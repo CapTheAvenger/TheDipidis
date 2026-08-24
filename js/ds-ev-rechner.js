@@ -234,7 +234,7 @@
     function ergebnisHtml(r, runden) {
         if (!r) {
             return '<p class="ds-note">' + esc(L(
-                'Zu diesem Deck liegen keine Paarungen vor — für das Feld, das wir messen, hat es noch nicht gespielt.',
+                'Zu diesem Deck liegen keine Paarungen vor — für das Meta, das wir messen, hat es noch nicht gespielt.',
                 'No matchups on record for this deck yet.')) + '</p>';
         }
         var siege = (r.ev / 100) * runden;
@@ -257,7 +257,7 @@
            Zahl selbst steht in derselben Groesse da, ob 11 Partien oder
            5.000 dahinterstehen, und ein Band liest sich anders als eine
            Warnung. Gemeldet wurde genau dieser Fall: 51,0 % aus 11 Partien
-           bei 16 % Feldabdeckung.
+           bei 16 % Meta-Abdeckung.
 
            Die Kachel bekommt deshalb einen Vorbehalt an der Rolle, wenn
            entweder zu wenige Partien gezaehlt oder zu wenig Feld gerechnet
@@ -273,7 +273,7 @@
             : '';
         var evDuennTitel = evDuenn
             ? L('Weniger als ' + EV_MIN_PARTIEN + ' gezählte Partien oder unter '
-                + EV_MIN_ABDECKUNG + ' % Feldabdeckung. Die Zahl steht da, aber das '
+                + EV_MIN_ABDECKUNG + ' % Meta-Abdeckung. Die Zahl steht da, aber das '
                 + 'Unsicherheitsband darunter ist hier der wichtigere Teil.',
                 'Fewer than ' + EV_MIN_PARTIEN + ' games counted, or under '
                 + EV_MIN_ABDECKUNG + ' % field coverage. The number is shown, but the '
@@ -311,7 +311,7 @@
                   r.gegner + ' Gegner-Decks · ' + r.partien.toLocaleString('de-DE') + ' gezählte Partien'
                     + (r.duenn ? ' · ' + r.duenn + ' davon unter 20 Partien' : '')
                     + (engerAusschnitt
-                        ? ' · in dieser Rechnung nur ' + zahl(r.gerechnet, 1) + ' % des Feldes'
+                        ? ' · in dieser Rechnung nur ' + zahl(r.gerechnet, 1) + ' % des Metas'
                         : ''),
                   r.gegner + ' opponent decks · ' + r.partien.toLocaleString('en-GB') + ' games counted'
                     + (r.duenn ? ' · ' + r.duenn + ' of them under 20 games' : '')
@@ -349,7 +349,7 @@
               + '<th class="ds-num" title="' + esc(L(
                   'Anteil unter den Gegnern, zu denen Daten vorliegen — auf 100 % normiert, weil '
                     + 'fehlende Paarungen weggelassen statt mit 50 % aufgefüllt werden. Der gemessene '
-                    + 'Feldanteil dieses Decks steht in der Meta-Performance-Tabelle.',
+                    + 'Meta-Anteil dieses Decks steht in der Meta-Performance-Tabelle.',
                   'Share among the opponents we have data for — normalised to 100 % because missing '
                     + 'pairings are left out rather than filled in at 50 %. The measured field share '
                     + 'is in the meta performance table.'))
@@ -378,7 +378,7 @@
         }).join('');
         /* Nur der kurze Name in die Auswahl. Die Erlaeuterung stand
            zuerst mit im <option>-Text — auf 390 px war davon
-           "Das ganze Feld — gewichtet nach geme…" uebrig, und der Teil,
+           "Das ganze Meta — gewichtet nach geme…" uebrig, und der Teil,
            der etwas erklaert, war genau der abgeschnittene. Sie steht
            jetzt als Zeile unter der Auswahl und wechselt mit ihr. */
         var feldOpt = FELDER.map(function (f) {
@@ -392,7 +392,7 @@
         + '<p class="ds-note">' + L(
             'Die Heatmap sagt, wer wen schlägt. Hier steht, was daraus für <em>dich</em> folgt: '
             + 'du wählst dein Deck, und die Seite gewichtet jede Paarung mit dem Anteil, den der '
-            + 'Gegner im Feld hat. Heraus kommt die Win Rate, mit der du über ein ganzes Turnier '
+            + 'Gegner im Meta hat. Heraus kommt die Win Rate, mit der du über ein ganzes Turnier '
             + 'rechnen kannst — nicht gegen ein Deck, sondern gegen alle auf einmal.',
             'The heatmap says who beats whom. This says what that means for <em>you</em>: pick your '
             + 'deck and every matchup is weighted by how much of the field that opponent is. The '
@@ -422,7 +422,7 @@
             'Gerechnet wird <strong>Anteil × Win Rate</strong>, aufsummiert über alle Gegner, zu denen '
             + 'Daten vorliegen. Die Quoten sind geglättet (Beta-Binomial, k = 20), damit ein 3-0 nicht '
             + 'als 100 % durchgeht. Das Band ist ±1,96 Standardabweichungen aus der Streuung der '
-            + 'einzelnen Paarungen; es nimmt die Feldanteile als bekannt an und ist deshalb eher zu '
+            + 'einzelnen Paarungen; es nimmt die Meta-Anteile als bekannt an und ist deshalb eher zu '
             + 'schmal als zu breit. Paarungen ohne Daten werden weggelassen, nicht mit 50 % aufgefüllt '
             + '— darum steht die Abdeckung daneben. Datenraum: Global/EN, Limitless Online.',
             'The sum is <strong>share × win rate</strong> over every opponent we have data for. Rates '

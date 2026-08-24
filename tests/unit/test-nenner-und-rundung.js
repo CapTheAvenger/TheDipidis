@@ -147,7 +147,7 @@ describe('Der "Other"-Eimer wird ausgewiesen', () => {
     it('die Kachel nennt beide Nenner', () => {
         assert.match(TIER, /window\.feldGroesseAusAnteilen/);
         assert.match(TIER, /fuehrt Limitless als "Other" und meldet sie nicht einzeln/);
-        assert.match(TIER, /Listen im Feld;/);
+        assert.match(TIER, /Listen im Meta;/);
     });
     it('nur wenn wirklich etwas fehlt', () => {
         assert.match(TIER, /const restAnteil = feldGesamt > totalEntries/);
@@ -203,7 +203,7 @@ describe('Meta-Performance: die Spalte "Anteil" nennt beide Herkuenfte', () => {
     });
 });
 
-describe('Der Feld-Durchschnitt sagt, worauf er steht', () => {
+describe('Der Meta-Durchschnitt sagt, worauf er steht', () => {
     it('nennt die Bedingung "mit erkanntem Archetyp"', () => {
         assert.match(HUB, /mit erkanntem Archetyp/);
         assert.match(HUB, /with a recognised archetype/);
@@ -298,8 +298,8 @@ describe('Glaettung wird benannt', () => {
         assert.match(TIER, /faktorRoh: rohVon\.has\(name\)/);
         assert.match(TIER, /roh \$\{einsNK\(r\.faktorRoh\)\}-mal/);
     });
-    it('der Feld-Durchschnitt steht im Blockkopf', () => {
-        assert.match(TIER, /Der <strong>Feld-Durchschnitt<\/strong>, gegen den die letzte Spalte vergleicht/);
+    it('der Meta-Durchschnitt steht im Blockkopf', () => {
+        assert.match(TIER, /Der <strong>Meta-Durchschnitt<\/strong>, gegen den die letzte Spalte vergleicht/);
     });
     it('die Tier-Banner zeigen die geglaettete Win Rate', () => {
         assert.match(TIER, /const zeigWR = \(sc && isFinite\(sc\.adjWR\)\) \? sc\.adjWR : winRate/);

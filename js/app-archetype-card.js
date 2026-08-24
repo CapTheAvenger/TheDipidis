@@ -210,7 +210,7 @@
         const rep = d
             ? tile('rep', 'neutral', L('arc.repLabel', de ? 'Anteil' : 'Share'),
                 `${esc(fmt(d.share))} %`,
-                esc(L('arc.repCtx', de ? '{n} Listen im Feld' : '{n} lists in the field')
+                esc(L('arc.repCtx', de ? '{n} Listen im Meta' : '{n} lists in the field')
                     .replace('{n}', fmtGanz(d.count))))
             : tile('rep', 'tie', L('arc.repLabel', de ? 'Anteil' : 'Share'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
@@ -250,7 +250,7 @@
                     .replace('{b}', fmtGanz(c.brought))
                     .replace('{q}', fmt((c.top8 / c.brought) * 100, 2))),
                 c.thin ? L('arc.convThin', de
-                    ? 'Kleine Stichprobe — der Wert ist zum Feld-Durchschnitt hin geglättet.'
+                    ? 'Kleine Stichprobe — der Wert ist zum Meta-Durchschnitt hin geglättet.'
                     : 'Small sample — the value is smoothed toward the field average.') : '',
                 arrow(c.perfPct))
             : tile('conv', 'tie', L('arc.convLabel', de ? 'Top-8 vs. Erw.' : 'Top-8 vs. exp.'),

@@ -1778,12 +1778,12 @@
                                   + '<strong>Listen</strong> und <strong>Win Rate</strong> kommen von der Online-Ladder '
                                   + '(' + fmtNumDS(ladderSumme) + ' Decklisten), <strong>Antritte</strong> und '
                                   + '<strong>Top 8</strong> aus den Turnieren (' + fmtNumDS(conv.totalBrought)
-                                  + ' gewichtete Antritte). Zwei Zählungen desselben Feldes — darum ist der Anteil '
+                                  + ' gewichtete Antritte). Zwei Zählungen desselben Metas — darum ist der Anteil '
                                   + 'in beiden fast gleich, die Stückzahlen aber nicht. Ein Strich heißt: dieses Deck '
                                   + 'steht in der einen Datei und in der anderen nicht — oder es heißt in den beiden '
                                   + 'Quellen verschieden. Blasse Zeilen haben unter '
                                   + CONV_THIN_N + ' Turnier-Antritte — dort ist die Top-8-Quote noch wackelig. '
-                                  + 'Der <strong>Feld-Durchschnitt</strong>, gegen den die letzte Spalte vergleicht, '
+                                  + 'Der <strong>Meta-Durchschnitt</strong>, gegen den die letzte Spalte vergleicht, '
                                   + 'liegt bei ' + fmtPct(conv.expected * 100, 1) + ' Top-8-Quote. Die letzte Spalte '
                                   + 'selbst ist geglättet (k = ' + CONV_PRIOR + '), die Top-8-Quote daneben ist roh; '
                                   + 'beide Werte stehen im Tooltip der Zelle. Unter ' + CONV_MIN_N + ' Antritten steht '
@@ -2011,7 +2011,7 @@
                             : (deDS ? 'einzelne Decklisten, nicht Deckarten' : 'individual decklists, not deck types'))
                         + (restAnteil > 0
                             ? (deDS
-                                ? ` · ${fmtPct(100 - restAnteil, 1)} von ${fmtNumDS(feldGesamt)} Listen im Feld;`
+                                ? ` · ${fmtPct(100 - restAnteil, 1)} von ${fmtNumDS(feldGesamt)} Listen im Meta;`
                                   + ` die uebrigen ${fmtNumDS(feldGesamt - totalEntries)} (${fmtPct(restAnteil, 1)})`
                                   + ' fuehrt Limitless als "Other" und meldet sie nicht einzeln'
                                 : ` · ${fmtPct(100 - restAnteil, 1)} of ${fmtNumDS(feldGesamt)} lists in the field;`
@@ -2052,7 +2052,7 @@
                         return statTile(deDS ? 'Top 8 Archetypes' : 'Top 8 archetypes',
                             fmtPct(acht, 0), '',
                             deDS
-                                ? `des Feldes — ${totalDecks} Archetypen insgesamt`
+                                ? `des Metas — ${totalDecks} Archetypen insgesamt`
                                 : `of the field — ${totalDecks} archetypes in total`);
                     })()}
                 </div>`;

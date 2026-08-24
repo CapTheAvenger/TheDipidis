@@ -304,10 +304,10 @@
             // liest ein Anfänger die 9,0% sonst als Erfolgsquote, obwohl sie
             // der Anteil ist; die Erfolgsgröße (Top-8-Quote) steht daneben im
             // Kontext. Auf der Best-Kachel wird der Anteil deshalb ausdrücklich
-            // als "Feldanteil" benannt, statt nur "des Feldes" (F05).
+            // als "Meta-Anteil" benannt, statt nur "des Metas" (F05).
             const anteilWort = d.role === 'best'
-                ? (de ? 'Feldanteil' : 'field share')
-                : (de ? 'des Feldes' : 'of the field');
+                ? (de ? 'Meta-Anteil' : 'field share')
+                : (de ? 'des Metas' : 'of the field');
             return `
                 <div class="ds-stat${cls}">
                     <span class="ds-stat-role">${role}</span>

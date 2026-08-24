@@ -903,7 +903,7 @@
                 : `${uniqueTournamentCount} Tournaments (${totalDecklists} ${listenWort})`;
             deckKachel.title = dePM
                 ? 'Limitless veroeffentlicht Decklisten erst ab Tag 2. Alle Kartenzahlen dieses '
-                  + 'Reiters stammen aus dem Top Cut, nicht aus dem ganzen Feld — Anteile sind '
+                  + 'Reiters stammen aus dem Top Cut, nicht aus dem ganzen Meta — Anteile sind '
                   + 'dadurch nach oben verzerrt.'
                 : 'Limitless publishes decklists from day 2 onward. Every card figure on this tab '
                   + 'comes from the top cut, not the whole field — inclusion rates are biased upward.';

@@ -110,20 +110,20 @@ describe('F04 — der angezeigte Rang ist die echte Anteils-Position', () => {
     });
 });
 
-describe('F05 — die Best-Kachel weist ihre grosse Zahl als Feldanteil aus', () => {
-    it('die Best-Kachel nennt "Feldanteil", die anderen "des Feldes"', () => {
+describe('F05 — die Best-Kachel weist ihre grosse Zahl als Meta-Anteil aus', () => {
+    it('die Best-Kachel nennt "Meta-Anteil", die anderen "des Metas"', () => {
         const { answerModel, answerHtml } = build('de');
         const model = answerModel(ROWS);
         const html = answerHtml(model);
 
         const best = tileMit(html, 'Dragapult');
         assert.match(best, /Erfolgreichstes Deck/, 'Dragapult ist nicht die Best-Kachel');
-        assert.match(best, /Feldanteil/,
-            'die grosse Zahl der Best-Kachel ist nicht als "Feldanteil" beschriftet');
+        assert.match(best, /Meta-Anteil/,
+            'die grosse Zahl der Best-Kachel ist nicht als "Meta-Anteil" beschriftet');
 
         // Die Meistgespielt-Kacheln behalten die knappe Beschriftung.
         const exc = tileMit(html, 'Mega Excadrill');
-        assert.match(exc, /des Feldes/);
+        assert.match(exc, /des Metas/);
     });
 
     it('englisch: die Best-Kachel nennt "field share"', () => {

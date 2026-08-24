@@ -7425,8 +7425,9 @@ window.MetaCall = (function () {
    * gerechnet wird. Zwei Verteilungen fuer dieselbe Frage — "wie oft
    * treffe ich dieses Deck in n Runden" —, und die Poisson-Naeherung ist
    * hier nicht einmal gut: sie gilt fuer viele Versuche mit kleiner
-   * Wahrscheinlichkeit, und hier sind es acht bis neun Runden mit
-   * Anteilen bis ueber 30 %.
+   * Wahrscheinlichkeit, und hier sind es acht Runden mit Anteilen bis
+   * ueber 30 %. (Der Tag 1 hatte frueher neun; die Messung unten stammt
+   * aus dieser Zeit und bleibt so stehen, weil sie so gemacht wurde.)
    *
    * Gemessen bei 9 Runden:
    *     Anteil 10 %   P(1×)  36,6 %  statt  38,7 %   (-2,2 pp)

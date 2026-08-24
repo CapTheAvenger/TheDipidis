@@ -302,7 +302,7 @@ describe('Battle Journal: die gespielte Liste wird eingefroren', () => {
 describe('Battle Journal: die Turnierzeile hat drei Ziele statt fünf', () => {
     const code = ohneKommentar(JOURNAL);
     const zeile = code.slice(code.indexOf('class="bj-tournament-header"'),
-                             code.indexOf('class="bj-tournament-header"') + 3000);
+                             code.indexOf('class="bj-tournament-header"') + 4200);
 
     it('der Bild-Knopf ruft das Hochformat auf', () => {
         assert.match(zeile, /shareTournamentPost\(/);
@@ -372,8 +372,10 @@ describe('Turnierbild: die Entscheidungen gegen die Vorlage', () => {
     });
 
     it('Farbe allein entscheidet nicht — es gibt ein Zeichen dazu', () => {
-        assert.match(poster, /L\('S', 'W'\)/, 'das Siegzeichen fehlt');
-        assert.match(poster, /L\('N', 'L'\)/, 'das Niederlagenzeichen fehlt');
+        // Seit dem 24.08. W/L/T statt S/N/U — der Betreiber hat die
+        // internationalen Kuerzel ausdruecklich gewollt.
+        assert.match(poster, /m\.result === 'win' \? 'W'/, 'das Siegzeichen fehlt');
+        assert.match(poster, /m\.result === 'loss' \? 'L' : 'T'/, 'das Niederlagenzeichen fehlt');
     });
 
     it('das Anzahl-Zeichen ist nicht rot', () => {
@@ -467,5 +469,150 @@ describe('Turnierbild: der Hinweis nennt den Weg, nicht nur das Ziel', () => {
         const code = ohneKommentar(SHARE);
         assert.match(code, /⋯ → Turnier bearbeiten/,
             'der Hinweis nennt den Klickpfad nicht');
+    });
+});
+
+// ── 9. Matchpunkte und der Day-2-Marker ─────────────────────────────
+
+describe('Turnierbild: die Matchpunkte', () => {
+    const I = ladeShare();
+    const r = (...ergebnisse) => ergebnisse.map((result, i) => ({ n: i + 1, result }));
+
+    it('Sieg 3, Unentschieden 1, Niederlage 0', () => {
+        assert.equal(I.matchPunkte(r('win')), 3);
+        assert.equal(I.matchPunkte(r('tie')), 1);
+        assert.equal(I.matchPunkte(r('loss')), 0);
+    });
+
+    it('5-2-1 ergibt 16 — genau die Day-2-Schwelle', () => {
+        // Acht Runden an Tag 1. 5 × 3 + 1 × 1 = 16.
+        const acht = r('win','win','win','win','win','loss','loss','tie');
+        assert.equal(I.matchPunkte(acht), 16);
+    });
+
+    it('eine leere Runde zählt nichts, statt zu stolpern', () => {
+        assert.equal(I.matchPunkte([{ n: 1, result: '' }]), 0);
+        assert.equal(I.matchPunkte(null), 0);
+    });
+});
+
+describe('Turnierbild: der Day-2-Marker', () => {
+    const I = ladeShare();
+
+    it('die Schwelle steht bei 16', () => {
+        // Der Betreiber nannte 16, eine Quelle im Netz 19. Beide stimmen —
+        // für verschiedene Formate: 19 galt für den alten Tag 1 mit neun
+        // Runden (6-2-1), heute sind es acht und damit 16 (5-2-1).
+        assert.equal(I.DAY2_PUNKTE, 16);
+    });
+
+    it('erscheint auf grossen Turnieren ab der Schwelle', () => {
+        assert.equal(I.hatDay2({ type: 'Regional/SPE/IC' }, 16), true);
+        assert.equal(I.hatDay2({ type: 'Regional/SPE/IC' }, 15), false);
+        assert.equal(I.hatDay2({ type: 'Regional/SPE/IC' }, 24), true);
+    });
+
+    it('erscheint NICHT auf Turnieren ohne zweiten Tag', () => {
+        // Ein Cup mit 18 Punkten hat trotzdem keinen Tag 2. Der Marker wäre
+        // dort eine falsche Auskunft, kein harmloser Zusatz.
+        ['Cup', 'Challenge', 'Online', 'Testing', ''].forEach(typ => {
+            assert.equal(I.hatDay2({ type: typ }, 30), false, `${typ} bekommt einen Marker`);
+        });
+    });
+
+    it('die Zahl ist dieselbe, mit der der Meta Call rechnet', () => {
+        // Zwei Stellen, eine Zahl. Läuft das auseinander, sagt das Bild
+        // etwas anderes als die Vorhersage daneben.
+        const MC = fs.readFileSync(path.join(ROOT, 'js', 'app-meta-call.js'), 'utf8');
+        const m = MC.match(/regional:\s*\{[^}]*rounds:\s*(\d+)[^}]*day2Points:\s*(\d+)/);
+        assert.ok(m, 'die Regional-Einstellung des Meta Calls ist nicht mehr auffindbar');
+        assert.equal(Number(m[2]), I.DAY2_PUNKTE, 'Bild und Meta Call nennen verschiedene Schwellen');
+        assert.equal(Number(m[1]), 8, 'Tag 1 hat acht Runden, nicht mehr neun');
+    });
+
+    it('kein Text verspricht mehr neun Runden', () => {
+        assert.ok(!/8-9 Swiss/.test(I18N), 'die Beschreibung nennt noch 8-9 Runden');
+        assert.match(I18N, /8 Swiss-Runden \+ Top-8-Cut/);
+    });
+});
+
+describe('Turnierbild: W, L und T statt S, N und U', () => {
+    const code = ohneKommentar(SHARE);
+
+    it('die Zeichen im Bild sind die internationalen', () => {
+        // Das Leerzeichen nach dem Komma ist NICHT verlaesslich: eine
+        // Ruecknahme schreibt sich genauso gut als L('S','W'). Also
+        // toleranter suchen, sonst laeuft die Zusicherung daran vorbei.
+        assert.ok(!/L\(\s*'S'\s*,\s*'W'\s*\)/.test(code), "L('S','W') ist zurück — im Bild steht wieder S");
+        assert.ok(!/L\(\s*'N'\s*,\s*'L'\s*\)/.test(code), "L('N','L') ist zurück");
+        assert.ok(!/L\(\s*'U'\s*,\s*'T'\s*\)/.test(code), "L('U','T') ist zurück");
+    });
+
+    it('die Fusszeile unter der Bilanz sagt W · L · T', () => {
+        assert.match(code, /fuss: 'W · L · T'/);
+        assert.ok(!/'S · N · U'/.test(code), 'S · N · U steht wieder unter der Bilanz');
+    });
+
+    it('jede Runde zeigt ihre Punkte', () => {
+        const poster = code.slice(code.indexOf('function postCardCanvas'),
+                                  code.indexOf('function sharePostCard'));
+        assert.match(poster, /ctx\.fillText\('\+' \+ rp/,
+            'unter den Kreisen stehen keine Punkte');
+    });
+});
+
+describe('Turnierbild: das Bild ohne Deckliste', () => {
+    const code = ohneKommentar(SHARE);
+    const J = ohneKommentar(JOURNAL);
+
+    it('die Karten werden verworfen, wenn man sie nicht zeigen will', () => {
+        // Wer während eines laufenden Turniers postet, will die Liste oft
+        // nicht preisgeben.
+        assert.match(code, /if \(o\.ohneDeckliste\) karten = \[\];/);
+    });
+
+    it('dann kommt auch kein Hinweis, die Liste zu verknüpfen', () => {
+        // Der Hinweis wäre dort eine Belehrung: die Liste FEHLT nicht, sie
+        // ist absichtlich weggelassen.
+        assert.match(code, /toast\(karten\.length \|\| o\.ohneDeckliste/);
+    });
+
+    it('der Dateiname sagt, was fehlt', () => {
+        assert.match(code, /_post_ohne_liste_/);
+    });
+
+    it('es gibt einen Menüeintrag dafür', () => {
+        assert.match(J, /shareTournamentPost\('\$\{safeTournKey\}','\$\{safeMetaKey\}', true\)/);
+        assert.match(I18N, /'bj\.imageNoList':\s*'Bild ohne Deckliste'/);
+    });
+
+    it('der normale Knopf zeigt die Liste weiterhin', () => {
+        const zeile = J.slice(J.indexOf('bj-tournament-image-btn'),
+                              J.indexOf('bj-tournament-image-btn') + 400);
+        assert.ok(!/, true\)/.test(zeile), 'der Hauptknopf lässt die Liste jetzt weg');
+    });
+});
+
+describe('Turnierbild: keine einzelne Kachel in der letzten Zeile', () => {
+    const I = ladeShare();
+
+    it('28 Karten enden nicht mit einer einzelnen Kachel', () => {
+        const m = I.gitterMasse(28, 952, 600);
+        assert.ok(m, 'für 28 Karten passt kein Gitter');
+        assert.ok(m.letzteZeile >= 2,
+            `die letzte Zeile hat ${m.letzteZeile} Kachel(n) — das liest sich wie ein Rest`);
+    });
+
+    it('dafür werden die Kacheln nicht beliebig klein', () => {
+        // Die vollere Zeile darf höchstens 12 % Kachelbreite kosten.
+        const m = I.gitterMasse(28, 952, 600);
+        const bestMoeglich = Math.max(...[7, 8, 9, 10].map(sp => {
+            const gap = sp >= 8 ? 8 : 10;
+            const kb = Math.floor((952 - gap * (sp - 1)) / sp);
+            const kh = Math.round(kb * 342 / 245);
+            return Math.ceil(28 / sp) * kh + (Math.ceil(28 / sp) - 1) * gap <= 600 ? kb : 0;
+        }));
+        assert.ok(m.kb >= bestMoeglich * 0.88,
+            `${m.kb} px statt bis zu ${bestMoeglich} px — zu viel Verlust für eine glatte Zeile`);
     });
 });

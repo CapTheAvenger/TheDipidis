@@ -954,6 +954,22 @@
             notes: entry.notes || '',
             sourceTab: entry.sourceTab || null,
             sourceArchetype: entry.sourceArchetype || null,
+            /* Diese Liste ist eine Falle: sie zaehlt die Felder EINZELN auf,
+             * und ein Feld, das buildBattleJournalEntry neu schreibt, faellt
+             * hier still heraus. Genau das ist mit deckSnapshot passiert —
+             * der eingefrorene Schnappschuss lag in der Outbox, ueberlebte
+             * die Synchronisierung nicht und war nach dem naechsten Laden
+             * weg. Ohne Firestore-Konto faellt das nicht auf, weil die
+             * Outbox dann nie geleert wird.
+             *
+             * tests/unit/test-journal-sync-felder.js vergleicht die beiden
+             * Feldlisten jetzt gegeneinander.
+             *
+             * Beide Felder werden nur geschrieben, wenn sie da sind: ein
+             * null wuerde bei set({merge:true}) eine bestehende Angabe auf
+             * dem Server ueberschreiben. */
+            ...(entry.deckSnapshot ? { deckSnapshot: entry.deckSnapshot } : {}),
+            ...(entry.placement ? { placement: entry.placement } : {}),
             createdAtMs: entry.createdAtMs,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             syncedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1394,6 +1410,10 @@
                             <button type="button" class="bj-tournament-share-btn bj-tournament-more-btn" onclick="bjToggleTournamentMenu(this)" aria-haspopup="true" aria-expanded="false" aria-label="${escapeHtml(battleJournalText('bj.moreActions', 'Weitere Aktionen'))}">⋯</button>
                             <div class="bj-tournament-menu" role="menu" hidden>
                                 <button type="button" role="menuitem" onclick="bjMenuAction(this, () => openEditTournamentModal('${safeTournKey}'))">${escapeHtml(battleJournalText('bj.editTournament', 'Turnier bearbeiten'))}</button>
+                                <!-- Waehrend eines laufenden Turniers will man
+                                     die eigene Liste oft nicht zeigen. Derselbe
+                                     Knopf, nur ohne Kartengitter. -->
+                                <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentPost('${safeTournKey}','${safeMetaKey}', true))">${escapeHtml(battleJournalText('bj.imageNoList', 'Bild ohne Deckliste'))}</button>
                                 <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentCard('${safeTournKey}','${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.imageSquare', 'Bild im Quadrat (1:1)'))}</button>
                                 <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentSummary('${safeTournKey}', false, '${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.shareTournament', 'Textbild für den Chat'))}</button>
                                 <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentSummary('${safeTournKey}', true, '${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Textbild mit Bricks und Notizen'))}</button>
@@ -2737,13 +2757,14 @@
 
     /* Das Turnierposter im Hochformat. Liegt wie das quadratische Bild in
      * js/ds-share.js — hier steht nur der Aufruf. */
-    window.shareTournamentPost = function (tournamentName, metaKey) {
+    window.shareTournamentPost = function (tournamentName, metaKey, ohneDeckliste) {
         if (!window.DsShare || typeof window.DsShare.sharePostCard !== 'function') {
             showToast(battleJournalText('bj.shareCardMissing',
                 'Das Bildmodul ist nicht geladen. Seite neu laden.'), 'warning');
             return;
         }
-        window.DsShare.sharePostCard(tournamentName, { metaKey: metaKey });
+        window.DsShare.sharePostCard(tournamentName,
+            { metaKey: metaKey, ohneDeckliste: !!ohneDeckliste });
     };
 
     window.shareTournamentSummary = shareTournamentSummary;

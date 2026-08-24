@@ -103,73 +103,80 @@ describe('Seitenrand: das Token selbst', () => {
     });
 });
 
-describe('Karte in Karte: die innere gibt ihr Polster ab', () => {
-    // Zweite Runde. Nach dem Token-Fix blieb ein Rest, und er kam nicht mehr
-    // vom Seitenrand, sondern von Verschachtelung. Gemessen auf 390 px:
-    //   section.ds-sec     1 px Rahmen
-    //   div.ds-sec-body   12 px Polster
-    //   div.tier-section   1 px Rahmen + 18 px Polster   <- zweiter Rahmen
-    //   div.arc-card       1 px Rahmen
-    // Inhalt begann bei 33 px, die Deck-Kachel war 324 statt 362 px breit.
-    const mobil = () => {
+describe('Auf dem Telefon ist alles randlos', () => {
+    // Drei Anlaeufe sind am Polster gescheitert, weil das Problem kein
+    // Polsterproblem war. Die oberen Bereiche eines Tabs stehen frei auf der
+    // Seite, die unteren stecken in Abschnittskarten — der Inhalt begann oben
+    // bei 13 px und unten bei 30. Am Bildschirmfoto gemessen streute der
+    // Einzug ueber 12, 13, 22, 25, 26 und 27 CSS-Pixel. Solange die einen
+    // Bereiche eine Karte haben und die anderen nicht, bekommt das kein
+    // Nachjustieren einzelner Klassen gerade.
+    //
+    // Entscheidung des Betreibers: auf dem Telefon keine Abschnittskarten.
+    // Nach dem Umbau liegen 72 Prozent aller Zeilen bei genau 12 px.
+    const block = () => {
         const css = lies('mobile-responsive.css');
-        const i = css.indexOf('Karte in Karte');
-        assert.ok(i > 0, 'der Block fuer verschachtelte Karten fehlt');
+        const i = css.indexOf('Auf dem Telefon ist alles randlos');
+        assert.ok(i > 0, 'der Randlos-Block fehlt');
         const m = css.indexOf('@media', i);
-        assert.ok(m > 0, 'kein @media nach dem Kommentar');
-        return css.slice(m, css.indexOf('\n}', css.indexOf('}', m)) + 2);
+        return css.slice(m, css.indexOf('\n}\n', m) + 3);
     };
 
-    it('die Regel greift nur auf kleinen Bildschirmen', () => {
-        const css = lies('mobile-responsive.css');
-        const i = css.indexOf('Karte in Karte');
-        const bis = css.slice(i, i + 2000);
-        assert.match(bis, /@media \(max-width:\s*768px\)/,
-            'ohne Breitengrenze wuerde auch der grosse Bildschirm sein Polster verlieren — '
-            + 'dort ist Platz genug und die Verschachtelung stoert nicht');
+    it('nur auf kleinen Bildschirmen', () => {
+        assert.match(block(), /@media \(max-width:\s*768px\)/,
+            'ohne Breitengrenze verloere auch der grosse Bildschirm seine Karten — '
+            + 'dort ordnen sie die Seite und sollen bleiben');
     });
 
-    it('sie nimmt nur waagerecht Polster weg, nicht senkrecht', () => {
-        const b = mobil();
-        assert.match(b, /padding-left:\s*0/, 'kein padding-left');
-        assert.match(b, /padding-right:\s*0/, 'kein padding-right');
-        assert.ok(!/padding-top:\s*0/.test(b) && !/padding:\s*0(?![^;]*px)/.test(b),
-            'die Regel nimmt auch senkrecht Abstand weg — der wird gebraucht');
-    });
-
-    it('sie greift nur auf VERSCHACHTELTE Flaechen, nicht auf alle', () => {
-        const b = mobil();
-        // Jeder Selektor muss einen Vorfahren nennen. Ein nacktes
-        // ".tier-section" wuerde auch die freistehende Flaeche treffen.
-        const sel = b.slice(b.indexOf('{', b.indexOf('@media')) + 1, b.indexOf('{', b.indexOf('px)')+8));
-        const zeilen = sel.split(',').map(x => x.trim()).filter(Boolean);
-        assert.ok(zeilen.length >= 2, 'zu wenige Selektoren gefunden — der Scanner greift nicht');
-        for (const z of zeilen) {
-            assert.ok(z.split(/\s+/).length >= 2,
-                `"${z}" nennt keinen Vorfahren — die Regel traefe auch freistehende Flaechen`);
+    it('die Abschnittsflaechen verlieren wirklich ihren Rahmen', () => {
+        const b = block();
+        for (const kl of ['.ds-sec', '.ds-panel', '.ds-filter', '.de-karte']) {
+            assert.ok(b.includes(kl), `${kl} wird nicht entrahmt`);
         }
+        // Und zwar in DER Regel, die die Flaechen nennt — nicht irgendwo
+        // sonst im Block. Sonst genuegt ein box-shadow im Verschachtelungs-
+        // teil, um den Test zufriedenzustellen.
+        const ersteRegel = b.slice(b.indexOf('.ds-sec,'), b.indexOf('}', b.indexOf('.ds-sec,')));
+        assert.match(ersteRegel, /border-radius:\s*0/, 'die Ecken bleiben rund');
+        assert.match(ersteRegel, /box-shadow:\s*none/, 'der Schatten bleibt');
+    });
+
+    it('der Einzug wird genau einmal gesetzt', () => {
+        const b = block();
+        assert.match(b, /var\(--mobil-einzug\)/,
+            'der Einzug haengt nicht am Token');
+        // Und er darf NICHT zusaetzlich auf verschachtelten Flaechen stehen.
+        const teile = b.split('padding-left: 0');
+        assert.ok(teile.length >= 2,
+            'es gibt keinen Block, der den Einzug bei verschachtelten Flaechen '
+            + 'wieder auf null setzt — dann addiert er sich erneut');
+    });
+
+    it('das Token ist genau einmal definiert', () => {
+        const tok = liesOhneKommentar('tokens.css');
+        const n = (tok.match(/--mobil-einzug\s*:/g) || []).length;
+        assert.equal(n, 1, `--mobil-einzug ist ${n}-mal definiert`);
     });
 
     it('sie deckt ALLE Flaechen ab, nicht nur einen Einzelfall', () => {
-        // Der Fehler, der diese Zeile erzwungen hat: die erste Fassung nannte
-        // nur .tier-section. Danach standen die Top-Archetypen bei 14 px und
-        // die Nachbarabschnitte weiter bei 27 — sichtbar ungleich, und damit
-        // schlimmer als vorher. Am Bildschirmfoto nachgemessen streute der
-        // Einzug ueber 12 bis 27 CSS-Pixel; nach der Verallgemeinerung liegen
-        // 74 Prozent aller Zeilen bei genau 14.
-        const b = mobil();
+        // Der Fehler aus PR #498: nur .tier-section behandelt, danach war die
+        // Seite ungleicher als vorher.
+        const b = block();
         const noetig = ['.ds-panel', '.heatmap-container', '.top-cards-container',
-                        '.tier-section', '.ds-sec-body .ds-sec-body'];
-        const fehlend = noetig.filter(k => !b.includes(k.split(' ').pop()));
+                        '.tier-section', '.ds-sec-body'];
+        const fehlend = noetig.filter(k => !b.includes(k));
         assert.deepEqual(fehlend, [],
-            'die Regel greift nicht fuer: ' + fehlend.join(', ')
-            + ' — eine Teilmenge zu behandeln macht die Seite UNGLEICHER, nicht gleicher');
+            'nicht abgedeckt: ' + fehlend.join(', ')
+            + ' — eine Teilmenge zu behandeln macht die Seite UNGLEICHER');
     });
 
-    it('der farbige Tier-Rahmen bleibt erhalten', () => {
-        const b = mobil();
-        assert.ok(!/border(-left|-right)?-width:\s*0/.test(b),
-            'die Regel entfernt den Rahmen — er unterscheidet aber Tier 1 von Tier 2 '
-            + 'und traegt damit Bedeutung, nicht nur Zierde');
+    it('Kacheln behalten ihr Polster', () => {
+        // Gegenprobe. Ohne ihr eigenes Polster klebte der Text an der
+        // Kachelkante — das waere kein Gewinn, sondern der naechste Fehler.
+        const b = block();
+        for (const bauteil of ['.arc-tile', '.ds-stat', '.stat-badge', 'button']) {
+            assert.ok(!b.includes(bauteil),
+                `${bauteil} steht im Randlos-Block — Bauteile sind keine Flaechen`);
+        }
     });
 });

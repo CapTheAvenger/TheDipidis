@@ -2778,3 +2778,27 @@
           sind keine Flaechen — ohne ihr Polster klebte der Text an ihrer
           eigenen Kante. Sie stehen darum bewusst NICHT in der Liste oben. */
 }
+
+/* ── Tabellenkopf auf dem Telefon ────────────────────────────────────
+   Gemeldet als „GEWICHT HIEBEINE WIN RATEPARTIEN TRÄGT BEI" — die
+   Beschriftungen liefen ineinander und standen nicht mehr ueber ihren
+   Zahlen.
+
+   Ursache sind drei Dinge, die zusammen zu breit werden: Grossbuchstaben,
+   Sperrschrift (--lbl-track) und white-space: nowrap auf den Zahlenspalten.
+   Auf dem Schreibtisch passt das, bei 390 px Breite und sechs Spalten nicht.
+
+   Auf dem Telefon darf der KOPF umbrechen und verliert die Sperrschrift.
+   Die Zahlen darunter behalten ihr nowrap — "1.234" ueber zwei Zeilen waere
+   schlimmer als ein Umbruch in der Beschriftung. */
+@media (max-width: 768px) {
+    .ds-table th {
+        white-space: normal;
+        letter-spacing: 0;
+        line-height: 1.25;
+        vertical-align: bottom;
+    }
+    .ds-table th.ds-num {
+        white-space: normal;
+    }
+}

@@ -93,6 +93,22 @@ describe('the card and the panel cannot disagree', () => {
         const expected = `+${fromMetric.toFixed(1).replace('.', ',')} %`;
         assert.equal(shown.trim(), expected);
     });
+
+    it('names the population the Top-8 quota is taken from', () => {
+        // Der Betreiber hat gefragt, was "79/755" neben "2.158 Listen"
+        // bedeutet. Die Antwort ist: eine andere Grundgesamtheit — nur
+        // Turniere mit gewertetem Top-8-Schnitt. Die Kachel muss das
+        // selbst sagen, sonst sieht es aus wie ein Widerspruch.
+        const { api, win } = loadCard();
+        const conv = win.computeConversionPerformance(
+            [t8row('field', 100000, 6320), t8row('Dragapult', 472.5, 56.5)]);
+        api.setData({ Dragapult: { share: 6, winRate: 54, count: 2158, partien: 8000 } }, conv);
+        const kachel = api.tilesHtml('Dragapult').match(/arc-tile--conv[\s\S]*$/)[0];
+        assert.match(kachel, /57 von 473 Antritten mit Top-8-Schnitt/,
+            'Zaehler und Nenner der Cut-Quote stehen nicht in der Kachel');
+        assert.match(kachel, /11,96 % Cut-Quote/,
+            'die Cut-Quote selbst fehlt — dann bleibt "+x %" unerklaert');
+    });
 });
 
 describe('missing conversion data is said out loud', () => {
@@ -117,12 +133,17 @@ describe('missing conversion data is said out loud', () => {
     });
 
     it('still shows share and win rate for such a deck', () => {
-        api.setData({ Dhelmise: { share: 4.45, winRate: 48.2, count: 900 } },
+        api.setData({ Dhelmise: { share: 4.45, winRate: 48.2, count: 900, partien: 3120 } },
                     { expected: 0.0632, decks: [] });
         const html = api.tilesHtml('Dhelmise');
         assert.match(html, /4,5 %/);
         assert.match(html, /48,2 %/);
-        assert.match(html, /−1,80/, 'distance from 50 % should carry its sign');
+        // Frueher stand hier der Abstand zu 50 % ("−1,80"). Der Betreiber hat
+        // ihn zu Recht als doppelt gemoppelt gemeldet: wer 48,2 % liest, weiss
+        // selbst, dass das unter 50 liegt. Die Zeile sagt jetzt, worauf die
+        // Quote beruht — das ist die Angabe, die man NICHT im Kopf hat.
+        assert.match(html, /3\.120/, 'die Partienzahl traegt die Aussagekraft');
+        assert.ok(!/gegenüber 50/.test(html), 'der Abstand zu 50 % ist wieder da');
         assert.match(html, /▼/, 'a below-50 win rate should carry a down arrow');
     });
 });

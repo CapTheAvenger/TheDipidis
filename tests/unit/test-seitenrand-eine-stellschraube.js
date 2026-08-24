@@ -133,12 +133,14 @@ describe('Auf dem Telefon ist alles randlos', () => {
         for (const kl of ['.ds-sec', '.ds-panel', '.ds-filter', '.de-karte']) {
             assert.ok(b.includes(kl), `${kl} wird nicht entrahmt`);
         }
-        // Und zwar in DER Regel, die die Flaechen nennt — nicht irgendwo
-        // sonst im Block. Sonst genuegt ein box-shadow im Verschachtelungs-
-        // teil, um den Test zufriedenzustellen.
-        const ersteRegel = b.slice(b.indexOf('.ds-sec,'), b.indexOf('}', b.indexOf('.ds-sec,')));
-        assert.match(ersteRegel, /border-radius:\s*0/, 'die Ecken bleiben rund');
-        assert.match(ersteRegel, /box-shadow:\s*none/, 'der Schatten bleibt');
+        // Und zwar in DER Regel, die den Rahmen abraeumt — nicht irgendwo
+        // sonst im Block. Sonst genuegt ein box-shadow an beliebiger Stelle,
+        // um den Test zufriedenzustellen.
+        const i = b.indexOf('border-left: 0');
+        assert.ok(i > 0, 'keine Regel, die den Rahmen abraeumt');
+        const rahmenRegel = b.slice(b.lastIndexOf('.ds-sec,', i), b.indexOf('}', i));
+        assert.match(rahmenRegel, /border-radius:\s*0/, 'die Ecken bleiben rund');
+        assert.match(rahmenRegel, /box-shadow:\s*none/, 'der Schatten bleibt');
     });
 
     it('der Einzug wird genau einmal gesetzt', () => {
@@ -150,6 +152,19 @@ describe('Auf dem Telefon ist alles randlos', () => {
         assert.ok(teile.length >= 2,
             'es gibt keinen Block, der den Einzug bei verschachtelten Flaechen '
             + 'wieder auf null setzt — dann addiert er sich erneut');
+    });
+
+    it('der Einzug haengt am Tab, nicht an den Flaechen', () => {
+        // Der Grund fuer den fuenften Anlauf: solange der Einzug an den
+        // Flaechen hing, konnte er sich addieren (Kachelgruppe in einer
+        // .ds-panel) oder fehlen (Kachelgruppe nackt daneben). Gemessen
+        // stand derselbe Kacheltyp mal bei 14, mal bei 26 px.
+        const b = block();
+        const i = b.indexOf('.tab-content');
+        assert.ok(i > 0, 'der Einzug haengt nicht am Tab');
+        const regel = b.slice(i, b.indexOf('}', i));
+        assert.match(regel, /padding-left:\s*var\(--mobil-einzug\)/,
+            '.tab-content setzt den Einzug nicht');
     });
 
     it('das Token ist genau einmal definiert', () => {

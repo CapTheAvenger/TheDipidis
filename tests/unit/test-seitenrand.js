@@ -80,7 +80,19 @@ function waagerecht(koerper) {
     return raus;
 }
 
-const ERLAUBT = /^(0|0px|var\(--page-gutter\)|var\(--page-gutter\) var\(--page-gutter\))$/;
+// Zwei Token sind erlaubt, und der Unterschied ist der Punkt:
+//
+//   --page-gutter   Rand der SEITE. Steht auf 0, damit Flaechen und
+//                   Trennlinien bis an die Bildschirmkante laufen.
+//   --mobil-einzug  Abstand des TEXTES zur Kante auf dem Telefon.
+//
+// Vier Anlaeufe sind daran gescheitert, dass beides in einer Zahl steckte:
+// setzt man sie auf 0, klebt der Text an der Kante; setzt man sie auf 12,
+// verlieren die Flaechen ihre volle Breite. Getrennt geht beides.
+//
+// Was weiterhin verboten bleibt, ist eine feste Zahl: dann entscheidet
+// wieder die Dateireihenfolge, und genau das war der Ausgangszustand.
+const ERLAUBT = /^(0|0px|var\(--page-gutter\)|var\(--page-gutter\) var\(--page-gutter\)|var\(--mobil-einzug\))$/;
 
 describe('der Seitenrand hat eine Quelle', () => {
     it('--page-gutter steht in tokens.css', () => {

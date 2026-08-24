@@ -54,6 +54,12 @@
         return isDe() ? s.replace('.', ',') : s;
     }
 
+    /** Ganze Zahl mit Tausendertrennung. "10243 Partien" liest sich schlecht. */
+    function fmtGanz(n) {
+        const z = Math.round(Number(n) || 0);
+        return isDe() ? z.toLocaleString('de-DE') : z.toLocaleString('en-US');
+    }
+
     function esc(s) {
         return String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -90,6 +96,10 @@
                     share: num(r.share_numeric),
                     winRate: num(r.win_rate_numeric),
                     count: num(r.count),
+                    // Partien = Siege + Niederlagen + Unentschieden. Sie sagen,
+                    // wie belastbar die Win Rate ist: 80 der 132 Decks liegen
+                    // unter 300 Partien, dort wackelt die Zahl sichtbar.
+                    partien: num(r.wins) + num(r.losses) + num(r.ties),
                 };
             }
             const rows = parseSemicolonCsv(top8Txt);
@@ -201,7 +211,7 @@
             ? tile('rep', 'neutral', L('arc.repLabel', de ? 'Anteil' : 'Share'),
                 `${esc(fmt(d.share))} %`,
                 esc(L('arc.repCtx', de ? '{n} Listen im Feld' : '{n} lists in the field')
-                    .replace('{n}', fmt(d.count, 0))))
+                    .replace('{n}', fmtGanz(d.count))))
             : tile('rep', 'tie', L('arc.repLabel', de ? 'Anteil' : 'Share'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
 
@@ -209,8 +219,12 @@
         const wr = d
             ? tile('wr', toneFor(wrDelta), L('arc.wrLabel', 'Win Rate'),
                 `${esc(fmt(d.winRate))} %`,
-                esc((wrDelta >= 0 ? '+' : '−') + fmt(Math.abs(wrDelta), 2) + ' '
-                    + L('arc.wrCtx', de ? 'gegenüber 50 %' : 'vs 50%')),
+                // Frueher stand hier "+3,99 gegenueber 50 %". Das ist doppelt:
+                // wer 54,0 % liest, weiss selbst, dass das 4 Punkte ueber 50
+                // liegt. Die Zeile sagt jetzt, worauf die Quote beruht.
+                esc(d.partien > 0
+                    ? L('arc.wrCtx', de ? 'aus {n} Partien' : 'from {n} games').replace('{n}', fmtGanz(d.partien))
+                    : L('arc.wrCtxLeer', de ? 'Partienzahl unbekannt' : 'game count unknown')),
                 '', arrow(wrDelta))
             : tile('wr', 'tie', L('arc.wrLabel', 'Win Rate'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
@@ -223,8 +237,18 @@
         const conv = c
             ? tile('conv', toneFor(c.perfPct), L('arc.convLabel', de ? 'Top-8 vs. Erw.' : 'Top-8 vs. exp.'),
                 `${c.perfPct >= 0 ? '+' : '−'}${esc(fmt(Math.abs(c.perfPct)))} %`,
-                esc(`${fmt(c.top8, 0)} / ${fmt(c.brought, 0)} → ${fmt((c.top8 / c.brought) * 100, 2)} % `
-                    + L('arc.convCtx', de ? 'Cut-Quote' : 'cut rate')),
+                // WICHTIG: c.brought zaehlt NICHT dieselbe Grundgesamtheit wie
+                // d.count. d.count sind alle Listen aus allen Onlineturnieren
+                // (Dragapult 2.158). c.brought sind nur die Antritte auf
+                // Turnieren MIT gewertetem Top-8-Schnitt (755, aus 103
+                // Turnieren). Nebeneinander sieht das aus wie ein Widerspruch,
+                // wenn man es nicht dazuschreibt — also steht es jetzt dabei.
+                esc(L('arc.convCtx', de
+                        ? '{t} von {b} Antritten mit Top-8-Schnitt → {q} % Cut-Quote'
+                        : '{t} of {b} entries in cut events → {q} % cut rate')
+                    .replace('{t}', fmtGanz(c.top8))
+                    .replace('{b}', fmtGanz(c.brought))
+                    .replace('{q}', fmt((c.top8 / c.brought) * 100, 2))),
                 c.thin ? L('arc.convThin', de
                     ? 'Kleine Stichprobe — der Wert ist zum Feld-Durchschnitt hin geglättet.'
                     : 'Small sample — the value is smoothed toward the field average.') : '',

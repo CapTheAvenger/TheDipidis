@@ -56,7 +56,7 @@
     /* Feldbilder. "Ganzes Feld" ist die Messung; die beiden anderen sind
        Was-waere-wenn und als solche beschriftet. */
     var FELDER = [
-        { id: 'alle',  de: 'Das ganze Feld',      en: 'The whole field',
+        { id: 'alle',  de: 'Das ganze Meta',      en: 'The whole field',
           deSub: 'gewichtet nach gemessenem Anteil', enSub: 'weighted by measured share' },
         /* Hiess "Nur Top 8 Archetypes". Genommen werden aber die acht
            groessten Gegner MIT DATEN, nicht die acht groessten des Feldes
@@ -286,7 +286,7 @@
               + (evDuenn ? ' is-duenn' : '') + '"'
               + (evDuenn ? ' title="' + esc(evDuennTitel) + '"' : '') + '>'
               + '<span class="ds-stat-role">'
-              + esc(L('gegen dieses Feld', 'against this field') + evDuennText) + '</span>'
+              + esc(L('gegen dieses Meta', 'against this meta') + evDuennText) + '</span>'
               + '<span class="ds-stat-label">' + esc(L('Erwartete Win Rate', 'Expected win rate')) + '</span>'
               + '<span class="ds-stat-value">' + esc(zahl(r.ev, 1)) + '<span class="ds-stat-unit"> %</span></span>'
               + '<span class="ds-stat-context">' + esc(L(
@@ -305,7 +305,7 @@
             + '</div>'
             + '<div class="ds-stat">'
               + '<span class="ds-stat-role">' + esc(L('Wovon die Zahl kommt', 'What the number rests on')) + '</span>'
-              + '<span class="ds-stat-label">' + esc(L('Abdeckung des Feldes', 'Field coverage')) + '</span>'
+              + '<span class="ds-stat-label">' + esc(L('Abdeckung des Metas', 'Meta coverage')) + '</span>'
               + '<span class="ds-stat-value">' + esc(zahl(r.abdeckung, 0)) + '<span class="ds-stat-unit"> %</span></span>'
               + '<span class="ds-stat-context">' + esc(L(
                   r.gegner + ' Gegner-Decks · ' + r.partien.toLocaleString('de-DE') + ' gezählte Partien'
@@ -388,7 +388,7 @@
 
         return ''
         + '<div class="ds-panel ' + BLOCK + '">'
-        + '<h3 class="ds-label">🎯 ' + esc(L('Gegen welches Feld?', 'Against which field?')) + '</h3>'
+        + '<h3 class="ds-label">🎯 ' + esc(L('Gegen welches Meta?', 'Against which meta?')) + '</h3>'
         + '<p class="ds-note">' + L(
             'Die Heatmap sagt, wer wen schlägt. Hier steht, was daraus für <em>dich</em> folgt: '
             + 'du wählst dein Deck, und die Seite gewichtet jede Paarung mit dem Anteil, den der '
@@ -403,7 +403,7 @@
             + esc(L('Dein Deck', 'Your deck')) + '</span>'
             + '<select class="ds-select ds-ev-deck">' + deckOpt + '</select></label>'
           + '<label class="ds-field is-wide"><span class="ds-stat-label">'
-            + esc(L('Das Feld', 'The field')) + '</span>'
+            + esc(L('Das Meta', 'The meta')) + '</span>'
             + '<select class="ds-select ds-ev-feldwahl">' + feldOpt + '</select></label>'
           + '<label class="ds-field is-narrow"><span class="ds-stat-label">'
             + esc(L('Runden', 'Rounds')) + '</span>'

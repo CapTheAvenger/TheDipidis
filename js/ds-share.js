@@ -342,7 +342,7 @@
         statCol(cols[0], C.dvZero,
             hasShare ? num(spec.share, 2) + ' %' : '–',
             C.ink,
-            L('Anteil im Feld', 'Meta share'),
+            L('Anteil am Meta', 'Meta share'),
             hasShare ? num(spec.count, 0) + ' ' + L('Listen', 'lists') : L('keine Daten', 'no data'));
 
         var wrDelta = isFinite(spec.winRate) ? spec.winRate - 50 : null;
@@ -378,7 +378,7 @@
                     : L('zu wenig Daten', 'not enough data'),
             hasConv
                 ? (spec.thin
-                    ? L('n unter 50 — zum Feld hin geglättet (K=50)',
+                    ? L('n unter 50 — zum Meta hin geglättet (K=50)',
                         'n below 50 — smoothed toward the field (K=50)')
                     : L('empirisch-bayessche Glättung, K=50',
                         'empirical-Bayes shrinkage, K=50'))
@@ -410,7 +410,7 @@
             [L('Datenraum', 'Data space'), spec.spaceLabel || '–'],
             [L('Format', 'Format'), spec.format || '–'],
             [L('Quelle', 'Source'), spec.source || '–'],
-            [L('Feld gesamt', 'Field total'),
+            [L('Meta gesamt', 'Meta total'),
              isFinite(spec.totalBrought) ? num(spec.totalBrought, 0) + ' ' + L('Einträge', 'entries') : '–'],
             [L('Stand', 'As of'), spec.stand || '–']
         ];

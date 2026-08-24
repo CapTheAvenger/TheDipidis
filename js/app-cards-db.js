@@ -2072,22 +2072,53 @@
             filterAndRenderCards();
         }
         
+        /**
+         * Der Schluessel, unter dem zwei Eintraege als DERSELBE Druck gelten.
+         *
+         * Ein Nachdruck ist dieselbe Karte in einem anderen Set: gleicher Text,
+         * gleiche Attacken. Zwei Karten mit demselben NAMEN sind dagegen nicht
+         * automatisch Nachdrucke voneinander. Armarouge PBL 12 (140 HP, Flame
+         * Legion) und Armarouge SSP 34 (140 HP, Crimson Blaster) sind zwei
+         * verschiedene Karten — der Betreiber hat gemeldet, dass PBL 12 im
+         * Standard-Druck fehlt. Ursache: die Zusammenfassung lief ueber den
+         * blossen Namen, und SSP 34 gewann den Vergleich, weil es die
+         * niedrigere Seltenheit hat.
+         *
+         * Die Druckfamilie steht in international_prints. Gemessen ueber alle
+         * 20.878 Drucke: jede Karte hat eine Familie, jede Familie enthaelt den
+         * eigenen Druck, und keine Familie spannt zwei Namen. Ueber den Namen
+         * bleiben 4.334 Eintraege uebrig, ueber die Familie 15.230 — die
+         * Differenz sind Karten, die es wirklich gibt und die vorher unsichtbar
+         * waren.
+         */
+        function cardPrintFamilyKey(card) {
+            const roh = String(card.international_prints || '').trim();
+            if (!roh) {
+                // Ohne Familienangabe steht die Karte fuer sich. Lieber ein
+                // Eintrag zu viel als eine echte Karte verschwinden lassen.
+                return String(card.set || '').toUpperCase() + '-' + String(card.number || '').toUpperCase();
+            }
+            return roh.split(',').map(t => t.trim().toUpperCase()).filter(Boolean).sort().join(',');
+        }
+
         function deduplicateCardsForDisplay(cards) {
             /**
-             * Remove duplicate cards (same name, different prints)
-             * Prefer the print that appears most in the CURRENTLY FILTERED archetypes
-             * Otherwise prefer: newest set with lowest rarity
-             * Modifies the array in-place
+             * Fasst NACHDRUCKE einer Karte zu einem Eintrag zusammen.
+             * Innerhalb der Familie gewinnt die niedrigste Seltenheit, dann das
+             * neueste Set. Verschiedene Karten mit gleichem Namen bleiben
+             * getrennt stehen. Arbeitet auf dem uebergebenen Array.
              */
+            const druckeGesamt = cards.length;
             const cardsByName = new Map();
             
-            // Group cards by name
+            // Gruppieren nach (Name, Druckfamilie) — nicht nach Name allein.
             cards.forEach(card => {
-                const cardName = card.name.toLowerCase();
-                if (!cardsByName.has(cardName)) {
-                    cardsByName.set(cardName, []);
+                const cardName = String(card.name || '').toLowerCase();
+                const key = cardName + '|' + cardPrintFamilyKey(card);
+                if (!cardsByName.has(key)) {
+                    cardsByName.set(key, { name: cardName, prints: [] });
                 }
-                cardsByName.get(cardName).push(card);
+                cardsByName.get(key).prints.push(card);
             });
             
             // Get active filters to determine which archetypes are relevant
@@ -2115,7 +2146,9 @@
                 return 50;
             };
             
-            cardsByName.forEach((prints, cardName) => {
+            cardsByName.forEach((gruppe) => {
+                const prints = gruppe.prints;
+                const cardName = gruppe.name;
                 if (prints.length === 1) {
                     selectedCards.push(prints[0]);
                     return;
@@ -2275,9 +2308,8 @@
             cards.length = 0;
             cards.push(...selectedCards);
             
-            const uniqueCardNames = cardsByName.size;
-            const totalPrintsRemoved = uniqueCardNames - selectedCards.length;
-            devLog(`[Cards Tab] Deduplicated: ${uniqueCardNames} unique cards (removed ${totalPrintsRemoved} duplicate prints)`);
+            const uniqueCards = cardsByName.size;
+            devLog(`[Cards Tab] Deduplicated: ${uniqueCards} distinct cards from ${druckeGesamt} prints`);
         }
         
         function sortCardsDatabase(cards) {

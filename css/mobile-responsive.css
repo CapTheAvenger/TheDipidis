@@ -2714,27 +2714,55 @@
 }
 
 /* ── Auf dem Telefon ist alles randlos ───────────────────────────────
-   Entschieden am 24.08.2026, nachdem drei Anlaeufe am Polster gescheitert
-   sind. Das eigentliche Problem war nie die Menge des Polsters, sondern ein
-   STRUKTURUNTERSCHIED: die oberen Bereiche eines Tabs stehen frei auf der
-   Seite, die unteren stecken in Abschnittskarten. Dadurch beginnt der Inhalt
-   oben bei 13 px und unten bei 30 — und dieser Sprung mitten auf der Seite
-   ist es, was auffaellt.
+   Entschieden am 24.08.2026 nach vier Anlaeufen. Das Problem war nie die
+   MENGE des Polsters, sondern dass es an unterschiedlich vielen Stellen
+   gesetzt wurde: manche Bereiche stehen frei auf der Seite, andere stecken
+   in einer Abschnittskarte, und Kachelgruppen mal in einer .ds-panel und mal
+   nackt. Je nachdem begann der Inhalt bei 13, 14, 24 oder 26 px.
 
-   Am Bildschirmfoto gemessen streute der Einzug ueber 12, 13, 22, 25, 26 und
-   27 CSS-Pixel. Kein Nachjustieren einzelner Klassen bekommt das gerade,
-   solange die einen Bereiche eine Karte haben und die anderen nicht.
+   Solange der Einzug an den Flaechen haengt, kann er sich addieren oder
+   fehlen — beides sieht man sofort. Darum haengt er jetzt an EINER Stelle:
+   am Tab selbst. Alles darunter setzt ihn auf null. Ob ein Bereich in einer
+   Karte sitzt oder nicht, aendert dann nichts mehr an seiner Kante.
 
-   Die Entscheidung lautet darum: auf dem Telefon KEINE Abschnittskarten.
-   Getrennt wird durch Ueberschrift und eine Linie ueber die volle Breite.
-   Der Einzug wird genau einmal gesetzt, auf der Abschnittsflaeche selbst.
-
-   Ab 769 px bleibt alles wie gehabt — dort ist Platz genug fuer Karten, und
-   sie ordnen die Seite dann auch wirklich. */
+   Ab 769 px bleibt alles wie gehabt — dort ordnen Karten die Seite wirklich. */
 @media (max-width: 768px) {
 
-    /* 1. Abschnittsflaechen verlieren ihren Rahmen. Die Linie oben bleibt als
-          einziger Trenner und laeuft ueber die volle Breite. */
+    /* 1. Der Einzug. Genau hier und nirgends sonst. */
+    .tab-content {
+        padding-left: var(--mobil-einzug);
+        padding-right: var(--mobil-einzug);
+    }
+
+    /* 2. Abschnittsflaechen verlieren Rahmen, Ecken und Schatten — und
+          setzen KEINEN eigenen Einzug mehr obendrauf. */
+    .ds-sec,
+    .ds-panel,
+    .ds-filter,
+    .de-karte,
+    .ds-sec > .ds-sec-body,
+    .ds-sec > .ds-sec-hd,
+    .ds-sec-body .ds-panel,
+    .ds-sec-body .ds-filter,
+    .ds-sec-body .ds-sec-body,
+    .ds-sec-body .tier-section,
+    .ds-sec-body .tier-hero-section,
+    .ds-sec-body .heatmap-container,
+    .ds-sec-body .top-cards-container,
+    .ds-sec-body .tier-movers-block,
+    .ds-sec-body .city-league-info-card,
+    .ds-sec-body .city-league-info-generated-block,
+    .cl-content-panel,
+    .cl-content-panel .tier-section,
+    .cl-content-panel .tier-hero-section,
+    .cl-content-panel .ds-panel,
+    .cl-content-panel .city-league-info-card,
+    .current-meta-content,
+    .current-meta-content > .ds-panel {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
     .ds-sec,
     .ds-panel,
     .ds-filter,
@@ -2746,40 +2774,7 @@
         box-shadow: none;
     }
 
-    /* 2. Der Einzug, genau einmal. */
-    .ds-sec > .ds-sec-body,
-    .ds-sec > .ds-sec-hd,
-    .ds-panel,
-    .ds-filter,
-    .de-karte {
-        padding-left: var(--mobil-einzug);
-        padding-right: var(--mobil-einzug);
-    }
-
-    /* 3. Was DARIN liegt, wiederholt ihn nicht — und zieht auch keinen
-          zweiten Rahmen. Kacheln, Eingabefelder und Knoepfe sind hier
-          bewusst NICHT aufgefuehrt: sie sind Bauteile, keine Flaechen,
-          und ihr Polster haelt den Text von ihrer eigenen Kante weg. */
-    .ds-sec-body .ds-panel,
-    .ds-sec-body .ds-filter,
-    .ds-sec-body .ds-sec-body,
-    .ds-sec-body .tier-section,
-    .ds-sec-body .tier-hero-section,
-    .ds-sec-body .heatmap-container,
-    .ds-sec-body .top-cards-container,
-    .ds-sec-body .tier-movers-block,
-    .ds-sec-body .city-league-info-card,
-    .ds-sec-body .city-league-info-generated-block,
-    .cl-content-panel .tier-section,
-    .cl-content-panel .tier-hero-section,
-    .cl-content-panel .ds-panel,
-    .cl-content-panel .city-league-info-card,
-    .current-meta-content > .ds-panel {
-        padding-left: 0;
-        padding-right: 0;
-        border-left: 0;
-        border-right: 0;
-        border-radius: 0;
-        box-shadow: none;
-    }
+    /* 3. Bauteile behalten ihr Polster. Kacheln, Eingabefelder und Knoepfe
+          sind keine Flaechen — ohne ihr Polster klebte der Text an ihrer
+          eigenen Kante. Sie stehen darum bewusst NICHT in der Liste oben. */
 }

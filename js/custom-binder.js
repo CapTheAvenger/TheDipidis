@@ -647,6 +647,28 @@
     // ── Sortierung ──
 
     /**
+     * Die Reihenfolge der Kartenarten — dieselbe wie im Filter "Alle Typen".
+     * Wer eine Zeile hier aendert, muss die Auswahlliste mitaendern; der Test
+     * test-custom-binder-typ-sortierung.js haelt beide zusammen.
+     */
+    const CB_TYP_REIHENFOLGE = [
+        'Pokemon-Grass', 'Pokemon-Fire', 'Pokemon-Water', 'Pokemon-Lightning',
+        'Pokemon-Psychic', 'Pokemon-Fighting', 'Pokemon-Darkness', 'Pokemon-Metal',
+        'Pokemon-Dragon', 'Pokemon-Colorless',
+        'Supporter', 'Item', 'Tool', 'Stadium',
+        'Special Energy', 'Basic Energy', 'ACE SPEC'
+    ];
+
+    function cbTypRang(shared, karte) {
+        const meta = shared.getMetaBinderTypeMeta(karte);
+        const typ = String(meta && meta.type || '');
+        const rang = CB_TYP_REIHENFOLGE.indexOf(typ);
+        // Unbekannte Art ans Ende, aber nicht durcheinander: alle unbekannten
+        // landen auf demselben Rang und werden danach nach Namen sortiert.
+        return rang === -1 ? CB_TYP_REIHENFOLGE.length : rang;
+    }
+
+    /**
      * Die Ordner-Sortierung. Voreinstellung 'binder' ist exakt die bisherige
      * Reihenfolge (Kartenart, dann neuestes Set, dann Sammelnummer) — sie war
      * schon immer die richtige, nur nie beschriftet und nie umschaltbar.
@@ -669,13 +691,22 @@
             });
         }
         if (cbSort === 'typ') {
-            // Kartenart zuerst, innerhalb der Art nach Element bzw. Name —
-            // das ist die Reihenfolge, in der viele ihren Ordner physisch fuehren.
+            // Kartenart zuerst, innerhalb der Art nach Name.
+            //
+            // Hier stand vorher ta.localeCompare(tb) — ein Vergleich der
+            // internen Typnamen, also ALPHABETISCH: "ACE SPEC", "Basic Energy",
+            // "Item", "Pokemon-Colorless", "Pokemon-Darkness", ... "Stadium",
+            // "Supporter", "Tool". Das ist keine Ordnerreihenfolge, das ist
+            // Zufall. Der Betreiber hat gemeldet, dass die Sortierung nicht in
+            // der richtigen Reihenfolge sortiert.
+            //
+            // CB_TYP_REIHENFOLGE ist genau die Reihenfolge, die im Filter
+            // "Alle Typen" darueber steht: erst die Pokémon nach Element, dann
+            // Unterstuetzer, Item, Tool, Stadium, Spezial-Energie,
+            // Basis-Energie, ACE SPEC. Zwei Listen, eine Reihenfolge.
             return karten.sort((a, b) => {
-                const ma = shared.getMetaBinderTypeMeta(a);
-                const mb_ = shared.getMetaBinderTypeMeta(b);
-                const ta = String(ma.type || ''), tb = String(mb_.type || '');
-                if (ta !== tb) return ta.localeCompare(tb);
+                const ra = cbTypRang(shared, a), rb = cbTypRang(shared, b);
+                if (ra !== rb) return ra - rb;
                 return nameVergleich(a, b);
             });
         }
@@ -1673,7 +1704,7 @@
                 }
                 currentGroup.cards.push(entry.html);
             });
-            grid.innerHTML = '<style>.cb-print-group{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;margin-bottom:16px;padding:10px;background:rgba(0,0,0,0.03);border-radius:10px;border:1px solid rgba(0,0,0,0.06)}.cb-print-group .meta-binder-card{margin:0}</style>'
+            grid.innerHTML = '<style>.cb-print-group{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;margin-bottom:16px;padding:10px;background:rgba(0,0,0,0.03);border-radius:10px;border:1px solid rgba(0,0,0,0.06)}.cb-print-group .meta-binder-card{margin:0;width:110px;flex:0 0 110px}@media(min-width:600px){.cb-print-group .meta-binder-card{width:130px;flex:0 0 130px}}</style>'
                 + groups.map(g => g.cards.length > 1
                     ? `<div class="cb-print-group">${g.cards.join('')}</div>`
                     : g.cards[0]

@@ -69,6 +69,14 @@
      * an den Rand, so wie es eine Anwendung tun sollte. */
     --page-gutter: 0px;
 
+    /* Einzug des INHALTS auf dem Telefon. Bewusst getrennt von --page-gutter:
+       der Seitenrand ist 0, die Flaechen laufen also bis an die Kante und
+       Trennlinien spannen ueber die volle Breite. Der Text darin braucht
+       trotzdem Luft zur Bildschirmkante — das ist diese Zahl, und sie wird
+       GENAU EINMAL gesetzt, naemlich auf der Abschnittsflaeche. Alles, was
+       darin liegt, wiederholt sie nicht. */
+    --mobil-einzug: 12px;
+
     /* ── Radien: drei ────────────────────────────────────────────── */
     --r-sm: 6px;        /* Chips, Zellen, kleine Knöpfe */
     --r-md: 11px;       /* Zeilen, Listeneinträge */

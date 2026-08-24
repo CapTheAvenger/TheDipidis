@@ -624,8 +624,8 @@
         ctx.fillStyle = C.ink;
         ctx.fillText(recText, recX, topY + 40);
         label(ctx, isFinite(spec.winRate)
-            ? L('Bilanz · ', 'Record · ') + num(spec.winRate, 1) + ' %'
-            : L('Bilanz', 'Record'), recX, topY + 60);
+            ? 'W · L · T · ' + num(spec.winRate, 1) + ' %'
+            : 'W · L · T', recX, topY + 60);
         ctx.textAlign = 'start';
 
         /* Der Signaturstrich, derselbe wie unter der Kopfzeile der
@@ -704,8 +704,10 @@
             ctx.textBaseline = 'middle';
             ctx.fillText('R' + (m.n || (r + 1)), RC.PAD + 18, cy);
 
-            var mark = m.result === 'win' ? L('S', 'W')
-                     : m.result === 'loss' ? L('N', 'L') : L('U', 'T');
+            /* W/L/T in beiden Sprachen. Die Kuerzel stehen so auf jeder
+             * Turniertabelle, und der Betreiber hat sie ausdruecklich so
+             * gewollt — S/N/U las sich fuer ihn nicht als Ergebnis. */
+            var mark = m.result === 'win' ? 'W' : m.result === 'loss' ? 'L' : 'T';
             var markColor = m.result === 'win' ? C.dvPos
                           : m.result === 'loss' ? C.dvNeg : C.dvZero;
             ctx.fillStyle = markColor;
@@ -957,8 +959,8 @@
                     bestOf: e.bestOf === 'bo3' ? 'bo3' : 'bo1',
                     games: (e.bestOf === 'bo3' && Array.isArray(e.bo3Games) && e.bo3Games.length)
                         ? e.bo3Games.map(function (gm) {
-                            return gm.result === 'win' ? L('S', 'W')
-                                 : gm.result === 'loss' ? L('N', 'L') : L('U', 'T');
+                            return gm.result === 'win' ? 'W'
+                                 : gm.result === 'loss' ? 'L' : 'T';
                           }).join('')
                         : ''
                 };
@@ -1047,6 +1049,39 @@
 
     var PC = { W: 1080, H: 1350, PAD: 64 };
 
+    /* Matchpunkte. Ein Sieg zaehlt 3, ein Unentschieden 1, eine Niederlage 0
+     * — dieselbe Rechnung, mit der die Turnierleitung die Tabelle fuehrt. */
+    var PUNKTE = { win: 3, tie: 1, loss: 0 };
+
+    function matchPunkte(runden) {
+        return (runden || []).reduce(function (summe, m) {
+            return summe + (m.result === 'win' ? PUNKTE.win
+                          : m.result === 'tie' ? PUNKTE.tie : PUNKTE.loss);
+        }, 0);
+    }
+
+    /* Ab wann Tag 2.
+     *
+     * Der Betreiber hat 16 genannt, eine Quelle im Netz nannte 19. Beide
+     * stimmen — fuer verschiedene Formate: 19 galt fuer den alten Tag 1 mit
+     * neun Runden (6-2-1), heute sind es acht Runden und damit 16 (5-2-1).
+     * Der Meta Call rechnet an anderer Stelle mit denselben Zahlen
+     * (js/app-meta-call.js: regional { rounds: 8, day2Points: 16 }), also
+     * stehen sie hier nicht zum zweiten Mal frei erfunden da.
+     *
+     * Nur die grossen Turniere haben ueberhaupt einen zweiten Tag. Auf einem
+     * Cup oder einer Challenge waere der Marker eine falsche Auskunft, also
+     * erscheint er dort nicht. */
+    var DAY2_PUNKTE = 16;
+    var DAY2_TYPEN = ['regional/spe/ic', 'regional', 'international', 'worlds', 'spe'];
+
+    function hatDay2(spec, punkte) {
+        var typ = String(spec && spec.type || '').trim().toLowerCase();
+        if (DAY2_TYPEN.indexOf(typ) === -1) return false;
+        return punkte >= DAY2_PUNKTE;
+    }
+
+
     /* Aus "Ultra Ball (SVI 196)" wird {name, set, number}. Das ist das
      * Format, in dem deck.cards die Schluessel fuehrt (siehe
      * js/firebase-collection.js: "Exact prints"). Passt der Schluessel
@@ -1116,14 +1151,31 @@
      * Median 25 verschiedene Karten, Maximum 36. */
     function gitterMasse(anzahl, breite, hoehe) {
         var beste = null;
+        var passende = [];
         for (var spalten = 4; spalten <= 12; spalten++) {
             var gap = spalten >= 8 ? 8 : 10;
             var kb = Math.floor((breite - gap * (spalten - 1)) / spalten);
             var kh = Math.round(kb * 342 / 245);          /* echtes Kartenformat */
             var zeilen = Math.ceil(anzahl / spalten);
             if (zeilen * kh + (zeilen - 1) * gap > hoehe) continue;
-            if (!beste || kb > beste.kb) beste = { spalten: spalten, kb: kb, kh: kh, gap: gap, zeilen: zeilen };
+            var rest = anzahl % spalten;
+            var kandidat = { spalten: spalten, kb: kb, kh: kh, gap: gap, zeilen: zeilen,
+                             letzteZeile: rest === 0 ? spalten : rest };
+            if (!beste || kb > beste.kb) beste = kandidat;
+            passende.push(kandidat);
         }
+        if (!beste) return null;
+
+        /* Unter den fast gleich grossen Aufteilungen die mit der volleren
+         * letzten Zeile. 28 Karten auf 9 Spalten enden mit EINER Kachel —
+         * das liest sich wie ein Rest, obwohl es die Liste ist. Auf 8
+         * Spalten sind es vier, bei kaum kleineren Kacheln. Die Grenze von
+         * 12 % ist die Schmerzgrenze: darunter wird das Bild sichtbar
+         * kleiner, und dann ist die krumme Zeile das kleinere Uebel. */
+        var schwelle = beste.kb * 0.88;
+        passende.forEach(function (k) {
+            if (k.kb >= schwelle && k.letzteZeile > beste.letzteZeile) beste = k;
+        });
         return beste;
     }
 
@@ -1165,14 +1217,25 @@
          * Drei Spalten — oder zwei, wenn keine Platzierung eingetragen
          * ist. Ein leerer Goldkasten waere schlechter als keiner. */
         var rec = spec.record || { w: 0, l: 0, t: 0 };
+        var punkte = matchPunkte(spec.rounds);
+        var day2 = hatDay2(spec, punkte);
+
         var spalten = [];
         if (spec.place) {
             spalten.push({ lab: L('PLATZIERUNG', 'PLACEMENT'), val: spec.place,
                            farbe: C.gold, mono: true });
         }
+        /* W · L · T, nicht S · N · U. Die Kuerzel sind international und
+         * stehen genauso auf jeder Turniertabelle — der Betreiber hat sie
+         * ausdruecklich so gewollt, und ein Bild fuer Instagram wird nicht
+         * nur in Deutschland gelesen. */
         spalten.push({ lab: L('ERGEBNIS', 'RESULT'),
                        val: rec.w + '-' + rec.l + '-' + rec.t,
-                       fuss: L('S · N · U', 'W · L · T'), farbe: C.ink, mono: true });
+                       fuss: 'W · L · T', farbe: C.ink, mono: true });
+        spalten.push({ lab: L('PUNKTE', 'POINTS'), val: String(punkte),
+                       fuss: L('Sieg 3 · Unentschieden 1', 'win 3 · tie 1'),
+                       farbe: day2 ? C.gold : C.brandInk, mono: true,
+                       marke: day2 ? 'DAY 2' : '' });
         spalten.push({ lab: L('RUNDEN', 'ROUNDS'), val: String((spec.rounds || []).length),
                        fuss: isFinite(spec.winRate) ? num(spec.winRate, 1) + ' % Win Rate' : '',
                        farbe: C.brandInk, mono: true });
@@ -1196,7 +1259,28 @@
              * bei textAlign 'center' verschiebt das ein zweites Mal, und
              * PLATZIERUNG stand sichtbar links neben seiner Zahl. */
             ctx.textAlign = 'center';
-            label(ctx, sp.lab, cx, bandY + 42);
+            if (sp.marke) {
+                /* Marke und Beschriftung stehen als EINE mittige Gruppe in
+                 * der Beschriftungszeile. Zuerst sass die Marke ueber der
+                 * Zahl — bei 74 px Ziffernhoehe lag sie mitten darauf. */
+                ctx.font = fSans(11, 700);
+                var lw = ctx.measureText(String(sp.lab).toUpperCase()).width;
+                ctx.font = fSans(12, 700);
+                var mw = ctx.measureText(sp.marke).width + 18;
+                var ges = lw + 10 + mw;
+                var lx = cx - ges / 2 + lw / 2;
+                ctx.textAlign = 'center';
+                label(ctx, sp.lab, lx, bandY + 42);
+                ctx.fillStyle = C.gold;
+                rr(ctx, cx - ges / 2 + lw + 10, bandY + 28, mw, 20, 10); ctx.fill();
+                ctx.fillStyle = C.bg0;
+                ctx.font = fSans(12, 700);
+                ctx.textBaseline = 'middle';
+                ctx.fillText(sp.marke, cx - ges / 2 + lw + 10 + mw / 2, bandY + 39);
+                ctx.textBaseline = 'alphabetic';
+            } else {
+                label(ctx, sp.lab, cx, bandY + 42);
+            }
             /* Der Wert schrumpft, wenn er nicht passt — "9/128" ist eine
              * gueltige Platzierung und dreimal so breit wie "3.". */
             var groesse = 74;
@@ -1212,6 +1296,7 @@
                 ctx.fillStyle = C.ink3;
                 ctx.fillText(clip(ctx, sp.fuss, sw - 28), cx, bandY + 142);
             }
+
         }
         ctx.textAlign = 'start';
 
@@ -1260,7 +1345,9 @@
          * Kante fest bei fussY - 200: bei zwei Reihen lief das Band in die
          * Fusszeile, bei einer verschenkte es Platz, den das Kartengitter
          * gebraucht haette. Das Gitter bekommt, was uebrig bleibt. */
-        var gegnerHoehe = einreihig ? (d + 22) : (2 * d + 20);
+        /* Platz fuer die Punktezeile unter jedem Kreis: 18 px. Bei einer
+         * Reihe steht darunter noch der Gegnername. */
+        var gegnerHoehe = einreihig ? (d + 40) : (2 * d + 20 + 18);
         var gegnerY = fussY - 20 - gegnerHoehe;
         var gegnerLabelY = gegnerY - 14;
 
@@ -1324,10 +1411,21 @@
             ctx.fillStyle = C.bg0;
             ctx.font = fSans(Math.round(pz * 1.35), 700);
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(m.result === 'win' ? L('S', 'W')
-                       : m.result === 'loss' ? L('N', 'L') : L('U', 'T'),
+            ctx.fillText(m.result === 'win' ? 'W'
+                       : m.result === 'loss' ? 'L' : 'T',
                        gx + d - pz, gy + d - pz + 1);
             ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+
+            /* Die Punkte der Runde. Drei fuer den Sieg, einer fuers
+             * Unentschieden, keiner fuer die Niederlage — damit man auf dem
+             * Bild nachrechnen kann, wie die Summe oben zustande kommt. */
+            var rp = m.result === 'win' ? PUNKTE.win
+                   : m.result === 'tie' ? PUNKTE.tie : PUNKTE.loss;
+            ctx.font = fMono(15, 700);
+            ctx.fillStyle = rp > 0 ? farbe : C.ink3;
+            ctx.textAlign = 'center';
+            ctx.fillText('+' + rp, gx + d / 2, gy + d + 17);
+            ctx.textAlign = 'start';
 
             /* Der Gegnername unter dem Kreis — nur einreihig, sonst gibt
              * es dafuer keine Hoehe. */
@@ -1335,7 +1433,7 @@
                 ctx.font = fSans(13, 600);
                 ctx.fillStyle = C.ink3;
                 ctx.textAlign = 'center';
-                ctx.fillText(clip(ctx, m.opponent || '–', d + gap), gx + d / 2, gy + d + 20);
+                ctx.fillText(clip(ctx, m.opponent || '–', d + gap), gx + d / 2, gy + d + 36);
                 ctx.textAlign = 'start';
             }
         }
@@ -1440,6 +1538,7 @@
     /** Das Turnierposter. Laedt Sprites und, wenn eine Liste eingefroren
      *  ist, die Kartenbilder. */
     function sharePostCard(tournamentName, opts) {
+        var o = opts || {};
         var spec = collectTournamentSpec(tournamentName, opts);
         if (!spec) {
             toast(L('Zu diesem Turnier stehen keine Partien im Journal.',
@@ -1447,10 +1546,17 @@
             return Promise.resolve(false);
         }
         var karten = schnappschussKarten(spec.deckSnapshot);
-        /* Der Hinweis gehoert hierher und NICHT auf das Bild. Ein Satz
+
+        /* Wer waehrend eines Turniers postet, will die Liste oft nicht
+         * zeigen. Dann faellt das Gitter weg wie bei einem Turnier ohne
+         * verknuepfte Liste — dieselbe Darstellung, andere Absicht. */
+        if (o.ohneDeckliste) karten = [];
+
+        /* Der Hinweis gehoert in den Toast und NICHT auf das Bild. Ein Satz
          * "verknuepfe deine Liste" auf einem Instagram-Post waere Werbung
-         * fuer eine Einstellung — hier ist er eine Auskunft. */
-        toast(karten.length
+         * fuer eine Einstellung — hier ist er eine Auskunft. Und wer das
+         * Gitter absichtlich weglaesst, braucht ihn ueberhaupt nicht. */
+        toast(karten.length || o.ohneDeckliste
             ? L('Bild wird erstellt …', 'Creating image …')
             : L('Bild wird erstellt — ohne Kartengitter. So kommt es rein: ⋯ → Turnier bearbeiten → „Welche Liste hast du gespielt?" → Speichern.',
                 'Creating image — without the card grid. To add it: ⋯ → Edit tournament → "Which list did you play?" → Save.'),
@@ -1466,7 +1572,8 @@
             }))
         ]).then(function (aa) {
             var cv = postCardCanvas(spec, { icons: aa[0], rIcons: aa[1], karten: aa[2] });
-            return deliver(cv, safeName(spec.tournament) + '_post_'
+            return deliver(cv, safeName(spec.tournament)
+                + (o.ohneDeckliste ? '_post_ohne_liste_' : '_post_')
                 + new Date().toISOString().slice(0, 10) + '.png');
         }).catch(function (err) {
             console.error('[DsShare] post card failed', err);
@@ -1485,6 +1592,8 @@
             PALETTE: C, deckCardCanvas: deckCardCanvas, resultCardCanvas: resultCardCanvas,
             collectTournamentSpec: collectTournamentSpec, clip: clip, corsUrl: corsUrl,
             postCardCanvas: postCardCanvas, schnappschussKarten: schnappschussKarten,
+            matchPunkte: matchPunkte, hatDay2: hatDay2,
+            PUNKTE: PUNKTE, DAY2_PUNKTE: DAY2_PUNKTE,
             parseKartenSchluessel: parseKartenSchluessel, gitterMasse: gitterMasse,
             safeName: safeName, initials: initials
         }

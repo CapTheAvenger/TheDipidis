@@ -278,14 +278,90 @@
             dropdown.classList.add('d-none');
             return;
         }
+        /* Keine Handler im Markup mehr — die Auswahl haengt unten an
+         * einer Erkennung, die Tippen von Wischen unterscheidet. Name und
+         * Feld reisen als Datenattribute mit. */
         dropdown.innerHTML = matches.map(name =>
             `<div class="bj-autocomplete-item" role="option"
-                  onmousedown="event.preventDefault(); bjSelectAutocomplete('${field}', '${escapeJsSingleQuoted(name)}')"
-                  ontouchstart="event.preventDefault(); bjSelectAutocomplete('${field}', '${escapeJsSingleQuoted(name)}')"
+                  data-bj-field="${escapeHtmlAttr(field)}"
+                  data-bj-name="${escapeHtmlAttr(name)}"
             >${escapeHtml(name)}</div>`
         ).join('');
         dropdown.classList.remove('d-none');
     }
+
+    /* ── Tippen ist nicht Wischen ──────────────────────────────────
+     *
+     * Hier stand ontouchstart="event.preventDefault(); bjSelectAutocomplete(...)".
+     * Auf dem Telefon ist die erste Beruehrung eines Wischens damit schon
+     * die Auswahl gewesen: der Betreiber wollte in der Gegnerliste
+     * scrollen und hatte sofort ein Deck im Feld. Das preventDefault hat
+     * zusaetzlich das Scrollen der Liste selbst unterbunden — es gab also
+     * gar keinen Weg, den fuenften Eintrag zu erreichen.
+     *
+     * Jetzt merkt sich touchstart nur die Stelle, touchmove verwirft die
+     * Beruehrung, sobald der Finger wandert, und erst touchend waehlt aus.
+     * Kein passives Zuhoeren bei touchend, weil dort preventDefault
+     * gebraucht wird: das unterdrueckt den nachgereichten Klick und damit
+     * eine zweite Auswahl.
+     */
+    const BJ_TIPP_WEG  = 10;    /* px, ab hier ist es ein Wischen */
+    const BJ_TIPP_ZEIT = 700;   /* ms, danach ist es ein langes Halten */
+    let _bjTippStart = null;
+
+    function _bjItemAus(ev) {
+        const ziel = ev.target;
+        return (ziel && ziel.closest) ? ziel.closest('.bj-autocomplete-item') : null;
+    }
+
+    function _bjWaehleAusItem(item) {
+        if (!item) return;
+        const feld = item.getAttribute('data-bj-field');
+        const name = item.getAttribute('data-bj-name');
+        if (feld && name) bjSelectAutocomplete(feld, name);
+    }
+
+    document.addEventListener('touchstart', function (ev) {
+        const item = _bjItemAus(ev);
+        if (!item || !ev.touches || ev.touches.length !== 1) { _bjTippStart = null; return; }
+        const t = ev.touches[0];
+        _bjTippStart = { x: t.clientX, y: t.clientY, item: item, zeit: Date.now() };
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function (ev) {
+        if (!_bjTippStart || !ev.touches || !ev.touches.length) return;
+        const t = ev.touches[0];
+        if (Math.abs(t.clientX - _bjTippStart.x) > BJ_TIPP_WEG
+            || Math.abs(t.clientY - _bjTippStart.y) > BJ_TIPP_WEG) {
+            _bjTippStart = null;
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchcancel', function () { _bjTippStart = null; }, { passive: true });
+
+    document.addEventListener('touchend', function (ev) {
+        const start = _bjTippStart;
+        _bjTippStart = null;
+        if (!start) return;
+        if (_bjItemAus(ev) !== start.item) return;
+        if (Date.now() - start.zeit > BJ_TIPP_ZEIT) return;
+        ev.preventDefault();          // unterdrueckt den nachgereichten Klick
+        _bjWaehleAusItem(start.item);
+    }, { passive: false });
+
+    /* Am Rechner: mousedown nur abfangen, damit das Eingabefeld den Fokus
+     * behaelt und die Liste nicht vor dem Klick verschwindet. Ausgewaehlt
+     * wird beim Klick. */
+    document.addEventListener('mousedown', function (ev) {
+        if (_bjItemAus(ev)) ev.preventDefault();
+    });
+
+    document.addEventListener('click', function (ev) {
+        const item = _bjItemAus(ev);
+        if (!item) return;
+        ev.preventDefault();
+        _bjWaehleAusItem(item);
+    });
 
     function bjHideAutocomplete(field) {
         const { dropdown } = _bjAutocompleteEls(field);

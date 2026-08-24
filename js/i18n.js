@@ -2979,7 +2979,7 @@ const translations = {
     'mc.dateWindowActive':      'Aktives Fenster: Daten ≥ {date}',
     'mc.dateWindowAuto':        'Auto: letzte 28 Tage (≥ {date}) — Datum wählen zum Überschreiben',
     'mc.dateWindowNone':        'Kein Datums-Filter — gesamte Meta-Historie wird genutzt',
-    'mc.scenariosExplainer':    'Ein Szenario ist eine Momentaufnahme deiner Turnier-Konfiguration und der dazu erstellten Vorhersage. Nutze „Speichern…" vor einem großen Event, um später vergleichen zu können wie das echte Feld aussah.',
+    'mc.scenariosExplainer':    'Ein Szenario ist eine Momentaufnahme deiner Turnier-Konfiguration und der dazu erstellten Vorhersage. Nutze „Speichern…" vor einem großen Event, um später vergleichen zu können wie das echte Meta aussah.',
     'mc.tournamentTypeRegionalDesc':  'Großes Turnier (≥ 100 Spieler). 8-9 Swiss-Runden + Top-8-Cut am Day 2. Day-2-Schwelle ist das Ziel der meisten Spieler — 16 Punkte entsprechen 5-2-1 (ein Sieg zählt 3, ein Unentschieden 1).',
     'mc.tournamentTypeChallengeDesc': 'Lokales Event (~16-64 Spieler). Nur Swiss, 4-6 Runden, kein Top-Cut. Zielpunkte entsprechen typischen Platzierungen.',
     'mc.tournamentTypeCupDesc':       'Lokales Event (~8-32 Spieler). 4-5 Swiss-Runden + Top-4 oder Top-8 Cut. Zielpunkte sind, was historisch über Buchholz den Cut schafft.',

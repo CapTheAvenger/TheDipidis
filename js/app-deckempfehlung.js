@@ -164,7 +164,7 @@
         if (oa.anteil_unbekannt < VORBEHALT_AB) return '';
         var gross = (oa.groesste_unbekannte || [])[0];
         var text = de()
-            ? '<strong>' + pz(oa.anteil_unbekannt) + ' % des Online-Feldes ist neu.</strong> '
+            ? '<strong>' + pz(oa.anteil_unbekannt) + ' % des Online-Metas ist neu.</strong> '
               + 'So viele der heute online gespielten Decks gab es bei den ausgewerteten Turnieren '
               + 'noch nicht'
               + (gross ? ' — darunter ' + sicher(gross.deck) + ' mit ' + pz(gross.anteil)

@@ -3509,7 +3509,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const _altI = t('buildInfo.altSuggestionsIntro');
                 altIntro.textContent = (_altI && _altI !== 'buildInfo.altSuggestionsIntro')
                     ? _altI
-                    : 'Bei diesen Karten spielt die Mehrheit des Feldes eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich deutlich besser. Der Builder hat NICHT automatisch angepasst, du kannst manuell überlegen ob du den Vorschlag übernimmst.';
+                    : 'Bei diesen Karten spielt die Mehrheit des Metas eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich deutlich besser. Der Builder hat NICHT automatisch angepasst, du kannst manuell überlegen ob du den Vorschlag übernimmst.';
                 altWrap.appendChild(altIntro);
 
                 altSuggestions

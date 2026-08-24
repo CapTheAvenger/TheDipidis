@@ -954,6 +954,22 @@
             notes: entry.notes || '',
             sourceTab: entry.sourceTab || null,
             sourceArchetype: entry.sourceArchetype || null,
+            /* Diese Liste ist eine Falle: sie zaehlt die Felder EINZELN auf,
+             * und ein Feld, das buildBattleJournalEntry neu schreibt, faellt
+             * hier still heraus. Genau das ist mit deckSnapshot passiert —
+             * der eingefrorene Schnappschuss lag in der Outbox, ueberlebte
+             * die Synchronisierung nicht und war nach dem naechsten Laden
+             * weg. Ohne Firestore-Konto faellt das nicht auf, weil die
+             * Outbox dann nie geleert wird.
+             *
+             * tests/unit/test-journal-sync-felder.js vergleicht die beiden
+             * Feldlisten jetzt gegeneinander.
+             *
+             * Beide Felder werden nur geschrieben, wenn sie da sind: ein
+             * null wuerde bei set({merge:true}) eine bestehende Angabe auf
+             * dem Server ueberschreiben. */
+            ...(entry.deckSnapshot ? { deckSnapshot: entry.deckSnapshot } : {}),
+            ...(entry.placement ? { placement: entry.placement } : {}),
             createdAtMs: entry.createdAtMs,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             syncedAt: firebase.firestore.FieldValue.serverTimestamp(),

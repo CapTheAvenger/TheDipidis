@@ -150,6 +150,22 @@ describe('Karte in Karte: die innere gibt ihr Polster ab', () => {
         }
     });
 
+    it('sie deckt ALLE Flaechen ab, nicht nur einen Einzelfall', () => {
+        // Der Fehler, der diese Zeile erzwungen hat: die erste Fassung nannte
+        // nur .tier-section. Danach standen die Top-Archetypen bei 14 px und
+        // die Nachbarabschnitte weiter bei 27 — sichtbar ungleich, und damit
+        // schlimmer als vorher. Am Bildschirmfoto nachgemessen streute der
+        // Einzug ueber 12 bis 27 CSS-Pixel; nach der Verallgemeinerung liegen
+        // 74 Prozent aller Zeilen bei genau 14.
+        const b = mobil();
+        const noetig = ['.ds-panel', '.heatmap-container', '.top-cards-container',
+                        '.tier-section', '.ds-sec-body .ds-sec-body'];
+        const fehlend = noetig.filter(k => !b.includes(k.split(' ').pop()));
+        assert.deepEqual(fehlend, [],
+            'die Regel greift nicht fuer: ' + fehlend.join(', ')
+            + ' — eine Teilmenge zu behandeln macht die Seite UNGLEICHER, nicht gleicher');
+    });
+
     it('der farbige Tier-Rahmen bleibt erhalten', () => {
         const b = mobil();
         assert.ok(!/border(-left|-right)?-width:\s*0/.test(b),

@@ -413,3 +413,59 @@ describe('Turnierbild: die Entscheidungen gegen die Vorlage', () => {
         assert.match(code, /var PC = \{ W: 1080, H: 1350/);
     });
 });
+
+// ── 8. Die Verknüpfung muss man finden können ───────────────────────
+
+describe('Battle Journal: der Deckname verknüpft die Liste von selbst', () => {
+    const code = ohneKommentar(JOURNAL);
+
+    it('ein eingetragener Deckname friert die gleichnamige Liste ein', () => {
+        // Gemeldet am 24.08.: "ich hatte extra mein eigenes Deck ausgewählt
+        // und trotzdem wurde es da nicht angezeigt". Er hatte im Formular
+        // "Mega Excadrill V1" gewählt — den Namen einer gespeicherten
+        // Liste. Die Verknüpfung lag aber nur im Turnierdialog.
+        assert.match(code, /function bjSchnappschussNachName\(deckName\)/);
+        assert.match(code, /const schnapp = bjSchnappschussNachName\(values\.ownDeck\);/,
+            'beim Loggen wird der Deckname nicht mehr ausgewertet');
+    });
+
+    it('bei zwei gleichnamigen Listen wird nicht geraten', () => {
+        // Lieber kein Gitter als das falsche.
+        const m = JOURNAL.match(/function bjSchnappschussNachName\(deckName\) \{[\s\S]*?\n    \}/);
+        assert.match(m[0], /treffer\.length !== 1/,
+            'bei mehreren Treffern wird trotzdem einer genommen');
+    });
+
+    it('ohne Treffer wird das Feld weggelassen, nicht auf null gesetzt', () => {
+        // Ein deckSnapshot: null auf jedem Eintrag wäre eine Verknüpfung,
+        // die es zu lösen gäbe — es gab aber nie eine.
+        assert.match(code, /return schnapp \? \{ deckSnapshot: schnapp \} : \{\};/);
+    });
+
+    it('der Dialog schlägt die gleichnamige Liste vor', () => {
+        assert.match(code, /const nachName = !vorhanden/,
+            'ohne Verknüpfung wird nichts vorgeschlagen');
+        assert.match(code, /bj\.snapshotSuggest/,
+            'der Vorschlag wird nicht beschriftet');
+        assert.match(I18N, /'bj\.snapshotSuggest':\s*'[^']*\{deck\}/,
+            'der Vorschlagstext nennt den Decknamen nicht');
+    });
+
+    it('das Schema zählt hoch und wird nirgends wieder gesenkt', () => {
+        // Ein Eintrag mit deckSnapshot traegt Fassung 7. Wer beim
+        // Bearbeiten eine 6 zurueckschreibt, macht ihn aelter, als er ist.
+        const stempel = [...code.matchAll(/schemaVersion:\s*(\d+)/g)].map(m => Number(m[1]));
+        assert.ok(stempel.length >= 2, 'es wird nirgends mehr ein Schema gestempelt');
+        stempel.forEach(v => assert.ok(v >= 7, `irgendwo wird noch Fassung ${v} geschrieben`));
+    });
+});
+
+describe('Turnierbild: der Hinweis nennt den Weg, nicht nur das Ziel', () => {
+    it('der Toast sagt, wo die Verknüpfung sitzt', () => {
+        // "Verknüpfe im Turnierdialog die Liste" hat der Betreiber nicht
+        // auf das ⋯-Menü abgebildet. Jetzt steht der Klickpfad da.
+        const code = ohneKommentar(SHARE);
+        assert.match(code, /⋯ → Turnier bearbeiten/,
+            'der Hinweis nennt den Klickpfad nicht');
+    });
+});

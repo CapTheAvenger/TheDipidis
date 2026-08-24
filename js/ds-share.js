@@ -1452,8 +1452,8 @@
          * fuer eine Einstellung — hier ist er eine Auskunft. */
         toast(karten.length
             ? L('Bild wird erstellt …', 'Creating image …')
-            : L('Bild wird erstellt — ohne Kartengitter. Verknüpfe im Turnierdialog die Liste, mit der du gespielt hast.',
-                'Creating image — without the card grid. Link the list you played in the tournament dialog.'),
+            : L('Bild wird erstellt — ohne Kartengitter. So kommt es rein: ⋯ → Turnier bearbeiten → „Welche Liste hast du gespielt?" → Speichern.',
+                'Creating image — without the card grid. To add it: ⋯ → Edit tournament → "Which list did you play?" → Save.'),
             'info');
         var rounds = spec.rounds || [];
         return Promise.all([

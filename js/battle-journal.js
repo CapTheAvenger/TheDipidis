@@ -876,8 +876,37 @@
             sourceTab: activeTab,
             sourceArchetype,
             userId: window.auth?.currentUser?.uid || null,
-            schemaVersion: 6
+            // Passt der eingetragene Deckname auf genau eine gespeicherte
+            // Liste, wird sie hier eingefroren. Kein Feld, kein Klick —
+            // die Auswahl ist schon getroffen. Passt nichts, fehlt das
+            // Feld und der Turnierdialog bleibt der Weg.
+            ...(function () {
+                const schnapp = bjSchnappschussNachName(values.ownDeck);
+                return schnapp ? { deckSnapshot: schnapp } : {};
+            })(),
+            schemaVersion: 7
         };
+    }
+
+    /**
+     * Der Schnappschuss zu einem Decknamen — wenn er eindeutig ist.
+     *
+     * Der Betreiber hat im Formular "Mega Excadrill V1" ausgewaehlt, also
+     * genau den Namen einer gespeicherten Liste, und das Bild kam trotzdem
+     * ohne Kartengitter: die Verknuepfung lag nur im Turnierdialog, den
+     * niemand aufmacht. Wer den Namen einer gespeicherten Liste eintraegt,
+     * hat die Liste gemeint. Also wird sie hier eingefroren.
+     *
+     * Bei zwei gleichnamigen Listen wird NICHT geraten — dann bleibt es
+     * beim Dialog. Lieber kein Gitter als das falsche.
+     */
+    function bjSchnappschussNachName(deckName) {
+        const gesucht = String(deckName || '').trim().toLowerCase();
+        if (!gesucht) return null;
+        const treffer = bjGespeicherteDecks()
+            .filter(d => String(d.name || '').trim().toLowerCase() === gesucht);
+        if (treffer.length !== 1) return null;
+        return bjBaueSchnappschuss(treffer[0].id);
     }
 
     function playSaveFeedback() {
@@ -2134,11 +2163,25 @@
                 + escapeHtml(String(d.name || '?'))
                 + ' (' + (Object.keys(d.cards).length) + ')</option>').join('');
 
+        /* Nichts verknuepft? Dann die Liste vorauswaehlen, die so heisst
+         * wie das eingetragene Deck. Ein Tipp auf Speichern genuegt, statt
+         * die eigene Liste in einer Auswahlliste wiederzufinden. */
+        const nachName = !vorhanden
+            ? decks.find(d => String(d.name || '').trim().toLowerCase()
+                === String((entries.find(e => e.ownDeck) || {}).ownDeck || '').trim().toLowerCase())
+            : null;
+
         sel.value = vorhanden && decks.some(d => String(d.id) === String(vorhanden.deckId))
-            ? String(vorhanden.deckId) : '';
+            ? String(vorhanden.deckId)
+            : (nachName ? String(nachName.id) : '');
 
         if (!state) return;
-        if (vorhanden) {
+        if (!vorhanden && nachName) {
+            state.textContent = battleJournalText('bj.snapshotSuggest',
+                'Vorgeschlagen: „{deck}\u201c — auf Speichern tippen, dann steht die Liste im Turnierbild.')
+                .replace('{deck}', String(nachName.name || ''));
+            state.classList.remove('is-set');
+        } else if (vorhanden) {
             state.textContent = battleJournalText('bj.snapshotFrozen',
                 'Eingefroren am {date} · {n} Karten')
                 .replace('{date}', bjSchnappschussDatum(vorhanden.frozenAtMs))
@@ -2485,7 +2528,11 @@
                 brick: matchBrick,
                 mulligan: matchMulligan,
                 notes: matchNotes,
-                schemaVersion: 6
+                // Mitziehen, nicht stehen lassen: ein Eintrag mit
+                // deckSnapshot traegt Fassung 7. Beim Bearbeiten eine 6
+                // zurueckzuschreiben wuerde ihn aelter aussehen lassen,
+                // als er ist.
+                schemaVersion: 7
             };
         } else {
             updatePayload = {

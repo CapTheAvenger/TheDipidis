@@ -22,6 +22,11 @@
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
+
+/** Kommentare raus, bevor eine Zusicherung nach Code sucht. */
+const ohneKommentar = src => String(src)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:"'`\\])\/\/.*$/gm, '$1');
 const fs = require('fs');
 const path = require('path');
 
@@ -287,8 +292,13 @@ describe('ds-share: ein Turnier ist die Gruppe seiner Partien', () => {
     it('liest die Runden aus dem Cache, nicht aus Firestore', () => {
         // Der Bildexport darf keinen Netzweg haben: er läuft auch offline,
         // und das Journal ist ausdrücklich ein Offline-Journal.
+        //
+        // Gescannt wird der Code OHNE Kommentare. Vorher schlug diese
+        // Zusicherung an, weil ein Kommentar auf js/firebase-collection.js
+        // verwies — ein Dateiname in Prosa ist kein Netzweg. Die Prüfung
+        // ist trotzdem richtig, sie las nur die falsche Textmenge.
         assert.match(SHARE, /window\._bjGetCache/);
-        assert.ok(!/firebase|firestore/i.test(SHARE),
+        assert.ok(!/firebase|firestore/i.test(ohneKommentar(SHARE)),
             'ds-share.js greift auf Firestore zu — das Journal ist offline-first.');
     });
 });

@@ -2712,3 +2712,31 @@
         overflow: visible;
     }
 }
+
+/* ── Karte in Karte: die innere gibt ihr waagerechtes Polster ab ──────
+   Gemessen auf 390 px, Kette bis zu einer Deck-Kachel im Meta-Tab:
+
+     section.ds-sec          1 px Rahmen
+     div.ds-sec-body        12 px Polster
+     div.tier-section        1 px Rahmen + 18 px Polster
+     div.arc-card            1 px Rahmen
+     -> Inhalt beginnt bei 33 px, die Kachel ist 324 statt 362 px breit
+
+   Die Tier-Flaeche ist eine vollwertige Karte (Grund, Radius, Rahmen), sie
+   sitzt aber INNERHALB einer zweiten Karte, die ihr Polster schon gestellt
+   hat. Auf dem Telefon ist das ein doppelter Rahmen: aussen 12 px, innen
+   noch einmal 18 px. Auf dem grossen Bildschirm stoert das nicht, dort ist
+   Platz genug — deshalb greift die Regel nur bis 768 px.
+
+   Der farbige Rahmen der Tier-Flaeche BLEIBT: er unterscheidet Tier 1 von
+   Tier 2 und traegt damit Bedeutung. Nur das Polster geht weg, und nur
+   waagerecht — senkrecht braucht es den Abstand weiterhin. */
+@media (max-width: 768px) {
+    .ds-sec-body .tier-section,
+    .ds-sec-body .tier-hero-section,
+    .cl-content-panel .tier-section,
+    .cl-content-panel .tier-hero-section {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}

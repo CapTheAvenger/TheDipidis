@@ -102,3 +102,58 @@ describe('Seitenrand: das Token selbst', () => {
         }
     });
 });
+
+describe('Karte in Karte: die innere gibt ihr Polster ab', () => {
+    // Zweite Runde. Nach dem Token-Fix blieb ein Rest, und er kam nicht mehr
+    // vom Seitenrand, sondern von Verschachtelung. Gemessen auf 390 px:
+    //   section.ds-sec     1 px Rahmen
+    //   div.ds-sec-body   12 px Polster
+    //   div.tier-section   1 px Rahmen + 18 px Polster   <- zweiter Rahmen
+    //   div.arc-card       1 px Rahmen
+    // Inhalt begann bei 33 px, die Deck-Kachel war 324 statt 362 px breit.
+    const mobil = () => {
+        const css = lies('mobile-responsive.css');
+        const i = css.indexOf('Karte in Karte');
+        assert.ok(i > 0, 'der Block fuer verschachtelte Karten fehlt');
+        const m = css.indexOf('@media', i);
+        assert.ok(m > 0, 'kein @media nach dem Kommentar');
+        return css.slice(m, css.indexOf('\n}', css.indexOf('}', m)) + 2);
+    };
+
+    it('die Regel greift nur auf kleinen Bildschirmen', () => {
+        const css = lies('mobile-responsive.css');
+        const i = css.indexOf('Karte in Karte');
+        const bis = css.slice(i, i + 2000);
+        assert.match(bis, /@media \(max-width:\s*768px\)/,
+            'ohne Breitengrenze wuerde auch der grosse Bildschirm sein Polster verlieren — '
+            + 'dort ist Platz genug und die Verschachtelung stoert nicht');
+    });
+
+    it('sie nimmt nur waagerecht Polster weg, nicht senkrecht', () => {
+        const b = mobil();
+        assert.match(b, /padding-left:\s*0/, 'kein padding-left');
+        assert.match(b, /padding-right:\s*0/, 'kein padding-right');
+        assert.ok(!/padding-top:\s*0/.test(b) && !/padding:\s*0(?![^;]*px)/.test(b),
+            'die Regel nimmt auch senkrecht Abstand weg — der wird gebraucht');
+    });
+
+    it('sie greift nur auf VERSCHACHTELTE Flaechen, nicht auf alle', () => {
+        const b = mobil();
+        // Jeder Selektor muss einen Vorfahren nennen. Ein nacktes
+        // ".tier-section" wuerde auch die freistehende Flaeche treffen.
+        const sel = b.slice(b.indexOf('{', b.indexOf('@media')) + 1, b.indexOf('{', b.indexOf('px)')+8));
+        const zeilen = sel.split(',').map(x => x.trim()).filter(Boolean);
+        assert.ok(zeilen.length >= 2, 'zu wenige Selektoren gefunden — der Scanner greift nicht');
+        for (const z of zeilen) {
+            assert.ok(z.split(/\s+/).length >= 2,
+                `"${z}" nennt keinen Vorfahren — die Regel traefe auch freistehende Flaechen`);
+        }
+    });
+
+    it('der farbige Tier-Rahmen bleibt erhalten', () => {
+        const b = mobil();
+        assert.ok(!/border(-left|-right)?-width:\s*0/.test(b),
+            'die Regel entfernt den Rahmen — er unterscheidet aber Tier 1 von Tier 2 '
+            + 'und traegt damit Bedeutung, nicht nur Zierde');
+    });
+});

@@ -2713,40 +2713,58 @@
     }
 }
 
-/* ── Karte in Karte: die innere gibt ihr waagerechtes Polster ab ──────
-   Gemessen auf 390 px, Kette bis zu einer Deck-Kachel im Meta-Tab:
+/* ── Auf dem Telefon ist alles randlos ───────────────────────────────
+   Entschieden am 24.08.2026, nachdem drei Anlaeufe am Polster gescheitert
+   sind. Das eigentliche Problem war nie die Menge des Polsters, sondern ein
+   STRUKTURUNTERSCHIED: die oberen Bereiche eines Tabs stehen frei auf der
+   Seite, die unteren stecken in Abschnittskarten. Dadurch beginnt der Inhalt
+   oben bei 13 px und unten bei 30 — und dieser Sprung mitten auf der Seite
+   ist es, was auffaellt.
 
-     section.ds-sec          1 px Rahmen
-     div.ds-sec-body        12 px Polster
-     div.tier-section        1 px Rahmen + 18 px Polster
-     div.arc-card            1 px Rahmen
-     -> Inhalt beginnt bei 33 px, die Kachel ist 324 statt 362 px breit
+   Am Bildschirmfoto gemessen streute der Einzug ueber 12, 13, 22, 25, 26 und
+   27 CSS-Pixel. Kein Nachjustieren einzelner Klassen bekommt das gerade,
+   solange die einen Bereiche eine Karte haben und die anderen nicht.
 
-   Die Tier-Flaeche ist eine vollwertige Karte (Grund, Radius, Rahmen), sie
-   sitzt aber INNERHALB einer zweiten Karte, die ihr Polster schon gestellt
-   hat. Auf dem Telefon ist das ein doppelter Rahmen: aussen 12 px, innen
-   noch einmal 18 px. Auf dem grossen Bildschirm stoert das nicht, dort ist
-   Platz genug — deshalb greift die Regel nur bis 768 px.
+   Die Entscheidung lautet darum: auf dem Telefon KEINE Abschnittskarten.
+   Getrennt wird durch Ueberschrift und eine Linie ueber die volle Breite.
+   Der Einzug wird genau einmal gesetzt, auf der Abschnittsflaeche selbst.
 
-   Der farbige Rahmen der Tier-Flaeche BLEIBT: er unterscheidet Tier 1 von
-   Tier 2 und traegt damit Bedeutung. Nur das Polster geht weg, und nur
-   waagerecht — senkrecht braucht es den Abstand weiterhin.
-
-   NACHTRAG. Die erste Fassung dieser Regel nannte nur .tier-section und hat
-   die Lage dadurch VERSCHLECHTERT: die Top-Archetypen standen danach bei
-   14 px, die Nachbarabschnitte weiter bei 27 — sichtbar ungleich, und genau
-   das ist aufgefallen. Am Bildschirmfoto nachgemessen begann der Inhalt je
-   Abschnitt mal bei 2, mal bei 12 CSS-Pixeln.
-
-   Die Regel gilt darum fuer ALLE Flaechen, die in einem Abschnittskoerper
-   liegen. Der Grundsatz: der Abschnittskoerper stellt den Einzug, und was
-   darin liegt, stellt keinen zweiten. Kacheln, Eingabefelder und Knoepfe
-   behalten ihr Polster — sie sind Bauteile, keine Flaechen. */
+   Ab 769 px bleibt alles wie gehabt — dort ist Platz genug fuer Karten, und
+   sie ordnen die Seite dann auch wirklich. */
 @media (max-width: 768px) {
+
+    /* 1. Abschnittsflaechen verlieren ihren Rahmen. Die Linie oben bleibt als
+          einziger Trenner und laeuft ueber die volle Breite. */
+    .ds-sec,
+    .ds-panel,
+    .ds-filter,
+    .de-karte {
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    /* 2. Der Einzug, genau einmal. */
+    .ds-sec > .ds-sec-body,
+    .ds-sec > .ds-sec-hd,
+    .ds-panel,
+    .ds-filter,
+    .de-karte {
+        padding-left: var(--mobil-einzug);
+        padding-right: var(--mobil-einzug);
+    }
+
+    /* 3. Was DARIN liegt, wiederholt ihn nicht — und zieht auch keinen
+          zweiten Rahmen. Kacheln, Eingabefelder und Knoepfe sind hier
+          bewusst NICHT aufgefuehrt: sie sind Bauteile, keine Flaechen,
+          und ihr Polster haelt den Text von ihrer eigenen Kante weg. */
+    .ds-sec-body .ds-panel,
+    .ds-sec-body .ds-filter,
+    .ds-sec-body .ds-sec-body,
     .ds-sec-body .tier-section,
     .ds-sec-body .tier-hero-section,
-    .ds-sec-body .ds-panel,
-    .ds-sec-body .ds-sec-body,
     .ds-sec-body .heatmap-container,
     .ds-sec-body .top-cards-container,
     .ds-sec-body .tier-movers-block,
@@ -2759,5 +2777,9 @@
     .current-meta-content > .ds-panel {
         padding-left: 0;
         padding-right: 0;
+        border-left: 0;
+        border-right: 0;
+        border-radius: 0;
+        box-shadow: none;
     }
 }

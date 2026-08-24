@@ -86,7 +86,7 @@ ENGLISH_ONLY_WORDS = [
 BILINGUAL_ALLOWED = {
     'pokémon', 'pokemon', 'tcg', 'hub', 'meta', 'deck', 'proxy',
     'playtester', 'bo1', 'bo3', 'ptcgl', 'city league', 'limitless',
-    'ok', 'item', 'ace spec', 'ass-klasse', 'cardmarket', 'win',
+    'ok', 'item', 'tool', 'ace spec', 'ass-klasse', 'cardmarket', 'win',
     'loss', 'tie', 'first', 'second', '1st', '2nd', 'mirror',
     'mulligan', 'lost zone', 'trainer', 'online', 'k.o.', 'basic',
     'de', 'en', 'iono', 'judge', 'roxanne', 'unfair stamp',

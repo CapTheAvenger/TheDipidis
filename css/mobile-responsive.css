@@ -2730,12 +2730,33 @@
 
    Der farbige Rahmen der Tier-Flaeche BLEIBT: er unterscheidet Tier 1 von
    Tier 2 und traegt damit Bedeutung. Nur das Polster geht weg, und nur
-   waagerecht — senkrecht braucht es den Abstand weiterhin. */
+   waagerecht — senkrecht braucht es den Abstand weiterhin.
+
+   NACHTRAG. Die erste Fassung dieser Regel nannte nur .tier-section und hat
+   die Lage dadurch VERSCHLECHTERT: die Top-Archetypen standen danach bei
+   14 px, die Nachbarabschnitte weiter bei 27 — sichtbar ungleich, und genau
+   das ist aufgefallen. Am Bildschirmfoto nachgemessen begann der Inhalt je
+   Abschnitt mal bei 2, mal bei 12 CSS-Pixeln.
+
+   Die Regel gilt darum fuer ALLE Flaechen, die in einem Abschnittskoerper
+   liegen. Der Grundsatz: der Abschnittskoerper stellt den Einzug, und was
+   darin liegt, stellt keinen zweiten. Kacheln, Eingabefelder und Knoepfe
+   behalten ihr Polster — sie sind Bauteile, keine Flaechen. */
 @media (max-width: 768px) {
     .ds-sec-body .tier-section,
     .ds-sec-body .tier-hero-section,
+    .ds-sec-body .ds-panel,
+    .ds-sec-body .ds-sec-body,
+    .ds-sec-body .heatmap-container,
+    .ds-sec-body .top-cards-container,
+    .ds-sec-body .tier-movers-block,
+    .ds-sec-body .city-league-info-card,
+    .ds-sec-body .city-league-info-generated-block,
     .cl-content-panel .tier-section,
-    .cl-content-panel .tier-hero-section {
+    .cl-content-panel .tier-hero-section,
+    .cl-content-panel .ds-panel,
+    .cl-content-panel .city-league-info-card,
+    .current-meta-content > .ds-panel {
         padding-left: 0;
         padding-right: 0;
     }

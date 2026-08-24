@@ -933,6 +933,12 @@
             // 50 % in der Zeile daneben.
             winRate: scored ? (w / scored) * 100 : NaN,
             deck: asc[0].ownDeck || '',
+            // Die eingefrorene Liste. Sie haengt am Turnier, gespeichert ist
+            // sie an jedem Eintrag — also die Gruppe fragen, nicht asc[0]:
+            // ein nachgetragener Match traegt sie nicht.
+            deckSnapshot: (asc.find(function (e) {
+                return e && e.deckSnapshot && e.deckSnapshot.cards;
+            }) || {}).deckSnapshot || null,
             format: asc[0].meta || '',
             type: asc[0].tournamentType || '',
             date: new Date(last.createdAtMs || Date.now())
@@ -943,6 +949,12 @@
                     result: e.result || '',
                     opponent: e.opponentArchetype || '–',
                     turnOrder: e.turnOrder || '',
+                    // BO1 oder BO3 stand bisher nur indirekt drin: als
+                    // gefuellte Spieleliste. Ein BO3 ohne eingetragene
+                    // Einzelspiele sah damit aus wie ein BO1. Der Betreiber
+                    // nennt die Angabe ausdruecklich, also steht sie jetzt
+                    // als eigenes Feld hier.
+                    bestOf: e.bestOf === 'bo3' ? 'bo3' : 'bo1',
                     games: (e.bestOf === 'bo3' && Array.isArray(e.bo3Games) && e.bo3Games.length)
                         ? e.bo3Games.map(function (gm) {
                             return gm.result === 'win' ? L('S', 'W')
@@ -1010,14 +1022,470 @@
         });
     }
 
+
+    /* ═══════════════════════════════════════════════════════════════
+     * Karte 3 · Turnierposter, 1080 × 1350
+     *
+     * Das Hochformat 4:5 ist das groesste Bild, das Instagram im Feed
+     * ungeschnitten zeigt — mehr Hoehe je Breite gibt es dort nicht.
+     * Vorlage sind die Liga-Posts, die der Betreiber mitgebracht hat:
+     * Ergebnis gross, die gespielte Liste als Kartengitter, die Gegner
+     * als Reihe. Was NICHT uebernommen wird:
+     *
+     *   · das Foto der Person — das Ergebnis gehoert aufs Bild, nicht
+     *     das Gesicht;
+     *   · das rote X auf besiegten Gegnern — zweideutig (wer hat wen
+     *     geschlagen?) und ausserhalb der Palette. Stattdessen faerbt
+     *     der Ring, und ein Zeichen im Eck sagt es noch einmal, damit
+     *     es auch farbfehlsichtig lesbar bleibt;
+     *   · ein Sponsorenband — diese Seite hat eine Marke, die passt in
+     *     84 px.
+     *
+     * Ohne eingefrorene Liste faellt das Gitter weg und der Deckblock
+     * wird gross. Ein leeres Kartenfeld waere schlimmer als keins.
+     * ═══════════════════════════════════════════════════════════════ */
+
+    var PC = { W: 1080, H: 1350, PAD: 64 };
+
+    /* Aus "Ultra Ball (SVI 196)" wird {name, set, number}. Das ist das
+     * Format, in dem deck.cards die Schluessel fuehrt (siehe
+     * js/firebase-collection.js: "Exact prints"). Passt der Schluessel
+     * nicht auf das Muster, bleibt er als Name stehen — dann gibt es
+     * eben kein Bild, aber die Karte faellt nicht aus der Liste. */
+    function parseKartenSchluessel(key) {
+        var m = String(key || '').match(/^(.*?)\s*\(([^()\s]+)\s+([^()\s]+)\)\s*$/);
+        if (!m) return { name: String(key || ''), set: '', number: '' };
+        return { name: m[1].trim(), set: m[2].trim(), number: m[3].trim() };
+    }
+
+    /* Die Reihenfolge, in der jeder eine Deckliste liest. Nicht das
+     * Alphabet — "Ancient Booster Energy Capsule" vor "Charizard ex"
+     * waere korrekt sortiert und trotzdem unlesbar. */
+    var PC_ART_RANG = {
+        Pokemon: 1, Supporter: 2, Item: 3, Tool: 4, Stadium: 5,
+        'Special Energy': 6, 'Basic Energy': 7
+    };
+
+    function kartenArtRang(karte) {
+        try {
+            var shared = window._mbShared;
+            if (!shared || typeof shared.getMetaBinderTypeMeta !== 'function') return 99;
+            var rec = (typeof shared.findCardRecord === 'function')
+                ? shared.findCardRecord(karte.name, karte.set, karte.number) : null;
+            var meta = shared.getMetaBinderTypeMeta({
+                name: karte.name, set: karte.set, number: karte.number,
+                type: (rec && rec.type) || '', rarity: (rec && rec.rarity) || ''
+            });
+            var kat = (typeof shared.getMetaBinderSortCategory === 'function')
+                ? shared.getMetaBinderSortCategory(meta) : String(meta.type || '');
+            return PC_ART_RANG[kat] || 99;
+        } catch (e) { return 99; }
+    }
+
+    /** Die Liste aus dem Schnappschuss, sortiert und mit Bild-URL. */
+    function schnappschussKarten(snap) {
+        if (!snap || !snap.cards) return [];
+        var shared = window._mbShared || {};
+        var liste = Object.keys(snap.cards).map(function (key) {
+            var teil = parseKartenSchluessel(key);
+            var url = '';
+            try {
+                if (typeof shared.findCardImage === 'function') {
+                    url = shared.findCardImage(teil.name, teil.set, teil.number) || '';
+                }
+            } catch (e) { url = ''; }
+            return {
+                key: key, name: teil.name, set: teil.set, number: teil.number,
+                anzahl: Number(snap.cards[key]) || 0,
+                rang: kartenArtRang(teil), url: url
+            };
+        });
+        liste.sort(function (a, b) {
+            if (a.rang !== b.rang) return a.rang - b.rang;
+            if (a.anzahl !== b.anzahl) return b.anzahl - a.anzahl;
+            return a.name.localeCompare(b.name, 'de');
+        });
+        return liste;
+    }
+
+    /* Wie viele Spalten passen, damit ALLE verschiedenen Karten in die
+     * gegebene Hoehe passen? Kein fester Deckel: was ein Deckel
+     * abschneidet, sind die Einzelkarten, und ueber genau die wird unter
+     * einem Post geredet. Lieber kleinere Kacheln als eine halbe Liste.
+     * Gemessen an 1.058 echten Listen aus data/tournament_decklists_per_player.csv:
+     * Median 25 verschiedene Karten, Maximum 36. */
+    function gitterMasse(anzahl, breite, hoehe) {
+        var beste = null;
+        for (var spalten = 4; spalten <= 12; spalten++) {
+            var gap = spalten >= 8 ? 8 : 10;
+            var kb = Math.floor((breite - gap * (spalten - 1)) / spalten);
+            var kh = Math.round(kb * 342 / 245);          /* echtes Kartenformat */
+            var zeilen = Math.ceil(anzahl / spalten);
+            if (zeilen * kh + (zeilen - 1) * gap > hoehe) continue;
+            if (!beste || kb > beste.kb) beste = { spalten: spalten, kb: kb, kh: kh, gap: gap, zeilen: zeilen };
+        }
+        return beste;
+    }
+
+    function postCardCanvas(spec, art) {
+        var cv = document.createElement('canvas');
+        cv.width = PC.W; cv.height = PC.H;
+        var ctx = cv.getContext('2d');
+        var innen = PC.W - PC.PAD * 2;
+
+        ctx.fillStyle = C.bg0; ctx.fillRect(0, 0, PC.W, PC.H);
+        var g1 = ctx.createRadialGradient(200, -120, 20, 200, -120, 820);
+        g1.addColorStop(0, 'rgba(85,102,224,.38)'); g1.addColorStop(1, 'rgba(85,102,224,0)');
+        ctx.fillStyle = g1; ctx.fillRect(0, 0, PC.W, PC.H);
+        var g2 = ctx.createRadialGradient(1180, 1420, 20, 1180, 1420, 760);
+        g2.addColorStop(0, 'rgba(255,203,5,.20)'); g2.addColorStop(1, 'rgba(255,203,5,0)');
+        ctx.fillStyle = g2; ctx.fillRect(0, 0, PC.W, PC.H);
+
+        /* ── Kopf ──────────────────────────────────────────────────── */
+        pokeball(ctx, PC.PAD + 13, 62, 13);
+        ctx.font = fSans(16, 700);
+        ctx.fillStyle = C.ink2;
+        ctx.textBaseline = 'middle';
+        ctx.fillText('thedipidis.app', PC.PAD + 36, 63);
+        ctx.textBaseline = 'alphabetic';
+
+        ctx.font = fSans(46, 700);
+        ctx.fillStyle = C.ink;
+        ctx.fillText(clip(ctx, spec.tournament || L('Turnier', 'Tournament'), innen), PC.PAD, 130);
+        ctx.font = fSans(18, 400);
+        ctx.fillStyle = C.ink3;
+        ctx.fillText(clip(ctx, [spec.type, spec.format, spec.date].filter(Boolean).join(' · '), innen),
+                     PC.PAD, 162);
+
+        var rg = ctx.createLinearGradient(PC.PAD, 0, PC.W - PC.PAD, 0);
+        rg.addColorStop(0, C.brand); rg.addColorStop(1, C.gold);
+        ctx.fillStyle = rg; ctx.fillRect(PC.PAD, 184, innen, 4);
+
+        /* ── Ergebnisband ──────────────────────────────────────────
+         * Drei Spalten — oder zwei, wenn keine Platzierung eingetragen
+         * ist. Ein leerer Goldkasten waere schlechter als keiner. */
+        var rec = spec.record || { w: 0, l: 0, t: 0 };
+        var spalten = [];
+        if (spec.place) {
+            spalten.push({ lab: L('PLATZIERUNG', 'PLACEMENT'), val: spec.place,
+                           farbe: C.gold, mono: true });
+        }
+        spalten.push({ lab: L('ERGEBNIS', 'RESULT'),
+                       val: rec.w + '-' + rec.l + '-' + rec.t,
+                       fuss: L('S · N · U', 'W · L · T'), farbe: C.ink, mono: true });
+        spalten.push({ lab: L('RUNDEN', 'ROUNDS'), val: String((spec.rounds || []).length),
+                       fuss: isFinite(spec.winRate) ? num(spec.winRate, 1) + ' % Win Rate' : '',
+                       farbe: C.brandInk, mono: true });
+
+        var bandY = 206, bandH = 168;
+        ctx.fillStyle = C.surface1;
+        rr(ctx, PC.PAD, bandY, innen, bandH, 20); ctx.fill();
+        ctx.strokeStyle = C.line; ctx.lineWidth = 1;
+        rr(ctx, PC.PAD, bandY, innen, bandH, 20); ctx.stroke();
+
+        var sw = innen / spalten.length;
+        ctx.textAlign = 'center';
+        for (var i = 0; i < spalten.length; i++) {
+            var sp = spalten[i];
+            var cx = PC.PAD + sw * i + sw / 2;
+            if (i > 0) {
+                ctx.fillStyle = C.line;
+                ctx.fillRect(PC.PAD + sw * i - 1, bandY + 28, 2, bandH - 56);
+            }
+            /* label() erbt textAlign. Hier stand cx minus die halbe Breite —
+             * bei textAlign 'center' verschiebt das ein zweites Mal, und
+             * PLATZIERUNG stand sichtbar links neben seiner Zahl. */
+            ctx.textAlign = 'center';
+            label(ctx, sp.lab, cx, bandY + 42);
+            /* Der Wert schrumpft, wenn er nicht passt — "9/128" ist eine
+             * gueltige Platzierung und dreimal so breit wie "3.". */
+            var groesse = 74;
+            do {
+                ctx.font = sp.mono ? fMono(groesse, 700) : fSans(groesse, 700);
+                if (ctx.measureText(sp.val).width <= sw - 36) break;
+                groesse -= 4;
+            } while (groesse > 26);
+            ctx.fillStyle = sp.farbe;
+            ctx.fillText(clip(ctx, sp.val, sw - 28), cx, bandY + 112);
+            if (sp.fuss) {
+                ctx.font = fSans(15, 400);
+                ctx.fillStyle = C.ink3;
+                ctx.fillText(clip(ctx, sp.fuss, sw - 28), cx, bandY + 142);
+            }
+        }
+        ctx.textAlign = 'start';
+
+        /* ── Deckzeile ─────────────────────────────────────────────── */
+        var karten = art.karten || [];
+        var hatGitter = karten.length > 0;
+        var deckY = bandY + bandH + 32;
+        var sprGr = hatGitter ? 54 : 150;
+        var big = (art.icons && art.icons.length) ? art.icons : [null];
+
+        if (hatGitter) {
+            for (var k = 0; k < big.length; k++) {
+                sprite(ctx, big[k], PC.PAD + k * (sprGr + 10), deckY, sprGr, initials(spec.deck));
+            }
+            var textX = PC.PAD + big.length * (sprGr + 10) + 8;
+            ctx.font = fSans(38, 700);
+            ctx.fillStyle = C.ink;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(clip(ctx, spec.deck || '–', PC.W - PC.PAD - textX - 220),
+                         textX, deckY + sprGr / 2 - 8);
+            ctx.font = fSans(16, 400);
+            ctx.fillStyle = C.ink3;
+            var summe = (spec.deckSnapshot && spec.deckSnapshot.cardCount) || 0;
+            ctx.fillText(karten.length + ' ' + L('verschiedene Karten', 'distinct cards')
+                + (summe ? ' · ' + summe + ' ' + L('gesamt', 'total') : ''),
+                textX, deckY + sprGr / 2 + 22);
+            ctx.textBaseline = 'alphabetic';
+        }
+
+        /* ── Gegnerband zuerst rechnen: es steht unten fest, das Gitter
+         * bekommt den Rest. ─────────────────────────────────────────── */
+        var rounds = spec.rounds || [];
+        var fussY = PC.H - 84;
+        var einreihig = rounds.length <= 9;
+        var d = einreihig ? 96 : 80;
+        var gap = einreihig ? 12 : 10;
+        var proReihe = einreihig ? rounds.length : Math.ceil(rounds.length / 2);
+        /* Bei mehr als 18 Runden wird es eng — dann schrumpft der Kreis
+         * weiter, statt Runden wegzulassen. Ein Bild, das die Haelfte
+         * der Runden verschweigt, ist eine falsche Auskunft. */
+        while (proReihe > 0 && proReihe * d + (proReihe - 1) * gap > innen && d > 44) {
+            d -= 4;
+        }
+
+        /* Erst die Hoehe des Bandes, dann seine Oberkante. Vorher stand die
+         * Kante fest bei fussY - 200: bei zwei Reihen lief das Band in die
+         * Fusszeile, bei einer verschenkte es Platz, den das Kartengitter
+         * gebraucht haette. Das Gitter bekommt, was uebrig bleibt. */
+        var gegnerHoehe = einreihig ? (d + 22) : (2 * d + 20);
+        var gegnerY = fussY - 20 - gegnerHoehe;
+        var gegnerLabelY = gegnerY - 14;
+
+        label(ctx, L('GEGNER', 'OPPONENTS'), PC.PAD, gegnerLabelY);
+        var boArten = {};
+        rounds.forEach(function (m) { boArten[m.bestOf || 'bo1'] = true; });
+        var boSchild = Object.keys(boArten).length === 1 ? Object.keys(boArten)[0].toUpperCase() : '';
+        if (boSchild) {
+            ctx.font = fSans(13, 700);
+            var bw = ctx.measureText(boSchild).width + 20;
+            ctx.strokeStyle = C.lineStrong; ctx.lineWidth = 1;
+            rr(ctx, PC.PAD + 120, gegnerLabelY - 15, bw, 22, 11); ctx.stroke();
+            ctx.fillStyle = C.ink3;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(boSchild, PC.PAD + 120 + bw / 2, gegnerLabelY - 4);
+            ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+        }
+
+        for (var r = 0; r < rounds.length; r++) {
+            var m = rounds[r];
+            var reihe = einreihig ? 0 : Math.floor(r / proReihe);
+            var spInReihe = einreihig ? r : (r % proReihe);
+            var inDieser = einreihig ? rounds.length
+                : Math.min(proReihe, rounds.length - reihe * proReihe);
+            var reiheB = inDieser * d + (inDieser - 1) * gap;
+            var gx = PC.PAD + Math.round((innen - reiheB) / 2) + spInReihe * (d + gap);
+            var gy = gegnerY + reihe * (d + 28);
+            var farbe = m.result === 'win' ? C.dvPos : m.result === 'loss' ? C.dvNeg : C.dvZero;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(gx + d / 2, gy + d / 2, d / 2 - 3, 0, Math.PI * 2);
+            ctx.closePath(); ctx.clip();
+            var ic = (art.rIcons && art.rIcons[r]) || null;
+            if (ic) {
+                ctx.drawImage(ic, gx + 4, gy + 4, d - 8, d - 8);
+            } else {
+                ctx.fillStyle = C.surface2;
+                ctx.fillRect(gx, gy, d, d);
+                ctx.fillStyle = C.ink3;
+                ctx.font = fSans(Math.round(d * 0.30), 700);
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(initials(m.opponent), gx + d / 2, gy + d / 2);
+                ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+            }
+            ctx.restore();
+
+            ctx.strokeStyle = farbe; ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(gx + d / 2, gy + d / 2, d / 2 - 2, 0, Math.PI * 2);
+            ctx.stroke();
+
+            /* Das Zeichen im Eck. Ring UND Zeichen, weil Farbe allein
+             * fuer rund acht Prozent der Maenner keine Auskunft ist. */
+            var pz = Math.max(11, Math.round(d * 0.15));
+            ctx.fillStyle = farbe;
+            ctx.beginPath();
+            ctx.arc(gx + d - pz, gy + d - pz, pz, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = C.bg0;
+            ctx.font = fSans(Math.round(pz * 1.35), 700);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(m.result === 'win' ? L('S', 'W')
+                       : m.result === 'loss' ? L('N', 'L') : L('U', 'T'),
+                       gx + d - pz, gy + d - pz + 1);
+            ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+
+            /* Der Gegnername unter dem Kreis — nur einreihig, sonst gibt
+             * es dafuer keine Hoehe. */
+            if (einreihig) {
+                ctx.font = fSans(13, 600);
+                ctx.fillStyle = C.ink3;
+                ctx.textAlign = 'center';
+                ctx.fillText(clip(ctx, m.opponent || '–', d + gap), gx + d / 2, gy + d + 20);
+                ctx.textAlign = 'start';
+            }
+        }
+
+        /* ── Kartengitter ODER grosser Deckblock ───────────────────── */
+        var gitterTop = deckY + (hatGitter ? sprGr + 22 : 0);
+        var gitterHoehe = gegnerLabelY - 26 - gitterTop;
+
+        if (hatGitter) {
+            var mass = gitterMasse(karten.length, innen, gitterHoehe);
+            if (mass) {
+                var startX = PC.PAD + Math.round((innen - (mass.spalten * mass.kb
+                    + (mass.spalten - 1) * mass.gap)) / 2);
+                /* Bleibt Luft, wird sie oben und unten gleich verteilt —
+                 * ein Gitter, das oben klebt, sieht nach abgeschnitten aus. */
+                var gitterH = mass.zeilen * mass.kh + (mass.zeilen - 1) * mass.gap;
+                gitterTop += Math.max(0, Math.round((gitterHoehe - gitterH) / 2));
+                for (var c2 = 0; c2 < karten.length; c2++) {
+                    var ka = karten[c2];
+                    var zeile = Math.floor(c2 / mass.spalten);
+                    var inZeile = Math.min(mass.spalten, karten.length - zeile * mass.spalten);
+                    /* Die letzte Zeile mittig. 28 Karten auf 9 Spalten enden
+                     * sonst mit einer einzelnen Kachel ganz links, und das
+                     * liest sich wie ein Rest, nicht wie eine Liste. */
+                    var zeilenX = startX + Math.round(((mass.spalten - inZeile) * (mass.kb + mass.gap)) / 2);
+                    var kx = zeilenX + (c2 % mass.spalten) * (mass.kb + mass.gap);
+                    var ky = gitterTop + zeile * (mass.kh + mass.gap);
+
+                    ctx.save();
+                    rr(ctx, kx, ky, mass.kb, mass.kh, 6); ctx.clip();
+                    if (ka.bild) {
+                        ctx.drawImage(ka.bild, kx, ky, mass.kb, mass.kh);
+                    } else {
+                        /* Nie ein Loch: eine getoente Platte mit dem
+                         * Kartennamen sieht wie eine Entscheidung aus,
+                         * ein weisses Rechteck wie ein Fehler. */
+                        ctx.fillStyle = C.surface2;
+                        ctx.fillRect(kx, ky, mass.kb, mass.kh);
+                        ctx.fillStyle = C.ink3;
+                        ctx.font = fSans(Math.max(9, Math.round(mass.kb * 0.10)), 600);
+                        ctx.textAlign = 'center';
+                        var woerter = String(ka.name).split(/\s+/);
+                        for (var wz = 0; wz < Math.min(3, woerter.length); wz++) {
+                            ctx.fillText(clip(ctx, woerter[wz], mass.kb - 8),
+                                kx + mass.kb / 2, ky + mass.kh / 2 - 10 + wz * 14);
+                        }
+                        ctx.textAlign = 'start';
+                    }
+                    ctx.restore();
+
+                    ctx.strokeStyle = 'rgba(37,48,87,.9)'; ctx.lineWidth = 1;
+                    rr(ctx, kx, ky, mass.kb, mass.kh, 6); ctx.stroke();
+
+                    /* Das Anzahl-Zeichen. Nicht rot — rot heisst auf
+                     * diesem Bild "Niederlage". Die Marke traegt es. */
+                    var br = Math.max(13, Math.round(mass.kb * 0.17));
+                    ctx.fillStyle = C.brand;
+                    ctx.beginPath();
+                    ctx.arc(kx + mass.kb - br - 3, ky + mass.kh - br - 3, br, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = C.bg0; ctx.lineWidth = 2.5; ctx.stroke();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = fSans(Math.round(br * 1.25), 700);
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(String(ka.anzahl), kx + mass.kb - br - 3, ky + mass.kh - br - 2);
+                    ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+                }
+            }
+        } else {
+            /* Ohne Liste: der Deckblock nimmt den Platz des Gitters. */
+            var bs2 = big.length > 1 ? 150 : 176;
+            var totalW = big.length * bs2 + (big.length - 1) * 16;
+            var bx = (PC.W - totalW) / 2;
+            var by = gitterTop + Math.max(0, Math.round((gitterHoehe - bs2 - 70) / 2));
+            for (var k2 = 0; k2 < big.length; k2++) {
+                sprite(ctx, big[k2], bx + k2 * (bs2 + 16), by, bs2, initials(spec.deck));
+            }
+            ctx.textAlign = 'center';
+            ctx.font = fSans(46, 700);
+            ctx.fillStyle = C.ink;
+            ctx.fillText(clip(ctx, spec.deck || '–', innen), PC.W / 2, by + bs2 + 52);
+            ctx.textAlign = 'start';
+        }
+
+        /* ── Fuss ──────────────────────────────────────────────────── */
+        pokeball(ctx, PC.PAD + 13, fussY + 30, 13);
+        ctx.font = fSans(18, 700);
+        ctx.fillStyle = C.ink2;
+        ctx.textBaseline = 'middle';
+        ctx.fillText('thedipidis.app', PC.PAD + 36, fussY + 31);
+        ctx.textAlign = 'right';
+        ctx.font = fSans(14, 400);
+        ctx.fillStyle = C.ink3;
+        ctx.fillText(L('Battle Journal', 'Battle Journal') + ' · ' + (spec.date || ''),
+                     PC.W - PC.PAD, fussY + 31);
+        ctx.textAlign = 'start';
+        ctx.textBaseline = 'alphabetic';
+
+        return cv;
+    }
+
+    /** Das Turnierposter. Laedt Sprites und, wenn eine Liste eingefroren
+     *  ist, die Kartenbilder. */
+    function sharePostCard(tournamentName, opts) {
+        var spec = collectTournamentSpec(tournamentName, opts);
+        if (!spec) {
+            toast(L('Zu diesem Turnier stehen keine Partien im Journal.',
+                    'No matches recorded for this tournament.'), 'warning');
+            return Promise.resolve(false);
+        }
+        var karten = schnappschussKarten(spec.deckSnapshot);
+        /* Der Hinweis gehoert hierher und NICHT auf das Bild. Ein Satz
+         * "verknuepfe deine Liste" auf einem Instagram-Post waere Werbung
+         * fuer eine Einstellung — hier ist er eine Auskunft. */
+        toast(karten.length
+            ? L('Bild wird erstellt …', 'Creating image …')
+            : L('Bild wird erstellt — ohne Kartengitter. Verknüpfe im Turnierdialog die Liste, mit der du gespielt hast.',
+                'Creating image — without the card grid. Link the list you played in the tournament dialog.'),
+            'info');
+        var rounds = spec.rounds || [];
+        return Promise.all([
+            loadIcons(spec.deck, 2),
+            Promise.all(rounds.map(function (m) {
+                return loadIcons(m.opponent, 1).then(function (a) { return a[0] || null; });
+            })),
+            Promise.all(karten.map(function (ka) {
+                return loadImage(ka.url).then(function (img) { ka.bild = img; return ka; });
+            }))
+        ]).then(function (aa) {
+            var cv = postCardCanvas(spec, { icons: aa[0], rIcons: aa[1], karten: aa[2] });
+            return deliver(cv, safeName(spec.tournament) + '_post_'
+                + new Date().toISOString().slice(0, 10) + '.png');
+        }).catch(function (err) {
+            console.error('[DsShare] post card failed', err);
+            toast(L('Bild-Export fehlgeschlagen', 'Image export failed'), 'error');
+            return false;
+        });
+    }
+
     window.DsShare = {
         shareDeckCard: shareDeckCard,
         shareResultCard: shareResultCard,
+        sharePostCard: sharePostCard,
         // Für Tests und für alles, was die Karte anders befüllen will als
         // die beiden Sammler oben.
         _internals: {
             PALETTE: C, deckCardCanvas: deckCardCanvas, resultCardCanvas: resultCardCanvas,
             collectTournamentSpec: collectTournamentSpec, clip: clip, corsUrl: corsUrl,
+            postCardCanvas: postCardCanvas, schnappschussKarten: schnappschussKarten,
+            parseKartenSchluessel: parseKartenSchluessel, gitterMasse: gitterMasse,
             safeName: safeName, initials: initials
         }
     };

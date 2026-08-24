@@ -6650,6 +6650,61 @@ details[open] > .tier-trending-summary::after {
     background: rgba(37,99,235,.1);
 }
 
+/* Der Bild-Knopf ist das Ziel dieser Zeile, also sieht er auch danach
+ * aus. Die uebrigen Aktionen liegen unter den drei Punkten. */
+.bj-tournament-image-btn {
+    border-color: var(--accent, #2563eb);
+    color: var(--accent, #2563eb);
+    font-weight: 700;
+}
+
+.bj-tournament-more { position: relative; flex-shrink: 0; }
+
+.bj-tournament-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 40;
+    min-width: 232px;
+    padding: 6px;
+    border: 1px solid var(--line, rgba(0,0,0,.12));
+    border-radius: 10px;
+    background: var(--surface-1, #fff);
+    box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.bj-tournament-menu[hidden] { display: none; }
+.bj-tournament-menu button {
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+}
+.bj-tournament-menu button:hover { background: rgba(37,99,235,.1); }
+
+/* Auf dem Telefon war diese Zeile bisher ungeregelt: fuenf Knoepfe
+ * nebeneinander liessen dem Turniernamen bei 390 px rund 44 px. Jetzt
+ * bricht die Zeile um, der Name bekommt die ganze Breite, und die
+ * Knoepfe sind gross genug zum Treffen. */
+@media (max-width: 768px) {
+    .bj-tournament-header { flex-wrap: wrap; }
+    .bj-tournament-info { flex: 1 0 100%; }
+    .bj-tournament-header .bj-tournament-add-btn,
+    .bj-tournament-header .bj-tournament-share-btn {
+        min-height: 40px;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+    .bj-tournament-menu { min-width: 0; left: auto; right: 0; width: max-content; max-width: 88vw; }
+}
+
 /* ── Improved History Item (gradient bg + emoji pills) ─── */
 .bj-history-item.is-win {
     background: linear-gradient(135deg, rgba(39,174,96,.08), rgba(39,174,96,.02));
@@ -10675,4 +10730,18 @@ body.arc-open { overflow: hidden; }
    Zelle. 2 px weniger Rand links und rechts geben 4. */
 @media (max-width: 360px) {
     .arc-tile { padding: 7px 5px 6px; }
+}
+
+/* Die Zeile unter der Listenauswahl im Turnierdialog. Sie sagt, ob eine
+ * Liste eingefroren ist und wann — ohne sie sieht ein leeres Auswahlfeld
+ * nach einem Fehler aus. */
+.bj-edit-snapshot-state {
+    margin: 6px 0 0;
+    font-size: 0.76rem;
+    line-height: 1.35;
+    color: var(--text-muted, #888);
+}
+.bj-edit-snapshot-state.is-set {
+    color: var(--accent, #2563eb);
+    font-weight: 600;
 }

@@ -1274,17 +1274,26 @@
                                 tPlacement ? `<span class="bj-tournament-placement">${escapeHtml(tPlacement)}</span>` : ''}
                         </div>
                         <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">+ Match</button>
-                        <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">Edit</button>
-                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}', false, '${safeMetaKey}')" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">Share</button>
-                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-details-btn" onclick="shareTournamentSummary('${safeTournKey}', true, '${safeMetaKey}')" title="${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Share with brick + notes'))}">Share+</button>
-                        <!-- Das quadratische Ergebnisbild. shareTournamentSummary()
-                             malt 600 px breit und beliebig hoch — ein Format, das
-                             Instagram beschneidet und das auf keiner Zeitleiste
-                             lesbar bleibt. DsShare malt 1080x1080 mit Deck,
-                             Platzierung und Runde fuer Runde. Beide bleiben:
-                             das schmale Bild ist in einem Chat schneller zu
-                             lesen, das quadratische ist das, was man postet. -->
-                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-card-btn" onclick="shareTournamentCard('${safeTournKey}','${safeMetaKey}')" title="${escapeHtml(battleJournalText('bj.shareTournamentCard', 'Post-ready image, 1080x1080'))}">◧ 1:1</button>
+                        <!-- Ein Knopf fuers Bild, der Rest unter die drei Punkte.
+                             Vorher standen hier fuenf Knoepfe nebeneinander:
+                             + Match, Edit, Share, Share+, 1:1. Nachgerechnet aus
+                             css/styles.css und der Schriftbreite blieben dem
+                             Turniernamen auf einem 390-px-Bildschirm rund 44 px —
+                             und fuer .bj-tournament-header gab es in keiner der
+                             33 CSS-Dateien eine einzige Mobilregel. Das war nicht
+                             eng, das war kaputt. Jetzt drei Ziele statt fuenf,
+                             und die beiden schmalen Textbilder bleiben erreichbar,
+                             nur eine Ebene tiefer. -->
+                        <button type="button" class="bj-tournament-share-btn bj-tournament-image-btn" onclick="shareTournamentPost('${safeTournKey}','${safeMetaKey}')" title="${escapeHtml(battleJournalText('bj.imageBtnTitle', 'Turnierbild fürs Posten erstellen'))}">${escapeHtml(battleJournalText('bj.imageBtn', 'Bild'))}</button>
+                        <div class="bj-tournament-more">
+                            <button type="button" class="bj-tournament-share-btn bj-tournament-more-btn" onclick="bjToggleTournamentMenu(this)" aria-haspopup="true" aria-expanded="false" aria-label="${escapeHtml(battleJournalText('bj.moreActions', 'Weitere Aktionen'))}">⋯</button>
+                            <div class="bj-tournament-menu" role="menu" hidden>
+                                <button type="button" role="menuitem" onclick="bjMenuAction(this, () => openEditTournamentModal('${safeTournKey}'))">${escapeHtml(battleJournalText('bj.editTournament', 'Turnier bearbeiten'))}</button>
+                                <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentCard('${safeTournKey}','${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.imageSquare', 'Bild im Quadrat (1:1)'))}</button>
+                                <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentSummary('${safeTournKey}', false, '${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.shareTournament', 'Textbild für den Chat'))}</button>
+                                <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentSummary('${safeTournKey}', true, '${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Textbild mit Bricks und Notizen'))}</button>
+                            </div>
+                        </div>
                     </div>`;
 
                 entries.forEach(entry => {
@@ -1978,6 +1987,101 @@
 
     let _editTournamentOrigName = '';
 
+    /* ── Die gespielte Liste einfrieren ────────────────────────────
+     *
+     * Ein Journaleintrag trug bisher nur den Decknamen als Text. Fuer das
+     * Turnierbild braucht es die 60 Karten. Ein Zeiger auf ein
+     * gespeichertes Deck reicht dafuer NICHT: saveDeck() in
+     * js/firebase-collection.js schreibt set() ohne Version auf dieselbe
+     * Doc-ID, es gibt also keine alte Fassung. Wer nach dem Turnier zwei
+     * Karten tauscht, dessen Bild von Sonntag zeigt ab Montag eine Liste,
+     * die er nie gespielt hat.
+     *
+     * Deshalb eine Kopie: beim Verknuepfen werden die Karten in die
+     * Turniereintraege geschrieben und aendern sich danach nicht mehr.
+     * Eine Liste wiegt als JSON rund 1 KB — jeder Eintrag ist ein eigenes
+     * Firestore-Dokument, das Ein-MiB-Limit gilt pro Dokument, hier ist
+     * also Platz. */
+
+    function bjGespeicherteDecks() {
+        const decks = Array.isArray(window.userDecks) ? window.userDecks : [];
+        return decks.filter(d => d && d.id && d.cards && Object.keys(d.cards).length > 0);
+    }
+
+    /** Baut die einzufrierende Kopie. Gibt null zurueck, wenn die id nicht
+     *  (mehr) aufloest — dann bleibt der alte Schnappschuss stehen. */
+    function bjBaueSchnappschuss(deckId) {
+        const deck = bjGespeicherteDecks().find(d => String(d.id) === String(deckId));
+        if (!deck) return null;
+        const karten = {};
+        let summe = 0;
+        Object.keys(deck.cards).forEach(k => {
+            const n = Number(deck.cards[k]) || 0;
+            if (n > 0) { karten[k] = n; summe += n; }
+        });
+        return {
+            deckId: String(deck.id),
+            deckName: String(deck.name || ''),
+            archetype: String(deck.archetype || ''),
+            cards: karten,
+            cardCount: summe,
+            frozenAtMs: Date.now()
+        };
+    }
+
+    /** Der Schnappschuss haengt am Turnier, gespeichert ist er an jedem
+     *  Eintrag. Ein spaeter nachgetragener Match hat ihn nicht — also die
+     *  ganze Gruppe fragen, nicht den ersten Eintrag. */
+    function bjFindeSchnappschuss(entries) {
+        const treffer = (entries || []).find(e => e && e.deckSnapshot && e.deckSnapshot.cards);
+        return treffer ? treffer.deckSnapshot : null;
+    }
+
+    function bjSchnappschussDatum(ms) {
+        try {
+            return new Date(Number(ms) || Date.now())
+                .toLocaleDateString(document.documentElement.lang === 'en' ? 'en-GB' : 'de-DE');
+        } catch (e) { return ''; }
+    }
+
+    function bjFuelleSchnappschussAuswahl(entries) {
+        const sel = document.getElementById('bjEditTournSnapshot');
+        const state = document.getElementById('bjEditTournSnapshotState');
+        if (!sel) return;
+
+        const decks = bjGespeicherteDecks();
+        const vorhanden = bjFindeSchnappschuss(entries);
+
+        const leer = battleJournalText('bj.snapshotNone', 'Keine Liste verknüpft');
+        sel.innerHTML = '<option value="">' + escapeHtml(leer) + '</option>'
+            + decks.map(d => '<option value="' + escapeHtml(String(d.id)) + '">'
+                + escapeHtml(String(d.name || '?'))
+                + ' (' + (Object.keys(d.cards).length) + ')</option>').join('');
+
+        sel.value = vorhanden && decks.some(d => String(d.id) === String(vorhanden.deckId))
+            ? String(vorhanden.deckId) : '';
+
+        if (!state) return;
+        if (vorhanden) {
+            state.textContent = battleJournalText('bj.snapshotFrozen',
+                'Eingefroren am {date} · {n} Karten')
+                .replace('{date}', bjSchnappschussDatum(vorhanden.frozenAtMs))
+                .replace('{n}', String(vorhanden.cardCount || 0));
+            state.classList.add('is-set');
+        } else if (decks.length === 0) {
+            // Der haeufigste Fall bei Gelegenheitsspielern: gar kein Deck
+            // gespeichert. Das muss dastehen, sonst sieht ein leeres
+            // Auswahlfeld nach einem Fehler aus.
+            state.textContent = battleJournalText('bj.snapshotNoDecks',
+                'Du hast noch keine Deckliste gespeichert. Ohne Liste zeigt das Turnierbild nur deine Deck-Symbole.');
+            state.classList.remove('is-set');
+        } else {
+            state.textContent = battleJournalText('bj.snapshotPick',
+                'Wähle die Liste, mit der du gespielt hast — sie wird kopiert und ändert sich danach nicht mehr.');
+            state.classList.remove('is-set');
+        }
+    }
+
     function openEditTournamentModal(tournamentName) {
         _editTournamentOrigName = tournamentName;
         const entries = journalHistoryCache.filter(e => e.tournamentName === tournamentName);
@@ -2012,6 +2116,8 @@
             placeInput.value = withPlace ? withPlace.placement : '';
         }
 
+        bjFuelleSchnappschussAuswahl(entries);
+
         modal.style.display = 'flex';
     }
 
@@ -2038,6 +2144,25 @@
         const newPlacement = String(document.getElementById('bjEditTournPlacement')?.value || '')
             .trim().slice(0, 16);
 
+        // Der Schnappschuss. Drei Faelle, und sie sind nicht dasselbe:
+        //   Auswahl leer + es gab keinen  -> nichts schreiben
+        //   Auswahl leer + es gab einen   -> Verknuepfung loesen (null)
+        //   Auswahl gesetzt               -> neu einfrieren
+        // Eine unveraenderte Auswahl friert absichtlich NEU ein: wer den
+        // Dialog oeffnet und speichert, hat gerade bestaetigt, dass diese
+        // Liste gilt. Das ist zugleich der "Liste aktualisieren"-Knopf,
+        // ohne dass es einen zweiten Knopf braucht.
+        const altGruppe = journalHistoryCache.filter(e => e.tournamentName === _editTournamentOrigName);
+        const alterSchnapp = bjFindeSchnappschuss(altGruppe);
+        const gewaehlteId = String(document.getElementById('bjEditTournSnapshot')?.value || '').trim();
+        let neuerSchnapp;                       // undefined = unveraendert lassen
+        if (gewaehlteId) {
+            neuerSchnapp = bjBaueSchnappschuss(gewaehlteId) || undefined;
+        } else if (alterSchnapp) {
+            neuerSchnapp = null;
+        }
+        const schnappFeld = (neuerSchnapp === undefined) ? {} : { deckSnapshot: neuerSchnapp };
+
         if (!newName) {
             showToast(battleJournalText('bj.editNameRequired', 'Tournament name is required.'), 'warning');
             return;
@@ -2053,6 +2178,7 @@
                 e.tournamentType = newType;
                 e.placement = newPlacement;
                 if (newDeck) e.ownDeck = newDeck;
+                if (neuerSchnapp !== undefined) e.deckSnapshot = neuerSchnapp;
                 outboxChanged = true;
             }
         });
@@ -2076,6 +2202,7 @@
                             tournamentType: newType,
                             placement: newPlacement,
                             ...(newDeck ? { ownDeck: newDeck } : {}),
+                            ...schnappFeld,
                             syncedAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
                     });
@@ -2095,6 +2222,7 @@
                 e.tournamentType = newType;
                 e.placement = newPlacement;
                 if (newDeck) e.ownDeck = newDeck;
+                if (neuerSchnapp !== undefined) e.deckSnapshot = neuerSchnapp;
             }
         });
 
@@ -2447,6 +2575,54 @@
     window.copyAllJournalEntries = copyAllJournalEntries;
     window.clearAllJournalEntries = clearAllJournalEntries;
     window.selectJournalType = selectJournalType;
+    /* ── Das Drei-Punkte-Menue der Turnierzeile ────────────────────
+     * Kein Bibliotheks-Popover: ein verstecktes div, das beim Klick
+     * sichtbar wird, und ein Dokumentklick schliesst es wieder. Mehr
+     * braucht eine Liste mit vier Eintraegen nicht. */
+    function bjSchliesseAlleMenues(ausser) {
+        document.querySelectorAll('.bj-tournament-menu').forEach(m => {
+            if (m === ausser) return;
+            m.hidden = true;
+            const knopf = m.parentElement && m.parentElement.querySelector('.bj-tournament-more-btn');
+            if (knopf) knopf.setAttribute('aria-expanded', 'false');
+        });
+    }
+
+    function bjToggleTournamentMenu(btn) {
+        const menu = btn.parentElement && btn.parentElement.querySelector('.bj-tournament-menu');
+        if (!menu) return;
+        const offen = !menu.hidden;
+        bjSchliesseAlleMenues(menu);
+        menu.hidden = offen;
+        btn.setAttribute('aria-expanded', offen ? 'false' : 'true');
+    }
+
+    /** Erst zumachen, dann handeln — sonst liegt das Menue ueber dem
+     *  Bild, das gerade aufgeht. */
+    function bjMenuAction(btn, fn) {
+        bjSchliesseAlleMenues(null);
+        try { fn(); } catch (e) { console.error('[Battle Journal] Menuaktion fehlgeschlagen', e); }
+    }
+
+    document.addEventListener('click', function (ev) {
+        if (ev.target && ev.target.closest && ev.target.closest('.bj-tournament-more')) return;
+        bjSchliesseAlleMenues(null);
+    });
+
+    window.bjToggleTournamentMenu = bjToggleTournamentMenu;
+    window.bjMenuAction = bjMenuAction;
+
+    /* Das Turnierposter im Hochformat. Liegt wie das quadratische Bild in
+     * js/ds-share.js — hier steht nur der Aufruf. */
+    window.shareTournamentPost = function (tournamentName, metaKey) {
+        if (!window.DsShare || typeof window.DsShare.sharePostCard !== 'function') {
+            showToast(battleJournalText('bj.shareCardMissing',
+                'Das Bildmodul ist nicht geladen. Seite neu laden.'), 'warning');
+            return;
+        }
+        window.DsShare.sharePostCard(tournamentName, { metaKey: metaKey });
+    };
+
     window.shareTournamentSummary = shareTournamentSummary;
 
     // Das quadratische Ergebnisbild lebt in js/ds-share.js — hier steht

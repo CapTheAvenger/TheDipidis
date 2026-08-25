@@ -312,6 +312,54 @@ def pruefe_plausibel(block):
     return block
 
 
+# Kategorien, deren Anteile sich auf hoechstens ~100 % summieren muessen:
+# ein Pokemon traegt EIN Item, hat EIN Wesen, hat EINE Faehigkeit. Bei
+# Attacken und Mitstreitern ist eine Summe ueber 100 % normal (vier
+# Attacken, fuenf Mitstreiter je Team).
+# SUMMEN_KATEGORIEN und SUMMEN_GRENZE stehen schon weiter oben — dieselbe
+# Regel, dieselbe Grenze. Hier kommt nur die Liste ALLER Kategorien dazu,
+# denn die Doppelzeilen-Regel gilt auch fuer Attacken und Mitstreiter.
+ALLE_KATEGORIEN = ("held_item", "nature", "ability", "move", "teammate")
+
+
+def unmoegliche_bloecke(pokemon):
+    """Welche Bloecke verletzen die Regeln, die die Daten selbst tragen?
+
+    Zwei Regeln, beide nicht verhandelbar:
+
+      * eine Anteilsliste einer eindeutigen Kategorie summiert sich nicht
+        deutlich ueber 100 %,
+      * keine Liste fuehrt dieselbe Zeile zweimal.
+
+    Am 25.08.2026 verletzte der frische Stand beide: 16 Listen ueber 105 %
+    (absol/doubles/nature 111,5 %; abomasnow/doubles/nature 117,5 %) und
+    zwei doppelte Attackenzeilen. Der committete Stand davor hatte von
+    beidem null. Diese Daten standen anschliessend im Deploy-Gate und
+    hielten drei Auslieferungen an — deshalb prueft der Scraper das jetzt
+    selbst und behaelt im Zweifel den alten Stand.
+
+    `pruefe_plausibel` bleibt daneben bestehen: sie faengt den EINZELNEN
+    Ausreisser an der gebrochenen Sortierung und markiert ihn. Diese
+    Pruefung hier faengt den Fall, fuer den es keinen einzelnen
+    Schuldigen gibt.
+    """
+    befunde = []
+    for slug, eintrag in (pokemon or {}).items():
+        for fmt in ("doubles", "singles"):
+            block = eintrag.get(fmt)
+            if not isinstance(block, dict):
+                continue
+            for kat in SUMMEN_KATEGORIEN:
+                summe = sum(z.get("pct") or 0 for z in (block.get(kat) or []))
+                if summe > SUMMEN_GRENZE:
+                    befunde.append(f"{slug}/{fmt}/{kat} = {summe:.1f} %")
+            for kat in ALLE_KATEGORIEN:
+                namen = [str(z.get("name") or "").strip() for z in (block.get(kat) or [])]
+                if len(namen) != len(set(namen)):
+                    befunde.append(f"{slug}/{fmt}/{kat}: doppelte Zeile")
+    return befunde
+
+
 def scrape_pokemon(slug):
     """Return (display_name, record, fehlt) — fehlt=True heisst: die Quelle
     kennt diesen Slug nicht (HTTP 404).
@@ -508,6 +556,19 @@ def main():
         print(f"FATAL: scraped {ok} Pokémon < 92% of expected {erwartet} "
               f"(previous {prev}, {len(entfallen)} von der Quelle entfernt) — "
               f"likely rate-limited; keeping committed JSON")
+        return 1
+
+    # Zweiter Schutz, andere Frage: nicht "ist es genug?", sondern "kann es
+    # stimmen?". Ein Stand, der die eigenen Regeln verletzt, darf nicht in
+    # die Auslieferung — dort haelt er sonst den ganzen Deploy an, so wie am
+    # 25.08.2026 dreimal hintereinander. Auch hier wird nichts geraten: der
+    # alte Stand bleibt stehen, der Lauf wird rot und sagt, was er gesehen hat.
+    unmoeglich = unmoegliche_bloecke(pokemon)
+    if unmoeglich:
+        print(f"FATAL: {len(unmoeglich)} Bloecke verletzen die Plausibilitaets"
+              f"regeln — der committete Stand bleibt stehen. Die ersten zehn:")
+        for zeile in unmoeglich[:10]:
+            print(f"  {zeile}")
         return 1
 
     out = {

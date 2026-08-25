@@ -483,8 +483,13 @@ def main():
     #                                    Florges-Bluetenfarben, Furfrou-Schnitte,
     #                                    Aegislash-Klingenform)
     #
-    # Die committete Datei trug 285 Eintraege. 92 % davon sind 262 — eine
-    # Zahl, die die Quelle nicht mehr liefern KANN. Der Schutz hat also nicht
+    # Die committete Datei trug 353 Eintraege. 92 % davon sind 325 — eine
+    # Zahl, die die Quelle nicht mehr liefern KANN. Der erste Lauf mit der
+    # neuen Regel (25.08.2026, 17:54 UTC) rechnete 115 entfallene Schluessel
+    # heraus, kam auf einen Erwartungswert von 238, holte 238 und schrieb die
+    # Datei zum ersten Mal seit 39 Tagen neu.
+    #
+    # Der Schutz hat also nicht
     # eine Drosselung abgefangen, sondern eine dauerhafte Verkleinerung der
     # Quelle in eine Dauersperre verwandelt: die Datei konnte nie wieder
     # frisch werden, und niemand sah es, weil der Schutz genau dafuer da ist,

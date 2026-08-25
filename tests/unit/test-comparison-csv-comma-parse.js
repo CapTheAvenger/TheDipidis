@@ -67,21 +67,47 @@ describe('Top 3 by Win Rate reads the real numbers', () => {
             'no comma decimals left — this test no longer guards anything');
     });
 
-    it('truncating changes the podium on the current data', () => {
+    /* Der Beweis liegt in einem eigenen Fixture, nicht in den Tagesdaten.
+     *
+     * Hier stand assert.notDeepEqual(broken, fixed) auf der LIVE-CSV: "auf
+     * diesen Daten aendert das Abschneiden das Treppchen". Am 25.08.2026
+     * war das nicht mehr wahr — die drei besten Decks hiessen 54,1 / 53,58
+     * / 53,28, und abgeschnitten (54 / 53 / 53) kam bei einer stabilen
+     * Sortierung dieselbe Reihenfolge heraus. Der Test schlug an, obwohl
+     * der Code in Ordnung war, und blockierte damit JEDEN Deploy: der
+     * taegliche Preislauf stiess den Pages-Deploy an, der Deploy fiel ueber
+     * diesen Test, und die Datencommits standen nicht live.
+     *
+     * Ein Test, dessen Aussage von den Zahlen des Tages abhaengt, ist keine
+     * Zusicherung, sondern ein Wuerfel. Der Fehler wird jetzt an Daten
+     * gezeigt, die ihn IMMER zeigen; die Live-CSV wird weiter geprueft,
+     * aber auf eine Aussage, die dauerhaft gilt. */
+    it('truncating changes the podium — bewiesen an eigenen Zahlen', () => {
+        const fixture = [
+            { deck_name: 'A', new_winrate: '53,10', new_count: '1000' },
+            { deck_name: 'B', new_winrate: '53,90', new_count: '1000' },
+            { deck_name: 'C', new_winrate: '53,50', new_count: '1000' },
+        ];
+        const top = arr => arr.slice(0, 3).map(r => r.deck_name);
+        const broken = top([...fixture].sort((a, b) =>
+            parseFloat(b.new_winrate) - parseFloat(a.new_winrate)));
+        const fixed = top([...fixture].sort((a, b) =>
+            parseLocaleNumber(b.new_winrate, 0) - parseLocaleNumber(a.new_winrate, 0)));
+        assert.deepEqual(broken, ['A', 'B', 'C'], 'abgeschnitten sind alle drei 53 — Reihenfolge bleibt');
+        assert.deepEqual(fixed, ['B', 'C', 'A'], 'mit Nachkommastellen sortiert es anders');
+        assert.notDeepEqual(broken, fixed);
+    });
+
+    it('das Treppchen der echten Daten ist nach Wert geordnet', () => {
+        // Diese Aussage gilt an jedem Tag, egal wie die Zahlen stehen.
         const max = Math.max(...rows.map(r => parseInt(r.new_count || '0', 10)));
         const field = rows.filter(r => parseInt(r.new_count || '0', 10) >= max * 0.1);
-        const top = arr => arr.slice(0, 3).map(r => r.deck_name);
-        // Stable sort, exactly like the app's .sort((a,b) => b.winRate - a.winRate)
-        const broken = top([...field].sort((a, b) =>
-            parseFloat(b.new_winrate || '0') - parseFloat(a.new_winrate || '0')));
-        const fixed = top([...field].sort((a, b) =>
-            parseLocaleNumber(b.new_winrate, 0) - parseLocaleNumber(a.new_winrate, 0)));
-        assert.notDeepEqual(broken, fixed,
-            'the bug would be invisible on this data — check the fixture');
-        // The correct podium must be genuinely ordered by value.
-        const vals = fixed.map(n =>
-            parseLocaleNumber(field.find(r => r.deck_name === n).new_winrate, 0));
+        const fixed = [...field]
+            .sort((a, b) => parseLocaleNumber(b.new_winrate, 0) - parseLocaleNumber(a.new_winrate, 0))
+            .slice(0, 3);
+        const vals = fixed.map(r => parseLocaleNumber(r.new_winrate, 0));
         assert.deepEqual(vals, [...vals].sort((a, b) => b - a));
+        assert.ok(vals.length === 3, 'zu wenige Decks im Feld, um ein Treppchen zu bilden');
     });
 
     it('the source no longer parseFloats new_winrate', () => {

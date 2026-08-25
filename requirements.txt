@@ -20,6 +20,21 @@ flask-cors>=4.0.0,<5
 # requirements.txt gets the same resolution.
 firebase-admin>=6.5,<8
 
+# google-api-core 2.35.0 (24.08.2026) hat in path_template.py ein
+# urllib.parse.quote(val, safe="/") eingebaut. Damit wird die
+# Firestore-Standarddatenbank "(default)" zu "%28default%29" — der
+# Server antwortet mit INVALID_ARGUMENT "Invalid database id
+# %28default%29" und der Preisalarm-Lauf bricht ab. Genau so am
+# 25.08.2026 passiert, nach 14 gruenen Laeufen in Folge und ohne eine
+# einzige Aenderung im Repo.
+#
+# Ausgeschlossen wird nur diese eine Version, nicht der ganze Zweig:
+# sobald google das behebt, darf die naechste Version wieder rein.
+# tests/python/test_api_core_pfadkodierung.py haelt den Fehlerfall
+# selbst fest, damit eine Rueckkehr auffaellt und nicht erst der
+# naechste Morgenlauf.
+google-api-core!=2.35.0,<3
+
 # Claude API SDK (Side Quest team-strategy generation in
 # champions-replica-scrape.yml via scripts/generate_team_strategies.py)
 anthropic>=0.40,<2

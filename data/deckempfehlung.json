@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-08-25 06:22:41+00:00",
+ "erzeugt": "2026-08-25 17:21:27+00:00",
  "format": "TEF-PBL",
  "betriebsart": "B",
  "betriebsart_klartext": "Kaltstart — TEF-PBL hat noch kein Praesenzturnier, Anker ist die Vorepoche TEF-POR",
@@ -64,7 +64,7 @@
  "ankerspieler_gesamt": 16264,
  "online_abdeckung": {
   "schnappschuss": "2026-08-25",
-  "anteil_unbekannt": 18.6,
+  "anteil_unbekannt": 18.59,
   "groesste_unbekannte": [
    {
     "deck": "Mega Excadrill",

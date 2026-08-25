@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T06:20:47Z",
+  "generated_at": "2026-08-25T17:20:56Z",
   "format_window": "PBL",
   "format_label": "TEF-PBL",
   "legal_format_min_set": "TEF",
@@ -10,7 +10,7 @@
   },
   "threats": {
     "hand_disruption": {
-      "weighted_meta_share": 0.2658,
+      "weighted_meta_share": 0.2659,
       "cards": [
         {
           "card_id": "POR|76",
@@ -34,7 +34,7 @@
             {
               "archetype": "Cynthia's Garchomp",
               "share_in_archetype": 0.25,
-              "meta_share": 0.0118
+              "meta_share": 0.0119
             },
             {
               "archetype": "Manectric Eelektrik",
@@ -59,7 +59,7 @@
             {
               "archetype": "Starmie Froslass",
               "share_in_archetype": 0.25,
-              "meta_share": 0.0064
+              "meta_share": 0.0065
             },
             {
               "archetype": "Mega Venusaur",
@@ -80,7 +80,7 @@
             {
               "archetype": "Starmie Froslass",
               "share_in_archetype": 0.35,
-              "meta_share": 0.0064
+              "meta_share": 0.0065
             }
           ]
         },
@@ -190,7 +190,7 @@
       ]
     },
     "bench_damage": {
-      "weighted_meta_share": 0.1431,
+      "weighted_meta_share": 0.1432,
       "cards": [
         {
           "card_id": "DRI|136",
@@ -215,7 +215,7 @@
             {
               "archetype": "Starmie Froslass",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0064
+              "meta_share": 0.0065
             }
           ]
         },

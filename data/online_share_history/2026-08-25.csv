@@ -1,10 +1,10 @@
 ﻿deck_name;rank;count;share;winrate
 Mega Excadrill;1;2591;7,78;48,9
-Dragapult;2;2403;7,22;54,1
-Festival Lead;3;2112;6,34;50,81
+Dragapult;2;2404;7,22;54,09
+Festival Lead;3;2113;6,35;50,8
 Dragapult Blaziken;4;1999;6,0;52,68
 Slowking;5;1831;5,5;52,42
-Alakazam Dudunsparce;6;1804;5,42;53,58
+Alakazam Dudunsparce;6;1805;5,42;53,58
 Dragapult Dusknoir;7;1801;5,41;50,01
 N's Zoroark;8;1721;5,17;48,14
 Grimmsnarl Froslass;9;1476;4,43;51,47
@@ -17,8 +17,8 @@ Mega Greninja;15;522;1,57;41,74
 Basic Box;16;495;1,49;52,55
 Ogerpon Meganium Hydrapple;17;455;1,37;51,21
 Rocket's Honchkrow;18;429;1,29;49,87
-Mega Chandelure;19;395;1,19;42,04
-Cynthia's Garchomp;20;394;1,18;52,12
+Cynthia's Garchomp;19;395;1,19;52,17
+Mega Chandelure;20;395;1,19;42,04
 Beedrill;21;370;1,11;49,0
 Mega Absol Box;22;353;1,06;46,91
 Kangaskhan Bouffalant;23;271;0,81;50,71
@@ -28,9 +28,9 @@ Ethan's Typhlosion;26;251;0,75;46,11
 Greninja;27;247;0,74;51,01
 Rocket's Mewtwo;28;239;0,72;44,77
 Hop's Trevenant;29;234;0,7;47,16
-Toxtricity Box;30;220;0,66;50,89
-Ceruledge;31;217;0,65;48,37
-Starmie Froslass;32;214;0,64;48,15
+Toxtricity Box;30;221;0,66;51,09
+Starmie Froslass;31;215;0,65;48,2
+Ceruledge;32;217;0,65;48,37
 Mega Venusaur;33;195;0,59;42,87
 Ogerpon Meganium Arboliva;34;179;0,54;55,27
 Dragapult Dudunsparce;35;178;0,53;55,22
@@ -40,7 +40,7 @@ Lopunny Dusknoir;38;155;0,47;49,78
 Mega Darkrai;39;149;0,45;38,41
 Starmie Dusknoir;40;142;0,43;46,33
 Cinccino;41;136;0,41;50,23
-Toxtricity;42;122;0,37;36,95
+Toxtricity;42;123;0,37;36,93
 Blaziken Zoroark;43;120;0,36;48,46
 Wailord;44;106;0,32;39,55
 Steven's Metagross;45;104;0,31;49,55
@@ -60,12 +60,12 @@ Marnie's Grimmsnarl;58;60;0,18;46,4
 Tera Box;59;60;0,18;50,42
 Diancie Dusknoir;60;59;0,18;47,95
 Erika's Victreebel;61;55;0,17;40,93
-Iron Thorns;62;55;0,17;32,29
-Zygarde Barbaracle;63;54;0,16;48,39
-Froslass Dudunsparce;64;52;0,16;39,41
-Hydreigon;65;54;0,16;33,17
+Hydreigon;62;55;0,17;32,84
+Iron Thorns;63;55;0,17;32,29
+Zygarde Barbaracle;64;54;0,16;48,39
+Froslass Dudunsparce;65;52;0,16;39,41
 Palafin;66;45;0,14;48,65
-Hop's Zacian;67;46;0,14;44,61
+Hop's Zacian;67;47;0,14;44,66
 Ogerpon Meganium;68;45;0,14;41,97
 Iono's Bellibolt;69;43;0,13;39,05
 Archaludon;70;39;0,12;35,92

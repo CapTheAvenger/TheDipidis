@@ -967,6 +967,67 @@ def check_shrink(findings, rows, base_rows):
                              f"({100.0*(prev-n)/prev:.0f}% fewer) — upstream fetch likely failed"))
 
 
+def check_champions_teams(findings, vorher):
+    """Der Bestand an Champions-Replica-Teams darf nicht wegbroeckeln.
+
+    data/champions_replica_teams.json entsteht taeglich aus
+    champions-replica-scrape.yml. Die Zahl schwankt von Natur aus — die
+    Quelle ist ein Fremdserver, und der Scraper ist ausdruecklich fail-soft.
+    Sie darf aber nicht ueber Tage in eine Richtung laufen:
+
+        19.08.  96 Teams
+        20.08.  73
+        21.08.  66
+        22.08.  62
+        25.08.  60  (Scrape 04:15 UTC)
+        25.08.  46  (Weekly Full Update 06:22 UTC)
+
+    Zwei getrennte Beobachtungen stecken darin. Erstens der Trend nach
+    unten — das sieht nach Drosselung aus, so wie CLAUDE.md sie fuer
+    play.pokemon.com beschreibt. Zweitens schreibt der WOECHENTLICHE Lauf
+    regelmaessig eine duennere Datei als der taegliche Scrape wenige
+    Stunden davor (46 gegen 60 am 25.08., 48 gegen 62 am 22.08., 53 gegen
+    66 am 21.08.) und ueberschreibt damit den besseren Stand.
+
+    Diese Pruefung stand vorher als feste Untergrenze (`> 50`) in
+    tests/unit/test-side-quest-usage.js. Dort war sie am falschen Platz: der
+    Test haengt im Deploy-Gate, also hat ein Datenrueckgang der Fremdquelle
+    die gesamte Auslieferung angehalten — inklusive der Preisdaten, die
+    voellig in Ordnung waren. Melden ja, blockieren nein.
+
+    Gegen die Grundlinie, nicht gegen eine feste Zahl: wie viele Teams es
+    gibt, entscheidet die Quelle, nicht dieses Skript.
+    """
+    pfad = os.path.join(DATA, "champions_replica_teams.json")
+    if not os.path.isfile(pfad):
+        return None
+    try:
+        with open(pfad, encoding="utf-8") as f:
+            jetzt = len((json.load(f) or {}).get("teams") or [])
+    except Exception as e:                                  # noqa: BLE001
+        findings.append(("CRITICAL", f"champions_replica_teams.json nicht lesbar: {e}"))
+        return None
+
+    if jetzt == 0:
+        findings.append(("CRITICAL",
+                         "champions_replica_teams.json enthaelt 0 Teams — der Scrape hat "
+                         "nichts geliefert und der fail-soft-Rueckfall hat nicht gegriffen."))
+        return jetzt
+
+    if not vorher:
+        return jetzt
+
+    if jetzt < vorher * 0.80:
+        findings.append(("WARN",
+                         f"champions_replica_teams.json: {vorher} -> {jetzt} Teams "
+                         f"({100.0*(vorher-jetzt)/vorher:.0f} % weniger). Der Scraper ist "
+                         f"fail-soft, ein Rueckgang ist also kein Absturz, sondern meist "
+                         f"eine gedrosselte Quelle. Faellt die Zahl mehrere Laeufe "
+                         f"hintereinander, holt der Scrape die Teams nicht mehr — dann "
+                         f"hilft kein Neustart, sondern langsamer abrufen."))
+    return jetzt
+
+
 def check_jp_setbestand(findings):
     """Ein Set-Code darf aus der japanischen Datenbank nicht verschwinden.
 
@@ -1219,6 +1280,7 @@ def main():
     check_meta_preiszuordnung(findings)
     check_champions_usage(findings)
     check_champions_freshness(findings)
+    champions_teams = check_champions_teams(findings, baseline.get("champions_teams"))
     check_uebersicht_gegen_chunks(findings)
     check_proxy_frische(findings)
     jp_sets = check_jp_setbestand(findings)
@@ -1255,6 +1317,7 @@ def main():
                 "price_integrity": price,
                 "empty_files": empties,
                 "jp_set_rows": jp_sets or {},
+                "champions_teams": champions_teams,
             }, f, ensure_ascii=False, indent=1, sort_keys=True)
         print(f"  Baseline updated -> {BASELINE}")
 

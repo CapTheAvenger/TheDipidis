@@ -51,6 +51,7 @@ Standalone wrt scrapers (no bs4 / requests dependency).
 from __future__ import annotations
 
 import csv
+import glob
 import json
 import os
 import re
@@ -191,6 +192,44 @@ def _japanische_set_codes(order_map: Dict[str, int]) -> set:
     return codes
 
 
+def _sets_mit_internationalen_karten() -> set:
+    """Set-Codes, zu denen die internationale Kartendatenbank ueberhaupt
+    Karten kennt.
+
+    Abgeleitet, nicht gepflegt. Der Anlass: am 25.08.2026 rutschte MEM in
+    die Counter-Empfehlungen. MEM und MEZ sind japanische Sets, standen
+    aber nie in der abgeleiteten JP-Liste — sie fielen bis dahin nur ueber
+    die Obergrenze des Formatfensters heraus. Diese Obergrenze traegt
+    nicht: sets.json vergibt MEZ und PBL beide die Ordnungszahl 158, und
+    MEM liegt mit 157 darunter. Eine Ordnung, in der zwei Sets denselben
+    Platz haben, kann sie nicht trennen.
+
+    Gemessen ueber alle 20.878 Drucke der Kartenchunks: von den Sets ab
+    Ordnungszahl 140 haben genau zwei keine einzige internationale Karte —
+    MEM und MEZ. M4, M5 und M6 haben welche (83 / 81 / 76) und werden
+    weiterhin ueber das Namensmuster M<Zahl> ausgeschlossen.
+
+    Die Aussage ist absichtlich schwaecher als "ist japanisch": sie sagt
+    nur, dass es zu diesem Set keine Karte gibt, die man international
+    spielen koennte. Ein Set ohne Karten kann in keiner Empfehlung stehen —
+    dafuer muss niemand wissen, aus welchem Zweig es stammt.
+
+    Leere Menge, wenn die Chunks fehlen: dann greift diese Regel nicht und
+    der Aufrufer filtert wie bisher. Lieber keine Grenze als eine falsche.
+    """
+    codes: set = set()
+    for pfad in sorted(glob.glob(os.path.join(DATA_DIR, "cards_chunk_*.json"))):
+        try:
+            with open(pfad, encoding="utf-8") as f:
+                for karte in json.load(f) or []:
+                    code = str((karte or {}).get("set") or "").strip().upper()
+                    if code:
+                        codes.add(code)
+        except Exception:                                   # noqa: BLE001
+            continue
+    return codes
+
+
 def load_legal_set_codes(order_map: Dict[str, int]) -> Tuple[set, str]:
     """Return ``(legal_set_codes, format_label)`` for the current
     Standard rotation. ``legal_set_codes`` is the set of upper-case set
@@ -224,8 +263,15 @@ def load_legal_set_codes(order_map: Dict[str, int]) -> Tuple[set, str]:
         return set(), ""
 
     japanisch = _japanische_set_codes(order_map)
+    # Dritte Bedingung seit 25.08.2026: das Set muss internationale Karten
+    # haben. Die Obergrenze allein reichte nicht — siehe
+    # _sets_mit_internationalen_karten(). Fehlen die Chunks, ist die Menge
+    # leer und die Bedingung entfaellt, statt alles zu verwerfen.
+    mit_karten = _sets_mit_internationalen_karten()
     legal = {s for s, idx in order_map.items()
-             if cutoff <= idx <= obergrenze and s not in japanisch}
+             if cutoff <= idx <= obergrenze
+             and s not in japanisch
+             and (not mit_karten or s in mit_karten)}
     legal |= {s for s in ALWAYS_LEGAL_SETS if s in order_map}
     return legal, f"{LEGAL_FORMAT_MIN_SET}-{aktuell}"
 

@@ -21,7 +21,6 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { execFileSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..', '..');
 const lies = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
@@ -39,83 +38,41 @@ function* bloecke() {
 }
 
 // ───────────────────────────────────────────────────────────────────
-// 1. Die Daten selbst
+// 1. Die Daten selbst — steht seit dem 25.08.2026 NICHT mehr hier
 // ───────────────────────────────────────────────────────────────────
-describe('Champions-Nutzungsdaten: keine unmoeglichen Anteile mehr', () => {
-    it('keine Anteilsliste summiert sich über 105 %', () => {
-        const schlimm = [];
-        for (const [name, fmt, b] of bloecke()) {
-            for (const kat of SUMMEN_KATEGORIEN) {
-                const s = (b[kat] || []).reduce((a, x) => a + (x.pct || 0), 0);
-                if (s > GRENZE) schlimm.push(`${name}/${fmt}/${kat} = ${s.toFixed(1)} %`);
-            }
-        }
-        assert.deepEqual(schlimm, [],
-            'ein Pokémon trägt ein Item und hat ein Wesen — diese Anteile können '
-            + 'nicht beide stimmen');
-    });
+//
+// Bis dahin prüfte dieser Block die ausgelieferte champions_usage.json
+// auf unmögliche Zahlen: Anteilslisten über 105 %, doppelte Zeilen,
+// genullte Ausreißer. Inhaltlich war das richtig. Der Ort war es nicht.
+//
+// Am 25.08.2026 lieferte die Quelle zum ersten Mal seit 39 Tagen wieder
+// Daten, und die trugen 16 Listen über 105 %, zwei doppelte
+// Attackenzeilen und einen Spread mit 173 Angriffspunkten. Weil diese
+// Datei im Deploy-Gate hängt, standen daraufhin DREI Deploys
+// hintereinander — auch für alles, was mit Champions nichts zu tun hat.
+// Dasselbe Muster hatte am Morgen desselben Tages schon einmal die ganze
+// Auslieferung angehalten (Champions-Teamzahl, PR #509).
+//
+// Ein Datenthema an einer Fremdquelle gehört gemeldet, nicht in eine
+// Sperre. Die Prüfung liegt jetzt an zwei Stellen, und beide sind
+// besser als diese hier:
+//
+//   * scripts/scrape_champions_usage.py → unmoegliche_bloecke()
+//     verweigert einen solchen Stand, BEVOR er committet wird.
+//   * scripts/data_guardian.py → check_champions_usage()
+//     meldet täglich, was trotzdem in data/ liegt — als WARN.
+//
+// Beide sind in tests/python/ abgesichert. Was hier bleibt, sind
+// Prüfungen am CODE (Abschnitt 2 und 3) — die gehören ins Gate, weil
+// sie nicht von Tagesdaten abhängen.
 
-    it('keine Liste führt dieselbe Zeile zweimal', () => {
-        const doppelt = [];
-        for (const [name, fmt, b] of bloecke()) {
-            for (const kat of ['held_item', 'nature', 'ability', 'move', 'teammate']) {
-                const n = (b[kat] || []).map(x => (x.name || '').trim());
-                if (n.length !== new Set(n).size) doppelt.push(`${name}/${fmt}/${kat}`);
-            }
-        }
-        assert.deepEqual(doppelt, []);
-    });
-
-    it('die konstante 53,9 an Position 6 ist weg', () => {
-        // Das war die Signatur: derselbe Wert, dieselbe Position, fünf
-        // verschiedene Items.
-        const treffer = [];
-        for (const [name, fmt, b] of bloecke()) {
-            (b.held_item || []).forEach((x, i) => {
-                if (x.pct === 53.9) treffer.push(`${name}/${fmt}/${i + 1}: ${x.name}`);
-            });
-        }
-        assert.deepEqual(treffer, []);
-    });
-
-    it('der entfernte Wert ist markiert, nicht ersetzt', () => {
-        const markiert = [];
-        for (const [name, fmt, b] of bloecke()) {
-            for (const kat of SUMMEN_KATEGORIEN) {
-                (b[kat] || []).forEach(x => {
-                    if (x.unplausibel) {
-                        markiert.push([name, fmt, kat, x]);
-                        assert.equal(x.pct, null,
-                            `${name}/${kat}: markiert, trägt aber weiter eine Zahl`);
-                        assert.match(x.unplausibel, /\d/,
-                            'die Markierung nennt den ursprünglichen Wert nicht');
-                    }
-                });
-            }
-        }
-        assert.equal(markiert.length, 8, `erwartet werden 8 genullte Werte, gefunden ${markiert.length}`);
-    });
-
-    it('und der betroffene Block trägt eine Warnung', () => {
-        let mitWarnung = 0;
-        for (const [, , b] of bloecke()) if (b._warnungen && b._warnungen.length) mitWarnung++;
-        assert.equal(mitWarnung, 8);
-    });
-
-    it('sonst ist nichts angefasst worden', () => {
-        // Die Attackenlisten summieren sich nie auf 100 % und wurden
-        // deshalb auch nicht geprüft — sie müssen unberührt sein.
-        let attacken = 0, mitPct = 0;
-        for (const [, , b] of bloecke()) {
-            (b.move || []).forEach(x => { attacken++; if (x.pct != null) mitPct++; });
-        }
-        assert.ok(attacken > 2000, `nur ${attacken} Attackenzeilen — die Datei ist geschrumpft`);
-        assert.ok(mitPct / attacken > 0.98, 'Attacken haben Prozentwerte verloren');
-    });
-
-    it('die Oberfläche kommt mit einem unbekannten Anteil zurecht', () => {
-        // pct == null wird seit jeher als "keine Zahl" gerendert — das ist
-        // die Voraussetzung dafür, dass Nullen statt Raten überhaupt geht.
+// ───────────────────────────────────────────────────────────────────
+// 1a. Der Renderer muss mit einem genullten Anteil umgehen können
+// ───────────────────────────────────────────────────────────────────
+describe('Ein unbekannter Anteil bricht die Oberfläche nicht', () => {
+    it('pct == null wird als "keine Zahl" gerendert, nicht als leer', () => {
+        // Das ist die Voraussetzung dafür, dass Nullen statt Raten
+        // überhaupt geht — eine Prüfung am Code, nicht an den Daten.
         const PD = lies('js/app-side-quest-pokedex.js');
         assert.ok(/a\.pct != null \? escapeHtml\(fmtPct\(a\.pct\)\) : ''/.test(PD)
             || /s\.pct != null \? escapeHtml\(fmtPct\(s\.pct\)\) : ''/.test(PD),
@@ -180,10 +137,16 @@ describe('data_guardian fängt ab, was der Scraper nicht kennt', () => {
             'definiert, aber nie aufgerufen');
     });
 
-    it('sie schlägt nur an, wenn der Scraper NICHT markiert hat', () => {
-        // Sonst wäre sie dauerhaft rot für Fälle, die bereits behandelt
-        // sind — und eine dauerhaft rote Prüfung liest niemand mehr.
-        assert.ok(/summe > GRENZE and not block\.get\("_warnungen"\)/.test(G));
+    it('CRITICAL nur, wenn der Scraper NICHT markiert hat', () => {
+        // Die Unterscheidung trägt die Stufe. OHNE Markierung hat die
+        // Erkennung des Scrapers die Form nicht erkannt — die Quelle hat
+        // sich verändert, das ist kritisch. MIT Markierung wusste er
+        // Bescheid; ist die Liste dann immer noch zu hoch, war es nicht
+        // ein Ausreißer, sondern die ganze Liste. Gemeldet, kein Notfall.
+        assert.ok(/\(unmarkiert if not block\.get\("_warnungen"\)/.test(G),
+            'die Trennung zwischen markiert und unmarkiert ist weg');
+        assert.ok(/else trotz_marke\)/.test(G),
+            'der Fall "markiert und trotzdem zu hoch" fällt wieder unter den Tisch');
     });
 
     it('INFO-Befunde werden jetzt auch ausgegeben', () => {
@@ -194,15 +157,33 @@ describe('data_guardian fängt ab, was der Scraper nicht kennt', () => {
         assert.ok(/INFO: \{len\(info\)\}/.test(G));
     });
 
-    it('und der Lauf ist auf dem aktuellen Datenstand sauber', () => {
-        const aus = execFileSync('python3', [path.join(ROOT, 'scripts/data_guardian.py')],
-            { cwd: ROOT, encoding: 'utf8' });
-        assert.ok(!/champions usage list\(s\) sum to more than/.test(aus),
-            'der Guardian findet unmarkierte Champions-Listen:\n' + aus);
-        assert.ok(!/carry the same row twice/.test(aus),
-            'der Guardian findet noch doppelte Zeilen:\n' + aus);
-        assert.match(aus, /champions usage block\(s\) carry a plausibility warning/,
-            'die INFO-Meldung über die markierten Blöcke fehlt');
+    it('er kennt die drei Regeln, die aus dem Spiel kommen', () => {
+        // Bis zum 25.08.2026 stand hier stattdessen ein Lauf des
+        // Guardians mit der Forderung, er möge auf dem AKTUELLEN
+        // Datenstand schweigen. Das war wieder eine Datenprüfung im
+        // Deploy-Gate: an dem Tag fand der Guardian zu Recht etwas, und
+        // die Auslieferung stand. Geprüft wird jetzt, dass die Regeln im
+        // Guardian VERDRAHTET sind — ob sie heute anschlagen, ist eine
+        // Frage an die Daten und gehört in seinen täglichen Bericht.
+        assert.ok(/sum to more than/.test(G),
+            'die Summenregel fehlt im Guardian');
+        assert.ok(/carry the same row twice/.test(G),
+            'die Regel gegen doppelte Zeilen fehlt im Guardian');
+        assert.ok(/SP_BUDGET, SP_MAX = 66, 32/.test(G),
+            'die Spread-Regel (66 Punkte / 32 je Wert) fehlt im Guardian');
+        assert.ok(/still above/.test(G),
+            'eine trotz Markierung zu hohe Liste wird nicht gemeldet');
+    });
+
+    it('und die Spread-Regel trägt dieselben Zahlen wie der Rechner', () => {
+        // Laufen sie auseinander, meldet der Guardian Spreads, die die
+        // Oberfläche klaglos anzeigt — oder schweigt zu solchen, die sie
+        // abschneidet.
+        const M = lies('js/app-side-quest-matchups.js');
+        assert.match(M, /const SP_MAX = 32;/);
+        assert.match(M, /const SP_BUDGET = 66;/);
+        assert.match(lies('scripts/scrape_champions_usage.py'), /SP_BUDGET = 66/);
+        assert.match(lies('scripts/scrape_champions_usage.py'), /SP_MAX = 32/);
     });
 });
 

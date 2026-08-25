@@ -77,9 +77,24 @@ def test_der_boden_des_tageslaufs_ist_nicht_kleiner_geworden():
     code = _quelle("champions-replica-scrape.yml")
     m = re.search(r'TOP="\$\{TOP:-(\d+)\}"', code)
     assert m, "der Vorgabewert fuer --top ist nicht mehr auffindbar"
-    assert int(m.group(1)) >= 40, (
-        f"der Boden steht auf {m.group(1)} — unter 40 zeigt die Side Quest in "
-        f"ruhigen Wochen weniger Teams als vorher"
+    # Am 25.08.2026 von 40 auf 60 angehoben. Begruendung: der feste Anteil
+    # der Liste (top-N nach Rang) lag durchgehend bei 25-31, das rollende
+    # 14-Tage-Fenster schwankte zwischen 71 und 30. Ein Boden von 60 liegt
+    # ueber dieser Schwankung — die Liste kann in einer ruhigen Woche nicht
+    # mehr sichtbar schrumpfen.
+    assert int(m.group(1)) >= 60, (
+        f"der Boden steht auf {m.group(1)} — unter 60 schrumpft die Side "
+        f"Quest in ruhigen Wochen wieder sichtbar"
+    )
+
+    # Der Vorgabewert des Handlaufs muss denselben Boden tragen. Stehen
+    # die beiden auseinander, holt ein Klick auf "Run workflow" still
+    # weniger als der Zeitplan — und niemand sieht warum.
+    d = re.search(r"top:\s*\n\s*description:[^\n]*\n\s*type: string\n(?:\s*#[^\n]*\n)*\s*default: '(\d+)'", code)
+    assert d, "der Vorgabewert des workflow_dispatch-Eingabefeldes fehlt"
+    assert d.group(1) == m.group(1), (
+        f"Handlauf holt {d.group(1)}, Zeitplan {m.group(1)} — das laeuft "
+        f"auseinander"
     )
 
 

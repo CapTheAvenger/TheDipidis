@@ -34,7 +34,10 @@ on:
       top:
         description: 'Number of top teams to include'
         type: string
-        default: '40'
+        # Muss zum Vorgabewert weiter unten passen — sonst holt ein
+        # Handlauf ueber die Oberflaeche stillschweigend weniger als der
+        # Zeitplan.
+        default: '60'
 
 permissions:
   contents: write   # Daten committen + pushen
@@ -89,8 +92,27 @@ jobs:
         run: |
           set +e
           echo "::group::scrapers/champions_replica_scraper.py"
+          # `--top` ist ein BODEN, kein Deckel: die Auswahl ist
+          # "beste N nach Rang" VEREINIGT MIT "alle Teams der letzten 14
+          # Tage". Am 25.08.2026 gemessen ueber acht Tagesstaende:
+          #
+          #     Stand   gesamt   im 14-Tage-Fenster   ausserhalb (= Boden)
+          #     18.08.      96                   71                     25
+          #     20.08.      73                   47                     26
+          #     22.08.      62                   31                     31
+          #     25.08.      60                   30                     30
+          #
+          # Der Boden stand still, das Fenster fiel von 71 auf 30 — die
+          # Quelle hatte nach dem 16./17.08. eine ruhige Woche. Sichtbar
+          # war davon nur, dass die Liste schrumpft.
+          #
+          # Ein Boden von 60 liegt UEBER dieser Schwankung. Damit kann die
+          # Liste in einer ruhigen Woche nicht mehr sichtbar kleiner
+          # werden, waechst aber in einer vollen weiterhin. Kosten: rund
+          # 20 zusaetzliche Pokepaste-Abrufe a 0,7 s. Die Obergrenze
+          # (--speed-max-teams, 120) bleibt unberuehrt.
           TOP="${{ github.event.inputs.top }}"
-          TOP="${TOP:-40}"
+          TOP="${TOP:-60}"
           python backend/scrapers/champions_replica_scraper.py --top "$TOP"
           rc=$?
           echo "::endgroup::"

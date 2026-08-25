@@ -797,7 +797,11 @@ def check_champions_usage(findings):
         return
 
     GRENZE = 105.0
-    unmarkiert, doppelt, markiert = [], [], 0
+    # Statuswertpunkte: 66 im Ganzen, 32 je Wert — dieselben Zahlen wie im
+    # Rechner (js/app-side-quest-matchups.js: SP_BUDGET, SP_MAX) und im
+    # Scraper. Sie kommen aus dem Spiel, nicht aus einer Schaetzung.
+    SP_BUDGET, SP_MAX = 66, 32
+    unmarkiert, trotz_marke, doppelt, spreads, markiert = [], [], [], [], 0
     for name, eintrag in (daten.get("pokemon") or {}).items():
         for fmt in ("doubles", "singles"):
             block = eintrag.get(fmt)
@@ -810,11 +814,32 @@ def check_champions_usage(findings):
                 if not liste:
                     continue
                 summe = sum(e.get("pct") or 0 for e in liste)
-                if summe > GRENZE and not block.get("_warnungen"):
-                    unmarkiert.append(f"{name}/{fmt}/{kat} = {summe:.1f} %")
+                if summe > GRENZE:
+                    # Die Unterscheidung traegt die Stufe: OHNE Markierung
+                    # hat die Erkennung des Scrapers die Form nicht erkannt
+                    # (die Quelle hat sich veraendert) — das ist kritisch.
+                    # MIT Markierung wusste er Bescheid und hat den einen
+                    # Ausreisser genullt; wenn die Liste dann IMMER NOCH zu
+                    # hoch ist, war es nicht ein Ausreisser, sondern die
+                    # ganze Liste. Gemeldet, aber kein Notfall.
+                    (unmarkiert if not block.get("_warnungen")
+                     else trotz_marke).append(f"{name}/{fmt}/{kat} = {summe:.1f} %")
                 namen = [(e.get("name") or "").strip() for e in liste]
                 if len(namen) != len(set(namen)):
                     doppelt.append(f"{name}/{fmt}/{kat}")
+            # Doppelte Zeilen gibt es auch in Attacken- und
+            # Mitstreiterlisten (25.08.2026: florges-red-flower und
+            # musharna, beide doubles/move). Die Summe darf dort ueber
+            # 100 % liegen, dieselbe Zeile zweimal nicht.
+            for kat in ("move", "teammate"):
+                namen = [(e.get("name") or "").strip() for e in (block.get(kat) or [])]
+                if namen and len(namen) != len(set(namen)):
+                    doppelt.append(f"{name}/{fmt}/{kat}")
+            for sp in (block.get("stat_points") or []):
+                werte = [w for w in (sp.get("points") or {}).values()
+                         if isinstance(w, (int, float))]
+                if werte and (sum(werte) > SP_BUDGET or any(w > SP_MAX for w in werte)):
+                    spreads.append(f"{name}/{fmt}: {sp.get('evs')}")
 
     if unmarkiert:
         findings.append(("CRITICAL",
@@ -829,6 +854,20 @@ def check_champions_usage(findings):
         findings.append(("WARN",
                          f"{len(doppelt)} champions usage list(s) carry the same row twice: "
                          f"{', '.join(doppelt[:8])}{' …' if len(doppelt) > 8 else ''}"))
+    if trotz_marke:
+        findings.append(("WARN",
+                         f"{len(trotz_marke)} champions usage list(s) are still above "
+                         f"{GRENZE:.0f} % AFTER the scraper nulled its outlier: "
+                         f"{', '.join(trotz_marke[:8])}"
+                         f"{' …' if len(trotz_marke) > 8 else ''} — then it was not one bad "
+                         f"row but the whole list. Measured 25.08.2026: 16 such lists in the "
+                         f"first fresh scrape after 39 days."))
+    if spreads:
+        findings.append(("WARN",
+                         f"{len(spreads)} champions stat spread(s) outside {SP_BUDGET} points "
+                         f"total / {SP_MAX} per stat: {', '.join(spreads[:8])}"
+                         f"{' …' if len(spreads) > 8 else ''} — the game does not allow these. "
+                         f"Measured 25.08.2026: araquanid/doubles carried 173 attack points."))
     if markiert:
         findings.append(("INFO",
                          f"{markiert} champions usage block(s) carry a plausibility warning "

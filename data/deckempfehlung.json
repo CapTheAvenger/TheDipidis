@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-08-23 17:49:22+00:00",
+ "erzeugt": "2026-08-25 06:22:41+00:00",
  "format": "TEF-PBL",
  "betriebsart": "B",
  "betriebsart_klartext": "Kaltstart — TEF-PBL hat noch kein Praesenzturnier, Anker ist die Vorepoche TEF-POR",
@@ -57,34 +57,34 @@
   {
    "id": "0070",
    "name": "International Championship New Orleans",
-   "datum": "2026-06-10",
+   "datum": "2026-06-12",
    "spieler": 3743
   }
  ],
  "ankerspieler_gesamt": 16264,
  "online_abdeckung": {
-  "schnappschuss": "2026-08-22",
-  "anteil_unbekannt": 18.89,
+  "schnappschuss": "2026-08-25",
+  "anteil_unbekannt": 18.6,
   "groesste_unbekannte": [
    {
     "deck": "Mega Excadrill",
-    "anteil": 7.83
+    "anteil": 7.78
    },
    {
     "deck": "Dhelmise",
-    "anteil": 4.05
+    "anteil": 4.03
    },
    {
     "deck": "Toucannon",
-    "anteil": 3.1
+    "anteil": 2.92
    },
    {
     "deck": "Mega Chandelure",
-    "anteil": 1.21
+    "anteil": 1.19
    },
    {
     "deck": "Mega Darkrai",
-    "anteil": 0.47
+    "anteil": 0.45
    }
   ]
  },

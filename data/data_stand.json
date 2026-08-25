@@ -1,18 +1,18 @@
 {
-  "erzeugt_am": "2026-08-22T03:31:33+00:00",
+  "erzeugt_am": "2026-08-25T06:22:41+00:00",
   "quelle": "Zeitpunkt des Laufs fuer geaenderte Dateien, sonst fortgeschrieben",
   "dateien": {
-    "limitless_online_decks.csv": "2026-08-22T03:31:33+00:00",
-    "limitless_online_decks_matchups.csv": "2026-08-22T03:31:33+00:00",
-    "online_tournament_top8_decks.csv": "2026-08-22T03:31:33+00:00",
-    "limitless_meta_stats.json": "2026-08-22T03:31:33+00:00",
+    "limitless_online_decks.csv": "2026-08-25T06:22:41+00:00",
+    "limitless_online_decks_matchups.csv": "2026-08-25T06:22:41+00:00",
+    "online_tournament_top8_decks.csv": "2026-08-25T06:22:41+00:00",
+    "limitless_meta_stats.json": "2026-08-25T06:22:41+00:00",
     "city_league_archetypes.csv": "2026-07-31T07:10:57+00:00",
     "city_league_analysis.csv": "2026-07-31T07:10:57+00:00",
     "city_league_analysis_past.csv": "2026-07-31T07:10:57+00:00",
     "city_league_archetypes_past.csv": "2026-08-22T03:31:33+00:00",
-    "all_cards_database.csv": "2026-08-09T11:11:58+00:00",
-    "price_data.csv": "2026-08-22T03:31:33+00:00",
-    "labs_tournament_decks.csv": "2026-07-31T07:10:57+00:00",
+    "all_cards_database.csv": "2026-08-25T06:22:41+00:00",
+    "price_data.csv": "2026-08-25T06:22:41+00:00",
+    "labs_tournament_decks.csv": "2026-08-25T06:22:41+00:00",
     "champions_usage.json": "2026-07-17T05:54:27+00:00"
   }
 }

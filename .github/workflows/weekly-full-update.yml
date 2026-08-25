@@ -438,30 +438,24 @@ jobs:
           echo "::endgroup::"
           exit 0  # nicht blockierend, aber sichtbar (S5)
 
-      - name: Run champions-replica scraper (Pokémon Champions Side Quest)
-        env:
-          PYTHONPATH: ${{ github.workspace }}/backend/core
-        working-directory: backend
-        # Independent feature, unrelated to TCG. Pulls the VGCPastes
-        # Champions M-A Repository Google Sheet (published-CSV export)
-        # + pokepast.es for each team's Showdown-format paste, writes
-        # data/champions_replica_teams.json for the Side Quest tab.
-        # Total HTTP: 1 (sheet) + N (one per pokepaste, default top-20)
-        # with a 0.7 s delay → ~15 s. Failure is non-blocking; the
-        # tab gracefully falls back to whatever JSON was last shipped.
-        run: |
-          set +e
-          echo "::group::scrapers/champions_replica_scraper.py"
-          python scrapers/champions_replica_scraper.py --top 20
-          rc=$?
-          if [ "$rc" -ne 0 ]; then
-              echo "::warning::champions_replica_scraper exited with $rc"
-              echo "FAIL scrapers/champions_replica_scraper.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
-          else
-              echo "OK   scrapers/champions_replica_scraper.py" >> "$RUNNER_TEMP/rc_extra.txt"
-          fi
-          echo "::endgroup::"
-          exit 0  # nicht blockierend, aber sichtbar (S5)
+      # KEIN champions-replica-Scrape mehr in diesem Lauf.
+      #
+      # Bis 25.08.2026 lief der Scraper hier ein zweites Mal — mit
+      # `--top 20`, waehrend champions-replica-scrape.yml ihn taeglich um
+      # 04:00 UTC mit `--top 40` startet. Der Wochenlauf kam Stunden
+      # spaeter und ueberschrieb das breitere Ergebnis mit dem schmaleren.
+      # Gemessen an vier Tagen:
+      #
+      #     18.08.  Tageslauf 96  ->  Wochenlauf 86
+      #     21.08.  Tageslauf 66  ->  Wochenlauf 53
+      #     22.08.  Tageslauf 62  ->  Wochenlauf 48
+      #     25.08.  Tageslauf 60  ->  Wochenlauf 46
+      #
+      # Jedes Mal 12-23 % weniger Teams, ohne einen einzigen neuen
+      # Datenpunkt: dieselbe Quelle, dieselbe Stunde, nur eine engere
+      # Auswahl. Der Tageslauf ist in jeder Hinsicht der bessere — er
+      # laeuft oefter und holt mehr. Der Wochenlauf laesst die Datei
+      # deshalb jetzt in Ruhe.
 
       - name: Bilanz der nicht blockierenden Schritte (S5)
         if: always()
@@ -545,7 +539,11 @@ jobs:
           set +e
           mkdir -p data
           # Monolith files first
-          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv tournament_decklists_per_player.csv champions_replica_teams.json champions_speed_corpus.json; do
+          # champions_replica_teams.json / champions_speed_corpus.json fehlen
+          # hier absichtlich: dieser Lauf scraped sie nicht mehr (s. o.), also
+          # darf er sie auch nicht zurueckschreiben. Sonst kopiert er den
+          # geseedeten Stand ueber eine womoeglich neuere Datei.
+          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv tournament_decklists_per_player.csv; do
               if [ -f "backend/core/data/$f" ]; then
                   cp "backend/core/data/$f" "data/$f"
                   sz=$(stat -c%s "data/$f")

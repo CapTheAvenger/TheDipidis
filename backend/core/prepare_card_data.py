@@ -772,10 +772,15 @@ SYNC_PATTERNS = [
     # archetype-aggregated stats — degraded gracefully but less precise.
     "tournament_decklists_per_player.csv",
     # Champions Side Quest — VGCPastes Google-Sheet derived team list.
-    # Refreshed by backend/scrapers/champions_replica_scraper.py on the
-    # weekly run; the Side Quest tab (js/app-side-quest.js) reads from
-    # data/. Unrelated to the TCG predictor pipeline but uses the same
-    # seed/sync infrastructure so the consistency test stays green.
+    # Refreshed von backend/scrapers/champions_replica_scraper.py, und
+    # zwar TAEGLICH aus champions-replica-scrape.yml (04:00 UTC, --top 40).
+    # Der Wochenlauf scraped sie seit dem 25.08.2026 nicht mehr — er lief
+    # mit --top 20 und ueberschrieb das breitere Tagesergebnis. Der
+    # Eintrag hier bleibt trotzdem stehen: der Wochenlauf seedet die
+    # Datei weiterhin nach backend/core/data/, und der Sync ueberspringt
+    # inhaltsgleiche Dateien, kopiert sie also nur zurueck, wenn sie
+    # jemand im selben Lauf wirklich veraendert hat.
+    # Die Side-Quest-Ansicht (js/app-side-quest.js) liest aus data/.
     "champions_replica_teams.json",
     # Scraper state files — list of tournament IDs each scraper has
     # already processed. Synced back to data/ so the next CI run can

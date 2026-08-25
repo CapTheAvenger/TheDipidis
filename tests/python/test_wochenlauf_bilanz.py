@@ -85,11 +85,19 @@ def _schritte_lesen(pfad):
         s["run"] = textwrap.dedent(s["run"])
     return schritte
 
+# champions_replica_scraper stand hier bis zum 25.08.2026 mit drin.
+# Seitdem laeuft er in diesem Workflow gar nicht mehr: er lief hier mit
+# --top 20, waehrend champions-replica-scrape.yml ihn taeglich mit
+# --top 40 startet, und ueberschrieb Stunden spaeter das breitere
+# Ergebnis mit dem schmaleren (18.08. 96->86, 21.08. 66->53, 22.08.
+# 62->48, 25.08. 60->46). Ein Schritt, den es nicht gibt, kann auch
+# nicht stillschweigend scheitern — die Regel bleibt fuer die drei
+# uebrigen unveraendert scharf. Dass er nicht zurueckkehrt, haelt
+# test_champions_nur_ein_scraper.py fest.
 NICHT_BLOCKIEREND = (
     "scrapers/labs_tournament_scraper.py",
     "scrapers/player_continuity_scraper.py",
     "scrapers/per_decklist_scraper.py",
-    "scrapers/champions_replica_scraper.py",
 )
 
 
@@ -143,7 +151,7 @@ def test_bilanzschritt_ist_ausfuehrbar(schritte, tmp_path):
     (tmp_path / "tmp" / "rc_extra.txt").write_text(
         "OK   scrapers/labs_tournament_scraper.py\n"
         "FAIL scrapers/per_decklist_scraper.py (rc=1)\n"
-        "FAIL scrapers/champions_replica_scraper.py (rc=2)\n",
+        "FAIL scrapers/player_continuity_scraper.py (rc=2)\n",
         encoding="utf-8")
     umgebung = dict(os.environ,
                     RUNNER_TEMP=str(tmp_path / "tmp"),

@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-08-24",
+    "last_updated": "2026-08-25",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-B",
@@ -10,7 +10,7 @@
       "M-B",
       "M-A"
     ],
-    "team_count": 62
+    "team_count": 60
   },
   "teams": [
     {
@@ -5824,204 +5824,6 @@
     },
     {
       "rank": 60,
-      "replica_code": "L1C33GUNQH",
-      "team_name": "Trick Room's Dragonite Scizor Team",
-      "tournament": "-",
-      "trainer": "Trick Room",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "10 Aug 2026",
-      "pokepaste_url": "https://pokepast.es/bf70e6ba30fbe827",
-      "pokemon": [
-        {
-          "name": "Dragonite",
-          "item": "Life Orb",
-          "ability": "Inner Focus",
-          "tera_type": "",
-          "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Dragon Claw",
-            "Extreme Speed",
-            "Superpower",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Scizor",
-          "item": "Scizorite",
-          "ability": "Technician",
-          "tera_type": "",
-          "evs": "32 HP / 20 Atk / 14 SpD",
-          "nature": "Adamant",
-          "moves": [
-            "Bullet Punch",
-            "Bug Bite",
-            "Protect",
-            "Swords Dance"
-          ]
-        },
-        {
-          "name": "Toxapex",
-          "item": "Leftovers",
-          "ability": "Regenerator",
-          "tera_type": "",
-          "evs": "32 HP / 16 Def / 18 SpD",
-          "nature": "Bold",
-          "moves": [
-            "Baneful Bunker",
-            "Toxic",
-            "Infestation",
-            "Wide Guard"
-          ]
-        },
-        {
-          "name": "Froslass",
-          "item": "Froslassite",
-          "ability": "Cursed Body",
-          "tera_type": "",
-          "evs": "12 HP / 1 Def / 20 SpA / 1 SpD / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Blizzard",
-            "Shadow Ball",
-            "Aurora Veil",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Incineroar",
-          "item": "Charcoal",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "30 HP / 23 Atk / 13 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Flare Blitz",
-            "Darkest Lariat",
-            "Fake Out",
-            "Parting Shot"
-          ]
-        },
-        {
-          "name": "Clefable",
-          "item": "Sitrus Berry",
-          "ability": "Unaware",
-          "tera_type": "",
-          "evs": "31 HP / 24 Def / 11 SpD",
-          "nature": "Bold",
-          "moves": [
-            "Moonblast",
-            "Thunder Wave",
-            "Follow Me",
-            "Life Dew"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 61,
-      "replica_code": "8BX9NXXAR0",
-      "team_name": "Klub's Venusaur Archaludon Team",
-      "tournament": "-",
-      "trainer": "Klub",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "10 Aug 2026",
-      "pokepaste_url": "https://pokepast.es/0268f38bb9e98923",
-      "pokemon": [
-        {
-          "name": "Venusaur",
-          "item": "Venusaurite",
-          "ability": "Chlorophyll",
-          "tera_type": "",
-          "evs": "32 HP / 17 SpA / 17 SpD",
-          "nature": "Modest",
-          "moves": [
-            "Protect",
-            "Earth Power",
-            "Giga Drain",
-            "Sludge Bomb"
-          ]
-        },
-        {
-          "name": "Pelipper",
-          "item": "Focus Sash",
-          "ability": "Drizzle",
-          "tera_type": "",
-          "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Weather Ball",
-            "Wide Guard",
-            "Hurricane",
-            "Tailwind"
-          ]
-        },
-        {
-          "name": "Archaludon",
-          "item": "Leftovers",
-          "ability": "Stamina",
-          "tera_type": "",
-          "evs": "32 HP / 1 Def / 5 SpA / 25 SpD / 3 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Protect",
-            "Draco Meteor",
-            "Flash Cannon",
-            "Electro Shot"
-          ]
-        },
-        {
-          "name": "Sneasler",
-          "item": "Life Orb",
-          "ability": "Poison Touch",
-          "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Fake Out",
-            "Close Combat",
-            "Poison Jab",
-            "Rock Slide"
-          ]
-        },
-        {
-          "name": "Basculegion",
-          "item": "Mystic Water",
-          "ability": "Adaptability",
-          "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Last Respects",
-            "Wave Crash",
-            "Aqua Jet",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Rotom-Wash",
-          "item": "Choice Scarf",
-          "ability": "Levitate",
-          "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Hydro Pump",
-            "Electroweb",
-            "Thunderbolt",
-            "Will-O-Wisp"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 62,
       "replica_code": "KKJP04F5J4",
       "team_name": "barudoru's Gallade Milotic Team",
       "tournament": "-",

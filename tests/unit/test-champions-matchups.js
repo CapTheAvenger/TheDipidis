@@ -124,16 +124,24 @@ describe('das vorbelegte Set kommt aus den Nutzungsdaten', () => {
 describe('die Statuswertpunkte bleiben im Rahmen des Spiels', () => {
     const api = load();
 
-    it('kein echter Spread der Datei sprengt 66 / 32', () => {
-        Object.values(DATA.usage.pokemon).forEach(rec => {
-            ['doubles', 'singles'].forEach(f => {
-                ((rec[f] && rec[f].stat_points) || []).forEach(s => {
-                    const p = s.points || {};
-                    assert.ok(api.spreadTotal(p) <= api.SP_BUDGET, `${rec.name}: ${s.evs}`);
-                    Object.values(p).forEach(v => assert.ok(v <= api.SP_MAX, `${rec.name}: ${s.evs}`));
-                });
-            });
-        });
+    it('der Rechner deckelt auch einen Spread, den die Datei nicht kennt', () => {
+        // Hier stand bis zum 25.08.2026 eine Prüfung ÜBER DIE DATEI:
+        // "kein echter Spread der Datei sprengt 66 / 32". Sie war
+        // inhaltlich richtig und am falschen Ort. An dem Tag lieferte die
+        // Quelle für Araquanid "2 HP / 173 Atk / 2 Def" — 173 Punkte, wo
+        // 32 erlaubt sind — und weil diese Datei im Deploy-Gate hängt,
+        // stand die ganze Auslieferung. Die Regel prüft jetzt
+        // scripts/data_guardian.py (WARN) und, davor,
+        // scripts/scrape_champions_usage.py (der Stand wird gar nicht
+        // erst committet).
+        //
+        // Was hier bleibt, ist die Frage an den CODE: hält der Rechner
+        // einen solchen Wert aus, wenn er trotzdem ankommt?
+        const gedeckelt = api.clampSpread({ hp: 2, atk: 173, def: 2 }, 'atk', 173);
+        assert.ok(gedeckelt.atk <= api.SP_MAX,
+            `173 Punkte kommen ungedeckelt durch: ${JSON.stringify(gedeckelt)}`);
+        assert.ok(api.spreadTotal(gedeckelt) <= api.SP_BUDGET,
+            `der Spread sprengt das Budget: ${JSON.stringify(gedeckelt)}`);
     });
 
     it('deckelt einen einzelnen Wert bei 32', () => {

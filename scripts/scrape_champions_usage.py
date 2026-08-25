@@ -321,6 +321,14 @@ def pruefe_plausibel(block):
 # denn die Doppelzeilen-Regel gilt auch fuer Attacken und Mitstreiter.
 ALLE_KATEGORIEN = ("held_item", "nature", "ability", "move", "teammate")
 
+# Statuswertpunkte: 66 im Ganzen, 32 je Wert. Dieselben Zahlen wie im
+# Rechner (js/app-side-quest-matchups.js: SP_BUDGET, SP_MAX) — sie kommen
+# aus dem Spiel, nicht aus einer Schaetzung. Am 25.08.2026 trug der
+# frische Stand "2 HP / 173 Atk / 2 Def" fuer Araquanid; 173 gibt es
+# nicht.
+SP_BUDGET = 66
+SP_MAX = 32
+
 
 def unmoegliche_bloecke(pokemon):
     """Welche Bloecke verletzen die Regeln, die die Daten selbst tragen?
@@ -329,7 +337,8 @@ def unmoegliche_bloecke(pokemon):
 
       * eine Anteilsliste einer eindeutigen Kategorie summiert sich nicht
         deutlich ueber 100 %,
-      * keine Liste fuehrt dieselbe Zeile zweimal.
+      * keine Liste fuehrt dieselbe Zeile zweimal,
+      * ein Statuswert-Spread bleibt in 66 Punkten gesamt und 32 je Wert.
 
     Am 25.08.2026 verletzte der frische Stand beide: 16 Listen ueber 105 %
     (absol/doubles/nature 111,5 %; abomasnow/doubles/nature 117,5 %) und
@@ -357,6 +366,12 @@ def unmoegliche_bloecke(pokemon):
                 namen = [str(z.get("name") or "").strip() for z in (block.get(kat) or [])]
                 if len(namen) != len(set(namen)):
                     befunde.append(f"{slug}/{fmt}/{kat}: doppelte Zeile")
+            for sp in (block.get("stat_points") or []):
+                werte = [w for w in (sp.get("points") or {}).values()
+                         if isinstance(w, (int, float))]
+                if sum(werte) > SP_BUDGET or any(w > SP_MAX for w in werte):
+                    befunde.append(f"{slug}/{fmt}: Spread {sp.get('evs')} "
+                                   f"sprengt {SP_BUDGET}/{SP_MAX}")
     return befunde
 
 

@@ -13,10 +13,14 @@ werden. Gemessen an der Quelle am 25.08.2026:
                                     Furfrou-Schnitte, Aegislash-Klingenform.
                                     Kein einziges Basis-Pokemon fehlt.
 
-Die committete Datei trug 285 Eintraege; 92 % davon sind 262. Die Quelle
-kann 262 nicht mehr liefern. Aus einem Schutz gegen duenne Scrapes war
+Die committete Datei trug 353 Eintraege; 92 % davon sind 325. Die Quelle
+kann 325 nicht mehr liefern. Aus einem Schutz gegen duenne Scrapes war
 damit eine Dauersperre geworden — unsichtbar, weil ein haltender Schutz
 genau so aussieht wie ein Schutz, der gerade etwas Gutes tut.
+
+Der erste Lauf mit der neuen Regel (25.08.2026, 17:54 UTC) rechnete 115
+entfallene Schluessel heraus, kam auf einen Erwartungswert von 238, holte
+238 und schrieb die Datei zum ersten Mal seit 39 Tagen neu.
 
 Die Regel jetzt: ein 404 ist eine Aussage der Quelle ("diese Seite gibt es
 nicht") und wird aus dem Vergleichswert herausgerechnet. Eine Drosselung

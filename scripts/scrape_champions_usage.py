@@ -313,12 +313,25 @@ def pruefe_plausibel(block):
 
 
 def scrape_pokemon(slug):
-    """Return (display_name, record) or (None, None) on failure."""
+    """Return (display_name, record, fehlt) — fehlt=True heisst: die Quelle
+    kennt diesen Slug nicht (HTTP 404).
+
+    Der Unterschied traegt den Regressionsschutz weiter unten. Eine
+    Drosselung liefert 429/503 oder einen Zeitueberlauf; ein 404 ist eine
+    Aussage der Quelle: diese Seite gibt es nicht. Beides als "fehlgeschlagen"
+    zu zaehlen hat den Lauf am 25.08.2026 dauerhaft blockiert — siehe die
+    Erklaerung am Schutz selbst.
+    """
     try:
         data = json.loads(fetch_text(f"{BASE}/api/pokemon/{slug}"))
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None, None, True
+        print(f"  WARN {slug}: api fetch failed ({e})")
+        return None, None, False
     except Exception as e:  # noqa: BLE001
         print(f"  WARN {slug}: api fetch failed ({e})")
-        return None, None
+        return None, None, False
 
     name = (data.get("battleName") or data.get("name") or "").strip()
     summary = data.get("summary") or {}
@@ -342,7 +355,7 @@ def scrape_pokemon(slug):
         s["season"] = season
         forms[fmt] = s
     if not forms:
-        return None, None
+        return None, None, False
     rec.update(forms)
 
     # Mega ability: summary.forms lists each form (Base / Mega / Mega X / Y)
@@ -359,7 +372,7 @@ def scrape_pokemon(slug):
                 rec["megaAbility"] = mab
             break
 
-    return en_name, rec
+    return en_name, rec, False
 
 
 def main():
@@ -389,6 +402,9 @@ def main():
     pokemon = {}
     season = None
     pending = list(slugs)
+    # Slugs, die die API mit 404 beantwortet. Getrennt von `pending`, weil
+    # sie nicht fehlgeschlagen sind — es gibt sie schlicht nicht.
+    nicht_vorhanden = set()
     start = time.time()
     for attempt in range(MAX_PASSES):
         if not pending:
@@ -407,11 +423,19 @@ def main():
             for fut in as_completed(futures):
                 done += 1
                 slug = futures[fut]
+                fehlt = False
                 try:
-                    name, rec = fut.result()
+                    name, rec, fehlt = fut.result()
                 except Exception as e:  # noqa: BLE001 — never let one kill the run
                     print(f"  WARN {slug}: {type(e).__name__}: {e}")
                     rec = None
+                if fehlt:
+                    # Die Quelle kennt den Slug nicht. Ein zweiter, dritter und
+                    # vierter Versuch aendert daran nichts — er kostet nur
+                    # Zeit aus dem Budget, das die echten Drosselungen
+                    # brauchen.
+                    nicht_vorhanden.add(slug)
+                    continue
                 if not rec:
                     failed.append(slug)
                     continue
@@ -426,6 +450,10 @@ def main():
                           f"{nat.get('name')} {nat.get('pct')}%")
         pending = failed
     ok = len(pokemon)
+    if nicht_vorhanden:
+        print(f"{len(nicht_vorhanden)} Slugs stehen in der Sitemap, aber die "
+              f"API kennt sie nicht (404) — z. B. "
+              f"{sorted(nicht_vorhanden)[:5]}")
     if pending:
         print(f"WARN: {len(pending)} slugs never resolved after {MAX_PASSES} "
               f"passes: {pending[:20]}")
@@ -438,12 +466,43 @@ def main():
     # snapshot. If we got noticeably fewer than last time, keep the committed
     # file (the workflow's fail-soft restores it on a non-zero exit).
     try:
-        prev = len((json.load(open(OUT, encoding="utf-8")).get("pokemon") or {}))
+        frueher_da = set(json.load(open(OUT, encoding="utf-8")).get("pokemon") or {})
     except Exception:  # noqa: BLE001
-        prev = 0
-    if prev and ok < prev * 0.92:
-        print(f"FATAL: scraped {ok} Pokémon < 92% of previous {prev} — likely "
-              f"rate-limited; keeping committed JSON")
+        frueher_da = set()
+    prev = len(frueher_da)
+    # Der Vergleichswert ist nicht die alte Gesamtzahl, sondern die alte
+    # Gesamtzahl OHNE die Eintraege, die es an der Quelle nicht mehr gibt.
+    #
+    # Warum: am 25.08.2026 war dieser Lauf sieben Mal in Folge rot, und die
+    # Datei stand seit dem 17.07. Gemessen an der Quelle:
+    #
+    #     Sitemap            358 Slugs
+    #     davon mit API-Eintrag  238
+    #     davon 404              120   — ausnahmslos Zierformen
+    #                                    (Alcremie-Cremes, Castform-Wetter,
+    #                                    Florges-Bluetenfarben, Furfrou-Schnitte,
+    #                                    Aegislash-Klingenform)
+    #
+    # Die committete Datei trug 285 Eintraege. 92 % davon sind 262 — eine
+    # Zahl, die die Quelle nicht mehr liefern KANN. Der Schutz hat also nicht
+    # eine Drosselung abgefangen, sondern eine dauerhafte Verkleinerung der
+    # Quelle in eine Dauersperre verwandelt: die Datei konnte nie wieder
+    # frisch werden, und niemand sah es, weil der Schutz genau dafuer da ist,
+    # dass nichts Duennes durchkommt.
+    #
+    # Ein 404 ist eine Aussage der Quelle, kein Ausfall. Eine Drosselung
+    # meldet sich mit 429/503 oder einem Zeitueberlauf und faellt weiterhin
+    # voll in den Vergleich — der Schutz bleibt fuer den Fall scharf, fuer den
+    # er gebaut wurde.
+    entfallen = frueher_da & nicht_vorhanden
+    erwartet = prev - len(entfallen)
+    if entfallen:
+        print(f"{len(entfallen)} frueher vorhandene Slugs liefern jetzt 404 — "
+              f"Vergleichswert {prev} -> {erwartet}")
+    if erwartet and ok < erwartet * 0.92:
+        print(f"FATAL: scraped {ok} Pokémon < 92% of expected {erwartet} "
+              f"(previous {prev}, {len(entfallen)} von der Quelle entfernt) — "
+              f"likely rate-limited; keeping committed JSON")
         return 1
 
     out = {

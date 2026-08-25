@@ -133,3 +133,109 @@ def test_der_scrape_meldet_was_die_quelle_nicht_mehr_kennt():
         "der Lauf schweigt ueber 404-Slugs — dann faellt es wieder erst "
         "auf, wenn die Datei Wochen alt ist"
     )
+
+# ── Der zweite Schutz: kann der Stand ueberhaupt stimmen? ────────────
+#
+# Am selben Abend zeigte sich, dass "frisch" nicht "richtig" heisst. Der
+# erste erfolgreiche Scrape seit 39 Tagen trug 16 Anteilslisten ueber
+# 105 % und zwei doppelte Attackenzeilen; der committete Stand davor
+# hatte von beidem null. Diese Daten landeten im Deploy-Gate und hielten
+# drei Auslieferungen an. Seitdem prueft der Scraper das selbst.
+
+
+def test_der_scraper_prueft_seinen_eigenen_stand():
+    assert "def unmoegliche_bloecke(" in CODE, (
+        "die Plausibilitaetspruefung des fertigen Standes fehlt — dann "
+        "wandert ein unmoeglicher Scrape wieder bis in den Deploy"
+    )
+    assert "unmoeglich = unmoegliche_bloecke(pokemon)" in CODE, (
+        "die Pruefung ist definiert, aber nicht verdrahtet"
+    )
+
+
+def test_sie_faengt_genau_die_beiden_faelle_von_heute(monkeypatch):
+    """Verhalten, nicht Quelltext — mit den echten Zahlen des Fundes."""
+    import importlib.util
+
+    pfad = os.path.join(ROOT, "scripts", "scrape_champions_usage.py")
+    spec = importlib.util.spec_from_file_location("champ_usage2", pfad)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    sauber = {"pelipper": {"doubles": {
+        "nature": [{"name": "Modest", "pct": 53.9}, {"name": "Timid", "pct": 30.1}],
+        "move": [{"name": "Hurricane", "pct": 98.4}, {"name": "Tailwind", "pct": 89.3}],
+    }}}
+    assert mod.unmoegliche_bloecke(sauber) == []
+
+    # absol/doubles/nature, wie am 25.08.2026 gescraped: 111,5 %
+    zu_hoch = {"absol": {"doubles": {"nature": [
+        {"name": "Adamant", "pct": 53.5}, {"name": "Jolly", "pct": 23.2},
+        {"name": "Brave", "pct": 10.9}, {"name": "Lonely", "pct": 8.3},
+        {"name": "Naive", "pct": 7.9}, {"name": "Timid", "pct": 7.7}]}}}
+    befunde = mod.unmoegliche_bloecke(zu_hoch)
+    assert len(befunde) == 1 and "111.5" in befunde[0], befunde
+
+    # musharna/doubles/move: dieselbe Zeile zweimal
+    doppelt = {"musharna": {"doubles": {"move": [
+        {"name": "Yawn", "pct": 60.0}, {"name": "Yawn", "pct": 60.0}]}}}
+    befunde = mod.unmoegliche_bloecke(doppelt)
+    assert len(befunde) == 1 and "doppelte Zeile" in befunde[0], befunde
+
+
+def test_sie_schlaegt_nicht_bei_attacken_an(monkeypatch):
+    """Vier Attacken summieren sich naturgemaess weit ueber 100 %.
+    Eine Pruefung, die dort anschlaegt, ist keine Pruefung, sondern Rauschen."""
+    import importlib.util
+
+    pfad = os.path.join(ROOT, "scripts", "scrape_champions_usage.py")
+    spec = importlib.util.spec_from_file_location("champ_usage3", pfad)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    vier_attacken = {"incineroar": {"doubles": {"move": [
+        {"name": "Fake Out", "pct": 95.0}, {"name": "Knock Off", "pct": 88.0},
+        {"name": "Parting Shot", "pct": 70.0}, {"name": "Flare Blitz", "pct": 65.0}]}}}
+    assert mod.unmoegliche_bloecke(vier_attacken) == []
+
+
+def test_ein_genullter_ausreisser_zaehlt_nicht_mit(monkeypatch):
+    """pruefe_plausibel setzt den Ausreisser auf None und markiert ihn.
+    Die Summenpruefung darf ihn dann nicht trotzdem mitrechnen."""
+    import importlib.util
+
+    pfad = os.path.join(ROOT, "scripts", "scrape_champions_usage.py")
+    spec = importlib.util.spec_from_file_location("champ_usage4", pfad)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    markiert = {"passimian": {"doubles": {"held_item": [
+        {"name": "Choice Scarf", "pct": 23.3}, {"name": "Sitrus Berry", "pct": 20.0},
+        {"name": "Leftovers", "pct": 18.0}, {"name": "Focus Sash", "pct": 15.0},
+        {"name": "Life Orb", "pct": 12.0},
+        {"name": "Assault Vest", "pct": None, "unplausibel": "53.9 %"}]}}}
+    assert mod.unmoegliche_bloecke(markiert) == []
+
+
+def test_die_summengrenze_bleibt_streng():
+    """Eine Grenze, die 111,5 % durchlaesst, haette den Fund nicht gefunden.
+
+    Mutationsprobe: mit SUMMEN_GRENZE = 200 blieben alle Verhaltenstests
+    oben gruen, weil kein Beispiel so hoch liegt. Diese Zusicherung
+    schliesst die Luecke.
+    """
+    m = re.search(r"SUMMEN_GRENZE\s*=\s*([\d.]+)", CODE)
+    assert m, "SUMMEN_GRENZE ist nicht mehr auffindbar"
+    grenze = float(m.group(1))
+    assert 100.0 < grenze <= 110.0, (
+        f"die Grenze steht auf {grenze} % — unter 100 schlaegt sie bei "
+        f"jeder normalen Liste an, ueber 110 laesst sie den Fall vom "
+        f"25.08.2026 (111,5 %) durch"
+    )
+    assert 'SUMMEN_KATEGORIEN = ("held_item", "nature", "ability")' in CODE, (
+        "die Liste der Kategorien mit Summenzwang hat sich geaendert"
+    )
+    assert CODE.count("SUMMEN_GRENZE =") == 1, (
+        "die Grenze steht zweimal im Code — dann kann eine der beiden "
+        "Stellen still auseinanderlaufen"
+    )

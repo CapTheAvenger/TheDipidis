@@ -875,6 +875,92 @@ def check_champions_usage(findings):
                          f"guessed. Fixing it needs the source, not this repo."))
 
 
+def check_champions_namen(findings):
+    """Loest jeder Nutzungs-Slug eine Spezies auf?
+
+    js/champions-names.js uebersetzt den Nutzungs-Slug ("hisuian-zoroark")
+    in den Showdown-Namen ("Zoroark-Hisui"). Das ist die Bruecke, ueber die
+    ein selbstgebautes Team in die Speed-Leiter kommt: findet sie nichts,
+    faellt das Pokémon dort STILL heraus (app-side-quest-play.js prueft
+    `!spec || !spec.baseStats` und ueberspringt).
+
+    Diese Pruefung stand bis zum 26.08.2026 in tests/unit/test-champions-
+    names.js und damit im Deploy-Gate — als "alle 353 Slugs loesen auf".
+    Am 26.08. um 14:12 UTC schrieb der Scraper 238 Eintraege (die Quelle hat
+    rund 115 Zierformen zurueckgezogen), und die Auslieferung stand still,
+    obwohl an der Aufloesung nichts kaputt war. Genau der Fehler, den PR
+    #516 einen Tag vorher fuer die Plausibilitaetspruefungen behoben hat.
+
+    Die Pruefung ist trotzdem gut: derselbe Lauf brachte 'fan-rotom' neu
+    mit, und das loeste tatsaechlich nicht auf. Sie gehoert nur hierher —
+    melden, nicht sperren.
+
+    Ausgefuehrt wird die JS-Regel selbst, nicht eine Kopie davon in Python:
+    zwei Implementierungen derselben Namensregeln waeren zwei Wahrheiten.
+    Fehlt node, meldet die Pruefung das ehrlich, statt stumm zu bestehen.
+    """
+    import subprocess  # noqa: PLC0415
+
+    usage = os.path.join(DATA, "champions_usage.json")
+    dex = os.path.join(DATA, "pokemon_battle_data.json")
+    modul = os.path.join(ROOT, "js", "champions-names.js")
+    for pfad in (usage, dex, modul):
+        if not os.path.exists(pfad):
+            findings.append(("WARN",
+                             f"champions name check skipped: {os.path.relpath(pfad, ROOT)} fehlt"))
+            return
+
+    skript = r"""
+const fs = require('fs'), vm = require('vm');
+const sb = { window: {} };
+vm.createContext(sb);
+vm.runInContext(fs.readFileSync(process.argv[1], 'utf8'), sb);
+const CN = sb.window.ChampionsNames;
+const DEX = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+const slugs = Object.keys(JSON.parse(fs.readFileSync(process.argv[3], 'utf8')).pokemon || {});
+const offen = slugs.filter(s => {
+    const n = CN.zuShowdown(s, DEX);
+    return !n || !DEX[n] || !DEX[n].baseStats;
+});
+console.log(JSON.stringify({ gesamt: slugs.length, offen: offen }));
+"""
+    try:
+        out = subprocess.run(["node", "-e", skript, "--", modul, dex, usage],
+                             cwd=ROOT, capture_output=True, text=True, timeout=60)
+    except FileNotFoundError:
+        findings.append(("WARN",
+                         "champions name check skipped: node ist hier nicht verfuegbar"))
+        return
+    except Exception as e:                                  # noqa: BLE001
+        findings.append(("WARN", f"champions name check failed to run: {e}"))
+        return
+
+    if out.returncode != 0:
+        findings.append(("WARN",
+                         "champions name check failed: "
+                         + (out.stderr or "").strip().splitlines()[-1:][0][:200]))
+        return
+
+    try:
+        res = json.loads((out.stdout or "").strip().splitlines()[-1])
+    except Exception as e:                                  # noqa: BLE001
+        findings.append(("WARN", f"champions name check gave no readable answer: {e}"))
+        return
+
+    offen = res.get("offen") or []
+    gesamt = res.get("gesamt") or 0
+    if not gesamt:
+        findings.append(("WARN", "champions_usage.json fuehrt kein einziges Pokémon"))
+        return
+    if offen:
+        findings.append(("WARN",
+                         f"{len(offen)} of {gesamt} champions usage slug(s) resolve to no "
+                         f"species with base stats — a team built from them loses those "
+                         f"Pokémon from the speed ladder without saying so: "
+                         + ", ".join(offen[:12])
+                         + (" …" if len(offen) > 12 else "")))
+
+
 def check_champions_freshness(findings):
     """Der stille Stillstand der In-Game-Nutzung.
 
@@ -1318,6 +1404,7 @@ def main():
     check_kartentext_bericht(findings)
     check_meta_preiszuordnung(findings)
     check_champions_usage(findings)
+    check_champions_namen(findings)
     check_champions_freshness(findings)
     champions_teams = check_champions_teams(findings, baseline.get("champions_teams"))
     check_uebersicht_gegen_chunks(findings)

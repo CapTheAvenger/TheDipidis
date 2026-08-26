@@ -92,6 +92,20 @@
         var woertlich = [];
         for (i = 0; i < w.length; i++) woertlich.push(cap(w[i]));
         out.push(woertlich.join('-'));
+
+        // Umgedrehte Formschreibweise: fan-rotom → Rotom-Fan.
+        // Die Quelle fuehrt seit dem 26.08.2026 BEIDE Richtungen — im selben
+        // Stand stehen 'rotom-fan' und 'fan-rotom'. Der Kandidat steht
+        // bewusst hier unten: er ist die unspezifischste Vermutung und darf
+        // keine der Regeln darueber ueberstimmen. Er kann auch nichts
+        // kaputtmachen, weil zuShowdown jeden Kandidaten gegen die
+        // Spezies-Tabelle haelt und null zurueckgibt, wenn keiner trifft.
+        if (w.length >= 2) {
+            var umgedreht = [cap(w[w.length - 1])];
+            for (i = 0; i < w.length - 1; i++) umgedreht.push(cap(w[i]));
+            out.push(umgedreht.join('-'));
+        }
+
         out.push(cap(w[0]));
         return out;
     }

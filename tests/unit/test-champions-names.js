@@ -6,7 +6,7 @@
  * "Alolan Ninetales"). Alles, was ein gespeichertes Team weiterverarbeitet,
  * erwartet Showdown-Namen ("Basculegion", "Ninetales-Alola"). Gemessen:
  *
- *     von 353 Anzeigenamen finden 152 keinen Eintrag in
+ *     von 353 Anzeigenamen (Stand 25.08.2026) fanden 152 keinen Eintrag in
  *     data/pokemon_battle_data.json
  *
  * Heute schadet das nicht — den Builder konsumiert nichts. In dem Moment, in
@@ -15,11 +15,25 @@
  * Pokémon ohne Spezies-Treffer mit `continue`. Ein Sechser-Team zeigt dann
  * vier Zeilen, und nichts wird rot.
  *
- * Dieser Test ist die Bedingung, unter der der Builder überhaupt speichern
- * darf: JEDER der 353 Slugs muss auf einen echten Eintrag zeigen — und zwar
- * auf den RICHTIGEN. Beides wird geprüft, denn "löst auf" und "löst korrekt
- * auf" sind zwei verschiedene Zusagen: die Regeln allein hätten
- * basculegion-female auf die Werte des Männchens geschickt (Ang 112 statt 92).
+ * Die Bedingung, unter der der Builder speichern darf, lautet: JEDER Slug
+ * des ausgelieferten Standes muss auf einen echten Eintrag zeigen — und zwar
+ * auf den RICHTIGEN. "Löst auf" und "löst korrekt auf" sind zwei verschiedene
+ * Zusagen: die Regeln allein hätten basculegion-female auf die Werte des
+ * Männchens geschickt (Ang 112 statt 92).
+ *
+ * Geprüft wird das in ZWEI Häusern, seit dem 26.08.2026 bewusst getrennt:
+ *
+ *   • hier, im Deploy-Gate: die REGEL, an festen Beispielen, die unabhängig
+ *     vom Tagesstand gelten müssen — Mega, Regionalform, Ausnahmeliste, die
+ *     Umkehrschreibweise, und dass Unbekanntes null liefert statt zu raten.
+ *   • im Data Guardian (scripts/data_guardian.py check_champions_namen):
+ *     die DATEN — löst jeder Slug der heutigen Datei auf? Der Guardian führt
+ *     dafür dieses Modul selbst aus, damit es nur eine Wahrheit gibt.
+ *
+ * Warum getrennt: die Datenzusicherung stand bis zum 26.08. hier und hing an
+ * "353". An diesem Tag lieferte die Quelle 238 (rund 115 Zierformen
+ * zurückgezogen), der Test fiel, und die Auslieferung stand — obwohl an der
+ * Auflösung nichts kaputt war. Dieselbe Lehre wie in PR #516, einen Tag alt.
  */
 
 const { describe, it } = require('node:test');
@@ -46,25 +60,60 @@ describe('Champions-Namen: jeder Slug findet seine Spezies', () => {
         assert.ok(CN && typeof CN.zuShowdown === 'function');
     });
 
-    it('alle 353 Nutzungs-Slugs lösen auf — kein einziger fällt durch', () => {
-        const fehlend = SLUGS.filter(s => !CN.zuShowdown(s, DEX));
-        assert.deepEqual(fehlend, [],
-            `diese Slugs finden keine Spezies und würden beim Speichern still `
-            + `aus der Speed-Ladder fallen: ${fehlend.slice(0, 12).join(', ')}`);
+    // ── Was hier NICHT mehr steht, und warum ────────────────────────────
+    // Bis zum 26.08.2026 stand hier "alle 353 Nutzungs-Slugs lösen auf"
+    // samt `SLUGS.length > 300`. Beides hing an den Daten DIESES Tages.
+    // Am 26.08. um 14:12 UTC schrieb der Scraper einen frischen Stand mit
+    // 238 Einträgen (die Quelle hat ~115 Zierformen zurückgezogen) — und
+    // die Auslieferung stand still, obwohl an der Auflösung nichts kaputt
+    // war. Genau der Fehler, den PR #516 einen Tag vorher für die
+    // Plausibilitätsprüfungen behoben hatte; ich habe ihn in #517 gleich
+    // wieder eingebaut.
+    //
+    // Die Prüfung ist gut und hat auch etwas gefunden ('fan-rotom' war neu
+    // und löste nicht auf). Sie gehört nur nicht ins Gate: sie prüft
+    // DATEN, nicht CODE. Sie läuft jetzt im Data Guardian
+    // (scripts/data_guardian.py check_champions_namen) — der meldet,
+    // statt zu sperren. Hier bleibt, was den Code prüft: feste Beispiele,
+    // die unabhängig vom Tagesstand gelten müssen.
+
+    it('die Regel greift auf festen Beispielen — unabhängig vom Tagesstand', () => {
+        const FAELLE = {
+            'garchomp':                 'Garchomp',
+            'hisuian-zoroark':          'Zoroark-Hisui',
+            'alolan-ninetales':         'Ninetales-Alola',
+            'mega-charizard-x':         'Charizard-Mega-X',
+            'mega-garchomp':            'Garchomp-Mega',
+            'paldean-tauros-aqua-breed':'Tauros-Paldea-Aqua',
+            'rotom-wash':               'Rotom-Wash',
+            // Die Quelle führt seit dem 26.08.2026 beide Richtungen im
+            // selben Stand: 'rotom-fan' UND 'fan-rotom'.
+            'fan-rotom':                'Rotom-Fan',
+        };
+        Object.keys(FAELLE).forEach(slug => {
+            assert.equal(CN.zuShowdown(slug, DEX), FAELLE[slug], `${slug} löst falsch auf`);
+        });
     });
 
-    it('die Auflösung zeigt auf einen Eintrag MIT Basiswerten', () => {
+    it('jeder Treffer zeigt auf einen Eintrag MIT Basiswerten', () => {
         // Ein Treffer ohne baseStats hilft nicht: app-side-quest-play.js prüft
-        // `!spec || !spec.baseStats` und überspringt beides gleich.
-        const ohne = SLUGS.filter(s => {
-            const e = DEX[CN.zuShowdown(s, DEX)];
-            return !e || !e.baseStats;
-        });
+        // `!spec || !spec.baseStats` und überspringt beides gleich. Diese
+        // Zusicherung darf bleiben — sie prüft die Spezies-Tabelle, die im
+        // Repo liegt, nicht den täglich wechselnden Scrape.
+        const ohne = Object.keys(DEX).filter(k => !DEX[k] || !DEX[k].baseStats);
         assert.deepEqual(ohne, []);
     });
 
-    it('es sind wirklich 353 — der Test darf nicht auf eine leere Liste laufen', () => {
-        assert.ok(SLUGS.length > 300, `nur ${SLUGS.length} Slugs geladen`);
+    it('was nicht auflöst, gibt null zurück statt zu raten', () => {
+        // Der Vertrag der Funktion (Kommentar in js/champions-names.js):
+        // der Aufrufer darf NICHT raten, also muss null kommen.
+        assert.equal(CN.zuShowdown('gibtesnicht-ganzsicher', DEX), null);
+        assert.equal(CN.zuShowdown('', DEX), null);
+    });
+
+    it('die Datei ist überhaupt lesbar — sonst prüft alles oben ins Leere', () => {
+        assert.ok(SLUGS.length > 0, 'champions_usage.json enthält keine Pokémon');
+        assert.ok(Object.keys(DEX).length > 500, 'die Spezies-Tabelle ist zu klein');
     });
 });
 

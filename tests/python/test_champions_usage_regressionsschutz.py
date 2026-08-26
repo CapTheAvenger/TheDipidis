@@ -239,3 +239,128 @@ def test_die_summengrenze_bleibt_streng():
         "die Grenze steht zweimal im Code — dann kann eine der beiden "
         "Stellen still auseinanderlaufen"
     )
+
+
+# ── Korrektur vom 26.08.2026: der Schutz war ein Daueralarm ──────────
+#
+# Der Lauf wurde jeden Morgen rot, und die Datei stand bei 40 Tagen —
+# obwohl 233 der 238 Pokemon voellig in Ordnung waren. Ursache war nicht
+# die Quelle allein, sondern eine zu breite Regel: `unmoegliche_bloecke`
+# lehnte den ganzen Stand ab, sobald irgendwo eine Anteilsliste ueber der
+# Grenze lag — und ueberstimmte damit `pruefe_plausibel`, die genau diesen
+# Fall seit dem 20.08. behandelt und woertlich protokolliert:
+# "kein einzelner Ausreisser, Liste unveraendert markiert".
+#
+# An der Quelle gemessen am 26.08.2026, unveraendert gegenueber dem
+# Vortag: 25 Wesenslisten ueber 105 %, 2 Spreads ausserhalb 66/32. Das ist
+# kein Ausrutscher, das ist ihr Zustand. Ein Alarm, der daraufhin taeglich
+# anschlaegt, ist keiner mehr.
+
+
+def _mod():
+    import importlib.util
+    pfad = os.path.join(ROOT, "scripts", "scrape_champions_usage.py")
+    spec = importlib.util.spec_from_file_location("champ_usage_korr", pfad)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_ein_markierter_block_wird_nicht_zweimal_bewertet():
+    """Der Kern der Korrektur.
+
+    Traegt ein Block einen Vermerk, hat die Selbstkontrolle den Fall
+    gesehen und behandelt. Ihn hier erneut abzulehnen heisst, ihre
+    Entscheidung zu ueberstimmen.
+    """
+    mod = _mod()
+    unmarkiert = {"absol": {"doubles": {"nature": [
+        {"name": "Adamant", "pct": 53.5}, {"name": "Jolly", "pct": 23.2},
+        {"name": "Brave", "pct": 10.9}, {"name": "Lonely", "pct": 8.3},
+        {"name": "Naive", "pct": 7.9}, {"name": "Timid", "pct": 7.7}]}}}
+    assert len(mod.unmoegliche_bloecke(unmarkiert)) == 1, (
+        "eine unmarkierte unmoegliche Liste muss weiterhin auffallen — sonst "
+        "kann sich die Quelle unbemerkt veraendern"
+    )
+
+    markiert = {"absol": {"doubles": dict(
+        unmarkiert["absol"]["doubles"],
+        _warnungen=["nature: Anteile summierten sich auf 111.5 %"])}}
+    assert mod.unmoegliche_bloecke(markiert) == [], (
+        "ein bereits markierter Block laesst den ganzen Lauf scheitern — "
+        "genau der Daueralarm vom 25./26.08."
+    )
+
+
+def test_die_selbstkontrolle_entfernt_unmoegliche_spreads():
+    """173 Angriffspunkte lassen sich nicht markieren und trotzdem zeigen —
+    der Spread traegt die Endwerte und damit die Speed-Tiers."""
+    mod = _mod()
+    block = {"stat_points": [
+        {"evs": "2 HP / 173 Atk / 2 Def", "points": {"hp": 2, "atk": 173, "def": 2}},
+        {"evs": "32 HP / 32 Atk / 2 Def", "points": {"hp": 32, "atk": 32, "def": 2}},
+        {"evs": "71 HP / 2 Atk / 32 SpD", "points": {"hp": 71, "atk": 2, "spd": 32}},
+    ]}
+    mod.pruefe_plausibel(block)
+    assert len(block["stat_points"]) == 1, block["stat_points"]
+    assert block["stat_points"][0]["evs"] == "32 HP / 32 Atk / 2 Def"
+    assert any("Spread" in w for w in block["_warnungen"]), (
+        "die Entfernung wird nicht vermerkt — dann ist sie eine stille Reparatur"
+    )
+
+
+def test_doppelte_zeilen_auch_in_attackenlisten():
+    """Die Regel lief bis zum 26.08. nur ueber die drei Listen mit
+    Summenzwang. Die beiden echten Faelle standen in Attackenlisten."""
+    mod = _mod()
+    block = {"move": [{"name": "Ally Switch", "pct": 60.0},
+                      {"name": "Ally Switch", "pct": 55.0},
+                      {"name": "Protect", "pct": 50.0}]}
+    mod.pruefe_plausibel(block)
+    assert len(block["move"]) == 2
+    assert any("doppelte" in w for w in block["_warnungen"])
+
+
+def test_der_echte_stand_vom_25_08_kommt_jetzt_durch():
+    """Der Beweis, dass die Korrektur traegt — an den echten Daten.
+
+    Ohne Selbstkontrolle lehnte der Schutz den Stand ab. Mit ihr bleibt
+    nichts uebrig, was den Lauf rechtfertigt abzubrechen.
+    """
+    import copy
+    mod = _mod()
+    # Ein Stand mit genau den Fehlerarten des 25.08.
+    roh = {
+        "absol": {"doubles": {"nature": [
+            {"name": "Adamant", "pct": 53.5}, {"name": "Jolly", "pct": 23.2},
+            {"name": "Brave", "pct": 10.9}, {"name": "Lonely", "pct": 8.3},
+            {"name": "Naive", "pct": 7.9}, {"name": "Timid", "pct": 7.7}]}},
+        "araquanid": {"doubles": {"stat_points": [
+            {"evs": "2 HP / 173 Atk / 2 Def", "points": {"hp": 2, "atk": 173, "def": 2}},
+            {"evs": "32 HP / 32 Def / 2 SpD", "points": {"hp": 32, "def": 32, "spd": 2}}]}},
+        "musharna": {"doubles": {"move": [
+            {"name": "Yawn", "pct": 60.0}, {"name": "Yawn", "pct": 55.0}]}},
+        "pelipper": {"doubles": {"nature": [
+            {"name": "Modest", "pct": 53.9}, {"name": "Timid", "pct": 30.1}]}},
+    }
+    ohne = copy.deepcopy(roh)
+    assert len(mod.unmoegliche_bloecke(ohne)) >= 3, (
+        "die Testdaten tragen die Fehler nicht mehr"
+    )
+
+    mit = copy.deepcopy(roh)
+    for rec in mit.values():
+        for fmt in ("doubles", "singles"):
+            b = rec.get(fmt)
+            if isinstance(b, dict):
+                mod.pruefe_plausibel(b)
+    assert mod.unmoegliche_bloecke(mit) == [], (
+        "nach der Entschaerfung bleibt ein Befund stehen — der Lauf waere "
+        "wieder rot"
+    )
+    # Und das Ergebnis ist ehrlich: entfernt, vermerkt, nichts geraten.
+    assert len(mit["araquanid"]["doubles"]["stat_points"]) == 1
+    assert len(mit["musharna"]["doubles"]["move"]) == 1
+    assert mit["pelipper"]["doubles"].get("_warnungen") is None, (
+        "ein sauberer Block bekommt einen Vermerk — dann sagt der Vermerk nichts mehr"
+    )

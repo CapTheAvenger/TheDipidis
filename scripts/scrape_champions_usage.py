@@ -223,6 +223,18 @@ SUMMEN_GRENZE = 105.0
 # Attacken tun das nicht (ein Pokemon hat vier), Teamkameraden auch nicht.
 SUMMEN_KATEGORIEN = ("held_item", "nature", "ability")
 
+# Die Doppelzeilen-Regel gilt fuer ALLE Listen — auch fuer Attacken und
+# Mitstreiter, deren Summe naturgemaess ueber 100 % liegt. Am 25.08.2026
+# fuehrten florges-red-flower und musharna dieselbe Attacke zweimal.
+ALLE_KATEGORIEN = ("held_item", "nature", "ability", "move", "teammate")
+
+# Statuswertpunkte: 66 im Ganzen, 32 je Wert. Dieselben Zahlen wie im
+# Rechner (js/app-side-quest-matchups.js: SP_BUDGET, SP_MAX) — sie kommen
+# aus dem Spiel, nicht aus einer Schaetzung. Am 25.08.2026 trug der
+# frische Stand "2 HP / 173 Atk / 2 Def" fuer Araquanid; 173 gibt es nicht.
+SP_BUDGET = 66
+SP_MAX = 32
+
 
 def pruefe_plausibel(block):
     """Meldet und entschaerft unmoegliche Anteilslisten — repariert nichts.
@@ -245,14 +257,16 @@ def pruefe_plausibel(block):
     """
     meldungen = []
 
-    for kat in SUMMEN_KATEGORIEN:
+    # Dieselbe Zeile zweimal — in JEDER Liste, nicht nur in den dreien mit
+    # Summenzwang. Bis zum 26.08.2026 lief diese Pruefung nur ueber
+    # SUMMEN_KATEGORIEN; Attacken- und Mitstreiterlisten blieben ungeprueft,
+    # und genau dort standen am 25.08. die beiden Doppelzeilen
+    # (florges-red-flower/move, musharna/move).
+    for kat in ALLE_KATEGORIEN:
         liste = block.get(kat) or []
         if not liste:
             continue
-
-        # 1. Dieselbe Zeile zweimal.
-        gesehen, doppelt = set(), []
-        entdoppelt = []
+        gesehen, doppelt, entdoppelt = set(), [], []
         for e in liste:
             n = (e.get("name") or "").strip()
             if n and n in gesehen:
@@ -262,9 +276,39 @@ def pruefe_plausibel(block):
             entdoppelt.append(e)
         if doppelt:
             meldungen.append(f"{kat}: doppelte Zeile(n) {', '.join(sorted(set(doppelt)))}")
-            block[kat] = liste = entdoppelt
+            block[kat] = entdoppelt
+            block.setdefault("_warnungen", []).append(
+                f"{kat}: doppelte Zeile(n) entfernt")
 
-        # 2. Summe ueber der Grenze -> welcher Wert kann es nicht sein?
+    # Ein Statuswert-Spread, den es im Spiel nicht gibt. Anders als bei den
+    # Anteilen laesst sich hier nichts markieren und trotzdem zeigen: der
+    # Spread traegt die Endwerte und damit die Speed-Tiers. 173 Angriffs-
+    # punkte (araquanid, 25.08.2026) sind keine Zahl, die man mit einem
+    # Vermerk versehen kann — die Zeile fliegt raus, die uebrigen bleiben.
+    # Geraten wird auch hier nichts.
+    spreads = block.get("stat_points") or []
+    if spreads:
+        gut, schlecht = [], []
+        for e in spreads:
+            werte = [w for w in (e.get("points") or {}).values()
+                     if isinstance(w, (int, float))]
+            if werte and (sum(werte) > SP_BUDGET or any(w > SP_MAX for w in werte)):
+                schlecht.append(e.get("evs") or "?")
+            else:
+                gut.append(e)
+        if schlecht:
+            meldungen.append(f"stat_points: {len(schlecht)} Spread(s) ausserhalb "
+                             f"{SP_BUDGET}/{SP_MAX} entfernt ({', '.join(schlecht[:3])})")
+            block["stat_points"] = gut
+            block.setdefault("_warnungen", []).append(
+                f"stat_points: {len(schlecht)} unmoegliche(r) Spread(s) entfernt")
+
+    for kat in SUMMEN_KATEGORIEN:
+        liste = block.get(kat) or []
+        if not liste:
+            continue
+
+        # Summe ueber der Grenze -> welcher Wert kann es nicht sein?
         summe = sum(e.get("pct") or 0 for e in liste)
         if summe > SUMMEN_GRENZE:
             # Die Quelle liefert diese Listen ABSTEIGEND sortiert. Ein Wert,
@@ -316,22 +360,45 @@ def pruefe_plausibel(block):
 # ein Pokemon traegt EIN Item, hat EIN Wesen, hat EINE Faehigkeit. Bei
 # Attacken und Mitstreitern ist eine Summe ueber 100 % normal (vier
 # Attacken, fuenf Mitstreiter je Team).
-# SUMMEN_KATEGORIEN und SUMMEN_GRENZE stehen schon weiter oben — dieselbe
-# Regel, dieselbe Grenze. Hier kommt nur die Liste ALLER Kategorien dazu,
-# denn die Doppelzeilen-Regel gilt auch fuer Attacken und Mitstreiter.
-ALLE_KATEGORIEN = ("held_item", "nature", "ability", "move", "teammate")
-
-# Statuswertpunkte: 66 im Ganzen, 32 je Wert. Dieselben Zahlen wie im
-# Rechner (js/app-side-quest-matchups.js: SP_BUDGET, SP_MAX) — sie kommen
-# aus dem Spiel, nicht aus einer Schaetzung. Am 25.08.2026 trug der
-# frische Stand "2 HP / 173 Atk / 2 Def" fuer Araquanid; 173 gibt es
-# nicht.
-SP_BUDGET = 66
-SP_MAX = 32
-
-
 def unmoegliche_bloecke(pokemon):
-    """Welche Bloecke verletzen die Regeln, die die Daten selbst tragen?
+    """Was ist unmoeglich UND von der Selbstkontrolle nicht bemerkt worden?
+
+    KORREKTUR VOM 26.08.2026 — die wichtigere Haelfte dieser Erklaerung.
+
+    Diese Pruefung stand seit dem 25.08. mit einer zu breiten Regel da: sie
+    lehnte den ganzen Stand ab, sobald IRGENDWO eine Anteilsliste ueber der
+    Grenze lag. Damit hat sie eine Entscheidung ueberstimmt, die das Projekt
+    schon bewusst getroffen hatte — `pruefe_plausibel` behandelt genau
+    diesen Fall seit dem 20.08. und protokolliert ihn woertlich als
+    "kein einzelner Ausreisser, Liste unveraendert markiert".
+
+    Die Folge war ein Job, der jeden Morgen rot wurde. Gemessen an der
+    Quelle am 26.08.2026, 13:30 — unveraendert gegenueber dem Vortag:
+
+        238 erreichbare Pokemon, 120 mit 404 (Zierformen)
+         25 Wesenslisten ueber 105 % (abomasnow 117,5; alolan-raichu 122,2)
+          2 Spreads ausserhalb 66/32 (araquanid 173 Ang, meowstic 105 gesamt)
+
+    Das ist kein Ausrutscher, das ist der Zustand der Quelle. Ein Alarm, der
+    daraufhin taeglich anschlaegt, ist keiner mehr — dieselbe Lehre wie beim
+    Deploy-Gate, nur eine Ebene weiter. Und der Preis war hoch: die Datei
+    stand dadurch bei 40 Tagen, waehrend 233 der 238 Pokemon voellig in
+    Ordnung waren.
+
+    Die Regel jetzt: `pruefe_plausibel` entschaerft und MARKIERT (doppelte
+    Zeilen raus, unmoegliche Spreads raus, Ausreisser auf unbekannt). Diese
+    Pruefung hier sieht nur noch, was danach IMMER NOCH unmoeglich ist UND
+    keinen Vermerk traegt — also einen Fall, den die Selbstkontrolle nicht
+    kennt. Dann hat sich die Quelle in einer Form veraendert, die niemand
+    geprueft hat, und nur dann ist Abbrechen richtig.
+
+    Was markiert ist, meldet der data_guardian taeglich weiter
+    (check_champions_usage, WARN) — sichtbar, ohne die Auslieferung oder
+    den Lauf anzuhalten. Moeglich ist das erst, seit PR #516 die
+    Datenpruefungen aus dem Deploy-Gate genommen hat: am 25.08. haette ein
+    durchgelassener Stand noch jeden Deploy angehalten.
+
+    Die urspruengliche Erklaerung, weiterhin gueltig:
 
     Zwei Regeln, beide nicht verhandelbar:
 
@@ -357,6 +424,12 @@ def unmoegliche_bloecke(pokemon):
         for fmt in ("doubles", "singles"):
             block = eintrag.get(fmt)
             if not isinstance(block, dict):
+                continue
+            # Traegt der Block einen Vermerk, hat die Selbstkontrolle den
+            # Fall gesehen und behandelt. Ihn hier ein zweites Mal zu
+            # bewerten hiesse, ihre Entscheidung zu ueberstimmen — und
+            # genau das war der Fehler vom 25.08.
+            if block.get("_warnungen"):
                 continue
             for kat in SUMMEN_KATEGORIEN:
                 summe = sum(z.get("pct") or 0 for z in (block.get(kat) or []))

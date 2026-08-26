@@ -184,6 +184,18 @@ describe('data_guardian fängt ab, was der Scraper nicht kennt', () => {
         assert.match(M, /const SP_BUDGET = 66;/);
         assert.match(lies('scripts/scrape_champions_usage.py'), /SP_BUDGET = 66/);
         assert.match(lies('scripts/scrape_champions_usage.py'), /SP_MAX = 32/);
+        // Seit dem 26.08.2026 gibt es eine VIERTE Stelle: js/champions-set.js
+        // traegt die Zahlen fuer den Team-Builder und beide Exporte. Sie muss
+        // mitziehen, sonst baut der Builder Verteilungen, die der Guardian
+        // anschliessend als unmoeglich meldet.
+        const CS = lies('js/champions-set.js');
+        assert.match(CS, /var SP_BUDGET = 66;/);
+        assert.match(CS, /var SP_MAX = 32;/);
+        // Und der Faktor zur Hauptreihe steht genau einmal.
+        assert.match(CS, /var EV_SCALE = 8;/);
+        assert.match(CS, /var EV_MAX = 252;/);
+        assert.equal((CS.match(/EV_SCALE = /g) || []).length, 1,
+            'EV_SCALE ist mehrfach definiert — zwei Faktoren sind zwei Wahrheiten');
     });
 });
 

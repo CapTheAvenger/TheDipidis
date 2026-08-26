@@ -144,6 +144,15 @@
             exportCopied: 'Kopiert! ✓',
             exportToastOk: 'Team kopiert — im Import/Export- bzw. „Submit teamlist"-Feld einfügen.',
             exportToastManual: 'Automatisches Kopieren ging nicht — Text im Fenster markieren und manuell kopieren.',
+            aktivAn: '⚡ Das spiele ich',
+            aktivIst: '⚡ Aktiv',
+            aktivAria: 'Als aktives Team setzen:',
+            aktivAus: 'Nicht mehr aktiv',
+            myTeamsEmpty: 'Noch keins. Bau dir eins im Reiter „Team-Builder“, übernimm ein Team von unten mit „Als eigenes übernehmen“, oder füg oben eine Paste ein.',
+            uebernehmen: '⧉ Als eigenes übernehmen',
+            uebernehmenAria: 'Dieses Team als eigenes kopieren:',
+            uebernommen: 'Kopiert — steht jetzt unter „Meine Teams“.',
+            uebernommenFehler: 'Kopieren nicht möglich — der Browser lässt keinen lokalen Speicher zu (privates Fenster?).',
         },
         en: {
             playBtn: 'Play',
@@ -433,6 +442,26 @@
                         <span class="side-quest-export-icon" aria-hidden="true">⤴</span>
                         <span class="side-quest-export-label">${escapeHtml(labels.exportBtn)}</span>
                     </button>`;
+        // "Das spiele ich gerade": genau ein Team traegt die Marke. Der Knopf
+        // schaltet um — ein zweiter Klick nimmt sie wieder weg.
+        const istAktiv = getActiveCode() && getActiveCode() === code;
+        const aktivBtn = `
+                    <button class="side-quest-active-btn${istAktiv ? ' is-active' : ''}"
+                            type="button"
+                            data-active-code="${escapeHtml(code)}"
+                            aria-pressed="${istAktiv ? 'true' : 'false'}"
+                            aria-label="${escapeHtml(labels.aktivAria)} ${escapeHtml(team.team_name || code)}">
+                        ${escapeHtml(istAktiv ? labels.aktivIst : labels.aktivAn)}
+                    </button>`;
+        // Ein fremdes Team als eigenes uebernehmen — mit eigenem Code, damit
+        // Marken und "aktiv" die Kopie treffen und nicht das Original.
+        const copyOwnBtn = team._imported ? '' : `
+                    <button class="side-quest-copyown-btn"
+                            type="button"
+                            data-copyown-code="${escapeHtml(code)}"
+                            aria-label="${escapeHtml(labels.uebernehmenAria)} ${escapeHtml(team.team_name || code)}">
+                        ${escapeHtml(labels.uebernehmen)}
+                    </button>`;
         // Imported teams have no real replica code: show a "your team"
         // badge + a remove button instead of the copy-code control.
         const cornerBtn = team._imported
@@ -466,6 +495,8 @@
                 <div class="side-quest-team-grid">${monsHtml}</div>
                 <div class="side-quest-team-footer">
                     ${playBtn}
+                    ${aktivBtn}
+                    ${copyOwnBtn}
                     ${infoBtn}
                     ${claudeBtn}
                     ${exportBtn}
@@ -702,7 +733,32 @@
     // mon fields were parsed FROM a Showdown paste (pokepaste), so this
     // round-trips to valid text. Champions is Lv.50 and has no Tera, so those
     // lines are conditional.
-    function buildShowdownExport(team) {
+    // Zwei Ziele, zwei Zahlenwelten.
+    //
+    // Bis zum 26.08.2026 bekamen Showdown und Limitless denselben Text — mit
+    // dem Kommentar "Limitless akzeptiert woertlich einen Showdown-Export".
+    // Fuer Limitless stimmt das: deren Champions-Teamsheet erwartet die
+    // spielinterne Verteilung (0–32 je Wert, Summe 66). Fuer Showdown stimmt
+    // es nicht: dort sind es EVs, 0–252, und 32 Punkte sind 256 EV. Ein
+    // Champions-Bau, der in Showdown "32 Atk" liest, spielt dort mit einem
+    // Achtel des gemeinten Angriffs.
+    //
+    // Deshalb: `showdownEinheiten` schaltet die Umrechnung ein (mal 8,
+    // gedeckelt bei 252). Die Zahlen im Speicher bleiben roh — umgerechnet
+    // wird erst beim Schreiben.
+    // Eine eigene Funktion, damit die Zusicherung sie fahren kann, ohne den
+    // ganzen Export nachzubauen — und damit die Umrechnung genau EINE Stelle
+    // hat. Das Etikett bleibt in beiden Faellen "EVs:": so liest Showdown es,
+    // so liest Limitless es, und so findet die Import-Regex den Wert wieder.
+    function buildEvsLine(m, showdownEinheiten) {
+        const CS = window.ChampionsSet;
+        const roh = (m && m.evs) || '';
+        if (!roh) return '';
+        const wert = (showdownEinheiten && CS) ? CS.toShowdownText(CS.parseSpread(roh)) : roh;
+        return wert ? `EVs: ${wert}` : '';
+    }
+
+    function buildShowdownExport(team, showdownEinheiten) {
         return (team.pokemon || []).map(m => {
             const name = String(m.name || '').trim();
             const item = String(m.item || '').trim();
@@ -710,11 +766,23 @@
             if (m.ability) lines.push(`Ability: ${m.ability}`);
             lines.push('Level: 50');
             if (m.tera_type) lines.push(`Tera Type: ${m.tera_type}`);
-            if (m.evs) lines.push(`EVs: ${m.evs}`);
+            const evsZeile = buildEvsLine(m, showdownEinheiten);
+            if (evsZeile) lines.push(evsZeile);
             if (m.nature) lines.push(`${m.nature} Nature`);
             (m.moves || []).forEach(mv => { if (mv) lines.push(`- ${mv}`); });
             return lines.join('\n');
         }).join('\n\n') + '\n';
+    }
+
+    // Um wie viel sprengt der Bau Showdowns 510er-Budget? 0 = passt.
+    function showdownUeberschuss(team) {
+        const CS = window.ChampionsSet;
+        if (!CS) return 0;
+        let max = 0;
+        (team.pokemon || []).forEach(m => {
+            max = Math.max(max, CS.showdownUeberschuss(CS.parseSpread(m.evs || '')));
+        });
+        return max;
     }
 
     function closeExportModal() {
@@ -727,7 +795,11 @@
     function openExportModal(team) {
         closeExportModal();
         const l = LABELS[uiLang()];
-        const text = buildShowdownExport(team);
+        // Startanzeige: die rohe Champions-Verteilung. Das ist, was im Team
+        // steht — und was Limitless erwartet. Auf Knopfdruck wird daraus die
+        // Showdown-Fassung.
+        let text = buildShowdownExport(team, false);
+        const ueberschuss = showdownUeberschuss(team);
         const overlay = document.createElement('div');
         overlay.id = 'sideQuestExportModal';
         overlay.className = 'side-quest-modal-overlay';
@@ -741,6 +813,7 @@
                     <p class="side-quest-import-hint">${escapeHtml(l.exportHint)}</p>
                     <textarea class="side-quest-import-text" id="sqExportText" rows="12" readonly spellcheck="false"></textarea>
                     <p class="side-quest-export-choose">${escapeHtml(l.exportChoose)}</p>
+                    <p class="side-quest-export-warn" hidden></p>
                     <div class="side-quest-import-actions side-quest-export-actions">
                         <button class="side-quest-export-choice sq-target-copy" type="button" data-export-target="copy">${escapeHtml(l.exportCopy)}</button>
                         <button class="side-quest-export-choice sq-target-showdown" type="button" data-export-target="showdown">${escapeHtml(l.exportShowdown)}</button>
@@ -762,12 +835,25 @@
         };
         overlay.querySelectorAll('.side-quest-export-choice').forEach(b => {
             b.addEventListener('click', () => {
+                const target = b.getAttribute('data-export-target');
+                // Ziel bestimmt die Einheiten: Showdown rechnet mal 8,
+                // Limitless und "nur kopieren" nehmen die rohen Punkte.
+                text = buildShowdownExport(team, target === 'showdown');
+                ta.value = text;
+                if (target === 'showdown' && ueberschuss) {
+                    const hin = overlay.querySelector('.side-quest-export-warn');
+                    if (hin) {
+                        hin.hidden = false;
+                        hin.textContent = uiLang() === 'de'
+                            ? `Achtung: als Showdown-EVs sind das ${ueberschuss} Punkte über dem 510er-Budget — Showdown lehnt den Bau ab. Limitless nimmt ihn an.`
+                            : `Heads up: as Showdown EVs this is ${ueberschuss} over the 510 budget — Showdown rejects the build. Limitless accepts it.`;
+                    }
+                }
                 // Select first: visible feedback + manual-copy fallback on
                 // mobile where programmatic clipboard writes are flaky.
                 ta.focus(); ta.select();
                 try { ta.setSelectionRange(0, text.length); } catch (_) {}
                 const ok = copyTextSync(text);
-                const target = b.getAttribute('data-export-target');
                 // Open synchronously inside the click gesture so the pop-up
                 // blocker allows it.
                 if (target && TARGET_URLS[target]) window.open(TARGET_URLS[target], '_blank', 'noopener');
@@ -1035,8 +1121,67 @@
         try { const a = JSON.parse(localStorage.getItem(IMPORT_KEY) || '[]'); return Array.isArray(a) ? a : []; }
         catch (_) { return []; }
     }
+    // Gibt jetzt zurueck, ob es geklappt hat. Vorher verschwand JEDER Fehler
+    // im leeren catch: der Aufrufer schloss danach das Modal und zeichnete
+    // neu, das Team stand da — und war nach dem Neuladen weg, ohne dass
+    // irgendwo etwas gesagt haette. Safari im privaten Fenster wirft hier
+    // immer, ein volles Speicherkontingent ebenso.
     function saveImported(a) {
-        try { localStorage.setItem(IMPORT_KEY, JSON.stringify(a)); } catch (_) {}
+        try {
+            localStorage.setItem(IMPORT_KEY, JSON.stringify(a));
+            return true;
+        } catch (err) {
+            console.warn('[SideQuest] eigene Teams konnten nicht gespeichert werden', err);
+            return false;
+        }
+    }
+
+    // ── Das aktive Team ─────────────────────────────────────────────────────
+    // "Das spiele ich gerade" — genau eins. Bewusst ein eigener Schluessel
+    // mit dem replica_code darin und kein Feld im Team-Objekt: so kann es
+    // per Konstruktion nie zwei aktive Teams geben, und ein Team, das aus
+    // der Liste faellt, nimmt keine halbe Markierung mit.
+    const ACTIVE_KEY = 'dipidis.sideQuest.activeTeam.v1';
+    function getActiveCode() {
+        try { return localStorage.getItem(ACTIVE_KEY) || ''; } catch (_) { return ''; }
+    }
+    function setActiveTeam(code) {
+        try {
+            if (code) localStorage.setItem(ACTIVE_KEY, String(code));
+            else localStorage.removeItem(ACTIVE_KEY);
+            render();
+            return true;
+        } catch (err) {
+            console.warn('[SideQuest] aktives Team konnte nicht gemerkt werden', err);
+            return false;
+        }
+    }
+
+    // Programmatischer Eingang fuer den Team-Builder. Bis heute gab es nur
+    // einen einzigen Weg in diesen Speicher: Text in das Import-Modal
+    // einfuegen.
+    function addImportedTeam(mons, name) {
+        if (!Array.isArray(mons) || !mons.length) return { ok: false, grund: 'leer' };
+        const team = makeImportedTeam(mons.slice(0, 6), name);
+        const arr = loadImported();
+        arr.unshift(team);
+        if (!saveImported(arr)) return { ok: false, grund: 'speicher' };
+        render();
+        return { ok: true, team: team };
+    }
+
+    // Ein Replica-Team als eigenes uebernehmen: dieselbe Aufstellung, aber
+    // ein eigener Code, damit Marken und "aktiv" die Kopie und nicht das
+    // Original treffen.
+    function copyAsOwn(team) {
+        if (!team || !Array.isArray(team.pokemon)) return { ok: false, grund: 'leer' };
+        const mons = team.pokemon.map(m => ({
+            name: m.name || '', item: m.item || '', ability: m.ability || '',
+            nature: m.nature || '', tera_type: m.tera_type || '',
+            evs: m.evs || '', moves: (m.moves || []).slice(0, 4),
+        }));
+        const basis = team.team_name || team.trainer || '';
+        return addImportedTeam(mons, basis ? `${basis} (Kopie)` : '');
     }
     function removeImported(id) {
         saveImported(loadImported().filter(t => t.replica_code !== id));
@@ -1188,7 +1333,19 @@
             if (!mons) { overlay.querySelector('#sqImportError').hidden = false; return; }
             const arr = loadImported();
             arr.unshift(makeImportedTeam(mons, nm));
-            saveImported(arr);
+            if (!saveImported(arr)) {
+                // Vorher schloss sich hier das Modal, das Team stand da, und
+                // beim naechsten Laden war es weg — kommentarlos. Jetzt sagt
+                // es das, und der Text bleibt im Feld stehen.
+                const fehler = overlay.querySelector('#sqImportError');
+                if (fehler) {
+                    fehler.hidden = false;
+                    fehler.textContent = (typeof getLang === 'function' && getLang() === 'de')
+                        ? 'Speichern nicht möglich — der Browser lässt keinen lokalen Speicher zu (privates Fenster?). Der Text bleibt stehen, damit nichts verloren geht.'
+                        : 'Could not save — this browser blocks local storage (private window?). Your text stays here so nothing is lost.';
+                }
+                return;
+            }
             closeImportModal();
             render();
         });
@@ -1275,14 +1432,20 @@
                 <div class="side-quest-teams">${sortTeams(byReg.get(id)).map(renderTeam).join('')}</div>
             </section>`).join('');
 
-        const myTeamsHtml = importedShown.length ? `
+        // "Meine Teams" steht jetzt IMMER da, auch leer. Vorher verschwand der
+        // Block ohne eigene Teams komplett — und damit der einzige Hinweis
+        // darauf, dass es eigene Teams ueberhaupt gibt. Wer noch keins hat,
+        // sieht so, wohin sein erstes wandert.
+        const myTeamsHtml = `
             <section class="side-quest-reg-block side-quest-myteams">
                 <h3 class="side-quest-reg-head is-current">
                     ⭐ ${escapeHtml(labels.myTeams)}
                     <span class="side-quest-reg-count">${importedShown.length}</span>
                 </h3>
-                <div class="side-quest-teams">${sortTeams(importedShown).map(renderTeam).join('')}</div>
-            </section>` : '';
+                ${importedShown.length
+                    ? `<div class="side-quest-teams">${sortTeams(importedShown).map(renderTeam).join('')}</div>`
+                    : `<p class="side-quest-myteams-empty">${escapeHtml(labels.myTeamsEmpty)}</p>`}
+            </section>`;
 
         const teamsBody = filtered.length
             ? blocksHtml
@@ -1310,6 +1473,32 @@
 
         host.querySelectorAll('.side-quest-copy-btn').forEach(btn => {
             btn.addEventListener('click', () => copyCode(btn));
+        });
+
+        host.querySelectorAll('[data-active-code]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-active-code') || '';
+                const schonAktiv = getActiveCode() === code;
+                // Zweiter Klick nimmt die Marke wieder weg. setActiveTeam
+                // zeichnet selbst neu.
+                setActiveTeam(schonAktiv ? '' : code);
+                if (typeof window.showToast === 'function') {
+                    window.showToast(schonAktiv ? labels.aktivAus : labels.aktivIst, 'success');
+                }
+            });
+        });
+
+        host.querySelectorAll('[data-copyown-code]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-copyown-code') || '';
+                const team = allTeams.find(t => (t.replica_code || '') === code);
+                if (!team) return;
+                const res = copyAsOwn(team);
+                if (typeof window.showToast === 'function') {
+                    window.showToast(res && res.ok ? labels.uebernommen : labels.uebernommenFehler,
+                                     res && res.ok ? 'success' : 'warning');
+                }
+            });
         });
 
         host.querySelectorAll('.side-quest-info-btn').forEach(btn => {
@@ -1365,6 +1554,10 @@
         teamIdentityHash,
         getMark,
         setMark,
+        addImportedTeam,
+        copyAsOwn,
+        getActiveCode,
+        setActiveTeam,
     };
 
     // Auto-render when the side-quest tab becomes active. The site uses

@@ -27,6 +27,23 @@ function cutLine(fragment) {
   return hit.trim();
 }
 
+// buildEvsLine lebt in der IIFE von app-side-quest.js. Statt die Zeile zu
+// schneiden (das ging nur, solange sie eine einzige war), wird die Funktion
+// im Ganzen geschnitten und in einer Sandbox mit dem echten ChampionsSet
+// ausgefuehrt — die Umrechnung wird also wirklich gefahren, nicht behauptet.
+function ladeBuildEvsLine() {
+  const vm = require('node:vm');
+  const start = SRC.indexOf('function buildEvsLine(');
+  assert.ok(start > -1, 'buildEvsLine nicht gefunden');
+  const ende = SRC.indexOf('\n    }', start);
+  const quelle = SRC.slice(start, ende + 6);
+  const sandbox = { window: {}, module: {}, console };
+  vm.createContext(sandbox);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', 'champions-set.js'), 'utf8'), sandbox);
+  vm.runInContext(quelle + '\nglobalThis.__fn = buildEvsLine;', sandbox);
+  return sandbox.__fn;
+}
+
 describe('F20 — Anzeige-Label ist "Statuswertpunkte:", Export bleibt "EVs:"', () => {
   it('Karten-Anzeige (renderPokemon): Label "Statuswertpunkte:", kein "EVs:"', () => {
     const line = cutLine('class="side-quest-evs-label"');
@@ -52,18 +69,29 @@ describe('F20 — Anzeige-Label ist "Statuswertpunkte:", Export bleibt "EVs:"', 
   });
 
   it('Showdown-Export bleibt "EVs:" und ist von der Import-Regex parsebar (Round-Trip)', () => {
-    const line = cutLine('lines.push(`EVs:');
-    const lines = [];
-    // eslint-disable-next-line no-new-func
-    const fn = new Function('lines', 'm', line);
-    fn(lines, { evs: '2 HP / 32 Atk / 32 Spe' });
-    assert.equal(lines.length, 1);
-    assert.match(lines[0], /^EVs: /, 'Export-Format nicht mehr "EVs:": ' + lines[0]);
-    // Dieselbe Regex, die der Import benutzt (Z.1118): /^EVs:\s*(.+)$/i
+    // Seit dem 26.08.2026 steckt die Zeile in buildEvsLine(m, showdownEinheiten):
+    // dieselbe Verteilung geht ROH nach Limitless und MAL 8 nach Showdown.
+    // Das Etikett bleibt in beiden Faellen "EVs:" — so liest Showdown es, so
+    // liest Limitless es, und so findet die Import-Regex den Wert wieder.
+    const fn = ladeBuildEvsLine();
+    const roh = fn({ evs: '2 HP / 32 Atk / 32 Spe' }, false);
+    assert.match(roh, /^EVs: /, 'Export-Format nicht mehr "EVs:": ' + roh);
+    // Dieselbe Regex, die der Import benutzt: /^EVs:\s*(.+)$/i
     const importRe = /^EVs:\s*(.+)$/i;
-    const parsed = lines[0].match(importRe);
+    const parsed = roh.match(importRe);
     assert.ok(parsed, 'Export-Zeile nicht von der Import-Regex parsebar — Round-Trip gebrochen');
     assert.equal(parsed[1].trim(), '2 HP / 32 Atk / 32 Spe');
+  });
+
+  it('Limitless bekommt die rohen Punkte, Showdown dieselben mal 8', () => {
+    // Der Fehler, den das verhindert: bis zum 26.08.2026 bekamen beide Ziele
+    // denselben Text. Ein Champions-Bau mit "32 Atk" spielte in Showdown mit
+    // einem Achtel des gemeinten Angriffs — 32 EV statt 256.
+    const fn = ladeBuildEvsLine();
+    assert.equal(fn({ evs: '2 HP / 32 Atk / 32 Spe' }, false), 'EVs: 2 HP / 32 Atk / 32 Spe');
+    // 32 x 8 = 256, gedeckelt auf 252; 2 x 8 = 16.
+    assert.equal(fn({ evs: '2 HP / 32 Atk / 32 Spe' }, true), 'EVs: 16 HP / 252 Atk / 252 Spe');
+    assert.equal(fn({ evs: '' }, true), '', 'ohne Verteilung darf keine Zeile entstehen');
   });
 
   it('die Import-Regex im Code ist unveraendert "EVs:"', () => {

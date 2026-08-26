@@ -16,9 +16,15 @@
  *   Mobil    current-meta, 4.088 px, 9 Abschnitte, Filter da
  *   Navi     Meta · Decks · Turnier · Karten · Champions (beide Breiten)
  *
- * Der Hub-Reiter bleibt bestehen und ist ueber das Pokeball-Menue
- * erreichbar — geloescht wird nichts, er ist nur kein eigener
- * Navigationspunkt mehr.
+ * Der Hub-Reiter bleibt bestehen — geloescht wird nichts.
+ *
+ * Nachtrag 26.08.2026: der Menuepunkt "Uebersicht" fuehrte weiterhin auf
+ * den Hub, waehrend der Aufruf der Seite auf current-meta landete. Zwei
+ * Antworten auf "wo ist Zuhause", vom Nutzer gemeldet. Er heisst jetzt
+ * "Startseite" und fuehrt dorthin, wo die Anwendung auch startet; die
+ * fuenf "← Uebersicht"-Knoepfe in den Werkzeugen ziehen mit. Der Hub
+ * behaelt einen Deep-Link (#hub / #uebersicht / #overview), damit die
+ * Zusage "geloescht wird nichts" weiter gilt.
  */
 
 const { describe, it } = require('node:test');
@@ -31,6 +37,7 @@ const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const stripJs = s => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:"'`])\/\/.*$/gm, '$1');
 
 const HTML = read('index.html');
+const INLINE = read('js/inline-init.js');
 const NAV = stripJs(read('js/ds-nav.js'));
 const HUB = stripJs(read('js/meta-analysis-hub.js'));
 
@@ -53,10 +60,27 @@ describe('Startseite — die Meta-Ansicht empfaengt', () => {
         assert.strictEqual(n, 1);
     });
 
-    it('der Hub-Reiter existiert weiter', () => {
-        // Nichts loeschen. Er ist ueber das Pokeball-Menue erreichbar.
+    it('der Hub-Reiter existiert weiter — und bleibt erreichbar', () => {
+        // Die Zusage vom 18.08.2026 lautete: nichts loeschen, der Hub bleibt
+        // ueber das Pokeball-Menue erreichbar.
+        //
+        // Am 26.08.2026 hat der Nutzer den Menuepunkt umgewidmet: "Uebersicht"
+        // heisst jetzt "Startseite" und fuehrt dorthin, wo die Anwendung auch
+        // startet — weil zwei verschiedene Antworten auf "wo ist Zuhause"
+        // verwirren. Damit faellt der Menueweg zum Hub weg.
+        //
+        // Die Zusage bleibt trotzdem eingeloest: der Reiter existiert und ist
+        // per Deep-Link erreichbar (#hub / #uebersicht / #overview). Gepruefst
+        // wird deshalb die ERREICHBARKEIT, nicht mehr der eine Weg dorthin —
+        // sonst haette dieser Test die Entscheidung des Nutzers blockiert,
+        // statt ihre Folge zu sichern.
         assert.match(HTML, /id="meta-analysis-hub"/);
-        assert.match(HTML, /data-tab-id="meta-analysis-hub"/);
+        const wege = [
+            /data-tab-id="meta-analysis-hub"/.test(HTML),               // Menue
+            /'hub':\s*'meta-analysis-hub'/.test(INLINE),                // Deep-Link
+        ];
+        assert.ok(wege.some(Boolean),
+            'der Hub-Reiter ist ueber keinen Weg mehr erreichbar — dann ist er geloescht, nur unsichtbar');
     });
 });
 

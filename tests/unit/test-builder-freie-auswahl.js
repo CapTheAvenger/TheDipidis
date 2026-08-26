@@ -58,10 +58,27 @@ describe('Der Befund, der die Änderung trägt', () => {
             ? USAGE[ersteWahl].doubles.teammate.map(t => String(t.name || '').toLowerCase().replace(/\s+/g, '-'))
             : []);
         const unerreichbar = slugs.filter(s => s !== ersteWahl && !mates.has(s));
-        assert.ok(unerreichbar.length > 300,
-            `nur ${unerreichbar.length} unerreichbar — die Annahme stimmt nicht mehr`);
-        assert.ok(unerreichbar.indexOf('raichu') !== -1,
-            'Raichu ist erreichbar — dann war der gemeldete Fall ein anderer');
+        // KEINE feste Zahl mehr. Hier stand `> 300`, gemessen an den 353
+        // Eintraegen vom 25.08.2026. Am 26.08. lieferte die Quelle 238 —
+        // und dieser Test hielt die Auslieferung an, obwohl die Aussage
+        // ("die Partner-Liste zeigt nur einen Bruchteil") unveraendert
+        // stimmte. Der Anteil traegt die Begruendung, nicht die Stueckzahl:
+        // acht Plaetze von N sind immer ein Bruchteil.
+        assert.ok(slugs.length > 20, `nur ${slugs.length} Slugs geladen — Datei leer?`);
+        const anteil = unerreichbar.length / slugs.length;
+        assert.ok(anteil > 0.8,
+            `nur ${(anteil * 100).toFixed(0)} % unerreichbar (${unerreichbar.length} von `
+            + `${slugs.length}) — die Annahme der freien Auswahl stimmt nicht mehr`);
+        // Auch der Beispielname stand hier fest: 'raichu', der Fall aus dem
+        // Screenshot vom 25.08.2026. Am 26.08. ist Raichu selbst in die
+        // Partner-Liste von Hisui-Arkani gerueckt — der gemeldete Fall hat
+        // sich durch das Meta erledigt, die Begruendung nicht. Statt eines
+        // Namens jetzt die Aussage dahinter: es gibt IMMER Pokémon, die man
+        // nur ueber die freie Suche erreicht, und zwar viele.
+        assert.ok(unerreichbar.length >= 50,
+            `nur ${unerreichbar.length} Pokémon ausserhalb der Partner-Liste`);
+        assert.ok(mates.size <= 8,
+            `die Partner-Liste hat ${mates.size} Eintraege — mehr als acht Plaetze`);
     });
 });
 

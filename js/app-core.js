@@ -1408,6 +1408,26 @@ const BASE_PATH = './data/';
                     case 'meta-call':
                         if (typeof MetaCall !== 'undefined') MetaCall.init();
                         break;
+                    // Side Quest hatte als einziger datengetriebener Tab keinen
+                    // Fall hier. Sein Renderer haengt in app-side-quest.js an
+                    // DOMContentLoaded und an einem Klick auf ein Element mit
+                    // data-tab-id="side-quest" — beides greift nicht, wenn der
+                    // Tab programmatisch aktiviert wird. Genau das tut der
+                    // Deep-Link #side-quest (inline-init.js applyHash laeuft
+                    // erst auf 'app:ui-ready', also nach DOMContentLoaded).
+                    // Folge, gemessen am 26.08.2026: Reiter "Teams" komplett
+                    // leer, waehrend die Daten (81 Teams) einwandfrei geladen
+                    // waren. Die Nachbarn hier machen es genauso.
+                    case 'side-quest':
+                        if (window.sideQuest && typeof window.sideQuest.render === 'function') {
+                            const teamsHost = document.getElementById('sideQuestTeamsHost');
+                            // Nur zeichnen, wenn die Teams-Ansicht auch sichtbar
+                            // ist — sonst uebermalt der Ruecksprung aus einem
+                            // anderen Tab die gerade gewaehlte Unteransicht nicht,
+                            // kostet aber unnoetig einen Durchlauf.
+                            if (!teamsHost || !teamsHost.hidden) window.sideQuest.render();
+                        }
+                        break;
                 }
             }
 

@@ -391,7 +391,15 @@
             b.classList.toggle('is-active', b.getAttribute('data-sq-view') === view);
             b.setAttribute('aria-selected', b.getAttribute('data-sq-view') === view ? 'true' : 'false');
         });
-        if (view === 'resources') {
+        // Teams war die einzige Unteransicht ohne Aktivierung. Wer von
+        // "Nutzung" zurueck auf "Teams" wechselte, sah einen leeren Kasten,
+        // solange der Teams-Renderer nicht schon einmal gelaufen war.
+        // render() ist billig: die Daten liegen im Modul-Cache.
+        if (view === 'teams') {
+            if (window.sideQuest && typeof window.sideQuest.render === 'function') {
+                window.sideQuest.render();
+            }
+        } else if (view === 'resources') {
             if (!_activated) {
                 _activated = true;
                 render();                 // paints the loading state

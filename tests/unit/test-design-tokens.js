@@ -187,8 +187,20 @@ describe('Phase 0: was sofort sichtbar ist', () => {
     it('es gibt eine Inhaltsbreite, und sie zieht die Rinne nicht doppelt ab', () => {
         const c = STYLES.match(/\n\s*\.container\s*\{[\s\S]*?\n\s*\}/);
         assert.ok(c);
-        assert.match(c[0], /width:\s*min\(1440px,\s*100%\)/);
+        // Seit dem 26.08.2026 waechst die Inhaltsbreite mit dem Fenster,
+        // statt bei 1440px stehenzubleiben (auf 2560px blieben 1120px
+        // Rand ungenutzt). Zugesichert bleibt dreierlei: 100 % begrenzt
+        // zuerst (sonst laeuft die Seite auf kleinen Schirmen ueber),
+        // der Boden bleibt 1440px (damit Tablet und Handy unveraendert
+        // bleiben), und es gibt eine Obergrenze (unbegrenzt breit ist
+        // keine Lesbarkeit).
+        assert.match(c[0], /width:\s*min\(100%,\s*clamp\(1440px,\s*[^,]+,\s*(\d+)px\)\)/);
+        const deckel = Number(c[0].match(/clamp\(1440px,\s*[^,]+,\s*(\d+)px\)/)[1]);
+        assert.ok(deckel > 1440 && deckel <= 2400,
+            `Obergrenze ${deckel}px liegt ausserhalb 1441..2400`);
         assert.doesNotMatch(c[0], /max-width:\s*1400px/);
+        // Fliesstext darf die neue Breite nicht mitnehmen.
+        assert.match(STYLES, /\.side-quest-intro,\s*\n\s*\.side-quest-subtitle \{\s*\n\s*max-width:\s*\d+ch/);
         // body trägt das Polster; ein zweiter Abzug im Container hat auf
         // 390px die Archetyp-Karten übereinandergeschoben.
         assert.doesNotMatch(STYLES, /body > \.container \{\s*width: min\(1440px, 100% - 32px\)/);

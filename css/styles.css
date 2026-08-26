@@ -215,9 +215,27 @@
            einem 1920er Bildschirm links und rechts je ~270px ungenutzt
            blieben und die Tabellen innen gedrängt standen. */
         .container {
-            width: min(1440px, 100%);
+            /* Gemessen am 26.08.2026 auf 2560px: von der Breite blieben
+               1440px Inhalt und 1120px leerer Rand — 44 % der Flaeche.
+               Ein fester Deckel kann das nicht loesen: er ist auf 1366px
+               zu gross und auf 2560px zu klein. Deshalb waechst die
+               Inhaltsbreite jetzt mit dem Fenster und stoppt bei 2040px.
+                 1366px -> 1366 (unveraendert, 100 % greift zuerst)
+                 1706px -> 1570 (vorher 1440)
+                 1920px -> 1766 (vorher 1440)
+                 2560px -> 2040 (vorher 1440)
+               Der Boden von 1440px haelt die Regel auf kleinen Schirmen
+               wirkungslos, damit sich an Tablet und Handy nichts aendert. */
+            width: min(100%, clamp(1440px, 92vw, 2040px));
             max-width: none;
             margin-inline: auto;
+        }
+        /* Fliesstext waechst nicht mit: eine Zeile ueber 2000px ist
+           unlesbar. Betrifft nur echte Absaetze, nicht Tabellen,
+           Kartengitter oder Konsolenansichten. */
+        .side-quest-intro,
+        .side-quest-subtitle {
+            max-width: 92ch;
         }
         /* Keine zusätzliche Rinne: body trägt bereits 20px Polster (12px
            auf dem Handy). Zöge der Container nochmal 32px ab, wären es

@@ -47,7 +47,10 @@
             picked: (n) => `${n} / ${MAX} gewählt`,
             suggestTitle: 'Passt dazu',
             suggestHintFirst: 'Meistgespielte Pokémon — tippen zum Starten, oder oben suchen.',
-            suggestHint: 'Sortiert nach Überschneidung — % = mit wie vielen deiner Gewählten das Pokémon zusammen gespielt wird (100 % = mit allen). Tippen zum Hinzufügen.',
+            suggestHint: 'Sortiert nach Überschneidung — % = auf wie vielen Partner-Listen deiner Gewählten das Pokémon steht. Tippen zum Hinzufügen.',
+            freeTitle: 'Weitere Treffer',
+            freeHint: 'Diese stehen auf keiner Partner-Liste deiner Auswahl — dort ist je Pokémon nur Platz für acht. Wählbar sind sie trotzdem.',
+            freeNone: 'Kein Pokémon dieses Namens gefunden.',
             none: 'Keine weitere Kombination gefunden — nimm ein Pokémon raus.',
             empty: 'Wähl ein Pokémon, um zu starten.',
             clear: 'Zurücksetzen',
@@ -60,7 +63,10 @@
             picked: (n) => `${n} / ${MAX} selected`,
             suggestTitle: 'Plays with',
             suggestHintFirst: 'Most-played Pokémon — tap to start, or search above.',
-            suggestHint: 'Sorted by overlap — % is how many of your picks it is played alongside (100% = all). Tap to add.',
+            suggestHint: 'Sorted by overlap — % is how many of your picks list it as a partner. Tap to add.',
+            freeTitle: 'Other matches',
+            freeHint: 'These are on none of your picks\' partner lists — each Pokémon only has eight slots there. You can still pick them.',
+            freeNone: 'No Pokémon of that name found.',
             none: 'No further combination found — remove a Pokémon.',
             empty: 'Pick a Pokémon to start.',
             clear: 'Reset',
@@ -202,24 +208,60 @@
     function clearAll() { _team = []; _query = ''; render(); }
 
     // ── Render ──────────────────────────────────────────────────────────────
-    function suggestionsHtml(l) {
-        const q = norm(_query);
-        let cand = candidates().filter(c => !q || searchHay(c.slug).indexOf(q) !== -1);
-        if (_team.length === 0 && !q) cand = cand.slice(0, EMPTY_CAP);
-        if (!cand.length) return `<p class="sqb-none">${escapeHtml(_team.length ? l.none : l.empty)}</p>`;
-        // Overlap % is only meaningful with ≥ 2 picks (with 1 pick everything is
-        // 100 % — the mon's own teammate list).
-        const showPct = _team.length >= 2;
-        return cand.map(c => {
-            const pct = showPct
-                ? `<span class="sqb-sugg-count">${Math.round(c.overlap * 100)}%</span>` : '';
-            const partial = showPct && c.overlap < 1 ? ' is-partial' : '';
-            return `<button type="button" class="sqb-sugg${partial}" data-add="${escapeHtml(c.slug)}">
+    /** Ein Vorschlagsknopf. */
+    function suggBtn(c, showPct) {
+        const pct = showPct
+            ? `<span class="sqb-sugg-count">${Math.round(c.overlap * 100)}%</span>` : '';
+        const partial = showPct && c.overlap < 1 ? ' is-partial' : '';
+        return `<button type="button" class="sqb-sugg${partial}" data-add="${escapeHtml(c.slug)}">
                 ${icon(c.slug)}
                 <span class="sqb-sugg-name">${escapeHtml(displayName(c.slug))}</span>
                 ${pct}
             </button>`;
-        }).join('');
+    }
+
+    /** Treffer der Suche, die in KEINER Partner-Liste der Auswahl stehen.
+     *
+     *  Bis zum 25.08.2026 suchte das Feld nur innerhalb der Vorschläge. Weil
+     *  jede Partner-Liste genau acht Plätze hat, waren damit ab der ersten
+     *  Wahl 211 der 353 Pokémon unerreichbar — gemeldet als "ich tippe Ra und
+     *  bekomme kein Raichu". Sie stehen jetzt in einem eigenen Block darunter.
+     *
+     *  Bewusst OHNE Wertung: die Partner-Listen tragen keine Prozentwerte
+     *  (alle 2824 Einträge haben pct: null) und sind auf acht gedeckelt.
+     *  "Wird nicht zusammen gespielt" wäre also mehr behauptet, als die Daten
+     *  hergeben. Der Hinweis nennt deshalb den Mechanismus, nicht ein Urteil. */
+    function freieTreffer(q) {
+        if (!q) return [];
+        const sel = new Set(_team);
+        const inVorschlag = new Set(candidates().map(c => c.slug));
+        return _mons
+            .filter(m => !sel.has(m.slug) && !inVorschlag.has(m.slug)
+                         && searchHay(m.slug).indexOf(q) !== -1)
+            .map(m => ({ slug: m.slug, overlap: 0 }));
+    }
+
+    function suggestionsHtml(l) {
+        const q = norm(_query);
+        let cand = candidates().filter(c => !q || searchHay(c.slug).indexOf(q) !== -1);
+        if (_team.length === 0 && !q) cand = cand.slice(0, EMPTY_CAP);
+        const frei = _team.length < MAX ? freieTreffer(q) : [];
+        if (!cand.length && !frei.length) {
+            return `<p class="sqb-none">${escapeHtml(
+                q ? l.freeNone : (_team.length ? l.none : l.empty))}</p>`;
+        }
+        // Overlap % is only meaningful with ≥ 2 picks (with 1 pick everything is
+        // 100 % — the mon's own teammate list).
+        const showPct = _team.length >= 2;
+        let html = cand.map(c => suggBtn(c, showPct)).join('');
+        if (frei.length) {
+            html += `<div class="sqb-free">
+                <h4 class="sqb-sec sqb-sec--free">${escapeHtml(l.freeTitle)}</h4>
+                <p class="sqb-hint">${escapeHtml(l.freeHint)}</p>
+                <div class="sqb-suggs">${frei.map(c => suggBtn(c, false)).join('')}</div>
+            </div>`;
+        }
+        return html;
     }
 
     function render() {

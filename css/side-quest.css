@@ -2282,6 +2282,16 @@ body.sqp-d-open { overflow: hidden; }
 .sqb-matching { color: #64748b; font-weight: 700; text-transform: none; letter-spacing: 0; }
 .sqb-hint { font-size: 0.78rem; color: #94a3b8; margin: 0 0 8px; }
 .sqb-suggs { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Zweiter Vorschlagsblock: Treffer der freien Suche, die auf keiner
+   Partner-Liste der Auswahl stehen (25.08.2026). Bewusst ruhiger als
+   "Passt dazu" — die Trennlinie sagt "andere Herkunft", die graue
+   Ueberschrift sagt "kein Datenbefund". Kein eigenes Farbsignal: die
+   Partner-Listen tragen keine Prozentwerte, also gibt es hier nichts
+   zu bewerten. */
+.sqb-free { width: 100%; margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid #e2e8f0; }
+.sqb-sec--free { color: #64748b; }
+.sqb-free .sqb-sec { margin-top: 0; }
 .sqb-sugg {
     display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
     padding: 4px 10px 4px 5px; border-radius: 999px;

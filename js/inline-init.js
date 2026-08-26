@@ -264,6 +264,15 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'tradelist':      'tradelist',
         'trade-list':     'tradelist',
         'collection':     'collection',
+        // Die Kachelseite hatte bis zum 26.08.2026 den Menuepunkt
+        // "Uebersicht". Der heisst jetzt "Startseite" und fuehrt dorthin,
+        // wo die Anwendung auch startet — auf Wunsch des Nutzers, weil zwei
+        // verschiedene Antworten auf "wo ist Zuhause" verwirren.
+        // Damit die Kachelseite nicht unerreichbar wird (Zusage vom
+        // 18.08.: "geloescht wird nichts"), behaelt sie einen Deep-Link.
+        'hub':            'meta-analysis-hub',
+        'uebersicht':     'meta-analysis-hub',
+        'overview':       'meta-analysis-hub',
     };
 
     function applyHash() {

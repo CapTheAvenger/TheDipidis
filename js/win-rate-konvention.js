@@ -54,7 +54,7 @@
     var KONVENTIONEN = {
         matchpunkte: {
             id: 'matchpunkte',
-            formel: '(3S + U) / (3 · Partien)',
+            formel: '(3S + U) / (3 · Matches)',
             kurzDe: 'Matchpunkte',
             kurzEn: 'Match points',
             langDe: 'Matchpunkte: ein Sieg zaehlt 3, ein Unentschieden 1, '
@@ -71,9 +71,9 @@
         mitUnentschieden: {
             id: 'mitUnentschieden',
             formel: 'S / (S + N + U)',
-            kurzDe: 'Siege je Partie',
+            kurzDe: 'Siege je Match',
             kurzEn: 'Wins per game',
-            langDe: 'Anteil gewonnener Partien an allen gespielten — Unentschieden '
+            langDe: 'Anteil gewonnener Matches an allen gespielten — Unentschieden '
                   + 'zaehlen im Nenner mit, aber nicht als halber Sieg.',
             langEn: 'Share of games won out of all games played — ties count in the '
                   + 'denominator, but not as half a win.',
@@ -85,9 +85,9 @@
         ohneUnentschieden: {
             id: 'ohneUnentschieden',
             formel: 'S / (S + N)',
-            kurzDe: 'Siege je entschiedener Partie',
+            kurzDe: 'Siege je entschiedenem Match',
             kurzEn: 'Wins per decided game',
-            langDe: 'Anteil gewonnener an den entschiedenen Partien — Unentschieden '
+            langDe: 'Anteil gewonnener an den entschiedenen Matches — Unentschieden '
                   + 'bleiben ganz aussen vor.',
             langEn: 'Share of decided games won — ties are left out entirely.',
             rechne: function (s, n) {

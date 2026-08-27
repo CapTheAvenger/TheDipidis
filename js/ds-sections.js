@@ -55,7 +55,7 @@
           de: ['Die stärksten Decks', 'Meta-Anteil und Top-8-Quote, mit Nenner'],
           en: ['The strongest decks', 'Share and top-8 rate, with denominators'] },
         { id: 'heatmap', auf: true,  nimm: ['#matchupHeatmapContainer'],
-          de: ['Matchups untereinander', 'wer schlägt wen, jede Zelle mit Partienzahl'],
+          de: ['Matchups untereinander', 'wer schlägt wen, jede Zelle mit Matchzahl'],
           en: ['Matchups', 'who beats whom, every cell with its game count'] },
         { id: 'cards',   auf: true,  nimm: ['div.top-cards-container'],
           de: ['Karten, die fast jedes Deck spielt', 'Format-Staples'],

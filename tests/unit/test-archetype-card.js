@@ -190,10 +190,10 @@ describe('matchups', () => {
         // fuer ein Summenzeichen ueber einer Zahlenspalte. W und L bleiben —
         // die sagt die Szene wirklich so.
         const html = api.matchupTableHtml('Dragapult');
-        assert.match(html, />Partien</, 'die Partienspalte heisst nicht mehr Σ');
+        assert.match(html, />Matches</, 'die Matchspalte heisst nicht mehr Σ');
         assert.ok(!/<th[^>]*>Σ<\/th>/.test(html), 'Σ ist zurueck');
-        assert.match(html, /title="[^"]*gewonnene Partien[^"]*">W</);
-        assert.match(html, /title="[^"]*verlorene Partien[^"]*">L</);
+        assert.match(html, /title="[^"]*gewonnene Matches[^"]*">W</);
+        assert.match(html, /title="[^"]*verlorene Matches[^"]*">L</);
         assert.match(html, /arc-mu-n-low/, 'the thin sample size should be marked');
         assert.match(html, />438</);
         assert.match(html, />267</);

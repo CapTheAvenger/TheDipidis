@@ -364,7 +364,7 @@
                hineinzeichnet. */
             (window.WinRateKonvention
                 ? window.WinRateKonvention.kurzHinweis('mitUnentschieden')
-                : L('Siege ÷ alle gespielten Partien',
+                : L('Siege ÷ alle gespielten Matches',
                     'wins ÷ all games played')));
 
         var hasConv = isFinite(spec.perfPct);
@@ -440,8 +440,8 @@
 
         label(ctx, L('Gegner', 'Opponent'), tx, ty);
         ctx.textAlign = 'right';
-        label(ctx, L('Partien', 'Games'), xGames, ty);
-        label(ctx, L('Bilanz', 'Record'), xRecord, ty);
+        label(ctx, L('Matches', 'Games'), xGames, ty);
+        label(ctx, L('Record', 'Record'), xRecord, ty);
         label(ctx, 'Win Rate', wrX + wrW - 10, ty);
         ctx.textAlign = 'start';
         ctx.fillStyle = C.line;
@@ -526,9 +526,9 @@
              * Rauschen — und Rauschen ist genau das, was das Audit an den
              * bestehenden Ansichten bemängelt hat. */
             var note = mus.some(function (m) { return m.thin; })
-                ? L('Graue Zeilen: unter ' + (spec.thinGames || 20) + ' Partien — die Quote ist dort noch ein Gerücht.',
+                ? L('Graue Zeilen: unter ' + (spec.thinGames || 20) + ' Matches — die Quote ist dort noch ein Gerücht.',
                     'Grey rows: fewer than ' + (spec.thinGames || 20) + ' games — that rate is still a rumour.')
-                : L('Sortiert nach Win Rate. Jede Zeile trägt ihre Partienzahl.',
+                : L('Sortiert nach Win Rate. Jede Zeile trägt ihre Matchzahl.',
                     'Sorted by win rate. Every row carries its game count.');
             ctx.font = fSans(11, 400);
             ctx.fillStyle = C.ink3;
@@ -722,8 +722,8 @@
                    initials(m.opponent));
 
             var tail = [];
-            if (m.turnOrder === 'first')  tail.push(L('1. Zug', 'went first'));
-            if (m.turnOrder === 'second') tail.push(L('2. Zug', 'went second'));
+            if (m.turnOrder === 'first')  tail.push(L('First', 'went first'));
+            if (m.turnOrder === 'second') tail.push(L('Second', 'went second'));
             if (m.games) tail.push(m.games);
             ctx.font = fSans(14, 400);
             ctx.fillStyle = C.ink3;
@@ -1002,7 +1002,7 @@
     function shareResultCard(tournamentName, opts) {
         var spec = collectTournamentSpec(tournamentName, opts);
         if (!spec) {
-            toast(L('Zu diesem Turnier stehen keine Partien im Journal.',
+            toast(L('Zu diesem Turnier stehen keine Matches im Journal.',
                     'No matches recorded for this tournament.'), 'warning');
             return Promise.resolve(false);
         }
@@ -1541,7 +1541,7 @@
         var o = opts || {};
         var spec = collectTournamentSpec(tournamentName, opts);
         if (!spec) {
-            toast(L('Zu diesem Turnier stehen keine Partien im Journal.',
+            toast(L('Zu diesem Turnier stehen keine Matches im Journal.',
                     'No matches recorded for this tournament.'), 'warning');
             return Promise.resolve(false);
         }

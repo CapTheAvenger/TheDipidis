@@ -1826,7 +1826,7 @@
                 ${_muVorbehalt}
                 <p class="past-meta-section-hint">${tournHint} ${
                     (typeof getLang === 'function' && getLang() === 'de')
-                        ? `Unter ${MU_MIN_GAMES} Partien ausgegraut und ohne Farbe.`
+                        ? `Unter ${MU_MIN_GAMES} Matches ausgegraut und ohne Farbe.`
                         : `Below ${MU_MIN_GAMES} games: faded and shown without colour.`}</p>
                 <div class="past-meta-matchup-table-wrap">
                     <table class="past-meta-matchup-table">

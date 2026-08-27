@@ -272,7 +272,7 @@
             ? L(' · dünne Grundlage', ' · thin basis')
             : '';
         var evDuennTitel = evDuenn
-            ? L('Weniger als ' + EV_MIN_PARTIEN + ' gezählte Partien oder unter '
+            ? L('Weniger als ' + EV_MIN_PARTIEN + ' gezählte Matches oder unter '
                 + EV_MIN_ABDECKUNG + ' % Meta-Abdeckung. Die Zahl steht da, aber das '
                 + 'Unsicherheitsband darunter ist hier der wichtigere Teil.',
                 'Fewer than ' + EV_MIN_PARTIEN + ' games counted, or under '
@@ -308,8 +308,8 @@
               + '<span class="ds-stat-label">' + esc(L('Abdeckung des Metas', 'Meta coverage')) + '</span>'
               + '<span class="ds-stat-value">' + esc(zahl(r.abdeckung, 0)) + '<span class="ds-stat-unit"> %</span></span>'
               + '<span class="ds-stat-context">' + esc(L(
-                  r.gegner + ' Gegner-Decks · ' + r.partien.toLocaleString('de-DE') + ' gezählte Partien'
-                    + (r.duenn ? ' · ' + r.duenn + ' davon unter 20 Partien' : '')
+                  r.gegner + ' Gegner-Decks · ' + r.partien.toLocaleString('de-DE') + ' gezählte Matches'
+                    + (r.duenn ? ' · ' + r.duenn + ' davon unter 20 Matches' : '')
                     + (engerAusschnitt
                         ? ' · in dieser Rechnung nur ' + zahl(r.gerechnet, 1) + ' % des Metas'
                         : ''),
@@ -358,7 +358,7 @@
                   'Geglättete Quote (k = 20) — ein 3-0 zählt hier nicht als 100 %',
                   'Smoothed rate (k = 20) — a 3-0 does not count as 100 % here'))
                 + '">' + esc(L('Deine Win Rate', 'Your win rate')) + '</th>'
-              + '<th class="ds-num">' + esc(L('Partien', 'Games')) + '</th>'
+              + '<th class="ds-num">' + esc(L('Matches', 'Games')) + '</th>'
               + '<th>' + esc(L('trägt bei', 'contributes')) + '</th>'
               + '<th class="ds-num" title="' + esc(L(
                   'Anteil × (Win Rate − 50). Die Summe dieser Spalte ist genau der Abstand deiner erwarteten Win Rate von 50 %.',

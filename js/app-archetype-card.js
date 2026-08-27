@@ -223,8 +223,8 @@
                 // wer 54,0 % liest, weiss selbst, dass das 4 Punkte ueber 50
                 // liegt. Die Zeile sagt jetzt, worauf die Quote beruht.
                 esc(d.partien > 0
-                    ? L('arc.wrCtx', de ? 'aus {n} Partien' : 'from {n} games').replace('{n}', fmtGanz(d.partien))
-                    : L('arc.wrCtxLeer', de ? 'Partienzahl unbekannt' : 'game count unknown')),
+                    ? L('arc.wrCtx', de ? 'aus {n} Matches' : 'from {n} games').replace('{n}', fmtGanz(d.partien))
+                    : L('arc.wrCtxLeer', de ? 'Anzahl Matches unbekannt' : 'game count unknown')),
                 '', arrow(wrDelta))
             : tile('wr', 'tie', L('arc.wrLabel', 'Win Rate'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
@@ -325,7 +325,7 @@
         const thinCount = rows.filter(m => m.thin).length;
         const note = thinCount
             ? `<p class="arc-mu-note">${esc(L('arc.thinNote', de
-                ? 'Blasse Zeilen: unter {n} Spielen — die Quote ist dort kaum aussagekräftig.'
+                ? 'Blasse Zeilen: unter {n} Matches — die Quote ist dort kaum aussagekräftig.'
                 : 'Faded rows: fewer than {n} games — the rate says little there.')
                 .replace('{n}', String(THIN_GAMES)))}</p>`
             : '';
@@ -338,11 +338,11 @@
                         <th title="${esc(window.WinRateKonvention
                             ? window.WinRateKonvention.hinweis('ohneUnentschieden')
                             : '')}">${esc(L('arc.colWinRate', 'Win Rate'))}</th>
-                        <th title="${esc(L('arc.colGames', de ? 'gespielte Partien' : 'games played'))}">${
-                            esc(de ? 'Partien' : 'Games')}</th>
-                        <th title="${esc(de ? 'gewonnene Partien' : 'games won')}">W</th>
-                        <th title="${esc(de ? 'verlorene Partien' : 'games lost')}">L</th>
-                        <th title="${esc(de ? 'unentschiedene Partien — sie zählen in der Win Rate dieser Tabelle nicht mit'
+                        <th title="${esc(L('arc.colGames', de ? 'gespielte Matches' : 'games played'))}">${
+                            esc(de ? 'Matches' : 'Games')}</th>
+                        <th title="${esc(de ? 'gewonnene Matches' : 'games won')}">W</th>
+                        <th title="${esc(de ? 'verlorene Matches' : 'games lost')}">L</th>
+                        <th title="${esc(de ? 'unentschiedene Matches — sie zählen in der Win Rate dieser Tabelle nicht mit'
                                             : 'ties — they do not count in this table\'s win rate')}">U</th>
                     </tr></thead>
                     <tbody>${body}</tbody>

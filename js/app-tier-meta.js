@@ -1656,7 +1656,7 @@
                           tip: { de: 'Decklisten auf der Online-Ladder', en: 'decklists on the online ladder' } },
                         { k: 'anteil',   de: 'Anteil',        en: 'Share',       num: true, hilf: 'share' },
                         { k: 'wr',       de: 'Win Rate',      en: 'Win rate',    num: true,
-                          tip: { de: 'gewonnene Partien auf der Ladder', en: 'games won on the ladder' } },
+                          tip: { de: 'gewonnene Matches auf der Ladder', en: 'games won on the ladder' } },
                         { k: 'antritte', de: 'Antritte',      en: 'Entries',     num: true,
                           tip: { de: 'gewichtete Turnier-Antritte', en: 'weighted tournament entries' } },
                         { k: 'cuts',     de: 'davon Top 8',   en: 'made top 8',  num: true },
@@ -2004,7 +2004,7 @@
                         totalEntries.toLocaleString(deDS ? 'de-DE' : 'en-US'), '',
                         (metaStats
                             ? (deDS
-                                ? `aus ${fmtNumDS(metaStats.turniere)} Turnieren · ${fmtNumDS(metaStats.spieler)} Spieler · ${fmtNumDS(metaStats.partien)} Partien`
+                                ? `aus ${fmtNumDS(metaStats.turniere)} Turnieren · ${fmtNumDS(metaStats.spieler)} Spieler · ${fmtNumDS(metaStats.partien)} Matches`
                                   + ` (Stand ${metaStatsStand.toLocaleDateString('de-DE')})`
                                 : `from ${fmtNumDS(metaStats.turniere)} tournaments · ${fmtNumDS(metaStats.spieler)} players · ${fmtNumDS(metaStats.partien)} matches`
                                   + ` (as of ${metaStatsStand.toLocaleDateString('en-GB')})`)
@@ -2217,7 +2217,7 @@
                             // Bilanz. Trainer Hill macht das vor und schreibt die
                             // Formel neben die Zahl.
                             const _labsTitle = (getLang() === 'de'
-                                ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Partien · Win Rate = W/(W+L+U) · Matchpunkte ${fmtPct(ent.matchPointPct)}`
+                                ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Matches · Win Rate = W/(W+L+U) · Matchpunkte ${fmtPct(ent.matchPointPct)}`
                                 : `Limitless Labs tournament data · ${ent.tournaments} tournaments, ${ent.games} games · win rate = W/(W+L+T) · match points ${fmtPct(ent.matchPointPct)}`);
                             labsBadge = `<span class="stat-badge stat-labs" title="${escapeHtml(_labsTitle)}">🏆 ${fmtPct(ent.winPct)} WR · ${ent.tournaments}T</span>`;
                         }

@@ -13,7 +13,7 @@
 .cards-filter-search-input {
     width: 100%;
     padding: 8px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--line);
     border-radius: 4px;
     font-size: 15px;
 }
@@ -63,7 +63,7 @@
    visually shout louder than the primary controls. */
 .btn-reset-filters {
     padding: 7px 14px;
-    background: #fff;
+    background: var(--surface-1);
     color: #c0392b;
     border: 1.5px solid #f0c4be;
     border-radius: 6px;
@@ -79,7 +79,7 @@
 .cards-filter-sort label,
 .cards-filter-view-mode label {
     font-weight: 600;
-    color: #555;
+    color: var(--ink-2);
     font-size: 12px;
 }
 .cards-filter-sort select {
@@ -89,7 +89,7 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    background: white;
+    background: var(--surface-1);
 }
 /* Print-view toggle as a segmented control (no gap between halves)
    so the user reads it as ONE switch with two states, not two

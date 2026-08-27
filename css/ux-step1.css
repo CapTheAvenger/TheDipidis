@@ -127,7 +127,7 @@
 .btn-outline:hover,
 .btn-system-secondary:hover,
 .btn-modern:not(.primary):not(.success):not(.danger):not(.tertiary-danger):hover {
-    background: #f5f8fd !important;
+    background: var(--ui-outline-bg-hover) !important;
     border-color: #aebdd4 !important;
 }
 
@@ -181,5 +181,5 @@ input[type="text"][placeholder*="search" i]:focus {
 
 .playtester-setup-modal-content {
     max-width: 600px !important;
-    background: #f8f9fa !important;
+    background: var(--surface-0) !important;
 }

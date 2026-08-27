@@ -9,8 +9,15 @@
  * Was er noch NICHT ist: ein Schalter für den Nutzer. Im Browser
  * gemessen (data-theme="dark" gesetzt, Chromium, 1440px):
  *
- *     Current Meta   1.824 von 2.590 sichtbaren Flächen bleiben hell
- *     Einstiegsseite    14 von     23
+ *     Current Meta      10 von   198 sichtbaren Flächen bleiben hell
+ *     Deck-Analyse        1 von    23
+ *     Meta Call          21 von   195
+ *     Kartendatenbank    62 von   300  (60 davon sind die gelben
+ *                                       Seltenheits-Chips, gewollt)
+ *     Proxy               6 von    35
+ *
+ * Stand 27.08.2026. Vorher lag Meta Call bei 182 von 195, die
+ * Kartendatenbank bei 262 von 300.
  *
  * Das ist der Flickenteppich, den die Analyse selbst vorhergesagt hat
  * ("mit 747 Hardcode-Farben würde jede dritte Fläche weiß bleiben").
@@ -108,10 +115,12 @@ describe('der zweite Tokensatz', () => {
 
 describe('wie weit die Seite dafür ist', () => {
     it('der Zähler fest verdrahteter heller Flächen steigt nicht', () => {
-        // 610 vor Phase 3, 603 danach. Jede Fläche, die hier
-        // verschwindet, ist eine, die im Dunkelmodus nicht weiß
-        // stehenbleibt.
-        const BASELINE = 603;
+        // 610 vor Phase 3, 603 danach, 465 nach dem Durchgang vom
+        // 27.08.2026 (Bauteil-Stylesheets auf Tokens, dazu dunkle Werte
+        // für die alten --bg-*/--text-*- und die --ui-*-Familie). Jede
+        // Fläche, die hier verschwindet, ist eine, die im Dunkelmodus
+        // nicht weiß stehenbleibt.
+        const BASELINE = 465;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);

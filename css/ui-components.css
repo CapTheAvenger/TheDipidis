@@ -53,7 +53,7 @@ img[src*="limitlesstcg"] {
        bug reported 2026-05-27. */
     position: fixed;
     z-index: 9999;
-    background: #fff;
+    background: var(--surface-1);
     border: 2px solid #93c5fd;
     border-radius: 0 0 10px 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
@@ -73,10 +73,10 @@ img[src*="limitlesstcg"] {
     font-size: 15px;
     outline: none;
     box-sizing: border-box;
-    background: #f8fafc;
+    background: var(--surface-0);
 }
 .searchable-select-search:focus {
-    background: #fff;
+    background: var(--surface-1);
     border-bottom-color: #60a5fa;
 }
 
@@ -456,7 +456,7 @@ img[src*="limitlesstcg"] {
 /* Modular meta card detail panel styles (used in app-meta-cards.js) */
 .meta-card-detail-panel {
     grid-column: 1 / -1 !important;
-    background: #f8f9fa !important;
+    background: var(--surface-0) !important;
     padding: 10px !important;
     border-radius: 8px !important;
     margin-bottom: 10px !important;
@@ -468,7 +468,7 @@ img[src*="limitlesstcg"] {
 }
 .meta-card-detail-title {
     font-weight: bold !important;
-    color: #333 !important;
+    color: var(--ink) !important;
 }
 .meta-card-detail-back {
     background: #6c757d !important;
@@ -481,7 +481,7 @@ img[src*="limitlesstcg"] {
 }
 .meta-card-detail-info {
     font-size: 0.85em !important;
-    color: #333 !important;
+    color: var(--ink) !important;
     margin-top: 8px !important;
     font-weight: 600 !important;
 }
@@ -492,7 +492,7 @@ img[src*="limitlesstcg"] {
     gap: 6px !important;
 }
 .meta-card-list-item {
-    background: #fff !important;
+    background: var(--surface-1) !important;
     padding: 8px !important;
     border-radius: 4px !important;
     cursor: pointer !important;
@@ -503,13 +503,13 @@ img[src*="limitlesstcg"] {
     align-items: center !important;
 }
 .meta-card-list-item:hover {
-    background: #f9f9f9 !important;
+    background: var(--surface-0) !important;
     transform: translateX(3px) !important;
 }
 .meta-card-list-thumb {
     width: 40px !important;
     height: 50px !important;
-    background: #f5f5f5 !important;
+    background: var(--surface-2) !important;
     border-radius: 3px !important;
     overflow: hidden !important;
     flex-shrink: 0 !important;
@@ -526,7 +526,7 @@ img[src*="limitlesstcg"] {
 }
 .meta-card-list-name {
     font-weight: 600 !important;
-    color: #333 !important;
+    color: var(--ink) !important;
     font-size: 0.9em !important;
     line-height: 1.2 !important;
     white-space: normal !important;
@@ -649,7 +649,7 @@ img[src*="limitlesstcg"] {
 /* Card info bottom section */
 .card-info-bottom {
     padding: 5px !important;
-    background: white !important;
+    background: var(--surface-1) !important;
     font-size: 0.7em !important;
     text-align: center !important;
     min-height: 48px !important;
@@ -696,13 +696,13 @@ img[src*="limitlesstcg"] {
 .heatmap-container {
     margin: 16px 0 !important;
     padding: 16px !important;
-    background: #fff !important;
+    background: var(--surface-1) !important;
     border-radius: 12px !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
 }
 .heatmap-title {
     margin: 0 0 12px 0 !important;
-    color: #2c3e50 !important;
+    color: var(--ink) !important;
     font-size: 1.5em !important;
     display: flex !important;
     align-items: center !important;
@@ -724,12 +724,12 @@ img[src*="limitlesstcg"] {
  * (--fs-sm = 12). Farbe und Abstand behalten ihr !important, an denen
  * aendert sich nichts. */
 .heatmap-desc {
-    color: #7f8c8d !important;
+    color: var(--ink-3) !important;
     margin: 0 0 20px 0 !important;
     font-size: var(--fs-md);
 }
 .heatmap-hint {
-    color: #95a5a6 !important;
+    color: var(--ink-3) !important;
     margin: 15px 0 0 0 !important;
     font-size: var(--fs-sm);
     font-style: italic !important;
@@ -747,7 +747,7 @@ img[src*="limitlesstcg"] {
     display: flex !important;
     flex-direction: column !important;
     gap: 4px !important;
-    color: #2c3e50 !important;
+    color: var(--ink) !important;
     font-size: 0.85rem !important;
     font-weight: 700 !important;
     min-width: 240px !important;
@@ -757,7 +757,7 @@ img[src*="limitlesstcg"] {
     padding: 10px !important;
     width: 100% !important;
     border-radius: 8px !important;
-    border: 1px solid #ccc !important;
+    border: 1px solid var(--line-strong) !important;
     font-family: inherit !important;
     font-size: 0.95rem !important;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
@@ -819,8 +819,8 @@ img[src*="limitlesstcg"] {
     position: sticky !important;
     left: 0 !important;
     z-index: 2 !important;
-    background: #ecf0f1 !important;
-    color: #2c3e50 !important;
+    background: var(--surface-2) !important;
+    color: var(--ink) !important;
     padding: 8px 8px !important;
     text-align: left !important;
     font-weight: bold !important;
@@ -852,18 +852,18 @@ img[src*="limitlesstcg"] {
     padding: 10px 6px !important;
     text-align: center !important;
     font-weight: 600 !important;
-    border: 1px solid #ddd !important;
+    border: 1px solid var(--line) !important;
     white-space: nowrap !important;
     min-width: 80px !important;
     transition: all 0.2s !important;
 }
 .heatmap-td-mirror {
     background: rgba(52, 73, 94, 0.1) !important;
-    color: #7f8c8d !important;
+    color: var(--ink-3) !important;
 }
 .heatmap-td-nodata {
     background: rgba(149, 165, 166, 0.15) !important;
-    color: #95a5a6 !important;
+    color: var(--ink-3) !important;
 }
 /* Die Schrift in der Heatmap traegt ueberall dieselbe Farbe.
  *
@@ -967,7 +967,7 @@ img[src*="limitlesstcg"] {
     top: 5px !important;
     left: 5px !important;
     background: #FFD600 !important;
-    color: #333 !important;
+    color: var(--ink) !important;
     min-width: 30px !important;
     height: 30px !important;
     border-radius: 50% !important;
@@ -986,7 +986,7 @@ img[src*="limitlesstcg"] {
 }
 .card-database-not-owned-line {
     font-size: 11px !important;
-    color: #999 !important;
+    color: var(--ink-3) !important;
 }
 .card-database-other-prints-line {
     font-size: 11px !important;
@@ -1008,7 +1008,7 @@ img[src*="limitlesstcg"] {
     overflow: hidden !important;
     box-shadow: 0 2px 10px rgba(0,0,0,0.10) !important;
     transition: transform 0.25s ease, box-shadow 0.25s ease !important;
-    background: #fff !important;
+    background: var(--surface-1) !important;
 }
 .card-item:hover {
     transform: translateY(-4px) !important;
@@ -1654,7 +1654,7 @@ img[src*="limitlesstcg"] {
     box-shadow: 0 2px 10px rgba(0,0,0,0.10);
     cursor: pointer;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
-    background: #fff;
+    background: var(--surface-1);
 }
 .city-league-card-item:hover {
     transform: translateY(-4px);
@@ -1783,7 +1783,7 @@ img[src*="limitlesstcg"] {
 
 .city-league-card-info-bottom {
     padding: 4px 5px;
-    background: #fff;
+    background: var(--surface-1);
     font-size: 0.65em;
     text-align: center;
     min-height: 40px;
@@ -1798,11 +1798,11 @@ img[src*="limitlesstcg"] {
     text-overflow: ellipsis;
     font-weight: 700;
     margin-bottom: 1px;
-    color: #333;
+    color: var(--ink);
     font-size: 0.7em;
 }
 .city-league-card-set-mobile {
-    color: #333;
+    color: var(--ink);
     font-size: 0.7em;
     margin-bottom: 0;
     font-weight: 600;
@@ -1810,7 +1810,7 @@ img[src*="limitlesstcg"] {
     flex-shrink: 0;
 }
 .city-league-card-stats-mobile {
-    color: #333;
+    color: var(--ink);
     font-size: 0.7em;
     margin-bottom: 0;
     font-weight: 600;
@@ -1825,7 +1825,7 @@ img[src*="limitlesstcg"] {
     overflow: hidden;
 }
 .city-league-card-avg-mobile {
-    color: #333;
+    color: var(--ink);
     font-size: 0.7em;
     margin-bottom: 1px;
     font-weight: 600;
@@ -1835,7 +1835,7 @@ img[src*="limitlesstcg"] {
 }
 .city-league-card-deck-stats-mobile {
     font-weight: 600;
-    color: #333;
+    color: var(--ink);
     font-size: 0.7em;
 }
 
@@ -2145,7 +2145,7 @@ img[src*="limitlesstcg"] {
 .city-league-card-table-row {
     display: flex;
     align-items: center;
-    background: white;
+    background: var(--surface-1);
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -2191,14 +2191,14 @@ img[src*="limitlesstcg"] {
 .city-league-card-title {
     margin: 0 0 8px 0;
     font-size: 1.2em;
-    color: #333;
+    color: var(--ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .city-league-card-set {
-    color: #333;
+    color: var(--ink);
     font-size: 0.9em;
     margin-bottom: 10px;
     font-weight: 600;
@@ -2212,14 +2212,14 @@ img[src*="limitlesstcg"] {
 }
 
 .city-league-card-stat-label {
-    color: #555;
+    color: var(--ink-2);
     font-size: 0.85em;
     font-weight: 600;
 }
 
 .city-league-card-stat-value {
     font-weight: 600;
-    color: #333;
+    color: var(--ink);
     margin-left: 5px;
     font-size: 0.95em;
 }
@@ -2728,20 +2728,20 @@ img[src*="limitlesstcg"] {
 .city-league-info-search-results {
     margin-top: 8px;
     font-size: 14px;
-    color: #555;
+    color: var(--ink-2);
     font-weight: 500;
 }
 .city-league-info-combined-explanation {
     margin-bottom: 15px;
     padding: 12px;
-    background: #ecf0f1;
+    background: var(--surface-2);
     border-radius: 5px;
     font-size: 0.9em;
-    color: #333;
+    color: var(--ink);
     font-weight: 500;
 }
 .city-league-info-generated-block {
-    background: #ecf0f1;
+    background: var(--surface-2);
     padding: 12px;
     border-radius: 8px;
     margin-top: 16px;
@@ -2774,7 +2774,7 @@ img[src*="limitlesstcg"] {
     border-collapse: separate;
     border-spacing: 0;
     box-shadow: 0 10px 24px rgba(17, 39, 66, 0.08);
-    background: white;
+    background: var(--surface-1);
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--cl-table-border);
@@ -2874,7 +2874,7 @@ img[src*="limitlesstcg"] {
     border-radius: 14px;
     overflow: hidden;
     border: 1px solid #d7e2f0;
-    background: #ffffff;
+    background: var(--surface-1);
     box-shadow: 0 12px 26px rgba(18, 42, 66, 0.1);
 }
 
@@ -2991,7 +2991,7 @@ img[src*="limitlesstcg"] {
 .city-league-loading-indicator {
     text-align: center;
     padding: 40px;
-    color: #999;
+    color: var(--ink-3);
 }
 /* Modular styles for average mode toggle bar */
 .avg-mode-toggle-bar {
@@ -3035,8 +3035,8 @@ img[src*="limitlesstcg"] {
 .proxy-queue-empty {
     padding: 20px;
     text-align: center;
-    color: #555;
-    background: #fff;
+    color: var(--ink-2);
+    background: var(--surface-1);
     border: 2px dashed #d0d7de;
     border-radius: 10px;
 }
@@ -3169,7 +3169,7 @@ img[src*="limitlesstcg"] {
     gap: 4px;
 }
 .build-info-card-score {
-    color: #888;
+    color: var(--ink-3);
     font-family: monospace;
     font-size: 0.82em;
     text-align: right;
@@ -3427,7 +3427,7 @@ img[src*="limitlesstcg"] {
 .proxy-warning-list {
     margin: 0;
     padding-left: 20px;
-    color: #4a4a4a;
+    color: var(--ink-2);
 }
 .proxy-warning-list li {
     line-height: 1.4;
@@ -3450,7 +3450,7 @@ img[src*="limitlesstcg"] {
     grid-template-columns: 66px minmax(0, 1fr);
     gap: 10px;
     align-items: start;
-    background: white;
+    background: var(--surface-1);
     border: 1px solid #e1e8ed;
     border-radius: 10px;
     padding: 10px;
@@ -3468,12 +3468,12 @@ img[src*="limitlesstcg"] {
 }
 .proxy-queue-card .proxy-queue-card-title {
     font-weight: 800;
-    color: #2c3e50;
+    color: var(--ink);
     line-height: 1.25;
 }
 .proxy-queue-card .proxy-queue-card-print {
     font-size: 0.9em;
-    color: #555;
+    color: var(--ink-2);
     margin-top: 2px;
 }
 .proxy-queue-card .proxy-queue-card-controls {
@@ -3622,7 +3622,7 @@ img[src*="limitlesstcg"] {
 
 .btn-system-secondary {
     background: #e1e8ed;
-    color: #2c3e50;
+    color: var(--ink);
     font-weight: 700;
     border: 2px solid #ccd6dd;
     border-radius: 8px;
@@ -3705,7 +3705,7 @@ img[src*="limitlesstcg"] {
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: #999;
+    color: var(--ink-3);
     padding: 4px 8px;
     border-radius: 8px;
     line-height: 1;
@@ -3749,7 +3749,7 @@ img[src*="limitlesstcg"] {
 }
 .draw-sim-combo-desc {
     font-size: 12px;
-    color: #888;
+    color: var(--ink-3);
     margin: 0 0 10px 0;
 }
 .draw-sim-combo-badges {
@@ -3832,14 +3832,14 @@ img[src*="limitlesstcg"] {
 .setup-modal-heading.green { color: #27ae60; }
 .setup-modal-description {
     margin-bottom: 15px;
-    color: #555;
+    color: var(--ink-2);
     font-size: 1.05em;
 }
 .setup-modal-label {
     display: block;
     font-weight: bold;
     margin-bottom: 8px;
-    color: #2c3e50;
+    color: var(--ink);
 }
 .setup-modal-textarea {
     width: 100%;
@@ -3857,7 +3857,7 @@ img[src*="limitlesstcg"] {
     padding: 10px 12px;
     border-radius: 8px;
     font-size: 14px;
-    background: white;
+    background: var(--surface-1);
     cursor: pointer;
 }
 .setup-modal-select.player1 { border: 2px solid #3B4CCA; }
@@ -3893,7 +3893,7 @@ img[src*="limitlesstcg"] {
     /* Waagerecht ueber --page-gutter: gleiche Lage wie .current-meta-content,
        eine randlose Seitenflaeche und keine Karte. */
     padding: 12px var(--page-gutter);
-    background: #ffffff;
+    background: var(--surface-1);
 }
 
 /* Inline-style overrides for form labels in deck analysis */
@@ -4789,7 +4789,7 @@ img[src*="limitlesstcg"] {
     margin: 0 0 6px;
     font-size: 1.02rem;
     font-weight: 800;
-    color: #111827;
+    color: var(--ink);
 }
 .empty-state__body {
     margin: 0 auto 14px;
@@ -4891,7 +4891,7 @@ img[src*="limitlesstcg"] {
     padding: 8px 14px;
     border: 1.5px solid rgba(59, 76, 202, 0.35);
     border-radius: 10px;
-    background: #fff;
+    background: var(--surface-1);
     color: #3B4CCA;
     font-weight: 700;
     font-size: 0.9rem;

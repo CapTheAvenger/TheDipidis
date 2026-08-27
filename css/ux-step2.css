@@ -11,7 +11,7 @@
 }
 
 .app-empty-state .deck-builder-empty-title {
-    color: #2c3e50;
+    color: var(--ink);
 }
 
 .app-empty-state .deck-builder-empty-text {

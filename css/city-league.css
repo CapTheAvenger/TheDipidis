@@ -2,14 +2,14 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 16px 20px;
-    background: white;
+    background: var(--surface-1);
     border-radius: 12px;
 }
 .tutorial-section {
     margin-bottom: 24px;
 }
 .tutorial-section-title {
-    color: #2c3e50;
+    color: var(--ink);
     border-bottom: 3px solid #3498db;
     padding-bottom: 10px;
     margin-bottom: 20px;
@@ -19,7 +19,7 @@
 .tutorial-section-desc {
     font-size: 1.1em;
     line-height: 1.8;
-    color: #555;
+    color: var(--ink-2);
 }
 /* ── Visual Quick-Start Guide ─────────────────────────────────────
  * Image placeholder slots that gracefully fall back to a captioned
@@ -39,7 +39,7 @@
 }
 .tutorial-screenshot {
     margin: 0;
-    background: #f8fafc;
+    background: var(--surface-0);
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     overflow: hidden;
@@ -109,7 +109,7 @@
     margin-top: 18px;
 }
 .tutorial-telegram-feature {
-    background: #ffffff;
+    background: var(--surface-1);
     border-radius: 10px;
     padding: 18px 18px 14px;
     border: 1px solid #ddd6fe;
@@ -183,12 +183,12 @@
 .sandbox-tip-box {
     text-align: center;
     padding: 20px;
-    background: linear-gradient(to bottom, #ffffff, #f0f4f8);
+    background: linear-gradient(to bottom, var(--surface-1), #f0f4f8);
     border-radius: 12px;
     border: 2px dashed #b3d9ff;
 }
 .sandbox-tip-text {
-    color: #555;
+    color: var(--ink-2);
     font-size: 1.05em;
     font-weight: 600;
     margin-bottom: 12px;
@@ -224,7 +224,7 @@
     transition: transform 0.2s;
 }
 .sandbox-container {
-    background: white;
+    background: var(--surface-1);
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -261,7 +261,7 @@
     margin-bottom: 24px;
 }
 .sandbox-player-panel {
-    background: #f8f9fa;
+    background: var(--surface-0);
     padding: 20px;
     border-radius: 12px;
     position: relative;
@@ -314,7 +314,7 @@
     background: #E3350D;
 }
 .sandbox-player-hint {
-    color: #666;
+    color: var(--ink-2);
     font-size: 0.9em;
     margin-bottom: 10px;
 }
@@ -329,7 +329,7 @@
     resize: vertical;
     margin-bottom: 15px;
     box-sizing: border-box;
-    background: #fff;
+    background: var(--surface-1);
 }
 .sandbox-player-status-row {
     display: flex;
@@ -339,8 +339,8 @@
 .sandbox-player-status {
     font-size: 13px;
     font-weight: 800;
-    color: #7f8c8d;
-    background: #eee;
+    color: var(--ink-3);
+    background: var(--surface-2);
     padding: 4px 10px;
     border-radius: 12px;
 }
@@ -401,10 +401,10 @@
     gap: 12px;
 }
 .proxy-panel {
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--line);
     border-radius: 10px;
     padding: 14px;
-    background: #fff;
+    background: var(--surface-1);
     overflow: hidden;
     min-width: 0;
 }
@@ -417,7 +417,7 @@
 .proxy-import-decklist-panel {}
 .proxy-panel-title {
     margin: 0 0 10px 0;
-    color: #2c3e50;
+    color: var(--ink);
     font-size: 1.1em;
     font-weight: 700;
 }
@@ -432,13 +432,13 @@
     font-size: 13px;
     min-width: 0;
     color: #1f2937;
-    background: #fff;
+    background: var(--surface-1);
 }
 /* Make the placeholder visibly distinct from real content. Without this
    the example text "4 Buddy-Buddy Poffin SVI 186" reads as if the
    textarea is pre-filled with actual cards (mono font, dark colour). */
 .proxy-decklist-input::placeholder {
-    color: #9ca3af;
+    color: var(--ink-3);
     font-style: italic;
     opacity: 1;
 }
@@ -481,7 +481,7 @@
     color: white;
 }
 .proxy-container {
-    background: white;
+    background: var(--surface-1);
     padding: 16px;
     border-radius: 14px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.08);
@@ -522,7 +522,7 @@
     border-radius: 8px;
     padding: 6px 10px;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--ink);
     font-size: 13px;
 }
 .proxy-header-unique {}
@@ -550,7 +550,7 @@
 }
 .past-meta-deck-summary-title {
     margin: 0;
-    color: #2c3e50;
+    color: var(--ink);
 }
 .past-meta-deck-count {
     font-weight: bold;
@@ -559,11 +559,11 @@
 .past-meta-deck-count-unique {
     font-weight: 500;
     font-size: 0.85em;
-    color: #666;
+    color: var(--ink-2);
     margin-left: 8px;
 }
 .past-meta-deck-price {
-    background: white;
+    background: var(--surface-1);
     border: 2px solid #2ecc71;
     color: #27ae60;
     padding: 6px 14px;
@@ -574,7 +574,7 @@
 .past-meta-hand-stats {
     display: none;
     padding: 8px 15px;
-    background: #f8f9fa;
+    background: var(--surface-0);
     border-radius: 6px;
     margin-bottom: 8px;
 }
@@ -598,7 +598,7 @@
     font-size: 1.3em;
     font-weight: 700;
     margin-bottom: 12px;
-    color: #2c3e50;
+    color: var(--ink);
 }
 .past-meta-stats-grid {
     display: flex;
@@ -787,7 +787,7 @@
     border: 2px solid #e0e5f0;
     border-radius: 10px;
     font-size: 0.95em;
-    background: #fff;
+    background: var(--surface-1);
     transition: border-color 0.2s, box-shadow 0.2s;
     font-family: 'Nunito', sans-serif;
 }
@@ -944,7 +944,7 @@
 .current-meta-hand-stats {
     display: none;
     padding: 8px 15px;
-    background: #f8f9fa;
+    background: var(--surface-0);
     border-radius: 6px;
     margin-bottom: 8px;
 }
@@ -968,7 +968,7 @@
     font-size: 1.3em;
     font-weight: 700;
     margin-bottom: 12px;
-    color: #2c3e50;
+    color: var(--ink);
 }
 .current-meta-stats-grid {
     display: flex;
@@ -1037,15 +1037,15 @@
     min-width: 28px;
 }
 .top256-tournament {
-    color: #374151;
+    color: var(--ink-2);
     font-weight: 500;
 }
 .top256-date {
-    color: #9ca3af;
+    color: var(--ink-3);
     font-size: 0.82em;
 }
 .current-meta-matchups-title {
-    color: #2c3e50;
+    color: var(--ink);
     margin-top: 0;
     margin-bottom: 25px;
     font-size: 1.15em;
@@ -1101,7 +1101,7 @@
     border: 2px solid #e0e5f0;
     border-radius: 10px;
     font-size: 0.95em;
-    background: #fff;
+    background: var(--surface-1);
     transition: border-color 0.2s, box-shadow 0.2s;
     font-family: 'Nunito', sans-serif;
 }
@@ -1115,7 +1115,7 @@
     top: 100%;
     left: 0;
     right: 0;
-    background: white;
+    background: var(--surface-1);
     border: 2px solid #bbb;
     border-top: none;
     border-radius: 0 0 4px 4px;
@@ -1127,7 +1127,7 @@
 .current-meta-matchup-details {
     margin-top: 15px;
     display: none;
-    background: #ecf0f1;
+    background: var(--surface-2);
     padding: 15px;
     border-radius: 4px;
 }
@@ -1177,7 +1177,7 @@
     border: 2px solid #e0e5f0;
     border-radius: 10px;
     font-size: 0.95em;
-    background: #fff;
+    background: var(--surface-1);
     transition: border-color 0.2s, box-shadow 0.2s;
     font-family: 'Nunito', sans-serif;
 }
@@ -1226,7 +1226,7 @@
 }
 .current-meta-deck-summary-title {
     margin: 0;
-    color: #2c3e50;
+    color: var(--ink);
 }
 .current-meta-deck-count {
     font-weight: bold;
@@ -1235,11 +1235,11 @@
 .current-meta-deck-count-unique {
     font-weight: 500;
     font-size: 0.85em;
-    color: #666;
+    color: var(--ink-2);
     margin-left: 8px;
 }
 .current-meta-deck-price {
-    background: white;
+    background: var(--surface-1);
     border: 2px solid #2ecc71;
     color: #27ae60;
     padding: 6px 14px;
@@ -1270,7 +1270,7 @@
     padding: 8px 12px;
     border: 1.5px solid #d0d7e2;
     border-radius: 8px;
-    background: #fff;
+    background: var(--surface-1);
     color: #1a2332;
     font-size: 0.95em;
     font-family: inherit;
@@ -1306,7 +1306,7 @@
     border-radius: 8px;
     font-weight: 600;
     border: 2px solid #d6dde6;
-    background: #f3f5f8;
+    background: var(--surface-2);
     color: #6b7280;
     cursor: pointer;
     transition: background 0.18s, border-color 0.18s, color 0.18s,
@@ -1316,7 +1316,7 @@
 .current-meta-format-btn:hover:not(.active) {
     background: #e8edf4;
     border-color: #b9c2cf;
-    color: #2c3e50;
+    color: var(--ink);
 }
 .current-meta-format-btn.active {
     background: #3B4CCA;
@@ -1332,7 +1332,7 @@
 }
 .current-meta-filter-status {
     margin-left: 15px;
-    color: #333;
+    color: var(--ink);
     font-weight: 600;
 }
 /* Der Filter "Major Tournament Decks" kann in einem Format, in dem noch
@@ -1380,9 +1380,9 @@
 .city-league-meta-card-panel {
     margin-top: 30px;
     padding: 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, var(--surface-0) 0%, #e9ecef 100%);
     border-radius: 10px;
-    border: 2px solid #dee2e6;
+    border: 2px solid var(--line);
 }
 .city-league-meta-card-header {
     display: flex;
@@ -1397,7 +1397,7 @@
 }
 .city-league-meta-card-count {
     font-size: 1em;
-    color: #333;
+    color: var(--ink);
     font-weight: 600;
 }
 .city-league-meta-card-filters {
@@ -1510,7 +1510,7 @@
     border: 2px solid #e0e5f0;
     border-radius: 10px;
     font-size: 0.95em;
-    background: #fff;
+    background: var(--surface-1);
     transition: border-color 0.2s, box-shadow 0.2s;
     font-family: 'Nunito', sans-serif;
 }
@@ -1587,7 +1587,7 @@
 }
 .city-league-mydeck-empty {
     text-align: center;
-    color: #666;
+    color: var(--ink-2);
     padding: 40px;
 }
 .city-league-action-bar {
@@ -1635,13 +1635,13 @@
     padding: 5px 12px;
     font-size: 0.88em;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--ink);
     white-space: nowrap;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     transition: background 0.15s, border-color 0.15s;
 }
 .toolbar-metric:hover {
-    background: #fff;
+    background: var(--surface-1);
     border-color: rgba(59,76,202,0.22);
 }
 .toolbar-metric-icon {
@@ -1694,7 +1694,7 @@
 /* --- End inline toolbar metrics --- */
 .city-league-deck-summary-title {
     margin: 0;
-    color: #2c3e50;
+    color: var(--ink);
 }
 .city-league-deck-count {
     font-weight: bold;
@@ -1703,11 +1703,11 @@
 .city-league-deck-count-unique {
     font-weight: 500;
     font-size: 0.85em;
-    color: #666;
+    color: var(--ink-2);
     margin-left: 8px;
 }
 .city-league-deck-price {
-    background: white;
+    background: var(--surface-1);
     border: 2px solid #2ecc71;
     color: #27ae60;
     padding: 6px 14px;
@@ -1775,7 +1775,7 @@
     font-size: 0.9em;
     color: var(--pokemon-blue, #3B4CCA);
     font-weight: 800;
-    background: #fff;
+    background: var(--surface-1);
     border: 1px solid rgba(59, 76, 202, 0.22);
     padding: 5px 12px;
     border-radius: 20px;
@@ -1800,7 +1800,7 @@
     border: 2px solid #e0e5f0;
     border-radius: 10px;
     font-size: 0.95em;
-    background: #fff;
+    background: var(--surface-1);
     transition: border-color 0.2s, box-shadow 0.2s;
     font-family: 'Nunito', sans-serif;
 }
@@ -1942,7 +1942,7 @@
 .btn-reset-date {
     padding: 7px 12px;
     font-size: 1.1em;
-    background: #fff;
+    background: var(--surface-1);
     color: #6b7280;
     border: 1px solid #d0d5e0;
     border-radius: 8px;
@@ -1960,7 +1960,7 @@
 }
 .date-label {
     font-size: 0.95em;
-    color: #333;
+    color: var(--ink);
     font-weight: 600;
     display: block;
     margin-bottom: 5px;
@@ -2165,7 +2165,7 @@
     padding: 8px 36px 8px 10px;
     border: 1px solid #cfd8e3;
     border-radius: 10px;
-    background-color: #ffffff;
+    background-color: var(--surface-1);
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
@@ -2411,7 +2411,7 @@
     gap: 8px;
     padding: 8px;
     margin-bottom: 10px;
-    background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
+    background: linear-gradient(135deg, var(--surface-0) 0%, #eef4ff 100%);
     border: 1px solid #dbe5f2;
     border-radius: 12px;
 }
@@ -2422,7 +2422,7 @@
     border: 1px solid #d4deec;
     border-radius: 10px;
     padding: 4px;
-    background: #ffffff;
+    background: var(--surface-1);
 }
 
 #current-analysis .current-meta-meta-share-btn,
@@ -2607,7 +2607,7 @@
 }
 
 #past-meta .past-meta-table-zebra tbody tr:nth-child(even) {
-    background: #f8fafc;
+    background: var(--surface-0);
 }
 
 @media (max-width: 768px) {
@@ -2721,7 +2721,7 @@
 }
 .past-meta-empty-state {
     padding: 12px 14px;
-    background: #f8fafc;
+    background: var(--surface-0);
     border-radius: 10px;
     border: 1px dashed #d1d5db;
     font-style: italic;
@@ -2730,7 +2730,7 @@
     padding: 14px 16px;
     color: #6b7280;
     font-style: italic;
-    background: #f8fafc;
+    background: var(--surface-0);
     border-radius: 10px;
 }
 .past-meta-stat-mono {
@@ -2745,7 +2745,7 @@
 .past-meta-matchup-title {
     font-size: 1.05rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--ink);
     margin: 18px 0 10px 0;
 }
 /* Matchup Matrix table — mirrors the rest of the app's table contract:
@@ -2759,7 +2759,7 @@
     overflow-x: auto;
     border-radius: 10px;
     border: 1px solid #d7e2f0;
-    background: #fff;
+    background: var(--surface-1);
 }
 .past-meta-matchup-table {
     width: 100%;
@@ -2916,7 +2916,7 @@
    highlights apply per row: green when all 3 agree, yellow when
    2 of 3 agree, red when only 1 source carries the card. */
 .three-way-compare-dialog {
-    background: #fff;
+    background: var(--surface-1);
     border-radius: 14px;
     width: min(96vw, 980px);
     max-height: 92vh;
@@ -2927,7 +2927,7 @@
 }
 .three-way-compare-header {
     padding: 14px 18px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--line);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2942,8 +2942,8 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    background: #fff;
+    border: 1px solid var(--line);
+    background: var(--surface-1);
     font-size: 1.2rem;
     cursor: pointer;
     color: #6b7280;
@@ -2966,8 +2966,8 @@
     border-bottom: 1px solid #f1f5f9;
 }
 .three-way-compare-table th {
-    background: #f8fafc;
-    color: #374151;
+    background: var(--surface-0);
+    color: var(--ink-2);
     font-weight: 700;
     position: sticky;
     top: 0;
@@ -2977,7 +2977,7 @@
 .three-way-compare-table td.three-way-card-col {
     text-align: left;
     font-weight: 600;
-    color: #111827;
+    color: var(--ink);
     min-width: 220px;
 }
 .three-way-compare-table tr.three-way-row-all { background: #ecfdf5; }

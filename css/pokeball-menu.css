@@ -12,7 +12,7 @@
 
 .pokeball-btn {
     width: 50px; height: 50px; border-radius: 50%;
-    background: #fff; border: 3px solid #333; position: relative;
+    background: var(--surface-1); border: 3px solid #333; position: relative;
     cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.35);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     overflow: hidden; flex-shrink: 0;
@@ -24,7 +24,7 @@
 }
 .pokeball-bottom {
     position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
-    background: #fff; transition: transform 0.4s;
+    background: var(--surface-1); transition: transform 0.4s;
 }
 .pokeball-center {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -40,7 +40,7 @@
     position: absolute;
     top: 70px;
     left: 0;
-    background: #fff;
+    background: var(--surface-1);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     width: 280px;
@@ -73,7 +73,7 @@
 .menu-item:last-child { border-bottom: none; }
 .menu-item:hover,
 .menu-item:focus-visible { background: var(--bg-light); color: var(--pokemon-blue); padding-left: 26px; outline: 2px solid var(--pokemon-blue); outline-offset: -2px; }
-.menu-item.active { background: #f0f4f8; color: var(--pokemon-blue); border-left: 5px solid var(--pokemon-red); }
+.menu-item.active { background: var(--surface-2); color: var(--pokemon-blue); border-left: 5px solid var(--pokemon-red); }
 
 .menu-icon {
     width: 18px;
@@ -97,10 +97,10 @@
     padding: 12px 18px;
     text-align: left;
     border: none;
-    background: #f8fafc;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--surface-0);
+    border-bottom: 1px solid var(--line);
     cursor: pointer;
-    color: #111827;
+    color: var(--ink);
     font-size: 14px;
     font-weight: 800;
     display: flex;
@@ -134,7 +134,7 @@
 
 .menu-submenu {
     display: none;
-    background: #ffffff;
+    background: var(--surface-1);
 }
 .menu-submenu.open {
     display: block;
@@ -209,7 +209,7 @@
 .action-bar .action-divider:has(+ .d-none),
 .action-bar .d-none + .action-divider { display: none; }
 .btn-modern {
-    background: #fff; border: 1px solid #d0d5e0; color: var(--text-dark);
+    background: var(--surface-1); border: 1px solid #d0d5e0; color: var(--text-dark);
     font-weight: 700; padding: 7px 13px; border-radius: 8px;
     cursor: pointer; transition: all 0.2s ease; display: inline-flex;
     align-items: center; gap: 6px; font-size: 0.88em; font-family: 'Nunito', sans-serif;
@@ -352,7 +352,7 @@
     margin: 0 0 6px;
     font-size: 1.02rem;
     font-weight: 800;
-    color: #111827;
+    color: var(--ink);
 }
 .deck-builder-empty-text {
     margin: 0 auto 14px;

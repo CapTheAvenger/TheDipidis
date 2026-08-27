@@ -402,7 +402,7 @@
         .control-input {
             width: 100%;
             padding: 10px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--line);
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.2s, box-shadow 0.2s;
@@ -788,7 +788,7 @@
             display: none;
             /* waagerecht: --page-gutter, siehe tokens.css */
             padding: 20px var(--page-gutter);
-            background: white;
+            background: var(--surface-1);
             min-height: 400px;
         }
         
@@ -1227,7 +1227,7 @@
         
         .deck-builder h2 {
             margin-bottom: 12px;
-            color: #333;
+            color: var(--ink);
         }
         
         .builder-controls {
@@ -1592,7 +1592,7 @@
         
         /* Cards Filter Styles */
         .cards-filter-section {
-            background: white;
+            background: var(--surface-1);
             padding: 16px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -1600,7 +1600,7 @@
         }
         
         .cards-filter-group {
-            background: white;
+            background: var(--surface-1);
         }
         
         .cards-filter-header {
@@ -1636,10 +1636,10 @@
         .cards-filter-options {
             max-height: 250px;
             overflow-y: auto;
-            border: 2px solid #e0e0e0;
+            border: 2px solid var(--line);
             border-radius: 6px;
             padding: 10px;
-            background: #fafafa;
+            background: var(--surface-0);
             scrollbar-width: thin;
             scrollbar-color: var(--accent) #f0f0f0;
             transition: all 0.3s ease;
@@ -1659,7 +1659,7 @@
         }
         
         .cards-filter-options::-webkit-scrollbar-track {
-            background: #f0f0f0;
+            background: var(--surface-2);
             border-radius: 4px;
         }
         
@@ -1776,7 +1776,7 @@
         }
         
         .card-database-item {
-            background: white;
+            background: var(--surface-1);
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -3590,7 +3590,7 @@
                 border-radius: 10px !important;
                 overflow: hidden !important;
                 box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
-                background: white !important;
+                background: var(--surface-1) !important;
                 display: flex !important;
                 flex-direction: column !important;
             }
@@ -3629,7 +3629,7 @@
                 display: -webkit-box !important;
                 -webkit-line-clamp: 2 !important;
                 -webkit-box-orient: vertical !important;
-                color: #333 !important;
+                color: var(--ink) !important;
             }
             
             /* Meta-Infos (Set, Type) kompakt */
@@ -3645,7 +3645,7 @@
                 padding: 2px 5px !important;
                 border-radius: 3px !important;
                 background: #e0e0e0 !important;
-                color: #333 !important;
+                color: var(--ink) !important;
                 font-weight: 600 !important;
             }
             
@@ -3653,8 +3653,8 @@
                 font-size: 10px !important;
                 padding: 2px 5px !important;
                 border-radius: 3px !important;
-                background: #f5f5f5 !important;
-                color: #333 !important;
+                background: var(--surface-2) !important;
+                color: var(--ink) !important;
                 font-weight: 600 !important;
             }
             
@@ -5856,7 +5856,7 @@ details[open] > .tier-trending-summary::after {
     min-width: 0;
     max-width: none;
     width: 100%;
-    background: white;
+    background: var(--surface-1);
     border-radius: 6px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0,0,0,0.10);
@@ -5890,7 +5890,7 @@ details[open] > .tier-trending-summary::after {
     aspect-ratio: 2.5 / 3.5;
     object-fit: cover;
     display: block;
-    background: #f5f5f5;
+    background: var(--surface-2);
 }
 
 .top-card-stats {
@@ -7675,7 +7675,7 @@ body.battle-journal-open {
    read as interactive rather than purely decorative. */
 .tab-help-btn {
     border: none;
-    background-color: white;
+    background-color: var(--surface-1);
     cursor: pointer;
     padding: 0;
     width: 32px;
@@ -7695,7 +7695,7 @@ body.battle-journal-open {
 .tab-help-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    background-color: #f0f0f0;
+    background-color: var(--surface-2);
 }
 .tab-help-btn:active {
     transform: scale(0.95);
@@ -8538,7 +8538,7 @@ body.battle-journal-open {
     position: sticky;
     left: 0;
     z-index: 2;
-    background-color: #ffffff;
+    background-color: var(--surface-1);
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
 }
 
@@ -10237,7 +10237,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     padding: 40px 24px;
     max-width: 640px;
     text-align: center;
-    background: #f8fafc;
+    background: var(--surface-0);
     border: 2px dashed #cbd5e1;
     border-radius: 14px;
 }

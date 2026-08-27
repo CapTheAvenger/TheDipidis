@@ -102,6 +102,14 @@
        drei Untergruende: 5,25 / 4,94 / 4,73. */
     --ink-3: #646c80;
 
+    /* Chips in der Kartendatenbank: Set und Kartentyp. Semantisch
+     * gefaerbt, deshalb eigene Tokens statt der neutralen Flaechen. */
+    --chip-set-bg: #e8eefc;
+    --chip-set-ink: #2e436f;
+    --chip-typ-bg: #dff6ec;
+    --chip-typ-ink: #116449;
+    --ui-outline-bg-hover: #f5f8fd;
+
     /* ── Marke: sparsam ──────────────────────────────────────────── */
     --brand: #3B4CCA;
     --brand-ink: #2a3899;
@@ -233,4 +241,35 @@
      * unsichtbar; die Innenkante übernimmt die Kantenzeichnung. */
     --e-1: 0 1px 3px rgba(0, 0, 0, .5);
     --e-2: 0 2px 12px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .035);
+
+    --chip-set-bg: #1b2440;
+    --chip-set-ink: #a8bcf0;
+    --chip-typ-bg: #12332a;
+    --chip-typ-ink: #6fd8ab;
+
+    /* Die alten Namen aus der Zeit vor der Tokenschicht. Sie stecken
+     * noch in rund hundert Regeln — ohne dunkle Werte bleibt genau dort
+     * alles hell. Sie zeigen jetzt auf dieselben Flaechen wie die neuen. */
+    --bg-body: var(--surface-0);
+    --bg-light: var(--surface-0);
+    --bg-white: var(--surface-1);
+    --bg-muted: var(--surface-2);
+    --text-main: var(--ink);
+    --text-primary: var(--ink);
+    --text-dark: var(--ink);
+    --text-muted: var(--ink-2);
+    --text-light: var(--ink-3);
+    --border-color: var(--line);
+    --border-light: var(--line);
+    --border-input: var(--line);
+    --ui-input-bg: var(--surface-1);
+
+    /* Die --ui-*-Familie aus ux-step1.css setzt ihre Flaechen mit
+     * !important. Ohne dunkle Werte gewinnt dort jeder Knopf und jedes
+     * Eingabefeld gegen alles andere und bleibt weiss. */
+    --ui-outline-bg: var(--surface-1);
+    --ui-outline-border: var(--line-strong);
+    --ui-outline-text: var(--ink);
+    --ui-outline-bg-hover: var(--surface-2);
+    --ui-input-border: var(--line-strong);
 }

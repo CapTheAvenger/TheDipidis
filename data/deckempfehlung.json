@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-08-25 17:21:27+00:00",
+ "erzeugt": "2026-08-27 21:18:25+00:00",
  "format": "TEF-PBL",
  "betriebsart": "B",
  "betriebsart_klartext": "Kaltstart — TEF-PBL hat noch kein Praesenzturnier, Anker ist die Vorepoche TEF-POR",
@@ -63,12 +63,12 @@
  ],
  "ankerspieler_gesamt": 16264,
  "online_abdeckung": {
-  "schnappschuss": "2026-08-25",
-  "anteil_unbekannt": 18.59,
+  "schnappschuss": "2026-08-27",
+  "anteil_unbekannt": 18.33,
   "groesste_unbekannte": [
    {
     "deck": "Mega Excadrill",
-    "anteil": 7.78
+    "anteil": 7.68
    },
    {
     "deck": "Dhelmise",
@@ -76,15 +76,15 @@
    },
    {
     "deck": "Toucannon",
-    "anteil": 2.92
+    "anteil": 2.82
    },
    {
     "deck": "Mega Chandelure",
-    "anteil": 1.19
+    "anteil": 1.17
    },
    {
     "deck": "Mega Darkrai",
-    "anteil": 0.45
+    "anteil": 0.44
    }
   ]
  },

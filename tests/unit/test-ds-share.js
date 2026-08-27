@@ -134,10 +134,10 @@ describe('ds-share: die Entscheidungen gegen die Vorlage', () => {
     });
 
     it('malt keine Zeile ohne ihre Partienzahl', () => {
-        assert.match(SHARE, /L\('Partien', 'Games'\)/,
-            'Die Spalte mit der Partienzahl ist aus der Matchup-Tabelle verschwunden.');
+        assert.match(SHARE, /L\('Matches', 'Games'\)/,
+            'Die Spalte mit der Matchzahl ist aus der Matchup-Tabelle verschwunden.');
         assert.match(SHARE, /num\(m\.games, 0\)/,
-            'Die Partienzahl wird nicht mehr je Zeile gemalt.');
+            'Die Matchzahl wird nicht mehr je Zeile gemalt.');
     });
 
     it('benutzt keine grün↔rot-Skala', () => {

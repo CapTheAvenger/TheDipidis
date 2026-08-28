@@ -99,6 +99,34 @@ describe('der Abbruch bei fehlender Kartenkunst', () => {
     const karten = (n) => Array.from({ length: n }, (_, i) =>
         ({ rang: i + 1, name: 'Karte ' + i, share: 50, url: 'u' + i }));
 
+    it('setzt Format und Format-Staples in die Kopfzeile', async () => {
+        // Der Titel im Bild ist kurz ("Meistgespielte Karten"); die
+        // Klammer "(Format-Staples)" der Seitenueberschrift lief dort
+        // unter das Logo, weil der Kopf nur 560 px breit ist. Sie steht
+        // jetzt in der Kopfzeile darueber, zusammen mit dem Format.
+        let gesehen = null;
+        const w = bau({});
+        const alt = w;
+        // staplesPostCanvas ist eine Attrappe; die Spezifikation kommt
+        // ueber den Zaehler nicht heraus, darum hier ein eigener Bau.
+        const QUELLE2 = QUELLE;
+        const attrappen = {
+            toast: () => {}, L: (de) => de,
+            spaceFacts: () => ({ format: 'TEF-PBL', source: 'Limitless Online', stamp: '28.08.2026' }),
+            activeSpace: () => 'gl', today: () => '28.08.2026',
+            markenBild: () => Promise.resolve(null), MC_BLUETEN: [],
+            loadImage: () => Promise.resolve({}),
+            staplesPostCanvas: (spec) => { gesehen = spec; return {}; },
+            deliver: () => true, safeName: (s) => s, console: { error: () => {} },
+        };
+        const fn = new Function(...Object.keys(attrappen), QUELLE2 + '\nreturn shareStaplesPost;')(...Object.values(attrappen));
+        await fn({ karten: karten(15), titel: 'Meistgespielte Karten' });
+        assert.equal(gesehen.kicker, 'TEF-PBL \u00b7 FORMAT-STAPLES');
+        assert.equal(gesehen.titel, 'Meistgespielte Karten');
+        assert.ok(!/Format-Staples/.test(gesehen.titel), 'die Klammer steht wieder im Titel');
+        assert.ok(alt);
+    });
+
     it('macht ohne Karten gar nichts', async () => {
         const w = bau({});
         assert.equal(await w.fn({ karten: [] }), false);

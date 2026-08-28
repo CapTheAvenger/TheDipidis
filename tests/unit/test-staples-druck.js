@@ -38,14 +38,13 @@ function schneide(kopf, bis) {
 const WIDGET = schneide('function renderTopCardsWidget(topCards)',
                         '/**\n         * Render and inject Top Cards Widget');
 
-function bauWidget(lang, modus) {
+function bauWidget(lang) {
     const attrappen = {
         t: (k) => ({
             'tier.mostUsedCards': 'Meistgespielte Karten',
-            'staples.printPlayed': 'Gespielter Druck',
             'cl.rarityLow': 'Niedrige Seltenheit',
             'cl.rarityMax': 'Max. Seltenheit',
-            'staples.printHint': 'Seltenheit aendert nur das Bild, nie die Zahlen.',
+            'staples.printHint': 'Der Stern waehlt ein anderes Artwork — das aendert nur das Bild, nie die Zahlen.',
             'mc.generateImage': 'Bild generieren',
         }[k] || k),
         getLang: () => lang,
@@ -55,7 +54,6 @@ function bauWidget(lang, modus) {
         ladeStaplesAnzahl: () => 15,
         staplesAnzahl: () => 15,
         STAPLES_STUFEN: [15, 30],
-        ladeStaplesModus: () => modus || 'gespielt',
     };
     const fabrik = new Function(...Object.keys(attrappen),
         WIDGET + '\nreturn renderTopCardsWidget;');
@@ -79,12 +77,15 @@ describe('Format-Staples: der Stern oeffnet den Anzeige-Modus', () => {
         assert.match(html, /openRaritySwitcherFromDB\('Night Stretcher', 'ASC', '196', 'staples'\)/);
     });
 
-    it('bietet die drei Druck-Knoepfe und den Bild-Knopf an', () => {
+    it('bietet keinen Modus-Umschalter mehr an', () => {
+        // Betreiber am 28.08.2026: "generell brauchen wir da nicht
+        // gespielter Druck, niedrige Seltenheit und max Seltenheit
+        // anbieten, da bieten wir einfach nur default min rarity an und
+        // man kann ueber den Stern die Raritaet aendern."
         const html = bauWidget('de')(karten());
-        assert.match(html, /id="staplesDruck-gespielt"/);
-        assert.match(html, /id="staplesDruck-min"/);
-        assert.match(html, /id="staplesDruck-max"/);
-        assert.match(html, /staplesBildErzeugen\(\)/);
+        assert.ok(!/staplesDruck-/.test(html), 'die Modus-Knoepfe sind zurueck');
+        assert.ok(!/setStaplesModus/.test(html));
+        assert.match(html, /staplesBildErzeugen\(\)/, 'der Bild-Knopf fehlt');
     });
 
     it('sagt dazu, dass die Seltenheit keine Zahl bewegt', () => {
@@ -94,11 +95,12 @@ describe('Format-Staples: der Stern oeffnet den Anzeige-Modus', () => {
         assert.match(html, /nie die Zahlen/);
     });
 
-    it('markiert genau den gemerkten Modus als aktiv', () => {
-        const html = bauWidget('de', 'max')(karten());
-        assert.match(html, /class="btn-toggle-item active" id="staplesDruck-max"/);
-        assert.ok(!/class="btn-toggle-item active" id="staplesDruck-min"/.test(html));
-        assert.match(html, /id="staplesDruck-max"[^>]*aria-pressed="true"/);
+    it('nennt den Stern als den Weg zu einem anderen Artwork', () => {
+        // Wenn der Umschalter weg ist, muss der Hinweis sagen, wo man
+        // stattdessen wechselt.
+        const html = bauWidget('de')(karten());
+        assert.match(html, /Der Stern w/, 'der Hinweis nennt den Stern nicht');
+        assert.match(html, /nie die Zahlen/, 'der Hinweis laesst die Zahlen-Zusage weg');
     });
 });
 
@@ -129,7 +131,7 @@ describe('Format-Staples: Top 15 und Top 30', () => {
 });
 
 describe('Format-Staples: die Anzahl nimmt nur bekannte Stufen', () => {
-    const WAHL = schneide('async function setStaplesAnzahl(n)', '\n        window.setStaplesModus');
+    const WAHL = schneide('async function setStaplesAnzahl(n)', '\n        window.setStaplesAnzahl');
 
     function bau() {
         const gemerkt = {};
@@ -139,10 +141,8 @@ describe('Format-Staples: die Anzahl nimmt nur bekannte Stufen', () => {
             localStorage: { setItem: (k, v) => { gemerkt[k] = v; } },
             document: { querySelector: () => null },
             renderTopCardsWidget: () => '',
-            setStaplesModus: () => Promise.resolve(),
-            zeichneStaplesBilderNeu: () => {},
+            staplesDruckeAnwenden: () => Promise.resolve(),
             console: { warn: () => {} },
-            _staplesModus: 'gespielt',
             _staplesDaten: [],
         };
         const fabrik = new Function(...Object.keys(attrappen),
@@ -217,14 +217,14 @@ function bauWahl(opts) {
 const KARTE = { name: 'Ultra Ball', set_code: 'MEG', set_number: '131', image_url: 'bild/MEG-131.png' };
 
 describe('Format-Staples: die Druckwahl', () => {
-    it('gibt im Modus "gespielt" den Druck aus der Deckliste zurueck', () => {
-        const w = bauWahl({ aufloeser: () => { throw new Error('darf nicht gefragt werden'); } });
-        assert.deepEqual(w.fn(KARTE, 'gespielt'), { set: 'MEG', number: '131', url: 'bild/MEG-131.png' });
+    it('nimmt den Druck, den der Aufloeser der Seite nennt', () => {
+        const w = bauWahl({ aufloeser: () => ({ set: 'MEG', number: '196' }) });
+        assert.deepEqual(w.fn(KARTE, 'min'), { set: 'MEG', number: '196', url: 'bild/MEG-196.png' });
     });
 
-    it('nimmt bei "max" den Druck, den der Aufloeser der Seite nennt', () => {
-        const w = bauWahl({ aufloeser: () => ({ set: 'PLF', number: '122' }) });
-        assert.deepEqual(w.fn(KARTE, 'max'), { set: 'PLF', number: '122', url: 'bild/PLF-122.png' });
+    it('bleibt beim Druck aus der Deckliste, wenn der Aufloeser nichts nennt', () => {
+        const w = bauWahl({ aufloeser: () => null });
+        assert.deepEqual(w.fn(KARTE, 'min'), { set: 'MEG', number: '131', url: 'bild/MEG-131.png' });
     });
 
     it('gibt die geliehene globale Vorliebe zurueck', () => {
@@ -242,17 +242,24 @@ describe('Format-Staples: die Druckwahl', () => {
         assert.equal(d.set, 'MEG');
     });
 
+    it('zeigt immer den guenstigsten Druck, ohne Umschalter', () => {
+        const QUELLE = SRC.slice(SRC.indexOf('const STAPLES_DRUCK ='), SRC.indexOf('const STAPLES_DRUCK =') + 40);
+        assert.match(QUELLE, /const STAPLES_DRUCK = 'min';/);
+        assert.ok(!/localStorage\.getItem\(STAPLES_MODUS_KEY\)/.test(SRC),
+            'der Modus wird noch gemerkt');
+    });
+
     it('laesst das von Hand gewaehlte Artwork den Modus stechen', () => {
         const w = bauWahl({
             window: { anzeigeDruckFuer: () => ({ set: 'SSP', number: '251' }) },
             aufloeser: () => ({ set: 'PLF', number: '122' }),
         });
-        assert.deepEqual(w.fn(KARTE, 'max'), { set: 'SSP', number: '251', url: 'bild/SSP-251.png' });
+        assert.deepEqual(w.fn(KARTE, 'min'), { set: 'SSP', number: '251', url: 'bild/SSP-251.png' });
     });
 
     it('bleibt beim gespielten Druck, wenn Set oder Nummer fehlen', () => {
         const w = bauWahl({ aufloeser: () => ({ set: 'PLF', number: '122' }) });
         const ohne = { name: 'Ultra Ball', set_code: '', set_number: '', image_url: 'x.png' };
-        assert.deepEqual(w.fn(ohne, 'max'), { set: '', number: '', url: 'x.png' });
+        assert.deepEqual(w.fn(ohne, 'min'), { set: '', number: '', url: 'x.png' });
     });
 });

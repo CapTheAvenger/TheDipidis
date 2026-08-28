@@ -2011,7 +2011,8 @@
                 return { rang: k.rang, name: k.name, share: k.share, bild: bilder[i] };
             });
             var cv = staplesPostCanvas({
-                kicker: spec.kicker || (facts.format || 'FORMAT-STAPLES'),
+                kicker: spec.kicker || (facts.format
+                    ? facts.format + ' \u00b7 FORMAT-STAPLES' : 'FORMAT-STAPLES'),
                 titel: spec.titel, untertitel: spec.untertitel, modus: spec.modus,
                 karten: karten, fuss: fussTeile.join(' · ')
             }, { logo: teile[0], blueten: teile[1] });

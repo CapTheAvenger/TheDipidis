@@ -2717,8 +2717,13 @@
             }
             const deLbl = getLang() === 'de';
             const modusNamen = { gespielt: t('staples.printPlayed'), min: t('cl.rarityLow'), max: t('cl.rarityMax') };
+            /* Kurzer Titel fuers Bild. Die Ueberschrift der Seite lautet
+             * "Meistgespielte Karten (Format-Staples)" — im Bild laeuft
+             * die Klammer unter das Logo, weil der Kopf dort nur 560 px
+             * breit ist. Die Klammer steht ohnehin schon in der
+             * Kopfzeile darueber. */
             await window.DsShare.shareStaplesPost({
-                titel: t('tier.mostUsedCards'),
+                titel: t('staples.imageTitle'),
                 untertitel: deLbl
                     ? 'In wie vielen der ' + (_staplesDaten && _staplesDaten.totalArchetypes || '?') + ' Archetypen mit Deckliste die Karte steckt'
                     : 'How many of the ' + (_staplesDaten && _staplesDaten.totalArchetypes || '?') + ' archetypes with decklists play the card',

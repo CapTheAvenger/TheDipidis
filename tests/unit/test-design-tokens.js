@@ -238,10 +238,31 @@ describe('Phase 0: die beiden Layoutfehler', () => {
 
 describe('grün↔rot verschwindet dort, wo ohnehin gearbeitet wurde', () => {
     it('Auf-/Absteiger im Current Meta nutzen die divergierende Skala', () => {
-        assert.match(CM, /#currentMetaContent \.rank-up \{\s*\n\s*color:\s*var\(--dv-pos\)/);
-        assert.match(CM, /#currentMetaContent \.rank-down \{\s*\n\s*color:\s*var\(--dv-neg\)/);
-        assert.match(CM, /#currentMetaContent \.positive \{\s*\n\s*color:\s*var\(--dv-pos\)/);
-        assert.match(CM, /#currentMetaContent \.negative \{\s*\n\s*color:\s*var\(--dv-neg\)/);
+        /* 28.08.2026: die Textvariante --dv-pos-ink / --dv-neg-ink kam dazu.
+           Der Kommentar in tokens.css sagt seit jeher "Text traegt immer
+           eine Textfarbe" — die Fuellfarbe --dv-pos lag als color: bei
+           4,42:1, die Textvariante liegt bei 5,77:1. Der Test prueft
+           deshalb jetzt die staerkere Regel: hier steht TEXT, also muss
+           die Textvariante stehen, nicht die Fuellfarbe. */
+        assert.match(CM, /#currentMetaContent \.rank-up \{\s*\n\s*color:\s*var\(--dv-pos-ink\)/);
+        assert.match(CM, /#currentMetaContent \.rank-down \{\s*\n\s*color:\s*var\(--dv-neg-ink\)/);
+        assert.match(CM, /#currentMetaContent \.positive \{\s*\n\s*color:\s*var\(--dv-pos-ink\)/);
+        assert.match(CM, /#currentMetaContent \.negative \{\s*\n\s*color:\s*var\(--dv-neg-ink\)/);
+    });
+
+    it('die Textvariante ist in beiden Modi definiert und dunkler bzw. heller', () => {
+        const T = fs.readFileSync(path.join(ROOT, 'css', 'tokens.css'), 'utf8');
+        const hell = T.slice(0, T.indexOf(':root[data-theme="dark"]'));
+        const dunkel = T.slice(T.indexOf(':root[data-theme="dark"]'));
+        for (const name of ['--dv-pos-ink', '--dv-neg-ink']) {
+            assert.match(hell, new RegExp(name + ':\\s*#'), name + ' fehlt im Hellsatz');
+            assert.match(dunkel, new RegExp(name + ':\\s*#'), name + ' fehlt im Dunkelsatz');
+        }
+        /* Und sie muss wirklich abweichen — ein Alias auf die Fuellfarbe
+           waere gruen, saehe aber genauso schlecht aus wie vorher. */
+        const wert = (t, n) => (t.match(new RegExp(n + ':\\s*(#\\w+)')) || [])[1];
+        assert.notEqual(wert(hell, '--dv-pos-ink'), wert(hell, '--dv-pos'));
+        assert.notEqual(wert(hell, '--dv-neg-ink'), wert(hell, '--dv-neg'));
     });
 
     it('die alten Grüntöne stehen nicht mehr in dieser Datei', () => {

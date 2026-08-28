@@ -1582,8 +1582,247 @@
         });
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+     * Turnierbild fuer den Meta Call
+     *
+     * Der Betreiber am 28.08.2026: "dann kannst du ja vielleicht einfach
+     * die Moeglichkeit geben auf der Webseite, dass man den Turniernamen
+     * eingibt und die Anzahl Teilnehmer, und dass darauf dann berechnet
+     * wird [...] und dann drueckt man auf 'Bild generieren' und dann wird
+     * das Bild, wie fuer unseren Instagram-Post besprochen, generiert."
+     *
+     * Das Format ist 1080x1350 — Instagram-Hochkant. Grund, Blueten,
+     * Logo und Fuss stammen aus demselben Entwurf wie die Posts, damit
+     * jemand, der ueber Instagram kommt, die Seite wiedererkennt.
+     * ═══════════════════════════════════════════════════════════════ */
+
+    var MP = { W: 1080, H: 1350 };
+
+    /* Farben aus dem Logo (Grund) und aus der Feldtabelle der Seite
+     * (Tafel). Die Tafel sieht deshalb aus wie die Tabelle im Meta Call,
+     * nicht wie eine zweite Gestaltung daneben. */
+    var MC_FARBEN = {
+        creme:  '#F7EFE4',
+        matt:   '#A38FA8',
+        holz:   '#E3B276',
+        kopf:   '#1A2640',
+        zeileA: '#FFFFFF',
+        zeileB: '#F7F8FB',
+        name:   '#1A2640',
+        wert:   '#2F7FBF',
+        linie:  'rgba(26,38,64,.10)'
+    };
+
+    /* Bluetenlage B1 — dieselbe, die der Betreiber fuer die Posts
+     * freigegeben hat. [Datei, x, y, Breite, Drehung in Grad, Deckung].
+     * Die Koordinaten gelten fuer 1080 Breite, also eins zu eins. */
+    var MC_BLUETEN = [
+        ['b0', 812, -46, 234, -12, 0.95],
+        ['b3', 700,  96, 168,  22, 0.88],
+        ['b5', 968, 128, 132, -28, 0.90],
+        ['p1', 636,  16,  86,  34, 0.70],
+        ['p3', 560, 176,  62, -18, 0.55],
+        ['p0', 452,  60,  54,  12, 0.40],
+        ['p4', 386, 214,  44, -34, 0.30]
+    ];
+
+    function markenBild(name) {
+        return loadImage('images/marke/' + name + '.webp');
+    }
+
+    /* Der Grund: dieselben zwei Verlaeufe wie in der CSS-Fassung der
+     * Posts. Ein Radialverlauf oben rechts ueber einem dunklen
+     * Linearverlauf. */
+    function malGrund(ctx) {
+        var lin = ctx.createLinearGradient(MP.W * 0.18, 0, MP.W * 0.82, MP.H);
+        lin.addColorStop(0,    '#241530');
+        lin.addColorStop(0.58, '#160C1B');
+        lin.addColorStop(1,    '#100810');
+        ctx.fillStyle = lin;
+        ctx.fillRect(0, 0, MP.W, MP.H);
+
+        var rad = ctx.createRadialGradient(
+            MP.W * 0.76, MP.H * 0.03, 0,
+            MP.W * 0.76, MP.H * 0.03, MP.W * 0.95
+        );
+        rad.addColorStop(0, 'rgba(74,45,85,.80)');
+        rad.addColorStop(1, 'rgba(74,45,85,0)');
+        ctx.fillStyle = rad;
+        ctx.fillRect(0, 0, MP.W, MP.H);
+    }
+
+    function malBluete(ctx, img, lage) {
+        if (!img) return;
+        var w = lage[3];
+        var h = w * (img.height / img.width);
+        ctx.save();
+        ctx.globalAlpha = lage[5];
+        ctx.translate(lage[1] + w / 2, lage[2] + h / 2);
+        ctx.rotate(lage[4] * Math.PI / 180);
+        ctx.shadowColor = 'rgba(0,0,0,.55)';
+        ctx.shadowBlur = 16;
+        ctx.shadowOffsetY = 8;
+        ctx.drawImage(img, -w / 2, -h / 2, w, h);
+        ctx.restore();
+    }
+
+    /* Das Logo liegt auf schwarzem Grund. 'screen' laesst das Schwarz
+     * verschwinden und den Rest stehen — dasselbe, was im Post
+     * mix-blend-mode:screen macht. Kann der Browser den Modus nicht,
+     * faellt er auf 'source-over' zurueck; dann sieht man einen
+     * dunklen Kasten, aber das Bild entsteht trotzdem. */
+    function malLogo(ctx, img, x, y, w) {
+        if (!img) return;
+        var h = w * (img.height / img.width);
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.drawImage(img, x, y, w, h);
+        ctx.restore();
+    }
+
+    function malMetaCallKopf(ctx, spec, logo) {
+        var kicker = String(spec.kicker || '').toUpperCase();
+        var titel  = String(spec.titel || 'Meta Call');
+
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = MC_FARBEN.holz;
+        ctx.font = fMono(24, 600);
+        var gesperrt = kicker.split('').join(' ');
+        ctx.fillText(clip(ctx, gesperrt, 540), 56, 322);
+
+        ctx.fillStyle = MC_FARBEN.creme;
+        var gr = 72;
+        ctx.font = fSans(gr, 800);
+        while (ctx.measureText(titel).width > 560 && gr > 40) {
+            gr -= 3;
+            ctx.font = fSans(gr, 800);
+        }
+        ctx.fillText(titel, 56, 322 + 14 + gr);
+
+        malLogo(ctx, logo, MP.W - 44 - 286, 300, 286);
+    }
+
+    function malMetaCallFuss(ctx, links) {
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = MC_FARBEN.matt;
+        ctx.font = fMono(22, 400);
+        ctx.fillText(clip(ctx, String(links || ''), 640), 56, MP.H - 50);
+
+        ctx.fillStyle = MC_FARBEN.holz;
+        ctx.font = fMono(24, 600);
+        var netz = 'thedipidis.app';
+        ctx.textAlign = 'right';
+        ctx.fillText(netz, MP.W - 56, MP.H - 50);
+        ctx.textAlign = 'left';
+    }
+
+    /* Die Tafel: Kopfzeile plus eine Zeile je Deck, im Zuschnitt der
+     * Feldtabelle. Hoehe richtet sich nach der Anzahl der Zeilen, damit
+     * zehn Decks genauso sauber sitzen wie sechs. */
+    function malMetaCallTafel(ctx, spec, sprites) {
+        var decks = spec.decks || [];
+        var x = 26, breite = MP.W - 52;
+        var oben = 580;
+        var kopfH = 54;
+        var zeileH = Math.min(58, Math.max(42, Math.floor((MP.H - 150 - oben - kopfH) / Math.max(1, decks.length))));
+        var hoehe = kopfH + decks.length * zeileH;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,.55)';
+        ctx.shadowBlur = 52;
+        ctx.shadowOffsetY = 22;
+        rr(ctx, x, oben, breite, hoehe, 12);
+        ctx.fillStyle = MC_FARBEN.zeileA;
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        rr(ctx, x, oben, breite, hoehe, 12);
+        ctx.clip();
+
+        ctx.fillStyle = MC_FARBEN.kopf;
+        ctx.fillRect(x, oben, breite, kopfH);
+        ctx.fillStyle = 'rgba(247,239,228,.72)';
+        ctx.font = fSans(19, 700);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(spec.spalteLinks || 'DECK').toUpperCase(), x + 26, oben + kopfH / 2);
+        ctx.textAlign = 'right';
+        ctx.fillText(String(spec.spalteRechts || '').toUpperCase(), x + breite - 26, oben + kopfH / 2);
+        ctx.textAlign = 'left';
+
+        decks.forEach(function (d, i) {
+            var y = oben + kopfH + i * zeileH;
+            ctx.fillStyle = i % 2 ? MC_FARBEN.zeileB : MC_FARBEN.zeileA;
+            ctx.fillRect(x, y, breite, zeileH);
+            ctx.fillStyle = MC_FARBEN.linie;
+            ctx.fillRect(x, y + zeileH - 1, breite, 1);
+
+            var sp = sprites[i] || [];
+            var sx = x + 22;
+            var gr = Math.min(30, zeileH - 14);
+            sp.slice(0, 2).forEach(function (img) {
+                sprite(ctx, img, sx, y + (zeileH - gr) / 2, gr, '');
+                sx += gr + 2;
+            });
+            if (!sp.length) sx += gr;
+
+            ctx.fillStyle = MC_FARBEN.name;
+            ctx.font = fSans(Math.min(24, zeileH - 26), 700);
+            ctx.textBaseline = 'middle';
+            ctx.fillText(clip(ctx, d.name, breite * 0.55), sx + 14, y + zeileH / 2);
+
+            ctx.fillStyle = d.wertFarbe || MC_FARBEN.wert;
+            ctx.font = fSans(Math.min(24, zeileH - 26), 700);
+            ctx.textAlign = 'right';
+            ctx.fillText(d.wert, x + breite - 26, y + zeileH / 2);
+            ctx.textAlign = 'left';
+        });
+
+        ctx.restore();
+        ctx.textBaseline = 'alphabetic';
+    }
+
+    function metaCallPostCanvas(spec, bilder) {
+        var cv = document.createElement('canvas');
+        cv.width = MP.W; cv.height = MP.H;
+        var ctx = cv.getContext('2d');
+
+        malGrund(ctx);
+        MC_BLUETEN.forEach(function (lage, i) { malBluete(ctx, bilder.blueten[i], lage); });
+        malMetaCallKopf(ctx, spec, bilder.logo);
+        malMetaCallTafel(ctx, spec, bilder.sprites);
+        malMetaCallFuss(ctx, spec.fuss);
+        return cv;
+    }
+
+    /* Oeffentlicher Weg: Spezifikation rein, Bild raus. Alle Bilder
+     * werden vorher geladen; faellt eines aus, bleibt sein Platz leer
+     * und das Bild entsteht trotzdem. */
+    function shareMetaCallPost(spec) {
+        if (!spec || !Array.isArray(spec.decks) || !spec.decks.length) {
+            toast(L('Keine Daten fuer das Bild', 'No data for the image'), 'error');
+            return Promise.resolve(false);
+        }
+        var laden = [
+            markenBild('logo'),
+            Promise.all(MC_BLUETEN.map(function (b) { return markenBild(b[0]); })),
+            Promise.all(spec.decks.map(function (d) { return loadIcons(d.name, 2); }))
+        ];
+        return Promise.all(laden).then(function (teile) {
+            var cv = metaCallPostCanvas(spec, {
+                logo: teile[0], blueten: teile[1], sprites: teile[2]
+            });
+            return deliver(cv, safeName(spec.dateiname || spec.titel || 'meta-call') + '.png');
+        }).catch(function (e) {
+            console.error('[DsShare] Meta-Call-Bild fehlgeschlagen', e);
+            toast(L('Bild-Export fehlgeschlagen', 'Image export failed'), 'error');
+            return false;
+        });
+    }
+
     window.DsShare = {
         shareDeckCard: shareDeckCard,
+        shareMetaCallPost: shareMetaCallPost,
         shareResultCard: shareResultCard,
         sharePostCard: sharePostCard,
         // Für Tests und für alles, was die Karte anders befüllen will als
@@ -1592,6 +1831,8 @@
             PALETTE: C, deckCardCanvas: deckCardCanvas, resultCardCanvas: resultCardCanvas,
             collectTournamentSpec: collectTournamentSpec, clip: clip, corsUrl: corsUrl,
             postCardCanvas: postCardCanvas, schnappschussKarten: schnappschussKarten,
+            metaCallPostCanvas: metaCallPostCanvas, MC_FARBEN: MC_FARBEN,
+            MC_BLUETEN: MC_BLUETEN, MP: MP,
             matchPunkte: matchPunkte, hatDay2: hatDay2,
             PUNKTE: PUNKTE, DAY2_PUNKTE: DAY2_PUNKTE,
             parseKartenSchluessel: parseKartenSchluessel, gitterMasse: gitterMasse,

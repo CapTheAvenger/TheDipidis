@@ -769,8 +769,10 @@ window.MetaCall = (function () {
   // js/ds-share.js (DAY2_PUNKTE) fuer den Marker auf dem Turnierbild.
   const MAJOR_DAY2_POINTS = { 8: 16, 9: 19 };
   const TOURNAMENT_SETTINGS_KEY = 'metacall_tournament_settings_v1';
+  const TOURNAMENT_NAME_KEY = 'metacall_tournament_name_v1';
 
   let _settings = {
+    tournamentName: '',        // frei eingegeben, steht auf dem Bild
     tournamentType: 'regional',
     totalPlayers  : 2000,
     rounds        : 8,
@@ -813,6 +815,11 @@ window.MetaCall = (function () {
       }
     }
   } catch (_e) { /* localStorage disabled — fall back to defaults */ }
+
+  try {
+    const gemerkt = localStorage.getItem(TOURNAMENT_NAME_KEY);
+    if (gemerkt) _settings.tournamentName = String(gemerkt).slice(0, 60);
+  } catch (_e) { /* privater Modus */ }
 
   // Whether the user has explicitly typed into the Players input.
   // Calculations always use _settings.totalPlayers (default 2000), but
@@ -7767,8 +7774,21 @@ window.MetaCall = (function () {
              oninput="MetaCall._onSetting('day2Points', +this.value)">
     </div>
     ${cupTopCutField}
+    <div class="metacall-field-group mc-turnier-name">
+      <label>${t('mc.labelTournamentName')}</label>
+      <input type="text" id="mc-turniername" maxlength="60"
+             value="${esc(s.tournamentName || '')}"
+             placeholder="${esc(t('mc.tournamentNamePlaceholder'))}"
+             oninput="MetaCall._onTournamentName(this.value)">
+    </div>
   </div>
   <p class="mc-tt-hint">${t(targetHintKey)} ${swissLink}</p>
+  <div class="mc-bild-zeile">
+    <button type="button" class="mc-bild-btn" onclick="MetaCall.generateTournamentImage()">
+      ${esc(t('mc.generateImage'))}
+    </button>
+    <span class="mc-bild-hinweis">${esc(t('mc.generateImageHint'))}</span>
+  </div>
 </div>`;
   }
 
@@ -10489,6 +10509,52 @@ window.MetaCall = (function () {
   }
 
   // ── Event Handlers ─────────────────────────────────────────
+  // Turniername. Er geht in keine Rechnung ein — er steht auf dem Bild
+  // und im Dateinamen. Deshalb loest er auch keinen Neulauf aus, nur
+  // das Merken.
+  function _onTournamentName(val) {
+    _settings.tournamentName = String(val || '').slice(0, 60);
+    try {
+      localStorage.setItem(TOURNAMENT_NAME_KEY, _settings.tournamentName);
+    } catch (_e) { /* privater Modus */ }
+  }
+
+  // "Bild generieren" — baut die Spezifikation aus dem, was gerade auf
+  // dem Bildschirm steht, und laesst js/ds-share.js daraus die Karte im
+  // Post-Entwurf malen. Ohne das Modul bleibt der Knopf ehrlich: er
+  // sagt, dass es nicht geht, statt nichts zu tun.
+  function generateTournamentImage() {
+    if (!window.DsShare || typeof window.DsShare.shareMetaCallPost !== 'function') {
+      if (typeof showToast === 'function') {
+        showToast(t('mc.generateImageMissing'), 'error');
+      }
+      return;
+    }
+    const feld = getPredictedField()
+      .filter(d => d.name && d.name !== '_junk')
+      .slice(0, 10);
+    if (!feld.length) {
+      if (typeof showToast === 'function') showToast(t('mc.generateImageEmpty'), 'error');
+      return;
+    }
+    const name = (_settings.tournamentName || '').trim();
+    const typLabel = t(_typeLabelI18nKey(_settings.tournamentType));
+    const spieler = _settings.totalPlayers
+      ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ` : '';
+    window.DsShare.shareMetaCallPost({
+      titel:        t('mc.imageTitle'),
+      kicker:       name || typLabel,
+      spalteLinks:  t('mc.colDeck'),
+      spalteRechts: t('mc.colPrediction'),
+      fuss:         `${spieler}${_settings.rounds} ${t('mc.roundsAbbr')} · ${_settings.day2Points} ${t('mc.ptsAbbr')}`,
+      dateiname:    (name || 'meta-call') + '-meta-call',
+      decks:        feld.map(d => ({
+        name: d.name,
+        wert: `${d.finalShare.toFixed(2).replace('.', ',')} %`,
+      })),
+    });
+  }
+
   function _onSetting(key, val) {
     if (isNaN(val) || val <= 0) return;
     _settings[key] = val;
@@ -11455,6 +11521,8 @@ window.MetaCall = (function () {
     // matchup row exists.
     getBaseMatchup: (deckA, deckB) => getBaseMatchup(deckA, deckB),
     _onSetting,
+    _onTournamentName,
+    generateTournamentImage,
     _setTournamentType,
     _setMetaCallMode,
     _onToggleSource,

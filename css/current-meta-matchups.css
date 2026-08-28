@@ -501,7 +501,7 @@
        (.top-card-share, .top-card-decks) stehen bereits auf dem Token. */
     font-size: var(--fs-sm);
     font-weight: 800;
-    color: #1a2c43;
+    color: var(--ink);
     line-height: 1.15;
     overflow: hidden;
     text-overflow: ellipsis;

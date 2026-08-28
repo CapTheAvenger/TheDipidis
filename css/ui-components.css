@@ -5018,9 +5018,9 @@ img[src*="limitlesstcg"] {
     margin-left: 4px;
     padding: 1px 6px;
     border-radius: 6px;
-    background: #fff3cd;
-    color: #8a6100;
-    border: 1px solid #f0c36d;
+    background: var(--vorbehalt-bg);
+    color: var(--vorbehalt);
+    border: 1px solid var(--vorbehalt);
     font-size: 0.68em;
     font-weight: 700;
     text-decoration: none;
@@ -5028,7 +5028,7 @@ img[src*="limitlesstcg"] {
     vertical-align: middle;
     cursor: help;
 }
-a.price-unverified-badge:hover { background: #ffe8a1; }
+a.price-unverified-badge:hover { background: var(--vorbehalt); color: var(--surface-0); }
 
 /* ── Hinweis zur einmaligen Sprachumstellung ────────────────────
  * Erscheint genau einmal je Browser und nur, wenn eine gespeicherte

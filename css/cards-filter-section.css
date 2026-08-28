@@ -97,21 +97,21 @@
 .cards-filter-view-mode {
     display: inline-flex;
     align-items: stretch;
-    border: 1.5px solid #c8b3da;
+    border: 1.5px solid var(--umschalter-linie);
     border-radius: 7px;
     overflow: hidden;
-    background: #f8f5fc;
+    background: var(--umschalter-bg);
 }
 .cards-filter-view-mode button {
     padding: 6px 14px;
     border: none;
     background: transparent;
-    color: #7d4ba0;
+    color: var(--umschalter-ink);
     cursor: pointer;
     font-weight: 600;
     font-size: 12px;
     transition: background 0.15s, color 0.15s;
-    border-right: 1.5px solid #c8b3da;
+    border-right: 1.5px solid var(--umschalter-linie);
 }
 .cards-filter-view-mode button:last-child {
     border-right: none;

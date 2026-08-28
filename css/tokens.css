@@ -156,6 +156,14 @@
      *
      * Eingefuehrt am 20.08.2026 mit Gruppe 8 der Pruefrunde, als drei
      * Ansichten unabhaengig voneinander denselben Farbwert brauchten. */
+    /* Der Zweizustands-Umschalter in der Kartendatenbank ("Liste /
+     * Raster"): eine eigene, violette Leiste. Sie liegt nicht auf der
+     * Standardachse, also bekommt sie eigene Namen statt einer
+     * Ausnahme im Hellen und einer zweiten im Dunkeln. */
+    --umschalter-bg:    #f8f5fc;
+    --umschalter-linie: #c8b3da;
+    --umschalter-ink:   #7d4ba0;
+
     --vorbehalt: #92700e;
     --vorbehalt-bg: rgba(234, 179, 8, .16);
 
@@ -241,6 +249,10 @@
      * unsichtbar; die Innenkante übernimmt die Kantenzeichnung. */
     --e-1: 0 1px 3px rgba(0, 0, 0, .5);
     --e-2: 0 2px 12px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .035);
+
+    --umschalter-bg:    #1d1533;
+    --umschalter-linie: #4b3a63;
+    --umschalter-ink:   #cba6e4;
 
     --chip-set-bg: #1b2440;
     --chip-set-ink: #a8bcf0;

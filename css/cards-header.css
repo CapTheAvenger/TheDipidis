@@ -204,6 +204,25 @@
 }
 .lang-toggle-btn:active { transform: translateY(0) scale(0.96); }
 
+/* Der Umschalter fuer den Dunkelmodus sitzt neben der Sprache und
+ * traegt dieselbe Form. Sichtbar ist immer genau ein Zeichen: im
+ * Hellen der Mond (was passiert, wenn man drueckt), im Dunkeln die
+ * Sonne. Ein Schalter, der seinen aktuellen Zustand zeigt statt
+ * seiner Wirkung, laesst jeden zweimal hinsehen. */
+.theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+}
+.theme-icon {
+    width: 18px;
+    height: 18px;
+}
+.theme-icon-sonne { display: none; }
+:root[data-theme="dark"] .theme-icon-mond  { display: none; }
+:root[data-theme="dark"] .theme-icon-sonne { display: block; }
+
 .user-info {
     display: flex;
     align-items: center;

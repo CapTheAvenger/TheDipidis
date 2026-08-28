@@ -14,6 +14,76 @@
     /* Override .header defaults */
     text-align: left;
     color: #fff;
+    /* Traegt die Bluetenschicht darunter, siehe .cards-header::after. */
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── Kirschblueten im Kopfbereich ────────────────────────────────
+ *
+ * Dieselben Blueten wie im Logo und auf den Instagram-Posten, damit
+ * jemand, der ueber Instagram kommt, dieselbe Seite wiedererkennt.
+ *
+ * Sie liegen in einer eigenen Schicht HINTER dem Inhalt, nicht als
+ * Hintergrundbild auf .cards-header selbst: nur so laesst sich die
+ * Deckung steuern. Bei voller Deckung stehen sie in Konkurrenz zur
+ * Ueberschrift; bei 55 % sind sie Zierrat und bleiben Zierrat.
+ *
+ * Rechts oben, wo im Kopf nichts steht — links sitzt der Pokeball,
+ * in der Mitte der Titel, rechts die Knopfleiste. Die Blueten
+ * beginnen ueber der Knopfleiste und laufen nach oben aus dem Bild.
+ * Ueber Zahlen liegt hier nie eine. */
+.cards-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.72;
+    background-repeat: no-repeat;
+    background-image:
+        url('../images/marke/b0.webp'),
+        url('../images/marke/b3.webp'),
+        url('../images/marke/b5.webp'),
+        url('../images/marke/p1.webp'),
+        url('../images/marke/p3.webp');
+    background-position:
+        right -30px top -34px,
+        right 96px top -20px,
+        right 18px bottom -26px,
+        right 188px top 22px,
+        right 258px top -2px;
+    background-size:
+        140px auto,
+        100px auto,
+        72px auto,
+        46px auto,
+        32px auto;
+}
+
+/* Der Inhalt liegt ueber der Bluetenschicht. Ohne diese Zeile
+ * entscheidet die Reihenfolge im Markup, und ::after gewinnt. */
+.cards-header > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Auf dem Telefon steht der Kopf gestapelt und ist doppelt so hoch.
+ * Dieselbe Lage waere dort ein Fleck mitten im Bild — also nur noch
+ * eine Bluete in der Ecke, kleiner und blasser. */
+@media (max-width: 768px) {
+    .cards-header::after {
+        opacity: 0.42;
+        background-image:
+            url('../images/marke/b0.webp'),
+            url('../images/marke/p1.webp');
+        background-position:
+            right -22px top -24px,
+            right 78px top 14px;
+        background-size:
+            92px auto,
+            32px auto;
+    }
 }
 .cards-header .header-flex-row {
     display: flex;

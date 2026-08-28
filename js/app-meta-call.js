@@ -710,7 +710,19 @@ window.MetaCall = (function () {
   // wipe customisation. The predictor itself reads `rounds` +
   // `day2Points` exactly as before — `day2Points` is repurposed as
   // the generic "target points to clear" for the active type.
-  const TOURNAMENT_TYPES = ['regional', 'challenge', 'cup'];
+  const TOURNAMENT_TYPES = ['worlds', 'regional', 'international', 'challenge', 'cup'];
+  // Die drei grossen Turniertypen laufen nach derselben Mechanik: Tag 1
+  // im Swiss, danach ein zweiter Tag. Sie unterscheiden sich nur in der
+  // ueblichen Feldgroesse, nicht in der Rechnung. Die beiden lokalen
+  // Typen (Challenge, Cup) haben keinen zweiten Tag und leiten ihre
+  // Runden aus der Teilnehmerzahl ab.
+  const MAJOR_TYPES = ['worlds', 'regional', 'international'];
+  // Punkte fuer den zweiten Tag, nach Rundenzahl. Ein Sieg zaehlt 3, ein
+  // Tie 1, eine Niederlage 0 — also 16 Punkte aus acht Runden (5-2-1)
+  // und 19 aus neun (6-2-1). Acht Runden sind der Normalfall, neun die
+  // Ausnahme bei sehr grossen Feldern. Dieselben Zahlen stehen in
+  // js/ds-share.js (DAY2_PUNKTE) fuer den Marker auf dem Turnierbild.
+  const MAJOR_DAY2_POINTS = { 8: 16, 9: 19 };
   const TOURNAMENT_SETTINGS_KEY = 'metacall_tournament_settings_v1';
 
   let _settings = {
@@ -732,7 +744,9 @@ window.MetaCall = (function () {
   // on one tab we keep those numbers around so switching back doesn't
   // re-suggest the auto-defaults over their carefully-tuned values.
   let _settingsByType = {
+    worlds:        { totalPlayers: 800,  rounds: 8, day2Points: 16 },
     regional:  { totalPlayers: 2000, rounds: 8, day2Points: 16 },
+    international: { totalPlayers: 3000, rounds: 8, day2Points: 16 },
     challenge: { totalPlayers: 24,   rounds: 5, day2Points: 13, topCutSize: 0 },
     cup:       { totalPlayers: 32,   rounds: 5, day2Points: 12, topCutSize: 8 },
   };
@@ -7554,23 +7568,33 @@ window.MetaCall = (function () {
       const slack = tc <= 4 ? 2 : 3;
       return Math.max(3, r * 3 - slack);
     }
-    // regional fallback — keep whatever the user / preset has.
+    if (MAJOR_TYPES.includes(type)) {
+      // Grosse Turniere: acht Runden brauchen 16 Punkte, neun brauchen
+      // 19. Andere Rundenzahlen kommen dort nicht vor; falls der Nutzer
+      // sie doch eintraegt, gilt dieselbe Regel (drei Punkte je Runde
+      // minus acht), damit die Zahl nicht stehen bleibt.
+      return MAJOR_DAY2_POINTS[r] || Math.max(3, r * 3 - 8);
+    }
     return null;
   }
 
   function _typeLabelI18nKey(type) {
     return ({
-      regional:  'mc.tournamentTypeRegional',
-      challenge: 'mc.tournamentTypeChallenge',
-      cup:       'mc.tournamentTypeCup',
+      worlds:        'mc.tournamentTypeWorlds',
+      regional:      'mc.tournamentTypeRegional',
+      international: 'mc.tournamentTypeInternational',
+      challenge:     'mc.tournamentTypeChallenge',
+      cup:           'mc.tournamentTypeCup',
     })[type] || 'mc.tournamentTypeRegional';
   }
 
   function _typeDescI18nKey(type) {
     return ({
-      regional:  'mc.tournamentTypeRegionalDesc',
-      challenge: 'mc.tournamentTypeChallengeDesc',
-      cup:       'mc.tournamentTypeCupDesc',
+      worlds:        'mc.tournamentTypeWorldsDesc',
+      regional:      'mc.tournamentTypeRegionalDesc',
+      international: 'mc.tournamentTypeInternationalDesc',
+      challenge:     'mc.tournamentTypeChallengeDesc',
+      cup:           'mc.tournamentTypeCupDesc',
     })[type] || 'mc.tournamentTypeRegionalDesc';
   }
 
@@ -7595,14 +7619,15 @@ window.MetaCall = (function () {
     // Tab-specific field set. Players + Rounds are always there;
     // target-points label changes per type; Cup adds Top Cut size;
     // Local types get a Swiss-calculator helper link.
-    const targetLabelKey = type === 'regional'
+    const istMajor = MAJOR_TYPES.includes(type);
+    const targetLabelKey = istMajor
       ? 'mc.labelDay2Points'
       : (type === 'cup' ? 'mc.labelTargetCutPoints' : 'mc.labelTargetTopPoints');
-    const targetHintKey = type === 'regional'
+    const targetHintKey = istMajor
       ? 'mc.targetHintRegional'
       : (type === 'cup' ? 'mc.targetHintCup' : 'mc.targetHintChallenge');
 
-    const swissLink = type === 'regional'
+    const swissLink = istMajor
       ? ''
       : `<a class="mc-tt-swisscalc" href="https://limitlesstcg.com/tools/swisscalc" target="_blank" rel="noopener">↗ ${esc(t('mc.swissCalcLink'))}</a>`;
 
@@ -7635,8 +7660,13 @@ window.MetaCall = (function () {
     </div>
     <div class="metacall-field-group">
       <label>${t('mc.labelRounds')}</label>
-      <input type="number" id="mc-rounds" min="1" max="15" value="${s.rounds}"
-             oninput="MetaCall._onSetting('rounds', +this.value)">
+      ${istMajor
+        ? `<select id="mc-rounds" onchange="MetaCall._onSetting('rounds', +this.value)">
+             <option value="8"${s.rounds === 9 ? '' : ' selected'}>${t('mc.rounds8')}</option>
+             <option value="9"${s.rounds === 9 ? ' selected' : ''}>${t('mc.rounds9')}</option>
+           </select>`
+        : `<input type="number" id="mc-rounds" min="1" max="15" value="${s.rounds}"
+             oninput="MetaCall._onSetting('rounds', +this.value)">`}
     </div>
     <div class="metacall-field-group">
       <label>${t(targetLabelKey)}</label>
@@ -10377,7 +10407,10 @@ window.MetaCall = (function () {
       // only), and target points in lock-step. Manual override is
       // still possible by editing those inputs afterwards; on the
       // next player-count change the auto-fill kicks in again.
-      if (_settings.tournamentType !== 'regional') {
+      // Grosse Turniere fahren acht oder neun Runden, unabhaengig
+      // davon wie voll die Halle ist — dort wird nichts nachgezogen.
+      // Nur die lokalen Typen leiten Runden und Cut aus dem Feld ab.
+      if (!MAJOR_TYPES.includes(_settings.tournamentType)) {
         _settings.rounds = _suggestSwissRounds(val);
         if (_settings.tournamentType === 'cup') {
           _settings.topCutSize = _suggestTopCutSize(val);
@@ -10397,7 +10430,7 @@ window.MetaCall = (function () {
         _syncSettingsInputsFromState();
       }
     }
-    if (key === 'rounds' && _settings.tournamentType !== 'regional') {
+    if (key === 'rounds') {
       // Manual rounds override — re-derive target so the points
       // floor matches the new round count (5R T8 = 12 pts vs
       // 6R T8 = 15 pts, etc.). User can still type their own
@@ -10426,7 +10459,7 @@ window.MetaCall = (function () {
     const targetEl  = document.getElementById('mc-day2pts');
     const topCutEl  = document.getElementById('mc-topcut');
     if (roundsEl && document.activeElement !== roundsEl) {
-      roundsEl.value = _settings.rounds;
+      roundsEl.value = String(_settings.rounds);
     }
     if (targetEl && document.activeElement !== targetEl) {
       targetEl.value = _settings.day2Points;

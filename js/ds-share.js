@@ -1073,7 +1073,7 @@
      * Cup oder einer Challenge waere der Marker eine falsche Auskunft, also
      * erscheint er dort nicht. */
     var DAY2_PUNKTE = 16;
-    var DAY2_TYPEN = ['regional/spe/ic', 'regional', 'international', 'worlds', 'spe'];
+    var DAY2_TYPEN = ['regional/spe/ic', 'regional/spe', 'regional', 'international', 'worlds', 'spe'];
 
     function hatDay2(spec, punkte) {
         var typ = String(spec && spec.type || '').trim().toLowerCase();

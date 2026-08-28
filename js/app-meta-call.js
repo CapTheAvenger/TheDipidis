@@ -1303,6 +1303,42 @@ window.MetaCall = (function () {
       }));
   }
 
+  // ── Namensbruecke Turnier -> Ladder ─────────────────────────────
+  // City League hat keine Decknamen. Die Namen werden dort aus den
+  // Bildern abgeleitet, deshalb heisst dasselbe Deck einmal "Dhelmise"
+  // (Ladder) und einmal "Dhelmise Banette" (City League). Ohne Bruecke
+  // standen beide als eigene Zeile im prognostizierten Feld, mit je
+  // etwa der Haelfte des Anteils — das Deck war doppelt gezaehlt und
+  // dabei zweimal zu klein.
+  //
+  // Die Bruecke ist GEPFLEGT, nicht geraten: data/archetype_aliases.json
+  // enthaelt nur Paare, die einzeln nachgerechnet wurden, und nennt zu
+  // jedem den Beleg. Was nicht drinsteht, bleibt getrennt — ueber
+  // Namensaehnlichkeit zu automatisieren wuerde Mega Greninja mit
+  // Greninja verschmelzen. Dieselbe Datei benutzt schon der Current-
+  // Meta-Tab (js/app-tier-meta.js); hier kommt kein zweiter Bestand
+  // dazu, sondern derselbe.
+  let _aliasTurnierZuLadder = new Map();
+
+  async function _loadArchetypeAliases() {
+    const karte = new Map();
+    try {
+      const resp = await fetch('data/archetype_aliases.json?t=' + Date.now());
+      if (!resp.ok) return karte;
+      const json = await resp.json();
+      (json.turnier_zu_ladder || []).forEach(e => {
+        if (e && e.turnier && e.ladder) karte.set(normalize(e.turnier), e.ladder);
+      });
+    } catch (_e) { /* ohne Bruecke bleibt es beim alten Verhalten */ }
+    return karte;
+  }
+
+  // Turniername -> Laddername, sofern die Bruecke das Paar kennt.
+  // Sonst bleibt der Name, wie er ist.
+  function _kanonName(name) {
+    return _aliasTurnierZuLadder.get(normalize(name)) || name;
+  }
+
   async function _loadClShares(path) {
     const out = {};
     try {
@@ -1310,10 +1346,15 @@ window.MetaCall = (function () {
       if (!resp.ok) return out;
       const rows = parseCSV(await resp.text(), ';');
       rows.forEach(r => {
-        const name = (r.archetype || '').trim();
-        if (!name) return;
+        const roh = (r.archetype || '').trim();
+        if (!roh) return;
+        const name = _kanonName(roh);
         const share = parseEU(r.new_meta_share || '0');
-        if (share > 0) out[normalize(name)] = { name, share };
+        if (share <= 0) return;
+        const k = normalize(name);
+        // Zwei City-League-Zeilen koennen auf denselben Ladder-Namen
+        // zeigen. Dann werden sie addiert, nicht ueberschrieben.
+        out[k] = { name, share: (out[k] ? out[k].share : 0) + share };
       });
     } catch (_e) { /* tolerate missing source */ }
     return out;
@@ -5030,6 +5071,11 @@ window.MetaCall = (function () {
       // Online tournament top-8 stats (Stage-1 scraper output). Optional —
       // missing file means we run pure-ladder. Predictor 2.0 will then
       // simply fall back to the ladder share.
+      // Die Namensbruecke muss stehen, BEVOR die erste Turnierquelle
+      // gelesen wird — sonst landen Zeilen unter dem Turniernamen im
+      // Bestand und die Bruecke greift nur bei der Haelfte.
+      _aliasTurnierZuLadder = await _loadArchetypeAliases();
+
       _tournamentStats = {};
       try {
         const tournResp = await fetch('data/online_tournament_top8_decks.csv?t=' + Date.now());
@@ -5041,7 +5087,9 @@ window.MetaCall = (function () {
           tournRows.forEach(r => {
             if (!r.deck_name) return;
             const brought = parseEU(r.total_brought_weighted || '0');
-            _tournamentStats[normalize(r.deck_name)] = {
+            // Dieselbe Bruecke wie bei City League: die Turnierquelle
+            // nennt "Dhelmise Banette", die Ladder "Dhelmise".
+            _tournamentStats[normalize(_kanonName(r.deck_name))] = {
               broughtShare: (brought / broughtSum) * 100,
               top8Conv    : parseEU(r.top8_conv_rate  || '0'),  // 0..1
               top16Conv   : parseEU(r.top16_conv_rate || '0'),

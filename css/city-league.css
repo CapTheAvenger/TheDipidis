@@ -183,7 +183,7 @@
 .sandbox-tip-box {
     text-align: center;
     padding: 20px;
-    background: linear-gradient(to bottom, var(--surface-1), #f0f4f8);
+    background: linear-gradient(to bottom, var(--surface-1), var(--surface-2));
     border-radius: 12px;
     border: 2px dashed #b3d9ff;
 }
@@ -1389,7 +1389,7 @@
 .city-league-meta-card-panel {
     margin-top: 30px;
     padding: 20px;
-    background: linear-gradient(135deg, var(--surface-0) 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, var(--surface-0) 0%, var(--surface-2) 100%);
     border-radius: 10px;
     border: 2px solid var(--line);
 }
@@ -2420,7 +2420,7 @@
     gap: 8px;
     padding: 8px;
     margin-bottom: 10px;
-    background: linear-gradient(135deg, var(--surface-0) 0%, #eef4ff 100%);
+    background: linear-gradient(135deg, var(--surface-0) 0%, var(--surface-2) 100%);
     border: 1px solid #dbe5f2;
     border-radius: 12px;
 }

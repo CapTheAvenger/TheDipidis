@@ -158,7 +158,7 @@
 
 #cards .card-database-info {
     padding: 3px !important;
-    background: linear-gradient(180deg, var(--surface-1) 0%, #f7f9fd 100%) !important;
+    background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-2) 100%) !important;
     border-top: none !important;
     display: flex !important;
     flex-direction: column !important;

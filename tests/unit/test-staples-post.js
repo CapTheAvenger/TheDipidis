@@ -73,6 +73,41 @@ describe('das Gitter der Staples-Kacheln', () => {
     });
 });
 
+/* Zeichnet staplesPostCanvas mit Attrappen und gibt zurueck, wo Logo und
+ * Kacheln gelandet sind. Nur Geometrie — nichts wird wirklich gemalt. */
+const POST = schneide('function staplesPostCanvas(spec, bilder)',
+                      '\n    /* Oeffentlicher Weg. Die Kartenbilder');
+
+function zeichneStaples(logoMasse, anzahl) {
+    const kacheln = [];
+    let logo = null;
+    const ctx = {
+        _px: 24,
+        set font(v) { const m = String(v).match(/(\d+)px/); if (m) this._px = +m[1]; },
+        get font() { return this._px + 'px'; },
+        measureText: (t) => ({ width: String(t).length * 0.62 * ctx._px }),
+        fillText: () => {}, textBaseline: '', fillStyle: '',
+    };
+    const attrappen = {
+        MP: { W: 1080, H: 1350 },
+        MC_FARBEN: { holz: '#E3B276' },
+        MC_BLUETEN: [],
+        malGrund: () => {}, malBluete: () => {}, malMetaCallFuss: () => {},
+        fMono: (g) => g + 'px mono',
+        clip: (c, t) => t,
+        malLogo: (c, img, x, y, w) => { logo = { x, y, w }; },
+        staplesGitter: staplesGitter,
+        malStapleKachel: (c, k, x, y, b, h) => { kacheln.push({ x, y, b, h }); },
+        document: { createElement: () => ({ width: 0, height: 0, getContext: () => ctx }) },
+    };
+    const fn = new Function(...Object.keys(attrappen), POST + '\nreturn staplesPostCanvas;')(
+        ...Object.values(attrappen));
+    const karten = Array.from({ length: anzahl }, (_, i) => ({ rang: i + 1, name: 'X', share: 1 }));
+    fn({ kicker: 'TEF-PBL \u00b7 FORMAT-STAPLES', karten: karten, fuss: 'Stand' },
+       { logo: { width: logoMasse.breite, height: logoMasse.hoehe }, blueten: [] });
+    return { logo: logo, kacheln: kacheln };
+}
+
 describe('die gesperrte Kopfzeile', () => {
     const KOPF = schneide('function malMetaCallKopf(ctx, spec, logo)', '\n    function malMetaCallFuss');
 
@@ -127,12 +162,45 @@ describe('die gesperrte Kopfzeile', () => {
         assert.match(K, /malLogo\(/, 'das Logo fehlt');
     });
 
-    it('gibt den Kacheln die frei gewordene Hoehe', () => {
-        // Ohne Titel und Untertitel faengt das Gitter hoeher an.
-        const K = schneide('function staplesPostCanvas(spec, bilder)', '\n    /* Oeffentlicher Weg. Die Kartenbilder');
-        const m = K.match(/var oben = (\d+);/);
-        assert.ok(m, 'der Gitteranfang steht nicht mehr in der Quelle');
-        assert.ok(+m[1] < 486, `das Gitter faengt bei ${m[1]} an, also nicht hoeher als vorher`);
+    it('laesst das Gitter erst unter dem Logo anfangen', () => {
+        /* Am 28.08.2026 fiel der Titel weg und der Gitteranfang wurde auf
+         * eine feste 380 gesetzt. Das Logo reicht aber bis 459 hinunter:
+         * es stand danach mitten in der ersten Kartenreihe. Gemeldet mit
+         * Bild: "was zur Hoelle ist da mit dem Logo passiert."
+         *
+         * Der alte Test hier fragte nur, ob der Anfang KLEINER als vorher
+         * ist — genau die Annahme, die den Fehler verursacht hat. Diese
+         * Fassung misst statt dessen die wirkliche Geometrie: keine Kachel
+         * darf ueber die Unterkante des Logos ragen. */
+        const echt = { breite: 760, hoehe: 423 };   // images/marke/logo.webp
+        const gemalt = zeichneStaples(echt, 15);
+        const logoUnten = gemalt.logo.y + gemalt.logo.w * (echt.hoehe / echt.breite);
+        assert.ok(gemalt.kacheln.length > 0, 'es wurde keine Kachel gezeichnet');
+        const obersteKachel = Math.min(...gemalt.kacheln.map(k => k.y));
+        assert.ok(obersteKachel >= logoUnten,
+            `die oberste Kachel beginnt bei ${obersteKachel.toFixed(0)}, das Logo `
+            + `reicht bis ${logoUnten.toFixed(0)} — sie ueberdecken sich`);
+    });
+
+    it('verschenkt ueber dem Gitter auch keine halbe Seite', () => {
+        // Die Gegenrichtung: der Anfang soll dem Logo folgen, nicht weit
+        // darunter stehenbleiben. Sonst waere die Ueberdeckung zwar weg,
+        // die Kacheln aber wieder unnoetig klein.
+        const echt = { breite: 760, hoehe: 423 };
+        const gemalt = zeichneStaples(echt, 15);
+        const logoUnten = gemalt.logo.y + gemalt.logo.w * (echt.hoehe / echt.breite);
+        const obersteKachel = Math.min(...gemalt.kacheln.map(k => k.y));
+        assert.ok(obersteKachel - logoUnten <= 80,
+            `zwischen Logo und erster Kachel liegen ${(obersteKachel - logoUnten).toFixed(0)} px`);
+    });
+
+    it('folgt einem hoeheren Logo nach unten', () => {
+        // Der Beweis, dass die Zahl gerechnet und nicht geraten ist.
+        const flach = zeichneStaples({ breite: 760, hoehe: 423 }, 15);
+        const hoch  = zeichneStaples({ breite: 760, hoehe: 700 }, 15);
+        const a = Math.min(...flach.kacheln.map(k => k.y));
+        const b = Math.min(...hoch.kacheln.map(k => k.y));
+        assert.ok(b > a, 'ein hoeheres Logo schiebt das Gitter nicht nach unten');
     });
 
     it('laesst der Meta-Call-Post seinen Titel', () => {

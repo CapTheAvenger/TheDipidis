@@ -1958,11 +1958,25 @@
             ctx.font = fMono(kGr, 600);
         }
         ctx.fillText(clip(ctx, gesperrt, 660), 56, 322);
-        malLogo(ctx, bilder.logo, MP.W - 44 - 286, 300, 286);
+
+        /* Das Logo setzt die Unterkante des Kopfes, nicht der Text.
+         *
+         * Am 28.08.2026 fiel der Titel weg und das Gitter rueckte auf
+         * y=380 hoch — das Logo reicht aber bis 459 hinunter und stand
+         * danach mitten in der ersten Kartenreihe. Gemeldet mit Bild:
+         * "was zur Hoelle ist da mit dem Logo passiert". Eine feste Zahl
+         * fuer den Gitteranfang kann das nicht wissen; sie wird deshalb
+         * aus der wirklich gezeichneten Logohoehe berechnet. */
+        var logoB = 286;
+        var logoY = 300;
+        var logoH = (bilder.logo && bilder.logo.width)
+            ? logoB * (bilder.logo.height / bilder.logo.width)
+            : logoB * 0.557;
+        malLogo(ctx, bilder.logo, MP.W - 44 - logoB, logoY, logoB);
 
         var pad = 40;
         var innen = MP.W - pad * 2;
-        var oben = 380;
+        var oben = Math.round(logoY + logoH + 22);
         var feldH = MP.H - 112 - oben;
         var karten = spec.karten || [];
         var mass = staplesGitter(karten.length, innen, feldH);

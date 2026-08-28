@@ -10590,8 +10590,8 @@ window.MetaCall = (function () {
     const spieler = _settings.totalPlayers
       ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ` : '';
     window.DsShare.shareMetaCallPost({
-      titel:        t('mc.imageTitle'),
-      kicker:       name || typLabel,
+      /* Turniername als Titel, Meta als Kicker — siehe shareMetaCallPost. */
+      titel:        name || typLabel || t('mc.imageTitle'),
       spalteLinks:  t('mc.colDeck'),
       spalteRechts: t('mc.colPrediction'),
       fuss:         `${spieler}${_settings.rounds} ${t('mc.roundsAbbr')} · ${_settings.day2Points} ${t('mc.ptsAbbr')}`,

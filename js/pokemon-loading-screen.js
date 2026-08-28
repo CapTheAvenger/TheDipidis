@@ -25,8 +25,33 @@
     { key: 'ace_specs',                         url: 'data/ace_specs.json',                        type: 'json' },
   ];
 
+  /* Sprache.
+   *
+   * Dieser Schirm laeuft VOR js/i18n.js — getLang() gibt es hier noch
+   * nicht. Er liest deshalb denselben Speicherplatz ('app_lang') und
+   * faellt auf dieselbe Browsererkennung zurueck. Eine eigene Regel waere
+   * eine zweite Wahrheit; gemeldet am 28.08.2026: "auf der englischen
+   * Version sind immer noch ganz viele Sachen in Deutsch" — der
+   * Ladeschirm war davon die sichtbarste Stelle, weil er bei JEDEM
+   * Seitenaufruf als Erstes erscheint. */
+  function ladeSprache() {
+    try {
+      const gespeichert = localStorage.getItem('app_lang');
+      if (gespeichert === 'en' || gespeichert === 'de') return gespeichert;
+      const tags = (navigator.languages && navigator.languages.length)
+        ? navigator.languages : [navigator.language || ''];
+      for (const tag of tags) {
+        const basis = String(tag).toLowerCase().split('-')[0];
+        if (basis === 'en' || basis === 'de') return basis;
+      }
+    } catch (e) { /* kein localStorage/navigator */ }
+    return 'de';
+  }
+  const LANG = ladeSprache();
+  const T = (de, en) => (LANG === 'de' ? de : en);
+
   // Pokémon Lade-Sprüche
-  const LOADING_MESSAGES = [
+  const LOADING_MESSAGES = LANG === 'de' ? [
     "Pokédex wird aktualisiert...",
     "Meta-Daten werden analysiert...",
     "Archetypes werden geladen...",
@@ -35,6 +60,15 @@
     "City League Daten werden gecacht...",
     "Karten-Datenbank wird vorbereitet...",
     "Fast fertig! Trainer macht sich bereit...",
+  ] : [
+    "Updating Pokédex...",
+    "Analysing meta data...",
+    "Loading archetypes...",
+    "Crunching deck stats...",
+    "Sorting tournament results...",
+    "Caching City League data...",
+    "Preparing card database...",
+    "Almost there! Trainer is getting ready...",
   ];
 
   // Pokéball SVG (inline, kein externes Bild nötig)
@@ -169,12 +203,12 @@
           <div class="loader-progress-fill" id="dipidis-progress-fill"></div>
         </div>
         <div class="loader-progress-text">
-          <span id="dipidis-progress-label">Initialisierung...</span>
+          <span id="dipidis-progress-label">${T('Initialisierung...', 'Initialising...')}</span>
           <span id="dipidis-progress-pct">0%</span>
         </div>
-        <div class="loader-status-msg" id="dipidis-status-msg">Daten werden vorbereitet...</div>
+        <div class="loader-status-msg" id="dipidis-status-msg">${T('Daten werden vorbereitet...', 'Preparing data...')}</div>
       </div>
-      <div class="loader-cache-badge" id="dipidis-cache-badge">⚡ Daten werden geladen</div>
+      <div class="loader-cache-badge" id="dipidis-cache-badge">⚡ ${T('Daten werden geladen', 'Loading data')}</div>
     `;
 
     const style = document.createElement('style');
@@ -224,7 +258,7 @@
   function hideLoader() {
     const el = document.getElementById('dipidis-loader');
     if (!el) return;
-    updateProgress(100, 'Bereit!');
+    updateProgress(100, T('Bereit!', 'Ready!'));
     setTimeout(() => {
       el.classList.add('fade-out');
       setTimeout(() => el.remove(), 700);
@@ -346,7 +380,7 @@
   // ─── HAUPT-INITIALISIERUNG ─────────────────────────────────────────────────
   async function init() {
     const loaderEl = createLoadingScreen();
-    updateProgress(2, 'Version wird geprüft...');
+    updateProgress(2, T('Version wird geprüft...', 'Checking version...'));
 
     let db, version, anyFromNetwork = false;
 
@@ -358,7 +392,7 @@
       return;
     }
 
-    updateProgress(8, 'Cache wird geprüft...');
+    updateProgress(8, T('Cache wird geprüft...', 'Checking cache...'));
 
     const total = DATA_FILES.length;
     let done = 0;
@@ -379,7 +413,7 @@
     );
 
     setBadge(!anyFromNetwork);
-    updateProgress(95, 'App wird initialisiert...');
+    updateProgress(95, T('App wird initialisiert...', 'Initialising app...'));
 
     await new Promise(r => setTimeout(r, 300));
 

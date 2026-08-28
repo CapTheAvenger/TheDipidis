@@ -209,6 +209,19 @@
             exportCopied: 'Copied! ✓',
             exportToastOk: 'Team copied — paste it into the Import/Export or "Submit teamlist" box.',
             exportToastManual: 'Auto-copy failed — select the text in the dialog and copy it manually.',
+            /* Diese neun fehlten. Bei englischer Sprache lieferte
+             * LABELS.en.<key> undefined, und escapeHtml(undefined) schrieb
+             * buchstaeblich "undefined" in Knopf und aria-label. Gemeldet
+             * am 28.08.2026 als Teil der Sprachpruefung. */
+            aktivAn: '⚡ This is what I play',
+            aktivIst: '⚡ Active',
+            aktivAria: 'Set as active team:',
+            aktivAus: 'No longer active',
+            myTeamsEmpty: 'None yet. Build one in the Team Builder tab, take one from below with "Copy to my teams", or paste one above.',
+            uebernehmen: '⧉ Copy to my teams',
+            uebernehmenAria: 'Copy this team to your own:',
+            uebernommen: 'Copied — it is now under "My teams".',
+            uebernommenFehler: 'Could not copy — your browser blocks local storage (private window?).',
         },
     };
 

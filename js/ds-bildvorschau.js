@@ -47,7 +47,43 @@
         else console.info('[Bildvorschau]', text);
     }
 
-    function speichern(blob, dateiname) {
+    /* Auf iPhone und iPad speichert <a download> NICHT in die
+     * Fotomediathek. Je nach Safari-Einstellung landet die Datei in
+     * "Dateien", oeffnet sich in einem neuen Tab oder es passiert
+     * sichtbar gar nichts. Gemeldet am 28.08.2026 mit Bildschirmfoto:
+     * "wenn ich auf Speichern druecke, dann wird's nicht immer in der
+     * Foto Mediathek gespeichert."
+     *
+     * Der einzige Weg vom Web in die Fotomediathek ist das Teilen-Blatt
+     * des Systems: navigator.share mit einer Datei, dort dann "Bild
+     * sichern". Auf dem Rechner waere ein Teilen-Blatt der Umweg — dort
+     * bleibt der Download.
+     *
+     * iPadOS meldet sich seit Version 13 als "Macintosh"; die
+     * Beruehrungspunkte verraten es trotzdem. */
+    function istApfelTouch() {
+        try {
+            var ua = navigator.userAgent || '';
+            if (/iPad|iPhone|iPod/.test(ua)) return true;
+            return /Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1;
+        } catch (e) { return false; }
+    }
+
+    function machDatei(blob, dateiname) {
+        try {
+            if (typeof File !== 'function') return null;
+            return new File([blob], dateiname, { type: blob.type || 'image/png' });
+        } catch (e) { return null; }
+    }
+
+    function kannDateiTeilen(datei) {
+        try {
+            return !!(datei && navigator.share && navigator.canShare
+                && navigator.canShare({ files: [datei] }));
+        } catch (e) { return false; }
+    }
+
+    function alsDownload(blob, dateiname) {
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
@@ -56,6 +92,28 @@
         a.click();
         document.body.removeChild(a);
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }
+
+    /* Gibt zurueck, ob das Fenster danach zugehen soll. Beim Teilen-Blatt
+     * bleibt es offen: bricht jemand ab, soll das Bild noch da sein. */
+    function speichern(blob, dateiname) {
+        if (istApfelTouch()) {
+            var datei = machDatei(blob, dateiname);
+            if (kannDateiTeilen(datei)) {
+                return navigator.share({ files: [datei] })
+                    .then(function () { return true; })
+                    .catch(function (e) {
+                        /* Abbruch ist kein Fehler — dann wollte man eben
+                         * nicht. Alles andere faellt auf den Download
+                         * zurueck, damit der Knopf nie ins Leere greift. */
+                        if (e && e.name === 'AbortError') return false;
+                        alsDownload(blob, dateiname);
+                        return true;
+                    });
+            }
+        }
+        alsDownload(blob, dateiname);
+        return Promise.resolve(true);
     }
 
     /**
@@ -104,6 +162,23 @@
             '</div>';
         document.body.appendChild(modal);
 
+        /* Das PNG wird sofort gebaut, nicht erst beim Klick.
+         *
+         * navigator.share darf nur aus einer Nutzergeste heraus laufen.
+         * canvas.toBlob ist asynchron — wer erst im Klick damit anfaengt,
+         * ruft share() nach dem Ende der Geste auf, und Safari lehnt das
+         * mit NotAllowedError ab. Das Fenster steht ohnehin Sekunden offen,
+         * bevor jemand tippt; bis dahin liegt der Blob bereit. */
+        var fertigerBlob = null;
+        try {
+            canvas.toBlob(function (b) { fertigerBlob = b; }, 'image/png');
+        } catch (e) { /* dann eben erst beim Klick */ }
+
+        function mitBlob(weiter) {
+            if (fertigerBlob) { weiter(fertigerBlob); return; }
+            canvas.toBlob(function (b) { fertigerBlob = b; weiter(b); }, 'image/png');
+        }
+
         return new Promise(function (fertig) {
             var vorher = document.activeElement;
             function zu() {
@@ -125,10 +200,15 @@
             modal.querySelector('.ds-bildvorschau-btn-secondary').addEventListener('click', zu);
 
             modal.querySelector('.ds-bildvorschau-btn-download').addEventListener('click', function () {
-                canvas.toBlob(function (blob) {
-                    if (blob) speichern(blob, dateiname);
-                    zu();
-                }, 'image/png');
+                mitBlob(function (blob) {
+                    if (!blob) { zu(); return; }
+                    /* Bricht jemand das Teilen-Blatt ab, bleibt das Fenster
+                     * offen — sonst waere das Bild weg, ohne dass es
+                     * irgendwo gelandet ist. */
+                    speichern(blob, dateiname).then(function (erledigt) {
+                        if (erledigt) zu();
+                    }, zu);
+                });
             });
 
             var teilen = modal.querySelector('.ds-bildvorschau-btn-kopieren');
@@ -151,16 +231,15 @@
                      * jeder Browser und braucht einen sicheren Kontext. Wo es
                      * nicht geht, wird gespeichert — ein Knopf, der nichts tut,
                      * waere schlechter. */
-                    canvas.toBlob(function (blob) {
+                    mitBlob(function (blob) {
                         if (!blob) { zu(); return; }
                         var kannKopieren = !!(navigator.clipboard
                             && window.ClipboardItem
                             && typeof navigator.clipboard.write === 'function');
                         if (!kannKopieren) {
-                            speichern(blob, dateiname);
                             melde(L('Kopieren geht hier nicht — gespeichert.',
                                     'Copying is not available here — saved instead.'));
-                            zu();
+                            speichern(blob, dateiname).then(zu, zu);
                             return;
                         }
                         navigator.clipboard.write([new window.ClipboardItem({ 'image/png': blob })])
@@ -168,12 +247,12 @@
                                 melde(L('Bild in der Zwischenablage.', 'Image copied to clipboard.'));
                             })
                             .catch(function () {
-                                speichern(blob, dateiname);
                                 melde(L('Kopieren abgelehnt — gespeichert.',
                                         'Copy was refused — saved instead.'));
+                                return speichern(blob, dateiname);
                             })
                             .then(zu, zu);
-                    }, 'image/png');
+                    });
                 });
             }
 

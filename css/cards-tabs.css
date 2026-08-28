@@ -171,7 +171,7 @@
     font-size: var(--fs-xs) !important;
     line-height: 1.15 !important;
     font-weight: 800 !important;
-    color: #1b2537 !important;
+    color: var(--ink) !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     display: -webkit-box !important;
@@ -313,7 +313,7 @@
 #cards .card-database-coverage-empty {
     display: none !important;
     background: #ebeff7 !important;
-    color: #66758f !important;
+    color: var(--ink-2) !important;
     border: 1px dashed #bcc8da !important;
 }
 

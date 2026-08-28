@@ -470,10 +470,15 @@
     margin-bottom: 10px;
 }
 .proxy-add-single-input {
-    border: 1px solid #ced4da;
+    border: 1px solid var(--line-strong);
     border-radius: 8px;
     padding: 10px;
     min-width: 0;
+    /* Ohne eigene Flaeche nimmt ein input die weisse Voreinstellung
+     * des Browsers — im Dunkelmodus vier weisse Kaesten in einer
+     * Reihe. */
+    background: var(--ui-input-bg);
+    color: var(--ink);
 }
 .proxy-add-card-btn {
     background: #e74c3c;
@@ -517,12 +522,16 @@
     flex-wrap: wrap;
 }
 .proxy-header-count {
+    /* Die weisse Scheibe ist Absicht: sie liegt auf dem roten Banner
+     * und muss sich in BEIDEN Modi davon abheben. Deshalb bleibt auch
+     * die Schrift fest dunkel — var(--ink) wurde im Dunkelmodus hell
+     * und die Zahl verschwand im eigenen Grund. */
     background: rgba(255,255,255,0.92);
     border: 1px solid rgba(255,255,255,0.4);
     border-radius: 8px;
     padding: 6px 10px;
     font-weight: 700;
-    color: var(--ink);
+    color: #1a2640;
     font-size: 13px;
 }
 .proxy-header-unique {}
@@ -2094,7 +2103,7 @@
     font-weight: bold;
     line-height: 1.2;
     word-break: break-word;
-    color: #1a2c43;
+    color: var(--ink);
 }
 
 .tier-hero-card .tier-hero-content {

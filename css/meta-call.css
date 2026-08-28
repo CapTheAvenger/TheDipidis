@@ -28,6 +28,8 @@
     --mc-bg-subtle-warm:      #f4f7fc;
     --mc-bg-info-faint:       #f6fbff;
     --mc-bg-info-soft:        #eaf0fb;
+    --mc-bg-junk:             #fff8f0;
+    --mc-bg-tip:              #fdfbf2;
     --mc-bg-info-light:       #d8e9f9;
     --mc-info-dark:           #0d4b87;
 
@@ -36,6 +38,42 @@
     --mc-personal-accent:         #9b59b6;
     --mc-personal-accent-dark:    #6c3a9b;
     --mc-personal-accent-deepest: #6c3483;
+}
+
+/* Der Meta Call hat seit dem Audit vom 11.06.2026 eine eigene
+ * Farbleiste — dieselben Namen, aber engere Abstufungen als die
+ * globale Tokenschicht. Ohne dunkle Werte blieben genau die Flaechen
+ * hell, die haeufigsten zuerst: Eingabefelder, Szenarienleiste,
+ * Abzeichen. Gemessen am 28.08.2026 waren das 21 von 197 Flaechen.
+ *
+ * Die Werte folgen derselben Ordnung wie im Hellen: die Schriftleiter
+ * wird heller statt dunkler, die Linien bleiben zwei Stufen
+ * auseinander, die Flaechen liegen dicht ueber dem Grund. */
+:root[data-theme="dark"] {
+    --mc-text-heading:        var(--ink);
+    --mc-text-heading-soft:   var(--ink);
+    --mc-text-muted-strong:   var(--ink-2);
+    --mc-text-muted:          var(--ink-2);
+    --mc-text-faint:          var(--ink-3);
+
+    --mc-border-faint:        var(--line);
+    --mc-border-light:        var(--line);
+    --mc-border:              var(--line);
+    --mc-border-strong:       var(--line-strong);
+
+    --mc-bg-faint:            var(--surface-1);
+    --mc-bg-subtle:           var(--surface-1);
+    --mc-bg-subtle-warm:      var(--surface-1);
+    --mc-bg-info-faint:       var(--surface-2);
+    --mc-bg-info-soft:        #1b2440;
+    --mc-bg-junk:             #2a2018;
+    --mc-bg-tip:              #22201a;
+    --mc-bg-info-light:       #22305a;
+    --mc-info-dark:           #9dc4f0;
+
+    --mc-personal-accent:         #c08ad8;
+    --mc-personal-accent-dark:    #b07ccb;
+    --mc-personal-accent-deepest: #a06fbe;
 }
 
 /* ============================================================
@@ -63,11 +101,11 @@
 .metacall-date-window {
   margin-top: 0;
   padding: 10px 14px;
-  background: #fff7e0;
-  border: 1px solid #f0d68a;
+  background: var(--vorbehalt-bg);
+  border: 1px solid var(--vorbehalt);
   border-radius: 10px;
   font-size: 0.85rem;
-  color: #6b5a1a;
+  color: var(--vorbehalt);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -380,6 +418,7 @@
   letter-spacing: 0.03em;
 }
 .metacall-field-group input[type="number"],
+.metacall-field-group input[type="text"],
 .metacall-field-group select {
   padding: 8px 10px;
   border: 1px solid var(--mc-border-strong);
@@ -391,6 +430,7 @@
   width: 100%;
 }
 .metacall-field-group input[type="number"]:focus,
+.metacall-field-group input[type="text"]:focus,
 .metacall-field-group select:focus {
   outline: none;
   border-color: var(--color-info);
@@ -514,7 +554,7 @@
 
 /* Junk row styling */
 .mc-row-junk td {
-  background: #fff8f0;
+  background: var(--mc-bg-junk);
 }
 .mc-row-junk .mc-deck-name {
   color: #e67e22;
@@ -965,7 +1005,7 @@
   border-color: var(--color-danger);
 }
 .mc-custom-add-btn {
-  background: #eaf4ff;
+  background: var(--mc-bg-info-soft);
   border: 1px dashed #89b7e0;
   color: #2170c4;
   border-radius: 8px;
@@ -977,7 +1017,7 @@
   transition: background 0.15s, border-color 0.15s;
 }
 .mc-custom-add-btn:hover {
-  background: #dcecff;
+  background: var(--mc-bg-info-light);
   border-color: var(--color-info);
   border-style: solid;
 }
@@ -1094,7 +1134,7 @@
   padding: 10px 14px;
   margin-bottom: 0;
   background: var(--mc-bg-subtle-warm);
-  border: 1px solid #dde5f0;
+  border: 1px solid var(--mc-border);
   border-radius: 10px;
   flex-wrap: wrap;
 }
@@ -1628,11 +1668,11 @@
   gap: 2px;
   padding: 1px 6px;
   border-radius: 8px;
-  background: #eef1f6;
+  background: var(--mc-bg-subtle);
   white-space: nowrap;
   cursor: help;
 }
-.mc-badge-chip:hover { background: #e3e8f0; color: var(--mc-text-heading-soft); }
+.mc-badge-chip:hover { background: var(--mc-bg-info-soft); color: var(--mc-text-heading-soft); }
 
 @media (max-width: 600px) {
   .mc-predictor-banner { font-size: 0.78rem; padding: 8px 10px; }
@@ -2383,7 +2423,7 @@
 }
 .mc-tip-card {
     padding: 10px 12px;
-    background: #fdfbf2;
+    background: var(--mc-bg-tip);
     border: 1px solid #e8d99c;
     border-radius: 10px;
     cursor: pointer;
@@ -2776,17 +2816,17 @@
     margin-left: auto;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #5b6a82;
-    background: #f1f4f9;
-    border: 1px solid #d6dee9;
+    color: var(--mc-text-muted-strong);
+    background: var(--mc-bg-subtle);
+    border: 1px solid var(--mc-border);
     border-radius: 8px;
     padding: 6px 10px;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .mc-collapse-all-btn:hover {
-    background: #e5ebf3;
-    border-color: #b9c6d8;
+    background: var(--mc-bg-info-soft);
+    border-color: var(--mc-border-strong);
     color: var(--text-dark);
 }
 .mc-collapse-all-btn:focus-visible {
@@ -3001,7 +3041,7 @@
     color: var(--color-success-dark);
 }
 .mc-cell-players .mc-players-count {
-    color: #4a5568;
+    color: var(--mc-text-muted-strong);
     font-weight: 600;
     font-size: 0.92rem;
 }

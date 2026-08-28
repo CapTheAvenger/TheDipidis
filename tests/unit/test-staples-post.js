@@ -109,14 +109,23 @@ describe('die gesperrte Kopfzeile', () => {
     });
 
     it('verkleinert auch den Untertitel, statt ihn zu schneiden', () => {
-        // Der Untertitel teilt sich die Zeile mit der Modus-Pille. Steht
-        // dort eine Spanne ("Gespielter Druck · 16–30"), wird die Pille
-        // breiter und der Satz lief in ein "…".
+        // Englische Untertitel sind laenger als deutsche; abschneiden
+        // waere schlechter als kleiner setzen.
         const KOPF2 = schneide('function staplesPostCanvas(spec, bilder)', '\n    /* Oeffentlicher Weg. Die Kartenbilder');
         assert.match(KOPF2, /while \(ctx\.measureText\(untertitel\)\.width > frei && utGr > \d+\)/,
             'der Untertitel verkleinert sich nicht');
-        assert.match(KOPF2, /var frei = MP\.W - 112 - modusB - 16;/,
-            'die Breite der Modus-Pille wird nicht abgezogen');
+        assert.match(KOPF2, /var frei = MP\.W - 112;/,
+            'der Untertitel bekommt nicht die ganze Breite');
+    });
+
+    it('malt keine Modus-Pille mehr', () => {
+        // Betreiber am 28.08.2026: "der gespielter Druck Banner muss im
+        // Bild noch weg." Sie sagte auch nichts, was das Bild nicht schon
+        // zeigt — welcher Ausschnitt zu sehen ist, steht als Rangziffer
+        // auf jeder Kachel.
+        const KOPF2 = schneide('function staplesPostCanvas(spec, bilder)', '\n    /* Oeffentlicher Weg. Die Kartenbilder');
+        assert.ok(!/spec\.modus/.test(KOPF2), 'die Pille wird wieder gezeichnet');
+        assert.ok(!/modusB/.test(KOPF2), 'ihr Platz wird noch freigehalten');
     });
 
     it('laesst eine kurze Kopfzeile in voller Groesse', () => {
@@ -278,12 +287,18 @@ describe('Top 30 wird auf zwei Bilder geteilt', () => {
         assert.equal(namen[29], 'K29');
     });
 
-    it('schreibt die Spanne ins Bild und in den Dateinamen', async () => {
-        // Zwei Bilder ohne Beschriftung sind zweimal dasselbe Bild.
+    it('gibt den beiden Bildern verschiedene Dateinamen', async () => {
+        // Ohne das ueberschreibt das zweite Bild beim Speichern das erste.
+        // Im Bild selbst steht die Spanne nicht mehr — sie steht als
+        // Rangziffer auf jeder Kachel (1–15 hier, 16–30 dort).
         const w = bau(30);
         await w.fn();
-        assert.match(w.rufe[0].modus, /1–15/);
-        assert.match(w.rufe[1].modus, /16–30/);
         assert.notEqual(w.rufe[0].dateiname, w.rufe[1].dateiname);
+        assert.match(w.rufe[0].dateiname, /1-15/);
+        assert.match(w.rufe[1].dateiname, /16-30/);
+        assert.equal(w.rufe[0].modus, undefined, 'der Modus wandert wieder ins Bild');
+        assert.equal(w.rufe[1].modus, undefined);
+        assert.equal(w.rufe[0].karten[0].rang, 1);
+        assert.equal(w.rufe[1].karten[0].rang, 16, 'die Rangziffer unterscheidet die Bilder nicht');
     });
 });

@@ -126,10 +126,16 @@ describe('wie weit die Seite dafür ist', () => {
         // 448 nach dem 28.08.2026: das Fenster-Grundgeruest
         // (.ui-modal-panel, .rarity-switcher-modal-content), die
         // Umschalter-Gruppe (vier Ansichten) und die Staples-Kachel.
-        /* 28.08.2026: 448 -> 446. Zwei Flaechen in
-           current-meta-matchups.css sind auf Token umgestellt; die
-           Grundlinie zieht mit, sonst schuetzt sie nichts mehr. */
-        const BASELINE = 446;
+        /* 28.08.2026, zweiter Durchgang: die Grundlinie stand auf 446,
+           gezaehlt wurden aber nur 445 — sie war eine Flaeche zu locker
+           und haette einen Rueckfall nicht gemerkt. Jetzt auf den
+           wirklich gezaehlten Stand gesetzt.
+           445 -> 417: meta-call.css hatte 28 getoente Flaechen als harte
+           Hex-Werte, obwohl die Datei seit dem 11.06. einen eigenen
+           Dunkelsatz hat. Sie haengen jetzt an fuenf Toenungs-Token mit
+           Bedeutung (info/ok/warn/bad/personal), damit Gelb im Dunkeln
+           Gelb bleibt und nicht Grau wird. */
+        const BASELINE = 417;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);

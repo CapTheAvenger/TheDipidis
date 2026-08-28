@@ -92,8 +92,8 @@
     font-weight: 600;
     color: var(--ink-3);
 }
-.ds-stat.is-pos .ds-stat-role { color: var(--dv-pos); }
-.ds-stat.is-neg .ds-stat-role { color: var(--dv-neg); }
+.ds-stat.is-pos .ds-stat-role { color: var(--dv-pos-ink); }
+.ds-stat.is-neg .ds-stat-role { color: var(--dv-neg-ink); }
 /* Duenne Grundlage: der farbige Streifen links tritt zurueck, die
    Rollenzeile wird neutral. Kein Rot — eine kleine Stichprobe ist kein
    Fehler, und die Kachel darf nicht wie eine Warnung aussehen; sie soll
@@ -279,8 +279,8 @@
     font-weight: 700;
     color: var(--ink);
 }
-.ds-chip.is-pos { color: var(--dv-pos); border-color: var(--dv-pos); }
-.ds-chip.is-neg { color: var(--dv-neg); border-color: var(--dv-neg); }
+.ds-chip.is-pos { color: var(--dv-pos-ink); border-color: var(--dv-pos); }
+.ds-chip.is-neg { color: var(--dv-neg-ink); border-color: var(--dv-neg); }
 
 /* ── Fachbegriff mit Erklärung an Ort und Stelle ─────────────────
    Der Text steht dort, wo die Zahl steht, statt auf einer Hilfeseite —

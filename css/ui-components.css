@@ -1162,7 +1162,10 @@ img[src*="limitlesstcg"] {
 .m-0 { margin: 0 !important; }
 .ta-center { text-align: center !important; }
 .fs-16 { font-size: 16px !important; }
-.color-grey-light { color: #aaa !important; }
+/* 28.08.2026: diese Klasse war VIERMAL definiert (#aaa, #aaa, #888, #888).
+   Die letzte gewann, die drei davor waren tote Zeilen — und alle vier zu
+   hell (3,54:1 auf Weiss). Eine Definition, ein Token. */
+.color-grey-light { color: var(--ink-3) !important; }
 .fs-085 { font-size: 0.85rem !important; }
 .mb-8 { margin-bottom: 8px !important; }
 /* Utility classes for modularizing remaining inline styles in index.html */
@@ -1264,7 +1267,6 @@ img[src*="limitlesstcg"] {
 .fs-12 { font-size: 12px !important; }
 .fw-700 { font-weight: 700 !important; }
 .bg-grey-dark { background: #333 !important; }
-.color-grey-light { color: #aaa !important; }
 .pos-fixed { position: fixed !important; }
 .top-0 { top: 0 !important; }
 .right-0 { right: 0 !important; }
@@ -1416,7 +1418,6 @@ img[src*="limitlesstcg"] {
 .ta-center { text-align: center !important; }
 .fw-900 { font-weight: 900 !important; }
 .fs-13 { font-size: 13px !important; }
-.color-grey-light { color: #888 !important; }
 .ls-1 { letter-spacing: 1px !important; }
 .ff-mono { font-family: monospace !important; }
 .fs-12 { font-size: 12px !important; }
@@ -1536,7 +1537,6 @@ img[src*="limitlesstcg"] {
 .box-shadow-blue { box-shadow: 0 3px 10px rgba(102,126,234,0.35) !important; }
 .scale-hover:hover { transform: scale(1.04) !important; }
 .color-white { color: #fff !important; }
-.color-grey-light { color: #888 !important; }
 .fs-12 { font-size: 12px !important; }
 .minw-260 { min-width: 260px !important; }
 .minw-280 { min-width: 280px !important; }
@@ -4928,7 +4928,7 @@ img[src*="limitlesstcg"] {
 }
 .cb-owned-line {
     display: block;
-    color: #8a8a8a;
+    color: var(--ink-3);
     font-size: 0.72rem;
     font-weight: 600;
 }
@@ -4990,7 +4990,7 @@ img[src*="limitlesstcg"] {
 }
 .deck-bench-main { flex: 1 1 auto; min-width: 0; }
 .deck-bench-name { display: block; font-weight: 700; font-size: 0.92rem; }
-.deck-bench-set { display: block; font-size: 0.75rem; color: #888; }
+.deck-bench-set { display: block; font-size: 0.75rem; color: var(--ink-3); }
 .deck-bench-ace { color: #e65100; font-weight: 700; }
 .deck-bench-bar {
     display: block;
@@ -5134,7 +5134,7 @@ a.price-unverified-badge:hover { background: var(--vorbehalt); color: var(--surf
     background: none; border: 0; border-left: 1px solid var(--line);
     color: var(--ink-3); font-size: var(--fs-lg); cursor: pointer;
 }
-.cb-binder-del:hover { color: var(--dv-neg); }
+.cb-binder-del:hover { color: var(--dv-neg-ink); }
 
 /* Das Abgleich-Board: steht ueber dem Gitter, nicht in einem Fenster.
    Ein Fenster muesste man schliessen, um nachzusehen, ob die Karte

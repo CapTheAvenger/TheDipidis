@@ -248,10 +248,10 @@
     const badge = document.getElementById('dipidis-cache-badge');
     if (!badge) return;
     if (fromCache) {
-      badge.textContent = '✅ Daten aus Cache geladen (instant!)';
+      badge.textContent = T('✅ Daten aus Cache geladen (instant!)', '✅ Loaded from cache (instant!)');
       badge.classList.add('from-cache');
     } else {
-      badge.textContent = '⬇️ Daten werden heruntergeladen & gecacht';
+      badge.textContent = T('⬇️ Daten werden heruntergeladen & gecacht', '⬇️ Downloading & caching data');
     }
   }
 

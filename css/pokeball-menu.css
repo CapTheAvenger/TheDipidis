@@ -232,14 +232,18 @@
     border-color: #fca5a5;
     color: #7f1d1d;
 }
-.btn-toggle-group { display: flex; background: #f8faff; border: 1px solid #d0d5e0; border-radius: 8px; overflow: hidden; }
+/* Gemessen 28.08.2026: die Gruppe stand fest auf #f8faff mit #6b7280
+ * Schrift. Im Dunkelmodus blieb sie eine helle Insel — auf der City
+ * League, in der Kartenuebersicht des laufenden Metas, im vergangenen
+ * Meta und in den Format-Staples, viermal dieselbe Gruppe. */
+.btn-toggle-group { display: flex; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
 .btn-toggle-item {
-    background: transparent; border: none; border-right: 1px solid #d0d5e0;
-    padding: 7px 13px; font-weight: 700; color: #6b7280; cursor: pointer; font-size: 0.83em;
+    background: transparent; border: none; border-right: 1px solid var(--line-strong);
+    padding: 7px 13px; font-weight: 700; color: var(--ink-2); cursor: pointer; font-size: 0.83em;
     transition: all 0.2s ease; font-family: 'Nunito', sans-serif;
 }
 .btn-toggle-item:last-child { border-right: none; }
-.btn-toggle-item:hover { background: rgba(59, 76, 202, 0.06); color: #4b5563; }
+.btn-toggle-item:hover { background: var(--ui-outline-bg-hover); color: var(--ink); }
 .btn-toggle-item.btn-success, .btn-toggle-item.active { background: var(--pokemon-blue) !important; color: white !important; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
 
 .deck-builder-toolbar {

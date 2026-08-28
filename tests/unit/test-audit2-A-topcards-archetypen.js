@@ -29,6 +29,10 @@ function build(lang) {
         fmtPct: (v) => String(v) + '%',
         escapeHtml: (s) => String(s == null ? '' : s),
         escapeJsStr: (s) => String(s == null ? '' : s),
+        // Seit dem Druck-Umschalter liest das Widget zwei weitere freie
+        // Namen: die Zahl der gezeigten Karten und den gemerkten Modus.
+        STAPLES_ANZAHL: 15,
+        ladeStaplesModus: () => 'gespielt',
     };
     // Als Ausdruck bauen, damit die Attrappen als Parameter im Gültigkeits-
     // bereich der Funktion liegen (die Funktion nutzt sie als freie Namen).
@@ -55,6 +59,12 @@ describe('F21 — Top-Cards nennen Archetypen, nicht Decks', () => {
         assert.match(html, /der Archetypen/, 'Prozent-Label sagt nicht "der Archetypen"');
         assert.match(html, /58 Archetypen/, 'Zähl-Label sagt nicht "Archetypen"');
         assert.match(html, /von 60 Archetypen/, 'der Nenner (60 Archetypen) wird nicht ausgewiesen');
+        // Die Seite weist an anderer Stelle 133 Archetypen aus. Beide Zahlen
+        // stimmen und zaehlen Verschiedenes: 133 ist die volle Online-Liste,
+        // 60 sind die Archetypen mit Deckliste — nur aus denen laesst sich
+        // zaehlen, welche Karte drinsteckt. Ohne den Zusatz liest sich
+        // "100 % der Archetypen" als 133 von 133.
+        assert.match(html, /von 60 Archetypen mit Deckliste/, 'der Nenner sagt nicht, welche Archetypen gemeint sind');
         // Die alte, irreführende Beschriftung darf nicht mehr auftauchen.
         assert.ok(!/der Decks/.test(html), 'noch "der Decks"');
         assert.ok(!/\d+ Decks/.test(html), 'noch "<n> Decks"');
@@ -65,7 +75,7 @@ describe('F21 — Top-Cards nennen Archetypen, nicht Decks', () => {
         const html = render(cards());
         assert.match(html, /of archetypes/);
         assert.match(html, /58 archetypes/);
-        assert.match(html, /of 60 archetypes/);
+        assert.match(html, /of 60 archetypes with decklists/);
         assert.ok(!/of decks/.test(html));
     });
 });

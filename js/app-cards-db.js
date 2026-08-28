@@ -3531,10 +3531,10 @@
             };
         }
         
-        function openRaritySwitcherFromDB(cardName, set, number) {
+        function openRaritySwitcherFromDB(cardName, set, number, anzeigeZiel) {
             // Create a deckKey format that openRaritySwitcher expects
             const deckKey = `${cardName} (${set} ${number})`;
-            openRaritySwitcher(cardName, deckKey);
+            openRaritySwitcher(cardName, deckKey, '', anzeigeZiel || '');
         }
         
         function filterCards() {
@@ -3725,19 +3725,24 @@
             return { distribution, total };
         }
 
-        async function openRaritySwitcher(cardName, deckKey, sourceHint = '') {
-            const isReady = await ensureCardDatabaseReadyForRaritySwitcher();
-            if (!isReady) {
-                showToast('Card database not loaded yet...', 'info');
-                return;
-            }
-
-            const safeDeckKey = String(deckKey || '');
-
-            // Extract card name from deckKey if needed (handle "CardName (SET NUM)" format)
-            const baseNameMatch = safeDeckKey.match(/^(.+?)\s*\(/);
-            const actualCardName = baseNameMatch ? baseNameMatch[1] : cardName;
+        /* ── Drucke einer Karte sammeln ─────────────────────────────────
+         *
+         * Der Block lag bis hierher mitten in openRaritySwitcher(). Er
+         * beantwortet eine Frage, die nicht am Deck haengt: welche
+         * Drucke gibt es von dieser Karte? Die Format-Staples brauchen
+         * dieselbe Antwort, ohne dass ein Deck im Spiel ist — darum
+         * steht er jetzt fuer sich. Reine Verschiebung, keine
+         * geaenderte Auswahl.
+         *
+         * Rueckgabe: { currentCard, isPokemonCard, versions }.
+         * versions ist leer, wenn nichts Vollstaendiges gefunden wurde;
+         * der Aufrufer entscheidet, was er dann sagt.
+         */
+        function collectCardPrints(cardName, set, number) {
+            const actualCardName = String(cardName || '');
             const normalizedActualCardName = normalizeCardName(actualCardName);
+            const currentSet = String(set || '').toUpperCase();
+            const currentNumber = String(number || '').toUpperCase();
 
             const cardMatchesActualName = (candidate) => {
                 if (!candidate) return false;
@@ -3745,41 +3750,7 @@
                 const candidateNameEn = normalizeCardName(candidate.name_en || '');
                 return candidateName === normalizedActualCardName || candidateNameEn === normalizedActualCardName;
             };
-            
-            // Extract set and number from deckKey (e.g., "Boss's Orders (RCL 189)" -> set="RCL", number="189")
-            const setNumMatch = safeDeckKey.match(/\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)/);
-            let currentSet = '';
-            let currentNumber = '';
-            if (setNumMatch) {
-                currentSet = setNumMatch[1];
-                currentNumber = setNumMatch[2];
-            }
-            
-            devLog(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${safeDeckKey}, actualCardName: ${actualCardName}`);
 
-            const resolvedTarget = resolveRaritySwitchTarget(actualCardName, safeDeckKey, sourceHint);
-            currentRaritySwitcherCard = {
-                cardName: actualCardName,
-                deckKey: safeDeckKey,
-                source: resolvedTarget.source || sourceHint || '',
-                resolvedOldKey: resolvedTarget.oldKey || safeDeckKey,
-                resolvedCount: resolvedTarget.count || 0,
-                profileDeckId: resolvedTarget.profileDeckId || (String(sourceHint || '').startsWith('profile|') ? String(sourceHint).slice('profile|'.length) : '')
-            };
-
-            const activeDeckContext = getRaritySwitcherDeckContext(
-                currentRaritySwitcherCard.source,
-                currentRaritySwitcherCard.profileDeckId
-            );
-            const activeDistribution = activeDeckContext
-                ? getDeckDistributionForCard(activeDeckContext.deck, actualCardName)
-                : { distribution: new Map(), total: 0 };
-            currentRaritySwitcherCard.totalCopies = activeDistribution.total;
-            devLog('[RaritySwitch][open] resolved target', {
-                input: { cardName, deckKey: safeDeckKey, sourceHint },
-                resolved: currentRaritySwitcherCard
-            });
-            
             // Find current card's data
             let currentCard = null;
             if (currentSet && currentNumber) {
@@ -3946,6 +3917,78 @@
                 // These are functionally identical cards validated by Limitless TCG database
                 devLog(`[Pokemon Filter] Showing all ${versions.length} international prints (trusted Limitless data)`);
             }
+
+            return { currentCard, isPokemonCard, versions };
+        }
+
+        /* anzeigeZiel: leer = der gewohnte Deck-Tausch. 'staples' = der
+         * Schalter wurde aus den Format-Staples geoeffnet, wo es kein Deck
+         * gibt. Dort waehlt ein Klick nur, welcher Druck angezeigt wird —
+         * bis hierher lief genau dieser Weg in "Diese Karte wurde im
+         * aktuellen Deck nicht gefunden", weil er nach einem Deck suchte,
+         * das es nie gab. */
+        async function openRaritySwitcher(cardName, deckKey, sourceHint = '', anzeigeZiel = '') {
+            const isReady = await ensureCardDatabaseReadyForRaritySwitcher();
+            if (!isReady) {
+                showToast('Card database not loaded yet...', 'info');
+                return;
+            }
+
+            const safeDeckKey = String(deckKey || '');
+
+            // Extract card name from deckKey if needed (handle "CardName (SET NUM)" format)
+            const baseNameMatch = safeDeckKey.match(/^(.+?)\s*\(/);
+            const actualCardName = baseNameMatch ? baseNameMatch[1] : cardName;
+            /* Namensvergleich und Druckliste stehen jetzt in
+             * collectCardPrints() — hier wird nur noch danach gefragt. */
+
+            // Extract set and number from deckKey (e.g., "Boss's Orders (RCL 189)" -> set="RCL", number="189")
+            const setNumMatch = safeDeckKey.match(/\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)/);
+            let currentSet = '';
+            let currentNumber = '';
+            if (setNumMatch) {
+                currentSet = setNumMatch[1];
+                currentNumber = setNumMatch[2];
+            }
+            
+            devLog(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${safeDeckKey}, actualCardName: ${actualCardName}`);
+
+            const resolvedTarget = resolveRaritySwitchTarget(actualCardName, safeDeckKey, sourceHint);
+            currentRaritySwitcherCard = {
+                cardName: actualCardName,
+                deckKey: safeDeckKey,
+                source: resolvedTarget.source || sourceHint || '',
+                resolvedOldKey: resolvedTarget.oldKey || safeDeckKey,
+                resolvedCount: resolvedTarget.count || 0,
+                profileDeckId: resolvedTarget.profileDeckId || (String(sourceHint || '').startsWith('profile|') ? String(sourceHint).slice('profile|'.length) : '')
+            };
+
+            const activeDeckContext = getRaritySwitcherDeckContext(
+                currentRaritySwitcherCard.source,
+                currentRaritySwitcherCard.profileDeckId
+            );
+            const activeDistribution = activeDeckContext
+                ? getDeckDistributionForCard(activeDeckContext.deck, actualCardName)
+                : { distribution: new Map(), total: 0 };
+            currentRaritySwitcherCard.totalCopies = activeDistribution.total;
+
+            /* Zwei Wege durch dasselbe Fenster. Mit Deck: Stueckzahlen
+             * verteilen, Drucke tauschen — wie bisher. Ohne Deck: nur
+             * waehlen, welcher Druck angezeigt wird. Der zweite Fall
+             * entstand nicht neu, er lief bis hierher in eine
+             * Fehlermeldung ("Diese Karte wurde im aktuellen Deck nicht
+             * gefunden"), weil das Fenster nach einem Deck suchte, das
+             * es an dieser Stelle nie gab. */
+            const nurAnzeige = anzeigeZiel === 'staples' || !activeDeckContext;
+            devLog('[RaritySwitch][open] resolved target', {
+                input: { cardName, deckKey: safeDeckKey, sourceHint },
+                resolved: currentRaritySwitcherCard
+            });
+            
+            const printInfo = collectCardPrints(actualCardName, currentSet, currentNumber);
+            const currentCard = printInfo.currentCard;
+            const isPokemonCard = printInfo.isPokemonCard;
+            let versions = printInfo.versions;
             
             if (versions.length === 0) {
                 showToast(`No complete versions found for "${actualCardName}". Card may not be fully indexed yet.`, 'warning', 5000);
@@ -4031,6 +4074,7 @@
                         ${_rsOwnedLine}
                         ${_rsOtherPrintLine}
                     </div>
+                    ${nurAnzeige ? '' : `
                     <div class="rarity-option-qty-wrap">
                         <label class="rarity-option-qty-label">Deck Qty</label>
                         <input
@@ -4045,15 +4089,21 @@
                             onclick="event.stopPropagation();"
                             oninput="this.value = Math.max(0, Math.min(60, parseInt(this.value || '0', 10) || 0));"
                         >
-                    </div>
+                    </div>`}
                     <div class="rarity-badge" style="--rarity-badge-bg: ${rarityBadgeColor};">
                         ${version.rarity || 'Unknown'}
                     </div>
+                    ${nurAnzeige ? `
+                    <button class="btn btn-primary rarity-option-swap-all-btn"
+                            onclick="event.stopPropagation(); waehleAnzeigeDruck('${safeOptionCardName}', '${escapeJsStr(currentSet)}', '${escapeJsStr(currentNumber)}', '${optionSet}', '${optionNumber}')"
+                            title="${t('rarity.showThisPrint')}">
+                        ${t('rarity.showThisPrint')}
+                    </button>` : `
                     <button class="btn btn-primary rarity-option-swap-all-btn"
                             onclick="event.stopPropagation(); selectRarityVersion('${optionSet}', '${optionNumber}', '${escapeJsStr(safeDeckKey)}', '${safeOptionCardName}', '${escapeJsStr((currentRaritySwitcherCard && currentRaritySwitcherCard.source) || '')}')"
                             title="${t('rarity.swapAll')}">
                         ${t('rarity.swapAll')}
-                    </button>
+                    </button>`}
                     ${cardmarketUrl ? `
                         <button class="${cardmarketBtnClass} card-database-price-btn" 
                                 onclick="event.stopPropagation(); openCardmarket('${cardmarketUrl}', '');" 
@@ -4108,7 +4158,15 @@
 
             const controlsHost = document.getElementById('raritySwitcherDistributionControls');
             const totalCopies = currentRaritySwitcherCard.totalCopies || 0;
-            const controlsHtml = `
+            /* Ohne Deck gibt es keine Stueckzahlen zu verteilen — dann
+             * bleibt unten nur das Schliessen stehen, statt eine Rechnung
+             * anzubieten, die ins Leere greift. */
+            const controlsHtml = nurAnzeige ? `
+                <div class="rarity-switcher-modal-buttons" id="raritySwitcherDistributionControls">
+                    <div class="rarity-distribution-summary">${t('rarity.displayOnlyHint')}</div>
+                    <button class="btn btn-secondary" onclick="closeRaritySwitcher()">Close</button>
+                </div>
+            ` : `
                 <div class="rarity-switcher-modal-buttons" id="raritySwitcherDistributionControls">
                     <div class="rarity-distribution-summary">${t('rarity.deckCopies')}: <strong>${totalCopies}</strong>. ${t('rarity.sumMustMatch')}</div>
                     <button class="btn btn-primary" onclick="applyRarityDistribution()">Apply Quantities</button>
@@ -4415,7 +4473,56 @@
             currentRaritySwitcherCard = null;
         }
 
+        /* Einen Druck nur fuer die Anzeige waehlen.
+         *
+         * Bewusst NICHT setRarityPreference(): dieser Speicher haengt am
+         * blossen Kartennamen und wird von der Deckansicht, dem
+         * Auto-Bauen, dem Binder und dem Proxy-Druck gelesen. Wer sich
+         * hier ein goldenes Artwork fuers Bild aussucht, haette sonst
+         * anschliessend in jedem eigenen Deck dasselbe Gold stehen. Der
+         * Anzeige-Speicher haengt dagegen an Set und Nummer des
+         * urspruenglichen Drucks — vier Karten desselben Namens bleiben
+         * vier Karten.
+         */
+        const ANZEIGE_DRUCK_KEY = 'anzeigeDruck_v1';
+
+        function ladeAnzeigeDrucke() {
+            try {
+                const roh = localStorage.getItem(ANZEIGE_DRUCK_KEY);
+                const obj = roh ? JSON.parse(roh) : {};
+                return (obj && typeof obj === 'object') ? obj : {};
+            } catch (_e) { return {}; }
+        }
+
+        function anzeigeDruckFuer(set, number) {
+            const schluessel = `${String(set || '').toUpperCase()}|${String(number || '').toUpperCase()}`;
+            const treffer = ladeAnzeigeDrucke()[schluessel];
+            return (treffer && treffer.set && treffer.number) ? treffer : null;
+        }
+
+        function waehleAnzeigeDruck(cardName, altSet, altNummer, neuSet, neuNummer) {
+            const schluessel = `${String(altSet || '').toUpperCase()}|${String(altNummer || '').toUpperCase()}`;
+            if (schluessel === '|') { closeRaritySwitcher(); return; }
+            try {
+                const alle = ladeAnzeigeDrucke();
+                alle[schluessel] = { set: String(neuSet || '').toUpperCase(), number: String(neuNummer || '').toUpperCase() };
+                localStorage.setItem(ANZEIGE_DRUCK_KEY, JSON.stringify(alle));
+            } catch (_e) { /* voller Speicher: dann eben nur fuer diese Sitzung nicht */ }
+            try {
+                document.dispatchEvent(new CustomEvent('ds:anzeigedruck', {
+                    detail: { name: cardName, set: neuSet, number: neuNummer }
+                }));
+            } catch (_e) { /* egal */ }
+            closeRaritySwitcher();
+        }
+
         // Explicit exports for inline onclick handlers across all tabs.
+        window.waehleAnzeigeDruck = waehleAnzeigeDruck;
+        window.anzeigeDruckFuer = anzeigeDruckFuer;
+        window.collectCardPrints = collectCardPrints;
+        window.getRaritySwitcherDeckContext = getRaritySwitcherDeckContext;
+        window.getRarityRank = getRarityRank;
+        window.ensureCardDatabaseReady = ensureCardDatabaseReadyForRaritySwitcher;
         window.openRaritySwitcher = openRaritySwitcher;
         window.closeRaritySwitcher = closeRaritySwitcher;
         window.selectRarityVersion = selectRarityVersion;

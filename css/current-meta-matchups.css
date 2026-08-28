@@ -522,7 +522,13 @@
        steht als eigener Punkt auf der Mangelliste. */
     font-size: 0.78em;
     font-weight: 700;
-    color: #2563eb;
+    /* Gemessen 28.08.2026 im Dunkelmodus: #2563eb stand mit 3,4:1 auf
+     * der Kachel. Der Wert traegt die Kernaussage und muss lesbar sein.
+     * --dv-pos waere die Farbe fuer einen positiven Wert, steht im
+     * Hellen aber nur auf 4,4:1 — bei 8 px Schrift zu wenig.
+     * --brand-ink ist derselbe Blauton in der Schriftvariante und traegt
+     * in beiden Modi (10,9:1 hell, 8,4:1 dunkel). */
+    color: var(--brand-ink);
 }
 
 #currentMetaContent .top-card-decks {
@@ -531,7 +537,8 @@
        die Kachel ist zu schmal dafuer. Siehe dort. */
     font-size: 0.72em;
     font-weight: 600;
-    color: #64748b;
+    /* 3,7:1 im Dunkeln, gemessen am selben Tag. */
+    color: var(--ink-3);
 }
 
 /* Matchup deck section cards.

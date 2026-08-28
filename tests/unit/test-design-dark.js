@@ -123,7 +123,10 @@ describe('wie weit die Seite dafür ist', () => {
         // für die alten --bg-*/--text-*- und die --ui-*-Familie). Jede
         // Fläche, die hier verschwindet, ist eine, die im Dunkelmodus
         // nicht weiß stehenbleibt.
-        const BASELINE = 452;
+        // 448 nach dem 28.08.2026: das Fenster-Grundgeruest
+        // (.ui-modal-panel, .rarity-switcher-modal-content), die
+        // Umschalter-Gruppe (vier Ansichten) und die Staples-Kachel.
+        const BASELINE = 448;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);

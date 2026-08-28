@@ -35,7 +35,13 @@
     border-radius: var(--ui-modal-radius);
     border: var(--ui-modal-border);
     box-shadow: var(--ui-modal-shadow);
-    background: #ffffff;
+    /* Stand 28.08.2026 gemessen: hier stand #ffffff fest. Im
+     * Dunkelmodus erbten die Fenster die helle Textfarbe der Seite und
+     * standen als weisse Platte mit weisser Schrift da — im
+     * Build-vs-Deck-Fenster waren "Mild", "Standard" und "Schwer"
+     * schlicht unsichtbar. Sechs Fenster hingen daran. */
+    background: var(--surface-1);
+    color: var(--ink);
 }
 
 .ui-modal-md {

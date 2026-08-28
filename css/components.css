@@ -932,7 +932,10 @@ html.is-signed-out [onclick*="radelist"]:hover {
     border: 1px solid var(--line);
     border-radius: 6px;
     background: var(--surface-1);
-    color: var(--brand);
+    /* --brand stand im Dunkeln mit 3,7:1 auf der Kachel; die beiden
+     * Zeichen sind Text, keine reine Flaeche. --brand-ink ist in beiden
+     * Modi die kontraststaerkere Schriftvariante derselben Farbe. */
+    color: var(--brand-ink);
     font: inherit;
     font-size: var(--fs-md);
     line-height: 1;

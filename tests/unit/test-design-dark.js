@@ -126,7 +126,10 @@ describe('wie weit die Seite dafür ist', () => {
         // 448 nach dem 28.08.2026: das Fenster-Grundgeruest
         // (.ui-modal-panel, .rarity-switcher-modal-content), die
         // Umschalter-Gruppe (vier Ansichten) und die Staples-Kachel.
-        const BASELINE = 448;
+        /* 28.08.2026: 448 -> 446. Zwei Flaechen in
+           current-meta-matchups.css sind auf Token umgestellt; die
+           Grundlinie zieht mit, sonst schuetzt sie nichts mehr. */
+        const BASELINE = 446;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);

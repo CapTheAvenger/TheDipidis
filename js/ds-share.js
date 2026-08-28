@@ -1959,9 +1959,20 @@
             ctx.fillText(modus, mx + 16, my + 18);
             ctx.textBaseline = 'alphabetic';
         }
+        /* Der Untertitel teilt sich die Zeile mit der Modus-Pille. Steht
+         * dort eine Spanne ("Gespielter Druck \u00b7 16\u201330"), wird die Pille
+         * breiter und der Satz wurde abgeschnitten. Er verkleinert sich
+         * jetzt, bis er passt \u2014 wie die Kopfzeile darueber. */
+        var frei = MP.W - 112 - modusB - 16;
+        var untertitel = String(spec.untertitel || '');
+        var utGr = 23;
         ctx.fillStyle = MC_FARBEN.matt;
-        ctx.font = fSans(23, 500);
-        ctx.fillText(clip(ctx, String(spec.untertitel || ''), MP.W - 112 - modusB - 16), 56, 452);
+        ctx.font = fSans(utGr, 500);
+        while (ctx.measureText(untertitel).width > frei && utGr > 16) {
+            utGr -= 1;
+            ctx.font = fSans(utGr, 500);
+        }
+        ctx.fillText(clip(ctx, untertitel, frei), 56, 452);
 
         var pad = 40;
         var innen = MP.W - pad * 2;

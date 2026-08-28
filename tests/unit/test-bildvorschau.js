@@ -136,16 +136,25 @@ describe('Bildvorschau — das Fenster selbst', () => {
     });
 
     it('der zweite Knopf kopiert, statt ein Menue zu oeffnen', () => {
-        // Gemeldet: "cool waer, wenn ich auf Teilen druecke, dass dann nicht
-        // 'n extra Menue aufgeht, sondern dass es automatisch in die
+        // Gemeldet am 19.08.2026: "cool waer, wenn ich auf Teilen druecke, dass
+        // dann nicht 'n extra Menue aufgeht, sondern dass es automatisch in die
         // Zwischenablage kopiert wird … beim Speichern wird's ja schon in die
-        // Fotomediathek gespeichert." Also ein Knopf in die Zwischenablage,
-        // einer auf die Platte, und kein dritter Weg dazwischen.
+        // Fotomediathek gespeichert."
+        //
+        // Der erste Teil gilt weiter: Kopieren kopiert, ohne Umweg. Der zweite
+        // Teil war eine Annahme, und sie stimmte auf dem iPhone nicht — <a
+        // download> landet dort in "Dateien", nie in Fotos (gemeldet am
+        // 28.08.2026 mit Bildschirmfoto). Darum darf SPEICHERN dort das
+        // Teilen-Blatt benutzen; es ist der einzige Weg in die Fotomediathek.
+        // Die Zusage hier ist enger geworden, nicht weggefallen: im
+        // Kopieren-Zweig hat navigator.share nach wie vor nichts zu suchen.
         assert.match(SRC, /ds-bildvorschau-btn-kopieren/);
         assert.match(SRC, /navigator\.clipboard\.write/);
         assert.match(SRC, /new window\.ClipboardItem\(\{ 'image\/png': blob \}\)/);
-        assert.ok(!/navigator\.share\(/.test(SRC),
-            'das System-Teilen-Menue ist zurueck');
+        const kopierAnfang = SRC.indexOf("var teilen = modal.querySelector('.ds-bildvorschau-btn-kopieren')");
+        assert.ok(kopierAnfang > -1, 'der Kopieren-Zweig wurde nicht gefunden');
+        assert.ok(!/navigator\.share\(/.test(SRC.slice(kopierAnfang)),
+            'der Kopieren-Knopf oeffnet wieder ein System-Menue');
     });
 
     it('und speichert, wo Kopieren nicht geht — mit Ansage', () => {

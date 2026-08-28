@@ -2388,10 +2388,27 @@
          * benutzen. Kein zweiter Auswahlweg, der irgendwann anders
          * entscheidet als der erste.
          */
-        const STAPLES_ANZAHL = 15;
+        /* Wie viele Staples gezeigt werden. 15 ist die gewachsene Zahl
+         * und bleibt die Voreinstellung — nach Pokegear 3.0 (65,0 %)
+         * faellt die Liste auf Budew (53,3 %), der groesste Sprung der
+         * ganzen Top 30. Genau da endet das Pflichtprogramm. Wer die
+         * zweite Reihe sehen will, schaltet auf 30. */
+        const STAPLES_STUFEN = [15, 30];
         const STAPLES_MODUS_KEY = 'staples_druckmodus_v1';
+        const STAPLES_ANZAHL_KEY = 'staples_anzahl_v1';
         let _staplesModus = 'gespielt';
+        let _staplesAnzahl = 15;
         let _staplesDaten = null;
+
+        function staplesAnzahl() { return _staplesAnzahl; }
+
+        function ladeStaplesAnzahl() {
+            try {
+                const n = parseInt(localStorage.getItem(STAPLES_ANZAHL_KEY), 10);
+                if (STAPLES_STUFEN.indexOf(n) !== -1) _staplesAnzahl = n;
+            } catch (_e) { /* egal */ }
+            return _staplesAnzahl;
+        }
 
         function ladeStaplesModus() {
             try {
@@ -2448,7 +2465,7 @@
 
         function staplesListe(modus) {
             const daten = _staplesDaten || [];
-            return daten.slice(0, STAPLES_ANZAHL).map((card, i) => {
+            return daten.slice(0, staplesAnzahl()).map((card, i) => {
                 const d = staplesDruckFuer(card, modus);
                 return {
                     rang: i + 1, name: card.name, share: card.global_share,
@@ -2502,13 +2519,33 @@
             if (document.querySelector('.top-cards-container')) zeichneStaplesBilderNeu();
         });
 
+        /* Die Anzahl aendert die Liste, nicht nur die Bilder — das Widget
+         * wird also neu gebaut, aus den schon geladenen Daten. */
+        async function setStaplesAnzahl(n) {
+            const wert = parseInt(n, 10);
+            if (STAPLES_STUFEN.indexOf(wert) === -1) return;
+            _staplesAnzahl = wert;
+            try { localStorage.setItem(STAPLES_ANZAHL_KEY, String(wert)); } catch (_e) { /* egal */ }
+            const behaelter = document.querySelector('.top-cards-container');
+            if (behaelter && _staplesDaten) {
+                behaelter.outerHTML = renderTopCardsWidget(_staplesDaten);
+                try {
+                    if (_staplesModus !== 'gespielt') await setStaplesModus(_staplesModus);
+                    else zeichneStaplesBilderNeu();
+                } catch (e) {
+                    console.warn('[Staples] Druckmodus nach Anzahlwechsel:', e);
+                }
+            }
+        }
+
         window.setStaplesModus = setStaplesModus;
+        window.setStaplesAnzahl = setStaplesAnzahl;
         window.staplesListe = staplesListe;
 
         function renderTopCardsWidget(topCards) {
             if (!topCards || topCards.length === 0) return '';
             
-            const top15 = topCards.slice(0, STAPLES_ANZAHL);
+            const gezeigt = topCards.slice(0, ladeStaplesAnzahl());
             const deLbl = getLang() === 'de';
             // Der Nenner der Prozente sind die Archetypen, nicht die Decklisten.
             // Er wird einmal als Untertitel ausgewiesen ("von N Archetypen"),
@@ -2533,12 +2570,25 @@
                     wert === modus ? ' active' : ''}" id="staplesDruck-${wert}"
                     aria-pressed="${wert === modus ? 'true' : 'false'}"
                     onclick="setStaplesModus('${wert}')">${escapeHtml(t(schluessel))}</button>`;
+            const anzahl = staplesAnzahl();
+            const zahlKnopf = (n) => `<button type="button" class="btn-toggle-item${
+                    n === anzahl ? ' active' : ''}" id="staplesAnzahl-${n}"
+                    aria-pressed="${n === anzahl ? 'true' : 'false'}"
+                    onclick="setStaplesAnzahl(${n})">${escapeHtml(deLbl ? 'Top ' + n : 'Top ' + n)}</button>`;
             const steuerung = `
                     <div class="top-cards-controls">
+                        <!-- Reihenfolge nach Breite: die drei Seltenheits-
+                             knoepfe fuellen auf dem Telefon eine Zeile
+                             allein. Die schmale Anzahl und der Bild-Knopf
+                             teilen sich dann die zweite, statt jeweils eine
+                             eigene zu bekommen. -->
                         <div class="btn-toggle-group top-cards-rarity">
                             ${knopf('gespielt', 'staples.printPlayed')}
                             ${knopf('min', 'cl.rarityLow')}
                             ${knopf('max', 'cl.rarityMax')}
+                        </div>
+                        <div class="btn-toggle-group top-cards-anzahl">
+                            ${STAPLES_STUFEN.map(zahlKnopf).join('')}
                         </div>
                         <button type="button" class="btn-modern top-cards-bild"
                                 onclick="staplesBildErzeugen()">${escapeHtml(t('mc.generateImage'))}</button>
@@ -2553,7 +2603,7 @@
                     ${steuerung}
                     <div class="top-cards-grid">`;
             
-            top15.forEach((card, index) => {
+            gezeigt.forEach((card, index) => {
                 const rank = index + 1;
                 const imageUrl = card.image_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="280"%3E%3Crect fill="%23ddd" width="200" height="280"/%3E%3C/svg%3E';
                 
@@ -2717,20 +2767,39 @@
             }
             const deLbl = getLang() === 'de';
             const modusNamen = { gespielt: t('staples.printPlayed'), min: t('cl.rarityLow'), max: t('cl.rarityMax') };
+            const n = _staplesDaten && _staplesDaten.totalArchetypes || '?';
+            const untertitel = deLbl
+                ? 'In wie vielen der ' + n + ' Archetypen mit Deckliste die Karte steckt'
+                : 'How many of the ' + n + ' archetypes with decklists play the card';
+
             /* Kurzer Titel fuers Bild. Die Ueberschrift der Seite lautet
              * "Meistgespielte Karten (Format-Staples)" — im Bild laeuft
              * die Klammer unter das Logo, weil der Kopf dort nur 560 px
              * breit ist. Die Klammer steht ohnehin schon in der
              * Kopfzeile darueber. */
-            await window.DsShare.shareStaplesPost({
+            const einBild = (karten, spanne) => window.DsShare.shareStaplesPost({
                 titel: t('staples.imageTitle'),
-                untertitel: deLbl
-                    ? 'In wie vielen der ' + (_staplesDaten && _staplesDaten.totalArchetypes || '?') + ' Archetypen mit Deckliste die Karte steckt'
-                    : 'How many of the ' + (_staplesDaten && _staplesDaten.totalArchetypes || '?') + ' archetypes with decklists play the card',
-                modus: modusNamen[_staplesModus] || '',
-                karten: liste,
-                dateiname: 'format-staples-' + _staplesModus
+                untertitel: untertitel,
+                modus: [modusNamen[_staplesModus] || '', spanne].filter(Boolean).join(' \u00b7 '),
+                karten: karten,
+                dateiname: 'format-staples-' + _staplesModus + (spanne ? '-' + spanne.replace(/\D+/g, '-') : '')
             });
+
+            /* Ab 16 Karten zwei Bilder statt eines.
+             *
+             * 30 Kacheln passen rechnerisch auf 1080 x 1350 — dann ist
+             * eine Karte 105 px breit und auf dem Telefon rund 40 px.
+             * Da erkennt niemand mehr, welche Karte das ist, und genau
+             * darum geht es hier ("weil teilweise ja Karten gleich
+             * heissen"). Zwei Bilder halten die Kachel gross; die
+             * Prozentzahlen sind ohnehin absolut und ueber beide Bilder
+             * vergleichbar. */
+            if (liste.length > 15) {
+                await einBild(liste.slice(0, 15), '1\u201315');
+                await einBild(liste.slice(15), '16\u2013' + liste.length);
+                return;
+            }
+            await einBild(liste, '');
         }
 
         window.staplesBildErzeugen = staplesBildErzeugen;

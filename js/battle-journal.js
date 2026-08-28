@@ -1232,13 +1232,19 @@
 
     // ── Read-time migration for old tournament type values ───
     function _migrateTypeValues(entries) {
+        // 'Regional/SPE/IC' war bis 08/2026 ein Sammeltopf. Seit die
+        // Weltmeisterschaft und die International Championship eigene
+        // Typen haben, wandern Alteintraege nach 'Regional/SPE'. Welche
+        // davon in Wahrheit ICs waren, steht nirgends — das raten wir
+        // nicht, der Nutzer kann sie im Bearbeiten-Dialog umhaengen.
         const map = {
             'City League':      'Cup',
-            'Special Event':    'Regional/SPE/IC',
+            'Special Event':    'Regional/SPE',
             'League Cup':       'Cup',
             'League Challenge': 'Challenge',
             'Casual':           'Testing',
-            'Regional':         'Regional/SPE/IC'
+            'Regional':         'Regional/SPE',
+            'Regional/SPE/IC':  'Regional/SPE'
         };
         return entries.map(e => {
             if (e.tournamentType && map[e.tournamentType]) {

@@ -132,7 +132,8 @@ def run():
 
         type_chips = page.evaluate("Array.from(document.querySelectorAll('#maFilterTypeChips .ma-chip')).map(c => c.dataset.value)")
         check("T3.9 Type chips include empty (Alle)", '' in type_chips)
-        check("T3.10 Type chips have new values", 'Regional/SPE/IC' in type_chips and 'Cup' in type_chips and 'Testing' in type_chips)
+        check("T3.10 Type chips have new values", 'Regional/SPE' in type_chips and 'Cup' in type_chips and 'Testing' in type_chips)
+        check("T3.10a Type chips have Worlds and International", 'Worlds' in type_chips and 'International' in type_chips)
 
         # Verify migration worked — old 'League Cup' entries should now be 'Cup'
         migrated_types = page.evaluate("window._bjSetCache ? Array.from(new Set(document.querySelectorAll ? [] : [])) : []")
@@ -141,9 +142,10 @@ def run():
             const entries = window._bjGetCache ? window._bjGetCache() : [];
             return [...new Set(entries.map(e => e.tournamentType))];
         })()""")
-        # The old 'League Cup' and 'Regional' should now be 'Cup' and 'Regional/SPE/IC'
+        # The old 'League Cup' and 'Regional' should now be 'Cup' and 'Regional/SPE'
         check("T3.10b Migration: no old League Cup", 'League Cup' not in cache_types)
         check("T3.10c Migration: no old Regional", 'Regional' not in cache_types)
+        check("T3.10d Migration: no old Regional/SPE/IC", 'Regional/SPE/IC' not in cache_types)
 
         tourn_opts = page.evaluate("Array.from(document.getElementById('maFilterTournament').options).map(o => o.value)")
         check("T3.11 Tournament filter has Cup Alpha", "Cup Alpha" in tourn_opts)

@@ -31,7 +31,9 @@ function build(lang) {
         escapeJsStr: (s) => String(s == null ? '' : s),
         // Seit dem Druck-Umschalter liest das Widget zwei weitere freie
         // Namen: die Zahl der gezeigten Karten und den gemerkten Modus.
-        STAPLES_ANZAHL: 15,
+        ladeStaplesAnzahl: () => 15,
+        staplesAnzahl: () => 15,
+        STAPLES_STUFEN: [15, 30],
         ladeStaplesModus: () => 'gespielt',
     };
     // Als Ausdruck bauen, damit die Attrappen als Parameter im Gültigkeits-

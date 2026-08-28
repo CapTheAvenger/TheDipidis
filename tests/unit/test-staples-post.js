@@ -108,6 +108,17 @@ describe('die gesperrte Kopfzeile', () => {
         assert.ok(r.groesse >= 15, 'sie wurde unter die Lesbarkeit verkleinert');
     });
 
+    it('verkleinert auch den Untertitel, statt ihn zu schneiden', () => {
+        // Der Untertitel teilt sich die Zeile mit der Modus-Pille. Steht
+        // dort eine Spanne ("Gespielter Druck · 16–30"), wird die Pille
+        // breiter und der Satz lief in ein "…".
+        const KOPF2 = schneide('function staplesPostCanvas(spec, bilder)', '\n    /* Oeffentlicher Weg. Die Kartenbilder');
+        assert.match(KOPF2, /while \(ctx\.measureText\(untertitel\)\.width > frei && utGr > \d+\)/,
+            'der Untertitel verkleinert sich nicht');
+        assert.match(KOPF2, /var frei = MP\.W - 112 - modusB - 16;/,
+            'die Breite der Modus-Pille wird nicht abgezogen');
+    });
+
     it('laesst eine kurze Kopfzeile in voller Groesse', () => {
         const r = malen('WORLDS 2026');
         assert.equal(r.groesse, 24);
@@ -202,5 +213,77 @@ describe('der Abbruch bei fehlender Kartenkunst', () => {
         assert.equal(w.zaehler.leinwaende, 0, 'es wurde trotzdem gezeichnet');
         assert.equal(w.zaehler.ausgeliefert, 0);
         assert.equal(w.gemeldet[0].art, 'error');
+    });
+});
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Top 30: zwei Bilder statt eines
+ *
+ * 30 Kacheln passen rechnerisch auf 1080 x 1350 — dann ist eine Karte
+ * 105 px breit und auf dem Telefon rund 40 px. Da erkennt niemand mehr,
+ * welche Karte das ist, und genau darum geht es hier ("weil teilweise ja
+ * Karten gleich heissen"). Diese Datei haelt fest, dass die Aufteilung
+ * nicht dem Zufall ueberlassen ist.
+ * ───────────────────────────────────────────────────────────────────── */
+describe('Top 30 wird auf zwei Bilder geteilt', () => {
+    const TIER = fs.readFileSync(path.join(ROOT, 'js', 'app-tier-meta.js'), 'utf8');
+    const a = TIER.indexOf('async function staplesBildErzeugen()');
+    const b = TIER.indexOf('window.staplesBildErzeugen', a);
+    assert.ok(a > -1 && b > a, 'staplesBildErzeugen-Schnitt fehlgeschlagen');
+    const QUELLE = TIER.slice(a, b);
+
+    function bau(anzahl) {
+        const rufe = [];
+        const liste = Array.from({ length: anzahl }, (_, i) =>
+            ({ rang: i + 1, name: 'K' + i, share: 90 - i }));
+        const attrappen = {
+            staplesListe: () => liste,
+            showToast: () => {},
+            getLang: () => 'de',
+            t: (k) => k,
+            window: {
+                DsShare: {
+                    shareStaplesPost: (spec) => { rufe.push(spec); return Promise.resolve(true); },
+                },
+            },
+            _staplesModus: 'gespielt',
+            _staplesDaten: Object.assign([], { totalArchetypes: 60 }),
+        };
+        const fn = new Function(...Object.keys(attrappen),
+            QUELLE + '\nreturn staplesBildErzeugen;')(...Object.values(attrappen));
+        return { fn, rufe };
+    }
+
+    it('macht aus 15 Karten ein Bild', async () => {
+        const w = bau(15);
+        await w.fn();
+        assert.equal(w.rufe.length, 1);
+        assert.equal(w.rufe[0].karten.length, 15);
+    });
+
+    it('macht aus 30 Karten zwei Bilder zu je 15', async () => {
+        const w = bau(30);
+        await w.fn();
+        assert.equal(w.rufe.length, 2, 'es entstand kein Karussell');
+        assert.equal(w.rufe[0].karten.length, 15);
+        assert.equal(w.rufe[1].karten.length, 15);
+    });
+
+    it('schneidet dabei keine Karte weg und wiederholt keine', async () => {
+        const w = bau(30);
+        await w.fn();
+        const namen = w.rufe[0].karten.concat(w.rufe[1].karten).map(k => k.name);
+        assert.equal(new Set(namen).size, 30, 'Karten doppelt oder verloren');
+        assert.equal(namen[0], 'K0');
+        assert.equal(namen[29], 'K29');
+    });
+
+    it('schreibt die Spanne ins Bild und in den Dateinamen', async () => {
+        // Zwei Bilder ohne Beschriftung sind zweimal dasselbe Bild.
+        const w = bau(30);
+        await w.fn();
+        assert.match(w.rufe[0].modus, /1–15/);
+        assert.match(w.rufe[1].modus, /16–30/);
+        assert.notEqual(w.rufe[0].dateiname, w.rufe[1].dateiname);
     });
 });

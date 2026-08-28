@@ -52,7 +52,9 @@ function bauWidget(lang, modus) {
         fmtPct: (v) => String(v) + '%',
         escapeHtml: (s) => String(s == null ? '' : s),
         escapeJsStr: (s) => String(s == null ? '' : s),
-        STAPLES_ANZAHL: 15,
+        ladeStaplesAnzahl: () => 15,
+        staplesAnzahl: () => 15,
+        STAPLES_STUFEN: [15, 30],
         ladeStaplesModus: () => modus || 'gespielt',
     };
     const fabrik = new Function(...Object.keys(attrappen),
@@ -97,6 +99,80 @@ describe('Format-Staples: der Stern oeffnet den Anzeige-Modus', () => {
         assert.match(html, /class="btn-toggle-item active" id="staplesDruck-max"/);
         assert.ok(!/class="btn-toggle-item active" id="staplesDruck-min"/.test(html));
         assert.match(html, /id="staplesDruck-max"[^>]*aria-pressed="true"/);
+    });
+});
+
+describe('Format-Staples: Top 15 und Top 30', () => {
+    it('bietet beide Stufen an und markiert die gewaehlte', () => {
+        const html = bauWidget('de')(karten());
+        assert.match(html, /id="staplesAnzahl-15"/);
+        assert.match(html, /id="staplesAnzahl-30"/);
+        assert.match(html, /setStaplesAnzahl\(30\)/);
+        assert.match(html, /class="btn-toggle-item active" id="staplesAnzahl-15"/);
+    });
+
+    it('schneidet die Liste bei der gewaehlten Anzahl ab', () => {
+        // Die Quelle liest die Anzahl ueber ladeStaplesAnzahl(); die
+        // Attrappe liefert hier 1, also darf nur eine Kachel entstehen.
+        const attrappen = {
+            t: (k) => k, getLang: () => 'de', fmtPct: (v) => String(v) + '%',
+            escapeHtml: (s) => String(s == null ? '' : s),
+            escapeJsStr: (s) => String(s == null ? '' : s),
+            ladeStaplesAnzahl: () => 1, staplesAnzahl: () => 1,
+            STAPLES_STUFEN: [15, 30], ladeStaplesModus: () => 'gespielt',
+        };
+        const render = new Function(...Object.keys(attrappen),
+            WIDGET + '\nreturn renderTopCardsWidget;')(...Object.values(attrappen));
+        const html = render(karten());
+        assert.equal((html.match(/class="top-card-item"/g) || []).length, 1);
+    });
+});
+
+describe('Format-Staples: die Anzahl nimmt nur bekannte Stufen', () => {
+    const WAHL = schneide('async function setStaplesAnzahl(n)', '\n        window.setStaplesModus');
+
+    function bau() {
+        const gemerkt = {};
+        const attrappen = {
+            STAPLES_STUFEN: [15, 30],
+            STAPLES_ANZAHL_KEY: 'staples_anzahl_v1',
+            localStorage: { setItem: (k, v) => { gemerkt[k] = v; } },
+            document: { querySelector: () => null },
+            renderTopCardsWidget: () => '',
+            setStaplesModus: () => Promise.resolve(),
+            zeichneStaplesBilderNeu: () => {},
+            console: { warn: () => {} },
+            _staplesModus: 'gespielt',
+            _staplesDaten: [],
+        };
+        const fabrik = new Function(...Object.keys(attrappen),
+            'let _staplesAnzahl = 15;' + WAHL +
+            '\nreturn { fn: setStaplesAnzahl, anzahl: () => _staplesAnzahl };');
+        const gebaut = fabrik(...Object.values(attrappen));
+        return { fn: gebaut.fn, anzahl: gebaut.anzahl, gemerkt: () => gemerkt };
+    }
+
+    it('nimmt 30 an', async () => {
+        const w = bau();
+        await w.fn(30);
+        assert.equal(w.anzahl(), 30);
+        assert.equal(w.gemerkt()['staples_anzahl_v1'], '30');
+    });
+
+    it('lehnt eine unbekannte Stufe ab, statt sie zu merken', async () => {
+        // Ein krummer Wert kaeme aus einem alten Speicher oder einem
+        // vertippten onclick — er darf die Liste nicht stillschweigend
+        // auf 7 oder 500 Karten stellen.
+        const w = bau();
+        await w.fn(7);
+        assert.equal(w.anzahl(), 15, 'die krumme Stufe wurde uebernommen');
+        assert.equal(w.gemerkt()['staples_anzahl_v1'], undefined, 'sie wurde sogar gemerkt');
+    });
+
+    it('lehnt auch Unsinn ohne Zahl ab', async () => {
+        const w = bau();
+        await w.fn('viele');
+        assert.equal(w.anzahl(), 15);
     });
 });
 

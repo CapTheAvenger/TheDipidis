@@ -183,6 +183,37 @@ describe('small samples are tamed', () => {
             `shrinkage failed: noise ${noise.perfPct.toFixed(0)} vs real ${real.perfPct.toFixed(0)}`);
     });
 
+    it('der laute Kleinstfall rutscht in der geglaetteten Liste nach unten', () => {
+        // Diese Zusicherung stand bis zum 28.08.2026 im Block "against the
+        // real file" und verlangte dort, dass der ROHE Spitzenreiter der
+        // Wochendaten eine winzige Stichprobe ist (`brought < 20`). Das ist
+        // keine Aussage ueber den Code, sondern ueber das Feld dieser Woche —
+        // und als der Wochenlauf am 27.08. um 21:18 neue Daten brachte, war
+        // sie falsch und hat den Deploy blockiert. Zum vierten Mal in diesem
+        // File aus demselben Grund.
+        //
+        // Hier steht dieselbe Eigenschaft an Daten, die ich selbst setze:
+        // ein Zwei-Eintrag-Deck fuehrt die rohe Liste an und darf die
+        // geglaettete nicht anfuehren. Das gilt jede Woche.
+        const rows = [
+            row('field', 100000, 6320),
+            row('winzig', 2, 1.0),                        // roh +690 %
+            ...Array.from({ length: 12 }, (_, i) =>
+                row('solide' + i, 300 + i * 40, (300 + i * 40) * (0.075 + i * 0.004))),
+        ];
+        const { decks } = compute.computeConversionPerformance(rows);
+        const rohSpitze = [...decks].sort((a, b) => b.rawPct - a.rawPct)[0];
+        assert.equal(rohSpitze.name, 'winzig', 'Kunstdaten treffen den Fall nicht mehr');
+
+        const gerankt = decks
+            .filter(d => d.brought >= compute.CONV_MIN_N)
+            .sort((a, b) => b.perfPct - a.perfPct);
+        const platz = gerankt.findIndex(d => d.name === 'winzig');
+        // -1 heisst: unter dem Boden der Aufrufer, taucht also nirgends auf.
+        assert.ok(platz === -1 || platz > 5,
+            `n=2 steht geglaettet noch auf Platz ${platz + 1}`);
+    });
+
     it('marks thin samples so the UI can de-emphasise them', () => {
         const { decks } = compute.computeConversionPerformance(
             [row('field', 100000, 6320), row('thin', 32, 4), row('solid', 472, 56)]);
@@ -254,11 +285,14 @@ describe('against the real file', () => {
         const unflagged = top10.filter(d => d.brought < CONV_THIN && !d.thin);
         assert.deepEqual(unflagged.map(d => d.name), [],
             'a thin deck would be shown without its warning');
-        assert.ok(top10.some(d => d.thin),
-            'fixture no longer contains a thin deck near the top — re-check the guard');
+        // Hier stand: "es MUSS ein duennes Deck in den Top 10 geben".
+        // Das ist eine Aussage ueber das Feld dieser Woche, kein Vertrag des
+        // Codes — an einer Woche ohne duennes Deck oben waere sie rot geworden,
+        // ohne dass etwas kaputt ist. Dass das Flag ueberhaupt gesetzt wird,
+        // steht als eigener Test an Kunstdaten ("marks thin samples").
     });
 
-    it('the loudest small sample is pushed down the smoothed list', () => {
+    it('der geglaettete Spitzenreiter haelt Boden und Flag ein', () => {
         // The property, not a threshold: "n > 100 at the top" was a
         // literal that rots with the weekly data. On 2026-08-14 the
         // smoothed leader is Toxtricity Box at n = 53 — above the thin
@@ -267,9 +301,6 @@ describe('against the real file', () => {
         // two-entry deck at +292 %, and it must not be near the top once
         // smoothed.
         const { decks } = compute.computeConversionPerformance(rows);
-        const byRaw = [...decks].sort((a, b) => b.rawPct - a.rawPct);
-        assert.ok(byRaw[0].brought < 20,
-            'fixture changed: the raw leader is no longer a tiny sample');
 
         // Rank the way every consumer does. computeConversionPerformance
         // deliberately does NOT apply CONV_MIN_N — the assertion two blocks
@@ -303,12 +334,10 @@ describe('against the real file', () => {
             `smoothed leader ${byPerf[0].name} sits below the caller floor at n=${byPerf[0].brought}`);
         assert.equal(byPerf[0].thin, byPerf[0].brought < CONV_THIN,
             `thin flag disagrees with n for the smoothed leader ${byPerf[0].name} (n=${byPerf[0].brought})`);
-        // -1 means the raw leader did not survive the floor at all — the
-        // strongest possible outcome, not a failure. Anything else has to sit
-        // well down the list.
-        const rawLeaderSmoothedRank = byPerf.findIndex(d => d.name === byRaw[0].name);
-        assert.ok(rawLeaderSmoothedRank === -1 || rawLeaderSmoothedRank > 10,
-            `the n=${byRaw[0].brought} raw leader still sits at #${rawLeaderSmoothedRank + 1} smoothed`);
+        // Der Rang des rohen Spitzenreiters wurde hier geprueft, solange der
+        // eine winzige Stichprobe WAR. Ist er das nicht mehr, prueft die Zeile
+        // nichts — sie sagt dann nur, wie das Feld gerade aussieht. Die
+        // Eigenschaft steht jetzt oben an Kunstdaten, wo sie jede Woche gilt.
     });
 });
 

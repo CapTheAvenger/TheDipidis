@@ -1,0 +1,140 @@
+/**
+ * Wachhund gegen die teuerste Testsorte dieses Projekts:
+ * ein Unit-Test, der eine Eigenschaft der LIVE-Daten behauptet.
+ *
+ * WARUM ES DIESE DATEI GIBT
+ *
+ * `deploy-pages.yml` bricht bei jedem roten Unit-Test ab. Ein Test, der
+ * behauptet "der roh beste Wert kommt von einer winzigen Stichprobe" oder
+ * "in den Top 10 steht ein duennes Deck", sagt nichts ueber den Code — er
+ * sagt, wie das Feld in DIESER Woche aussieht. Der naechste Datenlauf macht
+ * ihn rot, und die Auslieferung steht, ohne dass irgendwo ein Defekt ist.
+ *
+ * Das ist viermal passiert, immer in derselben Datei:
+ *
+ *   18.08.2026  test-conversion-performance.js  21 Stunden Deploy blockiert
+ *   28.08.2026  dieselbe Datei, die uebrig gebliebene Vorbedingung
+ *               (`byRaw[0].brought < 20`)       13 Stunden blockiert
+ *
+ * Jedes Mal wurde die rote Zeile entfernt und die naechste stehen gelassen.
+ * Dieser Wachhund macht daraus eine bewusste Entscheidung: wer einen Test
+ * an die Live-Daten haengt, muss ihn hier eintragen und begruenden.
+ *
+ * DIE REGEL
+ *
+ *   Eigenschaften des CODES gehoeren an Daten, die der Test selbst setzt.
+ *   Beobachtungen ueber die AKTUELLEN Daten gehoeren in den Data Guardian
+ *   (scripts/data_guardian.py) — der meldet WARN und stoppt nichts.
+ *
+ * Zulaessig an Live-Daten sind: Struktur (Spalten da, Schema stimmt),
+ * Parsebarkeit, und WEITE Baender mit Begruendung ("darf sich bewegen,
+ * nur nicht davonlaufen"). Nicht zulaessig ist eine enge Zahl, die aus
+ * dem Feld dieser Woche abgelesen wurde.
+ */
+
+const { describe, it } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('fs');
+const path = require('path');
+
+const UNIT = path.join(__dirname);
+
+const liestLiveDaten = (t) =>
+    /readFileSync\([^)]*(path\.join\([^)]*['"]data['"]|['"]data\/|ROOT[^)]*data)/.test(t) ||
+    /join\(ROOT,\s*['"]data['"]/.test(t);
+
+// assert.ok(... irgendwas < 5 ...) — eine Ungleichung gegen eine feste Zahl.
+const UNGLEICHUNG = /assert\.ok\([^;]*[<>]=?\s*-?\d/;
+
+function dateienMitDatenzugriff() {
+    return fs.readdirSync(UNIT)
+        .filter(f => f.startsWith('test-') && f.endsWith('.js'))
+        .filter(f => liestLiveDaten(fs.readFileSync(path.join(UNIT, f), 'utf8')));
+}
+
+function ungleichungen(datei) {
+    return fs.readFileSync(path.join(UNIT, datei), 'utf8').split('\n')
+        .filter(z => {
+            const s = z.trim();
+            if (s.startsWith('//') || s.startsWith('*')) return false;
+            return UNGLEICHUNG.test(z);
+        }).length;
+}
+
+/**
+ * Das Register. Jede Testdatei, die eine Datei aus data/ liest, steht hier
+ * mit einem Satz dazu, WARUM das in Ordnung ist. Eine neue Datei ohne
+ * Eintrag laesst diesen Test fallen — genau das ist der Zweck.
+ */
+const REGISTER = {
+    'test-champions-base-stats.js':      'Schema der Statuswerte, keine Zahlenbaender',
+    'test-champions-damage.js':          'Rechenwege am Schadensmodell; Baender sind physikalisch (Chance zwischen 0 und 1)',
+    'test-champions-matchups.js':        'Struktur der Matchup-Datei, Rechnung an gesetzten Werten',
+    'test-champions-speed-tiers.js':     'Sortierlogik; siehe BEOBACHTUNG unten — Zeile 148 haengt an den Daten',
+    'test-champions-sprites.js':         'nur Existenz von Sprite-Eintraegen, keine Ungleichung',
+    'test-comparison-csv-comma-parse.js':'Parsebarkeit des Komma-Formats, Struktur',
+    'test-conversion-performance.js':    'Feldquote als weites Band; die Wochenbehauptungen sind am 28.08. entfernt worden',
+    'test-datenlage-comparison-html.js': 'Dateigroesse als Obergrenze — eine Zusicherung ueber den Erzeuger, nicht ueber das Feld',
+    'test-datenstand.js':                'Schema von data_stand.json und Einbindung in den Wochenlauf',
+    'test-deckempfehlung-anzeige.js':    'Anzeigelogik an gesetzten Werten, Datei nur auf Schema geprueft',
+    'test-design-depth.js':              'liest data/ nur fuer Pfadaufloesung, prueft CSS',
+    'test-kartenart-und-drucke.js':      'Kartentypen und Drucke: Struktur; ein weites Band auf Ultra-Ball-Drucke',
+    'test-nenner-und-rundung.js':        'Rundungsvertrag; Abweichungen sind Toleranzen der Rechnung, keine Feldwerte',
+    'test-side-quest-play.js':           'Rechenwege am Nutzungsmodell, Toleranzen auf selbst gesetzten Anteilen',
+    'test-side-quest-usage.js':          'Struktur der Nutzungsdatei plus weite Untergrenzen (mindestens 10 Teams)',
+    'test-top100-weg.js':                'prueft, dass eine entfernte Ansicht nicht zurueckkommt',
+    'test-testdaten-wachhund.js':        'dieser Wachhund selbst',
+};
+
+// Stand 28.08.2026, nach dem Aufraeumen von test-conversion-performance.js.
+// Diese Zahl darf nicht steigen. Wer eine Ungleichung an Live-Daten
+// hinzufuegt, muss hier bewusst hochzaehlen und im Register begruenden.
+const OBERGRENZE = 61;
+
+describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
+
+    it('jede Datei mit Datenzugriff steht im Register', () => {
+        const unbekannt = dateienMitDatenzugriff().filter(f => !(f in REGISTER));
+        assert.deepEqual(unbekannt, [],
+            'Diese Testdateien lesen aus data/, stehen aber nicht im Register:\n' +
+            unbekannt.map(f => '  ' + f).join('\n') +
+            '\n\nEintragen und in einem Satz begruenden, warum die Zusicherungen ' +
+            'naechste Woche noch gelten. Faustregel: Struktur und weite Baender ja, ' +
+            'abgelesene Wochenwerte nein — die gehoeren in scripts/data_guardian.py.');
+    });
+
+    it('das Register enthaelt keine Datei, die es nicht mehr gibt', () => {
+        const da = new Set(fs.readdirSync(UNIT));
+        const tot = Object.keys(REGISTER).filter(f => !da.has(f));
+        assert.deepEqual(tot, [], 'Register zeigt auf geloeschte Dateien');
+    });
+
+    it('die Zahl der Ungleichungen an Live-Daten steigt nicht', () => {
+        const dateien = dateienMitDatenzugriff();
+        const proDatei = dateien.map(f => [f, ungleichungen(f)]).filter(([, n]) => n > 0);
+        const jetzt = proDatei.reduce((s, [, n]) => s + n, 0);
+        assert.ok(jetzt <= OBERGRENZE,
+            `Ungleichungen an Live-Daten: ${jetzt} (erlaubt: ${OBERGRENZE})\n` +
+            proDatei.sort((a, b) => b[1] - a[1]).map(([f, n]) => `  ${String(n).padStart(3)}  ${f}`).join('\n') +
+            '\n\nEine neue Ungleichung gegen eine feste Zahl auf Live-Daten ist die ' +
+            'Bauart, die den Deploy schon zweimal angehalten hat. Wenn sie wirklich ' +
+            'noetig ist: Obergrenze hier hochsetzen und dazuschreiben, warum die ' +
+            'Zahl auch in vier Wochen noch stimmt.');
+    });
+
+    it('meldet die bekannte Vorbedingung, die noch an den Daten haengt', () => {
+        // BEOBACHTUNG, kein Verbot: test-champions-speed-tiers.js:148 hat
+        // dieselbe Handschrift wie der Blocker vom 28.08. —
+        //     assert.ok(missing.length > 0, 'fixture changed — ...')
+        // Sie faellt, sobald die Quelle fuer jeden Eintrag Doubles-Daten
+        // liefert. Das ist kein Defekt, das waere eine Verbesserung der Daten.
+        // Der Test haelt hier nur fest, dass die Stelle bekannt ist; er wird
+        // rot, wenn jemand sie anfasst, ohne diesen Kommentar mitzuziehen.
+        const t = fs.readFileSync(path.join(UNIT, 'test-champions-speed-tiers.js'), 'utf8');
+        const trifft = /fixture changed/.test(t);
+        assert.equal(trifft, true,
+            'Die beobachtete Stelle in test-champions-speed-tiers.js ist weg oder ' +
+            'umformuliert. Wenn sie bereinigt wurde: diesen Test hier entfernen und ' +
+            'die Obergrenze um eins senken.');
+    });
+});

@@ -329,6 +329,37 @@
 }
 .mc-tt-swisscalc:hover { text-decoration: underline; }
 
+/* --- Turniername + "Bild generieren" ---
+   Der Name geht in keine Rechnung ein, er steht auf dem Bild. Das Feld
+   darf deshalb breiter sein als die Zahlenfelder daneben. */
+.mc-turnier-name { grid-column: span 2; }
+.mc-bild-zeile {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+.mc-bild-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong, #c5cfde);
+  background: var(--ui-outline-bg, #fff);
+  color: var(--ui-outline-text, #1a2640);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mc-bild-btn:hover { background: var(--ui-outline-bg-hover, #eef1f6); }
+.mc-bild-hinweis {
+  font-size: 0.78rem;
+  color: var(--mc-text-muted);
+}
+@media (max-width: 768px) {
+  .mc-turnier-name { grid-column: 1 / -1; }
+  .mc-bild-btn { width: 100%; }
+}
+
 /* --- Settings Grid --- */
 .metacall-settings-grid {
   display: grid;

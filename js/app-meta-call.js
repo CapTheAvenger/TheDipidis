@@ -769,8 +769,10 @@ window.MetaCall = (function () {
   // js/ds-share.js (DAY2_PUNKTE) fuer den Marker auf dem Turnierbild.
   const MAJOR_DAY2_POINTS = { 8: 16, 9: 19 };
   const TOURNAMENT_SETTINGS_KEY = 'metacall_tournament_settings_v1';
+  const TOURNAMENT_NAME_KEY = 'metacall_tournament_name_v1';
 
   let _settings = {
+    tournamentName: '',        // frei eingegeben, steht auf dem Bild
     tournamentType: 'regional',
     totalPlayers  : 2000,
     rounds        : 8,
@@ -813,6 +815,11 @@ window.MetaCall = (function () {
       }
     }
   } catch (_e) { /* localStorage disabled — fall back to defaults */ }
+
+  try {
+    const gemerkt = localStorage.getItem(TOURNAMENT_NAME_KEY);
+    if (gemerkt) _settings.tournamentName = String(gemerkt).slice(0, 60);
+  } catch (_e) { /* privater Modus */ }
 
   // Whether the user has explicitly typed into the Players input.
   // Calculations always use _settings.totalPlayers (default 2000), but
@@ -1296,6 +1303,42 @@ window.MetaCall = (function () {
       }));
   }
 
+  // ── Namensbruecke Turnier -> Ladder ─────────────────────────────
+  // City League hat keine Decknamen. Die Namen werden dort aus den
+  // Bildern abgeleitet, deshalb heisst dasselbe Deck einmal "Dhelmise"
+  // (Ladder) und einmal "Dhelmise Banette" (City League). Ohne Bruecke
+  // standen beide als eigene Zeile im prognostizierten Feld, mit je
+  // etwa der Haelfte des Anteils — das Deck war doppelt gezaehlt und
+  // dabei zweimal zu klein.
+  //
+  // Die Bruecke ist GEPFLEGT, nicht geraten: data/archetype_aliases.json
+  // enthaelt nur Paare, die einzeln nachgerechnet wurden, und nennt zu
+  // jedem den Beleg. Was nicht drinsteht, bleibt getrennt — ueber
+  // Namensaehnlichkeit zu automatisieren wuerde Mega Greninja mit
+  // Greninja verschmelzen. Dieselbe Datei benutzt schon der Current-
+  // Meta-Tab (js/app-tier-meta.js); hier kommt kein zweiter Bestand
+  // dazu, sondern derselbe.
+  let _aliasTurnierZuLadder = new Map();
+
+  async function _loadArchetypeAliases() {
+    const karte = new Map();
+    try {
+      const resp = await fetch('data/archetype_aliases.json?t=' + Date.now());
+      if (!resp.ok) return karte;
+      const json = await resp.json();
+      (json.turnier_zu_ladder || []).forEach(e => {
+        if (e && e.turnier && e.ladder) karte.set(normalize(e.turnier), e.ladder);
+      });
+    } catch (_e) { /* ohne Bruecke bleibt es beim alten Verhalten */ }
+    return karte;
+  }
+
+  // Turniername -> Laddername, sofern die Bruecke das Paar kennt.
+  // Sonst bleibt der Name, wie er ist.
+  function _kanonName(name) {
+    return _aliasTurnierZuLadder.get(normalize(name)) || name;
+  }
+
   async function _loadClShares(path) {
     const out = {};
     try {
@@ -1303,10 +1346,15 @@ window.MetaCall = (function () {
       if (!resp.ok) return out;
       const rows = parseCSV(await resp.text(), ';');
       rows.forEach(r => {
-        const name = (r.archetype || '').trim();
-        if (!name) return;
+        const roh = (r.archetype || '').trim();
+        if (!roh) return;
+        const name = _kanonName(roh);
         const share = parseEU(r.new_meta_share || '0');
-        if (share > 0) out[normalize(name)] = { name, share };
+        if (share <= 0) return;
+        const k = normalize(name);
+        // Zwei City-League-Zeilen koennen auf denselben Ladder-Namen
+        // zeigen. Dann werden sie addiert, nicht ueberschrieben.
+        out[k] = { name, share: (out[k] ? out[k].share : 0) + share };
       });
     } catch (_e) { /* tolerate missing source */ }
     return out;
@@ -5023,6 +5071,11 @@ window.MetaCall = (function () {
       // Online tournament top-8 stats (Stage-1 scraper output). Optional —
       // missing file means we run pure-ladder. Predictor 2.0 will then
       // simply fall back to the ladder share.
+      // Die Namensbruecke muss stehen, BEVOR die erste Turnierquelle
+      // gelesen wird — sonst landen Zeilen unter dem Turniernamen im
+      // Bestand und die Bruecke greift nur bei der Haelfte.
+      _aliasTurnierZuLadder = await _loadArchetypeAliases();
+
       _tournamentStats = {};
       try {
         const tournResp = await fetch('data/online_tournament_top8_decks.csv?t=' + Date.now());
@@ -5034,7 +5087,9 @@ window.MetaCall = (function () {
           tournRows.forEach(r => {
             if (!r.deck_name) return;
             const brought = parseEU(r.total_brought_weighted || '0');
-            _tournamentStats[normalize(r.deck_name)] = {
+            // Dieselbe Bruecke wie bei City League: die Turnierquelle
+            // nennt "Dhelmise Banette", die Ladder "Dhelmise".
+            _tournamentStats[normalize(_kanonName(r.deck_name))] = {
               broughtShare: (brought / broughtSum) * 100,
               top8Conv    : parseEU(r.top8_conv_rate  || '0'),  // 0..1
               top16Conv   : parseEU(r.top16_conv_rate || '0'),
@@ -7767,8 +7822,21 @@ window.MetaCall = (function () {
              oninput="MetaCall._onSetting('day2Points', +this.value)">
     </div>
     ${cupTopCutField}
+    <div class="metacall-field-group mc-turnier-name">
+      <label>${t('mc.labelTournamentName')}</label>
+      <input type="text" id="mc-turniername" maxlength="60"
+             value="${esc(s.tournamentName || '')}"
+             placeholder="${esc(t('mc.tournamentNamePlaceholder'))}"
+             oninput="MetaCall._onTournamentName(this.value)">
+    </div>
   </div>
   <p class="mc-tt-hint">${t(targetHintKey)} ${swissLink}</p>
+  <div class="mc-bild-zeile">
+    <button type="button" class="mc-bild-btn" onclick="MetaCall.generateTournamentImage()">
+      ${esc(t('mc.generateImage'))}
+    </button>
+    <span class="mc-bild-hinweis">${esc(t('mc.generateImageHint'))}</span>
+  </div>
 </div>`;
   }
 
@@ -10489,6 +10557,52 @@ window.MetaCall = (function () {
   }
 
   // ── Event Handlers ─────────────────────────────────────────
+  // Turniername. Er geht in keine Rechnung ein — er steht auf dem Bild
+  // und im Dateinamen. Deshalb loest er auch keinen Neulauf aus, nur
+  // das Merken.
+  function _onTournamentName(val) {
+    _settings.tournamentName = String(val || '').slice(0, 60);
+    try {
+      localStorage.setItem(TOURNAMENT_NAME_KEY, _settings.tournamentName);
+    } catch (_e) { /* privater Modus */ }
+  }
+
+  // "Bild generieren" — baut die Spezifikation aus dem, was gerade auf
+  // dem Bildschirm steht, und laesst js/ds-share.js daraus die Karte im
+  // Post-Entwurf malen. Ohne das Modul bleibt der Knopf ehrlich: er
+  // sagt, dass es nicht geht, statt nichts zu tun.
+  function generateTournamentImage() {
+    if (!window.DsShare || typeof window.DsShare.shareMetaCallPost !== 'function') {
+      if (typeof showToast === 'function') {
+        showToast(t('mc.generateImageMissing'), 'error');
+      }
+      return;
+    }
+    const feld = getPredictedField()
+      .filter(d => d.name && d.name !== '_junk')
+      .slice(0, 10);
+    if (!feld.length) {
+      if (typeof showToast === 'function') showToast(t('mc.generateImageEmpty'), 'error');
+      return;
+    }
+    const name = (_settings.tournamentName || '').trim();
+    const typLabel = t(_typeLabelI18nKey(_settings.tournamentType));
+    const spieler = _settings.totalPlayers
+      ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ` : '';
+    window.DsShare.shareMetaCallPost({
+      titel:        t('mc.imageTitle'),
+      kicker:       name || typLabel,
+      spalteLinks:  t('mc.colDeck'),
+      spalteRechts: t('mc.colPrediction'),
+      fuss:         `${spieler}${_settings.rounds} ${t('mc.roundsAbbr')} · ${_settings.day2Points} ${t('mc.ptsAbbr')}`,
+      dateiname:    (name || 'meta-call') + '-meta-call',
+      decks:        feld.map(d => ({
+        name: d.name,
+        wert: `${d.finalShare.toFixed(2).replace('.', ',')} %`,
+      })),
+    });
+  }
+
   function _onSetting(key, val) {
     if (isNaN(val) || val <= 0) return;
     _settings[key] = val;
@@ -11455,6 +11569,8 @@ window.MetaCall = (function () {
     // matchup row exists.
     getBaseMatchup: (deckA, deckB) => getBaseMatchup(deckA, deckB),
     _onSetting,
+    _onTournamentName,
+    generateTournamentImage,
     _setTournamentType,
     _setMetaCallMode,
     _onToggleSource,

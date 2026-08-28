@@ -2,6 +2,9 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a888d9678baaa6d1c22540b,2026-08-27,PBL,130,Greninja,27.0
+6a8893f18302ae761e5f8590,2026-08-27,PBL,205,Dragapult,34.0
+6a8d7b708302ae761e5fbde4,2026-08-27,PBL,135,Dragapult Dusknoir,30.0
 6a85cd2978baaa6d1c2238c2,2026-08-26,PBL,128,Cynthia's Garchomp,19.0
 6a8e92c90580a332c84202ed,2026-08-26,PBL,102,Dragapult Blaziken,27.0
 6a7a214b2b308b6067b50518,2026-08-26,PBL,116,Dragapult Dusknoir,30.0
@@ -100,4 +103,3 @@ worlds-of-doom-lcq,2026-08-08,PBL,657,Mega Lucario,34.0
 ban-pult,2026-08-01,PBL,514,Festival Lead,37.0
 6a699fa6937230b102d4811f,2026-07-31,PBL,100,Mega Excadrill,25.0
 6a5e305b52c24ac2da64732d,2026-07-31,PBL,102,Marnie's Grimmsnarl,21.0
-6a68191b52c24ac2da64e30d,2026-07-30,PBL,197,Dragapult,28.0

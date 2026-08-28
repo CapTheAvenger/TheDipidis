@@ -663,13 +663,13 @@
 .mc-vs-section {
     padding: 18px 22px;
     margin-bottom: 24px;
-    background: linear-gradient(180deg, var(--surface-1) 0%, #f8fafc 100%);
+    background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border: 1px solid var(--line);
     border-radius: 14px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 .mc-vs-title {
-    color: #0f172a;
+    color: var(--ink);
     margin: 0 0 14px;
     font-size: 1.2em;
     font-weight: 800;
@@ -1000,8 +1000,8 @@
     padding: 12px 14px;
     text-align: left;
     font-weight: 700;
-    color: #1e293b;
-    border-bottom: 2px solid #cbd5e1;
+    color: var(--ink-2);
+    border-bottom: 2px solid var(--line-strong);
     white-space: nowrap;
     text-transform: uppercase;
     font-size: 0.8em;
@@ -1043,16 +1043,16 @@
     transition: background 0.15s ease;
 }
 .mc-vs-table tbody tr:nth-child(even) {
-    background: #fafbfc;
+    background: var(--surface-2);
 }
 .mc-vs-table tbody tr:last-child { border-bottom: 0; }
 .mc-vs-table tbody tr:hover {
-    background: #eff6ff;
+    background: var(--surface-2);
 }
 .mc-vs-table td {
     padding: 11px 14px;
     vertical-align: middle;
-    color: #1e293b;
+    color: var(--ink);
 }
 .mc-vs-table td:first-child {
     font-weight: 500;

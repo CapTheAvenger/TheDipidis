@@ -77,6 +77,11 @@ describe('das Gitter der Staples-Kacheln', () => {
  * Kacheln gelandet sind. Nur Geometrie — nichts wird wirklich gemalt. */
 const POST = schneide('function staplesPostCanvas(spec, bilder)',
                       '\n    /* Oeffentlicher Weg. Die Kartenbilder');
+/* Der echte Kopf laeuft im Harness mit — er zeichnet das Logo, und genau
+   dessen Unterkante ist die Groesse, die hier geprueft wird. Ein
+   weggemockter Kopf wuerde die Attrappe pruefen, nicht die Auslieferung. */
+const KOPF_QUELLE = schneide('function malPostKopf(ctx, spec, logo)',
+                             '\n    function malMetaCallFuss');
 
 function zeichneStaples(logoMasse, anzahl) {
     const kacheln = [];
@@ -96,11 +101,14 @@ function zeichneStaples(logoMasse, anzahl) {
         fMono: (g) => g + 'px mono',
         clip: (c, t) => t,
         malLogo: (c, img, x, y, w) => { logo = { x, y, w }; },
+        fSans: (g) => g + 'px sans',
+        clip: (c, t) => t,
         staplesGitter: staplesGitter,
         malStapleKachel: (c, k, x, y, b, h) => { kacheln.push({ x, y, b, h }); },
         document: { createElement: () => ({ width: 0, height: 0, getContext: () => ctx }) },
     };
-    const fn = new Function(...Object.keys(attrappen), POST + '\nreturn staplesPostCanvas;')(
+    const fn = new Function(...Object.keys(attrappen),
+        KOPF_QUELLE + '\n' + POST + '\nreturn staplesPostCanvas;')(
         ...Object.values(attrappen));
     const karten = Array.from({ length: anzahl }, (_, i) => ({ rang: i + 1, name: 'X', share: 1 }));
     fn({ kicker: 'TEF-PBL \u00b7 FORMAT-STAPLES', karten: karten, fuss: 'Stand' },
@@ -109,7 +117,7 @@ function zeichneStaples(logoMasse, anzahl) {
 }
 
 describe('die gesperrte Kopfzeile', () => {
-    const KOPF = schneide('function malMetaCallKopf(ctx, spec, logo)', '\n    function malMetaCallFuss');
+    const KOPF = schneide('function malPostKopf(ctx, spec, logo)', '\n    function malMetaCallFuss');
 
     /* Eine Leinwand-Attrappe, die nur misst: gesperrte Monoschrift,
      * Breite = Zeichen x 0.62 x Schriftgroesse. Nah genug am echten
@@ -131,7 +139,7 @@ describe('die gesperrte Kopfzeile', () => {
                 ? t : t.slice(0, Math.floor(w / (0.62 * c._px))) + '\u2026'),
             malLogo: () => {}, MP: { W: 1080 },
         };
-        const fn = new Function(...Object.keys(attrappen), KOPF + '\nreturn malMetaCallKopf;')(...Object.values(attrappen));
+        const fn = new Function(...Object.keys(attrappen), KOPF + '\nreturn malPostKopf;')(...Object.values(attrappen));
         fn(ctx, { kicker: kicker, titel: 'x' }, null);
         // Der erste Aufruf ist die Kopfzeile, der zweite der Titel.
         return { gemalt: rufe[0].t, groesse: rufe[0].px };
@@ -145,7 +153,7 @@ describe('die gesperrte Kopfzeile', () => {
         assert.ok(r.groesse >= 15, 'sie wurde unter die Lesbarkeit verkleinert');
     });
 
-    it('traegt im Staples-Bild nur noch Kopfzeile und Logo', () => {
+    it('benutzt denselben Kopf wie der Meta-Call-Post', () => {
         // Betreiber am 28.08.2026, mit Titel und Untertitel eingekringelt:
         // "format staples als Text reicht, rest kann weg." Dazu: "der
         // gespielter Druck Banner muss im Bild noch weg."
@@ -156,10 +164,16 @@ describe('die gesperrte Kopfzeile', () => {
         assert.ok(!/modusB/.test(K), 'ihr Platz wird noch freigehalten');
         assert.ok(!/spec\.titel/.test(K), 'der Titel ist zurueck');
         assert.ok(!/spec\.untertitel/.test(K), 'der Untertitel ist zurueck');
-        assert.ok(!/malMetaCallKopf/.test(K),
-            'der Staples-Kopf zeichnet wieder den Meta-Call-Kopf mit Titel');
-        assert.match(K, /spec\.kicker/, 'die gesperrte Kopfzeile fehlt');
-        assert.match(K, /malLogo\(/, 'das Logo fehlt');
+        /* Betreiber am 28.08.2026, mit der gesperrten Zeile eingekringelt:
+           "warum steht das Format Staples noch da oben? Koennen wir mal
+           bitte ein Format durchziehen, die anderen waren doch super."
+           Also EIN Kopf fuer beide Bilder, kein zweiter Nachbau. */
+        assert.match(K, /malPostKopf\(ctx, spec, bilder\.logo\)/,
+            'das Staples-Bild zeichnet seinen Kopf wieder selbst');
+        assert.ok(!/fillText/.test(K),
+            'im Staples-Bild wird wieder eigener Kopftext gesetzt');
+        assert.ok(!/malLogo\(/.test(K),
+            'das Logo wird zusaetzlich zum Kopf noch einmal gezeichnet');
     });
 
     it('laesst das Gitter erst unter dem Logo anfangen', () => {
@@ -207,7 +221,7 @@ describe('die gesperrte Kopfzeile', () => {
         // Die beiden Bilder teilen sich Grund, Blueten und Fuss — aber
         // nicht den Kopf. Der Meta Call braucht seinen Titel weiter.
         const MC = schneide('function metaCallPostCanvas(spec, bilder)', '\n    /* Oeffentlicher Weg: Spezifikation rein');
-        assert.match(MC, /malMetaCallKopf\(ctx, spec, bilder\.logo\)/,
+        assert.match(MC, /malPostKopf\(ctx, spec, bilder\.logo\)/,
             'dem Meta-Call-Post wurde der Kopf mit weggenommen');
     });
 
@@ -246,9 +260,9 @@ describe('der Abbruch bei fehlender Kartenkunst', () => {
     const karten = (n) => Array.from({ length: n }, (_, i) =>
         ({ rang: i + 1, name: 'Karte ' + i, share: 50, url: 'u' + i }));
 
-    it('setzt Format und Format-Staples in die Kopfzeile', async () => {
-        // Die Kopfzeile ist das einzige Wort im Bild — sie muss das
-        // Format tragen, weil es unten nicht mehr steht.
+    it('trennt Format (Kicker) und Titel wie der Meta-Call-Post', async () => {
+        // Kicker = Format, Titel = worum es geht. Vorher stand beides in
+        // der gesperrten Zeile und lief ueber die halbe Bildbreite.
         let gesehen = null;
         const w = bau({});
         const alt = w;
@@ -266,9 +280,11 @@ describe('der Abbruch bei fehlender Kartenkunst', () => {
         };
         const fn = new Function(...Object.keys(attrappen), QUELLE2 + '\nreturn shareStaplesPost;')(...Object.values(attrappen));
         await fn({ karten: karten(15) });
-        assert.equal(gesehen.kicker, 'TEF-PBL \u00b7 FORMAT-STAPLES');
-        assert.equal(gesehen.titel, undefined, 'der Titel wandert wieder ins Bild');
-        assert.equal(gesehen.untertitel, undefined, 'der Untertitel wandert wieder ins Bild');
+        assert.equal(gesehen.kicker, 'TEF-PBL',
+            'der Kicker traegt wieder mehr als das Format');
+        assert.equal(gesehen.titel, 'Format-Staples',
+            'der Titel fehlt — dann steht das Wort wieder in der gesperrten Zeile');
+        assert.equal(gesehen.untertitel, undefined, 'der Untertitel ist zurueck');
         // Unten links nur das Datum: "Meta steht ja schon oben und
         // Limitless Online ist egal."
         assert.equal(gesehen.fuss, 'Stand 28.08.2026');

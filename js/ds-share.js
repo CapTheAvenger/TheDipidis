@@ -1680,7 +1680,22 @@
         ctx.restore();
     }
 
-    function malMetaCallKopf(ctx, spec, logo) {
+    /* Ein Kopf fuer alle Post-Bilder.
+     *
+     * Bis zum 28.08.2026 hatte das Staples-Bild einen eigenen, halb
+     * nachgebauten Kopf: gesperrte Zeile ja, Titel nein. Ergebnis waren
+     * zwei Gestaltungen fuer dieselbe Sache — "T E F - P B L  ·
+     * F O R M A T - S T A P L E S" gesperrt ueber die halbe Breite,
+     * waehrend der Meta Call daneben eine kurze Kickerzeile und einen
+     * grossen Titel trug. Betreiber, mit der gesperrten Zeile
+     * eingekringelt: "warum steht das Format Staples noch da oben?
+     * Koennen wir mal bitte ein Format durchziehen, die anderen waren
+     * doch super."
+     *
+     * Also: derselbe Kopf, immer. Kicker = Turnier oder Format, Titel =
+     * worum es geht. Der zweite Nachbau ist weg — und mit ihm die
+     * Stelle, an der die Logo-Ueberdeckung entstehen konnte. */
+    function malPostKopf(ctx, spec, logo) {
         var kicker = String(spec.kicker || '').toUpperCase();
         var titel  = String(spec.titel || 'Meta Call');
 
@@ -1799,7 +1814,7 @@
 
         malGrund(ctx);
         MC_BLUETEN.forEach(function (lage, i) { malBluete(ctx, bilder.blueten[i], lage); });
-        malMetaCallKopf(ctx, spec, bilder.logo);
+        malPostKopf(ctx, spec, bilder.logo);
         malMetaCallTafel(ctx, spec, bilder.sprites);
         malMetaCallFuss(ctx, spec.fuss);
         return cv;
@@ -1813,6 +1828,19 @@
             toast(L('Keine Daten fuer das Bild', 'No data for the image'), 'error');
             return Promise.resolve(false);
         }
+        /* Kicker = immer das aktuelle Meta, Titel = worum es geht.
+         *
+         * Betreiber am 28.08.2026: "immer das aktuelle Meta nutzen, bei dem
+         * Meta Call geht es ja nur darum, den Turniernamen dann als Titel
+         * zu nehmen." Vorher stand der Turniername im Kicker und ein
+         * fester Titel darunter — damit trug die kleine Zeile die
+         * eigentliche Information und die grosse eine Ueberschrift, die
+         * bei jedem Bild gleich war. */
+        var mcFacts = spaceFacts(activeSpace()) || {};
+        spec = Object.assign({}, spec, {
+            kicker: spec.kicker || mcFacts.format || '',
+            titel:  spec.titel  || ''
+        });
         var laden = [
             markenBild('logo'),
             Promise.all(MC_BLUETEN.map(function (b) { return markenBild(b[0]); })),
@@ -1934,49 +1962,30 @@
         malGrund(ctx);
         MC_BLUETEN.forEach(function (lage, i) { malBluete(ctx, bilder.blueten[i], lage); });
 
-        /* Kopf: nur die gesperrte Zeile und das Logo.
-         *
-         * Bis zum 28.08.2026 standen hier zusaetzlich ein Titel
-         * ("Meistgespielte Karten") und ein Untertitel ("In wie vielen der
-         * 60 Archetypen mit Deckliste die Karte steckt"). Betreiber, mit
-         * beidem eingekringelt: "format staples als Text reicht, rest
-         * kann weg."
-         *
-         * Gewonnen: die Kacheln bekommen die freie Hoehe. Verloren: der
-         * Untertitel erklaerte, worauf sich die Prozentzahl bezieht — das
-         * traegt jetzt der Text des Posts.
-         *
-         * Der Meta-Call-Post benutzt weiterhin malMetaCallKopf() mit
-         * Titel; nur dieses Bild hier zeichnet den Kopf selbst. */
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = MC_FARBEN.holz;
-        var gesperrt = String(spec.kicker || '').toUpperCase().split('').join(' ');
-        var kGr = 24;
-        ctx.font = fMono(kGr, 600);
-        while (ctx.measureText(gesperrt).width > 660 && kGr > 15) {
-            kGr -= 1;
-            ctx.font = fMono(kGr, 600);
-        }
-        ctx.fillText(clip(ctx, gesperrt, 660), 56, 322);
+        /* Derselbe Kopf wie der Meta-Call-Post: kurze Kickerzeile, grosser
+         * Titel, Logo rechts. Kein eigener Nachbau mehr. */
+        malPostKopf(ctx, spec, bilder.logo);
 
         /* Das Logo setzt die Unterkante des Kopfes, nicht der Text.
          *
-         * Am 28.08.2026 fiel der Titel weg und das Gitter rueckte auf
-         * y=380 hoch — das Logo reicht aber bis 459 hinunter und stand
-         * danach mitten in der ersten Kartenreihe. Gemeldet mit Bild:
-         * "was zur Hoelle ist da mit dem Logo passiert". Eine feste Zahl
-         * fuer den Gitteranfang kann das nicht wissen; sie wird deshalb
-         * aus der wirklich gezeichneten Logohoehe berechnet. */
-        var logoB = 286;
-        var logoY = 300;
+         * Am 28.08.2026 fiel der Titel weg und das Gitter rueckte auf eine
+         * feste y=380 hoch — das Logo reicht aber bis 459 hinunter und
+         * stand danach mitten in der ersten Kartenreihe. Gemeldet mit
+         * Bild: "was zur Hoelle ist da mit dem Logo passiert". Eine feste
+         * Zahl kann das nicht wissen; sie wird aus der wirklich
+         * gezeichneten Logohoehe gerechnet. malPostKopf zeichnet das Logo
+         * an derselben Stelle (x = W-44-286, y = 300, Breite 286).
+         *
+         * Der Titel endet bei rund y=428 und liegt damit ohnehin darueber
+         * — das Logo bleibt die bindende Kante. */
+        var LOGO_B = 286, LOGO_Y = 300;
         var logoH = (bilder.logo && bilder.logo.width)
-            ? logoB * (bilder.logo.height / bilder.logo.width)
-            : logoB * 0.557;
-        malLogo(ctx, bilder.logo, MP.W - 44 - logoB, logoY, logoB);
+            ? LOGO_B * (bilder.logo.height / bilder.logo.width)
+            : LOGO_B * 0.557;
 
         var pad = 40;
         var innen = MP.W - pad * 2;
-        var oben = Math.round(logoY + logoH + 22);
+        var oben = Math.round(LOGO_Y + logoH + 22);
         var feldH = MP.H - 112 - oben;
         var karten = spec.karten || [];
         var mass = staplesGitter(karten.length, innen, feldH);
@@ -2036,9 +2045,13 @@
             var karten = spec.karten.map(function (k, i) {
                 return { rang: k.rang, name: k.name, share: k.share, bild: bilder[i] };
             });
+            /* Kicker = Format, Titel = worum es geht — dieselbe Aufteilung
+             * wie beim Meta Call ("WORLDS \u00b7 TEF-PBL" / "Meta-Call").
+             * Vorher stand beides zusammengefasst in der gesperrten Zeile
+             * und lief ueber die halbe Bildbreite. */
             var cv = staplesPostCanvas({
-                kicker: spec.kicker || (facts.format
-                    ? facts.format + ' \u00b7 FORMAT-STAPLES' : 'FORMAT-STAPLES'),
+                kicker: spec.kicker || facts.format || '',
+                titel:  spec.titel  || L('Format-Staples', 'Format Staples'),
                 karten: karten, fuss: fuss
             }, { logo: teile[0], blueten: teile[1] });
             if (fehlend > 0) {

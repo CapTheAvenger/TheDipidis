@@ -71,14 +71,16 @@
 .meta-card-analysis-type-btn {
     padding: 6px 12px;
     font-size: 0.85em;
-    background: #6c757d;
+    /* War #6c757d mit opacity 0.6 — weisser Text darauf 2,29:1. Der
+       inaktive Zustand wird jetzt ueber eine hellere Flaeche gezeigt,
+       nicht ueber Transparenz: 6,68:1. */
+    background: #565d64;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    opacity: 0.6;
-    transition: background 0.2s, opacity 0.2s;
+    transition: background 0.2s;
 }
 
 #city-league-analysis .meta-card-analysis-share-btn,
@@ -88,27 +90,29 @@
     padding: 6px 10px;
     border-radius: 8px;
     font-weight: 700;
-    opacity: 0.85;
     box-shadow: none;
 }
 
+/* Aktiv wurde bis zum 28.08.2026 nur ueber opacity 0.6 vs 1 gezeigt.
+   Das kostete den inaktiven Knoepfen die Haelfte ihres Kontrasts
+   (weisser Text 2,29:1). Der Zustand haengt jetzt an einer Kontur —
+   sichtbar, ohne die Schrift zu schwaechen. */
 #city-league-analysis .meta-card-analysis-share-btn.active,
 #city-league-analysis .meta-card-analysis-type-btn.active,
-#city-league-analysis .meta-card-analysis-sort-btn.active {
-    opacity: 1;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
-}
+#city-league-analysis .meta-card-analysis-sort-btn.active,
 .meta-card-analysis-share-btn.active,
 .meta-card-analysis-type-btn.active {
-    opacity: 1;
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
 }
 
-#cityLeagueMetaShare90 { background: #28a745; }
+#cityLeagueMetaShare90 { background: #208838; }
 #cityLeagueMetaShare70 { background: #ffc107; color: #333; }
-#cityLeagueMetaShare50 { background: #17a2b8; }
-#cityLeagueMetaTypeTrainer { background: #28a745; }
+#cityLeagueMetaShare50 { background: #128193; }
+#cityLeagueMetaTypeTrainer { background: #208838; }
 #cityLeagueMetaTypePokemon { background: #ffc107; color: #333; }
-#cityLeagueMetaTypeEnergy { background: #20c997; }
+#cityLeagueMetaTypeEnergy { background: #158665; }
 
 .meta-card-analysis-sort-filter {
     display: flex;
@@ -118,17 +122,19 @@
 .meta-card-analysis-sort-btn {
     padding: 8px 14px;
     font-size: 0.9em;
-    background: #28a745;
+    /* #28a745 trug weissen Text mit 3,13:1 — und opacity 0.7 machte
+       daraus 2,20:1. Dunkleres Gruen (4,53:1), Zustand ueber Kontur. */
+    background: #208838;
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    opacity: 0.7;
-    transition: background 0.2s, opacity 0.2s;
+    transition: background 0.2s;
 }
 .meta-card-analysis-sort-btn.active {
-    opacity: 1;
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
 }
 #cityLeagueMetaGrid.meta-card-analysis-grid {
     /* Additional grid styles if needed */

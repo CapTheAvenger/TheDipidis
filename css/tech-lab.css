@@ -138,11 +138,11 @@
     flex: 0 0 auto;
     font-family: ui-monospace, SFMono-Regular, monospace;
     font-size: 0.78em;
-    color: #94a3b8;
+    color: var(--ink-3);
 }
 .tech-lab-picker-empty {
     padding: 12px 14px;
-    color: #94a3b8;
+    color: var(--ink-3);
     font-size: 0.88em;
     font-style: italic;
     text-align: center;
@@ -546,7 +546,7 @@
     align-items: center;
     justify-content: center;
     cursor: default;
-    color: #94a3b8;
+    color: var(--ink-3);
     font-size: 1.6em;
     font-weight: 700;
 }

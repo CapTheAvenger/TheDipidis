@@ -2142,11 +2142,11 @@
         }
         .cm-link-arrow { color: #00838f; font-size: 14px; }
         .cm-link-row-missing {
-            color: #94a3b8;
+            color: var(--ink-3);
             cursor: not-allowed;
         }
         .cm-link-row-missing .cm-link-count,
-        .cm-link-row-missing .cm-link-arrow { color: #94a3b8; }
+        .cm-link-row-missing .cm-link-arrow { color: var(--ink-3); }
         /* Fallback row — we don't have a direct product URL but the row
            still links somewhere useful (Cardmarket search). Tint amber
            so the user sees "this isn't an exact-print direct link". */
@@ -2727,7 +2727,7 @@
             top: 15px;
             font-size: 32px;
             font-weight: bold;
-            color: #aaa;
+            color: var(--ink-3);
             cursor: pointer;
             transition: all 0.2s ease;
             width: 44px;
@@ -2807,9 +2807,12 @@
         }
 
         .btn-cardmarket.no-price {
-            background: linear-gradient(135deg, #777 0%, #999 100%);
+            /* War ein Verlauf #777 -> #999 plus opacity: weisser Text lag
+               am hellen Ende bei 2,52:1. Deaktiviert heisst nicht
+               unlesbar — feste, dunklere Flaeche statt Transparenz:
+               6,27:1. */
+            background: #5a6169;
             cursor: not-allowed;
-            opacity: 0.9;
         }
 
         .compact-card-price {
@@ -4419,11 +4422,11 @@ h3:first-child {
 }
 .heatmap-neutral { 
     background-color: rgba(255, 235, 59, 0.15) !important; 
-    color: #f57f17; 
+    color: #8a5a00;  /* war #f57f17 = 2,56:1 auf der getoenten Zelle; jetzt 5,72:1, passend zu den 5,40:1 der roten Zelle */ 
 }
 .heatmap-mirror { 
     background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #fafafa 10px, #fafafa 20px); 
-    color: #999999; 
+    color: var(--ink-3); 
 }
 
 /* ==========================================================================
@@ -5528,7 +5531,7 @@ h3:first-child {
 .tier-trending-summary::after {
     content: '▼';
     font-size: 0.75rem;
-    color: #999;
+    color: var(--ink-3);
     margin-left: auto;
     transition: transform 0.25s ease;
 }
@@ -5736,7 +5739,7 @@ details[open] > .tier-trending-summary::after {
 
 .stat-compare-value {
     font-size: 0.65rem;
-    color: #888;
+    color: var(--ink-3);
     font-weight: 400;
     margin-left: 2px;
 }
@@ -7829,7 +7832,7 @@ body.battle-journal-open {
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: #999;
+    color: var(--ink-3);
     padding: 4px 8px;
     border-radius: 8px;
     line-height: 1;
@@ -8968,7 +8971,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 .bj-brick-text { font-weight: 700; color: #c0392b; }
 .bj-brick-hint {
     font-size: 0.76rem;
-    color: #999;
+    color: var(--ink-3);
     font-weight: 400;
 }
 
@@ -9412,7 +9415,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .tech-options-autocomplete-row .row-meta {
     font-size: 0.7em;
-    color: #999;
+    color: var(--ink-3);
 }
 .tech-options-grid {
     display: grid;
@@ -9421,7 +9424,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .tech-options-empty {
     grid-column: 1 / -1;
-    color: #999;
+    color: var(--ink-3);
     font-style: italic;
     text-align: center;
     padding: 16px;

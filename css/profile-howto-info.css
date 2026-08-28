@@ -1279,7 +1279,7 @@
 .mockup-vs-top8-row:nth-child(odd) { background: rgba(241, 245, 249, 0.4); }
 .mockup-vs-top8-rank {
     font-weight: 800;
-    color: #94a3b8;
+    color: var(--ink-3);
     text-align: right;
     font-size: var(--fs-xs);
 }
@@ -1465,7 +1465,7 @@
 }
 .mockup-wt-card-owned {
     font-size: var(--fs-xs);
-    color: #94a3b8;
+    color: var(--ink-3);
     line-height: 1.2;
 }
 .mockup-wt-card-live {
@@ -2910,7 +2910,7 @@
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #94a3b8;
+    color: var(--ink-3);
 }
 .mockup-stat-cell .value.is-good { color: #4ade80; }
 .mockup-stat-cell .value.is-bad  { color: #f87171; }

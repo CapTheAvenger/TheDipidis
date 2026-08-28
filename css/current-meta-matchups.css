@@ -107,10 +107,10 @@
 }
 
 .current-meta-matchups-best-title {
-    color: var(--dv-pos);
+    color: var(--dv-pos-ink);
 }
 .current-meta-matchups-worst-title {
-    color: var(--dv-neg);
+    color: var(--dv-neg-ink);
 }
 
 .current-meta-matchups-grid-container {
@@ -639,17 +639,17 @@
  * Farbsehschwäche, und „aufgestiegen" und „abgestiegen" sind für rund
  * jeden zwölften Mann sonst dieselbe Farbe. Werte aus tokens.css. */
 #currentMetaContent .rank-up {
-    color: var(--dv-pos);
+    color: var(--dv-pos-ink);
 }
 #currentMetaContent .rank-down {
-    color: var(--dv-neg);
+    color: var(--dv-neg-ink);
 }
 #currentMetaContent .positive {
-    color: var(--dv-pos);
+    color: var(--dv-pos-ink);
     font-weight: 700;
 }
 #currentMetaContent .negative {
-    color: var(--dv-neg);
+    color: var(--dv-neg-ink);
     font-weight: 700;
 }
 

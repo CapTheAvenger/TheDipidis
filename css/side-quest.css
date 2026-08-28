@@ -2255,7 +2255,7 @@ body.sqp-d-open { overflow: hidden; }
     background: rgba(52, 152, 219, 0.06); border: 1px solid rgba(52, 152, 219, 0.15);
 }
 .sqb-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.sqb-empty { font-size: 0.85rem; color: #94a3b8; padding: 4px 2px; }
+.sqb-empty { font-size: 0.85rem; color: var(--ink-3); padding: 4px 2px; }
 .sqb-chip {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 3px 8px 3px 4px; border-radius: 999px; cursor: pointer;
@@ -2280,7 +2280,7 @@ body.sqp-d-open { overflow: hidden; }
 .sqb-sec { font-size: 0.82rem; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;
     color: #16a34a; margin: 16px 0 2px; }
 .sqb-matching { color: #64748b; font-weight: 700; text-transform: none; letter-spacing: 0; }
-.sqb-hint { font-size: 0.78rem; color: #94a3b8; margin: 0 0 8px; }
+.sqb-hint { font-size: 0.78rem; color: var(--ink-3); margin: 0 0 8px; }
 .sqb-suggs { display: flex; flex-wrap: wrap; gap: 6px; }
 /* Zweiter Vorschlagsblock: Treffer der freien Suche, die auf keiner
    Partner-Liste der Auswahl stehen (25.08.2026). Bewusst ruhiger als
@@ -2304,7 +2304,7 @@ body.sqp-d-open { overflow: hidden; }
     font-size: 0.72rem; font-weight: 800; color: #0369a1;
     background: rgba(3,105,161,0.1); border-radius: 999px; padding: 0 6px; min-width: 18px; text-align: center;
 }
-.sqb-none, .sqb-loading { font-size: 0.9rem; color: #94a3b8; padding: 6px 2px; }
+.sqb-none, .sqb-loading { font-size: 0.9rem; color: var(--ink-3); padding: 6px 2px; }
 .sqb-teams { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .sqb-team {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -2322,7 +2322,7 @@ body.sqp-d-open { overflow: hidden; }
     background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 3px 8px;
 }
 .sqb-code.is-copied { color: #16a34a; border-color: #86efac; background: #f0fdf4; }
-.sqb-attr { font-size: 0.72rem; color: #9ca3af; margin-top: 14px; }
+.sqb-attr { font-size: 0.72rem; color: var(--ink-3); margin-top: 14px; }
 @media (max-width: 480px) {
     .sqb-team-name { max-width: 110px; }
     .sqb-team-bar-meta { margin-left: 0; width: 100%; justify-content: space-between; }
@@ -2355,7 +2355,7 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-ev b { font-size: 0.78rem; font-weight: 800; color: #2c3e50; font-variant-numeric: tabular-nums; }
 .sqp-ev small { font-size: var(--fs-xs); color: #6b7280; text-transform: uppercase; letter-spacing: 0.02em; }
 .sqp-ev.is-zero { border-color: #eef2f7; background: transparent; }
-.sqp-ev.is-zero b, .sqp-ev.is-zero small { color: #c3cad6; }
+.sqp-ev.is-zero b, .sqp-ev.is-zero small { color: var(--ink-3); }
 .sqp-d-evrow { align-items: center; }
 
 .sqp-d-teamgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
@@ -2386,7 +2386,7 @@ body.sqp-d-open { overflow: hidden; }
     display: flex; align-items: baseline; gap: 8px;
     border-left: 3px solid #22d3ee; padding-left: 8px;
 }
-.sqp-d-sec-hint { color: #9ca3af; font-size: 0.66rem; font-weight: 600; text-transform: none; }
+.sqp-d-sec-hint { color: var(--ink-3); font-size: 0.66rem; font-weight: 600; text-transform: none; }
 
 .sqp-sprite--hero { width: 64px; height: 64px; object-fit: contain; flex: 0 0 64px; }
 @media (max-width: 520px) { .sqp-sprite--hero { width: 52px; height: 52px; flex-basis: 52px; } }

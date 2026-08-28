@@ -113,7 +113,7 @@
 .anti-tech-quick-picks-legend span::before {
     content: "·";
     margin-right: 6px;
-    color: #9ca3af;
+    color: var(--ink-3);
 }
 
 .anti-tech-input {
@@ -296,7 +296,7 @@
     align-items: center;
 }
 .anti-tech-chips-empty {
-    color: #94a3b8;
+    color: var(--ink-3);
     font-size: 0.85em;
     font-style: italic;
 }
@@ -427,7 +427,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #9ca3af;
+    color: var(--ink-3);
     font-size: 1.6em;
     font-weight: 700;
     cursor: default;

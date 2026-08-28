@@ -2373,38 +2373,202 @@
          * Render Top Cards Widget (Format Staples)
          * Shows the most used cards across all decks in the current meta
          */
+        /* ── Format-Staples: welcher Druck wird gezeigt ────────────────
+         *
+         * Die Prozentzahl gehoert der KARTE, nicht dem Druck. Der Schalter
+         * wechselt darum ausschliesslich das Bild; keine Zahl im Widget
+         * haengt daran. Der Hinweis unter den Knoepfen sagt das auch,
+         * weil ein Bildwechsel direkt ueber einer Prozentzahl sonst
+         * gelesen wird, als haette sich die Zahl geaendert.
+         *
+         * 'gespielt' = der Druck, der in den Decklisten steht (bisheriges
+         * Verhalten, Voreinstellung). 'min'/'max' laufen durch
+         * getPreferredVersionForCard() — denselben Aufloeser, den die
+         * City League und die Kartenuebersicht des laufenden Metas
+         * benutzen. Kein zweiter Auswahlweg, der irgendwann anders
+         * entscheidet als der erste.
+         */
+        const STAPLES_ANZAHL = 15;
+        const STAPLES_MODUS_KEY = 'staples_druckmodus_v1';
+        let _staplesModus = 'gespielt';
+        let _staplesDaten = null;
+
+        function ladeStaplesModus() {
+            try {
+                const m = localStorage.getItem(STAPLES_MODUS_KEY);
+                if (m === 'min' || m === 'max' || m === 'gespielt') _staplesModus = m;
+            } catch (_e) { /* egal */ }
+            return _staplesModus;
+        }
+
+        /* Ein Druck je Karte, im gewaehlten Modus. Die einzeln gewaehlten
+         * Artworks (Stern-Knopf) stechen den Modus — wer eine Karte von
+         * Hand gesetzt hat, will sie so sehen. */
+        function staplesDruckFuer(card, modus) {
+            const basisSet = String(card.set_code || '').toUpperCase();
+            const basisNr  = String(card.set_number || '').toUpperCase();
+            const roh = { set: basisSet, number: basisNr, url: card.image_url || '' };
+            if (!basisSet || !basisNr) return roh;
+
+            try {
+                if (typeof window.anzeigeDruckFuer === 'function') {
+                    const eigen = window.anzeigeDruckFuer(basisSet, basisNr);
+                    if (eigen) {
+                        const u = (typeof getUnifiedCardImage === 'function')
+                            ? getUnifiedCardImage(eigen.set, eigen.number) : '';
+                        if (u) return { set: eigen.set, number: eigen.number, url: u };
+                    }
+                }
+            } catch (_e) { /* faellt auf den Modus zurueck */ }
+
+            if (modus !== 'min' && modus !== 'max') return roh;
+            if (typeof getPreferredVersionForCard !== 'function') return roh;
+
+            /* Die globale Vorliebe ist eine geteilte Variable. Sie wird
+             * hier nur geliehen und im finally zurueckgegeben — ohne das
+             * finally bliebe sie nach einem Fehler mitten in der Schleife
+             * auf 'max' stehen und wuerde still den Deckbau umstellen. */
+            const vorher = (typeof globalRarityPreference !== 'undefined') ? globalRarityPreference : null;
+            try {
+                globalRarityPreference = modus;
+                const v = getPreferredVersionForCard(card.name, basisSet, basisNr);
+                if (v && v.set && v.number) {
+                    const u = (typeof getUnifiedCardImage === 'function')
+                        ? getUnifiedCardImage(v.set, v.number) : '';
+                    return { set: String(v.set).toUpperCase(), number: String(v.number).toUpperCase(),
+                             url: u || v.image_url || roh.url };
+                }
+            } catch (e) {
+                console.warn('[Staples] Druckwahl fehlgeschlagen fuer', card.name, e);
+            } finally {
+                globalRarityPreference = vorher;
+            }
+            return roh;
+        }
+
+        function staplesListe(modus) {
+            const daten = _staplesDaten || [];
+            return daten.slice(0, STAPLES_ANZAHL).map((card, i) => {
+                const d = staplesDruckFuer(card, modus);
+                return {
+                    rang: i + 1, name: card.name, share: card.global_share,
+                    anzahl: card.deck_inclusion_count,
+                    set: d.set, number: d.number, url: d.url
+                };
+            });
+        }
+
+        async function setStaplesModus(modus) {
+            if (modus !== 'min' && modus !== 'max' && modus !== 'gespielt') return;
+            _staplesModus = modus;
+            try { localStorage.setItem(STAPLES_MODUS_KEY, modus); } catch (_e) { /* egal */ }
+
+            /* min/max brauchen die Kartendatenbank. Auf dem Meta-Reiter
+             * ist sie oft noch nicht geladen — erst laden, dann tauschen,
+             * sonst faellt jede Karte auf ihren gespielten Druck zurueck
+             * und der Knopf sieht kaputt aus. */
+            if (modus !== 'gespielt' && typeof window.ensureCardDatabaseReady === 'function') {
+                try { await window.ensureCardDatabaseReady(); } catch (_e) { /* egal */ }
+            }
+            zeichneStaplesBilderNeu();
+            markiereStaplesKnoepfe();
+        }
+
+        /* Nur die Bilder tauschen. Die Zahlen daneben werden absichtlich
+         * nicht neu gezeichnet — sie aendern sich nicht, und ein Flackern
+         * wuerde genau das behaupten. */
+        function zeichneStaplesBilderNeu() {
+            const liste = staplesListe(_staplesModus);
+            document.querySelectorAll('.top-cards-container .top-card-item').forEach((el, i) => {
+                const eintrag = liste[i];
+                const img = el.querySelector('.top-card-img');
+                if (!eintrag || !img || !eintrag.url) return;
+                if (img.getAttribute('src') !== eintrag.url) img.setAttribute('src', eintrag.url);
+                el.dataset.druck = eintrag.set + ' ' + eintrag.number;
+            });
+        }
+
+        function markiereStaplesKnoepfe() {
+            ['gespielt', 'min', 'max'].forEach(m => {
+                const b = document.getElementById('staplesDruck-' + m);
+                if (!b) return;
+                b.classList.toggle('active', m === _staplesModus);
+                b.setAttribute('aria-pressed', m === _staplesModus ? 'true' : 'false');
+            });
+        }
+
+        /* Ein von Hand gewaehltes Artwork wirkt sofort, ohne Neuaufbau. */
+        document.addEventListener('ds:anzeigedruck', function () {
+            if (document.querySelector('.top-cards-container')) zeichneStaplesBilderNeu();
+        });
+
+        window.setStaplesModus = setStaplesModus;
+        window.staplesListe = staplesListe;
+
         function renderTopCardsWidget(topCards) {
             if (!topCards || topCards.length === 0) return '';
             
-            const top15 = topCards.slice(0, 15);
+            const top15 = topCards.slice(0, STAPLES_ANZAHL);
             const deLbl = getLang() === 'de';
             // Der Nenner der Prozente sind die Archetypen, nicht die Decklisten.
             // Er wird einmal als Untertitel ausgewiesen ("von N Archetypen"),
             // damit "96,7% der Archetypen" nicht als Anteil an allen Decklisten
             // missverstanden wird (F21).
             const nArchetypen = topCards.totalArchetypes;
+            /* "von 60 Archetypen" allein ist missverstaendlich: die Seite
+             * weist an anderer Stelle 133 Archetypen aus. Beide Zahlen
+             * stimmen und zaehlen Verschiedenes — 133 ist die volle
+             * Online-Liste, 60 sind die Archetypen, zu denen ueberhaupt
+             * Decklisten vorliegen. Nur aus diesen 60 laesst sich zaehlen,
+             * welche Karte drinsteckt. Steht das nicht dabei, liest sich
+             * "100 % der Archetypen" als 133 von 133. */
             const nennerSub = (nArchetypen != null)
-                ? `<span class="top-cards-denominator" style="font-weight:600; color:#7f8c8d;">${
-                    deLbl ? 'von ' + nArchetypen + ' Archetypen' : 'of ' + nArchetypen + ' archetypes'}</span>`
+                ? `<span class="top-cards-denominator">${
+                    deLbl ? 'von ' + nArchetypen + ' Archetypen mit Deckliste'
+                          : 'of ' + nArchetypen + ' archetypes with decklists'}</span>`
                 : '';
+
+            const modus = ladeStaplesModus();
+            const knopf = (wert, schluessel) => `<button type="button" class="btn-toggle-item${
+                    wert === modus ? ' active' : ''}" id="staplesDruck-${wert}"
+                    aria-pressed="${wert === modus ? 'true' : 'false'}"
+                    onclick="setStaplesModus('${wert}')">${escapeHtml(t(schluessel))}</button>`;
+            const steuerung = `
+                    <div class="top-cards-controls">
+                        <div class="btn-toggle-group top-cards-rarity">
+                            ${knopf('gespielt', 'staples.printPlayed')}
+                            ${knopf('min', 'cl.rarityLow')}
+                            ${knopf('max', 'cl.rarityMax')}
+                        </div>
+                        <button type="button" class="btn-modern top-cards-bild"
+                                onclick="staplesBildErzeugen()">${escapeHtml(t('mc.generateImage'))}</button>
+                        <span class="top-cards-hint">${escapeHtml(t('staples.printHint'))}</span>
+                    </div>`;
 
             let html = `
                 <div class="top-cards-container">
-                    <h3 style="color: #2c3e50; margin: 0 0 15px 0; font-size: 1.3em; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                    <h3 class="top-cards-title">
                         ${t('tier.mostUsedCards')}${nennerSub}
                     </h3>
+                    ${steuerung}
                     <div class="top-cards-grid">`;
             
             top15.forEach((card, index) => {
                 const rank = index + 1;
                 const imageUrl = card.image_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="280"%3E%3Crect fill="%23ddd" width="200" height="280"/%3E%3C/svg%3E';
                 
-                // Determine rank badge color
+                /* Rangfarbe. Gemessen 28.08.2026: weisse Ziffern standen
+                 * auf Gold mit 2,2:1, auf Silber mit 2,6:1, auf Bronze mit
+                 * 3,1:1 — in beiden Modi, denn beide Farben lagen fest.
+                 * Die Ziffer ist keine Zierde, sie ist der Rang. Die
+                 * Flaechen bleiben, die Schrift wechselt auf Dunkel, wo
+                 * das traegt. */
                 let rankColor = '#95a5a6'; // Default gray
                 if (rank === 1) rankColor = '#f39c12'; // Gold
                 else if (rank === 2) rankColor = '#95a5a6'; // Silver
                 else if (rank === 3) rankColor = '#cd7f32'; // Bronze
                 else if (rank <= 5) rankColor = '#3498db'; // Blue for top 5
+                const rankInk = lesbareSchrift(rankColor);
                 
                 // ♡ und ★ sind die Symbole, die diese Seite schon benutzt:
                 // &#9825; fuer "auf die Wunschliste" (js/app-cards-db.js:2867)
@@ -2435,7 +2599,7 @@
                                     title="${escapeHtml(deLbl ? 'Auf die Wunschliste' : 'Add to wishlist')}"
                                     aria-label="${escapeHtml((deLbl ? 'Auf die Wunschliste: ' : 'Add to wishlist: ') + card.name)}">♡</button>
                             <button type="button" class="top-card-act"
-                                    onclick="openRaritySwitcherFromDB('${escapeJsStr(card.name)}', '${escapeJsStr(card.set_code)}', '${escapeJsStr(String(card.set_number))}')"
+                                    onclick="openRaritySwitcherFromDB('${escapeJsStr(card.name)}', '${escapeJsStr(card.set_code)}', '${escapeJsStr(String(card.set_number))}', 'staples')"
                                     title="${escapeHtml(deLbl ? 'Andere Artworks dieser Karte' : 'Other artworks of this card')}"
                                     aria-label="${escapeHtml((deLbl ? 'Artworks: ' : 'Artworks: ') + card.name)}">★</button>
                         </div>` : '';
@@ -2444,7 +2608,7 @@
                     <div class="top-card-item">
                         <div style="position:relative;">
                             <img src="${imageUrl}" class="top-card-img" alt="${escapeHtml(card.name)}" loading="lazy" data-image-source="limitless-en">
-                            <div class="top-card-rank" style="background: ${rankColor};">#${rank}</div>
+                            <div class="top-card-rank" style="background: ${rankColor}; color: ${rankInk};">#${rank}</div>
                         </div>
                         <div class="top-card-stats">
                             <div class="top-card-name">${escapeHtml(card.name)}</div>
@@ -2462,6 +2626,23 @@
             return html;
         }
         
+        /* Schwarz oder Weiss auf einer gegebenen Flaeche — was von
+         * beiden staerker absticht. Auf Gold (#f39c12) ist das Schwarz;
+         * weisse Ziffern standen dort mit 2,2:1. */
+        function lesbareSchrift(hintergrund) {
+            const m = String(hintergrund || '').match(/^#?([0-9a-f]{6})$/i);
+            if (!m) return '#ffffff';
+            const zahl = parseInt(m[1], 16);
+            const kanal = [(zahl >> 16) & 255, (zahl >> 8) & 255, zahl & 255].map(v => {
+                const x = v / 255;
+                return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+            });
+            const lum = 0.2126 * kanal[0] + 0.7152 * kanal[1] + 0.0722 * kanal[2];
+            const gegenWeiss = 1.05 / (lum + 0.05);
+            const gegenSchwarz = (lum + 0.05) / 0.05;
+            return gegenSchwarz >= gegenWeiss ? '#10151f' : '#ffffff';
+        }
+
         /**
          * Render and inject Top Cards Widget into Current Meta tab
          */
@@ -2483,6 +2664,7 @@
             
             // Calculate global card stats
             const globalStats = calculateGlobalCardStats(cardData);
+            _staplesDaten = globalStats;
             
             // Render widget HTML
             const widgetHtml = renderTopCardsWidget(globalStats);
@@ -2500,7 +2682,53 @@
                     container.insertAdjacentHTML('afterbegin', widgetHtml);
                 }
             }
+
+            /* Das Widget zeichnet zuerst die gespielten Drucke. Steht der
+             * Schalter auf min/max oder gibt es von Hand gewaehlte
+             * Artworks, werden die Bilder danach getauscht — das Widget
+             * steht also sofort und wird nicht erst leer. */
+            try {
+                if (_staplesModus !== 'gespielt') {
+                    await setStaplesModus(_staplesModus);
+                } else {
+                    zeichneStaplesBilderNeu();
+                }
+            } catch (e) {
+                console.warn('[Staples] Druckmodus konnte nicht angewendet werden:', e);
+            }
         }
+
+        /* ── Bild fuer einen Post ──────────────────────────────────────
+         *
+         * Der Betreiber: "wenn wir ueber Karten reden muessen wir immer
+         * die Kartenbilder mit anzeigen weil teilweise ja Karten gleich
+         * heissen". Darum traegt dieses Bild die echten Kartenbilder und
+         * nicht nur Namen und Balken.
+         */
+        async function staplesBildErzeugen() {
+            const liste = staplesListe(_staplesModus);
+            if (!liste.length) {
+                if (typeof showToast === 'function') showToast(t('staples.imageNoData'), 'warning');
+                return;
+            }
+            if (!window.DsShare || typeof window.DsShare.shareStaplesPost !== 'function') {
+                if (typeof showToast === 'function') showToast(t('staples.imageNoData'), 'warning');
+                return;
+            }
+            const deLbl = getLang() === 'de';
+            const modusNamen = { gespielt: t('staples.printPlayed'), min: t('cl.rarityLow'), max: t('cl.rarityMax') };
+            await window.DsShare.shareStaplesPost({
+                titel: t('tier.mostUsedCards'),
+                untertitel: deLbl
+                    ? 'In wie vielen der ' + (_staplesDaten && _staplesDaten.totalArchetypes || '?') + ' Archetypen mit Deckliste die Karte steckt'
+                    : 'How many of the ' + (_staplesDaten && _staplesDaten.totalArchetypes || '?') + ' archetypes with decklists play the card',
+                modus: modusNamen[_staplesModus] || '',
+                karten: liste,
+                dateiname: 'format-staples-' + _staplesModus
+            });
+        }
+
+        window.staplesBildErzeugen = staplesBildErzeugen;
         
 // ============================================================================
 // Live deck-name filter for the Current Meta tier list.

@@ -1820,9 +1820,217 @@
         });
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+     * Format-Staples als Post
+     *
+     * Der Betreiber: "wenn wir ueber Karten reden muessen wir immer die
+     * Kartenbilder mit anzeigen weil teilweise ja Karten gleich heissen
+     * und man schneller sieht um welche Karte es geht und was die kann".
+     * Darum traegt dieses Bild die echten Kartenbilder — Name und Balken
+     * allein sagen bei "Judge" oder "Switch" nicht, welche Karte gemeint
+     * ist.
+     *
+     * Grund, Blueten, Logo, Kopf und Fuss sind dieselben wie beim
+     * Meta-Call-Post. Das war eine Ansage: "dann sollten wir die gleichen
+     * Farben ueberall nutzen, nicht einmal Balken neon Blau und andere
+     * Gold." Neu ist nur das Kartengitter dazwischen.
+     * ═══════════════════════════════════════════════════════════════ */
+
+    /* Fuenf Spalten fuer bis zu 15 Karten — dann gehen drei volle Zeilen
+     * auf, statt sechs plus sechs plus drei. Die Kachelhoehe kommt aus
+     * dem verfuegbaren Feld, die Breite aus dem echten Kartenformat
+     * (245 x 342). Passt die Reihe nicht in die Breite, entscheidet die
+     * Breite. */
+    function staplesGitter(anzahl, breite, hoehe) {
+        var beste = null;
+        for (var spalten = 3; spalten <= 8; spalten++) {
+            var gap = spalten >= 7 ? 10 : 14;
+            var zeilen = Math.ceil(anzahl / spalten);
+            var kh = Math.floor((hoehe - gap * (zeilen - 1)) / zeilen);
+            var kb = Math.round(kh * 245 / 342);
+            var maxKb = Math.floor((breite - gap * (spalten - 1)) / spalten);
+            if (kb > maxKb) { kb = maxKb; kh = Math.round(kb * 342 / 245); }
+            if (kh < 60 || kb < 44) continue;
+            var rest = anzahl % spalten;
+            var kandidat = { spalten: spalten, zeilen: zeilen, kb: kb, kh: kh, gap: gap,
+                             letzteZeile: rest === 0 ? spalten : rest };
+            if (!beste || kb > beste.kb) beste = kandidat;
+        }
+        return beste;
+    }
+
+    /* Der Streifen am Fuss jeder Kachel: Name links, Anteil rechts in
+     * Gold. Er liegt AUF dem Bild statt darunter, weil eine eigene
+     * Textzeile je Karte eine ganze Kachelgroesse kostet — und eine
+     * kleinere Karte erkennt niemand mehr wieder. */
+    function malStapleKachel(ctx, k, x, y, kb, kh) {
+        ctx.save();
+        rr(ctx, x, y, kb, kh, 8); ctx.clip();
+        if (k.bild) {
+            ctx.drawImage(k.bild, x, y, kb, kh);
+        } else {
+            ctx.fillStyle = '#2A1B35';
+            ctx.fillRect(x, y, kb, kh);
+            ctx.fillStyle = MC_FARBEN.matt;
+            ctx.font = fSans(Math.max(10, Math.round(kb * 0.11)), 600);
+            ctx.textAlign = 'center';
+            var woerter = String(k.name || '').split(/\s+/);
+            for (var w = 0; w < Math.min(3, woerter.length); w++) {
+                ctx.fillText(clip(ctx, woerter[w], kb - 10), x + kb / 2, y + kh / 2 - 12 + w * 16);
+            }
+            ctx.textAlign = 'left';
+        }
+
+        var bandH = Math.max(34, Math.round(kh * 0.20));
+        var lin = ctx.createLinearGradient(0, y + kh - bandH - 12, 0, y + kh);
+        lin.addColorStop(0, 'rgba(12,6,14,0)');
+        lin.addColorStop(0.35, 'rgba(12,6,14,.80)');
+        lin.addColorStop(1, 'rgba(12,6,14,.94)');
+        ctx.fillStyle = lin;
+        ctx.fillRect(x, y + kh - bandH - 12, kb, bandH + 12);
+
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = MC_FARBEN.creme;
+        ctx.font = fSans(Math.max(10, Math.round(kb * 0.082)), 700);
+        ctx.fillText(clip(ctx, k.name || '', kb - 14), x + 7, y + kh - bandH * 0.52);
+
+        ctx.fillStyle = MC_FARBEN.holz;
+        ctx.font = fMono(Math.max(11, Math.round(kb * 0.095)), 700);
+        ctx.fillText(clip(ctx, num(k.share, 1) + ' %', kb - 14), x + 7, y + kh - 9);
+        ctx.restore();
+
+        ctx.strokeStyle = 'rgba(227,178,118,.34)'; ctx.lineWidth = 1;
+        rr(ctx, x, y, kb, kh, 8); ctx.stroke();
+
+        /* Der Rang oben links. Gold auf Dunkel — dieselbe Rolle, die
+         * Gold auf allen anderen Bildern hat. */
+        var r = Math.max(13, Math.round(kb * 0.105));
+        ctx.beginPath();
+        ctx.arc(x + r + 5, y + r + 5, r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(12,6,14,.88)'; ctx.fill();
+        ctx.strokeStyle = MC_FARBEN.holz; ctx.lineWidth = 1.6; ctx.stroke();
+        ctx.fillStyle = MC_FARBEN.holz;
+        ctx.font = fMono(Math.round(r * 1.05), 700);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(String(k.rang), x + r + 5, y + r + 6);
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    }
+
+    function staplesPostCanvas(spec, bilder) {
+        var cv = document.createElement('canvas');
+        cv.width = MP.W; cv.height = MP.H;
+        var ctx = cv.getContext('2d');
+
+        malGrund(ctx);
+        MC_BLUETEN.forEach(function (lage, i) { malBluete(ctx, bilder.blueten[i], lage); });
+        malMetaCallKopf(ctx, spec, bilder.logo);
+
+        /* Der Untertitel sagt, was die Prozentzahl zaehlt. Ohne ihn liest
+         * "100 %" wie ein Anteil an allen Archetypen des Formats — es
+         * sind aber die Archetypen, zu denen Decklisten vorliegen. */
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = MC_FARBEN.matt;
+        ctx.font = fSans(23, 500);
+
+        /* Der gewaehlte Druck gehoert nach oben, nicht in die Fusszeile:
+         * unten reisst er die Zeile ab ("… Gespielter Druck ·…"), und er
+         * beschreibt ohnehin, was man auf den Kacheln sieht. */
+        var modus = String(spec.modus || '');
+        var modusB = 0;
+        if (modus) {
+            ctx.font = fSans(19, 700);
+            modusB = Math.ceil(ctx.measureText(modus).width) + 32;
+            var mx = MP.W - 56 - modusB, my = 430;
+            rr(ctx, mx, my, modusB, 34, 17);
+            ctx.fillStyle = 'rgba(227,178,118,.16)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(227,178,118,.55)'; ctx.lineWidth = 1; ctx.stroke();
+            ctx.fillStyle = MC_FARBEN.holz;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(modus, mx + 16, my + 18);
+            ctx.textBaseline = 'alphabetic';
+        }
+        ctx.fillStyle = MC_FARBEN.matt;
+        ctx.font = fSans(23, 500);
+        ctx.fillText(clip(ctx, String(spec.untertitel || ''), MP.W - 112 - modusB - 16), 56, 452);
+
+        var pad = 40;
+        var innen = MP.W - pad * 2;
+        var oben = 486;
+        var feldH = MP.H - 112 - oben;
+        var karten = spec.karten || [];
+        var mass = staplesGitter(karten.length, innen, feldH);
+        if (mass) {
+            var gitterB = mass.spalten * mass.kb + (mass.spalten - 1) * mass.gap;
+            var gitterH = mass.zeilen * mass.kh + (mass.zeilen - 1) * mass.gap;
+            var startX = pad + Math.round((innen - gitterB) / 2);
+            var startY = oben + Math.max(0, Math.round((feldH - gitterH) / 2));
+            for (var i = 0; i < karten.length; i++) {
+                var zeile = Math.floor(i / mass.spalten);
+                var inZeile = Math.min(mass.spalten, karten.length - zeile * mass.spalten);
+                /* Eine angebrochene letzte Zeile mittig — links geklebt
+                 * liest sie sich wie ein Rest, nicht wie das Ende. */
+                var zx = startX + Math.round(((mass.spalten - inZeile) * (mass.kb + mass.gap)) / 2);
+                malStapleKachel(ctx, karten[i],
+                    zx + (i % mass.spalten) * (mass.kb + mass.gap),
+                    startY + zeile * (mass.kh + mass.gap),
+                    mass.kb, mass.kh);
+            }
+        }
+
+        malMetaCallFuss(ctx, spec.fuss);
+        return cv;
+    }
+
+    /* Oeffentlicher Weg. Die Kartenbilder laufen ueber denselben Proxy
+     * wie alle anderen; faellt eines aus, traegt seine Kachel den Namen
+     * statt eines Lochs. Fallen zu viele aus, wird das gesagt, statt ein
+     * halb leeres Bild wortlos anzubieten. */
+    function shareStaplesPost(spec) {
+        if (!spec || !Array.isArray(spec.karten) || !spec.karten.length) {
+            toast(L('Keine Daten fuer das Bild', 'No data for the image'), 'error');
+            return Promise.resolve(false);
+        }
+        var facts = spaceFacts(activeSpace()) || {};
+        var fussTeile = [facts.format || '', facts.source || '',
+                         L('Stand ', 'as of ') + (facts.stamp || today())].filter(Boolean);
+        return Promise.all([
+            markenBild('logo'),
+            Promise.all(MC_BLUETEN.map(function (b) { return markenBild(b[0]); })),
+            Promise.all(spec.karten.map(function (k) { return loadImage(k.url); }))
+        ]).then(function (teile) {
+            var bilder = teile[2];
+            var fehlend = bilder.filter(function (b) { return !b; }).length;
+            if (fehlend > Math.max(2, Math.floor(spec.karten.length / 3))) {
+                toast(L('Zu viele Kartenbilder liessen sich nicht laden (' + fehlend + ' von '
+                        + spec.karten.length + '). Bitte noch einmal versuchen.',
+                        'Too many card images failed to load (' + fehlend + ' of '
+                        + spec.karten.length + '). Please try again.'), 'error', 6000);
+                return false;
+            }
+            var karten = spec.karten.map(function (k, i) {
+                return { rang: k.rang, name: k.name, share: k.share, bild: bilder[i] };
+            });
+            var cv = staplesPostCanvas({
+                kicker: spec.kicker || (facts.format || 'FORMAT-STAPLES'),
+                titel: spec.titel, untertitel: spec.untertitel, modus: spec.modus,
+                karten: karten, fuss: fussTeile.join(' · ')
+            }, { logo: teile[0], blueten: teile[1] });
+            if (fehlend > 0) {
+                toast(L(fehlend + ' Kartenbild(er) fehlen im Post.',
+                        fehlend + ' card image(s) missing from the post.'), 'warning', 5000);
+            }
+            return deliver(cv, safeName(spec.dateiname || spec.titel || 'format-staples') + '.png');
+        }).catch(function (e) {
+            console.error('[DsShare] Staples-Bild fehlgeschlagen', e);
+            toast(L('Bild-Export fehlgeschlagen', 'Image export failed'), 'error');
+            return false;
+        });
+    }
+
     window.DsShare = {
         shareDeckCard: shareDeckCard,
         shareMetaCallPost: shareMetaCallPost,
+        shareStaplesPost: shareStaplesPost,
         shareResultCard: shareResultCard,
         sharePostCard: sharePostCard,
         // Für Tests und für alles, was die Karte anders befüllen will als
@@ -1832,6 +2040,7 @@
             collectTournamentSpec: collectTournamentSpec, clip: clip, corsUrl: corsUrl,
             postCardCanvas: postCardCanvas, schnappschussKarten: schnappschussKarten,
             metaCallPostCanvas: metaCallPostCanvas, MC_FARBEN: MC_FARBEN,
+            staplesPostCanvas: staplesPostCanvas, staplesGitter: staplesGitter,
             MC_BLUETEN: MC_BLUETEN, MP: MP,
             matchPunkte: matchPunkte, hatDay2: hatDay2,
             PUNKTE: PUNKTE, DAY2_PUNKTE: DAY2_PUNKTE,

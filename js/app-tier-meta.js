@@ -2375,28 +2375,36 @@
          */
         /* ── Format-Staples: welcher Druck wird gezeigt ────────────────
          *
-         * Die Prozentzahl gehoert der KARTE, nicht dem Druck. Der Schalter
-         * wechselt darum ausschliesslich das Bild; keine Zahl im Widget
-         * haengt daran. Der Hinweis unter den Knoepfen sagt das auch,
-         * weil ein Bildwechsel direkt ueber einer Prozentzahl sonst
-         * gelesen wird, als haette sich die Zahl geaendert.
+         * Es gibt keinen Modus-Umschalter mehr. Betreiber am 28.08.2026:
+         * "generell brauchen wir da nicht gespielter Druck, niedrige
+         * Seltenheit und max Seltenheit anbieten, da bieten wir einfach
+         * nur default min rarity an und man kann ueber den Stern die
+         * Raritaet aendern und Bild generiert dann so wie gerade die
+         * Anzeige ist."
          *
-         * 'gespielt' = der Druck, der in den Decklisten steht (bisheriges
-         * Verhalten, Voreinstellung). 'min'/'max' laufen durch
-         * getPreferredVersionForCard() — denselben Aufloeser, den die
-         * City League und die Kartenuebersicht des laufenden Metas
-         * benutzen. Kein zweiter Auswahlweg, der irgendwann anders
-         * entscheidet als der erste.
+         * Also: immer der guenstigste Druck, und wer eine Karte anders
+         * haben will, waehlt sie ueber den Stern einzeln. Das Bild nimmt,
+         * was zu sehen ist — kein zweiter Zustand, der abweichen kann.
+         *
+         * 'min' laeuft durch getPreferredVersionForCard(), denselben
+         * Aufloeser, den die City League und die Kartenuebersicht des
+         * laufenden Metas benutzen.
+         *
+         * Die Prozentzahl gehoert der KARTE, nicht dem Druck. Ein
+         * Artwork-Wechsel bewegt darum keine Zahl; der Hinweis unter den
+         * Kacheln sagt das, weil ein Bildwechsel direkt ueber einer
+         * Prozentzahl sonst gelesen wird, als haette sich die Zahl
+         * geaendert.
          */
+        const STAPLES_DRUCK = 'min';
+
         /* Wie viele Staples gezeigt werden. 15 ist die gewachsene Zahl
          * und bleibt die Voreinstellung — nach Pokegear 3.0 (65,0 %)
          * faellt die Liste auf Budew (53,3 %), der groesste Sprung der
          * ganzen Top 30. Genau da endet das Pflichtprogramm. Wer die
          * zweite Reihe sehen will, schaltet auf 30. */
         const STAPLES_STUFEN = [15, 30];
-        const STAPLES_MODUS_KEY = 'staples_druckmodus_v1';
         const STAPLES_ANZAHL_KEY = 'staples_anzahl_v1';
-        let _staplesModus = 'gespielt';
         let _staplesAnzahl = 15;
         let _staplesDaten = null;
 
@@ -2410,17 +2418,9 @@
             return _staplesAnzahl;
         }
 
-        function ladeStaplesModus() {
-            try {
-                const m = localStorage.getItem(STAPLES_MODUS_KEY);
-                if (m === 'min' || m === 'max' || m === 'gespielt') _staplesModus = m;
-            } catch (_e) { /* egal */ }
-            return _staplesModus;
-        }
-
-        /* Ein Druck je Karte, im gewaehlten Modus. Die einzeln gewaehlten
-         * Artworks (Stern-Knopf) stechen den Modus — wer eine Karte von
-         * Hand gesetzt hat, will sie so sehen. */
+        /* Ein Druck je Karte. Ein von Hand gewaehltes Artwork (Stern)
+         * sticht den Standarddruck — wer eine Karte gesetzt hat, will sie
+         * so sehen, im Widget wie im Bild. */
         function staplesDruckFuer(card, modus) {
             const basisSet = String(card.set_code || '').toUpperCase();
             const basisNr  = String(card.set_number || '').toUpperCase();
@@ -2463,10 +2463,10 @@
             return roh;
         }
 
-        function staplesListe(modus) {
+        function staplesListe() {
             const daten = _staplesDaten || [];
             return daten.slice(0, staplesAnzahl()).map((card, i) => {
-                const d = staplesDruckFuer(card, modus);
+                const d = staplesDruckFuer(card, STAPLES_DRUCK);
                 return {
                     rang: i + 1, name: card.name, share: card.global_share,
                     anzahl: card.deck_inclusion_count,
@@ -2475,42 +2475,28 @@
             });
         }
 
-        async function setStaplesModus(modus) {
-            if (modus !== 'min' && modus !== 'max' && modus !== 'gespielt') return;
-            _staplesModus = modus;
-            try { localStorage.setItem(STAPLES_MODUS_KEY, modus); } catch (_e) { /* egal */ }
-
-            /* min/max brauchen die Kartendatenbank. Auf dem Meta-Reiter
-             * ist sie oft noch nicht geladen — erst laden, dann tauschen,
-             * sonst faellt jede Karte auf ihren gespielten Druck zurueck
-             * und der Knopf sieht kaputt aus. */
-            if (modus !== 'gespielt' && typeof window.ensureCardDatabaseReady === 'function') {
+        /* Der guenstigste Druck braucht die Kartendatenbank. Auf dem
+         * Meta-Reiter ist sie oft noch nicht geladen — erst laden, dann
+         * tauschen, sonst faellt jede Karte auf den Druck aus der
+         * Deckliste zurueck und das Widget sieht zufaellig aus. */
+        async function staplesDruckeAnwenden() {
+            if (typeof window.ensureCardDatabaseReady === 'function') {
                 try { await window.ensureCardDatabaseReady(); } catch (_e) { /* egal */ }
             }
             zeichneStaplesBilderNeu();
-            markiereStaplesKnoepfe();
         }
 
         /* Nur die Bilder tauschen. Die Zahlen daneben werden absichtlich
          * nicht neu gezeichnet — sie aendern sich nicht, und ein Flackern
          * wuerde genau das behaupten. */
         function zeichneStaplesBilderNeu() {
-            const liste = staplesListe(_staplesModus);
+            const liste = staplesListe();
             document.querySelectorAll('.top-cards-container .top-card-item').forEach((el, i) => {
                 const eintrag = liste[i];
                 const img = el.querySelector('.top-card-img');
                 if (!eintrag || !img || !eintrag.url) return;
                 if (img.getAttribute('src') !== eintrag.url) img.setAttribute('src', eintrag.url);
                 el.dataset.druck = eintrag.set + ' ' + eintrag.number;
-            });
-        }
-
-        function markiereStaplesKnoepfe() {
-            ['gespielt', 'min', 'max'].forEach(m => {
-                const b = document.getElementById('staplesDruck-' + m);
-                if (!b) return;
-                b.classList.toggle('active', m === _staplesModus);
-                b.setAttribute('aria-pressed', m === _staplesModus ? 'true' : 'false');
             });
         }
 
@@ -2530,15 +2516,13 @@
             if (behaelter && _staplesDaten) {
                 behaelter.outerHTML = renderTopCardsWidget(_staplesDaten);
                 try {
-                    if (_staplesModus !== 'gespielt') await setStaplesModus(_staplesModus);
-                    else zeichneStaplesBilderNeu();
+                    await staplesDruckeAnwenden();
                 } catch (e) {
                     console.warn('[Staples] Druckmodus nach Anzahlwechsel:', e);
                 }
             }
         }
 
-        window.setStaplesModus = setStaplesModus;
         window.setStaplesAnzahl = setStaplesAnzahl;
         window.staplesListe = staplesListe;
 
@@ -2565,11 +2549,6 @@
                           : 'of ' + nArchetypen + ' archetypes with decklists'}</span>`
                 : '';
 
-            const modus = ladeStaplesModus();
-            const knopf = (wert, schluessel) => `<button type="button" class="btn-toggle-item${
-                    wert === modus ? ' active' : ''}" id="staplesDruck-${wert}"
-                    aria-pressed="${wert === modus ? 'true' : 'false'}"
-                    onclick="setStaplesModus('${wert}')">${escapeHtml(t(schluessel))}</button>`;
             const anzahl = staplesAnzahl();
             const zahlKnopf = (n) => `<button type="button" class="btn-toggle-item${
                     n === anzahl ? ' active' : ''}" id="staplesAnzahl-${n}"
@@ -2577,16 +2556,6 @@
                     onclick="setStaplesAnzahl(${n})">${escapeHtml(deLbl ? 'Top ' + n : 'Top ' + n)}</button>`;
             const steuerung = `
                     <div class="top-cards-controls">
-                        <!-- Reihenfolge nach Breite: die drei Seltenheits-
-                             knoepfe fuellen auf dem Telefon eine Zeile
-                             allein. Die schmale Anzahl und der Bild-Knopf
-                             teilen sich dann die zweite, statt jeweils eine
-                             eigene zu bekommen. -->
-                        <div class="btn-toggle-group top-cards-rarity">
-                            ${knopf('gespielt', 'staples.printPlayed')}
-                            ${knopf('min', 'cl.rarityLow')}
-                            ${knopf('max', 'cl.rarityMax')}
-                        </div>
                         <div class="btn-toggle-group top-cards-anzahl">
                             ${STAPLES_STUFEN.map(zahlKnopf).join('')}
                         </div>
@@ -2738,11 +2707,7 @@
              * Artworks, werden die Bilder danach getauscht — das Widget
              * steht also sofort und wird nicht erst leer. */
             try {
-                if (_staplesModus !== 'gespielt') {
-                    await setStaplesModus(_staplesModus);
-                } else {
-                    zeichneStaplesBilderNeu();
-                }
+                await staplesDruckeAnwenden();
             } catch (e) {
                 console.warn('[Staples] Druckmodus konnte nicht angewendet werden:', e);
             }
@@ -2756,7 +2721,7 @@
          * nicht nur Namen und Balken.
          */
         async function staplesBildErzeugen() {
-            const liste = staplesListe(_staplesModus);
+            const liste = staplesListe();
             if (!liste.length) {
                 if (typeof showToast === 'function') showToast(t('staples.imageNoData'), 'warning');
                 return;
@@ -2765,26 +2730,18 @@
                 if (typeof showToast === 'function') showToast(t('staples.imageNoData'), 'warning');
                 return;
             }
-            const deLbl = getLang() === 'de';
-            const n = _staplesDaten && _staplesDaten.totalArchetypes || '?';
-            const untertitel = deLbl
-                ? 'In wie vielen der ' + n + ' Archetypen mit Deckliste die Karte steckt'
-                : 'How many of the ' + n + ' archetypes with decklists play the card';
-
-            /* Kurzer Titel fuers Bild. Die Ueberschrift der Seite lautet
-             * "Meistgespielte Karten (Format-Staples)" — im Bild laeuft
-             * die Klammer unter das Logo, weil der Kopf dort nur 560 px
-             * breit ist. Die Klammer steht ohnehin schon in der
-             * Kopfzeile darueber. */
-            /* Kein Modus im Bild — der stand bis zum 28.08.2026 als Pille
-             * oben rechts und ist auf Wunsch raus. Im Dateinamen bleibt er,
-             * damit "niedrige" und "maximale" Seltenheit sich auf der
-             * Platte nicht gegenseitig ueberschreiben. */
+            /* Das Bild traegt nur noch die gesperrte Kopfzeile, die
+             * Kacheln und das Datum. Titel, Untertitel, Modus-Pille und
+             * die Quelle im Fuss sind am 28.08.2026 raus:
+             * "format staples als Text reicht, rest kann weg",
+             * "der gespielter Druck Banner muss im Bild noch weg",
+             * "unten in der Ecke reicht das Datum".
+             *
+             * Im Dateinamen bleiben Modus und Spanne stehen, damit zwei
+             * Ausspielungen sich auf der Platte nicht ueberschreiben. */
             const einBild = (karten, spanne) => window.DsShare.shareStaplesPost({
-                titel: t('staples.imageTitle'),
-                untertitel: untertitel,
                 karten: karten,
-                dateiname: 'format-staples-' + _staplesModus + (spanne ? '-' + spanne.replace(/\D+/g, '-') : '')
+                dateiname: 'format-staples' + (spanne ? '-' + spanne.replace(/\D+/g, '-') : '')
             });
 
             /* Ab 16 Karten zwei Bilder statt eines.

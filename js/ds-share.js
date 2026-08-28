@@ -1933,43 +1933,36 @@
 
         malGrund(ctx);
         MC_BLUETEN.forEach(function (lage, i) { malBluete(ctx, bilder.blueten[i], lage); });
-        malMetaCallKopf(ctx, spec, bilder.logo);
 
-        /* Der Untertitel sagt, was die Prozentzahl zaehlt. Ohne ihn liest
-         * "100 %" wie ein Anteil an allen Archetypen des Formats — es
-         * sind aber die Archetypen, zu denen Decklisten vorliegen. */
+        /* Kopf: nur die gesperrte Zeile und das Logo.
+         *
+         * Bis zum 28.08.2026 standen hier zusaetzlich ein Titel
+         * ("Meistgespielte Karten") und ein Untertitel ("In wie vielen der
+         * 60 Archetypen mit Deckliste die Karte steckt"). Betreiber, mit
+         * beidem eingekringelt: "format staples als Text reicht, rest
+         * kann weg."
+         *
+         * Gewonnen: die Kacheln bekommen die freie Hoehe. Verloren: der
+         * Untertitel erklaerte, worauf sich die Prozentzahl bezieht — das
+         * traegt jetzt der Text des Posts.
+         *
+         * Der Meta-Call-Post benutzt weiterhin malMetaCallKopf() mit
+         * Titel; nur dieses Bild hier zeichnet den Kopf selbst. */
         ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = MC_FARBEN.matt;
-        ctx.font = fSans(23, 500);
-
-        /* Hier stand bis zum 28.08.2026 eine Pille mit dem gewaehlten
-         * Druck ("Gespielter Druck", "Max. Seltenheit \u00b7 16\u201330").
-         * Betreiber: "der gespielter Druck Banner muss im Bild noch weg."
-         *
-         * Sie sagte auch nichts, was das Bild nicht schon zeigt: welcher
-         * Druck gewaehlt ist, sieht man an den Karten, und welcher
-         * Ausschnitt der Liste zu sehen ist, steht als Rangziffer auf
-         * jeder einzelnen Kachel (1\u201315 auf dem einen Bild, 16\u201330 auf
-         * dem anderen). Der Modus bleibt im Dateinamen, damit zwei
-         * Ausspielungen sich auf der Platte nicht ueberschreiben.
-         *
-         * Der Untertitel hat jetzt die ganze Breite. Die Schrumpfschleife
-         * bleibt: englische Untertitel sind laenger, und abschneiden ist
-         * schlechter als kleiner setzen. */
-        var frei = MP.W - 112;
-        var untertitel = String(spec.untertitel || '');
-        var utGr = 23;
-        ctx.fillStyle = MC_FARBEN.matt;
-        ctx.font = fSans(utGr, 500);
-        while (ctx.measureText(untertitel).width > frei && utGr > 16) {
-            utGr -= 1;
-            ctx.font = fSans(utGr, 500);
+        ctx.fillStyle = MC_FARBEN.holz;
+        var gesperrt = String(spec.kicker || '').toUpperCase().split('').join(' ');
+        var kGr = 24;
+        ctx.font = fMono(kGr, 600);
+        while (ctx.measureText(gesperrt).width > 660 && kGr > 15) {
+            kGr -= 1;
+            ctx.font = fMono(kGr, 600);
         }
-        ctx.fillText(clip(ctx, untertitel, frei), 56, 452);
+        ctx.fillText(clip(ctx, gesperrt, 660), 56, 322);
+        malLogo(ctx, bilder.logo, MP.W - 44 - 286, 300, 286);
 
         var pad = 40;
         var innen = MP.W - pad * 2;
-        var oben = 486;
+        var oben = 380;
         var feldH = MP.H - 112 - oben;
         var karten = spec.karten || [];
         var mass = staplesGitter(karten.length, innen, feldH);
@@ -2005,8 +1998,13 @@
             return Promise.resolve(false);
         }
         var facts = spaceFacts(activeSpace()) || {};
-        var fussTeile = [facts.format || '', facts.source || '',
-                         L('Stand ', 'as of ') + (facts.stamp || today())].filter(Boolean);
+
+        /* Unten links nur noch das Datum. Betreiber: "unten in der Ecke
+         * reicht das Datum, weil Meta steht ja schon oben und Limitless
+         * Online ist egal." Das Format steht in der Kopfzeile; die Quelle
+         * war die einzige Angabe, die nur hier stand — sie gehoert jetzt
+         * in den Text des Posts. */
+        var fuss = L('Stand ', 'as of ') + (facts.stamp || today());
         return Promise.all([
             markenBild('logo'),
             Promise.all(MC_BLUETEN.map(function (b) { return markenBild(b[0]); })),
@@ -2027,8 +2025,7 @@
             var cv = staplesPostCanvas({
                 kicker: spec.kicker || (facts.format
                     ? facts.format + ' \u00b7 FORMAT-STAPLES' : 'FORMAT-STAPLES'),
-                titel: spec.titel, untertitel: spec.untertitel,
-                karten: karten, fuss: fussTeile.join(' · ')
+                karten: karten, fuss: fuss
             }, { logo: teile[0], blueten: teile[1] });
             if (fehlend > 0) {
                 toast(L(fehlend + ' Kartenbild(er) fehlen im Post.',

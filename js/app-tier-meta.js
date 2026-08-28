@@ -2766,7 +2766,6 @@
                 return;
             }
             const deLbl = getLang() === 'de';
-            const modusNamen = { gespielt: t('staples.printPlayed'), min: t('cl.rarityLow'), max: t('cl.rarityMax') };
             const n = _staplesDaten && _staplesDaten.totalArchetypes || '?';
             const untertitel = deLbl
                 ? 'In wie vielen der ' + n + ' Archetypen mit Deckliste die Karte steckt'
@@ -2777,10 +2776,13 @@
              * die Klammer unter das Logo, weil der Kopf dort nur 560 px
              * breit ist. Die Klammer steht ohnehin schon in der
              * Kopfzeile darueber. */
+            /* Kein Modus im Bild — der stand bis zum 28.08.2026 als Pille
+             * oben rechts und ist auf Wunsch raus. Im Dateinamen bleibt er,
+             * damit "niedrige" und "maximale" Seltenheit sich auf der
+             * Platte nicht gegenseitig ueberschreiben. */
             const einBild = (karten, spanne) => window.DsShare.shareStaplesPost({
                 titel: t('staples.imageTitle'),
                 untertitel: untertitel,
-                modus: [modusNamen[_staplesModus] || '', spanne].filter(Boolean).join(' \u00b7 '),
                 karten: karten,
                 dateiname: 'format-staples-' + _staplesModus + (spanne ? '-' + spanne.replace(/\D+/g, '-') : '')
             });

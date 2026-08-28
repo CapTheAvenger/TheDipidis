@@ -1942,28 +1942,21 @@
         ctx.fillStyle = MC_FARBEN.matt;
         ctx.font = fSans(23, 500);
 
-        /* Der gewaehlte Druck gehoert nach oben, nicht in die Fusszeile:
-         * unten reisst er die Zeile ab ("… Gespielter Druck ·…"), und er
-         * beschreibt ohnehin, was man auf den Kacheln sieht. */
-        var modus = String(spec.modus || '');
-        var modusB = 0;
-        if (modus) {
-            ctx.font = fSans(19, 700);
-            modusB = Math.ceil(ctx.measureText(modus).width) + 32;
-            var mx = MP.W - 56 - modusB, my = 430;
-            rr(ctx, mx, my, modusB, 34, 17);
-            ctx.fillStyle = 'rgba(227,178,118,.16)'; ctx.fill();
-            ctx.strokeStyle = 'rgba(227,178,118,.55)'; ctx.lineWidth = 1; ctx.stroke();
-            ctx.fillStyle = MC_FARBEN.holz;
-            ctx.textBaseline = 'middle';
-            ctx.fillText(modus, mx + 16, my + 18);
-            ctx.textBaseline = 'alphabetic';
-        }
-        /* Der Untertitel teilt sich die Zeile mit der Modus-Pille. Steht
-         * dort eine Spanne ("Gespielter Druck \u00b7 16\u201330"), wird die Pille
-         * breiter und der Satz wurde abgeschnitten. Er verkleinert sich
-         * jetzt, bis er passt \u2014 wie die Kopfzeile darueber. */
-        var frei = MP.W - 112 - modusB - 16;
+        /* Hier stand bis zum 28.08.2026 eine Pille mit dem gewaehlten
+         * Druck ("Gespielter Druck", "Max. Seltenheit \u00b7 16\u201330").
+         * Betreiber: "der gespielter Druck Banner muss im Bild noch weg."
+         *
+         * Sie sagte auch nichts, was das Bild nicht schon zeigt: welcher
+         * Druck gewaehlt ist, sieht man an den Karten, und welcher
+         * Ausschnitt der Liste zu sehen ist, steht als Rangziffer auf
+         * jeder einzelnen Kachel (1\u201315 auf dem einen Bild, 16\u201330 auf
+         * dem anderen). Der Modus bleibt im Dateinamen, damit zwei
+         * Ausspielungen sich auf der Platte nicht ueberschreiben.
+         *
+         * Der Untertitel hat jetzt die ganze Breite. Die Schrumpfschleife
+         * bleibt: englische Untertitel sind laenger, und abschneiden ist
+         * schlechter als kleiner setzen. */
+        var frei = MP.W - 112;
         var untertitel = String(spec.untertitel || '');
         var utGr = 23;
         ctx.fillStyle = MC_FARBEN.matt;
@@ -2034,7 +2027,7 @@
             var cv = staplesPostCanvas({
                 kicker: spec.kicker || (facts.format
                     ? facts.format + ' \u00b7 FORMAT-STAPLES' : 'FORMAT-STAPLES'),
-                titel: spec.titel, untertitel: spec.untertitel, modus: spec.modus,
+                titel: spec.titel, untertitel: spec.untertitel,
                 karten: karten, fuss: fussTeile.join(' · ')
             }, { logo: teile[0], blueten: teile[1] });
             if (fehlend > 0) {

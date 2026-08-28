@@ -1686,9 +1686,19 @@
 
         ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = MC_FARBEN.holz;
-        ctx.font = fMono(24, 600);
-        var gesperrt = kicker.split('').join(' ');
-        ctx.fillText(clip(ctx, gesperrt, 540), 56, 322);
+        /* Die Kopfzeile ist gesperrt gesetzt, also gut doppelt so breit
+         * wie ihr Text. "WORLDS 2026" passt bei 24 px; "TEF-PBL \u00b7
+         * FORMAT-STAPLES" wurde zu "FORMAT-STA\u2026" abgeschnitten. Ein
+         * Format ist kein Zierrat \u2014 lieber kleiner als halb. Der Platz
+         * reicht bis zum Logo (x = 750), abzueglich Luft. */
+        var gesperrt = kicker.split('').join(' ');
+        var kickerGr = 24;
+        ctx.font = fMono(kickerGr, 600);
+        while (ctx.measureText(gesperrt).width > 660 && kickerGr > 15) {
+            kickerGr -= 1;
+            ctx.font = fMono(kickerGr, 600);
+        }
+        ctx.fillText(clip(ctx, gesperrt, 660), 56, 322);
 
         ctx.fillStyle = MC_FARBEN.creme;
         var gr = 72;

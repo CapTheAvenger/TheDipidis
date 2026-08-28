@@ -71,6 +71,50 @@ describe('das Gitter der Staples-Kacheln', () => {
     });
 });
 
+describe('die gesperrte Kopfzeile', () => {
+    const KOPF = schneide('function malMetaCallKopf(ctx, spec, logo)', '\n    function malMetaCallFuss');
+
+    /* Eine Leinwand-Attrappe, die nur misst: gesperrte Monoschrift,
+     * Breite = Zeichen x 0.62 x Schriftgroesse. Nah genug am echten
+     * Verhalten, um die Schrumpfschleife zu pruefen. */
+    function malen(kicker) {
+        const rufe = [];
+        const ctx = {
+            _px: 24,
+            set font(v) { const m = String(v).match(/(\d+)px/); if (m) this._px = +m[1]; },
+            get font() { return this._px + 'px'; },
+            measureText: (t) => ({ width: String(t).length * 0.62 * ctx._px }),
+            fillText: (t) => { rufe.push({ t: t, px: ctx._px }); },
+            textBaseline: '', fillStyle: '',
+        };
+        const attrappen = {
+            MC_FARBEN: { holz: '#E3B276', creme: '#F7EFE4' },
+            fMono: (g) => g + 'px mono', fSans: (g) => g + 'px sans',
+            clip: (c, t, w) => (c.measureText(t).width <= w
+                ? t : t.slice(0, Math.floor(w / (0.62 * c._px))) + '\u2026'),
+            malLogo: () => {}, MP: { W: 1080 },
+        };
+        const fn = new Function(...Object.keys(attrappen), KOPF + '\nreturn malMetaCallKopf;')(...Object.values(attrappen));
+        fn(ctx, { kicker: kicker, titel: 'x' }, null);
+        // Der erste Aufruf ist die Kopfzeile, der zweite der Titel.
+        return { gemalt: rufe[0].t, groesse: rufe[0].px };
+    }
+
+    it('schneidet ein langes Format nicht ab, sondern verkleinert', () => {
+        // "TEF-PBL · FORMAT-STAPLES" wurde zu "FORMAT-STA…".
+        const r = malen('TEF-PBL \u00b7 FORMAT-STAPLES');
+        assert.ok(!/\u2026/.test(r.gemalt), 'die Kopfzeile ist abgeschnitten: ' + r.gemalt);
+        assert.ok(r.groesse < 24, 'sie wurde nicht verkleinert');
+        assert.ok(r.groesse >= 15, 'sie wurde unter die Lesbarkeit verkleinert');
+    });
+
+    it('laesst eine kurze Kopfzeile in voller Groesse', () => {
+        const r = malen('WORLDS 2026');
+        assert.equal(r.groesse, 24);
+        assert.ok(!/\u2026/.test(r.gemalt));
+    });
+});
+
 describe('der Abbruch bei fehlender Kartenkunst', () => {
     const QUELLE = schneide('function shareStaplesPost(spec)', '\n    window.DsShare = {');
 

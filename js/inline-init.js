@@ -5,6 +5,39 @@
 
 window.CARD_BACK_URL = "https://images.pokemontcg.io/card-back.png";
 
+/* ── Dunkelmodus umschalten ──────────────────────────────────────
+ *
+ * Der Zustand steht auf <html data-theme>. Gesetzt wird er zweimal:
+ * einmal ganz oben in index.html, bevor die erste Stilvorlage laedt
+ * (sonst blitzt es weiss), und einmal hier, wenn jemand den Knopf
+ * drueckt. Gemerkt wird die Wahl in localStorage — sie schlaegt ab
+ * dann die Einstellung des Betriebssystems, denn wer einmal gewaehlt
+ * hat, will nicht beim naechsten Sonnenaufgang etwas anderes sehen. */
+function currentTheme() {
+    return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+    const dunkel = theme === 'dark';
+    if (dunkel) document.documentElement.dataset.theme = 'dark';
+    else delete document.documentElement.dataset.theme;
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) btn.setAttribute('aria-pressed', String(dunkel));
+    try { localStorage.setItem('theme', dunkel ? 'dark' : 'light'); }
+    catch (_) { /* privater Modus — die Wahl gilt dann nur diese Sitzung */ }
+}
+
+function toggleTheme() {
+    applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+}
+
+// Beim Laden den Knopf auf den Zustand stellen, den das Kopf-Skript
+// schon gesetzt hat.
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) btn.setAttribute('aria-pressed', String(currentTheme() === 'dark'));
+});
+
 function toggleMenuCluster(clusterId) {
     const submenu = document.getElementById('menu-submenu-' + clusterId);
     const trigger = document.getElementById('menu-group-' + clusterId);

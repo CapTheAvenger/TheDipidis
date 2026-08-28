@@ -140,7 +140,7 @@
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-08-27 13:00 UTC",
+ "generated": "2026-08-28 13:24 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -159,7 +159,7 @@
    "priced-by-date": 1171,
    "unique": 11013
   },
-  "nonempty_eur_price": 20379,
+  "nonempty_eur_price": 20380,
   "verified_collision_owners": {},
   "verified_collisions": []
  },

@@ -6,27 +6,30 @@
  * stand die Tokenschicht in Phase 0 am Anfang — mit 752 fest
  * verdrahteten Farben wäre er nicht machbar gewesen.
  *
- * Was er noch NICHT ist: ein Schalter für den Nutzer. Im Browser
- * gemessen (data-theme="dark" gesetzt, Chromium, 1440px):
+ * Seit dem 28.08.2026 gibt es den Schalter. Er stand unter der
+ * Bedingung "wenn der Zähler nahe null ist" — im Browser gemessen
+ * (data-theme="dark" gesetzt, Chromium, 1500px):
  *
- *     Current Meta      10 von   198 sichtbaren Flächen bleiben hell
- *     Deck-Analyse        1 von    23
- *     Meta Call          21 von   195
- *     Kartendatenbank    62 von   300  (60 davon sind die gelben
- *                                       Seltenheits-Chips, gewollt)
- *     Proxy               6 von    35
+ *     Current Meta        0 von   198 sichtbaren Flächen bleiben hell
+ *     Deck-Analyse        0 von    24
+ *     Meta Call           0 von   196
+ *     Kartendatenbank    60 von   299  (die farbigen Seltenheits-Chips,
+ *                                       gewollt — sie sind im Hellen
+ *                                       dieselben)
+ *     Proxy               2 von    35  (die weißen Zähler auf dem roten
+ *                                       Banner, ebenfalls gewollt)
  *
- * Stand 27.08.2026. Vorher lag Meta Call bei 182 von 195, die
- * Kartendatenbank bei 262 von 300.
+ * Vorher, am 27.08.2026: 10 / 1 / 21 / 62 / 6.
  *
- * Das ist der Flickenteppich, den die Analyse selbst vorhergesagt hat
- * ("mit 747 Hardcode-Farben würde jede dritte Fläche weiß bleiben").
- * Der Schalter kommt, wenn der Zähler unten nahe null ist — nicht
- * vorher. Ein halb dunkles Interface ist schlechter als ein helles.
+ * Zweite Messung, dieselbe Runde: Text unter 3:1 Kontrast. Von 205
+ * Stellen blieben 106 — 91 davon sind dieselben farbigen Chips, die
+ * auch im Hellen so aussehen. Die restlichen 15 liegen fast alle über
+ * 2,3:1 und stehen in docs/.
  *
- * Der Zähler funktioniert wie der !important-Zähler: er darf nie
- * steigen. Jede Datei, die in einer Phase angefasst wird, verlässt sie
- * mit weniger fest verdrahteten hellen Flächen.
+ * Der Zähler unten funktioniert wie der !important-Zähler: er darf nie
+ * steigen. Jede Datei, die angefasst wird, verlässt die Runde mit
+ * weniger fest verdrahteten hellen Flächen.
+ *
  */
 
 const { describe, it } = require('node:test');
@@ -120,7 +123,7 @@ describe('wie weit die Seite dafür ist', () => {
         // für die alten --bg-*/--text-*- und die --ui-*-Familie). Jede
         // Fläche, die hier verschwindet, ist eine, die im Dunkelmodus
         // nicht weiß stehenbleibt.
-        const BASELINE = 465;
+        const BASELINE = 452;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);

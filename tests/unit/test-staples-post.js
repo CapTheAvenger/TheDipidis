@@ -23,6 +23,8 @@ const path = require('node:path');
 const ROOT = path.join(__dirname, '..', '..');
 const SRC = fs.readFileSync(path.join(ROOT, 'js', 'ds-share.js'), 'utf8');
 
+const ohneKommentare = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
 function schneide(kopf, bis) {
     const a = SRC.indexOf(kopf);
     assert.ok(a > -1, `Kopf nicht gefunden: ${kopf}`);
@@ -108,15 +110,37 @@ describe('die gesperrte Kopfzeile', () => {
         assert.ok(r.groesse >= 15, 'sie wurde unter die Lesbarkeit verkleinert');
     });
 
-    it('verkleinert auch den Untertitel, statt ihn zu schneiden', () => {
-        // Der Untertitel teilt sich die Zeile mit der Modus-Pille. Steht
-        // dort eine Spanne ("Gespielter Druck · 16–30"), wird die Pille
-        // breiter und der Satz lief in ein "…".
-        const KOPF2 = schneide('function staplesPostCanvas(spec, bilder)', '\n    /* Oeffentlicher Weg. Die Kartenbilder');
-        assert.match(KOPF2, /while \(ctx\.measureText\(untertitel\)\.width > frei && utGr > \d+\)/,
-            'der Untertitel verkleinert sich nicht');
-        assert.match(KOPF2, /var frei = MP\.W - 112 - modusB - 16;/,
-            'die Breite der Modus-Pille wird nicht abgezogen');
+    it('traegt im Staples-Bild nur noch Kopfzeile und Logo', () => {
+        // Betreiber am 28.08.2026, mit Titel und Untertitel eingekringelt:
+        // "format staples als Text reicht, rest kann weg." Dazu: "der
+        // gespielter Druck Banner muss im Bild noch weg."
+        // Ohne Kommentare messen: ein Kommentar, der eine Funktion
+        // NENNT, ist kein Aufruf.
+        const K = ohneKommentare(schneide('function staplesPostCanvas(spec, bilder)', '\n    /* Oeffentlicher Weg. Die Kartenbilder'));
+        assert.ok(!/spec\.modus/.test(K), 'die Modus-Pille wird wieder gezeichnet');
+        assert.ok(!/modusB/.test(K), 'ihr Platz wird noch freigehalten');
+        assert.ok(!/spec\.titel/.test(K), 'der Titel ist zurueck');
+        assert.ok(!/spec\.untertitel/.test(K), 'der Untertitel ist zurueck');
+        assert.ok(!/malMetaCallKopf/.test(K),
+            'der Staples-Kopf zeichnet wieder den Meta-Call-Kopf mit Titel');
+        assert.match(K, /spec\.kicker/, 'die gesperrte Kopfzeile fehlt');
+        assert.match(K, /malLogo\(/, 'das Logo fehlt');
+    });
+
+    it('gibt den Kacheln die frei gewordene Hoehe', () => {
+        // Ohne Titel und Untertitel faengt das Gitter hoeher an.
+        const K = schneide('function staplesPostCanvas(spec, bilder)', '\n    /* Oeffentlicher Weg. Die Kartenbilder');
+        const m = K.match(/var oben = (\d+);/);
+        assert.ok(m, 'der Gitteranfang steht nicht mehr in der Quelle');
+        assert.ok(+m[1] < 486, `das Gitter faengt bei ${m[1]} an, also nicht hoeher als vorher`);
+    });
+
+    it('laesst der Meta-Call-Post seinen Titel', () => {
+        // Die beiden Bilder teilen sich Grund, Blueten und Fuss — aber
+        // nicht den Kopf. Der Meta Call braucht seinen Titel weiter.
+        const MC = schneide('function metaCallPostCanvas(spec, bilder)', '\n    /* Oeffentlicher Weg: Spezifikation rein');
+        assert.match(MC, /malMetaCallKopf\(ctx, spec, bilder\.logo\)/,
+            'dem Meta-Call-Post wurde der Kopf mit weggenommen');
     });
 
     it('laesst eine kurze Kopfzeile in voller Groesse', () => {
@@ -155,10 +179,8 @@ describe('der Abbruch bei fehlender Kartenkunst', () => {
         ({ rang: i + 1, name: 'Karte ' + i, share: 50, url: 'u' + i }));
 
     it('setzt Format und Format-Staples in die Kopfzeile', async () => {
-        // Der Titel im Bild ist kurz ("Meistgespielte Karten"); die
-        // Klammer "(Format-Staples)" der Seitenueberschrift lief dort
-        // unter das Logo, weil der Kopf nur 560 px breit ist. Sie steht
-        // jetzt in der Kopfzeile darueber, zusammen mit dem Format.
+        // Die Kopfzeile ist das einzige Wort im Bild — sie muss das
+        // Format tragen, weil es unten nicht mehr steht.
         let gesehen = null;
         const w = bau({});
         const alt = w;
@@ -175,10 +197,13 @@ describe('der Abbruch bei fehlender Kartenkunst', () => {
             deliver: () => true, safeName: (s) => s, console: { error: () => {} },
         };
         const fn = new Function(...Object.keys(attrappen), QUELLE2 + '\nreturn shareStaplesPost;')(...Object.values(attrappen));
-        await fn({ karten: karten(15), titel: 'Meistgespielte Karten' });
+        await fn({ karten: karten(15) });
         assert.equal(gesehen.kicker, 'TEF-PBL \u00b7 FORMAT-STAPLES');
-        assert.equal(gesehen.titel, 'Meistgespielte Karten');
-        assert.ok(!/Format-Staples/.test(gesehen.titel), 'die Klammer steht wieder im Titel');
+        assert.equal(gesehen.titel, undefined, 'der Titel wandert wieder ins Bild');
+        assert.equal(gesehen.untertitel, undefined, 'der Untertitel wandert wieder ins Bild');
+        // Unten links nur das Datum: "Meta steht ja schon oben und
+        // Limitless Online ist egal."
+        assert.equal(gesehen.fuss, 'Stand 28.08.2026');
         assert.ok(alt);
     });
 
@@ -278,12 +303,18 @@ describe('Top 30 wird auf zwei Bilder geteilt', () => {
         assert.equal(namen[29], 'K29');
     });
 
-    it('schreibt die Spanne ins Bild und in den Dateinamen', async () => {
-        // Zwei Bilder ohne Beschriftung sind zweimal dasselbe Bild.
+    it('gibt den beiden Bildern verschiedene Dateinamen', async () => {
+        // Ohne das ueberschreibt das zweite Bild beim Speichern das erste.
+        // Im Bild selbst steht die Spanne nicht mehr — sie steht als
+        // Rangziffer auf jeder Kachel (1–15 hier, 16–30 dort).
         const w = bau(30);
         await w.fn();
-        assert.match(w.rufe[0].modus, /1–15/);
-        assert.match(w.rufe[1].modus, /16–30/);
         assert.notEqual(w.rufe[0].dateiname, w.rufe[1].dateiname);
+        assert.match(w.rufe[0].dateiname, /1-15/);
+        assert.match(w.rufe[1].dateiname, /16-30/);
+        assert.equal(w.rufe[0].modus, undefined, 'der Modus wandert wieder ins Bild');
+        assert.equal(w.rufe[1].modus, undefined);
+        assert.equal(w.rufe[0].karten[0].rang, 1);
+        assert.equal(w.rufe[1].karten[0].rang, 16, 'die Rangziffer unterscheidet die Bilder nicht');
     });
 });

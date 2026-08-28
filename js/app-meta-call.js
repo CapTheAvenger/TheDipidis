@@ -298,8 +298,53 @@ window.MetaCall = (function () {
   // predicted-share output uses. Equal-tournament averaging would
   // overweight tiny side events relative to the 1000-player
   // Regionals.
-  let _lastMetaLabsByDeck      = {};        // norm(name) -> { share, players, n }
+  let _lastMetaLabsByDeck      = {};        // norm(name) -> { share, players, n, winRate, day2Conv }
   const PREDICTOR_5_5_FLOOR_FACTOR = 0.7;   // soft floor = lastMetaShare × 0.7
+
+  // ── Predictor 6.2 — Mehrmeta-Leistung ──────────────────────────
+  // Der Betreiber am 28.08.2026: "ein Deck, was ueber mehrere Meta gut
+  // performt, wie Dragapult zum Beispiel, zeigt ja auch, dass es
+  // natuerlich weiter gespielt wird."
+  //
+  // Predictor 5.5 kennt vom alten Format bisher nur den Anteil. Anteil
+  // allein sagt aber nur, wie viele das Deck mitgebracht haben, nicht
+  // ob es getragen hat. Im geschlossenen TEF-CRI standen nebeneinander:
+  // Dragapult 53,5 % Win Rate und 32 % Day-2-Quote — und Mega Greninja
+  // 37,9 % Win Rate bei 5,7 %. Beide hatten einen messbaren Anteil,
+  // beide bekamen denselben Boden.
+  //
+  // 6.2 spreizt deshalb den Bodenfaktor nach der Leistung im alten
+  // Meta, gemessen an den spielergewichteten Mittelwerten desselben
+  // Formats (nicht an frei gesetzten Schwellen):
+  //   Win Rate UND Day-2-Quote ueber Schnitt  -> 0.85 (traegt weiter)
+  //   beide unter Schnitt                     -> 0.55 (war nur populaer)
+  //   gemischt / keine Messung                -> 0.70 (wie bisher)
+  //
+  // Der Boden hebt nur an, er senkt nie — ein zu niedriger Faktor kann
+  // also hoechstens dazu fuehren, dass 5.5 gar nicht greift und die
+  // Online-Basis stehen bleibt. Das begrenzt den Schaden einer
+  // Fehleinschaetzung auf genau das, was ohne 5.5 ohnehin da stuende.
+  const PREDICTOR_6_2_STARK_FAKTOR   = 0.85;
+  const PREDICTOR_6_2_SCHWACH_FAKTOR = 0.55;
+  let _lastMetaAvgWinRate  = 0;   // spielergewichtet, altes Format
+  let _lastMetaAvgDay2Conv = 0;   // spielergewichtet, altes Format
+
+  // Bodenfaktor fuer ein Deck aus dem alten Meta. Ohne Messung bleibt
+  // es beim bisherigen Wert — kein Rateschritt.
+  function _floorFaktorMehrmeta(eintrag) {
+    if (!eintrag) return PREDICTOR_5_5_FLOOR_FACTOR;
+    const wr = eintrag.winRate;
+    const d2 = eintrag.day2Conv;
+    if (!(wr > 0) || !(d2 > 0)) return PREDICTOR_5_5_FLOOR_FACTOR;
+    if (!(_lastMetaAvgWinRate > 0) || !(_lastMetaAvgDay2Conv > 0)) {
+      return PREDICTOR_5_5_FLOOR_FACTOR;
+    }
+    const wrStark = wr >= _lastMetaAvgWinRate;
+    const d2Stark = d2 >= _lastMetaAvgDay2Conv;
+    if (wrStark && d2Stark)   return PREDICTOR_6_2_STARK_FAKTOR;
+    if (!wrStark && !d2Stark) return PREDICTOR_6_2_SCHWACH_FAKTOR;
+    return PREDICTOR_5_5_FLOOR_FACTOR;
+  }
   // Predictor 5.6 — growth-boost on the floor + post-floor decline-damper.
   // Backtest-tuned 2026-06-07 against Turin Final ground truth. Reduces
   // MAE-top20 from 1.65 (production) to 0.93. See the in-line comment
@@ -3729,12 +3774,16 @@ window.MetaCall = (function () {
             growth = Math.min(PREDICTOR_5_6_GROWTH_CAP, ratio);
           }
         }
-        const floorPct = lastMetaEntry.share * PREDICTOR_5_5_FLOOR_FACTOR * growth;
+        const floorFaktor = _floorFaktorMehrmeta(lastMetaEntry);
+        const floorPct = lastMetaEntry.share * floorFaktor * growth;
         if (predicted < floorPct) {
           d.lastMetaLabsFloor = {
             prevShare: Math.round(lastMetaEntry.share * 100) / 100,
             floorPct:  Math.round(floorPct * 100) / 100,
             growth:    Math.round(growth * 100) / 100,
+            faktor:    floorFaktor,
+            prevWinRate:  Math.round((lastMetaEntry.winRate || 0) * 100) / 100,
+            prevDay2Conv: Math.round((lastMetaEntry.day2Conv || 0) * 1000) / 1000,
             liftPP:    Math.round((floorPct - predicted) * 100) / 100,
           };
           predicted = floorPct;
@@ -5029,6 +5078,8 @@ window.MetaCall = (function () {
       _activeFormatTop15Decks = new Set();
       _majorSharesByDeck      = {};
       _lastMetaLabsByDeck     = {};
+      _lastMetaAvgWinRate     = 0;
+      _lastMetaAvgDay2Conv    = 0;
       _stickinessByDeck       = {};
       _porSnapshotByDeck      = {};
       _curSnapshotByDeck      = {};
@@ -5392,8 +5443,18 @@ window.MetaCall = (function () {
               const isLate = tid && lateTidSet.has(tid);
               const k = normalize(r.deck_name);
               if (!lastMetaAgg[k]) {
-                lastMetaAgg[k] = { name: r.deck_name, eSW: 0, eP: 0, lSW: 0, lP: 0, n: 0 };
+                lastMetaAgg[k] = {
+                  name: r.deck_name, eSW: 0, eP: 0, lSW: 0, lP: 0, n: 0,
+                  wSum: 0, wP: 0, dSum: 0, dP: 0,
+                };
               }
+              // Predictor 6.2 — Leistung im alten Meta, spielergewichtet.
+              // Zeilen ohne Messung zaehlen nicht mit; ein fehlender Wert
+              // darf den Schnitt nicht nach unten ziehen.
+              const wr = parseEU(r.win_pct || '0');
+              if (wr > 0) { lastMetaAgg[k].wSum += wr * players; lastMetaAgg[k].wP += players; }
+              const d2c = parseEU(r.day1_to_day2_conv || '0');
+              if (d2c > 0) { lastMetaAgg[k].dSum += d2c * players; lastMetaAgg[k].dP += players; }
               if (isLate) {
                 lastMetaAgg[k].lSW += share * players;
                 lastMetaAgg[k].lP  += players;
@@ -5427,9 +5488,26 @@ window.MetaCall = (function () {
                   lateShare:  lateShare,
                   players:    a.eP + a.lP,
                   n:          a.n,
+                  winRate:    a.wP > 0 ? a.wSum / a.wP : 0,
+                  day2Conv:   a.dP > 0 ? a.dSum / a.dP : 0,
                 };
               }
             });
+            // Predictor 6.2 — die Vergleichsmarke ist der Schnitt
+            // desselben Formats, spielergewichtet. Damit haengt die
+            // Einstufung nicht an einer gesetzten Zahl, die bei der
+            // naechsten Rotation nicht mehr passt.
+            (function () {
+              let wS = 0, wP = 0, dS = 0, dP = 0;
+              Object.keys(_lastMetaLabsByDeck).forEach(kk => {
+                const e = _lastMetaLabsByDeck[kk];
+                if (e.winRate  > 0) { wS += e.winRate  * e.players; wP += e.players; }
+                if (e.day2Conv > 0) { dS += e.day2Conv * e.players; dP += e.players; }
+              });
+              _lastMetaAvgWinRate  = wP > 0 ? wS / wP : 0;
+              _lastMetaAvgDay2Conv = dP > 0 ? dS / dP : 0;
+            }());
+
             try {
               const decks = Object.keys(_lastMetaLabsByDeck).length;
               if (decks > 0) {
@@ -5437,6 +5515,21 @@ window.MetaCall = (function () {
                   `[Predictor 5.5] Last-Meta-Labs floor armed (prev=${prevFmtKey}, ` +
                   `set-addition, full-player-weighted): ${decks} archetypes loaded. ` +
                   `Late tids: ${Array.from(lateTidSet).join(', ') || 'n/a'}.`
+                );
+                const stark = Object.keys(_lastMetaLabsByDeck)
+                  .filter(kk => _floorFaktorMehrmeta(_lastMetaLabsByDeck[kk]) === PREDICTOR_6_2_STARK_FAKTOR)
+                  .map(kk => _lastMetaLabsByDeck[kk])
+                  .sort((a, b) => b.share - a.share).slice(0, 6);
+                const schwach = Object.keys(_lastMetaLabsByDeck)
+                  .filter(kk => _floorFaktorMehrmeta(_lastMetaLabsByDeck[kk]) === PREDICTOR_6_2_SCHWACH_FAKTOR)
+                  .map(kk => _lastMetaLabsByDeck[kk])
+                  .sort((a, b) => b.share - a.share).slice(0, 6);
+                console.log(
+                  `[Predictor 6.2] Mehrmeta-Leistung: Schnitt ${prevFmtKey} = ` +
+                  `${_lastMetaAvgWinRate.toFixed(2)} % Win Rate / ` +
+                  `${(_lastMetaAvgDay2Conv * 100).toFixed(1)} % Day 2. ` +
+                  `Boden 0.85: ${stark.map(x => x.name).join(', ') || 'keins'}. ` +
+                  `Boden 0.55: ${schwach.map(x => x.name).join(', ') || 'keins'}.`
                 );
               }
             } catch (_e) { /* ignore */ }

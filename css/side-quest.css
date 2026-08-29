@@ -450,7 +450,7 @@
 
 .side-quest-tera {
     font-size: 0.65rem;
-    color: var(--accent, #5fb6ff);
+    color: var(--brand-ink);  /* 29.08.2026: --accent ist eine Flaechenfarbe (#667eea); als Schrift 3,29:1. --brand-ink ist derselbe Ton in der Textfassung und dreht im Dunkelmodus mit. */
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -530,7 +530,7 @@
 
 .side-quest-strategy summary::before {
     content: '▸ ';
-    color: var(--accent, #5fb6ff);
+    color: var(--brand-ink);  /* 29.08.2026: --accent ist eine Flaechenfarbe (#667eea); als Schrift 3,29:1. --brand-ink ist derselbe Ton in der Textfassung und dreht im Dunkelmodus mit. */
     transition: transform 120ms ease;
     display: inline-block;
 }
@@ -590,7 +590,7 @@
     height: 1.15rem;
     border-radius: 50%;
     border: 1.5px solid var(--accent, #5fb6ff);
-    color: var(--accent, #5fb6ff);
+    color: var(--brand-ink);  /* 29.08.2026: --accent ist eine Flaechenfarbe (#667eea); als Schrift 3,29:1. --brand-ink ist derselbe Ton in der Textfassung und dreht im Dunkelmodus mit. */
     font-size: 0.72rem;
     font-weight: 700;
     font-style: normal;
@@ -788,7 +788,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--accent, #5fb6ff);
+    color: var(--brand-ink);  /* 29.08.2026: --accent ist eine Flaechenfarbe (#667eea); als Schrift 3,29:1. --brand-ink ist derselbe Ton in der Textfassung und dreht im Dunkelmodus mit. */
 }
 
 .side-quest-modal-overview {
@@ -1820,7 +1820,7 @@
 }
 .sqp-preset:hover { background: var(--surface-2); border-color: #d8dee7; }
 .sqp-preset.is-active {
-    background: #3d7fd0;
+    background: #2e70c0;
     border-color: #5b9cef;
     color: #ffffff;
     box-shadow: 0 0 0 1px rgba(91, 156, 239, 0.4);
@@ -2293,7 +2293,7 @@ body.sqp-d-open { overflow: hidden; }
    zu bewerten. */
 .sqb-free { width: 100%; margin-top: 14px; padding-top: 12px;
     border-top: 1px solid #e2e8f0; }
-.sqb-sec--free { color: #64748b; }
+.sqb-sec--free { color: var(--ink-3); }
 .sqb-free .sqb-sec { margin-top: 0; }
 .sqb-sugg {
     display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
@@ -2408,7 +2408,7 @@ body.sqp-d-open { overflow: hidden; }
 .sqb-setzen {
     font-size: 0.92rem; font-weight: 800;
     padding: 10px 20px; border-radius: 10px;
-    border: 1px solid var(--gruen, #16a34a); background: var(--gruen, #16a34a); color: #fff;
+    border: 1px solid var(--gruen, #16a34a); background: var(--gruen, var(--solid-ok)); color: #fff;
     cursor: pointer;
 }
 .sqb-setzen:hover { filter: brightness(0.92); }
@@ -2474,7 +2474,7 @@ body.sqp-d-open { overflow: hidden; }
     border-radius: 10px; cursor: pointer; border: 1px solid var(--line-strong);
     background: var(--surface-1); color: var(--ink-2);
 }
-.sqb-do-save { border-color: var(--gruen, #16a34a); background: var(--gruen, #16a34a); color: #fff; }
+.sqb-do-save { border-color: var(--gruen, #16a34a); background: var(--gruen, var(--solid-ok)); color: #fff; }
 .sqb-do-save:hover { filter: brightness(0.92); }
 .sqb-do-active { border-color: var(--gold); color: var(--vorbehalt); }
 .sqb-do-active:hover { background: var(--vorbehalt-bg); }
@@ -2509,7 +2509,7 @@ body.sqp-d-open { overflow: hidden; }
     margin-left: auto; border: none; background: none;
     font-size: 1.5rem; line-height: 1; color: var(--ink-3); cursor: pointer;
 }
-.sqb-modal-x:hover { color: var(--alarm); }
+.sqb-modal-x:hover { color: var(--tint-bad-ink); }
 .sqb-modal-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
 .sqb-field { display: flex; flex-direction: column; gap: 5px; }
 .sqb-field > span {
@@ -2524,7 +2524,7 @@ body.sqp-d-open { overflow: hidden; }
 .sqb-moves { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .sqb-budget {
     font-style: normal; font-weight: 800; font-variant-numeric: tabular-nums;
-    color: var(--gruen, #16a34a); font-size: 0.8rem;
+    color: var(--gruen, var(--tint-ok-ink)); font-size: 0.8rem;
 }
 .sqb-budget.is-full { color: var(--vorbehalt); }
 .sqb-field--sp .sqb-hint { margin: 0; }

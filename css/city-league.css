@@ -51,7 +51,7 @@
 }
 .tutorial-screenshot-frame {
     aspect-ratio: 9 / 16;
-    background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-image: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%);
     /* Tutorial captures are portrait phone shots — contain shows the
        whole screenshot inside whatever frame aspect the banner uses
        instead of slicing the middle. The placeholder gradient still
@@ -175,10 +175,10 @@
     font-weight: 700;
 }
 .tutorial-tab-title-clmeta {
-    color: #e74c3c;
+    color: var(--tint-bad-ink);
 }
 .tutorial-tab-title-cldeck {
-    color: #27ae60;
+    color: var(--tint-ok-ink);
 }
 .sandbox-tip-box {
     text-align: center;
@@ -204,7 +204,7 @@
     padding: 20px 60px;
     border-radius: 50px;
     font-weight: 900;
-    background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+    background: linear-gradient(135deg, var(--solid-ok) 0%, #1e8449 100%);
     border: 3px solid #fff;
     box-shadow: 0 8px 25px rgba(39, 174, 96, 0.5);
     color: white;
@@ -357,7 +357,7 @@
     color: white;
 }
 .player2-load-btn {
-    background: #E3350D;
+    background: #d2310c;
     color: white;
 }
 .proxy-action-btn-row {
@@ -381,7 +381,7 @@
 .proxy-add-cm-btn,
 .proxy-add-pm-btn {}  /* Secondary: keep the .btn-modern default */
 .proxy-print-queue-btn {
-    background: #27ae60 !important;
+    background: var(--solid-ok) !important;
     border-color: #1e8449 !important;
     color: #fff !important;
 }
@@ -389,7 +389,7 @@
     background: #1e8449 !important;
 }
 .proxy-clear-queue-btn {
-    background: #e74c3c !important;
+    background: var(--solid-bad) !important;
     border-color: #c0392b !important;
     color: #fff !important;
 }
@@ -431,7 +431,7 @@
     font-family: Consolas, monospace;
     font-size: 13px;
     min-width: 0;
-    color: #1f2937;
+    color: var(--ink);
     background: var(--surface-1);
 }
 /* Make the placeholder visibly distinct from real content. Without this
@@ -458,7 +458,7 @@
     min-height: 42px;
 }
 .proxy-add-decklist-btn {
-    background: #e74c3c;
+    background: var(--solid-bad);
     border-color: #c0392b;
     color: white;
 }
@@ -481,7 +481,7 @@
     color: var(--ink);
 }
 .proxy-add-card-btn {
-    background: #e74c3c;
+    background: var(--solid-bad);
     border-color: #c0392b;
     color: white;
 }
@@ -510,9 +510,14 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.10);
     border-radius: 10px 10px 0 0;
 }
+/* 29.08.2026: `.proxy-title` (0,1,0) verlor gegen `.tab-content h2`
+   (0,1,1), das --ink setzt. Der Titel stand deshalb in der
+   Seitenschrift auf dem roten Banner: 3,96 hell, 3,93 dunkel. Der
+   Elternselektor davor hebt die Spezifitaet, ohne !important. */
+.proxy-header-row .proxy-title,
 .proxy-title {
     margin: 0;
-    color: white;
+    color: #fff;
     font-size: clamp(1.05em, 4vw, 1.45em);
     text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
 }
@@ -563,7 +568,7 @@
 }
 .past-meta-deck-count {
     font-weight: bold;
-    color: #3498db;
+    color: var(--dv-pos-ink);
 }
 .past-meta-deck-count-unique {
     font-weight: 500;
@@ -574,7 +579,7 @@
 .past-meta-deck-price {
     background: var(--surface-1);
     border: 2px solid #2ecc71;
-    color: #27ae60;
+    color: var(--tint-ok-ink);
     padding: 6px 14px;
     border-radius: 6px;
     font-size: 1.1em;
@@ -631,7 +636,7 @@
 }
 .past-meta-stat-label {
     font-size: 0.85em;
-    color: #6b7280;
+    color: var(--ink-3);
     margin-bottom: 4px;
     font-weight: 700;
     text-transform: uppercase;
@@ -650,7 +655,7 @@
     margin-top: 3px;
     font-size: 0.72em;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--ink-3);
     letter-spacing: 0.2px;
 }
 /* Unter der Schwelle warm eingefaerbt — ein Vorbehalt, keine Warnung. */
@@ -664,7 +669,7 @@
    placed decklist for the current archetype + filter and exposes a
    one-click "Compare with built deck" button. */
 .past-meta-best-header {
-    background: linear-gradient(135deg, #fff9f0 0%, #fff3e0 100%);
+    background: linear-gradient(135deg, var(--tint-warn) 0%, var(--tint-warn) 100%);
     border-radius: 12px;
     padding: 14px 18px;
     border: 1px solid rgba(245, 158, 11, 0.18);
@@ -687,22 +692,22 @@
     min-width: 38px;
     padding: 2px 8px;
     background: #f59e0b;
-    color: #fff;
+    color: var(--ink);
     font-weight: 800;
     border-radius: 6px;
     font-size: 0.95rem;
 }
 .past-meta-best-name {
     font-weight: 800;
-    color: #1f2937;
+    color: var(--ink);
 }
 .past-meta-best-record {
-    color: #4b5563;
+    color: var(--ink-2);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 .past-meta-best-sub {
-    color: #6b7280;
+    color: var(--ink-3);
     font-size: 0.88rem;
 }
 .past-meta-best-actions {
@@ -818,7 +823,7 @@
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: #6b7280;
+    color: var(--ink-3);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -901,7 +906,7 @@
     border-radius: 8px;
     border: none;
     background: transparent;
-    color: #6b7280;
+    color: var(--ink-3);
     cursor: pointer;
     opacity: 0.7;
     font-weight: 700;
@@ -930,7 +935,7 @@
     margin-bottom: 10px;
 }
 .current-meta-meta-empty {
-    color: #6b7280;
+    color: var(--ink-3);
     text-align: center;
     font-size: 1em;
     padding: 24px;
@@ -1001,7 +1006,7 @@
 }
 .current-meta-stat-label {
     font-size: 0.85em;
-    color: #6b7280;
+    color: var(--ink-3);
     margin-bottom: 4px;
     font-weight: 700;
     text-transform: uppercase;
@@ -1024,7 +1029,7 @@
 .current-meta-top256-title {
     font-size: 0.85em;
     font-weight: 700;
-    color: #6b7280;
+    color: var(--ink-3);
     text-transform: uppercase;
     letter-spacing: 0.3px;
     margin-bottom: 10px;
@@ -1083,16 +1088,16 @@
     font-size: 1em;
 }
 .current-meta-matchups-table.best-matchups th {
-    background: #27ae60;
+    background: var(--solid-ok);
     color: #fff;
 }
 .current-meta-matchups-table.worst-matchups th {
-    background: #e74c3c;
+    background: var(--solid-bad);
     color: #fff;
 }
 .current-meta-matchup-select-title {
     margin-top: 0;
-    color: #3498db;
+    color: var(--dv-pos-ink);
     font-size: 1.1em;
     font-weight: 700;
 }
@@ -1208,7 +1213,7 @@
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: #6b7280;
+    color: var(--ink-3);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -1239,7 +1244,7 @@
 }
 .current-meta-deck-count {
     font-weight: bold;
-    color: #3498db;
+    color: var(--dv-pos-ink);
 }
 .current-meta-deck-count-unique {
     font-weight: 500;
@@ -1250,7 +1255,7 @@
 .current-meta-deck-price {
     background: var(--surface-1);
     border: 2px solid #2ecc71;
-    color: #27ae60;
+    color: var(--tint-ok-ink);
     padding: 6px 14px;
     border-radius: 6px;
     font-size: 1.1em;
@@ -1296,7 +1301,7 @@
 .current-meta-date-clear {
     padding: 6px 14px;
     font-size: 0.9em;
-    background: #4caf50;
+    background: #377e39;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -1316,7 +1321,7 @@
     font-weight: 600;
     border: 2px solid #d6dde6;
     background: var(--surface-2);
-    color: #6b7280;
+    color: var(--ink-3);
     cursor: pointer;
     transition: background 0.18s, border-color 0.18s, color 0.18s,
                 box-shadow 0.18s, transform 0.18s;
@@ -1430,7 +1435,7 @@
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: #6b7280;
+    color: var(--ink-3);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -1463,7 +1468,7 @@
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: #6b7280;
+    color: var(--ink-3);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -1491,7 +1496,7 @@
     padding: 6px 12px;
     font-size: 0.85em;
     background: transparent;
-    color: #6b7280;
+    color: var(--ink-3);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -1506,7 +1511,7 @@
 }
 .city-league-meta-sort-btn.active {
     background: #22c55e;
-    color: #fff;
+    color: var(--ink);
     opacity: 1;
     font-weight: 800;
     box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
@@ -1535,7 +1540,7 @@
 }
 .city-league-meta-empty {
     text-align: center;
-    color: #6b7280;
+    color: var(--ink-3);
     padding: 32px;
     grid-column: 1 / -1;
     font-weight: 600;
@@ -1663,11 +1668,11 @@
 }
 .toolbar-metric-sep {
     font-weight: 600;
-    color: #6b7280;
+    color: var(--ink-3);
     margin-left: 1px;
 }
 .toolbar-metric-price .toolbar-metric-value {
-    color: #27ae60;
+    color: var(--tint-ok-ink);
 }
 /* Der Block, der hier stand, setzte fuer sechs Selektoren dieselbe Farbe
    mit !important, die ui-components.css:1305 fuer .color-red ohnehin und
@@ -1707,7 +1712,7 @@
 }
 .city-league-deck-count {
     font-weight: bold;
-    color: #3498db;
+    color: var(--dv-pos-ink);
 }
 .city-league-deck-count-unique {
     font-weight: 500;
@@ -1718,7 +1723,7 @@
 .city-league-deck-price {
     background: var(--surface-1);
     border: 2px solid #2ecc71;
-    color: #27ae60;
+    color: var(--tint-ok-ink);
     padding: 6px 14px;
     border-radius: 6px;
     font-size: 1.1em;
@@ -1831,7 +1836,7 @@
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: #6b7280;
+    color: var(--ink-3);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -1880,7 +1885,7 @@
 }
 .city-league-stat-label {
     font-size: 0.78em;
-    color: #6b7280;
+    color: var(--ink-3);
     font-weight: 700;
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -1931,7 +1936,7 @@
 .city-league-loading {
     text-align: center;
     padding: 40px;
-    color: #6b7280;
+    color: var(--ink-3);
     font-weight: 600;
     background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
     border-radius: 12px;
@@ -1952,7 +1957,7 @@
     padding: 7px 12px;
     font-size: 1.1em;
     background: var(--surface-1);
-    color: #6b7280;
+    color: var(--ink-3);
     border: 1px solid #d0d5e0;
     border-radius: 8px;
     cursor: pointer;
@@ -2163,7 +2168,7 @@
 #city-league-analysis .date-range-container .form-label-block {
     margin-bottom: 4px;
     font-size: 0.82rem;
-    color: #4b5563;
+    color: var(--ink-2);
     font-weight: 700;
 }
 
@@ -2208,7 +2213,7 @@
     align-items: center;
     gap: 6px;
     margin-bottom: 4px;
-    color: #4b5563;
+    color: var(--ink-2);
 }
 
 #city-league-analysis .city-league-stat-label-cards::before,
@@ -2398,7 +2403,7 @@
     align-items: center;
     gap: 6px;
     margin-bottom: 4px;
-    color: #4b5563;
+    color: var(--ink-2);
 }
 
 #current-analysis .current-meta-stat-label-cards::before,
@@ -2580,7 +2585,7 @@
     align-items: center;
     gap: 6px;
     margin-bottom: 4px;
-    color: #4b5563;
+    color: var(--ink-2);
 }
 
 #past-meta .past-meta-stat-label-cards::before,
@@ -2723,7 +2728,7 @@
    the existing teal-blue gradient + hover lift; the matchup table is
    a clean read-only sort by games-played-desc. */
 .past-meta-section-hint {
-    color: #6b7280;
+    color: var(--ink-3);
     font-size: 0.86rem;
     margin: 0 0 12px 0;
     line-height: 1.45;
@@ -2737,7 +2742,7 @@
 }
 .past-meta-loading-state {
     padding: 14px 16px;
-    color: #6b7280;
+    color: var(--ink-3);
     font-style: italic;
     background: var(--surface-0);
     border-radius: 10px;
@@ -2809,7 +2814,7 @@
 }
 .past-meta-matchup-table tbody td:nth-child(1) {
     text-align: left;
-    color: #1f2937;
+    color: var(--ink);
     font-weight: 600;
 }
 .past-meta-matchup-table tbody tr:nth-child(even) td {
@@ -2822,16 +2827,16 @@
 .past-meta-matchup-table .past-meta-mu-games {
     text-align: center;
     font-variant-numeric: tabular-nums;
-    color: #4b5563;
+    color: var(--ink-2);
 }
 .past-meta-matchup-table .past-meta-mu-wr {
     text-align: center;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
-.past-meta-matchup-table .past-meta-mu-good { color: #15803d; }
+.past-meta-matchup-table .past-meta-mu-good { color: var(--tint-ok-ink); }
 .past-meta-matchup-table .past-meta-mu-bad  { color: #b91c1c; }
-.past-meta-matchup-table .past-meta-mu-even { color: #6b7280; }
+.past-meta-matchup-table .past-meta-mu-even { color: var(--ink-3); }
 
 /* Season-closed notice ─────────────────────────────────────────────
  * Shown at the top of both City League tabs while the current
@@ -2900,7 +2905,7 @@
 .current-meta-quickref-col-title {
     margin: 0 0 10px;
     font-size: 0.98rem;
-    color: #1f2937;
+    color: var(--ink);
     font-weight: 800;
 }
 .current-meta-quickref-body {
@@ -2945,7 +2950,7 @@
 .three-way-compare-header h3 {
     margin: 0;
     font-size: 1.05rem;
-    color: #1f2937;
+    color: var(--ink);
 }
 .three-way-compare-close {
     width: 32px;
@@ -2955,7 +2960,7 @@
     background: var(--surface-1);
     font-size: 1.2rem;
     cursor: pointer;
-    color: #6b7280;
+    color: var(--ink-3);
 }
 .three-way-compare-close:hover { background: #f3f4f6; }
 .three-way-compare-body {
@@ -2998,7 +3003,7 @@
    amber tint + inset border draws the eye to the diverging quantity
    without breaking the row-level all-agree semantic. */
 .three-way-compare-table td.three-way-cell-mismatch {
-    color: #b45309;
+    color: var(--tint-warn-ink);
     font-weight: 700;
     background: rgba(245, 158, 11, 0.18);
     box-shadow: inset 0 0 0 2px rgba(245, 158, 11, 0.55);
@@ -3006,7 +3011,7 @@
 }
 .three-way-compare-table .three-way-col-total {
     font-weight: 500;
-    color: #6b7280;
+    color: var(--ink-3);
     font-size: 0.78em;
 }
 /* Category-section divider rows — break the table into Pokémon /
@@ -3037,7 +3042,7 @@
     gap: 10px;
     flex-wrap: wrap;
     padding: 8px 0 14px;
-    color: #4b5563;
+    color: var(--ink-2);
     font-size: 0.88rem;
 }
 .three-way-compare-summary span {

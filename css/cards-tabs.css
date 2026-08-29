@@ -139,7 +139,7 @@
 }
 
 #cards .card-database-top-actions .btn-green.card-badge {
-    background: #28a745 !important;
+    background: #1f8035 !important;
     color: #fff !important;
 }
 
@@ -150,13 +150,13 @@
 
 #cards .card-database-top-actions .btn-wishlist.card-badge {
     background: #F48FB1 !important;
-    color: #fff !important;
+    color: var(--ink) !important;
     border-color: #F48FB1 !important;
 }
 
 #cards .card-database-top-actions .btn-tradelist.card-badge {
     background: #a3d9cd !important;
-    color: #fff !important;
+    color: var(--ink) !important;
     border-color: #a3d9cd !important;
 }
 
@@ -355,7 +355,7 @@
 }
 
 #cards .pagination-ellipsis {
-    color: #74829b !important;
+    color: var(--ink-3) !important;
     font-weight: 700 !important;
 }
 
@@ -404,7 +404,7 @@
 
 #cards .pagination-controls .btn-green {
     color: #fff !important;
-    background: linear-gradient(135deg, #12a863 0%, #0f8c55 100%) !important;
+    background: linear-gradient(135deg, #0e7f4b 0%, #0e804d 100%) !important;
     border-color: #0f9155 !important;
     box-shadow: 0 4px 10px rgba(16, 154, 93, 0.24) !important;
 }

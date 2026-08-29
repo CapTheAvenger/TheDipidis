@@ -142,7 +142,7 @@
 .wl-bot-import-table th {
   position: sticky;
   top: 0;
-  background: #667eea;
+  background: var(--solid-info);
   color: #fff;
   padding: 7px 8px;
   text-align: left;
@@ -197,7 +197,7 @@
 }
 
 .wl-bot-import-btn--primary {
-  background: linear-gradient(135deg, #27ae60, #1e8449);
+  background: linear-gradient(135deg, var(--solid-ok), #1e8449);
   color: #fff;
 }
 

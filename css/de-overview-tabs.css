@@ -12,7 +12,7 @@
 .de-overview-desc {
     font-size: 1.1em;
     line-height: 1.8;
-    color: #555;
+    color: var(--ink-2);
 }
 /* 29.08.2026: .de-overview-highlight stand hier zweimal, Wort fuer
    Wort gleich. Diese erste war toter Text — im Stylesheet gewinnt
@@ -62,7 +62,7 @@
 .de-overview-desc {
     font-size: 1.1em;
     line-height: 1.8;
-    color: #555;
+    color: var(--ink-2);
 }
 .de-overview-highlight {
     color: var(--tint-warn-ink);
@@ -98,8 +98,8 @@
 .de-tab-block h3 {
     margin-top: 0;
 }
-.de-tab-block-city-league-meta h3 { color: #e74c3c; }
-.de-tab-block-city-league-analysis h3 { color: #27ae60; }
+.de-tab-block-city-league-meta h3 { color: var(--tint-bad-ink); }
+.de-tab-block-city-league-analysis h3 { color: var(--tint-ok-ink); }
 .de-tab-block p,
 .de-tab-block ul {
     line-height: 1.7;

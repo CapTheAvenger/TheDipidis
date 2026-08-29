@@ -26,7 +26,11 @@
    ==================================================================== */
 :root {
     /* ── Brand: Pokémon ─────────────────────────────────────────── */
-    --pokemon-red: #E3350D;
+    /* 29.08.2026 minimal nachgezogen: #E3350D traegt weisse Schrift an
+       mehreren Stellen (Proxy-Kopf, Knoepfe) und lag bei 4,39 — knapp
+       unter der Grenze. #D2310C ist derselbe Rotton, kaum zu
+       unterscheiden, und haelt 5,02. */
+    --pokemon-red: #D2310C;
     --pokemon-red-dark: #A82508;
     --pokemon-blue: #3B4CCA;
     --pokemon-blue-dark: #283593;
@@ -39,21 +43,59 @@
     --color-secondary: #2c3e50;
 
     /* ── Accent gradient (modals, banners) ─────────────────────── */
-    --accent: #667eea;
+    /* 29.08.2026: --accent ist die Flaeche des Akzent-Verlaufs und
+       traegt ueberall weisse Schrift — bei #667eea waren das 3,66:1,
+       162 Fundstellen, die haeufigste Einzelursache der ganzen Messung.
+       Derselbe Blauton, so weit abgedunkelt, dass weiss darauf 5,0
+       erreicht. Als SCHRIFT wird --accent nicht mehr benutzt; dafuer
+       steht --brand-ink. */
+    --accent: #4663e6;
     --accent-end: #764ba2;
     --accent-hover: #5568d3;
 
-    /* ── Semantic status ──────────────────────────────────────── */
-    --color-success: #27ae60;
-    --color-success-dark: #1e8449;
-    --color-danger: #e74c3c;
-    --color-danger-dark: #c0392b;
-    --color-warning: #f39c12;
-    --color-warning-dark: #e0a800;
-    --color-info: #3498db;
-    --color-info-hover: #2980b9;
+    /* ── Semantic status ──────────────────────────────────────────
+     * 29.08.2026: diese sechs standen auf der Flat-UI-Palette und wurden
+     * an ueber hundert Stellen ALS TEXTFARBE benutzt — #27ae60 hat auf
+     * Weiss 2,87:1, #3498db 3,15:1, #f39c12 2,19:1. Weil die Regeln
+     * bereits ueber diese Namen liefen, sass der Fehler hier an der
+     * Definition und nicht in den Regeln: eine Zeile statt hundert.
+     *
+     * Sie zeigen jetzt auf die --tint-*-ink-Familie, die schon da war
+     * und in beiden Modi haelt (hell 5,0:1, dunkel 7,8:1). Die
+     * *-dark-Varianten bleiben eigenstaendig: sie werden als FLAECHE
+     * benutzt, nicht als Schrift, und sind dort dunkel genug.
+     *
+     * Wer hier wieder einen rohen Hex-Wert einsetzt, bricht beide Modi
+     * gleichzeitig — der Wert kann nicht in beiden richtig sein. */
+    /* Nachtrag vom selben Tag, weil der erste Versuch falsch war:
+     * ich hatte diese Namen pauschal auf die Textfarben gelegt. Gezaehlt
+     * werden sie aber in BEIDEN Rollen — --color-success 6-mal als
+     * Schrift und 11-mal als Flaeche, --color-info 17 zu 19. Ein Wert
+     * kann nicht beides sein: als Flaeche mit weisser Schrift muss er
+     * dunkel genug sein, als Schrift auf hellem Grund ebenfalls, aber im
+     * Dunkelmodus muss die Schrift AUFhellen und die Flaeche nicht. Der
+     * erste Versuch machte aus der Flaeche eine helle Textfarbe — weiss
+     * darauf landete bei 2,27:1.
+     *
+     * Deshalb tragen die alten Namen jetzt die FLAECHE (ihre historische
+     * Rolle und die haeufigere), und daneben steht je ein -ink-Geschwister
+     * fuer Schrift. Wer eine Bedeutung als Text braucht, nimmt das
+     * -ink; wer eine Flaeche faerbt, den alten Namen. */
+    --color-success: var(--solid-ok);
+    --color-success-ink: var(--tint-ok-ink);
+    --color-success-dark: var(--tint-ok-ink);
+    --color-danger: var(--solid-bad);
+    --color-danger-ink: var(--tint-bad-ink);
+    --color-danger-dark: var(--tint-bad-ink);
+    --color-warning: #9c6308;
+    --color-warning-ink: var(--tint-warn-ink);
+    --color-warning-dark: var(--tint-warn-ink);
+    --color-info: var(--solid-info);
+    --color-info-ink: var(--dv-pos-ink);
+    --color-info-hover: var(--dv-pos-ink);
     /* legacy aliases still referenced in older files — keep alive */
     --color-error: var(--color-danger);
+    --color-error-ink: var(--color-danger-ink);
     --color-error-dark: var(--color-danger-dark);
 
     /* ── Text ─────────────────────────────────────────────────── */
@@ -369,7 +411,7 @@
         .btn-gradient-primary {
             padding: 12px 24px;
             font-size: 1em;
-            background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+            background: linear-gradient(135deg, #006cdf 0%, #6610f2 100%);
             color: white;
             border: none;
             border-radius: 6px;
@@ -478,7 +520,7 @@
             font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            color: #64748b;
+            color: var(--ink-3);
             font-weight: 700;
         }
 
@@ -823,7 +865,7 @@
         .loading {
             text-align: center;
             padding: 32px;
-            color: #6b7280;
+            color: var(--ink-3);
             font-size: 15px;
             font-weight: 600;
             background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
@@ -835,7 +877,7 @@
         .error {
             background: #ffe6e6;
             border-left: 4px solid var(--color-error);
-            color: var(--color-error);
+            color: var(--color-error-ink);
             padding: 15px;
             border-radius: 5px;
             margin: 20px 0;
@@ -934,7 +976,7 @@
             font-weight: bold;
         }
         
-        .trend.improved { color: #27ae60; }
+        .trend.improved { color: var(--tint-ok-ink); }
         .trend.declined { color: #e67e22; }
         .trend.stable { color: #95a5a6; }
         
@@ -942,8 +984,8 @@
             font-weight: bold;
         }
         
-        .change.positive { color: #27ae60; }
-        .change.negative { color: var(--color-error); }
+        .change.positive { color: var(--tint-ok-ink); }
+        .change.negative { color: var(--color-error-ink); }
         
         .search-box {
             margin: 20px 0;
@@ -1265,7 +1307,7 @@
 
         .rarity-pref-btn {
             background: #ffffff;
-            color: #6b7280;
+            color: var(--ink-3);
             border: 1px solid transparent;
             padding: 5px 10px;
             border-radius: 6px;
@@ -1402,13 +1444,13 @@
         /* Pokéball icon - open state */
         .cards-toggle::before {
             content: '⚫';
-            color: var(--accent);
+            color: var(--brand-ink);
         }
 
         /* Pokéball icon - closed state */
         .cards-toggle.collapsed::before {
             content: '⚪';
-            color: var(--accent);
+            color: var(--brand-ink);
         }
 
         /* Stats Grid */
@@ -1863,23 +1905,23 @@
             margin-top: 4px;
         }
         
-        .rarity-common { background: #95a5a6; color: white; }
-        .rarity-uncommon { background: #16a085; color: white; }
-        .rarity-rare { background: #f39c12; color: white; }
+        .rarity-common { background: var(--solid-neutral); color: white; }
+        .rarity-uncommon { background: #117d68; color: white; }
+        .rarity-rare { background: var(--gold); color: var(--on-light); }
         .rarity-holo { background: #9b59b6; color: white; }
         .rarity-double { background: var(--color-error); color: white; }
         .rarity-triple { background: var(--color-error-dark); color: white; }
         .rarity-ultra { background: var(--text-dark); color: white; }
-        .rarity-secret { background: linear-gradient(45deg, #f39c12, var(--color-error)); color: white; }
+        .rarity-secret { background: linear-gradient(45deg, #f39c12, var(--color-error)); color: var(--ink); }
         .rarity-rainbow { background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); color: white; }
         .rarity-art { background: #8e44ad; color: white; }
         .rarity-special-art { background: var(--color-error-dark); color: white; }
-        .rarity-char-holo { background: #3498db; color: white; }
-        .rarity-char-super { background: #2980b9; color: white; }
+        .rarity-char-holo { background: var(--solid-info); color: white; }
+        .rarity-char-super { background: #2575a9; color: white; }
         .rarity-radiant { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%); color: white; }
         .rarity-shiny { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: var(--text-dark); }
-        .rarity-shiny-ultra { background: linear-gradient(135deg, #bdc3c7 0%, var(--text-dark) 100%); color: white; }
-        .rarity-promo { background: #e67e22; color: white; }
+        .rarity-shiny-ultra { background: linear-gradient(135deg, #bdc3c7 0%, var(--text-dark) 100%); color: var(--ink); }
+        .rarity-promo { background: #aa5a13; color: white; }
         
         .card-database-actions {
             display: flex;
@@ -1914,7 +1956,7 @@
         
         .card-database-btn-market {
             background: #f39c12;
-            color: white;
+            color: var(--ink);
         }
         
         .card-database-btn-market:hover {
@@ -2096,7 +2138,7 @@
             cursor: pointer;
             color: #666;
         }
-        .auth-modal-close:hover { color: var(--color-error); }
+        .auth-modal-close:hover { color: var(--color-error-ink); }
 
         /* Deck Compare darf breiter sein */
         #deckCompareModal .rarity-switcher-modal-content {
@@ -2136,7 +2178,7 @@
             gap: 10px;
             padding: 8px 12px;
             border-bottom: 1px solid #f0f3f7;
-            color: #1f2d3d;
+            color: var(--ink);
             text-decoration: none;
             font-size: 13px;
             transition: background 0.12s;
@@ -2147,7 +2189,7 @@
         .cm-link-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .cm-link-set {
             font-size: 11px;
-            color: #6b7c93;
+            color: var(--ink-3);
             font-family: 'Courier New', monospace;
             white-space: nowrap;
         }
@@ -2164,11 +2206,11 @@
         .cm-link-row-fallback { background: #fffbeb; }
         .cm-link-row-fallback:hover { background: #fef3c7; }
         .cm-link-row-fallback .cm-link-count,
-        .cm-link-row-fallback .cm-link-arrow { color: #b45309; }
+        .cm-link-row-fallback .cm-link-arrow { color: var(--tint-warn-ink); }
         .cm-link-empty {
             padding: 16px;
             text-align: center;
-            color: #6b7c93;
+            color: var(--ink-3);
             font-size: 13px;
         }
 
@@ -2222,7 +2264,7 @@
 
         .image-view-export {
             background: linear-gradient(135deg, #1abc9c, #16a085);
-            color: white;
+            color: var(--ink);
             border: none;
             font-size: 20px;
             cursor: pointer;
@@ -2510,7 +2552,7 @@
         .sc-action-collect   { background: #4CAF50; }
         .sc-action-rarity    { background: #FFC107; color: #333; }
         .sc-action-limitless { background: #6c3dc5; }
-        .sc-action-proxy     { background: #e74c3c; }
+        .sc-action-proxy     { background: var(--solid-bad); }
         .sc-action-market    { background: linear-gradient(135deg, #ff6b35, #ff8c42); }
 
         @media (max-width: 700px) {
@@ -2684,8 +2726,8 @@
 
         .rarity-badge {
             display: inline-block;
-            background-color: #FDB927;
-            color: #333;
+            background-color: var(--gold);
+            color: var(--on-light);
             padding: 3px 8px;
             border-radius: 4px;
             font-size: 11px;
@@ -2704,7 +2746,7 @@
         }
 
         .rarity-switcher-modal-buttons button {
-            background-color: #4CAF50;
+            background-color: #377e39;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -2751,7 +2793,7 @@
         }
 
         .rarity-switcher-close:hover {
-            color: var(--color-error);
+            color: var(--color-error-ink);
             background: rgba(231, 76, 60, 0.1);
             transform: rotate(90deg);
         }
@@ -2795,7 +2837,7 @@
         /* Cardmarket Button Styles */
         .btn-cardmarket {
             background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
-            color: white;
+            color: var(--ink);
             border: none;
             border-radius: 4px;
             font-size: 11px;
@@ -4274,7 +4316,7 @@
 }
 
 .fullscreen-close:hover {
-    background: #f44336;
+    background: #dc1a0c;
     color: white;
     transform: rotate(90deg);
 }
@@ -4898,7 +4940,7 @@ h3:first-child {
         border-radius: 0 8px 8px 0 !important; /* Rechts abgerundet */
     }
     .endturn-btn {
-        background: #27ae60 !important;
+        background: var(--solid-ok) !important;
         border-radius: 0 8px 8px 0 !important;
     }
 
@@ -5042,7 +5084,7 @@ h3:first-child {
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: none;
-    color: #6c757d;
+    color: var(--ink-3);
     margin-left: 8px;
 }
 
@@ -5315,7 +5357,7 @@ h3:first-child {
     }
 
     .endturn-btn {
-        background: #27ae60 !important;
+        background: var(--solid-ok) !important;
         border-radius: 0 8px 8px 0 !important;
     }
 
@@ -5679,7 +5721,7 @@ details[open] > .tier-trending-summary::after {
  * with the share/winrate headline number. */
 .stat-badge.stat-sample-size {
     background: rgba(108, 117, 125, 0.12);
-    color: #4b5563;
+    color: var(--ink-2);
     font-weight: 500;
 }
 
@@ -5689,7 +5731,7 @@ details[open] > .tier-trending-summary::after {
  * eine aus 608. Gedaempft wie die Stichprobenmarke daneben. */
 .stat-badge.tier-listen-n {
     background: rgba(108, 117, 125, 0.12);
-    color: #4b5563;
+    color: var(--ink-2);
     font-weight: 500;
 }
 /* Unter der Schwelle: warm statt grau, aber kein Rot — eine duenne
@@ -5795,15 +5837,14 @@ details[open] > .tier-trending-summary::after {
     cursor: help;
 }
 
-.stat-power { background: #fff3e0; color: #e65100; }
-.stat-trend-up { 
-    background: #e8f5e9; 
-    color: #2e7d32; 
-}
-.stat-trend-down { 
-    background: #ffebee; 
-    color: #c62828; 
-}
+/* 29.08.2026: die drei getoenten Abzeichen. .stat-power hatte nach der
+   Umstellung eine Schrift, die im Dunkelmodus mitdreht, auf einer
+   Flaeche, die fest hell blieb — hellbraun auf Hellgelb, 2,1:1. Flaeche
+   und Schrift muessen zusammen wandern, sonst entsteht genau der
+   Befund, den man gerade beseitigt hat. Jetzt beide als Paar. */
+.stat-power     { background: var(--tint-warn); color: var(--tint-warn-ink); }
+.stat-trend-up  { background: var(--tint-ok);   color: var(--tint-ok-ink); }
+.stat-trend-down{ background: var(--tint-bad);  color: var(--tint-bad-ink); }
 
 .card-trend-badge {
     position: absolute;
@@ -5844,12 +5885,22 @@ details[open] > .tier-trending-summary::after {
 }
 
 .trend-up {
-    color: #2ecc71 !important;
+    color: var(--tint-ok-ink) !important;
     text-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
 }
 
+/* 29.08.2026: stand auf var(--color-error-ink). Das sieht wie ein
+   Umweg ohne Folgen aus, ist aber einer MIT: --color-error-ink ist bei
+   :root als var(--color-danger-ink) -> var(--tint-bad-ink) definiert,
+   und diese Kette wird dort aufgeloest, wo sie DEKLARIERT ist — am
+   :root —, nicht dort, wo sie benutzt wird. Die helle Mockup-Insel
+   setzt --tint-bad-ink auf ihrem eigenen Element neu; ueber den Umweg
+   kam das nie an, und in den Mockups stand weiter der Dunkelmodus-Ton:
+   hellrot auf Weiss, 3,06:1.
+   Direkt benutzt wird der Token dagegen am Element aufgeloest und die
+   Insel greift. Wer hier wieder einen Alias einsetzt, hebelt sie aus. */
 .trend-down {
-    color: var(--color-error) !important;
+    color: var(--tint-bad-ink) !important;
     text-shadow: 0 0 6px rgba(231, 76, 60, 0.6);
 }
 
@@ -5984,7 +6035,7 @@ details[open] > .tier-trending-summary::after {
     top: 3px;
     left: 3px;
     background: #f39c12;
-    color: white;
+    color: var(--ink);
     padding: 2px 5px;
     border-radius: 4px;
     font-weight: 900;
@@ -6077,7 +6128,7 @@ details[open] > .tier-trending-summary::after {
 }
 
 .battle-journal-profile-actions .btn-gradient-green {
-    background: linear-gradient(135deg, #27ae60 0%, #1f8b4d 100%);
+    background: linear-gradient(135deg, var(--solid-ok) 0%, #1f8b4d 100%);
 }
 
 .battle-journal-fab {
@@ -6115,7 +6166,7 @@ details[open] > .tier-trending-summary::after {
     height: 22px;
     border-radius: 999px;
     background: var(--pokemon-yellow);
-    color: #1f2d3d;
+    color: var(--ink);
     font-size: 12px;
     font-weight: 900;
     display: inline-flex;
@@ -6241,7 +6292,7 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-status-badge.is-success {
     background: rgba(39, 174, 96, 0.14);
-    color: #1e8449;
+    color: var(--tint-ok-ink);
 }
 
 .battle-journal-pending-count {
@@ -6603,7 +6654,7 @@ details[open] > .tier-trending-summary::after {
 .bj-history-pending {
     display: inline-block;
     font-size: 0.7rem;
-    background: #e67e22;
+    background: #aa5a13;
     color: #fff;
     border-radius: 4px;
     padding: 1px 6px;
@@ -7336,7 +7387,7 @@ details[open] > .tier-trending-summary::after {
     position: absolute;
     right: 22px;
     top: 16px;
-    background: #1f8b4d;
+    background: #1c7f47;
     color: #fff;
     border-radius: 999px;
     padding: 8px 12px;
@@ -7735,10 +7786,10 @@ body.battle-journal-open {
     animation: toastSlideOut 0.3s ease-in forwards;
 }
 
-.toast-success { background: #27ae60; }
+.toast-success { background: var(--solid-ok); }
 .toast-warning { background: #f39c12; color: #333; }
 .toast-error { background: var(--color-error); }
-.toast-info { background: #3498db; }
+.toast-info { background: var(--solid-info); }
 
 .toast-icon {
     flex-shrink: 0;
@@ -8461,11 +8512,11 @@ body.battle-journal-open {
 }
 
 .attack-btn {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: linear-gradient(135deg, var(--solid-bad), #c0392b);
 }
 
 .endturn-btn {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    background: linear-gradient(135deg, var(--solid-ok), var(--solid-ok));
 }
 
 .oppview-btn {
@@ -8531,7 +8582,7 @@ body.battle-journal-open {
     }
 
     .endturn-btn {
-        background: #27ae60 !important;
+        background: var(--solid-ok) !important;
         border-radius: 0 8px 8px 0 !important;
     }
 
@@ -8833,7 +8884,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 .deck-btn-folder:hover { background: #f39c12; }
 
 .deck-btn-copy { background: rgba(52, 152, 219, 0.9); }
-.deck-btn-copy:hover { background: #2980b9; }
+.deck-btn-copy:hover { background: var(--solid-info); }
 
 .deck-btn-limitless { background: rgba(230, 126, 34, 0.9); }
 .deck-btn-limitless:hover { background: #d35400; }
@@ -8867,7 +8918,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 .deck-btn-rename:hover { background: #7d3c98; }
 
 .deck-btn-duplicate { background: rgba(46, 204, 113, 0.9); }
-.deck-btn-duplicate:hover { background: #27ae60; }
+.deck-btn-duplicate:hover { background: var(--solid-ok); }
 
 .deck-btn-delete { background: rgba(231, 76, 60, 0.9); }
 .deck-btn-delete:hover { background: #c0392b; }
@@ -9057,7 +9108,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 }
 .bj-mulligan-badge {
     background: rgba(52, 152, 219, .15);
-    color: #2980b9;
+    color: var(--dv-pos-ink);
     border: 1px solid rgba(41, 128, 185, .35);
 }
 .bj-history-item.is-brick {
@@ -9066,7 +9117,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 }
 .bj-history-notes {
     font-size: 0.78rem;
-    color: #6b7c93;
+    color: var(--ink-3);
     margin-top: 3px;
     font-style: italic;
     line-height: 1.4;
@@ -9113,7 +9164,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 
 /* Match-level mulligan label tinted blue (vs brick's red) so the
    two checkboxes are visually distinguishable when stacked. */
-.bj-mulligan-text { color: #2980b9 !important; }
+.bj-mulligan-text { color: var(--dv-pos-ink) !important; }
 .bj-game-notes-input {
     flex: 1;
     min-width: 0;
@@ -9170,7 +9221,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 /* ── Compact Matchup List (replaces heatmap when 2D makes no sense) ── */
 .ma-matchup-list-context {
     font-size: 0.85rem;
-    color: #6b7c93;
+    color: var(--ink-3);
     margin: 0 0 10px 2px;
 }
 .ma-matchup-list-context strong { color: #1a2533; }
@@ -9209,7 +9260,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 }
 .ma-matchup-record {
     font-size: 0.82rem;
-    color: #6b7c93;
+    color: var(--ink-3);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
@@ -9362,7 +9413,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     justify-content: space-between;
     padding: 10px 14px;
     background: linear-gradient(90deg, #6c5ce7 0%, #a29bfe 100%);
-    color: #fff;
+    color: var(--ink);
     font-weight: 700;
     cursor: pointer;
     user-select: none;
@@ -9386,7 +9437,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .tech-options-hint {
     font-size: 0.78em;
-    color: #6b7c93;
+    color: var(--ink-3);
     margin-bottom: 10px;
     font-style: italic;
 }
@@ -9526,7 +9577,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     display: flex;
     flex-direction: column;
     font-size: 0.7em;
-    color: #6b7c93;
+    color: var(--ink-3);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -9538,7 +9589,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-radius: 4px;
     font-size: 0.85em;
     background: #fff;
-    color: #1f2d3d;
+    color: var(--ink);
     text-transform: none;
     letter-spacing: normal;
     font-weight: 500;
@@ -9553,7 +9604,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-radius: 4px;
     font-size: 0.82em;
     background: #fff;
-    color: #1f2d3d;
+    color: var(--ink);
     transition: border-color 0.15s;
 }
 .tech-option-note:focus { outline: none; border-color: #6c5ce7; }
@@ -9662,8 +9713,8 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border: 1px solid rgba(255,255,255,0.18);
     cursor: help;
 }
-.tier-trend-chip.tier-trend-up   { color: #2ecc71; border-color: rgba(46,204,113,0.4); }
-.tier-trend-chip.tier-trend-down { color: #e74c3c; border-color: rgba(231,76,60,0.4); }
+.tier-trend-chip.tier-trend-up   { color: var(--tint-ok-ink); border-color: rgba(46,204,113,0.4); }
+.tier-trend-chip.tier-trend-down { color: var(--tint-bad-ink); border-color: rgba(231,76,60,0.4); }
 .tier-trend-chip.tier-trend-flat { color: #95a5a6; }
 
 /* Data-source transparency banner — promoted from a quiet pill to a
@@ -9723,7 +9774,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #6b7280;
+    color: var(--ink-3);
     padding: 4px 6px;
     border-bottom: 1px solid rgba(0,0,0,0.10);
 }
@@ -9744,9 +9795,9 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-right: 1px solid rgba(0, 0, 0, 0.06);
 }
 .tier-movers-table tr:last-child td { border-bottom: none; }
-.tier-mover-name  { color: #1f2937; font-weight: 600; }
+.tier-mover-name  { color: var(--ink); font-weight: 600; }
 .tier-mover-share { color: #374151; font-variant-numeric: tabular-nums; }
-.tier-mover-prev  { color: #6b7280; font-variant-numeric: tabular-nums; font-size: 0.82rem; }
+.tier-mover-prev  { color: var(--ink-3); font-variant-numeric: tabular-nums; font-size: 0.82rem; }
 .tier-mover-delta { font-weight: 800; font-variant-numeric: tabular-nums; }
 /* Hier stand bis zum 20.08.2026 #16a34a gegen #dc2626 — Gruen gegen
    Rot, also genau das Paar, das der haeufigste Fall von
@@ -9770,7 +9821,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     align-items: center;
     gap: 8px;
     padding: 12px 4px;
-    color: #6b7280;
+    color: var(--ink-3);
     font-size: 0.82rem;
     font-style: italic;
 }
@@ -9789,7 +9840,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     align-items: center;
     justify-content: center;
     gap: 10px;
-    color: #6b7280;
+    color: var(--ink-3);
     font-size: 0.88rem;
 }
 
@@ -9833,6 +9884,11 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     margin: var(--s-2) 2px 0;
 }
 /* Sample-size n= label on heatmap cells — small subscript under WR. */
+/* 29.08.2026: die Zelle traegt eine Datenfarbe, die mit dem Wert
+   wandert — von fast weiss bis zu einem satten Blaugruen. --ink-2 haelt
+   auf den hellen Enden (6,57) und faellt auf den satten (3,73). Ein
+   Token kann das nicht loesen, weil der Grund kein Token ist. Deshalb
+   hier ein eigener, dunklerer Ton, der ueber die ganze Skala haelt. */
 .heatmap-td-n {
     display: block;
     /* 0.62em der Zellenschrift ergab gemessene 8,68 px — die kleinste
@@ -9846,7 +9902,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
        ist kein Beiwerk, sie ist die Angabe, an der man ablesen soll, wie
        ernst die Quote darueber zu nehmen ist. */
     opacity: 1;
-    color: var(--ink-2);
+    color: var(--heatmap-ink);
     line-height: 1;
     margin-top: 2px;
     font-variant-numeric: tabular-nums;
@@ -9880,7 +9936,12 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     }
     .tier-data-source { font-size: 0.78rem; padding: 6px 10px; }
     .tier-trend-chip { font-size: var(--fs-xs); padding: 1px 4px; }
-    .heatmap-td-n { font-size: var(--fs-xs); }
+    /* 29.08.2026: die Zelle traegt eine Datenfarbe, die mit dem Wert
+   wandert — von fast weiss bis zu einem satten Blaugruen. --ink-2 haelt
+   auf den hellen Enden (6,57) und faellt auf den satten (3,73). Ein
+   Token kann das nicht loesen, weil der Grund kein Token ist. Deshalb
+   hier ein eigener, dunklerer Ton, der ueber die ganze Skala haelt. */
+.heatmap-td-n { font-size: var(--fs-xs); }
 }
 
 /* ============================================================
@@ -10351,7 +10412,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .ca-empty-icon {
     font-size: 2.6rem;
-    color: #3498db;
+    color: var(--dv-pos-ink);
     line-height: 1;
     margin-bottom: 8px;
     animation: ca-empty-bounce 1.6s ease-in-out infinite;
@@ -10369,7 +10430,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .ca-empty-hint {
     margin: 0;
     font-size: 0.92rem;
-    color: #6b7280;
+    color: var(--ink-3);
     line-height: 1.5;
 }
 
@@ -10407,7 +10468,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
    frisch, aelter als vierzehn Tage, unbekannt. Keine Ampel, nur so viel
    Auszeichnung, dass man hinsieht. */
 .data-freshness-chip.is-alt .js-data-freshness {
-    color: var(--alarm);
+    color: var(--tint-bad-ink);
     font-weight: 600;
 }
 .data-freshness-chip.is-unbekannt .js-data-freshness {
@@ -10429,7 +10490,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .cl-date-range-hint {
     margin-top: 4px;
     font-size: 0.74rem;
-    color: #6b7280;
+    color: var(--ink-3);
     font-style: italic;
     line-height: 1.3;
 }
@@ -10445,7 +10506,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     display: block;
     margin-top: 2px;
     font-size: 0.72rem;
-    color: var(--text-muted, #6b7280);
+    color: var(--text-muted, var(--ink-3));
     letter-spacing: 0.02em;
 }
 .date-format-hint-inline {

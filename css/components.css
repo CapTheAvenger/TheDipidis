@@ -533,7 +533,7 @@ html.is-signed-out [onclick*="radelist"]:hover {
     border: 1px solid var(--line);
     border-radius: 999px;
     background: var(--surface-1);
-    color: var(--brand);
+    color: var(--brand-ink);
     font: inherit;
     font-size: var(--fs-sm);
     font-weight: 700;
@@ -555,7 +555,7 @@ html.is-signed-out [onclick*="radelist"]:hover {
     border: 1px solid var(--line);
     border-radius: 999px;
     background: var(--surface-1);
-    color: var(--brand);
+    color: var(--brand-ink);
     font: inherit;
     font-size: var(--fs-xs);
     font-weight: 700;
@@ -724,7 +724,7 @@ html.is-signed-out [onclick*="radelist"]:hover {
     user-select: none;
     white-space: nowrap;
 }
-.cm-rang-th:hover { color: var(--brand); }
+.cm-rang-th:hover { color: var(--brand-ink); }
 .cm-rang-th:focus-visible {
     outline: 2px solid var(--brand);
     outline-offset: -2px;
@@ -1067,4 +1067,15 @@ html.is-signed-out [onclick*="radelist"]:hover {
     outline-offset: 2px;
 }
 
-.de-empfehlung .de-mehr { color: var(--brand); font-weight: 600; }
+/* 29.08.2026: --brand (#3B4CCA) ist die Markenflaeche; als Schrift
+   auf dunklem Grund 3,67:1. --brand-ink ist derselbe Ton in der
+   Textfassung und hellt im Dunkelmodus auf. */
+.de-empfehlung .de-mehr { color: var(--brand-ink); font-weight: 600; }
+
+/* Nackte <a> ohne eigene Klasse fielen auf die Browser-Vorgabe #0000EE
+   zurueck — auf dem dunklen Grund 1,76:1. Beim Lesen des Stylesheets
+   sieht man das nicht, weil dort gar keine Farbe steht. Niedrigste
+   Spezifitaet, damit jede Regel mit eigener Farbe gewinnt.
+   (Gehoert nicht nach tokens.css: die Datei traegt nur Token, und ein
+   Test haelt das fest.) */
+a:not([class]) { color: var(--link); }

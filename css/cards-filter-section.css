@@ -64,7 +64,7 @@
 .btn-reset-filters {
     padding: 7px 14px;
     background: var(--surface-1);
-    color: #c0392b;
+    color: var(--tint-bad-ink);
     border: 1.5px solid #f0c4be;
     border-radius: 6px;
     cursor: pointer;
@@ -135,7 +135,7 @@
     font-weight: 500;
     font-size: 12px;
     white-space: nowrap;
-    color: #6b7c93;
+    color: var(--ink-3);
 }
 
 #cards .cards-filter-section {

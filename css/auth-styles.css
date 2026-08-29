@@ -16,7 +16,7 @@
 }
 
 .user-btn:hover {
-    background: #2980b9;
+    background: var(--solid-info);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
@@ -96,7 +96,7 @@
 }
 
 .auth-btn-primary:hover {
-    background: #2980b9;
+    background: var(--solid-info);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
@@ -158,7 +158,7 @@
 }
 
 .profile-tab-btn:hover {
-    color: var(--color-info);
+    color: var(--color-info-ink);
     background: rgba(52, 152, 219, 0.05);
 }
 
@@ -167,7 +167,7 @@
    wraps to multiple rows. The previous styling (just colour + 3px
    underline) was too subtle on dense screens. */
 .profile-tab-btn.active {
-    color: var(--color-info);
+    color: var(--color-info-ink);
     border-bottom-color: var(--color-info);
     font-weight: 700;
     background: rgba(52, 152, 219, 0.10);
@@ -223,9 +223,9 @@
 }
 /* Group accent colours pulse the label so the user can tell groups
    apart at a glance without competing with the active-tab underline. */
-.profile-tab-group[data-group="cards"] .profile-tab-group-label { color: #2980b9; }
+.profile-tab-group[data-group="cards"] .profile-tab-group-label { color: var(--dv-pos-ink); }
 .profile-tab-group[data-group="decks"] .profile-tab-group-label { color: #8e44ad; }
-.profile-tab-group[data-group="play"]  .profile-tab-group-label { color: #16a085; }
+.profile-tab-group[data-group="play"]  .profile-tab-group-label { color: var(--tint-ok-ink); }
 .profile-tab-group[data-group="misc"]  .profile-tab-group-label { color: #7f8c8d; }
 
 .profile-tab-content {
@@ -285,7 +285,7 @@
     position: absolute;
     top: 5px;
     left: 5px;
-    background: #4CAF50;
+    background: #377e39;
     color: white;
     width: 24px;
     height: 24px;

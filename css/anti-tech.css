@@ -15,7 +15,7 @@
 }
 
 .anti-tech-modal-intro {
-    color: #4b5563;
+    color: var(--ink-2);
     font-size: 0.9em;
     margin: 4px 0 16px;
     line-height: 1.45;
@@ -30,7 +30,7 @@
     font-size: 0.85em;
     font-weight: 700;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--ink-3);
     letter-spacing: 0.04em;
 }
 
@@ -85,7 +85,7 @@
 .anti-tech-quick-pick-share {
     font-family: ui-monospace, SFMono-Regular, monospace;
     font-size: 0.85em;
-    color: #6b7280;
+    color: var(--ink-3);
 }
 .anti-tech-quick-pick-meta {
     display: inline-flex;
@@ -107,7 +107,7 @@
     gap: 2px;
     margin: 0 0 8px;
     font-size: 0.78em;
-    color: #6b7280;
+    color: var(--ink-3);
     line-height: 1.3;
 }
 .anti-tech-quick-picks-legend span::before {
@@ -154,7 +154,7 @@
 }
 .anti-tech-suggestion-empty {
     padding: 6px 10px;
-    color: #6b7280;
+    color: var(--ink-3);
     font-size: 0.85em;
     font-style: italic;
 }
@@ -201,7 +201,7 @@
 .anti-tech-aggression-desc {
     grid-column: 2;
     grid-row: 2;
-    color: #6b7280;
+    color: var(--ink-3);
     font-size: 0.82em;
     line-height: 1.35;
 }
@@ -235,7 +235,7 @@
 .anti-tech-preview-pill-label {
     font-size: 0.75em;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--ink-3);
     letter-spacing: 0.04em;
     font-weight: 600;
 }
@@ -249,12 +249,12 @@
 }
 .anti-tech-preview-note {
     font-size: 0.75em;
-    color: #6b7280;
+    color: var(--ink-3);
     font-style: italic;
 }
 .anti-tech-preview-empty {
     font-size: 0.85em;
-    color: #6b7280;
+    color: var(--ink-3);
     font-style: italic;
 }
 
@@ -305,7 +305,7 @@
     align-items: center;
     gap: 4px;
     padding: 3px 4px 3px 10px;
-    background: #6366f1;
+    background: #585bf0;
     color: #ffffff;
     border-radius: 14px;
     font-size: 0.85em;
@@ -332,7 +332,7 @@
 /* Quick-pick multi-select — active state now means "added to
  * the target set". Mirrors the chip color. */
 .anti-tech-quick-pick.is-active {
-    background: #6366f1;
+    background: #585bf0;
     color: #ffffff;
     border-color: #4338ca;
 }
@@ -369,7 +369,7 @@
 .anti-tech-card-empty,
 .anti-tech-card-loading {
     padding: 18px 14px;
-    color: #6b7280;
+    color: var(--ink-3);
     font-size: 0.9em;
     font-style: italic;
     text-align: center;
@@ -449,7 +449,7 @@
     flex-wrap: wrap;
     gap: 4px 12px;
     font-size: 0.82em;
-    color: #64748b;
+    color: var(--ink-3);
 }
 .anti-tech-card-targets {
     color: #166534;

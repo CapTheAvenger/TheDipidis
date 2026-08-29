@@ -53,7 +53,7 @@
     box-shadow: 0 2px 8px rgba(34, 197, 94, 0.06);
 }
 .how-to-use-info-block .how-to-use-info-title {
-    color: #16a34a;
+    color: var(--tint-ok-ink);
     margin-top: 0;
     font-weight: 800;
 }
@@ -911,8 +911,8 @@
     background: rgba(59, 76, 202, 0.10);
     color: var(--brand-ink);
 }
-.tutorial-mockup .mockup-pill--green { background: rgba(34, 197, 94, 0.12); color: #16a34a; }
-.tutorial-mockup .mockup-pill--red   { background: rgba(239, 68, 68, 0.12);  color: #dc2626; }
+.tutorial-mockup .mockup-pill--green { background: rgba(34, 197, 94, 0.12); color: var(--tint-ok-ink); }
+.tutorial-mockup .mockup-pill--red   { background: rgba(239, 68, 68, 0.12);  color: var(--tint-bad-ink); }
 .tutorial-mockup .mockup-pill--amber { background: rgba(255, 203, 5, 0.20);  color: #8a6500; }
 
 /* Hub tile grid — replaces the homepage-tiles screenshot. */
@@ -943,7 +943,7 @@
 }
 .mockup-hub-tile .mockup-tile-desc {
     font-size: 0.68rem;
-    color: #64748b;
+    color: var(--ink-3);
     line-height: 1.3;
 }
 
@@ -990,7 +990,7 @@
     z-index: 2;
 }
 .mockup-card-badge--max  { top: -6px; right: -6px; background: #ef4444; }
-.mockup-card-badge--in   { top: -6px; left: -6px;  background: #16a34a; }
+.mockup-card-badge--in   { top: -6px; left: -6px;  background: var(--solid-ok); }
 .mockup-card-badge--wish { bottom: -4px; right: -4px; background: #ec4899; font-size: 0.7rem; }
 .mockup-card-info {
     display: flex;
@@ -1006,7 +1006,7 @@
 }
 .mockup-card-stats {
     font-size: 0.65rem;
-    color: #64748b;
+    color: var(--ink-3);
     line-height: 1.3;
 }
 .mockup-card-stats strong { color: var(--pokemon-blue, #3B4CCA); font-weight: 700; }
@@ -1028,8 +1028,8 @@
 }
 .mockup-action-btn--blue   { background: rgba(59, 76, 202, 0.12); color: var(--pokemon-blue, #3B4CCA); border-color: rgba(59, 76, 202, 0.20); }
 .mockup-action-btn--yellow { background: rgba(255, 203, 5, 0.18); color: #8a6500;                     border-color: rgba(255, 203, 5, 0.35); }
-.mockup-action-btn--red    { background: rgba(239, 68, 68, 0.12); color: #dc2626;                     border-color: rgba(239, 68, 68, 0.22); }
-.mockup-action-btn--green  { background: rgba(34, 197, 94, 0.12); color: #16a34a;                     border-color: rgba(34, 197, 94, 0.22); }
+.mockup-action-btn--red    { background: rgba(239, 68, 68, 0.12); color: var(--tint-bad-ink);                     border-color: rgba(239, 68, 68, 0.22); }
+.mockup-action-btn--green  { background: rgba(34, 197, 94, 0.12); color: var(--tint-ok-ink);                     border-color: rgba(34, 197, 94, 0.22); }
 
 /* Profile navigation — replaces the My Profile menu screenshot. */
 .mockup-profile-nav {
@@ -1074,7 +1074,7 @@
     font-size: var(--fs-xs);
     font-weight: 800;
     background: rgba(255, 255, 255, 0.7);
-    color: #64748b;
+    color: var(--ink-3);
     padding: 0 4px;
     border-radius: 6px;
 }
@@ -1101,8 +1101,8 @@
     align-items: center;
 }
 .mockup-tier-card--t1 .mockup-tier-header { background: linear-gradient(90deg, #d32f2f, #ef4444); }
-.mockup-tier-card--t2 .mockup-tier-header { background: linear-gradient(90deg, #f57c00, #fb923c); }
-.mockup-tier-card--t3 .mockup-tier-header { background: linear-gradient(90deg, #388e3c, #4ade80); }
+.mockup-tier-card--t2 .mockup-tier-header { background: linear-gradient(90deg, #a55300, #fb923c); }
+.mockup-tier-card--t3 .mockup-tier-header { background: linear-gradient(90deg, #2d7530, #4ade80); }
 .mockup-tier-rows {
     background: var(--surface-1);
 }
@@ -1117,16 +1117,16 @@
 }
 .mockup-tier-row:first-child { border-top: 0; }
 .mockup-tier-row-name { font-weight: 700; color: #0f172a; }
-.mockup-tier-row-share { font-weight: 700; color: #64748b; }
+.mockup-tier-row-share { font-weight: 700; color: var(--ink-3); }
 .mockup-tier-row-arrow {
     font-size: 0.7rem;
     font-weight: 800;
     padding: 1px 5px;
     border-radius: 4px;
 }
-.mockup-tier-row-arrow--up   { color: #16a34a; background: rgba(34, 197, 94, 0.12); }
-.mockup-tier-row-arrow--down { color: #dc2626; background: rgba(239, 68, 68, 0.12); }
-.mockup-tier-row-arrow--flat { color: #64748b; background: rgba(100, 116, 139, 0.10); }
+.mockup-tier-row-arrow--up   { color: var(--tint-ok-ink); background: rgba(34, 197, 94, 0.12); }
+.mockup-tier-row-arrow--down { color: var(--tint-bad-ink); background: rgba(239, 68, 68, 0.12); }
+.mockup-tier-row-arrow--flat { color: var(--ink-3); background: rgba(100, 116, 139, 0.10); }
 
 /* ── Tier bracket deck-banner-cards (matches live City League) ────
    The real .deck-banner-card on the City League page is a small
@@ -1201,19 +1201,24 @@
     border-radius: 4px;
     font-size: var(--fs-xs);
     font-weight: 700;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* 29.08.2026: Grund war fest hell (weiss bzw. #fff3e0), die Schrift
+       lief aber schon ueber Token und drehte im Dunkelmodus mit —
+       hellrot auf Hellgelb, 2,79:1. Diese Abzeichen stehen auch
+       AUSSERHALB von .tutorial-mockup, greifen die helle Insel also
+       nicht ab. Jetzt drehen Flaeche und Schrift gemeinsam. */
+    background: var(--surface-1);
+    border: 1px solid var(--line);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    color: #475569;
+    color: var(--ink-2);
 }
 .mockup-stat-badge.is-rank {
-    background: #fff3e0;
-    color: #e65100;
+    background: var(--tint-warn);
+    color: var(--tint-warn-ink);
     border-color: rgba(230, 81, 0, 0.18);
 }
-.mockup-stat-badge .trend-up   { color: #16a34a; font-weight: 800; }
-.mockup-stat-badge .trend-down { color: #dc2626; font-weight: 800; }
-.mockup-stat-badge .trend-flat { color: #64748b; font-weight: 800; }
+.mockup-stat-badge .trend-up   { color: var(--tint-ok-ink); font-weight: 800; }
+.mockup-stat-badge .trend-down { color: var(--tint-bad-ink); font-weight: 800; }
+.mockup-stat-badge .trend-flat { color: var(--ink-3); font-weight: 800; }
 
 /* ── Performance Improvers / Decliners — stacked vertically ─────
    Was a 2-up grid; the thumb slot is too narrow for two readable
@@ -1237,7 +1242,7 @@
     letter-spacing: 0.04em;
     color: #fff;
 }
-.mockup-movers-block.is-up   .mockup-movers-head { background: linear-gradient(90deg, #16a34a, #4ade80); }
+.mockup-movers-block.is-up   .mockup-movers-head { background: linear-gradient(90deg, var(--solid-ok), #4ade80); }
 .mockup-movers-block.is-down .mockup-movers-head { background: linear-gradient(90deg, #dc2626, #f87171); }
 .mockup-movers-table {
     display: grid;
@@ -1262,8 +1267,8 @@
     text-align: right;
     font-weight: 800;
 }
-.mockup-movers-row.is-up   .mockup-movers-delta { color: #16a34a; }
-.mockup-movers-row.is-down .mockup-movers-delta { color: #dc2626; }
+.mockup-movers-row.is-up   .mockup-movers-delta { color: var(--tint-ok-ink); }
+.mockup-movers-row.is-down .mockup-movers-delta { color: var(--tint-bad-ink); }
 
 /* ── Overall vs Top-8 mini-tables — stacked vertically ──────────
    Same reason as .mockup-movers above: 2-up grid collapsed deck
@@ -1353,7 +1358,7 @@
 }
 .mockup-comparison-row:nth-child(odd) { background: rgba(241, 245, 249, 0.5); }
 .mockup-comparison-row .mockup-row-deck { font-weight: 700; color: #0f172a; }
-.mockup-comparison-row .mockup-row-rank { color: #64748b; font-weight: 700; text-align: right; }
+.mockup-comparison-row .mockup-row-rank { color: var(--ink-3); font-weight: 700; text-align: right; }
 .mockup-comparison-row .mockup-row-rank small {
     display: inline-block;
     margin-left: 4px;
@@ -1362,16 +1367,16 @@
     padding: 0 4px;
     border-radius: 4px;
 }
-.mockup-comparison-row .mockup-row-rank small.up   { color: #16a34a; background: rgba(34, 197, 94, 0.12); }
-.mockup-comparison-row .mockup-row-rank small.down { color: #dc2626; background: rgba(239, 68, 68, 0.12); }
+.mockup-comparison-row .mockup-row-rank small.up   { color: var(--tint-ok-ink); background: rgba(34, 197, 94, 0.12); }
+.mockup-comparison-row .mockup-row-rank small.down { color: var(--tint-bad-ink); background: rgba(239, 68, 68, 0.12); }
 .mockup-comparison-row .mockup-row-count { font-weight: 800; color: var(--pokemon-blue, #3B4CCA); text-align: right; }
 .mockup-comparison-row .mockup-row-count small {
     display: block;
     font-size: var(--fs-xs);
     font-weight: 800;
 }
-.mockup-comparison-row .mockup-row-count small.up   { color: #16a34a; }
-.mockup-comparison-row .mockup-row-count small.down { color: #dc2626; }
+.mockup-comparison-row .mockup-row-count small.up   { color: var(--tint-ok-ink); }
+.mockup-comparison-row .mockup-row-count small.down { color: var(--tint-bad-ink); }
 
 /* Layout helper: side-by-side mockups in one banner image slot */
 .tutorial-mockup-stack {
@@ -1420,7 +1425,7 @@
     background-color: #1e293b;
 }
 /* Per-card gradient stand-ins for the actual card art. */
-.mockup-wt-card-art.is-grass    { background-image: linear-gradient(135deg, #16a34a, #4ade80, #84cc16); }
+.mockup-wt-card-art.is-grass    { background-image: linear-gradient(135deg, var(--solid-ok), #4ade80, #84cc16); }
 .mockup-wt-card-art.is-water    { background-image: linear-gradient(135deg, #1e40af, #2563eb, #0ea5e9); }
 .mockup-wt-card-art.is-fire     { background-image: linear-gradient(135deg, #b91c1c, #ef4444, #f59e0b); }
 .mockup-wt-card-art.is-bug      { background-image: linear-gradient(135deg, #4d7c0f, #a3e635, #fbbf24); }
@@ -1432,7 +1437,7 @@
     position: absolute;
     top: 4px;
     left: 4px;
-    background: #e67e22;
+    background: #aa5a13;
     color: #fff;
     width: 22px;
     height: 22px;
@@ -1444,7 +1449,7 @@
     font-weight: 800;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
-.mockup-wt-card-art-qty.is-trade { background: #16a085; }
+.mockup-wt-card-art-qty.is-trade { background: #117d68; }
 .mockup-wt-card-art-actions {
     position: absolute;
     top: 4px;
@@ -1456,7 +1461,7 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #e67e22;
+    background: #aa5a13;
     color: #fff;
     font-size: 0.75rem;
     font-weight: 800;
@@ -1465,7 +1470,7 @@
     justify-content: center;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
-.mockup-wt-card-art-actions span.is-remove { background: #e74c3c; }
+.mockup-wt-card-art-actions span.is-remove { background: var(--solid-bad); }
 .mockup-wt-card-art-actions span.is-trade  { background: #16a085; }
 .mockup-wt-card-body {
     padding: 7px 7px 8px;
@@ -1484,7 +1489,7 @@
 }
 .mockup-wt-card-set {
     font-size: 0.66rem;
-    color: #64748b;
+    color: var(--ink-3);
     line-height: 1.2;
 }
 .mockup-wt-card-owned {
@@ -1494,7 +1499,7 @@
 }
 .mockup-wt-card-live {
     align-self: flex-start;
-    background: linear-gradient(135deg, #27ae60, #219a52);
+    background: linear-gradient(135deg, var(--solid-ok), #219a52);
     color: #fff;
     padding: 3px 9px;
     border-radius: 6px;
@@ -1534,13 +1539,13 @@
 .mockup-wt-card-grid.is-tradelist .mockup-wt-card-user-label,
 .mockup-wt-card-grid.is-tradelist .mockup-wt-card-user-input,
 .mockup-wt-card-grid.is-tradelist .mockup-wt-card-user-suffix {
-    color: #16a085;
+    color: var(--tint-ok-ink);
 }
 .mockup-wt-card-trigger {
     margin-top: 4px;
     padding: 5px 6px;
     border-radius: 6px;
-    background: linear-gradient(135deg, #16a34a, #15803d);
+    background: linear-gradient(135deg, var(--solid-ok), #15803d);
     color: #fff;
     text-align: center;
     font-size: 0.7rem;
@@ -1604,7 +1609,7 @@
     position: absolute;
     top: 3px;
     left: 3px;
-    background: #e74c3c;
+    background: var(--solid-bad);
     color: #fff;
     width: 22px;
     height: 22px;
@@ -1647,7 +1652,7 @@
 }
 .mockup-form-intro {
     font-size: 0.74rem;
-    color: #64748b;
+    color: var(--ink-3);
     line-height: 1.5;
 }
 .mockup-form-row {
@@ -1680,7 +1685,7 @@
 .mockup-form-input.is-narrow { min-width: 56px; }
 .mockup-form-help {
     font-size: 0.7rem;
-    color: #64748b;
+    color: var(--ink-3);
     line-height: 1.5;
 }
 .mockup-form-help code {
@@ -1728,7 +1733,7 @@
 }
 .mockup-tg-bubble.is-me {
     align-self: flex-end;
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, #7e4af5, #7c3aed);
     color: #fff;
     border-bottom-right-radius: 4px;
     font-weight: 700;
@@ -1786,7 +1791,7 @@
 }
 .mockup-deck-section--tech .mockup-deck-section-head {
     background: linear-gradient(90deg, rgba(245, 124, 0, 0.16), rgba(245, 124, 0, 0.04));
-    color: #b45309;
+    color: var(--tint-warn-ink);
 }
 .mockup-deck-section--rare .mockup-deck-section-head {
     background: linear-gradient(90deg, rgba(100, 116, 139, 0.16), rgba(100, 116, 139, 0.04));
@@ -1827,7 +1832,7 @@
 }
 .mockup-deck-row-name small {
     font-size: var(--fs-xs);
-    color: #64748b;
+    color: var(--ink-3);
     font-weight: 700;
     letter-spacing: 0.04em;
 }
@@ -1838,12 +1843,12 @@
 }
 .mockup-deck-row-share {
     font-weight: 800;
-    color: #16a34a;
+    color: var(--tint-ok-ink);
     text-align: right;
     font-size: 0.72rem;
 }
-.mockup-deck-row-share.is-mid  { color: #b45309; }
-.mockup-deck-row-share.is-low  { color: #64748b; }
+.mockup-deck-row-share.is-mid  { color: var(--tint-warn-ink); }
+.mockup-deck-row-share.is-low  { color: var(--ink-3); }
 .mockup-deck-row-avg {
     color: #475569;
     font-weight: 700;
@@ -1859,7 +1864,7 @@
 .mockup-deck-section--rare .mockup-deck-rare-folded {
     padding: 6px 10px;
     font-size: 0.68rem;
-    color: #64748b;
+    color: var(--ink-3);
     font-style: italic;
     background: rgba(241, 245, 249, 0.4);
     border-top: 1px solid rgba(15, 23, 42, 0.05);
@@ -1959,9 +1964,9 @@
 .mockup-builder-btn--green {
     background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(34, 197, 94, 0.04));
     border-color: rgba(34, 197, 94, 0.28);
-    color: #16a34a;
+    color: var(--tint-ok-ink);
 }
-.mockup-builder-btn--green .mockup-builder-btn-num { background: #16a34a; }
+.mockup-builder-btn--green .mockup-builder-btn-num { background: var(--solid-ok); }
 .mockup-builder-btn--full {
     grid-column: 1 / -1;
     justify-content: center;
@@ -2014,8 +2019,8 @@
     font-weight: 800;
     color: #475569;
 }
-.mockup-builder-hand-stats .up   { color: #16a34a; }
-.mockup-builder-hand-stats .down { color: #dc2626; }
+.mockup-builder-hand-stats .up   { color: var(--tint-ok-ink); }
+.mockup-builder-hand-stats .down { color: var(--tint-bad-ink); }
 
 @media (max-width: 540px) {
     .mockup-deck-row { grid-template-columns: 1fr 44px 50px; }
@@ -2047,13 +2052,13 @@
     border-radius: 50%;
     flex: 0 0 auto;
 }
-.mockup-deckgrid-section-head .dot.is-main { background: #16a34a; }
+.mockup-deckgrid-section-head .dot.is-main { background: var(--solid-ok); }
 .mockup-deckgrid-section-head .dot.is-tech { background: #f59e0b; }
 .mockup-deckgrid-section-head .dot.is-rare { background: #94a3b8; }
 .mockup-deckgrid-section-head .hint {
     font-size: 0.68rem;
     font-weight: 500;
-    color: #64748b;
+    color: var(--ink-3);
 }
 .mockup-deckgrid-section-head .count {
     margin-left: auto;
@@ -2139,7 +2144,7 @@
     font-weight: 600;
 }
 .mockup-deckgrid-info .set-stats .set {
-    color: #64748b;
+    color: var(--ink-3);
     font-weight: 700;
     letter-spacing: 0.02em;
 }
@@ -2147,8 +2152,8 @@
     color: var(--pokemon-blue, #3B4CCA);
     font-weight: 800;
 }
-.mockup-deckgrid-info .set-stats .pct.is-mid  { color: #b45309; }
-.mockup-deckgrid-info .set-stats .pct.is-low  { color: #64748b; }
+.mockup-deckgrid-info .set-stats .pct.is-mid  { color: var(--tint-warn-ink); }
+.mockup-deckgrid-info .set-stats .pct.is-low  { color: var(--ink-3); }
 .mockup-deckgrid-info .avg,
 .mockup-deckgrid-info .deck-stats {
     color: #475569;
@@ -2178,12 +2183,12 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.mockup-deckgrid-actions .btn.is-remove { background: #fee2e2; color: #dc2626; border-color: rgba(220, 38, 38, 0.18); }
-.mockup-deckgrid-actions .btn.is-add    { background: #dcfce7; color: #16a34a; border-color: rgba(22, 163, 74, 0.18); }
-.mockup-deckgrid-actions .btn.is-rarity { background: #fef3c7; color: #b45309; border-color: rgba(245, 158, 11, 0.22); }
+.mockup-deckgrid-actions .btn.is-remove { background: #fee2e2; color: var(--tint-bad-ink); border-color: rgba(220, 38, 38, 0.18); }
+.mockup-deckgrid-actions .btn.is-add    { background: #dcfce7; color: var(--tint-ok-ink); border-color: rgba(22, 163, 74, 0.18); }
+.mockup-deckgrid-actions .btn.is-rarity { background: #fef3c7; color: var(--tint-warn-ink); border-color: rgba(245, 158, 11, 0.22); }
 .mockup-deckgrid-actions .btn.is-l      { background: #e0e7ff; color: var(--pokemon-blue, #3B4CCA); border-color: rgba(59, 76, 202, 0.18); }
 .mockup-deckgrid-actions .btn.is-p      { background: #ffedd5; color: #ea580c; border-color: rgba(234, 88, 12, 0.22); }
-.mockup-deckgrid-actions .btn.is-price  { background: #ccfbf1; color: #0d9488; border-color: rgba(13, 148, 136, 0.22); flex: 2; }
+.mockup-deckgrid-actions .btn.is-price  { background: #ccfbf1; color: #137739; border-color: rgba(13, 148, 136, 0.22); flex: 2; }
 .mockup-deckgrid-rare-pill {
     display: flex;
     align-items: center;
@@ -2194,7 +2199,7 @@
     border: 1px dashed rgba(15, 23, 42, 0.18);
     border-radius: 8px;
     font-size: 0.7rem;
-    color: #64748b;
+    color: var(--ink-3);
     font-style: italic;
 }
 
@@ -2260,8 +2265,8 @@
     font-size: 0.66rem;
 }
 .mockup-bs-rank.is-t1 { background: linear-gradient(135deg, #d32f2f, #ef4444); }
-.mockup-bs-rank.is-t2 { background: linear-gradient(135deg, #f57c00, #fb923c); }
-.mockup-bs-rank.is-t3 { background: linear-gradient(135deg, #388e3c, #4ade80); }
+.mockup-bs-rank.is-t2 { background: linear-gradient(135deg, #a55300, #fb923c); }
+.mockup-bs-rank.is-t3 { background: linear-gradient(135deg, #2d7530, #4ade80); }
 .mockup-bs-deck {
     font-weight: 800;
     color: #0f172a;
@@ -2276,7 +2281,7 @@
 .mockup-bs-deck small {
     font-size: var(--fs-xs);
     font-weight: 700;
-    color: #64748b;
+    color: var(--ink-3);
     letter-spacing: 0.04em;
 }
 .mockup-bs-share {
@@ -2296,11 +2301,11 @@
     padding: 0 4px;
     border-radius: 4px;
 }
-.mockup-bs-share small.up   { color: #16a34a; background: rgba(34, 197, 94, 0.12); }
-.mockup-bs-share small.down { color: #dc2626; background: rgba(239, 68, 68, 0.12); }
+.mockup-bs-share small.up   { color: var(--tint-ok-ink); background: rgba(34, 197, 94, 0.12); }
+.mockup-bs-share small.down { color: var(--tint-bad-ink); background: rgba(239, 68, 68, 0.12); }
 .mockup-bs-count {
     font-weight: 700;
-    color: #64748b;
+    color: var(--ink-3);
     text-align: right;
     font-size: 0.66rem;
     min-width: 36px;
@@ -2338,7 +2343,7 @@
     gap: 8px;
 }
 .mockup-bs-sample b {
-    color: #16a34a;
+    color: var(--tint-ok-ink);
     font-weight: 800;
     font-size: 0.82rem;
 }
@@ -2362,7 +2367,7 @@
 .mockup-staple-rank {
     font-weight: 800;
     font-size: 0.64rem;
-    color: #64748b;
+    color: var(--ink-3);
     text-align: center;
 }
 .mockup-staple-img {
@@ -2390,7 +2395,7 @@
 .mockup-staple-set {
     font-size: var(--fs-xs);
     font-weight: 700;
-    color: #64748b;
+    color: var(--ink-3);
     letter-spacing: 0.04em;
 }
 .mockup-staple-bar {
@@ -2430,7 +2435,7 @@
     letter-spacing: 0.04em;
 }
 .mockup-cooking-toggle span.is-active {
-    background: linear-gradient(135deg, #ef4444, #f97316);
+    background: linear-gradient(135deg, #de1313, #ba4f05);
     color: #fff;
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
 }
@@ -2466,7 +2471,7 @@
 .mockup-cooking-active {
     font-size: 0.66rem;
     font-weight: 800;
-    color: #16a34a;
+    color: var(--tint-ok-ink);
     background: rgba(34, 197, 94, 0.12);
     padding: 4px 10px;
     border-radius: 999px;
@@ -2492,7 +2497,7 @@
     color: #fff;
     letter-spacing: 0.04em;
 }
-.mockup-matchup-section.is-best  .mockup-matchup-head { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.mockup-matchup-section.is-best  .mockup-matchup-head { background: linear-gradient(90deg, var(--solid-ok), #22c55e); }
 .mockup-matchup-section.is-worst .mockup-matchup-head { background: linear-gradient(90deg, #dc2626, #ef4444); }
 .mockup-matchup-section.is-neutral .mockup-matchup-head { background: linear-gradient(90deg, #475569, #64748b); }
 .mockup-matchup-rows {
@@ -2526,12 +2531,12 @@
     padding: 2px 8px;
     border-radius: 5px;
 }
-.mockup-matchup-wr.is-good { color: #16a34a; background: rgba(34, 197, 94, 0.14); }
-.mockup-matchup-wr.is-bad  { color: #dc2626; background: rgba(239, 68, 68, 0.14); }
-.mockup-matchup-wr.is-even { color: #b45309; background: rgba(245, 158, 11, 0.16); }
+.mockup-matchup-wr.is-good { color: var(--tint-ok-ink); background: rgba(34, 197, 94, 0.14); }
+.mockup-matchup-wr.is-bad  { color: var(--tint-bad-ink); background: rgba(239, 68, 68, 0.14); }
+.mockup-matchup-wr.is-even { color: var(--tint-warn-ink); background: rgba(245, 158, 11, 0.16); }
 .mockup-matchup-record {
     font-size: var(--fs-xs);
-    color: #64748b;
+    color: var(--ink-3);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     min-width: 64px;
@@ -2608,7 +2613,7 @@
 .mockup-tech-slots-label {
     font-size: 0.7rem;
     font-weight: 800;
-    color: #b45309;
+    color: var(--tint-warn-ink);
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
@@ -2632,7 +2637,7 @@
     padding: 4px 10px;
     border-radius: 999px;
     background: #f59e0b;
-    color: #fff;
+    color: var(--ink);
     letter-spacing: 0.04em;
 }
 
@@ -2657,7 +2662,7 @@
 }
 .mockup-aggression-card .desc {
     font-size: var(--fs-xs);
-    color: #64748b;
+    color: var(--ink-3);
     margin-top: 2px;
     line-height: 1.25;
 }
@@ -2666,7 +2671,7 @@
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.02));
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15);
 }
-.mockup-aggression-card.is-active .label { color: #dc2626; }
+.mockup-aggression-card.is-active .label { color: var(--tint-bad-ink); }
 
 /* ── Suggested techs modal: card list with threat tags ────────── */
 .mockup-techlist {
@@ -2689,7 +2694,7 @@
     width: 18px;
     height: 18px;
     border-radius: 5px;
-    background: #16a34a;
+    background: var(--solid-ok);
     color: #fff;
     display: flex;
     align-items: center;
@@ -2726,7 +2731,7 @@
 .mockup-techlist-tag {
     font-size: var(--fs-xs);
     font-weight: 800;
-    color: #b45309;
+    color: var(--tint-warn-ink);
     background: rgba(245, 158, 11, 0.14);
     padding: 1px 5px;
     border-radius: 4px;
@@ -2742,7 +2747,7 @@
     background: #dc2626;
     letter-spacing: 0.04em;
 }
-.mockup-techlist-threat.is-med { background: #f59e0b; }
+.mockup-techlist-threat.is-med { background: #f59e0b; color: var(--on-light); }
 .mockup-techlist-threat.is-low { background: #64748b; }
 
 /* ── Tech-Lab card "Beaten by" / "Good against" block ─────────── */
@@ -2778,7 +2783,7 @@
 .mockup-techlab-target-sub {
     font-size: 0.66rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--ink-3);
     letter-spacing: 0.04em;
 }
 .mockup-techlab-rating {
@@ -2788,7 +2793,7 @@
     padding: 4px 10px;
     border-radius: 999px;
     color: #fff;
-    background: #16a34a;
+    background: var(--solid-ok);
     letter-spacing: 0.04em;
 }
 
@@ -2864,7 +2869,7 @@
 .mockup-picker-row .meta {
     font-size: var(--fs-xs);
     font-weight: 800;
-    color: #64748b;
+    color: var(--ink-3);
     letter-spacing: 0.04em;
 }
 
@@ -2934,7 +2939,11 @@
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--ink-3);
+    /* 29.08.2026: sitzt in .mockup-stat-card, deren Grund fest
+       #0f172a ist. --ink-3 ist dort in BEIDEN Modi zu dunkel
+       (3,20:1) — die Flaeche dreht nicht mit, also darf es die
+       Schrift auch nicht. */
+    color: var(--on-dark-2);
 }
 .mockup-stat-cell .value.is-good { color: #4ade80; }
 .mockup-stat-cell .value.is-bad  { color: #f87171; }
@@ -2973,7 +2982,7 @@
     font-size: 0.78rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
-.mockup-cdb-card .heart.is-on { background: #ec4899; color: #fff; }
+.mockup-cdb-card .heart.is-on { background: #d51674; color: #fff; }
 .mockup-cdb-card .star {
     position: absolute;
     top: 4px;
@@ -3028,7 +3037,7 @@
     display: block;
     font-size: var(--fs-xs);
     font-weight: 800;
-    color: #64748b;
+    color: var(--ink-3);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     margin-bottom: 1px;
@@ -3071,7 +3080,7 @@
     justify-content: center;
     font-size: 0.7rem;
 }
-.mockup-bj-result.is-w { background: #16a34a; }
+.mockup-bj-result.is-w { background: var(--solid-ok); }
 .mockup-bj-result.is-l { background: #dc2626; }
 .mockup-bj-result.is-t { background: #b45309; }
 .mockup-bj-vs {
@@ -3084,7 +3093,7 @@
 .mockup-bj-vs small {
     display: block;
     font-size: var(--fs-xs);
-    color: #64748b;
+    color: var(--ink-3);
     font-weight: 700;
     margin-top: 2px;
 }
@@ -3155,7 +3164,7 @@
     padding: 0 4px;
     font-size: 0.66rem;
     font-weight: 800;
-    color: #b45309;
+    color: var(--tint-warn-ink);
     letter-spacing: 0.04em;
 }
 
@@ -3173,7 +3182,7 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #ec4899);
+    background: linear-gradient(135deg, #585bf0, #d51674);
     color: #fff;
     display: flex;
     align-items: center;
@@ -3185,9 +3194,9 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 .mockup-tg-dash-avatar:first-child { margin-left: 0; }
-.mockup-tg-dash-avatar.v2 { background: linear-gradient(135deg, #16a34a, #facc15); }
+.mockup-tg-dash-avatar.v2 { background: linear-gradient(135deg, var(--solid-ok), #facc15); }
 .mockup-tg-dash-avatar.v3 { background: linear-gradient(135deg, #f97316, #dc2626); }
-.mockup-tg-dash-avatar.v4 { background: linear-gradient(135deg, #0891b2, #6366f1); }
+.mockup-tg-dash-avatar.v4 { background: linear-gradient(135deg, #067391, #6366f1); }
 .mockup-tg-dash-count {
     margin-left: auto;
     font-size: 0.66rem;
@@ -3220,7 +3229,7 @@
     justify-content: space-between;
     font-size: var(--fs-xs);
     font-weight: 800;
-    color: #64748b;
+    color: var(--ink-3);
     letter-spacing: 0.04em;
 }
 .mockup-trend-foot .now { color: var(--pokemon-blue, #3B4CCA); }
@@ -3244,7 +3253,7 @@
     height: 28px;
     border-radius: 50%;
     background: linear-gradient(135deg, #ef4444, #f59e0b);
-    color: #fff;
+    color: var(--ink);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3315,7 +3324,7 @@
     justify-content: center;
     text-align: center;
     background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
-    color: #64748b;
+    color: var(--ink-3);
     font-size: 0.78rem;
     font-weight: 700;
     padding: 14px;
@@ -3369,16 +3378,23 @@
     --line:      #e3e7ef;
     --ink:       #161a23;
     --ink-2:     #4d5566;
-    --ink-3:     #646c80;
+    --ink-3:     #575e70;
     /* 29.08.2026 nachgetragen: ohne diese vier liefen die Marken- und
        Tint-Toene der Insel weiter mit ihren DUNKELMODUS-Werten — heller
        Text auf dem weissen Mockup-Grund, 2,61:1. Eine halb umgestellte
        Insel ist schlimmer als gar keine. */
     --brand-ink: #2a3899;
-    --tint-warn-ink: #b45309;
-    --tint-ok-ink:   #15803d;
+    --tint-warn-ink: #a74d08;
+    --tint-ok-ink:   #137337;
     --tint-bad-ink:  #991b1b;
     --tint-info-ink: #3730a3;
+    --tint-info: #f0f6ff;
+    --tint-ok: #f0fdf4;
+    --tint-warn: #fff7e6;
+    --tint-bad: #fff0ee;
+    --vorbehalt: #82640c;
+    --vorbehalt-bg: rgba(234, 179, 8, .16);
+    --bar-track: #e9edf4;
     color: var(--ink);
     background: var(--surface-1);
     border-color: rgba(255, 255, 255, 0.14);

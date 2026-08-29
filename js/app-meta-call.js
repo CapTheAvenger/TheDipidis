@@ -8522,7 +8522,7 @@ window.MetaCall = (function () {
       <div class="mc-day2-sub">${day2Sub}</div>
       <div class="mc-day2-stats">
         <div class="mc-day2-stat">
-          <div class="mc-day2-stat-val" style="color:#27ae60">${expWin.toFixed(1)}</div>
+          <div class="mc-day2-stat-val" style="color:var(--tint-ok-ink)">${expWin.toFixed(1)}</div>
           <div class="mc-day2-stat-lbl">${t('mc.avgWins')}</div>
         </div>
         <div class="mc-day2-stat">
@@ -8530,7 +8530,7 @@ window.MetaCall = (function () {
           <div class="mc-day2-stat-lbl">${t('mc.avgTies')}</div>
         </div>
         <div class="mc-day2-stat">
-          <div class="mc-day2-stat-val" style="color:#e74c3c">${expLoss.toFixed(1)}</div>
+          <div class="mc-day2-stat-val" style="color:var(--tint-bad-ink)">${expLoss.toFixed(1)}</div>
           <div class="mc-day2-stat-lbl">${t('mc.avgLosses')}</div>
         </div>
       </div>
@@ -8547,7 +8547,7 @@ window.MetaCall = (function () {
         </div>
         <div class="mc-histogram-axis">
           <span>0 ${t('mc.ptsAbbr')}</span>
-          <span style="color:#27ae60">${t('mc.histDay2Label').replace('{n}', _settings.day2Points)}</span>
+          <span style="color:var(--tint-ok-ink)">${t('mc.histDay2Label').replace('{n}', _settings.day2Points)}</span>
           <span>${maxPts} ${t('mc.ptsAbbr')}</span>
         </div>
       </div>
@@ -9195,7 +9195,7 @@ window.MetaCall = (function () {
         && _activeInPersonSetCode
         && _currentSetUpper
         && _activeInPersonSetCode !== _currentSetUpper)
-      ? ` <span class="mc-predictor-banner-lagwindow" style="opacity:0.85;color:#b45309;" title="${esc(t('mc.bannerLagWindowHelp').replace(/\{new\}/g, _currentSetUpper).replace(/\{old\}/g, _activeInPersonSetCode))}">${esc(t('mc.bannerLagWindow').replace('{new}', _currentSetUpper))}</span>`
+      ? ` <span class="mc-predictor-banner-lagwindow" style="opacity:0.85;color:var(--tint-warn-ink);" title="${esc(t('mc.bannerLagWindowHelp').replace(/\{new\}/g, _currentSetUpper).replace(/\{old\}/g, _activeInPersonSetCode))}">${esc(t('mc.bannerLagWindow').replace('{new}', _currentSetUpper))}</span>`
       : '';
     // Stale-cache canary (2026-06). Surfaces the newest scraped_at
     // timestamp we saw across the loaded labs CSV. If this displays
@@ -9228,7 +9228,9 @@ window.MetaCall = (function () {
       // gedacht und sind fuer Turniere zu streng. 35 Tage = lag_days plus
       // Karenz, dieselbe Grenze, an der auch das Lag-Fenster zugeht.
       const isStale = ageDays > 35;
-      const color = isStale ? '#b91c1c' : '#374151';
+      /* 29.08.2026: beide fest, auf einer Toenung, die im Dunkelmodus
+         dunkel wird — 2,19:1. Die Token drehen mit. */
+      const color = isStale ? 'var(--tint-bad-ink)' : 'var(--ink-2)';
       // "⚠ STALE" sagt einem Spieler nichts. Was er wissen will, ist
       // das Alter — und zwar ohne dass wir ihm die Ursache andichten.
       // Der englische Originaltext behauptete "browser is serving

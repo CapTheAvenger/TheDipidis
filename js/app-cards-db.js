@@ -3100,19 +3100,26 @@
                 const deckCount = coverageStats.deckCount || 0;
                 const archetypeCount = coverageStats.archetypeCount || 0;
                 const maxCount = coverageStats.maxCount || 0;
-                let coverageColor = '#95a5a6'; // Gray for < 50%
+                /* 29.08.2026: die fuenf Stufen trugen weisse Schrift auf
+                   der jeweiligen Flat-UI-Farbe — gemessen 2,56:1 auf dem
+                   Grau, 62-mal je Seite die haeufigste Einzelstelle der
+                   ganzen Anwendung. Jetzt dieselben fuenf Stufen, aber
+                   soweit abgedunkelt, dass weiss darauf 5,0:1 erreicht.
+                   Gelb bleibt Gelb: dort traegt die Flaeche die Bedeutung
+                   und der Text --ink (siehe .card-database-coverage). */
+                let coverageColor = 'var(--solid-neutral)'; // Grau < 50%
                 let coverageIcon = '\u{1F4CA}'; // bar chart
                 if (percentage >= 99.5) {
-                    coverageColor = '#e74c3c'; // Red for 100%
+                    coverageColor = 'var(--solid-bad)'; // Rot 100%
                     coverageIcon = '\uD83D\uDD25'; // fire
                 } else if (percentage >= 90) {
-                    coverageColor = '#e67e22'; // Orange for >=90%
+                    coverageColor = '#aa5a13'; // Orange >=90%
                     coverageIcon = '\u26A1'; // lightning
                 } else if (percentage >= 70) {
-                    coverageColor = '#f39c12'; // Yellow for >=70%
+                    coverageColor = '#9c6308'; // Gelb >=70%
                     coverageIcon = '\u2B50'; // star
                 } else if (percentage >= 50) {
-                    coverageColor = '#3498db'; // Blue for >=50%
+                    coverageColor = 'var(--solid-info)'; // Blau >=50%
                     coverageIcon = '\u{1F4CA}'; // bar chart
                 }
                 // Format the display with max count

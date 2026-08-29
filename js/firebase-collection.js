@@ -1372,15 +1372,15 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
       collectionHtml.push(`
           <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
             <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}', '${escapeJsSingleQuoted(card.cardmarket_url || '')}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}')">
-            <div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${ownedCount}x owned">${ownedCount}x</div>
+            <div style="position: absolute; top: 5px; left: 5px; background: #377e39; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${ownedCount}x owned">${ownedCount}x</div>
             <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
-              <button onclick="addToCollection('${safeCardIdJs}')" style="background: #27ae60; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${ownedCount}/4)">+</button>
-              <button onclick="removeFromCollection('${safeCardIdJs}')" style="background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
+              <button onclick="addToCollection('${safeCardIdJs}')" style="background: var(--solid-ok); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${ownedCount}/4)">+</button>
+              <button onclick="removeFromCollection('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
             </div>
             <div style="padding: 8px; background: var(--surface-1);">
               <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
               <div style="font-size: 0.75em; color: var(--ink-2);">${safeSetHtml} ${safeNumberHtml}</div>
-              <div style="font-size: 0.8em; color: #27ae60; font-weight: 600; margin-top: 4px;">${priceDisplay}</div>
+              <div style="font-size: 0.8em; color: var(--tint-ok-ink); font-weight: 600; margin-top: 4px;">${priceDisplay}</div>
             </div>
           </div>
         `);
@@ -1558,7 +1558,7 @@ function buildWishlistTargetPill(cmPriceRaw, userMaxRaw) {
   const max = _parsePriceNum(userMaxRaw);
   if (cm === null || max === null) return '';
   if (cm > max) return '';
-  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(22,163,74,0.35);" title="Cardmarket-Preis (${cm.toFixed(2).replace('.',',')} €) ist auf oder unter deinem Wunsch-Maximum (${max.toFixed(2).replace('.',',')} €)">🎯 Unter deinem Ziel</div>`;
+  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,var(--solid-ok),#15803d);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(22,163,74,0.35);" title="Cardmarket-Preis (${cm.toFixed(2).replace('.',',')} €) ist auf oder unter deinem Wunsch-Maximum (${max.toFixed(2).replace('.',',')} €)">🎯 Unter deinem Ziel</div>`;
 }
 
 function buildTradelistUnderpricedPill(cmPriceRaw, userMinRaw) {
@@ -1811,20 +1811,20 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       wishlistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
           <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}', '${escapeJsSingleQuoted(card.cardmarket_url || '')}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}')">
-          <div style="position: absolute; top: 5px; left: 5px; background: #e67e22; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${wantedCount}x wanted">${wantedCount}x</div>
+          <div style="position: absolute; top: 5px; left: 5px; background: #aa5a13; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${wantedCount}x wanted">${wantedCount}x</div>
           <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
-            <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #e67e22; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Need more (${wantedCount}/4)">+</button>
-            <button onclick="removeFromWishlist('${safeCardIdJs}')" style="background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
+            <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #aa5a13; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Need more (${wantedCount}/4)">+</button>
+            <button onclick="removeFromWishlist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
           </div>
           <div style="padding: 8px; background: var(--surface-1);">
             <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
             <div style="font-size: 0.75em; color: var(--ink-2);">${safeSetHtml} ${safeNumberHtml}</div>
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.75em; color: ${ownedCount > 0 ? '#4CAF50' : '#999'}; font-weight: 600;">✓ ${ownedCount}/${maxLabel}</span>
-              <button onclick="addOwnedFromWishlist('${safeCardIdJs}')" style="background: #4CAF50; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; line-height: 1;" title="Add to collection (owned: ${ownedCount})">+</button>
+              <button onclick="addOwnedFromWishlist('${safeCardIdJs}')" style="background: #377e39; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; line-height: 1;" title="Add to collection (owned: ${ownedCount})">+</button>
             </div>
             ${cmUrl
-              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
+              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, var(--solid-ok), #1b8044); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
               : `<div style="font-size: 0.8em; color: var(--ink-3); margin-top: 4px;">${priceDisplay}</div>`}${priceTrustBadge(card, cmUrl)}
             ${lowDisplay ? `<div style="font-size: 0.7em; color: var(--ink-3); margin-top: 2px;">${lowDisplay}</div>` : ''}
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
@@ -1901,7 +1901,7 @@ function openWishlistGridModal() {
 
     html += `<div class="compact-card" data-export-card${maxPrice > 0 ? ` data-max-price="${maxPrice.toFixed(2)}"` : ''}>
       <img src="${safeImage}" alt="${safeName}" style="width:100%;display:block;border-radius:5px;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}">
-      ${wantedCount > 1 ? `<span class="compact-badge" style="position:absolute;top:2px;right:2px;background:#e67e22;color:#fff;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,.4);padding:0 3px;">${wantedCount}x</span>` : ''}
+      ${wantedCount > 1 ? `<span class="compact-badge" style="position:absolute;top:2px;right:2px;background:#aa5a13;color:#fff;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,.4);padding:0 3px;">${wantedCount}x</span>` : ''}
       ${maxPriceStrip}
     </div>`;
   });
@@ -2294,7 +2294,7 @@ function updateDecksUI() {
             <p style="color: #34495e; margin: 10px 0; font-weight: 600;">
               ${totalCards} Cards (${uniqueCards} Unique)
             </p>
-            <button onclick="deleteDeck('${safeDeckIdJs}')" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+            <button onclick="deleteDeck('${safeDeckIdJs}')" style="padding: 10px 20px; background: var(--solid-bad); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
               Delete
             </button>
           </div>
@@ -2683,7 +2683,7 @@ function updateDecksUI() {
         const safeCardmarketTitleHtml = escapeHtml(eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available');
         const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber, window.userCollectionCounts);
         const otherPrintSparkle = otherPrintOwnedCount > 0
-          ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Owned other INT prints: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));"></span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
+          ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Owned other INT prints: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));"></span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:var(--ink);font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
           : '';
         
         const collLabel       = ownedCount > 0 ? `${ownedCount}/4` : '+';
@@ -2739,7 +2739,7 @@ function updateDecksUI() {
       ? 'linear-gradient(135deg, #1B5E20 0%, #388E3C 50%, #43A047 100%)'
       : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
     const activeBorder = isActive ? 'border: 2px solid #66BB6A;' : '';
-    const activeLabel = isActive ? `<span style="display:inline-block;background:#4CAF50;color:white;font-size:0.7em;padding:1px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;font-weight:700;">${getLang()==='de' ? 'IRL GEBAUT' : 'IRL BUILT'}</span>` : '';
+    const activeLabel = isActive ? `<span style="display:inline-block;background:#377e39;color:white;font-size:0.7em;padding:1px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;font-weight:700;">${getLang()==='de' ? 'IRL GEBAUT' : 'IRL BUILT'}</span>` : '';
     
     return `
       <div class="saved-deck-item" data-deck-name="${safeDeckNameHtml}" data-deck-archetype="${safeDeckArchetypeHtml}" data-deck-folder="${safeFolderHtml}" data-deck-active="${isActive}" style="background: var(--surface-1); border-radius: 10px; box-shadow: ${isActive ? '0 0 12px rgba(76,175,80,0.5), 0 2px 8px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.1)'}; overflow: hidden; margin-bottom: 10px; ${activeBorder}">
@@ -3281,7 +3281,7 @@ function compareActiveDecks() {
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button onclick="this.closest('#compare-active-modal').remove()" style="padding:10px 20px;border:1px solid #555;border-radius:8px;background:transparent;color: var(--ink-3);cursor:pointer;font-weight:600;">${isDE ? 'Abbrechen' : 'Cancel'}</button>
-        <button id="compare-active-run" style="padding:10px 20px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer;font-weight:700;">${isDE ? 'Vergleichen' : 'Compare'}</button>
+        <button id="compare-active-run" style="padding:10px 20px;border:none;border-radius:8px;background:#377e39;color:white;cursor:pointer;font-weight:700;">${isDE ? 'Vergleichen' : 'Compare'}</button>
       </div>
     </div>
   `;
@@ -3845,7 +3845,7 @@ async function showDeckFolderSelectModal(options = {}) {
 
     const okBtn = document.createElement('button');
     okBtn.textContent = 'OK';
-    okBtn.style.cssText = 'padding:8px 20px;border:none;border-radius:8px;background:#667eea;color:#fff;cursor:pointer;font-size:0.9em;font-weight:600';
+    okBtn.style.cssText = 'padding:8px 20px;border:none;border-radius:8px;background:var(--solid-info);color:#fff;cursor:pointer;font-size:0.9em;font-weight:600';
 
     function close(value) {
       overlay.remove();
@@ -4058,7 +4058,7 @@ function renderFolderNav() {
   nav.style.gap = '6px';
   nav.style.alignItems = 'center';
 
-  nav.innerHTML = `<button onclick="filterDecksByFolder('')" style="padding: 6px 14px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">All</button>` +
+  nav.innerHTML = `<button onclick="filterDecksByFolder('')" style="padding: 6px 14px; background: var(--solid-info); color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">All</button>` +
     folders.map(f => {
       const safe = escapeHtml(f);
       const safeJs = escapeJsSingleQuoted(f);
@@ -4527,7 +4527,7 @@ async function openCompareSavedDeck(deckIndex) {
         <textarea id="compare-paste-text" style="width:100%;min-height:180px;padding:10px;border:1px solid #ccc;border-radius:8px;resize:vertical;font-family:Consolas,monospace;font-size:12px;" placeholder="${getLang()==='de' ? 'Beispiel:' : 'Example:'}\n4 Charizard ex MEW 006\n3 Pidgeot ex OBF 164\n..."></textarea>
         <div id="compare-paste-preview" style="margin-top:10px;padding:10px;border-radius:8px;background:#fff7e6;border:1px solid #ffe0a6;color:#7a5a00;font-size:12px;">${getLang()==='de' ? 'Noch keine Liste erkannt. Füge eine Deckliste ein.' : 'No list detected yet. Paste a deck list.'}</div>
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
-          <button id="compare-paste-run" style="padding:8px 12px;border:none;border-radius:8px;background:#27ae60;color:white;cursor:pointer;font-weight:700;">${getLang()==='de' ? 'Vergleichen' : 'Compare'}</button>
+          <button id="compare-paste-run" style="padding:8px 12px;border:none;border-radius:8px;background:var(--solid-ok);color:white;cursor:pointer;font-weight:700;">${getLang()==='de' ? 'Vergleichen' : 'Compare'}</button>
         </div>
       `;
 
@@ -4953,7 +4953,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
           ? 'Karten mit diesem Zeichen wurden nur über den Namen zugeordnet — der Druck fehlt in der Kartendatenbank. Vor dem Umbau kurz selbst prüfen.'
           : 'Cards marked this way were matched by name only — the print is missing from the card database. Worth checking before you rebuild.'}
       </div>` : ''}
-    ${(!swapOut.length && !swapIn.length) ? `<div style="text-align:center;color:#27ae60;font-weight:700;padding:24px 0;">${de ? 'Keine Unterschiede — die Decks sind identisch.' : 'No differences — the decks are identical.'}</div>` : ''}
+    ${(!swapOut.length && !swapIn.length) ? `<div style="text-align:center;color:var(--tint-ok-ink);font-weight:700;padding:24px 0;">${de ? 'Keine Unterschiede — die Decks sind identisch.' : 'No differences — the decks are identical.'}</div>` : ''}
   `;
 
   // Create comparison modal
@@ -4982,7 +4982,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       </div>
       <div style="margin:-4px 0 12px 0;font-size:12px;color: var(--ink-2);">${mode === 'functional' ? (getLang()==='de' ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Artwork and set variants of the same card are merged.') : (getLang()==='de' ? 'Jeder Print (set+nummer) wird einzeln verglichen.' : 'Each print (set+number) is compared individually.')}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:${view === 'changes' ? '6px' : '15px'};">
-        <div style="background:#667eea;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}<div style="font-size:0.72em;font-weight:600;opacity:.95;">${sizeA === 60 ? '60/60' : `⚠ ${sizeA}/60`}</div></div>
+        <div style="background:var(--solid-info);color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}<div style="font-size:0.72em;font-weight:600;opacity:.95;">${sizeA === 60 ? '60/60' : `⚠ ${sizeA}/60`}</div></div>
         <div style="background:#764ba2;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameB}<div style="font-size:0.72em;font-weight:600;opacity:.95;">${sizeB === 60 ? '60/60' : `⚠ ${sizeB}/60`}</div></div>
       </div>
       ${view === 'changes' ? `<div style="font-size:12px;color: var(--ink-2);margin-bottom:12px;text-align:center;">${de ? `So baust du <b>${safeNameA}</b> in <b>${safeNameB}</b> um:` : `How to turn <b>${safeNameA}</b> into <b>${safeNameB}</b>:`}</div>` : ''}
@@ -4990,7 +4990,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       ${onlyA.length ? `<div style="margin-bottom:12px;"><h4 style="color:#667eea;margin:0 0 5px 0;">Only in ${safeNameA} (${onlyA.length})</h4><div style="font-size:0.9em;color: var(--ink-2);">${onlyA.join('<br>')}</div></div>` : ''}
       ${onlyB.length ? `<div style="margin-bottom:12px;"><h4 style="color:#764ba2;margin:0 0 5px 0;">Only in ${safeNameB} (${onlyB.length})</h4><div style="font-size:0.9em;color: var(--ink-2);">${onlyB.join('<br>')}</div></div>` : ''}
       ${different.length ? `<div style="margin-bottom:12px;"><h4 style="color:#e67e22;margin:0 0 5px 0;">Different counts (${different.length})</h4><div style="font-size:0.9em;color: var(--ink-2);">${different.join('<br>')}</div></div>` : ''}
-      <div style="margin-bottom:12px;"><h4 style="color:#27ae60;margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color: var(--ink-2);">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>`}
+      <div style="margin-bottom:12px;"><h4 style="color:var(--tint-ok-ink);margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color: var(--ink-2);">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>`}
       ${totalProxyCopies > 0 ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);text-align:center;"><button onclick="addCompareNewCardsToProxy()" style="padding:10px 20px;border:none;border-radius:8px;background:#1e8449;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#166b3a';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.35)'" onmouseout="this.style.background='#1e8449';this.style.transform='';this.style.boxShadow=''">${getLang()==='de' ? '➕ Alle neuen Karten zum Proxy Printer' : 'Add all new cards to Proxy Printer'} (${totalProxyCopies})</button></div>` : ''}
     </div>
   `;
@@ -5585,7 +5585,7 @@ function dexImportShowPreview(matched, unmatched) {
     const tableBlock = matched.length > 0 ? `
         <div style="max-height:220px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:12px;">
             <table style="width:100%;border-collapse:collapse;">
-                <thead><tr style="background:#667eea;color:#fff;position:sticky;top:0;">
+                <thead><tr style="background:var(--solid-info);color:#fff;position:sticky;top:0;">
                     <th style="padding:7px 10px;text-align:left;">${getLang()==='de' ? 'Karte' : 'Card'}</th>
                     <th style="padding:7px 6px;text-align:center;">Set</th>
                     <th style="padding:7px 6px;text-align:center;">${getLang()==='de' ? 'Nr.' : 'No.'}</th>
@@ -5596,18 +5596,18 @@ function dexImportShowPreview(matched, unmatched) {
                         <td style="padding:5px 10px;">${escapeHtml(m.card.name)}</td>
                         <td style="padding:5px 6px;text-align:center;">${escapeHtml(m.card.set)}</td>
                         <td style="padding:5px 6px;text-align:center;">${escapeHtml(m.card.number)}</td>
-                        <td style="padding:5px 6px;text-align:center;font-weight:700;color:#27ae60;">${m.qty}×</td>
+                        <td style="padding:5px 6px;text-align:center;font-weight:700;color:var(--tint-ok-ink);">${m.qty}×</td>
                     </tr>`).join('')}
                 </tbody>
             </table>
         </div>
         <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
             <button onclick="dexImportExecute('merge')"
-                    style="flex:1;min-width:160px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
+                    style="flex:1;min-width:160px;background:linear-gradient(135deg,var(--solid-ok),#1e8449);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
               ${getLang()==='de' ? 'Abgleichen (Merge)' : 'Merge'}<br><small style="font-weight:400;opacity:.85;">${getLang()==='de' ? 'Importierte Mengen ersetzen, andere Karten bleiben' : 'Imported quantities replace existing, other cards remain'}</small>
             </button>
             <button onclick="dexImportExecute('replace')"
-                    style="flex:1;min-width:160px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
+                    style="flex:1;min-width:160px;background:linear-gradient(135deg,var(--solid-bad),#c0392b);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
                 ${getLang()==='de' ? 'Ersetzen (Replace)' : 'Replace'}<br><small style="font-weight:400;opacity:.85;">${getLang()==='de' ? 'Kollektion komplett ersetzen' : 'Completely replace collection'}</small>
             </button>
         </div>` : `<p style="color: var(--ink-3);text-align:center;">${getLang()==='de' ? 'Keine Karten in der Datenbank gefunden.' : 'No cards found in the database.'}</p>`;
@@ -5994,10 +5994,10 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
       tradelistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
           <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}', '${escapeJsSingleQuoted(card.cardmarket_url || '')}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}')">
-          <div style="position: absolute; top: 5px; left: 5px; background: #16a085; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${tradeCount}x for trade">${tradeCount}x</div>
+          <div style="position: absolute; top: 5px; left: 5px; background: #117d68; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${tradeCount}x for trade">${tradeCount}x</div>
           <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
-            <button onclick="addToTradelist('${safeCardIdJs}')" style="background: #16a085; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${tradeCount}/4)">+</button>
-            <button onclick="removeFromTradelist('${safeCardIdJs}')" style="background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">\u2212</button>
+            <button onclick="addToTradelist('${safeCardIdJs}')" style="background: #117d68; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${tradeCount}/4)">+</button>
+            <button onclick="removeFromTradelist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">\u2212</button>
           </div>
           <div style="padding: 8px; background: var(--surface-1);">
             <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
@@ -6006,16 +6006,16 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
               <span style="font-size: 0.75em; color: ${ownedCount > 0 ? '#4CAF50' : '#999'}; font-weight: 600;">\u2713 ${ownedCount}/${maxLabel}</span>
             </div>
             ${cmUrl
-              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
+              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, var(--solid-ok), #1b8044); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
               : `<div style="font-size: 0.8em; color: var(--ink-3); margin-top: 4px;">${priceDisplay}</div>`}
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
-              <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">ca</span>
+              <span style="font-size: 0.72em; color: var(--tint-ok-ink); font-weight: 600;">ca</span>
               <input type="text" inputmode="decimal" value="${minPriceVal}" placeholder="\u2014"
                 aria-label="Minimum price for ${safeNameHtml}"
-                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; color: #16a085; text-align: right; outline: none; box-sizing: border-box;"
+                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; color: var(--tint-ok-ink); text-align: right; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#16a085'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveTradelistMinPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
-              <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">\u20ac</span>
+              <span style="font-size: 0.72em; color: var(--tint-ok-ink); font-weight: 600;">\u20ac</span>
             </div>
             ${buildTradelistUnderpricedPill(card.eur_price, minPriceRaw)}
           </div>
@@ -6070,7 +6070,7 @@ function openTradelistGridModal() {
       : '';
     html += `<div class="compact-card" data-export-card${minPrice > 0 ? ` data-min-price="${minPrice.toFixed(2)}"` : ''}>
       <img src="${safeImage}" alt="${safeName}" style="width:100%;display:block;border-radius:5px;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}">
-      ${tradeCount > 1 ? `<span class="compact-badge" style="position:absolute;top:2px;right:2px;background:#16a085;color:#fff;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,.4);padding:0 3px;">${tradeCount}x</span>` : ''}
+      ${tradeCount > 1 ? `<span class="compact-badge" style="position:absolute;top:2px;right:2px;background:#117d68;color:#fff;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,.4);padding:0 3px;">${tradeCount}x</span>` : ''}
       ${minPriceStrip}
     </div>`;
   });

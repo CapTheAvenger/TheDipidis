@@ -365,7 +365,7 @@
 }
 
 .cm-view-mode-btn.is-active {
-    background: var(--accent-color, #3a86ff);
+    background: var(--accent-color, #0a63e6);
     color: #fff;
 }
 

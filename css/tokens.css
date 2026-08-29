@@ -100,7 +100,11 @@
        26 % aller Textstellen der Startseite (Deckname, Kontextzeile,
        Notiz) und 38 Rangzellen in Current Meta. #646c80 raeumt alle
        drei Untergruende: 5,25 / 4,94 / 4,73. */
-    --ink-3: #646c80;
+    /* 29.08.2026 noch einmal nachgezogen: #646c80 hielt 5,25 auf Weiss,
+       aber nur 4,70 auf den getoenten Flaechen, auf denen er ebenfalls
+       steht. Die Grenze gilt dort genauso. #60687b holt alle benutzten
+       Gruende ueber 4,99 und ist auf Weiss 5,58 — kaum sichtbar dunkler. */
+    --ink-3: #575e70;
 
     /* Chips in der Kartendatenbank: Set und Kartentyp. Semantisch
      * gefaerbt, deshalb eigene Tokens statt der neutralen Flaechen. */
@@ -159,9 +163,90 @@
        unsichtbar — das war der Fehler an 28 Stellen im Meta Call und an
        drei in Side Quest. Gemessen hell: 9,14 / 4,79 / 4,71 / 7,50. */
     --tint-info-ink: #3730a3;
-    --tint-ok-ink:   #15803d;
-    --tint-warn-ink: #b45309;
+    /* 29.08.2026 nachgezogen: die beiden hielten 4,79 bzw. 4,71 gegen
+       --tint-ok / --tint-warn und waren damit gerade richtig. Gemessen
+       wurden sie aber auch auf SATTEREN Toenungen, die anderswo direkt
+       als rgba(...) stehen — rgba(34,197,94,.12) ueber Weiss ergibt
+       #dbf3d8, und dort lag Gruen bei 4,26. Jetzt gegen die satteste
+       tatsaechlich benutzte Toenung gerechnet, mit 5,0 statt 4,5 als
+       Ziel. Auf Weiss dadurch 5,94 statt 5,02 — dunkler, aber nicht
+       sichtbar anders, und es haelt ueberall. */
+    --tint-ok-ink:   #137337;
+    --tint-warn-ink: #a74d08;
     --tint-bad-ink:  #991b1b;
+    /* ── Kraeftige Flaechen, die WEISSE Schrift tragen ──────────────
+     *
+     * Die dritte Rolle neben --tint-* (getoente Flaeche, dunkler Text)
+     * und --dv-* (Datenachse). Sie fehlte, und deshalb standen ueberall
+     * eigene Hex-Werte: #27ae60, #667eea, #95a5a6, #e74c3c, #16a34a,
+     * #2ecc71 — die uebliche Flat-UI-Palette. Alle sind zu hell fuer
+     * weisse Schrift:
+     *
+     *   weiss auf #95a5a6  2,56:1     weiss auf #27ae60  2,87:1
+     *   weiss auf #667eea  3,66:1     weiss auf #e74c3c  3,82:1
+     *
+     * Gemessen am 29.08.2026 ueber alle Ansichten und beide Modi: 162
+     * Stellen allein mit weiss auf #667eea, 62 mit weiss auf #95a5a6.
+     * Das ist kein Dunkelmodus-Problem — es war in beiden Modi so.
+     *
+     * Diese vier sind dieselben Toene, nur so weit abgedunkelt, dass
+     * weisse Schrift 5,0:1 erreicht (4,5 ist die Grenze, die halbe Stufe
+     * darueber ist Reserve gegen Kantenglaettung). Ausgerechnet, nicht
+     * geschaetzt.
+     *
+     * Sie brauchen KEINEN Dunkelmodus-Wert: eine Flaeche mit eigener
+     * Schrift ist in sich geschlossen, sie steht nicht auf dem
+     * Seitengrund und muss deshalb nicht mitdrehen.
+     *
+     * GOLD steht bewusst nicht in dieser Reihe. Gold weit genug
+     * abzudunkeln macht es braun und nimmt ihm die Bedeutung. Auf Gold
+     * gilt stattdessen die Regel, die oben schon steht: die Flaeche
+     * traegt die Bedeutung, der Text traegt --ink. Gemessen: --ink auf
+     * #FFCB05 ist 11,44:1. */
+    /* Schrift auf einer Flaeche, die NICHT mitdreht.
+     *
+     * --ink dreht: hell #161a23, dunkel #eef2ff. Das ist richtig fuer
+     * alles, was auf dem Seitengrund sitzt. Auf einer festen Flaeche —
+     * Gold, ein Pastellchip, ein Farbverlauf — ist es falsch, und zwar
+     * genau im Dunkelmodus: die Flaeche bleibt gelb, die Schrift wird
+     * weiss, 1,36:1. Genau das ist mir am 29.08. beim Umbau der
+     * .rarity-badge passiert, nachdem ich dort weiss durch --ink
+     * ersetzt hatte.
+     *
+     * Wer eine feste Flaeche faerbt, nimmt --on-light. Wer eine Flaeche
+     * ueber Token faerbt, nimmt --ink. */
+    --on-light: #161a23;
+
+    /* Nackte Links.
+     *
+     * Ein <a> ohne eigene Farbe faellt auf die Browser-Vorgabe zurueck:
+     * #0000EE. Auf dem dunklen Grund sind das 1,76:1 — praktisch
+     * unlesbar, und niemand sieht es beim Lesen des Stylesheets, weil
+     * dort gar keine Farbe steht. Gefunden am 29.08.2026 in der
+     * Anleitung, wo mehrere Verweise nach draussen so gesetzt sind. */
+    --link: var(--brand-ink);
+
+    /* Das Gegenstueck zu --on-light: Schrift auf einer Flaeche, die
+     * immer DUNKEL ist. Es gibt solche Flaechen — die Konsole der Side
+     * Quest, die dunklen Tafeln im Meta Call (#1a1a2e), die
+     * Mockup-Kopfzeilen (#0f172a). Dort ist --ink-3 im Hellmodus
+     * falsch: dunkelgrau auf dunkelblau, 3,06:1, und zwar in BEIDEN
+     * Modi gleich schlecht, weil die Flaeche nicht mitdreht. */
+    --on-dark:   #b9c1e0;
+    /* Die Zahl in der Heatmap-Zelle. Ihr Grund ist eine Datenfarbe, die
+     * mit dem Wert wandert — von fast weiss bis zu einem satten Ton, und
+     * im Dunkelmodus dreht die ganze Skala mit. --ink-2 haelt auf den
+     * hellen Enden (6,57) und faellt auf den satten (3,73); ein fester
+     * Wert scheitert im jeweils anderen Modus. Deshalb ein eigenes Paar,
+     * gegen beide Skalen ausgerechnet: 5,02 hell, 7,39 dunkel. */
+    --heatmap-ink: #3c424f;
+    --on-dark-2: #8791b8;
+
+    --solid-ok:      #1d7f46;   /* weiss darauf 5,03:1 */
+    --solid-bad:     #d52c1a;   /* weiss darauf 4,99:1 */
+    --solid-info:    #4663e6;   /* weiss darauf 5,01:1 */
+    --solid-neutral: #617274;   /* weiss darauf 5,04:1 */
+
     --dv-zero: #9aa3b5;
     --dv-pos-bg: rgba(42, 120, 214, .12);
     --dv-neg-bg: rgba(227, 73, 72, .12);
@@ -202,7 +287,11 @@
     --umschalter-linie: #c8b3da;
     --umschalter-ink:   #7d4ba0;
 
-    --vorbehalt: #92700e;
+    /* 29.08.2026: stand auf #92700e. Auf der eigenen Toenung
+       (rgba(234,179,8,.16) ueber Weiss) waren das 4,16:1 — unter der
+       Grenze, und die beiden stehen per Definition immer zusammen.
+       Nachgezogen auf 5,01 gegen die Toenung, 5,56 gegen Weiss. */
+    --vorbehalt: #82640c;
     --vorbehalt-bg: rgba(234, 179, 8, .16);
 
     --space-jp: #b45309;
@@ -259,6 +348,7 @@
     --line-strong: #35427a;
     --ink: #eef2ff;
     --ink-2: #b9c1e0;
+    --heatmap-ink: #b9c1e0;
     --ink-3: #8791b8;
 
     --brand: #5566e0;
@@ -271,7 +361,10 @@
     /* Im Dunkeln muss die Textvariante HELLER sein, nicht dunkler:
 
        5,10 / 5,51 / 4,77 bzw. 5,38 / 5,81 / 5,04. */
-    --dv-pos-ink: #498cdc;
+    /* 29.08.2026 nachgezogen: haelt 5,10 auf --surface-1, aber nur
+       4,42 auf der Meta-Call-Tafel (#1b2440), die etwas heller ist.
+       #5996df raeumt beide. */
+    --dv-pos-ink: #5996df;
     --dv-neg-ink: #e76463;
 
     /* --ink liegt auf diesen vier zwischen 13,8:1 und 14,7:1. */

@@ -13,7 +13,10 @@
     --mc-text-heading:        #1a2533;
     --mc-text-heading-soft:   #1f2d3d;
     --mc-text-muted-strong:   #4a5b73;
-    --mc-text-muted:          #6b7c93;
+    /* 29.08.2026: stand auf #6b7c93 — 4,26:1 auf Weiss, unter der
+       Grenze fuer Fliesstext. --ink-3 ist derselbe Graublauton, nur
+       so weit nachgezogen, dass er haelt (5,25 hell, 5,4 dunkel). */
+    --mc-text-muted:          var(--ink-3);
     --mc-text-faint:          #8b9bb0;
 
     /* Borders — light-to-strong on the same blue-grey axis */
@@ -166,7 +169,7 @@
 .metacall-date-clear {
   padding: 5px 12px;
   font-size: 0.85em;
-  background: #4caf50;
+  background: #377e39;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -175,7 +178,7 @@
 .metacall-date-clear:hover { background: #43a047; }
 .metacall-date-window-hint {
   font-weight: 400;
-  color: #8a7a44;
+  color: var(--vorbehalt);
   margin-left: auto;
   font-size: 0.85rem;
 }
@@ -209,7 +212,7 @@
   padding: 2px 8px;
   border-radius: 20px;
   background: var(--mc-bg-info-soft);
-  color: var(--color-info);
+  color: var(--color-info-ink);
 }
 
 /* --- Tournament-type tabs (Regional / Local Challenge / Local Cup) --- */
@@ -505,7 +508,10 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--mc-text-muted);
+  /* 29.08.2026: der Kopf erbt den dunklen Verlauf von `table thead`
+     (styles.css). --mc-text-muted ist dort in beiden Modi zu dunkel,
+     3,06:1. */
+  color: var(--on-dark);
   white-space: nowrap;
 }
 .metacall-table td {
@@ -531,7 +537,7 @@
   gap: 6px;
 }
 .mc-share-online {
-  color: var(--color-info);
+  color: var(--color-info-ink);
   font-weight: 600;
 }
 .mc-share-personal input[type="number"] {
@@ -551,7 +557,7 @@
 }
 .mc-share-final {
   font-weight: 700;
-  color: var(--color-success);
+  color: var(--color-success-ink);
 }
 .mc-share-final.has-personal {
   color: var(--mc-personal-accent);
@@ -575,7 +581,7 @@
 }
 .mc-encounters-bar .mc-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-info), #2ecc71);
+  background: linear-gradient(90deg, var(--color-info), var(--solid-ok));
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -675,7 +681,7 @@
 }
 .mc-override-toggle {
   font-size: 0.82rem;
-  color: var(--color-info);
+  color: var(--color-info-ink);
   cursor: pointer;
   text-decoration: underline;
   background: none;
@@ -707,7 +713,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--mc-text-muted);
+  color: var(--on-dark);
 }
 .mc-override-table td {
   padding: 5px 10px;
@@ -715,7 +721,7 @@
   vertical-align: middle;
 }
 .mc-wr-meta {
-  color: var(--color-info);
+  color: var(--color-info-ink);
   font-size: 0.84rem;
 }
 .mc-wr-override input[type="number"] {
@@ -736,9 +742,9 @@
   font-size: 0.78rem;
   font-weight: 700;
 }
-.mc-wr-indicator.favorable { color: var(--color-success); }
-.mc-wr-indicator.even { color: var(--color-warning); }
-.mc-wr-indicator.unfavorable { color: var(--color-danger); }
+.mc-wr-indicator.favorable { color: var(--color-success-ink); }
+.mc-wr-indicator.even { color: var(--color-warning-ink); }
+.mc-wr-indicator.unfavorable { color: var(--color-danger-ink); }
 
 /* --- Results Panel --- */
 .metacall-results-grid {
@@ -767,7 +773,7 @@
   font-weight: 800;
   line-height: 1;
   margin-bottom: 4px;
-  background: linear-gradient(135deg, var(--color-success), #2ecc71);
+  background: linear-gradient(135deg, var(--color-success), var(--solid-ok));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -885,7 +891,7 @@
   transform: translateX(-50%);
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--color-warning);
+  color: var(--color-warning-ink);
   white-space: nowrap;
 }
 .mc-histogram-axis {
@@ -926,7 +932,7 @@
 .mc-enc-bar-fill {
   height: 100%;
   border-radius: 5px;
-  background: linear-gradient(90deg, var(--color-info), #2ecc71);
+  background: linear-gradient(90deg, var(--color-info), var(--solid-ok));
   transition: width 0.3s ease;
 }
 .mc-enc-val {
@@ -938,9 +944,9 @@
   font-size: 0.75rem;
   margin-top: 1px;
 }
-.mc-enc-wr.favorable { color: var(--color-success); }
-.mc-enc-wr.unfavorable { color: var(--color-danger); }
-.mc-enc-wr.even { color: var(--color-warning); }
+.mc-enc-wr.favorable { color: var(--color-success-ink); }
+.mc-enc-wr.unfavorable { color: var(--color-danger-ink); }
+.mc-enc-wr.even { color: var(--color-warning-ink); }
 
 /* No deck selected state */
 .mc-no-deck-msg {
@@ -973,7 +979,7 @@
 .metacall-error {
   text-align: center;
   padding: 32px 20px;
-  color: var(--color-danger);
+  color: var(--color-danger-ink);
   font-size: 0.9rem;
   border: 1px solid #fde;
   border-radius: 10px;
@@ -1040,7 +1046,7 @@
 .mc-custom-add-btn {
   background: var(--mc-bg-info-soft);
   border: 1px dashed #89b7e0;
-  color: #2170c4;
+  color: var(--dv-pos-ink);
   border-radius: 8px;
   padding: 9px 14px;
   font-weight: 600;
@@ -1105,7 +1111,7 @@
   display: inline-block;
   width: 14px;
   font-size: 0.68rem;
-  color: var(--color-info);
+  color: var(--color-info-ink);
   margin-right: 5px;
   transition: transform 0.15s;
 }
@@ -1142,7 +1148,7 @@
   margin-left: auto;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-info);
+  color: var(--color-info-ink);
   background: var(--mc-bg-info-soft);
   border: 1px solid #bdd4f0;
   border-radius: 6px;
@@ -1249,7 +1255,7 @@
 .mc-scenario-history > summary {
   cursor: pointer;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--ink);
   list-style: none;
   user-select: none;
 }
@@ -1279,7 +1285,7 @@
 }
 .mc-scenario-hist-row:last-child { border-bottom: none; }
 .mc-scenario-hist-date {
-  color: #6b7280;
+  color: var(--ink-3);
   font-variant-numeric: tabular-nums;
   flex: 0 0 70px;
 }
@@ -1671,15 +1677,20 @@
   color: var(--mc-personal-accent-deepest);
   cursor: help;
 }
+/* 29.08.2026: beide Banner tragen eine leicht getoente, halbdurchsichtige
+   Flaeche — die wird im Dunkelmodus dunkel, weil der Grund darunter
+   dunkel ist. Die Schrift stand aber fest auf einem dunklen Ton und
+   blieb es: 2,40 bzw. 2,19. Die Toenung bleibt, die Schrift dreht
+   jetzt mit. */
 .mc-predictor-banner-a {
   background: linear-gradient(90deg, rgba(255,178,30,0.12), rgba(255,178,30,0.04));
   border-color: rgba(255,178,30,0.40);
-  color: #8a5a00;
+  color: var(--tint-warn-ink);
 }
 .mc-predictor-banner-b {
   background: linear-gradient(90deg, rgba(39,174,96,0.12), rgba(39,174,96,0.04));
   border-color: rgba(39,174,96,0.40);
-  color: #145c33;
+  color: var(--tint-ok-ink);
 }
 
 /* Per-deck source-breakdown badge sits under .mc-deck-name. Tiny chip
@@ -1726,7 +1737,7 @@
 }
 .mc-badge-chip.mc-badge-journal {
     background: rgba(241,196,15,0.16);
-    color: #7e5c00;
+    color: var(--tint-warn-ink);
     border: 1px solid rgba(241,196,15,0.34);
 }
 .mc-badge-chip.mc-badge-journal:hover {
@@ -1844,7 +1855,9 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: var(--mc-text-muted);
+    /* sitzt wie die anderen Tabellenkoepfe auf dem dunklen thead-Verlauf
+       aus styles.css — dort ist --mc-text-muted in beiden Modi zu dunkel. */
+    color: var(--on-dark);
     white-space: nowrap;
 }
 .mc-rec-table tr:last-child td { border-bottom: none; }
@@ -1907,7 +1920,7 @@
 .mc-rec-day2,
 .mc-rec-score {
     font-variant-numeric: tabular-nums;
-    color: var(--color-success);
+    color: var(--color-success-ink);
 }
 .mc-rec-wr,
 .mc-rec-wins,
@@ -1946,7 +1959,10 @@
     padding: 1px 6px;
     border-radius: 999px;
     background: rgba(120,120,130,0.16);
-    color: var(--mc-ink-3, #6b7280);
+    /* 29.08.2026: --ink-3 haelt auf den Standardflaechen, aber diese
+       Toenung liegt dazwischen — 4,48 hell wie dunkel, knapp darunter.
+       --ink-2 hat dort Reserve. */
+    color: var(--mc-ink-2, var(--ink-2));
     white-space: nowrap;
     cursor: help;
 }
@@ -2011,7 +2027,7 @@
    prediction signal, not a per-matchup override. */
 .mc-badge-chip.mc-badge-tg-share {
     background: rgba(26,188,156,0.14);
-    color: #117864;
+    color: var(--tint-ok-ink);
     border: 1px solid rgba(26,188,156,0.32);
     font-weight: 700;
 }
@@ -2148,7 +2164,7 @@
 }
 .mc-rec-reason-wr {
     flex: 0 0 auto;
-    color: #1f8049;
+    color: var(--tint-ok-ink);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -2227,12 +2243,12 @@
     font-size: 0.88rem;
 }
 .mc-source-label strong {
-    color: #1f2937;
+    color: var(--ink);
     font-weight: 600;
 }
 .mc-source-meta {
     font-size: 0.76rem;
-    color: #6b7280;
+    color: var(--ink-3);
 }
 @media (max-width: 700px) {
     .mc-sources-row { grid-template-columns: 1fr; }
@@ -2264,7 +2280,7 @@
     min-width: 0;
     padding-right: 4px;
     font-weight: 500;
-    color: #5b6a82;
+    color: var(--ink-3);
     line-height: 1.3;
     word-break: normal;
     overflow-wrap: break-word;
@@ -2285,7 +2301,7 @@
     flex: 0 0 auto;
     font-size: 0.75rem;
     font-weight: 500;
-    color: #7d8ca5;
+    color: var(--ink-3);
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
@@ -2405,7 +2421,7 @@
 .mc-intel-row-personal .mc-intel-label { color: #9a6b1f; }
 .mc-intel-row-personal .mc-intel-value { color: #7c5615; }
 .mc-intel-value-emph { font-weight: 700; }
-.mc-intel-trend-pos { color: #1f8049; }
+.mc-intel-trend-pos { color: var(--tint-ok-ink); }
 .mc-intel-trend-neg { color: var(--color-danger-dark); }
 
 @media (max-width: 600px) {
@@ -2491,11 +2507,11 @@
 }
 .mc-tip-day2 {
     font-size: 0.82rem;
-    color: #5b6a82;
+    color: var(--ink-3);
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
-.mc-tip-day2 strong { color: #1f8049; }
+.mc-tip-day2 strong { color: var(--tint-ok-ink); }
 .mc-tip-reason {
     font-size: 0.84rem;
     color: var(--mc-text-muted-strong);
@@ -2638,7 +2654,7 @@
     white-space: nowrap;
 }
 .mc-intel-tile-extra {
-    color: #7d8ca5;
+    color: var(--ink-3);
     font-size: 0.74rem;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
@@ -2807,11 +2823,11 @@
 .mc-th-final    { color: var(--color-success-dark); }
 
 /* ── AVG ENC traffic-light scale ── */
-.mc-encounters-bar.mc-enc-low  .mc-bar-fill { background: #2ecc71; }
+.mc-encounters-bar.mc-enc-low  .mc-bar-fill { background: var(--solid-ok); }
 .mc-encounters-bar.mc-enc-mid  .mc-bar-fill { background: #f1c40f; }
 .mc-encounters-bar.mc-enc-high .mc-bar-fill { background: var(--color-danger); }
 .mc-encounters-bar.mc-enc-low  .mc-encounters-label { color: var(--color-success-dark); }
-.mc-encounters-bar.mc-enc-mid  .mc-encounters-label { color: #b7770a; }
+.mc-encounters-bar.mc-enc-mid  .mc-encounters-label { color: var(--tint-warn-ink); }
 .mc-encounters-bar.mc-enc-high .mc-encounters-label { color: var(--color-danger-dark); }
 
 /* Help cursor on column headers that carry a tooltip — no native
@@ -3125,7 +3141,7 @@
     background: var(--surface-1);
     border-color: #e2e8f0;
 }
-.mc-intel-tile-label { font-size: 0.68rem; color: #8fa3bb; }
+.mc-intel-tile-label { font-size: 0.68rem; color: var(--ink-3); }
 .mc-intel-tile-value { font-size: 0.92rem; }
 
 /* 13. Major chip cleaner */
@@ -3151,7 +3167,7 @@
     padding: 4px 10px;
     margin: 0 0 12px;
     font-size: 0.81rem;
-    color: #5b8db8;
+    color: var(--dv-pos-ink);
     max-width: 100%;
 }
 
@@ -3222,7 +3238,7 @@
         gap: 6px;
         font-size: 0.78rem;
         font-weight: 600;
-        color: #5b8db8;
+        color: var(--dv-pos-ink);
         background: var(--mc-tint-info);
         border: 1px solid #c5daf0;
         border-radius: 6px;

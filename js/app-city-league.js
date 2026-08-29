@@ -931,7 +931,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 decreased.slice(0, 10).forEach(d => {
                     const change = parseInt(d.count_change || 0);
                     const placement_change = parseLocaleNumber(d.avg_placement_change || '0', 0);
-                    const placement_color = placement_change < 0 ? '#27ae60' : '#e74c3c';
+                    const placement_color = placement_change < 0 ? 'var(--tint-ok-ink)' : 'var(--tint-bad-ink)';
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr class="city-league-info-table-row" tabindex="0">
@@ -973,7 +973,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                         <tr class="city-league-info-table-row" tabindex="0">
                             <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count} <span class="city-league-info-table-count-change">(${countChangeText})</span></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-entry">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: #27ae60;">(-${improvement.toFixed(2)})</span></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-entry">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: var(--tint-ok-ink);">(-${improvement.toFixed(2)})</span></td>
                         </tr>`;
                 });
                 html += `</tbody></table></div>`;
@@ -1002,7 +1002,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                         <tr class="city-league-info-table-row" tabindex="0">
                             <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count} <span class="city-league-info-table-count-change">(${countChangeText})</span></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-exit">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: #e74c3c;">(+${decline.toFixed(2)})</span></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-exit">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: var(--tint-bad-ink);">(+${decline.toFixed(2)})</span></td>
                         </tr>`;
                 });
                 html += `</tbody></table></div>`;
@@ -1156,13 +1156,13 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
 
                 data.forEach(d => {
                     const changeValue = parseInt(d.count_change || 0);
-                    const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
+                    const changeColor = changeValue > 0 ? 'var(--tint-ok-ink)' : changeValue < 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     // parseLocaleNumber: avg_placement_change traegt ein deutsches
                     // Komma (Zeile 306 schreibt es mit .replace('.', ',')).
                     // parseFloat('1,25') ergab 1 — die Aenderung wurde auf ganze
                     // Plaetze gerundet und das Vorzeichen entschied ueber die Farbe.
                     const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
-                    const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
+                    const placementColor = placementChange < 0 ? 'var(--tint-ok-ink)' : placementChange > 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
                     const variantsJson = encodeURIComponent(JSON.stringify(d.variants || []));
 
@@ -1192,7 +1192,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             
                 data.forEach(d => {
                     const changeValue = parseInt(d.count_change || 0);
-                    const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
+                    const changeColor = changeValue > 0 ? 'var(--tint-ok-ink)' : changeValue < 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const changeText = changeValue > 0 ? `+${changeValue}` : `${changeValue}`;
                     
                     // parseLocaleNumber: avg_placement_change traegt ein deutsches
@@ -1200,7 +1200,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     // parseFloat('1,25') ergab 1 — die Aenderung wurde auf ganze
                     // Plaetze gerundet und das Vorzeichen entschied ueber die Farbe.
                     const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
-                    const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
+                    const placementColor = placementChange < 0 ? 'var(--tint-ok-ink)' : placementChange > 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const placementText = placementChange > 0 ? `+${placementChange.toFixed(2)}` : placementChange.toFixed(2);
                     
                     // Capitalize first letter
@@ -1250,9 +1250,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 
                 data.forEach(d => {
                     const changeValue = parseInt(d.count_change || 0);
-                    const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
+                    const changeColor = changeValue > 0 ? 'var(--tint-ok-ink)' : changeValue < 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
-                    const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
+                    const placementColor = placementChange < 0 ? 'var(--tint-ok-ink)' : placementChange > 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     
                     tableHTML += `
@@ -1279,11 +1279,11 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             
                 data.forEach(d => {
                     const changeValue = parseInt(d.count_change || 0);
-                    const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
+                    const changeColor = changeValue > 0 ? 'var(--tint-ok-ink)' : changeValue < 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const changeText = changeValue > 0 ? `+${changeValue}` : `${changeValue}`;
                     
                     const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
-                    const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
+                    const placementColor = placementChange < 0 ? 'var(--tint-ok-ink)' : placementChange > 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const placementText = placementChange > 0 ? `+${placementChange.toFixed(2)}` : placementChange.toFixed(2);
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     

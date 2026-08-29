@@ -323,12 +323,12 @@
             
             let html = `
                 <div id="deckCompareContent">
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; color: white;">
+                <div style="background: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%); padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; color: white;">
                     <div style="display:flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <h3 style="margin: 0; font-size: 1.1em;">${oldDeckName} vs Current Deck</h3>
                         <div style="display: flex; gap: 6px;">
                             <button onclick="openCompareScreenshotModal()" style="border: none; border-radius: 6px; padding: 6px 10px; background: rgba(255,255,255,0.25); color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;" title="Screenshot for sharing">Share</button>
-                            <button onclick="addComparisonNewCardsToProxy()" style="border: none; border-radius: 6px; padding: 6px 10px; background: #e74c3c; color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;">Proxy: New Cards</button>
+                            <button onclick="addComparisonNewCardsToProxy()" style="border: none; border-radius: 6px; padding: 6px 10px; background: var(--solid-bad); color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;">Proxy: New Cards</button>
                         </div>
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px;">
@@ -384,7 +384,7 @@
                         const showProxy = group.type === 'new' || (group.type === 'changed' && card.newCount > card.oldCount);
                         const proxyCount = group.type === 'new' ? parseProxyCount(card.newCount, 1) : (card.newCount - card.oldCount);
                         const proxyBtn = showProxy
-                            ? `<button onclick="addCardToProxy('${cardNameEscaped}', '${cardSetEscaped}', '${cardNumberEscaped}', ${proxyCount})" style="margin-top: 4px; border: none; border-radius: 4px; padding: 3px 6px; background: #e74c3c; color: white; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.7em;">+Proxy</button>`
+                            ? `<button onclick="addCardToProxy('${cardNameEscaped}', '${cardSetEscaped}', '${cardNumberEscaped}', ${proxyCount})" style="margin-top: 4px; border: none; border-radius: 4px; padding: 3px 6px; background: var(--solid-bad); color: white; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.7em;">+Proxy</button>`
                             : '';
                         
                         html += `
@@ -449,7 +449,7 @@
                 window._shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
             } catch (e) {
                 console.error('Compare screenshot failed:', e);
-                preview.innerHTML = '<p style="color:#e74c3c;">' + (t('share.screenshotFailed') || 'Screenshot failed') + '</p>';
+                preview.innerHTML = '<p style="color:var(--tint-bad-ink);">' + (t('share.screenshotFailed') || 'Screenshot failed') + '</p>';
             }
         }
 
@@ -738,7 +738,7 @@
 
             let html = `
                 <div id="deckCompareContent">
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; color: white;">
+                <div style="background: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%); padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; color: white;">
                     <div style="display:flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <h3 style="margin: 0; font-size: 1.1em;">Deck A vs Deck B</h3>
                         <button onclick="openCompareScreenshotModal()" style="border: none; border-radius: 6px; padding: 6px 10px; background: rgba(255,255,255,0.25); color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;" title="Screenshot for sharing">Share</button>
@@ -790,7 +790,7 @@
                         const escapedName = (card.name || '').replace(/'/g, "\\'");
                         const escapedSet = (card.set || '').replace(/'/g, "\\'");
                         const escapedNum = (card.number || '').replace(/'/g, "\\'");
-                        const proxyBtn = showProxy ? `<button onclick="addCardToProxy('${escapedName}','${escapedSet}','${escapedNum}',${proxyQty})" style="margin-top:4px;border:none;border-radius:4px;padding:3px 8px;background:#e74c3c;color:white;font-weight:600;cursor:pointer;font-size:0.7em;width:100%;">+${proxyQty} Proxy</button>` : '';
+                        const proxyBtn = showProxy ? `<button onclick="addCardToProxy('${escapedName}','${escapedSet}','${escapedNum}',${proxyQty})" style="margin-top:4px;border:none;border-radius:4px;padding:3px 8px;background:var(--solid-bad);color:white;font-weight:600;cursor:pointer;font-size:0.7em;width:100%;">+${proxyQty} Proxy</button>` : '';
                         html += `
                             <div style="background: white; border: 2px solid ${group.color}; border-radius: 6px; padding: 6px; text-align: center;">
                                 ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" loading="lazy" decoding="async" style="width: 100%; border-radius: 4px; margin-bottom: 4px; aspect-ratio: 2.5/3.5; object-fit: cover;">` : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:#999;">${card.set} ${card.number}</div>`}
@@ -1099,7 +1099,7 @@
             if (!toast) {
                 toast = document.createElement('div');
                 toast.id = 'deckShareToast';
-                toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#27ae60;color:white;padding:14px 28px;border-radius:30px;font-weight:bold;font-size:1em;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.25);opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;';
+                toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--solid-ok);color:white;padding:14px 28px;border-radius:30px;font-weight:bold;font-size:1em;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.25);opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;';
                 document.body.appendChild(toast);
             }
             toast.textContent = msg;
@@ -1460,7 +1460,7 @@
                 section.style.cssText = 'padding:0 30px 20px;background:var(--bg-white);';
                 section.innerHTML = `
                     <details open style="border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:10px;">
-                        <summary style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:12px 20px;cursor:pointer;font-weight:700;font-size:1em;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                        <summary style="background:linear-gradient(135deg,var(--solid-info),#764ba2);color:white;padding:12px 20px;cursor:pointer;font-weight:700;font-size:1em;list-style:none;display:flex;justify-content:space-between;align-items:center;">
                             ${t('chart.metaShareTitle')} <span style="font-size:0.8em;opacity:0.8;">${t('chart.toggle')}</span>
                         </summary>
                         <div style="padding:20px;display:flex;gap:20px;flex-wrap:wrap;justify-content:center;align-items:center;">

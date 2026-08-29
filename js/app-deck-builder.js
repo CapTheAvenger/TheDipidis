@@ -996,7 +996,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         deckCount += deck[key] || 0;
                     }
                 }
-                const countBadge = deckCount > 0 ? '<span style="background:#667eea;color:#fff;padding:1px 7px;border-radius:10px;font-size:0.75em;font-weight:700;margin-left:auto;">' + deckCount + 'x</span>' : '';
+                const countBadge = deckCount > 0 ? '<span style="background:var(--solid-info);color:#fff;padding:1px 7px;border-radius:10px;font-size:0.75em;font-weight:700;margin-left:auto;">' + deckCount + 'x</span>' : '';
 
                 return '<div onclick="addCardToDeck(\'' + source + '\', \'' + safeNameJs + '\', \'' + safeSet + '\', \'' + safeNum + '\'); deckBuilderShowAutocomplete(document.getElementById(\'' + source + 'DeckGridSearch\'), \'' + source + '\')" ' +
                     'style="display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.15s;" ' +
@@ -1647,7 +1647,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // Check if user owns this card (specific print)
                 const cardId = `${safeCardName}|${setCode}|${setNumber}`;
                 const isOwned = window.userCollection && window.userCollection.has(cardId);
-                const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
+                const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #377e39; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
 
                 html += `
                     <div class="deck-card pos-rel" title="${safeCardName} (${count}x) - ${percentage}%">
@@ -2378,7 +2378,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (imageUrl && imageUrl.trim() !== '') {
                     imgHtml = `<img src="${imageUrl}" alt="${card.card_name}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${escapeJsStr(card.card_name)} (${card.set_code || ''} ${card.set_number || ''})');">`;
                 } else {
-                    imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;"></div>`;
+                    imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;"></div>`;
                 }
 
                 const html = `
@@ -2407,7 +2407,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                             </div>
                             
                             <!-- Add button -->
-                            <button class="btn btn-success" style="padding: 4px 8px; font-size: 0.75em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; margin-top: 8px; width: 100%;" onclick="addCardToDeck('cityLeague', '${escapeJsStr(card.card_name)}', '${card.set_code || ''}', '${card.set_number || ''}')" title="${t('deck.addToDeck')}">${t('deck.addToDeck')}</button>
+                            <button class="btn btn-success" style="padding: 4px 8px; font-size: 0.75em; background: #1f8035; color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; margin-top: 8px; width: 100%;" onclick="addCardToDeck('cityLeague', '${escapeJsStr(card.card_name)}', '${card.set_code || ''}', '${card.set_number || ''}')" title="${t('deck.addToDeck')}">${t('deck.addToDeck')}</button>
                         </div>
                     </div>
                 `;
@@ -2528,7 +2528,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     `;
                 } else {
                     return `
-                        <div class="compact-card" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div class="compact-card" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%); color: white;">
                             <div style="text-align: center;">
                                 <div style="font-size: 0.8em; margin-bottom: 5px;">${cardName.substring(0, 15)}</div>
                                 <div class="compact-badge" style="position: static;">${count}</div>
@@ -2975,14 +2975,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // Render canvas
             const canvas = await _buildDeckCanvas(grid, deckName);
             if (!canvas) {
-                preview.innerHTML = '<p style="color:#e74c3c;">' + (getLang() === 'de' ? 'Bild konnte nicht erstellt werden' : 'Could not generate image') + '</p>';
+                preview.innerHTML = '<p style="color:var(--tint-bad-ink);">' + (getLang() === 'de' ? 'Bild konnte nicht erstellt werden' : 'Could not generate image') + '</p>';
                 return;
             }
 
             _shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
 
             if (!_shareImageBlob) {
-                preview.innerHTML = '<p style="color:#e74c3c;">' + (getLang() === 'de' ? 'Bild konnte nicht erstellt werden (Canvas tainted?)' : 'Could not generate image (canvas tainted?)') + '</p>';
+                preview.innerHTML = '<p style="color:var(--tint-bad-ink);">' + (getLang() === 'de' ? 'Bild konnte nicht erstellt werden (Canvas tainted?)' : 'Could not generate image (canvas tainted?)') + '</p>';
                 return;
             }
 

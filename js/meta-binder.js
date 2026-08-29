@@ -1692,7 +1692,7 @@
                         <div class="deck-banner-content">
                             <div class="deck-banner-name">${bannerIcon}${safeName}</div>
                             <div class="deck-banner-stats" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
-                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="${mbText('mb.tooltipLowerRank','Lower rank = better performance')}">${currentMetaLabel}: ${rankText}</span>
+                                <span class="stat-badge rank-performance-hint" style="background:var(--tint-warn);color:var(--tint-warn-ink);" title="${mbText('mb.tooltipLowerRank','Lower rank = better performance')}">${currentMetaLabel}: ${rankText}</span>
                                 <span class="stat-badge">${currentMetaLabel}: ${shareText}</span>
                                 <span class="stat-badge">${mbText('mb.statCityCurrent','City current:')} ${cityCurrentText}</span>
                                 <span class="stat-badge">${mbText('mb.statCityPast','City past:')} ${cityPastText}</span>

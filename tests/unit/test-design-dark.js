@@ -180,7 +180,7 @@ describe('wie weit die Seite dafür ist', () => {
            mitgezaehlt, die Messung im Browser aber nicht — sie las nur
            backgroundColor. Ein Verlauf von Weiss nach Fastweiss ist
            eine weisse Flaeche. */
-        const BASELINE = 295;
+        const BASELINE = 290;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);
@@ -191,8 +191,9 @@ describe('wie weit die Seite dafür ist', () => {
            Am 29.08.2026 auf den gemessenen Stand gesetzt: 212 (von 215
            vor dem Durchgang desselben Tages). Vorher gab es diesen
            Zaehler gar nicht, deshalb keine Reihe frueherer Werte — die
-           faengt hier an. */
-        const BASELINE_INK = 212;
+           faengt hier an. 215 -> 212 -> 182 im Lauf desselben Tages,
+           als die Flat-UI-Palette auf Token umgestellt wurde. */
+        const BASELINE_INK = 182;
         const now = countHardcodedDarkInk();
         assert.ok(now <= BASELINE_INK,
             `fest verdrahtete dunkle Textfarben: ${now} (erlaubt: ${BASELINE_INK})`);
@@ -265,14 +266,56 @@ describe('die Anleitungs-Mockups sind eine helle Insel', () => {
         const iMock = HOWTO.indexOf('.tutorial-mockup .mockup-header');
         assert.ok(iMock > 0, 'Inselanfang nicht gefunden');
         const drinnen = HOWTO.slice(iMock);
-        const benutzt = new Set(
-            [...drinnen.matchAll(/(?<![-a-zA-Z])color:\s*var\((--[a-z0-9-]+)\)/g)].map(m => m[1]));
+        /* Nicht nur Schriften: auch FLAECHEN. Am 29.08.2026 hatte die
+           Insel die vier --tint-*-ink gesetzt, aber nicht die vier
+           --tint-* dazu — hellbrauner Text auf dunkelbrauner Flaeche,
+           2,77:1. Eine Insel, die nur die halbe Familie festhaelt, ist
+           schlimmer als gar keine, weil sie die andere Haelfte still
+           drehen laesst. */
+        const benutzt = new Set([
+            ...[...drinnen.matchAll(/(?<![-a-zA-Z])color:\s*var\((--[a-z0-9-]+)\)/g)].map(m => m[1]),
+            ...[...drinnen.matchAll(/background(?:-color)?:\s*var\((--[a-z0-9-]+)\)/g)].map(m => m[1]),
+        ]);
         const gesetzt = new Set(
             [...insel.matchAll(/(--[a-z0-9-]+):/g)].map(m => m[1]));
-        const fehlt = [...benutzt].filter(t => !gesetzt.has(t));
+        /* Nur Token, die im Dunkelmodus ueberhaupt einen anderen Wert
+           bekommen, muessen hier festgehalten werden. --solid-* und
+           --on-light/--on-dark sind absichtlich modusunabhaengig: sie
+           faerben Flaechen, die selbst nicht drehen. Sie in der Insel
+           zu verlangen waere Buchhaltung ohne Wirkung. */
+        const TOK = fs.readFileSync(path.join(ROOT, 'css', 'tokens.css'), 'utf8');
+        const dunkelBlock = TOK.slice(TOK.indexOf('[data-theme="dark"]'));
+        const dreht = t => new RegExp('\\' + t + ':').test(dunkelBlock);
+        const fehlt = [...benutzt].filter(t => dreht(t) && !gesetzt.has(t));
         assert.deepEqual(fehlt, [],
             'als Textfarbe benutzt, aber in der Insel nicht neu gesetzt — '
             + 'diese Token behalten drinnen ihren Dunkelmodus-Wert: ' + fehlt.join(', '));
+    });
+
+    it('ihre Werte sind dieselben wie im hellen Grundsatz', () => {
+        /* Die Insel schreibt die HELLEN Werte noch einmal hin — anders
+           geht es nicht, CSS kann einen Token nicht "auf den Grundwert
+           zuruecksetzen". Damit ist sie eine Kopie, und Kopien laufen
+           auseinander: am 29.08.2026 wurde --tint-ok-ink von #15803d auf
+           #137337 nachgezogen, die Insel behielt den alten Wert, und die
+           Mockup-Chips standen wieder unter der Grenze.
+
+           Diese Zusage haelt beide Seiten zusammen: jeder Token, den die
+           Insel setzt, muss den Wert haben, den :root ihm im Hellen gibt. */
+        const TOK = fs.readFileSync(path.join(ROOT, 'css', 'tokens.css'), 'utf8');
+        const iDunkel = TOK.indexOf('[data-theme="dark"]');
+        const hell = iDunkel > 0 ? TOK.slice(0, iDunkel) : TOK;
+        const abweichungen = [];
+        for (const m of insel.matchAll(/(--[a-z0-9-]+):\s*([^;]+);/g)) {
+            const [, name, wert] = m;
+            const r = hell.match(new RegExp('\\' + name + ':\\s*([^;]+);'));
+            if (!r) continue;
+            if (r[1].trim() !== wert.trim()) {
+                abweichungen.push(`${name}: Insel ${wert.trim()} vs :root ${r[1].trim()}`);
+            }
+        }
+        assert.deepEqual(abweichungen, [],
+            'die Insel ist von den Grundwerten abgedriftet:\n' + abweichungen.join('\n'));
     });
 
     it('der Bereich ausserhalb der Mockups laeuft dagegen ueber Token', () => {

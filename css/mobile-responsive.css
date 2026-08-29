@@ -2520,8 +2520,8 @@
   letter-spacing: -0.2px;
 }
 .my-deck-card-btn--market-na { cursor: not-allowed; opacity: 0.7; }
-.my-deck-card-btn--coll       { background: #95a5a6; font-size: 12px; }
-.my-deck-card-btn--coll-owned { background: #27ae60; }
+.my-deck-card-btn--coll       { background: var(--solid-neutral); font-size: 12px; }
+.my-deck-card-btn--coll-owned { background: var(--solid-ok); }
 .my-deck-card-btn--coll-tiny  { font-size: var(--fs-xs); }
 .my-deck-card-btn--wish       { background: #bdc3c7; font-size: 11px; }
 .my-deck-card-btn--wish-on    { background: #E91E63; }

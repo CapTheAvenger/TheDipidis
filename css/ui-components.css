@@ -90,7 +90,7 @@ img[src*="limitlesstcg"] {
     padding: 8px 12px 4px;
     font-size: 0.8em;
     font-weight: 700;
-    color: #64748b;
+    color: var(--ink-3);
     text-transform: uppercase;
     letter-spacing: 0.03em;
     background: #f1f5f9;
@@ -179,7 +179,7 @@ img[src*="limitlesstcg"] {
         content: attr(data-label);
         font-weight: 700;
         font-size: 0.82em;
-        color: #6b7280;
+        color: var(--ink-3);
         flex-shrink: 0;
         min-width: 90px;
     }
@@ -235,7 +235,7 @@ img[src*="limitlesstcg"] {
 }
 .empty-state-desc {
     font-size: 0.92em;
-    color: #6b7280;
+    color: var(--ink-3);
     max-width: 340px;
     margin: 0 0 18px 0;
     line-height: 1.5;
@@ -327,7 +327,7 @@ img[src*="limitlesstcg"] {
 .loading-indicator-msg {
     font-size: 0.95em;
     font-weight: 700;
-    color: #6b7280;
+    color: var(--ink-3);
     margin-bottom: 14px;
 }
 .loading-indicator-bar {
@@ -545,7 +545,7 @@ img[src*="limitlesstcg"] {
     font-weight: 500 !important;
 }
 .meta-card-list-badge {
-    background: #28a745 !important;
+    background: #1f8035 !important;
     color: #fff !important;
     padding: 2px 6px !important;
     border-radius: 10px !important;
@@ -649,7 +649,7 @@ img[src*="limitlesstcg"] {
 .card-badge-top-left {
     top: 5px !important;
     left: 5px !important;
-    background: #28a745 !important;
+    background: #1f8035 !important;
     color: white !important;
 }
 
@@ -693,7 +693,7 @@ img[src*="limitlesstcg"] {
 }
 /* Modular utility class for live price button (used in app-price.js) */
 .price-btn-live {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    background: linear-gradient(135deg, #0b7f58 0%, #047f59 100%) !important;
     color: #fff !important;
     box-shadow: 0 0 8px rgba(16, 185, 129, 0.5) !important;
     cursor: pointer !important;
@@ -899,7 +899,7 @@ img[src*="limitlesstcg"] {
     margin-top: 15px !important;
 }
 .btn-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    background: linear-gradient(135deg, #0b7f58 0%, #047f59 100%) !important;
     color: #fff !important;
     box-shadow: 0 0 8px rgba(16, 185, 129, 0.5) !important;
     cursor: pointer !important;
@@ -923,9 +923,16 @@ img[src*="limitlesstcg"] {
     display: flex !important;
     gap: 10px !important;
 }
+/* 29.08.2026: .rarity-badge steht in ZWEI Dateien. styles.css gibt ihr
+   Gold als Flaeche und #333 als Schrift — ein stimmiges Paar. Diese
+   Regel hier ueberschrieb davon nur die Schrift, mit !important, und
+   liess das Gold stehen: weiss auf Gold, 1,73:1, der schlechteste Wert
+   der ganzen Anwendung. Wieder eine Doppeldefinition, die man beim
+   Lesen einer der beiden Stellen nicht sieht.
+   Auf Gold traegt --ink 10,07:1. */
 .rarity-badge {
     border-radius: 6px !important;
-    color: #fff !important;
+    color: var(--on-light) !important;
     text-align: center !important;
     font-weight: 700 !important;
     font-size: 14px !important;
@@ -936,7 +943,7 @@ img[src*="limitlesstcg"] {
 .card-database-price-btn {
     display: block !important;
     padding: 8px !important;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%) !important;
     color: white !important;
     border-radius: 6px !important;
     text-align: center !important;
@@ -957,7 +964,7 @@ img[src*="limitlesstcg"] {
     position: absolute !important;
     top: 5px !important;
     left: 5px !important;
-    background: #4CAF50 !important;
+    background: #377e39 !important;
     color: white !important;
     width: 30px !important;
     height: 30px !important;
@@ -1045,7 +1052,7 @@ img[src*="limitlesstcg"] {
     color: white !important;
 }
 .card-badge-green {
-    background: #28a745 !important;
+    background: #1f8035 !important;
     color: white !important;
 }
 /* Absolute-position helpers for card badges (top-right / top-left) */
@@ -1308,13 +1315,13 @@ img[src*="limitlesstcg"] {
 .maxh-90vh { max-height: 90vh !important; }
 .color-white { color: #fff !important; }
 /* ptHandActionBar Judge/Iono/Opp Utility Classes */
-.color-green { color: #2ecc71 !important; }
+.color-green { color: var(--tint-ok-ink) !important; }
 .ml-2 { margin-left: 2px !important; }
-.bg-green { background: #27ae60 !important; }
+.bg-green { background: var(--solid-ok) !important; }
 .border-green { border-color: #2ecc71 !important; }
 .color-yellow-light { color: #f1c40f !important; }
 .bg-orange { background: #f39c12 !important; }
-.color-red { color: #e74c3c !important; }
+.color-red { color: var(--tint-bad-ink) !important; }
 .bg-red-dark { background: #c0392b !important; }
 .border-red { border-color: #e74c3c !important; }
 /* ptHandActionBar Utility Classes */
@@ -1436,7 +1443,7 @@ img[src*="limitlesstcg"] {
 .my-8 { margin: 8px 0 !important; }
 .pt-12 { padding-top: 12px !important; }
 /* ptDirectActionModal Additional Utility Classes */
-.bg-red { background: #e74c3c !important; }
+.bg-red { background: var(--solid-bad) !important; }
 .bg-grey-light { background: var(--surface-2) !important; }
 .mt-5 { margin-top: 5px !important; }
 .py-12 { padding-top: 12px !important; padding-bottom: 12px !important; }
@@ -1449,7 +1456,7 @@ img[src*="limitlesstcg"] {
 .bg-orange { background: #f39c12 !important; }
 .color-white { color: #fff !important; }
 /* Deck Compare Modal Utility Classes */
-.bg-gradient-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+.bg-gradient-blue { background: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%) !important; }
 .border-1-blue { border: 1px solid #b3d9ff !important; }
 .color-blue-dark { color: #004085 !important; }
 .fs-95 { font-size: 0.95em !important; }
@@ -1480,7 +1487,7 @@ img[src*="limitlesstcg"] {
 .mt-20 { margin-top: 20px; }
 .mt--12 { margin-top: -12px; }
 .ta-center { text-align: center; }
-.color-blue { color: #3498db; }
+.color-blue { color: var(--dv-pos-ink); }
 
 .bg-white { background: #fff; }
 .bg-none { background: none; }
@@ -1521,7 +1528,7 @@ img[src*="limitlesstcg"] {
 .select-orange { border: 2px solid #FF9800 !important; }
 .fs-15 { font-size: 15px !important; }
 .minw-160 { min-width: 160px !important; }
-.btn-gradient-green { background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%) !important; border: none !important; }
+.btn-gradient-green { background: linear-gradient(135deg, var(--solid-ok) 0%, #1e8449 100%) !important; border: none !important; }
 .box-shadow-green { box-shadow: 0 3px 10px rgba(39,174,96,0.35) !important; }
 .collection-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px !important; }
 .w-100 { width: 100% !important; }
@@ -1547,8 +1554,8 @@ img[src*="limitlesstcg"] {
 .fs-12 { font-size: 12px !important; }
 .minw-260 { min-width: 260px !important; }
 .minw-280 { min-width: 280px !important; }
-.btn-gradient-blue { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%) !important; border: none !important; }
-.btn-gradient-red { background: linear-gradient(135deg,#e74c3c 0%,#c0392b 100%) !important; border: none !important; }
+.btn-gradient-blue { background: linear-gradient(135deg,var(--solid-info) 0%,#764ba2 100%) !important; border: none !important; }
+.btn-gradient-red { background: linear-gradient(135deg,var(--solid-bad) 0%,#c0392b 100%) !important; border: none !important; }
 .box-shadow-red { box-shadow: 0 3px 10px rgba(231,76,60,0.35) !important; }
 .px-16 { padding-left: 16px !important; padding-right: 16px !important; }
 .fs-13 { font-size: 13px !important; }
@@ -1579,7 +1586,7 @@ img[src*="limitlesstcg"] {
 .fs-120 { font-size: 1.2em !important; }
 .opacity-90 { opacity: 0.9 !important; }
 .support-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%) !important;
     color: #fff !important;
     padding: 20px !important;
     border-radius: 12px !important;
@@ -1608,7 +1615,7 @@ img[src*="limitlesstcg"] {
 .my-5 { margin: 5px 0 !important; }
 .lh-19 { line-height: 1.9 !important; }
 .badge-gold { background: #FFD700 !important; padding: 2px 8px !important; border-radius: 4px !important; color: #000 !important; }
-.badge-red { background: #ee5a24 !important; padding: 2px 8px !important; border-radius: 4px !important; color: #fff !important; }
+.badge-red { background: #c7410f !important; padding: 2px 8px !important; border-radius: 4px !important; color: #fff !important; }
 .badge-green { background: #55efc4 !important; padding: 2px 8px !important; border-radius: 4px !important; color: #000 !important; }
 /* 29.08.2026: .color-grey stand FUENFMAL in dieser Datei, mit vier
    verschiedenen Werten (#ccc, #666, #666, #555, #555). Im Stylesheet
@@ -1632,8 +1639,8 @@ img[src*="limitlesstcg"] {
 .m-0 { margin: 0 !important; }
 .mb-8 { margin-bottom: 8px !important; }
 .mt-15 { margin-top: 15px !important; }
-.color-blue { color: #3498db !important; }
-.color-green { color: #2ecc71 !important; }
+.color-blue { color: var(--dv-pos-ink) !important; }
+.color-green { color: var(--tint-ok-ink) !important; }
 .color-dark { color: var(--ink) !important; }
 .mt-0 { margin-top: 0 !important; }
 .lh-17 { line-height: 1.7 !important; }
@@ -1728,7 +1735,7 @@ img[src*="limitlesstcg"] {
     justify-content: center;
     font-size: 13px;
     line-height: 1;
-    color: white;
+    color: var(--ink);
     background: #F48FB1;
     border: 1.5px solid rgba(255,255,255,0.5);
     box-shadow: 0 2px 6px rgba(0,0,0,0.25);
@@ -1767,7 +1774,7 @@ img[src*="limitlesstcg"] {
     z-index: 4 !important;
     cursor: help;
     background: #f59e0b !important;
-    color: #fff !important;
+    color: var(--ink) !important;
     font-weight: 800 !important;
     font-size: 0.6em !important;
     border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
@@ -1994,7 +2001,7 @@ img[src*="limitlesstcg"] {
 }
 .city-league-card-pin-btn.is-active {
     background: linear-gradient(135deg, #facc15 0%, #d97706 100%);
-    color: #1f2937;
+    color: var(--ink);
     filter: none;
     box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.6) inset;
 }
@@ -2008,7 +2015,7 @@ img[src*="limitlesstcg"] {
     top: 4px;
     left: 4px;
     background: linear-gradient(135deg, #facc15 0%, #d97706 100%);
-    color: #1f2937;
+    color: var(--ink);
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -2037,7 +2044,7 @@ img[src*="limitlesstcg"] {
     filter: none;
 }
 .city-league-card-exclude-btn.is-active {
-    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+    background: linear-gradient(135deg, #de1313 0%, #991b1b 100%);
     color: #ffffff;
     filter: none;
     box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.6) inset;
@@ -2055,7 +2062,7 @@ img[src*="limitlesstcg"] {
     position: absolute;
     top: 4px;
     left: 30px;
-    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+    background: linear-gradient(135deg, #de1313 0%, #991b1b 100%);
     color: #ffffff;
     width: 22px;
     height: 22px;
@@ -2193,7 +2200,7 @@ img[src*="limitlesstcg"] {
     position: absolute;
     top: 5px;
     left: 5px;
-    background: #28a745;
+    background: #1f8035;
     color: white;
     border-radius: 50%;
     width: 24px;
@@ -2266,7 +2273,7 @@ img[src*="limitlesstcg"] {
 .city-league-card-actions .city-league-card-proxy-btn {
     padding: 10px 20px;
     white-space: nowrap;
-    background: #e74c3c;
+    background: var(--solid-bad);
     border-color: #c0392b;
 }
 
@@ -2724,7 +2731,7 @@ img[src*="limitlesstcg"] {
 
 .city-league-info-table-cell-main-desktop,
 .city-league-info-table-cell-main-mobile {
-    color: #1f2d3d;
+    color: var(--ink);
     text-decoration: none;
 }
 
@@ -2891,7 +2898,7 @@ img[src*="limitlesstcg"] {
 }
 
 .city-league-info-table-cell-main-desktop {
-    color: #1f2d3d !important;
+    color: var(--ink) !important;
     text-decoration: none;
     font-weight: 700;
 }
@@ -2986,7 +2993,7 @@ img[src*="limitlesstcg"] {
     margin-bottom: 16px;
 }
 .city-league-info-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%);
     color: white;
     padding: 16px;
     border-radius: 12px;
@@ -3398,13 +3405,13 @@ img[src*="limitlesstcg"] {
 }
 .modal-dialog .modal-btn-ok {
     border: none;
-    background: #667eea;
+    background: var(--solid-info);
     color: #fff;
     font-weight: 600;
 }
 .modal-dialog .modal-btn-copy {
     border: none;
-    background: #28a745;
+    background: #1f8035;
     color: #fff;
     font-weight: 600;
 }
@@ -3413,7 +3420,7 @@ img[src*="limitlesstcg"] {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    background: linear-gradient(135deg, var(--solid-bad) 0%, #c0392b 100%);
     color: white;
     padding: 12px 16px;
     border-radius: 10px;
@@ -3531,7 +3538,7 @@ img[src*="limitlesstcg"] {
 }
 .proxy-queue-card .proxy-queue-card-controls .btn-plus {
     border: none;
-    background: #28a745;
+    background: #1f8035;
     color: white;
     min-width: 34px;
 }
@@ -3631,7 +3638,7 @@ img[src*="limitlesstcg"] {
    Primary, Secondary, Danger, Ghost
    ==================================== */
 .btn-system-primary {
-    background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+    background: linear-gradient(135deg, var(--solid-ok) 0%, #1e8449 100%);
     color: #fff;
     font-weight: 700;
     border: none;
@@ -3796,7 +3803,7 @@ img[src*="limitlesstcg"] {
     padding: 3px 10px;
     border: none;
     border-radius: 12px;
-    background: #2ecc71;
+    background: var(--solid-ok);
     color: #000;
     font-size: 11px;
     font-weight: 700;
@@ -3805,7 +3812,7 @@ img[src*="limitlesstcg"] {
     cursor: pointer;
 }
 .draw-sim-combo-badge:hover {
-    background: #27ae60;
+    background: var(--solid-ok);
 }
 .draw-sim-combo-badge:focus-visible {
     outline: 2px solid #fff;
@@ -3822,7 +3829,7 @@ img[src*="limitlesstcg"] {
     margin-left: auto;
     font-size: 1.1em;
     font-weight: 700;
-    color: #2ecc71;
+    color: var(--tint-ok-ink);
 }
 /* Wonach gerechnet wurde, steht unter der Zahl. Der Unterschied zwischen
    einer Rechnung mit und ohne Mulligan-Regel betraegt bis zu drei
@@ -3856,7 +3863,7 @@ img[src*="limitlesstcg"] {
     padding-bottom: 10px;
 }
 .setup-modal-heading.blue { color: #3B4CCA; }
-.setup-modal-heading.green { color: #27ae60; }
+.setup-modal-heading.green { color: var(--tint-ok-ink); }
 .setup-modal-description {
     margin-bottom: 15px;
     color: var(--ink-2);
@@ -3996,17 +4003,17 @@ img[src*="limitlesstcg"] {
     display: block;
     font-size: 1.5rem;
     font-weight: 800;
-    color: var(--text-dark, #1f2d3d);
+    color: var(--text-dark, var(--ink));
 }
 
-.meta-binder-stat-green { color: #27ae60; }
-.meta-binder-stat-red { color: #e74c3c; }
+.meta-binder-stat-green { color: var(--tint-ok-ink); }
+.meta-binder-stat-red { color: var(--tint-bad-ink); }
 
 .meta-binder-stat-label {
     display: block;
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--text-light, #6c757d);
+    color: var(--text-light, var(--ink-3));
     margin-top: 2px;
 }
 
@@ -4114,7 +4121,7 @@ img[src*="limitlesstcg"] {
 
 .meta-binder-delta-text {
     font-size: 0.85rem;
-    color: var(--text-light, #6c757d);
+    color: var(--text-light, var(--ink-3));
     line-height: 1.5;
 }
 
@@ -4160,7 +4167,7 @@ img[src*="limitlesstcg"] {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.15s ease;
-    color: var(--text-dark, #1f2d3d);
+    color: var(--text-dark, var(--ink));
 }
 
 .meta-binder-filter-btn:hover {
@@ -4278,16 +4285,16 @@ img[src*="limitlesstcg"] {
     border: 1.5px solid rgba(0,0,0,0.15) !important;
 }
 .meta-binder-card .card-database-top-actions .btn-green.card-badge {
-    background: #28a745 !important;
-    color: #fff !important;
+    background: #1f8035 !important;
+    color: var(--ink) !important;
 }
 .meta-binder-card .card-database-top-actions .btn-red.card-badge {
     background: #dc3545 !important;
-    color: #fff !important;
+    color: var(--ink) !important;
 }
 .meta-binder-card .card-database-top-actions .btn-wishlist.card-badge {
     background: #F48FB1 !important;
-    color: #fff !important;
+    color: var(--ink) !important;
     border-color: #F48FB1 !important;
 }
 
@@ -4296,7 +4303,7 @@ img[src*="limitlesstcg"] {
     width: 100%;
     padding: 4px 0;
     border: none;
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, var(--solid-info), var(--solid-info));
     color: #fff;
     font-size: 0.68rem;
     font-weight: 700;
@@ -4305,7 +4312,7 @@ img[src*="limitlesstcg"] {
     transition: background 0.2s;
 }
 .meta-binder-prints-btn:hover {
-    background: linear-gradient(135deg, #2980b9, #1a6da0);
+    background: linear-gradient(135deg, var(--solid-info), #1a6da0);
 }
 
 .meta-binder-card-fallback {
@@ -4317,7 +4324,7 @@ img[src*="limitlesstcg"] {
     padding: 10px;
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--text-dark, #1f2d3d);
+    color: var(--text-dark, var(--ink));
     background: #f0f4ff;
 }
 
@@ -4337,9 +4344,9 @@ img[src*="limitlesstcg"] {
 .calc-input:focus { border-color: var(--pokemon-blue, #3498db); outline: none; }
 .calc-results { display: flex; flex-direction: column; gap: 14px; }
 .calc-result-card { border-radius: 12px; padding: 20px; text-align: center; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
-.calc-result-draw { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-.calc-result-prize { background: linear-gradient(135deg, #c0392b, #e74c3c); }
-.calc-result-topdeck { background: linear-gradient(135deg, #2980b9, #3498db); }
+.calc-result-draw { background: linear-gradient(135deg, var(--solid-ok), var(--solid-ok)); }
+.calc-result-prize { background: linear-gradient(135deg, #c0392b, var(--solid-bad)); }
+.calc-result-topdeck { background: linear-gradient(135deg, var(--solid-info), var(--solid-info)); }
 .calc-result-label { font-size: 0.85rem; opacity: .85; margin-bottom: 6px; }
 .calc-result-value { font-size: 2.4rem; font-weight: 800; line-height: 1.1; }
 .calc-result-note { font-size: 0.7rem; opacity: .7; margin-top: 4px; }
@@ -4364,19 +4371,19 @@ img[src*="limitlesstcg"] {
 }
 
 .meta-binder-card-need {
-    color: var(--text-dark, #1f2d3d);
+    color: var(--text-dark, var(--ink));
 }
 
 .meta-binder-count-ok {
-    color: #27ae60;
+    color: var(--tint-ok-ink);
 }
 
 .meta-binder-count-intl {
-    color: #2980b9;
+    color: var(--dv-pos-ink);
 }
 
 .meta-binder-count-missing {
-    color: #e74c3c;
+    color: var(--tint-bad-ink);
 }
 
 .meta-binder-badge-new {
@@ -4424,7 +4431,7 @@ img[src*="limitlesstcg"] {
 .pt-attack-player-label.blue { color: #3B4CCA; }
 
 /* Energy discard button in context menu (was inline) */
-.pt-menu-btn.energy-discard { background: #e67e22; color: #fff; }
+.pt-menu-btn.energy-discard { background: #aa5a13; color: #fff; }
 .pt-menu-btn.retreat-btn { background: #c0392b; color: #fff; }
 .pt-menu-btn.ko-btn { flex: 1; font-weight: 800; }
 
@@ -4474,7 +4481,7 @@ img[src*="limitlesstcg"] {
 .custom-binder-dropdown-loading,
 .custom-binder-dropdown-empty {
     padding: 12px 16px;
-    color: var(--text-light, #6c757d);
+    color: var(--text-light, var(--ink-3));
     font-size: 0.85rem;
     text-align: center;
 }
@@ -4485,7 +4492,7 @@ img[src*="limitlesstcg"] {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--text-light, #6c757d);
+    color: var(--text-light, var(--ink-3));
     border-top: 1px solid var(--border-color, #eee);
     margin-top: 2px;
 }
@@ -4504,7 +4511,7 @@ img[src*="limitlesstcg"] {
     text-align: left;
     font-size: 0.85rem;
     cursor: pointer;
-    color: var(--text-dark, #1f2d3d);
+    color: var(--text-dark, var(--ink));
     transition: background 0.1s;
 }
 
@@ -4589,13 +4596,13 @@ img[src*="limitlesstcg"] {
 .cb-mpg-name {
     font-size: 0.82rem;
     font-weight: 700;
-    color: var(--text-dark, #1f2d3d);
+    color: var(--text-dark, var(--ink));
     line-height: 1.2;
 }
 
 .cb-mpg-meta {
     font-size: 0.65rem;
-    color: var(--text-light, #6c757d);
+    color: var(--text-light, var(--ink-3));
 }
 
 .custom-binder-chips {
@@ -4616,7 +4623,7 @@ img[src*="limitlesstcg"] {
     border-radius: 16px;
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--text-dark, #1f2d3d);
+    color: var(--text-dark, var(--ink));
     white-space: nowrap;
 }
 
@@ -4712,7 +4719,7 @@ img[src*="limitlesstcg"] {
 
 .cb-preset-delete:hover {
     background: rgba(231,76,60,0.12);
-    color: #e74c3c;
+    color: var(--tint-bad-ink);
 }
 
 /* ── .toolbar-action ─ unified pill button for Wishlist / Tradelist /
@@ -4797,7 +4804,7 @@ img[src*="limitlesstcg"] {
     border-radius: 14px;
     background: linear-gradient(135deg, #f8fbff 0%, #eff6ff 100%);
     text-align: center;
-    color: #1f2937;
+    color: var(--ink);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 .empty-state__icon {
@@ -4822,7 +4829,7 @@ img[src*="limitlesstcg"] {
     margin: 0 auto 14px;
     max-width: 460px;
     font-size: 0.94rem;
-    color: #4b5563;
+    color: var(--ink-2);
     line-height: 1.45;
 }
 .empty-state__cta {
@@ -4945,7 +4952,7 @@ img[src*="limitlesstcg"] {
     border: none;
     border-radius: 0 0 10px 10px;
     background: #f0a020;
-    color: #fff;
+    color: var(--ink);
     font-weight: 800;
     font-size: 0.88rem;
     cursor: pointer;
@@ -5018,7 +5025,7 @@ img[src*="limitlesstcg"] {
 .deck-bench-main { flex: 1 1 auto; min-width: 0; }
 .deck-bench-name { display: block; font-weight: 700; font-size: 0.92rem; }
 .deck-bench-set { display: block; font-size: 0.75rem; color: var(--ink-3); }
-.deck-bench-ace { color: #e65100; font-weight: 700; }
+.deck-bench-ace { color: var(--tint-warn-ink); font-weight: 700; }
 .deck-bench-bar {
     display: block;
     height: 5px;

@@ -92,7 +92,7 @@
     place-items: center;
     width: 30px;
     height: 34px;
-    background: #e3350d;
+    background: #d2310c;
     clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
     color: #fff;
     font-family: var(--font-num);

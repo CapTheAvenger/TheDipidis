@@ -1424,6 +1424,27 @@ const translations = {
     'bj.typeCup':               'Cup',
     'bj.typeOnline':            'Online',
     'bj.typeTesting':           'Testing',
+    // Die Hilfsfunktionen battleJournalText/cbText/mbText fallen bei
+    // Fehltreffer auf ihren fest eingebauten ENGLISCHEN zweiten
+    // Parameter zurueck. Diese elf Schluessel fehlten — der deutsche
+    // Nutzer bekam "Add match", "Delete this match entry?",
+    // "Image saved!". Elf davon liegen im Bearbeiten-Fluss des Battle
+    // Journals, den derselbe Nutzer oft laeuft.
+    // Am 29.08.2026 im angemeldeten Chrome gemessen: alle 14 fehlten.
+    'bj.addMatch':              'Add match',
+    'bj.editEntry':             'Edit',
+    'bj.deleteEntry':           'Delete',
+    'bj.imageSaved':            'Image saved!',
+    'bj.editNameRequired':      'Tournament name is required.',
+    'bj.editError':             'Error saving changes.',
+    'bj.editSaved':             'Tournament updated!',
+    'bj.editDeckRequired':      'Deck and opponent are required.',
+    'bj.editEntrySaved':        'Match updated!',
+    'bj.deleteEntryConfirm':    'Delete this match entry?',
+    'bj.entryDeleted':          'Entry deleted.',
+    'mb.newThisWeek':           'New This Week',
+    'mb.printsBtnLabel':        'Versions',
+    'mb.buildError':            'Could not build the binder — please try again.',
 
     // ── Matchup Analysis ────────────────────────────────────
     'ma.matches':               'Matches',
@@ -3549,6 +3570,21 @@ const translations = {
     'bj.typeCup':               'Cup',
     'bj.typeOnline':            'Online',
     'bj.typeTesting':           'Testing',
+    // Siehe die Begruendung im englischen Block.
+    'bj.addMatch':              'Match hinzufügen',
+    'bj.editEntry':             'Bearbeiten',
+    'bj.deleteEntry':           'Löschen',
+    'bj.imageSaved':            'Bild gespeichert!',
+    'bj.editNameRequired':      'Der Turniername fehlt.',
+    'bj.editError':             'Änderungen konnten nicht gespeichert werden.',
+    'bj.editSaved':             'Turnier aktualisiert!',
+    'bj.editDeckRequired':      'Deck und Gegner fehlen.',
+    'bj.editEntrySaved':        'Match aktualisiert!',
+    'bj.deleteEntryConfirm':    'Diesen Match-Eintrag löschen?',
+    'bj.entryDeleted':          'Eintrag gelöscht.',
+    'mb.newThisWeek':           'Neu diese Woche',
+    'mb.printsBtnLabel':        'Prints',
+    'mb.buildError':            'Der Binder konnte nicht gebaut werden — bitte noch einmal versuchen.',
 
     // ── Matchup-Analyse ─────────────────────────────────────
     'ma.matches':               'Matches',

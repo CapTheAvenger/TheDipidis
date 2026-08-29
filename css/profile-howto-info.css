@@ -1,3 +1,21 @@
+/* ── Feste dunkle Textfarben -> Token (29.08.2026) ────────────────
+ *
+ * Gemessen im Dunkelmodus: 569 Textstellen allein in der Anleitung unter
+ * der WCAG-Grenze, die meisten bei 1,21:1 — dunkelgrau auf dunkelblau,
+ * praktisch unsichtbar. Ursache waren 25 Regeln oberhalb des
+ * Mockup-Bereichs, die ihre Textfarbe fest gesetzt hatten, waehrend die
+ * Flaechen darunter laengst ueber Token liefen.
+ *
+ * Das ist der Spiegel des Fehlers vom 28.08., wo ich nur die FLAECHEN
+ * umgestellt hatte und dunkle Schrift auf dunklem Grund stehen liess.
+ * Diesmal andersherum: die Flaechen waren schon Token, die Schrift nicht.
+ *
+ * --pokemon-blue (#3B4CCA) als Textfarbe wurde zu --brand-ink: dieselbe
+ * Marke, aber die Variante, die im Dunkelmodus aufhellt (2,58:1 -> lesbar).
+ *
+ * Der Mockup-Bereich weiter unten bleibt bewusst ausgenommen — er ist
+ * eine helle Insel (siehe die Notiz am Dateiende). */
+
 /*
  * Modular CSS for Profile and How to Use Info blocks
  * Extracted from inline styles in index.html
@@ -12,7 +30,7 @@
     box-shadow: 0 2px 8px rgba(59, 76, 202, 0.06);
 }
 .profile-info-block .profile-info-title {
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
     margin-top: 0;
     font-weight: 800;
 }
@@ -68,7 +86,9 @@
     padding: 28px 28px 30px;
     margin: 0 0 24px;
     border-radius: 18px;
-    background: linear-gradient(140deg, #ffffff 0%, #f8fafc 100%);
+    /* 29.08.2026: der Verlauf stand fest auf Weiss. Als background-IMAGE
+       rutschte er durch jede Zaehlung, die nur backgroundColor liest. */
+    background: linear-gradient(140deg, var(--surface-1) 0%, var(--surface-2) 100%);
     box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
     border: 1px solid rgba(15, 23, 42, 0.05);
     align-items: center;
@@ -164,7 +184,7 @@
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
     background: rgba(59, 76, 202, 0.08);
     padding: 4px 10px;
     border-radius: 999px;
@@ -173,13 +193,13 @@
 .feature-banner-title {
     font-size: 1.6rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--ink);
     margin: 0 0 8px;
     line-height: 1.15;
 }
 .feature-banner-tagline {
     font-size: 1rem;
-    color: #475569;
+    color: var(--ink-2);
     line-height: 1.55;
     margin: 0 0 18px;
 }
@@ -196,7 +216,7 @@
     padding-left: 22px;
     font-size: 0.94rem;
     line-height: 1.5;
-    color: #1e293b;
+    color: var(--ink);
 }
 .feature-banner-bullets li::before {
     content: '';
@@ -209,7 +229,7 @@
     background: linear-gradient(135deg, var(--pokemon-blue, #3B4CCA), var(--pokemon-yellow, #FFCB05));
 }
 .feature-banner-bullets li strong {
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
     font-weight: 700;
 }
 .feature-banner-protip {
@@ -219,11 +239,11 @@
     border-left: 3px solid var(--pokemon-yellow, #FFCB05);
     border-radius: 6px;
     font-size: 0.88rem;
-    color: #5c4a00;
+    color: var(--tint-warn-ink);
     line-height: 1.5;
 }
 .feature-banner-protip strong {
-    color: #8a6500;
+    color: var(--tint-warn-ink);
 }
 
 /* Cover image fallback caption while screenshots are loading or 404 */
@@ -252,7 +272,7 @@
     font-weight: 800;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #64748b;
+    color: var(--ink-3);
 }
 .feature-section-divider::before,
 .feature-section-divider::after {
@@ -270,7 +290,7 @@
     margin: 18px 0 36px;
 }
 .quickstart-step {
-    background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--tint-info) 0%, var(--surface-1) 100%);
     border: 1px solid rgba(59, 76, 202, 0.10);
     border-radius: 14px;
     padding: 22px 22px 24px;
@@ -289,14 +309,14 @@
 .quickstart-step h3 {
     margin: 0 0 8px;
     font-size: 1.05rem;
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
     font-weight: 800;
 }
 .quickstart-step p {
     margin: 0;
     font-size: 0.88rem;
     line-height: 1.55;
-    color: #334155;
+    color: var(--ink-2);
 }
 
 /* Hero block at the top */
@@ -355,7 +375,11 @@
 
 /* Closing CTA */
 .tutorial-cta {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    /* Bernstein bleibt Bernstein — das ist ein Akzent, keine Flaeche.
+       Aber die Schrift darin erbte im Dunkelmodus das helle --ink und
+       verschwand. Deshalb steht hier eine eigene, dunkle Textfarbe. */
+    color: var(--tint-warn-ink);
+    background: linear-gradient(135deg, var(--tint-warn) 0%, var(--tint-warn) 100%);
     border-radius: 16px;
     padding: 28px 30px;
     margin: 28px 0;
@@ -364,13 +388,13 @@
 }
 .tutorial-cta h2 {
     margin: 0 0 10px;
-    color: #8a6500;
+    color: var(--tint-warn-ink);
     font-size: 1.4rem;
     font-weight: 900;
 }
 .tutorial-cta p {
     margin: 0 0 16px;
-    color: #5c4a00;
+    color: var(--tint-warn-ink);
     font-size: 0.98rem;
     line-height: 1.55;
 }
@@ -512,7 +536,7 @@
    actions (e.g. Share + Save). Same coord system, different colour. */
 .screenshot-hotspot.is-accent {
     background: linear-gradient(135deg, var(--pokemon-yellow, #FFCB05), #d4a500);
-    color: #5c4a00;
+    color: var(--tint-warn-ink);
 }
 .screenshot-hotspot.is-accent::after {
     border-color: rgba(255, 203, 5, 0.6);
@@ -576,7 +600,7 @@
 /* Chapter intro block — sits below a section divider, replaces a
    normal paragraph as the "hello, here's what we'll cover" lede. */
 .tutorial-chapter-intro {
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-1) 100%);
     border: 1px solid rgba(15, 23, 42, 0.06);
     border-radius: 16px;
     padding: 28px 30px 26px;
@@ -598,24 +622,24 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     background: rgba(59, 76, 202, 0.10);
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
     padding: 5px 12px;
     border-radius: 999px;
 }
 .tutorial-chapter-intro .chapter-pill--light {
     background: rgba(255, 203, 5, 0.18);
-    color: #8a6500;
+    color: var(--tint-warn-ink);
 }
 .tutorial-chapter-intro h2 {
     font-size: 1.7rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--ink);
     margin: 0 0 12px;
     line-height: 1.18;
 }
 .tutorial-chapter-intro .chapter-lede {
     font-size: 1rem;
-    color: #334155;
+    color: var(--ink-2);
     line-height: 1.65;
     margin: 0 0 16px;
 }
@@ -632,7 +656,7 @@
 }
 .tutorial-chapter-intro .chapter-toc li {
     font-size: 0.88rem;
-    color: #1e293b;
+    color: var(--ink);
     line-height: 1.45;
     padding-left: 18px;
     position: relative;
@@ -641,7 +665,7 @@
     content: '→';
     position: absolute;
     left: 0;
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
     font-weight: 800;
 }
 
@@ -655,14 +679,14 @@
     margin: 32px 4px 14px;
     font-size: 1.25rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--ink);
     line-height: 1.2;
 }
 .tutorial-chapter-heading > span {
     font-size: 0.85rem;
     font-weight: 900;
     letter-spacing: 0.08em;
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
     background: rgba(59, 76, 202, 0.10);
     padding: 4px 10px;
     border-radius: 6px;
@@ -673,12 +697,12 @@
 .tutorial-paragraph {
     font-size: 1rem;
     line-height: 1.7;
-    color: #334155;
+    color: var(--ink-2);
     margin: 0 4px 24px;
     max-width: 78ch;
 }
 .tutorial-paragraph strong {
-    color: #0f172a;
+    color: var(--ink);
 }
 .tutorial-paragraph code {
     background: rgba(15, 23, 42, 0.06);
@@ -690,7 +714,7 @@
 /* Methodology / data-source callout — used when we need to explain
    how a value is computed. Sits between banners. */
 .tutorial-callout {
-    background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--tint-info) 0%, var(--surface-1) 100%);
     border: 1px solid rgba(59, 76, 202, 0.14);
     border-left: 4px solid var(--pokemon-blue, #3B4CCA);
     border-radius: 12px;
@@ -699,14 +723,14 @@
 }
 .tutorial-callout strong {
     display: block;
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
     font-weight: 800;
     margin-bottom: 6px;
     font-size: 0.95rem;
 }
 .tutorial-callout p {
     margin: 0;
-    color: #1e293b;
+    color: var(--ink);
     line-height: 1.6;
     font-size: 0.93rem;
 }
@@ -714,12 +738,12 @@
     margin-top: 8px;
 }
 .tutorial-callout--warn {
-    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--tint-warn) 0%, var(--surface-1) 100%);
     border-color: rgba(255, 203, 5, 0.5);
     border-left-color: #f59e0b;
 }
 .tutorial-callout--warn strong {
-    color: #8a6500;
+    color: var(--tint-warn-ink);
 }
 
 /* Pull-quote — the big italic break between sections that puts
@@ -728,7 +752,7 @@
     font-size: 1.25rem;
     font-weight: 700;
     font-style: italic;
-    color: #0f172a;
+    color: var(--ink);
     line-height: 1.35;
     padding: 22px 28px 22px 32px;
     margin: 28px 4px;
@@ -753,7 +777,7 @@
     font-style: normal;
     font-size: 0.85rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--ink-3);
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
@@ -869,12 +893,12 @@
 .tutorial-mockup .mockup-title {
     font-size: 0.82rem;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--ink);
     letter-spacing: 0.02em;
 }
 .tutorial-mockup .mockup-subtitle {
     font-size: 0.72rem;
-    color: #64748b;
+    color: var(--ink-3);
     font-weight: 600;
 }
 .tutorial-mockup .mockup-pill {
@@ -885,7 +909,7 @@
     padding: 3px 9px;
     border-radius: 999px;
     background: rgba(59, 76, 202, 0.10);
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
 }
 .tutorial-mockup .mockup-pill--green { background: rgba(34, 197, 94, 0.12); color: #16a34a; }
 .tutorial-mockup .mockup-pill--red   { background: rgba(239, 68, 68, 0.12);  color: #dc2626; }
@@ -3316,4 +3340,48 @@
 #profile > .container > .header p {
     font-size: 0.8rem;
     margin: 0;
+}
+
+/* ── Die Anleitungs-Mockups sind Bilder, keine Oberflaeche (29.08.2026) ──
+ *
+ * Gemessen im Dunkelmodus: 99 Stellen mit hellem Grund UND heller Schrift,
+ * die meisten davon hier. Der Grund war nicht, dass jemand geschlampt hat,
+ * sondern dass diese Bausteine halb umgestellt waren: `.tutorial-mockup`
+ * lief schon ueber `var(--surface-1)` und wurde dunkel, waehrend die 66
+ * Flaechen und 88 Textfarben darin auf festen hellen bzw. dunklen Werten
+ * standen. Also dunkle Schrift auf dunklem Grund an einer Stelle und helle
+ * auf hellem an der naechsten — im selben Kasten.
+ *
+ * Die Mockups zeigen, wie die Seite AUSSIEHT. Sie sind gezeichnete
+ * Bildschirmfotos. Ein Bildschirmfoto dreht nicht mit, wenn der Leser das
+ * Licht ausmacht — sonst zeigt es etwas, das es nie gab. Deshalb bleiben
+ * sie hell und bekommen ihre eigene Farbwelt zurueck, statt Regel fuer
+ * Regel auf Token umgebaut zu werden. Dieselbe Ueberlegung wie bei
+ * `.sq-console`, nur andersherum: die Konsole ist immer dunkel, das
+ * Mockup ist immer hell.
+ *
+ * Damit der Kasten im Dunkeln nicht blendet, sitzt er auf einem Rahmen
+ * und ist leicht heruntergedimmt — er soll als Abbildung lesbar sein,
+ * nicht als Scheinwerfer. */
+[data-theme="dark"] .tutorial-mockup {
+    --surface-1: #ffffff;
+    --surface-2: #f1f3f7;
+    --line:      #e3e7ef;
+    --ink:       #161a23;
+    --ink-2:     #4d5566;
+    --ink-3:     #646c80;
+    /* 29.08.2026 nachgetragen: ohne diese vier liefen die Marken- und
+       Tint-Toene der Insel weiter mit ihren DUNKELMODUS-Werten — heller
+       Text auf dem weissen Mockup-Grund, 2,61:1. Eine halb umgestellte
+       Insel ist schlimmer als gar keine. */
+    --brand-ink: #2a3899;
+    --tint-warn-ink: #b45309;
+    --tint-ok-ink:   #15803d;
+    --tint-bad-ink:  #991b1b;
+    --tint-info-ink: #3730a3;
+    color: var(--ink);
+    background: var(--surface-1);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 10px 30px rgba(0, 0, 0, 0.45);
+    filter: brightness(0.9);
 }

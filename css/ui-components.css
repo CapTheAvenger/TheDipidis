@@ -417,7 +417,14 @@ img[src*="limitlesstcg"] {
 }
 .border-3-red { border: 3px solid #dc3545 !important; }
 .bg-red-light { background: #fff5f5 !important; }
-.bg-grey-light { background: #f8f9fa !important; }
+/* 29.08.2026: .bg-grey-light stand DREIMAL in dieser Datei, mit drei
+   verschiedenen Werten — #f8f9fa hier, #eee weiter unten, #ecf0f1 ganz
+   unten. Im Stylesheet gewinnt still die letzte, also war #ecf0f1 der
+   einzige Wert, den je jemand gesehen hat; die anderen zwei waren toter
+   Text, der beim Lesen in die Irre fuehrt. Dasselbe Muster wie
+   .color-grey-light (viermal, am 28.08. zusammengefasst) und
+   cb.filterMissing in js/i18n.js. Alle drei laufen jetzt ueber einen
+   Token. */
 .cursor-text { cursor: text !important; }
 /* Modular meta matchup table styles (used in app-meta-cards.js) */
 .matchups-grid-container {
@@ -1114,7 +1121,7 @@ img[src*="limitlesstcg"] {
 .br-5 { border-radius: 5px !important; }
 .pointer { cursor: pointer !important; }
 .color-white { color: #fff !important; }
-.color-grey { color: #ccc !important; }
+
 .border-grey-dark { border: 1px solid #555 !important; }
 .bg-grey-dark { background: #333 !important; }
 .gap-10 { gap: 10px !important; }
@@ -1430,7 +1437,7 @@ img[src*="limitlesstcg"] {
 .pt-12 { padding-top: 12px !important; }
 /* ptDirectActionModal Additional Utility Classes */
 .bg-red { background: #e74c3c !important; }
-.bg-grey-light { background: #eee !important; }
+.bg-grey-light { background: var(--surface-2) !important; }
 .mt-5 { margin-top: 5px !important; }
 .py-12 { padding-top: 12px !important; padding-bottom: 12px !important; }
 .fw-bold { font-weight: bold !important; }
@@ -1457,7 +1464,7 @@ img[src*="limitlesstcg"] {
 .ml-20 { margin-left: 20px; }
 .lh-17 { line-height: 1.7; }
 .fs-095 { font-size: 0.95em; }
-.color-grey-dark { color: #555; }
+
 /* Auth modal utility classes */
 .w-28 { width: 28px; }
 .h-28 { height: 28px; }
@@ -1474,7 +1481,7 @@ img[src*="limitlesstcg"] {
 .mt--12 { margin-top: -12px; }
 .ta-center { text-align: center; }
 .color-blue { color: #3498db; }
-.color-grey { color: #666; }
+
 .bg-white { background: #fff; }
 .bg-none { background: none; }
 .border-none { border: none; }
@@ -1497,7 +1504,7 @@ img[src*="limitlesstcg"] {
 .fs-16 { font-size: 16px; }
 .fw-600 { font-weight: 600; }
 .fw-bold { font-weight: bold; }
-.color-grey { color: #666; }
+
 .color-white { color: #fff; }
 .btn-green { background: #4CAF50; border: none; cursor: pointer; }
 .btn-red { background: #f44336; border: none; cursor: pointer; }
@@ -1523,7 +1530,7 @@ img[src*="limitlesstcg"] {
 .box-shadow-light { box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important; }
 .mt-8 { margin-top: 8px !important; }
 .fw-500 { font-weight: 500 !important; }
-.color-grey { color: #555 !important; }
+
 .flex { display: flex !important; }
 .gap-10 { gap: 10px !important; }
 .align-center { align-items: center !important; }
@@ -1546,7 +1553,7 @@ img[src*="limitlesstcg"] {
 .px-16 { padding-left: 16px !important; padding-right: 16px !important; }
 .fs-13 { font-size: 13px !important; }
 .bg-white { background: #fff !important; }
-.color-dark { color: #333 !important; }
+
 .select-blue { border: 2px solid #667eea !important; }
 .fs-80 { font-size: 0.8em !important; }
 .opacity-75 { opacity: 0.75 !important; }
@@ -1603,10 +1610,22 @@ img[src*="limitlesstcg"] {
 .badge-gold { background: #FFD700 !important; padding: 2px 8px !important; border-radius: 4px !important; color: #000 !important; }
 .badge-red { background: #ee5a24 !important; padding: 2px 8px !important; border-radius: 4px !important; color: #fff !important; }
 .badge-green { background: #55efc4 !important; padding: 2px 8px !important; border-radius: 4px !important; color: #000 !important; }
-.color-grey { color: #555 !important; }
+/* 29.08.2026: .color-grey stand FUENFMAL in dieser Datei, mit vier
+   verschiedenen Werten (#ccc, #666, #666, #555, #555). Im Stylesheet
+   gewinnt still die letzte — vier Definitionen waren toter Text, der
+   beim Lesen genau die falsche Fassung zeigt. .color-dark stand zweimal
+   (#333, #2c3e50). Beide jetzt einmal, ueber Token.
+   Dasselbe Muster wie .bg-grey-light (dreimal), .color-grey-light
+   (viermal, am 28.08. zusammengefasst) und cb.filterMissing in
+   js/i18n.js (zweimal) — alle am selben Tag oder im selben Umbau
+   gefunden. Das ist kein Zufall mehr, sondern ein Sammelplatz. */
+.color-grey { color: var(--ink-3) !important; }
+.color-grey-dark { color: var(--ink-2) !important; }
 .lh-20 { line-height: 2 !important; }
 .mt-25 { margin-top: 25px !important; }
-.bg-cyan-light { background: #d1ecf1 !important; }
+/* 29.08.2026: heller Cyan-Grund mit geerbter, im Dunkelmodus heller
+   Schrift. Grund und Schrift gehoeren zusammen, deshalb beide hier. */
+.bg-cyan-light { background: #d1ecf1 !important; color: #12525c !important; }
 .border-left-cyan { border-left: 4px solid #17a2b8 !important; }
 .br-6 { border-radius: 6px !important; }
 .mb-15 { margin-bottom: 15px !important; }
@@ -1615,14 +1634,14 @@ img[src*="limitlesstcg"] {
 .mt-15 { margin-top: 15px !important; }
 .color-blue { color: #3498db !important; }
 .color-green { color: #2ecc71 !important; }
-.color-dark { color: #2c3e50 !important; }
+.color-dark { color: var(--ink) !important; }
 .mt-0 { margin-top: 0 !important; }
 .lh-17 { line-height: 1.7 !important; }
 .lh-18 { line-height: 1.8 !important; }
 .fs-105 { font-size: 1.05em !important; }
 .pb-10 { padding-bottom: 10px !important; }
 .br-5 { border-radius: 5px !important; }
-.bg-grey-light { background: #ecf0f1 !important; }
+.bg-grey-light { background: var(--surface-2) !important; }
 .border-left-green { border-left: 4px solid #2ecc71 !important; }
 .border-bottom-blue { border-bottom: 3px solid #3498db !important; }
 /* Utility classes for modularized index.html blocks */
@@ -1635,8 +1654,12 @@ img[src*="limitlesstcg"] {
 .flex-between { display: flex !important; justify-content: space-between !important; align-items: center !important; }
 .flex-wrap { flex-wrap: wrap !important; }
 .gap-15 { gap: 15px !important; }
-.bg-light { background: #f8f9fa !important; }
-.bg-blue-light { background: #e8f4fd !important; }
+/* 29.08.2026: beide standen auf festen hellen Werten und wurden in der
+   Anleitung neunmal auf Kaesten gelegt, deren Text im Dunkelmodus hell
+   ist. Die Token drehen mit; die Bedeutung ("etwas hellere Flaeche",
+   "blau getoente Flaeche") bleibt in beiden Modi dieselbe. */
+.bg-light { background: var(--surface-2) !important; }
+.bg-blue-light { background: var(--tint-info) !important; }
 .border-left-blue { border-left: 4px solid #3498db !important; }
 .city-league-other-print-sparkle {
     top: 52px;
@@ -2758,7 +2781,7 @@ img[src*="limitlesstcg"] {
     margin-bottom: 24px;
 }
 .city-league-info-table-title {
-    color: #1f2d3d;
+    color: var(--ink);
     border-bottom: 2px solid #2f80c7;
     padding-bottom: 10px;
     margin-bottom: 20px;
@@ -2770,6 +2793,7 @@ img[src*="limitlesstcg"] {
     --cl-table-row-even: #f6f9ff;
     --cl-table-row-hover: #e9f2ff;
     --cl-table-border: #d7e2f0;
+    --cl-table-title-ink: #1f2d3d;
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -2804,7 +2828,7 @@ img[src*="limitlesstcg"] {
     border-right: 1px solid rgba(255, 255, 255, 0.18);
 }
 .city-league-info-table-row {
-    border-bottom: 1px solid #e4ebf6;
+    border-bottom: 1px solid var(--cl-table-border);
     transition: background-color 0.2s ease;
     cursor: pointer;
 }
@@ -2820,7 +2844,9 @@ img[src*="limitlesstcg"] {
     padding: 12px 14px;
     font-size: 0.95em;
     vertical-align: middle;
-    color: #1f2d3d;
+    /* 29.08.2026: stand fest auf #1f2d3d. 31 Zellen mit 1,26:1 im
+       Dunkelmodus — die Zahlen der Tabelle waren schlicht nicht da. */
+    color: var(--ink);
 }
 .city-league-info-table-cell:not(:last-child) {
     border-right: 1px solid var(--cl-table-border);
@@ -2838,7 +2864,7 @@ img[src*="limitlesstcg"] {
     /* color/bold restricted to the change span — cell itself stays neutral */
 }
 .city-league-info-table-count-change {
-    color: #4c5f78;
+    color: var(--ink-3);
     font-size: 0.88em;
     font-weight: 600;
 }
@@ -2852,7 +2878,8 @@ img[src*="limitlesstcg"] {
 .city-league-info-table-cell-archetype .archetype-jump-link:link,
 .city-league-info-table-cell-archetype .archetype-jump-link:visited,
 .city-league-info-table-cell-archetype .archetype-jump-link:active {
-    color: #1f2d3d !important;
+    /* 29.08.2026: 21 Decknamen bei 1,26:1 im Dunkelmodus. */
+    color: var(--ink) !important;
     font-weight: 700;
     text-decoration: none;
 }
@@ -2894,7 +2921,7 @@ img[src*="limitlesstcg"] {
 
 #cityLeagueFullTable .city-league-info-table-row:nth-child(even),
 #cityLeagueCombinedTable .city-league-info-table-row:nth-child(even) {
-    background: #f4f8ff;
+    background: var(--cl-table-row-even);
 }
 
 #cityLeagueFullTable .city-league-info-table-cell,
@@ -2910,7 +2937,7 @@ img[src*="limitlesstcg"] {
 
 #cityLeagueFullTable .city-league-info-table-row,
 #cityLeagueCombinedTable .city-league-info-table-row {
-    border-bottom: 1px solid #dfe8f5;
+    border-bottom: 1px solid var(--cl-table-border);
 }
 
 #cityLeagueFullTable .city-league-info-table-row:last-child,
@@ -5210,3 +5237,18 @@ a.price-unverified-badge:hover { background: var(--vorbehalt); color: var(--surf
 .custom-binder-dropdown-item.is-ohne-daten { opacity: .55; }
 .cb-dd-warn { display: block; color: var(--vorbehalt); font-size: var(--fs-xs); }
 .cb-filter-name { min-width: 140px; }
+
+/* ── City-League-Tabelle im Dunkelmodus (29.08.2026) ──────────────
+   Die drei Werte oben sind bewusst auf `.city-league-info-table`
+   gebunden statt global — die Tabelle hat ihr eigenes Blau, das nicht
+   zu den neutralen --surface-* passt. Deshalb dreht sie hier als
+   Gruppe mit, statt Regel fuer Regel.
+
+   Vorher gemessen: 14 Zeilen mit #f4f8ff/#f6f9ff und einer Textfarbe
+   von rgb(238,242,255) — hellblau auf hellblau. */
+[data-theme="dark"] .city-league-info-table {
+    --cl-table-row-even: #172144;
+    --cl-table-row-hover: #1e2c58;
+    --cl-table-border: #2a3560;
+    --cl-table-title-ink: var(--ink);
+}

@@ -5035,12 +5035,17 @@ h3:first-child {
 
 /* Per-tier accent: top divider + matching header underline + a faint
    tinted background so the eye locks onto each tier instantly. */
-.tier-1            { border-top-color: #d32f2f; background: #fef7f7; }
-.tier-1 h3         { color: #d32f2f; border-color: #d32f2f; }
-.tier-2            { border-top-color: #f57c00; background: #fff8f0; }
-.tier-2 h3         { color: #f57c00; border-color: #f57c00; }
-.tier-3            { border-top-color: #388e3c; background: #f4faf4; }
-.tier-3 h3         { color: #388e3c; border-color: #388e3c; }
+/* 29.08.2026: die drei Toenungen und ihre Ueberschriften waren fest
+   verdrahtet und blieben im Dunkelmodus hell — live gemessen die drei
+   groessten hellen Flaechen der ganzen Seite (je 1720 px breit). Sie
+   haengen jetzt an den Toenungs-Token, die Bedeutung bleibt: Tier 1 rot,
+   Tier 2 bernstein, Tier 3 gruen. */
+.tier-1            { border-top-color: var(--tint-bad-ink);  background: var(--tint-bad); }
+.tier-1 h3         { color: var(--tint-bad-ink);  border-color: var(--tint-bad-ink); }
+.tier-2            { border-top-color: var(--tint-warn-ink); background: var(--tint-warn); }
+.tier-2 h3         { color: var(--tint-warn-ink); border-color: var(--tint-warn-ink); }
+.tier-3            { border-top-color: var(--tint-ok-ink);   background: var(--tint-ok); }
+.tier-3 h3         { color: var(--tint-ok-ink);   border-color: var(--tint-ok-ink); }
 
 .tier-hero-section {
     margin: 0 0 28px 0;
@@ -5208,9 +5213,9 @@ h3:first-child {
     display: inline-block;
 }
 
-.tier-1 .deck-tier-title { color: #d32f2f; border-color: #d32f2f; }
-.tier-2 .deck-tier-title { color: #f57c00; border-color: #f57c00; }
-.tier-3 .deck-tier-title { color: #388e3c; border-color: #388e3c; }
+.tier-1 .deck-tier-title { color: var(--tint-bad-ink); border-color: var(--tint-bad-ink); }
+.tier-2 .deck-tier-title { color: var(--tint-warn-ink); border-color: var(--tint-warn-ink); }
+.tier-3 .deck-tier-title { color: var(--tint-ok-ink); border-color: var(--tint-ok-ink); }
 .tier-trending .deck-tier-title { color: #1976d2; border-color: #1976d2; }
 
 /* Hidden by default so desktop layout stays unchanged */
@@ -9748,8 +9753,8 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     grid-column: 1 / -1;
     text-align: center;
     padding: 18px 14px;
-    background: #f9fafb;
-    border: 1px dashed #d1d5db;
+    background: var(--surface-2);
+    border: 1px dashed var(--line-strong);
     border-radius: 10px;
     display: flex;
     align-items: center;

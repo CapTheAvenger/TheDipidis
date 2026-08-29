@@ -414,6 +414,35 @@ window.MetaCall = (function () {
   const PREDICTOR_5_8_STRONG_DAMP      = 0.70;
   const PREDICTOR_5_8_MILD_DAMP        = 0.85;
 
+  // ── Die Klebrigkeit braucht ein Fenster, sonst ist sie null ──────
+  //
+  // sticky_pct = Anteil der Piloten, die dasselbe Deck auf MINDESTENS
+  // ZWEI Turnieren gebracht haben. Bei einem einzigen Turnier im
+  // Fenster ist dieser Anteil nicht "niedrig", sondern konstruktions-
+  // bedingt exakt 0 — ein zweites Mal kann es dort gar nicht geben.
+  //
+  // Gemessen am 29.08.2026: rechnet man nur das aktuelle Vorformat
+  // (TEF-CRI), bleibt nach Abzug von Turnier 0070 — dessen 512 Zeilen
+  // allesamt kein deck_archetype tragen — genau EIN verwertbares
+  // Turnier uebrig. Ergebnis: Dragapult, das groesste Deck des Feldes,
+  // kaeme mit brought=105 und sticky=0,00 % auf x0,70. Nicht weil
+  // seine Spieler es fallen lassen, sondern weil die Frage im Fenster
+  // nicht beantwortbar ist.
+  //
+  // Heute feuert das nicht, weil die Spalte `meta` leer ist und damit
+  // ueber alle 10 verwertbaren Turniere gerechnet wird (11 stehen in
+  // der Datei, 0070 faellt mangels Archetyp heraus). Es feuert in dem
+  // Moment,
+  // in dem wieder gescrapt wird oder die Spalte gefuellt ankommt —
+  // also genau dann, wenn wieder jemand hinsieht.
+  //
+  // Dieselbe strukturelle Regel wie beim Frueh-/Spaet-Fenster von 5.6:
+  // eine Kennzahl, die zwei Zeitpunkte vergleicht, braucht mehr als
+  // einen Zeitpunkt.
+  const PREDICTOR_5_8_MIN_TURNIERE     = 3;
+  let _stickinessTurniere = 0;   // Turniere mit verwertbaren Zeilen
+  let _stickinessTragfaehig = false;
+
   // Predictor 5.9 — Format-Migration-Boost (2026-06-08).
   // Compares the latest CRI-era online snapshot against the latest
   // pre-rotation POR-era snapshot to detect decks that emerged or
@@ -4635,8 +4664,14 @@ window.MetaCall = (function () {
         // tries this but doesn't bring it" — boosting on top would
         // fight 5.8 and end up over-pumping (OMH: damp ×0.7 + boost
         // +1 pp → 7.1 % vs real 5.61). Stickiness signal wins.
+        // Die Sperre faellt mit dem Daempfer. Sonst blockierte eine
+        // Kennzahl, die selbst nicht feuern darf, weiter das einzige
+        // frische Signal, das der Motor hat — gemessen am 29.08.2026
+        // betraf das genau ein Deck (Grimmsnarl Froslass, online
+        // 1,13 % -> 4,35 %), also den Fall, fuer den 5.9 gebaut wurde.
         const stickEntry = _stickinessByDeck[k];
-        if (stickEntry && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT
+        if (_stickinessTragfaehig && stickEntry
+            && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT
             && stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
           return;
         }
@@ -4721,6 +4756,8 @@ window.MetaCall = (function () {
     //                                            vs +4.28 pre-fix)
     let stickinessDamped = false;
     _shareList.forEach(d => {
+      // Kein Fenster, keine Aussage — siehe PREDICTOR_5_8_MIN_TURNIERE.
+      if (!_stickinessTragfaehig) return;
       const k = normalize(d.name);
       const stickEntry = _stickinessByDeck[k];
       if (!stickEntry || stickEntry.brought < PREDICTOR_5_8_MIN_BROUGHT) return;
@@ -5176,6 +5213,8 @@ window.MetaCall = (function () {
       _lastMetaLabsByDeck     = {};
       _lastMetaAvgWinRate     = 0;
       _lastMetaAvgDay2Conv    = 0;
+      _stickinessTurniere     = 0;
+      _stickinessTragfaehig   = false;
       _bodenAlterTage         = null;
       _bodenAbgelaufen        = false;
       _bodenDecks             = 0;
@@ -5246,6 +5285,12 @@ window.MetaCall = (function () {
           // Aggregate: per (player, archetype) → set of tournament_ids
           const seenByPair = {};
           const broughtByArch = {};
+          // Wie viele Turniere tragen ueberhaupt verwertbare Zeilen bei?
+          // Gemessen am 29.08.2026: Turnier 0070 liefert 512 Zeilen, alle
+          // ohne deck_archetype — es faellt in der Schleife unten heraus
+          // und darf deshalb auch nicht als Fenstertiefe zaehlen.
+          const turniereImFenster = new Set();
+          let zeilenMitMeta = 0;
           rows.forEach(r => {
             if (!r) return;
             const player = (r.player_name || '').trim();
@@ -5258,11 +5303,13 @@ window.MetaCall = (function () {
             // CSV row has no meta we still count it — labs is the source
             // of truth, missing meta is a scraper-side gap not relevant
             // to the signal.
+            if (meta) zeilenMitMeta += 1;
             if (prev && meta && meta !== prev) return;
             const k = normalize(arch);
             const key = player + '|' + k;
             if (!seenByPair[key]) seenByPair[key] = new Set();
             seenByPair[key].add(tid);
+            turniereImFenster.add(tid);
             broughtByArch[k] = (broughtByArch[k] || 0) + 1;
           });
           const uniqueByArch = {};
@@ -5284,12 +5331,31 @@ window.MetaCall = (function () {
               sticky_pct: u > 0 ? (r / u) * 100 : 0,
             };
           });
+          _stickinessTurniere = turniereImFenster.size;
+          _stickinessTragfaehig = _stickinessTurniere >= PREDICTOR_5_8_MIN_TURNIERE;
           try {
             const decks = Object.keys(_stickinessByDeck).length;
             console.log(
-              `[Predictor 5.8] Player-stickiness loaded: ${decks} archetypes ` +
-              `from previous-format (${prev || 'any'}) continuity data.`
+              `[Predictor 5.8] Klebrigkeit geladen: ${decks} Archetypen aus ` +
+              `${_stickinessTurniere} Turnier(en) (Vorformat ${prev || 'beliebig'}).`
             );
+            if (!_stickinessTragfaehig) {
+              console.log(
+                `[Predictor 5.8] Daempfer AUS — ${_stickinessTurniere} Turnier(e) im ` +
+                `Fenster, noetig sind ${PREDICTOR_5_8_MIN_TURNIERE}. Unter dieser Zahl ` +
+                `ist sticky_pct kein niedriger Wert, sondern gar keiner: ein zweites ` +
+                `Mitbringen ist im Fenster nicht moeglich. Ohne diese Sperre bekaeme ` +
+                `das groesste Deck des Feldes x${PREDICTOR_5_8_STRONG_DAMP}.`
+              );
+            }
+            if (!zeilenMitMeta) {
+              console.log(
+                `[Predictor 5.8] Hinweis: die Spalte meta ist in allen Zeilen von ` +
+                `player_continuity.csv leer — der Formatfilter greift nicht, die ` +
+                `Klebrigkeit wird ueber ALLE geladenen Turniere gerechnet. ` +
+                `Gemeldet, nicht repariert: das gehoert in den Scraper.`
+              );
+            }
           } catch (_e) { /* ignore */ }
         }
       } catch (_e) { /* optional — no damper when missing */ }

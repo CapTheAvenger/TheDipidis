@@ -320,12 +320,49 @@ window.MetaCall = (function () {
   //   beide unter Schnitt                     -> 0.55 (war nur populaer)
   //   gemischt / keine Messung                -> 0.70 (wie bisher)
   //
-  // Der Boden hebt nur an, er senkt nie — ein zu niedriger Faktor kann
-  // also hoechstens dazu fuehren, dass 5.5 gar nicht greift und die
-  // Online-Basis stehen bleibt. Das begrenzt den Schaden einer
-  // Fehleinschaetzung auf genau das, was ohne 5.5 ohnehin da stuende.
+  // ACHTUNG — hier stand bis zum 29.08.2026 der Satz "Der Boden hebt
+  // nur an, er senkt nie", und daraus abgeleitet, der Schaden einer
+  // Fehleinschaetzung sei begrenzt. Beides ist falsch. Nach allen
+  // Stufen wird auf 100 % normiert (siehe _runPredictor, "renorm").
+  // Jede Anhebung eines Decks senkt damit zwangslaeufig alle anderen.
+  // Gemessen am 29.08.2026: der Boden hob 33 von 131 Decks um zusammen
+  // 17,53 pp an — und drueckte dadurch Dragapult Blaziken von 9,45 %
+  // auf 6,84 %, ein Deck, das der Boden nie angefasst hat. Ein zu
+  // hoher Faktor ist deshalb kein harmloser Nichteingriff, sondern
+  // eine stille Umverteilung zulasten genau der Decks, die gerade
+  // gespielt werden.
   const PREDICTOR_6_2_STARK_FAKTOR   = 0.85;
   const PREDICTOR_6_2_SCHWACH_FAKTOR = 0.55;
+
+  // ── Was der Boden braucht, um ueberhaupt zu tragen (29.08.2026) ──
+  //
+  // Der Boden hatte bis hierher keine einzige Bedingung ausser
+  // "das Deck kam im alten Format vor". Gemessen am 29.08.2026 stand
+  // er auf TEF-CRI = GENAU ZWEI Turnieren (Turin 06.06., NAIC 12.06.),
+  // 147 Zeilen, 89 Archetypen. Davon:
+  //   * 31 Archetypen aus nur EINEM der beiden Turniere
+  //   * 44 Archetypen mit hoechstens 5 Spielern insgesamt
+  //   * Median ueber alle: 6 Spieler
+  // Ein Anteil aus einem einzigen Spieler ist keine Messung, sondern
+  // ein Rundungsrest — und er hat trotzdem einen Boden gesetzt.
+  //
+  // Zwei Bedingungen, beide strukturell statt gesetzt:
+  //   MIN_TURNIERE: ein Boden darf nicht auf einem einzelnen Ereignis
+  //     ruhen. Das ist dieselbe Regel, die das Haus schon fuer
+  //     Matchups anwendet (min. Partien, nicht min. Qualitaet).
+  //   MIN_SPIELER: unterhalb dieser Zahl verschiebt EIN Spieler den
+  //     Anteil um mehr als ein Zwanzigstel seines eigenen Werts.
+  //     Gemessen liegt der Median bei 6 — 20 ist der Punkt, ab dem
+  //     die Zahl einen Fehler von einem Spieler ueberlebt.
+  const PREDICTOR_5_5_MIN_TURNIERE = 2;
+  const PREDICTOR_5_5_MIN_SPIELER  = 20;
+  // Unter dieser Zahl an Turnieren gibt es kein Frueh-/Spaet-Fenster,
+  // das den Namen verdient: slice(-2) nimmt bei genau zwei Turnieren
+  // BEIDE als "spaet" und laesst das Frueh-Fenster fuer jedes Deck
+  // leer. Gemessen: earlyShare = 0 bei allen 89, growth ≡ 1,0,
+  // Decline-Damper feuerte bei 0 Decks. Beide Haelften von 5.6 waren
+  // tot, ohne dass irgendwo etwas rot wurde.
+  const PREDICTOR_5_6_MIN_TURNIERE_SPLIT = 3;
   let _lastMetaAvgWinRate  = 0;   // spielergewichtet, altes Format
   let _lastMetaAvgDay2Conv = 0;   // spielergewichtet, altes Format
 
@@ -594,6 +631,10 @@ window.MetaCall = (function () {
   // statt ihn zu behaupten. Siehe die lange Notiz bei der Erkennung.
   let _lagFensterAlterTage = null;   // Alter der neuesten Labs-Zeile in Tagen
   let _lagFensterAbgelaufen = false; // aelter als lag_days + Karenz
+  let _bodenAlterTage = null;        // Alter des juengsten Vorformat-Turniers
+  let _bodenAbgelaufen = false;      // Boden 5.5 wegen Alters nicht scharf
+  let _bodenDecks = 0;               // Archetypen, die die Evidenzhuerde nahmen
+  let _bodenVerworfen = 0;           // Archetypen, die sie nicht nahmen
   let _lagNeuesteLabsZeile = '';     // deren Datum
   let _activeMetaKeyVoll = '';       // voller Format-Schluessel, z. B. 'TEF-CRI'
 
@@ -5135,6 +5176,10 @@ window.MetaCall = (function () {
       _lastMetaLabsByDeck     = {};
       _lastMetaAvgWinRate     = 0;
       _lastMetaAvgDay2Conv    = 0;
+      _bodenAlterTage         = null;
+      _bodenAbgelaufen        = false;
+      _bodenDecks             = 0;
+      _bodenVerworfen         = 0;
       _stickinessByDeck       = {};
       _porSnapshotByDeck      = {};
       _curSnapshotByDeck      = {};
@@ -5467,11 +5512,55 @@ window.MetaCall = (function () {
           const prevFmtKey = String((_formatWindow && _formatWindow.previous_format_key) || '')
             .trim().toUpperCase();
           const setAdditionOnly = !!(_formatWindow && _formatWindow.set_addition_only);
-          if (prevFmtKey && setAdditionOnly) {
-            const prevRows = labsRowsAll.filter(r => {
-              const meta = String(r.meta || '').trim().toUpperCase();
-              return meta === prevFmtKey;
-            });
+          const prevRowsAlle = prevFmtKey ? labsRowsAll.filter(r => {
+            const meta = String(r.meta || '').trim().toUpperCase();
+            return meta === prevFmtKey;
+          }) : [];
+          // ── Der Boden bekommt dieselbe Uhr wie die Ebene daneben ──
+          //
+          // Das Lag-Fenster oben laeuft nach lag_days + Karenz ab; der
+          // Chip im Kopf faerbt sich nach derselben Grenze rot. Der
+          // Boden hatte als einzige dieser drei Stellen kein Ablaufdatum
+          // und stand am 29.08.2026 noch scharf auf Turnieren vom
+          // 06./12.06. — 78 Tage alt, aus einem Kartenpool vor PBL.
+          //
+          // Die Begruendung des Bodens ist Kontinuitaet: "die Piloten
+          // spielen weiter, bis das neue Set etwas hervorbringt, das
+          // sie verdraengt". Genau diese Bedingung ist nicht mehr
+          // erfuellt, sobald ein ganzes Set dazwischenliegt und seit
+          // Wochen kein Vor-Ort-Turnier mehr gemessen wurde. Dann ist
+          // der alte Anteil keine Kontinuitaet mehr, sondern ein Zitat.
+          //
+          // Kein neuer Wert: dieselbe Grenze wie das Lag-Fenster. Der
+          // Boden kommt von selbst zurueck, sobald wieder gescrapt wird.
+          let prevNeuestesISO = '';
+          prevRowsAlle.forEach(r => {
+            const iso = _rowISO(r);
+            if (iso && iso > prevNeuestesISO) prevNeuestesISO = iso;
+          });
+          let prevAlterTage = null;
+          if (prevNeuestesISO) {
+            const d = new Date(prevNeuestesISO + 'T00:00:00Z');
+            if (!isNaN(d.getTime())) {
+              prevAlterTage = Math.floor((Date.now() - d.getTime()) / 86400000);
+            }
+          }
+          const prevGrenzeTage = lagTage + LAG_KARENZ_TAGE;
+          const prevZuAlt = prevAlterTage != null && prevAlterTage > prevGrenzeTage;
+          _bodenAlterTage = prevAlterTage;
+          _bodenAbgelaufen = prevZuAlt;
+          if (prevFmtKey && setAdditionOnly && prevZuAlt) {
+            try {
+              console.log(
+                `[Predictor 5.5] Boden NICHT scharf — juengstes ${prevFmtKey}-Turnier ` +
+                `${prevNeuestesISO} ist ${prevAlterTage} Tage alt (Grenze ${prevGrenzeTage}). ` +
+                `Dieselbe Grenze wie das Lag-Fenster. Fuer dieses Format liegen keine ` +
+                `belastbaren Vor-Ort-Daten vor; die Prognose steht auf der Online-Basis.`
+              );
+            } catch (_e) { /* ignore */ }
+          }
+          if (prevFmtKey && setAdditionOnly && !prevZuAlt) {
+            const prevRows = prevRowsAlle;
             const tidsByDate = {};
             prevRows.forEach(r => {
               const tid = (r.tournament_id || '').trim();
@@ -5485,7 +5574,29 @@ window.MetaCall = (function () {
               if (da !== db) return da < db ? -1 : 1;
               return a < b ? -1 : 1;
             });
-            const lateTidSet = new Set(sortedTids.slice(-2));
+            // Ein Frueh-/Spaet-Fenster nur, wenn es beide Haelften
+            // wirklich gibt. Bei genau zwei Turnieren nimmt slice(-2)
+            // BEIDE als "spaet"; das Frueh-Fenster bleibt fuer jedes
+            // Deck leer, earlyShare wird 0, und damit koennen weder der
+            // Wachstums-Boost noch der Decline-Damper (5.6) jemals
+            // feuern. Sie liefen nicht falsch — sie liefen gar nicht,
+            // und nichts sagte es. Lieber ehrlich kein Split als ein
+            // Split, der nur aus einer Haelfte besteht.
+            const splitMoeglich = sortedTids.length >= PREDICTOR_5_6_MIN_TURNIERE_SPLIT;
+            const lateTidSet = splitMoeglich
+              ? new Set(sortedTids.slice(-2))
+              : new Set();
+            if (!splitMoeglich) {
+              try {
+                console.log(
+                  `[Predictor 5.6] Kein Frueh-/Spaet-Fenster — ${prevFmtKey} hat nur ` +
+                  `${sortedTids.length} Turnier(e), noetig sind ${PREDICTOR_5_6_MIN_TURNIERE_SPLIT}. ` +
+                  `Wachstums-Boost und Decline-Damper bleiben aus; der Boden nutzt den ` +
+                  `Gesamtschnitt. Bisher war dieser Zustand nicht von einem laufenden ` +
+                  `Split zu unterscheiden.`
+                );
+              } catch (_e) { /* ignore */ }
+            }
 
             // Per-deck: separate early/late accumulators
             const lastMetaAgg = {}; // k -> { name, eSW, eP, lSW, lP, n }
@@ -5500,7 +5611,7 @@ window.MetaCall = (function () {
               if (!lastMetaAgg[k]) {
                 lastMetaAgg[k] = {
                   name: r.deck_name, eSW: 0, eP: 0, lSW: 0, lP: 0, n: 0,
-                  wSum: 0, wP: 0, dSum: 0, dP: 0,
+                  wSum: 0, wP: 0, dSum: 0, dP: 0, turniere: new Set(),
                 };
               }
               // Predictor 6.2 — Leistung im alten Meta, spielergewichtet.
@@ -5518,6 +5629,7 @@ window.MetaCall = (function () {
                 lastMetaAgg[k].eP  += players;
               }
               lastMetaAgg[k].n += 1;
+              if (tid) lastMetaAgg[k].turniere.add(tid);
             });
             Object.keys(lastMetaAgg).forEach(k => {
               const a = lastMetaAgg[k];
@@ -5535,7 +5647,19 @@ window.MetaCall = (function () {
               // (early-strong, late-declining) on the baseline side.
               const fullPlayers = a.eP + a.lP;
               const floorShare  = fullPlayers > 0 ? (a.eSW + a.lSW) / fullPlayers : 0;
-              if (floorShare > 0) {
+              // Evidenzhuerde: ein Boden darf nicht auf einem einzelnen
+              // Turnier und nicht auf einer Handvoll Spieler stehen.
+              // Ohne sie hob der Boden am 29.08.2026 Lillie's Clefairy
+              // von 0,11 auf 0,91 (Faktor 8) und Metagross von 0,09 auf
+              // 0,54 (Faktor 6) — beide aus Zaehlungen, die ein
+              // einzelner Spieler umwirft.
+              const genugTurniere = a.turniere.size >= PREDICTOR_5_5_MIN_TURNIERE;
+              const genugSpieler  = fullPlayers >= PREDICTOR_5_5_MIN_SPIELER;
+              if (floorShare > 0 && !(genugTurniere && genugSpieler)) {
+                _bodenVerworfen += 1;
+              }
+              if (floorShare > 0 && genugTurniere && genugSpieler) {
+                _bodenDecks += 1;
                 _lastMetaLabsByDeck[k] = {
                   name:       a.name,
                   share:      floorShare,
@@ -5567,9 +5691,12 @@ window.MetaCall = (function () {
               const decks = Object.keys(_lastMetaLabsByDeck).length;
               if (decks > 0) {
                 console.log(
-                  `[Predictor 5.5] Last-Meta-Labs floor armed (prev=${prevFmtKey}, ` +
-                  `set-addition, full-player-weighted): ${decks} archetypes loaded. ` +
-                  `Late tids: ${Array.from(lateTidSet).join(', ') || 'n/a'}.`
+                  `[Predictor 5.5] Boden scharf (prev=${prevFmtKey}, set-addition, ` +
+                  `spielergewichtet): ${decks} Archetypen tragen, ${_bodenVerworfen} an der ` +
+                  `Evidenzhuerde verworfen (min. ${PREDICTOR_5_5_MIN_TURNIERE} Turniere, ` +
+                  `min. ${PREDICTOR_5_5_MIN_SPIELER} Spieler). Juengstes Turnier ` +
+                  `${prevNeuestesISO} (${prevAlterTage} Tage, Grenze ${prevGrenzeTage}). ` +
+                  `Spaet-Turniere: ${Array.from(lateTidSet).join(', ') || 'kein Split'}.`
                 );
                 const stark = Object.keys(_lastMetaLabsByDeck)
                   .filter(kk => _floorFaktorMehrmeta(_lastMetaLabsByDeck[kk]) === PREDICTOR_6_2_STARK_FAKTOR)
@@ -6036,8 +6163,14 @@ window.MetaCall = (function () {
 
       // ── Predictor 3.0 — compute predicted share per deck ──
       // Mode A baseline (no labs, no TG, no CL):
-      //   0.40 × ladder + 0.30 × brought + 0.20 × top8_conv_boost
+      //   0.30 × ladder + 0.10 × brought + 0.50 × top8_conv_boost
       //                 + 0.10 × weekly_trend_signal
+      // (29.08.2026 richtiggestellt: hier stand 0.40/0.30/0.20/0.10.
+      //  Der Code rechnet seit einer Umgewichtung 0.30/0.10/0.50/0.10
+      //  — siehe die Formel selbst, Suchwort "ladderPctDamped". Die
+      //  Formel steht rund 2300 Zeilen entfernt; wer diese Uebersicht
+      //  las statt der Formel, las das Falsche. Eine Zusage haelt die
+      //  beiden jetzt zusammen, siehe test-meta-call-gewichte.js.)
       // Mode A + Testing Group / + CL toggles:
       //   keep 2.x weights (TG/CL replace the brought/ladder pillar).
       // Mode B (labs majors present):
@@ -7570,14 +7703,6 @@ window.MetaCall = (function () {
     return { day2, geheimtipps: tips, day2UeberSchwelle };
   }
 
-  // Poisson P(k; λ)
-  function poissonP(k, lambda) {
-    if (lambda <= 0) return k === 0 ? 1 : 0;
-    let lp = -lambda + k * Math.log(lambda);
-    for (let i = 1; i <= k; i++) lp -= Math.log(i);
-    return Math.exp(lp);
-  }
-
   /**
    * Genau die Verteilung, die die Day-2-Kette daneben schon benutzt
    * (20.08.2026).
@@ -7600,9 +7725,12 @@ window.MetaCall = (function () {
    * 5,4 Prozentpunkten. Binomial ist hier nicht nur richtiger, sondern
    * auch billiger — n ist einstellig.
    *
-   * poissonP bleibt: es wird an anderer Stelle fuer eine andere Frage
-   * gebraucht, und ein Loeschen waere eine Aenderung, die niemand
-   * angefordert hat.
+   * poissonP ist am 29.08.2026 entfallen. Der Satz, der hier stand —
+   * "es wird an anderer Stelle fuer eine andere Frage gebraucht" —
+   * war nachweislich falsch: die Funktion hatte im ganzen Repo keinen
+   * einzigen Aufrufer mehr. Eine unbenutzte Funktion ist harmlos, eine
+   * falsche Begruendung fuer ihr Bleiben ist es nicht: sie haelt den
+   * naechsten Leser davon ab, nachzusehen.
    */
   function binomialP(k, n, p) {
     if (!(n >= 0) || k < 0 || k > n) return 0;
@@ -9191,6 +9319,14 @@ window.MetaCall = (function () {
     const _currentSetUpper = (_formatWindow && _formatWindow.current_set)
       ? String(_formatWindow.current_set).trim().toUpperCase()
       : '';
+    // 29.08.2026 geprueft und VERWORFEN: den Chip zusaetzlich bei
+    // abgelaufenem Lag-Fenster zu zeigen. Er stand dann direkt neben
+    // mc.bannerModeA ("Vorhersage basiert auf Online-Ladder und
+    // Online-Turnier-Top-8") und sagte dasselbe ein zweites Mal —
+    // im Bild nachgesehen, nicht vermutet. Was in diesem Zustand
+    // wirklich fehlt, ist nicht die Quelle, sondern die FOLGE des
+    // Alters; die steht jetzt im Titel des Datums-Chips weiter unten,
+    // wo der Leser sie sucht, und kostet keine Zeile Text.
     const _lagWindowChip = (_metaSource === 'current'
         && _activeInPersonSetCode
         && _currentSetUpper
@@ -9245,7 +9381,20 @@ window.MetaCall = (function () {
       const scrapeHinweis = _dataLastScrapedAt
         ? ` — ${t('mc.bannerScrapedAt').replace('{date}', _dataLastScrapedAt.slice(0, 10))}`
         : '';
-      staleTag = ` <span class="mc-predictor-banner-stale" style="opacity:0.85;color:${color};" title="${esc(t('mc.bannerDataHelp') + scrapeHinweis)}">${esc(label)}</span>`;
+      // Der bisherige Titel beruhigt: "ein Abstand von einigen Wochen
+      // kann schlicht heissen, dass keins gespielt wurde — das ist
+      // nicht automatisch ein Fehler." Das stimmt, und es ist am
+      // 29.08.2026 trotzdem zu wenig: bei 78 Tagen liegt ein ganzer
+      // Set-Release dazwischen, und die Vor-Ort-Ebene faellt fuer die
+      // Prognose komplett aus. Der Leser fragt an genau dieser Zahl,
+      // was sie bedeutet — die Antwort gehoert hierher, nicht in eine
+      // zusaetzliche Zeile.
+      const datumHilfe = (_lagFensterAbgelaufen && _lagFensterAlterTage != null)
+        ? t('mc.bannerDataGapHelp')
+            .replace(/\{days\}/g, String(_lagFensterAlterTage))
+            .replace(/\{new\}/g, _currentSetUpper || '')
+        : t('mc.bannerDataHelp');
+      staleTag = ` <span class="mc-predictor-banner-stale" style="opacity:0.85;color:${color};" title="${esc(datumHilfe + scrapeHinweis)}">${esc(label)}</span>`;
     }
 
     // Predictor 3.0: when a post-major baseline snapshot is loaded, append

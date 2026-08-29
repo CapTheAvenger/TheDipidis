@@ -1092,7 +1092,7 @@
 
                     const statsHtml = `
                         <div class="deck-banner-stats" style="display: flex; flex-direction: column; align-items: flex-start;">
-                            <span class="stat-badge rank-performance-hint" style="background: #fff3e0; color: #e65100;" title="${escapeHtml(t('cl.heroRankHint'))}">
+                            <span class="stat-badge rank-performance-hint" style="background: var(--tint-warn); color: var(--tint-warn-ink);" title="${escapeHtml(t('cl.heroRankHint'))}">
                                 ${escapeHtml(t('tier.clRank'))}: ${currentRank} ${m3RankDisplay} ${isM4WithComparison ? `<span class="trend-icon ${rankTrendClass}">${rankIcon}</span>` : ''}
                             </span>
                             <span class="stat-badge">

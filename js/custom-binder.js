@@ -1314,7 +1314,7 @@
                                 <div class="deck-banner-content">
                                     <div class="deck-banner-name">${safeName}</div>
                                     <div class="deck-banner-stats" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
-                                        <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;">${currentMetaLabel}: ${rankText}</span>
+                                        <span class="stat-badge rank-performance-hint" style="background:var(--tint-warn);color:var(--tint-warn-ink);">${currentMetaLabel}: ${rankText}</span>
                                         <span class="stat-badge">${currentMetaLabel}: ${shareText}</span>
                                         <span class="stat-badge">City current: ${cityCurrentText}</span>
                                         <span class="stat-badge">City past: ${cityPastText}</span>

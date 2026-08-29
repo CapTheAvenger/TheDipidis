@@ -3106,7 +3106,7 @@
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 10px;">
                         <div>
                             <strong style="color: #333;">Win Rate:</strong><br>
-                            <span style="font-size: 1.5em; color: #3498db;">${escapeHtml(winRate)}</span>
+                            <span style="font-size: 1.5em; color: var(--dv-pos-ink);">${escapeHtml(winRate)}</span>
                         </div>
                         <div>
                             <strong style="color: #333;">Record:</strong><br>
@@ -3817,7 +3817,7 @@
                         <div class="card-table-row" data-card-name="${cardName.toLowerCase()}" style="display: flex; align-items: center; background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); gap: 20px;">
                             <div style="flex-shrink: 0; position: relative; width: 120px;">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; border-radius: 6px; cursor: zoom-in; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
-                                ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${deckCount}</div>` : ''}
+                                ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #1f8035; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${deckCount}</div>` : ''}
                                 ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                             </div>
                             <div style="flex-grow: 1; min-width: 0;">
@@ -3825,7 +3825,7 @@
                                 <div style="color: #333; font-size: 0.9em; margin-bottom: 10px; font-weight: 600;">${setCode} ${setNumber}</div>
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
                                     <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Usage Share:</span> <span style="font-weight: 600; color: #667eea; margin-left: 5px;">${percentage}%</span></div>
-                                    <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø Count (if used):</span> <span style="font-weight: 600; color: #27ae60; margin-left: 5px;">${avgCount}x</span></div>
+                                    <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø Count (if used):</span> <span style="font-weight: 600; color: var(--tint-ok-ink); margin-left: 5px;">${avgCount}x</span></div>
                                     <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø Count (overall):</span> <span style="font-weight: 600; color: #f39c12; margin-left: 5px;">${avgCountOverall}x</span></div>
                                     <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Deck Count:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${decksWithCardDisplay} / ${totalDecksDisplay}</span></div>
                                     <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Max Count:</span> <span style="font-weight: 600; color: #dc3545; margin-left: 5px;">${maxCount}</span></div>
@@ -3833,7 +3833,7 @@
                             </div>
                             <div style="flex-shrink: 0; display:flex; flex-direction:column; gap:6px;">
                                 <button class="btn btn-success" style="padding: 10px 20px; font-size: 0.95em;" onclick="addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')">Add to Deck</button>
-                                <button class="btn" style="padding: 10px 20px; font-size: 0.85em; background:#e74c3c; color:white;" onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)">Proxy</button>
+                                <button class="btn" style="padding: 10px 20px; font-size: 0.85em; background:var(--solid-bad); color:white;" onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)">Proxy</button>
                             </div>
                         </div>
                     `;

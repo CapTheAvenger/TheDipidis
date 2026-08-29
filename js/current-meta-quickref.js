@@ -489,7 +489,7 @@
       }
       return `
         <div class="past-meta-best-card" title="${_escHtml(c.name)} (${c.count}x)">
-          ${img ? `<img src="${img}" alt="${_escHtml(c.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;color:#6b7280;text-align:center;padding:4px;">${_escHtml(c.name)}</span>`}
+          ${img ? `<img src="${img}" alt="${_escHtml(c.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;color:var(--ink-3);text-align:center;padding:4px;">${_escHtml(c.name)}</span>`}
           <div class="past-meta-best-card-count">${c.count}</div>
         </div>`;
     }).join('');
@@ -591,7 +591,7 @@
         ? `<span class="past-meta-best-record"${_qWpHinweis ? ` title="${_escHtml(_qWpHinweis)}"` : ''}>${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${_qWpStr}</span>`
         : '';
       return `
-        <div class="past-meta-best-header" style="background: linear-gradient(135deg, #fff9f0 0%, #fff3e0 100%);">
+        <div class="past-meta-best-header" style="background: linear-gradient(135deg, var(--tint-warn) 0%, var(--tint-warn) 100%);">
           <div class="past-meta-best-headline">
             <span class="past-meta-best-place">${_escHtml(placeStr)}</span>
             <span class="past-meta-best-name">${_escHtml(ref.player_name || '')}</span>

@@ -1476,14 +1476,14 @@
                     
                     devLog('Current Meta data loaded successfully');
                 } else {
-                    currentMetaContent.innerHTML = '<div style="color: #e74c3c; padding: 20px;">Error loading comparison data</div>';
+                    currentMetaContent.innerHTML = '<div style="color: var(--tint-bad-ink); padding: 20px;">Error loading comparison data</div>';
                 }
                 
                 window.currentMetaLoaded = true;
             } catch (error) {
                 console.error('Error loading Current Meta:', error);
                 currentMetaContent.innerHTML = `
-                    <div style="color: #e74c3c; padding: 20px;">
+                    <div style="color: var(--tint-bad-ink); padding: 20px;">
                         <strong>Error:</strong> Could not load comparison HTML.
                         <br><small>${error.message}</small>
                     </div>
@@ -1596,12 +1596,12 @@
                         let changeText = '';
                         if (deltaHtml.includes('rank-up')) {
                             const match = deltaHtml.match(/(\d+)/);
-                            if (match) changeText = ` <span style="color: #27ae60; font-size: 0.9em;">(↑${match[1]})</span>`;
+                            if (match) changeText = ` <span style="color: var(--tint-ok-ink); font-size: 0.9em;">(↑${match[1]})</span>`;
                         } else if (deltaHtml.includes('rank-down')) {
                             const match = deltaHtml.match(/(\d+)/);
-                            if (match) changeText = ` <span style="color: #e74c3c; font-size: 0.9em;">(↓${match[1]})</span>`;
+                            if (match) changeText = ` <span style="color: var(--tint-bad-ink); font-size: 0.9em;">(↓${match[1]})</span>`;
                         } else {
-                            changeText = ' <span style="color: #95a5a6; font-size: 0.9em;">(-)</span>';
+                            changeText = ' <span style="color: var(--ink-3); font-size: 0.9em;">(-)</span>';
                         }
                         
                         // Update new rank cell to include change
@@ -1857,11 +1857,11 @@
                             // Add new stats
                             const statsHtml = `
                                 <p class="meta-online-stats" style="font-size: 0.85em; color: #555; margin: 15px 0 5px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-weight: 500;">
-                                    <strong style="color: #3498db;">Online Meta:</strong><br>
+                                    <strong style="color: var(--dv-pos-ink);">Online Meta:</strong><br>
                                     <span style="font-size: 0.95em;">${metaStats.tournaments.toLocaleString()} tournaments · ${metaStats.players.toLocaleString()} players · ${metaStats.matches.toLocaleString()} matches</span>
                                 </p>
                                 <p class="meta-major-stats" style="font-size: 0.85em; color: #555; margin: 5px 0 0 0; font-weight: 500;">
-                                    <strong style="color: #27ae60;">Major Tournaments:</strong><br>
+                                    <strong style="color: var(--tint-ok-ink);">Major Tournaments:</strong><br>
                                     <span style="font-size: 0.95em;">${(majorTournaments || 0).toLocaleString()} tournaments · ${(totalPlayers || 0).toLocaleString()} players</span>
                                 </p>
                             `;

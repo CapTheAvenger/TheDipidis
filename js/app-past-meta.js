@@ -1022,8 +1022,8 @@
                 html += '<tr>';
                 html += `<td style="text-align: center; font-weight: bold; color: #2c3e50;">${count}</td>`;
                 html += `<td>${cardName}</td>`;
-                html += `<td style="text-align: center;">${isAceSpecCard ? '<span style="color: #e74c3c; font-weight: bold;">★</span>' : '-'}</td>`;
-                html += `<td style="text-align: center; display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${escapeJsStr(cardName)}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button><button class="btn" style="padding: 6px 10px; font-size: 0.8em; background:#e74c3c; color:white;" onclick='addCardToProxy("${escapeJsStr(cardName)}", "${proxySetCode}", "${proxySetNumber}", 1)'>Proxy</button></td>`;
+                html += `<td style="text-align: center;">${isAceSpecCard ? '<span style="color: var(--tint-bad-ink); font-weight: bold;">★</span>' : '-'}</td>`;
+                html += `<td style="text-align: center; display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${escapeJsStr(cardName)}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button><button class="btn" style="padding: 6px 10px; font-size: 0.8em; background:var(--solid-bad); color:white;" onclick='addCardToProxy("${escapeJsStr(cardName)}", "${proxySetCode}", "${proxySetNumber}", 1)'>Proxy</button></td>`;
                 html += '</tr>';
             });
             
@@ -2074,7 +2074,7 @@
                 }
                 return `
                     <div class="past-meta-best-card" title="${_esc(c.name)} (${c.count}x)">
-                        ${imgUrl ? `<img src="${imgUrl}" alt="${_esc(c.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;color:#6b7280;text-align:center;padding:4px;">${_esc(c.name)}</span>`}
+                        ${imgUrl ? `<img src="${imgUrl}" alt="${_esc(c.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;color:var(--ink-3);text-align:center;padding:4px;">${_esc(c.name)}</span>`}
                         <div class="past-meta-best-card-count">${c.count}</div>
                     </div>
                 `;

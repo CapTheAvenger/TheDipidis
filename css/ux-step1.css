@@ -18,7 +18,13 @@
     --ui-secondary-end: #1f9255;
     --ui-secondary-border: #1d884f;
 
-    --ui-danger-start: #e2564a;
+    /* 29.08.2026: stand auf #e2564a — weisse Schrift darauf ergibt
+       3,71:1 und verfehlt 4,5. Betrifft jeden .btn-danger und
+       .btn-gradient-red; allein der Proxy-Knopf der Kartendatenbank
+       kommt 60-mal pro Seite vor. Der Kontrastdurchgang vom selben Tag
+       hatte das nicht gefunden, weil sein Messwerkzeug das Wort
+       "Proxy" wegfilterte (siehe PR-Text). Jetzt 5,48:1. */
+    --ui-danger-start: #c62f22;
     --ui-danger-end: #c84237;
     --ui-danger-border: #b23a30;
 

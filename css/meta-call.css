@@ -346,7 +346,9 @@
 .metacall-date-help-icon {
   display: inline-block;
   margin-left: 4px;
-  color: var(--ink-3);
+  /* 29.08.2026: --ink-3 ergab auf dem getoenten Datumsfenster-Grund
+     3,98:1. --ink-2 ist die naechststaerkere Stufe und dreht mit. */
+  color: var(--ink-2);
   font-size: 0.85em;
   cursor: help;
 }
@@ -595,8 +597,13 @@
 .mc-row-junk td {
   background: var(--mc-bg-junk);
 }
+/* 29.08.2026, zweiter Anlauf. Erst stand hier #e67e22 (2,85:1 auf
+   Weiss), dann mein #a3540b — das trug hell, fiel aber im Dunkelmodus
+   auf 3,22:1 durch. Genau der Fehler, um den es bei diesem Durchgang
+   geht: eine feste Farbe auf einem Grund, der sich dreht.
+   --tint-warn-ink ist die Warnschrift des Hauses und dreht mit. */
 .mc-row-junk .mc-deck-name {
-  color: #e67e22;
+  color: var(--tint-warn-ink);
 }
 
 /* --- My Deck Panel --- */
@@ -1855,9 +1862,16 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    /* sitzt wie die anderen Tabellenkoepfe auf dem dunklen thead-Verlauf
-       aus styles.css — dort ist --mc-text-muted in beiden Modi zu dunkel. */
-    color: var(--on-dark);
+    /* 29.08.2026, zwei Anlaeufe. Der alte Kommentar behauptete, dieses
+       th sitze auf dem dunklen thead-Verlauf; gemessen hat es seinen
+       EIGENEN hellen Grund, und --on-dark ergab dort 1,69:1. Nur die
+       Schrift zu drehen reichte aber nicht: je nach Zustand kam die
+       Messung einmal auf hellen, einmal auf dunklen Grund — eine Regel,
+       zwei Gruende. Deshalb bringt das th seinen Grund jetzt SELBST mit.
+       Schrift und Flaeche gehoeren zusammen; wer nur eines von beidem
+       festlegt, ueberlaesst das andere dem Zufall der Schachtelung. */
+    background: var(--surface-2);
+    color: var(--ink-2);
     white-space: nowrap;
 }
 .mc-rec-table tr:last-child td { border-bottom: none; }
@@ -1880,9 +1894,16 @@
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
-.mc-rec-table tr:nth-child(1) .mc-rec-rank { color: #f1c40f; font-size: 1.05em; }
+/* Gold/Bronze waren als Medaillenfarben gedacht, ergaben auf Weiss aber
+   1,66:1 und 3,14:1. Dunkler gesaettigt traegt hell (4,92 / 6,35), faellt
+   aber im Dunkelmodus durch (3,59 / 2,78). Eine Medaillenfarbe, die in
+   beiden Modi traegt, gibt es nicht — deshalb dreht sie jetzt mit dem
+   Modus. Die Rangfolge steht ohnehin in der Zahl, nicht in der Farbe. */
+.mc-rec-table tr:nth-child(1) .mc-rec-rank { color: #8a6d00; font-size: 1.05em; }
+:root[data-theme="dark"] .mc-rec-table tr:nth-child(1) .mc-rec-rank { color: #e3c04a; }
 .mc-rec-table tr:nth-child(2) .mc-rec-rank { color: var(--ink-3); }
-.mc-rec-table tr:nth-child(3) .mc-rec-rank { color: #cd7f32; }
+.mc-rec-table tr:nth-child(3) .mc-rec-rank { color: #8a5220; }
+:root[data-theme="dark"] .mc-rec-table tr:nth-child(3) .mc-rec-rank { color: #d6a374; }
 .mc-rec-name {
     /* td stays as table-cell — flex on a <td> breaks the alignment
        between header and data rows. Inner wrapper does the layout. */
@@ -2810,7 +2831,9 @@
 .mc-cell-final .mc-share-final.has-personal {
     color: var(--mc-personal-accent-dark);
 }
-.mc-cell-dash { color: #c0c8d4; font-weight: 500; }
+/* 1,69:1 auf dem hellen Zeilengrund. Ein Gedankenstrich ist Text.
+   Fester Grauwert traegt nur in einem Modus — --ink-3 dreht mit. */
+.mc-cell-dash { color: var(--ink-3); font-weight: 500; }
 .mc-cell-players .mc-players-count {
     color: var(--mc-text-muted);
     font-variant-numeric: tabular-nums;

@@ -101,3 +101,60 @@ describe('Die vierzehn Nachzuegler bleiben zweisprachig', () => {
             `deutsch und englisch identisch — vermutlich nur kopiert: ${gleich.join(', ')}`);
     });
 });
+
+describe('Das Matchup-Modal ist nicht mehr halbdeutsch verdrahtet', () => {
+    const HTML = fs.readFileSync(path.join(wurzel, 'index.html'), 'utf8');
+
+    it('Titel, Beschriftungen, Chip und Brick-Optionen tragen Schluessel', () => {
+        // Die Selects wurden von populateMatchupFilters sauber
+        // befuellt, die Beschriftungen daneben fasste keine JS-Stelle
+        // an: ein englischer Nutzer las "All My Decks" unter
+        // "Mein Deck".
+        const noetig = ['matchupAnalysis.title', 'matchupAnalysis.subtitle',
+            'matchupAnalysis.myDeck', 'matchupAnalysis.meta',
+            'matchupAnalysis.tournament', 'matchupAnalysis.bricks',
+            'matchupAnalysis.chipAll', 'matchupAnalysis.brickIncl',
+            'matchupAnalysis.brickExcl', 'matchupAnalysis.brickOnly'];
+        const fehlenImHtml = noetig.filter(k => !HTML.includes(`"${k}"`));
+        assert.deepEqual(fehlenImHtml, [], `ohne Schluessel im HTML: ${fehlenImHtml}`);
+        const fehlenInTabelle = noetig.filter(k => anzahlInTabelle(k) !== 2);
+        assert.deepEqual(fehlenInTabelle, [], `nicht in beiden Bloecken: ${fehlenInTabelle}`);
+    });
+
+    it('kein deutsches Attribut ohne Schluessel mehr im Modal', () => {
+        const i = HTML.indexOf('class="ma-modal-header"');
+        assert.notEqual(i, -1, 'das Modal ist verschwunden');
+        const block = HTML.slice(i, i + 4000);
+        const roh = [...block.matchAll(/(title|placeholder)="([^"]*[äöüÄÖÜß][^"]*)"/g)]
+            .filter(m => !block.slice(Math.max(0, m.index - 300), m.index + 300)
+                .includes(`data-i18n-${m[1] === 'title' ? 'title' : 'placeholder'}`))
+            .map(m => m[2].slice(0, 40));
+        assert.deepEqual(roh, [], `deutsches Attribut ohne Schluessel: ${roh}`);
+    });
+});
+
+describe('Der Offline-Hinweis kennt beide Sprachen', () => {
+    const OFF = fs.readFileSync(path.join(wurzel, 'js', 'offline-prefetch.js'), 'utf8');
+
+    it('es gibt eine Sprachverzweigung', () => {
+        // Der ganze Block hatte keine — ein englischer Nutzer bekam
+        // auf dem iPhone ein komplett deutsches Banner.
+        assert.match(OFF, /app_lang/, 'liest die Sprachmarke nicht');
+        assert.match(OFF, /var DE = sprache === 'de'/, 'keine Verzweigung mehr');
+    });
+
+    it('jeder der drei Texte hat eine englische Fassung', () => {
+        for (const en of ['Offline only works via Safari',
+                          'For offline: add to home screen',
+                          'Dismiss hint']) {
+            assert.ok(OFF.includes(en), `englische Fassung fehlt: ${en}`);
+        }
+    });
+
+    it('das Modul verlaesst sich nicht auf i18n', () => {
+        // offline-prefetch.js laedt vor i18n.js. Ein t()-Aufruf waere
+        // hier eine Zeitbombe, kein Fortschritt.
+        assert.ok(!/\bt\(['"]/.test(OFF),
+            'benutzt t() — das Modul laedt vor i18n.js');
+    });
+});

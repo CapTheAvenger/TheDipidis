@@ -125,7 +125,7 @@
    "PLS 130"
   ]
  },
- "champions_teams": 80,
+ "champions_teams": 77,
  "empty_files": {
   "city_league_analysis.csv": true,
   "city_league_archetypes.csv": true,
@@ -140,7 +140,7 @@
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-08-28 13:24 UTC",
+ "generated": "2026-08-29 09:33 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -151,7 +151,7 @@
   "SVP": 228
  },
  "price_integrity": {
-  "duplicate_idproducts": 93,
+  "duplicate_idproducts": 95,
   "match_methods": {
    "live-verified": 5028,
    "manual-pin": 51,

@@ -132,16 +132,39 @@
         if (sessionStorage.getItem('__homescreen_hint_dismissed')) return;
         if (document.getElementById('offline-homescreen-hint')) return;
 
-        var title, body;
+        // Dieser Block hatte keine einzige Sprachverzweigung: ein
+        // englischer Nutzer bekam auf dem iPhone ein komplett
+        // deutsches Banner. Das Modul laedt vor i18n.js und darf sich
+        // nicht auf window.t verlassen — deshalb hier eine eigene,
+        // winzige Auswahl statt eines Schluessels. Sie liest dieselbe
+        // Marke wie i18n.js (app_lang) und faellt auf die
+        // Browsersprache zurueck.
+        var sprache = (function () {
+            try {
+                var gespeichert = localStorage.getItem('app_lang');
+                if (gespeichert === 'de' || gespeichert === 'en') return gespeichert;
+            } catch (e) { /* privater Modus */ }
+            return (navigator.language || 'en').toLowerCase().indexOf('de') === 0 ? 'de' : 'en';
+        })();
+        var DE = sprache === 'de';
+
+        var title, body, schliessen;
+        schliessen = DE ? 'Hinweis schließen' : 'Dismiss hint';
         if (isIOSChrome() || isIOSOtherBrowser()) {
             // Chrome / Firefox / Edge on iOS can't install real PWAs —
             // their "Add to Home Screen" just makes a shortcut that
             // reopens the same browser. Send the user to Safari.
-            title = 'Offline funktioniert nur über Safari';
-            body = 'iOS erlaubt nur Safari, eine echte App zum Home-Bildschirm zu installieren. Chrome/Firefox-Shortcuts haben dasselbe Speicher-Limit wie ein Tab (~50 MB). Öffne thedipidis.app in <b>Safari</b>, dann Teilen-Icon → "Zum Home-Bildschirm" → öffne die App von dort.';
+            title = DE ? 'Offline funktioniert nur über Safari'
+                       : 'Offline only works via Safari';
+            body = DE
+                ? 'iOS erlaubt nur Safari, eine echte App zum Home-Bildschirm zu installieren. Chrome/Firefox-Shortcuts haben dasselbe Speicher-Limit wie ein Tab (~50 MB). Öffne thedipidis.app in <b>Safari</b>, dann Teilen-Icon → "Zum Home-Bildschirm" → öffne die App von dort.'
+                : 'iOS only lets Safari install a real app to the home screen. Chrome/Firefox shortcuts have the same storage limit as a tab (~50 MB). Open thedipidis.app in <b>Safari</b>, then Share icon → "Add to Home Screen" → open the app from there.';
         } else {
-            title = 'Für Offline: Zum Home-Bildschirm';
-            body = 'Im Browser-Tab limitiert iOS den Offline-Speicher auf wenige MB. Tipp Teilen-Icon → "Zum Home-Bildschirm" und öffne die App von dort.';
+            title = DE ? 'Für Offline: Zum Home-Bildschirm'
+                       : 'For offline: add to home screen';
+            body = DE
+                ? 'Im Browser-Tab limitiert iOS den Offline-Speicher auf wenige MB. Tipp Teilen-Icon → "Zum Home-Bildschirm" und öffne die App von dort.'
+                : 'In a browser tab iOS caps offline storage at a few MB. Tap the Share icon → "Add to Home Screen" and open the app from there.';
         }
 
         var banner = document.createElement('div');
@@ -167,7 +190,7 @@
             '<div style="font-weight:700;margin-bottom:4px">' + title + '</div>' +
             '<div style="font-weight:400;opacity:.88;font-size:12px">' + body + '</div>' +
             '</div>' +
-            '<button type="button" aria-label="Hinweis schließen" style="background:transparent;border:0;color:#fff;font-size:20px;line-height:1;padding:0;cursor:pointer;opacity:.7">×</button>';
+            '<button type="button" aria-label="' + schliessen + '" style="background:transparent;border:0;color:#fff;font-size:20px;line-height:1;padding:0;cursor:pointer;opacity:.7">×</button>';
         banner.querySelector('button').addEventListener('click', function () {
             sessionStorage.setItem('__homescreen_hint_dismissed', '1');
             banner.remove();

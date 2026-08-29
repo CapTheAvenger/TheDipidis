@@ -969,7 +969,9 @@ function updateCollectionTypeLoadingIndicator() {
   const pending = window._pendingPokemonTypeFetches ? window._pendingPokemonTypeFetches.size : 0;
   if (pending > 0) {
     el.style.display = 'block';
-    el.textContent = `Elementtypen werden geladen... (${pending})`;
+    el.textContent = (typeof getLang === 'function' && getLang() === 'de')
+      ? `Elementtypen werden geladen... (${pending})`
+      : `Loading element types... (${pending})`;
   } else {
     el.style.display = 'none';
   }

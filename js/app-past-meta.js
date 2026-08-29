@@ -1254,7 +1254,9 @@
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
                                 <div class="city-league-card-badge city-league-card-badge-max"${
                                     avgCount > 0 && avgCount < 0.5
-                                        ? ` title="Ø ${avgCount.toFixed(2)} Kopien je Liste — auf 1 aufgerundet, damit die Karte nicht als 0 dasteht"`
+                                        ? ` title="${(typeof getLang === 'function' && getLang() === 'de')
+                                            ? `Ø ${avgCount.toFixed(2)} Kopien je Liste — auf 1 aufgerundet, damit die Karte nicht als 0 dasteht`
+                                            : `Avg ${avgCount.toFixed(2)} copies per list — rounded up to 1 so the card isn't shown as 0`}"`
                                         : ''}>${maxCount}</div>
                                 ${pinBadgeHtml}
                                 ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}

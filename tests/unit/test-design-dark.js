@@ -140,8 +140,11 @@ describe('wie weit die Seite dafür ist', () => {
            profile-howto-info.css auf Flaechen-Token. Dabei mussten 43
            feste dunkle Textfarben mitgezogen werden — eine Flaeche
            umzustellen und den Text stehenzulassen ergibt dunkel auf
-           dunkel. */
-        const BASELINE = 320;
+           dunkel.
+           320 -> 316: die drei Tier-Toenungen und der leere
+           Movers-Block. Live gemessen waren das die groessten hellen
+           Flaechen der ganzen Seite — je 1720 px breit. */
+        const BASELINE = 316;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);

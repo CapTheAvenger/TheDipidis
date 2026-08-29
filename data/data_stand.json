@@ -1,5 +1,5 @@
 {
-  "erzeugt_am": "2026-08-28T09:21:35+00:00",
+  "erzeugt_am": "2026-08-29T10:06:58+00:00",
   "quelle": "Zeitpunkt des Laufs fuer geaenderte Dateien, sonst fortgeschrieben",
   "dateien": {
     "limitless_online_decks.csv": "2026-08-28T06:48:16+00:00",
@@ -14,5 +14,8 @@
     "price_data.csv": "2026-08-28T09:21:35+00:00",
     "labs_tournament_decks.csv": "2026-08-25T06:22:41+00:00",
     "champions_usage.json": "2026-07-17T05:54:27+00:00"
+  },
+  "inhalt_bis": {
+    "labs_tournament_decks.csv": "2026-06-12"
   }
 }

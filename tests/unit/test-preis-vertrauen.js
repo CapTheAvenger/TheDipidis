@@ -33,16 +33,41 @@ function stueck(quelle, re, was) {
     return m[0];
 }
 
-function ladeBadge() {
+// 29.08.2026: Die Faelle tragen jetzt Sprachschluessel statt festem
+// Deutsch. Der Test bekommt deshalb die ECHTE Sprachtabelle statt einer
+// Attrappe — damit prueft er die ganze Kette: Schluessel vorhanden,
+// Text vorhanden, Text kommt beim Nutzer an. Eine Attrappe haette den
+// Fall "Schluessel existiert gar nicht" durchgelassen.
+const I18N = lies('js/i18n.js');
+
+function sprachtabelle(sprache) {
+    // Beide Bloecke stehen nacheinander in derselben Datei; der erste
+    // ist englisch, der zweite deutsch.
+    const alle = [...I18N.matchAll(/^ {4}'([a-zA-Z0-9._]+)':\s*('(?:\\.|[^'\\])*')/gm)];
+    const mitte = Math.floor(alle.length / 2);
+    const teil = sprache === 'en' ? alle.slice(0, mitte) : alle.slice(mitte);
+    const karte = {};
+    for (const m of teil) {
+        if (karte[m[1]] === undefined) {
+            // eslint-disable-next-line no-eval
+            karte[m[1]] = eval(m[2]);
+        }
+    }
+    return karte;
+}
+
+function ladeBadge(sprache = 'de') {
+    const tabelle = sprachtabelle(sprache);
     const quelle =
         stueck(COLLECTION, /const PRICE_TRUST_CASES = \{[\s\S]*?\n\};/, 'faelle')
         + '\n'
         + stueck(COLLECTION, /function priceTrustBadge\(card, cmUrl\) \{[\s\S]*?\n\}/, 'badge');
     const w = { cardDBHasMappingStatus: true };
     // eslint-disable-next-line no-new-func
-    return new Function('window', 'escapeHtml',
+    return new Function('window', 'escapeHtml', 't',
         quelle + '\nreturn priceTrustBadge;')(w, (x) => String(x)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'));
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'),
+        (k) => (tabelle[k] !== undefined ? tabelle[k] : k));
 }
 
 describe('Das Vertrauenszeichen kennt alle drei Faelle', () => {
@@ -69,14 +94,42 @@ describe('Das Vertrauenszeichen kennt alle drei Faelle', () => {
     });
 
     it('ohne Feld im Datensatz schweigt es ganz', () => {
+        const tabelle = sprachtabelle('de');
         const quelle =
             stueck(COLLECTION, /const PRICE_TRUST_CASES = \{[\s\S]*?\n\};/, 'faelle')
             + '\n'
             + stueck(COLLECTION, /function priceTrustBadge\(card, cmUrl\) \{[\s\S]*?\n\}/, 'badge');
         // eslint-disable-next-line no-new-func
-        const ohne = new Function('window', 'escapeHtml',
-            quelle + '\nreturn priceTrustBadge;')({ cardDBHasMappingStatus: false }, (x) => x);
+        const ohne = new Function('window', 'escapeHtml', 't',
+            quelle + '\nreturn priceTrustBadge;')({ cardDBHasMappingStatus: false }, (x) => x,
+            (k) => (tabelle[k] !== undefined ? tabelle[k] : k));
         assert.equal(ohne({ mapping_status: 'unmapped' }), '');
+    });
+
+    it('im englischen Modus steht dort kein deutsches Wort', () => {
+        // Genau der Fehler, der das ausgeloest hat: die Tabelle war
+        // vollstaendig, die Anzeige trotzdem deutsch.
+        const en = ladeBadge('en');
+        for (const st of ['unverified', 'unmapped', 'collision']) {
+            const html = en({ mapping_status: st });
+            assert.ok(html.length > 0, st + ': gar kein Zeichen');
+            assert.ok(!/[äöüÄÖÜß]/.test(html), st + ': Umlaut im englischen Text — ' + html.slice(0, 90));
+            assert.ok(!/\b(nicht|ohne|Nummer|doppelt|Karte|Preis|einem|einer|derselben)\b/.test(html),
+                st + ': deutsches Wort im englischen Text — ' + html.slice(0, 120));
+        }
+    });
+
+    it('kein Fall zeigt seinen eigenen Schluessel statt eines Textes', () => {
+        // Wenn t() den Schluessel nicht findet, gibt es ihn selbst
+        // zurueck. Das saehe aus wie ein Text und waere keiner.
+        for (const sprache of ['de', 'en']) {
+            const b = ladeBadge(sprache);
+            for (const st of ['unverified', 'unmapped', 'collision']) {
+                const html = b({ mapping_status: st });
+                assert.ok(!/preis\.[a-zA-Z]/.test(html),
+                    `${sprache}/${st}: roher Schluessel in der Anzeige — ${html.slice(0, 100)}`);
+            }
+        }
     });
 
     it('und es haengt nicht mehr allein an der Wunschliste', () => {

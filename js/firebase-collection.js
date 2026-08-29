@@ -1558,7 +1558,13 @@ function buildWishlistTargetPill(cmPriceRaw, userMaxRaw) {
   const max = _parsePriceNum(userMaxRaw);
   if (cm === null || max === null) return '';
   if (cm > max) return '';
-  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,var(--solid-ok),#15803d);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(22,163,74,0.35);" title="Cardmarket-Preis (${cm.toFixed(2).replace('.',',')} €) ist auf oder unter deinem Wunsch-Maximum (${max.toFixed(2).replace('.',',')} €)">🎯 Unter deinem Ziel</div>`;
+  // 29.08.2026: Text und Titel kommen aus der Sprachtabelle. Vorher
+  // standen sie fest auf Deutsch und erschienen so auch im englischen
+  // Modus — im Browser nachgemessen.
+  const titel = t('preis.zielPillTitel')
+    .replace('{cm}', `${cm.toFixed(2).replace('.', ',')} €`)
+    .replace('{max}', `${max.toFixed(2).replace('.', ',')} €`);
+  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,var(--solid-ok),#15803d);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(22,163,74,0.35);" title="${escapeHtml(titel)}">${escapeHtml(t('preis.zielPill'))}</div>`;
 }
 
 function buildTradelistUnderpricedPill(cmPriceRaw, userMinRaw) {
@@ -1575,7 +1581,11 @@ function buildTradelistUnderpricedPill(cmPriceRaw, userMinRaw) {
   // *underselling*). "Preis Check" is a neutral nudge: tap me and
   // look at the numbers. The hover title still surfaces the full
   // explanation including the delta for users who want the detail.
-  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(220,38,38,0.35);" title="Markt (${cm.toFixed(2).replace('.',',')} €) ist ${deltaPct.toFixed(0)} % über deinem Preis (${min.toFixed(2).replace('.',',')} €). Tipp den Preis-Input an, um anzupassen.">⚠ Preis Check</div>`;
+  const titel2 = t('preis.checkPillTitel')
+    .replace('{cm}', `${cm.toFixed(2).replace('.', ',')} €`)
+    .replace('{pct}', deltaPct.toFixed(0))
+    .replace('{min}', `${min.toFixed(2).replace('.', ',')} €`);
+  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(220,38,38,0.35);" title="${escapeHtml(titel2)}">${escapeHtml(t('preis.checkPill'))}</div>`;
 }
 // Expose for the cron-side reuse + bot tooling.
 window.buildWishlistTargetPill = buildWishlistTargetPill;
@@ -1624,13 +1634,14 @@ window.selectPriceInput = selectPriceInput;
  * and never carry it either). window.cardDBHasMappingStatus is true only
  * when the loaded dataset knows the field.
  */
+// 29.08.2026: Beschriftung und Titel kommen aus der Sprachtabelle statt
+// aus festem Deutsch. Die Schluessel stehen hier, die Texte dort — sonst
+// waere die Tabelle zwar vollstaendig und die Anzeige trotzdem deutsch,
+// genau der Zustand, den die Messung im englischen Modus gefunden hat.
 const PRICE_TRUST_CASES = {
   unverified: {
-    label: '⚠ nicht verifiziert',
-    title: 'Preis nicht verifiziert: Diese Karte teilt sich den Namen mit '
-      + 'anderen Drucken derselben Edition, und die Zuordnung zum Cardmarket-Produkt '
-      + 'ist noch nicht bestätigt. Der Preis kann zu einem anderen Druck gehören — '
-      + 'auf Cardmarket prüfen.',
+    label: 'preis.unverifiziert',
+    title: 'preis.unverifiziertTitel',
   },
   // Bis zum 20.08.2026 trugen 3.015 Preiszeilen ohne jede Zuordnungszeile
   // den Wert 'ok' — der Vorgabewert eines fehlenden Eintrags im Mischer.
@@ -1638,19 +1649,15 @@ const PRICE_TRUST_CASES = {
   // nicht mehr angefasst worden. 'ok' hiess dort nicht "geprueft", sondern
   // "nichts bekannt".
   unmapped: {
-    label: '⚠ ohne Zuordnung',
-    title: 'Zu dieser Karte gibt es keine Zeile in der Cardmarket-Zuordnung. '
-      + 'Der Preis stammt aus einem alten Bestand und wurde nie einem Produkt '
-      + 'zugeordnet — er kann beliebig danebenliegen.',
+    label: 'preis.ohneZuordnung',
+    title: 'preis.ohneZuordnungTitel',
   },
   // 100 Produktnummern bedienen je zwei verschiedene Karten. Beide zeigen
   // denselben Preis, obwohl ihre Cardmarket-Links auf verschiedene Produkte
   // zeigen — mindestens eine der beiden Zahlen ist zwangslaeufig falsch.
   collision: {
-    label: '⚠ Nummer doppelt vergeben',
-    title: 'Diese Cardmarket-Produktnummer ist zwei verschiedenen Karten '
-      + 'zugeordnet. Beide zeigen denselben Preis, und mindestens einer der '
-      + 'beiden gehoert der anderen Karte — auf Cardmarket pruefen.',
+    label: 'preis.nummerDoppelt',
+    title: 'preis.nummerDoppeltTitel',
   },
 };
 
@@ -1660,8 +1667,8 @@ function priceTrustBadge(card, cmUrl) {
     if (!card) return '';
     const fall = PRICE_TRUST_CASES[card.mapping_status];
     if (!fall) return '';
-    const label = fall.label;
-    const title = fall.title;
+    const label = escapeHtml(t(fall.label));
+    const title = t(fall.title);
     if (cmUrl) {
       return `<a href="${escapeHtml(cmUrl)}" target="_blank" rel="noopener noreferrer" `
         + `class="price-unverified-badge" title="${escapeHtml(title)}">${label}</a>`;

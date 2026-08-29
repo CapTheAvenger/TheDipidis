@@ -133,7 +133,25 @@ VISIBLE_TEXT_JS = """(() => {
 def run():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+        # 29.08.2026: Dieser Test lief in KEINEM Workflow, und er konnte es
+        # auch nicht — `networkidle` wird nie erreicht, weil die Seite auf
+        # Firebase und andere externe Hosts wartet, die es hier nicht gibt.
+        # Er lief also nie durch und hat nie etwas gemeldet. Zwei kleine
+        # Aenderungen machen ihn lauffaehig:
+        #   * alles ausser localhost blockieren
+        #   * auf domcontentloaded warten statt auf networkidle
+        # Ausserdem wird die Einmal-Migration (app_lang_reset_2026_08)
+        # vorab gesetzt: sonst schreibt sie ein gespeichertes 'en' auf die
+        # Browsersprache um und der Test misst den falschen Zustand.
+        context = browser.new_context(locale="en-US", service_workers="block")
+        context.route("**/*", lambda route: (
+            route.continue_() if route.request.url.startswith(("http://127.0.0.1:8000", "data:", "blob:"))
+            else route.abort()
+        ))
+        page = context.new_page()
+        page.add_init_script(
+            "try { localStorage.setItem('app_lang_reset_2026_08', '1'); } catch (e) {}"
+        )
 
         # ═══════════════════════════════════════════════════════
         #   PHASE 1: ENGLISH MODE
@@ -143,9 +161,9 @@ def run():
         print("══════════════════════════════════════════════════")
 
         # Force English via localStorage before page load
-        page.goto(BASE, wait_until="networkidle", timeout=30000)
+        page.goto(BASE, wait_until="domcontentloaded", timeout=30000)
         page.evaluate("localStorage.setItem('app_lang', 'en')")
-        page.reload(wait_until="networkidle", timeout=30000)
+        page.reload(wait_until="domcontentloaded", timeout=30000)
         page.wait_for_timeout(1500)
 
         lang = page.evaluate("document.documentElement.lang")
@@ -748,7 +766,7 @@ def run():
         stored = page.evaluate("localStorage.getItem('app_lang')")
         check("PERSIST.1 localStorage saved 'de'", stored == "de", f"got '{stored}'")
 
-        page.reload(wait_until="networkidle", timeout=30000)
+        page.reload(wait_until="domcontentloaded", timeout=30000)
         page.wait_for_timeout(1500)
 
         lang_after_reload = page.evaluate("document.documentElement.lang")

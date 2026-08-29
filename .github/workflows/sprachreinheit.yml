@@ -1,0 +1,57 @@
+name: Sprachreinheit (i18n)
+
+# Dieser Test gab es seit Monaten — 46 Zusicherungen ueber beide
+# Sprachen, Paritaet, Titel, Platzhalter, Persistenz. Er lief in KEINEM
+# Workflow, und er konnte es auch nicht: er wartete auf `networkidle`,
+# das nie eintritt, weil die Seite auf Firebase wartet. Er ist also nie
+# durchgelaufen und hat nie etwas gemeldet.
+#
+# Am 29.08.2026 lauffaehig gemacht (externe Hosts blocken,
+# domcontentloaded statt networkidle, Migrationsmarke vorsetzen) und
+# von 48 Fehlmeldungen auf 0 gebracht — davon waren 45 Fehler des
+# Tests selbst (er verglich textContent mit Rohtext, der HTML enthaelt)
+# und 3 echte Fehler der Seite.
+#
+# Ab jetzt laeuft er bei jedem PR. Ein Test, der nicht laeuft, ist
+# keine Zusage, sondern eine Behauptung.
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  sprachreinheit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Serve the site
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 &
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null http://127.0.0.1:8000/index.html; then
+              echo "Server steht."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Server kam nicht hoch."
+          exit 1
+
+      - name: Sprachreinheit pruefen
+        run: python3 tests/e2e_i18n_language_purity.py

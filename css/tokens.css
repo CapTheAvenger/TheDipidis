@@ -217,6 +217,14 @@
      * ueber Token faerbt, nimmt --ink. */
     --on-light: #161a23;
 
+    /* Die gedaempften Geschwister von --on-light. Gleiche Regel: sie
+     * gehoeren auf eine FESTE helle Flaeche und bleiben deshalb in
+     * beiden Modi gleich. Wer hier --ink-2/--ink-3 nimmt, baut eine
+     * Flaeche, die im Dunkelmodus hell auf hell steht — gemessen am
+     * 29.08.2026 an sieben Stellen, 1,02:1 bis 3,10:1. */
+    --on-light-2: #4d5566;
+    --on-light-3: #575e70;
+
     /* Nackte Links.
      *
      * Ein <a> ohne eigene Farbe faellt auf die Browser-Vorgabe zurueck:

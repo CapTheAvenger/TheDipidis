@@ -112,8 +112,14 @@
     .ds-tabbar-btn .ds-tabbar-gl { font-size: var(--fs-lg); line-height: 1; }
     .ds-tabbar-btn[aria-current="page"] { color: var(--brand-ink); }
 
-    /* Damit die Leiste den letzten Inhalt nicht verdeckt. */
+    /* Damit die Leiste den letzten Inhalt nicht verdeckt.
+     * ACHTUNG: die Fusszeile steht AUSSERHALB von .tabs-container
+     * (index.html: main endet Zeile 2882, footer folgt 2889). Sie
+     * braucht deshalb ihren eigenen Abstand, sonst liegt sie
+     * dauerhaft unter der fixierten Leiste und ist nicht
+     * wegscrollbar — gemessen am 29.08.2026 in 11 von 13 Ansichten. */
     .tabs-container { padding-bottom: 64px; }
+    .footer { padding-bottom: 64px; }
 }
 
 /* ── Der Datenraum-Ausweis ────────────────────────────────────────────

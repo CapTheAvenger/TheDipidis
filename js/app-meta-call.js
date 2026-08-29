@@ -4790,7 +4790,16 @@ window.MetaCall = (function () {
     // Lopunny damped to 4.38 → 4.61. The new scheme keeps Lopunny at
     // 4.38 and instead lifts Solo Dragapult / Raging Bolt / etc. by
     // a slightly larger factor that just absorbs the freed share.
-    if (stickinessDamped) {
+    // ACHTUNG: Diese Renormierung MUSS immer laufen, nicht nur wenn 5.8
+    // gedaempft hat. Stufe 5.9 addiert ihre Prozentpunkte NACH der
+    // einzigen Renormierung (oben, predictedShareRaw / predictedSum).
+    // Stand sie im if-Zweig, summierte die Liste auf ueber 100 %,
+    // sobald 5.8 nichts daempft — und genau das macht die neue
+    // Fenster-Sperre PREDICTOR_5_8_MIN_TURNIERE wahrscheinlich.
+    // Gemessen am 29.08.2026 mit den echten Momentaufnahmen: 102,66 %.
+    // Ohne gedaempftes Deck faellt die Aufteilung auf "alle skalieren"
+    // zurueck — das ist die schlichte Renormierung, die nach 5.9 fehlt.
+    {
       const dampedTotal = _shareList
         .filter(d => d.stickinessDamper)
         .reduce((s, d) => s + (d.predictedShare || 0), 0);
@@ -4807,7 +4816,7 @@ window.MetaCall = (function () {
       });
       try {
         const damped = _shareList.filter(d => d.stickinessDamper).length;
-        console.log(
+        if (damped > 0) console.log(
           `[Predictor 5.8] Post-everything stickiness damp: ${damped} decks ` +
           `damped (sum ${dampedTotal.toFixed(2)} %), non-damped scale ` +
           `×${scale.toFixed(3)} (target ${targetForNonDamped.toFixed(2)} %).`

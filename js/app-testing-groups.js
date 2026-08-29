@@ -397,6 +397,18 @@ window.TestingGroups = (function () {
   // edits appear instantly. We still guard against overwriting an input
   // the local user is actively typing into (_editingKey); full re-render
   // only runs when structural changes occur (deck list, members).
+  // Dies ist der Auffrischmechanismus der Gruppe. Jede Mutation
+  // schreibt nach Firestore, der Schnappschuss kommt zurueck und
+  // ruft _applySnapshot — die Ansicht zeichnet sich also von selbst.
+  //
+  // Fuenf Mutationen riefen bis zum 29.08.2026 zusaetzlich ein
+  // _refreshCurrentGroup() auf, das es nirgends im Repo gibt. Der
+  // Aufruf stand hinter dem erfolgreichen Schreibvorgang im try, der
+  // ReferenceError landete im catch — Deck/Mitglied hinzufuegen,
+  // entfernen und Rolle aendern speicherten korrekt und meldeten
+  // danach "Speichern fehlgeschlagen". Die Aufrufe sind entfernt,
+  // nicht ersetzt: der Schnappschuss macht die Arbeit bereits.
+  // Wer hier wieder ein Auffrischen einbaut, zeichnet doppelt.
   function _startRealtimeListener() {
     _stopRealtimeListener();
     const db = _db();
@@ -680,7 +692,6 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'deck_added', name, null, name);
-      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] addDeck failed', err);
       alert(t('tg.errSave'));
@@ -713,7 +724,6 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'deck_removed', deckName, deckName, null);
-      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] removeDeck failed', err);
       alert(t('tg.errSave'));
@@ -747,7 +757,6 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'member_added', clean, null, role);
-      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] addMember failed', err);
       alert(t('tg.errSave'));
@@ -766,7 +775,6 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'role_changed', uid, null, newRole);
-      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] changeRole failed', err);
       alert(t('tg.errSave'));
@@ -791,7 +799,6 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'member_removed', uid, null, null);
-      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] removeMember failed', err);
       alert(t('tg.errSave'));

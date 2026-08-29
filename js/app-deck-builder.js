@@ -5917,21 +5917,21 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 findings.push({
                     level: 'warn',
                     key: 'energy_low',
-                    message: `Energie-Economy: ${totalEnergies} (Modern: 7–11)`,
-                    hint: 'Decks unter 7 Energien laufen Gefahr, in mittlerer Spielphase ohne Beschleuniger zu stehen.',
+                    message: t('audit.energyRange').replace('{n}', String(totalEnergies)),
+                    hint: t('audit.energyLowHint'),
                 });
             } else if (totalEnergies > 11) {
                 findings.push({
                     level: 'warn',
                     key: 'energy_high',
-                    message: `Energie-Economy: ${totalEnergies} (Modern: 7–11)`,
-                    hint: 'Decks über 11 Energien produzieren spät häufige Dead-Draws — eine Energie ist hier weniger wert als ein Such-Item.',
+                    message: t('audit.energyRange').replace('{n}', String(totalEnergies)),
+                    hint: t('audit.energyHighHint'),
                 });
             } else {
                 findings.push({
                     level: 'info',
                     key: 'energy_ok',
-                    message: `Energie-Economy: ${totalEnergies} (im 7–11 Korridor)`,
+                    message: t('audit.energyOk').replace('{n}', String(totalEnergies)),
                 });
             }
 
@@ -5944,8 +5944,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 findings.push({
                     level: 'warn',
                     key: 'stadium_missing',
-                    message: `Farblose Engine ohne Stadium: ${[...new Set(colorlessEngineNames)].join(', ')}`,
-                    hint: "Team Rocket's Watchtower (DRI 180) deaktiviert alle Fähigkeiten farbloser Pokémon. Ohne eigenes Stadium zum „Bumpen“ liegt die Draw-Engine still, sobald der Gegner Watchtower spielt.",
+                    message: t('audit.stadiumMissing')
+                        .replace('{names}', [...new Set(colorlessEngineNames)].join(', ')),
+                    hint: t('audit.stadiumMissingHint'),
                 });
             }
 
@@ -5956,10 +5957,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 findings.push({
                     level: heroCape ? 'info' : 'warn',
                     key: 'mega_ex_prizing',
-                    message: `Mega-ex Hauptangreifer: ${megaEx.card.card_name} (3 Preiskarten bei KO)`,
-                    hint: heroCape
-                        ? 'Hero\'s Cape ist im Deck — gute Defensive gegen den Drei-Preis-Verlust.'
-                        : 'Hero\'s Cape (ACE SPEC) erhöht HP signifikant und schützt vor One-Hit-KO; in Mega-ex-Decks praktisch alternativlos.',
+                    message: t('audit.megaExPrizing').replace('{name}', megaEx.card.card_name),
+                    hint: heroCape ? t('audit.megaExWithCape') : t('audit.megaExNoCape'),
                 });
             }
 
@@ -5977,10 +5976,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             findings.push({
                 level: pctBasic >= 70 ? 'info' : (pctBasic >= 50 ? 'warn' : 'crit'),
                 key: 'opening_basic_prob',
-                message: `P(≥1 Basis-Pokémon in Starthand): ${pctBasic}% (${totalBasics} Basics)`,
-                hint: pctBasic < 70
-                    ? 'Mulligan-Rate über 30% verschenkt Karten an den Gegner — modernes Optimum sind 7–11 Basics für ~70–80% Keep-Rate.'
-                    : undefined,
+                message: t('audit.openingBasic')
+                    .replace('{pct}', String(pctBasic))
+                    .replace('{n}', String(totalBasics)),
+                hint: pctBasic < 70 ? t('audit.openingBasicHint') : undefined,
             });
 
             // 5. Single-of irreplaceables → Exchange Ticket recommendation.
@@ -5999,8 +5998,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 findings.push({
                     level: 'info',
                     key: 'exchange_ticket_missing',
-                    message: `Single-of-Risiko: ${aceSpecEntry.card.card_name} (ACE SPEC) kann in den Preisen feststecken`,
-                    hint: 'Exchange Ticket (JTG 156) erlaubt es, alle verbleibenden Preiskarten neu zu ziehen — Standard-Tech in Konsistenz-Listen mit 1-of-Schlüsselkarten.',
+                    message: t('audit.singleOfRisk').replace('{name}', aceSpecEntry.card.card_name),
+                    hint: t('audit.singleOfRiskHint'),
                 });
             }
 

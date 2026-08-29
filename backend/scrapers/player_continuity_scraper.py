@@ -91,6 +91,45 @@ def load_deck_archetype_map(data_dir: str) -> Dict[str, str]:
     return out
 
 
+def load_meta_map(data_dir: str) -> Dict[str, str]:
+    """Map tournament_id -> meta from labs_tournament_decks.csv.
+
+    Warum nicht aus labs_tournaments.json: dieser Index fuehrt die
+    Spalte `meta` ueberhaupt nicht (Schluessel: tournament_id,
+    tournament_name, tournament_date, tournament_type, country,
+    total_players). `t.get('meta')` war deshalb immer None, und die
+    Spalte stand in ALLEN 5619 Zeilen der Ausgabe leer — gemessen am
+    29.08.2026.
+
+    Das ist keine Kosmetik: der Prognosemotor filtert die Klebrigkeit
+    ueber genau diese Spalte (`js/app-meta-call.js`: if (prev && meta
+    && meta !== prev) return;). Ohne sie greift der Filter nie und das
+    Fenster mischt drei Formate.
+
+    labs_tournament_decks.csv fuehrt `meta` je Turnier eindeutig und
+    ist dieselbe Quelle, aus der schon die Archetyp-Karte kommt."""
+    path = os.path.join(data_dir, "labs_tournament_decks.csv")
+    out: Dict[str, str] = {}
+    if not os.path.exists(path):
+        logger.warning("labs_tournament_decks.csv fehlt — meta bleibt leer.")
+        return out
+    widersprueche: Dict[str, set] = {}
+    with open(path, encoding='utf-8-sig') as f:
+        for r in csv.DictReader(f):
+            tid = (r.get('tournament_id') or '').strip()
+            meta = (r.get('meta') or '').strip()
+            if not tid or not meta:
+                continue
+            widersprueche.setdefault(tid, set()).add(meta)
+            out.setdefault(tid, meta)
+    # Melden, nicht stillschweigend das erste nehmen.
+    for tid, werte in widersprueche.items():
+        if len(werte) > 1:
+            logger.warning("tid=%s traegt mehrere metas %s — nehme %s",
+                           tid, sorted(werte), out[tid])
+    return out
+
+
 def scrape_standings_full(tournament_id: str) -> List[Dict]:
     """Fetch /<tid>/standings and return every row as
     { place, player_name, country, deck_slug, wins, losses, ties }.
@@ -124,6 +163,27 @@ def scrape_standings_full(tournament_id: str) -> List[Dict]:
     col_place   = find_col(['place', 'rank', 'pos', 'position']) or 0
     col_player  = find_col(['player', 'name'])
     col_country = find_col(['country', 'cc', 'flag'])
+    if col_country is None:
+        # Die Flaggenspalte auf labs traegt eine LEERE Kopfzeile. Der
+        # Textabgleich oben konnte sie deshalb nie finden — country
+        # stand in allen 5619 Zeilen leer. Also nach dem Inhalt suchen:
+        # die erste Zelle, die eine Flagge mit zweibuchstabigem alt
+        # traegt (<img alt="US">) oder einen Landeslink (?c=US).
+        for zeile in table.select('tbody tr')[:8]:
+            zellen = zeile.find_all('td')
+            for i, z in enumerate(zellen):
+                img = z.find('img')
+                if img and re.fullmatch(r'[A-Za-z]{2}', (img.get('alt') or '').strip()):
+                    col_country = i
+                    break
+                a = z.find('a', href=re.compile(r'[?&]c=[A-Za-z]{2}\b'))
+                if a:
+                    col_country = i
+                    break
+            if col_country is not None:
+                break
+        if col_country is None:
+            logger.warning("    Keine Laenderspalte gefunden fuer %s", tournament_id)
     col_record  = find_col(['record', 'w-l-t', 'record (w-l-t)'])
 
     out: List[Dict] = []
@@ -233,6 +293,8 @@ def main():
 
     archetype_map = load_deck_archetype_map(data_dir)
     logger.info("Loaded %d deck_slug → deck_name mappings", len(archetype_map))
+    meta_map = load_meta_map(data_dir)
+    logger.info("Loaded %d tournament_id → meta mappings", len(meta_map))
 
     # Filter tids per CLI
     target = []
@@ -272,7 +334,12 @@ def main():
     for i, t in enumerate(target, 1):
         tid = str(t.get('tournament_id')).strip()
         date = (t.get('tournament_date') or '').strip()
-        meta = (t.get('meta') or '').strip()
+        # Index zuerst (falls er die Spalte je bekommt), sonst die
+        # Karte aus labs_tournament_decks.csv.
+        meta = (t.get('meta') or '').strip() or meta_map.get(tid, '')
+        if not meta:
+            logger.warning("    tid=%s ohne meta — die Klebrigkeit kann "
+                           "dieses Turnier nicht nach Format filtern.", tid)
         logger.info("[%d/%d] tid=%s  %s  %s",
                     i, len(target), tid, date, meta or '(no meta)')
         rows = scrape_standings_full(tid)

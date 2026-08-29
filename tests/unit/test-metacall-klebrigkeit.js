@@ -21,8 +21,21 @@
  *         r = +0,568,  p = 0,045,  n = 13
  *     und zwar in der Richtung, die der Daempfer annimmt: wenig
  *     klebrige Decks verlieren Anteil. Unterhalb der Schwelle
- *     verschwindet der Zusammenhang (r = +0,12, p = 0,34) — die
- *     Schwelle 100 sitzt also richtig.
+ *     verschwindet er (r = +0,049, p = 0,75, n = 45) — die Schwelle
+ *     100 sitzt also richtig.
+ *
+ *     RICHTIGSTELLUNG durch die Nachpruefung: hier stand "unterhalb
+ *     der Schwelle r = +0,12". Das war die Zahl ueber ALLE 58 Decks,
+ *     nicht die unterhalb. Die richtige Zahl stuetzt das Argument
+ *     staerker, aber falsch etikettiert ist falsch etikettiert.
+ *
+ *     Ebenfalls aus der Nachpruefung, und wichtiger: p = 0,043 ist
+ *     NICHT belastbar. Laesst man je ein Deck weg, verlieren 8 von 13
+ *     Auslassungen die Signifikanz (ohne Dragapult r = +0,40, p = 0,20).
+ *     Die Schwelle 100 wurde ausserdem nachtraeglich gewaehlt. Der
+ *     Befund traegt als "Vorzeichen und Groessenordnung stimmen" —
+ *     nicht als Beweis. Deshalb wird der Daempfer hier abgesichert,
+ *     nicht gefeiert.
  *
  * Bleibt der eine, gemessene Fehler: bei zu wenigen Turnieren im
  * Fenster ist sticky_pct nicht niedrig, sondern unbestimmt.
@@ -106,8 +119,9 @@ describe('Predictor 5.8 — die Schwellen, die die Messung stuetzt', () => {
     it('die Spielerschwelle bleibt bei 100', () => {
         // Nicht gesetzt, sondern gemessen: unterhalb dieser Schwelle
         // verschwindet der Zusammenhang zwischen Klebrigkeit und
-        // Anteilsaenderung (r = +0,12, p = 0,34 ueber alle Decks),
-        // oberhalb ist er da (r = +0,57, p = 0,045).
+        // Anteilsaenderung (r = +0,049, p = 0,75, n = 45), oberhalb
+        // ist er da (r = +0,568, p = 0,043, n = 13). Zur Belastbarkeit
+        // siehe den Kopf dieser Datei.
         assert.equal(konstante('PREDICTOR_5_8_MIN_BROUGHT'), 100);
     });
 
@@ -119,5 +133,44 @@ describe('Predictor 5.8 — die Schwellen, die die Messung stuetzt', () => {
         assert.ok(stark >= 0.5, 'eine Halbierung waere keine Daempfung mehr, sondern eine Loeschung');
         assert.ok(konstante('PREDICTOR_5_8_VERY_LOW_STICK') < konstante('PREDICTOR_5_8_LOW_STICK'),
             'die Schwellen stehen in der falschen Reihenfolge');
+    });
+});
+
+describe('Der Datums-Chip rechnet mit derselben Grenze wie das Lag-Fenster', () => {
+    it('keine zweite, fest verdrahtete Zahl im Renderer', () => {
+        // Bis zum 29.08.2026 stand hier `ageDays > 35`, direkt ueber
+        // einem Titel, der aus lag_days + Karenz kommt. Heute gleich,
+        // weil lag_days = 14 — aber lag_days steht in
+        // data/format_window.json. Bei der naechsten Rotation waeren
+        // Farbe und Erklaerung des Chips auseinandergelaufen.
+        const i = MC.indexOf('const isStale =');
+        assert.notEqual(i, -1, 'die Veraltungs-Entscheidung ist verschwunden');
+        const zeile = MC.slice(i, MC.indexOf('\n', i));
+        assert.ok(!/>\s*\d+\s*;/.test(zeile),
+            'der Chip entscheidet wieder an einer fest verdrahteten Zahl: ' + zeile.trim());
+        assert.match(zeile, /LAG_KARENZ_TAGE/,
+            'der Chip benutzt nicht dieselbe Karenz wie das Lag-Fenster');
+    });
+
+    it('die Karenz steht auf Modulebene, sonst wirft der Renderer', () => {
+        // Sie stand bis zum 29.08.2026 lokal in loadData(). Der
+        // Chip-Renderer laeuft in einem anderen Gueltigkeitsbereich —
+        // node --check haette das nicht bemerkt, der Browser schon.
+        const i = MC.indexOf('const LAG_KARENZ_TAGE = 21;');
+        assert.notEqual(i, -1, 'LAG_KARENZ_TAGE ist verschwunden');
+        const einrueckung = MC.slice(MC.lastIndexOf('\n', i) + 1, i).length;
+        assert.equal(einrueckung, 2,
+            `LAG_KARENZ_TAGE steht mit ${einrueckung} Leerzeichen eingerueckt — `
+            + 'auf Modulebene sind es 2. Tiefer heisst: in einer Funktion, '
+            + 'und dann sieht der Renderer sie nicht.');
+    });
+
+    it('die Fenstertiefe wird NACH der Wache gezaehlt', () => {
+        const wache = MC.indexOf('if (!player || !arch || !tid) return;');
+        const zaehl = MC.indexOf('turniereImFenster.add(tid);');
+        assert.ok(wache > -1 && zaehl > -1, 'Wache oder Zaehlung verschwunden');
+        assert.ok(zaehl > wache,
+            'Turniere ohne Archetyp wuerden die Fenstertiefe aufblaehen — '
+            + 'Turnier 0070 traegt 512 solche Zeilen');
     });
 });

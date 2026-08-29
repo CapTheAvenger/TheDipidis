@@ -37,8 +37,18 @@ function schnitt(quelle, vonAnker, bisAnker, wasFuer) {
 // 1. Das Lag-Fenster hat jetzt eine Altersgrenze
 // ───────────────────────────────────────────────────────────────────
 describe('Lag-Fenster: Nachhinken hat eine Frist, eine Datenluecke nicht', () => {
+    // 29.08.2026: LAG_KARENZ_TAGE steht seit der Chip-Vereinheitlichung
+    // auf Modulebene, nicht mehr im Lag-Block. Der Schnitt beginnt
+    // deshalb an der ersten Zeile der eigentlichen Logik; die Karenz
+    // wird weiter AUS DER QUELLE gelesen, damit ein geaenderter Wert
+    // hier auffaellt statt stillschweigend mitzuwandern.
+    const KARENZ = (() => {
+        const m = MC.match(/const LAG_KARENZ_TAGE = (\d+);/);
+        assert.ok(m, 'LAG_KARENZ_TAGE steht nicht mehr in js/app-meta-call.js');
+        return Number(m[1]);
+    })();
     const block = schnitt(MC,
-        'const LAG_KARENZ_TAGE = 21;',
+        'const lagTage = (_formatWindow && Number(_formatWindow.lag_days)) || 14;',
         '_activeMetaKeyVoll = activeMetaKey;',
         'Lag-Fenster');
 
@@ -48,6 +58,7 @@ describe('Lag-Fenster: Nachhinken hat eine Frist, eine Datenluecke nicht', () =>
      */
     function fahre({ neueste, heute, activeSetCode, currentSetCode, lagDays }) {
         const rumpf = `
+            const LAG_KARENZ_TAGE = ${KARENZ};
             let _lagFensterAlterTage = null, _lagFensterAbgelaufen = false;
             let _lagNeuesteLabsZeile = '', _activeMetaKeyVoll = '';
             const _formatWindow = { lag_days: lagDays };

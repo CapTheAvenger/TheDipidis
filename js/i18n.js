@@ -2032,6 +2032,28 @@ const translations = {
     // Kartendatenbank). Standen bis zum 29.08.2026 fest auf Deutsch und
     // waren damit die einzigen Texte, die im englischen Modus noch
     // deutsch erschienen — im Browser nachgemessen, nicht vermutet.
+    // Zwei Custom-Binder-Knoepfe trugen ihren Titel fest auf Deutsch,
+    // waehrend ihre Beschriftung uebersetzt war — im angemeldeten
+    // Bereich am 29.08.2026 im Browser des Betreibers gemessen.
+    // Build-Quality-Audit: die Ueberschrift war uebersetzt, die sieben
+    // Befunde darunter standen fest auf Deutsch. Am 29.08.2026 im
+    // angemeldeten Bereich bestaetigt — sie werden per textContent
+    // ausgegeben, gehen also ungefiltert auf den Bildschirm.
+    'audit.energyRange':       'Energy economy: {n} (modern: 7-11)',
+    'audit.energyOk':          'Energy economy: {n} (inside the 7-11 corridor)',
+    'audit.energyLowHint':     'Decks below 7 energies risk stalling mid-game with no accelerator in hand.',
+    'audit.energyHighHint':    'Decks above 11 energies draw dead more often late — an energy is worth less here than a search item.',
+    'audit.stadiumMissing':    'Colourless engine without a stadium: {names}',
+    'audit.stadiumMissingHint': "Team Rocket's Watchtower (DRI 180) shuts off every colourless Pokemon ability. Without your own stadium to bump it, the draw engine sits idle the moment the opponent plays Watchtower.",
+    'audit.megaExPrizing':     'Mega-ex main attacker: {name} (gives up 3 prizes when knocked out)',
+    'audit.megaExWithCape':    "Hero's Cape is in the deck — solid insurance against the three-prize swing.",
+    'audit.megaExNoCape':      "Hero's Cape (ACE SPEC) raises HP significantly and protects against a one-hit KO; in Mega-ex decks there is practically no alternative.",
+    'audit.openingBasic':      'P(at least 1 basic Pokemon in the opening hand): {pct}% ({n} basics)',
+    'audit.openingBasicHint':  'A mulligan rate above 30% hands the opponent free cards — the modern optimum is 7-11 basics for a ~70-80% keep rate.',
+    'audit.singleOfRisk':      'Single-of risk: {name} (ACE SPEC) can get stuck in the prizes',
+    'audit.singleOfRiskHint':  'Exchange Ticket (JTG 156) lets you redraw all remaining prize cards — standard tech in consistency lists with 1-of key cards.',
+    'cb.topMetaTitel':         'Pick the current meta top 10',
+    'cb.saveBinderTitel':      'Save the selection and its state as a folder',
     'preis.zielPill':          '🎯 Below your target',
     'preis.zielPillTitel':     'Cardmarket price ({cm}) is at or below your wishlist maximum ({max})',
     'preis.checkPill':         '⚠ Price check',
@@ -4121,6 +4143,21 @@ const translations = {
     'profile.priceAlerts.intro':          'Bekomme eine Telegram-Nachricht, wenn der Marktpreis einer Wishlist-Karte auf oder unter deinen Maximalwert sinkt — oder wenn der Marktpreis einer Trade-Karte über deinem Mindestpreis liegt. So bist du immer auf dem aktuellen Stand.',
     'profile.priceAlerts.toggle':         'Telegram-Preisalarme aktivieren',
     'profile.priceAlerts.chatIdLabel':    'Telegram-Chat-ID',
+    'audit.energyRange':       'Energie-Economy: {n} (Modern: 7–11)',
+    'audit.energyOk':          'Energie-Economy: {n} (im 7–11 Korridor)',
+    'audit.energyLowHint':     'Decks unter 7 Energien laufen Gefahr, in mittlerer Spielphase ohne Beschleuniger zu stehen.',
+    'audit.energyHighHint':    'Decks über 11 Energien produzieren spät häufige Dead-Draws — eine Energie ist hier weniger wert als ein Such-Item.',
+    'audit.stadiumMissing':    'Farblose Engine ohne Stadium: {names}',
+    'audit.stadiumMissingHint': "Team Rocket's Watchtower (DRI 180) deaktiviert alle Fähigkeiten farbloser Pokémon. Ohne eigenes Stadium zum „Bumpen“ liegt die Draw-Engine still, sobald der Gegner Watchtower spielt.",
+    'audit.megaExPrizing':     'Mega-ex Hauptangreifer: {name} (3 Preiskarten bei KO)',
+    'audit.megaExWithCape':    "Hero's Cape ist im Deck — gute Defensive gegen den Drei-Preis-Verlust.",
+    'audit.megaExNoCape':      "Hero's Cape (ACE SPEC) erhöht HP signifikant und schützt vor One-Hit-KO; in Mega-ex-Decks praktisch alternativlos.",
+    'audit.openingBasic':      'P(≥1 Basis-Pokémon in Starthand): {pct}% ({n} Basics)',
+    'audit.openingBasicHint':  'Mulligan-Rate über 30% verschenkt Karten an den Gegner — modernes Optimum sind 7–11 Basics für ~70–80% Keep-Rate.',
+    'audit.singleOfRisk':      'Single-of-Risiko: {name} (ACE SPEC) kann in den Preisen feststecken',
+    'audit.singleOfRiskHint':  'Exchange Ticket (JTG 156) erlaubt es, alle verbleibenden Preiskarten neu zu ziehen — Standard-Tech in Consistency-Listen mit 1-of-Schlüsselkarten.',
+    'cb.topMetaTitel':         'Top 10 des aktuellen Metas auswählen',
+    'cb.saveBinderTitel':      'Auswahl und Stand als Ordner sichern',
     'preis.zielPill':          '🎯 Unter deinem Ziel',
     'preis.zielPillTitel':     'Cardmarket-Preis ({cm}) ist auf oder unter deinem Wunsch-Maximum ({max})',
     'preis.checkPill':         '⚠ Preis Check',

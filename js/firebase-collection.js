@@ -6214,12 +6214,26 @@ window.toggleTradelistFromCardDbButton = toggleTradelistFromCardDbButton;
 // listener the rendered output froze on whichever language was active
 // when the data loaded — the 2026-06-11 Chrome-plugin verification
 // caught "May 29, 2026" persisting in DE mode after a toggle.
+//
+// 29.08.2026 — dieselbe Luecke, zwei Flaechen weiter. Der Kommentar
+// oben beschreibt den Fehler genau ("froze on whichever language was
+// active when the data loaded"), der Zuhoerer deckte aber nur Decks
+// und Profil ab. Im angemeldeten Konto des Betreibers gemessen: nach
+// einem Sprachwechsel standen in der Wunschliste weiter 24 deutsche
+// Pillen, obwohl t() bereits Englisch lieferte und eine frisch
+// erzeugte Pille englisch war. Erst ein erzwungenes Neuzeichnen
+// machte alle 24 englisch. Wunschliste und Trade List gehoeren also
+// in denselben Zuhoerer.
 document.addEventListener('languageChanged', () => {
   try {
     if (typeof updateDecksUI === 'function') updateDecksUI();
     if (window.userProfile && typeof updateProfileUI === 'function') {
       updateProfileUI(window.userProfile);
     }
+    // Die Preis-Pillen und Vertrauens-Abzeichen backen die Sprache beim
+    // Zeichnen ein — ohne Neuzeichnen bleibt der alte Stand stehen.
+    if (typeof updateWishlistUI === 'function') updateWishlistUI();
+    if (typeof updateTradelistUI === 'function') updateTradelistUI();
   } catch (err) {
     console.warn('[i18n] profile re-render on languageChanged failed:', err);
   }

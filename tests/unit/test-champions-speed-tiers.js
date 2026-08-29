@@ -168,7 +168,17 @@ describe('against the real data', () => {
 
 describe('styling', () => {
     it('the tier numbers reuse the existing "played value" blue', () => {
-        assert.match(CSS, /\.sqp-st-item b \{[^}]*#1d6fd0/);
+        /* 28.08.2026: #1d6fd0 wurde zu var(--brand-ink) — dieselbe Farbe,
+           aber sie dreht jetzt im Dunkelmodus mit (#8b98ff). Der Test
+           prueft weiter dieselbe Absicht: die Stufenzahlen benutzen
+           denselben Ton wie der "gespielte Wert", nicht einen eigenen. */
+        const stufe = (CSS.match(/\.sqp-st-item b \{[^}]*\}/) || [])[0];
+        const gespielt = (CSS.match(/\.sqp-stat-used \{[^}]*\}/) || [])[0];
+        assert.ok(stufe, '.sqp-st-item b fehlt');
+        assert.ok(gespielt, '.sqp-stat-used fehlt');
+        const farbe = s => (s.match(/color:\s*(var\(--[a-z0-9-]+\)|#[0-9a-f]{3,6})/i) || [])[1];
+        assert.equal(farbe(stufe), farbe(gespielt),
+            `Stufenzahl ${farbe(stufe)} weicht vom gespielten Wert ${farbe(gespielt)} ab`);
         assert.match(CSS, /\.sqp-st \{/);
     });
 });

@@ -139,6 +139,29 @@
      * 5,25 / 4,94 / 4,73. */
     --dv-pos-ink: #2366b5;
     --dv-neg-ink: #c03e3d;
+
+    /* Getoente Flaechen mit Bedeutung, seitenweit.
+     *
+     * Entstanden am 28.08.2026 im Meta Call, wo 28 solcher Flaechen als
+     * harte Hex-Werte lagen. Dieselben Toene stehen auch in Side Quest,
+     * in der How-to-Ansicht und in der City League — deshalb gehoeren
+     * sie hierher und nicht in ein Bauteil-Stylesheet.
+     *
+     * Regel: die Flaeche traegt die Bedeutung, der Text traegt --ink.
+     * Wer hier eine feste dunkle Textfarbe danebensetzt, macht sie im
+     * Dunkelmodus unsichtbar. */
+    --tint-info: #f0f6ff;
+    --tint-ok:   #f0fdf4;
+    --tint-warn: #fff7e6;
+    --tint-bad:  #fff0ee;
+    /* Der passende Text dazu. Wer eine Toenung benutzt und daneben eine
+       feste dunkle Textfarbe schreibt, macht sie im Dunkelmodus
+       unsichtbar — das war der Fehler an 28 Stellen im Meta Call und an
+       drei in Side Quest. Gemessen hell: 9,14 / 4,79 / 4,71 / 7,50. */
+    --tint-info-ink: #3730a3;
+    --tint-ok-ink:   #15803d;
+    --tint-warn-ink: #b45309;
+    --tint-bad-ink:  #991b1b;
     --dv-zero: #9aa3b5;
     --dv-pos-bg: rgba(42, 120, 214, .12);
     --dv-neg-bg: rgba(227, 73, 72, .12);
@@ -250,6 +273,17 @@
        5,10 / 5,51 / 4,77 bzw. 5,38 / 5,81 / 5,04. */
     --dv-pos-ink: #498cdc;
     --dv-neg-ink: #e76463;
+
+    /* --ink liegt auf diesen vier zwischen 13,8:1 und 14,7:1. */
+    --tint-info: #16203f;
+    --tint-ok:   #12291f;
+    --tint-warn: #2a2214;
+    --tint-bad:  #2e1a1c;
+    /* Gemessen dunkel: 5,25 / 6,79 / 6,82 / 5,36. */
+    --tint-info-ink: #918dcc;
+    --tint-ok-ink:   #7eb994;
+    --tint-warn-ink: #d5a077;
+    --tint-bad-ink:  #c68181;
     --dv-zero: #6a739a;
     --dv-pos-bg: rgba(106, 168, 255, .16);
     --dv-neg-bg: rgba(255, 143, 122, .16);

@@ -183,7 +183,18 @@ def run():
                 const expected = window.t(key);
                 const labelChild = el.querySelector('.menu-item-label');
                 let actual = '';
-                if (labelChild) {
+                if (el.hasAttribute('data-i18n-html')) {
+                    // 29.08.2026: DIE Fehlerquelle dieses Tests. Bei
+                    // data-i18n-html schreibt der Renderer den ganzen
+                    // Wert inklusive Kindelementen; der Vergleich nahm
+                    // aber nur die DIREKTEN Textknoten und verlor damit
+                    // jeden Text, der in einem <code> oder <strong>
+                    // steckt. Aus "Send /myid to @TheDipidisBot" wurde
+                    // "Send to and paste" — 14 der 48 Meldungen waren
+                    // genau das, und keine davon war ein Fehler der
+                    // Seite. Hier ist textContent das Richtige.
+                    actual = el.textContent.trim();
+                } else if (labelChild) {
                     actual = labelChild.textContent.trim();
                 } else if (el.children.length > 0) {
                     const textNodes = Array.from(el.childNodes)
@@ -195,7 +206,15 @@ def run():
                     actual = el.textContent.trim();
                 }
                 // Strip HTML tags from BOTH sides for comparison
-                const strip = s => s.replace(/<[^>]+>/g, '').replace(/\\s+/g, ' ').trim();
+                // 29.08.2026: Entities mit dekodieren. Der Wert in der
+                // Tabelle schreibt &gt; und &amp;, der Browser zeigt
+                // > und & — ohne Dekodierung meldet der Vergleich einen
+                // Unterschied, den kein Nutzer je sieht.
+                const strip = (s) => {
+                    const d = document.createElement('textarea');
+                    d.innerHTML = String(s).replace(/<[^>]+>/g, '');
+                    return d.value.replace(/\\s+/g, ' ').trim();
+                };
                 const expectedClean = strip(expected);
                 const actualClean = strip(actual);
                 if (actualClean && expectedClean) {
@@ -302,7 +321,11 @@ def run():
         # ── T6: Verify toggle button shows 'EN' in English mode
         print("\n-- EN: toggle button --")
         toggle_text = page.evaluate("document.getElementById('langToggleBtn')?.textContent?.trim()")
-        check("EN.6 toggle shows 'EN'", toggle_text == "EN", f"got '{toggle_text}'")
+        # 29.08.2026: Der Umschalter zeigt seit dem 18.08. das ZIEL, nicht
+        # den Zustand — ein Knopf beschriftet seine Wirkung (js/i18n.js,
+        # Suchwort "Der Umschalter zeigt das ZIEL"). Die alte Erwartung
+        # war eine veraltete Zusicherung, kein Fehler der Seite.
+        check("EN.6 toggle offers DE as the target", toggle_text == "DE", f"got '{toggle_text}'")
 
         # ── T7: Translation key coverage — every EN key has a value
         print("\n-- EN: key coverage --")
@@ -368,9 +391,15 @@ def run():
         if identical_keys:
             for k in identical_keys[:20]:
                 print(f"    WARN identical: {k}")
-        # Informational — some identical translations are intentional
+        # Informational — some identical translations are intentional.
+        # 29.08.2026: Grenze von 15 auf 120 gezogen. Am 27.08. wurde
+        # bewusst auf Szenesprache umgestellt — "Win Rate", "Day 2",
+        # "Matchup", "Tier", "Meta Call" stehen im deutschen Block
+        # absichtlich englisch, weil die Szene sie so sagt. Gemessen:
+        # 108. Die Zahl ist ein Abdrift-Waechter, keine Qualitaetsgrenze;
+        # sie soll melden, wenn UNGEWOLLT Uebersetzungen ausbleiben.
         check(f"EN.8 identical EN/DE keys (excluding brand/TCG terms): {len(identical_keys)}",
-              len(identical_keys) <= 15,
+              len(identical_keys) <= 120,
               f"{len(identical_keys)} keys" if identical_keys else "")
 
         # ═══════════════════════════════════════════════════════
@@ -400,7 +429,10 @@ def run():
                 const expected = window.t(key);
                 const labelChild = el.querySelector('.menu-item-label');
                 let actual = '';
-                if (labelChild) {
+                if (el.hasAttribute('data-i18n-html')) {
+                    // siehe die gleichlautende Stelle im englischen Block
+                    actual = el.textContent.trim();
+                } else if (labelChild) {
                     actual = labelChild.textContent.trim();
                 } else if (el.children.length > 0) {
                     const textNodes = Array.from(el.childNodes)
@@ -410,7 +442,15 @@ def run():
                 } else {
                     actual = el.textContent.trim();
                 }
-                const strip = s => s.replace(/<[^>]+>/g, '').replace(/\\s+/g, ' ').trim();
+                // 29.08.2026: Entities mit dekodieren. Der Wert in der
+                // Tabelle schreibt &gt; und &amp;, der Browser zeigt
+                // > und & — ohne Dekodierung meldet der Vergleich einen
+                // Unterschied, den kein Nutzer je sieht.
+                const strip = (s) => {
+                    const d = document.createElement('textarea');
+                    d.innerHTML = String(s).replace(/<[^>]+>/g, '');
+                    return d.value.replace(/\\s+/g, ' ').trim();
+                };
                 const expectedClean = strip(expected);
                 const actualClean = strip(actual);
                 if (actualClean && expectedClean) {
@@ -516,7 +556,7 @@ def run():
         # ── T14: Verify toggle button shows 'DE' in German mode
         print("\n-- DE: toggle button --")
         toggle_text_de = page.evaluate("document.getElementById('langToggleBtn')?.textContent?.trim()")
-        check("DE.6 toggle shows 'DE'", toggle_text_de == "DE", f"got '{toggle_text_de}'")
+        check("DE.6 toggle offers EN as the target", toggle_text_de == "EN", f"got '{toggle_text_de}'")
 
         # ═══════════════════════════════════════════════════════
         #   PHASE 3: SWITCH BACK TO ENGLISH (round-trip)
@@ -690,7 +730,7 @@ def run():
         DE_ACTION_EXPECT = {
             'sc-action-wishlist':  'Wunschliste',
             'sc-action-collect':   'Sammlung',
-            'sc-action-rarity':    'Anderes Print',
+            'sc-action-rarity':    'Andere Prints zeigen',   # 29.08.2026: Wortlaut aus js/i18n.js (action.otherPrint)
             'sc-action-limitless': 'Limitless Kartendetails öffnen',
             'sc-action-proxy':     'Zum Proxy-Drucker hinzufügen',
             'sc-action-market':    'Cardmarket öffnen',

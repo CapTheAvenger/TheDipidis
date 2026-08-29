@@ -192,8 +192,18 @@ describe('wie weit die Seite dafür ist', () => {
            vor dem Durchgang desselben Tages). Vorher gab es diesen
            Zaehler gar nicht, deshalb keine Reihe frueherer Werte — die
            faengt hier an. 215 -> 212 -> 182 im Lauf desselben Tages,
-           als die Flat-UI-Palette auf Token umgestellt wurde. */
-        const BASELINE_INK = 182;
+           als die Flat-UI-Palette auf Token umgestellt wurde.
+
+           182 -> 183 am Abend des 29.08.2026, bewusst und begruendet:
+           .mockup-deckgrid-actions .btn.is-p ging von #ea580c auf
+           #9a3412, weil die alte Farbe auf ihrer hellen Flaeche nur
+           3,11:1 erreichte (jetzt 6,38:1). Die Stelle liegt IN der
+           .tutorial-mockup-Insel, die im Dunkelmodus absichtlich hell
+           bleibt — dort ist eine feste dunkle Schrift richtig und ein
+           drehendes Token waere falsch. Ein Zaehlerstand ist kein
+           Selbstzweck; er soll Abdriften melden, und dieser Schritt
+           ist keines. */
+        const BASELINE_INK = 183;
         const now = countHardcodedDarkInk();
         assert.ok(now <= BASELINE_INK,
             `fest verdrahtete dunkle Textfarben: ${now} (erlaubt: ${BASELINE_INK})`);

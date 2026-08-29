@@ -59,10 +59,50 @@
         if (MANIFEST) return MANIFEST;
         MANIFEST = fetch(basis() + 'data_stand.json?t=' + Date.now(), { cache: 'no-store' })
             .then(function (r) { return r && r.ok ? r.json() : null; })
-            .then(function (j) { return (j && j.dateien) || {}; })
-            .catch(function () { return {}; });
+            .then(function (j) {
+                return { dateien: (j && j.dateien) || {},
+                         inhalt: (j && j.inhalt_bis) || {} };
+            })
+            .catch(function () { return { dateien: {}, inhalt: {} }; });
         return MANIFEST;
     }
+
+    /**
+     * Wie weit reicht der INHALT dieser Datei? ISO-Tag oder null.
+     *
+     * GEMESSEN am 29.08.2026: labs_tournament_decks.csv wurde am 25.08.
+     * neu geschrieben, das juengste Turnier darin ist vom 12.06. — 74 Tage
+     * Abstand. Der Betreiber hat bestaetigt: seitdem war Sommerpause, die
+     * Daten stimmen also.
+     *
+     * EHRLICH DAZU: heute zeigt KEIN Chip diese Datei an (die fuenf
+     * data-quelle-Angaben in index.html nennen andere Dateien), und der
+     * Meta Call nennt das Turnieralter bereits selbst richtig
+     * ("Juengstes Turnier: … — vor N Tagen"). Es war also kein sichtbarer
+     * Fehler. Es war eine offene Flanke: zeigt irgendwann ein Chip auf
+     * eine Datei, deren Inhalt hinter ihrem Schreibdatum zurueckliegt,
+     * stuende dort dasselbe falsche Versprechen wie damals beim Datum des
+     * BESUCHS — nur eine Ebene tiefer. Diese Ebene wird hier geschlossen,
+     * bevor sie jemand aufmacht.
+     *
+     * Deshalb: wo der Inhalt ein eigenes Datum hat und es SPUERBAR
+     * zurueckliegt, nennt der Chip den Inhalt. Die Dateiaenderung bleibt
+     * im Tooltip — beides ist wahr, aber die Frage "wie aktuell sind
+     * diese Zahlen" beantwortet der Inhalt.
+     */
+    function inhaltStand(datei) {
+        return manifest().then(function (m) {
+            var iso = m.inhalt && m.inhalt[datei];
+            if (!iso) return null;
+            var d = new Date(iso + 'T00:00:00Z');
+            return isNaN(d.getTime()) ? null : d;
+        });
+    }
+
+    /* Ab wann gilt der Abstand als spuerbar? Eine Woche. Darunter ist der
+       Unterschied zwischen "Datei" und "Inhalt" Rauschen und wuerde den
+       Chip nur unruhig machen. */
+    var ABSTAND_TAGE = 7;
 
     /**
      * Stand einer Datendatei als Date, oder null.
@@ -73,7 +113,7 @@
      */
     function stand(datei) {
         return manifest().then(function (m) {
-            var iso = m[datei];
+            var iso = m.dateien[datei];
             if (!iso) return null;
             var d = new Date(iso);
             return isNaN(d.getTime()) ? null : d;
@@ -102,21 +142,47 @@
         Array.prototype.forEach.call(chips, function (el) {
             var datei = el.getAttribute('data-quelle');
             if (!datei) { el.textContent = alsText(null); return; }
-            stand(datei).then(function (d) {
+            Promise.all([stand(datei), inhaltStand(datei)]).then(function (paar) {
+                var dDatei = paar[0];
+                var dInhalt = paar[1];
+
+                /* Der Inhalt gewinnt, wenn er spuerbar aelter ist als die
+                   Datei. Sonst bleibt es beim Dateidatum — dann sagen beide
+                   dasselbe und eine zweite Zahl waere nur Laerm. */
+                var abstand = (dDatei && dInhalt)
+                    ? (dDatei.getTime() - dInhalt.getTime()) / 86400000 : 0;
+                var zeigeInhalt = dInhalt && abstand > ABSTAND_TAGE;
+                var d = zeigeInhalt ? dInhalt : dDatei;
+
                 el.textContent = alsText(d);
                 var tage = alterTage(d);
                 var eltern = el.closest ? el.closest('.data-freshness-chip') : null;
                 if (eltern) {
                     eltern.classList.toggle('is-alt', tage !== null && tage > 14);
                     eltern.classList.toggle('is-unbekannt', d === null);
-                    eltern.setAttribute('title', d
-                        ? (de()
+                    var titel;
+                    if (!d) {
+                        titel = de() ? 'Fuer ' + datei + ' ist kein Stand hinterlegt'
+                                     : 'no recorded date for ' + datei;
+                    } else if (zeigeInhalt) {
+                        /* Beides nennen: der Inhalt beantwortet "wie aktuell
+                           sind die Zahlen", die Dateiaenderung beantwortet
+                           "wann wurde zuletzt nachgesehen". */
+                        titel = de()
+                            ? 'Juengster Eintrag in ' + datei + ': ' + alsText(dInhalt)
+                              + ' — vor ' + Math.floor(tage) + ' Tagen.'
+                              + ' Zuletzt nachgesehen am ' + alsText(dDatei) + '.'
+                            : 'newest entry in ' + datei + ': ' + alsText(dInhalt)
+                              + ' — ' + Math.floor(tage) + ' days ago.'
+                              + ' Last checked ' + alsText(dDatei) + '.';
+                    } else {
+                        titel = de()
                             ? 'Letzte Aenderung von ' + datei
                               + (tage !== null ? ' — vor ' + Math.floor(tage) + ' Tagen' : '')
                             : 'last change to ' + datei
-                              + (tage !== null ? ' — ' + Math.floor(tage) + ' days ago' : ''))
-                        : (de() ? 'Fuer ' + datei + ' ist kein Stand hinterlegt'
-                                : 'no recorded date for ' + datei));
+                              + (tage !== null ? ' — ' + Math.floor(tage) + ' days ago' : '');
+                    }
+                    eltern.setAttribute('title', titel);
                 }
             });
         });

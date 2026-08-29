@@ -1377,9 +1377,9 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
               <button onclick="addToCollection('${safeCardIdJs}')" style="background: #27ae60; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${ownedCount}/4)">+</button>
               <button onclick="removeFromCollection('${safeCardIdJs}')" style="background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
             </div>
-            <div style="padding: 8px; background: white;">
+            <div style="padding: 8px; background: var(--surface-1);">
               <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
-              <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
+              <div style="font-size: 0.75em; color: var(--ink-2);">${safeSetHtml} ${safeNumberHtml}</div>
               <div style="font-size: 0.8em; color: #27ae60; font-weight: 600; margin-top: 4px;">${priceDisplay}</div>
             </div>
           </div>
@@ -1816,23 +1816,23 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #e67e22; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Need more (${wantedCount}/4)">+</button>
             <button onclick="removeFromWishlist('${safeCardIdJs}')" style="background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
           </div>
-          <div style="padding: 8px; background: white;">
+          <div style="padding: 8px; background: var(--surface-1);">
             <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
-            <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
+            <div style="font-size: 0.75em; color: var(--ink-2);">${safeSetHtml} ${safeNumberHtml}</div>
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.75em; color: ${ownedCount > 0 ? '#4CAF50' : '#999'}; font-weight: 600;">✓ ${ownedCount}/${maxLabel}</span>
               <button onclick="addOwnedFromWishlist('${safeCardIdJs}')" style="background: #4CAF50; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; line-height: 1;" title="Add to collection (owned: ${ownedCount})">+</button>
             </div>
             ${cmUrl
               ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
-              : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">${priceDisplay}</div>`}${priceTrustBadge(card, cmUrl)}
-            ${lowDisplay ? `<div style="font-size: 0.7em; color: #888; margin-top: 2px;">${lowDisplay}</div>` : ''}
+              : `<div style="font-size: 0.8em; color: var(--ink-3); margin-top: 4px;">${priceDisplay}</div>`}${priceTrustBadge(card, cmUrl)}
+            ${lowDisplay ? `<div style="font-size: 0.7em; color: var(--ink-3); margin-top: 2px;">${lowDisplay}</div>` : ''}
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">Max:</span>
               <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
                 aria-label="Maximum price for ${safeNameHtml}"
-                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.85em; font-weight: 600; color: #8e44ad; text-align: right; outline: none; box-sizing: border-box;"
-                onfocus="this.style.borderColor='#8e44ad'; selectPriceInput(this)" onblur="this.style.borderColor='#ddd'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
+                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; color: #8e44ad; text-align: right; outline: none; box-sizing: border-box;"
+                onfocus="this.style.borderColor='#8e44ad'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
               <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">€</span>
             </div>
@@ -1906,7 +1906,7 @@ function openWishlistGridModal() {
     </div>`;
   });
 
-  grid.innerHTML = html || '<p style="color:#999;">No cards to display</p>';
+  grid.innerHTML = html || '<p style="color: var(--ink-3);">No cards to display</p>';
   modal.classList.add('show');
 }
 
@@ -2286,8 +2286,8 @@ function updateDecksUI() {
         const safeArchetypeHtml = escapeHtml(deck.archetype || 'Custom');
         const safeDeckIdJs = escapeJsSingleQuoted(deck.id || '');
         return `
-          <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px;">
-            <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2em;">${safeDeckNameHtml}</h3>
+          <div style="background: var(--surface-1); padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px;">
+            <h3 style="margin: 0 0 10px 0; color: var(--ink); font-size: 1.2em;">${safeDeckNameHtml}</h3>
             <p style="color: #7f8c8d; margin: 5px 0; font-size: 0.9em;">
               <strong>Archetype:</strong> ${safeArchetypeHtml}
             </p>
@@ -2517,7 +2517,7 @@ function updateDecksUI() {
                    placeholder="${addPlaceholder}"
                    oninput="myDeckTechShowAutocomplete(this, ${deckIndex})"
                    onfocus="this.style.borderColor='#7c4dff'"
-                   onblur="setTimeout(() => { this.style.borderColor='#ddd'; myDeckTechHideAutocomplete('${deckId}'); }, 200)"
+                   onblur="setTimeout(() => { this.style.borderColor='var(--line)'; myDeckTechHideAutocomplete('${deckId}'); }, 200)"
                    autocomplete="off">
             <div id="${deckId}-tech-autocomplete" class="tech-options-autocomplete d-none"></div>
           </div>
@@ -2742,7 +2742,7 @@ function updateDecksUI() {
     const activeLabel = isActive ? `<span style="display:inline-block;background:#4CAF50;color:white;font-size:0.7em;padding:1px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;font-weight:700;">${getLang()==='de' ? 'IRL GEBAUT' : 'IRL BUILT'}</span>` : '';
     
     return `
-      <div class="saved-deck-item" data-deck-name="${safeDeckNameHtml}" data-deck-archetype="${safeDeckArchetypeHtml}" data-deck-folder="${safeFolderHtml}" data-deck-active="${isActive}" style="background: white; border-radius: 10px; box-shadow: ${isActive ? '0 0 12px rgba(76,175,80,0.5), 0 2px 8px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.1)'}; overflow: hidden; margin-bottom: 10px; ${activeBorder}">
+      <div class="saved-deck-item" data-deck-name="${safeDeckNameHtml}" data-deck-archetype="${safeDeckArchetypeHtml}" data-deck-folder="${safeFolderHtml}" data-deck-active="${isActive}" style="background: var(--surface-1); border-radius: 10px; box-shadow: ${isActive ? '0 0 12px rgba(76,175,80,0.5), 0 2px 8px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.1)'}; overflow: hidden; margin-bottom: 10px; ${activeBorder}">
         <div class="deck-header-row" onclick="toggleDeckCollapse('${deckId}')" style="padding: clamp(8px, 2vw, 15px) clamp(10px, 3vw, 20px); cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: ${activeGradient}; color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
           <div class="deck-name-col" style="flex: 1; min-width: 0;">
             <h3 style="margin: 0 0 3px 0; font-size: 1.1em; font-weight: 600;">${safeDeckNameHtml}${activeLabel}</h3>
@@ -2797,23 +2797,23 @@ function updateDecksUI() {
             <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg); margin-left: auto;">▼</div>
           </div>
         </div>
-        <div id="${deckId}" style="display: none; padding: clamp(4px, 1.5vw, 15px); background: #f8f9fa;">
+        <div id="${deckId}" style="display: none; padding: clamp(4px, 1.5vw, 15px); background: var(--surface-2);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
             <div style="position: relative; flex: 1; min-width: 200px;">
               <input type="text" id="${deckId}-card-search" placeholder="${getLang()==='de' ? 'Karte suchen & hinzufügen...' : 'Search & add card...'}" 
                      oninput="myDeckShowAutocomplete(this, ${deckIndex})" 
-                     style="width: 100%; padding: 8px 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.9em; box-sizing: border-box; outline: none; transition: border-color 0.2s;"
-                     onfocus="this.style.borderColor='#667eea'" onblur="setTimeout(()=>{this.style.borderColor='#ddd'; myDeckHideAutocomplete('${deckId}')}, 200)"
+                     style="width: 100%; padding: 8px 12px; border: 2px solid var(--line); border-radius: 6px; font-size: 0.9em; box-sizing: border-box; outline: none; transition: border-color 0.2s;"
+                     onfocus="this.style.borderColor='#667eea'" onblur="setTimeout(()=>{this.style.borderColor='var(--line)'; myDeckHideAutocomplete('${deckId}')}, 200)"
                      autocomplete="off">
-              <div id="${deckId}-autocomplete" class="d-none" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 300px; overflow-y: auto; z-index: 100;"></div>
+              <div id="${deckId}-autocomplete" class="d-none" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--surface-1); border: 1px solid var(--line); border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 300px; overflow-y: auto; z-index: 100;"></div>
             </div>
             <div style="display: flex; gap: 6px; align-items: center;">
-              <span style="font-size: 0.85em; color: #666; font-weight: 600;">${totalCards}/60</span>
+              <span style="font-size: 0.85em; color: var(--ink-2); font-weight: 600;">${totalCards}/60</span>
               <button onclick="openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="Compare this deck">Compare</button>
             </div>
           </div>
           <div class="my-deck-cards-grid">
-            ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
+            ${cardsHtml || '<p style="color: var(--ink-3); padding: 20px; text-align: center;">No cards found</p>'}
           </div>
           ${_renderTechOptionsSection(deck, deckIndex, deckId)}
         </div>
@@ -3037,11 +3037,11 @@ function myDeckShowAutocomplete(inputEl, deckIndex) {
     return `
       <div onclick="myDeckAddCard(${deckIndex}, '${safeNameJs}', '${safeSet}', '${safeNum}'); myDeckHideAutocomplete('${deckId}'); document.getElementById('${deckId}-card-search').value='';" 
            style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.15s;"
-           onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='white'">
+           onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background='var(--surface-1)'">
         ${imgUrl ? `<img src="${escapeHtml(imgUrl)}" style="width: 32px !important; height: 45px !important; min-width: 32px; object-fit: cover; border-radius: 3px; flex: 0 0 auto;" loading="lazy" onerror="this.style.display='none'">` : ''}
         <div style="flex: 1; min-width: 0;">
-          <div style="font-size: 0.85em; font-weight: 600; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeNameHtml}</div>
-          <div style="font-size: 0.7em; color: #999;">${escapeHtml(card.set || '')} ${escapeHtml(card.number || '')} · ${escapeHtml(card.type || '')}</div>
+          <div style="font-size: 0.85em; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeNameHtml}</div>
+          <div style="font-size: 0.7em; color: var(--ink-3);">${escapeHtml(card.set || '')} ${escapeHtml(card.number || '')} · ${escapeHtml(card.type || '')}</div>
         </div>
       </div>
     `;
@@ -3259,28 +3259,28 @@ function compareActiveDecks() {
   }).join('');
 
   modal.innerHTML = `
-    <div style="background:#1a1a2e;border-radius:14px;max-width:500px;width:100%;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,0.35);color:#eee;">
+    <div style="background:#1a1a2e;border-radius:14px;max-width:500px;width:100%;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,0.35);color:var(--line);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
         <h2 style="margin:0;font-size:1.2em;color:#4CAF50;">${isDE ? 'Gebaute Decks vergleichen' : 'Compare Built Decks'}</h2>
-        <button onclick="this.closest('#compare-active-modal').remove()" style="background:none;border:none;color:#aaa;font-size:24px;cursor:pointer;">✕</button>
+        <button onclick="this.closest('#compare-active-modal').remove()" style="background:none;border:none;color: var(--ink-3);font-size:24px;cursor:pointer;">✕</button>
       </div>
-      <p style="color:#bbb;font-size:0.9em;margin:0 0 16px;">${isDE ? 'Wähle 2 deiner gebauten Decks zum Vergleichen:' : 'Choose 2 of your built decks to compare:'}</p>
+      <p style="color: var(--ink-3);font-size:0.9em;margin:0 0 16px;">${isDE ? 'Wähle 2 deiner gebauten Decks zum Vergleichen:' : 'Choose 2 of your built decks to compare:'}</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
         <div>
-          <label style="display:block;font-size:0.85em;color:#aaa;margin-bottom:4px;">Deck A</label>
-          <select id="compare-active-a" style="width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#2a2a3e;color:#eee;font-size:0.95em;">
+          <label style="display:block;font-size:0.85em;color: var(--ink-3);margin-bottom:4px;">Deck A</label>
+          <select id="compare-active-a" style="width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#2a2a3e;color:var(--line);font-size:0.95em;">
             ${options}
           </select>
         </div>
         <div>
-          <label style="display:block;font-size:0.85em;color:#aaa;margin-bottom:4px;">Deck B</label>
-          <select id="compare-active-b" style="width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#2a2a3e;color:#eee;font-size:0.95em;">
+          <label style="display:block;font-size:0.85em;color: var(--ink-3);margin-bottom:4px;">Deck B</label>
+          <select id="compare-active-b" style="width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#2a2a3e;color:var(--line);font-size:0.95em;">
             ${options}
           </select>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;">
-        <button onclick="this.closest('#compare-active-modal').remove()" style="padding:10px 20px;border:1px solid #555;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;font-weight:600;">${isDE ? 'Abbrechen' : 'Cancel'}</button>
+        <button onclick="this.closest('#compare-active-modal').remove()" style="padding:10px 20px;border:1px solid #555;border-radius:8px;background:transparent;color: var(--ink-3);cursor:pointer;font-weight:600;">${isDE ? 'Abbrechen' : 'Cancel'}</button>
         <button id="compare-active-run" style="padding:10px 20px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer;font-weight:700;">${isDE ? 'Vergleichen' : 'Compare'}</button>
       </div>
     </div>
@@ -3747,7 +3747,7 @@ function toggleBuiltFilter() {
       btn.style.color = 'white';
       btn.style.borderColor = '#4CAF50';
     } else {
-      btn.style.background = 'white';
+      btn.style.background = 'var(--surface-1)';
       btn.style.color = '#4CAF50';
       btn.style.borderColor = '#4CAF50';
     }
@@ -4062,9 +4062,9 @@ function renderFolderNav() {
     folders.map(f => {
       const safe = escapeHtml(f);
       const safeJs = escapeJsSingleQuoted(f);
-      return `<span draggable="true" data-folder="${safe}" style="display:inline-flex;align-items:center;gap:0;background:#f0f0f0;border:1px solid #ddd;border-radius:20px;overflow:hidden;cursor:grab;transition:transform 0.15s,opacity 0.15s;">` +
-        `<button onclick="filterDecksByFolder('${safeJs}')" style="padding:6px 10px 6px 14px;background:transparent;color:#333;border:none;cursor:pointer;font-weight:600;font-size:0.85em;">${safe}</button>` +
-        `<button onclick="event.stopPropagation();deleteDeckFolder('${safeJs}')" title="Delete folder" style="padding:4px 10px 4px 4px;background:transparent;color:#999;border:none;cursor:pointer;font-size:0.9em;line-height:1;">&times;</button>` +
+      return `<span draggable="true" data-folder="${safe}" style="display:inline-flex;align-items:center;gap:0;background: var(--surface-2);border:1px solid var(--line);border-radius:20px;overflow:hidden;cursor:grab;transition:transform 0.15s,opacity 0.15s;">` +
+        `<button onclick="filterDecksByFolder('${safeJs}')" style="padding:6px 10px 6px 14px;background:transparent;color: var(--ink);border:none;cursor:pointer;font-weight:600;font-size:0.85em;">${safe}</button>` +
+        `<button onclick="event.stopPropagation();deleteDeckFolder('${safeJs}')" title="Delete folder" style="padding:4px 10px 4px 4px;background:transparent;color: var(--ink-3);border:none;cursor:pointer;font-size:0.9em;line-height:1;">&times;</button>` +
         `</span>`;
     }).join('');
 
@@ -4137,7 +4137,7 @@ function filterDecksByFolder(folder) {
       if (!folder) {
         allBtn.style.background = '#667eea'; allBtn.style.color = 'white'; allBtn.style.border = 'none';
       } else {
-        allBtn.style.background = '#f0f0f0'; allBtn.style.color = '#333'; allBtn.style.border = '1px solid #ddd';
+        allBtn.style.background = 'var(--surface-2)'; allBtn.style.color = 'var(--ink)'; allBtn.style.border = '1px solid var(--line)';
       }
     }
     // Folder spans
@@ -4151,11 +4151,11 @@ function filterDecksByFolder(folder) {
         const delBtn = span.querySelectorAll('button')[1];
         if (delBtn) delBtn.style.color = 'rgba(255,255,255,0.7)';
       } else {
-        span.style.background = '#f0f0f0';
-        span.style.borderColor = '#ddd';
-        if (nameBtn) { nameBtn.style.color = '#333'; }
+        span.style.background = 'var(--surface-2)';
+        span.style.borderColor = 'var(--line)';
+        if (nameBtn) { nameBtn.style.color = 'var(--ink)'; }
         const delBtn = span.querySelectorAll('button')[1];
-        if (delBtn) delBtn.style.color = '#999';
+        if (delBtn) delBtn.style.color = 'var(--ink-3)';
       }
     });
   }
@@ -4487,16 +4487,16 @@ async function openCompareSavedDeck(deckIndex) {
 
   const safeBaseDeckName = escapeHtml(baseDeck.name || 'Base Deck');
   modal.innerHTML = `
-    <div style="background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.35);">
+    <div style="background: var(--surface-1);border-radius:12px;max-width:760px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.35);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <h2 style="margin:0;font-size:1.25em;">Compare Deck: ${safeBaseDeckName}</h2>
         <button id="deck-compare-source-close" style="background:none;border:none;font-size:24px;cursor:pointer;line-height:1;">✕</button>
       </div>
-      <p style="margin:0 0 14px 0;color:#555;">${getLang()==='de' ? 'Wähle, womit du vergleichen möchtest:' : 'Choose what to compare with:'}</p>
+      <p style="margin:0 0 14px 0;color: var(--ink-2);">${getLang()==='de' ? 'Wähle, womit du vergleichen möchtest:' : 'Choose what to compare with:'}</p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-        <button id="compare-source-paste" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">${getLang()==='de' ? 'Limitless / PTCGL Liste einfügen' : 'Paste Limitless / PTCGL list'}</button>
-        <button id="compare-source-saved" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">${getLang()==='de' ? 'Gespeichertes Deck ausw\u00e4hlen' : 'Choose saved deck'}</button>
+        <button id="compare-source-paste" style="padding:10px 12px;border:1px solid var(--line);border-radius:8px;background: var(--surface-2);cursor:pointer;font-weight:700;">${getLang()==='de' ? 'Limitless / PTCGL Liste einfügen' : 'Paste Limitless / PTCGL list'}</button>
+        <button id="compare-source-saved" style="padding:10px 12px;border:1px solid var(--line);border-radius:8px;background: var(--surface-2);cursor:pointer;font-weight:700;">${getLang()==='de' ? 'Gespeichertes Deck ausw\u00e4hlen' : 'Choose saved deck'}</button>
       </div>
 
       <div id="compare-source-pane"></div>
@@ -4515,10 +4515,10 @@ async function openCompareSavedDeck(deckIndex) {
   function setMode(mode) {
     if (!pane) return;
     if (btnPaste && btnSaved) {
-      btnPaste.style.background = mode === 'paste' ? '#667eea' : '#f8f9fa';
-      btnPaste.style.color = mode === 'paste' ? 'white' : '#222';
-      btnSaved.style.background = mode === 'saved' ? '#667eea' : '#f8f9fa';
-      btnSaved.style.color = mode === 'saved' ? 'white' : '#222';
+      btnPaste.style.background = mode === 'paste' ? '#667eea' : 'var(--surface-2)';
+      btnPaste.style.color = mode === 'paste' ? 'white' : 'var(--ink)';
+      btnSaved.style.background = mode === 'saved' ? '#667eea' : 'var(--surface-2)';
+      btnSaved.style.color = mode === 'saved' ? 'white' : 'var(--ink)';
     }
 
     if (mode === 'paste') {
@@ -4595,7 +4595,7 @@ async function openCompareSavedDeck(deckIndex) {
     pane.innerHTML = `
       <label style="display:block;font-weight:600;margin:6px 0;">${getLang()==='de' ? 'Gespeichertes Deck suchen' : 'Search saved deck'}</label>
       <input id="compare-saved-search" type="text" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" placeholder="${getLang()==='de'? 'Deckname oder Archetype suchen...' : 'Search deck name or archetype...'}" />
-      <div id="compare-saved-list" style="margin-top:10px;max-height:260px;overflow:auto;border:1px solid #eee;border-radius:8px;"></div>
+      <div id="compare-saved-list" style="margin-top:10px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px;"></div>
     `;
 
     const searchInput = pane.querySelector('#compare-saved-search');
@@ -4611,7 +4611,7 @@ async function openCompareSavedDeck(deckIndex) {
       });
 
       if (filtered.length === 0) {
-        list.innerHTML = '<div style="padding:10px;color:#777;">' + (getLang()==='de' ? 'Keine passenden Decks gefunden.' : 'No matching decks found.') + '</div>';
+        list.innerHTML = '<div style="padding:10px;color: var(--ink-3);">' + (getLang()==='de' ? 'Keine passenden Decks gefunden.' : 'No matching decks found.') + '</div>';
         return;
       }
 
@@ -4621,9 +4621,9 @@ async function openCompareSavedDeck(deckIndex) {
         const cards = d.totalCards || Object.values(d.cards || {}).reduce((s, n) => s + (parseInt(n, 10) || 0), 0);
         const uid = escapeJsSingleQuoted(String(d.id || ''));
         return `
-          <button data-deck-id="${uid}" style="width:100%;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid #f0f0f0;background:white;cursor:pointer;">
-            <div style="font-weight:700;color:#2c3e50;">${safeName}</div>
-            <div style="font-size:12px;color:#666;">${safeArche} • ${cards} ${getLang()==='de' ? 'Karten' : 'Cards'}</div>
+          <button data-deck-id="${uid}" style="width:100%;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid #f0f0f0;background: var(--surface-1);cursor:pointer;">
+            <div style="font-weight:700;color: var(--ink);">${safeName}</div>
+            <div style="font-size:12px;color: var(--ink-2);">${safeArche} • ${cards} ${getLang()==='de' ? 'Karten' : 'Cards'}</div>
           </button>
         `;
       }).join('');
@@ -4906,15 +4906,15 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
     const detail = (c.from > 0 && c.to > 0)
       ? `${c.from} → ${c.to}` : '';
     return `
-      <div style="border:2px solid ${colour};border-radius:8px;padding:5px;text-align:center;background:#fff;position:relative;">
+      <div style="border:2px solid ${colour};border-radius:8px;padding:5px;text-align:center;background: var(--surface-1);position:relative;">
         ${img
           ? `<img src="${escapeHtmlAttr(img)}" alt="${nm}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:2.5/3.5;object-fit:cover;border-radius:5px;">`
-          : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#eee;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.66em;color:#777;padding:4px;text-align:center;line-height:1.15;">${(c.set || c.number) ? `${escapeHtml(c.set || '')} ${escapeHtml(c.number || '')}` : nm}</div>`}
+          : `<div style="width:100%;aspect-ratio:2.5/3.5;background:var(--line);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.66em;color: var(--ink-3);padding:4px;text-align:center;line-height:1.15;">${(c.set || c.number) ? `${escapeHtml(c.set || '')} ${escapeHtml(c.number || '')}` : nm}</div>`}
         <div style="position:absolute;top:2px;right:2px;background:${colour};color:#fff;border-radius:999px;min-width:26px;padding:2px 7px;font-weight:800;font-size:0.95em;box-shadow:0 1px 3px rgba(0,0,0,.3);">${c.qty}</div>
         ${c.byName ? `<div style="position:absolute;top:2px;left:2px;background:#fcf8e3;color:#8a6d3b;border-radius:4px;padding:0 4px;font-size:0.7em;font-weight:800;" title="${de ? 'Nur über den Namen zugeordnet — dieser Druck fehlt in der Kartendatenbank, die Zuordnung ist nicht geprüft.' : 'Matched by name only — this print is missing from the card database, so the match is unverified.'}">⚠</div>` : ''}
         <div style="font-weight:600;font-size:0.72em;margin-top:3px;line-height:1.2;" title="${nm}">${nm}</div>
         ${c.reprintOnly ? `<div style="font-size:0.63em;color:#8a6d3b;">${de ? 'nur anderer Druck' : 'same card, other print'}</div>` : ''}
-        ${detail ? `<div style="font-size:0.66em;color:#888;">${detail}</div>` : ''}
+        ${detail ? `<div style="font-size:0.66em;color: var(--ink-3);">${detail}</div>` : ''}
       </div>`;
   }
 
@@ -4940,12 +4940,12 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       </div>` : '';
 
   const changesHtml = `
-    <div style="text-align:center;font-size:13px;font-weight:800;color:#444;margin-bottom:12px;">
+    <div style="text-align:center;font-size:13px;font-weight:800;color: var(--ink);margin-bottom:12px;">
       ${de ? `${totalOut} raus · ${totalIn} rein` : `${totalOut} out · ${totalIn} in`}
     </div>
     ${section(de ? `➖ Raus aus ${safeNameA}` : `➖ Out of ${safeNameA}`, '#c0392b', outCards)}
     ${section(de ? `➕ Rein (aus ${safeNameB})` : `➕ In (from ${safeNameB})`, '#1e8449', inCards)}
-    ${energyBits.length ? `<div style="margin-bottom:14px;font-size:12px;color:#555;background:#f7f7f7;border-radius:6px;padding:8px 10px;">
+    ${energyBits.length ? `<div style="margin-bottom:14px;font-size:12px;color: var(--ink-2);background:var(--surface-2);border-radius:6px;padding:8px 10px;">
         <b>${de ? 'Basis-Energie' : 'Basic energy'}:</b> ${energyBits.join(' · ')}
       </div>` : ''}
     ${anyByName ? `<div style="margin-bottom:12px;font-size:11px;color:#8a6d3b;background:#fcf8e3;border-radius:6px;padding:6px 8px;">
@@ -4966,7 +4966,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
   modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
   
   modal.innerHTML = `
-    <div style="background:white;border-radius:12px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;padding:25px;">
+    <div style="background: var(--surface-1);border-radius:12px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;padding:25px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
         <h2 style="margin:0;font-size:1.3em;">Deck Comparison</h2>
         <button onclick="this.closest('#deck-compare-modal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
@@ -4976,22 +4976,22 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
         <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, '${mode}', 'list')" style="flex:1;min-height:44px;padding:8px 10px;border-radius:8px;border:${view === 'list' ? 'none' : '1px solid #ccc'};background:${view === 'list' ? '#34495e' : '#f5f5f5'};color:${view === 'list' ? 'white' : '#333'};font-size:13px;font-weight:800;cursor:pointer;">${de ? '📋 Volle Liste' : '📋 Full list'}</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-bottom:12px;">
-        <span style="font-size:12px;color:#666;font-weight:700;margin-right:4px;">Compare mode:</span>
+        <span style="font-size:12px;color: var(--ink-2);font-weight:700;margin-right:4px;">Compare mode:</span>
         <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Functional (prints merged)</button>
         <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Exact print</button>
       </div>
-      <div style="margin:-4px 0 12px 0;font-size:12px;color:#666;">${mode === 'functional' ? (getLang()==='de' ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Artwork and set variants of the same card are merged.') : (getLang()==='de' ? 'Jeder Print (set+nummer) wird einzeln verglichen.' : 'Each print (set+number) is compared individually.')}</div>
+      <div style="margin:-4px 0 12px 0;font-size:12px;color: var(--ink-2);">${mode === 'functional' ? (getLang()==='de' ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Artwork and set variants of the same card are merged.') : (getLang()==='de' ? 'Jeder Print (set+nummer) wird einzeln verglichen.' : 'Each print (set+number) is compared individually.')}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:${view === 'changes' ? '6px' : '15px'};">
         <div style="background:#667eea;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}<div style="font-size:0.72em;font-weight:600;opacity:.95;">${sizeA === 60 ? '60/60' : `⚠ ${sizeA}/60`}</div></div>
         <div style="background:#764ba2;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameB}<div style="font-size:0.72em;font-weight:600;opacity:.95;">${sizeB === 60 ? '60/60' : `⚠ ${sizeB}/60`}</div></div>
       </div>
-      ${view === 'changes' ? `<div style="font-size:12px;color:#666;margin-bottom:12px;text-align:center;">${de ? `So baust du <b>${safeNameA}</b> in <b>${safeNameB}</b> um:` : `How to turn <b>${safeNameA}</b> into <b>${safeNameB}</b>:`}</div>` : ''}
+      ${view === 'changes' ? `<div style="font-size:12px;color: var(--ink-2);margin-bottom:12px;text-align:center;">${de ? `So baust du <b>${safeNameA}</b> in <b>${safeNameB}</b> um:` : `How to turn <b>${safeNameA}</b> into <b>${safeNameB}</b>:`}</div>` : ''}
       ${view === 'changes' ? changesHtml : `
-      ${onlyA.length ? `<div style="margin-bottom:12px;"><h4 style="color:#667eea;margin:0 0 5px 0;">Only in ${safeNameA} (${onlyA.length})</h4><div style="font-size:0.9em;color:#555;">${onlyA.join('<br>')}</div></div>` : ''}
-      ${onlyB.length ? `<div style="margin-bottom:12px;"><h4 style="color:#764ba2;margin:0 0 5px 0;">Only in ${safeNameB} (${onlyB.length})</h4><div style="font-size:0.9em;color:#555;">${onlyB.join('<br>')}</div></div>` : ''}
-      ${different.length ? `<div style="margin-bottom:12px;"><h4 style="color:#e67e22;margin:0 0 5px 0;">Different counts (${different.length})</h4><div style="font-size:0.9em;color:#555;">${different.join('<br>')}</div></div>` : ''}
-      <div style="margin-bottom:12px;"><h4 style="color:#27ae60;margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color:#555;">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>`}
-      ${totalProxyCopies > 0 ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid #eee;text-align:center;"><button onclick="addCompareNewCardsToProxy()" style="padding:10px 20px;border:none;border-radius:8px;background:#1e8449;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#166b3a';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.35)'" onmouseout="this.style.background='#1e8449';this.style.transform='';this.style.boxShadow=''">${getLang()==='de' ? '➕ Alle neuen Karten zum Proxy Printer' : 'Add all new cards to Proxy Printer'} (${totalProxyCopies})</button></div>` : ''}
+      ${onlyA.length ? `<div style="margin-bottom:12px;"><h4 style="color:#667eea;margin:0 0 5px 0;">Only in ${safeNameA} (${onlyA.length})</h4><div style="font-size:0.9em;color: var(--ink-2);">${onlyA.join('<br>')}</div></div>` : ''}
+      ${onlyB.length ? `<div style="margin-bottom:12px;"><h4 style="color:#764ba2;margin:0 0 5px 0;">Only in ${safeNameB} (${onlyB.length})</h4><div style="font-size:0.9em;color: var(--ink-2);">${onlyB.join('<br>')}</div></div>` : ''}
+      ${different.length ? `<div style="margin-bottom:12px;"><h4 style="color:#e67e22;margin:0 0 5px 0;">Different counts (${different.length})</h4><div style="font-size:0.9em;color: var(--ink-2);">${different.join('<br>')}</div></div>` : ''}
+      <div style="margin-bottom:12px;"><h4 style="color:#27ae60;margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color: var(--ink-2);">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>`}
+      ${totalProxyCopies > 0 ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);text-align:center;"><button onclick="addCompareNewCardsToProxy()" style="padding:10px 20px;border:none;border-radius:8px;background:#1e8449;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#166b3a';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.35)'" onmouseout="this.style.background='#1e8449';this.style.transform='';this.style.boxShadow=''">${getLang()==='de' ? '➕ Alle neuen Karten zum Proxy Printer' : 'Add all new cards to Proxy Printer'} (${totalProxyCopies})</button></div>` : ''}
     </div>
   `;
   
@@ -5577,13 +5577,13 @@ function dexImportShowPreview(matched, unmatched) {
     const unmatchedBlock = unmatched.length > 0 ? `
         <details style="margin-bottom:12px;">
             <summary style="cursor:pointer;color:#856404;font-weight:600;padding:4px 0;">${unmatched.length} ${getLang()==='de' ? 'nicht gefundene Karten (anzeigen)' : 'unmatched cards (show)'}</summary>
-            <ul style="font-size:11px;color:#666;max-height:130px;overflow-y:auto;margin-top:8px;padding-left:18px;">
+            <ul style="font-size:11px;color: var(--ink-2);max-height:130px;overflow-y:auto;margin-top:8px;padding-left:18px;">
                 ${unmatched.map(u => `<li>${escapeHtml(u.rawName || '?')} (${escapeHtml(u.rawSet)} ${escapeHtml(u.rawNum)}) — ${u.qty}x</li>`).join('')}
             </ul>
         </details>` : '';
 
     const tableBlock = matched.length > 0 ? `
-        <div style="max-height:220px;overflow-y:auto;border:1px solid #ddd;border-radius:8px;margin-bottom:14px;font-size:12px;">
+        <div style="max-height:220px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:12px;">
             <table style="width:100%;border-collapse:collapse;">
                 <thead><tr style="background:#667eea;color:#fff;position:sticky;top:0;">
                     <th style="padding:7px 10px;text-align:left;">${getLang()==='de' ? 'Karte' : 'Card'}</th>
@@ -5610,10 +5610,10 @@ function dexImportShowPreview(matched, unmatched) {
                     style="flex:1;min-width:160px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
                 ${getLang()==='de' ? 'Ersetzen (Replace)' : 'Replace'}<br><small style="font-weight:400;opacity:.85;">${getLang()==='de' ? 'Kollektion komplett ersetzen' : 'Completely replace collection'}</small>
             </button>
-        </div>` : `<p style="color:#888;text-align:center;">${getLang()==='de' ? 'Keine Karten in der Datenbank gefunden.' : 'No cards found in the database.'}</p>`;
+        </div>` : `<p style="color: var(--ink-3);text-align:center;">${getLang()==='de' ? 'Keine Karten in der Datenbank gefunden.' : 'No cards found in the database.'}</p>`;
 
     modal.innerHTML = `
-        <div style="background:#fff;border-radius:14px;max-width:660px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+        <div style="background: var(--surface-1);border-radius:14px;max-width:660px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
             <h2 style="margin-top:0;color:#667eea;margin-bottom:18px;">${getLang()==='de' ? 'Dex Import Vorschau' : 'Dex Import Preview'}</h2>
             <div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
                 <div style="background:#d4edda;border-radius:8px;padding:10px 16px;flex:1;text-align:center;min-width:100px;">
@@ -5632,7 +5632,7 @@ function dexImportShowPreview(matched, unmatched) {
             ${tableBlock}
             ${unmatchedBlock}
             <button onclick="document.getElementById('dexImportModal').remove()"
-                    style="width:100%;background:#f0f0f0;border:none;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:#555;margin-top:4px;">
+                    style="width:100%;background: var(--surface-2);border:none;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color: var(--ink-2);margin-top:4px;">
                 ${getLang()==='de' ? '✕ Abbrechen' : '✕ Cancel'}
             </button>
         </div>`;
@@ -5999,21 +5999,21 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
             <button onclick="addToTradelist('${safeCardIdJs}')" style="background: #16a085; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${tradeCount}/4)">+</button>
             <button onclick="removeFromTradelist('${safeCardIdJs}')" style="background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">\u2212</button>
           </div>
-          <div style="padding: 8px; background: white;">
+          <div style="padding: 8px; background: var(--surface-1);">
             <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
-            <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
+            <div style="font-size: 0.75em; color: var(--ink-2);">${safeSetHtml} ${safeNumberHtml}</div>
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.75em; color: ${ownedCount > 0 ? '#4CAF50' : '#999'}; font-weight: 600;">\u2713 ${ownedCount}/${maxLabel}</span>
             </div>
             ${cmUrl
               ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
-              : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">${priceDisplay}</div>`}
+              : `<div style="font-size: 0.8em; color: var(--ink-3); margin-top: 4px;">${priceDisplay}</div>`}
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">ca</span>
               <input type="text" inputmode="decimal" value="${minPriceVal}" placeholder="\u2014"
                 aria-label="Minimum price for ${safeNameHtml}"
-                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.85em; font-weight: 600; color: #16a085; text-align: right; outline: none; box-sizing: border-box;"
-                onfocus="this.style.borderColor='#16a085'; selectPriceInput(this)" onblur="this.style.borderColor='#ddd'; saveTradelistMinPrice('${safeCardIdJs}', this.value)"
+                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; color: #16a085; text-align: right; outline: none; box-sizing: border-box;"
+                onfocus="this.style.borderColor='#16a085'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveTradelistMinPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
               <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">\u20ac</span>
             </div>
@@ -6074,7 +6074,7 @@ function openTradelistGridModal() {
       ${minPriceStrip}
     </div>`;
   });
-  grid.innerHTML = html || '<p style="color:#999;">No cards to display</p>';
+  grid.innerHTML = html || '<p style="color: var(--ink-3);">No cards to display</p>';
   modal.classList.add('show');
 }
 

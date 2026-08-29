@@ -96,14 +96,28 @@ describe('Ein dynamisch gebauter Schluessel braucht seinen Vorgabewert', () => {
         assert.equal(n, 2, `tg.action.update steht ${n}x statt 2x (en + de)`);
     });
 
-    it('kein t()-Aufruf im Testing-Group-Verlauf endet ohne Eintrag', () => {
-        // Alle festen Zweige des Schluessels muessen es auch geben.
-        const benutzt = new Set();
-        for (const m of TG.matchAll(/'(tg\.action\.[a-z_]+)'/g)) benutzt.add(m[1]);
-        for (const k of benutzt) {
-            const n = (I18N.match(new RegExp("'" + k.replace(/\./g, '\\.') + "':", 'g')) || []).length;
-            assert.equal(n, 2, `${k} fehlt in einer der beiden Sprachen`);
+    it('jede geloggte Aktion hat ihren Eintrag in beiden Sprachen', () => {
+        // FRUEHERE FASSUNG WAR WERTLOS. Sie suchte nach dem fertigen
+        // String 'tg.action.xxx' im Quelltext — den gibt es dort nie,
+        // weil der Schluessel aus 'tg.action.' + a.action gebaut wird.
+        // Die Menge blieb leer, die Schleife lief nullmal, die Zusage
+        // bestand ohne zu pruefen. Dahinter lagen drei echt fehlende
+        // Schluessel, die als Rohtext auf dem Bildschirm standen.
+        // Jetzt wird der zweite Parameter von _logActivity gelesen —
+        // das ist die Stelle, an der der Name wirklich entsteht.
+        const aktionen = new Set(['update']);   // der Vorgabewert
+        for (const m of TG.matchAll(/_logActivity\([^,]+,\s*'([a-z_]+)'/g)) {
+            aktionen.add(m[1]);
         }
+        assert.ok(aktionen.size >= 10,
+            `nur ${aktionen.size} Aktionen gefunden — die Erkennung greift nicht mehr`);
+        const fehlen = [];
+        for (const a of aktionen) {
+            const n = (I18N.match(new RegExp("'tg\\.action\\." + a + "':", 'g')) || []).length;
+            if (n !== 2) fehlen.push(`${a} (${n}x statt 2x)`);
+        }
+        assert.deepEqual(fehlen, [],
+            `ohne Eintrag steht der rohe Schluessel auf dem Bildschirm: ${fehlen.join(', ')}`);
     });
 });
 

@@ -2550,6 +2550,18 @@ window.MetaCall = (function () {
   // boosted counter decks.
   function _computeFieldSuppression() {
     if (!_shareList || _shareList.length === 0) return;
+
+    // Zuruecksetzen VOR dem Modus-Tor. Der Wert wurde mit `(alt || 0)
+    // + neu` fortgeschrieben und nirgends geloescht. Folge: ein Lauf
+    // im Gegen-Modus setzte fieldSuppressionPp > 0; beim Umschalten
+    // auf Standard brach die Funktion direkt unten ab, das Feld blieb
+    // stehen — und _computeOnlinePresenceFloor steigt bei
+    // `(d.fieldSuppressionPp || 0) > 0` aus. Der 5.5-Online-Boden war
+    // fuer diese Decks im Standardmodus dauerhaft aus, obwohl 4.6 nie
+    // gefeuert hatte. Bei mehrfachem Umschalten summierte er sich
+    // zusaetzlich auf.
+    _shareList.forEach(d => { d.fieldSuppressionPp = 0; });
+
     // Gated by the Meta Call mode toggle. Standard mode treats the
     // online ladder as truth — counter-suppression off.
     if (_metaCallMode !== 'counter') return;
@@ -4023,7 +4035,15 @@ window.MetaCall = (function () {
         // ladder, Crustle 1.50 %), the cap doesn't bind and the full
         // bonus applies.
         const ladderShare = d.ladderShare || 0;
-        const broughtShare = d.broughtShare || 0;
+        // d.broughtShare gab es NIE. Die Deck-Objekte in _shareList
+        // fuehren name, onlineShare, ladderShare, trend, onlineWinPct
+        // — der Antrittsanteil liegt auf _tournamentStats[k]. Der Wert
+        // war also immer 0, und der Deckel bestand faktisch nur aus
+        // ladderShare. Der Kommentar oben ("online + brought signal")
+        // beschrieb eine Haelfte, die nicht existierte.
+        // Richtung war konservativ, die Absicht aber unumgesetzt.
+        const _bStats = _tournamentStats && _tournamentStats[k];
+        const broughtShare = (_bStats && _bStats.broughtShare) || 0;
         const presenceCap = Math.max(ladderShare, broughtShare);
         const bonus = Math.min(rawBonus, presenceCap);
         if (bonus > 0.01) {
@@ -4046,7 +4066,14 @@ window.MetaCall = (function () {
       // are more frequent and lower stakes per pilot than regionals.
       const onlineWin = _onlineWinsByDeck[k];
       d.onlineWin = null;
-      const currentOnlineShare = d.onlineShare || 0;
+      // NICHT d.onlineShare lesen: das wird am Ende des Laufs mit der
+      // Prognose ueberschrieben (Predictor 2.0). Beim zweiten Lauf —
+      // etwa nach _onToggleSource oder _setMetaCallMode — pruefte 4.7
+      // seine Schranke gegen die eigene Vorprognose statt gegen den
+      // Leiter-Anteil. Der Quelltext warnt an anderer Stelle
+      // ausdruecklich davor; hier stand es trotzdem.
+      // d.ladderShare traegt denselben Ausgangswert und bleibt roh.
+      const currentOnlineShare = d.ladderShare || 0;
       if (onlineWin && currentOnlineShare < PREDICTOR_4_7_MAX_SHARE_PCT) {
         const todayISO = _todayISO();
         const ageDays = Math.max(
@@ -4471,6 +4498,10 @@ window.MetaCall = (function () {
       const target       = currentTotal * (1 - TIER1_BLEND_WEIGHT)
                          + projection * TIER1_BLEND_WEIGHT;
       if (target <= currentTotal) return; // already at/above target
+      // Gleiche Luecke wie in 6.1: bei currentTotal === 0 ist
+      // target > 0, die Wache oben greift nicht, und memberScale
+      // wird Infinity -> NaN.
+      if (!(currentTotal > 0)) return;
       const liftPP       = target - currentTotal;
       const memberScale  = target / currentTotal;
       const famSet       = new Set(f.members);
@@ -4546,6 +4577,13 @@ window.MetaCall = (function () {
       if (slot.currentTotal >= slot.lmShare * LIVE_SHARE_FLOOR_DIVERGENCE) return;
       const floorTotal = slot.lmShare * LIVE_SHARE_FLOOR_SHRINKAGE;
       if (slot.currentTotal >= floorTotal) return;
+      // Ohne diese Wache: currentTotal === 0 laeuft durch beide Tore
+      // oben (0 >= lmShare*0.5 falsch, 0 >= floorTotal falsch), unten
+      // wird scale = floorTotal / 0 = Infinity und before * scale
+      // = 0 * Infinity = NaN — das erbt dann d.onlineShare.
+      // Erreichbar ueber die Platzhalter mit Anteil 0, die weiter
+      // unten in _shareList geschoben werden.
+      if (!(slot.currentTotal > 0)) return;
       const lift = floorTotal - slot.currentTotal;
       totalLiveLift += lift;
       slot.members.forEach(m => liveFloorWinners.add(m));
@@ -4689,15 +4727,19 @@ window.MetaCall = (function () {
             porShare < PREDICTOR_5_9_NEW_POR_THRESHOLD &&
             cur.share >= PREDICTOR_5_9_NEW_CUR_MIN) {
           // NEW deck (didn't exist meaningfully in POR)
+          // Kappung ZULETZT. Vorher stand sie vor dem wrFactor, der
+          // bis 1.5 laeuft: die echte Obergrenze war 3.0 pp statt der
+          // benannten 2.0. 5.4, 4.6 und 4.7 kappen alle zuletzt.
           boost = Math.min(PREDICTOR_5_9_NEW_BOOST_PP_MAX,
-                           cur.share * PREDICTOR_5_9_NEW_BOOST_FACTOR) * wrFactor;
+                           cur.share * PREDICTOR_5_9_NEW_BOOST_FACTOR * wrFactor);
           kind = 'NEW';
         } else if (wrFactor > 0 &&
                    porShare >= PREDICTOR_5_9_NEW_POR_THRESHOLD &&
                    cur.share / porShare > PREDICTOR_5_9_RISING_RATIO_MIN) {
           // RISING deck (existed in POR but exploded in CRI)
+          // Wie oben: echte Obergrenze war 2.25 pp statt 1.5.
           boost = Math.min(PREDICTOR_5_9_RISING_BOOST_PP_MAX,
-                           (cur.share - porShare) * PREDICTOR_5_9_RISING_BOOST_FACT) * wrFactor;
+                           (cur.share - porShare) * PREDICTOR_5_9_RISING_BOOST_FACT * wrFactor);
           kind = 'RISING';
         } else if (porShare >= PREDICTOR_5_9_QC_MIN_POR_SHARE &&
                    cur.share < porShare &&

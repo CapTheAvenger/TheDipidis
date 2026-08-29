@@ -35,10 +35,19 @@ function loadBadge() {
     if (!c) throw new Error('PRICE_TRUST_CASES not found');
     const m = FC.match(/function priceTrustBadge\(card, cmUrl\) \{[\s\S]*?\n\}\n/);
     if (!m) throw new Error('priceTrustBadge not found');
+    // 29.08.2026: Die Faelle tragen Sprachschluessel. Der Test speist die
+    // ECHTE deutsche Tabelle ein — sonst pruefte er nur, dass irgendein
+    // String herauskommt, und der Schluessel selbst waere schon einer.
+    const I18N = fs.readFileSync(path.join(ROOT, 'js', 'i18n.js'), 'utf8');
+    const alle = [...I18N.matchAll(/^ {4}'([a-zA-Z0-9._]+)':\s*('(?:\\.|[^'\\])*')/gm)];
+    const de = alle.slice(Math.floor(alle.length / 2));
+    const tabelle = {};
+    for (const x of de) if (tabelle[x[1]] === undefined) tabelle[x[1]] = eval(x[2]);
     const ns = {};
-    new Function('window', 'escapeHtml', 'exports',
+    new Function('window', 'escapeHtml', 'exports', 't',
         c[0] + '\n' + m[0] + 'exports.fn = priceTrustBadge;')(
-        globalThisStub(), (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'), ns);
+        globalThisStub(), (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'), ns,
+        (k) => (tabelle[k] !== undefined ? tabelle[k] : k));
     return ns.fn;
 }
 let _flag = true;

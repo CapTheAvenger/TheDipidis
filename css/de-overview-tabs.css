@@ -14,13 +14,11 @@
     line-height: 1.8;
     color: #555;
 }
-.de-overview-highlight {
-    background: #fef9e7;
-    border-left: 4px solid #f39c12;
-    padding: 12px 16px;
-    border-radius: 6px;
-    margin-top: 12px;
-}
+/* 29.08.2026: .de-overview-highlight stand hier zweimal, Wort fuer
+   Wort gleich. Diese erste war toter Text — im Stylesheet gewinnt
+   die spaetere. Die verbliebene weiter unten laeuft jetzt ueber
+   Token. Dasselbe Muster wie .bg-grey-light (dreimal) und
+   .de-tab-block (zweimal), beide am selben Tag gefunden. */
 
 .de-tabs-section {
     margin-bottom: 40px;
@@ -35,11 +33,9 @@
     display: grid;
     gap: 20px;
 }
-.de-tab-block {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-}
+/* 29.08.2026: diese Regel stand doppelt in derselben Datei (hier und
+   weiter unten mit border-left). Die spaetere gewann still. Der Grund
+   bleibt nur einmal stehen, jetzt als Token. */
 .de-tab-block-city-league-meta {
     border-left: 4px solid #e74c3c;
 }
@@ -69,7 +65,8 @@
     color: #555;
 }
 .de-overview-highlight {
-    background: #fef9e7;
+    color: var(--tint-warn-ink);
+    background: var(--tint-warn);
     border-left: 4px solid #f39c12;
     padding: 12px 16px;
     border-radius: 6px;
@@ -90,7 +87,7 @@
     gap: 20px;
 }
 .de-tab-block {
-    background: #f8f9fa;
+    background: var(--surface-2);
     padding: 20px;
     border-radius: 8px;
     border-left-width: 4px;

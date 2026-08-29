@@ -89,7 +89,11 @@
 
 #cards .card-database-image-wrap {
     position: relative !important;
-    background: linear-gradient(180deg, #f5f8ff 0%, #edf3ff 100%) !important;
+    /* 29.08.2026: der Platzhalter hinter dem Kartenbild. Sobald das
+       Bild geladen ist, deckt es ihn vollstaendig ab — sichtbar ist er
+       nur waehrend des Ladens und wenn ein Bild fehlt. Genau dann war er
+       im Dunkelmodus eine leuchtende Kachel. */
+    background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 100%) !important;
 }
 
 #cards .card-database-image-wrap img {

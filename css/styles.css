@@ -1307,7 +1307,7 @@
 
         .rarity-pref-btn {
             background: #ffffff;
-            color: var(--ink-3);
+            color: var(--on-light-3);
             border: 1px solid transparent;
             padding: 5px 10px;
             border-radius: 6px;
@@ -1956,7 +1956,7 @@
         
         .card-database-btn-market {
             background: #f39c12;
-            color: var(--ink);
+            color: var(--on-light);
         }
         
         .card-database-btn-market:hover {
@@ -3309,7 +3309,16 @@
                Es ist das Datum der letzten Aktualisierung; das ist
                keine Fussnote. */
             .footer {
-                padding: 15px;
+                /* Unten 64px statt 15px: ab 768px liegt die fixierte
+                 * Tableiste (.ds-tabbar, Knoepfe 56px hoch) ueber dem
+                 * Seitenende, und die Fusszeile steht AUSSERHALB von
+                 * .tabs-container — der Schutzabstand dort erreicht sie
+                 * nicht. ds-nav.css deckt das Band 431-768px ab; diese
+                 * Kurzschreibweise laedt spaeter und wuerde ihren Wert
+                 * sonst zuruecksetzen. Wer hier wieder "padding: 15px"
+                 * schreibt, versteckt das Datum der letzten
+                 * Aktualisierung dauerhaft unter der Leiste. */
+                padding: 15px 15px 64px;
             }
 
             /* Grid-Layouts optimiert */
@@ -3710,7 +3719,7 @@
                 padding: 2px 5px !important;
                 border-radius: 3px !important;
                 background: #e0e0e0 !important;
-                color: var(--ink) !important;
+                color: var(--on-light) !important;
                 font-weight: 600 !important;
             }
             
@@ -6035,7 +6044,7 @@ details[open] > .tier-trending-summary::after {
     top: 3px;
     left: 3px;
     background: #f39c12;
-    color: var(--ink);
+    color: var(--on-light);
     padding: 2px 5px;
     border-radius: 4px;
     font-weight: 900;
@@ -9589,7 +9598,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-radius: 4px;
     font-size: 0.85em;
     background: #fff;
-    color: var(--ink);
+    color: var(--on-light);
     text-transform: none;
     letter-spacing: normal;
     font-weight: 500;
@@ -9604,7 +9613,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-radius: 4px;
     font-size: 0.82em;
     background: #fff;
-    color: var(--ink);
+    color: var(--on-light);
     transition: border-color 0.15s;
 }
 .tech-option-note:focus { outline: none; border-color: #6c5ce7; }

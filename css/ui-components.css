@@ -90,7 +90,7 @@ img[src*="limitlesstcg"] {
     padding: 8px 12px 4px;
     font-size: 0.8em;
     font-weight: 700;
-    color: var(--ink-3);
+    color: var(--on-light-3);
     text-transform: uppercase;
     letter-spacing: 0.03em;
     background: #f1f5f9;
@@ -981,7 +981,7 @@ img[src*="limitlesstcg"] {
     top: 5px !important;
     left: 5px !important;
     background: #FFD600 !important;
-    color: var(--ink) !important;
+    color: var(--on-light) !important;
     min-width: 30px !important;
     height: 30px !important;
     border-radius: 50% !important;
@@ -1735,7 +1735,7 @@ img[src*="limitlesstcg"] {
     justify-content: center;
     font-size: 13px;
     line-height: 1;
-    color: var(--ink);
+    color: var(--on-light);
     background: #F48FB1;
     border: 1.5px solid rgba(255,255,255,0.5);
     box-shadow: 0 2px 6px rgba(0,0,0,0.25);
@@ -1774,7 +1774,7 @@ img[src*="limitlesstcg"] {
     z-index: 4 !important;
     cursor: help;
     background: #f59e0b !important;
-    color: var(--ink) !important;
+    color: var(--on-light) !important;
     font-weight: 800 !important;
     font-size: 0.6em !important;
     border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
@@ -3656,7 +3656,7 @@ img[src*="limitlesstcg"] {
 
 .btn-system-secondary {
     background: #e1e8ed;
-    color: var(--ink);
+    color: var(--on-light);
     font-weight: 700;
     border: 2px solid #ccd6dd;
     border-radius: 8px;
@@ -4294,7 +4294,7 @@ img[src*="limitlesstcg"] {
 }
 .meta-binder-card .card-database-top-actions .btn-wishlist.card-badge {
     background: #F48FB1 !important;
-    color: var(--ink) !important;
+    color: var(--on-light) !important;
     border-color: #F48FB1 !important;
 }
 
@@ -4952,7 +4952,7 @@ img[src*="limitlesstcg"] {
     border: none;
     border-radius: 0 0 10px 10px;
     background: #f0a020;
-    color: var(--ink);
+    color: var(--on-light);
     font-weight: 800;
     font-size: 0.88rem;
     cursor: pointer;

@@ -1346,7 +1346,12 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(135deg, var(--color-success), #16a085);
+  /* Das zweite Verlaufsende war #16a085: weisse Schrift darauf
+   * ergibt 3,28:1, gemessen ueber den Verlauf 3,91:1 — unter den
+   * geforderten 4,5:1. --color-success (#1d7f46) haelt mit 5,03:1,
+   * das Ende zog den Knopf herunter. #0f7a58 haelt denselben
+   * Teal-Ton und kommt auf 5,32:1. */
+  background: linear-gradient(135deg, var(--color-success), #0f7a58);
   border: none;
   border-radius: 6px;
   padding: 4px 11px;

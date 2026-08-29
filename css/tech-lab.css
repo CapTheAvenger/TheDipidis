@@ -428,7 +428,7 @@
     border: 1px solid #e5e7eb;
     border-radius: 6px;
     background: #f9fafb;
-    color: var(--ink-3);
+    color: var(--on-light-3);
     font-size: 0.72em;
     font-weight: 600;
     cursor: pointer;
@@ -490,7 +490,7 @@
 .tech-lab-loading {
     grid-column: 1 / -1;
     padding: 22px 16px;
-    color: var(--ink-3);
+    color: var(--on-light-3);
     font-size: 0.92em;
     font-style: italic;
     text-align: center;
@@ -620,7 +620,7 @@
 .tech-lab-note {
     margin: 14px 0 0;
     font-size: 0.8em;
-    color: var(--ink-3);
+    color: var(--on-light-3);
     font-style: italic;
     line-height: 1.45;
     padding: 8px 12px;

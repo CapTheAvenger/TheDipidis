@@ -2640,7 +2640,7 @@
     padding: 4px 10px;
     border-radius: 999px;
     background: #f59e0b;
-    color: var(--ink);
+    color: var(--on-light);
     letter-spacing: 0.04em;
 }
 

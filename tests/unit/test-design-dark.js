@@ -134,8 +134,14 @@ describe('wie weit die Seite dafür ist', () => {
            Hex-Werte, obwohl die Datei seit dem 11.06. einen eigenen
            Dunkelsatz hat. Sie haengen jetzt an fuenf Toenungs-Token mit
            Bedeutung (info/ok/warn/bad/personal), damit Gelb im Dunkeln
-           Gelb bleibt und nicht Grau wird. */
-        const BASELINE = 417;
+           Gelb bleibt und nicht Grau wird.
+           417 -> 320: firebase-collection.js (Sammlung, Wunschliste,
+           Tauschliste) von Inline-Farben auf Token, side-quest.css und
+           profile-howto-info.css auf Flaechen-Token. Dabei mussten 43
+           feste dunkle Textfarben mitgezogen werden — eine Flaeche
+           umzustellen und den Text stehenzulassen ergibt dunkel auf
+           dunkel. */
+        const BASELINE = 320;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);

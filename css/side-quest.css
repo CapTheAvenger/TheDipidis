@@ -23,7 +23,7 @@
 
 .side-quest-intro {
     margin: 0 0 1.25rem 0;
-    color: #4a4a4a;
+    color: var(--ink);
 }
 
 .side-quest-subtitle {
@@ -39,14 +39,14 @@
 
 .side-quest-status {
     font-size: 0.85rem;
-    color: #5a6473;
+    color: var(--ink-2);
     margin: 0.5rem 0;
 }
 
 .side-quest-empty {
     padding: 2rem 1rem;
     text-align: center;
-    color: #5a6473;
+    color: var(--ink-2);
     border: 1px dashed #e0e0e0;
     border-radius: 12px;
     background: var(--surface-alt, #f8f9fa);
@@ -63,7 +63,7 @@
 .side-quest-filter {
     margin: 0 0 1rem 0;
     padding: 0.8rem 0.9rem;
-    background: #ffffff;
+    background: var(--surface-1);
     border: 1px solid #e0e0e0;
     border-radius: 12px;
     box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
@@ -77,18 +77,18 @@
 .side-quest-filter-title {
     font-weight: 800;
     font-size: 0.95rem;
-    color: #2c3e50;
+    color: var(--ink);
 }
 .side-quest-filter-count {
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.78rem;
 }
 .side-quest-filter-clear {
     margin-left: auto;
     appearance: none;
     border: 1px solid #e0e0e0;
-    background: #f8f9fa;
-    color: #4a4a4a;
+    background: var(--surface-2);
+    color: var(--ink);
     font: inherit;
     font-size: 0.76rem;
     font-weight: 600;
@@ -96,7 +96,7 @@
     border-radius: 999px;
     cursor: pointer;
 }
-.side-quest-filter-clear:hover { background: #ecf0f1; }
+.side-quest-filter-clear:hover { background: var(--surface-2); }
 .side-quest-filter-chips {
     display: flex;
     flex-wrap: wrap;
@@ -112,7 +112,7 @@
     border: 1px solid rgba(95, 182, 255, 0.4);
     border-radius: 999px;
     font-size: 0.82rem;
-    color: #2c3e50;
+    color: var(--ink);
 }
 .side-quest-filter-chip .tcg-pokemon-icon { width: 22px; height: 22px; }
 .side-quest-filter-chip-name { font-weight: 600; }
@@ -120,13 +120,13 @@
     appearance: none;
     border: 0;
     background: transparent;
-    color: #2980b9;
+    color: var(--brand-ink);
     font-size: 1rem;
     line-height: 1;
     cursor: pointer;
     padding: 0 2px;
 }
-.side-quest-filter-remove:hover { color: #1d6fd0; }
+.side-quest-filter-remove:hover { color: var(--brand-ink); }
 /* Opens the Quick-Pick-style grid overlay. Looks like a tappable field. */
 .side-quest-filter-trigger {
     width: 100%;
@@ -137,8 +137,8 @@
     padding: 0.7rem 0.85rem;
     border-radius: 10px;
     border: 1px solid #e0e0e0;
-    background: #f8f9fa;
-    color: #4a4a4a;
+    background: var(--surface-2);
+    color: var(--ink);
     font: inherit;
     font-size: 0.92rem;
     font-weight: 600;
@@ -155,22 +155,22 @@
     width: 1.5rem; height: 1.5rem;
     border-radius: 7px;
     background: rgba(95, 182, 255, 0.16);
-    color: #1d6fd0;
+    color: var(--brand-ink);
     font-size: 1.1rem;
     font-weight: 700;
     flex: 0 0 auto;
 }
 .side-quest-filter-hint {
     margin: 0.45rem 0 0 0;
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.72rem;
 }
 .side-quest-filter-none {
     margin: 1rem 0;
     padding: 1rem;
     text-align: center;
-    color: #5a6473;
-    background: #f8f9fa;
+    color: var(--ink-2);
+    background: var(--surface-2);
     border: 1px dashed #e0e0e0;
     border-radius: 10px;
 }
@@ -186,9 +186,9 @@
     border-bottom: 1px solid #e0e0e0;
     font-size: 0.95rem;
     font-weight: 800;
-    color: #5a6473;
+    color: var(--ink-2);
 }
-.side-quest-reg-head.is-current { color: #2c3e50; }
+.side-quest-reg-head.is-current { color: var(--ink); }
 .side-quest-reg-head.is-current::before {
     content: "";
     width: 8px; height: 8px;
@@ -199,7 +199,7 @@
 .side-quest-reg-count {
     font-size: 0.72rem;
     font-weight: 700;
-    color: #6b7280;
+    color: var(--ink-2);
     background: rgba(0, 0, 0, 0.05);
     padding: 1px 8px;
     border-radius: 999px;
@@ -213,17 +213,17 @@
     font-size: 0.66rem;
     font-weight: 800;
     letter-spacing: 0.02em;
-    color: #5a6473;
+    color: var(--ink-2);
     background: rgba(0, 0, 0, 0.04);
     border: 1px solid #e0e0e0;
 }
 .side-quest-reg-badge.is-current {
-    color: #2e9d60;
+    color: var(--tint-ok-ink);
     background: rgba(76, 209, 130, 0.16);
     border-color: rgba(76, 209, 130, 0.45);
 }
 .side-quest-import-badge {
-    color: #6f4fe0;
+    color: var(--brand-ink);
     background: rgba(150, 120, 255, 0.16);
     border-color: rgba(150, 120, 255, 0.5);
 }
@@ -234,7 +234,7 @@
     appearance: none;
     border: 1px solid rgba(150, 120, 255, 0.5);
     background: rgba(150, 120, 255, 0.12);
-    color: #5b3fc4;
+    color: var(--brand-ink);
     font: inherit;
     font-size: 0.86rem;
     font-weight: 700;
@@ -250,7 +250,7 @@
     appearance: none;
     border: 1px solid rgba(220, 80, 80, 0.4);
     background: rgba(255, 100, 100, 0.08);
-    color: #c0392b;
+    color: var(--tint-bad-ink);
     font-size: 1rem;
     line-height: 1;
     width: 2.1rem; height: 2.1rem;
@@ -258,35 +258,35 @@
     cursor: pointer;
     flex: 0 0 auto;
 }
-.side-quest-remove-btn:hover { background: rgba(255, 100, 100, 0.18); color: #a93226; }
+.side-quest-remove-btn:hover { background: rgba(255, 100, 100, 0.18); color: var(--tint-bad-ink); }
 
 .side-quest-import .side-quest-modal-body { display: flex; flex-direction: column; }
-.side-quest-import-hint { margin: 0 0 0.7rem 0; color: #5a6473; font-size: 0.84rem; line-height: 1.45; }
+.side-quest-import-hint { margin: 0 0 0.7rem 0; color: var(--ink-2); font-size: 0.84rem; line-height: 1.45; }
 .side-quest-import-name {
     box-sizing: border-box; width: 100%;
     padding: 0.55rem 0.7rem; margin-bottom: 0.6rem;
     border: 1px solid #e0e0e0; border-radius: 8px;
-    background: #ffffff; color: #2c3e50; font: inherit; font-size: 0.9rem;
+    background: var(--surface-1); color: var(--ink); font: inherit; font-size: 0.9rem;
 }
 .side-quest-import-text {
     box-sizing: border-box; width: 100%; resize: vertical;
     min-height: 9rem;
     padding: 0.6rem 0.7rem;
     border: 1px solid #e0e0e0; border-radius: 8px;
-    background: #ffffff; color: #2c3e50;
+    background: var(--surface-1); color: var(--ink);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.82rem; line-height: 1.4;
 }
 .side-quest-import-name:focus, .side-quest-import-text:focus {
     outline: none; border-color: #9678ff; box-shadow: 0 0 0 2px rgba(150, 120, 255, 0.2);
 }
-.side-quest-import-error { color: #c0392b; font-size: 0.82rem; margin: 0.5rem 0 0 0; }
+.side-quest-import-error { color: var(--tint-bad-ink); font-size: 0.82rem; margin: 0.5rem 0 0 0; }
 .side-quest-import-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.9rem; }
 .side-quest-import-cancel, .side-quest-import-do {
     appearance: none; border: 1px solid #e0e0e0; font: inherit; font-weight: 700;
     font-size: 0.86rem; padding: 0.5rem 1rem; border-radius: 9px; cursor: pointer;
 }
-.side-quest-import-cancel { background: #f8f9fa; color: #4a4a4a; }
+.side-quest-import-cancel { background: var(--surface-2); color: var(--ink); }
 .side-quest-import-do { background: #6f4fe0; border-color: #6f4fe0; color: #fff; }
 .side-quest-import-do:hover { background: #7e60ee; }
 
@@ -303,7 +303,7 @@
 }
 
 .side-quest-team {
-    background: #ffffff;
+    background: var(--surface-1);
     border: 1px solid #e0e0e0;
     border-radius: 14px;
     padding: 1rem 1.1rem 1.1rem 1.1rem;
@@ -332,7 +332,7 @@
 .side-quest-date {
     font-size: 0.72rem;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--ink-2);
     letter-spacing: 0.01em;
     white-space: nowrap;
 }
@@ -341,12 +341,12 @@
     margin: 0;
     font-size: 1.05rem;
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--ink);
 }
 
 .side-quest-team-tourney {
     font-size: 0.78rem;
-    color: #6b7280;
+    color: var(--ink-2);
     margin-top: 0.1rem;
 }
 
@@ -359,7 +359,7 @@
     border: 1px solid rgba(95, 182, 255, 0.35);
     border-radius: 10px;
     padding: 0.55rem 0.85rem;
-    color: #2c3e50;
+    color: var(--ink);
     cursor: pointer;
     font-family: inherit;
     transition: background 120ms ease, transform 80ms ease;
@@ -384,7 +384,7 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #5a6473;
+    color: var(--ink-2);
     font-weight: 600;
 }
 
@@ -416,7 +416,7 @@
 }
 
 .side-quest-mon {
-    background: #f8f9fa;
+    background: var(--surface-2);
     border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.55rem 0.65rem;
@@ -445,7 +445,7 @@
 .side-quest-mon-name {
     font-weight: 600;
     font-size: 0.92rem;
-    color: #2c3e50;
+    color: var(--ink);
 }
 
 .side-quest-tera {
@@ -460,7 +460,7 @@
     gap: 0.4rem;
     flex-wrap: wrap;
     font-size: 0.72rem;
-    color: #5a6473;
+    color: var(--ink-2);
     margin-bottom: 0.35rem;
 }
 
@@ -468,13 +468,13 @@
 .side-quest-nature {
     font-size: 0.7rem;
     line-height: 1.35;
-    color: #5a6473;
+    color: var(--ink-2);
     margin-bottom: 0.2rem;
     word-break: break-word;
 }
 
 .side-quest-evs-label {
-    color: #5fb6ff;
+    color: var(--brand-ink);
     font-weight: 600;
 }
 
@@ -483,11 +483,11 @@
 }
 
 .side-quest-ability {
-    color: #4a4a4a;
+    color: var(--ink);
 }
 
 .side-quest-item {
-    color: #5a6473;
+    color: var(--ink-2);
     font-style: italic;
 }
 
@@ -497,7 +497,7 @@
     margin: 0;
     font-size: 0.78rem;
     line-height: 1.35;
-    color: #4a4a4a;
+    color: var(--ink);
 }
 
 .side-quest-move {
@@ -519,7 +519,7 @@
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #4a4a4a;
+    color: var(--ink);
     user-select: none;
     list-style: none;
 }
@@ -543,7 +543,7 @@
     margin: 0.5rem 0 0 1.1rem;
     padding: 0;
     font-size: 0.85rem;
-    color: #4a4a4a;
+    color: var(--ink);
     line-height: 1.45;
 }
 
@@ -566,7 +566,7 @@
     border: 1px solid rgba(95, 182, 255, 0.35);
     border-radius: 10px;
     padding: 0.45rem 0.8rem;
-    color: #2563ad;
+    color: var(--brand-ink);
     cursor: pointer;
     font-family: inherit;
     font-size: 0.82rem;
@@ -608,7 +608,7 @@
     border: 1px solid rgba(193, 138, 255, 0.38);
     border-radius: 10px;
     padding: 0.45rem 0.8rem;
-    color: #6f4fe0;
+    color: var(--brand-ink);
     cursor: pointer;
     font-family: inherit;
     font-size: 0.82rem;
@@ -649,7 +649,7 @@
     border: 1px solid rgba(74, 144, 226, 0.4);
     border-radius: 10px;
     padding: 0.45rem 0.8rem;
-    color: #2f6fb0;
+    color: var(--brand-ink);
     cursor: pointer;
     font-family: inherit;
     font-size: 0.82rem;
@@ -668,7 +668,7 @@
     margin: 0.6rem 0 0.35rem;
     font-size: 0.82rem;
     font-weight: 600;
-    color: #4a4a4a;
+    color: var(--ink);
 }
 .side-quest-export-actions {
     display: flex;
@@ -692,14 +692,14 @@
 .sq-target-copy {
     background: rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(0, 0, 0, 0.18);
-    color: #444;
+    color: var(--ink);
 }
 .sq-target-copy:hover { background: rgba(0, 0, 0, 0.08); }
 /* Showdown blue — pushed to the right, next to Limitless */
 .sq-target-showdown {
     background: rgba(74, 144, 226, 0.1);
     border: 1px solid rgba(74, 144, 226, 0.45);
-    color: #2f6fb0;
+    color: var(--brand-ink);
     margin-left: auto;
 }
 .sq-target-showdown:hover { background: rgba(74, 144, 226, 0.2); }
@@ -707,7 +707,7 @@
 .sq-target-limitless {
     background: rgba(214, 48, 49, 0.1);
     border: 1px solid rgba(214, 48, 49, 0.45);
-    color: #c0392b;
+    color: var(--tint-bad-ink);
 }
 .sq-target-limitless:hover { background: rgba(214, 48, 49, 0.2); }
 
@@ -724,7 +724,7 @@
 }
 
 .side-quest-modal {
-    background: #ffffff;
+    background: var(--surface-1);
     border: 1px solid #e0e0e0;
     border-radius: 14px;
     box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
@@ -748,19 +748,19 @@
     margin: 0;
     font-size: 1.05rem;
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--ink);
 }
 
 .side-quest-modal-sub {
     margin: 0.2rem 0 0 0;
     font-size: 0.78rem;
-    color: #6b7280;
+    color: var(--ink-2);
 }
 
 .side-quest-modal-close {
     background: transparent;
     border: none;
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
@@ -770,14 +770,14 @@
 }
 
 .side-quest-modal-close:hover {
-    color: #2c3e50;
+    color: var(--ink);
     background: rgba(0, 0, 0, 0.06);
 }
 
 .side-quest-modal-body {
     padding: 0.9rem 1.1rem 1.1rem 1.1rem;
     overflow-y: auto;
-    color: #333;
+    color: var(--ink);
     font-size: 0.88rem;
     line-height: 1.5;
 }
@@ -793,7 +793,7 @@
 
 .side-quest-modal-overview {
     margin: 0;
-    color: #2c3e50;
+    color: var(--ink);
 }
 
 .side-quest-modal-roles {
@@ -806,7 +806,7 @@
 }
 
 .side-quest-modal-role {
-    background: #f8f9fa;
+    background: var(--surface-2);
     border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.5rem 0.65rem;
@@ -817,13 +817,13 @@
     align-items: center;
     gap: 0.4rem;
     margin-bottom: 0.15rem;
-    color: #2c3e50;
+    color: var(--ink);
 }
 
 .side-quest-modal-role-text {
     display: block;
     font-size: 0.84rem;
-    color: #4a4a4a;
+    color: var(--ink);
 }
 
 .side-quest-modal-plan {
@@ -847,7 +847,7 @@
 .side-quest-modal-ai-note {
     margin: 1.2rem 0 0 0;
     font-size: 0.72rem;
-    color: #6b7280;
+    color: var(--ink-2);
     border-top: 1px dotted rgba(0, 0, 0, 0.1);
     padding-top: 0.6rem;
 }
@@ -862,7 +862,7 @@
 .side-quest-mark-hint {
     margin: 0.5rem 0 0 0;
     font-size: 0.76rem;
-    color: #6b7280;
+    color: var(--ink-2);
 }
 
 .side-quest-team-footer {
@@ -896,7 +896,7 @@
     padding: 0;
     border-radius: 9px;
     border: 1px solid #e0e0e0;
-    background: #f8f9fa;
+    background: var(--surface-2);
     cursor: pointer;
     font-size: 0.95rem;
     line-height: 1;
@@ -907,7 +907,7 @@
 
 .side-quest-mark-btn:hover {
     filter: grayscale(0) opacity(1);
-    background: #ecf0f1;
+    background: var(--surface-2);
 }
 
 .side-quest-mark-btn:active {
@@ -969,7 +969,7 @@
     border: 1px solid rgba(76, 209, 130, 0.45);
     border-radius: 10px;
     padding: 0.45rem 0.85rem;
-    color: #1f8a52;
+    color: var(--tint-ok-ink);
     cursor: pointer;
     font-family: inherit;
     font-size: 0.82rem;
@@ -982,7 +982,10 @@
     display: inline-flex; align-items: center; justify-content: center;
     width: 1.1rem; height: 1.1rem;
     border-radius: 50%;
-    background: rgba(76, 209, 130, 0.85); color: #0a1018;
+    /* Der Kreis ist fast deckend und bleibt in beiden Modi hellgruen —
+       hier waere ein drehendes Token falsch, --ink wuerde im Dunkeln
+       weiss auf Hellgruen ergeben (1,75:1). Feste dunkle Schrift. */
+    background: rgba(76, 209, 130, 0.85); color: #0b2a1a;
     font-size: 0.7rem; font-weight: 800;
 }
 
@@ -1000,14 +1003,14 @@
 @keyframes sq-play-fade { from { opacity: 0; } to { opacity: 1; } }
 
 .sq-play-panel {
-    background: #ffffff;
+    background: var(--surface-1);
     border: 1px solid #e0e0e0;
     border-radius: 14px;
     box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
     width: min(96vw, 1180px);
     max-height: calc(100vh - 1.5rem);
     display: flex; flex-direction: column;
-    color: #333;
+    color: var(--ink);
     overflow: hidden;
 }
 
@@ -1017,12 +1020,12 @@
     border-bottom: 1px solid #e0e0e0;
     flex-shrink: 0;
 }
-.sq-play-title { margin: 0; font-size: 1rem; font-weight: 700; color: #2c3e50; }
+.sq-play-title { margin: 0; font-size: 1rem; font-weight: 700; color: var(--ink); }
 .sq-play-close {
     width: 2rem; height: 2rem; border-radius: 50%;
-    background: #f8f9fa;
+    background: var(--surface-2);
     border: 1px solid #e0e0e0;
-    color: #4a4a4a; font-size: 1.2rem; line-height: 1; cursor: pointer;
+    color: var(--ink); font-size: 1.2rem; line-height: 1; cursor: pointer;
 }
 .sq-play-close:hover { background: rgba(95, 182, 255, 0.25); }
 
@@ -1037,12 +1040,12 @@
     .sq-play-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 
-.sq-play-col-title { margin: 0 0 0.4rem 0; font-size: 0.95rem; font-weight: 700; color: #2c3e50; }
-.sq-play-col-hint { margin: 0 0 0.6rem 0; font-size: 0.78rem; color: #6b7280; }
+.sq-play-col-title { margin: 0 0 0.4rem 0; font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+.sq-play-col-hint { margin: 0 0 0.6rem 0; font-size: 0.78rem; color: var(--ink-2); }
 
 .sq-play-mons { display: flex; flex-direction: column; gap: 0.45rem; }
 .sq-play-mon {
-    background: #f8f9fa;
+    background: var(--surface-2);
     border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.55rem 0.7rem;
@@ -1050,15 +1053,15 @@
 }
 .sq-play-mon-head { display: flex; align-items: center; gap: 0.5rem; }
 .sq-play-mon-titleblock { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.sq-play-mon-name { font-weight: 700; font-size: 0.9rem; color: #2c3e50; }
+.sq-play-mon-name { font-weight: 700; font-size: 0.9rem; color: var(--ink); }
 
 .sq-play-mon-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; font-size: 0.8rem; }
-.sq-play-row-label { color: #6b7280; min-width: 5.2rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.sq-play-row-label { color: var(--ink-2); min-width: 5.2rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
 .sq-play-speed { display: inline-flex; align-items: baseline; gap: 0.4rem; }
-.sq-play-speed-actual { font-weight: 700; font-size: 1.05rem; color: #2980b9; }
-.sq-play-speed-tail { color: #2e9d60; font-weight: 600; font-size: 0.85rem; }
-.sq-play-speed-range { color: #6b7280; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78rem; }
-.sq-play-speed-missing { color: #d9483b; }
+.sq-play-speed-actual { font-weight: 700; font-size: 1.05rem; color: var(--brand-ink); }
+.sq-play-speed-tail { color: var(--tint-ok-ink); font-weight: 600; font-size: 0.85rem; }
+.sq-play-speed-range { color: var(--ink-2); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78rem; }
+.sq-play-speed-missing { color: var(--tint-bad-ink); }
 
 .sq-play-types, .sq-play-weaks { display: inline-flex; gap: 4px; flex-wrap: wrap; }
 .sq-play-type, .sq-play-weak {
@@ -1071,7 +1074,7 @@
 }
 .sq-play-weak small { opacity: 0.85; font-weight: 600; }
 .sq-play-weak-4x { box-shadow: 0 0 0 2px #ffb347 inset, 0 1px 2px rgba(0,0,0,0.4) inset; }
-.sq-play-noweak { color: #6b7280; font-style: italic; font-size: 0.78rem; }
+.sq-play-noweak { color: var(--ink-2); font-style: italic; font-size: 0.78rem; }
 
 /* Type-color palette (gen 6+ canonical hex) */
 .sq-play-type-normal   { background: #a8a878; }
@@ -1103,29 +1106,29 @@
 
 .sq-play-opp-slot {
     position: relative;
-    background: #f8f9fa;
+    background: var(--surface-2);
     border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.55rem 0.45rem;
     display: flex; flex-direction: column; align-items: center;
     gap: 4px; min-height: 6.2rem;
     font-family: inherit;
-    color: #2c3e50;
+    color: var(--ink);
     cursor: pointer;
 }
 .sq-play-opp-empty {
     border-style: dashed;
     border-color: #cdd3da;
-    color: #6b7280;
+    color: var(--ink-2);
     justify-content: center;
 }
-.sq-play-opp-empty:hover { background: rgba(95, 182, 255, 0.08); color: #2563ad; }
+.sq-play-opp-empty:hover { background: rgba(95, 182, 255, 0.08); color: var(--brand-ink); }
 .sq-play-opp-empty-icon { font-size: 1.8rem; line-height: 1; opacity: 0.5; }
 .sq-play-opp-empty-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
 
 .sq-play-opp-filled { cursor: default; }
 .sq-play-opp-name { font-size: 0.75rem; font-weight: 700; text-align: center; }
-.sq-play-opp-speed { font-size: 0.7rem; color: #6b7280; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.sq-play-opp-speed { font-size: 0.7rem; color: var(--ink-2); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
 .sq-play-opp-clear {
     position: absolute; top: 4px; right: 4px;
@@ -1151,7 +1154,7 @@
     animation: sq-play-fade 100ms ease-out;
 }
 .sq-play-picker-panel {
-    background: #ffffff; border: 1px solid #e0e0e0; border-radius: 14px;
+    background: var(--surface-1); border: 1px solid #e0e0e0; border-radius: 14px;
     width: min(96vw, 720px);
     /* Anchor to the top (align-items: flex-start) and cap to the VISIBLE
      * viewport (dvh, not vh) minus the safe areas, so the header — and its
@@ -1160,7 +1163,7 @@
     max-height: calc(100vh - 2rem);
     max-height: calc(100dvh - max(1rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom)));
     display: flex; flex-direction: column;
-    color: #333;
+    color: var(--ink);
     overflow: hidden;
 }
 .sq-play-picker-head {
@@ -1168,23 +1171,23 @@
     padding: 0.6rem 0.7rem;
     border-bottom: 1px solid #e0e0e0;
     position: sticky; top: 0; z-index: 1;
-    background: #ffffff;
+    background: var(--surface-1);
 }
 .sq-play-picker-search {
     flex: 1;
-    background: #f8f9fa;
+    background: var(--surface-2);
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 0.5rem 0.7rem;
-    color: #2c3e50;
+    color: var(--ink);
     font-size: 0.9rem;
     font-family: inherit;
 }
 .sq-play-picker-search:focus { outline: 2px solid #5fb6ff; outline-offset: 1px; }
 .sq-play-picker-close {
     width: 2rem; height: 2rem; border-radius: 50%;
-    background: #f8f9fa; border: 1px solid #e0e0e0;
-    color: #4a4a4a; font-size: 1.2rem; line-height: 1; cursor: pointer;
+    background: var(--surface-2); border: 1px solid #e0e0e0;
+    color: var(--ink); font-size: 1.2rem; line-height: 1; cursor: pointer;
 }
 
 .sq-play-picker-grid {
@@ -1197,10 +1200,10 @@
     -webkit-overflow-scrolling: touch;
 }
 .sq-play-picker-cell {
-    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px;
+    background: var(--surface-2); border: 1px solid #e0e0e0; border-radius: 8px;
     padding: 0.35rem; cursor: pointer;
     display: flex; flex-direction: column; align-items: center; gap: 2px;
-    color: #4a4a4a;
+    color: var(--ink);
     font-family: inherit;
 }
 .sq-play-picker-cell:hover { background: rgba(95, 182, 255, 0.12); border-color: #5fb6ff; }
@@ -1213,7 +1216,7 @@
     content: "✓";
     position: absolute;
     top: 2px; left: 4px;
-    color: #1d6fd0;
+    color: var(--brand-ink);
     font-size: 0.7rem;
     font-weight: 900;
 }
@@ -1231,7 +1234,7 @@
 .sq-play-picker-toggle {
     background: rgba(95, 182, 255, 0.12);
     border: 1px solid rgba(95, 182, 255, 0.4);
-    color: #2563ad;
+    color: var(--brand-ink);
     border-radius: 8px;
     padding: 0.35rem 0.6rem;
     font-size: 0.78rem; font-weight: 700;
@@ -1243,7 +1246,7 @@
 .sq-play-picker-toggle[aria-pressed="true"] {
     background: rgba(255, 193, 7, 0.18);
     border-color: rgba(255, 193, 7, 0.5);
-    color: #a87b1a;
+    color: var(--tint-bad-ink);
 }
 .sq-play-picker-toggle-count { opacity: 0.75; font-weight: 600; }
 
@@ -1285,12 +1288,12 @@
     line-height: 1.18;
     font-size: 0.66rem;
     min-height: 2.36em;
-    color: #4a4a4a;
+    color: var(--ink);
 }
 .sq-play-picker-empty {
     grid-column: 1 / -1;
     text-align: center;
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.8rem;
     padding: 1.2rem;
     margin: 0;
@@ -1332,7 +1335,7 @@
  * how many more picks until the picker auto-closes. */
 .sq-play-picker-progress {
     background: rgba(76, 209, 130, 0.18);
-    color: #1f8a52;
+    color: var(--tint-ok-ink);
     border: 1px solid rgba(76, 209, 130, 0.5);
     border-radius: 8px;
     padding: 0.3rem 0.55rem;
@@ -1354,7 +1357,7 @@
  * the user sees the whole field at a glance without scrolling.
  */
 .sq-play-ladder {
-    background: #f8f9fa;
+    background: var(--surface-2);
     border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.55rem 0.6rem 0.65rem 0.6rem;
@@ -1364,7 +1367,7 @@
 .sq-play-ladder-hint {
     margin: 0.2rem 0 0.45rem 0;
     font-size: 0.72rem;
-    color: #6b7280;
+    color: var(--ink-2);
 }
 .sq-play-ladder-rows {
     list-style: none; padding: 0; margin: 0;
@@ -1380,7 +1383,7 @@
     padding: 4px 6px;
     border-radius: 6px;
     border-left: 3px solid transparent;
-    background: #ffffff;
+    background: var(--surface-1);
     border: 1px solid #e8eaed;
     border-left: 3px solid transparent;
     font-size: 0.78rem;
@@ -1390,7 +1393,7 @@
 .sq-play-ladder-opp   { border-left-color: #f56666; }
 
 .sq-play-ladder-rank {
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.68rem;
     font-weight: 700;
     text-align: right;
@@ -1404,7 +1407,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #2c3e50;
+    color: var(--ink);
     font-weight: 600;
 }
 .sq-play-ladder-side {
@@ -1423,7 +1426,7 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
     font-weight: 800;
-    color: #2c3e50;
+    color: var(--ink);
     font-size: 0.92rem;
 }
 /* "~" prefix on opponent typical-speed numbers; "?" prefix when
@@ -1431,13 +1434,13 @@
  * old "typ" superscript that the user reported reading as "Type"
  * — universally-known "approximately" glyph is unambiguous. */
 .sq-play-ladder-prefix {
-    color: #6b7280;
+    color: var(--ink-2);
     font-weight: 600;
     margin-right: 1px;
     font-size: 0.85em;
 }
 .sq-play-ladder-prefix-base {
-    color: #b8860b;
+    color: var(--tint-warn-ink);
 }
 /* Post-Mega Speed pill — Mega Evolution (held Mega Stone) changes the
  * base stats, so we show the resulting Speed + range. The violet "M …"
@@ -1449,7 +1452,7 @@
     padding: 0 6px;
     border-radius: 6px;
     background: rgba(193, 138, 255, 0.16);
-    color: #6f4fe0;
+    color: var(--brand-ink);
     font-size: 0.82em;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -1485,7 +1488,7 @@
  * number first. */
 .sq-play-ladder-range {
     text-align: right;
-    color: #6b7280;
+    color: var(--ink-2);
     font-variant-numeric: tabular-nums;
     font-size: 0.7rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -1493,7 +1496,7 @@
 }
 .sq-play-ladder-tw {
     text-align: right;
-    color: #2e9d60;
+    color: var(--tint-ok-ink);
     font-variant-numeric: tabular-nums;
     font-size: 0.72rem;
     font-weight: 600;
@@ -1508,15 +1511,15 @@
     flex-direction: column;
     align-items: center;
     line-height: 1.05;
-    color: #2563ad;
+    color: var(--brand-ink);
 }
 .sq-play-opp-speed-typ strong {
     font-size: 0.95rem;
-    color: #2563ad;
+    color: var(--brand-ink);
 }
 .sq-play-opp-speed-typ small {
     font-size: var(--fs-xs);
-    color: #6b7280;
+    color: var(--ink-2);
     font-weight: 500;
 }
 
@@ -1550,7 +1553,7 @@
     gap: 3px;
     padding: 3px;
     margin: 0 0 1rem 0;
-    background: #f8f9fa;
+    background: var(--surface-2);
     border: 1px solid #e0e0e0;
     border-radius: 11px;
 }
@@ -1558,7 +1561,7 @@
     appearance: none;
     border: 0;
     background: transparent;
-    color: #5a6473;
+    color: var(--ink-2);
     font: inherit;
     font-weight: 700;
     font-size: 0.86rem;
@@ -1567,7 +1570,7 @@
     cursor: pointer;
     transition: background 120ms ease, color 120ms ease;
 }
-.side-quest-subtab:hover { color: #2c3e50; }
+.side-quest-subtab:hover { color: var(--ink); }
 .side-quest-subtab.is-active {
     background: #2563ad;
     color: #fff;
@@ -1576,7 +1579,7 @@
 /* ── Resources / Nachschlagen ────────────────────────────────────── */
 .sq-res-intro {
     margin: 0 0 0.8rem 0;
-    color: #4a4a4a;
+    color: var(--ink);
     font-size: 0.85rem;
     line-height: 1.45;
 }
@@ -1586,8 +1589,8 @@
     padding: 0.7rem 0.9rem;
     border-radius: 10px;
     border: 1px solid #e0e0e0;
-    background: #ffffff;
-    color: #2c3e50;
+    background: var(--surface-1);
+    color: var(--ink);
     font: inherit;
     font-size: 0.95rem;
     margin-bottom: 0.7rem;
@@ -1606,8 +1609,8 @@
 .sq-res-chip {
     appearance: none;
     border: 1px solid #e0e0e0;
-    background: #f8f9fa;
-    color: #4a4a4a;
+    background: var(--surface-2);
+    color: var(--ink);
     font: inherit;
     font-size: 0.8rem;
     font-weight: 600;
@@ -1616,11 +1619,11 @@
     cursor: pointer;
     transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
-.sq-res-chip:hover { background: #ecf0f1; }
+.sq-res-chip:hover { background: var(--surface-2); }
 .sq-res-chip.is-active {
     background: rgba(95, 182, 255, 0.16);
     border-color: rgba(95, 182, 255, 0.5);
-    color: #2563ad;
+    color: var(--brand-ink);
 }
 .sq-res-chip-n {
     opacity: 0.6;
@@ -1629,11 +1632,11 @@
 }
 .sq-res-count {
     margin: 0 0 0.5rem 0;
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.74rem;
 }
 .sq-res-status {
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.88rem;
     padding: 0.6rem 0;
 }
@@ -1649,7 +1652,7 @@
 .sq-res-entry {
     border: 1px solid #e0e0e0;
     border-radius: 9px;
-    background: #ffffff;
+    background: var(--surface-1);
     overflow: hidden;
 }
 .sq-res-entry.is-open { border-color: #2f6dad; }
@@ -1674,12 +1677,12 @@
     min-width: 0;
 }
 .sq-res-name {
-    color: #2c3e50;
+    color: var(--ink);
     font-weight: 700;
     font-size: 0.92rem;
 }
 .sq-res-name-alt {
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.74rem;
 }
 .sq-res-badges {
@@ -1701,25 +1704,25 @@
     padding: 1px 7px;
     border-radius: 999px;
     background: rgba(120, 200, 120, 0.16);
-    color: #2e9d60;
+    color: var(--tint-ok-ink);
     border: 1px solid rgba(120, 200, 120, 0.45);
     font-size: 0.66rem;
     font-weight: 700;
 }
 .sq-res-cat {
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.68rem;
     font-weight: 600;
 }
 .sq-res-chevron {
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.7rem;
     transition: transform 140ms ease;
 }
 .sq-res-entry.is-open .sq-res-chevron { transform: rotate(180deg); }
 .sq-res-effect {
     padding: 0 0.7rem 0.65rem 0.7rem;
-    color: #333;
+    color: var(--ink);
     font-size: 0.86rem;
     line-height: 1.5;
 }
@@ -1734,13 +1737,13 @@
 }
 .sq-res-stat {
     font-size: 0.8rem;
-    color: #555;
+    color: var(--ink);
     white-space: nowrap;
 }
-.sq-res-stat-k { color: #8a8f98; }
-.sq-res-stat b { color: #2c3e50; font-variant-numeric: tabular-nums; }
+.sq-res-stat-k { color: var(--ink-3); }
+.sq-res-stat b { color: var(--ink); font-variant-numeric: tabular-nums; }
 .sq-res-stat-dmg {
-    color: #4a4a4a;
+    color: var(--ink);
     background: rgba(0, 0, 0, 0.05);
     border-radius: 6px;
     padding: 0 0.4rem;
@@ -1748,28 +1751,28 @@
 }
 /* Priority is only shown when non-zero, so make it pop — it's the meaningful
    bit (Fake Out +3, Trick Room −7). */
-.sq-res-stat-prio b { color: #d35400; }
+.sq-res-stat-prio b { color: var(--tint-warn-ink); }
 .sq-res-verified {
-    color: #2e9d60;
+    color: var(--tint-ok-ink);
     font-weight: 900;
     margin-right: 4px;
 }
 .sq-res-noeff {
-    color: #6b7280;
+    color: var(--ink-2);
     font-style: italic;
 }
 .sq-res-attr {
     margin: 0.9rem 0 0 0;
     padding-top: 0.6rem;
     border-top: 1px solid #e0e0e0;
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.7rem;
     line-height: 1.4;
 }
 
 /* ── Side Quest · Champions — Pokédex table ─────────────────────── */
 .sqp-intro {
-    color: #4a4a4a;
+    color: var(--ink);
     font-size: 0.85rem;
     line-height: 1.5;
     margin: 0 0 0.7rem;
@@ -1780,8 +1783,8 @@
     padding: 0.7rem 0.9rem;
     border-radius: 10px;
     border: 1px solid #e0e0e0;
-    background: #ffffff;
-    color: #2c3e50;
+    background: var(--surface-1);
+    color: var(--ink);
     font: inherit;
     font-size: 0.95rem;
     margin-bottom: 0.7rem;
@@ -1795,7 +1798,7 @@
     margin-bottom: 0.55rem;
 }
 .sqp-presets-label {
-    color: #5a6473;
+    color: var(--ink-2);
     font-size: 0.74rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -1805,8 +1808,8 @@
 .sqp-preset {
     appearance: none;
     border: 1px solid #e0e0e0;
-    background: #f8f9fa;
-    color: #4a4a4a;
+    background: var(--surface-2);
+    color: var(--ink);
     font: inherit;
     font-size: 0.8rem;
     font-weight: 600;
@@ -1815,7 +1818,7 @@
     cursor: pointer;
     transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
-.sqp-preset:hover { background: #ecf0f1; border-color: #d8dee7; }
+.sqp-preset:hover { background: var(--surface-2); border-color: #d8dee7; }
 .sqp-preset.is-active {
     background: #3d7fd0;
     border-color: #5b9cef;
@@ -1831,8 +1834,8 @@
 .sqp-select {
     appearance: none;
     border: 1px solid #e0e0e0;
-    background: #ffffff;
-    color: #2c3e50;
+    background: var(--surface-1);
+    color: var(--ink);
     font: inherit;
     font-size: 0.82rem;
     padding: 0.4rem 1.8rem 0.4rem 0.7rem;
@@ -1842,8 +1845,8 @@
     background-repeat: no-repeat;
     background-position: right 0.6rem center;
 }
-.sqp-count { color: #6b7280; font-size: 0.78rem; margin: 0 0 0.45rem; }
-.sqp-status { color: #6b7280; font-size: 0.9rem; padding: 1rem 0; }
+.sqp-count { color: var(--ink-2); font-size: 0.78rem; margin: 0 0 0.45rem; }
+.sqp-status { color: var(--ink-2); font-size: 0.9rem; padding: 1rem 0; }
 
 .sqp-table-wrap {
     overflow-x: auto;
@@ -1863,7 +1866,7 @@
     min-width: 100%;
     white-space: nowrap;
     font-size: 0.82rem;
-    color: #333;
+    color: var(--ink);
 }
 /* Neutralise the global `table { display:block }` and
    `table thead, table tbody { display:table; table-layout:fixed }` rules,
@@ -1884,8 +1887,8 @@
 #sideQuestPokedexHost .sqp-table thead th {
     position: sticky;
     top: 0;
-    background: #ecf0f1;
-    color: #5a6473;
+    background: var(--surface-2);
+    color: var(--ink-2);
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -1894,7 +1897,7 @@
 }
 #sideQuestPokedexHost .sqp-sortable { cursor: pointer; user-select: none; }
 #sideQuestPokedexHost .sqp-sortable:hover { color: #2c3e50; background: #dfe6e9; }
-#sideQuestPokedexHost .sqp-table thead th.is-sorted { color: #2563ad; }
+#sideQuestPokedexHost .sqp-table thead th.is-sorted { color: var(--brand-ink); }
 #sideQuestPokedexHost .sqp-table tbody tr:hover { background: rgba(0, 0, 0, 0.03); }
 
 /* Sticky Pokémon name column (left) for horizontal scrolling. The id
@@ -1904,15 +1907,15 @@
     position: sticky;
     left: 0;
     text-align: left;
-    background-color: #ffffff;
+    background-color: var(--surface-1);
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.08);
     z-index: 1;
     min-width: 124px;
 }
-#sideQuestPokedexHost .sqp-table thead th.sqp-c-mon { background-color: #ecf0f1; z-index: 3; }
-#sideQuestPokedexHost .sqp-table tbody tr:hover td.sqp-c-mon { background-color: #f0f2f5; }
+#sideQuestPokedexHost .sqp-table thead th.sqp-c-mon { background-color: var(--surface-2); z-index: 3; }
+#sideQuestPokedexHost .sqp-table tbody tr:hover td.sqp-c-mon { background-color: var(--surface-2); }
 .sqp-mon-name { display: block; font-weight: 700; }
-.sqp-mon-sub { display: block; color: #6b7280; font-size: 0.68rem; margin-top: 1px; }
+.sqp-mon-sub { display: block; color: var(--ink-2); font-size: 0.68rem; margin-top: 1px; }
 
 .sqp-type {
     display: inline-block;
@@ -1929,26 +1932,26 @@
    = Lv. 50 at 0 SP, blue = the actually-played final value. */
 #sideQuestPokedexHost .sqp-stat-base {
     display: block;
-    color: #b45309;
+    color: var(--tint-warn-ink);
     font-weight: 800;
     font-size: 0.8rem;
     letter-spacing: 0.01em;
     line-height: 1.25;
 }
 #sideQuestPokedexHost .sqp-stat-top { display: block; font-size: 0.8rem; white-space: nowrap; }
-#sideQuestPokedexHost .sqp-stat-top b { font-weight: 600; color: #5a6473; }
-#sideQuestPokedexHost .sqp-stat-used { color: #1d6fd0; font-weight: 600; font-size: 0.74rem; margin-left: 2px; }
-#sideQuestPokedexHost .sqp-stat small { display: block; color: #6b7280; font-size: 0.64rem; margin-top: 1px; }
+#sideQuestPokedexHost .sqp-stat-top b { font-weight: 600; color: var(--ink-2); }
+#sideQuestPokedexHost .sqp-stat-used { color: var(--brand-ink); font-weight: 600; font-size: 0.74rem; margin-left: 2px; }
+#sideQuestPokedexHost .sqp-stat small { display: block; color: var(--ink-2); font-size: 0.64rem; margin-top: 1px; }
 /* Legend keys mirror the cell colours exactly — that is the whole point. */
 .sqp-key { font-weight: 700; }
-.sqp-key-base { color: #b45309; font-weight: 800; }
-.sqp-key-lv50 { color: #5a6473; }
-.sqp-key-used { color: #1d6fd0; }
-.sqp-key-range { color: #6b7280; font-weight: 600; }
-#sideQuestPokedexHost .sqp-c-total b { color: #2c3e50; }
+.sqp-key-base { color: var(--tint-warn-ink); font-weight: 800; }
+.sqp-key-lv50 { color: var(--ink-2); }
+.sqp-key-used { color: var(--brand-ink); }
+.sqp-key-range { color: var(--ink-2); font-weight: 600; }
+#sideQuestPokedexHost .sqp-c-total b { color: var(--ink); }
 
 .sqp-note, .sqp-attr {
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.7rem;
     line-height: 1.4;
     margin: 0.5rem 0 0;
@@ -1969,8 +1972,8 @@
     align-items: center;
     gap: 0.45rem;
     border: 1px solid #e0e0e0;
-    background: #f8f9fa;
-    color: #4a4a4a;
+    background: var(--surface-2);
+    color: var(--ink);
     font: inherit;
     font-size: 0.82rem;
     font-weight: 700;
@@ -1997,7 +2000,7 @@
     box-shadow: 0 0 6px rgba(91, 227, 154, 0.6);
 }
 .sq-res-champ-note {
-    color: #6b7280;
+    color: var(--ink-2);
     font-size: 0.72rem;
     line-height: 1.3;
     flex: 1 1 12rem;
@@ -2007,17 +2010,17 @@
 /* ── Pokédex: most-used SP spread (meta) expandable row ─────────── */
 #sideQuestPokedexHost .sqp-row.has-meta { cursor: pointer; }
 #sideQuestPokedexHost .sqp-row.has-meta:hover td { background: rgba(0, 0, 0, 0.03); }
-#sideQuestPokedexHost .sqp-row.has-meta:hover td.sqp-c-mon { background: #f0f2f5; }
+#sideQuestPokedexHost .sqp-row.has-meta:hover td.sqp-c-mon { background: var(--surface-2); }
 .sqp-caret {
     display: inline-block;
-    color: #2563ad;
+    color: var(--brand-ink);
     font-size: 0.7rem;
     margin-right: 0.3rem;
     transition: transform 120ms ease;
 }
 #sideQuestPokedexHost .sqp-row.is-open .sqp-caret { transform: rotate(90deg); }
 #sideQuestPokedexHost .sqp-detail td {
-    background: #f8f9fa;
+    background: var(--surface-2);
     border-bottom: 1px solid #e0e0e0;
     padding: 0;
 }
@@ -2027,7 +2030,7 @@
     gap: 0.3rem;
     padding: 0.5rem 0.7rem 0.6rem;
     font-size: 0.82rem;
-    color: #333;
+    color: var(--ink);
     white-space: normal;
     text-align: left;
 }
@@ -2037,22 +2040,22 @@
     align-items: baseline;
     gap: 0.4rem;
 }
-.sqp-meta-final b { color: #1d6fd0; font-weight: 700; }
+.sqp-meta-final b { color: var(--brand-ink); font-weight: 700; }
 .sqp-meta-tag {
-    color: #2e9d60;
+    color: var(--tint-ok-ink);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.68rem;
     letter-spacing: 0.03em;
 }
-.sqp-meta-evs { font-weight: 700; color: #2c3e50; }
-.sqp-meta-nat { color: #4a4a4a; }
-.sqp-meta-n { color: #6b7280; font-size: 0.72rem; }
-.sqp-meta-pct { color: #1d6fd0; font-weight: 700; font-size: 0.78rem; }
+.sqp-meta-evs { font-weight: 700; color: var(--ink); }
+.sqp-meta-nat { color: var(--ink); }
+.sqp-meta-n { color: var(--ink-2); font-size: 0.72rem; }
+.sqp-meta-pct { color: var(--brand-ink); font-weight: 700; font-size: 0.78rem; }
 /* In-game ladder provenance tag (replaces the "(n von total)" sample note
    when the build comes from the authoritative championsbattledata usage). */
 .sqp-meta-src {
-    color: #2e9d60;
+    color: var(--tint-ok-ink);
     font-size: 0.72rem;
     font-weight: 600;
     white-space: nowrap;
@@ -2071,31 +2074,31 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-d-card {
     position: relative;
     width: 100%; max-width: 640px;
-    background: #ffffff; border: 1px solid #e0e0e0; border-radius: 14px;
+    background: var(--surface-1); border: 1px solid #e0e0e0; border-radius: 14px;
     box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
     padding: 18px 18px 14px;
 }
 .sqp-d-close {
     position: absolute; top: 8px; right: 10px;
-    background: none; border: none; color: #6b7280;
+    background: none; border: none; color: var(--ink-2);
     font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 4px 8px;
     border-radius: 8px;
 }
-.sqp-d-close:hover { color: #2c3e50; background: #f0f2f5; }
+.sqp-d-close:hover { color: var(--ink); background: var(--surface-2); }
 .sqp-d-head { display: flex; align-items: center; gap: 12px; padding-right: 28px; flex-wrap: wrap; }
-.sqp-d-name-main { font-size: 1.25rem; font-weight: 800; color: #2c3e50; }
-.sqp-d-name-sub { display: block; color: #6b7280; font-size: 0.74rem; margin-top: 2px; }
+.sqp-d-name-main { font-size: 1.25rem; font-weight: 800; color: var(--ink); }
+.sqp-d-name-sub { display: block; color: var(--ink-2); font-size: 0.74rem; margin-top: 2px; }
 .sqp-d-types { display: flex; gap: 6px; margin-left: auto; }
 /* Defensive type matchups under the type badges (weak / immune / resist). */
 .sqp-fx { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 2px; }
 .sqp-fx-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .sqp-fx-lbl {
-    font-size: 0.76rem; font-weight: 800; color: #6b7280;
+    font-size: 0.76rem; font-weight: 800; color: var(--ink-2);
     flex: 0 0 auto; min-width: 96px;
 }
-.sqp-fx-row.is-weak   .sqp-fx-lbl { color: #c0392b; }
-.sqp-fx-row.is-immune .sqp-fx-lbl { color: #2c3e50; }
-.sqp-fx-row.is-resist .sqp-fx-lbl { color: #2e9d60; }
+.sqp-fx-row.is-weak   .sqp-fx-lbl { color: var(--tint-bad-ink); }
+.sqp-fx-row.is-immune .sqp-fx-lbl { color: var(--ink); }
+.sqp-fx-row.is-resist .sqp-fx-lbl { color: var(--tint-ok-ink); }
 .sqp-fx-badges { display: flex; flex-wrap: wrap; gap: 4px; }
 .sqp-fx-badge {
     display: inline-flex; align-items: center; gap: 3px;
@@ -2108,47 +2111,47 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-d-searchwrap { position: relative; margin: 12px 0 8px; }
 .sqp-d-search {
     width: 100%; box-sizing: border-box;
-    background: #ffffff; border: 1px solid #e0e0e0; border-radius: 9px;
-    color: #2c3e50; padding: 8px 11px; font-size: 0.9rem;
+    background: var(--surface-1); border: 1px solid #e0e0e0; border-radius: 9px;
+    color: var(--ink); padding: 8px 11px; font-size: 0.9rem;
 }
 .sqp-d-search:focus { outline: none; border-color: rgba(95, 182, 255, 0.6); }
 .sqp-d-results {
     position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 5;
-    background: #ffffff; border: 1px solid #e0e0e0; border-radius: 9px;
+    background: var(--surface-1); border: 1px solid #e0e0e0; border-radius: 9px;
     box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
     max-height: 260px; overflow-y: auto; padding: 4px;
 }
 .sqp-d-hit {
     display: block; width: 100%; text-align: left; cursor: pointer;
-    background: none; border: none; color: #333;
+    background: none; border: none; color: var(--ink);
     padding: 7px 9px; border-radius: 7px; font-size: 0.88rem;
 }
-.sqp-d-hit:hover { background: #f0f2f5; color: #2c3e50; }
-.sqp-d-hit span { color: #6b7280; font-size: 0.78rem; margin-left: 4px; }
-.sqp-d-nohit { color: #6b7280; padding: 8px; font-size: 0.85rem; }
+.sqp-d-hit:hover { background: var(--surface-2); color: var(--ink); }
+.sqp-d-hit span { color: var(--ink-2); font-size: 0.78rem; margin-left: 4px; }
+.sqp-d-nohit { color: var(--ink-2); padding: 8px; font-size: 0.85rem; }
 .sqp-d-fmts { display: flex; align-items: center; gap: 8px; margin: 4px 0 12px; flex-wrap: wrap; }
 .sqp-d-fmt {
-    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 999px;
-    color: #4a4a4a; padding: 5px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    background: var(--surface-2); border: 1px solid #e0e0e0; border-radius: 999px;
+    color: var(--ink); padding: 5px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
 }
 .sqp-d-fmt:hover:not(:disabled) { border-color: #c8d0da; }
-.sqp-d-fmt.is-active { background: rgba(95, 182, 255, 0.14); border-color: #5fb6ff; color: #1d6fd0; }
+.sqp-d-fmt.is-active { background: rgba(95, 182, 255, 0.14); border-color: #5fb6ff; color: var(--brand-ink); }
 .sqp-d-fmt:disabled { opacity: 0.35; cursor: default; }
-.sqp-d-season { color: #6b7280; font-size: 0.74rem; margin-left: auto; }
+.sqp-d-season { color: var(--ink-2); font-size: 0.74rem; margin-left: auto; }
 .sqp-d-sec { margin-top: 14px; }
 .sqp-d-sec-title {
-    margin: 0 0 7px; color: #2e9d60; font-size: 0.72rem; font-weight: 700;
+    margin: 0 0 7px; color: var(--tint-ok-ink); font-size: 0.72rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.04em;
 }
 .sqp-d-stats { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-.sqp-d-stats th { color: #6b7280; font-weight: 600; font-size: 0.68rem; text-align: right; padding: 2px 6px; }
+.sqp-d-stats th { color: var(--ink-2); font-weight: 600; font-size: 0.68rem; text-align: right; padding: 2px 6px; }
 .sqp-d-stats th:first-child { text-align: left; }
 .sqp-d-stats td { padding: 3px 6px; text-align: right; border-top: 1px solid #e0e0e0; }
-.sqp-d-st-lab { text-align: left !important; color: #5a6473; }
-.sqp-d-st-basebase { color: #b45309; font-weight: 800; }
-.sqp-d-st-base { color: #2c3e50; font-weight: 700; }
-.sqp-d-st-used { color: #1d6fd0; font-weight: 700; }
-.sqp-d-st-range { color: #6b7280; font-size: 0.78rem; }
+.sqp-d-st-lab { text-align: left !important; color: var(--ink-2); }
+.sqp-d-st-basebase { color: var(--tint-warn-ink); font-weight: 800; }
+.sqp-d-st-base { color: var(--ink); font-weight: 700; }
+.sqp-d-st-used { color: var(--brand-ink); font-weight: 700; }
+.sqp-d-st-range { color: var(--ink-2); font-size: 0.78rem; }
 /* Speed tiers under the stat table: the played Speed and the two
    modifiers Champions actually quantifies. Blue, because it is derived
    from the played value (same colour role as .sqp-d-st-used). */
@@ -2163,19 +2166,19 @@ body.sqp-d-open { overflow: hidden; }
     background: rgba(95, 182, 255, 0.10);
     font-size: 0.86rem;
 }
-.sqp-st-title { color: #5a6473; font-weight: 700; font-size: 0.72rem;
+.sqp-st-title { color: var(--ink-2); font-weight: 700; font-size: 0.72rem;
                 text-transform: uppercase; letter-spacing: 0.02em; }
 .sqp-st-item { white-space: nowrap; }
-.sqp-st-lab { color: #5a6473; font-size: 0.74rem; margin-right: 4px; }
-.sqp-st-item b { color: #1d6fd0; font-weight: 800; }
-.sqp-st-note { flex-basis: 100%; color: #6b7280; font-size: 0.68rem; line-height: 1.35; }
+.sqp-st-lab { color: var(--ink-2); font-size: 0.74rem; margin-right: 4px; }
+.sqp-st-item b { color: var(--brand-ink); font-weight: 800; }
+.sqp-st-note { flex-basis: 100%; color: var(--ink-2); font-size: 0.68rem; line-height: 1.35; }
 
 .sqp-d-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin-top: 4px; }
 @media (max-width: 520px) { .sqp-d-grid { grid-template-columns: 1fr; } }
 .sqp-d-row {
     position: relative; display: flex; align-items: center; gap: 8px;
     padding: 4px 8px; border-radius: 6px; overflow: hidden;
-    font-size: 0.84rem; margin-bottom: 2px; background: #f8f9fa;
+    font-size: 0.84rem; margin-bottom: 2px; background: var(--surface-2);
 }
 /* Silph-Scope-style gradient rather than a flat pale fill: at 5 % the
    old bar was nearly invisible against the row, so the proportion — the
@@ -2187,34 +2190,34 @@ body.sqp-d-open { overflow: hidden; }
     background: linear-gradient(90deg, #6366f1 0%, #22d3ee 100%);
     opacity: 0.22;
 }
-.sqp-d-name { position: relative; z-index: 1; color: #2c3e50; flex: 1; }
-.sqp-d-extra { color: #5a6473; font-size: 0.74rem; }
-.sqp-d-pct { position: relative; z-index: 1; color: #1d6fd0; font-weight: 700; font-size: 0.8rem; }
-.sqp-d-none { color: #6b7280; font-size: 0.88rem; padding: 10px 0; }
+.sqp-d-name { position: relative; z-index: 1; color: var(--ink); flex: 1; }
+.sqp-d-extra { color: var(--ink-2); font-size: 0.74rem; }
+.sqp-d-pct { position: relative; z-index: 1; color: var(--brand-ink); font-weight: 700; font-size: 0.8rem; }
+.sqp-d-none { color: var(--ink-2); font-size: 0.88rem; padding: 10px 0; }
 
 /* Pokédex table format toggle (which format the "used" brackets show). */
 .sqp-fmt-toggle { display: inline-flex; align-items: center; gap: 6px; }
-.sqp-fmt-lbl { color: #6b7280; font-size: 0.74rem; }
+.sqp-fmt-lbl { color: var(--ink-2); font-size: 0.74rem; }
 .sqp-fmt-btn {
-    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 999px;
-    color: #4a4a4a; padding: 4px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    background: var(--surface-2); border: 1px solid #e0e0e0; border-radius: 999px;
+    color: var(--ink); padding: 4px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
 }
 .sqp-fmt-btn:hover { border-color: #c8d0da; }
-.sqp-fmt-btn.is-active { background: rgba(95, 182, 255, 0.14); border-color: #5fb6ff; color: #1d6fd0; }
+.sqp-fmt-btn.is-active { background: rgba(95, 182, 255, 0.14); border-color: #5fb6ff; color: var(--brand-ink); }
 
 /* German name shown beside the English one in the detail usage rows. */
-.sqp-d-de { color: #5a6473; margin-left: 7px; font-size: 0.82em; }
-.sqp-d-de::before { content: "· "; color: #6b7280; }
+.sqp-d-de { color: var(--ink-2); margin-left: 7px; font-size: 0.82em; }
+.sqp-d-de::before { content: "· "; color: var(--ink-2); }
 
 /* Teammate list (no % in-game — clean numbered rows). */
-.sqp-d-team { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: #f8f9fa; margin-bottom: 2px; font-size: 0.84rem; }
-.sqp-d-team-rank { color: #6b7280; font-weight: 700; min-width: 1.1em; text-align: center; }
+.sqp-d-team { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: var(--surface-2); margin-bottom: 2px; font-size: 0.84rem; }
+.sqp-d-team-rank { color: var(--ink-2); font-weight: 700; min-width: 1.1em; text-align: center; }
 
 /* Ability row in the detail overlay: name + % on top, effect text below. */
 .sqp-d-ability { flex-direction: column; align-items: stretch; gap: 3px; padding: 6px 8px; }
 .sqp-d-ab-top { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; }
 .sqp-d-ab-top .sqp-d-name { flex: 1; }
-.sqp-d-ab-fx { position: relative; z-index: 1; color: #6b7280; font-size: 0.76rem; line-height: 1.35; }
+.sqp-d-ab-fx { position: relative; z-index: 1; color: var(--ink-2); font-size: 0.76rem; line-height: 1.35; }
 
 /* Mega ability badge in the detail header (the ability a Mega gets after
    evolving — shown by the name; the usage section lists the pre-mega base). */
@@ -2226,29 +2229,29 @@ body.sqp-d-open { overflow: hidden; }
 }
 .sqp-d-megaab-top { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
 .sqp-d-megaab-lbl {
-    color: #6f4fe0; font-weight: 800; font-size: 0.68rem;
+    color: var(--brand-ink); font-weight: 800; font-size: 0.68rem;
     text-transform: uppercase; letter-spacing: 0.03em;
 }
-.sqp-d-megaab-name { color: #2c3e50; font-weight: 700; }
-.sqp-d-megaab-fx { color: #4a4a4a; font-size: 0.8rem; line-height: 1.35; margin-top: 4px; }
+.sqp-d-megaab-name { color: var(--ink); font-weight: 700; }
+.sqp-d-megaab-fx { color: var(--ink); font-size: 0.8rem; line-height: 1.35; margin-top: 4px; }
 
 /* "Kampfdaten" finder — a direct search list that opens the detail overlay. */
 .sqp-bf-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
 .sqp-bf-item {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     width: 100%; text-align: left; cursor: pointer;
-    background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
+    background: var(--surface-1); border: 1px solid #e0e0e0; border-radius: 10px;
     padding: 9px 12px; font: inherit;
     transition: background 120ms ease, border-color 120ms ease;
 }
-.sqp-bf-item:hover { background: #f8f9fa; border-color: #c9d2dc; }
-.sqp-bf-name { font-weight: 700; color: #2c3e50; }
-.sqp-bf-sub { display: block; font-weight: 500; color: #6b7280; font-size: 0.74rem; margin-top: 1px; }
+.sqp-bf-item:hover { background: var(--surface-2); border-color: #c9d2dc; }
+.sqp-bf-name { font-weight: 700; color: var(--ink); }
+.sqp-bf-sub { display: block; font-weight: 500; color: var(--ink-2); font-size: 0.74rem; margin-top: 1px; }
 .sqp-bf-types { display: flex; gap: 5px; flex-shrink: 0; }
 
 /* ── Team Builder (co-occurrence) ──────────────────────────────────────────── */
 .sqb { padding: 2px 0 8px; }
-.sqb-intro { font-size: 0.9rem; color: #4b5563; margin: 4px 0 12px; line-height: 1.4; }
+.sqb-intro { font-size: 0.9rem; color: var(--ink); margin: 4px 0 12px; line-height: 1.4; }
 .sqb-team-bar {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     flex-wrap: wrap; padding: 8px; border-radius: 12px;
@@ -2259,27 +2262,27 @@ body.sqp-d-open { overflow: hidden; }
 .sqb-chip {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 3px 8px 3px 4px; border-radius: 999px; cursor: pointer;
-    background: #fff; border: 1px solid #cbd5e1; font-weight: 700; color: #1f2d3d;
+    background: var(--surface-1); border: 1px solid #cbd5e1; font-weight: 700; color: var(--ink);
     font-size: 0.82rem;
 }
 .sqb-chip:hover { border-color: #ef4444; }
 .sqb-chip .tcg-pokemon-icon { width: 26px; height: 26px; }
-.sqb-chip-x { color: #ef4444; font-weight: 900; margin-left: 2px; }
+.sqb-chip-x { color: var(--tint-bad-ink); font-weight: 900; margin-left: 2px; }
 .sqb-team-bar-meta { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-.sqb-count { font-size: 0.82rem; font-weight: 800; color: #2c3e50; white-space: nowrap; }
+.sqb-count { font-size: 0.82rem; font-weight: 800; color: var(--ink); white-space: nowrap; }
 .sqb-clear {
-    font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer;
+    font-size: 0.78rem; font-weight: 700; color: var(--brand-ink); cursor: pointer;
     background: none; border: none; text-decoration: underline;
 }
 .sqb-searchwrap { margin: 12px 0 6px; }
 .sqb-search {
     width: 100%; box-sizing: border-box; padding: 11px 14px;
-    border-radius: 12px; border: 1px solid #d1d5db; font-size: 1rem; background: #fff;
+    border-radius: 12px; border: 1px solid #d1d5db; font-size: 1rem; background: var(--surface-1);
 }
 .sqb-search:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52,152,219,0.15); }
 .sqb-sec { font-size: 0.82rem; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;
-    color: #16a34a; margin: 16px 0 2px; }
-.sqb-matching { color: #64748b; font-weight: 700; text-transform: none; letter-spacing: 0; }
+    color: var(--tint-ok-ink); margin: 16px 0 2px; }
+.sqb-matching { color: var(--brand-ink); font-weight: 700; text-transform: none; letter-spacing: 0; }
 .sqb-hint { font-size: 0.78rem; color: var(--ink-3); margin: 0 0 8px; }
 .sqb-suggs { display: flex; flex-wrap: wrap; gap: 6px; }
 /* Zweiter Vorschlagsblock: Treffer der freien Suche, die auf keiner
@@ -2295,13 +2298,13 @@ body.sqp-d-open { overflow: hidden; }
 .sqb-sugg {
     display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
     padding: 4px 10px 4px 5px; border-radius: 999px;
-    background: #f1f5f9; border: 1px solid #e2e8f0; color: #1f2d3d; font-weight: 700;
+    background: var(--surface-2); border: 1px solid #e2e8f0; color: var(--ink); font-weight: 700;
     font-size: 0.85rem;
 }
 .sqb-sugg:hover { background: #dbeafe; border-color: #93c5fd; }
 .sqb-sugg .tcg-pokemon-icon { width: 30px; height: 30px; }
 .sqb-sugg-count {
-    font-size: 0.72rem; font-weight: 800; color: #0369a1;
+    font-size: 0.72rem; font-weight: 800; color: var(--brand-ink);
     background: rgba(3,105,161,0.1); border-radius: 999px; padding: 0 6px; min-width: 18px; text-align: center;
 }
 .sqb-none, .sqb-loading { font-size: 0.9rem; color: var(--ink-3); padding: 6px 2px; }
@@ -2309,27 +2312,27 @@ body.sqp-d-open { overflow: hidden; }
 .sqb-team {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     flex-wrap: wrap; padding: 8px 10px; border-radius: 12px;
-    background: #fff; border: 1px solid #e5e7eb;
+    background: var(--surface-1); border: 1px solid #e5e7eb;
 }
 .sqb-team-mons { display: flex; gap: 2px; flex-wrap: wrap; }
 .sqb-team-mon .tcg-pokemon-icon { width: 34px; height: 34px; }
 .sqb-team-meta { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.sqb-team-name { font-size: 0.78rem; color: #64748b; font-weight: 600; max-width: 160px;
+.sqb-team-name { font-size: 0.78rem; color: var(--brand-ink); font-weight: 600; max-width: 160px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sqb-code {
     font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; font-weight: 800;
-    letter-spacing: 0.06em; cursor: pointer; color: #b45309;
-    background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 3px 8px;
+    letter-spacing: 0.06em; cursor: pointer; color: var(--tint-warn-ink);
+    background: var(--tint-warn); border: 1px solid var(--line-strong); border-radius: 8px; padding: 3px 8px;
 }
-.sqb-code.is-copied { color: #16a34a; border-color: #86efac; background: #f0fdf4; }
+.sqb-code.is-copied { color: var(--tint-ok-ink); border-color: var(--line-strong); background: var(--tint-ok); }
 .sqb-attr { font-size: 0.72rem; color: var(--ink-3); margin-top: 14px; }
 @media (max-width: 480px) {
     .sqb-team-name { max-width: 110px; }
     .sqb-team-bar-meta { margin-left: 0; width: 100%; justify-content: space-between; }
 }
 /* Partial-overlap suggestions (<100%) in the Team Builder get an amber count. */
-.sqb-sugg.is-partial { background: #fffbeb; border-color: #fde68a; }
-.sqb-sugg.is-partial .sqb-sugg-count { color: #b45309; background: rgba(180,83,9,0.12); }
+.sqb-sugg.is-partial { background: var(--tint-warn); border-color: var(--line-strong); }
+.sqb-sugg.is-partial .sqb-sugg-count { color: var(--tint-warn-ink); background: rgba(180,83,9,0.12); }
 
 
 /* ── Pokédex: sprites, stat-point boxes, teammate grid ─────────────
@@ -2352,8 +2355,8 @@ body.sqp-d-open { overflow: hidden; }
     background: rgba(255, 255, 255, 0.75);
     line-height: 1.1;
 }
-.sqp-ev b { font-size: 0.78rem; font-weight: 800; color: #2c3e50; font-variant-numeric: tabular-nums; }
-.sqp-ev small { font-size: var(--fs-xs); color: #6b7280; text-transform: uppercase; letter-spacing: 0.02em; }
+.sqp-ev b { font-size: 0.78rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+.sqp-ev small { font-size: var(--fs-xs); color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.02em; }
 .sqp-ev.is-zero { border-color: #eef2f7; background: transparent; }
 .sqp-ev.is-zero b, .sqp-ev.is-zero small { color: var(--ink-3); }
 .sqp-d-evrow { align-items: center; }
@@ -2363,17 +2366,17 @@ body.sqp-d-open { overflow: hidden; }
     position: relative; text-align: center;
     padding: 6px 2px 4px;
     border: 1px solid #e7ebf1; border-radius: 8px;
-    background: #f8f9fa;
+    background: var(--surface-2);
 }
 .sqp-d-teamrank {
     position: absolute; top: 2px; left: 2px;
     min-width: 15px; height: 15px; padding: 0 3px;
-    border-radius: 8px; background: #eef2ff; color: #4f46e5;
+    border-radius: 8px; background: var(--tint-info); color: var(--tint-info-ink);
     font-size: var(--fs-xs); font-weight: 800; line-height: 15px;
 }
 .sqp-d-teamname {
     display: block; margin-top: 2px;
-    font-size: var(--fs-xs); line-height: 1.2; color: #4a4a4a;
+    font-size: var(--fs-xs); line-height: 1.2; color: var(--ink);
     overflow-wrap: anywhere;
 }
 @media (max-width: 520px) {

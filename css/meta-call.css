@@ -50,11 +50,11 @@
      * gekostet: Gelb heisst Vorbehalt, Gruen heisst gut, Rot heisst
      * Fehler. Darum fuenf Familien statt 28 Einzelwerte — im Hellen
      * praktisch die alten Toene, im Dunkeln dieselbe Bedeutung. */
-    --mc-tint-info:      #f0f6ff;
+    --mc-tint-info:      var(--tint-info);
     --mc-tint-info-hover:#e8eef8;
-    --mc-tint-ok:        #f0fdf4;
-    --mc-tint-warn:      #fff7e6;
-    --mc-tint-bad:       #fff0ee;
+    --mc-tint-ok:        var(--tint-ok);
+    --mc-tint-warn:      var(--tint-warn);
+    --mc-tint-bad:       var(--tint-bad);
     --mc-tint-personal:  #faf6ff;
     --mc-d2-ok:   #166534;
     --mc-d2-mid:  #92400e;
@@ -98,11 +98,11 @@
 
     /* Dieselbe Bedeutung, dunkel getoent. --ink liegt darauf zwischen
        13,8:1 und 15,1:1 — gemessen, nicht geschaetzt. */
-    --mc-tint-info:      #16203f;
+    --mc-tint-info:      var(--tint-info);
     --mc-tint-info-hover:#1c2a52;
-    --mc-tint-ok:        #12291f;
-    --mc-tint-warn:      #2a2214;
-    --mc-tint-bad:       #2e1a1c;
+    --mc-tint-ok:        var(--tint-ok);
+    --mc-tint-warn:      var(--tint-warn);
+    --mc-tint-bad:       var(--tint-bad);
     --mc-tint-personal:  #211738;
     --mc-d2-ok:   #6ee7a5;
     --mc-d2-mid:  #f0c274;
@@ -153,7 +153,7 @@
   border: 1.5px solid #d0d7e2;
   border-radius: 6px;
   background: var(--surface-1);
-  color: #1a2332;
+  color: var(--ink);
   font-size: 0.92em;
   font-family: inherit;
 }
@@ -1224,7 +1224,7 @@
 }
 .mc-scenarios-refresh-btn {
   background: var(--surface-1);
-  color: #16a34a;
+  color: var(--ink-3);
   border: 1px solid #c6f6d5;
   border-radius: 7px;
   padding: 7px 10px;
@@ -3064,7 +3064,7 @@
     font-size: 0.88rem;
     background: var(--surface-2);
     border: 1.5px solid #c8a8e8;
-    color: #7b2d9b;
+    color: var(--ink);
 }
 .mc-cell-est .mc-personal-input::placeholder {
     color: #c9a8e0;

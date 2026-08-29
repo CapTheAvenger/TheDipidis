@@ -72,7 +72,12 @@ describe('stat cell shows the species base stat', () => {
         const base = CSS.match(/\.sqp-stat-base \{[\s\S]*?\}/)[0];
         const lv50 = CSS.match(/\.sqp-stat-top b \{[^}]*\}/)[0];
         const used = CSS.match(/\.sqp-stat-used \{[^}]*\}/)[0];
-        const colour = s => (s.match(/color:\s*(#[0-9a-f]{6})/i) || [])[1];
+        /* 28.08.2026: die drei Farben sind Token statt Hex, damit sie im
+           Dunkelmodus mitdrehen. Die Absicht bleibt: drei verschiedene.
+           Beim Umbau war genau das kurz kaputt — Basis und Lv50 landeten
+           beide auf --ink-2, weil #b45309 (Bernstein) faelschlich als
+           neutraler Grauton behandelt wurde. Dieser Test hat es gefangen. */
+        const colour = s => (s.match(/color:\s*(var\(--[a-z0-9-]+\)|#[0-9a-f]{3,6})/i) || [])[1];
         const cols = [colour(base), colour(lv50), colour(used)];
         assert.equal(new Set(cols).size, 3, `colours not distinct: ${cols}`);
         assert.match(base, /font-weight:\s*800/, 'base should carry the most weight');
@@ -113,7 +118,16 @@ describe('detail overlay separates base from Lv50', () => {
         assert.match(tbl, /sqp-d-st-base">\$\{s\.lv50\}/, 'Lv50 column changed unexpectedly');
         assert.ok(tbl.indexOf('colBaseTrue') < tbl.indexOf('colLv50'),
             'header order must match the cell order');
-        assert.match(CSS, /\.sqp-d-st-basebase \{[^}]*#b45309/,
+        /* Der Ton ist jetzt ein Token (--tint-warn-ink), damit er im
+           Dunkelmodus mitdreht. Die Absicht bleibt: dieselbe Farbe wie
+           die Basis-Spalte der Tabelle — deshalb wird gegen jene
+           verglichen statt gegen einen festen Hex-Wert. */
+        const farbe = sel => {
+            const r = CSS.match(new RegExp('\\.' + sel + ' \\{[^}]*\\}'));
+            return r ? (r[0].match(/color:\s*(var\(--[a-z0-9-]+\)|#[0-9a-f]{3,6})/i) || [])[1] : null;
+        };
+        assert.ok(farbe('sqp-d-st-basebase'), '.sqp-d-st-basebase fehlt');
+        assert.equal(farbe('sqp-d-st-basebase'), farbe('sqp-key-base'),
             'detail base column must use the same amber as the table');
     });
 

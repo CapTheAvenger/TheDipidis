@@ -1123,7 +1123,7 @@
     margin-top: 14px;
     padding: 10px 12px;
     font-size: 0.82em;
-    color: #4b5563;
+    color: var(--ink);
     align-items: center;
     background: var(--surface-1);
     border: 1px solid var(--line);

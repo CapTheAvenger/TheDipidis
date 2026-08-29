@@ -24,8 +24,31 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 
-const MC = fs.readFileSync(
+const MC_ROH = fs.readFileSync(
     path.join(__dirname, '..', '..', 'js', 'app-meta-call.js'), 'utf8');
+
+/* NACHGESCHAERFT am 29.08.2026. Die erste Fassung dieser Datei war
+ * wertlos: eine Nachpruefung holte JEDEN der sechs Fehler zurueck,
+ * ohne dass eine der 13 Zusagen rot wurde. Drei Loecher:
+ *
+ *   1. Alle Zusagen lasen den ROHTEXT. Ein `//` vor der reparierten
+ *      Zeile aendert am Regex nichts — und "beim Suchen kurz
+ *      auskommentiert und vergessen" ist der wahrscheinlichste
+ *      Rueckfall ueberhaupt. Deshalb wird hier jetzt der Quelltext
+ *      OHNE Kommentare geprueft.
+ *   2. Die S8-Zusage liess sich mit Mathematik aushebeln:
+ *      min(A,B)*w ist bitgleich mit min(A*w, B*w). Wer wrFactor in
+ *      BEIDE Argumente zieht, stellt die alte Bauart her und erfuellt
+ *      trotzdem "wrFactor steht innerhalb". Jetzt wird das erste
+ *      Argument von Math.min als BLANKE Konstante verlangt.
+ *   3. Zwei Zusagen waren auf `d.` verankert. `x.ladderShare = wert`
+ *      und ein Tippfehler im Feldnamen kamen glatt durch.
+ *
+ * Jede Zusage unten ist gegen die Mutation geprueft, die sie
+ * ausgehebelt hat. */
+const MC = MC_ROH
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^[ \t]*\/\/.*$/gm, '');
 
 describe('S4 — fieldSuppressionPp summierte sich ueber Laeufe', () => {
     it('wird vor dem Modus-Tor zurueckgesetzt', () => {
@@ -39,6 +62,14 @@ describe('S4 — fieldSuppressionPp summierte sich ueber Laeufe', () => {
         assert.ok(iReset < iTor,
             'das Zuruecksetzen steht HINTER dem Modus-Tor — im Standardmodus ' +
             'bricht die Funktion vorher ab und der alte Wert bleibt stehen');
+        // Nicht nur vor DIESEM Tor: vor jedem fruehen Ausstieg. Sonst
+        // genuegt ein zweites `if (...) return;` davor, um das Leck
+        // wieder zu oeffnen (z.B. fuer den Aktuell/Vergangen-Schalter).
+        const davor = kopf.slice(0, iReset);
+        const frueheReturns = (davor.match(/\breturn\s*;/g) || []).length;
+        assert.equal(frueheReturns, 1,
+            `${frueheReturns} fruehe return vor dem Zuruecksetzen statt 1 — ` +
+            `ein Ausstieg davor laesst den alten Wert wieder stehen`);
     });
 
     it('der Boden steigt weiterhin bei gesetzter Unterdrueckung aus', () => {
@@ -81,14 +112,23 @@ describe('S6 — 4.7 las seine eigene Vorprognose', () => {
         // Das echte Risiko ist ein anderes: schriebe irgendwo die
         // PROGNOSE nach ladderShare zurueck, waere der Ersatz genauso
         // kaputt wie d.onlineShare vorher.
-        const schlecht = (MC.match(/\.ladderShare\s*=\s*[^;\n]*/g) || [])
-            .filter(z => /predictedShare|onlineShare/.test(z));
+        // Auch die Zeile DAVOR mitlesen — ein Zwischenwert
+        // (`const wert = x.predictedShare; x.ladderShare = wert;`)
+        // versteckt die Rueckkopplung sonst vor dem Regex.
+        const schlecht = [];
+        for (const m of MC.matchAll(/[A-Za-z_$][\w$]*\.ladderShare\s*=[^=][^;\n]*/g)) {
+            const umfeld = MC.slice(Math.max(0, m.index - 160), m.index + m[0].length);
+            if (/predictedShare|\.onlineShare/.test(umfeld)) schlecht.push(m[0].trim());
+        }
         assert.deepEqual(schlecht, [],
             'die Prognose fliesst nach ladderShare zurueck: ' + schlecht.join(' | '));
     });
 
     it('die erlaubten Zuweisungen sind genau die des Datumsfilters', () => {
-        const alle = (MC.match(/d\.ladderShare\s*=\s*[^;\n]*/g) || []);
+        // NICHT auf `d.` verankern: `x.ladderShare = wert` kam sonst
+        // glatt durch, und mit `const wert = x.predictedShare || 0;`
+        // eine Zeile davor auch an der Zusage darueber vorbei.
+        const alle = (MC.match(/[A-Za-z_$][\w$]*\.ladderShare\s*=[^=][^;\n]*/g) || []);
         assert.equal(alle.length, 2,
             `${alle.length} Zuweisungen statt 2 — es ist eine dazugekommen, ` +
             `die diese Zusage nicht kennt: ${alle.join(' | ')}`);
@@ -104,6 +144,14 @@ describe('S7 — d.broughtShare gab es nie', () => {
         const umfeld = MC.slice(i - 700, i);
         assert.match(umfeld, /_tournamentStats\s*&&\s*_tournamentStats\[k\]/,
             'broughtShare kommt nicht aus _tournamentStats');
+        // Ein Tippfehler im Feldnamen stellt broughtShare = 0 exakt
+        // wieder her, ohne dass die Zusage oben etwas merkt. Also
+        // gegen den Namen pruefen, den _tournamentStats WIRKLICH
+        // schreibt (Z. ~5223: broughtShare: (brought / broughtSum)…).
+        const feldImBau = /broughtShare\s*:/.test(MC);
+        assert.ok(feldImBau, '_tournamentStats schreibt broughtShare nicht mehr');
+        assert.match(umfeld, /_bStats\.broughtShare/,
+            'der gelesene Feldname passt nicht zu dem, den _tournamentStats schreibt');
         assert.ok(!/const broughtShare = d\.broughtShare/.test(umfeld),
             'liest wieder d.broughtShare — dieses Feld existiert am Deck-Objekt nicht');
     });
@@ -125,9 +173,14 @@ describe('S8 — 5.9 kappte vor dem WR-Faktor', () => {
             const i = MC.indexOf('Math.min(' + konst);
             assert.notEqual(i, -1, konst + ' nicht gefunden');
             const ausdruck = MC.slice(i, MC.indexOf(';', i));
+            // Das erste Argument muss die BLANKE Konstante sein.
+            // Sonst laesst sich min(A,B)*w als min(A*w, B*w)
+            // schreiben — bitgleich mit der alten Bauart.
+            assert.match(ausdruck, new RegExp('Math\\.min\\(\\s*' + konst + '\\s*,'),
+                konst + ': das erste Argument von Math.min ist nicht mehr die ' +
+                'blanke Obergrenze — min(A,B)*w laesst sich als min(A*w,B*w) tarnen');
             assert.match(ausdruck, /wrFactor\)/,
-                konst + ': wrFactor steht wieder ausserhalb der Kappung — ' +
-                'die Konstante heisst PP_MAX, war aber keine Obergrenze');
+                konst + ': wrFactor steht wieder ausserhalb der Kappung');
             assert.ok(!/\)\s*\*\s*wrFactor\s*$/.test(ausdruck.trim()),
                 konst + ': multipliziert nach der Kappung');
         }
@@ -164,5 +217,59 @@ describe('S9 — Division durch Null wurde NaN', () => {
         assert.equal(skala, Infinity);
         assert.ok(Number.isNaN(vorher * skala),
             'genau dieser Wert landete auf d.predictedShare und d.onlineShare');
+    });
+});
+
+// _loadDataImpl enthaelt MEHRERE `return true;` (fruehe Ausstiege).
+// Der erste Versuch dieser Zusage schnitt den Rumpf am ersten davon
+// ab und sah die Matchup-Schritte gar nicht — sie schlug an, ohne
+// dass etwas kaputt war. Deshalb hier bis zur naechsten
+// Funktionsdeklaration schneiden.
+function ladeRumpf() {
+    const i = MC.indexOf('async function _loadDataImpl');
+    assert.notEqual(i, -1, '_loadDataImpl ist verschwunden');
+    // Beide Formen suchen: die naechste Deklaration ist hier
+    // `async function _onToggleSource`, nicht `function`. Der erste
+    // Versuch suchte nur `\n  function ` und lief deshalb ueber das
+    // Funktionsende hinaus in _onToggleSource — dort steht auch ein
+    // _runPredictor(), und die Zusage war damit blind fuer das
+    // Entfernen des zweiten Laufs.
+    const kandidaten = ['\n  function ', '\n  async function ']
+        .map(m => MC.indexOf(m, i + 10))
+        .filter(x => x !== -1);
+    const ende = kandidaten.length ? Math.min(...kandidaten) : MC.length;
+    return MC.slice(i, ende);
+}
+
+describe('Der erste Bildschirm rechnet mit vollstaendigem Zustand', () => {
+    it('_loadDataImpl laesst den Motor NACH den Matchups noch einmal laufen', () => {
+        // BEFUND: der erste Lauf stand vor _matchupMap und
+        // _onlineWinsByDeck. 4.0a und 4.5 liefen damit leer, und der
+        // erste Bildschirm zeigte andere Zahlen als jeder spaetere
+        // Lauf — 27 von 131 Decks ueber 0,1 pp, groesste Abweichung
+        // 1,31 pp. Der Nutzer sah eine Zahl, die beim ersten
+        // beliebigen Klick ohne erkennbaren Grund sprang.
+        const rumpf = ladeRumpf();
+
+        const iMatchup = rumpf.indexOf('_matchupMap = {}');
+        const iOnline  = rumpf.lastIndexOf('_onlineWinsByDeck = {}');
+        assert.ok(iMatchup > 0 && iOnline > 0, 'die Ladeschritte sind verschoben');
+
+        const laeufe = [...rumpf.matchAll(/_runPredictor\(\);/g)].map(m => m.index);
+        assert.ok(laeufe.length >= 2,
+            `nur ${laeufe.length} _runPredictor() in _loadDataImpl — der zweite ` +
+            `Lauf fehlt, der erste Bildschirm rechnet wieder ohne Matchups`);
+        assert.ok(laeufe[laeufe.length - 1] > Math.max(iMatchup, iOnline),
+            'der letzte Lauf steht immer noch VOR den Matchups/Online-Siegern');
+    });
+
+    it('der fruehe Lauf bleibt erhalten', () => {
+        // Er wird gebraucht: das Banner haengt daran. Der zweite Lauf
+        // korrigiert ihn, er ersetzt ihn nicht.
+        const rumpf = ladeRumpf();
+        const iMatchup = rumpf.indexOf('_matchupMap = {}');
+        const laeufe = [...rumpf.matchAll(/_runPredictor\(\);/g)].map(m => m.index);
+        assert.ok(laeufe.some(x => x < iMatchup),
+            'der fruehe Lauf ist weg — das Banner bekommt keine Daten mehr');
     });
 });

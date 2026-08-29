@@ -6681,6 +6681,27 @@ window.MetaCall = (function () {
         _onlineWinsByDeck = {};
       }
 
+      // Zweiter Lauf, jetzt mit vollstaendigem Zustand.
+      //
+      // BEFUND (29.08.2026): _runPredictor() lief weiter oben — VOR
+      // der Matchup-Matrix (_matchupMap), den Labs-Matchups und den
+      // Online-Siegern (_onlineWinsByDeck). Der erste Bildschirm, den
+      // der Nutzer sieht, rechnete also ohne 4.0a (Meta-Dynamik) und
+      // ohne 4.5 (Konzentrations-Gegendecks). Beim ersten beliebigen
+      // Klick, der einen Neulauf ausloest, sprangen die Zahlen: 27 von
+      // 131 Decks um mehr als 0,1 pp, die groesste Verschiebung 1,31 pp
+      // (Lillie's Clefairy), Dragapult von 11,54 auf 10,45. Ab dem
+      // zweiten Lauf war es stabil — der erste war der Ausreisser.
+      //
+      // Der fruehe Lauf oben bleibt: das Banner haengt daran. Dieser
+      // hier korrigiert ihn, sobald alles da ist.
+      //
+      // Dass ein zweiter Lauf ueberhaupt gefahrlos ist, ist neu: bis
+      // zu den Reparaturen an fieldSuppressionPp (Zustand ueber Laeufe)
+      // und an 4.7 (las die eigene Vorprognose) haette er den Zustand
+      // verschleppt statt ihn zu korrigieren.
+      _runPredictor();
+
       return true;
     } catch (e) {
       console.error('[MetaCall] Data load error:', e);

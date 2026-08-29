@@ -43,9 +43,9 @@ GERMAN_ONLY_WORDS = [
     'Einstellungen', 'Wunschliste',
     'Konto erstellen', 'Vergangenes Meta', 'Aktuelles Meta',
     'Sprache wechseln', 'Dein Deck', 'Mein Profil', 'Rechner',
-    'Testhand', 'Konsistenz', 'Raster', 'Unterstützer',
+    'Testhand', 'Raster', 'Unterstützer',
     'Werkzeug', 'Stadion', 'Deck-Statistiken',
-    'Karten-Anteil-Filter', 'Deckliste importieren',
+    'Deckliste importieren',
     'Einzelne Karte hinzufügen', 'Letztes Update',
     'Benutzerprofil', 'Gespeicherte Decks',
     'Karten im Besitz', 'Sammlungswert', 'Anzeigename',
@@ -65,9 +65,9 @@ ENGLISH_ONLY_WORDS = [
     'Main Menu', 'Card Database', 'Archetype Overview', 'Card Overview',
     'Deck Builder', 'Create Account',
     'Switch language', 'Your Deck', 'My Profile', 'Calculator',
-    'Test Draw', 'Consistency', 'Supporter',
+    'Test Draw', 'Supporter',
     'Stadium', 'Deck Statistics',
-    'Card Share Filter', 'Import Decklist',
+    'Import Decklist',
     'Add Single Card', 'Last Update',
     'User Profile', 'Saved Decks',
     'Cards Owned', 'Collection Value', 'Display Name',
@@ -92,6 +92,14 @@ BILINGUAL_ALLOWED = {
     'de', 'en', 'iono', 'judge', 'roxanne', 'unfair stamp',
     'csv', 'dex', 'nr.', 'irl', 'profil', 'journal',
     'energy', 'save', 'close', 'clear', 'compare', 'share',
+    # 29.08.2026: Szenesprache. Der Betreiber: "Sachen, die man aus der
+    # englischen Sprache im Deutschen nimmt, bleiben auf jeden Fall auch
+    # in der deutschen Version." Vorher standen 'Consistency' und
+    # 'Card Share Filter' als englisch-only in der Sperrliste und
+    # 'Konsistenz' / 'Karten-Anteil-Filter' als deutsch-only — die
+    # deutsche Oberflaeche sagt jetzt beides englisch, wie die Szene.
+    'consistency', 'staple', 'staples', 'max consistency',
+    'card share filter', 'karten-share-filter', 'testing-group-share',
     'import', 'export', 'copy', 'cancel', 'remove', 'unique',
     'password', 'all cards', 'collection', 'wishlist',
     'complete', 'missing', 'generate', 'continue',
@@ -631,6 +639,12 @@ def run():
             'sc-action-limitless': 'Open Limitless Card Details',
             'sc-action-proxy':     'Add to Proxy Printer',
             'sc-action-market':    'Open Cardmarket',
+        }
+        # 29.08.2026: hier fehlten die schliessende Klammer und die
+        # for-Zeile. Die Datei liess sich dadurch nicht einmal parsen —
+        # dieser Reinheitstest ist also nie gelaufen. Gefunden, weil eine
+        # Wording-Aenderung ihn haette betreffen muessen und nichts passierte.
+        for cls, expected in EN_ACTION_EXPECT.items():
             actual = en_labels.get(cls, '<missing>')
             check(f"AP.EN {cls}='{expected}'",
                   actual == expected,
@@ -662,6 +676,12 @@ def run():
             'sc-action-limitless': 'Limitless Kartendetails öffnen',
             'sc-action-proxy':     'Zum Proxy-Drucker hinzufügen',
             'sc-action-market':    'Cardmarket öffnen',
+        }
+        # 29.08.2026: hier fehlten die schliessende Klammer und die
+        # for-Zeile. Die Datei liess sich dadurch nicht einmal parsen —
+        # dieser Reinheitstest ist also nie gelaufen. Gefunden, weil eine
+        # Wording-Aenderung ihn haette betreffen muessen und nichts passierte.
+        for cls, expected in DE_ACTION_EXPECT.items():
             actual = de_labels.get(cls, '<missing>')
             check(f"AP.DE {cls}='{expected}'",
                   actual == expected,

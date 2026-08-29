@@ -6232,8 +6232,16 @@ document.addEventListener('languageChanged', () => {
     }
     // Die Preis-Pillen und Vertrauens-Abzeichen backen die Sprache beim
     // Zeichnen ein — ohne Neuzeichnen bleibt der alte Stand stehen.
-    if (typeof updateWishlistUI === 'function') updateWishlistUI();
-    if (typeof updateTradelistUI === 'function') updateTradelistUI();
+    //
+    // ueber filterWishlist/filterTradelist statt direkt: die beiden
+    // Zeichner nehmen (searchFilter, setFilter) und bekommen sie sonst
+    // leer. Ein Sprachwechsel haette damit einen aktiven Filter
+    // weggeworfen, waehrend das Suchfeld ihn weiter anzeigt — die
+    // Liste haette nicht mehr zur Eingabe gepasst.
+    if (typeof filterWishlist === 'function') filterWishlist();
+    else if (typeof updateWishlistUI === 'function') updateWishlistUI();
+    if (typeof filterTradelist === 'function') filterTradelist();
+    else if (typeof updateTradelistUI === 'function') updateTradelistUI();
   } catch (err) {
     console.warn('[i18n] profile re-render on languageChanged failed:', err);
   }

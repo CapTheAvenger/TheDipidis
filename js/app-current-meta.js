@@ -597,6 +597,15 @@
 
         // ── i18n: re-render on language change ──────────────────
         document.addEventListener('languageChanged', () => {
-            if (typeof renderMatchupHeatmap === 'function' && document.getElementById('matchupAnalysisModal')?.style.display !== 'none') renderMatchupHeatmap();
+            // 29.08.2026: hier stand `matchupAnalysisModal` — das ist das
+            // Modal des Battle Journals und traegt ein inline
+            // display:none. Die Bedingung war damit IMMER falsch, und
+            // die Heatmap wurde beim Sprachwechsel nie neu gezeichnet:
+            // Achsenbeschriftungen, Titel, Platzhalter und Knoepfe
+            // blieben in der alten Sprache stehen. Gemeint war der
+            // Behaelter der Heatmap selbst.
+            const behaelter = document.getElementById('matchupHeatmapContainer');
+            const sichtbar = !!behaelter && behaelter.offsetParent !== null;
+            if (typeof renderMatchupHeatmap === 'function' && sichtbar) renderMatchupHeatmap();
         });
         

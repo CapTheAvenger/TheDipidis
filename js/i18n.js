@@ -6,7 +6,7 @@ const I18N_STORAGE_KEY = 'app_lang';
 const I18N_SUPPORTED = ['en', 'de'];
 
 /* Wohin ein Schluessel faellt, den die aktive Sprache nicht kennt.
-   Beide Woerterbuecher haben heute exakt 1.745 Schluessel und decken
+   Beide Woerterbuecher fuehren aktuell 1.913 Schluessel und decken
    sich vollstaendig — der Rueckfall ist reine Vorsorge und bleibt auf
    Englisch, weil neue Schluessel dort zuerst entstehen. */
 const I18N_FALLBACK_LANG = 'en';
@@ -1210,6 +1210,11 @@ const translations = {
     'tg.role.owner':            'Owner',
     'tg.role.editor':           'Editor',
     'tg.role.viewer':           'Viewer',
+    // 29.08.2026: js/app-testing-groups.js baut den Schluessel als
+    // 'tg.action.' + (a.action || 'update'). Der Vorgabewert hatte
+    // keinen Eintrag — t() gibt dann den Schluessel selbst zurueck,
+    // und der steht als 'tg.action.update' auf dem Bildschirm.
+    'tg.action.update':         'changed',
     'tg.action.group_created':  'created group',
     'tg.action.group_renamed':  'renamed group',
     'tg.action.matchup_update': 'set WR',
@@ -1593,6 +1598,9 @@ const translations = {
     // ── City League Deck Analysis tab (HTML) ─────────────────
     'cl.pleaseSelectDeck':      '-- Please Select Deck --',
     'btn.helpTitle':            'Help',
+    // 29.08.2026: der Meta-Call-Kopf wird dynamisch gebaut und stand
+    // deshalb mit festem title="Help" da — als einziger von 17.
+    'btn.helpAriaMetaCall':     'Help for Meta Call',
     'filter.showAllDataTitle':  'Show All Data',
     'filter.searchDeckPlaceholder': 'Enter deck name...',
     'filter.searchDeckAria':    'Search deck by name',
@@ -3329,6 +3337,7 @@ const translations = {
     'tg.role.owner':            'Owner',
     'tg.role.editor':           'Editor',
     'tg.role.viewer':           'Viewer',
+    'tg.action.update':         'geändert',
     'tg.action.group_created':  'hat Gruppe erstellt',
     'tg.action.group_renamed':  'hat Gruppe umbenannt',
     'tg.action.matchup_update': 'hat WR gesetzt',
@@ -3711,6 +3720,7 @@ const translations = {
     // ── City League Deck Analysis tab (HTML) ─────────────────
     'cl.pleaseSelectDeck':      '-- Bitte Deck auswählen --',
     'btn.helpTitle':            'Hilfe',
+    'btn.helpAriaMetaCall':     'Hilfe zum Meta Call',
     'filter.showAllDataTitle':  'Alle Daten anzeigen',
     'filter.searchDeckPlaceholder': 'Deckname eingeben...',
     'filter.searchDeckAria':    'Deck nach Name suchen',

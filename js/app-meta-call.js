@@ -8825,7 +8825,7 @@ window.MetaCall = (function () {
     container.innerHTML = `
 <div class="metacall-wrap">
   <div class="metacall-header">
-    <h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="Help" aria-label="Help for Meta Call" data-i18n-title="btn.helpTitle"></button></h2>
+    <h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="${esc(t('btn.helpTitle'))}" aria-label="${esc(t('btn.helpAriaMetaCall'))}" data-i18n-title="btn.helpTitle" data-i18n-aria="btn.helpAriaMetaCall"></button></h2>
     <p class="color-grey">${t('mc.subtitle')}</p>
   </div>
   <div class="mc-top-bar">
@@ -11568,7 +11568,7 @@ window.MetaCall = (function () {
 
     container.innerHTML = `
 <div class="metacall-wrap">
-  <div class="metacall-header"><h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="Help" aria-label="Help for Meta Call" data-i18n-title="btn.helpTitle"></button></h2></div>
+  <div class="metacall-header"><h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="${esc(t('btn.helpTitle'))}" aria-label="${esc(t('btn.helpAriaMetaCall'))}" data-i18n-title="btn.helpTitle" data-i18n-aria="btn.helpAriaMetaCall"></button></h2></div>
   <div class="metacall-loading">${t('mb.loading')}</div>
 </div>`;
 

@@ -1356,6 +1356,151 @@ def check_uebersicht_gegen_chunks(findings):
             + ("; …" if len(ohne_chunk) > 8 else "")))
 
 
+def tote_spalten():
+    """{Datei: [Spalte, ...]} — Pflichtspalten der Consumer-Dateien, in denen
+    KEINE einzige Zeile einen Wert traegt.
+
+    Warum das fehlte: check_schema prueft nur, dass der Spaltenname im Kopf
+    steht. Eine Spalte darf danach zu 100 % leer sein und gilt trotzdem als
+    vorhanden. GEMESSEN am 29.08.2026: cardmarket_card_images.csv fuehrt
+    `number` und `name_de` im Kopf, beide sind in allen 1295 Zeilen leer —
+    und `number` ist eine der beiden Spalten, ueber die die Hausregel das
+    Verknuepfen ueberhaupt erlaubt. Ebenso: top8/top16/top32_conv_rate sind
+    in allen 14 labs_tournament_decks*.csv durchgehend 0.
+
+    Grundlinien-Vergleich, nicht absolute Schwelle: eine Spalte, die seit
+    jeher leer ist, ist ein bekannter Zustand. Neu leer geworden ist ein
+    Ereignis."""
+    out = {}
+    for datei, eintrag in CONSUMERS.items():
+        # CONSUMERS ist {Datei: {"required": [...], "purpose": "..."}} —
+        # die Pflichtspalten stehen eine Ebene tiefer. Die erste Fassung
+        # iterierte ueber die Schluessel des inneren Wortverzeichnisses und
+        # meldete brav "purpose und required sind leer" fuer jede Datei.
+        spalten = eintrag.get("required", []) if isinstance(eintrag, dict) else eintrag
+        pfad = os.path.join(DATA, datei)
+        if not os.path.exists(pfad):
+            continue
+        zeilen = list(read_csv(pfad))
+        if not zeilen:
+            continue
+        leer = []
+        for sp in spalten:
+            if all(not (col(r, sp) or "").strip() for r in zeilen):
+                leer.append(sp)
+        if leer:
+            out[datei] = sorted(leer)
+    return out
+
+
+def check_tote_spalten(findings, cur, base):
+    if cur is None or base is None:
+        return
+    for datei in sorted(set(cur) | set(base)):
+        neu_leer = sorted(set(cur.get(datei, [])) - set(base.get(datei, [])))
+        wieder_da = sorted(set(base.get(datei, [])) - set(cur.get(datei, [])))
+        if neu_leer:
+            findings.append(("CRITICAL",
+                             f"{datei}: Pflichtspalte(n) {neu_leer} sind jetzt in JEDER "
+                             f"Zeile leer — der Header steht noch, der Inhalt ist weg"))
+        if wieder_da:
+            findings.append(("INFO",
+                             f"{datei}: {wieder_da} traegt/tragen wieder Werte"))
+
+
+def inhalt_gegen_datei():
+    """{Datei: (juengstes Datum im Inhalt, Commitdatum)} fuer die Dateien, die
+    ein eigenes Datum fuehren.
+
+    Warum: GEMESSEN am 29.08.2026 wurde labs_tournament_decks.csv am 25.08.
+    committet, das juengste Turnier darin war vom 12.06. — 74 Tage Abstand.
+    Der angezeigte Datenstand war damit zwei Monate optimistischer als die
+    Daten. Das war KEIN Ausfall (der Betreiber hat Sommerpause bestaetigt),
+    aber es war auch nicht sichtbar. Beides gehoert gemeldet: ein wachsender
+    Abstand kann Sommerpause heissen oder einen stillen Scraper-Ausfall —
+    unterscheiden kann das nur ein Mensch, und dafuer muss er es sehen."""
+    felder = {
+        "labs_tournament_decks.csv": "tournament_date",
+    }
+    out = {}
+    for datei, spalte in felder.items():
+        pfad = os.path.join(DATA, datei)
+        if not os.path.exists(pfad):
+            continue
+        werte = set()
+        for r in read_csv(pfad):
+            v = (col(r, spalte) or "").strip()[:10]
+            if len(v) == 10 and v[4] == "-" and v[7] == "-":
+                werte.add(v)
+        if not werte:
+            continue
+        # _last_commit_date liefert ein date-Objekt, kein ISO-Wort.
+        c = _last_commit_date(os.path.join("data", datei))
+        out[datei] = [max(werte), c.isoformat() if c else ""]
+    return out
+
+
+def check_inhalt_gegen_datei(findings, cur):
+    """Braucht keine Grundlinie: der Abstand ist auch beim ersten Lauf eine
+    Aussage ueber den Zustand."""
+    if not cur:
+        return
+    for datei, (inhalt, commit) in sorted(cur.items()):
+        if not commit:
+            continue
+        try:
+            di = dt.datetime.strptime(inhalt, "%Y-%m-%d")
+            dc = dt.datetime.strptime(commit, "%Y-%m-%d")
+        except ValueError:
+            continue
+        abstand = (dc - di).days
+        if abstand >= 30:
+            findings.append(("WARN",
+                             f"{datei}: zuletzt geschrieben am {commit}, juengster "
+                             f"Eintrag aber vom {inhalt} — {abstand} Tage Abstand. "
+                             f"Entweder Turnierpause oder ein Scraper, der still "
+                             f"nichts Neues findet; das entscheidet nur ein Blick "
+                             f"auf die Quelle"))
+
+
+def check_ace_liste(findings):
+    """data/ace_specs.json ist von Hand gepflegt. Geprueft wird, was sich im
+    Repo pruefen LAESST: innere Stimmigkeit und Alter. NICHT geprueft werden
+    kann die Vollstaendigkeit — all_cards_merged.csv kennt keine Raritaet
+    'ACE SPEC', es gibt also keine unabhaengige Referenz."""
+    pfad = os.path.join(DATA, "ace_specs.json")
+    if not os.path.exists(pfad):
+        return
+    try:
+        with open(pfad, encoding="utf-8") as f:
+            d = json.load(f)
+    except (OSError, ValueError):
+        return
+    namen = [str(n).strip().lower() for n in d.get("ace_specs", []) if str(n).strip()]
+    eindeutig = set(namen)
+    if len(namen) != len(eindeutig):
+        doppelt = sorted({n for n in namen if namen.count(n) > 1})
+        findings.append(("WARN",
+                         f"ace_specs.json: {len(namen) - len(eindeutig)} doppelte "
+                         f"Eintraege ({doppelt}) — fuer die Anwendung folgenlos, aber "
+                         f"total_count zaehlt sie mit"))
+    if d.get("total_count") != len(eindeutig):
+        findings.append(("WARN",
+                         f"ace_specs.json: total_count sagt {d.get('total_count')}, "
+                         f"es sind {len(eindeutig)} eindeutige Namen"))
+    ts = str(d.get("timestamp") or "")[:10]
+    if ts:
+        try:
+            alter = (dt.datetime.now() - dt.datetime.strptime(ts, "%Y-%m-%d")).days
+            if alter > 120:
+                findings.append(("INFO",
+                                 f"ace_specs.json ist {alter} Tage alt (Stand {ts}) und "
+                                 f"wird von Hand gepflegt. Ob seither Ace Specs "
+                                 f"dazugekommen sind, laesst sich hier nicht feststellen"))
+        except ValueError:
+            pass
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--update-baseline", action="store_true",
@@ -1379,6 +1524,8 @@ def main():
     cov = set_coverage()
     rows = file_rows()
     ace = ace_guard_prints()
+    tot = tote_spalten()
+    inhalt_alter = inhalt_gegen_datei()
     price = price_integrity()
     empties = empty_data_files()
     jp_sets = None
@@ -1396,11 +1543,14 @@ def main():
         check_ace_guard(findings, ace, baseline.get("ace_guard_prints"))
         check_price_integrity(findings, price, baseline.get("price_integrity"))
         check_emptiness(findings, empties, baseline.get("empty_files"))
+        check_tote_spalten(findings, tot, baseline.get("tote_spalten"))
     # Der Paar-Widerspruch braucht keine Grundlinie: er ist auch beim ersten
     # Lauf eine Aussage ueber den Zustand, nicht ueber eine Veraenderung.
     check_paired_emptiness(findings, empties)
     # Widersprueche brauchen keine Grundlinie.
     check_verified_collisions(findings, price)
+    check_inhalt_gegen_datei(findings, inhalt_alter)
+    check_ace_liste(findings)
     check_kartentext_bericht(findings)
     check_meta_preiszuordnung(findings)
     check_champions_usage(findings)
@@ -1442,6 +1592,7 @@ def main():
                 "ace_guard_prints": ace,
                 "price_integrity": price,
                 "empty_files": empties,
+                "tote_spalten": tot,
                 "jp_set_rows": jp_sets or {},
                 "champions_teams": champions_teams,
             }, f, ensure_ascii=False, indent=1, sort_keys=True)

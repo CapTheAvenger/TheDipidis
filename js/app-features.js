@@ -1455,9 +1455,11 @@
                 if (!anchor) return;
                 const section = document.createElement('div');
                 section.id = containerId;
-                section.style.cssText = 'padding:0 30px 20px;background:#fff;';
+                /* 29.08.2026: stand fest auf #fff und war im Dunkelmodus ein weisser
+   Block. Der Token dreht mit. */
+                section.style.cssText = 'padding:0 30px 20px;background:var(--bg-white);';
                 section.innerHTML = `
-                    <details open style="border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-top:10px;">
+                    <details open style="border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:10px;">
                         <summary style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:12px 20px;cursor:pointer;font-weight:700;font-size:1em;list-style:none;display:flex;justify-content:space-between;align-items:center;">
                             ${t('chart.metaShareTitle')} <span style="font-size:0.8em;opacity:0.8;">${t('chart.toggle')}</span>
                         </summary>

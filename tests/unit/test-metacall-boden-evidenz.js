@@ -67,6 +67,11 @@ describe('Predictor 5.5 — Evidenzhuerde je Archetyp', () => {
             'ein einzelnes Turnier darf keinen Boden setzen');
         assert.ok(konstante('PREDICTOR_5_5_MIN_SPIELER') >= 20,
             'unter 20 Spielern verschiebt ein einzelner Spieler den Anteil zu stark');
+        // Was die Huerde WIRKLICH aussortiert, wird in
+        // test-metacall-boden-verhalten.js gerechnet statt behauptet.
+        // Diese Datei liest nur Quelltext und kann eine falsche
+        // Begruendung nicht bemerken — genau das ist am 29.08.2026
+        // passiert.
     });
 
     it('beide Bedingungen entscheiden wirklich ueber die Ablage', () => {

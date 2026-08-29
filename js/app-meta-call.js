@@ -658,11 +658,12 @@ window.MetaCall = (function () {
   let _formatWindow = null;      // { current_set, set_release_date, in_person_legal_date, lag_days }
   // Zustand des Lag-Fensters, damit die Oberflaeche ihn benennen kann,
   // statt ihn zu behaupten. Siehe die lange Notiz bei der Erkennung.
+  // Karenz auf das Lag-Fenster. Stand bis zum 29.08.2026 lokal in
+  // loadData(); seit der Chip-Titel dieselbe Grenze benutzt, muss sie
+  // auf Modulebene stehen — sonst wirft der Renderer.
+  const LAG_KARENZ_TAGE = 21;
   let _lagFensterAlterTage = null;   // Alter der neuesten Labs-Zeile in Tagen
   let _lagFensterAbgelaufen = false; // aelter als lag_days + Karenz
-  let _bodenAlterTage = null;        // Alter des juengsten Vorformat-Turniers
-  let _bodenAbgelaufen = false;      // Boden 5.5 wegen Alters nicht scharf
-  let _bodenDecks = 0;               // Archetypen, die die Evidenzhuerde nahmen
   let _bodenVerworfen = 0;           // Archetypen, die sie nicht nahmen
   let _lagNeuesteLabsZeile = '';     // deren Datum
   let _activeMetaKeyVoll = '';       // voller Format-Schluessel, z. B. 'TEF-CRI'
@@ -5215,9 +5216,15 @@ window.MetaCall = (function () {
       _lastMetaAvgDay2Conv    = 0;
       _stickinessTurniere     = 0;
       _stickinessTragfaehig   = false;
-      _bodenAlterTage         = null;
-      _bodenAbgelaufen        = false;
-      _bodenDecks             = 0;
+      // Diese vier werden nur innerhalb `if (labsResp.ok)` gesetzt. Das
+      // war harmlos, solange nichts sie las — seit dem 29.08.2026 haengt
+      // der Titel des Datums-Chips daran. Schlaegt der Labs-Abruf beim
+      // naechsten Lauf fehl, stuende sonst der Lueckentext eines
+      // frueheren Laufs weiter auf dem Bildschirm.
+      _lagFensterAlterTage    = null;
+      _lagFensterAbgelaufen   = false;
+      _lagNeuesteLabsZeile    = '';
+      _activeMetaKeyVoll      = '';
       _bodenVerworfen         = 0;
       _stickinessByDeck       = {};
       _porSnapshotByDeck      = {};
@@ -5297,13 +5304,13 @@ window.MetaCall = (function () {
             const arch   = (r.deck_archetype || '').trim();
             const tid    = (r.tournament_id || '').trim();
             const meta   = (r.meta || '').trim().toUpperCase();
+            if (meta) zeilenMitMeta += 1;
             if (!player || !arch || !tid) return;
             // Restrict to previous-format rows when format_window is set
             // (Turin uses TEF-POR continuity, not SVI-ASC etc.). If the
             // CSV row has no meta we still count it — labs is the source
             // of truth, missing meta is a scraper-side gap not relevant
             // to the signal.
-            if (meta) zeilenMitMeta += 1;
             if (prev && meta && meta !== prev) return;
             const k = normalize(arch);
             const key = player + '|' + k;
@@ -5463,7 +5470,6 @@ window.MetaCall = (function () {
           // Danach gilt schlicht "fuer dieses Format liegen keine
           // Vor-Ort-Daten vor" — dieselbe leere Labs-Ebene, aber unter
           // ihrem richtigen Namen, und die Online-Siege zaehlen wieder.
-          const LAG_KARENZ_TAGE = 21;
           const lagTage = (_formatWindow && Number(_formatWindow.lag_days)) || 14;
           let lagAlterTage = null;
           if (activeNewestDate) {
@@ -5613,8 +5619,6 @@ window.MetaCall = (function () {
           }
           const prevGrenzeTage = lagTage + LAG_KARENZ_TAGE;
           const prevZuAlt = prevAlterTage != null && prevAlterTage > prevGrenzeTage;
-          _bodenAlterTage = prevAlterTage;
-          _bodenAbgelaufen = prevZuAlt;
           if (prevFmtKey && setAdditionOnly && prevZuAlt) {
             try {
               console.log(
@@ -5715,17 +5719,32 @@ window.MetaCall = (function () {
               const floorShare  = fullPlayers > 0 ? (a.eSW + a.lSW) / fullPlayers : 0;
               // Evidenzhuerde: ein Boden darf nicht auf einem einzelnen
               // Turnier und nicht auf einer Handvoll Spieler stehen.
-              // Ohne sie hob der Boden am 29.08.2026 Lillie's Clefairy
-              // von 0,11 auf 0,91 (Faktor 8) und Metagross von 0,09 auf
-              // 0,54 (Faktor 6) — beide aus Zaehlungen, die ein
-              // einzelner Spieler umwirft.
+              //
+              // RICHTIGSTELLUNG 29.08.2026 (Nachpruefung): hier standen
+              // Lillie's Clefairy und Metagross als Beispielfaelle. Das
+              // war falsch — beide BESTEHEN die Huerde (je 2 Turniere,
+              // 44 bzw. 50 Spieler). Was ihre Anhebung heute verhindert,
+              // ist die Alterssperre, nicht diese Huerde. Eine Begruendung
+              // mit Beispielen, die sie nicht trifft, ist schlimmer als
+              // gar keine: sie laesst den naechsten Leser glauben, die
+              // Huerde sei geprueft.
+              //
+              // Was sie WIRKLICH tut, nachgezaehlt auf TEF-CRI:
+              //   89 Archetypen -> 54 verworfen, 35 bleiben.
+              //   Alle 54 liegen bei hoechstens 0,45 % Anteil; der
+              //   groesste Verworfene ist Mega Starmie (2 Turniere,
+              //   18 Spieler, 0,45 %).
+              //   An der Turnierbedingung allein scheitert derzeit
+              //   KEINES — bei einem Vorformat aus genau zwei Turnieren
+              //   kann sie kaum greifen. Sie steht trotzdem, weil sie
+              //   strukturell richtig ist und in einem Format mit mehr
+              //   Turnieren beisst.
               const genugTurniere = a.turniere.size >= PREDICTOR_5_5_MIN_TURNIERE;
               const genugSpieler  = fullPlayers >= PREDICTOR_5_5_MIN_SPIELER;
               if (floorShare > 0 && !(genugTurniere && genugSpieler)) {
                 _bodenVerworfen += 1;
               }
               if (floorShare > 0 && genugTurniere && genugSpieler) {
-                _bodenDecks += 1;
                 _lastMetaLabsByDeck[k] = {
                   name:       a.name,
                   share:      floorShare,
@@ -6236,7 +6255,7 @@ window.MetaCall = (function () {
       //  — siehe die Formel selbst, Suchwort "ladderPctDamped". Die
       //  Formel steht rund 2300 Zeilen entfernt; wer diese Uebersicht
       //  las statt der Formel, las das Falsche. Eine Zusage haelt die
-      //  beiden jetzt zusammen, siehe test-meta-call-gewichte.js.)
+      //  beiden jetzt zusammen, siehe test-metacall-gewichte-reihenfolge.js.)
       // Mode A + Testing Group / + CL toggles:
       //   keep 2.x weights (TG/CL replace the brought/ladder pillar).
       // Mode B (labs majors present):
@@ -9429,7 +9448,14 @@ window.MetaCall = (function () {
       // Laufs. Majors sind selten; acht Tage waren fuer einen Wochenlauf
       // gedacht und sind fuer Turniere zu streng. 35 Tage = lag_days plus
       // Karenz, dieselbe Grenze, an der auch das Lag-Fenster zugeht.
-      const isStale = ageDays > 35;
+      // 29.08.2026: hier stand fest `> 35`. Direkt darunter benutzt der
+      // Titel `_lagFensterAbgelaufen`, das aus lag_days + Karenz kommt.
+      // Heute sind beide gleich (lag_days = 14), aber lag_days steht in
+      // data/format_window.json — bei der naechsten Rotation waeren
+      // Farbe und Erklaerung des Chips auseinandergelaufen. Zwei Zahlen
+      // fuer dieselbe Frage; jetzt eine.
+      const _lagTageChip = (_formatWindow && Number(_formatWindow.lag_days)) || 14;
+      const isStale = ageDays > (_lagTageChip + LAG_KARENZ_TAGE);
       /* 29.08.2026: beide fest, auf einer Toenung, die im Dunkelmodus
          dunkel wird — 2,19:1. Die Token drehen mit. */
       const color = isStale ? 'var(--tint-bad-ink)' : 'var(--ink-2)';

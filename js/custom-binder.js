@@ -1401,7 +1401,7 @@
                         <option value="3">${cbText('cb.decks3','ab 3 Decks')}</option>
                         <option value="5">${cbText('cb.decks5','ab 5 Decks')}</option>
                     </select>
-                    <select id="cbFilterMissing" onchange="cbApplyFilter()" class="select-system" aria-label="${escapeHtmlAttr(cbText('cb.filterMissing','Fehlmenge'))}">
+                    <select id="cbFilterMissing" onchange="cbApplyFilter()" class="select-system" aria-label="${escapeHtmlAttr(cbText('cb.filterMissingAria','Fehlmenge'))}">
                         <option value="all">${cbText('cb.missingAny','Fehlmenge: egal')}</option>
                         <option value="ab1">${cbText('cb.missing1','fehlt mindestens 1')}</option>
                         <option value="ab2">${cbText('cb.missing2','fehlen mindestens 2')}</option>

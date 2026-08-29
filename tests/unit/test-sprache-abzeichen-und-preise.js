@@ -122,3 +122,32 @@ describe('Das englische Tutorial', () => {
             'ohne diesen Hinweis liest sich der deutsche Bot-Text wie ein Uebersetzungsfehler');
     });
 });
+
+describe('Sprachwechsel zeichnet die Preisflaechen neu', () => {
+    // Am 29.08.2026 im angemeldeten Konto des Betreibers gemessen: nach
+    // einem Sprachwechsel standen in der Wunschliste weiter 24 deutsche
+    // Pillen, obwohl t() bereits Englisch lieferte und eine frisch
+    // erzeugte Pille englisch war. Erst ein erzwungenes Neuzeichnen
+    // machte alle 24 englisch. Der Kommentar im Code beschrieb den
+    // Fehler bereits — der Zuhoerer deckte nur Decks und Profil ab.
+    it('der languageChanged-Zuhoerer fasst auch Wunschliste und Trade List an', () => {
+        const i = COLLECTION.indexOf("document.addEventListener('languageChanged'");
+        assert.notEqual(i, -1, 'der Zuhoerer ist verschwunden');
+        const block = COLLECTION.slice(i, i + 1200);
+        assert.match(block, /updateWishlistUI/,
+            'die Wunschliste wird beim Sprachwechsel nicht neu gezeichnet — '
+            + 'die Pillen backen die Sprache beim Zeichnen ein');
+        assert.match(block, /updateTradelistUI/,
+            'die Trade List wird beim Sprachwechsel nicht neu gezeichnet');
+        assert.match(block, /updateDecksUI/, 'die Decks sind aus dem Zuhoerer gefallen');
+    });
+
+    it('die beiden Custom-Binder-Knoepfe haben uebersetzte Titel', () => {
+        for (const k of ['cb.topMetaTitel', 'cb.saveBinderTitel']) {
+            assert.ok(HTML.includes('data-i18n-title="' + k + '"'),
+                'index.html verweist nicht auf ' + k);
+            const n = (I18N.match(new RegExp("'" + k.replace('.', '\\.') + "':", 'g')) || []).length;
+            assert.equal(n, 2, k + ' steht ' + n + 'x in js/i18n.js, noetig sind 2');
+        }
+    });
+});

@@ -59,13 +59,48 @@ function loadAuditHelpers() {
         extractTopLevel(src, '_buildQualityAudit'),
     ].join('\n\n');
 
-    const sandbox = { console, Math, Number, String, Array, Set, Object, RegExp, Boolean };
-    const ctx = vm.createContext(sandbox);
-    vm.runInContext(snippet, ctx, { filename: 'audit-extract.js' });
+    // 29.08.2026: Die Befundtexte kommen jetzt aus der Sprachtabelle
+    // statt aus festem Deutsch — sie wurden per textContent ausgegeben
+    // und standen damit auch im englischen Modus auf Deutsch. Der Test
+    // bekommt deshalb die ECHTE Tabelle, nicht eine Attrappe: so prueft
+    // er zusaetzlich, dass jeder benutzte Schluessel wirklich existiert.
+    // Eine Attrappe wuerde einen Tippfehler im Schluessel durchlassen.
+    const i18nSrc = fs.readFileSync(
+        path.resolve(__dirname, '../../js/i18n.js'), 'utf-8');
+    const alleZeilen = [...i18nSrc.matchAll(
+        /^ {4}'([a-zA-Z0-9._]+)':\s*('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")/gm)];
+    const bauTabelle = (haelfte) => {
+        const mitte = Math.floor(alleZeilen.length / 2);
+        const teil = haelfte === 'en' ? alleZeilen.slice(0, mitte) : alleZeilen.slice(mitte);
+        const karte = {};
+        for (const m of teil) if (karte[m[1]] === undefined) karte[m[1]] = eval(m[2]);
+        return karte;
+    };
+    const tabellen = { de: bauTabelle('de'), en: bauTabelle('en') };
+    const benutzt = new Set();
+    const macheT = (sprache) => (k) => {
+        benutzt.add(k);
+        const v = tabellen[sprache][k];
+        if (v === undefined) throw new Error('Schluessel fehlt in ' + sprache + ': ' + k);
+        return v;
+    };
+
+    const baue = (sprache) => {
+        const sandbox = { console, Math, Number, String, Array, Set, Object, RegExp, Boolean,
+                          t: macheT(sprache) };
+        const ctx = vm.createContext(sandbox);
+        vm.runInContext(snippet, ctx, { filename: 'audit-extract.js' });
+        return sandbox;
+    };
+    const de = baue('de');
+    const en = baue('en');
     return {
-        binomialChoose: sandbox._binomialChoose,
-        probAtLeastOneInOpening: sandbox._probAtLeastOneInOpening,
-        buildQualityAudit: sandbox._buildQualityAudit,
+        binomialChoose: de._binomialChoose,
+        probAtLeastOneInOpening: de._probAtLeastOneInOpening,
+        buildQualityAudit: de._buildQualityAudit,
+        buildQualityAuditEN: en._buildQualityAudit,
+        benutzteSchluessel: benutzt,
+        tabellen,
     };
 }
 
@@ -300,5 +335,73 @@ describe('_buildQualityAudit', () => {
         ];
         const audit = HELPERS.buildQualityAudit(deck);
         assert.equal(findFinding(audit, 'exchange_ticket_missing'), undefined);
+    });
+});
+
+describe('Das Build-Quality-Audit spricht die Sprache des Nutzers', () => {
+    // Am 29.08.2026 im angemeldeten Konto belegt: die Ueberschrift des
+    // Audits war uebersetzt, die sieben Befunde darunter standen fest
+    // auf Deutsch. Sie gehen per textContent auf den Bildschirm, also
+    // ungefiltert — im englischen Modus las man eine englische
+    // Ueberschrift ueber deutschen Saetzen.
+    const deck = [
+        E('Pikachu ex', 'Pokémon', 4),
+        E('Basic Fire Energy', 'Energy', 4),
+    ];
+
+    it('derselbe Befund kommt in beiden Sprachen unterschiedlich heraus', () => {
+        const de = HELPERS.buildQualityAudit(deck, 60);
+        const en = HELPERS.buildQualityAuditEN(deck, 60);
+        assert.equal(de.findings.length, en.findings.length,
+            'die Sprache darf die ANZAHL der Befunde nicht veraendern');
+        assert.ok(de.findings.length > 0, 'kein Befund erzeugt — Testdeck taugt nicht');
+        let verschieden = 0;
+        for (let i = 0; i < de.findings.length; i++) {
+            assert.equal(de.findings[i].key, en.findings[i].key,
+                'die Reihenfolge der Befunde haengt an der Sprache');
+            assert.equal(de.findings[i].level, en.findings[i].level,
+                'die Einstufung haengt an der Sprache');
+            if (de.findings[i].message !== en.findings[i].message) verschieden++;
+        }
+        assert.ok(verschieden > 0,
+            'kein einziger Befundtext unterscheidet sich — die Texte haengen '
+            + 'wieder fest im Code statt in der Sprachtabelle');
+    });
+
+    it('im englischen Modus steht in keinem Befund ein deutsches Wort', () => {
+        const en = HELPERS.buildQualityAuditEN(deck, 60);
+        // "Deck", "Decks", "Karte" sind Szenesprache und stehen auch im
+        // englischen Text richtig — sie duerfen hier nicht anschlagen.
+        // Geprueft wird auf Woerter, die es im Englischen nicht gibt.
+        const DEUTSCH = /[äöüÄÖÜß]|\b(?:und|oder|nicht|kein|keine|einer|einem|Energien|ohne|unter|ueber|Starthand|Preiskarten|Gegner|erlaubt|verschenkt|erhoeht|schuetzt|liegt|sobald|verbleibenden|feststecken|zwingend|Faehigkeiten)\b/;
+        for (const f of en.findings) {
+            assert.ok(!DEUTSCH.test(f.message),
+                `deutsches Wort im englischen Befund ${f.key}: ${f.message}`);
+            if (f.hint) {
+                assert.ok(!DEUTSCH.test(f.hint),
+                    `deutsches Wort im englischen Hinweis ${f.key}: ${f.hint}`);
+            }
+        }
+    });
+
+    it('kein Befund zeigt einen rohen Schluessel statt eines Textes', () => {
+        for (const audit of [HELPERS.buildQualityAudit(deck, 60), HELPERS.buildQualityAuditEN(deck, 60)]) {
+            for (const f of audit.findings) {
+                assert.ok(!/^audit\.[a-zA-Z]/.test(f.message), 'roher Schluessel: ' + f.message);
+                assert.ok(!/\{(n|pct|name|names)\}/.test(f.message),
+                    'nicht ersetzter Platzhalter: ' + f.message);
+            }
+        }
+    });
+
+    it('jeder benutzte Schluessel steht in beiden Sprachen', () => {
+        // benutzteSchluessel wird beim Laden gefuellt; die Ausfuehrung
+        // oben hat alle Zweige beruehrt, die dieses Deck ausloest.
+        HELPERS.buildQualityAudit(deck, 60);
+        assert.ok(HELPERS.benutzteSchluessel.size > 0, 'kein Schluessel benutzt');
+        for (const k of HELPERS.benutzteSchluessel) {
+            assert.notEqual(HELPERS.tabellen.de[k], undefined, 'fehlt auf Deutsch: ' + k);
+            assert.notEqual(HELPERS.tabellen.en[k], undefined, 'fehlt auf Englisch: ' + k);
+        }
     });
 });

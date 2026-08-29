@@ -52,6 +52,36 @@ function luminance(hex) {
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }
 
+/* Fest verdrahtete DUNKLE Textfarben: das, was im Dunkelmodus auf
+ * dunklem Grund verschwindet.
+ *
+ * Dieser Zaehler fehlte bis zum 29.08.2026, und das war die Luecke, die
+ * am meisten gekostet hat. Der Zaehler darunter sieht nur Flaechen. Am
+ * 28.08. galt die Startseite deshalb als fertig — 0 helle Flaechen —
+ * waehrend im Browser gemessen 1348 Textstellen unter der WCAG-Grenze
+ * lagen, die allermeisten dunkelgrau auf dunkelblau bei 1,21:1. Ein
+ * halber Zaehler meldet halbe Wahrheiten, und zwar immer die
+ * angenehmere.
+ *
+ * Die beiden gehoeren zusammen: eine Flaeche umzustellen und den Text
+ * stehenzulassen ergibt dunkel auf dunkel; nur den Text umzustellen
+ * ergibt hell auf hell. Beides ist schon passiert. */
+function countHardcodedDarkInk() {
+    return fs.readdirSync(path.join(ROOT, 'css'))
+        .filter(f => f.endsWith('.css'))
+        .reduce((total, f) => {
+            const txt = stripComments(fs.readFileSync(path.join(ROOT, 'css', f), 'utf8'));
+            // Nur `color:`, nicht `border-color:`/`background-color:`.
+            const decls = txt.match(/(?<![-a-zA-Z])color\s*:\s*[^;{}]+[;}]/g) || [];
+            return total + decls.filter(d => {
+                const val = d.slice(d.indexOf(':') + 1);
+                if (val.includes('var(')) return false;
+                const hexes = val.match(/#[0-9a-fA-F]{3,6}\b/g);
+                return !!hexes && hexes.every(h => (luminance(h) ?? 1) < 0.30);
+            }).length;
+        }, 0);
+}
+
 // Fest verdrahtete helle Flächen: das, was im Dunkelmodus weiß
 // stehenbleibt. var(--…) zählt nicht mit — das ist ja der Weg raus.
 function countHardcodedLightSurfaces() {
@@ -143,11 +173,29 @@ describe('wie weit die Seite dafür ist', () => {
            dunkel.
            320 -> 316: die drei Tier-Toenungen und der leere
            Movers-Block. Live gemessen waren das die groessten hellen
-           Flaechen der ganzen Seite — je 1720 px breit. */
-        const BASELINE = 316;
+           Flaechen der ganzen Seite — je 1720 px breit.
+           316 -> 295: City League (Kasten, Tabelle, Tier-Kacheln),
+           die Anleitungs-Verlaeufe und der Platzhalter hinter den
+           Kartenbildern. Verlaeufe hatte dieser Zaehler bis dahin
+           mitgezaehlt, die Messung im Browser aber nicht — sie las nur
+           backgroundColor. Ein Verlauf von Weiss nach Fastweiss ist
+           eine weisse Flaeche. */
+        const BASELINE = 295;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);
+    });
+
+    it('der Zähler fest verdrahteter dunkler Textfarben steigt nicht', () => {
+        /* Die andere Haelfte, siehe die Notiz an countHardcodedDarkInk.
+           Am 29.08.2026 auf den gemessenen Stand gesetzt: 212 (von 215
+           vor dem Durchgang desselben Tages). Vorher gab es diesen
+           Zaehler gar nicht, deshalb keine Reihe frueherer Werte — die
+           faengt hier an. */
+        const BASELINE_INK = 212;
+        const now = countHardcodedDarkInk();
+        assert.ok(now <= BASELINE_INK,
+            `fest verdrahtete dunkle Textfarben: ${now} (erlaubt: ${BASELINE_INK})`);
     });
 
     it('die sichtbarste Chrome ist umgestellt', () => {
@@ -182,5 +230,58 @@ describe('wie weit die Seite dafür ist', () => {
             assert.ok(countHardcodedLightSurfaces() < 60,
                 'ein Umschalter braucht erst den Zähler unter 60 — sonst wird die Seite ein Flickenteppich');
         }
+    });
+});
+
+describe('die Anleitungs-Mockups sind eine helle Insel', () => {
+    /* Die Mockups zeichnen die Oberflaeche nach — sie sind gemalte
+       Bildschirmfotos. Ein Bildschirmfoto dreht nicht mit, wenn der
+       Leser das Licht ausmacht, sonst zeigt es etwas, das es nie gab.
+       Deshalb behalten sie im Dunkelmodus ihre eigene helle Farbwelt,
+       statt Regel fuer Regel umgestellt zu werden: 66 Flaechen und 88
+       Textfarben, die zusammen schon stimmen.
+
+       Der Fallstrick dabei ist die HALBE Insel. Beim ersten Versuch
+       standen nur --surface-* und --ink* drin; --brand-ink behielt
+       seinen Dunkelmodus-Wert und malte helles Blau auf den weissen
+       Mockup-Grund, 2,61:1. Diese Zusage haelt fest, dass alle Token,
+       die drinnen als Textfarbe vorkommen, auch drinnen gesetzt sind. */
+    const HOWTO = fs.readFileSync(path.join(ROOT, 'css', 'profile-howto-info.css'), 'utf8');
+    const insel = (HOWTO.match(/\[data-theme="dark"\]\s*\.tutorial-mockup\s*\{[^}]*\}/) || [])[0];
+
+    it('die Insel existiert', () => {
+        assert.ok(insel, '[data-theme="dark"] .tutorial-mockup fehlt');
+        assert.match(insel, /color:\s*var\(--ink\)/,
+            'ohne eigene Textfarbe erbt der Kasten die helle des Dunkelmodus');
+    });
+
+    it('sie setzt jeden Token neu, den sie drinnen benutzt', () => {
+        /* Die Insel faengt bei der ERSTEN `.tutorial-mockup .mockup-*`
+           Regel an, nicht bei `.mockup-hub-tiles`. Genau daran ist
+           die erste Fassung dieser Zusage gescheitert: sie schnitt zu
+           spaet, `.tutorial-mockup .mockup-pill` lag davor, und das
+           Entfernen von --brand-ink aus der Insel blieb unbemerkt.
+           Gefunden durch Mutationspruefung, nicht durch Nachdenken. */
+        const iMock = HOWTO.indexOf('.tutorial-mockup .mockup-header');
+        assert.ok(iMock > 0, 'Inselanfang nicht gefunden');
+        const drinnen = HOWTO.slice(iMock);
+        const benutzt = new Set(
+            [...drinnen.matchAll(/(?<![-a-zA-Z])color:\s*var\((--[a-z0-9-]+)\)/g)].map(m => m[1]));
+        const gesetzt = new Set(
+            [...insel.matchAll(/(--[a-z0-9-]+):/g)].map(m => m[1]));
+        const fehlt = [...benutzt].filter(t => !gesetzt.has(t));
+        assert.deepEqual(fehlt, [],
+            'als Textfarbe benutzt, aber in der Insel nicht neu gesetzt — '
+            + 'diese Token behalten drinnen ihren Dunkelmodus-Wert: ' + fehlt.join(', '));
+    });
+
+    it('der Bereich ausserhalb der Mockups laeuft dagegen ueber Token', () => {
+        // Genau umgekehrt: oberhalb von .mockup-hub-tiles darf keine
+        // feste dunkle Textfarbe mehr stehen. 25 waren es am 29.08.,
+        // 569 Textstellen unter der Grenze gingen darauf zurueck.
+        const draussen = stripComments(HOWTO.slice(0, HOWTO.indexOf('.tutorial-mockup .mockup-header')));
+        const fest = (draussen.match(/(?<![-a-zA-Z])color:\s*(#[0-9a-fA-F]{3,6})/g) || [])
+            .filter(d => (luminance(d.match(/#[0-9a-fA-F]{3,6}/)[0]) ?? 1) < 0.30);
+        assert.deepEqual(fest, [], 'feste dunkle Textfarbe ausserhalb der Insel: ' + fest.join(' | '));
     });
 });

@@ -1471,7 +1471,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .mockup-wt-card-art-actions span.is-remove { background: var(--solid-bad); }
-.mockup-wt-card-art-actions span.is-trade  { background: #16a085; }
+.mockup-wt-card-art-actions span.is-trade  { background: #0f766e; }  /* 3,28:1 -> 5,47:1 */
 .mockup-wt-card-body {
     padding: 7px 7px 8px;
     display: flex;
@@ -1955,7 +1955,7 @@
     border-color: rgba(245, 158, 11, 0.4);
     color: #8a6500;
 }
-.mockup-builder-btn--accent .mockup-builder-btn-num { background: #ef4444; }
+.mockup-builder-btn--accent .mockup-builder-btn-num { background: #c62f22; }  /* 3,76:1 -> 5,48:1 */
 .mockup-builder-btn--blue {
     background: linear-gradient(135deg, rgba(59, 76, 202, 0.12), rgba(59, 76, 202, 0.04));
     border-color: rgba(59, 76, 202, 0.25);
@@ -2098,7 +2098,9 @@
     font-weight: 800;
     padding: 2px 6px;
     border-radius: 999px;
-    background: rgba(239, 68, 68, 0.92);
+    /* 29.08.2026: weisse Schrift darauf ergab 4,22:1. Die Insel ist
+       hell, der Wert gilt also in BEIDEN Modi. Jetzt 5,48:1. */
+    background: rgba(198, 47, 34, 0.94);
     color: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
     letter-spacing: 0.02em;
@@ -2187,7 +2189,8 @@
 .mockup-deckgrid-actions .btn.is-add    { background: #dcfce7; color: var(--tint-ok-ink); border-color: rgba(22, 163, 74, 0.18); }
 .mockup-deckgrid-actions .btn.is-rarity { background: #fef3c7; color: var(--tint-warn-ink); border-color: rgba(245, 158, 11, 0.22); }
 .mockup-deckgrid-actions .btn.is-l      { background: #e0e7ff; color: var(--pokemon-blue, #3B4CCA); border-color: rgba(59, 76, 202, 0.18); }
-.mockup-deckgrid-actions .btn.is-p      { background: #ffedd5; color: #ea580c; border-color: rgba(234, 88, 12, 0.22); }
+/* 3,11:1 -> 6,38:1; Farbton bleibt, nur dunkler gesaettigt. */
+.mockup-deckgrid-actions .btn.is-p      { background: #ffedd5; color: #9a3412; border-color: rgba(154, 52, 18, 0.28); }
 .mockup-deckgrid-actions .btn.is-price  { background: #ccfbf1; color: #137739; border-color: rgba(13, 148, 136, 0.22); flex: 2; }
 .mockup-deckgrid-rare-pill {
     display: flex;
@@ -2258,7 +2261,7 @@
 .mockup-bs-rank {
     font-weight: 800;
     color: #fff;
-    background: #475569;
+    background: #3f4a5c;   /* 29.08.2026: 4,04:1 -> 6,45:1 */
     border-radius: 5px;
     text-align: center;
     padding: 2px 0;
@@ -3195,7 +3198,7 @@
 }
 .mockup-tg-dash-avatar:first-child { margin-left: 0; }
 .mockup-tg-dash-avatar.v2 { background: linear-gradient(135deg, var(--solid-ok), #facc15); }
-.mockup-tg-dash-avatar.v3 { background: linear-gradient(135deg, #f97316, #dc2626); }
+.mockup-tg-dash-avatar.v3 { background: linear-gradient(135deg, #b45309, #a3231b); }  /* 2,80:1 -> 5,02:1 */
 .mockup-tg-dash-avatar.v4 { background: linear-gradient(135deg, #067391, #6366f1); }
 .mockup-tg-dash-count {
     margin-left: auto;

@@ -10089,21 +10089,32 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     align-items: center;
     margin-bottom: 14px;
 }
+/* BEFUND (Abnahmerunde 30.08.2026): dieses Feld war fuer einen dunklen
+   Kartenhintergrund gebaut — `color:#f4f7fb` auf `rgba(255,255,255,.06)`.
+   Es sitzt aber in `.ds-sec`, und die ist im Hellmodus weiss. Gemessen:
+   der eingetippte Text stand bei 1,07:1, der Platzhalter bei 2,56:1. Wer
+   im Hellmodus einen Decknamen tippte, sah nicht, was er tippte.
+   Im Dunkelmodus war dasselbe Feld einwandfrei — deshalb ist es nie
+   aufgefallen. Farben kommen jetzt aus den Tokens und drehen mit. */
 .tier-search-input {
     flex: 1;
     padding: 10px 38px 10px 14px;
-    border: 1px solid rgba(255,255,255,0.18);
+    border: 1px solid var(--line-strong);
     border-radius: 999px;
-    background: rgba(255,255,255,0.06);
-    color: #f4f7fb;
+    background: var(--surface-2);
+    color: var(--ink);
     font-size: 0.92rem;
     outline: none;
     transition: border-color 0.15s, background 0.15s;
 }
-.tier-search-input::placeholder { color: #95a5a6; }
+.tier-search-input::placeholder { color: var(--ink-3); }
 .tier-search-input:focus {
-    border-color: rgba(46,204,113,0.55);
-    background: rgba(255,255,255,0.10);
+    border-color: var(--accent, #4663e6);
+    background: var(--surface-1);
+}
+.tier-search-input:focus-visible {
+    outline: 2px solid var(--accent, #4663e6);
+    outline-offset: 1px;
 }
 .tier-search-clear {
     position: absolute;
@@ -10111,15 +10122,15 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: #95a5a6;
+    color: var(--ink-3);
     font-size: 0.85rem;
     padding: 4px 8px;
     border-radius: 50%;
     user-select: none;
 }
 .tier-search-clear:hover {
-    color: #f4f7fb;
-    background: rgba(255,255,255,0.10);
+    color: var(--ink);
+    background: var(--surface-2);
 }
 
 @media (max-width: 700px) {

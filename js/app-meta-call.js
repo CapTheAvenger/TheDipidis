@@ -9674,7 +9674,12 @@ window.MetaCall = (function () {
             .replace(/\{days\}/g, String(_lagFensterAlterTage))
             .replace(/\{new\}/g, _currentSetUpper || '')
         : t('mc.bannerDataHelp');
-      staleTag = ` <span class="mc-predictor-banner-stale" style="opacity:0.85;color:${color};" title="${esc(datumHilfe + scrapeHinweis)}">${esc(label)}</span>`;
+      // BEFUND (Abnahmerunde 30.08.2026): mit `opacity: 0.85` stand der
+      // Hinweis im Dunkelmodus bei 4,07:1 — --tint-bad-ink (#c68181) auf
+      // dem Kachelgrund, um 15 % weggeblendet. Ohne die Deckkraft sind
+      // es 5,11:1. Die Deckkraft war als Zurueckhaltung gedacht; die
+      // ruhigere Farbe leistet das schon, und sie kostet keinen Kontrast.
+      staleTag = ` <span class="mc-predictor-banner-stale" style="color:${color};" title="${esc(datumHilfe + scrapeHinweis)}">${esc(label)}</span>`;
     }
 
     // Predictor 3.0: when a post-major baseline snapshot is loaded, append
@@ -11002,6 +11007,35 @@ window.MetaCall = (function () {
   // dem Bildschirm steht, und laesst js/ds-share.js daraus die Karte im
   // Post-Entwurf malen. Ohne das Modul bleibt der Knopf ehrlich: er
   // sagt, dass es nicht geht, statt nichts zu tun.
+  /* Das prognostizierte Feld: Name + Endanteil, absteigend.
+   *
+   * BEFUND (Abnahmerunde 30.08.2026): der Knopf "Bild generieren" tat
+   * nichts. generateTournamentImage() rief `getPredictedField()` frei
+   * auf — die gab es aber nur als Eigenschaft des zurueckgegebenen
+   * Objekts, nicht im Modul. Ergebnis auf jedem Klick:
+   *
+   *     ReferenceError: getPredictedField is not defined
+   *         at Object.generateTournamentImage (app-meta-call.js:11012)
+   *
+   * Es lag nicht an fehlenden Daten: MetaCall.getPredictedField()
+   * lieferte im selben Moment 131 Eintraege. Es fehlte ein Wort.
+   *
+   * Damit das nicht wieder auseinander laeuft, steht die Rechnung
+   * jetzt EINMAL hier, und die Aussenschnittstelle reicht sie nur
+   * durch. Wer die eine aendert, aendert die andere mit.
+   */
+  function _prognostiziertesFeld() {
+    return (_shareList || [])
+      .filter(d => d && d.name && d.name !== '_junk')
+      .map(d => ({
+        name:         d.name,
+        finalShare:   typeof d.finalShare === 'number' ? d.finalShare : (d.onlineShare || 0),
+        onlineShare:  d.onlineShare || 0,
+        ladderShare:  d.ladderShare || 0,
+      }))
+      .sort((a, b) => b.finalShare - a.finalShare);
+  }
+
   function generateTournamentImage() {
     if (!window.DsShare || typeof window.DsShare.shareMetaCallPost !== 'function') {
       if (typeof showToast === 'function') {
@@ -11009,9 +11043,7 @@ window.MetaCall = (function () {
       }
       return;
     }
-    const feld = getPredictedField()
-      .filter(d => d.name && d.name !== '_junk')
-      .slice(0, 10);
+    const feld = _prognostiziertesFeld().slice(0, 10);
     if (!feld.length) {
       if (typeof showToast === 'function') showToast(t('mc.generateImageEmpty'), 'error');
       return;
@@ -12013,15 +12045,7 @@ window.MetaCall = (function () {
     // show a "Matchups vs Meta Call" panel so a deck-builder can see
     // at a glance whether their build is favoured vs the predicted
     // tournament composition.
-    getPredictedField: () => (_shareList || [])
-      .filter(d => d && d.name && d.name !== '_junk')
-      .map(d => ({
-        name:         d.name,
-        finalShare:   typeof d.finalShare === 'number' ? d.finalShare : (d.onlineShare || 0),
-        onlineShare:  d.onlineShare || 0,
-        ladderShare:  d.ladderShare || 0,
-      }))
-      .sort((a, b) => b.finalShare - a.finalShare),
+    getPredictedField: _prognostiziertesFeld,
     // Expose the matchup-matrix lookup so other tabs can compute
     // per-opponent WR using the same (Predictor-5.3-corrected) data
     // the recommendation engine uses. Falls back to 50/50 when no

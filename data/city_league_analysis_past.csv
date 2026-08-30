@@ -19,7 +19,7 @@
 2026-W22;Mega Venusaur;Ultra Ball;ASC 213;4;4;1;4,0;4,0;1;100,0;ASC;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Mega Venusaur;Night Stretcher;ASC 196;2;2;1;2,0;2,0;1;100,0;ASC;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Mega Venusaur;Poké Pad;POR 81;1;1;1;1,0;1,0;1;100,0;POR;81;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_081_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
-2026-W22;Mega Venusaur;Unfair Stamp;TWM 165;1;1;1;1,0;1,0;1;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
+2026-W22;Mega Venusaur;Unfair Stamp;TWM 165;1;1;1;1,0;1,0;1;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Mega Venusaur;Forest of Vitality;ASC 188;4;4;1;4,0;4,0;1;100,0;ASC;188;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_188_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Mega Venusaur;Grass Energy;EVO 91;12;12;1;12,0;12,0;1;100,0;EVO;91;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_091_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Ogerpon Box;Teal Mask Ogerpon ex;TWM 25;15;4;5;3,0;3,0;5;100,0;TWM;25;Double Rare;Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_025_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
@@ -40,7 +40,7 @@
 2026-W22;Ogerpon Box;Ultra Ball;ASC 213;20;4;5;4,0;4,0;5;100,0;ASC;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Ogerpon Box;Bug Catching Set;PRE 102;10;4;3;3,33;2,0;5;60,0;PRE;102;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_102_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Ogerpon Box;Night Stretcher;ASC 196;6;2;5;1,2;1,2;5;100,0;ASC;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
-2026-W22;Ogerpon Box;Unfair Stamp;TWM 165;5;1;5;1,0;1,0;5;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
+2026-W22;Ogerpon Box;Unfair Stamp;TWM 165;5;1;5;1,0;1,0;5;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Ogerpon Box;Tera Orb;SSP 189;2;1;2;1,0;0,4;5;40,0;SSP;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_189_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Ogerpon Box;Area Zero Underdepths;PRE 94;15;4;5;3,0;3,0;5;100,0;PRE;94;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_094_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Ogerpon Box;Grass Energy;EVO 91;40;12;5;8,0;8,0;5;100,0;EVO;91;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_091_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
@@ -84,7 +84,7 @@
 2026-W22;Dragapult Blaziken;Ultra Ball;ASC 213;20;4;5;4,0;4,0;5;100,0;ASC;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Dragapult Blaziken;Night Stretcher;ASC 196;9;2;5;1,8;1,8;5;100,0;ASC;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Dragapult Blaziken;Rare Candy;MEG 125;14;4;5;2,8;2,8;5;100,0;MEG;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
-2026-W22;Dragapult Blaziken;Unfair Stamp;TWM 165;5;1;5;1,0;1,0;5;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
+2026-W22;Dragapult Blaziken;Unfair Stamp;TWM 165;5;1;5;1,0;1,0;5;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Dragapult Blaziken;Area Zero Underdepths;PRE 94;3;2;2;1,5;0,6;5;40,0;PRE;94;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_094_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Dragapult Blaziken;Fire Energy;EVO 92;15;3;5;3,0;3,0;5;100,0;EVO;92;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_092_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
 2026-W22;Dragapult Blaziken;Psychic Energy;EVO 95;15;3;5;3,0;3,0;5;100,0;EVO;95;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_095_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;5
@@ -117,7 +117,7 @@
 2026-W22;Dragapult;Ultra Ball;ASC 213;12;4;3;4,0;4,0;3;100,0;ASC;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
 2026-W22;Dragapult;Poké Pad;POR 81;12;4;3;4,0;4,0;3;100,0;POR;81;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_081_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
 2026-W22;Dragapult;Night Stretcher;ASC 196;8;3;3;2,67;2,67;3;100,0;ASC;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
-2026-W22;Dragapult;Unfair Stamp;TWM 165;2;1;2;1,0;0,67;3;66,67;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
+2026-W22;Dragapult;Unfair Stamp;TWM 165;2;1;2;1,0;0,67;3;66,67;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;3
 2026-W22;Dragapult;Risky Ruins;MEG 127;5;2;3;1,67;1,67;3;100,0;MEG;127;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_127_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
 2026-W22;Dragapult;Fire Energy;EVO 92;9;3;3;3,0;3,0;3;100,0;EVO;92;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_092_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
 2026-W22;Dragapult;Psychic Energy;EVO 95;9;3;3;3,0;3,0;3;100,0;EVO;95;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_095_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
@@ -125,7 +125,7 @@
 2026-W22;Dragapult;Special Red Card;CRI 82;2;1;2;1,0;0,67;3;66,67;CRI;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_082_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
 2026-W22;Dragapult;Team Rocket's Watchtower;ASC 210;2;1;2;1,0;0,67;3;66,67;ASC;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
 2026-W22;Dragapult;Rare Candy;MEG 125;1;1;1;1,0;0,33;3;33,33;MEG;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
-2026-W22;Dragapult;Hero's Cape;TEF 152;1;1;1;1,0;0,33;3;33,33;TEF;152;Ultra Rare;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_152_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;3
+2026-W22;Dragapult;Hero's Cape;TEF 152;1;1;1;1,0;0,33;3;33,33;TEF;152;Ultra Rare;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_152_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;3
 2026-W22;Dhelmise Banette;Dhelmise;PBL 39;8;4;2;4,0;4,0;2;100,0;PBL;39;Uncommon;Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_039_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dhelmise Banette;Shuppet;PBL 33;7;4;2;3,5;3,5;2;100,0;PBL;33;Common;Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_033_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dhelmise Banette;Banette;PBL 34;7;4;2;3,5;3,5;2;100,0;PBL;34;Uncommon;Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_034_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
@@ -150,7 +150,7 @@
 2026-W22;Dhelmise Banette;Prism Tower;CRI 80;6;3;2;3,0;3,0;2;100,0;CRI;80;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_080_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dhelmise Banette;Telepathic Psychic Energy;POR 88;8;4;2;4,0;4,0;2;100,0;POR;88;Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_088_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dhelmise Banette;Psychic Energy;EVO 95;3;2;2;1,5;1,5;2;100,0;EVO;95;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_095_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
-2026-W22;Dhelmise Banette;Legacy Energy;TWM 167;2;1;2;1,0;1,0;2;100,0;TWM;167;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_167_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
+2026-W22;Dhelmise Banette;Legacy Energy;TWM 167;2;1;2;1,0;1,0;2;100,0;TWM;167;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_167_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dhelmise Banette;Fan Rotom;SCR 118;1;1;1;1,0;0,5;2;50,0;SCR;118;Common;Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_118_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dhelmise Banette;Moltres;PFL 14;1;1;1;1,0;0,5;2;50,0;PFL;14;Rare;Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_014_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dhelmise Banette;Chien-Pao;SSP 56;1;1;1;1,0;0,5;2;50,0;SSP;56;Rare;Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_056_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
@@ -177,7 +177,7 @@
 2026-W22;Slowking;Wondrous Patch;PFL 94;3;3;1;3,0;3,0;1;100,0;PFL;94;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_094_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Slowking;Night Stretcher;ASC 196;2;2;1;2,0;2,0;1;100,0;ASC;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Slowking;Switch;MEG 130;1;1;1;1,0;1,0;1;100,0;MEG;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
-2026-W22;Slowking;Secret Box;TWM 163;1;1;1;1,0;1,0;1;100,0;TWM;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
+2026-W22;Slowking;Secret Box;TWM 163;1;1;1;1,0;1,0;1;100,0;TWM;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Slowking;Lucky Helmet;TWM 158;1;1;1;1,0;1,0;1;100,0;TWM;158;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_158_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Slowking;Academy at Night;SFA 54;4;4;1;4,0;4,0;1;100,0;SFA;54;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_054_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Slowking;Telepathic Psychic Energy;POR 88;4;4;1;4,0;4,0;1;100,0;POR;88;Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_088_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
@@ -205,7 +205,7 @@
 2026-W22;Dragapult Dusknoir;Ultra Ball;ASC 213;8;4;2;4,0;4,0;2;100,0;ASC;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dragapult Dusknoir;Rare Candy;MEG 125;5;3;2;2,5;2,5;2;100,0;MEG;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dragapult Dusknoir;Night Stretcher;ASC 196;4;2;2;2,0;2,0;2;100,0;ASC;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
-2026-W22;Dragapult Dusknoir;Unfair Stamp;TWM 165;2;1;2;1,0;1,0;2;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
+2026-W22;Dragapult Dusknoir;Unfair Stamp;TWM 165;2;1;2;1,0;1,0;2;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dragapult Dusknoir;Team Rocket's Watchtower;ASC 210;4;2;2;2,0;2,0;2;100,0;ASC;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dragapult Dusknoir;Psychic Energy;EVO 95;6;3;2;3,0;3,0;2;100,0;EVO;95;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_095_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
 2026-W22;Dragapult Dusknoir;Fire Energy;EVO 92;6;3;2;3,0;3,0;2;100,0;EVO;92;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_092_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;2
@@ -229,7 +229,7 @@
 2026-W22;N's Zoroark;Poké Pad;POR 81;4;4;1;4,0;4,0;1;100,0;POR;81;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_081_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;N's Zoroark;N's PP Up;ASC 195;4;4;1;4,0;4,0;1;100,0;ASC;195;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_195_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;N's Zoroark;Night Stretcher;ASC 196;2;2;1;2,0;2,0;1;100,0;ASC;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
-2026-W22;N's Zoroark;Unfair Stamp;TWM 165;1;1;1;1,0;1,0;1;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
+2026-W22;N's Zoroark;Unfair Stamp;TWM 165;1;1;1;1,0;1,0;1;100,0;TWM;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;1
 2026-W22;N's Zoroark;Ultra Ball;ASC 213;1;1;1;1,0;1,0;1;100,0;ASC;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;N's Zoroark;Special Red Card;CRI 82;1;1;1;1,0;1,0;1;100,0;CRI;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_082_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;N's Zoroark;Binding Mochi;PRE 95;2;2;1;2,0;2,0;1;100,0;PRE;95;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_095_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
@@ -254,7 +254,7 @@
 2026-W22;Festival Lead;Ultra Ball;ASC 213;2;2;1;2,0;2,0;1;100,0;ASC;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Festival Lead;Bug Catching Set;PRE 102;2;2;1;2,0;2,0;1;100,0;PRE;102;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_102_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Festival Lead;Night Stretcher;ASC 196;1;1;1;1,0;1,0;1;100,0;ASC;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
-2026-W22;Festival Lead;Secret Box;TWM 163;1;1;1;1,0;1,0;1;100,0;TWM;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
+2026-W22;Festival Lead;Secret Box;TWM 163;1;1;1;1,0;1,0;1;100,0;TWM;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Festival Lead;Switch;MEG 130;1;1;1;1,0;1,0;1;100,0;MEG;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Festival Lead;Brave Bangle;WHT 80;2;2;1;2,0;2,0;1;100,0;WHT;80;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_080_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Festival Lead;Air Balloon;ASC 181;2;2;1;2,0;2,0;1;100,0;ASC;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
@@ -282,7 +282,7 @@
 2026-W22;Toxtricity Mega Absol;Buddy-Buddy Poffin;ASC 184;1;1;1;1,0;1,0;1;100,0;ASC;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Toxtricity Mega Absol;Ultra Ball;ASC 213;1;1;1;1,0;1,0;1;100,0;ASC;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Toxtricity Mega Absol;Team Rocket's Venture Bomb;DRI 179;1;1;1;1,0;1,0;1;100,0;DRI;179;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_179_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
-2026-W22;Toxtricity Mega Absol;Secret Box;TWM 163;1;1;1;1,0;1,0;1;100,0;TWM;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
+2026-W22;Toxtricity Mega Absol;Secret Box;TWM 163;1;1;1;1,0;1,0;1;100,0;TWM;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Toxtricity Mega Absol;Air Balloon;ASC 181;2;2;1;2,0;2,0;1;100,0;ASC;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Toxtricity Mega Absol;Lumiose City;POR 77;1;1;1;1,0;1,0;1;100,0;POR;77;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_077_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Toxtricity Mega Absol;Darkness Energy;EVO 97;10;10;1;10,0;10,0;1;100,0;EVO;97;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_097_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
@@ -308,7 +308,7 @@
 2026-W22;Mega Greninja;Special Red Card;CRI 82;2;2;1;2,0;2,0;1;100,0;CRI;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_082_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Mega Greninja;Ultra Ball;ASC 213;1;1;1;1,0;1,0;1;100,0;ASC;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Mega Greninja;Energy Retrieval;WHT 82;1;1;1;1,0;1,0;1;100,0;WHT;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_082_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
-2026-W22;Mega Greninja;Sparkling Crystal;PRE 129;1;1;1;1,0;1,0;1;100,0;PRE;129;Ultra Rare;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_129_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
+2026-W22;Mega Greninja;Sparkling Crystal;PRE 129;1;1;1;1,0;1,0;1;100,0;PRE;129;Ultra Rare;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_129_R_EN_LG.png;Yes;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Mega Greninja;Air Balloon;ASC 181;1;1;1;1,0;1,0;1;100,0;ASC;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Mega Greninja;Lumiose City;POR 77;1;1;1;1,0;1,0;1;100,0;POR;77;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_077_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1
 2026-W22;Mega Greninja;Water Energy;EVO 93;5;5;1;5,0;5,0;1;100,0;EVO;93;Common;Basic Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_093_R_EN_LG.png;No;City League;568;6th June 2026;6th June 2026;1

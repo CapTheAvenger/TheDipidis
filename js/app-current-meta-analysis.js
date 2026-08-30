@@ -1918,6 +1918,13 @@
             });
             renderNoDeckSelectedState('currentMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
             resetDeckOverviewCounts('currentMetaCardCount', 'currentMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
+            // Beide Behaelter sind jetzt versteckt; die naechste Anzeige
+            // faellt damit auf das Raster zurueck (siehe isTableViewActive
+            // in applyCurrentMetaFilter). Der Umschalter muss denselben
+            // Zustand tragen, sonst verspricht er nach dem naechsten
+            // Deckwechsel das, was schon da ist (Befund B, 30.08.2026).
+            document.querySelectorAll('button[onclick*="toggleCurrentMetaDeckGridView"]')
+                .forEach(b => window.ansichtsUmschalterBeschriften(b, 'grid'));
         }
         
         // Render "Used in Top 256" breakdown per major tournament for
@@ -3149,7 +3156,9 @@
                 `;
                 detailsEl.classList.remove('d-none');
             } else {
-                detailsEl.innerHTML = '<p style="color: #444; text-align: center; font-weight: 500;">No matchup data found</p>';
+                // Befund C (30.08.2026): festes 'No matchup data found'.
+                detailsEl.innerHTML = '<p style="color: #444; text-align: center; font-weight: 500;">'
+                    + escapeHtml(t('cm.noMatchupData')) + '</p>';
                 detailsEl.classList.remove('d-none');
             }
         }
@@ -3884,7 +3893,9 @@
             html += renderTier(spicyCards, 'Spicy Techs (< 15%)', '');
             
             if (html === '') {
-                html = '<p style="text-align: center; padding: 20px; color: #444;">No cards found</p>';
+                // Befund C (30.08.2026): festes 'No cards found'.
+                html = '<p style="text-align: center; padding: 20px; color: #444;">'
+                    + escapeHtml(t('cl.noCardsFound')) + '</p>';
             }
             
             tableContainer.innerHTML = html;
@@ -3947,6 +3958,14 @@
                 // Befund J (30.08.2026): "Cards" fest verdrahtet.
                 countElement.textContent = `${visibleCount} ${t('cl.cards')}`;
             }
+
+            // Befund E (30.08.2026): die Abschnittskoepfe zeigten weiter
+            // die ungefilterten Zahlen und blieben bei 0 Treffern stehen;
+            // gemeldet wurde die leere Suche nirgends. Melden, nicht
+            // verschweigen.
+            if (typeof window.uebersichtSuchergebnisMelden === 'function') {
+                window.uebersichtSuchergebnisMelden(gridContainer, visibleCount);
+            }
         }
         
         function toggleCurrentMetaDeckGridView() {
@@ -3954,7 +3973,6 @@
             const tableViewContainer = document.getElementById('currentMetaDeckTableView');
             // Get button from DOM instead of event
             const gridButtons = document.querySelectorAll('button[onclick*="toggleCurrentMetaDeckGridView"]');
-            const button = gridButtons[0];
             
             if (!gridViewContainer || !tableViewContainer) {
                 console.warn('Grid or table container not found');
@@ -3989,14 +4007,18 @@
             //
             // Befund J (30.08.2026): der Umschalter beschriftete sich
             // ausserdem in beiden Sprachen englisch.
+            // Befund B (30.08.2026): der Zustand wird am Knopf vermerkt,
+            // sonst ueberschreibt der naechste Sprachwechsel die
+            // zustandsabhaengige Beschriftung mit dem statischen
+            // data-i18n-Wert und der Knopf verspricht, was schon da ist.
             if (isGridViewActive) {
                 gridViewContainer.classList.add('d-none');
                 tableViewContainer.classList.remove('d-none');
-                if (button) button.textContent = t('btn.gridView');
+                gridButtons.forEach(b => window.ansichtsUmschalterBeschriften(b, 'list'));
             } else {
                 tableViewContainer.classList.add('d-none');
                 gridViewContainer.classList.remove('d-none');
-                if (button) button.textContent = t('btn.listView');
+                gridButtons.forEach(b => window.ansichtsUmschalterBeschriften(b, 'grid'));
             }
             
             // Re-apply filter to preserve percentage filter and render correct view

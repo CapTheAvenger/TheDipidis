@@ -65,6 +65,7 @@ const I18N   = read('js/i18n.js');
 const CARDS  = read('js/app-cards-db.js');
 const CORE   = read('js/app-core.js');
 const CMA    = read('js/app-current-meta-analysis.js');
+const CL     = read('js/app-city-league.js');
 const PAST   = read('js/app-past-meta.js');
 const TIER   = read('js/app-tier-meta.js');
 const CB     = read('js/custom-binder.js');
@@ -488,14 +489,22 @@ describe('Befund J — "0 Cards / 60 Total", Grid/List, Toasts', () => {
 
     it('der Ansichtsumschalter beschriftet sich in beiden Sprachen', () => {
         for (const [datei, src] of [['app-current-meta-analysis.js', CMA],
-                                    ['app-past-meta.js', PAST]]) {
+                                    ['app-past-meta.js', PAST],
+                                    ['app-city-league.js', CL]]) {
             assert.ok(!/textContent = 'Grid View'/.test(src),
                 datei + ': "Grid View" ist wieder fest verdrahtet');
             assert.ok(!/textContent = 'List View'/.test(src),
                 datei + ': "List View" ist wieder fest verdrahtet');
-            assert.ok(src.includes("t('btn.gridView')") && src.includes("t('btn.listView')"),
-                datei + ': der Umschalter liest seine Beschriftung nicht aus i18n');
+            assert.ok(src.includes('ansichtsUmschalterBeschriften'),
+                datei + ': der Umschalter meldet seinen Zustand nicht mehr an '
+                + 'den gemeinsamen Beschriftungshelfer');
         }
+        // Seit dem 30.08.2026 (Befund B) liegt der Wortlaut in EINEM
+        // Helfer in app-core.js statt dreimal in den Umschaltern. Vorher
+        // stand er im Knopf und wurde vom naechsten Sprachwechsel mit dem
+        // statischen data-i18n-Wert ueberschrieben.
+        assert.ok(CORE.includes("t('btn.listView')") && CORE.includes("t('btn.gridView')"),
+            'app-core.js: der Beschriftungshelfer liest die beiden Schluessel nicht');
         zweisprachig('btn.gridView');
         zweisprachig('btn.listView');
     });

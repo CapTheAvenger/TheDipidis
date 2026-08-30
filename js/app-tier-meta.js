@@ -2538,6 +2538,35 @@
             }
         }
 
+        /* Das Staples-Widget aus den SCHON geladenen Zahlen neu beschriften.
+         *
+         * URSACHE (gemessen 30.08.2026, Startseite "Current Meta (Global)"):
+         * renderTopCardsWidget() baut den ganzen Block als HTML-String und
+         * setzt ihn per innerHTML; updateTranslationsInDOM() erreicht nur
+         * Elemente mit data-i18n. FOLGE: nach dem Umschalten von Deutsch
+         * auf Englisch standen dort weiter 34 deutsche Zeilen —
+         * "Meistgespielte Karten (Format-Staples)", "von 60 Archetypen mit
+         * Deckliste", "Bild generieren", der Stern-Hinweis und 15
+         * Prozentzeilen samt deutschem Zahlenformat ("100,0 %" statt
+         * "100.0%").
+         *
+         * Bewusst NICHT renderCurrentMetaTopCards(): das laedt die Zeilen
+         * mit forceRefresh erneut. Einem Sprachklick ist kein zweiter
+         * Datenabruf zuzumuten — die Zahlen liegen in _staplesDaten schon
+         * fertig da. Gleicher Weg wie setStaplesAnzahl() darueber.
+         */
+        async function staplesWidgetNeuBeschriften() {
+            const behaelter = document.querySelector('.top-cards-container');
+            if (!behaelter || !_staplesDaten) return false;
+            behaelter.outerHTML = renderTopCardsWidget(_staplesDaten);
+            try {
+                await staplesDruckeAnwenden();
+            } catch (e) {
+                console.warn('[Staples] Druckmodus nach Sprachwechsel:', e);
+            }
+            return true;
+        }
+
         window.setStaplesAnzahl = setStaplesAnzahl;
         window.staplesListe = staplesListe;
 
@@ -2825,6 +2854,15 @@ document.addEventListener('languageChanged', () => {
         Promise.resolve()
             .then(() => renderCurrentMetaTierList())
             .catch(err => console.warn('[i18n] Current-Meta-Tier-Liste nicht neu gezeichnet:', err));
+    }
+    /* Befund A2 (30.08.2026): der Handler hier zog nur die beiden
+     * Tier-Listen nach, das Staples-Widget darueber blieb deutsch.
+     * Nur nachziehen, wenn es ueberhaupt schon steht. */
+    if (typeof staplesWidgetNeuBeschriften === 'function'
+        && document.querySelector('.top-cards-container')) {
+        Promise.resolve()
+            .then(() => staplesWidgetNeuBeschriften())
+            .catch(err => console.warn('[i18n] Staples-Widget nicht neu gezeichnet:', err));
     }
     const clMount = document.getElementById('cityLeagueTierSections');
     if (clMount && clMount.children.length && window.cityLeagueImageMap

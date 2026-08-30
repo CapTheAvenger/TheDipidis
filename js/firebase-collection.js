@@ -3838,7 +3838,9 @@ async function showDeckFolderSelectModal(options = {}) {
 
     const msg = document.createElement('p');
     msg.style.cssText = 'margin:0 0 14px;font-size:0.9em;color:#bbb;line-height:1.5';
-    msg.textContent = 'Select a folder for this deck.';
+    // Befund C (30.08.2026): der Ordner-Dialog sprach an vier Stellen
+    // fest englisch, waehrend der Rest der Seite deutsch war.
+    msg.textContent = t('folder.selectPrompt');
     modal.appendChild(msg);
 
     const select = document.createElement('select');
@@ -3847,7 +3849,7 @@ async function showDeckFolderSelectModal(options = {}) {
     if (includeNoFolder) {
       const noFolderOption = document.createElement('option');
       noFolderOption.value = '__NO_FOLDER__';
-      noFolderOption.textContent = '(No Folder)';
+      noFolderOption.textContent = t('folder.none');
       select.appendChild(noFolderOption);
     }
 
@@ -3861,7 +3863,7 @@ async function showDeckFolderSelectModal(options = {}) {
     if (includeCreateNew) {
       const createOption = document.createElement('option');
       createOption.value = '__NEW_FOLDER__';
-      createOption.textContent = '+ Create New Folder';
+      createOption.textContent = t('folder.createNew');
       select.appendChild(createOption);
     }
 
@@ -3877,7 +3879,7 @@ async function showDeckFolderSelectModal(options = {}) {
     btnRow.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;margin-top:16px';
 
     const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = 'Cancel';
+    cancelBtn.textContent = t('folder.cancel');
     cancelBtn.style.cssText = 'padding:8px 20px;border:1px solid #555;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;font-size:0.9em';
 
     const okBtn = document.createElement('button');

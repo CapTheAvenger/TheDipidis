@@ -693,7 +693,10 @@
                     description: t('cl.noDataFoundDesc'),
                     icon: 'cards'
                 });
-                countSpan.textContent = '0 Cards';
+                // Befund C (30.08.2026): '0 Cards' fest verdrahtet. Der
+                // Zaehler daneben sagte korrekt "90 Karten", dieser hier
+                // "0 Cards" — mit Bildschirmfoto belegt.
+                countSpan.textContent = '0 ' + t('cl.cards');
                 return;
             }
             
@@ -737,24 +740,24 @@
                     );
                     
                     if (matchingCards.length > 0) {
-                        // Check name_en, name_de, set+number, pokedex_number
-                        for (const card of matchingCards) {
-                            const nameEn = (card.name_en || card.name || '').toLowerCase();
-                            const nameDe = (card.name_de || '').toLowerCase();
-                            const setCode = (card.set || '').toLowerCase();
-                            const cardNum = (card.number || '').toLowerCase();
-                            const dexNum = (card.pokedex_number || '').toString();
-                            const setNumSpace = `${setCode} ${cardNum}`;
-                            const setNumCombined = `${setCode}${cardNum}`;
-                            
-                            if (nameEn.includes(term) ||
-                                nameDe.includes(term) ||
-                                setNumSpace.includes(term) ||
-                                setNumCombined.includes(term) ||
-                                (dexNum !== '' && dexNum === term) ||
-                                (term.length >= 3 && dexNum !== '' && dexNum.includes(term))) {
-                                return true;
-                            }
+                        // Befund D (30.08.2026): hier stand eine dritte,
+                        // handgeschriebene Kopie derselben Suchvorschrift,
+                        // deren Pokedex-Zweig `card.pokedex_number` las.
+                        // Diese Spalte ist in ALLEN 20.878 Zeilen von
+                        // data/all_cards_database.csv leer — gemessen fand
+                        // die Meta-Karten-Suche nach "52" (Meowth) und
+                        // "1016" (Fezandipiti) 0 Treffer, obwohl der
+                        // Platzhalter daneben Pokedex-Suche verspricht.
+                        //
+                        // Jetzt der gemeinsame filterCardsArray() aus
+                        // app-core.js: derselbe Vergleich, aber mit dem
+                        // Rueckfall auf window.pokedexNumbers (1064
+                        // Eintraege). Damit steht diese Ansicht hinter der
+                        // Funktion — sie war in der Auslieferung von
+                        // nirgends mehr aufgerufen (siehe Begruendung in
+                        // app-core.js).
+                        if (typeof window.filterCardsArray === 'function') {
+                            if (window.filterCardsArray(matchingCards, term).length > 0) return true;
                         }
                     }
                     
@@ -801,7 +804,8 @@
                 });
             }
             
-            countSpan.textContent = `${cards.length} Cards`;
+            // Befund C (30.08.2026): "15 Cards" auf deutscher Oberflaeche.
+            countSpan.textContent = `${cards.length} ${t('cl.cards')}`;
             
             if (cards.length === 0) {
                 // Daten sind da, der Filter laesst nichts uebrig. Der
@@ -984,7 +988,9 @@
             // Debug logging
             if (allAvailableCards.length === 0) {
                 console.warn('[searchDeckCards] allCardsDatabase is empty or not loaded yet');
-                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #444; font-weight: 500;">Loading card database...</div>';
+                // Befund C (30.08.2026): fester englischer Ladehinweis.
+                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #444; font-weight: 500;">'
+                    + escapeHtml(t('cdb.loadingDatabase')) + '</div>';
                 return;
             }
             
@@ -995,22 +1001,24 @@
             }
             
             // STAGE 1: Show unique card names - OMNI-SEARCH
-            const matchingCards = allAvailableCards.filter(card => {
-                const nameEn = (card.name_en || card.name || '').toLowerCase();
-                const nameDe = (card.name_de || '').toLowerCase();
-                const setCode = (card.set || '').toLowerCase();
-                const cardNum = (card.number || '').toLowerCase();
-                const dexNum = (card.pokedex_number || '').toString();
-                const setNumSpace = `${setCode} ${cardNum}`;
-                const setNumCombined = `${setCode}${cardNum}`;
-                
-                return nameEn.includes(searchTerm) ||
-                       nameDe.includes(searchTerm) ||
-                       setNumSpace.includes(searchTerm) ||
-                       setNumCombined.includes(searchTerm) ||
-                       (dexNum !== '' && dexNum === searchTerm) ||
-                       (searchTerm.length >= 3 && dexNum !== '' && dexNum.includes(searchTerm));
-            });
+            //
+            // Befund D (30.08.2026), zwei Fliegen: hier stand eine
+            // WORTGLEICHE Kopie von filterCardsArray() aus app-core.js —
+            // bis auf den Pokedex-Zweig, der `card.pokedex_number` las.
+            // Diese Spalte ist in allen 20.878 Zeilen leer, die Suche fand
+            // also 0 Treffer, obwohl der Platzhalter Pokedex verspricht.
+            //
+            // Zugleich war filterCardsArray() in der Auslieferung von
+            // NIRGENDS mehr aufgerufen: nur zwei Unit-Tests hielten die
+            // dort eingebaute Pokedex-Korrektur am Leben — toter Code, den
+            // Tests bestaetigen. Statt Funktion und Zusicherungen zu
+            // loeschen wird die Kopie hier durch den Aufruf ersetzt. Damit
+            // hat die Zusicherung wieder eine Ansicht hinter sich, und es
+            // gibt nur noch EINE Suchvorschrift statt zweier, die
+            // auseinanderlaufen koennen.
+            const matchingCards = (typeof window.filterCardsArray === 'function')
+                ? window.filterCardsArray(allAvailableCards, searchTerm)
+                : allAvailableCards;
             
             // Get unique card names
             const uniqueNames = [...new Set(matchingCards.map(c => c.name_en || c.name))].sort();
@@ -1018,7 +1026,9 @@
             devLog(`[searchDeckCards] Search term: "${searchTerm}", found ${uniqueNames.length} unique cards (${matchingCards.length} versions)`);
             
             if (uniqueNames.length === 0) {
-                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #444; font-weight: 500;">No cards found</div>';
+                // Befund C (30.08.2026): festes 'No cards found'.
+                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #444; font-weight: 500;">'
+                    + escapeHtml(t('cl.noCardsFound')) + '</div>';
                 return;
             }
             
@@ -1579,7 +1589,8 @@
                     
                     thOldRank.remove();
                     thRankDelta.remove();
-                    thNewRank.textContent = 'Rank';
+                    // Befund C (30.08.2026): fester Spaltenkopf 'Rank'.
+                    thNewRank.textContent = t('cl.rank');
                     
                     // Update each data row
                     const rows = table.querySelectorAll('tbody tr');
@@ -1880,3 +1891,31 @@
                 console.error('[ERR] Error patching Meta stats:', error);
             }
         }
+
+/* Sprachwechsel zeichnet die beiden Meta-Karten-Gitter neu.
+ *
+ * URSACHE (gemessen 30.08.2026): renderMetaCards() baut Gitter und
+ * Zaehler als HTML-String und setzt sie per innerHTML; switchLanguage()
+ * ruft nur updateTranslationsInDOM(), und das fasst ausschliesslich
+ * Elemente mit data-i18n an. FOLGE: nach dem Umschalten blieb der
+ * Zaehler stehen — in der Richtung EN->DE zuletzt als "12 Cards" neben
+ * einer sonst deutschen Ansicht (die einzige veraltete Zeile, die nach
+ * den Befunden A1 bis A4 noch uebrig war).
+ *
+ * Nur neu zeichnen, wenn die Ansicht schon Daten hat — sonst wuerde ein
+ * Sprachwechsel auf einer anderen Seite die Leermeldung in einen
+ * verborgenen Reiter schreiben. Vorbild: js/app-quellen.js.
+ */
+document.addEventListener('languageChanged', () => {
+    for (const quelle of ['cityLeague', 'currentMeta']) {
+        const gitterId = quelle === 'cityLeague' ? 'cityLeagueMetaGrid' : 'currentMetaMetaGrid';
+        const gitter = document.getElementById(gitterId);
+        if (!gitter || !gitter.children.length) continue;
+        if (!metaCardData[quelle] || !metaCardData[quelle].length) continue;
+        try {
+            renderMetaCards(quelle);
+        } catch (err) {
+            console.warn('[i18n] Meta-Karten (' + quelle + ') nicht neu gezeichnet:', err);
+        }
+    }
+});

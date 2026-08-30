@@ -1344,6 +1344,32 @@ const BASE_PATH = './data/';
 
         loadProxyQueue();
 
+        /* Befund A3 (30.08.2026): app-core.js hatte GAR KEINEN
+         * languageChanged-Listener.
+         *
+         * URSACHE: renderProxyQueue() baut die Warteschlange als
+         * HTML-String und setzt sie per innerHTML; switchLanguage() ruft
+         * nur updateTranslationsInDOM(), und das fasst ausschliesslich
+         * Elemente mit data-i18n an. FOLGE: nach dem Umschalten von
+         * Deutsch auf Englisch blieb im Proxy Printer die Zeile
+         * "Warteschlange leer - Karten ueber die »Proxy«-Knoepfe
+         * hinzufuegen." stehen (1 von 21 erfassten Zeilen des Reiters,
+         * gemessen gegen einen frischen EN-Ladevorgang) — ebenso alle
+         * Beschriftungen der Karten in einer gefuellten Warteschlange.
+         *
+         * Nur neu zeichnen, wenn die Liste ueberhaupt schon gezeichnet
+         * ist. Vorbild: js/app-quellen.js.
+         */
+        document.addEventListener('languageChanged', function () {
+            const list = document.getElementById('proxyQueueList');
+            if (!list || !list.children.length) return;
+            try {
+                renderProxyQueue();
+            } catch (err) {
+                console.warn('[i18n] Proxy-Warteschlange nicht neu gezeichnet:', err);
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             clearLegacyProxyQueueStorage();
             window.proxyQueue = [];
@@ -1362,6 +1388,138 @@ const BASE_PATH = './data/';
             }, { passive: false });
         });
         
+        /* ── Uebersichtssuche: melden, nicht verschweigen ──────────
+         *
+         * Befund E (30.08.2026). Die Uebersicht der Deck-Analysen filtert
+         * die Kacheln, indem sie einzelne .card-item versteckt. Die drei
+         * Abschnittskoepfe darueber ("Kernkarten", "Optionen", "Situativ")
+         * werden dagegen EINMAL gebaut und danach nie wieder angefasst.
+         * FOLGE, gemessen: bei 0 Treffern standen sie mitsamt ihren
+         * UNGEFILTERTEN Zahlen weiter da — "Kernkarten 14 / Optionen 9 /
+         * Situativ 21" — waehrend der Zaehler daneben "0 Karten" sagte.
+         * Die Seite widersprach sich also selbst. Vergangenes Meta blieb
+         * bei 0 Treffern voellig leer, ohne ein Wort.
+         *
+         * Projektregel: melden, nicht verschweigen. Vorbild ist die
+         * Kartendatenbank ("Keine Karten gefunden — Filtereinstellungen
+         * anpassen", cdb.noCardsFound / cdb.adjustFilters).
+         *
+         * Ein Helfer fuer alle drei Ansichten, weil sie sich sonst wieder
+         * auseinander entwickeln — sie verstecken Kacheln schon heute auf
+         * drei Arten (d-none in City League und Vergangenes Meta,
+         * style.display in der globalen Analyse), darum fragt der Zaehler
+         * unten beide Wege ab.
+         */
+        function uebersichtSuchergebnisMelden(gridContainer, sichtbareGesamt) {
+            if (!gridContainer) return;
+            const versteckt = el => el.classList.contains('d-none')
+                || el.style.display === 'none';
+
+            // 1) Abschnittskoepfe mitziehen: eigene Zahl, und weg, wenn
+            //    dieser Abschnitt gerade nichts mehr zeigt.
+            gridContainer.querySelectorAll('.meta-card-skeleton-section').forEach(sec => {
+                const karten = sec.querySelectorAll('.card-item');
+                let sichtbar = 0;
+                karten.forEach(k => { if (!versteckt(k)) sichtbar++; });
+                const zaehler = sec.querySelector('.meta-card-skeleton-count');
+                if (zaehler) zaehler.textContent = String(sichtbar);
+                sec.classList.toggle('d-none', karten.length > 0 && sichtbar === 0);
+            });
+
+            // 2) Bei null Treffern eine Meldung, sonst keine.
+            //
+            // KLASSE, keine id: es gibt drei Uebersichten (Japan, Global,
+            // Vergangenes Meta) und drei gleiche id-Werte im selben
+            // Dokument waeren ungueltig.
+            let hinweis = gridContainer.querySelector('.' + UEBERSICHT_LEER_KLASSE);
+            if (sichtbareGesamt > 0) {
+                if (hinweis) hinweis.remove();
+                return;
+            }
+            if (!hinweis) {
+                hinweis = document.createElement('div');
+                hinweis.className = UEBERSICHT_LEER_KLASSE;
+                hinweis.setAttribute('role', 'status');
+                hinweis.setAttribute('aria-live', 'polite');
+                gridContainer.appendChild(hinweis);
+            }
+            uebersichtLeermeldungBeschriften(hinweis);
+        }
+
+        // Der Wortlaut der Leermeldung, in der aktiven Sprache. Getrennt,
+        // weil ihn auch der Sprachwechsel unten braucht: die Meldung wird
+        // per innerHTML gebaut und traegt kein data-i18n, wird von
+        // updateTranslationsInDOM() also nicht erreicht.
+        const UEBERSICHT_LEER_KLASSE = 'ds-uebersicht-leer';
+        function uebersichtLeermeldungBeschriften(hinweis) {
+            const titel = t('cdb.noCardsFound');
+            const text  = t('cdb.adjustFilters');
+            hinweis.innerHTML = (typeof getEmptyStateBoxHtml === 'function')
+                ? getEmptyStateBoxHtml({ title: titel, description: text, icon: 'cards' })
+                : ('<div class="empty-state-box"><div class="empty-state-title">' + titel
+                   + '</div><div class="empty-state-desc">' + text + '</div></div>');
+        }
+
+        document.addEventListener('languageChanged', () => {
+            document.querySelectorAll('.' + UEBERSICHT_LEER_KLASSE)
+                .forEach(uebersichtLeermeldungBeschriften);
+        });
+
+        if (typeof window !== 'undefined') {
+            window.uebersichtSuchergebnisMelden = uebersichtSuchergebnisMelden;
+        }
+
+        /* ── Beschriftung der Raster/Liste-Umschalter ──────────────
+         *
+         * Befund B (30.08.2026), zwei getrennte Fehler, beide gemessen.
+         *
+         * (1) Die STARTbeschriftung log. In der Deck-Analyse Japan
+         *     ueberschrieben zwei Stellen in app-city-league.js sie mit
+         *     dem festen englischen Wort 'List View' — auch auf Deutsch.
+         *     In den beiden anderen Analysen stand data-i18n="cl.btnGrid",
+         *     und dieser Schluessel trug in BEIDEN Sprachbloecken den
+         *     englischen Wert 'Grid'. Gemessene Starttabelle:
+         *       Japan "List View" / Global "Grid" / Vergangen "Grid".
+         *
+         * (2) Jeder Sprachwechsel warf die ZUSTANDSABHAENGIGE
+         *     Beschriftung weg: updateTranslationsInDOM() setzt den
+         *     statischen data-i18n-Wert zurueck. Im Rasterzustand
+         *     versprach der Knopf danach das, was schon auf dem Schirm
+         *     war ("Grid View", waehrend das Raster stand).
+         *
+         * Deshalb tragen die drei Umschalter KEIN data-i18n mehr, sondern
+         * data-view-toggle mit ihrem Zustand ("grid" oder "list"). Der
+         * Zustand ist die einzige Quelle der Beschriftung, und beschriftet
+         * wird immer das ZIEL des Klicks, nie der aktuelle Zustand:
+         *   Raster sichtbar -> "Listenansicht" / "List View"
+         *   Liste  sichtbar -> "Rasteransicht" / "Grid View"
+         */
+        function ansichtsUmschalterBeschriften(btn, zustand) {
+            if (!btn || !btn.setAttribute) return;
+            if (zustand === 'grid' || zustand === 'list') {
+                btn.setAttribute('data-view-toggle', zustand);
+            }
+            const rasterSichtbar = btn.getAttribute('data-view-toggle') !== 'list';
+            btn.textContent = rasterSichtbar ? t('btn.listView') : t('btn.gridView');
+        }
+
+        function alleAnsichtsUmschalterBeschriften() {
+            document.querySelectorAll('[data-view-toggle]')
+                .forEach(btn => ansichtsUmschalterBeschriften(btn));
+        }
+
+        if (typeof window !== 'undefined') {
+            window.ansichtsUmschalterBeschriften = ansichtsUmschalterBeschriften;
+            window.alleAnsichtsUmschalterBeschriften = alleAnsichtsUmschalterBeschriften;
+        }
+
+        // Startbeschriftung: das HTML traegt nur einen Platzhalter, weil
+        // die richtige Beschriftung vom Zustand abhaengt.
+        document.addEventListener('DOMContentLoaded', alleAnsichtsUmschalterBeschriften);
+        // Und nach jedem Sprachwechsel neu — mit dem Zustand, den der
+        // Knopf gerade traegt, statt mit einem festen Wortlaut.
+        document.addEventListener('languageChanged', alleAnsichtsUmschalterBeschriften);
+
         // Tab switching
         function switchTab(tabName) {
             const tabs = document.querySelectorAll('.tab-content');
@@ -3116,6 +3274,39 @@ const BASE_PATH = './data/';
                        (dexNum !== '' && dexNum === term) ||
                        (term.length >= 3 && dexNum !== '' && dexNum.includes(term));
             });
+        }
+
+        /* Befund D (30.08.2026): filterCardsArray() war in der
+         * AUSLIEFERUNG von nirgends mehr aufgerufen — nur zwei Unit-Tests
+         * riefen sie noch, die eingebaute Pokedex-Korrektur war also
+         * toter Code, den Tests trotzdem bestaetigten.
+         *
+         * ENTSCHEIDUNG: die Funktion bleibt und wird wieder benutzt, statt
+         * sie samt Zusicherungen zu loeschen.
+         *
+         * Grund: in app-meta-cards.js standen ZWEI handgeschriebene Kopien
+         * genau dieses Filters — in renderMetaCards() und in
+         * searchDeckCards(). Beide waren wortgleich bis auf den
+         * Pokedex-Zweig, der die leere CSV-Spalte pokedex_number las und
+         * deshalb nichts fand. Drei Kopien derselben Suchvorschrift, von
+         * denen zwei bereits auseinandergelaufen sind, waren das
+         * eigentliche Problem; loeschen haette die beiden ungeprueften
+         * Kopien zurueckgelassen.
+         *
+         * Seit dem 30.08.2026 rufen beide Stellen window.filterCardsArray.
+         * renderMetaCards() ist die LIVE-Ansicht, an der die Zusicherungen
+         * jetzt haengen — gemessen: Meta-Karten-Suche nach "52" (Meowth)
+         * 0 -> 1 Treffer, nach "1016" (Fezandipiti) 0 -> 1 Treffer.
+         * searchDeckCards() ist dagegen selbst unerreichbar: die Elemente
+         * cityLeagueDeckCardSearch / cityLeagueDeckSearchResults (und die
+         * beiden Geschwister) kommen im ganzen Projekt nur noch in
+         * getElementById-Aufrufen und in zwei verwaisten CSS-Regeln vor,
+         * in keinem HTML. Diese Aenderung dort ist also nur am Quelltext
+         * geprueft, nicht im Browser — sie beseitigt die Kopie, nicht
+         * einen sichtbaren Fehler.
+         */
+        if (typeof window !== 'undefined') {
+            window.filterCardsArray = filterCardsArray;
         }
 
         function getCardVersionsByName(cardName) {

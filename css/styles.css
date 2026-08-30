@@ -1221,9 +1221,18 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
+        /* BEFUND (30.08.2026, Abnahme): `color: #333` fest. Diese Regel
+           (0,1,1) gewinnt gegen `.meta-card-skeleton-title` (0,1,0) und
+           hat die Reparatur dort ausgehebelt: im Dunkelmodus stand
+           "Kernkarten" und "Optionen" mit #333333 auf #0b0f1e — 1,51:1,
+           noetig sind 3,0 fuer grosse Schrift. Die dritte Ueberschrift
+           daneben ("Situativ") ist ein <summary><span> und wurde von
+           dieser Regel nicht erfasst; deshalb fiel im selben Bild eine
+           Zeile aus und zwei nicht.
+           --ink kippt mit dem Modus. */
         .deck-visual h3 {
             margin-bottom: 12px;
-            color: #333;
+            color: var(--ink);
             text-align: center;
             font-size: 1.3em;
         }
@@ -9999,10 +10008,19 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .meta-card-skeleton-section.meta-card-skeleton-niche[open] > summary::before {
     transform: rotate(90deg);
 }
+/* BEFUND (30.08.2026, Abnahme): die Farbe stand fest auf #f4f7fb —
+   nahezu weiss. Im HELLmodus ist die Ueberschrift damit unsichtbar:
+   gemessen stand "Situativ" als leere Zeile da, waehrend die
+   Geschwister "Kernkarten" und "Optionen" (die eine konkurrierende
+   h3-Regel erwischt) lesbar blieben. Im DUNKELmodus dieselbe Klasse in
+   der anderen Richtung: #333333 auf #121625 = 1,42:1, noetig sind 3,0
+   fuer grosse Schrift.
+   Eine Klasse, zwei fest verdrahtete Farben, keine fuer beide Modi.
+   --ink kippt mit dem Modus und loest beide Faelle. */
 .meta-card-skeleton-title {
     font-size: 1rem;
     font-weight: 700;
-    color: #f4f7fb;
+    color: var(--ink);
     margin: 0 0 10px 0;
     display: flex;
     align-items: center;

@@ -163,14 +163,54 @@ describe('Der Raster-Umschalter blendet auch wieder ein', () => {
             }
         });
 
+        // Seit dem 30.08.2026 (Befund B) steht die Beschriftung nicht mehr
+        // in den drei Umschaltern, sondern in EINEM Helfer in app-core.js.
+        // Grund: der alte Aufbau schrieb den Wortlaut direkt in den Knopf,
+        // und der naechste Sprachwechsel warf ihn wieder weg. Die
+        // Umschalter melden dem Helfer jetzt nur noch ihren ZUSTAND;
+        // welcher Wortlaut dazugehoert, entscheidet er.
+        //
+        // Die Zusage prueft deshalb beides: dass der Umschalter BEIDE
+        // Zustaende meldet, und (weiter unten, einmal) dass der Helfer
+        // beide i18n-Schluessel liest.
         it(`${was}: die Beschriftung kippt mit`, () => {
             const i = quelle.indexOf('function ' + fn);
             const rumpf = quelle.slice(i, i + 2500);
-            assert.match(rumpf, /btn\.gridView/,
-                `${was}: die Beschriftung "Rasteransicht" fehlt`);
-            assert.match(rumpf, /btn\.listView/,
-                `${was}: die Beschriftung "Listenansicht" fehlt — dann bleibt ` +
-                `sie nach dem ersten Klick stehen, wie vor der Reparatur`);
+            // Beide Schreibweisen sind im Haus: zwei Zweige mit je einem
+            // festen Zustand (Global, Japan) und ein Fragezeichen-Ausdruck
+            // (Vergangenes Meta). Geprueft wird deshalb nicht die
+            // Schreibweise, sondern dass in den Argumenten der Aufrufe
+            // BEIDE Zustaende vorkommen.
+            const argumente = [];
+            let pos = rumpf.indexOf('ansichtsUmschalterBeschriften(');
+            while (pos !== -1) {
+                const auf = rumpf.indexOf('(', pos);
+                let tiefe = 0;
+                for (let k = auf; k < rumpf.length; k++) {
+                    if (rumpf[k] === '(') tiefe++;
+                    else if (rumpf[k] === ')') {
+                        tiefe--;
+                        if (tiefe === 0) { argumente.push(rumpf.slice(auf, k + 1)); break; }
+                    }
+                }
+                pos = rumpf.indexOf('ansichtsUmschalterBeschriften(', pos + 1);
+            }
+            assert.ok(argumente.length > 0,
+                `${was}: der Beschriftungshelfer wird gar nicht gerufen — dann ` +
+                `traegt der Knopf, was zuletzt im HTML stand`);
+            const alleArgumente = argumente.join(' ');
+            assert.ok(alleArgumente.includes("'grid'"),
+                `${was}: der Zustand "grid" wird dem Beschriftungshelfer nicht ` +
+                `gemeldet — dann verspricht der Knopf im Rasterzustand das, ` +
+                `was schon da ist`);
+            assert.ok(alleArgumente.includes("'list'"),
+                `${was}: der Zustand "list" wird nicht gemeldet — dann bleibt ` +
+                `die Beschriftung nach dem ersten Klick stehen, wie vor der ` +
+                `Reparatur`);
+            assert.doesNotMatch(rumpf, /textContent\s*=\s*t\('btn\.(grid|list)View'\)/,
+                `${was}: die Beschriftung wird wieder direkt in den Knopf ` +
+                `geschrieben — genau das ueberschreibt der naechste ` +
+                `Sprachwechsel mit dem statischen data-i18n-Wert`);
         });
     }
 });

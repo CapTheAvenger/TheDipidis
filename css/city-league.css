@@ -641,7 +641,16 @@
     margin-bottom: 18px;
 }
 .past-meta-stat-card {
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 10px;
     padding: 14px 20px;
     min-width: 200px;
@@ -777,7 +786,16 @@
 
 .past-meta-cards-header {
     display: block;
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 14px;
     padding: 16px 20px;
     border: 1px solid rgba(59, 76, 202, 0.10);
@@ -1011,7 +1029,16 @@
     margin-bottom: 18px;
 }
 .current-meta-stat-card {
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 10px;
     padding: 14px 20px;
     min-width: 200px;
@@ -1041,7 +1068,16 @@
 .current-meta-top256-section {
     margin-top: 14px;
     padding: 14px 20px;
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(59, 76, 202, 0.08);
     border-left: 3px solid var(--pokemon-blue, #3B4CCA);
@@ -1167,7 +1203,16 @@
 }
 .current-meta-cards-header {
     display: block;
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 14px;
     padding: 16px 20px;
     border: 1px solid rgba(59, 76, 202, 0.10);
@@ -1589,7 +1634,16 @@
 .city-league-hand-stats {
     display: none;
     padding: 8px 15px;
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 8px;
     margin-bottom: 8px;
     border: 1px solid rgba(59, 76, 202, 0.06);
@@ -1784,7 +1838,16 @@
 .city-league-cards-header {
     display: block;
     margin-bottom: 20px;
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 14px;
     padding: 18px 22px;
     border: 1px solid rgba(59, 76, 202, 0.10);
@@ -1886,7 +1949,16 @@
     gap: 14px;
 }
 .city-league-stat-card {
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 10px;
     padding: 12px 16px;
     min-width: 0;
@@ -1958,7 +2030,16 @@
     padding: 40px;
     color: var(--ink-3);
     font-weight: 600;
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 12px;
     border: 1px solid rgba(59, 76, 202, 0.08);
     margin: 12px 0;
@@ -2920,7 +3001,16 @@
     .current-meta-quickref-grid { grid-template-columns: 1fr; }
 }
 .current-meta-quickref-col {
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 12px;
     padding: 14px 16px;
     border: 1px solid rgba(59, 76, 202, 0.12);
@@ -2968,7 +3058,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
+       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
+       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
+       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
+       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
+       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
+       Dunkeln praktisch nicht zu lesen.
+       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
+       traegt die Kennung weiter. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
 }
 .three-way-compare-header h3 {
     margin: 0;

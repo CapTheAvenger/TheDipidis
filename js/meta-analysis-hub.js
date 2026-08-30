@@ -39,36 +39,12 @@
         // i18n returns either an array (preferred) or a comma-separated string;
         // fall back to English defaults if the key is missing.
         const fallbacks = {
-            cityLeague: [
-                'Aktuelle Meta-Verteilung aus japanischen Cardshop-Turnieren',
-                'Wöchentliche Trends und Tier-Bewegungen',
-                'Schnellster Frühindikator vor internationalen Major-Turnieren'
-            ],
-            cityLeagueAnalysis: [
-                'Tiefenanalyse einzelner Decks aus der City League',
-                'Karten-Verteilung, Standard-Listen und häufige Tech-Picks',
-                'Matchup-Win-Rates aus japanischen Turnieren'
-            ],
-            currentMeta: [
-                'Online-Turnier-Auswertung von play.limitlesstcg.com',
-                'Top-8 / Top-16-Conversion pro Deck',
-                'Globale Sicht, näher am EU/US-Wettbewerbsumfeld'
-            ],
-            currentMetaAnalysis: [
-                'Tiefenanalyse globaler Online-Decks',
-                'Karten-Listen, Hand-Stats und Win-Rates',
-                'Detail-Sicht für Spieler, die international antreten'
-            ],
-            pastMeta: [
-                'Historische Major-Turnier-Daten (Regionals, IC, Worlds)',
-                'Ergebnisse vergangener Standard-Formate',
-                'Lerne aus der Geschichte für zukünftige Meta-Calls'
-            ],
-            metaCall: [
-                'Vorhersage der Meta-Verteilung für dein nächstes Turnier',
-                'Eigene Schätzungen mit Online-Daten kombinieren',
-                'Erwartete Begegnungen pro Runde inkl. Matchup-Übersicht'
-            ]
+            cityLeague: ['Was in Japan gerade gespielt wird — der früheste Indikator.'],
+            cityLeagueAnalysis: ['Ein japanisches Deck von innen: Karten, Anteile, Matchups.'],
+            currentMeta: ['Was online und auf Majors gespielt wird.'],
+            currentMetaAnalysis: ['Ein globales Deck von innen: Karten, Anteile, Matchups.'],
+            pastMeta: ['Abgeschlossene Formate, eingefroren — zum Vergleichen.'],
+            metaCall: ['Was auf deinem nächsten Turnier stehen wird.'],
         };
         const key = `metaHub.tile.${tileKey}.bullets`;
         if (typeof window.t === 'function') {

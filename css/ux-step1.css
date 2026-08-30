@@ -14,9 +14,26 @@
     --ui-primary-end: #2f53c3;
     --ui-primary-border: #2d4db7;
 
-    --ui-secondary-start: #2fac67;
-    --ui-secondary-end: #1f9255;
-    --ui-secondary-border: #1d884f;
+    /* 30.08.2026: stand auf #2fac67 -> #1f9255. Weisse Schrift darauf
+       ergibt 2,91:1 am hellen und 3,96:1 am dunklen Ende — beide unter
+       4,5. Betrifft .btn-secondary, .btn-green, .btn-gradient-green und
+       .btn-modern.success, zusammen 19 Stellen in index.html plus die
+       JS-erzeugten; gemessen an den Filterknoepfen "Limitless Decks"
+       und "Major-Decks" der Meta-Ansicht.
+
+       Dass es so lange stand, ist der eigentliche Befund: der Rot-Ton
+       daneben wurde am 29.08. aus GENAU DIESEM Grund korrigiert, und
+       in css/tokens.css:253 steht seit damals `--solid-ok: #1d7f46`
+       mit dem Vermerk "weiss darauf 5,03:1". Der Verlauf hier wurde
+       bei der Umstellung uebersehen — die flache Farbe war richtig,
+       der Verlauf blieb falsch.
+
+       Neu: 4,50:1 am hellen und 6,48:1 am dunklen Ende. Das helle Ende
+       ist das hellste Gruen, das 4,5 noch haelt — dunkler als noetig
+       waere hier kein Gewinn, der Knopf soll gruen bleiben. */
+    --ui-secondary-start: #208844;
+    --ui-secondary-end: #196c36;
+    --ui-secondary-border: #176331;
 
     /* 29.08.2026: stand auf #e2564a — weisse Schrift darauf ergibt
        3,71:1 und verfehlt 4,5. Betrifft jeden .btn-danger und

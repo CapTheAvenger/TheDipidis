@@ -627,6 +627,22 @@ img[src*="limitlesstcg"] {
     transition: opacity 0.2s, box-shadow 0.2s;
 }
 /* Card badge utility classes */
+/*
+ * BEFUND (30.08.2026, auf 390 px gemessen): die Abzeichen auf jeder
+ * Karte (+ / - / Wunschliste / Druckwechsel) rendern mit 18 x 18 px.
+ * Das ist die groesste einzelne Gruppe zu kleiner Tippziele auf der
+ * Seite — allein in der Kartendatenbank 95 von 111.
+ *
+ * Sie duerfen nicht groesser AUSSEHEN: vier Abzeichen sitzen in den
+ * Ecken eines Kartenbildes, und ein 44er Kreis wuerde das Bild
+ * zudecken. Die sichtbare Groesse bleibt deshalb, und die Trefferflaeche
+ * waechst darunter per ::after — unsichtbar, aber tippbar.
+ *
+ * 44 px auf einem 18-px-Abzeichen hiesse 13 px Ueberstand nach jeder
+ * Seite; bei zwei Abzeichen in derselben Ecke ueberlappten sich die
+ * Flaechen. Deshalb 40 px: genug fuer einen Daumen, ohne dass zwei
+ * benachbarte Abzeichen dieselbe Beruehrung einfangen.
+ */
 .card-badge {
     position: absolute !important;
     border-radius: 50% !important;
@@ -640,6 +656,24 @@ img[src*="limitlesstcg"] {
     box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
     z-index: 2 !important;
 }
+/* Die vergroesserte Trefferflaeche. Liegt UNTER dem Abzeichen
+   (z-index 1 gegen dessen 2), damit sie nichts ueberdeckt, und ist
+   fuer Zeigegeraete ohne Feinsteuerung gedacht — auf der Maus stoert
+   sie nicht, weil sie durchsichtig ist. */
+@media (pointer: coarse) {
+    .card-badge::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        z-index: -1;
+    }
+}
+
 .card-badge-top-right {
     top: 5px !important;
     right: 5px !important;

@@ -880,7 +880,25 @@ def aggregate_card_data(all_decks: List[DeckEntry], card_db: CardDatabaseLookup,
         else:
             group_key = arch
         grouped_deck_counts[group_key] += 1
-        seen: Set[str] = set()
+        # BEFUND (30.08.2026): `max_count` wurde ueber die einzelne
+        # DRUCKZEILE gebildet, `total_count` aber ueber alle Drucke
+        # derselben Karte in einem Deck. Spielt ein Deck 3x Applin
+        # TWM 126 und 1x Applin aus einem anderen Druck, stand
+        # total_count auf 4 und max_count auf 3 — und die Spalte
+        # behauptete, hoechstens drei Kopien laegen im Deck.
+        #
+        # Gemessen: 365 in sich widerspruechliche Zeilen in drei
+        # ausgelieferten Dateien (city_league_analysis_M3.csv 358,
+        # current_meta_card_data.csv 5, city_league_analysis_past.csv 2).
+        # Sichtbar wurde es beim Kopieren einer Deckliste aus einer
+        # einzigen Auswahl: dort liest die Oberflaeche `max_count`, und
+        # 264 von 4.129 Auswahlen kamen auf 56 bis 59 statt 60.
+        #
+        # `max_count` heisst "so viele Kopien lagen hoechstens in EINEM
+        # Deck". Also erst je Deck zusammenzaehlen, dann das Maximum
+        # nehmen. Nebenbei faellt `seen` weg: die Menge der Namen dieses
+        # Decks ist jetzt ohnehin da.
+        pro_deck: DefaultDict[str, int] = defaultdict(int)
         for c in deck.get('cards', []):
             name = c.get('name', '')
             if not name:
@@ -893,14 +911,16 @@ def aggregate_card_data(all_decks: List[DeckEntry], card_db: CardDatabaseLookup,
                 continue
 
             grouped_cards[group_key][name]['total_count'] += count
-            grouped_cards[group_key][name]['max_count'] = max(grouped_cards[group_key][name]['max_count'], count)
+            pro_deck[name] += count
             sc = str(c.get('set_code', '') or c.get('set', ''))
             sn = str(c.get('set_number', '') or c.get('number', ''))
             if sc and sn:
                 grouped_cards[group_key][name]['set_versions'][(sc, sn)] += count
-            if name not in seen:
-                grouped_cards[group_key][name]['deck_count'] += 1
-                seen.add(name)
+
+        for name, im_deck in pro_deck.items():
+            eintrag = grouped_cards[group_key][name]
+            eintrag['max_count'] = max(eintrag['max_count'], im_deck)
+            eintrag['deck_count'] += 1
 
     result: List[RowDict] = []
     for group_key, cards in grouped_cards.items():

@@ -69,6 +69,7 @@ const translations = {
     'menu.playtester':        'Playtester',
     'menu.profile':           'My Profile',
     'menu.howToUse':          'How to Use',
+    'menu.quellen':           'Sources & Method',
     'menu.sideQuest':         'Side Quest: Pokémon Champions Replica',
 
     // ── Tab labels ───────────────────────────────────────────
@@ -1753,7 +1754,7 @@ const translations = {
     'filter.dateFormatHint':    'DD.MM.YYYY',
 
     // ── Tab 3: Current Meta ──────────────────────────────────
-    'cm.limitlessHeading':      'Limitless Online Comparison',
+    'cm.limitlessHeading':      'Current meta',
 
     // ── Tab 4: Current Meta Deck Analysis ────────────────────
     'cm.analysisHeading':       'Current Meta Deck Analysis',
@@ -2253,6 +2254,7 @@ const translations = {
     'menu.playtester':        'Playtester',
     'menu.profile':           'Mein Profil',
     'menu.howToUse':          'Anleitung',
+    'menu.quellen':           'Quellen & Methodik',
     'menu.sideQuest':         'Side Quest: Pokémon Champions Replica',
 
     // ── Tab labels ───────────────────────────────────────────
@@ -3911,7 +3913,7 @@ const translations = {
     'filter.dateFormatHint':    'TT.MM.JJJJ',
 
     // ── Tab 3: Current Meta ──────────────────────────────────
-    'cm.limitlessHeading':      'Limitless Online Vergleich',
+    'cm.limitlessHeading':      'Aktuelles Meta',
 
     // ── Tab 4: Current Meta Deck Analysis ────────────────────
     'cm.analysisHeading':       'Deck-Analyse: aktuelles Meta',

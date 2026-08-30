@@ -1418,6 +1418,14 @@ const BASE_PATH = './data/';
                     // Folge, gemessen am 26.08.2026: Reiter "Teams" komplett
                     // leer, waehrend die Daten (81 Teams) einwandfrei geladen
                     // waren. Die Nachbarn hier machen es genauso.
+                    // Quellen & Methodik zeichnet sich nicht von selbst:
+                    // der Inhalt haengt an der Sprache und wird deshalb
+                    // beim Oeffnen gebaut, nicht beim Laden der Seite.
+                    case 'quellen':
+                        if (window.Quellen && typeof window.Quellen.render === 'function') {
+                            window.Quellen.render();
+                        }
+                        break;
                     case 'side-quest':
                         if (window.sideQuest && typeof window.sideQuest.render === 'function') {
                             const teamsHost = document.getElementById('sideQuestTeamsHost');

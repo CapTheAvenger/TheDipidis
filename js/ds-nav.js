@@ -79,24 +79,24 @@
         'past-meta':            'past'
     };
 
+    // Der Trennungshinweis stand bis zum 30.08.2026 als eigene Zeile
+    // unter JEDEM Ausweis — auf jeder Datenseite, bei jedem Aufruf,
+    // derselbe Satz. Er ist richtig und wichtig, aber er gehoert einmal
+    // erklaert, nicht dreimal wiederholt: die Region steht ohnehin
+    // gross im Ausweis ("🌐 Global", "🇯🇵 Japan"), und genau das ist
+    // die Aussage. Der Satz dazu steht jetzt unter Quellen & Methodik.
     var SPACE_TEXT = {
         jp: {
-            de: { region: '🇯🇵 Japan · City League', source: 'limitlesstcg.com/jp',
-                  note: 'Global und Past werden getrennt geführt und nie mit diesen Zahlen gemischt.' },
-            en: { region: '🇯🇵 Japan · City League', source: 'limitlesstcg.com/jp',
-                  note: 'Global and Past are kept separate and never mixed into these numbers.' }
+            de: { region: '🇯🇵 Japan · City League', source: 'limitlesstcg.com/jp' },
+            en: { region: '🇯🇵 Japan · City League', source: 'limitlesstcg.com/jp' }
         },
         gl: {
-            de: { region: '🌐 Global · Online + Majors', source: 'Limitless Online',
-                  note: 'Japan und Past werden getrennt geführt und nie mit diesen Zahlen gemischt.' },
-            en: { region: '🌐 Global · Online + Majors', source: 'Limitless Online',
-                  note: 'Japan and Past are kept separate and never mixed into these numbers.' }
+            de: { region: '🌐 Global · Online + Majors', source: 'Limitless Online' },
+            en: { region: '🌐 Global · Online + Majors', source: 'Limitless Online' }
         },
         past: {
-            de: { region: '📦 Past · eingefrorene Formate', source: 'Limitless Labs',
-                  note: 'Japan und Global werden getrennt geführt und nie mit diesen Zahlen gemischt.' },
-            en: { region: '📦 Past · frozen formats', source: 'Limitless Labs',
-                  note: 'Japan and Global are kept separate and never mixed into these numbers.' }
+            de: { region: '📦 Past · eingefrorene Formate', source: 'Limitless Labs' },
+            en: { region: '📦 Past · frozen formats', source: 'Limitless Labs' }
         }
     };
 
@@ -256,11 +256,15 @@
         // "TEF-PBL" direkt untereinander liest sich wie ein Fehler.
         // Der Ausweis behaelt, was der Filter nicht zeigt — Quelle,
         // Stichprobe, Stand und den Trennungshinweis.
-        var fmt = formatFor(key);
-        if (fmt.label) {
-            bits.push('<span class="ds-space-format"><b>' + f.format + '</b> ' + esc(fmt.label) +
-                (fmt.since ? esc(' (' + f.since + ' ' + fmt.since + ')') : '') + '</span>');
-        }
+        // Das Format stand bis zum 30.08.2026 auch hier — und damit
+        // VIERMAL auf demselben Bildschirm: im Ausweis, im
+        // Datenraum-Filter direkt darunter, in der Ueberschrift und im
+        // Kopf der Deckempfehlung. Der Filter zeigt es gross und ist
+        // bedienbar; der Ausweis wiederholte es nur. Er behaelt jetzt,
+        // was sonst nirgends steht: Quelle, Stichprobe und Stand.
+        //
+        // formatFor() bleibt — die Ueberschrift der Meta-Ansicht holt
+        // sich das Kuerzel von dort (formatMarke weiter unten).
 
         bits.push('<span><b>' + f.source + '</b> ' + esc(t.source) + '</span>');
 
@@ -280,8 +284,12 @@
         else if (facts.luecke) bits.push('<span class="ds-space-pause">' + esc(f.luecke) + '</span>');
 
         host.setAttribute('data-space', key);
+        // Statt des wiederholten Trennungssatzes ein Weg zur Erklaerung.
+        // Wer die Zahl nur lesen will, wird nicht aufgehalten; wer sie
+        // nachrechnen will, findet den Beleg in einem Klick.
         host.innerHTML = bits.join('<span class="ds-space-sep" aria-hidden="true">·</span>') +
-            '<span class="ds-space-note">' + esc(t.note) + '</span>';
+            '<a class="qu-verweis ds-space-quelle" href="#quellen">' +
+            esc(lg === 'de' ? 'Quellen & Methodik' : 'Sources & method') + ' →</a>';
     }
 
     var current = null;
@@ -371,8 +379,26 @@
         document.addEventListener('languageChanged', function () { window.DsNav.refresh(); });
         window.addEventListener('languageChanged', function () { window.DsNav.refresh(); });
 
+        formatMarke();
+        document.addEventListener('languageChanged', formatMarke);
+
         var active = document.querySelector('.tab-content.active');
         onTab(active ? active.id : 'current-meta');
+    }
+
+    // Das Formatkuerzel neben der Ueberschrift der Meta-Ansicht.
+    //
+    // Die Ueberschrift hiess bis zum 30.08.2026 "Limitless Online
+    // Vergleich" — das ist die Quelle, nicht der Inhalt, und die Quelle
+    // steht ohnehin eine Zeile tiefer im Ausweis. Was der Leser sucht,
+    // ist das Format. Es kommt aus derselben Stelle wie ueberall sonst
+    // (window._formatWindow, gespeist aus data/format_window.json), damit
+    // die naechste Rotation es mitnimmt statt es stehen zu lassen.
+    function formatMarke() {
+        var el = document.getElementById('cmFormatLabel');
+        if (!el) return;
+        var f = formatFor('gl');
+        el.textContent = f.label ? ' \u00b7 ' + f.label : '';
     }
 
     if (document.readyState === 'loading') {

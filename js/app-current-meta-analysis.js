@@ -3969,13 +3969,33 @@
             
             const isGridViewActive = !gridViewContainer.classList.contains('d-none');
             
+            // BEFUND (30.08.2026): beide Zweige riefen nur `add('d-none')`
+            // — es wurde etwas versteckt und NIE etwas eingeblendet.
+            // Gemessen mit drei Klicks hintereinander: das Gitter blieb
+            // durchgehend 2404 px sichtbar, die Tabelle durchgehend leer,
+            // und nur die Beschriftung kippte einmal um und nie zurueck.
+            // Der Grund, warum das Gitter trotzdem stehenblieb: das
+            // anschliessende applyCurrentMetaFilter() zeichnet es sofort
+            // wieder.
+            //
+            // Die beiden Geschwisteransichten machen es richtig
+            // (toggleDeckGridView in app-city-league.js,
+            // togglePastMetaDeckGridView in app-past-meta.js). Derselbe
+            // Knopf, drei Ansichten, zwei Verhalten — hier die dritte
+            // nachgezogen. Anders als bei City League genuegt hier
+            // `d-none` allein: die beiden Behaelter in index.html:1403/1408
+            // tragen keine zweite Versteckklasse (nachgesehen, nicht
+            // angenommen).
+            //
+            // Befund J (30.08.2026): der Umschalter beschriftete sich
+            // ausserdem in beiden Sprachen englisch.
             if (isGridViewActive) {
                 gridViewContainer.classList.add('d-none');
-                // Befund J (30.08.2026): der Umschalter beschriftete sich
-                // in beiden Sprachen englisch.
+                tableViewContainer.classList.remove('d-none');
                 if (button) button.textContent = t('btn.gridView');
             } else {
                 tableViewContainer.classList.add('d-none');
+                gridViewContainer.classList.remove('d-none');
                 if (button) button.textContent = t('btn.listView');
             }
             
@@ -4059,9 +4079,37 @@
                     deckCards.push({ ...cardData, count: count });
                 }
             } else {
+                /* BEFUND (30.08.2026): ohne selbstgebautes Deck nahm diese
+                   Schleife `max_count` — die HOECHSTE Kopienzahl ueber alle
+                   ausgewerteten Listen. Gemessen an Dragapult (Global):
+                   die Anzeige darueber sagt "52 Karten / 60 Gesamt", in der
+                   Zwischenablage landeten **109** (Pokemon 39, Trainer 58,
+                   Energie 12). Die Ausgabe traegt PTCGL-Abschnittskoepfe,
+                   sieht also aus wie eine Deckliste — sie ist keine, sondern
+                   ein Kartenpool. Deck-Analyse (Japan) lieferte 74.
+
+                   Vergangenes Meta macht es seit dem 29.08. richtig
+                   (getPastMetaRepresentativeCardCopies): der Mittelwert ist
+                   die repraesentative Kopienzahl, `max_count` nur dort, wo es
+                   keinen Mittelwert gibt — also bei einer Auswahl aus einer
+                   einzigen Liste. Dieselbe Rechnung, dieselben Feldnamen
+                   (average_count_overall / average_count / max_count).
+
+                   Der Boden von einer Kopie bleibt bewusst WEG: er gehoert
+                   auf das einzelne Kaertchen im Gitter, damit eine Karte aus
+                   0,3 % der Listen dort nicht als "0" steht. In einer
+                   Deckliste waeren es erfundene Karten. */
+                const einzelneListe = allCards.length > 0 &&
+                    allCards.every(c => (parseInt(c.total_decks_in_archetype || 0, 10) || 0) <= 1);
+                const zahl = (v) => {
+                    const n = parseFloat(String(v == null ? '' : v).replace(',', '.'));
+                    return isFinite(n) ? n : 0;
+                };
                 allCards.forEach(card => {
                     const cardName = card.card_name;
-                    const maxCount = parseInt(card.max_count) || 0;
+                    const maxCount = einzelneListe
+                        ? (parseInt(card.max_count, 10) || 0)
+                        : Math.round(zahl(card.average_count_overall ?? card.average_count));
                     if (maxCount <= 0) return;
                     
                     const originalSet = card.set_code || '';

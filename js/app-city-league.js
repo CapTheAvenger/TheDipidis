@@ -3928,12 +3928,15 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 // Switch to list/table view
                 gridViewContainer.classList.add('d-none');
                 tableViewContainer.classList.remove('d-none', 'city-league-deck-table-view-hidden');
-                if (button) button.textContent = 'Grid View';
+                // Befund J (30.08.2026): der Umschalter beschriftete sich
+                // in beiden Sprachen englisch — die Schluessel gab es
+                // laengst, sie wurden nur nicht benutzt.
+                if (button) button.textContent = t('btn.gridView');
             } else {
                 // Switch back to grid view
                 tableViewContainer.classList.add('d-none');
                 gridViewContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
-                if (button) button.textContent = 'List View';
+                if (button) button.textContent = t('btn.listView');
             }
             
             // Re-apply filter to preserve percentage filter and render correct view
@@ -4033,13 +4036,36 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     });
                 }
             } else {
-                // COPY ARCHETYPE CARDS with max_count
-                devLog('[copyDeckOverview] Copying archetype cards with max_count, mode:', currentRarityMode);
-                
+                /* BEFUND (30.08.2026): ohne selbstgebautes Deck nahm diese
+                   Schleife `max_count` — die HOECHSTE Kopienzahl ueber alle
+                   ausgewerteten Listen. Die Anzeige darueber sagte
+                   "33 Karten / 60 Gesamt", in der Zwischenablage landeten
+                   **74**. Die Ausgabe traegt PTCGL-Abschnittskoepfe, sieht
+                   also aus wie eine Deckliste — sie war keine, sondern ein
+                   Kartenpool. Deck-Analyse (Global) hatte denselben Fehler
+                   mit 109 statt 60.
+
+                   Wie dort und wie in Vergangenes Meta (seit 29.08.):
+                   der Mittelwert ist die repraesentative Kopienzahl,
+                   `max_count` nur dort, wo es keinen gibt — bei einer
+                   Auswahl aus einer einzigen Liste. Ohne Boden von einer
+                   Kopie: der gehoert auf das Kaertchen im Gitter, nicht in
+                   eine Deckliste. */
+                devLog('[copyDeckOverview] Copying archetype cards, mode:', currentRarityMode);
+
+                const einzelneListe = allCards.length > 0 &&
+                    allCards.every(c => (parseInt(c.total_decks_in_archetype || 0, 10) || 0) <= 1);
+                const zahl = (v) => {
+                    const n = parseFloat(String(v == null ? '' : v).replace(',', '.'));
+                    return isFinite(n) ? n : 0;
+                };
+
                 // Process each card from archetype
                 allCards.forEach(card => {
                     const cardName = card.card_name;
-                    const maxCount = parseInt(card.max_count) || 0;
+                    const maxCount = einzelneListe
+                        ? (parseInt(card.max_count, 10) || 0)
+                        : Math.round(zahl(card.average_count_overall ?? card.average_count));
                     if (maxCount <= 0) return;
                     
                     const originalSet = card.set_code || '';

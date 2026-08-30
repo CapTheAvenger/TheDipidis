@@ -42,7 +42,14 @@ describe('Side Quest: der Teams-Reiter wird tatsächlich gezeichnet', () => {
         // weiter unten in der Datei.
         const start = CORE.indexOf('function switchTab(tabName)');
         assert.ok(start > -1, 'switchTab nicht gefunden');
-        const block = CORE.slice(start, start + 4000);
+        // Bis zum 30.08.2026 stand hier `start + 4000` — eine gezaehlte
+        // Laenge statt einer Grenze. Ein neuer `case` davor (quellen)
+        // hat side-quest aus dem Fenster geschoben, und die Zusage fiel
+        // durch, obwohl der Fall unveraendert dastand. Jetzt endet der
+        // Ausschnitt dort, wo der switch endet.
+        const ende = CORE.indexOf('// Notify the Meta & Deck Analysis Hub', start);
+        assert.ok(ende > start, 'das Ende des switch-Blocks ist nicht mehr auffindbar');
+        const block = CORE.slice(start, ende);
         assert.match(block, /case 'side-quest':/,
             'switchTab hat keinen Fall für side-quest — der Deep-Link #side-quest zeichnet dann nichts');
         const fall = block.slice(block.indexOf("case 'side-quest':"));

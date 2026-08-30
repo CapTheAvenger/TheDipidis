@@ -117,6 +117,14 @@
     /* ── Marke: sparsam ──────────────────────────────────────────── */
     --brand: #3B4CCA;
     --brand-ink: #2a3899;
+    /* BEFUND (30.08.2026): --pokemon-blue wurde an 30 Stellen benutzt und
+       NIRGENDS definiert. Jede dieser Stellen lief in den Rueckfallwert
+       #3B4CCA — einen festen Hellmodus-Blauton, der im Dunkelmodus so
+       stehen blieb. Als Textfarbe auf --surface-1 sind das 2,58:1.
+       Jetzt ist es ein echtes Token und dreht mit. Fuer Text auf einer
+       Flaeche bleibt --brand-ink die richtige Wahl, die hier ist fuer
+       Raender und Flaechen. */
+    --pokemon-blue: var(--brand);
     --gold: #FFCB05;
     --alarm: #E3350D;
 
@@ -361,6 +369,7 @@
 
     --brand: #5566e0;
     --brand-ink: #8b98ff;
+    --pokemon-blue: var(--brand);
     --gold: #ffcb05;
     --alarm: #ff6a4d;
 

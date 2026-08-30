@@ -154,10 +154,24 @@
     }
     /* Ein Sprunglink in einer Tabellenzelle darf die Zeile nicht
        auseinanderziehen — er bekommt die Hoehe ueber Innenabstand,
-       nicht ueber eine Mindesthoehe. */
-    html .archetype-jump-link {
-        display: inline-block;
-        padding-block: 12px;
+       nicht ueber eine Mindesthoehe.
+
+       NACHGEMESSEN 30.08.2026: die Regel darueber hat nicht gewirkt, der
+       Link blieb bei 19 px. `html .archetype-jump-link` ist (0,1,1);
+       css/styles.css:4698 schreibt `.archetype-jump-link:link` — eine
+       Klasse UND eine Pseudoklasse, also (0,2,0), und das gewinnt. Die
+       Pseudoklassen muessen hier also mitgeschrieben werden; mit dem
+       zusaetzlichen `a` steht es (0,2,2) gegen (0,2,0).
+
+       `display` bleibt weg: styles.css setzt dort `inline-flex`, damit
+       das Symbol neben dem Namen sitzt. Innenabstand wirkt darauf
+       genauso, und ein erzwungenes `inline-block` haette das Symbol
+       umbrechen lassen. */
+    html a.archetype-jump-link,
+    html a.archetype-jump-link:link,
+    html a.archetype-jump-link:visited,
+    html a.archetype-jump-link:active {
+        padding-block: 15px;
     }
     html .card-database-price-btn,
     html .card-database-rarity-btn {

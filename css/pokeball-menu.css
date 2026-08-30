@@ -303,7 +303,7 @@
     cursor: pointer;
     list-style: none;
     user-select: none;
-    color: #3b4cca;
+    color: var(--brand-ink);
     font-weight: 700;
 }
 .deck-builder-algo-hint summary::-webkit-details-marker { display: none; }

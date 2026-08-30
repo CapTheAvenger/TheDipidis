@@ -3816,8 +3816,12 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 // Gemessen: die drei Nachbarsuchen fanden ueber die
                 // Pokedex-Nummer, diese hier 0 Treffer. Die Kachel kennt
                 // nur ihren Namen, also faellt der gemeinsame Helfer auf
-                // window.pokedexNumbers zurueck (1064 Eintraege) — die
-                // CSV-Spalte pokedex_number ist in allen 20.878 Zeilen leer.
+                // window.pokedexNumbers zurueck (1064 Eintraege).
+                // 30.08.2026 nachgemessen: die CSV-Spalte pokedex_number
+                // ist NICHT mehr in allen Zeilen leer — in
+                // all_cards_merged.csv sind 15.382 von 20.878 gefuellt.
+                // Fuer diese Kachel aendert das nichts (sie hat nur den
+                // Namen), aber der Satz stimmte nicht mehr.
                 const dexNum = (typeof window.cardPokedexSearchValue === 'function')
                     ? window.cardPokedexSearchValue({ name: cardName })
                     : '';

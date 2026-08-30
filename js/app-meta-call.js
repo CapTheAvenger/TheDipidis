@@ -1266,9 +1266,32 @@ window.MetaCall = (function () {
   //     ladder mash-up").
   // 200 is the hard ceiling (100 % WR × 2× day2 multiplier); typical
   // top entries land around 60-90.
+  // Gehoert der Schluessel zum LAUFENDEN Meta? Dieselbe Regel wie im
+  // Katalog oben (Suffix-Vergleich gegen format_window.current_set).
+  function _istLaufenderMeta(metaKey) {
+    const schluessel = String(metaKey || '').trim().toUpperCase();
+    if (!schluessel) return false;
+    let aktuell = '';
+    try {
+      if (_formatWindow && _formatWindow.current_set) {
+        aktuell = String(_formatWindow.current_set).trim().toUpperCase();
+      }
+    } catch (_e) { /* tolerieren */ }
+    if (!aktuell) return false;
+    return schluessel === aktuell || schluessel.endsWith('-' + aktuell);
+  }
+
   async function _loadPastMetaLabsAggregate(metaKey) {
     if (!metaKey) return null;
     if (_pastMetaLabsCache.has(metaKey)) return _pastMetaLabsCache.get(metaKey);
+    // BEFUND (30.08.2026): auf JEDER Seitenlast stand
+    // `404 data/labs_tournament_decks_TEF-PBL.csv` in der Konsole.
+    // Der Auszug entsteht erst, wenn ein Format geschlossen ist — fuer
+    // den laufenden Meta kann es ihn also gar nicht geben. Der Abruf
+    // lief trotzdem, wurde sauber abgefangen und hinterliess nur
+    // Laerm. Wer echte Fehler sucht, sucht sie zwischen solchen
+    // Zeilen; deshalb weg damit.
+    if (_istLaufenderMeta(metaKey)) { _pastMetaLabsCache.set(metaKey, null); return null; }
 
     let csvText = null;
     try {

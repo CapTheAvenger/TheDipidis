@@ -623,7 +623,45 @@ def _split_labs_by_meta(rows: List[Dict], prefix: str, header: List[str]) -> Dic
             writer.writerows(bucket)
         counts[meta] = len(bucket)
         logger.info("  → %s: %d rows", os.path.basename(out_path), len(bucket))
+    _schreibe_labs_verzeichnis(data_dir, prefix)
     return counts
+
+
+def _schreibe_labs_verzeichnis(data_dir: str, prefix: str) -> None:
+    """Schreibt data/<prefix>_verzeichnis.json — welche Meta-Auszuege es gibt.
+
+    BEFUND (30.08.2026): das Frontend hat vorher geraten. js/app-tier-meta.js
+    schickte auf JEDER Seitenlast ein HEAD auf
+    data/labs_tournament_decks_<laufender Meta>.csv und fing die 404 sauber
+    ab — aber die Zeile stand trotzdem in der Konsole. Fuer den laufenden
+    Meta gibt es den Auszug erst, wenn Labs-Daten mit diesem Meta-Wert
+    ankommen; bis dahin war jeder Seitenaufruf eine Fehlermeldung, die
+    keine war. Wer echte Fehler sucht, sucht sie zwischen solchen Zeilen.
+
+    Das Verzeichnis wird bei jedem Lauf aus den tatsaechlich geschriebenen
+    Dateien neu erzeugt — es kann also nicht veralten, ohne dass die
+    Dateien danebenliegen.
+    """
+    import glob as _glob
+    schluessel = []
+    for pfad in sorted(_glob.glob(os.path.join(data_dir, f'{prefix}_*.csv'))):
+        name = os.path.basename(pfad)
+        rest = name[len(prefix) + 1:-4]
+        if not rest or rest.startswith('_'):
+            continue           # _unsorted ist kein Meta
+        schluessel.append(rest)
+    ziel = os.path.join(data_dir, f'{prefix}_verzeichnis.json')
+    with open(ziel, 'w', encoding='utf-8') as f:
+        json.dump({
+            'quelle': prefix,
+            'stand': datetime.now(timezone.utc).isoformat(timespec='seconds'),
+            'meta_keys': schluessel,
+            '_hinweis': ('Welche Meta-Auszuege es gibt. Das Frontend fragt hier '
+                         'nach, statt jede Datei einzeln zu probieren — ein HEAD '
+                         'auf eine Datei, die es nicht gibt, ist eine 404 in der '
+                         'Konsole des Nutzers.'),
+        }, f, ensure_ascii=False, indent=2)
+    logger.info("  → %s: %d Meta-Auszuege", os.path.basename(ziel), len(schluessel))
 
 
 # ── ID-walk discovery (backfill — 2026-05-24) ────────────────────────────────

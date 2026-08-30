@@ -63,6 +63,89 @@ from card_scraper_shared import (
 setup_console_encoding()
 logger = setup_logging("champions_replica_scraper")
 
+
+# ── Zeichensatz ──────────────────────────────────────────────────────
+#
+# BEFUND (30.08.2026): in data/champions_replica_teams.json stand
+# "Sidi I. Haidala's PokÃ©ChampionsDestiny Top 4 Team", in
+# data/champions_team_strategies.json "Extreme Speed PokÃ©mon
+# Champions #5". Drei Stellen, in der Oberflaeche sichtbar.
+#
+# URSACHE: `requests` faellt fuer resp.text auf ISO-8859-1 zurueck,
+# wenn der Content-Type-Kopf keinen charset nennt (so schreibt es
+# RFC 2616 vor). Der CSV-Export von Google Sheets nennt keinen — die
+# UTF-8-Bytes von "é" (0xC3 0xA9) wurden also als zwei Latin-1-Zeichen
+# gelesen: "Ã©". Kein Fehler, keine Meldung, nur falsche Buchstaben.
+#
+# Beide Quellen liefern UTF-8. Wenn der Kopf nichts sagt, sagen wir es.
+
+
+def _text_utf8(resp) -> str:
+    """resp.text, aber ohne den Latin-1-Rueckfall von requests."""
+    kopf = (resp.headers.get('content-type') or '').lower()
+    if 'charset=' not in kopf:
+        resp.encoding = 'utf-8'
+    return resp.text
+
+
+# Die Anfangszeichen, an denen ein Fehllesen zu erkennen ist: 0xC3/0xC2
+# leiten in UTF-8 fast jeden westeuropaeischen Buchstaben ein, 0xE2 jedes
+# typografische Zeichen. Wer keines davon traegt, wird nicht angefasst.
+_MOJIBAKE = re.compile(r'[ÃÂâ][\u0080-\u00ff\u0152\u0153\u0160\u0161'
+                       r'\u0178\u017d\u017e\u0192\u02c6\u02dc'
+                       r'\u2013\u2014\u2018-\u201e\u2020-\u2022'
+                       r'\u2026\u2030\u2039\u203a\u20ac\u2122]')
+
+# Zwei Fehllesarten kommen vor: ISO-8859-1 (der Rueckfall von requests,
+# RFC 2616) und cp1252 (was Browser und viele Werkzeuge stattdessen
+# nehmen). Sie unterscheiden sich nur in 0x80-0x9f — genau dort, wo "ß"
+# und die typografischen Anfuehrungszeichen liegen. Beide werden
+# probiert, in dieser Reihenfolge.
+_FEHLLESARTEN = ('latin-1', 'cp1252')
+
+
+def entwirre(text):
+    """Dreht ein Fehllesen zurueck — oder laesst den Text in Ruhe.
+
+    Das ist keine Schaetzung: `text.encode(<lesart>).decode('utf-8')` ist
+    die EXAKTE Umkehrung des Fehlers. Geht sie fuer keine der beiden
+    Lesarten auf, war es kein Fehllesen, und der Text bleibt
+    unveraendert. Angefasst wird ausserdem nur, was eines der bekannten
+    Anfangszeichen traegt.
+    """
+    if not isinstance(text, str):
+        return text
+    # Bis zu drei Runden: ein Text kann zweimal fehlgelesen worden sein
+    # (einmal beim Abruf, einmal beim Weiterreichen), und dann steht
+    # nach der ersten Umkehrung immer noch ein Doppelzeichen da.
+    for _ in range(3):
+        if not _MOJIBAKE.search(text):
+            break
+        naechster = None
+        for lesart in _FEHLLESARTEN:
+            try:
+                naechster = text.encode(lesart).decode('utf-8')
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                continue
+            break
+        # Geht keine der beiden Lesarten auf, war es kein Fehllesen —
+        # dann bleibt der Text, wie er ist.
+        if naechster is None or naechster == text:
+            break
+        text = naechster
+    return text
+
+
+def entwirre_tief(wert):
+    """entwirre() ueber verschachtelte Listen und Woerterbuecher."""
+    if isinstance(wert, str):
+        return entwirre(wert)
+    if isinstance(wert, list):
+        return [entwirre_tief(x) for x in wert]
+    if isinstance(wert, dict):
+        return {k: entwirre_tief(v) for k, v in wert.items()}
+    return wert
+
 # The VGCPastes "Champions" repository is a public Google Sheet with one
 # tab per regulation (plus non-Champions tabs we ignore). We DISCOVER the
 # Champions regulation tabs dynamically from the sheet's tab list (via the
@@ -230,7 +313,7 @@ def fetch_sheet_csv(url: str = SHEET_CSV_URL) -> str:
         'User-Agent': 'TheDipidisChampionsBot/1.0 (+https://thedipidis.app)',
     })
     resp.raise_for_status()
-    text = resp.text
+    text = _text_utf8(resp)
     logger.info("  → %d bytes received", len(text))
     return text
 
@@ -250,7 +333,7 @@ def discover_regulation_tabs() -> List[Tuple[str, str]]:
                           '(KHTML, like Gecko) Chrome/124 Safari/537.36',
         })
         resp.raise_for_status()
-        html = resp.text
+        html = _text_utf8(resp)
         # The tab switcher embeds JS like:
         #   {name: "Champions M-B", pageUrl: "...gid=1458357160", gid: "1458357160", …}
         items = re.findall(r'name:\s*"([^"]+)"[^}]*?gid:\s*"(\d+)"', html)
@@ -389,7 +472,7 @@ def fetch_pokepaste_raw(url: str, timeout: int = 15) -> Optional[str]:
             'User-Agent': 'TheDipidisChampionsBot/1.0 (+https://thedipidis.app)',
         })
         if resp.ok and resp.text.strip():
-            return resp.text
+            return _text_utf8(resp)
         logger.warning("  pokepaste %s returned HTTP %d", paste_id, resp.status_code)
     except Exception as e:
         logger.warning("  pokepaste %s fetch failed: %s", paste_id, e)
@@ -746,6 +829,9 @@ def main():
         logger.warning("0 teams parsed — keeping previous %s untouched", out_path)
         return 0
 
+    # Letzte Bereinigung vor dem Schreiben: was aus einem frueheren Lauf
+    # noch als Fehllesen im Zwischenspeicher liegt, wird hier geheilt.
+    output = entwirre_tief(output)
     tmp_path = out_path + '.tmp'
     with open(tmp_path, 'w', encoding='utf-8') as f:
         json.dump(output, f, indent=2, ensure_ascii=False)

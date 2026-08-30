@@ -164,13 +164,14 @@
 .ds-space b { color: var(--ink-2); font-weight: 600; }
 .ds-space-sep { color: var(--line-strong); }
 
-/* Der Trennungshinweis rutscht ans Ende der Zeile und bricht auf Mobil
- * als eigene Zeile um — er ist wichtig, aber nicht das Erste. */
-.ds-space-note { margin-left: auto; }
+/* Der Weg zu Quellen & Methodik rutscht ans Ende der Zeile und bricht
+ * auf Mobil als eigene Zeile um — erreichbar, aber nicht das Erste.
+ * Vorher stand hier der Trennungssatz selbst, auf jeder Datenseite. */
+.ds-space-quelle { margin-left: auto; }
 
 @media (max-width: 768px) {
     .ds-space { padding: var(--s-2) var(--s-3); }
-    .ds-space-note { margin-left: 0; flex-basis: 100%; }
+    .ds-space-quelle { margin-left: 0; flex-basis: 100%; }
 }
 
 /* Saisonpause ist kein Fehler. Der alte Zustand war ein roter
@@ -245,14 +246,24 @@
  * zweimal "Global" und zweimal "TEF–PBL" direkt untereinander sich wie
  * ein Fehler liest.
  *
+ * 30.08.2026: das Format ist jetzt auf JEDER Breite aus dem Ausweis
+ * heraus — es stand viermal auf demselben Bildschirm (Ausweis, Filter,
+ * Ueberschrift, Kopf der Deckempfehlung). `.ds-space-format` gibt es
+ * deshalb nicht mehr; die Regel hier deckt nur noch die Region ab.
+ *
  * Der Ausweis behaelt, was der Filter NICHT zeigt und was die Zahlen
- * belastbar macht: Quelle, Stichprobe, Stand und den Satz, dass die drei
- * Datenraeume nie miteinander verrechnet werden. Auf dem Schreibtisch
- * ist Platz genug, dort bleibt beides stehen. */
+ * belastbar macht: Quelle, Stichprobe und Stand. */
 @media (max-width: 768px) {
-    .ds-space-region,
-    .ds-space-format { display: none; }
+    .ds-space-region { display: none; }
     /* Der erste Trenner haengt sonst am Anfang in der Luft. */
-    .ds-space-format + .ds-space-sep,
     .ds-space-region + .ds-space-sep { display: none; }
+}
+
+/* Das Formatkuerzel neben der Ueberschrift der Meta-Ansicht. Es gehoert
+ * zur Ueberschrift, soll sie aber nicht ueberstimmen: gleiche Zeile,
+ * ruhigere Farbe. */
+.cm-format {
+    font-weight: 700;
+    color: var(--ink-3);
+    white-space: nowrap;
 }

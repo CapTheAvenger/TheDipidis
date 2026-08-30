@@ -1,0 +1,130 @@
+/* Quellen & Methodik.
+ *
+ * Die Seite ist bewusst schmal und ruhig: sie wird gelesen, nicht
+ * ueberflogen. Alle Abschnitte ausser dem ersten starten zugeklappt,
+ * damit beim Oeffnen eine Uebersicht steht und keine Textwand — genau
+ * der Fehler, den diese Seite auf den Datenseiten beheben soll.
+ *
+ * Farben kommen ausschliesslich aus tokens.css, damit der Dunkelmodus
+ * ohne eigene Regeln mitkommt.
+ */
+
+/* Linksbuendig unter der Ueberschrift, nicht mittig: die Ueberschrift
+ * und der Rueckweg stehen am linken Rand des Containers, und eine
+ * zentrierte Textspalte darunter sieht aus, als gehoerte sie nicht dazu.
+ * Die Breite bleibt gedeckelt — 62 Zeichen sind die Zeile, die man noch
+ * liest; der Container selbst waechst auf grossen Schirmen bis 2040px. */
+.quellen-main {
+    max-width: 62ch;
+    margin: 0;
+    padding-bottom: var(--s-5, 32px);
+}
+
+.qu-lead {
+    margin: 0 0 var(--s-4, 24px);
+    font-size: 1.02rem;
+    line-height: 1.55;
+    color: var(--ink-2);
+}
+
+/* ── Abschnitt ───────────────────────────────────────────────────── */
+.qu-sec {
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg, 12px);
+    background: var(--surface-1);
+    margin: 0 0 10px;
+    overflow: hidden;
+}
+
+.qu-sum {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 16px;
+    min-height: 44px;               /* tippbar */
+    cursor: pointer;
+    list-style: none;
+    font-size: 1.03rem;
+    font-weight: 700;
+    color: var(--ink);
+    user-select: none;
+}
+.qu-sum::-webkit-details-marker { display: none; }
+
+/* Eigener Pfeil, damit er in beiden Modi dieselbe Farbe hat wie der
+   Text daneben — der System-Marker ignoriert color in Safari. */
+.qu-sum::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 8px; height: 8px;
+    border-right: 2px solid var(--ink-3);
+    border-bottom: 2px solid var(--ink-3);
+    transform: rotate(-45deg);
+    transition: transform 140ms ease;
+}
+.qu-sec[open] > .qu-sum::before { transform: rotate(45deg); }
+
+.qu-sum:hover { background: var(--surface-2); }
+.qu-sum:focus-visible {
+    outline: 2px solid var(--accent, #4663e6);
+    outline-offset: -2px;
+}
+
+.qu-body {
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+}
+
+.qu-p {
+    margin: 0 0 11px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+}
+.qu-p:last-child { margin-bottom: 0; }
+
+/* ── Quellen- und Begriffsliste ──────────────────────────────────── */
+.qu-src, .qu-dl { margin: 0; }
+.qu-src dt, .qu-dl dt {
+    margin-top: 13px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+.qu-src dt:first-child, .qu-dl dt:first-child { margin-top: 0; }
+.qu-src dd, .qu-dl dd {
+    margin: 3px 0 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--ink-2);
+}
+
+/* Die Quellenliste bekommt eine Kante, weil sie die einzige Stelle ist,
+   an der Herkunft und Beschreibung nebeneinander stehen. */
+.qu-src dd {
+    padding-left: 10px;
+    border-left: 2px solid var(--line);
+}
+
+/* ── Verweis von einer Datenseite hierher ────────────────────────── */
+/* Ersetzt die Fussnoten, die vorher unter den Tabellen standen. Er
+   soll leise sein: wer ihn nicht braucht, soll ihn nicht lesen muessen. */
+.qu-verweis {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: var(--ink-3);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+}
+.qu-verweis:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink-3);
+}
+
+@media (max-width: 560px) {
+    .qu-sum { font-size: 0.98rem; padding: 14px 13px; }
+    .qu-body { padding: 13px 13px 14px; }
+}

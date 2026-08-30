@@ -485,9 +485,28 @@
     border-color: #c0392b;
     color: white;
 }
+/* Der Innenabstand steht in einer Variablen, weil das rote Banner
+ * darunter ihn negativ spiegeln muss, um bis an die Kanten zu reichen.
+ *
+ * BEFUND (30.08.2026): die beiden waren auseinandergelaufen. Auf 390 px
+ * setzt css/mobile-responsive.css:386 `.proxy-container { padding: 0
+ * !important }`, waehrend `.proxy-header-row` weiterhin `margin: -14px`
+ * trug. Gemessen ragte der Kasten dadurch beidseitig ueber den
+ * Bildschirm — 404 px breit bei einem Container von 13 bis 377 —, der
+ * `border-radius` wurde abgeschnitten und der Titel stand 2 px links
+ * der Textspalte aller anderen Elemente. Auf 768 px dasselbe.
+ *
+ * Auffaellig war es nie: `html`/`body` tragen `overflow-x: hidden`
+ * (css/styles.css:234/252), der Ueberhang wird also weggeschnitten
+ * statt scrollbar zu werden. Ein Detektor ueber `scrollWidth` kann so
+ * einen Ueberlauf hier grundsaetzlich nicht sehen — gemessen mit einem
+ * absichtlich 250 px zu breiten Element: `scrollWidth` waechst um 0.
+ *
+ * Mit einer gemeinsamen Variablen koennen sie nicht mehr driften. */
 .proxy-container {
+    --proxy-pad: 16px;
     background: var(--surface-1);
-    padding: 16px;
+    padding: var(--proxy-pad);
     border-radius: 14px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.08);
     max-width: 1200px;
@@ -503,7 +522,8 @@
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
-    margin: -20px -20px 14px -20px;
+    /* Spiegelt den Innenabstand des Containers, siehe dort. */
+    margin: calc(var(--proxy-pad, 16px) * -1) calc(var(--proxy-pad, 16px) * -1) 14px;
     padding: 10px 18px;
     background: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-red-dark) 100%);
     border-bottom: 3px solid var(--pokemon-yellow, #FFCB05);
@@ -2009,13 +2029,16 @@
         grid-template-columns: 1fr;
     }
     .proxy-container {
-        padding: 14px;
+        --proxy-pad: 14px;
     }
     .proxy-header-row {
         flex-direction: column;
         align-items: center;
         text-align: center;
-        margin: -14px -14px 12px -14px;
+        /* Kein eigener Randwert mehr — die Regel oben spiegelt
+           --proxy-pad, und damit kann das Banner nicht mehr breiter
+           werden als der Container. */
+        margin-bottom: 12px;
     }
     .sandbox-container {
         padding: 14px;

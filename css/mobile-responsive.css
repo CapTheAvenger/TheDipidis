@@ -382,9 +382,17 @@
 /* === CONTAINER PADDING ADJUSTMENTS === */
 @media (max-width: 768px) {
     .container,
-    .proxy-container,
     .sandbox-container {
         padding: 0 !important;
+    }
+    /* .proxy-container regelt seinen Innenabstand ueber --proxy-pad,
+       weil das rote Banner darunter ihn negativ spiegelt. Ein
+       `padding: 0 !important` hier hat die beiden am 30.08.2026
+       auseinanderlaufen lassen: der Rand blieb bei -14px stehen und
+       das Banner ragte beidseitig ueber den Bildschirm (404 px bei
+       einem Container von 364 px). Siehe css/city-league.css. */
+    .proxy-container {
+        --proxy-pad: 0px;
     }
 }
 

@@ -1,0 +1,97 @@
+/* Tippziele auf Zeigegeraeten ohne Feinsteuerung.
+ *
+ * Eigene Datei, weil hier `!important` steht und css/components.css
+ * ausdruecklich ohne auskommt — drei Zusicherungen bewachen das
+ * (test-design-components.js, test-ev-rechner.js, test-meta-bausteine.js).
+ * Die Regel unten BRAUCHT es: mehrere der Hoehen, die sie ueberstimmt,
+ * tragen selbst `!important` und eine ID im Selektor.
+ *
+ * BEFUND (30.08.2026, auf 390 px gemessen): 288 von 1206 klickbaren
+ * Elementen waren unter 44 x 44 px. Es sind keine Einzelfaelle, sondern
+ * eine ganze Familie: Knoepfe, Auswahlfelder und Eingaben stehen ueber
+ * ein Dutzend Dateien verteilt auf `min-height: 36px` oder `38px`
+ * (city-league.css:2201/2405, cards-tabs.css:386, close-buttons.css:173,
+ * meta-call.css:3016, mobile-responsive.css:744, side-quest.css:2789 und
+ * weitere). Jede einzeln nachzuziehen heisst, die naechste zu vergessen.
+ *
+ * Deshalb eine Regel an einer Stelle. Sie greift NUR auf Geraeten, die
+ * sich als grob melden (`pointer: coarse`) — auf der Maus aendert sich
+ * nichts, dort waren 36 px nie ein Problem.
+ *
+ * Was bewusst NICHT mitgezogen wird:
+ *   - Fliesstext-Verweise (a innerhalb von p, li, td). 44 px Hoehe auf
+ *     einem Link mitten im Satz reisst die Zeile auseinander; dort ist
+ *     Innenabstand die richtige Antwort, nicht Mindesthoehe.
+ *   - .card-badge — die Abzeichen auf den Kartenbildern. Sie duerfen
+ *     nicht groesser aussehen (vier sitzen in den Ecken eines Bildes);
+ *     ihre Trefferflaeche waechst unsichtbar per ::after, siehe
+ *     css/ui-components.css.
+ *   - Elemente mit [data-klein] — die ausdrueckliche Abmeldung fuer
+ *     Faelle, in denen 44 px das Layout sprengen wuerde.
+ *   - Die Seitenzahlen der Kartendatenbank
+ *     (#cards .pagination-controls). Dort stehen 241 Seiten zur Wahl;
+ *     css/cards-tabs.css:498/555/628 drueckt die Knoepfe auf 30 px,
+ *     damit eine Reihe davon auf 390 px passt. Das ist eine bewusste
+ *     Entscheidung, keine Nachlaessigkeit, und sie ist vertretbar:
+ *     30 px erfuellt die Mindestgroesse nach WCAG 2.5.8 (AA, 24 px).
+ *     Die 44 px hier sind das strengere 2.5.5 (AAA). Wer sie auch dort
+ *     will, muss die Seitenwahl umbauen, nicht die Hoehe hochziehen —
+ *     sonst bricht die Leiste auf vier Zeilen um.
+ *   - .card-proxy-btn und .card-limitless-btn — die "Proxy"-, Preis-
+ *     und "L"-Knoepfe, die auf dem
+ *     Kartenbild selbst liegen. Sie stehen zu zweit in einer Zeile von
+ *     unter 90 px Breite; 44 px Hoehe wuerde die Karte zudecken.
+ *     Dieselbe Loesung wie bei .card-badge: die Trefferflaeche waechst
+ *     unsichtbar, die sichtbare Groesse bleibt (siehe unten).
+ *
+ * `!important` steht hier ungern, ist aber noetig: mehrere der Regeln
+ * oben tragen eine ID im Selektor (#current-analysis .current-meta-
+ * format-btn) und gewinnen sonst.
+ */
+@media (pointer: coarse) {
+    button:not(.card-badge):not([data-klein]):not(.pagination-page-btn):not(.card-proxy-btn):not(.card-limitless-btn),
+    select:not([data-klein]),
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([data-klein]),
+    [role="button"]:not(.card-badge):not([data-klein]) {
+        min-height: 44px !important;
+    }
+    /* Kontrollkaestchen brauchen die Flaeche genauso, duerfen aber nicht
+       in die Breite laufen — sie bekommen sie quadratisch. */
+    input[type="checkbox"]:not([data-klein]),
+    input[type="radio"]:not([data-klein]) {
+        min-width: 24px;
+        min-height: 24px;
+    }
+}
+
+
+/* Trefferflaeche der Knoepfe auf dem Kartenbild.
+ *
+ * BEFUND (30.08.2026): `.card-proxy-btn` rendert auf 390 px mit 17 px
+ * Hoehe — die kleinsten Tippziele der ganzen Seite, und es sind zwei
+ * pro Karte bei bis zu 60 Karten auf einem Bildschirm.
+ *
+ * Wie bei .card-badge waechst hier nur die FLAECHE, nicht das Aussehen:
+ * die Knoepfe liegen auf dem Kartenbild, ein 44er Kasten wuerde die
+ * Karte verdecken. 34 px statt 44, weil zwei Knoepfe nebeneinander in
+ * einer Zeile von unter 90 px stehen — mehr, und sie fingen einander
+ * die Beruehrung ab. Das ist mehr als das Doppelte der bisherigen
+ * Flaeche und liegt ueber der Mindestgroesse nach WCAG 2.5.8 (24 px). */
+@media (pointer: coarse) {
+    .card-proxy-btn,
+    .card-limitless-btn {
+        position: relative;
+    }
+    .card-proxy-btn::after,
+    .card-limitless-btn::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        min-width: 34px;
+        height: 34px;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+    }
+}

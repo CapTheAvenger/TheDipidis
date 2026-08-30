@@ -76,7 +76,11 @@ describe('Side Quest: der Teams-Reiter wird tatsächlich gezeichnet', () => {
         const hostsStart = RES.indexOf('const VIEW_HOSTS');
         const hosts = RES.slice(hostsStart, RES.indexOf('}', hostsStart));
         const ansichten = [...hosts.matchAll(/^\s*(\w+):/gm)].map(m => m[1]);
-        assert.ok(ansichten.length >= 7, `nur ${ansichten.length} Ansichten erkannt`);
+        // Sechs seit dem 30.08.2026: "Kampfdaten" ist entfernt, weil es
+        // dasselbe Detail-Modal öffnete wie "Pokémon". Diese Schranke ist
+        // nur die Gegenprobe zur Erkennung — fällt sie auf 0 oder 1,
+        // greift die Schleife darunter ins Leere und winkt alles durch.
+        assert.ok(ansichten.length >= 6, `nur ${ansichten.length} Ansichten erkannt`);
         for (const v of ansichten) {
             assert.match(block, new RegExp(`view === '${v}'`),
                 `Ansicht '${v}' wird in showView nie aktiviert — sie bliebe leer`);

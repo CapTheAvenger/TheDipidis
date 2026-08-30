@@ -104,10 +104,21 @@ describe('the card and the panel cannot disagree', () => {
             [t8row('field', 100000, 6320), t8row('Dragapult', 472.5, 56.5)]);
         api.setData({ Dragapult: { share: 6, winRate: 54, count: 2158, partien: 8000 } }, conv);
         const kachel = api.tilesHtml('Dragapult').match(/arc-tile--conv[\s\S]*$/)[0];
-        assert.match(kachel, /57 von 473 Antritten mit Top-8-Schnitt/,
+        /* NACHTRAG (Schlussabnahme 30.08.2026): hier stand
+           "57 von 473". Die Datei fuehrt 56,5 von 472,5 — Antritte sind
+           turniergewichtet, halbe Werte sind normal. Gerundet gedruckt
+           ergibt 57/473 = 12,05 %, danebengeschrieben stand aber die
+           Quote aus den ungerundeten Werten: 11,96 %. Der Satz war aus
+           seinen eigenen Zahlen nicht nachrechenbar, und dieser Test
+           hat genau das festgehalten.
+           Die Startseite zeigte fuer denselben Wert schon
+           "71,5 von 708" — zwei Ansichten, zwei Schreibweisen. */
+        assert.match(kachel, /56,5 von 472,5 Antritten mit Top-8-Schnitt/,
             'Zaehler und Nenner der Cut-Quote stehen nicht in der Kachel');
         assert.match(kachel, /11,96 % Cut-Quote/,
             'die Cut-Quote selbst fehlt — dann bleibt "+x %" unerklaert');
+        // Und die Probe: die Quote folgt aus den beiden Zahlen davor.
+        assert.equal((56.5 / 472.5 * 100).toFixed(2), '11.96');
     });
 });
 

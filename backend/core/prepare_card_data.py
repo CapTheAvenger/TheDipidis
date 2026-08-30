@@ -100,10 +100,52 @@ def load_csv(filepath: str) -> List[Dict]:
     return cards
 
 def load_pokedex() -> Dict[str, int]:
-    dex_path = os.path.join(get_data_dir(), 'pokemon_dex_numbers.json')
-    if os.path.exists(dex_path):
-        with open(dex_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
+    """Namen -> Pokedex-Nummer. Sucht in BEIDEN Datenverzeichnissen.
+
+    BEFUND (30.08.2026): `pokedex_number` stand in 20.878 von 20.878
+    Kartenzeilen leer — in all_cards_merged.csv/.json und in allen drei
+    cards_chunk_*.json. Mindestens seit dem 05.08.2026.
+
+    Die Ursache war kein Parserfehler, sondern ein Pfad: diese Funktion
+    las ausschliesslich `get_data_dir()`, und das ist
+    `backend/core/data/`. Dort liegt die Datei nicht und kein Workflow
+    kopiert sie hin (0 Treffer fuer pokemon_dex_numbers in
+    daily-price-refresh.yml und weekly-full-update.yml). Sie liegt im
+    Repo unter `data/pokemon_dex_numbers.json` — 1064 Eintraege.
+
+    Der Rueckgabewert `{}` bei fehlender Datei war der zweite Teil des
+    Problems: jede Karte bekam still `''`, und niemand erfuhr davon.
+
+    Was daran hing (alles gemessen, nicht geschaetzt):
+      * Die Kartensuche verspricht im Platzhalter „Name (EN/DE), Set+Nr.
+        oder Pokedex" — die Pokedex-Zusage lieferte 0 Treffer, immer.
+      * js/app-core.js sortiert Pokemon nach Dex; alle landeten auf 9999,
+        die Entwicklungslinien-Sortierung griff nie.
+      * 580 Pokemon-Karten haben weder energy_type noch einen Eintrag in
+        energy_type_map.json; 474 davon waeren ueber die Dex-Nummer
+        aufloesbar gewesen.
+
+    Gegenprobe mit der echten Datei und derselben Namenslogik: 15.349
+    von 17.537 Pokemon-Zeilen werden gefuellt. Die 2.188 Fehlschlaege
+    sind Mega-Formen und `Type: Null` — die stehen so nicht in der
+    Dex-Liste und bleiben leer. Melden, nicht raten.
+    """
+    project_root = os.path.dirname(os.path.dirname(get_app_path()))
+    kandidaten = [
+        os.path.join(project_root, 'data', 'pokemon_dex_numbers.json'),
+        os.path.join(get_data_dir(), 'pokemon_dex_numbers.json'),
+    ]
+    for dex_path in kandidaten:
+        if os.path.exists(dex_path):
+            with open(dex_path, 'r', encoding='utf-8') as f:
+                dex = json.load(f)
+            if dex:
+                print(f"Pokedex-Nummern: {len(dex)} Eintraege aus {dex_path}")
+                return dex
+    # Still leer zurueckgeben hat den Fehler oben monatelang verdeckt.
+    print("::warning::pokemon_dex_numbers.json in keinem Datenverzeichnis "
+          "gefunden — pokedex_number bleibt in ALLEN Zeilen leer. "
+          f"Gesucht in: {', '.join(kandidaten)}")
     return {}
 
 def get_base_pokemon_name(name: str) -> str:

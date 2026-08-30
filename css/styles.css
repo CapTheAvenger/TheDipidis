@@ -5174,8 +5174,22 @@ h3:first-child {
     box-shadow: 0 12px 26px rgba(20, 33, 61, 0.16);
 }
 
+/* Die Kacheln tragen seit dem 30.08.2026 role="button" und tabindex="0" —
+   vorher waren sie per Tastatur nicht erreichbar (WCAG 2.1.1). Wer sie
+   erreicht, muss auch sehen, dass er sie erreicht hat (WCAG 2.4.7). */
+.tier-hero-card:focus-visible {
+    outline: 2px solid var(--accent, #4663e6);
+    outline-offset: 3px;
+}
+
+/* BEFUND (Schlussabnahme 30.08.2026): bei 390 px endete diese Flaeche
+   bei 393 px, also 3 px hinter dem Bildschirmrand — abgeschnitten durch
+   das overflow-x: hidden weiter oben, aber eben doch daneben. Die Kachel
+   traegt bereits `overflow: hidden`; das Bild soll SIE ueberragen, nicht
+   die Seite. Mit `max-width` bleibt der Ueberhang innerhalb der Kachel. */
 .tier-hero-bg {
     position: absolute;
+    max-width: calc(100% + 18px);
     right: -18px;
     top: -20px;
     width: 58%;

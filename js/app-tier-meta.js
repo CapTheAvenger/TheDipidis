@@ -7,6 +7,17 @@
          * Formula: (share * 2) + ((winRate - 50) * 3), normalized to 0-100
          * If winRate doesn't exist, use only share
          */
+        /* Deutsche Zahlen tragen ein Komma.
+         *
+         * BEFUND (Schlussabnahme 30.08.2026): die Heldenkachel schrieb
+         * "Ø Rang 14.0", waehrend die Tabelle darunter "14,83" setzte.
+         * Zwei Zahlen derselben Ansicht, zwei Konventionen. */
+        function _dezimal(wert) {
+            const roh = String(wert == null ? '' : wert);
+            if (typeof getLang === 'function' && getLang() === 'en') return roh;
+            return /^-?\d+\.\d+$/.test(roh) ? roh.replace('.', ',') : roh;
+        }
+
         function calculatePowerScore(share, winRate = null) {
             let score = 0;
 
@@ -866,7 +877,7 @@
                     <section class="tier-hero-section" aria-label="${escapeHtml(t('cl.heroAria'))}">
                         <div class="tier-hero-header">
                             <h2>${t('cl.heroTitle')}</h2>
-                            <p>${t('cl.heroSubtitle')}</p>
+                            <p>${t(window.currentCityLeagueFormat === 'past' ? 'cl.heroSubtitlePast' : 'cl.heroSubtitle')}</p>
                         </div>
                         <div class="tier-hero-grid">`;
 
@@ -884,7 +895,14 @@
                     const variantLabel = variantCount === 1 ? t('cl.heroVariantSingular') : t('cl.heroVariantPlural');
 
                     heroHtml += `
-                        <div class="tier-hero-card" onclick="analyzeCombinedArchetype('${combinedMainEscaped}', '${combinedVariantsJsonEscaped}')">
+                        <!-- BEFUND (Schlussabnahme 30.08.2026): die fuenf Kacheln
+                             trugen onclick, aber weder tabindex noch role. Ueber
+                             40 Tabulatorschritte gemessen: die Kette sprang vom
+                             Zeitraum-Knopf direkt in Tier 1 — die Kacheln
+                             dazwischen kamen nie vor. WCAG 2.1.1. -->
+                        <div class="tier-hero-card" role="button" tabindex="0"
+                             onclick="analyzeCombinedArchetype('${combinedMainEscaped}', '${combinedVariantsJsonEscaped}')"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                             ${imageUrl ? `<div class="tier-hero-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
                             <div class="tier-hero-content">
                                 <div class="archetype-card-header">
@@ -893,8 +911,8 @@
                                 </div>
                                 <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
                                 <div class="tier-hero-stats">
-                                    <span class="stat-badge">${item.totalCount} ${t('cl.decks')}</span>
-                                    <span class="stat-badge rank-performance-hint" title="${escapeHtml(t('cl.heroRankHint'))}">${t('cl.heroAvgRank')} ${avgRankText}</span>
+                                    <span class="stat-badge">${item.totalCount} ${t(item.totalCount === 1 ? 'cl.deckSingular' : 'cl.decks')}</span>
+                                    <span class="stat-badge rank-performance-hint" title="${escapeHtml(t('cl.heroRankHint'))}">${t('cl.heroAvgRank')} ${_dezimal(avgRankText)}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -1303,7 +1321,9 @@
                         : (getLang() === 'de' ? 'Varianten' : 'Variants');
 
                     heroHtml += `
-                        <div class="tier-hero-card" onclick="navigateToCMAnalysisWithCombinedDeck('${combinedMainEscaped}', '${combinedVariantsJsonEscaped}')">
+                        <div class="tier-hero-card" role="button" tabindex="0"
+                             onclick="navigateToCMAnalysisWithCombinedDeck('${combinedMainEscaped}', '${combinedVariantsJsonEscaped}')"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                             ${imageUrl ? `<div class="tier-hero-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
                             <div class="tier-hero-content">
                                 <div class="archetype-card-header">

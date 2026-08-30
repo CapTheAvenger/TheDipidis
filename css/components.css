@@ -322,6 +322,14 @@
 }
 .meta-hub-answer-line strong { color: var(--ink); }
 
+/* Gewichtete Antritte koennen halbe Werte sein (71,5 von 708). Die
+   gepunktete Linie zeigt, dass an der Zahl eine Erklaerung haengt, ohne
+   den Satz zu zerreissen — wer sie nicht braucht, liest darueber weg. */
+.mah-gewichtet {
+    border-bottom: 1px dotted var(--ink-3);
+    cursor: help;
+}
+
 /* ── Nachgeladene Anleitung: Warten und Scheitern ──────────────────
  *
  * Die Anleitung steht seit dem 18.08.2026 nicht mehr in index.html,

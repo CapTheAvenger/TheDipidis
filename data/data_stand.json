@@ -1,5 +1,5 @@
 {
-  "erzeugt_am": "2026-08-29T10:06:58+00:00",
+  "erzeugt_am": "2026-08-30T14:43:54+00:00",
   "quelle": "Zeitpunkt des Laufs fuer geaenderte Dateien, sonst fortgeschrieben",
   "dateien": {
     "limitless_online_decks.csv": "2026-08-28T06:48:16+00:00",
@@ -17,5 +17,9 @@
   },
   "inhalt_bis": {
     "labs_tournament_decks.csv": "2026-06-12"
-  }
+  },
+  "leer": [
+    "city_league_analysis.csv",
+    "city_league_archetypes.csv"
+  ]
 }

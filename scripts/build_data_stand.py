@@ -85,6 +85,28 @@ INHALT_BIS = {
 }
 
 
+def _ohne_datenzeilen(datei):
+    """True, wenn die CSV ausser der Kopfzeile nichts enthaelt.
+
+    Nur CSVs: eine JSON-Datei steht oft in einer einzigen Zeile, und die
+    waere nach dieser Rechnung "nur eine Kopfzeile". Beim ersten Lauf hat
+    das champions_usage.json faelschlich als leer gemeldet — die Datei
+    ist 1,4 MB gross und fuehrt 168 Pokemon.
+    """
+    if not datei.lower().endswith(".csv"):
+        return False
+    pfad = os.path.join(WURZEL, "data", datei)
+    try:
+        with open(pfad, encoding="utf-8-sig", errors="replace", newline="") as fh:
+            fh.readline()                      # Kopfzeile
+            for zeile in fh:
+                if zeile.strip():
+                    return False
+        return True
+    except OSError:
+        return False
+
+
 def inhalt_bis(datei, spalte):
     """Juengstes Datum IM Inhalt, als ISO-Tag. None, wenn nicht lesbar.
 
@@ -197,11 +219,27 @@ def main():
         if bis:
             inhalt[f] = bis
 
+    # Dritte Ebene: hat die Datei ueberhaupt Zeilen?
+    #
+    # BEFUND (Schlussabnahme 30.08.2026): der Frische-Chip der City League
+    # zeigte "Daten: 31.7.2026" — den Schreibzeitpunkt von
+    # city_league_analysis.csv. Diese Datei hat aber 0 Datenzeilen (nur
+    # die Kopfzeile), und die gezeigten Zahlen stammen aus
+    # city_league_archetypes_past.csv vom 6. Juni. Daneben stand
+    # "Verfuegbar: 6.6.2026" — zwei Daten, acht Wochen auseinander.
+    #
+    # Ein Datum an einer leeren Datei ist kein Stand, sondern der
+    # Zeitpunkt, an dem zuletzt nichts hineingeschrieben wurde. Der Chip
+    # soll das sagen koennen, also muss er es wissen.
+    leer = sorted(f for f in stand if _ohne_datenzeilen(f))
+
     with open(ZIEL, "w", encoding="utf-8") as fh:
         json.dump({"erzeugt_am": jetzt, "quelle": quelle,
-                   "dateien": stand, "inhalt_bis": inhalt},
+                   "dateien": stand, "inhalt_bis": inhalt, "leer": leer},
                   fh, indent=2, ensure_ascii=False)
         fh.write("\n")
+    if leer:
+        print("ohne Datenzeilen: " + ", ".join(leer))
 
     print("data/data_stand.json: %d Staende" % len(stand))
     for f, d in sorted(stand.items()):

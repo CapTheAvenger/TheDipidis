@@ -364,7 +364,12 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 const currentOpt = sel.querySelector('option[value="current"]');
                 if (currentOpt) {
                     currentOpt.disabled = true;
-                    currentOpt.title = 'Season pause — current data unavailable';
+                    // Der Grund steht am Element, damit ihn auch die
+                    // Knopfleiste (js/ds-filter.js) uebernehmen kann —
+                    // sie baut sich aus genau diesen Optionen.
+                    currentOpt.title = (typeof t === 'function')
+                        ? t('cl.currentUnavailable')
+                        : 'Saisonpause — aktuelle Daten nicht verfuegbar';
                 }
             };
             _disableCurrent(document.getElementById('cityLeagueFormatSelect'));
@@ -461,9 +466,83 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
         // data — a genuine off-season gap. Once a current-window event lands
         // (e.g. a JP major pulled in via additional_tournament_ids), the
         // banner disappears on its own instead of lingering as a stale notice.
+        /* Deutsche Zahlen tragen ein Komma.
+         *
+         * BEFUND (Schlussabnahme 30.08.2026): 40 sichtbare Textknoten der
+         * City-League-Ansicht standen mit Punkt da — "Ø Rang 14.0",
+         * "(+28.00)", "14.00" —, waehrend daneben "14,83" und "11,5 %"
+         * korrekt gesetzt waren. Eine einzige Zelle mischte beides:
+         * "28,0 (+28.00)".
+         *
+         * Der Vorrat an Helfern war da (js/app-tier-meta.js, parseLocale-
+         * Number); er wurde an diesen Stellen nur nie benutzt. Deshalb
+         * hier einer, der direkt neben den Ausgabestellen steht. */
+        /* Mehrwortnamen brauchen mehr als den ersten Buchstaben.
+         *
+         * BEFUND (Schlussabnahme 30.08.2026): die Tabelle "Archetypen
+         * kombiniert" zeigte "Mega venusaur" und "Mega greninja",
+         * waehrend Heldenkachel und Vergleichstabelle derselben Ansicht
+         * "Mega Venusaur" schrieben. Dieselbe Sache, drei Schreibweisen
+         * auf einem Bildschirm — `d.main.charAt(0).toUpperCase()` hebt
+         * nur den ERSTEN Buchstaben des ganzen Schluessels.
+         *
+         * js/app-tier-meta.js:673 macht es seit jeher richtig
+         * (toTitleCaseWords); hier stand die kurze Fassung. */
+        function _grossJedesWort(wert) {
+            return String(wert || '')
+                .split(' ')
+                .filter(Boolean)
+                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(' ');
+        }
+
+        function _komma(zahl, stellen) {
+            const n = Number(zahl);
+            if (!isFinite(n)) return String(zahl == null ? '' : zahl);
+            const text = n.toFixed(stellen == null ? 2 : stellen);
+            return (typeof getLang === 'function' && getLang() === 'en')
+                ? text
+                : text.replace('.', ',');
+        }
+        /* Dasselbe fuer Werte, die schon als Zeichenkette vorliegen —
+         * die abgeleiteten Vergleichsdaten schreiben "14.00" hinein. */
+        /* BEFUND (Schlussabnahme 30.08.2026): auf einem Bildschirm
+         * standen "14,83", "14,2", "12,0" und daneben in der
+         * kombinierten Tabelle "14,00" und "14,20" — dieselbe Groesse
+         * in zwei Genauigkeiten, weil die Vergleichsdaten ihre
+         * Nachkommastellen so mitbringen, wie sie berechnet wurden.
+         * Eine Ø-Platzierung hat hier immer zwei Nachkommastellen. */
+        function _rang(wert) {
+            const roh = String(wert == null ? '' : wert).trim();
+            if (!/^-?\d+(\.\d+)?$/.test(roh)) return _kommaText(wert);
+            return _komma(Number(roh), 2);
+        }
+
+        function _kommaText(wert) {
+            const roh = String(wert == null ? '' : wert);
+            if (typeof getLang === 'function' && getLang() === 'en') return roh;
+            return /^-?\d+\.\d+$/.test(roh) ? roh.replace('.', ',') : roh;
+        }
+
         function setCitySeasonNotice(show) {
+            // BEFUND (Schlussabnahme 30.08.2026): hier stand
+            // `el.style.display = show ? '' : 'none'`. Der Leerstring
+            // ENTFERNT die Inline-Angabe und faellt auf die Stilvorgabe
+            // zurueck — und die ist `display: none`
+            // (css/city-league.css, .cl-season-notice). Die Meldung
+            // konnte also NIE sichtbar werden.
+            //
+            // Gemessen: das style-Attribut war leer (die "Anzeigen"-
+            // Aktion war also gelaufen), _clAusgewichen stand auf true,
+            // und die Hoehe war 0 px. Von Hand auf `block` gesetzt sind
+            // es 66 px mit dem fertigen Text "Saison-Pause: Die aktuelle
+            // City-League-Saison ist beendet …".
+            //
+            // Der Text war geschrieben, richtig formuliert, wurde
+            // ausgeloest — und hat den Nutzer nie erreicht. Genau in der
+            // Lage, fuer die er gebaut wurde, schwieg die Seite.
             document.querySelectorAll('.cl-season-notice').forEach(el => {
-                el.style.display = show ? '' : 'none';
+                el.style.display = show ? 'block' : 'none';
             });
         }
 
@@ -731,23 +810,51 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     if (archetypesData.length > 0) {
                         const dates = archetypesData.map(d => d.date).filter(d => d);
                         if (dates.length > 0) {
+                            /* BEFUND (Schlussabnahme 30.08.2026): in der
+                             * deutschen Oberflaeche stand "Zeitraum:
+                             * 6th June 2026 - 6th June 2026" — die
+                             * Rohzeichenkette aus der CSV, englisch, mit
+                             * Ordnungszahl-Endung, durchgereicht.
+                             *
+                             * Und die Sortierung daneben war auch falsch:
+                             * die Monatstabelle kannte nur Kurzformen
+                             * ("Jun"), die Datei schreibt aber "June" —
+                             * jeder Monat fiel auf '01'. Dazu wurde ein
+                             * '20' vor das Jahr geklebt, aus "2026" also
+                             * "202026". Bei einem einzigen Datum faellt
+                             * das nicht auf; bei zweien waere der
+                             * Zeitraum vertauscht gewesen.
+                             *
+                             * Jetzt: einmal richtig lesen, dann in der
+                             * Sprache des Nutzers ausgeben. */
                             const parsedDates = dates.map(d => {
-                                const parts = d.split(' ');
-                                if (parts.length >= 3) {
-                                    const day = parts[0];
-                                    const month = parts[1];
-                                    const year = parts[2];
-                                    const monthMap = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'};
-                                    const monthNum = monthMap[month] || '01';
-                                    const fullYear = '20' + year;
-                                    return {original: d, comparable: fullYear + monthNum + day.padStart(2, '0')};
-                                }
-                                return {original: d, comparable: '99999999'};
+                                const m = String(d).match(
+                                    /^\s*(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s+(\d{4})\s*$/);
+                                if (!m) return { original: d, datum: null, comparable: '99999999' };
+                                const monate = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+                                                 jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+                                const mi = monate[m[2].slice(0, 3).toLowerCase()];
+                                if (mi == null) return { original: d, datum: null, comparable: '99999999' };
+                                const datum = new Date(Date.UTC(Number(m[3]), mi, Number(m[1])));
+                                return {
+                                    original: d,
+                                    datum,
+                                    comparable: m[3] + String(mi + 1).padStart(2, '0')
+                                                     + m[1].padStart(2, '0'),
+                                };
                             });
-                            
+
                             const minDateObj = parsedDates.reduce((a, b) => a.comparable < b.comparable ? a : b);
                             const maxDateObj = parsedDates.reduce((a, b) => a.comparable > b.comparable ? a : b);
-                            dateRange = `${minDateObj.original} - ${maxDateObj.original}`;
+                            const _schema = (typeof getLang === 'function' && getLang() === 'en')
+                                ? 'en-GB' : 'de-DE';
+                            const zeige = (o) => o.datum
+                                ? o.datum.toLocaleDateString(_schema,
+                                    { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+                                : o.original;
+                            dateRange = (minDateObj.comparable === maxDateObj.comparable)
+                                ? zeige(minDateObj)
+                                : `${zeige(minDateObj)} – ${zeige(maxDateObj)}`;
                         }
                     }
                 } catch (e) {
@@ -820,6 +927,29 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             // Return cached result if data reference hasn't changed
             if (_cityLeagueSortCache && _cityLeagueSortDataRef === data) return _cityLeagueSortCache;
             
+            /* BEFUND (Schlussabnahme 30.08.2026): gibt es GAR KEINEN
+             * Vorzeitraum, erfindet der Vergleich Aussagen.
+             *
+             * In data/city_league_archetypes_past_comparison.csv tragen
+             * alle 11 Zeilen status=NEU und old_count=0. Daraus wurde
+             * `avg_placement_change = new_avg - 0`, also fuer JEDE Zeile
+             * eine "Verschlechterung" — und die Oberflaeche baute daraus
+             * die Rubrik "Performance verschlechtert (schlechtere
+             * Ø-Platzierung)" mit 10 Zeilen, darunter "Slowking 8,0
+             * (+8.00)". Eine Ø-Platzierung von 8,0 ist gut; verschlechtert
+             * hat sich nichts, weil es nichts gab, wogegen.
+             *
+             * Gleichzeitig meldete die Karte daneben "Keine Veraenderungen
+             * in den Top 10": top10Old sortiert nach old_count, das fuer
+             * alle Zeilen 0 ist. Array.prototype.sort ist stabil, also
+             * blieb die CSV-Reihenfolge stehen — und die ist schon nach
+             * new_count sortiert. Alte und neue Rangliste waren identisch.
+             *
+             * Zwei sich widersprechende Aussagen aus einer Datengrundlage,
+             * die fuer keine von beiden traegt. Also sagen wir es. */
+            const keinVorzeitraum = data.length > 0
+                && data.every(d => (parseInt(d.old_count || 0, 10) || 0) === 0);
+
             const newArchetypes = data.filter(d => d.status === 'NEU');
             const disappeared = data.filter(d => d.status === 'VERSCHWUNDEN');
             const increased = data.filter(d => d.status !== 'NEU' && parseInt(d.count_change || 0) > 0)
@@ -856,7 +986,16 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 .slice(0, 10).map(d => d.archetype);
             
             _cityLeagueSortDataRef = data;
-            _cityLeagueSortCache = { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted, topByCount, topByPlacement, top10New, top10Old };
+            _cityLeagueSortCache = {
+                newArchetypes, disappeared, increased, decreased,
+                // Ohne Vorzeitraum gibt es nichts zu vergleichen. Lieber
+                // keine Rubrik als eine erfundene.
+                improvers: keinVorzeitraum ? [] : improvers,
+                decliners: keinVorzeitraum ? [] : decliners,
+                sorted, topByCount, topByPlacement, top10New,
+                top10Old: keinVorzeitraum ? [] : top10Old,
+                keinVorzeitraum,
+            };
             return _cityLeagueSortCache;
         }
         
@@ -866,20 +1005,28 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             if (!content || !cityLeagueData || cityLeagueData.length === 0) return;
             
             // Use cached sort results
-            const { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted, topByCount, topByPlacement, top10New, top10Old } = getCityLeagueSortedSections(cityLeagueData);
+            const { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted, topByCount, topByPlacement, top10New, top10Old, keinVorzeitraum } = getCityLeagueSortedSections(cityLeagueData);
             const totalArchetypes = cityLeagueData.length;
             
             // Generate timestamp
             const now = new Date();
-            const generatedDate = now.toLocaleString('de-DE', { 
+            // BEFUND (Schlussabnahme 30.08.2026): 'de-DE' stand hier fest,
+            // also zeigte auch die englische Fassung "30.08.2026, 14:35:23".
+            const _gebietsschema = (typeof getLang === 'function' && getLang() === 'en')
+                ? 'en-GB' : 'de-DE';
+            const generatedDate = now.toLocaleString(_gebietsschema, { 
                 year: 'numeric', month: '2-digit', day: '2-digit', 
                 hour: '2-digit', minute: '2-digit', second: '2-digit' 
             });
             
             const maxCount = parseInt(topByCount[0]?.new_count || 0);
             
-            const entries = top10New.filter(arch => !top10Old.includes(arch));
-            const exits = top10Old.filter(arch => !top10New.includes(arch));
+            // Ohne Vorzeitraum ist auch "aufgestiegen" eine Behauptung:
+            // top10Old ist leer, also waere JEDER Archetyp ein Aufsteiger.
+            // Das stuende dann direkt ueber dem Satz, der sagt, dass es
+            // nichts zu vergleichen gibt.
+            const entries = keinVorzeitraum ? [] : top10New.filter(arch => !top10Old.includes(arch));
+            const exits = keinVorzeitraum ? [] : top10Old.filter(arch => !top10New.includes(arch));
             
             let html = `
                 <div id="cityLeagueTierSections"></div>
@@ -900,7 +1047,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                         <div class="city-league-info-card-details">
                             ${entries.length > 0 ? `<strong class="city-league-info-card-entry">+ ${t('cl.entries')}</strong><br>${entries.map(arch => `${arch}`).join('<br>')}<br><br>` : ''}
                             ${exits.length > 0 ? `<strong class="city-league-info-card-exit">- ${t('cl.exits')}</strong><br>${exits.map(arch => `${arch}`).join('<br>')}<br>` : ''}
-                            ${entries.length === 0 && exits.length === 0 ? t('cl.noTop10Changes') : ''}
+                            ${keinVorzeitraum ? t('cl.noBaseline') : (entries.length === 0 && exits.length === 0 ? t('cl.noTop10Changes') : '')}
                         </div>
                     </div>
                     <div class="city-league-info-card">
@@ -934,12 +1081,12 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     const placement_color = placement_change < 0 ? 'var(--tint-ok-ink)' : 'var(--tint-bad-ink)';
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
-                        <tr class="city-league-info-table-row" tabindex="0">
+                        <tr class="city-league-info-table-row">
                             <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.old_count}</td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count}</td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-exit">${change}</td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: ${placement_color};">(${placement_change > 0 ? '+' : ''}${placement_change.toFixed(2)})</span></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center">${_rang(d.new_avg_placement)} ${(parseInt(d.old_count || 0, 10) || 0) === 0 ? '' : `<span class="city-league-info-table-placement" style="--placement-color: ${placement_color};">(${placement_change > 0 ? '+' : ''}${_komma(placement_change, 2)})</span>`}</td>
                         </tr>`;
                 });
                 html += `</tbody></table></div>`;
@@ -970,10 +1117,10 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     const countChangeText = countChange > 0 ? `+${countChange}` : `${countChange}`;
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
-                        <tr class="city-league-info-table-row" tabindex="0">
+                        <tr class="city-league-info-table-row">
                             <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count} <span class="city-league-info-table-count-change">(${countChangeText})</span></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-entry">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: var(--tint-ok-ink);">(-${improvement.toFixed(2)})</span></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-entry">${_rang(d.new_avg_placement)} <span class="city-league-info-table-placement" style="--placement-color: var(--tint-ok-ink);">(-${_komma(improvement, 2)})</span></td>
                         </tr>`;
                 });
                 html += `</tbody></table></div>`;
@@ -999,10 +1146,10 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     const countChangeText = countChange > 0 ? `+${countChange}` : `${countChange}`;
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
-                        <tr class="city-league-info-table-row" tabindex="0">
+                        <tr class="city-league-info-table-row">
                             <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count} <span class="city-league-info-table-count-change">(${countChangeText})</span></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-exit">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: var(--tint-bad-ink);">(+${decline.toFixed(2)})</span></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-exit">${_rang(d.new_avg_placement)} <span class="city-league-info-table-placement" style="--placement-color: var(--tint-bad-ink);">(+${_komma(decline, 2)})</span></td>
                         </tr>`;
                 });
                 html += `</tbody></table></div>`;
@@ -1163,7 +1310,15 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     // Plaetze gerundet und das Vorzeichen entschied ueber die Farbe.
                     const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const placementColor = placementChange < 0 ? 'var(--tint-ok-ink)' : placementChange > 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
-                    const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
+                    /* BEFUND (Schlussabnahme 30.08.2026): stand old_count auf 0,
+                       zeigte die Tabelle "14,83 (+14,83)" — die Ø-Platzierung
+                       habe sich um 14,83 Plaetze verschlechtert. Es gab aber
+                       keinen Vorzeitraum, gegen den sie sich haette
+                       verschlechtern koennen; die Klammer wiederholte nur den
+                       Wert davor mit einem Vorzeichen. Die Zahl selbst bleibt
+                       stehen, die erfundene Veraenderung nicht. */
+                    const _ohneBasis = (parseInt(d.old_count || 0, 10) || 0) === 0;
+                    const displayName = _grossJedesWort(d.main);
                     /* BEFUND (Abnahmerunde 30.08.2026): encodeURIComponent
                        kodiert den Apostroph NICHT. Der Archetyp "N's" ergab
                        damit einen Aufrufer, der beim Klick zerbricht:
@@ -1184,8 +1339,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                         <tr class="city-league-info-table-row city-league-info-table-row-mobile" title="${d.variants.join(', ')}">
                             <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-mobile" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="${t('cl.analyzeVariants')}"><span style="display:inline-flex;align-items:center;gap:6px;">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.slugIconHtml(d.main,{size:'sm'}):'')}${displayName}</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-variants-mobile">${d.variant_count}</td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-mobile">${d.new_count} <span class="city-league-info-table-count-change-mobile" style="color: ${changeColor};">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-mobile">${d.new_avg_placement} <span class="city-league-info-table-placement-mobile" style="color: ${placementColor};">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-mobile">${d.new_count} ${_ohneBasis ? '' : `<span class="city-league-info-table-count-change-mobile" style="color: ${changeColor};">(${changeValue > 0 ? '+' : ''}${changeValue})</span>`}</td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-mobile">${_rang(d.new_avg_placement)} ${_ohneBasis ? '' : `<span class="city-league-info-table-placement-mobile" style="color: ${placementColor};">(${placementChange > 0 ? '+' : ''}${_komma(placementChange, 2)})</span>`}</td>
                         </tr>`;
                 });
 
@@ -1205,6 +1360,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     <tbody>`;
             
                 data.forEach(d => {
+                    /* Siehe Befund weiter oben: ohne Vorzeitraum ist jede
+                       Klammer nur der Wert davor mit einem Vorzeichen. */
+                    const _ohneBasis = (parseInt(d.old_count || 0, 10) || 0) === 0;
                     const changeValue = parseInt(d.count_change || 0);
                     const changeColor = changeValue > 0 ? 'var(--tint-ok-ink)' : changeValue < 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const changeText = changeValue > 0 ? `+${changeValue}` : `${changeValue}`;
@@ -1215,10 +1373,10 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     // Plaetze gerundet und das Vorzeichen entschied ueber die Farbe.
                     const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const placementColor = placementChange < 0 ? 'var(--tint-ok-ink)' : placementChange > 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
-                    const placementText = placementChange > 0 ? `+${placementChange.toFixed(2)}` : placementChange.toFixed(2);
+                    const placementText = (placementChange > 0 ? '+' : '') + _komma(placementChange, 2);
                     
                     // Capitalize first letter
-                    const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
+                    const displayName = _grossJedesWort(d.main);
                     /* BEFUND (Abnahmerunde 30.08.2026): encodeURIComponent
                        kodiert den Apostroph NICHT. Der Archetyp "N's" ergab
                        damit einen Aufrufer, der beim Klick zerbricht:
@@ -1239,8 +1397,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                         <tr class="city-league-info-table-row city-league-info-table-row-desktop" title="${d.variants.join(', ')}">
                             <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-desktop" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="${t('cl.analyzeVariants')}"><span style="display:inline-flex;align-items:center;gap:6px;">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.slugIconHtml(d.main,{size:'sm'}):'')}${displayName}</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-variants-desktop">${d.variant_count}</td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-desktop">${d.new_count} <span class="city-league-info-table-count-change-desktop" style="--change-color: ${changeColor};">(${changeText})</span></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-desktop">${d.new_avg_placement} <span class="city-league-info-table-placement-desktop" style="--placement-color: ${placementColor};">(${placementText})</span></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-desktop">${d.new_count} ${_ohneBasis ? '' : `<span class="city-league-info-table-count-change-desktop" style="--change-color: ${changeColor};">(${changeText})</span>`}</td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-desktop">${_rang(d.new_avg_placement)} ${_ohneBasis ? '' : `<span class="city-league-info-table-placement-desktop" style="--placement-color: ${placementColor};">(${placementText})</span>`}</td>
                         </tr>`;
                 })
                 
@@ -1277,6 +1435,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     <tbody>`;
                 
                 data.forEach(d => {
+                    /* Siehe Befund weiter oben: ohne Vorzeitraum ist jede
+                       Klammer nur der Wert davor mit einem Vorzeichen. */
+                    const _ohneBasis = (parseInt(d.old_count || 0, 10) || 0) === 0;
                     const changeValue = parseInt(d.count_change || 0);
                     const changeColor = changeValue > 0 ? 'var(--tint-ok-ink)' : changeValue < 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
@@ -1286,8 +1447,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     tableHTML += `
                         <tr class="city-league-info-table-row city-league-info-table-row-mobile" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}">
                             <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-mobile"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-mobile">${d.new_count} <span class="city-league-info-table-count-change-mobile" style="color: ${changeColor};">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-mobile">${d.new_avg_placement} <span class="city-league-info-table-placement-mobile" style="color: ${placementColor};">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-mobile">${d.new_count} ${_ohneBasis ? '' : `<span class="city-league-info-table-count-change-mobile" style="color: ${changeColor};">(${changeValue > 0 ? '+' : ''}${changeValue})</span>`}</td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-mobile">${_rang(d.new_avg_placement)} ${_ohneBasis ? '' : `<span class="city-league-info-table-placement-mobile" style="color: ${placementColor};">(${placementChange > 0 ? '+' : ''}${_komma(placementChange, 2)})</span>`}</td>
                         </tr>`;
                 });
                 
@@ -1306,20 +1467,23 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     <tbody>`;
             
                 data.forEach(d => {
+                    /* Siehe Befund weiter oben: ohne Vorzeitraum ist jede
+                       Klammer nur der Wert davor mit einem Vorzeichen. */
+                    const _ohneBasis = (parseInt(d.old_count || 0, 10) || 0) === 0;
                     const changeValue = parseInt(d.count_change || 0);
                     const changeColor = changeValue > 0 ? 'var(--tint-ok-ink)' : changeValue < 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const changeText = changeValue > 0 ? `+${changeValue}` : `${changeValue}`;
                     
                     const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const placementColor = placementChange < 0 ? 'var(--tint-ok-ink)' : placementChange > 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
-                    const placementText = placementChange > 0 ? `+${placementChange.toFixed(2)}` : placementChange.toFixed(2);
+                    const placementText = (placementChange > 0 ? '+' : '') + _komma(placementChange, 2);
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     
                     tableHTML += `
                         <tr class="city-league-info-table-row city-league-info-table-row-desktop" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}">
                             <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-desktop"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-desktop">${d.new_count} <span class="city-league-info-table-count-change-desktop" style="color: ${changeColor};">(${changeText})</span></td>
-                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-desktop">${d.new_avg_placement} <span class="city-league-info-table-placement-desktop" style="color: ${placementColor};">(${placementText})</span></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-desktop">${d.new_count} ${_ohneBasis ? '' : `<span class="city-league-info-table-count-change-desktop" style="color: ${changeColor};">(${changeText})</span>`}</td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-desktop">${_rang(d.new_avg_placement)} ${_ohneBasis ? '' : `<span class="city-league-info-table-placement-desktop" style="color: ${placementColor};">(${placementText})</span>`}</td>
                         </tr>`;
                 });
                 
@@ -1597,7 +1761,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 top10.forEach(archetype => {
                     const option = document.createElement('option');
                     option.value = archetype.name;
-                    option.textContent = `${archetype.name} (${archetype.deckCount} ${t('cl.decks')})`;
+                    option.textContent = `${archetype.name} (${archetype.deckCount} ${t(archetype.deckCount === 1 ? 'cl.deckSingular' : 'cl.decks')})`;
                     topGroup.appendChild(option);
                 });
                 select.appendChild(topGroup);
@@ -1610,7 +1774,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 rest.forEach(archetype => {
                     const option = document.createElement('option');
                     option.value = archetype.name;
-                    option.textContent = `${archetype.name} (${archetype.deckCount} ${t('cl.decks')})`;
+                    option.textContent = `${archetype.name} (${archetype.deckCount} ${t(archetype.deckCount === 1 ? 'cl.deckSingular' : 'cl.decks')})`;
                     restGroup.appendChild(option);
                 });
                 select.appendChild(restGroup);
@@ -1639,7 +1803,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 combinedGroups.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = 'GROUP:' + g.variants.join('|');
-                    opt.textContent = `${g.main.charAt(0).toUpperCase() + g.main.slice(1)} — ${t('cl.allVariants')} (${g.totalDecks} ${t('cl.decks')})`;
+                    opt.textContent = `${_grossJedesWort(g.main)} — ${t('cl.allVariants')} (${g.totalDecks} ${t(g.totalDecks === 1 ? 'cl.deckSingular' : 'cl.decks')})`;
                     combinedOptGroup.appendChild(opt);
                 });
                 select.appendChild(combinedOptGroup);

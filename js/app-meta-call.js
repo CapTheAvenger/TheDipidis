@@ -7836,8 +7836,16 @@ window.MetaCall = (function () {
     const DAY2_THRESHOLD = 0.20;
     const DAY2_MIN = 10;
     const DAY2_MAX = 10;
+    /* BEFUND (Schlussabnahme 30.08.2026): eine Zeile zeigte "20,0 %"
+       und daneben das Abzeichen "unter 20 %". Beides stimmte fuer sich
+       — die Anzeige rundet auf eine Nachkommastelle (0,19951 → 20,0),
+       die Einordnung rechnete mit dem rohen Wert — und zusammen ergab
+       es einen sichtbaren Widerspruch, den kein Leser aufloesen kann.
+       Die Schwelle greift jetzt auf der Zahl, die auch dasteht. */
+    const _day2Angezeigt = (p) => Math.round((Number(p) || 0) * 1000) / 10;
+    const _ueberDay2Schwelle = (e) => _day2Angezeigt(e.day2Prob) >= DAY2_THRESHOLD * 100;
     const day2Eval = evaluated.filter(e => day2Eligible.has(normalize(e.name)));
-    let day2 = day2Eval.filter(e => e.day2Prob >= DAY2_THRESHOLD);
+    let day2 = day2Eval.filter(_ueberDay2Schwelle);
     // Wie viele es WIRKLICH ueber die Schwelle schaffen. Das Abzeichen
     // zeigte bisher die Laenge der aufgefuellten Liste und behauptete
     // damit "10 Day-2-faehig", auch wenn es sechs waren. Die Auffuellung
@@ -7846,7 +7854,7 @@ window.MetaCall = (function () {
     const day2UeberSchwelle = day2.length;
     if (day2.length < DAY2_MIN) day2 = day2Eval.slice(0, DAY2_MIN);
     if (day2.length > DAY2_MAX) day2 = day2.slice(0, DAY2_MAX);
-    day2 = day2.map(e => (e.day2Prob >= DAY2_THRESHOLD
+    day2 = day2.map(e => (_ueberDay2Schwelle(e)
       ? e : Object.assign({}, e, { unterSchwelle: true })));
     const day2Names = new Set(day2.map(d => normalize(d.name)));
 
@@ -8007,6 +8015,18 @@ window.MetaCall = (function () {
   if (typeof window !== 'undefined') window._mcBinomialP = binomialP;
 
   // ── Rendering ──────────────────────────────────────────────
+  /* Deutsche Zahlen tragen ein Komma.
+   *
+   * BEFUND (Schlussabnahme 30.08.2026): in der Empfehlungstabelle stand
+   * "∅ 4.31" mit Punkt, waehrend die Prozentwerte derselben Zeile
+   * korrekt "11,5 %" setzten. Zehn sichtbare Textknoten dieser Ansicht
+   * waren betroffen. */
+  function _dezimalMc(wert) {
+    const roh = String(wert == null ? '' : wert);
+    if (typeof getLang === 'function' && getLang() === 'en') return roh;
+    return /^-?\d+\.\d+$/.test(roh) ? roh.replace('.', ',') : roh;
+  }
+
   function esc(s) {
     return String(s)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -9221,7 +9241,7 @@ window.MetaCall = (function () {
         <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}${counterPickTag}</span>${historyLine}</td>
         <td class="mc-rec-day2"><strong>${day2Pct}%</strong>${unterSchwelleTag}</td>
         <td class="mc-rec-wr">${wrPct}%</td>
-        <td class="mc-rec-wins">∅ ${r.expWin.toFixed(2)}</td>
+        <td class="mc-rec-wins">∅ ${_dezimalMc(r.expWin.toFixed(2))}</td>
         <td class="mc-rec-toggle"><span class="mc-rec-chevron" aria-hidden="true">▼</span></td>
       </tr>
       <tr class="mc-rec-reason-row" id="${reasonId}" hidden>

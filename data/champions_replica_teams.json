@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-08-29",
+    "last_updated": "2026-08-30",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-B",
@@ -10,7 +10,7 @@
       "M-B",
       "M-A"
     ],
-    "team_count": 77
+    "team_count": 75
   },
   "teams": [
     {
@@ -7372,204 +7372,6 @@
             "Shadow Ball",
             "Make It Rain",
             "Nasty Plot",
-            "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 76,
-      "replica_code": "8YHCR4668E",
-      "team_name": "chillgatr's Meganium Gallade Team",
-      "tournament": "-",
-      "trainer": "chillgatr",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "15 Aug 2026",
-      "pokepaste_url": "https://pokepast.es/0ba19a345ad55f4f",
-      "pokemon": [
-        {
-          "name": "Milotic",
-          "item": "Life Orb",
-          "ability": "Competitive",
-          "tera_type": "",
-          "evs": "32 HP / 6 Def / 20 SpA / 8 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Ice Beam",
-            "Scald",
-            "Icy Wind",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Meganium",
-          "item": "Meganiumite",
-          "ability": "Overgrow",
-          "tera_type": "",
-          "evs": "26 HP / 32 SpA / 8 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Protect",
-            "Solar Beam",
-            "Dazzling Gleam",
-            "Weather Ball"
-          ]
-        },
-        {
-          "name": "Aerodactyl",
-          "item": "Focus Sash",
-          "ability": "Unnerve",
-          "tera_type": "",
-          "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Protect",
-            "Tailwind",
-            "Rock Slide",
-            "Dual Wingbeat"
-          ]
-        },
-        {
-          "name": "Gholdengo",
-          "item": "Sitrus Berry",
-          "ability": "Good as Gold",
-          "tera_type": "",
-          "evs": "32 HP / 27 SpA / 7 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Protect",
-            "Nasty Plot",
-            "Make It Rain",
-            "Shadow Ball"
-          ]
-        },
-        {
-          "name": "Tyranitar",
-          "item": "Choice Scarf",
-          "ability": "Sand Stream",
-          "tera_type": "",
-          "evs": "10 HP / 32 Atk / 24 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Rock Slide",
-            "Knock Off",
-            "Low Kick",
-            "Ice Punch"
-          ]
-        },
-        {
-          "name": "Gallade",
-          "item": "White Herb",
-          "ability": "Sharpness",
-          "tera_type": "",
-          "evs": "24 HP / 32 Atk / 10 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Protect",
-            "Psycho Cut",
-            "Trick Room",
-            "Sacred Sword"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 77,
-      "replica_code": "9SAX2X1U4B",
-      "team_name": "toshiniki's Raichu-Y Staraptor Team",
-      "tournament": "-",
-      "trainer": "toshiniki",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "15 Aug 2026",
-      "pokepaste_url": "https://pokepast.es/d5abd0dbf9bf82cb",
-      "pokemon": [
-        {
-          "name": "Staraptor",
-          "item": "Staraptite",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "23 HP / 11 Atk / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Dual Wingbeat",
-            "Close Combat",
-            "Tailwind",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Raichu",
-          "item": "Raichunite Y",
-          "ability": "Lightning Rod",
-          "tera_type": "",
-          "evs": "29 HP / 5 Def / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Zap Cannon",
-            "Focus Blast",
-            "Fake Out",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Glimmora",
-          "item": "Focus Sash",
-          "ability": "Toxic Debris",
-          "tera_type": "",
-          "evs": "32 SpA / 2 SpD / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Power Gem",
-            "Sludge Bomb",
-            "Earth Power",
-            "Spiky Shield"
-          ]
-        },
-        {
-          "name": "Kingambit",
-          "item": "Chople Berry",
-          "ability": "Defiant",
-          "tera_type": "",
-          "evs": "30 HP / 25 Atk / 6 Def / 5 SpD",
-          "nature": "Adamant",
-          "moves": [
-            "Kowtow Cleave",
-            "Iron Head",
-            "Sucker Punch",
-            "Low Kick"
-          ]
-        },
-        {
-          "name": "Sylveon",
-          "item": "Fairy Feather",
-          "ability": "Pixilate",
-          "tera_type": "",
-          "evs": "18 HP / 10 Def / 21 SpA / 17 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Hyper Voice",
-            "Hyper Beam",
-            "Quick Attack",
-            "Detect"
-          ]
-        },
-        {
-          "name": "Farigiraf",
-          "item": "Sitrus Berry",
-          "ability": "Armor Tail",
-          "tera_type": "",
-          "evs": "29 HP / 21 Def / 16 SpD",
-          "nature": "Bold",
-          "moves": [
-            "Psychic",
-            "Helping Hand",
-            "Trick Room",
             "Protect"
           ]
         }

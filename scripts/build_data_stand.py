@@ -59,6 +59,17 @@ DATEIEN = [
     "price_data.csv",
     "labs_tournament_decks.csv",
     "champions_usage.json",
+    # NACHTRAG (Abnahmerunde 30.08.2026): diese beiden werden von
+    # js/app-city-league.js als aktuelle City-League-Quellen geladen
+    # (Zeilen 566-568 und 1598-1600), standen aber nicht in dieser
+    # Liste. Sie sind heute LEER — ohne Eintrag haette ein Chip, der
+    # kuenftig auf sie zeigt, "hat Daten" gemeldet.
+    "city_league_archetypes_comparison.csv",
+    "city_league_archetypes_deck_stats.csv",
+    # Die eigentliche Quelle des Reiters "Vergangene Turniere". Der
+    # Frischechip dort zeigte bis heute auf city_league_analysis_past.csv
+    # — eine Datei, die dieser Reiter gar nicht laedt.
+    "tournament_cards_data_overview.csv",
 ]
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

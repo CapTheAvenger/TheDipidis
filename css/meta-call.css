@@ -475,10 +475,15 @@
 .metacall-field-group input[type="number"]:focus,
 .metacall-field-group input[type="text"]:focus,
 .metacall-field-group select:focus {
-  outline: none;
+  /* NACHTRAG (2. Abnahmerunde): der Ring allein trug nur 1,40:1 gegen
+     die Flaeche — sichtbar ist er damit nicht. Der Rahmen wird jetzt
+     zweimal so dick und nimmt die Akzentfarbe (#4663e6, 5,01:1 gegen
+     Weiss); der Ring liegt als weiche Kante darum. */
+  outline: 2px solid var(--color-info);
+  outline-offset: 1px;
   border-color: var(--color-info);
   background: var(--surface-1);
-  box-shadow: 0 0 0 3px rgba(79, 109, 156, 0.25);
+  box-shadow: 0 0 0 3px rgba(70, 99, 230, 0.25);
 }
 
 
@@ -1208,9 +1213,10 @@
   cursor: pointer;
 }
 .mc-scenarios-select:focus {
-  outline: none;
+  outline: 2px solid var(--color-info);
+  outline-offset: 1px;
   border-color: var(--color-info);
-  box-shadow: 0 0 0 3px rgba(79, 109, 156, 0.25);
+  box-shadow: 0 0 0 3px rgba(70, 99, 230, 0.25);
 }
 .mc-scenarios-save-btn {
   background: var(--color-info);

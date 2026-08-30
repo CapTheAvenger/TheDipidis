@@ -224,9 +224,9 @@
 /* Group accent colours pulse the label so the user can tell groups
    apart at a glance without competing with the active-tab underline. */
 .profile-tab-group[data-group="cards"] .profile-tab-group-label { color: var(--dv-pos-ink); }
-.profile-tab-group[data-group="decks"] .profile-tab-group-label { color: #8e44ad; }
+.profile-tab-group[data-group="decks"] .profile-tab-group-label { color: var(--profil-decks-ink); }
 .profile-tab-group[data-group="play"]  .profile-tab-group-label { color: var(--tint-ok-ink); }
-.profile-tab-group[data-group="misc"]  .profile-tab-group-label { color: #7f8c8d; }
+.profile-tab-group[data-group="misc"]  .profile-tab-group-label { color: var(--profil-misc-ink); }
 
 .profile-tab-content {
     padding: 20px 0;

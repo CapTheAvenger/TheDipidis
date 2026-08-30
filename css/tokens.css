@@ -314,6 +314,19 @@
     --space-gl: var(--brand);
     --space-past: var(--ink-3);
 
+    /* BEFUND (2. Abnahmerunde 30.08.2026): der Meta-Anteil in der
+       Kartenkachel stand als .color-yellow (#FFCB05) bei 9,6 px auf
+       weissem Grund — 1,52:1. Im Dunkelmodus ist genau dieses Gelb
+       richtig. Also zwei Werte statt einem: hell eine Stufe dunkler
+       (4,92:1), dunkel das Marken-Gelb. */
+    --meta-anteil-ink: #a16207;
+
+    /* Gruppenfarben der Profilleiste. Sie standen fest verdrahtet und
+       drehten mit dem Modus nicht mit: "Konto" (#7f8c8d) lag hell bei
+       3,48:1, "Decks" (#8e44ad) dunkel bei 3,01:1. */
+    --profil-decks-ink: #7d3c98;
+    --profil-misc-ink: #566566;
+
     /* ── Der Signaturstrich ──────────────────────────────────────────
      * Zwei Pixel Marke-nach-Gold unter der Kopfzeile ersetzen den alten
      * 82px hohen roten Verlaufsbanner, der auf jeder Ansicht lag und
@@ -408,6 +421,11 @@
     --space-jp: #f0b429;
     --space-gl: var(--brand);
     --space-past: var(--ink-3);
+
+    --meta-anteil-ink: #FFCB05;
+
+    --profil-decks-ink: #c79cf0;
+    --profil-misc-ink: #9aa8aa;
 
     /* Auf dunklem Grund braucht ein Schatten mehr Tiefe, sonst ist er
      * unsichtbar; die Innenkante übernimmt die Kantenzeichnung. */

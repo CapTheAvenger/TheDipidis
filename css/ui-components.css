@@ -1137,6 +1137,12 @@ img[src*="limitlesstcg"] {
 .justify-space-between { justify-content: space-between !important; }
 .mb-14 { margin-bottom: 14px !important; }
 .color-yellow { color: #FFCB05 !important; }
+
+/* Der Meta-Anteil in der Kartenkachel. Siehe --meta-anteil-ink in
+   tokens.css: dasselbe Gelb im Dunkelmodus, im Hellmodus eine Stufe
+   dunkler, damit 9,6 px auf Weiss lesbar bleiben. */
+.karten-metaanteil { color: var(--meta-anteil-ink); }
+
 .flex-wrap { flex-wrap: wrap !important; }
 .gap-15 { gap: 15px !important; }
 .justify-center { justify-content: center !important; }
@@ -3037,10 +3043,13 @@ img[src*="limitlesstcg"] {
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
+/* BEFUND (2. Abnahmerunde 30.08.2026): Weiss auf dem Verlauf
+   (#4663e6 → #764ba2) traegt 5,01:1. Die Deckkraft von 0,9 zog es auf
+   4,39:1 — knapp unter die Grenze, fuer nichts: die Ueberschrift ist
+   ohnehin durch Groesse und Abstand vom Wert darunter abgesetzt. */
 .city-league-info-card-title {
     margin: 0 0 10px 0;
     font-size: 1.1em;
-    opacity: 0.9;
 }
 .city-league-info-card-total {
     font-size: 2.5em;
@@ -3049,7 +3058,6 @@ img[src*="limitlesstcg"] {
 }
 .city-league-info-card-details {
     font-size: 0.85em;
-    opacity: 0.9;
     margin-top: 10px;
     text-align: left;
 }
@@ -4385,9 +4393,14 @@ img[src*="limitlesstcg"] {
 .calc-result-draw { background: linear-gradient(135deg, var(--solid-ok), var(--solid-ok)); }
 .calc-result-prize { background: linear-gradient(135deg, #c0392b, var(--solid-bad)); }
 .calc-result-topdeck { background: linear-gradient(135deg, var(--solid-info), var(--solid-info)); }
-.calc-result-label { font-size: 0.85rem; opacity: .85; margin-bottom: 6px; }
+/* BEFUND (2. Abnahmerunde 30.08.2026): die Deckkraft zog weissen Text
+   auf den farbigen Ergebniskarten unter die Grenze — Beschriftung
+   3,96-4,11:1, Fussnote 3,10-3,30:1. Sie war reine Zierde: die
+   Rangordnung im Kaertchen entsteht schon aus Schriftgroesse und
+   -staerke (0,85rem gegen 2,4rem, 800). */
+.calc-result-label { font-size: 0.85rem; margin-bottom: 6px; }
 .calc-result-value { font-size: 2.4rem; font-weight: 800; line-height: 1.1; }
-.calc-result-note { font-size: 0.7rem; opacity: .7; margin-top: 4px; }
+.calc-result-note { font-size: 0.72rem; margin-top: 4px; }
 .calc-result-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .calc-prob-high { color: #fff !important; }
 .calc-prob-mid { color: #fff !important; }

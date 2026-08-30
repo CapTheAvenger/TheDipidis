@@ -113,7 +113,16 @@ jobs:
         if: ${{ inputs.schreiben }}
         run: |
           python -m pip install --quiet pytest
-          python -m pytest tests/python/test_ace_spec_regel.py tests/python/test_ace_spec_bestand.py -q
+          # test_ace_spec_bestand.py prueft den ausgelieferten Bestand und
+          # kann es erst, wenn dieser Lauf ihn einmal geraeumt hat — beim
+          # ersten Mal liegt die Datei deshalb noch nicht im Repo.
+          dateien="tests/python/test_ace_spec_regel.py"
+          if [ -f tests/python/test_ace_spec_bestand.py ]; then
+            dateien="$dateien tests/python/test_ace_spec_bestand.py"
+          else
+            echo "::notice::test_ace_spec_bestand.py noch nicht im Repo — kommt im Folge-PR."
+          fi
+          python -m pytest $dateien -q
 
       - name: Committen
         id: commit

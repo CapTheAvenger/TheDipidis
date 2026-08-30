@@ -2025,8 +2025,12 @@ img[src*="limitlesstcg"] {
     text-align: center;
 }
 .city-league-card-pin-btn {
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
+    /* BEFUND (30.08.2026): weisses Zeichen auf einer zu 12 % weissen
+       Flaeche ueber einer hellen Karte — im Hellmodus 1,00:1, also
+       unsichtbar. 52 Knoepfe. Die Flaeche kam aus einer dunklen
+       Vorlage; auf einer Token-Flaeche traegt der Text --ink. */
+    background: var(--surface-2);
+    color: var(--ink);
     font-size: 11px;
     filter: grayscale(1) opacity(0.7);
 }

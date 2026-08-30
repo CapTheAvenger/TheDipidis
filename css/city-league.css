@@ -674,7 +674,7 @@
 .past-meta-stat-value {
     font-size: 1.3em;
     font-weight: 800;
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
 }
 /* Der Nenner unter der Quote. "100,0 %" aus einem Day-1-Spieler sah
    genauso aus wie aus 600 — die zwei Zahlen, aus denen sie entsteht,
@@ -854,18 +854,23 @@
     flex-wrap: wrap;
     padding: 4px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid #e0e5f0;
+    /* BEFUND (30.08.2026): rgba(255,255,255,0.7) blieb im Dunkelmodus
+       weiss — eine helle Leiste mitten in der dunklen Ansicht, und die
+       ruhenden Knoepfe darauf standen bei 1,78:1. Weiss ist hier kein
+       Farbwert, sondern "etwas heller als der Grund"; genau das ist
+       --surface-2 in beiden Modi. */
+    background: var(--surface-2);
+    border: 1px solid var(--line);
 }
 .past-meta-cards-type-btn {
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: var(--ink-3);
+    /* Dieselbe Kontrastbremse wie bei .city-league-type-btn — siehe dort. */
+    color: var(--ink-2);
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    opacity: 0.7;
     font-weight: 700;
     transition: all 0.2s ease;
     font-family: 'Nunito', sans-serif;
@@ -1062,7 +1067,7 @@
 .current-meta-stat-value {
     font-size: 1.3em;
     font-weight: 800;
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
 }
 /* --- Top 256 Tournament Breakdown --- */
 .current-meta-top256-section {
@@ -1103,7 +1108,7 @@
 }
 .top256-count {
     font-weight: 800;
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
     min-width: 28px;
 }
 .top256-tournament {
@@ -1738,7 +1743,7 @@
 }
 .toolbar-metric-value {
     font-weight: 800;
-    color: #3b4cca;
+    color: var(--brand-ink);
 }
 .toolbar-metric-sep {
     font-weight: 600;
@@ -1870,7 +1875,9 @@
 }
 .city-league-cards-count {
     font-size: 0.9em;
-    color: var(--pokemon-blue, #3B4CCA);
+    /* --pokemon-blue ist der Flaechenton; auf einer Flaeche gelesen
+       braucht es die Schriftvariante. */
+    color: var(--brand-ink);
     font-weight: 800;
     background: var(--surface-1);
     border: 1px solid rgba(59, 76, 202, 0.22);
@@ -1881,7 +1888,10 @@
 .city-league-cards-count-summary {
     margin-left: 4px;
     font-weight: 600;
-    opacity: 0.72;
+    /* Vorher opacity 0,72 auf dem geerbten Blau: 1,93:1 im Dunkelmodus.
+       Der Zusatz soll leiser sein als die Zahl davor, nicht blasser —
+       deshalb die ruhigere Textfarbe statt halber Deckkraft. */
+    color: var(--ink-2);
 }
 .city-league-cards-controls {
     display: flex;
@@ -1912,18 +1922,26 @@
     flex-wrap: wrap;
     padding: 4px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid #e0e5f0;
+    /* BEFUND (30.08.2026): rgba(255,255,255,0.7) blieb im Dunkelmodus
+       weiss — eine helle Leiste mitten in der dunklen Ansicht, und die
+       ruhenden Knoepfe darauf standen bei 1,78:1. Weiss ist hier kein
+       Farbwert, sondern "etwas heller als der Grund"; genau das ist
+       --surface-2 in beiden Modi. */
+    background: var(--surface-2);
+    border: 1px solid var(--line);
 }
 .city-league-type-btn {
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: var(--ink-3);
+    /* BEFUND (30.08.2026): --ink-3 mit opacity 0,7 landete im Dunkelmodus
+       bei 1,39:1. Die Deckkraft war als Ruhe gedacht und wurde zur
+       Kontrastbremse — sie multipliziert sich auf JEDE Farbe darunter.
+       Der ruhige Eindruck kommt jetzt aus der Farbe selbst. */
+    color: var(--ink-2);
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    opacity: 0.7;
     font-weight: 700;
     transition: all 0.2s ease;
     font-family: 'Nunito', sans-serif;
@@ -1987,7 +2005,7 @@
     font-size: 1.9em;
     line-height: 1;
     font-weight: 800;
-    color: var(--pokemon-blue, #3B4CCA);
+    color: var(--brand-ink);
 }
 .city-league-header {
     margin-bottom: 20px;
@@ -2330,7 +2348,7 @@
 #city-league-analysis .city-league-stat-value {
     font-size: 1.7em;
     font-weight: 900;
-    color: #1e3a8a;
+    color: var(--brand-ink);
 }
 
 @media (max-width: 768px) {
@@ -2520,7 +2538,7 @@
 #current-analysis .current-meta-stat-value {
     font-size: 1.7em;
     font-weight: 900;
-    color: #1e3a8a;
+    color: var(--brand-ink);
 }
 
 #current-analysis .current-meta-meta-card-filters {
@@ -2702,7 +2720,7 @@
 #past-meta .past-meta-stat-value {
     font-size: 1.7em;
     font-weight: 900;
-    color: #1e3a8a;
+    color: var(--brand-ink);
 }
 
 #past-meta .past-meta-table-scroll {
@@ -2939,7 +2957,7 @@
     font-variant-numeric: tabular-nums;
 }
 .past-meta-matchup-table .past-meta-mu-good { color: var(--tint-ok-ink); }
-.past-meta-matchup-table .past-meta-mu-bad  { color: #b91c1c; }
+.past-meta-matchup-table .past-meta-mu-bad  { color: var(--tint-bad-ink); }
 .past-meta-matchup-table .past-meta-mu-even { color: var(--ink-3); }
 
 /* Season-closed notice ─────────────────────────────────────────────

@@ -162,7 +162,9 @@
     color: var(--ink-2);
 }
 .ds-space b { color: var(--ink-2); font-weight: 600; }
-.ds-space-sep { color: var(--line-strong); }
+/* Der Punkt zwischen zwei Wegweisern ist Text, kein Rahmen:
+   --line-strong stand im Dunkeln mit 1,74:1 auf der Kachel. */
+.ds-space-sep { color: var(--ink-3); }
 
 /* Der Weg zu Quellen & Methodik rutscht ans Ende der Zeile und bricht
  * auf Mobil als eigene Zeile um — erreichbar, aber nicht das Erste.

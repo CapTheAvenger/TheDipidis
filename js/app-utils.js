@@ -1697,3 +1697,95 @@ function deckGroessenText(karten, anzahlListen) {
 
 window.mittlereDeckGroesse = mittlereDeckGroesse;
 window.deckGroessenText = deckGroessenText;
+
+/* ── Kopien auf die Deckgroesse verteilen ─────────────────────────────
+ *
+ * BEFUND (30.08.2026): "Deckliste kopieren" rundete jede Karte einzeln
+ * (`Math.round(average_count_overall)`) und legte die Ergebnisse
+ * zusammen. Gemessen ueber alle 60 Archetypen in
+ * data/current_meta_card_data.csv kommt dabei nur 10x eine 60 heraus;
+ * die anderen 50 landen zwischen 41 und 61 — Dragapult bei 56,
+ * Grimmsnarl Froslass bei 61. In der Zwischenablage steht dann eine
+ * Liste, die PTCGL nicht annimmt.
+ *
+ * Dabei sind die Daten selbst exakt: die ROHE Summe der
+ * average_count_overall ist in JEDEM der 60 Archetypen 60,00. Nicht die
+ * Zahlen sind schief, sondern der Operator. Einzeln runden verliert die
+ * Summe; das ist derselbe Fehler wie bei Sitzverteilungen, und die
+ * Loesung ist dieselbe: erst abrunden, dann die uebrigen Plaetze nach
+ * den groessten Resten vergeben (Hare/Niemeyer, "groesster Rest").
+ *
+ * Was die Funktion NICHT tut: eine Summe zurechtbiegen, die nicht passt.
+ * Liegt die rohe Summe mehr als `toleranz` von der Deckgroesse entfernt,
+ * bleibt es beim einzelnen Runden und `basis` sagt 'ungerundet'. Das
+ * trifft z. B. den Sammeleimer "Other", der gar kein Deck ist.
+ *
+ * Obergrenzen bleiben gewahrt: hoechstens 4 Kopien je Karte, genau 1 je
+ * ACE SPEC, Basis-Energie unbegrenzt. Kann die Deckgroesse damit nicht
+ * erreicht werden, wird gemeldet statt gedrueckt.
+ */
+function verteileKopienAufDeckgroesse(karten, deckgroesse, optionen) {
+    const opt = optionen || {};
+    const toleranz = (opt.toleranz != null) ? opt.toleranz : 0.5;
+    const ziel = (deckgroesse > 0) ? deckgroesse : 60;
+    if (!Array.isArray(karten) || karten.length === 0) {
+        return { kopien: [], basis: 'leer', summe: 0 };
+    }
+    const zahl = (w) => (typeof parseLocaleNumber === 'function')
+        ? parseLocaleNumber(w, 0)
+        : (parseFloat(String(w == null ? '' : w).replace(',', '.')) || 0);
+
+    const roh = karten.map(k => Math.max(0, zahl(opt.wert ? opt.wert(k) : k)));
+    const rohSumme = roh.reduce((s, x) => s + x, 0);
+
+    // Obergrenze je Karte. Basis-Energie ist von der Vierer-Regel
+    // ausgenommen, ACE SPEC darf genau einmal ins Deck.
+    const grenze = karten.map((k, i) => {
+        if (opt.grenze) return opt.grenze(k, i);
+        const name = (k && (k.card_name || k.name)) || '';
+        const typ = String((k && (k.type || k.card_type)) || '');
+        if (typeof window !== 'undefined' && typeof window.isAceSpec === 'function'
+            && window.isAceSpec(name)) return 1;
+        if (/basic\s+energy/i.test(typ)) return Infinity;
+        return 4;
+    });
+
+    if (Math.abs(rohSumme - ziel) > toleranz) {
+        // Nicht zurechtbiegen — die Summe passt schon in den Daten nicht.
+        return {
+            kopien: roh.map((x, i) => Math.min(Math.round(x), grenze[i])),
+            basis: 'ungerundet',
+            summe: rohSumme
+        };
+    }
+
+    const boden = roh.map((x, i) => Math.min(Math.floor(x), grenze[i]));
+    let vergeben = boden.reduce((s, x) => s + x, 0);
+    const reste = roh.map((x, i) => ({ i, rest: x - Math.floor(x) }));
+    // Groesster Rest zuerst; bei Gleichstand der groessere Rohwert, damit
+    // die Reihenfolge der Eingabe das Ergebnis nicht bestimmt.
+    reste.sort((a, b) => (b.rest - a.rest) || (roh[b.i] - roh[a.i]) || (a.i - b.i));
+
+    let runde = 0;
+    while (vergeben < ziel && runde < 1000) {
+        let etwasVergeben = false;
+        for (const r of reste) {
+            if (vergeben >= ziel) break;
+            if (boden[r.i] < grenze[r.i]) {
+                boden[r.i] += 1;
+                vergeben += 1;
+                etwasVergeben = true;
+            }
+        }
+        if (!etwasVergeben) break;   // alle an der Obergrenze
+        runde++;
+    }
+
+    return {
+        kopien: boden,
+        basis: (vergeben === ziel) ? 'verteilt' : 'obergrenze',
+        summe: vergeben
+    };
+}
+
+window.verteileKopienAufDeckgroesse = verteileKopienAufDeckgroesse;

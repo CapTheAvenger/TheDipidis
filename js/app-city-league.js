@@ -4115,13 +4115,29 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     const n = parseFloat(String(v == null ? '' : v).replace(',', '.'));
                     return isFinite(n) ? n : 0;
                 };
+                /* Einzeln runden verliert die Summe: die rohen Mittelwerte
+                   ergeben in JEDEM Archetyp exakt 60, gerundet aber nur in
+                   10 von 60 Faellen — Dragapult 56, Grimmsnarl Froslass 61.
+                   Nach groessten Resten verteilen haelt die Summe.
+                   Siehe verteileKopienAufDeckgroesse() in js/app-utils.js. */
+                const _verteilung = (!einzelneListe
+                        && typeof verteileKopienAufDeckgroesse === 'function')
+                    ? verteileKopienAufDeckgroesse(allCards, 60, {
+                        wert: (c) => c.average_count_overall ?? c.average_count })
+                    : null;
+                const _kopienNach = new Map();
+                if (_verteilung && _verteilung.basis === 'verteilt') {
+                    allCards.forEach((c, i) => _kopienNach.set(c, _verteilung.kopien[i]));
+                }
 
                 // Process each card from archetype
                 allCards.forEach(card => {
                     const cardName = card.card_name;
                     const maxCount = einzelneListe
                         ? (parseInt(card.max_count, 10) || 0)
-                        : Math.round(zahl(card.average_count_overall ?? card.average_count));
+                        : (_kopienNach.has(card)
+                            ? _kopienNach.get(card)
+                            : Math.round(zahl(card.average_count_overall ?? card.average_count)));
                     if (maxCount <= 0) return;
                     
                     const originalSet = card.set_code || '';

@@ -2160,6 +2160,33 @@
     window.cbToggleArchetypeDropdown = cbToggleArchetypeDropdown;
     window.cbFilterArchetypeList = cbFilterArchetypeList;
     window.cbSetFilter = cbSetFilter;
+    /* Sprachwechsel zeichnet den Custom Binder neu.
+     *
+     * URSACHE (gemessen 30.08.2026): cbRenderBinder() baut Kennzahlen,
+     * Filterzeile, Ordner-Leiste und Kartenraster als HTML-String
+     * zusammen. switchLanguage() ruft nur updateTranslationsInDOM(),
+     * und das fasst ausschliesslich Elemente mit data-i18n an. FOLGE:
+     * nach dem Umschalten standen die gebauten Beschriftungen weiter in
+     * der alten Sprache, bis der Nutzer neu generierte.
+     *
+     * Nur neu zeichnen, wenn das Raster ueberhaupt schon gefuellt ist —
+     * sonst baut ein Sprachwechsel auf einer anderen Seite still Inhalt
+     * in einen verborgenen Reiter. Vorbild: js/app-quellen.js.
+     */
+    document.addEventListener('languageChanged', function () {
+        var grid = document.getElementById('cbGrid');
+        if (!grid || !grid.children.length) return;
+        var delta = window._cbDelta;
+        if (!delta || !Array.isArray(delta.cards)) return;
+        try {
+            cbRenderBinder(delta, mb());
+            cbRenderBinderBar();
+            cbRenderPresetBar();
+        } catch (err) {
+            console.warn('[i18n] Custom Binder nicht neu gezeichnet:', err);
+        }
+    });
+
     window.cbSetPrintView = cbSetPrintView;
     window.cbApplyFilter = cbApplyFilter;
     window.cbAddMissingToWishlist = cbAddMissingToWishlist;

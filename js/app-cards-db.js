@@ -1707,7 +1707,15 @@
                     const baseName = (card.name || '').toLowerCase();
                     const setCode = (card.set || '').toLowerCase();
                     const cardNum = String(card.number || '').toLowerCase();
-                    const dexNum = (card.pokedex_number || '').toString();
+                    // Befund N (30.08.2026): card.pokedex_number ist in
+                    // allen 20.419 CSV-Zeilen leer — die Spalte steht nicht
+                    // einmal in der Kopfzeile. Der Helfer faellt deshalb auf
+                    // window.pokedexNumbers zurueck (1064 Namen -> Nummer),
+                    // sonst bleibt das Pokedex-Versprechen des Platzhalters
+                    // ohne Wirkung.
+                    const dexNum = (typeof window.cardPokedexSearchValue === 'function')
+                        ? window.cardPokedexSearchValue(card)
+                        : (card.pokedex_number || '').toString();
                     // One blob containing every searchable field, joined
                     // with spaces. .includes(token) on this matches names,
                     // set codes, numbers, dex IDs and any concat of them.
@@ -2779,6 +2787,18 @@
             });
         }
         
+        /* Kurzform von t() mit Rueckfalltext: die Kartendatenbank baut
+           ihre Bedienelemente im Skript zusammen, dort greift kein
+           data-i18n. Ohne Rueckfall stuende bei fehlendem Schluessel der
+           Schluesselname im Knopf. */
+        function _cdbLabel(key, fallback) {
+            if (typeof t === 'function') {
+                const v = t(key);
+                if (v && v !== key) return v;
+            }
+            return fallback;
+        }
+
         function createPaginationControls(totalCards, totalPages) {
             // Compact mode on phones: shorter prev/next labels and a
             // tighter page-number window so the whole bar fits in two
@@ -2793,23 +2813,26 @@
             const leftControls = document.createElement('div');
             leftControls.className = 'pagination-left-controls';
             
+            // Befund E (30.08.2026): "Copy Names", "Copied!" und die
+            // Fehlermeldung standen als englische Literale in der
+            // Seitenleiste und blieben auch im deutschen Modus stehen.
             const copyBtn = document.createElement('button');
             copyBtn.type = 'button';
-            copyBtn.textContent = 'Copy Names';
-            copyBtn.title = 'Copy all filtered card names to clipboard';
+            copyBtn.textContent = _cdbLabel('cdb.copyNames', 'Copy Names');
+            copyBtn.title = _cdbLabel('cdb.copyNamesTitle', 'Copy all filtered card names to clipboard');
             copyBtn.className = 'btn-green btn-outline btn-lg';
             copyBtn.onclick = () => {
                 const cardNames = window.filteredCardsData.map(c => c.name).join('\n');
                 navigator.clipboard.writeText(cardNames).then(() => {
-                    copyBtn.textContent = 'Copied!';
+                    copyBtn.textContent = _cdbLabel('cdb.copied', 'Copied!');
                     copyBtn.classList.add('btn-success');
                     setTimeout(() => {
-                        copyBtn.textContent = 'Copy Names';
+                        copyBtn.textContent = _cdbLabel('cdb.copyNames', 'Copy Names');
                         copyBtn.classList.remove('btn-success');
                     }, 2000);
                 }).catch(err => {
                     console.error('Copy failed:', err);
-                    showToast('Copy failed', 'error');
+                    showToast(_cdbLabel('cdb.copyFailed', 'Copy failed'), 'error');
                 });
             };
             leftControls.appendChild(copyBtn);
@@ -2821,8 +2844,11 @@
             // Previous button
             const prevBtn = document.createElement('button');
             prevBtn.type = 'button';
-            prevBtn.textContent = compactPager ? '←' : '← Previous';
-            prevBtn.setAttribute('aria-label', 'Previous page');
+            // Befund E (30.08.2026): auch die Blaetterknoepfe standen fest
+            // auf Englisch — neben "Namen kopieren" wirkte das wie ein
+            // halb uebersetzter Balken.
+            prevBtn.textContent = compactPager ? '←' : _cdbLabel('cdb.prev', '← Previous');
+            prevBtn.setAttribute('aria-label', _cdbLabel('cdb.prevAria', 'Previous page'));
             prevBtn.className = 'btn-blue btn-outline btn-lg';
             prevBtn.disabled = currentCardsPage === 1 || showAllCards;
             if (prevBtn.disabled) {
@@ -2892,8 +2918,8 @@
             // Next button
             const nextBtn = document.createElement('button');
             nextBtn.type = 'button';
-            nextBtn.textContent = compactPager ? '→' : 'Next →';
-            nextBtn.setAttribute('aria-label', 'Next page');
+            nextBtn.textContent = compactPager ? '→' : _cdbLabel('cdb.next', 'Next →');
+            nextBtn.setAttribute('aria-label', _cdbLabel('cdb.nextAria', 'Next page'));
             nextBtn.className = 'btn-blue btn-outline btn-lg';
             nextBtn.disabled = currentCardsPage === totalPages || showAllCards;
             if (nextBtn.disabled) {
@@ -2918,8 +2944,15 @@
             
             const toggleShowAllBtn = document.createElement('button');
             toggleShowAllBtn.type = 'button';
-            toggleShowAllBtn.textContent = showAllCards ? 'Paginated' : 'Show All';
-            toggleShowAllBtn.title = showAllCards ? 'Switch back to paginated view' : 'Show all cards at once';
+            // Befund E (30.08.2026): "Show All" / "Paginated" wurden hart
+            // gesetzt — im deutschen Modus stand englisch da, was die
+            // Seitenzahl daneben ("Seite 1 von 14") schon deutsch sagte.
+            toggleShowAllBtn.textContent = showAllCards
+                ? _cdbLabel('cdb.showPaginated', 'Paginated')
+                : _cdbLabel('cdb.showAll', 'Show All');
+            toggleShowAllBtn.title = showAllCards
+                ? _cdbLabel('cdb.showPaginatedTitle', 'Switch back to paginated view')
+                : _cdbLabel('cdb.showAllTitle', 'Show all cards at once');
             toggleShowAllBtn.className = 'btn-purple btn-outline btn-lg';
             toggleShowAllBtn.onclick = () => {
                 showAllCards = !showAllCards;
@@ -4752,3 +4785,30 @@
         }
 
         // Initialize
+
+/* Sprachwechsel zeichnet die Kartendatenbank neu.
+ *
+ * URSACHE (gemessen 30.08.2026): renderCardDatabase() baut Kacheln,
+ * Trefferzeile und Seitenleiste im Skript zusammen. switchLanguage()
+ * ruft nur updateTranslationsInDOM(), und das erreicht ausschliesslich
+ * Elemente mit data-i18n — die gebauten Knoten tragen keins. FOLGE:
+ * nach einem Sprachwechsel standen "Alle anzeigen", "Namen kopieren"
+ * und "14.990 Karten gefunden (Seite 1 von 241)" weiter in der alten
+ * Sprache, bis der Nutzer einen Filter anfasste. Nachgemessen am
+ * 30.08.2026: nach switchLanguage('en') stand in der Trefferzeile
+ * sogar wieder "Loading cards...".
+ *
+ * Nur neu zeichnen, wenn die Ansicht ueberhaupt schon gezeichnet ist —
+ * sonst fuellt ein Sprachwechsel auf einer anderen Seite still einen
+ * verborgenen Reiter. Vorbild: js/app-quellen.js.
+ */
+document.addEventListener('languageChanged', () => {
+    const content = document.getElementById('cardsContent');
+    if (!content || !content.children.length) return;
+    if (!Array.isArray(window.filteredCardsData)) return;
+    try {
+        renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
+    } catch (err) {
+        console.warn('[i18n] Kartendatenbank konnte nicht neu gezeichnet werden:', err);
+    }
+});

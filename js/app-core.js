@@ -3040,6 +3040,47 @@ const BASE_PATH = './data/';
             return map;
         }
 
+        /* Pokedex-Nummer einer Karte als Suchtext — mit Rueckfall.
+         *
+         * URSACHE (gemessen 30.08.2026): der Platzhalter der Kartensuche
+         * verspricht "Name (EN/DE), Set+Nr. oder Pokedex". Der
+         * Pokedex-Zweig las aber ausschliesslich card.pokedex_number, und
+         * diese Spalte gibt es in data/all_cards_database.csv gar nicht.
+         * Kopfzeile am 30.08.2026:
+         *   name_en,name_de,set,number,type,energy_type,hp,rarity,
+         *   image_url,international_prints,jp_prints,cardmarket_url,card_text
+         * Gemessen: 20.419 Zeilen, davon 0 mit gefuellter pokedex_number.
+         * FOLGE: die Suche nach "25" fand kein einziges Pikachu — das
+         * Suchfeld versprach etwas, das es nicht konnte.
+         *
+         * Der Rueckfall geht ueber getCardPokedexNumber() aus
+         * firebase-collection.js. Diese Funktion liest window.pokedexNumbers
+         * (1064 Eintraege Name -> Nummer aus data/pokemon_dex_numbers.json)
+         * und wird von der Sortierung "Nach Pokedex-Nr." bereits erfolgreich
+         * benutzt. Bewusst KEINE zweite Namensnormalisierung hier: davon gab
+         * es in diesem Projekt schon einmal drei auseinandergelaufene Kopien.
+         *
+         * Rueckgabe ist ein STRING, weil die Suchvergleiche mit Text
+         * arbeiten; unbekannt ist ''. Die Spalte gewinnt, sobald sie
+         * gefuellt ist.
+         */
+        function cardPokedexSearchValue(card) {
+            if (!card || typeof card !== 'object') return '';
+            const direct = card.pokedex_number;
+            if (direct !== undefined && direct !== null && String(direct).trim() !== '') {
+                return String(direct).trim();
+            }
+            if (typeof window === 'undefined' || typeof window.getCardPokedexNumber !== 'function') return '';
+            const probe = { name: card.name_en || card.name || '' };
+            if (!probe.name) return '';
+            const n = window.getCardPokedexNumber(probe);
+            if (typeof n !== 'number' || !isFinite(n) || n <= 0 || n >= Number.MAX_SAFE_INTEGER) return '';
+            return String(n);
+        }
+        if (typeof window !== 'undefined') {
+            window.cardPokedexSearchValue = cardPokedexSearchValue;
+        }
+
         /**
          * Universal Omni-Search helper.
          * Filters an array of card objects by a search term, checking:
@@ -3058,7 +3099,14 @@ const BASE_PATH = './data/';
                 const nameDe = (card.name_de || '').toLowerCase();
                 const setCode = (card.set || '').toLowerCase();
                 const cardNumber = (card.number || '').toLowerCase();
-                const dexNum = (card.pokedex_number || '').toString();
+                // Rueckfall auf window.pokedexNumbers: die CSV-Spalte
+                // pokedex_number ist leer, sonst faende die Suche nach
+                // "25" kein einziges Pikachu (Befund N, 30.08.2026).
+                // typeof-Wache, weil die Unit-Tests filterCardsArray
+                // einzeln in eine Sandbox ohne window schneiden.
+                const dexNum = (typeof window !== 'undefined' && typeof window.cardPokedexSearchValue === 'function')
+                    ? window.cardPokedexSearchValue(card)
+                    : (card.pokedex_number || '').toString();
                 const setNumSpace = `${setCode} ${cardNumber}`;
                 const setNumCombined = `${setCode}${cardNumber}`;
                 return nameEn.includes(term) ||

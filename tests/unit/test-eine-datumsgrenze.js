@@ -157,7 +157,29 @@ describe('"Alle" sagt, wenn es dasselbe zeigt wie "Nur Limitless"', () => {
             'Respect value already set by populateCurrentMetaDeckSelect',
             'Formatfilter');
         assert.match(block, /format === 'all'/);
-        assert.match(block, /alleWieLive/);
         assert.match(block, /kein-major-im-format/);
+        // Seit dem Sprachdurchgang vom 30.08.2026 merkt sich der Filter nur
+        // noch den Formatschluessel; den Satz baut
+        // updateCurrentMetaFilterStatusLabel(). Grund: sonst koennte der
+        // languageChanged-Listener den Vorbehalt beim Nachziehen der
+        // Statuszeile nicht mitnehmen und wuerde ihn wegschreiben.
+        assert.match(block, /_cmAlleWieLiveFormat/,
+            'der Filter merkt sich den Vorbehalt nicht mehr');
+        assert.match(block, /updateCurrentMetaFilterStatusLabel\(format\)/,
+            'der Filter laesst die Statuszeile nicht neu schreiben');
+    });
+
+    it('die Statuszeile formuliert den Hinweis in der aktiven Sprache', () => {
+        const fn = extrahiere(
+            CM,
+            'function updateCurrentMetaFilterStatusLabel(format) {',
+            'async function setCurrentMetaFormatFilter(format) {',
+            'Statuszeile');
+        assert.match(fn, /alleWieLive/,
+            'der Hinweistext wird nicht mehr aus i18n geholt');
+        assert.match(fn, /_cmAlleWieLiveFormat/,
+            'der gemerkte Vorbehalt wird nicht ausgewertet');
+        assert.match(fn, /cm-filter-status-vorbehalt/,
+            'die Auszeichnung des Vorbehalts fehlt');
     });
 });

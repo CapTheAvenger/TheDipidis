@@ -637,11 +637,80 @@ class CardDatabaseLookup:
                 self.rarity = d['rarity']; self.supertype = d['supertype']
         return CardInfo(best)
 
+    # ── ACE SPEC ──────────────────────────────────────────────────
+    #
+    # BEFUND (30.08.2026): die Erkennung unten hing allein an
+    # `'ace spec' in v['type']`. Diese Zeichenkette kommt in KEINEM der
+    # 37 type-Werte aus all_cards_database.csv und in keinem der 10 aus
+    # japanese_cards_database.csv vor — die Pruefung konnte nur noch
+    # False liefern, still und ohne Meldung.
+    #
+    # Was das kostet: `is_ace_spec` steht in 18 ausgelieferten Dateien.
+    # Gegen die kanonische Liste data/ace_specs.json gemessen sind
+    # 12.734 Zeilen faelschlich "Yes" (Reste eines aelteren DB-Stands:
+    # "Switch" 3.386x, "Jamming Tower" 2.243x) und 5.411 faelschlich
+    # "No"/leer (echte ACE SPECs: "Unfair Stamp" 600x, "Prime Catcher",
+    # "Secret Box", "Legacy Energy"). Jede NEU erzeugte Zeile bekaeme
+    # weiterhin ein falsches "No" — current_meta_card_data.csv vom
+    # 28.08.2026 hat 184 davon.
+    #
+    # Die Reparatur raet nicht, sie gleicht ab: data/ace_specs.json ist
+    # dieselbe Liste, der das Frontend seit jeher vertraut
+    # (js/app-core.js:2396 ff., meta-binder.js isAceSpecRow) — 39 Namen,
+    # Quelle limitlesstcg.com/cards?q=is:ace. Der type-Weg bleibt davor
+    # stehen, falls die Datenbank das Feld je zurueckbekommt.
+    #
+    # Ist WEDER ein type-Treffer moeglich NOCH die Liste lesbar, wird
+    # das gemeldet statt still "No" zu schreiben (Projektregel: melden,
+    # nicht raten).
+    _ACE_LISTE = None          # None = noch nicht geladen, set() = leer
+    _ACE_GEMELDET = False
+
+    @classmethod
+    def _ace_namen(cls) -> set:
+        if cls._ACE_LISTE is not None:
+            return cls._ACE_LISTE
+        cls._ACE_LISTE = set()
+        here = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(os.path.dirname(here))
+        for pfad in (os.path.join(project_root, 'data', 'ace_specs.json'),
+                     os.path.join(get_data_dir(), 'ace_specs.json')):
+            try:
+                if not os.path.exists(pfad):
+                    continue
+                with open(pfad, encoding='utf-8') as f:
+                    roh = json.load(f).get('ace_specs') or []
+                namen = {str(n).strip().lower() for n in roh if str(n).strip()}
+                if namen:
+                    cls._ACE_LISTE = namen
+                    return cls._ACE_LISTE
+            except (OSError, ValueError):
+                continue
+        if not cls._ACE_GEMELDET:
+            cls._ACE_GEMELDET = True
+            print("::warning::ace_specs.json nicht lesbar — is_ace_spec kann "
+                  "nur noch ueber das type-Feld erkannt werden, und das "
+                  "fuehrt seit einem DB-Wechsel keine ACE-SPEC-Angabe mehr.")
+        return cls._ACE_LISTE
+
     def is_ace_spec_by_name(self, card_name: str) -> bool:
         norm = self.normalize_name(card_name)
-        if norm not in self.cards: return False
-        # A card is ACE SPEC only if any variant's type explicitly contains 'ace spec'
-        return any('ace spec' in v['type'].lower() for v in self.cards[norm])
+        # 1) Der urspruengliche Weg. Heute tot, aber nicht falsch: sobald
+        #    die Kartendatenbank das type-Feld wieder fuehrt, gewinnt sie,
+        #    weil sie die Auflage pro Druck kennt und die Liste nur Namen.
+        if norm in self.cards and any('ace spec' in (v.get('type') or '').lower()
+                                      for v in self.cards[norm]):
+            return True
+        # 2) Abgleich gegen die kanonische Liste — kein Raten.
+        namen = self._ace_namen()
+        if not namen:
+            return False
+        roh = str(card_name or '').strip().lower()
+        if roh in namen:
+            return True
+        # Die Liste fuehrt reine Kartennamen; unsere Aufrufer geben
+        # gelegentlich einen mit Set-Zusatz herein.
+        return roh.split(' (')[0].strip() in namen
 
     def get_card_type(self, card_name: str) -> str:
         """Returns 'Pokemon', 'Trainer', or 'Energy'."""

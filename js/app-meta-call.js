@@ -2234,6 +2234,33 @@ window.MetaCall = (function () {
   // separate helper because the existing _FAMILY_DISPLAY_NAMES is
   // keyed by extractMainPokemon's output, while overrides bring
   // their own display layer.
+  // BEFUND (30.08.2026): es gab ZWEI Schemata fuer den Familien-
+  // schluessel, und sie liefen nebeneinander her.
+  //
+  //   _familyKeyForDeck  — Override-Karte (data/deck_families.json)
+  //                        zuerst, dann extractMainPokemon. Trug
+  //                        d._tier1FamKey und den 6.1-Live-Boden.
+  //   extractMainPokemon — reine Erst-Wort-Heuristik. Trug 4.4/4.5/4.6/
+  //                        5.7 und familyAgg, also den 5.5.5-Deckel,
+  //                        den 6.0-Boden und die 5.6.1-Spende.
+  //
+  // Gemessen landeten dadurch 7 von 131 Decks in verschiedenen Familien
+  // (3x Ogerpon Meganium, 2x Starmie, Clefairy Ogerpon, Ogerpon Box).
+  // Die Wirkung auf den Endanteil ist klein — vereinheitlicht aendern
+  // sich 3 von 131 Decks, groesste Abweichung 0,058 pp — weil Deckel
+  // (>28 %) und Spende (>=3 Mitglieder) bei diesen Kleinfamilien fast
+  // nie greifen.
+  //
+  // Gefaehrlich war die Kreuzung: der 6.0-Boden sucht in einem
+  // extractMainPokemon-Eimer nach einem Mitglied mit _tier1Eligible,
+  // und das wurde ueber _familyKeyForDeck bestimmt. Sobald eine
+  // Override-Familie tier-1-faehig wird, hebt der Boden die falsche
+  // Deckmenge — leise und ohne Fehlermeldung.
+  //
+  // Jetzt fragt jede Familienbildung dieselbe Stelle. extractMainPokemon
+  // bleibt fuer das, wofuer es gebaut ist: den echten Pokemon-Namen zu
+  // finden (_loadArchetypeHpMap braucht ihn, um HP aus den Kartendaten
+  // zu holen — ein Override-Schluessel wuerde dort ins Leere greifen).
   function _familyKeyForDeck(name) {
     if (!name) return name;
     if (_deckFamilyOverrideByName && _deckFamilyOverrideByName.has(name)) {
@@ -2423,7 +2450,7 @@ window.MetaCall = (function () {
     _shareList.forEach(d => {
       const share = d.ladderShare || 0;
       totalLadder += share;
-      const family = extractMainPokemon(d.name);
+      const family = _familyKeyForDeck(d.name);
       if (!family) return;
       familyShare.set(family, (familyShare.get(family) || 0) + share);
       if (!familyMembers.has(family)) familyMembers.set(family, []);
@@ -2447,7 +2474,7 @@ window.MetaCall = (function () {
     // (Dragapult Blaziken doesn't get credit for "beating Dragapult").
     _shareList.forEach(c => {
       const ck = normalize(c.name);
-      const myFamily = extractMainPokemon(c.name);
+      const myFamily = _familyKeyForDeck(c.name);
       let totalBoost = 0;
       const reasons = [];
 
@@ -2573,7 +2600,7 @@ window.MetaCall = (function () {
     _shareList.forEach(d => {
       const share = d.predictedShareRaw || 0;
       grandTotal += share;
-      const family = extractMainPokemon(d.name);
+      const family = _familyKeyForDeck(d.name);
       if (!family) return;
       familyTotal.set(family, (familyTotal.get(family) || 0) + share);
       if (!familyMembers.has(family)) familyMembers.set(family, []);
@@ -2643,7 +2670,7 @@ window.MetaCall = (function () {
     const totalLadder = _shareList.reduce((s, d) => s + (d.ladderShare || 0), 0) || 1;
     const familyLadder = new Map();
     _shareList.forEach(d => {
-      const family = extractMainPokemon(d.name);
+      const family = _familyKeyForDeck(d.name);
       if (!family) return;
       familyLadder.set(family, (familyLadder.get(family) || 0) + (d.ladderShare || 0));
     });
@@ -2661,7 +2688,7 @@ window.MetaCall = (function () {
     _shareList.forEach(d => {
       // Skip members of the dominant family — they're being
       // suppressed by 4.6, not boosted.
-      if (extractMainPokemon(d.name) === dominantFamily) return;
+      if (_familyKeyForDeck(d.name) === dominantFamily) return;
 
       const k = normalize(d.name);
       const stats = _tournamentStats[k];
@@ -2847,7 +2874,7 @@ window.MetaCall = (function () {
     const familyMap = new Map();
     let totalRaw = 0;
     _shareList.forEach(d => {
-      const family = extractMainPokemon(d.name);
+      const family = _familyKeyForDeck(d.name);
       if (!family || family === '_junk') return;
       const share = d.predictedShareRaw || 0;
       totalRaw += share;
@@ -2941,7 +2968,7 @@ window.MetaCall = (function () {
     const familyMap = new Map();
     let totalRaw = 0;
     _shareList.forEach(d => {
-      const family = extractMainPokemon(d.name);
+      const family = _familyKeyForDeck(d.name);
       if (!family || family === '_junk') return;
       const share = d.predictedShareRaw || 0;
       totalRaw += share;
@@ -2967,7 +2994,7 @@ window.MetaCall = (function () {
 
     const applied = [];
     _shareList.forEach(d => {
-      const family = extractMainPokemon(d.name);
+      const family = _familyKeyForDeck(d.name);
       if (family === leaderFamily) return;
       const fieldShare = ((d.predictedShareRaw || 0) / totalRaw) * 100;
       if (fieldShare > PREDICTOR_57_COUNTER_MAX_FIELD_SHARE) return;
@@ -2982,7 +3009,23 @@ window.MetaCall = (function () {
       const boost = Math.min(PREDICTOR_57_BOOST_PP_MAX, wrEdge * PREDICTOR_57_BOOST_SCALE);
       if (boost <= 0.05) return;
 
-      d.predictedShareRaw = (d.predictedShareRaw || 0) + boost;
+      // BEFUND (30.08.2026): hier wurden PROZENTPUNKTE direkt auf einen
+      // ROHWERT addiert. `boost` ist durch PREDICTOR_57_BOOST_PP_MAX
+      // gedeckelt, also pp — `predictedShareRaw` laeuft aber auf einer
+      // eigenen Skala, deren Summe nicht 100 ist (gemessen: 113,3 in
+      // der Juni-Lage, 103,5 heute).
+      //
+      // Die Nachbarstufen rechnen um und diese nicht: 4.6 mit
+      // `(suppressPp / 100) * grandTotal`, 5.5 mit
+      // `(floorPct / 100) * totalRaw`. Bei Summe 113,3 lieferte ein
+      // zugesagtes "+1,50 pp" real 1,32 pp — die Konstante meinte nicht,
+      // was sie sagt.
+      //
+      // Umgerechnet gemessen: 20 von 88 Decks aendern sich um >= 0,01 pp,
+      // 4 um >= 0,1 pp (Sylveon +0,13 pp / +14,5 %, Lillie's Clefairy
+      // +0,16 pp). Heute 15 von 131 Decks, groesste Aenderung 0,043 pp.
+      const boostRaw = (boost / 100) * totalRaw;
+      d.predictedShareRaw = (d.predictedShareRaw || 0) + boostRaw;
       d.antiLeaderBoostPp = boost;
       applied.push({
         name: d.name,
@@ -3017,7 +3060,7 @@ window.MetaCall = (function () {
     let totalLadder = 0;
     _shareList.forEach(d => {
       totalLadder += (d.ladderShare || 0);
-      const family = extractMainPokemon(d.name);
+      const family = _familyKeyForDeck(d.name);
       if (!family) return;
       familyShare.set(family, (familyShare.get(family) || 0) + (d.ladderShare || 0));
       if (!familyMembers.has(family)) familyMembers.set(family, []);
@@ -3038,7 +3081,7 @@ window.MetaCall = (function () {
       _matchupCoverageLastLogId = majorId;
       const gaps = [];
       _shareList.forEach(c => {
-        if (extractMainPokemon(c.name) === dominant.family) return;
+        if (_familyKeyForDeck(c.name) === dominant.family) return;
         const ck = normalize(c.name);
         let bestWr = null;
         let coverage = 0;
@@ -3287,7 +3330,7 @@ window.MetaCall = (function () {
     _familyOnlineTotal = {};
     _shareList.forEach(d => {
       const k = normalize(d.name);
-      const family = extractMainPokemon(d.name);
+      const family = _familyKeyForDeck(d.name);
       if (!family || family === '_junk') return;
       _familyOnlineTotal[family] = (_familyOnlineTotal[family] || 0) + (d.ladderShare || 0);
       const labsRow = _labsRowsByDeck && _labsRowsByDeck[k];
@@ -3667,7 +3710,7 @@ window.MetaCall = (function () {
       // variant's share-of-family from current online ladder). Falls
       // back to the raw variant share when the family aggregate is
       // missing (e.g. solo deck, or family had zero online presence).
-      const family = extractMainPokemon(d.name);
+      const family = _familyKeyForDeck(d.name);
       const labsRow = _labsRowsByDeck[k];
       const rawVariantLabsPct = labsRow ? (labsRow.share / labsTotalShare) * 100 : 0;
       let labsPct;
@@ -4351,7 +4394,7 @@ window.MetaCall = (function () {
     const FAMILY_CAP_MIN_VARIANTS = 2;
     const familyAgg = {}; // family-key -> { total, members[] }
     _shareList.forEach(d => {
-      const fam = extractMainPokemon(d.name);
+      const fam = _familyKeyForDeck(d.name);
       if (!fam || fam === '_junk') return;
       if (!familyAgg[fam]) familyAgg[fam] = { total: 0, members: [] };
       familyAgg[fam].total += d.predictedShare || 0;
@@ -4360,6 +4403,25 @@ window.MetaCall = (function () {
     Object.keys(familyAgg).forEach(fam => {
       const f = familyAgg[fam];
       if (f.members.length < FAMILY_CAP_MIN_VARIANTS) return;
+      // BEFUND (30.08.2026): f.total wurde EINMAL oben gebaut und dann
+      // durch die ganze Schleife getragen. Sobald die erste Familie
+      // gedeckelt wird, skaliert der Block unten JEDEN anderen Eintrag
+      // mit othersScale — die zweite Familie rechnet danach mit Zahlen,
+      // die es nicht mehr gibt.
+      //
+      // Gemessen mit FAMILY_CAP_PCT = 2.0 auf echten Daten (drei
+      // Familien ueber dem Deckel): Ogerpon feuerte mit eingefroren
+      // 6,860 gegen live 6,967, Lopunny mit 2,160 gegen 2,308. KEINE
+      // der drei landete danach auf dem Deckel — 2,108 / 2,137 / 2,035
+      // statt 2,000 — und die Summe brach auf 99,907 % statt 100.
+      // Unsichtbar blieb das nur, weil die 5.8-Renormierung am Ende
+      // ohnehin auf 100 zieht.
+      //
+      // Mit dem ausgelieferten Deckel von 28 und der 6.0-Ausnahme feuert
+      // heute keine zweite Familie; der Fehler schlaeft. Er ist trotzdem
+      // Arithmetik, keine Abstimmung: die Summe muss stimmen, waehrend
+      // gerechnet wird, nicht erst danach.
+      f.total = f.members.reduce((s2, m) => s2 + (m.predictedShare || 0), 0);
       // Predictor 6.0 cap-exemption: when the Tier-1 Convergence
       // Detector fires for a family, the famConvProjection is a
       // data-driven ceiling that explicitly anticipates the
@@ -6309,15 +6371,36 @@ window.MetaCall = (function () {
       //  beiden jetzt zusammen, siehe test-metacall-gewichte-reihenfolge.js.)
       // Mode A + Testing Group / + CL toggles:
       //   keep 2.x weights (TG/CL replace the brought/ladder pillar).
-      // Mode B (labs majors present):
-      //   0.40 × labs × t8_conv_boost
-      //   + 0.20 × brought
-      //   + 0.15 × ladder
-      //   + 0.15 × post_major_trend_signal
-      //   + 0.10 × weekly_trend_signal
+      // Mode B (labs majors present) — WAS DIESE ZEILEN BESCHREIBEN,
+      // LAEUFT NICHT MEHR. Bis zum 30.08.2026 stand hier:
+      //
+      //   0.40 × labs × t8_conv_boost + 0.20 × brought + 0.15 × ladder
+      //   + 0.15 × post_major_trend_signal + 0.10 × weekly_trend_signal
+      //
+      // Gemessen in einer echten Modus-B-Lage (Juni, TEF-CRI, 88 Decks):
+      // ALLE 88 nehmen `predicted = _kernWert` (der Prognosekern), die
+      // gewichtete Formel lief fuer 0 Decks. Der Rueckfallzweig, den der
+      // Kommentar daneben mit 1,8 % beziffert, traf 0 %.
+      //
+      // Die Mode-A-Haelfte desselben Kommentars wurde am 29.08.
+      // richtiggestellt und mit test-metacall-gewichte-reihenfolge.js
+      // abgesichert; die Mode-B-Haelfte blieb stehen, obwohl der Kopf
+      // derselben Testdatei die Mode-B-Sabotage als vorgefuehrten
+      // Angriff auffuehrt. Ein Kommentar, der eine andere Rechnung
+      // beschreibt als die daneben, ist schlimmer als keiner: er wird
+      // geglaubt.
+      //
+      // Die Gewichte unten existieren weiter und sind nicht tot — sie
+      // tragen die Zweige, die einspringen, wenn der Kern keinen Wert
+      // liefert. Nur ist das der Ausnahmefall, nicht der Hauptweg.
       // *_trend_signal(d) = ladder × clip(1 + (curr-base)/base, 0.7, 1.3)
       // labs_t8_boost(d)  = clip(top8_conv_rate / 0.25, 0.5, 2.0)
-      const totalLadder = _shareList.reduce((s, d) => s + d.onlineShare, 0) || 1;
+      //
+      // `totalLadder` wird hier gebaut und NIRGENDS gelesen. Stehen
+      // lassen waere die naechste Falle: `d.onlineShare` wird am Ende
+      // des Laufs mit der Prognose ueberschrieben (Befund S6), also
+      // haette diese Summe je nach Aufrufzeitpunkt zwei verschiedene
+      // Bedeutungen. Wer sie braucht, baut sie aus `d.ladderShare`.
       const labsTotalShare = Object.values(labsRowsByDeck).reduce((s, d) => s + d.share, 0) || 1;
       // Make sure every deck in labsRowsByDeck appears in _shareList so
       // its share isn't dropped silently (treat unknowns with no ladder

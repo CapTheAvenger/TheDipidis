@@ -108,6 +108,8 @@
             markLiked: 'Fand ich gut',
             markDisliked: 'Nicht nochmal',
             markHint: 'Markieren: ⭐ probieren · 👍 gut · 👎 nicht nochmal',
+            lastUpdated: 'Stand:',
+            subtitleFallback: 'Replica-Codes von Top-Turnierplatzierungen. Tippe auf einen Code, um ihn zu kopieren.',
             filterTitle: 'Teams mit …',
             filterPh: 'Pokémon eingeben (bis zu 6) …',
             filterHint: 'Zeigt nur Teams, die ALLE gewählten Pokémon enthalten.',
@@ -173,6 +175,8 @@
             markLiked: 'Liked it',
             markDisliked: 'Not again',
             markHint: 'Mark teams: ⭐ try · 👍 liked · 👎 not again',
+            lastUpdated: 'Last updated:',
+            subtitleFallback: 'Replica codes from top tournament finishes. Tap a code to copy.',
             filterTitle: 'Teams with …',
             filterPh: 'Type a Pokémon (up to 6) …',
             filterHint: 'Shows only teams that contain ALL selected Pokémon.',
@@ -329,13 +333,31 @@
     }
 
     function renderHeader(meta) {
-        const subtitle = meta.subtitle || '';
-        const updated  = meta.last_updated || '';
         const labels   = LABELS[uiLang()];
+        // Befund F (30.08.2026): der Untertitel kam ungefiltert aus
+        // _meta.subtitle der champions_replica_teams.json und lag dort nur
+        // auf Englisch vor — im deutschen Modus stand also
+        // "Replica codes from top tournament finishes." mitten auf einer
+        // deutschen Seite.
+        //
+        // NACHTRAG vom selben Tag: der erste Anlauf legte ein Feld
+        // subtitle_de NEBEN das englische in dieselbe Datei. Das haelt
+        // keinen Tag — die Datei gehoert dem Scraper, und der naechste
+        // Lauf (04:04 UTC, noch am Tag der Aenderung) hat das Feld
+        // wortlos wieder entfernt. Eine Uebersetzung in einer
+        // gescrapten Datei ist eine Uebersetzung auf Zeit.
+        //
+        // Deutsch kommt deshalb aus dem Code. Englisch liest weiter die
+        // Datei, weil der Text dort mit den Daten mitwandern darf;
+        // subtitle_de wird geachtet, falls es doch einmal auftaucht.
+        const subtitle = (uiLang() === 'de'
+            ? (meta.subtitle_de || labels.subtitleFallback)
+            : (meta.subtitle || labels.subtitleFallback)) || '';
+        const updated  = meta.last_updated || '';
         return `
             <div class="side-quest-intro">
                 <p class="side-quest-subtitle">${escapeHtml(subtitle)}</p>
-                ${updated ? `<p class="side-quest-updated">Last updated: ${escapeHtml(updated)}</p>` : ''}
+                ${updated ? `<p class="side-quest-updated">${escapeHtml(labels.lastUpdated)} ${escapeHtml(updated)}</p>` : ''}
                 <p class="side-quest-mark-hint">${escapeHtml(labels.markHint)}</p>
             </div>
         `;

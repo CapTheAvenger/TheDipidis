@@ -280,8 +280,14 @@ describe('applyCurrentMetaFilter', () => {
         assert.equal(Array.isArray(tableRendered), true);
         assert.equal(tableRendered.length, 2);
         assert.equal(gridRendered, null);
-        assert.equal(countEl.textContent, '2 deck.cards');
-        assert.equal(summaryEl.textContent, '/ 4 Total');
+        // Seit dem Sprachdurchgang vom 30.08.2026 laufen BEIDE Zahlen
+        // ueber dieselben Schluessel wie die City-League-Ansicht
+        // (cl.cards / cl.total). Vorher stand hier "/ 4 Total" fest
+        // verdrahtet auf Englisch, waehrend nebenan schon "60 Gesamt"
+        // gerendert wurde. t() gibt in dieser Sandbox den Schluessel
+        // zurueck, deshalb stehen die Schluesselnamen in der Erwartung.
+        assert.equal(countEl.textContent, '2 cl.cards');
+        assert.equal(summaryEl.textContent, '/ 4 cl.total');
     });
 
     it('renders grid view when table is hidden', () => {

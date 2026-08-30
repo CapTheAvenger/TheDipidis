@@ -123,11 +123,15 @@
                                  // (tournament_id, player_name, place)
   let _tournamentSizes = null;  // Map(tournament_id → total_players)
   let _aceSpecNames    = null;  // Set of normalized ACE-SPEC card names
-                                 // sourced from data/ace_specs.json. The
-                                 // per-decklist CSV's is_ace_spec column
-                                 // is empty for all 78k rows (limitless
-                                 // decklist HTML doesn't tag specs), so
-                                 // we resolve the flag by name here.
+                                 // sourced from data/ace_specs.json.
+                                 // 30.08.2026 nachgemessen: die Spalte
+                                 // is_ace_spec in
+                                 // tournament_decklists_per_player.csv ist
+                                 // NICHT mehr leer (26.760 Zeilen: 1.058
+                                 // Yes, 25.691 No, 11 leer). Sie kommt aber
+                                 // aus derselben Liste, die hier gelesen
+                                 // wird — der Namensweg bleibt also die
+                                 // Quelle, nicht der Rueckfall.
   let _loadPromise     = null;
 
   function _norm(s) {

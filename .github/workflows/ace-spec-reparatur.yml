@@ -1,6 +1,13 @@
-name: is_ace_spec reparieren
+name: Daten reparieren
 
-# Einmaliger Aufraeumlauf, per Hand ausgeloest.
+# Aufraeumlaeufe an den ausgelieferten CSVs, per Hand ausgeloest.
+#
+# Zurzeit zwei:
+#   scripts/repariere_ace_spec.py      is_ace_spec belegen statt raten
+#   scripts/repariere_set_nummern.py   den URL-Rest aus set_number
+#
+# Beide sind wiederholbar: laufen sie ein zweites Mal, aendert sich
+# nichts und es wird nichts committet.
 #
 # Warum als Workflow und nicht als normaler Commit: die Reparatur beruehrt
 # 21 CSVs mit zusammen rund 155 MB, darunter data/city_league_analysis_M3.csv
@@ -29,7 +36,7 @@ permissions:
   actions: write   # deploy-pages anstossen (GITHUB_TOKEN-Push tut es nicht)
 
 concurrency:
-  group: ace-spec-reparatur
+  group: datenreparatur
   cancel-in-progress: false
 
 jobs:
@@ -50,11 +57,14 @@ jobs:
           PYTHONUNBUFFERED: '1'
         run: |
           set -o pipefail
-          python scripts/repariere_ace_spec.py 2>&1 | tee /tmp/ace.log
-          if grep -q '^::error::' /tmp/ace.log; then
-            echo "::error::Reparatur meldet einen Fehler — nichts geschrieben."
-            exit 1
-          fi
+          for skript in repariere_ace_spec repariere_set_nummern; do
+            echo "── $skript ─────────────────────────────────────────────"
+            python "scripts/$skript.py" 2>&1 | tee "/tmp/$skript.log"
+            if grep -q '^::error::' "/tmp/$skript.log"; then
+              echo "::error::$skript meldet einen Fehler — nichts geschrieben."
+              exit 1
+            fi
+          done
 
       - name: Schreiben
         if: ${{ inputs.schreiben }}
@@ -62,17 +72,21 @@ jobs:
           PYTHONUNBUFFERED: '1'
         run: |
           set -o pipefail
-          python scripts/repariere_ace_spec.py --schreiben 2>&1 | tee /tmp/ace-schreiben.log
-          if grep -q '^::error::' /tmp/ace-schreiben.log; then
-            echo "::error::Nachpruefung fehlgeschlagen — Aenderung wird nicht committet."
-            exit 1
-          fi
+          for skript in repariere_ace_spec repariere_set_nummern; do
+            echo "── $skript ─────────────────────────────────────────────"
+            python "scripts/$skript.py" --schreiben 2>&1 | tee "/tmp/$skript-schreiben.log"
+            if grep -q '^::error::' "/tmp/$skript-schreiben.log"; then
+              echo "::error::Nachpruefung von $skript fehlgeschlagen — nichts committet."
+              exit 1
+            fi
+          done
 
-      - name: Gegenprobe — nur is_ace_spec darf abweichen
+      - name: Gegenprobe — nur die drei erlaubten Spalten duerfen abweichen
         if: ${{ inputs.schreiben }}
         run: |
           # Zweite, unabhaengige Pruefung gegen den Stand vor dem Lauf:
-          # jedes geaenderte Byte muss in dieser einen Spalte liegen.
+          # jedes geaenderte Byte muss in einer der drei Spalten liegen,
+          # die die beiden Skripte anfassen duerfen.
           python - <<'PY'
           import os, subprocess, sys
           sys.path.insert(0, os.getcwd())
@@ -89,16 +103,19 @@ jobs:
                                         capture_output=True, check=True).stdout.decode("utf-8")
               _, tr, namen, neu_z = lies(pfad)
               alt_z = zerlege_zeilen(alt_text)
-              if len(alt_z) != len(neu_z) or "is_ace_spec" not in namen:
-                  print("::error::%s: Zeilenzahl oder Kopf veraendert." % pfad); fehler += 1; continue
-              i = namen.index("is_ace_spec")
+              if len(alt_z) != len(neu_z):
+                  print("::error::%s: Zeilenzahl veraendert." % pfad); fehler += 1; continue
+              erlaubt = {namen.index(n) for n in ("is_ace_spec", "set_number", "card_identifier")
+                         if n in namen}
+              if not erlaubt:
+                  print("::error::%s: keine der erwarteten Spalten im Kopf." % pfad); fehler += 1; continue
               for a, b in zip(alt_z[1:], neu_z[1:]):
                   fa = [w for w, _, _ in felder(a.rstrip("\r\n"), tr)]
                   fb = [w for w, _, _ in felder(b.rstrip("\r\n"), tr)]
                   if len(fa) != len(fb):
                       print("::error::%s: Feldzahl veraendert." % pfad); fehler += 1; break
                   for k, (x, y) in enumerate(zip(fa, fb)):
-                      if k != i and x != y:
+                      if k not in erlaubt and x != y:
                           print("::error::%s: Spalte %r veraendert (%r -> %r)."
                                 % (pfad, namen[k], x, y)); fehler += 1; break
                   else:
@@ -106,7 +123,7 @@ jobs:
                   break
           if fehler:
               sys.exit(1)
-          print("Gegenprobe sauber: %d Dateien, nur is_ace_spec abweichend." % len(geaendert))
+          print("Gegenprobe sauber: %d Dateien, nur die erlaubten Spalten abweichend." % len(geaendert))
           PY
 
       - name: Tests
@@ -117,11 +134,11 @@ jobs:
           # kann es erst, wenn dieser Lauf ihn einmal geraeumt hat — beim
           # ersten Mal liegt die Datei deshalb noch nicht im Repo.
           dateien="tests/python/test_ace_spec_regel.py"
-          if [ -f tests/python/test_ace_spec_bestand.py ]; then
-            dateien="$dateien tests/python/test_ace_spec_bestand.py"
-          else
-            echo "::notice::test_ace_spec_bestand.py noch nicht im Repo — kommt im Folge-PR."
-          fi
+          for f in tests/python/test_ace_spec_bestand.py \
+                   tests/python/test_set_nummern_und_maxcount.py; do
+            if [ -f "$f" ]; then dateien="$dateien $f"
+            else echo "::notice::$f noch nicht im Repo — kommt im Folge-PR."; fi
+          done
           python -m pytest $dateien -q
 
       - name: Committen
@@ -136,7 +153,7 @@ jobs:
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git commit -m "Daten: is_ace_spec belegt statt geraten — $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git commit -m "Daten: Reparaturlauf — $(date -u +'%Y-%m-%d %H:%M UTC')"
           for versuch in 1 2 3; do
             if git push origin HEAD:main; then
               echo "pushed=true" >> "$GITHUB_OUTPUT"

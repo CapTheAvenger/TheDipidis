@@ -2758,7 +2758,7 @@ function updateDecksUI() {
                     title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}">${collLabel}</button>
                 <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')"
                     class="my-deck-card-btn my-deck-card-btn--wish${wishOnClass}"
-                    title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">\u2764</button>
+                    title="${escapeHtml(t(isWishlisted ? 'akt.removeWishlist' : 'akt.addWishlist'))}">\u2764</button>
                 <button onclick="event.stopPropagation(); myDeckRemoveCard(${deckIndex}, '${safeDeckKeyJs}')"
                     class="my-deck-card-btn my-deck-card-btn--delete"
                     title="${getLang()==='de' ? 'Karte komplett entfernen' : 'Remove card from deck'}">\u2715</button>

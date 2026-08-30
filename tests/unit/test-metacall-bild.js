@@ -233,7 +233,18 @@ describe('Bild generieren: der Turniername rechnet nicht mit', () => {
     it('das Bild zeigt hoechstens zehn Decks und keinen Restposten', () => {
         const m = MC.match(/function generateTournamentImage\(\) \{[\s\S]*?\n  \}/);
         assert.match(m[0], /slice\(0, 10\)/);
-        assert.match(m[0], /'_junk'/);
+        // 30.08.2026: der _junk-Filter stand frueher hier drin. Er ist in
+        // _prognostiziertesFeld() gewandert — dieselbe Rechnung, die jetzt
+        // auch die Aussenschnittstelle benutzt, nachdem der Knopf mit
+        // einem ReferenceError auf eine Funktion zeigte, die es im Modul
+        // gar nicht gab. Der Test folgt dem Weg, statt eine Zeichenkette
+        // an ihrer alten Stelle zu suchen.
+        assert.match(m[0], /_prognostiziertesFeld\(\)/,
+            'der Knopf holt das Feld nicht mehr ueber _prognostiziertesFeld()');
+        const f = MC.match(/function _prognostiziertesFeld\(\) \{[\s\S]*?\n  \}/);
+        assert.ok(f, '_prognostiziertesFeld() ist nicht auffindbar');
+        assert.match(f[0], /'_junk'/,
+            'der Restposten wird nirgends mehr herausgefiltert');
     });
 });
 

@@ -73,6 +73,20 @@ describe('Gewichtete Antritte werden nicht zu ganzen gerundet', () => {
     });
 });
 
+describe('Ø-Platzierungen stehen überall mit zwei Nachkommastellen', () => {
+    it('auch auf den Tier-Karten', () => {
+        // Sie zeigten "Platzierung: 13,7", die Tabelle darunter "13,67".
+        const TIER = lies('js/app-tier-meta.js');
+        assert.match(TIER, /const currentRank = currentRankValue > 0 \? kommaAus\(currentRankValue, 2\)/);
+        assert.ok(!/kommaAus\(currentRankValue, 1\)/.test(TIER), 'wieder eine Nachkommastelle');
+    });
+
+    it('und auf der kombinierten Heldenkachel', () => {
+        const TIER = lies('js/app-tier-meta.js');
+        assert.match(TIER, /\? item\.weightedRank\.toFixed\(2\)/);
+    });
+});
+
 describe('Dezimalpunkte in deutschen Zahlen', () => {
     it('der Coverage-Balken der Kartendatenbank', () => {
         const CDB = ohneKomm(lies('js/app-cards-db.js'));

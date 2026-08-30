@@ -368,7 +368,6 @@
         usage: 'sideQuestUsageHost',
         matchups: 'sideQuestMatchupsHost',
         pokedex: 'sideQuestPokedexHost',
-        battle: 'sideQuestBattleHost',
         builder: 'sideQuestBuilderHost',
         resources: 'sideQuestResourcesHost',
     };
@@ -409,8 +408,6 @@
             }
         } else if (view === 'pokedex' && window.sideQuestPokedex) {
             window.sideQuestPokedex.activate();
-        } else if (view === 'battle' && window.sideQuestPokedex && window.sideQuestPokedex.activateBattle) {
-            window.sideQuestPokedex.activateBattle();
         } else if (view === 'builder' && window.sideQuestBuilder) {
             window.sideQuestBuilder.activate();
         } else if (view === 'usage' && window.sideQuestUsage) {
@@ -423,7 +420,6 @@
     function setSubtabLabels() {
         const l = t();
         const pokedexLabel = uiLang() === 'de' ? 'Pokémon' : 'Pokémon';
-        const battleLabel = uiLang() === 'de' ? 'Kampfdaten' : 'Battle data';
         const builderLabel = uiLang() === 'de' ? 'Team-Builder' : 'Team Builder';
         document.querySelectorAll('.side-quest-subtab').forEach(b => {
             const v = b.getAttribute('data-sq-view');
@@ -431,7 +427,6 @@
                           : v === 'matchups' ? 'Matchups'
                           : v === 'resources' ? l.tabResources
                           : v === 'pokedex' ? pokedexLabel
-                          : v === 'battle' ? battleLabel
                           : v === 'builder' ? builderLabel
                           : l.tabTeams;
         });

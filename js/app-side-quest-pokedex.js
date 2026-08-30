@@ -80,8 +80,6 @@
             attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Nutzungsdaten: championsbattledata.com (In-Game-Analyse) · Deutsche Namen: PokéAPI',
             // Detail overlay
             detailHint: 'Tipp auf ein Pokémon → alle In-Game-Infos',
-            battleIntro: 'Such ein Pokémon und tipp drauf — dann siehst du direkt alle Kampfdaten (Wesen, SP, Attacken, Item, Fähigkeit, Team) für Doppel & Einzel.',
-            battleSearchPh: '🔎 Pokémon suchen …',
             detailSearchPh: '🔎 Anderes Pokémon …',
             fmtDoubles: 'Doppelkämpfe',
             fmtSingles: 'Einzelkämpfe',
@@ -100,6 +98,9 @@
             noUsage: 'Für dieses Pokémon gibt es noch keine In-Game-Nutzungsdaten.',
             closeLabel: 'Schließen',
             megaAbility: 'Mega-Fähigkeit',
+            megaAbilityUnknown: 'Steht bisher nur im Spiel. Keine belegte Quelle — wir raten nicht.',
+            viaBase: (basis, stein, pct) =>
+                `Nutzungsdaten von ${basis} — ${pct}\u00a0% der ${basis}-Builds halten ${stein}.`,
             usageSeasonLbl: (s) => `Saison: ${s} · Quelle: championsbattledata.com · Stand unbekannt`,
             colBaseTrue: 'Basis', colLv50: 'Lv50', colUsed: 'Genutzt', colRange: 'Range',
             tblFormatLabel: 'Genutzte Werte:',
@@ -138,8 +139,6 @@
             attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · Usage: championsbattledata.com (in-game analysis) · German names: PokéAPI',
             // Detail overlay
             detailHint: 'Tap a Pokémon → full in-game info',
-            battleIntro: 'Search a Pokémon and tap it — you get all its battle data (nature, SP, moves, item, ability, team) for Doubles & Singles, straight away.',
-            battleSearchPh: '🔎 Search a Pokémon …',
             detailSearchPh: '🔎 Another Pokémon …',
             fmtDoubles: 'Doubles',
             fmtSingles: 'Singles',
@@ -158,6 +157,9 @@
             noUsage: 'No in-game usage data for this Pokémon yet.',
             closeLabel: 'Close',
             megaAbility: 'Mega ability',
+            megaAbilityUnknown: 'In-game only so far. No sourced value — we don\u2019t guess.',
+            viaBase: (basis, stein, pct) =>
+                `Usage data from ${basis} — ${pct}\u00a0% of ${basis} builds hold ${stein}.`,
             usageSeasonLbl: (s) => `Season: ${s} · Source: championsbattledata.com · date unknown`,
             colBaseTrue: 'Base', colLv50: 'Lv50', colUsed: 'Used', colRange: 'Range',
             tblFormatLabel: 'Used values:',
@@ -246,10 +248,22 @@
         return _usageLoading;
     }
 
-    // EN→DE name maps for moves/items/abilities/Pokémon (German UI only).
+    // EN→DE name maps for moves/items/abilities/Pokémon — PLUS abilityFx,
+    // die Wirkungstexte der Faehigkeiten, und die gibt es in beiden
+    // Sprachen (alle 194 Eintraege fuehren de UND en).
+    //
+    // BEFUND (30.08.2026): der Sprachriegel hier stand vor der ganzen
+    // Datei, nicht nur vor den Namen. In der englischen Oberflaeche kam
+    // sie deshalb nie an — und damit stand im Champions-Modal zu jeder
+    // Faehigkeit nur der Name, ohne eine Zeile dazu, was sie tut. Der
+    // deutsche Nutzer bekam die Erklaerung, der englische nicht.
+    // Gemessen am Mega-Despotar: DE "Sand Stream · Erzeugt beim
+    // Einwechseln 5 Runden Sandsturm", EN nur "Sand Stream".
+    //
+    // Die Namensabfrage selbst bleibt deutsch: deName() wird ohnehin nur
+    // aufgerufen, wenn uiLang() === 'de' (zwei Stellen, beide geprueft).
     function loadNamesDe() {
         if (_namesDe) return Promise.resolve(_namesDe);
-        if (uiLang() !== 'de') return Promise.resolve(null);
         if (_namesDeLoading) return _namesDeLoading;
         _namesDeLoading = fetch(`${NAMES_DE_URL}?t=${Date.now()}`)
             .then(r => r.ok ? r.json() : null)
@@ -732,6 +746,14 @@
         }
         return null;
     }
+    // Derselbe Name als reiner Text — fuer Saetze, die als Ganzes
+    // maskiert werden. Bevorzugt die Sprache der Oberflaeche und faellt
+    // auf Englisch zurueck, statt einen leeren Platzhalter zu zeigen.
+    function nmText(en, kind) {
+        if (!en) return '';
+        const de = uiLang() === 'de' ? deName(en, kind) : null;
+        return de || en;
+    }
     function nmHtml(en, kind) {
         const de = uiLang() === 'de' ? deName(en, kind) : null;
         return de && de !== en
@@ -898,8 +920,24 @@
 
     // For Mega forms: the fixed ability they get after evolving (the usage
     // section shows the PRE-mega base ability, so this is shown by the name).
+    //
+    // 16 der 75 Mega-Formen fuehren keine — es sind die Champions-eigenen
+    // M-B-Formen, und keine oeffentliche Quelle nennt ihre Faehigkeit
+    // (roster.json kennt sie nicht, championsbattledata hat keine Seite
+    // dafuer, Smogon liefert nur Werte und Typen). Die Zeile bisher
+    // einfach wegzulassen las sich wie "hat keine besondere Faehigkeit" —
+    // eine Aussage, fuer die wir keinen Beleg haben. Also wird die
+    // Luecke benannt statt verschwiegen.
     function megaAbilityBadge(en) {
         const l = t();
+        if (!en) {
+            return `<div class="sqp-d-megaab sqp-d-megaab--unknown">
+                <div class="sqp-d-megaab-top">
+                    <span class="sqp-d-megaab-lbl">${escapeHtml(l.megaAbility)}</span>
+                    <span class="sqp-d-megaab-name">${escapeHtml(l.megaAbilityUnknown)}</span>
+                </div>
+            </div>`;
+        }
         const fx = abilityFxText(en);
         return `<div class="sqp-d-megaab">
                 <div class="sqp-d-megaab-top">
@@ -910,13 +948,32 @@
             </div>`;
     }
 
+    // Mega-Formen haben keine eigenen Nutzungsdaten: gespielt wird die
+    // Grundform mit dem Mega-Stein. Der Pokedex-Bauer uebernimmt deshalb
+    // die Zahlen der Grundform — aber nur MIT Beleg, naemlich dem Anteil,
+    // zu dem die Grundform genau diesen Stein haelt. Dieser Hinweis macht
+    // den Beleg sichtbar; eine geerbte Zahl ohne ihn waere eine
+    // Behauptung.
+    function viaBaseNote(e) {
+        const m = e && e.meta;
+        if (!m || !m.viaBase || !m.viaStone) return '';
+        const l = t();
+        const basis = nmText(m.viaBase, 'pokemon');
+        const stein = nmText(m.viaStone, 'items');
+        const pct = (m.viaStonePct != null)
+            ? String(m.viaStonePct).replace('.', uiLang() === 'de' ? ',' : '.')
+            : '?';
+        return `<p class="sqp-d-viabase">${escapeHtml(l.viaBase(basis, stein, pct))}</p>`;
+    }
+
     function detailOverlayHtml(e) {
         const l = t();
         const lang = uiLang();
         const primary = lang === 'de' ? e.de : e.en;
         const secondary = lang === 'de' ? e.en : e.de;
         const dex = e.dex != null ? `#${e.dex}` : '';
-        const megaAb = e.megaAbility ? megaAbilityBadge(e.megaAbility) : '';
+        const megaAb = (e.form === 'Mega' || e.megaAbility)
+            ? megaAbilityBadge(e.megaAbility || '') : '';
         const rec = usageRecFor(e);
         // Pick a format that exists for this Pokémon.
         let fmt = _detailFormat;
@@ -960,6 +1017,7 @@
                     ${detailStatsTable(e, block)}
                     ${speedTierRow(e, topBuildFinal(e, block))}
                 </div>
+                ${viaBaseNote(e)}
                 ${detailUsageBlock(e, block)}
                 <p class="sqp-attr">${escapeHtml(l.attribution)}</p>
             </div>`;
@@ -1158,77 +1216,26 @@
 
     // ── "Kampfdaten" view: a direct search → detail overlay, so you can jump
     // straight to a Pokémon's battle data without scrolling the table. ──
-    let _battleQuery = '';
-    function battleListHtml() {
-        const l = t();
-        const lang = uiLang();
-        const q = norm(_battleQuery).trim();
-        const list = _entries
-            .filter(e => matches(e, q))
-            .sort((a, b) => (lang === 'de' ? a.de : a.en).localeCompare(lang === 'de' ? b.de : b.en));
-        const rows = list.map(e => {
-            const primary = lang === 'de' ? e.de : e.en;
-            const secondary = lang === 'de' ? e.en : e.de;
-            const dex = e.dex != null ? `#${e.dex}` : '';
-            const idx = _entries.indexOf(e);
-            return `<button type="button" class="sqp-bf-item" data-bidx="${idx}">
-                    <span class="sqp-bf-name">${escapeHtml(primary)}<span class="sqp-bf-sub">${escapeHtml(secondary)} · ${escapeHtml(dex)}</span></span>
-                    <span class="sqp-bf-types">${typeBadge(e.t1, e.t1de)} ${e.t2 ? typeBadge(e.t2, e.t2de) : ''}</span>
-                </button>`;
-        }).join('');
-        return { count: list.length, rows: rows || `<p class="sqp-status">${escapeHtml(l.none)}</p>` };
-    }
-    function wireBattleRows(host) {
-        host.querySelectorAll('.sqp-bf-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const e = _entries[parseInt(btn.getAttribute('data-bidx'), 10)];
-                if (e) openDetail(e);
-            });
-        });
-    }
-    // Update only the count + list on input, so the search box keeps focus.
-    function updateBattleList(host) {
-        const { count, rows } = battleListHtml();
-        const cEl = host.querySelector('.sqp-count');
-        if (cEl) cEl.textContent = t().count(count);
-        const lEl = host.querySelector('.sqp-bf-list');
-        if (lEl) { lEl.innerHTML = rows; wireBattleRows(host); }
-    }
-    function renderBattle() {
-        const host = document.getElementById('sideQuestBattleHost');
-        if (!host) return;
-        const l = t();
-        if (!_entries) { host.innerHTML = `<p class="sqp-status">${escapeHtml(l.loading)}</p>`; return; }
-        if (_entries.length === 0) { host.innerHTML = `<p class="sqp-status">${escapeHtml(l.error)}</p>`; return; }
-        const { count, rows } = battleListHtml();
-        host.innerHTML = `
-            <div class="sqp sqp-battle">
-                <p class="sqp-intro">${escapeHtml(l.battleIntro)}</p>
-                <input id="sqbSearch" class="sqp-search" type="search"
-                       placeholder="${escapeHtml(l.battleSearchPh)}" value="${escapeHtml(_battleQuery)}"
-                       autocomplete="off" spellcheck="false" aria-label="${escapeHtml(l.battleSearchPh)}">
-                <p class="sqp-count">${escapeHtml(l.count(count))}</p>
-                <div class="sqp-bf-list">${rows}</div>
-            </div>`;
-        const search = host.querySelector('#sqbSearch');
-        if (search) search.addEventListener('input', () => { _battleQuery = search.value; updateBattleList(host); });
-        wireBattleRows(host);
-    }
-    function activateBattle() {
-        if (!_entries) { renderBattle(); loadData().then(renderBattle); }
-        else renderBattle();
-    }
+    // Der Reiter "Kampfdaten" ist am 29.08.2026 entfernt worden.
+    //
+    // Er war eine zweite Suchliste ueber denselben Datensatz und
+    // oeffnete beim Klick dasselbe Modal wie der Pokemon-Reiter —
+    // identische Ueberschrift, identische Werte, identische Quelle.
+    // Zwei Wege zum selben Bildschirm sind kein Merkmal, sondern eine
+    // Frage, die der Nutzer sich stellen muss ("was ist der
+    // Unterschied?"), ohne dass es eine Antwort gibt.
+    //
+    // Die Kampfdaten selbst sind nicht weg: sie stehen im Modal des
+    // Pokemon-Reiters, wo sie immer standen.
 
     document.addEventListener('languageChanged', () => {
         const host = document.getElementById('sideQuestPokedexHost');
         if (_activated && host && !host.hidden) render();
-        const bhost = document.getElementById('sideQuestBattleHost');
-        if (bhost && !bhost.hidden) renderBattle();
     });
 
     // Shared with the usage view — one slug rule for the whole Champions
     // area, so a form that resolves in one list resolves in the other.
     window.championsSprite = { slug: spriteSlug, img: spriteImg };
 
-    window.sideQuestPokedex = { activate, render, loadData, activateBattle, renderBattle };
+    window.sideQuestPokedex = { activate, render, loadData };
 })();

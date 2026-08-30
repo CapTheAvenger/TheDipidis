@@ -339,8 +339,14 @@ describe('Verdrahtung und Darstellung', () => {
         // Mit dem siebten Reiter war die Leiste 626px breit und machte
         // main.tabs-container auf 390px waagerecht scrollbar — die ganze
         // Seite ließ sich verschieben, ohne dass ein Regler sichtbar war.
+        //
+        // 30.08.2026: der Reiter "Kampfdaten" ist raus — er öffnete
+        // dasselbe Modal wie "Pokémon", zeigte also zweimal dieselben
+        // Daten. Damit sind es sechs. Der Umbruch bleibt trotzdem
+        // Pflicht: sechs Reiter passen auf 390px ebenfalls nicht in
+        // eine Zeile, und der nächste Reiter kommt bestimmt.
         const tabs = (HTML.match(/data-sq-view="/g) || []).length;
-        assert.ok(tabs >= 7, `nur ${tabs} Reiter — Testannahme prüfen`);
+        assert.ok(tabs >= 6, `nur ${tabs} Reiter — Testannahme prüfen`);
         assert.match(CSS, /\.side-quest-subtabs \{[^}]*flex-wrap: wrap/);
         assert.match(CSS, /\.side-quest-subtabs \{[^}]*max-width: 100%/);
     });

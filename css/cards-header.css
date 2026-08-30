@@ -16,7 +16,25 @@
     color: #fff;
     /* Traegt die Bluetenschicht darunter, siehe .cards-header::after. */
     position: relative;
-    overflow: hidden;
+    /* KEIN overflow: hidden.
+     *
+     * BEFUND (29.08.2026, live gemessen): Der Kopf ist 97 px hoch und
+     * schnitt alles darunter weg. Das Pokeball-Menue haengt als
+     * absolut positioniertes Kind im Kopf, ist 689 px hoch und beginnt
+     * bei y=102 — **674 seiner 689 Pixel wurden weggeschnitten**. Der
+     * Klick oeffnete das Menue korrekt (Klasse `show` gesetzt,
+     * opacity 1, visibility visible), sichtbar blieb ein 15-Pixel-
+     * Streifen. Fuer den Nutzer sah das aus, als passiere nichts.
+     *
+     * Auf dem Telefon ist der Pokeball der einzige Weg zu Side Quest,
+     * Anleitung, Druckliste, Rechner und Profil — die untere Leiste
+     * kennt nur fuenf Ziele. Der Kopf hat also fuenf Bereiche
+     * unerreichbar gemacht.
+     *
+     * Das Beschneiden brauchte nur die Bluetenschicht, damit sie nicht
+     * ueber die runden Ecken laeuft. Das macht sie jetzt selbst
+     * (border-radius auf ::after). */
+    overflow: visible;
 }
 
 /* ── Kirschblueten im Kopfbereich ────────────────────────────────
@@ -40,6 +58,10 @@
     z-index: 0;
     pointer-events: none;
     opacity: 0.72;
+    /* Beschneidet sich selbst, seit der Kopf es nicht mehr tut.
+     * Ohne das liefen die Blueten ueber die runden Ecken hinaus. */
+    border-radius: inherit;
+    overflow: hidden;
     background-repeat: no-repeat;
     background-image:
         url('../images/marke/b0.webp'),

@@ -58,6 +58,67 @@ KEEP = {"stat_alignment": 6, "stat_points": 6, "held_item": 8, "move": 12,
 # Output key per source category.
 OUT_KEY = {"stat_alignment": "nature"}
 
+# ── Zerschnittene Item-Namen ───────────────────────────────────────────
+#
+# BEFUND (30.08.2026): die Quelle liefert zwei Mega-Steine mit einem
+# eingeschobenen Leerzeichen — "Tyra nitarite" statt "Tyranitarite" und
+# "Mega niumite" statt "Meganiumite". Beide standen so in
+# champions_usage.json und damit im Modal. Es sind die einzigen zwei von
+# 238 Pokemon; ein Parserfehler auf unserer Seite ist es nicht, der Name
+# kommt genau so aus dem CSV-Feld.
+#
+# Repariert wird ausschliesslich gegen die kanonische Liste aus
+# data/champions_available_items.json (Serebii, 181 Namen). Bedingung:
+# der Name OHNE Leerzeichen muss dort genau einen Treffer haben. Damit
+# ist das kein Raten, sondern ein Abgleich — "Tyranitarite" ist derselbe
+# Gegenstand, nur richtig geschrieben. Findet sich kein Treffer, bleibt
+# der Name unveraendert stehen und wird gemeldet (Regel: melden, nicht
+# still reparieren).
+ITEMS_REF = os.path.join(ROOT, "data", "champions_available_items.json")
+
+
+def lade_item_namen():
+    """{name ohne Leerzeichen, klein: kanonischer Name} — leer bei Fehler."""
+    try:
+        with open(ITEMS_REF, encoding="utf-8") as f:
+            namen = json.load(f).get("items") or []
+    except Exception:
+        return {}
+    karte = {}
+    for n in namen:
+        k = n.replace(" ", "").lower()
+        if k in karte and karte[k] != n:
+            # Zwei Gegenstaende, die sich nur in Leerzeichen unterscheiden:
+            # dann ist die Zuordnung nicht mehr eindeutig, und wir lassen
+            # beide in Ruhe.
+            karte[k] = None
+        else:
+            karte.setdefault(k, n)
+    return {k: v for k, v in karte.items() if v}
+
+
+_ITEM_KARTE = None
+_ITEM_UNBEKANNT = set()
+
+
+def repariere_itemnamen(name):
+    global _ITEM_KARTE
+    if _ITEM_KARTE is None:
+        _ITEM_KARTE = lade_item_namen()
+    if not name or not _ITEM_KARTE:
+        return name
+    if name in _ITEM_KARTE.values():
+        return name
+    treffer = _ITEM_KARTE.get(name.replace(" ", "").lower())
+    if treffer and treffer != name:
+        print(f"  Item-Name zusammengesetzt: {name!r} -> {treffer!r}", file=sys.stderr)
+        return treffer
+    if not treffer and name not in _ITEM_UNBEKANNT:
+        _ITEM_UNBEKANNT.add(name)
+        print(f"  Item nicht in der Referenzliste: {name!r} "
+              f"(bleibt unveraendert)", file=sys.stderr)
+    return name
+
 _POINT_COLS = [("hp", "hp_points"), ("atk", "attack_points"),
                ("def", "defense_points"), ("spa", "sp_atk_points"),
                ("spd", "sp_def_points"), ("spe", "speed_points")]
@@ -200,7 +261,8 @@ def summarize_csv(text):
                 evs, points = evs_string(r)
                 items.append({"evs": evs, "pct": pct, "points": points})
             elif cat == "held_item":
-                entry = {"name": r.get("name", "").strip(), "pct": pct}
+                entry = {"name": repariere_itemnamen(r.get("name", "").strip()),
+                         "pct": pct}
                 if pct is None and id(r) in derived_pct:
                     entry["pct"] = derived_pct[id(r)]
                     entry["derived"] = True   # computed, not source-reported

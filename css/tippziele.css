@@ -82,14 +82,94 @@
     .card-limitless-btn {
         position: relative;
     }
+    /* NACHTRAG (30.08.2026, Abnahme): die erste Fassung hatte
+       `width: 100%` und wurde dadurch nicht zentriert, sondern um die
+       halbe Knopfbreite nach rechts geschoben — gemessen 42 px Versatz.
+       Die Flaeche lag also neben dem Knopf statt um ihn herum. Feste
+       Breite statt Prozent, dann trifft translate(-50%,-50%). */
     .card-proxy-btn::after,
     .card-limitless-btn::after {
         content: "";
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 100%;
-        min-width: 34px;
+        width: 44px;
+        height: 34px;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+    }
+}
+
+/* ── Nachtrag aus der Abnahme vom 30.08.2026 ──────────────────────────
+ *
+ * Die Regel oben fasst `button`, `select`, `input` und `[role=button]`.
+ * Die Abnahme hat gemessen, dass die wichtigsten verbliebenen Ziele
+ * gar keine davon sind — es sind `div` und `a` mit Klick-Behandlung,
+ * und die faellt kein Element-Selektor:
+ *
+ *   .searchable-select-display     38 px — die DECK-AUSWAHL aller drei
+ *                                  Analysen, also das wichtigste
+ *                                  Bedienelement dieser Seiten
+ *   .archetype-jump-link           19 px, 25x auf city-league —
+ *                                  Navigationslinks in einer Tabelle,
+ *                                  kein Fliesstext
+ *   .city-league-info-table-row    33,5 px (10x), -cell 31,5 px (9x)
+ *   .heatmap-td                    40 px, 36x auf current-meta
+ *   .tier-search-clear             27,4 x 24 px — das Kreuz zum Leeren
+ *                                  der Suche auf der Startseite
+ *   .card-database-price-btn       20 px (8x), ohne ::after-Flaeche
+ *   .card-database-rarity-btn      20 px (8x), ebenso
+ *
+ * Die ersten fuenf wachsen selbst — sie stehen nicht auf einem Bild und
+ * haben Platz. Die beiden Kartendatenbank-Knoepfe liegen wie die
+ * Abzeichen auf dem Kartenbild und bekommen die unsichtbare Flaeche.
+ */
+@media (pointer: coarse) {
+    /* Fuehrendes `html`: die Regeln, gegen die hier angeschrieben wird,
+       tragen selbst `!important` und dieselbe Spezifitaet (eine Klasse).
+       Dann entscheidet die Reihenfolge der Stylesheets — und
+       css/mobile-responsive.css laedt nach dieser Datei, gewinnt also.
+       Gemessen: `.searchable-select-display` blieb trotz
+       `min-height: 44px !important` bei 38 px, weil
+       mobile-responsive.css:744 dasselbe Gewicht hat und spaeter kommt.
+       Mit `html` davor (0,1,1 gegen 0,1,0) haengt es nicht mehr an der
+       Ladereihenfolge. */
+    html .searchable-select-display,
+    html .tier-search-clear {
+        min-height: 44px !important;
+    }
+    html .tier-search-clear {
+        min-width: 44px !important;
+    }
+    /* Tabellenzellen: `min-height` hat auf `display: table-cell` laut
+       Spezifikation KEINE Wirkung — gemessen blieb `.heatmap-td` bei
+       40 px, obwohl `min-height: 44px` berechnet wurde. Bei Zellen
+       wirkt `height` selbst als Mindesthoehe. */
+    html .heatmap-td,
+    html .city-league-info-table-cell,
+    html .city-league-info-table-row,
+    html .city-league-info-table-row-mobile,
+    html .city-league-info-table-row-desktop {
+        height: 44px;
+    }
+    /* Ein Sprunglink in einer Tabellenzelle darf die Zeile nicht
+       auseinanderziehen — er bekommt die Hoehe ueber Innenabstand,
+       nicht ueber eine Mindesthoehe. */
+    html .archetype-jump-link {
+        display: inline-block;
+        padding-block: 12px;
+    }
+    html .card-database-price-btn,
+    html .card-database-rarity-btn {
+        position: relative;
+    }
+    html .card-database-price-btn::after,
+    html .card-database-rarity-btn::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 44px;
         height: 34px;
         transform: translate(-50%, -50%);
         z-index: -1;

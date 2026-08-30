@@ -2217,6 +2217,117 @@ const translations = {
     'auth.hasAccount':          'Already have an account? <strong>Sign In</strong>',
     'auth.minChars':            'Minimum 6 characters',
     'auth.or':                  'or',
+    /* ── Sprachbefunde 30.08.2026 ────────────────────────────
+       Neue Schluessel aus dem Sprach- und Beschriftungsdurchgang
+       vom 30.08.2026. Jeder Eintrag ersetzt einen fest verdrahteten
+       Text, der in der jeweils anderen Sprache stehen blieb. */
+
+    // ── Cardmarket Wants helper modal (Befund B) ─────────────
+    'cmw.title':                '🛒 Cardmarket Wants — Helper',
+    'cmw.dialogAria':           'Cardmarket Wishlist Helper',
+    'cmw.intro':                '<strong>Cardmarket’s paste-text fundamentally adds at "any version" only</strong> — it matches by card identity (name + attacks), not by print. To pin the exact print/artwork from your wishlist, use Section 1 below: every link opens the specific Cardmarket product page where you click "Add to Wants" once.',
+    'cmw.section1':             '1. Direct product links —',
+    'cmw.section1Accent':       'exact print',
+    'cmw.section1Hint':         'Click each row to open that card’s exact-print product page on Cardmarket. On every page click "Add to Wants" once to add it with the correct artwork. A 🔍 icon means we don’t have a direct URL for that print yet — clicking still opens Cardmarket’s product search for the card.',
+    'cmw.section2':             '2. Paste-text —',
+    'cmw.section2Accent':       'fast bulk-add (any version)',
+    'cmw.copyPaste':            '📋 Copy paste-text',
+    'cmw.openWants':            '↗ Open Cardmarket Wants',
+    'cmw.hintEmpty':            'Wishlist is empty.',
+    'cmw.hintMissing':          'Pokémon attacks attached automatically. No attack data yet for: <strong>{names}</strong> — those will fall back to bare names (re-run <code>pokemon_card_text_scraper.py</code> to fill the gap).',
+    'cmw.hintMore':             ', +{n} more',
+    'cmw.hintOk':               'Pokémon attacks attached automatically so the parser disambiguates each card. Cardmarket adds them at "any version" — see Section 1 above for exact print.',
+    'cmw.listEmpty':            'Add cards to your wishlist first.',
+    'cmw.rowTitle':             'Open the exact-print product page on Cardmarket',
+    'cmw.rowFallbackTitle':     'No direct product URL stored — opens Cardmarket search for this card. Run all_cards_scraper to get a direct link.',
+
+    // ── Battle Journal edit dialog (Befund D) ────────────────
+    'bj.notesLabel':            'Notes',
+
+    // ── Card database pager (Befund E) ───────────────────────
+    'cdb.copyNames':            'Copy Names',
+    'cdb.copyNamesTitle':       'Copy all filtered card names to clipboard',
+    'cdb.copied':               'Copied!',
+    'cdb.copyFailed':           'Copy failed',
+    'cdb.showAll':              'Show All',
+    'cdb.showAllTitle':         'Show all cards at once',
+    'cdb.showPaginated':        'Paginated',
+    'cdb.showPaginatedTitle':   'Switch back to paginated view',
+    'cdb.prev':                 '← Previous',
+    'cdb.prevAria':             'Previous page',
+    'cdb.next':                 'Next →',
+    'cdb.nextAria':             'Next page',
+
+    // ── Side Quest header (Befund F) ─────────────────────────
+    'sideQuest.subtitle':       'Top current doubles teams from op.gg / victoryroad — tap a replica code to copy it.',
+    'sideQuest.lastUpdated':    'Last updated:',
+
+    // ── Deck grid image button (Befund G) ────────────────────
+    'ui.saveDeckGridImage':     '💾 Save as image',
+
+    // ── Legend sample card (Befund H) ────────────────────────
+    'legend.sampleCardName':    'Card name',
+
+    // ── Telegram chat id (Befund I) ──────────────────────────
+    'settings.chatIdPlaceholder': 'e.g. 123456789',
+
+    // ── Deck overview view toggle (Befund J) ─────────────────
+    'btn.listView':             'List View',
+
+    // ── Custom binder search row (Befund C) ──────────────────
+    'cb.browseAria':            'Browse all archetypes',
+
+    // ── showNotification (Befund K) ──────────────────────────
+    'notif.signInFeature':      'Please sign in to use this feature',
+    'notif.signInSaveDecks':    'Please sign in to save decks',
+    'notif.signInProfile':      'Please sign in to update your profile',
+    'notif.signInFirst':        'Please log in first',
+    'notif.maxCopiesPlayset':   'Maximum 4 copies per card (playset)',
+    'notif.maxCopies':          'Maximum 4 copies per card',
+    'notif.collectionError':    'Error updating collection',
+    'notif.collectionAlreadyEmpty': 'Collection is already empty',
+    'notif.collectionCleared':  'Collection cleared',
+    'notif.wishlistAdded':      'Added to wishlist ({n}x)',
+    'notif.wishlistError':      'Error updating wishlist',
+    'notif.wishlistCount':      'Wishlist: {n}x',
+    'notif.wishlistRemoved':    'Removed from wishlist',
+    'notif.wishlistEmpty':      'Wishlist is empty',
+    'notif.wishlistCopied':     'Wishlist copied to clipboard!',
+    'notif.wishlistCopiedShort':'Wishlist copied!',
+    'notif.invalidDeckSource':  'Invalid deck source',
+    'notif.emptyDeck':          'Cannot save empty deck',
+    'notif.deckSavedNamed':     'Deck "{name}" saved successfully!',
+    'notif.deckSaved':          'Deck saved!',
+    'notif.deckUpdated':        'Deck updated!',
+    'notif.deckDeleted':        'Deck deleted',
+    'notif.deckError':          'Error updating deck',
+    'notif.noDecksLoaded':      'No decks loaded',
+    'notif.deckNotFound':       'Deck not found',
+    'notif.chatIdInvalid':      'Please enter a valid Telegram chat ID (e.g. 123456789). Get it by sending /myid to the bot.',
+    'notif.priceAlertsOn':      '✅ Price alerts enabled',
+    'notif.priceAlertsOff':     '🔕 Price alerts disabled',
+    'notif.saveFailed':         'Saving failed',
+    'notif.enterName':          'Please enter a name',
+    'notif.nameUpdated':        'Name updated!',
+    'notif.nameError':          'Error updating name',
+    'notif.imageExportUnavailable': 'Image export not available',
+    'notif.copyFailed':         'Copy failed',
+    'notif.nothingToCopy':      'Nothing to copy',
+    'notif.pasteTextCopied':    'Paste-text copied — paste into Cardmarket Wants list',
+    'notif.folderDeleted':      'Folder "{name}" deleted',
+    'notif.folderDeleteError':  'Error deleting the folder',
+    'notif.folderExists':       'Folder already exists',
+    'notif.folderCreated':      'Folder "{name}" created. Use the Folder button on a deck to move it.',
+    'notif.deckMoved':          'Moved to "{name}"',
+    'notif.deckUnfiled':        'Removed from folder',
+    'notif.deckMoveError':      'Error moving deck',
+    'notif.tradelistAdded':     'Added to trade list ({n}x)',
+    'notif.tradelistError':     'Error updating trade list',
+    'notif.tradelistCount':     'Trade list: {n}x',
+    'notif.tradelistRemoved':   'Removed from trade list',
+    'notif.tradelistEmpty':     'Trade list is empty',
+    'notif.tradelistCopied':    'Trade list copied to clipboard!',
+    'notif.tradelistCopiedShort':'Trade list copied!',
   },
 
   de: {
@@ -4362,6 +4473,116 @@ const translations = {
     'auth.hasAccount':          'Bereits ein Konto? <strong>Anmelden</strong>',
     'auth.minChars':            'Mindestens 6 Zeichen',
     'auth.or':                  'oder',
+    /* ── Sprachbefunde 30.08.2026 ────────────────────────────
+       Deutsche Haelfte der Schluessel aus dem Sprach- und
+       Beschriftungsdurchgang vom 30.08.2026. */
+
+    // ── Cardmarket-Wants-Helfer (Befund B) ───────────────────
+    'cmw.title':                '🛒 Cardmarket Wants — Helfer',
+    'cmw.dialogAria':           'Cardmarket-Wunschlisten-Helfer',
+    'cmw.intro':                '<strong>Der Einfüge-Text von Cardmarket legt grundsätzlich nur „beliebige Version" an</strong> — er trifft die Karten-Identität (Name + Attacken), nicht den einzelnen Druck. Wenn du genau den Druck bzw. das Artwork aus deiner Wunschliste willst, nimm Abschnitt 1: jeder Link öffnet die passende Cardmarket-Produktseite, auf der du einmal auf „Add to Wants" klickst.',
+    'cmw.section1':             '1. Direkte Produktlinks —',
+    'cmw.section1Accent':       'genau dieser Druck',
+    'cmw.section1Hint':         'Klick eine Zeile an, um die Produktseite genau dieses Drucks auf Cardmarket zu öffnen. Dort einmal auf „Add to Wants" klicken, dann steht die Karte mit dem richtigen Artwork drin. Ein 🔍 heißt: für diesen Druck haben wir noch keine direkte Adresse — der Klick öffnet dann die Cardmarket-Produktsuche für die Karte.',
+    'cmw.section2':             '2. Einfüge-Text —',
+    'cmw.section2Accent':       'schnell in Menge (beliebige Version)',
+    'cmw.copyPaste':            '📋 Einfüge-Text kopieren',
+    'cmw.openWants':            '↗ Cardmarket Wants öffnen',
+    'cmw.hintEmpty':            'Wunschliste ist leer.',
+    'cmw.hintMissing':          'Pokémon-Attacken werden automatisch angehängt. Für diese Karten liegen noch keine Attacken vor: <strong>{names}</strong> — sie fallen auf den blanken Namen zurück (<code>pokemon_card_text_scraper.py</code> erneut laufen lassen, um die Lücke zu schließen).',
+    'cmw.hintMore':             ', +{n} weitere',
+    'cmw.hintOk':               'Pokémon-Attacken werden automatisch angehängt, damit der Parser jede Karte eindeutig zuordnet. Cardmarket legt sie als „beliebige Version" an — für genau einen Druck siehe Abschnitt 1 oben.',
+    'cmw.listEmpty':            'Setz zuerst Karten auf deine Wunschliste.',
+    'cmw.rowTitle':             'Produktseite genau dieses Drucks auf Cardmarket öffnen',
+    'cmw.rowFallbackTitle':     'Keine direkte Produktadresse hinterlegt — öffnet die Cardmarket-Suche für diese Karte. all_cards_scraper laufen lassen, um einen direkten Link zu bekommen.',
+
+    // ── Battle Journal, Bearbeiten-Dialog (Befund D) ─────────
+    'bj.notesLabel':            'Notizen',
+
+    // ── Seitenleiste der Kartendatenbank (Befund E) ──────────
+    'cdb.copyNames':            'Namen kopieren',
+    'cdb.copyNamesTitle':       'Alle gefilterten Kartennamen in die Zwischenablage kopieren',
+    'cdb.copied':               'Kopiert!',
+    'cdb.copyFailed':           'Kopieren fehlgeschlagen',
+    'cdb.showAll':              'Alle anzeigen',
+    'cdb.showAllTitle':         'Alle Karten auf einmal anzeigen',
+    'cdb.showPaginated':        'Seitenweise',
+    'cdb.showPaginatedTitle':   'Zurück zur seitenweisen Ansicht',
+    'cdb.prev':                 '← Zurück',
+    'cdb.prevAria':             'Vorherige Seite',
+    'cdb.next':                 'Weiter →',
+    'cdb.nextAria':             'Nächste Seite',
+
+    // ── Side-Quest-Kopfbereich (Befund F) ────────────────────
+    'sideQuest.subtitle':       'Aktuelle Top-Doubles-Teams von op.gg / victoryroad — tippe auf einen Replica-Code, um ihn zu kopieren.',
+    'sideQuest.lastUpdated':    'Stand:',
+
+    // ── Bild-Knopf im Deck-Raster (Befund G) ─────────────────
+    'ui.saveDeckGridImage':     '💾 Als Bild speichern',
+
+    // ── Musterkarte der Legende (Befund H) ───────────────────
+    'legend.sampleCardName':    'Karten-Name',
+
+    // ── Telegram-Chat-ID (Befund I) ──────────────────────────
+    'settings.chatIdPlaceholder': 'z. B. 123456789',
+
+    // ── Umschalter der Deck-Übersicht (Befund J) ─────────────
+    'btn.listView':             'Listenansicht',
+
+    // ── Suchzeile im Custom Binder (Befund C) ────────────────
+    'cb.browseAria':            'Alle Archetypen durchsehen',
+
+    // ── showNotification (Befund K) ──────────────────────────
+    'notif.signInFeature':      'Bitte melde dich an, um diese Funktion zu nutzen',
+    'notif.signInSaveDecks':    'Bitte melde dich an, um Decks zu speichern',
+    'notif.signInProfile':      'Bitte melde dich an, um dein Profil zu ändern',
+    'notif.signInFirst':        'Bitte erst einloggen',
+    'notif.maxCopiesPlayset':   'Maximal 4 Kopien pro Karte (Playset)',
+    'notif.maxCopies':          'Maximal 4 Kopien pro Karte',
+    'notif.collectionError':    'Fehler beim Aktualisieren der Sammlung',
+    'notif.collectionAlreadyEmpty': 'Die Sammlung ist bereits leer',
+    'notif.collectionCleared':  'Sammlung wurde geleert',
+    'notif.wishlistAdded':      'Auf die Wunschliste gesetzt ({n}x)',
+    'notif.wishlistError':      'Fehler beim Aktualisieren der Wunschliste',
+    'notif.wishlistCount':      'Wunschliste: {n}x',
+    'notif.wishlistRemoved':    'Von der Wunschliste entfernt',
+    'notif.wishlistEmpty':      'Die Wunschliste ist leer',
+    'notif.wishlistCopied':     'Wunschliste in die Zwischenablage kopiert!',
+    'notif.wishlistCopiedShort':'Wunschliste kopiert!',
+    'notif.invalidDeckSource':  'Ungültige Deck-Quelle',
+    'notif.emptyDeck':          'Ein leeres Deck lässt sich nicht speichern',
+    'notif.deckSavedNamed':     'Deck „{name}" gespeichert!',
+    'notif.deckSaved':          'Deck gespeichert!',
+    'notif.deckUpdated':        'Deck aktualisiert!',
+    'notif.deckDeleted':        'Deck gelöscht',
+    'notif.deckError':          'Fehler beim Aktualisieren des Decks',
+    'notif.noDecksLoaded':      'Keine Decks geladen',
+    'notif.deckNotFound':       'Deck nicht gefunden',
+    'notif.chatIdInvalid':      'Bitte eine gültige Telegram-Chat-ID einfügen (z. B. 123456789). Hol sie dir per /myid beim Bot.',
+    'notif.priceAlertsOn':      '✅ Preisalarme aktiviert',
+    'notif.priceAlertsOff':     '🔕 Preisalarme deaktiviert',
+    'notif.saveFailed':         'Speichern fehlgeschlagen',
+    'notif.enterName':          'Bitte einen Namen eingeben',
+    'notif.nameUpdated':        'Name geändert!',
+    'notif.nameError':          'Fehler beim Ändern des Namens',
+    'notif.imageExportUnavailable': 'Bild-Export nicht verfügbar',
+    'notif.copyFailed':         'Kopieren fehlgeschlagen',
+    'notif.nothingToCopy':      'Nichts zu kopieren',
+    'notif.pasteTextCopied':    'Einfüge-Text kopiert — in die Cardmarket-Wants-Liste einfügen',
+    'notif.folderDeleted':      'Ordner „{name}" gelöscht',
+    'notif.folderDeleteError':  'Fehler beim Löschen des Ordners',
+    'notif.folderExists':       'Diesen Ordner gibt es schon',
+    'notif.folderCreated':      'Ordner „{name}" angelegt. Über den Ordner-Knopf am Deck verschiebst du Decks hinein.',
+    'notif.deckMoved':          'Nach „{name}" verschoben',
+    'notif.deckUnfiled':        'Aus dem Ordner entfernt',
+    'notif.deckMoveError':      'Fehler beim Verschieben des Decks',
+    'notif.tradelistAdded':     'Zur Tauschliste hinzugefügt ({n}x)',
+    'notif.tradelistError':     'Fehler beim Aktualisieren der Tauschliste',
+    'notif.tradelistCount':     'Tauschliste: {n}x',
+    'notif.tradelistRemoved':   'Von der Tauschliste entfernt',
+    'notif.tradelistEmpty':     'Die Tauschliste ist leer',
+    'notif.tradelistCopied':    'Tauschliste in die Zwischenablage kopiert!',
+    'notif.tradelistCopiedShort':'Tauschliste kopiert!',
   }
 };
 

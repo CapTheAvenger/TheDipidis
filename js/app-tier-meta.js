@@ -2267,8 +2267,23 @@
             
             html += '</div>';
             
-            // Prepend hero + tier sections before existing content
-            container.innerHTML = html + container.innerHTML;
+            // Prepend hero + tier sections before existing content.
+            //
+            // Der vorherige Lauf muss vorher raus. Bis zum 30.08.2026 lief
+            // renderCurrentMetaTierList() je Seitenaufruf genau einmal, da
+            // war das gleichgueltig. Seit der Sprachwechsel sie ein zweites
+            // Mal ruft, wuerde das blosse Voranstellen Hero-Bereich und
+            // Tier-Liste zweimal untereinander zeigen — einmal je Sprache
+            // (nachgemessen: 2 x .tier-hero-section, "Top-Archetypen" ueber
+            // "Top Archetypes"). Die erzeugten Knoten werden deshalb
+            // markiert und beim naechsten Lauf zuerst entfernt.
+            // Nicht ':scope >': ds-sections.js sortiert die erzeugten
+            // Bloecke nach dem Einfuegen in .ds-sec-Abschnitte um, sie
+            // stehen danach also nicht mehr direkt unter dem Host.
+            container.querySelectorAll('[data-cm-tier-block="1"]').forEach(el => el.remove());
+            const tierFragment = document.createRange().createContextualFragment(html);
+            Array.from(tierFragment.children).forEach(el => el.setAttribute('data-cm-tier-block', '1'));
+            container.insertBefore(tierFragment, container.firstChild);
 
             // Fill the stacked archetype cards. Deliberately after the
             // innerHTML assignment and deliberately not awaited: the tier
@@ -2782,3 +2797,40 @@ window.filterTierDeckCards = function (term) {
         card.style.display = match ? '' : 'none';
     });
 };
+
+/* Sprachwechsel zeichnet die Tier-Listen neu.
+ *
+ * URSACHE (gemessen 30.08.2026, Reiter "Current Meta (Global)"):
+ * renderCurrentMetaTierList() baut den ganzen Block als HTML-String
+ * zusammen und setzt ihn per innerHTML. switchLanguage() ruft nur
+ * updateTranslationsInDOM(), und das fasst ausschliesslich Elemente mit
+ * data-i18n an — gebautes HTML hat keins. FOLGE: nach dem Umschalten
+ * von Deutsch auf Englisch standen dort weiter
+ *   "Top-Archetypen", "Meistgespielte Deck-Varianten (Global)",
+ *   "6 Varianten", "GEMELDETE LISTEN ... aus 475 Turnieren"
+ * bis der Nutzer den Reiter verliess und neu betrat.
+ *
+ * Nur neu zeichnen, wenn die Ansicht ueberhaupt schon gezeichnet ist —
+ * sonst fuellt ein Sprachwechsel auf einer anderen Seite still einen
+ * verborgenen Reiter. Vorbild: js/app-quellen.js.
+ *
+ * Die City-League-Tier-Liste kommt nur mit, wenn ihre Bild-Zuordnung
+ * schon im Speicher liegt (window.cityLeagueImageMap). Ohne sie wuerde
+ * renderCityLeagueTierList() die 35-MB-Analyse-CSV erneut laden — das
+ * ist einem Sprachklick nicht zumutbar.
+ */
+document.addEventListener('languageChanged', () => {
+    const cmContent = document.getElementById('currentMetaContent');
+    if (cmContent && cmContent.children.length && typeof renderCurrentMetaTierList === 'function') {
+        Promise.resolve()
+            .then(() => renderCurrentMetaTierList())
+            .catch(err => console.warn('[i18n] Current-Meta-Tier-Liste nicht neu gezeichnet:', err));
+    }
+    const clMount = document.getElementById('cityLeagueTierSections');
+    if (clMount && clMount.children.length && window.cityLeagueImageMap
+        && typeof renderCityLeagueTierList === 'function') {
+        Promise.resolve()
+            .then(() => renderCityLeagueTierList(null, window.cityLeagueImageMap))
+            .catch(err => console.warn('[i18n] City-League-Tier-Liste nicht neu gezeichnet:', err));
+    }
+});

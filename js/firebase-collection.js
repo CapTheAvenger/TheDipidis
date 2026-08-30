@@ -237,6 +237,23 @@ window.updateUserDoc = updateUserDoc;
  * Jetzt oeffnet derselbe Klick die Anmeldung. Wer sie wegklickt, ist da,
  * wo er vorher war.
  */
+/* Kurzform von t() mit Rueckfalltext.
+ *
+ * Befund K (30.08.2026): von den fest verdrahteten showNotification-
+ * Texten in dieser Datei standen 31 auf Englisch und 3 auf Deutsch —
+ * derselbe Nutzer bekam je nach Knopf mal "Deck deleted", mal
+ * "Ordner gelöscht". Alle laufen jetzt ueber i18n; der Rueckfalltext
+ * bleibt der bisherige englische Wortlaut, damit ein fehlender
+ * Schluessel nie den Schluesselnamen im Hinweis zeigt.
+ */
+function fcText(key, fallback) {
+  if (typeof t === 'function') {
+    const v = t(key);
+    if (v && v !== key) return v;
+  }
+  return fallback;
+}
+
 function requireSignIn() {
   const user = (typeof auth !== 'undefined' && auth) ? auth.currentUser : null;
   if (user) return true;
@@ -259,7 +276,7 @@ async function addToCollection(cardId) {
 
   const currentCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
   if (currentCount >= 4) {
-    showNotification('Maximum 4 copies per card (playset)', 'info');
+    showNotification(fcText('notif.maxCopiesPlayset', 'Maximum 4 copies per card (playset)'), 'info');
     return;
   }
 
@@ -334,7 +351,7 @@ async function addToCollection(cardId) {
     }
   } catch (error) {
     console.error('Error adding to collection:', error);
-    showNotification('Error updating collection', 'error');
+    showNotification(fcText('notif.collectionError', 'Error updating collection'), 'error');
   }
 }
 
@@ -382,7 +399,7 @@ async function removeFromCollection(cardId) {
     }
   } catch (error) {
     console.error('Error removing from collection:', error);
-    showNotification('Error updating collection', 'error');
+    showNotification(fcText('notif.collectionError', 'Error updating collection'), 'error');
   }
 }
 
@@ -406,7 +423,7 @@ async function addToWishlistWithCount(cardId, count) {
     window.userWishlist.add(cardId);
     if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
     window.userWishlistCounts.set(cardId, qty);
-    showNotification(`Added to wishlist (${qty}x)`, 'success');
+    showNotification(fcText('notif.wishlistAdded', 'Added to wishlist ({n}x)').replace('{n}', qty), 'success');
     if (typeof filterWishlist === 'function') filterWishlist();
     else updateWishlistUI();
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
@@ -416,7 +433,7 @@ async function addToWishlistWithCount(cardId, count) {
     if (typeof refreshCustomBinderOwnership === 'function') refreshCustomBinderOwnership();
   } catch (error) {
     console.error('Error adding to wishlist:', error);
-    showNotification('Error updating wishlist', 'error');
+    showNotification(fcText('notif.wishlistError', 'Error updating wishlist'), 'error');
   }
 }
 
@@ -427,7 +444,7 @@ async function addToWishlist(cardId) {
   
   const currentCount = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 0) : 0;
   if (currentCount >= 4) {
-    showNotification('Maximum 4 copies per card', 'info');
+    showNotification(fcText('notif.maxCopies', 'Maximum 4 copies per card'), 'info');
     return;
   }
 
@@ -443,7 +460,7 @@ async function addToWishlist(cardId) {
     window.userWishlist.add(cardId);
     if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
     window.userWishlistCounts.set(cardId, newCount);
-    showNotification(`Added to wishlist (${newCount}x)`, 'success');
+    showNotification(fcText('notif.wishlistAdded', 'Added to wishlist ({n}x)').replace('{n}', newCount), 'success');
 
     // Update wishlist display — preserve any active search/set filter.
     if (typeof filterWishlist === 'function') filterWishlist();
@@ -455,7 +472,7 @@ async function addToWishlist(cardId) {
     }
   } catch (error) {
     console.error('Error adding to wishlist:', error);
-    showNotification('Error updating wishlist', 'error');
+    showNotification(fcText('notif.wishlistError', 'Error updating wishlist'), 'error');
   }
 }
 
@@ -481,7 +498,9 @@ async function removeFromWishlist(cardId) {
       );
       if (window.userWishlistCounts) window.userWishlistCounts.set(cardId, newCount);
     }
-    showNotification(newCount > 0 ? `Wishlist: ${newCount}x` : 'Removed from wishlist', 'success');
+    showNotification(newCount > 0
+      ? fcText('notif.wishlistCount', 'Wishlist: {n}x').replace('{n}', newCount)
+      : fcText('notif.wishlistRemoved', 'Removed from wishlist'), 'success');
 
     // Update wishlist display — preserve any active search/set filter.
     if (typeof filterWishlist === 'function') filterWishlist();
@@ -513,7 +532,7 @@ async function toggleWishlist(cardId) {
 async function saveCurrentDeckToProfile(source) {
   const user = auth.currentUser;
   if (!user) {
-    showNotification('Please sign in to save decks', 'error');
+    showNotification(fcText('notif.signInSaveDecks', 'Please sign in to save decks'), 'error');
     showAuthModal('signin');
     return;
   }
@@ -530,14 +549,14 @@ async function saveCurrentDeckToProfile(source) {
     deck = window.pastMetaDeck || {};
     archetype = window.pastMetaCurrentArchetype;
   } else {
-    showNotification('Invalid deck source', 'error');
+    showNotification(fcText('notif.invalidDeckSource', 'Invalid deck source'), 'error');
     return;
   }
   
   // Check if deck is empty
   const totalCards = Object.values(deck).reduce((sum, count) => sum + count, 0);
   if (totalCards === 0) {
-    showNotification('Cannot save empty deck', 'error');
+    showNotification(fcText('notif.emptyDeck', 'Cannot save empty deck'), 'error');
     return;
   }
   
@@ -590,7 +609,7 @@ async function saveCurrentDeckToProfile(source) {
   window.userDecks.unshift(deckData);
   if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
 
-  showNotification(`Deck "${trimmedName}" saved successfully!`, 'success');
+  showNotification(fcText('notif.deckSavedNamed', 'Deck "{name}" saved successfully!').replace('{name}', trimmedName), 'success');
   if (typeof updateDecksUI === 'function') updateDecksUI();
 
   // Fire Firestore write fire-and-forget. set() WITHOUT merge to
@@ -626,7 +645,7 @@ async function saveCurrentDeckToProfile(source) {
 async function savePriceAlerts() {
   const user = auth.currentUser;
   if (!user) {
-    showNotification('Bitte erst einloggen', 'error');
+    showNotification(fcText('notif.signInFirst', 'Please log in first'), 'error');
     return;
   }
   const enabledEl   = document.getElementById('settings-price-alerts-enabled');
@@ -637,7 +656,7 @@ async function savePriceAlerts() {
   const thresholdPct = Math.max(0, Math.min(100, parseInt(thresholdEl && thresholdEl.value || '10', 10) || 10));
 
   if (enabled && !/^\d{4,}$/.test(chatIdRaw)) {
-    showNotification('Bitte eine gültige Telegram-Chat-ID einfügen (z. B. 123456789). Hol sie dir per /myid beim Bot.', 'error');
+    showNotification(fcText('notif.chatIdInvalid', 'Please enter a valid Telegram chat ID (e.g. 123456789). Get it by sending /myid to the bot.'), 'error');
     return;
   }
 
@@ -663,10 +682,12 @@ async function savePriceAlerts() {
         tradelistThresholdPct: thresholdPct,
       };
     }
-    showNotification(enabled ? '✅ Preisalarme aktiviert' : '🔕 Preisalarme deaktiviert', 'success');
+    showNotification(enabled
+      ? fcText('notif.priceAlertsOn', '✅ Price alerts enabled')
+      : fcText('notif.priceAlertsOff', '🔕 Price alerts disabled'), 'success');
   } catch (error) {
     console.error('Error saving price alerts:', error);
-    showNotification('Speichern fehlgeschlagen', 'error');
+    showNotification(fcText('notif.saveFailed', 'Saving failed'), 'error');
   }
 }
 
@@ -686,7 +707,7 @@ window.loadPriceAlertsIntoSettings = loadPriceAlertsIntoSettings;
 async function saveDisplayName() {
   const user = auth.currentUser;
   if (!user) {
-    showNotification('Please sign in to update your profile', 'error');
+    showNotification(fcText('notif.signInProfile', 'Please sign in to update your profile'), 'error');
     return;
   }
   
@@ -694,7 +715,7 @@ async function saveDisplayName() {
   const displayName = nameInput.value.trim();
   
   if (!displayName) {
-    showNotification('Please enter a name', 'error');
+    showNotification(fcText('notif.enterName', 'Please enter a name'), 'error');
     return;
   }
   
@@ -716,10 +737,10 @@ async function saveDisplayName() {
       nameEl.textContent = displayName;
     }
     
-    showNotification('Name updated!', 'success');
+    showNotification(fcText('notif.nameUpdated', 'Name updated!'), 'success');
   } catch (error) {
     console.error('Error updating name:', error);
-    showNotification('Error updating name', 'error');
+    showNotification(fcText('notif.nameError', 'Error updating name'), 'error');
   }
 }
 
@@ -743,7 +764,7 @@ async function saveDisplayName() {
 function saveDeck(deckData) {
   const user = auth.currentUser;
   if (!user) {
-    showNotification('Please sign in to save decks', 'error');
+    showNotification(fcText('notif.signInSaveDecks', 'Please sign in to save decks'), 'error');
     return;
   }
 
@@ -769,7 +790,9 @@ function saveDeck(deckData) {
   else window.userDecks.unshift(localCopy);
   if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
 
-  showNotification(isNew ? 'Deck saved!' : 'Deck updated!', 'success');
+  showNotification(isNew
+    ? fcText('notif.deckSaved', 'Deck saved!')
+    : fcText('notif.deckUpdated', 'Deck updated!'), 'success');
   if (typeof updateDecksUI === 'function') updateDecksUI();
 
   // Build the Firestore payload — full state, ready for a non-merging
@@ -809,7 +832,7 @@ function deleteDeck(deckId) {
     if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
   }
 
-  showNotification('Deck deleted', 'success');
+  showNotification(fcText('notif.deckDeleted', 'Deck deleted'), 'success');
   if (typeof updateDecksUI === 'function') updateDecksUI();
 
   // Fire Firestore delete in background.
@@ -823,13 +846,13 @@ function deleteDeck(deckId) {
 // Load deck from profile for comparison (removed old loadDeckFromProfile function)
 async function loadSavedDeckForComparison(deckId) {
   if (!window.userDecks) {
-    showNotification('No decks loaded', 'error');
+    showNotification(fcText('notif.noDecksLoaded', 'No decks loaded'), 'error');
     return null;
   }
   
   const deck = window.userDecks.find(d => d.id === deckId);
   if (!deck) {
-    showNotification('Deck not found', 'error');
+    showNotification(fcText('notif.deckNotFound', 'Deck not found'), 'error');
     return null;
   }
   
@@ -1458,7 +1481,7 @@ async function clearCollection() {
   const user = auth.currentUser;
 
   if (!window.userCollection || window.userCollection.size === 0) {
-    showNotification('Collection is already empty', 'info');
+    showNotification(fcText('notif.collectionAlreadyEmpty', 'Collection is already empty'), 'info');
     return;
   }
 
@@ -1484,7 +1507,7 @@ async function clearCollection() {
       renderCardDatabase(window.filteredCardsData);
     }
 
-    showNotification('Collection wurde geleert', 'success');
+    showNotification(fcText('notif.collectionCleared', 'Collection cleared'), 'success');
   } catch (error) {
     console.error('Error clearing collection:', error);
     showNotification(getLang()==='de' ? 'Fehler beim Leeren der Collection' : 'Error clearing the collection', 'error');
@@ -1874,7 +1897,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
 // Open wishlist as compact grid modal (for screenshot / sharing)
 function openWishlistGridModal() {
   if (!window.userWishlist || window.userWishlist.size === 0) {
-    showNotification('Wishlist is empty', 'info');
+    showNotification(fcText('notif.wishlistEmpty', 'Wishlist is empty'), 'info');
     return;
   }
 
@@ -1930,7 +1953,7 @@ function exportWishlistAsImage() {
   if (typeof exportDeckAsImage === 'function') {
     exportDeckAsImage(grid, 'Wishlist');
   } else {
-    showNotification('Image export not available', 'error');
+    showNotification(fcText('notif.imageExportUnavailable', 'Image export not available'), 'error');
   }
 }
 
@@ -1990,7 +2013,7 @@ async function saveWishlistMaxPrice(cardId, rawValue) {
 // Copy wishlist data to clipboard as text
 function copyWishlistToClipboard() {
   if (!window.userWishlist || window.userWishlist.size === 0) {
-    showNotification('Wishlist is empty', 'info');
+    showNotification(fcText('notif.wishlistEmpty', 'Wishlist is empty'), 'info');
     return;
   }
   const allCards = window.allCardsDatabase || [];
@@ -2018,7 +2041,7 @@ function copyWishlistToClipboard() {
 
   if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
     navigator.clipboard.writeText(text).then(() => {
-      showNotification('Wishlist copied to clipboard!', 'success');
+      showNotification(fcText('notif.wishlistCopied', 'Wishlist copied to clipboard!'), 'success');
     }).catch(() => _fallbackCopyWishlist(text));
   } else {
     _fallbackCopyWishlist(text);
@@ -2031,7 +2054,7 @@ function _fallbackCopyWishlist(text) {
   ta.style.cssText = 'position:fixed;left:-9999px';
   document.body.appendChild(ta);
   ta.select();
-  try { document.execCommand('copy'); showNotification('Wishlist copied!', 'success'); } catch (_) { showNotification('Copy failed', 'error'); }
+  try { document.execCommand('copy'); showNotification(fcText('notif.wishlistCopiedShort', 'Wishlist copied!'), 'success'); } catch (_) { showNotification(fcText('notif.copyFailed', 'Copy failed'), 'error'); }
   document.body.removeChild(ta);
 }
 
@@ -2071,7 +2094,7 @@ function _loadPokemonCardText() {
 
 async function copyWishlistForCardmarket() {
   if (!window.userWishlist || window.userWishlist.size === 0) {
-    showNotification('Wishlist is empty', 'info');
+    showNotification(fcText('notif.wishlistEmpty', 'Wishlist is empty'), 'info');
     return;
   }
   const allCards = window.allCardsDatabase || [];
@@ -2144,14 +2167,19 @@ function _populateCardmarketWishlistModal({ items, pasteText, totalCount, missin
 
   const hint = document.getElementById('cardmarketPasteHint');
   if (hint) {
+    // Befund B (30.08.2026): das ganze Wants-Fenster stand auf Englisch,
+    // auch dieser im Skript erzeugte Hinweis.
     if (totalCount === 0) {
-      hint.textContent = 'Wishlist is empty.';
+      hint.textContent = fcText('cmw.hintEmpty', 'Wishlist is empty.');
     } else if (missingDisambig && missingDisambig.length) {
       const names = missingDisambig.map(c => c.name).slice(0, 4).join(', ');
-      const more = missingDisambig.length > 4 ? `, +${missingDisambig.length - 4} more` : '';
-      hint.innerHTML = `Pokémon attacks attached automatically. No attack data yet for: <strong>${names}${more}</strong> — those will fall back to bare names (re-run <code>pokemon_card_text_scraper.py</code> to fill the gap).`;
+      const more = missingDisambig.length > 4
+        ? fcText('cmw.hintMore', ', +{n} more').replace('{n}', missingDisambig.length - 4)
+        : '';
+      hint.innerHTML = fcText('cmw.hintMissing', 'Pokémon attacks attached automatically. No attack data yet for: <strong>{names}</strong> — those will fall back to bare names (re-run <code>pokemon_card_text_scraper.py</code> to fill the gap).')
+        .replace('{names}', names + more);
     } else {
-      hint.innerHTML = 'Pokémon attacks attached automatically so the parser disambiguates each card. Cardmarket adds them at "any version" — see Section 1 above for exact print.';
+      hint.innerHTML = fcText('cmw.hintOk', 'Pokémon attacks attached automatically so the parser disambiguates each card. Cardmarket adds them at "any version" — see Section 1 above for exact print.');
     }
   }
 
@@ -2165,7 +2193,7 @@ function _populateCardmarketWishlistModal({ items, pasteText, totalCount, missin
   const list = document.getElementById('cardmarketLinkList');
   if (list) {
     if (items.length === 0) {
-      list.innerHTML = '<div class="cm-link-empty">Add cards to your wishlist first.</div>';
+      list.innerHTML = `<div class="cm-link-empty">${fcText('cmw.listEmpty', 'Add cards to your wishlist first.')}</div>`;
     } else {
       list.innerHTML = items.map(({ count, name, set, number, url }) => {
         const setLabel = set ? `${set}${number ? ' ' + number : ''}` : '';
@@ -2174,8 +2202,8 @@ function _populateCardmarketWishlistModal({ items, pasteText, totalCount, missin
         const targetUrl = url || _buildCardmarketSearchUrl(name, set, number);
         const arrow = isFallback ? '🔍' : '↗';
         const tooltip = isFallback
-          ? 'No direct product URL stored — opens Cardmarket search for this card. Run all_cards_scraper to get a direct link.'
-          : 'Open the exact-print product page on Cardmarket';
+          ? fcText('cmw.rowFallbackTitle', 'No direct product URL stored — opens Cardmarket search for this card. Run all_cards_scraper to get a direct link.')
+          : fcText('cmw.rowTitle', 'Open the exact-print product page on Cardmarket');
         return `<a class="cm-link-row${isFallback ? ' cm-link-row-fallback' : ''}" href="${targetUrl}" target="_blank" rel="noopener noreferrer" title="${tooltip}">
           <span class="cm-link-count">${count}x</span>
           <span class="cm-link-name">${safeName}</span>
@@ -2196,11 +2224,11 @@ function _buildCardmarketSearchUrl(name, set, number) {
 function copyCardmarketPasteText() {
   const ta = document.getElementById('cardmarketPasteTextarea');
   if (!ta || !ta.value) {
-    showNotification('Nothing to copy', 'info');
+    showNotification(fcText('notif.nothingToCopy', 'Nothing to copy'), 'info');
     return;
   }
   const text = ta.value;
-  const onOk = () => showNotification('Paste-text copied — paste into Cardmarket Wants list', 'success');
+  const onOk = () => showNotification(fcText('notif.pasteTextCopied', 'Paste-text copied — paste into Cardmarket Wants list'), 'success');
   if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
     navigator.clipboard.writeText(text).then(onOk).catch(() => _fallbackCopyWishlist(text));
   } else {
@@ -2982,7 +3010,7 @@ async function myDeckAddCard(deckIndex, cardName, setCode, setNumber) {
     }, 100);
   } catch (error) {
     console.error('Error adding card:', error);
-    showNotification('Error updating deck', 'error');
+    showNotification(fcText('notif.deckError', 'Error updating deck'), 'error');
   }
 }
 
@@ -3120,7 +3148,7 @@ async function myDeckTechAdd(deckIndex, cardName, setCode, setNumber) {
     _refreshDeckUiKeepOpen(deckIndex, true);
   } catch (e) {
     console.error('myDeckTechAdd', e);
-    showNotification('Error updating deck', 'error');
+    showNotification(fcText('notif.deckError', 'Error updating deck'), 'error');
   }
 }
 
@@ -3972,13 +4000,13 @@ async function deleteDeckFolder(folderName) {
       window.deckFolders = window.deckFolders.filter(f => f !== folderName);
     }
 
-    showNotification(`Ordner "${folderName}" gelöscht`, 'success');
+    showNotification(fcText('notif.folderDeleted', 'Folder "{name}" deleted').replace('{name}', folderName), 'success');
     filterDecksByFolder('');
     renderFolderNav();
     updateDecksUI();
   } catch (error) {
     console.error('Error deleting deck folder:', error);
-    showNotification('Fehler beim Löschen des Ordners', 'error');
+    showNotification(fcText('notif.folderDeleteError', 'Error deleting the folder'), 'error');
   }
 }
 
@@ -4016,11 +4044,11 @@ async function createDeckFolder() {
   const trimmed = name.trim();
   const existing = getDeckFolders();
   if (existing.includes(trimmed)) {
-    showNotification('Folder already exists', 'error');
+    showNotification(fcText('notif.folderExists', 'Folder already exists'), 'error');
     return;
   }
   await persistDeckFolderName(trimmed);
-  showNotification(`Folder "${trimmed}" created. Use the Folder button on a deck to move it.`, 'success');
+  showNotification(fcText('notif.folderCreated', 'Folder "{name}" created. Use the Folder button on a deck to move it.').replace('{name}', trimmed), 'success');
   renderFolderNav();
 }
 
@@ -4044,12 +4072,14 @@ async function moveDeckToFolder(deckIndex) {
       .update({ folder: folder, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     
     deck.folder = folder;
-    showNotification(folder ? `Moved to "${folder}"` : 'Removed from folder', 'success');
+    showNotification(folder
+      ? fcText('notif.deckMoved', 'Moved to "{name}"').replace('{name}', folder)
+      : fcText('notif.deckUnfiled', 'Removed from folder'), 'success');
     updateDecksUI();
     renderFolderNav();
   } catch (error) {
     console.error('Error moving deck to folder:', error);
-    showNotification('Error moving deck', 'error');
+    showNotification(fcText('notif.deckMoveError', 'Error moving deck'), 'error');
   }
 }
 
@@ -5788,13 +5818,13 @@ async function addToTradelistWithCount(cardId, count) {
     window.userTradelist.add(cardId);
     if (!window.userTradelistCounts) window.userTradelistCounts = new Map();
     window.userTradelistCounts.set(cardId, qty);
-    showNotification(`Added to trade list (${qty}x)`, 'success');
+    showNotification(fcText('notif.tradelistAdded', 'Added to trade list ({n}x)').replace('{n}', qty), 'success');
     updateTradelistUI();
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData)
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, tradelistUpdate: true });
   } catch (error) {
     console.error('Error adding to tradelist:', error);
-    showNotification('Error updating trade list', 'error');
+    showNotification(fcText('notif.tradelistError', 'Error updating trade list'), 'error');
   }
 }
 
@@ -5803,7 +5833,7 @@ async function addToTradelist(cardId) {
   const user = auth.currentUser;
   if (!requireSignIn()) return;
   const currentCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 0) : 0;
-  if (currentCount >= 4) { showNotification('Maximum 4 copies per card', 'info'); return; }
+  if (currentCount >= 4) { showNotification(fcText('notif.maxCopies', 'Maximum 4 copies per card'), 'info'); return; }
   const newCount = currentCount + 1;
   try {
     // Single atomic write — see addToTradelistWithCount.
@@ -5815,13 +5845,13 @@ async function addToTradelist(cardId) {
     window.userTradelist.add(cardId);
     if (!window.userTradelistCounts) window.userTradelistCounts = new Map();
     window.userTradelistCounts.set(cardId, newCount);
-    showNotification(`Added to trade list (${newCount}x)`, 'success');
+    showNotification(fcText('notif.tradelistAdded', 'Added to trade list ({n}x)').replace('{n}', newCount), 'success');
     updateTradelistUI();
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData)
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, tradelistUpdate: true });
   } catch (error) {
     console.error('Error adding to tradelist:', error);
-    showNotification('Error updating trade list', 'error');
+    showNotification(fcText('notif.tradelistError', 'Error updating trade list'), 'error');
   }
 }
 
@@ -5847,7 +5877,9 @@ async function removeFromTradelist(cardId) {
       );
       if (window.userTradelistCounts) window.userTradelistCounts.set(cardId, newCount);
     }
-    showNotification(newCount > 0 ? `Trade list: ${newCount}x` : 'Removed from trade list', 'success');
+    showNotification(newCount > 0
+      ? fcText('notif.tradelistCount', 'Trade list: {n}x').replace('{n}', newCount)
+      : fcText('notif.tradelistRemoved', 'Removed from trade list'), 'success');
     updateTradelistUI();
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData)
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, tradelistUpdate: true });
@@ -6054,7 +6086,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
 // Grid modal for tradelist
 function openTradelistGridModal() {
   if (!window.userTradelist || window.userTradelist.size === 0) {
-    showNotification('Trade list is empty', 'info');
+    showNotification(fcText('notif.tradelistEmpty', 'Trade list is empty'), 'info');
     return;
   }
   const modal = document.getElementById('tradelistGridModal');
@@ -6098,7 +6130,7 @@ function exportTradelistAsImage() {
   if (typeof exportDeckAsImage === 'function') {
     exportDeckAsImage(grid, 'Trade List');
   } else {
-    showNotification('Image export not available', 'error');
+    showNotification(fcText('notif.imageExportUnavailable', 'Image export not available'), 'error');
   }
 }
 
@@ -6137,7 +6169,7 @@ async function saveTradelistMinPrice(cardId, rawValue) {
 // Copy tradelist to clipboard
 function copyTradelistToClipboard() {
   if (!window.userTradelist || window.userTradelist.size === 0) {
-    showNotification('Trade list is empty', 'info');
+    showNotification(fcText('notif.tradelistEmpty', 'Trade list is empty'), 'info');
     return;
   }
   const allCards = window.allCardsDatabase || [];
@@ -6162,7 +6194,7 @@ function copyTradelistToClipboard() {
   const text = `Trade List (${window.userTradelist.size} cards):\n${lines.join('\n')}${totalStr}`;
   if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
     navigator.clipboard.writeText(text).then(() => {
-      showNotification('Trade list copied to clipboard!', 'success');
+      showNotification(fcText('notif.tradelistCopied', 'Trade list copied to clipboard!'), 'success');
     }).catch(() => _fallbackCopyTradelist(text));
   } else {
     _fallbackCopyTradelist(text);
@@ -6175,7 +6207,7 @@ function _fallbackCopyTradelist(text) {
   ta.style.cssText = 'position:fixed;left:-9999px';
   document.body.appendChild(ta);
   ta.select();
-  try { document.execCommand('copy'); showNotification('Trade list copied!', 'success'); } catch (_) { showNotification('Copy failed', 'error'); }
+  try { document.execCommand('copy'); showNotification(fcText('notif.tradelistCopiedShort', 'Trade list copied!'), 'success'); } catch (_) { showNotification(fcText('notif.copyFailed', 'Copy failed'), 'error'); }
   document.body.removeChild(ta);
 }
 

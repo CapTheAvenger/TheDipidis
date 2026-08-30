@@ -1170,6 +1170,22 @@
             renderBattleJournalSummary();
             updateThemeVisual();
             renderDeckChoices();
+            // Das OFFENE Matchup-Fenster fehlte hier bis zum 30.08.2026.
+            // populateMatchupFilters() und renderMatchupAnalysis() werden
+            // sonst nur von openMatchupAnalysisModal() gerufen. FOLGE: wer
+            // die Sprache bei geoeffneter Matchup-Analyse umschaltete, sah
+            // Auswahllisten und Tabelle weiter in der alten Sprache, bis er
+            // das Fenster schloss und neu oeffnete. Nur wenn es wirklich
+            // offen ist — sonst zeichnen wir in ein verborgenes Fenster.
+            const maModal = document.getElementById('matchupAnalysisModal');
+            if (maModal && maModal.style.display === 'flex') {
+                try {
+                    populateMatchupFilters();
+                    renderMatchupAnalysis();
+                } catch (err) {
+                    console.warn('[i18n] Matchup-Analyse nicht neu gezeichnet:', err);
+                }
+            }
         });
 
         window.addEventListener('online', () => {

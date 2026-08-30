@@ -785,7 +785,7 @@
                 pastMetaCurrentCards = [];
                 pastMetaFilteredCards = [];
                 pastMetaCurrentScope = null;
-                resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 Cards', '/ 0 Total');
+                resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
                 renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
                 return;
             }
@@ -956,7 +956,7 @@
             if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
                 document.getElementById('pastMetaDeckTableView').classList.add('d-none');
                 document.getElementById('pastMetaDeckVisual').classList.add('d-none');
-                resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 Cards', '/ 0 Total');
+                resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
                 const gridContainer = document.getElementById('pastMetaDeckGrid');
                 if (gridContainer) {
                     const selectedArchetype = String(document.getElementById('pastMetaDeckSelect')?.value || '').trim();
@@ -983,8 +983,11 @@
             
             // Update counts
             const totalCards = getPastMetaSummaryTotalCount(sortedCards);
-            document.getElementById('pastMetaCardCount').textContent = `${sortedCards.length} Cards`;
-            document.getElementById('pastMetaCardCountSummary').textContent = `/ ${Math.round(totalCards)} Total`;
+            // Befund J (30.08.2026): "Cards" und "Total" standen fest auf
+            // Englisch, waehrend die City-League-Ansicht an derselben
+            // Stelle bereits "33 Karten / 60 Gesamt" schreibt.
+            document.getElementById('pastMetaCardCount').textContent = `${sortedCards.length} ${t('cl.cards')}`;
+            document.getElementById('pastMetaCardCountSummary').textContent = `/ ${Math.round(totalCards)} ${t('cl.total')}`;
             
             // Render based on view mode
             if (pastMetaShowGridView) {
@@ -1325,14 +1328,23 @@
                 const cardSet = card.getAttribute('data-card-set') || '';
                 const cardNumber = card.getAttribute('data-card-number') || '';
 
-                // Check search term filter (name, set+number)
+                // Check search term filter (name, set+number, Pokedex)
                 const setNumSpace = `${cardSet} ${cardNumber}`;
                 const setNumCombined = `${cardSet}${cardNumber}`;
+                // Befund N (30.08.2026): hier fehlte der Pokedex-Zweig ganz,
+                // waehrend das Suchfeld daneben Pokedex verspricht. Die
+                // Kachel kennt nur ihren Namen, also faellt der Helfer auf
+                // window.pokedexNumbers zurueck.
+                const dexNum = (typeof window.cardPokedexSearchValue === 'function')
+                    ? window.cardPokedexSearchValue({ name: cardName })
+                    : '';
                 const matchesSearch = searchTerm === '' ||
                     cardName.includes(searchTerm) ||
                     cardNameDe.includes(searchTerm) ||
                     setNumSpace.includes(searchTerm) ||
-                    setNumCombined.includes(searchTerm);
+                    setNumCombined.includes(searchTerm) ||
+                    (dexNum !== '' && dexNum === searchTerm) ||
+                    (searchTerm.length >= 3 && dexNum !== '' && dexNum.includes(searchTerm));
 
                 const matchesType = pastMetaOverviewCardTypeFilter === 'all' || cardType === pastMetaOverviewCardTypeFilter
                     || (pastMetaOverviewCardTypeFilter === 'Energy' && cardType === 'Basic Energy');
@@ -1349,7 +1361,8 @@
             // Update card count
             const countElement = document.getElementById('pastMetaCardCount');
             if (countElement) {
-                countElement.textContent = `${visibleCount} Cards`;
+                // Befund J (30.08.2026): "Cards" fest verdrahtet.
+                countElement.textContent = `${visibleCount} ${t('cl.cards')}`;
             }
         }
         
@@ -1402,9 +1415,11 @@
             pastMetaShowGridView = !pastMetaShowGridView;
             
             if (pastMetaShowGridView) {
-                if (button) button.textContent = 'List View';
+                // Befund J (30.08.2026): der Umschalter beschriftete sich
+                // in beiden Sprachen englisch.
+                if (button) button.textContent = t('btn.listView');
             } else {
-                if (button) button.textContent = 'Grid View';
+                if (button) button.textContent = t('btn.gridView');
             }
             
             // Re-render with new view

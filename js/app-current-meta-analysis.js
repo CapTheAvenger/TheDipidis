@@ -1081,6 +1081,44 @@
         }
 
         // Format filter functions
+        /* Die Zeile "Aktiver Filter: Alle Turniere".
+         *
+         * Stand bis zum 30.08.2026 nur in setCurrentMetaFormatFilter() und
+         * wurde daher ausschliesslich beim Klick auf einen Filterknopf
+         * geschrieben. FOLGE (gemessen 30.08.2026): nach einem
+         * Sprachwechsel blieb sie in der alten Sprache stehen, bis der
+         * Nutzer den Filter noch einmal anfasste. Als eigene Funktion kann
+         * der languageChanged-Listener am Dateiende sie nachziehen.
+         */
+        /* Merkzettel fuer den Vorbehalt "Alle zeigt dasselbe wie Limitless".
+           Enthaelt den Formatschluessel, solange der Vorbehalt gilt, sonst
+           null. Als Zustand statt als fertiger Satz, damit der
+           Sprachwechsel ihn in der neuen Sprache neu formulieren kann. */
+        let _cmAlleWieLiveFormat = null;
+
+        function updateCurrentMetaFilterStatusLabel(format) {
+            const statusEl = document.getElementById('currentMetaFilterStatus');
+            if (!statusEl) return;
+            const labels = {
+                'all': typeof t === 'function' ? t('currentMeta.allTournaments') : 'All Tournaments',
+                'live': typeof t === 'function' ? t('currentMeta.limitlessOnly') : 'Limitless Decks Only',
+                'play': typeof t === 'function' ? t('currentMeta.majorOnly') : 'Major Tournament Decks Only'
+            };
+            if (!labels[format]) return;
+            if (format === 'all' && _cmAlleWieLiveFormat) {
+                const hinweis = (typeof t === 'function' ? t('currentMeta.alleWieLive') : '')
+                    .replace('{format}', _cmAlleWieLiveFormat);
+                if (hinweis) {
+                    statusEl.textContent = hinweis;
+                    statusEl.classList.add('cm-filter-status-vorbehalt');
+                    return;
+                }
+            }
+            statusEl.classList.remove('cm-filter-status-vorbehalt');
+            const filterLabel = typeof t === 'function' ? t('currentMeta.activeFilter') : 'Active filter:';
+            statusEl.textContent = `${filterLabel} ${labels[format]}`;
+        }
+
         async function setCurrentMetaFormatFilter(format) {
             currentMetaFormatFilter = format;
             devLog('[Current Meta] Format filter set to:', format);
@@ -1104,17 +1142,10 @@
                 btn.title = '';
             });
             
-            // Update status text
+            // Update status text. Der Vorbehalt-Zweig weiter unten ruft
+            // dieselbe Funktion noch einmal, sobald er weiss, ob er gilt.
             const statusEl = document.getElementById('currentMetaFilterStatus');
-            if (statusEl) {
-                const labels = {
-                    'all': typeof t === 'function' ? t('currentMeta.allTournaments') : 'All Tournaments',
-                    'live': typeof t === 'function' ? t('currentMeta.limitlessOnly') : 'Limitless Decks Only',
-                    'play': typeof t === 'function' ? t('currentMeta.majorOnly') : 'Major Tournament Decks Only'
-                };
-                const filterLabel = typeof t === 'function' ? t('currentMeta.activeFilter') : 'Active filter:';
-                statusEl.textContent = `${filterLabel} ${labels[format]}`;
-            }
+            updateCurrentMetaFilterStatusLabel(format);
             
             // Refresh dropdown list to show only archetypes matching the filter
             const currentMetaDeckSelect = document.getElementById('currentMetaDeckSelect');
@@ -1158,20 +1189,18 @@
             if (format === 'all') {
                 const grund = await _cmMajorLeerGrund();
                 if (grund.grund === 'kein-major-im-format') {
-                    const format_ = await _cmFormatSchluessel();
-                    const hinweis = (typeof t === 'function'
-                        ? t('currentMeta.alleWieLive') : '')
-                        .replace('{format}', format_ || '?');
-                    if (statusEl && hinweis) {
-                        statusEl.textContent = hinweis;
-                        statusEl.classList.add('cm-filter-status-vorbehalt');
-                    }
-                } else if (statusEl) {
-                    statusEl.classList.remove('cm-filter-status-vorbehalt');
+                    // Nur das Format merken, den Satz baut
+                    // updateCurrentMetaFilterStatusLabel() — sonst koennte
+                    // der Sprachwechsel den Vorbehalt nicht mitnehmen und
+                    // wuerde ihn beim Nachziehen wegschreiben.
+                    _cmAlleWieLiveFormat = (await _cmFormatSchluessel()) || '?';
+                } else {
+                    _cmAlleWieLiveFormat = null;
                 }
-            } else if (statusEl) {
-                statusEl.classList.remove('cm-filter-status-vorbehalt');
+            } else {
+                _cmAlleWieLiveFormat = null;
             }
+            updateCurrentMetaFilterStatusLabel(format);
 
             // Respect value already set by populateCurrentMetaDeckSelect (pending selection)
             const currentValue = currentMetaDeckSelect ? currentMetaDeckSelect.value : '';
@@ -1888,7 +1917,7 @@
                 if (el) el.classList.add('d-none');
             });
             renderNoDeckSelectedState('currentMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
-            resetDeckOverviewCounts('currentMetaCardCount', 'currentMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 Total');
+            resetDeckOverviewCounts('currentMetaCardCount', 'currentMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
         }
         
         // Render "Used in Top 256" breakdown per major tournament for
@@ -3179,8 +3208,12 @@
             const countEl = document.getElementById('currentMetaCardCount');
             const summaryEl = document.getElementById('currentMetaCardCountSummary');
             
-            if (countEl) countEl.textContent = `${uniqueCount} ${t('deck.cards')}`;
-            if (summaryEl) summaryEl.textContent = `/ ${filteredTotal} Total`;
+            // Befund J (30.08.2026): der Nenner stand fest auf "Total",
+            // waehrend die City-League-Ansicht daneben schon t('cl.total')
+            // benutzt und "60 Gesamt" schreibt. Gleiche Zahl, gleiche
+            // Stelle, zwei Sprachen.
+            if (countEl) countEl.textContent = `${uniqueCount} ${t('cl.cards')}`;
+            if (summaryEl) summaryEl.textContent = `/ ${filteredTotal} ${t('cl.total')}`;
         }
         
         // Set overview rarity mode
@@ -3878,14 +3911,23 @@
                 const cardSet = card.getAttribute('data-card-set') || '';
                 const cardNumber = card.getAttribute('data-card-number') || '';
 
-                // Check search term filter (name, set+number)
+                // Check search term filter (name, set+number, Pokedex)
                 const setNumSpace = `${cardSet} ${cardNumber}`;
                 const setNumCombined = `${cardSet}${cardNumber}`;
+                // Befund N (30.08.2026): hier fehlte der Pokedex-Zweig ganz,
+                // waehrend das Suchfeld daneben Pokedex verspricht. Die
+                // Kachel kennt nur ihren Namen, also faellt der Helfer auf
+                // window.pokedexNumbers zurueck.
+                const dexNum = (typeof window.cardPokedexSearchValue === 'function')
+                    ? window.cardPokedexSearchValue({ name: cardName })
+                    : '';
                 const matchesSearch = searchTerm === '' ||
                     cardName.includes(searchTerm) ||
                     cardNameDe.includes(searchTerm) ||
                     setNumSpace.includes(searchTerm) ||
-                    setNumCombined.includes(searchTerm);
+                    setNumCombined.includes(searchTerm) ||
+                    (dexNum !== '' && dexNum === searchTerm) ||
+                    (searchTerm.length >= 3 && dexNum !== '' && dexNum.includes(searchTerm));
 
                 const matchesType = currentMetaOverviewCardTypeFilter === 'all' || cardType === currentMetaOverviewCardTypeFilter
                     || (currentMetaOverviewCardTypeFilter === 'Energy' && cardType === 'Basic Energy');
@@ -3902,7 +3944,8 @@
             // Update card count
             const countElement = document.getElementById('currentMetaCardCount');
             if (countElement) {
-                countElement.textContent = `${visibleCount} Cards`;
+                // Befund J (30.08.2026): "Cards" fest verdrahtet.
+                countElement.textContent = `${visibleCount} ${t('cl.cards')}`;
             }
         }
         
@@ -3920,7 +3963,7 @@
             
             const cards = window.currentCurrentMetaDeckCards;
             if (!cards || cards.length === 0) {
-                showToast('Please select a deck first!', 'warning');
+                showToast(t('cl.selectDeckFirst'), 'warning');
                 return;
             }
             
@@ -3928,10 +3971,12 @@
             
             if (isGridViewActive) {
                 gridViewContainer.classList.add('d-none');
-                if (button) button.textContent = 'Grid View';
+                // Befund J (30.08.2026): der Umschalter beschriftete sich
+                // in beiden Sprachen englisch.
+                if (button) button.textContent = t('btn.gridView');
             } else {
                 tableViewContainer.classList.add('d-none');
-                if (button) button.textContent = 'List View';
+                if (button) button.textContent = t('btn.listView');
             }
             
             // Re-apply filter to preserve percentage filter and render correct view
@@ -3948,7 +3993,7 @@
             const allCardsFromDb = window.allCardsDatabase || [];
             
             if (!hasDeck && allCards.length === 0) {
-                showToast('No cards to copy! Please select an archetype first.', 'warning');
+                showToast(t('cl.noCopyCards'), 'warning');
                 return;
             }
             
@@ -4081,7 +4126,7 @@
             if (energy.length > 0) output += `Energy: ${energyCount}\n` + energy.join('\n');
             
             navigator.clipboard.writeText(output).then(() => {
-                showToast('Deck copied to clipboard!', 'success');
+                showToast(t('cl.deckCopied'), 'success');
             }).catch(err => {
                 console.error('Error copying:', err);
                 showToast('Error copying to clipboard!', 'error');
@@ -4095,3 +4140,34 @@
                 filterSelect.onchange = applyCurrentMetaFilter;
             }
         });
+/* Sprachwechsel zieht die Filterzeile der Deck-Analyse (Global) nach.
+ *
+ * URSACHE (gemessen 30.08.2026): "Aktiver Filter: Alle Turniere" wird im
+ * Skript gesetzt, traegt also kein data-i18n und wird von
+ * updateTranslationsInDOM() nicht erreicht. FOLGE: nach dem Umschalten
+ * auf Englisch stand die deutsche Zeile weiter da.
+ *
+ * Nur nachziehen, wenn die Zeile ueberhaupt schon etwas sagt — sonst
+ * schriebe ein Sprachwechsel auf einer anderen Seite Text in einen
+ * verborgenen Reiter. Vorbild: js/app-quellen.js.
+ */
+document.addEventListener('languageChanged', () => {
+    const statusEl = document.getElementById('currentMetaFilterStatus');
+    if (statusEl && statusEl.textContent.trim()
+        && typeof updateCurrentMetaFilterStatusLabel === 'function') {
+        updateCurrentMetaFilterStatusLabel(currentMetaFormatFilter);
+    }
+    // Auch "44 Karten / 60 Gesamt" und die Kartenliste kommen aus dem
+    // Skript. Ohne das hier stand nach dem Umschalten weiter "44 Karten"
+    // in einer englischen Oberflaeche. Nur wenn ueberhaupt ein Deck
+    // geladen ist — applyCurrentMetaFilter() steigt sonst selbst aus.
+    if (Array.isArray(window.currentCurrentMetaDeckCards)
+        && window.currentCurrentMetaDeckCards.length
+        && typeof applyCurrentMetaFilter === 'function') {
+        try {
+            applyCurrentMetaFilter();
+        } catch (err) {
+            console.warn('[i18n] Deck-Analyse (Global) nicht neu gezeichnet:', err);
+        }
+    }
+});

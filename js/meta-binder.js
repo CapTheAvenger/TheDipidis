@@ -2411,6 +2411,32 @@
         });
     }
 
+    /* Sprachwechsel zeichnet den Meta Binder neu.
+     *
+     * URSACHE (gemessen 30.08.2026): renderMetaBinder() baut Kennzahlen-
+     * leiste, Filterzeile und Kartenraster als HTML-String zusammen.
+     * switchLanguage() ruft nur updateTranslationsInDOM(), und das
+     * erreicht ausschliesslich Elemente mit data-i18n — gebautes Markup
+     * hat keins. FOLGE: nach dem Umschalten blieben Beschriftungen wie
+     * "Neu seit letztem Generate" oder "Fehlend (Karten / Kopien)" in
+     * der alten Sprache stehen, bis der Nutzer neu generierte.
+     *
+     * Nur neu zeichnen, wenn das Raster ueberhaupt schon gefuellt ist —
+     * sonst baut ein Sprachwechsel auf einer anderen Seite still Inhalt
+     * in einen verborgenen Reiter. Vorbild: js/app-quellen.js.
+     */
+    document.addEventListener('languageChanged', function () {
+        var grid = document.getElementById('metaBinderGrid');
+        if (!grid || !grid.children.length) return;
+        var delta = window._metaBinderDelta;
+        if (!delta || !Array.isArray(delta.cards)) return;
+        try {
+            renderMetaBinder(delta);
+        } catch (err) {
+            console.warn('[i18n] Meta Binder nicht neu gezeichnet:', err);
+        }
+    });
+
     window.buildMetaBinder = buildMetaBinderWithChunkWatch;
     window.loadSavedMetaBinder = loadSavedMetaBinder;
     window.refreshMetaBinderOwnership = refreshMetaBinderOwnership;

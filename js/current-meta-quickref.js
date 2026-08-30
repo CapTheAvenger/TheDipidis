@@ -500,7 +500,14 @@
     return (typeof t === 'function') ? (t(key) || fallback) : fallback;
   }
 
+  /* Der zuletzt gezeichnete Archetyp.
+     Nur dafuer da, dass der Sprachwechsel unten dieselben zwei Panels
+     noch einmal zeichnen kann — er bekommt sonst keinen Archetypen
+     gereicht. */
+  let _quickRefLastArchetype = null;
+
   async function renderQuickRefPanels(archetype) {
+    _quickRefLastArchetype = archetype || null;
     const section    = document.getElementById('currentMetaQuickRefSection');
     const majorBody  = document.getElementById('currentMetaQuickRefMajorBody');
     const onlineBody = document.getElementById('currentMetaQuickRefOnlineBody');
@@ -821,6 +828,30 @@
       modal.classList.add('d-none');
       modal.style.display = 'none';
     }
+  }
+
+  /* Sprachwechsel zeichnet die Schnellreferenz neu.
+   *
+   * URSACHE (gemessen 30.08.2026): renderQuickRefPanels() setzt beide
+   * Panels per innerHTML zusammen — Ueberschriften, "Loading…",
+   * Platzhaltertexte und Kartenzeilen tragen kein data-i18n und werden
+   * von updateTranslationsInDOM() nicht erreicht. FOLGE: nach dem
+   * Umschalten blieben sie in der alten Sprache stehen, bis der Nutzer
+   * einen anderen Archetypen waehlte.
+   *
+   * Nur neu zeichnen, wenn die Panels ueberhaupt schon sichtbar sind —
+   * sonst faellt ein Sprachwechsel auf einer anderen Seite in einen
+   * verborgenen Reiter. Vorbild: js/app-quellen.js.
+   */
+  if (typeof document !== 'undefined') {
+    document.addEventListener('languageChanged', function () {
+      const section = document.getElementById('currentMetaQuickRefSection');
+      if (!section || section.classList.contains('d-none')) return;
+      if (!_quickRefLastArchetype) return;
+      Promise.resolve()
+        .then(() => renderQuickRefPanels(_quickRefLastArchetype))
+        .catch(err => console.warn('[i18n] Schnellreferenz nicht neu gezeichnet:', err));
+    });
   }
 
   // ── Exports ──────────────────────────────────────────────────────

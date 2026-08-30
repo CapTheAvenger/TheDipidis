@@ -1780,6 +1780,32 @@ window.TestingGroups = (function () {
     window.addEventListener('hashchange', handleHashInvite);
   }
 
+  /* Sprachwechsel zeichnet die Testgruppen neu.
+   *
+   * URSACHE (gemessen 30.08.2026): dieses Modul hatte GAR KEINEN
+   * languageChanged-Listener. renderAll() baut Liste und Gruppendetail
+   * per innerHTML zusammen, alle Beschriftungen kommen aus t() zum
+   * Zeitpunkt des Zeichnens und tragen kein data-i18n. FOLGE: ein
+   * offenes Gruppendetail (_renderGroupDetail) blieb nach dem
+   * Umschalten vollstaendig in der alten Sprache stehen, bis der
+   * Nutzer die Gruppe schloss und wieder oeffnete.
+   *
+   * Nur neu zeichnen, wenn der Bereich ueberhaupt schon gezeichnet ist —
+   * sonst fuellt ein Sprachwechsel auf einer anderen Seite still einen
+   * verborgenen Reiter. Vorbild: js/app-quellen.js.
+   */
+  if (typeof document !== 'undefined') {
+    document.addEventListener('languageChanged', function () {
+      const container = document.getElementById('profile-testinggroups');
+      if (!container || !container.children.length) return;
+      try {
+        renderAll();
+      } catch (err) {
+        console.warn('[i18n] Testgruppen nicht neu gezeichnet:', err);
+      }
+    });
+  }
+
   return {
     init,
     loadMyGroups,

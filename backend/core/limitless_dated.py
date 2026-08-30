@@ -18,6 +18,10 @@ import os
 import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
+try:  # als Paket (backend.core) ...
+    from .ace_spec_regel import entscheide_zeile, lade_ace_liste
+except ImportError:  # ... oder als Einzelmodul, wie die Scraper es laden
+    from ace_spec_regel import entscheide_zeile, lade_ace_liste
 
 try:
     from zoneinfo import ZoneInfo  # Python 3.9+
@@ -355,7 +359,12 @@ def aggregate_tournament_archetype(
             "rarity": rarity,
             "type": type_,
             "image_url": image_url,
-            "is_ace_spec": "",
+            # Drei Werte, jeder mit Beleg — siehe
+            # backend/core/ace_spec_regel.py. Frueher stand hier fest "";
+            # type_ und max_count liegen aber vor, und damit ist ein Teil
+            # der Zeilen belegbar statt unbekannt.
+            "is_ace_spec": entscheide_zeile(
+                name, lade_ace_liste(), agg["max_count"], type_),
             "total_players": int(total_players or 0),
         })
     return out

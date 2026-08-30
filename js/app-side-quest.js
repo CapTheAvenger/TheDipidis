@@ -916,7 +916,8 @@
             btn.classList.add('is-copied');
             const label = btn.querySelector('.side-quest-copy-label');
             const prev  = label ? label.textContent : '';
-            if (label) label.textContent = 'Copied!';
+            // Befund C (30.08.2026): festes 'Copied!'.
+            if (label) label.textContent = t('cdb.copied');
             setTimeout(() => {
                 btn.classList.remove('is-copied');
                 if (label) label.textContent = prev || 'Replica';
@@ -1396,7 +1397,8 @@
         // Only show the loading hint on the first build — re-renders
         // after a mark click run off the cached data and shouldn't
         // flash "Loading…".
-        if (status && !_loaded) status.textContent = 'Loading…';
+        // Befund C (30.08.2026): festes 'Loading…'.
+        if (status && !_loaded) status.textContent = t('sideQuest.loading');
         const [data] = await Promise.all([loadData(), loadStrategies(), loadDeNames()]);
         const meta  = data._meta || {};
         const teams = Array.isArray(data.teams) ? data.teams : [];

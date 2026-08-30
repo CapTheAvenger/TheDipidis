@@ -43,7 +43,9 @@
                 } else {
                     const option = document.createElement('option');
                     option.value = '';
-                    option.textContent = '-- No saved decks available --';
+                    // Befund C (30.08.2026): feste englische Leerzeile im
+                    // Auswahlfeld des Deck-Vergleichs.
+                    option.textContent = t('deckCompare.noSavedDecks');
                     option.disabled = true;
                     savedDeckSelect.appendChild(option);
                 }

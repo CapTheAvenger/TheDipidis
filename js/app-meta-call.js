@@ -8353,7 +8353,7 @@ window.MetaCall = (function () {
              onchange="MetaCall._onToggleSource('clCurrent', this.checked)">
       <span class="mc-source-label">
         <strong>${t('mc.sourceCurrentCityLeague')}</strong>
-        <span class="mc-source-meta">${hasCurrent ? curCount + ' archetypes' : 'no data'}</span>
+        <span class="mc-source-meta">${_quellenAnzahlText(hasCurrent, curCount)}</span>
       </span>
     </label>
     <label class="mc-source-toggle">
@@ -8361,11 +8361,21 @@ window.MetaCall = (function () {
              onchange="MetaCall._onToggleSource('clPast', this.checked)">
       <span class="mc-source-label">
         <strong>${t('mc.sourcePastCityLeague')}</strong>
-        <span class="mc-source-meta">${hasPast ? pastCount + ' archetypes' : 'no data'}</span>
+        <span class="mc-source-meta">${_quellenAnzahlText(hasPast, pastCount)}</span>
       </span>
     </label>
   </div>
 </div>`;
+  }
+
+  /* Befund C (30.08.2026): hier standen `curCount + ' archetypes'` und
+   * 'no data' als feste englische Literale. Das waren die einzigen zwei
+   * Stellen der Liste, die im Regelbetrieb sichtbar waren — mit
+   * Bildschirmfoto belegt: in den Datenquellen-Kaesten stand auf
+   * Deutsch "11 archetypes" und "no data". */
+  function _quellenAnzahlText(hatDaten, anzahl) {
+    if (!hatDaten) return esc(t('mc.sourceNoData'));
+    return esc(String(t('mc.sourceArchetypes')).replace('{n}', anzahl));
   }
 
   function _renderFlatDeckRow(deck, maxShare) {
@@ -11716,9 +11726,42 @@ window.MetaCall = (function () {
   // alte Container lag hinter der Anmeldung, obwohl dieses Modul in
   // 10.839 Zeilen keinen einzigen Treffer fuer currentUser,
   // getCurrentUser oder window.auth hat.
+  /* Sprachwechsel: die Registrierung MUSS vor jedem Ruecksprung stehen.
+   *
+   * URSACHE (gemessen 30.08.2026): die Registrierung stand am ENDE von
+   * init(), also hinter `if (_shareList && _matchupMap) { renderAll();
+   * return; }`. Beim ersten Betreten haengt init() am `await loadData()`
+   * und kehrt erst nach dem Netz zurueck; bei jedem weiteren Betreten
+   * greift der Ruecksprung und die Zeile darunter wird nie erreicht.
+   * Eine Instrumentierung von document.addEventListener zaehlte NULL
+   * Registrierungen aus dieser Datei.
+   * FOLGE: nach dem Umschalten von Deutsch auf Englisch blieben in
+   * diesem Reiter 311 Textzeilen deutsch stehen (gemessen gegen einen
+   * frischen EN-Ladevorgang derselben Ansicht) — der schlimmste Fall
+   * der ganzen Seite.
+   *
+   * Genau EINMAL registrieren: init() laeuft bei jedem Reiterwechsel
+   * erneut, und n Registrierungen bedeuten n renderAll() pro Klick.
+   * Nur neu zeichnen, wenn die Ansicht schon gezeichnet ist — sonst
+   * fuellt ein Sprachwechsel auf einer anderen Seite still einen
+   * verborgenen Reiter. Vorbild: js/app-quellen.js.
+   */
+  let _sprachListenerAktiv = false;
+  function _sprachListenerRegistrieren() {
+    if (_sprachListenerAktiv) return;
+    _sprachListenerAktiv = true;
+    document.addEventListener('languageChanged', () => {
+      const host = document.getElementById('metaCallHost');
+      if (!host || !host.children.length) return;
+      if (!_shareList) return;
+      renderAll();
+    });
+  }
+
   async function init() {
     const container = document.getElementById('metaCallHost');
     if (!container) return;
+    _sprachListenerRegistrieren();
     if (_shareList && _matchupMap) { renderAll(); return; }
 
     container.innerHTML = `
@@ -11735,11 +11778,6 @@ window.MetaCall = (function () {
       return;
     }
     renderAll();
-
-    // Re-render when language is switched while MetaCall is open
-    document.addEventListener('languageChanged', () => {
-      if (_shareList) renderAll();
-    }, { once: false });
   }
 
   // Click-handler for a Recommendations row → jumps to the global

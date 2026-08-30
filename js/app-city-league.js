@@ -2016,6 +2016,20 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             return select.value;
         }
 
+        // Zuletzt ermittelte Datumsspanne der geladenen Zeilen, roh und
+        // ohne Beschriftung (siehe _updateCityLeagueDateRangeHints).
+        let _clDatumsSpanneText = '';
+
+        // Beschriftet die beiden "Verfuegbar: ..."-Hinweise neu, ohne die
+        // Datenzeilen erneut zu lesen. Wird vom Sprachwechsel gerufen.
+        function _relabelCityLeagueDateRangeHints() {
+            if (!_clDatumsSpanneText) return;
+            const label = (typeof t === 'function' ? t('filter.availableRange') : 'Available')
+                + `: ${_clDatumsSpanneText}`;
+            document.querySelectorAll('.cl-date-range-hint')
+                .forEach(el => { el.textContent = label; });
+        }
+
         // Update the From/To date inputs with min+max attributes derived
         // from the loaded data, plus a "Available: …" hint below each
         // input so the user knows what range is on file before picking.
@@ -2057,6 +2071,15 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 return m ? `${parseInt(m[3], 10)}.${parseInt(m[2], 10)}.${m[1]}` : iso;
             };
             const rangeText = `${fmt(minISO)} – ${fmt(maxISO)}`;
+            // Befund A4 (30.08.2026): die beiden Hinweise wurden einmal
+            // gesetzt und danach nie wieder angefasst. FOLGE: nach dem
+            // Umschalten von Deutsch auf Englisch stand unter beiden
+            // Datumsfeldern weiter "Verfuegbar: 6.6.2026 - 6.6.2026"
+            // (2 von 4 gemessenen veralteten Zeilen dieses Reiters).
+            // Die Spanne selbst ist sprachunabhaengig — sie wird hier
+            // gemerkt, damit der Sprachwechsel unten nur noch das Wort
+            // davor tauschen muss und nicht erneut alle Zeilen liest.
+            _clDatumsSpanneText = rangeText;
             const ensureHint = (input, text) => {
                 let hint = input.nextElementSibling;
                 if (!hint || !hint.classList || !hint.classList.contains('cl-date-range-hint')) {
@@ -2653,7 +2676,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
 
                     const statusEl = document.getElementById('cityLeagueDateFilterStatus');
                     if (statusEl) {
-                        statusEl.textContent = 'Date filter active, but card data has no tournament dates. Re-run City League Analysis scraper and regenerate city_league_analysis.csv.';
+                        // Befund C (30.08.2026): englischer Scraper-Hinweis
+                        // mitten im deutschen Nutzertext.
+                        statusEl.textContent = t('cl.dateFilterNoDates');
                         statusEl.classList.add('color-red-light');
                     }
                     return;
@@ -2777,9 +2802,14 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 cityLeagueStatAvgPlacement: avgPlacement !== '-' ? avgPlacement : '-'
             }, 'cityLeagueStatsSection');
             
-            // Reset button text to show list view option
+            // Befund B (30.08.2026): hier wurde die englische Zeichenkette
+            // fuer die Listenansicht fest in den Knopf geschrieben —
+            // auch wenn die Seite deutsch war. Das war
+            // die gemessene STARTbeschriftung dieses Reiters. Der Helfer
+            // setzt den Zustand (nach dem Neuaufbau steht das Raster) und
+            // beschriftet in der aktiven Sprache.
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
-            gridButtons.forEach(btn => btn.textContent = 'List View');
+            gridButtons.forEach(btn => window.ansichtsUmschalterBeschriften(btn, 'grid'));
             
             // Apply current filter (this renders the grid - do not call renderCityLeagueDeckGrid separately)
             applyCityLeagueFilter();
@@ -2795,9 +2825,10 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             });
             resetDeckOverviewCounts('cityLeagueCardCount', 'cityLeagueCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
             
-            // Reset button text
+            // Wie oben: fester englischer Wortlaut ersetzt (Befund B,
+            // 30.08.2026). Nach dem Leeren steht wieder das Raster.
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
-            gridButtons.forEach(btn => btn.textContent = 'List View');
+            gridButtons.forEach(btn => window.ansichtsUmschalterBeschriften(btn, 'grid'));
         }
         
         function normalizeSetCode(rawSetCode) {
@@ -3776,14 +3807,27 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 const cardSet = card.getAttribute('data-card-set') || '';
                 const cardNumber = card.getAttribute('data-card-number') || '';
 
-                // Check search term filter (name, set+number)
+                // Check search term filter (name, set+number, Pokedex)
                 const setNumSpace = `${cardSet} ${cardNumber}`;
                 const setNumCombined = `${cardSet}${cardNumber}`;
+                // Befund D (30.08.2026): dieser Filter hatte den
+                // Pokedex-Zweig GAR NICHT, obwohl der Platzhalter darueber
+                // "Name (EN/DE), Set+Nr. oder Pokedex suchen…" verspricht.
+                // Gemessen: die drei Nachbarsuchen fanden ueber die
+                // Pokedex-Nummer, diese hier 0 Treffer. Die Kachel kennt
+                // nur ihren Namen, also faellt der gemeinsame Helfer auf
+                // window.pokedexNumbers zurueck (1064 Eintraege) — die
+                // CSV-Spalte pokedex_number ist in allen 20.878 Zeilen leer.
+                const dexNum = (typeof window.cardPokedexSearchValue === 'function')
+                    ? window.cardPokedexSearchValue({ name: cardName })
+                    : '';
                 const matchesSearch = searchTerm === '' ||
                     cardName.includes(searchTerm) ||
                     cardNameDe.includes(searchTerm) ||
                     setNumSpace.includes(searchTerm) ||
-                    setNumCombined.includes(searchTerm);
+                    setNumCombined.includes(searchTerm) ||
+                    (dexNum !== '' && dexNum === searchTerm) ||
+                    (searchTerm.length >= 3 && dexNum !== '' && dexNum.includes(searchTerm));
 
                 const matchesType = overviewCardTypeFilter === 'all' || cardType === overviewCardTypeFilter
                     || (overviewCardTypeFilter === 'Energy' && cardType === 'Basic Energy');
@@ -3801,6 +3845,14 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             const countElement = document.getElementById('cityLeagueCardCount');
             if (countElement) {
                 countElement.textContent = `${visibleCount} ${t('cl.cards')}`;
+            }
+
+            // Befund E (30.08.2026): die Abschnittskoepfe zeigten weiter
+            // die ungefilterten Zahlen und blieben bei 0 Treffern stehen;
+            // gemeldet wurde die leere Suche nirgends. Melden, nicht
+            // verschweigen.
+            if (typeof window.uebersichtSuchergebnisMelden === 'function') {
+                window.uebersichtSuchergebnisMelden(gridContainer, visibleCount);
             }
         }
         
@@ -3908,8 +3960,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             const gridViewContainer = document.getElementById('cityLeagueDeckVisual');
             const tableViewContainer = document.getElementById('cityLeagueDeckTableView');
             // Get button from DOM instead of event
+            // Alle Umschalter dieser Ansicht, nicht nur der erste: die
+            // Beschriftung darf nicht auseinanderlaufen.
             const gridButtons = document.querySelectorAll('button[onclick*="toggleDeckGridView"]');
-            const button = gridButtons[0];
             
             if (!gridViewContainer || !tableViewContainer) {
                 console.warn('[WARN] Grid or table container not found');
@@ -3931,12 +3984,15 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 // Befund J (30.08.2026): der Umschalter beschriftete sich
                 // in beiden Sprachen englisch — die Schluessel gab es
                 // laengst, sie wurden nur nicht benutzt.
-                if (button) button.textContent = t('btn.gridView');
+                // Befund B (30.08.2026): der Zustand wird jetzt am Knopf
+                // vermerkt, damit ein spaeterer Sprachwechsel ihn nicht
+                // mit dem statischen data-i18n-Wert ueberschreibt.
+                gridButtons.forEach(b => window.ansichtsUmschalterBeschriften(b, 'list'));
             } else {
                 // Switch back to grid view
                 tableViewContainer.classList.add('d-none');
                 gridViewContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
-                if (button) button.textContent = t('btn.listView');
+                gridButtons.forEach(b => window.ansichtsUmschalterBeschriften(b, 'grid'));
             }
             
             // Re-apply filter to preserve percentage filter and render correct view
@@ -4482,6 +4538,20 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
 
         // ── i18n: re-render on language change ──────────────────
         document.addEventListener('languageChanged', () => {
+            // Befund A4 (30.08.2026): diese drei Zeilen haengen NICHT an
+            // window.cityLeagueLoaded. Der Datumshinweis und die beiden
+            // Zaehler stehen auch dann schon da, wenn nur die Analyse
+            // geladen ist — und blieben deshalb deutsch stehen.
+            _relabelCityLeagueDateRangeHints();
+            // Steht die Deck-Ansicht auf "nichts gewaehlt", tragen die
+            // beiden Zaehler den Text aus clearCityLeagueDeckView(); der
+            // wird sonst nie wieder angefasst ("0 Karten" / "/ 0 Gesamt").
+            const statsSec = document.getElementById('cityLeagueStatsSection');
+            if (statsSec && statsSec.classList.contains('d-none')
+                && typeof resetDeckOverviewCounts === 'function') {
+                resetDeckOverviewCounts('cityLeagueCardCount', 'cityLeagueCardCountSummary',
+                    '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
+            }
             if (window.cityLeagueLoaded) {
                 // Re-render the comparison tables if data is available
                 if (window.cityLeagueSortedData) {

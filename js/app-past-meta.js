@@ -1042,7 +1042,9 @@
             const gridContainer = document.getElementById('pastMetaDeckGrid');
             
             if (cards.length === 0) {
-                gridContainer.innerHTML = '<p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">No cards found</p>';
+                // Befund C (30.08.2026): festes 'No cards found'.
+                gridContainer.innerHTML = '<p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">'
+                    + escapeHtml(t('cl.noCardsFound')) + '</p>';
                 return;
             }
             
@@ -1364,6 +1366,14 @@
                 // Befund J (30.08.2026): "Cards" fest verdrahtet.
                 countElement.textContent = `${visibleCount} ${t('cl.cards')}`;
             }
+
+            // Befund E (30.08.2026): die Abschnittskoepfe zeigten weiter
+            // die ungefilterten Zahlen und blieben bei 0 Treffern stehen;
+            // gemeldet wurde die leere Suche nirgends. Melden, nicht
+            // verschweigen.
+            if (typeof window.uebersichtSuchergebnisMelden === 'function') {
+                window.uebersichtSuchergebnisMelden(gridContainer, visibleCount);
+            }
         }
         
         function setPastMetaRarityMode(mode) {
@@ -1399,7 +1409,6 @@
             const gridViewContainer = document.getElementById('pastMetaDeckVisual');
             const tableViewContainer = document.getElementById('pastMetaDeckTableView');
             const gridButtons = document.querySelectorAll('button[onclick*="togglePastMetaDeckGridView"]');
-            const button = gridButtons[0];
             
             if (!gridViewContainer || !tableViewContainer) {
                 console.warn('[WARN] Grid or table container not found');
@@ -1414,13 +1423,13 @@
             // Toggle between views
             pastMetaShowGridView = !pastMetaShowGridView;
             
-            if (pastMetaShowGridView) {
-                // Befund J (30.08.2026): der Umschalter beschriftete sich
-                // in beiden Sprachen englisch.
-                if (button) button.textContent = t('btn.listView');
-            } else {
-                if (button) button.textContent = t('btn.gridView');
-            }
+            // Befund J (30.08.2026): der Umschalter beschriftete sich in
+            // beiden Sprachen englisch. Befund B (30.08.2026): der Zustand
+            // wird am Knopf vermerkt, damit ein spaeterer Sprachwechsel
+            // die Beschriftung nicht auf den statischen data-i18n-Wert
+            // zurueckwirft.
+            gridButtons.forEach(b => window.ansichtsUmschalterBeschriften(
+                b, pastMetaShowGridView ? 'grid' : 'list'));
             
             // Re-render with new view
             renderPastMetaCards();

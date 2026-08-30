@@ -42,17 +42,63 @@ def _lies(pfad):
 
 @pytest.fixture(scope="module")
 def eingaben():
-    """Alle Dateinamen, die prepare_card_data.py aus data_dir liest."""
+    """Alle Dateinamen, die prepare_card_data.py aus data_dir LIEST.
+
+    NACHGESCHAERFT (30.08.2026). Die Erkennung verlangte vorher, dass
+    der Pfad direkt in `load_csv(os.path.join(data_dir, '...'))` oder
+    `load_json(...)` steht. Damit sah sie 2 von 5 echten Eingaben:
+    price_data.csv, pokemonproxies_url_map.json und
+    pokemon_dex_numbers.json werden ueber eine Zwischenvariable und ein
+    blankes `open()` gelesen und fielen durch.
+
+    Das war teuer: `pokemon_dex_numbers.json` wurde nirgends geseedet,
+    `load_pokedex()` gab still {} zurueck, und `pokedex_number` stand in
+    20.878 von 20.878 Kartenzeilen leer — die Pokedex-Suche im Frontend
+    lieferte nie einen Treffer. Der Waechter hier war dafuer gebaut und
+    hat es nicht gesehen.
+
+    Jetzt wird jeder data_dir-Pfad erfasst und danach entschieden, ob er
+    gelesen oder geschrieben wird. Eine neue Eingabe faellt damit
+    automatisch auf, egal mit welchem Leser sie geholt wird.
+    """
     quelle = _lies(os.path.join("backend", "core", "prepare_card_data.py"))
-    treffer = set(re.findall(r"os\.path\.join\(\s*data_dir\s*,\s*'([^']+)'", quelle))
-    treffer |= set(re.findall(r'os\.path\.join\(\s*data_dir\s*,\s*"([^"]+)"', quelle))
-    # Ausgaben interessieren hier nicht — nur, was gelesen wird.
-    gelesen = {n for n in treffer
-               if re.search(r"load_csv\(os\.path\.join\(data_dir, '" + re.escape(n) + r"'\)",
-                            quelle)
-               or re.search(r"load_json\(os\.path\.join\(data_dir, '" + re.escape(n) + r"'\)",
-                            quelle)}
-    assert gelesen, f"keine Eingaben erkannt (gefunden: {sorted(treffer)})"
+
+    # Jeder os.path.join(data_dir, '<datei>') — samt der Variable, der er
+    # zugewiesen wird (falls es eine gibt).
+    muster = re.compile(
+        r"(?:(\w+)\s*=\s*)?os\.path\.join\(\s*data_dir\s*,\s*['\"]([^'\"]+)['\"]\s*\)")
+    kandidaten = {}          # datei -> variablenname oder None
+    for m in muster.finditer(quelle):
+        kandidaten.setdefault(m.group(2), m.group(1))
+
+    assert kandidaten, "keine data_dir-Pfade erkannt — die Erkennung greift nicht"
+
+    def wird_geschrieben(datei, var):
+        # Ein Ausgabepfad landet in open(..., 'w') oder in einem Writer.
+        if var:
+            if re.search(r"open\(\s*" + re.escape(var) + r"\s*,\s*['\"][wa]", quelle):
+                return True
+        return bool(re.search(
+            r"open\(\s*os\.path\.join\(\s*data_dir\s*,\s*['\"]"
+            + re.escape(datei) + r"['\"]\s*\)\s*,\s*['\"][wa]", quelle))
+
+    def wird_gelesen(datei, var):
+        if re.search(r"load_(?:csv|json)\(\s*os\.path\.join\(\s*data_dir\s*,\s*"
+                     r"['\"]" + re.escape(datei) + r"['\"]", quelle):
+            return True
+        if not var:
+            return False
+        # open(var) ohne Modus ist Lesen; os.path.exists/isfile davor auch.
+        return bool(re.search(r"open\(\s*" + re.escape(var) + r"\s*[,)]", quelle)
+                    or re.search(r"load_(?:csv|json)\(\s*" + re.escape(var) + r"\s*\)", quelle))
+
+    gelesen = {d for d, v in kandidaten.items()
+               if wird_gelesen(d, v) and not wird_geschrieben(d, v)}
+    assert len(gelesen) >= 4, (
+        f"nur {len(gelesen)} Eingaben erkannt ({sorted(gelesen)}) — die "
+        f"Erkennung greift nicht mehr, und dann winkt dieser Waechter alles "
+        f"durch. Kandidaten waren: {sorted(kandidaten)}"
+    )
     return gelesen
 
 
@@ -71,6 +117,12 @@ def _seed_liste(workflow: str) -> set:
 @pytest.mark.parametrize("workflow,beschreibung", list(WORKFLOWS.items()))
 def test_der_seed_enthaelt_jede_eingabe(workflow, beschreibung, eingaben):
     geseedet = _seed_liste(workflow)
+    # KEINE Ausnahme fuer "liegt doch im Repo unter data/". Ich hatte am
+    # 30.08.2026 eine eingebaut und damit den Waechter entschaerft: die
+    # Gegenprobe (pokemonproxies_url_map.json aus dem Seed streichen) lief
+    # danach gruen durch, obwohl der Lauf die Datei nicht mehr bekommen
+    # haette. Ob eine Datei im Repo liegt, sagt nichts darueber, ob der
+    # Leser sie DORT sucht — prepare_card_data.py liest sie aus data_dir.
     fehlend = sorted(eingaben - geseedet)
     assert not fehlend, (
         f"{beschreibung} ({workflow}) kopiert diese Eingaben von "

@@ -45,10 +45,30 @@ def _kanonisch():
 
 # ── Die Daten ──────────────────────────────────────────────────────
 
+# Namen, die die Referenzliste nicht kennt und die wir NICHT korrigieren.
+#
+# Die Serebii-Liste hinkt neuen Gegenstaenden zwangslaeufig hinterher,
+# und die Quelle liefert gelegentlich Muell. Eine harte Schwelle waere
+# hier Rauschen (Projektregel: Aenderung gegen eine Grundlinie erkennen,
+# nicht absolute Schwellen setzen) — deshalb steht hier eine Grundlinie:
+# was schon bekannt ist, ist geduldet, alles NEUE faellt auf.
+#
+# Geraten wird nichts. Der Scraper laesst diese Namen unveraendert
+# stehen und meldet sie (repariere_itemnamen), und das Modal zeigt, was
+# die Quelle sagt.
+#
+#   WUE — 30.08.2026, eelektross/doubles, 1,1 %. Drei Grossbuchstaben,
+#         kein Gegenstand dieses Namens existiert. Sieht nach einem
+#         abgeschnittenen Eintrag der Quelle aus. Nicht korrigierbar:
+#         ohne Leerzeichen ergibt sich kein Treffer in der Liste, also
+#         waere jede Zuordnung geraten.
+GEDULDET_UNBEKANNT = {"WUE"}
+
+
 def test_jeder_gehaltene_gegenstand_steht_in_der_referenzliste():
     """Ein Name, den die Referenzliste nicht kennt, ist entweder neu
     (dann gehoert die Liste nachgezogen) oder zerschnitten."""
-    erlaubt = set(_kanonisch())
+    erlaubt = set(_kanonisch()) | GEDULDET_UNBEKANNT
     usage = _lade("champions_usage.json")
     pk = usage.get("pokemon") or usage
     unbekannt = {}
@@ -61,8 +81,12 @@ def test_jeder_gehaltene_gegenstand_steht_in_der_referenzliste():
                 if n and n not in erlaubt:
                     unbekannt.setdefault(n, []).append(f"{slug}/{fmt}")
     assert not unbekannt, (
-        "Gegenstaende ausserhalb der Referenzliste — vermutlich wieder "
-        f"zerschnitten: { {k: v[:2] for k, v in unbekannt.items()} }"
+        "NEUE Gegenstaende ausserhalb der Referenzliste: "
+        f"{ {k: v[:2] for k, v in unbekannt.items()} }. "
+        "Entweder ist die Serebii-Liste veraltet (dann nachziehen) oder die "
+        "Quelle liefert einen zerschnittenen Namen (dann greift die Reparatur "
+        "in scrape_champions_usage.py). Ist beides ausgeschlossen, gehoert der "
+        "Name mit Begruendung in GEDULDET_UNBEKANNT — nicht stillschweigend."
     )
 
 
@@ -156,3 +180,30 @@ def test_die_referenzliste_ist_ohne_leerzeichen_eindeutig():
             doppelt.append((gesehen[k], n))
         gesehen[k] = n
     assert not doppelt, f"nicht mehr eindeutig: {doppelt}"
+
+
+def test_die_grundlinie_bleibt_klein():
+    """Eine Duldungsliste, die waechst, ist keine Grundlinie mehr.
+
+    Steht hier eines Tages ein Dutzend Namen, ist nicht die Quelle
+    kaputt, sondern unsere Referenzliste veraltet — und dann gehoert
+    sie nachgezogen, statt die Ausnahmen weiterzuzaehlen."""
+    assert len(GEDULDET_UNBEKANNT) <= 3, (
+        f"{len(GEDULDET_UNBEKANNT)} geduldete Unbekannte — "
+        f"data/champions_available_items.json gehoert aktualisiert: "
+        f"{sorted(GEDULDET_UNBEKANNT)}"
+    )
+
+
+def test_kein_geduldeter_name_ist_in_wahrheit_reparierbar():
+    """Die Duldung darf keine Reparatur ersetzen.
+
+    Waere ein geduldeter Name ohne Leerzeichen doch ein Treffer in der
+    Referenzliste, waere er kein Raetsel, sondern genau der Fehler, den
+    diese Datei behandelt — und dann gehoerte er repariert."""
+    ohne = {n.replace(" ", "").lower() for n in _kanonisch()}
+    reparierbar = [n for n in GEDULDET_UNBEKANNT
+                   if n.replace(" ", "").lower() in ohne]
+    assert not reparierbar, (
+        f"geduldet, obwohl reparierbar: {reparierbar}"
+    )

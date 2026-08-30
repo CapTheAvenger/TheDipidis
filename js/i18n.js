@@ -87,43 +87,31 @@ const translations = {
 
     // ── Meta & Deck Analysis Hub ─────────────────────────────
     'metaHub.title':                            'Meta & Deck Analysis',
-    'metaHub.subtitle':                         'Pick a category to dive into the data — from Japan’s weekly meta to global online tournaments.',
+    'metaHub.subtitle':                         'Japan, Global, Past — meta and decks for each. Plus the forecast.',
     'metaHub.backToOverview':                   '← Home',
     'metaHub.tile.cityLeague.title':            'City League Meta',
     'metaHub.tile.cityLeague.bullets':          [
-        'Live meta share from Japan’s weekly cardshop tournaments',
-        'Tier shifts and momentum, week over week',
-        'Earliest leading indicator before international Majors'
+        'What Japan is playing right now — the earliest signal.'
     ],
     'metaHub.tile.cityLeagueAnalysis.title':    'Deck Analysis (Japan)',
     'metaHub.tile.cityLeagueAnalysis.bullets':  [
-        'Deep-dive into individual decks from the City League scene',
-        'Card distributions, common stock lists and tech picks',
-        'Matchup win rates pulled from Japanese tournaments'
+        'One Japanese deck from the inside: cards, shares, matchups.'
     ],
     'metaHub.tile.currentMeta.title':           'Current Meta (Global)',
     'metaHub.tile.currentMeta.bullets':         [
-        'Online tournament data from play.limitlesstcg.com',
-        'Top-8 / Top-16 conversion rates per deck',
-        'Global view that’s closer to the EU/US competitive scene'
+        'What is played online and at majors.'
     ],
     'metaHub.tile.currentMetaAnalysis.title':   'Deck Analysis (Global)',
     'metaHub.tile.currentMetaAnalysis.bullets': [
-        'Deep-dive into globally played online decks',
-        'Card lists, opening-hand stats and win rates',
-        'Detail view for players competing internationally'
+        'One global deck from the inside: cards, shares, matchups.'
     ],
     'metaHub.tile.pastMeta.title':              'Past Meta',
     'metaHub.tile.pastMeta.bullets':            [
-        'Historical Major data (Regionals, Internationals, Worlds)',
-        'Results from previous Standard formats',
-        'Learn from history to sharpen future meta calls'
+        'Completed formats, frozen — for comparison.'
     ],
     'metaHub.tile.metaCall.title':              'Meta Call',
     'metaHub.tile.metaCall.bullets':            [
-        'Predict the meta share for your next tournament',
-        'Blend your own estimates with the online data',
-        'Expected encounters per round, with matchup overview'
+        'What will be at your next tournament.'
     ],
     'legend.title':                             'Legend',
     'legend.summary':                           'Legend',
@@ -2396,43 +2384,31 @@ const translations = {
 
     // ── Meta & Deck Analysis Hub ─────────────────────────────
     'metaHub.title':                            'Meta & Deck-Analyse',
-    'metaHub.subtitle':                         'Wähle eine Kategorie, um in die Daten einzutauchen — von Japans wöchentlichem Meta bis zu globalen Online-Turnieren.',
+    'metaHub.subtitle':                         'Japan, Global, Vergangen — je Meta und Deck. Dazu die Prognose.',
     'metaHub.backToOverview':                   '← Startseite',
     'metaHub.tile.cityLeague.title':            'City League Meta',
     'metaHub.tile.cityLeague.bullets':          [
-        'Aktuelle Meta-Verteilung aus japanischen Cardshop-Turnieren',
-        'Wöchentliche Trends und Tier-Bewegungen',
-        'Schnellster Frühindikator vor internationalen Major-Turnieren'
+        'Was in Japan gerade gespielt wird — der früheste Indikator.'
     ],
     'metaHub.tile.cityLeagueAnalysis.title':    'Deck-Analyse (Japan)',
     'metaHub.tile.cityLeagueAnalysis.bullets':  [
-        'Tiefenanalyse einzelner Decks aus der City League',
-        'Karten-Verteilung, Standard-Listen und häufige Tech-Picks',
-        'Win Rates je Matchup aus japanischen Turnieren'
+        'Ein japanisches Deck von innen: Karten, Anteile, Matchups.'
     ],
     'metaHub.tile.currentMeta.title':           'Aktuelles Meta (Global)',
     'metaHub.tile.currentMeta.bullets':         [
-        'Online-Turnier-Auswertung von play.limitlesstcg.com',
-        'Top-8 / Top-16-Conversion pro Deck',
-        'Globale Sicht, näher am EU/US-Wettbewerbsumfeld'
+        'Was online und auf Majors gespielt wird.'
     ],
     'metaHub.tile.currentMetaAnalysis.title':   'Deck-Analyse (Global)',
     'metaHub.tile.currentMetaAnalysis.bullets': [
-        'Tiefenanalyse globaler Online-Decks',
-        'Karten-Listen, Hand-Stats und Win Rates',
-        'Detail-Sicht für Spieler, die international antreten'
+        'Ein globales Deck von innen: Karten, Anteile, Matchups.'
     ],
     'metaHub.tile.pastMeta.title':              'Vergangenes Meta',
     'metaHub.tile.pastMeta.bullets':            [
-        'Historische Major-Turnier-Daten (Regionals, IC, Worlds)',
-        'Ergebnisse vergangener Standard-Formate',
-        'Lerne aus der Geschichte für zukünftige Meta-Calls'
+        'Abgeschlossene Formate, eingefroren — zum Vergleichen.'
     ],
     'metaHub.tile.metaCall.title':              'Meta Call',
     'metaHub.tile.metaCall.bullets':            [
-        'Vorhersage der Meta-Verteilung für dein nächstes Turnier',
-        'Eigene Schätzungen mit Online-Daten kombinieren',
-        'Erwartete Begegnungen pro Runde inkl. Matchup-Übersicht'
+        'Was auf deinem nächsten Turnier stehen wird.'
     ],
     'legend.title':                             'Legende',
     'legend.summary':                           'Legende',

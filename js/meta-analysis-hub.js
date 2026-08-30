@@ -163,9 +163,21 @@
         // EINE Herleitung der Headline-Quote. Die Kachel liest sie unten aus
         // demselben `ordered[0]`, der Satz aus headlineConvPct — beide also
         // aus derselben Zahl statt aus zwei Rechenwegen.
-        const headlineConvPct = ordered.length && ordered[0].role === 'best'
-            ? ordered[0].convPct
-            : (headline ? (headline.top8 / headline.brought) * 100 : 0);
+        /* BEFUND (Schlussabnahme 30.08.2026): der Satz zeigte
+           "72 von 708 Antritten kamen in die Top 8, das sind 10,1 %".
+           72/708 sind 10,17 % — gerundet 10,2. Die 10,1 kam nicht aus
+           den beiden Zahlen davor, sondern aus der CSV-Spalte
+           top8_conv_rate, die ungewichtet zaehlt, waehrend "72 von 708"
+           die gewichteten Werte sind. Zwei Rechenwege in einem Satz,
+           und der Leser kann ihn nicht nachrechnen.
+           Die Quote kommt jetzt aus genau den Zahlen, die daneben
+           stehen. */
+        const headlineConvPct = headline && headline.brought > 0
+            ? (headline.top8 / headline.brought) * 100
+            : 0;
+        if (ordered.length && ordered[0].role === 'best') {
+            ordered[0] = Object.assign({}, ordered[0], { convPct: headlineConvPct });
+        }
 
         return { conv, top: ordered.slice(0, 3), headline, totalBrought, headlineConvPct };
     }
@@ -179,7 +191,21 @@
         if (!best) return '';
         const de = isDe();
         const loc = de ? 'de-DE' : 'en-US';
-        const zahl = (v) => Math.round(v).toLocaleString(loc);
+        /* BEFUND (Schlussabnahme 30.08.2026): der Satz las sich
+           "72 von 708 Antritten kamen in die Top 8, das sind 10,1 %".
+           72/708 sind 10,2 — der Leser rechnet nach und findet einen
+           Fehler, den es nicht gibt. In der Datei stehen 71,5 von 708:
+           Antritte sind turniergewichtet, halbe Werte sind normal.
+           Math.round hat die 71,5 zu 72 gemacht und damit eine Zahl
+           gedruckt, aus der die Prozentangabe nicht folgt.
+           Dieselbe Regel wie im Rest des Hauses (Gruppe 6, 20.08.2026):
+           eine Nachkommastelle, wo der Wert keine ganze Zahl ist. */
+        const zahl = (v) => {
+            const n = Number(v) || 0;
+            return Number.isInteger(n)
+                ? n.toLocaleString(loc)
+                : n.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        };
 
         // EINE Zahl, nicht zwei.
         //
@@ -207,8 +233,17 @@
 
         // Absolute Zahlen zuerst. "78 von 772" versteht jeder sofort;
         // "10,1 %" ist die Ableitung daraus, nicht umgekehrt.
-        const cuts = zahl(best.top8);
-        const antritte = zahl(best.brought);
+        /* Halbe Antritte brauchen eine Erklaerung an Ort und Stelle,
+           sonst liest sich "71,5 Antritte" wie ein Fehler. Ein Titel
+           reicht — der Satz soll kurz bleiben. */
+        const gewichtet = de
+            ? 'Antritte sind nach Turniergröße gewichtet; deshalb kommen halbe Werte vor.'
+            : 'Entries are weighted by tournament size, so half values occur.';
+        const mitHinweis = (v) => (Number.isInteger(Number(v))
+            ? zahl(v)
+            : `<span class="mah-gewichtet" title="${escapeHtml(gewichtet)}">${zahl(v)}</span>`);
+        const cuts = mitHinweis(best.top8);
+        const antritte = mitHinweis(best.brought);
         const quote = fmtPct(model.headlineConvPct);
         const schnitt = fmtPct(model.conv.expected * 100, 1);
 

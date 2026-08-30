@@ -3137,20 +3137,26 @@
                 const record = matchup.record || '-';
                 const totalGames = matchup.total_games || '0';
                 
+                /* BEFUND (Schlussabnahme 30.08.2026): dieser Block war der
+                   letzte in der Ansicht mit fest verdrahtetem Englisch
+                   ("Win Rate:", "Record:", "Total Games:") und drei
+                   Festfarben (#2c3e50, #333), die im Dunkelmodus dunkel
+                   auf dunkel stehen. Beschriftung kommt jetzt aus i18n,
+                   Farbe aus den Tokens. */
                 detailsEl.innerHTML = `
-                    <h4 style="margin-top: 0; color: #2c3e50;">Matchup: vs ${escapeHtml(opponent)}</h4>
+                    <h4 style="margin-top: 0; color: var(--ink);">${t('matchup.vsTitle').replace('{n}', escapeHtml(opponent))}</h4>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 10px;">
                         <div>
-                            <strong style="color: #333;">Win Rate:</strong><br>
+                            <strong style="color: var(--ink-2);">${t('matchup.winRate')}:</strong><br>
                             <span style="font-size: 1.5em; color: var(--dv-pos-ink);">${escapeHtml(winRate)}</span>
                         </div>
                         <div>
-                            <strong style="color: #333;">Record:</strong><br>
-                            <span style="font-size: 1.2em; color: #2c3e50;">${escapeHtml(record)}</span>
+                            <strong style="color: var(--ink-2);">${t('matchup.record')}:</strong><br>
+                            <span style="font-size: 1.2em; color: var(--ink);">${escapeHtml(record)}</span>
                         </div>
                         <div>
-                            <strong style="color: #333;">Total Games:</strong><br>
-                            <span style="font-size: 1.5em; color: #2c3e50;">${escapeHtml(totalGames)}</span>
+                            <strong style="color: var(--ink-2);">${t('matchup.totalGames')}</strong><br>
+                            <span style="font-size: 1.5em; color: var(--ink);">${escapeHtml(totalGames)}</span>
                         </div>
                     </div>
                 `;

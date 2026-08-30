@@ -502,6 +502,8 @@ const translations = {
     'cl.entries':               'Entries:',
     'cl.exits':                 'Exits:',
     'cl.noTop10Changes':        'No changes in top 10',
+    'cl.noBaseline':            'No prior window to compare against — every archetype here is new.',
+    'cl.currentUnavailable':    'Season pause — no current City League data',
     'cl.dataSource':            'Data Source',
     'cl.period':                'Period:',
     'cl.tournaments':           'Tournaments:',
@@ -587,7 +589,9 @@ const translations = {
     'cl.energy':                'Energy:',
     'cl.heroAria':              'Top Archetypes Hero',
     'cl.heroTitle':             'Top Archetypes',
-    'cl.heroSubtitle':          'Combined by main Pokemon, based on current City League deck counts.',
+    'cl.heroSubtitle':          'Combined by main Pokémon, based on current City League deck counts.',
+    'cl.heroSubtitlePast':      'Combined by main Pokémon, based on the last complete City League window.',
+    'cl.deckSingular':          'deck',
     'cl.heroVariantSingular':   'variant',
     'cl.heroVariantPlural':     'variants',
     'cl.heroAvgRank':           'Avg Rank',
@@ -1803,6 +1807,8 @@ const translations = {
     'matchup.opponent':         'Opponent',
     'matchup.winRate':          'Win Rate',
     'matchup.record':           'Record',
+    'matchup.totalGames':       'Total games:',
+    'matchup.vsTitle':          'Matchup vs {n}',
     'matchup.noData':           'No data available',
     'matchup.selectTitle':      'Select & Analyze Opponent Matchup',
     'matchup.searchPlaceholder':'Type to search deck...',
@@ -2786,6 +2792,9 @@ const translations = {
     'cl.entries':               'Aufsteiger:',
     'cl.exits':                 'Absteiger:',
     'cl.noTop10Changes':        'Keine Veränderungen in den Top 10',
+    // Ohne Vorzeitraum ist jede Veraenderungsaussage erfunden.
+    'cl.noBaseline':            'Kein Vorzeitraum zum Vergleichen — jeder Archetyp hier ist neu.',
+    'cl.currentUnavailable':    'Saisonpause — keine aktuellen City-League-Daten',
     'cl.dataSource':            'Datenquelle',
     'cl.period':                'Zeitraum:',
     'cl.tournaments':           'Turniere:',
@@ -2871,7 +2880,20 @@ const translations = {
     'cl.energy':                'Energie:',
     'cl.heroAria':              'Top-Archetypen Hero',
     'cl.heroTitle':             'Top Archetypen',
-    'cl.heroSubtitle':          'Nach Haupt-Pokemon kombiniert, basierend auf den aktuellen City-League-Deckzahlen.',
+    // BEFUND (Schlussabnahme 30.08.2026): der Satz sagte fest
+    // "aktuellen", waehrend der Zeitraum per Vorgabe auf
+    // "Vergangenes Meta" stand und die Zahlen nachweislich aus dem
+    // Juni kamen. Ein Text, der sich dem Zeitraum nicht anpasst,
+    // wird falsch, sobald der Zeitraum sich anpasst.
+    // Dazu das fehlende é in "Pokemon" — der Spaltenkopf zwei
+    // Zeilen tiefer schreibt es richtig.
+    'cl.heroSubtitle':          'Nach Haupt-Pokémon kombiniert, basierend auf den aktuellen City-League-Deckzahlen.',
+    'cl.heroSubtitlePast':      'Nach Haupt-Pokémon kombiniert, basierend auf dem letzten vollständigen City-League-Zeitraum.',
+    // BEFUND (Schlussabnahme 30.08.2026): 'cl.decks' hatte keine
+    // Einzahl, obwohl die Variantenform direkt daneben eine hat.
+    // In der Heldenkachel stand "1 Variante" neben "1 Decks",
+    // und im Deck-Auswahlfeld fuenfmal "(1 Decks)".
+    'cl.deckSingular':          'Deck',
     'cl.heroVariantSingular':   'Variante',
     'cl.heroVariantPlural':     'Varianten',
     'cl.heroAvgRank':           'Ø Rang',
@@ -4078,6 +4100,8 @@ const translations = {
     'matchup.opponent':         'Gegner',
     'matchup.winRate':          'Win Rate',
     'matchup.record':           'Record',
+    'matchup.totalGames':       'Partien gesamt:',
+    'matchup.vsTitle':          'Matchup gegen {n}',
     'matchup.noData':           'Keine Daten verfügbar',
     'matchup.vsMetaCallTitle':  'Matchups gegen Meta Call (Erwartetes Meta)',
     'matchup.bestVsField':      'Beste Matchups im Meta',

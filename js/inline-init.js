@@ -110,6 +110,21 @@ function switchTabAndUpdateMenu(tabId) {
         target.classList.add('active');
     }
 
+    /* BEFUND (Schlussabnahme 30.08.2026): die Adresszeile stand bei
+       jedem Ansichtswechsel still. Gemessen ueber sechs Wechsel blieb
+       `history.length` konstant bei 2 und die URL bei
+       "thedipidis.app/" — der Zurueck-Knopf des Browsers hat also die
+       SEITE VERLASSEN statt eine Ansicht zurueckzugehen, und eine
+       geoeffnete Ansicht liess sich nicht verlinken. Die Tieflinks
+       (#meta-call & Co.) gab es die ganze Zeit, sie wurden nur nie
+       geschrieben.
+       Geschrieben wird mit pushState, nicht ueber location.hash —
+       pushState loest kein hashchange aus, es kann also keine
+       Schleife mit applyHash() geben. */
+    if (typeof window.__dsSchreibeTabHash === 'function') {
+        window.__dsSchreibeTabHash(tabId);
+    }
+
     document.querySelectorAll('.menu-item.active').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById('menu-btn-' + tabId);
     const badge = document.getElementById('current-tab-title');
@@ -313,6 +328,10 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'overview':       'meta-analysis-hub',
     };
 
+    // Waehrend applyHash() laeuft, ruft es switchTabAndUpdateMenu — und
+    // das wuerde den Hash zurueckschreiben, den wir gerade lesen.
+    let routetGerade = false;
+
     function applyHash() {
         const rawFull = (window.location.hash || '').replace(/^#/, '').trim();
         if (!rawFull) return;
@@ -374,6 +393,12 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
             }
         }
 
+        // Merker fuer setupInitialTabLoad weiter unten: hier wurde
+        // wirklich auf eine Ansicht geroutet. Der Merker ersetzt die
+        // fruehere Pruefung `if (window.location.hash) return` — seit
+        // die Anwendung den Hash selbst schreibt, ist "es gibt einen
+        // Hash" kein Beleg mehr dafuer, dass ein Tieflink lief.
+        window.__dsTieflinkGeroutet = true;
         if (typeof switchTabAndUpdateMenu === 'function') {
             switchTabAndUpdateMenu(tabId);
         } else if (typeof switchTab === 'function') {
@@ -443,15 +468,69 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         }
     }
 
+    // ── Adresszeile und Verlauf ─────────────────────────────────
+    // Nur Kennungen, die in HASH_ALIASES auf sich selbst zeigen, sind
+    // eine kanonische Schreibweise. Alles andere (Kurzformen wie
+    // 'hub', 'journal', 'deck-analysis') bleibt lesbar, wird aber
+    // nicht geschrieben — sonst haette dieselbe Ansicht zwei URLs.
+    function kanonischerHash(tabId) {
+        if (!tabId || HASH_ALIASES[tabId] !== tabId) return null;
+        return tabId;
+    }
+
+    function schreibeHash(tabId, ersetzen) {
+        if (routetGerade) return;          // applyHash ruft switchTab — nicht zurueckschreiben
+        const h = kanonischerHash(tabId);
+        if (!h) return;
+        const ziel = window.location.pathname + window.location.search + '#' + h;
+        if (window.location.hash === '#' + h && !ersetzen) return;
+        try {
+            if (ersetzen) window.history.replaceState({ tab: h }, '', ziel);
+            else window.history.pushState({ tab: h }, '', ziel);
+        } catch (_e) { /* file:// und aehnliche Faelle: lieber nichts als ein Absturz */ }
+    }
+    window.__dsSchreibeTabHash = schreibeHash;
+
+    function routeMitSperre() {
+        routetGerade = true;
+        try { applyHash(); } finally { routetGerade = false; }
+    }
+
+    // Damit der erste Verlaufseintrag schon eine Ansicht benennt. Ohne
+    // ihn fuehrt der erste Zurueck-Schritt auf eine URL ohne Hash, und
+    // applyHash haette nichts, worauf es zeigen koennte.
+    function stempleStartansicht() {
+        if (window.location.hash) return;
+        const aktiv = document.querySelector('.tab-content.active');
+        if (aktiv && aktiv.id) schreibeHash(aktiv.id, true);
+    }
+
     // Fire once on initial load, after the app is ready
     if (window.__appResourcesSettled) {
-        applyHash();
+        routeMitSperre();
+        stempleStartansicht();
     } else {
-        window.addEventListener('app:ui-ready', applyHash, { once: true });
+        window.addEventListener('app:ui-ready', function () {
+            routeMitSperre();
+            stempleStartansicht();
+        }, { once: true });
     }
 
     // Also respond to hash changes while the user is already on the page
-    window.addEventListener('hashchange', applyHash);
+    window.addEventListener('hashchange', routeMitSperre);
+
+    // Zurueck/Vorwaerts im Browser. pushState allein aendert die Ansicht
+    // nicht zurueck — ohne diesen Zuhoerer stuende nach einem Zurueck
+    // die alte URL ueber der neuen Ansicht.
+    window.addEventListener('popstate', function () {
+        if (window.location.hash) { routeMitSperre(); return; }
+        // Kein Hash mehr: zurueck auf die Ansicht, mit der die
+        // Anwendung startet, statt auf der letzten stehenzubleiben.
+        const start = document.getElementById('current-meta') ? 'current-meta' : null;
+        if (!start || typeof switchTabAndUpdateMenu !== 'function') return;
+        routetGerade = true;
+        try { switchTabAndUpdateMenu(start); } finally { routetGerade = false; }
+    });
 })();
 
 // ── Initial-page-load data trigger ──────────────────────────
@@ -475,7 +554,7 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
 // firing once.
 (function setupInitialTabLoad() {
     function triggerInitialTabLoad() {
-        if (window.location.hash) return;  // hash branch already runs switchTab
+        if (window.__dsTieflinkGeroutet) return;  // hash branch already ran switchTab
         const activeTab = document.querySelector('.tab-content.active');
         if (!activeTab || !activeTab.id) return;
         if (typeof switchTab === 'function') {

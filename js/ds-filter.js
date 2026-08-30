@@ -92,7 +92,16 @@
         var out = [];
         for (var i = 0; i < sel.options.length; i++) {
             var o = sel.options[i];
-            out.push({ wert: o.value, text: (o.textContent || o.value).trim() });
+            // BEFUND (Schlussabnahme 30.08.2026): der Knopf "Aktuelles
+            // Meta" sah bedienbar aus und tat nichts. Waehrend der
+            // Saisonpause sperrt js/app-city-league.js die Option
+            // `current` in BEIDEN Auswahlfeldern — diese Knopfleiste
+            // baut sich aber aus denselben Optionen und hat die
+            // Sperre nie mitgelesen. Gemessen: Textlaenge der Ansicht
+            // vor dem Klick 3154 Zeichen, vier Sekunden danach 3154.
+            // Kein Hinweis, kein disabled, kein aria-disabled.
+            out.push({ wert: o.value, text: (o.textContent || o.value).trim(),
+                       gesperrt: !!o.disabled, grund: o.title || '' });
         }
         return { sel: sel, opts: out, aktiv: sel.value };
     }
@@ -182,10 +191,20 @@
             f.opts.forEach(function (o) {
                 var b = document.createElement('button');
                 b.type = 'button';
-                b.className = 'ds-filter-btn' + (o.wert === f.aktiv ? ' is-on' : '');
+                b.className = 'ds-filter-btn' + (o.wert === f.aktiv ? ' is-on' : '')
+                                              + (o.gesperrt ? ' is-gesperrt' : '');
                 b.setAttribute('aria-pressed', String(o.wert === f.aktiv));
                 b.textContent = o.text;
+                if (o.gesperrt) {
+                    // Gesperrt heisst gesperrt: sichtbar, nicht anklickbar,
+                    // und mit dem Grund daran. Ein Knopf, der aussieht wie
+                    // ein Knopf und nichts tut, ist schlimmer als keiner.
+                    b.disabled = true;
+                    b.setAttribute('aria-disabled', 'true');
+                    if (o.grund) b.title = o.grund;
+                }
                 b.addEventListener('click', function () {
+                    if (o.gesperrt) return;
                     // Den vorhandenen Select bedienen, nicht ersetzen:
                     // an ihm haengt die ganze Ladelogik.
                     f.sel.value = o.wert;

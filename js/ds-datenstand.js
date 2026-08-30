@@ -61,9 +61,10 @@
             .then(function (r) { return r && r.ok ? r.json() : null; })
             .then(function (j) {
                 return { dateien: (j && j.dateien) || {},
-                         inhalt: (j && j.inhalt_bis) || {} };
+                         inhalt: (j && j.inhalt_bis) || {},
+                         leer: (j && j.leer) || [] };
             })
-            .catch(function () { return { dateien: {}, inhalt: {} }; });
+            .catch(function () { return { dateien: {}, inhalt: {}, leer: [] }; });
         return MANIFEST;
     }
 
@@ -120,6 +121,25 @@
         });
     }
 
+    /* Hat die Datei ueberhaupt Zeilen?
+     *
+     * BEFUND (Schlussabnahme 30.08.2026): der Chip der City League zeigte
+     * "Daten: 31.7.2026" — den Schreibzeitpunkt von
+     * city_league_analysis.csv. Diese Datei hat 0 Datenzeilen; die
+     * gezeigten Zahlen stammen aus einer anderen Datei vom 6. Juni.
+     * Daneben stand "Verfuegbar: 6.6.2026". Zwei Daten, acht Wochen
+     * auseinander, und das aeltere war das richtige.
+     *
+     * Ein Datum an einer leeren Datei ist kein Stand, sondern der
+     * Zeitpunkt, an dem zuletzt nichts hineingeschrieben wurde. Das ist
+     * dieselbe Sorte Halbwahrheit wie das Datum des BESUCHS, gegen das
+     * dieses Modul ueberhaupt gebaut wurde. */
+    function istLeer(datei) {
+        return manifest().then(function (m) {
+            return (m.leer || []).indexOf(datei) !== -1;
+        });
+    }
+
     function alsText(d) {
         if (!d) return de() ? 'unbekannt' : 'unknown';
         return d.toLocaleDateString(de() ? 'de-DE' : 'en-GB');
@@ -142,9 +162,28 @@
         Array.prototype.forEach.call(chips, function (el) {
             var datei = el.getAttribute('data-quelle');
             if (!datei) { el.textContent = alsText(null); return; }
-            Promise.all([stand(datei), inhaltStand(datei)]).then(function (paar) {
+            Promise.all([stand(datei), inhaltStand(datei), istLeer(datei)]).then(function (paar) {
                 var dDatei = paar[0];
                 var dInhalt = paar[1];
+                var leer = paar[2];
+
+                if (leer) {
+                    el.textContent = de() ? 'keine Daten' : 'no data';
+                    var e0 = el.closest ? el.closest('.data-freshness-chip') : null;
+                    if (e0) {
+                        e0.classList.add('is-unbekannt');
+                        e0.classList.remove('is-alt');
+                        e0.setAttribute('title', de()
+                            ? datei + ' enthaelt zurzeit keine Datenzeilen. Das Datum '
+                              + 'daran waere der Zeitpunkt, an dem zuletzt nichts '
+                              + 'hineingeschrieben wurde — die angezeigten Zahlen '
+                              + 'stammen aus einer anderen Quelle.'
+                            : datei + ' currently holds no data rows. A date on it would '
+                              + 'be the moment nothing was last written to it — the '
+                              + 'numbers shown come from another source.');
+                    }
+                    return;
+                }
 
                 /* Der Inhalt gewinnt, wenn er spuerbar aelter ist als die
                    Datei. Sonst bleibt es beim Dateidatum — dann sagen beide

@@ -107,20 +107,28 @@
         var wieviel = namen.length <= 3
             ? namen.join(de() ? ' und ' : ' and ')
             : (de() ? namen.length + ' Präsenzturniere' : namen.length + ' in-person tournaments');
+        // Die Mindestspielerzahl haengt am Format und gehoert deshalb
+        // hierher, nicht auf die Methodikseite: sie ist der Nenner
+        // dieser Empfehlung, keine allgemeine Regel.
+        var grenze = d.min_ankerspieler_anzeige;
+        var zusatz = grenze
+            ? (de() ? ' (min. ' + gz(grenze) + ' pro Deck)'
+                    : ' (min. ' + gz(grenze) + ' per deck)')
+            : '';
         if (d.betriebsart === 'B') {
-            return de()
-                ? 'Im Format ' + sicher(d.format) + ' gab es noch kein Präsenzturnier. Die Empfehlung '
-                  + 'stützt sich deshalb auf ' + wieviel + ' aus den Formaten davor — zusammen '
-                  + sp + ' Spieler.'
-                : 'There has been no in-person tournament in ' + sicher(d.format) + ' yet, so the '
-                  + 'recommendation rests on ' + wieviel + ' from the formats before it — '
-                  + sp + ' players in total.';
+            // Zwei Saetze fuer eine Angabe. Der Grund ("es gab noch
+            // kein Praesenzturnier") und die Folge ("also die davor")
+            // sind dieselbe Aussage, einmal gesagt reicht.
+            return (de()
+                ? sicher(d.format) + ' hatte noch kein Präsenzturnier — ausgewertet: '
+                  + wieviel + ' aus den Formaten davor, ' + sp + ' Spieler'
+                : 'No in-person tournament in ' + sicher(d.format) + ' yet — evaluated: '
+                  + wieviel + ' from the formats before, ' + sp + ' players') + zusatz + '.';
         }
-        return de()
-            ? 'Ausgewertet: ' + wieviel + ' aus dem laufenden Format ' + sicher(d.format)
-              + ' — zusammen ' + sp + ' Spieler.'
-            : 'Evaluated: ' + wieviel + ' from the current format ' + sicher(d.format)
-              + ' — ' + sp + ' players in total.';
+        return (de()
+            ? 'Ausgewertet: ' + wieviel + ' aus ' + sicher(d.format) + ', ' + sp + ' Spieler'
+            : 'Evaluated: ' + wieviel + ' from ' + sicher(d.format) + ', ' + sp + ' players')
+            + zusatz + '.';
     }
 
     function satzNuechtern(v) {
@@ -129,55 +137,44 @@
         if (!v || !v.turniere || typeof v.empfehlung_mittel !== 'number') return '';
         var scheitert = Math.round((100 - v.empfehlung_mittel) / 100 * 10) / 10;
         if (!isFinite(scheitert)) return '';
+        // Drei Saetze waren zwei zu viel. Die Aussage ist eine: auch
+        // das beste Deck reicht meistens nicht. Wer wissen will, warum
+        // das am Format liegt und nicht an der Rechnung, findet es unter
+        // Quellen & Methodik.
         return de()
-            ? 'Das heißt nicht, dass es reicht: In rund ' + pz(100 - v.empfehlung_mittel, 0)
-              + ' % der Turniere schafft es auch das empfohlene Deck nicht in Day 2. '
-              + 'Das liegt am Format, nicht an der Rechnung.'
-            : 'That does not mean it is enough: in about ' + pz(100 - v.empfehlung_mittel, 0)
-              + ' % of tournaments even the recommended deck misses Day 2. '
-              + 'That is the format, not the maths.';
+            ? 'Auch damit reicht es in ' + pz(100 - v.empfehlung_mittel, 0)
+              + ' % der Turniere nicht für Day 2.'
+            : 'Even so, it misses Day 2 at ' + pz(100 - v.empfehlung_mittel, 0)
+              + ' % of tournaments.';
     }
 
-    function satzBeleg(v, art) {
-        if (!v || !v.turniere) return '';
-        var wo = (art === 'B')
-            ? (de() ? 'an ' + v.turniere + ' vergangenen Kaltstarts' : 'against ' + v.turniere + ' past cold starts')
-            : (de() ? 'an ' + v.turniere + ' vergangenen Turnieren' : 'against ' + v.turniere + ' past tournaments');
-        var se = (typeof v.vorsprung_standardfehler === 'number')
-            ? (de() ? ' (± ' + pz(v.vorsprung_standardfehler) + ' pp)' : ' (± ' + pz(v.vorsprung_standardfehler) + ' pp)')
-            : '';
-        return de()
-            ? 'Nachgerechnet ' + wo + ': wer dieser Regel gefolgt wäre, kam im Schnitt auf '
-              + pz(v.empfehlung_mittel) + ' % Day 2, ein beliebiges Deck auf ' + pz(v.feld_mittel)
-              + ' %. Vorsprung ' + pz(v.vorsprung) + ' pp' + se + ', besser in '
-              + v.ueber_feldschnitt + ' von ' + v.turniere + ' Fällen. Die im Nachhinein beste '
-              + 'Wahl kam auf ' + pz(v.bestmoeglich_mittel) + ' %.'
-            : 'Replayed ' + wo + ': following this rule averaged ' + pz(v.empfehlung_mittel)
-              + ' % Day 2, an arbitrary deck ' + pz(v.feld_mittel) + ' %. Margin '
-              + pz(v.vorsprung) + ' pp' + se + ', better in ' + v.ueber_feldschnitt + ' of '
-              + v.turniere + ' cases. The best pick in hindsight reached '
-              + pz(v.bestmoeglich_mittel) + ' %.';
-    }
+    // satzBeleg() stand hier bis zum 30.08.2026: die Nachrechnung
+    // ("wer dieser Regel gefolgt waere, kam im Schnitt auf X % Day 2 …").
+    // Sie war der Inhalt des aufklappbaren Beleg-Kastens, und der ist
+    // nach Quellen & Methodik umgezogen. Die Funktion hatte danach
+    // keinen Aufrufer mehr; ein toter Textbaustein ist schlimmer als
+    // gar keiner, weil ihn beim naechsten Mal jemand fuer benutzt haelt.
 
     function blockVorbehalt(oa) {
+        /* Bis zum 30.08.2026 standen hier fuenf Zeilen: der Anteil, was
+           er bedeutet, das groesste unbekannte Deck mit eigener Zahl, was
+           die Rechnung darueber nicht weiss, wo man es nachsieht, und das
+           Datum des Online-Schnappschusses. Alles davon stimmt — und
+           alles davon steht direkt unter der Empfehlung, also an der
+           Stelle, an der jemand gerade eine Entscheidung trifft.
+
+           Der Vorbehalt bleibt, weil er die Aussage darueber begrenzt;
+           ihn wegzulassen waere unehrlich. Er passt aber in einen Satz.
+           Die Herleitung steht unter Quellen & Methodik. */
         if (!oa || typeof oa.anteil_unbekannt !== 'number') return '';
         if (oa.anteil_unbekannt < VORBEHALT_AB) return '';
-        var gross = (oa.groesste_unbekannte || [])[0];
         var text = de()
-            ? '<strong>' + pz(oa.anteil_unbekannt) + ' % des Online-Metas ist neu.</strong> '
-              + 'So viele der heute online gespielten Decks gab es bei den ausgewerteten Turnieren '
-              + 'noch nicht'
-              + (gross ? ' — darunter ' + sicher(gross.deck) + ' mit ' + pz(gross.anteil)
-                          + ' % Anteil' : '')
-              + '. Wie sich die Empfehlung gegen diese Decks schlägt, sagt die Rechnung nicht. '
-              + 'Prüf das im Meta Call, bevor du dich festlegst. Online-Stand: '
-              + datum(oa.schnappschuss) + '.'
-            : '<strong>' + pz(oa.anteil_unbekannt) + ' % of the online field is new.</strong> '
-              + 'That many decks played online today did not exist at the tournaments evaluated here'
-              + (gross ? ' — among them ' + sicher(gross.deck) + ' at ' + pz(gross.anteil) + ' %' : '')
-              + '. How the recommendation fares against them is not something this calculation knows. '
-              + 'Check it in the Meta Call before committing. Online snapshot: '
-              + datum(oa.schnappschuss) + '.';
+            ? '<strong>' + pz(oa.anteil_unbekannt) + ' % des Felds ist neu.</strong> '
+              + 'Gegen diese Decks ist die Empfehlung ungeprüft — '
+              + '<a href="#meta-call">im Meta Call nachsehen</a>.'
+            : '<strong>' + pz(oa.anteil_unbekannt) + ' % of the field is new.</strong> '
+              + 'The recommendation is untested against those decks — '
+              + '<a href="#meta-call">check the Meta Call</a>.';
         return '<p class="de-vorbehalt">' + text + '</p>';
     }
 
@@ -223,21 +220,18 @@
         +   '<p class="ds-note">' + satzNuechtern(v) + '</p>'
         +   blockVorbehalt(d.online_abdeckung)
 
-        +   '<details class="de-beleg">'
-        +     '<summary>' + (de() ? 'Wie zuverlässig ist das?' : 'How reliable is this?') + '</summary>'
-        +     '<p class="ds-note">' + satzBeleg(v, d.betriebsart) + '</p>'
-        +     '<p class="ds-note">' + satzAnker(d) + '</p>'
-        +     '<p class="ds-note">'
-        +       (de()
-                  ? 'Decks mit wenigen Spielern werden Richtung Durchschnitt korrigiert, sonst '
-                    + 'stünde ein Deck mit sechs Spielern und einem Glückstreffer auf Rang 1. '
-                    + 'Unter ' + gz(d.min_ankerspieler_anzeige) + ' ausgewerteten Spielern taucht '
-                    + 'ein Deck hier gar nicht erst auf.'
-                  : 'Decks with few players are pulled towards the average, otherwise a deck with '
-                    + 'six players and one lucky run would rank first. Below '
-                    + gz(d.min_ankerspieler_anzeige) + ' evaluated players a deck is not listed at all.')
-        +     '</p>'
-        +   '</details>'
+        // Der aufklappbare Beleg-Kasten "Wie zuverlaessig ist das?"
+        // stand hier bis zum 30.08.2026 mit drei Absaetzen: Nachrechnung,
+        // Ankerturniere, Glaettung und Mindestspielerzahl. Er ist nicht
+        // geloescht, sondern umgezogen — die allgemeinen Teile stehen
+        // unter Quellen & Methodik, die zwei Angaben, die NUR fuer diese
+        // Empfehlung gelten (welche Turniere, wie viele Spieler), bleiben
+        // hier als eine Zeile. Sie sind der Nenner der Zahlen darueber,
+        // keine Methodik.
+        +   '<p class="ds-note de-beleg-zeile">' + satzAnker(d) + ' '
+        +     '<a class="qu-verweis" href="#quellen">'
+        +     (de() ? 'Wie zuverlässig ist das? →' : 'How reliable is this? →')
+        +     '</a></p>'
 
         +   '<p class="ds-note"><a href="#meta-call" class="de-mehr">'
         +     (de() ? 'Alternativen und Matchups im Meta Call →' : 'Alternatives and matchups in the Meta Call →')

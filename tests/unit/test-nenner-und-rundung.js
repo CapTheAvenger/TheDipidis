@@ -27,6 +27,11 @@ const TIER     = lies('js/app-tier-meta.js');
 const PAST     = lies('js/app-past-meta.js');
 const EV       = lies('js/ds-ev-rechner.js');
 const HUB      = lies('js/meta-analysis-hub.js');
+// Die Texte in app-quellen.js sind ueber mehrere Quellzeilen
+// zusammengesetzt ('… deck ' + 'with a recognised archetype'). Geprueft
+// wird der Satz, den der Leser sieht, nicht wo der Umbruch steht — also
+// werden die Nahtstellen vorher zusammengezogen.
+const QUELLEN  = lies('js/app-quellen.js').replace(/'\s*\+\s*\n\s*'/g, '');
 const CURRENT  = lies('js/app-current-meta-analysis.js');
 
 function stueck(quelle, re, was) {
@@ -205,8 +210,32 @@ describe('Meta-Performance: die Spalte "Anteil" nennt beide Herkuenfte', () => {
 
 describe('Der Meta-Durchschnitt sagt, worauf er steht', () => {
     it('nennt die Bedingung "mit erkanntem Archetyp"', () => {
-        assert.match(HUB, /mit erkanntem Archetyp/);
-        assert.match(HUB, /with a recognised archetype/);
+        // Der Vergleichswert ("…-mal so oft wie der Schnitt") steht NICHT
+        // ueber allen Decks, sondern nur ueber denen mit erkanntem
+        // Archetyp. Ohne diese Bedingung ist die Zahl eine andere Zahl.
+        //
+        // Bis zum 30.08.2026 stand die Bedingung in der Fussnote unter
+        // der Kachel — zusammen mit fuenf weiteren Erklaerungszeilen,
+        // direkt unter der ersten Zahl der Startseite. Der Text ist nach
+        // Quellen & Methodik umgezogen. Die Zusage folgt ihm: sie darf
+        // nicht dadurch erfuellt sein, dass die Bedingung nirgends mehr
+        // steht.
+        assert.match(QUELLEN, /mit erkanntem Archetyp/,
+            'die Bedingung fehlt auf der Methodikseite — dann steht sie nirgends');
+        assert.match(QUELLEN, /with a recognised archetype/,
+            'die englische Fassung fehlt');
+    });
+
+    it('und die Kachel fuehrt dorthin', () => {
+        // Eine Erklaerung, die niemand findet, ist keine. Der Weg von
+        // der Zahl zur Bedingung muss ein Klick sein.
+        assert.match(HUB, /href="#quellen"/,
+            'die Kachel verweist nicht mehr auf die Methodikseite — ' +
+            'dann ist die Bedingung von der Zahl aus unerreichbar');
+        // Der Nenner selbst bleibt an der Zahl: er ist die Bezugsgroesse,
+        // keine Methodik.
+        assert.match(HUB, /gewichteten Antritten/);
+        assert.match(HUB, /weighted entries/);
     });
     it('der Kommentar behauptet nicht mehr, roh und geglaettet fielen zusammen', () => {
         assert.doesNotMatch(HUB, /roher und geglaetteter Wert hier zusammen/);

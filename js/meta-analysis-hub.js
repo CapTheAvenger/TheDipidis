@@ -330,9 +330,19 @@
                 </h3>
                 <p class="meta-hub-answer-line">${answerSentence(model)}</p>
                 <div class="ds-stat-row">${model.top.map(tile).join('')}</div>
+                <!-- Bis zum 30.08.2026 stand hier eine sechszeilige
+                     Fussnote: Definition von Anteil, von Top-8-Quote, die
+                     Herleitung des Vergleichswerts, der Hinweis auf die
+                     Glaettung und die Quelle. Alles richtig, alles
+                     ungelesen — direkt unter der ersten Zahl, die jemand
+                     auf dieser Seite sieht. Die Erklaerung steht jetzt
+                     unter Quellen & Methodik; hier bleibt der Weg dorthin.
+                     Der Nenner selbst ist keine Erklaerung, sondern die
+                     Bezugsgroesse der Zahl darueber — er bleibt. -->
                 <p class="ds-note">${de
-                    ? `Anteil = wie oft ein Deck gespielt wurde, gemessen an ${Math.round(model.totalBrought).toLocaleString('de-DE')} gewichteten Antritten. Top-8-Quote = wie oft es davon die Top 8 erreicht hat. Die Angabe „…-mal so oft wie der Schnitt“ vergleicht diese Quote mit ${fmtPct(model.conv.expected * 100, 1)} — so oft kommt ein durchschnittliches Deck <em>mit erkanntem Archetyp</em> in die Top 8. Der Vergleichswert ist geglättet (k = ${window.CONV_PRIOR || 50}), die Quote daneben ist roh; beide Zahlen decken sich nur bei großen Stichproben. Alles aus Limitless Online.`
-                    : `Share = how often a deck was played, over ${Math.round(model.totalBrought).toLocaleString('en-US')} weighted entries. Top-8 rate = how often it reached top 8. "As often as average" compares that rate against ${fmtPct(model.conv.expected * 100, 1)} — how often an average deck <em>with a recognised archetype</em> makes top 8. That comparison value is smoothed (k = ${window.CONV_PRIOR || 50}) while the rate beside it is raw; the two only coincide on large samples. All from Limitless Online.`}</p>
+                    ? `Von ${Math.round(model.totalBrought).toLocaleString('de-DE')} gewichteten Antritten.`
+                    : `Out of ${Math.round(model.totalBrought).toLocaleString('en-US')} weighted entries.`}
+                    <a class="qu-verweis" href="#quellen">${de ? 'Wie das gerechnet ist →' : 'How this is calculated →'}</a></p>
             </section>`;
     }
 

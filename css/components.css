@@ -1055,6 +1055,17 @@ html.is-signed-out [onclick*="radelist"]:hover {
     line-height: 1.45;
 }
 
+/* Die Belegzeile: welche Turniere, wie viele Spieler, und der Weg zur
+ * Methodik. Sie ersetzt den aufklappbaren Kasten, der bis zum
+ * 30.08.2026 hier stand — drei Absaetze unter einer Entscheidung. */
+.de-empfehlung .de-beleg-zeile {
+    margin: var(--s-3) 0 0;
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-2);
+    flex-wrap: wrap;
+}
+
 .de-empfehlung .de-beleg { margin: var(--s-3) 0; }
 .de-empfehlung .de-beleg > summary {
     cursor: pointer;

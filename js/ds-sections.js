@@ -54,9 +54,13 @@
         { id: 'top',     auf: true,  nimm: ['section.tier-hero-section', 'div.ds-stat-row', 'div.tier-search-row'],
           de: ['Die stärksten Decks', 'Meta-Anteil und Top-8-Quote, mit Nenner'],
           en: ['The strongest decks', 'Share and top-8 rate, with denominators'] },
+        // "Matchups untereinander — wer schlaegt wen, jede Zelle mit
+        // Matchzahl" war eine Beschreibung der Tabelle, kein Titel. So
+        // spricht in der Szene niemand, und die Zeile erklaerte etwas,
+        // das die Tabelle darunter in einer Sekunde selbst zeigt.
         { id: 'heatmap', auf: true,  nimm: ['#matchupHeatmapContainer'],
-          de: ['Matchups untereinander', 'wer schlägt wen, jede Zelle mit Matchzahl'],
-          en: ['Matchups', 'who beats whom, every cell with its game count'] },
+          de: ['Matchups', 'wer schlägt wen'],
+          en: ['Matchups', 'who beats whom'] },
         { id: 'cards',   auf: true,  nimm: ['div.top-cards-container'],
           de: ['Karten, die fast jedes Deck spielt', 'Format-Staples'],
           en: ['Cards nearly every deck plays', 'format staples'] },

@@ -513,9 +513,17 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
          * Nachkommastellen so mitbringen, wie sie berechnet wurden.
          * Eine Ø-Platzierung hat hier immer zwei Nachkommastellen. */
         function _rang(wert) {
+            /* NACHTRAG (Abnahmerunde 30.08.2026): der erste Anlauf pruefte
+               nur auf einen PUNKT als Dezimaltrenner. Die abgeleiteten
+               Vergleichsdaten schreiben ihre Werte aber bereits mit
+               deutschem Komma hinein (Zeile 306: .replace('.', ',')),
+               also fiel jede Zeile durch und blieb bei ihrer
+               mitgelieferten Genauigkeit — "14,2" neben "14,83".
+               Gemessen: 8 von 11 Zeilen einstellig. */
             const roh = String(wert == null ? '' : wert).trim();
-            if (!/^-?\d+(\.\d+)?$/.test(roh)) return _kommaText(wert);
-            return _komma(Number(roh), 2);
+            const punkt = roh.replace(',', '.');
+            if (!/^-?\d+(\.\d+)?$/.test(punkt)) return _kommaText(wert);
+            return _komma(Number(punkt), 2);
         }
 
         function _kommaText(wert) {

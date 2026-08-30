@@ -1718,7 +1718,7 @@
                 
                 // Generate HTML for display
                 const top3ByCountHtml = decksByCount
-                    .map(d => `<span style="color: white; font-weight: 600;">${escapeHtml(d.name)}</span> (${d.count.toLocaleString()})`)
+                    .map(d => `<span style="color: white; font-weight: 600;">${escapeHtml(d.name)}</span> (${zahlLokal(d.count)})`)
                     .join('<br>');
                 
                 const top3ByWinRateHtml = decksByWinRate
@@ -1869,11 +1869,11 @@
                             const statsHtml = `
                                 <p class="meta-online-stats" style="font-size: 0.85em; color: #555; margin: 15px 0 5px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-weight: 500;">
                                     <strong style="color: var(--dv-pos-ink);">Online Meta:</strong><br>
-                                    <span style="font-size: 0.95em;">${metaStats.tournaments.toLocaleString()} tournaments · ${metaStats.players.toLocaleString()} players · ${metaStats.matches.toLocaleString()} matches</span>
+                                    <span style="font-size: 0.95em;">${zahlLokal(metaStats.tournaments)} tournaments · ${zahlLokal(metaStats.players)} players · ${zahlLokal(metaStats.matches)} matches</span>
                                 </p>
                                 <p class="meta-major-stats" style="font-size: 0.85em; color: #555; margin: 5px 0 0 0; font-weight: 500;">
                                     <strong style="color: var(--tint-ok-ink);">Major Tournaments:</strong><br>
-                                    <span style="font-size: 0.95em;">${(majorTournaments || 0).toLocaleString()} tournaments · ${(totalPlayers || 0).toLocaleString()} players</span>
+                                    <span style="font-size: 0.95em;">${zahlLokal((majorTournaments || 0))} tournaments · ${zahlLokal((totalPlayers || 0))} players</span>
                                 </p>
                             `;
                             existingP.insertAdjacentHTML('afterend', statsHtml);

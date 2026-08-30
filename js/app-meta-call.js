@@ -7428,13 +7428,23 @@ window.MetaCall = (function () {
       if (!groups[main]) { groups[main] = []; order.push(main); }
       groups[main].push(deck);
     });
-    return order.map(main => ({
-      main,
-      variants   : groups[main],
-      totalShare : groups[main].reduce((s, d) => s + d.finalShare, 0),
-      totalOnline: groups[main].reduce((s, d) => s + d.onlineShare, 0),
-      totalCount : groups[main].reduce((s, d) => s + d.count, 0),
-    }));
+    /* BEFUND (Abnahmerunde 30.08.2026): die Gruppenzeile zeigte
+       "23,41 %" und daneben "469 Spieler". 2.000 x 23,405725 % sind
+       468. Die 469 entstand, weil `totalCount` die Summe der schon
+       einzeln gerundeten Varianten war (209+168+92), waehrend
+       `totalShare` aus den ungerundeten Anteilen kam — zwei
+       Rechenwege fuer dieselbe Groesse, nebeneinander in einer Zeile.
+       Die Spielerzahl folgt jetzt aus dem Anteil, der danebensteht. */
+    return order.map(main => {
+      const totalShare = groups[main].reduce((s, d) => s + d.finalShare, 0);
+      return {
+        main,
+        variants   : groups[main],
+        totalShare,
+        totalOnline: groups[main].reduce((s, d) => s + d.onlineShare, 0),
+        totalCount : Math.round((Number(_settings.totalPlayers) || 0) * totalShare / 100),
+      };
+    });
   }
 
   // ── Markov Chain – Day 2 Probability ──────────────────────
@@ -8072,6 +8082,14 @@ window.MetaCall = (function () {
   // Prozent-Anteil, locale-korrekt. Deutsche UI bekommt das schmale
   // geschützte Leerzeichen vor dem % wie window.formatPercent auf der
   // restlichen Seite.
+  /* BEFUND (Abnahmerunde 30.08.2026): _mcPct() setzt im Deutschen seit
+     jeher ein Leerzeichen vor das Prozentzeichen. 36 Stellen bauten den
+     Wert aber von Hand zusammen und liessen es weg — in einer Zelle
+     standen dadurch "18,9%" und "unter 20 %" nebeneinander. */
+  function _mcPz() {
+    return (typeof getLang === 'function' && getLang() === 'de') ? '\u00a0%' : '%';
+  }
+
   function _mcPct(n, dp) {
     const de = (typeof getLang === 'function' && getLang() === 'de');
     return _mcNum(n, dp) + (de ? ' %' : '%');
@@ -8192,7 +8210,7 @@ window.MetaCall = (function () {
 
     const cupTopCutField = type === 'cup'
       ? `<div class="metacall-field-group">
-           <label>${t('mc.labelTopCut')}</label>
+           <label for="mc-topcut">${t('mc.labelTopCut')}</label>
            <select id="mc-topcut" onchange="MetaCall._onSetting('topCutSize', +this.value)">
              <option value="4"${s.topCutSize === 4 ? ' selected' : ''}>${t('mc.topCut4')}</option>
              <option value="8"${s.topCutSize === 8 ? ' selected' : ''}>${t('mc.topCut8')}</option>
@@ -8211,14 +8229,14 @@ window.MetaCall = (function () {
   <p class="mc-tt-hint mc-tt-hint-type">${t(_typeDescI18nKey(type))}</p>
   <div class="metacall-settings-grid">
     <div class="metacall-field-group">
-      <label>${t('mc.labelPlayers')}</label>
+      <label for="mc-players">${t('mc.labelPlayers')}</label>
       <input type="number" id="mc-players" min="2" max="9999"
              value="${_playersInputTouched ? s.totalPlayers : ''}"
              placeholder="${s.totalPlayers}"
              oninput="MetaCall._onSetting('totalPlayers', +this.value)">
     </div>
     <div class="metacall-field-group">
-      <label>${t('mc.labelRounds')}</label>
+      <label for="mc-rounds">${t('mc.labelRounds')}</label>
       ${istMajor
         ? `<select id="mc-rounds" onchange="MetaCall._onSetting('rounds', +this.value)">
              <option value="8"${s.rounds === 9 ? '' : ' selected'}>${t('mc.rounds8')}</option>
@@ -8228,13 +8246,13 @@ window.MetaCall = (function () {
              oninput="MetaCall._onSetting('rounds', +this.value)">`}
     </div>
     <div class="metacall-field-group">
-      <label>${t(targetLabelKey)}</label>
+      <label for="mc-day2pts">${t(targetLabelKey)}</label>
       <input type="number" id="mc-day2pts" min="1" max="45" value="${s.day2Points}"
              oninput="MetaCall._onSetting('day2Points', +this.value)">
     </div>
     ${cupTopCutField}
     <div class="metacall-field-group mc-turnier-name">
-      <label>${t('mc.labelTournamentName')}</label>
+      <label for="mc-turniername">${t('mc.labelTournamentName')}</label>
       <input type="text" id="mc-turniername" maxlength="60"
              value="${esc(s.tournamentName || '')}"
              placeholder="${esc(t('mc.tournamentNamePlaceholder'))}"
@@ -8457,7 +8475,7 @@ window.MetaCall = (function () {
       <td class="mc-cell-online"><span class="mc-share-online">${onlineDisplay}</span></td>
       <td class="mc-cell-est">${personalCell}</td>
       <td class="mc-cell-final"><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${_mcPct(deck.finalShare, 2)}</span></td>
-      <td class="mc-cell-players"><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
+      <td class="mc-cell-players"><span class="mc-players-count">${zahlLokal(deck.count)}</span></td>
       <td class="mc-cell-enc">
         <div class="mc-encounters-bar mc-enc-${encTier}">
           <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
@@ -8605,7 +8623,7 @@ window.MetaCall = (function () {
   <td class="mc-cell-online"><span class="mc-share-online">${_mcPct(group.totalOnline, 2)}</span></td>
   <td class="mc-cell-est"><span class="mc-cell-dash">—</span></td>
   <td class="mc-cell-final"><span class="mc-share-final">${_mcPct(group.totalShare, 2)}</span></td>
-  <td class="mc-cell-players"><span class="mc-players-count">${group.totalCount.toLocaleString()}</span></td>
+  <td class="mc-cell-players"><span class="mc-players-count">${zahlLokal(group.totalCount)}</span></td>
   <td class="mc-cell-enc">
     <div class="mc-encounters-bar mc-enc-${groupEncTier}">
       <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
@@ -8641,7 +8659,7 @@ window.MetaCall = (function () {
             <td class="mc-cell-online"><span class="mc-share-online">${_mcPct(deck.onlineShare, 2)}</span></td>
             <td class="mc-cell-est">${pCell}</td>
             <td class="mc-cell-final"><span class="mc-share-final${hasP ? ' has-personal' : ''}">${_mcPct(deck.finalShare, 2)}</span></td>
-            <td class="mc-cell-players"><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
+            <td class="mc-cell-players"><span class="mc-players-count">${zahlLokal(deck.count)}</span></td>
             <td class="mc-cell-enc">
               <div class="mc-encounters-bar mc-enc-${dEncTier}">
                 <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${dBarW}%"></div></div>
@@ -8686,7 +8704,7 @@ window.MetaCall = (function () {
   <div class="metacall-panel-title">
     <span class="mc-panel-title-text">${t('mc.panelField')}</span>
     <span class="mc-badge">Top ${TOP_N}</span>
-    <span class="mc-badge" id="mc-players-badge">${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')}</span>
+    <span class="mc-badge" id="mc-players-badge">${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')}</span>
     <button class="mc-collapse-all-btn" onclick="MetaCall._toggleAllDetails()" title="${esc(allBtnLabel)}" aria-label="${esc(allBtnLabel)}">
       <span class="mc-btn-icon">${allBtnIcon}</span>
       <span class="mc-btn-text">${esc(allBtnLabel)}</span>
@@ -8729,7 +8747,7 @@ window.MetaCall = (function () {
           <th class="mc-th-est" title="${esc(t('mc.headerPersonalTooltip'))}">${t('mc.headerPersonal')}</th>
           <th class="mc-th-final" title="${esc(t('mc.headerFinalTooltip'))}">${t('mc.headerFinal')}</th>
           <th class="mc-th-players">${t('mc.headerPlayers')}</th>
-          <th class="mc-th-enc" title="${esc(t('mc.headerAvgEncTooltip').replace('{n}', _settings.rounds))}">${t('mc.headerAvgEnc')} (${_settings.rounds} R.)</th>
+          <th class="mc-th-enc" id="mc-th-enc" title="${esc(t('mc.headerAvgEncTooltip').replace('{n}', _settings.rounds))}">${t('mc.headerAvgEnc')} (${_settings.rounds} R.)</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -8913,7 +8931,7 @@ window.MetaCall = (function () {
       return `<div class="mc-encounter-row">
         <div>
           <div class="mc-enc-name" title="${esc(deck.name)}">${esc(name)}${jTag}</div>
-          <div class="mc-enc-wr ${wrCls}">WR ${wrPct}% · P(1×) ${p1.toFixed(0)}% · P(2×) ${p2.toFixed(0)}%</div>
+          <div class="mc-enc-wr ${wrCls}">WR ${wrPct}${_mcPz()} · P(1×) ${p1.toFixed(0)}${_mcPz()} · P(2×) ${p2.toFixed(0)}${_mcPz()}</div>
         </div>
         <div class="mc-enc-bar-bg"><div class="mc-enc-bar-fill" style="width:${barW}%"></div></div>
         <div class="mc-enc-val">∅ ${_mcNum(lambda, 2)}</div>
@@ -8923,7 +8941,7 @@ window.MetaCall = (function () {
     const day2Sub = t('mc.day2Sub')
       .replace('{pts}', _settings.day2Points)
       .replace('{r}',   _settings.rounds)
-      .replace('{n}',   _settings.totalPlayers.toLocaleString());
+      .replace('{n}',   zahlLokal(_settings.totalPlayers));
 
     return `
 <div class="metacall-panel">
@@ -8938,7 +8956,7 @@ window.MetaCall = (function () {
 
     <div class="mc-day2-card">
       <div class="mc-day2-deck-name">${esc(_settings.myDeck)}</div>
-      <div class="mc-day2-pct${cls}">${pct}%</div>
+      <div class="mc-day2-pct${cls}">${pct}${_mcPz()}</div>
       <div class="mc-day2-label">${t(_predictTitleKey())}</div>
       <div class="mc-day2-sub">${day2Sub}</div>
       <div class="mc-day2-stats">
@@ -9239,8 +9257,8 @@ window.MetaCall = (function () {
             data-reason-id="${reasonId}">
         <td class="mc-rec-rank">${i + 1}</td>
         <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}${counterPickTag}</span>${historyLine}</td>
-        <td class="mc-rec-day2"><strong>${day2Pct}%</strong>${unterSchwelleTag}</td>
-        <td class="mc-rec-wr">${wrPct}%</td>
+        <td class="mc-rec-day2"><strong>${day2Pct}${_mcPz()}</strong>${unterSchwelleTag}</td>
+        <td class="mc-rec-wr">${wrPct}${_mcPz()}</td>
         <td class="mc-rec-wins">∅ ${_dezimalMc(r.expWin.toFixed(2))}</td>
         <td class="mc-rec-toggle"><span class="mc-rec-chevron" aria-hidden="true">▼</span></td>
       </tr>
@@ -9275,7 +9293,7 @@ window.MetaCall = (function () {
                   onclick="MetaCall._jumpToDeckAnalysis('${safeNameJs}')">
               <div class="mc-tip-head">
                 <span class="mc-tip-name">${icon}${esc(tip.name)}</span>
-                <span class="mc-tip-day2">${esc(pillLabel)}: <strong>${day2Pct}%</strong></span>
+                <span class="mc-tip-day2">${esc(pillLabel)}: <strong>${day2Pct}${_mcPz()}</strong></span>
               </div>
               <div class="mc-tip-reason">${esc(reasonText)}</div>
             </div>`;
@@ -9401,13 +9419,13 @@ window.MetaCall = (function () {
           <div class="mc-frozen-share-bar"><div class="mc-frozen-share-bar-fill" style="width:${barW}%"></div></div>
           <span class="mc-frozen-share-pct-val"><strong>${shareStr}%</strong></span>
         </td>
-        <td class="mc-frozen-share-players">${a.players.toLocaleString()}</td>
+        <td class="mc-frozen-share-players">${zahlLokal(a.players)}</td>
       </tr>`;
     }).join('');
 
     const totalsHint = t('mc.frozenShareTotals')
       .replace('{archetypes}', String(sorted.length))
-      .replace('{players}', total.toLocaleString())
+      .replace('{players}', zahlLokal(total))
       .replace('{n}', String(cached.tournamentCount));
 
     return `
@@ -9470,7 +9488,7 @@ window.MetaCall = (function () {
         <td class="mc-rec-score"><strong>${scoreStr}</strong></td>
         <td class="mc-rec-wr">${winStr}%</td>
         <td class="mc-rec-day2conv">${day2Str}%</td>
-        <td class="mc-rec-players">${a.players.toLocaleString()}</td>
+        <td class="mc-rec-players">${zahlLokal(a.players)}</td>
       </tr>`;
     }).join('');
 
@@ -10022,6 +10040,16 @@ window.MetaCall = (function () {
       tmp.innerHTML = renderFieldPanel(field);
       const newTbody = tmp.querySelector('tbody');
       if (newTbody) fieldTbody.innerHTML = newTbody.innerHTML;
+      /* BEFUND (Abnahmerunde 30.08.2026): hier wird nur der <tbody>
+         getauscht. Die Kopfzeile traegt aber die Rundenzahl —
+         "Ø Begegnungen (8 R.)". Wer die Runden auf 9 stellte, bekam
+         richtig gerechnete Zahlen unter einem Kopf, der 8 behauptete. */
+      const neuerKopf = tmp.querySelector('#mc-th-enc');
+      const alterKopf = container.querySelector('#mc-th-enc');
+      if (neuerKopf && alterKopf) {
+        alterKopf.innerHTML = neuerKopf.innerHTML;
+        alterKopf.title = neuerKopf.title;
+      }
     }
     // Player-count badge in the field-panel header is rendered alongside
     // the panel title (not inside the tbody we just swapped). Sync it
@@ -10030,7 +10058,7 @@ window.MetaCall = (function () {
     // focus on any active personal-share input.
     const playersBadge = container.querySelector('#mc-players-badge');
     if (playersBadge) {
-      playersBadge.textContent = `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')}`;
+      playersBadge.textContent = `${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')}`;
     }
     const resultsPanel = container.querySelector('.metacall-results-grid');
     const resultsWrap  = resultsPanel ? resultsPanel.closest('.metacall-panel') : null;
@@ -10233,7 +10261,7 @@ window.MetaCall = (function () {
 
       ctx.fillStyle = '#9ab1d4';
       ctx.font = '13px system-ui, sans-serif';
-      ctx.fillText('(' + deck.count.toLocaleString() + ')', countX, y + ROW_H / 2);
+      ctx.fillText('(' + zahlLokal(deck.count) + ')', countX, y + ROW_H / 2);
       ctx.textAlign = 'left';
 
       y += ROW_H;
@@ -10373,10 +10401,10 @@ window.MetaCall = (function () {
       // around it instead of behind it.
       const day2Pct = (tip.day2Prob * 100).toFixed(1);
       const pillLabel = _settings.tournamentType === 'cup'
-        ? `Top ${_settings.topCutSize || 8}: ${day2Pct}%`
+        ? `Top ${_settings.topCutSize || 8}: ${day2Pct}${_mcPz()}`
         : (_settings.tournamentType === 'challenge'
-            ? `1.-2.: ${day2Pct}%`
-            : `${t('mc.recDay2')}: ${day2Pct}%`);
+            ? `1.-2.: ${day2Pct}${_mcPz()}`
+            : `${t('mc.recDay2')}: ${day2Pct}${_mcPz()}`);
       ctx.font = 'bold 13px system-ui, sans-serif';
       const pillTextW = ctx.measureText(pillLabel).width;
       const pillW = pillTextW + 16;
@@ -10484,7 +10512,7 @@ window.MetaCall = (function () {
       ? ` · Past Meta: ${_pastMetaFormatKey || '?'}`
       : ` · Current Meta${(() => { const c = _displayInPersonSetCode(); return c ? ' (' + c + ')' : ''; })()}`;
     _paintHeader(ctx, W, 'META CALL',
-      `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}${_srcLabel}`);
+      `${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}${_srcLabel}`);
 
     // Section label
     ctx.fillStyle = '#3498db';
@@ -10549,7 +10577,7 @@ window.MetaCall = (function () {
       // Player count
       ctx.fillStyle = '#9ab1d4';
       ctx.font = '13px system-ui, sans-serif';
-      ctx.fillText('(' + deck.count.toLocaleString() + ')', countX, y + ROW_H / 2);
+      ctx.fillText('(' + zahlLokal(deck.count) + ')', countX, y + ROW_H / 2);
       ctx.textAlign = 'left';
 
       y += ROW_H;
@@ -10558,7 +10586,7 @@ window.MetaCall = (function () {
     _paintFooter(ctx, W, H);
     _showSharePreview(canvas, `metacall-field-${_formatDateFilename()}.png`,
       'Meta Call — Field Composition',
-      `Meta share prognosis for ${_settings.totalPlayers.toLocaleString()} players · ${_settings.rounds} rounds`);
+      `Meta share prognosis for ${zahlLokal(_settings.totalPlayers)} players · ${_settings.rounds} rounds`);
   }
 
   // ── A2) Field + Recommendations side-by-side share image ──
@@ -10764,10 +10792,10 @@ window.MetaCall = (function () {
     // Header subtitle adapts to active tournament type — Day 2,
     // Top Cut, or 1./2. Platz.
     const baseTitleLine = _settings.tournamentType === 'cup'
-      ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Top ${_settings.topCutSize}: ${_settings.day2Points} ${t('mc.ptsAbbr')}`
+      ? `${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Top ${_settings.topCutSize}: ${_settings.day2Points} ${t('mc.ptsAbbr')}`
       : (_settings.tournamentType === 'challenge'
-          ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · 1.-2.: ${_settings.day2Points} ${t('mc.ptsAbbr')}`
-          : `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}`);
+          ? `${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · 1.-2.: ${_settings.day2Points} ${t('mc.ptsAbbr')}`
+          : `${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}`);
     // View-mode suffix so the reader can tell single (per-variant) from
     // combined (family-grouped) at a glance — matters when both PNGs
     // arrive in the same Telegram thread.
@@ -10815,7 +10843,7 @@ window.MetaCall = (function () {
       canvas,
       `metacall-field-and-recs-${_formatDateFilename()}.png`,
       'Meta Call — Field & Recommendations',
-      `Meta + top picks for ${_settings.totalPlayers.toLocaleString()} players · ${_settings.rounds} rounds`,
+      `Meta + top picks for ${zahlLokal(_settings.totalPlayers)} players · ${_settings.rounds} rounds`,
     );
   }
 
@@ -10856,7 +10884,7 @@ window.MetaCall = (function () {
       ? ` · Past Meta: ${_pastMetaFormatKey || '?'}`
       : ` · Current Meta${(() => { const c = _displayInPersonSetCode(); return c ? ' (' + c + ')' : ''; })()}`;
     _paintHeader(ctx, W, 'META CALL',
-      `${_settings.myDeck} · ${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')}${_srcLabel2}`);
+      `${_settings.myDeck} · ${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')}${_srcLabel2}`);
 
     // Day 2 / Day 1 WR twin card
     const cardY = HEADER_H + 10;
@@ -10994,7 +11022,7 @@ window.MetaCall = (function () {
     _paintFooter(ctx, W, H);
     _showSharePreview(canvas, `metacall-day2-${_formatDateFilename()}.png`,
       `Meta Call — ${_settings.myDeck}`,
-      `Day 2 chance: ${pct}% · ${_settings.myDeck} vs ${_settings.totalPlayers.toLocaleString()} players`);
+      `Day 2 chance: ${pct}% · ${_settings.myDeck} vs ${zahlLokal(_settings.totalPlayers)} players`);
   }
 
   function _roundRect(ctx, x, y, w, h, r) {
@@ -11045,15 +11073,67 @@ window.MetaCall = (function () {
    * durch. Wer die eine aendert, aendert die andere mit.
    */
   function _prognostiziertesFeld() {
-    return (_shareList || [])
-      .filter(d => d && d.name && d.name !== '_junk')
-      .map(d => ({
-        name:         d.name,
-        finalShare:   typeof d.finalShare === 'number' ? d.finalShare : (d.onlineShare || 0),
-        onlineShare:  d.onlineShare || 0,
-        ladderShare:  d.ladderShare || 0,
-      }))
-      .sort((a, b) => b.finalShare - a.finalShare);
+    /* BEFUND (Abnahmerunde 30.08.2026): diese Funktion hat die
+       Kalibrierung des Nutzers NIE ausgeliefert.
+       `_shareList` traegt nur `onlineShare`; `finalShare` entsteht
+       ausschliesslich in buildField(), und dessen Ergebnis wurde nie
+       zurueckgeschrieben. Die Pruefung `typeof d.finalShare ===
+       'number'` war damit toter Code, der Rueckfallzweig
+       `(d.onlineShare || 0)` griff immer.
+       Gemessen: nach `_onPersonalShare('Dragapult','40')` zeigte die
+       Meta-Call-Tabelle 40,00 %, waehrend getPredictedField() im
+       selben Moment weiter 10,44 % lieferte. Drei Verbraucher haben
+       das ungeschoente Online-Feld benutzt: das Turnierbild, das
+       Panel "Matchups gegen Meta Call" (Feldanteil UND die daraus
+       gewichtete Win Rate) und app-anti-tech.js.
+
+       buildField() deckt nur die Top-N plus eigene Decks ab; der Rest
+       steckt im Sammelposten `_junk`. Damit die Liste so vollstaendig
+       bleibt wie bisher (gemessen 131 Eintraege), bekommt der Rest
+       den Sammelposten anteilig nach seinem Online-Anteil. Die Summe
+       bleibt dieselbe wie in der Tabelle. */
+    const liste = (_shareList || []).filter(d => d && d.name && d.name !== '_junk');
+    if (!liste.length) return [];
+
+    const feld = (typeof buildField === 'function' ? buildField() : []) || [];
+    const kalibriert = new Map();
+    let sammelposten = 0;
+    const eigene = [];
+    feld.forEach(d => {
+      if (!d || !d.name) return;
+      if (d.name === '_junk') { sammelposten = d.finalShare || 0; return; }
+      kalibriert.set(d.name, d.finalShare || 0);
+      if (d.isCustom) eigene.push(d);
+    });
+
+    // Die Normierung, die buildField() vornimmt, muss hier dieselbe sein,
+    // sonst summiert sich das Ergebnis nicht auf 100.
+    const summeOnline = liste.reduce((s, d) => s + (d.onlineShare || 0), 0) || 1;
+    const rest = liste.filter(d => !kalibriert.has(d.name));
+    const restSumme = rest.reduce((s, d) => s + (d.onlineShare || 0), 0);
+    const faktor = restSumme > 0 ? (sammelposten / ((restSumme / summeOnline) * 100)) : 0;
+
+    const ladder = new Map(liste.map(d => [d.name, d.ladderShare || 0]));
+    const aus = liste.map(d => {
+      const norm = ((d.onlineShare || 0) / summeOnline) * 100;
+      return {
+        name:        d.name,
+        finalShare:  kalibriert.has(d.name) ? kalibriert.get(d.name) : norm * faktor,
+        onlineShare: d.onlineShare || 0,
+        ladderShare: d.ladderShare || 0,
+      };
+    });
+    // Eigene Decks stehen nicht in _shareList, gehoeren aber ins Feld.
+    eigene.forEach(d => {
+      if (aus.some(x => x.name === d.name)) return;
+      aus.push({
+        name:        d.name,
+        finalShare:  d.finalShare || 0,
+        onlineShare: 0,
+        ladderShare: ladder.get(d.name) || 0,
+      });
+    });
+    return aus.sort((a, b) => b.finalShare - a.finalShare);
   }
 
   function generateTournamentImage() {
@@ -11071,7 +11151,7 @@ window.MetaCall = (function () {
     const name = (_settings.tournamentName || '').trim();
     const typLabel = t(_typeLabelI18nKey(_settings.tournamentType));
     const spieler = _settings.totalPlayers
-      ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ` : '';
+      ? `${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')} · ` : '';
     window.DsShare.shareMetaCallPost({
       /* Turniername als Titel, Meta als Kicker — siehe shareMetaCallPost. */
       titel:        name || typLabel || t('mc.imageTitle'),

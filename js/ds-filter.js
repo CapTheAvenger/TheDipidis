@@ -221,6 +221,7 @@
     }
 
     function zeichne() {
+        horcheAufQuellen();
         var tab = aktiverTab();
         var raum = raumFuerTab(tab);
         if (!raum) return;
@@ -251,6 +252,30 @@
         }
         document.addEventListener('languageChanged', zeichne);
         window.addEventListener('languageChanged', zeichne);
+
+        /* BEFUND (Abnahmerunde 30.08.2026): die Kopie oben und das
+           Original unten liefen auseinander. Das eigene Menue schreibt
+           in die Quell-Auswahl zurueck (Zeile 179), umgekehrt gab es
+           nichts: wer das Format unten im "Meta/Format-Filter" aenderte,
+           sah oben weiter das alte. Zwei widerspruechliche Formatangaben
+           gleichzeitig auf einem Bildschirm.
+           Gehorcht wird der Quelle — sie ist das Original. */
+        horcheAufQuellen();
+    }
+
+    // Wird bei jedem zeichne() erneut aufgerufen: die Auswahlfelder
+    // entstehen teils erst, wenn der Reiter das erste Mal geladen hat.
+    // Der Merker verhindert Doppelanmeldungen.
+    function horcheAufQuellen() {
+        RAEUME.map(function (r) { return r.quelle; }).filter(Boolean)
+            .forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el || el.__dsFilterHorcht) return;
+                el.__dsFilterHorcht = true;
+                el.addEventListener('change', function () {
+                    try { setTimeout(zeichne, 30); } catch (e) { /* nie die Auswahl blockieren */ }
+                });
+            });
     }
 
     if (document.readyState === 'loading') {

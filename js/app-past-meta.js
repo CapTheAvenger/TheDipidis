@@ -299,7 +299,7 @@
             if (pastMetaGrid && !pastMetaGrid.innerHTML.trim()) {
                 showTableSkeleton(pastMetaGrid, { rows: 6, cols: 4, withImage: true });
             }
-            showToast('Loading Past Meta data...', 'info');
+            showToast(t('pm.toastLoading'), 'info');
             
             // Phase 1: Load lightweight overview CSV (24KB) for tournament/format dropdowns
             const tournamentOverview = await loadCSV('tournament_cards_data_overview.csv');
@@ -345,7 +345,7 @@
 
             // Populate Format Filter from manifest meta_keys (no full data load yet)
             const formatSelect = document.getElementById('pastMetaFormatFilter');
-            resetSelectWithPlaceholder(formatSelect, '-- All Formats --', 'all');
+            resetSelectWithPlaceholder(formatSelect, t('pm.allFormats'), 'all');
             let defaultFormat = 'all';
 
             if (pastMetaManifest && Array.isArray(pastMetaManifest.meta_keys) && pastMetaManifest.meta_keys.length > 0) {
@@ -435,7 +435,7 @@
             
             const tournamentCount = [...new Set(pastMetaDecks.map(d => d.tournament_id))].length;
             devLog(`Loaded ${pastMetaDecks.length} decks from ${tournamentCount} tournaments (lazy card loading)`);
-            showToast(`Past Meta: ${pastMetaDecks.length} decks loaded`, 'success');
+            showToast(t('pm.toastLoaded').replace('{n}', zahlLokal(pastMetaDecks.length)), 'success');
             window.pastMetaLoaded = true;
           } catch (err) {
             console.error('[Past Meta] loadPastMeta failed:', err);
@@ -680,7 +680,7 @@
                 });
             
             // Rebuild tournament filter dropdown
-            resetSelectWithPlaceholder(tournamentSelect, '-- All Tournaments --', 'all');
+            resetSelectWithPlaceholder(tournamentSelect, t('pm.allTournaments'), 'all');
             tournaments.forEach(tournament => {
                 // Clean tournament name: remove " - Limitless"
                 let cleanName = tournament.tournament_name.replace(/\s*[-|•]\s*Limitless\s*$/i, '');
@@ -1676,7 +1676,7 @@
             const DAY2_MIN_SPIELER = 10;
             const day2Duenn = day1 > 0 && day1 < DAY2_MIN_SPIELER;
             const fmtPct = (n) => n.toFixed(1).replace('.', ',') + '%';
-            const fmtInt = (n) => Math.round(n).toLocaleString();
+            const fmtInt = (n) => zahlLokal(Math.round(n));
 
             const tournLabel = (typeof t === 'function' ? t('pm.perfStatTournaments') : 'Tournaments');
             const playersLabel = (typeof t === 'function' ? t('pm.perfStatPlayers') : 'Players');

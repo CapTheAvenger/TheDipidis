@@ -78,6 +78,8 @@ from card_scraper_shared import (
     CardDatabaseLookup,
     extract_cards_from_decklist_soup,
 )
+# Dieselbe Regel wie in der Bestandsreparatur.
+from ace_spec_regel import entscheide_zeile, lade_ace_liste
 
 # Reuse the JH scraper's name → labs-tid resolver + format/meta derivation
 # so per-decklist rows carry the same canonical labels as the existing
@@ -551,7 +553,12 @@ def scrape_one_tournament(
                     'set_number':                set_number,
                     'count':                     c.get('count', 0),
                     'type':                      c.get('type', '') or c.get('card_type', ''),
-                    'is_ace_spec':               'Yes' if c.get('is_ace_spec') else 'No',
+                    # Belegt statt geraten — siehe backend/core/ace_spec_regel.py.
+                    'is_ace_spec':               ('Yes' if c.get('is_ace_spec')
+                                                  else entscheide_zeile(
+                                                      card_name, lade_ace_liste(),
+                                                      c.get('count', 0),
+                                                      c.get('type', '') or c.get('card_type', ''))),
                     'scraped_at':                scraped_at,
                 })
 

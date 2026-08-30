@@ -1004,7 +1004,11 @@
                     // waehrend die Karte daneben "54,0 %" schreibt.
                     const kommaAus = (x, n) => (getLang() === 'de'
                         ? x.toFixed(n).replace('.', ',') : x.toFixed(n));
-                    const currentRank = currentRankValue > 0 ? kommaAus(currentRankValue, 1) : kommaAus(0, 1);
+                    /* NACHTRAG (Schlussabnahme 30.08.2026): eine
+                       Nachkommastelle, waehrend die Tabellen derselben
+                       Ansicht zwei zeigen ("13,7" ueber "13,67"). Eine
+                       Ø-Platzierung hat auf dieser Seite zwei. */
+                    const currentRank = currentRankValue > 0 ? kommaAus(currentRankValue, 2) : kommaAus(0, 2);
                     const currentShare = kommaAus(currentShareValue, 1);
                     const m3Deck = window.m3BaselineData ? window.m3BaselineData[deckName] : null;
 

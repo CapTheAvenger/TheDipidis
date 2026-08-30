@@ -435,15 +435,26 @@ html.is-signed-out [onclick*="Wishlist"],
 html.is-signed-out [onclick*="ishlist"],
 html.is-signed-out [onclick*="Tradelist"],
 html.is-signed-out [onclick*="radelist"] {
-    opacity: .5;
-    filter: saturate(.35);
+    /* BEFUND (Schlussabnahme 30.08.2026): gedaempft wurde ueber halbe
+       Deckkraft plus Entsaettigung. Das zog den weissen Text auf den
+       Knoepfen auf 2,06:1 (gruen) und 2,15:1 (rot) — auf jeder Seite
+       sechzigmal.
+       Die Absicht bleibt richtig und bleibt: der Knopf soll aussehen,
+       wie er sich verhaelt. Sie darf ihn nur nicht unlesbar machen.
+       Blasser geht nicht — weiss auf diesen beiden Farben traegt schon
+       in voller Saettigung nur 5,00 bzw. 4,53, jede Aufhellung faellt
+       darunter (nachgemessen: 3,92 und 3,70). Also GRAU statt blass:
+       das ist ohnehin das deutlichere Zeichen fuer "hier fehlt noch
+       etwas", und der Kontrast steigt, statt zu fallen — 5,7 und
+       6,9:1. */
+    filter: grayscale(.85);
 }
 html.is-signed-out [onclick*="Collection"]:hover,
 html.is-signed-out [onclick*="Wishlist"]:hover,
 html.is-signed-out [onclick*="ishlist"]:hover,
 html.is-signed-out [onclick*="Tradelist"]:hover,
 html.is-signed-out [onclick*="radelist"]:hover {
-    opacity: .85;
+    opacity: 1;
     filter: none;
 }
 

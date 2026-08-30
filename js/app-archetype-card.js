@@ -60,6 +60,24 @@
         return isDe() ? z.toLocaleString('de-DE') : z.toLocaleString('en-US');
     }
 
+    /* BEFUND (Schlussabnahme 30.08.2026): die Kachel schrieb
+       "72 von 708 Antritten … 10,10 % Cut-Quote". In der Datei stehen
+       71,5 von 708 — Antritte sind turniergewichtet. fmtGanz() rundete
+       die halbe Zahl weg, die Quote kam aus dem ungerundeten Wert, und
+       72/708 sind 10,17 %. Die Startseite zeigte fuer denselben Wert
+       schon "71,5 von 708" (js/meta-analysis-hub.js, dort am
+       29.08. behoben) — zwei Ansichten, dieselbe Zahl, zwei
+       Schreibweisen, und nur eine passte zu ihrer eigenen Prozentangabe.
+       Dieselbe Regel wie dort: eine Nachkommastelle, wo der Wert keine
+       ganze Zahl ist. */
+    function fmtGewichtet(n) {
+        const z = Number(n) || 0;
+        const loc = isDe() ? 'de-DE' : 'en-US';
+        return Number.isInteger(z)
+            ? z.toLocaleString(loc)
+            : z.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    }
+
     function esc(s) {
         return String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -246,8 +264,8 @@
                 esc(L('arc.convCtx', de
                         ? '{t} von {b} Antritten mit Top-8-Schnitt → {q} % Cut-Quote'
                         : '{t} of {b} entries in cut events → {q} % cut rate')
-                    .replace('{t}', fmtGanz(c.top8))
-                    .replace('{b}', fmtGanz(c.brought))
+                    .replace('{t}', fmtGewichtet(c.top8))
+                    .replace('{b}', fmtGewichtet(c.brought))
                     .replace('{q}', fmt((c.top8 / c.brought) * 100, 2))),
                 c.thin ? L('arc.convThin', de
                     ? 'Kleine Stichprobe — der Wert ist zum Meta-Durchschnitt hin geglättet.'

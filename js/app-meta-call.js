@@ -9664,7 +9664,13 @@ window.MetaCall = (function () {
     let staleTag = '';
     const _chipDatum = _lagNeuesteLabsZeile || (_dataLastScrapedAt || '').slice(0, 10);
     if (_chipDatum) {
-      const shortDate = _chipDatum;
+      /* BEFUND (Schlussabnahme 30.08.2026): hier ging das rohe
+         ISO-Datum in den deutschen Satz — "Juengstes Turnier:
+         2026-06-12". Dieselbe Datei dreht es an anderer Stelle schon
+         richtig um (`.split('-').reverse().join('.')`). */
+      const shortDate = (typeof getLang === 'function' && getLang() === 'en')
+        ? _chipDatum
+        : String(_chipDatum).split('-').reverse().join('.');
       const ageDays = (function () {
         try {
           return Math.floor((Date.now() - new Date(shortDate + 'T00:00:00Z').getTime()) / 86400000);

@@ -3042,8 +3042,8 @@
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
                         <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="Add ${displayName} Prize Pack to collection">+</button>
                         <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="Remove ${displayName} Prize Pack from collection">-</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#fff; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t('akt.toggleWishlist').replace('{n}', displayName))}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#fff; background: ${userTradesCard ? '#16a085' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#16a085' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t('akt.toggleTradelist').replace('{n}', displayName))}">&#8644;</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#16233a; background: ${userWantsCard ? '#F06292' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#F06292' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t('akt.toggleWishlist').replace('{n}', displayName))}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#16233a; background: ${userTradesCard ? '#3fbfa4' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#3fbfa4' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t('akt.toggleTradelist').replace('{n}', displayName))}">&#8644;</button>
                     </div>
                 </div>
                 <div class="card-database-info">
@@ -3169,7 +3169,16 @@
                 }
                 // Format the display with max count
                 const maxCountText = maxCount > 0 ? ` · Max: ${maxCount}x` : '';
-                const coveragePctLabel = (percentage > 0 && percentage < 0.1) ? '<0.1' : percentage.toFixed(1);
+                /* BEFUND (Schlussabnahme 30.08.2026): "1.9% Coverage" mit
+                   Punkt, waehrend der Preis zwei Zeilen darueber das
+                   Komma richtig setzt. Auf einer Seite 60-mal. */
+                const _kommaZahl = (v, st) => {
+                    const txt = Number(v).toFixed(st);
+                    return (typeof getLang === 'function' && getLang() === 'en') ? txt : txt.replace('.', ',');
+                };
+                const coveragePctLabel = (percentage > 0 && percentage < 0.1)
+                    ? _kommaZahl(0.1, 1).replace(/^/, '<')
+                    : _kommaZahl(percentage, 1);
                 coverageDisplay = `<div class="card-database-coverage" style="background: ${coverageColor};" title="${deckCount} Decks / ${archetypeCount} Archetypes${maxCount > 0 ? ' · Max: ' + maxCount + 'x copies per deck' : ''}">
                     ${coverageIcon} ${coveragePctLabel}% Coverage${maxCountText}
                 </div>`;
@@ -3186,8 +3195,8 @@
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="Add ${displayName} to collection">+</button>
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="Remove ${displayName} from collection">-</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color: ${userWantsCard ? '#fff' : '#fff'}; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist') + ' — ' + displayName)}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color: #fff; background: ${userTradesCard ? '#16a085' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#16a085' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist') + ' — ' + displayName)}">${userTradesCard ? '&#8644;' : '&#8644;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#16233a; background: ${userWantsCard ? '#F06292' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#F06292' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist') + ' — ' + displayName)}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#16233a; background: ${userTradesCard ? '#3fbfa4' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#3fbfa4' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist') + ' — ' + displayName)}">${userTradesCard ? '&#8644;' : '&#8644;'}</button>
                     </div>
                 </div>
                 <div class="card-database-info">

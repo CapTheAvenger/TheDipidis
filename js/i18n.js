@@ -3596,7 +3596,7 @@ const translations = {
     'mc.labelJunkWinRate':      'Others-Win% (vs Others)',
     'mc.labelJunkPlayers':      'Others-Spieler',
     'mc.junkExplanation':       'z.B. 30 % → 30% der Spieler spielen irgendetwas und haben keine Ahnung vom Meta.',
-    'mc.junkDecks':             'Others',
+    'mc.junkDecks':             'Sonstige',
     'mc.panelField':            'Zusammensetzung des Metas',
     'mc.variants':              'Varianten',
     'mc.flatView':              '📊 Varianten einzeln',

@@ -1841,8 +1841,18 @@
                 const matchKey = (window.normalizeArchetypeForMatch || stripExSuffix);
                 const cleanArch = matchKey(archetype);
                 const deckStatEntry = deckStats.find(d => d.deck_name && matchKey(d.deck_name) === cleanArch);
-                if (deckStatEntry && deckStatEntry.win_rate) {
-                    winrate = deckStatEntry.win_rate;
+                /* BEFUND (Schlussabnahme 30.08.2026): hier stand die
+                   ROHSPALTE `win_rate` ("54.05%") — mit Punkt. Die
+                   Datei fuehrt daneben `win_rate_numeric` ("54,05"),
+                   genau fuer diesen Fall. Auf demselben Bildschirm
+                   stand die Kachel darueber auf "54,0 %". */
+                if (deckStatEntry && (deckStatEntry.win_rate_numeric || deckStatEntry.win_rate)) {
+                    const roh = deckStatEntry.win_rate_numeric || deckStatEntry.win_rate;
+                    const zahl = (typeof parseLocaleNumber === 'function')
+                        ? parseLocaleNumber(roh, NaN) : parseFloat(String(roh).replace(',', '.'));
+                    winrate = Number.isFinite(zahl)
+                        ? (typeof zahlLokal === 'function' ? zahlLokal(zahl, 2) : zahl.toFixed(2)) + ' %'
+                        : String(deckStatEntry.win_rate);
                 }
                 
                 // Calculate matchup vs Top 20
@@ -1876,8 +1886,10 @@
                         });
                         
                         if (totalGames > 0) {
-                            const avgWinrate = (totalWins / totalGames * 100).toFixed(2);
-                            matchupVsTop20 = `${avgWinrate}% (${relevantMatchups.length} MU)`;
+                            const _wr = totalWins / totalGames * 100;
+                            const avgWinrate = (typeof zahlLokal === 'function')
+                                ? zahlLokal(_wr, 2) : _wr.toFixed(2);
+                            matchupVsTop20 = `${avgWinrate} % (${relevantMatchups.length} MU)`;
                         }
                     }
                 }

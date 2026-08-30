@@ -1140,6 +1140,33 @@
             }
         }
         
+        /* Gibt es fuer diesen Meta ueberhaupt einen Labs-Auszug?
+         *
+         * BEFUND (30.08.2026): hier stand ein HEAD auf
+         * data/labs_tournament_decks_<laufender Meta>.csv. Der Auszug
+         * entsteht erst, wenn Labs-Daten mit diesem Meta-Wert ankommen —
+         * fuer den laufenden Meta gibt es ihn also noch nicht, und jeder
+         * Seitenaufruf hinterliess `404 labs_tournament_decks_TEF-PBL.csv`
+         * in der Konsole. Abgefangen war das sauber; die Meldung stand
+         * trotzdem da, und wer echte Fehler sucht, sucht sie zwischen
+         * solchen Zeilen.
+         *
+         * Das Verzeichnis wird bei jedem Scraper-Lauf aus den tatsaechlich
+         * geschriebenen Dateien neu erzeugt (labs_tournament_scraper.py,
+         * _schreibe_labs_verzeichnis) und kann deshalb nicht veralten,
+         * ohne dass die Dateien danebenliegen. Fehlt es, wird nichts
+         * behauptet: dann gibt es auch keinen Auszug. */
+        let _labsVerzeichnis = null;
+        async function labsAuszugVorhanden(metaKey) {
+            if (_labsVerzeichnis === null) {
+                try {
+                    const r = await fetch(`${BASE_PATH}labs_tournament_decks_verzeichnis.json?t=${Date.now()}`);
+                    _labsVerzeichnis = r.ok ? ((await r.json()).meta_keys || []) : [];
+                } catch (_e) { _labsVerzeichnis = []; }
+            }
+            return _labsVerzeichnis.indexOf(String(metaKey).toUpperCase()) !== -1;
+        }
+
         /**
          * Render Tier List for Current Meta (Global)
          * Includes Top Archetypes hero section + Tier 1-3 + Rogue banners.
@@ -1320,13 +1347,10 @@
                 const metaKey = (fw && fw.oldest_legal_set && fw.current_set)
                     ? `${String(fw.oldest_legal_set).toUpperCase()}-${String(fw.current_set).toUpperCase()}`
                     : null;
-                if (metaKey) {
+                if (metaKey && await labsAuszugVorhanden(metaKey)) {
                     const labsUrl = `${BASE_PATH}labs_tournament_decks_${metaKey}.csv?t=${timestamp}`;
-                    const labsHead = await fetch(labsUrl, { method: 'HEAD' });
-                    if (labsHead.ok) {
-                        const labsRows = await fetchAndParseCSV(labsUrl);
-                        labsByName = aggregateLabsRowsByDeck(labsRows);
-                    }
+                    const labsRows = await fetchAndParseCSV(labsUrl);
+                    labsByName = aggregateLabsRowsByDeck(labsRows);
                 }
             } catch (_e) { /* labs missing — share + WR only */ }
 

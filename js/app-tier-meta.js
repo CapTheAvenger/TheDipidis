@@ -888,9 +888,14 @@
                         : getArchetypeImage(item.representativeVariant, representativeCards);
                     const combinedMainEscaped = escapeJsStr(item.key || item.label || item.representativeVariant || '');
                     const combinedVariantsJsonEscaped = escapeJsStr(encodeURIComponent(JSON.stringify(item.variants || [])));
+                    /* BEFUND (Schlussabnahme 30.08.2026): die Heldenkachel
+                       schrieb "Ø Rang 14,0", die Tabelle direkt darunter
+                       "14,00" und "14,20" — dieselbe Groesse auf einem
+                       Bildschirm in zwei Genauigkeiten. Zwei Stellen,
+                       wie ueberall sonst bei Ø-Platzierungen. */
                     const avgRankText = Number.isFinite(item.weightedRank) && item.weightedRank < 999
-                        ? item.weightedRank.toFixed(1)
-                        : '0.0';
+                        ? item.weightedRank.toFixed(2)
+                        : '0.00';
                     const variantCount = item.variants.length;
                     const variantLabel = variantCount === 1 ? t('cl.heroVariantSingular') : t('cl.heroVariantPlural');
 
@@ -2056,8 +2061,8 @@
                         + (restAnteil > 0
                             ? (deDS
                                 ? ` · ${fmtPct(100 - restAnteil, 1)} von ${fmtNumDS(feldGesamt)} Listen im Meta;`
-                                  + ` die uebrigen ${fmtNumDS(feldGesamt - totalEntries)} (${fmtPct(restAnteil, 1)})`
-                                  + ' fuehrt Limitless als "Other" und meldet sie nicht einzeln'
+                                  + ` die \u00fcbrigen ${fmtNumDS(feldGesamt - totalEntries)} (${fmtPct(restAnteil, 1)})`
+                                  + ' f\u00fchrt Limitless als \u201eOther\u201c und meldet sie nicht einzeln'
                                 : ` · ${fmtPct(100 - restAnteil, 1)} of ${fmtNumDS(feldGesamt)} lists in the field;`
                                   + ` the remaining ${fmtNumDS(feldGesamt - totalEntries)} (${fmtPct(restAnteil, 1)})`
                                   + ' Limitless files as "Other" and does not report them individually')

@@ -1006,21 +1006,29 @@
             const container = document.getElementById('elementTypeFilterOptions');
             if (!container) return;
 
+            /* BEFUND (Abnahmerunde 30.08.2026): die Energietypen standen
+               als einzige Liste im Filter auf Englisch, waehrend die
+               Kategorie-Liste direkt darueber vollstaendig deutsch ist.
+               Auf den deutschen Karten heissen sie Pflanze, Feuer,
+               Wasser, Elektro, Psycho, Kampf, Finsternis, Metall,
+               Drache, Farblos — das ist kein Szene-Denglisch, sondern
+               der aufgedruckte Name. Der `value` bleibt englisch, weil
+               die Filterlogik und die Kartendaten darauf laufen. */
             const elementTypes = [
-                { value: 'Grass', label: 'Grass', color: '#78C850' },
-                { value: 'Fire', label: 'Fire', color: '#F08030' },
-                { value: 'Water', label: 'Water', color: '#6890F0' },
-                { value: 'Lightning', label: 'Lightning', color: '#F8D030' },
-                { value: 'Psychic', label: 'Psychic', color: '#F85888' },
-                { value: 'Fighting', label: 'Fighting', color: '#C03028' },
-                { value: 'Darkness', label: 'Darkness', color: '#705848' },
-                { value: 'Metal', label: 'Metal', color: '#B8B8D0' },
-                { value: 'Dragon', label: 'Dragon', color: '#7038F8' },
-                { value: 'Colorless', label: 'Colorless', color: '#A8A878' }
+                { value: 'Grass', label: t('cards.energyGrass'), color: '#78C850' },
+                { value: 'Fire', label: t('cards.energyFire'), color: '#F08030' },
+                { value: 'Water', label: t('cards.energyWater'), color: '#6890F0' },
+                { value: 'Lightning', label: t('cards.energyLightning'), color: '#F8D030' },
+                { value: 'Psychic', label: t('cards.energyPsychic'), color: '#F85888' },
+                { value: 'Fighting', label: t('cards.energyFighting'), color: '#C03028' },
+                { value: 'Darkness', label: t('cards.energyDarkness'), color: '#705848' },
+                { value: 'Metal', label: t('cards.energyMetal'), color: '#B8B8D0' },
+                { value: 'Dragon', label: t('cards.energyDragon'), color: '#7038F8' },
+                { value: 'Colorless', label: t('cards.energyColorless'), color: '#A8A878' }
             ];
 
             container.innerHTML = elementTypes.map(et => (
-                `<label class="label-block"><input type="checkbox" value="${et.value}" onchange="filterAndRenderCards()"> ${et.label}</label>`
+                `<label class="label-block"><input type="checkbox" value="${et.value}" onchange="filterAndRenderCards()"> ${escapeHtml(et.label)}</label>`
             )).join('');
         }
 
@@ -1229,7 +1237,11 @@
             // Add separator before metas
             const separator = document.createElement('div');
             separator.className = 'meta-filter-separator';
-            separator.innerHTML = '<strong class="label-block meta-filter-title">Tournament Formats:</strong>';
+            // BEFUND (Abnahmerunde 30.08.2026): fest verdrahtetes Englisch
+            // mitten im sonst deutschen Filterfeld — direkt ueber
+            // "Meta / Format" und den deutschen Set-Kuerzeln.
+            separator.innerHTML = '<strong class="label-block meta-filter-title">'
+                + escapeHtml(t('cards.tournamentFormats')) + '</strong>';
             container.appendChild(separator);
             
             sortedMetas.forEach(meta => {
@@ -2894,7 +2906,7 @@
                 // Add ellipsis if there's a gap
                 if (i > 0 && page - pagesToShow[i-1] > 1) {
                     const ellipsis = document.createElement('span');
-                    ellipsis.textContent = '...';
+                    ellipsis.textContent = '\u2026';
                     ellipsis.className = 'pagination-ellipsis';
                     pageInfo.appendChild(ellipsis);
                 }

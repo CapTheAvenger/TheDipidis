@@ -9,7 +9,8 @@
         'getTotalRadiantCopiesInDeck', 'getLegalMaxCopies', 'getOpeningHandProbability',
         'formatAverageValueForUi', 'getAverageValueSuffix', 'setAverageDisplayMode',
         'ensureAverageDisplayToggleUi', 'sanitizeDeckDependencies', 'getStrictBaseCardName',
-        'calculateCombinedVariantStats', 'safeParseFloat', 'getPreferredVersionForCard'
+        'calculateCombinedVariantStats', 'safeParseFloat', 'getPreferredVersionForCard',
+        'zahlLokal'
     ];
     utils.forEach(fn => { if (typeof window[fn] !== 'function' && typeof eval(fn) === 'function') window[fn] = eval(fn); });
 })();
@@ -1308,6 +1309,28 @@ function showTableSkeleton(containerOrId, opts) {
  * parsePastMetaNumber, _parsePriceNum, plus inline
  * parseFloat(x.replace(',', '.')) in 10+ spots). Use this everywhere.
  */
+/* Die Gegenrichtung zu parseLocaleNumber: eine Zahl so schreiben, wie
+ * die eingestellte Sprache sie schreibt.
+ *
+ * BEFUND (Abnahmerunde 30.08.2026): `.toLocaleString()` OHNE Argument
+ * nimmt die Sprache des BROWSERS, nicht die der Seite. Wer die Seite
+ * auf Deutsch liest, aber einen englischen Browser hat, sah "2,000
+ * Spieler" — ein Komma an der Stelle des Tausenderpunkts. Gezaehlt:
+ * 21 Aufrufstellen ohne Argument, alle in Zahlen, die neben deutsch
+ * formatierten Werten stehen.
+ */
+function zahlLokal(wert, stellen) {
+    // Number(null) ist 0 — ein fehlender Wert soll aber nicht als "0"
+    // dastehen, sondern als nichts.
+    if (wert == null || wert === '') return '';
+    const n = Number(wert);
+    if (!Number.isFinite(n)) return String(wert == null ? '' : wert);
+    const loc = (typeof getLang === 'function' && getLang() === 'en') ? 'en-US' : 'de-DE';
+    return stellen == null
+        ? n.toLocaleString(loc)
+        : n.toLocaleString(loc, { minimumFractionDigits: stellen, maximumFractionDigits: stellen });
+}
+
 function parseLocaleNumber(input, fallback = 0) {
     if (typeof input === 'number' && Number.isFinite(input)) return input;
     if (input == null) return fallback;

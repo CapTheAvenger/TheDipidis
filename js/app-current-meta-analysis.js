@@ -2982,7 +2982,13 @@
                     devLog(`Rendered matchups via CSV fallback for: ${archetype}`);
                     return;
                 }
-                console.error(`No HTML matchup section + CSV fallback failed for: ${archetype}`);
+                /* BEFUND (Abnahmerunde 30.08.2026): hier stand console.error.
+                   Fuer ein Deck ohne eine einzige Partie ist "keine
+                   Matchup-Daten" aber der richtige Zustand, kein Fehler —
+                   die Oberflaeche sagt das daneben auch ehrlich. Ein
+                   roter Konsoleneintrag pro datenarmem Deck verdeckt die
+                   echten Fehler. Gemeldet wird jetzt als Hinweis. */
+                devLog(`Keine Matchup-Daten fuer: ${archetype} (weder HTML-Abschnitt noch CSV)`);
                 matchupsSection.classList.add('d-none');
                 return;
             }

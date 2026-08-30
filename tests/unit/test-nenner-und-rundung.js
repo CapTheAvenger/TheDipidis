@@ -151,7 +151,12 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
 describe('Der "Other"-Eimer wird ausgewiesen', () => {
     it('die Kachel nennt beide Nenner', () => {
         assert.match(TIER, /window\.feldGroesseAusAnteilen/);
-        assert.match(TIER, /fuehrt Limitless als "Other" und meldet sie nicht einzeln/);
+        // NACHTRAG (Abnahmerunde 30.08.2026): hier stand die Zeichenkette
+        // mit ASCII-Ersatzschreibung ("uebrigen", "fuehrt"). Der Satz wird
+        // dem Nutzer ANGEZEIGT — in einem deutschen Satz stehen Umlaute.
+        // Der Test hat die Schreibweise festgehalten, statt sie zu pruefen.
+        assert.match(TIER, /f\\u00fchrt Limitless als \\u201eOther\\u201c und meldet sie nicht einzeln/);
+        assert.ok(!/uebrigen \$\{fmtNumDS/.test(TIER), 'die ASCII-Ersatzschreibung ist zurueck');
         assert.match(TIER, /Listen im Meta;/);
     });
     it('nur wenn wirklich etwas fehlt', () => {

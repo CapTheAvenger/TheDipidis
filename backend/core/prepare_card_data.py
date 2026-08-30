@@ -15,6 +15,7 @@ import os
 import re
 import shutil
 import sys
+import unicodedata
 from typing import List, Dict
 from card_scraper_shared import get_data_dir, get_app_path, setup_console_encoding, load_set_order, card_sort_key
 
@@ -155,9 +156,128 @@ def get_base_pokemon_name(name: str) -> str:
     # Entferne bekannte Präfixe (Radiant, Galarian, Dark, etc.)
     name = re.sub(r'^(radiant|shining|galarian|hisuian|alolan|paldean|dark|light|basic)\s+', '', name)
     # Bereinige Satzzeichen (Mr. Mime -> mr-mime, Farfetch'd -> farfetchd)
-    name = name.replace("\u2019", "").replace("'", "").replace(".", "").strip()
+    name = name.replace("’", "").replace("'", "").replace(".", "").strip()
     # Leerzeichen zu Bindestrich für exakten PokéAPI-Match (Roaring Moon -> roaring-moon)
     return name.replace(" ", "-")
+
+
+# ── Dex-Nummer aus dem Kartennamen ───────────────────────────────────
+#
+# BEFUND (30.08.2026): `pokedex_number` fehlte in 1.999 von 17.182
+# Pokemon-Zeilen der ausgelieferten Chunks — 11,6 %. Die Luecke war
+# nicht zufaellig, sondern folgte vier Mustern, die get_base_pokemon_name
+# allesamt nicht kennt:
+#
+#   Bindestrich-Zusatz      Mewtwo-EX, Silvally-GX, Charizard-EX
+#   Besitzer davor          Team Rocket's Mewtwo ex, Iono's Bellibolt ex
+#   Beiname davor           Teal Mask Ogerpon ex, Bloodmoon Ursaluna ex,
+#                           Mega Lucario ex, Detective Pikachu
+#   Formangabe dahinter     Castform Sunny Form, Shellos East Sea,
+#                           Wormadam Plant Cloak, Unown [A], Zapdos G
+#
+# Die alte Funktion schneidet nur Suffixe mit LEERZEICHEN davor ab und
+# kennt eine feste Praefixliste. Jede Karte, deren Art nicht am Anfang
+# oder allein steht, fiel durch.
+#
+# Statt die Liste der Beinamen zu verlaengern — sie waechst mit jedem
+# Set — sucht `loese_dex_nummer` die Art IM Namen: sie probiert alle
+# zusammenhaengenden Wortfolgen, laengste zuerst, und nimmt die, die in
+# data/pokemon_dex_numbers.json steht. "Mega Charizard X" hat die Art in
+# der Mitte, "Teal Mask Ogerpon" hinten, "Castform Sunny Form" vorne —
+# eine Regel deckt alle drei.
+#
+# Zwei Faelle bleiben absichtlich leer, weil eine Zahl dort falsch waere:
+#
+#   Tag Teams ("Mewtwo & Mew-GX", 31 Namen, 121 Zeilen) fuehren ZWEI
+#   Arten. Eine der beiden Nummern zu nehmen waere eine Behauptung.
+#
+#   Mehrdeutigkeit: passen bei gleicher Wortlaenge zwei verschiedene
+#   Arten, wird nichts gesetzt.
+#
+# Gegenprobe: von den 15.183 Zeilen, die schon eine Nummer trugen,
+# widerspricht die neue Aufloesung KEINER EINZIGEN. Sie fuellt 1.878 der
+# 1.999 Luecken; offen bleiben 121 Zeilen — 31 Tag Teams und
+# "Buried Fossil", das gar kein Pokemon ist.
+_DEX_SUFFIX = (r'(?:vstar|vmax|v-union|v|ex|gx|break|star|lv\.?x|legend'
+               r'|prism star|delta species)')
+
+
+def _dex_entkleide(name: str) -> str:
+    """Kleinschreibung, Satzzeichen weg, Kartenzusaetze hinten ab."""
+    s = unicodedata.normalize('NFKC', name or '').lower()
+    s = s.replace('’', '').replace("'", '').replace('.', '')
+    # Klammern nicht loeschen, sondern oeffnen: "ナッシー[Exeggutor]" traegt
+    # den einzigen lateinischen Namen darin.
+    s = re.sub(r'\[([^\]]*)\]', r' \1 ', s)
+    s = s.replace(':', ' ')                      # Type: Null
+    # Alles ausser Buchstaben, Ziffern, & und Bindestrich faellt weg.
+    # Das raeumt auch unsichtbare Zeichen ab: in den Chunks stand ein
+    # Zero-Width Space vor "Thievul", der jeden Vergleich scheitern liess.
+    s = re.sub(r'[^a-z0-9À-ɏ&\- ]', ' ', s)
+    s = re.sub(r'\s+', ' ', s).strip()
+    # Genau EIN Durchgang. Gegen alle 20.878 Kartennamen geprueft: ein
+    # zweiter aendert nichts, und eine Schleife, die nie eine zweite
+    # Runde dreht, taeuscht Gruendlichkeit vor.
+    # Der Bindestrich zaehlt hier als Trenner ("Mewtwo-EX" -> "mewtwo"),
+    # weil das Kuerzel an der Karte haengt, nicht am Artnamen.
+    return re.sub(r'[-\s]+' + _DEX_SUFFIX + r'$', '', s)
+
+
+def _ohne_akzente(s: str) -> str:
+    return ''.join(c for c in unicodedata.normalize('NFD', s)
+                   if unicodedata.category(c) != 'Mn')
+
+
+def _dex_treffer(worte, pokedex):
+    """Die Dex-Liste schreibt teils mit Bindestrich (ho-oh), teils mit
+    Leerzeichen (nidoran f) — beides probieren, dazu ohne Akzente."""
+    for form in ('-'.join(worte), ' '.join(worte)):
+        for variante in (form, _ohne_akzente(form)):
+            if variante in pokedex:
+                return variante
+    return None
+
+
+def _dex_suche(worte, pokedex):
+    for laenge in range(len(worte), 0, -1):
+        gefunden = {}
+        for i in range(0, len(worte) - laenge + 1):
+            treffer = _dex_treffer(worte[i:i + laenge], pokedex)
+            if treffer:
+                gefunden[pokedex[treffer]] = treffer
+        if len(gefunden) == 1:
+            return next(iter(gefunden.values())), ''
+        if len(gefunden) > 1:
+            return None, 'mehrdeutig: ' + ', '.join(sorted(gefunden.values()))
+    return None, 'kein Treffer in pokemon_dex_numbers.json'
+
+
+def loese_dex_nummer(name: str, pokedex: dict):
+    """(Nummer oder None, Grund). Der Grund ist leer, wenn es geklappt hat."""
+    if not pokedex:
+        return None, 'keine Dex-Liste geladen'
+    s = _dex_entkleide(name)
+    if not s:
+        return None, 'Name enthaelt nichts Lesbares'
+    if '&' in s:
+        return None, 'Tag Team — zwei Arten, keine eindeutige Nummer'
+    # Nidoran: das Geschlecht steht nur im Symbol, nicht im Wort.
+    if 'nidoran' in s:
+        roh = name or ''
+        if '♀' in roh and 'nidoran-f' in pokedex:
+            return pokedex['nidoran-f'], ''
+        if '♂' in roh and 'nidoran-m' in pokedex:
+            return pokedex['nidoran-m'], ''
+    treffer, grund = _dex_suche(s.split(' '), pokedex)
+    if treffer:
+        return pokedex[treffer], ''
+    if '-' in s:
+        # Letzter Versuch: Bindestriche als Worttrenner ("Ash-Greninja-EX").
+        # Absichtlich zuletzt, weil sie in echten Namen vorkommen (Ho-Oh).
+        treffer2, _ = _dex_suche(re.split(r'[- ]', s), pokedex)
+        if treffer2:
+            return pokedex[treffer2], ''
+    return None, grund
 
 def create_merged_database():
     print("=" * 80)
@@ -325,6 +445,10 @@ def create_merged_database():
     merged_cards = english_cards + jp_to_add
 
     match_count = 0
+    # Was ohne Nummer bleibt, nach Grund — damit eine wachsende
+    # Luecke auffaellt, statt still im Datenbestand zu sitzen.
+    dex_offen = {}
+    dex_offene_namen = {}
 
     # Load the pokemonproxies URL lookup once. Same file the frontend
     # deck builder reads — populated by scripts/scrape_pokemonproxies_
@@ -425,20 +549,17 @@ def create_merged_database():
         is_pokemon = not any(t in card_type_lower for t in NON_POKEMON)
         
         if is_pokemon:
-            base_name = get_base_pokemon_name(card.get('name_en', ''))
-            dex_num = pokedex.get(base_name)
-
-            # Nidoran ♀ / ♂ edge case
-            if not dex_num and 'nidoran' in base_name:
-                raw = card.get('name_en', '')
-                if '\u2640' in raw:
-                    dex_num = pokedex.get('nidoran-f')
-                elif '\u2642' in raw:
-                    dex_num = pokedex.get('nidoran-m')
-
+            # Sucht die Art IM Namen statt nur am Anfang — siehe
+            # loese_dex_nummer(). Was offen bleibt, bleibt leer und wird
+            # unten gezaehlt, nicht geraten.
+            dex_num, grund = loese_dex_nummer(card.get('name_en', ''), pokedex)
             if dex_num:
                 card['pokedex_number'] = str(dex_num)
                 match_count += 1
+            else:
+                dex_offen[grund] = dex_offen.get(grund, 0) + 1
+                dex_offene_namen.setdefault(grund, set()).add(
+                    card.get('name_en', ''))
 
     # Sort cards: newest sets first (descending set index), then by card number ascending
     set_order = load_set_order()
@@ -521,6 +642,21 @@ def create_merged_database():
         
     print(f"✓ Erfolgreich {len(merged_cards)} Karten für das Frontend exportiert!")
     print(f"✓ Pokédex-Nummern gefunden für: {match_count} Pokémon")
+    if dex_offen:
+        gesamt = sum(dex_offen.values())
+        print(f"  ohne Dex-Nummer: {gesamt} Zeilen")
+        for grund, anzahl in sorted(dex_offen.items(), key=lambda t: -t[1]):
+            namen = sorted(dex_offene_namen.get(grund, set()))
+            probe = ', '.join(namen[:4]) + (' ...' if len(namen) > 4 else '')
+            print(f"    {anzahl:6d}  {grund}  ({len(namen)} Namen: {probe})")
+        # Tag Teams sind erklaerbar und bleiben erklaerbar. Alles andere
+        # ist eine Luecke, die jemand ansehen sollte.
+        unerklaert = sum(a for g, a in dex_offen.items()
+                         if 'Tag Team' not in g)
+        if unerklaert > 200:
+            print(f"::warning::{unerklaert} Pokemon-Zeilen ohne Dex-Nummer "
+                  "und ohne Tag-Team-Grund — die Namensaufloesung deckt "
+                  "einen neuen Fall nicht ab.")
 
     # Generate chunked JSON files for fast frontend loading
     os.makedirs(frontend_data, exist_ok=True)

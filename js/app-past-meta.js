@@ -381,7 +381,7 @@
             console.log(`[Past Meta] After chunk load: ${pastMetaDecks.length} decks for format "${defaultFormat}"`);
 
             if (pastMetaDecks.length === 0) {
-                showToast('No past tournament data found for ' + defaultFormat, 'error');
+                showToast(t('toast.noPastDataFor') + defaultFormat, 'error');
                 console.error('[Past Meta] No decks found in tournament CSV — chunk may have failed to parse');
                 // Surface the failure in the UI so the user isn't staring
                 // at an empty "Select a Deck" dropdown wondering what's
@@ -439,7 +439,7 @@
             window.pastMetaLoaded = true;
           } catch (err) {
             console.error('[Past Meta] loadPastMeta failed:', err);
-            showToast('Error loading Past Meta: ' + (err.message || err), 'error');
+            showToast(t('toast.pastMetaLoadError') + (err.message || err), 'error');
           }
         }
         
@@ -736,8 +736,8 @@
             
             archetypes.forEach(entry => {
                 const tournamentCount = entry.tournaments.length;
-                const displayName = tournamentCount > 1 
-                    ? `${entry.archetype} (${tournamentCount} Tournaments)`
+                const displayName = tournamentCount > 1
+                    ? `${entry.archetype} ${t('pm.tournamentsSuffix').replace('{n}', tournamentCount)}`
                     : entry.archetype;
                 const option = document.createElement('option');
                 option.value = entry.archetype;
@@ -933,7 +933,7 @@
             devLog(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${uniqueTournamentCount} tournaments, ${totalDecklists} total decklists)`);
           } catch (err) {
             console.error('[Past Meta] Error loading deck cards:', err);
-            showToast('Error loading deck: ' + (err.message || err), 'error');
+            showToast(t('toast.deckLoadError') + (err.message || err), 'error');
           }
         }
         
@@ -1440,7 +1440,7 @@
         
         function copyPastMetaDeckOverview() {
             if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
-                showToast('No cards available to copy', 'warning');
+                showToast(t('toast.nothingToCopy'), 'warning');
                 return;
             }
             
@@ -1452,10 +1452,10 @@
             });
             
             navigator.clipboard.writeText(deckText).then(() => {
-                showToast('Deck list copied!', 'success');
+                showToast(t('toast.deckListCopied'), 'success');
             }).catch(err => {
                 console.error('Failed to copy:', err);
-                showToast('Error copying', 'error');
+                showToast(t('toast.copyFailedShort'), 'error');
             });
         }
         

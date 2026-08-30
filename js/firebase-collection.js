@@ -225,7 +225,7 @@ window.updateUserDoc = updateUserDoc;
  * Knoepfen gehoeren zur Sammlung, zur Wunschliste oder zur Tauschliste.
  * Jeder davon hat auf einen Klick geantwortet mit
  *
- *     showNotification('Please sign in to use this feature', 'error')
+ *     showNotification(t('toast.signInNeeded'), 'error')
  *
  * Drei Dinge daran sind falsch. Es ist kein Fehler, sondern eine
  * Voraussetzung — rote Meldung fuer "du bist nicht angemeldet" ist
@@ -1424,10 +1424,10 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
     } else if (searchFilter) {
       collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current search filter.', icon: 'cards' });
     } else {
-      collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: 'Browse Cards', buttonOnclick: "switchTab('cards')" });
+      collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: t('leer.collectionTitle'), description: t('leer.collectionDesc'), icon: 'professor', buttonText: t('leer.collectionCta'), buttonOnclick: "switchTab('cards')" });
     }
   } else if (collectionGrid) {
-    collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: 'Browse Cards', buttonOnclick: "switchTab('cards')" });
+    collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: t('leer.collectionTitle'), description: t('leer.collectionDesc'), icon: 'professor', buttonText: t('leer.collectionCta'), buttonOnclick: "switchTab('cards')" });
   }
 
   // Update tab counter
@@ -1448,7 +1448,7 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
       </div>
       <div class="stat-item"${collectionValueNote(stats)
             ? ` title="${escapeHtml(collectionValueNote(stats))}"` : ''}>
-        <span class="stat-value">${stats.totalValue.toFixed(2)}€</span>
+        <span class="stat-value">${zahlLokal(stats.totalValue, 2)} €</span>
         <span class="stat-label">Collection Value</span>
       </div>
     `;
@@ -1461,7 +1461,7 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
   }
   const profileCollectionValueEl = document.getElementById('profile-collection-value');
   if (profileCollectionValueEl) {
-    profileCollectionValueEl.textContent = `${stats.totalValue.toFixed(2)}€`;
+    profileCollectionValueEl.textContent = `${zahlLokal(stats.totalValue, 2)} €`;
     setzeSammlungsNotiz(collectionValueNote(stats));
   }
 }
@@ -1853,7 +1853,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             <div style="font-size: 0.75em; color: var(--ink-2);">${safeSetHtml} ${safeNumberHtml}</div>
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.75em; color: ${ownedCount > 0 ? '#4CAF50' : '#999'}; font-weight: 600;">✓ ${ownedCount}/${maxLabel}</span>
-              <button onclick="addOwnedFromWishlist('${safeCardIdJs}')" style="background: #377e39; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; line-height: 1;" title="Add to collection (owned: ${ownedCount})">+</button>
+              <button onclick="addOwnedFromWishlist('${safeCardIdJs}')" style="background: #377e39; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; line-height: 1;" title="${escapeHtml(t('akt.addCollectionOwned').replace('{n}', ownedCount))}">+</button>
             </div>
             ${cmUrl
               ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, var(--solid-ok), #1b8044); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
@@ -1890,7 +1890,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
   } else if (searchFilter || setFilter) {
     wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current filters.', icon: 'cards' });
   } else {
-    wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Wishlist is empty!', description: 'Add cards to your wishlist by clicking the ♡ button on any card.', icon: 'pokeball' });
+    wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: t('leer.wishlistTitle'), description: t('leer.wishlistDesc'), icon: 'pokeball' });
   }
 }
 
@@ -2270,7 +2270,7 @@ function updateProfileUI(profile) {
   
   const collectionValue = document.getElementById('profile-collection-value');
   if (collectionValue) {
-    collectionValue.textContent = `${stats.totalValue.toFixed(2)}€`;
+    collectionValue.textContent = `${zahlLokal(stats.totalValue, 2)} €`;
     setzeSammlungsNotiz(collectionValueNote(stats));
   }
   
@@ -2305,7 +2305,7 @@ function updateDecksUI() {
   }
 
   if (!window.userDecks || window.userDecks.length === 0) {
-    decksGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No saved Decks yet!', description: 'Build a deck in the City League or Current Meta tab and save it to see it here.', icon: 'pokeball', buttonText: 'Build a Deck', buttonOnclick: "switchTab('cityLeague')" });
+    decksGrid.innerHTML = getEmptyStateBoxHtml({ title: t('leer.decksTitle'), description: t('leer.decksDesc'), icon: 'pokeball', buttonText: t('leer.decksCta'), buttonOnclick: "switchTab('cityLeague')" });
     return;
   }
   
@@ -2717,7 +2717,7 @@ function updateDecksUI() {
         const safeCardIdJs = escapeJsSingleQuoted(cardId);
         const safeDeckKeyJs = escapeJsSingleQuoted(card.deck_key || `${cardName} (${setCode} ${setNumber})`);
         const safeProfileHintJs = escapeJsSingleQuoted(`profile|${deck.id || ''}`);
-        const safeCardmarketTitleHtml = escapeHtml(eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available');
+        const safeCardmarketTitleHtml = escapeHtml(eurPrice ? t('cl.buyCardmarket') + ' ' + eurPrice : t('cl.priceNA'));
         const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber, window.userCollectionCounts);
         const otherPrintSparkle = otherPrintOwnedCount > 0
           ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Owned other INT prints: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));"></span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:var(--ink);font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
@@ -2743,7 +2743,7 @@ function updateDecksUI() {
                     title="${getLang()==='de' ? 'Anzahl verringern' : 'Decrease count'}">\u2212</button>
                 <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeDeckKeyJs}', '${safeProfileHintJs}')"
                     class="my-deck-card-btn my-deck-card-btn--rarity"
-                    title="Switch rarity/print">\u2605</button>
+                    title="${escapeHtml(t('cl.switchPrint'))}">\u2605</button>
                 <button onclick="event.stopPropagation(); myDeckChangeCardCount(${deckIndex}, '${safeDeckKeyJs}', 1)"
                     class="my-deck-card-btn my-deck-card-btn--add"
                     title="${getLang()==='de' ? 'Anzahl erh\u00f6hen' : 'Increase count'}">+</button>
@@ -2755,7 +2755,7 @@ function updateDecksUI() {
                     title="${safeCardmarketTitleHtml}">${safePriceDisplayHtml}</button>
                 <button onclick="event.stopPropagation(); toggleCollection('${safeCardIdJs}')"
                     class="my-deck-card-btn my-deck-card-btn--coll${collOwnedClass}${collTinyClass}"
-                    title="Add to collection (${ownedCount}/4)">${collLabel}</button>
+                    title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}">${collLabel}</button>
                 <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')"
                     class="my-deck-card-btn my-deck-card-btn--wish${wishOnClass}"
                     title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">\u2764</button>
@@ -3357,7 +3357,7 @@ function compareActiveDecks() {
 function copyMyDeck(deckIndex) {
   const deck = window.userDecks && window.userDecks[deckIndex];
   if (!deck || !deck.cards) {
-    showToast('Deck not found!', 'error');
+    showToast(t('toast.deckMissing'), 'error');
     return;
   }
 
@@ -3420,16 +3420,16 @@ function copyMyDeck(deckIndex) {
   output = output.trim();
 
   navigator.clipboard.writeText(output).then(() => {
-    showToast('Deck copied to clipboard!', 'success');
+    showToast(t('toast.deckCopied'), 'success');
   }).catch(() => {
-    showToast('Error copying to clipboard!', 'error');
+    showToast(t('toast.copyFailed'), 'error');
   });
 }
 
 function copyDeckAndOpenLimitless(deckIndex) {
   const deck = window.userDecks && window.userDecks[deckIndex];
   if (!deck || !deck.cards) {
-    showToast('Deck not found!', 'error');
+    showToast(t('toast.deckMissing'), 'error');
     return;
   }
 
@@ -3476,7 +3476,7 @@ function copyDeckAndOpenLimitless(deckIndex) {
     showToast(de ? 'Deck kopiert! Limitless Builder \u00f6ffnet sich...' : 'Deck copied! Opening Limitless Builder...', 'success');
     window.open('https://my.limitlesstcg.com/builder', '_blank', 'noopener');
   }).catch(() => {
-    showToast('Error copying to clipboard!', 'error');
+    showToast(t('toast.copyFailed'), 'error');
   });
 }
 
@@ -6081,7 +6081,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
   } else if (searchFilter || setFilter) {
     tradelistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current filters.', icon: 'cards' });
   } else {
-    tradelistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Trade List is empty!', description: 'Add cards to your trade list by clicking the trade button on any card.', icon: 'pokeball' });
+    tradelistGrid.innerHTML = getEmptyStateBoxHtml({ title: t('leer.tradelistTitle'), description: t('leer.tradelistDesc'), icon: 'pokeball' });
   }
 }
 

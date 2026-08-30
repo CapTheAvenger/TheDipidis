@@ -8223,7 +8223,7 @@ window.MetaCall = (function () {
   <div class="metacall-panel-title">
     ${t('mc.panelSettings')}
   </div>
-  <div class="mc-tt-tabs" role="tablist" aria-label="Tournament type">
+  <div class="mc-tt-tabs" role="tablist" aria-label="${esc(t('matchupAnalysis.tournamentType'))}">
     ${TOURNAMENT_TYPES.map(tabBtn).join('')}
   </div>
   <p class="mc-tt-hint mc-tt-hint-type">${t(_typeDescI18nKey(type))}</p>

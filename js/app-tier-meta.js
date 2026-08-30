@@ -2708,7 +2708,7 @@
                         <div class="top-card-actions">
                             <button type="button" class="top-card-act"
                                     onclick="addToWishlist('${escapeJsStr(kartenId)}')"
-                                    title="${escapeHtml(deLbl ? 'Auf die Wunschliste' : 'Add to wishlist')}"
+                                    title="${escapeHtml(t('akt.addWishlist'))}"
                                     aria-label="${escapeHtml((deLbl ? 'Auf die Wunschliste: ' : 'Add to wishlist: ') + card.name)}">♡</button>
                             <button type="button" class="top-card-act"
                                     onclick="openRaritySwitcherFromDB('${escapeJsStr(card.name)}', '${escapeJsStr(card.set_code)}', '${escapeJsStr(String(card.set_number))}', 'staples')"

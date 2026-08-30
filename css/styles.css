@@ -10431,11 +10431,17 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-size: 0.78rem;
     font-weight: 800;
 }
-.meta-hub-legend-key-red    { background: #ef4444; }
-.meta-hub-legend-key-green  { background: #22c55e; }
-.meta-hub-legend-key-pink   { background: #ec4899; }
-.meta-hub-legend-key-amber  { background: #f59e0b; }
-.meta-hub-legend-key-action { background: #2563eb; }
+/* BEFUND (2. Abnahmerunde 30.08.2026): weisse Buchstaben auf diesen
+   fuenf Kreisen. Gemessen: Amber 2,15:1, Gruen 2,28:1, Pink 3,53:1,
+   Rot 3,76:1 — alle unter 4,5:1, und der Buchstabe IST die Zuordnung
+   zur Legende, also nicht schmueckend, sondern tragend.
+   Dieselben Farbfamilien, nur eine Stufe dunkler:
+   Rot 5,74 · Gruen 5,02 · Pink 6,04 · Amber 4,92 · Blau 6,70. */
+.meta-hub-legend-key-red    { background: #c81e1e; }
+.meta-hub-legend-key-green  { background: #15803d; }
+.meta-hub-legend-key-pink   { background: #be185d; }
+.meta-hub-legend-key-amber  { background: #a16207; }
+.meta-hub-legend-key-action { background: #1d4ed8; }
 
 @media (max-width: 700px) {
     .meta-hub-legend {

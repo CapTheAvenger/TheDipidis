@@ -117,19 +117,27 @@
     z-index: 3 !important;
 }
 
+/* BEFUND (2. Abnahmerunde 30.08.2026): 21 px, unter 430 px sogar
+   18 px — vier Tippziele mit 3 px Abstand, das ist unter jeder
+   Mindestgroesse (WCAG 2.2 verlangt 24 x 24, wenn der Abstand nicht
+   reicht, und 3 px reichen nicht).
+   Der Grund fuer die Verkleinerung war Platzmangel. Den gibt es hier
+   nicht: nachgemessen ist das Kartenbild bei 390 px Bildschirmbreite
+   173,5 px breit, die vier Knoepfe brauchten 18*4+3*3 = 81 px. Mit
+   26 px sind es 113 px — passt mit 60 px Luft. */
 #cards .card-database-top-actions .card-badge {
     position: relative !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
-    flex: 0 0 21px !important;
-    width: 21px !important;
-    height: 21px !important;
-    min-width: 21px !important;
-    min-height: 21px !important;
-    max-width: 21px !important;
-    max-height: 21px !important;
+    flex: 0 0 26px !important;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+    max-width: 26px !important;
+    max-height: 26px !important;
     padding: 0 !important;
     font-size: 10px !important;
     line-height: 1 !important;
@@ -279,7 +287,7 @@
 #cards .card-database-limitless-btn,
 #cards .card-database-limitless-placeholder {
     width: 100% !important;
-    min-height: 20px !important;
+    min-height: 24px !important;
     border-radius: 6px !important;
     font-size: var(--fs-xs) !important;
     font-weight: 700 !important;
@@ -530,14 +538,14 @@
     #cards .card-database-rarity-btn,
     #cards .card-database-proxy-btn,
     #cards .card-database-price-placeholder {
-        min-height: 20px !important;
+        min-height: 24px !important;
         font-size: var(--fs-xs) !important;
         padding: 1px 2px !important;
     }
 
     #cards .card-database-limitless-btn,
     #cards .card-database-limitless-placeholder {
-        min-height: 18px !important;
+        min-height: 24px !important;
         font-size: var(--fs-xs) !important;
     }
 
@@ -595,7 +603,7 @@
     #cards .card-database-proxy-btn,
     #cards .card-database-price-placeholder,
     #cards .card-database-limitless-btn {
-        min-height: 18px !important;
+        min-height: 24px !important;
         font-size: var(--fs-xs) !important;
         padding: 1px 2px !important;
     }
@@ -606,14 +614,16 @@
         padding: 1px 4px !important;
     }
 
+    /* Siehe oben: die Verkleinerung auf 18 px war nicht noetig, das
+       Bild ist hier 173,5 px breit. 24 px ist die Untergrenze. */
     #cards .card-database-top-actions .card-badge {
-        flex: 0 0 18px !important;
-        width: 18px !important;
-        height: 18px !important;
-        min-width: 18px !important;
-        min-height: 18px !important;
-        max-width: 18px !important;
-        max-height: 18px !important;
+        flex: 0 0 24px !important;
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        min-height: 24px !important;
+        max-width: 24px !important;
+        max-height: 24px !important;
         font-size: var(--fs-xs) !important;
     }
 
@@ -640,7 +650,7 @@
     #cards .card-database-proxy-btn,
     #cards .card-database-price-placeholder,
     #cards .card-database-limitless-btn {
-        min-height: 17px !important;
+        min-height: 24px !important;
     }
 }
 
@@ -691,6 +701,6 @@
     #cards .card-database-proxy-btn,
     #cards .card-database-price-placeholder,
     #cards .card-database-limitless-btn {
-        min-height: 16px !important;
+        min-height: 24px !important;
     }
 }

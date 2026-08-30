@@ -1691,7 +1691,7 @@
             let deckCards;
 
             if (primaryRows.length === 0 && (!fusionActive || secondaryRows.length === 0)) {
-                showToast(`No data found for ${archetype} with filter "${currentMetaFormatFilter}"!`, 'warning');
+                showToast(t('toast.noDataForFilter').replace('{n}', archetype).replace('{f}', currentMetaFormatFilter), 'warning');
                 clearCurrentMetaDeckView();
                 return;
             }
@@ -1721,7 +1721,7 @@
             // Show loading indicator for aggregation work
             const _earlyTotalRowEstimate = primaryRows.length + secondaryRows.length;
             if (needsAggregation && _earlyTotalRowEstimate > 100) {
-                showToast(`Processing ${_earlyTotalRowEstimate} card entries... This may take a moment`, 'info');
+                showToast(t('toast.processingCards').replace('{n}', _earlyTotalRowEstimate), 'info');
             }
 
             // Use setTimeout to allow UI to update and prevent complete freezing
@@ -4227,7 +4227,7 @@
                 showToast(t('cl.deckCopied'), 'success');
             }).catch(err => {
                 console.error('Error copying:', err);
-                showToast('Error copying to clipboard!', 'error');
+                showToast(t('toast.copyFailed'), 'error');
             });
         }
         

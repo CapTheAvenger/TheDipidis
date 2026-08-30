@@ -1663,8 +1663,8 @@
             // bar under the image. Ownership only as a grey side note.
             const topActions = isPrintMode ? '' : `
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
-                        <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${safeName} to collection">+</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${safeName} from collection">-</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="Add ${safeName} to collection">+</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="Remove ${safeName} from collection">-</button>
                         <button type="button" data-card-id="${safeCardId}" data-missing="${String(missingCount)}" onclick="toggleWishlistMetaBinder(this)" class="btn-wishlist card-badge" style="color: #fff; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add missing (' + missingCount + ') to wishlist'}" aria-label="${userWantsCard ? 'Remove' : 'Add'} ${safeName} wishlist">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                     </div>`;
             const infoBlock = isPrintMode ? `

@@ -119,6 +119,19 @@
     text-decoration: none;
     border-bottom: 1px solid transparent;
 }
+/* BEFUND (Abnahmerunde 30.08.2026): 130,7 x 19 px auf 390 px — genau
+   die Bauart, die bei .archetype-jump-link schon behoben war und hier
+   uebersehen wurde. Ein Verweis in einer Zeile darf sie nicht
+   auseinanderziehen, also kommt die Hoehe aus dem Innenabstand, nicht
+   aus einer Mindesthoehe. 12,5 + 19 + 12,5 = 44. */
+@media (pointer: coarse) {
+    html a.qu-verweis,
+    html a.qu-verweis:link,
+    html a.qu-verweis:visited,
+    html a.qu-verweis:active {
+        padding-block: 13px;
+    }
+}
 .qu-verweis:hover {
     color: var(--ink);
     border-bottom-color: var(--ink-3);

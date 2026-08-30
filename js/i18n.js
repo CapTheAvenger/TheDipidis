@@ -3815,7 +3815,11 @@ const translations = {
     'setup.description':        'Dein aktuelles Deck <strong>(Spieler 1)</strong> ist bereit. Was soll <strong>Spieler 2</strong> spielen?',
 
     // ── Meta Chart ───────────────────────────────────────────
-    'chart.metaShareTitle':     'Meta Share Chart – Top Archetypen',
+    // BEFUND (Abnahmerunde 30.08.2026): hier stand "Meta Share Chart –
+    // Top Archetypen" — ein englischer Satzbau mitten in der deutschen
+    // Fassung. "Share" bleibt: so redet die Szene, und der Rest der
+    // Oberflaeche sagt es 14x. "Chart" nicht — dafuer gibt es ein Wort.
+    'chart.metaShareTitle':     'Top-Archetypen nach Share',
     'chart.toggle':             'umschalten',
     'chart.deckCount':          'Deck-Anzahl',
     'chart.otherShare':         'Alle uebrigen Archetypen',

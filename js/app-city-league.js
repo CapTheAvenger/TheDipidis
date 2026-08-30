@@ -1164,7 +1164,21 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const placementColor = placementChange < 0 ? 'var(--tint-ok-ink)' : placementChange > 0 ? 'var(--tint-bad-ink)' : 'var(--ink-3)';
                     const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
-                    const variantsJson = encodeURIComponent(JSON.stringify(d.variants || []));
+                    /* BEFUND (Abnahmerunde 30.08.2026): encodeURIComponent
+                       kodiert den Apostroph NICHT. Der Archetyp "N's" ergab
+                       damit einen Aufrufer, der beim Klick zerbricht:
+
+                           analyzeCombinedArchetype('n\'s', '%5B%22N's...%22%5D')
+                           -> SyntaxError: missing ) after argument list
+
+                       Gemessen: 34 von 35 Aufrufern gueltig, einer kaputt —
+                       auf Schreibtisch und Mobil. js/app-tier-meta.js:879
+                       macht es an derselben Stelle richtig; hier fehlte der
+                       zweite Schritt. Der Wert steht in einem
+                       einfach-gequoteten JS-String, also muss er auch fuer
+                       JS entschaerft werden, nicht nur fuer die URL. */
+                    const variantsJson = escapeJsStr(
+                        encodeURIComponent(JSON.stringify(d.variants || [])));
 
                     tableHTML += `
                         <tr class="city-league-info-table-row city-league-info-table-row-mobile" title="${d.variants.join(', ')}">
@@ -1205,7 +1219,21 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     
                     // Capitalize first letter
                     const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
-                    const variantsJson = encodeURIComponent(JSON.stringify(d.variants || []));
+                    /* BEFUND (Abnahmerunde 30.08.2026): encodeURIComponent
+                       kodiert den Apostroph NICHT. Der Archetyp "N's" ergab
+                       damit einen Aufrufer, der beim Klick zerbricht:
+
+                           analyzeCombinedArchetype('n\'s', '%5B%22N's...%22%5D')
+                           -> SyntaxError: missing ) after argument list
+
+                       Gemessen: 34 von 35 Aufrufern gueltig, einer kaputt —
+                       auf Schreibtisch und Mobil. js/app-tier-meta.js:879
+                       macht es an derselben Stelle richtig; hier fehlte der
+                       zweite Schritt. Der Wert steht in einem
+                       einfach-gequoteten JS-String, also muss er auch fuer
+                       JS entschaerft werden, nicht nur fuer die URL. */
+                    const variantsJson = escapeJsStr(
+                        encodeURIComponent(JSON.stringify(d.variants || [])));
                     
                     tableHTML += `
                         <tr class="city-league-info-table-row city-league-info-table-row-desktop" title="${d.variants.join(', ')}">

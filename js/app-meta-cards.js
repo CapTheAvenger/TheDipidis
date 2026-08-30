@@ -877,19 +877,19 @@
                                 <div class="card-info-text mb-6">
                                     <div class="fw-bold mb-2 nowrap ellipsis">${card.card_name}</div>
                                     <div class="color-grey fs-09">${setCode} ${setNumber}</div>
-                                    ${card.metaShare > 0 ? `<div class="color-yellow fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
+                                    ${card.metaShare > 0 ? `<div class="karten-metaanteil fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
                                 </div>
                                 
                                 <!-- Card Actions: Row 1 = ★ + | Row 2 = L P price -->
                                 <div class="card-action-buttons card-action-buttons-col">
                                     <div class="city-league-card-action-row" style="grid-template-columns: 1fr 1fr;">
-                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="city-league-card-action-btn city-league-card-rarity-btn" title="Switch rarity/print">★</button>
-                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-add-btn" title="Add to deck">+</button>
+                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="city-league-card-action-btn city-league-card-rarity-btn" title="${escapeHtml(t('cl.switchPrint'))}">★</button>
+                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-add-btn" title="${escapeHtml(t('cl.addToDeck'))}">+</button>
                                     </div>
                                     <div class="city-league-card-action-row" style="grid-template-columns: 1fr 1fr 2fr;">
-                                        ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-limitless-btn" title="Open on Limitless">L</button>` : '<span></span>'}
-                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" class="city-league-card-action-btn city-league-card-proxy-btn" title="Add to proxy">P</button>
-                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-market-btn" data-market-bg="${priceBackground}" data-market-cursor="${eurPrice ? 'pointer' : 'not-allowed'}" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                        ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-limitless-btn" title="${escapeHtml(t('cl.openLimitless'))}">L</button>` : '<span></span>'}
+                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" class="city-league-card-action-btn city-league-card-proxy-btn" title="${escapeHtml(t('cl.addToProxy'))}">P</button>
+                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-market-btn" data-market-bg="${priceBackground}" data-market-cursor="${eurPrice ? 'pointer' : 'not-allowed'}" title="${escapeHtml(eurPrice ? t('cl.buyCardmarket') + ' ' + eurPrice : t('cl.priceNA'))}">${priceDisplay}</button>
                                     </div>
                                 </div>
                             </div>
@@ -1157,7 +1157,7 @@
                         </div>
                         ${versionCount > 0 ? `<div class="card-badge card-badge-top-left">${versionCount}</div>` : ''}
                         ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
-                        <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="card-badge card-badge-top-right pointer" title="Add to Deck">+</button>
+                        <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="card-badge card-badge-top-right pointer" title="${escapeHtml(t('cl.addToDeck'))}">+</button>
                         <div class="card-info-bottom">
                             <div class="fs-11 color-grey fw-700">${setCode} ${setNumber}</div>
                         </div>

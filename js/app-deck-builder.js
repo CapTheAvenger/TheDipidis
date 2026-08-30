@@ -1247,7 +1247,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         if (!isNaN(p)) { totalPrice += p * (parseInt(count) || 0); hasAnyPrice = true; }
                     }
                 }
-                priceEl.textContent = hasAnyPrice ? (isNaN(totalPrice) ? '0.00' : totalPrice.toFixed(2)) + ' \u20ac' : t('deck.priceNA');
+                /* BEFUND (Abnahmerunde 30.08.2026): der Deckpreis stand mit
+                   Punkt da — "1.69 €" statt "1,69 €". Jede andere Zahl der
+                   Seite traegt ein Komma; hier ging toFixed(2) roh in die
+                   Anzeige. */
+                priceEl.textContent = hasAnyPrice
+                    ? (typeof zahlLokal === 'function'
+                        ? zahlLokal(isNaN(totalPrice) ? 0 : totalPrice, 2)
+                        : (isNaN(totalPrice) ? '0.00' : totalPrice.toFixed(2))) + ' \u20ac'
+                    : t('deck.priceNA');
             }
 
             // Add visual warning to deck container if over 60 cards
@@ -1658,9 +1666,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         <div class="deck-card-overlay">${overlayText}</div>
                         <div class="deck-card-actions">
                             <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 1fr;">
-                                <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-remove-btn" title="Remove from deck">-</button>
-                                <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-rarity-btn" title="Switch rarity/print">★</button>
-                                <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-add-btn" title="Add to deck">+</button>
+                                <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-remove-btn" title="${escapeHtml(t('cl.removeFromDeck'))}">-</button>
+                                <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-rarity-btn" title="${escapeHtml(t('cl.switchPrint'))}">★</button>
+                                <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-add-btn" title="${escapeHtml(t('cl.addToDeck'))}">+</button>
                             </div>
                             <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 2fr;">
                                 ${setCode && setNumber ? `<button onclick="openLimitlessCard('${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-limitless-btn" title="${t('deck.openLimitless')}">L</button>` : '<span></span>'}
@@ -3951,7 +3959,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 return 0;
             }
             if (!window.allCardsDatabase || !window.allCardsDatabase.length) {
-                if (typeof showToast === 'function') showToast(t('cards.notLoadedYet') || 'Card database not loaded yet...', 'warning');
+                if (typeof showToast === 'function') showToast(t('cards.notLoadedYet') || t('toast.cardsNotLoaded'), 'warning');
                 return 0;
             }
 

@@ -67,26 +67,26 @@
             const selectedDeckId = savedDeckSelect.value;
             
             if (!selectedDeckId) {
-                showToast('Please select a saved deck!', 'warning');
+                showToast(t('toast.pickSavedDeck'), 'warning');
                 return;
             }
             
             if (!currentDeckSource) {
-                showToast('No deck source selected!', 'error');
+                showToast(t('toast.noDeckSource'), 'error');
                 return;
             }
             
             // Check if card database is loaded
             if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
                 console.error('[compareWithSavedDeck] ERROR: cardsBySetNumberMap not loaded!');
-                showToast('Card database not loaded yet. Please wait a moment and try again.', 'warning');
+                showToast(t('toast.cardsNotLoadedWait'), 'warning');
                 return;
             }
             
             // Get selected saved deck
             const savedDeck = window.userDecks.find(d => d.id === selectedDeckId);
             if (!savedDeck) {
-                showToast('Saved deck not found!', 'error');
+                showToast(t('toast.savedDeckMissing'), 'error');
                 return;
             }
             
@@ -129,7 +129,7 @@
                            window.pastMetaDeck;
             
             if (!deckMap || Object.keys(deckMap).length === 0) {
-                showToast('Current deck is empty!', 'warning');
+                showToast(t('toast.deckEmpty'), 'warning');
                 return;
             }
             
@@ -973,19 +973,19 @@
             const oldDeckText = document.getElementById('oldDeckListInput').value.trim();
             
             if (!oldDeckText) {
-                showToast('Please paste an old deck list first!', 'warning');
+                showToast(t('toast.pasteOldList'), 'warning');
                 return;
             }
             
             if (!currentDeckSource) {
-                showToast('No deck source selected!', 'error');
+                showToast(t('toast.noDeckSource'), 'error');
                 return;
             }
             
             // Check if card database is loaded
             if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
                 console.error('[deckCompare] ERROR: cardsBySetNumberMap not loaded!');
-                showToast('Card database not loaded yet. Please wait a moment and try again.', 'warning');
+                showToast(t('toast.cardsNotLoadedWait'), 'warning');
                 return;
             }
             
@@ -1001,7 +1001,7 @@
                            window.pastMetaDeck;
             
             if (!deckMap || Object.keys(deckMap).length === 0) {
-                showToast('Current deck is empty!', 'warning');
+                showToast(t('toast.deckEmpty'), 'warning');
                 return;
             }
             

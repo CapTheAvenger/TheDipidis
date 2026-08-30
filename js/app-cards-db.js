@@ -323,7 +323,7 @@
             const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
             section.classList.toggle('mobile-filters-collapsed', isMobile);
             toggleBtn.setAttribute('aria-expanded', isMobile ? 'false' : 'true');
-            toggleBtn.textContent = isMobile ? 'Show Filters' : 'Hide Filters';
+            toggleBtn.textContent = t(isMobile ? 'cards.showFilters' : 'cards.hideFilters');
         }
 
         function toggleCardsFilterPanel() {
@@ -333,7 +333,7 @@
 
             const collapsed = section.classList.toggle('mobile-filters-collapsed');
             toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-            toggleBtn.textContent = collapsed ? 'Show Filters' : 'Hide Filters';
+            toggleBtn.textContent = t(collapsed ? 'cards.showFilters' : 'cards.hideFilters');
         }
         window.toggleCardsFilterPanel = toggleCardsFilterPanel;
         
@@ -2702,7 +2702,7 @@
                     wishBtn.style.background = inWishlist ? '#E91E63' : '#F48FB1';
                     wishBtn.style.borderColor = inWishlist ? '#E91E63' : '#F48FB1';
                     wishBtn.innerHTML = inWishlist ? '&#9829;' : '&#9825;';
-                    wishBtn.title = inWishlist ? 'Remove from wishlist' : 'Add to wishlist';
+                    wishBtn.title = t(inWishlist ? 'akt.removeWishlist' : 'akt.addWishlist');
                 }
 
                 // Collection remove button style
@@ -3040,10 +3040,10 @@
                          aria-label="Open ${displayName} Prize Pack image in fullscreen">
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
-                        <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${displayName} Prize Pack to collection">+</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} Prize Pack from collection">-</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#fff; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}" aria-label="Toggle ${displayName} Prize Pack wishlist">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#fff; background: ${userTradesCard ? '#16a085' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#16a085' : '#a3d9cd'};" title="${userTradesCard ? 'Remove from trade list' : 'Add to trade list'}" aria-label="Toggle ${displayName} Prize Pack trade list">&#8644;</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="Add ${displayName} Prize Pack to collection">+</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="Remove ${displayName} Prize Pack from collection">-</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#fff; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t('akt.toggleWishlist').replace('{n}', displayName))}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#fff; background: ${userTradesCard ? '#16a085' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#16a085' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t('akt.toggleTradelist').replace('{n}', displayName))}">&#8644;</button>
                     </div>
                 </div>
                 <div class="card-database-info">
@@ -3184,10 +3184,10 @@
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
                     ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="Owned other INT prints">${altPrintOwnedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${displayName} to collection">+</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} from collection">-</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color: ${userWantsCard ? '#fff' : '#fff'}; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}" aria-label="${userWantsCard ? 'Remove ' + displayName + ' from wishlist' : 'Add ' + displayName + ' to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color: #fff; background: ${userTradesCard ? '#16a085' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#16a085' : '#a3d9cd'};" title="${userTradesCard ? 'Remove from trade list' : 'Add to trade list'}" aria-label="${userTradesCard ? 'Remove ' + displayName + ' from trade list' : 'Add ' + displayName + ' to trade list'}">${userTradesCard ? '&#8644;' : '&#8644;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="Add ${displayName} to collection">+</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="Remove ${displayName} from collection">-</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color: ${userWantsCard ? '#fff' : '#fff'}; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist') + ' — ' + displayName)}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color: #fff; background: ${userTradesCard ? '#16a085' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#16a085' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist') + ' — ' + displayName)}">${userTradesCard ? '&#8644;' : '&#8644;'}</button>
                     </div>
                 </div>
                 <div class="card-database-info">
@@ -3203,7 +3203,7 @@
                         </div>
                     </div>
                     <div class="card-database-secondary-row">
-                        <button type="button" onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add to proxy queue" aria-label="Add ${displayName} to proxy queue">Proxy</button>
+                        <button type="button" onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="${escapeHtml(t('akt.addProxyQueue'))}" aria-label="Add ${displayName} to proxy queue">Proxy</button>
                         ${limitlessButton}
                     </div>
                     ${coverageDisplay}
@@ -3982,7 +3982,7 @@
         async function openRaritySwitcher(cardName, deckKey, sourceHint = '', anzeigeZiel = '') {
             const isReady = await ensureCardDatabaseReadyForRaritySwitcher();
             if (!isReady) {
-                showToast('Card database not loaded yet...', 'info');
+                showToast(t('toast.cardsNotLoaded'), 'info');
                 return;
             }
 
@@ -4043,7 +4043,7 @@
             let versions = printInfo.versions;
             
             if (versions.length === 0) {
-                showToast(`No complete versions found for "${actualCardName}". Card may not be fully indexed yet.`, 'warning', 5000);
+                showToast(t('toast.noCompleteVersions').replace('{n}', actualCardName), 'warning', 5000);
                 console.error(`[openRaritySwitcher] No complete versions found for "${actualCardName}".`);
                 return;
             }
@@ -4052,7 +4052,7 @@
             const optionsList = document.getElementById('rarityOptionsList');
             if (!optionsList) {
                 console.error('[openRaritySwitcher] #rarityOptionsList not found in DOM');
-                showToast('Rarity switcher UI not available.', 'warning', 4000);
+                showToast(t('toast.rarityUiMissing'), 'warning', 4000);
                 return;
             }
             optionsList.innerHTML = '';
@@ -4235,7 +4235,7 @@
             const modal = document.getElementById('raritySwitcherModal');
             if (!modal) {
                 console.error('[openRaritySwitcher] #raritySwitcherModal not found in DOM');
-                showToast('Rarity switcher modal not available.', 'warning', 4000);
+                showToast(t('toast.rarityModalMissing'), 'warning', 4000);
                 return;
             }
             modal.classList.add('show');
@@ -4431,20 +4431,20 @@
 
         async function applyRarityDistribution() {
             if (!currentRaritySwitcherCard) {
-                showToast('No active rarity selection.', 'warning');
+                showToast(t('toast.noRaritySelection'), 'warning');
                 return;
             }
 
             const cardName = currentRaritySwitcherCard.cardName || '';
             const expectedTotal = parseInt(currentRaritySwitcherCard.totalCopies, 10) || 0;
             if (expectedTotal <= 0) {
-                showToast('Card is not present in the active deck.', 'warning');
+                showToast(t('toast.cardNotInDeck'), 'warning');
                 return;
             }
 
             const qtyInputs = Array.from(document.querySelectorAll('#rarityOptionsList .rarity-option-qty-input'));
             if (qtyInputs.length === 0) {
-                showToast('No print options available.', 'warning');
+                showToast(t('toast.noPrintOptions'), 'warning');
                 return;
             }
 
@@ -4460,7 +4460,7 @@
             });
 
             if (desiredTotal !== expectedTotal) {
-                showToast(`Total qty must be ${expectedTotal} (currently ${desiredTotal}).`, 'warning', 4500);
+                showToast(t('toast.qtyMismatch').replace('{soll}', expectedTotal).replace('{ist}', desiredTotal), 'warning', 4500);
                 return;
             }
 
@@ -4469,7 +4469,7 @@
                 currentRaritySwitcherCard.profileDeckId
             );
             if (!deckContext || !deckContext.deck) {
-                showToast('Unable to resolve active deck.', 'warning');
+                showToast(t('toast.noActiveDeck'), 'warning');
                 return;
             }
 
@@ -4515,7 +4515,7 @@
                 setRarityPreference(cardName, { mode: 'specific', set: firstPrint.setCode, number: firstPrint.setNumber });
             }
 
-            showToast('Print quantities updated.', 'success');
+            showToast(t('toast.printQtyUpdated'), 'success');
             closeRaritySwitcher();
         }
 
@@ -4667,7 +4667,7 @@
 
         function openCardmarket(cardmarketUrl, cardName, plain) {
             if (!cardmarketUrl || cardmarketUrl.trim() === '') {
-                showToast(`Cardmarket link not available for ${cardName}`, 'warning');
+                showToast(t('toast.noCardmarketLink').replace('{n}', cardName), 'warning');
                 return;
             }
 

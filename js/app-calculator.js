@@ -167,6 +167,36 @@
 
     window.updateCalculations = updateCalculations;
 
+    /* Sprachwechsel: die drei Ergebniszahlen mitziehen.
+     *
+     * URSACHE (gemessen 30.08.2026): dieses Modul hatte keinen
+     * languageChanged-Listener. Die Beschriftungen daneben haengen an
+     * data-i18n und werden von i18n.js selbst umgeschrieben, die Zahlen
+     * dagegen entstehen nur in updateCalculations() — und das lief
+     * zuletzt beim Laden bzw. beim letzten Tastendruck im Eingabefeld.
+     * FOLGE: nach dem Umschalten von Deutsch auf Englisch standen
+     * "11,67 %", "11,32 %", "1,89 %" unter englischen Beschriftungen
+     * (umgekehrt "11.67%", "11.32%", "1.89%" unter deutschen), also drei
+     * Zahlen im Trennzeichen der abgewaehlten Sprache. Ein Punkt statt
+     * eines Kommas ist in einer Prozentzahl kein Schoenheitsfehler: 11.67
+     * und 11,67 sind in beiden Lesarten verschiedene Zahlen.
+     *
+     * Neu rechnen statt nur neu formatieren: updateCalculations() ist
+     * reine Arithmetik auf den vier Eingabefeldern, kostet kein Netz und
+     * keine Daten, und _calcPct() fragt getLang() beim Formatieren ab.
+     * Der Wert bleibt derselbe, nur die Schreibweise folgt.
+     *
+     * Ohne Sichtbarkeitspruefung, aber nicht ohne Bedingung: das Modul
+     * baut nichts auf, es beschreibt vier feste Felder aus index.html.
+     * Fehlen die Felder, kehrt updateCalculations() von selbst zurueck —
+     * ein Sprachwechsel kann hier also keinen ungeoeffneten Reiter
+     * befuellen. Genau die Sichtbarkeitspruefung waere hier falsch: der
+     * Rechner liegt in einem eigenen Reiter, und wer woanders umschaltet,
+     * traefe sonst denselben Fehler wie die Heatmap (siehe
+     * js/app-current-meta.js, 30.08.2026).
+     */
+    document.addEventListener('languageChanged', updateCalculations);
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init, { once: true });
     } else {

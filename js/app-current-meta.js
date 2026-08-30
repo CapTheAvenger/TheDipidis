@@ -604,8 +604,37 @@
             // Achsenbeschriftungen, Titel, Platzhalter und Knoepfe
             // blieben in der alten Sprache stehen. Gemeint war der
             // Behaelter der Heatmap selbst.
+            //
+            // 30.08.2026: die Sichtbarkeitspruefung (offsetParent) war der
+            // zweite Teil desselben Fehlers, nur umgekehrt. Wer beim
+            // Umschalten NICHT auf der Startseite steht, hat eine
+            // verborgene Heatmap: offsetParent ist null, es wird nichts
+            // neu gezeichnet — und beim Zurueckkehren zeichnet niemand
+            // nach, weil loadCurrentMeta() nur einmal laeuft
+            // (window.currentMetaLoaded). Gemessen: Startseite verlassen,
+            // auf EN schalten, zurueckkehren — 7 Beschriftungen deutsch
+            // ("Matchup-Heatmap", "Y-Achse (Dein Deck)", ...), 91x
+            // "Matches" statt "games" und 90 Prozentzahlen mit Komma
+            // statt Punkt, also 130 veraltete Zeilen gegen einen frischen
+            // EN-Ladevorgang derselben Ansicht.
+            //
+            // Von den beiden moeglichen Wegen — beim Wechsel auch
+            // verborgene Ansichten nachziehen ODER beim Betreten pruefen —
+            // ist hier der erste der richtige: renderMatchupHeatmap()
+            // baut ausschliesslich aus window._matchupRegistry, also aus
+            // Daten, die schon im Speicher liegen. Es faellt kein Netz an,
+            // keine CSV wird nachgeladen, und der Ruecksprung bleibt
+            // sofort korrekt statt erst nach einem weiteren Zeichenlauf.
+            // Der zweite Weg braeuchte ausserdem einen Haken in
+            // switchTab() (app-core.js), also eine Aenderung ausserhalb
+            // dieses Moduls.
+            //
+            // Die Bedingung bleibt aber: nur nachziehen, was schon
+            // GEZEICHNET ist. Existiert der Behaelter nicht, war die
+            // Ansicht nie offen — dann darf ein Sprachwechsel sie auch
+            // nicht befuellen und keine Daten anfordern.
             const behaelter = document.getElementById('matchupHeatmapContainer');
-            const sichtbar = !!behaelter && behaelter.offsetParent !== null;
-            if (typeof renderMatchupHeatmap === 'function' && sichtbar) renderMatchupHeatmap();
+            const bereitsGezeichnet = !!behaelter;
+            if (typeof renderMatchupHeatmap === 'function' && bereitsGezeichnet) renderMatchupHeatmap();
         });
         

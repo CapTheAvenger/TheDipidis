@@ -270,12 +270,76 @@ def load_usage():
         print(f"WARN: in-game usage unavailable ({e}) — using VGCPastes sample")
         return {}, None
     season = (data.get("_meta") or {}).get("season")
+    # ZWEI DURCHGAENGE, und die Reihenfolge ist der ganze Punkt.
+    #
+    # BEFUND (29.08.2026): championsbattledata gibt Regional- und
+    # Sonderformen denselben `name` wie der Grundform — sowohl
+    # slug "raichu" als auch slug "alolan-raichu" heissen "Raichu".
+    # Der alte Index setzte erst den NAMEN, dann den slug, beides per
+    # setdefault. Da "alolan-raichu" in der Datei vor "raichu" steht,
+    # belegte Alola-Raichu den Schluessel "raichu" — und die
+    # Grundform Raichu zeigte im Pokedex die Werte, das Item und die
+    # Faehigkeit von Alola-Raichu (Surge Surfer, Fokusgurt).
+    #
+    # Gemessen: 41 solcher Namenskollisionen, quer durch die
+    # Alola-, Hisui- und Galar-Formen sowie Gourgeist und Basculegion.
+    #
+    # Der slug ist eindeutig, der Name ist es nicht. Also zuerst alle
+    # slugs, danach die Namen nur noch als Rueckfall — ein Name kann
+    # einen slug jetzt nicht mehr ueberschreiben.
     index = {}
     for slug, rec in (data.get("pokemon") or {}).items():
-        for key in (_norm(rec.get("name", "")), _norm(slug)):
-            if key:
-                index.setdefault(key, rec)
+        key = _norm(slug)
+        if key:
+            index.setdefault(key, rec)
+    for slug, rec in (data.get("pokemon") or {}).items():
+        key = _norm(rec.get("name", ""))
+        if key:
+            index.setdefault(key, rec)
     return index, season
+
+
+def _stein_anteil(rec, en_name):
+    """Wie viel Prozent der Grundform tragen den Mega-Stein DIESER Form?
+
+    In Pokemon Champions meldet man die GRUNDFORM an. Ob daraus im Kampf
+    eine Mega-Form wird, entscheidet allein das getragene Item. Die
+    In-Game-Nutzungsdaten stehen deshalb ausschliesslich unter der
+    Grundform — und der Mega-Stein steht dort als Item.
+
+    Beispiel Despotar (29.08.2026): Item 1 ist "Tyra nitarite" mit
+    56,5 %. Diese 56,5 % SIND Mega-Despotar. Raichu unterscheidet sogar
+    die Formen: "Raichunite Y" 86,4 %, "Raichunite X" 7,8 %.
+
+    Rueckgabe: (prozent, steinname) oder (None, None), wenn die
+    Grundform keinen passenden Stein traegt. Ohne Stein wird NICHT
+    geerbt — dann ist die Mega-Form im Feld schlicht nicht vertreten.
+    """
+    blk = rec.get(PRIMARY_FORMAT) or rec.get(
+        "singles" if PRIMARY_FORMAT == "doubles" else "doubles")
+    if not blk:
+        return None, None
+    # "Mega Raichu Y" -> Kennung "y"; "Mega Tyranitar" -> keine Kennung.
+    m = re.match(r"^Mega\s+(.+?)(?:\s+([XY]))?$", en_name or "")
+    kennung = (m.group(2) or "").lower() if m else ""
+    treffer = []
+    for it in (blk.get("held_item") or []):
+        name = (it.get("name") or "")
+        knapp = re.sub(r"[^a-z]", "", name.lower())
+        if not (knapp.endswith("ite") or knapp.endswith("itex") or knapp.endswith("itey")):
+            continue
+        if kennung:
+            # X/Y-Formen brauchen den passenden Stein, sonst nichts.
+            if not knapp.endswith("ite" + kennung):
+                continue
+        elif knapp.endswith("itex") or knapp.endswith("itey"):
+            # Eine formlose Mega-Form erbt keinen X/Y-Stein.
+            continue
+        treffer.append((it.get("pct") or 0, name))
+    if not treffer:
+        return None, None
+    treffer.sort(reverse=True)
+    return treffer[0][0], treffer[0][1]
 
 
 def usage_meta(rec, base6):
@@ -478,8 +542,33 @@ def main():
         # base species. Non-base forms require an exact match so a Mega never
         # inherits its base form's spread.
         rec = usage_index.get(_norm(e["en"]))
+        stein_pct = stein_name = None
         if not rec and e.get("form", "Base") == "Base":
             rec = usage_index.get(_norm(entry_base(e["en"])))
+        if not rec and e.get("form") == "Mega":
+            # BIS 29.08.2026 STAND HIER: "Non-base forms require an exact
+            # match so a Mega never inherits its base form's spread."
+            #
+            # Das war fachlich falsch. In Champions meldet man die
+            # GRUNDFORM an; ob daraus ein Mega wird, entscheidet der
+            # getragene Stein. Es KANN gar keine eigenen
+            # Nutzungsdaten fuer eine Mega-Form geben — sie stehen
+            # zwangslaeufig unter der Grundform.
+            #
+            # Folge der alten Regel: 70 von 75 Mega-Formen zeigten
+            # "Fuer dieses Pokemon gibt es noch keine
+            # In-Game-Nutzungsdaten", obwohl 73 Grundformen einen
+            # Mega-Stein als meistgenutztes Item fuehren.
+            #
+            # Geerbt wird nur MIT Beleg: die Grundform muss den
+            # passenden Stein tragen. Die Statuswerte werden mit den
+            # BASISWERTEN DER MEGA-FORM gerechnet (base6 gehoert zum
+            # Eintrag), nicht mit denen der Grundform.
+            kandidat = usage_index.get(_norm(entry_base(e["en"])))
+            if kandidat:
+                stein_pct, stein_name = _stein_anteil(kandidat, e["en"])
+                if stein_pct:
+                    rec = kandidat
         if rec:
             # championsbattledata's per-mega "megaAbility" covers ALL megas
             # (incl. the Champions-original M-B ones); prefer it over the
@@ -488,6 +577,13 @@ def main():
                 e["megaAbility"] = rec["megaAbility"]
             meta = usage_meta(rec, base6)
             if meta:
+                if stein_pct:
+                    # Der Oberflaeche sagen, woher die Zahlen kommen und
+                    # fuer welchen Anteil sie gelten. Eine geerbte Zahl
+                    # ohne diesen Hinweis waere eine Behauptung.
+                    meta["viaBase"] = entry_base(e["en"])
+                    meta["viaStone"] = stein_name
+                    meta["viaStonePct"] = stein_pct
                 e["meta"] = meta
                 ingame_hits += 1
                 continue
@@ -505,6 +601,33 @@ def main():
     # Stable, friendly default order: by total descending, then name.
     entries.sort(key=lambda e: (-(e["total"] or 0), e["en"]))
 
+    # ── Mega-Faehigkeiten ohne Quelle ──────────────────────────────
+    #
+    # BEFUND (30.08.2026, in Chrome gegen die Quellen geprueft): 16 der
+    # 75 Mega-Formen fuehren keine `megaAbility`. Es sind genau die 16
+    # M-B-Ergaenzungen aus champions_roster_extra.json — die
+    # otterlyclueless-roster.json kennt sie nicht (nachgesehen: 258
+    # Eintraege, keiner davon), und championsbattledata liefert
+    # `summary.forms` nur fuer Pokemon mit eigener Seite. Smogon liefert
+    # fuer diese Formen Statuswerte und Typen, aber keine
+    # Champions-Faehigkeit.
+    #
+    # Es gibt dafuer also derzeit keine oeffentliche Quelle. Nach
+    # CLAUDE.md ("Never invent card data", "Report, don't silently
+    # repair") wird hier nichts geraten und nichts gefuellt: die Luecke
+    # wird benannt, damit die Oberflaeche sie benennen kann statt die
+    # Zeile wortlos wegzulassen. Wortlos weglassen liest sich wie
+    # "diese Mega-Form hat keine besondere Faehigkeit" — und das waere
+    # eine Aussage, die wir nicht belegen koennen.
+    mega_ohne_ability = sorted(
+        e["en"] for e in entries
+        if e.get("form") == "Mega" and not (e.get("megaAbility") or "").strip()
+    )
+    if mega_ohne_ability:
+        print(f"HINWEIS: {len(mega_ohne_ability)} Mega-Formen ohne belegte "
+              f"Mega-Faehigkeit (keine oeffentliche Quelle):",
+              ", ".join(mega_ohne_ability))
+
     out = {
         "_meta": {
             "format": "Pokémon Champions · Pokédex (bilingual base stats + Lv.50 range)",
@@ -515,6 +638,13 @@ def main():
             "bulk": "bulkPhys = base KP × base Verteidigung; bulkSpec = base KP × base Spezial-Verteidigung.",
             "usageSeason": usage_season,
             "usageFormat": PRIMARY_FORMAT,
+            # Benannte Luecke statt stiller Auslassung — siehe oben.
+            "megaAbilityMissing": mega_ohne_ability,
+            "megaAbilityMissingNote":
+                "Champions-eigene Mega-Formen (M-B). Ihre Mega-Faehigkeit ist "
+                "bisher nur im Spiel sichtbar; keine oeffentliche Quelle "
+                "fuehrt sie. Wird nachgetragen, sobald es eine gibt — "
+                "geraten wird nicht.",
             "sources": [
                 "otterlyclueless/pokemon-champions-data (CC BY 4.0) — M-A roster, base stats, types",
                 "M-B additions: pokebase.app Champions dex + official Mega list; stats/types from Smogon (pokemon-showdown)",

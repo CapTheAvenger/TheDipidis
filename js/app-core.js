@@ -1617,9 +1617,21 @@ const BASE_PATH = './data/';
             // sub-tabs, prefer the side-menu label (e.g. "Deck Analysis (Japan)")
             // so the title reflects the specific area, not the hub.
             const menuLabelEl = document.querySelector(`.menu-item[data-tab-id="${tabName}"] .menu-item-label`);
+            /* BEFUND (Schlussabnahme 30.08.2026): fuer die Kachelseite gibt
+               es keinen Menuepunkt mit `data-tab-id="meta-analysis-hub"`
+               (der Knopf oben zeigt auf current-meta). menuLabelEl war
+               also null, und `activeBtn` fand den Knopf der VORHERIGEN
+               Ansicht — der Reitertitel blieb bei "Vergangenes Meta"
+               stehen, waehrend die Kachelseite offen war.
+               Ohne Menuepunkt nimmt der Titel die Ueberschrift der
+               Ansicht selbst; die steht ohnehin in jedem Reiter. */
+            const ueberschriftEl = !menuLabelEl
+                ? document.querySelector(`#${tabName} h2 [data-i18n], #${tabName} h1 [data-i18n]`)
+                : null;
             const titleText = menuLabelEl
                 ? menuLabelEl.textContent.trim()
-                : (activeBtn ? activeBtn.textContent.trim() : '');
+                : (ueberschriftEl ? ueberschriftEl.textContent.trim()
+                    : (activeBtn ? activeBtn.textContent.trim() : ''));
             if (titleText) {
                 document.title = titleText + ' – Pokémon TCG Hub';
                 const badge = document.getElementById('current-tab-title');

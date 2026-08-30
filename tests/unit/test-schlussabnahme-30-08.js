@@ -137,6 +137,26 @@ describe('Datum und Restposten im Meta Call', () => {
     });
 });
 
+describe('Reitertitel und der letzte englische Knopf', () => {
+    it('die Kachelseite bekommt ihren eigenen Titel', () => {
+        // Es gibt keinen Menuepunkt mit data-tab-id="meta-analysis-hub" —
+        // der Knopf oben zeigt auf current-meta. menuLabelEl war null und
+        // `activeBtn` fand den Knopf der VORHERIGEN Ansicht: der
+        // Reitertitel blieb bei "Vergangenes Meta" stehen.
+        const CORE = ohneKomm(lies('js/app-core.js'));
+        assert.match(CORE, /const ueberschriftEl = !menuLabelEl/);
+        assert.match(CORE, /ueberschriftEl \? ueberschriftEl\.textContent\.trim\(\)/);
+        // Und die Ueberschrift, aus der er sich bedient, gibt es wirklich.
+        assert.match(lies('index.html'), /<div id="meta-analysis-hub"[\s\S]{0,600}?<h2><span data-i18n="metaHub\.title"/);
+    });
+
+    it('kein fest verdrahteter englischer Knopftitel mehr im Profil-Deck', () => {
+        const FC = lies('js/firebase-collection.js');
+        assert.ok(!/isWishlisted \? 'Remove from wishlist' : 'Add to wishlist'/.test(FC));
+        assert.match(FC, /t\(isWishlisted \? 'akt\.removeWishlist' : 'akt\.addWishlist'\)/);
+    });
+});
+
 describe('Ausgeloggte Knöpfe bleiben lesbar', () => {
     const CSS = lies('css/components.css');
     const CDB = lies('js/app-cards-db.js');

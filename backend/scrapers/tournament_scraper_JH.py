@@ -35,6 +35,9 @@ from card_scraper_shared import (
     fetch_page_bs4, setup_logging, load_settings, load_set_order,
     extract_cards_from_decklist_soup
 )
+# Dieselbe Regel wie in der Bestandsreparatur — card_scraper_shared liegt
+# neben ace_spec_regel, der Pfad ist zu diesem Zeitpunkt also schon gesetzt.
+from ace_spec_regel import entscheide_zeile, lade_ace_liste
 
 setup_console_encoding()
 
@@ -529,7 +532,12 @@ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[lis
                 "set_code": sc,
                 "card_number": sn,
                 "full_name": f"{name} {sc} {sn}".strip(),
-                "is_ace_spec": "Yes" if card_db.is_ace_spec_by_name(name) else "No"
+                # Belegt statt geraten — siehe backend/core/ace_spec_regel.py.
+                # c['count'] ist die Zahl der Kopien in DIESEM Deck; mehr als
+                # eine schliesst eine ACE SPEC aus.
+                "is_ace_spec": ("Yes" if card_db.is_ace_spec_by_name(name)
+                                else entscheide_zeile(name, lade_ace_liste(),
+                                                      c['count'], c.get('type', '')))
             })
 
     return cards, deck_name

@@ -71,12 +71,18 @@ describe('Die Heatmap zeichnet beim Sprachwechsel neu', () => {
         // Journals, das ein inline display:none traegt. Die Bedingung
         // war damit IMMER falsch: Achsen, Titel und Knoepfe blieben in
         // der alten Sprache stehen.
-        const i = CURRENT.indexOf("document.addEventListener('languageChanged'");
-        assert.notEqual(i, -1, 'der Zuhoerer ist verschwunden');
         // Kommentare duerfen den alten Namen nennen — sie erklaeren ja
-        // genau ihn. Geprueft wird der Code.
+        // genau ihn. Geprueft wird der Code. Deshalb wird ZUERST
+        // weggeschnitten und ERST DANN das Fenster gelegt: die frueher
+        // umgekehrte Reihenfolge mass 1200 Rohzeichen ab, und als der
+        // Zuhoerer am 30.08.2026 einen laengeren Kommentar bekam, lagen
+        // die Codezeilen ausserhalb des Fensters — die Zusage wurde rot,
+        // ohne dass sich am Verhalten etwas geaendert haette.
         const ohneKommentar = (q) => q.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
-        const block = ohneKommentar(CURRENT.slice(i, i + 1200));
+        const CURRENT_CODE = ohneKommentar(CURRENT);
+        const i = CURRENT_CODE.indexOf("document.addEventListener('languageChanged'");
+        assert.notEqual(i, -1, 'der Zuhoerer ist verschwunden');
+        const block = CURRENT_CODE.slice(i, i + 1200);
         assert.match(block, /matchupHeatmapContainer/,
             'der Zuhoerer prueft nicht den Behaelter der Heatmap');
         assert.ok(!block.includes('matchupAnalysisModal'),

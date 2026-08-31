@@ -182,6 +182,19 @@
         hisuian: 'hisui', alolan: 'alola', galarian: 'galar', paldean: 'paldea',
     };
 
+    /* Adressen, die sich nicht aus der Regel ergeben. Geschluesselt auf
+     * den BERECHNETEN Slug, nicht auf den Namen: derselbe Pokemon
+     * erreicht diese Funktion in zwei Schreibweisen — aus dem Pokedex
+     * als "Paldean Tauros (Combat Breed)", als Teamkamerad aus
+     * champions_usage.json als "Paldean Tauros Combat Breed" (ohne
+     * Klammern, siehe app-side-quest-usage.js und -matchups.js). Ein
+     * Eintrag auf den Namen wuerde nur eine der beiden treffen und die
+     * andere still ins Leere laufen lassen.
+     * Geprueft am 31.08.2026 gegen die echte Bildquelle, nicht geraten. */
+    const _SPRITE_SONDERFALL = {
+        'tauros-paldea-combat': 'tauros-paldea',
+    };
+
     function spriteSlug(en) {
         // Five names carry punctuation the URL cannot: "Mr. Rime",
         // "Rotom (Heat)", "Lycanroc (Dusk)", "Kommo-o". Dots and brackets
@@ -202,7 +215,20 @@
             return rest.join('-').toLowerCase() + '-mega' + variant;
         }
         if (_REGION_SUFFIX[first]) {
-            return parts.slice(1).join('-').toLowerCase() + '-' + _REGION_SUFFIX[first];
+            const rest = parts.slice(1).map((w) => w.toLowerCase());
+            const kern = rest.shift();
+            if (!kern) return '';   // "Paldean" allein ist kein Name
+            /* "Breed" / "Form" ist bei Limitless kein Teil des Namens —
+             * "Paldean Tauros (Blaze Breed)" liegt dort als
+             * tauros-paldea-blaze. Am 31.08.2026 alle Schreibweisen im
+             * Browser durchprobiert: tauros-paldea, tauros-paldea-blaze
+             * und tauros-paldea-aqua laden, tauros-paldea-combat nicht.
+             * Die Gefechtvariante IST dort die Grundschreibweise der
+             * paldeanischen Form — sie steht in _SPRITE_SONDERFALL. */
+            const variante = rest.filter((w) => !/^(breed|breeds|form|forme)$/.test(w));
+            const roh = kern + '-' + _REGION_SUFFIX[first]
+                      + (variante.length ? '-' + variante.join('-') : '');
+            return _SPRITE_SONDERFALL[roh] || roh;
         }
         return parts.join('-').toLowerCase();
     }
@@ -211,7 +237,7 @@
 
     /* Die Grundform zu einer Mega-Form — als Rueckfall fuer das Bild.
      *
-     * BEFUND (31.08.2026, alle 290 Eintraege im Browser geprueft): fuer
+     * BEFUND (31.08.2026, alle Eintraege im Browser geprueft): fuer
      * 9 Mega-Formen liefert die Bildquelle nichts. Es sind die
      * Champions-eigenen: Glimmora, Scovillain, Raichu X, Raichu Y,
      * Staraptor, Golurk, Crabominable, Meowstic, Chimecho. Alle neun

@@ -70,7 +70,7 @@ const REGISTER = {
     'test-champions-base-stats.js':      'Schema der Statuswerte, keine Zahlenbaender',
     'test-champions-damage.js':          'Rechenwege am Schadensmodell; Baender sind physikalisch (Chance zwischen 0 und 1)',
     'test-champions-matchups.js':        'Struktur der Matchup-Datei, Rechnung an gesetzten Werten',
-    'test-champions-speed-tiers.js':     'Sortierlogik; siehe BEOBACHTUNG unten — Zeile 148 haengt an den Daten',
+    'test-champions-speed-tiers.js':     'Sortierlogik an gesetzten Werten; die letzte Zusicherung an der Datenlage ist am 31.08.2026 entfallen',
     'test-champions-sprites.js':         'nur Existenz von Sprite-Eintraegen, keine Ungleichung',
     'test-comparison-csv-comma-parse.js':'Parsebarkeit des Komma-Formats, Struktur',
     'test-conversion-performance.js':    'Feldquote als weites Band; die Wochenbehauptungen sind am 28.08. entfernt worden',
@@ -88,10 +88,11 @@ const REGISTER = {
     'test-testdaten-wachhund.js':        'dieser Wachhund selbst',
 };
 
-// Stand 28.08.2026, nach dem Aufraeumen von test-conversion-performance.js.
+// Stand 31.08.2026, nach dem Aufraeumen der letzten Vorbedingung in
+// test-champions-speed-tiers.js (vorher 61, Stand 28.08.2026).
 // Diese Zahl darf nicht steigen. Wer eine Ungleichung an Live-Daten
 // hinzufuegt, muss hier bewusst hochzaehlen und im Register begruenden.
-const OBERGRENZE = 61;
+const OBERGRENZE = 60;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 
@@ -124,19 +125,14 @@ describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
             'Zahl auch in vier Wochen noch stimmt.');
     });
 
-    it('meldet die bekannte Vorbedingung, die noch an den Daten haengt', () => {
-        // BEOBACHTUNG, kein Verbot: test-champions-speed-tiers.js:148 hat
-        // dieselbe Handschrift wie der Blocker vom 28.08. —
-        //     assert.ok(missing.length > 0, 'fixture changed — ...')
-        // Sie faellt, sobald die Quelle fuer jeden Eintrag Doubles-Daten
-        // liefert. Das ist kein Defekt, das waere eine Verbesserung der Daten.
-        // Der Test haelt hier nur fest, dass die Stelle bekannt ist; er wird
-        // rot, wenn jemand sie anfasst, ohne diesen Kommentar mitzuziehen.
-        const t = fs.readFileSync(path.join(UNIT, 'test-champions-speed-tiers.js'), 'utf8');
-        const trifft = /fixture changed/.test(t);
-        assert.equal(trifft, true,
-            'Die beobachtete Stelle in test-champions-speed-tiers.js ist weg oder ' +
-            'umformuliert. Wenn sie bereinigt wurde: diesen Test hier entfernen und ' +
-            'die Obergrenze um eins senken.');
-    });
+    /* Die frueher hier beobachtete Vorbedingung in
+     * test-champions-speed-tiers.js ("fixture changed — no entry lacks
+     * doubles data") ist am 31.08.2026 eingetreten und bereinigt worden:
+     * seit Tauros (Paldea) in seine drei Varianten aufgeteilt wurde, hat
+     * jeder Pokedex-Eintrag einen Doppelkampf-Datensatz. Genau der Fall,
+     * den der Kommentar vorhergesagt hat — "kein Defekt, das waere eine
+     * Verbesserung der Daten". Die Zusicherung prueft dort jetzt das
+     * Verhalten an gesetzten Werten statt an der Datenlage, die
+     * Beobachtung ist damit erledigt und die Obergrenze um eins
+     * gesenkt. */
 });

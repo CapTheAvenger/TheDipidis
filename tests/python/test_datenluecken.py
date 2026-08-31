@@ -20,6 +20,7 @@ Beides wird hier gegen die Dateien selbst gerechnet, nicht behauptet.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -424,3 +425,92 @@ def test_inventar_skript_laeuft_durch():
     finally:
         with open(pfad, "w", encoding="utf-8") as f:
             f.write(vorher)
+
+
+def _bauer():
+    """Den Bauer als Modul laden. Beim Import laeuft nur Modulrumpf —
+    kein Netz, kein Schreiben."""
+    import importlib.util
+    pfad = os.path.join(ROOT, "scripts", "build_champions_pokedex.py")
+    spec = importlib.util.spec_from_file_location("bauer_unter_test", pfad)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_der_bauer_setzt_die_entschiedenen_namen_selbst(tmp_path):
+    """Eine Handkorrektur in einer erzeugten Datei ist keine Korrektur.
+
+    BEFUND (31.08.2026): zwei der 63 Entscheidungen — Sharp Beak
+    ("Spitzer Schnabel") und Snow Warning ("Schneeschauer") — standen
+    nur noch als Handaenderung IN data/champions_names_de.json. Der
+    naechste Lauf von build_champions_pokedex.py holte die Namen wieder
+    aus PokeAPI ("Hackattack", "Hagelalarm"), und beide Konflikte waren
+    zurueck. Aufgefallen ist es erst, weil ein Neubau noetig war.
+
+    Geprueft wird hier nicht der Quelltext, sondern das Ergebnis: der
+    Bauer schreibt in eine Wegwerfdatei, und darin muss der entschiedene
+    Name stehen — auch dann, wenn eine fruehere Quelle etwas anderes
+    sagt. Ein Test auf Zeichenketten im Quelltext bliebe gruen, wenn die
+    Anwendung leer liefe.
+    """
+    mod = _bauer()
+    ziel = tmp_path / "names_de.json"
+    mod.NAMES_DE_OUT = str(ziel)
+    mod.write_names_de({"Pikachu": "Pikachu"})
+    geschrieben = json.loads(ziel.read_text(encoding="utf-8"))
+
+    entschieden = _json(os.path.join(DATA, "champions_namen_entschieden.json"))["namen"]
+    abweichungen = []
+    for gruppe, eintraege in entschieden.items():
+        for en, rec in eintraege.items():
+            ist = geschrieben.get(gruppe, {}).get(en)
+            if ist != rec["de"]:
+                abweichungen.append(f"{gruppe}/{en}: {ist!r} statt {rec['de']!r}")
+    assert not abweichungen, (
+        "der Bauer schreibt andere Namen als entschieden:\n  "
+        + "\n  ".join(abweichungen))
+    # Die zwei, die der Neubau zuvor zurueckgedreht hat — namentlich.
+    assert geschrieben["items"]["Sharp Beak"] == "Spitzer Schnabel"
+    assert geschrieben["abilities"]["Snow Warning"] == "Schneeschauer"
+
+
+def test_eine_neue_entscheidung_wirkt_ohne_dass_jemand_nachfasst(tmp_path):
+    """Gegenprobe mit einer erfundenen Entscheidung.
+
+    Ohne sie koennte der Bauer die Datei zwar lesen, aber nur zufaellig
+    dieselben Werte schreiben, die ohnehin herauskaemen.
+    """
+    mod = _bauer()
+    quelle = tmp_path / "entschieden.json"
+    quelle.write_text(json.dumps({"namen": {
+        "abilities": {"Intimidate": {"de": "PRUEFWERT-A"}},
+        "moves": {"Protect": {"de": "PRUEFWERT-B"}},
+        "items": {"Leftovers": {"de": "PRUEFWERT-C"}},
+    }}, ensure_ascii=False), encoding="utf-8")
+    ziel = tmp_path / "names_de.json"
+    mod.NAMEN_ENTSCHIEDEN_PATH = str(quelle)
+    mod.NAMES_DE_OUT = str(ziel)
+    mod.write_names_de({})
+    g = json.loads(ziel.read_text(encoding="utf-8"))
+    assert g["abilities"]["Intimidate"] == "PRUEFWERT-A"
+    assert g["moves"]["Protect"] == "PRUEFWERT-B"
+    assert g["items"]["Leftovers"] == "PRUEFWERT-C"
+
+
+def test_die_entscheidung_kommt_nach_allen_anderen_quellen():
+    """Reihenfolge im Quelltext — als Ergaenzung, nicht als Ersatz.
+
+    Das Verhalten oben faellt auch dann auf, wenn die Anwendung zu frueh
+    steht und danach ueberschrieben wird. Diese Zusicherung sagt
+    zusaetzlich, WO der Fehler dann liegt.
+    """
+    with open(os.path.join(ROOT, "scripts", "build_champions_pokedex.py"),
+              encoding="utf-8") as f:
+        quelle = f.read()
+    assert quelle.index("open(NAMEN_ENTSCHIEDEN_PATH") > quelle.index(
+        "ABILITY_OVERRIDES_PATH, encoding"), (
+        "die Entscheidungen werden vor den anderen Quellen gesetzt und "
+        "danach ueberschrieben")
+    assert quelle.index("open(NAMEN_ENTSCHIEDEN_PATH") < quelle.index(
+        "with open(NAMES_DE_OUT"), "die Entscheidungen kommen zu spaet zum Schreiben"

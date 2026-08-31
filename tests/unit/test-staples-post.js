@@ -407,10 +407,21 @@ describe('Top 30 wird auf zwei Bilder geteilt', () => {
  * Die Rangmuenze auf der Kachel
  *
  * Am 31.08.2026 im Livebild aufgefallen: die Muenze sass oben links —
- * genau dort, wo jede Pokemon-Karte ihren gedruckten Namen traegt. Rang 1
- * las sich als "Stretcher" statt "Night Stretcher", Rang 2 als "Ball",
+ * genau dort, wo jede Pokemon-Karte ihren gedruckten Namen traegt. Rang
+ * 1 las sich als "Stretcher" statt "Night Stretcher", Rang 2 als "Ball",
  * Rang 3 als "Determination". Sie gehoert ins dunkle Band unten rechts,
  * wo sie nichts zudeckt.
+ *
+ * Der erste Anlauf loeste das eine Problem und schuf dasselbe an der
+ * anderen Seite: die Muenze stand NEBEN dem Namen und nahm ihm 44 px
+ * Breite. Nachgemessen mit den echten 15 Staples und der echten Schrift
+ * wurden dadurch drei Namen abgeschnitten, die vorher vollstaendig
+ * dastanden — "Lillie's Determination" (139 px), "Team Rocket's Petrel"
+ * (135), "Buddy-Buddy Poffin" (134), bei 116 px Platz.
+ *
+ * Darum steht der Name jetzt UEBER der Muenze und behaelt die volle
+ * Kachelbreite; nur die kurze Prozentzeile teilt sich die Reihe mit ihr.
+ * Beide Fehler sind hier festgehalten, nicht nur der erste.
  * ═══════════════════════════════════════════════════════════════════ */
 
 const KACHEL = schneide('function malStapleKachel(ctx, k, x, y, kb, kh)',
@@ -419,19 +430,38 @@ const KACHEL = schneide('function malStapleKachel(ctx, k, x, y, kb, kh)',
 function zeichneKachel(karte, x, y, kb, kh) {
     const kreise = [];
     const texte = [];
-    const clipBreiten = [];
+    const clipRufe = [];
+    /* save/restore stapeln wirklich. Eine Attrappe mit No-Ops wuerde
+     * behaupten, die expliziten Ruecksetzer seien noetig, obwohl
+     * restore() sie erledigt — und einen roten Test fuer richtigen Code
+     * liefern. */
+    const stapel = [];
     const ctx = {
         _px: 12,
         set font(v) { const m = String(v).match(/(\d+)px/); if (m) this._px = +m[1]; },
         get font() { return this._px + 'px'; },
-        save: () => {}, restore: () => {}, clip: () => {},
+        save() {
+            stapel.push({ textAlign: this.textAlign, textBaseline: this.textBaseline,
+                          fillStyle: this.fillStyle, strokeStyle: this.strokeStyle,
+                          lineWidth: this.lineWidth, geklemmt: this.geklemmt });
+        },
+        restore() { Object.assign(this, stapel.pop() || {}); },
+        clip() { this.geklemmt = true; },
         beginPath: () => {}, fill: () => {}, stroke: () => {},
-        fillRect: () => {}, drawImage: () => {},
-        createLinearGradient: () => ({ addColorStop: () => {} }),
+        fillRect: (rx, ry, rw, rh) => { ctx._letzterRect = { x: rx, y: ry, w: rw, h: rh }; },
+        drawImage: () => {},
+        createLinearGradient: (x0, y0, x1, y1) => {
+            ctx._verlauf = { y0, y1 };
+            return { addColorStop: () => {} };
+        },
         measureText: (t) => ({ width: String(t).length * 6 }),
         arc: (cx, cy, r) => { kreise.push({ cx, cy, r }); },
         fillText: (t, tx, ty) => { texte.push({ t: String(t), x: tx, y: ty }); },
-        textAlign: '', textBaseline: '', fillStyle: '', strokeStyle: '', lineWidth: 0,
+        // Die Vorgaben einer echten Leinwand, damit "wieder wie vorher"
+        // etwas Pruefbares heisst.
+        textAlign: 'start', textBaseline: 'alphabetic',
+        fillStyle: '#000000', strokeStyle: '#000000', lineWidth: 1,
+        geklemmt: false,
     };
     const attrappen = {
         MC_FARBEN: { holz: '#E3B276', creme: '#F5E9DC', matt: '#9A8AA5' },
@@ -439,63 +469,137 @@ function zeichneKachel(karte, x, y, kb, kh) {
         fSans: (g) => g + 'px sans',
         fMono: (g) => g + 'px mono',
         num: (v, n) => Number(v).toFixed(n).replace('.', ','),
-        clip: (c, t, b) => { clipBreiten.push(b); return t; },
+        clip: (c, t, b) => { clipRufe.push({ t: String(t), b }); return t; },
     };
     const fn = new Function(...Object.keys(attrappen),
         KACHEL + '\nreturn malStapleKachel;')(...Object.values(attrappen));
     fn(ctx, karte, x, y, kb, kh);
-    return { kreise, texte, clipBreiten, ctx };
+    return { kreise, texte, clipRufe, ctx };
 }
 
+/* Die Kachelmasse, die staplesGitter fuer ein 1080x1350-Bild wirklich
+ * liefert — plus die Untergrenze, die es zulaesst. Eine einzige
+ * Kachelgroesse zu pruefen hiesse, den interessanten Bereich (kleine
+ * Kacheln) nie anzufassen. */
+const MASSE = [
+    [324, 452],   //  1–3 Karten
+    [239, 334],   //  7–8
+    [188, 262],   //  9–10
+    [174, 243],   // 15 — der Regelfall
+    [134, 187],   // 20
+    [116, 162],   // 30
+    [102, 143],   // 40
+    [88, 123],    // die Untergrenze aus staplesGitter
+];
+
 describe('die Rangmuenze auf der Staples-Kachel', () => {
-    const X = 100, Y = 200, KB = 150, KH = 209;
-    const karte = { rang: 7, name: 'Night Stretcher', share: 88.3, bild: {} };
+    const karte = { rang: 7, name: "Lillie's Determination", share: 88.3, bild: {} };
 
-    it('liegt in der unteren Haelfte der Kachel, nicht ueber dem Kartennamen', () => {
-        const { kreise } = zeichneKachel(karte, X, Y, KB, KH);
-        assert.equal(kreise.length, 1, 'genau eine Muenze je Kachel');
-        const m = kreise[0];
-        assert.ok(m.cy - m.r > Y + KH * 0.5,
-            `Muenze beginnt bei ${m.cy - m.r}, muss unter ${Y + KH * 0.5} liegen — `
-            + 'oben steht der gedruckte Kartenname');
-    });
+    for (const [KB, KH] of MASSE) {
+        describe(`Kachel ${KB}x${KH}`, () => {
+            const X = 100, Y = 200;
 
-    it('liegt an der rechten Kante, nicht ueber Name und Prozentzeile', () => {
-        const { kreise } = zeichneKachel(karte, X, Y, KB, KH);
-        const m = kreise[0];
-        assert.ok(m.cx - m.r > X + KB * 0.5,
-            `Muenze beginnt bei x=${m.cx - m.r}, links stehen Name und Anteil`);
-        assert.ok(m.cx + m.r <= X + KB,
-            `Muenze ragt bis ${m.cx + m.r} ueber die Kachelkante ${X + KB} hinaus`);
-        assert.ok(m.cy + m.r <= Y + KH,
-            `Muenze ragt bis ${m.cy + m.r} unter die Kachelkante ${Y + KH}`);
-    });
+            it('liegt ganz in der unteren rechten Ecke der Kachel', () => {
+                const { kreise } = zeichneKachel(karte, X, Y, KB, KH);
+                assert.equal(kreise.length, 1, 'genau eine Muenze je Kachel');
+                const m = kreise[0];
+                assert.ok(m.cy - m.r > Y + KH * 0.5,
+                    `Muenze beginnt bei ${m.cy - m.r}, oben steht der gedruckte Kartenname`);
+                assert.ok(m.cx - m.r > X + KB * 0.5, `Muenze beginnt bei x=${m.cx - m.r}`);
+                assert.ok(m.cx + m.r <= X + KB, 'Muenze ragt seitlich hinaus');
+                assert.ok(m.cy + m.r <= Y + KH, 'Muenze ragt unten hinaus');
+            });
 
-    it('traegt die Rangziffer in ihrer Mitte', () => {
-        const { kreise, texte } = zeichneKachel(karte, X, Y, KB, KH);
-        const m = kreise[0];
-        const ziffer = texte.find((t) => t.t === '7');
-        assert.ok(ziffer, 'die Rangziffer fehlt');
-        assert.ok(Math.abs(ziffer.x - m.cx) <= 1,
-            `Ziffer bei x=${ziffer.x}, Muenze bei ${m.cx}`);
-        assert.ok(Math.abs(ziffer.y - m.cy) <= 2,
-            `Ziffer bei y=${ziffer.y}, Muenze bei ${m.cy}`);
-    });
+            it('traegt die Rangziffer in ihrer Mitte', () => {
+                const { kreise, texte } = zeichneKachel(karte, X, Y, KB, KH);
+                const m = kreise[0];
+                const ziffer = texte.find((t) => t.t === '7');
+                assert.ok(ziffer, 'die Rangziffer fehlt');
+                assert.ok(Math.abs(ziffer.x - m.cx) <= 1, `Ziffer bei x=${ziffer.x}`);
+                assert.ok(Math.abs(ziffer.y - m.cy) <= 2, `Ziffer bei y=${ziffer.y}`);
+            });
 
-    it('nimmt Name und Prozentzeile den Platz der Muenze ab', () => {
-        const { kreise, clipBreiten } = zeichneKachel(karte, X, Y, KB, KH);
-        const m = kreise[0];
-        const frei = m.cx - m.r - (X + 7);
-        assert.ok(clipBreiten.length >= 2, 'Name und Anteil werden beide beschnitten');
-        clipBreiten.forEach((b) => {
-            assert.ok(b <= frei + 1,
-                `Textbreite ${b} laeuft unter die Muenze (frei sind ${frei})`);
+            it('laesst dem Namen die volle Kachelbreite', () => {
+                const { clipRufe } = zeichneKachel(karte, X, Y, KB, KH);
+                const name = clipRufe.find((c) => c.t === karte.name);
+                assert.ok(name, 'der Name wird nicht gesetzt');
+                assert.equal(name.b, KB - 14,
+                    'der Name darf keine Breite an die Muenze verlieren — genau '
+                    + 'das hat am 31.08. drei Staples abgeschnitten');
+            });
+
+            it('haelt den Namen ueber der Muenze', () => {
+                const { kreise, texte } = zeichneKachel(karte, X, Y, KB, KH);
+                const m = kreise[0];
+                const name = texte.find((t) => t.t === karte.name);
+                assert.ok(name, 'der Name wird nicht gezeichnet');
+                assert.ok(name.y <= m.cy - m.r,
+                    `Namensgrundlinie ${name.y} liegt nicht ueber der Muenzenoberkante `
+                    + `${m.cy - m.r} — dann ueberlagern sich Text und Muenze`);
+            });
+
+            it('gibt der Prozentzeile den Platz neben der Muenze, und der ist positiv', () => {
+                const { kreise, clipRufe } = zeichneKachel(karte, X, Y, KB, KH);
+                const m = kreise[0];
+                const proz = clipRufe.find((c) => /%/.test(c.t));
+                assert.ok(proz, 'die Prozentzeile wird nicht gesetzt');
+                const frei = m.cx - m.r - (X + 7);
+                assert.ok(proz.b > 0, `Prozentbreite ${proz.b} ist nicht positiv — `
+                    + 'clip() liefert dann nur noch ein Auslassungszeichen');
+                assert.ok(proz.b >= 40, `Prozentbreite ${proz.b} reicht nicht fuer "100,0 %"`);
+                assert.ok(proz.b <= frei + 1,
+                    `Prozentbreite ${proz.b} laeuft unter die Muenze (frei: ${frei})`);
+                assert.ok(proz.b >= frei - 12,
+                    `Prozentbreite ${proz.b} verschenkt Platz (frei waeren ${frei})`);
+            });
+
+            it('legt den Verlauf so hoch, dass der Name auf Dunkel steht', () => {
+                const { texte, ctx } = zeichneKachel(karte, X, Y, KB, KH);
+                const name = texte.find((t) => t.t === karte.name);
+                const oberkante = name.y - Math.max(10, Math.round(KB * 0.082));
+                assert.ok(ctx._verlauf, 'kein Verlauf gezeichnet');
+                assert.ok(ctx._verlauf.y0 <= oberkante,
+                    `Verlauf beginnt bei ${ctx._verlauf.y0}, der Name schon bei ${oberkante}`);
+                assert.equal(ctx._verlauf.y1, Y + KH, 'der Verlauf endet nicht am Kachelfuss');
+            });
         });
+    }
+
+    it('hinterlaesst keinen Zustand fuer die naechste Kachel', () => {
+        // restore() erledigt das; die Zusicherung prueft das Ergebnis,
+        // nicht die Zeile, die es bewirkt.
+        const { ctx } = zeichneKachel(karte, 100, 200, 174, 243);
+        assert.equal(ctx.textAlign, 'start', 'textAlign bleibt auf center stehen');
+        assert.equal(ctx.textBaseline, 'alphabetic', 'textBaseline bleibt auf middle stehen');
+        assert.equal(ctx.geklemmt, false, 'der Clip der Kachel steht noch');
     });
 
-    it('setzt Textausrichtung und Grundlinie wieder zurueck', () => {
-        const { ctx } = zeichneKachel(karte, X, Y, KB, KH);
-        assert.equal(ctx.textAlign, 'left', 'textAlign bleibt auf center stehen');
-        assert.equal(ctx.textBaseline, 'alphabetic', 'textBaseline bleibt auf middle stehen');
+    it('JEDES Gitter, das staplesGitter zurueckgibt, traegt die Fusszeile', () => {
+        /* Die Formel fuer die Prozentbreite hat keine eigene
+         * Untergrenze — sie haengt allein an der Kachelbreite, die
+         * staplesGitter zulaesst. Wer die Grenze dort senkt, macht die
+         * Breite negativ, und clip() liefert nur noch "…".
+         *
+         * Darum wird hier nicht das eine gelieferte Layout geprueft,
+         * sondern der ganze Raum: ueber Kartenzahl, Feldbreite und
+         * Feldhoehe hinweg darf kein zurueckgegebenes Gitter eine
+         * Kachel enthalten, in der Muenze und Prozentzeile nicht mehr
+         * nebeneinander passen. */
+        let geprueft = 0;
+        for (let anzahl = 1; anzahl <= 40; anzahl++) {
+            for (const breite of [300, 500, 700, 1000, 1400]) {
+                for (const hoehe of [120, 200, 380, 560, 757, 1000]) {
+                    const m = staplesGitter(anzahl, breite, hoehe);
+                    if (!m) continue;
+                    geprueft++;
+                    const r = Math.max(13, Math.round(m.kb * 0.105));
+                    const prozentB = m.kb - 14 - (2 * r + 8);
+                    assert.ok(prozentB >= 40,
+                        `${anzahl} Karten in ${breite}x${hoehe} ergeben kb=${m.kb}: `
+                        + `Prozentbreite ${prozentB} — unter 40 px passt "100,0 %" nicht`);
+                }
+            }
+        }
+        assert.ok(geprueft > 100, `nur ${geprueft} Gitter geprueft — der Raum ist zu klein`);
     });
 });

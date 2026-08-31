@@ -39,6 +39,26 @@ NEW_MEGAS = [
     "Dragalge-Mega", "Falinks-Mega", "Raichu-Mega-X", "Raichu-Mega-Y",
 ]
 
+# Formen, die pokebase zwar fuehrt, deren Slug aber nicht auf einen
+# Smogon-Schluessel abbildet.
+#
+# BEFUND (31.08.2026): pokebase listet die drei Paldea-Tauros als
+# "tauros-paldea-aqua-breed" / "tauros-paldea-blaze-breed"; daraus macht
+# slug_to_smogon "Tauros-Paldea-Aqua-Breed", was Smogon nicht kennt
+# ("Tauros-Paldea-Aqua"). Sie fielen deshalb still aus der Liste — und
+# die Gefechtvariante kam ueber den otterlyclueless-Roster herein und
+# trug den Namen aller drei.
+#
+# Wichtiger als der Fall selbst ist die Stelle: diese Datei wird von
+# champions-replica-scrape.yml taeglich NEU geschrieben. Wer die
+# Schluessel nur in data/champions_roster_extra.json eintraegt, verliert
+# sie beim naechsten Lauf — mit rotem Test und angehaltenem Deploy.
+# Kuratierte Zugaenge gehoeren hierher, wie NEW_MEGAS.
+EXTRA_FORMEN = [
+    "Tauros-Paldea-Blaze",   # pokebase: tauros-paldea-blaze-breed, Kampf/Feuer
+    "Tauros-Paldea-Aqua",    # pokebase: tauros-paldea-aqua-breed,  Kampf/Wasser
+]
+
 
 def slug_to_smogon(slug):
     """pokebase slug → Smogon species name. 'ninetales-alola' →
@@ -74,9 +94,13 @@ def main():
         return 1
 
     megas = [m for m in NEW_MEGAS if m in smogon]
-    # Stable, de-duplicated key list (base first, then megas).
+    formen = [f for f in EXTRA_FORMEN if f in smogon]
+    fehlend = [f for f in EXTRA_FORMEN if f not in smogon]
+    if fehlend:
+        print(f"WARN: kuratierte Formen ohne Smogon-Eintrag: {fehlend}", file=sys.stderr)
+    # Stable, de-duplicated key list (base first, then megas, then forms).
     seen, keys = set(), []
-    for k in base + megas:
+    for k in base + megas + formen:
         if k not in seen:
             seen.add(k)
             keys.append(k)
@@ -86,15 +110,20 @@ def main():
             "description": "Champions roster additions not in the otterlyclueless "
                            "M-A dataset. Base species from pokebase.app Champions dex; "
                            "new Mega Evolutions from official M-B coverage. Stats/types "
-                           "resolved from Smogon; German names from PokéAPI.",
+                           "resolved from Smogon; German names from PokéAPI. "
+                           "Kuratierte Einzelformen (EXTRA_FORMEN in "
+                           "scripts/scrape_champions_roster.py), deren pokebase-Slug "
+                           "nicht auf einen Smogon-Schluessel abbildet, kommen zuletzt.",
             "sources": [POKEBASE, "official M-B Mega coverage", "Smogon (pokemon-showdown)"],
             "base_count": len(base),
             "mega_count": len(megas),
+            "form_count": len(formen),
         },
         "smogonKeys": keys,
     }
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print(f"Wrote {OUT} — {len(base)} base + {len(megas)} mega = {len(keys)} keys")
+    print(f"Wrote {OUT} — {len(base)} base + {len(megas)} mega "
+          f"+ {len(formen)} Formen = {len(keys)} keys")
     return 0
 
 

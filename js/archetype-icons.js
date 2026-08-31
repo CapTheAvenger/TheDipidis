@@ -97,8 +97,32 @@
     'wellspring':'wellspring',
     'cornerstone':'cornerstone',
     'hearthflame':'hearthflame',
-    'tealmask':  'teal-mask',
+    // Teal Mask ist Ogerpons GRUNDFORM — Limitless fuehrt sie unter
+    // dem blanken 'ogerpon'. Der leere Suffix heisst hier "Formwort
+    // erkannt, aber kein Zusatz am Slug". Am 31.08.2026 geprueft:
+    // ogerpon, ogerpon-wellspring, ogerpon-hearthflame und
+    // ogerpon-cornerstone laden, ogerpon-teal-mask nicht.
+    'tealmask':  '',
   };
+
+  // Kuerzestes Pokemon der Reihe hat drei Buchstaben (Mew, Muk). Ein
+  // ein- oder zweibuchstabiges Wort ist nie eine Art — "N's Zoroark"
+  // ergab sonst den Slug 'n', und den gibt es nicht.
+  const _MIN_SLUG_LAENGE = 3;
+
+  /* Art + Formzusatz -> Slug, mit der Variante GANZ hinten.
+   *
+   * BEFUND (31.08.2026): "Mega Charizard-X" ergab charizard-x-mega.
+   * Limitless schreibt charizard-mega-x — geprueft, ebenso
+   * mewtwo-mega-x/-y. Der Dreher steckte in zehn kuratierten
+   * Eintraegen UND hier im Rateweg; nach der Datenkorrektur kam er
+   * ueber diesen Weg sofort zurueck, weil nicht jeder Archetypname in
+   * der kuratierten Datei steht. */
+  function _formSlug(art, suffix) {
+    const m = String(art).match(/^(.+)-([xy])$/);
+    if (m) return suffix ? `${m[1]}-${suffix}-${m[2]}` : `${m[1]}-${m[2]}`;
+    return suffix ? `${art}-${suffix}` : String(art);
+  }
 
   function _sanitizeWord(w) {
     // Drop apostrophe-s possessives ("N's" → "N", "Rocket's" → "Rocket"),
@@ -123,22 +147,38 @@
       const w = raw[i].toLowerCase();
       if (!w || _NOISE_TOKENS.has(w)) continue;
 
-      // Form prefix + next word → "lucario-mega"-style slug.
-      const formSuffix = _FORM_PREFIX_SUFFIX[w];
-      if (formSuffix && raw[i + 1]) {
-        const nxt = raw[i + 1].toLowerCase();
+      // Formzusatz, ein ODER zwei Woerter. "Teal Mask Ogerpon" kam
+      // vorher als ["teal","mask"] heraus — zwei Slugs, die es beide
+      // nicht gibt, und Ogerpon selbst tauchte gar nicht auf.
+      let formSuffix = _FORM_PREFIX_SUFFIX[w];
+      let extraWort = 0;
+      if (formSuffix === undefined && raw[i + 1]) {
+        const zusammen = w + raw[i + 1].toLowerCase();
+        if (_FORM_PREFIX_SUFFIX[zusammen] !== undefined) {
+          formSuffix = _FORM_PREFIX_SUFFIX[zusammen];
+          extraWort = 1;
+        }
+      }
+
+      // `undefined` heisst "kein Formwort"; '' heisst "Formwort, aber
+      // der Slug traegt keinen Zusatz" (Ogerpons Teal Mask). Die
+      // Unterscheidung braucht !== undefined, ein Wahrheitstest wuerde
+      // den leeren Zusatz verschlucken.
+      const artWort = raw[i + 1 + extraWort];
+      if (formSuffix !== undefined && artWort) {
+        const nxt = artWort.toLowerCase();
         if (!_NOISE_TOKENS.has(nxt)) {
-          const combined = nxt + '-' + formSuffix;
-          if (!seen.has(combined)) {
+          const combined = _formSlug(nxt, formSuffix);
+          if (combined && !seen.has(combined)) {
             slugs.push(combined);
             seen.add(combined);
           }
-          i++; // consume the pokémon word
+          i += 1 + extraWort; // Formwort(e) + Art verbraucht
           continue;
         }
       }
 
-      if (!seen.has(w)) {
+      if (w.length >= _MIN_SLUG_LAENGE && !seen.has(w)) {
         slugs.push(w);
         seen.add(w);
       }

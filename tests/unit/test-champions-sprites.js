@@ -205,6 +205,7 @@ function showdownNamen() {
 describe('Showdown-Namen aus den Replica-Teams', () => {
     const umrechnen = new Function(
         chunk(/    const _SD_REGION = \{[\s\S]*?\n    \]\);\n/, 'Showdown-Tabellen')
+        + chunk(/    const _SD_ANZEIGE = \{[^\n]*\};\n/, '_SD_ANZEIGE')
         + chunk(/    function showdownZuAnzeige\(nm\) \{[\s\S]*?\n    \}\n/, 'showdownZuAnzeige')
         + 'return showdownZuAnzeige;')();
 
@@ -220,6 +221,13 @@ describe('Showdown-Namen aus den Replica-Teams', () => {
             ['Tauros-Paldea-Aqua', 'Paldean Tauros (Aqua Breed)'],
             ['Rotom-Heat', 'Rotom (Heat)'],
             ['Lycanroc-Dusk', 'Lycanroc (Dusk)'],
+            // In Champions gibt es nur die Ewigbluetler, und die heisst
+            // dort schlicht Floette — dieselbe Sache wie bei den
+            // Basiswerten (ROSTER_WERTE_AUS_SMOGON im Bau-Skript).
+            // Live gemessen am 31.08.: ohne diese Zeile war das die
+            // letzte Zeile der Teams-Ansicht, die noch bei Limitless
+            // landete und einen anderen Bildstil trug.
+            ['Floette-Eternal', 'Floette'],
         ]) {
             assert.equal(umrechnen(sd), erwartet, sd);
         }
@@ -606,6 +614,7 @@ describe('das erzeugte Bild-Markup', () => {
         + chunk(/    function spriteSlug\(en\) \{[\s\S]*?\n    \}\n/, 'spriteSlug')
         + chunk(/    function lokalName\(en\) \{[\s\S]*?\n    \}\n/, 'lokalName')
         + chunk(/    const _SD_REGION = \{[\s\S]*?\n    \]\);\n/, 'Showdown-Tabellen')
+        + chunk(/    const _SD_ANZEIGE = \{[^\n]*\};\n/, '_SD_ANZEIGE')
         + chunk(/    function showdownZuAnzeige\(nm\) \{[\s\S]*?\n    \}\n/, 'showdownZuAnzeige')
         + chunk(/    function basisName\(en\) \{[\s\S]*?\n    \}\n/, 'basisName')
         + chunk(/    function grundformSlug\(en\) \{[\s\S]*?\n    \}\n/, 'grundformSlug')

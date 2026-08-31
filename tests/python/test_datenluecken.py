@@ -20,6 +20,7 @@ Beides wird hier gegen die Dateien selbst gerechnet, nicht behauptet.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -424,3 +425,41 @@ def test_inventar_skript_laeuft_durch():
     finally:
         with open(pfad, "w", encoding="utf-8") as f:
             f.write(vorher)
+
+
+def test_der_bauer_setzt_die_entschiedenen_namen_selbst():
+    """Eine Handkorrektur in einer erzeugten Datei ist keine Korrektur.
+
+    BEFUND (31.08.2026): zwei der 63 Entscheidungen — Sharp Beak
+    ("Spitzer Schnabel") und Snow Warning ("Schneeschauer") — standen
+    nur noch als Handaenderung IN data/champions_names_de.json. Der
+    naechste Lauf von build_champions_pokedex.py holte die Namen wieder
+    aus PokeAPI ("Hackattack", "Hagelalarm"), und beide Konflikte waren
+    zurueck. Aufgefallen ist es erst, weil ein Neubau noetig war.
+
+    Also liest der Bauer die Entscheidungsdatei jetzt selbst — als
+    letzten Schritt, damit sie gegen alle vorherigen Quellen gewinnt.
+    """
+    with open(os.path.join(ROOT, "scripts", "build_champions_pokedex.py"),
+              encoding="utf-8") as f:
+        quelle = f.read()
+    assert "NAMEN_ENTSCHIEDEN_PATH" in quelle, (
+        "der Bauer kennt die Entscheidungsdatei nicht")
+    assert "champions_namen_entschieden.json" in quelle
+    # Gelesen UND angewandt: der blosse Pfad genuegt nicht.
+    assert re.search(r"open\(NAMEN_ENTSCHIEDEN_PATH", quelle), (
+        "die Entscheidungsdatei wird nie geoeffnet")
+    anwendung = quelle[quelle.index("open(NAMEN_ENTSCHIEDEN_PATH"):]
+    anwendung = anwendung[:anwendung.index("with open(NAMES_DE_OUT")]
+    for gruppe in ("abilities", "moves", "items"):
+        assert gruppe in anwendung, f"Gruppe {gruppe} wird nicht uebernommen"
+    assert "out.setdefault(" in anwendung or "out[" in anwendung, (
+        "die gelesenen Namen landen nirgends")
+    # Und zwar NACH den anderen Quellen — sonst ueberschreibt PokeAPI sie
+    # wieder.
+    assert quelle.index("open(NAMEN_ENTSCHIEDEN_PATH") > quelle.index(
+        "ABILITY_OVERRIDES_PATH, encoding"), (
+        "die Entscheidungen werden vor den anderen Quellen gesetzt und "
+        "danach ueberschrieben")
+    assert quelle.index("open(NAMEN_ENTSCHIEDEN_PATH") < quelle.index(
+        "with open(NAMES_DE_OUT"), "die Entscheidungen kommen zu spaet zum Schreiben"

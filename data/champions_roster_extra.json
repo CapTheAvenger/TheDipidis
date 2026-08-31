@@ -1,13 +1,14 @@
 {
  "_meta": {
-  "description": "Champions roster additions not in the otterlyclueless M-A dataset. Base species from pokebase.app Champions dex; new Mega Evolutions from official M-B coverage. Stats/types resolved from Smogon; German names from PokéAPI.",
+  "description": "Champions roster additions not in the otterlyclueless M-A dataset. Base species from pokebase.app Champions dex; new Mega Evolutions from official M-B coverage. Stats/types resolved from Smogon; German names from PokéAPI. Kuratierte Einzelformen (EXTRA_FORMEN in scripts/scrape_champions_roster.py), deren pokebase-Slug nicht auf einen Smogon-Schluessel abbildet, kommen zuletzt.",
   "sources": [
    "https://pokebase.app/pokemon-champions/pokemon",
    "official M-B Mega coverage",
    "Smogon (pokemon-showdown)"
   ],
-  "base_count": 74,
-  "mega_count": 33
+  "base_count": 100,
+  "mega_count": 16,
+  "form_count": 2
  },
  "smogonKeys": [
   "Aerodactyl",

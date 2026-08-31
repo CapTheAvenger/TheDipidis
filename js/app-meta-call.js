@@ -5620,7 +5620,7 @@ window.MetaCall = (function () {
             console.info(
               '[MetaCall] Lag-Fenster abgelaufen — neueste Labs-Zeile %s ist %d Tage alt '
               + '(Grenze %d). Kein Nachhinken, sondern eine Datenluecke: aktives Format '
-              + 'bleibt %s, die Vor-Ort-Ebene fehlt fuer dieses Format.',
+              + 'bleibt %s, die Vor-Ort-Ebene fehlt für dieses Format.',
               activeNewestDate, lagAlterTage, lagTage + LAG_KARENZ_TAGE, currentSetCode);
             activeSetCode = currentSetCode;
           }

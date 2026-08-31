@@ -786,7 +786,7 @@
                 pastMetaFilteredCards = [];
                 pastMetaCurrentScope = null;
                 resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
-                renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
+                renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte wähle ein Deck aus dem Dropdown, um die Karten zu laden');
                 return;
             }
             
@@ -961,7 +961,7 @@
                 if (gridContainer) {
                     const selectedArchetype = String(document.getElementById('pastMetaDeckSelect')?.value || '').trim();
                     if (!selectedArchetype) {
-                        renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
+                        renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte wähle ein Deck aus dem Dropdown, um die Karten zu laden');
                     } else {
                         gridContainer.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match the current filters.', icon: 'cards' });
                     }
@@ -1608,7 +1608,7 @@
             if (gewaehlt && !wantedTid) {
                 cards.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${
                     (typeof getLang === 'function' && getLang() === 'de')
-                        ? 'Fuer dieses Turnier gibt es keine Turnierauswertung — es fehlt die Zuordnung zu den Labs-Daten.'
+                        ? 'Für dieses Turnier gibt es keine Turnierauswertung — es fehlt die Zuordnung zu den Labs-Daten.'
                         : 'No tournament breakdown for this event — it has no link to the labs data.'}</p>`;
                 matchup.innerHTML = '';
                 return;

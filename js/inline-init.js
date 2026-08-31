@@ -64,10 +64,117 @@ function syncMenuClustersForTab(tabId) {
     });
 }
 
+/* Die Hoehe des Pokeball-Menues an den Platz anpassen, der wirklich da ist.
+ *
+ * BEFUND (31.08.2026, gemessen bei 1440x700 auf der Startseite): der
+ * letzte sichtbare Eintrag war waagerecht durchgeschnitten. Das
+ * Stylesheet deckelt das Menue mit `max-height: calc(100vh - 90px)` —
+ * also gegen die GANZE Bildhoehe. Das Menue haengt aber absolut im
+ * Kopfbereich und scrollt mit: sobald die Seite ein Stueck gescrollt
+ * ist, beginnt es oberhalb des sichtbaren Bereichs. Gemessen lag sein
+ * oberer Rand bei -23 px, waehrend der Deckel 610 px erlaubte — die
+ * letzten 23 px fielen unten heraus, und `overflow-y: auto` machte
+ * daraus einen Rollbalken in einem 280 px schmalen Kasten, den man
+ * uebersieht.
+ *
+ * Gerechnet wird deshalb ab der TATSAECHLICHEN Position. Und wenn das
+ * Menue oben aus dem Bild ragt, waere sein oberer Teil ohnehin
+ * unerreichbar — dann wird ein Stueck zurueckgescrollt, statt unten
+ * abzuschneiden.
+ */
+function menueHoeheAnpassen(drop) {
+    if (!drop) return;
+    drop.style.maxHeight = '';        // erst zuruecksetzen, sonst misst man den alten Deckel
+    let r = drop.getBoundingClientRect();
+    if (r.top < 8) {
+        window.scrollBy(0, Math.round(r.top) - 8);
+        r = drop.getBoundingClientRect();
+    }
+    const oben = Math.max(r.top, 8);
+    // 240 als Boden: lieber ein rollbares Menue als ein zweizeiliges.
+    const platz = Math.max(240, Math.round(window.innerHeight - oben - 16));
+    drop.style.maxHeight = platz + 'px';
+
+    /* Auf eine ganze Zeile abrunden.
+     *
+     * Reicht der Platz nicht fuer alle Eintraege, rollt das Menue — das
+     * ist richtig. Falsch waere, dabei eine Zeile in der Mitte
+     * durchzuschneiden: genau das sah aus wie ein kaputtes Menue und
+     * war der gemeldete Fehler. Der Deckel wandert deshalb auf die
+     * naechste Zeilenkante darunter. Dann sieht man eine Zeile ganz
+     * oder gar nicht, und dass unten mehr kommt, zeigt der Rollbalken.
+     */
+    /* Auf eine ganze Zeile abrunden — gemessen, nicht gerechnet.
+     *
+     * Reicht der Platz nicht fuer alle Eintraege, rollt das Menue. Das
+     * ist richtig. Falsch waere, dabei eine Zeile in der Mitte
+     * durchzuschneiden: genau das sah aus wie ein kaputtes Menue und
+     * war der gemeldete Fehler.
+     *
+     * Drei Anlaeufe ueber das Box-Modell (Zeilenkanten, Rahmenbreite,
+     * border-box) landeten daneben, weil `max-height` die Aussenkante
+     * meint und die Zeilenkanten im Inhaltsraum liegen — und weil ein
+     * geaenderter Deckel den Rollbalken erscheinen laesst, was die
+     * Breite und damit den Umbruch aendert. Deshalb wird jetzt nicht
+     * mehr vorausberechnet, sondern korrigiert: schneidet die Unterkante
+     * eine Zeile, wird der Deckel auf deren OBERKANTE gezogen und neu
+     * gemessen. Zwei Durchgaenge reichen; der dritte ist die Reserve.
+     */
+    for (let versuch = 0; versuch < 3; versuch++) {
+        const kasten = drop.getBoundingClientRect();
+        let schnittBei = null;
+        const zeilen = drop.querySelectorAll('.menu-header, .menu-item');
+        for (let i = 0; i < zeilen.length; i++) {
+            const el = zeilen[i];
+            if (!el.getClientRects().length) continue;
+            const zr = el.getBoundingClientRect();
+            if (zr.top < kasten.bottom - 1 && zr.bottom > kasten.bottom + 1) {
+                schnittBei = (schnittBei === null) ? zr.top : Math.min(schnittBei, zr.top);
+            }
+        }
+        if (schnittBei === null) break;
+        const neueHoehe = Math.round(kasten.height - (kasten.bottom - schnittBei));
+        if (neueHoehe < 240 || neueHoehe >= Math.round(kasten.height)) break;
+        drop.style.maxHeight = neueHoehe + 'px';
+    }
+}
+window.menueHoeheAnpassen = menueHoeheAnpassen;
+
+/* Nachrechnen, wenn sich der INHALT aendert — nicht nach Zeitplan.
+ *
+ * Die Hoehe aendert sich, wenn ein Untermenue auf- oder zuklappt, und
+ * das laeuft mit Uebergang. Drei Anlaeufe mit requestAnimationFrame,
+ * setTimeout(320) und transitionend haben das Rennen jeweils in
+ * einzelnen Faellen verloren (gemessen bei 1440x700: "Mein Profil"
+ * blieb halb). Ein ResizeObserver auf die Untermenues gewinnt es
+ * immer: er feuert genau dann, wenn die Hoehe wirklich steht.
+ *
+ * Beobachtet werden nur die Untermenues, nicht der Kasten selbst —
+ * sonst loest die eigene Hoehenaenderung die naechste Runde aus.
+ */
+var _menueBeobachter = null;
+function menueBeobachtungStarten(drop) {
+    if (typeof ResizeObserver !== 'function') return;
+    menueBeobachtungBeenden();
+    _menueBeobachter = new ResizeObserver(function () {
+        requestAnimationFrame(function () {
+            if (drop.classList.contains('show')) menueHoeheAnpassen(drop);
+        });
+    });
+    drop.querySelectorAll('.menu-submenu').forEach(function (el) {
+        _menueBeobachter.observe(el);
+    });
+}
+function menueBeobachtungBeenden() {
+    if (_menueBeobachter) { _menueBeobachter.disconnect(); _menueBeobachter = null; }
+}
+
 function toggleMainMenu() {
     const drop = document.getElementById('mainMenuDropdown');
     const trig = document.getElementById('mainMenuTrigger');
     const open = drop.classList.toggle('show');
+    if (open) { menueHoeheAnpassen(drop); menueBeobachtungStarten(drop); }
+    else { menueBeobachtungBeenden(); }
     trig.classList.toggle('open', open);
     // aria-expanded stand fest auf "false" im Markup und wurde nie
     // nachgezogen. Ein Menue, das sich nicht ansagt, ist fuer eine
@@ -181,6 +288,37 @@ function setMenuHighlight(menuBtnId) {
 }
 window.setMenuHighlight = setMenuHighlight;
 
+/* Ein aufgeklapptes Untermenue macht das Menue laenger, ein Drehen des
+ * Geraets macht das Bild kuerzer. Beides ohne Nachrechnen heisst wieder
+ * abgeschnitten. */
+document.addEventListener('click', function (e) {
+    const menu = document.getElementById('mainMenuDropdown');
+    if (!menu || !menu.classList.contains('show')) return;
+    if (!menu.contains(e.target)) return;
+    // Nach dem Aufklappen messen, nicht davor — und nicht nur einmal:
+    // ein Untermenue klappt MIT UEBERGANG auf. Wer nur im naechsten
+    // Bild misst, misst die Hoehe von vorher, und der Deckel passt zum
+    // alten Inhalt. Gemessen bei 1440x700: "Quellen & Methodik" blieb
+    // dadurch halb geschnitten, obwohl die Kantenrechnung stimmte.
+    requestAnimationFrame(function () { menueHoeheAnpassen(menu); });
+    setTimeout(function () { menueHoeheAnpassen(menu); }, 320);
+});
+
+// Der Uebergang selbst ist das verlaesslichste Signal: wenn er fertig
+// ist, steht die Hoehe fest.
+document.addEventListener('transitionend', function (e) {
+    const menu = document.getElementById('mainMenuDropdown');
+    if (!menu || !menu.classList.contains('show')) return;
+    if (!menu.contains(e.target) || e.target === menu) return;
+    menueHoeheAnpassen(menu);
+}, true);
+['resize', 'orientationchange'].forEach(function (ev) {
+    window.addEventListener(ev, function () {
+        const menu = document.getElementById('mainMenuDropdown');
+        if (menu && menu.classList.contains('show')) menueHoeheAnpassen(menu);
+    });
+});
+
 document.addEventListener('click', function(e) {
     const menu    = document.getElementById('mainMenuDropdown');
     const trigger = document.getElementById('mainMenuTrigger');
@@ -188,6 +326,7 @@ document.addEventListener('click', function(e) {
         if (!menu.contains(e.target) && !trigger.contains(e.target)) {
             menu.classList.remove('show');
             trigger.classList.remove('open');
+            menueBeobachtungBeenden();
         }
     }
 });
@@ -236,6 +375,15 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'methodik':              'quellen',
         'method':                'quellen',
         'impressum':             'quellen',
+        // Tieflinks in einen einzelnen Abschnitt. Ohne Eintrag hier
+        // steigt applyHash() wortlos aus, und der Verweis fuehrt
+        // nirgendwohin — derselbe Fehler wie frueher bei #side-quest.
+        'quellen-quellen':       'quellen',
+        'quellen-begriffe':      'quellen',
+        'quellen-zuverlaessig':  'quellen',
+        'quellen-trennung':      'quellen',
+        'quellen-stand':         'quellen',
+        'quellen-rechtliches':   'quellen',
         'how-to-use':            'tutorial',
         'howto':                 'tutorial',
         'help':                  'tutorial',
@@ -418,6 +566,27 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         const profileSub = PROFILE_SUBTAB_FOR_HASH[rawTab];
         if (tabId === 'profile' && profileSub && typeof window.switchProfileTab === 'function') {
             try { window.switchProfileTab(profileSub); } catch (_e) { /* tolerate */ }
+        }
+
+        /* Quellen & Methodik: ein Anker klappt seinen Abschnitt auf.
+         *
+         * BEFUND (Agentenrunde 31.08.2026): js/app-quellen.js hat dafuer
+         * seit dem Umzug der Erklaerungen eine Funktion `open(id)` — mit
+         * einem Kommentar, der genau diesen Zweck beschreibt. Sie hatte
+         * keinen einzigen Aufrufer. Ein Verweis wie #quellen-begriffe
+         * haette die Seite geoeffnet und sonst nichts getan: der
+         * Abschnitt bleibt zu, es wird nicht gescrollt, und niemand
+         * merkt, dass der Link nicht ankam.
+         *
+         * Erlaubt sind nur die Abschnitts-Kennungen, die es gibt — ein
+         * unbekannter Anker soll die Seite oeffnen und in Ruhe lassen,
+         * nicht ins Leere scrollen.
+         */
+        if (tabId === 'quellen' && window.Quellen && typeof window.Quellen.open === 'function') {
+            const ABSCHNITTE = { quellen: 1, begriffe: 1, zuverlaessig: 1,
+                                 trennung: 1, stand: 1, rechtliches: 1 };
+            const teil = rawTab.indexOf('quellen-') === 0 ? rawTab.slice(8) : '';
+            try { window.Quellen.open(ABSCHNITTE[teil] ? teil : ''); } catch (_e) { /* tolerate */ }
         }
 
         // focusCard=<set>|<number> deep-link (driven by the Telegram

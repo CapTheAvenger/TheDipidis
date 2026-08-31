@@ -262,7 +262,7 @@ function requireSignIn() {
   } else if (typeof showNotification === 'function') {
     showNotification(
       (typeof getLang === 'function' && getLang() === 'de')
-        ? 'Dafuer musst du angemeldet sein.'
+        ? 'Dafür musst du angemeldet sein.'
         : 'Please sign in to use this feature.',
       'info');
   }
@@ -1485,7 +1485,7 @@ async function clearCollection() {
     return;
   }
 
-  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Collection zuruecksetzen? Alle Karten werden auf "nicht im Besitz" gesetzt.' : 'Really reset the entire collection? All cards will be set to "not owned".');
+  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Sammlung zurücksetzen? Alle Karten werden auf „nicht im Besitz“ gesetzt.' : 'Really reset the entire collection? All cards will be set to "not owned".');
   if (!ok) return;
 
   try {

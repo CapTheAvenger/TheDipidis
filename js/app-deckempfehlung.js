@@ -120,14 +120,14 @@
             // kein Praesenzturnier") und die Folge ("also die davor")
             // sind dieselbe Aussage, einmal gesagt reicht.
             return (de()
-                ? sicher(d.format) + ' hatte noch kein Präsenzturnier — ausgewertet: '
+                ? sicher(d.format) + ' hatte noch kein Präsenzturnier. Basis: '
                   + wieviel + ' aus den Formaten davor, ' + sp + ' Spieler'
-                : 'No in-person tournament in ' + sicher(d.format) + ' yet — evaluated: '
+                : 'No in-person tournament in ' + sicher(d.format) + ' yet. Basis: '
                   + wieviel + ' from the formats before, ' + sp + ' players') + zusatz + '.';
         }
         return (de()
-            ? 'Ausgewertet: ' + wieviel + ' aus ' + sicher(d.format) + ', ' + sp + ' Spieler'
-            : 'Evaluated: ' + wieviel + ' from ' + sicher(d.format) + ', ' + sp + ' players')
+            ? 'Basis: ' + wieviel + ' aus ' + sicher(d.format) + ', ' + sp + ' Spieler'
+            : 'Basis: ' + wieviel + ' from ' + sicher(d.format) + ', ' + sp + ' players')
             + zusatz + '.';
     }
 
@@ -135,17 +135,22 @@
         /* Der wichtigste Satz der ganzen Karte. Wer ihn nicht liest, haelt eine
            Empfehlung fuer eine Zusage. */
         if (!v || !v.turniere || typeof v.empfehlung_mittel !== 'number') return '';
-        var scheitert = Math.round((100 - v.empfehlung_mittel) / 100 * 10) / 10;
-        if (!isFinite(scheitert)) return '';
+        // Frueher stand hier ein gerundeter Zwischenwert `scheitert`, der
+        // nirgends benutzt wurde — die Anzeige unten rechnet aus dem
+        // Rohwert. Ein toter, halbgerundeter Wert neben einer Anzeige ist
+        // genau das Konstrukt, das beim naechsten Umbau versehentlich
+        // scharfgeschaltet und dann doppelt gerundet wird. Geblieben ist
+        // die Pruefung, die er eigentlich leistete.
+        if (!isFinite(Number(v.empfehlung_mittel))) return '';
         // Drei Saetze waren zwei zu viel. Die Aussage ist eine: auch
         // das beste Deck reicht meistens nicht. Wer wissen will, warum
         // das am Format liegt und nicht an der Rechnung, findet es unter
         // Quellen & Methodik.
         return de()
-            ? 'Auch damit reicht es in ' + pz(100 - v.empfehlung_mittel, 0)
-              + ' % der Turniere nicht für Day 2.'
-            : 'Even so, it misses Day 2 at ' + pz(100 - v.empfehlung_mittel, 0)
-              + ' % of tournaments.';
+            ? 'Und trotzdem: in ' + pz(100 - v.empfehlung_mittel, 0)
+              + ' % der Turniere ist nach Day 1 Schluss.'
+            : 'And still: at ' + pz(100 - v.empfehlung_mittel, 0)
+              + ' % of tournaments it is over after Day 1.';
     }
 
     // satzBeleg() stand hier bis zum 30.08.2026: die Nachrechnung
@@ -169,11 +174,11 @@
         if (!oa || typeof oa.anteil_unbekannt !== 'number') return '';
         if (oa.anteil_unbekannt < VORBEHALT_AB) return '';
         var text = de()
-            ? '<strong>' + pz(oa.anteil_unbekannt) + ' % des Felds ist neu.</strong> '
-              + 'Gegen diese Decks ist die Empfehlung ungeprüft — '
+            ? '<strong>' + pz(oa.anteil_unbekannt) + ' % vom Feld sind neu.</strong> '
+              + 'Gegen die Decks ist der Pick ungetestet — '
               + '<a href="#meta-call">im Meta Call nachsehen</a>.'
             : '<strong>' + pz(oa.anteil_unbekannt) + ' % of the field is new.</strong> '
-              + 'The recommendation is untested against those decks — '
+              + 'The pick is untested against those decks — '
               + '<a href="#meta-call">check the Meta Call</a>.';
         return '<p class="de-vorbehalt">' + text + '</p>';
     }
@@ -189,7 +194,11 @@
         }
         var e = d.empfehlung;
         var v = d.vertrauen || {};
-        var kopf = de() ? 'Was du mitnehmen solltest' : 'What to bring';
+        /* BEFUND (31.08.2026, vom Betreiber angestrichen): "Was du mitnehmen
+   solltest" liest sich wie eine Packliste. Gemeint ist das Deck, das
+   wir fuer das naechste Turnier empfehlen — und genau so heisst es
+   jetzt. "Pick" ist das Wort, das die Szene ohnehin benutzt. */
+        var kopf = de() ? 'Unser Pick fürs Turnier' : 'Our pick for the event';
 
         return ''
         + '<section class="ds-panel de-empfehlung" aria-labelledby="deEmpfehlungTitel">'
@@ -204,16 +213,17 @@
         +     '<div class="ds-stat is-pos">'
         +       '<div class="ds-stat-value">' + pz(v.empfehlung_mittel) + ' %</div>'
         +       '<div class="ds-stat-label">'
-                  + (de() ? 'so oft reicht es für Day 2' : 'how often this reaches Day 2') + '</div>'
+                  + (de() ? 'schafft Day 2' : 'makes Day 2') + '</div>'
         +       '<div class="ds-stat-context">'
-                  + (de() ? 'beliebiges Deck ' : 'arbitrary deck ') + pz(v.feld_mittel) + ' %</div>'
+                  + (de() ? 'Schnitt aller Decks ' : 'average across all decks ') + pz(v.feld_mittel) + ' %</div>'
         +     '</div>'
         +     '<div class="ds-stat">'
         +       '<div class="ds-stat-value">' + pz(e.day2_geschrumpft) + ' %</div>'
         +       '<div class="ds-stat-label">'
-                  + (de() ? 'Day-2-Quote des Decks bisher' : 'the deck’s Day 2 rate so far') + '</div>'
-        +       '<div class="ds-stat-context">' + gz(e.ankerspieler) + ' '
-                  + (de() ? 'Spieler ausgewertet' : 'players evaluated') + '</div>'
+                  + (de() ? 'Day-2-Rate bisher' : 'Day 2 rate so far') + '</div>'
+        +       '<div class="ds-stat-context">'
+                  + (de() ? 'aus ' : 'from ') + gz(e.ankerspieler) + ' '
+                  + (de() ? 'Spielern' : 'players') + '</div>'
         +     '</div>'
         +   '</div>'
 
@@ -234,7 +244,7 @@
         +     '</a></p>'
 
         +   '<p class="ds-note"><a href="#meta-call" class="de-mehr">'
-        +     (de() ? 'Alternativen und Matchups im Meta Call →' : 'Alternatives and matchups in the Meta Call →')
+        +     (de() ? 'Alternativen & Matchups im Meta Call →' : 'Alternatives & matchups in the Meta Call →')
         +   '</a></p>'
         + '</section>';
     }

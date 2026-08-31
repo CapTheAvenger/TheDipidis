@@ -95,6 +95,7 @@
             btnSenden: 'Bestätigen & senden ↗',
             btnAlle: 'Alle %n Vorschläge auf einmal bestätigen ↗',
             btnAlleTeil: '%n von %g Vorschlägen auf einmal bestätigen ↗',
+            laedt: 'Lädt …',
             fehler: 'Das Lücken-Inventar konnte nicht geladen werden.',
             fehlerText: 'data/datenluecken.json fehlt oder ist unlesbar. Erzeugen mit: python3 scripts/datenluecken.py',
             stand: 'Inventar erzeugt',
@@ -122,6 +123,7 @@
             btnSenden: 'Confirm & send ↗',
             btnAlle: 'Confirm all %n proposals at once ↗',
             btnAlleTeil: 'Confirm %n of %g proposals at once ↗',
+            laedt: 'Loading …',
             fehler: 'The gap inventory could not be loaded.',
             fehlerText: 'data/datenluecken.json is missing or unreadable. Build it with: python3 scripts/datenluecken.py',
             stand: 'Inventory built',
@@ -305,7 +307,16 @@
                 + esc(c.fehlerText) + '</p></div>';
             return true;
         }
-        if (!_daten) { host.innerHTML = ''; return true; }
+        if (!_daten) {
+            /* BEFUND (Agentenrunde 31.08.2026): hier stand host.innerHTML = ''.
+               oeffne() ruft render() SOFORT auf, bevor laden() die Daten hat —
+               in diesem Fenster loeschte die Seite ihren eigenen Inhalt und
+               zeigte einen leeren Kasten ohne jeden Hinweis. Ausgerechnet in
+               dieser Datei steht daneben der Kommentar "Melden, nicht still
+               leer lassen". */
+            host.innerHTML = '<p class="dl-lead">' + esc(c.laedt) + '</p>';
+            return true;
+        }
 
         var alle = _daten.luecken || [];
         var klassen = (_daten._meta && _daten._meta.klassen) || {};

@@ -66,7 +66,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
         text = de
             ? 'Die Set-Rotation hat auch die Vergangenheits-Dateien geleert, und der Nachlauf '
               + 'hat sie nicht wieder gefuellt. Die Vergangenheit pausiert nicht \u2014 hier fehlt '
-              + 'schlicht der Schnappschuss des letzten vollstaendigen Zeitraums.'
+              + 'schlicht der Schnappschuss des letzten vollständigen Zeitraums.'
             : 'The set rotation emptied the past-snapshot files as well, and the follow-up run '
               + 'never refilled them. The past does not pause \u2014 the snapshot of the last '
               + 'complete window is simply missing.';
@@ -74,7 +74,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             titel = de ? 'Keine City-League-Daten' : 'No City League data';
             text = (de
                 ? 'Im laufenden Format ist noch kein Turnier gescrapt'
-                  + (tage != null ? ' \u2014 die Rotation liegt ' + tage + ' Tage zurueck' : '')
+                  + (tage != null ? ' \u2014 die Rotation liegt ' + tage + ' Tage zurück' : '')
                   + '. Und der Vergangenheits-Schnappschuss fehlt ebenfalls: die Rotation hat '
                   + 'auch ihn geleert, der Nachlauf hat ihn nicht wieder gefuellt. '
                 : 'No tournament in the current format has been scraped yet'
@@ -94,7 +94,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
               + 'first tournament in the new format has been scraped.';
         if (tage != null) {
             text += de
-                ? ' Die Rotation liegt ' + tage + ' Tage zurueck; seither ist kein Turnier '
+                ? ' Die Rotation liegt ' + tage + ' Tage zurück; seither ist kein Turnier '
                   + 'im neuen Format gescrapt worden.'
                 : ' The rotation was ' + tage + ' days ago; no tournament in the new format has '
                   + 'been scraped since.';
@@ -369,7 +369,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     // sie baut sich aus genau diesen Optionen.
                     currentOpt.title = (typeof t === 'function')
                         ? t('cl.currentUnavailable')
-                        : 'Saisonpause — aktuelle Daten nicht verfuegbar';
+                        : 'Saisonpause — aktuelle Daten nicht verfügbar';
                 }
             };
             _disableCurrent(document.getElementById('cityLeagueFormatSelect'));

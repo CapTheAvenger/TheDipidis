@@ -373,14 +373,27 @@
         return String(name || '').toLowerCase().trim();
     }
 
+    /* BEFUND (31.08.2026, live gemessen): hier standen drei kaputte
+     * Bilder — raichu-mega-y, staraptor-mega, scovillain-mega. Der Weg
+     * ueber ArchetypeIcons zeigt auf Limitless, und dort gibt es die
+     * Champions-eigenen Mega-Formen nicht.
+     *
+     * Diese Ansicht bildet Champions ab, also gehoert sie an den
+     * Champions-Bildweg: erst unsere gespiegelte Datei, dann Limitless,
+     * dann die Grundart. championsSprite.img() rechnet die
+     * Showdown-Schreibweise der Replica-Teams ("Raichu-Mega-Y") selbst
+     * auf unsere Namen um. ArchetypeIcons bleibt der Rueckfall, falls
+     * das Pokédex-Modul nicht geladen ist. */
     function pokemonIcon(name) {
         const slug = pokemonSlug(name);
         if (!slug) return '';
+        if (window.championsSprite && typeof window.championsSprite.img === 'function') {
+            const html = window.championsSprite.img(name, 'tcg-pokemon-icon tcg-pokemon-icon--md');
+            if (html) return html;
+        }
         if (window.ArchetypeIcons && typeof window.ArchetypeIcons.slugIconHtml === 'function') {
             return window.ArchetypeIcons.slugIconHtml(slug, { size: 'md', alt: name });
         }
-        // Fallback when ArchetypeIcons hasn't loaded — render the img
-        // directly with the same R2 prefix the helper uses.
         const url = 'https://r2.limitlesstcg.net/pokemon/gen9/' + slug + '.png';
         return `<img class="tcg-pokemon-icon tcg-pokemon-icon--md" src="${url}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.style.display='none'">`;
     }

@@ -270,9 +270,15 @@
         if (_FORM_SUFFIX[words[0]] && words[1]) return words[1] + '-' + _FORM_SUFFIX[words[0]];
         return words[0];
     }
+    /* Erst der Champions-Bildweg (eigene gespiegelte Datei), dann die
+     * alten Wege — siehe den Kommentar in app-side-quest.js. */
     function icon(slug) {
         const name = dispSlug(slug);
         const sprite = spriteSlug(name);
+        if (window.championsSprite && typeof window.championsSprite.img === 'function') {
+            const html = window.championsSprite.img(name, 'tcg-pokemon-icon tcg-pokemon-icon--md');
+            if (html) return html;
+        }
         if (window.ArchetypeIcons && typeof window.ArchetypeIcons.slugIconHtml === 'function') {
             return window.ArchetypeIcons.slugIconHtml(sprite, { size: 'md', alt: name });
         }

@@ -1,0 +1,102 @@
+name: Champions Sprites spiegeln
+
+# Holt die Pokémon-Champions-Icons von PokeWiki nach images/champions/
+# und schreibt data/champions_sprites.json.
+#
+# WARUM ALS EIGENER JOB, VON HAND AUSGELOEST
+#
+# Der Kader aendert sich mit einer neuen Regelrunde, nicht taeglich.
+# 292 Abrufe bei einem ehrenamtlichen Wiki sind nichts, was ein Cron
+# jede Nacht wiederholen sollte — das Skript laedt darum nur, was noch
+# fehlt, und der Job laeuft nur auf Zuruf. Nach einer Regelrunde mit
+# neuen Pokémon einmal starten, fertig.
+#
+# Rechteinhaber der Icons ist The Pokémon Company / Nintendo /
+# GAME FREAK; PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG. Das
+# Manifest haelt zu jeder Datei fest, woher sie stammt.
+#
+# Ausloesen: GitHub → Actions → "Champions Sprites spiegeln" →
+#            Run workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Auch vorhandene Dateien neu laden"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  # actions: write erlaubt den `gh workflow run`-Anstoss unten. Ohne
+  # ihn scheitert der Dispatch mit 403 — der Lauf bliebe gruen und der
+  # Deploy einfach aus.
+  actions: write
+
+concurrency:
+  group: champions-sprites
+  cancel-in-progress: false
+
+jobs:
+  spiegeln:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Icons holen
+        run: |
+          if [ "${{ inputs.force }}" = "true" ]; then
+            python3 scripts/build_champions_sprites.py --force
+          else
+            python3 scripts/build_champions_sprites.py
+          fi
+
+      - name: Bestand melden
+        run: |
+          echo "Dateien: $(ls -1 images/champions | wc -l)"
+          echo "Groesse: $(du -sh images/champions | cut -f1)"
+          python3 - <<'PY'
+          import json
+          d = json.load(open('data/champions_sprites.json', encoding='utf-8'))
+          m = d['_meta']
+          print(f"Manifest: {m['anzahl']} Eintraege, {m['bytes']/1024:.0f} KB")
+          masse = {(v['breite'], v['hoehe']) for v in d['sprites'].values()}
+          print("Groessen:", sorted(masse))
+          PY
+
+      - name: Commit + push
+        id: commit
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add images/champions data/champions_sprites.json
+          if git diff --cached --quiet; then
+            echo "Nichts geaendert — kein Push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          n="$(git diff --cached --name-only | wc -l)"
+          git commit -m "Auto: Champions-Icons gespiegelt (${n} Dateien)
+
+          Quelle: pokewiki.de, CMP-Icons (Pokémon Champions), 128x128.
+          Erzeugt von scripts/build_champions_sprites.py; die Herkunft
+          jeder einzelnen Datei steht in data/champions_sprites.json."
+          git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # GitHub unterdrueckt `on: push`-Workflows fuer Pushes mit
+      # GITHUB_TOKEN (Rekursionsschutz). Ohne diesen Schritt laegen die
+      # Icons im Repo und die Seite zeigte weiter die alten — genau der
+      # Fehler vom 21.08.2026, den tests/python/test_deploy_dispatch.py
+      # seither abfaengt. Die Bilder sind browsersichtbar, also gehoert
+      # der Anstoss hierher und nicht in die Ausnahmeliste.
+      - name: Deploy anstossen (GITHUB_TOKEN-Push triggert ihn nicht)
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-pages.yml --ref main

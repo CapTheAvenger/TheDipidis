@@ -402,3 +402,100 @@ describe('Top 30 wird auf zwei Bilder geteilt', () => {
         assert.equal(w.rufe[1].karten[0].rang, 16, 'die Rangziffer unterscheidet die Bilder nicht');
     });
 });
+
+/* ═══════════════════════════════════════════════════════════════════
+ * Die Rangmuenze auf der Kachel
+ *
+ * Am 31.08.2026 im Livebild aufgefallen: die Muenze sass oben links —
+ * genau dort, wo jede Pokemon-Karte ihren gedruckten Namen traegt. Rang 1
+ * las sich als "Stretcher" statt "Night Stretcher", Rang 2 als "Ball",
+ * Rang 3 als "Determination". Sie gehoert ins dunkle Band unten rechts,
+ * wo sie nichts zudeckt.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+const KACHEL = schneide('function malStapleKachel(ctx, k, x, y, kb, kh)',
+                        '\n    function staplesPostCanvas');
+
+function zeichneKachel(karte, x, y, kb, kh) {
+    const kreise = [];
+    const texte = [];
+    const clipBreiten = [];
+    const ctx = {
+        _px: 12,
+        set font(v) { const m = String(v).match(/(\d+)px/); if (m) this._px = +m[1]; },
+        get font() { return this._px + 'px'; },
+        save: () => {}, restore: () => {}, clip: () => {},
+        beginPath: () => {}, fill: () => {}, stroke: () => {},
+        fillRect: () => {}, drawImage: () => {},
+        createLinearGradient: () => ({ addColorStop: () => {} }),
+        measureText: (t) => ({ width: String(t).length * 6 }),
+        arc: (cx, cy, r) => { kreise.push({ cx, cy, r }); },
+        fillText: (t, tx, ty) => { texte.push({ t: String(t), x: tx, y: ty }); },
+        textAlign: '', textBaseline: '', fillStyle: '', strokeStyle: '', lineWidth: 0,
+    };
+    const attrappen = {
+        MC_FARBEN: { holz: '#E3B276', creme: '#F5E9DC', matt: '#9A8AA5' },
+        rr: () => {},
+        fSans: (g) => g + 'px sans',
+        fMono: (g) => g + 'px mono',
+        num: (v, n) => Number(v).toFixed(n).replace('.', ','),
+        clip: (c, t, b) => { clipBreiten.push(b); return t; },
+    };
+    const fn = new Function(...Object.keys(attrappen),
+        KACHEL + '\nreturn malStapleKachel;')(...Object.values(attrappen));
+    fn(ctx, karte, x, y, kb, kh);
+    return { kreise, texte, clipBreiten, ctx };
+}
+
+describe('die Rangmuenze auf der Staples-Kachel', () => {
+    const X = 100, Y = 200, KB = 150, KH = 209;
+    const karte = { rang: 7, name: 'Night Stretcher', share: 88.3, bild: {} };
+
+    it('liegt in der unteren Haelfte der Kachel, nicht ueber dem Kartennamen', () => {
+        const { kreise } = zeichneKachel(karte, X, Y, KB, KH);
+        assert.equal(kreise.length, 1, 'genau eine Muenze je Kachel');
+        const m = kreise[0];
+        assert.ok(m.cy - m.r > Y + KH * 0.5,
+            `Muenze beginnt bei ${m.cy - m.r}, muss unter ${Y + KH * 0.5} liegen — `
+            + 'oben steht der gedruckte Kartenname');
+    });
+
+    it('liegt an der rechten Kante, nicht ueber Name und Prozentzeile', () => {
+        const { kreise } = zeichneKachel(karte, X, Y, KB, KH);
+        const m = kreise[0];
+        assert.ok(m.cx - m.r > X + KB * 0.5,
+            `Muenze beginnt bei x=${m.cx - m.r}, links stehen Name und Anteil`);
+        assert.ok(m.cx + m.r <= X + KB,
+            `Muenze ragt bis ${m.cx + m.r} ueber die Kachelkante ${X + KB} hinaus`);
+        assert.ok(m.cy + m.r <= Y + KH,
+            `Muenze ragt bis ${m.cy + m.r} unter die Kachelkante ${Y + KH}`);
+    });
+
+    it('traegt die Rangziffer in ihrer Mitte', () => {
+        const { kreise, texte } = zeichneKachel(karte, X, Y, KB, KH);
+        const m = kreise[0];
+        const ziffer = texte.find((t) => t.t === '7');
+        assert.ok(ziffer, 'die Rangziffer fehlt');
+        assert.ok(Math.abs(ziffer.x - m.cx) <= 1,
+            `Ziffer bei x=${ziffer.x}, Muenze bei ${m.cx}`);
+        assert.ok(Math.abs(ziffer.y - m.cy) <= 2,
+            `Ziffer bei y=${ziffer.y}, Muenze bei ${m.cy}`);
+    });
+
+    it('nimmt Name und Prozentzeile den Platz der Muenze ab', () => {
+        const { kreise, clipBreiten } = zeichneKachel(karte, X, Y, KB, KH);
+        const m = kreise[0];
+        const frei = m.cx - m.r - (X + 7);
+        assert.ok(clipBreiten.length >= 2, 'Name und Anteil werden beide beschnitten');
+        clipBreiten.forEach((b) => {
+            assert.ok(b <= frei + 1,
+                `Textbreite ${b} laeuft unter die Muenze (frei sind ${frei})`);
+        });
+    });
+
+    it('setzt Textausrichtung und Grundlinie wieder zurueck', () => {
+        const { ctx } = zeichneKachel(karte, X, Y, KB, KH);
+        assert.equal(ctx.textAlign, 'left', 'textAlign bleibt auf center stehen');
+        assert.equal(ctx.textBaseline, 'alphabetic', 'textBaseline bleibt auf middle stehen');
+    });
+});

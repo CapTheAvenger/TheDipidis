@@ -1888,7 +1888,18 @@
             var kb = Math.round(kh * 245 / 342);
             var maxKb = Math.floor((breite - gap * (spalten - 1)) / spalten);
             if (kb > maxKb) { kb = maxKb; kh = Math.round(kb * 342 / 245); }
-            if (kh < 60 || kb < 44) continue;
+            /* Untergrenze der Kachelbreite: 88 px, nicht 44.
+             *
+             * Unter dem Bild stehen Name UND Prozentzeile, und rechts
+             * daneben sitzt die Rangmuenze (Radius mindestens 13). Bei
+             * 44 px Breite bliebe fuer die Prozentzeile eine NEGATIVE
+             * Breite uebrig; clip() liefert dann nur noch "…". Bei 88 px
+             * sind es 40 px, genug fuer "100,0 %" in der kleinsten
+             * Schrift. Erreichbar ist das ohnehin nie — der Aufrufer
+             * teilt ab 16 Karten in zwei Bilder, und selbst 40 Karten
+             * ergeben noch 102 px —, aber eine Formel ohne Untergrenze
+             * ist eine Falle, die irgendwann jemand ausloest. */
+            if (kh < 60 || kb < 88) continue;
             var rest = anzahl % spalten;
             var kandidat = { spalten: spalten, zeilen: zeilen, kb: kb, kh: kh, gap: gap,
                              letzteZeile: rest === 0 ? spalten : rest };
@@ -1919,14 +1930,6 @@
             ctx.textAlign = 'left';
         }
 
-        var bandH = Math.max(34, Math.round(kh * 0.20));
-        var lin = ctx.createLinearGradient(0, y + kh - bandH - 12, 0, y + kh);
-        lin.addColorStop(0, 'rgba(12,6,14,0)');
-        lin.addColorStop(0.35, 'rgba(12,6,14,.80)');
-        lin.addColorStop(1, 'rgba(12,6,14,.94)');
-        ctx.fillStyle = lin;
-        ctx.fillRect(x, y + kh - bandH - 12, kb, bandH + 12);
-
         /* Der Rang sitzt in der unteren rechten Ecke, IM dunklen Band.
          *
          * Vorher stand er oben links — genau dort, wo jede Pokemon-Karte
@@ -1934,25 +1937,50 @@
          * 31.08.2026 las sich Rang 1 als "Stretcher" statt "Night
          * Stretcher", Rang 2 als "Ball", Rang 3 als "Determination": die
          * Muenze deckte jeweils das erste Wort zu. Unten rechts liegt das
-         * Band ohnehin schon dunkel ueber dem Bild, dort verdeckt die
-         * Muenze nichts, und Gold auf Dunkel bleibt dieselbe Rolle wie
-         * auf allen anderen Bildern. */
+         * Band ohnehin schon dunkel ueber dem Bild, dort verdeckt sie
+         * nichts, und Gold auf Dunkel bleibt dieselbe Rolle wie auf allen
+         * anderen Bildern. */
+        var bandH = Math.max(34, Math.round(kh * 0.20));
         var r = Math.max(13, Math.round(kb * 0.105));
         var rangX = x + kb - r - 7;
         var rangY = y + kh - r - 8;
 
-        /* Name und Prozentzeile duerfen nicht unter die Muenze laufen —
-         * der Platz, den sie belegt, geht von der Textbreite ab. */
-        var textB = kb - 14 - (2 * r + 8);
+        /* Die Namenszeile liegt UEBER der Muenze, nicht neben ihr.
+         *
+         * Der erste Anlauf setzte die Muenze neben den Namen und zog ihr
+         * Mass von der Textbreite ab. Nachgemessen mit den echten 15
+         * Staples und der echten Schrift: die Breite faellt von 160 auf
+         * 116 px, und drei Namen, die vorher vollstaendig dastanden,
+         * werden abgeschnitten — "Lillie's Determination" (139),
+         * "Team Rocket's Petrel" (135), "Buddy-Buddy Poffin" (134).
+         * Damit waere derselbe Fehler zurueck, nur an der anderen Seite:
+         * ein Kartenname, den man nicht ganz lesen kann.
+         *
+         * Also bekommt der Name die volle Kachelbreite und rueckt so weit
+         * hoch, dass er die Muenze ueberspringt; nur die kurze
+         * Prozentzeile teilt sich die Reihe mit ihr. Der Verlauf waechst
+         * mit, damit der Name auf Dunkel bleibt. */
+        var nameGroesse = Math.max(10, Math.round(kb * 0.082));
+        var nameOben = Math.max(Math.round(bandH * 0.52), 2 * r + 10);
+        var schattenH = Math.max(bandH + 12, nameOben + nameGroesse + 8);
+
+        var lin = ctx.createLinearGradient(0, y + kh - schattenH, 0, y + kh);
+        lin.addColorStop(0, 'rgba(12,6,14,0)');
+        lin.addColorStop(0.35, 'rgba(12,6,14,.80)');
+        lin.addColorStop(1, 'rgba(12,6,14,.94)');
+        ctx.fillStyle = lin;
+        ctx.fillRect(x, y + kh - schattenH, kb, schattenH);
 
         ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = MC_FARBEN.creme;
-        ctx.font = fSans(Math.max(10, Math.round(kb * 0.082)), 700);
-        ctx.fillText(clip(ctx, k.name || '', textB), x + 7, y + kh - bandH * 0.52);
+        ctx.font = fSans(nameGroesse, 700);
+        ctx.fillText(clip(ctx, k.name || '', kb - 14), x + 7, y + kh - nameOben);
 
+        /* Nur diese Zeile laeuft auf die Muenze zu — "100,0 %" braucht
+         * rund ein Drittel der Kachelbreite, der Platz reicht immer. */
         ctx.fillStyle = MC_FARBEN.holz;
         ctx.font = fMono(Math.max(11, Math.round(kb * 0.095)), 700);
-        ctx.fillText(clip(ctx, num(k.share, 1) + ' %', textB), x + 7, y + kh - 9);
+        ctx.fillText(clip(ctx, num(k.share, 1) + ' %', kb - 14 - (2 * r + 8)), x + 7, y + kh - 9);
 
         ctx.beginPath();
         ctx.arc(rangX, rangY, r, 0, Math.PI * 2);

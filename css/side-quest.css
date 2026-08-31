@@ -2398,6 +2398,22 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-d-sec-hint { color: var(--ink-3); font-size: 0.66rem; font-weight: 600; text-transform: none; }
 
 .sqp-sprite--hero { width: 64px; height: 64px; object-fit: contain; flex: 0 0 64px; }
+
+/* Bild der Grundform statt eigener Mega-Darstellung.
+ *
+ * Fuer 9 Champions-eigene Mega-Formen fuehrt die Bildquelle nichts
+ * (js/app-side-quest-pokedex.js nennt sie). Statt der Luecke steht dort
+ * die Grundform — aber sichtbar als Ersatz, nicht als Aussage ueber das
+ * Aussehen der Mega-Form. Der gestrichelte Rahmen sagt "nicht das
+ * Original", der Titel sagt, warum. Nur Deckkraft zu senken waere zu
+ * leise: das liest sich wie ein Ladefehler. */
+.sqp-sprite--grundform {
+    border: 1px dashed var(--line-strong);
+    border-radius: 6px;
+    padding: 1px;
+    opacity: .85;
+    box-sizing: border-box;
+}
 @media (max-width: 520px) { .sqp-sprite--hero { width: 52px; height: 52px; flex-basis: 52px; } }
 
 /* ── Team-Builder: der Schreibpfad (26.08.2026) ───────────────────────────

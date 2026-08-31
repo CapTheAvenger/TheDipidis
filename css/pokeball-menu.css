@@ -53,7 +53,25 @@
     visibility: hidden;
     transform: translateY(-10px) scale(0.98);
     transform-origin: top left;
-    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* NICHT `all`.
+     *
+     * BEFUND (31.08.2026): `transition: all` animierte auch max-height.
+     * Die Hoehe wird beim Oeffnen aus dem tatsaechlich vorhandenen Platz
+     * gerechnet (js/inline-init.js, menueHoeheAnpassen) und dabei so
+     * korrigiert, dass keine Zeile mittendrin abgeschnitten wird — diese
+     * Korrektur misst den Kasten. Solange der Uebergang laeuft, liefert
+     * die Messung Zwischenwerte: gemessen bei 1440x700 ein Kasten von
+     * 541 px bei einem Deckel von 545 px, also mitten im scale(0.98).
+     * Die Korrektur rechnete damit und schnitt "Mein Profil" an.
+     *
+     * Animiert wird deshalb nur noch, was aussehen soll wie eine
+     * Bewegung. Hoehe und Deckel springen — das sieht niemand, weil sie
+     * sich nur beim Oeffnen aendern.
+     */
+    transition: opacity 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                visibility 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Rueckfall ohne JavaScript; menueHoeheAnpassen setzt den echten Wert. */
     max-height: calc(100vh - 90px);
     overflow-y: auto;
 }

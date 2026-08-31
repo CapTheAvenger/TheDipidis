@@ -136,6 +136,32 @@ ROSTER_UMBENENNUNG = {
                        "Tauros (Paldea, Gefechtvariante)"),
 }
 
+# ── Roster-Zeilen, die sich selbst widersprechen ───────────────────
+#
+# BEFUND (31.08.2026, beim Umstellen der Sprites): der Roster von
+# otterlyclueless fuehrt Floette mit 54/45/47/75/98/52 und Mega Floette
+# mit 74/85/87/155/148/102 — beide als championsVerified. Das kann nicht
+# beides stimmen: eine Mega-Entwicklung aendert die Basis-KP NIE, hier
+# waeren es +20.
+#
+# Welche Zeile ist die falsche? Die Mega-Zeile deckt sich Stat fuer Stat
+# mit Smogons Floette-Mega. Und Smogons Floette-Ewigbluetler
+# (74/65/67/125/128/92) plus (0/+20/+20/+30/+20/+10) ergibt genau diese
+# Mega-Werte. Zwei unabhaengige Quellen sagen also 74 KP; nur die
+# Basiszeile sagt 54. Sie ist die falsche.
+#
+# Drittes Indiz: pokewiki fuehrt fuer Champions genau zwei
+# Floette-Icons, 670e (Ewigbluetler) und 670m1 (Mega) — eine
+# gewoehnliche Floette gibt es dort nicht.
+#
+# Der Name bleibt "Floette", so heisst sie im Spiel. Nur die Werte
+# kommen aus dem richtigen Smogon-Schluessel. Sobald der Roster das
+# oben korrigiert, faellt dieser Eintrag ersatzlos weg — der Test dazu
+# prueft die Rechnung, nicht die Zahlen.
+ROSTER_WERTE_AUS_SMOGON = {
+    "Floette": "Floette-Eternal",
+}
+
 # Base species whose canonical name contains a hyphen (not a form suffix).
 HYPHEN_BASE = {"Kommo-o", "Hakamo-o", "Jangmo-o", "Ho-Oh", "Porygon-Z",
                "Type-Null", "Mr-Mime", "Mime-Jr", "Mr-Rime",
@@ -517,6 +543,19 @@ def main():
     entries = []
     missing_de = []
     missing_stats = []
+    korrigiert = []
+
+    _sm_cache = {}
+
+    def smogon_fuer_korrektur():
+        if "d" not in _sm_cache:
+            try:
+                _sm_cache["d"] = json.load(open(SMOGON_PATH, encoding="utf-8"))
+            except Exception as e:  # noqa: BLE001
+                print(f"WARN: Smogon-Daten fuer die Werte-Korrektur nicht lesbar ({e})")
+                _sm_cache["d"] = {}
+        return _sm_cache["d"]
+
     for r in roster:
         name = r["name"]
         st = stats_by_name.get(name)
@@ -535,6 +574,18 @@ def main():
         types = r.get("types") or []
         t1 = types[0] if len(types) > 0 else ""
         t2 = types[1] if len(types) > 1 else ""
+
+        if name in ROSTER_WERTE_AUS_SMOGON:
+            sm_key = ROSTER_WERTE_AUS_SMOGON[name]
+            sm = (smogon_fuer_korrektur() or {}).get(sm_key) or {}
+            bs = sm.get("baseStats")
+            if bs:
+                st = dict(st, **{k: bs[k] for k in ("hp", "atk", "def", "spa", "spd", "spe")})
+                st.pop("total", None)
+                korrigiert.append(f"{name} -> {sm_key}")
+            else:
+                print(f"WARN: Werte-Korrektur {name} -> {sm_key} nicht moeglich "
+                      f"(Smogon-Schluessel fehlt) — Roster-Werte bleiben stehen")
 
         hp, atk, df = st["hp"], st["atk"], st["def"]
         spa, spd, spe = st["spa"], st["spd"], st["spe"]
@@ -605,6 +656,8 @@ def main():
         added += 1
     if added:
         print(f"Added {added} M-B roster supplement entries (Smogon stats)")
+    if korrigiert:
+        print("Roster-Werte aus Smogon korrigiert: " + ", ".join(korrigiert))
 
     # Attach the "most-used" build to each entry. Priority:
     #   1. In-game ladder usage (championsbattledata mirror) — authoritative,

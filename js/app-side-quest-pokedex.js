@@ -271,6 +271,82 @@
             .replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     }
 
+    /* ── Showdown-Namen ─────────────────────────────────────────────
+     *
+     * BEFUND (31.08.2026, live gemessen direkt nach dem Umbau): die
+     * Teams-Ansicht zeigte weiter drei kaputte Bilder — raichu-mega-y,
+     * staraptor-mega, scovillain-mega. Sie fuettert diese Funktion
+     * naemlich mit Showdown-Schreibweise aus den Replica-Teams
+     * ("Raichu-Mega-Y", "Ninetales-Alola", "Floette-Eternal"), nicht
+     * mit unseren Anzeigenamen.
+     *
+     * Dieselbe Umrechnung macht parse_smogon() im Bau-Skript. Sie hier
+     * zu wiederholen ist doppelt — aber die Alternative waere, das
+     * Manifest zur Laufzeit zu laden, nur um Namen zu uebersetzen. Ein
+     * Test rechnet beide Seiten gegeneinander, ueber alle Namen, die in
+     * den Replica-Teams wirklich vorkommen.
+     *
+     * Harmlos fuer alles andere: ohne Bindestrich passiert nichts, und
+     * die Namen, die einen Bindestrich TRAGEN, stehen geschuetzt in
+     * _BINDESTRICH_BASIS. */
+    const _SD_REGION = { alola: 'Alolan', galar: 'Galarian',
+                         hisui: 'Hisuian', paldea: 'Paldean' };
+    const _SD_VARIANTE = { combat: 'Combat Breed', blaze: 'Blaze Breed',
+                           aqua: 'Aqua Breed' };
+    const _BINDESTRICH_BASIS = new Set([
+        'kommo-o', 'hakamo-o', 'jangmo-o', 'ho-oh', 'porygon-z', 'type-null',
+        'mr-mime', 'mime-jr', 'mr-rime', 'wo-chien', 'chi-yu', 'ting-lu',
+        'chien-pao',
+    ]);
+
+    function showdownZuAnzeige(nm) {
+        const roh = String(nm || '').trim();
+        if (!roh || roh.indexOf('-') < 0) return roh;
+        if (_BINDESTRICH_BASIS.has(roh.toLowerCase())) return roh;
+        const teile = roh.split('-');
+        const kopf = teile[0];
+        const rest = teile.slice(1).map((x) => x.toLowerCase());
+        if (rest[0] === 'mega') {
+            const v = rest[1];
+            return 'Mega ' + kopf + (v === 'x' ? ' X' : v === 'y' ? ' Y' : '');
+        }
+        const region = _SD_REGION[rest[0]];
+        if (region) {
+            const variante = _SD_VARIANTE[rest[1]];
+            return region + ' ' + kopf + (variante ? ' (' + variante + ')' : '');
+        }
+        // Alt-Form: "Rotom-Heat" -> "Rotom (Heat)"
+        return kopf + ' (' + teile.slice(1).join('-') + ')';
+    }
+
+    /* Die Grundart zu einer Form — Rueckfall, wenn es die Form selbst
+     * nicht als Bild gibt. Deckt mehr ab als grundformSlug(): auch
+     * "Maushold (Four)" -> "Maushold", das in den Replica-Teams
+     * vorkommt und bei Limitless kein eigenes Bild hat. */
+    function basisName(en) {
+        const roh = String(en || '').trim();
+        if (!roh) return '';
+        let n = roh.replace(/\s*\([^)]*\)\s*$/, '').trim();
+        n = n.replace(/^Mega\s+/i, '').replace(/\s+[XY]$/, '');
+        n = n.replace(/^(Alolan|Galarian|Hisuian|Paldean)\s+/i, '');
+        if (n && n !== roh) return n;
+
+        /* Letzter Ausweg: das erste Wort.
+         *
+         * BEFUND (31.08.2026): die Nutzungsdaten fuehren Formnamen ohne
+         * Klammern und ohne Praefix — "Basculegion Male", "Aegislash
+         * Shield Forme", "Palafin Zero Form". Keine Regel oben greift,
+         * und die Zelle blieb leer, obwohl wir die Grundart haben.
+         *
+         * Das ist bewusst die LETZTE Stufe: bei zweiteiligen Artnamen
+         * ("Iron Valiant") kommt Unsinn heraus. Erreicht wird sie aber
+         * nur, wenn weder die eigene Datei noch Limitless etwas hatten —
+         * und dann war die Zelle ohnehin leer. Schlimmstenfalls bleibt
+         * sie es. */
+        const woerter = roh.split(/\s+/);
+        return woerter.length > 1 ? woerter[0] : '';
+    }
+
     /* Die Grundform zu einer Mega-Form — als Rueckfall fuer das Bild.
      *
      * BEFUND (31.08.2026, alle Eintraege im Browser geprueft): fuer
@@ -302,48 +378,65 @@
     }
 
     /* Die Rueckfallkette, eine Stufe je Fehlschlag:
-     *   lokal  -> images/champions/<name>.png   (alle 292 Kadereintraege)
-     *   fremd  -> Limitless                     (Namen ausserhalb des Kaders)
-     *   grund  -> Bild der Grundform, beschriftet
-     *   sonst  -> verstecken
+     *   lokal      -> images/champions/<name>.png   (alle 292 Kadereintraege)
+     *   fremd      -> Limitless                     (Namen ausserhalb des Kaders)
+     *   grundLokal -> eigene Datei der Grundart, beschriftet
+     *   grundFremd -> Limitless-Bild der Grundart, beschriftet
+     *   sonst      -> verstecken
      * Jede Stufe wird genau einmal versucht; ohne den Merker liefe ein
-     * dauerhaft fehlschlagendes Bild in eine Endlosschleife. */
+     * dauerhaft fehlschlagendes Bild in eine Endlosschleife — bei 292
+     * Bildern gleichzeitig. */
+    const _NAECHSTE = { lokal: 'fremd', fremd: 'grundLokal',
+                        grundLokal: 'grundFremd', grundFremd: 'aus' };
+
     function spriteErsatz(img) {
         if (!img) return;
-        const stufe = img.dataset.stufe || 'fremd';
+        let stufe = img.dataset.stufe || 'fremd';
 
-        if (stufe === 'lokal') {
-            const fremd = img.getAttribute('data-fremd');
-            img.dataset.stufe = 'fremd';
-            if (fremd) { img.src = SPRITE_BASIS + fremd + '.png'; return; }
-        }
+        for (let i = 0; i < 4; i++) {
+            stufe = _NAECHSTE[stufe] || 'aus';
+            img.dataset.stufe = stufe;
 
-        if (img.dataset.stufe === 'fremd') {
-            const basis = img.getAttribute('data-grundform');
-            img.dataset.stufe = 'grund';
-            if (basis) {
-                img.classList.add('sqp-sprite--grundform');
-                img.title = t().spriteGrundform;
-                img.alt = t().spriteGrundform;
-                img.src = SPRITE_BASIS + basis + '.png';
-                return;
+            if (stufe === 'fremd') {
+                const fremd = img.getAttribute('data-fremd');
+                if (fremd) { img.src = SPRITE_BASIS + fremd + '.png'; return; }
+                continue;
             }
+            if (stufe === 'grundLokal' || stufe === 'grundFremd') {
+                const basis = img.getAttribute(
+                    stufe === 'grundLokal' ? 'data-grundlokal' : 'data-grundform');
+                if (basis) {
+                    img.classList.add('sqp-sprite--grundform');
+                    img.title = t().spriteGrundform;
+                    img.alt = t().spriteGrundform;
+                    img.src = (stufe === 'grundLokal' ? LOKAL_BASIS : SPRITE_BASIS)
+                            + basis + '.png';
+                    return;
+                }
+                continue;
+            }
+            break;
         }
 
         img.style.visibility = 'hidden';
     }
 
     function spriteImg(en, cls) {
-        const lok = lokalName(en);
-        const fremd = spriteSlug(en);
+        // Showdown-Schreibweise aus den Replica-Teams zuerst auf unsere
+        // Anzeigenamen bringen; alles andere laesst das unveraendert.
+        const name = showdownZuAnzeige(en);
+        const lok = lokalName(name);
+        const fremd = spriteSlug(name);
         if (!lok && !fremd) return '';
-        const basis = grundformSlug(en);
+        const grundLokal = lokalName(basisName(name));
+        const basis = grundformSlug(name);
         const stufe = lok ? 'lokal' : 'fremd';
         const src = lok ? (LOKAL_BASIS + lok + '.png') : (SPRITE_BASIS + fremd + '.png');
         return `<img class="sqp-sprite ${cls || ''}" loading="lazy" alt=""
                      src="${src}"
                      data-stufe="${stufe}"
                      data-fremd="${fremd}"
+                     data-grundlokal="${grundLokal}"
                      data-grundform="${basis}"
                      onerror="window.championsSprite && window.championsSprite.ersatz(this)">`;
     }

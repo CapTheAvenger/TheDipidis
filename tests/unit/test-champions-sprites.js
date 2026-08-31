@@ -171,6 +171,113 @@ describe('die gespiegelten Bilder', () => {
     });
 });
 
+/* ═══════════════════════════════════════════════════════════════════
+ * Showdown-Namen aus den Replica-Teams
+ *
+ * BEFUND (31.08.2026, live gemessen direkt nach dem Umbau): die
+ * Teams-Ansicht zeigte weiter drei kaputte Bilder — raichu-mega-y,
+ * staraptor-mega, scovillain-mega. Sie fuettert dieselbe Funktion mit
+ * Showdown-Schreibweise ("Raichu-Mega-Y"), nicht mit Anzeigenamen.
+ *
+ * Die Umrechnung steht jetzt doppelt: einmal als parse_smogon() im
+ * Bau-Skript, einmal als showdownZuAnzeige() im Frontend. Doppelt ist
+ * eine Einladung zum Auseinanderlaufen — darum rechnet dieser Block
+ * beide Seiten gegen dieselben Daten.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+const TEAMS_PFAD = path.join(ROOT, 'data', 'champions_replica_teams.json');
+
+function showdownNamen() {
+    const roh = JSON.parse(fs.readFileSync(TEAMS_PFAD, 'utf8'));
+    const namen = new Set();
+    (function sammle(o) {
+        if (Array.isArray(o)) { o.forEach(sammle); return; }
+        if (o && typeof o === 'object') {
+            for (const [k, v] of Object.entries(o)) {
+                if (k === 'name' && typeof v === 'string') namen.add(v);
+                else sammle(v);
+            }
+        }
+    })(roh);
+    return [...namen];
+}
+
+describe('Showdown-Namen aus den Replica-Teams', () => {
+    const umrechnen = new Function(
+        chunk(/    const _SD_REGION = \{[\s\S]*?\n    \]\);\n/, 'Showdown-Tabellen')
+        + chunk(/    function showdownZuAnzeige\(nm\) \{[\s\S]*?\n    \}\n/, 'showdownZuAnzeige')
+        + 'return showdownZuAnzeige;')();
+
+    it('rechnet die Showdown-Schreibweise auf unsere Anzeigenamen um', () => {
+        for (const [sd, erwartet] of [
+            ['Raichu-Mega-Y', 'Mega Raichu Y'],
+            ['Raichu-Mega-X', 'Mega Raichu X'],
+            ['Scovillain-Mega', 'Mega Scovillain'],
+            ['Staraptor-Mega', 'Mega Staraptor'],
+            ['Ninetales-Alola', 'Alolan Ninetales'],
+            ['Arcanine-Hisui', 'Hisuian Arcanine'],
+            ['Slowbro-Galar', 'Galarian Slowbro'],
+            ['Tauros-Paldea-Aqua', 'Paldean Tauros (Aqua Breed)'],
+            ['Rotom-Heat', 'Rotom (Heat)'],
+            ['Lycanroc-Dusk', 'Lycanroc (Dusk)'],
+        ]) {
+            assert.equal(umrechnen(sd), erwartet, sd);
+        }
+    });
+
+    it('laesst alles in Ruhe, was keine Showdown-Form ist', () => {
+        for (const n of ['Dragapult', 'Mega Raichu Y', 'Paldean Tauros (Aqua Breed)',
+                         'Kommo-o', 'Ho-Oh', 'Porygon-Z', 'Mr. Rime', '']) {
+            assert.equal(umrechnen(n), n, `${n} wurde veraendert`);
+        }
+    });
+
+    it('jeder Name aus den echten Replica-Teams findet ein Bild', () => {
+        // Der Fund, der diesen Block ausgeloest hat: die Teams-Ansicht
+        // zeigte drei Loecher, weil niemand diese Namen je gegen die
+        // Bilddateien gehalten hatte.
+        const dateien = new Set(fs.readdirSync(path.join(ROOT, 'images', 'champions')));
+        const basisName = new Function(
+            chunk(/    function basisName\(en\) \{[\s\S]*?\n    \}\n/, 'basisName')
+            + 'return basisName;')();
+        const ohne = [];
+        for (const sd of showdownNamen()) {
+            const anz = umrechnen(sd);
+            const direkt = lokalName(anz) + '.png';
+            const grund = lokalName(basisName(anz)) + '.png';
+            if (!dateien.has(direkt) && !dateien.has(grund)) ohne.push(`${sd} -> ${direkt}`);
+        }
+        assert.deepEqual(ohne, [],
+            'diese Team-Namen haben weder eigenes Bild noch Grundart-Rueckfall');
+    });
+
+    it('die Umrechnung deckt sich mit parse_smogon im Bau-Skript', () => {
+        // Beide Seiten schreiben dieselbe Regel auf. Laufen sie
+        // auseinander, zeigt die eine Ansicht Bilder und die andere
+        // nicht — ohne dass irgendwo etwas rot wird.
+        const py = fs.readFileSync(
+            path.join(ROOT, 'scripts', 'build_champions_pokedex.py'), 'utf8');
+        for (const [sd, erwartet] of [
+            ['Ninetales-Alola', 'Alolan Ninetales'],
+            ['Raichu-Mega-Y', 'Mega Raichu Y'],
+            ['Tauros-Paldea-Blaze', 'Paldean Tauros (Blaze Breed)'],
+        ]) {
+            assert.equal(umrechnen(sd), erwartet);
+        }
+        // Die Regionen und die Varianten muessen beide Seiten kennen.
+        for (const r of ['Alola', 'Hisui', 'Galar', 'Paldea']) {
+            assert.match(py, new RegExp(`"${r}"`), `parse_smogon kennt ${r} nicht`);
+            assert.match(SRC, new RegExp(r.toLowerCase() + ':'),
+                `showdownZuAnzeige kennt ${r} nicht`);
+        }
+        for (const v of ['Combat', 'Blaze', 'Aqua']) {
+            assert.match(py, new RegExp(`"${v}"`), `parse_smogon kennt ${v} nicht`);
+            assert.match(SRC, new RegExp(v.toLowerCase() + ':'),
+                `showdownZuAnzeige kennt ${v} nicht`);
+        }
+    });
+});
+
 describe('against the real Pokédex', () => {
     it('every entry produces a slug', () => {
         const empty = DEX.entries.filter(e => !slug(e.en));
@@ -258,9 +365,111 @@ describe('against the real Pokédex', () => {
      * Reihenfolge falsch war oder eine Stufe nie erreicht wurde. Hier
      * laeuft stattdessen ein Attrappen-Bild durch alle Stufen. */
     function ersatzKette(anfang) {
-        const ersatz = new Function('SPRITE_BASIS', 't',
-            chunk(/    function spriteErsatz\(img\) \{[\s\S]*?\n    \}\n/, 'spriteErsatz')
-            + 'return spriteErsatz;')('R2/', () => ({ spriteGrundform: 'Grundform' }));
+        const ersatz = new Function('SPRITE_BASIS', 'LOKAL_BASIS', 't',
+            chunk(/    const _NAECHSTE = \{[\s\S]*?\n\n/, '_NAECHSTE')
+            + chunk(/    function spriteErsatz\(img\) \{[\s\S]*?\n    \}\n/, 'spriteErsatz')
+            + 'return spriteErsatz;')('R2/', 'LOK/', () => ({ spriteGrundform: 'Grundform' }));
+        const img = {
+            dataset: { stufe: anfang.stufe },
+            style: {},
+            classList: { _k: [], add(c) { this._k.push(c); } },
+            _attr: anfang.attr || {},
+            getAttribute(n) { return this._attr[n] || ''; },
+            src: anfang.src || 'start',
+        };
+        const verlauf = [];
+        for (let i = 0; i < 8; i++) {
+            const vorher = img.src;
+            ersatz(img);
+            if (img.style.visibility === 'hidden') { verlauf.push('versteckt'); break; }
+            if (img.src === vorher) { verlauf.push('KEIN FORTSCHRITT'); break; }
+            verlauf.push(img.src);
+        }
+        return { verlauf, img };
+    }
+
+    it('faellt von lokal ueber Limitless auf beide Grundart-Stufen', () => {
+        const { verlauf, img } = ersatzKette({
+            stufe: 'lokal',
+            attr: { 'data-fremd': 'raichu-mega-y', 'data-grundlokal': 'raichu',
+                    'data-grundform': 'raichu' },
+        });
+        assert.deepEqual(verlauf,
+            ['R2/raichu-mega-y.png', 'LOK/raichu.png', 'R2/raichu.png', 'versteckt']);
+        assert.ok(img.classList._k.includes('sqp-sprite--grundform'),
+            'der Rueckfall auf die Grundart muss sich zu erkennen geben');
+        assert.equal(img.title, 'Grundform');
+        assert.equal(img.alt, 'Grundform', 'auch eine Sprachausgabe muss es erfahren');
+    });
+
+    it('ueberspringt Stufen, fuer die es nichts zu holen gibt', () => {
+        assert.deepEqual(ersatzKette({
+            stufe: 'lokal', attr: { 'data-fremd': '', 'data-grundlokal': 'raichu' },
+        }).verlauf, ['LOK/raichu.png', 'versteckt']);
+        assert.deepEqual(ersatzKette({
+            stufe: 'lokal', attr: { 'data-fremd': 'x', 'data-grundform': 'y' },
+        }).verlauf, ['R2/x.png', 'R2/y.png', 'versteckt']);
+    });
+
+    it('versteckt sich, wenn keine Stufe mehr uebrig ist', () => {
+        assert.deepEqual(ersatzKette({ stufe: 'lokal', attr: {} }).verlauf, ['versteckt']);
+    });
+
+    it('laeuft nie in eine Schleife', () => {
+        // Ohne Stufenmerker probierte ein dauerhaft fehlschlagendes Bild
+        // dieselbe Adresse endlos weiter — im Browser bei 292 Bildern
+        // gleichzeitig.
+        const alleAttr = { 'data-fremd': 'x', 'data-grundlokal': 'y', 'data-grundform': 'z' };
+        for (const anfang of [
+            { stufe: 'lokal', attr: alleAttr },
+            { stufe: 'fremd', attr: alleAttr },
+            { stufe: 'grundLokal', attr: alleAttr },
+            { stufe: 'grundFremd', attr: alleAttr },
+            { stufe: undefined, attr: {} },
+            { stufe: 'quatsch', attr: alleAttr },
+        ]) {
+            const { verlauf } = ersatzKette(anfang);
+            assert.ok(!verlauf.includes('KEIN FORTSCHRITT'),
+                `Schleife bei ${JSON.stringify(anfang)}: ${verlauf.join(' -> ')}`);
+            assert.equal(verlauf[verlauf.length - 1], 'versteckt',
+                `die Kette endet nicht: ${verlauf.join(' -> ')}`);
+        }
+    });
+
+    it('a miss falls back to the base form instead of vanishing', () => {
+        // BEFUND 31.08.2026, alle 290 Eintraege im Browser geprueft: fuer
+        // 9 Mega-Formen liefert Limitless nichts — Glimmora, Scovillain,
+        // Raichu X, Raichu Y, Staraptor, Golurk, Crabominable, Meowstic,
+        // Chimecho. Sieben andere Schreibweisen und fuenf andere
+        // Verzeichnisse ebenfalls geprueft: es gibt sie dort nicht.
+        // Vorher versteckte sich der Fehlschlag lautlos und hinterliess
+        // eine Luecke, die aussah wie ein Fehler.
+        assert.match(SRC, /onerror="window\.championsSprite && window\.championsSprite\.ersatz\(this\)"/);
+        assert.match(SRC, /data-grundform="\$\{basis\}"/);
+        assert.match(SRC, /r2\.limitlesstcg\.net\/pokemon\/gen9\//);
+    });
+
+    it('der Ersatz sagt, dass er ein Ersatz ist', () => {
+        // Ein unbeschriftetes Raichu neben "Raichu (Mega Y)" waere eine
+        // Behauptung ueber das Aussehen der Mega-Form.
+        const f = chunk(/    function spriteErsatz\(img\) \{[\s\S]*?\n    \}\n/, 'spriteErsatz');
+        assert.match(f, /classList\.add\('sqp-sprite--grundform'\)/);
+        assert.match(f, /img\.title = t\(\)\.spriteGrundform/);
+        assert.match(f, /img\.alt = t\(\)\.spriteGrundform/,
+            'auch fuer eine Sprachausgabe muss der Ersatz erkennbar sein');
+    });
+
+    /* Die Rueckfallkette wird AUSGEFUEHRT, nicht gelesen.
+     *
+     * Die alte Fassung prueft Zeichenketten im Quelltext. Sie blieb
+     * gruen, solange die richtigen Woerter dastanden — auch wenn die
+     * Reihenfolge falsch war oder eine Stufe nie erreicht wurde. Hier
+     * laeuft stattdessen ein Attrappen-Bild durch alle Stufen. */
+    function ersatzKette(anfang) {
+        const ersatz = new Function('SPRITE_BASIS', 'LOKAL_BASIS', 't',
+            chunk(/    const _NAECHSTE = \{[\s\S]*?\n\n/, '_NAECHSTE')
+            + chunk(/    function spriteErsatz\(img\) \{[\s\S]*?\n    \}\n/, 'spriteErsatz')
+            + 'return spriteErsatz;')('R2/', 'LOK/', () => ({ spriteGrundform: 'Grundform' }));
         const img = {
             dataset: { stufe: anfang.stufe },
             style: {},
@@ -366,5 +575,142 @@ describe('against the real Pokédex', () => {
         // kein Bild. Seit dem Spiegel stimmt das nicht mehr.
         assert.ok(!/legendSprite:[^\n]*neun/.test(SRC),
             'die Legende nennt noch die neun fehlenden Mega-Formen');
+    });
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+ * Wer die Bilder zeichnet
+ *
+ * BEFUND (31.08.2026): Pokédex, Nutzung und Matchups liefen schon ueber
+ * championsSprite. Teams, Team-Builder und "Das spiele ich" nicht — sie
+ * gingen ueber ArchetypeIcons, also direkt auf Limitless. In der
+ * Teams-Ansicht standen deshalb weiter drei Loecher, nachdem der
+ * Pokédex laengst sauber war.
+ *
+ * Diese Zusicherungen halten fest, dass alle Champions-Ansichten
+ * denselben Weg nehmen. Ohne sie faellt eine neue Ansicht still auf
+ * Limitless zurueck und das Problem kommt in einer Ecke wieder, in die
+ * niemand schaut.
+ * ═══════════════════════════════════════════════════════════════════ */
+/* spriteImg wird AUSGEFUEHRT und das erzeugte Markup gelesen.
+ *
+ * Die uebrigen Zusicherungen pruefen die Bausteine einzeln. Sie blieben
+ * beide gruen, als testweise (a) die Showdown-Umrechnung und (b) die
+ * Grundart-Stufe aus spriteImg entfernt wurden — die Bausteine waren ja
+ * noch da, nur benutzt hat sie niemand mehr. Genau diese Luecke schliesst
+ * dieser Block. */
+describe('das erzeugte Bild-Markup', () => {
+    const bild = new Function('LOKAL_BASIS', 'SPRITE_BASIS',
+        chunk(/    const _REGION_SUFFIX = \{[\s\S]*?\n    \};\n/, '_REGION_SUFFIX')
+        + chunk(/    const _SPRITE_SONDERFALL = \{[\s\S]*?\n    \};\n/, '_SPRITE_SONDERFALL')
+        + chunk(/    function spriteSlug\(en\) \{[\s\S]*?\n    \}\n/, 'spriteSlug')
+        + chunk(/    function lokalName\(en\) \{[\s\S]*?\n    \}\n/, 'lokalName')
+        + chunk(/    const _SD_REGION = \{[\s\S]*?\n    \]\);\n/, 'Showdown-Tabellen')
+        + chunk(/    function showdownZuAnzeige\(nm\) \{[\s\S]*?\n    \}\n/, 'showdownZuAnzeige')
+        + chunk(/    function basisName\(en\) \{[\s\S]*?\n    \}\n/, 'basisName')
+        + chunk(/    function grundformSlug\(en\) \{[\s\S]*?\n    \}\n/, 'grundformSlug')
+        + chunk(/    function spriteImg\(en, cls\) \{[\s\S]*?\n    \}\n/, 'spriteImg')
+        + 'return spriteImg;')('LOK/', 'R2/');
+
+    const attr = (html, n) => (html.match(new RegExp(n + '="([^"]*)"')) || [, null])[1];
+
+    it('zeigt zuerst auf die eigene Datei', () => {
+        const h = bild('Mega Raichu Y', 'x');
+        assert.equal(attr(h, 'src'), 'LOK/mega-raichu-y.png');
+        assert.equal(attr(h, 'data-stufe'), 'lokal');
+    });
+
+    it('rechnet Showdown-Namen um, bevor es die Datei bildet', () => {
+        // Ohne die Umrechnung stuende hier LOK/raichu-mega-y.png — eine
+        // Datei, die es nicht gibt. Genau die drei Loecher der
+        // Teams-Ansicht vom 31.08.
+        for (const [sd, datei] of [
+            ['Raichu-Mega-Y', 'mega-raichu-y'],
+            ['Scovillain-Mega', 'mega-scovillain'],
+            ['Staraptor-Mega', 'mega-staraptor'],
+            ['Ninetales-Alola', 'alolan-ninetales'],
+            ['Tauros-Paldea-Aqua', 'paldean-tauros-aqua-breed'],
+        ]) {
+            assert.equal(attr(bild(sd, ''), 'src'), 'LOK/' + datei + '.png', sd);
+        }
+    });
+
+    it('legt fuer jede Stufe etwas Brauchbares hin', () => {
+        const h = bild('Raichu-Mega-Y', '');
+        assert.equal(attr(h, 'data-fremd'), 'raichu-mega-y', 'Limitless-Stufe fehlt');
+        assert.equal(attr(h, 'data-grundlokal'), 'raichu', 'eigene Grundart-Stufe fehlt');
+        assert.equal(attr(h, 'data-grundform'), 'raichu', 'fremde Grundart-Stufe fehlt');
+    });
+
+    it('gibt auch Formen ohne eigenes Bild einen Rueckfall', () => {
+        // "Maushold-Four" steht so in den Replica-Teams, hat aber weder
+        // bei uns noch bei Limitless ein eigenes Bild. Ohne die
+        // Grundart-Stufe bliebe die Zelle leer.
+        assert.equal(attr(bild('Maushold-Four', ''), 'data-grundlokal'), 'maushold');
+        // Und die Formnamen OHNE Klammern aus den Nutzungsdaten. Am
+        // 31.08. war "Basculegion Male" nach dem Umbau das letzte
+        // kaputte Bild auf der ganzen Seite.
+        for (const [n, grund] of [
+            ['Basculegion Male', 'basculegion'],
+            ['Aegislash Shield Forme', 'aegislash'],
+            ['Palafin Zero Form', 'palafin'],
+            ['Vivillon Fancy Pattern', 'vivillon'],
+        ]) {
+            assert.equal(attr(bild(n, ''), 'data-grundlokal'), grund, n);
+        }
+    });
+
+    it('erfindet fuer einteilige Namen keine Grundart', () => {
+        // Sonst zeigte "Dragapult" bei einem Fehlschlag irgendein
+        // anderes Bild statt gar keins.
+        assert.equal(attr(bild('Dragapult', ''), 'data-grundlokal'), '');
+        assert.equal(attr(bild('Garchomp', ''), 'data-grundlokal'), '');
+    });
+
+    it('haengt die Fehlerbehandlung an, sonst greift keine Stufe', () => {
+        assert.match(bild('Dragapult', ''), /onerror="window\.championsSprite/);
+    });
+
+    it('reicht die Klasse durch und bleibt bei Unsinn stumm', () => {
+        assert.match(bild('Dragapult', 'sq-mate-img'), /class="sqp-sprite sq-mate-img"/);
+        assert.equal(bild('', ''), '');
+        assert.equal(bild(null, ''), '');
+    });
+});
+
+describe('alle Champions-Ansichten nehmen denselben Bildweg', () => {
+    const ANSICHTEN = {
+        'app-side-quest.js': 'Teams',
+        'app-side-quest-builder.js': 'Team-Builder',
+        'app-side-quest-play.js': 'Das spiele ich',
+        'app-side-quest-usage.js': 'Nutzung',
+        'app-side-quest-matchups.js': 'Matchups',
+    };
+
+    for (const [datei, ansicht] of Object.entries(ANSICHTEN)) {
+        it(`${ansicht} fragt championsSprite zuerst`, () => {
+            const q = fs.readFileSync(path.join(ROOT, 'js', datei), 'utf8');
+            assert.match(q, /window\.championsSprite/,
+                `${datei} kennt den Champions-Bildweg nicht`);
+            const cs = q.indexOf('window.championsSprite');
+            const ai = q.indexOf('window.ArchetypeIcons');
+            if (ai > -1) {
+                assert.ok(cs < ai,
+                    `${datei} fragt ArchetypeIcons vor championsSprite — dann `
+                    + 'landen die Champions-eigenen Mega-Formen wieder bei Limitless');
+            }
+        });
+    }
+
+    it('keine Champions-Ansicht baut die Limitless-Adresse als ERSTES', () => {
+        // Ein direkt gebautes R2-Bild ist nur als letzter Rueckfall in
+        // Ordnung — dann naemlich, wenn gar kein Modul geladen ist.
+        for (const datei of Object.keys(ANSICHTEN)) {
+            const q = fs.readFileSync(path.join(ROOT, 'js', datei), 'utf8');
+            const r2 = q.indexOf('r2.limitlesstcg.net');
+            if (r2 < 0) continue;
+            assert.ok(q.indexOf('window.championsSprite') < r2,
+                `${datei} baut die Limitless-Adresse vor dem Champions-Bildweg`);
+        }
     });
 });

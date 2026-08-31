@@ -1,0 +1,242 @@
+{
+  "_meta": {
+    "zweck": "Belegte Mega-Faehigkeiten fuer die 16 Champions-eigenen (M-B) Mega-Formen. Weder otterlyclueless/roster.json noch championsbattledata.com fuehren sie; scripts/build_champions_pokedex.py laesst die Zeile deshalb leer und benennt die Luecke. Diese Datei ist der Ort, an dem ein Wert MIT Quelle nachgetragen wird.",
+    "regel": "Kein Wert ohne Quelle und Lesedatum. Uebernommen wird nur, was 'uebernommen': true traegt. Alles andere ist ein Vorschlag und steht im Admin-Bereich zur Pruefung.",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/<slug>",
+    "gelesen_am": "2026-08-31",
+    "seitenaufbau": "Eine pokebase-Pokemonseite hat ZWEI Faehigkeiten-Bloecke. (a) Der Kasten oben nennt die Faehigkeit DIESER Form, mit Beschreibung und ohne Prozentwert. (b) Weiter unten steht eine Nutzungsverteilung MIT Prozentwerten; sie gehoert zur Grundform und enthaelt auch die Mega-Nutzer. 'wert' unten stammt ausschliesslich aus (a), 'basisFaehigkeiten' aus (b) bzw. aus (a) der Grundform-Seite.",
+    "kalibrierung": {
+      "frage": "Ist Block (a) auf einer Mega-Seite wirklich die Mega-Faehigkeit — oder faellt er auf die Grundform zurueck?",
+      "pruefung": "Gegen 11 Mega-Formen geprueft, deren megaAbility championsbattledata.com unabhaengig fuehrt. Block (a) traf in 11 von 11 Faellen den bekannten Wert.",
+      "kontrollen": {
+        "Mega Manectric": "Intimidate",
+        "Mega Abomasnow": "Snow Warning",
+        "Mega Venusaur": "Thick Fat",
+        "Mega Excadrill": "Piercing Drill",
+        "Mega Medicham": "Pure Power",
+        "Mega Banette": "Prankster",
+        "Mega Audino": "Healer",
+        "Mega Chimecho": "Levitate",
+        "Mega Steelix": "Sand Force",
+        "Mega Gengar": "Shadow Tag",
+        "Mega Scizor": "Technician"
+      },
+      "haerte": "Bei Manectric, Medicham, Banette, Audino, Chimecho und Steelix ist die Mega-Faehigkeit ZUGLEICH eine Faehigkeit der Grundform. Block (a) lieferte trotzdem den richtigen Wert — ein blosser Rueckfall auf die Grundform ist damit ausgeschlossen.",
+      "zweitbeleg": "Unabhaengig davon stimmen Basiswerte und Typen aller 16 Formen bei pokebase mit unseren Daten ueberein (16/16, geprueft 31.08.2026)."
+    },
+    "einstufung": {
+      "eindeutig": "Der Wert taucht in der Faehigkeitenliste der Grundform NICHT auf. Er kann deshalb kein Rueckfall auf die Grundform sein und wird uebernommen.",
+      "mehrdeutig": "Der Wert taucht auch bei der Grundform auf. Nach der Kalibrierung oben ist er sehr wahrscheinlich richtig, aber der Einzelbeleg traegt ihn nicht allein — er wartet auf Bestaetigung im Admin-Bereich."
+    }
+  },
+  "eintraege": {
+    "Mega Eelektross": {
+      "wert": "Eelevate",
+      "slug": "eelektross-mega",
+      "grundform": "Eelektross",
+      "basisFaehigkeiten": [
+        "Levitate"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Eelevate ist keine Fähigkeit von Eelektross und existiert außerhalb von Pokémon Champions nicht."
+    },
+    "Mega Pyroar": {
+      "wert": "Fire Mane",
+      "slug": "pyroar-mega",
+      "grundform": "Pyroar",
+      "basisFaehigkeiten": [
+        "Rivalry",
+        "Unnerve",
+        "Moxie"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Fire Mane ist keine Fähigkeit von Pyroar und existiert außerhalb von Pokémon Champions nicht."
+    },
+    "Mega Scolipede": {
+      "wert": "Shell Armor",
+      "slug": "scolipede-mega",
+      "grundform": "Scolipede",
+      "basisFaehigkeiten": [
+        "Poison Point",
+        "Swarm",
+        "Speed Boost"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Shell Armor steht in keiner Fähigkeitenliste von Scolipede."
+    },
+    "Mega Mawile": {
+      "wert": "Huge Power",
+      "slug": "mawile-mega",
+      "grundform": "Mawile",
+      "basisFaehigkeiten": [
+        "Hyper Cutter",
+        "Intimidate",
+        "Sheer Force"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Huge Power steht in keiner Fähigkeitenliste von Mawile."
+    },
+    "Mega Metagross": {
+      "wert": "Tough Claws",
+      "slug": "metagross-mega",
+      "grundform": "Metagross",
+      "basisFaehigkeiten": [
+        "Clear Body",
+        "Tough Claws",
+        "Light Metal"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Tough Claws steht auch bei Metagross — dort allerdings mit rund 3 %, was zu den Mega-Nutzern passt."
+    },
+    "Mega Swampert": {
+      "wert": "Swift Swim",
+      "slug": "swampert-mega",
+      "grundform": "Swampert",
+      "basisFaehigkeiten": [
+        "Torrent",
+        "Damp",
+        "Swift Swim"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Swift Swim steht auch bei Swampert — dort mit rund 3 %."
+    },
+    "Mega Blaziken": {
+      "wert": "Speed Boost",
+      "slug": "blaziken-mega",
+      "grundform": "Blaziken",
+      "basisFaehigkeiten": [
+        "Speed Boost",
+        "Blaze",
+        "Multiscale"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Speed Boost ist auch eine Fähigkeit von Blaziken."
+    },
+    "Mega Sceptile": {
+      "wert": "Lightning Rod",
+      "slug": "sceptile-mega",
+      "grundform": "Sceptile",
+      "basisFaehigkeiten": [
+        "Overgrow",
+        "Unburden",
+        "Lightning Rod"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Lightning Rod steht auch bei Sceptile — dort mit rund 4 %."
+    },
+    "Mega Barbaracle": {
+      "wert": "Tough Claws",
+      "slug": "barbaracle-mega",
+      "grundform": "Barbaracle",
+      "basisFaehigkeiten": [
+        "Tough Claws",
+        "Sniper",
+        "Pickpocket"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Tough Claws ist eine reguläre Fähigkeit von Barbaracle."
+    },
+    "Mega Dragalge": {
+      "wert": "Regenerator",
+      "slug": "dragalge-mega",
+      "grundform": "Dragalge",
+      "basisFaehigkeiten": [
+        "Adaptability",
+        "Poison Point",
+        "Poison Touch",
+        "Regenerator"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Regenerator steht auch bei Dragalge — dort mit rund 2 %."
+    },
+    "Mega Scrafty": {
+      "wert": "Intimidate",
+      "slug": "scrafty-mega",
+      "grundform": "Scrafty",
+      "basisFaehigkeiten": [
+        "Shed Skin",
+        "Moxie",
+        "Intimidate"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Intimidate ist auch eine Fähigkeit von Scrafty."
+    },
+    "Mega Raichu X": {
+      "wert": "Electric Surge",
+      "slug": "raichu-mega-x",
+      "grundform": "Raichu",
+      "basisFaehigkeiten": [
+        "Lightning Rod",
+        "Static",
+        "No Guard",
+        "Electric Surge"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Electric Surge taucht in der Nutzungsliste von Raichu auf (unter 1 %) — das sind sehr wahrscheinlich die Mega-X-Nutzer selbst, aber die Liste allein trennt das nicht."
+    },
+    "Mega Raichu Y": {
+      "wert": "No Guard",
+      "slug": "raichu-mega-y",
+      "grundform": "Raichu",
+      "basisFaehigkeiten": [
+        "Lightning Rod",
+        "Static",
+        "No Guard",
+        "Electric Surge"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "No Guard taucht in der Nutzungsliste von Raichu auf (rund 2 %) — sehr wahrscheinlich die Mega-Y-Nutzer selbst, aber die Liste allein trennt das nicht."
+    },
+    "Mega Staraptor": {
+      "wert": "Contrary",
+      "slug": "staraptor-mega",
+      "grundform": "Staraptor",
+      "basisFaehigkeiten": [
+        "Intimidate",
+        "Reckless",
+        "Contrary"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Contrary taucht in der Nutzungsliste von Staraptor auf (rund 2 %)."
+    },
+    "Mega Malamar": {
+      "wert": "Contrary",
+      "slug": "malamar-mega",
+      "grundform": "Malamar",
+      "basisFaehigkeiten": [
+        "Contrary",
+        "Suction Cups",
+        "Infiltrator"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Contrary ist die Standardfähigkeit von Malamar."
+    },
+    "Mega Falinks": {
+      "wert": "Defiant",
+      "slug": "falinks-mega",
+      "grundform": "Falinks",
+      "basisFaehigkeiten": [
+        "Battle Armor",
+        "Defiant"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Defiant ist die meistgenutzte Fähigkeit von Falinks."
+    }
+  }
+}

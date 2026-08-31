@@ -299,9 +299,20 @@
         'chien-pao',
     ]);
 
+    /* Showdown-Namen, die bei uns schlicht anders heissen.
+     *
+     * "Floette-Eternal" ist in Champions einfach Floette: es gibt dort
+     * gar keine andere. Dieselbe Sache steckt in
+     * ROSTER_WERTE_AUS_SMOGON im Bau-Skript, wo der Eintrag die Werte
+     * der Ewigbluetler bekommt. Ohne diese Zeile landete die Zeile bei
+     * Limitless und trug als einzige einen anderen Bildstil. */
+    const _SD_ANZEIGE = { 'floette-eternal': 'Floette' };
+
     function showdownZuAnzeige(nm) {
         const roh = String(nm || '').trim();
         if (!roh || roh.indexOf('-') < 0) return roh;
+        const fest = _SD_ANZEIGE[roh.toLowerCase()];
+        if (fest) return fest;
         if (_BINDESTRICH_BASIS.has(roh.toLowerCase())) return roh;
         const teile = roh.split('-');
         const kopf = teile[0];

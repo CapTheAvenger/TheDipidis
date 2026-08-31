@@ -71,12 +71,92 @@ jobs:
           done
           echo "::error::Could not push baseline after 3 attempts"; exit 1
 
+      # Ein roter Datenlauf war bisher nur per Mail sichtbar — und Mails gehen
+      # unter. Genau das ist im August passiert: "Champions Usage Refresh" war
+      # mehrere Tage rot (zu scharfer Schutz in scrape_champions_usage.py, PR
+      # #518), ohne dass es jemandem auffiel, und davor liefen 31 Laeufe gruen,
+      # waehrend champions_usage.json seit dem 17.07. stillstand.
+      #
+      # Die Stillstand-Haelfte faengt check_champions_freshness() ab. Die
+      # Rot-Haelfte hatte keinen Kanal. Sie bekommt jetzt denselben wie alles
+      # andere hier: das eine rollende Issue, das sich von selbst schliesst,
+      # sobald wieder alles gruen ist.
+      #
+      # Nicht ueberwacht: bot-keepalive (alle 5 Minuten, waere nur Rauschen),
+      # visual-fullpage (Bildvergleich, keine Daten) und dieser Lauf selbst.
+      - name: Datenlaeufe auf Rot pruefen
+        id: laeufe
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          # Ohne gh liefert jede Abfrage eine leere Zeile, und die Schleife
+          # unten haelt jeden Workflow fuer "noch nie gelaufen" — die Pruefung
+          # meldete dann stumm alles gruen, ohne etwas geprueft zu haben.
+          # Genau die Bauart, die diesen Waechter noetig gemacht hat. Also
+          # zuerst nachsehen, und den Ausfall als Befund melden statt als
+          # Schweigen. Kein exit 1: die Meldung danach soll trotzdem laufen,
+          # sonst verschluckt dieser Schritt die Funde des Guardians mit.
+          if ! command -v gh >/dev/null 2>&1; then
+            echo "::error::gh steht auf dem Runner nicht zur Verfuegung — die Laufkontrolle hat NICHTS geprueft."
+            echo "- **CRITICAL** Laufkontrolle uebersprungen: \`gh\` fehlt auf dem Runner. Der Status der Datenlaeufe ist damit unbekannt, nicht gruen." >> /tmp/findings.md
+            echo "rot=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Alle geplanten Laeufe, deren Scheitern bedeutet, dass die Seite
+          # veraltete oder falsche Daten ausliefert.
+          WORKFLOWS="
+            champions-replica-scrape.yml
+            champions-usage-refresh.yml
+            daily-price-refresh.yml
+            weekly-full-update.yml
+            per-decklist-scrape.yml
+            verify-cardmarket-mapping.yml
+            cardmarket-card-images.yml
+            prizepack-official-images.yml
+          "
+          rot=0
+          for wf in $WORKFLOWS; do
+            zeile=$(gh run list --workflow "$wf" --branch main --limit 1 \
+                      --json conclusion,status,createdAt,url \
+                      --jq '.[0] | [.conclusion, .status, .createdAt, .url] | @tsv' 2>/dev/null)
+            if [ -z "$zeile" ]; then
+              echo "  $wf — noch kein Lauf auf main, uebersprungen"
+              continue
+            fi
+            schluss=$(printf '%s' "$zeile" | cut -f1)
+            status=$(printf  '%s' "$zeile" | cut -f2)
+            wann=$(printf    '%s' "$zeile" | cut -f3)
+            url=$(printf     '%s' "$zeile" | cut -f4)
+            # Ein Lauf ohne Ergebnis laeuft noch. Das ist kein Befund.
+            if [ "$status" != "completed" ]; then
+              echo "  $wf — laeuft noch ($status)"
+              continue
+            fi
+            case "$schluss" in
+              success|skipped)
+                echo "  $wf — $schluss"
+                ;;
+              cancelled)
+                echo "::warning::$wf: letzter Lauf wurde abgebrochen ($wann) — $url"
+                echo "- WARN \`$wf\`: letzter Lauf abgebrochen ($wann) — [Lauf ansehen]($url)" >> /tmp/findings.md
+                ;;
+              *)
+                echo "::error::$wf: letzter Lauf ist $schluss ($wann) — $url"
+                echo "- **CRITICAL** \`$wf\`: letzter Lauf auf main ist **$schluss** ($wann) — [Lauf ansehen]($url)" >> /tmp/findings.md
+                rot=$((rot + 1))
+                ;;
+            esac
+          done
+          echo "rot=$rot" >> "$GITHUB_OUTPUT"
+
       - name: Report findings
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           CRIT: ${{ steps.guard.outputs.crit }}
+          ROT: ${{ steps.laeufe.outputs.rot }}
         run: |
           TITLE="🛡️ Data guardian: findings"
           # Reuse one rolling issue instead of opening a new one every morning.
@@ -84,7 +164,7 @@ jobs:
                  "https://api.github.com/repos/$REPO/issues?state=open&per_page=100" \
                | T="$TITLE" python3 -c "import sys,json,os;t=os.environ['T'];print(next((i['number'] for i in json.load(sys.stdin) if i['title']==t),''))")
 
-          if [ "${CRIT:-0}" = "0" ]; then
+          if [ "$(( ${CRIT:-0} + ${ROT:-0} ))" = "0" ]; then
             if [ -n "$NUM" ]; then
               echo "All clear — closing issue #$NUM"
               curl -sS -X PATCH -H "Authorization: Bearer $GH_TOKEN" \

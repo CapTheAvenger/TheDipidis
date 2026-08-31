@@ -6,8 +6,8 @@
    "official M-B Mega coverage",
    "Smogon (pokemon-showdown)"
   ],
-  "base_count": 100,
-  "mega_count": 16
+  "base_count": 74,
+  "mega_count": 33
  },
  "smogonKeys": [
   "Aerodactyl",
@@ -114,6 +114,8 @@
   "Malamar-Mega",
   "Barbaracle-Mega",
   "Dragalge-Mega",
-  "Falinks-Mega"
+  "Falinks-Mega",
+  "Tauros-Paldea-Blaze",
+  "Tauros-Paldea-Aqua"
  ]
 }

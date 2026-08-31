@@ -1,11 +1,9 @@
 {
  "_meta": {
-  "erzeugt": "2026-08-31T11:30:45Z",
+  "erzeugt": "2026-08-31T13:00:53Z",
   "erzeuger": "scripts/datenluecken.py",
-  "anzahl": 1,
-  "jeKlasse": {
-   "nutzungsdaten": 1
-  },
+  "anzahl": 0,
+  "jeKlasse": {},
   "klassen": {
    "mega-faehigkeit": {
     "de": "Mega-Fähigkeit ohne Beleg",
@@ -26,15 +24,5 @@
   },
   "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten."
  },
- "luecken": [
-  {
-   "id": "nutzungsdaten/paldean-tauros",
-   "klasse": "nutzungsdaten",
-   "titel": "Tauros (Paldea) — kein Nutzungsdatensatz",
-   "titelEn": "Paldean Tauros — no usage record",
-   "wo": "data/champions_usage.json → pokemon[Paldean Tauros]",
-   "ansicht": "side-quest",
-   "vorschlag": null
-  }
- ]
+ "luecken": []
 }

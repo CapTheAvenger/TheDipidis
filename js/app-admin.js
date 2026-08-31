@@ -1,5 +1,16 @@
 /* Admin — Datenlücken und der Weg, sie zu schließen.
  *
+ * KLASSENPRAEFIX: dl- (Datenluecken), NICHT ad-.
+ * Gemessen am 31.08.2026 an der laufenden Seite: mit dem
+ * urspruenglichen Praefix stand der Knopf im Browser auf
+ * display:none — kein Fehler im Stilblatt, sondern eine
+ * kosmetische Filterregel jedes gaengigen Werbeblockers. Die
+ * beiden Knoepfe je Luecke, also der ganze Zweck der Seite,
+ * waren fuer jeden Besucher mit Blocker unsichtbar. Die
+ * lokale Messung hatte es NICHT gefunden, weil sie Elemente
+ * mit Hoehe 0 herausfilterte. tests/unit/test-admin-datenluecken.js
+ * haelt den Praefix jetzt fest.
+ *
  * WARUM ES DIESE SEITE GIBT
  *
  * Die Seite benennt ihre Lücken schon heute an Ort und Stelle: der
@@ -192,40 +203,40 @@
         var e = (v && v.einstufung) || 'ungeprueft';
         var text = e === 'eindeutig' ? c.eindeutig
             : e === 'mehrdeutig' ? c.mehrdeutig : c.ungeprueft;
-        return '<span class="ad-badge ad-badge--' + esc(e) + '">' + esc(text) + '</span>';
+        return '<span class="dl-badge dl-badge--' + esc(e) + '">' + esc(text) + '</span>';
     }
 
     function karteHtml(l) {
         var c = t();
         var v = l.vorschlag;
         var titel = de() ? (l.titel || l.id) : (l.titelEn || l.titel || l.id);
-        var h = '<article class="ad-karte">'
-            + '<h3 class="ad-karte-titel">' + esc(titel) + '</h3>'
-            + '<p class="ad-wo"><span class="ad-wo-label">' + esc(c.wo) + '</span> '
+        var h = '<article class="dl-karte">'
+            + '<h3 class="dl-karte-titel">' + esc(titel) + '</h3>'
+            + '<p class="dl-wo"><span class="dl-wo-label">' + esc(c.wo) + '</span> '
             + '<code>' + esc(l.wo) + '</code></p>';
-        if (l.notiz) h += '<p class="ad-notiz">' + esc(l.notiz) + '</p>';
+        if (l.notiz) h += '<p class="dl-notiz">' + esc(l.notiz) + '</p>';
         if (v) {
-            h += '<div class="ad-vorschlag">'
-                + '<div class="ad-vorschlag-kopf">'
-                + '<span class="ad-vorschlag-label">' + esc(c.vorschlag) + '</span>'
+            h += '<div class="dl-vorschlag">'
+                + '<div class="dl-vorschlag-kopf">'
+                + '<span class="dl-vorschlag-label">' + esc(c.vorschlag) + '</span>'
                 + einstufungHtml(v) + '</div>'
-                + '<p class="ad-wert">' + esc(v.wert) + '</p>';
-            if (v.begruendung) h += '<p class="ad-begruendung">' + esc(v.begruendung) + '</p>';
+                + '<p class="dl-wert">' + esc(v.wert) + '</p>';
+            if (v.begruendung) h += '<p class="dl-begruendung">' + esc(v.begruendung) + '</p>';
             if (v.grundform && (v.basisFaehigkeiten || []).length) {
-                h += '<p class="ad-basis"><span class="ad-wo-label">' + esc(c.grundform)
+                h += '<p class="dl-basis"><span class="dl-wo-label">' + esc(c.grundform)
                     + ' (' + esc(v.grundform) + ')</span> '
                     + esc(v.basisFaehigkeiten.join(', ')) + '</p>';
             }
             h += '</div>';
         } else {
-            h += '<p class="ad-kein">' + esc(c.keinVorschlag) + '</p>';
+            h += '<p class="dl-kein">' + esc(c.keinVorschlag) + '</p>';
         }
-        h += '<div class="ad-aktionen">';
+        h += '<div class="dl-aktionen">';
         if (v && v.quelle) {
-            h += '<a class="ad-btn ad-btn--still" href="' + esc(v.quelle)
+            h += '<a class="dl-btn dl-btn--still" href="' + esc(v.quelle)
                 + '" target="_blank" rel="noopener noreferrer">' + esc(c.btnQuelle) + '</a>';
         }
-        h += '<a class="ad-btn ad-btn--haupt" href="' + esc(issueUrl(l))
+        h += '<a class="dl-btn dl-btn--haupt" href="' + esc(issueUrl(l))
             + '" target="_blank" rel="noopener noreferrer">' + esc(c.btnSenden) + '</a>'
             + '</div></article>';
         return h;
@@ -253,8 +264,8 @@
         var klassen = (_daten._meta && _daten._meta.klassen) || {};
         var jeKlasse = (_daten._meta && _daten._meta.jeKlasse) || {};
 
-        var kopf = '<p class="ad-lead">' + esc(c.lead) + '</p>'
-            + '<p class="ad-hinweis">' + esc(c.offenHinweis) + '</p>';
+        var kopf = '<p class="dl-lead">' + esc(c.lead) + '</p>'
+            + '<p class="dl-hinweis">' + esc(c.offenHinweis) + '</p>';
 
         if (!alle.length) {
             host.innerHTML = kopf + '<div class="ds-empty"><p class="ds-empty-title">'
@@ -263,14 +274,14 @@
             return true;
         }
 
-        var filter = '<div class="ad-filter" role="group" aria-label="'
+        var filter = '<div class="dl-filter" role="group" aria-label="'
             + esc(c.titel) + '">'
-            + '<button type="button" class="ad-chip' + (_filter === 'alle' ? ' is-an' : '')
-            + '" data-ad-filter="alle">' + esc(c.alle) + ' <b>' + alle.length + '</b></button>';
+            + '<button type="button" class="dl-chip' + (_filter === 'alle' ? ' is-an' : '')
+            + '" data-dl-filter="alle">' + esc(c.alle) + ' <b>' + alle.length + '</b></button>';
         Object.keys(jeKlasse).sort().forEach(function (k) {
             var label = (klassen[k] && klassen[k][de() ? 'de' : 'en']) || k;
-            filter += '<button type="button" class="ad-chip'
-                + (_filter === k ? ' is-an' : '') + '" data-ad-filter="' + esc(k) + '">'
+            filter += '<button type="button" class="dl-chip'
+                + (_filter === k ? ' is-an' : '') + '" data-dl-filter="' + esc(k) + '">'
                 + esc(label) + ' <b>' + jeKlasse[k] + '</b></button>';
         });
         filter += '</div>';
@@ -282,21 +293,21 @@
             return l.vorschlag && l.vorschlag.wert;
         });
         var sammel = mitVorschlag.length > 1
-            ? '<div class="ad-sammel"><a class="ad-btn ad-btn--haupt" href="'
+            ? '<div class="dl-sammel"><a class="dl-btn dl-btn--haupt" href="'
                 + esc(issueUrlSammel(mitVorschlag)) + '" target="_blank" rel="noopener noreferrer">'
                 + esc(c.btnAlle.replace('%n', String(mitVorschlag.length))) + '</a></div>'
             : '';
 
         var stand = (_daten._meta && _daten._meta.erzeugt)
-            ? '<p class="ad-stand">' + esc(c.stand) + ': '
+            ? '<p class="dl-stand">' + esc(c.stand) + ': '
                 + esc(String(_daten._meta.erzeugt).replace('T', ' ').replace('Z', ' UTC'))
                 + '</p>'
             : '';
 
         host.innerHTML = kopf + filter
-            + '<div class="ad-liste">' + sichtbar.map(karteHtml).join('') + '</div>'
+            + '<div class="dl-liste">' + sichtbar.map(karteHtml).join('') + '</div>'
             + sammel
-            + '<div class="ad-fuss"><h3>' + esc(c.wieWeiter) + '</h3><p>'
+            + '<div class="dl-fuss"><h3>' + esc(c.wieWeiter) + '</h3><p>'
             + esc(c.wieWeiterText) + '</p>' + stand + '</div>';
         return true;
     }
@@ -326,9 +337,9 @@
     }
 
     document.addEventListener('click', function (ev) {
-        var btn = ev.target && ev.target.closest && ev.target.closest('[data-ad-filter]');
+        var btn = ev.target && ev.target.closest && ev.target.closest('[data-dl-filter]');
         if (!btn) return;
-        _filter = btn.getAttribute('data-ad-filter') || 'alle';
+        _filter = btn.getAttribute('data-dl-filter') || 'alle';
         render();
     });
 

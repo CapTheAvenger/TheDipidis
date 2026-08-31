@@ -231,8 +231,11 @@ def test_namenskonflikte_nennen_beide_werte(inventar):
     Luecke, die nur einen der beiden Werte nennt, waere deshalb ein
     Urteil, das wir nicht faellen koennen — sie muss beide zeigen.
     """
+    # KEINE Mindestzahl: am 31.08.2026 sind alle 63 aufgeloest worden,
+    # und ein Test, der offene Konflikte braucht, geht ausgerechnet dann
+    # kaputt, wenn die Arbeit getan ist. Geprueft wird die FORM — wenn
+    # wieder einer auftaucht, muss er beide Werte nennen.
     konflikte = [l for l in inventar["luecken"] if l["klasse"] == "namenskonflikt"]
-    assert konflikte, "Testvoraussetzung: mindestens ein Konflikt"
     for l in konflikte:
         v = l["vorschlag"]
         assert (v.get("wert") or "").strip(), l["id"]
@@ -303,6 +306,86 @@ def test_kein_ascii_ersatz_in_den_deutschen_texten(inventar):
         v = l.get("vorschlag") or {}
         pruefe(l["id"] + ".begruendung", v.get("begruendung"))
     assert not treffer, "ASCII-Ersatz in sichtbarem Text:\n  " + "\n  ".join(treffer)
+
+
+# ── Die entschiedenen Namen ────────────────────────────────────────
+
+@pytest.fixture(scope="module")
+def entschieden():
+    return _json(os.path.join(DATA, "champions_namen_entschieden.json"))
+
+
+def test_jeder_entschiedene_name_traegt_seine_quelle(entschieden):
+    """63 Faelle, jeder einzeln nachgeschlagen.
+
+    Drei Agentenlaeufe hatten vier davon falsch gemeldet — Chilan Berry,
+    Triple Axel, Weather Ball und Snow Warning. Deshalb steht hier je
+    Name die Adresse, unter der er nachzulesen ist, und nicht bloss das
+    Ergebnis.
+    """
+    gesamt = 0
+    for topf, eintraege in entschieden["namen"].items():
+        assert topf in ("moves", "items", "abilities"), topf
+        for en, rec in eintraege.items():
+            gesamt += 1
+            assert (rec.get("de") or "").strip(), f"{topf}/{en}: kein deutscher Name"
+            assert rec["quelle"] == "https://pokewiki.de/" + en.replace(" ", "_"), (
+                f"{topf}/{en}: die Quelle zeigt nicht auf den englischen Namen"
+            )
+    assert gesamt == 63, f"{gesamt} statt 63 entschiedene Namen"
+
+
+def test_die_entschiedenen_namen_stehen_auch_in_den_daten(entschieden):
+    """Sonst waere die Entscheidung eine Notiz und keine Aenderung."""
+    tabelle = _json(os.path.join(DATA, "champions_names_de.json"))
+    dateien = {
+        "moves": ("champions_moves_reference.json", "moves"),
+        "items": ("champions_items_reference.json", "items"),
+        "abilities": ("champions_abilities_reference.json", "abilities"),
+    }
+    abweichungen = []
+    for topf, eintraege in entschieden["namen"].items():
+        datei, schluessel = dateien[topf]
+        block = _json(os.path.join(DATA, datei)).get(schluessel, {})
+        for en, rec in eintraege.items():
+            if tabelle.get(topf, {}).get(en) != rec["de"]:
+                abweichungen.append(
+                    f"Namenstabelle {topf}/{en}: "
+                    f"{tabelle.get(topf, {}).get(en)!r} statt {rec['de']!r}")
+            v = block.get(en)
+            if isinstance(v, dict) and v.get("de_name") != rec["de"]:
+                abweichungen.append(
+                    f"{datei} {en}: {v.get('de_name')!r} statt {rec['de']!r}")
+    assert not abweichungen, "\n  ".join([""] + abweichungen)
+
+
+def test_die_vier_falsch_gemeldeten_namen_stehen_richtig(entschieden):
+    """Namentlich festgehalten, weil sie durch eine Pruefung gerutscht sind."""
+    n = entschieden["namen"]
+    assert n["items"]["Chilan Berry"]["de"] == "Latchibeere"
+    assert n["moves"]["Triple Axel"]["de"] == "Dreifach-Axel"
+    assert n["moves"]["Weather Ball"]["de"] == "Meteorologe"
+    assert n["abilities"]["Snow Warning"]["de"] == "Schneeschauer"
+    # Und die zwei, bei denen die alte Referenz recht behielt bzw.
+    # beide Seiten danebenlagen.
+    assert n["items"]["Sharp Beak"]["de"] == "Spitzer Schnabel"
+    assert n["moves"]["Throat Chop"]["de"] == "Neck Strike"
+
+
+def test_kein_deutscher_name_ist_der_englische(entschieden):
+    """Gegenprobe gegen die Luecke, die den Fund ausgeloest hat.
+
+    In der Namenstabelle stand bei Throat Chop ein englisch klingender
+    Wert — der war ausnahmsweise richtig. Bei allen anderen waere er ein
+    Zeichen fuer eine nicht uebersetzte Zeile.
+    """
+    erlaubt = {"Poltergeist", "Neck Strike", "Triple Axel", "Lux Calamitatis"}
+    verdaechtig = []
+    for topf, eintraege in entschieden["namen"].items():
+        for en, rec in eintraege.items():
+            if rec["de"] == en and rec["de"] not in erlaubt:
+                verdaechtig.append(f"{topf}/{en}")
+    assert not verdaechtig, "deutscher Name gleich englischem: " + ", ".join(verdaechtig)
 
 
 # ── Das Build-Skript ───────────────────────────────────────────────

@@ -1,0 +1,269 @@
+/* Side Quest · Champions — Statuszustände.
+ *
+ * Sieben Karten, alle zugeklappt beim Öffnen: die Übersicht soll die
+ * Übersicht sein, nicht sieben Textwände untereinander. Wer einen
+ * Zustand anklickt, bekommt alles dazu.
+ *
+ * Farben ausschließlich aus tokens.css — der Dunkelmodus kommt damit
+ * ohne eigene Regeln mit. Die Tönung je Karte (--tint-*) trägt die
+ * Bedeutung; der Text daneben trägt sie noch einmal in Worten, damit
+ * die Aussage nicht an der Farbe hängt.
+ *
+ * KLASSENPRÄFIX: sz-. Nicht ad-/ads- — solche Namen blendet jeder
+ * Werbeblocker aus (siehe css/admin.css, 31.08.2026).
+ */
+
+/* ── Kopf ────────────────────────────────────────────────────────── */
+.sz-lead {
+    margin: 0 0 6px;
+    font-size: 1.02rem;
+    line-height: 1.55;
+    color: var(--ink-2);
+}
+
+.sz-quelle {
+    margin: 0 0 10px;
+    font-size: .88rem;
+    color: var(--ink-3);
+}
+/* Der Quellenlink ist der einzige Weg von hier zum Beleg — er muss
+   tippbar sein. Gemessen am 31.08.2026: als reiner Inline-Link war er
+   14 px hoch. Als inline-flex mit eigener Mindesthoehe bleibt er im
+   Satz stehen und ist trotzdem zu treffen. */
+.sz-quelle a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 4px;
+    color: var(--ink-2);
+}
+.sz-stand { color: var(--ink-3); }
+
+.sz-geltung {
+    margin: 0 0 var(--s-4);
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--ink-3);
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+    font-size: .88rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+}
+
+.sz-werkzeuge { margin: 0 0 12px; }
+
+.sz-alle {
+    min-height: 44px;               /* tippbar */
+    padding: 10px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface-1);
+    color: var(--ink-2);
+    font-size: .92rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.sz-alle:hover { border-color: var(--ink-3); color: var(--ink); }
+
+/* ── Karte ───────────────────────────────────────────────────────── */
+.sz-liste-karten { display: grid; gap: 10px; }
+
+.sz-karte {
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--surface-1);
+    overflow: hidden;
+}
+
+.sz-kopf {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 44px;               /* tippbar */
+    padding: 14px 16px;
+    border: 0;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: var(--ink);
+}
+.sz-kopf:hover { background: var(--surface-2); }
+
+/* Das Kürzel trägt die Tönung, nicht die ganze Karte: eine flächig
+   eingefärbte Karte macht den Text darin schwerer lesbar, und es sind
+   sieben nebeneinander. */
+.sz-kuerzel {
+    flex: 0 0 auto;
+    min-width: 48px;
+    padding: 6px 8px;
+    border-radius: var(--r-md);
+    font-size: .8rem;
+    font-weight: 800;
+    letter-spacing: .03em;
+    text-align: center;
+    background: var(--tint-info);
+    color: var(--tint-info-ink);
+}
+.sz-karte--warn .sz-kuerzel { background: var(--tint-warn); color: var(--tint-warn-ink); }
+.sz-karte--bad  .sz-kuerzel { background: var(--tint-bad);  color: var(--tint-bad-ink); }
+.sz-karte--info .sz-kuerzel { background: var(--tint-info); color: var(--tint-info-ink); }
+
+.sz-kopf-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sz-name { font-size: 1.05rem; font-weight: 700; color: var(--ink); }
+.sz-zweitname { font-size: .8rem; color: var(--ink-3); }
+.sz-kurz { margin-top: 2px; font-size: .9rem; line-height: 1.45; color: var(--ink-2); }
+
+.sz-art {
+    flex: 0 0 auto;
+    font-size: .78rem;
+    color: var(--ink-3);
+    white-space: nowrap;
+}
+
+.sz-pfeil {
+    flex: 0 0 auto;
+    width: 8px; height: 8px;
+    border-right: 2px solid var(--ink-3);
+    border-bottom: 2px solid var(--ink-3);
+    transform: rotate(45deg);
+    transition: transform .15s ease;
+}
+.sz-kopf[aria-expanded="true"] .sz-pfeil { transform: rotate(-135deg); }
+
+/* ── Körper ──────────────────────────────────────────────────────── */
+.sz-koerper {
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+}
+
+.sz-wirkungen { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
+
+.sz-wirkung {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    gap: 10px;
+}
+
+/* Die Zahl ist der Grund, warum jemand hier ist. Sie steht deshalb in
+   der Zifferschrift und links, nicht mitten im Satz vergraben. */
+.sz-wert {
+    font-family: var(--font-num);
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+}
+.sz-wirkung-text { font-size: .94rem; line-height: 1.55; color: var(--ink-2); }
+
+.sz-fakten {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 12px;
+    margin: 0 0 12px;
+    font-size: .9rem;
+}
+.sz-fakten dt { color: var(--ink-3); }
+.sz-fakten dd { margin: 0; color: var(--ink-2); }
+
+.sz-typen { display: flex; flex-wrap: wrap; gap: 6px; }
+.sz-typ {
+    padding: 2px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-2);
+    font-size: .84rem;
+    color: var(--ink-2);
+}
+
+.sz-hinweis {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--ink-3);
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+    font-size: .9rem;
+    line-height: 1.55;
+    color: var(--ink-2);
+}
+
+/* ── Die vier Blöcke ─────────────────────────────────────────────── */
+.sz-block { margin: 0 0 14px; }
+.sz-block:last-child { margin-bottom: 0; }
+
+.sz-block-titel {
+    margin: 0 0 8px;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.sz-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+
+.sz-zeile {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.sz-pill {
+    padding: 3px 9px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+    font-size: .86rem;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+}
+/* Attacke, Item, Fähigkeit sind drei verschiedene Dinge — die
+   Randfarbe sagt es, der Block darüber sagt es noch einmal. */
+.sz-pill--move    { border-color: var(--tint-info-ink); }
+.sz-pill--item    { border-color: var(--tint-ok-ink); }
+.sz-pill--ability { border-color: var(--tint-warn-ink); }
+
+.sz-zeile-text { font-size: .9rem; line-height: 1.5; color: var(--ink-2); }
+
+.sz-leer { margin: 0; font-size: .9rem; color: var(--ink-3); }
+
+.sz-frueher { margin: 14px 0 0; font-size: .88rem; }
+.sz-frueher summary {
+    min-height: 44px;               /* tippbar */
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--ink-3);
+}
+.sz-frueher p { margin: 0 0 0 2px; line-height: 1.55; color: var(--ink-2); }
+
+/* ── Schmal ──────────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+    /* Vier Spalten passen bei 390px nicht: Kürzel und Pfeil bleiben
+       außen, der Text nimmt die Mitte, die Art rutscht darunter. */
+    .sz-kopf {
+        grid-template-columns: auto 1fr auto;
+        gap: 10px;
+    }
+    .sz-art {
+        grid-column: 2;
+        grid-row: 2;
+        margin-top: 2px;
+    }
+    .sz-wirkung, .sz-zeile { grid-template-columns: 1fr; gap: 4px; }
+    .sz-wert { justify-self: start; }
+    .sz-pill { justify-self: start; }
+    .sz-fakten { grid-template-columns: 1fr; gap: 2px 0; }
+    .sz-fakten dd { margin-bottom: 8px; }
+}

@@ -39,15 +39,41 @@ pruefe('Hero: Mindeststichprobe für die Überschrift ist >= 100', () => {
         `Mindeststichprobe ${m[1]} zu niedrig — Toxtricity Box wurde mit 53 Antritten zum "stärksten Deck" gekürt`);
 });
 
-pruefe('Hero: die Überschrift nennt die Stichprobe', () => {
-    // Geprueft wird die Aussage, nicht der Variablenname: der Satz muss die
-    // Zahl der Antritte nennen. Seit dem 19.08.2026 nennt er zusaetzlich die
-    // absolute Zahl der Top-8-Plaetze ("78 von 772"), weil "n = 772" als
-    // Rechnerjargon beanstandet wurde.
-    assert.ok(/von \$\{\w+\} Antritten/.test(hub), 'deutscher Satz nennt die Antritte nicht');
-    assert.ok(/of \$\{\w+\} entries/.test(hub), 'englischer Satz nennt die Antritte nicht');
-    assert.ok(/\$\{cuts\} von/.test(hub), 'die absolute Zahl der Top-8-Plaetze fehlt');
+pruefe('Hero: die Stichprobe steht sichtbar dabei', () => {
+    // Geprueft wird die AUSSAGE, nicht der Ort. Bis zum 30.08.2026 trug
+    // der Ueberschriftssatz die absoluten Zahlen selbst ("71,5 von 708
+    // Antritten kamen in die Top 8, das sind 10,1 %").
+    //
+    // Am 31.08.2026 hat der Betreiber genau diesen Satz angestrichen: er
+    // war vier Teilsaetze lang und trug den Rechenweg mit, obwohl er der
+    // erste Satz der Seite ist. Die Aussage steht jetzt oben, die
+    // absoluten Zahlen eine Zeile tiefer beim Nenner (answerNenner).
+    //
+    // Geloescht ist nichts, und genau das haelt diese Pruefung fest:
+    // eine Quote ohne ihren Nenner waere eine Behauptung. Die Zahlen
+    // duerfen umziehen, verschwinden duerfen sie nicht.
+    const nenner = hub.match(/function answerNenner\(model\) \{[\s\S]*?\n    \}/);
+    assert.ok(nenner, 'answerNenner nicht gefunden — wo steht der Nenner jetzt?');
+    const n = nenner[0];
+    assert.ok(/von \$\{mit\(best\.brought\)\}/.test(n), 'deutscher Nenner nennt die Antritte nicht');
+    assert.ok(/of \$\{mit\(best\.brought\)\}/.test(n), 'englischer Nenner nennt die Antritte nicht');
+    assert.ok(/\$\{mit\(best\.top8\)\}/.test(n), 'die absolute Zahl der Top-8-Plaetze fehlt');
+    assert.ok(/\$\{gesamt\} gewichteten Antritten/.test(n), 'die Gesamtstichprobe fehlt');
+    // Die AUFRUFSTELLE, nicht die Definition: `function answerNenner(model)`
+    // steht auch dann noch da, wenn niemand sie mehr zeichnet.
+    assert.ok(/class="ds-note">\$\{answerNenner\(model\)\}/.test(hub),
+        'der Nenner wird nirgends gezeichnet');
     assert.ok(!/n = \$\{/.test(hub), '"n = " ist wieder da — bitte ausschreiben');
+    // Und der Satz selbst nennt weiterhin beide Quoten.
+    const satz = hub.match(/function answerSentence\(model\) \{[\s\S]*?\n    \}/)[0];
+    // Zweimal je Platzhalter: einmal deutsch, einmal englisch. Eine
+    // blosse Existenzpruefung uebersieht, dass eine der beiden Fassungen
+    // die Zahl verloren hat — genau das ist beim Nachschaerfen dieser
+    // Datei passiert.
+    const zaehl = (re) => (satz.match(re) || []).length;
+    assert.equal(zaehl(/\$\{quote\}/g), 2, 'die Quote fehlt in einer Sprachfassung');
+    assert.equal(zaehl(/\$\{schnitt\}/g), 2, 'der Vergleichswert fehlt in einer Sprachfassung');
+    assert.equal(zaehl(/\$\{fak\}/g), 2, 'das Vielfache fehlt in einer Sprachfassung');
 });
 
 pruefe('Hero: das Deck aus der Überschrift steht als erste Kachel', () => {

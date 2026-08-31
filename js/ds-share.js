@@ -1927,31 +1927,46 @@
         ctx.fillStyle = lin;
         ctx.fillRect(x, y + kh - bandH - 12, kb, bandH + 12);
 
+        /* Der Rang sitzt in der unteren rechten Ecke, IM dunklen Band.
+         *
+         * Vorher stand er oben links — genau dort, wo jede Pokemon-Karte
+         * ihren eigenen gedruckten Namen traegt. Im Livebild vom
+         * 31.08.2026 las sich Rang 1 als "Stretcher" statt "Night
+         * Stretcher", Rang 2 als "Ball", Rang 3 als "Determination": die
+         * Muenze deckte jeweils das erste Wort zu. Unten rechts liegt das
+         * Band ohnehin schon dunkel ueber dem Bild, dort verdeckt die
+         * Muenze nichts, und Gold auf Dunkel bleibt dieselbe Rolle wie
+         * auf allen anderen Bildern. */
+        var r = Math.max(13, Math.round(kb * 0.105));
+        var rangX = x + kb - r - 7;
+        var rangY = y + kh - r - 8;
+
+        /* Name und Prozentzeile duerfen nicht unter die Muenze laufen —
+         * der Platz, den sie belegt, geht von der Textbreite ab. */
+        var textB = kb - 14 - (2 * r + 8);
+
         ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = MC_FARBEN.creme;
         ctx.font = fSans(Math.max(10, Math.round(kb * 0.082)), 700);
-        ctx.fillText(clip(ctx, k.name || '', kb - 14), x + 7, y + kh - bandH * 0.52);
+        ctx.fillText(clip(ctx, k.name || '', textB), x + 7, y + kh - bandH * 0.52);
 
         ctx.fillStyle = MC_FARBEN.holz;
         ctx.font = fMono(Math.max(11, Math.round(kb * 0.095)), 700);
-        ctx.fillText(clip(ctx, num(k.share, 1) + ' %', kb - 14), x + 7, y + kh - 9);
-        ctx.restore();
+        ctx.fillText(clip(ctx, num(k.share, 1) + ' %', textB), x + 7, y + kh - 9);
 
-        ctx.strokeStyle = 'rgba(227,178,118,.34)'; ctx.lineWidth = 1;
-        rr(ctx, x, y, kb, kh, 8); ctx.stroke();
-
-        /* Der Rang oben links. Gold auf Dunkel — dieselbe Rolle, die
-         * Gold auf allen anderen Bildern hat. */
-        var r = Math.max(13, Math.round(kb * 0.105));
         ctx.beginPath();
-        ctx.arc(x + r + 5, y + r + 5, r, 0, Math.PI * 2);
+        ctx.arc(rangX, rangY, r, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(12,6,14,.88)'; ctx.fill();
         ctx.strokeStyle = MC_FARBEN.holz; ctx.lineWidth = 1.6; ctx.stroke();
         ctx.fillStyle = MC_FARBEN.holz;
         ctx.font = fMono(Math.round(r * 1.05), 700);
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(String(k.rang), x + r + 5, y + r + 6);
+        ctx.fillText(String(k.rang), rangX, rangY + 1);
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        ctx.restore();
+
+        ctx.strokeStyle = 'rgba(227,178,118,.34)'; ctx.lineWidth = 1;
+        rr(ctx, x, y, kb, kh, 8); ctx.stroke();
     }
 
     function staplesPostCanvas(spec, bilder) {

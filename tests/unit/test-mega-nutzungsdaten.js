@@ -151,14 +151,15 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
         // die Quelle nachgezogen. Schrumpft sie, ist eine Quelle
         // aufgetaucht — dann gehoert die Begruendung ueberarbeitet.
         //
-        // Am 31.08.2026 ist genau das passiert: pokebase.app fuehrt die
-        // Werte doch (der Befund vom 30.08., es gebe keine oeffentliche
-        // Quelle, war falsch). Vier der sechzehn stehen damit belegt in
-        // den Daten, zwoelf warten im Admin-Bereich auf Bestaetigung.
-        assert.equal((POKEDEX._meta.megaAbilityMissing || []).length, 12,
-            'die Zahl der belegfreien Mega-Faehigkeiten hat sich geaendert — ' +
+        // Am 31.08.2026 ist genau das passiert, in zwei Schritten:
+        // pokebase.app fuehrt die Werte doch (der Befund vom 30.08., es
+        // gebe keine oeffentliche Quelle, war falsch) — vier trugen den
+        // Einzelbeleg allein. Die uebrigen zwoelf hat der Betreiber
+        // noch am selben Tag bestaetigt. Die Luecke ist damit zu.
+        assert.deepEqual(POKEDEX._meta.megaAbilityMissing || [], [],
+            'eine Mega-Form steht wieder ohne belegte Faehigkeit da — ' +
             'nachsehen, warum, und die Begruendung im Bauer nachziehen');
-        assert.equal((POKEDEX._meta.megaAbilityBelegt || []).length, 4,
+        assert.equal((POKEDEX._meta.megaAbilityBelegt || []).length, 16,
             'die Zahl der nachtraeglich belegten hat sich geaendert');
     });
 
@@ -182,6 +183,12 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
         assert.deepEqual(behauptet, [...belegt].sort());
     });
 
+    it('jede Mega-Form fuehrt jetzt eine Faehigkeit', () => {
+        const ohne = MEGAS.filter(e => !(e.megaAbility || '').trim()).map(e => e.en);
+        assert.deepEqual(ohne, [],
+            'ohne Faehigkeit steht in der Oberflaeche wieder ein Platzhalter: ' + ohne);
+    });
+
     it('die Luecke wird nicht mehr als quellenlos beschrieben', () => {
         // Der alte Wortlaut ("keine oeffentliche Quelle fuehrt sie") war
         // eine Aussage ueber die Welt, und sie stimmt seit dem
@@ -189,8 +196,8 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
         const note = POKEDEX._meta.megaAbilityMissingNote || '';
         assert.ok(!/keine oeffentliche Quelle/i.test(note),
             'der widerlegte Satz steht wieder in den Daten');
-        assert.ok(/#admin|Admin-Bereich/.test(note),
-            'die Notiz muss sagen, wo die offenen Faelle liegen');
+        assert.ok(/champions_mega_faehigkeiten\.json/.test(note),
+            'die Notiz muss sagen, wo die Herkunft je Form steht');
     });
 });
 

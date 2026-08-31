@@ -258,7 +258,7 @@ describe('City League: zwei Faelle, zwei Meldungen', () => {
         const f = laden({ jp_release_date: '2026-07-31' });
         const html = f(false);
         assert.match(html, /Saisonpause in Japan/);
-        assert.match(html, /Die Rotation liegt \d+ Tage zurueck/);
+        assert.match(html, /Die Rotation liegt \d+ Tage zurück/);
     });
 
     it('die Vergangenheit pausiert nicht — dort fehlt der Schnappschuss', () => {
@@ -273,7 +273,7 @@ describe('City League: zwei Faelle, zwei Meldungen', () => {
         const f = laden(null);
         const html = f(false);
         assert.match(html, /Saisonpause in Japan/);
-        assert.doesNotMatch(html, /Tage zurueck/);
+        assert.doesNotMatch(html, /Tage zurück/);
     });
 
     it('nach dem Ausweichen sagt die Meldung, dass BEIDES fehlt', () => {
@@ -286,7 +286,7 @@ describe('City League: zwei Faelle, zwei Meldungen', () => {
         assert.match(html, /Keine City-League-Daten/);
         assert.match(html, /Im laufenden Format ist noch kein Turnier gescrapt/);
         assert.match(html, /Vergangenheits-Schnappschuss fehlt ebenfalls/);
-        assert.match(html, /die Rotation liegt \d+ Tage zurueck/);
+        assert.match(html, /die Rotation liegt \d+ Tage zurück/);
     });
 
     it('und der Aufrufer reicht durch, um welchen Reiter es geht', () => {

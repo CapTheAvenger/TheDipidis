@@ -180,6 +180,7 @@
     <link rel="stylesheet" href="css/meta-call.css?v=202608302045" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/side-quest.css?v=202608302045" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/quellen.css?v=202608302045" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/admin.css?v=202608302045" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/tippziele.css?v=202608302045" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/testing-groups.css?v=202608302045" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/archetype-icons.css?v=202608302045" type="text/css" media="print" onload="this.media='all'">
@@ -2217,6 +2218,22 @@
                 </div>
             </div>
 
+            <!-- Tab: Admin — Datenlücken. Steht bewusst NICHT im Menü und
+                 ist nur über #admin erreichbar; die Seite selbst sagt, dass
+                 das kein Zugangsschutz ist. Inhalt liegt in js/app-admin.js,
+                 die Liste in data/datenluecken.json. -->
+            <div id="admin" class="tab-content">
+                <div class="container">
+                    <nav class="tool-back-nav" data-i18n-aria="aria.backNav" aria-label="Back navigation">
+                        <button type="button" class="tool-back-btn" id="adminZurueck" onclick="switchTabAndUpdateMenu('current-meta')">← Startseite</button>
+                    </nav>
+                    <div class="header">
+                        <h2 id="adminTitel">Datenlücken</h2>
+                    </div>
+                    <div class="admin-main" id="adminHost"></div>
+                </div>
+            </div>
+
             <!-- Tab: Side Quest — Pokémon Champions Replica Codes -->
             <!-- Casual feature, not part of the TCG pipeline. Renders the
                  current Top-N Champions doubles teams from
@@ -3732,6 +3749,7 @@
     <script src="js/app-side-quest-play.js?v=202608302045" defer></script>
     <script src="js/app-side-quest-pokedex.js?v=202608302045" defer></script>
     <script src="js/app-quellen.js?v=202608302045" defer></script>
+    <script src="js/app-admin.js?v=202608302045" defer></script>
     <!-- Die Bruecke zwischen Nutzungs-Slug, Anzeigename und Showdown-Name.
          Muss VOR allem stehen, was ein gebautes Team weiterverarbeitet. -->
     <script src="js/champions-set.js?v=202608302045" defer></script>

@@ -140,14 +140,30 @@ describe('the played build is read without disturbing the cache', () => {
 describe('against the real data', () => {
     const { topBuildFinal, speedTierRow } = build('de');
 
-    it('the Pokémon without a doubles record get no tier line', () => {
-        const missing = DEX.entries.filter(e => {
+    /* Diese Pruefung hing frueher daran, dass MINDESTENS EIN echter
+     * Eintrag keinen Doppelkampf-Datensatz hat — und wurde rot, als am
+     * 31.08.2026 der letzte solche Eintrag (Tauros (Paldea)) seinen
+     * Datensatz bekam. Ein Test, der beim Gelingen der Arbeit
+     * fehlschlaegt, prueft die Daten und nicht das Verhalten. Geprueft
+     * wird jetzt das Verhalten: ein Eintrag OHNE Datensatz bekommt keine
+     * Stufenzeile, egal ob es einen solchen Eintrag gerade gibt. */
+    it('ein Eintrag ohne Doppelkampf-Datensatz bekommt keine Stufenzeile', () => {
+        const vorlage = DEX.entries.find(x => x.en === 'Dragapult');
+        for (const ohne of [null, undefined, {}, { singles: {} }]) {
+            const e = JSON.parse(JSON.stringify(vorlage));
+            delete e.meta;
+            const final = topBuildFinal(e, ohne && ohne.doubles);
+            assert.equal(speedTierRow(e, final), '',
+                `ohne Datensatz (${JSON.stringify(ohne)}) entstand eine Stufenzeile`);
+        }
+    });
+
+    it('alle echten Eintraege ohne Datensatz bleiben ohne Stufenzeile', () => {
+        // Gibt es gerade keinen solchen Eintrag, ist die Schleife leer —
+        // und das ist der gute Fall, kein Fehlschlag.
+        for (const e of DEX.entries) {
             const rec = e.meta && e.meta.slug ? USAGE.pokemon[e.meta.slug] : null;
-            return !(rec && rec.doubles);
-        });
-        assert.ok(missing.length > 0, 'fixture changed — no entry lacks doubles data');
-        for (const e of missing) {
-            const rec = e.meta && e.meta.slug ? USAGE.pokemon[e.meta.slug] : null;
+            if (rec && rec.doubles) continue;
             const final = topBuildFinal(e, rec && rec.doubles);
             assert.equal(speedTierRow(e, final), '',
                 `${e.en} would render a tier without a played build`);

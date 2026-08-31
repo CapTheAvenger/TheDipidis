@@ -30,6 +30,7 @@ function chunk(re, what) {
 
 const slug = new Function(
     chunk(/    const _REGION_SUFFIX = \{[\s\S]*?\n    \};\n/, '_REGION_SUFFIX') +
+    chunk(/    const _SPRITE_SONDERFALL = \{[\s\S]*?\n    \};\n/, '_SPRITE_SONDERFALL') +
     chunk(/    function spriteSlug\(en\) \{[\s\S]*?\n    \}\n/, 'spriteSlug') +
     'return spriteSlug;')();
 
@@ -41,7 +42,9 @@ describe('form comes last, as Limitless expects', () => {
         ['Hisuian Goodra', 'goodra-hisui'],
         ['Alolan Ninetales', 'ninetales-alola'],
         ['Galarian Slowking', 'slowking-galar'],
-        ['Paldean Tauros', 'tauros-paldea'],
+        ['Paldean Tauros (Combat Breed)', 'tauros-paldea'],
+        ['Paldean Tauros (Blaze Breed)', 'tauros-paldea-blaze'],
+        ['Paldean Tauros (Aqua Breed)', 'tauros-paldea-aqua'],
         ['Dragapult', 'dragapult'],
     ];
     for (const [name, want] of cases) {
@@ -116,6 +119,7 @@ describe('against the real Pokédex', () => {
         // neun nachtraegt.
         const g = new Function(
             chunk(/    const _REGION_SUFFIX = \{[\s\S]*?\n    \};\n/, '_REGION_SUFFIX') +
+            chunk(/    const _SPRITE_SONDERFALL = \{[\s\S]*?\n    \};\n/, '_SPRITE_SONDERFALL') +
             chunk(/    function spriteSlug\(en\) \{[\s\S]*?\n    \}\n/, 'spriteSlug') +
             chunk(/    function grundformSlug\(en\) \{[\s\S]*?\n    \}\n/, 'grundformSlug') +
             'return grundformSlug;')();
@@ -131,6 +135,7 @@ describe('against the real Pokédex', () => {
     it('jede Mega-Form im Pokédex hat eine ableitbare Grundform', () => {
         const g = new Function(
             chunk(/    const _REGION_SUFFIX = \{[\s\S]*?\n    \};\n/, '_REGION_SUFFIX') +
+            chunk(/    const _SPRITE_SONDERFALL = \{[\s\S]*?\n    \};\n/, '_SPRITE_SONDERFALL') +
             chunk(/    function spriteSlug\(en\) \{[\s\S]*?\n    \}\n/, 'spriteSlug') +
             chunk(/    function grundformSlug\(en\) \{[\s\S]*?\n    \}\n/, 'grundformSlug') +
             'return grundformSlug;')();

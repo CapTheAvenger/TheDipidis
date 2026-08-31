@@ -139,3 +139,104 @@ describe('die bekannten Formen bleiben richtig', () => {
         assert.deepEqual(schlecht, [], 'so eine Adresse kann nie laden');
     });
 });
+
+/* ═══════════════════════════════════════════════════════════════════
+ * slugIconHtml bekommt nicht immer einen Slug
+ *
+ * BEFUND (31.08.2026, live in der City-League-Tabelle, NACH zwei schon
+ * ausgelieferten Korrekturen): vier Icons luden weiter nicht —
+ * n's.png, mega%20venusaur.png, festival.png, mega%20greninja.png.
+ *
+ * Sie kamen nicht ueber getIconUrls (das war laengst sauber), sondern
+ * ueber slugIconHtml. Der Aufrufer reicht dort `d.main` durch, und das
+ * ist ein Archetyp-NAME, kein Slug. Die Funktion hat ihn schlicht
+ * kleingeschrieben und angehaengt — Leerzeichen und Apostroph
+ * inklusive.
+ *
+ * Der Fund kam erst zustande, weil ich nach dem Deploy die GEMELDETE
+ * ANSICHT aufgemacht habe statt nur meiner eigenen Rechnung zu
+ * glauben. Die Rechnung sagte "null kaputt" und hatte recht — fuer den
+ * Weg, den sie prueft.
+ * ═══════════════════════════════════════════════════════════════════ */
+describe('slugIconHtml erkennt einen Namen als Namen', () => {
+    function helfer(archetypen) {
+        const daten = {
+            _meta: { urlPrefix: 'R2/', urlSuffix: '.png' },
+            archetypes: archetypen || {},
+        };
+        const idx = new Map();
+        const norm = (n) => (n || '').toLowerCase()
+            .replace(/[\s\-'‘’‛`´ʼ]/g, '');
+        for (const k of Object.keys(daten.archetypes)) idx.set(norm(k), daten.archetypes[k]);
+        return new Function('_data', '_normalizedIndex', 'normalize',
+            chunk(/  const _NOISE_TOKENS = new Set\(\[[\s\S]*?\]\);\n/, '_NOISE_TOKENS')
+            + chunk(/  const _FORM_PREFIX_SUFFIX = \{[\s\S]*?\n  \};\n/, '_FORM_PREFIX_SUFFIX')
+            + chunk(/  const _MIN_SLUG_LAENGE = \d+;\n/, '_MIN_SLUG_LAENGE')
+            + chunk(/  function _formSlug\(art, suffix\) \{[\s\S]*?\n  \}\n/, '_formSlug')
+            + chunk(/  function _sanitizeWord\(w\) \{[\s\S]*?\n  \}\n/, '_sanitizeWord')
+            + chunk(/  function _speculativeSlugs\(name\) \{[\s\S]*?\n  \}\n/, '_speculativeSlugs')
+            + chunk(/  function _escAttr\([\s\S]*?\n  \}\n/, '_escAttr')
+            + chunk(/  function getIconUrls\(archetypeName\) \{[\s\S]*?\n  \}\n/, 'getIconUrls')
+            + chunk(/  function getIconHtml\(archetypeName, opts\) \{[\s\S]*?\n  \}\n/, 'getIconHtml')
+            + chunk(/  const _IST_SLUG = [^\n]*\n/, '_IST_SLUG')
+            + chunk(/  function slugIconHtml\(slug, opts\) \{[\s\S]*?\n  \}\n/, 'slugIconHtml')
+            + 'return slugIconHtml;')(daten, idx, norm);
+    }
+
+    const quellen = (html) => [...html.matchAll(/src="([^"]*)"/g)].map(m => m[1]);
+
+    it('baut aus einem Namen keine Adresse mit Leerzeichen', () => {
+        const f = helfer();
+        assert.deepEqual(quellen(f('Mega Venusaur')), ['R2/venusaur-mega.png']);
+        assert.deepEqual(quellen(f('Mega Greninja')), ['R2/greninja-mega.png']);
+    });
+
+    it('baut aus einem Namen keine Adresse mit Apostroph', () => {
+        const f = helfer();
+        // "N's" ist keine Art — lieber gar kein Bild als n's.png.
+        assert.equal(f("N's"), '');
+        assert.deepEqual(quellen(f("N's Zoroark")), ['R2/zoroark.png']);
+    });
+
+    it('nimmt einen echten Slug weiterhin unveraendert', () => {
+        const f = helfer();
+        assert.deepEqual(quellen(f('dragapult')), ['R2/dragapult.png']);
+        assert.deepEqual(quellen(f('charizard-mega-x')), ['R2/charizard-mega-x.png']);
+        assert.deepEqual(quellen(f('Dragapult')), ['R2/dragapult.png'], 'Grossschreibung ist ok');
+    });
+
+    it('ein Slug wird als Slug benutzt, nicht als Name nachgeschlagen', () => {
+        // Ohne diese Unterscheidung faellt es nicht auf, wenn ALLES
+        // durch die Namensaufloesung laeuft: fuer die meisten Woerter
+        // kommt dabei zufaellig dasselbe heraus. Hier nicht — die
+        // Tabelle fuehrt 'dragapult' als Archetyp-NAMEN mit einem
+        // anderen Bild.
+        const f = helfer({ dragapult: ['pikachu'], 'Mega Venusaur': ['snorlax'] });
+        assert.deepEqual(quellen(f('dragapult')), ['R2/dragapult.png'],
+            'der Slug wurde als Archetypname nachgeschlagen');
+        // Gegenprobe mit einem NAMENSFOERMIGEN Schluessel: der muss
+        // sehr wohl ueber die Tabelle laufen.
+        assert.deepEqual(quellen(f('Mega Venusaur')), ['R2/snorlax.png'],
+            'ein Name muss ueber die Tabelle laufen');
+    });
+
+    it('nimmt einen kuratierten Namen ueber die Tabelle', () => {
+        const f = helfer({ 'Festival Lead': ['pikachu', 'raichu'] });
+        assert.deepEqual(quellen(f('Festival Lead')), ['R2/pikachu.png', 'R2/raichu.png']);
+    });
+
+    it('erzeugt NIE eine Adresse mit Leerzeichen, Apostroph oder Prozentzeichen', () => {
+        const f = helfer();
+        const eingaben = ["N's", 'Mega Venusaur', 'Festival', 'Mega Greninja',
+                          "Rocket's Mewtwo", 'Mega Charizard-X', 'Teal Mask Ogerpon',
+                          'dragapult', '  ', '', null, undefined];
+        const schlecht = eingaben.flatMap(e => quellen(f(e)))
+            .filter(u => /[\s'%]/.test(u.replace(/^R2\//, '')));
+        assert.deepEqual(schlecht, []);
+    });
+
+    it('bleibt bei leerer Eingabe stumm', () => {
+        const f = helfer();
+        for (const e of ['', '   ', null, undefined, 0]) assert.equal(f(e), '');
+    });
+});

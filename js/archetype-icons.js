@@ -254,19 +254,43 @@
     return `<span class="${groupCls}">${imgs}</span>`;
   }
 
-  // Direct Pokémon-slug renderer — useful when the caller already knows
-  // the species slug (e.g. City League's `d.main` field is just the
-  // main-Pokémon slug without an archetype wrapping) and doesn't need
-  // the archetype-name → slugs lookup.
+  // Ein Slug enthaelt nur Kleinbuchstaben, Ziffern und Bindestriche.
+  // Alles andere ist ein NAME und muss ueber die Namensaufloesung.
+  const _IST_SLUG = /^[a-z0-9-]+$/;
+
+  /* Direkter Slug-Renderer — fuer Aufrufer, die den Artnamen schon als
+   * Slug haben und die Archetyp-Aufloesung nicht brauchen.
+   *
+   * BEFUND (31.08.2026, live in der City-League-Tabelle): der Aufrufer
+   * reicht hier `d.main` durch, und das ist KEIN Slug, sondern ein
+   * Archetyp-Name. Aus "Mega Venusaur" wurde
+   * .../gen9/mega%20venusaur.png, aus "N's" wurde .../gen9/n's.png —
+   * Adressen mit Leerzeichen und Apostroph, die nie laden koennen.
+   *
+   * Statt den Aufrufer umzubauen (und den naechsten wieder zu
+   * vergessen) prueft die Funktion jetzt selbst, was sie bekommen hat:
+   * sieht es nicht wie ein Slug aus, laeuft es ueber dieselbe
+   * Namensaufloesung wie getIconHtml. "Mega Venusaur" ergibt so
+   * venusaur-mega, "N's" gar nichts — beides besser als eine Adresse,
+   * die garantiert scheitert. */
   function slugIconHtml(slug, opts) {
     if (!slug) return '';
+    const roh = String(slug).trim();
+    if (!roh) return '';
+    if (!_IST_SLUG.test(roh.toLowerCase())) {
+      return getIconHtml(roh, {
+        size: (opts && opts.size) || 'sm',
+        layout: 'inline',
+        alt: (opts && opts.alt) || '',
+      });
+    }
     const meta = (_data && _data._meta) || {};
     const prefix = meta.urlPrefix || 'https://r2.limitlesstcg.net/pokemon/gen9/';
     const suffix = meta.urlSuffix || '.png';
     const size = (opts && opts.size) || 'sm';
     const alt = (opts && opts.alt) || '';
     return `<img class="tcg-pokemon-icon tcg-pokemon-icon--${size}" ` +
-           `src="${_escAttr(prefix + String(slug).toLowerCase() + suffix)}" ` +
+           `src="${_escAttr(prefix + roh.toLowerCase() + suffix)}" ` +
            `alt="${_escAttr(alt)}" loading="lazy" ` +
            `onerror="this.style.display='none'">`;
   }

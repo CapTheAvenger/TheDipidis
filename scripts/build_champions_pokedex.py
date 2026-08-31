@@ -673,8 +673,22 @@ def main():
             "format": "Pokémon Champions · Pokédex (bilingual base stats + Lv.50 range)",
             "count": len(entries),
             "level": 50,
-            "rangeBasis": "Lv. 50 final stat: min = 0 IV / 0 SP / hindering nature, "
-                          "max = 31 IV / 252 EV-equiv / beneficial nature (standard formula).",
+            # BEFUND (Agentenrunde 31.08.2026, nachgerechnet fuer alle 290
+            # Eintraege und 1450 Werte): dieser Satz beschrieb eine Formel, die
+            # nicht benutzt wird. Er behauptete "min = 0 IV". Mit IV 0 stimmt
+            # KEINER der 1450 gespeicherten min-Werte; mit IV 31 stimmen alle
+            # 1450. Beispiel Mega Dragonite, Sp.-Angriff Basis 145: gespeichert
+            # ist 148, mit IV 31 kommt 148 heraus, mit IV 0 kaeme 135.
+            #
+            # Die Daten sind in sich richtig, der Text daneben war es nicht —
+            # und die Oberflaeche sagte es sogar korrekt ("IS fix 31"). Ein
+            # Beschreibungstext, der der eigenen Datei widerspricht, ist
+            # schlimmer als keiner: er laedt zum Nachrechnen mit der falschen
+            # Formel ein.
+            "rangeBasis": "Lv. 50 final stat: min = IV 31 / 0 SP / hindering nature, "
+                          "max = IV 31 / 252 EV-equiv / beneficial nature (standard formula). "
+                          "IV is fixed at 31 in BOTH bounds — Champions does not expose IVs, "
+                          "so the range spans SP and nature only.",
             "bulk": "bulkPhys = base KP × base Verteidigung; bulkSpec = base KP × base Spezial-Verteidigung.",
             "usageSeason": usage_season,
             "usageFormat": PRIMARY_FORMAT,

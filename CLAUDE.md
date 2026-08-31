@@ -28,6 +28,14 @@ way; each one exists because breaking it cost real time.
    `main` ≠ deployed.
 4. Tell the user to hard-refresh (`Strg`+`Umschalt`+`R`) for JS/CSS changes;
    pure data files (`data/*.json`) are fetched fresh and need no bump.
+   **Exception — `data/archetype_icons.json` DOES need a bump.**
+   `js/archetype-icons.js` fetches it at `?v=<the script's own version
+   token>` (deliberately, so the JSON stays tied to the deploy that
+   shipped the script). Without a bump the URL is unchanged and a
+   returning visitor keeps the cached old JSON — the data edit ships to
+   `main`, passes CI, and reaches nobody. Found 31.08.2026 while fixing
+   ten broken icon slugs; grep for `CACHE_TOKEN` before assuming any
+   other data file is bump-free.
 5. **If `git push` is blocked, ship onto a branch and merge — never a series
    of commits straight to `main`.** Some sessions cannot push (the git proxy
    answers 403 for this repo) and have to use the GitHub web upload UI, which

@@ -370,7 +370,7 @@
       "ogerpon-hearthflame"
     ],
     "Teal Mask Ogerpon": [
-      "ogerpon-teal-mask"
+      "ogerpon"
     ],
     "Wellspring Ogerpon": [
       "ogerpon-wellspring"
@@ -1155,16 +1155,16 @@
       "kangaskhan-mega"
     ],
     "Mega Charizard-X Delphox": [
-      "charizard-x-mega",
+      "charizard-mega-x",
       "delphox"
     ],
     "Mega Charizard-X Dudunsparce": [
-      "charizard-x-mega",
+      "charizard-mega-x",
       "dudunsparce"
     ],
     "Mega Charizard-X Mega Charizard-Y": [
-      "charizard-x-mega",
-      "charizard-y-mega"
+      "charizard-mega-x",
+      "charizard-mega-y"
     ],
     "Mega Clefable Aromatisse": [
       "clefable-mega",
@@ -1837,7 +1837,7 @@
     ],
     "Typhlosion Mega Charizard-X": [
       "typhlosion",
-      "charizard-x-mega"
+      "charizard-mega-x"
     ],
     "Tyranitar Dragapult": [
       "tyranitar",
@@ -1930,8 +1930,7 @@
       "pecharunt"
     ],
     "Alolan Exeggutor": [
-      "alolan",
-      "exeggutor"
+      "exeggutor-alola"
     ],
     "Mewtwo Spidops": [
       "mewtwo",
@@ -1943,23 +1942,23 @@
     ],
     "Dusknoir Mega Starmie": [
       "dusknoir",
-      "mega-starmie"
+      "starmie-mega"
     ],
     "Mega Greninja Drakloak": [
-      "mega-greninja",
+      "greninja-mega",
       "drakloak"
     ],
     "Delphox Mega Charizard-X": [
       "delphox",
-      "mega-charizard-x"
+      "charizard-mega-x"
     ],
     "Garchomp Blaziken": [
       "garchomp",
       "blaziken"
     ],
     "Mega Eelektross Mega Manectric": [
-      "mega-eelektross",
-      "mega-manectric"
+      "eelektross-mega",
+      "manectric-mega"
     ],
     "Zoroark Meowth": [
       "zoroark",
@@ -1967,7 +1966,7 @@
     ],
     "Arboliva Mega Froslass": [
       "arboliva",
-      "mega-froslass"
+      "froslass-mega"
     ],
     "Dragapult Zoroark": [
       "dragapult",

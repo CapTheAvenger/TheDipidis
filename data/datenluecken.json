@@ -1,0 +1,291 @@
+{
+ "_meta": {
+  "erzeugt": "2026-08-31T06:51:35Z",
+  "erzeuger": "scripts/datenluecken.py",
+  "anzahl": 14,
+  "jeKlasse": {
+   "fehlender-bereich": 1,
+   "mega-faehigkeit": 12,
+   "nutzungsdaten": 1
+  },
+  "klassen": {
+   "mega-faehigkeit": {
+    "de": "Mega-Fähigkeit ohne Beleg",
+    "en": "Mega ability without a source"
+   },
+   "nutzungsdaten": {
+    "de": "Kein Nutzungsdatensatz",
+    "en": "No usage record"
+   },
+   "fehlender-bereich": {
+    "de": "Bereich fehlt ganz",
+    "en": "Whole area missing"
+   }
+  },
+  "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten."
+ },
+ "luecken": [
+  {
+   "id": "bereich/statuszustaende",
+   "klasse": "fehlender-bereich",
+   "titel": "Statuszustände — Übersicht fehlt",
+   "titelEn": "Status conditions — overview missing",
+   "wo": "data/champions_statuszustaende.json (existiert nicht)",
+   "ansicht": "side-quest",
+   "datei": "champions_statuszustaende.json",
+   "vorschlag": null,
+   "notiz": "Paralyse, Schlaf, Verbrennung, Einfrieren, Vergiftung, Verwirrung: was sie tun und mit welcher Wahrscheinlichkeit. Steht heute nirgends — auch pokebase führt keine solche Seite. Braucht eine zitierbare Regelquelle; Champions-eigene Zahlen werden nicht aus dem Hauptspiel übernommen, ohne dass das dabeisteht."
+  },
+  {
+   "id": "mega-faehigkeit/mega-barbaracle",
+   "klasse": "mega-faehigkeit",
+   "titel": "Thanathora (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Barbaracle — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Barbaracle].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Tough Claws",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/barbaracle-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Tough Claws ist eine reguläre Fähigkeit von Barbaracle.",
+    "grundform": "Barbaracle",
+    "basisFaehigkeiten": [
+     "Tough Claws",
+     "Sniper",
+     "Pickpocket"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-blaziken",
+   "klasse": "mega-faehigkeit",
+   "titel": "Lohgock (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Blaziken — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Blaziken].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Speed Boost",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/blaziken-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Speed Boost ist auch eine Fähigkeit von Blaziken.",
+    "grundform": "Blaziken",
+    "basisFaehigkeiten": [
+     "Speed Boost",
+     "Blaze",
+     "Multiscale"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-dragalge",
+   "klasse": "mega-faehigkeit",
+   "titel": "Tandrak (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Dragalge — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Dragalge].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Regenerator",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/dragalge-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Regenerator steht auch bei Dragalge — dort mit rund 2 %.",
+    "grundform": "Dragalge",
+    "basisFaehigkeiten": [
+     "Adaptability",
+     "Poison Point",
+     "Poison Touch",
+     "Regenerator"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-falinks",
+   "klasse": "mega-faehigkeit",
+   "titel": "Legios (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Falinks — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Falinks].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Defiant",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/falinks-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Defiant ist die meistgenutzte Fähigkeit von Falinks.",
+    "grundform": "Falinks",
+    "basisFaehigkeiten": [
+     "Battle Armor",
+     "Defiant"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-malamar",
+   "klasse": "mega-faehigkeit",
+   "titel": "Calamanero (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Malamar — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Malamar].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Contrary",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/malamar-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Contrary ist die Standardfähigkeit von Malamar.",
+    "grundform": "Malamar",
+    "basisFaehigkeiten": [
+     "Contrary",
+     "Suction Cups",
+     "Infiltrator"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-metagross",
+   "klasse": "mega-faehigkeit",
+   "titel": "Metagross (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Metagross — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Metagross].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Tough Claws",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/metagross-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Tough Claws steht auch bei Metagross — dort allerdings mit rund 3 %, was zu den Mega-Nutzern passt.",
+    "grundform": "Metagross",
+    "basisFaehigkeiten": [
+     "Clear Body",
+     "Tough Claws",
+     "Light Metal"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-raichu-x",
+   "klasse": "mega-faehigkeit",
+   "titel": "Raichu (Mega X) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Raichu X — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Raichu X].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Electric Surge",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/raichu-mega-x",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Electric Surge taucht in der Nutzungsliste von Raichu auf (unter 1 %) — das sind sehr wahrscheinlich die Mega-X-Nutzer selbst, aber die Liste allein trennt das nicht.",
+    "grundform": "Raichu",
+    "basisFaehigkeiten": [
+     "Lightning Rod",
+     "Static",
+     "No Guard",
+     "Electric Surge"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-raichu-y",
+   "klasse": "mega-faehigkeit",
+   "titel": "Raichu (Mega Y) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Raichu Y — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Raichu Y].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "No Guard",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/raichu-mega-y",
+    "einstufung": "mehrdeutig",
+    "begruendung": "No Guard taucht in der Nutzungsliste von Raichu auf (rund 2 %) — sehr wahrscheinlich die Mega-Y-Nutzer selbst, aber die Liste allein trennt das nicht.",
+    "grundform": "Raichu",
+    "basisFaehigkeiten": [
+     "Lightning Rod",
+     "Static",
+     "No Guard",
+     "Electric Surge"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-sceptile",
+   "klasse": "mega-faehigkeit",
+   "titel": "Gewaldro (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Sceptile — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Sceptile].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Lightning Rod",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/sceptile-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Lightning Rod steht auch bei Sceptile — dort mit rund 4 %.",
+    "grundform": "Sceptile",
+    "basisFaehigkeiten": [
+     "Overgrow",
+     "Unburden",
+     "Lightning Rod"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-scrafty",
+   "klasse": "mega-faehigkeit",
+   "titel": "Irokex (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Scrafty — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Scrafty].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Intimidate",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/scrafty-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Intimidate ist auch eine Fähigkeit von Scrafty.",
+    "grundform": "Scrafty",
+    "basisFaehigkeiten": [
+     "Shed Skin",
+     "Moxie",
+     "Intimidate"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-staraptor",
+   "klasse": "mega-faehigkeit",
+   "titel": "Staraptor (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Staraptor — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Staraptor].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Contrary",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/staraptor-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Contrary taucht in der Nutzungsliste von Staraptor auf (rund 2 %).",
+    "grundform": "Staraptor",
+    "basisFaehigkeiten": [
+     "Intimidate",
+     "Reckless",
+     "Contrary"
+    ]
+   }
+  },
+  {
+   "id": "mega-faehigkeit/mega-swampert",
+   "klasse": "mega-faehigkeit",
+   "titel": "Sumpex (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Swampert — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Swampert].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Swift Swim",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/swampert-mega",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Swift Swim steht auch bei Swampert — dort mit rund 3 %.",
+    "grundform": "Swampert",
+    "basisFaehigkeiten": [
+     "Torrent",
+     "Damp",
+     "Swift Swim"
+    ]
+   }
+  },
+  {
+   "id": "nutzungsdaten/paldean-tauros",
+   "klasse": "nutzungsdaten",
+   "titel": "Tauros (Paldea) — kein Nutzungsdatensatz",
+   "titelEn": "Paldean Tauros — no usage record",
+   "wo": "data/champions_usage.json → pokemon[Paldean Tauros]",
+   "ansicht": "side-quest",
+   "vorschlag": null
+  }
+ ]
+}

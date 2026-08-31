@@ -109,7 +109,7 @@ describe('Mega-Formen erben die Zahlen der Grundform — mit Beleg', () => {
     });
 });
 
-describe('Die sechzehn fehlenden Mega-Faehigkeiten werden benannt', () => {
+describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
     it('die Luecke steht als Liste in den Daten', () => {
         const meta = POKEDEX._meta || {};
         assert.ok(Array.isArray(meta.megaAbilityMissing),
@@ -150,9 +150,47 @@ describe('Die sechzehn fehlenden Mega-Faehigkeiten werden benannt', () => {
         // Waechst sie, ist eine neue Form dazugekommen und niemand hat
         // die Quelle nachgezogen. Schrumpft sie, ist eine Quelle
         // aufgetaucht — dann gehoert die Begruendung ueberarbeitet.
-        assert.equal((POKEDEX._meta.megaAbilityMissing || []).length, 16,
+        //
+        // Am 31.08.2026 ist genau das passiert: pokebase.app fuehrt die
+        // Werte doch (der Befund vom 30.08., es gebe keine oeffentliche
+        // Quelle, war falsch). Vier der sechzehn stehen damit belegt in
+        // den Daten, zwoelf warten im Admin-Bereich auf Bestaetigung.
+        assert.equal((POKEDEX._meta.megaAbilityMissing || []).length, 12,
             'die Zahl der belegfreien Mega-Faehigkeiten hat sich geaendert — ' +
             'nachsehen, warum, und die Begruendung im Bauer nachziehen');
+        assert.equal((POKEDEX._meta.megaAbilityBelegt || []).length, 4,
+            'die Zahl der nachtraeglich belegten hat sich geaendert');
+    });
+
+    it('jeder nachgetragene Wert traegt, woher er kommt', () => {
+        // Die Gegenprobe zur Luecke von der anderen Seite: ein Wert, der
+        // nachtraeglich hereinkam, muss seine Herkunft mitfuehren.
+        // Sonst steht er irgendwann neben den geprueften M-A-Werten und
+        // niemand weiss mehr, welcher woher stammt.
+        const belegt = new Set(POKEDEX._meta.megaAbilityBelegt || []);
+        assert.ok(belegt.size > 0, 'Testvoraussetzung: mindestens einer');
+        for (const e of MEGAS) {
+            if (!belegt.has(e.en)) continue;
+            assert.ok((e.megaAbility || '').trim(),
+                `${e.en} gilt als belegt, fuehrt aber keine Faehigkeit`);
+            assert.equal(e.megaAbilityQuelle, 'pokebase',
+                `${e.en}: Herkunft fehlt oder ist unerwartet`);
+        }
+        // Und umgekehrt: kein Eintrag darf eine Herkunft behaupten,
+        // ohne in der Liste zu stehen.
+        const behauptet = MEGAS.filter(e => e.megaAbilityQuelle).map(e => e.en).sort();
+        assert.deepEqual(behauptet, [...belegt].sort());
+    });
+
+    it('die Luecke wird nicht mehr als quellenlos beschrieben', () => {
+        // Der alte Wortlaut ("keine oeffentliche Quelle fuehrt sie") war
+        // eine Aussage ueber die Welt, und sie stimmt seit dem
+        // 31.08.2026 nicht mehr. Sie darf nicht zurueckkommen.
+        const note = POKEDEX._meta.megaAbilityMissingNote || '';
+        assert.ok(!/keine oeffentliche Quelle/i.test(note),
+            'der widerlegte Satz steht wieder in den Daten');
+        assert.ok(/#admin|Admin-Bereich/.test(note),
+            'die Notiz muss sagen, wo die offenen Faelle liegen');
     });
 });
 

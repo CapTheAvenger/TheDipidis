@@ -1584,6 +1584,14 @@ const BASE_PATH = './data/';
                             window.Quellen.render();
                         }
                         break;
+                    // Der Admin-Bereich holt sein Inventar erst beim
+                    // Oeffnen — er steht in keinem Menue, also lohnt kein
+                    // Abruf beim Laden der Seite.
+                    case 'admin':
+                        if (window.DsAdmin && typeof window.DsAdmin.open === 'function') {
+                            window.DsAdmin.open();
+                        }
+                        break;
                     case 'side-quest':
                         if (window.sideQuest && typeof window.sideQuest.render === 'function') {
                             const teamsHost = document.getElementById('sideQuestTeamsHost');

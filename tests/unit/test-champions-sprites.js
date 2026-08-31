@@ -21,6 +21,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..', '..');
 const SRC = fs.readFileSync(path.join(ROOT, 'js', 'app-side-quest-pokedex.js'), 'utf8');
 const DEX = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'champions_pokedex.json'), 'utf8'));
+const USAGE = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'champions_usage.json'), 'utf8'));
 
 function chunk(re, what) {
     const m = SRC.match(re);
@@ -45,6 +46,13 @@ describe('form comes last, as Limitless expects', () => {
         ['Paldean Tauros (Combat Breed)', 'tauros-paldea'],
         ['Paldean Tauros (Blaze Breed)', 'tauros-paldea-blaze'],
         ['Paldean Tauros (Aqua Breed)', 'tauros-paldea-aqua'],
+        // Ohne Klammern — so stehen die Namen in champions_usage.json und
+        // so kommen sie aus der Teamkameraden- und der Matchup-Ansicht
+        // (app-side-quest-usage.js:243, app-side-quest-matchups.js:465).
+        // "Paldean Tauros Aqua Breed" liegt heute schon so in den Daten.
+        ['Paldean Tauros Combat Breed', 'tauros-paldea'],
+        ['Paldean Tauros Blaze Breed', 'tauros-paldea-blaze'],
+        ['Paldean Tauros Aqua Breed', 'tauros-paldea-aqua'],
         ['Dragapult', 'dragapult'],
     ];
     for (const [name, want] of cases) {
@@ -52,10 +60,14 @@ describe('form comes last, as Limitless expects', () => {
     }
 
     it('never throws on empty or odd input', () => {
-        for (const bad of ['', null, undefined, '   ', 'Mega']) {
+        for (const bad of ['', null, undefined, '   ', 'Mega', 'Paldean', 'Alolan', '(  )']) {
             assert.doesNotThrow(() => slug(bad));
         }
         assert.equal(slug(''), '');
+        // Ein nackter Regionalzusatz ist kein Name — "undefined-paldea"
+        // waere eine Adresse, die es nie geben kann.
+        assert.equal(slug('Paldean'), '');
+        assert.equal(slug('Alolan'), '');
     });
 });
 
@@ -76,6 +88,44 @@ describe('against the real Pokédex', () => {
     it('slugs are URL-safe', () => {
         const bad = DEX.entries.map(e => slug(e.en)).filter(s => !/^[a-z0-9-]+$/.test(s));
         assert.deepEqual(bad, [], 'a slug with spaces or punctuation cannot resolve');
+    });
+
+    it('jeder Teamkameraden-Name aus den Nutzungsdaten ergibt einen Slug', () => {
+        // Diese Namen erreichen dieselbe Funktion wie die Pokedex-Namen,
+        // stehen aber OHNE Klammern in den Daten. Ein Sonderfall, der nur
+        // auf die Klammer-Schreibweise passt, laesst sie still ins Leere
+        // laufen — das Bild versteckt sich dann kommentarlos.
+        const namen = new Set();
+        for (const rec of Object.values(USAGE.pokemon || {})) {
+            for (const fmt of ['doubles', 'singles']) {
+                for (const t of ((rec[fmt] || {}).teammate || [])) {
+                    if (t && t.name) namen.add(t.name);
+                }
+            }
+        }
+        // Kein Zahlenband gegen die Daten dieser Woche — nur die
+        // Zusicherung, dass die Datei ueberhaupt noch Teamkameraden
+        // fuehrt. Sonst liefe die Schleife leer und der Test waere
+        // gruen, ohne etwas geprueft zu haben.
+        assert.notDeepEqual([...namen], [],
+            'kein einziger Datensatz hat Teamkameraden — champions_usage.json '
+            + 'hat seine Form geaendert');
+        const leer = [...namen].filter((n) => !slug(n));
+        assert.deepEqual(leer, [], 'diese Namen ergeben keinen Slug');
+        const kaputt = [...namen].map((n) => slug(n)).filter((s) => !/^[a-z0-9-]+$/.test(s)
+            || s.includes('undefined') || s.startsWith('-') || s.endsWith('-'));
+        assert.deepEqual(kaputt, [], 'diese Slugs koennen nicht aufloesen');
+    });
+
+    it('beide Schreibweisen derselben Form ergeben denselben Slug', () => {
+        for (const [mit, ohne] of [
+            ['Paldean Tauros (Combat Breed)', 'Paldean Tauros Combat Breed'],
+            ['Paldean Tauros (Blaze Breed)', 'Paldean Tauros Blaze Breed'],
+            ['Paldean Tauros (Aqua Breed)', 'Paldean Tauros Aqua Breed'],
+        ]) {
+            assert.equal(slug(mit), slug(ohne),
+                `${mit} und ${ohne} zeigen auf verschiedene Bilder`);
+        }
     });
 
     it('a miss falls back to the base form instead of vanishing', () => {

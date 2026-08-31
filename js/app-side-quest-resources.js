@@ -370,6 +370,12 @@
         pokedex: 'sideQuestPokedexHost',
         builder: 'sideQuestBuilderHost',
         resources: 'sideQuestResourcesHost',
+        // Statuszustaende, seit dem 31.08.2026. Der Host heisst
+        // bewusst NICHT sideQuestStatusHost: #sideQuestStatus ist
+        // schon vergeben — das ist die Ladeanzeige der Teams-Ansicht,
+        // und zwei aehnliche Namen nebeneinander sind der Fehler, den
+        // man erst beim Debuggen bemerkt.
+        status: 'sideQuestZustaendeHost',
     };
     function showView(view) {
         if (!VIEW_HOSTS[view]) view = 'teams';
@@ -414,6 +420,8 @@
             window.sideQuestUsage.activate();
         } else if (view === 'matchups' && window.sideQuestMatchups) {
             window.sideQuestMatchups.activate();
+        } else if (view === 'status' && window.sideQuestStatus) {
+            window.sideQuestStatus.activate();
         }
     }
 
@@ -425,6 +433,7 @@
             const v = b.getAttribute('data-sq-view');
             b.textContent = v === 'usage' ? (uiLang() === 'de' ? 'Nutzung' : 'Usage')
                           : v === 'matchups' ? 'Matchups'
+                          : v === 'status' ? 'Status'
                           : v === 'resources' ? l.tabResources
                           : v === 'pokedex' ? pokedexLabel
                           : v === 'builder' ? builderLabel
@@ -454,6 +463,9 @@
         const resHost = document.getElementById('sideQuestResourcesHost');
         if (_activated && resHost && !resHost.hidden) render();
     });
+
+    // Die Statusansicht zeichnet sich bei Sprachwechsel selbst
+    // (js/app-side-quest-status.js); hier steht nur der Unterreiter.
 
     window.sideQuestResources = { showView, render, loadData };
 })();

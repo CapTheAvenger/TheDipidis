@@ -1,11 +1,10 @@
 {
  "_meta": {
-  "erzeugt": "2026-08-31T06:51:35Z",
+  "erzeugt": "2026-08-31T08:30:51Z",
   "erzeuger": "scripts/datenluecken.py",
-  "anzahl": 14,
+  "anzahl": 64,
   "jeKlasse": {
-   "fehlender-bereich": 1,
-   "mega-faehigkeit": 12,
+   "namenskonflikt": 63,
    "nutzungsdaten": 1
   },
   "klassen": {
@@ -17,6 +16,10 @@
     "de": "Kein Nutzungsdatensatz",
     "en": "No usage record"
    },
+   "namenskonflikt": {
+    "de": "Zwei deutsche Namen",
+    "en": "Two German names"
+   },
    "fehlender-bereich": {
     "de": "Bereich fehlt ganz",
     "en": "Whole area missing"
@@ -26,256 +29,1011 @@
  },
  "luecken": [
   {
-   "id": "bereich/statuszustaende",
-   "klasse": "fehlender-bereich",
-   "titel": "Statuszustände — Übersicht fehlt",
-   "titelEn": "Status conditions — overview missing",
-   "wo": "data/champions_statuszustaende.json (existiert nicht)",
-   "ansicht": "side-quest",
-   "datei": "champions_statuszustaende.json",
-   "vorschlag": null,
-   "notiz": "Paralyse, Schlaf, Verbrennung, Einfrieren, Vergiftung, Verwirrung: was sie tun und mit welcher Wahrscheinlichkeit. Steht heute nirgends — auch pokebase führt keine solche Seite. Braucht eine zitierbare Regelquelle; Champions-eigene Zahlen werden nicht aus dem Hauptspiel übernommen, ohne dass das dabeisteht."
-  },
-  {
-   "id": "mega-faehigkeit/mega-barbaracle",
-   "klasse": "mega-faehigkeit",
-   "titel": "Thanathora (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Barbaracle — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Barbaracle].megaAbility",
+   "id": "namenskonflikt/adaptability",
+   "klasse": "namenskonflikt",
+   "titel": "Fähigkeit Adaptability — zwei deutsche Namen",
+   "titelEn": "Fähigkeit Adaptability — two German names",
+   "wo": "data/champions_abilities_reference.json → Adaptability.de_name  vs.  data/champions_names_de.json → abilities",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Tough Claws",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/barbaracle-mega",
+    "wert": "Anpassung",
+    "quelle": "https://pokewiki.de/Anpassung",
     "einstufung": "mehrdeutig",
-    "begruendung": "Tough Claws ist eine reguläre Fähigkeit von Barbaracle.",
-    "grundform": "Barbaracle",
-    "basisFaehigkeiten": [
-     "Tough Claws",
-     "Sniper",
-     "Pickpocket"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Adaptivität“, die Namenstabelle „Anpassung“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-blaziken",
-   "klasse": "mega-faehigkeit",
-   "titel": "Lohgock (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Blaziken — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Blaziken].megaAbility",
+   "id": "namenskonflikt/aqua-jet",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Aqua Jet — zwei deutsche Namen",
+   "titelEn": "Attacke Aqua Jet — two German names",
+   "wo": "data/champions_moves_reference.json → Aqua Jet.de_name  vs.  data/champions_names_de.json → moves",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Speed Boost",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/blaziken-mega",
+    "wert": "Wasserdüse",
+    "quelle": "https://pokewiki.de/Wasserdüse",
     "einstufung": "mehrdeutig",
-    "begruendung": "Speed Boost ist auch eine Fähigkeit von Blaziken.",
-    "grundform": "Blaziken",
-    "basisFaehigkeiten": [
-     "Speed Boost",
-     "Blaze",
-     "Multiscale"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Aquaknarre“, die Namenstabelle „Wasserdüse“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-dragalge",
-   "klasse": "mega-faehigkeit",
-   "titel": "Tandrak (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Dragalge — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Dragalge].megaAbility",
+   "id": "namenskonflikt/babiri-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Babiri Berry — zwei deutsche Namen",
+   "titelEn": "Item Babiri Berry — two German names",
+   "wo": "data/champions_items_reference.json → Babiri Berry.de_name  vs.  data/champions_names_de.json → items",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Regenerator",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/dragalge-mega",
+    "wert": "Babiribeere",
+    "quelle": "https://pokewiki.de/Babiribeere",
     "einstufung": "mehrdeutig",
-    "begruendung": "Regenerator steht auch bei Dragalge — dort mit rund 2 %.",
-    "grundform": "Dragalge",
-    "basisFaehigkeiten": [
-     "Adaptability",
-     "Poison Point",
-     "Poison Touch",
-     "Regenerator"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Tahaibeere (Stahl)“, die Namenstabelle „Babiribeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-falinks",
-   "klasse": "mega-faehigkeit",
-   "titel": "Legios (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Falinks — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Falinks].megaAbility",
+   "id": "namenskonflikt/black-sludge",
+   "klasse": "namenskonflikt",
+   "titel": "Item Black Sludge — zwei deutsche Namen",
+   "titelEn": "Item Black Sludge — two German names",
+   "wo": "data/champions_items_reference.json → Black Sludge.de_name  vs.  data/champions_names_de.json → items",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Defiant",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/falinks-mega",
+    "wert": "Giftschleim",
+    "quelle": "https://pokewiki.de/Giftschleim",
     "einstufung": "mehrdeutig",
-    "begruendung": "Defiant ist die meistgenutzte Fähigkeit von Falinks.",
-    "grundform": "Falinks",
-    "basisFaehigkeiten": [
-     "Battle Armor",
-     "Defiant"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Schwarzer Schlamm“, die Namenstabelle „Giftschleim“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-malamar",
-   "klasse": "mega-faehigkeit",
-   "titel": "Calamanero (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Malamar — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Malamar].megaAbility",
+   "id": "namenskonflikt/bone-rush",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Bone Rush — zwei deutsche Namen",
+   "titelEn": "Attacke Bone Rush — two German names",
+   "wo": "data/champions_moves_reference.json → Bone Rush.de_name  vs.  data/champions_names_de.json → moves",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Contrary",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/malamar-mega",
+    "wert": "Knochenhatz",
+    "quelle": "https://pokewiki.de/Knochenhatz",
     "einstufung": "mehrdeutig",
-    "begruendung": "Contrary ist die Standardfähigkeit von Malamar.",
-    "grundform": "Malamar",
-    "basisFaehigkeiten": [
-     "Contrary",
-     "Suction Cups",
-     "Infiltrator"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Knochenkeule“, die Namenstabelle „Knochenhatz“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-metagross",
-   "klasse": "mega-faehigkeit",
-   "titel": "Metagross (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Metagross — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Metagross].megaAbility",
+   "id": "namenskonflikt/charti-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Charti Berry — zwei deutsche Namen",
+   "titelEn": "Item Charti Berry — two German names",
+   "wo": "data/champions_items_reference.json → Charti Berry.de_name  vs.  data/champions_names_de.json → items",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Tough Claws",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/metagross-mega",
+    "wert": "Chiaribeere",
+    "quelle": "https://pokewiki.de/Chiaribeere",
     "einstufung": "mehrdeutig",
-    "begruendung": "Tough Claws steht auch bei Metagross — dort allerdings mit rund 3 %, was zu den Mega-Nutzern passt.",
-    "grundform": "Metagross",
-    "basisFaehigkeiten": [
-     "Clear Body",
-     "Tough Claws",
-     "Light Metal"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Granabeere“, die Namenstabelle „Chiaribeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-raichu-x",
-   "klasse": "mega-faehigkeit",
-   "titel": "Raichu (Mega X) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Raichu X — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Raichu X].megaAbility",
+   "id": "namenskonflikt/chilan-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Chilan Berry — zwei deutsche Namen",
+   "titelEn": "Item Chilan Berry — two German names",
+   "wo": "data/champions_items_reference.json → Chilan Berry.de_name  vs.  data/champions_names_de.json → items",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Electric Surge",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/raichu-mega-x",
+    "wert": "Latchibeere",
+    "quelle": "https://pokewiki.de/Latchibeere",
     "einstufung": "mehrdeutig",
-    "begruendung": "Electric Surge taucht in der Nutzungsliste von Raichu auf (unter 1 %) — das sind sehr wahrscheinlich die Mega-X-Nutzer selbst, aber die Liste allein trennt das nicht.",
-    "grundform": "Raichu",
-    "basisFaehigkeiten": [
-     "Lightning Rod",
-     "Static",
-     "No Guard",
-     "Electric Surge"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Chilanbeere“, die Namenstabelle „Latchibeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-raichu-y",
-   "klasse": "mega-faehigkeit",
-   "titel": "Raichu (Mega Y) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Raichu Y — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Raichu Y].megaAbility",
+   "id": "namenskonflikt/chople-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Chople Berry — zwei deutsche Namen",
+   "titelEn": "Item Chople Berry — two German names",
+   "wo": "data/champions_items_reference.json → Chople Berry.de_name  vs.  data/champions_names_de.json → items",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "No Guard",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/raichu-mega-y",
+    "wert": "Rospelbeere",
+    "quelle": "https://pokewiki.de/Rospelbeere",
     "einstufung": "mehrdeutig",
-    "begruendung": "No Guard taucht in der Nutzungsliste von Raichu auf (rund 2 %) — sehr wahrscheinlich die Mega-Y-Nutzer selbst, aber die Liste allein trennt das nicht.",
-    "grundform": "Raichu",
-    "basisFaehigkeiten": [
-     "Lightning Rod",
-     "Static",
-     "No Guard",
-     "Electric Surge"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Tahaibeere“, die Namenstabelle „Rospelbeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-sceptile",
-   "klasse": "mega-faehigkeit",
-   "titel": "Gewaldro (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Sceptile — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Sceptile].megaAbility",
+   "id": "namenskonflikt/clangorous-soul",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Clangorous Soul — zwei deutsche Namen",
+   "titelEn": "Attacke Clangorous Soul — two German names",
+   "wo": "data/champions_moves_reference.json → Clangorous Soul.de_name  vs.  data/champions_names_de.json → moves",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Lightning Rod",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/sceptile-mega",
+    "wert": "Seelentanz",
+    "quelle": "https://pokewiki.de/Seelentanz",
     "einstufung": "mehrdeutig",
-    "begruendung": "Lightning Rod steht auch bei Sceptile — dort mit rund 4 %.",
-    "grundform": "Sceptile",
-    "basisFaehigkeiten": [
-     "Overgrow",
-     "Unburden",
-     "Lightning Rod"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Schuppenseele“, die Namenstabelle „Seelentanz“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-scrafty",
-   "klasse": "mega-faehigkeit",
-   "titel": "Irokex (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Scrafty — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Scrafty].megaAbility",
+   "id": "namenskonflikt/coba-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Coba Berry — zwei deutsche Namen",
+   "titelEn": "Item Coba Berry — two German names",
+   "wo": "data/champions_items_reference.json → Coba Berry.de_name  vs.  data/champions_names_de.json → items",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Intimidate",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/scrafty-mega",
+    "wert": "Kobabeere",
+    "quelle": "https://pokewiki.de/Kobabeere",
     "einstufung": "mehrdeutig",
-    "begruendung": "Intimidate ist auch eine Fähigkeit von Scrafty.",
-    "grundform": "Scrafty",
-    "basisFaehigkeiten": [
-     "Shed Skin",
-     "Moxie",
-     "Intimidate"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Nanabbeere“, die Namenstabelle „Kobabeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-staraptor",
-   "klasse": "mega-faehigkeit",
-   "titel": "Staraptor (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Staraptor — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Staraptor].megaAbility",
+   "id": "namenskonflikt/colbur-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Colbur Berry — zwei deutsche Namen",
+   "titelEn": "Item Colbur Berry — two German names",
+   "wo": "data/champions_items_reference.json → Colbur Berry.de_name  vs.  data/champions_names_de.json → items",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Contrary",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/staraptor-mega",
+    "wert": "Burleobeere",
+    "quelle": "https://pokewiki.de/Burleobeere",
     "einstufung": "mehrdeutig",
-    "begruendung": "Contrary taucht in der Nutzungsliste von Staraptor auf (rund 2 %).",
-    "grundform": "Staraptor",
-    "basisFaehigkeiten": [
-     "Intimidate",
-     "Reckless",
-     "Contrary"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Kerzalbeere“, die Namenstabelle „Burleobeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {
-   "id": "mega-faehigkeit/mega-swampert",
-   "klasse": "mega-faehigkeit",
-   "titel": "Sumpex (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Swampert — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Swampert].megaAbility",
+   "id": "namenskonflikt/competitive",
+   "klasse": "namenskonflikt",
+   "titel": "Fähigkeit Competitive — zwei deutsche Namen",
+   "titelEn": "Fähigkeit Competitive — two German names",
+   "wo": "data/champions_abilities_reference.json → Competitive.de_name  vs.  data/champions_names_de.json → abilities",
    "ansicht": "side-quest",
    "vorschlag": {
-    "wert": "Swift Swim",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/swampert-mega",
+    "wert": "Unbeugsamkeit",
+    "quelle": "https://pokewiki.de/Unbeugsamkeit",
     "einstufung": "mehrdeutig",
-    "begruendung": "Swift Swim steht auch bei Swampert — dort mit rund 3 %.",
-    "grundform": "Swampert",
-    "basisFaehigkeiten": [
-     "Torrent",
-     "Damp",
-     "Swift Swim"
-    ]
+    "begruendung": "Die Referenzdatei schreibt „Wettkampfeifer“, die Namenstabelle „Unbeugsamkeit“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/cursed-body",
+   "klasse": "namenskonflikt",
+   "titel": "Fähigkeit Cursed Body — zwei deutsche Namen",
+   "titelEn": "Fähigkeit Cursed Body — two German names",
+   "wo": "data/champions_abilities_reference.json → Cursed Body.de_name  vs.  data/champions_names_de.json → abilities",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Tastfluch",
+    "quelle": "https://pokewiki.de/Tastfluch",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Fluchkörper“, die Namenstabelle „Tastfluch“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/dire-claw",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Dire Claw — zwei deutsche Namen",
+   "titelEn": "Attacke Dire Claw — two German names",
+   "wo": "data/champions_moves_reference.json → Dire Claw.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Unheilsklauen",
+    "quelle": "https://pokewiki.de/Unheilsklauen",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Schreckenskralle“, die Namenstabelle „Unheilsklauen“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/dual-wingbeat",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Dual Wingbeat — zwei deutsche Namen",
+   "titelEn": "Attacke Dual Wingbeat — two German names",
+   "wo": "data/champions_moves_reference.json → Dual Wingbeat.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Doppelflügel",
+    "quelle": "https://pokewiki.de/Doppelflügel",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Duo-Flügelschlag“, die Namenstabelle „Doppelflügel“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/electro-shot",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Electro Shot — zwei deutsche Namen",
+   "titelEn": "Attacke Electro Shot — two German names",
+   "wo": "data/champions_moves_reference.json → Electro Shot.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Stromstrahl",
+    "quelle": "https://pokewiki.de/Stromstrahl",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Elektroschuss“, die Namenstabelle „Stromstrahl“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/flip-turn",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Flip Turn — zwei deutsche Namen",
+   "titelEn": "Attacke Flip Turn — two German names",
+   "wo": "data/champions_moves_reference.json → Flip Turn.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Rollwende",
+    "quelle": "https://pokewiki.de/Rollwende",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Wendigo“, die Namenstabelle „Rollwende“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/flower-trick",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Flower Trick — zwei deutsche Namen",
+   "titelEn": "Attacke Flower Trick — two German names",
+   "wo": "data/champions_moves_reference.json → Flower Trick.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Blumentrick",
+    "quelle": "https://pokewiki.de/Blumentrick",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Flower Trick“, die Namenstabelle „Blumentrick“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/freeze-dry",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Freeze-Dry — zwei deutsche Namen",
+   "titelEn": "Attacke Freeze-Dry — two German names",
+   "wo": "data/champions_moves_reference.json → Freeze-Dry.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Gefriertrockner",
+    "quelle": "https://pokewiki.de/Gefriertrockner",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Gefriertrocknung“, die Namenstabelle „Gefriertrockner“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/gale-wings",
+   "klasse": "namenskonflikt",
+   "titel": "Fähigkeit Gale Wings — zwei deutsche Namen",
+   "titelEn": "Fähigkeit Gale Wings — two German names",
+   "wo": "data/champions_abilities_reference.json → Gale Wings.de_name  vs.  data/champions_names_de.json → abilities",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Orkanschwingen",
+    "quelle": "https://pokewiki.de/Orkanschwingen",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Mutwind“, die Namenstabelle „Orkanschwingen“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/haban-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Haban Berry — zwei deutsche Namen",
+   "titelEn": "Item Haban Berry — two German names",
+   "wo": "data/champions_items_reference.json → Haban Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Terirobeere",
+    "quelle": "https://pokewiki.de/Terirobeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Honmelbeere“, die Namenstabelle „Terirobeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/headlong-rush",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Headlong Rush — zwei deutsche Namen",
+   "titelEn": "Attacke Headlong Rush — two German names",
+   "wo": "data/champions_moves_reference.json → Headlong Rush.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Schmetterramme",
+    "quelle": "https://pokewiki.de/Schmetterramme",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Kopfsprung“, die Namenstabelle „Schmetterramme“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/hospitality",
+   "klasse": "namenskonflikt",
+   "titel": "Fähigkeit Hospitality — zwei deutsche Namen",
+   "titelEn": "Fähigkeit Hospitality — two German names",
+   "wo": "data/champions_abilities_reference.json → Hospitality.de_name  vs.  data/champions_names_de.json → abilities",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Gastlichkeit",
+    "quelle": "https://pokewiki.de/Gastlichkeit",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Gastfreundschaft“, die Namenstabelle „Gastlichkeit“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/hydro-cannon",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Hydro Cannon — zwei deutsche Namen",
+   "titelEn": "Attacke Hydro Cannon — two German names",
+   "wo": "data/champions_moves_reference.json → Hydro Cannon.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Aquahaubitze",
+    "quelle": "https://pokewiki.de/Aquahaubitze",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Hydrokanone“, die Namenstabelle „Aquahaubitze“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/hyper-voice",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Hyper Voice — zwei deutsche Namen",
+   "titelEn": "Attacke Hyper Voice — two German names",
+   "wo": "data/champions_moves_reference.json → Hyper Voice.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Schallwelle",
+    "quelle": "https://pokewiki.de/Schallwelle",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Hyperstimme“, die Namenstabelle „Schallwelle“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/kasib-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Kasib Berry — zwei deutsche Namen",
+   "titelEn": "Item Kasib Berry — two German names",
+   "wo": "data/champions_items_reference.json → Kasib Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Zitarzbeere",
+    "quelle": "https://pokewiki.de/Zitarzbeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Maronbeere“, die Namenstabelle „Zitarzbeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/kebia-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Kebia Berry — zwei deutsche Namen",
+   "titelEn": "Item Kebia Berry — two German names",
+   "wo": "data/champions_items_reference.json → Kebia Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Grarzbeere",
+    "quelle": "https://pokewiki.de/Grarzbeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Magobeere“, die Namenstabelle „Grarzbeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/kowtow-cleave",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Kowtow Cleave — zwei deutsche Namen",
+   "titelEn": "Attacke Kowtow Cleave — two German names",
+   "wo": "data/champions_moves_reference.json → Kowtow Cleave.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Kniefallspalter",
+    "quelle": "https://pokewiki.de/Kniefallspalter",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Kniefall-Klinge“, die Namenstabelle „Kniefallspalter“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/light-of-ruin",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Light of Ruin — zwei deutsche Namen",
+   "titelEn": "Attacke Light of Ruin — two German names",
+   "wo": "data/champions_moves_reference.json → Light of Ruin.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Lux Calamitatis",
+    "quelle": "https://pokewiki.de/Lux_Calamitatis",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Lichtkanone“, die Namenstabelle „Lux Calamitatis“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/liquidation",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Liquidation — zwei deutsche Namen",
+   "titelEn": "Attacke Liquidation — two German names",
+   "wo": "data/champions_moves_reference.json → Liquidation.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Aquadurchstoß",
+    "quelle": "https://pokewiki.de/Aquadurchstoß",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Aquadurchbruch“, die Namenstabelle „Aquadurchstoß“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/lum-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Lum Berry — zwei deutsche Namen",
+   "titelEn": "Item Lum Berry — two German names",
+   "wo": "data/champions_items_reference.json → Lum Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Prunusbeere",
+    "quelle": "https://pokewiki.de/Prunusbeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Wunderbeere“, die Namenstabelle „Prunusbeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/matcha-gotcha",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Matcha Gotcha — zwei deutsche Namen",
+   "titelEn": "Attacke Matcha Gotcha — two German names",
+   "wo": "data/champions_moves_reference.json → Matcha Gotcha.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Quirlschuss",
+    "quelle": "https://pokewiki.de/Quirlschuss",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Tee-Verkostung“, die Namenstabelle „Quirlschuss“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/meteor-mash",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Meteor Mash — zwei deutsche Namen",
+   "titelEn": "Attacke Meteor Mash — two German names",
+   "wo": "data/champions_moves_reference.json → Meteor Mash.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Sternenhieb",
+    "quelle": "https://pokewiki.de/Sternenhieb",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Meteorschlag“, die Namenstabelle „Sternenhieb“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/no-guard",
+   "klasse": "namenskonflikt",
+   "titel": "Fähigkeit No Guard — zwei deutsche Namen",
+   "titelEn": "Fähigkeit No Guard — two German names",
+   "wo": "data/champions_abilities_reference.json → No Guard.de_name  vs.  data/champions_names_de.json → abilities",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Schildlos",
+    "quelle": "https://pokewiki.de/Schildlos",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Schlupfwinkel“, die Namenstabelle „Schildlos“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/occa-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Occa Berry — zwei deutsche Namen",
+   "titelEn": "Item Occa Berry — two German names",
+   "wo": "data/champions_items_reference.json → Occa Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Koakobeere",
+    "quelle": "https://pokewiki.de/Koakobeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Wasmelbeere“, die Namenstabelle „Koakobeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/parting-shot",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Parting Shot — zwei deutsche Namen",
+   "titelEn": "Attacke Parting Shot — two German names",
+   "wo": "data/champions_moves_reference.json → Parting Shot.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Abgangstirade",
+    "quelle": "https://pokewiki.de/Abgangstirade",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Standpauke“, die Namenstabelle „Abgangstirade“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/passho-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Passho Berry — zwei deutsche Namen",
+   "titelEn": "Item Passho Berry — two German names",
+   "wo": "data/champions_items_reference.json → Passho Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Foepasbeere",
+    "quelle": "https://pokewiki.de/Foepasbeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Pamtrebeere“, die Namenstabelle „Foepasbeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/payapa-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Payapa Berry — zwei deutsche Namen",
+   "titelEn": "Item Payapa Berry — two German names",
+   "wo": "data/champions_items_reference.json → Payapa Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Pyapabeere",
+    "quelle": "https://pokewiki.de/Pyapabeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Yapabeere“, die Namenstabelle „Pyapabeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/poison-jab",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Poison Jab — zwei deutsche Namen",
+   "titelEn": "Attacke Poison Jab — two German names",
+   "wo": "data/champions_moves_reference.json → Poison Jab.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Gifthieb",
+    "quelle": "https://pokewiki.de/Gifthieb",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Giftstreich“, die Namenstabelle „Gifthieb“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/poltergeist",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Poltergeist — zwei deutsche Namen",
+   "titelEn": "Attacke Poltergeist — two German names",
+   "wo": "data/champions_moves_reference.json → Poltergeist.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Poltergeist",
+    "quelle": "https://pokewiki.de/Poltergeist",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Brimborium“, die Namenstabelle „Poltergeist“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/power-whip",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Power Whip — zwei deutsche Namen",
+   "titelEn": "Attacke Power Whip — two German names",
+   "wo": "data/champions_moves_reference.json → Power Whip.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Blattgeißel",
+    "quelle": "https://pokewiki.de/Blattgeißel",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Schmackhieb“, die Namenstabelle „Blattgeißel“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/rindo-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Rindo Berry — zwei deutsche Namen",
+   "titelEn": "Item Rindo Berry — two German names",
+   "wo": "data/champions_items_reference.json → Rindo Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Grindobeere",
+    "quelle": "https://pokewiki.de/Grindobeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Linganbeere“, die Namenstabelle „Grindobeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/rock-tomb",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Rock Tomb — zwei deutsche Namen",
+   "titelEn": "Attacke Rock Tomb — two German names",
+   "wo": "data/champions_moves_reference.json → Rock Tomb.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Felsgrab",
+    "quelle": "https://pokewiki.de/Felsgrab",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Felswurf“, die Namenstabelle „Felsgrab“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/rocky-helmet",
+   "klasse": "namenskonflikt",
+   "titel": "Item Rocky Helmet — zwei deutsche Namen",
+   "titelEn": "Item Rocky Helmet — two German names",
+   "wo": "data/champions_items_reference.json → Rocky Helmet.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Beulenhelm",
+    "quelle": "https://pokewiki.de/Beulenhelm",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Schutzhelm“, die Namenstabelle „Beulenhelm“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/scale-shot",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Scale Shot — zwei deutsche Namen",
+   "titelEn": "Attacke Scale Shot — two German names",
+   "wo": "data/champions_moves_reference.json → Scale Shot.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Schuppenschuss",
+    "quelle": "https://pokewiki.de/Schuppenschuss",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Schuppensalve“, die Namenstabelle „Schuppenschuss“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/shadow-sneak",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Shadow Sneak — zwei deutsche Namen",
+   "titelEn": "Attacke Shadow Sneak — two German names",
+   "wo": "data/champions_moves_reference.json → Shadow Sneak.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Schattenstoß",
+    "quelle": "https://pokewiki.de/Schattenstoß",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Mogelschatten“, die Namenstabelle „Schattenstoß“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/sharp-beak",
+   "klasse": "namenskonflikt",
+   "titel": "Item Sharp Beak — zwei deutsche Namen",
+   "titelEn": "Item Sharp Beak — two German names",
+   "wo": "data/champions_items_reference.json → Sharp Beak.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Hackattack",
+    "quelle": "https://pokewiki.de/Hackattack",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Spitzer Schnabel“, die Namenstabelle „Hackattack“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/shuca-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Shuca Berry — zwei deutsche Namen",
+   "titelEn": "Item Shuca Berry — two German names",
+   "wo": "data/champions_items_reference.json → Shuca Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Schukebeere",
+    "quelle": "https://pokewiki.de/Schukebeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Babiribeere“, die Namenstabelle „Schukebeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/sitrus-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Sitrus Berry — zwei deutsche Namen",
+   "titelEn": "Item Sitrus Berry — two German names",
+   "wo": "data/champions_items_reference.json → Sitrus Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Tsitrubeere",
+    "quelle": "https://pokewiki.de/Tsitrubeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Prunusbeere“, die Namenstabelle „Tsitrubeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/smooth-rock",
+   "klasse": "namenskonflikt",
+   "titel": "Item Smooth Rock — zwei deutsche Namen",
+   "titelEn": "Item Smooth Rock — two German names",
+   "wo": "data/champions_items_reference.json → Smooth Rock.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Glattbrocken",
+    "quelle": "https://pokewiki.de/Glattbrocken",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Glättstein“, die Namenstabelle „Glattbrocken“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/snow-warning",
+   "klasse": "namenskonflikt",
+   "titel": "Fähigkeit Snow Warning — zwei deutsche Namen",
+   "titelEn": "Fähigkeit Snow Warning — two German names",
+   "wo": "data/champions_abilities_reference.json → Snow Warning.de_name  vs.  data/champions_names_de.json → abilities",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Hagelalarm",
+    "quelle": "https://pokewiki.de/Hagelalarm",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Diamantstaub“, die Namenstabelle „Hagelalarm“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/stamina",
+   "klasse": "namenskonflikt",
+   "titel": "Fähigkeit Stamina — zwei deutsche Namen",
+   "titelEn": "Fähigkeit Stamina — two German names",
+   "wo": "data/champions_abilities_reference.json → Stamina.de_name  vs.  data/champions_names_de.json → abilities",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Zähigkeit",
+    "quelle": "https://pokewiki.de/Zähigkeit",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Steher“, die Namenstabelle „Zähigkeit“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/stomping-tantrum",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Stomping Tantrum — zwei deutsche Namen",
+   "titelEn": "Attacke Stomping Tantrum — two German names",
+   "wo": "data/champions_moves_reference.json → Stomping Tantrum.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Fruststampfer",
+    "quelle": "https://pokewiki.de/Fruststampfer",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Stampftanz“, die Namenstabelle „Fruststampfer“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/sucker-punch",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Sucker Punch — zwei deutsche Namen",
+   "titelEn": "Attacke Sucker Punch — two German names",
+   "wo": "data/champions_moves_reference.json → Sucker Punch.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Tiefschlag",
+    "quelle": "https://pokewiki.de/Tiefschlag",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Überrumpler“, die Namenstabelle „Tiefschlag“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/tanga-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Tanga Berry — zwei deutsche Namen",
+   "titelEn": "Item Tanga Berry — two German names",
+   "wo": "data/champions_items_reference.json → Tanga Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Tanigabeere",
+    "quelle": "https://pokewiki.de/Tanigabeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Sananabeere“, die Namenstabelle „Tanigabeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/throat-chop",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Throat Chop — zwei deutsche Namen",
+   "titelEn": "Attacke Throat Chop — two German names",
+   "wo": "data/champions_moves_reference.json → Throat Chop.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Neck Strike",
+    "quelle": "https://pokewiki.de/Neck_Strike",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Knebelhieb“, die Namenstabelle „Neck Strike“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/toxic-debris",
+   "klasse": "namenskonflikt",
+   "titel": "Fähigkeit Toxic Debris — zwei deutsche Namen",
+   "titelEn": "Fähigkeit Toxic Debris — two German names",
+   "wo": "data/champions_abilities_reference.json → Toxic Debris.de_name  vs.  data/champions_names_de.json → abilities",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Giftbelag",
+    "quelle": "https://pokewiki.de/Giftbelag",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Giftschuppen“, die Namenstabelle „Giftbelag“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/triple-axel",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Triple Axel — zwei deutsche Namen",
+   "titelEn": "Attacke Triple Axel — two German names",
+   "wo": "data/champions_moves_reference.json → Triple Axel.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Dreifach-Axel",
+    "quelle": "https://pokewiki.de/Dreifach-Axel",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Triple Axel“, die Namenstabelle „Dreifach-Axel“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/wacan-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Wacan Berry — zwei deutsche Namen",
+   "titelEn": "Item Wacan Berry — two German names",
+   "wo": "data/champions_items_reference.json → Wacan Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Kerzalbeere",
+    "quelle": "https://pokewiki.de/Kerzalbeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Setangbeere“, die Namenstabelle „Kerzalbeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/wave-crash",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Wave Crash — zwei deutsche Namen",
+   "titelEn": "Attacke Wave Crash — two German names",
+   "wo": "data/champions_moves_reference.json → Wave Crash.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Wellentackle",
+    "quelle": "https://pokewiki.de/Wellentackle",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Wellenbrecher“, die Namenstabelle „Wellentackle“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/weather-ball",
+   "klasse": "namenskonflikt",
+   "titel": "Attacke Weather Ball — zwei deutsche Namen",
+   "titelEn": "Attacke Weather Ball — two German names",
+   "wo": "data/champions_moves_reference.json → Weather Ball.de_name  vs.  data/champions_names_de.json → moves",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Meteorologe",
+    "quelle": "https://pokewiki.de/Meteorologe",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Wetterball“, die Namenstabelle „Meteorologe“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/white-herb",
+   "klasse": "namenskonflikt",
+   "titel": "Item White Herb — zwei deutsche Namen",
+   "titelEn": "Item White Herb — two German names",
+   "wo": "data/champions_items_reference.json → White Herb.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Schlohkraut",
+    "quelle": "https://pokewiki.de/Schlohkraut",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Eiskraut“, die Namenstabelle „Schlohkraut“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
+   }
+  },
+  {
+   "id": "namenskonflikt/yache-berry",
+   "klasse": "namenskonflikt",
+   "titel": "Item Yache Berry — zwei deutsche Namen",
+   "titelEn": "Item Yache Berry — two German names",
+   "wo": "data/champions_items_reference.json → Yache Berry.de_name  vs.  data/champions_names_de.json → items",
+   "ansicht": "side-quest",
+   "vorschlag": {
+    "wert": "Kiroyabeere",
+    "quelle": "https://pokewiki.de/Kiroyabeere",
+    "einstufung": "mehrdeutig",
+    "begruendung": "Die Referenzdatei schreibt „Jonagobeere“, die Namenstabelle „Kiroyabeere“. Welcher stimmt, entscheidet die Nachschlageseite.",
+    "grundform": "",
+    "basisFaehigkeiten": []
    }
   },
   {

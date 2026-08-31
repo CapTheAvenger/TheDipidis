@@ -49,6 +49,17 @@
     var LUECKEN_URL = 'data/datenluecken.json';
     var ISSUE_BASIS = 'https://github.com/CapTheAvenger/TheDipidis/issues/new';
 
+    /* Obergrenze fuer die erzeugte Adresse.
+     *
+     * GEMESSEN (31.08.2026): mit 63 offenen Luecken war die
+     * Sammeladresse 12.147 Zeichen lang. GitHub weist eine Anfrage
+     * dieser Laenge ab — der Knopf haette wortlos auf eine Fehlerseite
+     * gefuehrt, und zwar erst ab einer bestimmten Zahl von Luecken,
+     * also genau dann, wenn man ihn am dringendsten braucht. 6000 ist
+     * mit Abstand unter dem, was Server und Browser sicher tragen.
+     */
+    var MAX_ADRESSE = 6000;
+
     var _daten = null;
     var _laden = null;
     var _filter = 'alle';
@@ -83,6 +94,7 @@
             btnQuelle: 'Quelle ansehen ↗',
             btnSenden: 'Bestätigen & senden ↗',
             btnAlle: 'Alle %n Vorschläge auf einmal bestätigen ↗',
+            btnAlleTeil: '%n von %g Vorschlägen auf einmal bestätigen ↗',
             fehler: 'Das Lücken-Inventar konnte nicht geladen werden.',
             fehlerText: 'data/datenluecken.json fehlt oder ist unlesbar. Erzeugen mit: python3 scripts/datenluecken.py',
             stand: 'Inventar erzeugt',
@@ -109,6 +121,7 @@
             btnQuelle: 'View source ↗',
             btnSenden: 'Confirm & send ↗',
             btnAlle: 'Confirm all %n proposals at once ↗',
+            btnAlleTeil: 'Confirm %n of %g proposals at once ↗',
             fehler: 'The gap inventory could not be loaded.',
             fehlerText: 'data/datenluecken.json is missing or unreadable. Build it with: python3 scripts/datenluecken.py',
             stand: 'Inventory built',
@@ -170,7 +183,8 @@
             + '&body=' + encodeURIComponent(rumpf.join('\n'));
     }
 
-    function issueUrlSammel(liste) {
+    function sammelAdresse(teil, gesamt) {
+        var rest = gesamt - teil.length;
         var zeilen = [
             '### Sammelbestätigung',
             '',
@@ -178,7 +192,12 @@
             'streiche ich unten heraus oder schreibe den richtigen Wert dahinter.',
             ''
         ];
-        liste.forEach(function (l) {
+        if (rest > 0) {
+            zeilen.push('> Hier stehen ' + teil.length + ' von ' + gesamt
+                + ' Lücken. Für die übrigen ' + rest + ' den Knopf danach noch '
+                + 'einmal drücken — mehr passt nicht in eine Adresse.', '');
+        }
+        teil.forEach(function (l) {
             var v = l.vorschlag || {};
             zeilen.push('- [ ] `' + l.id + '` → **' + (v.wert || '—') + '**  ('
                 + (v.einstufung || '—') + ', ' + (v.quelle || '—') + ')');
@@ -187,13 +206,41 @@
             'Quelle, die ich geprüft habe: ',
             'Notiz: ', '',
             '<!-- datenluecke-sammel ' + JSON.stringify({
-                ids: liste.map(function (l) { return l.id; })
+                ids: teil.map(function (l) { return l.id; }),
+                von: teil.length, gesamt: gesamt
             }) + ' -->');
         return ISSUE_BASIS
             + '?title=' + encodeURIComponent('[Datenlücke] Sammelbestätigung ('
-                + liste.length + ')')
+                + teil.length + (rest > 0 ? ' von ' + gesamt : '') + ')')
             + '&labels=' + encodeURIComponent('datenluecke')
             + '&body=' + encodeURIComponent(zeilen.join('\n'));
+    }
+
+    /* Nimmt so viele Lücken auf, wie in eine Adresse passen — und sagt
+     * im Rumpf, wie viele das sind. Lieber ein Vorgang mit 40 Zeilen
+     * und einem Hinweis als ein Knopf, der auf eine Fehlerseite führt.
+     */
+    function issueUrlSammel(liste) {
+        var url = sammelAdresse(liste, liste.length);
+        if (url.length <= MAX_ADRESSE) return url;
+        var teil = liste.slice();
+        while (teil.length > 1) {
+            teil = teil.slice(0, teil.length - 1);
+            url = sammelAdresse(teil, liste.length);
+            if (url.length <= MAX_ADRESSE) return url;
+        }
+        return url;
+    }
+
+    /* Wie viele Lücken der Sammelknopf tatsächlich mitnimmt — die
+     * Beschriftung soll keine Zahl versprechen, die die Adresse nicht
+     * trägt.
+     */
+    function sammelAnzahl(liste) {
+        var url = issueUrlSammel(liste);
+        var m = /datenluecke-sammel/.test(decodeURIComponent(url))
+            ? /"von":(\d+)/.exec(decodeURIComponent(url)) : null;
+        return m ? Number(m[1]) : liste.length;
     }
 
     /* ── Zeichnen ─────────────────────────────────────────────── */
@@ -292,10 +339,14 @@
         var mitVorschlag = sichtbar.filter(function (l) {
             return l.vorschlag && l.vorschlag.wert;
         });
+        var sammelN = mitVorschlag.length > 1 ? sammelAnzahl(mitVorschlag) : 0;
         var sammel = mitVorschlag.length > 1
             ? '<div class="dl-sammel"><a class="dl-btn dl-btn--haupt" href="'
                 + esc(issueUrlSammel(mitVorschlag)) + '" target="_blank" rel="noopener noreferrer">'
-                + esc(c.btnAlle.replace('%n', String(mitVorschlag.length))) + '</a></div>'
+                + esc((sammelN < mitVorschlag.length ? c.btnAlleTeil : c.btnAlle)
+                    .replace('%n', String(sammelN))
+                    .replace('%g', String(mitVorschlag.length)))
+                + '</a></div>'
             : '';
 
         var stand = (_daten._meta && _daten._meta.erzeugt)
@@ -351,6 +402,7 @@
     window.DsAdmin = {
         render: render,
         open: oeffne,
-        _intern: { issueUrl: issueUrl, issueUrlSammel: issueUrlSammel, T: T }
+        _intern: { issueUrl: issueUrl, issueUrlSammel: issueUrlSammel,
+                   sammelAnzahl: sammelAnzahl, MAX_ADRESSE: MAX_ADRESSE, T: T }
     };
 })();

@@ -44,14 +44,22 @@ const INVENTAR = JSON.parse(lies('data', 'datenluecken.json'));
 function baueAdressen() {
     const basis = /var ISSUE_BASIS = '([^']+)';/.exec(ADMIN);
     assert.ok(basis, 'ISSUE_BASIS nicht gefunden');
+    const max = /var MAX_ADRESSE = (\d+);/.exec(ADMIN);
+    assert.ok(max, 'MAX_ADRESSE nicht gefunden');
     const einzeln = /function issueUrl\(l\) \{[\s\S]*?\n    \}/.exec(ADMIN);
+    const bauen = /function sammelAdresse\(teil, gesamt\) \{[\s\S]*?\n    \}/.exec(ADMIN);
     const sammel = /function issueUrlSammel\(liste\) \{[\s\S]*?\n    \}/.exec(ADMIN);
+    const anzahl = /function sammelAnzahl\(liste\) \{[\s\S]*?\n    \}/.exec(ADMIN);
     assert.ok(einzeln, 'issueUrl nicht gefunden');
+    assert.ok(bauen, 'sammelAdresse nicht gefunden');
     assert.ok(sammel, 'issueUrlSammel nicht gefunden');
+    assert.ok(anzahl, 'sammelAnzahl nicht gefunden');
     const f = new Function(
         "var ISSUE_BASIS = '" + basis[1] + "';\n"
-        + einzeln[0] + '\n' + sammel[0] + '\n'
-        + 'return { issueUrl: issueUrl, issueUrlSammel: issueUrlSammel };'
+        + 'var MAX_ADRESSE = ' + max[1] + ';\n'
+        + einzeln[0] + '\n' + bauen[0] + '\n' + sammel[0] + '\n' + anzahl[0] + '\n'
+        + 'return { issueUrl: issueUrl, issueUrlSammel: issueUrlSammel,'
+        + ' sammelAnzahl: sammelAnzahl, MAX_ADRESSE: MAX_ADRESSE };'
     );
     return f();
 }
@@ -160,14 +168,42 @@ describe('Admin — der Rückkanal', () => {
     });
 
     it('die Sammeladresse führt jede Kennung einzeln auf', () => {
-        const liste = INVENTAR.luecken.filter(l => l.vorschlag && l.vorschlag.wert);
-        assert.ok(liste.length > 1, 'Testvoraussetzung: mehr als ein Vorschlag');
+        // Feste Beispielliste statt der echten: das Inventar schrumpft,
+        // wenn Lücken geschlossen werden — am 31.08.2026 von 14 auf 1 —
+        // und ein Test, der eine Mindestzahl offener Lücken braucht,
+        // geht ausgerechnet dann kaputt, wenn alles gut läuft.
+        const liste = [
+            BEISPIEL,
+            Object.assign({}, BEISPIEL, {
+                id: 'mega-faehigkeit/mega-metagross',
+                titel: 'Metagross (Mega) — Mega-Fähigkeit fehlt',
+                vorschlag: Object.assign({}, BEISPIEL.vorschlag, { wert: 'Tough Claws' })
+            }),
+            Object.assign({}, BEISPIEL, {
+                id: 'nutzungsdaten/paldean-tauros',
+                titel: 'Tauros (Paldea) — kein Nutzungsdatensatz',
+                vorschlag: Object.assign({}, BEISPIEL.vorschlag, { wert: '—' })
+            })
+        ];
         const rumpf = new URL(A.issueUrlSammel(liste)).searchParams.get('body');
         for (const l of liste) {
             assert.ok(rumpf.includes(l.id), `${l.id} fehlt in der Sammelbestätigung`);
         }
         assert.equal((rumpf.match(/- \[ \] /g) || []).length, liste.length,
             'jede Lücke braucht ihr eigenes Kästchen zum Abhaken');
+        assert.ok(rumpf.includes('"ids"'), 'die maschinenlesbare Zeile fehlt');
+    });
+
+    it('das echte Inventar lässt sich in eine Sammeladresse gießen', () => {
+        // Die Gegenprobe am tatsächlichen Stand — ohne Mindestzahl,
+        // damit ein leeres Inventar kein Fehlschlag ist. Gezählt wird
+        // gegen sammelAnzahl, nicht gegen die Listenlänge: bei vielen
+        // Lücken kürzt die Adresse (siehe eigener Abschnitt unten).
+        const liste = INVENTAR.luecken.filter(l => l.vorschlag && l.vorschlag.wert);
+        const url = A.issueUrlSammel(liste);
+        assert.ok(url.length <= A.MAX_ADRESSE, `${url.length} Zeichen`);
+        const rumpf = new URL(url).searchParams.get('body');
+        assert.equal((rumpf.match(/- \[ \] /g) || []).length, A.sammelAnzahl(liste));
     });
 
     it('Sonderzeichen im Titel überleben die Adresse', () => {
@@ -183,6 +219,74 @@ describe('Admin — der Rückkanal', () => {
         assert.equal(u.searchParams.get('labels'), 'datenluecke');
         assert.ok((u.searchParams.get('body') || '').includes(gemein.id),
             'der Rumpf darf am & nicht abreissen');
+    });
+});
+
+describe('Admin — die Adresse bleibt unter der Grenze', () => {
+    // GEMESSEN (31.08.2026): als der Namenskonflikt als neue Klasse
+    // dazukam, standen 63 Lücken im Inventar — und die Sammeladresse
+    // wurde 12.147 Zeichen lang. GitHub weist so etwas ab. Der Knopf
+    // wäre also genau dann kaputtgegangen, wenn viel zu tun ist, und
+    // hätte wortlos auf eine Fehlerseite geführt.
+
+    function vieleLuecken(n) {
+        const liste = [];
+        for (let i = 0; i < n; i++) {
+            liste.push({
+                id: 'namenskonflikt/eine-ziemlich-lange-kennung-nummer-' + i,
+                klasse: 'namenskonflikt',
+                titel: 'Attacke Beispiel ' + i + ' — zwei deutsche Namen',
+                wo: 'data/champions_moves_reference.json → Beispiel.de_name  vs.  '
+                    + 'data/champions_names_de.json → moves',
+                vorschlag: {
+                    wert: 'Ein deutscher Name ' + i,
+                    quelle: 'https://pokewiki.de/Ein_deutscher_Name_' + i,
+                    einstufung: 'mehrdeutig',
+                    begruendung: 'Die Referenzdatei schreibt X, die Namenstabelle Y.'
+                }
+            });
+        }
+        return liste;
+    }
+
+    it('63 Lücken sprengen die Adresse nicht mehr', () => {
+        const url = A.issueUrlSammel(vieleLuecken(63));
+        assert.ok(url.length <= A.MAX_ADRESSE,
+            `${url.length} Zeichen — über der Grenze von ${A.MAX_ADRESSE}`);
+    });
+
+    it('auch 500 Lücken bleiben unter der Grenze', () => {
+        const url = A.issueUrlSammel(vieleLuecken(500));
+        assert.ok(url.length <= A.MAX_ADRESSE,
+            `${url.length} Zeichen — über der Grenze von ${A.MAX_ADRESSE}`);
+    });
+
+    it('der Rumpf sagt, wie viele von wie vielen drinstehen', () => {
+        const liste = vieleLuecken(63);
+        const rumpf = new URL(A.issueUrlSammel(liste)).searchParams.get('body');
+        const n = A.sammelAnzahl(liste);
+        assert.ok(n > 0 && n < 63, `${n} von 63 — es sollte gekürzt worden sein`);
+        assert.ok(rumpf.includes('von 63 Lücken'),
+            'der Rumpf muss sagen, dass er nicht alles enthält');
+        assert.ok(rumpf.includes('"gesamt":63'),
+            'die maschinenlesbare Zeile muss die Gesamtzahl führen');
+        assert.equal((rumpf.match(/- \[ \] /g) || []).length, n,
+            'die Zahl im Rumpf muss zu den Kästchen passen');
+    });
+
+    it('eine kurze Liste wird nicht gekürzt und trägt keinen Hinweis', () => {
+        const liste = vieleLuecken(3);
+        assert.equal(A.sammelAnzahl(liste), 3);
+        const rumpf = new URL(A.issueUrlSammel(liste)).searchParams.get('body');
+        assert.ok(!rumpf.includes('von 3 Lücken'),
+            'ohne Kürzung darf kein Teilungshinweis dastehen');
+    });
+
+    it('die Beschriftung verspricht keine Zahl, die die Adresse nicht trägt', () => {
+        // Zwei Wortlaute: einer für "alle", einer für "n von g".
+        assert.match(ADMIN, /btnAlleTeil:\s*'%n von %g/);
+        assert.match(ADMIN, /btnAlleTeil:\s*'Confirm %n of %g/);
+        assert.match(ADMIN, /sammelN < mitVorschlag\.length \? c\.btnAlleTeil : c\.btnAlle/);
     });
 });
 

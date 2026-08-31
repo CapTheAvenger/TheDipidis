@@ -42,6 +42,7 @@ USAGE_PATH = os.path.join(ROOT, "data", "champions_usage.json")
 DE_OVERRIDES_PATH = os.path.join(ROOT, "data", "de_name_overrides.json")
 RESOURCES_PATH = os.path.join(ROOT, "data", "champions_resources.json")
 ABILITY_OVERRIDES_PATH = os.path.join(ROOT, "data", "champions_ability_overrides.json")
+MEGA_ABILITY_PATH = os.path.join(ROOT, "data", "champions_mega_faehigkeiten.json")
 OUT_PATH = os.path.join(ROOT, "data", "champions_pokedex.json")
 NAMES_DE_OUT = os.path.join(ROOT, "data", "champions_names_de.json")
 
@@ -601,32 +602,71 @@ def main():
     # Stable, friendly default order: by total descending, then name.
     entries.sort(key=lambda e: (-(e["total"] or 0), e["en"]))
 
-    # ── Mega-Faehigkeiten ohne Quelle ──────────────────────────────
+    # ── Mega-Faehigkeiten der 16 M-B-Formen ────────────────────────
     #
-    # BEFUND (30.08.2026, in Chrome gegen die Quellen geprueft): 16 der
-    # 75 Mega-Formen fuehren keine `megaAbility`. Es sind genau die 16
-    # M-B-Ergaenzungen aus champions_roster_extra.json — die
-    # otterlyclueless-roster.json kennt sie nicht (nachgesehen: 258
-    # Eintraege, keiner davon), und championsbattledata liefert
-    # `summary.forms` nur fuer Pokemon mit eigener Seite. Smogon liefert
-    # fuer diese Formen Statuswerte und Typen, aber keine
+    # BEFUND (30.08.2026): 16 der 75 Mega-Formen fuehren keine
+    # `megaAbility`. Es sind genau die 16 M-B-Ergaenzungen aus
+    # champions_roster_extra.json — die otterlyclueless-roster.json
+    # kennt sie nicht (258 Eintraege, keiner davon), und
+    # championsbattledata liefert `summary.forms` nur fuer Pokemon mit
+    # eigener Seite. Smogon liefert Statuswerte und Typen, aber keine
     # Champions-Faehigkeit.
     #
-    # Es gibt dafuer also derzeit keine oeffentliche Quelle. Nach
-    # CLAUDE.md ("Never invent card data", "Report, don't silently
-    # repair") wird hier nichts geraten und nichts gefuellt: die Luecke
-    # wird benannt, damit die Oberflaeche sie benennen kann statt die
-    # Zeile wortlos wegzulassen. Wortlos weglassen liest sich wie
-    # "diese Mega-Form hat keine besondere Faehigkeit" — und das waere
-    # eine Aussage, die wir nicht belegen koennen.
+    # KORREKTUR (31.08.2026): der damalige Schluss "es gibt dafuer keine
+    # oeffentliche Quelle" war falsch — die Quellenzeile dieser Datei
+    # nannte pokebase.app schon damals fuer genau diese 16 Formen. Was
+    # fehlte, war nicht die Quelle, sondern ihre Kalibrierung: eine
+    # pokebase-Pokemonseite hat ZWEI Faehigkeiten-Bloecke, und wer sie
+    # verwechselt, haelt die Nutzungsverteilung der Grundform fuer die
+    # Faehigkeit der Mega-Form.
+    #
+    #   (a) Kasten oben  — die Faehigkeit DIESER Form, ohne Prozentwert.
+    #   (b) weiter unten — Nutzungsverteilung der Grundform, mit
+    #                      Prozentwerten, inklusive der Mega-Nutzer.
+    #
+    # Block (a) wurde gegen 11 Mega-Formen geprueft, deren megaAbility
+    # championsbattledata unabhaengig fuehrt: 11 von 11 richtig, darunter
+    # sechs Faelle, in denen die Mega-Faehigkeit ZUGLEICH eine Faehigkeit
+    # der Grundform ist (Manectric, Medicham, Banette, Audino, Chimecho,
+    # Steelix). Ein blosser Rueckfall auf die Grundform ist damit
+    # ausgeschlossen. Zusaetzlich stimmen Basiswerte und Typen aller 16
+    # Formen bei pokebase mit unseren Daten ueberein (16/16).
+    #
+    # Uebernommen wird trotzdem nur, was einzeln traegt: ein Wert, der in
+    # der Faehigkeitenliste der Grundform NICHT vorkommt, kann kein
+    # Rueckfall sein ("eindeutig"). Alles andere bleibt leer und
+    # erscheint als Vorschlag im Admin-Bereich (#admin) zur Bestaetigung.
+    # Nach CLAUDE.md ("Never invent card data", "Report, don't silently
+    # repair") wird nichts geraten und nichts still gefuellt.
+    mega_quellen = {}
+    try:
+        with open(MEGA_ABILITY_PATH, encoding="utf-8") as f:
+            mega_quellen = (json.load(f) or {}).get("eintraege", {}) or {}
+    except Exception as e:                                   # noqa: BLE001
+        print(f"WARN: Mega-Faehigkeiten-Quelldatei nicht lesbar ({e})")
+
+    mega_belegt = []
+    for e in entries:
+        if e.get("form") != "Mega" or (e.get("megaAbility") or "").strip():
+            continue
+        q = mega_quellen.get(e["en"])
+        if not q or not q.get("uebernommen") or not (q.get("wert") or "").strip():
+            continue
+        e["megaAbility"] = q["wert"]
+        e["megaAbilityQuelle"] = "pokebase"
+        mega_belegt.append(e["en"])
+
     mega_ohne_ability = sorted(
         e["en"] for e in entries
         if e.get("form") == "Mega" and not (e.get("megaAbility") or "").strip()
     )
+    if mega_belegt:
+        print(f"Mega-Faehigkeiten aus belegter Quelle nachgetragen: "
+              f"{len(mega_belegt)} — " + ", ".join(sorted(mega_belegt)))
     if mega_ohne_ability:
-        print(f"HINWEIS: {len(mega_ohne_ability)} Mega-Formen ohne belegte "
-              f"Mega-Faehigkeit (keine oeffentliche Quelle):",
-              ", ".join(mega_ohne_ability))
+        print(f"HINWEIS: {len(mega_ohne_ability)} Mega-Formen weiter ohne "
+              f"belegte Mega-Faehigkeit (Vorschlag liegt vor, Bestaetigung "
+              f"offen):", ", ".join(mega_ohne_ability))
 
     out = {
         "_meta": {
@@ -641,13 +681,17 @@ def main():
             # Benannte Luecke statt stiller Auslassung — siehe oben.
             "megaAbilityMissing": mega_ohne_ability,
             "megaAbilityMissingNote":
-                "Champions-eigene Mega-Formen (M-B). Ihre Mega-Faehigkeit ist "
-                "bisher nur im Spiel sichtbar; keine oeffentliche Quelle "
-                "fuehrt sie. Wird nachgetragen, sobald es eine gibt — "
-                "geraten wird nicht.",
+                "Champions-eigene Mega-Formen (M-B). Fuer jede liegt ein "
+                "Vorschlag aus pokebase.app vor (data/champions_mega_faehigkeiten.json); "
+                "uebernommen ist er erst, wenn er einzeln traegt — also in der "
+                "Faehigkeitenliste der Grundform nicht vorkommt und deshalb kein "
+                "Rueckfall auf sie sein kann. Die uebrigen warten im Admin-Bereich "
+                "(#admin) auf Bestaetigung. Geraten wird nicht.",
+            "megaAbilityBelegt": sorted(mega_belegt),
             "sources": [
                 "otterlyclueless/pokemon-champions-data (CC BY 4.0) — M-A roster, base stats, types",
                 "M-B additions: pokebase.app Champions dex + official Mega list; stats/types from Smogon (pokemon-showdown)",
+                "pokebase.app Champions dex — Mega-Faehigkeiten der M-B-Formen (Kasten oben je Formseite); gegen 11 unabhaengig bekannte Mega-Faehigkeiten kalibriert, 11/11 richtig",
                 "PokéAPI — German species names",
                 "championsbattledata.com — in-game ranked usage (nature / SP spread / item / move / ability / teammate), per format",
             ],

@@ -43,6 +43,7 @@ DE_OVERRIDES_PATH = os.path.join(ROOT, "data", "de_name_overrides.json")
 RESOURCES_PATH = os.path.join(ROOT, "data", "champions_resources.json")
 ABILITY_OVERRIDES_PATH = os.path.join(ROOT, "data", "champions_ability_overrides.json")
 MEGA_ABILITY_PATH = os.path.join(ROOT, "data", "champions_mega_faehigkeiten.json")
+NAMEN_ENTSCHIEDEN_PATH = os.path.join(ROOT, "data", "champions_namen_entschieden.json")
 OUT_PATH = os.path.join(ROOT, "data", "champions_pokedex.json")
 NAMES_DE_OUT = os.path.join(ROOT, "data", "champions_names_de.json")
 
@@ -98,6 +99,43 @@ REGION_SUFFIX = {"Alola": ("Alolan", "Alola", "Regional"),
                  "Hisui": ("Hisuian", "Hisui", "Regional"),
                  "Galar": ("Galarian", "Galar", "Regional"),
                  "Paldea": ("Paldean", "Paldea", "Regional")}
+
+# ── Paldea-Tauros: drei Varianten, im Roster nur eine ──────────────
+#
+# BEFUND (31.08.2026, letzter offener Punkt der Lueckeninventur):
+# champions_usage.json fuehrt drei Ladder-Datensaetze
+# (paldean-tauros-combat-breed / -blaze-breed / -aqua-breed), der
+# otterlyclueless-Roster dagegen nur einen Eintrag "Paldean Tauros" mit
+# reinem Kampf-Typ und 75/110/105/30/70/100 — das IST die
+# Gefechtvariante. Die beiden anderen fehlten ganz, und der eine
+# Eintrag trug den Namen aller drei.
+#
+# Zwei unabhaengige Belege, beide am 31.08.2026 geprueft:
+#   * pokebase.app Champions-Dex listet alle drei Formen, Typen
+#     Kampf / Kampf-Feuer / Kampf-Wasser, Basiswerte identisch.
+#   * data/pokemon_battle_data.json (Smogon) fuehrt
+#     Tauros-Paldea-Combat / -Blaze / -Aqua mit denselben Typen und
+#     denselben Basiswerten.
+# Deutsche Formnamen von pokewiki.de/Tauros: Gefechtvariante,
+# Flammenvariante, Flutenvariante.
+#
+# Der englische Name traegt hier zugleich die Ladder-Verknuepfung:
+# _norm("Paldean Tauros (Combat Breed)") ist genau
+# _norm("paldean-tauros-combat-breed"). Darum ist die Umbenennung nicht
+# nur Kosmetik — sie schliesst die Luecke.
+VARIANTE_SUFFIX = {
+    "Combat": ("Combat Breed", "Gefechtvariante"),
+    "Blaze":  ("Blaze Breed",  "Flammenvariante"),
+    "Aqua":   ("Aqua Breed",   "Flutenvariante"),
+}
+
+# Roster-Eintraege, deren Name eine Form meint, aber alle nennt.
+# (Roster-Name) -> (englischer Name, deutscher Name)
+ROSTER_UMBENENNUNG = {
+    "Paldean Tauros": ("Paldean Tauros (Combat Breed)",
+                       "Tauros (Paldea, Gefechtvariante)"),
+}
+
 # Base species whose canonical name contains a hyphen (not a form suffix).
 HYPHEN_BASE = {"Kommo-o", "Hakamo-o", "Jangmo-o", "Ho-Oh", "Porygon-Z",
                "Type-Null", "Mr-Mime", "Mime-Jr", "Mr-Rime",
@@ -116,6 +154,16 @@ def parse_smogon(nm):
     if nm.endswith("-Mega"):
         b = nm[:-5]; return (f"Mega {b}", b, "Mega", "Mega")
     if "-" in nm and nm not in HYPHEN_BASE:
+        # Region PLUS Variante, z. B. "Tauros-Paldea-Blaze". Ohne diesen
+        # Zweig faellt der Name in den Alt-Form-Zweig unten und wird
+        # "Tauros (Paldea-Blaze)" mit form="Base" — falsch beschriftet
+        # und ohne Anschluss an den Ladder-Datensatz.
+        teile = nm.split("-")
+        if len(teile) == 3 and teile[1] in REGION_SUFFIX and teile[2] in VARIANTE_SUFFIX:
+            b, region, var = teile
+            pre, de_region, kind = REGION_SUFFIX[region]
+            en_var, de_var = VARIANTE_SUFFIX[var]
+            return (f"{pre} {b} ({en_var})", b, f"{de_region}, {de_var}", kind)
         b, suf = nm.split("-", 1)
         if suf in REGION_SUFFIX:
             pre, de, kind = REGION_SUFFIX[suf]
@@ -420,6 +468,33 @@ def write_names_de(pokemon_names_de):
     except Exception as e:  # noqa: BLE001
         print(f"WARN: names_de — ability overrides unavailable ({e})")
     out["pokemon"] = {k: v for k, v in (pokemon_names_de or {}).items() if v}
+
+    # ── Von Hand entschiedene deutsche Namen, ganz zuletzt ────────────
+    #
+    # BEFUND (31.08.2026): 63 Namen widersprachen sich zwischen den
+    # Referenzdateien und dieser Tabelle; jeder einzelne wurde gegen
+    # pokewiki.de nachgeschlagen und die Entscheidung samt Quelle in
+    # data/champions_namen_entschieden.json abgelegt. Zwei davon
+    # ("Sharp Beak" -> Spitzer Schnabel, "Snow Warning" -> Schneeschauer)
+    # standen danach nur noch als Handkorrektur IN der erzeugten Datei —
+    # und waren beim naechsten Lauf wieder weg, weil PokeAPI etwas
+    # anderes liefert. Eine Korrektur, die ein Neubau ueberschreibt, ist
+    # keine Korrektur. Darum wird die Entscheidungsdatei jetzt hier
+    # gelesen und gewinnt gegen alle vorherigen Quellen.
+    try:
+        ent = json.load(open(NAMEN_ENTSCHIEDEN_PATH, encoding="utf-8")).get("namen") or {}
+        gesetzt = 0
+        for gruppe in ("abilities", "moves", "items"):
+            for en, v in (ent.get(gruppe) or {}).items():
+                de = (v or {}).get("de")
+                if de and out.get(gruppe, {}).get(en) != de:
+                    out.setdefault(gruppe, {})[en] = de
+                    gesetzt += 1
+        print(f"Entschiedene deutsche Namen angewandt: {gesetzt} korrigiert "
+              f"(von {sum(len(ent.get(g) or {}) for g in ('abilities','moves','items'))} belegten)")
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: names_de — Entscheidungsdatei nicht lesbar ({e})")
+
     with open(NAMES_DE_OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
     kb = os.path.getsize(NAMES_DE_OUT) / 1024
@@ -454,6 +529,8 @@ def main():
             missing_de.append(base_en)
             base_de = base_en  # fall back to English rather than guess
         name_de = f"{base_de} ({form_de})" if form_de else base_de
+        if name in ROSTER_UMBENENNUNG:
+            name, name_de = ROSTER_UMBENENNUNG[name]
 
         types = r.get("types") or []
         t1 = types[0] if len(types) > 0 else ""

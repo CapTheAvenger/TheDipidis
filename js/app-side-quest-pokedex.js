@@ -72,7 +72,7 @@
             legendUsed: '= meistgenutzter Endwert',
             legendRange: '= mögliche Spanne (Lv. 50, IS fix 31, 0–32 SP, Wesen ±10 %)',
             legendTail: 'Die Spalte „Ges“ ist die Basiswertsumme. Tipp auf ein Pokémon → alle In-Game-Infos (Wesen, SP, Attacken, Item, Team) für Doppel und Einzel.',
-            legendSprite: 'Ein gestrichelt umrandetes Bild zeigt die Grundform: für neun Champions-eigene Mega-Formen führt unsere Bildquelle keine eigene Darstellung.',
+            legendSprite: 'Die Bilder sind die Icons aus Pokémon Champions (Quelle: PokeWiki). Ein gestrichelt umrandetes Bild zeigt ausnahmsweise die Grundform, wenn für eine Form kein eigenes Bild vorliegt.',
             metaTitle: 'Meist genutzt:',
             metaStats: 'Endwerte Lv. 50:',
             baseStatsLabel: 'Basiswerte:',
@@ -133,7 +133,7 @@
             legendUsed: '= most-used final value',
             legendRange: '= possible range (Lv. 50, IV fixed 31, 0–32 SP, nature ±10%)',
             legendTail: 'The “Tot” column is the base stat total. Tap a Pokémon → full in-game info (nature, SP, moves, item, team) for Doubles and Singles.',
-            legendSprite: 'A dashed border means the picture shows the base form: for nine Champions-original Mega forms our sprite source carries no separate artwork.',
+            legendSprite: 'The artwork is the in-game Pokémon Champions icon set (source: PokeWiki). A dashed border means the picture falls back to the base form because that form has no artwork of its own.',
             metaTitle: 'Most used:',
             metaStats: 'Final stats Lv. 50:',
             baseStatsLabel: 'Base stats:',
@@ -233,7 +233,43 @@
         return parts.join('-').toLowerCase();
     }
 
+    /* ── Woher die Bilder kommen ────────────────────────────────────
+     *
+     * Bis zum 31.08.2026 kam jedes Sprite von r2.limitlesstcg.net.
+     * Zwei Probleme, beide gemessen:
+     *
+     *   1. Fuer neun Champions-eigene Mega-Formen liefert Limitless
+     *      nichts. Sieben Schreibweisen und fuenf Verzeichnisse
+     *      geprueft — die Bilder existieren dort nicht.
+     *   2. Limitless liefert die Sprites der HAUPTREIHE in 35–41 px.
+     *      Diese Ansicht bildet aber Pokémon Champions nach.
+     *
+     * Seither liegen die Icons AUS Champions bei uns: 292 Stueck,
+     * 128x128, gespiegelt von pokewiki nach images/champions/ (siehe
+     * scripts/build_champions_sprites.py und
+     * data/champions_sprites.json, wo zu jeder Datei steht, woher sie
+     * stammt).
+     *
+     * Limitless bleibt als ZWEITE Stufe stehen, und zwar nicht aus
+     * Nostalgie: die Teamkameraden- und Matchup-Ansichten rufen diese
+     * Funktion mit Namen auf, die gar nicht im Kader stehen
+     * ("Houndstone", "Overqwil", "Malamar" u. a. — am 31.08. fuenf
+     * Stueck). Fuer die gibt es keine gespiegelte Datei, wohl aber ein
+     * Limitless-Sprite. Die Kette verliert also nichts.
+     */
     const SPRITE_BASIS = 'https://r2.limitlesstcg.net/pokemon/gen9/';
+    const LOKAL_BASIS = 'images/champions/';
+
+    /* Der eigene Dateiname eines Eintrags — bewusst NICHT der
+     * Limitless-Slug. Der traegt fremde Eigenheiten (tauros-paldea fuer
+     * die Gefechtvariante), unserer folgt schlicht dem englischen
+     * Namen. Angenehmer Nebeneffekt: die klammerlose Schreibweise aus
+     * den Nutzungsdaten ("Paldean Tauros Aqua Breed") und die aus dem
+     * Pokédex ("Paldean Tauros (Aqua Breed)") ergeben denselben Namen. */
+    function lokalName(en) {
+        return String(en || '').toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    }
 
     /* Die Grundform zu einer Mega-Form — als Rueckfall fuer das Bild.
      *
@@ -265,26 +301,49 @@
         return spriteSlug(rest.join(' '));
     }
 
+    /* Die Rueckfallkette, eine Stufe je Fehlschlag:
+     *   lokal  -> images/champions/<name>.png   (alle 292 Kadereintraege)
+     *   fremd  -> Limitless                     (Namen ausserhalb des Kaders)
+     *   grund  -> Bild der Grundform, beschriftet
+     *   sonst  -> verstecken
+     * Jede Stufe wird genau einmal versucht; ohne den Merker liefe ein
+     * dauerhaft fehlschlagendes Bild in eine Endlosschleife. */
     function spriteErsatz(img) {
-        if (!img || img.dataset.ersetzt) {
-            if (img) img.style.visibility = 'hidden';
-            return;
+        if (!img) return;
+        const stufe = img.dataset.stufe || 'fremd';
+
+        if (stufe === 'lokal') {
+            const fremd = img.getAttribute('data-fremd');
+            img.dataset.stufe = 'fremd';
+            if (fremd) { img.src = SPRITE_BASIS + fremd + '.png'; return; }
         }
-        const basis = img.getAttribute('data-grundform');
-        if (!basis) { img.style.visibility = 'hidden'; return; }
-        img.dataset.ersetzt = '1';
-        img.classList.add('sqp-sprite--grundform');
-        img.title = t().spriteGrundform;
-        img.alt = t().spriteGrundform;
-        img.src = SPRITE_BASIS + basis + '.png';
+
+        if (img.dataset.stufe === 'fremd') {
+            const basis = img.getAttribute('data-grundform');
+            img.dataset.stufe = 'grund';
+            if (basis) {
+                img.classList.add('sqp-sprite--grundform');
+                img.title = t().spriteGrundform;
+                img.alt = t().spriteGrundform;
+                img.src = SPRITE_BASIS + basis + '.png';
+                return;
+            }
+        }
+
+        img.style.visibility = 'hidden';
     }
 
     function spriteImg(en, cls) {
-        const slug = spriteSlug(en);
-        if (!slug) return '';
+        const lok = lokalName(en);
+        const fremd = spriteSlug(en);
+        if (!lok && !fremd) return '';
         const basis = grundformSlug(en);
+        const stufe = lok ? 'lokal' : 'fremd';
+        const src = lok ? (LOKAL_BASIS + lok + '.png') : (SPRITE_BASIS + fremd + '.png');
         return `<img class="sqp-sprite ${cls || ''}" loading="lazy" alt=""
-                     src="${SPRITE_BASIS}${slug}.png"
+                     src="${src}"
+                     data-stufe="${stufe}"
+                     data-fremd="${fremd}"
                      data-grundform="${basis}"
                      onerror="window.championsSprite && window.championsSprite.ersatz(this)">`;
     }

@@ -27,6 +27,13 @@
     "einstufung": {
       "eindeutig": "Der Wert taucht in der Faehigkeitenliste der Grundform NICHT auf. Er kann deshalb kein Rueckfall auf die Grundform sein und wird uebernommen.",
       "mehrdeutig": "Der Wert taucht auch bei der Grundform auf. Nach der Kalibrierung oben ist er sehr wahrscheinlich richtig, aber der Einzelbeleg traegt ihn nicht allein — er wartet auf Bestaetigung im Admin-Bereich."
+    },
+    "bestaetigung": {
+      "von": "Betreiber",
+      "am": "2026-08-31",
+      "wortlaut": "Mega Metagross hat als Mega-Faehigkeit Krallenwucht und Mega Falinks hat Defiant — das ist alles korrekt.",
+      "wirkung": "Damit sind auch die zwoelf mehrdeutigen Vorschlaege bestaetigt. Sie stehen jetzt in den Daten und tragen 'bestaetigt': true. Die Einstufung 'mehrdeutig' bleibt stehen — sie beschreibt, was der Einzelbeleg hergibt, und das aendert sich durch die Bestaetigung nicht. Uebernommen wird ab jetzt, was ENTWEDER eindeutig belegt ODER vom Betreiber bestaetigt ist.",
+      "gegenprobe": "Krallenwucht ist in data/champions_names_de.json die deutsche Entsprechung von Tough Claws — die Bestaetigung deckt sich also mit dem, was pokebase fuer Mega Metagross fuehrt."
     }
   },
   "eintraege": {
@@ -90,8 +97,12 @@
         "Light Metal"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Tough Claws steht auch bei Metagross — dort allerdings mit rund 3 %, was zu den Mega-Nutzern passt."
+      "uebernommen": true,
+      "begruendung": "Tough Claws steht auch bei Metagross — dort allerdings mit rund 3 %, was zu den Mega-Nutzern passt.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Swampert": {
       "wert": "Swift Swim",
@@ -103,8 +114,12 @@
         "Swift Swim"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Swift Swim steht auch bei Swampert — dort mit rund 3 %."
+      "uebernommen": true,
+      "begruendung": "Swift Swim steht auch bei Swampert — dort mit rund 3 %.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Blaziken": {
       "wert": "Speed Boost",
@@ -116,8 +131,12 @@
         "Multiscale"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Speed Boost ist auch eine Fähigkeit von Blaziken."
+      "uebernommen": true,
+      "begruendung": "Speed Boost ist auch eine Fähigkeit von Blaziken.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Sceptile": {
       "wert": "Lightning Rod",
@@ -129,8 +148,12 @@
         "Lightning Rod"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Lightning Rod steht auch bei Sceptile — dort mit rund 4 %."
+      "uebernommen": true,
+      "begruendung": "Lightning Rod steht auch bei Sceptile — dort mit rund 4 %.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Barbaracle": {
       "wert": "Tough Claws",
@@ -142,8 +165,12 @@
         "Pickpocket"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Tough Claws ist eine reguläre Fähigkeit von Barbaracle."
+      "uebernommen": true,
+      "begruendung": "Tough Claws ist eine reguläre Fähigkeit von Barbaracle.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Dragalge": {
       "wert": "Regenerator",
@@ -156,8 +183,12 @@
         "Regenerator"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Regenerator steht auch bei Dragalge — dort mit rund 2 %."
+      "uebernommen": true,
+      "begruendung": "Regenerator steht auch bei Dragalge — dort mit rund 2 %.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Scrafty": {
       "wert": "Intimidate",
@@ -169,8 +200,12 @@
         "Intimidate"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Intimidate ist auch eine Fähigkeit von Scrafty."
+      "uebernommen": true,
+      "begruendung": "Intimidate ist auch eine Fähigkeit von Scrafty.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Raichu X": {
       "wert": "Electric Surge",
@@ -183,8 +218,12 @@
         "Electric Surge"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Electric Surge taucht in der Nutzungsliste von Raichu auf (unter 1 %) — das sind sehr wahrscheinlich die Mega-X-Nutzer selbst, aber die Liste allein trennt das nicht."
+      "uebernommen": true,
+      "begruendung": "Electric Surge taucht in der Nutzungsliste von Raichu auf (unter 1 %) — das sind sehr wahrscheinlich die Mega-X-Nutzer selbst, aber die Liste allein trennt das nicht.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Raichu Y": {
       "wert": "No Guard",
@@ -197,8 +236,12 @@
         "Electric Surge"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "No Guard taucht in der Nutzungsliste von Raichu auf (rund 2 %) — sehr wahrscheinlich die Mega-Y-Nutzer selbst, aber die Liste allein trennt das nicht."
+      "uebernommen": true,
+      "begruendung": "No Guard taucht in der Nutzungsliste von Raichu auf (rund 2 %) — sehr wahrscheinlich die Mega-Y-Nutzer selbst, aber die Liste allein trennt das nicht.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Staraptor": {
       "wert": "Contrary",
@@ -210,8 +253,12 @@
         "Contrary"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Contrary taucht in der Nutzungsliste von Staraptor auf (rund 2 %)."
+      "uebernommen": true,
+      "begruendung": "Contrary taucht in der Nutzungsliste von Staraptor auf (rund 2 %).",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Malamar": {
       "wert": "Contrary",
@@ -223,8 +270,12 @@
         "Infiltrator"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Contrary ist die Standardfähigkeit von Malamar."
+      "uebernommen": true,
+      "begruendung": "Contrary ist die Standardfähigkeit von Malamar.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     },
     "Mega Falinks": {
       "wert": "Defiant",
@@ -235,8 +286,12 @@
         "Defiant"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Defiant ist die meistgenutzte Fähigkeit von Falinks."
+      "uebernommen": true,
+      "begruendung": "Defiant ist die meistgenutzte Fähigkeit von Falinks.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
     }
   }
 }

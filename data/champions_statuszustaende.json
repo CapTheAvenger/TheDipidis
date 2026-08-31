@@ -1,0 +1,909 @@
+{
+ "_meta": {
+  "zweck": "Die Statuszustaende, die es in Pokemon Champions gibt: was sie tun, mit welcher Wahrscheinlichkeit, wie lange, und wie man sie wieder los wird.",
+  "quelle": {
+   "name": "PokéWiki",
+   "url": "https://pokewiki.de/Statusver%C3%A4nderungen",
+   "gelesen_am": "2026-08-31",
+   "einzelseiten": {
+    "paralyse": "https://pokewiki.de/Paralyse",
+    "verbrennung": "https://pokewiki.de/Verbrennung",
+    "vergiftung": "https://pokewiki.de/Vergiftung",
+    "schwere-vergiftung": "https://pokewiki.de/Vergiftung",
+    "schlaf": "https://pokewiki.de/Schlaf",
+    "einfrieren": "https://pokewiki.de/Gefroren",
+    "verwirrung": "https://pokewiki.de/Verwirrung"
+   }
+  },
+  "geltung": "Die Regeln und Zahlen stammen aus der Hauptreihe, Stand 9. Generation. Champions bestaetigt sie nicht als Ganzes — es gibt dort keine Regelseite dazu, weder im Spiel noch bei pokebase. Wo unsere eigenen Champions-Daten eine Zahl nennen, deckt sie sich bisher mit dieser Quelle: Irrlicht nennt 1/16 KP und halbierten physischen Angriff, Schlafpuder nennt 1 bis 3 Runden.",
+  "auswahl": "Aufgenommen sind die Zustaende, die in Champions nachweislich vorkommen. Der Beleg ist die Prunusbeere: sie heilt laut data/champions_items_reference.json Brand, Gift, Paralyse, Schlaf, Frost und Verwirrung. Die schwere Vergiftung kommt ueber Toxin und den Toxik-Orb dazu.",
+  "regel": "Keine Zahl ohne Quelle. Wo die Hauptreihe zwischen Generationen abweicht, steht der aktuelle Wert und daneben, was frueher galt — sonst liest jemand einen alten Wert nach und haelt uns fuer falsch.",
+  "aufloesung": "Jeder 'key' ist ein englischer Name aus data/champions_names_de.json; die Oberflaeche zeigt den deutschen. Zeigt ein Schluessel ins Leere, faellt das im Test auf.",
+  "anzahl": 7,
+  "belegbasis": "Genannt wird nur, was in Champions belegt ist. Fuer Attacken ist die Belegbasis die Vereinigung aus den In-Game-Nutzungsdaten (data/champions_usage.json, meistgenutzte Attacken je Pokemon), den Replica-Teams (data/champions_replica_teams.json) und der Attackenreferenz (data/champions_moves_reference.json) — zusammen 393 Attacken. ACHTUNG: die Nutzungsdaten fuehren je Pokemon nur die haeufigsten Attacken. Wer dort fehlt, ist damit NICHT widerlegt, sondern nur unbelegt. Deshalb wurde Pilzspore am 31.08.2026 wieder herausgenommen: sie waere die staerkste Schlaf-Attacke, aber kein Champions-Datensatz fuehrt sie. data/champions_names_de.json taugt dafuer nicht als Beleg — die Datei fuehrt 927 Attacken und 1025 Pokemon, also die ganze Hauptreihe, nicht den Champions-Pool."
+ },
+ "zustaende": [
+  {
+   "id": "paralyse",
+   "de": "Paralyse",
+   "en": "Paralysis",
+   "kuerzel": "PAR",
+   "art": "primaer",
+   "farbe": "warn",
+   "kurz": {
+    "de": "Halbe Initiative — und in einer von vier Runden geht gar nichts.",
+    "en": "Speed halved — and one turn in four is lost entirely."
+   },
+   "wirkung": [
+    {
+     "wert": "×0,5",
+     "de": "Die Initiative sinkt auf die Hälfte. Wer vorher schneller war, zieht jetzt oft hinterher.",
+     "en": "Speed drops to half. Whoever was faster before now often moves second."
+    },
+    {
+     "wert": "25 %",
+     "de": "In jeder Runde besteht eine Chance von 25 %, dass das Pokémon gar nicht angreift.",
+     "en": "Each turn there is a 25 % chance the Pokémon cannot act at all."
+    }
+   ],
+   "dauer": {
+    "de": "Bleibt, bis sie geheilt wird. Ein Wechsel hilft nicht.",
+    "en": "Stays until cured. Switching does not help."
+   },
+   "immunTypen": [
+    "Electric"
+   ],
+   "frueher": {
+    "de": "Bis zur 6. Generation sank die Initiative auf ein Viertel statt auf die Hälfte, und Elektro-Pokémon waren noch nicht immun.",
+    "en": "Up to Gen 6 Speed dropped to a quarter rather than a half, and Electric types were not yet immune."
+   },
+   "verursacht": [
+    {
+     "key": "Thunder Wave",
+     "art": "attacke",
+     "de": "Setzt die Paralyse ohne Schaden — die verlässlichste Quelle.",
+     "en": "Inflicts paralysis with no damage — the most reliable source."
+    },
+    {
+     "key": "Nuzzle",
+     "art": "attacke",
+     "de": "Wenig Schaden, dafür Paralyse als sichere Nebenwirkung.",
+     "en": "Little damage, but paralysis as a guaranteed side effect."
+    },
+    {
+     "key": "Glare",
+     "art": "attacke",
+     "de": "Setzt die Paralyse ohne Schaden.",
+     "en": "Inflicts paralysis with no damage."
+    },
+    {
+     "key": "Thunderbolt",
+     "art": "attacke",
+     "de": "10 % Chance auf Paralyse als Nebenwirkung.",
+     "en": "10 % chance of paralysis as a side effect."
+    },
+    {
+     "key": "Thunder Punch",
+     "art": "attacke",
+     "de": "10 % Chance auf Paralyse als Nebenwirkung.",
+     "en": "10 % chance of paralysis as a side effect."
+    },
+    {
+     "key": "Dire Claw",
+     "art": "attacke",
+     "de": "50 % Chance auf Gift, Paralyse oder Schlaf — welches, entscheidet der Zufall.",
+     "en": "50 % chance of poison, paralysis or sleep — which one is random."
+    },
+    {
+     "key": "Static",
+     "art": "faehigkeit",
+     "de": "30 % Chance, den Angreifer bei Kontakt zu paralysieren.",
+     "en": "30 % chance to paralyse an attacker on contact."
+    }
+   ],
+   "immun": [
+    {
+     "key": "Limber",
+     "art": "faehigkeit",
+     "de": "Kann nicht paralysiert werden.",
+     "en": "Cannot be paralysed."
+    },
+    {
+     "key": "Purifying Salt",
+     "art": "faehigkeit",
+     "de": "Immun gegen jeden Statuszustand.",
+     "en": "Immune to every status condition."
+    },
+    {
+     "key": "Flower Veil",
+     "art": "faehigkeit",
+     "de": "Schützt verbündete Pflanzen-Pokémon vor Statusproblemen.",
+     "en": "Protects allied Grass types from status conditions."
+    }
+   ],
+   "heilt": [
+    {
+     "key": "Cheri Berry",
+     "art": "item",
+     "de": "Heilt die Paralyse sofort. Einmalig.",
+     "en": "Cures paralysis at once. One use."
+    },
+    {
+     "key": "Lum Berry",
+     "art": "item",
+     "de": "Heilt jeden Statuszustand sofort. Einmalig.",
+     "en": "Cures any status condition at once. One use."
+    },
+    {
+     "key": "Natural Cure",
+     "art": "faehigkeit",
+     "de": "Heilt den Status beim Auswechseln.",
+     "en": "Cures the condition on switching out."
+    },
+    {
+     "key": "Shed Skin",
+     "art": "faehigkeit",
+     "de": "Heilt den Status mit einer Chance von 1/3 pro Runde.",
+     "en": "Cures the condition with a 1/3 chance each turn."
+    },
+    {
+     "key": "Hydration",
+     "art": "faehigkeit",
+     "de": "Heilt den Status am Rundenende, solange es regnet.",
+     "en": "Cures the condition at the end of the turn while it rains."
+    },
+    {
+     "key": "Synchronize",
+     "art": "faehigkeit",
+     "de": "Gibt Paralyse, Gift und Verbrennung an den Verursacher weiter.",
+     "en": "Passes paralysis, poison and burn back to whoever caused it."
+    }
+   ],
+   "nutzt": [
+    {
+     "key": "Quick Feet",
+     "art": "faehigkeit",
+     "de": "Initiative ×1,5 bei Status — und die Halbierung durch Paralyse entfällt.",
+     "en": "Speed ×1.5 while statused — and the paralysis penalty does not apply."
+    },
+    {
+     "key": "Guts",
+     "art": "faehigkeit",
+     "de": "Angriff ×1,5, solange ein Statuszustand anliegt.",
+     "en": "Attack ×1.5 while any status condition is active."
+    },
+    {
+     "key": "Marvel Scale",
+     "art": "faehigkeit",
+     "de": "Verteidigung ×1,5, solange ein Statuszustand anliegt.",
+     "en": "Defense ×1.5 while any status condition is active."
+    }
+   ]
+  },
+  {
+   "id": "verbrennung",
+   "de": "Verbrennung",
+   "en": "Burn",
+   "kuerzel": "BRT",
+   "art": "primaer",
+   "farbe": "bad",
+   "kurz": {
+    "de": "Halber physischer Schaden, dazu jede Runde ein Sechzehntel der KP.",
+    "en": "Physical damage halved, plus a sixteenth of max HP every turn."
+   },
+   "wirkung": [
+    {
+     "wert": "×0,5",
+     "de": "Der Schaden physischer Attacken wird halbiert. Gegen einen Spezialangreifer richtet die Verbrennung deshalb wenig aus.",
+     "en": "Damage from physical moves is halved. Against a special attacker a burn therefore does little."
+    },
+    {
+     "wert": "1/16 (6,25 %)",
+     "de": "Am Rundenende gehen 1/16 der maximalen KP verloren.",
+     "en": "1/16 of max HP is lost at the end of each turn."
+    }
+   ],
+   "dauer": {
+    "de": "Bleibt, bis sie geheilt wird. Ein Wechsel hilft nicht.",
+    "en": "Stays until cured. Switching does not help."
+   },
+   "immunTypen": [
+    "Fire"
+   ],
+   "frueher": {
+    "de": "In der 2. bis 6. Generation kostete die Verbrennung 1/8 der KP pro Runde, also doppelt so viel.",
+    "en": "In Gens 2–6 burn cost 1/8 of max HP per turn — twice as much."
+   },
+   "verursacht": [
+    {
+     "key": "Will-O-Wisp",
+     "art": "attacke",
+     "de": "Verbrennt das Ziel ohne Schaden — die verlässlichste Quelle.",
+     "en": "Burns the target with no damage — the most reliable source."
+    },
+    {
+     "key": "Heat Wave",
+     "art": "attacke",
+     "de": "Trifft beide Gegner; 10 % Chance auf Verbrennung.",
+     "en": "Hits both opponents; 10 % chance to burn."
+    },
+    {
+     "key": "Infernal Parade",
+     "art": "attacke",
+     "de": "30 % Chance auf Verbrennung — und doppelter Schaden, wenn das Ziel schon einen Status hat.",
+     "en": "30 % chance to burn — and double damage if the target already has a condition."
+    },
+    {
+     "key": "Flare Blitz",
+     "art": "attacke",
+     "de": "Der Anwender kann sich selbst verbrennen.",
+     "en": "The user can burn itself."
+    },
+    {
+     "key": "Matcha Gotcha",
+     "art": "attacke",
+     "de": "Trifft beide Gegner; 20 % Chance auf Verbrennung.",
+     "en": "Hits both opponents; 20 % chance to burn."
+    },
+    {
+     "key": "Flame Body",
+     "art": "faehigkeit",
+     "de": "30 % Chance, den Angreifer bei Kontakt zu verbrennen.",
+     "en": "30 % chance to burn an attacker on contact."
+    },
+    {
+     "key": "Flame Orb",
+     "art": "item",
+     "de": "Verbrennt den Träger selbst am Rundenende — Absicht, kein Unfall.",
+     "en": "Burns its own holder at the end of the turn — by design, not by accident."
+    }
+   ],
+   "immun": [
+    {
+     "key": "Water Bubble",
+     "art": "faehigkeit",
+     "de": "Kann nicht verbrannt werden.",
+     "en": "Cannot be burned."
+    },
+    {
+     "key": "Purifying Salt",
+     "art": "faehigkeit",
+     "de": "Immun gegen jeden Statuszustand.",
+     "en": "Immune to every status condition."
+    },
+    {
+     "key": "Leaf Guard",
+     "art": "faehigkeit",
+     "de": "Bei Sonnenschein immun gegen jeden Statuszustand.",
+     "en": "Immune to every status condition in harsh sunlight."
+    },
+    {
+     "key": "Flower Veil",
+     "art": "faehigkeit",
+     "de": "Schützt verbündete Pflanzen-Pokémon vor Statusproblemen.",
+     "en": "Protects allied Grass types from status conditions."
+    }
+   ],
+   "heilt": [
+    {
+     "key": "Rawst Berry",
+     "art": "item",
+     "de": "Heilt die Verbrennung sofort. Einmalig.",
+     "en": "Cures the burn at once. One use."
+    },
+    {
+     "key": "Lum Berry",
+     "art": "item",
+     "de": "Heilt jeden Statuszustand sofort. Einmalig.",
+     "en": "Cures any status condition at once. One use."
+    },
+    {
+     "key": "Natural Cure",
+     "art": "faehigkeit",
+     "de": "Heilt den Status beim Auswechseln.",
+     "en": "Cures the condition on switching out."
+    },
+    {
+     "key": "Shed Skin",
+     "art": "faehigkeit",
+     "de": "Heilt den Status mit einer Chance von 1/3 pro Runde.",
+     "en": "Cures the condition with a 1/3 chance each turn."
+    },
+    {
+     "key": "Hydration",
+     "art": "faehigkeit",
+     "de": "Heilt den Status am Rundenende, solange es regnet.",
+     "en": "Cures the condition at the end of the turn while it rains."
+    },
+    {
+     "key": "Synchronize",
+     "art": "faehigkeit",
+     "de": "Gibt Paralyse, Gift und Verbrennung an den Verursacher weiter.",
+     "en": "Passes paralysis, poison and burn back to whoever caused it."
+    }
+   ],
+   "nutzt": [
+    {
+     "key": "Guts",
+     "art": "faehigkeit",
+     "de": "Angriff ×1,5 bei Status — und die Halbierung durch die Verbrennung entfällt.",
+     "en": "Attack ×1.5 while statused — and the burn penalty does not apply."
+    },
+    {
+     "key": "Marvel Scale",
+     "art": "faehigkeit",
+     "de": "Verteidigung ×1,5, solange ein Statuszustand anliegt.",
+     "en": "Defense ×1.5 while any status condition is active."
+    },
+    {
+     "key": "Quick Feet",
+     "art": "faehigkeit",
+     "de": "Initiative ×1,5, solange ein Statuszustand anliegt.",
+     "en": "Speed ×1.5 while any status condition is active."
+    }
+   ]
+  },
+  {
+   "id": "vergiftung",
+   "de": "Vergiftung",
+   "en": "Poison",
+   "kuerzel": "GIF",
+   "art": "primaer",
+   "farbe": "warn",
+   "kurz": {
+    "de": "Jede Runde ein Achtel der KP — gleichbleibend.",
+    "en": "An eighth of max HP every turn — at a constant rate."
+   },
+   "wirkung": [
+    {
+     "wert": "1/8 (12,5 %)",
+     "de": "Am Rundenende gehen 1/8 der maximalen KP verloren. Der Betrag steigt nicht.",
+     "en": "1/8 of max HP is lost at the end of each turn. The amount does not grow."
+    }
+   ],
+   "dauer": {
+    "de": "Bleibt, bis sie geheilt wird. Ein Wechsel hilft nicht.",
+    "en": "Stays until cured. Switching does not help."
+   },
+   "immunTypen": [
+    "Poison",
+    "Steel"
+   ],
+   "verursacht": [
+    {
+     "key": "Sludge Bomb",
+     "art": "attacke",
+     "de": "30 % Chance auf Vergiftung.",
+     "en": "30 % chance to poison."
+    },
+    {
+     "key": "Poison Jab",
+     "art": "attacke",
+     "de": "30 % Chance auf Vergiftung.",
+     "en": "30 % chance to poison."
+    },
+    {
+     "key": "Gunk Shot",
+     "art": "attacke",
+     "de": "30 % Chance auf Vergiftung.",
+     "en": "30 % chance to poison."
+    },
+    {
+     "key": "Dire Claw",
+     "art": "attacke",
+     "de": "50 % Chance auf Gift, Paralyse oder Schlaf — welches, entscheidet der Zufall.",
+     "en": "50 % chance of poison, paralysis or sleep — which one is random."
+    },
+    {
+     "key": "Poison Point",
+     "art": "faehigkeit",
+     "de": "30 % Chance, den Angreifer bei Kontakt zu vergiften.",
+     "en": "30 % chance to poison an attacker on contact."
+    },
+    {
+     "key": "Poison Touch",
+     "art": "faehigkeit",
+     "de": "30 % Chance, ein per Kontakt getroffenes Ziel zu vergiften.",
+     "en": "30 % chance to poison a target hit by contact."
+    },
+    {
+     "key": "Corrosion",
+     "art": "faehigkeit",
+     "de": "Vergiftet auch Gift- und Stahl-Pokémon — die Typ-Immunität greift dagegen nicht.",
+     "en": "Poisons even Poison and Steel types — the type immunity does not hold against it."
+    }
+   ],
+   "immun": [
+    {
+     "key": "Immunity",
+     "art": "faehigkeit",
+     "de": "Kann nicht vergiftet werden.",
+     "en": "Cannot be poisoned."
+    },
+    {
+     "key": "Purifying Salt",
+     "art": "faehigkeit",
+     "de": "Immun gegen jeden Statuszustand.",
+     "en": "Immune to every status condition."
+    },
+    {
+     "key": "Flower Veil",
+     "art": "faehigkeit",
+     "de": "Schützt verbündete Pflanzen-Pokémon vor Statusproblemen.",
+     "en": "Protects allied Grass types from status conditions."
+    }
+   ],
+   "heilt": [
+    {
+     "key": "Pecha Berry",
+     "art": "item",
+     "de": "Heilt die Vergiftung sofort. Einmalig.",
+     "en": "Cures the poison at once. One use."
+    },
+    {
+     "key": "Lum Berry",
+     "art": "item",
+     "de": "Heilt jeden Statuszustand sofort. Einmalig.",
+     "en": "Cures any status condition at once. One use."
+    },
+    {
+     "key": "Natural Cure",
+     "art": "faehigkeit",
+     "de": "Heilt den Status beim Auswechseln.",
+     "en": "Cures the condition on switching out."
+    },
+    {
+     "key": "Shed Skin",
+     "art": "faehigkeit",
+     "de": "Heilt den Status mit einer Chance von 1/3 pro Runde.",
+     "en": "Cures the condition with a 1/3 chance each turn."
+    },
+    {
+     "key": "Hydration",
+     "art": "faehigkeit",
+     "de": "Heilt den Status am Rundenende, solange es regnet.",
+     "en": "Cures the condition at the end of the turn while it rains."
+    },
+    {
+     "key": "Synchronize",
+     "art": "faehigkeit",
+     "de": "Gibt Paralyse, Gift und Verbrennung an den Verursacher weiter.",
+     "en": "Passes paralysis, poison and burn back to whoever caused it."
+    }
+   ],
+   "nutzt": [
+    {
+     "key": "Poison Heal",
+     "art": "faehigkeit",
+     "de": "Heilt statt zu schaden: der Träger bekommt KP zurück, solange er vergiftet ist.",
+     "en": "Heals instead of hurting: the holder regains HP while poisoned."
+    },
+    {
+     "key": "Guts",
+     "art": "faehigkeit",
+     "de": "Angriff ×1,5, solange ein Statuszustand anliegt.",
+     "en": "Attack ×1.5 while any status condition is active."
+    },
+    {
+     "key": "Marvel Scale",
+     "art": "faehigkeit",
+     "de": "Verteidigung ×1,5, solange ein Statuszustand anliegt.",
+     "en": "Defense ×1.5 while any status condition is active."
+    }
+   ]
+  },
+  {
+   "id": "schwere-vergiftung",
+   "de": "Schwere Vergiftung",
+   "en": "Badly Poisoned",
+   "kuerzel": "TOX",
+   "art": "primaer",
+   "farbe": "bad",
+   "kurz": {
+    "de": "Wie Gift, aber der Schaden wächst jede Runde — bis das Pokémon wechselt.",
+    "en": "Like poison, but the damage grows every turn — until the Pokémon switches out."
+   },
+   "wirkung": [
+    {
+     "wert": "n × 1/16",
+     "de": "Der Verlust beginnt bei 1/16 der maximalen KP und steigt jede Runde um weitere 1/16: 6,25 %, 12,5 %, 18,75 %, 25 % und so weiter.",
+     "en": "Loss starts at 1/16 of max HP and grows by another 1/16 each turn: 6.25 %, 12.5 %, 18.75 %, 25 % and so on."
+    },
+    {
+     "wert": "Zähler zurück auf 0",
+     "de": "Beim Auswechseln fällt der Zähler auf null — beim nächsten Einwechseln geht es wieder mit 6,25 % los.",
+     "en": "Switching out resets the counter to zero — it starts again at 6.25 % on the next switch-in."
+    }
+   ],
+   "dauer": {
+    "de": "Bleibt, bis sie geheilt wird. Der Zähler ist bei 15/16 gedeckelt.",
+    "en": "Stays until cured. The counter is capped at 15/16."
+   },
+   "immunTypen": [
+    "Poison",
+    "Steel"
+   ],
+   "hinweis": {
+    "de": "Der Zähler ist der ganze Unterschied zur normalen Vergiftung: wer stehen bleibt, verliert immer mehr; wer wechselt, fängt von vorn an. Genau deshalb ist Toxin gegen Pokémon stark, die nicht ausweichen können — und schwach gegen die, die es können.",
+    "en": "The counter is the whole difference from ordinary poison: stay in and you lose more and more; switch and it starts over. That is exactly why Toxic is strong against Pokémon that cannot switch away — and weak against those that can."
+   },
+   "verursacht": [
+    {
+     "key": "Toxic",
+     "art": "attacke",
+     "de": "Setzt die schwere Vergiftung ohne Schaden.",
+     "en": "Inflicts bad poison with no damage."
+    },
+    {
+     "key": "Toxic Orb",
+     "art": "item",
+     "de": "Vergiftet den Träger selbst schwer am Rundenende — Absicht, kein Unfall.",
+     "en": "Badly poisons its own holder at the end of the turn — by design, not by accident."
+    },
+    {
+     "key": "Corrosion",
+     "art": "faehigkeit",
+     "de": "Vergiftet auch Gift- und Stahl-Pokémon.",
+     "en": "Poisons even Poison and Steel types."
+    }
+   ],
+   "immun": [
+    {
+     "key": "Immunity",
+     "art": "faehigkeit",
+     "de": "Kann nicht vergiftet werden.",
+     "en": "Cannot be poisoned."
+    },
+    {
+     "key": "Purifying Salt",
+     "art": "faehigkeit",
+     "de": "Immun gegen jeden Statuszustand.",
+     "en": "Immune to every status condition."
+    }
+   ],
+   "heilt": [
+    {
+     "key": "Pecha Berry",
+     "art": "item",
+     "de": "Heilt die Vergiftung sofort. Einmalig.",
+     "en": "Cures the poison at once. One use."
+    },
+    {
+     "key": "Lum Berry",
+     "art": "item",
+     "de": "Heilt jeden Statuszustand sofort. Einmalig.",
+     "en": "Cures any status condition at once. One use."
+    },
+    {
+     "key": "Natural Cure",
+     "art": "faehigkeit",
+     "de": "Heilt den Status beim Auswechseln.",
+     "en": "Cures the condition on switching out."
+    },
+    {
+     "key": "Shed Skin",
+     "art": "faehigkeit",
+     "de": "Heilt den Status mit einer Chance von 1/3 pro Runde.",
+     "en": "Cures the condition with a 1/3 chance each turn."
+    }
+   ],
+   "nutzt": [
+    {
+     "key": "Poison Heal",
+     "art": "faehigkeit",
+     "de": "Heilt statt zu schaden — auch bei der schweren Vergiftung.",
+     "en": "Heals instead of hurting — with bad poison too."
+    },
+    {
+     "key": "Guts",
+     "art": "faehigkeit",
+     "de": "Angriff ×1,5, solange ein Statuszustand anliegt.",
+     "en": "Attack ×1.5 while any status condition is active."
+    }
+   ]
+  },
+  {
+   "id": "schlaf",
+   "de": "Schlaf",
+   "en": "Sleep",
+   "kuerzel": "SLF",
+   "art": "primaer",
+   "farbe": "info",
+   "kurz": {
+    "de": "Ein bis drei Runden gar nichts — und beim Wechsel beginnt der Zähler von vorn.",
+    "en": "One to three turns of nothing — and the counter restarts on a switch."
+   },
+   "wirkung": [
+    {
+     "wert": "1–3 Runden",
+     "de": "Das Pokémon kann nicht angreifen, bis es aufwacht.",
+     "en": "The Pokémon cannot act until it wakes."
+    },
+    {
+     "wert": "Zähler zurück",
+     "de": "Beim Auswechseln wird der Zähler auf den Ausgangswert zurückgesetzt — Wechseln verkürzt den Schlaf also nicht, es verlängert ihn.",
+     "en": "Switching out resets the counter to its starting value — so switching does not shorten sleep, it lengthens it."
+    }
+   ],
+   "dauer": {
+    "de": "1 bis 3 Runden, dann wacht das Pokémon von selbst auf.",
+    "en": "1 to 3 turns, then it wakes by itself."
+   },
+   "immunTypen": [],
+   "hinweis": {
+    "de": "Kein Typ ist gegen Schlaf immun. Puder-Attacken wie Schlafpuder wirken aber nicht auf Pflanzen-Pokémon und nicht auf Träger von Partikelschutz.",
+    "en": "No type is immune to sleep. Powder moves such as Sleep Powder, however, do not affect Grass types or holders of Overcoat."
+   },
+   "frueher": {
+    "de": "Bis zur 4. Generation dauerte der Schlaf 1 bis 7 Runden, und der Zähler lief beim Wechsel weiter.",
+    "en": "Up to Gen 4 sleep lasted 1 to 7 turns and the counter kept running across a switch."
+   },
+   "verursacht": [
+    {
+     "key": "Sleep Powder",
+     "art": "attacke",
+     "de": "Setzt den Schlaf für 1 bis 3 Runden — die verlässlichste belegte Quelle.",
+     "en": "Inflicts sleep for 1 to 3 turns — the most reliable sourced option."
+    },
+    {
+     "key": "Hypnosis",
+     "art": "attacke",
+     "de": "Setzt den Schlaf, trifft aber unzuverlässig.",
+     "en": "Inflicts sleep, but lands unreliably."
+    },
+    {
+     "key": "Yawn",
+     "art": "attacke",
+     "de": "Das Ziel schläft erst am Ende der nächsten Runde ein — ein Wechsel verhindert es.",
+     "en": "The target only falls asleep at the end of the next turn — switching prevents it."
+    },
+    {
+     "key": "Dire Claw",
+     "art": "attacke",
+     "de": "50 % Chance auf Gift, Paralyse oder Schlaf.",
+     "en": "50 % chance of poison, paralysis or sleep."
+    }
+   ],
+   "immun": [
+    {
+     "key": "Insomnia",
+     "art": "faehigkeit",
+     "de": "Kann nicht einschlafen.",
+     "en": "Cannot fall asleep."
+    },
+    {
+     "key": "Sweet Veil",
+     "art": "faehigkeit",
+     "de": "Schützt sich selbst und die Verbündeten vor Schlaf.",
+     "en": "Protects itself and its allies from sleep."
+    },
+    {
+     "key": "Overcoat",
+     "art": "faehigkeit",
+     "de": "Immun gegen Puder-Attacken wie Schlafpuder.",
+     "en": "Immune to powder moves such as Sleep Powder."
+    },
+    {
+     "key": "Electric Surge",
+     "art": "faehigkeit",
+     "de": "Das Elektrofeld hält Pokémon am Boden wach.",
+     "en": "Electric Terrain keeps grounded Pokémon awake."
+    },
+    {
+     "key": "Purifying Salt",
+     "art": "faehigkeit",
+     "de": "Immun gegen jeden Statuszustand.",
+     "en": "Immune to every status condition."
+    }
+   ],
+   "heilt": [
+    {
+     "key": "Chesto Berry",
+     "art": "item",
+     "de": "Weckt sofort auf. Einmalig.",
+     "en": "Wakes up at once. One use."
+    },
+    {
+     "key": "Lum Berry",
+     "art": "item",
+     "de": "Heilt jeden Statuszustand sofort. Einmalig.",
+     "en": "Cures any status condition at once. One use."
+    },
+    {
+     "key": "Early Bird",
+     "art": "faehigkeit",
+     "de": "Wacht doppelt so schnell auf.",
+     "en": "Wakes up twice as fast."
+    },
+    {
+     "key": "Natural Cure",
+     "art": "faehigkeit",
+     "de": "Heilt den Status beim Auswechseln.",
+     "en": "Cures the condition on switching out."
+    },
+    {
+     "key": "Shed Skin",
+     "art": "faehigkeit",
+     "de": "Heilt den Status mit einer Chance von 1/3 pro Runde.",
+     "en": "Cures the condition with a 1/3 chance each turn."
+    },
+    {
+     "key": "Hydration",
+     "art": "faehigkeit",
+     "de": "Heilt den Status am Rundenende, solange es regnet.",
+     "en": "Cures the condition at the end of the turn while it rains."
+    }
+   ],
+   "nutzt": [
+    {
+     "key": "Guts",
+     "art": "faehigkeit",
+     "de": "Angriff ×1,5, solange ein Statuszustand anliegt.",
+     "en": "Attack ×1.5 while any status condition is active."
+    }
+   ]
+  },
+  {
+   "id": "einfrieren",
+   "de": "Einfrieren",
+   "en": "Freeze",
+   "kuerzel": "GFR",
+   "art": "primaer",
+   "farbe": "info",
+   "kurz": {
+    "de": "Gar keine Aktion — und pro Runde nur 20 % Chance aufzutauen.",
+    "en": "No action at all — and only a 20 % chance to thaw each turn."
+   },
+   "wirkung": [
+    {
+     "wert": "kein Zug",
+     "de": "Das Pokémon kann nicht angreifen.",
+     "en": "The Pokémon cannot act."
+    },
+    {
+     "wert": "20 %",
+     "de": "Pro Runde taut es mit einer Wahrscheinlichkeit von 20 % auf.",
+     "en": "Each turn it thaws with a probability of 20 %."
+    },
+    {
+     "wert": "sofort",
+     "de": "Ein Treffer durch eine Feuer-Attacke taut es sofort auf.",
+     "en": "Being hit by a Fire move thaws it immediately."
+    }
+   ],
+   "dauer": {
+    "de": "Offen. Im Schnitt fünf Runden, aber ohne Obergrenze.",
+    "en": "Open-ended. Five turns on average, with no upper bound."
+   },
+   "immunTypen": [
+    "Ice"
+   ],
+   "hinweis": {
+    "de": "Der Zustand mit der größten Streuung: 20 % pro Runde heißt, dass es einmal nach einer Runde vorbei ist und einmal nach zehn. Bei Sonnenschein friert überhaupt nichts ein.",
+    "en": "The swingiest condition: 20 % per turn means it can end after one turn or after ten. In harsh sunlight nothing freezes at all."
+   },
+   "verursacht": [],
+   "immun": [
+    {
+     "key": "Magma Armor",
+     "art": "faehigkeit",
+     "de": "Kann nicht einfrieren.",
+     "en": "Cannot be frozen."
+    },
+    {
+     "key": "Purifying Salt",
+     "art": "faehigkeit",
+     "de": "Immun gegen jeden Statuszustand.",
+     "en": "Immune to every status condition."
+    }
+   ],
+   "heilt": [
+    {
+     "key": "Aspear Berry",
+     "art": "item",
+     "de": "Taut sofort auf. Einmalig.",
+     "en": "Thaws at once. One use."
+    },
+    {
+     "key": "Lum Berry",
+     "art": "item",
+     "de": "Heilt jeden Statuszustand sofort. Einmalig.",
+     "en": "Cures any status condition at once. One use."
+    },
+    {
+     "key": "Natural Cure",
+     "art": "faehigkeit",
+     "de": "Heilt den Status beim Auswechseln.",
+     "en": "Cures the condition on switching out."
+    },
+    {
+     "key": "Shed Skin",
+     "art": "faehigkeit",
+     "de": "Heilt den Status mit einer Chance von 1/3 pro Runde.",
+     "en": "Cures the condition with a 1/3 chance each turn."
+    }
+   ],
+   "nutzt": [
+    {
+     "key": "Guts",
+     "art": "faehigkeit",
+     "de": "Angriff ×1,5, solange ein Statuszustand anliegt.",
+     "en": "Attack ×1.5 while any status condition is active."
+    }
+   ]
+  },
+  {
+   "id": "verwirrung",
+   "de": "Verwirrung",
+   "en": "Confusion",
+   "kuerzel": "—",
+   "art": "fluechtig",
+   "farbe": "warn",
+   "kurz": {
+    "de": "In einem von drei Fällen trifft sich das Pokémon selbst.",
+    "en": "One time in three the Pokémon hits itself."
+   },
+   "wirkung": [
+    {
+     "wert": "1/3 (33 %)",
+     "de": "Mit einer Wahrscheinlichkeit von 1/3 greift das Pokémon nicht an, sondern trifft sich selbst.",
+     "en": "With a probability of 1/3 the Pokémon hits itself instead of attacking."
+    },
+    {
+     "wert": "Stärke 40",
+     "de": "Der Selbsttreffer rechnet wie eine typlose physische Attacke mit Stärke 40 — kein Volltreffer, keine Typenwirkung, kein Typbonus.",
+     "en": "The self-hit is calculated as a typeless physical move with 40 power — no critical hit, no type effectiveness, no STAB."
+    }
+   ],
+   "dauer": {
+    "de": "2 bis 5 Runden. Beim Auswechseln ist sie sofort weg.",
+    "en": "2 to 5 turns. Switching out removes it at once."
+   },
+   "immunTypen": [],
+   "hinweis": {
+    "de": "Anders als die übrigen ist die Verwirrung ein flüchtiger Zustand: sie überlebt den Wechsel nicht und blockiert deshalb auch keinen zweiten Statuszustand. Ein Pokémon kann gleichzeitig verwirrt und paralysiert sein.",
+    "en": "Unlike the others, confusion is a volatile condition: it does not survive a switch, and so it does not block a second status condition either. A Pokémon can be confused and paralysed at the same time."
+   },
+   "frueher": {
+    "de": "Bis zur 6. Generation lag die Chance auf den Selbsttreffer bei 50 % statt bei einem Drittel.",
+    "en": "Up to Gen 6 the self-hit chance was 50 % rather than one third."
+   },
+   "verursacht": [],
+   "immun": [
+    {
+     "key": "Own Tempo",
+     "art": "faehigkeit",
+     "de": "Kann nicht verwirrt werden.",
+     "en": "Cannot be confused."
+    },
+    {
+     "key": "Purifying Salt",
+     "art": "faehigkeit",
+     "de": "Immun gegen jeden Statuszustand.",
+     "en": "Immune to every status condition."
+    }
+   ],
+   "heilt": [
+    {
+     "key": "Persim Berry",
+     "art": "item",
+     "de": "Hebt die Verwirrung sofort auf. Einmalig.",
+     "en": "Clears the confusion at once. One use."
+    },
+    {
+     "key": "Lum Berry",
+     "art": "item",
+     "de": "Heilt jeden Statuszustand sofort. Einmalig.",
+     "en": "Cures any status condition at once. One use."
+    },
+    {
+     "key": "Natural Cure",
+     "art": "faehigkeit",
+     "de": "Heilt den Status beim Auswechseln.",
+     "en": "Cures the condition on switching out."
+    }
+   ],
+   "nutzt": []
+  }
+ ]
+}

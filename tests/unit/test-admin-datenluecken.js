@@ -33,6 +33,7 @@ const ROOT = path.join(__dirname, '..', '..');
 const lies = (...p) => fs.readFileSync(path.join(ROOT, ...p), 'utf8');
 
 const ADMIN = lies('js', 'app-admin.js');
+const CSS = lies('css', 'admin.css');
 const HTML = lies('index.html');
 const INIT = lies('js', 'inline-init.js');
 const CORE = lies('js', 'app-core.js');
@@ -207,6 +208,45 @@ describe('Admin — die Sprachfassungen', () => {
             assert.ok(!deTeil.includes(wort),
                 `"${wort}" steht in der deutschen Fassung`);
         }
+    });
+});
+
+describe('Admin — der Werbeblocker-Fallstrick', () => {
+    it('keine Klasse beginnt mit ad-', () => {
+        // GEMESSEN am 31.08.2026 an der laufenden Seite: mit dem Präfix
+        // `ad-` stand `.ad-btn` im Browser auf display:none — kein
+        // Fehler im Stilblatt, sondern eine kosmetische Filterregel
+        // jedes gängigen Werbeblockers. Betroffen waren die beiden
+        // Knöpfe je Lücke, also genau der Zweck der Seite.
+        //
+        // Die lokale Messung hatte es NICHT gefunden, weil sie
+        // Elemente mit Höhe 0 herausfilterte — ein display:none-Element
+        // hat Höhe 0 und fiel damit durch dasselbe Sieb wie ein
+        // Element, das gar nicht da ist. Deshalb steht die Regel jetzt
+        // hier, wo sie ohne Browser hält.
+        const treffer = new Set();
+        for (const [datei, quelle] of [['css/admin.css', CSS], ['js/app-admin.js', ADMIN]]) {
+            for (const m of quelle.matchAll(/(?<![\w-])ad-[a-z]/g)) {
+                treffer.add(datei + ': ' + quelle.slice(m.index, m.index + 20).split(/['"\s{,]/)[0]);
+            }
+        }
+        assert.deepEqual([...treffer], [],
+            'Klassen mit dem Präfix ad- werden von Werbeblockern ausgeblendet');
+    });
+
+    it('das Stilblatt und das Modul benutzen denselben Präfix', () => {
+        const ausCss = new Set([...CSS.matchAll(/\.(dl-[a-z-]+)/g)].map(m => m[1]));
+        const ausJs = new Set([...ADMIN.matchAll(/(?<![\w-])(dl-[a-z-]+)/g)].map(m => m[1]));
+        assert.ok(ausCss.size > 15, `nur ${ausCss.size} Klassen im Stilblatt`);
+        // Jede Klasse, die das Modul zeichnet, muss im Stilblatt stehen —
+        // sonst steht sie ohne Gestaltung auf der Seite. Eine Variante
+        // wie dl-btn--still darf dabei auf die Regel ihrer Grundklasse
+        // zurueckfallen; sie ist dann kein toter Name, sondern ein
+        // Haken fuer spaeter.
+        const gedeckt = k => ausCss.has(k) || ausCss.has(k.split('--')[0]);
+        const ohneStil = [...ausJs].filter(k => !gedeckt(k) && !k.endsWith('-'));
+        assert.deepEqual(ohneStil, [],
+            'gezeichnet, aber nirgends gestaltet: ' + ohneStil.join(', '));
     });
 });
 

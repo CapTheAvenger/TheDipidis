@@ -1,5 +1,16 @@
 /* Admin — Datenlücken.
  *
+ * KLASSENPRAEFIX: dl- (Datenluecken), NICHT ad-.
+ * Gemessen am 31.08.2026 an der laufenden Seite: mit dem
+ * urspruenglichen Praefix stand der Knopf im Browser auf
+ * display:none — kein Fehler im Stilblatt, sondern eine
+ * kosmetische Filterregel jedes gaengigen Werbeblockers. Die
+ * beiden Knoepfe je Luecke, also der ganze Zweck der Seite,
+ * waren fuer jeden Besucher mit Blocker unsichtbar. Die
+ * lokale Messung hatte es NICHT gefunden, weil sie Elemente
+ * mit Hoehe 0 herausfilterte. tests/unit/test-admin-datenluecken.js
+ * haelt den Praefix jetzt fest.
+ *
  * Gleiche Haltung wie css/quellen.css: schmale Lesespalte, alle Farben
  * aus tokens.css, damit der Dunkelmodus ohne eigene Regeln mitkommt.
  * Die Seite wird gelesen und abgearbeitet, nicht überflogen — deshalb
@@ -12,14 +23,14 @@
     padding-bottom: var(--s-8);
 }
 
-.ad-lead {
+.dl-lead {
     margin: 0 0 10px;
     font-size: 1.02rem;
     line-height: 1.55;
     color: var(--ink-2);
 }
 
-.ad-hinweis {
+.dl-hinweis {
     margin: 0 0 var(--s-4);
     padding: 10px 12px;
     border: 1px solid var(--line);
@@ -32,14 +43,14 @@
 }
 
 /* ── Filterzeile ─────────────────────────────────────────────────── */
-.ad-filter {
+.dl-filter {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin: 0 0 var(--s-4);
 }
 
-.ad-chip {
+.dl-chip {
     min-height: 44px;               /* tippbar */
     padding: 8px 14px;
     border: 1px solid var(--line);
@@ -50,46 +61,46 @@
     font-weight: 600;
     cursor: pointer;
 }
-.ad-chip b { font-weight: 800; color: var(--ink); }
-.ad-chip:hover { border-color: var(--ink-3); }
-.ad-chip.is-an {
+.dl-chip b { font-weight: 800; color: var(--ink); }
+.dl-chip:hover { border-color: var(--ink-3); }
+.dl-chip.is-an {
     background: var(--ink);
     border-color: var(--ink);
     color: var(--surface-1);
 }
-.ad-chip.is-an b { color: var(--surface-1); }
+.dl-chip.is-an b { color: var(--surface-1); }
 
 /* ── Karte je Lücke ──────────────────────────────────────────────── */
-.ad-liste { display: grid; gap: 12px; }
+.dl-liste { display: grid; gap: 12px; }
 
-.ad-karte {
+.dl-karte {
     border: 1px solid var(--line);
     border-radius: var(--r-lg);
     background: var(--surface-1);
     padding: 16px;
 }
 
-.ad-karte-titel {
+.dl-karte-titel {
     margin: 0 0 8px;
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--ink);
 }
 
-.ad-wo, .ad-basis {
+.dl-wo, .dl-basis {
     margin: 0 0 8px;
     font-size: .86rem;
     line-height: 1.5;
     color: var(--ink-2);
 }
-.ad-wo-label { color: var(--ink-3); }
-.ad-wo code {
+.dl-wo-label { color: var(--ink-3); }
+.dl-wo code {
     font-size: .84rem;
     word-break: break-word;
     color: var(--ink-2);
 }
 
-.ad-notiz {
+.dl-notiz {
     margin: 0 0 10px;
     font-size: .92rem;
     line-height: 1.55;
@@ -97,7 +108,7 @@
 }
 
 /* ── Vorschlag ───────────────────────────────────────────────────── */
-.ad-vorschlag {
+.dl-vorschlag {
     margin: 10px 0 12px;
     padding: 12px;
     border: 1px solid var(--line);
@@ -105,7 +116,7 @@
     background: var(--surface-2);
 }
 
-.ad-vorschlag-kopf {
+.dl-vorschlag-kopf {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -113,7 +124,7 @@
     margin-bottom: 6px;
 }
 
-.ad-vorschlag-label {
+.dl-vorschlag-label {
     font-size: .78rem;
     font-weight: 700;
     letter-spacing: .04em;
@@ -121,21 +132,21 @@
     color: var(--ink-3);
 }
 
-.ad-wert {
+.dl-wert {
     margin: 0 0 6px;
     font-size: 1.12rem;
     font-weight: 700;
     color: var(--ink);
 }
 
-.ad-begruendung {
+.dl-begruendung {
     margin: 0;
     font-size: .9rem;
     line-height: 1.55;
     color: var(--ink-2);
 }
 
-.ad-kein {
+.dl-kein {
     margin: 10px 0 12px;
     font-size: .92rem;
     color: var(--ink-2);
@@ -145,7 +156,7 @@
    "eindeutig belegt" heißt, der Beleg trägt allein; "Bestätigung nötig"
    heißt, er tut es nicht. Deshalb zwei klar getrennte Farben — und
    zusätzlich der Wortlaut, damit die Aussage nicht an der Farbe hängt. */
-.ad-badge {
+.dl-badge {
     display: inline-block;
     padding: 3px 9px;
     border-radius: 999px;
@@ -155,25 +166,25 @@
     color: var(--ink-2);
     background: var(--surface-1);
 }
-.ad-badge--eindeutig {
+.dl-badge--eindeutig {
     background: var(--tint-ok);
     border-color: var(--tint-ok);
     color: var(--tint-ok-ink);
 }
-.ad-badge--mehrdeutig {
+.dl-badge--mehrdeutig {
     background: var(--tint-warn);
     border-color: var(--tint-warn);
     color: var(--tint-warn-ink);
 }
 
 /* ── Knöpfe ──────────────────────────────────────────────────────── */
-.ad-aktionen {
+.dl-aktionen {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.ad-btn {
+.dl-btn {
     display: inline-flex;
     align-items: center;
     min-height: 44px;               /* tippbar */
@@ -186,35 +197,35 @@
     font-weight: 600;
     text-decoration: none;
 }
-.ad-btn:hover { border-color: var(--ink-3); color: var(--ink); }
-.ad-btn--haupt {
+.dl-btn:hover { border-color: var(--ink-3); color: var(--ink); }
+.dl-btn--haupt {
     background: var(--ink);
     border-color: var(--ink);
     color: var(--surface-1);
 }
-.ad-btn--haupt:hover { color: var(--surface-1); opacity: .9; }
+.dl-btn--haupt:hover { color: var(--surface-1); opacity: .9; }
 
-.ad-sammel { margin: 16px 0 0; }
+.dl-sammel { margin: 16px 0 0; }
 
 /* ── Fuß ─────────────────────────────────────────────────────────── */
-.ad-fuss {
+.dl-fuss {
     margin: var(--s-8) 0 0;
     padding-top: var(--s-4);
     border-top: 1px solid var(--line);
 }
-.ad-fuss h3 {
+.dl-fuss h3 {
     margin: 0 0 6px;
     font-size: .98rem;
     font-weight: 700;
     color: var(--ink);
 }
-.ad-fuss p {
+.dl-fuss p {
     margin: 0 0 8px;
     font-size: .92rem;
     line-height: 1.55;
     color: var(--ink-2);
 }
-.ad-stand {
+.dl-stand {
     margin: 0;
     font-size: .82rem;
     color: var(--ink-3);

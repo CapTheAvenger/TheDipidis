@@ -1825,7 +1825,7 @@
      * und das Bild entsteht trotzdem. */
     function shareMetaCallPost(spec) {
         if (!spec || !Array.isArray(spec.decks) || !spec.decks.length) {
-            toast(L('Keine Daten fuer das Bild', 'No data for the image'), 'error');
+            toast(L('Keine Daten für das Bild', 'No data for the image'), 'error');
             return Promise.resolve(false);
         }
         /* Kicker = immer das aktuelle Meta, Titel = worum es geht.
@@ -2017,7 +2017,7 @@
      * halb leeres Bild wortlos anzubieten. */
     function shareStaplesPost(spec) {
         if (!spec || !Array.isArray(spec.karten) || !spec.karten.length) {
-            toast(L('Keine Daten fuer das Bild', 'No data for the image'), 'error');
+            toast(L('Keine Daten für das Bild', 'No data for the image'), 'error');
             return Promise.resolve(false);
         }
         var facts = spaceFacts(activeSpace()) || {};

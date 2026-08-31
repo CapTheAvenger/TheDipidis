@@ -1928,7 +1928,7 @@
                 const el = document.getElementById(id);
                 if (el) el.classList.add('d-none');
             });
-            renderNoDeckSelectedState('currentMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
+            renderNoDeckSelectedState('currentMetaDeckGrid', 'Bitte wähle ein Deck aus dem Dropdown, um die Karten zu laden');
             resetDeckOverviewCounts('currentMetaCardCount', 'currentMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
             // Beide Behaelter sind jetzt versteckt; die naechste Anzeige
             // faellt damit auf das Raster zurueck (siehe isTableViewActive

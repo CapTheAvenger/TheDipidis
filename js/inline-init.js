@@ -375,6 +375,15 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'methodik':              'quellen',
         'method':                'quellen',
         'impressum':             'quellen',
+        // Tieflinks in einen einzelnen Abschnitt. Ohne Eintrag hier
+        // steigt applyHash() wortlos aus, und der Verweis fuehrt
+        // nirgendwohin — derselbe Fehler wie frueher bei #side-quest.
+        'quellen-quellen':       'quellen',
+        'quellen-begriffe':      'quellen',
+        'quellen-zuverlaessig':  'quellen',
+        'quellen-trennung':      'quellen',
+        'quellen-stand':         'quellen',
+        'quellen-rechtliches':   'quellen',
         'how-to-use':            'tutorial',
         'howto':                 'tutorial',
         'help':                  'tutorial',
@@ -557,6 +566,27 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         const profileSub = PROFILE_SUBTAB_FOR_HASH[rawTab];
         if (tabId === 'profile' && profileSub && typeof window.switchProfileTab === 'function') {
             try { window.switchProfileTab(profileSub); } catch (_e) { /* tolerate */ }
+        }
+
+        /* Quellen & Methodik: ein Anker klappt seinen Abschnitt auf.
+         *
+         * BEFUND (Agentenrunde 31.08.2026): js/app-quellen.js hat dafuer
+         * seit dem Umzug der Erklaerungen eine Funktion `open(id)` — mit
+         * einem Kommentar, der genau diesen Zweck beschreibt. Sie hatte
+         * keinen einzigen Aufrufer. Ein Verweis wie #quellen-begriffe
+         * haette die Seite geoeffnet und sonst nichts getan: der
+         * Abschnitt bleibt zu, es wird nicht gescrollt, und niemand
+         * merkt, dass der Link nicht ankam.
+         *
+         * Erlaubt sind nur die Abschnitts-Kennungen, die es gibt — ein
+         * unbekannter Anker soll die Seite oeffnen und in Ruhe lassen,
+         * nicht ins Leere scrollen.
+         */
+        if (tabId === 'quellen' && window.Quellen && typeof window.Quellen.open === 'function') {
+            const ABSCHNITTE = { quellen: 1, begriffe: 1, zuverlaessig: 1,
+                                 trennung: 1, stand: 1, rechtliches: 1 };
+            const teil = rawTab.indexOf('quellen-') === 0 ? rawTab.slice(8) : '';
+            try { window.Quellen.open(ABSCHNITTE[teil] ? teil : ''); } catch (_e) { /* tolerate */ }
         }
 
         // focusCard=<set>|<number> deep-link (driven by the Telegram

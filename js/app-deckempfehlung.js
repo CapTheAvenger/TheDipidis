@@ -135,8 +135,13 @@
         /* Der wichtigste Satz der ganzen Karte. Wer ihn nicht liest, haelt eine
            Empfehlung fuer eine Zusage. */
         if (!v || !v.turniere || typeof v.empfehlung_mittel !== 'number') return '';
-        var scheitert = Math.round((100 - v.empfehlung_mittel) / 100 * 10) / 10;
-        if (!isFinite(scheitert)) return '';
+        // Frueher stand hier ein gerundeter Zwischenwert `scheitert`, der
+        // nirgends benutzt wurde — die Anzeige unten rechnet aus dem
+        // Rohwert. Ein toter, halbgerundeter Wert neben einer Anzeige ist
+        // genau das Konstrukt, das beim naechsten Umbau versehentlich
+        // scharfgeschaltet und dann doppelt gerundet wird. Geblieben ist
+        // die Pruefung, die er eigentlich leistete.
+        if (!isFinite(Number(v.empfehlung_mittel))) return '';
         // Drei Saetze waren zwei zu viel. Die Aussage ist eine: auch
         // das beste Deck reicht meistens nicht. Wer wissen will, warum
         // das am Format liegt und nicht an der Rechnung, findet es unter

@@ -58,7 +58,7 @@
             kurzDe: 'Matchpunkte',
             kurzEn: 'Match points',
             langDe: 'Matchpunkte: ein Sieg zaehlt 3, ein Unentschieden 1, '
-                  + 'eine Niederlage 0 — das ist, was ueber die Platzierung entscheidet. '
+                  + 'eine Niederlage 0 — das ist, was über die Platzierung entscheidet. '
                   + 'Bei Unentschieden liegt der Gleichstand deshalb unter 50 %.',
             langEn: 'Match points: a win counts 3, a tie 1, a loss 0 — this is what '
                   + 'decides standings. With ties present, an even record therefore '

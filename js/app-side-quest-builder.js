@@ -74,6 +74,7 @@
             setzen: '✓ Team setzen',
             setzenHint: 'Übernimmt die Auswahl und baut aus der Nutzungsanalyse für jedes Pokémon einen Vorschlag: Fähigkeit, Item, Wesen, vier Attacken und Statuswertpunkte. Alles danach änderbar.',
             zurueckZurAuswahl: '← zurück zur Auswahl',
+            schliessen: 'Schließen',
             bauTitel: 'Dein Team',
             bearbeiten: 'Bearbeiten',
             namePh: 'Teamname (optional)',
@@ -118,6 +119,7 @@
             setzen: '✓ Set team',
             setzenHint: 'Takes your picks and builds a suggestion for each Pokémon from the usage analysis: ability, item, nature, four moves and stat points. Everything stays editable.',
             zurueckZurAuswahl: '← back to picking',
+            schliessen: 'Close',
             bauTitel: 'Your team',
             bearbeiten: 'Edit',
             namePh: 'Team name (optional)',
@@ -584,7 +586,7 @@
             <div class="sqb-modal-box">
                 <div class="sqb-modal-head">
                     <h3>${escapeHtml(l.modalTitel(displayName(slug)))}</h3>
-                    <button type="button" class="sqb-modal-x" aria-label="×">×</button>
+                    <button type="button" class="sqb-modal-x" aria-label="${escapeHtml(l.schliessen)}">×</button>
                 </div>
                 ${leer ? `<p class="sqb-warn">${escapeHtml(l.keineDaten)}</p>` : ''}
                 <div class="sqb-modal-body">

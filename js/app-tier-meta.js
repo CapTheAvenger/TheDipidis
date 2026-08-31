@@ -1748,7 +1748,7 @@
                         // Feld-Durchschnitt; nur der Faktor schweigt.
                         if (!(r.antritte >= CONV_MIN_N)) {
                             return `<span class="cm-rang-wert" title="${escapeHtml(deR
-                                ? 'Unter ' + CONV_MIN_N + ' gewichteten Antritten — zu wenig fuer eine Schaetzung'
+                                ? 'Unter ' + CONV_MIN_N + ' gewichteten Antritten — zu wenig für eine Schätzung'
                                 : 'Fewer than ' + CONV_MIN_N + ' weighted entries — too little for an estimate')}">–</span>`;
                         }
                         const einsNK = (v) => v.toLocaleString(deR ? 'de-DE' : 'en-US',

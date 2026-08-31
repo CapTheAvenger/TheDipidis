@@ -182,6 +182,12 @@
         hisuian: 'hisui', alolan: 'alola', galarian: 'galar', paldean: 'paldea',
     };
 
+    /* Namen, deren Bildadresse sich nicht aus der Regel ergibt. Geprueft
+     * am 31.08.2026 gegen die echte Bildquelle, nicht geraten. */
+    const _SPRITE_SONDERFALL = {
+        'paldean tauros (combat breed)': 'tauros-paldea',
+    };
+
     function spriteSlug(en) {
         // Five names carry punctuation the URL cannot: "Mr. Rime",
         // "Rotom (Heat)", "Lycanroc (Dusk)", "Kommo-o". Dots and brackets
@@ -202,7 +208,20 @@
             return rest.join('-').toLowerCase() + '-mega' + variant;
         }
         if (_REGION_SUFFIX[first]) {
-            return parts.slice(1).join('-').toLowerCase() + '-' + _REGION_SUFFIX[first];
+            const rest = parts.slice(1).map((w) => w.toLowerCase());
+            const kern = rest.shift();
+            /* "Breed" / "Form" ist bei Limitless kein Teil des Namens —
+             * "Paldean Tauros (Blaze Breed)" liegt dort als
+             * tauros-paldea-blaze. Am 31.08.2026 alle Schreibweisen im
+             * Browser durchprobiert: tauros-paldea, tauros-paldea-blaze
+             * und tauros-paldea-aqua laden, tauros-paldea-combat nicht.
+             * Die Gefechtvariante IST dort die Grundschreibweise der
+             * paldeanischen Form — sie steht in _SPRITE_SONDERFALL. */
+            const variante = rest.filter((w) => !/^(breed|breeds|form|forme)$/.test(w));
+            const sonder = _SPRITE_SONDERFALL[String(en).toLowerCase().trim()];
+            if (sonder) return sonder;
+            return kern + '-' + _REGION_SUFFIX[first]
+                 + (variante.length ? '-' + variante.join('-') : '');
         }
         return parts.join('-').toLowerCase();
     }

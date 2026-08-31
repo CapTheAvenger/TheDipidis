@@ -1,0 +1,2348 @@
+{
+ "_meta": {
+  "zweck": "Pokémon-Champions-Icons, gespiegelt nach images/champions/. Eine Zeile je Pokédex-Eintrag, mit der Adresse, aus der die Datei stammt.",
+  "quelle": "https://www.pokewiki.de/Liste_der_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions",
+  "rechte": "Die Icons sind Spiel-Screenshots. Rechteinhaber: The Pokémon Company / Nintendo / GAME FREAK. PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG; die dortige CC-BY-SA-Lizenz gilt nur fuer den Wiki-Text, nicht fuer diese Bilder.",
+  "erzeuger": "scripts/build_champions_sprites.py",
+  "anzahl": 292,
+  "bytes": 4282093
+ },
+ "sprites": {
+  "Mega Dragonite": {
+   "datei": "images/champions/mega-dragonite.png",
+   "formschluessel": "149m1",
+   "quelle": "https://www.pokewiki.de/images/7/72/Pok%C3%A9mon-Icon_149m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18447
+  },
+  "Mega Garchomp": {
+   "datei": "images/champions/mega-garchomp.png",
+   "formschluessel": "445m1",
+   "quelle": "https://www.pokewiki.de/images/e/e8/Pok%C3%A9mon-Icon_445m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19548
+  },
+  "Mega Metagross": {
+   "datei": "images/champions/mega-metagross.png",
+   "formschluessel": "376m1",
+   "quelle": "https://www.pokewiki.de/images/f/fb/Pok%C3%A9mon-Icon_376m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 20151
+  },
+  "Mega Tyranitar": {
+   "datei": "images/champions/mega-tyranitar.png",
+   "formschluessel": "248m1",
+   "quelle": "https://www.pokewiki.de/images/5/56/Pok%C3%A9mon-Icon_248m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18019
+  },
+  "Mega Floette": {
+   "datei": "images/champions/mega-floette.png",
+   "formschluessel": "670m1",
+   "quelle": "https://www.pokewiki.de/images/0/01/Pok%C3%A9mon-Icon_670m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11181
+  },
+  "Mega Gyarados": {
+   "datei": "images/champions/mega-gyarados.png",
+   "formschluessel": "130m1",
+   "quelle": "https://www.pokewiki.de/images/6/68/Pok%C3%A9mon-Icon_130m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16015
+  },
+  "Mega Swampert": {
+   "datei": "images/champions/mega-swampert.png",
+   "formschluessel": "260m1",
+   "quelle": "https://www.pokewiki.de/images/d/d2/Pok%C3%A9mon-Icon_260m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15267
+  },
+  "Mega Charizard X": {
+   "datei": "images/champions/mega-charizard-x.png",
+   "formschluessel": "006m1",
+   "quelle": "https://www.pokewiki.de/images/d/dc/Pok%C3%A9mon-Icon_006m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15456
+  },
+  "Mega Charizard Y": {
+   "datei": "images/champions/mega-charizard-y.png",
+   "formschluessel": "006m2",
+   "quelle": "https://www.pokewiki.de/images/5/53/Pok%C3%A9mon-Icon_006m2_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17034
+  },
+  "Mega Delphox": {
+   "datei": "images/champions/mega-delphox.png",
+   "formschluessel": "655m1",
+   "quelle": "https://www.pokewiki.de/images/1/11/Pok%C3%A9mon-Icon_655m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 20482
+  },
+  "Mega Aggron": {
+   "datei": "images/champions/mega-aggron.png",
+   "formschluessel": "306m1",
+   "quelle": "https://www.pokewiki.de/images/1/1d/Pok%C3%A9mon-Icon_306m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18762
+  },
+  "Mega Blastoise": {
+   "datei": "images/champions/mega-blastoise.png",
+   "formschluessel": "009m1",
+   "quelle": "https://www.pokewiki.de/images/f/f1/Pok%C3%A9mon-Icon_009m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16965
+  },
+  "Mega Blaziken": {
+   "datei": "images/champions/mega-blaziken.png",
+   "formschluessel": "257m1",
+   "quelle": "https://www.pokewiki.de/images/9/98/Pok%C3%A9mon-Icon_257m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16481
+  },
+  "Mega Chesnaught": {
+   "datei": "images/champions/mega-chesnaught.png",
+   "formschluessel": "652m1",
+   "quelle": "https://www.pokewiki.de/images/8/84/Pok%C3%A9mon-Icon_652m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 21249
+  },
+  "Mega Feraligatr": {
+   "datei": "images/champions/mega-feraligatr.png",
+   "formschluessel": "160m1",
+   "quelle": "https://www.pokewiki.de/images/6/61/Pok%C3%A9mon-Icon_160m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15333
+  },
+  "Mega Greninja": {
+   "datei": "images/champions/mega-greninja.png",
+   "formschluessel": "658m1",
+   "quelle": "https://www.pokewiki.de/images/5/5e/Pok%C3%A9mon-Icon_658m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12213
+  },
+  "Mega Sceptile": {
+   "datei": "images/champions/mega-sceptile.png",
+   "formschluessel": "254m1",
+   "quelle": "https://www.pokewiki.de/images/8/8b/Pok%C3%A9mon-Icon_254m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13529
+  },
+  "Mega Emboar": {
+   "datei": "images/champions/mega-emboar.png",
+   "formschluessel": "500m1",
+   "quelle": "https://www.pokewiki.de/images/5/59/Pok%C3%A9mon-Icon_500m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18202
+  },
+  "Mega Glimmora": {
+   "datei": "images/champions/mega-glimmora.png",
+   "formschluessel": "970m1",
+   "quelle": "https://www.pokewiki.de/images/b/b5/Pok%C3%A9mon-Icon_970m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19553
+  },
+  "Mega Lucario": {
+   "datei": "images/champions/mega-lucario.png",
+   "formschluessel": "448m1",
+   "quelle": "https://www.pokewiki.de/images/7/7a/Pok%C3%A9mon-Icon_448m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13253
+  },
+  "Mega Meganium": {
+   "datei": "images/champions/mega-meganium.png",
+   "formschluessel": "154m1",
+   "quelle": "https://www.pokewiki.de/images/f/ff/Pok%C3%A9mon-Icon_154m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18218
+  },
+  "Mega Venusaur": {
+   "datei": "images/champions/mega-venusaur.png",
+   "formschluessel": "003m1",
+   "quelle": "https://www.pokewiki.de/images/6/63/Pok%C3%A9mon-Icon_003m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18190
+  },
+  "Mega Chandelure": {
+   "datei": "images/champions/mega-chandelure.png",
+   "formschluessel": "609m1",
+   "quelle": "https://www.pokewiki.de/images/0/05/Pok%C3%A9mon-Icon_609m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16793
+  },
+  "Mega Starmie": {
+   "datei": "images/champions/mega-starmie.png",
+   "formschluessel": "121m1",
+   "quelle": "https://www.pokewiki.de/images/0/0f/Pok%C3%A9mon-Icon_121m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16191
+  },
+  "Mega Gallade": {
+   "datei": "images/champions/mega-gallade.png",
+   "formschluessel": "475m1",
+   "quelle": "https://www.pokewiki.de/images/3/39/Pok%C3%A9mon-Icon_475m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14446
+  },
+  "Mega Gardevoir": {
+   "datei": "images/champions/mega-gardevoir.png",
+   "formschluessel": "282m1",
+   "quelle": "https://www.pokewiki.de/images/7/77/Pok%C3%A9mon-Icon_282m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12174
+  },
+  "Mega Aerodactyl": {
+   "datei": "images/champions/mega-aerodactyl.png",
+   "formschluessel": "142m1",
+   "quelle": "https://www.pokewiki.de/images/c/c8/Pok%C3%A9mon-Icon_142m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12776
+  },
+  "Mega Eelektross": {
+   "datei": "images/champions/mega-eelektross.png",
+   "formschluessel": "604m1",
+   "quelle": "https://www.pokewiki.de/images/a/a8/Pok%C3%A9mon-Icon_604m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17363
+  },
+  "Mega Ampharos": {
+   "datei": "images/champions/mega-ampharos.png",
+   "formschluessel": "181m1",
+   "quelle": "https://www.pokewiki.de/images/9/93/Pok%C3%A9mon-Icon_181m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12568
+  },
+  "Mega Steelix": {
+   "datei": "images/champions/mega-steelix.png",
+   "formschluessel": "208m1",
+   "quelle": "https://www.pokewiki.de/images/1/12/Pok%C3%A9mon-Icon_208m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 21085
+  },
+  "Mega Excadrill": {
+   "datei": "images/champions/mega-excadrill.png",
+   "formschluessel": "530m1",
+   "quelle": "https://www.pokewiki.de/images/1/1e/Pok%C3%A9mon-Icon_530m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14779
+  },
+  "Mega Pyroar": {
+   "datei": "images/champions/mega-pyroar.png",
+   "formschluessel": "668m1",
+   "quelle": "https://www.pokewiki.de/images/7/71/Pok%C3%A9mon-Icon_668m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16761
+  },
+  "Archaludon": {
+   "datei": "images/champions/archaludon.png",
+   "formschluessel": "1018",
+   "quelle": "https://www.pokewiki.de/images/5/5d/Pok%C3%A9mon-Icon_1018_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18742
+  },
+  "Dragapult": {
+   "datei": "images/champions/dragapult.png",
+   "formschluessel": "887",
+   "quelle": "https://www.pokewiki.de/images/c/ca/Pok%C3%A9mon-Icon_887_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14999
+  },
+  "Dragonite": {
+   "datei": "images/champions/dragonite.png",
+   "formschluessel": "149",
+   "quelle": "https://www.pokewiki.de/images/7/7c/Pok%C3%A9mon-Icon_149_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17368
+  },
+  "Garchomp": {
+   "datei": "images/champions/garchomp.png",
+   "formschluessel": "445",
+   "quelle": "https://www.pokewiki.de/images/5/5d/Pok%C3%A9mon-Icon_445_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18235
+  },
+  "Goodra": {
+   "datei": "images/champions/goodra.png",
+   "formschluessel": "706",
+   "quelle": "https://www.pokewiki.de/images/0/08/Pok%C3%A9mon-Icon_706_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12230
+  },
+  "Hisuian Goodra": {
+   "datei": "images/champions/hisuian-goodra.png",
+   "formschluessel": "706a",
+   "quelle": "https://www.pokewiki.de/images/a/ae/Pok%C3%A9mon-Icon_706a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12161
+  },
+  "Hydreigon": {
+   "datei": "images/champions/hydreigon.png",
+   "formschluessel": "635",
+   "quelle": "https://www.pokewiki.de/images/a/af/Pok%C3%A9mon-Icon_635_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15928
+  },
+  "Kommo-o": {
+   "datei": "images/champions/kommo-o.png",
+   "formschluessel": "784",
+   "quelle": "https://www.pokewiki.de/images/2/2a/Pok%C3%A9mon-Icon_784_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19815
+  },
+  "Mega Alakazam": {
+   "datei": "images/champions/mega-alakazam.png",
+   "formschluessel": "065m1",
+   "quelle": "https://www.pokewiki.de/images/8/8a/Pok%C3%A9mon-Icon_065m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18138
+  },
+  "Mega Barbaracle": {
+   "datei": "images/champions/mega-barbaracle.png",
+   "formschluessel": "689m1",
+   "quelle": "https://www.pokewiki.de/images/6/6e/Pok%C3%A9mon-Icon_689m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19435
+  },
+  "Mega Gengar": {
+   "datei": "images/champions/mega-gengar.png",
+   "formschluessel": "094m1",
+   "quelle": "https://www.pokewiki.de/images/7/7c/Pok%C3%A9mon-Icon_094m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15063
+  },
+  "Mega Hawlucha": {
+   "datei": "images/champions/mega-hawlucha.png",
+   "formschluessel": "701m1",
+   "quelle": "https://www.pokewiki.de/images/7/7a/Pok%C3%A9mon-Icon_701m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16567
+  },
+  "Mega Heracross": {
+   "datei": "images/champions/mega-heracross.png",
+   "formschluessel": "214m1",
+   "quelle": "https://www.pokewiki.de/images/0/00/Pok%C3%A9mon-Icon_214m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14270
+  },
+  "Mega Houndoom": {
+   "datei": "images/champions/mega-houndoom.png",
+   "formschluessel": "229m1",
+   "quelle": "https://www.pokewiki.de/images/1/19/Pok%C3%A9mon-Icon_229m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12955
+  },
+  "Mega Pinsir": {
+   "datei": "images/champions/mega-pinsir.png",
+   "formschluessel": "127m1",
+   "quelle": "https://www.pokewiki.de/images/6/6f/Pok%C3%A9mon-Icon_127m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17349
+  },
+  "Mega Scizor": {
+   "datei": "images/champions/mega-scizor.png",
+   "formschluessel": "212m1",
+   "quelle": "https://www.pokewiki.de/images/6/67/Pok%C3%A9mon-Icon_212m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15460
+  },
+  "Metagross": {
+   "datei": "images/champions/metagross.png",
+   "formschluessel": "376",
+   "quelle": "https://www.pokewiki.de/images/1/15/Pok%C3%A9mon-Icon_376_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15252
+  },
+  "Tyranitar": {
+   "datei": "images/champions/tyranitar.png",
+   "formschluessel": "248",
+   "quelle": "https://www.pokewiki.de/images/e/e4/Pok%C3%A9mon-Icon_248_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17841
+  },
+  "Mega Abomasnow": {
+   "datei": "images/champions/mega-abomasnow.png",
+   "formschluessel": "460m1",
+   "quelle": "https://www.pokewiki.de/images/8/8e/Pok%C3%A9mon-Icon_460m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18716
+  },
+  "Mega Dragalge": {
+   "datei": "images/champions/mega-dragalge.png",
+   "formschluessel": "691m1",
+   "quelle": "https://www.pokewiki.de/images/e/eb/Pok%C3%A9mon-Icon_691m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18246
+  },
+  "Mega Altaria": {
+   "datei": "images/champions/mega-altaria.png",
+   "formschluessel": "334m1",
+   "quelle": "https://www.pokewiki.de/images/8/81/Pok%C3%A9mon-Icon_334m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14781
+  },
+  "Mega Kangaskhan": {
+   "datei": "images/champions/mega-kangaskhan.png",
+   "formschluessel": "115m1",
+   "quelle": "https://www.pokewiki.de/images/2/20/Pok%C3%A9mon-Icon_115m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18563
+  },
+  "Mega Slowbro": {
+   "datei": "images/champions/mega-slowbro.png",
+   "formschluessel": "080m1",
+   "quelle": "https://www.pokewiki.de/images/b/be/Pok%C3%A9mon-Icon_080m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14921
+  },
+  "Mega Victreebel": {
+   "datei": "images/champions/mega-victreebel.png",
+   "formschluessel": "071m1",
+   "quelle": "https://www.pokewiki.de/images/a/a4/Pok%C3%A9mon-Icon_071m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14586
+  },
+  "Mega Scrafty": {
+   "datei": "images/champions/mega-scrafty.png",
+   "formschluessel": "560m1",
+   "quelle": "https://www.pokewiki.de/images/2/23/Pok%C3%A9mon-Icon_560m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13846
+  },
+  "Mega Scovillain": {
+   "datei": "images/champions/mega-scovillain.png",
+   "formschluessel": "952m1",
+   "quelle": "https://www.pokewiki.de/images/d/d2/Pok%C3%A9mon-Icon_952m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19107
+  },
+  "Mega Drampa": {
+   "datei": "images/champions/mega-drampa.png",
+   "formschluessel": "780m1",
+   "quelle": "https://www.pokewiki.de/images/6/6d/Pok%C3%A9mon-Icon_780m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15244
+  },
+  "Mega Raichu X": {
+   "datei": "images/champions/mega-raichu-x.png",
+   "formschluessel": "026m1",
+   "quelle": "https://www.pokewiki.de/images/f/f9/Pok%C3%A9mon-Icon_026m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14370
+  },
+  "Mega Raichu Y": {
+   "datei": "images/champions/mega-raichu-y.png",
+   "formschluessel": "026m2",
+   "quelle": "https://www.pokewiki.de/images/7/72/Pok%C3%A9mon-Icon_026m2_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14592
+  },
+  "Mega Scolipede": {
+   "datei": "images/champions/mega-scolipede.png",
+   "formschluessel": "545m1",
+   "quelle": "https://www.pokewiki.de/images/2/24/Pok%C3%A9mon-Icon_545m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16337
+  },
+  "Mega Staraptor": {
+   "datei": "images/champions/mega-staraptor.png",
+   "formschluessel": "398m1",
+   "quelle": "https://www.pokewiki.de/images/c/c0/Pok%C3%A9mon-Icon_398m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19219
+  },
+  "Mega Clefable": {
+   "datei": "images/champions/mega-clefable.png",
+   "formschluessel": "036m1",
+   "quelle": "https://www.pokewiki.de/images/b/b2/Pok%C3%A9mon-Icon_036m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12074
+  },
+  "Mega Golurk": {
+   "datei": "images/champions/mega-golurk.png",
+   "formschluessel": "623m1",
+   "quelle": "https://www.pokewiki.de/images/9/99/Pok%C3%A9mon-Icon_623m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 23925
+  },
+  "Mega Malamar": {
+   "datei": "images/champions/mega-malamar.png",
+   "formschluessel": "687m1",
+   "quelle": "https://www.pokewiki.de/images/3/3c/Pok%C3%A9mon-Icon_687m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15621
+  },
+  "Mega Froslass": {
+   "datei": "images/champions/mega-froslass.png",
+   "formschluessel": "478m1",
+   "quelle": "https://www.pokewiki.de/images/e/e0/Pok%C3%A9mon-Icon_478m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16848
+  },
+  "Mega Glalie": {
+   "datei": "images/champions/mega-glalie.png",
+   "formschluessel": "362m1",
+   "quelle": "https://www.pokewiki.de/images/8/8e/Pok%C3%A9mon-Icon_362m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18964
+  },
+  "Mega Lopunny": {
+   "datei": "images/champions/mega-lopunny.png",
+   "formschluessel": "428m1",
+   "quelle": "https://www.pokewiki.de/images/2/2e/Pok%C3%A9mon-Icon_428m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17055
+  },
+  "Mega Pidgeot": {
+   "datei": "images/champions/mega-pidgeot.png",
+   "formschluessel": "018m1",
+   "quelle": "https://www.pokewiki.de/images/a/a9/Pok%C3%A9mon-Icon_018m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12599
+  },
+  "Mega Crabominable": {
+   "datei": "images/champions/mega-crabominable.png",
+   "formschluessel": "740m1",
+   "quelle": "https://www.pokewiki.de/images/f/f0/Pok%C3%A9mon-Icon_740m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 22553
+  },
+  "Mega Manectric": {
+   "datei": "images/champions/mega-manectric.png",
+   "formschluessel": "310m1",
+   "quelle": "https://www.pokewiki.de/images/f/fb/Pok%C3%A9mon-Icon_310m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16136
+  },
+  "Mega Falinks": {
+   "datei": "images/champions/mega-falinks.png",
+   "formschluessel": "870m1",
+   "quelle": "https://www.pokewiki.de/images/c/c3/Pok%C3%A9mon-Icon_870m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14747
+  },
+  "Mega Meowstic": {
+   "datei": "images/champions/mega-meowstic.png",
+   "formschluessel": "678m1",
+   "quelle": "https://www.pokewiki.de/images/0/06/Pok%C3%A9mon-Icon_678m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12166
+  },
+  "Mega Absol": {
+   "datei": "images/champions/mega-absol.png",
+   "formschluessel": "359m1",
+   "quelle": "https://www.pokewiki.de/images/b/bc/Pok%C3%A9mon-Icon_359m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16668
+  },
+  "Mega Skarmory": {
+   "datei": "images/champions/mega-skarmory.png",
+   "formschluessel": "227m1",
+   "quelle": "https://www.pokewiki.de/images/6/6c/Pok%C3%A9mon-Icon_227m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15291
+  },
+  "Mega Camerupt": {
+   "datei": "images/champions/mega-camerupt.png",
+   "formschluessel": "323m1",
+   "quelle": "https://www.pokewiki.de/images/7/7f/Pok%C3%A9mon-Icon_323m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17177
+  },
+  "Mega Sharpedo": {
+   "datei": "images/champions/mega-sharpedo.png",
+   "formschluessel": "319m1",
+   "quelle": "https://www.pokewiki.de/images/8/85/Pok%C3%A9mon-Icon_319m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12504
+  },
+  "Arcanine": {
+   "datei": "images/champions/arcanine.png",
+   "formschluessel": "059",
+   "quelle": "https://www.pokewiki.de/images/5/55/Pok%C3%A9mon-Icon_059_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17915
+  },
+  "Hisuian Arcanine": {
+   "datei": "images/champions/hisuian-arcanine.png",
+   "formschluessel": "059a",
+   "quelle": "https://www.pokewiki.de/images/c/c6/Pok%C3%A9mon-Icon_059a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16862
+  },
+  "Mega Banette": {
+   "datei": "images/champions/mega-banette.png",
+   "formschluessel": "354m1",
+   "quelle": "https://www.pokewiki.de/images/2/20/Pok%C3%A9mon-Icon_354m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14357
+  },
+  "Mega Chimecho": {
+   "datei": "images/champions/mega-chimecho.png",
+   "formschluessel": "358m1",
+   "quelle": "https://www.pokewiki.de/images/c/c8/Pok%C3%A9mon-Icon_358m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 25156
+  },
+  "Florges": {
+   "datei": "images/champions/florges.png",
+   "formschluessel": "671",
+   "quelle": "https://www.pokewiki.de/images/6/62/Pok%C3%A9mon-Icon_671_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15177
+  },
+  "Floette": {
+   "datei": "images/champions/floette.png",
+   "formschluessel": "670e",
+   "quelle": "https://www.pokewiki.de/images/1/15/Pok%C3%A9mon-Icon_670e_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9367
+  },
+  "Gholdengo": {
+   "datei": "images/champions/gholdengo.png",
+   "formschluessel": "1000",
+   "quelle": "https://www.pokewiki.de/images/c/cd/Pok%C3%A9mon-Icon_1000_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12844
+  },
+  "Kingambit": {
+   "datei": "images/champions/kingambit.png",
+   "formschluessel": "983",
+   "quelle": "https://www.pokewiki.de/images/c/c1/Pok%C3%A9mon-Icon_983_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15694
+  },
+  "Volcarona": {
+   "datei": "images/champions/volcarona.png",
+   "formschluessel": "637",
+   "quelle": "https://www.pokewiki.de/images/8/8d/Pok%C3%A9mon-Icon_637_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15280
+  },
+  "Mega Audino": {
+   "datei": "images/champions/mega-audino.png",
+   "formschluessel": "531m1",
+   "quelle": "https://www.pokewiki.de/images/e/e8/Pok%C3%A9mon-Icon_531m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15352
+  },
+  "Gyarados": {
+   "datei": "images/champions/gyarados.png",
+   "formschluessel": "130",
+   "quelle": "https://www.pokewiki.de/images/e/eb/Pok%C3%A9mon-Icon_130_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 20328
+  },
+  "Hydrapple": {
+   "datei": "images/champions/hydrapple.png",
+   "formschluessel": "1019",
+   "quelle": "https://www.pokewiki.de/images/5/56/Pok%C3%A9mon-Icon_1019_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10326
+  },
+  "Milotic": {
+   "datei": "images/champions/milotic.png",
+   "formschluessel": "350",
+   "quelle": "https://www.pokewiki.de/images/4/48/Pok%C3%A9mon-Icon_350_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18883
+  },
+  "Snorlax": {
+   "datei": "images/champions/snorlax.png",
+   "formschluessel": "143",
+   "quelle": "https://www.pokewiki.de/images/0/05/Pok%C3%A9mon-Icon_143_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12854
+  },
+  "Annihilape": {
+   "datei": "images/champions/annihilape.png",
+   "formschluessel": "979",
+   "quelle": "https://www.pokewiki.de/images/6/66/Pok%C3%A9mon-Icon_979_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17811
+  },
+  "Noivern": {
+   "datei": "images/champions/noivern.png",
+   "formschluessel": "715",
+   "quelle": "https://www.pokewiki.de/images/0/0a/Pok%C3%A9mon-Icon_715_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12620
+  },
+  "Rhyperior": {
+   "datei": "images/champions/rhyperior.png",
+   "formschluessel": "464",
+   "quelle": "https://www.pokewiki.de/images/8/87/Pok%C3%A9mon-Icon_464_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 20617
+  },
+  "Swampert": {
+   "datei": "images/champions/swampert.png",
+   "formschluessel": "260",
+   "quelle": "https://www.pokewiki.de/images/4/4a/Pok%C3%A9mon-Icon_260_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16030
+  },
+  "Vanilluxe": {
+   "datei": "images/champions/vanilluxe.png",
+   "formschluessel": "584",
+   "quelle": "https://www.pokewiki.de/images/1/1f/Pok%C3%A9mon-Icon_584_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16357
+  },
+  "Charizard": {
+   "datei": "images/champions/charizard.png",
+   "formschluessel": "006",
+   "quelle": "https://www.pokewiki.de/images/2/20/Pok%C3%A9mon-Icon_006_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15765
+  },
+  "Delphox": {
+   "datei": "images/champions/delphox.png",
+   "formschluessel": "655",
+   "quelle": "https://www.pokewiki.de/images/e/e0/Pok%C3%A9mon-Icon_655_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13378
+  },
+  "Hisuian Typhlosion": {
+   "datei": "images/champions/hisuian-typhlosion.png",
+   "formschluessel": "157a",
+   "quelle": "https://www.pokewiki.de/images/0/01/Pok%C3%A9mon-Icon_157a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13561
+  },
+  "Infernape": {
+   "datei": "images/champions/infernape.png",
+   "formschluessel": "392",
+   "quelle": "https://www.pokewiki.de/images/b/bf/Pok%C3%A9mon-Icon_392_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19023
+  },
+  "Typhlosion": {
+   "datei": "images/champions/typhlosion.png",
+   "formschluessel": "157",
+   "quelle": "https://www.pokewiki.de/images/4/4e/Pok%C3%A9mon-Icon_157_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15582
+  },
+  "Aggron": {
+   "datei": "images/champions/aggron.png",
+   "formschluessel": "306",
+   "quelle": "https://www.pokewiki.de/images/b/b4/Pok%C3%A9mon-Icon_306_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18101
+  },
+  "Basculegion": {
+   "datei": "images/champions/basculegion.png",
+   "formschluessel": "902",
+   "quelle": "https://www.pokewiki.de/images/f/ff/Pok%C3%A9mon-Icon_902_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17972
+  },
+  "Blastoise": {
+   "datei": "images/champions/blastoise.png",
+   "formschluessel": "009",
+   "quelle": "https://www.pokewiki.de/images/9/98/Pok%C3%A9mon-Icon_009_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17940
+  },
+  "Blaziken": {
+   "datei": "images/champions/blaziken.png",
+   "formschluessel": "257",
+   "quelle": "https://www.pokewiki.de/images/f/f2/Pok%C3%A9mon-Icon_257_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17312
+  },
+  "Chesnaught": {
+   "datei": "images/champions/chesnaught.png",
+   "formschluessel": "652",
+   "quelle": "https://www.pokewiki.de/images/9/99/Pok%C3%A9mon-Icon_652_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18899
+  },
+  "Decidueye": {
+   "datei": "images/champions/decidueye.png",
+   "formschluessel": "724",
+   "quelle": "https://www.pokewiki.de/images/8/87/Pok%C3%A9mon-Icon_724_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13594
+  },
+  "Empoleon": {
+   "datei": "images/champions/empoleon.png",
+   "formschluessel": "395",
+   "quelle": "https://www.pokewiki.de/images/0/06/Pok%C3%A9mon-Icon_395_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14161
+  },
+  "Feraligatr": {
+   "datei": "images/champions/feraligatr.png",
+   "formschluessel": "160",
+   "quelle": "https://www.pokewiki.de/images/b/b7/Pok%C3%A9mon-Icon_160_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18641
+  },
+  "Greninja": {
+   "datei": "images/champions/greninja.png",
+   "formschluessel": "658",
+   "quelle": "https://www.pokewiki.de/images/4/42/Pok%C3%A9mon-Icon_658_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13915
+  },
+  "Hisuian Decidueye": {
+   "datei": "images/champions/hisuian-decidueye.png",
+   "formschluessel": "724a",
+   "quelle": "https://www.pokewiki.de/images/6/66/Pok%C3%A9mon-Icon_724a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13730
+  },
+  "Incineroar": {
+   "datei": "images/champions/incineroar.png",
+   "formschluessel": "727",
+   "quelle": "https://www.pokewiki.de/images/f/fa/Pok%C3%A9mon-Icon_727_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14504
+  },
+  "Mamoswine": {
+   "datei": "images/champions/mamoswine.png",
+   "formschluessel": "473",
+   "quelle": "https://www.pokewiki.de/images/f/f7/Pok%C3%A9mon-Icon_473_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15837
+  },
+  "Meowscarada": {
+   "datei": "images/champions/meowscarada.png",
+   "formschluessel": "908",
+   "quelle": "https://www.pokewiki.de/images/7/75/Pok%C3%A9mon-Icon_908_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13730
+  },
+  "Primarina": {
+   "datei": "images/champions/primarina.png",
+   "formschluessel": "730",
+   "quelle": "https://www.pokewiki.de/images/b/b2/Pok%C3%A9mon-Icon_730_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15785
+  },
+  "Quaquaval": {
+   "datei": "images/champions/quaquaval.png",
+   "formschluessel": "914",
+   "quelle": "https://www.pokewiki.de/images/8/83/Pok%C3%A9mon-Icon_914_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15887
+  },
+  "Sceptile": {
+   "datei": "images/champions/sceptile.png",
+   "formschluessel": "254",
+   "quelle": "https://www.pokewiki.de/images/9/9a/Pok%C3%A9mon-Icon_254_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16450
+  },
+  "Skeledirge": {
+   "datei": "images/champions/skeledirge.png",
+   "formschluessel": "911",
+   "quelle": "https://www.pokewiki.de/images/8/8f/Pok%C3%A9mon-Icon_911_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15916
+  },
+  "Emboar": {
+   "datei": "images/champions/emboar.png",
+   "formschluessel": "500",
+   "quelle": "https://www.pokewiki.de/images/a/a5/Pok%C3%A9mon-Icon_500_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19974
+  },
+  "Hisuian Samurott": {
+   "datei": "images/champions/hisuian-samurott.png",
+   "formschluessel": "503a",
+   "quelle": "https://www.pokewiki.de/images/5/58/Pok%C3%A9mon-Icon_503a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17442
+  },
+  "Samurott": {
+   "datei": "images/champions/samurott.png",
+   "formschluessel": "503",
+   "quelle": "https://www.pokewiki.de/images/8/84/Pok%C3%A9mon-Icon_503_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16627
+  },
+  "Serperior": {
+   "datei": "images/champions/serperior.png",
+   "formschluessel": "497",
+   "quelle": "https://www.pokewiki.de/images/9/99/Pok%C3%A9mon-Icon_497_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15189
+  },
+  "Armarouge": {
+   "datei": "images/champions/armarouge.png",
+   "formschluessel": "936",
+   "quelle": "https://www.pokewiki.de/images/0/06/Pok%C3%A9mon-Icon_936_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11879
+  },
+  "Ceruledge": {
+   "datei": "images/champions/ceruledge.png",
+   "formschluessel": "937",
+   "quelle": "https://www.pokewiki.de/images/8/86/Pok%C3%A9mon-Icon_937_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12600
+  },
+  "Espeon": {
+   "datei": "images/champions/espeon.png",
+   "formschluessel": "196",
+   "quelle": "https://www.pokewiki.de/images/a/a9/Pok%C3%A9mon-Icon_196_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12180
+  },
+  "Flareon": {
+   "datei": "images/champions/flareon.png",
+   "formschluessel": "136",
+   "quelle": "https://www.pokewiki.de/images/9/9d/Pok%C3%A9mon-Icon_136_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13898
+  },
+  "Glaceon": {
+   "datei": "images/champions/glaceon.png",
+   "formschluessel": "471",
+   "quelle": "https://www.pokewiki.de/images/9/9c/Pok%C3%A9mon-Icon_471_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11984
+  },
+  "Glimmora": {
+   "datei": "images/champions/glimmora.png",
+   "formschluessel": "970",
+   "quelle": "https://www.pokewiki.de/images/8/80/Pok%C3%A9mon-Icon_970_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10868
+  },
+  "Hippowdon": {
+   "datei": "images/champions/hippowdon.png",
+   "formschluessel": "450",
+   "quelle": "https://www.pokewiki.de/images/f/f6/Pok%C3%A9mon-Icon_450_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13955
+  },
+  "Jolteon": {
+   "datei": "images/champions/jolteon.png",
+   "formschluessel": "135",
+   "quelle": "https://www.pokewiki.de/images/3/3a/Pok%C3%A9mon-Icon_135_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15379
+  },
+  "Leafeon": {
+   "datei": "images/champions/leafeon.png",
+   "formschluessel": "470",
+   "quelle": "https://www.pokewiki.de/images/b/ba/Pok%C3%A9mon-Icon_470_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14616
+  },
+  "Lucario": {
+   "datei": "images/champions/lucario.png",
+   "formschluessel": "448",
+   "quelle": "https://www.pokewiki.de/images/1/1e/Pok%C3%A9mon-Icon_448_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11176
+  },
+  "Meganium": {
+   "datei": "images/champions/meganium.png",
+   "formschluessel": "154",
+   "quelle": "https://www.pokewiki.de/images/6/61/Pok%C3%A9mon-Icon_154_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12435
+  },
+  "Sylveon": {
+   "datei": "images/champions/sylveon.png",
+   "formschluessel": "700",
+   "quelle": "https://www.pokewiki.de/images/3/3b/Pok%C3%A9mon-Icon_700_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11590
+  },
+  "Torterra": {
+   "datei": "images/champions/torterra.png",
+   "formschluessel": "389",
+   "quelle": "https://www.pokewiki.de/images/9/90/Pok%C3%A9mon-Icon_389_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17734
+  },
+  "Umbreon": {
+   "datei": "images/champions/umbreon.png",
+   "formschluessel": "197",
+   "quelle": "https://www.pokewiki.de/images/7/7d/Pok%C3%A9mon-Icon_197_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10685
+  },
+  "Vaporeon": {
+   "datei": "images/champions/vaporeon.png",
+   "formschluessel": "134",
+   "quelle": "https://www.pokewiki.de/images/a/aa/Pok%C3%A9mon-Icon_134_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11927
+  },
+  "Venusaur": {
+   "datei": "images/champions/venusaur.png",
+   "formschluessel": "003",
+   "quelle": "https://www.pokewiki.de/images/1/1d/Pok%C3%A9mon-Icon_003_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19549
+  },
+  "Wyrdeer": {
+   "datei": "images/champions/wyrdeer.png",
+   "formschluessel": "899",
+   "quelle": "https://www.pokewiki.de/images/a/a3/Pok%C3%A9mon-Icon_899_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12268
+  },
+  "Luxray": {
+   "datei": "images/champions/luxray.png",
+   "formschluessel": "405",
+   "quelle": "https://www.pokewiki.de/images/5/57/Pok%C3%A9mon-Icon_405_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12575
+  },
+  "Aurorus": {
+   "datei": "images/champions/aurorus.png",
+   "formschluessel": "699",
+   "quelle": "https://www.pokewiki.de/images/d/dc/Pok%C3%A9mon-Icon_699_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11034
+  },
+  "Tyrantrum": {
+   "datei": "images/champions/tyrantrum.png",
+   "formschluessel": "697",
+   "quelle": "https://www.pokewiki.de/images/2/2a/Pok%C3%A9mon-Icon_697_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 19117
+  },
+  "Chandelure": {
+   "datei": "images/champions/chandelure.png",
+   "formschluessel": "609",
+   "quelle": "https://www.pokewiki.de/images/7/77/Pok%C3%A9mon-Icon_609_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14718
+  },
+  "Farigiraf": {
+   "datei": "images/champions/farigiraf.png",
+   "formschluessel": "981",
+   "quelle": "https://www.pokewiki.de/images/4/49/Pok%C3%A9mon-Icon_981_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11062
+  },
+  "Mr. Rime": {
+   "datei": "images/champions/mr-rime.png",
+   "formschluessel": "866",
+   "quelle": "https://www.pokewiki.de/images/6/6c/Pok%C3%A9mon-Icon_866_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16927
+  },
+  "Rotom (Heat)": {
+   "datei": "images/champions/rotom-heat.png",
+   "formschluessel": "479a",
+   "quelle": "https://www.pokewiki.de/images/c/ca/Pok%C3%A9mon-Icon_479a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9846
+  },
+  "Rotom (Wash)": {
+   "datei": "images/champions/rotom-wash.png",
+   "formschluessel": "479b",
+   "quelle": "https://www.pokewiki.de/images/3/37/Pok%C3%A9mon-Icon_479b_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10066
+  },
+  "Starmie": {
+   "datei": "images/champions/starmie.png",
+   "formschluessel": "121",
+   "quelle": "https://www.pokewiki.de/images/e/e4/Pok%C3%A9mon-Icon_121_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16145
+  },
+  "Krookodile": {
+   "datei": "images/champions/krookodile.png",
+   "formschluessel": "553",
+   "quelle": "https://www.pokewiki.de/images/d/df/Pok%C3%A9mon-Icon_553_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17236
+  },
+  "Gallade": {
+   "datei": "images/champions/gallade.png",
+   "formschluessel": "475",
+   "quelle": "https://www.pokewiki.de/images/f/f0/Pok%C3%A9mon-Icon_475_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9449
+  },
+  "Gardevoir": {
+   "datei": "images/champions/gardevoir.png",
+   "formschluessel": "282",
+   "quelle": "https://www.pokewiki.de/images/e/ea/Pok%C3%A9mon-Icon_282_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11779
+  },
+  "Aerodactyl": {
+   "datei": "images/champions/aerodactyl.png",
+   "formschluessel": "142",
+   "quelle": "https://www.pokewiki.de/images/0/08/Pok%C3%A9mon-Icon_142_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14533
+  },
+  "Eelektross": {
+   "datei": "images/champions/eelektross.png",
+   "formschluessel": "604",
+   "quelle": "https://www.pokewiki.de/images/4/48/Pok%C3%A9mon-Icon_604_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17233
+  },
+  "Roserade": {
+   "datei": "images/champions/roserade.png",
+   "formschluessel": "407",
+   "quelle": "https://www.pokewiki.de/images/b/b4/Pok%C3%A9mon-Icon_407_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14119
+  },
+  "Avalugg": {
+   "datei": "images/champions/avalugg.png",
+   "formschluessel": "713",
+   "quelle": "https://www.pokewiki.de/images/f/f2/Pok%C3%A9mon-Icon_713_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16241
+  },
+  "Hisuian Avalugg": {
+   "datei": "images/champions/hisuian-avalugg.png",
+   "formschluessel": "713a",
+   "quelle": "https://www.pokewiki.de/images/c/c7/Pok%C3%A9mon-Icon_713a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13770
+  },
+  "Ampharos": {
+   "datei": "images/champions/ampharos.png",
+   "formschluessel": "181",
+   "quelle": "https://www.pokewiki.de/images/0/00/Pok%C3%A9mon-Icon_181_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12631
+  },
+  "Gliscor": {
+   "datei": "images/champions/gliscor.png",
+   "formschluessel": "472",
+   "quelle": "https://www.pokewiki.de/images/7/7f/Pok%C3%A9mon-Icon_472_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15812
+  },
+  "Grimmsnarl": {
+   "datei": "images/champions/grimmsnarl.png",
+   "formschluessel": "861",
+   "quelle": "https://www.pokewiki.de/images/c/c5/Pok%C3%A9mon-Icon_861_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16556
+  },
+  "Hatterene": {
+   "datei": "images/champions/hatterene.png",
+   "formschluessel": "858",
+   "quelle": "https://www.pokewiki.de/images/c/c5/Pok%C3%A9mon-Icon_858_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11331
+  },
+  "Hisuian Zoroark": {
+   "datei": "images/champions/hisuian-zoroark.png",
+   "formschluessel": "571a",
+   "quelle": "https://www.pokewiki.de/images/d/d7/Pok%C3%A9mon-Icon_571a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18376
+  },
+  "Mega Medicham": {
+   "datei": "images/champions/mega-medicham.png",
+   "formschluessel": "308m1",
+   "quelle": "https://www.pokewiki.de/images/a/ae/Pok%C3%A9mon-Icon_308m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15315
+  },
+  "Sandaconda": {
+   "datei": "images/champions/sandaconda.png",
+   "formschluessel": "844",
+   "quelle": "https://www.pokewiki.de/images/8/81/Pok%C3%A9mon-Icon_844_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14691
+  },
+  "Sneasler": {
+   "datei": "images/champions/sneasler.png",
+   "formschluessel": "903",
+   "quelle": "https://www.pokewiki.de/images/f/fb/Pok%C3%A9mon-Icon_903_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11497
+  },
+  "Steelix": {
+   "datei": "images/champions/steelix.png",
+   "formschluessel": "208",
+   "quelle": "https://www.pokewiki.de/images/1/17/Pok%C3%A9mon-Icon_208_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16955
+  },
+  "Tsareena": {
+   "datei": "images/champions/tsareena.png",
+   "formschluessel": "763",
+   "quelle": "https://www.pokewiki.de/images/6/67/Pok%C3%A9mon-Icon_763_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13560
+  },
+  "Weavile": {
+   "datei": "images/champions/weavile.png",
+   "formschluessel": "461",
+   "quelle": "https://www.pokewiki.de/images/b/b3/Pok%C3%A9mon-Icon_461_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15071
+  },
+  "Zoroark": {
+   "datei": "images/champions/zoroark.png",
+   "formschluessel": "571",
+   "quelle": "https://www.pokewiki.de/images/6/62/Pok%C3%A9mon-Icon_571_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15432
+  },
+  "Excadrill": {
+   "datei": "images/champions/excadrill.png",
+   "formschluessel": "530",
+   "quelle": "https://www.pokewiki.de/images/1/1a/Pok%C3%A9mon-Icon_530_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11253
+  },
+  "Polteageist": {
+   "datei": "images/champions/polteageist.png",
+   "formschluessel": "855",
+   "quelle": "https://www.pokewiki.de/images/5/55/Pok%C3%A9mon-Icon_855_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13057
+  },
+  "Sinistcha": {
+   "datei": "images/champions/sinistcha.png",
+   "formschluessel": "1013",
+   "quelle": "https://www.pokewiki.de/images/5/52/Pok%C3%A9mon-Icon_1013_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9823
+  },
+  "Pyroar": {
+   "datei": "images/champions/pyroar.png",
+   "formschluessel": "668",
+   "quelle": "https://www.pokewiki.de/images/3/3e/Pok%C3%A9mon-Icon_668_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15017
+  },
+  "Tinkaton": {
+   "datei": "images/champions/tinkaton.png",
+   "formschluessel": "959",
+   "quelle": "https://www.pokewiki.de/images/e/ed/Pok%C3%A9mon-Icon_959_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18860
+  },
+  "Alolan Ninetales": {
+   "datei": "images/champions/alolan-ninetales.png",
+   "formschluessel": "038a",
+   "quelle": "https://www.pokewiki.de/images/7/7f/Pok%C3%A9mon-Icon_038a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14600
+  },
+  "Beartic": {
+   "datei": "images/champions/beartic.png",
+   "formschluessel": "614",
+   "quelle": "https://www.pokewiki.de/images/d/db/Pok%C3%A9mon-Icon_614_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14709
+  },
+  "Conkeldurr": {
+   "datei": "images/champions/conkeldurr.png",
+   "formschluessel": "534",
+   "quelle": "https://www.pokewiki.de/images/1/1e/Pok%C3%A9mon-Icon_534_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15750
+  },
+  "Machamp": {
+   "datei": "images/champions/machamp.png",
+   "formschluessel": "068",
+   "quelle": "https://www.pokewiki.de/images/e/e5/Pok%C3%A9mon-Icon_068_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18130
+  },
+  "Ninetales": {
+   "datei": "images/champions/ninetales.png",
+   "formschluessel": "038",
+   "quelle": "https://www.pokewiki.de/images/8/8f/Pok%C3%A9mon-Icon_038_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18088
+  },
+  "Aegislash": {
+   "datei": "images/champions/aegislash.png",
+   "formschluessel": "681",
+   "quelle": "https://www.pokewiki.de/images/4/4b/Pok%C3%A9mon-Icon_681_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14631
+  },
+  "Alakazam": {
+   "datei": "images/champions/alakazam.png",
+   "formschluessel": "065",
+   "quelle": "https://www.pokewiki.de/images/3/3e/Pok%C3%A9mon-Icon_065_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 20462
+  },
+  "Clawitzer": {
+   "datei": "images/champions/clawitzer.png",
+   "formschluessel": "693",
+   "quelle": "https://www.pokewiki.de/images/9/99/Pok%C3%A9mon-Icon_693_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13327
+  },
+  "Garganacl": {
+   "datei": "images/champions/garganacl.png",
+   "formschluessel": "934",
+   "quelle": "https://www.pokewiki.de/images/0/0c/Pok%C3%A9mon-Icon_934_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15519
+  },
+  "Gengar": {
+   "datei": "images/champions/gengar.png",
+   "formschluessel": "094",
+   "quelle": "https://www.pokewiki.de/images/e/e7/Pok%C3%A9mon-Icon_094_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12726
+  },
+  "Hawlucha": {
+   "datei": "images/champions/hawlucha.png",
+   "formschluessel": "701",
+   "quelle": "https://www.pokewiki.de/images/d/d2/Pok%C3%A9mon-Icon_701_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11324
+  },
+  "Heracross": {
+   "datei": "images/champions/heracross.png",
+   "formschluessel": "214",
+   "quelle": "https://www.pokewiki.de/images/b/b6/Pok%C3%A9mon-Icon_214_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14286
+  },
+  "Houndoom": {
+   "datei": "images/champions/houndoom.png",
+   "formschluessel": "229",
+   "quelle": "https://www.pokewiki.de/images/5/5f/Pok%C3%A9mon-Icon_229_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13786
+  },
+  "Kleavor": {
+   "datei": "images/champions/kleavor.png",
+   "formschluessel": "900",
+   "quelle": "https://www.pokewiki.de/images/7/71/Pok%C3%A9mon-Icon_900_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13048
+  },
+  "Mudsdale": {
+   "datei": "images/champions/mudsdale.png",
+   "formschluessel": "750",
+   "quelle": "https://www.pokewiki.de/images/a/ad/Pok%C3%A9mon-Icon_750_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15427
+  },
+  "Pinsir": {
+   "datei": "images/champions/pinsir.png",
+   "formschluessel": "127",
+   "quelle": "https://www.pokewiki.de/images/7/73/Pok%C3%A9mon-Icon_127_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13394
+  },
+  "Politoed": {
+   "datei": "images/champions/politoed.png",
+   "formschluessel": "186",
+   "quelle": "https://www.pokewiki.de/images/5/5b/Pok%C3%A9mon-Icon_186_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13983
+  },
+  "Scizor": {
+   "datei": "images/champions/scizor.png",
+   "formschluessel": "212",
+   "quelle": "https://www.pokewiki.de/images/9/9b/Pok%C3%A9mon-Icon_212_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17159
+  },
+  "Talonflame": {
+   "datei": "images/champions/talonflame.png",
+   "formschluessel": "663",
+   "quelle": "https://www.pokewiki.de/images/5/5a/Pok%C3%A9mon-Icon_663_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13217
+  },
+  "Simipour": {
+   "datei": "images/champions/simipour.png",
+   "formschluessel": "516",
+   "quelle": "https://www.pokewiki.de/images/8/86/Pok%C3%A9mon-Icon_516_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15938
+  },
+  "Simisage": {
+   "datei": "images/champions/simisage.png",
+   "formschluessel": "512",
+   "quelle": "https://www.pokewiki.de/images/5/54/Pok%C3%A9mon-Icon_512_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13148
+  },
+  "Simisear": {
+   "datei": "images/champions/simisear.png",
+   "formschluessel": "514",
+   "quelle": "https://www.pokewiki.de/images/b/b6/Pok%C3%A9mon-Icon_514_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16182
+  },
+  "Alcremie": {
+   "datei": "images/champions/alcremie.png",
+   "formschluessel": "869",
+   "quelle": "https://www.pokewiki.de/images/8/82/Pok%C3%A9mon-Icon_869_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11035
+  },
+  "Bastiodon": {
+   "datei": "images/champions/bastiodon.png",
+   "formschluessel": "411",
+   "quelle": "https://www.pokewiki.de/images/b/be/Pok%C3%A9mon-Icon_411_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16684
+  },
+  "Bellibolt": {
+   "datei": "images/champions/bellibolt.png",
+   "formschluessel": "939",
+   "quelle": "https://www.pokewiki.de/images/9/99/Pok%C3%A9mon-Icon_939_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12480
+  },
+  "Corviknight": {
+   "datei": "images/champions/corviknight.png",
+   "formschluessel": "823",
+   "quelle": "https://www.pokewiki.de/images/5/5d/Pok%C3%A9mon-Icon_823_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13977
+  },
+  "Mega Beedrill": {
+   "datei": "images/champions/mega-beedrill.png",
+   "formschluessel": "015m1",
+   "quelle": "https://www.pokewiki.de/images/4/45/Pok%C3%A9mon-Icon_015m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18162
+  },
+  "Pangoro": {
+   "datei": "images/champions/pangoro.png",
+   "formschluessel": "675",
+   "quelle": "https://www.pokewiki.de/images/1/15/Pok%C3%A9mon-Icon_675_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16720
+  },
+  "Rampardos": {
+   "datei": "images/champions/rampardos.png",
+   "formschluessel": "409",
+   "quelle": "https://www.pokewiki.de/images/0/05/Pok%C3%A9mon-Icon_409_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12939
+  },
+  "Toxapex": {
+   "datei": "images/champions/toxapex.png",
+   "formschluessel": "748",
+   "quelle": "https://www.pokewiki.de/images/d/dc/Pok%C3%A9mon-Icon_748_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14585
+  },
+  "Abomasnow": {
+   "datei": "images/champions/abomasnow.png",
+   "formschluessel": "460",
+   "quelle": "https://www.pokewiki.de/images/b/b9/Pok%C3%A9mon-Icon_460_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14958
+  },
+  "Gourgeist": {
+   "datei": "images/champions/gourgeist.png",
+   "formschluessel": "711",
+   "quelle": "https://www.pokewiki.de/images/6/6b/Pok%C3%A9mon-Icon_711_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11726
+  },
+  "Altaria": {
+   "datei": "images/champions/altaria.png",
+   "formschluessel": "334",
+   "quelle": "https://www.pokewiki.de/images/c/cd/Pok%C3%A9mon-Icon_334_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11300
+  },
+  "Galarian Slowbro": {
+   "datei": "images/champions/galarian-slowbro.png",
+   "formschluessel": "080a",
+   "quelle": "https://www.pokewiki.de/images/a/aa/Pok%C3%A9mon-Icon_080a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15838
+  },
+  "Galarian Slowking": {
+   "datei": "images/champions/galarian-slowking.png",
+   "formschluessel": "199a",
+   "quelle": "https://www.pokewiki.de/images/f/f2/Pok%C3%A9mon-Icon_199a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12633
+  },
+  "Kangaskhan": {
+   "datei": "images/champions/kangaskhan.png",
+   "formschluessel": "115",
+   "quelle": "https://www.pokewiki.de/images/f/fa/Pok%C3%A9mon-Icon_115_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17702
+  },
+  "Oranguru": {
+   "datei": "images/champions/oranguru.png",
+   "formschluessel": "765",
+   "quelle": "https://www.pokewiki.de/images/7/72/Pok%C3%A9mon-Icon_765_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15648
+  },
+  "Paldean Tauros (Aqua Breed)": {
+   "datei": "images/champions/paldean-tauros-aqua-breed.png",
+   "formschluessel": "128c",
+   "quelle": "https://www.pokewiki.de/images/c/c8/Pok%C3%A9mon-Icon_128c_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11279
+  },
+  "Paldean Tauros (Blaze Breed)": {
+   "datei": "images/champions/paldean-tauros-blaze-breed.png",
+   "formschluessel": "128b",
+   "quelle": "https://www.pokewiki.de/images/a/a2/Pok%C3%A9mon-Icon_128b_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10221
+  },
+  "Paldean Tauros (Combat Breed)": {
+   "datei": "images/champions/paldean-tauros-combat-breed.png",
+   "formschluessel": "128a",
+   "quelle": "https://www.pokewiki.de/images/a/af/Pok%C3%A9mon-Icon_128a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10659
+  },
+  "Passimian": {
+   "datei": "images/champions/passimian.png",
+   "formschluessel": "766",
+   "quelle": "https://www.pokewiki.de/images/9/95/Pok%C3%A9mon-Icon_766_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15044
+  },
+  "Reuniclus": {
+   "datei": "images/champions/reuniclus.png",
+   "formschluessel": "579",
+   "quelle": "https://www.pokewiki.de/images/d/d4/Pok%C3%A9mon-Icon_579_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13176
+  },
+  "Slowbro": {
+   "datei": "images/champions/slowbro.png",
+   "formschluessel": "080",
+   "quelle": "https://www.pokewiki.de/images/5/53/Pok%C3%A9mon-Icon_080_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17201
+  },
+  "Slowking": {
+   "datei": "images/champions/slowking.png",
+   "formschluessel": "199",
+   "quelle": "https://www.pokewiki.de/images/2/22/Pok%C3%A9mon-Icon_199_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14953
+  },
+  "Tauros": {
+   "datei": "images/champions/tauros.png",
+   "formschluessel": "128",
+   "quelle": "https://www.pokewiki.de/images/0/08/Pok%C3%A9mon-Icon_128_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14010
+  },
+  "Toxicroak": {
+   "datei": "images/champions/toxicroak.png",
+   "formschluessel": "454",
+   "quelle": "https://www.pokewiki.de/images/8/85/Pok%C3%A9mon-Icon_454_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14889
+  },
+  "Victreebel": {
+   "datei": "images/champions/victreebel.png",
+   "formschluessel": "071",
+   "quelle": "https://www.pokewiki.de/images/6/60/Pok%C3%A9mon-Icon_071_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12900
+  },
+  "Vileplume": {
+   "datei": "images/champions/vileplume.png",
+   "formschluessel": "045",
+   "quelle": "https://www.pokewiki.de/images/f/f8/Pok%C3%A9mon-Icon_045_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11304
+  },
+  "Scrafty": {
+   "datei": "images/champions/scrafty.png",
+   "formschluessel": "560",
+   "quelle": "https://www.pokewiki.de/images/2/2f/Pok%C3%A9mon-Icon_560_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11512
+  },
+  "Lycanroc": {
+   "datei": "images/champions/lycanroc.png",
+   "formschluessel": "745",
+   "quelle": "https://www.pokewiki.de/images/6/64/Pok%C3%A9mon-Icon_745_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12842
+  },
+  "Lycanroc (Dusk)": {
+   "datei": "images/champions/lycanroc-dusk.png",
+   "formschluessel": "745b",
+   "quelle": "https://www.pokewiki.de/images/c/c7/Pok%C3%A9mon-Icon_745b_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12394
+  },
+  "Scovillain": {
+   "datei": "images/champions/scovillain.png",
+   "formschluessel": "952",
+   "quelle": "https://www.pokewiki.de/images/0/03/Pok%C3%A9mon-Icon_952_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14682
+  },
+  "Alolan Raichu": {
+   "datei": "images/champions/alolan-raichu.png",
+   "formschluessel": "026a",
+   "quelle": "https://www.pokewiki.de/images/d/d5/Pok%C3%A9mon-Icon_026a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15164
+  },
+  "Appletun": {
+   "datei": "images/champions/appletun.png",
+   "formschluessel": "842",
+   "quelle": "https://www.pokewiki.de/images/d/d4/Pok%C3%A9mon-Icon_842_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10733
+  },
+  "Drampa": {
+   "datei": "images/champions/drampa.png",
+   "formschluessel": "780",
+   "quelle": "https://www.pokewiki.de/images/3/34/Pok%C3%A9mon-Icon_780_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14823
+  },
+  "Flapple": {
+   "datei": "images/champions/flapple.png",
+   "formschluessel": "841",
+   "quelle": "https://www.pokewiki.de/images/0/0a/Pok%C3%A9mon-Icon_841_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10678
+  },
+  "Raichu": {
+   "datei": "images/champions/raichu.png",
+   "formschluessel": "026",
+   "quelle": "https://www.pokewiki.de/images/a/a8/Pok%C3%A9mon-Icon_026_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14296
+  },
+  "Spiritomb": {
+   "datei": "images/champions/spiritomb.png",
+   "formschluessel": "442",
+   "quelle": "https://www.pokewiki.de/images/4/4a/Pok%C3%A9mon-Icon_442_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14296
+  },
+  "Staraptor": {
+   "datei": "images/champions/staraptor.png",
+   "formschluessel": "398",
+   "quelle": "https://www.pokewiki.de/images/b/bb/Pok%C3%A9mon-Icon_398_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14310
+  },
+  "Toucannon": {
+   "datei": "images/champions/toucannon.png",
+   "formschluessel": "733",
+   "quelle": "https://www.pokewiki.de/images/1/16/Pok%C3%A9mon-Icon_733_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11819
+  },
+  "Clefable": {
+   "datei": "images/champions/clefable.png",
+   "formschluessel": "036",
+   "quelle": "https://www.pokewiki.de/images/4/49/Pok%C3%A9mon-Icon_036_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13090
+  },
+  "Cofagrigus": {
+   "datei": "images/champions/cofagrigus.png",
+   "formschluessel": "563",
+   "quelle": "https://www.pokewiki.de/images/1/1b/Pok%C3%A9mon-Icon_563_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15179
+  },
+  "Golurk": {
+   "datei": "images/champions/golurk.png",
+   "formschluessel": "623",
+   "quelle": "https://www.pokewiki.de/images/f/f1/Pok%C3%A9mon-Icon_623_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 21882
+  },
+  "Runerigus": {
+   "datei": "images/champions/runerigus.png",
+   "formschluessel": "867",
+   "quelle": "https://www.pokewiki.de/images/6/6f/Pok%C3%A9mon-Icon_867_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15700
+  },
+  "Espathra": {
+   "datei": "images/champions/espathra.png",
+   "formschluessel": "956",
+   "quelle": "https://www.pokewiki.de/images/3/38/Pok%C3%A9mon-Icon_956_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14917
+  },
+  "Heliolisk": {
+   "datei": "images/champions/heliolisk.png",
+   "formschluessel": "695",
+   "quelle": "https://www.pokewiki.de/images/9/93/Pok%C3%A9mon-Icon_695_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10031
+  },
+  "Froslass": {
+   "datei": "images/champions/froslass.png",
+   "formschluessel": "478",
+   "quelle": "https://www.pokewiki.de/images/2/26/Pok%C3%A9mon-Icon_478_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13138
+  },
+  "Glalie": {
+   "datei": "images/champions/glalie.png",
+   "formschluessel": "362",
+   "quelle": "https://www.pokewiki.de/images/0/0a/Pok%C3%A9mon-Icon_362_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16324
+  },
+  "Lopunny": {
+   "datei": "images/champions/lopunny.png",
+   "formschluessel": "428",
+   "quelle": "https://www.pokewiki.de/images/9/96/Pok%C3%A9mon-Icon_428_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13913
+  },
+  "Mega Mawile": {
+   "datei": "images/champions/mega-mawile.png",
+   "formschluessel": "303m1",
+   "quelle": "https://www.pokewiki.de/images/e/e9/Pok%C3%A9mon-Icon_303m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14870
+  },
+  "Mega Sableye": {
+   "datei": "images/champions/mega-sableye.png",
+   "formschluessel": "302m1",
+   "quelle": "https://www.pokewiki.de/images/e/e0/Pok%C3%A9mon-Icon_302m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16899
+  },
+  "Orthworm": {
+   "datei": "images/champions/orthworm.png",
+   "formschluessel": "968",
+   "quelle": "https://www.pokewiki.de/images/9/9c/Pok%C3%A9mon-Icon_968_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14123
+  },
+  "Salazzle": {
+   "datei": "images/champions/salazzle.png",
+   "formschluessel": "758",
+   "quelle": "https://www.pokewiki.de/images/3/38/Pok%C3%A9mon-Icon_758_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11947
+  },
+  "Slurpuff": {
+   "datei": "images/champions/slurpuff.png",
+   "formschluessel": "685",
+   "quelle": "https://www.pokewiki.de/images/2/29/Pok%C3%A9mon-Icon_685_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11950
+  },
+  "Whimsicott": {
+   "datei": "images/champions/whimsicott.png",
+   "formschluessel": "547",
+   "quelle": "https://www.pokewiki.de/images/9/92/Pok%C3%A9mon-Icon_547_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12856
+  },
+  "Pidgeot": {
+   "datei": "images/champions/pidgeot.png",
+   "formschluessel": "018",
+   "quelle": "https://www.pokewiki.de/images/e/e5/Pok%C3%A9mon-Icon_018_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17972
+  },
+  "Crabominable": {
+   "datei": "images/champions/crabominable.png",
+   "formschluessel": "740",
+   "quelle": "https://www.pokewiki.de/images/2/29/Pok%C3%A9mon-Icon_740_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13492
+  },
+  "Mimikyu": {
+   "datei": "images/champions/mimikyu.png",
+   "formschluessel": "778",
+   "quelle": "https://www.pokewiki.de/images/3/3a/Pok%C3%A9mon-Icon_778_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 8480
+  },
+  "Manectric": {
+   "datei": "images/champions/manectric.png",
+   "formschluessel": "310",
+   "quelle": "https://www.pokewiki.de/images/e/e1/Pok%C3%A9mon-Icon_310_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13343
+  },
+  "Garbodor": {
+   "datei": "images/champions/garbodor.png",
+   "formschluessel": "569",
+   "quelle": "https://www.pokewiki.de/images/0/05/Pok%C3%A9mon-Icon_569_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17224
+  },
+  "Trevenant": {
+   "datei": "images/champions/trevenant.png",
+   "formschluessel": "709",
+   "quelle": "https://www.pokewiki.de/images/3/30/Pok%C3%A9mon-Icon_709_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15951
+  },
+  "Furfrou": {
+   "datei": "images/champions/furfrou.png",
+   "formschluessel": "676",
+   "quelle": "https://www.pokewiki.de/images/1/1d/Pok%C3%A9mon-Icon_676_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10590
+  },
+  "Galarian Stunfisk": {
+   "datei": "images/champions/galarian-stunfisk.png",
+   "formschluessel": "618a",
+   "quelle": "https://www.pokewiki.de/images/e/ec/Pok%C3%A9mon-Icon_618a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9833
+  },
+  "Stunfisk": {
+   "datei": "images/champions/stunfisk.png",
+   "formschluessel": "618",
+   "quelle": "https://www.pokewiki.de/images/c/c1/Pok%C3%A9mon-Icon_618_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10290
+  },
+  "Klefki": {
+   "datei": "images/champions/klefki.png",
+   "formschluessel": "707",
+   "quelle": "https://www.pokewiki.de/images/8/85/Pok%C3%A9mon-Icon_707_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 8925
+  },
+  "Maushold": {
+   "datei": "images/champions/maushold.png",
+   "formschluessel": "925",
+   "quelle": "https://www.pokewiki.de/images/f/fd/Pok%C3%A9mon-Icon_925_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 7640
+  },
+  "Torkoal": {
+   "datei": "images/champions/torkoal.png",
+   "formschluessel": "324",
+   "quelle": "https://www.pokewiki.de/images/1/1d/Pok%C3%A9mon-Icon_324_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12601
+  },
+  "Meowstic": {
+   "datei": "images/champions/meowstic.png",
+   "formschluessel": "678",
+   "quelle": "https://www.pokewiki.de/images/4/4e/Pok%C3%A9mon-Icon_678_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12502
+  },
+  "Absol": {
+   "datei": "images/champions/absol.png",
+   "formschluessel": "359",
+   "quelle": "https://www.pokewiki.de/images/0/0b/Pok%C3%A9mon-Icon_359_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12704
+  },
+  "Forretress": {
+   "datei": "images/champions/forretress.png",
+   "formschluessel": "205",
+   "quelle": "https://www.pokewiki.de/images/6/68/Pok%C3%A9mon-Icon_205_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14914
+  },
+  "Skarmory": {
+   "datei": "images/champions/skarmory.png",
+   "formschluessel": "227",
+   "quelle": "https://www.pokewiki.de/images/2/23/Pok%C3%A9mon-Icon_227_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16395
+  },
+  "Aromatisse": {
+   "datei": "images/champions/aromatisse.png",
+   "formschluessel": "683",
+   "quelle": "https://www.pokewiki.de/images/1/1a/Pok%C3%A9mon-Icon_683_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12920
+  },
+  "Camerupt": {
+   "datei": "images/champions/camerupt.png",
+   "formschluessel": "323",
+   "quelle": "https://www.pokewiki.de/images/9/95/Pok%C3%A9mon-Icon_323_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18154
+  },
+  "Sharpedo": {
+   "datei": "images/champions/sharpedo.png",
+   "formschluessel": "319",
+   "quelle": "https://www.pokewiki.de/images/e/e8/Pok%C3%A9mon-Icon_319_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9946
+  },
+  "Palafin": {
+   "datei": "images/champions/palafin.png",
+   "formschluessel": "964",
+   "quelle": "https://www.pokewiki.de/images/1/1b/Pok%C3%A9mon-Icon_964_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12291
+  },
+  "Banette": {
+   "datei": "images/champions/banette.png",
+   "formschluessel": "354",
+   "quelle": "https://www.pokewiki.de/images/c/c3/Pok%C3%A9mon-Icon_354_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12175
+  },
+  "Chimecho": {
+   "datei": "images/champions/chimecho.png",
+   "formschluessel": "358",
+   "quelle": "https://www.pokewiki.de/images/8/84/Pok%C3%A9mon-Icon_358_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 6597
+  },
+  "Araquanid": {
+   "datei": "images/champions/araquanid.png",
+   "formschluessel": "752",
+   "quelle": "https://www.pokewiki.de/images/0/06/Pok%C3%A9mon-Icon_752_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15563
+  },
+  "Arbok": {
+   "datei": "images/champions/arbok.png",
+   "formschluessel": "024",
+   "quelle": "https://www.pokewiki.de/images/c/c5/Pok%C3%A9mon-Icon_024_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14809
+  },
+  "Liepard": {
+   "datei": "images/champions/liepard.png",
+   "formschluessel": "510",
+   "quelle": "https://www.pokewiki.de/images/7/76/Pok%C3%A9mon-Icon_510_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11693
+  },
+  "Audino": {
+   "datei": "images/champions/audino.png",
+   "formschluessel": "531",
+   "quelle": "https://www.pokewiki.de/images/d/d3/Pok%C3%A9mon-Icon_531_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12069
+  },
+  "Pelipper": {
+   "datei": "images/champions/pelipper.png",
+   "formschluessel": "279",
+   "quelle": "https://www.pokewiki.de/images/3/3c/Pok%C3%A9mon-Icon_279_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11348
+  },
+  "Rotom": {
+   "datei": "images/champions/rotom.png",
+   "formschluessel": "479",
+   "quelle": "https://www.pokewiki.de/images/e/e6/Pok%C3%A9mon-Icon_479_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 8153
+  },
+  "Morpeko": {
+   "datei": "images/champions/morpeko.png",
+   "formschluessel": "877",
+   "quelle": "https://www.pokewiki.de/images/5/57/Pok%C3%A9mon-Icon_877_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 8840
+  },
+  "Dedenne": {
+   "datei": "images/champions/dedenne.png",
+   "formschluessel": "702",
+   "quelle": "https://www.pokewiki.de/images/d/db/Pok%C3%A9mon-Icon_702_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10132
+  },
+  "Emolga": {
+   "datei": "images/champions/emolga.png",
+   "formschluessel": "587",
+   "quelle": "https://www.pokewiki.de/images/0/0b/Pok%C3%A9mon-Icon_587_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10327
+  },
+  "Diggersby": {
+   "datei": "images/champions/diggersby.png",
+   "formschluessel": "660",
+   "quelle": "https://www.pokewiki.de/images/2/24/Pok%C3%A9mon-Icon_660_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13912
+  },
+  "Azumarill": {
+   "datei": "images/champions/azumarill.png",
+   "formschluessel": "184",
+   "quelle": "https://www.pokewiki.de/images/2/23/Pok%C3%A9mon-Icon_184_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12824
+  },
+  "Castform": {
+   "datei": "images/champions/castform.png",
+   "formschluessel": "351",
+   "quelle": "https://www.pokewiki.de/images/5/5c/Pok%C3%A9mon-Icon_351_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 7266
+  },
+  "Watchog": {
+   "datei": "images/champions/watchog.png",
+   "formschluessel": "505",
+   "quelle": "https://www.pokewiki.de/images/0/0c/Pok%C3%A9mon-Icon_505_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9721
+  },
+  "Vivillon": {
+   "datei": "images/champions/vivillon.png",
+   "formschluessel": "666",
+   "quelle": "https://www.pokewiki.de/images/9/90/Pok%C3%A9mon-Icon_666_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14634
+  },
+  "Medicham": {
+   "datei": "images/champions/medicham.png",
+   "formschluessel": "308",
+   "quelle": "https://www.pokewiki.de/images/b/b0/Pok%C3%A9mon-Icon_308_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10995
+  },
+  "Ariados": {
+   "datei": "images/champions/ariados.png",
+   "formschluessel": "168",
+   "quelle": "https://www.pokewiki.de/images/9/9b/Pok%C3%A9mon-Icon_168_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11074
+  },
+  "Beedrill": {
+   "datei": "images/champions/beedrill.png",
+   "formschluessel": "015",
+   "quelle": "https://www.pokewiki.de/images/c/c9/Pok%C3%A9mon-Icon_015_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15939
+  },
+  "Mawile": {
+   "datei": "images/champions/mawile.png",
+   "formschluessel": "303",
+   "quelle": "https://www.pokewiki.de/images/b/b8/Pok%C3%A9mon-Icon_303_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10465
+  },
+  "Sableye": {
+   "datei": "images/champions/sableye.png",
+   "formschluessel": "302",
+   "quelle": "https://www.pokewiki.de/images/c/ce/Pok%C3%A9mon-Icon_302_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10098
+  },
+  "Pikachu": {
+   "datei": "images/champions/pikachu.png",
+   "formschluessel": "025",
+   "quelle": "https://www.pokewiki.de/images/6/6a/Pok%C3%A9mon-Icon_025_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9762
+  },
+  "Ditto": {
+   "datei": "images/champions/ditto.png",
+   "formschluessel": "132",
+   "quelle": "https://www.pokewiki.de/images/5/5e/Pok%C3%A9mon-Icon_132_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 6602
+  }
+ }
+}

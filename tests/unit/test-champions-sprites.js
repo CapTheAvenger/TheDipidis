@@ -71,6 +71,106 @@ describe('form comes last, as Limitless expects', () => {
     });
 });
 
+/* ═══════════════════════════════════════════════════════════════════
+ * Die gespiegelten Bilder
+ *
+ * Seit dem 31.08.2026 liegen alle 292 Champions-Icons bei uns unter
+ * images/champions/. Der Dateiname folgt dem englischen Namen; wer die
+ * Regel im Frontend anders schreibt als im Bau-Skript, bekommt 292
+ * stille 404 und eine Tabelle voller versteckter Bilder.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+const MANIFEST = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'data', 'champions_sprites.json'), 'utf8'));
+
+const lokalName = new Function(
+    chunk(/    function lokalName\(en\) \{[\s\S]*?\n    \}\n/, 'lokalName')
+    + 'return lokalName;')();
+
+describe('die gespiegelten Bilder', () => {
+    it('jeder Pokédex-Eintrag hat eine gespiegelte Datei', () => {
+        const ohne = DEX.entries.filter((e) => !MANIFEST.sprites[e.en]).map((e) => e.en);
+        assert.deepEqual(ohne, [], 'diese Eintraege haben kein Bild im Manifest');
+    });
+
+    it('die Namensregel im Frontend deckt sich mit dem Bau-Skript', () => {
+        // Der teuerste Bruch: beide Seiten sehen einzeln richtig aus,
+        // aber sie erzeugen verschiedene Dateinamen.
+        const schief = [];
+        for (const e of DEX.entries) {
+            const erwartet = 'images/champions/' + lokalName(e.en) + '.png';
+            if (MANIFEST.sprites[e.en].datei !== erwartet) {
+                schief.push(`${e.en}: Frontend ${erwartet}, Manifest `
+                    + MANIFEST.sprites[e.en].datei);
+            }
+        }
+        assert.deepEqual(schief, []);
+    });
+
+    it('die Datei liegt wirklich da, ist ein PNG und 128x128', () => {
+        const fehlen = [];
+        const falsch = [];
+        for (const [en, v] of Object.entries(MANIFEST.sprites)) {
+            const p = path.join(ROOT, v.datei);
+            if (!fs.existsSync(p)) { fehlen.push(en); continue; }
+            const b = fs.readFileSync(p);
+            if (b.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a'
+                || b.subarray(12, 16).toString() !== 'IHDR') {
+                falsch.push(`${en}: kein PNG`); continue;
+            }
+            const w = b.readUInt32BE(16), h = b.readUInt32BE(20);
+            if (w !== 128 || h !== 128) falsch.push(`${en}: ${w}x${h}`);
+        }
+        assert.deepEqual(fehlen, [], 'diese Dateien fehlen im Repo');
+        assert.deepEqual(falsch, []);
+    });
+
+    it('keine zwei Eintraege zeigen dasselbe Bild', () => {
+        // Ein vertauschtes Formkuerzel faellt sonst nirgends auf: das
+        // Bild laedt, es sieht nur zweimal gleich aus.
+        const crypto = require('node:crypto');
+        const nach = new Map();
+        const doppelt = [];
+        for (const [en, v] of Object.entries(MANIFEST.sprites)) {
+            const h = crypto.createHash('sha256')
+                .update(fs.readFileSync(path.join(ROOT, v.datei))).digest('hex');
+            if (nach.has(h)) doppelt.push(`${en} = ${nach.get(h)}`);
+            nach.set(h, en);
+        }
+        assert.deepEqual(doppelt, []);
+    });
+
+    it('das Manifest sagt zu jedem Bild, woher es stammt', () => {
+        // Wir spiegeln fremde Arbeit; die Herkunft muss nachvollziehbar
+        // bleiben, Datei fuer Datei.
+        const ohne = Object.entries(MANIFEST.sprites)
+            .filter(([, v]) => !/^https:\/\/www\.pokewiki\.de\/images\//.test(v.quelle || ''))
+            .map(([en]) => en);
+        assert.deepEqual(ohne, []);
+        assert.match(MANIFEST._meta.rechte, /§ 51 UrhG/);
+        assert.match(MANIFEST._meta.rechte, /Nintendo/);
+    });
+
+    it('die erste Stufe ist die eigene Datei, nicht die fremde', () => {
+        const f = chunk(/    function spriteImg\(en, cls\) \{[\s\S]*?\n    \}\n/, 'spriteImg');
+        assert.match(f, /LOKAL_BASIS/, 'die lokale Basis wird nicht benutzt');
+        assert.ok(f.indexOf('LOKAL_BASIS') < f.indexOf('SPRITE_BASIS'),
+            'Limitless steht vor der eigenen Datei — dann laedt niemand den Spiegel');
+        assert.match(f, /data-stufe/, 'ohne Stufe kann die Kette nicht fortschreiten');
+    });
+
+    it('beide Schreibweisen derselben Form ergeben dieselbe Datei', () => {
+        // Aus dem Pokédex mit Klammern, aus den Nutzungsdaten ohne.
+        for (const [mit, ohne] of [
+            ['Paldean Tauros (Combat Breed)', 'Paldean Tauros Combat Breed'],
+            ['Paldean Tauros (Aqua Breed)', 'Paldean Tauros Aqua Breed'],
+            ['Rotom (Heat)', 'Rotom Heat'],
+        ]) {
+            assert.equal(lokalName(mit), lokalName(ohne), `${mit} vs ${ohne}`);
+        }
+    });
+});
+
 describe('against the real Pokédex', () => {
     it('every entry produces a slug', () => {
         const empty = DEX.entries.filter(e => !slug(e.en));
@@ -151,17 +251,75 @@ describe('against the real Pokédex', () => {
             'auch fuer eine Sprachausgabe muss der Ersatz erkennbar sein');
     });
 
-    it('der Ersatz versucht es genau einmal', () => {
-        const f = chunk(/    function spriteErsatz\(img\) \{[\s\S]*?\n    \}\n/, 'spriteErsatz');
-        // Lesen UND Setzen. Nur die Abfrage stehen zu lassen genuegt
-        // nicht: der Merker wird nie wahr, der Ersatz laeuft in eine
-        // Schleife, und ein blosses /dataset\.ersetzt/ merkt davon nichts.
-        assert.match(f, /if \(!img \|\| img\.dataset\.ersetzt\)/,
-            'die Abfrage des Merkers fehlt');
-        assert.match(f, /img\.dataset\.ersetzt = '1'/,
-            'ohne Setzen laeuft ein fehlschlagender Ersatz in eine Schleife');
-        assert.match(f, /visibility = 'hidden'/,
-            'scheitert auch der Ersatz, bleibt nur noch verstecken');
+    /* Die Rueckfallkette wird AUSGEFUEHRT, nicht gelesen.
+     *
+     * Die alte Fassung prueft Zeichenketten im Quelltext. Sie blieb
+     * gruen, solange die richtigen Woerter dastanden — auch wenn die
+     * Reihenfolge falsch war oder eine Stufe nie erreicht wurde. Hier
+     * laeuft stattdessen ein Attrappen-Bild durch alle Stufen. */
+    function ersatzKette(anfang) {
+        const ersatz = new Function('SPRITE_BASIS', 't',
+            chunk(/    function spriteErsatz\(img\) \{[\s\S]*?\n    \}\n/, 'spriteErsatz')
+            + 'return spriteErsatz;')('R2/', () => ({ spriteGrundform: 'Grundform' }));
+        const img = {
+            dataset: { stufe: anfang.stufe },
+            style: {},
+            classList: { _k: [], add(c) { this._k.push(c); } },
+            _attr: anfang.attr || {},
+            getAttribute(n) { return this._attr[n] || ''; },
+            src: anfang.src || 'start',
+        };
+        const verlauf = [];
+        for (let i = 0; i < 8; i++) {
+            const vorher = img.src;
+            ersatz(img);
+            if (img.style.visibility === 'hidden') { verlauf.push('versteckt'); break; }
+            if (img.src === vorher) { verlauf.push('KEIN FORTSCHRITT'); break; }
+            verlauf.push(img.src);
+        }
+        return { verlauf, img };
+    }
+
+    it('faellt von lokal auf Limitless und dann auf die Grundform', () => {
+        const { verlauf, img } = ersatzKette({
+            stufe: 'lokal',
+            attr: { 'data-fremd': 'raichu-mega-y', 'data-grundform': 'raichu' },
+        });
+        assert.deepEqual(verlauf, ['R2/raichu-mega-y.png', 'R2/raichu.png', 'versteckt']);
+        assert.ok(img.classList._k.includes('sqp-sprite--grundform'),
+            'der Rueckfall auf die Grundform muss sich zu erkennen geben');
+        assert.equal(img.title, 'Grundform');
+        assert.equal(img.alt, 'Grundform', 'auch eine Sprachausgabe muss es erfahren');
+    });
+
+    it('ueberspringt Limitless, wenn es dort nichts zu holen gibt', () => {
+        const { verlauf } = ersatzKette({
+            stufe: 'lokal', attr: { 'data-fremd': '', 'data-grundform': 'raichu' },
+        });
+        assert.deepEqual(verlauf, ['R2/raichu.png', 'versteckt']);
+    });
+
+    it('versteckt sich, wenn keine Stufe mehr uebrig ist', () => {
+        const { verlauf } = ersatzKette({ stufe: 'lokal', attr: {} });
+        assert.deepEqual(verlauf, ['versteckt']);
+    });
+
+    it('laeuft nie in eine Schleife', () => {
+        // Ohne Stufenmerker probierte ein dauerhaft fehlschlagendes Bild
+        // dieselbe Adresse endlos weiter — im Browser bei 292 Bildern
+        // gleichzeitig.
+        for (const anfang of [
+            { stufe: 'lokal', attr: { 'data-fremd': 'x', 'data-grundform': 'y' } },
+            { stufe: 'fremd', attr: { 'data-grundform': 'y' } },
+            { stufe: 'grund', attr: { 'data-grundform': 'y' } },
+            { stufe: undefined, attr: {} },
+        ]) {
+            const { verlauf } = ersatzKette(anfang);
+            assert.ok(!verlauf.includes('KEIN FORTSCHRITT'),
+                `Schleife bei ${JSON.stringify(anfang)}: ${verlauf.join(' -> ')}`);
+            assert.equal(verlauf[verlauf.length - 1], 'versteckt',
+                `die Kette endet nicht: ${verlauf.join(' -> ')}`);
+        }
     });
 
     it('die Grundform wird aus dem Namen abgeleitet, nicht aus einer Liste', () => {
@@ -193,10 +351,20 @@ describe('against the real Pokédex', () => {
         assert.deepEqual(ohne, [], 'ohne Grundform gibt es keinen Rueckfall');
     });
 
-    it('die Legende erklärt den gestrichelten Rahmen — in beiden Sprachen', () => {
+    it('die Legende nennt die Quelle und erklärt den Rahmen — in beiden Sprachen', () => {
         const treffer = [...SRC.matchAll(/legendSprite:/g)];
         assert.equal(treffer.length, 2, `${treffer.length} statt 2 Sprachfassungen`);
-        assert.match(SRC, /legendSprite: 'Ein gestrichelt umrandetes Bild/);
-        assert.match(SRC, /legendSprite: 'A dashed border/);
+        // Wir spiegeln fremde Arbeit. Sie zu nennen ist das Mindeste,
+        // und es macht fuer Leser nachvollziehbar, woher die Bilder
+        // kommen.
+        const zeilen = SRC.split('\n').filter((z) => z.includes('legendSprite:'));
+        for (const z of zeilen) {
+            assert.match(z, /PokeWiki/, `Quelle fehlt in: ${z.trim()}`);
+            assert.match(z, /Champions/, `das Spiel fehlt in: ${z.trim()}`);
+        }
+        // Die alte Fassung behauptete, fuer neun Mega-Formen gebe es
+        // kein Bild. Seit dem Spiegel stimmt das nicht mehr.
+        assert.ok(!/legendSprite:[^\n]*neun/.test(SRC),
+            'die Legende nennt noch die neun fehlenden Mega-Formen');
     });
 });

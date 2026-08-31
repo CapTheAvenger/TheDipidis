@@ -90,7 +90,75 @@ def nutzungsdaten():
     return luecken
 
 
-# ── Pruefung 3: benannte Bereiche, die es noch nicht gibt ──────────
+# ── Pruefung 3: deutsche Namen, die sich widersprechen ─────────────
+#
+# BEFUND (31.08.2026, beim Bau der Statusuebersicht): vier Dateien
+# fuehren deutsche Namen. Die drei Referenzdateien tun es als
+# `de_name`, champions_names_de.json als eigene Tabelle. An 63 Stellen
+# sagen sie etwas anderes.
+#
+# Beide Seiten koennen falsch sein, und beide sind es stellenweise:
+#   Sitrus Berry  Referenz "Prunusbeere"   Tabelle "Tsitrubeere"
+#                 — Prunusbeere ist der Name der Lum Berry. Hier
+#                   stehen zwei Beeren vertauscht, und zwar in der
+#                   Referenz.
+#   Throat Chop   Referenz "Knebelhieb"    Tabelle "Neck Strike"
+#                 — hier steht ein ENGLISCHER Name im deutschen Feld,
+#                   also ist diesmal die Referenz die richtige Seite.
+#
+# Deshalb wird hier kein Sieger ausgerufen. Die Luecke nennt beide
+# Werte und verlinkt die Nachschlageseite; entschieden wird im
+# Admin-Bereich, nicht hier.
+NAMENSQUELLEN = [
+    ("champions_moves_reference.json", "moves", "moves", "Attacke"),
+    ("champions_items_reference.json", "items", "items", "Item"),
+    ("champions_abilities_reference.json", "abilities", "abilities", "F\u00e4higkeit"),
+]
+
+
+def namenskonflikte():
+    try:
+        namen = _lies("champions_names_de.json")
+    except FileNotFoundError:
+        return []
+    luecken = []
+    for datei, schluessel, topf, art in NAMENSQUELLEN:
+        try:
+            block = _lies(datei)
+        except FileNotFoundError:
+            continue
+        eintraege = block.get(schluessel, block)
+        tabelle = namen.get(topf, {})
+        for k, v in sorted(eintraege.items()):
+            if k.startswith("_") or not isinstance(v, dict):
+                continue
+            a = (v.get("de_name") or "").strip()
+            b = (tabelle.get(k) or "").strip()
+            if not a or not b or a == b:
+                continue
+            luecken.append({
+                "id": "namenskonflikt/" + k.lower().replace(" ", "-"),
+                "klasse": "namenskonflikt",
+                "titel": "%s %s \u2014 zwei deutsche Namen" % (art, k),
+                "titelEn": "%s %s \u2014 two German names" % (art, k),
+                "wo": "data/%s \u2192 %s.de_name  vs.  "
+                      "data/champions_names_de.json \u2192 %s" % (datei, k, topf),
+                "ansicht": "side-quest",
+                "vorschlag": {
+                    "wert": b,
+                    "quelle": "https://pokewiki.de/" + b.replace(" ", "_"),
+                    "einstufung": "mehrdeutig",
+                    "begruendung": "Die Referenzdatei schreibt \u201e%s\u201c, die "
+                                   "Namenstabelle \u201e%s\u201c. Welcher stimmt, "
+                                   "entscheidet die Nachschlageseite." % (a, b),
+                    "grundform": "",
+                    "basisFaehigkeiten": [],
+                },
+            })
+    return luecken
+
+
+# ── Pruefung 4: benannte Bereiche, die es noch nicht gibt ──────────
 #
 # Anders als oben faellt das keiner Datei auf: eine Seite, die es nicht
 # gibt, fehlt in keinem JSON. Sie steht deshalb hier von Hand — und
@@ -121,7 +189,8 @@ def fehlende_bereiche():
             if not os.path.exists(os.path.join(DATA, b.get("datei") or ""))]
 
 
-PRUEFUNGEN = [mega_faehigkeiten, nutzungsdaten, fehlende_bereiche]
+PRUEFUNGEN = [mega_faehigkeiten, nutzungsdaten, namenskonflikte,
+              fehlende_bereiche]
 
 KLASSEN = {
     "mega-faehigkeit": {
@@ -131,6 +200,10 @@ KLASSEN = {
     "nutzungsdaten": {
         "de": "Kein Nutzungsdatensatz",
         "en": "No usage record",
+    },
+    "namenskonflikt": {
+        "de": "Zwei deutsche Namen",
+        "en": "Two German names",
     },
     "fehlender-bereich": {
         "de": "Bereich fehlt ganz",

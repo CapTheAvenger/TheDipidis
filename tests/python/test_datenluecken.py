@@ -122,12 +122,43 @@ def test_mehrdeutig_heisst_wirklich_auch_bei_der_grundform(quellen):
         )
 
 
-def test_uebernommen_wird_nur_was_eindeutig_ist(quellen):
+def test_uebernommen_wird_nur_mit_beleg_oder_bestaetigung(quellen):
+    """Die Regel, die am 31.08.2026 erweitert wurde — und ihre Grenze.
+
+    Bis zur Bestaetigung galt: uebernommen wird nur, was EINZELN traegt
+    (der Wert kommt bei der Grundform nicht vor). Seit der Betreiber die
+    zwoelf mehrdeutigen Faelle bestaetigt hat, gilt: uebernommen wird,
+    was eindeutig belegt ODER vom Betreiber bestaetigt ist.
+
+    Die Einstufung "mehrdeutig" bleibt bei diesen zwoelf stehen. Sie
+    beschreibt, was der Einzelbeleg hergibt, und daran hat die
+    Bestaetigung nichts geaendert — sie hat eine zweite, unabhaengige
+    Quelle danebengestellt. Wer die Einstufung nachtraeglich auf
+    "eindeutig" umschreibt, loescht genau diese Unterscheidung.
+    """
     for name, e in quellen["eintraege"].items():
-        if e.get("uebernommen"):
-            assert e["einstufung"] == "eindeutig", (
-                f"{name}: uebernommen, obwohl {e['einstufung']}"
-            )
+        if not e.get("uebernommen"):
+            continue
+        if e["einstufung"] == "eindeutig":
+            continue
+        b = e.get("bestaetigt") or {}
+        assert b.get("von") and b.get("am"), (
+            f"{name}: uebernommen und {e['einstufung']}, aber ohne "
+            f"Bestaetigung — dann fehlt der zweite Beleg"
+        )
+
+
+def test_eine_bestaetigung_ersetzt_keine_einstufung(quellen):
+    """Gegenprobe: nichts wird als eindeutig ausgegeben, was es nicht ist."""
+    for name, e in quellen["eintraege"].items():
+        if not e.get("bestaetigt"):
+            continue
+        basis = e.get("basisFaehigkeiten") or []
+        assert e["wert"] in basis, (
+            f"{name}: traegt eine Bestaetigung, obwohl der Wert bei der "
+            f"Grundform gar nicht vorkommt — dann waere er eindeutig und "
+            f"braeuchte sie nicht"
+        )
 
 
 def test_jeder_eintrag_traegt_quelle_und_begruendung(quellen):
@@ -160,6 +191,20 @@ def test_uebernommene_werte_stehen_im_pokedex(quellen, pokedex):
             )
 
 
+def test_alle_sechzehn_megas_sind_belegt(quellen, pokedex):
+    """Der Stand, den der 31.08.2026 hergestellt hat.
+
+    Waechst die Zahl der offenen wieder, ist entweder eine Form
+    dazugekommen oder eine Uebernahme zurueckgenommen worden. Beides
+    soll auffallen.
+    """
+    assert len(quellen["eintraege"]) == 16
+    offen = [n for n, e in quellen["eintraege"].items() if not e.get("uebernommen")]
+    assert offen == [], "wieder ohne Beleg: " + ", ".join(offen)
+    assert pokedex["_meta"]["megaAbilityMissing"] == []
+    assert len(pokedex["_meta"]["megaAbilityBelegt"]) == 16
+
+
 def test_offene_megas_stehen_im_inventar_die_belegten_nicht(inventar, quellen):
     im_inventar = {
         l["id"].split("/", 1)[1]
@@ -175,6 +220,34 @@ def test_offene_megas_stehen_im_inventar_die_belegten_nicht(inventar, quellen):
             assert kennung in im_inventar, (
                 f"{name} ist offen, fehlt aber im Inventar"
             )
+
+
+def test_namenskonflikte_nennen_beide_werte(inventar):
+    """Die Klasse, die am 31.08.2026 dazukam.
+
+    Hier ist ausdruecklich KEINE Seite im Recht: bei Sitrus Berry hat
+    die Referenzdatei zwei Beeren vertauscht, bei Throat Chop steht in
+    der Namenstabelle ein englischer Name im deutschen Feld. Eine
+    Luecke, die nur einen der beiden Werte nennt, waere deshalb ein
+    Urteil, das wir nicht faellen koennen — sie muss beide zeigen.
+    """
+    konflikte = [l for l in inventar["luecken"] if l["klasse"] == "namenskonflikt"]
+    assert konflikte, "Testvoraussetzung: mindestens ein Konflikt"
+    for l in konflikte:
+        v = l["vorschlag"]
+        assert (v.get("wert") or "").strip(), l["id"]
+        b = v.get("begruendung") or ""
+        assert "Referenzdatei" in b and "Namenstabelle" in b, (
+            f"{l['id']}: die Begruendung nennt nicht beide Seiten"
+        )
+        # Beide Werte muessen wirklich dastehen, nicht nur die Rollen.
+        assert b.count("\u201e") == 2, (
+            f"{l['id']}: es steht nicht genau ein Wert je Seite in der Begruendung"
+        )
+        assert v["quelle"].startswith("https://pokewiki.de/"), l["id"]
+        assert " vs.  " in l["wo"], (
+            f"{l['id']}: 'wo' muss beide Dateien nennen"
+        )
 
 
 def test_jede_offene_mega_luecke_traegt_ihren_vorschlag(inventar):

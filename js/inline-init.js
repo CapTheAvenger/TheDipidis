@@ -281,6 +281,11 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'meta-analysis-hub':     'meta-analysis-hub',
         'hub':                   'meta-analysis-hub',
         'uebersicht':            'meta-analysis-hub',
+        // Admin — Datenluecken. Der EINZIGE Weg dorthin: die Seite steht
+        // in keinem Menue. Kein Zugangsschutz, und die Seite sagt das
+        // auch — sie zeigt nur, was uns fehlt.
+        'admin':                 'admin',
+        'datenluecken':          'admin',
         // Per-profile-sub-tab deep links — added 2026-06 so the screenshot
         // tutorial can drive directly into a specific profile sub-tab via
         // the same hash routing mechanism the Telegram bot uses for deep-

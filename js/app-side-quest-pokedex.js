@@ -98,7 +98,7 @@
             noUsage: 'Für dieses Pokémon gibt es noch keine In-Game-Nutzungsdaten.',
             closeLabel: 'Schließen',
             megaAbility: 'Mega-Fähigkeit',
-            megaAbilityUnknown: 'Steht bisher nur im Spiel. Keine belegte Quelle — wir raten nicht.',
+            megaAbilityUnknown: 'Vorschlag liegt vor, Bestätigung steht aus — bis dahin steht hier nichts. Geraten wird nicht.',
             viaBase: (basis, stein, pct) =>
                 `Nutzungsdaten von ${basis} — ${pct}\u00a0% der ${basis}-Builds halten ${stein}.`,
             usageSeasonLbl: (s) => `Saison: ${s} · Quelle: championsbattledata.com · Stand unbekannt`,
@@ -157,7 +157,7 @@
             noUsage: 'No in-game usage data for this Pokémon yet.',
             closeLabel: 'Close',
             megaAbility: 'Mega ability',
-            megaAbilityUnknown: 'In-game only so far. No sourced value — we don\u2019t guess.',
+            megaAbilityUnknown: 'A proposal exists, confirmation is pending — until then nothing stands here. We don\u2019t guess.',
             viaBase: (basis, stein, pct) =>
                 `Usage data from ${basis} — ${pct}\u00a0% of ${basis} builds hold ${stein}.`,
             usageSeasonLbl: (s) => `Season: ${s} · Source: championsbattledata.com · date unknown`,
@@ -922,12 +922,21 @@
     // section shows the PRE-mega base ability, so this is shown by the name).
     //
     // 16 der 75 Mega-Formen fuehren keine — es sind die Champions-eigenen
-    // M-B-Formen, und keine oeffentliche Quelle nennt ihre Faehigkeit
-    // (roster.json kennt sie nicht, championsbattledata hat keine Seite
-    // dafuer, Smogon liefert nur Werte und Typen). Die Zeile bisher
+    // M-B-Formen, und keine der bis dahin benutzten Quellen nennt ihre
+    // Faehigkeit (roster.json kennt sie nicht, championsbattledata hat
+    // keine Seite dafuer, Smogon liefert nur Werte und Typen). Die Zeile
     // einfach wegzulassen las sich wie "hat keine besondere Faehigkeit" —
     // eine Aussage, fuer die wir keinen Beleg haben. Also wird die
     // Luecke benannt statt verschwiegen.
+    //
+    // NACHTRAG 31.08.2026: pokebase.app fuehrt die Werte doch. Vier der
+    // 16 sind damit belegt und stehen jetzt normal in der Zeile (siehe
+    // data/champions_mega_faehigkeiten.json). Die uebrigen zwoelf tragen
+    // einen Vorschlag, der einzeln nicht traegt, weil derselbe Name auch
+    // bei der Grundform steht; sie warten im Admin-Bereich (#admin) auf
+    // Bestaetigung. Bis dahin bleibt die Zeile leer — ein Vorschlag ist
+    // kein Beleg, und die Oberflaeche behauptet nichts, was wir nicht
+    // belegen koennen.
     function megaAbilityBadge(en) {
         const l = t();
         if (!en) {

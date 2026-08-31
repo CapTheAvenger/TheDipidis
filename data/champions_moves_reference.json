@@ -1,137 +1,616 @@
 {
-  "_meta": {
-    "version": 2,
-    "format": "Pokémon Champions · Regulation M-A (Apr–Jun 2026)",
-    "description": "Verifizierte Mechanik- und Namens-Referenz für Attacken im Champions-Movepool. Wird von scripts/generate_team_strategies.py beim Generieren der Side-Quest-Strategie-Guides als Faktenblock in den System-Prompt injiziert, damit Claude (a) den OFFIZIELLEN DEUTSCHEN NAMEN konsistent verwendet (statt unübersetzt zu lassen) und (b) exakte Mechanik-Effekte (Rundenzahl, %, Bedingungen) zitiert statt zu raten. v2 (2026-06-13): vollständige Abdeckung aller 102 Attacken, die in den 20 aktuellen Top-Champions-Teams vorkommen — vorher fehlten ~70 Damage-Moves, weshalb der Pilotlauf Acrobatics/Thunderbolt/Hydro Pump etc. im deutschen Guide unübersetzt liess.",
-    "lookup_keys": "Sowohl der englische Showdown-Name (key) als auch der deutsche Lokalisationsname (de_name) sind durchsuchbar; case-insensitive."
+ "_meta": {
+  "version": 2,
+  "format": "Pokémon Champions · Regulation M-A (Apr–Jun 2026)",
+  "description": "Verifizierte Mechanik- und Namens-Referenz für Attacken im Champions-Movepool. Wird von scripts/generate_team_strategies.py beim Generieren der Side-Quest-Strategie-Guides als Faktenblock in den System-Prompt injiziert, damit Claude (a) den OFFIZIELLEN DEUTSCHEN NAMEN konsistent verwendet (statt unübersetzt zu lassen) und (b) exakte Mechanik-Effekte (Rundenzahl, %, Bedingungen) zitiert statt zu raten. v2 (2026-06-13): vollständige Abdeckung aller 102 Attacken, die in den 20 aktuellen Top-Champions-Teams vorkommen — vorher fehlten ~70 Damage-Moves, weshalb der Pilotlauf Acrobatics/Thunderbolt/Hydro Pump etc. im deutschen Guide unübersetzt liess.",
+  "lookup_keys": "Sowohl der englische Showdown-Name (key) als auch der deutsche Lokalisationsname (de_name) sind durchsuchbar; case-insensitive.",
+  "de_namen_geprueft": "Die deutschen Namen sind am 31.08.2026 einzeln gegen pokewiki.de geprueft worden; Herkunft je Name: data/champions_namen_entschieden.json."
+ },
+ "moves": {
+  "Tailwind": {
+   "de_name": "Rückenwind",
+   "type": "Flying",
+   "effect": "Verdoppelt die Initiative aller Pokémon auf der eigenen Seite für 4 Runden."
   },
-  "moves": {
-    "Tailwind":          { "de_name": "Rückenwind",       "type": "Flying",   "effect": "Verdoppelt die Initiative aller Pokémon auf der eigenen Seite für 4 Runden." },
-    "Trick Room":        { "de_name": "Bizarroraum",      "type": "Psychic",  "effect": "Langsamere Pokémon agieren 5 Runden lang zuerst (erneuter Einsatz beendet ihn vorzeitig)." },
-    "Rain Dance":        { "de_name": "Regentanz",        "type": "Water",    "effect": "5 Runden Regen (8 mit Nassbrocken/Damp Rock)." },
-
-    "Protect":           { "de_name": "Schutzschild",     "type": "Normal",   "effect": "Schützt Anwender 1 Runde vor allen Attacken. Erfolgschance drittelt sich bei aufeinanderfolgendem Einsatz." },
-    "King's Shield":     { "de_name": "Königsschild",     "type": "Steel",    "effect": "Schützt; Kontaktangreifer erhalten −1 Angriff." },
-    "Spiky Shield":      { "de_name": "Schutzstacheln",   "type": "Grass",    "effect": "Schützt; Kontaktangreifer verlieren 1/8 max. KP." },
-    "Wide Guard":        { "de_name": "Rundumschutz",     "type": "Rock",     "effect": "Schützt die eigene Seite 1 Runde vor Mehrziel-Attacken." },
-
-    "Light Screen":      { "de_name": "Lichtschild",      "type": "Psychic",  "effect": "Spezial-Schaden −1/2 (Einzel) bzw. −1/3 (Doppel) für 5 Runden (8 mit Lichtlehm)." },
-    "Reflect":           { "de_name": "Reflektor",        "type": "Psychic",  "effect": "Physischer Schaden −1/2 (Einzel) bzw. −1/3 (Doppel) für 5 Runden (8 mit Lichtlehm)." },
-    "Aurora Veil":       { "de_name": "Auroraschleier",   "type": "Ice",      "effect": "Beide Schadensarten −1/2 (Einzel)/−1/3 (Doppel) für 5 Runden (8 mit Lichtlehm); nur bei Schnee einsetzbar." },
-
-    "Will-O-Wisp":       { "de_name": "Irrlicht",         "type": "Fire",     "accuracy": 85, "effect": "Verbrennt das Ziel: Ziel verliert pro Runde 1/16 max. KP und sein physischer Angriff wird halbiert." },
-    "Hypnosis":          { "de_name": "Hypnose",          "type": "Psychic",  "accuracy": 60, "effect": "Versetzt das Ziel in Schlaf — unzuverlässig." },
-    "Sleep Powder":      { "de_name": "Schlafpuder",      "type": "Grass",    "accuracy": 75, "effect": "Versetzt das Ziel in Schlaf (1–3 Runden Handlungsausfall)." },
-    "Disable":           { "de_name": "Aussetzer",        "type": "Normal",   "accuracy": 100, "effect": "Sperrt die zuletzt benutzte Attacke des Ziels für 4 Runden." },
-    "Encore":            { "de_name": "Zugabe",           "type": "Normal",   "accuracy": 100, "effect": "Ziel muss seine zuletzt eingesetzte Attacke 3 Runden lang wiederholen — sperrt Setup-Attacken oder zwingt Spam." },
-    "Perish Song":       { "de_name": "Abgesang",         "type": "Normal",   "effect": "Alle Pokémon auf dem Feld werden 3 Runden nach Einsatz K.O. (außer sie wechseln aus)." },
-    "Parting Shot":      { "de_name": "Standpauke",       "type": "Dark",     "accuracy": 100, "effect": "Ziel −1 Angriff & Spez.-Angriff; Anwender wechselt aus." },
-    "Rage Powder":       { "de_name": "Wutpulver",        "type": "Bug",      "effect": "Zieht alle Einzelziel-Attacken der Gegner 1 Runde auf den Anwender (wirkt nicht auf Pflanzen-Typen)." },
-    "Helping Hand":      { "de_name": "Rechte Hand",      "type": "Normal",   "effect": "Verstärkt die Attacke eines Verbündeten diese Runde um 50 %." },
-
-    "Calm Mind":         { "de_name": "Gedankengut",      "type": "Psychic",  "effect": "Eigener Spez.-Angriff & Spez.-Vert. +1." },
-    "Swords Dance":      { "de_name": "Schwerttanz",      "type": "Normal",   "effect": "Eigener Angriff +2." },
-    "Coil":              { "de_name": "Einrollen",        "type": "Poison",   "effect": "Eigener Angriff, Verteidigung & Genauigkeit +1." },
-    "Clangorous Soul":   { "de_name": "Schuppenseele",    "type": "Dragon",   "effect": "Verliert 1/3 max. KP, dafür alle 5 Kampfwerte +1." },
-
-    "Recover":           { "de_name": "Genesung",         "type": "Normal",   "effect": "Heilt 1/2 der max. KP." },
-    "Roost":             { "de_name": "Ruheort",          "type": "Flying",   "effect": "Heilt 1/2 max. KP; verliert diese Runde den Flug-Typ." },
-    "Life Dew":          { "de_name": "Lebenstropfen",    "type": "Water",    "effect": "Heilt 1/4 max. KP von Anwender und allen Verbündeten." },
-
-    "Fake Out":          { "de_name": "Mogelhieb",        "type": "Normal",   "category": "Physical", "effect": "Vorzugsangriff (Prio +3), nur in der ersten Runde nach Einwechseln. Lässt das Ziel zucken (verliert die Runde)." },
-    "Quick Attack":      { "de_name": "Ruckzuckhieb",     "type": "Normal",   "category": "Physical", "effect": "Vorzugsangriff (Prio +1)." },
-    "Sucker Punch":      { "de_name": "Überrumpler",      "type": "Dark",     "category": "Physical", "effect": "Vorzugsangriff (Prio +1); trifft nur, wenn das Ziel diese Runde eine Angriffsattacke einsetzt." },
-    "Shadow Sneak":      { "de_name": "Mogelschatten",    "type": "Ghost",    "category": "Physical", "effect": "Vorzugsangriff (Prio +1)." },
-    "Aqua Jet":          { "de_name": "Aquaknarre",       "type": "Water",    "category": "Physical", "effect": "Vorzugsangriff (Prio +1)." },
-
-    "U-turn":            { "de_name": "Kehrtwende",       "type": "Bug",      "category": "Physical", "effect": "Greift an und wechselt anschließend aus." },
-    "Volt Switch":       { "de_name": "Voltwechsel",      "type": "Electric", "category": "Special",  "effect": "Greift an und wechselt anschließend aus." },
-    "Flip Turn":         { "de_name": "Wendigo",          "type": "Water",    "category": "Physical", "effect": "Greift an und wechselt anschließend aus." },
-
-    "Acrobatics":        { "de_name": "Akrobatik",        "type": "Flying",   "category": "Physical", "effect": "Doppelter Schaden, wenn der Anwender kein Item trägt." },
-    "Brave Bird":        { "de_name": "Sturzflug",        "type": "Flying",   "category": "Physical", "effect": "Sehr starker Flug-Angriff; Anwender erleidet 1/3 des zugefügten Schadens als Rückstoß." },
-    "Dual Wingbeat":     { "de_name": "Duo-Flügelschlag", "type": "Flying",   "category": "Physical", "effect": "Trifft 2× pro Einsatz." },
-    "Air Slash":         { "de_name": "Luftschnitt",      "type": "Flying",   "category": "Special",  "effect": "30 % Chance, das Ziel zucken zu lassen." },
-
-    "Thunderbolt":       { "de_name": "Donnerblitz",      "type": "Electric", "category": "Special",  "effect": "Solide Elektro-Spezial-Attacke; 10 % Paralyse." },
-    "Thunder Punch":     { "de_name": "Donnerschlag",     "type": "Electric", "category": "Physical", "effect": "Kontaktangriff; 10 % Paralyse." },
-    "Electro Shot":      { "de_name": "Elektroschuss",    "type": "Electric", "category": "Special",  "effect": "Auflade-Attacke; ohne Aufladung bei Regen oder mit Energiekraut (Power Herb)." },
-    "Electroweb":        { "de_name": "Elektronetz",      "type": "Electric", "category": "Special",  "effect": "Trifft beide Gegner; senkt deren Initiative um 1." },
-
-    "Hydro Pump":        { "de_name": "Hydropumpe",       "type": "Water",    "category": "Special",  "accuracy": 80, "effect": "Sehr starke Wasser-Attacke." },
-    "Hydro Cannon":      { "de_name": "Hydrokanone",      "type": "Water",    "category": "Special",  "accuracy": 90, "effect": "Sehr starker Wasser-Hit; Anwender kann in der nächsten Runde nicht angreifen." },
-    "Muddy Water":       { "de_name": "Lehmbrühe",        "type": "Water",    "category": "Special",  "effect": "Trifft beide Gegner; 30 % Chance, deren Genauigkeit zu senken." },
-    "Wave Crash":        { "de_name": "Wellenbrecher",    "type": "Water",    "category": "Physical", "effect": "Starker Kontaktangriff; Anwender erleidet 1/3 des zugefügten Schadens als Rückstoß." },
-    "Liquidation":       { "de_name": "Aquadurchbruch",   "type": "Water",    "category": "Physical", "effect": "20 % Chance, die Verteidigung des Ziels zu senken." },
-
-    "Flare Blitz":       { "de_name": "Flammenblitz",     "type": "Fire",     "category": "Physical", "effect": "Starker Kontaktangriff; Anwender erleidet 1/3 des Schadens als Rückstoß und kann sich verbrennen." },
-    "Heat Wave":         { "de_name": "Hitzewelle",       "type": "Fire",     "category": "Special",  "effect": "Trifft beide Gegner; 10 % Verbrennung." },
-    "Weather Ball":      { "de_name": "Wetterball",       "type": "Normal",   "category": "Special",  "effect": "Doppelter Schaden und wechselt den Typ bei aktivem Wetter (Sonne=Feuer, Regen=Wasser, Sand=Gestein, Schnee=Eis)." },
-    "Overheat":          { "de_name": "Hitzekoller",      "type": "Fire",     "category": "Special",  "effect": "Sehr starker Feuer-Spezial-Hit; Anwender erleidet danach −2 Spez.-Angriff." },
-    "Eruption":          { "de_name": "Eruption",         "type": "Fire",     "category": "Special",  "effect": "Trifft beide Gegner; Schaden skaliert mit den eigenen KP (volle KP = volle Stärke)." },
-    "Infernal Parade":   { "de_name": "Phantomparade",    "type": "Ghost",    "category": "Special",  "effect": "Doppelter Schaden bei Status-Problemen des Ziels; 30 % Verbrennung." },
-
-    "Blizzard":          { "de_name": "Blizzard",         "type": "Ice",      "category": "Special",  "accuracy": 70, "effect": "Trifft beide Gegner; 10 % Eis. Trifft IMMER bei Schnee." },
-    "Ice Beam":          { "de_name": "Eisstrahl",        "type": "Ice",      "category": "Special",  "effect": "Solide Eis-Attacke; 10 % Eis." },
-    "Freeze-Dry":        { "de_name": "Gefriertrocknung", "type": "Ice",      "category": "Special",  "effect": "Trifft Wasser-Typen super-effektiv (statt nicht-sehr-effektiv); 10 % Eis." },
-    "Triple Axel":       { "de_name": "Triple Axel",      "type": "Ice",      "category": "Physical", "accuracy": 90, "effect": "Drei-Treffer-Attacke; Stärke steigt mit jedem Treffer (20/40/60). Genauigkeit pro Treffer." },
-
-    "Earth Power":       { "de_name": "Erdkräfte",        "type": "Ground",   "category": "Special",  "effect": "10 % Chance, die Spez.-Vert. des Ziels zu senken." },
-    "Earthquake":        { "de_name": "Erdbeben",         "type": "Ground",   "category": "Physical", "effect": "Trifft alle anderen Pokémon auf dem Feld — auch den eigenen Partner." },
-    "Stomping Tantrum":  { "de_name": "Stampftanz",       "type": "Ground",   "category": "Physical", "effect": "Doppelter Schaden, wenn die letzte Aktion des Anwenders fehlgeschlagen ist." },
-    "Bone Rush":         { "de_name": "Knochenkeule",     "type": "Ground",   "category": "Physical", "effect": "2 bis 5 Treffer pro Einsatz." },
-    "Headlong Rush":     { "de_name": "Kopfsprung",       "type": "Ground",   "category": "Physical", "effect": "Starker Kontaktangriff; Anwender erleidet −1 Vert. & Spez.-Vert." },
-
-    "Power Gem":         { "de_name": "Juwelenkraft",     "type": "Rock",     "category": "Special",  "effect": "Solide Gestein-Spezial-Attacke." },
-    "Rock Slide":        { "de_name": "Steinhagel",       "type": "Rock",     "category": "Physical", "effect": "Trifft beide Gegner; 30 % Chance, sie zucken zu lassen." },
-    "Rock Tomb":         { "de_name": "Felswurf",         "type": "Rock",     "category": "Physical", "accuracy": 95, "effect": "Senkt die Initiative des Ziels um 1." },
-    "Stone Edge":        { "de_name": "Steinkante",       "type": "Rock",     "category": "Physical", "accuracy": 80, "effect": "Sehr starker Gestein-Hit; erhöhte Volltrefferquote." },
-
-    "Sludge Bomb":       { "de_name": "Matschbombe",      "type": "Poison",   "category": "Special",  "effect": "30 % Vergiftungs-Chance." },
-    "Poison Jab":        { "de_name": "Giftstreich",      "type": "Poison",   "category": "Physical", "effect": "30 % Vergiftungs-Chance." },
-    "Gunk Shot":         { "de_name": "Mülltreffer",      "type": "Poison",   "category": "Physical", "accuracy": 80, "effect": "30 % Vergiftungs-Chance." },
-    "Dire Claw":         { "de_name": "Schreckenskralle", "type": "Poison",   "category": "Physical", "effect": "50 % Chance auf zufälligen Status: Vergiftung, Paralyse oder Schlaf." },
-
-    "Iron Head":         { "de_name": "Eisenschädel",     "type": "Steel",    "category": "Physical", "effect": "30 % Chance, das Ziel zucken zu lassen." },
-    "Flash Cannon":      { "de_name": "Lichtkanone",      "type": "Steel",    "category": "Special",  "effect": "10 % Chance, Spez.-Vert. des Ziels zu senken." },
-    "Meteor Mash":       { "de_name": "Meteorschlag",     "type": "Steel",    "category": "Physical", "effect": "20 % Chance, den eigenen Angriff um 1 zu erhöhen." },
-
-    "Moonblast":         { "de_name": "Mondgewalt",       "type": "Fairy",    "category": "Special",  "effect": "30 % Chance, Spez.-Angriff des Ziels zu senken." },
-    "Dazzling Gleam":    { "de_name": "Zauberschein",     "type": "Fairy",    "category": "Special",  "effect": "Trifft beide Gegner." },
-    "Draining Kiss":     { "de_name": "Diebeskuss",       "type": "Fairy",    "category": "Special",  "effect": "Heilt den Anwender um 75 % des zugefügten Schadens." },
-    "Light of Ruin":     { "de_name": "Lichtkanone",      "type": "Fairy",    "category": "Special",  "accuracy": 90, "effect": "Sehr starker Fee-Hit (Spez.-Stärke 140); Anwender erleidet 1/2 des Schadens als Rückstoß. Signatur-Attacke von Florges (Mega-Form)." },
-    "Matcha Gotcha":     { "de_name": "Tee-Verkostung",   "type": "Grass",    "category": "Special",  "effect": "Trifft beide Gegner; heilt Anwender und Verbündete um 50 % des Schadens; 20 % Verbrennung. Signatur von Sinistcha." },
-
-    "Dragon Claw":       { "de_name": "Drachenklaue",     "type": "Dragon",   "category": "Physical", "effect": "Solide Drachen-Attacke." },
-    "Dragon Pulse":      { "de_name": "Drachenpuls",      "type": "Dragon",   "category": "Special",  "effect": "Solide Drachen-Spezial-Attacke." },
-    "Clanging Scales":   { "de_name": "Schuppenrasseln",  "type": "Dragon",   "category": "Special",  "effect": "Trifft beide Gegner; Anwender −1 Verteidigung danach." },
-    "Scale Shot":        { "de_name": "Schuppensalve",    "type": "Dragon",   "category": "Physical", "accuracy": 90, "effect": "2 bis 5 Treffer; danach −1 Verteidigung, +1 Initiative." },
-
-    "Shadow Ball":       { "de_name": "Spukball",         "type": "Ghost",    "category": "Special",  "effect": "20 % Chance, Spez.-Vert. des Ziels zu senken." },
-    "Poltergeist":       { "de_name": "Brimborium",       "type": "Ghost",    "category": "Physical", "accuracy": 90, "effect": "Sehr stark, schlägt nur fehl, wenn das Ziel kein Item trägt." },
-    "Last Respects":     { "de_name": "Letzte Ehre",      "type": "Ghost",    "category": "Physical", "effect": "Stärke steigt um 50 für jedes besiegte Team-Mitglied (max. 850); Game-Ender im späten Spiel." },
-
-    "Knock Off":         { "de_name": "Abschlag",         "type": "Dark",     "category": "Physical", "effect": "Schlägt das Item des Ziels ab (dauerhaft); 50 % mehr Schaden, wenn das Ziel ein Item trug." },
-    "Throat Chop":       { "de_name": "Knebelhieb",       "type": "Dark",     "category": "Physical", "effect": "Sperrt das Ziel für 2 Runden auf Schall-Attacken (z. B. Hyperstimme)." },
-
-    "Close Combat":      { "de_name": "Nahkampf",         "type": "Fighting", "category": "Physical", "effect": "Sehr starker Kampf-Hit; Anwender −1 Vert. & Spez.-Vert." },
-    "Aura Sphere":       { "de_name": "Aurasphäre",       "type": "Fighting", "category": "Special",  "effect": "Trifft immer (kein Genauigkeits-Check)." },
-    "High Jump Kick":    { "de_name": "Turmkick",         "type": "Fighting", "category": "Physical", "accuracy": 90, "effect": "Sehr stark; Anwender erleidet 1/2 max. KP, wenn er fehlschlägt." },
-    "Low Kick":          { "de_name": "Fußkick",          "type": "Fighting", "category": "Physical", "effect": "Schaden skaliert mit dem Gewicht des Ziels (max. 120 bei sehr schweren Pokémon)." },
-
-    "Hyper Beam":        { "de_name": "Hyperstrahl",      "type": "Normal",   "category": "Special",  "accuracy": 90, "effect": "Sehr stark; Anwender muss in der nächsten Runde rasten." },
-    "Hyper Voice":       { "de_name": "Hyperstimme",      "type": "Normal",   "category": "Special",  "effect": "Trifft beide Gegner; Schall-Attacke (umgeht Delegator)." },
-
-    "Energy Ball":       { "de_name": "Energieball",      "type": "Grass",    "category": "Special",  "effect": "10 % Chance, Spez.-Vert. des Ziels zu senken." },
-    "Giga Drain":        { "de_name": "Gigasauger",       "type": "Grass",    "category": "Special",  "effect": "Heilt den Anwender um 50 % des zugefügten Schadens." },
-    "Power Whip":        { "de_name": "Schmackhieb",      "type": "Grass",    "category": "Physical", "accuracy": 85, "effect": "Starker Pflanzen-Hit." },
-    "Solar Beam":        { "de_name": "Solarstrahl",      "type": "Grass",    "category": "Special",  "effect": "Auflade-Attacke; ohne Aufladung bei harschem Sonnenlicht oder mit Energiekraut (Power Herb)." },
-    "Flower Trick":      { "de_name": "Flower Trick",     "type": "Grass",    "category": "Physical", "effect": "Trifft immer und ist immer ein Volltreffer. Signatur von Floragato/Maushold-Familie." },
-
-    "Psychic":           { "de_name": "Psychokinese",     "type": "Psychic",  "category": "Special",  "effect": "10 % Chance, Spez.-Vert. des Ziels zu senken." },
-    "Psyshock":          { "de_name": "Psychoschock",     "type": "Psychic",  "category": "Special",  "effect": "Berechnet Schaden gegen die Verteidigung statt Spez.-Verteidigung." },
-    "Psycho Cut":        { "de_name": "Psychoklinge",     "type": "Psychic",  "category": "Physical", "effect": "Erhöhte Volltrefferquote." },
-
-    "Kowtow Cleave":     { "de_name": "Kniefall-Klinge",  "type": "Dark",     "category": "Physical", "effect": "Trifft immer (kein Genauigkeits-Check). Signatur-Attacke von Kingambit." }
+  "Trick Room": {
+   "de_name": "Bizarroraum",
+   "type": "Psychic",
+   "effect": "Langsamere Pokémon agieren 5 Runden lang zuerst (erneuter Einsatz beendet ihn vorzeitig)."
+  },
+  "Rain Dance": {
+   "de_name": "Regentanz",
+   "type": "Water",
+   "effect": "5 Runden Regen (8 mit Nassbrocken/Damp Rock)."
+  },
+  "Protect": {
+   "de_name": "Schutzschild",
+   "type": "Normal",
+   "effect": "Schützt Anwender 1 Runde vor allen Attacken. Erfolgschance drittelt sich bei aufeinanderfolgendem Einsatz."
+  },
+  "King's Shield": {
+   "de_name": "Königsschild",
+   "type": "Steel",
+   "effect": "Schützt; Kontaktangreifer erhalten −1 Angriff."
+  },
+  "Spiky Shield": {
+   "de_name": "Schutzstacheln",
+   "type": "Grass",
+   "effect": "Schützt; Kontaktangreifer verlieren 1/8 max. KP."
+  },
+  "Wide Guard": {
+   "de_name": "Rundumschutz",
+   "type": "Rock",
+   "effect": "Schützt die eigene Seite 1 Runde vor Mehrziel-Attacken."
+  },
+  "Light Screen": {
+   "de_name": "Lichtschild",
+   "type": "Psychic",
+   "effect": "Spezial-Schaden −1/2 (Einzel) bzw. −1/3 (Doppel) für 5 Runden (8 mit Lichtlehm)."
+  },
+  "Reflect": {
+   "de_name": "Reflektor",
+   "type": "Psychic",
+   "effect": "Physischer Schaden −1/2 (Einzel) bzw. −1/3 (Doppel) für 5 Runden (8 mit Lichtlehm)."
+  },
+  "Aurora Veil": {
+   "de_name": "Auroraschleier",
+   "type": "Ice",
+   "effect": "Beide Schadensarten −1/2 (Einzel)/−1/3 (Doppel) für 5 Runden (8 mit Lichtlehm); nur bei Schnee einsetzbar."
+  },
+  "Will-O-Wisp": {
+   "de_name": "Irrlicht",
+   "type": "Fire",
+   "accuracy": 85,
+   "effect": "Verbrennt das Ziel: Ziel verliert pro Runde 1/16 max. KP und sein physischer Angriff wird halbiert."
+  },
+  "Hypnosis": {
+   "de_name": "Hypnose",
+   "type": "Psychic",
+   "accuracy": 60,
+   "effect": "Versetzt das Ziel in Schlaf — unzuverlässig."
+  },
+  "Sleep Powder": {
+   "de_name": "Schlafpuder",
+   "type": "Grass",
+   "accuracy": 75,
+   "effect": "Versetzt das Ziel in Schlaf (1–3 Runden Handlungsausfall)."
+  },
+  "Disable": {
+   "de_name": "Aussetzer",
+   "type": "Normal",
+   "accuracy": 100,
+   "effect": "Sperrt die zuletzt benutzte Attacke des Ziels für 4 Runden."
+  },
+  "Encore": {
+   "de_name": "Zugabe",
+   "type": "Normal",
+   "accuracy": 100,
+   "effect": "Ziel muss seine zuletzt eingesetzte Attacke 3 Runden lang wiederholen — sperrt Setup-Attacken oder zwingt Spam."
+  },
+  "Perish Song": {
+   "de_name": "Abgesang",
+   "type": "Normal",
+   "effect": "Alle Pokémon auf dem Feld werden 3 Runden nach Einsatz K.O. (außer sie wechseln aus)."
+  },
+  "Parting Shot": {
+   "de_name": "Abgangstirade",
+   "type": "Dark",
+   "accuracy": 100,
+   "effect": "Ziel −1 Angriff & Spez.-Angriff; Anwender wechselt aus."
+  },
+  "Rage Powder": {
+   "de_name": "Wutpulver",
+   "type": "Bug",
+   "effect": "Zieht alle Einzelziel-Attacken der Gegner 1 Runde auf den Anwender (wirkt nicht auf Pflanzen-Typen)."
+  },
+  "Helping Hand": {
+   "de_name": "Rechte Hand",
+   "type": "Normal",
+   "effect": "Verstärkt die Attacke eines Verbündeten diese Runde um 50 %."
+  },
+  "Calm Mind": {
+   "de_name": "Gedankengut",
+   "type": "Psychic",
+   "effect": "Eigener Spez.-Angriff & Spez.-Vert. +1."
+  },
+  "Swords Dance": {
+   "de_name": "Schwerttanz",
+   "type": "Normal",
+   "effect": "Eigener Angriff +2."
+  },
+  "Coil": {
+   "de_name": "Einrollen",
+   "type": "Poison",
+   "effect": "Eigener Angriff, Verteidigung & Genauigkeit +1."
+  },
+  "Clangorous Soul": {
+   "de_name": "Seelentanz",
+   "type": "Dragon",
+   "effect": "Verliert 1/3 max. KP, dafür alle 5 Kampfwerte +1."
+  },
+  "Recover": {
+   "de_name": "Genesung",
+   "type": "Normal",
+   "effect": "Heilt 1/2 der max. KP."
+  },
+  "Roost": {
+   "de_name": "Ruheort",
+   "type": "Flying",
+   "effect": "Heilt 1/2 max. KP; verliert diese Runde den Flug-Typ."
+  },
+  "Life Dew": {
+   "de_name": "Lebenstropfen",
+   "type": "Water",
+   "effect": "Heilt 1/4 max. KP von Anwender und allen Verbündeten."
+  },
+  "Fake Out": {
+   "de_name": "Mogelhieb",
+   "type": "Normal",
+   "category": "Physical",
+   "effect": "Vorzugsangriff (Prio +3), nur in der ersten Runde nach Einwechseln. Lässt das Ziel zucken (verliert die Runde)."
+  },
+  "Quick Attack": {
+   "de_name": "Ruckzuckhieb",
+   "type": "Normal",
+   "category": "Physical",
+   "effect": "Vorzugsangriff (Prio +1)."
+  },
+  "Sucker Punch": {
+   "de_name": "Tiefschlag",
+   "type": "Dark",
+   "category": "Physical",
+   "effect": "Vorzugsangriff (Prio +1); trifft nur, wenn das Ziel diese Runde eine Angriffsattacke einsetzt."
+  },
+  "Shadow Sneak": {
+   "de_name": "Schattenstoß",
+   "type": "Ghost",
+   "category": "Physical",
+   "effect": "Vorzugsangriff (Prio +1)."
+  },
+  "Aqua Jet": {
+   "de_name": "Wasserdüse",
+   "type": "Water",
+   "category": "Physical",
+   "effect": "Vorzugsangriff (Prio +1)."
+  },
+  "U-turn": {
+   "de_name": "Kehrtwende",
+   "type": "Bug",
+   "category": "Physical",
+   "effect": "Greift an und wechselt anschließend aus."
+  },
+  "Volt Switch": {
+   "de_name": "Voltwechsel",
+   "type": "Electric",
+   "category": "Special",
+   "effect": "Greift an und wechselt anschließend aus."
+  },
+  "Flip Turn": {
+   "de_name": "Rollwende",
+   "type": "Water",
+   "category": "Physical",
+   "effect": "Greift an und wechselt anschließend aus."
+  },
+  "Acrobatics": {
+   "de_name": "Akrobatik",
+   "type": "Flying",
+   "category": "Physical",
+   "effect": "Doppelter Schaden, wenn der Anwender kein Item trägt."
+  },
+  "Brave Bird": {
+   "de_name": "Sturzflug",
+   "type": "Flying",
+   "category": "Physical",
+   "effect": "Sehr starker Flug-Angriff; Anwender erleidet 1/3 des zugefügten Schadens als Rückstoß."
+  },
+  "Dual Wingbeat": {
+   "de_name": "Doppelflügel",
+   "type": "Flying",
+   "category": "Physical",
+   "effect": "Trifft 2× pro Einsatz."
+  },
+  "Air Slash": {
+   "de_name": "Luftschnitt",
+   "type": "Flying",
+   "category": "Special",
+   "effect": "30 % Chance, das Ziel zucken zu lassen."
+  },
+  "Thunderbolt": {
+   "de_name": "Donnerblitz",
+   "type": "Electric",
+   "category": "Special",
+   "effect": "Solide Elektro-Spezial-Attacke; 10 % Paralyse."
+  },
+  "Thunder Punch": {
+   "de_name": "Donnerschlag",
+   "type": "Electric",
+   "category": "Physical",
+   "effect": "Kontaktangriff; 10 % Paralyse."
+  },
+  "Electro Shot": {
+   "de_name": "Stromstrahl",
+   "type": "Electric",
+   "category": "Special",
+   "effect": "Auflade-Attacke; ohne Aufladung bei Regen oder mit Energiekraut (Power Herb)."
+  },
+  "Electroweb": {
+   "de_name": "Elektronetz",
+   "type": "Electric",
+   "category": "Special",
+   "effect": "Trifft beide Gegner; senkt deren Initiative um 1."
+  },
+  "Hydro Pump": {
+   "de_name": "Hydropumpe",
+   "type": "Water",
+   "category": "Special",
+   "accuracy": 80,
+   "effect": "Sehr starke Wasser-Attacke."
+  },
+  "Hydro Cannon": {
+   "de_name": "Aquahaubitze",
+   "type": "Water",
+   "category": "Special",
+   "accuracy": 90,
+   "effect": "Sehr starker Wasser-Hit; Anwender kann in der nächsten Runde nicht angreifen."
+  },
+  "Muddy Water": {
+   "de_name": "Lehmbrühe",
+   "type": "Water",
+   "category": "Special",
+   "effect": "Trifft beide Gegner; 30 % Chance, deren Genauigkeit zu senken."
+  },
+  "Wave Crash": {
+   "de_name": "Wellentackle",
+   "type": "Water",
+   "category": "Physical",
+   "effect": "Starker Kontaktangriff; Anwender erleidet 1/3 des zugefügten Schadens als Rückstoß."
+  },
+  "Liquidation": {
+   "de_name": "Aquadurchstoß",
+   "type": "Water",
+   "category": "Physical",
+   "effect": "20 % Chance, die Verteidigung des Ziels zu senken."
+  },
+  "Flare Blitz": {
+   "de_name": "Flammenblitz",
+   "type": "Fire",
+   "category": "Physical",
+   "effect": "Starker Kontaktangriff; Anwender erleidet 1/3 des Schadens als Rückstoß und kann sich verbrennen."
+  },
+  "Heat Wave": {
+   "de_name": "Hitzewelle",
+   "type": "Fire",
+   "category": "Special",
+   "effect": "Trifft beide Gegner; 10 % Verbrennung."
+  },
+  "Weather Ball": {
+   "de_name": "Meteorologe",
+   "type": "Normal",
+   "category": "Special",
+   "effect": "Doppelter Schaden und wechselt den Typ bei aktivem Wetter (Sonne=Feuer, Regen=Wasser, Sand=Gestein, Schnee=Eis)."
+  },
+  "Overheat": {
+   "de_name": "Hitzekoller",
+   "type": "Fire",
+   "category": "Special",
+   "effect": "Sehr starker Feuer-Spezial-Hit; Anwender erleidet danach −2 Spez.-Angriff."
+  },
+  "Eruption": {
+   "de_name": "Eruption",
+   "type": "Fire",
+   "category": "Special",
+   "effect": "Trifft beide Gegner; Schaden skaliert mit den eigenen KP (volle KP = volle Stärke)."
+  },
+  "Infernal Parade": {
+   "de_name": "Phantomparade",
+   "type": "Ghost",
+   "category": "Special",
+   "effect": "Doppelter Schaden bei Status-Problemen des Ziels; 30 % Verbrennung."
+  },
+  "Blizzard": {
+   "de_name": "Blizzard",
+   "type": "Ice",
+   "category": "Special",
+   "accuracy": 70,
+   "effect": "Trifft beide Gegner; 10 % Eis. Trifft IMMER bei Schnee."
+  },
+  "Ice Beam": {
+   "de_name": "Eisstrahl",
+   "type": "Ice",
+   "category": "Special",
+   "effect": "Solide Eis-Attacke; 10 % Eis."
+  },
+  "Freeze-Dry": {
+   "de_name": "Gefriertrockner",
+   "type": "Ice",
+   "category": "Special",
+   "effect": "Trifft Wasser-Typen super-effektiv (statt nicht-sehr-effektiv); 10 % Eis."
+  },
+  "Triple Axel": {
+   "de_name": "Dreifach-Axel",
+   "type": "Ice",
+   "category": "Physical",
+   "accuracy": 90,
+   "effect": "Drei-Treffer-Attacke; Stärke steigt mit jedem Treffer (20/40/60). Genauigkeit pro Treffer."
+  },
+  "Earth Power": {
+   "de_name": "Erdkräfte",
+   "type": "Ground",
+   "category": "Special",
+   "effect": "10 % Chance, die Spez.-Vert. des Ziels zu senken."
+  },
+  "Earthquake": {
+   "de_name": "Erdbeben",
+   "type": "Ground",
+   "category": "Physical",
+   "effect": "Trifft alle anderen Pokémon auf dem Feld — auch den eigenen Partner."
+  },
+  "Stomping Tantrum": {
+   "de_name": "Fruststampfer",
+   "type": "Ground",
+   "category": "Physical",
+   "effect": "Doppelter Schaden, wenn die letzte Aktion des Anwenders fehlgeschlagen ist."
+  },
+  "Bone Rush": {
+   "de_name": "Knochenhatz",
+   "type": "Ground",
+   "category": "Physical",
+   "effect": "2 bis 5 Treffer pro Einsatz."
+  },
+  "Headlong Rush": {
+   "de_name": "Schmetterramme",
+   "type": "Ground",
+   "category": "Physical",
+   "effect": "Starker Kontaktangriff; Anwender erleidet −1 Vert. & Spez.-Vert."
+  },
+  "Power Gem": {
+   "de_name": "Juwelenkraft",
+   "type": "Rock",
+   "category": "Special",
+   "effect": "Solide Gestein-Spezial-Attacke."
+  },
+  "Rock Slide": {
+   "de_name": "Steinhagel",
+   "type": "Rock",
+   "category": "Physical",
+   "effect": "Trifft beide Gegner; 30 % Chance, sie zucken zu lassen."
+  },
+  "Rock Tomb": {
+   "de_name": "Felsgrab",
+   "type": "Rock",
+   "category": "Physical",
+   "accuracy": 95,
+   "effect": "Senkt die Initiative des Ziels um 1."
+  },
+  "Stone Edge": {
+   "de_name": "Steinkante",
+   "type": "Rock",
+   "category": "Physical",
+   "accuracy": 80,
+   "effect": "Sehr starker Gestein-Hit; erhöhte Volltrefferquote."
+  },
+  "Sludge Bomb": {
+   "de_name": "Matschbombe",
+   "type": "Poison",
+   "category": "Special",
+   "effect": "30 % Vergiftungs-Chance."
+  },
+  "Poison Jab": {
+   "de_name": "Gifthieb",
+   "type": "Poison",
+   "category": "Physical",
+   "effect": "30 % Vergiftungs-Chance."
+  },
+  "Gunk Shot": {
+   "de_name": "Mülltreffer",
+   "type": "Poison",
+   "category": "Physical",
+   "accuracy": 80,
+   "effect": "30 % Vergiftungs-Chance."
+  },
+  "Dire Claw": {
+   "de_name": "Unheilsklauen",
+   "type": "Poison",
+   "category": "Physical",
+   "effect": "50 % Chance auf zufälligen Status: Vergiftung, Paralyse oder Schlaf."
+  },
+  "Iron Head": {
+   "de_name": "Eisenschädel",
+   "type": "Steel",
+   "category": "Physical",
+   "effect": "30 % Chance, das Ziel zucken zu lassen."
+  },
+  "Flash Cannon": {
+   "de_name": "Lichtkanone",
+   "type": "Steel",
+   "category": "Special",
+   "effect": "10 % Chance, Spez.-Vert. des Ziels zu senken."
+  },
+  "Meteor Mash": {
+   "de_name": "Sternenhieb",
+   "type": "Steel",
+   "category": "Physical",
+   "effect": "20 % Chance, den eigenen Angriff um 1 zu erhöhen."
+  },
+  "Moonblast": {
+   "de_name": "Mondgewalt",
+   "type": "Fairy",
+   "category": "Special",
+   "effect": "30 % Chance, Spez.-Angriff des Ziels zu senken."
+  },
+  "Dazzling Gleam": {
+   "de_name": "Zauberschein",
+   "type": "Fairy",
+   "category": "Special",
+   "effect": "Trifft beide Gegner."
+  },
+  "Draining Kiss": {
+   "de_name": "Diebeskuss",
+   "type": "Fairy",
+   "category": "Special",
+   "effect": "Heilt den Anwender um 75 % des zugefügten Schadens."
+  },
+  "Light of Ruin": {
+   "de_name": "Lux Calamitatis",
+   "type": "Fairy",
+   "category": "Special",
+   "accuracy": 90,
+   "effect": "Sehr starker Fee-Hit (Spez.-Stärke 140); Anwender erleidet 1/2 des Schadens als Rückstoß. Signatur-Attacke von Florges (Mega-Form)."
+  },
+  "Matcha Gotcha": {
+   "de_name": "Quirlschuss",
+   "type": "Grass",
+   "category": "Special",
+   "effect": "Trifft beide Gegner; heilt Anwender und Verbündete um 50 % des Schadens; 20 % Verbrennung. Signatur von Sinistcha."
+  },
+  "Dragon Claw": {
+   "de_name": "Drachenklaue",
+   "type": "Dragon",
+   "category": "Physical",
+   "effect": "Solide Drachen-Attacke."
+  },
+  "Dragon Pulse": {
+   "de_name": "Drachenpuls",
+   "type": "Dragon",
+   "category": "Special",
+   "effect": "Solide Drachen-Spezial-Attacke."
+  },
+  "Clanging Scales": {
+   "de_name": "Schuppenrasseln",
+   "type": "Dragon",
+   "category": "Special",
+   "effect": "Trifft beide Gegner; Anwender −1 Verteidigung danach."
+  },
+  "Scale Shot": {
+   "de_name": "Schuppenschuss",
+   "type": "Dragon",
+   "category": "Physical",
+   "accuracy": 90,
+   "effect": "2 bis 5 Treffer; danach −1 Verteidigung, +1 Initiative."
+  },
+  "Shadow Ball": {
+   "de_name": "Spukball",
+   "type": "Ghost",
+   "category": "Special",
+   "effect": "20 % Chance, Spez.-Vert. des Ziels zu senken."
+  },
+  "Poltergeist": {
+   "de_name": "Poltergeist",
+   "type": "Ghost",
+   "category": "Physical",
+   "accuracy": 90,
+   "effect": "Sehr stark, schlägt nur fehl, wenn das Ziel kein Item trägt."
+  },
+  "Last Respects": {
+   "de_name": "Letzte Ehre",
+   "type": "Ghost",
+   "category": "Physical",
+   "effect": "Stärke steigt um 50 für jedes besiegte Team-Mitglied (max. 850); Game-Ender im späten Spiel."
+  },
+  "Knock Off": {
+   "de_name": "Abschlag",
+   "type": "Dark",
+   "category": "Physical",
+   "effect": "Schlägt das Item des Ziels ab (dauerhaft); 50 % mehr Schaden, wenn das Ziel ein Item trug."
+  },
+  "Throat Chop": {
+   "de_name": "Neck Strike",
+   "type": "Dark",
+   "category": "Physical",
+   "effect": "Sperrt das Ziel für 2 Runden auf Schall-Attacken (z. B. Hyperstimme)."
+  },
+  "Close Combat": {
+   "de_name": "Nahkampf",
+   "type": "Fighting",
+   "category": "Physical",
+   "effect": "Sehr starker Kampf-Hit; Anwender −1 Vert. & Spez.-Vert."
+  },
+  "Aura Sphere": {
+   "de_name": "Aurasphäre",
+   "type": "Fighting",
+   "category": "Special",
+   "effect": "Trifft immer (kein Genauigkeits-Check)."
+  },
+  "High Jump Kick": {
+   "de_name": "Turmkick",
+   "type": "Fighting",
+   "category": "Physical",
+   "accuracy": 90,
+   "effect": "Sehr stark; Anwender erleidet 1/2 max. KP, wenn er fehlschlägt."
+  },
+  "Low Kick": {
+   "de_name": "Fußkick",
+   "type": "Fighting",
+   "category": "Physical",
+   "effect": "Schaden skaliert mit dem Gewicht des Ziels (max. 120 bei sehr schweren Pokémon)."
+  },
+  "Hyper Beam": {
+   "de_name": "Hyperstrahl",
+   "type": "Normal",
+   "category": "Special",
+   "accuracy": 90,
+   "effect": "Sehr stark; Anwender muss in der nächsten Runde rasten."
+  },
+  "Hyper Voice": {
+   "de_name": "Schallwelle",
+   "type": "Normal",
+   "category": "Special",
+   "effect": "Trifft beide Gegner; Schall-Attacke (umgeht Delegator)."
+  },
+  "Energy Ball": {
+   "de_name": "Energieball",
+   "type": "Grass",
+   "category": "Special",
+   "effect": "10 % Chance, Spez.-Vert. des Ziels zu senken."
+  },
+  "Giga Drain": {
+   "de_name": "Gigasauger",
+   "type": "Grass",
+   "category": "Special",
+   "effect": "Heilt den Anwender um 50 % des zugefügten Schadens."
+  },
+  "Power Whip": {
+   "de_name": "Blattgeißel",
+   "type": "Grass",
+   "category": "Physical",
+   "accuracy": 85,
+   "effect": "Starker Pflanzen-Hit."
+  },
+  "Solar Beam": {
+   "de_name": "Solarstrahl",
+   "type": "Grass",
+   "category": "Special",
+   "effect": "Auflade-Attacke; ohne Aufladung bei harschem Sonnenlicht oder mit Energiekraut (Power Herb)."
+  },
+  "Flower Trick": {
+   "de_name": "Blumentrick",
+   "type": "Grass",
+   "category": "Physical",
+   "effect": "Trifft immer und ist immer ein Volltreffer. Signatur von Floragato/Maushold-Familie."
+  },
+  "Psychic": {
+   "de_name": "Psychokinese",
+   "type": "Psychic",
+   "category": "Special",
+   "effect": "10 % Chance, Spez.-Vert. des Ziels zu senken."
+  },
+  "Psyshock": {
+   "de_name": "Psychoschock",
+   "type": "Psychic",
+   "category": "Special",
+   "effect": "Berechnet Schaden gegen die Verteidigung statt Spez.-Verteidigung."
+  },
+  "Psycho Cut": {
+   "de_name": "Psychoklinge",
+   "type": "Psychic",
+   "category": "Physical",
+   "effect": "Erhöhte Volltrefferquote."
+  },
+  "Kowtow Cleave": {
+   "de_name": "Kniefallspalter",
+   "type": "Dark",
+   "category": "Physical",
+   "effect": "Trifft immer (kein Genauigkeits-Check). Signatur-Attacke von Kingambit."
   }
+ }
 }

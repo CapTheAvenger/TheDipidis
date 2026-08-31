@@ -247,15 +247,53 @@
         const quote = fmtPct(model.headlineConvPct);
         const schnitt = fmtPct(model.conv.expected * 100, 1);
 
+        /* BEFUND (31.08.2026, vom Betreiber angestrichen): der Satz war
+           vier Teilsaetze lang und trug die Herleitung mit — "71,5 von
+           708 Antritten kamen in die Top 8, das sind 10,1 %. Ueber alle
+           Decks zusammen sind es 6,2 % — also rund 1,6-mal so oft."
+           Alles richtig, aber es ist der erste Satz der Seite, und wer
+           ihn liest, will die Aussage, nicht den Rechenweg.
+
+           Die Aussage steht jetzt hier, die absoluten Zahlen eine Zeile
+           tiefer beim Nenner (answerHtml). Geloescht wird nichts: eine
+           Quote ohne ihren Nenner waere eine Behauptung. */
         return de
-            ? `<strong>${escapeHtml(best.name)}</strong> ist gerade das erfolgreichste Deck: `
-              + `${cuts} von ${antritte} Antritten kamen in die Top 8, das sind ${quote}. `
-              + `Über alle Decks zusammen sind es ${schnitt} — `
-              + `${escapeHtml(best.name)} schafft es also rund ${fak}-mal so oft.`
+            ? `<strong>${escapeHtml(best.name)}</strong> ist gerade das stärkste Deck: `
+              + `${quote} Top-8-Quote gegen ${schnitt} im Schnitt — `
+              + `rund ${fak}-mal so oft.`
             : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: `
-              + `${cuts} of ${antritte} entries made top 8, that is ${quote}. `
-              + `Across all decks it is ${schnitt} — `
-              + `so ${escapeHtml(best.name)} gets there about ${fak}× as often.`;
+              + `${quote} top-8 rate against ${schnitt} on average — `
+              + `about ${fak}× as often.`;
+    }
+
+    /* Der Nenner zum Satz darueber: aus wie vielen Antritten die Quote
+       kommt, und wie viele davon beim Spitzenreiter in die Top 8 gingen.
+       Steht bewusst unter dem Satz und nicht darin. */
+    function answerNenner(model) {
+        const de = isDe();
+        const loc = de ? 'de-DE' : 'en-US';
+        const best = model.headline;
+        const gesamt = Math.round(model.totalBrought).toLocaleString(loc);
+        if (!best) {
+            return de ? `Aus ${gesamt} gewichteten Antritten.`
+                      : `Out of ${gesamt} weighted entries.`;
+        }
+        const zahl = (v) => {
+            const n = Number(v) || 0;
+            return Number.isInteger(n) ? n.toLocaleString(loc)
+                : n.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        };
+        const hinweis = de
+            ? 'Antritte sind nach Turniergröße gewichtet; deshalb kommen halbe Werte vor.'
+            : 'Entries are weighted by tournament size, so half values occur.';
+        const mit = (v) => (Number.isInteger(Number(v))
+            ? zahl(v)
+            : `<span class="mah-gewichtet" title="${escapeHtml(hinweis)}">${zahl(v)}</span>`);
+        return de
+            ? `Aus ${gesamt} gewichteten Antritten · ${escapeHtml(best.name)}: `
+              + `${mit(best.top8)} von ${mit(best.brought)} in die Top 8.`
+            : `Out of ${gesamt} weighted entries · ${escapeHtml(best.name)}: `
+              + `${mit(best.top8)} of ${mit(best.brought)} made top 8.`;
     }
 
     function answerHtml(model) {
@@ -333,7 +371,7 @@
         return `
             <section class="meta-hub-answer" aria-labelledby="metaHubAnswerTitle">
                 <h3 class="ds-label" id="metaHubAnswerTitle">
-                    ${de ? 'Was ist gerade stark?' : 'What is strong right now?'}
+                    ${de ? 'Was gerade läuft' : 'What is running right now'}
                     <span class="ds-label-note">${de ? 'Daten' : 'Data'}: <span
                         class="js-data-freshness"
                         data-quelle="online_tournament_top8_decks.csv"
@@ -350,9 +388,7 @@
                      unter Quellen & Methodik; hier bleibt der Weg dorthin.
                      Der Nenner selbst ist keine Erklaerung, sondern die
                      Bezugsgroesse der Zahl darueber — er bleibt. -->
-                <p class="ds-note">${de
-                    ? `Von ${Math.round(model.totalBrought).toLocaleString('de-DE')} gewichteten Antritten.`
-                    : `Out of ${Math.round(model.totalBrought).toLocaleString('en-US')} weighted entries.`}
+                <p class="ds-note">${answerNenner(model)}
                     <a class="qu-verweis" href="#quellen">${de ? 'Wie das gerechnet ist →' : 'How this is calculated →'}</a></p>
             </section>`;
     }

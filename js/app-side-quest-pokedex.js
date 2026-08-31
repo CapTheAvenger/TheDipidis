@@ -72,6 +72,7 @@
             legendUsed: '= meistgenutzter Endwert',
             legendRange: '= mögliche Spanne (Lv. 50, IS fix 31, 0–32 SP, Wesen ±10 %)',
             legendTail: 'Die Spalte „Ges“ ist die Basiswertsumme. Tipp auf ein Pokémon → alle In-Game-Infos (Wesen, SP, Attacken, Item, Team) für Doppel und Einzel.',
+            legendSprite: 'Ein gestrichelt umrandetes Bild zeigt die Grundform: für neun Champions-eigene Mega-Formen führt unsere Bildquelle keine eigene Darstellung.',
             metaTitle: 'Meist genutzt:',
             metaStats: 'Endwerte Lv. 50:',
             baseStatsLabel: 'Basiswerte:',
@@ -98,6 +99,7 @@
             noUsage: 'Für dieses Pokémon gibt es noch keine In-Game-Nutzungsdaten.',
             closeLabel: 'Schließen',
             megaAbility: 'Mega-Fähigkeit',
+            spriteGrundform: 'Bild der Grundform — für diese Mega-Form führt unsere Bildquelle keine eigene Darstellung.',
             megaAbilityUnknown: 'Vorschlag liegt vor, Bestätigung steht aus — bis dahin steht hier nichts. Geraten wird nicht.',
             viaBase: (basis, stein, pct) =>
                 `Nutzungsdaten von ${basis} — ${pct}\u00a0% der ${basis}-Builds halten ${stein}.`,
@@ -131,6 +133,7 @@
             legendUsed: '= most-used final value',
             legendRange: '= possible range (Lv. 50, IV fixed 31, 0–32 SP, nature ±10%)',
             legendTail: 'The “Tot” column is the base stat total. Tap a Pokémon → full in-game info (nature, SP, moves, item, team) for Doubles and Singles.',
+            legendSprite: 'A dashed border means the picture shows the base form: for nine Champions-original Mega forms our sprite source carries no separate artwork.',
             metaTitle: 'Most used:',
             metaStats: 'Final stats Lv. 50:',
             baseStatsLabel: 'Base stats:',
@@ -157,6 +160,7 @@
             noUsage: 'No in-game usage data for this Pokémon yet.',
             closeLabel: 'Close',
             megaAbility: 'Mega ability',
+            spriteGrundform: 'Base form artwork — our sprite source carries no separate picture for this Mega form.',
             megaAbilityUnknown: 'A proposal exists, confirmation is pending — until then nothing stands here. We don\u2019t guess.',
             viaBase: (basis, stein, pct) =>
                 `Usage data from ${basis} — ${pct}\u00a0% of ${basis} builds hold ${stein}.`,
@@ -203,12 +207,60 @@
         return parts.join('-').toLowerCase();
     }
 
+    const SPRITE_BASIS = 'https://r2.limitlesstcg.net/pokemon/gen9/';
+
+    /* Die Grundform zu einer Mega-Form — als Rueckfall fuer das Bild.
+     *
+     * BEFUND (31.08.2026, alle 290 Eintraege im Browser geprueft): fuer
+     * 9 Mega-Formen liefert die Bildquelle nichts. Es sind die
+     * Champions-eigenen: Glimmora, Scovillain, Raichu X, Raichu Y,
+     * Staraptor, Golurk, Crabominable, Meowstic, Chimecho. Alle neun
+     * Grundformen sind dort vorhanden — geprueft, ebenso wie sieben
+     * andere Schreibweisen des Mega-Namens und fuenf andere
+     * Verzeichnisse. Die Bilder existieren dort schlicht nicht.
+     *
+     * Bisher versteckte sich der Fehlschlag lautlos (visibility:hidden),
+     * und in der Tabelle klaffte eine Luecke, die aussah wie ein Fehler.
+     * Jetzt faellt die Zeile auf das Bild der GRUNDFORM zurueck — und
+     * sagt das auch, ueber eine eigene Klasse und einen Titel. Ein
+     * unbeschriftetes Raichu-Bild neben "Raichu (Mega Y)" waere eine
+     * Behauptung ueber das Aussehen, die wir nicht belegen koennen.
+     *
+     * Keine feste Liste: geprueft wird zur Laufzeit. Ergaenzt die
+     * Bildquelle eines der neun, verschwindet der Rueckfall von selbst.
+     */
+    function grundformSlug(en) {
+        const teile = String(en || '').trim().split(/\s+/);
+        if (!teile.length || teile[0].toLowerCase() !== 'mega') return '';
+        const rest = teile.slice(1);
+        // "Mega Raichu Y" -> raichu (die Variante faellt weg),
+        // "Mega Metagross" -> metagross.
+        if (rest.length > 1) rest.pop();
+        return spriteSlug(rest.join(' '));
+    }
+
+    function spriteErsatz(img) {
+        if (!img || img.dataset.ersetzt) {
+            if (img) img.style.visibility = 'hidden';
+            return;
+        }
+        const basis = img.getAttribute('data-grundform');
+        if (!basis) { img.style.visibility = 'hidden'; return; }
+        img.dataset.ersetzt = '1';
+        img.classList.add('sqp-sprite--grundform');
+        img.title = t().spriteGrundform;
+        img.alt = t().spriteGrundform;
+        img.src = SPRITE_BASIS + basis + '.png';
+    }
+
     function spriteImg(en, cls) {
         const slug = spriteSlug(en);
         if (!slug) return '';
+        const basis = grundformSlug(en);
         return `<img class="sqp-sprite ${cls || ''}" loading="lazy" alt=""
-                     src="https://r2.limitlesstcg.net/pokemon/gen9/${slug}.png"
-                     onerror="this.style.visibility='hidden'">`;
+                     src="${SPRITE_BASIS}${slug}.png"
+                     data-grundform="${basis}"
+                     onerror="window.championsSprite && window.championsSprite.ersatz(this)">`;
     }
 
     function escapeHtml(s) {
@@ -343,7 +395,8 @@
             key('lv50', '166', l.legendLv50),
             key('used', '(168)', l.legendUsed),
             key('range', '166–198', l.legendRange),
-        ].join(' · ') + ` · ${escapeHtml(l.legendTail)}`;
+        ].join(' · ') + ` · ${escapeHtml(l.legendTail)}`
+             + ` · ${escapeHtml(l.legendSprite)}`;
     }
 
     const COLS = [
@@ -1244,7 +1297,8 @@
 
     // Shared with the usage view — one slug rule for the whole Champions
     // area, so a form that resolves in one list resolves in the other.
-    window.championsSprite = { slug: spriteSlug, img: spriteImg };
+    window.championsSprite = { slug: spriteSlug, img: spriteImg,
+                               ersatz: spriteErsatz, grundform: grundformSlug };
 
     window.sideQuestPokedex = { activate, render, loadData };
 })();

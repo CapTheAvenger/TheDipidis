@@ -92,6 +92,31 @@
                         ['Tier',
                          'Gruppierung nach Anteil und Erfolg. Die Schwellen stehen in der ' +
                          'Tier-Liste selbst.'],
+                        // Am 31.08.2026 von der Startseite hierher gezogen:
+                        // dort standen sie als Erklaersaetze mitten zwischen
+                        // den Zahlen, an der Stelle, an der jemand gerade
+                        // eine Entscheidung trifft.
+                        ['Unser Pick',
+                         'Das Deck, das die Empfehlung für das nächste Turnier ausgibt. ' +
+                         'Es ist der Vorschlag mit der besten Day-2-Aussicht im aktuellen ' +
+                         'Feld — keine Zusage, sondern die beste Wette, die die Daten hergeben.'],
+                        ['„schafft Day 2“',
+                         'Wie oft ein Spieler mit diesem Deck über den ersten Tag hinauskommt, ' +
+                         'gerechnet über die ausgewerteten Präsenzturniere. Daneben steht ' +
+                         'derselbe Wert für ein beliebiges Deck — ohne diesen Vergleich sagt ' +
+                         'die Zahl nichts.'],
+                        ['„Day-2-Rate bisher“',
+                         'Der tatsächlich beobachtete Wert dieses Decks, geschrumpft: Decks mit ' +
+                         'wenigen Spielern werden Richtung Durchschnitt korrigiert. Deshalb ' +
+                         'weicht er von der Aussicht daneben ab.'],
+                        ['„min. 30 pro Deck“',
+                         'Ein Deck taucht in der Auswertung erst auf, wenn mindestens so viele ' +
+                         'Spieler es gespielt haben. Darunter ist die Quote Rauschen. Die ' +
+                         'Schwelle hängt am Format und steht deshalb bei der Empfehlung selbst.'],
+                        ['„% vom Feld sind neu“',
+                         'Der Anteil des Feldes, für den es noch keine Präsenzdaten gibt — ' +
+                         'meist frisch gebaute Decks aus dem Online-Fenster. Gegen sie ist der ' +
+                         'Pick ungetestet, weil sie in keinem ausgewerteten Turnier vorkamen.'],
                     ],
                 },
                 {
@@ -189,6 +214,26 @@
                         ['Tier',
                          'Grouping by share and success. The thresholds are stated in the ' +
                          'tier list itself.'],
+                        ['Our pick',
+                         'The deck the recommendation puts forward for the next event. It is ' +
+                         'the best Day 2 prospect in the current field — not a promise, but the ' +
+                         'best bet the data supports.'],
+                        ['“makes Day 2”',
+                         'How often a player with this deck gets past day one, across the ' +
+                         'evaluated in-person tournaments. Next to it stands the same value for ' +
+                         'an arbitrary deck — without that comparison the number says nothing.'],
+                        ['“Day 2 rate so far”',
+                         'The value actually observed for this deck, shrunk: decks with few ' +
+                         'players are pulled towards the average. That is why it differs from ' +
+                         'the prospect beside it.'],
+                        ['“min. 30 per deck”',
+                         'A deck only enters the evaluation once at least that many players ran ' +
+                         'it. Below that the rate is noise. The threshold depends on the format ' +
+                         'and therefore stands with the recommendation itself.'],
+                        ['“% of the field is new”',
+                         'The share of the field with no in-person data yet — mostly freshly ' +
+                         'built decks from the online window. The pick is untested against them ' +
+                         'because they appeared in none of the evaluated tournaments.'],
                     ],
                 },
                 {

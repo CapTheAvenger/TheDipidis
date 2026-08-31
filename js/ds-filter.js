@@ -158,7 +158,15 @@
             g2.appendChild(chip);
             var note = document.createElement('span');
             note.className = 'ds-filter-note';
-            note.textContent = d ? 'hier gibt es nur das laufende Format' : 'only the running format here';
+            /* BEFUND (31.08.2026, vom Betreiber angestrichen): "hier gibt
+               es nur das laufende Format" klang wie eine Entschuldigung
+               fuer eine fehlende Auswahl. Es ist aber keine Luecke,
+               sondern die Eigenschaft dieses Datenraums: die globale
+               Online-Quelle fuehrt immer nur das gerade gespielte
+               Format. Das gehoert als Aussage dagestanden, nicht als
+               Bedauern. */
+            note.textContent = d ? 'Global läuft immer im aktuellen Format.'
+                                 : 'Global always runs the current format.';
             g2.appendChild(note);
         } else if (f.opts.length > 4) {
             // Sechzehn Knoepfe mit Beschriftungen wie "Scarlet & Violet

@@ -1382,7 +1382,31 @@
                     : null;
                 if (metaKey && await labsAuszugVorhanden(metaKey)) {
                     const labsUrl = `${BASE_PATH}labs_tournament_decks_${metaKey}.csv?t=${timestamp}`;
-                    const labsRows = await fetchAndParseCSV(labsUrl);
+                    // KOMMA, nicht Semikolon. fetchAndParseCSV trennt per
+                    // Vorgabe an ';' — das ist die Schreibweise der eigenen
+                    // Exporte (limitless_online_decks_comparison.csv &Co.).
+                    // Die Labs-Auszuege kommen aus einer anderen Quelle und
+                    // trennen an ','; app-past-meta.js gibt das an seiner
+                    // Ladestelle ausdruecklich mit (_pmLoadLabsCsv, :1523),
+                    // hier fehlte es.
+                    //
+                    // BEFUND 01.09.2026: mit ';' geparst wird die Datei zu 44
+                    // Zeilen mit EINEM Feld, dessen Schluessel die ganze
+                    // Kopfzeile ist. `deck_name` ist damit undefined,
+                    // aggregateLabsRowsByDeck ueberspringt jede Zeile, und
+                    // labsByName ist ein leeres Objekt. Kein Fehler, keine
+                    // Meldung — computeTierScore bekommt schlicht nie einen
+                    // Treffer und faellt auf Anteil + Winrate zurueck.
+                    //
+                    // Wirkung, gemessen an TEF-PBL (Worlds, 44 Decks, 33
+                    // davon ueber der 15-Partien-Schwelle):
+                    //   Tier 1  Grimmsnarl Froslass raus, Dragapult Dusknoir rein
+                    //   Tier 2  vier von neun Plaetzen anders (Crustle,
+                    //           Lucario Hariyama, Mega Chandelure,
+                    //           Rocket's Mewtwo steigen aus Tier 3 auf)
+                    // Das ist genau das, was der Kommentar unten verspricht:
+                    // "computeTierScore weights it as the strongest signal".
+                    const labsRows = await fetchAndParseCSV(labsUrl, ',');
                     labsByName = aggregateLabsRowsByDeck(labsRows);
                 }
             } catch (_e) { /* labs missing — share + WR only */ }

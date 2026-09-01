@@ -393,18 +393,19 @@
             </section>`;
     }
 
-    // Zwei Hosts, ein Rechenweg.
+    // Ein Host, ein Rechenweg.
     //
-    // Seit dem 18.08.2026 ist die Meta-Ansicht die Startseite und der
-    // Hub nur noch ueber das Pokeball-Menue erreichbar. Der Antwortblock
-    // ist der beste Teil des Hubs — er beantwortet "was ist gerade
-    // stark" ohne einen einzigen Klick. Ihn dort zu lassen hiesse, ihn
-    // zu verlieren.
+    // Bis zum 01.09.2026 waren es zwei: der Hub und ein zweiter Platz
+    // ganz oben auf der Startseite. Gemeldet: "und was gerade laeuft
+    // ist genau so ein komischer Block … ich glaube, unser Pick fuers
+    // Turnier und was gerade laeuft koennen wir entfernen."
     //
-    // Bewusst DIESELBE Funktion und dieselbe Datei fuer beide Stellen:
-    // zwei Herleitungen waeren zwei Wahrheiten, und genau davon hatte
-    // diese Seite vier Win Rates fuer ein Deck auf einem Bildschirm.
-    const ANSWER_HOSTS = [ANSWER_HOST_ID, 'metaAnswerTop'];
+    // Der Block selbst bleibt, wo er hergehoert — im Hub, der die Frage
+    // "was ist gerade stark" stellt. Auf der Startseite stand er ueber
+    // den Decks und sagte dasselbe noch einmal, nur mit anderen Worten.
+    // Die Liste bleibt eine Liste, damit ein zweiter Platz eine Zeile
+    // Aenderung ist und kein Umbau.
+    const ANSWER_HOSTS = [ANSWER_HOST_ID];
 
     async function renderAnswer() {
         const hosts = ANSWER_HOSTS

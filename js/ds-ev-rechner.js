@@ -72,7 +72,19 @@
           enSub: 'ignores share — shows raw matchup strength' },
     ];
 
-    var RUNDEN_STD = 9;
+    /* Acht, nicht neun.
+     *
+     * Neun war eine Annahme aus der Rundenformel grosser Turniere; sie
+     * stimmt fuer Felder ab 513 Spielern. Gemeldet vom Betreiber am
+     * 01.09.2026: "Fakt ist eins, dass wir auf Turnieren, wie gesagt,
+     * immer 8 Runden spielen, deswegen muss hier die Kalkulation bitte
+     * auf 8 Runden sein und nicht auf 9."
+     *
+     * Die Zahl ist ein Startwert, kein Gesetz — das Feld bleibt
+     * aenderbar, und wer eine andere Zahl eintraegt, bekommt sie beim
+     * naechsten Besuch wieder. Aber der Startwert soll das Turnier
+     * abbilden, das dieser Nutzerkreis tatsaechlich spielt. */
+    var RUNDEN_STD = 8;
 
     function de() {
         return (typeof window.getLang === 'function' && window.getLang() === 'de');

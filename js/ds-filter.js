@@ -156,18 +156,17 @@
             chip.textContent = (window.DsNav && typeof window.DsNav.getFacts === 'function'
                 && (window.DsNav.getFacts(raum.key) || {}).format) || (d ? 'laufendes Fenster' : 'current window');
             g2.appendChild(chip);
-            var note = document.createElement('span');
-            note.className = 'ds-filter-note';
-            /* BEFUND (31.08.2026, vom Betreiber angestrichen): "hier gibt
-               es nur das laufende Format" klang wie eine Entschuldigung
-               fuer eine fehlende Auswahl. Es ist aber keine Luecke,
-               sondern die Eigenschaft dieses Datenraums: die globale
-               Online-Quelle fuehrt immer nur das gerade gespielte
-               Format. Das gehoert als Aussage dagestanden, nicht als
-               Bedauern. */
-            note.textContent = d ? 'Global läuft immer im aktuellen Format.'
-                                 : 'Global always runs the current format.';
-            g2.appendChild(note);
+            /* HIER STAND EIN ERKLAERSATZ BIS ZUM 01.09.2026.
+               Erst "hier gibt es nur das laufende Format", dann — nach
+               der ersten Rueckmeldung — "Global laeuft immer im
+               aktuellen Format." Beide Fassungen erklaerten dasselbe
+               Feld, das direkt daneben steht und "TEF-PBL" sagt.
+               Gemeldet: "Okay, den Zusatz kannst du aber rauslassen.
+               Lieber dieses TEF-bis-PBL-Feld optisch den anderen
+               anpassen." Genau das ist passiert — der Satz ist weg, das
+               Schild sieht jetzt aus wie ein gesetzter Knopf
+               (css/components.css, .ds-filter-fixed). Wo eine Anzeige
+               fuer sich spricht, braucht sie keine Bildunterschrift. */
         } else if (f.opts.length > 4) {
             // Sechzehn Knoepfe mit Beschriftungen wie "Scarlet & Violet
             // → Phantasmal Flames (SVI-PFL)" waeren eine Wand, keine

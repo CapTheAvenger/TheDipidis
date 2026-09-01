@@ -1406,6 +1406,43 @@
                 if (/Rank Climbers|Rank Fallers|Full Comparison Table/i.test(titel)) { sec.remove(); return; }
                 if (h2 && /Matchup Analysis/i.test(titel)) sec.remove();
             });
+            _entferneLeereHuellen(root);
+            return root;
+        }
+
+        /* Was uebrig bleibt, wenn man einen Block aus seiner Huelle nimmt.
+         *
+         * GEMESSEN am 01.09.2026 auf der Startseite: das erste Kind von
+         * #currentMetaContent war
+         *     <div style="display:grid; grid-template-columns:1fr 1fr;
+         *                 gap:30px; margin-bottom:40px"></div>
+         * — die zweispaltige Huelle, in der "Biggest Rank Climbers" und
+         * "Biggest Rank Fallers" standen. Die beiden Abschnitte sind seit
+         * dem 19.08.2026 entfernt, ihre Huelle nicht. Sie hat keine
+         * Kinder, keinen Text und trotzdem 40px Aussenabstand: ein
+         * unsichtbarer Block, der die ganze Seite um 40px nach unten
+         * schiebt.
+         *
+         * Vorsatz statt Regel: geloescht wird nur, was NICHTS enthaelt —
+         * kein Text, kein Element, kein Bild. Ein Behaelter, der spaeter
+         * gefuellt wird, ist hier nicht dabei, weil dieser Aufruf auf dem
+         * geparsten Scraper-Dokument laeuft und nicht auf der Seite. */
+        function _entferneLeereHuellen(root) {
+            /* Von innen nach aussen: nimmt man die innere Huelle weg,
+               wird die aeussere leer und muss im selben Durchgang noch
+               erkannt werden. Zweimal reicht fuer jede Schachtelung, die
+               der Scraper erzeugt; mehr waere Vorsorge fuer einen Fall,
+               den es nicht gibt. */
+            for (var runde = 0; runde < 2; runde++) {
+                var weg = 0;
+                root.querySelectorAll('div').forEach(function (d) {
+                    if (d.children.length) return;
+                    if ((d.textContent || '').trim()) return;
+                    d.remove();
+                    weg++;
+                });
+                if (!weg) break;
+            }
             return root;
         }
 

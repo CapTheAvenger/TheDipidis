@@ -248,6 +248,89 @@
 }
 .sz-frueher p { margin: 0 0 0 2px; line-height: 1.55; color: var(--ink-2); }
 
+/* ── Statuswert-Stufen ────────────────────────────────────────────
+   Eine Tabelle, keine Kartenreihe: dreizehn Zeilen, die man von oben
+   nach unten liest und in denen genau eine Zahl je Zeile zaehlt.
+   Die Nullzeile bekommt eine Kante, weil sie die Grenze ist — ohne
+   sie liest sich das Ganze wie zwei getrennte Listen. */
+.sz-stufen {
+    margin-top: var(--s-6, 28px);
+    padding-top: var(--s-5, 22px);
+    border-top: 1px solid var(--line);
+}
+.sz-stufen-titel {
+    margin: 0 0 6px;
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    color: var(--ink);
+}
+.sz-stufen-tabelle {
+    width: 100%;
+    max-width: 640px;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
+}
+.sz-stufen-tabelle th,
+.sz-stufen-tabelle td {
+    padding: 7px 12px 7px 0;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+}
+/* HINTERGRUND AUSDRUECKLICH SETZEN, NICHT ERBEN.
+   BEFUND (Review 01.09.2026): css/styles.css malt auf JEDES `table thead`
+   einen dunklen Verlauf (#1a1a2e -> #0f3460) mit weisser Schrift. Diese
+   Tabelle setzte nur die Farbe und erbte den Grund — gemessen standen
+   die Spaltenkoepfe im Hellmodus bei 2,5:1 bis 2,0:1 statt 4,5:1. Im
+   Dunkelmodus fiel es nicht auf, weil dort zufaellig beides dunkel ist.
+   Dieselbe Loesung wie bei den anderen Haustabellen (.sqp-table,
+   .tg-members-table): eigene Flaeche aus den Tokens.
+
+   Und KEIN nowrap: table-layout: fixed gibt jeder der vier Spalten
+   160px, die deutschen Ueberschriften brauchen bis zu 230px. Gemessen
+   lief "Die Meldung im Kampf lautet" in die Nachbarspalte und wurde am
+   Rand abgeschnitten. Die Koepfe duerfen umbrechen; die Zahlen darunter
+   nicht. */
+.sz-stufen-tabelle thead th {
+    font-size: var(--lbl);
+    letter-spacing: var(--lbl-track);
+    font-weight: var(--lbl-weight);
+    text-transform: uppercase;
+    background: var(--surface-2);
+    color: var(--ink-3);
+    white-space: normal;
+    vertical-align: bottom;
+    line-height: 1.3;
+}
+.sz-stufe-nr {
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+}
+.sz-stufe-bruch, .sz-stufe-pct { color: var(--ink-2); white-space: nowrap; }
+.sz-stufe-pct { font-weight: 700; color: var(--ink); }
+.sz-stufe-wort { color: var(--ink-2); }
+.sz-stufe-leer { color: var(--ink-3); font-style: italic; }
+/* Die Richtung als Kante links, nicht als Flaeche: eine getoente Zeile
+   wuerde die Zahl darin mit einfaerben, und die Zahl ist der Inhalt.
+   Blau nach oben, Rot nach unten — dieselbe divergierende Skala wie
+   ueberall sonst, nie Gruen gegen Rot. */
+.sz-stufe-zeile.is-auf .sz-stufe-nr { box-shadow: inset 3px 0 0 var(--dv-pos); padding-left: 10px; }
+.sz-stufe-zeile.is-ab  .sz-stufe-nr { box-shadow: inset 3px 0 0 var(--dv-neg); padding-left: 10px; }
+.sz-stufe-zeile.is-null th,
+.sz-stufe-zeile.is-null td {
+    background: var(--surface-2);
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+}
+.sz-stufen-hinweis {
+    margin: 10px 0 0;
+    font-size: var(--fs-xs);
+    line-height: 1.55;
+    color: var(--ink-3);
+    max-width: 92ch;
+}
+
 /* ── Schmal ──────────────────────────────────────────────────────── */
 @media (max-width: 560px) {
     /* Vier Spalten passen bei 390px nicht: Kürzel und Pfeil bleiben
@@ -266,4 +349,13 @@
     .sz-pill { justify-self: start; }
     .sz-fakten { grid-template-columns: 1fr; gap: 2px 0; }
     .sz-fakten dd { margin-bottom: 8px; }
+    /* Die Meldungsspalte ist die laengste und die entbehrlichste:
+       wer auf 390px die Tabelle liest, sucht die Prozentzahl. Sie
+       bleibt erreichbar — die Tabelle scrollt in ihrem Kasten. */
+    /* Die Mindestbreite kommt aus css/mobile-responsive.css
+       (.mobile-table-scroll > table { min-width: 520px }) und hat die
+       hoehere Spezifitaet — ein eigener Wert hier waere wirkungslos und
+       wuerde beim naechsten Lesen fuer bare Muenze genommen. */
+    .sz-stufen-tabelle { font-size: var(--fs-xs); }
+    .sz-stufen-tabelle th, .sz-stufen-tabelle td { padding-right: 8px; }
 }

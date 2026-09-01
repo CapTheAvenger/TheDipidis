@@ -76,8 +76,31 @@ uebrigen Bytes der Zeile — Trennzeichen, Anfuehrungszeichen,
 Zeilenende, BOM — bleiben unangetastet. Nach dem Schreiben prueft das
 Skript Datei fuer Datei nach, dass wirklich nur diese Spalte anders ist.
 
-Aufruf:  python3 scripts/repariere_ace_spec.py [--schreiben]
-Ohne --schreiben wird nur berichtet.
+WARUM DAS SKRIPT AUCH IM WOCHENLAUF STEHT
+-----------------------------------------
+Am 01.09.2026 kam die Drift zurueck: der Scraper uebernahm is_ace_spec
+aus der Stichprobenzeile und liess das Feld leer, wenn die Stichprobe
+leer war. 7.790 unbelegte Felder, darunter Pokemon. Gemerkt hat es
+niemand, bis tests/python/test_ace_spec_bestand.py im Deploy rot wurde —
+und ein roter Deploy heisst: die ganze Seite bleibt auf dem alten Stand
+stehen, wegen einer Spalte, die das Frontend nicht einmal liest.
+
+Die Ursache ist seitdem behoben (backend/scrapers/tournament_scraper_JH.py).
+Trotzdem laeuft dieses Skript jetzt im Wochenlauf mit — aber NUR
+berichtend, mit --melden. Es schreibt dort nichts.
+
+Das ist Absicht und folgt der Regel aus CLAUDE.md, "Report, don't
+silently repair": faende der Lauf Drift, waere das ein Hinweis auf eine
+NEUE Quelle unbelegter Zeilen. Die will man sehen, nicht stumm
+ueberschreiben lassen. Die Meldung erscheint auf der Laufseite, bevor
+der Deploy rot wird; geschrieben wird danach von Hand ueber den
+Workflow "Daten reparieren".
+
+Aufruf:  python3 scripts/repariere_ace_spec.py [--schreiben | --melden] [--streng]
+Ohne Schalter wird nur berichtet.
+  --melden   zusaetzlich eine ::warning::-Zeile je Datei mit Drift
+             (fuer die Laufseite). Beendet sich trotzdem mit 0.
+  --streng   beendet sich mit 1, wenn Drift gefunden wurde.
 """
 
 import argparse
@@ -220,7 +243,15 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--schreiben", action="store_true",
                     help="Dateien tatsaechlich aendern (sonst nur berichten)")
+    ap.add_argument("--melden", action="store_true",
+                    help="Drift zusaetzlich als ::warning:: melden (Laufseite)")
+    ap.add_argument("--streng", action="store_true",
+                    help="mit 1 beenden, wenn Drift gefunden wurde")
     args = ap.parse_args()
+    if args.schreiben and args.melden:
+        print("::error::--schreiben und --melden schliessen sich aus: "
+              "entweder raeumen oder berichten.")
+        return 1
 
     ace = lade_ace_liste()
     dateien = dateien_mit_spalte()
@@ -308,6 +339,24 @@ def main() -> int:
             print("   ... und %d weitere Namen" % (len(offen) - 15))
     if not args.schreiben:
         print("\n(Nur berichtet. Mit --schreiben wird geaendert.)")
+
+    # Drift = Felder, die anders belegt waeren als sie dastehen. Im
+    # Schreibmodus sind sie soeben geraeumt worden und keine Meldung
+    # mehr wert; im Berichtsmodus stehen sie noch in den Dateien.
+    drift = 0 if args.schreiben else gesamt["geaendert"]
+    if args.melden and drift:
+        print("::warning::is_ace_spec driftet wieder: %d Felder in den "
+              "ausgelieferten CSVs sind anders belegt als die Regel es "
+              "vorgibt. Das deutet auf eine neue Quelle unbelegter Zeilen — "
+              "nachsehen, dann den Workflow \"Daten reparieren\" mit "
+              "schreiben=true ausloesen." % drift)
+    elif args.melden:
+        # "OK" allein liesse sich nicht von "OK, weil nichts geprueft wurde"
+        # unterscheiden. Also immer die Zahl dazu.
+        print("is_ace_spec: keine Drift — %d Dateien, %d Zeilen geprueft."
+              % (len(dateien), gesamt["Yes"] + gesamt["No"] + gesamt["(leer)"]))
+    if args.streng and drift:
+        return 1
     return 0
 
 

@@ -269,5 +269,30 @@ describe('Beide Kopierstellen benutzen die Verteilung', () => {
             assert.ok(/basis === 'verteilt'/.test(q),
                 datei + ' uebernimmt auch eine Verteilung, die nicht aufging');
         });
+
+        /* BEFUND (01.09.2026): faellt die Verteilung zurueck, kam trotzdem
+           "Deck in Zwischenablage kopiert!" — und in der Zwischenablage lag
+           eine Liste, die PTCGL ablehnt. Der Nutzer sucht den Fehler dann
+           bei sich. Die Zahl steht an der Stelle ohnehin schon bereit. */
+        it(datei + ' meldet, wenn die kopierte Liste keine 60 Karten hat', () => {
+            const q = ohneKomm(lies(datei));
+            assert.ok(/pokemonCount \+ trainerCount \+ energyCount/.test(q),
+                datei + ' zaehlt die kopierten Karten gar nicht zusammen');
+            assert.ok(/cl\.deckCopiedIncomplete/.test(q),
+                datei + ' meldet Erfolg auch fuer eine unvollstaendige Liste');
+            assert.ok(/=== 60/.test(q),
+                datei + ' prueft die Gesamtzahl nicht gegen 60');
+        });
     }
+});
+
+describe('Die Meldung fuer die unvollstaendige Liste gibt es in beiden Sprachen', () => {
+    const i18n = lies('js/i18n.js');
+    it('deutsch und englisch hinterlegt', () => {
+        const treffer = i18n.match(/'cl\.deckCopiedIncomplete':\s*'([^']*)'/g) || [];
+        assert.strictEqual(treffer.length, 2,
+            `cl.deckCopiedIncomplete steht ${treffer.length}x in js/i18n.js, erwartet 2 (EN + DE)`);
+        treffer.forEach(z => assert.ok(/\{n\}/.test(z),
+            'der Platzhalter {n} fehlt — dann steht keine Zahl in der Meldung: ' + z));
+    });
 });

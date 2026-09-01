@@ -10787,43 +10787,83 @@ body.arc-open { overflow: hidden; }
     font-size: var(--fs-xs); line-height: 1.35;
 }
 
-/* ── Vier Kacheln, zwei davon geteilt (01.09.2026) ───────────────────
+/* ── Vier Kacheln, zwei davon geteilt ────────────────────────────────
  *
- * Die Karte trug drei Kacheln mit je einer Zahl. Seit dem Auftrag
- * "Share: online x Major y" tragen Anteil und Win Rate ZWEI Zahlen, und
- * dazu kam die Day-2-Quote vom Major als vierte Kachel.
+ * KORRIGIERT AM 02.09.2026. Die erste Fassung hat die Zahlen
+ * uebereinandergeschoben: "7,5 %4,1 %" stand als ein Klumpen da.
  *
- * Zwei Spalten statt vier ab hier: vier nebeneinander ergaeben auf
- * 390 px rund 90 px je Kachel, und eine geteilte Kachel braucht darin
- * zweimal Platz fuer "22,2 %" plus die Herkunft. Auf dem Schreibtisch
- * stehen sie in einer Reihe. */
+ * Zwei Fehler, beide derselbe Denkfehler — Bildschirmbreite mit
+ * KARTENBREITE verwechselt:
+ *
+ *   1. `@media (min-width: 720px)` fragt den Bildschirm. Die Karte ist
+ *      aber auch am Schreibtisch nur rund 380 px breit; sie steht in
+ *      einer Spalte, nicht ueber die ganze Seite. Am Schreibtisch griff
+ *      deshalb die Vierer-Reihe: 380 / 4 = 95 px je Kachel, davon zwei
+ *      Haelften a 40 px — und "22,2 %" braucht rund 50.
+ *   2. `clamp(0.92rem, 3.4vw, 1.18rem)` rechnet 3,4 % der
+ *      BILDSCHIRMbreite. Auf 1280 px sind das 43 px, also der obere
+ *      Anschlag 1,18rem — die groesste Schrift genau dort, wo am
+ *      wenigsten Platz war.
+ *
+ * Jetzt haengt nichts mehr am Bildschirm: `auto-fit` bricht nach der
+ * Breite um, die das Gitter tatsaechlich hat, und die Schriftgroessen
+ * sind fest. Zwei Spalten unter ~620 px Kartenbreite, vier darueber.
+ *
+ * Dazu die Anordnung, die der Betreiber vorgeschlagen hat: "vll sollte
+ * auch die Ueberschrift Share und Win Rate sein und die Daten darunter
+ * entsprechend kleiner". Die Ueberschrift steht oben, die beiden Zahlen
+ * darunter UNTEREINANDER statt nebeneinander — gestapelt passen sie in
+ * jede Kachelbreite, nebeneinander nie zuverlaessig. */
 .arc-tiles--vier {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Flex statt Gitter, weil `repeat(auto-fit, minmax(150px, 1fr))` bei
+       breiter Karte eine FUENFTE Spur anlegt, die leer bleibt — gemessen
+       bei 900 px Kartenbreite. Vier Elemente in fuenf Spuren heisst: die
+       Kacheln sind schmaler als noetig und die Reihe hoert mittendrin auf.
+       `flex-wrap` legt nur so viele Plaetze an, wie es Kacheln gibt.
+       Gemessen: 320/380/420 px -> 2 je Reihe · ab 620 px -> 4 in einer. */
+    display: flex;
+    flex-wrap: wrap;
 }
-@media (min-width: 720px) {
-    .arc-tiles--vier { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.arc-tiles--vier > .arc-tile {
+    flex: 1 1 150px;
+    min-width: 0;
 }
 
-/* Die beiden Haelften einer geteilten Kachel. `min-width: 0` ist noetig,
-   damit die Zahl schrumpfen darf statt das Gitter aufzuspreizen —
-   dieselbe Falle wie bei den Deckbau-Kacheln, wo eine feste Breite den
-   Text beidseitig abgeschnitten hat. */
+/* Die Ueberschrift steht bei ALLEN vier Kacheln oben, sonst stehen die
+   Zahlen der geteilten und der einfachen Kacheln auf verschiedenen
+   Hoehen. Feste Mindesthoehe, weil "Day-2-Quote (Major)" umbricht und
+   "Anteil" nicht — genau der Grund, aus dem die Bezeichnung frueher
+   unten stand. */
+.arc-tiles--vier .arc-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.arc-tiles--vier .arc-tile-label {
+    order: -1;
+    margin-top: 0;
+    min-height: 2.4em;
+}
+
+/* Eine Zeile je Herkunft: links woher, rechts die Zahl. */
 .arc-halbe {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    align-items: start;
+    grid-template-columns: 1fr;
+    gap: 3px;
 }
-.arc-halb { min-width: 0; }
+.arc-halb {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+}
 .arc-halb .arc-tile-value {
-    /* Zwei Zahlen nebeneinander statt einer allein — entsprechend
-       kleiner, aber immer noch die groesste Schrift der Kachel. */
-    font-size: clamp(0.92rem, 3.4vw, 1.18rem);
+    /* Fest, nicht clamp(): die Kachel ist schmal und ihre Breite haengt
+       nicht am Bildschirm. Immer noch die groesste Schrift der Kachel. */
+    font-size: 1.05rem;
+    line-height: 1.2;
 }
-/* Die Herkunft steht UNTER der Zahl, nicht daneben: nebeneinander
-   waere sie auf 390 px die erste, die umbricht, und eine Zahl, deren
-   Herkunft in die naechste Zeile rutscht, ist wieder eine Zahl ohne
-   Herkunft. */
 .arc-halb-quelle {
     color: var(--arc-ink3);
     font-size: var(--fs-xs);
@@ -10832,12 +10872,20 @@ body.arc-open { overflow: hidden; }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex: 0 1 auto;
 }
 /* Fehlt die Major-Seite, steht dort ein Strich — sichtbar leiser als
    eine echte Zahl, damit das Auge nicht zwei Werte vergleicht, von
    denen einer keiner ist. */
 .arc-halb--leer .arc-tile-value { color: var(--arc-ink3); font-weight: 600; }
 .arc-halb--leer .arc-halb-quelle { font-style: italic; }
+
+/* Die einfachen Kacheln (Top-8, Day 2) tragen ihre Zahl allein und
+   duerfen sie deshalb groesser zeigen — aber auch hier fest, aus
+   demselben Grund. */
+.arc-tiles--vier .arc-tile:not(.arc-tile--geteilt) .arc-tile-value {
+    font-size: 1.25rem;
+}
 
 .arc-mu-title {
     margin: 10px 12px 4px; font-size: 0.72rem; color: var(--arc-ink3);

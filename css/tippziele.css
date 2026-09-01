@@ -49,7 +49,7 @@
  * format-btn) und gewinnen sonst.
  */
 @media (pointer: coarse) {
-    button:not(.card-badge):not([data-klein]):not(.pagination-page-btn):not(.card-proxy-btn):not(.card-limitless-btn),
+    button:not(.card-badge):not([data-klein]):not(.pagination-page-btn):not(.card-proxy-btn):not(.card-limitless-btn):not(.wishlist-heart-badge),
     select:not([data-klein]),
     input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([data-klein]),
     [role="button"]:not(.card-badge):not([data-klein]) {
@@ -184,5 +184,48 @@
         height: 34px;
         transform: translate(-50%, -50%);
         z-index: -1;
+    }
+}
+
+/* ── Das Wunschlisten-Herz ───────────────────────────────────────
+ *
+ * BEFUND 01.09.2026: das Herz sitzt IM Kartenbild, nicht daneben. Von der
+ * Regel oben auf 44 px hochgezogen belegte es 45 % der Bildhoehe, verdeckte
+ * die Prozentzeile um 22,4 px und stand als rosa Flaeche mitten auf der
+ * Karte — gemessen an 74 Herzen der Deckbau-Ansicht, jedes 22 x 44 statt
+ * 22 x 22. Auf der Maus (kein `pointer: coarse`) war es immer richtig, der
+ * Bruch war reine Handy-Ansicht.
+ *
+ * Fuenf Regeln setzen dort `height: 22px !important`
+ * (ui-components.css:1780, mobile-responsive.css:1434/2073/2082,
+ * index.html:346) — `min-height` schlaegt `height`, also half keine davon.
+ * Deshalb steht das Herz jetzt in der Ausnahmeliste und bekommt die
+ * Trefferflaeche unsichtbar per ::after, genau wie die anderen kleinen
+ * Knoepfe weiter unten.
+ */
+@media (pointer: coarse) {
+    /* KEIN `position` hier. Das Muster von .card-proxy-btn weiter oben
+     * setzt `position: relative`, weil jener Knopf statisch steht. Das
+     * Herz steht schon absolut (css/ui-components.css:1779) — und weil
+     * diese Datei spaeter eingebunden wird (index.html:185 gegen :161)
+     * und beide Selektoren dieselbe Spezifitaet haben, wuerde `relative`
+     * gewinnen und das Herz in den Fluss zurueckholen.
+     *
+     * Gemessen, als hier versehentlich `relative` stand: alle 74 Herzen
+     * rutschten auf x = -3 (hingen links aus der Kachel heraus), y von
+     * 22 auf 229,4, und jede Kachel wurde 22 px hoeher — Seitenverhaeltnis
+     * 1,648 statt 1,400, das Kartenbild also gestreckt. Nur unter
+     * `pointer: coarse`, auf der Maus unsichtbar.
+     *
+     * Ohne `position` erbt das ::after die schon vorhandene absolute
+     * Positionierung des Herzens, und das ist genau richtig. */
+    .wishlist-heart-badge::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 34px;
+        height: 34px;
+        transform: translate(-50%, -50%);
     }
 }

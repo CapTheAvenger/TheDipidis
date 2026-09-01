@@ -21,14 +21,82 @@
 
     const DECKS_URL = 'limitless_online_decks.csv';
     const TOP8_URL = 'online_tournament_top8_decks.csv';
+    // Die Praesenzseite. Der Dateiname traegt den Meta-Schluessel, welche
+    // es gibt sagt das Verzeichnis (siehe _majorLaden).
+    const MAJOR_VERZ_URL = 'labs_tournament_decks_verzeichnis.json';
+
+    /* WARUM DIE KACHELN SEIT DEM 01.09.2026 ZWEI ZAHLEN TRAGEN
+       ------------------------------------------------------
+       Auftrag des Betreibers: "In der tierlist bei global sollte wir
+       Share: online x Major y ttl z % und das gleiche fuer winrate und
+       top 8 / day 2 Quote. So sieht man schnell den Unterschied zwischen
+       online und Major Ergebnissen."
+
+       Und es IST ein Unterschied, gemessen am 01.09. gegen Worlds San
+       Francisco (774 Spieler, 44 Archetypen):
+
+           Deck                  Anteil online   Anteil Major
+           Dragapult                    7,3 %        22,2 %
+           Dragapult Dusknoir           5,5 %        10,5 %
+           Dragapult Blaziken           5,8 %         9,8 %
+           Mega Excadrill               7,5 %         4,1 %
+           Grimmsnarl Froslass          4,3 %         0,9 %
+           Dhelmise                     4,0 %         1,0 %
+
+       Dragapult verdreifacht seinen Anteil, Dhelmise faellt auf ein
+       Viertel. Wer nur die Online-Spalte sah, hat das Turnierfeld nicht
+       gesehen.
+
+       DREI ENTSCHEIDUNGEN, DIE HIER FESTHAENGEN
+
+       1. Keine dritte "gesamt"-Zahl. Ehrlich gepoolt wiegt das eine
+          Major 2-3 % — der Mischwert laege praktisch auf dem
+          Online-Wert und wuerde genau den Unterschied verstecken, um
+          den es geht. Zwei beschriftete Zahlen sagen mehr als drei,
+          von denen eine nichts traegt.
+
+       2. Beide Win Rates sind Siege / ALLE Partien. Entscheidung des
+          Betreibers: "online wird die winrate ganz normal gewonnene
+          kaempfe durch gesamtanzahl kaempfe genommen, was ja auch
+          richtig ist weil nur so viele Kaempfe gewonnen wurden."
+          Die Labs-Datei fuehrt daneben `win_pct` als MATCHPUNKTE
+          ((3S+U)/3n) — die wird hier bewusst NICHT gelesen, sondern aus
+          wins/losses/ties neu gerechnet. Sonst staende links eine
+          Win Rate und rechts eine Punktequote, und der Leser
+          vergliche zwei Skalen.
+
+          ABER: am Major enden 10,98 % der Partien unentschieden, online
+          nur 1,26 %. Auf derselben Skala kostet das die Major-Spalte
+          rund fuenf Punkte, ohne dass ein Deck schlechter gespielt
+          haette. Deshalb steht die Remisquote im Hinweis an der Kachel —
+          ohne sie liest sich "54,1 online gegen 42,4 Major" als
+          Leistungseinbruch, und das waere falsch.
+
+       3. Top-8 und Day 2 sind KEIN Paar. Ein Major vergibt acht
+          Cut-Plaetze: 22 von 27 Decks stehen dort auf null, eine
+          Major-Top-8-Quote waere fast ueberall 0,0 %. Umgekehrt gibt es
+          Day 2 online gar nicht. Also traegt die dritte Kachel die
+          Online-Top-8-Quote weiter und die vierte die Day-2-Quote vom
+          Major — jede mit ihrer Herkunft in der Beschriftung, keine mit
+          einer leeren Gegenspalte. So hat es der Betreiber auch
+          entschieden. */
 
     // A matchup on fewer games than this says very little — 8 wins in 12
     // games reads as 66 % and means almost nothing. Same threshold and
     // the same treatment as the heatmap's `heatmap-td-n-low`.
     const THIN_GAMES = 20;
 
+    /* Ab wann die Major-Win-Rate gezeigt wird.
+       Unter 40 entschiedenen Partien schwankt sie um mehr, als der
+       Unterschied gross ist, den sie zeigen soll — Grimmsnarl Froslass
+       steht am 01.09. mit 24,4 % da, auf 45 Partien und 4 Antritten.
+       Der Anteil dagegen wird immer gezeigt: er ruht auf den Antritten,
+       nicht auf Partien, und "1 von 774" ist eine belastbare Aussage. */
+    const MIN_MAJOR_PARTIEN = 40;
+
     let _decks = null;          // deck_name -> { share, winRate, count }
     let _conv = null;           // computeConversionPerformance() result
+    let _major = null;          // deck_name -> { share, winRate, ... } | {} wenn kein Major
     let _loading = null;
     let _openDeck = null;       // name of the deck currently shown
 
@@ -86,27 +154,142 @@
 
     // ── data ────────────────────────────────────────────────────────
 
-    function parseSemicolonCsv(text) {
+    /* Das Trennzeichen ist ein Argument, kein Naturgesetz.
+     *
+     * Die eigenen Exporte trennen an ';', die Labs-Auszuege an ','. Bis
+     * zum 01.09.2026 hiess diese Funktion parseSemicolonCsv und konnte nur
+     * das eine — an anderer Stelle wurde damit eine Komma-Datei geparst,
+     * was 44 Zeilen mit je EINEM Feld ergab und stillschweigend als
+     * "keine Daten" durchging (PR #602). Deshalb steht es jetzt hier
+     * oben, sichtbar, mit ';' als Vorgabe fuer die Bestandsaufrufe. */
+    function parseCsv(text, sep) {
+        const trenn = sep || ';';
         const lines = String(text || '').replace(/^﻿/, '').split(/\r?\n/).filter(Boolean);
         if (!lines.length) return [];
-        const head = lines[0].split(';');
+        const head = teile(lines[0], trenn).map(h => h.trim());
         return lines.slice(1).map(line => {
-            const cells = line.split(';');
+            const cells = teile(line, trenn);
             const row = {};
             head.forEach((h, i) => { row[h] = cells[i]; });
             return row;
         });
     }
 
+    /* Anfuehrungszeichen zaehlen. Ein blosses split() reicht nicht.
+     *
+     * BEFUND 01.09.2026, beim Bau der Major-Spalte: die Labs-Auszuege
+     * fuehren eine Spalte `pokemon` mit Listen darin —
+     *
+     *     …,Dragapult Dusknoir,dragapult-dusknoir,"dragapult, dusknoir",81,…
+     *
+     * 28 der 44 Zeilen tragen so ein Feld. Mit `split(',')` zerfaellt es
+     * in zwei, und ab dort ist JEDE folgende Spalte um eins verschoben:
+     * `player_count` las 'dusknoir"', `day1_players` las 0, und die
+     * Day-2-Quote des Feldes kam auf 404,5 % heraus. Genau daran ist es
+     * aufgefallen — eine Quote ueber 100 faellt auf. Die 27 Decks
+     * darunter waeren still falsch gewesen.
+     *
+     * Die Vorgaengerfunktion parseSemicolonCsv hat genauso geteilt; fuer
+     * die eigenen Semikolon-Exporte ging das gut, weil dort keine
+     * Anfuehrungszeichen stehen. Jetzt zaehlt der Teiler sie, und beide
+     * Trennzeichen laufen ueber denselben Weg. */
+    function teile(zeile, trenn) {
+        const raus = [];
+        let feld = '';
+        let inAnf = false;
+        for (let i = 0; i < zeile.length; i++) {
+            const c = zeile[i];
+            if (c === '"') {
+                // Zwei Anfuehrungszeichen hintereinander sind eines im Text.
+                if (inAnf && zeile[i + 1] === '"') { feld += '"'; i++; continue; }
+                inAnf = !inAnf;
+                continue;
+            }
+            if (c === trenn && !inAnf) { raus.push(feld); feld = ''; continue; }
+            feld += c;
+        }
+        raus.push(feld);
+        return raus;
+    }
+
+    // Bestandsname, damit die Aufrufer und die Tests nicht alle mitwandern.
+    function parseSemicolonCsv(text) { return parseCsv(text, ';'); }
+
+    /* Der Auszug des laufenden Formats, wenn es einen gibt.
+     *
+     * Erst das Verzeichnis fragen, dann die Datei holen — das ist derselbe
+     * Weg wie in js/app-tier-meta.js (labsAuszugVorhanden). Ein HEAD auf
+     * einen Auszug, den es noch nicht gibt, hinterliesse sonst bei jedem
+     * Seitenaufruf eine 404 in der Konsole; fuer ein frisches Format ist
+     * "noch kein Praesenzturnier" der Normalfall, kein Fehler.
+     *
+     * KOMMA, nicht Semikolon. Die Labs-Dateien kommen aus einer anderen
+     * Quelle als die eigenen Exporte. Mit dem hauseigenen ';' geparst wird
+     * die Datei zu Zeilen mit EINEM Feld, `deck_name` ist undefined, und
+     * alles faellt still auf "kein Major" zurueck — genau der Fehler, der
+     * die Tier-Liste am 01.09. Worlds nicht sehen liess (PR #602). */
+    function _majorLaden(base, stamp) {
+        const fw = (typeof window !== 'undefined') ? window._formatWindow : null;
+        const alt = fw && fw.oldest_legal_set ? String(fw.oldest_legal_set).toUpperCase() : '';
+        const neu = fw && fw.current_set ? String(fw.current_set).toUpperCase() : '';
+        if (!alt || !neu) return Promise.resolve({});
+        const key = `${alt}-${neu}`;
+        return fetch(base + MAJOR_VERZ_URL + stamp)
+            .then(r => r.ok ? r.json() : null)
+            .then(v => {
+                const kennt = v && Array.isArray(v.meta_keys) && v.meta_keys.indexOf(key) !== -1;
+                if (!kennt) return '';
+                return fetch(`${base}labs_tournament_decks_${key}.csv${stamp}`)
+                    .then(r => r.ok ? r.text() : '');
+            })
+            .then(txt => {
+                const raus = {};
+                if (!txt) return raus;
+                for (const r of parseCsv(txt, ',')) {
+                    const name = String(r.deck_name || '').trim();
+                    if (!name) continue;
+                    const s = num(r.wins), n_ = num(r.losses), u = num(r.ties);
+                    const partien = s + n_ + u;
+                    const d1 = num(r.day1_players);
+                    const d2 = num(r.day2_players);
+                    const e = raus[name] || (raus[name] = {
+                        antritte: 0, share: 0, siege: 0, partien: 0,
+                        unentschieden: 0, day1: 0, day2: 0, turniere: 0,
+                    });
+                    e.antritte += num(r.player_count);
+                    e.share += num(r.share_pct);
+                    e.siege += s;
+                    e.partien += partien;
+                    e.unentschieden += u;
+                    e.day1 += d1;
+                    e.day2 += d2;
+                    e.turniere += 1;
+                }
+                for (const k of Object.keys(raus)) {
+                    const e = raus[k];
+                    // Siege durch ALLE Partien — dieselbe Rechnung wie online.
+                    // NICHT die Spalte `win_pct` der Datei: die fuehrt
+                    // Matchpunkte (3S+U)/3n und ist eine andere Skala.
+                    e.winRate = e.partien > 0 ? (e.siege / e.partien) * 100 : null;
+                    e.remisQuote = e.partien > 0 ? (e.unentschieden / e.partien) * 100 : null;
+                    e.day2Quote = e.day1 > 0 ? (e.day2 / e.day1) * 100 : null;
+                }
+                return raus;
+            })
+            .catch(() => ({}));
+    }
+
     function load() {
-        if (_decks && _conv) return Promise.resolve(true);
+        if (_decks && _conv && _major) return Promise.resolve(true);
         if (_loading) return _loading;
         const base = (typeof BASE_PATH === 'string') ? BASE_PATH : 'data/';
         const stamp = `?t=${Date.now()}`;
         _loading = Promise.all([
             fetch(base + DECKS_URL + stamp).then(r => r.ok ? r.text() : ''),
             fetch(base + TOP8_URL + stamp).then(r => r.ok ? r.text() : ''),
-        ]).then(([decksTxt, top8Txt]) => {
+            _majorLaden(base, stamp),
+        ]).then(([decksTxt, top8Txt, major]) => {
+            _major = major || {};
             _decks = {};
             for (const r of parseSemicolonCsv(decksTxt)) {
                 if (!r.deck_name) continue;
@@ -124,7 +307,7 @@
             _conv = (rows.length && typeof window.computeConversionPerformance === 'function')
                 ? window.computeConversionPerformance(rows) : null;
             return true;
-        }).catch(() => { _decks = _decks || {}; _conv = null; return false; });
+        }).catch(() => { _decks = _decks || {}; _conv = null; _major = _major || {}; return false; });
         return _loading;
     }
 
@@ -240,6 +423,63 @@
             </div>`;
     }
 
+    /* Eine Kachel mit ZWEI Zahlen — links online, rechts Major.
+     *
+     * Die Herkunft steht unter jeder Zahl, nicht daneben und nicht im
+     * Hinweis: die ganze Kachel existiert, weil die beiden Zahlen
+     * verschieden sind, und eine Zahl ohne ihre Herkunft ist auf dieser
+     * Seite der Fehler, aus dem alle anderen folgen.
+     *
+     * Fehlt die Major-Seite (Format ohne Praesenzturnier, Deck war nicht
+     * dabei), steht dort ein Strich und darunter der Grund — nicht 0,0 %.
+     * Eine Null liest sich als "hat nichts erreicht", und das ist etwas
+     * ganz anderes als "war nicht da". */
+    /* Die Summen der Praesenzseite — Nenner fuer die Hinweise.
+       Einmal gerechnet, nicht je Kachel: die Karte zeichnet bis zu 30
+       Kacheln je Seitenaufbau. */
+    let _majorFeldCache = null;
+    function _majorFeld() {
+        if (_majorFeldCache) return _majorFeldCache;
+        let antritte = 0, day1 = 0, day2 = 0;
+        for (const k of Object.keys(_major || {})) {
+            antritte += _major[k].antritte || 0;
+            day1 += _major[k].day1 || 0;
+            day2 += _major[k].day2 || 0;
+        }
+        _majorFeldCache = {
+            antritte, day1, day2,
+            day2Quote: day1 > 0 ? (day2 / day1) * 100 : null,
+        };
+        return _majorFeldCache;
+    }
+
+    function tileGeteilt(role, tone, label, onlineWert, majorWert, majorLeer, tip, pfeil) {
+        const de = isDe();
+        const hat = !!tip;
+        const ttl = hat
+            ? ` data-hinweis="${esc(tip)}" tabindex="0"`
+              + ` aria-label="${esc(label)} — ${de ? 'online' : 'online'} ${
+                    esc(String(onlineWert).replace(/<[^>]*>/g, ''))}, Major ${
+                    esc(String(majorWert || majorLeer).replace(/<[^>]*>/g, ''))}: ${esc(tip)}"`
+            : '';
+        const arw = pfeil ? `<span class="arc-tile-arrow" aria-hidden="true">${pfeil}</span>` : '';
+        const halb = (wert, quelle, schwach) =>
+            `<div class="arc-halb${schwach ? ' arc-halb--leer' : ''}">
+                <div class="arc-tile-value">${wert}</div>
+                <div class="arc-halb-quelle">${esc(quelle)}</div>
+            </div>`;
+        return `<div class="arc-tile arc-tile--${role} arc-tile--geteilt arc-tone--${tone}${
+                hat ? ' arc-tile--hinweis' : ''}"${ttl}>
+                <div class="arc-halbe">
+                    ${halb(arw + onlineWert, L('arc.quelleOnline', 'online'), false)}
+                    ${halb(majorWert || '–', majorWert
+                        ? L('arc.quelleMajor', 'Major')
+                        : esc(majorLeer || L('arc.quelleMajor', 'Major')), !majorWert)}
+                </div>
+                <div class="arc-tile-label">${esc(label)}</div>
+            </div>`;
+    }
+
     function tilesHtml(name) {
         const de = isDe();
         const d = _decks[findKey(_decks, name)] || null;
@@ -266,21 +506,66 @@
            Ein frueherer Kommentar an dieser Stelle behauptete das
            Gegenteil — der Hinweis an der Kachel ist die einzige Stelle,
            an der "2.577" steht, und muss es deshalb bleiben. */
+        const m = _major ? (_major[findKey(_major, name)] || null) : null;
+        const majorLeer = L('arc.keinMajor', de ? 'kein Major' : 'no major');
+
         const rep = d
-            ? tile('rep', 'neutral', L('arc.repLabel', de ? 'Anteil' : 'Share'),
-                `${esc(fmt(d.share))} %`, '',
-                L('arc.repCtx', de ? '{n} Listen im Meta' : '{n} lists in the field')
-                    .replace('{n}', fmtGanz(d.count)))
+            ? tileGeteilt('rep', 'neutral', L('arc.repLabel', de ? 'Anteil' : 'Share'),
+                `${esc(fmt(d.share))} %`,
+                m ? `${esc(fmt(m.share))} %` : '',
+                majorLeer,
+                L('arc.repTip2', de
+                    ? '{n} Listen im Meta online. {mj}'
+                    : '{n} lists in the online field. {mj}')
+                    .replace('{n}', fmtGanz(d.count))
+                    .replace('{mj}', m
+                        ? L('arc.repTipMajor', de
+                            ? 'Auf Präsenzturnieren {a} von {g} Antritten.'
+                            : 'At in-person events {a} of {g} entries.')
+                            .replace('{a}', fmtGanz(m.antritte))
+                            .replace('{g}', fmtGanz(_majorFeld().antritte))
+                        : L('arc.repTipOhne', de
+                            ? 'Für dieses Format gibt es noch kein Präsenzturnier mit diesem Deck.'
+                            : 'No in-person event with this deck in this format yet.')))
             : tile('rep', 'tie', L('arc.repLabel', de ? 'Anteil' : 'Share'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
 
         const wrDelta = d ? d.winRate - 50 : null;
+        /* Die Major-Win-Rate wird ab MIN_MAJOR_PARTIEN gezeigt.
+           Unter 40 entschiedenen Partien schwankt sie um mehr, als der
+           Unterschied gross ist, den sie zeigen soll: Grimmsnarl Froslass
+           steht am 01.09. mit 24,4 % da — auf 45 Partien. */
+        const wrMajor = (m && m.winRate != null && m.partien >= MIN_MAJOR_PARTIEN)
+            ? `${esc(fmt(m.winRate))} %` : '';
         const wr = d
-            ? tile('wr', toneFor(wrDelta), L('arc.wrLabel', 'Win Rate'),
-                `${esc(fmt(d.winRate))} %`, '',
-                d.partien > 0
-                    ? L('arc.wrCtx', de ? 'aus {n} Matches' : 'from {n} games').replace('{n}', fmtGanz(d.partien))
-                    : L('arc.wrCtxLeer', de ? 'Anzahl Matches unbekannt' : 'game count unknown'),
+            ? tileGeteilt('wr', toneFor(wrDelta), L('arc.wrLabel', 'Win Rate'),
+                `${esc(fmt(d.winRate))} %`,
+                wrMajor,
+                (m && m.partien > 0 && m.partien < MIN_MAJOR_PARTIEN)
+                    ? L('arc.wrDuenn', de ? 'zu wenige' : 'too few')
+                    : majorLeer,
+                /* DIE REMISQUOTE STEHT HIER, UND SIE MUSS ES.
+                   Beide Zahlen sind Siege durch ALLE Partien — dieselbe
+                   Rechnung, Entscheidung des Betreibers. Nur enden am
+                   Major 10,98 % der Partien unentschieden und online
+                   1,26 %. Das kostet die rechte Spalte rund fuenf Punkte,
+                   ohne dass ein Deck schlechter gespielt haette.
+                   Dragapult: 54,1 online gegen 42,4 Major, bei 12,1 %
+                   Unentschieden. Ohne diesen Satz liest sich das als
+                   Leistungseinbruch — und das waere falsch. */
+                L('arc.wrTip2', de
+                    ? 'Siege geteilt durch alle Partien, auf beiden Seiten gleich gerechnet. Online aus {n} Partien. {mj}'
+                    : 'Wins divided by all games, same on both sides. Online from {n} games. {mj}')
+                    .replace('{n}', fmtGanz(d.partien))
+                    .replace('{mj}', (m && m.partien > 0)
+                        ? L('arc.wrTipMajor', de
+                            ? 'Major aus {p} Partien, davon {u} % unentschieden — online sind es 1,3 %. Unentschieden zählen auf beiden Seiten nicht als Sieg, drücken die Major-Spalte also spürbar.'
+                            : 'Major from {p} games, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down.')
+                            .replace('{p}', fmtGanz(m.partien))
+                            .replace('{u}', fmt(m.remisQuote))
+                        : L('arc.wrTipOhne', de
+                            ? 'Noch keine Präsenzpartien für dieses Deck in diesem Format.'
+                            : 'No in-person games for this deck in this format yet.')),
                 arrow(wrDelta))
             : tile('wr', 'tie', L('arc.wrLabel', 'Win Rate'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
@@ -325,7 +610,7 @@
         const schnitt = (_conv && isFinite(_conv.expected)) ? _conv.expected * 100 : null;
         const conv = (c && quote != null)
             ? tile('conv', toneFor(c.perfPct),
-                L('arc.convLabel2', de ? 'Top-8-Quote' : 'Top-8 rate'),
+                L('arc.convLabel3', de ? 'Top-8-Quote (online)' : 'Top-8 rate (online)'),
                 `${esc(fmt(quote))} %`,
                 esc(schnitt != null
                     ? L('arc.convCtx2', de ? 'Schnitt aller Decks {s} %'
@@ -347,13 +632,66 @@
                     ? 'Kleine Stichprobe — die Quote steht auf wenigen Antritten und schwankt stark.'
                     : 'Small sample — the rate rests on few entries and swings hard.') : ''),
                 arrow(c.perfPct))
-            : tile('conv', 'tie', L('arc.convLabel2', de ? 'Top-8-Quote' : 'Top-8 rate'),
+            : tile('conv', 'tie', L('arc.convLabel3', de ? 'Top-8-Quote (online)' : 'Top-8 rate (online)'),
                 '–',
                 esc(L('arc.convMissing', de ? 'zu wenig Daten' : 'not enough data')),
                 L('arc.convMissingTip', de
                     ? 'Dieses Deck fehlt in der Top-Cut-Datei. Das heißt nicht, dass es nie konvertiert — die Win Rate stammt aus einer anderen Quelle.'
                     : 'This deck is absent from the top-cut file. That does not mean it never converts — the win rate comes from a different source.'));
-        return `<div class="arc-tiles">${rep}${wr}${conv}</div>`;
+        /* DIE VIERTE KACHEL: DAY 2, UND SIE HAT KEINE ONLINE-SEITE.
+           Die dritte traegt die Top-8-Quote der Online-Turniere, die
+           vierte die Day-2-Quote vom Major. Das ist absichtlich KEIN
+           Paar aus zwei Spalten:
+
+             - Ein Major vergibt acht Cut-Plaetze. 22 von 27 Decks stehen
+               dort auf null; eine Major-Top-8-Quote waere fast ueberall
+               0,0 % und saehe aus wie ein Befund, wo eine Feldgroesse
+               steht.
+             - Day 2 gibt es online gar nicht. Online-Turniere haben
+               keinen zweiten Tag.
+
+           Also zwei Kacheln, jede mit ihrer Herkunft in der
+           Beschriftung, keine mit einer leeren Gegenspalte. So hat es
+           der Betreiber entschieden: "online gibt es keine
+           Day-Two-Daten. Von den Onlinern nehmen wir die
+           Top-8-Platzierungen. Wir ergaenzen einfach nur noch die
+           Day-Two-Quote fuer Major."
+
+           Gemessen am 01.09.: Feldschnitt 18,2 % (141 von 774). Und die
+           Zahl traegt etwas — Dragapult bringt den groessten Anteil mit
+           (22,2 %) und kommt mit 12,8 % unterdurchschnittlich durch,
+           Alakazam Dudunsparce mit 26,4 % ueberdurchschnittlich. */
+        const feld = _majorFeld();
+        const d2 = (m && m.day2Quote != null && m.day1 >= 5)
+            ? tile('day2', toneFor(feld.day2Quote != null ? m.day2Quote - feld.day2Quote : 0),
+                L('arc.day2Label', de ? 'Day-2-Quote (Major)' : 'Day 2 rate (major)'),
+                `${esc(fmt(m.day2Quote))} %`,
+                esc(feld.day2Quote != null
+                    ? L('arc.day2Ctx', de ? 'Schnitt aller Decks {s} %' : 'field average {s} %')
+                        .replace('{s}', fmt(feld.day2Quote))
+                    : ''),
+                L('arc.day2Tip', de
+                    ? '{d2} von {d1} Antritten haben Tag 2 erreicht. Nur Präsenzturniere — online gibt es keinen zweiten Tag.'
+                    : '{d2} of {d1} entries made day 2. In-person events only — online has no second day.')
+                    .replace('{d2}', fmtGanz(m.day2))
+                    .replace('{d1}', fmtGanz(m.day1)),
+                arrow(feld.day2Quote != null ? m.day2Quote - feld.day2Quote : 0))
+            : tile('day2', 'tie',
+                L('arc.day2Label', de ? 'Day-2-Quote (Major)' : 'Day 2 rate (major)'),
+                '–',
+                esc(m
+                    ? L('arc.day2Duenn', de ? 'zu wenige Antritte' : 'too few entries')
+                    : L('arc.keinMajor', de ? 'kein Major' : 'no major')),
+                m
+                    ? L('arc.day2DuennTip', de
+                        ? 'Dieses Deck stand mit {d1} Antritten am Start — zu wenige für eine Quote.'
+                        : 'This deck had {d1} entries — too few for a rate.')
+                        .replace('{d1}', fmtGanz(m.day1))
+                    : L('arc.day2OhneTip', de
+                        ? 'Für dieses Format gibt es noch kein Präsenzturnier mit diesem Deck. Day 2 ist eine reine Präsenzgröße.'
+                        : 'No in-person event with this deck in this format yet. Day 2 is in-person only.'));
+
+        return `<div class="arc-tiles arc-tiles--vier">${rep}${wr}${conv}${d2}</div>`;
     }
 
     // Four quantised steps, not a ramp: at every step the text colour is

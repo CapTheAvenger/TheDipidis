@@ -56,39 +56,82 @@ def _zeile(name, day1, konv):
 
 # ── 1. Die Formel ──────────────────────────────────────────────────────
 
-def test_duenne_datenlage_wird_geschrumpft(modul):
+def test_duenne_datenlage_erreicht_die_empfehlung_nicht(modul):
     """Der Fall, fuer den die Schrumpfung da ist — am echten Anker geprueft.
 
-    Sylveon steht im aktuellen Anker mit 6 Spielern und 66,7 % Rohquote.
-    Ohne Schrumpfung waere es die Empfehlung fuer Worlds gewesen; mit ihr
-    faellt es hinter Dragapult (2.038 Spieler, 31,7 %) zurueck.
+    Geprueft wird, was der Nutzer bekommt: der erste Eintrag der ANZEIGE-Liste.
+    Der rohe Score-Spitzenreiter ist nicht die Empfehlung, und das ist keine
+    Feinheit, sondern der Kern des Schutzes.
 
-    WICHTIG, weil nicht offensichtlich: die Schrumpfung garantiert das nicht
-    fuer jede denkbare Konstellation. Ein Deck mit n Spielern behaelt das
-    Gewicht n/(n+k) auf seinem Rohwert — bei n=6 und k=60 sind das 9 %. Liegt
-    der Prior nahe am Wert des dicken Decks, kann ein extremer Ausreisser
-    trotzdem obenauf landen. Im echten Anker ist das ausgeschlossen, weil
-    Dragapult 13 Punkte ueber dem Prior liegt: ein 6-Spieler-Deck muesste
-    dafuer ueber 160 % Konversion zeigen. Der Test unten sichert genau diese
-    Lage, nicht die Formel im Allgemeinen.
+    WICHTIG, weil nicht offensichtlich: die Schrumpfung allein garantiert das
+    nicht. Ein Deck mit n Spielern behaelt das Gewicht n/(n+k) auf seinem
+    Rohwert — bei n=20 und k=30 sind das 40 %. Liegt der Rohwert weit genug
+    ueber dem Prior, steht so ein Deck trotz Schrumpfung oben auf dem rohen
+    Score. Genau das ist am Anker vom 01.09.2026 der Fall: Crustle, 20 Spieler,
+    40,0 % roh, geschrumpft 26,9 — vor Alakazam Dudunsparce (53 Spieler,
+    26,4 % roh, geschrumpft 23,5). Abgefangen wird es erst von MIN_ANZEIGE.
+
+    Der Test haelt deshalb BEIDE Stufen fest, statt sich auf eine zu verlassen:
+    die Schrumpfung zieht den Ausreisser messbar zum Feldmittel, und die
+    Anzeigeschwelle haelt ihn aus der Liste. Faellt eine der beiden weg, wird
+    ein 20-Spieler-Deck zur Empfehlung.
+
+    Vorgeschichte: bis zum 28.08.2026 lief das Format TEF-PBL im Kaltstart, der
+    Anker umfasste zwei Epochen und Dragapult stand mit 2.038 Spielern darin.
+    Seit Worlds San Francisco (774 Spieler) gilt Betriebsart A mit genau einem
+    Ankerturnier. Absolute Spielerzahlen aus der Kaltstartzeit sind seitdem
+    keine sinnvolle Messlatte mehr — MIN_ANZEIGE ist es.
     """
     turniere = modul.lies_turniere(os.path.join(WURZEL, "data"))
     if not turniere:
         pytest.skip("keine Turnierdaten")
     format_key, vorformat = modul.aktuelles_format(os.path.join(WURZEL, "data"))
     anker, k, _ = modul.waehle_anker(turniere, format_key, vorformat)
-    score, detail, _ = modul.bewerte(anker, k)
+    score, detail, p0 = modul.bewerte(anker, k)
     if not score:
         pytest.skip("kein Anker")
-    beste = max(score, key=lambda x: score[x])
-    assert detail["d1"][beste] >= 100, (
-        f"empfohlen wurde {detail['namen'][beste]!r} mit nur "
-        f"{detail['d1'][beste]:.0f} Ankerspielern — die Schrumpfung greift nicht")
-    duenn = [x for x in score if detail["d1"][x] < 20]
-    for x in duenn:
-        assert score[x] < score[beste], (
-            f"{detail['namen'][x]!r} hat nur {detail['d1'][x]:.0f} Spieler "
-            f"({detail['roh'][x]:.1f} % roh) und steht trotzdem oben")
+    voll, sichtbar = modul.ranglisten(score, detail)
+    assert sichtbar, "die Anzeigeliste darf nicht leer werden"
+
+    # Stufe 0: was empfohlen wird, steht auf einer belastbaren Zahl.
+    empfohlen = sichtbar[0]
+    assert empfohlen["ankerspieler"] >= modul.MIN_ANZEIGE, (
+        f"empfohlen wurde {empfohlen['deck']!r} mit nur "
+        f"{empfohlen['ankerspieler']} Ankerspielern")
+    dick = [kk for kk in score if detail["d1"][kk] >= modul.MIN_ANZEIGE]
+    assert dick, "kein Deck ueber der Anzeigeschwelle — der Test greift ins Leere"
+    bester_dicker = max(dick, key=lambda x: score[x])
+    assert empfohlen["schluessel"] == bester_dicker, (
+        "die Anzeigeliste ordnet anders als der Score")
+
+    # Stufe 1: die Schrumpfung zieht jedes duenne Deck zum Feldmittel.
+    duenn = [kk for kk in score if detail["d1"][kk] < modul.MIN_ANZEIGE]
+    assert duenn, "kein duennes Deck im Anker — der Test greift ins Leere"
+    for kk in duenn:
+        roh = detail["roh"][kk]
+        if abs(roh - p0) < 1e-9:
+            continue
+        assert abs(score[kk] - p0) < abs(roh - p0), (
+            f"{detail['namen'][kk]!r}: {roh:.1f} % roh, {score[kk]:.1f} "
+            f"geschrumpft — das ist nicht naeher am Feldmittel {p0:.1f}")
+
+    # Stufe 2: der rohe Ausreisser bleibt aus der Liste, die der Nutzer sieht.
+    spitzenroh = max(score, key=lambda x: (detail["roh"][x], detail["d1"][x]))
+    sichtbare = {e["schluessel"] for e in sichtbar}
+    if detail["d1"][spitzenroh] < modul.MIN_ANZEIGE:
+        assert spitzenroh not in sichtbare, (
+            f"{detail['namen'][spitzenroh]!r} steht mit "
+            f"{detail['d1'][spitzenroh]:.0f} Ankerspielern und "
+            f"{detail['roh'][spitzenroh]:.1f} % roh in der Anzeigeliste")
+        assert detail["roh"][spitzenroh] > empfohlen["day2_roh"], (
+            "der Ausreisser saehe roh schlechter aus als die Empfehlung — "
+            "dann prueft dieser Test nicht mehr, was er soll")
+    for e in sichtbar:
+        assert e["ankerspieler"] >= modul.MIN_ANZEIGE, (
+            f"{e['deck']} steht mit nur {e['ankerspieler']} Ankerspielern in der Liste")
+    # Und er verschwindet nicht spurlos: die volle Liste bleibt nachpruefbar.
+    assert spitzenroh in {e["schluessel"] for e in voll}, (
+        "der Ausreisser fehlt auch in der vollstaendigen Liste")
 
 
 def test_gewicht_auf_dem_rohwert_ist_n_durch_n_plus_k(modul):

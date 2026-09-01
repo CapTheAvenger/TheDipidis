@@ -390,8 +390,28 @@ describe('Day-2-Konversion: 100 % aus einem Spieler ist keine Quote', () => {
                 if ((parseInt(f[iD1], 10) || 0) <= 1) einSpieler++;
             }
         }
-        assert.equal(hundert, 74);
-        assert.equal(einSpieler, 65);
+        /* KEINE FESTEN ZAEHLERSTAENDE MEHR (01.09.2026).
+         *
+         * Hier stand `assert.equal(hundert, 74)` und
+         * `assert.equal(einSpieler, 65)`. Beides waren Momentaufnahmen
+         * einer Datei, die mit jedem Turnier waechst: der geplante Lauf
+         * um 06:34 UTC hat ein Turnier ergaenzt, aus 74 wurden 75, und
+         * der Deploy stand rot — ohne dass sich am Befund oder am Code
+         * irgendetwas geaendert haette.
+         *
+         * Der Befund selbst ist unveraendert richtig und wird jetzt als
+         * EIGENSCHAFT geprueft: es gibt reichlich 100-%-Zeilen, und die
+         * grosse Mehrheit davon steht auf einem einzigen Spieler. Das
+         * ist die Aussage, wegen der die Kachel ihren Nenner zeigt —
+         * und sie haelt, egal wie viele Turniere dazukommen. */
+        assert.ok(hundert >= 40,
+            'nur ' + hundert + ' Zeilen mit 100 % Konversion — die Datei hat sich '
+            + 'so stark geaendert, dass der Befund nachgeprueft gehoert');
+        const anteil = hundert > 0 ? einSpieler / hundert : 0;
+        assert.ok(anteil >= 0.7,
+            'nur ' + einSpieler + ' von ' + hundert + ' der 100-%-Zeilen stehen auf '
+            + 'einem einzigen Spieler (' + (anteil * 100).toFixed(0) + ' %) — wenn das '
+            + 'dauerhaft faellt, traegt die Kachel ihren Nenner aus einem anderen Grund');
     });
 
     it('die Kachel traegt jetzt Zaehler und Nenner', () => {

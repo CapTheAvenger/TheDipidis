@@ -20,6 +20,8 @@ import json
 import os
 import sys
 
+import pytest
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
@@ -417,12 +419,64 @@ def test_pin_write_replaces_the_row_for_that_card(tmp_path, monkeypatch):
     assert by[('OBF', '223')]['cardmarket_product_id'] == '222'
 
 
-def test_real_repo_pin_resolves_the_reported_card():
-    """End-to-end on live data with the values the maintainer read off the
-    page for N's Darmanitan SVP 181."""
-    current, cands, _ = pinner.load_candidates('SVP', '181')
-    obs = {'trend': 16.11, 'avg30': 15.68, 'avg7': 18.42}
-    fits = [(pinner.score(obs, e), pid) for pid, e in cands]
+# The guide snapshot the maintainer's observation was matched against on
+# 09.08.2026 (data/price_guide_6.json at 2026-08-07T02:45:09+0200). Frozen on
+# purpose: the live file is refreshed daily, so a fixed observation drifts out
+# of tolerance as prices move — by 01.09.2026 the 7-day average of the correct
+# product had moved from 16,25 € to 13,02 €, a factor of 1,41 against the
+# observed 18,42 €. That is price movement, not a mapping error, and a test
+# that cannot tell the two apart is worse than none.
+PIN_SNAPSHOT = {
+    816614: {'trend': 16.70, 'avg30': 15.24, 'avg7': 16.25},
+    817772: {'trend': 34.37, 'avg30': 28.71, 'avg7': 22.95},
+}
+PIN_OBSERVATION = {'trend': 16.11, 'avg30': 15.68, 'avg7': 18.42}
+PIN_ID = 816614
+
+
+def test_the_reported_observation_identifies_exactly_one_product():
+    """The maintainer's numbers for N's Darmanitan SVP 181, against the guide
+    they were read against. This is what justified the pin and it must stay
+    reproducible forever — hence the frozen snapshot above."""
+    fits = [(pinner.score(PIN_OBSERVATION, e), pid)
+            for pid, e in PIN_SNAPSHOT.items()]
     fits = [(s, pid) for s, pid in fits if s]
     assert len(fits) == 1, f'observation must identify exactly one product, got {fits}'
-    assert fits[0][1] == 816614
+    assert fits[0][1] == PIN_ID
+
+
+def test_the_pin_in_the_repo_is_the_product_that_was_identified():
+    """What the CSV carries must be what the observation resolved to."""
+    with open(os.path.join(ROOT, 'data', 'cardmarket_mapping_manual.csv'),
+              encoding='utf-8-sig', newline='') as f:
+        row = next((r for r in csv.DictReader(f)
+                    if r['set'].upper() == 'SVP' and r['number'] == '181'), None)
+    assert row, 'the SVP 181 pin is gone from data/cardmarket_mapping_manual.csv'
+    assert int(row['cardmarket_product_id']) == PIN_ID
+
+
+def test_the_candidate_pool_on_live_data_still_needs_the_pin():
+    """Live data, not a fixture: SVP 181 must still be ambiguous by name, the
+    pinned product must still be among the candidates, and the candidates must
+    still be far enough apart in price that reading the page separates them.
+
+    Deliberately NOT checked here: whether the observation from 09.08.2026
+    still fits today's prices. It does not, and it should not have to — see
+    PIN_SNAPSHOT. What has to hold is that the METHOD still works today.
+    """
+    current, cands, _ = pinner.load_candidates('SVP', '181')
+    if not cands:
+        pytest.skip('no candidate pool — price guide not present')
+    ids = [pid for pid, _ in cands]
+    assert len(ids) > 1, (
+        'SVP 181 is no longer ambiguous by expansion+name — then the pin has '
+        'lost its reason and this test should be rewritten, not deleted')
+    assert PIN_ID in ids, f'the pinned product {PIN_ID} is no longer a candidate: {ids}'
+    heute = dict(cands)[PIN_ID]
+    beobachtung = {m: heute[m] for m in ('trend', 'avg30')
+                   if heute.get(m) and heute[m] > 0}
+    assert beobachtung, f'the pinned product carries no live price: {heute}'
+    treffer = [pid for pid, e in cands if pinner.score(beobachtung, e)]
+    assert treffer == [PIN_ID], (
+        'reading trend and 30-day average off the page no longer identifies '
+        f'the product: {treffer}')

@@ -157,6 +157,23 @@ describe('verteileKopienAufDeckgroesse', () => {
 describe('Der ausgelieferte Bestand', () => {
     const verteile = ladeVerteilung();
 
+    /* GRUPPIERT NACH (ARCHETYP, META), NICHT NACH ARCHETYP ALLEIN.
+     *
+     * BEFUND (01.09.2026): der geplante Datenlauf um 06:34 UTC hat zum
+     * ersten Mal ein Praesenzturnier in die Datei gebracht. Vorher fuehrte
+     * data/current_meta_card_data.csv genau ein Meta ("Meta Live", 3311
+     * Zeilen), seither zwei ("Meta Live" 3391 + "Meta Play!" 1154).
+     *
+     * Diese Funktion gruppierte nur nach Archetyp und warf damit beide
+     * Metas in einen Topf: statt 60,00 kamen 119,94 heraus, und der Test
+     * meldete 31 kaputte Archetypen. Die Daten waren in Ordnung — je
+     * (Archetyp, Meta) steht die Summe unveraendert auf exakt 60,00.
+     * Falsch war die Gruppierung hier.
+     *
+     * Das Meta gehoert in den Schluessel, weil es die Zaehlung definiert:
+     * eine Deckliste aus dem Online-Feld und eine aus den Turnieren sind
+     * zwei Listen, nicht eine mit 120 Karten.
+     */
     function archetypen() {
         const roh = lies('data/current_meta_card_data.csv').replace(/^﻿/, '');
         const zeilen = roh.split(/\r?\n/).filter(Boolean);
@@ -165,17 +182,36 @@ describe('Der ausgelieferte Bestand', () => {
         const iName = kopf.indexOf('card_name');
         const iTyp = kopf.indexOf('type');
         const iAvg = kopf.indexOf('average_count_overall');
+        const iMeta = kopf.indexOf('meta');
+        assert.ok(iMeta >= 0, 'Spalte "meta" fehlt — dann traegt der Schluessel sie nicht');
         const pro = new Map();
         for (const z of zeilen.slice(1)) {
             const f = z.split(';');
             if (f.length !== kopf.length) continue;
-            if (!pro.has(f[iArch])) pro.set(f[iArch], []);
-            pro.get(f[iArch]).push({
+            const schluessel = f[iArch] + ' · ' + f[iMeta];
+            if (!pro.has(schluessel)) pro.set(schluessel, []);
+            pro.get(schluessel).push({
                 card_name: f[iName], type: f[iTyp], average_count_overall: f[iAvg],
             });
         }
         return pro;
     }
+
+    it('die Datei fuehrt mehr als ein Meta — der Schluessel muss es tragen', () => {
+        // Ohne diese Pruefung faellt niemandem auf, wenn der Schluessel
+        // wieder auf den blossen Archetyp zurueckfaellt: bei nur einem
+        // Meta waere beides gleichwertig, und der Fehler kaeme erst beim
+        // naechsten Praesenzturnier wieder hoch — so wie heute.
+        const roh = lies('data/current_meta_card_data.csv').replace(/^﻿/, '');
+        const zeilen = roh.split(/\r?\n/).filter(Boolean);
+        const kopf = zeilen[0].split(';');
+        const iMeta = kopf.indexOf('meta');
+        const metas = new Set(zeilen.slice(1).map(z => z.split(';')[iMeta]).filter(Boolean));
+        assert.ok(metas.size >= 1, 'keine Meta-Werte gelesen');
+        // Und der Schluessel dieser Testdatei enthaelt das Meta wirklich.
+        assert.ok([...archetypen().keys()].every(k => k.includes(' · ')),
+            'der Gruppierungsschluessel traegt das Meta nicht mehr');
+    });
 
     it('ergibt in jedem Archetyp genau 60 Karten', () => {
         const pro = archetypen();
@@ -186,7 +222,7 @@ describe('Der ausgelieferte Bestand', () => {
             const summe = r.kopien.reduce((s, x) => s + x, 0);
             if (r.basis !== 'verteilt' || summe !== 60) schlecht.push([name, r.basis, summe]);
         }
-        assert.deepStrictEqual(schlecht, [], 'Archetypen ohne 60: ' + JSON.stringify(schlecht));
+        assert.deepStrictEqual(schlecht, [], 'Archetyp/Meta ohne 60: ' + JSON.stringify(schlecht));
     });
 
     it('setzt nirgends mehr als vier Kopien einer Nicht-Energie', () => {

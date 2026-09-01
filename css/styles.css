@@ -10787,6 +10787,58 @@ body.arc-open { overflow: hidden; }
     font-size: var(--fs-xs); line-height: 1.35;
 }
 
+/* ── Vier Kacheln, zwei davon geteilt (01.09.2026) ───────────────────
+ *
+ * Die Karte trug drei Kacheln mit je einer Zahl. Seit dem Auftrag
+ * "Share: online x Major y" tragen Anteil und Win Rate ZWEI Zahlen, und
+ * dazu kam die Day-2-Quote vom Major als vierte Kachel.
+ *
+ * Zwei Spalten statt vier ab hier: vier nebeneinander ergaeben auf
+ * 390 px rund 90 px je Kachel, und eine geteilte Kachel braucht darin
+ * zweimal Platz fuer "22,2 %" plus die Herkunft. Auf dem Schreibtisch
+ * stehen sie in einer Reihe. */
+.arc-tiles--vier {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 720px) {
+    .arc-tiles--vier { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Die beiden Haelften einer geteilten Kachel. `min-width: 0` ist noetig,
+   damit die Zahl schrumpfen darf statt das Gitter aufzuspreizen —
+   dieselbe Falle wie bei den Deckbau-Kacheln, wo eine feste Breite den
+   Text beidseitig abgeschnitten hat. */
+.arc-halbe {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-items: start;
+}
+.arc-halb { min-width: 0; }
+.arc-halb .arc-tile-value {
+    /* Zwei Zahlen nebeneinander statt einer allein — entsprechend
+       kleiner, aber immer noch die groesste Schrift der Kachel. */
+    font-size: clamp(0.92rem, 3.4vw, 1.18rem);
+}
+/* Die Herkunft steht UNTER der Zahl, nicht daneben: nebeneinander
+   waere sie auf 390 px die erste, die umbricht, und eine Zahl, deren
+   Herkunft in die naechste Zeile rutscht, ist wieder eine Zahl ohne
+   Herkunft. */
+.arc-halb-quelle {
+    color: var(--arc-ink3);
+    font-size: var(--fs-xs);
+    line-height: 1.2;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Fehlt die Major-Seite, steht dort ein Strich — sichtbar leiser als
+   eine echte Zahl, damit das Auge nicht zwei Werte vergleicht, von
+   denen einer keiner ist. */
+.arc-halb--leer .arc-tile-value { color: var(--arc-ink3); font-weight: 600; }
+.arc-halb--leer .arc-halb-quelle { font-style: italic; }
+
 .arc-mu-title {
     margin: 10px 12px 4px; font-size: 0.72rem; color: var(--arc-ink3);
     text-transform: uppercase; letter-spacing: 0.04em;

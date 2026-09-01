@@ -616,7 +616,32 @@ def aggregate_tournament_cards(all_decks: list, t_info: dict, card_db: CardDatab
                 "rarity": db_c.get("rarity", "") if db_c else "",
                 "type": db_c.get("type", "") if db_c else "",
                 "image_url": db_c.get("image_url", "") if db_c else "",
-                "is_ace_spec": samp["is_ace_spec"]
+                # NEU ENTSCHIEDEN, NICHT AUS DER EINZELZEILE UEBERNOMMEN.
+                #
+                # BEFUND (01.09.2026): 180 Pokemon-Zeilen in
+                # tournament_cards_data_cards_TEF-PBL.csv standen mit leerem
+                # is_ace_spec da — Meowth ex, Fezandipiti ex, Shaymin. Bei
+                # einem Pokemon ist die Frage aber immer entscheidbar: ein
+                # Pokemon ist nie eine ACE SPEC.
+                #
+                # Ursache: extract_cards_from_decklist_soup() liefert
+                # {name, count, set_code, set_number} und KEIN type. Die
+                # Entscheidung oben in extract_single_deck() bekommt also
+                # immer typ="" und kann nur ueber die Kopienzahl gehen —
+                # bei einer einzeln gespielten Karte bleibt sie leer.
+                #
+                # Hier ist die Lage besser: db_c traegt den Typ, und
+                # stat["max_count"] ist das Maximum ueber ALLE Decks statt
+                # der Kopienzahl eines einzigen. Beides ist strengere
+                # Evidenz, also wird hier neu entschieden. Die Einzelzeile
+                # bleibt der Rueckfall — sie kann ein "Yes" tragen, das aus
+                # der Namensliste kam und den db_c-Weg nicht braucht.
+                "is_ace_spec": (samp["is_ace_spec"] if samp["is_ace_spec"] == "Yes"
+                                else (entscheide_zeile(
+                                          samp["name"], lade_ace_liste(),
+                                          stat["max_count"],
+                                          (db_c.get("type", "") if db_c else ""))
+                                      or samp["is_ace_spec"]))
             })
 
     return aggregated

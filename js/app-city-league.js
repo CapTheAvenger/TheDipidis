@@ -4425,9 +4425,19 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 output += energy.join('\n');
             }
             
-            // Copy to clipboard
+            // Copy to clipboard. Ergibt die Liste keine 60 Karten, sagt die
+            // Meldung das — siehe denselben Befund in
+            // app-current-meta-analysis.js (01.09.2026): eine Erfolgsmeldung
+            // ueber einer Liste, die PTCGL ablehnt, schickt den Nutzer auf
+            // die falsche Fehlersuche.
+            const _gesamt = pokemonCount + trainerCount + energyCount;
             navigator.clipboard.writeText(output).then(() => {
-                showToast(t('cl.deckCopied'), 'success');
+                if (_gesamt === 60) {
+                    showToast(t('cl.deckCopied'), 'success');
+                } else {
+                    showToast(t('cl.deckCopiedIncomplete').replace('{n}', String(_gesamt)),
+                        'warning');
+                }
             }).catch(err => {
                 console.error('Error copying:', err);
                 showToast(t('cl.copyError'), 'error');

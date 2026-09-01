@@ -117,7 +117,11 @@
    ============================================================ */
 
 .metacall-wrap {
-  max-width: 1500px;
+  /* Kein fester Deckel mehr — der aeussere .container regelt die
+     Inhaltsbreite fuer die ganze Seite an einer Stelle (css/styles.css).
+     Ein zweiter Deckel hier liess auf breiten Schirmen genau den Rand
+     stehen, den der erste gerade weggenommen hatte. */
+  max-width: none;
   padding-bottom: 40px;
 }
 

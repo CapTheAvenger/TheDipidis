@@ -1304,15 +1304,22 @@
 
             let heroHtml = '';
             if (topHeroArchetypes.length > 0) {
+                /* DER EIGENE KOPF DIESES BLOCKS IST AM 01.09.2026 WEGGEFALLEN.
+                 *
+                 * Er trug zwei Zeilen: "Top-Archetypen" und darunter
+                 * "Meistgespielte Deck-Varianten (Global)". Beide standen
+                 * direkt unter der Abschnittsueberschrift von
+                 * js/ds-sections.js, die seither "Die meistgespielten Decks"
+                 * heisst — drei Ueberschriften uebereinander fuer eine
+                 * Kachelreihe. Gemeldet: "den Zusatz 'meistgespielte
+                 * Deckvarianten global' kann meiner Meinung nach weg."
+                 *
+                 * Der Name bleibt am Abschnitt selbst haengen (aria-label),
+                 * damit ein Vorlesegeraet den Block weiter benennen kann. */
                 const heroTitle = typeof t === 'function' ? t('currentMeta.topArchetypes') : 'Top Archetypes';
-                const heroSubtitle = typeof t === 'function' ? t('currentMeta.topArchetypesSub') : 'Most played deck variants (Global)';
 
                 heroHtml = `
                     <section class="tier-hero-section" aria-label="${heroTitle}">
-                        <div class="tier-hero-header">
-                            <h2>${heroTitle}</h2>
-                            <p>${heroSubtitle}</p>
-                        </div>
                         <div class="tier-hero-grid">`;
 
                 topHeroArchetypes.forEach((item, index) => {
@@ -1346,10 +1353,7 @@
                                             ? `Summe über ${variantCount} Varianten. Die einzelne Variante steht weiter unten in der Tabelle und ist entsprechend kleiner.`
                                             : `Sum across ${variantCount} variants — the individual variant is smaller and listed in the table below.`)
                                         : (getLang() === 'de' ? 'Eine einzelne Variante' : 'Single variant')}">${
-                                        fmtPct(parseFloat(shareText))}${variantCount > 1
-                                            ? ` <small class="stat-badge-suffix">${getLang() === 'de'
-                                                ? `über ${variantCount} Varianten` : `across ${variantCount} variants`}</small>`
-                                            : ''}</span>
+                                        fmtPct(parseFloat(shareText))}</span>
                                     <span class="stat-badge" title="${getLang() === 'de' ? 'Gewichtete durchschnittliche Win Rate' : 'Weighted average winrate'}">WR ${fmtPct(parseFloat(winrateText))}</span>
                                 </div>
                             </div>
@@ -1455,20 +1459,20 @@
                 tierGroups['tier-trending'] = tierGroups['tier-trending'].slice(0, 20);
             }
 
-            // ============================================================
-            // Live deck-name filter — user types, cards hide instantly.
-            // Filter runs against data-deck-name on every .deck-banner-
-            // card, so it works across all four tier sections + the
-            // hero section without needing a re-render.
-            // ============================================================
-            const filterHtml = `
-                <div class="tier-search-row">
-                    <input type="search" class="tier-search-input"
-                           placeholder="${escapeHtml(t('tier.searchPlaceholder'))}"
-                           aria-label="${escapeHtml(t('tier.searchAria'))}"
-                           oninput="filterTierDeckCards(this.value)">
-                    <span class="tier-search-clear" onclick="this.previousElementSibling.value=''; filterTierDeckCards('');" title="${escapeHtml(t('tier.clearFilter'))}">✕</span>
-                </div>`;
+            // DIE DECK-SUCHE STAND HIER BIS ZUM 01.09.2026.
+            //
+            // Gemeldet: "darunter ist auch noch eine Suchleiste, die
+            // ueberhaupt gar keine Funktion hat". Das stimmte, und der
+            // Grund war der Umbau in Abschnitte: das Feld filterte
+            // .deck-banner-card, und die stehen seit dem 18.08.2026
+            // allesamt im Abschnitt "Tier-Liste" — der faengt
+            // zugeklappt an. Wer im obersten Abschnitt tippte, filterte
+            // also etwas, das er nicht sehen konnte.
+            //
+            // Das Feld ist deshalb weg und nicht repariert: eine Suche
+            // ueber 138 Decks gehoert in den Abschnitt, in dem die 138
+            // Decks stehen, nicht ueber die drei Kacheln ganz oben. Der
+            // Gedanke ist in docs/geparkte-features.md notiert.
 
             // ============================================================
             // Side-by-side Overall vs Top-8 panel — pulls from the new
@@ -1710,16 +1714,42 @@
                         { k: 'anteil',   de: 'Anteil',        en: 'Share',       num: true, hilf: 'share' },
                         { k: 'wr',       de: 'Win Rate',      en: 'Win rate',    num: true,
                           tip: { de: 'gewonnene Matches auf der Ladder', en: 'games won on the ladder' } },
-                        { k: 'antritte', de: 'Antritte',      en: 'Entries',     num: true,
-                          tip: { de: 'gewichtete Turnier-Antritte', en: 'weighted tournament entries' } },
-                        { k: 'cuts',     de: 'davon Top 8',   en: 'made top 8',  num: true },
+                        /* DREI UEBERSCHRIFTEN NEU BENANNT AM 01.09.2026.
+                           Gemeldet: "was sind denn bitte 618,5 Antritte?
+                           Was ist das fuer eine Kennzahl? … 'davon Top 8,
+                           21'. Heisst es jetzt, dass nur 21 Listen von 2715
+                           Listen Top 8 gekommen sind? Aber das kann ja nicht
+                           sein … 'den Top 8 gegenueber Durchschnitt', den
+                           Part verstehe ich auch noch nicht."
+                           Der Fehler war nicht die Zahl, sondern dass zwei
+                           Zaehlungen nebeneinanderstanden, ohne dass die
+                           Ueberschriften sie auseinanderhielten: Listen und
+                           Anteil kommen von der Ladder, Antritte und Top 8
+                           von den Turnieren. Deshalb steht die Herkunft
+                           jetzt in der Ueberschrift und nicht nur im
+                           Fliesstext darunter. */
+                        { k: 'antritte', de: 'Turnier-Antritte', en: 'Tournament entries', num: true,
+                          tip: { de: 'Starts auf Turnieren, nach Turniergröße gewichtet — halbe Werte sind deshalb echt. Eine andere Zählung als die Listen links.',
+                                 en: 'Entries at tournaments, weighted by event size — half values are real. A different count from the lists on the left.' } },
+                        { k: 'cuts',     de: 'Top 8',          en: 'Top 8',      num: true,
+                          tip: { de: 'davon in die Top 8 — bezogen auf die Turnier-Antritte links, nicht auf die Listen.',
+                                 en: 'of those, made top 8 — out of the tournament entries on the left, not the lists.' } },
                         { k: 'quote',    de: 'Top-8-Quote',   en: 'Top-8 rate',  num: true, hilf: 'top8' },
                         // hilf statt tip: TERMS.vsField sagt beides — was 1,6-mal
                         // heisst UND dass kleine Stichproben geglaettet werden.
-                        // Der Text stand seit jeher im File und wurde von keiner
-                        // Stelle benutzt; angehaengt war der kurze tip, der die
-                        // Glaettung verschweigt.
-                        { k: 'faktor',   de: 'Top 8 ggü. Ø',  en: 'Top 8 vs. avg', num: true, hilf: 'vsField' },
+                        //
+                        // `zusatz` traegt die einzige Zahl, die der feste
+                        // Glossartext nicht kennen kann: den Meta-Durchschnitt
+                        // dieses Laufs. Er stand bis zum 01.09.2026 im
+                        // Blocktext ueber der Tabelle — in einem Absatz von
+                        // 918 Zeichen, den der Betreiber zu Recht nicht
+                        // gelesen hat. Ohne ihn haette "0,8-mal" keinen
+                        // Bezugspunkt, also steht er jetzt an der Spalte, die
+                        // damit vergleicht.
+                        { k: 'faktor',   de: 'ggü. Schnitt',  en: 'vs. average', num: true, hilf: 'vsField',
+                          zusatz: deR
+                            ? `Der Meta-Durchschnitt liegt bei ${fmtPct(conv.expected * 100, 1)} Top-8-Quote.`
+                            : `The field average is ${fmtPct(conv.expected * 100, 1)} top-8 rate.` },
                     ];
 
                     const zelle = (r, k) => {
@@ -1779,9 +1809,10 @@
 
                     const kopfZellen = SPALTEN.map(c => {
                         const txt = deR ? c.de : c.en;
-                        const beschriftet = c.hilf ? hintTerm(txt, term(c.hilf))
-                                          : (c.tip ? hintTerm(txt, deR ? c.tip.de : c.tip.en)
-                                                   : escapeHtml(txt));
+                        const hilfstext = c.hilf ? term(c.hilf)
+                                         : (c.tip ? (deR ? c.tip.de : c.tip.en) : '');
+                        const voll = hilfstext + (c.zusatz ? ' ' + c.zusatz : '');
+                        const beschriftet = voll ? hintTerm(txt, voll) : escapeHtml(txt);
                         return `<th class="${c.num ? 'ds-num ' : ''}cm-rang-th" data-rang-spalte="${c.k}"
                                     role="button" tabindex="0" aria-sort="${c.k === 'listen' ? 'descending' : 'none'}"
                                     title="${escapeHtml(deR ? 'Nach dieser Spalte sortieren' : 'Sort by this column')}">${
@@ -1794,8 +1825,6 @@
                     // Antritt — das bleibt moeglich, kostet aber nicht mehr
                     // standardmaessig 138 Zeilen Seitenhoehe.
                     const SICHTBAR = 25;
-                    const ladderSumme = (normalizedDecks || [])
-                        .reduce((sum, d) => sum + (d.new_count || 0), 0);
                     const zeilen = reihen.map((r, i) => `
                         <tr class="${r.duenn ? 'is-muted' : ''}${i >= SICHTBAR ? ' cm-rang-mehr' : ''}"${
                             i >= SICHTBAR ? ' hidden' : ''}>
@@ -1827,34 +1856,19 @@
                         <div class="ds-panel cm-rangliste-block">
                             <h3 class="ds-label">🏆 ${deR ? 'Meta-Performance' : 'Meta performance'}</h3>
                             <p class="ds-note cm-rang-hinweis">${deR
-                                ? 'Eine Zeile je Deck, jede Spaltenüberschrift sortiert. '
-                                  + '<strong>Listen</strong> und <strong>Win Rate</strong> kommen von der Online-Ladder '
-                                  + '(' + fmtNumDS(ladderSumme) + ' Decklisten), <strong>Antritte</strong> und '
-                                  + '<strong>Top 8</strong> aus den Turnieren (' + fmtNumDS(conv.totalBrought)
-                                  + ' gewichtete Antritte). Zwei Zählungen desselben Metas — darum ist der Anteil '
-                                  + 'in beiden fast gleich, die Stückzahlen aber nicht. Ein Strich heißt: dieses Deck '
-                                  + 'steht in der einen Datei und in der anderen nicht — oder es heißt in den beiden '
-                                  + 'Quellen verschieden. Blasse Zeilen haben unter '
-                                  + CONV_THIN_N + ' Turnier-Antritte — dort ist die Top-8-Quote noch wackelig. '
-                                  + 'Der <strong>Meta-Durchschnitt</strong>, gegen den die letzte Spalte vergleicht, '
-                                  + 'liegt bei ' + fmtPct(conv.expected * 100, 1) + ' Top-8-Quote. Die letzte Spalte '
-                                  + 'selbst ist geglättet (k = ' + CONV_PRIOR + '), die Top-8-Quote daneben ist roh; '
-                                  + 'beide Werte stehen im Tooltip der Zelle. Unter ' + CONV_MIN_N + ' Antritten steht '
-                                  + 'dort ein Strich statt einer Zahl, die nur den Durchschnitt wiederholt. Antritte '
-                                  + 'werden nach Turnieralter gewichtet, halbe Werte sind deshalb echt und keine Rundung.'
-                                : 'One row per deck, every column heading sorts. <strong>Lists</strong> and '
-                                  + '<strong>win rate</strong> come from the online ladder (' + fmtNumDS(ladderSumme)
-                                  + ' decklists), <strong>entries</strong> and <strong>top 8</strong> from tournaments ('
-                                  + fmtNumDS(conv.totalBrought) + ' weighted entries). Two counts of the same field — '
-                                  + 'which is why the share matches but the totals do not. A dash means the deck is in '
-                                  + 'one file and not the other — or it goes by a different name in the two sources. '
-                                  + 'Faded rows have fewer than ' + CONV_THIN_N
-                                  + ' tournament entries. The <strong>field average</strong> the last column compares '
-                                  + 'against is ' + fmtPct(conv.expected * 100, 1) + ' top-8 rate. That column is '
-                                  + 'smoothed (k = ' + CONV_PRIOR + ') while the top-8 rate beside it is raw; the cell '
-                                  + 'tooltip carries both. Below ' + CONV_MIN_N + ' entries it shows a dash instead of '
-                                  + 'a number that merely repeats the average. Entries are weighted by tournament age, '
-                                  + 'so half values are real, not a rounding artefact.'}</p>
+                                ? 'Zwei Zählungen desselben Metas nebeneinander: <strong>Listen</strong> und '
+                                  + '<strong>Anteil</strong> von der Online-Ladder, <strong>Turnier-Antritte</strong> '
+                                  + 'und <strong>Top 8</strong> von den Turnieren. Darum ist der Anteil in beiden fast '
+                                  + 'gleich, die Stückzahlen aber nicht. Ein Strich heißt: das Deck steht in der einen '
+                                  + 'Quelle und in der anderen nicht — oder es heißt in den beiden '
+                                  + 'Quellen verschieden. Jede Spaltenüberschrift sortiert und erklärt sich selbst. '
+                                : 'Two counts of the same field side by side: <strong>lists</strong> and '
+                                  + '<strong>share</strong> from the online ladder, <strong>tournament entries</strong> '
+                                  + 'and <strong>top 8</strong> from tournaments. That is why the share matches but the '
+                                  + 'totals do not. A dash means the deck is in one source and not the other — '
+                                  + 'or it goes by a different name in the two sources. Every column heading sorts '
+                                  + 'and explains itself. '}<a class="qu-verweis" href="#quellen">${
+                                    deR ? 'Nenner und Rechenweg →' : 'Denominators and method →'}</a></p>
                             <div class="mobile-table-scroll">
                                 <table class="ds-table cm-rangliste" data-rang-sortiert="listen" data-rang-richtung="ab">
                                     <thead><tr><th class="ds-rank">#</th>${kopfZellen}</tr></thead>
@@ -1879,95 +1893,28 @@
                 console.warn('Top-8-Block konnte nicht gerendert werden:', _e && _e.message);
             }
 
-            // ============================================================
-            // Performance Improvers / Decliners (TrainerHill pattern).
-            // Filters decks where share moved >= 0.4 percentage points
-            // since the previous comparison snapshot. Top 5 each side.
-            // ============================================================
-            const movers = normalizedDecks
-                .filter(d => d.old_share > 0 && Math.abs((d.share || 0) - d.old_share) >= 0.4)
-                .map(d => ({
-                    archetype: d.archetype,
-                    share: d.share || 0,
-                    oldShare: d.old_share,
-                    delta: (d.share || 0) - d.old_share,
-                    winrate: d.winrate || 0,
-                }));
-            // Split by sign FIRST, sort within each side. Without the
-            // sign filter, a single mover with delta > 0 ended up in
-            // both lists (improvers got the top-5-by-desc which
-            // included it as +1.0, decliners got the top-5-by-asc
-            // which also included it because there were < 5 candidates
-            // on the negative side). Visible regression: N's Zoroark
-            // shown as +1.0 % in Improvers AND -1.0 % in Decliners
-            // with identical Share/Prev numbers.
-            const improvers = movers.filter(m => m.delta > 0)
-                                    .sort((a, b) => b.delta - a.delta)
-                                    .slice(0, 5);
-            const decliners = movers.filter(m => m.delta < 0)
-                                    .sort((a, b) => a.delta - b.delta)
-                                    .slice(0, 5);
-
-            const renderMoverRow = (m, sign) => {
-                const delta = (typeof window.formatPercentSigned === 'function')
-                    ? window.formatPercentSigned(m.delta)
-                    : (m.delta >= 0 ? '+' : '') + m.delta.toFixed(1) + '%';
-                // Getoente Zelle statt farbigem Text — der Baustein dafuer
-                // steht schon in css/components.css und garantiert, dass
-                // der Kontrast der Zahl unabhaengig vom Wert bleibt.
-                const cls = sign === 'up' ? 'ds-tint-pos' : 'ds-tint-neg';
-                return `<tr>
-                    <td>${escapeHtml(m.archetype)}</td>
-                    <td class="ds-num">${fmtPct(m.share)}</td>
-                    <td class="ds-num">${fmtPct(m.oldShare)}</td>
-                    <td class="ds-num tier-mover-delta ${cls}">${delta}</td>
-                </tr>`;
-            };
-
-            // Always render BOTH blocks side-by-side, even when one or both
-            // are empty. Showing only "Festival Lead +1.0%" as the single
-            // improver looked like a rendering error. A friendly empty
-            // state makes the sparse-data case explicit.
-            const emptyMoversNotice = `
-                <div class="tier-movers-empty">
-                    <span class="tier-movers-empty-icon">📋</span>
-                    <span>Zu wenig Bewegung diese Woche (≥ 0,4 pp Veränderung).</span>
-                </div>`;
-            const deMv = getLang() === 'de';
-            const renderMoverBlock = (title, list, sign) => `
-                <div class="ds-panel tier-movers-block tier-movers-${sign === 'up' ? 'improvers' : 'decliners'}">
-                    <h3 class="ds-label">${title}</h3>
-                    ${list.length > 0
-                      ? `<table class="ds-table">
-                            <thead><tr><th>Deck</th>
-                                <th class="ds-num">${hintTerm(deMv ? 'Anteil' : 'Share', term('share'))}</th>
-                                <th class="ds-num">${hintTerm(deMv ? 'Vorher' : 'Prev', term('prev'))}</th>
-                                <th class="ds-num">${hintTerm('Δ', term('delta'))}</th></tr></thead>
-                            <tbody>${list.map(m => renderMoverRow(m, sign)).join('')}</tbody>
-                         </table>`
-                      : emptyMoversNotice}
-                </div>`;
-            let moversHtml = `
-                <div class="tier-movers-row">
-                    ${renderMoverBlock('📈 Performance Improvers', improvers, 'up')}
-                    ${renderMoverBlock('📉 Performance Decliners', decliners, 'down')}
-                </div>`;
-            // If BOTH sides are empty, replace the whole row with one
-            // clean note so we don't render two empty boxes.
-            if (improvers.length === 0 && decliners.length === 0) {
-                moversHtml = `
-                <div class="tier-movers-row tier-movers-row--empty">
-                    <div class="tier-movers-block tier-movers-block--full-empty">
-                        <span class="tier-movers-empty-icon">📋</span>
-                        <span>Diese Woche keine signifikanten Share-Bewegungen (≥ 0,4 pp). Schau morgen wieder vorbei.</span>
-                    </div>
-                </div>`;
-            }
+            // AUF- UND ABSTEIGER STANDEN HIER BIS ZUM 01.09.2026.
+            //
+            // Zwei Tabellen mit je fuenf Zeilen: welche Decks seit dem
+            // Vergleichsfenster mindestens 0,4 Prozentpunkte Anteil
+            // gewonnen oder verloren haben. Gemeldet: "ganz unten auf
+            // der Seite haben wir noch den Auf- und Absteiger. Ich
+            // glaube, das ist mittlerweile auch eine Sache, die wir
+            // wegnehmen koennen."
+            //
+            // Und sie hatte ein Problem, das sie nie loswurde: an den
+            // meisten Tagen bewegte sich nichts ueber der Schwelle, und
+            // dann standen zwei leere Kaesten mit einem Zettel-Symbol da.
+            // Ein Block, der die Haelfte der Zeit "nichts" sagt, ist
+            // kein Block. Die Bewegung selbst ist nicht verloren: die
+            // Pfeile an den Tier-Karten zeigen sie pro Deck, dort wo das
+            // Deck steht. Notiert in docs/geparkte-features.md.
 
             // ============================================================
-            // Data-Source transparency box. TrainerHill-inspired metadata
-            // strip telling the user how many deck entries / archetypes
-            // back the snapshot — builds confidence in the numbers.
+            // Der Datenumfang: worauf die Zahlen dieser Ansicht beruhen.
+            // Gerechnet wird er hier, weil dies die einzige Stelle ist,
+            // die BEIDE Nenner kennt (Ladder-Listen und Turnier-Antritte).
+            // Angezeigt wird er unter Quellen & Methodik.
             // ============================================================
             const totalDecks   = normalizedDecks.length;
             const totalEntries = normalizedDecks.reduce((s, d) => s + (d.new_count || 0), 0);
@@ -1989,11 +1936,6 @@
                 : 0;
             const restAnteil = feldGesamt > totalEntries
                 ? (feldGesamt - totalEntries) / feldGesamt * 100 : 0;
-            // Die Datenbasis als Kennzahl-Kacheln statt als Fließtextzeile:
-            // dieselben Zahlen, aber lesbar, ohne den Satz zu entziffern.
-            // Drei Kacheln aus components.css, keine eigene Regel.
-            const deDS = getLang() === 'de';
-
             // Die Turnierzahlen standen bisher im Abschnitt "Ueberblick" ganz
             // unten, in einer lila Kachel, auf Englisch, hinter zwei weiteren
             // Abschnitten. Gemeldet: "die Ueberblick koennen wir rausnehmen,
@@ -2045,70 +1987,51 @@
                 // Fehlt die Datei, bleibt die Kachel bei ihrer kurzen Zeile.
                 console.warn('limitless_meta_stats.json nicht geladen:', e && e.message);
             }
-            const statTile = (label, value, unit, context) => `
-                <div class="ds-stat">
-                    <span class="ds-stat-label">${escapeHtml(label)}</span>
-                    <span class="ds-stat-value">${value}${unit ? `<span class="ds-stat-unit">${unit}</span>` : ''}</span>
-                    <span class="ds-stat-context">${escapeHtml(context)}</span>
-                </div>`;
-            const dataSourceHtml = `
-                <div class="ds-stat-row">
-                    ${statTile(deDS ? 'Gemeldete Listen' : 'Reported lists',
-                        totalEntries.toLocaleString(deDS ? 'de-DE' : 'en-US'), '',
-                        (metaStats
-                            ? (deDS
-                                ? `aus ${fmtNumDS(metaStats.turniere)} Turnieren · ${fmtNumDS(metaStats.spieler)} Spieler · ${fmtNumDS(metaStats.partien)} Matches`
-                                  + ` (Stand ${metaStatsStand.toLocaleDateString('de-DE')})`
-                                : `from ${fmtNumDS(metaStats.turniere)} tournaments · ${fmtNumDS(metaStats.spieler)} players · ${fmtNumDS(metaStats.partien)} matches`
-                                  + ` (as of ${metaStatsStand.toLocaleDateString('en-GB')})`)
-                            : (deDS ? 'einzelne Decklisten, nicht Deckarten' : 'individual decklists, not deck types'))
-                        + (restAnteil > 0
-                            ? (deDS
-                                ? ` · ${fmtPct(100 - restAnteil, 1)} von ${fmtNumDS(feldGesamt)} Listen im Meta;`
-                                  + ` die \u00fcbrigen ${fmtNumDS(feldGesamt - totalEntries)} (${fmtPct(restAnteil, 1)})`
-                                  + ' f\u00fchrt Limitless als \u201eOther\u201c und meldet sie nicht einzeln'
-                                : ` · ${fmtPct(100 - restAnteil, 1)} of ${fmtNumDS(feldGesamt)} lists in the field;`
-                                  + ` the remaining ${fmtNumDS(feldGesamt - totalEntries)} (${fmtPct(restAnteil, 1)})`
-                                  + ' Limitless files as "Other" and does not report them individually')
-                            : ''))}
-                    ${statTile(deDS ? 'Archetypen' : 'Archetypes',
-                        String(totalDecks), '',
-                        deDS ? 'mindestens ein gemeldetes Deck' : 'at least one reported deck')}
-                    ${(() => {
-                        // Dritte Kachel: wie eng ist das Feld?
-                        //
-                        // Hier stand der Feld-Durchschnitt (6,20 % Top-8-Quote).
-                        // Der steht seit dem 19.08.2026 schon im Satz darueber
-                        // — zweimal dieselbe Zahl auf einem Bildschirm war der
-                        // Grund fuer die Rueckmeldung "entscheide Dich fuer eine
-                        // Zahl". Also eine, die sonst nirgends steht.
-                        //
-                        // Und "Decks im Feld" hiess es fuer 26.319 Eintraege,
-                        // obwohl es nur 131 Deckarten gibt. Gemeldet: "jetzt
-                        // sind ja nicht 26.000 verschiedene Decks, wir haben
-                        // 26.000 verschiedene Listen." Jetzt heisst es so.
-                        // fieldConv, nicht enriched: enriched steht mit const
-                        // im try-Block oben und ist hier nicht mehr im Scope.
-                        // Beim ersten Versuch stand hier enriched — das haette
-                        // die ganze Kachelreihe mit einem ReferenceError
-                        // gerissen, still, weil ein try/catch darum liegt.
-                        if (!fieldConv || !(fieldConv.totalBrought > 0)) return '';
-                        const top = [...(fieldConv.decks || [])].sort((x, y) => y.brought - x.brought);
-                        const acht = top.slice(0, 8).reduce((sum, d) => sum + d.brought, 0)
-                                     / fieldConv.totalBrought * 100;
-                        if (!(acht > 0)) return '';
-                        // "Die acht groessten" war zwar deutsch, aber niemand
-                        // sagt das. Gemeldet: "man wuerde hier von Top 8
-                        // Archetypes sprechen … die englischen Woerter, die in
-                        // der Community benutzt werden, sollten wir schon
-                        // benutzen." Meta, Top 8 und Archetype sind genau solche.
-                        return statTile(deDS ? 'Top 8 Archetypes' : 'Top 8 archetypes',
-                            fmtPct(acht, 0), '',
-                            deDS
-                                ? `des Metas — ${totalDecks} Archetypen insgesamt`
-                                : `of the field — ${totalDecks} archetypes in total`);
-                    })()}
-                </div>`;
+            // DIE KACHELREIHE "GEMELDETE LISTEN / ARCHETYPEN / TOP 8
+            // ARCHETYPES" STAND HIER BIS ZUM 01.09.2026.
+            //
+            // Gemeldet: "Ich weiss nicht, ob diese Aussage tatsaechlich
+            // irgendeinen Mehrwert hat. Ich wuerde fast sagen, dass das
+            // weg kann. … koennen wir das bei Quelle mit angeben? Okay,
+            // die Daten berufen sich auf so und so viele gemeldete
+            // Listen, so und so viele Turniere, so und so viele Spieler."
+            //
+            // Genau so ist es jetzt: die Zahlen sind nicht weg, sie
+            // stehen unter Quellen & Methodik. Gerechnet werden sie
+            // weiter hier — das ist die Stelle, die beide Nenner kennt —
+            // und von dort weitergereicht. Auf der Startseite selbst
+            // stand die Reihe zwischen der Antwort und den Decks und
+            // beantwortete eine Frage, die dort niemand stellt.
+            /* Wie eng ist das Feld? Der Anteil der acht groessten
+               Archetypen — in der Szene "Top 8 Archetypes", und genau so
+               gemeldet: "man wuerde hier von Top 8 Archetypes sprechen …
+               die englischen Woerter, die in der Community benutzt
+               werden, sollten wir schon benutzen."
+               Die Zahl stand in der dritten Kachel der entfernten Reihe.
+               Sie ist die einzige der drei, die sonst nirgends steht —
+               sie zu loeschen waere keine Kuerzung, sondern ein Verlust.
+               Also zieht sie mit den anderen beiden nach Quellen &
+               Methodik. */
+            var top8Anteil = null;
+            if (fieldConv && fieldConv.totalBrought > 0 && Array.isArray(fieldConv.decks)) {
+                var groesste = [...fieldConv.decks].sort((x, y) => y.brought - x.brought).slice(0, 8);
+                var summe = groesste.reduce((s2, d) => s2 + d.brought, 0);
+                if (summe > 0) top8Anteil = summe / fieldConv.totalBrought * 100;
+            }
+            if (window.DsDatenumfang && typeof window.DsDatenumfang.setzen === 'function') {
+                window.DsDatenumfang.setzen({
+                    listen: totalEntries,
+                    archetypen: totalDecks,
+                    antritte: (fieldConv && fieldConv.totalBrought > 0) ? fieldConv.totalBrought : null,
+                    top8Anteil: top8Anteil,
+                    feldGesamt: feldGesamt || 0,
+                    restAnteil: restAnteil || 0,
+                    turniere: metaStats ? metaStats.turniere : null,
+                    spieler: metaStats ? metaStats.spieler : null,
+                    partien: metaStats ? metaStats.partien : null,
+                    stand: metaStatsStand ? metaStatsStand.toISOString() : null,
+                });
+            }
 
             // Die Basis, auf der JEDE Quote dieser Ansicht beruht, wandert in
             // den Datenraum-Ausweis über dem Tab. Vorher standen hier vier
@@ -2116,13 +2039,13 @@
             // keine davon sagte, welche der Nenner ist.
             if (window.DsNav && fieldConv && fieldConv.totalBrought > 0) {
                 window.DsNav.setSpaceFacts({
-                    sample: deDS
+                    sample: getLang() === 'de'
                         ? `${fmtNumDS(fieldConv.totalBrought)} gewichtete Antritte · ${totalEntries.toLocaleString('de-DE')} Decks`
                         : `${fmtNumDS(fieldConv.totalBrought)} weighted entries · ${totalEntries.toLocaleString('en-US')} decks`
                 }, 'gl');
             }
 
-            let html = heroHtml + dataSourceHtml + filterHtml + overallTop8Html + moversHtml + '<div style="margin-bottom: 30px;">';
+            let html = heroHtml + overallTop8Html + '<div style="margin-bottom: 30px;">';
 
             // Render each tier
             ['tier-1', 'tier-2', 'tier-3', 'tier-trending'].forEach(tierKey => {
@@ -2632,19 +2555,30 @@
             // Er wird einmal als Untertitel ausgewiesen ("von N Archetypen"),
             // damit "96,7% der Archetypen" nicht als Anteil an allen Decklisten
             // missverstanden wird (F21).
-            const nArchetypen = topCards.totalArchetypes;
-            /* "von 60 Archetypen" allein ist missverstaendlich: die Seite
-             * weist an anderer Stelle 133 Archetypen aus. Beide Zahlen
-             * stimmen und zaehlen Verschiedenes — 133 ist die volle
-             * Online-Liste, 60 sind die Archetypen, zu denen ueberhaupt
-             * Decklisten vorliegen. Nur aus diesen 60 laesst sich zaehlen,
-             * welche Karte drinsteckt. Steht das nicht dabei, liest sich
-             * "100 % der Archetypen" als 133 von 133. */
-            const nennerSub = (nArchetypen != null)
-                ? `<span class="top-cards-denominator">${
-                    deLbl ? 'von ' + nArchetypen + ' Archetypen mit Deckliste'
-                          : 'of ' + nArchetypen + ' archetypes with decklists'}</span>`
-                : '';
+            /* DER EIGENE KOPF DIESES BLOCKS IST AM 01.09.2026 WEGGEFALLEN.
+             *
+             * Er lautete "Meistgespielte Karten (Format-Staples)" mit dem
+             * Zusatz "von 60 Archetypen mit Deckliste" — und stand direkt
+             * unter der Abschnittsueberschrift, die seither
+             * "Meistgespielte Karten" heisst. Gemeldet: "Dann hast du hier
+             * nochmal an der rechten Seite 'Formatstaples' stehen, das
+             * brauchen wir auch nicht nochmal … Und ich glaube, dieses
+             * 'von 60 Archetypen mit Decklists', das brauchen wir auch
+             * nicht."
+             *
+             * Der Nenner ist damit nicht verschwunden: er steht in der
+             * Zeile unter jeder Karte ("96,7 % der Archetypen" / "58
+             * Archetypen") und ausfuehrlich unter Quellen & Methodik —
+             * dorthin wird er hier gemeldet. Das ist wichtig: die Seite
+             * weist an anderer Stelle 133 Archetypen aus, und ohne die
+             * 60 daneben liest sich "100 % der Archetypen" als 133 von
+             * 133. Die Zahl darf also die Flaeche verlassen, aber nicht
+             * die Seite. */
+            if (topCards.totalArchetypes != null && typeof window !== 'undefined'
+                && window.DsDatenumfang
+                && typeof window.DsDatenumfang.ergaenze === 'function') {
+                window.DsDatenumfang.ergaenze({ staplesArchetypen: topCards.totalArchetypes });
+            }
 
             const anzahl = staplesAnzahl();
             const zahlKnopf = (n) => `<button type="button" class="btn-toggle-item${
@@ -2663,9 +2597,6 @@
 
             let html = `
                 <div class="top-cards-container">
-                    <h3 class="top-cards-title">
-                        ${t('tier.mostUsedCards')}${nennerSub}
-                    </h3>
                     ${steuerung}
                     <div class="top-cards-grid">`;
             
@@ -2870,15 +2801,12 @@
 // users immediately see "your filter has no Tier 1 hits" rather than the
 // section disappearing under their cursor.
 // ============================================================================
-window.filterTierDeckCards = function (term) {
-    const t = String(term || '').toLowerCase().trim().replace(/\s+/g, '');
-    const cards = document.querySelectorAll('.deck-banner-card[data-deck-name]');
-    cards.forEach(card => {
-        const name = (card.getAttribute('data-deck-name') || '').replace(/\s+/g, '');
-        const match = !t || name.includes(t);
-        card.style.display = match ? '' : 'none';
-    });
-};
+/* filterTierDeckCards() stand hier bis zum 01.09.2026 — der Filter
+   hinter dem Suchfeld ueber der Tier-Liste. Feld und Filter sind
+   zusammen gegangen: das Feld stand im obersten Abschnitt, die Karten,
+   die es filterte, im zugeklappten Abschnitt darunter. Warum, und was
+   an einer Rueckkehr anders sein muesste, steht in
+   docs/geparkte-features.md. */
 
 /* Sprachwechsel zeichnet die Tier-Listen neu.
  *

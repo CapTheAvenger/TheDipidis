@@ -70,6 +70,16 @@
                     ],
                 },
                 {
+                    id: 'umfang', auf: false,
+                    h: 'Worauf die Zahlen beruhen',
+                    p: ['Die Meta-Ansicht zählt zweimal unabhängig voneinander: einmal die ' +
+                        'gemeldeten Decklisten der Online-Ladder, einmal die gewichteten ' +
+                        'Antritte auf Turnieren. Beide Nenner stehen hier.'],
+                    umfang: true,
+                    leer: 'Der Umfang steht erst zur Verfügung, wenn die Meta-Ansicht in ' +
+                          'dieser Sitzung einmal geladen wurde. Geschätzt wird hier nichts.',
+                },
+                {
                     id: 'begriffe', auf: false,
                     h: 'Was die Begriffe heißen',
                     dl: [
@@ -194,6 +204,16 @@
                     ],
                 },
                 {
+                    id: 'umfang', auf: false,
+                    h: 'What the numbers rest on',
+                    p: ['The meta view counts twice, independently: once the reported ' +
+                        'decklists on the online ladder, once the weighted entries at ' +
+                        'tournaments. Both denominators are stated here.'],
+                    umfang: true,
+                    leer: 'The scope becomes available once the meta view has loaded in this ' +
+                          'session. Nothing here is estimated.',
+                },
+                {
                     id: 'begriffe', auf: false,
                     h: 'What the terms mean',
                     dl: [
@@ -285,6 +305,23 @@
     function abschnittHtml(a) {
         var teile = [];
         (a.p || []).forEach(function (t) { teile.push(absatz(t)); });
+        /* Der einzige Abschnitt mit lebenden Zahlen. Sie kommen aus
+           js/ds-datenumfang.js, gerechnet von js/app-tier-meta.js —
+           hier wird nichts nachgerechnet, damit es keine zweite
+           Wahrheit fuer dieselbe Groesse gibt. Fehlt der Umfang, steht
+           das da; eine Naeherung waere schlimmer als eine Luecke. */
+        if (a.umfang) {
+            var zeilen = (window.DsDatenumfang
+                && typeof window.DsDatenumfang.saetze === 'function')
+                ? window.DsDatenumfang.saetze(de()) : [];
+            if (zeilen.length) {
+                teile.push('<ul class="qu-umfang">' + zeilen.map(function (z) {
+                    return '<li>' + esc(z) + '</li>';
+                }).join('') + '</ul>');
+            } else if (a.leer) {
+                teile.push('<p class="qu-p qu-leer">' + esc(a.leer) + '</p>');
+            }
+        }
         if (a.src && a.src.length) {
             teile.push('<dl class="qu-src">' + a.src.map(function (z) {
                 return '<dt>' + esc(z[0]) + '</dt><dd>' + esc(z[1]) + '</dd>';

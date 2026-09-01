@@ -189,18 +189,26 @@ describe('Phase 0: was sofort sichtbar ist', () => {
         assert.ok(c);
         // Seit dem 26.08.2026 waechst die Inhaltsbreite mit dem Fenster,
         // statt bei 1440px stehenzubleiben (auf 2560px blieben 1120px
-        // Rand ungenutzt). Zugesichert bleibt dreierlei: 100 % begrenzt
-        // zuerst (sonst laeuft die Seite auf kleinen Schirmen ueber),
-        // der Boden bleibt 1440px (damit Tablet und Handy unveraendert
-        // bleiben), und es gibt eine Obergrenze (unbegrenzt breit ist
-        // keine Lesbarkeit).
-        assert.match(c[0], /width:\s*min\(100%,\s*clamp\(1440px,\s*[^,]+,\s*(\d+)px\)\)/);
-        const deckel = Number(c[0].match(/clamp\(1440px,\s*[^,]+,\s*(\d+)px\)/)[1]);
-        assert.ok(deckel > 1440 && deckel <= 2400,
-            `Obergrenze ${deckel}px liegt ausserhalb 1441..2400`);
-        assert.doesNotMatch(c[0], /max-width:\s*1400px/);
+        // Rand ungenutzt).
+        //
+        // GEAENDERT am 01.09.2026: die Obergrenze ist gefallen. Sie stand
+        // auf 2040px und war auf einem 3440px-Ultrawide erneut zu klein —
+        // 887px Rand je Seite, derselbe Befund wie im August, nur eine
+        // Bildschirmgroesse weiter. Ein Deckel in Pixeln kennt die
+        // naechstgroessere Diagonale grundsaetzlich nicht.
+        //
+        // Die Lesbarkeit haengt seither nicht mehr am Container, sondern
+        // am Fliesstext selbst — der bekommt den ch-Deckel, den der
+        // Container nicht mehr traegt. Genau das wird unten geprueft, und
+        // ausfuehrlich in tests/unit/test-inhaltsbreite.js, das die Regel
+        // fuer echte Fensterbreiten ausrechnet statt sie zu lesen.
+        assert.match(c[0], /width:\s*min\(100%,\s*max\(1440px,\s*[\d.]+vw\)\)/);
+        assert.doesNotMatch(c[0], /max-width:\s*\d+px/,
+            'ein Pixel-Deckel ist zurueck — siehe test-inhaltsbreite.js');
         // Fliesstext darf die neue Breite nicht mitnehmen.
-        assert.match(STYLES, /\.side-quest-intro,\s*\n\s*\.side-quest-subtitle \{\s*\n\s*max-width:\s*\d+ch/);
+        assert.match(STYLES, /\.side-quest-intro,\s*\n\s*\.side-quest-subtitle,/);
+        const fliess = STYLES.slice(STYLES.indexOf('.side-quest-intro,'));
+        assert.match(fliess.slice(0, fliess.indexOf('}')), /max-width:\s*\d+ch/);
         // body trägt das Polster; ein zweiter Abzug im Container hat auf
         // 390px die Archetyp-Karten übereinandergeschoben.
         assert.doesNotMatch(STYLES, /body > \.container \{\s*width: min\(1440px, 100% - 32px\)/);

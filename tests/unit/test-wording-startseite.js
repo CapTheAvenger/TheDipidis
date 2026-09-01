@@ -40,6 +40,11 @@ describe('Die alten Formulierungen kommen nicht zurück', () => {
         [HUB, 'Was ist gerade stark?', 'als Frage formuliert, obwohl die Antwort darunter steht'],
         [HUB, 'ist gerade das erfolgreichste Deck', 'vier Teilsätze im ersten Satz der Seite'],
         [FILTER, 'hier gibt es nur das laufende Format', 'klang wie eine Entschuldigung'],
+        // Und die zweite Fassung desselben Satzes, am 01.09.2026:
+        // "Okay, den Zusatz kannst du aber rauslassen. Lieber dieses
+        // TEF-bis-PBL-Feld optisch den anderen anpassen." Eine Anzeige,
+        // die "TEF-PBL" sagt, braucht keine Bildunterschrift.
+        [FILTER, 'Global läuft immer im aktuellen Format.', 'erklärte das Feld daneben, das für sich spricht'],
     ];
     for (const [quelle, text, warum] of abgeloest) {
         it(`„${text}“ steht nicht mehr da (${warum})`, () => {
@@ -57,7 +62,6 @@ describe('Die neuen Formulierungen stehen in beiden Sprachen', () => {
         [EMPF, "'Und trotzdem: in '", "'And still: at '"],
         [EMPF, "' % vom Feld sind neu.</strong> '", null],
         [HUB, "'Was gerade läuft'", "'What is running right now'"],
-        [FILTER, "'Global läuft immer im aktuellen Format.'", "'Global always runs the current format.'"],
     ];
     for (const [quelle, de, en] of paare) {
         it(`${de.slice(0, 34)} …`, () => {

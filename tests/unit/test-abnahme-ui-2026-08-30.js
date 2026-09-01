@@ -37,7 +37,8 @@
  *   .archetype-jump-link        19 px, 25x auf city-league
  *   .city-league-info-table-*   31,5-33,5 px, 19x
  *   .heatmap-td                 40 px, 36x
- *   .tier-search-clear          27,4 x 24 px
+ *   .tier-search-clear          27,4 x 24 px  (entfernt 01.09.2026
+ *                               mitsamt dem Suchfeld)
  *   .card-database-price-btn    20 px, 8x, ohne ::after-Flaeche
  *   .card-database-rarity-btn   20 px, 8x, ebenso
  *
@@ -126,12 +127,15 @@ describe('Auch die Ziele, die kein Element-Selektor fasst', () => {
         'archetype-jump-link',
         'city-league-info-table-cell',
         'heatmap-td',
-        'tier-search-clear',
+        // 'tier-search-clear' stand hier bis zum 01.09.2026. Das Suchfeld
+        // ueber der Tier-Liste ist entfernt (docs/geparkte-features.md);
+        // ein Tippziel fuer ein Element, das es nicht gibt, waere eine
+        // Zusicherung ueber nichts.
         'card-database-price-btn',
         'card-database-rarity-btn',
     ];
 
-    it('jede der sieben Klassen steht in der Regel', () => {
+    it('jede dieser Klassen steht in der Regel', () => {
         // WORTGRENZE. `.heatmap-td-weg` enthaelt `.heatmap-td` als
         // Teilzeichenkette — eine Umbenennung kam damit glatt durch.
         const fehlen = NAMEN.filter(n =>
@@ -157,7 +161,7 @@ describe('Auch die Ziele, die kein Element-Selektor fasst', () => {
         // Gleiches Gewicht entscheidet die Reihenfolge, und
         // mobile-responsive.css laedt spaeter. Ohne das fuehrende `html`
         // blieb die Deck-Auswahl trotz !important bei 38 px.
-        for (const n of ['searchable-select-display', 'heatmap-td', 'tier-search-clear']) {
+        for (const n of ['searchable-select-display', 'heatmap-td']) {
             assert.ok(TIPP.includes('html .' + n),
                 `.${n} steht ohne \`html\` davor — dann entscheidet die ` +
                 `Ladereihenfolge, und mobile-responsive.css gewinnt`);

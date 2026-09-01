@@ -196,7 +196,29 @@
     // Two classes on purpose: the ROLE (rep / wr / conv) is the stable
     // hook for selectors and tests, the TONE is only the colour.
     function tile(role, tone, label, value, context, titleAttr, arrow) {
-        const ttl = titleAttr ? ` title="${esc(titleAttr)}"` : '';
+        /* DER HINWEIS HAENGT AN data-hinweis, NICHT MEHR NUR AN title
+           (01.09.2026, aus dem Review derselben Aenderung).
+
+           Am selben Tag sind die Nenner ("2.577 Listen im Meta", "aus
+           12.271 Matches") von der Kachelflaeche in den Hinweis
+           gezogen, weil sie dort zu viel Platz nahmen. Ein reines
+           title-Attribut erscheint aber nur beim Verweilen mit der
+           Maus — nie beim Klick und auf keinem Telefon. Die Nenner
+           waeren damit fuer die Haelfte der Besucher schlicht weg, und
+           genau dieses Argument steht zwei Dateien weiter in
+           js/app-utils.js, wo termHint aus demselben Grund umgebaut
+           wurde.
+
+           Also dieselbe Loesung wie dort: die Sprechblase aus
+           css/components.css, die auf Verweilen UND auf Fokus
+           anspringt, plus aria-label fuer Vorlesegeraete. Das title
+           bleibt NICHT zusaetzlich stehen — zwei Blasen uebereinander
+           sind schlimmer als eine. */
+        const hat = !!titleAttr;
+        const ttl = hat
+            ? ` data-hinweis="${esc(titleAttr)}" tabindex="0"`
+              + ` aria-label="${esc(label)} ${esc(value).replace(/<[^>]*>/g, '')}: ${esc(titleAttr)}"`
+            : '';
         const arw = arrow ? `<span class="arc-tile-arrow" aria-hidden="true">${arrow}</span>` : '';
         // Wert oben, Bezeichnung darunter — genau die Reihenfolge, in der
         // statCol() in js/ds-share.js die Bildkarte malt (Wert auf +62,
@@ -207,10 +229,14 @@
         // die der ersten, weil "Top-8 vs. Erw." umbricht und "Anteil"
         // nicht. Drei Zahlen nebeneinander, die nicht auf einer Linie
         // liegen, liest niemand als eine Reihe.
-        return `<div class="arc-tile arc-tile--${role} arc-tone--${tone}"${ttl}>
+        /* Eine leere Kontextzeile ist keine Kontextzeile: sie kostet
+           Hoehe und sieht aus wie eine Angabe, die nicht geladen hat. */
+        const ctx = context ? `<div class="arc-tile-ctx">${context}</div>` : '';
+        return `<div class="arc-tile arc-tile--${role} arc-tone--${tone}${
+                hat ? ' arc-tile--hinweis' : ''}"${ttl}>
                 <div class="arc-tile-value">${arw}${value}</div>
                 <div class="arc-tile-label">${esc(label)}</div>
-                <div class="arc-tile-ctx">${context}</div>
+                ${ctx}
             </div>`;
     }
 
@@ -224,26 +250,38 @@
         // jetzt margin-right in css/styles.css, in px statt in em.
         const arrow = (v) => (Math.abs(v) < 0.05 ? '' : (v > 0 ? '▲' : '▼'));
 
-        // Share carries no good/bad direction — it is neutral by nature.
+        /* DIE NENNER STEHEN SEIT DEM 01.09.2026 IM HINWEIS, NICHT AUF
+           DER KACHELFLAECHE.
+           Gemeldet: "'2.577 Listen im Meta' brauchen wir, glaube ich,
+           nicht. Dann '54 % Winrate aus so und so vielen Matches'
+           brauchen wir, glaube ich, auch nicht."
+
+           Geloescht sind sie deshalb nicht: eine Quote ohne Nenner ist
+           auf dieser Seite der Fehler, aus dem alles andere folgt. Sie
+           haengen an der Kachel und sind ueber Verweilen, Klick und
+           Tastatur erreichbar (siehe tile()).
+
+           Und zwar HIER und nur hier: unter Quellen & Methodik stehen
+           die Summen des ganzen Datenraums, nicht der Nenner je Deck.
+           Ein frueherer Kommentar an dieser Stelle behauptete das
+           Gegenteil — der Hinweis an der Kachel ist die einzige Stelle,
+           an der "2.577" steht, und muss es deshalb bleiben. */
         const rep = d
             ? tile('rep', 'neutral', L('arc.repLabel', de ? 'Anteil' : 'Share'),
-                `${esc(fmt(d.share))} %`,
-                esc(L('arc.repCtx', de ? '{n} Listen im Meta' : '{n} lists in the field')
-                    .replace('{n}', fmtGanz(d.count))))
+                `${esc(fmt(d.share))} %`, '',
+                L('arc.repCtx', de ? '{n} Listen im Meta' : '{n} lists in the field')
+                    .replace('{n}', fmtGanz(d.count)))
             : tile('rep', 'tie', L('arc.repLabel', de ? 'Anteil' : 'Share'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
 
         const wrDelta = d ? d.winRate - 50 : null;
         const wr = d
             ? tile('wr', toneFor(wrDelta), L('arc.wrLabel', 'Win Rate'),
-                `${esc(fmt(d.winRate))} %`,
-                // Frueher stand hier "+3,99 gegenueber 50 %". Das ist doppelt:
-                // wer 54,0 % liest, weiss selbst, dass das 4 Punkte ueber 50
-                // liegt. Die Zeile sagt jetzt, worauf die Quote beruht.
-                esc(d.partien > 0
+                `${esc(fmt(d.winRate))} %`, '',
+                d.partien > 0
                     ? L('arc.wrCtx', de ? 'aus {n} Matches' : 'from {n} games').replace('{n}', fmtGanz(d.partien))
-                    : L('arc.wrCtxLeer', de ? 'Anzahl Matches unbekannt' : 'game count unknown')),
-                '', arrow(wrDelta))
+                    : L('arc.wrCtxLeer', de ? 'Anzahl Matches unbekannt' : 'game count unknown'),
+                arrow(wrDelta))
             : tile('wr', 'tie', L('arc.wrLabel', 'Win Rate'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
 
@@ -252,26 +290,64 @@
         // the opposite of "we have no tournament data for this deck".
         const c = _conv ? _conv.decks.find(x =>
             String(x.name).toLowerCase() === String(name).toLowerCase()) : null;
-        const conv = c
-            ? tile('conv', toneFor(c.perfPct), L('arc.convLabel', de ? 'Top-8 vs. Erw.' : 'Top-8 vs. exp.'),
-                `${c.perfPct >= 0 ? '+' : '−'}${esc(fmt(Math.abs(c.perfPct)))} %`,
+        /* DIE DRITTE KACHEL HIESS BIS ZUM 01.09.2026 "Top-8 vs. Erw."
+           UND ZEIGTE "+59,2 %".
+           Gemeldet: "'plus 59 % Top 8 wird erwartet…' Ja, den Bereich
+           verstehe ich noch nicht so ganz, auch mit der Erklaerung ist
+           es darunter verwirrend."
+           Zu Recht: +59,2 % war kein Prozentsatz einer Quote, sondern
+           ein Vergleich zweier Quoten — und stand mit Prozentzeichen
+           neben zwei echten Prozentwerten. Wer das als "erreicht in
+           59 % der Faelle die Top 8" liest, liegt um den Faktor sechs
+           daneben.
+
+           WARUM HIER DER FELD-SCHNITT STEHT UND NICHT DAS VIELFACHE
+           (Befund aus dem Review derselben Aenderung):
+
+           Die erste Fassung schrieb die ROHE Quote gross und das
+           GEGLAETTETE Vielfache darunter. Das sind zwei Groessen aus
+           zwei Rechnungen, und sie gehen auseinander: Marnie's
+           Grimmsnarl stand mit "13,0 % · 1,2-mal so oft wie der
+           Schnitt" da, obwohl 13,0 / 6,19 = 2,1 ist. In 68 von 120
+           Decks wich das nachrechenbare Verhaeltnis um mindestens 0,5
+           vom angezeigten Vielfachen ab. Zwei Zahlen nebeneinander, die
+           sich nicht ineinander umrechnen lassen, sind schlimmer als
+           eine Zahl allein — der Leser haelt sich fuers Rechnen zu
+           dumm, statt der Anzeige zu misstrauen.
+
+           Jetzt steht daneben, wogegen verglichen wird: der
+           Feld-Durchschnitt, roh wie die Quote darueber. 13,0 gegen
+           6,2 — das rechnet jeder selbst, und es stimmt. Das
+           geglaettete Vielfache bleibt in der Rangliste, wo es als
+           geglaettet beschriftet ist, seine eigene Spalte hat und unter
+           der Mindestzahl ehrlich schweigt. */
+        const quote = c && c.brought > 0 ? (c.top8 / c.brought) * 100 : null;
+        const schnitt = (_conv && isFinite(_conv.expected)) ? _conv.expected * 100 : null;
+        const conv = (c && quote != null)
+            ? tile('conv', toneFor(c.perfPct),
+                L('arc.convLabel2', de ? 'Top-8-Quote' : 'Top-8 rate'),
+                `${esc(fmt(quote))} %`,
+                esc(schnitt != null
+                    ? L('arc.convCtx2', de ? 'Schnitt aller Decks {s} %'
+                                           : 'field average {s} %')
+                        .replace('{s}', fmt(schnitt))
+                    : ''),
                 // WICHTIG: c.brought zaehlt NICHT dieselbe Grundgesamtheit wie
                 // d.count. d.count sind alle Listen aus allen Onlineturnieren
                 // (Dragapult 2.158). c.brought sind nur die Antritte auf
                 // Turnieren MIT gewertetem Top-8-Schnitt (755, aus 103
                 // Turnieren). Nebeneinander sieht das aus wie ein Widerspruch,
-                // wenn man es nicht dazuschreibt — also steht es jetzt dabei.
-                esc(L('arc.convCtx', de
-                        ? '{t} von {b} Antritten mit Top-8-Schnitt → {q} % Cut-Quote'
-                        : '{t} of {b} entries in cut events → {q} % cut rate')
+                // wenn man es nicht dazuschreibt — also steht es im Hinweis.
+                L('arc.convTip2', de
+                    ? '{t} von {b} gewichteten Antritten auf Turnieren mit Top-8-Schnitt.'
+                    : '{t} of {b} weighted entries at events with a top-8 cut.')
                     .replace('{t}', fmtGewichtet(c.top8))
                     .replace('{b}', fmtGewichtet(c.brought))
-                    .replace('{q}', fmt((c.top8 / c.brought) * 100, 2))),
-                c.thin ? L('arc.convThin', de
-                    ? 'Kleine Stichprobe — der Wert ist zum Meta-Durchschnitt hin geglättet.'
-                    : 'Small sample — the value is smoothed toward the field average.') : '',
+                + (c.thin ? ' ' + L('arc.convThin2', de
+                    ? 'Kleine Stichprobe — die Quote steht auf wenigen Antritten und schwankt stark.'
+                    : 'Small sample — the rate rests on few entries and swings hard.') : ''),
                 arrow(c.perfPct))
-            : tile('conv', 'tie', L('arc.convLabel', de ? 'Top-8 vs. Erw.' : 'Top-8 vs. exp.'),
+            : tile('conv', 'tie', L('arc.convLabel2', de ? 'Top-8-Quote' : 'Top-8 rate'),
                 '–',
                 esc(L('arc.convMissing', de ? 'zu wenig Daten' : 'not enough data')),
                 L('arc.convMissingTip', de
@@ -360,8 +436,15 @@
                             esc(de ? 'Matches' : 'Games')}</th>
                         <th title="${esc(de ? 'gewonnene Matches' : 'games won')}">W</th>
                         <th title="${esc(de ? 'verlorene Matches' : 'games lost')}">L</th>
-                        <th title="${esc(de ? 'unentschiedene Matches — sie zählen in der Win Rate dieser Tabelle nicht mit'
-                                            : 'ties — they do not count in this table\'s win rate')}">U</th>
+                        <!-- T, nicht U. Gemeldet am 01.09.2026: "wenn man bei
+                             der Tierliste die Matchups aufklappt, dann auf
+                             jeden Fall Win-Loss-Tie nutzen und nicht
+                             Win-Loss-Unentschieden." W und L standen schon
+                             englisch da; ein deutsches U dazwischen war ein
+                             Bruch mitten in einer dreispaltigen Bilanz. Die
+                             Szene sagt ohnehin Tie. -->
+                        <th title="${esc(de ? 'Unentschieden (Tie) — sie zählen in der Win Rate dieser Tabelle nicht mit'
+                                            : 'ties — they do not count in this table\'s win rate')}">T</th>
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>

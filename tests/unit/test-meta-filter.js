@@ -90,7 +90,36 @@ describe('Filter — kein zweites Bedienelement', () => {
         const block = /var RAEUME = \[([\s\S]*?)\n    \];/.exec(CODE)[1];
         assert.match(block, /key:\s*'gl',[\s\S]*?quelle:\s*null/);
         assert.match(CODE, /ds-filter-fixed/);
-        assert.match(CSS, /\.ds-filter-fixed\s*\{[^}]*border:\s*1px dashed/);
+        /* DIE GESTRICHELTE UMRANDUNG IST AM 01.09.2026 GEFALLEN.
+           Sie war 32px hoch und stand neben zwei 44px hohen Knopfreihen.
+           Gemeldet: "Lieber dieses TEF-bis-PBL-Feld optisch den anderen
+           anpassen." Das Schild sieht jetzt aus wie ein gesetzter Knopf.
+           Dass es keiner ist, sagt der fehlende Hover und der fehlende
+           Zeigefinger — nicht mehr eine zweite Formensprache.
+           Geprueft wird deshalb die GLEICHHEIT statt des Unterschieds:
+           dieselbe Mindesthoehe und dieselbe Rundung wie .ds-filter-btn. */
+        const schild = /\.ds-filter-fixed\s*\{([^}]*)\}/.exec(CSS)[1];
+        const knopf  = /\.ds-filter-btn\s*\{([^}]*)\}/.exec(CSS)[1];
+        assert.ok(!/border:\s*1px dashed/.test(schild), 'die gestrichelte Kante ist zurueck');
+        for (const eig of ['min-height', 'border-radius']) {
+            const w = (t) => (new RegExp(eig + ':\\s*([^;]+);').exec(t) || [])[1];
+            assert.strictEqual(w(schild), w(knopf),
+                `${eig} weicht wieder vom Knopf ab: ${w(schild)} statt ${w(knopf)}`);
+        }
+    });
+
+    it('das Schild erklaert sich nicht selbst', () => {
+        /* Darunter stand ein Satz: erst "hier gibt es nur das laufende
+           Format", dann "Global laeuft immer im aktuellen Format."
+           Gemeldet: "Okay, den Zusatz kannst du aber rauslassen."
+           Eine Anzeige, die "TEF-PBL" sagt, braucht keine
+           Bildunterschrift, die "das ist das laufende Format" sagt. */
+        assert.ok(!/läuft immer im aktuellen Format/.test(CODE),
+            'der Erklaersatz ist zurueck');
+        assert.ok(!/ds-filter-note/.test(CODE),
+            'die Klasse fuer den Erklaersatz wird wieder benutzt');
+        assert.ok(!/\.ds-filter-note\s*\{/.test(CSS),
+            'die Regel fuer den Erklaersatz steht noch, ohne dass sie jemand benutzt');
     });
 
     it('die zweite Spalte heisst bei Japan nicht "Format"', () => {

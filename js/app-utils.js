@@ -1407,9 +1407,68 @@ function termHint(label, explanation) {
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     if (!explanation) return esc(label);
-    return `<span class="ds-term" title="${esc(explanation)}" tabindex="0">${esc(label)}</span>`;
+    /* DAS FRAGEZEICHEN MUSSTE ANTWORTEN LERNEN (01.09.2026).
+     *
+     * Gemeldet: "wenn ich hier auf Fragezeichen druecke, dann passiert
+     * nicht mal irgendwas … wenn die Fragezeichen zu keiner Info
+     * fuehren, dann bitte auch die Fragezeichen da weglassen."
+     *
+     * Der Text war da — als title-Attribut. Ein title erscheint nur
+     * beim Verweilen mit der Maus, nie beim Klick und auf keinem
+     * Telefon. Und die haeufigste Stelle fuer diese Marken sind die
+     * Spaltenkoepfe der Meta-Performance: die tragen selbst ein title
+     * ("Nach dieser Spalte sortieren") und sortieren beim Klick. Also
+     * genau das gemeldete Verhalten — man drueckt und es passiert
+     * etwas anderes.
+     *
+     * Der Text steht jetzt in data-hinweis und wird von einer
+     * Sprechblase gezeigt (css/components.css), die auf Verweilen UND
+     * auf Tastaturfokus anspringt; der Klick setzt den Fokus, also
+     * antwortet sie auch auf Fingertipp. aria-label traegt Wort und
+     * Erklaerung zusammen fuer Vorlesegeraete.
+     *
+     * KEIN title mehr: zwei Sprechblasen uebereinander sind schlimmer
+     * als eine. */
+    /* title="" ist Absicht und kein Rest: die Marke sitzt haeufig in
+       einem <th>, das selbst ein title traegt ("Nach dieser Spalte
+       sortieren"). Ohne den leeren eigenen title erbt die Marke jenen
+       und der Browser malte seine Sprechblase neben unsere. */
+    return `<span class="ds-term" data-hinweis="${esc(explanation)}" title="" tabindex="0"`
+         + ` role="note" aria-label="${esc(label)}: ${esc(explanation)}">${esc(label)}</span>`;
 }
 window.termHint = termHint;
+
+/* Ein Klick auf die Marke soll die Erklaerung zeigen und sonst nichts.
+ *
+ * Ohne diesen Riegel sortiert derselbe Klick die Tabelle darunter (die
+ * Marke sitzt im Spaltenkopf), und die Sprechblase erscheint ueber
+ * einer Zeile, die sich gerade verschoben hat. Bei den Archetyp-Kacheln
+ * waere es schlimmer: die Karte darunter springt in die Deck-Analyse,
+ * und der Hinweis waere nie zu lesen.
+ *
+ * Delegiert an das Dokument und in der Erfassungsphase, damit auch
+ * Marken in spaeter erzeugtem Markup erfasst sind und der Riegel VOR
+ * dem Handler der Karte greift. */
+const DS_HINWEIS_ZIELE = '.ds-term, .arc-tile--hinweis';
+if (typeof document !== 'undefined' && !document.__dsTermRiegel) {
+    document.__dsTermRiegel = true;
+    document.addEventListener('click', function (ev) {
+        const t = ev.target && ev.target.closest
+            ? ev.target.closest(DS_HINWEIS_ZIELE) : null;
+        if (!t) return;
+        ev.stopPropagation();
+        ev.preventDefault();
+        try { t.focus(); } catch (e) { /* ohne Fokus bleibt das Verweilen */ }
+    }, true);
+    /* Und ein zweiter Weg hinaus: wer die Blase offen hat und daneben
+       tippt, soll sie loswerden, ohne ein anderes Bedienelement zu
+       treffen. Escape ist dafuer die Taste, die jeder kennt. */
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Escape') return;
+        const a = document.activeElement;
+        if (a && a.matches && a.matches(DS_HINWEIS_ZIELE)) a.blur();
+    });
+}
 
 // ============================================================================
 // Conversion Performance — how much more often a deck makes the cut

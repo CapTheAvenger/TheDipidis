@@ -62,13 +62,25 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
             assert.match(TIER, new RegExp("k: '" + k + "'"), 'Spalte fehlt: ' + k);
         }
         assert.match(TIER, /de: 'Listen'/);
-        assert.match(TIER, /de: 'Antritte'/);
         assert.match(TIER, /de: 'Win Rate'/);
+        /* "Antritte" heisst seit dem 01.09.2026 "Turnier-Antritte".
+           Gemeldet: "was sind denn bitte 618,5 Antritte? Was ist das
+           fuer eine Kennzahl?" Der Fehler war nicht die halbe Zahl,
+           sondern dass die Ueberschrift nicht sagte, dass hier eine
+           ANDERE Grundgesamtheit gezaehlt wird als in der Spalte
+           "Listen" daneben. Jetzt steht die Herkunft in der
+           Ueberschrift. */
+        assert.match(TIER, /de: 'Turnier-Antritte'/);
     });
 
     it('jede der beiden Spalten sagt, woher sie kommt', () => {
         assert.match(TIER, /Decklisten auf der Online-Ladder/);
-        assert.match(TIER, /gewichtete Turnier-Antritte/);
+        assert.match(TIER, /Starts auf Turnieren, nach Turniergröße gewichtet/);
+        // Und die Top-8-Spalte sagt, worauf sie sich bezieht — sie hiess
+        // "davon Top 8" und wurde als "davon von den Listen links"
+        // gelesen: "Heisst es jetzt, dass nur 21 Listen von 2715 Listen
+        // Top 8 gekommen sind? Aber das kann ja nicht sein."
+        assert.match(TIER, /bezogen auf die Turnier-Antritte links, nicht auf die Listen/);
     });
 
     it('die Tabelle nimmt Decks aus BEIDEN Quellen', () => {
@@ -100,15 +112,20 @@ describe('Meta-Performance — was dafuer wegfiel', () => {
         assert.ok(!/id: 'overview'/.test(SEC));
         assert.ok(!/id: 'full'/.test(SEC));
         const ids = [...SEC.matchAll(/id: '([a-z]+)'/g)].map(m => m[1]);
-        assert.deepEqual(ids, ['top', 'heatmap', 'cards', 'ev', 'tiers', 'rang', 'movers'],
+        // 'movers' fiel am 01.09.2026 weg — siehe docs/geparkte-features.md.
+        assert.deepEqual(ids, ['top', 'heatmap', 'cards', 'ev', 'tiers', 'rang'],
             'Abschnitte: ' + ids.join(', '));
     });
 
-    it('die eine Angabe aus dem Ueberblick ist oben angekommen', () => {
+    it('die eine Angabe aus dem Ueberblick ist nicht verloren gegangen', () => {
+        // Sie stand ab dem 20.08.2026 in der Kachel "Gemeldete Listen"
+        // und seit dem 01.09.2026 unter Quellen & Methodik — gerechnet
+        // wird sie unveraendert hier.
         assert.match(TIER, /limitless_meta_stats\.json/);
         assert.match(TIER, /metaStats\.turniere/);
         assert.match(TIER, /metaStats\.spieler/);
         assert.match(TIER, /metaStats\.partien/);
+        assert.match(TIER, /window\.DsDatenumfang\.setzen/);
     });
 
     it('der Rest der Liste steht hinter einem Knopf', () => {
@@ -140,7 +157,13 @@ describe('Verstaendliche Beschriftung', () => {
     });
 
     it('die Szene-Begriffe stehen da, wo die Szene sie benutzt', () => {
-        assert.match(TIER, /'Top 8 Archetypes'/);
+        // 'Top 8 Archetypes' stand in der Kachelreihe, die es seit dem
+        // 01.09.2026 nicht mehr gibt. Der Begriff ist mit der Zahl nach
+        // Quellen & Methodik gezogen — gemeldet war er ausdruecklich:
+        // "man wuerde hier von Top 8 Archetypes sprechen … die
+        // englischen Woerter, die in der Community benutzt werden,
+        // sollten wir schon benutzen."
+        assert.match(read('js/ds-datenumfang.js'), /Top 8 Archetypes/);
         assert.match(TIER, /'Meta-Performance'/);
         assert.match(SEC, /'Meta-Performance'/);
         assert.ok(!/Wer wird gespielt, wer kommt durch/.test(TIER));
@@ -164,30 +187,38 @@ describe('Platz auf dem Schreibtisch', () => {
     });
 });
 
-describe('Auf- und Absteiger — nie gruen gegen rot', () => {
-    // Die Hausregel steht seit Phase 0 in css/tokens.css: divergierende
-    // Skalen sind blau/rot, weil gruen/rot der haeufigste Fall von
-    // Farbfehlsichtigkeit ist. Die Delta-Spalte der Auf- und Absteiger
-    // war bis zum 20.08.2026 die letzte Stelle, die sie nicht befolgte.
-    const CSS = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+describe('Auf- und Absteiger — entfernt, nicht vergessen', () => {
+    /* Hier standen drei Pruefungen an der Delta-Spalte: getoente Zelle
+       statt farbigem Text, kein Gruen mehr, Vorzeichen neben der Zahl.
+       Der ganze Block ist am 01.09.2026 gegangen. Gemeldet: "ganz unten
+       auf der Seite haben wir noch den Auf- und Absteiger. Ich glaube,
+       das ist mittlerweile auch eine Sache, die wir wegnehmen koennen."
 
-    it('die Delta-Spalte faerbt die Zelle, nicht den Text', () => {
-        assert.match(TIER, /ds-tint-pos/);
-        assert.match(TIER, /ds-tint-neg/);
-        assert.doesNotMatch(TIER, /tier-mover-up|tier-mover-down/);
+       Was bleibt, ist die Hausregel, aus der die drei Pruefungen kamen:
+       divergierende Skalen sind blau/rot, nie gruen/rot. Sie gilt
+       weiter fuer den Balken in der Rangliste — er ist die letzte
+       divergierende Darstellung dieser Ansicht. */
+
+    it('der Block wird nicht mehr erzeugt', () => {
+        assert.ok(!/tier-movers-row/.test(TIER), 'die Movers sind zurueck');
+        assert.ok(!/Performance Improvers/.test(TIER));
+        assert.ok(!/tier-mover-delta/.test(TIER));
     });
 
-    it('und das alte Gruen ist weg', () => {
-        // Ohne Kommentare: die Begruendung im Kommentar NENNT das alte
-        // Gruen, und das soll sie auch.
-        const ohne = CSS.replace(/\/\*[\s\S]*?\*\//g, '');
-        const block = ohne.slice(ohne.indexOf('.tier-mover-delta'),
-                                 ohne.indexOf('.tier-mover-delta') + 300);
-        assert.doesNotMatch(block, /#16a34a/i);
-        assert.match(block, /color: var\(--ink\)/);
+    it('und die Regel, wegen der es ihn gab, gilt weiter', () => {
+        // Der divergierende Balken der Rangliste ist die letzte Stelle,
+        // an der eine Skala eine Richtung hat.
+        assert.match(TIER, /ds-bar-track is-diverging/);
+        const TOK = read('css/tokens.css');
+        const hex = /--dv-pos:\s*#([0-9a-fA-F]{6})/.exec(TOK);
+        assert.ok(hex, '--dv-pos ist keine Hex-Farbe');
+        const [r, g, b] = [0, 2, 4].map(i => parseInt(hex[1].slice(i, i + 2), 16));
+        assert.ok(b > g && b > r, `--dv-pos #${hex[1]} ist wieder gruen (r${r} g${g} b${b})`);
     });
 
-    it('das Vorzeichen steht neben der Zahl, die Farbe traegt nie allein', () => {
-        assert.match(TIER, /formatPercentSigned/);
+    it('der Eintrag in den geparkten Features steht', () => {
+        const parken = read('docs/geparkte-features.md');
+        assert.match(parken, /Auf- und Absteiger/);
+        assert.match(parken, /Was anders sein müsste/);
     });
 });

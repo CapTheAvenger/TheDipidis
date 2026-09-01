@@ -181,11 +181,48 @@ describe('Fachbegriffe erklären sich dort, wo die Zahl steht', () => {
         UTILS.match(/function termHint\(label, explanation\) \{[\s\S]*?\n\}/)[0] +
         '\nreturn termHint;')();
 
-    it('macht aus Begriff plus Satz eine Marke mit Titel', () => {
+    it('macht aus Begriff plus Satz eine Marke mit Hinweis', () => {
+        /* GEAENDERT am 01.09.2026: der Text stand als title-Attribut da.
+           Ein title erscheint nur beim Verweilen mit der Maus — nie beim
+           Klick und auf keinem Telefon. Gemeldet: "wenn ich hier auf
+           Fragezeichen druecke, dann passiert nicht mal irgendwas."
+           Er steht jetzt in data-hinweis, wird von einer CSS-Sprechblase
+           gezeigt (auf :hover UND :focus, und den Fokus setzt der Klick)
+           und liegt zusaetzlich im aria-label fuer Vorlesegeraete.
+           Das leere title="" ist Absicht: die Marke sitzt oft in einem
+           <th>, das selbst ein title traegt, und wuerde ihn sonst erben. */
         const html = termHint('Anteil', 'Wie oft gespielt.');
         assert.match(html, /class="ds-term"/);
-        assert.match(html, /title="Wie oft gespielt\."/);
+        assert.match(html, /data-hinweis="Wie oft gespielt\."/);
+        assert.match(html, /title=""/);
+        assert.match(html, /aria-label="Anteil: Wie oft gespielt\."/);
         assert.match(html, />Anteil</);
+    });
+
+    it('die Sprechblase geht auch bei Tastaturfokus auf, nicht nur beim Verweilen', () => {
+        // Das ist der eigentliche Punkt der Aenderung: ohne :focus
+        // waere der Text weiterhin fuer jeden unerreichbar, der nicht
+        // mit einer Maus darueberfaehrt.
+        const block = COMP.slice(COMP.indexOf('.ds-term'), COMP.indexOf('/* ── Fußnote'));
+        assert.match(block, /\.ds-term::before,/);
+        assert.match(block, /content:\s*attr\(data-hinweis\)/);
+        assert.match(block, /\.ds-term:focus::before,/);
+        assert.match(block, /\.ds-term:hover::before,/);
+        /* Dieselbe Blase traegt seit dem 01.09.2026 auch die Nenner der
+           Archetyp-Kacheln. Zwei Sprechblasen mit leicht verschiedenem
+           Aussehen waeren derselbe Fehler wie zwei Win Rates fuer ein
+           Deck — geprueft wird deshalb, dass es EINE Regel ist. */
+        assert.match(block, /\.arc-tile--hinweis::before/);
+        assert.match(block, /\.arc-tile--hinweis:focus::before/);
+        /* Und der Klick darf nicht bloss die Tabelle darunter sortieren —
+           bei den Archetyp-Kacheln waere es schlimmer: die Karte springt
+           in die Deck-Analyse und der Hinweis waere nie zu lesen. Der
+           Riegel deckt deshalb beide Ziele ab. */
+        assert.match(UTILS, /DS_HINWEIS_ZIELE = '\.ds-term, \.arc-tile--hinweis'/);
+        assert.match(UTILS, /closest\(DS_HINWEIS_ZIELE\)/);
+        assert.match(UTILS, /stopPropagation/);
+        // In der Erfassungsphase, sonst greift der Handler der Karte zuerst.
+        assert.match(UTILS, /\}, true\);/);
     });
 
     it('ohne Erklärung bleibt es der blanke Begriff', () => {
@@ -212,15 +249,32 @@ describe('Fachbegriffe erklären sich dort, wo die Zahl steht', () => {
         assert.doesNotMatch(block, /#[0-9a-f]{3,6}/i);
     });
 
-    it('Current Meta erklärt Anteil, Top-8 und vs. Feld', () => {
-        assert.match(TIER, /hintTerm\(/);
+    it('Current Meta erklärt jede Spalte, die eine Erklärung hat', () => {
+        /* Gezaehlt wurden hier frueher die hintTerm-Aufrufe: erst >= 6
+           (drei Tabellen), dann >= 4 (eine Tabelle plus Movers). Seit die
+           Movers weg sind (01.09.2026) gibt es genau eine Aufrufstelle,
+           die ALLE Spalten beschriftet — die Zahl sagt also nichts mehr
+           ueber die Abdeckung.
+           Geprueft wird deshalb die Regel statt der Anzahl: jede Spalte,
+           die einen Hilfstext mitbringt, muss durch hintTerm laufen, und
+           jeder benannte Hilfstext muss es auch geben. */
         assert.match(TIER, /vsField:/);
         assert.match(TIER, /Feld-Durchschnitt/);
-        // Waren >= 6, solange drei Tabellen dieselben Begriffe je einzeln
-        // erklaerten. Seit der Zusammenlegung zur Rangliste erklaert jeder
-        // Begriff sich genau einmal — weniger Aufrufe, gleiche Abdeckung.
-        assert.ok((TIER.match(/hintTerm\(/g) || []).length >= 4,
-            'zu wenige Begriffe erklärt');
+        assert.match(TIER, /const hilfstext = c\.hilf \? term\(c\.hilf\)/,
+            'Spalten mit hilf holen ihren Text nicht mehr aus TERMS');
+        assert.match(TIER, /c\.tip \? \(deR \? c\.tip\.de : c\.tip\.en\)/,
+            'Spalten mit tip holen ihren Text nicht mehr aus der Spaltendefinition');
+        assert.match(TIER, /const beschriftet = voll \? hintTerm\(txt, voll\) : escapeHtml\(txt\)/,
+            'der Hilfstext laeuft nicht mehr durch hintTerm');
+
+        const spalten = TIER.slice(TIER.indexOf('const SPALTEN = ['));
+        const block = spalten.slice(0, spalten.indexOf('];'));
+        const hilfen = [...block.matchAll(/hilf:\s*'([a-zA-Z]+)'/g)].map(m => m[1]);
+        assert.ok(hilfen.length >= 2, `nur ${hilfen.length} Spalten mit Hilfstext`);
+        hilfen.forEach(k => assert.match(TIER, new RegExp('\\n\\s+' + k + ':'),
+            `TERMS kennt '${k}' nicht — die Marke zeigte undefined`));
+        // Und mindestens eine Spalte mit eigenem Tipp statt Sammelbegriff.
+        assert.ok((block.match(/tip:\s*\{/g) || []).length >= 2);
     });
 
     it('der Helfer heißt nicht `hint` — der Name war schon vergeben', () => {
@@ -239,16 +293,29 @@ describe('Fachbegriffe erklären sich dort, wo die Zahl steht', () => {
 });
 
 describe('dieselbe Zahl, dasselbe Format', () => {
-    it('Movers und Kacheln formatieren über den gemeinsamen Weg', () => {
-        assert.match(TIER, /window\.formatPercentSigned\(m\.delta\)/);
-        assert.match(TIER, /fmtPct\(m\.share\)/);
-        assert.match(TIER, /fmtPct\(m\.oldShare\)/);
+    it('die Rangliste formatiert über den gemeinsamen Weg', () => {
+        /* Hier standen bis zum 01.09.2026 die Movers-Zellen. Der Block
+           ist entfernt; geprueft wird jetzt an der Rangliste, dass keine
+           Zelle ihre eigene Zahlenschreibweise erfindet. */
+        assert.match(TIER, /fmtPct\(r\.anteil\)/);
+        assert.match(TIER, /fmtPct\(r\.wr\)/);
+        assert.match(TIER, /fmtPct\(r\.quote\)/);
+        assert.doesNotMatch(TIER, /toFixed\(1\) \+ ' ?%'/,
+            'eine Zelle formatiert wieder an fmtPct vorbei');
     });
 
-    it('die Familienzahl ist als solche beschriftet', () => {
+    it('die Familienzahl steht genau einmal auf der Kachel', () => {
         // Dragapult stand als 16,0 % (Familie) neben 5,9 % (Archetyp)
-        // ohne ein Wort dazu, was wie ein Widerspruch aussah.
-        assert.match(TIER, /über \$\{variantCount\} Varianten/);
+        // ohne ein Wort dazu, was wie ein Widerspruch aussah — daher die
+        // Beschriftung. Sie stand danach ZWEIMAL auf derselben Kachel:
+        // gross als "6 Varianten" und klein als "über 6 Varianten" hinter
+        // der Prozentzahl. Gemeldet am 01.09.2026: "einmal das in Groß
+        // reicht auf jeden Fall aus."
+        assert.match(TIER, /tier-hero-meta">\$\{variantCount\} \$\{variantLabel\}/,
+            'die grosse Variantenzahl fehlt jetzt ganz');
+        assert.doesNotMatch(TIER, /stat-badge-suffix/,
+            'die kleine Wiederholung hinter der Prozentzahl ist zurueck');
+        // Die Erklaerung bleibt — nur eben im Titel, nicht als zweite Zeile.
         assert.match(TIER, /Summe über \$\{variantCount\} Varianten/);
     });
 });

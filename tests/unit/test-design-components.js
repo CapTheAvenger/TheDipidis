@@ -116,9 +116,12 @@ describe('Current Meta benutzt die Komponenten wirklich', () => {
         assert.match(TIER, /<div class="ds-panel cm-rangliste-block">\s*\n\s*<h3 class="ds-label">🏆/);
         assert.ok(!/<h3 class="ds-label">🌐/.test(TIER),
             'die zweite Rangliste ist wieder da');
+        // Bis zum 01.09.2026 waren es zwei: die Rangliste und die
+        // Movers-Tabelle. "Auf- und Absteiger" ist entfernt (siehe
+        // docs/geparkte-features.md), es bleibt eine.
         const tabellen = (TIER.match(/class="ds-table[^"]*"/g) || []);
-        assert.equal(tabellen.length, 2,
-            'erwartet: die Rangliste und die Movers-Tabelle — gefunden: ' + tabellen.join(', '));
+        assert.equal(tabellen.length, 1,
+            'erwartet: die Rangliste — gefunden: ' + tabellen.join(', '));
         assert.ok(tabellen.some(t => t.indexOf('cm-rangliste') > -1),
             'die Rangliste traegt ihre eigene Klasse nicht');
     });
@@ -132,14 +135,31 @@ describe('Current Meta benutzt die Komponenten wirklich', () => {
         assert.match(TIER, /cm-rangliste/, 'der Balken haengt nicht an der Rangliste');
     });
 
-    it('die Datenbasis erscheint als Kennzahl-Kacheln', () => {
-        assert.match(TIER, /class="ds-stat-row/);
-        assert.match(TIER, /class="ds-stat-value"/);
-        assert.match(TIER, /class="ds-stat-label"/);
+    it('die Datenbasis steht unter Quellen & Methodik, nicht mehr auf der Startseite', () => {
+        // Bis zum 01.09.2026 drei Kennzahl-Kacheln ueber den Decks.
+        // Gemeldet: "koennen wir das bei Quelle mit angeben?"
+        // Geprueft wird beides: die Kacheln sind weg UND die Zahlen
+        // kommen an — sonst waere die Kuerzung ein Verlust.
+        assert.ok(!/class="ds-stat-row"[\s\S]{0,400}Gemeldete Listen/.test(TIER),
+            'die Kachelreihe "Gemeldete Listen" ist wieder da');
+        assert.match(TIER, /window\.DsDatenumfang[\s\S]{0,200}setzen/,
+            'der Datenumfang wird nicht mehr weitergereicht');
+        const QUELLEN = fs.readFileSync(path.join(ROOT, 'js', 'app-quellen.js'), 'utf8');
+        assert.match(QUELLEN, /umfang:\s*true/, 'die Quellenseite zeigt den Umfang nicht');
+        const UMFANG = fs.readFileSync(path.join(ROOT, 'js', 'ds-datenumfang.js'), 'utf8');
+        assert.match(UMFANG, /gemeldete Decklisten/);
+        assert.match(UMFANG, /Turniere/);
+        assert.match(UMFANG, /Spieler/);
     });
 
     it('Zahlenspalten sind als solche markiert', () => {
-        assert.match(TIER, /<td class="ds-num"/);
+        // Bis zum 01.09.2026 traf das feste `<td class="ds-num"` aus der
+        // Movers-Tabelle. Die ist entfernt; die Rangliste setzt die
+        // Klasse aus der Spaltendefinition heraus. Geprueft wird
+        // deshalb, dass jede als `num` markierte Spalte auch `ds-num`
+        // bekommt — das ist die Regel, nicht die Schreibweise.
+        assert.match(TIER, /c\.num \? 'ds-num' : ''/);
+        assert.match(TIER, /num: true/);
         assert.match(TIER, /<td class="ds-rank">/);
     });
 });

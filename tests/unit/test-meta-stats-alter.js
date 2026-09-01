@@ -58,8 +58,19 @@ describe('Der Schaden: ohne frischen Stand wird nichts behauptet', () => {
     });
 
     it('und schreibt den Stand an die Zahlen, wenn sie erscheinen', () => {
-        assert.match(TIER, /Stand \$\{metaStatsStand\.toLocaleDateString\('de-DE'\)\}/);
-        assert.match(TIER, /as of \$\{metaStatsStand\.toLocaleDateString\('en-GB'\)\}/);
+        /* GEAENDERT am 01.09.2026: die Zahlen stehen nicht mehr in einer
+           Kachel auf der Startseite, sondern unter Quellen & Methodik.
+           Der Stand reist mit — genau darum geht es hier: eine Zahl
+           ohne ihr Datum ist die Zahl von irgendwann. Die Weitergabe
+           passiert in app-tier-meta.js, der Satz entsteht in
+           js/ds-datenumfang.js. */
+        assert.match(TIER, /stand: metaStatsStand \? metaStatsStand\.toISOString\(\) : null/,
+            'der Stand wird nicht mehr weitergereicht');
+        const UMFANG = read('js/ds-datenumfang.js');
+        assert.match(UMFANG, /Stand ' \+ dt\.toLocaleDateString\('de-DE'\)/);
+        assert.match(UMFANG, /as of ' \+ dt\.toLocaleDateString\('en-GB'\)/);
+        // Und ohne Stand steht kein erfundenes Datum da.
+        assert.match(UMFANG, /if \(!isNaN\(dt\.getTime\(\)\)\)/);
     });
 
     it('die zweite Lesestelle prueft dasselbe', () => {

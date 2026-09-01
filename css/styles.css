@@ -170,17 +170,10 @@
     --transition-base:  200ms ease;
     --transition-slow:  350ms ease;
 
-    /* ── Z-index scale ────────────────────────────────────────── */
-    /* Ordered lowest → highest. Playtester JS uses 99998-100000 for
-       its own stacking context; do NOT overlap those here. */
-    --z-base: 1;
-    --z-dropdown: 100;
-    --z-sticky: 200;
-    --z-modal-backdrop: 1000;
-    --z-modal: 1001;
-    --z-popover: 1500;
-    --z-notification: 2000;
-    --z-top: 2500;
+    /* Die Stapelreihenfolge (--z-base … --z-top) stand hier bis zum
+       01.09.2026 und ist nach css/tokens.css umgezogen — dorthin, wo
+       jede andere Skala steht und wo css/components.css sie benutzen
+       darf. Werte unveraendert. */
 }
 
 /* ====================================
@@ -261,23 +254,52 @@
                1440px Inhalt und 1120px leerer Rand — 44 % der Flaeche.
                Ein fester Deckel kann das nicht loesen: er ist auf 1366px
                zu gross und auf 2560px zu klein. Deshalb waechst die
-               Inhaltsbreite jetzt mit dem Fenster und stoppt bei 2040px.
+               Inhaltsbreite mit dem Fenster.
+
+               NACHGEMESSEN am 01.09.2026 auf einem 3440px-Ultrawide
+               (3822 CSS-px): der Deckel von 2040px liess links und rechts
+               je 887px leer — genau derselbe Befund wie im August, nur
+               eine Bildschirmgroesse weiter. Ein Deckel in Pixeln kann
+               das grundsaetzlich nicht loesen, weil er die naechstgroessere
+               Diagonale nicht kennt. Deshalb gibt es keinen mehr: die
+               Inhaltsbreite ist 92vw, der Rest ist Rand.
                  1366px -> 1366 (unveraendert, 100 % greift zuerst)
-                 1706px -> 1570 (vorher 1440)
-                 1920px -> 1766 (vorher 1440)
-                 2560px -> 2040 (vorher 1440)
+                 1920px -> 1766
+                 2560px -> 2355 (vorher 2040)
+                 3822px -> 3516 (vorher 2040)
                Der Boden von 1440px haelt die Regel auf kleinen Schirmen
-               wirkungslos, damit sich an Tablet und Handy nichts aendert. */
-            width: min(100%, clamp(1440px, 92vw, 2040px));
+               wirkungslos, damit sich an Tablet und Handy nichts aendert.
+
+               Der Deckel war nie fuer Tabellen da, sondern fuer
+               Fliesstext — eine Zeile ueber 2000px liest niemand. Den
+               Job macht jetzt die Regel darunter, und zwar nur dort, wo
+               tatsaechlich Text steht. */
+            width: min(100%, max(1440px, 92vw));
             max-width: none;
             margin-inline: auto;
         }
         /* Fliesstext waechst nicht mit: eine Zeile ueber 2000px ist
            unlesbar. Betrifft nur echte Absaetze, nicht Tabellen,
-           Kartengitter oder Konsolenansichten. */
+           Kartengitter oder Konsolenansichten.
+           92ch sind bei der Grundschrift rund 830px — die Obergrenze
+           dessen, was das Auge ohne Zeilensprung zurueckfindet. */
         .side-quest-intro,
-        .side-quest-subtitle {
+        .side-quest-subtitle,
+        .ds-note,
+        .ds-sub,
+        .heatmap-desc,
+        .guide-desc,
+        .ca-empty-hint,
+        .qu-lead,
+        .qu-p,
+        .qu-dl dd,
+        .qu-src dd {
             max-width: 92ch;
+        }
+        /* Mittig gesetzter Fliesstext bleibt mittig, wenn ihn die Regel
+           oben schmaler macht — ohne das rutschte er an die linke Kante. */
+        .ca-empty-hint {
+            margin-inline: auto;
         }
         /* Keine zusätzliche Rinne: body trägt bereits 20px Polster (12px
            auf dem Handy). Zöge der Container nochmal 32px ab, wären es
@@ -1135,7 +1157,10 @@
         }
 
         .city-league-container {
-            width: min(1440px, 100%);
+            /* Derselbe Grund wie bei .container (siehe dort): ein Deckel
+               in Pixeln kennt die naechstgroessere Diagonale nicht. Auf
+               dem 3440er blieben hier 2076px Rand stehen. */
+            width: 100%;
             max-width: none;
             margin-inline: auto;
             /* 29.08.2026: stand auf festem `white`. Im Dunkelmodus war das
@@ -10082,63 +10107,15 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     box-shadow: 0 0 4px rgba(0,0,0,0.30);
 }
 
-/* Live tier deck-name filter (TrainerHill-style search above the tiers) */
-.tier-search-row {
-    position: relative;
-    display: flex;
-    align-items: center;
-    margin-bottom: 14px;
-}
-/* BEFUND (Abnahmerunde 30.08.2026): dieses Feld war fuer einen dunklen
-   Kartenhintergrund gebaut — `color:#f4f7fb` auf `rgba(255,255,255,.06)`.
-   Es sitzt aber in `.ds-sec`, und die ist im Hellmodus weiss. Gemessen:
-   der eingetippte Text stand bei 1,07:1, der Platzhalter bei 2,56:1. Wer
-   im Hellmodus einen Decknamen tippte, sah nicht, was er tippte.
-   Im Dunkelmodus war dasselbe Feld einwandfrei — deshalb ist es nie
-   aufgefallen. Farben kommen jetzt aus den Tokens und drehen mit. */
-.tier-search-input {
-    flex: 1;
-    padding: 10px 38px 10px 14px;
-    border: 1px solid var(--line-strong);
-    border-radius: 999px;
-    background: var(--surface-2);
-    color: var(--ink);
-    font-size: 0.92rem;
-    outline: none;
-    transition: border-color 0.15s, background 0.15s;
-}
-.tier-search-input::placeholder { color: var(--ink-3); }
-.tier-search-input:focus {
-    border-color: var(--accent, #4663e6);
-    background: var(--surface-1);
-}
-.tier-search-input:focus-visible {
-    outline: 2px solid var(--accent, #4663e6);
-    outline-offset: 1px;
-}
-.tier-search-clear {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: var(--ink-3);
-    font-size: 0.85rem;
-    padding: 4px 8px;
-    border-radius: 50%;
-    user-select: none;
-}
-.tier-search-clear:hover {
-    color: var(--ink);
-    background: var(--surface-2);
-}
+/* Das Suchfeld ueber der Tier-Liste (.tier-search-row / -input /
+   -clear) stand hier bis zum 01.09.2026. Es ist mitsamt seinem Filter
+   entfernt; die Begruendung steht in docs/geparkte-features.md. */
 
 @media (max-width: 700px) {
     .meta-card-skeleton-grid {
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: 6px;
     }
-    .tier-search-input { font-size: 0.86rem; padding: 8px 32px 8px 12px; }
 }
 
 /* ──────────────────────────────────────────────────────────────

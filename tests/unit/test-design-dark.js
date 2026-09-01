@@ -222,10 +222,17 @@ describe('wie weit die Seite dafür ist', () => {
         assert.match(cl, /\.current-meta-content \{[^}]*background: var\(--surface-1\)/);
     });
 
-    it('der Movers-Block holt Fläche und Kante aus der Komponente', () => {
-        assert.doesNotMatch(stripComments(STYLES), /\.tier-movers-block \{\s*background: #f9fafb/);
+    it('die Rangliste holt Fläche und Kante aus der Komponente', () => {
+        /* Hier stand bis zum 01.09.2026 der Movers-Block ("Auf- und
+           Absteiger"). Er ist entfernt (docs/geparkte-features.md), also
+           traegt die Rangliste diese Zusicherung: kein fester Hellwert
+           als Flaeche, sondern .ds-panel — sonst bleibt der Kasten im
+           Dunkelmodus weiss. */
+        assert.doesNotMatch(stripComments(STYLES), /\.cm-rangliste-block \{\s*background: #f9fafb/);
         const tier = fs.readFileSync(path.join(ROOT, 'js', 'app-tier-meta.js'), 'utf8');
-        assert.match(tier, /class="ds-panel tier-movers-block/);
+        assert.match(tier, /class="ds-panel cm-rangliste-block"/);
+        assert.doesNotMatch(tier, /class="ds-panel tier-movers-block/,
+            'der Movers-Block ist zurueck');
     });
 
     it('es gibt noch keinen Schalter — und das ist Absicht', () => {

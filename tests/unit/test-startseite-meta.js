@@ -115,22 +115,37 @@ describe('Navigation — fuenf Ziele, auf beiden Breiten dieselben', () => {
     });
 });
 
-describe('Startseite — der Antwortblock geht nicht verloren', () => {
-    it('die Meta-Ansicht hat einen eigenen Host dafuer', () => {
-        assert.match(HTML, /id="metaAnswerTop"/);
-        const iAns = HTML.indexOf('id="metaAnswerTop"');
-        const iCon = HTML.indexOf('id="currentMetaContent"');
-        assert.ok(iAns < iCon, 'die Antwort gehoert ueber die Bausteine');
+describe('Startseite — der Antwortblock steht im Hub, nicht darueber', () => {
+    /* DER ZWEITE PLATZ IST AM 01.09.2026 GEFALLEN.
+     *
+     * Als die Meta-Ansicht am 18.08.2026 Startseite wurde, bekam der
+     * Antwortblock des Hubs dort einen zweiten Host — sonst haette ihn
+     * auf der Startseite niemand mehr gesehen. Seither ist die Ansicht
+     * darunter gewachsen: die Kachelreihe der meistgespielten Decks
+     * sagt in Zahlen, was der Block in Prosa sagte. Gemeldet: "Und was
+     * gerade laeuft ist genau so ein komischer Block. Also ich glaube,
+     * unser Pick fuers Turnier und was gerade laeuft koennen wir
+     * entfernen."
+     *
+     * Der Block ist NICHT geloescht — er zeichnet unveraendert im Hub,
+     * wo die Frage "was ist gerade stark" wirklich gestellt wird. */
+    it('der zweite Host ist weg, der Block ist es nicht', () => {
+        assert.ok(!/id="metaAnswerTop"/.test(HTML), 'der zweite Host ist zurueck');
+        assert.match(HTML, /id="metaHubAnswer"/, 'der Block hat gar keinen Host mehr');
+        const parken = read('docs/geparkte-features.md');
+        assert.match(parken, /Was gerade läuft/);
     });
 
-    it('beide Hosts werden aus DERSELBEN Funktion gefuellt', () => {
+    it('die Hosts werden aus EINER Funktion gefuellt', () => {
         // Zwei Herleitungen waeren zwei Wahrheiten — diese Seite hatte
         // schon einmal vier Siegquoten fuer ein Deck auf einem Schirm.
-        assert.match(HUB, /const ANSWER_HOSTS = \[ANSWER_HOST_ID, 'metaAnswerTop'\]/);
+        // Die Liste bleibt eine Liste, damit ein zweiter Platz wieder
+        // eine Zeile Aenderung ist und kein Umbau.
+        assert.match(HUB, /const ANSWER_HOSTS = \[ANSWER_HOST_ID\]/);
         const fn = /async function renderAnswer\(\) \{[\s\S]*?\n    \}/.exec(HUB)[0];
         assert.match(fn, /hosts\.forEach/);
         assert.strictEqual((fn.match(/answerModel\(/g) || []).length, 1,
-            'nur ein Modell fuer beide Hosts');
+            'nur ein Modell fuer alle Hosts');
     });
 
     it('er wird auch beim Wechsel auf die Meta-Ansicht gefuellt', () => {

@@ -50,20 +50,29 @@
     // also reicht ein schmaler Rand, damit er nicht an der Kante pickt.
     var ABSTAND_OBEN = 16;
 
+    // ZWEI AENDERUNGEN AM 01.09.2026, beide aus derselben Rueckmeldung.
+    //
+    // 1. "Die staerksten Decks" war eine Behauptung, die die Daten
+    //    darunter nicht decken. Gemeldet: "Wichtig hierbei ist aber,
+    //    dass wir vielleicht nicht sagen 'die staerksten Decks',
+    //    sondern es sind de facto erstmal nur die meistgenutzten
+    //    Decks." Genau so ist es: sortiert wird nach Anteil.
+    // 2. Die Unterzeilen wiederholten, was daneben ohnehin steht
+    //    ("wer schlaegt wen" unter "Matchups", "Format-Staples" unter
+    //    einer Ueberschrift, die das Wort schon traegt). Gemeldet:
+    //    "Dieses 'Wer schlaegt wen' kann da weg … ist eine super
+    //    sinnlose Bezeichnung." Wo die Unterzeile nichts hinzufuegt,
+    //    steht keine mehr.
     var SECTIONS = [
-        { id: 'top',     auf: true,  nimm: ['section.tier-hero-section', 'div.ds-stat-row', 'div.tier-search-row'],
-          de: ['Die stärksten Decks', 'Meta-Anteil und Top-8-Quote, mit Nenner'],
-          en: ['The strongest decks', 'Share and top-8 rate, with denominators'] },
-        // "Matchups untereinander — wer schlaegt wen, jede Zelle mit
-        // Matchzahl" war eine Beschreibung der Tabelle, kein Titel. So
-        // spricht in der Szene niemand, und die Zeile erklaerte etwas,
-        // das die Tabelle darunter in einer Sekunde selbst zeigt.
+        { id: 'top',     auf: true,  nimm: ['section.tier-hero-section'],
+          de: ['Die meistgespielten Decks', ''],
+          en: ['The most played decks', ''] },
         { id: 'heatmap', auf: true,  nimm: ['#matchupHeatmapContainer'],
-          de: ['Matchups', 'wer schlägt wen'],
-          en: ['Matchups', 'who beats whom'] },
+          de: ['Matchups', ''],
+          en: ['Matchups', ''] },
         { id: 'cards',   auf: true,  nimm: ['div.top-cards-container'],
-          de: ['Karten, die fast jedes Deck spielt', 'Format-Staples'],
-          en: ['Cards nearly every deck plays', 'format staples'] },
+          de: ['Meistgespielte Karten', ''],
+          en: ['Most played cards', ''] },
         { id: 'ev',      auf: false, nimm: ['div.ds-ev-block'],
           de: ['Gegen welches Meta?', 'was dein Deck über ein ganzes Turnier holt'],
           en: ['Against which field?', 'what your deck scores across a whole tournament'] },
@@ -73,9 +82,10 @@
         { id: 'rang',    auf: false, nimm: ['div.cm-rangliste-block'],
           de: ['Meta-Performance', 'Listen, Win Rate und Top-8-Quote je Deck — sortierbar'],
           en: ['Meta performance', 'lists, win rate and top-8 rate per deck — sortable'] },
-        { id: 'movers',  auf: false, nimm: ['div.tier-movers-row', 'div.matchups-grid-container'],
-          de: ['Auf- und Absteiger', 'Bewegung gegenüber der Vorwoche'],
-          en: ['Climbers and fallers', 'movement against last week'] },
+        // Der Abschnitt "Auf- und Absteiger" stand hier bis zum
+        // 01.09.2026. Seine beiden Bloecke werden nicht mehr erzeugt
+        // (js/app-tier-meta.js), also gaebe es hier nichts mehr
+        // einzusammeln.
     ];
 
     function de() {
@@ -170,6 +180,18 @@
         return out;
     }
 
+    /* Eine leere Unterzeile ist keine Unterzeile.
+       Seit dem 01.09.2026 haben drei Abschnitte keine mehr — sie
+       wiederholten den Titel daneben. Das leere span stehen zu lassen
+       kostet Abstand und liest sich als abgeschnittener Text; es wird
+       deshalb ausgeblendet statt nur geleert. */
+    function setzeUnterzeile(wurzel, text) {
+        var el = wurzel.querySelector('.ds-sec-sub');
+        if (!el) return;
+        el.textContent = text || '';
+        el.hidden = !text;
+    }
+
     function kopf(s, aufgeklappt) {
         var t = texte(s);
         var b = document.createElement('button');
@@ -181,7 +203,7 @@
             '<span class="ds-sec-t"></span>' +
             '<span class="ds-sec-sub"></span>';
         b.querySelector('.ds-sec-t').textContent = t[0];
-        b.querySelector('.ds-sec-sub').textContent = t[1];
+        setzeUnterzeile(b, t[1]);
         return b;
     }
 
@@ -433,7 +455,7 @@
             if (!sec) return;
             var t = texte(s);
             sec.querySelector('.ds-sec-t').textContent = t[0];
-            sec.querySelector('.ds-sec-sub').textContent = t[1];
+            setzeUnterzeile(sec, t[1]);
         });
         zeichneReset(host);
     }

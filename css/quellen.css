@@ -100,6 +100,25 @@
     color: var(--ink-2);
 }
 
+/* ── Datenumfang ─────────────────────────────────────────────────
+   Die einzige Liste auf dieser Seite mit lebenden Zahlen. Sie steht
+   bewusst als Aufzaehlung und nicht als Absatz: es sind vier
+   voneinander unabhaengige Angaben, und in einem Absatz haette man sie
+   auseinandersortieren muessen. */
+.qu-umfang {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+    max-width: 92ch;
+}
+.qu-umfang li { margin-top: 6px; }
+.qu-umfang li:first-child { margin-top: 0; }
+/* Fehlt der Umfang, sagt die Seite das — leiser als eine echte Angabe,
+   damit eine Luecke nicht wie eine Zahl aussieht. */
+.qu-leer { color: var(--ink-3); font-style: italic; }
+
 /* Die Quellenliste bekommt eine Kante, weil sie die einzige Stelle ist,
    an der Herkunft und Beschreibung nebeneinander stehen. */
 .qu-src dd {

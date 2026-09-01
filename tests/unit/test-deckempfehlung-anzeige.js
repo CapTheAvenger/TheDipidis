@@ -129,26 +129,32 @@ describe('Deckempfehlung: sie zeigt die Zahl ihrer eigenen Betriebsart', () => {
 });
 
 describe('Deckempfehlung: die Verdrahtung haelt', () => {
-    it('index.html hat den Host und das Skript', () => {
-        assert.ok(HTML.includes('id="deckempfehlungHost"'), '#deckempfehlungHost fehlt');
+    /* DIE KARTE STEHT SEIT DEM 01.09.2026 AUF KEINER SEITE.
+     *
+     * Gemeldet: "unser Pick fuers Turnier finde ich als Aussage erstmal
+     * grundsaetzlich komisch, weil wer ist unser? Also ich selber spiele
+     * zum Beispiel keinen Dragapult." Der Host ist aus index.html
+     * entfernt; Modul, Daten und Rechenweg stehen unveraendert, damit
+     * eine Rueckkehr eine Zeile HTML ist. Warum und was anders sein
+     * muesste, steht in docs/geparkte-features.md.
+     *
+     * Die Tests darueber (die echten Daten, "unbekannt" statt "null",
+     * die Betriebsart) laufen weiter — sie pruefen die Rechnung, und die
+     * ist nicht geparkt, sondern nur unsichtbar. Genau dafuer sind sie
+     * da: dass das Modul nicht still verrottet, waehrend es wartet. */
+    it('der Host ist entfernt, das Modul ist es nicht', () => {
+        assert.ok(!HTML.includes('id="deckempfehlungHost"'),
+            'der Host ist zurueck — dann muessen die Platz-Tests darunter wieder her');
         assert.match(HTML, /<script src="js\/app-deckempfehlung\.js\?v=\d{12}" defer><\/script>/,
             'das Skript fehlt, hat kein ?v= oder kein defer');
-    });
-
-    it('der Host steht vor der beschreibenden Uebersicht, nicht danach', () => {
-        const host = HTML.indexOf('id="deckempfehlungHost"');
-        const antwort = HTML.indexOf('id="metaAnswerTop"');
-        assert.ok(host >= 0 && antwort >= 0);
-        assert.ok(host < antwort,
-            'erst die Entscheidung, dann die Belege — der Host gehoert vor #metaAnswerTop');
-    });
-
-    it('der Host liegt nicht im Meta Call', () => {
-        // MetaCall.renderAll() ueberschreibt #metaCallHost bei jeder Interaktion.
-        const mc = HTML.indexOf('id="metaCallHost"');
-        const host = HTML.indexOf('id="deckempfehlungHost"');
-        assert.ok(host < mc || mc < 0,
-            'der Host darf nicht im Meta Call stehen — MetaCall wischt ihn weg');
+        // Ohne Host tut das Modul nichts — und zwar OHNE Netzverkehr.
+        // Wuerde es die Datei trotzdem holen, waere es ein stiller
+        // Kostenposten auf jedem Seitenaufruf.
+        assert.match(QUELLE, /var host = document\.getElementById\('deckempfehlungHost'\);\s*\n\s*if \(!host\) return Promise\.resolve\(false\);/,
+            'zeichne() prueft den Host nicht mehr vor dem Laden');
+        const parken = fs.readFileSync(path.join(ROOT, 'docs', 'geparkte-features.md'), 'utf8');
+        assert.match(parken, /Unser Pick fürs Turnier/,
+            'ein entferntes Feature ohne Eintrag wird beim naechsten Mal neu gebaut');
     });
 
     it('app-core.js zeichnet die Karte beim Wechsel auf die Startseite', () => {

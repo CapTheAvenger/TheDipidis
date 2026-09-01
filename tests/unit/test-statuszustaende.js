@@ -342,3 +342,251 @@ describe('Statuszustände — Oberfläche', () => {
         assert.match(JS_MODUL, /return topf\[schluessel\] \|\| schluessel;/);
     });
 });
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Statuswert-Stufen (01.09.2026)
+ *
+ * Vom Betreiber angefragt: „'...steigt': +1 Stufe (+50 % / 150 %) ·
+ * '...steigt stark': +2 (200 %) · '...steigt drastisch': +3 (250 %)" —
+ * die Formulierungen stehen in zwanzig Attackentexten, die Zahlen
+ * dahinter standen nirgends.
+ *
+ * Was hier schiefgehen kann, und zwar still:
+ *
+ * 1. Eine Zahl in der Tabelle stimmt nicht mit der Formel überein. Eine
+ *    handgetippte Prozentspalte ist genau die Stelle, an der aus 66,7
+ *    irgendwann 65 wird. Deshalb wird jede Zeile NACHGERECHNET, nicht
+ *    verglichen.
+ * 2. Die Wortstufen rutschen. „steigt stark" ist +2, nicht +3 — wer das
+ *    verwechselt, macht aus einer Verdopplung eine Verzweieinhalbfachung.
+ * 3. Die Tabelle wird gebaut, aber nicht gezeigt.
+ * ──────────────────────────────────────────────────────────────────── */
+
+describe('Statuswert-Stufen: die Zahlen', () => {
+    const ST = DATEN.stufen;
+
+    it('es gibt sie, und zwar von -6 bis +6 ohne Lücke', () => {
+        assert.ok(ST && Array.isArray(ST.tabelle), 'kein stufen.tabelle in den Daten');
+        const stufen = ST.tabelle.map(z => z.stufe);
+        assert.deepEqual(stufen, [6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6],
+            'Reihenfolge oder Umfang stimmen nicht: ' + stufen.join(', '));
+    });
+
+    it('jede Zeile folgt der Hauptreihen-Formel — nachgerechnet, nicht abgeschrieben', () => {
+        // Erhöhung (2+n)/2, Senkung 2/(2-n). Beide Quellen im _meta
+        // nennen dieselbe Tabelle; hier wird sie unabhängig erzeugt.
+        for (const z of ST.tabelle) {
+            const n = z.stufe;
+            const soll = n >= 0 ? (2 + n) / 2 : 2 / (2 - n);
+            assert.ok(Math.abs(z.faktor - soll) < 1e-6,
+                `Stufe ${n}: Faktor ${z.faktor} statt ${soll.toFixed(4)}`);
+            const [za, ne] = z.bruch.split('/').map(Number);
+            assert.ok(Math.abs(za / ne - soll) < 1e-6,
+                `Stufe ${n}: Bruch ${z.bruch} ergibt nicht ${soll.toFixed(4)}`);
+            // Beide Sprachfassungen, und beide gegen die Formel.
+            for (const feld of ['prozent_de', 'prozent_en']) {
+                assert.ok(z[feld], `Stufe ${n}: ${feld} fehlt`);
+                const pct = Number(z[feld].replace(' %', '').replace(',', '.'));
+                assert.ok(Math.abs(pct - soll * 100) < 0.06,
+                    `Stufe ${n}: "${z[feld]}" passt nicht zu ${(soll * 100).toFixed(1)} %`);
+            }
+            /* BEFUND (Review 01.09.2026): es gab nur EIN Prozentfeld, mit
+               deutschem Dezimalkomma — die englische Oberflaeche zeigte
+               "66,7 %". Deutsch schreibt Komma, Englisch Punkt. */
+            assert.ok(!z.prozent_en.includes(','), `Stufe ${n}: englisch mit Komma`);
+            if (z.prozent_de !== z.prozent_en) {
+                assert.ok(z.prozent_de.includes(','), `Stufe ${n}: deutsch ohne Komma`);
+            }
+        }
+    });
+
+    it('die vier Zahlen aus der Anfrage stehen genau so da', () => {
+        // Der Abgleich gegen das, was der Betreiber geschrieben hat.
+        const bei = (n) => ST.tabelle.find(z => z.stufe === n).prozent_de;
+        assert.equal(bei(1), '150 %');
+        assert.equal(bei(2), '200 %');
+        assert.equal(bei(3), '250 %');
+        assert.equal(bei(6), '400 %');
+        assert.equal(bei(-2), '50 %');
+        assert.equal(bei(-3), '40 %');
+        assert.equal(bei(-6), '25 %');
+        // 2/3 sind 66,7 % — der Betreiber schrieb 66 %. Gerundet wird
+        // auf eine Nachkommastelle, weil 66 % die Zahl kleiner macht,
+        // als sie ist.
+        assert.equal(bei(-1), '66,7 %');
+    });
+
+    it('die Wortstufen sitzen auf den richtigen Zahlen', () => {
+        const wort = (n) => ST.tabelle.find(z => z.stufe === n).wort_de;
+        assert.equal(wort(1), 'steigt');
+        assert.equal(wort(2), 'steigt stark');
+        assert.equal(wort(3), 'steigt drastisch');
+        assert.equal(wort(-1), 'sinkt');
+        assert.equal(wort(-2), 'sinkt stark');
+        assert.equal(wort(-3), 'sinkt drastisch');
+        assert.equal(wort(0), '', 'die Nullzeile darf keine Meldung tragen');
+        // Ab drei Stufen bleibt es bei "drastisch" — es gibt kein
+        // eigenes Wort für +4, +5, +6.
+        for (const n of [4, 5, 6]) assert.equal(wort(n), 'steigt drastisch');
+        for (const n of [-4, -5, -6]) assert.equal(wort(n), 'sinkt drastisch');
+        // Und in beiden Sprachen.
+        for (const z of ST.tabelle) {
+            assert.equal(!!z.wort_de, !!z.wort_en,
+                `Stufe ${z.stufe}: eine Sprache hat eine Meldung, die andere nicht`);
+        }
+        /* BEFUND (Review 01.09.2026): die englischen Fassungen lauteten
+           "fell harshly" / "fell severely". Der Simulator selbst schreibt
+           die Woerter andersherum — data/text/default.ts, unboost2:
+           "{POKEMON}'s {STAT} harshly fell!". Wir behaupten in der Spalte,
+           das sei die Meldung im Kampf; dann muss sie es auch sein. */
+        const en = (n) => ST.tabelle.find(z => z.stufe === n).wort_en;
+        assert.equal(en(-2), 'harshly fell');
+        assert.equal(en(-3), 'severely fell');
+        assert.equal(en(2), 'rose sharply');
+        assert.equal(en(3), 'rose drastically');
+    });
+
+    it('keine Zahl ohne Quelle — die Projektregel gilt auch hier', () => {
+        const m = ST._meta || {};
+        assert.ok(Array.isArray(m.quellen) && m.quellen.length >= 2,
+            'weniger als zwei Quellen: eine allein hat schon einmal danebengelegen');
+        m.quellen.forEach(q => {
+            assert.match(q.url, /^https:\/\//, 'Quelle ohne Adresse: ' + q.name);
+            assert.match(q.gelesen_am, /^\d{4}-\d{2}-\d{2}$/, 'Quelle ohne Lesedatum: ' + q.name);
+        });
+        assert.match(m.formel, /2 \+ Stufe/, 'die Formel steht nicht bei den Daten');
+        // Und der ehrliche Vorbehalt: Genauigkeit und Fluchtwert folgen
+        // einer ANDEREN Tabelle. Wer das wegloescht, druckt falsche Zahlen.
+        assert.match(m.ausnahme_de, /Genauigkeit und Fluchtwert/);
+        assert.match(m.ausnahme_en, /[Aa]ccuracy and evasion/);
+        assert.match(m.geltung, /Champions/,
+            'es fehlt der Hinweis, dass die Zahlen aus der Hauptreihe stammen');
+    });
+});
+
+describe('Statuswert-Stufen: die Anzeige', () => {
+    it('die Tabelle wird gebaut UND eingehängt', () => {
+        assert.match(JS_MODUL, /function stufenHtml\(\)/, 'kein Renderer');
+        assert.match(JS_MODUL, /\+ stufenHtml\(\);/,
+            'die Tabelle wird gebaut, aber nie in die Seite gehängt');
+    });
+
+    it('sie wird wirklich aus den Daten erzeugt — ausgeführt, nicht gelesen', () => {
+        // Der Renderer wird geschnitten und mit den echten Daten
+        // gefahren. Ein Test, der nur den Quelltext liest, hätte eine
+        // vertauschte Spalte nicht bemerkt.
+        const start = JS_MODUL.indexOf('function stufenHtml()');
+        const ende = JS_MODUL.indexOf('\n    }', start);
+        const quelle = JS_MODUL.slice(start, ende + 6);
+        const fn = new Function('_daten', 't', 'de', 'esc', quelle + '\nreturn stufenHtml;')(
+            DATEN,
+            () => ({
+                stufenTitel: 'Statuswert-Stufen', stufenLead: 'L', stufeSp: 'Stufe',
+                faktorSp: 'Faktor', wertSp: 'Bleibt', meldungSp: 'Meldung',
+                stufenGrenze: 'G', stufenAusnahme: 'A', stufenGilt: 'GG',
+                stufenMeldung: 'M',
+                grund: 'unverändert', quelleLabel: 'Regeln von',
+            }),
+            () => true,
+            (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
+                { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
+        );
+        const html = fn();
+        assert.match(html, /<table class="sz-stufen-tabelle">/);
+        // Dreizehn Zeilen, jede genau einmal.
+        assert.equal((html.match(/class="sz-stufe-zeile/g) || []).length, 13);
+        // Die Zahlen aus der Anfrage stehen im erzeugten Markup.
+        for (const p of ['150 %', '200 %', '250 %', '400 %', '66,7 %', '50 %', '40 %', '25 %']) {
+            assert.ok(html.includes(p), `${p} fehlt in der gerenderten Tabelle`);
+        }
+        assert.ok(html.includes('steigt stark') && html.includes('sinkt drastisch'));
+        // Vorzeichen: +2 muss als "+2" dastehen, nicht als "2".
+        assert.match(html, />\+2</);
+        assert.match(html, />-2</);
+        // Der Vorbehalt und die Quellen reisen mit.
+        assert.ok(html.includes('Regeln von'));
+        /* BEFUND (Review 01.09.2026): die Spalte behauptete "Die Meldung
+           im Kampf lautet" fuer JEDE Zeile. Die Meldung richtet sich aber
+           nach der ANZAHL verschobener Stufen, nicht nach der erreichten
+           Stufe — vom Grundwert aus dasselbe, sonst nicht. Der Hinweis
+           dazu muss mitkommen, sonst behauptet die Tabelle zu viel. */
+        assert.ok(html.includes('>M<'), 'der Bezug der Meldung fehlt');
+        assert.match(html, /pokewiki\.de/);
+        // Und nichts Rohes.
+        assert.ok(!/undefined|NaN|\[object/.test(html), html.slice(0, 300));
+    });
+
+    it('die englische Fassung zeigt englische Zahlen', () => {
+        /* Der Renderer muss die Sprache wirklich AUSWERTEN. Die Pruefung
+           oben faehrt ihn nur auf Deutsch — mit `esc(z.prozent_de)` waere
+           sie gruen geblieben, und die englische Oberflaeche haette
+           weiter "66,7 %" gezeigt. Also derselbe Renderer, andere
+           Sprache. */
+        const start = JS_MODUL.indexOf('function stufenHtml()');
+        const ende = JS_MODUL.indexOf('\n    }', start);
+        const quelle = JS_MODUL.slice(start, ende + 6);
+        const bau = (deutsch) => new Function('_daten', 't', 'de', 'esc', quelle + '\nreturn stufenHtml;')(
+            DATEN,
+            () => ({ stufenTitel: 'T', stufenLead: 'L', stufeSp: 'S', faktorSp: 'F',
+                     wertSp: 'W', meldungSp: 'M', stufenGrenze: 'G', stufenAusnahme: 'A',
+                     stufenGilt: 'GG', stufenMeldung: 'MM', grund: '-', quelleLabel: 'Q' }),
+            () => deutsch,
+            (x) => String(x == null ? '' : x))();
+        const en = bau(false), deHtml = bau(true);
+        assert.ok(en.includes('66.7 %'), 'englisch zeigt kein 66.7 % — die Sprache wird ignoriert');
+        assert.ok(!en.includes('66,7 %'), 'englisch zeigt ein deutsches Komma');
+        assert.ok(deHtml.includes('66,7 %'), 'deutsch zeigt kein Komma');
+        // Und die Meldungen wechseln mit.
+        assert.ok(en.includes('harshly fell') && !en.includes('sinkt stark'));
+        assert.ok(deHtml.includes('sinkt stark') && !deHtml.includes('harshly fell'));
+    });
+
+    it('ohne Daten bleibt sie leer statt halb', () => {
+        const start = JS_MODUL.indexOf('function stufenHtml()');
+        const ende = JS_MODUL.indexOf('\n    }', start);
+        const quelle = JS_MODUL.slice(start, ende + 6);
+        const bau = (daten) => new Function('_daten', 't', 'de', 'esc', quelle + '\nreturn stufenHtml;')(
+            daten, () => ({}), () => true, (s) => String(s));
+        assert.equal(bau(null)(), '');
+        assert.equal(bau({})(), '');
+        assert.equal(bau({ stufen: { tabelle: [] } })(), '');
+    });
+
+    it('die Tabelle ist gestylt, ohne feste Farben und ohne Grün gegen Rot', () => {
+        assert.match(CSS, /\.sz-stufen-tabelle/, 'kein CSS für die Tabelle');
+        const block = CSS.slice(CSS.indexOf('/* ── Statuswert-Stufen'),
+                                CSS.indexOf('/* ── Schmal'));
+        // Kommentare zählen nicht mit: die Begründung NENNT den geerbten
+        // Verlauf (#1a1a2e), gegen den hier angeschrieben wird.
+        const ohne = block.replace(/\/\*[\s\S]*?\*\//g, '');
+        assert.ok(!/#[0-9a-f]{3,6}/i.test(ohne), 'feste Farbe im Stufen-Block');
+        // Richtung über die divergierende Skala, nicht über Grün/Rot.
+        assert.match(ohne, /var\(--dv-pos\)/);
+        assert.match(ohne, /var\(--dv-neg\)/);
+        assert.ok(!/green|--gut\b/i.test(ohne));
+    });
+
+    it('der Spaltenkopf bringt seine eigene Fläche mit', () => {
+        /* BEFUND (Review 01.09.2026): css/styles.css malt auf JEDES
+           `table thead` einen dunklen Verlauf mit weisser Schrift. Diese
+           Tabelle setzte nur die Textfarbe und erbte den Grund — gemessen
+           standen die Spaltenköpfe im Hellmodus bei 2,0:1 bis 2,5:1
+           statt der geforderten 4,5:1. Im Dunkelmodus fiel es nicht auf,
+           weil dort zufällig beides dunkel ist. Genau die Sorte Fehler,
+           die eine Woche steht. */
+        const kopf = CSS.slice(CSS.indexOf('.sz-stufen-tabelle thead th'));
+        const block = kopf.slice(0, kopf.indexOf('}'));
+        assert.match(block, /background:\s*var\(--/,
+            'der Spaltenkopf erbt wieder den dunklen Verlauf aus styles.css');
+        /* Und kein nowrap: table-layout ist fixed, vier Spalten teilen
+           sich 640px, die deutschen Überschriften brauchen mehr. Gemessen
+           lief "Die Meldung im Kampf lautet" in die Nachbarspalte. */
+        assert.ok(!/white-space:\s*nowrap/.test(block),
+            'die Spaltenköpfe dürfen nicht mehr umbrechen — sie werden abgeschnitten');
+    });
+
+    it('auf dem Telefon scrollt sie, statt die Seite zu sprengen', () => {
+        assert.match(JS_MODUL, /mobile-table-scroll/,
+            'die Tabelle steht ohne Scrollkasten — bei 390px läuft sie über');
+    });
+});

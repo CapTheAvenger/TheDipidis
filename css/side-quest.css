@@ -2595,11 +2595,10 @@ body.sqp-d-open { overflow: hidden; }
     padding: 12px 14px; border: 1px dashed var(--line-strong); border-radius: 10px;
     background: var(--surface-0);
 }
-.side-quest-export-warn {
-    font-size: 0.8rem; color: var(--vorbehalt); background: var(--vorbehalt-bg);
-    border: 1px solid var(--line); border-radius: 8px;
-    padding: 8px 11px; margin: 10px 0 0;
-}
+/* .side-quest-export-warn stand hier bis zum 01.09.2026: die Warnung,
+   dass ein Bau Showdowns 510er-EV-Budget sprengt. Showdowns
+   Champions-Formate rechnen selbst in Statuspunkten und deckeln bei 66 —
+   die Warnung hatte kein Thema mehr. Siehe js/champions-set.js. */
 
 /* ── Champions "console" ───────────────────────────────────────────
    Ported from champions-layout-prototyp.html. Scoped to .sq-console,

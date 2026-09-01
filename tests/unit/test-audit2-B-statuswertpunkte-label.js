@@ -4,7 +4,9 @@
  * Groesse, die der Matchups-Subtab korrekt 'Statuswertpunkte' nennt
  * (app-side-quest-matchups.js:80). Fix: die ANZEIGE-Labels vereinheitlicht auf
  * 'Statuswertpunkte:'. Die Showdown-Round-Trip-Zeilen (Export/Import/Placeholder)
- * BLEIBEN 'EVs:' — sonst bricht der Paste-Round-Trip.
+ * BLEIBEN 'EVs:' — sonst bricht der Paste-Round-Trip. (Nachtrag 01.09.2026:
+ * das Etikett ist auch in Showdowns Champions-Formaten 'EVs:', die Zahl
+ * dahinter aber der Statuspunkt — deshalb wird nichts mehr umgerechnet.)
  *
  * Test: die betroffenen Ausdruecke werden aus app-side-quest.js geschnitten und
  * ausgefuehrt. Anzeige -> 'Statuswertpunkte:' ohne 'EVs:'; Export -> weiterhin
@@ -69,12 +71,12 @@ describe('F20 — Anzeige-Label ist "Statuswertpunkte:", Export bleibt "EVs:"', 
   });
 
   it('Showdown-Export bleibt "EVs:" und ist von der Import-Regex parsebar (Round-Trip)', () => {
-    // Seit dem 26.08.2026 steckt die Zeile in buildEvsLine(m, showdownEinheiten):
-    // dieselbe Verteilung geht ROH nach Limitless und MAL 8 nach Showdown.
-    // Das Etikett bleibt in beiden Faellen "EVs:" — so liest Showdown es, so
-    // liest Limitless es, und so findet die Import-Regex den Wert wieder.
+    // Das Etikett bleibt "EVs:" — so schreibt Showdown es selbst
+    // (sim/teams.ts, exportSet), so liest sein Importer es, so liest
+    // Limitless es, und so findet unsere Import-Regex den Wert wieder.
+    // Die Zahl dahinter ist in einem Champions-Format der Statuspunkt.
     const fn = ladeBuildEvsLine();
-    const roh = fn({ evs: '2 HP / 32 Atk / 32 Spe' }, false);
+    const roh = fn({ evs: '2 HP / 32 Atk / 32 Spe' });
     assert.match(roh, /^EVs: /, 'Export-Format nicht mehr "EVs:": ' + roh);
     // Dieselbe Regex, die der Import benutzt: /^EVs:\s*(.+)$/i
     const importRe = /^EVs:\s*(.+)$/i;
@@ -83,15 +85,30 @@ describe('F20 — Anzeige-Label ist "Statuswertpunkte:", Export bleibt "EVs:"', 
     assert.equal(parsed[1].trim(), '2 HP / 32 Atk / 32 Spe');
   });
 
-  it('Limitless bekommt die rohen Punkte, Showdown dieselben mal 8', () => {
-    // Der Fehler, den das verhindert: bis zum 26.08.2026 bekamen beide Ziele
-    // denselben Text. Ein Champions-Bau mit "32 Atk" spielte in Showdown mit
-    // einem Achtel des gemeinten Angriffs — 32 EV statt 256.
+  it('beide Ziele bekommen die rohen Punkte', () => {
+    /* DIESE ZUSICHERUNG STAND VOM 26.08. BIS ZUM 01.09.2026 AUF DEM KOPF.
+       Sie verlangte, dass der Showdown-Zweig mal 8 rechnet — die Annahme
+       war, Showdown lese Champions-Baue als gewoehnliche EVs.
+
+       Der Betreiber hat das bezweifelt und hatte recht. Showdown hat
+       eigene Champions-Formate, die selbst in Statuspunkten rechnen:
+       sim/dex-formats.ts setzt evLimit = 66 fuer mod 'champions*',
+       sim/team-validator.ts lehnt jeden Wert ueber 32 mit "has more than
+       32 Stat Points" ab. Der umgerechnete Bau wurde dort also nicht
+       falsch verstanden, sondern zurueckgewiesen.
+
+       Der Schalter ist weg; buildEvsLine nimmt nur noch den Bau. Ein
+       zweites Argument darf keine Wirkung mehr haben — sonst ist die
+       Umrechnung durch die Hintertuer zurueck. */
     const fn = ladeBuildEvsLine();
-    assert.equal(fn({ evs: '2 HP / 32 Atk / 32 Spe' }, false), 'EVs: 2 HP / 32 Atk / 32 Spe');
-    // 32 x 8 = 256, gedeckelt auf 252; 2 x 8 = 16.
-    assert.equal(fn({ evs: '2 HP / 32 Atk / 32 Spe' }, true), 'EVs: 16 HP / 252 Atk / 252 Spe');
-    assert.equal(fn({ evs: '' }, true), '', 'ohne Verteilung darf keine Zeile entstehen');
+    assert.equal(fn({ evs: '2 HP / 32 Atk / 32 Spe' }), 'EVs: 2 HP / 32 Atk / 32 Spe');
+    assert.equal(fn({ evs: '2 HP / 32 Atk / 32 Spe' }, true), 'EVs: 2 HP / 32 Atk / 32 Spe',
+      'ein zweites Argument schaltet wieder eine Umrechnung ein');
+    assert.equal(fn({ evs: '' }), '', 'ohne Verteilung darf keine Zeile entstehen');
+    // Und keine Zahl darf ueber Showdowns Deckel von 32 liegen.
+    for (const m of fn({ evs: '2 HP / 32 Atk / 32 Spe' }).matchAll(/(\d+) /g)) {
+      assert.ok(Number(m[1]) <= 32, `${m[1]} liegt ueber Showdowns Deckel von 32 Statuspunkten`);
+    }
   });
 
   it('die Import-Regex im Code ist unveraendert "EVs:"', () => {

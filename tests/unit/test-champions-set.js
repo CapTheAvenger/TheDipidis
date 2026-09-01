@@ -26,13 +26,16 @@ const CS = sandbox.window.ChampionsSet;
 const rein = v => JSON.parse(JSON.stringify(v));
 
 describe('ChampionsSet: die Zahlen', () => {
-    it('haengt sich an window und traegt die vier Konstanten', () => {
+    it('haengt sich an window und traegt die Konstanten', () => {
         assert.ok(CS);
         assert.equal(CS.SP_BUDGET, 66);
         assert.equal(CS.SP_MAX, 32);
         assert.equal(CS.EV_SCALE, 8);
         assert.equal(CS.EV_MAX, 252);
-        assert.equal(CS.EV_TOTAL_MAX, 510);
+        // EV_TOTAL_MAX (510) ist am 01.09.2026 entfallen: es war der
+        // Deckel fuer eine Umrechnung, die es nicht mehr gibt. Siehe die
+        // Begruendung weiter unten.
+        assert.equal(CS.EV_TOTAL_MAX, undefined);
     });
 
     it('die sechs Werte stehen in Spielreihenfolge', () => {
@@ -90,27 +93,76 @@ describe('ChampionsSet: lesen und schreiben', () => {
     });
 });
 
-describe('ChampionsSet: die beiden Zahlenwelten', () => {
-    it('Showdown bekommt dieselbe Verteilung mal acht, gedeckelt bei 252', () => {
+describe('ChampionsSet: EINE Zahlenwelt, nicht zwei', () => {
+    /* BIS ZUM 01.09.2026 STANDEN HIER DREI PRUEFUNGEN AN toShowdownText()
+       UND showdownUeberschuss().
+       Sie hielten fest, dass der Showdown-Export die Punkte mal 8 rechnet
+       (32 -> 252) und meldet, wenn ein Bau das 510er-EV-Budget sprengt.
+
+       Beides war ab dem 26.08.2026 falsch, und der Betreiber hat es
+       bemerkt: "wir machen den Showdown paste falsch oder? showdown
+       arbeitet doch sicher mittlerweile auch mit den max 32 wie beim
+       Limitless paste oder?"
+
+       Nachgeprueft am Quelltext des Simulators
+       (github.com/smogon/pokemon-showdown, Stand 01.09.2026):
+
+         sim/dex-formats.ts    format.mod.startsWith('champions')
+                                   -> this.evLimit = 66
+         sim/team-validator.ts useStatPoints = mod.startsWith('champions');
+                               set.evs[stat] > 32
+                                   -> "has more than 32 Stat Points in ..."
+         data/aliases.ts       cou: "[Gen 9 Champions] OU"
+
+       Ein umgerechneter Bau wurde von Showdown also nicht falsch
+       verstanden, sondern abgelehnt: 252 waeren dort 252 Statuspunkte.
+
+       Die Tests pruefen deshalb jetzt das Gegenteil — dass es genau EINE
+       Serialisierung gibt und keine zweite zurueckkommt. Das ist die
+       Zusicherung, die etwas wert ist: die Umrechnung war nicht kaputt,
+       sie war ueberfluessig, und ihr Rueckbau ist der Fehler, den man beim
+       naechsten Mal wieder macht. */
+
+    it('es gibt nur eine Serialisierung', () => {
+        assert.equal(typeof CS.toChampionsText, 'function');
+        assert.equal(CS.toShowdownText, undefined,
+            'die Umrechnung fuer den Paste ist zurueck — siehe Kopf von js/champions-set.js');
+        assert.equal(CS.showdownUeberschuss, undefined,
+            'die 510er-Warnung ist zurueck; Showdown deckelt Champions bei 66 Punkten');
+        assert.equal(CS.EV_TOTAL_MAX, undefined);
+    });
+
+    it('und sie schreibt die Punkte, wie sie sind', () => {
+        // Genau der Fall aus der Meldung: 2/32/32 bleibt 2/32/32.
         const s = CS.parseSpread('2 HP / 32 Atk / 32 Spe');
-        // 32 x 8 = 256 → 252. 2 x 8 = 16.
-        assert.equal(CS.toShowdownText(s), '16 HP / 252 Atk / 252 Spe');
+        assert.equal(CS.toChampionsText(s), '2 HP / 32 Atk / 32 Spe');
+        // Keine Zahl darueber, die Showdown zurueckweisen wuerde.
+        for (const m of CS.toChampionsText(s).matchAll(/(\d+) /g)) {
+            assert.ok(Number(m[1]) <= CS.SP_MAX, `${m[1]} liegt ueber dem Deckel von ${CS.SP_MAX}`);
+        }
+        assert.ok(CS.spreadTotal(s) <= CS.SP_BUDGET);
     });
 
-    it('meldet, wenn der Bau Showdowns 510er-Budget sprengt', () => {
-        // Champions' 66 Punkte ergeben mal 8 bis zu 528: ein voll
-        // ausgereizter Bau ist in Showdown schlicht nicht legal. Gemeldet,
-        // nicht heimlich beschnitten — welcher Wert geopfert wird, ist eine
-        // Spielentscheidung.
-        assert.equal(CS.showdownUeberschuss(CS.parseSpread('2 HP / 32 Atk / 32 Spe')), 10);
-        assert.equal(CS.showdownUeberschuss(CS.parseSpread('32 Atk / 30 Spe')), 0);
+    it('der Umrechnungsfaktor bleibt — aber nur fuer die Statusformel', () => {
+        /* EV_SCALE und EV_MAX sind nicht geloescht: js/app-side-quest-play.js
+           fuettert damit die Hauptreihen-Formel, um aus Champions-Punkten
+           einen Initiative-Wert zu machen. Das ist eine Rechnung ueber
+           Werte, kein Schreiben von Text. */
+        assert.equal(CS.EV_SCALE, 8);
+        assert.equal(CS.EV_MAX, 252);
+        const PLAY = fs.readFileSync(
+            path.join(__dirname, '..', '..', 'js', 'app-side-quest-play.js'), 'utf8');
+        assert.match(PLAY, /CHAMPIONS_EV_SCALE/,
+            'die Statusformel benutzt den Faktor nicht mehr — dann kann er weg');
     });
 
-    it('rechnet nichts still weg', () => {
-        // Der Ueberschuss steht im Text unveraendert drin — wer 252/252
-        // exportiert, sieht 252/252 und die Warnung dazu.
-        const s = CS.parseSpread('32 Atk / 32 Spe / 2 HP');
-        assert.match(CS.toShowdownText(s), /252 Atk/);
-        assert.match(CS.toShowdownText(s), /252 Spe/);
+    it('kein Aufrufer rechnet den Paste noch um', () => {
+        const dir = path.join(__dirname, '..', '..', 'js');
+        const treffer = fs.readdirSync(dir).filter(f => f.endsWith('.js')).filter(f => {
+            const txt = fs.readFileSync(path.join(dir, f), 'utf8')
+                .replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:"'`])\/\/.*$/gm, '$1');
+            return /toShowdownText|showdownUeberschuss/.test(txt);
+        });
+        assert.deepEqual(treffer, [], 'diese Dateien rufen die Umrechnung wieder auf: ' + treffer);
     });
 });

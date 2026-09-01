@@ -83,8 +83,7 @@
             speichernFehler: 'Speichern nicht möglich — der Browser lässt keinen lokalen Speicher zu (privates Fenster?). Nutz den Export, dann geht nichts verloren.',
             aktivSetzen: '⚡ Das spiele ich gerade',
             aktivGesetzt: 'Als aktives Team gesetzt.',
-            exportL: '🏆 Limitless-Paste',
-            exportS: '⚔️ Showdown-Paste',
+            exportL: '📋 Paste kopieren (Limitless & Showdown)',
             kopiert: 'In die Zwischenablage kopiert.',
             modalTitel: (n) => `${n} bearbeiten`,
             faehigkeit: 'Fähigkeit',
@@ -99,7 +98,6 @@
             fertig: 'Fertig',
             keineDaten: 'Für dieses Pokémon liegen keine Nutzungsdaten vor — Vorgaben sind leer.',
             nameUnklar: 'Für dieses Pokémon fehlt der Showdown-Name; es bleibt beim Anzeigenamen und Showdown erkennt es womöglich nicht.',
-            evWarnung: (n) => `Achtung: als Showdown-EVs sind das ${n} Punkte über dem 510er-Budget. Limitless nimmt den Bau trotzdem an, Showdown lehnt ihn ab.`,
         },
         en: {
             intro: 'Build a doubles team: pick a Pokémon — the builder shows who it is played alongside (in-game analysis). Each further pick narrows the pool to Pokémon played with ALL of your picks.',
@@ -128,8 +126,7 @@
             speichernFehler: 'Could not save — this browser blocks local storage (private window?). Use the export instead so nothing is lost.',
             aktivSetzen: '⚡ This is what I play',
             aktivGesetzt: 'Set as the active team.',
-            exportL: '🏆 Limitless paste',
-            exportS: '⚔️ Showdown paste',
+            exportL: '📋 Copy paste (Limitless & Showdown)',
             kopiert: 'Copied to clipboard.',
             modalTitel: (n) => `Edit ${n}`,
             faehigkeit: 'Ability',
@@ -144,7 +141,6 @@
             fertig: 'Done',
             keineDaten: 'No usage data for this Pokémon — defaults are empty.',
             nameUnklar: 'No Showdown name for this Pokémon; it keeps its display name and Showdown may not recognise it.',
-            evWarnung: (n) => `Heads up: as Showdown EVs this is ${n} over the 510 budget. Limitless accepts the build, Showdown rejects it.`,
         },
     };
     function t() { return LABELS[uiLang()]; }
@@ -431,12 +427,17 @@
         return { mons, name: _teamName };
     }
 
-    function pasteText(showdownEinheiten) {
+    /* EIN Paste fuer beide Ziele (nachgeprueft 01.09.2026).
+       Bis dahin gab es zwei Knoepfe, und der Showdown-Zweig rechnete die
+       Punkte mal 8. Showdowns Champions-Formate rechnen aber selbst in
+       Statuspunkten (evLimit 66, Deckel 32) — der umgerechnete Bau wurde
+       dort abgelehnt. Belegstellen im Kopf von js/champions-set.js. */
+    function pasteText() {
         const CSx = CS();
         const zeilen = [];
         _team.forEach(slug => {
             const st = _sets[slug] || standardSet(slug);
-            const evs = showdownEinheiten ? CSx.toShowdownText(st.sp) : CSx.toChampionsText(st.sp);
+            const evs = CSx.toChampionsText(st.sp);
             zeilen.push(st.item ? `${st.showdown} @ ${st.item}` : st.showdown);
             if (st.ability) zeilen.push(`Ability: ${st.ability}`);
             zeilen.push('Level: 50');
@@ -448,14 +449,10 @@
         return zeilen.join('\n').trim();
     }
 
-    function ueberschussGesamt() {
-        let max = 0;
-        _team.forEach(slug => {
-            const st = _sets[slug] || standardSet(slug);
-            max = Math.max(max, CS().showdownUeberschuss(st.sp));
-        });
-        return max;
-    }
+    /* ueberschussGesamt() stand hier bis zum 01.09.2026 und meldete, um
+       wie viel ein Bau Showdowns 510er-EV-Budget sprengt. In einem
+       Champions-Format deckelt Showdown bei 66 Statuspunkten — und mehr
+       laesst clampSpread() ohnehin nicht zu. Die Frage stellt sich nicht. */
 
     function melde(text, art) {
         if (typeof window.showNotification === 'function') window.showNotification(text, art || 'info');
@@ -542,7 +539,6 @@
     }
 
     function bauHtml(l) {
-        const ueber = ueberschussGesamt();
         return `<div class="sqb sqb--bau">
             <div class="sqb-bau-top">
                 <button type="button" class="sqb-back">${escapeHtml(l.zurueckZurAuswahl)}</button>
@@ -559,10 +555,8 @@
             </div>
             <div class="sqb-export">
                 <div class="sqb-export-btns">
-                    <button type="button" class="sqb-exp" data-mode="limitless">${escapeHtml(l.exportL)}</button>
-                    <button type="button" class="sqb-exp" data-mode="showdown">${escapeHtml(l.exportS)}</button>
+                    <button type="button" class="sqb-exp">${escapeHtml(l.exportL)}</button>
                 </div>
-                ${ueber ? `<p class="sqb-warn">${escapeHtml(l.evWarnung(ueber))}</p>` : ''}
                 <textarea class="sqb-paste" readonly rows="10" spellcheck="false"></textarea>
             </div>
             <p class="sqb-attr">${escapeHtml(l.attribution)}</p>
@@ -754,7 +748,7 @@
         if (akt) akt.addEventListener('click', () => aktivSetzen(l));
         host.querySelectorAll('.sqb-exp').forEach(b => {
             b.addEventListener('click', () => {
-                const text = pasteText(b.getAttribute('data-mode') === 'showdown');
+                const text = pasteText();
                 const ta = host.querySelector('.sqb-paste');
                 if (ta) ta.value = text;
                 kopiere(text, l);

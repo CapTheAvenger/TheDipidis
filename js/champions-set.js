@@ -1,26 +1,62 @@
 // Champions-Sets: die Zahlen und die Umrechnung, an einer Stelle
 // ============================================================================
 // Pokémon Champions rechnet Statuswertpunkte anders als die Hauptreihe:
-// 0–32 pro Wert, Summe hoechstens 66. Showdown und die Hauptreihe rechnen
-// mit EVs: 0–252 pro Wert. Der Faktor zwischen beiden ist 8
-// (32 · 8 = 256, gedeckelt auf 252).
+// 0–32 pro Wert, Summe hoechstens 66. Die Hauptreihe rechnet mit EVs:
+// 0–252 pro Wert, Summe 510. Der Faktor zwischen beiden ist 8
+// (32 · 8 = 256, gedeckelt auf 252) — das gilt fuer die STATUSFORMEL.
+//
+// Fuer den TEAM-PASTE gilt er NICHT: Showdown hat eigene
+// Champions-Formate und rechnet dort selbst in Statuspunkten. Warum das
+// hier so ausfuehrlich steht, erklaert der naechste Block.
 //
 // Diese Zahlen lagen bisher an drei Stellen verstreut:
 //   js/app-side-quest-matchups.js  SP_MAX / SP_BUDGET   (Rechner)
 //   js/app-side-quest-play.js      CHAMPIONS_EV_SCALE / MAX_EV_MAINLINE
 //   scripts/scrape_champions_usage.py  SP_BUDGET / SP_MAX (Scraper)
-// und der Export kannte keine davon — er schrieb die rohen 0–32 unter das
-// Etikett "EVs:". Fuer Limitless ist das richtig (deren Teamsheet nimmt die
-// spielinterne Verteilung), fuer Showdown ist es um den Faktor 8 daneben.
+// Deshalb hier: eine Quelle fuer die Zahlen.
 //
-// Deshalb hier: eine Quelle fuer die Zahlen und beide Serialisierungen.
+// ── DER PASTE BRAUCHT KEINE UMRECHNUNG (nachgeprueft 01.09.2026) ──────────
+//
+// Am 26.08.2026 bekam der Showdown-Export eine Umrechnung mal 8: die
+// Annahme war, dass Showdown Champions-Baue als gewoehnliche EVs liest und
+// "32 Atk" dort einem Achtel des gemeinten Angriffs entspraeche.
+//
+// Der Betreiber hat das bezweifelt — "showdown arbeitet doch sicher
+// mittlerweile auch mit den max 32 wie beim Limitless paste oder?" — und
+// hatte recht. Showdown hat inzwischen eigene Champions-Formate, und die
+// rechnen in Statuspunkten. Belegt an der Quelle
+// (github.com/smogon/pokemon-showdown, Stand 01.09.2026):
+//
+//   sim/dex-formats.ts       if (format.mod.startsWith('champions'))
+//                                this.evLimit = 66;
+//   sim/team-validator.ts    const useStatPoints =
+//                                dex.currentMod.startsWith('champions');
+//                            ... set.evs[stat] > 32 ->
+//                                "has more than 32 Stat Points in ..."
+//   data/aliases.ts          cou: "[Gen 9 Champions] OU", ...
+//
+// Das Etikett der Zeile bleibt "EVs:" (sim/teams.ts schreibt es so, der
+// Importer liest es so), aber die Zahl dahinter IST der Statuspunkt. Ein
+// umgerechneter Bau wird von Showdown abgelehnt: "252 Atk" sind dort 252
+// Statuspunkte, also mehr als 32 je Wert und weit ueber dem Budget von 66.
+//
+// Damit gibt es nur noch EINE Serialisierung — dieselbe fuer Showdown und
+// fuer Limitless. toShowdownText() und showdownUeberschuss() sind
+// ersatzlos entfallen, und mit ihnen die Warnung ueber das 510er-Budget:
+// Showdown deckelt Champions-Baue bei 66, und darunter bleibt
+// clampSpread() ohnehin.
 (function () {
     'use strict';
 
     var SP_BUDGET = 66;   // Summe aller sechs Werte
     var SP_MAX = 32;      // je Einzelwert
-    var EV_SCALE = 8;     // Champions-SP → Showdown-EV
-    var EV_MAX = 252;     // Deckel der Hauptreihe
+    /* Diese beiden gelten weiter — aber fuer die STATUSRECHNUNG, nicht
+       fuer den Paste. js/app-side-quest-play.js fuettert damit die
+       Hauptreihen-Formel, um aus Champions-Punkten einen Initiative-Wert
+       zu machen. Fuer das Schreiben eines Teams werden sie nicht mehr
+       gebraucht; siehe den Kopf dieser Datei. */
+    var EV_SCALE = 8;     // Champions-SP → EV, nur fuer die Statusformel
+    var EV_MAX = 252;     // Deckel der Hauptreihe, ebenso
 
     // Reihenfolge wie im Spiel und in den Quelldaten.
     var KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
@@ -91,34 +127,7 @@
         return teile.join(' / ');
     }
 
-    // Dieselbe Verteilung als Showdown-EVs: mal 8, gedeckelt bei 252.
-    function toShowdownText(s) {
-        var teile = [];
-        for (var i = 0; i < KEYS.length; i++) {
-            var k = KEYS[i], v = zahl(s && s[k]);
-            if (v) teile.push(Math.min(v * EV_SCALE, EV_MAX) + ' ' + LABEL[k]);
-        }
-        return teile.join(' / ');
-    }
-
-    // Showdown deckelt die Summe aller EVs bei 510. Champions' 66 Punkte
-    // ergeben mal 8 aber bis zu 528 — ein voll ausgereizter Champions-Bau
-    // ist in Showdown schlicht nicht legal. Wir rechnen trotzdem ehrlich um
-    // und melden den Ueberschuss, statt still irgendwo Punkte abzuziehen:
-    // welcher Wert geopfert wird, ist eine Spielentscheidung, keine
-    // Rundungsfrage. (Hausregel: melden, nicht heimlich reparieren.)
-    var EV_TOTAL_MAX = 510;
-    function showdownUeberschuss(s) {
-        var sum = 0;
-        for (var i = 0; i < KEYS.length; i++) {
-            sum += Math.min(zahl(s && s[KEYS[i]]) * EV_SCALE, EV_MAX);
-        }
-        return Math.max(0, sum - EV_TOTAL_MAX);
-    }
-
     window.ChampionsSet = {
-        EV_TOTAL_MAX: EV_TOTAL_MAX,
-        showdownUeberschuss: showdownUeberschuss,
         SP_BUDGET: SP_BUDGET,
         SP_MAX: SP_MAX,
         EV_SCALE: EV_SCALE,
@@ -130,7 +139,6 @@
         clampSpread: clampSpread,
         spreadTotal: spreadTotal,
         parseSpread: parseSpread,
-        toChampionsText: toChampionsText,
-        toShowdownText: toShowdownText
+        toChampionsText: toChampionsText
     };
 })();

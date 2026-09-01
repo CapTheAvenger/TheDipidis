@@ -74,7 +74,14 @@ describe('Rangliste — eine statt drei', () => {
         // sah aus wie 772 Top-8-Plaetze.
         assert.match(TIER, /k: 'antritte'/, 'die Antritte fehlen als Spalte');
         assert.match(TIER, /k: 'cuts'/, 'die absolute Zahl der Top-8-Plaetze fehlt als Spalte');
-        assert.match(TIER, /de: 'davon Top 8'/);
+        /* "davon Top 8" hiess die Spalte bis zum 01.09.2026. Das "davon"
+           bezog sich auf die Antritte links — gelesen wurde es als
+           "davon von den Listen": "Heisst es jetzt, dass nur 21 Listen
+           von 2715 Listen Top 8 gekommen sind? Aber das kann ja nicht
+           sein." Der Bezug steht jetzt nicht mehr im Wort, sondern in
+           der Erklaerung an der Spalte, wo er vollstaendig hinpasst. */
+        assert.match(TIER, /k: 'cuts',[\s\S]{0,80}de: 'Top 8'/);
+        assert.match(TIER, /bezogen auf die Turnier-Antritte links, nicht auf die Listen/);
     });
 
     it('die Kopfzellen sagen, dass man sie antippen kann', () => {

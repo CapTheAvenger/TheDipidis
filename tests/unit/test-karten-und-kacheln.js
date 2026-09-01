@@ -55,48 +55,154 @@ const stripCss = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const TIER = stripJs(read('js/app-tier-meta.js'));
 const CSS = stripCss(read('css/components.css'));
 
-describe('Kennzahl-Kacheln', () => {
-    it('26.319 heissen jetzt Listen, nicht Decks', () => {
+describe('Der Datenumfang — von der Startseite nach Quellen & Methodik', () => {
+    /* HIER STANDEN BIS ZUM 01.09.2026 FUENF PRUEFUNGEN AN DREI
+       KENNZAHL-KACHELN ("Gemeldete Listen", "Archetypen", "Top 8
+       Archetypes"), die ueber den Decks hingen.
+       Gemeldet: "Ich weiss nicht, ob diese Aussage tatsaechlich
+       irgendeinen Mehrwert hat. … koennen wir das bei Quelle mit
+       angeben? Okay, die Daten berufen sich auf so und so viele
+       gemeldete Listen, so und so viele Turniere, so und so viele
+       Spieler."
+       Die Kacheln sind weg, die Zahlen nicht. Diese Pruefungen decken
+       jetzt den Weg ab, den sie nehmen — denn ein Umzug, bei dem am
+       Zielort nichts ankommt, ist eine Loeschung mit besserer Presse. */
+    const UMFANG = stripJs(read('js/ds-datenumfang.js'));
+    const QUELLEN = stripJs(read('js/app-quellen.js'));
+
+    it('die Kachelreihe ist von der Startseite verschwunden', () => {
+        assert.ok(!/'Gemeldete Listen'/.test(TIER), 'die Kachelreihe ist zurueck');
+        assert.ok(!/'Top 8 Archetypes'/.test(TIER));
         assert.ok(!/'Decks im Feld'/.test(TIER), '"Decks im Feld" ist wieder da');
-        assert.match(TIER, /'Gemeldete Listen'/);
-        assert.match(TIER, /einzelne Decklisten, nicht Deckarten/);
     });
 
-    it('der Feld-Durchschnitt steht nicht mehr doppelt', () => {
-        // Er steht im Antwortsatz darueber (js/meta-analysis-hub.js).
-        assert.ok(!/'Feld-Durchschnitt'/.test(TIER),
-            'die Kachel wiederholt wieder eine Zahl von weiter oben');
-    });
-
-    it('stattdessen etwas, das sonst nirgends steht — in Szene-Sprache', () => {
-        // Hiess zuerst "Die acht groessten". Gemeldet: "man wuerde hier von
-        // Top 8 Archetypes sprechen … die englischen Woerter, die in der
-        // Community benutzt werden, sollten wir schon benutzen."
-        assert.match(TIER, /'Top 8 Archetypes'/);
-        assert.ok(!/'Die acht größten'/.test(TIER), 'die alte Beschriftung ist zurueck');
-    });
-
-    it('und sie rechnet aus fieldConv, nicht aus enriched', () => {
-        // enriched steht mit const im try-Block weiter oben und ist an der
-        // Kachelstelle nicht mehr im Scope. Beim ersten Versuch stand es
-        // hier — das haette die ganze Reihe still gerissen, weil ein
-        // try/catch darum liegt.
-        const a = TIER.indexOf("'Top 8 Archetypes'");
-        assert.ok(a > -1);
-        // Nur der Kachel-Block selbst, nicht die Rangliste weiter oben:
-        // die darf enriched benutzen, sie steht im try.
-        const start = TIER.lastIndexOf('${(() => {', a);
-        const block = TIER.slice(start, a);
-        assert.match(block, /fieldConv\.decks/);
-        assert.ok(!/enriched/.test(block),
-            'enriched ist an dieser Stelle nicht im Scope');
-    });
-
-    it('die Kachel nennt, woraus die Listen bestehen', () => {
-        // Die einzige Angabe aus dem aufgeloesten Abschnitt "Ueberblick", die
-        // sonst nirgends stand.
+    it('gerechnet wird sie weiter dort, wo beide Nenner bekannt sind', () => {
+        // Ein zweiter Rechenweg fuer dieselbe Groesse ist der Fehler,
+        // aus dem diese Seite einmal vier Win Rates fuer ein Deck auf
+        // einem Bildschirm hatte.
         assert.match(TIER, /limitless_meta_stats\.json/);
-        assert.match(TIER, /aus \$\{fmtNumDS\(metaStats\.turniere\)\} Turnieren/);
+        assert.match(TIER, /window\.DsDatenumfang\.setzen\(\{/);
+        for (const feld of ['listen', 'archetypen', 'antritte', 'turniere', 'spieler', 'partien']) {
+            assert.match(TIER, new RegExp('\\n\\s+' + feld + ':'), `${feld} wird nicht gemeldet`);
+        }
+        assert.ok(!/function saetze/.test(TIER),
+            'app-tier-meta.js formuliert die Saetze selbst — das ist der zweite Weg');
+    });
+
+    it('und sie kommt bei Quellen & Methodik an', () => {
+        assert.match(QUELLEN, /umfang: true/);
+        assert.match(QUELLEN, /window\.DsDatenumfang[\s\S]{0,120}saetze\(de\(\)\)/);
+        // In beiden Sprachen, sonst ist die Kuerzung fuer die eine ein Verlust.
+        assert.match(QUELLEN, /Worauf die Zahlen beruhen/);
+        assert.match(QUELLEN, /What the numbers rest on/);
+    });
+
+    it('fehlt der Umfang, wird er nicht geschaetzt', () => {
+        // Der Kern der Datenregeln dieses Projekts: eine Luecke wird
+        // benannt, nicht gefuellt.
+        assert.match(QUELLEN, /leer:/);
+        assert.match(UMFANG, /if \(!u\) return \[\]/);
+        assert.match(UMFANG, /HOECHSTALTER_MS/,
+            'ein alter Stand wuerde als heutiger ausgegeben');
+    });
+
+    it('jede Zeile faellt weg, wenn ihre Zahl fehlt', () => {
+        // Sonst stuende "null Turniere · undefined Spieler" da.
+        const F = new Function('window', 'sessionStorage', 'Date',
+            UMFANG + '\nreturn window.DsDatenumfang;');
+        const w = {};
+        F(w, { getItem: () => null, setItem: () => {} }, Date);
+        const api = w.DsDatenumfang;
+        api.setzen({ listen: 26319, archetypen: 138 });
+        const z = api.saetze(true).join(' | ');
+        assert.match(z, /26\.319 gemeldete Decklisten/);
+        assert.match(z, /138 Archetypen/);
+        assert.ok(!/Turniere/.test(z), 'eine unbekannte Zahl wurde trotzdem gedruckt');
+        assert.ok(!/null|undefined|NaN/.test(z), z);
+    });
+
+    it('ein Nachtrag ueberlebt den naechsten Stand', () => {
+        /* BEFUND aus dem Review (01.09.2026): setzen() ersetzte den
+           ganzen Stand und warf staplesArchetypen weg. Beim ERSTEN
+           Aufbau fiel das nicht auf (Tier-Liste vor Staples-Widget);
+           beim SPRACHWECHSEL dreht sich die Reihenfolge, und die Zeile
+           ueber die Kartenanteile verschwand dauerhaft.
+           Genau diese Reihenfolge wird hier nachgestellt. */
+        const F = new Function('window', 'sessionStorage', 'Date',
+            UMFANG + '\nreturn window.DsDatenumfang;');
+        const w = {};
+        let gemerkt = null;
+        F(w, { getItem: () => gemerkt, setItem: (k, v) => { gemerkt = v; } }, Date);
+        const api = w.DsDatenumfang;
+
+        api.setzen({ listen: 100, archetypen: 10 });
+        api.ergaenze({ staplesArchetypen: 60 });
+        assert.equal(api.lesen().staplesArchetypen, 60);
+
+        // Der Sprachwechsel: Staples zuerst, Tier-Liste danach.
+        api.ergaenze({ staplesArchetypen: 60 });
+        api.setzen({ listen: 101, archetypen: 10 });
+        assert.equal(api.lesen().staplesArchetypen, 60,
+            'der neue Stand hat den Nachtrag weggewischt');
+        assert.match(api.saetze(true).join(' | '), /60 Archetypen, zu denen vollständige/);
+    });
+
+    it('ein Nachtrag allein ist noch kein Umfang', () => {
+        /* Sonst stuende unter Quellen & Methodik ein Umfang aus einer
+           einzigen Zeile ueber Kartenanteile — das saehe aus wie eine
+           Antwort und waere eine Luecke. */
+        const F = new Function('window', 'sessionStorage', 'Date',
+            UMFANG + '\nreturn window.DsDatenumfang;');
+        const w = {};
+        let gemerkt = null;
+        F(w, { getItem: () => gemerkt, setItem: (k, v) => { gemerkt = v; } }, Date);
+        const api = w.DsDatenumfang;
+        api.ergaenze({ staplesArchetypen: 60 });
+        assert.equal(api.lesen(), null, 'ein halber Stand wurde gespeichert');
+        assert.deepEqual(api.saetze(true), [], 'aus einem Nachtrag allein wurden Saetze');
+        // Und er ist nicht verloren: der naechste echte Stand nimmt ihn mit.
+        api.setzen({ listen: 100, archetypen: 10 });
+        assert.equal(api.lesen().staplesArchetypen, 60);
+    });
+
+    it('mit allen Zahlen stehen alle Zeilen da', () => {
+        const F = new Function('window', 'sessionStorage', 'Date',
+            UMFANG + '\nreturn window.DsDatenumfang;');
+        const w = {};
+        F(w, { getItem: () => null, setItem: () => {} }, Date);
+        const api = w.DsDatenumfang;
+        api.setzen({ listen: 26319, archetypen: 138, antritte: 8130,
+                     feldGesamt: 27357, restAnteil: 3.8,
+                     turniere: 475, spieler: 14026, partien: 59910,
+                     stand: '2026-08-28T00:00:00Z' });
+        api.ergaenze({ staplesArchetypen: 60 });
+        const z = api.saetze(true).join(' | ');
+        assert.match(z, /26\.319 gemeldete Decklisten/);
+        assert.match(z, /8\.130 gewichtete Turnier-Antritte/);
+        assert.match(z, /475 Turniere/);
+        assert.match(z, /14\.026 Spieler/);
+        assert.match(z, /59\.910 Partien/);
+        assert.match(z, /60 Archetypen, zu denen vollständige/);
+        assert.ok(!/null|undefined|NaN/.test(z), z);
+    });
+
+    it('und der Feldanteil der acht groessten ist mitgezogen, nicht geloescht', () => {
+        /* Die dritte Kachel der entfernten Reihe. Sie ist die einzige
+           der drei, deren Zahl sonst nirgends stand — sie zu loeschen
+           waere keine Kuerzung, sondern ein Verlust gewesen. Der Review
+           hat genau das beanstandet, weil docs/geparkte-features.md
+           "das ist kein Parken, das ist ein Umzug" behauptete. */
+        assert.match(TIER, /top8Anteil/, 'der Anteil wird nicht mehr gerechnet');
+        assert.match(TIER, /\.slice\(0, 8\)/);
+        const F = new Function('window', 'sessionStorage', 'Date',
+            UMFANG + '\nreturn window.DsDatenumfang;');
+        const w = {};
+        F(w, { getItem: () => null, setItem: () => {} }, Date);
+        w.DsDatenumfang.setzen({ listen: 100, archetypen: 10, top8Anteil: 61.4 });
+        const z = w.DsDatenumfang.saetze(true).join(' | ');
+        assert.match(z, /acht größten Archetypen/);
+        assert.match(z, /Top 8 Archetypes/);
+        assert.match(z, /61 % des Feldes/);
     });
 });
 

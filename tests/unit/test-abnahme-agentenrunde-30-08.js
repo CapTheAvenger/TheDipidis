@@ -135,28 +135,59 @@ describe('Das Prozentzeichen steht überall gleich', () => {
 });
 
 /* ── Das Suchfeld über den Tiers ─────────────────────────────────── */
-describe('Das Tier-Suchfeld überlebt den Hellmodus', () => {
-    const CSS = lies('css/styles.css');
-    const block = CSS.match(/\.tier-search-input \{[\s\S]*?\}/)[0];
+describe('Das Tier-Suchfeld — entfernt, die Lehre bleibt', () => {
+    /* HIER STANDEN VIER PRUEFUNGEN AN .tier-search-input.
+     *
+     * Der Befund vom 30.08.2026: das Feld war fuer einen dunklen
+     * Kartenhintergrund gebaut, sass aber in einer im Hellmodus weissen
+     * Flaeche — gemessen stand der eingetippte Text bei 1,07:1. Im
+     * Dunkelmodus war es einwandfrei, deshalb ist es nie aufgefallen.
+     *
+     * Das Feld selbst ist am 01.09.2026 gegangen (es filterte Karten in
+     * einem zugeklappten Abschnitt, siehe docs/geparkte-features.md).
+     * Die vier Pruefungen liefen danach in einen TypeError, weil
+     * CSS.match(...) null lieferte — und zwar im describe-Rumpf, also
+     * BEVOR node --test eine einzige Zusicherung gezaehlt hatte. Die
+     * Suite meldete "# fail 0" und verschwand lautlos aus der
+     * Gesamtzahl.
+     *
+     * Was bleibt, ist die Lehre, und die gilt fuer jedes Eingabefeld:
+     * Schrift und Flaeche kommen aus Tokens, sonst stimmt genau ein
+     * Modus. Geprueft wird sie jetzt an ALLEN Eingabefeldern statt an
+     * einem. */
+    const CSS = ohneKomm(lies('css/styles.css'));
+    const UI  = ohneKomm(lies('css/ui-components.css'));
 
-    it('keine für Dunkel gebauten Festfarben mehr', () => {
-        assert.ok(!/#f4f7fb/.test(block), 'die helle Schriftfarbe ist zurück');
-        assert.ok(!/rgba\(255,255,255,0\.06\)/.test(block), 'der dunkle Hintergrund ist zurück');
+    it('das Feld ist wirklich weg — samt seinem Filter', () => {
+        assert.ok(!/tier-search/.test(CSS), '.tier-search-* steht wieder im CSS');
+        assert.ok(!/filterTierDeckCards/.test(ohneKomm(lies('js/app-tier-meta.js'))));
     });
 
-    it('Farbe und Fläche kommen aus den Tokens', () => {
-        assert.match(block, /color: var\(--ink\)/);
-        assert.match(block, /background: var\(--surface-2\)/);
+    it('kein Eingabefeld im Hellkontext traegt eine fuer Dunkel gebaute Festfarbe', () => {
+        /* Genau die zwei Werte, die den Befund ausgemacht haben, an
+           allen Eingabefeldern statt nur an einem.
+           Regeln, die AUSDRUECKLICH im Dunkelmodus stehen, sind
+           ausgenommen — dort ist eine helle Schrift auf dunkler Flaeche
+           kein Fehler, sondern der Zweck. */
+        const regeln = [...CSS.matchAll(/([^{}]*input[^{}]*)\{([^}]*)\}/gi)];
+        assert.ok(regeln.length > 3, `nur ${regeln.length} Eingabefeld-Regeln gefunden`);
+        let geprueft = 0;
+        for (const [, sel, body] of regeln) {
+            if (/is-dark|data-theme="dark"|prefers-color-scheme:\s*dark/i.test(sel)) continue;
+            geprueft++;
+            assert.ok(!/#f4f7fb/i.test(body),
+                `die helle Schriftfarbe ist zurueck in: ${sel.trim().slice(0, 60)}`);
+            assert.ok(!/rgba\(255, ?255, ?255, ?0?\.0\d\)/i.test(body),
+                `der dunkle Hintergrund ist zurueck in: ${sel.trim().slice(0, 60)}`);
+        }
+        assert.ok(geprueft > 3, `nur ${geprueft} Regeln blieben nach dem Ausschluss uebrig`);
     });
 
-    it('Platzhalter und Löschen-Zeichen ebenso', () => {
-        assert.match(CSS, /\.tier-search-input::placeholder \{ color: var\(--ink-3\); \}/);
-        const clear = CSS.match(/\.tier-search-clear \{[\s\S]*?\}/)[0];
-        assert.ok(!/#95a5a6/.test(clear), 'die Festfarbe des Löschen-Zeichens ist zurück');
-    });
-
-    it('und es zeigt jetzt, wo der Tastaturfokus steht', () => {
-        assert.match(CSS, /\.tier-search-input:focus-visible \{/);
+    it('und das verbliebene Suchfeld der Ansicht zeigt, wo der Fokus steht', () => {
+        // Die Heatmap-Suche ist das einzige Eingabefeld, das auf der
+        // Startseite noch steht. Ohne Fokusring ist es mit der Tastatur
+        // unsichtbar — derselbe Fehler eine Ebene tiefer.
+        assert.match(UI, /\.heatmap-search-input:focus/);
     });
 });
 

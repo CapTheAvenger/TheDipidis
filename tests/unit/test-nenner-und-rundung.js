@@ -149,19 +149,41 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
 });
 
 describe('Der "Other"-Eimer wird ausgewiesen', () => {
-    it('die Kachel nennt beide Nenner', () => {
+    /* Die gelisteten Anteile summieren sich auf 96,19 %, nicht auf 100.
+       Limitless fuehrt alles unterhalb seiner Namensschwelle als "Other"
+       und meldet es nicht einzeln. Keine angezeigte Zahl ist dadurch
+       falsch — nur passte der Nenner der Prozentzahl zu keiner
+       sichtbaren Groesse, solange er nirgends stand.
+
+       Er stand ab dem 20.08.2026 in der Kachel "Gemeldete Listen" und
+       steht seit dem 01.09.2026 unter Quellen & Methodik (die Kachel
+       ist entfernt, siehe docs/geparkte-features.md). Gerechnet wird er
+       unveraendert in app-tier-meta.js; formuliert wird der Satz in
+       js/ds-datenumfang.js. Beide Haelften werden hier geprueft —
+       einzeln waere jede von ihnen wertlos. */
+    const UMFANG = lies('js/ds-datenumfang.js');
+
+    it('der Nenner wird weiter gerechnet und weitergereicht', () => {
         assert.match(TIER, /window\.feldGroesseAusAnteilen/);
+        assert.match(TIER, /feldGesamt: feldGesamt \|\| 0/);
+        assert.match(TIER, /restAnteil: \(typeof restAnteil|restAnteil: restAnteil \|\| 0/);
+    });
+
+    it('nur wenn wirklich etwas fehlt', () => {
+        assert.match(TIER, /const restAnteil = feldGesamt > totalEntries/);
+        // Ohne Rest keine Zeile: "0 Listen fuehrt Limitless als Other"
+        // waere eine Aussage ueber nichts.
+        assert.match(UMFANG, /if \(u\.feldGesamt && u\.restAnteil\)/);
+        assert.match(UMFANG, /d\.restAnteil > 0\) \? d\.restAnteil : null/);
+    });
+
+    it('und der Satz sagt es in beiden Sprachen, mit Umlauten', () => {
         // NACHTRAG (Abnahmerunde 30.08.2026): hier stand die Zeichenkette
         // mit ASCII-Ersatzschreibung ("uebrigen", "fuehrt"). Der Satz wird
         // dem Nutzer ANGEZEIGT — in einem deutschen Satz stehen Umlaute.
-        // Der Test hat die Schreibweise festgehalten, statt sie zu pruefen.
-        assert.match(TIER, /f\\u00fchrt Limitless als \\u201eOther\\u201c und meldet sie nicht einzeln/);
-        assert.ok(!/uebrigen \$\{fmtNumDS/.test(TIER), 'die ASCII-Ersatzschreibung ist zurueck');
-        assert.match(TIER, /Listen im Meta;/);
-    });
-    it('nur wenn wirklich etwas fehlt', () => {
-        assert.match(TIER, /const restAnteil = feldGesamt > totalEntries/);
-        assert.match(TIER, /restAnteil > 0\s*$/m);
+        assert.match(UMFANG, /„Other“ und meldet sie nicht einzeln/);
+        assert.match(UMFANG, /filed as "Other" by Limitless/);
+        assert.ok(!/uebrigen/.test(UMFANG), 'die ASCII-Ersatzschreibung ist zurueck');
     });
 });
 
@@ -314,8 +336,11 @@ describe('Halbe gewichtete Antritte werden als halbe gedruckt', () => {
         assert.match(TIER, /k === 'antritte'\) return r\.antritte == null \? '–' : fmtHalb/);
         assert.match(TIER, /k === 'cuts'\)\s+return r\.cuts\s+== null \? '–' : fmtHalb/);
     });
-    it('der Blocktext erklaert, warum es halbe Antritte gibt', () => {
-        assert.match(TIER, /halbe Werte sind deshalb echt und keine Rundung/);
+    it('der Spaltenkopf erklaert, warum es halbe Antritte gibt', () => {
+        // Stand bis zum 01.09.2026 im Blocktext ueber der Tabelle — in
+        // einem Absatz von 918 Zeichen. Jetzt am Spaltenkopf, an dem die
+        // halben Zahlen stehen.
+        assert.match(TIER, /nach Turniergröße gewichtet — halbe Werte sind deshalb echt/);
     });
 });
 
@@ -332,8 +357,14 @@ describe('Glaettung wird benannt', () => {
         assert.match(TIER, /faktorRoh: rohVon\.has\(name\)/);
         assert.match(TIER, /roh \$\{einsNK\(r\.faktorRoh\)\}-mal/);
     });
-    it('der Meta-Durchschnitt steht im Blockkopf', () => {
-        assert.match(TIER, /Der <strong>Meta-Durchschnitt<\/strong>, gegen den die letzte Spalte vergleicht/);
+    it('der Meta-Durchschnitt steht an der Spalte, die mit ihm vergleicht', () => {
+        // Stand bis zum 01.09.2026 im Blocktext. Ohne ihn hat "0,8-mal"
+        // keinen Bezugspunkt — er darf also umziehen, aber nicht gehen.
+        assert.match(TIER, /zusatz: deR/);
+        assert.match(TIER, /Der Meta-Durchschnitt liegt bei \$\{fmtPct\(conv\.expected \* 100, 1\)\} Top-8-Quote/);
+        assert.match(TIER, /The field average is \$\{fmtPct\(conv\.expected \* 100, 1\)\} top-8 rate/);
+        // Und er muss auch wirklich in die Marke wandern.
+        assert.match(TIER, /voll = hilfstext \+ \(c\.zusatz \? ' ' \+ c\.zusatz : ''\)/);
     });
     it('die Tier-Banner zeigen die geglaettete Win Rate', () => {
         assert.match(TIER, /const zeigWR = \(sc && isFinite\(sc\.adjWR\)\) \? sc\.adjWR : winRate/);

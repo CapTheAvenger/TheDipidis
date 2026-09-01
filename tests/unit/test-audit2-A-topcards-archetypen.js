@@ -35,6 +35,9 @@ function build(lang) {
         staplesAnzahl: () => 15,
         STAPLES_STUFEN: [15, 30],
         ladeStaplesModus: () => 'gespielt',
+        // Seit dem 01.09.2026 meldet das Widget seinen Nenner an den
+        // Datenumfang, statt ihn selbst als Untertitel zu drucken.
+        window: { DsDatenumfang: { ergaenze: (d) => gemeldet.push(d) } },
     };
     // Als Ausdruck bauen, damit die Attrappen als Parameter im Gültigkeits-
     // bereich der Funktion liegen (die Funktion nutzt sie als freie Namen).
@@ -44,6 +47,8 @@ function build(lang) {
     );
     return factory(...Object.values(globals));
 }
+
+const gemeldet = [];
 
 function cards() {
     const arr = [
@@ -60,13 +65,18 @@ describe('F21 — Top-Cards nennen Archetypen, nicht Decks', () => {
         const html = render(cards());
         assert.match(html, /der Archetypen/, 'Prozent-Label sagt nicht "der Archetypen"');
         assert.match(html, /58 Archetypen/, 'Zähl-Label sagt nicht "Archetypen"');
-        assert.match(html, /von 60 Archetypen/, 'der Nenner (60 Archetypen) wird nicht ausgewiesen');
-        // Die Seite weist an anderer Stelle 133 Archetypen aus. Beide Zahlen
-        // stimmen und zaehlen Verschiedenes: 133 ist die volle Online-Liste,
-        // 60 sind die Archetypen mit Deckliste — nur aus denen laesst sich
-        // zaehlen, welche Karte drinsteckt. Ohne den Zusatz liest sich
-        // "100 % der Archetypen" als 133 von 133.
-        assert.match(html, /von 60 Archetypen mit Deckliste/, 'der Nenner sagt nicht, welche Archetypen gemeint sind');
+        // DER NENNER STEHT SEIT DEM 01.09.2026 NICHT MEHR IM WIDGET.
+        // Gemeldet: "Und ich glaube, dieses 'von 60 Archetypen mit
+        // Decklists', das brauchen wir auch nicht."
+        // Er darf die Flaeche verlassen, aber nicht die Seite: die Seite
+        // weist an anderer Stelle 133 Archetypen aus, und ohne die 60
+        // daneben liest sich "100 % der Archetypen" als 133 von 133.
+        // Also wird er an den Datenumfang gemeldet und erscheint unter
+        // Quellen & Methodik. Geprueft wird beides — weg von hier UND
+        // angekommen dort.
+        assert.ok(!/von 60 Archetypen/.test(html), 'der Untertitel ist zurueck');
+        assert.ok(gemeldet.some(d => d && d.staplesArchetypen === 60),
+            'der Nenner wird nicht mehr an den Datenumfang gemeldet');
         // Die alte, irreführende Beschriftung darf nicht mehr auftauchen.
         assert.ok(!/der Decks/.test(html), 'noch "der Decks"');
         assert.ok(!/\d+ Decks/.test(html), 'noch "<n> Decks"');
@@ -77,7 +87,8 @@ describe('F21 — Top-Cards nennen Archetypen, nicht Decks', () => {
         const html = render(cards());
         assert.match(html, /of archetypes/);
         assert.match(html, /58 archetypes/);
-        assert.match(html, /of 60 archetypes with decklists/);
+        assert.ok(!/of 60 archetypes/.test(html));
         assert.ok(!/of decks/.test(html));
+        assert.ok(gemeldet.some(d => d && d.staplesArchetypen === 60));
     });
 });

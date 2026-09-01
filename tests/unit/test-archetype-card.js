@@ -82,16 +82,44 @@ describe('the card and the panel cannot disagree', () => {
     });
 
     it('produce the same number for one fixture', () => {
+        /* GEAENDERT am 01.09.2026. Die Kachel zeigte den Vergleichswert
+           als grosse Zahl: "+80,0 %". Gemeldet: "'plus 59 % Top 8 wird
+           erwartet…' Ja, den Bereich verstehe ich noch nicht so ganz."
+           Zu Recht — +80 % ist kein Prozentsatz einer Quote, sondern das
+           Verhaeltnis zweier Quoten, und stand mit Prozentzeichen neben
+           zwei echten Prozentwerten.
+           Gross steht jetzt die Quote selbst (56,5/472,5 = 11,96 %), das
+           Verhaeltnis darunter als Vielfaches (1,8-mal). Geprueft wird
+           weiter, dass BEIDE Zahlen aus derselben gemeinsamen Funktion
+           stammen — das war der Sinn dieses Tests und bleibt es. */
         const { api, win } = loadCard();
         const rows = [t8row('field', 100000, 6320), t8row('Dragapult', 472.5, 56.5)];
         const conv = win.computeConversionPerformance(rows);
-        const fromMetric = conv.decks.find(d => d.name === 'Dragapult').perfPct;
+        const eintrag = conv.decks.find(d => d.name === 'Dragapult');
 
         api.setData({ Dragapult: { share: 6, winRate: 54, count: 400 } }, conv);
         const html = api.tilesHtml('Dragapult');
         const shown = html.match(/arc-tile--conv[\s\S]*?arc-tile-value">(?:<span[^>]*>[^<]*<\/span>)?([^<]+)</)[1];
-        const expected = `+${fromMetric.toFixed(1).replace('.', ',')} %`;
-        assert.equal(shown.trim(), expected);
+        const quote = eintrag.top8 / eintrag.brought * 100;
+        assert.equal(shown.trim(), `${quote.toFixed(1).replace('.', ',')} %`);
+
+        /* NACHTRAG (Review derselben Aenderung): daneben stand zuerst
+           das geglaettete Vielfache. Das ging mit der ROHEN Quote
+           darueber nicht zusammen — in 68 von 120 Decks wich das
+           nachrechenbare Verhaeltnis um mindestens 0,5 vom angezeigten
+           Vielfachen ab, weil das eine geglaettet ist und das andere
+           nicht. Jetzt steht dort der Feld-Durchschnitt, roh wie die
+           Quote. Der Leser kann die beiden Zahlen ineinander umrechnen,
+           und es geht auf — das ist der ganze Punkt. */
+        const ctx = html.match(/arc-tile--conv[\s\S]*?arc-tile-ctx">([^<]+)</)[1];
+        const schnitt = (conv.expected * 100).toFixed(1).replace('.', ',');
+        assert.equal(ctx.trim(), `Schnitt aller Decks ${schnitt} %`);
+        // Und die Probe: die grosse Zahl geteilt durch diese ergibt
+        // genau das, was der Leser im Kopf ausrechnen wuerde.
+        const gross = Number(shown.trim().replace(' %', '').replace(',', '.'));
+        const unten = Number(schnitt.replace(',', '.'));
+        assert.ok(Math.abs(gross / unten - quote / (conv.expected * 100)) < 0.05,
+            'die beiden Zahlen auf der Kachel lassen sich nicht ineinander umrechnen');
     });
 
     it('names the population the Top-8 quota is taken from', () => {
@@ -113,10 +141,23 @@ describe('the card and the panel cannot disagree', () => {
            hat genau das festgehalten.
            Die Startseite zeigte fuer denselben Wert schon
            "71,5 von 708" — zwei Ansichten, zwei Schreibweisen. */
-        assert.match(kachel, /56,5 von 472,5 Antritten mit Top-8-Schnitt/,
-            'Zaehler und Nenner der Cut-Quote stehen nicht in der Kachel');
-        assert.match(kachel, /11,96 % Cut-Quote/,
-            'die Cut-Quote selbst fehlt — dann bleibt "+x %" unerklaert');
+        /* NACHTRAG (01.09.2026): Zaehler und Nenner stehen seither im
+           Titel der Kachel statt in ihrem Fuss — die Kachel selbst
+           traegt jetzt die Quote gross und das Vielfache darunter.
+           Verschwunden sind sie nicht: eine Quote ohne Grundgesamtheit
+           ist genau der Fehler, den dieser Test verhindert. */
+        /* NACHTRAG (Review): sie hingen zuerst nur am title-Attribut —
+           also nur fuer den, der mit einer Maus darueberfaehrt. Jetzt
+           an data-hinweis mit der Sprechblase aus css/components.css,
+           die auch auf Fokus anspringt, plus aria-label. */
+        assert.match(kachel, /data-hinweis="56,5 von 472,5 gewichteten Antritten auf Turnieren mit Top-8-Schnitt\./,
+            'Zaehler und Nenner der Cut-Quote stehen nicht an der Kachel');
+        assert.match(kachel, /tabindex="0"/,
+            'der Hinweis ist ohne Maus nicht erreichbar');
+        assert.match(kachel, /aria-label="[^"]*56,5 von 472,5/,
+            'ein Vorlesegeraet bekommt den Nenner nicht');
+        assert.match(kachel, /arc-tile-value">(?:<span[^>]*>[^<]*<\/span>)?12,0 %</,
+            'die Cut-Quote selbst fehlt');
         // Und die Probe: die Quote folgt aus den beiden Zahlen davor.
         assert.equal((56.5 / 472.5 * 100).toFixed(2), '11.96');
     });
@@ -139,7 +180,7 @@ describe('missing conversion data is said out loud', () => {
         api.setData({ 'Basic Box': { share: 1.33, winRate: 53.78, count: 260 } },
                     { expected: 0.0632, decks: [] });
         const html = api.tilesHtml('Basic Box');
-        assert.match(html, /title="[^"]*Top-Cut-Datei[^"]*"/);
+        assert.match(html, /data-hinweis="[^"]*Top-Cut-Datei[^"]*"/);
         assert.match(html, /andere[nr]? Quelle/);
     });
 

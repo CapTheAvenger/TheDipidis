@@ -63,19 +63,22 @@ describe('Bausteine — Aufbau', () => {
         // Und am 20.08.2026 einer dazu: 'ev', der Rechner "Gegen welches
         // Feld?". Er kam bewusst NICHT nach vorn — die ersten drei sind
         // die Eingangsantwort und bleiben zu dritt.
-        assert.strictEqual(ids.length, 7, 'gefunden: ' + ids.join(', '));
-        assert.strictEqual(new Set(ids).size, 7, 'doppelte id');
+        // Und am 01.09.2026 einer weniger: 'movers' ("Auf- und
+        // Absteiger") ist entfernt. Gemeldet: "ich glaube, das ist
+        // mittlerweile auch eine Sache, die wir wegnehmen koennen."
+        assert.strictEqual(ids.length, 6, 'gefunden: ' + ids.join(', '));
+        assert.strictEqual(new Set(ids).size, 6, 'doppelte id');
         const de = (block[1].match(/de:\s*\[/g) || []).length;
         const en = (block[1].match(/en:\s*\[/g) || []).length;
-        assert.strictEqual(de, 7);
-        assert.strictEqual(en, 7);
+        assert.strictEqual(de, 6);
+        assert.strictEqual(en, 6);
     });
 
     it('die ersten drei sind offen, der Rest zu', () => {
         const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE)[1];
         const flags = [...block.matchAll(/auf:\s*(true|false)/g)].map(m => m[1] === 'true');
         assert.deepStrictEqual(flags.slice(0, 3), [true, true, true]);
-        assert.deepStrictEqual(flags.slice(3), [false, false, false, false]);
+        assert.deepStrictEqual(flags.slice(3), [false, false, false]);
     });
 
     it('die Antwort steht vorn: Decks, Matchups, Karten — dann der Rest', () => {
@@ -84,11 +87,13 @@ describe('Bausteine — Aufbau', () => {
         assert.deepStrictEqual(ids.slice(0, 3), ['top', 'heatmap', 'cards'],
             'die Heatmap stand vorher 7,3 Bildschirme tief');
         // 'full' gibt es nicht mehr — die vollstaendige Tabelle ist in die
-        // Rangliste aufgegangen. Ans Ende gehoert jetzt, was am wenigsten
-        // beantwortet: die Bewegung gegenueber der Vorwoche.
-        assert.strictEqual(ids[ids.length - 1], 'movers',
+        // Rangliste aufgegangen. Seit dem 01.09.2026 auch 'movers' nicht
+        // mehr; ans Ende gehoert jetzt die Rangliste, die als einzige
+        // JEDEN Archetyp fuehrt und deshalb am seltensten gebraucht wird.
+        assert.strictEqual(ids[ids.length - 1], 'rang',
             'der am wenigsten dringende Abschnitt gehoert ans Ende');
-        assert.ok(!ids.includes('full') && !ids.includes('overview'),
+        assert.ok(!ids.includes('full') && !ids.includes('overview')
+                  && !ids.includes('movers'),
             'aufgeloeste Abschnitte sind zurueck: ' + ids.join(', '));
     });
 });
@@ -96,9 +101,11 @@ describe('Bausteine — Aufbau', () => {
 describe('Bausteine — verschieben, nicht neu erzeugen', () => {
     it('die Bloecke werden umgehaengt, nicht ueber innerHTML neu gesetzt', () => {
         // Der ganze Ansatz haengt daran: appendChild bewegt den Knoten
-        // und laesst jeden Ereignis-Handler dran. Im Browser geprueft:
-        // das Suchfeld der Tier-Ansicht filtert nach dem Umzug weiter
-        // (29 -> 1 Karten).
+        // und laesst jeden Ereignis-Handler dran. Im Browser geprueft am
+        // 18.08.2026 am Suchfeld der Tier-Ansicht, das nach dem Umzug
+        // weiterfilterte (29 -> 1 Karten). Das Suchfeld ist seit dem
+        // 01.09.2026 entfernt; die Zusicherung gilt unveraendert fuer
+        // die Sortierung der Rangliste und die Heatmap-Tooltips.
         assert.match(CODE, /body2\.appendChild\(t\)/);
         // innerHTML darf nur auf Knoten stehen, die dieses Modul selbst
         // erzeugt hat — nie auf einem Block, der schon Handler traegt.

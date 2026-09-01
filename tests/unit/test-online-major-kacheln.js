@@ -266,6 +266,123 @@ describe('Was die beiden Spalten an den echten Daten zeigen', () => {
     });
 });
 
+describe('Die Kachel haengt nicht an der Bildschirmbreite', () => {
+
+    /* KORREKTUR 02.09.2026 — die erste Fassung schob die Zahlen
+     * uebereinander: "7,5 %4,1 %" stand als ein Klumpen da.
+     *
+     * Zwei Fehler, derselbe Denkfehler: Bildschirmbreite mit KARTENbreite
+     * verwechselt.
+     *   - `@media (min-width: 720px)` fragt den Bildschirm. Die Karte ist
+     *     aber auch am Schreibtisch nur rund 380 px breit. Dort griff also
+     *     die Vierer-Reihe: 95 px je Kachel, zwei Haelften a 40 px, und
+     *     "22,2 %" braucht 50.
+     *   - `clamp(0.92rem, 3.4vw, 1.18rem)` rechnet 3,4 % der BILDSCHIRM-
+     *     breite: auf 1280 px sind das 43 px, also der obere Anschlag —
+     *     die groesste Schrift genau dort, wo am wenigsten Platz war.
+     *
+     * Nachgemessen an geklonten Kacheln in Kaesten bekannter Breite:
+     * 320/380/420 px -> 2 je Reihe, ab 620 px -> 4 in einer, keine
+     * Ueberlappung, keine leere Spur. */
+
+    const cssRoh = fs.readFileSync(path.join(wurzel, 'css', 'styles.css'), 'utf8');
+    // Kommentare zuerst weg: im Block steht die alte Fassung als
+    // Begruendung drin, und eine Suche wuerde sie als Rueckfall lesen.
+    const css = cssRoh.replace(/\/\*[\s\S]*?\*\//g, ' ');
+
+    /* GENAU den Regelrumpf schneiden, nicht ein Fenster von n Zeichen.
+     * Die erste Fassung dieses Tests nahm 2600 Zeichen ab dem Selektor —
+     * nach dem Entfernen der Kommentare reichte das in NACHBARREGELN
+     * hinein, und zwei Mutationen blieben deshalb gruen: ein `flex-wrap`
+     * aus einer fremden Regel erfuellte die Zusage stellvertretend. */
+    function rumpf(selektor) {
+        const re = new RegExp('(^|[},\\s])' + selektor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*\\{');
+        const m = re.exec(css);
+        assert.ok(m, 'die Regel ' + selektor + ' fehlt im Stylesheet');
+        const auf = css.indexOf('{', m.index);
+        const zu = css.indexOf('}', auf);
+        assert.ok(zu > auf, 'die Regel ' + selektor + ' ist nicht geschlossen');
+        return css.slice(auf + 1, zu);
+    }
+    const ohneCssKomm = css.slice(css.indexOf('.arc-tiles--vier'),
+                                 css.indexOf('.arc-tiles--vier') + 1600);
+
+    it('keine Bildschirm-Medienabfrage steuert die Kachelreihe', () => {
+        // Im GANZEN Stylesheet suchen, nicht nur im Rumpf: die Medienabfrage
+        // steht ja gerade AUSSERHALB der Regel. Die erste Fassung dieses
+        // Tests suchte im Block ab dem Selektor und uebersah sie deshalb.
+        for (const m of css.matchAll(/@media[^{]*\{/g)) {
+            const auf = css.indexOf('{', m.index);
+            // grob bis zur schliessenden Klammer der Medienabfrage
+            let tiefe = 0, j = auf;
+            for (; j < css.length; j++) {
+                if (css[j] === '{') tiefe++;
+                else if (css[j] === '}') { tiefe--; if (tiefe === 0) break; }
+            }
+            const inhalt = css.slice(m.index, j + 1);
+            if (!/min-width|max-width/.test(m[0])) continue;
+            assert.ok(!/arc-tiles--vier|arc-halbe|arc-halb\b/.test(inhalt),
+                'die Kachelreihe haengt wieder an einer Bildschirmbreite '
+                + `(${m[0].trim()}). Die Karte ist auch am Schreibtisch nur `
+                + '~380 px breit — dort griff die Vierer-Reihe, jede Haelfte '
+                + 'bekam 40 px, und "22,2 %" braucht 50: die Zahlen schoben '
+                + 'sich uebereinander');
+        }
+    });
+
+    it('die Schriftgroesse der Zahlen haengt nicht an vw', () => {
+        const regel = rumpf('.arc-halb .arc-tile-value');
+        assert.ok(!/vw/.test(regel),
+            'die Zahlengroesse rechnet wieder mit vw — das ist die BILDSCHIRM-'
+            + 'breite, nicht die der Kachel, und wird am Schreibtisch am groessten, '
+            + 'wo am wenigsten Platz ist');
+        assert.ok(/font-size:\s*[\d.]+rem/.test(regel),
+            'die Zahlengroesse ist nicht mehr fest gesetzt');
+    });
+
+    it('die Reihe legt keine leeren Plaetze an', () => {
+        // `repeat(auto-fit, minmax(150px, 1fr))` erzeugte bei 900 px eine
+        // fuenfte Spur fuer vier Kacheln.
+        const reihe = rumpf('.arc-tiles--vier');
+        assert.ok(!/grid-template-columns:\s*repeat\(auto-f/.test(reihe),
+            'auto-fit ist zurueck — bei breiter Karte legt es eine Spur mehr an, '
+            + 'als es Kacheln gibt (gemessen 5 Spuren fuer 4 Kacheln bei 900 px)');
+        assert.ok(/display:\s*flex/.test(reihe) && /flex-wrap:\s*wrap/.test(reihe),
+            'die Reihe bricht nicht mehr per flex-wrap um');
+    });
+
+    it('die Ueberschrift steht oben und haelt ihre Hoehe', () => {
+        // Sonst stehen die Zahlen der geteilten und der einfachen Kacheln
+        // auf verschiedenen Hoehen: "Day-2-Quote (Major)" bricht um,
+        // "Anteil" nicht.
+        const kopf = rumpf('.arc-tiles--vier .arc-tile-label');
+        assert.ok(/order:\s*-1/.test(kopf),
+            'die Ueberschrift steht nicht mehr oben');
+        assert.ok(/min-height:\s*[\d.]+em/.test(kopf),
+            'die Ueberschrift hat keine Mindesthoehe mehr — dann stehen die '
+            + 'Zahlen der vier Kacheln auf verschiedenen Zeilen');
+    });
+
+    it('Herkunft und Zahl stehen in einer Zeile, die Zeilen untereinander', () => {
+        const regel = rumpf('.arc-halbe');
+        assert.ok(/grid-template-columns:\s*1fr/.test(regel),
+            'die beiden Herkuenfte stehen wieder nebeneinander — nebeneinander '
+            + 'passen sie in die echte Kartenbreite nicht');
+        const zeile = rumpf('.arc-halb');
+        assert.ok(/justify-content:\s*space-between/.test(zeile),
+            'Herkunft und Zahl stehen nicht mehr an den beiden Enden ihrer Zeile');
+    });
+
+    it('das Markup setzt die Herkunft VOR die Zahl', () => {
+        const i = ohneKomm.indexOf('const halb = (wert, quelle, schwach)');
+        assert.ok(i > 0, 'der Halb-Baustein ist verschwunden');
+        const rumpf = ohneKomm.slice(i, i + 420);
+        assert.ok(rumpf.indexOf('arc-halb-quelle') < rumpf.indexOf('arc-tile-value'),
+            'die Zahl steht wieder vor ihrer Herkunft — in einer Zeile gelesen '
+            + 'gehoert erst hin, WORAUS die Zahl kommt');
+    });
+});
+
 describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
 
     it('es gibt einen Leer-Text, keine Null', () => {

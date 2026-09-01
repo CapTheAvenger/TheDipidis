@@ -115,8 +115,6 @@
  *                                  kein Fliesstext
  *   .city-league-info-table-row    33,5 px (10x), -cell 31,5 px (9x)
  *   .heatmap-td                    40 px, 36x auf current-meta
- *   .tier-search-clear             27,4 x 24 px — das Kreuz zum Leeren
- *                                  der Suche auf der Startseite
  *   .card-database-price-btn       20 px (8x), ohne ::after-Flaeche
  *   .card-database-rarity-btn      20 px (8x), ebenso
  *
@@ -134,12 +132,11 @@
        mobile-responsive.css:744 dasselbe Gewicht hat und spaeter kommt.
        Mit `html` davor (0,1,1 gegen 0,1,0) haengt es nicht mehr an der
        Ladereihenfolge. */
-    html .searchable-select-display,
-    html .tier-search-clear {
+    /* .tier-search-clear stand hier bis zum 01.09.2026 mit; das
+       Suchfeld ueber der Tier-Liste ist entfernt (siehe
+       docs/geparkte-features.md). */
+    html .searchable-select-display {
         min-height: 44px !important;
-    }
-    html .tier-search-clear {
-        min-width: 44px !important;
     }
     /* Tabellenzellen: `min-height` hat auf `display: table-cell` laut
        Spezifikation KEINE Wirkung — gemessen blieb `.heatmap-td` bei

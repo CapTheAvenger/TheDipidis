@@ -803,6 +803,18 @@ img[src*="limitlesstcg"] {
     font-size: 0.95rem !important;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
 }
+/* Wo der Tastaturfokus steht.
+   Aufgefallen am 01.09.2026: das Suchfeld ueber der Tier-Liste hatte
+   seit dem 30.08. einen Fokusring, dieses hier nie — und es ist seit
+   dem Wegfall des anderen das einzige Eingabefeld der Startseite. Wer
+   mit der Tastatur navigiert, sprang bis dahin in ein Feld, das
+   aussah wie vorher. */
+.heatmap-search-input:focus,
+.heatmap-search-input:focus-visible {
+    outline: 2px solid var(--brand) !important;
+    outline-offset: 1px !important;
+    border-color: var(--brand) !important;
+}
 .heatmap-table {
     border-collapse: collapse !important;
     width: 100% !important;

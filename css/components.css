@@ -287,6 +287,7 @@
    dort liest ihn niemand. Der Punkt hinter dem Wort ist absichtlich
    klein: er soll auffindbar sein, nicht laut. */
 .ds-term {
+    position: relative;
     border-bottom: 1px dotted var(--line-strong);
     cursor: help;
     text-decoration: none;
@@ -299,6 +300,69 @@
     color: var(--ink-3);
     font-weight: 700;
 }
+
+/* Die Sprechblase.
+   Sie gilt fuer .ds-term (Fachbegriffe an Zahlen) UND fuer
+   .arc-tile--hinweis (die Nenner der Archetyp-Kacheln). Eine Regel,
+   zwei Nutzer — zwei Sprechblasen mit leicht verschiedenem Aussehen
+   waeren derselbe Fehler wie zwei Win Rates fuer ein Deck.
+   BIS ZUM 01.09.2026 war die Erklaerung ein title-Attribut. Das
+   erscheint nur beim Verweilen mit der Maus — nie beim Klick, nie auf
+   dem Telefon. Gemeldet: "wenn ich hier auf Fragezeichen druecke, dann
+   passiert nicht mal irgendwas". Die Blase haengt jetzt an
+   data-hinweis (js/app-utils.js, termHint) und geht bei :hover UND bei
+   :focus auf; den Fokus setzt der Klick.
+   Die Blase ist reine Anzeige und faengt deshalb keine Klicks ab. */
+.ds-term::before,
+.arc-tile--hinweis::before {
+    content: attr(data-hinweis);
+    position: absolute;
+    left: 0;
+    top: calc(100% + 6px);
+    z-index: var(--z-popover);
+    display: block;
+    width: max-content;
+    max-width: min(38ch, 78vw);
+    padding: 8px 10px;
+    border-radius: var(--r-sm);
+    background: var(--ink);
+    color: var(--surface-1);
+    font-size: var(--fs-xs);
+    font-weight: 400;
+    line-height: 1.45;
+    letter-spacing: normal;
+    text-transform: none;
+    text-align: left;
+    white-space: normal;
+    box-shadow: var(--e-2);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 120ms ease;
+}
+.ds-term:hover::before,
+.ds-term:focus::before,
+.ds-term:focus-visible::before,
+.arc-tile--hinweis:hover::before,
+.arc-tile--hinweis:focus::before,
+.arc-tile--hinweis:focus-visible::before {
+    opacity: 1;
+    visibility: visible;
+}
+/* Ohne Hinweistext keine leere Blase. */
+.ds-term:not([data-hinweis])::before,
+.arc-tile--hinweis:not([data-hinweis])::before { content: none; }
+/* Die Kachel ist selbst der Anker. Sie traegt keinen Zeigefinger — sie
+   ist keine Schaltflaeche —, aber einen sichtbaren Fokusring, sonst
+   waere sie mit der Tastatur unauffindbar. */
+.arc-tile--hinweis { position: relative; cursor: help; }
+.arc-tile--hinweis:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+/* Die dritte Kachel steht am rechten Rand ihrer Reihe; dort laeuft die
+   Blase sonst aus der Karte heraus. */
+.arc-tiles > .arc-tile--hinweis:last-child::before { left: auto; right: 0; }
+/* Am rechten Rand der Tabelle wuerde die Blase sonst hinausragen. Die
+   letzten beiden Spalten lassen sie deshalb nach links auslaufen. */
+th:nth-last-child(-n+2) .ds-term::before { left: auto; right: 0; }
 
 /* ── Fußnote ─────────────────────────────────────────────────────── */
 .ds-note {
@@ -683,23 +747,32 @@ html.is-signed-out [onclick*="radelist"]:hover {
 .ds-filter-seg.is-space .ds-filter-btn.is-on[data-space="past"] { box-shadow: inset 0 -2px 0 var(--space-past), var(--e-1); }
 
 /* Global hat keine Formatwahl. Ein Schild, kein Schalter — ein Knopf,
-   der nichts zu waehlen hat, ist eine Luege ueber die Daten. */
+   der nichts zu waehlen hat, ist eine Luege ueber die Daten.
+
+   BIS ZUM 01.09.2026 stand hier eine gestrichelte Umrandung, 32px hoch,
+   neben zwei 44px hohen Knopfreihen mit voller Flaeche. Gemeldet:
+   "Lieber dieses TEF-bis-PBL-Feld optisch den anderen anpassen."
+   Es sieht jetzt aus wie ein gesetzter Knopf — gleiche Groesse, gleiche
+   Rundung, gleicher Schatten — und traegt die Datenraum-Farbe an der
+   Unterkante, genau wie der aktive Datenraum-Knopf daneben. Dass es
+   kein Schalter ist, sagt der fehlende Zeigefinger und der fehlende
+   Hover; eine gestrichelte Linie musste das nicht zusaetzlich sagen. */
 .ds-filter-fixed {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     padding: 6px 13px;
-    min-height: 32px;
-    line-height: 20px;
-    border: 1px dashed var(--line-strong);
+    min-height: 44px;
+    border: 0;
     border-radius: 999px;
-    color: var(--ink-2);
+    background: var(--surface-1);
+    box-shadow: inset 0 -2px 0 var(--space-gl), var(--e-1);
+    color: var(--ink);
     font-size: var(--fs-sm);
     font-weight: 700;
+    white-space: nowrap;
 }
-
-.ds-filter-note {
-    font-size: var(--fs-xs);
-    color: var(--ink-3);
-}
+/* Damit das Schild in derselben Schiene sitzt wie eine Knopfreihe. */
+.ds-filter-group > .ds-filter-fixed { margin: 3px 0; }
 
 @media (max-width: 768px) {
     .ds-filter {
@@ -708,7 +781,6 @@ html.is-signed-out [onclick*="radelist"]:hover {
     }
     .ds-filter-group { width: 100%; }
     .ds-filter-btn { font-size: var(--fs-xs); padding: 6px 10px; }
-    .ds-filter-note { display: none; }
 }
 
 /* Ab fuenf Optionen ein Auswahlfeld statt einer Knopfreihe. Sechzehn

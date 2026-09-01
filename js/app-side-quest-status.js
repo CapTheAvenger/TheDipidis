@@ -77,7 +77,7 @@
     var T = {
         de: {
             titel: 'Statuszustände',
-            lead: 'Was Paralyse, Schlaf, Verbrennung und die übrigen wirklich tun — mit den Zahlen dahinter.',
+            lead: 'Was Paralyse, Schlaf, Verbrennung und die übrigen wirklich tun — mit den Zahlen dahinter. Ganz unten: was „steigt stark“ und „sinkt drastisch“ in Prozent bedeuten.',
             quelleLabel: 'Regeln nach',
             geltung: 'Champions führt selbst keine Regelseite zu Statuszuständen. Die Zahlen stammen deshalb aus der Hauptreihe (Stand 9. Generation). Wo unsere Champions-Daten eine Zahl nennen, deckt sie sich damit: Irrlicht nennt 1/16 KP und halbierten physischen Angriff, Schlafpuder 1 bis 3 Runden.',
             wirkung: 'Wirkung',
@@ -96,11 +96,22 @@
             fehler: 'Die Statusübersicht konnte nicht geladen werden.',
             fehlerText: 'data/champions_statuszustaende.json fehlt oder ist unlesbar.',
             aufklappen: 'Alles aufklappen',
-            zuklappen: 'Alles zuklappen'
+            zuklappen: 'Alles zuklappen',
+            stufenTitel: 'Statuswert-Stufen',
+            stufenLead: 'Was „steigt stark“ und „sinkt drastisch“ in Zahlen heißen. Eine Attacke verschiebt den Wert um Stufen, nicht um Prozente — der Faktor hängt davon ab, wo der Wert schon steht.',
+            stufeSp: 'Stufe',
+            faktorSp: 'Faktor',
+            wertSp: 'Vom Grundwert',
+            meldungSp: 'Meldung im Kampf',
+            stufenGrenze: 'Weiter als +6 oder −6 geht es nicht: dort ist bei 400 % Schluss und bei 25 %.',
+            stufenMeldung: 'Die Meldung richtet sich danach, um wie viele Stufen eine Attacke verschiebt — nicht danach, wo der Wert danach steht. Vom Grundwert aus ist das dasselbe. Ab drei Stufen auf einmal heißt es immer „drastisch“.',
+            stufenAusnahme: 'Genauigkeit und Fluchtwert folgen einer eigenen, flacheren Tabelle — von 1/3 bei −6 bis 3 bei +6.',
+            stufenGilt: 'Gilt für Angriff, Verteidigung, Spezial-Angriff, Spezial-Verteidigung und Initiative.',
+            grund: 'unverändert'
         },
         en: {
             titel: 'Status conditions',
-            lead: 'What paralysis, sleep, burn and the rest actually do — with the numbers behind them.',
+            lead: 'What paralysis, sleep, burn and the rest actually do — with the numbers behind them. At the bottom: what "rose sharply" and "fell severely" mean in percent.',
             quelleLabel: 'Rules from',
             geltung: 'Champions carries no rules page on status conditions of its own. The numbers therefore come from the main series (Gen 9). Where our Champions data names a number it agrees: Will-O-Wisp says 1/16 HP and halved physical attack, Sleep Powder says 1 to 3 turns.',
             wirkung: 'Effect',
@@ -119,7 +130,18 @@
             fehler: 'The status overview could not be loaded.',
             fehlerText: 'data/champions_statuszustaende.json is missing or unreadable.',
             aufklappen: 'Expand all',
-            zuklappen: 'Collapse all'
+            zuklappen: 'Collapse all',
+            stufenTitel: 'Stat stages',
+            stufenLead: 'What "rose sharply" and "fell severely" mean as numbers. A move shifts the stat by stages, not by percent — the factor depends on where the stat already stands.',
+            stufeSp: 'Stage',
+            faktorSp: 'Factor',
+            wertSp: 'Of the base',
+            meldungSp: 'Battle message',
+            stufenGrenze: 'It stops at +6 and −6: 400 % at the top, 25 % at the bottom.',
+            stufenMeldung: 'The message depends on how many stages a move shifts, not on where the stat ends up. From the base value the two coincide. Three stages at once or more always reads "drastically".',
+            stufenAusnahme: 'Accuracy and evasion follow their own, flatter table — from 1/3 at −6 to 3 at +6.',
+            stufenGilt: 'Applies to Attack, Defense, Special Attack, Special Defense and Speed.',
+            grund: 'unchanged'
         }
     };
     function t() { return T[de() ? 'de' : 'en']; }
@@ -194,6 +216,61 @@
              + '</article>';
     }
 
+    /* Die Stufentabelle.
+     *
+     * WARUM SIE HIER STEHT UND NICHT BEI DEN ATTACKEN
+     *
+     * "Der Angriff steigt stark" ist ein Satz, den man in zwanzig
+     * Attackentexten liest. Zwanzigmal dieselbe Erklaerung darunter
+     * waere genau die Unuebersichtlichkeit, gegen die diese Seite
+     * gerade aufgeraeumt wurde. Also einmal, an dem Ort, an dem ohnehin
+     * steht, was im Kampf mit einem Pokemon passiert — und von den
+     * Attacken aus verlinkt.
+     *
+     * WARUM DIE ZEILE MIT DER 0 DABEI IST
+     *
+     * Ohne sie liest sich die Tabelle wie zwei Listen. Mit ihr sieht
+     * man in einem Blick, dass +1 und -1 NICHT symmetrisch sind:
+     * plus die Haelfte gegen minus ein Drittel. Genau das ueberrascht
+     * die meisten.
+     */
+    function stufenHtml() {
+        var c = t(), st = _daten && _daten.stufen;
+        if (!st || !st.tabelle || !st.tabelle.length) return '';
+        var m = st._meta || {};
+        var zeilen = st.tabelle.map(function (z) {
+            var wort = de() ? z.wort_de : z.wort_en;
+            var null_ = (z.stufe === 0);
+            return '<tr class="sz-stufe-zeile'
+                 + (null_ ? ' is-null' : (z.stufe > 0 ? ' is-auf' : ' is-ab')) + '">'
+                 + '<th scope="row" class="sz-stufe-nr">'
+                 + (z.stufe > 0 ? '+' : '') + z.stufe + '</th>'
+                 + '<td class="sz-stufe-bruch">' + esc(z.bruch) + '</td>'
+                 + '<td class="sz-stufe-pct">' + esc(de() ? z.prozent_de : z.prozent_en) + '</td>'
+                 + '<td class="sz-stufe-wort">'
+                 + (wort ? esc(wort) : '<span class="sz-stufe-leer">' + esc(c.grund) + '</span>')
+                 + '</td></tr>';
+        }).join('');
+        var quellen = (m.quellen || []).map(function (q) {
+            return '<a href="' + esc(q.url) + '" target="_blank" rel="noopener noreferrer">'
+                 + esc(q.name) + '</a>';
+        }).join(' · ');
+        return '<section class="sz-stufen" aria-labelledby="szStufenTitel">'
+             + '<h3 class="sz-stufen-titel" id="szStufenTitel">' + esc(c.stufenTitel) + '</h3>'
+             + '<p class="sz-lead">' + esc(c.stufenLead) + '</p>'
+             + '<div class="mobile-table-scroll"><table class="sz-stufen-tabelle">'
+             + '<thead><tr><th scope="col">' + esc(c.stufeSp) + '</th>'
+             + '<th scope="col">' + esc(c.faktorSp) + '</th>'
+             + '<th scope="col">' + esc(c.wertSp) + '</th>'
+             + '<th scope="col">' + esc(c.meldungSp) + '</th></tr></thead>'
+             + '<tbody>' + zeilen + '</tbody></table></div>'
+             + '<p class="sz-stufen-hinweis">' + esc(c.stufenGilt) + ' ' + esc(c.stufenGrenze) + '</p>'
+             + '<p class="sz-stufen-hinweis">' + esc(c.stufenMeldung) + '</p>'
+             + '<p class="sz-stufen-hinweis">' + esc(c.stufenAusnahme) + '</p>'
+             + (quellen ? '<p class="sz-quelle">' + esc(c.quelleLabel) + ' ' + quellen + '</p>' : '')
+             + '</section>';
+    }
+
     function render() {
         var host = document.getElementById('sideQuestZustaendeHost');
         if (!host) return false;
@@ -224,7 +301,8 @@
           + '<button type="button" class="sz-alle" data-sz-alle="'
           + (_alleOffen ? 'zu' : 'auf') + '">'
           + esc(_alleOffen ? c.zuklappen : c.aufklappen) + '</button></div>'
-          + '<div class="sz-liste-karten">' + liste.join('') + '</div>';
+          + '<div class="sz-liste-karten">' + liste.join('') + '</div>'
+          + stufenHtml();
         return true;
     }
 

@@ -779,34 +779,35 @@
     // the Showdown teambuilder AND Limitless "Submit teamlist" both accept
     // (Limitless literally says "export from Showdown … and paste it"). The
     // mon fields were parsed FROM a Showdown paste (pokepaste), so this
-    // round-trips to valid text. Champions is Lv.50 and has no Tera, so those
-    // lines are conditional.
-    // Zwei Ziele, zwei Zahlenwelten.
+    // round-trips to valid text. Champions is Lv.50, so that line is fixed.
+    // Die Tera-Zeile steht nur, wenn ein Team eine traegt: Champions kennt
+    // kein Tera, und Showdown wirft die Zeile in einem Champions-Format
+    // ohnehin weg (sim/teams.ts schreibt sie dort nicht, der Validator
+    // loescht set.teraType). Sie bleibt trotzdem bedingt drin, damit ein
+    // aus einer fremden Pokepaste importiertes Team seine Angabe nicht
+    // beim Durchlauf verliert.
+    // EIN ZIEL, EINE ZAHLENWELT (nachgeprueft 01.09.2026).
     //
-    // Bis zum 26.08.2026 bekamen Showdown und Limitless denselben Text — mit
-    // dem Kommentar "Limitless akzeptiert woertlich einen Showdown-Export".
-    // Fuer Limitless stimmt das: deren Champions-Teamsheet erwartet die
-    // spielinterne Verteilung (0–32 je Wert, Summe 66). Fuer Showdown stimmt
-    // es nicht: dort sind es EVs, 0–252, und 32 Punkte sind 256 EV. Ein
-    // Champions-Bau, der in Showdown "32 Atk" liest, spielt dort mit einem
-    // Achtel des gemeinten Angriffs.
+    // Vom 26.08. bis zum 01.09.2026 rechnete der Showdown-Zweig die Punkte
+    // mal 8, weil wir annahmen, Showdown lese Champions-Baue als
+    // gewoehnliche EVs. Der Betreiber hat das bezweifelt und hatte recht:
+    // Showdown hat eigene Champions-Formate, und die rechnen in
+    // Statuspunkten (evLimit 66, Deckel 32 je Wert). Die Belegstellen im
+    // Showdown-Quelltext stehen im Kopf von js/champions-set.js.
     //
-    // Deshalb: `showdownEinheiten` schaltet die Umrechnung ein (mal 8,
-    // gedeckelt bei 252). Die Zahlen im Speicher bleiben roh — umgerechnet
-    // wird erst beim Schreiben.
-    // Eine eigene Funktion, damit die Zusicherung sie fahren kann, ohne den
-    // ganzen Export nachzubauen — und damit die Umrechnung genau EINE Stelle
-    // hat. Das Etikett bleibt in beiden Faellen "EVs:": so liest Showdown es,
-    // so liest Limitless es, und so findet die Import-Regex den Wert wieder.
-    function buildEvsLine(m, showdownEinheiten) {
-        const CS = window.ChampionsSet;
+    // Ein umgerechneter Bau wurde von Showdown also nicht etwa falsch
+    // verstanden, sondern rundheraus abgelehnt. Beide Ziele bekommen jetzt
+    // denselben Text — den, der ohnehin im Team steht.
+    //
+    // Das Etikett bleibt "EVs:": so schreibt Showdown es selbst
+    // (sim/teams.ts), so liest sein Importer es, und so findet unsere
+    // eigene Import-Regex den Wert wieder.
+    function buildEvsLine(m) {
         const roh = (m && m.evs) || '';
-        if (!roh) return '';
-        const wert = (showdownEinheiten && CS) ? CS.toShowdownText(CS.parseSpread(roh)) : roh;
-        return wert ? `EVs: ${wert}` : '';
+        return roh ? `EVs: ${roh}` : '';
     }
 
-    function buildShowdownExport(team, showdownEinheiten) {
+    function buildShowdownExport(team) {
         return (team.pokemon || []).map(m => {
             const name = String(m.name || '').trim();
             const item = String(m.item || '').trim();
@@ -814,7 +815,7 @@
             if (m.ability) lines.push(`Ability: ${m.ability}`);
             lines.push('Level: 50');
             if (m.tera_type) lines.push(`Tera Type: ${m.tera_type}`);
-            const evsZeile = buildEvsLine(m, showdownEinheiten);
+            const evsZeile = buildEvsLine(m);
             if (evsZeile) lines.push(evsZeile);
             if (m.nature) lines.push(`${m.nature} Nature`);
             (m.moves || []).forEach(mv => { if (mv) lines.push(`- ${mv}`); });
@@ -822,16 +823,10 @@
         }).join('\n\n') + '\n';
     }
 
-    // Um wie viel sprengt der Bau Showdowns 510er-Budget? 0 = passt.
-    function showdownUeberschuss(team) {
-        const CS = window.ChampionsSet;
-        if (!CS) return 0;
-        let max = 0;
-        (team.pokemon || []).forEach(m => {
-            max = Math.max(max, CS.showdownUeberschuss(CS.parseSpread(m.evs || '')));
-        });
-        return max;
-    }
+    // showdownUeberschuss() stand hier bis zum 01.09.2026: um wie viel ein
+    // Bau Showdowns 510er-EV-Budget sprengt. Die Frage stellt sich nicht
+    // mehr — in einem Champions-Format deckelt Showdown bei 66
+    // Statuspunkten, und mehr laesst der Bau ohnehin nicht zu.
 
     function closeExportModal() {
         const el = document.getElementById('sideQuestExportModal');
@@ -843,11 +838,10 @@
     function openExportModal(team) {
         closeExportModal();
         const l = LABELS[uiLang()];
-        // Startanzeige: die rohe Champions-Verteilung. Das ist, was im Team
-        // steht — und was Limitless erwartet. Auf Knopfdruck wird daraus die
-        // Showdown-Fassung.
-        let text = buildShowdownExport(team, false);
-        const ueberschuss = showdownUeberschuss(team);
+        // Ein Text fuer beide Ziele: die rohe Champions-Verteilung. Das ist,
+        // was im Team steht, was Limitless erwartet und was Showdowns
+        // Champions-Formate lesen.
+        const text = buildShowdownExport(team);
         const overlay = document.createElement('div');
         overlay.id = 'sideQuestExportModal';
         overlay.className = 'side-quest-modal-overlay';
@@ -861,7 +855,6 @@
                     <p class="side-quest-import-hint">${escapeHtml(l.exportHint)}</p>
                     <textarea class="side-quest-import-text" id="sqExportText" rows="12" readonly spellcheck="false"></textarea>
                     <p class="side-quest-export-choose">${escapeHtml(l.exportChoose)}</p>
-                    <p class="side-quest-export-warn" hidden></p>
                     <div class="side-quest-import-actions side-quest-export-actions">
                         <button class="side-quest-export-choice sq-target-copy" type="button" data-export-target="copy">${escapeHtml(l.exportCopy)}</button>
                         <button class="side-quest-export-choice sq-target-showdown" type="button" data-export-target="showdown">${escapeHtml(l.exportShowdown)}</button>
@@ -884,19 +877,8 @@
         overlay.querySelectorAll('.side-quest-export-choice').forEach(b => {
             b.addEventListener('click', () => {
                 const target = b.getAttribute('data-export-target');
-                // Ziel bestimmt die Einheiten: Showdown rechnet mal 8,
-                // Limitless und "nur kopieren" nehmen die rohen Punkte.
-                text = buildShowdownExport(team, target === 'showdown');
-                ta.value = text;
-                if (target === 'showdown' && ueberschuss) {
-                    const hin = overlay.querySelector('.side-quest-export-warn');
-                    if (hin) {
-                        hin.hidden = false;
-                        hin.textContent = uiLang() === 'de'
-                            ? `Achtung: als Showdown-EVs sind das ${ueberschuss} Punkte über dem 510er-Budget — Showdown lehnt den Bau ab. Limitless nimmt ihn an.`
-                            : `Heads up: as Showdown EVs this is ${ueberschuss} over the 510 budget — Showdown rejects the build. Limitless accepts it.`;
-                    }
-                }
+                // Das Ziel bestimmt nur noch, wohin der Nutzer geschickt
+                // wird — der Text ist fuer beide derselbe.
                 // Select first: visible feedback + manual-copy fallback on
                 // mobile where programmatic clipboard writes are flaky.
                 ta.focus(); ta.select();

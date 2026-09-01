@@ -4023,24 +4023,39 @@
             /* MOBILE DECK BUILDER (Dein Deck) */
             /* ============================== */
             
-            /* Mobile Deck Builder (Dein Deck) - 4 Spalten mit max 69px Breite */
+            /* Mobile Deck Builder (Dein Deck) - Kacheln wachsen mit
+             *
+             * BEFUND 01.09.2026: hier standen vier Spalten a 69 px, fest
+             * verdrahtet. Gemessen bei 320, 390, 430 UND 767 px: immer
+             * 4 x 69, Kachel 69 x 96,6 — bei 767 px blieben 60 % der
+             * Breite leer. Und 69 px reichen fuer den Inhalt der Kachel
+             * nicht: die Prozentzeile braucht 80 px und wurde links wie
+             * rechts beschnitten (siehe unten).
+             *
+             * Vier fruehere Regeln (styles.css:3116/3179/3369,
+             * mobile-responsive.css:167) wollten das schon flexibel haben
+             * und verloren gegen das `!important` hier.
+             *
+             * auto-fill statt fester Spaltenzahl: 390 px ergibt 3 Spalten
+             * a 88,7 px, 767 px ergibt 6 a 100,5 px. Der ganze Block steht
+             * in `@media (max-width: 768px)` — am Desktop aendert sich
+             * nichts, bitgenau nachgemessen bei 1280 px. */
             #cityLeagueMyDeckGrid,
             #currentMetaMyDeckGrid,
             #pastMetaMyDeckGrid {
-                grid-template-columns: repeat(4, minmax(auto, 69px)) !important;
+                grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)) !important;
                 gap: 8px !important;
                 padding: 8px !important;
-                justify-content: center !important;
+                justify-content: stretch !important;
             }
 
-            /* Mobile Deck Builder Cards - enforce 69px width */
             #cityLeagueMyDeckGrid .deck-card,
             #currentMetaMyDeckGrid .deck-card,
             #pastMetaMyDeckGrid .deck-card {
-                width: 69px !important;
-                max-width: 69px !important;
-                min-width: 69px !important;
-                padding-bottom: 140% !important; /* Maintains aspect ratio 69x97 */
+                width: auto !important;
+                max-width: none !important;
+                min-width: 0 !important;
+                padding-bottom: 140% !important; /* Seitenverhaeltnis 5:7 */
                 margin: 0 !important;
             }
             
@@ -4052,14 +4067,15 @@
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
             }
             
-            /* Mobile Deck Builder - IMG exakt 69x97px */
+            /* Das Bild fuellt die Kachel, statt auf 69x97 festgenagelt zu
+               sein — sonst waechst die Kachel und das Bild bleibt klein. */
             #cityLeagueMyDeckGrid .deck-card img,
             #currentMetaMyDeckGrid .deck-card img,
             #pastMetaMyDeckGrid .deck-card img {
-                width: 69px !important;
-                height: 97px !important;
-                max-width: 69px !important;
-                max-height: 97px !important;
+                width: 100% !important;
+                height: 100% !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
                 object-fit: cover !important;
             }
 
@@ -4076,9 +4092,23 @@
                 right: 3px !important;
                 height: 13px !important;
                 line-height: 13px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
+                /* BEFUND 01.09.2026: hier stand `display: flex` mit
+                 * `justify-content: center`. Ein Flex-Container zentriert
+                 * seinen Inhalt auch dann, wenn der breiter ist als er
+                 * selbst — dann ragt er auf BEIDEN Seiten heraus und
+                 * `overflow: hidden` schneidet symmetrisch ab. Das
+                 * `text-overflow: ellipsis` daneben war wirkungslos, weil
+                 * es nur auf einen Block wirkt, nicht auf ein Flex-Kind.
+                 * Gemessen: clientWidth 63,0 gegen scrollWidth 80,0, also
+                 * je 8,5 px vorn und hinten weg — aus
+                 * "100,0 % | Ø 1,20x" wurde "0,0% | Ø 1,2". Auf allen
+                 * 29 Kacheln, und niemand konnte sehen, dass etwas fehlt.
+                 * Mit `block` + `text-align` greift die Ellipse. */
+                display: block !important;
+                text-align: center !important;
+                letter-spacing: 0 !important;
+                font-size: 10px !important;
+                padding: 0 1px !important;
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;

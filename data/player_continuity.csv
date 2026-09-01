@@ -5618,3 +5618,515 @@ tournament_id,tournament_date,meta,place,player_name,country,deck_slug,deck_arch
 0069,2026-06-06,TEF-CRI,510,Luca Meroni,IT,ursaluna-lunatone,Ursaluna Lunatone,4,2,2
 0069,2026-06-06,TEF-CRI,511,Roberto Pittalis,IT,basic-box-m,Basic Box,4,2,2
 0069,2026-06-06,TEF-CRI,512,Blagovest Vladimirov,IT,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0071,2026-08-28,TEF-PBL,1,Andrew Hedrick,US,dragapult-ex,Dragapult,14,2,0
+0071,2026-08-28,TEF-PBL,2,Diego Cassiraga,AR,alakazam-dudunsparce,Alakazam Dudunsparce,12,2,2
+0071,2026-08-28,TEF-PBL,3,Brent Tonisson,AU,dragapult-ex,Dragapult,12,2,1
+0071,2026-08-28,TEF-PBL,4,Henry Chao,US,dragapult-dusknoir,Dragapult Dusknoir,11,1,3
+0071,2026-08-28,TEF-PBL,5,Rune Heiremans,BE,crustle-dri,Crustle,10,1,3
+0071,2026-08-28,TEF-PBL,6,Satoshi Matsui,US,crustle-dri,Crustle,11,3,0
+0071,2026-08-28,TEF-PBL,7,Mateusz Łaszkiewicz,PL,alakazam-dusknoir,Alakazam Dusknoir,10,2,2
+0071,2026-08-28,TEF-PBL,8,Nathan Spry,AU,basic-box-m,Basic Box,10,2,2
+0071,2026-08-28,TEF-PBL,9,Öjvind Svinhufvud,FI,n-zoroark,N's Zoroark,9,2,2
+0071,2026-08-28,TEF-PBL,10,Kian Amini,US,dragapult-ex,Dragapult,9,2,2
+0071,2026-08-28,TEF-PBL,11,Calvin Connor,US,alakazam-dudunsparce,Alakazam Dudunsparce,9,2,1
+0071,2026-08-28,TEF-PBL,12,Henry Thompson,US,alakazam-dudunsparce,Alakazam Dudunsparce,9,2,1
+0071,2026-08-28,TEF-PBL,13,Cali White,CA,basic-box-m,Basic Box,9,2,1
+0071,2026-08-28,TEF-PBL,14,HUI YUAN HUANG,TW,dragapult-dudunsparce,Dragapult Dudunsparce,9,2,1
+0071,2026-08-28,TEF-PBL,15,Grant Walworth,US,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,9,2,1
+0071,2026-08-28,TEF-PBL,16,Alberto Cortes,MX,basic-box-m,Basic Box,9,3,0
+0071,2026-08-28,TEF-PBL,17,Keito Arai,JP,basic-box-m,Basic Box,9,3,0
+0071,2026-08-28,TEF-PBL,18,Alex Schemanske,US,alakazam-dudunsparce,Alakazam Dudunsparce,9,3,0
+0071,2026-08-28,TEF-PBL,19,Angus Johnson,AU,alakazam-dusknoir,Alakazam Dusknoir,9,3,0
+0071,2026-08-28,TEF-PBL,20,NATALIE Millar,AU,dragapult-dusknoir,Dragapult Dusknoir,9,3,0
+0071,2026-08-28,TEF-PBL,21,Cerys Jones,US,alakazam-dudunsparce,Alakazam Dudunsparce,8,1,3
+0071,2026-08-28,TEF-PBL,22,aaron arturo aguirre osuna,MX,basic-box-m,Basic Box,9,3,0
+0071,2026-08-28,TEF-PBL,23,Marco Cifuentes,CL,n-zoroark,N's Zoroark,9,3,0
+0071,2026-08-28,TEF-PBL,24,Yerco Valencia,CL,basic-box-m,Basic Box,8,2,2
+0071,2026-08-28,TEF-PBL,25,Chun Chit Cheung,HK,dragapult-blaziken,Dragapult Blaziken,8,2,2
+0071,2026-08-28,TEF-PBL,26,Michele Schiraldi,CA,n-zoroark,N's Zoroark,8,2,2
+0071,2026-08-28,TEF-PBL,27,Nina Eisenblätter,DE,alakazam-dudunsparce,Alakazam Dudunsparce,8,2,2
+0071,2026-08-28,TEF-PBL,28,Alessio Cefola,IT,dragapult-ex,Dragapult,8,2,2
+0071,2026-08-28,TEF-PBL,29,Jackson Ford,CA,dragapult-blaziken,Dragapult Blaziken,8,2,2
+0071,2026-08-28,TEF-PBL,30,Gan Pee Wei Jun,MY,toxtricity-box,Toxtricity Box,8,2,2
+0071,2026-08-28,TEF-PBL,31,Aarni Karjala,FI,slowking-scr,Slowking,8,2,2
+0071,2026-08-28,TEF-PBL,32,Makani Tran,US,dragapult-ex,Dragapult,8,2,2
+0071,2026-08-28,TEF-PBL,33,Aleksi Jäntti,FI,seaking-pre,Seaking Festival Lead,8,2,2
+0071,2026-08-28,TEF-PBL,34,Federico Nattkemper,AR,alakazam-dudunsparce,Alakazam Dudunsparce,8,2,2
+0071,2026-08-28,TEF-PBL,35,MINHO SONG,KR,slowking-scr,Slowking,8,3,1
+0071,2026-08-28,TEF-PBL,36,Stéphane Ivanoff,FR,slowking-scr,Slowking,8,3,1
+0071,2026-08-28,TEF-PBL,37,Boming Wang,CN,mega-excadrill-ex,Mega Excadrill,8,3,1
+0071,2026-08-28,TEF-PBL,38,Rahul Reddy,US,crustle-dri,Crustle,8,3,1
+0071,2026-08-28,TEF-PBL,39,Emiliano Zapata,MX,mega-excadrill-ex,Mega Excadrill,8,3,1
+0071,2026-08-28,TEF-PBL,40,Katy Montgomerie,UK,dragapult-ex,Dragapult,8,3,1
+0071,2026-08-28,TEF-PBL,41,Guilherme Stroschon,BR,mega-excadrill-ex,Mega Excadrill,8,3,1
+0071,2026-08-28,TEF-PBL,42,Daniel Merlo,US,dragapult-dusknoir,Dragapult Dusknoir,8,3,1
+0071,2026-08-28,TEF-PBL,43,Tomi Markkula,FI,raging-bolt-ogerpon,Raging Bolt Ogerpon,8,3,1
+0071,2026-08-28,TEF-PBL,44,KAZUKI YUASA,JP,slowking-scr,Slowking,8,3,1
+0071,2026-08-28,TEF-PBL,45,James Kowalski,US,lillie-clefairy,Lillie's Clefairy,8,3,1
+0071,2026-08-28,TEF-PBL,46,Rajveer Singh,US,n-zoroark,N's Zoroark,8,3,1
+0071,2026-08-28,TEF-PBL,47,Hugo De Torres,ES,clefairy-ogerpon,Clefairy Ogerpon,8,3,1
+0071,2026-08-28,TEF-PBL,48,Joey Gaffney,CA,dragapult-blaziken,Dragapult Blaziken,8,3,1
+0071,2026-08-28,TEF-PBL,49,David Zheng,US,dragapult-blaziken,Dragapult Blaziken,8,3,1
+0071,2026-08-28,TEF-PBL,50,SHIH WEI CHEN,TW,sharpedo-toxtricity,Sharpedo Toxtricity,8,3,1
+0071,2026-08-28,TEF-PBL,51,Christian LaBella,CA,n-zoroark,N's Zoroark,8,3,1
+0071,2026-08-28,TEF-PBL,52,Nathan Ginsburg,US,alakazam-dudunsparce,Alakazam Dudunsparce,8,3,1
+0071,2026-08-28,TEF-PBL,53,Benjamin PHAM,NL,mega-excadrill-ex,Mega Excadrill,8,3,1
+0071,2026-08-28,TEF-PBL,54,Yoshiyuki Yamaguchi,JP,n-zoroark,N's Zoroark,8,4,0
+0071,2026-08-28,TEF-PBL,55,Joji Koyama,JP,,,8,4,0
+0071,2026-08-28,TEF-PBL,56,Kensuke Miyagi,JP,basic-box-m,Basic Box,8,4,0
+0071,2026-08-28,TEF-PBL,57,Piper Lepine,US,n-zoroark,N's Zoroark,8,4,0
+0071,2026-08-28,TEF-PBL,58,Yu Zheng Cha,MY,lopunny-dudunsparce,Lopunny Dudunsparce,7,2,3
+0071,2026-08-28,TEF-PBL,59,Jose López,ES,basic-box-m,Basic Box,8,4,0
+0071,2026-08-28,TEF-PBL,60,Liam Halliburton,US,n-zoroark,N's Zoroark,8,4,0
+0071,2026-08-28,TEF-PBL,61,Jack Wong,CA,slowking-scr,Slowking,8,4,0
+0071,2026-08-28,TEF-PBL,62,James Cox,NL,raging-bolt-ogerpon,Raging Bolt Ogerpon,8,4,0
+0071,2026-08-28,TEF-PBL,63,Marco Garcia,BR,dragapult-ex,Dragapult,8,4,0
+0071,2026-08-28,TEF-PBL,64,Noah Sakadjian,US,n-zoroark,N's Zoroark,8,4,0
+0071,2026-08-28,TEF-PBL,65,Adam Awae,TH,dragapult-ex,Dragapult,7,2,3
+0071,2026-08-28,TEF-PBL,66,Sammy Goldschein,US,dragapult-ex,Dragapult,7,2,3
+0071,2026-08-28,TEF-PBL,67,Tianyi Rong,CN,alakazam-dudunsparce,Alakazam Dudunsparce,7,3,2
+0071,2026-08-28,TEF-PBL,68,Friedrich Illbruck,DE,alakazam-dudunsparce,Alakazam Dudunsparce,7,3,2
+0071,2026-08-28,TEF-PBL,69,CAI YI,CN,slowking-scr,Slowking,7,3,2
+0071,2026-08-28,TEF-PBL,70,Dawid Andrzejewski,PL,festival-lead,Dipplin,7,3,2
+0071,2026-08-28,TEF-PBL,71,Federico Gallo,ES,dhelmise-pbl,Dhelmise,7,3,2
+0071,2026-08-28,TEF-PBL,72,Max Roberts,UK,dragapult-ex,Dragapult,7,3,2
+0071,2026-08-28,TEF-PBL,73,Ethan Wilde,UK,festival-lead,Dipplin,7,3,2
+0071,2026-08-28,TEF-PBL,74,Emanuel Diogo,AR,kangaskhan-bouffalant,Kangaskhan Bouffalant,7,3,2
+0071,2026-08-28,TEF-PBL,75,Nicolas Darge,DE,alakazam-dudunsparce,Alakazam Dudunsparce,7,3,2
+0071,2026-08-28,TEF-PBL,76,Takumi Kagawa,JP,basic-box-m,Basic Box,7,3,2
+0071,2026-08-28,TEF-PBL,77,Hung-Jui Chen,TW,alakazam-dudunsparce,Alakazam Dudunsparce,7,3,2
+0071,2026-08-28,TEF-PBL,78,KAI-YU FANG,TW,dragapult-blaziken,Dragapult Blaziken,7,3,2
+0071,2026-08-28,TEF-PBL,79,Fabio Battistella,IT,basic-box-m,Basic Box,7,4,1
+0071,2026-08-28,TEF-PBL,80,Brennan Kamerman,NL,slowking-scr,Slowking,7,4,1
+0071,2026-08-28,TEF-PBL,81,Diego Varea,PE,dragapult-ex,Dragapult,6,2,4
+0071,2026-08-28,TEF-PBL,82,Alberto Bonsanto,MX,dragapult-ex,Dragapult,7,4,1
+0071,2026-08-28,TEF-PBL,83,Taiga Ishikawa,JP,festival-lead,Dipplin,7,4,1
+0071,2026-08-28,TEF-PBL,84,Reuben Davidson,UK,dragapult-ex,Dragapult,7,4,1
+0071,2026-08-28,TEF-PBL,85,Chih Hsuan Chien,TW,dragapult-blaziken,Dragapult Blaziken,7,4,1
+0071,2026-08-28,TEF-PBL,86,Toma Arizono,JP,slowking-scr,Slowking,7,4,1
+0071,2026-08-28,TEF-PBL,87,Jack Moore,CA,dragapult-ex,Dragapult,7,4,1
+0071,2026-08-28,TEF-PBL,88,Cameron Ware,US,basic-box-m,Basic Box,7,4,1
+0071,2026-08-28,TEF-PBL,89,gustavo wada,BR,dragapult-dusknoir,Dragapult Dusknoir,7,4,1
+0071,2026-08-28,TEF-PBL,90,Asaki Hasegawa,JP,dragapult-ex,Dragapult,7,4,1
+0071,2026-08-28,TEF-PBL,91,Pearce Blend,US,alakazam-dudunsparce,Alakazam Dudunsparce,7,4,1
+0071,2026-08-28,TEF-PBL,92,Alexander Thorvaldson,AU,festival-lead,Dipplin,7,4,1
+0071,2026-08-28,TEF-PBL,93,Juho Kallama,FI,rocket-mewtwo-ex,Rocket's Mewtwo,7,4,1
+0071,2026-08-28,TEF-PBL,94,Carlos Medina Astete,PE,crustle-dri,Crustle,7,4,1
+0071,2026-08-28,TEF-PBL,95,Rikutaro Itazu,JP,mega-excadrill-ex,Mega Excadrill,7,4,1
+0071,2026-08-28,TEF-PBL,96,Christian Schrader,DE,n-zoroark,N's Zoroark,7,4,1
+0071,2026-08-28,TEF-PBL,97,Gabriel Pino Semedo,BR,mega-excadrill-ex,Mega Excadrill,7,4,1
+0071,2026-08-28,TEF-PBL,98,Ryota Tanaka,JP,dragapult-ex,Dragapult,7,4,1
+0071,2026-08-28,TEF-PBL,99,KE DUO XU,CN,slowking-scr,Slowking,7,4,1
+0071,2026-08-28,TEF-PBL,100,kohei kurita,JP,dragapult-dusknoir,Dragapult Dusknoir,7,4,1
+0071,2026-08-28,TEF-PBL,101,jianfeng dong,CN,festival-lead,Dipplin,7,4,1
+0071,2026-08-28,TEF-PBL,102,Lance Bradshaw,US,dragapult-ex,Dragapult,6,3,3
+0071,2026-08-28,TEF-PBL,103,Sizhou Li,CN,basic-box-m,Basic Box,6,3,3
+0071,2026-08-28,TEF-PBL,104,Huichan Chun,KR,slowking-scr,Slowking,7,5,0
+0071,2026-08-28,TEF-PBL,105,Kay Feng Kelvin Ching,SG,dragapult-blaziken,Dragapult Blaziken,6,3,3
+0071,2026-08-28,TEF-PBL,106,Joseph Hollin,UK,dragapult-dusknoir,Dragapult Dusknoir,6,3,3
+0071,2026-08-28,TEF-PBL,107,Matias Candia,CL,dhelmise-pbl,Dhelmise,7,5,0
+0071,2026-08-28,TEF-PBL,108,Vinícius fernandez,BR,n-zoroark,N's Zoroark,7,5,0
+0071,2026-08-28,TEF-PBL,109,Kamil Colatosti,CA,dragapult-ex,Dragapult,7,5,0
+0071,2026-08-28,TEF-PBL,110,Yunrong Cai,US,crustle-dri,Crustle,6,3,3
+0071,2026-08-28,TEF-PBL,111,Naoya Iwamoto,JP,,,6,3,3
+0071,2026-08-28,TEF-PBL,112,Mustafa Tobah,US,crustle-dri,Crustle,6,3,3
+0071,2026-08-28,TEF-PBL,113,Brandon Salazar,US,basic-box-m,Basic Box,6,3,3
+0071,2026-08-28,TEF-PBL,114,Thomas Ducrot,FR,alakazam-dudunsparce,Alakazam Dudunsparce,6,4,2
+0071,2026-08-28,TEF-PBL,115,Alexandre Solé,BE,mega-chandelure-ex,Mega Chandelure,6,4,2
+0071,2026-08-28,TEF-PBL,116,Adriano Manzini Silva,BR,dragapult-blaziken,Dragapult Blaziken,6,4,2
+0071,2026-08-28,TEF-PBL,117,CHUN HSI TUNG,TW,slowking-scr,Slowking,6,4,2
+0071,2026-08-28,TEF-PBL,118,Konsta Kallama,FI,dragapult-ex,Dragapult,6,4,2
+0071,2026-08-28,TEF-PBL,119,Junsong Hao,CN,mega-excadrill-ex,Mega Excadrill,6,4,2
+0071,2026-08-28,TEF-PBL,120,SHIZUKI NAKAGAWA,JP,mega-venusaur-ex,Mega Venusaur,6,4,2
+0071,2026-08-28,TEF-PBL,121,Cássio Moraes,BR,dragapult-ex,Dragapult,6,4,2
+0071,2026-08-28,TEF-PBL,122,Tim Franklin,AU,mega-excadrill-ex,Mega Excadrill,6,4,2
+0071,2026-08-28,TEF-PBL,123,Viktor Andersson,SE,crustle-dri,Crustle,6,5,1
+0071,2026-08-28,TEF-PBL,124,Dominikus Devon Khusuma,ID,basic-box-m,Basic Box,6,5,1
+0071,2026-08-28,TEF-PBL,125,Matthew Kayser,ZA,basic-box-m,Basic Box,6,5,1
+0071,2026-08-28,TEF-PBL,126,Bulin Zheng,US,n-zoroark,N's Zoroark,6,5,1
+0071,2026-08-28,TEF-PBL,127,Shuto Kogawa,AU,clefairy-ogerpon,Clefairy Ogerpon,6,5,1
+0071,2026-08-28,TEF-PBL,128,YIN-JU CHOU,TW,dragapult-blaziken,Dragapult Blaziken,6,5,1
+0071,2026-08-28,TEF-PBL,129,Krzysztof Figas,PL,basic-box-m,Basic Box,6,5,1
+0071,2026-08-28,TEF-PBL,130,Joshua Vanoverschelde,BE,lopunny-dudunsparce,Lopunny Dudunsparce,6,5,1
+0071,2026-08-28,TEF-PBL,131,hayato takaoka,JP,basic-box-m,Basic Box,6,5,1
+0071,2026-08-28,TEF-PBL,132,ZI-YI Liu,TW,dragapult-dusknoir,Dragapult Dusknoir,6,5,1
+0071,2026-08-28,TEF-PBL,133,Guillermo Rosales,MX,clefairy-ogerpon,Clefairy Ogerpon,6,5,1
+0071,2026-08-28,TEF-PBL,134,AKIMASA SHINDO,JP,lucario-hariyama,Lucario Hariyama,6,5,1
+0071,2026-08-28,TEF-PBL,135,Grant Manley,US,lucario-hariyama,Lucario Hariyama,6,6,0
+0071,2026-08-28,TEF-PBL,136,FUKA OHASHI,JP,dragapult-blaziken,Dragapult Blaziken,6,6,0
+0071,2026-08-28,TEF-PBL,137,Riley McKay,CA,dragapult-ex,Dragapult,5,5,2
+0071,2026-08-28,TEF-PBL,138,Seunghyeok Lee,KR,basic-box-m,Basic Box,5,5,2
+0071,2026-08-28,TEF-PBL,139,Gaston Kitela,AR,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,5,2
+0071,2026-08-28,TEF-PBL,140,Anthony Ribeiro,BR,lopunny-dusknoir,Lopunny Dusknoir,5,6,1
+0071,2026-08-28,TEF-PBL,141,Yihao Chen,US,crustle-dri,Crustle,5,6,1
+0071,2026-08-28,TEF-PBL,142,KIM SEUNGRIM,KR,dragapult-ex,Dragapult,5,6,1
+0071,2026-08-28,TEF-PBL,143,Abaan Ahmed,US,dragapult-dusknoir,Dragapult Dusknoir,5,4,1
+0071,2026-08-28,TEF-PBL,144,Tord Reklev,NO,n-zoroark,N's Zoroark,5,3,0
+0071,2026-08-28,TEF-PBL,145,Hector Adrian Pio Robles Sánchez,MX,slowking-scr,Slowking,5,3,0
+0071,2026-08-28,TEF-PBL,146,Kashvinder Singh Mann,SG,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,3,0
+0071,2026-08-28,TEF-PBL,147,Lucas Matheus,BR,dragapult-blaziken,Dragapult Blaziken,5,3,0
+0071,2026-08-28,TEF-PBL,148,Aaron Friedman,US,basic-box-m,Basic Box,5,3,0
+0071,2026-08-28,TEF-PBL,149,Sander Wojcik,NL,dudunsparce-control,Dudunsparce Control,5,3,0
+0071,2026-08-28,TEF-PBL,150,Yasmin Kiss,DE,ethan-typhlosion,Ethan's Typhlosion,5,3,0
+0071,2026-08-28,TEF-PBL,151,Tomoki Mizuno,JP,basic-box-m,Basic Box,5,3,0
+0071,2026-08-28,TEF-PBL,152,YUTARO KADOYA,JP,festival-lead,Dipplin,5,3,0
+0071,2026-08-28,TEF-PBL,153,Ben Dobberstein,US,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,3,0
+0071,2026-08-28,TEF-PBL,154,Matthew Burris,AU,dragapult-dusknoir,Dragapult Dusknoir,5,3,0
+0071,2026-08-28,TEF-PBL,155,Rafael Masuko,BR,dragapult-ex,Dragapult,5,3,0
+0071,2026-08-28,TEF-PBL,156,Akihiro Urata,JP,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,3,0
+0071,2026-08-28,TEF-PBL,157,YIKUN WANG,CN,alakazam-dudunsparce,Alakazam Dudunsparce,5,3,0
+0071,2026-08-28,TEF-PBL,158,Addison Yip,AU,alakazam-dudunsparce,Alakazam Dudunsparce,5,3,0
+0071,2026-08-28,TEF-PBL,159,Ting Tsun Ho,HK,dragapult-ex,Dragapult,5,3,0
+0071,2026-08-28,TEF-PBL,160,Johnathan Heng,AU,alakazam-dudunsparce,Alakazam Dudunsparce,5,3,0
+0071,2026-08-28,TEF-PBL,161,tatsuki sakamoto,JP,slowking-scr,Slowking,5,3,0
+0071,2026-08-28,TEF-PBL,162,ZHI LUN WU,TW,dragapult-ex,Dragapult,5,3,0
+0071,2026-08-28,TEF-PBL,163,TERUYUKI NAGASHIMA,JP,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,3,0
+0071,2026-08-28,TEF-PBL,164,Riccardo Coviello,IT,dragapult-ex,Dragapult,5,3,0
+0071,2026-08-28,TEF-PBL,165,Jeremy Castro,US,dragapult-ex,Dragapult,5,3,0
+0071,2026-08-28,TEF-PBL,166,Emma Hagen,NO,basic-box-m,Basic Box,5,3,0
+0071,2026-08-28,TEF-PBL,167,KABU FUKASE,JP,basic-box-m,Basic Box,5,3,0
+0071,2026-08-28,TEF-PBL,168,Jamie Hindley,UK,dragapult-ex,Dragapult,5,3,0
+0071,2026-08-28,TEF-PBL,169,Lucas Xing,CA,n-zoroark,N's Zoroark,5,3,0
+0071,2026-08-28,TEF-PBL,170,Bodhi Robinson,US,dragapult-ex,Dragapult,5,3,0
+0071,2026-08-28,TEF-PBL,171,Alejandro González Sánchez,ES,clefairy-ogerpon,Clefairy Ogerpon,5,3,0
+0071,2026-08-28,TEF-PBL,172,Christian Fontenot,DK,basic-box-m,Basic Box,5,3,0
+0071,2026-08-28,TEF-PBL,173,Carter Malnaik,US,crustle-dri,Crustle,5,3,0
+0071,2026-08-28,TEF-PBL,174,Aleksander Rutowicz,PL,alakazam-dusknoir,Alakazam Dusknoir,5,3,0
+0071,2026-08-28,TEF-PBL,175,Yasumasa Takeuchi,JP,crustle-dri,Crustle,5,3,0
+0071,2026-08-28,TEF-PBL,176,Hayden Matthews,AU,n-zoroark,N's Zoroark,5,3,0
+0071,2026-08-28,TEF-PBL,177,Sebastian Leiva Contreras,CL,n-zoroark,N's Zoroark,5,3,0
+0071,2026-08-28,TEF-PBL,178,Nigel Tan,NZ,dragapult-dusknoir,Dragapult Dusknoir,5,3,0
+0071,2026-08-28,TEF-PBL,179,Felix Christen,CH,other,Other,5,3,0
+0071,2026-08-28,TEF-PBL,180,Toshiyuki Otake,JP,basic-box-m,Basic Box,5,3,0
+0071,2026-08-28,TEF-PBL,181,智炜 华,CN,slowking-scr,Slowking,5,3,0
+0071,2026-08-28,TEF-PBL,182,Daekyung Ok,KR,dragapult-blaziken,Dragapult Blaziken,5,3,0
+0071,2026-08-28,TEF-PBL,183,Romano Pillay,ZA,dragapult-blaziken,Dragapult Blaziken,5,3,0
+0071,2026-08-28,TEF-PBL,184,Joseph Mousaed,US,crustle-dri,Crustle,4,1,3
+0071,2026-08-28,TEF-PBL,185,Isaiah Cheville,US,mega-excadrill-ex,Mega Excadrill,5,3,0
+0071,2026-08-28,TEF-PBL,186,Vicente Rodriguez,CL,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,3,0
+0071,2026-08-28,TEF-PBL,187,Shunki Aida,JP,dragapult-dusknoir,Dragapult Dusknoir,5,3,0
+0071,2026-08-28,TEF-PBL,188,Truwin Tran,US,crustle-dri,Crustle,5,3,0
+0071,2026-08-28,TEF-PBL,189,Nicolai Stiborg,DK,mega-lucario-ex,Mega Lucario,5,3,0
+0071,2026-08-28,TEF-PBL,190,YU-JEN LIN,TW,clefairy-ogerpon,Clefairy Ogerpon,5,3,0
+0071,2026-08-28,TEF-PBL,191,ZhuoMing Ren,CN,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,3,0
+0071,2026-08-28,TEF-PBL,192,Andi Cheung,AU,dragapult-ex,Dragapult,5,3,0
+0071,2026-08-28,TEF-PBL,193,Jose Ordaz,US,alakazam-dudunsparce,Alakazam Dudunsparce,5,3,0
+0071,2026-08-28,TEF-PBL,194,Robert Simpson,CA,dragapult-ex,Dragapult,4,2,2
+0071,2026-08-28,TEF-PBL,195,Eli Sabin,ID,crustle-dri,Crustle,4,2,2
+0071,2026-08-28,TEF-PBL,196,RUI XU,CN,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0071,2026-08-28,TEF-PBL,197,Matthew Hubbard,US,raging-bolt-ogerpon,Raging Bolt Ogerpon,4,2,2
+0071,2026-08-28,TEF-PBL,198,Giovanny Sasso,BR,n-zoroark,N's Zoroark,4,2,2
+0071,2026-08-28,TEF-PBL,199,Albert Chew,ID,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0071,2026-08-28,TEF-PBL,200,YUTO TAKAHASHI,JP,dragapult-ex,Dragapult,4,2,2
+0071,2026-08-28,TEF-PBL,201,Masashi Kuramitsu,JP,crustle-dri,Crustle,4,2,2
+0071,2026-08-28,TEF-PBL,202,Nick Kee Haw,MY,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0071,2026-08-28,TEF-PBL,203,Luke Parkes,UK,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0071,2026-08-28,TEF-PBL,204,Tsz Chun Tsang,HK,slowking-scr,Slowking,4,2,2
+0071,2026-08-28,TEF-PBL,205,MA Jihyeong,KR,basic-box-m,Basic Box,4,2,2
+0071,2026-08-28,TEF-PBL,206,Ryo Moridomi,JP,crustle-dri,Crustle,4,2,2
+0071,2026-08-28,TEF-PBL,207,Shun Ito,JP,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,2,2
+0071,2026-08-28,TEF-PBL,208,Alex Mullen,US,dragapult-ex,Dragapult,4,2,2
+0071,2026-08-28,TEF-PBL,209,Vignesh Krishnan,AU,raging-bolt-ogerpon,Raging Bolt Ogerpon,4,2,2
+0071,2026-08-28,TEF-PBL,210,克也 木佐木,JP,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0071,2026-08-28,TEF-PBL,211,Matteo Fellico,IT,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0071,2026-08-28,TEF-PBL,212,Chu Youlin,TW,n-zoroark,N's Zoroark,4,2,2
+0071,2026-08-28,TEF-PBL,213,Arath Gomez,MX,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0071,2026-08-28,TEF-PBL,214,Dong yang Chen,CN,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0071,2026-08-28,TEF-PBL,215,Yuki Uchida,JP,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,2,2
+0071,2026-08-28,TEF-PBL,216,Jonathan Gorgos,DE,toucannon-pbl,Toucannon,4,3,1
+0071,2026-08-28,TEF-PBL,217,Yanjie Zhang,CN,slowking-scr,Slowking,4,3,1
+0071,2026-08-28,TEF-PBL,218,Victor De Torres Palacios,ES,clefairy-ogerpon,Clefairy Ogerpon,4,3,1
+0071,2026-08-28,TEF-PBL,219,YiFei Hou,CN,dragapult-blaziken,Dragapult Blaziken,4,3,1
+0071,2026-08-28,TEF-PBL,220,Matías Valencia,CL,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,221,mizuki sakunaga,JP,dragapult-dusknoir,Dragapult Dusknoir,4,3,1
+0071,2026-08-28,TEF-PBL,222,Pak Hei Leung,UK,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,223,Yoong KaiJian,MY,toxtricity-box,Toxtricity Box,4,3,1
+0071,2026-08-28,TEF-PBL,224,Hayato Okada,JP,dragapult-blaziken,Dragapult Blaziken,4,3,1
+0071,2026-08-28,TEF-PBL,225,Yuta Mizuguchi,JP,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,226,Cheuk Nam Pang,HK,crustle-dri,Crustle,4,3,1
+0071,2026-08-28,TEF-PBL,227,Tsubasa Watanabe,JP,n-zoroark,N's Zoroark,4,3,1
+0071,2026-08-28,TEF-PBL,228,Fernando Cifuentes,CL,seaking-pre,Seaking Festival Lead,4,3,1
+0071,2026-08-28,TEF-PBL,229,Francisco Osorio,CL,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,230,JW Kriewall,US,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,231,Carlos Sepúlveda,CL,dragapult-dusknoir,Dragapult Dusknoir,4,3,1
+0071,2026-08-28,TEF-PBL,232,Koichi Yamamoto,JP,dragapult-dusknoir,Dragapult Dusknoir,4,3,1
+0071,2026-08-28,TEF-PBL,233,Asuka Kamikariya,JP,basic-box-m,Basic Box,4,3,1
+0071,2026-08-28,TEF-PBL,234,Pin Yuan LIN,TW,dragapult-ex,Dragapult,3,1,4
+0071,2026-08-28,TEF-PBL,235,Nozomi Sawada,JP,mega-excadrill-ex,Mega Excadrill,4,3,1
+0071,2026-08-28,TEF-PBL,236,Genessa Benton,US,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,237,Ronald Chang,TW,mega-absol-box,Mega Absol Box,4,3,1
+0071,2026-08-28,TEF-PBL,238,Cristian Sarnataro,IT,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,239,Dominik Fink,DE,slowking-scr,Slowking,4,3,1
+0071,2026-08-28,TEF-PBL,240,William Azevedo,BR,n-zoroark,N's Zoroark,4,3,1
+0071,2026-08-28,TEF-PBL,241,YUTA ITO,JP,,,4,3,1
+0071,2026-08-28,TEF-PBL,242,Zhihao Qiu,CN,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,243,King Yeung Lee,HK,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,244,Justin Newdorf,US,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,245,Christopher Carillon,US,kangaskhan-bouffalant,Kangaskhan Bouffalant,4,3,1
+0071,2026-08-28,TEF-PBL,246,Mauricio Serrano Ramirez,MX,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1
+0071,2026-08-28,TEF-PBL,247,Nico Alabas,DE,n-zoroark,N's Zoroark,4,3,1
+0071,2026-08-28,TEF-PBL,248,Febryansyah Aminullah Lubis,ID,dragapult-blaziken,Dragapult Blaziken,4,3,1
+0071,2026-08-28,TEF-PBL,249,Fabian Lomeli,MX,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,250,Leon Thiemann,DE,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1
+0071,2026-08-28,TEF-PBL,251,TOMOYA YOKOGAWA,JP,slowking-scr,Slowking,4,3,1
+0071,2026-08-28,TEF-PBL,252,Alex Hamilton,US,dragapult-dusknoir,Dragapult Dusknoir,4,3,1
+0071,2026-08-28,TEF-PBL,253,Jonathan Ruiz,EC,dhelmise-pbl,Dhelmise,4,3,1
+0071,2026-08-28,TEF-PBL,254,Gideon Clarence Ong,PH,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,255,Dario Scarnò,IT,slowking-scr,Slowking,4,3,1
+0071,2026-08-28,TEF-PBL,256,KAZUKI KUMEGAWA,JP,metagross-cri,Metagross,4,3,1
+0071,2026-08-28,TEF-PBL,257,Joshua Frink,US,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1
+0071,2026-08-28,TEF-PBL,258,Benjamin Martinsen,NO,n-zoroark,N's Zoroark,4,3,1
+0071,2026-08-28,TEF-PBL,259,Ben Kim,US,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,260,RangFeng Kong,CN,n-zoroark,N's Zoroark,4,3,1
+0071,2026-08-28,TEF-PBL,261,chun yin poon,HK,rockets-honchkrow,Rocket's Honchkrow,4,3,1
+0071,2026-08-28,TEF-PBL,262,WEI XIE,CN,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,263,TOMOKI HASEGAWA,JP,,,4,3,1
+0071,2026-08-28,TEF-PBL,264,Jeffrey Xue,CA,n-zoroark,N's Zoroark,4,3,1
+0071,2026-08-28,TEF-PBL,265,Xuhao Zhang,CN,dragapult-blaziken,Dragapult Blaziken,4,3,1
+0071,2026-08-28,TEF-PBL,266,Daiki Nagamatsu,JP,slowking-scr,Slowking,4,3,1
+0071,2026-08-28,TEF-PBL,267,Ajay Sridhar,US,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1
+0071,2026-08-28,TEF-PBL,268,Masato Tsuruta,JP,dragapult-dusknoir,Dragapult Dusknoir,4,3,1
+0071,2026-08-28,TEF-PBL,269,Gabriel Smart,US,slowking-scr,Slowking,4,3,1
+0071,2026-08-28,TEF-PBL,270,Masahiro Kiuchi,JP,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,271,Pang Kai Hing,HK,dragapult-blaziken,Dragapult Blaziken,4,3,1
+0071,2026-08-28,TEF-PBL,272,Tomoki Takasaka,JP,,,4,3,1
+0071,2026-08-28,TEF-PBL,273,Nawon Ghe,KR,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,274,Jack Pitcher,CA,dragapult-blaziken,Dragapult Blaziken,4,3,1
+0071,2026-08-28,TEF-PBL,275,Joseph Bjerg,US,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1
+0071,2026-08-28,TEF-PBL,276,Ted Tobyn,UK,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,277,Minato Takagi,JP,clefairy-ogerpon,Clefairy Ogerpon,4,3,1
+0071,2026-08-28,TEF-PBL,278,Ilan Louboff,FR,dragapult-dusknoir,Dragapult Dusknoir,4,3,1
+0071,2026-08-28,TEF-PBL,279,Ng Jiun Herng,MY,dragapult-blaziken,Dragapult Blaziken,4,3,1
+0071,2026-08-28,TEF-PBL,280,XIAOXIAN CHEN,CN,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,281,Christian Sky Mendoza,PH,basic-box-m,Basic Box,4,3,1
+0071,2026-08-28,TEF-PBL,282,César Alberto Salinas magaña,MX,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,283,Matt Bacnis,US,festival-lead,Dipplin,4,3,1
+0071,2026-08-28,TEF-PBL,284,Hiroki Nishida,JP,dragapult-dusknoir,Dragapult Dusknoir,4,3,1
+0071,2026-08-28,TEF-PBL,285,Kazutaka Yoshida,JP,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1
+0071,2026-08-28,TEF-PBL,286,Hiromu Mizutani,JP,basic-box-m,Basic Box,4,3,1
+0071,2026-08-28,TEF-PBL,287,Tomas Traub,CL,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1
+0071,2026-08-28,TEF-PBL,288,Bert Wolters,NL,mega-lucario-ex,Mega Lucario,4,3,1
+0071,2026-08-28,TEF-PBL,289,Alessandro Frenda,IT,basic-box-m,Basic Box,4,3,1
+0071,2026-08-28,TEF-PBL,290,Kim Pobega,IT,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,291,Daniel Powell,UK,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,292,TENSEI TSUBAKINO,JP,,,4,3,1
+0071,2026-08-28,TEF-PBL,293,Ross Cawthon,US,slowking-scr,Slowking,4,3,1
+0071,2026-08-28,TEF-PBL,294,Aoi Saito,JP,dragapult-ex,Dragapult,4,3,1
+0071,2026-08-28,TEF-PBL,295,Julio Santos De Leon,US,dragapult-dusknoir,Dragapult Dusknoir,4,4,0
+0071,2026-08-28,TEF-PBL,296,Felipe Bastias,CL,dragapult-ex,Dragapult,4,4,0
+0071,2026-08-28,TEF-PBL,297,Matt Chuang,US,dragapult-ex,Dragapult,4,3,0
+0071,2026-08-28,TEF-PBL,298,Jordan Nelle,US,dragapult-ex,Dragapult,4,3,0
+0071,2026-08-28,TEF-PBL,299,JOEL NGUYEN,FR,other,Other,4,3,0
+0071,2026-08-28,TEF-PBL,300,Daniel Veres,AT,basic-box-m,Basic Box,4,4,0
+0071,2026-08-28,TEF-PBL,301,Arthur Trutzschler,NL,basic-box-m,Basic Box,4,4,0
+0071,2026-08-28,TEF-PBL,302,Benny Billinger,CA,slowking-scr,Slowking,4,3,0
+0071,2026-08-28,TEF-PBL,303,Ryan Antonucci,US,dragapult-dusknoir,Dragapult Dusknoir,4,3,0
+0071,2026-08-28,TEF-PBL,304,Takatoshi Sano,JP,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,4,0
+0071,2026-08-28,TEF-PBL,305,Maito Akaishi,JP,basic-box-m,Basic Box,4,4,0
+0071,2026-08-28,TEF-PBL,306,Rebecca van der Lee,UK,alakazam-dudunsparce,Alakazam Dudunsparce,3,2,3
+0071,2026-08-28,TEF-PBL,307,Haruto Miki,JP,mega-excadrill-ex,Mega Excadrill,4,4,0
+0071,2026-08-28,TEF-PBL,308,Manuel González,CL,dragapult-ex,Dragapult,4,4,0
+0071,2026-08-28,TEF-PBL,309,Michael Jelderian,CA,dragapult-dusknoir,Dragapult Dusknoir,4,4,0
+0071,2026-08-28,TEF-PBL,310,kohei eguchi,JP,mega-excadrill-ex,Mega Excadrill,4,4,0
+0071,2026-08-28,TEF-PBL,311,Shu Hosoda,JP,slowking-scr,Slowking,4,4,0
+0071,2026-08-28,TEF-PBL,312,Hiro Kamei,JP,dragapult-dudunsparce,Dragapult Dudunsparce,4,4,0
+0071,2026-08-28,TEF-PBL,313,Owyn Kamerman,NL,dragapult-ex,Dragapult,4,4,0
+0071,2026-08-28,TEF-PBL,314,MING-FENG WU,TW,dragapult-ex,Dragapult,4,3,0
+0071,2026-08-28,TEF-PBL,315,Janus Wagner,DE,tera-box,Tera Box,3,2,3
+0071,2026-08-28,TEF-PBL,316,Tianyang Huang,CN,dragapult-ex,Dragapult,4,4,0
+0071,2026-08-28,TEF-PBL,317,星輔 平田,JP,,,4,4,0
+0071,2026-08-28,TEF-PBL,318,Tomoharu Kumada,JP,dragapult-blaziken,Dragapult Blaziken,4,4,0
+0071,2026-08-28,TEF-PBL,319,Eliot Duclos,FR,dragapult-blaziken,Dragapult Blaziken,3,2,3
+0071,2026-08-28,TEF-PBL,320,Toby Clark,UK,basic-box-m,Basic Box,4,4,0
+0071,2026-08-28,TEF-PBL,321,Guillermo Muñoz Tejo,CL,festival-lead,Dipplin,4,3,0
+0071,2026-08-28,TEF-PBL,322,To Chun Wong,HK,dragapult-ex,Dragapult,4,4,0
+0071,2026-08-28,TEF-PBL,323,Daniel Magda,CZ,dragapult-ex,Dragapult,4,3,0
+0071,2026-08-28,TEF-PBL,324,Kaname Sato,JP,mega-greninja-ex,Mega Greninja,4,4,0
+0071,2026-08-28,TEF-PBL,325,Hyogo Ohara,JP,dragapult-dusknoir,Dragapult Dusknoir,4,4,0
+0071,2026-08-28,TEF-PBL,326,Ciro Savarese,IT,basic-box-m,Basic Box,4,4,0
+0071,2026-08-28,TEF-PBL,327,リョウマ 伊藤,JP,dragapult-ex,Dragapult,4,3,0
+0071,2026-08-28,TEF-PBL,328,Benjamin Gorgos,DE,alakazam-dudunsparce,Alakazam Dudunsparce,4,4,0
+0071,2026-08-28,TEF-PBL,329,Takuya Shomura,JP,,,4,4,0
+0071,2026-08-28,TEF-PBL,330,DING KEYI,CN,dragapult-blaziken,Dragapult Blaziken,4,4,0
+0071,2026-08-28,TEF-PBL,331,Jaden Berberich,DE,n-zoroark,N's Zoroark,4,4,0
+0071,2026-08-28,TEF-PBL,332,Lorenzo Zanchi,IT,grimmsnarl-froslass,Grimmsnarl Froslass,4,4,0
+0071,2026-08-28,TEF-PBL,333,Chun Sing WONG,HK,crustle-dri,Crustle,3,2,3
+0071,2026-08-28,TEF-PBL,334,Aurelien RITZLER,FR,froslass-munkidori,Froslass Munkidori,4,4,0
+0071,2026-08-28,TEF-PBL,335,HIROMICHI TANAKA,JP,dragapult-blaziken,Dragapult Blaziken,4,4,0
+0071,2026-08-28,TEF-PBL,336,Daniel James,UK,slowking-scr,Slowking,4,4,0
+0071,2026-08-28,TEF-PBL,337,Christian Christian,ID,dragapult-blaziken,Dragapult Blaziken,4,4,0
+0071,2026-08-28,TEF-PBL,338,Jerrick Gumila,US,mega-lucario-ex,Mega Lucario,4,4,0
+0071,2026-08-28,TEF-PBL,339,Darwin Rasubala,ID,dragapult-dusknoir,Dragapult Dusknoir,4,4,0
+0071,2026-08-28,TEF-PBL,340,ILYA KORNILOV,FI,seaking-pre,Seaking Festival Lead,4,4,0
+0071,2026-08-28,TEF-PBL,341,jeremy lim,AU,basic-box-m,Basic Box,4,4,0
+0071,2026-08-28,TEF-PBL,342,YuFan Lu,CN,dragapult-blaziken,Dragapult Blaziken,4,4,0
+0071,2026-08-28,TEF-PBL,343,Nuch Watveaw,TH,starmie-froslass,Starmie Froslass,4,4,0
+0071,2026-08-28,TEF-PBL,344,Lance Monakil,PH,basic-box-m,Basic Box,4,4,0
+0071,2026-08-28,TEF-PBL,345,Frank Luciano,US,dragapult-ex,Dragapult,4,4,0
+0071,2026-08-28,TEF-PBL,346,Yu Tak Man,HK,dragapult-blaziken,Dragapult Blaziken,3,2,3
+0071,2026-08-28,TEF-PBL,347,Takuya Fukunaga,TH,dragapult-dusknoir,Dragapult Dusknoir,4,4,0
+0071,2026-08-28,TEF-PBL,348,Victor ZHAO,FR,mega-lucario-ex,Mega Lucario,4,4,0
+0071,2026-08-28,TEF-PBL,349,Shunsuke Shoda,JP,,,4,4,0
+0071,2026-08-28,TEF-PBL,350,DONG-SIOU Yang,TW,basic-box-m,Basic Box,3,2,3
+0071,2026-08-28,TEF-PBL,351,Marcin Ogórek,PL,greninja-ex,Greninja,4,4,0
+0071,2026-08-28,TEF-PBL,352,Sebastian Mora,CL,kangaskhan-bouffalant,Kangaskhan Bouffalant,3,2,3
+0071,2026-08-28,TEF-PBL,353,Tatsuki Akagi,JP,alakazam-dudunsparce,Alakazam Dudunsparce,4,4,0
+0071,2026-08-28,TEF-PBL,354,福田 悠人,JP,n-zoroark,N's Zoroark,4,4,0
+0071,2026-08-28,TEF-PBL,355,Matias Vera,AR,alakazam-dudunsparce,Alakazam Dudunsparce,3,2,3
+0071,2026-08-28,TEF-PBL,356,Alexis Hormazabal,CL,basic-box-m,Basic Box,4,4,0
+0071,2026-08-28,TEF-PBL,357,JIA-YUN XIE,TW,dragapult-dusknoir,Dragapult Dusknoir,4,4,0
+0071,2026-08-28,TEF-PBL,358,Dohyeon Kim,KR,dragapult-ex,Dragapult,4,4,0
+0071,2026-08-28,TEF-PBL,359,Sergio César Augusto Torres Ramírez,PE,slowking-scr,Slowking,4,4,0
+0071,2026-08-28,TEF-PBL,360,Kaede Onishi,JP,dragapult-blaziken,Dragapult Blaziken,4,4,0
+0071,2026-08-28,TEF-PBL,361,Ji Wu Dong,TW,mega-excadrill-ex,Mega Excadrill,3,3,2
+0071,2026-08-28,TEF-PBL,362,Raz Wolpe,IL,dragapult-ex,Dragapult,3,2,2
+0071,2026-08-28,TEF-PBL,363,Adam Kalamat,CA,dragapult-blaziken,Dragapult Blaziken,3,3,2
+0071,2026-08-28,TEF-PBL,364,David Walerian Rzepka,DE,n-zoroark,N's Zoroark,3,3,2
+0071,2026-08-28,TEF-PBL,365,RYOTA HIGASHIGUCHI,JP,basic-box-m,Basic Box,3,3,2
+0071,2026-08-28,TEF-PBL,366,Takuto Itagaki,JP,dragapult-dusknoir,Dragapult Dusknoir,3,3,2
+0071,2026-08-28,TEF-PBL,367,Audityo Pramudya Mulyo,ID,dragapult-dusknoir,Dragapult Dusknoir,3,3,2
+0071,2026-08-28,TEF-PBL,368,Kian Blount,UK,dragapult-blaziken,Dragapult Blaziken,3,3,2
+0071,2026-08-28,TEF-PBL,369,Finn Schleusner,DE,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2
+0071,2026-08-28,TEF-PBL,370,Donguk Jung,KR,slowking-scr,Slowking,3,3,2
+0071,2026-08-28,TEF-PBL,371,Tomas Riquelme,CL,slowking-scr,Slowking,3,3,2
+0071,2026-08-28,TEF-PBL,372,Boran Yang,CN,alakazam-dudunsparce,Alakazam Dudunsparce,2,1,5
+0071,2026-08-28,TEF-PBL,373,Hirofumi Fujimoto,JP,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,3,2
+0071,2026-08-28,TEF-PBL,374,HSUEH-KUANG HUNG,TW,dragapult-ex,Dragapult,3,3,2
+0071,2026-08-28,TEF-PBL,375,Francesco Pironti,IT,dragapult-ex,Dragapult,3,3,2
+0071,2026-08-28,TEF-PBL,376,André Miranda,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,2,2
+0071,2026-08-28,TEF-PBL,377,XIRAN XIA,CN,dragapult-ex,Dragapult,3,3,2
+0071,2026-08-28,TEF-PBL,378,Alvaro Guerrero,CL,dragapult-blaziken,Dragapult Blaziken,3,3,2
+0071,2026-08-28,TEF-PBL,379,Daniel Abramovici,BR,basic-box-m,Basic Box,3,3,2
+0071,2026-08-28,TEF-PBL,380,Cheng Tsz Kin,HK,dragapult-blaziken,Dragapult Blaziken,3,3,2
+0071,2026-08-28,TEF-PBL,381,YU TING LIN,TW,dragapult-dusknoir,Dragapult Dusknoir,3,3,2
+0071,2026-08-28,TEF-PBL,382,ZhengEr Kuang,CN,dragapult-blaziken,Dragapult Blaziken,3,3,2
+0071,2026-08-28,TEF-PBL,383,Emanuele Conti,IT,festival-lead,Dipplin,3,3,2
+0071,2026-08-28,TEF-PBL,384,Alejandro Carrillo,CL,dragapult-ex,Dragapult,3,3,2
+0071,2026-08-28,TEF-PBL,385,Kaiyu Fujimoto,JP,n-zoroark,N's Zoroark,3,3,2
+0071,2026-08-28,TEF-PBL,386,Aurora Viets,US,dragapult-dusknoir,Dragapult Dusknoir,3,3,2
+0071,2026-08-28,TEF-PBL,387,Julio Sánchez Rodríguez,ES,dragapult-ex,Dragapult,3,3,2
+0071,2026-08-28,TEF-PBL,388,Marco Antônio Silva de Macedo Mota,BR,dragapult-blaziken,Dragapult Blaziken,3,4,1
+0071,2026-08-28,TEF-PBL,389,Miguel Angel Rojas Duk,CL,dragapult-dusknoir,Dragapult Dusknoir,3,4,1
+0071,2026-08-28,TEF-PBL,390,Murilo Mercadante,BR,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,391,Filipe Passos,BR,dragapult-ex,Dragapult,3,3,1
+0071,2026-08-28,TEF-PBL,392,Mitsuki Omizo,JP,slowking-scr,Slowking,3,4,1
+0071,2026-08-28,TEF-PBL,393,Henry Gao,US,crustle-dri,Crustle,3,4,1
+0071,2026-08-28,TEF-PBL,394,Krittamet Santivivattanapong,TH,dragapult-dusknoir,Dragapult Dusknoir,3,4,1
+0071,2026-08-28,TEF-PBL,395,Drew Stephenson,UK,n-zoroark,N's Zoroark,3,3,1
+0071,2026-08-28,TEF-PBL,396,Kang Yu Xian,SG,dragapult-dusknoir,Dragapult Dusknoir,3,4,1
+0071,2026-08-28,TEF-PBL,397,Margherita Caponeri,IT,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,4,1
+0071,2026-08-28,TEF-PBL,398,ZEHONG CHEN,CN,n-zoroark,N's Zoroark,3,4,1
+0071,2026-08-28,TEF-PBL,399,Vincent Owen,US,n-zoroark,N's Zoroark,3,4,1
+0071,2026-08-28,TEF-PBL,400,riccardo corino,IT,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,401,Nerses Fatunz,DE,alakazam-dudunsparce,Alakazam Dudunsparce,2,2,4
+0071,2026-08-28,TEF-PBL,402,Rone Nielsen,DK,dragapult-ex,Dragapult,2,2,4
+0071,2026-08-28,TEF-PBL,403,Keigo Ichikawa,JP,dragapult-dusknoir,Dragapult Dusknoir,3,4,1
+0071,2026-08-28,TEF-PBL,404,TAIGA UCHINO,JP,alakazam-dudunsparce,Alakazam Dudunsparce,3,4,1
+0071,2026-08-28,TEF-PBL,405,Yiu Lun Chan,HK,dragapult-blaziken,Dragapult Blaziken,3,4,1
+0071,2026-08-28,TEF-PBL,406,Yuki Oka,JP,lopunny-dusknoir,Lopunny Dusknoir,3,4,1
+0071,2026-08-28,TEF-PBL,407,Alessandro Cremascoli,IT,festival-lead,Dipplin,3,4,1
+0071,2026-08-28,TEF-PBL,408,Man Kin Ho,HK,dragapult-blaziken,Dragapult Blaziken,3,4,1
+0071,2026-08-28,TEF-PBL,409,Yasuyuki Sasaki,JP,basic-box-m,Basic Box,3,4,1
+0071,2026-08-28,TEF-PBL,410,Patrik Bartošovič,CZ,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,4,1
+0071,2026-08-28,TEF-PBL,411,HIROICHI AOYAMA,JP,,,3,4,1
+0071,2026-08-28,TEF-PBL,412,Javier Andres Fernández Caro,CL,n-zoroark,N's Zoroark,3,4,1
+0071,2026-08-28,TEF-PBL,413,Yushin Matsuno,JP,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,4,1
+0071,2026-08-28,TEF-PBL,414,Seinosuke Shiokawa,JP,dragapult-dusknoir,Dragapult Dusknoir,3,3,1
+0071,2026-08-28,TEF-PBL,415,Raul Merino,PE,basic-box-m,Basic Box,3,4,1
+0071,2026-08-28,TEF-PBL,416,Tsz Kit Cheung,HK,n-zoroark,N's Zoroark,3,4,1
+0071,2026-08-28,TEF-PBL,417,Bradley Curcio,US,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,418,Irvin De Los Rios,MX,grimmsnarl-froslass,Grimmsnarl Froslass,3,4,1
+0071,2026-08-28,TEF-PBL,419,Antoine Boulay,FR,festival-lead,Dipplin,3,4,1
+0071,2026-08-28,TEF-PBL,420,Keito Ogino,JP,dragapult-dusknoir,Dragapult Dusknoir,3,4,1
+0071,2026-08-28,TEF-PBL,421,Jan Hausmann,DE,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,422,Yuen Lung Ku,HK,dragapult-ex,Dragapult,3,3,1
+0071,2026-08-28,TEF-PBL,423,Teo Hazard,CL,basic-box-m,Basic Box,3,4,1
+0071,2026-08-28,TEF-PBL,424,Manuel Urzúa,CL,basic-box-m,Basic Box,3,4,1
+0071,2026-08-28,TEF-PBL,425,Héctor Xavier Rodríguez Franco,MX,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,426,CHIEH-CHIH HUANG,TW,dragapult-dusknoir,Dragapult Dusknoir,3,4,1
+0071,2026-08-28,TEF-PBL,427,YUKI TOKUNAGA,JP,,,3,4,1
+0071,2026-08-28,TEF-PBL,428,Shota Utsumi,JP,dragapult-blaziken,Dragapult Blaziken,3,4,1
+0071,2026-08-28,TEF-PBL,429,George Tan Shing Hong,MY,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,4,1
+0071,2026-08-28,TEF-PBL,430,Jon Bieligk,US,dragapult-blaziken,Dragapult Blaziken,3,4,1
+0071,2026-08-28,TEF-PBL,431,YI WEN LIU,TW,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,432,Charlie Lockyer,US,slowking-scr,Slowking,3,4,1
+0071,2026-08-28,TEF-PBL,433,Minhui He,CN,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,434,Ryunosuke Murata,JP,,,3,4,1
+0071,2026-08-28,TEF-PBL,435,Zenan Jiang,CN,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,436,Sergio Alcaide Nieto,ES,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,4,1
+0071,2026-08-28,TEF-PBL,437,Anthony Geiger,US,dragapult-ex,Dragapult,3,3,1
+0071,2026-08-28,TEF-PBL,438,Ciaran Farah,CA,festival-lead,Dipplin,3,4,1
+0071,2026-08-28,TEF-PBL,439,Guan Fu Li,TW,basic-box-m,Basic Box,3,4,1
+0071,2026-08-28,TEF-PBL,440,Zhiqian Zhang,CN,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,4,1
+0071,2026-08-28,TEF-PBL,441,Miguel Angel Marin Herrera,MX,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,442,Shu Ambe,JP,dragapult-dusknoir,Dragapult Dusknoir,3,4,1
+0071,2026-08-28,TEF-PBL,443,Brian Kim,US,slowking-scr,Slowking,3,4,1
+0071,2026-08-28,TEF-PBL,444,Julian Gort-Barry,CA,n-zoroark,N's Zoroark,3,3,1
+0071,2026-08-28,TEF-PBL,445,Sango Makimura,JP,,,3,4,1
+0071,2026-08-28,TEF-PBL,446,Kristopher Kemp,US,basic-box-m,Basic Box,3,4,1
+0071,2026-08-28,TEF-PBL,447,Benjamin Hebert,CA,dragapult-ex,Dragapult,3,4,1
+0071,2026-08-28,TEF-PBL,448,Justin Templer,US,dragapult-ex,Dragapult,3,3,0
+0071,2026-08-28,TEF-PBL,449,Yano Wataru,JP,,,2,3,3
+0071,2026-08-28,TEF-PBL,450,Aaron Davis,US,lillie-clefairy,Lillie's Clefairy,3,3,0
+0071,2026-08-28,TEF-PBL,451,Brendan Chua,SG,dragapult-dusknoir,Dragapult Dusknoir,3,3,0
+0071,2026-08-28,TEF-PBL,452,Nicolas Galaz,CL,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,3,0
+0071,2026-08-28,TEF-PBL,453,Richard Yannow,US,dragapult-ex,Dragapult,3,5,0
+0071,2026-08-28,TEF-PBL,454,KOTA ISHIMORI,JP,dragapult-blaziken,Dragapult Blaziken,3,5,0
+0071,2026-08-28,TEF-PBL,455,Rafael Yuiti,BR,mega-excadrill-ex,Mega Excadrill,3,3,0
+0071,2026-08-28,TEF-PBL,456,Alejandro Luciano Eijo,BR,slowking-scr,Slowking,3,3,0
+0071,2026-08-28,TEF-PBL,457,Peter Lo,AU,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,3,0
+0071,2026-08-28,TEF-PBL,458,Min Qian Chen,TW,lillie-clefairy,Lillie's Clefairy,3,4,0
+0071,2026-08-28,TEF-PBL,459,Zach Lesage,CA,mega-excadrill-ex,Mega Excadrill,3,3,0
+0071,2026-08-28,TEF-PBL,460,Sebastian Lashmet,US,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,0
+0071,2026-08-28,TEF-PBL,461,Fabrizio Inga Silva,PE,dragapult-ex,Dragapult,3,4,0
+0071,2026-08-28,TEF-PBL,462,RYUKI OKADA,JP,basic-box-m,Basic Box,3,4,0
+0071,2026-08-28,TEF-PBL,463,Sora Nagisa,JP,basic-box-m,Basic Box,3,4,0
+0071,2026-08-28,TEF-PBL,464,David Glen Bantug,PH,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,3,0
+0071,2026-08-28,TEF-PBL,465,Pedro Side,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,5,0
+0071,2026-08-28,TEF-PBL,466,Nobuto Hongo,JP,slowking-scr,Slowking,3,5,0
+0071,2026-08-28,TEF-PBL,467,Jintao Wen,CN,dragapult-blaziken,Dragapult Blaziken,2,3,3
+0071,2026-08-28,TEF-PBL,468,Yuhao Fu,CN,dhelmise-pbl,Dhelmise,3,3,0
+0071,2026-08-28,TEF-PBL,469,Nino Anderluh,SI,mega-excadrill-ex,Mega Excadrill,3,3,0
+0071,2026-08-28,TEF-PBL,470,HSIEH BING CHEN,TW,dragapult-ex,Dragapult,3,4,0
+0071,2026-08-28,TEF-PBL,471,Yoann Barszezak,FR,dragapult-blaziken,Dragapult Blaziken,3,4,0
+0071,2026-08-28,TEF-PBL,472,Sentaro Kadono,JP,festival-lead,Dipplin,3,5,0
+0071,2026-08-28,TEF-PBL,473,Vincenzo Cipolla,IT,dragapult-ex,Dragapult,3,4,0
+0071,2026-08-28,TEF-PBL,474,Yuki Shibaseki,JP,mega-venusaur-ex,Mega Venusaur,3,5,0
+0071,2026-08-28,TEF-PBL,475,CHIH-HAO CHUANG,TW,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,5,0
+0071,2026-08-28,TEF-PBL,476,Evan Aguilar,US,dragapult-ex,Dragapult,3,5,0
+0071,2026-08-28,TEF-PBL,477,Mike Ellis,UK,dragapult-ex,Dragapult,3,3,0
+0071,2026-08-28,TEF-PBL,478,Ethan Lin,US,dragapult-ex,Dragapult,2,3,3
+0071,2026-08-28,TEF-PBL,479,ryota okano,JP,,,3,5,0
+0071,2026-08-28,TEF-PBL,480,JOOHO KOH,KR,dragapult-ex,Dragapult,3,3,0
+0071,2026-08-28,TEF-PBL,481,dohan kim,KR,dragapult-ex,Dragapult,3,5,0
+0071,2026-08-28,TEF-PBL,482,CHIA WEN BIN,MY,dragapult-dusknoir,Dragapult Dusknoir,3,5,0
+0071,2026-08-28,TEF-PBL,483,Caleb Barber,UK,festival-lead,Dipplin,3,5,0
+0071,2026-08-28,TEF-PBL,484,João Gabriel Penteado,BR,dragapult-dusknoir,Dragapult Dusknoir,3,4,0
+0071,2026-08-28,TEF-PBL,485,Victor De Velasco,MX,dragapult-ex,Dragapult,3,5,0
+0071,2026-08-28,TEF-PBL,486,Yu Yu Lun,TW,dragapult-ex,Dragapult,3,3,0
+0071,2026-08-28,TEF-PBL,487,taiyo agaki,JP,basic-box-m,Basic Box,3,5,0
+0071,2026-08-28,TEF-PBL,488,Aneil Saini,CA,alakazam-dudunsparce,Alakazam Dudunsparce,3,5,0
+0071,2026-08-28,TEF-PBL,489,Eduardo Molina,CL,dragapult-dudunsparce,Dragapult Dudunsparce,3,5,0
+0071,2026-08-28,TEF-PBL,490,Cristiano Castaneda,US,dragapult-ex,Dragapult,3,4,0
+0071,2026-08-28,TEF-PBL,491,Owen Dalgard,US,festival-lead,Dipplin,3,3,0
+0071,2026-08-28,TEF-PBL,492,Yuma Tachi,JP,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,5,0
+0071,2026-08-28,TEF-PBL,493,Enzo DUVAL,FR,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,5,0
+0071,2026-08-28,TEF-PBL,494,Caleb Rogerson,US,dragapult-ex,Dragapult,3,3,0
+0071,2026-08-28,TEF-PBL,495,Fernando Lopez,CL,basic-box-m,Basic Box,3,4,0
+0071,2026-08-28,TEF-PBL,496,Kun Wee Soh,SG,dragapult-dusknoir,Dragapult Dusknoir,3,5,0
+0071,2026-08-28,TEF-PBL,497,Oscar Vera,MX,dragapult-blaziken,Dragapult Blaziken,3,5,0
+0071,2026-08-28,TEF-PBL,498,Simon Trottier-Lacasse,CA,n-zoroark,N's Zoroark,3,3,0
+0071,2026-08-28,TEF-PBL,499,yugo kobuchi,JP,dragapult-dusknoir,Dragapult Dusknoir,3,5,0
+0071,2026-08-28,TEF-PBL,500,kousuke horibe,JP,dragapult-ex,Dragapult,3,5,0
+0071,2026-08-28,TEF-PBL,501,Ong Wei yi,SG,n-zoroark,N's Zoroark,3,5,0
+0071,2026-08-28,TEF-PBL,502,Sheldon Kuppan,ZA,dragapult-dusknoir,Dragapult Dusknoir,3,5,0
+0071,2026-08-28,TEF-PBL,503,Hiromu Sasaki,JP,dragapult-dusknoir,Dragapult Dusknoir,3,5,0
+0071,2026-08-28,TEF-PBL,504,Oscar Rivas,ES,kangaskhan-bouffalant,Kangaskhan Bouffalant,3,4,0
+0071,2026-08-28,TEF-PBL,505,Antoni Martiniano Acuzar,PH,dragapult-ex,Dragapult,3,5,0
+0071,2026-08-28,TEF-PBL,506,Takumi Mitani,JP,,,3,5,0
+0071,2026-08-28,TEF-PBL,507,Takumi Mizusugi,JP,,,3,5,0
+0071,2026-08-28,TEF-PBL,508,Terry Tai,SG,mega-excadrill-ex,Mega Excadrill,3,3,0
+0071,2026-08-28,TEF-PBL,509,Chongwen Jin,CN,slowking-scr,Slowking,3,5,0
+0071,2026-08-28,TEF-PBL,510,Zach Elliott,US,dragapult-ex,Dragapult,3,5,0
+0071,2026-08-28,TEF-PBL,511,Carlo Neria,PH,dragapult-blaziken,Dragapult Blaziken,3,5,0
+0071,2026-08-28,TEF-PBL,512,JIA LIN WU,CN,mega-excadrill-ex,Mega Excadrill,2,3,3

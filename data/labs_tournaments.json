@@ -1,5 +1,13 @@
 [
   {
+    "tournament_id": "0071",
+    "tournament_name": "World Championship San Francisco",
+    "tournament_date": "2026-08-28",
+    "tournament_type": "worlds",
+    "country": "US",
+    "total_players": 774
+  },
+  {
     "tournament_id": "0070",
     "tournament_name": "International Championship New Orleans",
     "tournament_date": "2026-06-12",
@@ -54,37 +62,5 @@
     "tournament_type": "regional",
     "country": "CZ",
     "total_players": 1367
-  },
-  {
-    "tournament_id": "0060",
-    "tournament_name": "Regional Championship Orlando",
-    "tournament_date": "2026-04-04",
-    "tournament_type": "regional",
-    "country": "",
-    "total_players": 2734
-  },
-  {
-    "tournament_id": "0061",
-    "tournament_name": "Regional Championship Querétaro",
-    "tournament_date": "2026-04-04",
-    "tournament_type": "regional",
-    "country": "",
-    "total_players": 1434
-  },
-  {
-    "tournament_id": "0067",
-    "tournament_name": "Special Event Lima",
-    "tournament_date": "2026-05-23",
-    "tournament_type": "special",
-    "country": "",
-    "total_players": 485
-  },
-  {
-    "tournament_id": "0069",
-    "tournament_name": "Special Event Turin",
-    "tournament_date": "2026-06-06",
-    "tournament_type": "special",
-    "country": "",
-    "total_players": 2032
   }
 ]

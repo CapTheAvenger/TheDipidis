@@ -51,7 +51,24 @@
 
     var HOST_ID = 'currentMetaContent';
     var BLOCK   = 'ds-ev-block';
-    var STORE   = 'ds_ev_wahl_v1';
+    /* v2 seit dem 01.09.2026, und der Sprung ist der Zweck.
+     *
+     * Der Startwert der Rundenzahl ist von 9 auf 8 gefallen (siehe
+     * RUNDEN_STD). Ein Startwert greift aber nur bei jemandem, der noch
+     * nie hier war — wer den Rechner schon einmal geoeffnet hatte, trug
+     * die 9 in localStorage und haette sie behalten. LIVE NACHGEMESSEN
+     * am 01.09.2026 nach dem Deploy: die Seite zeigte weiter 9, obwohl
+     * der Startwert auf 8 stand. Der Betreiber, der die Aenderung
+     * gemeldet hat, gehoert zu genau dieser Gruppe — fuer ihn haette
+     * sich nichts geaendert, und die Meldung waere zu Recht ein zweites
+     * Mal gekommen.
+     *
+     * Ein neuer Schluessel setzt die gemerkte Wahl einmalig zurueck. Das
+     * kostet jeden eine erneute Einstellung von Deck und Feldbild — der
+     * Preis dafuer, dass die korrigierte Zahl auch bei denen ankommt,
+     * die die Seite schon kennen. Wer weiter mit 9 Runden rechnet, traegt
+     * sie einmal ein und behaelt sie. */
+    var STORE   = 'ds_ev_wahl_v2';
 
     /* Feldbilder. "Ganzes Feld" ist die Messung; die beiden anderen sind
        Was-waere-wenn und als solche beschriftet. */

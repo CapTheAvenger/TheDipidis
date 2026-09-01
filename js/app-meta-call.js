@@ -1381,10 +1381,40 @@ window.MetaCall = (function () {
     const archetypes = [];
     for (const [name, agg] of byDeck) {
       const games = agg.wins + agg.losses + agg.ties;
-      // Ties count as half a win so the metric matches how players
-      // describe winrate ("I went 6-2-1 → 6.5/9 = 72 %") and stays
-      // consistent with labs's own win_pct definition.
-      const winPct = games > 0 ? (agg.wins + 0.5 * agg.ties) / games * 100 : 0;
+      /* SIEGE DURCH ALLE PARTIEN. Unentschieden stehen im Nenner, nicht
+         als halber Sieg im Zaehler.
+         ----------------------------------------------------------------
+         Hier stand bis zum 01.09.2026 `(S + 0,5·U) / Partien`, mit der
+         Begruendung, das sei "consistent with labs's own win_pct
+         definition". Beides war falsch.
+
+         Nachgemessen ueber die 1.897 Zeilen von labs_tournament_decks.csv
+         mit mindestens 50 Partien:
+
+             (3S+U)/3G  — Matchpunkte     Ø 0,002 pp von win_pct
+             (S+0,5U)/G — was hier stand  Ø 2,519 pp, max 5,446 pp
+
+         `win_pct` der Datei SIND Matchpunkte. Die Formel hier war weder
+         das noch die Konvention des Hauses, sondern die vierte, erfundene
+         — dieselbe, die js/win-rate-konvention.js am 20.08. entfernt und
+         ausdruecklich nicht mehr auffuehrt.
+
+         Die Spalte darueber heisst woertlich "Win %". Auf dieser Seite
+         ist Win % seit jeher S/(S+N+U) — so rechnet
+         limitless_online_decks.csv, und so rechnet Limitless selbst:
+         Mega Excadrill 6.430-6.666-110 zeigt dort 48,69 %, und
+         6.430 / 13.206 = 48,69.
+
+         WAS SICH DADURCH AENDERT, gemessen: alle 14 Epochen sortieren
+         sich um, groesster Sprung 18 Plaetze (Mega Lopunny in SVI-ASC,
+         28 -> 46). In TEF-PBL faellt Dhelmise von 6 auf 8 und Mega
+         Excadrill steigt von 8 auf 6 — genau der Effekt, den die alte
+         Formel verdeckt hat: sie belohnte Unentschieden. Dhelmise hat
+         14,5 % davon, Mega Excadrill 7,9 %.
+
+         Das ist keine Geschmacksfrage: der Score darunter ist
+         winPct × (1 + day2Conv) und trug den Fehler mit. */
+      const winPct = games > 0 ? agg.wins / games * 100 : 0;
       const day2Conv = agg.day1 > 0 ? agg.day2 / agg.day1 : 0;
       archetypes.push({
         name,

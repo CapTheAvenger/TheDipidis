@@ -96,9 +96,33 @@
                          'durchschnittlichen Decks mit erkanntem Archetyp. Der ' +
                          'Vergleichswert ist geglättet, die Quote daneben ist roh — bei ' +
                          'kleinen Stichproben gehen beide Zahlen deshalb auseinander.'],
+                        // FALSCH BIS ZUM 01.09.2026. Hier stand: "Unentschieden
+                        // halb gezählt", also (S + 0,5·U) / Partien. Das ist
+                        // genau die vierte, erfundene Konvention, die
+                        // js/win-rate-konvention.js am 20.08. entfernt hat und
+                        // ausdrücklich NICHT aufführt ("wer sie braucht, soll
+                        // erklären, warum").
+                        //
+                        // Die Stelle, die den bekanntesten Widerspruch der Seite
+                        // auflösen soll, beschrieb ihn also selbst — mit einer
+                        // Formel, die keine einzige angezeigte Zahl benutzt.
+                        // Nachgemessen über limitless_online_decks.csv (134
+                        // Zeilen): die angezeigte Quote weicht von S/(S+N+U) um
+                        // 0,003 pp ab, von der Glossarformel um 0,49 pp im
+                        // Median und 8,33 pp im Maximum.
+                        //
+                        // Der Beleg, den der Betreiber am 01.09. geschickt hat,
+                        // steht jetzt als Rechnung dabei: Limitless zeigt für
+                        // Mega Excadrill die Bilanz 6430-6666-110 und daneben
+                        // 48,69 %. 6430 / 13.206 = 48,69. Unentschieden stehen
+                        // im Nenner, nicht als halber Sieg im Zähler.
                         ['Win Rate',
-                         'Gewonnene Spiele geteilt durch gespielte Spiele, Unentschieden ' +
-                         'halb gezählt.'],
+                         'Gewonnene Matches geteilt durch alle gespielten. ' +
+                         'Unentschieden zählen im Nenner mit, aber nicht als ' +
+                         'halber Sieg. Beispiel: eine Bilanz von 6.430 Siegen, ' +
+                         '6.666 Niederlagen und 110 Unentschieden sind 13.206 ' +
+                         'Matches und damit 48,7 % — dieselbe Rechnung wie bei ' +
+                         'Limitless.'],
                         ['Tier',
                          'Gruppierung nach Anteil und Erfolg. Die Schwellen stehen in der ' +
                          'Tier-Liste selbst.'],

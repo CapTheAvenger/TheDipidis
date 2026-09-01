@@ -185,7 +185,7 @@
         // set suffix into the UI (the CRI miss is what triggered this).
         function stripExSuffix(name) {
             return String(name || '')
-                .replace(/\s+(?:asc|blk|cri|dri|jtg|m3|m4|m5|meg|mee|mep|mew|obf|paf|pal|par|pfl|por|pre|scr|sfa|ssp|svi|sve|svp|tef|twm|wht)$/i, '')
+                .replace(/\s+(?:asc|blk|cri|dri|jtg|m3|m4|m5|m6|meg|mee|mep|mew|obf|paf|pal|par|pbl|pfl|por|pre|scr|sfa|ssp|svi|sve|svp|tef|twm|wht)$/i, '')
                 .replace(/\s+ex$/i, '')
                 .trim();
         }
@@ -223,12 +223,45 @@
             if (!Array.isArray(onlineRows) || !Array.isArray(tournamentRows) || !archetype) {
                 return onlineRows;
             }
-            if (tournamentRows.length === 0) return onlineRows;
+            if (tournamentRows.length === 0) return nurOnline(onlineRows);
+
+            /* Ohne Major-Seite darf die gemischte Eingabe NICHT unveraendert
+               weiterlaufen.
+        
+               BEFUND (01.09.2026): beim Filter 'all' enthaelt onlineRows die
+               'Meta Live'- UND die 'Meta Play!'-Zeilen derselben Datei. Die
+               beiden zaehlen ueber verschiedene Deckbasen. Solange die
+               Zusammenfuehrung greift, spielt das keine Rolle — sie rechnet
+               die Major-Seite ohnehin aus tournament_cards_data. Faellt sie
+               aber weg, geht die Mischung ungerechnet nach draussen, und die
+               Summe je Deck steht bei 120 statt 60. Gemessen an 6 Archetypen
+               (Dhelmise Pbl, Toucannon Pbl, Basic Box M, Mega Lucario,
+               Mega Absol Box, Ogerpon Meganium Hydrapple, "Other").
+        
+               In dem Fall bleibt die Online-Seite allein stehen. Das ist
+               ehrlich: die 'Meta Play!'-Zeilen sind laut Kopfkommentar
+               ohnehin luecken behaftet und nur als Ersatz fuer die
+               Turnierdaten gedacht — nicht als eigene Quelle daneben. */
+            function nurOnline(reihen) {
+                const live = reihen.filter(r => {
+                    const m = String(r.meta || '').trim();
+                    return !m || m.startsWith('Meta Live');
+                });
+                return live.length > 0 ? live : reihen;
+            }
 
             const stripPriceTag = (s) => String(s || '')
                 .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
                 .trim();
-            const archLower = String(archetype || '').trim().toLowerCase();
+            // BEFUND (01.09.2026): hier stand der ROHE Name, waehrend die
+            // Turnierzeilen unten durch stripExSuffix() gehen. Fuer jeden
+            // Archetyp, dessen Name ein Set-Kuerzel traegt — "Dhelmise Pbl",
+            // "Toucannon Pbl", "Basic Box M" — konnte der Vergleich damit
+            // nie greifen: links "dhelmise pbl", rechts "dhelmise". Die
+            // Major-Seite fiel still weg, und die Funktion gab die Eingabe
+            // unveraendert zurueck. Beide Seiten muessen gleich behandelt
+            // werden, sonst vergleicht der Filter zwei Schreibweisen.
+            const archLower = stripExSuffix(stripPriceTag(archetype)).toLowerCase();
 
             // Restrict to the current meta date window. The 'play' path
             // applies this filter when loading currentMetaTournamentCardsData,
@@ -244,7 +277,7 @@
                 const cleaned = stripExSuffix(stripPriceTag(r.archetype || '')).toLowerCase();
                 return cleaned && cleaned === archLower;
             });
-            if (archetypeRows.length === 0) return onlineRows;
+            if (archetypeRows.length === 0) return nurOnline(onlineRows);
 
             // Aggregate per-card stats CUMULATIVELY across every Major
             // tournament in the meta window. Previous implementation
@@ -316,7 +349,7 @@
             // earlier <4 floor in the latest-tournament-only version
             // existed to suppress sparse-tournament noise, which doesn't
             // apply once we sum across the whole meta window.
-            if (majorTotalDecks < 1) return onlineRows;
+            if (majorTotalDecks < 1) return nurOnline(onlineRows);
 
             // Sum per-bucket per-card stats across all buckets.
             const majorAgg = new Map();
@@ -351,20 +384,45 @@
                 const t = parseInt(card.total_decks_in_archetype || 0, 10) || 0;
                 if (t > onlineTotal) onlineTotal = t;
             });
-            if (onlineTotal === 0) return onlineRows;
+            if (onlineTotal === 0) return nurOnline(onlineRows);
             const combinedTotal = onlineTotal + majorTotalDecks;
 
             // Group online rows by lower-case card name (multiple prints
             // of the same card share their deck_count / total_count once
             // the row is already stale-dedup'd, but we still aggregate
             // defensively).
+            //
+            // BEFUND (01.09.2026): Hier fehlte der Meta-Live-Filter, den die
+            // Zaehlung von onlineTotal darueber schon hatte. Beim Filter
+            // 'all' enthaelt onlineRows AUCH die 'Meta Play!'-Zeilen
+            // derselben Datei — und die zaehlen ueber eine ANDERE Deckbasis.
+            // Ihr total_count landete per max() im Zaehler, waehrend der
+            // Nenner die Meta-Live-Deckzahl blieb. Gemessen an Dragapult:
+            // 60,00 Karten je Deck werden dadurch zu 139,55.
+            //
+            // Sichtbar wurde das erst am 01.09.2026, weil der Datenlauf an
+            // diesem Tag zum ersten Mal 'Meta Play!'-Zeilen fuer dieses
+            // Format schrieb. Folge auf der Seite: "Deckliste kopieren"
+            // lieferte keine 60 Karten mehr, weil die Rohsumme die Toleranz
+            // von verteileKopienAufDeckgroesse() riss und stillschweigend
+            // auf einzelnes Runden zurueckfiel.
+            //
+            // Die Major-Seite kommt bewusst NICHT aus diesen Zeilen, sondern
+            // aus tournament_cards_data — siehe der Kopfkommentar dieser
+            // Funktion: die 'Meta Play!'-Zeilen sind strukturell luecken-
+            // haft (von ~33 Karten ueberleben 4 den Listenparser).
             const onlineByName = new Map();
             onlineRows.forEach(card => {
+                const meta = String(card.meta || '').trim();
+                if (meta && !meta.startsWith('Meta Live')) return;
                 const cn = String(card.card_name || '').trim().toLowerCase();
                 if (!cn) return;
                 if (!onlineByName.has(cn)) onlineByName.set(cn, []);
                 onlineByName.get(cn).push(card);
             });
+            // Kein eigener Ausstieg fuer eine leere Online-Seite noetig:
+            // ohne Meta-Live-Zeile bleibt onlineTotal 0, und die Pruefung
+            // darueber hat dann schon unveraendert zurueckgegeben.
 
             const merged = [];
             const seen = new Set();
@@ -4235,8 +4293,19 @@
             if (trainer.length > 0) output += `Trainer: ${trainerCount}\n` + trainer.join('\n') + '\n\n';
             if (energy.length > 0) output += `Energy: ${energyCount}\n` + energy.join('\n');
             
+            /* BEFUND (01.09.2026): wenn die Zahlen kein volles Deck ergeben,
+               landete trotzdem "Deck in Zwischenablage kopiert!" auf dem
+               Schirm — und in der Zwischenablage eine Liste, die PTCGL nicht
+               annimmt. Der Nutzer sucht den Fehler dann bei sich. Die Zahl
+               steht hier ohnehin schon da; sie gehoert in die Meldung. */
+            const _gesamt = pokemonCount + trainerCount + energyCount;
             navigator.clipboard.writeText(output).then(() => {
-                showToast(t('cl.deckCopied'), 'success');
+                if (_gesamt === 60) {
+                    showToast(t('cl.deckCopied'), 'success');
+                } else {
+                    showToast(t('cl.deckCopiedIncomplete').replace('{n}', String(_gesamt)),
+                        'warning');
+                }
             }).catch(err => {
                 console.error('Error copying:', err);
                 showToast(t('toast.copyFailed'), 'error');

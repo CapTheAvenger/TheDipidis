@@ -167,6 +167,17 @@ describe('Der EV-Rechner rechnet über ein echtes Turnier', () => {
             'die Rechnung ist nicht mehr Quote mal Runden');
     });
 
+    it('und der Startwert erreicht auch, wer schon einmal hier war', () => {
+        /* Ein Startwert greift nur bei einem leeren Speicher. Wer den
+           Rechner vorher geöffnet hatte, trug die 9 in localStorage —
+           live nachgemessen nach dem Deploy: die Seite zeigte weiter 9.
+           Darunter ausgerechnet der Betreiber, der die Änderung
+           gemeldet hat; ohne den Schlüsselsprung hätte sich für ihn
+           nichts geändert. */
+        assert.match(EV, /var STORE\s*=\s*'ds_ev_wahl_v2'/,
+            'der Speicherschlüssel steht wieder auf v1 — dann behalten alte Besucher ihre 9');
+    });
+
     it('bleibt aber änderbar — die Zahl ist ein Startwert, kein Gesetz', () => {
         // Wer neun Runden spielt, soll neun eintragen können, und die
         // Eingabe soll den nächsten Besuch überleben.

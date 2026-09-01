@@ -463,20 +463,31 @@
                     esc(String(majorWert || majorLeer).replace(/<[^>]*>/g, ''))}: ${esc(tip)}"`
             : '';
         const arw = pfeil ? `<span class="arc-tile-arrow" aria-hidden="true">${pfeil}</span>` : '';
+        /* Herkunft LINKS, Zahl RECHTS, eine Zeile je Quelle.
+         *
+         * Bis zum 02.09.2026 standen die beiden nebeneinander, die Zahl
+         * oben und die Herkunft darunter. Auf der echten Kartenbreite
+         * (rund 380 px, auch am Schreibtisch) blieben je Haelfte 40 px,
+         * und "22,2 %" braucht 50 — die Zahlen schoben sich uebereinander
+         * und standen als "7,5 %4,1 %" da.
+         *
+         * Gestapelt passt es in jede Kachelbreite. Und die Ueberschrift
+         * steht jetzt oben, wie vom Betreiber vorgeschlagen: sie gilt fuer
+         * beide Zahlen, also gehoert sie ueber beide und nicht unter sie. */
         const halb = (wert, quelle, schwach) =>
             `<div class="arc-halb${schwach ? ' arc-halb--leer' : ''}">
-                <div class="arc-tile-value">${wert}</div>
-                <div class="arc-halb-quelle">${esc(quelle)}</div>
+                <span class="arc-halb-quelle">${esc(quelle)}</span>
+                <span class="arc-tile-value">${wert}</span>
             </div>`;
         return `<div class="arc-tile arc-tile--${role} arc-tile--geteilt arc-tone--${tone}${
                 hat ? ' arc-tile--hinweis' : ''}"${ttl}>
+                <div class="arc-tile-label">${esc(label)}</div>
                 <div class="arc-halbe">
                     ${halb(arw + onlineWert, L('arc.quelleOnline', 'online'), false)}
                     ${halb(majorWert || '–', majorWert
                         ? L('arc.quelleMajor', 'Major')
                         : esc(majorLeer || L('arc.quelleMajor', 'Major')), !majorWert)}
                 </div>
-                <div class="arc-tile-label">${esc(label)}</div>
             </div>`;
     }
 

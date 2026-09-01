@@ -1,6 +1,6 @@
 {
   "quelle": "labs_tournament_decks",
-  "stand": "2026-08-30T11:55:49+00:00",
+  "stand": "2026-09-01T19:04:56+00:00",
   "meta_keys": [
     "BRS-PRE",
     "BRS-SCR",
@@ -13,7 +13,8 @@
     "SVI-MEG",
     "SVI-PFL",
     "TEF-CRI",
+    "TEF-PBL",
     "TEF-POR"
   ],
-  "_hinweis": "Welche Meta-Auszuege es gibt. Das Frontend fragt hier nach, statt jede Datei einzeln zu probieren — ein HEAD auf eine Datei, die es nicht gibt, ist eine 404 in der Konsole des Nutzers."
+  "_hinweis": "Welche Meta-Auszuege es gibt. Das Frontend fragt hier nach, statt jede Datei einzeln zu probieren — ein HEAD auf einen noch nicht existierenden Auszug hinterliess sonst eine 404 in der Konsole. Gebaut aus den Dateien in data/ (scripts/schreibe_labs_verzeichnis.py), also aus demselben Ordner, aus dem das Frontend liest."
 }

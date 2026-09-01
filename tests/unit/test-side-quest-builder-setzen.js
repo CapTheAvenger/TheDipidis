@@ -153,12 +153,31 @@ describe('Team-Builder: die beiden Ausgaenge', () => {
         assert.match(text, /^- Dragon Claw$/m);
     });
 
-    it('Showdown bekommt dieselbe Verteilung mal acht', () => {
+    it('Showdown bekommt genau denselben Text wie Limitless', () => {
+        /* Diese Zusicherung verlangte bis zum 01.09.2026 das Gegenteil:
+           "EVs: 16 HP / 252 Atk / 252 Spe", also die Verteilung mal acht.
+
+           Sie war falsch. Showdown hat eigene Champions-Formate, die in
+           Statuspunkten rechnen — sim/dex-formats.ts setzt evLimit = 66,
+           sim/team-validator.ts lehnt jeden Wert ueber 32 ab. Der
+           umgerechnete Bau wurde dort zurueckgewiesen, nicht falsch
+           gespielt. Gemeldet vom Betreiber: "wir machen den Showdown
+           paste falsch oder?"
+
+           Es gibt deshalb nur noch einen Paste. Geprueft wird, dass ein
+           uebergebenes Argument keine zweite Fassung mehr erzeugt —
+           sonst kaeme die Umrechnung durch die Hintertuer zurueck. */
         const w = ladeBuilder();
         w._sqBuilderInternals.setState(['garchomp'], RAW, DEX, {});
-        const text = w._sqBuilderInternals.pasteText(true);
-        assert.match(text, /^EVs: 16 HP \/ 252 Atk \/ 252 Spe$/m,
-            'die Umrechnung fehlt — Showdown spielt sonst mit einem Achtel der Werte');
+        const roh = w._sqBuilderInternals.pasteText();
+        assert.match(roh, /^EVs: 2 HP \/ 32 Atk \/ 32 Spe$/m);
+        assert.equal(w._sqBuilderInternals.pasteText(true), roh,
+            'ein Argument schaltet wieder eine zweite Fassung ein');
+        // Und keine Zahl ueber Showdowns Deckel von 32 Statuspunkten.
+        const zeile = roh.match(/^EVs: (.+)$/m)[1];
+        for (const m of zeile.matchAll(/(\d+) /g)) {
+            assert.ok(Number(m[1]) <= 32, `${m[1]} liegt ueber dem Deckel von 32`);
+        }
     });
 });
 
@@ -168,12 +187,16 @@ describe('Team-Builder: die Verdrahtung', () => {
         assert.match(BUILDER, /\.sqb-setzen'\);\s*if \(setzen\) setzen\.addEventListener\('click', setzeTeam\)/);
     });
 
-    it('Speichern, Aktiv-Setzen und beide Exporte sind verdrahtet', () => {
+    it('Speichern, Aktiv-Setzen und der Export sind verdrahtet', () => {
         ['.sqb-do-save', '.sqb-do-active', '.sqb-exp'].forEach(sel => {
             assert.ok(BUILDER.includes(sel), `${sel} fehlt`);
         });
-        assert.match(BUILDER, /data-mode="limitless"/);
-        assert.match(BUILDER, /data-mode="showdown"/);
+        // Ein Knopf statt zwei: der Text ist fuer Limitless und fuer
+        // Showdown derselbe (01.09.2026). Zwei Knoepfe, die dasselbe
+        // erzeugen, sind eine Behauptung ueber einen Unterschied.
+        assert.ok(!/data-mode="showdown"/.test(BUILDER),
+            'der zweite Export-Knopf ist zurueck');
+        assert.equal((BUILDER.match(/class="sqb-exp"/g) || []).length, 1);
     });
 
     it('der Editor bietet Wesen, Item, Faehigkeit, vier Attacken und sechs Regler', () => {

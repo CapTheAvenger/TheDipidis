@@ -794,6 +794,39 @@ window.MetaCall = (function () {
   const PREDICTOR_55_REQUIRE_LABS_N      = 1;    // need ≥ N labs samples to apply (filters
                                                   // pure-online noise decks)
 
+  // ── GEMELDET, NICHT REPARIERT (01.09.2026) ────────────────────────
+  //
+  // Die beiden Konstanten direkt darueber tragen ZWEI verschiedene
+  // Denkmodelle fuer dasselbe `n`, zwei Zeilen auseinander:
+  //
+  //     MIN_N       = 0.5   "weighted labs count"   ← richtig
+  //     REQUIRE_N   = 1     "N labs samples"        ← falsch
+  //
+  // `n` ist eine REZENZ-GEWICHTSSUMME und liegt strukturell in
+  // [0,5 ; 1,0] — kein Stichprobenzaehler. Eine Bedingung `n >= 1`
+  // bedeutet damit faktisch "es gibt ein ZWEITES Turnier", nicht "es
+  // gibt ueberhaupt eines".
+  //
+  // Betroffen sind vier Tore, die dadurch seit ihrer Entstehung
+  // gesperrt sind:
+  //     Predictor 5.1   Day-2-Multiplikator      (`_day2Q.n >= 1`)
+  //     Predictor 5.3   Piloten-Daempfer         (ueber dieselbe Kette)
+  //     Predictor 5.2   Qualitaets-Boden         (`q.n < 1`)
+  //     Predictor 5.5   Praesenzboden, Online-Zweig
+  //
+  // Historisch ausgezaehlt waeren das keine Randfaelle: 34 offene
+  // Deck-Epochen beim Qualitaets-Boden, 85 Ausloesungen beim
+  // Piloten-Daempfer, heute 2 Decks (Ogerpon Meganium Hydrapple mit 12
+  // Piloten, Clefairy Ogerpon mit 10).
+  //
+  // WARUM HIER TROTZDEM NICHTS GEAENDERT WIRD: vier Tore zu oeffnen ist
+  // keine Fehlerbehebung, sondern eine Verhaltensaenderung an vier
+  // Stellen gleichzeitig — und ob die Stufen dann HELFEN, ist nie
+  // gemessen worden. CLAUDE.md, "Report, don't silently repair": ein
+  // gemeldetes Loch ist behebbar, eine geratene Korrektur sieht richtig
+  // aus und ist falsch. Der naechste Schritt ist eine Messung je Tor
+  // gegen die Rueckwaertsstrecke, nicht ein Suchen-und-Ersetzen.
+
   // ── Predictor 4.2 — Ladder-Bias-Damper ─────────────────────
   // Casual decks (Alakazam, Starmie, Grimmsnarl …) over-index on the
   // online ladder relative to in-person majors. Pre-Prague backtest
@@ -2958,6 +2991,34 @@ window.MetaCall = (function () {
   }
 
   // ── Predictor 5.7 — Anti-Leader Tech-Boost ──────────────────
+  //
+  // GEMELDET, NICHT REPARIERT (01.09.2026) — diese Stufe steht auf einer
+  // Zahl, die Predictor 5.3 vorher deckweit verschoben hat.
+  //
+  // 5.7 liest die Matchup-Winrate ueber `getBaseMatchup`, also NACH der
+  // Korrektur von Predictor 5.3. 5.3 setzte am 01.09. fuer Dragapult
+  // −7,73 pp (Worlds-Winrate 46,41 % gegen Online 54,14 %). Diese eine
+  // deckweite Feldgroesse hebt damit die Winrate JEDER Paarung gegen
+  // Dragapult gleichmaessig um 7,73 pp — und 5.7 liest das anschliessend
+  // als Beleg dafuer, dass ein Deck ein guter Konter sei. Die Schwelle
+  // von 55 % liegt real also bei 47,3 %.
+  //
+  // Gemessen: ueber der Schwelle liegen OHNE 5.3 drei Decks, MIT 5.3
+  // sieben. Clefairy Ogerpon, Cynthia's Garchomp, Lopunny Dudunsparce
+  // und Mega Excadrill werden ausschliesslich auf diesem Weg angehoben.
+  //
+  // Die naheliegende Korrektur — 5.7 gegen `_matchupMap` roh lesen
+  // lassen statt gegen `getBaseMatchup` — faellt hier bewusst aus:
+  // gemessen an der leckfreien Rueckwaertsstrecke feuert 5.7 in 7 von 54
+  // Zielen und ist dort in 5 von 7 Faellen SCHLECHTER (+0,022 pp, SE
+  // 0,012). Bei n = 7 traegt das weder ein Abschalten noch ein Umbauen.
+  // Beides braucht das zweite TEF-PBL-Major.
+  //
+  // Der Deckel ist die dritte offene Frage: 4.5 deckelt bei 0,5 + 3,5 pp,
+  // 5.7 zusaetzlich bei 1,5 pp, und die Summe wird nirgends geprueft —
+  // ein Deck kann so 5,5 pp aus Konter-Argumenten bekommen. Weil nach
+  // allen Stufen auf 100 % normiert wird, geht jede Anhebung zulasten
+  // aller uebrigen Decks.
   // When a leading family dominates the field, the player base
   // brings hard counters in anticipation. At Indianapolis, Hydrapple,
   // Mega Lucario, and Basic Box were ALL under-predicted (−3.35,
@@ -3615,7 +3676,14 @@ window.MetaCall = (function () {
       if (_metaSource !== 'past'
           && _meanDay2Conv > 0 && _deckDay2Conv > 0 && _day2Q && _day2Q.n >= 1) {
         const rawBoost = _deckDay2Conv / _meanDay2Conv;
-        const trust = _day2Q.n >= 3 ? 1.00 : (_day2Q.n === 2 ? 0.80 : 0.50);
+        // BEFUND (01.09.2026): `_day2Q.n === 2` ist eine exakte Gleichheit
+        // auf einer Gleitkommasumme. `n` ist keine Stichprobenzahl,
+        // sondern eine Rezenz-GEWICHTSSUMME (siehe die Konstanten bei
+        // Z. ~792) — ueber 379 geprüfte Deck-Epochen wurde die 2 kein
+        // einziges Mal getroffen. Der mittlere Vertrauensgrad 0,80 war
+        // damit unerreichbar; es gab nur 1,00 oder 0,50.
+        // Jetzt als Spanne, nicht als Punkt.
+        const trust = _day2Q.n >= 3 ? 1.00 : (_day2Q.n >= 1.75 ? 0.80 : 0.50);
         const tempered = 1.0 + (rawBoost - 1.0) * trust;
         day2Boost = _clip(tempered, 0.80, 1.40);
 
@@ -3711,7 +3779,30 @@ window.MetaCall = (function () {
       // ~30 % of the field"). Both channels write to the same `boost`
       // field so a deck that counters both kinds of threat gets the
       // sum (each subject to its own per-channel cap).
-      const metaDynBoostPp = (_metaDynamicsByDeck[k] && _metaDynamicsByDeck[k].boost) || 0;
+      // STILLGELEGT am 01.09.2026 — dieser Term erreicht die Prognose nicht.
+      //
+      // `metaDynBoostPp` steht ausschliesslich in den vier Summanden des
+      // Modus-B-RUECKFALLZWEIGS (Z. ~3807/3817/3827/3835). Seit dem
+      // 28.08. ueberspringt `predicted = _kernWert` (Z. 3767) diesen
+      // Zweig fuer jedes Deck, das der Prognosekern kennt — und Phase α
+      // verwirft genau die Decks, die er nicht kennt. Beide Mengen
+      // werden in derselben Schleife befuellt, sie koennen also nicht
+      // auseinanderfallen. Gemessen am 01.09.2026: 134 Ladder-Decks, 44
+      // nach Phase α, davon 44 mit Kernwert. Gelieferter Beitrag:
+      // **0,00 pp**. In Modus A kommt der Term in keinem Zweig vor.
+      //
+      // Die Konsole meldete trotzdem weiter "Surge decks" und
+      // "Top counters" mit Prozentzahlen — eine Stufe, die aussieht, als
+      // wuerde sie arbeiten. Dieselbe Falle wie beim Hype-Damper.
+      //
+      // Der Weg zurueck, falls der Rueckfallzweig je wieder traegt: den
+      // Schalter auf true stellen. Vorher aber messen, ob der Term dann
+      // ueberhaupt hilft — historisch ist das nie geprueft worden, weil
+      // die Online-Matchup-Matrix keinen Verlauf hat.
+      const META_DYN_AKTIV = false;
+      const metaDynBoostPp = META_DYN_AKTIV
+        ? ((_metaDynamicsByDeck[k] && _metaDynamicsByDeck[k].boost) || 0)
+        : 0;
 
       // Predictor 4.2 — Ladder-Bias-Damper. Casual decks have high
       // ladder share but underperform competitively; competitive decks
@@ -4698,12 +4789,32 @@ window.MetaCall = (function () {
       slot.currentTotal += d.predictedShare || 0;
     });
 
+    // STILLGELEGT am 01.09.2026 — strukturell tot, nicht nur heute stumm.
+    //
+    // Das Tor verlangt `currentTotal < lmShare × 0,50`: die aktuelle
+    // Prognose einer Familie muss unter die Haelfte ihres letzten
+    // Major-Anteils gefallen sein. Seit dem 28.08. IST `predicted` aber
+    // der Prognosekern, und dessen Anker sind genau diese Major-Anteile.
+    // Die Bedingung vergleicht die Groesse also mit sich selbst.
+    //
+    // Nachgezaehlt ueber 122 Familien-Epochen: **null** Ausloesungen.
+    // Das gemessene Minimum des Verhaeltnisses liegt bei 0,60, der
+    // Median bei 0,97 — die Schwelle 0,50 wird nie unterschritten.
+    // Und selbst wenn: der Boden laege bei 30,12 %, waehrend der
+    // Familien-Deckel (5.5.5) dieselbe Familie zwei Stufen vorher auf
+    // 28,0 % zieht. Die beiden arbeiten gegeneinander.
+    //
+    // Der Weg zurueck: den Vergleich gegen eine Groesse fuehren, die
+    // NICHT major-verankert ist — die rohe Ladder etwa. Dann ist es eine
+    // andere Stufe und braucht eine eigene Messung.
+    const LIVE_SHARE_FLOOR_AKTIV = false;
     const liveFloorWinners = new Set();
     const liveFloorLog     = [];
     let   totalLiveLift    = 0;
     // Diagnostic for the user-invoked inspector — see _diag below.
     _lsFamsLastRun = lsFams;
     Object.entries(lsFams).forEach(([fk, slot]) => {
+      if (!LIVE_SHARE_FLOOR_AKTIV) return;
       if (slot.lmShare < LIVE_SHARE_FLOOR_MIN_LM_SHARE) return;
       if (slot.lmPilots < LIVE_SHARE_FLOOR_MIN_LM_PILOTS) return;
       if (slot.currentTotal >= slot.lmShare * LIVE_SHARE_FLOOR_DIVERGENCE) return;
@@ -5083,7 +5194,16 @@ window.MetaCall = (function () {
     // on the right targets in their current dataset.
     const damped = _shareList.filter(d => d.hypeDamperApplied);
     const floored = _shareList.filter(d => typeof d.qualityFloorApplied === 'number');
-    const softExp = _shareList.filter(d => typeof d.concentrationExp === 'number' && d.concentrationExp < 1.49);
+    // BEFUND (01.09.2026): diese Zeile meldete JEDES Deck als "gesoftet".
+    // Der Konzentrations-Exponent wurde am 23.08. bewusst auf konstant
+    // 1,00 gesetzt (siehe dort) — und 1,00 ist kleiner als 1,49. Die
+    // Telemetrie hat also seitdem eine Stufe gemeldet, die es nicht mehr
+    // gibt, mit dem immer gleichen Wert "^1.00". Wer die Konsole liest,
+    // um zu pruefen, ob eine Mechanik feuert, wurde hier belogen.
+    const softExp = _shareList.filter(d =>
+      typeof d.concentrationExp === 'number'
+      && d.concentrationExp < 1.49
+      && d.concentrationExp !== 1.00);
     if (damped.length) {
       console.info('[MetaCall] predictor 5.2 — Hype-Damper fired on:',
         damped.slice(0, 5).map(d => `${d.name} (×0.75)`).join(', '));
@@ -5095,6 +5215,24 @@ window.MetaCall = (function () {
     if (softExp.length) {
       console.info('[MetaCall] predictor 5.2 — Concentration-Exp softened for:',
         softExp.slice(0, 5).map(d => `${d.name} (^${d.concentrationExp.toFixed(2)})`).join(', '));
+    }
+    // BEFUND (01.09.2026): der Wachstums-Schub (Predictor 5.4) lief seit
+    // jeher ohne jede Meldung — als Einziger der wirksamen Stufen. Beim
+    // Auszaehlen der 23 Stufen stand er deshalb faelschlich auf der
+    // Liste der stummen, obwohl er am 01.09. **12 von 43 Decks** angehoben
+    // hat, bis zu +3,33 pp (Basic Box), +3,09 (Crustle), +3,08 (Alakazam
+    // Dudunsparce). Eine Stufe, die man nur findet, wenn man den Code
+    // liest, ist beim naechsten Umbau die, die niemand mitdenkt.
+    const growthBoosted = _shareList.filter(d => d.day2GrowthBoostPP > 0);
+    if (growthBoosted.length) {
+      console.info('[MetaCall] predictor 5.4 — Wachstums-Schub auf %d Deck(s):',
+        growthBoosted.length,
+        growthBoosted
+          .slice()
+          .sort((a, b) => b.day2GrowthBoostPP - a.day2GrowthBoostPP)
+          .slice(0, 5)
+          .map(d => `${d.name} (+${d.day2GrowthBoostPP.toFixed(2)} pp)`)
+          .join(', '));
     }
     const pilotDamped = _shareList.filter(d => d.pilotSkillDamped);
     if (pilotDamped.length) {

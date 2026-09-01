@@ -586,6 +586,24 @@ jobs:
           shopt -u nullglob
           exit 0
 
+      - name: Labs-Verzeichnis aus data/ neu bauen
+        # BEFUND 01.09.2026: der Scraper schreibt das Verzeichnis in seinen
+        # eigenen Arbeitsordner (backend/core/data/), die Ruecksicherung
+        # darueber kopiert per Glob nur *.csv — und das Verzeichnis ist kein
+        # CSV. Es blieb drueben liegen, waehrend die Auszuege herueberkamen.
+        # Gemessen: labs_tournament_decks_TEF-PBL.csv (44 Zeilen, Worlds San
+        # Francisco, 774 Spieler) lag in data/, das Verzeichnis daneben stand
+        # auf dem 30.08. und kannte TEF-PBL nicht. js/app-tier-meta.js
+        # (labsAuszugVorhanden) fragt genau dieses Verzeichnis, bevor es
+        # laedt — das erste Praesenzturnier des laufenden Formats wurde von
+        # der Tier-Liste nie angefasst.
+        #
+        # Deshalb hier, NACH der Ruecksicherung und VOR dem Commit, aus dem
+        # Ordner gebaut, aus dem auch das Frontend liest.
+        # tests/python/test_labs_verzeichnis.py haelt beide Bedingungen.
+        run: |
+          python3 scripts/schreibe_labs_verzeichnis.py
+
       # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
       # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
       # _site/ on every deploy (its "Cache-bust asset references" step), so the

@@ -3530,6 +3530,15 @@ window.MetaCall = (function () {
 
     _shareList.forEach(d => {
       const k = normalize(d.name);
+      // BEFUND (01.09.2026): `hypeDamperApplied` wurde gesetzt und nie
+      // zurueckgenommen. `_shareList` ueberlebt aber mehrere
+      // Predictor-Laeufe je Seitenaufbau, und die Telemetrie am Ende
+      // filtert genau auf diese Marke. Die Konsole meldete deshalb im
+      // zweiten Lauf Decks als gedaempft, die dieser Lauf nie angefasst
+      // hatte — eine Pruefspur, die man nicht mehr lesen kann. Die
+      // Bewertung war nie betroffen (`predicted` wird je Lauf neu
+      // gerechnet), die Nachvollziehbarkeit schon.
+      d.hypeDamperApplied = false;
       const rawLadderPct = (d.ladderShare / totalLadder) * 100;
       // Phase β — Major-First-Anchor. For decks that are "in-person
       // established" (≥2 recent majors at ≥2 % share), replace the
@@ -4026,9 +4035,47 @@ window.MetaCall = (function () {
       // (deck was 4 days old) → ratio 3.43 → 25 % cut → ~1.85 %
       // predicted → dropped out of Top 25 entirely. Skip the damper
       // in Mode A; reactivate as soon as labs major data lands.
+      // STILLGELEGT am 01.09.2026 — der Damper hat nie das verglichen,
+      // was er zu vergleichen behauptet.
+      //
+      // 1. Beide Seiten kommen aus derselben Quelle. `broughtShare` wird
+      //    an genau einer Stelle befuellt, aus
+      //    online_tournament_top8_decks.csv — also aus ONLINE-Turnieren,
+      //    in Modus A wie in Modus B. Die Begruendung von 5.4 ("in Modus
+      //    B gibt es einen echten Major-Anker") beschreibt eine
+      //    Quellenumschaltung, die es nie gegeben hat. Der Damper hat
+      //    Online gegen Online gehalten — genau der Fehler, den 5.4
+      //    beheben wollte.
+      //
+      // 2. Das Verhaeltnis war deckunabhaengig konstant. `ladderPct` ist
+      //    zusaetzlich durch `totalLadder` normiert, `broughtPct` nicht.
+      //    Damit ist ratio = 100 / totalLadder = 1 / Deckungsgrad — fuer
+      //    JEDES Deck derselbe Wert. Gemessen am 01.09.: 1,0850 bei
+      //    allen 49 Decks; ueber neun Stichtage 1,087 bis 1,136. Die
+      //    Schwelle 1,25 war damit kein Deck-Kriterium, sondern ein
+      //    globaler Schalter, der bei einer Ladder-Deckung unter 80 %
+      //    umgelegt haette. Er hat nie ausgeloest.
+      //
+      // 3. Bei einem einzigen Major traegt er nicht. Ueber 147 Deckpaare
+      //    aus 11 Epochenwechseln bringt ein pauschaler 25-%-Schnitt in
+      //    53 % der Faelle eine Verbesserung — ein Muenzwurf. Und bei
+      //    774 Spielern liegt die 1,25-Schwelle fuer jedes Deck unter
+      //    5 % Anteil INNERHALB des 95-%-Bandes der Mitbring-Quote
+      //    selbst.
+      //
+      // Was es braeuchte, damit er wiederkommt: den Vergleich gegen
+      // `_lastMajorByDeck[k].day1Share` statt gegen `broughtShare`
+      // (die rohe Ladder liegt dafuer in `_origLadderShareByDeck`),
+      // eine Mindest-Pilotenzahl, und mindestens ZWEI Majors im Format.
+      // Zur Groessenordnung: gegen day1Share gerechnet wuerde er heute
+      // 22 von 43 Decks daempfen, 14 davon mit hoechstens 5 Piloten —
+      // und Dragapult laege bei 0,34, also online UNTER-, nicht
+      // ueberrepraesentiert. Ein Deck, das er nie haette treffen duerfen.
       const HYPE_DAMPER_RATIO_MIN  = 1.25;
       const HYPE_DAMPER_FACTOR     = 0.75;
-      if (_predictorMode === 'B'
+      const HYPE_DAMPER_AKTIV      = false;
+      if (HYPE_DAMPER_AKTIV
+          && _predictorMode === 'B'
           && broughtPct > 0
           && ladderPct > broughtPct * HYPE_DAMPER_RATIO_MIN) {
         d.hypeDamperApplied = true;
@@ -5760,8 +5807,10 @@ window.MetaCall = (function () {
               console.log(
                 `[Predictor 5.5] Boden NICHT scharf — juengstes ${prevFmtKey}-Turnier ` +
                 `${prevNeuestesISO} ist ${prevAlterTage} Tage alt (Grenze ${prevGrenzeTage}). ` +
-                `Dieselbe Grenze wie das Lag-Fenster. Fuer dieses Format liegen keine ` +
-                `belastbaren Vor-Ort-Daten vor; die Prognose steht auf der Online-Basis.`
+                `Dieselbe Grenze wie das Lag-Fenster. Der Boden aus dem VORFORMAT bleibt ` +
+                `damit aus. Ueber das laufende Format sagt das nichts — der Satz ` +
+                `"fuer dieses Format liegen keine Vor-Ort-Daten vor" stand hier bis zum ` +
+                `01.09.2026 und war ab dem ersten eigenen Major schlicht falsch.`
               );
             } catch (_e) { /* ignore */ }
           }
@@ -11991,7 +12040,14 @@ window.MetaCall = (function () {
       const key = `${t}|${a}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      const norm = normalize(a);
+      // BEFUND (01.09.2026): hier stand `normalize(a)` ohne
+      // _kanonName(). Die Schreibweisen des datierten Stroms treffen
+      // damit die Schluessel von _tournamentStats nicht, und die
+      // Umschreibung setzt die Mitbring-Quote der betroffenen Decks auf
+      // null statt auf ihren Wert. Gemessen am 01.09.: Dhelmise
+      // (4,13 %), Toucannon (2,75 %), Basic Box (1,62 %), Beedrill
+      // (1,14 %) und Metagross (0,22 %) — zusammen 56 Eimer.
+      const norm = normalize(_kanonName(a));
       counts.set(norm, (counts.get(norm) || 0) + 1);
     }
     return counts;
@@ -12040,16 +12096,46 @@ window.MetaCall = (function () {
       // matters; in Mode A, the limitless ladder snapshot IS the
       // authoritative current-format signal and must not be
       // overwritten. Skip the override entirely.
-      const skipLadderOverride = _predictorMode !== 'B';
-      if (skipLadderOverride) {
-        try {
-          console.info(
-            `[Predictor 5.6] Mode A — skipping ladder/brought rewrite ` +
-            `from dated-cards (kept raw limitless ladder share).`
-          );
-        } catch (_e) { /* ignore */ }
-      }
-      if (!skipLadderOverride && cutoff && /^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {
+      // BEFUND (01.09.2026) — die Ausnahme fuer Modus B faellt weg.
+      //
+      // Der Satz oben, in Modus B werde der datierte Strom "gegen die
+      // Major-Anteile re-verankert", war eine Absichtserklaerung ohne
+      // Umsetzung. Die einzige Stelle, die das taete, ist Phase β
+      // (_medianMajorShare) — und die verlangt ZWEI Majors à >= 2 %.
+      // TEF-PBL hat eines. Also lief der umgeschriebene Wert ungefiltert
+      // in die Prognose; er traegt 0,60 der Modus-B-Formel.
+      //
+      // Nachgemessen an der Rueckwaertsstrecke (n = 7 Ziele, MAE ueber
+      // die Vereinigung der jeweiligen Top 12, wie im V3-Papier):
+      //
+      //     Fenster aus                     1,670 pp
+      //     beide umgeschrieben (bisher)    2,397 pp   +44 % Fehler
+      //     nur broughtShare umgeschrieben  1,753 pp
+      //
+      // 7 von 7 Zielen schlechter, kein Ausreisser. Am groessten ist der
+      // Schaden in genau der Lage, die seit heute gilt: ein einziges
+      // frueheres Major (LA, New Orleans).
+      //
+      // Der Grund ist nicht die Stichprobengroesse (715 Eimer gegen
+      // 36.368 Ladder-Listen), sondern die Deckelung: das Sammeln
+      // begrenzt auf 60 Decks à 20 Listen, also hat JEDER Archetyp
+      // 13–20 Eimer. Der Spitzenwert ist damit strukturell auf ~2,8 %
+      // gedeckelt, die Streuung faellt von 1,52 auf 0,46 pp, und die
+      // Rangkorrelation zur Ladder betraegt ρ = 0,11. Das ist keine
+      // ungenaue Ladder, das ist eine andere Groesse.
+      //
+      // `broughtShare` wird weiter umgeschrieben — dort kostet das
+      // Fenster nur +0,08 pp, und ohne die Umschreibung haette der
+      // Datumsfilter auf die Mitbring-Quote gar keine Wirkung.
+      const skipLadderOverride = true;
+      try {
+        console.info(
+          `[Predictor 5.6] ladderShare bleibt roh (Modus ${_predictorMode}) — ` +
+          `die Umschreibung aus dem datierten Strom kostete 0,73 pp MAE ` +
+          `ueber 7 Ziele. Nur broughtShare folgt dem Datenfenster.`
+        );
+      } catch (_e) { /* ignore */ }
+      if (cutoff && /^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {
         // Cache pre-filter values on first override so a later "Clear"
         // can restore them without a full reload.
         if (!_origLadderShareByDeck) {
@@ -12067,25 +12153,20 @@ window.MetaCall = (function () {
         const counts = _bucketCountsFromDatedRows(_datedCardsRows || []);
         const totalBuckets = Array.from(counts.values()).reduce((s, n) => s + n, 0);
         if (totalBuckets > 0) {
-          for (const d of _shareList) {
-            const k = normalize(d.name);
-            const c = counts.get(k) || 0;
-            d.ladderShare = (c / totalBuckets) * 100;
-          }
+          // `ladderShare` bleibt unangetastet — siehe die Begruendung oben.
           if (_tournamentStats) {
             for (const k of Object.keys(_tournamentStats)) {
               const c = counts.get(k) || 0;
               _tournamentStats[k].broughtShare = (c / totalBuckets) * 100;
             }
           }
-          console.info(`[MetaCall] date filter — recomputed ladder + brought from ${totalBuckets} dated buckets (cutoff ${cutoff})`);
+          console.info(`[MetaCall] date filter — recomputed brought from ${totalBuckets} dated buckets (cutoff ${cutoff})`);
         }
-      } else if (_origLadderShareByDeck) {
-        // Cutoff cleared — restore original values.
-        for (const d of _shareList) {
-          const orig = _origLadderShareByDeck.get(normalize(d.name));
-          if (typeof orig === 'number') d.ladderShare = orig;
-        }
+      } else if (_origBroughtShareByDeck) {
+        // Cutoff cleared — restore original values. `ladderShare` wird
+        // seit dem 01.09.2026 nicht mehr umgeschrieben und braucht
+        // deshalb auch keine Wiederherstellung; der Zwischenspeicher
+        // bleibt nur, weil der Hype-Damper-Vergleich ihn braucht.
         if (_origBroughtShareByDeck && _tournamentStats) {
           for (const [k, v] of _origBroughtShareByDeck) {
             if (_tournamentStats[k]) _tournamentStats[k].broughtShare = v;
@@ -12093,7 +12174,7 @@ window.MetaCall = (function () {
         }
         _origLadderShareByDeck = null;
         _origBroughtShareByDeck = null;
-        console.info('[MetaCall] date filter cleared — restored original ladder + brought shares');
+        console.info('[MetaCall] date filter cleared — restored original brought shares');
       }
 
       _runPredictor();

@@ -1225,7 +1225,66 @@
       totalWeight:   scored.totalW,
       coreThreshold: usedThreshold,
       scoredCards:   scoredCardsOut,
+      kategorien:    _kategorieDeckung(lists, deck),
     };
+  }
+
+  /* Wie viele der Praesenzlisten spielen ueberhaupt eine Karte dieser
+   * Kategorie — und wie viele hat der Bau daraus genommen?
+   *
+   * ANLASS (01.09.2026). Der Betreiber sah im Aggregat "18 von 28 Decks
+   * spielen ein Stadion" und im Bau kein einziges. Beides stimmte: der
+   * Bau rechnet nur mit den Praesenzlisten (Worlds, n = 8, dort 3 von 8),
+   * das Aggregat zaehlt Online mit. Zwei Grundgesamtheiten auf einem
+   * Bildschirm, ohne dass eine von beiden sagt, welche sie ist.
+   *
+   * WARUM DER BAU TROTZDEM SO BLEIBT. Zwei Messrunden:
+   *   - Sechs Kategorie-Regeln durchgerechnet, keine schlaegt den
+   *     heutigen Bau (56,92 von 60 gegen beste Variante 56,50).
+   *   - Die Gewichtung Praesenz-gegen-Online durchgefahren (k = 0 bis
+   *     unendlich): die Kurve ist flach, bester Wert 54,47 gegen 54,16,
+   *     95-%-Intervall [-0,02; +0,67] — enthaelt die Null.
+   *   Und bei KEINEM k landet ein Stadion im Bau, auch nicht bei reinem
+   *   Online: 15 Listen spielen eines, aber vier verschiedene, der
+   *   Erwartungswert bleibt bei 0,8 Karten. Es ist kein
+   *   Gewichtungsproblem.
+   *
+   * Also nicht der Bau aendert sich, sondern was danebensteht. Diese
+   * Zahlen sind die Praesenzseite — exakt, weil hier echte Listen
+   * vorliegen und Kookkurrenz messbar ist. Die Online-Seite kommt aus
+   * dem Aggregat und wird im Aufrufer erganzt; sie ist eine Naeherung
+   * (Summe der Einzelkarten-Anteile), und das muss dort dranstehen. */
+  function _kategorieDeckung(lists, deck) {
+    const kat = (c) => {
+      const typ = String((c && c.type) || '');
+      if (!typ) return 'Pokemon';
+      const k = typ.toLowerCase();
+      if (k.indexOf('special energy') !== -1) return 'Special Energy';
+      if (k.indexOf('energy') !== -1) return 'Basic Energy';
+      if (/^[GRWLPFDMNC]/.test(typ)) return 'Pokemon';
+      if (typ === 'Supporter') return 'Supporter';
+      if (typ === 'Item') return 'Item';
+      if (typ === 'Tool') return 'Tool';
+      if (typ === 'Stadium') return 'Stadium';
+      return 'Pokemon';
+    };
+    const raus = {};
+    const n = (lists || []).length;
+    for (const l of (lists || [])) {
+      const gesehen = new Set();
+      for (const c of (l.cards || [])) gesehen.add(kat(c));
+      for (const k of gesehen) {
+        raus[k] = raus[k] || { listenMit: 0, listen: n, gebaut: 0 };
+        raus[k].listenMit += 1;
+      }
+    }
+    for (const e of (deck || [])) {
+      const k = kat(e);
+      raus[k] = raus[k] || { listenMit: 0, listen: n, gebaut: 0 };
+      raus[k].gebaut += (e.count || 0);
+    }
+    for (const k of Object.keys(raus)) raus[k].listen = n;
+    return raus;
   }
 
   global.MostConsistencyBuilder = {

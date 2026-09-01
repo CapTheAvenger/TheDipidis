@@ -7040,6 +7040,64 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     });
                 }
 
+                /* WO DER BAU UND DAS AGGREGAT AUSEINANDERGEHEN.
+                 *
+                 * Der Betreiber sah "18 von 28 Decks spielen ein Stadion"
+                 * und im Bau kein einziges. Beide Zahlen stimmten — sie
+                 * zaehlen nur Verschiedenes: der Bau die Praesenzlisten
+                 * (Worlds, n = 8), das Aggregat auch die Online-Listen.
+                 * Ohne diese Zeile sieht das aus wie ein Fehler.
+                 *
+                 * Nur ab 15 Prozentpunkten Abweichung, sonst steht bei
+                 * jedem Deck siebenmal dasselbe. Gemessen trifft das
+                 * 5 von 63 Zellen, im Schnitt 0,6 Zeilen je Bau —
+                 * angefuehrt von genau dem Fall, der den Anstoss gab.
+                 *
+                 * Die Online-Zahl ist eine NAEHERUNG und sagt das auch:
+                 * online liegen nur Aggregate vor, keine Listen. Wer
+                 * zwei verschiedene Stadien spielt, wird zweimal
+                 * gezaehlt. Die Praesenzzahl ist exakt — dort gibt es
+                 * echte Listen. */
+                const katAudit = [];
+                try {
+                    const kats = result.kategorien || {};
+                    const onlineRows = Array.isArray(window.currentCurrentMetaDeckCards)
+                        ? window.currentCurrentMetaDeckCards : [];
+                    const onlineJeKat = {};
+                    let onlineListen = 0;
+                    for (const r of onlineRows) {
+                        const k = getCardTypeCategory(r.type || '');
+                        const drin = parseInt(r.deck_inclusion_count || '0', 10) || 0;
+                        const ges  = parseInt(r.total_decks_in_archetype || '0', 10) || 0;
+                        if (ges > onlineListen) onlineListen = ges;
+                        onlineJeKat[k] = (onlineJeKat[k] || 0) + drin;
+                    }
+                    for (const k of Object.keys(kats)) {
+                        const e = kats[k];
+                        if (!e.listen) continue;
+                        const pMajor = (e.listenMit / e.listen) * 100;
+                        if (!onlineListen) continue;
+                        // Gedeckelt: die Summe kann ueber die Listenzahl
+                        // hinauslaufen, wenn ein Deck zwei Karten der
+                        // Kategorie spielt. Mehr als "alle" gibt es nicht.
+                        const roh = onlineJeKat[k] || 0;
+                        const mit = Math.min(roh, onlineListen);
+                        const pOnline = (mit / onlineListen) * 100;
+                        if (Math.abs(pOnline - pMajor) < 15) continue;
+                        katAudit.push({
+                            level: e.gebaut === 0 && pOnline >= 50 ? 'warn' : 'info',
+                            message: `${k}: Präsenz ${e.listenMit}/${e.listen} `
+                                   + `(${pMajor.toFixed(0)} %) · online ~${mit}/${onlineListen} `
+                                   + `(${pOnline.toFixed(0)} %) — gebaut: ${e.gebaut}`,
+                            hint: 'Gebaut wird aus den Präsenzlisten. Die Online-Zahl '
+                                + 'ist eine Näherung: online liegen nur Aggregate vor, '
+                                + 'keine Listen — wer zwei Karten dieser Kategorie '
+                                + 'spielt, ist doppelt gezählt.',
+                        });
+                    }
+                } catch (_e) { /* die Zeile ist Zusatz, nie Voraussetzung */ }
+                auditFindings.push(...katAudit);
+
                 // Phase 4.5 alternative-count suggestions — non-blocking
                 // diagnostic. Each event tells the user "the builder
                 // kept N copies but the field plurality plays M and

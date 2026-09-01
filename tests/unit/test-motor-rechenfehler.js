@@ -287,7 +287,7 @@ describe('S6 — 4.7 las seine eigene Vorprognose', () => {
             'die Prognose fliesst nach ladderShare zurueck: ' + schlecht.join(' | '));
     });
 
-    it('die erlaubten Zuweisungen sind genau die des Datumsfilters', () => {
+    it('ladderShare wird ueberhaupt nicht mehr zugewiesen', () => {
         // NICHT auf `d.` verankern: `x.ladderShare = wert` kam sonst
         // glatt durch, und mit `const wert = x.predictedShare || 0;`
         // eine Zeile davor auch an der Zusage darueber vorbei.
@@ -295,12 +295,19 @@ describe('S6 — 4.7 las seine eigene Vorprognose', () => {
         // als x.ladderShare. Ohne das kam Umgehung S6-b durch — sie
         // schrieb die Prognose in Klammerschreibweise zurueck, und
         // beide Regexe kannten nur den Punkt.
+        //
+        // Bis zum 01.09.2026 standen hier ZWEI erlaubte Zuweisungen:
+        // die Neuberechnung aus den datierten Buendeln und ihre
+        // Wiederherstellung. Beide sind weg — die Umschreibung der
+        // Ladder aus dem datierten Strom kostete gemessen 0,73 pp MAE
+        // ueber sieben Ziele (siehe tests/unit/test-datenfenster-und-
+        // damper.js). Damit wird die Zusage strenger statt schwaecher:
+        // gibt es GAR KEINE Zuweisung, kann es auch keinen Weg geben,
+        // auf dem die Prognose nach ladderShare zurueckfliesst.
         const alle = (MC.match(/[A-Za-z_$][\w$]*\.ladderShare\s*=[^=][^;\n]*/g) || []);
-        assert.equal(alle.length, 2,
-            `${alle.length} Zuweisungen statt 2 — es ist eine dazugekommen, ` +
-            `die diese Zusage nicht kennt: ${alle.join(' | ')}`);
-        assert.ok(alle.some(z => /totalBuckets/.test(z)), 'Neuberechnung fehlt');
-        assert.ok(alle.some(z => /orig/.test(z)), 'Wiederherstellung fehlt');
+        assert.deepEqual(alle, [],
+            `${alle.length} Zuweisung(en) an ladderShare — der Wert kommt aus ` +
+            `der Ladder-CSV und wird nirgends sonst gesetzt: ${alle.join(' | ')}`);
     });
 });
 

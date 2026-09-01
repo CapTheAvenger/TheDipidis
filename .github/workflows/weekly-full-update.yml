@@ -618,6 +618,31 @@ jobs:
         run: |
           python3 scripts/reconcile_tournament_coverage.py data
 
+      - name: is_ace_spec nachrechnen (melden, nicht reparieren)
+        # Am 01.09.2026 kam die Drift zurueck: der Scraper uebernahm
+        # is_ace_spec aus der Stichprobenzeile und liess das Feld leer,
+        # wenn die Stichprobe leer war — 7.790 unbelegte Felder, darunter
+        # Pokemon. Gemerkt hat es niemand, bis
+        # tests/python/test_ace_spec_bestand.py im Deploy rot wurde. Und
+        # ein roter Deploy heisst: die ganze Seite bleibt stehen, wegen
+        # einer Spalte, die das Frontend nicht einmal liest.
+        #
+        # Die Ursache ist behoben (backend/scrapers/tournament_scraper_JH.py).
+        # Dieser Schritt ist das Netz darunter, und er haengt bewusst HIER:
+        # vor dem Commit, solange der Deploy noch gruen ist.
+        #
+        # Nur melden, nicht schreiben — CLAUDE.md, "Report, don't silently
+        # repair". Faende der Lauf Drift, waere das ein Hinweis auf eine
+        # NEUE Quelle unbelegter Zeilen; die will man ansehen, nicht stumm
+        # ueberschreiben lassen. Geraeumt wird danach von Hand ueber den
+        # Workflow "Daten reparieren" (ace-spec-reparatur.yml).
+        #
+        # Weich wie die Abgleichung darueber: ::warning:: auf der Laufseite,
+        # Exit 0. Ein Hinweis darf den Wochenlauf nicht abbrechen, den er
+        # retten soll. Mit --streng wuerde er gaten.
+        run: |
+          python3 scripts/repariere_ace_spec.py --melden
+
       - name: Upload scraper logs on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

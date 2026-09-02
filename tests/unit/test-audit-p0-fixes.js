@@ -71,7 +71,14 @@ pruefe('Hero: die Stichprobe steht sichtbar dabei', () => {
     // die Zahl verloren hat — genau das ist beim Nachschaerfen dieser
     // Datei passiert.
     const zaehl = (re) => (satz.match(re) || []).length;
-    assert.equal(zaehl(/\$\{quote\}/g), 2, 'die Quote fehlt in einer Sprachfassung');
+    /* NACHTRAG 02.09.2026: die Quote steht in beiden Fassungen als
+       ${q} — sie traegt seither einen Titel, der sagt, dass sie nach
+       AKTUALITAET gewichtet ist (der Nenner darunter zaehlt dagegen
+       Koepfe). Geprueft wird weiter, dass sie in BEIDEN Fassungen
+       vorkommt; nur der Name der Einsetzung hat sich geaendert. */
+    assert.equal(zaehl(/\$\{q\}/g), 2, 'die Quote fehlt in einer Sprachfassung');
+    assert.equal(zaehl(/mah-quote/g), 1,
+        'der Hinweis auf die Gewichtung haengt nicht mehr an der Quote');
     assert.equal(zaehl(/\$\{schnitt\}/g), 2, 'der Vergleichswert fehlt in einer Sprachfassung');
     assert.equal(zaehl(/\$\{fak\}/g), 2, 'das Vielfache fehlt in einer Sprachfassung');
 });

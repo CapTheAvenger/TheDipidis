@@ -1534,8 +1534,30 @@
                        gewichteten Wert zurueck und die Ueberschrift sagt
                        das — eine halbe Zahl unter einer Ueberschrift, die
                        sie nicht erklaert, kommt nicht zurueck. */
-                    const hatRoh = t8rows.some(r =>
-                        r.total_brought != null && String(r.total_brought).trim() !== '');
+                    /* ALLES ODER NICHTS, und nur brauchbare Zahlen.
+
+                       Stand bis zum 02.09.2026 auf `.some(... !== '')`:
+                       eine einzige gefuellte Zeile schaltete die gezaehlte
+                       Anzeige fuer ALLE ein, und "abc" oder "0" galten als
+                       Zaehlung. Dieselbe Pruefung wie im Eingangsblock —
+                       eine ganze Zahl in JEDER Zeile, sonst gar nicht. */
+                    const ganzeZahl = (v) => /^\d+$/.test(String(v == null ? '' : v).trim());
+
+                    /* Die Quote aus DEN Zahlen, die daneben stehen.
+
+                       Nicht aus einer dritten Quelle: eine Zeile, deren
+                       Prozentwert sich aus ihren eigenen zwei Zahlen
+                       nicht ergibt, kann niemand nachrechnen — und genau
+                       das ist an dieser Ansicht schon zweimal
+                       beanstandet worden. */
+                    const quoteAus = (d) => {
+                        const b = (d.broughtAnzeige != null) ? d.broughtAnzeige : d.brought;
+                        const c = (d.top8Anzeige != null) ? d.top8Anzeige : d.top8;
+                        return b > 0 ? (c / b) * 100 : 0;
+                    };
+                    const hatRoh = t8rows.length > 0
+                        && t8rows.every(r => ganzeZahl(r.total_brought) && ganzeZahl(r.top8_count))
+                        && t8rows.reduce((sum, r) => sum + Number(r.total_brought), 0) > 0;
                     const enriched = t8rows.map(r => {
                         const brought = parseLocaleNumber(r.total_brought_weighted || '0', 0);
                         const top8 = parseLocaleNumber(r.top8_count_weighted || '0', 0);
@@ -1556,7 +1578,25 @@
                             // Hinweis sagt, warum.
                             broughtAnzeige: hatRoh ? broughtRoh : null,
                             top8Anzeige:    hatRoh ? top8Roh    : null,
-                            top8ConvPct: parseLocaleNumber(r.top8_conv_rate || '0', 0) * 100,
+                            /* BEFUND DER ABNAHME (02.09.2026): hier stand
+                               die Spalte `top8_conv_rate` aus der Datei —
+                               die GEWICHTETE Quote. Daneben stehen seit
+                               dem 01.09. die GEZAEHLTEN Antritte und
+                               Top-8-Zahlen. In einer Zeile standen damit
+                               120, 1.172 und 10,5 % — und 120/1172 sind
+                               10,2 %. Der Eingangsblock zeigte fuer
+                               dasselbe Deck 10,2 %; zwei Reiter, zwei
+                               Zahlen.
+
+                               Die Quote kommt jetzt aus genau den beiden
+                               Zahlen, die die Zeile zeigt. Fehlen die
+                               Zaehlungen, sind es die gewichteten — dann
+                               stehen daneben auch die gewichteten. */
+                            top8ConvPct: quoteAus({
+                                brought, top8,
+                                broughtAnzeige: hatRoh ? broughtRoh : null,
+                                top8Anzeige:    hatRoh ? top8Roh    : null,
+                            }),
                         };
                     });
                     _antritteRoh = hatRoh;
@@ -1738,7 +1778,17 @@
                         v.top8Anzeige = (v.top8Anzeige == null || d.top8Anzeige == null)
                             ? null : v.top8Anzeige + d.top8Anzeige;
                         v.broughtPct += d.broughtPct;
-                        v.top8ConvPct = v.brought > 0 ? (v.top8 / v.brought) * 100 : 0;
+                        /* Bewusst INLINE statt ueber den Helfer quoteAus:
+                           tests/unit/test-namensbruecke.js schneidet
+                           diesen Block heraus und fuehrt ihn per
+                           new Function() ohne aeusseren
+                           Gueltigkeitsbereich aus. Ein Aufruf nach
+                           draussen bricht dort mit "quoteAus is not
+                           defined" — gemessen am 02.09.2026. Dieselbe
+                           Rechnung wie in quoteAus, drei Zeilen. */
+                        const vB = (v.broughtAnzeige != null) ? v.broughtAnzeige : v.brought;
+                        const vC = (v.top8Anzeige != null) ? v.top8Anzeige : v.top8;
+                        v.top8ConvPct = vB > 0 ? (vC / vB) * 100 : 0;
                     });
                     const alleNamen = new Set([
                         ...[...turnierVon.keys()],

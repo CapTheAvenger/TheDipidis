@@ -248,8 +248,21 @@ describe('Der Verbund fasst zusammen, statt eine zweite Zeile zu bauen', () => {
         assert.ok(/const kanon = \(n\) => _alias\.get\(n\) \|\| n;/.test(TIER));
         assert.ok(/v\.brought \+= d\.brought;/.test(TIER),
             'zwei Zeilen auf denselben Namen wuerden einander ueberschreiben');
-        assert.ok(/v\.top8ConvPct = v\.brought > 0 \? \(v\.top8 \/ v\.brought\) \* 100 : 0;/.test(TIER),
+        /* NACHTRAG 02.09.2026: die Quote wird weiterhin aus der SUMME neu
+           gerechnet — aber aus den Zahlen, die die Zeile auch ZEIGT
+           (broughtAnzeige/top8Anzeige, sobald die Datei die gezaehlten
+           Spalten fuehrt), nicht mehr fest aus den gewichteten. Der
+           Grund: in einer Zeile standen 120, 1.172 und 10,5 %, und
+           120/1172 sind 10,2 %. Der Eingangsblock sagte fuer dasselbe
+           Deck 10,2 % — zwei Reiter, zwei Zahlen.
+
+           Geprueft wird deshalb die Eigenschaft, nicht der Wortlaut: die
+           Quote kommt aus einem Zaehler und einem Nenner DIESER Zeile. */
+        assert.ok(/v\.top8ConvPct = vB > 0 \? \(vC \/ vB\) \* 100 : 0;/.test(TIER),
             'die Quote wird nicht aus der Summe neu gerechnet');
+        assert.ok(/const vB = \(v\.broughtAnzeige != null\) \? v\.broughtAnzeige : v\.brought;/.test(TIER),
+            'die Quote nimmt nicht die Zahl, die daneben steht');
+        assert.ok(/const vC = \(v\.top8Anzeige != null\) \? v\.top8Anzeige : v\.top8;/.test(TIER));
     });
 
     it('die Faktor-Karten werden mit umgeschluesselt', () => {

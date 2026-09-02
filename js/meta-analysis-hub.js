@@ -101,23 +101,94 @@
 
     function answerModel(rows) {
         if (!rows || !rows.length || typeof window.computeConversionPerformance !== 'function') return null;
-        const conv = window.computeConversionPerformance(rows);
-        if (!conv || !(conv.expected > 0)) return null;
         const num = (v) => (typeof window.parseLocaleNumber === 'function')
             ? window.parseLocaleNumber(v, 0) : (parseFloat(v) || 0);
-        const totalBrought = rows.reduce((sum, r) => sum + num(r.total_brought_weighted), 0);
+
+        /* DIE GEZAEHLTEN STARTS (02.09.2026, nachgeschaerft nach der Abnahme).
+
+           Angestrichen am 01.09.: "wie kann es hier ,5 Antritte geben?
+           entweder man hat teilgenommen oder nicht aber halb teilnehmen
+           geht nicht." Zu Recht — total_brought_weighted ist eine nach
+           AKTUALITAET gewichtete Summe (Turniere der letzten sieben Tage
+           zaehlen 1,0, aeltere 0,5), und eine Teilnehmerzahl mit Komma
+           ist keine. Seit dem Wochenlauf am 02.09. fuehrt die Datei
+           zusaetzlich total_brought und top8_count: echte Zaehlungen.
+
+           EIN ERSTER VERSUCH TAUSCHTE NUR DEN NENNER AUS — und die
+           Abnahme hat ihn zerlegt: die Kachel zeigte dann "aus 1.172
+           Antritten · Top-8-Quote 10,5 %", aber 120/1172 sind 10,24 %.
+           Eine gezaehlte Grundgesamtheit neben einer gewichteten Quote,
+           die daraus nicht folgt — genau die Beanstandung vom 30.08.
+           ("der Leser kann ihn nicht nachrechnen"), eine Ebene tiefer.
+
+           Deshalb wird jetzt der ganze Block gezaehlt gerechnet, nicht
+           nur beschriftet: dieselbe Funktion, dieselbe Glaettung,
+           dieselbe Rangfolge — nur mit gezaehlten Eingaben. Anteil,
+           Quote, Feldschnitt und Vielfaches stammen dann aus denselben
+           Zahlen, die daneben stehen, und jede laesst sich nachrechnen.
+
+           Alles oder nichts: taugt EINE Zeile nicht, bleibt der ganze
+           Block gewichtet. Eine Mischung waere keins von beidem.
+
+           Geprueft wird auf eine ganze Zahl, nicht auf "nicht leer": ein
+           zerschossener Wochenlauf mit "abc" oder "0" lieferte sonst
+           keine Rueckfall-, sondern eine falsche Anzeige ("0 von 120"). */
+        const ganzeZahl = (v) => /^\d+$/.test(String(v == null ? '' : v).trim());
+        /* Je Zeile brauchbar, nicht nur in der Summe (Abnahme 02.09.2026).
+
+           Die Summenpruefung allein liess zwei Loecher: eine einzelne
+           Zeile mit `total_brought=0` fiel aus der Rangfolge (die
+           Ueberschrift sprang auf ein anderes Deck, die Kachel zeigte
+           0 Antritte), und `top8_count > total_brought` ergab
+           "1.177 von 1.172 in die Top 8". Beides sind kaputte Daten, und
+           bei kaputten Daten ist der gewichtete Rueckfall die ehrlichere
+           Anzeige als eine unmoegliche Zahl. */
+        const brauchbar = (r) => ganzeZahl(r.total_brought) && ganzeZahl(r.top8_count)
+            && num(r.total_brought) > 0
+            && num(r.top8_count) <= num(r.total_brought);
+        const hatRoh = rows.every(brauchbar);
+
+        /* Dieselben Zeilen, nur mit den gezaehlten Spalten an der Stelle
+           der gewichteten. Kein zweiter Rechenweg — computeConversion-
+           Performance bleibt eine Funktion, und die Glaettung, die
+           Mindeststichprobe und die Rangfolge gelten unveraendert. */
+        const zeilen = hatRoh
+            ? rows.map(r => Object.assign({}, r, {
+                total_brought_weighted: r.total_brought,
+                top8_count_weighted: r.top8_count,
+            }))
+            : rows;
+
+        const conv = window.computeConversionPerformance(zeilen);
+        if (!conv || !(conv.expected > 0)) return null;
+        const totalBrought = zeilen.reduce((sum, r) => sum + num(r.total_brought_weighted), 0);
         if (!(totalBrought > 0)) return null;
+
         const byPerf = new Map(conv.decks.map(d => [d.name, d]));
-        const top = rows
+        const top = zeilen
             .map(r => {
                 const brought = num(r.total_brought_weighted);
                 const d = byPerf.get(r.deck_name);
                 return {
                     name: r.deck_name,
                     sharePct: (brought / totalBrought) * 100,
-                    convPct: num(r.top8_conv_rate) * 100,
+                    /* BEFUND DER ABNAHME (02.09.2026): hier stand
+                       `num(r.top8_conv_rate) * 100` — die Spalte aus der
+                       Datei. Die ist die GEWICHTETE Quote, waehrend die
+                       Antritte daneben gezaehlt sind. Gemessen: Mega
+                       Excadrill zeigte 2,7 % neben 936 Antritten, aber
+                       27/936 sind 2,9 %; Slowking 6,3 % neben 825, echt
+                       5,9 %. Eine dritte Quelle fuer dieselbe Groesse,
+                       und der Leser kann die Kachel nicht nachrechnen —
+                       dieselbe Beanstandung wie am 30.08., nur eine
+                       Kachel weiter.
+
+                       Die Quote kommt jetzt aus genau den beiden Zahlen,
+                       die die Kachel zeigt. */
+                    convPct: (d && d.brought > 0) ? (d.top8 / d.brought) * 100 : null,
                     perfPct: d ? d.perfPct : null,
                     brought,
+                    top8: d ? d.top8 : null,
                 };
             })
             .sort((a, b) => b.sharePct - a.sharePct);
@@ -136,10 +207,25 @@
         // Bewusst inline statt als Helfer: answerModel wird in
         // tests/unit/test-design-depth.js isoliert per new Function() extrahiert
         // und muss deshalb ohne äußeren Gültigkeitsbereich laufen.
-        // Mindeststichprobe fuer die Ueberschrift. Vorher reichte brought >= 20
-        // plus "nicht duenn" (< CONV_THIN_N = 50), faktisch also 50 Antritte —
-        // damit wurde Toxtricity Box mit 53 Antritten (8 Cuts) zum "staerksten
-        // Deck" gekuert, bei einem 95-%-Intervall von rund +-10 Prozentpunkten.
+        /* Mindeststichprobe fuer die Ueberschrift. Vorher reichte
+           brought >= 20 plus "nicht duenn" (< CONV_THIN_N = 50), faktisch
+           also 50 Antritte — damit wurde Toxtricity Box mit 53 Antritten
+           (8 Cuts) zum "staerksten Deck" gekuert, bei einem 95-%-Intervall
+           von rund +-10 Prozentpunkten.
+
+           NACHTRAG 02.09.2026: die Schwelle misst STICHPROBENGROESSE, und
+           seit heute ist `brought` die gezaehlte Zahl statt der
+           gewichteten. Das ist kein Aufweichen, sondern die Korrektur
+           eines alten Schiefstands: die Gewichtung halbiert aeltere
+           Turniere, der gewichtete Wert war also KLEINER als die
+           tatsaechliche Stichprobe. Ein Vertrauensintervall haengt aber
+           an der echten Zahl der Antritte, nicht an einer gewichteten
+           Summe. 100 heisst jetzt, was es immer heissen sollte: hundert
+           Leute haben das Deck gespielt.
+
+           Der Kreis der Kandidaten waechst dadurch von 15 auf 28 Decks —
+           und Toxtricity Box mit seinen 53 gewichteten Antritten liegt
+           auch gezaehlt unter der Schwelle. */
         const HEADLINE_MIN_BROUGHT = 100;
         const headline = (conv.decks || [])
             .filter(d => !d.thin && d.brought >= HEADLINE_MIN_BROUGHT)
@@ -179,7 +265,17 @@
             ordered[0] = Object.assign({}, ordered[0], { convPct: headlineConvPct });
         }
 
-        return { conv, top: ordered.slice(0, 3), headline, totalBrought, headlineConvPct };
+        // Die gezaehlten Zahlen des Spitzenreiters wandern mit — der
+        // Nenner unter dem Satz nimmt sie, sofern sie fuer JEDE Zeile da
+        // sind.
+        /* `hatRoh` sagt nur noch, WELCHE Sorte Zahlen im ganzen Block
+           steckt — gerechnet ist alles schon mit ihnen. Der Nenner
+           braucht deshalb keine zweite Quelle mehr; er liest dieselben
+           Felder wie die Kachel. */
+        return {
+            conv, top: ordered.slice(0, 3), headline, totalBrought, headlineConvPct,
+            hatRoh,
+        };
     }
 
     // Ein Satz Klartext über dem Zahlenblock. Er nennt das Deck, das am
@@ -231,19 +327,15 @@
         const faktor = 1 + (best.perfPct / 100);
         const fak = faktor.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
-        // Absolute Zahlen zuerst. "78 von 772" versteht jeder sofort;
-        // "10,1 %" ist die Ableitung daraus, nicht umgekehrt.
-        /* Halbe Antritte brauchen eine Erklaerung an Ort und Stelle,
-           sonst liest sich "71,5 Antritte" wie ein Fehler. Ein Titel
-           reicht — der Satz soll kurz bleiben. */
-        const gewichtet = de
-            ? 'Antritte sind nach Turniergröße gewichtet; deshalb kommen halbe Werte vor.'
-            : 'Entries are weighted by tournament size, so half values occur.';
-        const mitHinweis = (v) => (Number.isInteger(Number(v))
-            ? zahl(v)
-            : `<span class="mah-gewichtet" title="${escapeHtml(gewichtet)}">${zahl(v)}</span>`);
-        const cuts = mitHinweis(best.top8);
-        const antritte = mitHinweis(best.brought);
+        /* Hier standen bis zum 02.09.2026 `cuts`, `antritte`, `gewichtet`
+           und `mitHinweis` — vier Bindungen, die der Satz seit dem
+           31.08. nicht mehr benutzt (die absoluten Zahlen wanderten
+           damals in die Zeile darunter). Der Text darin behauptete
+           ausserdem, gewichtet werde "nach Turniergröße"; gewichtet wird
+           nach AKTUALITAET. Toter Code mit einer falschen Begruendung
+           ist die schlechteste Sorte: er wird nicht gelesen, weil er
+           nichts tut, und beim naechsten Kopieren stimmt er trotzdem
+           nicht. */
         const quote = fmtPct(model.headlineConvPct);
         const schnitt = fmtPct(model.conv.expected * 100, 1);
 
@@ -257,12 +349,34 @@
            Die Aussage steht jetzt hier, die absoluten Zahlen eine Zeile
            tiefer beim Nenner (answerHtml). Geloescht wird nichts: eine
            Quote ohne ihren Nenner waere eine Behauptung. */
+        /* Der Hinweis auf die Gewichtung steht an der QUOTE, nicht am
+           Nenner (02.09.2026). Dort wird gewichtet: frische Turniere
+           zaehlen voll, aeltere halb. Der Nenner darunter zaehlt
+           dagegen Koepfe und braucht das Wort nicht — er hatte es
+           frueher trotzdem, und die halben Zahlen kamen daher. */
+        /* Der Hinweis sagt, WELCHE Sorte Zahlen in diesem Block steckt.
+           Beide Faelle sind ehrlich, aber sie sind nicht dasselbe, und
+           der Leser soll es wissen koennen. */
+        const gew = model.hatRoh
+            ? (de
+                ? 'Quote, Anteil und Vergleich sind aus gezählten Starts gerechnet — '
+                  + 'aus denselben Zahlen, die daneben stehen. Nachrechenbar.'
+                : 'Rate, share and comparison come from counted entries — the same '
+                  + 'numbers shown beside them. You can check the arithmetic.')
+            : (de
+                ? 'Quote, Anteil und Vergleich sind nach Aktualität gewichtet: '
+                  + 'Turniere der letzten sieben Tage zählen voll, ältere halb. '
+                  + 'Deshalb kommen halbe Werte vor.'
+                : 'Rate, share and comparison are weighted by recency: tournaments '
+                  + 'from the last seven days count fully, older ones half. That is '
+                  + 'why half values occur.');
+        const q = `<span class="mah-quote" title="${escapeHtml(gew)}">${quote}</span>`;
         return de
             ? `<strong>${escapeHtml(best.name)}</strong> ist gerade das stärkste Deck: `
-              + `${quote} Top-8-Quote gegen ${schnitt} im Schnitt — `
+              + `${q} Top-8-Quote gegen ${schnitt} im Schnitt — `
               + `rund ${fak}-mal so oft.`
             : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: `
-              + `${quote} top-8 rate against ${schnitt} on average — `
+              + `${q} top-8 rate against ${schnitt} on average — `
               + `about ${fak}× as often.`;
     }
 
@@ -273,19 +387,44 @@
         const de = isDe();
         const loc = de ? 'de-DE' : 'en-US';
         const best = model.headline;
-        const gesamt = Math.round(model.totalBrought).toLocaleString(loc);
-        if (!best) {
-            return de ? `Aus ${gesamt} gewichteten Antritten.`
-                      : `Out of ${gesamt} weighted entries.`;
-        }
+        const roh = model.hatRoh;
         const zahl = (v) => {
             const n = Number(v) || 0;
             return Number.isInteger(n) ? n.toLocaleString(loc)
                 : n.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
         };
+
+        /* MIT GEZAEHLTEN STARTS — der Normalfall seit dem 02.09.2026.
+           Hier steht kein "gewichtet", weil hier nichts gewichtet ist:
+           1.172 Leute haben das Deck gespielt, 120 davon kamen in die
+           Top 8. Halbe Antritte kann es in diesem Satz nicht mehr geben.
+
+           Der Hinweis auf die Gewichtung wandert an die QUOTE darueber —
+           dort gehoert er hin, denn dort wird gewichtet. */
+        if (roh) {
+            const gesamt = Math.round(model.totalBrought).toLocaleString(loc);
+            if (!best) {
+                return de ? `Aus ${gesamt} Antritten.` : `Out of ${gesamt} entries.`;
+            }
+            return de
+                ? `Aus ${gesamt} Antritten · ${escapeHtml(best.name)}: `
+                  + `${zahl(best.top8)} von ${zahl(best.brought)} in die Top 8.`
+                : `Out of ${gesamt} entries · ${escapeHtml(best.name)}: `
+                  + `${zahl(best.top8)} of ${zahl(best.brought)} made top 8.`;
+        }
+
+        /* OHNE gezaehlte Spalten — aeltere Dateien. Dann bleibt es bei
+           den gewichteten Werten, und das Wort steht dabei: eine halbe
+           Zahl unter einer Ueberschrift, die sie nicht erklaert, kommt
+           nicht zurueck. */
+        const gesamt = Math.round(model.totalBrought).toLocaleString(loc);
+        if (!best) {
+            return de ? `Aus ${gesamt} gewichteten Antritten.`
+                      : `Out of ${gesamt} weighted entries.`;
+        }
         const hinweis = de
-            ? 'Antritte sind nach Turniergröße gewichtet; deshalb kommen halbe Werte vor.'
-            : 'Entries are weighted by tournament size, so half values occur.';
+            ? 'Antritte sind nach Aktualität gewichtet; deshalb kommen halbe Werte vor.'
+            : 'Entries are weighted by recency, so half values occur.';
         const mit = (v) => (Number.isInteger(Number(v))
             ? zahl(v)
             : `<span class="mah-gewichtet" title="${escapeHtml(hinweis)}">${zahl(v)}</span>`);
@@ -342,6 +481,12 @@
             // Satz darüber. Zwei Darstellungen derselben Groesse auf einem
             // Bildschirm waren genau das, was hier beanstandet wurde.
             const loc = de ? 'de-DE' : 'en-US';
+            /* d.brought traegt seit dem 02.09.2026 dieselbe Sorte Zahl
+               wie alles andere im Block: gezaehlt, wenn die Datei die
+               Spalten fuehrt, sonst gewichtet. Zwei Zahlen fuer dieselbe
+               Groesse auf einem Bildschirm kann es damit nicht mehr
+               geben — die Quote daneben ist aus genau dieser Zahl
+               gerechnet. */
             const antritte = Math.round(d.brought).toLocaleString(loc);
             const fak = d.perfPct == null ? '' :
                 (1 + d.perfPct / 100).toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -638,6 +783,12 @@
         refreshLanguage,
         SUB_TABS
     };
+
+    /* Fuer die Tests: das Modell einzeln aufrufbar, ohne DOM und ohne
+       Netz. Nachgerechnet werden kann nur, was man aufrufen kann — die
+       vorige Testschicht suchte im Quelltext nach Zeichenketten und
+       belegte deshalb nichts. */
+    window._metaHubIntern = { answerModel, answerNenner, answerSentence };
 
     document.addEventListener('DOMContentLoaded', () => {
         renderTiles();

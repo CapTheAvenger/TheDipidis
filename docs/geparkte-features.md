@@ -144,9 +144,21 @@ nicht in einem Gesprächsverlauf verschwinden.
   Attacken und dem Set-Editor. Gerechnet wird über dasselbe
   `bestMove()`/`ChampionsDamage` wie die Einzelansicht — ein zweiter
   Rechenweg wäre der sichere Weg zu zwei Antworten auf dieselbe Frage.
-* **Statusstufen bei Champions** dort erklären, wo „steigt stark" und
+* ~~**Statusstufen bei Champions** dort erklären, wo „steigt stark" und
   „sinkt drastisch" stehen: +1/+2/+3 sind 150/200/250 %, Maximum +6 =
-  400 %; −1/−2/−3 sind 66/50/40 %, Minimum −6 = 25 %.
-* **Showdown-Paste** gegen die 32-Punkte-Skala prüfen, die der
-  Limitless-Paste bereits verwendet.
+  400 %; −1/−2/−3 sind 66/50/40 %, Minimum −6 = 25 %.~~
+  **Gebaut am 02.09.2026.** Die Tabelle stand seit dem 01.09. im Reiter
+  „Statuszustände"; von den Attackentexten aus war sie nicht zu finden.
+  Jetzt trägt die Stufenangabe im Text selbst ihren Faktor („by 2 stages
+  +2 · 200 %", „stark erhöht +2 · 200 %") und führt per Klick zur ganzen
+  Tabelle. Genauigkeit, Fluchtwert und Volltrefferquote bleiben
+  ausdrücklich unmarkiert — die folgen laut den Daten einer eigenen,
+  flacheren Tabelle, deren Zwischenwerte nicht belegt sind.
+* ~~**Showdown-Paste** gegen die 32-Punkte-Skala prüfen, die der
+  Limitless-Paste bereits verwendet.~~
+  **Erledigt am 01.09.2026** und am 02.09. nachgeprüft: Showdowns
+  Champions-Formate rechnen selbst in Statuspunkten (`evLimit = 66`,
+  Deckel 32, belegt im Kopf von `js/champions-set.js`). `toShowdownText()`
+  und `showdownUeberschuss()` sind ersatzlos entfallen — es gibt nur noch
+  EINE Serialisierung für beide Ziele.
 * **Alle übrigen Reiter** mit derselben Aufräumbrille durchgehen.

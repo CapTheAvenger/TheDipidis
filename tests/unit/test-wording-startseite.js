@@ -81,14 +81,35 @@ describe('Die neuen Formulierungen stehen in beiden Sprachen', () => {
 describe('Beim Kürzen ist keine Zahl verschwunden', () => {
     it('der Hub-Satz nennt Quote, Vergleichswert und Vielfaches — zweisprachig', () => {
         const satz = /function answerSentence\(model\) \{[\s\S]*?\n    \}/.exec(HUB)[0];
-        for (const [ph, name] of [[/\$\{quote\}/g, 'Quote'], [/\$\{schnitt\}/g, 'Vergleichswert'],
+        // ${q} statt ${quote} seit dem 02.09.2026: die Quote traegt einen
+        // Titel, der die Gewichtung erklaert. Der Satz nennt sie weiter
+        // in beiden Sprachfassungen.
+        for (const [ph, name] of [[/\$\{q\}/g, 'Quote'], [/\$\{schnitt\}/g, 'Vergleichswert'],
                                   [/\$\{fak\}/g, 'Vielfaches']]) {
             assert.equal((satz.match(ph) || []).length, 2, `${name} fehlt in einer Sprachfassung`);
         }
     });
 
+    /* Der Ausschnitt geht bis zur naechsten Funktion, nicht bis zur
+       ersten Zeile, die mit vier Leerzeichen und } beginnt: answerNenner
+       hat seit dem 02.09.2026 zwei Zweige, und die alte Fassung schnitt
+       mitten im ersten ab. */
+    const nenner = () => HUB.slice(
+        HUB.indexOf('function answerNenner(model) {'),
+        HUB.indexOf('function answerHtml(model) {'));
+
     it('der Nenner nennt Gesamtstichprobe und die absoluten Top-8-Zahlen', () => {
-        const n = /function answerNenner\(model\) \{[\s\S]*?\n    \}/.exec(HUB)[0];
+        const n = nenner();
+        assert.ok(n.length > 200, 'answerNenner nicht gefunden');
+        // Der gezaehlte Zweig — der Normalfall seit dem Wochenlauf.
+        assert.match(n, /\$\{gesamt\} Antritten · /);
+        assert.match(n, /\$\{gesamt\} entries · /);
+        // Seit dem 02.09.2026 rechnet der ganze Block gezaehlt; `best`
+        // traegt deshalb selbst die gezaehlten Zahlen, und ein zweites
+        // Feld dafuer gibt es nicht mehr.
+        assert.match(n, /zahl\(best\.top8\)/);
+        assert.match(n, /zahl\(best\.brought\)/);
+        // Und der Rueckfall, falls die gezaehlten Spalten fehlen.
         assert.match(n, /\$\{gesamt\} gewichteten Antritten/);
         assert.match(n, /\$\{gesamt\} weighted entries/);
         assert.equal((n.match(/\$\{mit\(best\.top8\)\}/g) || []).length, 2);
@@ -96,10 +117,23 @@ describe('Beim Kürzen ist keine Zahl verschwunden', () => {
     });
 
     it('halbe Antritte erklären sich weiterhin an Ort und Stelle', () => {
-        // "71,5 Antritte" liest sich sonst wie ein Fehler.
-        const n = /function answerNenner\(model\) \{[\s\S]*?\n    \}/.exec(HUB)[0];
-        assert.match(n, /nach Turniergröße gewichtet/);
-        assert.match(n, /weighted by tournament size/);
+        /* "71,5 Antritte" liest sich sonst wie ein Fehler.
+
+           KORREKTUR 02.09.2026: hier stand "nach Turniergröße gewichtet".
+           Das war falsch — gewichtet wird nach AKTUALITAET (Turniere der
+           letzten sieben Tage 1,0, aeltere 0,5, siehe
+           backend/scrapers/online_tournament_scraper.py:361). Die
+           Zusicherung hat die falsche Erklaerung festgehalten, statt sie
+           zu finden.
+
+           Der Zweig greift ausserdem nur noch, wenn die Datei die
+           gezaehlten Spalten NICHT fuehrt; im Normalfall stehen dort
+           ganze Zahlen und gar kein Hinweis. */
+        const n = nenner();
+        assert.match(n, /nach Aktualität gewichtet/);
+        assert.match(n, /weighted by recency/);
+        assert.ok(!/nach Turniergröße gewichtet/.test(n),
+            'die falsche Begruendung ist zurueck');
         assert.match(n, /class="mah-gewichtet"/);
     });
 

@@ -29,6 +29,7 @@
 
     const LABELS = {
         de: {
+            stufeTitel: (stufe, pct) => `Stufe ${stufe} \u2014 der Wert liegt danach bei ${pct} des Ausgangswerts. Klick fuer die ganze Tabelle.`,
             tabTeams:    'Teams',
             tabResources:'Nachschlagen',
             heading:     'Nachschlagewerk',
@@ -61,6 +62,7 @@
             attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Deutsche Texte: PokéAPI',
         },
         en: {
+            stufeTitel: (stufe, pct) => `Stage ${stufe} \u2014 the stat then sits at ${pct} of its base. Click for the full table.`,
             tabTeams:    'Teams',
             tabResources:'Look up',
             heading:     'Reference',
@@ -209,6 +211,232 @@
         return `<div class="sq-res-movestats">${parts.join('')}</div>`;
     }
 
+    /* „Der Angriff steigt stark" — und wie viel ist das?
+
+       Die Stufentabelle steht im Reiter „Statuszustaende". Von den
+       Attackentexten aus war sie nicht zu finden: wer „senkt stark"
+       liest, weiss weiterhin nicht, ob das die Haelfte oder ein Drittel
+       ist. Die Zahl steht jetzt dort, wo das Wort steht.
+
+       ── WOHER DIE ZAHL KOMMT, UND WOHER NICHT ──────────────────────
+
+       Ein erster Entwurf las die Stufe aus dem DEUTSCHEN Text ab
+       ("stark" = 2, "drastisch" = 3). Die Abnahme am 02.09.2026 hat ihn
+       zerlegt, und zwar zu Recht:
+
+         · Er lief ueber alle 1268 Eintraege, nicht nur ueber die 494
+           Attacken. 84 Item- und Faehigkeitstexte trugen eine Marke, die
+           niemand geprueft hatte.
+         · Vier Faehigkeiten trugen die UMKEHRUNG ihrer Aussage:
+           "Hindert Angreifer daran, die Verteidigung zu senken" bekam
+           "-1 · 66,7 %".
+         · Aus Multiplikatoren wurden Stufen: Leben-Orb "erhoeht den
+           Schaden um 30 %" bekam "+1 · 150 %".
+         · Fadenschuss zeigte je nach Sprachschalter -1 oder -2 — dieselbe
+           Attacke, zwei Zahlen.
+
+       Die Ursache war nicht ein Fehler, sondern der Ansatz: deutscher
+       Fliesstext ist keine verlaessliche Quelle fuer eine Zahl.
+
+       Der englische Text ist es. Er ist formelhaft — "Raises the user's
+       Speed by 2 stages.", "Has a 100% chance to lower the target's
+       Attack by 1 stage." — und nennt die Stufenzahl ausdruecklich. Die
+       Zahl kommt deshalb IMMER von dort, in beiden Sprachfassungen.
+
+       Der deutsche Text wird nur noch benutzt, um die Marke zu
+       PLATZIEREN, nie um sie zu berechnen. Findet sich dort nicht genau
+       ein Richtungswort mit passendem Vorzeichen, bleibt der deutsche
+       Text unmarkiert — die Zahl waere richtig, aber niemand wuesste,
+       auf welchen der beiden Effekte sie sich bezieht.
+
+       ── WAS AUSDRUECKLICH KEINE MARKE BEKOMMT ──────────────────────
+
+         · alles ausser Attacken (cat !== 'move')
+         · Texte mit mehr als einer Stufenangabe — dann ist unklar,
+           welche gemeint ist
+         · Genauigkeit, Fluchtwert und Volltrefferquote: die folgen laut
+           den Daten selbst einer eigenen, flacheren Tabelle, deren
+           Zwischenwerte dort ausdruecklich NICHT belegt sind
+
+       Eine erfundene Zahl ist schlimmer als keine. */
+
+    // "raises ... by 2 stages" / "lowers ... by 1 stage". Der Punkt und
+    // das Semikolon begrenzen, damit sich die Angabe nicht ueber zwei
+    // Saetze zieht.
+    /* Auch die Partizip- und Verlaufsformen (Abnahme 02.09.2026):
+       "lowering the Speed by 1 stage" (Klebenetz), "have their Attack
+       lowered by 1 stage" (Koenigsschild). Dieselbe formelhafte
+       Struktur, nur eine andere Wortform — sie zu uebergehen hiess,
+       richtige Zahlen wegzulassen.
+
+       `by` ist wahlfrei, weil ein einziger Text es weglaesst
+       ("Raises the Attack of the user and all allies 1 stage.",
+       Heulschrei). Die Zahl vor "stage(s)" traegt die Aussage auch
+       ohne das Wort. */
+    const EN_STUFE = /\b(raise|raises|raising|raised|lower|lowers|lowering|lowered)\b([^.;]*?)\b(?:by\s+)?(one|two|three|1|2|3)\s+stages?\b/gi;
+    const EN_ZAHL = { one: 1, two: 2, three: 3, '1': 1, '2': 2, '3': 3 };
+
+    /* Genauigkeit, Fluchtwert und Volltrefferquote folgen NICHT dieser
+       Tabelle — das steht in data/champions_statuszustaende.json selbst:
+
+         gilt_fuer  "Angriff, Verteidigung, Spezial-Angriff,
+                     Spezial-Verteidigung und Initiative"
+         ausnahme   "Genauigkeit und Fluchtwert folgen einer eigenen,
+                     flacheren Tabelle ... Die Zwischenwerte stehen hier
+                     nicht, weil wir sie nicht Stufe fuer Stufe belegt
+                     haben."
+
+       Gemessen: zehn Attacken haetten sonst eine Zahl aus der falschen
+       Tabelle getragen. */
+    const AUSNAHME = /\b(evasi\w*|accuracy|critical hit)\b/i;
+
+    // Nur zum PLATZIEREN im deutschen Text — nie zum Rechnen.
+    const DE_RICHTUNG = /\b(erhöht|erhöhen|senkt|senken|steigt|steigen|sinkt|sinken|reduziert|verringert)\b/gi;
+
+    /* Die eine Stufenzahl eines Attackentextes — oder null.
+
+       null heisst: keine, mehr als eine, oder eine aus der anderen
+       Tabelle. In allen drei Faellen wird nichts markiert. */
+    /* Redet der Satz ueber eine ANDERE Attacke?
+
+       BEFUND (Abnahme 02.09.2026): Nebelfeld und Psychofeld tragen im
+       englischen Text den Satz "... and Secret Power has a 30% chance to
+       lower Special Attack by 1 stage." Das ist eine Aussage ueber
+       Kraftreserve, nicht ueber das Feld — die Marke sass am falschen
+       Eintrag. Lokal war sie wahr und deshalb besonders schwer zu sehen.
+
+       Geprueft wird gegen die Namen der anderen Attacken aus derselben
+       Datei, nicht gegen eine hier gepflegte Liste: zwei Listen waeren
+       zwei Wahrheiten, und diese eine ist ohnehin schon da. */
+    function fremdeAttacke(satz, eigenerName) {
+        const alle = _entries || [];
+        for (let i = 0; i < alle.length; i++) {
+            const e = alle[i];
+            if (e.cat !== 'move' || !e.en || e.en === eigenerName) continue;
+            // Kurze Namen wie "Rest" oder "Bind" stehen zu oft als
+            // gewoehnliches Wort im Text; erst ab zwei Woertern oder
+            // sechs Zeichen ist ein Treffer aussagekraeftig.
+            if (e.en.length < 6 && e.en.indexOf(' ') === -1) continue;
+            if (satz.indexOf(e.en) !== -1) return e.en;
+        }
+        return null;
+    }
+
+    function stufeAusEnglisch(enText, eigenerName) {
+        const text = enText || '';
+        EN_STUFE.lastIndex = 0;
+        let m, gefunden = null, anzahl = 0;
+        while ((m = EN_STUFE.exec(text)) !== null) {
+            anzahl++;
+            if (AUSNAHME.test(m[0])) return null;
+            // Der Satz um die Fundstelle.
+            const von = Math.max(0, text.lastIndexOf('.', m.index) + 1);
+            let bis = text.indexOf('.', m.index + m[0].length);
+            if (bis === -1) bis = text.length;
+            if (fremdeAttacke(text.slice(von, bis), eigenerName)) return null;
+            const n = EN_ZAHL[String(m[3]).toLowerCase()] || 1;
+            gefunden = /^raise/i.test(m[1]) ? n : -n;
+        }
+        return anzahl === 1 ? gefunden : null;
+    }
+
+    /* Wo im Text die Marke sitzt.
+
+       Englisch: auf der Stufenangabe selbst ("by 2 stages") — dort steht
+       die Aussage, und die Zahl zerreisst den Satz nicht.
+       Deutsch: auf dem einen Richtungswort, sofern es genau eins mit
+       passendem Vorzeichen gibt. */
+    function stufenTreffer(text, de, stufe) {
+        if (stufe == null || !text) return [];
+        if (!de) {
+            EN_STUFE.lastIndex = 0;
+            const m = EN_STUFE.exec(text);
+            if (!m) return [];
+            /* Markiert wird die Stufenangabe am Ende ("by 2 stages"),
+               nicht das Richtungswort am Anfang — sonst stuende die Zahl
+               mitten im Satz. Fehlt das "by", faengt die Marke bei der
+               Zahl an. */
+            const ganz = m[0];
+            const rel = ganz.toLowerCase().lastIndexOf('by ');
+            const zahlRel = ganz.search(/\b(one|two|three|1|2|3)\s+stages?\b/i);
+            const von = m.index + (rel >= 0 ? rel : (zahlRel >= 0 ? zahlRel : 0));
+            return [{ von, bis: m.index + ganz.length,
+                      wort: text.slice(von, m.index + ganz.length), stufe }];
+        }
+        DE_RICHTUNG.lastIndex = 0;
+        const alle = [];
+        let d;
+        while ((d = DE_RICHTUNG.exec(text)) !== null) {
+            const auf = /^(erh|steig)/i.test(d[1]);
+            alle.push({ von: d.index, bis: d.index + d[1].length, wort: d[1], auf });
+        }
+        if (alle.length !== 1) return [];
+        if (alle[0].auf !== (stufe > 0)) return [];
+        return [{ von: alle[0].von, bis: alle[0].bis, wort: alle[0].wort, stufe }];
+    }
+
+    let _stufen = null;          // stufe -> { prozent_de, prozent_en, bruch }
+    let _stufenAngefragt = false;
+    function stufenGeladen() {
+        const roh = window.SideQuestStufen;
+        if (!roh || !Array.isArray(roh)) {
+            /* Noch nicht da: einmal anfordern und danach neu zeichnen.
+               Ohne das haengt die Zahl davon ab, ob jemand vorher den
+               Reiter "Statuszustaende" geoeffnet hat — und der Text
+               saehe fuer zwei Leute verschieden aus. */
+            if (!_stufenAngefragt && window.sideQuestStatus
+                && typeof window.sideQuestStatus.stufen === 'function') {
+                _stufenAngefragt = true;
+                window.sideQuestStatus.stufen().then(function (t) {
+                    if (t && t.length) { _stufen = null; render(); }
+                });
+            }
+            return null;
+        }
+        if (_stufen) return _stufen;
+        _stufen = {};
+        roh.forEach(z => { _stufen[Number(z.stufe)] = z; });
+        return _stufen;
+    }
+
+    /* Nimmt den ROHEN Effekttext und gibt HTML zurueck. Der Text wird
+       stueckweise escaped — nie der zusammengesetzte String, sonst wuerde
+       die eigene Auszeichnung mit escaped. */
+    function mitStufenzahl(text, eintrag) {
+        // Nur Attacken. Faehigkeiten und Items reden ueber Multiplikatoren
+        // und ueber das VERHINDERN von Senkungen; beides ist keine Stufe.
+        if (!eintrag || eintrag.cat !== 'move') return escapeHtml(text);
+        const tab = stufenGeladen();
+        if (!tab) return escapeHtml(text);
+        const stufe = stufeAusEnglisch(eintrag.en_effect, eintrag.en);
+        if (stufe == null) return escapeHtml(text);
+        const z = tab[stufe];
+        if (!z) return escapeHtml(text);
+
+        /* Welche Sprache der TEXT hat, nicht welche die Oberflaeche hat
+           (Abnahme 02.09.2026). Zwoelf Attacken haben keinen deutschen
+           Text; effectFor() faellt dort auf den englischen zurueck. Nach
+           der Oberflaeche zu entscheiden hiess: derselbe englische
+           Satz trug im englischen UI eine Marke und im deutschen keine. */
+        const zeigtDeutsch = !!(eintrag.de_effect && eintrag.de_effect.trim())
+            && text === eintrag.de_effect;
+        const treffer = stufenTreffer(text, zeigtDeutsch, stufe);
+        const de = uiLang() === 'de';
+        if (!treffer.length) return escapeHtml(text);
+
+        const l = t();
+        const pct = de ? z.prozent_de : z.prozent_en;
+        const vz = stufe > 0 ? '+' : '';
+        const tr = treffer[0];
+        return escapeHtml(text.slice(0, tr.von))
+            + `<a class="sq-res-stufe" href="#side-quest-stufen"`
+            + ` data-sq-stufe="${escapeHtml(String(stufe))}"`
+            + ` title="${escapeHtml(l.stufeTitel(vz + stufe, pct))}"`
+            + `>${escapeHtml(tr.wort)}<span class="sq-res-stufe-pct">${
+                escapeHtml(vz + stufe + ' · ' + pct)}</span></a>`
+            + escapeHtml(text.slice(tr.bis));
+    }
+
     function renderEntry(e) {
         const lang = uiLang();
         const l = t();
@@ -220,7 +448,7 @@
             : '';
         const eff = effectFor(e);
         const effHtml = eff
-            ? escapeHtml(eff)
+            ? mitStufenzahl(eff, e)
             : `<span class="sq-res-noeff">${escapeHtml(l.noEffect)}</span>`;
         return `
             <li class="sq-res-entry sq-res-cat-${e.cat}${e.verified ? ' is-verified' : ''}">
@@ -338,6 +566,26 @@
             if (btn._sqWired) return;
             btn._sqWired = true;
             btn.addEventListener('click', () => toggleEffect(btn));
+        });
+        /* Der Sprung zur ganzen Stufentabelle. Der href bleibt echt
+           (Mittelklick, Tastatur, "Link kopieren" sollen funktionieren),
+           aber der normale Klick wechselt die Ansicht selbst — sonst
+           laedt die Seite neu und der aufgeklappte Effekttext ist weg. */
+        host.querySelectorAll('[data-sq-stufe]').forEach(a => {
+            if (a._sqWired) return;
+            a._sqWired = true;
+            a.addEventListener('click', (ev) => {
+                if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
+                ev.preventDefault();
+                ev.stopPropagation();
+                showView('status');
+                if (window.sideQuestStatus) window.sideQuestStatus.activate();
+                // Nach dem Zeichnen scrollen, sonst gibt es das Ziel noch nicht.
+                setTimeout(() => {
+                    const ziel = document.getElementById('szStufenTitel');
+                    if (ziel) ziel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                }, 120);
+            });
         });
     }
 
@@ -468,4 +716,11 @@
     // (js/app-side-quest-status.js); hier steht nur der Unterreiter.
 
     window.sideQuestResources = { showView, render, loadData };
+    /* Fuer die Tests: die Stufenerkennung einzeln pruefbar, ohne den
+       ganzen Renderer und ohne DOM. */
+    window._sqResIntern = {
+        mitStufenzahl, stufenTreffer, stufeAusEnglisch, fremdeAttacke, EN_ZAHL,
+        // Fuer die Tests: die Eintragsliste setzen, ohne zu laden.
+        setEntries: (e) => { _entries = e; },
+    };
 })();

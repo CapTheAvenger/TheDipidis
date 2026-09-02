@@ -1,3 +1,6 @@
+/* BLEIBT SCHMAL, mit Absicht: die Anleitung ist Fliesstext. Eine Zeile
+   ueber 2000 px ist unlesbar — dieselbe Begruendung, aus der css/styles.css
+   den Fliesstext auf 92ch haelt, auch wenn .container mitwaechst. */
 .tutorial-main-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -509,8 +512,12 @@
     padding: var(--proxy-pad);
     border-radius: 14px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    max-width: 1200px;
-    margin: 0 auto;
+    /* Waechst mit dem Fenster (02.09.2026): der Proxy-Drucker legt
+       Kartengitter aus, und die haben auf 2560 px Platz fuer mehr
+       Spalten. Dieselbe Regel wie .container in css/styles.css. */
+    width: min(100%, max(1200px, 92vw));
+    max-width: none;
+    margin-inline: auto;
     overflow: hidden;
 }
 /* Proxy banner unified with .header (Theme A Option 1) — same slim red

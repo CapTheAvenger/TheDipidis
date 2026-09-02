@@ -242,7 +242,18 @@ describe('matchups', () => {
         // fuer ein Summenzeichen ueber einer Zahlenspalte. W und L bleiben —
         // die sagt die Szene wirklich so.
         const html = api.matchupTableHtml('Dragapult');
-        assert.match(html, />Matches</, 'die Matchspalte heisst nicht mehr Σ');
+        /* NACHTRAG 02.09.2026: die Spalte heisst jetzt "M" — die acht
+           Spalten passen in eine 411 px breite Karte sonst nicht. Ein
+           Zeichen statt eines Wortes ist hier nur erlaubt, WEIL direkt
+           unter der Tabelle eine Legende steht, die es aufloest. Genau
+           daran fehlte es dem alten Σ. */
+        assert.ok(!/>\u03a3</.test(html),
+            'das Summenzeichen ist zurueck — "n ist gleich sagt nichts aus", '
+            + 'und ein Sigma sagt noch weniger');
+        assert.match(html, />M</, 'die Matchspalte ist verschwunden');
+        assert.match(html, /arc-mu-legende/,
+            'die Legende unter der Tabelle fehlt — dann steht dort ein '
+            + 'nacktes "M", das nichts aufloest');
         assert.ok(!/<th[^>]*>Σ<\/th>/.test(html), 'Σ ist zurueck');
         assert.match(html, /title="[^"]*gewonnene Matches[^"]*">W</);
         assert.match(html, /title="[^"]*verlorene Matches[^"]*">L</);

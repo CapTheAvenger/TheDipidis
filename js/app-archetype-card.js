@@ -883,9 +883,9 @@
                         <th>${esc(L('arc.colOpponent', de ? 'Gegner-Deck' : 'Deck'))}</th>
                         <th title="${esc(window.WinRateKonvention
                             ? window.WinRateKonvention.hinweis('ohneUnentschieden')
-                            : '')}">${esc(L('arc.colWinRate', 'Win Rate'))}</th>
+                            : '')}">${esc(L('arc.colWinRate', 'WR'))}</th>
                         <th title="${esc(L('arc.colGames', de ? 'gespielte Matches' : 'games played'))}">${
-                            esc(de ? 'Matches' : 'Games')}</th>
+                            esc(L('arc.colGamesKurz', 'M'))}</th>
                         <th title="${esc(de ? 'gewonnene Matches' : 'games won')}">W</th>
                         <th title="${esc(de ? 'verlorene Matches' : 'games lost')}">L</th>
                         <!-- T, nicht U. Gemeldet am 01.09.2026: "wenn man bei
@@ -912,15 +912,18 @@
                         <th title="${esc(L('arc.colMajorTip', de
                             ? 'Präsenzturniere: Matchpunkte (3 Siege + 1 Unentschieden) ÷ (3 × Matches) — eine andere Rechnung als die Win Rate links, weil die Quelle je Paarung keine Bilanz veröffentlicht.'
                             : 'In-person events: match points (3 wins + 1 tie) ÷ (3 × games) — a different calculation from the win rate on the left, because the source publishes no record per pairing.'))}">${
-                            esc(L('arc.colMajor', de ? 'Major-Punkte' : 'Major points'))}</th>
+                            esc(L('arc.colMajor', de ? 'Major-P' : 'Major-P'))}</th>
                         <th title="${esc(L('arc.colMajorN', de
                             ? 'Präsenzpartien dieser Paarung'
                             : 'in-person games for this pairing'))}">${
-                            esc(de ? 'Major-Matches' : 'Major matches')}</th>
+                            esc(L('arc.colMajorNKurz', 'Major-M'))}</th>
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>
-            </div>${note}`;
+            </div>
+            <p class="arc-mu-legende">${esc(L('arc.muLegende', de
+                ? 'WR = Win Rate · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-P = Matchpunkte auf Präsenzturnieren, Major-M die Matches dahinter'
+                : 'WR = win rate · M = matches · W/L/T = wins / losses / ties · Major-P = match points at in-person events, Major-M the matches behind them'))}</p>${note}`;
         if (!collapsed) return table;
         // Closed by default inline: the tiles are the scroll content, the
         // table is a reference you open when you need it. Otherwise a

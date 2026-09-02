@@ -633,12 +633,32 @@
                 let html = `
                     <div id="matchupHeatmapContainer" class="heatmap-container">
                         <h2 class="heatmap-title"><span style="font-size: 1.2em;"></span> ${t('heatmap.title')}</h2>
-                        <p class="heatmap-desc">
-                            ${t('heatmap.desc')}
-                            <span class="heatmap-key heatmap-key-fav"></span> ${t('heatmap.favorable')} (≥ 55 %),
-                            <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45–54,9 %),
-                            <span class="heatmap-key heatmap-key-unfav"></span> ${t('heatmap.unfavorable')} (≤ 45 %)
-                        </p>
+                        <!-- Beschreibung links, Legende rechts.
+                             Rechts oben stand bisher nichts (mit rotem Kreis
+                             markiert gemeldet), waehrend im Gitter 100-mal
+                             "Win Rate" und "Matches" ausgeschrieben standen
+                             und die Zellen breit machten. Der Betreiber:
+                             "vll sollten wir hier eine legende machen und
+                             sagen das WR = Win Rate ist und Games = G oder
+                             Matches … oder Matches = M weil sonst sind die
+                             Zellen zu breit."
+                             Also: die Woerter einmal an einer Stelle, die
+                             Kuerzel in den Zellen. -->
+                        <div class="heatmap-kopf">
+                            <p class="heatmap-desc">
+                                ${t('heatmap.desc')}
+                                <span class="heatmap-key heatmap-key-fav"></span> ${t('heatmap.favorable')} (≥ 55 %),
+                                <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45–54,9 %),
+                                <span class="heatmap-key heatmap-key-unfav"></span> ${t('heatmap.unfavorable')} (≤ 45 %)
+                            </p>
+                            <dl class="heatmap-legende">
+                                <dt>${t('heatmap.wrLabel')}</dt><dd>${t('heatmap.legendeWr')}</dd>
+                                <dt>${t('heatmap.gamesShort')}</dt><dd>${t('heatmap.legendeM')}</dd>
+                                <dt>${t('heatmap.onlineLabel')}</dt><dd>${t('heatmap.legendeOnline')}</dd>
+                                <dt>${t('heatmap.majorLabel')}</dt><dd>${t('heatmap.legendeMajor')}</dd>
+                                <dt><i>${t('heatmap.legendeKursivKurz')}</i></dt><dd>${t('heatmap.legendeKursiv')}</dd>
+                            </dl>
+                        </div>
                         ${searchControlsHtml}
                         <div class="heatmap-table-scroll">
                             ${tableHtml}

@@ -10023,7 +10023,10 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
  * Quote darueber zu nehmen ist. */
 .heatmap-zelle {
     display: grid;
-    grid-template-columns: 52px 1fr 1fr;
+    /* 26 px reichen fuer "WR" und "M" — vorher standen dort "Win Rate"
+       und "Matches" ausgeschrieben und brauchten 52. Die Woerter stehen
+       jetzt einmal in der Legende ueber dem Gitter. */
+    grid-template-columns: 26px 1fr 1fr;
     gap: 1px 6px;
     align-items: baseline;
     text-align: right;
@@ -10055,6 +10058,56 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     margin: 1px 0;
 }
 .heatmap-zelle-duenn { font-style: italic; }
+
+/* Beschreibung links, Legende rechts (02.09.2026).
+   Rechts oben war leer, waehrend im Gitter 100-mal "Win Rate" und
+   "Matches" ausgeschrieben standen. Jetzt stehen die Woerter einmal
+   hier und die Kuerzel in den Zellen — das spart je Spalte rund 30 px. */
+.heatmap-kopf {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px 28px;
+    justify-content: space-between;
+}
+.heatmap-kopf > .heatmap-desc {
+    flex: 1 1 420px;
+    min-width: 0;
+    margin: 0;
+}
+.heatmap-legende {
+    flex: 0 1 auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 10px;
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--line, #2a3a5e);
+    border-radius: 8px;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    align-content: start;
+}
+.heatmap-legende dt {
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+.heatmap-legende dd {
+    margin: 0;
+    opacity: 0.85;
+}
+
+/* Die Legende unter der Matchup-Tabelle. Dieselbe Idee: die Kuerzel in
+   der Kopfzeile bleiben kurz, das Wort steht einmal darunter. Damit
+   passen die acht Spalten wieder ohne waagerechtes Scrollen. */
+.arc-mu-legende {
+    margin: 6px 12px 10px;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    color: var(--arc-ink3);
+}
 
 /* Wenig Partien: gestrichelt, nicht blass.
 
@@ -11167,7 +11220,7 @@ body.arc-open { overflow: hidden; }
 #archetypeCardOverlay .arc-card .mobile-table-scroll .arc-mu-table,
 #currentMetaContent .mobile-table-scroll .arc-mu-table,
 #archetypeCardOverlay .mobile-table-scroll .arc-mu-table {
-    min-width: 480px;
+    min-width: 411px;
 }
 #currentMetaContent .arc-mu-table thead,
 #archetypeCardOverlay .arc-mu-table thead { display: table-header-group; }
@@ -11220,11 +11273,11 @@ body.arc-open { overflow: hidden; }
 #currentMetaContent .arc-mu-table th:nth-child(2),
 #currentMetaContent .arc-mu-table td:nth-child(2),
 #archetypeCardOverlay .arc-mu-table th:nth-child(2),
-#archetypeCardOverlay .arc-mu-table td:nth-child(2) { width: 80px; }
+#archetypeCardOverlay .arc-mu-table td:nth-child(2) { width: 58px; }
 #currentMetaContent .arc-mu-table th:nth-child(n+3),
 #currentMetaContent .arc-mu-table td:nth-child(n+3),
 #archetypeCardOverlay .arc-mu-table th:nth-child(n+3),
-#archetypeCardOverlay .arc-mu-table td:nth-child(n+3) { width: 66px; }
+#archetypeCardOverlay .arc-mu-table td:nth-child(n+3) { width: 36px; }
 /* W, L und U sind ein- bis dreistellige Zahlen — 58 px sind dafuer zu viel,
    seit die Unentschieden als eigene Spalte dazugekommen sind (20.08.2026).
    Mit 42 px und einer auf 88 px verschmaelerten Quote-Spalte bleiben auf
@@ -11252,11 +11305,11 @@ body.arc-open { overflow: hidden; }
 #currentMetaContent .arc-mu-table th:nth-child(7),
 #currentMetaContent .arc-mu-table td:nth-child(7),
 #archetypeCardOverlay .arc-mu-table th:nth-child(7),
-#archetypeCardOverlay .arc-mu-table td:nth-child(7) { width: 54px; }
+#archetypeCardOverlay .arc-mu-table td:nth-child(7) { width: 52px; }
 #currentMetaContent .arc-mu-table th:nth-child(8),
 #currentMetaContent .arc-mu-table td:nth-child(8),
 #archetypeCardOverlay .arc-mu-table th:nth-child(8),
-#archetypeCardOverlay .arc-mu-table td:nth-child(8) { width: 66px; }
+#archetypeCardOverlay .arc-mu-table td:nth-child(8) { width: 50px; }
 /* Ohne Ausrufezeichen: der einzige Gegenspieler ist `table thead` aus
    css/styles.css:839 mit Element-Spezifitaet (0,0,1). Diese Regel hier
    liegt bei (1,1,1) und gewinnt ohnehin. */

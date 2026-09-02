@@ -74,20 +74,29 @@ describe('Die Datei wird nur einmal gelesen', () => {
 describe('Die beiden Spalten heissen verschieden', () => {
 
     it('die Praesenzspalte heisst nicht "Win Rate"', () => {
-        assert.ok(/arc\.colMajor'/.test(karte),
-            'die Beschriftung der Praesenzspalte fehlt');
-        const i18n = lies(path.join('js', 'i18n.js'));
-        const m = i18n.match(/'arc\.colMajor':\s*'([^']*)'/g) || [];
-        assert.strictEqual(m.length, 2,
-            `'arc.colMajor' steht ${m.length}× in i18n.js, erwartet 2 (deutsch und englisch)`);
-        for (const s of m) {
-            assert.ok(!/Win Rate/i.test(s),
-                'die Praesenzspalte heisst wieder "Win Rate" — sie rechnet aber '
-                + 'Matchpunkte, die Spalte links S/(S+N). Zwei Namen fuer zwei '
-                + 'Groessen ist in Ordnung, ein Name fuer zwei nicht');
-            assert.ok(/Punkte|points/i.test(s),
-                'der Name sagt nicht mehr, dass es Punkte sind: ' + s);
+        /* Links steht S/(S+N), rechts stehen MATCHPUNKTE (3S+U)/3n. Zwei
+           Spalten mit demselben Namen und zwei Rechnungen waeren genau der
+           Fehler, den diese Seite seit Wochen abarbeitet.
+
+           Seit dem 02.09.2026 heisst die Spalte kurz "Major-P" — die
+           Kopfzeile hat in einer 411 px breiten Karte keinen Platz fuer
+           mehr. Aufgeloest wird das Kuerzel in der Legende direkt unter
+           der Tabelle; ein Kuerzel ohne Legende bleibt verboten. */
+        const I18N = lies(path.join('js', 'i18n.js'));
+        const werte = [...I18N.matchAll(/'arc\.colMajor':\s*'([^']*)'/g)].map(m => m[1]);
+        assert.ok(werte.length >= 1, 'arc.colMajor fehlt in i18n.js');
+        for (const w of werte) {
+            assert.ok(!/win\s*rate/i.test(w),
+                `die Praesenzspalte heisst "${w}" — dieselbe Ueberschrift `
+                + 'wie die Siegquote links, obwohl es Matchpunkte sind');
         }
+        const leg = [...I18N.matchAll(/'arc\.muLegende':\s*'([^']*)'/g)].map(m => m[1]);
+        assert.strictEqual(leg.length, 2,
+            `arc.muLegende steht ${leg.length}× in i18n.js, erwartet 2`);
+        const deL = leg.find(z => /Matchpunkte/.test(z));
+        assert.ok(deL, 'die deutsche Legende nennt die Matchpunkte nicht mehr');
+        assert.ok(/Major-P/.test(deL),
+            'die Legende loest "Major-P" nicht mehr auf');
     });
 
     it('der Spaltenkopf erklaert die Rechnung', () => {
@@ -263,10 +272,20 @@ describe('Die acht Spalten passen, oder die Tabelle scrollt', () => {
             'der Behaelter steht wieder auf visible. Acht Spalten passen '
             + 'in eine 411 px breite Karte nicht: allein "Matches" braucht '
             + '66 px und kommt zweimal vor (online und Major)');
-        assert.match(css, /\.mobile-table-scroll \.arc-mu-table[^{]*\{[^}]*min-width:\s*480px/,
+        const mb = /\.mobile-table-scroll \.arc-mu-table[^{]*\{[^}]*min-width:\s*(\d+)px/.exec(css);
+        assert.ok(mb,
             'die Mindestbreite der Tabelle fehlt. Sie steht auf '
             + '`table-layout: fixed`, dort werden min-width-Angaben auf '
             + 'ZELLEN ignoriert — ohne sie draengt der Browser die '
             + 'Deckspalte auf 25 px zusammen');
+        // Sie muss zur Summe der acht Spaltenbreiten passen, sonst
+        // schrumpft der Browser wieder irgendeine davon zusammen.
+        const breiten = [...css.matchAll(
+            /#currentMetaContent \.arc-mu-table th:nth-child\((\d+)\)[\s\S]{0,400}?\{\s*(?:[^}]*?)width:\s*(\d+)px/g)]
+            .map(m => Number(m[2]));
+        const summe = breiten.reduce((a, b) => a + b, 0);
+        assert.ok(Number(mb[1]) >= summe,
+            `die Mindestbreite steht auf ${mb[1]} px, die gesetzten `
+            + `Spaltenbreiten summieren sich aber auf ${summe} px`);
     });
 });

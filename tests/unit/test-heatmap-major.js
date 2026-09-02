@@ -174,15 +174,45 @@ describe('Die Zelle zeigt beide Zahlen mit ihrer Herkunft', () => {
             'die Zeilenbeschriftung fuer die Matches fehlt — eine nackte Zahl '
             + 'in der Zelle war schon einmal der Befund ("n ist gleich sagt '
             + 'nichts aus")');
-        // Und sie heisst ueberall gleich: "Matches", nicht "Partien".
+        /* Die Zellen tragen seit dem 02.09.2026 Kuerzel: "WR" und "M".
+           Ausgeschrieben standen die Woerter 100-mal im Gitter und machten
+           jede Spalte 50 px breiter. Der Betreiber: "vll sollten wir hier
+           eine legende machen … oder Matches = M weil sonst sind die
+           Zellen zu breit."
+
+           Erlaubt ist das NUR mit Legende — ein nacktes Kuerzel war am
+           selben Tag der Befund ("mit M kann man erstmal nichts
+           anfangen"). Also wird hier beides zugesichert: das Kuerzel in
+           der Zelle UND sein Wort in der Legende darueber. */
         const i18n = lies(path.join('js', 'i18n.js'));
-        const gs = [...i18n.matchAll(/'heatmap\.gamesShort':\s*'([^']*)'/g)].map(m => m[1]);
-        assert.strictEqual(gs.length, 2,
-            `heatmap.gamesShort steht ${gs.length}× in i18n.js, erwartet 2`);
-        for (const w of gs) {
-            assert.strictEqual(w, 'Matches',
-                `die Matchzahl heisst hier "${w}" — der Betreiber wollte `
-                + '"Matches wie ueberall woanders auch"');
+        for (const [schluessel, wort] of [['heatmap.legendeWr', /[Ww]in [Rr]ate/],
+                                           ['heatmap.legendeM', /[Mm]atches/]]) {
+            const w = [...i18n.matchAll(
+                new RegExp(`'${schluessel.replace('.', '\\.')}':\\s*'([^']*)'`, 'g'))]
+                .map(m => m[1]);
+            assert.strictEqual(w.length, 2,
+                `${schluessel} steht ${w.length}× in i18n.js, erwartet 2 (de und en)`);
+            for (const t of w) {
+                assert.match(t, wort,
+                    `die Legende loest ${schluessel} nicht mehr auf ("${t}")`);
+            }
+        }
+        /* Auf den GEZEICHNETEN Block pruefen, nicht auf das Vorkommen des
+           Schluessels. Die erste Fassung blieb gruen, als der Aufruf
+           kaputtgemacht wurde — der Schluesselname stand ja weiter da. */
+        const jsQ = lies(path.join('js', 'app-current-meta.js'));
+        const iL = jsQ.indexOf('class="heatmap-legende"');
+        assert.ok(iL > 0,
+            'der Legendenblock ist aus dem Markup verschwunden — dann stehen '
+            + 'im Gitter nur noch WR und M, und nichts sagt, was das ist');
+        const block = jsQ.slice(iL, jsQ.indexOf('</dl>', iL));
+        assert.ok(block.length > 40, 'der Legendenblock ist leer');
+        for (const sch of ['heatmap.wrLabel', 'heatmap.legendeWr',
+                           'heatmap.gamesShort', 'heatmap.legendeM',
+                           'heatmap.onlineLabel', 'heatmap.majorLabel']) {
+            assert.ok(new RegExp(`\\$\\{t\\('${sch.replace('.', '\\.')}'\\)\\}`).test(block),
+                `die Legende ruft ${sch} nicht mehr auf — der Eintrag fehlt `
+                + 'oder wird nicht mehr eingesetzt');
         }
     });
 

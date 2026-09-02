@@ -81,7 +81,31 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {
         // hier fiel es dem Nutzer auf: die Tabelle sagte Win Rate, die
         // Karte daneben Siegquote.
         assert.match(read('js/app-archetype-card.js'), /L\('arc\.wrLabel', 'Win Rate'\)/);
-        assert.match(read('js/app-archetype-card.js'), /L\('arc\.colWinRate', 'Win Rate'\)/);
+        /* NACHTRAG 02.09.2026 — die Regel ist jetzt schaerfer, nicht loser.
+
+           In der Matchup-Tabelle heisst die Spalte "WR". Das ist erlaubt,
+           WEIL direkt darunter eine Legende steht, die sie aufloest. Der
+           Anlass war Platz: ausgeschrieben brauchten die acht Spalten
+           mehr, als die Karte hat, und der Betreiber schlug es selbst vor
+           ("vll sollten wir hier eine legende machen … oder Matches = M
+           weil sonst sind die Zellen zu breit").
+
+           Ein Kuerzel ohne Legende faellt damit weiterhin durch — genau
+           das war der Befund zu "M 49,4 % · 52" am selben Tag. */
+        const legende = /'arc\.muLegende'/.test(read('js/app-archetype-card.js'))
+            || /arc\.muLegende/.test(I18N);
+        assert.ok(legende,
+            'die Legende unter der Matchup-Tabelle ist weg. Dann stehen dort '
+            + 'nur noch Kuerzel (WR, M, Major-P), die nichts aufloest');
+        for (const [kuerzel, wort] of [['WR', 'Win Rate'], ['M', 'Matches'],
+                                        ['Major-P', 'Matchpunkte']]) {
+            const zeilen = [...I18N.matchAll(/'arc\.muLegende':\s*'([^']*)'/g)]
+                .map(m => m[1]);
+            assert.ok(zeilen.length >= 1, 'arc.muLegende fehlt in i18n.js');
+            const de_zeile = zeilen.find(z => /Matchpunkte/.test(z)) || zeilen[0];
+            assert.ok(de_zeile.includes(kuerzel) && de_zeile.includes(wort),
+                `die Legende loest "${kuerzel}" nicht mehr nach "${wort}" auf`);
+        }
         assert.match(read('js/ds-share.js'), /'Win Rate'/);
         assert.match(read('js/app-tier-meta.js'), /Win Rate/);
         assert.match(read('js/ds-ev-rechner.js'), /Erwartete Win Rate/);

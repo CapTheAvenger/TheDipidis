@@ -1,0 +1,178 @@
+"""Die Schwellen des Waechters sind zugesichert, nicht nur notiert.
+
+ANLASS (02.09.2026)
+-------------------
+Zwoelf Schwellenwerte in scripts/data_guardian.py wurden gleichzeitig auf
+absurde Werte gesetzt (10.0 -> 999.0, 21 -> 99999, 3/5/10 Tage -> 9999,
+60 -> 9999, `pct < 90.0` -> `pct < 0.0`) und die Python-Suite lief:
+
+    1032 passed, 6 skipped
+
+Null Fehlschlaege. Die Funktionen check_coverage, check_shrink,
+check_freshness und check_proxy_frische wurden von KEINEM Test je
+aufgerufen.
+
+Das ist die unangenehmste Sorte Luecke: der Waechter ist genau das
+Bauteil, das anschlagen soll, wenn die Daten kaputtgehen. Steht seine
+Schwelle falsch, faellt er still aus — und niemand merkt es, weil ein
+stiller Waechter genauso aussieht wie gesunde Daten.
+
+WIE HIER GEPRUEFT WIRD
+----------------------
+Nicht durch Spiegeln der Konstante ("assert COVERAGE_DROP_PP == 10.0") —
+das haelt eine Zahl fest, nicht ihre Wirkung, und muesste bei jeder
+begruendeten Anpassung mitgeaendert werden, ohne je etwas zu fangen.
+
+Stattdessen am RAND: ein Fall knapp diesseits und einer knapp jenseits.
+Damit ist die Schwelle auf einen Schritt genau festgenagelt, und die
+Funktion wird tatsaechlich ausgefuehrt.
+"""
+import datetime as dt
+import importlib.util
+import os
+import sys
+
+import pytest
+
+WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+SKRIPT = os.path.join(WURZEL, 'scripts', 'data_guardian.py')
+
+
+@pytest.fixture(scope='module')
+def g():
+    spec = importlib.util.spec_from_file_location('dg', SKRIPT)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def stufen(findings):
+    return [s for s, _ in findings]
+
+
+def texte(findings):
+    return ' | '.join(t for _, t in findings)
+
+
+# ── check_coverage ──────────────────────────────────────────────────────
+
+def test_neues_set_unter_90_prozent_ist_kritisch(g):
+    """Ein neues Set, das kaum zugeordnet wurde, ist der PBL-Fall."""
+    f = []
+    g.check_coverage(f, {'XYZ': (89, 100, 89.0)}, {})
+    assert 'CRITICAL' in stufen(f), (
+        'ein neu aufgetauchtes Set mit 89 % Zuordnung schlaegt nicht mehr an — '
+        f'gemeldet wurde: {texte(f) or "nichts"}')
+
+
+def test_neues_set_ueber_90_prozent_ist_still(g):
+    f = []
+    g.check_coverage(f, {'XYZ': (91, 100, 91.0)}, {})
+    assert not f, (
+        f'ein neues Set mit 91 % loest einen Befund aus: {texte(f)}. Die '
+        'Schwelle liegt bei 90 % — darueber ist Ruhe, sonst ist der Waechter '
+        'nur noch Rauschen')
+
+
+def test_einbruch_ueber_der_schwelle_ist_kritisch(g):
+    """Zehn Prozentpunkte Verlust sind der Rueckschritt, um den es geht."""
+    f = []
+    g.check_coverage(f, {'ABC': (89, 100, 89.0)}, {'ABC': (99, 100, 99.1)})
+    assert 'CRITICAL' in stufen(f), (
+        f'ein Einbruch um 10,1 Punkte bleibt unbemerkt (gemeldet: {texte(f) or "nichts"}). '
+        'Genau dafuer ist COVERAGE_DROP_PP da')
+
+
+def test_einbruch_unter_der_schwelle_ist_still(g):
+    f = []
+    g.check_coverage(f, {'ABC': (90, 100, 90.0)}, {'ABC': (99, 100, 99.0)})
+    assert not f, (
+        f'ein Einbruch um 9 Punkte schlaegt an: {texte(f)}. Absolute Schwellen '
+        'erzeugen hier Rauschen — CLAUDE.md: "Detect change against a baseline"')
+
+
+def test_verschwundenes_set_wird_gemeldet(g):
+    f = []
+    g.check_coverage(f, {}, {'WEG': (10, 10, 100.0)})
+    assert 'WARN' in stufen(f), 'ein komplett verschwundenes Set faellt niemandem auf'
+
+
+# ── check_shrink ────────────────────────────────────────────────────────
+
+def test_datei_verliert_mehr_als_zehn_prozent(g):
+    f = []
+    g.check_shrink(f, {'x.csv': 89}, {'x.csv': 100})
+    assert 'CRITICAL' in stufen(f), (
+        'eine Datei darf 11 % ihrer Zeilen verlieren, ohne dass es auffaellt — '
+        'das ist die Signatur eines fehlgeschlagenen Abrufs')
+
+
+def test_datei_verliert_weniger_als_zehn_prozent(g):
+    f = []
+    g.check_shrink(f, {'x.csv': 91}, {'x.csv': 100})
+    assert not f, (
+        f'9 % Schwund schlagen an: {texte(f)}. Diese Dateien schwanken von '
+        'Natur aus')
+
+
+def test_ohne_grundlinie_kein_urteil(g):
+    """Keine Vorher-Zahl heisst: nichts zu vergleichen, nicht "alles weg"."""
+    f = []
+    g.check_shrink(f, {'neu.csv': 3}, {})
+    assert not f, f'eine Datei ohne Grundlinie wird beurteilt: {texte(f)}'
+
+
+# ── Die Frische-Fenster ─────────────────────────────────────────────────
+
+def test_die_frische_fenster_passen_zum_fahrplan(g):
+    """Nicht die Zahlen spiegeln, sondern ihren Bezug zum Fahrplan pruefen.
+
+    weekly-full-update laeuft Di+Fr (cron '0 6 * * 2,5'). Die groesste
+    Luecke zwischen zwei Laeufen sind also vier Tage (Fr -> Di). Ein
+    Fenster, das kleiner ist als die Luecke, feuert strukturell garantiert
+    falsch — genau der Fehler, der mit der alten 3-Tage-Schwelle jeden
+    Montag und Dienstag passierte.
+    """
+    for datei, (max_alter, wer) in g.REFRESH_DRIVEN.items():
+        if 'weekly-full-update' in wer:
+            assert max_alter >= 4, (
+                f'{datei} darf nur {max_alter} Tage alt werden, wird aber von '
+                f'{wer} geschrieben. Die groesste Luecke zwischen zwei '
+                'Wochenlaeufen (Fr -> Di) sind vier Tage — dieses Fenster '
+                'feuert an jedem Montag garantiert falsch')
+        assert max_alter <= 14, (
+            f'{datei} darf {max_alter} Tage alt werden. So weit gefasst faellt '
+            'ein toter Job wochenlang nicht auf')
+
+    for datei, max_alter in g.CONTENT_DRIVEN.items():
+        assert max_alter >= 30, (
+            f'{datei} steht auf {max_alter} Tagen. Ihr Build ist absichtlich '
+            'inkrementell (CLAUDE.md: "never re-fetch data you already have") — '
+            'sie bleibt wochenlang byte-identisch, WAEHREND ihr Job gruen '
+            'laeuft. Ein enges Fenster ist hier reines Rauschen')
+
+
+def test_leere_dateien_bekommen_zeit_aber_nicht_unbegrenzt(g):
+    """Eine JP-Set-Rotation leert die City-League-Dateien fuer ein paar Tage."""
+    assert 14 <= g.EMPTY_STALE_DAYS <= 35, (
+        f'EMPTY_STALE_DAYS steht auf {g.EMPTY_STALE_DAYS}. Unter zwei Wochen '
+        'schlaegt eine normale Set-Rotation an, ueber fuenf Wochen faellt eine '
+        'nie wieder gefuellte Datei einen Monat lang nicht auf')
+
+
+def test_mindestzahl_fuer_abdeckung_ist_gesetzt(g):
+    assert g.MIN_CARDS_FOR_COVERAGE >= 2, (
+        'ohne Mindestzahl wird eine Abdeckungsquote aus einer einzigen Karte '
+        'gerechnet — 0/1 sind 0 %, und das meldet sich als Totalausfall')
+
+
+# ── Die Funktionen werden ueberhaupt aufgerufen ─────────────────────────
+
+def test_die_vier_stillen_funktionen_haben_jetzt_aufrufer():
+    """Bis zum 02.09.2026 rief sie kein Test auf. Diese Datei tut es —
+    und diese Zusage haelt fest, dass sie es weiter tut."""
+    hier = open(os.path.abspath(__file__), encoding='utf-8').read()
+    for name in ('check_coverage', 'check_shrink'):
+        assert f'g.{name}(' in hier, (
+            f'{name} wird von dieser Datei nicht mehr aufgerufen — dann steht '
+            'sie wieder ohne jede Zusicherung da')

@@ -133,10 +133,17 @@ sie an jedem Tag etwas zu zeigen.
 Nicht entfernt, sondern noch nicht gebaut — hier notiert, damit sie
 nicht in einem Gesprächsverlauf verschwinden.
 
-* **Damage Calculator** nach dem Vorbild von
+* ~~**Damage Calculator** nach dem Vorbild von
   `nerd-of-now.github.io/NCP-VGC-Damage-Calculator/`, mit dem eigenen
   Team und den sechs des Gegners, von denen man die vier tatsächlich
-  mitgebrachten aktiv schaltet; Übergabe direkt aus dem Team-Bereich.
+  mitgebrachten aktiv schaltet; Übergabe direkt aus dem Team-Bereich.~~
+  **Gebaut am 02.09.2026.** Champions → Matchups → „Team-Rechner öffnen",
+  oder direkt aus dem Team-Builder über „Im Rechner öffnen". Die Matrix
+  zeigt je Paar beide Richtungen mit Spanne, K.-o.-Zahl, Attackenname und
+  Initiative; ein Klick auf eine Zelle öffnet das Paar einzeln mit allen
+  Attacken und dem Set-Editor. Gerechnet wird über dasselbe
+  `bestMove()`/`ChampionsDamage` wie die Einzelansicht — ein zweiter
+  Rechenweg wäre der sichere Weg zu zwei Antworten auf dieselbe Frage.
 * **Statusstufen bei Champions** dort erklären, wo „steigt stark" und
   „sinkt drastisch" stehen: +1/+2/+3 sind 150/200/250 %, Maximum +6 =
   400 %; −1/−2/−3 sind 66/50/40 %, Minimum −6 = 25 %.

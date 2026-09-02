@@ -2993,3 +2993,169 @@ body.sqp-d-open { overflow: hidden; }
 .sq-console .sq-mu-spd { flex-direction: column; align-items: flex-start; gap: 0; line-height: 1.25; }
 .sq-console .sq-mu-spd-n { display: flex; align-items: baseline; gap: 5px; }
 .sq-console .sq-mu-spd-n i::before { content: "vs "; color: var(--sq-dim2); }
+
+/* ── Team-Rechner (02.09.2026) ───────────────────────────────────────
+   Eigenes Team gegen die sechs des Gegners, davon vier aktiv. Die
+   Konsole bringt ihren eigenen dunklen Satz --sq-* mit und ist in
+   beiden Seitenmodi dieselbe — deshalb steht hier kein zweiter
+   Farbsatz, sondern es werden dieselben Marken benutzt wie in der
+   Matchup-Tabelle darueber. Gruen ist, was du austeilst, rot, was du
+   einsteckst; das gilt eine Ansicht weiter oben genauso.
+
+   --sq-gut / --sq-schlecht sind exakt die beiden Farben aus
+   .sq-mu-bar.is-deal / .is-take. Als Marke statt als Literal, damit
+   nicht die dritte Stelle entsteht, an der dasselbe Gruen nochmal
+   von Hand steht. */
+.sq-console .sq-team {
+    --sq-gut: #6fdca0; --sq-schlecht: #ff8f7a; --sq-patt: #8791b8;
+    display: flex; flex-direction: column; gap: 12px; padding: 14px;
+}
+.sq-console .sq-team-hinweis {
+    margin: 0; color: var(--sq-dim); font-size: 11.5px; max-width: 78ch;
+}
+
+/* Die Bank: ein Chip je Pokemon, angeklickt schaltet er sich aus dem
+   Kampf. Ausgeschaltet bleibt er lesbar — ausgegraut heisst hier
+   "nicht dabei", nicht "kaputt".
+
+   Schalter und Kreuz liegen NEBENEINANDER in einer Gruppe, nicht
+   ineinander: ein Bedienelement in einem <button> ist ungueltiges HTML
+   und laesst Tastatur und Screenreader raten. */
+.sq-console .sq-team-bank { display: flex; flex-wrap: wrap; gap: 7px; }
+.sq-console .sq-team-chipgruppe {
+    display: inline-flex; align-items: stretch;
+    border: .8px solid var(--sq-line); border-radius: 999px; overflow: hidden;
+    background: var(--sq-deep);
+}
+/* Ohne Set oder ohne Angriffsattacke kann die Zeile nicht gerechnet
+   werden. Das steht am Chip, nicht erst in der leeren Matrixzelle —
+   sonst sucht man den Grund an der falschen Stelle. */
+.sq-console .sq-team-chipgruppe.is-ohne-set { border-style: dashed; }
+.sq-console .sq-team-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: 0; padding: 5px 10px;
+    color: var(--sq-dim); font: inherit; font-size: 11.5px;
+    cursor: pointer; transition: background .12s, color .12s;
+}
+.sq-console .sq-team-chipgruppe:hover { border-color: var(--sq-accent); }
+.sq-console .sq-team-chip:focus-visible,
+.sq-console .sq-team-chip-weg:focus-visible {
+    outline: 2px solid var(--sq-accent2); outline-offset: -2px;
+}
+.sq-console .sq-team-chip.is-an {
+    background: rgba(85,102,224,.22); color: var(--sq-txt);
+    box-shadow: inset 0 0 0 .8px var(--sq-accent);
+}
+.sq-console .sq-team-chip-name small {
+    display: block; font-size: 10px; color: var(--sq-dim2); line-height: 1.2;
+}
+.sq-console .sq-team-chip-warn {
+    font-style: normal; font-size: 10px; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--sq-schlecht);
+}
+.sq-console .sq-team-chip-weg {
+    background: none; border: 0; border-left: .8px solid var(--sq-line);
+    line-height: 1; padding: 0 8px; color: var(--sq-dim2);
+    font: inherit; font-size: 13px; cursor: pointer;
+}
+.sq-console .sq-team-chip-weg:hover { color: var(--sq-schlecht); }
+
+/* Fuer Screenreader, nicht fuer das Auge: das Urteil der Zelle als Text.
+   Die Farbkante allein traegt es nicht — weder bei Rot-Gruen-Schwaeche
+   noch beim Vorlesen. */
+.sq-console .sq-nur-vorlesen {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+.sq-console .sq-team-zaehler {
+    margin: 8px 0 0; font-family: var(--sq-num); font-size: 10.5px; color: var(--sq-dim2);
+}
+.sq-console .sq-team-zuviel { color: var(--sq-accent2); cursor: help; }
+
+.sq-console .sq-team-vorschlag { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.sq-console .sq-team-vorschlag button {
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
+    color: var(--sq-txt); font: inherit; font-size: 11.5px; padding: 4px 9px; cursor: pointer;
+}
+.sq-console .sq-team-vorschlag button:hover { border-color: var(--sq-accent); }
+
+/* Die Matrix. Breite Tabellen scrollen in ihrem eigenen Kasten, nie
+   die Seite — dieselbe Regel wie ueberall sonst im Projekt. */
+.sq-console .sq-team-matrixwrap { overflow-x: auto; }
+/* Kein festes min-width auf der Tabelle: die Zellen bringen mit
+   ihren 122px selbst genug Breite mit, und ein Riegel von 420px
+   waere genau das, was die Spalten auf dem Handy unbeweglich
+   macht. Gescrollt wird im Wrapper darueber. */
+.sq-console .sq-team-matrix { border-collapse: collapse; width: 100%; }
+.sq-console .sq-team-matrix th,
+.sq-console .sq-team-matrix td {
+    border: .8px solid var(--sq-line); padding: 7px 8px; text-align: left; vertical-align: top;
+}
+.sq-console .sq-team-matrix thead th {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--sq-accent2); font-weight: 700; white-space: nowrap;
+}
+.sq-console .sq-team-matrix tbody th {
+    font-size: 11.5px; font-weight: 600; color: var(--sq-txt); white-space: nowrap;
+}
+.sq-console .sq-team-matrix thead td { border: 0; }
+
+.sq-console .sq-team-zelle {
+    position: relative; min-width: 122px;
+    font-family: var(--sq-num); font-size: 11px;
+}
+/* Die Kante links traegt das Urteil. Eine flaechige Einfaerbung wuerde
+   die Zahlen darin schwerer lesbar machen; ein Streifen sagt dasselbe
+   und laesst den Text in Ruhe. */
+.sq-console .sq-team-zelle.is-gut { box-shadow: inset 3px 0 0 var(--sq-gut); }
+.sq-console .sq-team-zelle.is-schlecht { box-shadow: inset 3px 0 0 var(--sq-schlecht); }
+.sq-console .sq-team-zelle.is-patt { box-shadow: inset 3px 0 0 var(--sq-patt); }
+.sq-console .sq-team-zelle.is-leer { color: var(--sq-dim2); text-align: center; }
+
+.sq-console .sq-team-pfeil {
+    position: absolute; top: 6px; right: 7px; font-size: 10px; color: var(--sq-dim); cursor: help;
+}
+.sq-console .sq-team-deal,
+.sq-console .sq-team-take {
+    display: grid; grid-template-columns: 1fr auto; align-items: baseline;
+    column-gap: 6px; padding-right: 16px;
+}
+.sq-console .sq-team-deal i,
+.sq-console .sq-team-take i {
+    grid-column: 1 / -1; font-style: normal; font-size: 10px; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--sq-dim2);
+}
+.sq-console .sq-team-deal b { color: var(--sq-gut); font-weight: 700; }
+.sq-console .sq-team-take b { color: var(--sq-schlecht); font-weight: 700; }
+/* Der Attackenname unter der Zahl: gedaempft, damit er die Zahl nicht
+   ueberstimmt, aber da — eine Prozentangabe ohne ihre Attacke kann man
+   nicht nachrechnen. */
+.sq-console .sq-team-deal em,
+.sq-console .sq-team-take em {
+    grid-column: 1 / -1; font-style: normal; font-size: 10px; color: var(--sq-dim2);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* Immun ist nicht "trifft fuer fast nichts" — deshalb kein Zahlenwert
+   in Gruen oder Rot, sondern ein neutrales Wort. */
+.sq-console .sq-team-deal.is-immun b,
+.sq-console .sq-team-take.is-immun b,
+.sq-console .sq-team-deal.is-ohne b,
+.sq-console .sq-team-take.is-ohne b { color: var(--sq-dim2); font-weight: 600; }
+
+/* Die Zelle springt in die Einzelansicht. Sie muss also aussehen, als
+   koennte man sie anklicken. */
+.sq-console .sq-team-zelle[role="button"] { cursor: pointer; }
+.sq-console .sq-team-zelle[role="button"]:hover { background: rgba(85,102,224,.10); }
+.sq-console .sq-team-zelle[role="button"]:focus-visible {
+    outline: 2px solid var(--sq-accent2); outline-offset: -2px;
+}
+.sq-console .sq-team-deal u,
+.sq-console .sq-team-take u {
+    text-decoration: none; font-size: 10px; color: var(--sq-dim);
+}
+.sq-console .sq-team-take { margin-top: 4px; }
+
+@media (max-width: 700px) {
+    .sq-console .sq-team { padding: 10px; }
+    .sq-console .sq-team-zelle { min-width: 104px; font-size: 10.5px; }
+}

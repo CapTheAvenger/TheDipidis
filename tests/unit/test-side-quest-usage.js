@@ -179,7 +179,13 @@ describe('scoping', () => {
         // rule that escaped would darken them too.
         const start = CSS.indexOf('/* ── Champions "console"');
         assert.ok(start > 0, 'console block not found');
-        const block = CSS.slice(start);
+        /* Kommentare zuerst weg (02.09.2026).
+           Ohne das las dieser Test die PROSA als Selektor: ein Satz, der
+           eine Klasse beim Namen nennt ("dieselbe Farbe wie in
+           .sq-mu-bar.is-deal"), wurde als Regel ausserhalb der Konsole
+           gemeldet. Der Test war damit eine Falle fuer jeden, der seine
+           Aenderung erklaert — und genau das soll er nicht sein. */
+        const block = CSS.slice(start).replace(/\/\*[\s\S]*?\*\//g, '');
         const selectors = block.split('\n')
             .filter(l => /^\.[a-z]/.test(l.trim()) || /^\s*\.[a-z][^{]*\{/.test(l))
             .map(l => l.trim().split('{')[0].trim())

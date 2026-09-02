@@ -1539,9 +1539,9 @@
                        Stand bis zum 02.09.2026 auf `.some(... !== '')`:
                        eine einzige gefuellte Zeile schaltete die gezaehlte
                        Anzeige fuer ALLE ein, und "abc" oder "0" galten als
-                       Zaehlung. Dieselbe Pruefung wie im Eingangsblock —
-                       eine ganze Zahl in JEDER Zeile, sonst gar nicht. */
-                    const ganzeZahl = (v) => /^\d+$/.test(String(v == null ? '' : v).trim());
+                       Zaehlung. Die Pruefung selbst steht seit derselben
+                       Runde in app-utils.js — eine ganze Zahl in JEDER
+                       Zeile, Antritte ueber null, Cuts nicht darueber. */
 
                     /* Die Quote aus DEN Zahlen, die daneben stehen.
 
@@ -1555,9 +1555,18 @@
                         const c = (d.top8Anzeige != null) ? d.top8Anzeige : d.top8;
                         return b > 0 ? (c / b) * 100 : 0;
                     };
-                    const hatRoh = t8rows.length > 0
-                        && t8rows.every(r => ganzeZahl(r.total_brought) && ganzeZahl(r.top8_count))
-                        && t8rows.reduce((sum, r) => sum + Number(r.total_brought), 0) > 0;
+                    /* BEFUND DER ABNAHME (02.09.2026): hier stand ein
+                       DRITTES, lockereres Tor. Es prueft nur, ob die
+                       SUMME der Antritte ueber null liegt — nicht, ob
+                       jede Zeile Antritte hat und ob die Cuts nicht
+                       ueber den Antritten liegen. Eine einzige kaputte
+                       Scraper-Zeile hatte damit gereicht, um die
+                       Tabelle als einzige Ansicht auf gezaehlten Zahlen
+                       stehenzulassen, waehrend die drei anderen
+                       zurueckfallen. Derselbe Fehler, nur eine Ansicht
+                       weiter. Jetzt dasselbe Tor wie ueberall sonst. */
+                    const hatRoh = (typeof window.gezaehlteZeilen === 'function')
+                        && window.gezaehlteZeilen(t8rows).hatRoh;
                     const enriched = t8rows.map(r => {
                         const brought = parseLocaleNumber(r.total_brought_weighted || '0', 0);
                         const top8 = parseLocaleNumber(r.top8_count_weighted || '0', 0);

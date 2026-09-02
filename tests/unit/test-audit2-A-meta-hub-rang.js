@@ -47,13 +47,25 @@ const body = [
     'return { answerModel: answerModel, answerHtml: answerHtml };',
 ].join('\n');
 
+
+/* Das ECHTE Tor aus app-utils.js, nicht eine Attrappe. Es entscheidet,
+   ob die Anzeige die gezaehlten oder die gewichteten Spalten nimmt —
+   mit einer Attrappe liefe der Test genau am Verzweigungspunkt vorbei.
+   Dieselbe Technik wie bei parseLocaleNumber daneben. */
+function echtesTor(pLN) {
+    const stueck = fs.readFileSync(path.join(ROOT, 'js', 'app-utils.js'), 'utf8').match(/function gezaehlteZeilen\(rows\) \{[\s\S]*?\n\}/)[0];
+    return new Function('parseLocaleNumber', stueck + '\nreturn gezaehlteZeilen;')(pLN);
+}
+
 function build(lang) {
+    const pLN = (v, d) => {
+        const n = parseFloat(v);
+        return Number.isFinite(n) ? n : (d || 0);
+    };
     const stubWindow = {
         CONV_PRIOR: 50,
-        parseLocaleNumber: (v, d) => {
-            const n = parseFloat(v);
-            return Number.isFinite(n) ? n : (d || 0);
-        },
+        parseLocaleNumber: pLN,
+        gezaehlteZeilen: echtesTor(pLN),
         // Nachgebautes conv-Objekt: Dragapult klar bester Performer über der
         // Mindeststichprobe, damit es Headline wird.
         computeConversionPerformance: () => ({

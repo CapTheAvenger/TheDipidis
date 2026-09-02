@@ -132,6 +132,9 @@
 
     let _decks = null;          // deck_name -> { share, winRate, count }
     let _conv = null;           // computeConversionPerformance() result
+    /* Stehen hinter _conv gezaehlte oder gewichtete Antritte? Der
+       Hinweistext an der Kachel nennt die Sorte beim Namen. */
+    let _convGezaehlt = false;
     let _major = null;          // deck_name -> { share, winRate, ... } | {} wenn kein Major
     let _majorMu = null;        // deck_name -> { gegner -> { anzahl, punkte } }
     let _loading = null;
@@ -349,8 +352,19 @@
                 };
             }
             const rows = parseSemicolonCsv(top8Txt);
+            /* BEFUND DER ABNAHME (02.09.2026): diese Karte war die
+               VIERTE Ansicht derselben Quote — und die einzige, die
+               noch die gewichtete Spalte zeigte. Fuer Dragapult stand
+               hier 10,5 %, waehrend Startseite, Meta-Performance und
+               die Intel-Kachel des Meta Calls 10,2 % sagten. Ueber die
+               121 Zeilen der Datei wichen 53 Decks ab.
+               Dasselbe Tor wie ueberall sonst, aus app-utils.js. */
+            const tor = (rows.length && typeof window.gezaehlteZeilen === 'function')
+                ? window.gezaehlteZeilen(rows)
+                : { zeilen: rows, hatRoh: false };
+            _convGezaehlt = tor.hatRoh;
             _conv = (rows.length && typeof window.computeConversionPerformance === 'function')
-                ? window.computeConversionPerformance(rows) : null;
+                ? window.computeConversionPerformance(tor.zeilen) : null;
             return true;
         }).catch(() => { _decks = _decks || {}; _conv = null; _major = _major || {}; _majorMu = _majorMu || {}; return false; });
         return _loading;
@@ -736,9 +750,16 @@
                 // Turnieren MIT gewertetem Top-8-Schnitt (755, aus 103
                 // Turnieren). Nebeneinander sieht das aus wie ein Widerspruch,
                 // wenn man es nicht dazuschreibt — also steht es im Hinweis.
-                L('arc.convTip2', de
-                    ? '{t} von {b} gewichteten Antritten auf Turnieren mit Top-8-Schnitt.'
-                    : '{t} of {b} weighted entries at events with a top-8 cut.')
+                (_convGezaehlt
+                    ? L('arc.convTip3', de
+                        ? '{t} von {b} Antritten auf Turnieren mit Top-8-Schnitt.'
+                        : '{t} of {b} entries at events with a top-8 cut.')
+                    : L('arc.convTip2', de
+                        ? '{t} von {b} gewichteten Antritten auf Turnieren mit Top-8-Schnitt.'
+                        : '{t} of {b} weighted entries at events with a top-8 cut.'))
+                    /* fmtGewichtet schreibt ganze Zahlen ohne
+                       Nachkomma — gezaehlte Antritte sind ganze
+                       Zahlen, also braucht es keine zweite Funktion. */
                     .replace('{t}', fmtGewichtet(c.top8))
                     .replace('{b}', fmtGewichtet(c.brought))
                 + (c.thin ? ' ' + L('arc.convThin2', de

@@ -47,6 +47,16 @@ const parseLocaleNumber = new Function(
     UTILS.match(/function parseLocaleNumber\(input, fallback = 0\) \{[\s\S]*?\n\}/)[0] +
     '\nreturn parseLocaleNumber;')();
 
+
+/* Das ECHTE Tor aus app-utils.js, nicht eine Attrappe. Es entscheidet,
+   ob die Anzeige die gezaehlten oder die gewichteten Spalten nimmt —
+   mit einer Attrappe liefe der Test genau am Verzweigungspunkt vorbei.
+   Dieselbe Technik wie bei parseLocaleNumber daneben. */
+function echtesTor(pLN) {
+    const stueck = UTILS.match(/function gezaehlteZeilen\(rows\) \{[\s\S]*?\n\}/)[0];
+    return new Function('parseLocaleNumber', stueck + '\nreturn gezaehlteZeilen;')(pLN);
+}
+
 describe('die Vergleichsdatei wird gelesen, wie sie geschrieben ist', () => {
     const rows = csvRows();
 
@@ -113,7 +123,7 @@ describe('Ebene 1 auf der Einstiegsseite', () => {
     it('zeigt nichts statt Platzhalter, wenn die Datei fehlt', () => {
         const model = new Function('window',
             HUB.match(/function answerModel\(rows\) \{[\s\S]*?\n    \}/)[0] +
-            '\nreturn answerModel;')({});
+            '\nreturn answerModel;')({ gezaehlteZeilen: echtesTor(parseLocaleNumber) });
         assert.equal(model(null), null);
         assert.equal(model([]), null);
     });
@@ -127,6 +137,7 @@ describe('Ebene 1 auf der Einstiegsseite', () => {
         // jede Kachel sagt über ihre Rolle, warum sie dort steht.
         const stubWindow = {
             parseLocaleNumber,
+            gezaehlteZeilen: echtesTor(parseLocaleNumber),
             computeConversionPerformance: () => ({
                 expected: 0.06,
                 decks: [{ name: 'A', perfPct: 10, brought: 100, top8: 10, thin: false }],
@@ -153,6 +164,7 @@ describe('Ebene 1 auf der Einstiegsseite', () => {
         // (8 Cuts) — 95-%-Intervall rund ±10 Prozentpunkte.
         const stubWindow = {
             parseLocaleNumber,
+            gezaehlteZeilen: echtesTor(parseLocaleNumber),
             computeConversionPerformance: () => ({
                 expected: 0.06,
                 decks: [{ name: 'Klein', perfPct: 80, brought: 53, top8: 8, thin: false }],

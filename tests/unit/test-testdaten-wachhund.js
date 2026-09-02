@@ -70,8 +70,9 @@ const REGISTER = {
     'test-champions-base-stats.js':      'Schema der Statuswerte, keine Zahlenbaender',
     'test-champions-damage.js':          'Rechenwege am Schadensmodell; Baender sind physikalisch (Chance zwischen 0 und 1)',
     'test-champions-matchups.js':        'Struktur der Matchup-Datei, Rechnung an gesetzten Werten',
-    'test-hub-gezaehlte-antritte.js':    'Gezaehlte Antritte: ruft answerModel() mit den echten Zeilen auf und rechnet jede angezeigte Zahl gegen die CSV nach — Anteil, Quote, Feldschnitt und Nenner muessen aus denselben zwei Zahlen folgen, die daneben stehen. Das sind GLEICHUNGEN gegen die Datei, keine Behauptungen ueber Wochenwerte: welche Zahlen dort stehen, ist der Pruefung egal, sie muessen nur zueinander passen. Dazu Eigenschaften der Spalten (ganze Zahlen, keine Top 8 ueber den Antritten) und das Alles-oder-nichts-Tor gegen kaputte Werte.',
+    'test-hub-gezaehlte-antritte.js':    'Gezaehlte Antritte: ruft answerModel() und answerHtml() mit den echten Zeilen auf und rechnet jede angezeigte Zahl gegen die CSV nach — Anteil, Quote, Feldschnitt und Nenner muessen aus denselben zwei Zahlen folgen, die daneben stehen. Das sind GLEICHUNGEN gegen die Datei, keine Behauptungen ueber Wochenwerte: welche Zahlen dort stehen, ist der Pruefung egal, sie muessen nur zueinander passen. Dazu Eigenschaften der Spalten (ganze Zahlen, keine Top 8 ueber den Antritten), das Alles-oder-nichts-Tor gegen kaputte Werte und seit dem 02.09.2026 die Probe, dass das Vielfache im Satz und auf jeder Kachel aus den beiden Zahlen folgt, die daneben stehen.',
     'test-stufen-im-text.js':            'Stufen im Attackentext: liest die 494 Attacken aus champions_resources.json und die Stufentabelle aus champions_statuszustaende.json. Geprueft werden EIGENSCHAFTEN, keine Wochenwerte: dass keine Marke auf Genauigkeit, Fluchtwert oder Volltreffer sitzt (die folgen laut den Daten selbst einer anderen Tabelle), dass jede Stufe eine der sechs bekannten ist, dass benannte Attacken ihre Marke tragen, und dass Tabelle und Formel uebereinstimmen. Attackenbeschreibungen sind gepflegter Text, keine Wochenzahlen.',
+    'test-vier-ansichten-eine-quote.js': 'Vier Ansichten, eine Quote: liest online_tournament_top8_decks.csv, um die vier Rechenwege GEGENEINANDER zu pruefen — nicht gegen Wochenwerte. Die fuenf Ungleichungen sind Eigenschaften der Datei, keine Behauptungen ueber diese Woche: dass sie ueberhaupt Zeilen hat (>20), und dass sich gewichtete und gezaehlte Spalte bei genug Zeilen unterscheiden (>5) — ohne diesen Unterschied wuerde der Vergleich stillschweigend nichts pruefen, was genau der Fehler war, den die Abnahme am 02.09.2026 gefunden hat. Welche Zahlen dort stehen, ist der Pruefung egal; alle Vergleiche sind Gleichungen zwischen zwei Rechenwegen auf denselben Zeilen.',
     'test-team-rechner.js':              'Team-Rechner: liest data/, um echte Paare zu bilden — welche, ist der Pruefung egal. Verglichen wird die Matrixzelle mit bestMove() auf denselben Daten (Gleichheit zweier Rechenwege), der Spiegelkampf (gilt fuer jedes Pokemon) und die Namensaufloesung ueber den Slug (eine Eigenschaft der Zuordnung). Die EINE Ungleichung ist eine Eigenschaft der Urteilsregel, kein Wochenwert: unter 5 % der farbigen Zellen duerfen sich auf einen K.O. unter 50 % Chance stuetzen. Vor der Korrektur am 02.09.2026 waren es 30 %; die Schranke haelt, solange die Regel ueber den Durchschnittswurf wertet, und faellt, wenn jemand sie auf ko.hits zurueckdreht.',
     'test-champions-speed-tiers.js':     'Sortierlogik an gesetzten Werten; die letzte Zusicherung an der Datenlage ist am 31.08.2026 entfallen',
     'test-champions-sprites.js':         'nur Existenz von Sprite-Eintraegen, keine Ungleichung',
@@ -106,7 +107,37 @@ const REGISTER = {
 //
 // Diese Zahl darf nicht steigen. Wer eine Ungleichung an Live-Daten
 // hinzufuegt, muss hier bewusst hochzaehlen und im Register begruenden.
-const OBERGRENZE = 61;
+// 02.09.2026, zweite Erhoehung des Tages: 61 -> 66, um FUENF
+// Ungleichungen in test-vier-ansichten-eine-quote.js.
+//
+// Sie sind der Grund, warum es diese Datei gibt. Die Abnahme fand zwei
+// Aenderungen am Produktivcode, die die gezaehlte Quote vollstaendig
+// zurueckdrehen und trotzdem alle damaligen Zusicherungen gruen lassen
+// — weil die alte Datei Regex auf den Quelltext war und die Zahlen
+// selbst stellte. Ein Vergleich zweier Rechenwege braucht echte Daten,
+// und er braucht die Zusicherung, dass die Daten den Unterschied
+// UEBERHAUPT zeigen koennten: waeren gewichtete und gezaehlte Spalte
+// identisch, liefe der ganze Vergleich leer und meldete gruen.
+//
+// Keine davon behauptet einen Wochenwert. "Mehr als 20 Decks in der
+// Datei" und "mehr als 5 Zeilen, in denen sich die beiden Spalten
+// unterscheiden" gelten, solange die Datei ueberhaupt etwas enthaelt
+// und die Gewichtung ueberhaupt etwas tut. Faellt eine davon, ist
+// nicht die Woche anders — dann prueft der Test nichts mehr, und das
+// soll auffallen.
+// 66 -> 68 in derselben Runde: test-hub-gezaehlte-antritte.js prueft
+// jetzt zusaetzlich, dass das Vielfache im Satz und auf jeder Kachel
+// aus den beiden Zahlen folgt, die daneben stehen ("10,2 % gegen
+// 6,1 % — rund 1,7-mal"). Der Satz sagte bis zum 02.09.2026 1,6, weil
+// er die geglaettete Groesse zeigte, waehrend der Hinweis daneben in
+// derselben Zeile "Nachrechenbar" behauptete.
+//
+// Die beiden neuen Ungleichungen sind Vorpruefungen, keine Wochenwerte:
+// "der Feldschnitt ist groesser als null" und "es gibt ueberhaupt eine
+// Kachel mit Quote und Vielfachem". Ohne sie liefe die Gleichung
+// stillschweigend leer, und der Test meldete gruen, obwohl er nichts
+// mehr liest.
+const OBERGRENZE = 68;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

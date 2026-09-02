@@ -219,6 +219,67 @@ describe('Gezaehlte Antritte — der Satz, den man liest', () => {
         });
     });
 
+    it('das Vielfache im Satz folgt aus den beiden Zahlen im Satz', () => {
+        /* BEFUND (02.09.2026): der Satz nannte "10,2 % Top-8-Quote gegen
+           6,1 % im Schnitt — rund 1,6-mal so oft". 10,2 durch 6,1 sind
+           1,7. Gezeigt wurde die GEGLAETTETE Groesse, mitten in einem
+           Satz, der die beiden Zahlen nennt, aus denen sie nicht folgt —
+           und der Hinweis an der Quote daneben sagte in derselben Zeile
+           "Nachrechenbar".
+
+           Aufgefallen ist es, als die Intel-Kachel des Meta Calls auf
+           dieselbe Grundgesamtheit gezogen wurde und dort 1,7x stand.
+
+           Das ist keine Behauptung ueber diese Woche: geprueft wird,
+           dass drei ANGEZEIGTE Zahlen zueinander passen, welche auch
+           immer dort stehen. */
+        ['de', 'en'].forEach(lang => {
+            const { satz } = texte(null, lang);
+            const nackt = satz.replace(/<[^>]*>/g, '').replace(/[\s ]+/g, ' ');
+            /* Das Prozentzeichen haengt im Sandkasten ohne
+               Intl-Locale direkt an der Zahl ("10.2%"), auf der Seite
+               mit schmalem Leerzeichen. Beides zulassen — geprueft wird
+               die Rechnung, nicht die Typografie. */
+            const mm = nackt.match(lang === 'de'
+                ? /([\d.,]+) ?% Top-8-Quote gegen ([\d.,]+) ?% im Schnitt — rund ([\d.,]+)-mal/
+                : /([\d.,]+) ?% top-8 rate against ([\d.,]+) ?% on average — about ([\d.,]+)×/);
+            assert.ok(mm, `${lang}: Satz nicht lesbar: ${nackt}`);
+            /* Tausenderpunkte gibt es bei Prozentwerten unter 100 nicht,
+               also ist der Punkt hier immer das Dezimalzeichen. */
+            const z = (x) => Number(String(x).replace(',', '.'));
+            const quote = z(mm[1]), schnitt = z(mm[2]), fak = z(mm[3]);
+            assert.ok(schnitt > 0, `${lang}: Schnitt ist ${schnitt}`);
+            const soll = Math.round((quote / schnitt) * 10) / 10;
+            assert.equal(fak, soll,
+                `${lang}: der Satz sagt ${fak}-mal, seine eigenen Zahlen ergeben `
+                + `${soll} (${quote} / ${schnitt})`);
+        });
+    });
+
+    it('und das Vielfache auf JEDER Kachel folgt aus den Zahlen dieser Kachel', () => {
+        const sb = lade('de');
+        const m = sb._metaHubIntern.answerModel(ROWS);
+        /* Kein Rueckfall auf das Modell: geprueft wird der fertige
+           Block. Ein Test, der bei fehlendem Zugang leise etwas
+           Schwaecheres prueft, meldet gruen, wenn er gar nichts mehr
+           sieht — genau der Fehler, den die Abnahme am 02.09.2026 an
+           der Vorgaengerdatei gefunden hat. */
+        assert.equal(typeof sb._metaHubIntern.answerHtml, 'function',
+            'answerHtml ist nicht mehr exportiert — dann prueft diese Datei die '
+            + 'Absicht statt des Ergebnisses');
+        const html = sb._metaHubIntern.answerHtml(m);
+        const schnitt = m.conv.expected * 100;
+        const nackt = html.replace(/<[^>]*>/g, '|').replace(/[\s ]+/g, ' ');
+        const treffer = [...nackt.matchAll(/Top-8-Quote ([\d.,]+) ?% ?· ?([\d.,]+)-mal/g)];
+        assert.ok(treffer.length > 0, 'keine Kachel mit Quote und Vielfachem gefunden');
+        treffer.forEach(t => {
+            const q = Number(t[1].replace(',', '.'));
+            const f = Number(t[2].replace(',', '.'));
+            assert.equal(f, Math.round((q / schnitt) * 10) / 10,
+                `Kachel sagt ${f}-mal, ihre Zahlen ergeben ${(q / schnitt).toFixed(2)}`);
+        });
+    });
+
     it('im gezaehlten Satz kommt das Wort "gewichtet" nicht vor', () => {
         ['de', 'en'].forEach(lang => {
             const { m, nenner } = texte(null, lang);

@@ -217,3 +217,56 @@ describe('Die Zahlen hinter der Spalte', () => {
             + 'stimmt dann nicht mehr');
     });
 });
+
+describe('Die acht Spalten passen, oder die Tabelle scrollt', () => {
+    /* Kommentare zuerst weg. Die erste Fassung dieser Zusagen suchte im
+       rohen Text — und fand "overflow-wrap: anywhere" in der Begruendung,
+       die genau erklaert, warum es NICHT dastehen darf. Derselbe Fehler
+       ist in diesem Projekt schon mehrfach passiert. */
+    const css = fs.readFileSync(path.join(wurzel, 'css', 'styles.css'), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, ' ');
+
+    it('die 42-px-Regel gilt nicht mehr fuer die Major-Spalten', () => {
+        /* ANLASS (02.09.2026, mit Bild): die beiden letzten Ueberschriften
+           klebten ineinander ("MAJOR-#PUNKTE"). Die Regel `nth-child(n+4)`
+           gab jeder Spalte ab der vierten 42 px — gedacht fuer W, L und T
+           mit ihren ein- bis dreistelligen Zahlen. Die beiden
+           Major-Spalten aus PR #611 erbten das stillschweigend, und
+           "Major-Punkte" braucht einlagig 96 px. */
+        assert.ok(!/arc-mu-table th:nth-child\(n\+4\)/.test(css),
+            'die Sammelregel ab Spalte 4 ist zurueck — dann erben die '
+            + 'Major-Spalten wieder die 42 px fuer einstellige Zahlen');
+        assert.match(css, /arc-mu-table th:nth-child\(7\)/,
+            'die Major-Punkte-Spalte hat keine eigene Breite mehr');
+        assert.match(css, /arc-mu-table th:nth-child\(8\)/,
+            'die Major-Matches-Spalte hat keine eigene Breite mehr');
+    });
+
+    it('die Ueberschriften duerfen umbrechen — aber nicht im Wort', () => {
+        const i = css.indexOf('.arc-mu-table thead th');
+        assert.ok(i > 0, 'die Umbruchregel fuer die Kopfzeile fehlt');
+        const rumpf = css.slice(i, css.indexOf('}', i));
+        assert.match(rumpf, /white-space:\s*normal/,
+            'die Kopfzellen stehen wieder auf nowrap — dann laeuft '
+            + '"Major-Punkte" ueber statt umzubrechen');
+        assert.ok(!/overflow-wrap:\s*anywhere/.test(rumpf),
+            'overflow-wrap: anywhere ist zurueck — das bricht MITTEN im '
+            + 'Wort ("Maj/or/punk/te") und ist schlimmer als der Ueberlauf');
+        // Und sie muss die nowrap-Regel ueberhaupt schlagen koennen.
+        assert.ok(/#(currentMetaContent|archetypeCardOverlay) \.arc-mu-table thead th/.test(css),
+            'die Umbruchregel ist nicht mehr auf denselben Behaelter '
+            + 'bezogen wie die nowrap-Regel und verliert damit gegen sie');
+    });
+
+    it('passt die Tabelle nicht, scrollt sie — statt zu ueberlappen', () => {
+        assert.match(css, /\.arc-card \.mobile-table-scroll \{[^}]*overflow-x:\s*auto/,
+            'der Behaelter steht wieder auf visible. Acht Spalten passen '
+            + 'in eine 411 px breite Karte nicht: allein "Matches" braucht '
+            + '66 px und kommt zweimal vor (online und Major)');
+        assert.match(css, /\.mobile-table-scroll \.arc-mu-table[^{]*\{[^}]*min-width:\s*480px/,
+            'die Mindestbreite der Tabelle fehlt. Sie steht auf '
+            + '`table-layout: fixed`, dort werden min-width-Angaben auf '
+            + 'ZELLEN ignoriert — ohne sie draengt der Browser die '
+            + 'Deckspalte auf 25 px zusammen');
+    });
+});

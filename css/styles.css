@@ -11056,6 +11056,41 @@ body.arc-open { overflow: hidden; }
     white-space: nowrap;
 }
 .arc-mu-major-duenn { font-style: italic; }
+
+/* Die Kopfzeilen duerfen umbrechen (02.09.2026).
+ *
+ * th und td stehen auf `white-space: nowrap`, damit Zahlen nicht
+ * umbrechen. Fuer die Kopfzellen ist das falsch: "Major-Punkte" braucht
+ * einlagig 98 px und bekommt in der Karte 42 — gemessen auf der
+ * laufenden Seite, Tabelle 476 px in einem 411 px breiten Behaelter. Auf
+ * dem Schirm klebten die beiden letzten Ueberschriften ineinander
+ * ("MAJOR-#PUNKTE").
+ *
+ * Gemeldet mit Bild. Die Tabelle scrollt hier bewusst nicht, also muss
+ * der Text umbrechen statt zu ueberlaufen. Der Bindestrich in
+ * "Major-Punkte" ist die natuerliche Bruchstelle. */
+#currentMetaContent .arc-mu-table thead th,
+#archetypeCardOverlay .arc-mu-table thead th,
+#currentMetaArchetypeCard .arc-mu-table thead th {
+    /* Die Kopfzeilen duerfen umbrechen. th und td stehen auf `nowrap`,
+       damit Zahlen nicht umbrechen — fuer Ueberschriften ist das falsch:
+       "Major-Punkte" braucht einlagig 96 px und bekam 42, gemessen auf
+       der laufenden Seite. Auf dem Schirm klebten die beiden letzten
+       Ueberschriften ineinander ("MAJOR-#PUNKTE"), gemeldet mit Bild.
+       Diese Tabelle scrollt bewusst nicht, also muss der Text umbrechen.
+
+       Dieselbe Spezifitaet wie die nowrap-Regel darueber (1,1,2) und
+       spaeter notiert — sonst gewinnt sie und hier passiert nichts.
+       Genau das war der erste Versuch.
+
+       NUR an Leerzeichen brechen, nie im Wort: `overflow-wrap: anywhere`
+       machte daraus "Maj/or/poi/nts", schlimmer als der Ueberlauf. */
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    line-height: 1.15;
+    vertical-align: bottom;
+}
 .arc-halb--duenn .arc-halb-quelle { opacity: 0.85; }
 
 /* Die einfachen Kacheln (Top-8, Day 2) tragen ihre Zahl allein und
@@ -11097,7 +11132,43 @@ body.arc-open { overflow: hidden; }
     border-collapse: collapse; font-size: 0.76rem;
     background: var(--arc-s1);
 }
-.arc-card .mobile-table-scroll { overflow-x: visible; }
+/* DIESE TABELLE SCROLLT DOCH — seit dem 02.09.2026.
+ *
+ * Sie stand hier bewusst auf `visible`, und das war richtig, solange sie
+ * sechs Spalten hatte. Mit den beiden Praesenzspalten aus PR #611 sind es
+ * acht, und acht passen in eine Karte von 411 px nicht: allein die
+ * Ueberschrift "Matches" braucht 66 px, und sie kommt zweimal vor
+ * (online und Major). Kleiner setzen geht nicht — 10 px sind der Boden
+ * aus tests/unit/test-schriftboden.js, und die Zahl daneben ist genau
+ * die, an der man die Quote einschaetzt.
+ *
+ * Also lieber waagerecht scrollen als Ueberschriften ineinander schieben.
+ * Gemeldet mit Bild: die letzten beiden Koepfe klebten als
+ * "MAJOR-#PUNKTE" aufeinander. */
+.arc-card .mobile-table-scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+/* Nachfahre, nicht Kind: die Tabelle haengt nicht immer direkt im
+   Scrollbehaelter. Mit `>` griff die Regel gar nicht, die Tabelle blieb
+   auf 100 % und die Deckspalte bekam 25 px statt der noetigen 94 —
+   "Dragapult Dusknoir" passte in keine Zeile mehr. */
+/* Die Tabelle steht auf `table-layout: fixed`. Damit werden `min-width`
+   auf Zellen SCHLICHT IGNORIERT — die Spaltenbreiten kommen allein aus
+   den `width`-Angaben der ersten Zeile. Der erste Versuch setzte
+   `min-width: 94px` auf die Deckspalte und `min-width: max-content` auf
+   die Tabelle; beides blieb wirkungslos, die Spalte behielt ihre 25 px.
+   Gemerkt erst, als der Browser gefragt wurde statt der Regel geglaubt.
+
+   Also: feste Breite auf die Deckspalte, und eine Mindestbreite auf die
+   TABELLE (die gilt auch bei fixed), gerechnet als Summe der acht
+   Spalten: 94 + 80 + 66 + 40 + 40 + 40 + 54 + 66 = 480. */
+#currentMetaContent .arc-card .mobile-table-scroll .arc-mu-table,
+#archetypeCardOverlay .arc-card .mobile-table-scroll .arc-mu-table,
+#currentMetaContent .mobile-table-scroll .arc-mu-table,
+#archetypeCardOverlay .mobile-table-scroll .arc-mu-table {
+    min-width: 480px;
+}
 #currentMetaContent .arc-mu-table thead,
 #archetypeCardOverlay .arc-mu-table thead { display: table-header-group; }
 #currentMetaContent .arc-mu-table tbody,
@@ -11128,7 +11199,11 @@ body.arc-open { overflow: hidden; }
 #archetypeCardOverlay .arc-mu-table td:nth-child(1),
 #currentMetaArchetypeCard .arc-mu-table th:nth-child(1),
 #currentMetaArchetypeCard .arc-mu-table td:nth-child(1) {
-    width: auto; text-align: left; white-space: normal;
+    /* 94 px statt auto (02.09.2026): die Tabelle steht auf
+       `table-layout: fixed`, dort verteilt `auto` nur den Rest — mit acht
+       Spalten blieben der Deckspalte 25 px, und der Name war weg.
+       Gemessen: 94 px tragen "Dragapult Dusknoir" in einer Zeile. */
+    width: 94px; text-align: left; white-space: normal;
     position: static;
     background-color: transparent;
     box-shadow: none;
@@ -11145,21 +11220,43 @@ body.arc-open { overflow: hidden; }
 #currentMetaContent .arc-mu-table th:nth-child(2),
 #currentMetaContent .arc-mu-table td:nth-child(2),
 #archetypeCardOverlay .arc-mu-table th:nth-child(2),
-#archetypeCardOverlay .arc-mu-table td:nth-child(2) { width: 88px; }
+#archetypeCardOverlay .arc-mu-table td:nth-child(2) { width: 80px; }
 #currentMetaContent .arc-mu-table th:nth-child(n+3),
 #currentMetaContent .arc-mu-table td:nth-child(n+3),
 #archetypeCardOverlay .arc-mu-table th:nth-child(n+3),
-#archetypeCardOverlay .arc-mu-table td:nth-child(n+3) { width: 58px; }
+#archetypeCardOverlay .arc-mu-table td:nth-child(n+3) { width: 66px; }
 /* W, L und U sind ein- bis dreistellige Zahlen — 58 px sind dafuer zu viel,
    seit die Unentschieden als eigene Spalte dazugekommen sind (20.08.2026).
    Mit 42 px und einer auf 88 px verschmaelerten Quote-Spalte bleiben auf
    390 px 94 px fuer den Deck-Namen; gemessen passt "Dragapult Dusknoir"
    damit wieder in eine Zeile. Gleiche Spezifitaet wie die Regel darueber,
    spaeter notiert — deshalb ohne Ausrufezeichen. */
-#currentMetaContent .arc-mu-table th:nth-child(n+4),
-#currentMetaContent .arc-mu-table td:nth-child(n+4),
-#archetypeCardOverlay .arc-mu-table th:nth-child(n+4),
-#archetypeCardOverlay .arc-mu-table td:nth-child(n+4) { width: 42px; }
+/* Nur noch W, L und T — bis zum 02.09.2026 stand hier `n+4`, und die
+   beiden Major-Spalten aus PR #611 erbten damit die 42 px, die fuer
+   einstellige Zahlen gedacht waren. Ihre Ueberschriften brauchen mehr
+   und liefen ueber. */
+#currentMetaContent .arc-mu-table th:nth-child(4),
+#currentMetaContent .arc-mu-table td:nth-child(4),
+#currentMetaContent .arc-mu-table th:nth-child(5),
+#currentMetaContent .arc-mu-table td:nth-child(5),
+#currentMetaContent .arc-mu-table th:nth-child(6),
+#currentMetaContent .arc-mu-table td:nth-child(6),
+#archetypeCardOverlay .arc-mu-table th:nth-child(4),
+#archetypeCardOverlay .arc-mu-table td:nth-child(4),
+#archetypeCardOverlay .arc-mu-table th:nth-child(5),
+#archetypeCardOverlay .arc-mu-table td:nth-child(5),
+#archetypeCardOverlay .arc-mu-table th:nth-child(6),
+#archetypeCardOverlay .arc-mu-table td:nth-child(6) { width: 40px; }
+/* Die beiden Praesenzspalten: breit genug fuer eine zweizeilige
+   Ueberschrift ("Major" / "Punkte") und Werte wie "100,0 %". */
+#currentMetaContent .arc-mu-table th:nth-child(7),
+#currentMetaContent .arc-mu-table td:nth-child(7),
+#archetypeCardOverlay .arc-mu-table th:nth-child(7),
+#archetypeCardOverlay .arc-mu-table td:nth-child(7) { width: 54px; }
+#currentMetaContent .arc-mu-table th:nth-child(8),
+#currentMetaContent .arc-mu-table td:nth-child(8),
+#archetypeCardOverlay .arc-mu-table th:nth-child(8),
+#archetypeCardOverlay .arc-mu-table td:nth-child(8) { width: 66px; }
 /* Ohne Ausrufezeichen: der einzige Gegenspieler ist `table thead` aus
    css/styles.css:839 mit Element-Spezifitaet (0,0,1). Diese Regel hier
    liegt bei (1,1,1) und gewinnt ohnehin. */

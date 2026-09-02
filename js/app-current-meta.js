@@ -557,39 +557,72 @@
                             // den Kontrast in Ruhe. Schwelle 20, dieselbe wie
                             // THIN_GAMES in js/app-archetype-card.js.
                             const lowSample = totalGames < 20;
-                            const sampleClass = 'heatmap-td-n';
                             // "n=638" ist Rechnerjargon. Gemeldet am 19.08.2026:
                             // "n ist gleich sagt nichts aus … es muss fuer jeden
                             // von der Strasse klar sein, was sind hier die Daten,
                             // die ich sehen kann." Also steht da jetzt, was es ist.
-                            const sampleHtml = `<small class="${sampleClass}">${totalGames} ${
-                                t('heatmap.gamesShort')}</small>`;
 
-                            /* Die Praesenzzeile. Steht unter der Online-Zahl,
-                               kleiner, mit ihrer Partienzahl — und mit einem
-                               Zeichen davor, das sagt, dass es eine ANDERE
-                               Rechnung ist (Matchpunkte statt Siegquote).
-                               Unter 10 Partien gedaempft: von 90 Zellen des
-                               Top-10-Gitters haben 56 mindestens 10. */
+                            /* Die Zelle traegt das kleine Kreuz aus der Skizze
+                               des Betreibers (02.09.2026):
+
+                                              online / Major
+                                   Win Rate     xx  /  xx
+                                   Matches      xx  /  xx
+
+                               Vorher stand da "M 49,4 % \u00b7 52" unter der
+                               Online-Zahl. R\u00fcckmeldung: "mit M kann man erstmal
+                               nichts anfangen, man sollte da schon Major
+                               ausschreiben vll geht eine Aufteilung ..." — und
+                               die Skizze dazu.
+
+                               F\u00fcnf Entw\u00fcrfe wurden gerendert und angesehen
+                               (/tmp/hm), bevor einer in den Zweig kam. Der
+                               Sieger ist die Skizze selbst: die beiden Win
+                               Rates stehen NEBENEINANDER, nicht untereinander.
+                               Genau darum ging es — "so sieht man schnell den
+                               Unterschied zwischen online und Major
+                               Ergebnissen" — und ein Vergleich nebeneinander
+                               ist ein Blick, ein Vergleich untereinander ein
+                               Sprung. Beide W\u00f6rter stehen in jeder Zelle;
+                               90-mal "online"/"Major" zu lesen kostet nichts,
+                               sich merken zu m\u00fcssen, welche Spalte welche ist,
+                               kostet bei jedem Blick.
+
+                               Der Major-Wert sind Matchpunkte, keine Siegquote
+                               — die Quelle liefert je Paarung nur Anzahl und
+                               Punkte. Der Versatz ist klein und systematisch
+                               (Median -2,0 pp, davon -1,8 reine Z\u00e4hlweise) und
+                               steht \u00fcber der Heatmap wie im Tooltip jeder
+                               Zelle. Unter 10 Matches: kursiv. */
                             const mj = (majorLookup.get(normalizeName(rowDeck)) || new Map())
                                 .get(normalizedColDeckMap.get(colDeck));
-                            const majorDuenn = mj && mj.anzahl < 10;
-                            const majorHtml = mj
-                                ? `<small class="heatmap-td-major${majorDuenn ? ' heatmap-td-major-duenn' : ''}">${
-                                    t('heatmap.majorKurz')} ${
+                            const majorDuenn = !!(mj && mj.anzahl < 10);
+                            const pctTxt = (v) => (typeof window.formatPercent === 'function')
+                                ? window.formatPercent(v) : Number(v).toFixed(1) + ' %';
+                            const dk = majorDuenn ? ' heatmap-zelle-duenn' : '';
+                            const zellenHtml = `<span class="heatmap-zelle">`
+                                + `<span class="heatmap-zelle-ecke"></span>`
+                                + `<span class="heatmap-zelle-quelle">${t('heatmap.onlineLabel')}</span>`
+                                + `<span class="heatmap-zelle-quelle">${t('heatmap.majorLabel')}</span>`
+                                + `<span class="heatmap-zelle-strich"></span>`
+                                + `<span class="heatmap-zelle-kennzahl">${t('heatmap.wrLabel')}</span>`
+                                + `<span class="heatmap-zelle-wr">${
                                     (typeof window.formatPercent === 'function')
-                                        ? window.formatPercent(mj.punkte) : mj.punkte.toFixed(1) + ' %'} · ${
-                                    mj.anzahl}</small>`
-                                : '';
+                                        ? window.formatPercent(winRate) : winRate.toFixed(1) + ' %'}</span>`
+                                + `<span class="heatmap-zelle-wr${dk}">${
+                                    mj ? pctTxt(mj.punkte) : '\u2013'}</span>`
+                                + `<span class="heatmap-zelle-kennzahl">${t('heatmap.gamesShort')}</span>`
+                                + `<span class="heatmap-zelle-n">${totalGames}</span>`
+                                + `<span class="heatmap-zelle-n${dk}">${
+                                    mj ? mj.anzahl : '\u2013'}</span>`
+                                + `</span>`;
                             const majorTip = mj
-                                ? ` · ${t('heatmap.majorTip')
-                                    .replace('{w}', ((typeof window.formatPercent === 'function')
-                                        ? window.formatPercent(mj.punkte) : mj.punkte.toFixed(1) + ' %'))
+                                ? ` \u00b7 ${t('heatmap.majorTip')
+                                    .replace('{w}', pctTxt(mj.punkte))
                                     .replace('{n}', String(mj.anzahl))}`
-                                : ` · ${t('heatmap.majorFehlt')}`;
+                                : ` \u00b7 ${t('heatmap.majorFehlt')}`;
                             const vollTip = tooltip + majorTip;
-                            tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${escAttr(vollTip)}" onclick="showToast('${safeRow} vs ${safeCol}: ${escapeJsStr(vollTip)}', 'info', 5000)">${(typeof window.formatPercent === 'function')
-                                ? window.formatPercent(winRate) : winRate.toFixed(1) + ' %'}${sampleHtml}${majorHtml}</td>`;
+                            tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${escAttr(vollTip)}" onclick="showToast('${safeRow} vs ${safeCol}: ${escapeJsStr(vollTip)}', 'info', 5000)">${zellenHtml}</td>`;
                         }
                     });
                     tableHtml += '</tr>';

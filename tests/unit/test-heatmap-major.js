@@ -128,33 +128,104 @@ describe('Die Praesenzdaten werden geladen', () => {
 
 describe('Die Zelle zeigt beide Zahlen mit ihrer Herkunft', () => {
 
-    it('die Praesenzzeile wird gezeichnet', () => {
-        assert.ok(/heatmap-td-major/.test(jsK), 'die Praesenzzeile fehlt in der Zelle');
-        // Auf die BEDINGUNG pruefen, nicht nur auf das Vorkommen der Klasse:
-        // die erste Fassung dieser Zusage blieb gruen, als der Ausdruck auf
-        // `false && mj` gesetzt wurde — der Klassenname stand ja weiter da.
-        assert.ok(/const majorHtml = mj\s*\n/.test(jsK),
-            'die Praesenzzeile haengt an einer anderen Bedingung als "es gibt '
-            + 'einen Major-Wert" — ein vorgeschaltetes false schaltet sie ab, '
-            + 'ohne dass am Markup etwas fehlt');
-        assert.ok(/heatmap\.majorKurz/.test(js),
-            'das Kuerzel vor der Major-Zahl fehlt — dann stehen zwei Zahlen '
-            + 'untereinander und nichts sagt, welche welche ist');
+    it('beide Quellen sind ausgeschrieben, nicht abgekuerzt', () => {
+        // ANLASS (02.09.2026): die erste Fassung schrieb "M 49,4 % · 52".
+        // Der Betreiber: "mit M kann man erstmal nichts anfangen, man sollte
+        // da schon Major ausschreiben". Ein Kuerzel darf hier nicht
+        // zurueckkommen.
+        assert.ok(/'heatmap\.onlineLabel'/.test(jsK) && /'heatmap\.majorLabel'/.test(jsK),
+            'die Quellenbeschriftung der Zelle fehlt — dann stehen zwei '
+            + 'Zahlen nebeneinander und nichts sagt, welche welche ist');
+        const i18n = lies(path.join('js', 'i18n.js'));
+        const major = [...i18n.matchAll(/'heatmap\.majorLabel':\s*'([^']*)'/g)].map(m => m[1]);
+        assert.strictEqual(major.length, 2,
+            `heatmap.majorLabel steht ${major.length}× in i18n.js, erwartet 2`);
+        for (const w of major) {
+            assert.strictEqual(w, 'Major',
+                `die Quelle heisst "${w}" statt "Major" — genau die Abkuerzung, `
+                + 'die gemeldet wurde');
+        }
     });
 
-    it('die Partienzahl steht dabei', () => {
-        const i = jsK.indexOf('heatmap-td-major');
-        const rumpf = jsK.slice(i, i + 600);
-        assert.ok(/mj\.anzahl/.test(rumpf),
-            'die Partienzahl der Paarung fehlt — von 90 Zellen haben nur 56 '
-            + 'mindestens 10 Partien, ohne die Zahl sieht man das nicht');
+    it('die beiden Win Rates stehen nebeneinander, nicht untereinander', () => {
+        // Das ist der ganze Zweck: "so sieht man schnell den Unterschied
+        // zwischen online und Major Ergebnissen". Untereinander ist der
+        // Vergleich ein Sprung, nebeneinander ein Blick. Getragen wird das
+        // vom Raster — drei Spalten, Kennzahl links, dann die beiden Quellen.
+        const css = lies(path.join('css', 'styles.css'));
+        const i = css.indexOf('.heatmap-zelle {');
+        assert.ok(i > 0, '.heatmap-zelle fehlt im Stylesheet');
+        const rumpf = css.slice(i, css.indexOf('}', i));
+        assert.ok(/display:\s*grid/.test(rumpf),
+            '.heatmap-zelle ist kein Raster mehr — dann fallen die Felder '
+            + 'untereinander und der Vergleich nebeneinander ist weg');
+        const spalten = /grid-template-columns:\s*([^;]+);/.exec(rumpf);
+        assert.ok(spalten, 'die Spalten des Zellenrasters sind nicht gesetzt');
+        assert.strictEqual(spalten[1].trim().split(/\s+/).length, 3,
+            `das Zellenraster hat ${spalten[1].trim().split(/\s+/).length} Spalten `
+            + '(erwartet 3: Kennzahl, online, Major) — mit zwei Spalten steht '
+            + 'die Major-Zahl wieder unter der Online-Zahl');
+    });
+
+    it('beide Kennzahlen sind beschriftet', () => {
+        assert.ok(/'heatmap\.wrLabel'/.test(jsK),
+            'die Zeilenbeschriftung "Win Rate" fehlt');
+        assert.ok(/'heatmap\.gamesShort'/.test(jsK),
+            'die Zeilenbeschriftung fuer die Matches fehlt — eine nackte Zahl '
+            + 'in der Zelle war schon einmal der Befund ("n ist gleich sagt '
+            + 'nichts aus")');
+        // Und sie heisst ueberall gleich: "Matches", nicht "Partien".
+        const i18n = lies(path.join('js', 'i18n.js'));
+        const gs = [...i18n.matchAll(/'heatmap\.gamesShort':\s*'([^']*)'/g)].map(m => m[1]);
+        assert.strictEqual(gs.length, 2,
+            `heatmap.gamesShort steht ${gs.length}× in i18n.js, erwartet 2`);
+        for (const w of gs) {
+            assert.strictEqual(w, 'Matches',
+                `die Matchzahl heisst hier "${w}" — der Betreiber wollte `
+                + '"Matches wie ueberall woanders auch"');
+        }
+    });
+
+    it('die Matchzahl beider Quellen steht in der Zelle', () => {
+        const i = jsK.indexOf('const zellenHtml');
+        assert.ok(i > 0, 'die Zelle wird nicht mehr aus zellenHtml gebaut');
+        const rumpf = jsK.slice(i, jsK.indexOf('const majorTip', i));
+        assert.ok(/\$\{totalGames\}/.test(rumpf),
+            'die Online-Matchzahl fehlt in der Zelle');
+        const nFelder = [...rumpf.matchAll(
+            /heatmap-zelle-n[^"]*">\$\{([\s\S]*?)\}<\/span>/g)].map(m => m[1]);
+        assert.strictEqual(nFelder.length, 2,
+            `die Zelle zeichnet ${nFelder.length} Matchzahl-Felder, erwartet 2 `
+            + '(online und Major)');
+        assert.ok(/\btotalGames\b/.test(nFelder[0]),
+            'das erste Matchzahl-Feld traegt nicht die Online-Matchzahl');
+        assert.ok(/^\s*mj\s*\?/.test(nFelder[1]) && /mj\.anzahl/.test(nFelder[1]),
+            'das zweite Matchzahl-Feld haengt nicht an "es gibt einen '
+            + 'Major-Wert" oder traegt dessen Matchzahl nicht — von 90 Zellen '
+            + 'haben nur 56 mindestens 10 Matches, ohne die Zahl sieht man '
+            + 'das nicht');
+        const wrFelder = [...rumpf.matchAll(
+            /heatmap-zelle-wr[^"]*">\$\{([\s\S]*?)\}<\/span>/g)].map(m => m[1]);
+        assert.strictEqual(wrFelder.length, 2,
+            `die Zelle zeichnet ${wrFelder.length} Win-Rate-Felder, erwartet 2`);
+        assert.ok(/mj\s*\?/.test(wrFelder[1]) && /mj\.punkte/.test(wrFelder[1]),
+            'das Major-Win-Rate-Feld haengt nicht am Major-Wert');
+        assert.ok(/heatmap\.majorLabel/.test(rumpf) && /heatmap\.onlineLabel/.test(rumpf),
+            'die Quellen sind in der gebauten Zelle nicht beschriftet');
     });
 
     it('duenne Paarungen werden markiert', () => {
-        assert.ok(/majorDuenn = mj && mj\.anzahl < 10/.test(jsK),
+        assert.ok(/majorDuenn = !!\(mj && mj\.anzahl < 10\)/.test(jsK),
             'die Markierung fuer duenne Paarungen ist weg');
-        assert.ok(/\.heatmap-td-major-duenn/.test(lies(path.join('css', 'styles.css'))),
-            'die Markierung fehlt im Stylesheet');
+        // Sie muss auch ANKOMMEN: die Klasse haengt an majorDuenn, nicht
+        // an einer Konstanten.
+        assert.ok(/const dk = majorDuenn \? ' heatmap-zelle-duenn' : ''/.test(jsK),
+            'die Markierung haengt nicht mehr an majorDuenn');
+        const css = lies(path.join('css', 'styles.css'));
+        assert.ok(/\.heatmap-zelle-duenn\s*\{[^}]*font-style:\s*italic/.test(css),
+            'die Markierung fehlt im Stylesheet oder ist keine Kursivstellung '
+            + 'mehr — Blaesse ist hier verboten, sie kostete schon einmal den '
+            + 'Kontrast (3,42:1)');
     });
 
     it('der Hinweis nennt die Zaehlweise', () => {

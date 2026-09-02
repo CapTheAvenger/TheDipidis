@@ -338,6 +338,13 @@ describe('Die Kachel haengt nicht an der Bildschirmbreite', () => {
             + 'wo am wenigsten Platz ist');
         assert.ok(/font-size:\s*[\d.]+rem/.test(regel),
             'die Zahlengroesse ist nicht mehr fest gesetzt');
+        // Rechtsbuendig ist keine Kosmetik: die Werte der beiden Zeilen
+        // muessen an derselben Kante enden, sonst haengt "7,3 %" gegen
+        // "22,2 %" versetzt und der senkrechte Vergleich, fuer den die
+        // Kachel da ist, kostet wieder einen Moment.
+        assert.ok(/text-align:\s*right/.test(regel),
+            'der Wert ist nicht mehr rechtsbuendig — die beiden Zeilen '
+            + 'fluchten dann nicht');
     });
 
     it('die Reihe legt keine leeren Plaetze an', () => {
@@ -363,23 +370,40 @@ describe('Die Kachel haengt nicht an der Bildschirmbreite', () => {
             + 'Zahlen der vier Kacheln auf verschiedenen Zeilen');
     });
 
-    it('Herkunft und Zahl stehen in einer Zeile, die Zeilen untereinander', () => {
+    it('Herkunft, Wert und Stueckzahl stehen in einer Zeile, die Zeilen untereinander', () => {
         const regel = rumpf('.arc-halbe');
         assert.ok(/grid-template-columns:\s*1fr/.test(regel),
             'die beiden Herkuenfte stehen wieder nebeneinander — nebeneinander '
             + 'passen sie in die echte Kartenbreite nicht');
+        // Seit dem 02.09.2026 traegt jede Zeile DREI Felder: woher, wie viel,
+        // worauf es steht. Ein Raster, damit die drei Felder der beiden Zeilen
+        // senkrecht in einer Flucht stehen — dafuer ist die Kachel da.
         const zeile = rumpf('.arc-halb');
-        assert.ok(/justify-content:\s*space-between/.test(zeile),
-            'Herkunft und Zahl stehen nicht mehr an den beiden Enden ihrer Zeile');
+        assert.ok(/display:\s*grid/.test(zeile),
+            '.arc-halb ist kein Raster mehr — mit space-between wandern die '
+            + 'Felder je nach Textlaenge und die beiden Zeilen fluchten nicht');
+        const spalten = /grid-template-columns:\s*([^;]+);/.exec(zeile);
+        assert.ok(spalten, '.arc-halb hat keine gesetzten Spalten mehr');
+        const n = spalten[1].trim().split(/\s+/).length;
+        assert.strictEqual(n, 3,
+            `.arc-halb hat ${n} Spalten (erwartet 3: Herkunft, Wert, Stueckzahl) `
+            + '— mit zweien faellt die Stueckzahl wieder weg');
     });
 
-    it('das Markup setzt die Herkunft VOR die Zahl', () => {
-        const i = ohneKomm.indexOf('const halb = (wert, quelle, schwach');
-        assert.ok(i > 0, 'der Halb-Baustein ist verschwunden');
-        const rumpf = ohneKomm.slice(i, i + 420);
-        assert.ok(rumpf.indexOf('arc-halb-quelle') < rumpf.indexOf('arc-tile-value'),
-            'die Zahl steht wieder vor ihrer Herkunft — in einer Zeile gelesen '
-            + 'gehoert erst hin, WORAUS die Zahl kommt');
+    it('das Markup setzt Herkunft, dann Wert, dann Stueckzahl', () => {
+        const i = ohneKomm.indexOf('const halb = (wert, quelle, anzahl');
+        assert.ok(i > 0, 'der Halb-Baustein ist verschwunden oder hat die '
+            + 'Stueckzahl wieder verloren');
+        const r = ohneKomm.slice(i, i + 520);
+        const q = r.indexOf('arc-halb-quelle');
+        const w = r.indexOf('arc-tile-value');
+        const a = r.indexOf('arc-halb-anzahl');
+        assert.ok(q > 0 && w > 0 && a > 0,
+            'eines der drei Felder fehlt im Markup der Zeile');
+        assert.ok(q < w && w < a,
+            'die Reihenfolge stimmt nicht (erwartet Herkunft, Wert, Stueckzahl) '
+            + '— in einer Zeile gelesen gehoert erst hin, WORAUS die Zahl kommt, '
+            + 'und zuletzt, worauf sie steht');
     });
 });
 
@@ -431,14 +455,48 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
             + '"es gibt ueberhaupt Partien"');
     });
 
-    it('die Partienzahl steht auf der Kachel, nicht nur im Hinweis', () => {
+    it('die Matchzahl steht auf der Kachel — fuer BEIDE Quellen', () => {
         // Ein Hinweis erscheint erst beim Verweilen — auf dem Telefon also nie.
-        // Die Partienzahl ist aber genau die Zahl, an der man entscheidet, ob
+        // Die Matchzahl ist aber genau die Zahl, an der man entscheidet, ob
         // man der Quote glaubt.
-        assert.ok(/arc\.quelleMajorN/.test(quelle),
-            'die Partienzahl ist von der Major-Zeile verschwunden');
-        assert.ok(/\{n\} Partien/.test(quelle),
-            'die Beschriftung nennt die Partienzahl nicht mehr');
+        //
+        // ANLASS (02.09.2026): "wenn wir da aber schon eine Zahl hinschreiben
+        // wie viele Leute das Deck genutzt haben, dann sollten wir das bei
+        // Online auch machen ... und dann sollten wir die Online Matches da
+        // auch als Zahl erwaehnen." Vorher stand die Zahl nur beim Major.
+        const i = ohneKomm.indexOf("tileGeteilt('wr'");
+        assert.ok(i > 0, "tileGeteilt('wr') fehlt");
+        const r = ohneKomm.slice(i, i + 400);
+        assert.ok(/fmtGanz\(d\.partien\)/.test(r),
+            'die Online-Matchzahl fehlt auf der Win-Rate-Kachel');
+        assert.ok(/fmtGanz\(m\.partien\)/.test(r),
+            'die Major-Matchzahl fehlt auf der Win-Rate-Kachel');
+
+        const j = ohneKomm.indexOf("tileGeteilt('rep'");
+        assert.ok(j > 0, "tileGeteilt('rep') fehlt");
+        const r2 = ohneKomm.slice(j, j + 400);
+        assert.ok(/fmtGanz\(d\.count\)/.test(r2),
+            'die Online-Stueckzahl fehlt auf der Anteil-Kachel');
+        assert.ok(/fmtGanz\(m\.antritte\)/.test(r2),
+            'die Major-Stueckzahl fehlt auf der Anteil-Kachel');
+    });
+
+    it('auf der Kachelflaeche steht kein "Antritte" und kein "Partien"', () => {
+        // "also das antritte da kannst du weglassen, also das wort antritte
+        //  ... und statt partien Matches wie ueberall woanders auch"
+        // Die Zahl bleibt, das Wort geht. Geprueft werden die Bausteine, die
+        // auf die FLAECHE gehen — in den Hinweistexten darf weiter erklaert
+        // werden.
+        for (const tot of ['arc.quelleMajorN', 'arc.quelleMajorA']) {
+            assert.ok(!ohneKomm.includes(tot),
+                `${tot} ist zurueck — dieser Schluessel trug "Major · {n} `
+                + 'Antritte" bzw. "Major · {n} Partien" auf die Kachelflaeche');
+        }
+        const i18n = fs.readFileSync(path.join(wurzel, 'js', 'i18n.js'), 'utf8');
+        for (const tot of ['arc.quelleMajorN', 'arc.quelleMajorA']) {
+            assert.ok(!i18n.includes(tot),
+                `${tot} steht noch in i18n.js — toter Schluessel`);
+        }
     });
 
     it('eine duenne Stichprobe wird markiert statt verschwiegen', () => {

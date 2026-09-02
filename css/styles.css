@@ -9995,36 +9995,60 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-variant-numeric: tabular-nums;
 }
 
-/* Die Praesenzzeile in der Heatmap-Zelle (02.09.2026).
+/* Das kleine Kreuz in der Heatmap-Zelle (02.09.2026).
  *
  * Auftrag: "vll sollten wir auch in der Heatmap in jedem Feld online Win
  * Rate / Major Win Rate zeigen so hat man immer und ueberall den
- * Vergleich". Abdeckung nachgemessen: 90 von 90 Zellen des Top-10-Gitters
- * haben einen Major-Wert, 56 davon mit mindestens 10 Partien.
+ * Vergleich". Der erste Wurf schrieb "M 49,4 % · 52" unter die
+ * Online-Zahl. Rueckmeldung: "mit M kann man erstmal nichts anfangen,
+ * man sollte da schon Major ausschreiben vll geht eine Aufteilung
+ * online / Major | Win Rate xx / xx | Matches xx / xx" — mit Skizze.
  *
- * Sie steht UNTER der Online-Zahl und traegt ein "M" davor, weil sie eine
- * andere Rechnung ist: die Labs-Datei liefert je Paarung nur Anzahl und
- * Matchpunkte, keine Bilanz — auf die Online-Skala laesst sie sich nicht
- * bringen. Der Unterschied ist klein und systematisch (Median -2,0 pp,
- * davon -1,8 reine Zaehlweise), steht aber im Hinweis, damit ihn niemand
- * als Einbruch liest.
+ * Das ist genau dieses Raster: Quellen als Spalten, Kennzahlen als
+ * Zeilen. Die beiden Win Rates stehen damit NEBENEINANDER. Der Vergleich,
+ * um den es die ganze Zeit geht, ist ein Blick statt eines Sprungs.
  *
- * Volle Deckkraft aus demselben Grund wie bei der Partienzahl darueber:
- * eine gedaempfte Farbe auf gedaempftem Grund fiel schon einmal unter
- * 4,5:1. Duenn wird ueber Kursivstellung gezeigt, nicht ueber Blaesse. */
-.heatmap-td-major {
-    display: block;
-    font-size: var(--fs-xs);
-    font-weight: 500;
-    opacity: 1;
+ * Feste Spaltenbreiten, damit die Zahlen ueber alle 90 Zellen des Gitters
+ * in einer Flucht stehen. Volle Deckkraft: eine gedaempfte Farbe auf
+ * gedaempftem Grund fiel hier schon einmal auf 3,42:1. Duenne
+ * Stichproben werden kursiv gesetzt, nicht blass. Keine Schrift unter
+ * 10 px — das ist der Boden aus tests/unit/test-schriftboden.js, und die
+ * Stueckzahl ist die Angabe, an der man ablesen soll, wie ernst die
+ * Quote darueber zu nehmen ist. */
+.heatmap-zelle {
+    display: grid;
+    grid-template-columns: 52px 1fr 1fr;
+    gap: 1px 6px;
+    align-items: baseline;
+    text-align: right;
+    white-space: nowrap;
     color: var(--heatmap-ink);
-    line-height: 1;
-    margin-top: 1px;
     font-variant-numeric: tabular-nums;
-    border-top: 1px dotted currentColor;
-    padding-top: 2px;
 }
-.heatmap-td-major-duenn { font-style: italic; }
+.heatmap-zelle-quelle {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+.heatmap-zelle-kennzahl {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-align: left;
+}
+.heatmap-zelle-wr {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+.heatmap-zelle-n {
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+.heatmap-zelle-strich {
+    grid-column: 1 / -1;
+    border-top: 1px dotted currentColor;
+    margin: 1px 0;
+}
+.heatmap-zelle-duenn { font-style: italic; }
 
 /* Wenig Partien: gestrichelt, nicht blass.
 
@@ -10883,18 +10907,34 @@ body.arc-open { overflow: hidden; }
     grid-template-columns: 1fr;
     gap: 3px;
 }
+/* Drei Felder je Zeile seit dem 02.09.2026: Quelle | Wert | Stueckzahl.
+   Raster statt flex, weil die drei Felder der beiden Zeilen senkrecht in
+   einer Flucht stehen muessen — genau dafuer ist die Kachel da. Die
+   Stueckzahl bekommt eine feste Spalte, damit vierstellige Zahlen
+   ("2.754") den Wert daneben nicht verschieben. */
 .arc-halb {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 6px;
+    gap: 0 6px;
     min-width: 0;
+}
+.arc-halb-anzahl {
+    font-size: 0.66rem;
+    font-weight: 500;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.85;
 }
 .arc-halb .arc-tile-value {
     /* Fest, nicht clamp(): die Kachel ist schmal und ihre Breite haengt
        nicht am Bildschirm. Immer noch die groesste Schrift der Kachel. */
     font-size: 1.05rem;
     line-height: 1.2;
+    /* Rechtsbuendig, damit die Werte beider Zeilen an derselben Kante
+       enden — sonst haengt "7,3 %" gegen "22,2 %" versetzt. */
+    text-align: right;
 }
 .arc-halb-quelle {
     color: var(--arc-ink3);
@@ -10904,7 +10944,7 @@ body.arc-open { overflow: hidden; }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex: 0 1 auto;
+    min-width: 0;
 }
 /* Fehlt die Major-Seite, steht dort ein Strich — sichtbar leiser als
    eine echte Zahl, damit das Auge nicht zwei Werte vergleicht, von

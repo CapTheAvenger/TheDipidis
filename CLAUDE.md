@@ -80,6 +80,17 @@ way; each one exists because breaking it cost real time.
 
 ## Verification
 
+* **Nach jedem Deploy die geänderte Stelle im Browser ANSEHEN.** Grüne Tests
+  heißen nicht, dass es gut aussieht. Angeordnet am 02.09.2026: *"kannst du
+  bitte künftig alles was du änderst danach Live testen ob das wirklich Sinn
+  ergibt was du da gemacht hast."* Anlass war eine Heatmap-Zelle, die
+  `M 49,4 % · 52` schrieb — alle Tests grün, für einen Leser unlesbar. Der
+  Fehler war nicht der Code, sondern dass ihn niemand angeschaut hat.
+* **Bei Layout-Entscheidungen mehrere Entwürfe rendern und vergleichen, bevor
+  einer in den Zweig kommt.** Ein Mock mit echten Zahlen, Playwright-Screenshot,
+  hinsehen. Kostet Minuten und hat am 02.09. fünf Entwürfe gegeneinander
+  gestellt; gewonnen hat der, den der Betreiber selbst skizziert hatte — nicht
+  der, den ich für den elegantesten hielt.
 * Prefer driving the real thing over asserting it works. There is Playwright
   tooling: `tests/e2e-playtester-smoke.js`, `tests/mobile_ux_audit.js`, and the
   `visual-*.yml` workflows.

@@ -114,7 +114,8 @@ describe('Befund 2 — "Day 2" nur, wo es einen zweiten Tag gibt', () => {
         const holen = (sch) => [...I18N.matchAll(
             new RegExp("'" + sch.replace(/\./g, '\\.') + "':\\s*'([^']*)'", 'g'))]
             .map((m) => m[1]);
-        for (const sch of ['mc.histZielLabel', 'mc.recHintZiel', 'mc.recBadgeZielCount']) {
+        for (const sch of ['mc.histZielLabel', 'mc.recHintZiel',
+                           'mc.recBadgeZielCount', 'mc.subtitle']) {
             const werte = holen(sch);
             assert.strictEqual(werte.length, 2,
                 `${sch} steht ${werte.length}× in i18n.js, erwartet 2`);

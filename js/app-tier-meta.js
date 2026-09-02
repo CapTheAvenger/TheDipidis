@@ -1761,6 +1761,23 @@
                         // fuehrt — halbe Antritte gibt es nicht. Gerechnet
                         // wird oben weiter mit der gewichteten.
                         const antritte = t ? t.broughtAnzeige : null;
+                        /* BEFUND (02.09.2026, vom Betreiber angestrichen): drei
+                           Spalten standen komplett auf Strich — "Turnier-Antritte",
+                           "Top 8" UND "ggue. Schnitt". Die ersten beiden zu Recht:
+                           die gezaehlten Starts kommen erst mit dem Wochenlauf.
+                           Die dritte war mein Fehler. Am 01.09. habe ich
+                           broughtAnzeige auf null gesetzt, wenn die rohe Spalte
+                           fehlt — und dieselbe Variable trug danach auch die
+                           STATISTISCHEN SCHWELLEN. `null >= 20` ist false, also
+                           schwieg der Faktor bei jedem Deck, und `duenn` war
+                           ueberall wahr.
+
+                           Anzeige und Schwelle sind zwei verschiedene Fragen.
+                           Was auf dem Schirm steht, muss eine gezaehlte Zahl
+                           sein; ob die Stichprobe traegt, entscheidet der
+                           gewichtete Wert — der ist immer da und war nie
+                           strittig. Deshalb ab hier zwei Felder. */
+                        const antritteGew = t ? t.brought : null;
                         return {
                             name,
                             listen:  l ? l.new_count : null,
@@ -1768,6 +1785,7 @@
                             anteilAusTurnier: !l && !!t,
                             wr:      l && l.winrate > 0 ? l.winrate : null,
                             antritte,
+                            antritteGew,
                             quote:   t ? t.top8ConvPct : null,
                             cuts:    t ? t.top8Anzeige : null,
                             faktor:  perfVon.has(name) ? 1 + perfVon.get(name) / 100 : null,
@@ -1775,7 +1793,7 @@
                             // Duenn heisst hier: zu wenig TURNIER-Antritte, um die
                             // Top-8-Quote zu glauben. Die Ladder-Spalten sind davon
                             // unberuehrt, die stehen auf 2.121 Listen.
-                            duenn: !(antritte >= CONV_THIN_N),
+                            duenn: !(antritteGew >= CONV_THIN_N),
                             rang: l ? (l.new_count || 0) : 0,
                         };
                     });
@@ -1843,6 +1861,27 @@
                             : `The field average is ${fmtPct(conv.expected * 100, 1)} top-8 rate.` },
                     ];
 
+                    /* BEFUND (02.09.2026, vom Betreiber angestrichen):
+                       "Wenn die Zahlen da leer sind brauchen wir die Spalten
+                       denn ueberhaupt?" — Nein. Solange die Datei die
+                       gezaehlten Starts nicht fuehrt, stehen unter
+                       "Turnier-Antritte" und "Top 8" 138 Striche und sonst
+                       nichts. Eine Spalte, die in JEDER Zeile schweigt, ist
+                       keine Information, sie ist Breite.
+
+                       Weg heisst hier nicht geloescht: sobald eine einzige
+                       Zeile eine gezaehlte Zahl traegt, sind beide Spalten
+                       wieder da. Die Top-8-Quote und der Faktor bleiben
+                       ohnehin stehen — die rechnen mit dem gewichteten Wert
+                       und brauchen die Zaehlung nicht.
+
+                       Geprueft wird an den Zeilen, nicht am Datei-Flag: was
+                       die Tabelle zeigen kann, entscheidet das, was in der
+                       Tabelle steht. */
+                    const hatWert = (k) => reihen.some(r => r[k] != null);
+                    const SPALTEN_SICHTBAR = SPALTEN.filter(c =>
+                        (c.k !== 'antritte' && c.k !== 'cuts') || hatWert(c.k));
+
                     const zelle = (r, k) => {
                         if (k === 'name')     return escapeHtml(r.name);
                         if (k === 'listen')   return r.listen   == null ? '–' : fmtNumDS(r.listen);
@@ -1867,7 +1906,7 @@
                         // Durchschnitt" und heisst "wir wissen nichts". Die Zeile
                         // bleibt, ihre Antritte zaehlen weiter in den
                         // Feld-Durchschnitt; nur der Faktor schweigt.
-                        if (!(r.antritte >= CONV_MIN_N)) {
+                        if (!(r.antritteGew >= CONV_MIN_N)) {
                             return `<span class="cm-rang-wert" title="${escapeHtml(deR
                                 ? 'Unter ' + CONV_MIN_N + ' gewichteten Antritten — zu wenig für eine Schätzung'
                                 : 'Fewer than ' + CONV_MIN_N + ' weighted entries — too little for an estimate')}">–</span>`;
@@ -1898,7 +1937,7 @@
                     reihen.sort((x, y) => (y.listen || 0) - (x.listen || 0)
                                        || (y.anteil || 0) - (x.anteil || 0));
 
-                    const kopfZellen = SPALTEN.map(c => {
+                    const kopfZellen = SPALTEN_SICHTBAR.map(c => {
                         const txt = deR ? c.de : c.en;
                         const hilfstext = c.hilf ? term(c.hilf)
                                          : (c.tip ? (deR ? c.tip.de : c.tip.en) : '');
@@ -1920,7 +1959,7 @@
                         <tr class="${r.duenn ? 'is-muted' : ''}${i >= SICHTBAR ? ' cm-rang-mehr' : ''}"${
                             i >= SICHTBAR ? ' hidden' : ''}>
                             <td class="ds-rank">${i + 1}</td>
-                            ${SPALTEN.map(c => `<td class="${c.num ? 'ds-num' : ''}">${zelle(r, c.k)}</td>`).join('')}
+                            ${SPALTEN_SICHTBAR.map(c => `<td class="${c.num ? 'ds-num' : ''}">${zelle(r, c.k)}</td>`).join('')}
                         </tr>`).join('');
                     const versteckt = Math.max(0, reihen.length - SICHTBAR);
 
@@ -1946,19 +1985,46 @@
                     overallTop8Html = `
                         <div class="ds-panel cm-rangliste-block">
                             <h3 class="ds-label">🏆 ${deR ? 'Meta-Performance' : 'Meta performance'}</h3>
-                            <p class="ds-note cm-rang-hinweis">${deR
-                                ? 'Zwei Zählungen desselben Metas nebeneinander: <strong>Listen</strong> und '
-                                  + '<strong>Anteil</strong> von der Online-Ladder, <strong>Turnier-Antritte</strong> '
-                                  + 'und <strong>Top 8</strong> von den Turnieren. Darum ist der Anteil in beiden fast '
-                                  + 'gleich, die Stückzahlen aber nicht. Ein Strich heißt: das Deck steht in der einen '
-                                  + 'Quelle und in der anderen nicht — oder es heißt in den beiden '
-                                  + 'Quellen verschieden. Jede Spaltenüberschrift sortiert und erklärt sich selbst. '
-                                : 'Two counts of the same field side by side: <strong>lists</strong> and '
-                                  + '<strong>share</strong> from the online ladder, <strong>tournament entries</strong> '
-                                  + 'and <strong>top 8</strong> from tournaments. That is why the share matches but the '
-                                  + 'totals do not. A dash means the deck is in one source and not the other — '
-                                  + 'or it goes by a different name in the two sources. Every column heading sorts '
-                                  + 'and explains itself. '}<a class="qu-verweis" href="#quellen">${
+                            <p class="ds-note cm-rang-hinweis">${(() => {
+                                /* BEFUND (02.09.2026): der Text nannte vier
+                                   Spalten, von denen zwei gerade nicht in der
+                                   Tabelle stehen. Wer "Turnier-Antritte" liest
+                                   und keine findet, sucht seinen eigenen Fehler.
+                                   Also beschreibt der Text, was da IST — und
+                                   sagt in einem Satz, was fehlt und warum. */
+                                const zaehlungDa = hatWert('antritte');
+                                if (deR) {
+                                    return zaehlungDa
+                                        ? 'Zwei Zählungen desselben Metas nebeneinander: <strong>Listen</strong> und '
+                                          + '<strong>Anteil</strong> von der Online-Ladder, <strong>Turnier-Antritte</strong> '
+                                          + 'und <strong>Top 8</strong> von den Turnieren. Darum ist der Anteil in beiden fast '
+                                          + 'gleich, die Stückzahlen aber nicht. Ein Strich heißt: das Deck steht in der einen '
+                                          + 'Quelle und in der anderen nicht — oder es heißt in den beiden '
+                                          + 'Quellen verschieden. Jede Spaltenüberschrift sortiert und erklärt sich selbst. '
+                                        : '<strong>Listen</strong>, <strong>Anteil</strong> und <strong>Win Rate</strong> '
+                                          + 'kommen von der Online-Ladder, <strong>Top-8-Quote</strong> und '
+                                          + '<strong>ggü. Schnitt</strong> von den Turnieren. Ein Strich heißt: das Deck steht '
+                                          + 'in der einen Quelle und in der anderen nicht — oder es heißt in den beiden '
+                                          + 'Quellen verschieden. Die Stückzahlen (Antritte und Top 8) fehlen noch: die Datei '
+                                          + 'führt bisher nur eine gewichtete Summe, und halb teilnehmen geht nicht. Sie '
+                                          + 'kommen mit dem nächsten Datenlauf; die Quoten stimmen schon jetzt. '
+                                          + 'Jede Spaltenüberschrift sortiert und erklärt sich selbst. ';
+                                }
+                                return zaehlungDa
+                                    ? 'Two counts of the same field side by side: <strong>lists</strong> and '
+                                      + '<strong>share</strong> from the online ladder, <strong>tournament entries</strong> '
+                                      + 'and <strong>top 8</strong> from tournaments. That is why the share matches but the '
+                                      + 'totals do not. A dash means the deck is in one source and not the other — '
+                                      + 'or it goes by a different name in the two sources. Every column heading sorts '
+                                      + 'and explains itself. '
+                                    : '<strong>Lists</strong>, <strong>share</strong> and <strong>win rate</strong> come '
+                                      + 'from the online ladder, <strong>top-8 rate</strong> and <strong>vs. average</strong> '
+                                      + 'from tournaments. A dash means the deck is in one source and not the other — or it '
+                                      + 'goes by a different name in the two sources. The raw counts (entries and top 8) are '
+                                      + 'still missing: the file so far carries only a weighted sum, and you cannot '
+                                      + 'half-attend. They arrive with the next data run; the rates are already correct. '
+                                      + 'Every column heading sorts and explains itself. ';
+                            })()}<a class="qu-verweis" href="#quellen">${
                                     deR ? 'Nenner und Rechenweg →' : 'Denominators and method →'}</a></p>
                             <div class="mobile-table-scroll">
                                 <table class="ds-table cm-rangliste" data-rang-sortiert="listen" data-rang-richtung="ab">

@@ -1027,6 +1027,7 @@
     // Kachel daneben.
     function factsFor(name) {
         const d = _decks ? (_decks[findKey(_decks, name)] || null) : null;
+        const m = _major ? (_major[findKey(_major, name)] || null) : null;
         const c = _conv ? _conv.decks.find(x =>
             String(x.name).toLowerCase() === String(name).toLowerCase()) : null;
         return {
@@ -1042,6 +1043,19 @@
             expected:     _conv ? _conv.expected : NaN,
             totalBrought: _conv ? _conv.totalBrought : NaN,
             thinGames: THIN_GAMES,
+            /* DIE PRAESENZSEITE FUERS BILD (02.09.2026).
+               Gemeldet: "im generiertem Bild fehlen die Daten voellig."
+               Zu Recht — die Karte trug seit dem 01.09. vier Kacheln mit
+               online UND Major, das Bild daneben nur die drei alten Zahlen.
+               Und das Bild ist die Fassung, die die Seite VERLAESST. */
+            majorShare:    m ? m.share : NaN,
+            majorWinRate:  m && m.winRate != null ? m.winRate : NaN,
+            majorPartien:  m ? m.partien : NaN,
+            majorAntritte: m ? m.antritte : NaN,
+            majorRemis:    m && m.remisQuote != null ? m.remisQuote : NaN,
+            majorDay2:     m && m.day2Quote != null ? m.day2Quote : NaN,
+            majorDay2Feld: _majorFeld().day2Quote,
+            majorDuennAb:  MAJOR_DUENN_PARTIEN,
         };
     }
 

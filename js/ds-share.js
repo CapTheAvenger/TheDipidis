@@ -233,7 +233,12 @@
 
     var DC = {
         W: 1200, H: 675,
-        HEAD: 64, STATS: 128, FOOT: 38,
+        /* STATS von 128 auf 150: seit dem 02.09. traegt jede Spalte eine
+           dritte Zeile (die Praesenzzahl). Sie sitzt auf HEAD + 136, und
+           bei 128 haette der Block auf y = 192 geendet — die Zeile waere
+           in den Koerper darunter gelaufen. bodyY rechnet sich daraus, der
+           Rest der Karte rutscht also mit. */
+        HEAD: 64, STATS: 150, FOOT: 38,
         KEY_W: 300, PAD: 24
     };
 
@@ -317,7 +322,7 @@
             { x: DC.KEY_W + w2 + 2, w: DC.W - (DC.KEY_W + w2 + 2) }
         ];
 
-        function statCol(col, accent, value, valueColor, key, note, note2) {
+        function statCol(col, accent, value, valueColor, key, note, note2, note3) {
             ctx.fillStyle = C.surface1;
             ctx.fillRect(col.x, DC.HEAD, col.w, DC.STATS);
             ctx.fillStyle = accent;
@@ -336,14 +341,37 @@
                 ctx.font = fSans(11, 400);
                 ctx.fillText(clip(ctx, note2, maxW), x, DC.HEAD + 118);
             }
+            /* Eine dritte Zeile fuer die Praesenzzahl.
+               DC.STATS ist 150 px hoch, die zweite Notiz sitzt auf +118 —
+               es bleibt Platz, und die Zeile wird nur gezeichnet, wenn es
+               etwas zu sagen gibt. */
+            if (note3) {
+                ctx.font = fMono(12, 500);
+                ctx.fillStyle = C.ink;
+                ctx.fillText(clip(ctx, note3, maxW), x, DC.HEAD + 136);
+            }
         }
+
+        /* DIE PRAESENZZAHLEN AUFS BILD (02.09.2026).
+           Gemeldet: "im generiertem Bild fehlen die Daten voellig." Die
+           Karte trug seit dem 01.09. online UND Major, das Bild nur die
+           drei alten Zahlen — und das Bild ist die Fassung, die die Seite
+           VERLAESST. Wer es teilt, teilte den halben Befund. */
+        var hatMajorShare = isFinite(spec.majorShare);
+        var hatMajorWr = isFinite(spec.majorWinRate) && isFinite(spec.majorPartien)
+            && spec.majorPartien > 0;
 
         var hasShare = isFinite(spec.share);
         statCol(cols[0], C.dvZero,
             hasShare ? num(spec.share, 2) + ' %' : '–',
             C.ink,
-            L('Anteil am Meta', 'Meta share'),
-            hasShare ? num(spec.count, 0) + ' ' + L('Listen', 'lists') : L('keine Daten', 'no data'));
+            L('Anteil am Meta · online', 'Meta share · online'),
+            hasShare ? num(spec.count, 0) + ' ' + L('Listen', 'lists') : L('keine Daten', 'no data'),
+            '',
+            hatMajorShare
+                ? 'Major ' + num(spec.majorShare, 2) + ' %  ·  '
+                    + num(spec.majorAntritte, 0) + ' ' + L('Antritte', 'entries')
+                : L('Major: keine Daten', 'major: no data'));
 
         var wrDelta = isFinite(spec.winRate) ? spec.winRate - 50 : null;
         statCol(cols[1],
@@ -365,24 +393,71 @@
             (window.WinRateKonvention
                 ? window.WinRateKonvention.kurzHinweis('mitUnentschieden')
                 : L('Siege ÷ alle gespielten Matches',
-                    'wins ÷ all games played')));
+                    'wins ÷ all games played')),
+            /* Beide Seiten rechnen Siege durch ALLE Partien — dieselbe
+               Formel. Was sie trennt, ist die Remisquote: am Major rund
+               11 %, online 1,3 %. Das drueckt die rechte Zahl um etwa
+               fuenf Punkte, ohne dass ein Deck schlechter gespielt haette,
+               und deshalb steht sie hier mit dabei. */
+            hatMajorWr
+                ? 'Major ' + num(spec.majorWinRate, 2) + ' %  ·  '
+                    + num(spec.majorPartien, 0) + ' ' + L('Partien', 'games')
+                    + (isFinite(spec.majorRemis)
+                        ? '  ·  ' + num(spec.majorRemis, 1) + ' % ' + L('unentsch.', 'ties')
+                        : '')
+                : L('Major: keine Daten', 'major: no data'));
 
-        var hasConv = isFinite(spec.perfPct);
+        /* DAS BILD ZEIGTE NOCH DIE ZAHL, DIE DIE KARTE AUFGEGEBEN HAT.
+           ---------------------------------------------------------------
+           Hier stand `signed(spec.perfPct)` gross, also "-48,9 %" unter der
+           Beschriftung "Top-8 gegen Erwartung". Genau diese Darstellung hat
+           die Karte am 01.09.2026 abgeloest, weil sie gemeldet wurde:
+           "'plus 59 % Top 8 wird erwartet…' den Bereich verstehe ich noch
+           nicht so ganz". Zu Recht — es war kein Prozentsatz einer Quote,
+           sondern der Vergleich zweier Quoten, und er stand mit
+           Prozentzeichen neben zwei echten Prozentwerten. Wer das als
+           "erreicht in 49 % der Faelle die Top 8" liest, liegt um den
+           Faktor sechzehn daneben.
+
+           Die Karte trug seitdem die QUOTE mit dem Feldschnitt daneben,
+           das Bild weiter den Vergleichswert. Das Bild ist die Fassung,
+           die die Seite verlaesst — also stand die aufgegebene Zahl genau
+           dort, wo sie am weitesten reist. Aus der Pruefrunde vom 01.09.,
+           bestaetigt durch die Gegenprobe.
+
+           Jetzt dieselbe Groesse wie auf der Karte: die rohe Quote gross,
+           der rohe Feldschnitt daneben. Beide roh, damit sie sich
+           ineinander umrechnen lassen — das geglaettete Vielfache bleibt
+           der Rangliste, wo es als geglaettet beschriftet ist. */
+        var hasConv = isFinite(spec.perfPct) && isFinite(spec.top8) && spec.brought > 0;
+        var convQuote = hasConv ? (spec.top8 / spec.brought) * 100 : NaN;
+        var convFeld = isFinite(spec.expected) ? spec.expected * 100 : NaN;
         statCol(cols[2],
             !hasConv ? C.dvZero : (spec.perfPct >= 0 ? C.dvPos : C.dvNeg),
-            hasConv ? signed(spec.perfPct, 1) + ' %' : '–',
+            hasConv ? num(convQuote, 2) + ' %' : '–',
             C.ink,
-            L('Top-8 gegen Erwartung', 'Top-8 vs expectation'),
-            hasConv ? num(spec.top8, 0) + ' / ' + num(spec.brought, 0) + ' → '
-                      + num((spec.top8 / spec.brought) * 100, 2) + ' %'
-                    : L('zu wenig Daten', 'not enough data'),
+            L('Top-8-Quote · online', 'Top-8 rate · online'),
+            hasConv
+                ? (isFinite(convFeld)
+                    ? L('Schnitt aller Decks ', 'field average ') + num(convFeld, 2) + ' %'
+                    : num(spec.top8, 0) + ' / ' + num(spec.brought, 0))
+                : L('zu wenig Daten', 'not enough data'),
             hasConv
                 ? (spec.thin
                     ? L('n unter 50 — zum Meta hin geglättet (K=50)',
                         'n below 50 — smoothed toward the field (K=50)')
                     : L('empirisch-bayessche Glättung, K=50',
                         'empirical-Bayes shrinkage, K=50'))
-                : L('Deck fehlt in der Top-Cut-Datei', 'deck absent from the top-cut file'));
+                : L('Deck fehlt in der Top-Cut-Datei', 'deck absent from the top-cut file'),
+            /* Day 2 hat KEINE Online-Seite — Online-Turniere haben keinen
+               zweiten Tag. Deshalb steht sie hier als eigene Zeile unter
+               der Online-Top-8-Quote und nicht als Gegenspalte. */
+            isFinite(spec.majorDay2)
+                ? 'Day 2 (Major) ' + num(spec.majorDay2, 1) + ' %'
+                    + (isFinite(spec.majorDay2Feld)
+                        ? '  ·  ' + L('Schnitt', 'field') + ' ' + num(spec.majorDay2Feld, 1) + ' %'
+                        : '')
+                : L('Day 2 (Major): keine Daten', 'day 2 (major): no data'));
 
         /* ── Körper links: Sprites groß + Herkunft ─────────────────── */
         ctx.fillStyle = C.line; ctx.fillRect(0, bodyY, DC.W, bodyH);
@@ -410,8 +485,22 @@
             [L('Datenraum', 'Data space'), spec.spaceLabel || '–'],
             [L('Format', 'Format'), spec.format || '–'],
             [L('Quelle', 'Source'), spec.source || '–'],
-            [L('Meta gesamt', 'Meta total'),
-             isFinite(spec.totalBrought) ? num(spec.totalBrought, 0) + ' ' + L('Einträge', 'entries') : '–'],
+            /* "META GESAMT 7.178" WAR EINE FALSCHE BESCHRIFTUNG.
+               ----------------------------------------------------------
+               spec.totalBrought ist die Summe von `total_brought_weighted`
+               aus online_tournament_top8_decks.csv — der Nenner der
+               TOP-8-QUOTE, also nur die Antritte auf Turnieren MIT
+               gewertetem Schnitt. Neben einem Anteil von 7,55 % gelesen,
+               unter der Zeile "Meta gesamt", ist das der Nenner dieses
+               Anteils — und der ist 37.749, nicht 7.178. Faktor fuenf.
+
+               Aus der Pruefrunde vom 01.09.2026, dort als eigener Fund
+               ("Meta gesamt 7.178 ist nicht der Nenner", Analyst B5).
+               Der Nenner des Anteils steht ohnehin schon oben in der
+               ersten Spalte ("2.849 Listen") — hier fehlte nur, dass
+               diese Zahl etwas anderes zaehlt. */
+            [L('Antritte mit Top-8-Schnitt', 'Entries at cut events'),
+             isFinite(spec.totalBrought) ? num(spec.totalBrought, 0) : '–'],
             [L('Stand', 'As of'), spec.stand || '–']
         ];
         for (var li = 0; li < lines.length; li++) {

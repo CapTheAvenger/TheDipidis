@@ -86,13 +86,35 @@
     // the same treatment as the heatmap's `heatmap-td-n-low`.
     const THIN_GAMES = 20;
 
-    /* Ab wann die Major-Win-Rate gezeigt wird.
-       Unter 40 entschiedenen Partien schwankt sie um mehr, als der
-       Unterschied gross ist, den sie zeigen soll — Grimmsnarl Froslass
-       steht am 01.09. mit 24,4 % da, auf 45 Partien und 4 Antritten.
-       Der Anteil dagegen wird immer gezeigt: er ruht auf den Antritten,
-       nicht auf Partien, und "1 von 774" ist eine belastbare Aussage. */
-    const MIN_MAJOR_PARTIEN = 40;
+    /* Ab wann eine Major-Win-Rate als duenn MARKIERT wird — nicht, ab
+       wann sie gezeigt wird. Sie wird immer gezeigt, sobald es Partien
+       gibt.
+       ------------------------------------------------------------------
+       Hier stand bis zum 02.09.2026 `MIN_MAJOR_PARTIEN = 40`, und
+       darunter blieb die Kachel leer. Der Betreiber hat es gemeldet:
+       "es gibt Major Daten warum werden sie nicht genutzt?" — Lucario
+       Hariyama 14-15-2, Rocket's Mewtwo 8-8-2, beide standen auf
+       "zu wenige".
+
+       Nachgemessen war die Schwelle nicht nur zu hoch, sondern
+       willkuerlich. Sie verbarg 27 von 44 Decks, und sie trennte nichts:
+
+           Grimmsnarl Froslass   45 Partien · 24,4 % · KI ±15 pp  ANGEZEIGT
+           Alakazam Dusknoir     39 Partien · 66,7 % · KI ±16 pp  verborgen
+
+       Praktisch dieselbe Unsicherheit, gegenteilige Behandlung. Die
+       Partienzahl ist ein Kontinuum von 16 bis 1.277; ein Schnitt
+       mittendrin macht aus "unsicher" faelschlich "nicht vorhanden".
+       Und schlimmer: die Begruendung, die hier stand, trug nicht — sie
+       nannte Grimmsnarl als Beispiel fuer das, was die Schwelle
+       verhindere, und Grimmsnarl lag mit 45 Partien darueber.
+
+       Richtig ist, die Zahl zu zeigen UND zu sagen, wie sicher sie ist.
+       Deshalb steht die Partienzahl jetzt auf der Kachel und das
+       Vertrauensintervall im Hinweis. 100 Partien ist die Grenze, ab der
+       das 95-%-Intervall enger als ±10 Punkte wird — darunter wird die
+       Zahl gedaempft dargestellt, aber sie steht da. */
+    const MAJOR_DUENN_PARTIEN = 100;
 
     let _decks = null;          // deck_name -> { share, winRate, count }
     let _conv = null;           // computeConversionPerformance() result
@@ -453,7 +475,7 @@
         return _majorFeldCache;
     }
 
-    function tileGeteilt(role, tone, label, onlineWert, majorWert, majorLeer, tip, pfeil) {
+    function tileGeteilt(role, tone, label, onlineWert, majorWert, majorLeer, majorQuelle, majorDuenn, tip, pfeil) {
         const de = isDe();
         const hat = !!tip;
         const ttl = hat
@@ -474,8 +496,9 @@
          * Gestapelt passt es in jede Kachelbreite. Und die Ueberschrift
          * steht jetzt oben, wie vom Betreiber vorgeschlagen: sie gilt fuer
          * beide Zahlen, also gehoert sie ueber beide und nicht unter sie. */
-        const halb = (wert, quelle, schwach) =>
-            `<div class="arc-halb${schwach ? ' arc-halb--leer' : ''}">
+        const halb = (wert, quelle, schwach, duenn) =>
+            `<div class="arc-halb${schwach ? ' arc-halb--leer' : ''}${
+                duenn ? ' arc-halb--duenn' : ''}">
                 <span class="arc-halb-quelle">${esc(quelle)}</span>
                 <span class="arc-tile-value">${wert}</span>
             </div>`;
@@ -484,9 +507,11 @@
                 <div class="arc-tile-label">${esc(label)}</div>
                 <div class="arc-halbe">
                     ${halb(arw + onlineWert, L('arc.quelleOnline', 'online'), false)}
-                    ${halb(majorWert || '–', majorWert
-                        ? L('arc.quelleMajor', 'Major')
-                        : esc(majorLeer || L('arc.quelleMajor', 'Major')), !majorWert)}
+                    ${halb(majorWert || '–',
+                        majorWert
+                            ? (majorQuelle || L('arc.quelleMajor', 'Major'))
+                            : esc(majorLeer || L('arc.quelleMajor', 'Major')),
+                        !majorWert, majorWert && majorDuenn)}
                 </div>
             </div>`;
     }
@@ -525,6 +550,12 @@
                 `${esc(fmt(d.share))} %`,
                 m ? `${esc(fmt(m.share))} %` : '',
                 majorLeer,
+                /* Der Anteil ruht auf ANTRITTEN, nicht auf Partien: "1 von
+                   774" ist auch bei einem Antritt eine belastbare Aussage.
+                   Deshalb keine Partienzahl und keine Daempfung. */
+                m ? L('arc.quelleMajorA', de ? 'Major · {n} Antritte' : 'major · {n} entries')
+                        .replace('{n}', fmtGanz(m.antritte)) : null,
+                false,
                 L('arc.repTip2', de
                     ? '{n} Listen im Meta online. {mj}'
                     : '{n} lists in the online field. {mj}')
@@ -542,19 +573,28 @@
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
 
         const wrDelta = d ? d.winRate - 50 : null;
-        /* Die Major-Win-Rate wird ab MIN_MAJOR_PARTIEN gezeigt.
-           Unter 40 entschiedenen Partien schwankt sie um mehr, als der
-           Unterschied gross ist, den sie zeigen soll: Grimmsnarl Froslass
-           steht am 01.09. mit 24,4 % da — auf 45 Partien. */
-        const wrMajor = (m && m.winRate != null && m.partien >= MIN_MAJOR_PARTIEN)
+        // Gezeigt, sobald es Partien gibt. Wie sicher sie ist, steht daneben.
+        const wrMajor = (m && m.winRate != null && m.partien > 0)
             ? `${esc(fmt(m.winRate))} %` : '';
+        // Halbe Breite des 95-%-Intervalls, in Prozentpunkten. Bei einer
+        // Quote nahe 50 % ist 1,96·sqrt(0,25/n) die konservative Schaetzung —
+        // sie wird nie zu schmal.
+        const wrKi = (m && m.partien > 0) ? 196 * Math.sqrt(0.25 / m.partien) : null;
+        const wrDuenn = !!(m && m.partien > 0 && m.partien < MAJOR_DUENN_PARTIEN);
         const wr = d
             ? tileGeteilt('wr', toneFor(wrDelta), L('arc.wrLabel', 'Win Rate'),
                 `${esc(fmt(d.winRate))} %`,
                 wrMajor,
-                (m && m.partien > 0 && m.partien < MIN_MAJOR_PARTIEN)
-                    ? L('arc.wrDuenn', de ? 'zu wenige' : 'too few')
-                    : majorLeer,
+                majorLeer,
+                /* Die Partienzahl steht MIT auf der Zeile, nicht nur im
+                   Hinweis: sie ist die Zahl, an der man entscheidet, ob man
+                   der Quote glaubt, und ein Hinweis erscheint erst beim
+                   Verweilen — auf dem Telefon also nie. */
+                m && m.partien > 0
+                    ? L('arc.quelleMajorN', de ? 'Major · {n} Partien' : 'major · {n} games')
+                        .replace('{n}', fmtGanz(m.partien))
+                    : null,
+                wrDuenn,
                 /* DIE REMISQUOTE STEHT HIER, UND SIE MUSS ES.
                    Beide Zahlen sind Siege durch ALLE Partien — dieselbe
                    Rechnung, Entscheidung des Betreibers. Nur enden am
@@ -570,10 +610,11 @@
                     .replace('{n}', fmtGanz(d.partien))
                     .replace('{mj}', (m && m.partien > 0)
                         ? L('arc.wrTipMajor', de
-                            ? 'Major aus {p} Partien, davon {u} % unentschieden — online sind es 1,3 %. Unentschieden zählen auf beiden Seiten nicht als Sieg, drücken die Major-Spalte also spürbar.'
-                            : 'Major from {p} games, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down.')
+                            ? 'Major aus {p} Partien, davon {u} % unentschieden — online sind es 1,3 %. Unentschieden zählen auf beiden Seiten nicht als Sieg, drücken die Major-Spalte also spürbar. Bei dieser Partienzahl liegt der Wert auf ±{k} Punkte genau.'
+                            : 'Major from {p} games, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down. At this sample the value is accurate to ±{k} points.')
                             .replace('{p}', fmtGanz(m.partien))
                             .replace('{u}', fmt(m.remisQuote))
+                            .replace('{k}', fmt(wrKi, 0))
                         : L('arc.wrTipOhne', de
                             ? 'Noch keine Präsenzpartien für dieses Deck in diesem Format.'
                             : 'No in-person games for this deck in this format yet.')),

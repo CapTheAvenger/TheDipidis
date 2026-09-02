@@ -63,24 +63,85 @@
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
 
+                /* DIE SUCHFELDER — drei Fehler auf einmal, gemeldet am 02.09.2026
+                 * ("die Y-Achse und x-Achse Suchfilter funktionieren nicht
+                 * vernuenftig"). An der laufenden Seite nachgestellt:
+                 *
+                 *   Ausgangslage        10 Zeilen · Feld ""
+                 *   Y = "Dragapult"      5 Zeilen · Feld "dragapult"
+                 *   Y geleert            5 Zeilen · Feld "dragapult"   <-- !
+                 *
+                 * 1. DAS FELD LIESS SICH NICHT LEEREN. Hier stand
+                 *    `(input.value || window.heatmapSearchY || '')`. Ein
+                 *    leerer Text ist falsy, also fiel der Ausdruck auf die
+                 *    GESPEICHERTE vorige Suche zurueck. Wer den Filter
+                 *    loeschte, bekam ihn sofort wieder — und im Feld stand
+                 *    danach wieder, was er gerade geloescht hatte.
+                 *    Jetzt entscheidet, ob das Feld EXISTIERT, nicht ob
+                 *    etwas drinsteht.
+                 *
+                 * 2. DER TEXT WURDE KLEINGESCHRIEBEN. `.toLowerCase()` lief
+                 *    auf dem Wert, der gleich wieder ins Feld geschrieben
+                 *    wird — aus "Dragapult" wurde beim Tippen "dragapult".
+                 *    Jetzt zwei Groessen: `anzeigeY` steht im Feld, `sucheY`
+                 *    vergleicht.
+                 *
+                 * 3. ZWEI VERSCHIEDENE NORMALISIERER fuer dieselbe Sache.
+                 *    Der Deckname wurde von ' ’ ‛ ` ´ Leerzeichen und
+                 *    Bindestrich befreit, die Suche nur von ' ’ Leerzeichen
+                 *    und Bindestrich. "N`s Zoroark" mit Gravis fand deshalb
+                 *    nichts. Jetzt derselbe Ausdruck fuer beide Seiten. */
+                const APOSTROPHE = /[\u2019\u2018\u201B'`´\s-]/g;
                 const existingSearchYInput = document.getElementById('heatmapSearchY');
                 const existingSearchXInput = document.getElementById('heatmapSearchX');
-                const rawSearchY = ((existingSearchYInput && existingSearchYInput.value) || window.heatmapSearchY || '').toLowerCase().trim();
-                const rawSearchX = ((existingSearchXInput && existingSearchXInput.value) || window.heatmapSearchX || '').toLowerCase().trim();
-                window.heatmapSearchY = rawSearchY;
-                window.heatmapSearchX = rawSearchX;
-                const normalizedSearchY = rawSearchY.replace(/['’\s-]/g, '');
-                const normalizedSearchX = rawSearchX.replace(/['’\s-]/g, '');
+                const anzeigeY = (existingSearchYInput
+                    ? existingSearchYInput.value
+                    : (window.heatmapSearchY || '')).trim();
+                const anzeigeX = (existingSearchXInput
+                    ? existingSearchXInput.value
+                    : (window.heatmapSearchX || '')).trim();
+                window.heatmapSearchY = anzeigeY;
+                window.heatmapSearchX = anzeigeX;
+                const rawSearchY = anzeigeY.toLowerCase();
+                const rawSearchX = anzeigeX.toLowerCase();
+                const normalizedSearchY = rawSearchY.replace(APOSTROPHE, '');
+                const normalizedSearchX = rawSearchX.replace(APOSTROPHE, '');
+                /* Der ganze Behaelter wird bei jedem Tastendruck per
+                 * outerHTML ersetzt — dabei stirbt das Eingabefeld und mit
+                 * ihm der Fokus. Deshalb wird er hinterher zurueckgesetzt.
+                 *
+                 * BEFUND 02.09.2026: das geschah nur im Hauptpfad. Der
+                 * Leerpfad ("Keine Decks gefunden") kehrt vorher zurueck und
+                 * liess den Fokus liegen — ausgerechnet dort, wo man ihn am
+                 * dringendsten braucht: nach einem Tippfehler steht man vor
+                 * einer leeren Tabelle und kann ihn nicht verbessern, ohne
+                 * das Feld neu anzuklicken. */
+                const fokusZurueck = () => {
+                    if (!activeHeatmapInputId) return;
+                    requestAnimationFrame(() => {
+                        const input = document.getElementById(activeHeatmapInputId);
+                        if (!input) return;
+                        input.focus({ preventScroll: true });
+                        if (typeof activeSelectionStart === 'number' && typeof activeSelectionEnd === 'number') {
+                            try {
+                                input.setSelectionRange(activeSelectionStart, activeSelectionEnd);
+                            } catch (e) {
+                                // Auswahl laesst sich nicht immer setzen — der Fokus zaehlt.
+                            }
+                        }
+                    });
+                };
+
                 const searchControlsHtml = `
                     <div id="heatmapSearchWrapper" class="heatmap-search-wrapper">
                         <div class="heatmap-search-row">
                             <label class="heatmap-search-label">
                                 ${t('heatmap.yLabel')}
-                                <input type="text" id="heatmapSearchY" value="${escapeAttr(rawSearchY)}" placeholder="${t('heatmap.placeholderY')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" class="heatmap-search-input">
+                                <input type="text" id="heatmapSearchY" value="${escapeAttr(anzeigeY)}" placeholder="${t('heatmap.placeholderY')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" class="heatmap-search-input">
                             </label>
                             <label class="heatmap-search-label">
                                 ${t('heatmap.xLabel')}
-                                <input type="text" id="heatmapSearchX" value="${escapeAttr(rawSearchX)}" placeholder="${t('heatmap.placeholderX')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" class="heatmap-search-input">
+                                <input type="text" id="heatmapSearchX" value="${escapeAttr(anzeigeX)}" placeholder="${t('heatmap.placeholderX')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" class="heatmap-search-input">
                             </label>
                         </div>
                     </div>
@@ -139,7 +200,9 @@
                 const axisDeckLimit = (window.heatmapExpanded ? deckNames : deckNames.slice(0, 10));
                 const matchesAxisSearch = (deckName, rawSearch, normalizedSearch) => {
                     const normalDeck = String(deckName || '').toLowerCase();
-                    const strippedDeck = normalDeck.replace(/[\u2019\u2018\u201B'`´\s-]/g, '');
+                    // Derselbe Ausdruck wie fuer die Suche oben — sonst
+                    // findet ein Gravis im Decknamen seinen Gegenpart nicht.
+                    const strippedDeck = normalDeck.replace(APOSTROPHE, '');
                     return normalDeck.includes(rawSearch) || strippedDeck.includes(normalizedSearch);
                 };
 
@@ -183,6 +246,7 @@
                             currentMetaContent.insertAdjacentHTML('afterbegin', emptyHtml);
                         }
                     }
+                    fokusZurueck();
                     return;
                 }
                 
@@ -411,20 +475,7 @@
                     }
                 }
 
-                if (activeHeatmapInputId) {
-                    requestAnimationFrame(() => {
-                        const input = document.getElementById(activeHeatmapInputId);
-                        if (!input) return;
-                        input.focus({ preventScroll: true });
-                        if (typeof activeSelectionStart === 'number' && typeof activeSelectionEnd === 'number') {
-                            try {
-                                input.setSelectionRange(activeSelectionStart, activeSelectionEnd);
-                            } catch (e) {
-                                // ignore selection restore errors for unsupported input states
-                            }
-                        }
-                    });
-                }
+                fokusZurueck();
                 
                 devLog('Matchup Heatmap rendered successfully');
                 

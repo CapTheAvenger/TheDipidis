@@ -148,14 +148,14 @@
                 // gemeldeten Listen der Ladder. Jetzt nennt der Text beide
                 // Nenner, und die sieben Ausnahmen sind in der Spalte markiert.
                 share: 'Anteil an den gemeldeten Listen der Online-Ladder. Decks ohne Ladder-Zeile zeigen stattdessen ihren Anteil an den gewichteten Turnier-Antritten — diese Werte stehen kursiv.',
-                top8: 'Wie oft dieses Deck aus seinen Antritten die Top 8 erreicht hat.',
+                top8: 'Wie oft dieses Deck aus seinen Antritten die Top 8 erreicht hat. Nach Aktualität gewichtet: Turniere der letzten sieben Tage zählen voll, ältere halb — damit die Quote das heutige Meta abbildet und nicht die Turniere vom Frühjahr. Das ist eine grobe Stufe, kein Naturgesetz.',
                 vsField: '1,6-mal heißt: erreicht die Top 8 anderthalbmal so oft wie ein durchschnittliches Deck. Kleine Stichproben werden zum Durchschnitt hin geglättet (k = 50) — der rohe Wert steht im Tooltip der Zelle.',
                 prev: 'Anteil im vorherigen Vergleichszeitraum.',
                 delta: 'Veränderung des Anteils in Prozentpunkten. Gelistet ab 0,4 pp.',
             },
             en: {
                 share: 'Share of reported lists on the online ladder. Decks without a ladder row show their share of weighted tournament entries instead — those values are italic.',
-                top8: 'How often this deck reached top 8 out of its entries.',
+                top8: 'How often this deck reached top 8 out of its entries. Weighted by recency: events from the last seven days count fully, older ones half, so the rate tracks today\u2019s meta rather than the spring. That is a coarse step, not a law of nature.',
                 vsField: '1.6× means: reaches top 8 one and a half times as often as an average deck. Small samples are smoothed toward the average (k = 50) — the raw value is in the cell tooltip.',
                 prev: 'Share in the previous comparison window.',
                 delta: 'Change in share, in percentage points. Listed from 0.4 pp.',
@@ -1549,8 +1549,13 @@
                             // Was auf den Schirm geht. Ohne rohe Spalte der
                             // gewichtete Wert — dann traegt die Ueberschrift
                             // das Wort "gewichtet".
-                            broughtAnzeige: hatRoh ? broughtRoh : brought,
-                            top8Anzeige:    hatRoh ? top8Roh    : top8,
+                            // Kein Ersatzwert, wenn die gezaehlte Zahl fehlt.
+                            // Der gewichtete Wert IST keine Antrittszahl —
+                            // "wenn das keine verlässliche Zahl ist, dann weg
+                            // damit". Dann steht dort ein Strich und der
+                            // Hinweis sagt, warum.
+                            broughtAnzeige: hatRoh ? broughtRoh : null,
+                            top8Anzeige:    hatRoh ? top8Roh    : null,
                             top8ConvPct: parseLocaleNumber(r.top8_conv_rate || '0', 0) * 100,
                         };
                     });
@@ -1726,8 +1731,12 @@
                         // Auch die Anzeigezahlen addieren — sonst zeigt die
                         // Zeile die Antritte nur EINES der zusammengefassten
                         // Namen, waehrend die Quote daneben aus beiden kommt.
-                        v.broughtAnzeige += d.broughtAnzeige;
-                        v.top8Anzeige    += d.top8Anzeige;
+                        // null bleibt null: aus "unbekannt" plus "unbekannt"
+                        // wird keine 0, sonst stuende da eine erfundene Zahl.
+                        v.broughtAnzeige = (v.broughtAnzeige == null || d.broughtAnzeige == null)
+                            ? null : v.broughtAnzeige + d.broughtAnzeige;
+                        v.top8Anzeige = (v.top8Anzeige == null || d.top8Anzeige == null)
+                            ? null : v.top8Anzeige + d.top8Anzeige;
                         v.broughtPct += d.broughtPct;
                         v.top8ConvPct = v.brought > 0 ? (v.top8 / v.brought) * 100 : 0;
                     });
@@ -1804,19 +1813,15 @@
                            die noch nicht fuehrt, traegt die Ueberschrift das
                            Wort "gewichtet" — dann erklaert sie wenigstens, was
                            man sieht. */
-                        { k: 'antritte',
-                          de: _antritteRoh ? 'Turnier-Antritte' : 'Turnier-Antritte (gewichtet)',
-                          en: _antritteRoh ? 'Tournament entries' : 'Tournament entries (weighted)',
+                        { k: 'antritte', de: 'Turnier-Antritte', en: 'Tournament entries',
                           num: true,
                           tip: { de: _antritteRoh
                                     ? 'Wie oft dieses Deck auf einem Turnier angetreten ist — gezählte Starts. Eine andere Zählung als die Listen links.'
-                                    : 'Starts auf Turnieren, nach Aktualität gewichtet: Turniere der letzten sieben Tage zählen voll, ältere halb. Daher die halben Werte. Die gezählten Starts kommen mit dem nächsten Datenlauf.',
+                                    : 'Die gezählten Starts kommen mit dem nächsten Datenlauf. Bis dahin steht hier ein Strich: die Datei führt bisher nur eine nach Aktualität gewichtete Summe, und die ist keine Teilnehmerzahl — halb teilnehmen geht nicht.',
                                  en: _antritteRoh
                                     ? 'How often this deck entered a tournament — counted starts. A different count from the lists on the left.'
-                                    : 'Entries at tournaments, weighted by recency: events from the last seven days count fully, older ones half. Hence the half values. Plain counts arrive with the next data run.' } },
-                        { k: 'cuts',
-                          de: _antritteRoh ? 'Top 8' : 'Top 8 (gewichtet)',
-                          en: _antritteRoh ? 'Top 8' : 'Top 8 (weighted)',
+                                    : 'Counted starts arrive with the next data run. Until then a dash: the file so far carries only a recency-weighted sum, and that is not a number of entries — you cannot half-attend.' } },
+                        { k: 'cuts', de: 'Top 8', en: 'Top 8',
                           num: true,
                           tip: { de: 'davon in die Top 8 — bezogen auf die Turnier-Antritte links, nicht auf die Listen.',
                                  en: 'of those, made top 8 — out of the tournament entries on the left, not the lists.' } },

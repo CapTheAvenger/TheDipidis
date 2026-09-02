@@ -374,7 +374,7 @@ describe('Die Kachel haengt nicht an der Bildschirmbreite', () => {
     });
 
     it('das Markup setzt die Herkunft VOR die Zahl', () => {
-        const i = ohneKomm.indexOf('const halb = (wert, quelle, schwach)');
+        const i = ohneKomm.indexOf('const halb = (wert, quelle, schwach');
         assert.ok(i > 0, 'der Halb-Baustein ist verschwunden');
         const rumpf = ohneKomm.slice(i, i + 420);
         assert.ok(rumpf.indexOf('arc-halb-quelle') < rumpf.indexOf('arc-tile-value'),
@@ -401,12 +401,72 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
         }
     });
 
-    it('die Major-Win-Rate hat eine Mindest-Stichprobe', () => {
-        assert.ok(/MIN_MAJOR_PARTIEN\s*=\s*\d+/.test(ohneKomm),
-            'die Mindestzahl an Partien ist weg — Grimmsnarl Froslass stand '
-            + 'am 01.09. mit 24,4 % da, auf 45 Partien');
-        const m = ohneKomm.match(/MIN_MAJOR_PARTIEN\s*=\s*(\d+)/);
-        assert.ok(Number(m[1]) >= 20, 'die Mindestzahl ist zu klein geworden');
+    /* DIESE ZUSAGE WURDE AM 02.09.2026 UMGEDREHT.
+     *
+     * Sie verlangte vorher eine Mindest-Stichprobe, unter der die
+     * Major-Win-Rate GAR NICHT erschien (`MIN_MAJOR_PARTIEN = 40`). Der
+     * Betreiber hat gemeldet, was das anrichtet: "es gibt Major Daten
+     * warum werden sie nicht genutzt?" — Lucario Hariyama 14-15-2 und
+     * Rocket's Mewtwo 8-8-2 standen auf "zu wenige".
+     *
+     * Nachgemessen war die Schwelle willkuerlich. Sie verbarg 27 von 44
+     * Decks, und sie trennte nichts:
+     *
+     *     Grimmsnarl Froslass  45 Partien · ±15 pp  ANGEZEIGT
+     *     Alakazam Dusknoir    39 Partien · ±16 pp  verborgen
+     *
+     * Die Begruendung, die im Code stand, trug nicht einmal: sie nannte
+     * Grimmsnarl als das, was die Schwelle verhindere — und Grimmsnarl
+     * lag darueber.
+     *
+     * Die neue Zusage: die Zahl wird GEZEIGT, und daneben steht, wie
+     * sicher sie ist. */
+    it('die Major-Win-Rate wird gezeigt, sobald es Partien gibt', () => {
+        assert.ok(!/MIN_MAJOR_PARTIEN/.test(ohneKomm),
+            'die harte Mindest-Stichprobe ist zurueck — sie verbarg 27 von 44 '
+            + 'Decks und trennte dabei nichts (45 Partien angezeigt, 39 verborgen, '
+            + 'bei praktisch gleicher Unsicherheit)');
+        assert.ok(/wrMajor = \(m && m\.winRate != null && m\.partien > 0\)/.test(ohneKomm),
+            'die Major-Win-Rate haengt wieder an einer anderen Bedingung als '
+            + '"es gibt ueberhaupt Partien"');
+    });
+
+    it('die Partienzahl steht auf der Kachel, nicht nur im Hinweis', () => {
+        // Ein Hinweis erscheint erst beim Verweilen — auf dem Telefon also nie.
+        // Die Partienzahl ist aber genau die Zahl, an der man entscheidet, ob
+        // man der Quote glaubt.
+        assert.ok(/arc\.quelleMajorN/.test(quelle),
+            'die Partienzahl ist von der Major-Zeile verschwunden');
+        assert.ok(/\{n\} Partien/.test(quelle),
+            'die Beschriftung nennt die Partienzahl nicht mehr');
+    });
+
+    it('eine duenne Stichprobe wird markiert statt verschwiegen', () => {
+        assert.ok(/MAJOR_DUENN_PARTIEN\s*=\s*\d+/.test(ohneKomm),
+            'die Markierung fuer duenne Stichproben ist weg');
+        const m = ohneKomm.match(/MAJOR_DUENN_PARTIEN\s*=\s*(\d+)/);
+        assert.ok(Number(m[1]) >= 50,
+            `die Schwelle liegt bei ${m[1]} Partien — bei so wenigen ist das `
+            + '95-%-Intervall breiter als ±14 Punkte und die Daempfung sagt nichts mehr');
+        assert.ok(/arc-halb--duenn/.test(quelle),
+            'die gedaempfte Darstellung wird nicht mehr gesetzt');
+        const css = fs.readFileSync(path.join(wurzel, 'css', 'styles.css'), 'utf8')
+            .replace(/\/\*[\s\S]*?\*\//g, ' ');
+        // Auf die ZAHL pruefen, nicht auf das blosse Vorkommen der Klasse:
+        // die erste Fassung dieser Zusage blieb gruen, als die Regel fuer den
+        // Wert umbenannt wurde und nur die fuer die Beschriftung stehenblieb.
+        assert.ok(/\.arc-halb--duenn\s+\.arc-tile-value\s*\{[^}]*opacity/.test(css),
+            'die duenne ZAHL wird nicht mehr gedaempft dargestellt — dann sieht '
+            + 'eine Quote aus 18 Partien aus wie eine aus 1.277');
+    });
+
+    it('das Vertrauensintervall steht im Hinweis', () => {
+        assert.ok(/wrKi/.test(ohneKomm), 'das Intervall wird nicht mehr gerechnet');
+        assert.ok(/1\.96|196 \* Math\.sqrt/.test(ohneKomm),
+            'das Intervall wird nicht mehr aus der Normalverteilung gerechnet');
+        assert.ok(/±\{k\} Punkte/.test(quelle),
+            'der Hinweis nennt das Intervall nicht mehr — dann steht dort eine '
+            + 'Zahl ohne jede Angabe, wie sicher sie ist');
     });
 
     it('der Anteil wird auch ohne Mindestzahl gezeigt', () => {

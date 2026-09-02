@@ -318,6 +318,15 @@
         ]).then(function (beide) {
             _daten = beide[0];
             _namen = beide[1];
+            /* Die Stufentabelle wird ausserhalb dieses Reiters gebraucht:
+               im Nachschlagen steht in zwanzig Attackentexten "steigt
+               stark", und dort gehoert der Faktor hin. Weitergereicht wird
+               DIE Tabelle, nicht eine Kopie der Zahlen — zwei Listen
+               waeren zwei Wahrheiten. */
+            if (_daten && _daten.stufen && Array.isArray(_daten.stufen.tabelle)) {
+                window.SideQuestStufen = _daten.stufen.tabelle;
+                document.dispatchEvent(new CustomEvent('sideQuestStufenBereit'));
+            }
             render();
             return _daten;
         }).catch(function (e) {
@@ -360,8 +369,18 @@
         if (host && !host.hidden && host.children.length) render();
     });
 
+    /* Die Stufentabelle auf Zuruf — auch wenn dieser Reiter nie
+       geoeffnet wurde. Das Nachschlagen braucht sie fuer die
+       Attackentexte, und ob jemand vorher hier war, darf nicht
+       entscheiden, ob dort eine Zahl steht. laden() haelt seine eigene
+       Zusage fest, ein zweiter Aufruf laedt also nichts nach. */
+    function stufen() {
+        if (window.SideQuestStufen) return Promise.resolve(window.SideQuestStufen);
+        return laden().then(function () { return window.SideQuestStufen || null; });
+    }
+
     window.sideQuestStatus = {
-        activate: activate, render: render,
+        activate: activate, render: render, stufen: stufen,
         _intern: { T: T, TYP_DE: TYP_DE }
     };
 })();

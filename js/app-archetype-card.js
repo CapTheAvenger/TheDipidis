@@ -119,6 +119,7 @@
     let _decks = null;          // deck_name -> { share, winRate, count }
     let _conv = null;           // computeConversionPerformance() result
     let _major = null;          // deck_name -> { share, winRate, ... } | {} wenn kein Major
+    let _majorMu = null;        // deck_name -> { gegner -> { anzahl, punkte } }
     let _loading = null;
     let _openDeck = null;       // name of the deck currently shown
 
@@ -302,7 +303,7 @@
     }
 
     function load() {
-        if (_decks && _conv && _major) return Promise.resolve(true);
+        if (_decks && _conv && _major && _majorMu) return Promise.resolve(true);
         if (_loading) return _loading;
         const base = (typeof BASE_PATH === 'string') ? BASE_PATH : 'data/';
         const stamp = `?t=${Date.now()}`;
@@ -310,8 +311,16 @@
             fetch(base + DECKS_URL + stamp).then(r => r.ok ? r.text() : ''),
             fetch(base + TOP8_URL + stamp).then(r => r.ok ? r.text() : ''),
             _majorLaden(base, stamp),
-        ]).then(([decksTxt, top8Txt, major]) => {
+            /* Die Praesenz-Matchups kommen aus js/app-current-meta.js —
+               dieselbe Datei zweimal zu parsen hiesse, zwei Zahlen fuer
+               eine Sache zu fuehren. Fehlt der Verweis (andere Seite,
+               anderer Ladeweg), bleibt die Spalte leer statt kaputt. */
+            (typeof window.ladeMajorMatchups === 'function')
+                ? window.ladeMajorMatchups().catch(() => ({}))
+                : Promise.resolve({}),
+        ]).then(([decksTxt, top8Txt, major, majorMu]) => {
             _major = major || {};
+            _majorMu = majorMu || {};
             _decks = {};
             for (const r of parseSemicolonCsv(decksTxt)) {
                 if (!r.deck_name) continue;
@@ -329,7 +338,7 @@
             _conv = (rows.length && typeof window.computeConversionPerformance === 'function')
                 ? window.computeConversionPerformance(rows) : null;
             return true;
-        }).catch(() => { _decks = _decks || {}; _conv = null; _major = _major || {}; return false; });
+        }).catch(() => { _decks = _decks || {}; _conv = null; _major = _major || {}; _majorMu = _majorMu || {}; return false; });
         return _loading;
     }
 
@@ -372,7 +381,30 @@
                 ties: Number.isFinite(parts[2]) ? parts[2] : null,
                 games,
                 thin: games < THIN_GAMES,
+                /* DIE PRAESENZSEITE JE PAARUNG (02.09.2026).
+                   Gemeldet: "ausgeklappt auf VS Deck Ebene sehe ich nicht
+                   das Online und Major jeweils angezeigt wird."
+
+                   ACHTUNG, ANDERE RECHNUNG: `punkte` sind MATCHPUNKTE
+                   (3S+U)/3n. Die Spalte links rechnet S/(S+N). Die
+                   Labs-Datei liefert je Paarung nur Anzahl und Prozent,
+                   keine Bilanz — ohne die Unentschieden laesst sich das
+                   nicht umrechnen, und die Quelle veroeffentlicht sie
+                   nicht. Deshalb traegt die Spalte einen eigenen Namen und
+                   der Kopf sagt, was sie ist.
+
+                   Gemessen ueber die 90 Paarungen des Top-10-Gitters:
+                   Median -2,0 pp gegen die Online-Spalte, wovon -1,8 pp
+                   reine Zaehlweise sind (11 % Unentschieden am Major). Der
+                   Unterschied ist also fast vollstaendig Konvention. */
+                majorPunkte: null,
+                majorAnzahl: null,
             };
+        }).map(m => {
+            const von = _majorMu ? (_majorMu[findKey(_majorMu, name)] || null) : null;
+            const e = von ? (von[findKey(von, m.opponent)] || null) : null;
+            if (e) { m.majorPunkte = e.punkte; m.majorAnzahl = e.anzahl; }
+            return m;
         }).sort((a, b) => b.winRate - a.winRate);
     }
 
@@ -804,6 +836,21 @@
                     <td class="arc-mu-w">${m.wins == null ? '–' : m.wins}</td>
                     <td class="arc-mu-l">${m.losses == null ? '–' : m.losses}</td>
                     <td class="arc-mu-u">${m.ties == null ? '–' : m.ties}</td>
+                    <td class="arc-mu-major${
+                        (m.majorAnzahl != null && m.majorAnzahl < 10) ? ' arc-mu-major-duenn' : ''
+                    }" title="${esc(m.majorPunkte == null
+                        ? L('arc.muMajorFehlt', de
+                            ? 'Keine Präsenzpartien für diese Paarung.'
+                            : 'No in-person games for this pairing.')
+                        : L('arc.muMajorTip', de
+                            ? '{w} aus {n} Präsenzpartien. Matchpunkte, nicht Win Rate — die Quelle veröffentlicht je Paarung keine Bilanz. Bei ausgeglichenem Ergebnis liegt der Wert rund 2 Punkte unter der Spalte links.'
+                            : '{w} from {n} in-person games. Match points, not win rate — the source publishes no record per pairing. At an even record it sits about 2 points below the column on the left.')
+                            .replace('{w}', fmt(m.majorPunkte) + ' %')
+                            .replace('{n}', String(m.majorAnzahl)))
+                    }">${m.majorPunkte == null ? '–' : esc(fmt(m.majorPunkte)) + ' %'}</td>
+                    <td class="arc-mu-major-n${
+                        (m.majorAnzahl != null && m.majorAnzahl < 10) ? ' arc-mu-n-low' : ''
+                    }">${m.majorAnzahl == null ? '–' : m.majorAnzahl}</td>
                 </tr>`;
         }).join('');
         const thinCount = rows.filter(m => m.thin).length;
@@ -835,6 +882,26 @@
                              Szene sagt ohnehin Tie. -->
                         <th title="${esc(de ? 'Unentschieden (Tie) — sie zählen in der Win Rate dieser Tabelle nicht mit'
                                             : 'ties — they do not count in this table\'s win rate')}">T</th>
+                        <!-- DIE PRAESENZSPALTE HEISST ANDERS, WEIL SIE ETWAS
+                             ANDERES IST. Links steht S/(S+N), hier stehen
+                             MATCHPUNKTE (3S+U)/3n — die Labs-Datei liefert je
+                             Paarung nur Anzahl und Prozent, keine Bilanz, und
+                             ohne die Unentschieden laesst sich das nicht
+                             umrechnen. Zwei Spalten mit demselben Namen und
+                             zwei Rechnungen waeren genau der Fehler, den
+                             diese Seite seit Wochen abarbeitet; zwei
+                             verschiedene Namen fuer zwei verschiedene Groessen
+                             sind in Ordnung. Der gemessene Abstand (Median
+                             -2,0 pp, davon -1,8 Zaehlweise) steht im Hinweis
+                             jeder Zelle. -->
+                        <th title="${esc(L('arc.colMajorTip', de
+                            ? 'Präsenzturniere: Matchpunkte (3 Siege + 1 Unentschieden) ÷ (3 × Partien) — eine andere Rechnung als die Win Rate links, weil die Quelle je Paarung keine Bilanz veröffentlicht.'
+                            : 'In-person events: match points (3 wins + 1 tie) ÷ (3 × games) — a different calculation from the win rate on the left, because the source publishes no record per pairing.'))}">${
+                            esc(L('arc.colMajor', de ? 'Major-Punkte' : 'Major points'))}</th>
+                        <th title="${esc(L('arc.colMajorN', de
+                            ? 'Präsenzpartien dieser Paarung'
+                            : 'in-person games for this pairing'))}">${
+                            esc(de ? 'M-Partien' : 'M-games')}</th>
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>

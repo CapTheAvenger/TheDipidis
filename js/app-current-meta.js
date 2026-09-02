@@ -41,6 +41,14 @@
         window._majorMatchupRegistry = window._majorMatchupRegistry || null;
         let _majorLaeuft = false;
 
+        /* Nach aussen gereicht, damit js/app-archetype-card.js dieselbe
+           Datei nicht ein zweites Mal parst. Zwei Parser fuer eine Datei
+           sind zwei Zahlen fuer eine Sache, sobald einer angefasst wird —
+           dieselbe Begruendung, aus der getArchetypeShares() existiert.
+           app-current-meta.js laedt vor app-archetype-card.js
+           (index.html:3734 gegen :3745), der Verweis steht also. */
+        window.ladeMajorMatchups = ladeMajorMatchups;
+
         async function ladeMajorMatchups() {
             if (window._majorMatchupRegistry) return window._majorMatchupRegistry;
             const leer = {};

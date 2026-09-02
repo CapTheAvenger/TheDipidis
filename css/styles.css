@@ -10925,6 +10925,31 @@ body.arc-open { overflow: hidden; }
  * und unter 100 Partien (95-%-Intervall breiter als ±10 Punkte) ist sie
  * gedaempft. Dieselbe Sprache wie `heatmap-td-thin` in der Heatmap. */
 .arc-halb--duenn .arc-tile-value { opacity: 0.72; font-weight: 600; }
+
+/* Die Praesenzspalten der Matchup-Tabelle (02.09.2026).
+ *
+ * Gemeldet: "ausgeklappt auf VS Deck Ebene sehe ich nicht das Online und
+ * Major jeweils angezeigt wird."
+ *
+ * Sie stehen RECHTS und tragen eigene Namen, weil sie eine andere Rechnung
+ * sind: links S/(S+N), hier Matchpunkte. Die Labs-Datei liefert je Paarung
+ * nur Anzahl und Prozent, keine Bilanz — ohne die Unentschieden nicht
+ * umrechenbar. Zwei Spalten mit demselben Namen und zwei Rechnungen waeren
+ * genau der Fehler, den diese Seite seit Wochen abarbeitet.
+ *
+ * Eine linke Kante trennt sie sichtbar von der Online-Seite. Duenne
+ * Paarungen kursiv, nicht blass — Blaesse hat schon einmal den Kontrast
+ * gekostet (3,42:1 an den Heatmap-Zellen). */
+.arc-mu-table th:nth-last-child(2),
+.arc-mu-table td.arc-mu-major {
+    border-left: 1px solid var(--arc-line);
+}
+.arc-mu-major, .arc-mu-major-n {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.arc-mu-major-duenn { font-style: italic; }
 .arc-halb--duenn .arc-halb-quelle { opacity: 0.85; }
 
 /* Die einfachen Kacheln (Top-8, Day 2) tragen ihre Zahl allein und

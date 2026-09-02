@@ -815,6 +815,74 @@ describe('Team-Rechner — Oberflaeche', () => {
             'eine breite Matrix schiebt die ganze Seite zur Seite');
     });
 
+    /* BEFUND (live gemessen, 02.09.2026, nach dem ersten Ausliefern):
+       styles.css:918 setzt `table { display: block }` und direkt darunter
+       `table thead, table tbody { display: table; width: 100% }`. Damit
+       ist eine <table> keine Tabellenbox mehr — Kopf und Koerper werden
+       zwei unabhaengige Tabellen. Genau daran ist am 19.08.2026 die
+       Heatmap um 280 px verrutscht.
+
+       Gemessen ohne die Ausnahme: jede Zelle 687 px breit in einem
+       3822-px-Fenster, Beschriftung links, Zahl weit rechts.
+       Mit der Ausnahme: 773 px Tabellenbreite bei JEDER Fensterbreite
+       von 390 bis 3822 px, nirgends geklemmt. */
+    it('die Matrix ist von der Pauschalregel table{display:block} ausgenommen', () => {
+        const regel = (sel) => {
+            const m = CSS_C.match(new RegExp(sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+                + '\\s*\\{([^}]*)\\}'));
+            return m ? m[1] : null;
+        };
+        assert.match(CSS_C, /\.sq-console \.sq-team-matrix thead \{[^}]*display:\s*table-header-group/,
+            'der Tabellenkopf bleibt eine eigene Tabelle und flucht nicht mit dem Koerper');
+        assert.match(CSS_C, /\.sq-console \.sq-team-matrix tbody \{[^}]*display:\s*table-row-group/);
+        assert.match(CSS_C, /\.sq-console \.sq-team-matrix tr \{[^}]*display:\s*table-row/);
+        assert.match(CSS_C, /\.sq-console \.sq-team-matrix th,[\s\S]{0,200}?display:\s*table-cell/);
+        const m = regel('.sq-console .sq-team-matrix');
+        assert.ok(m, '.sq-team-matrix nicht gefunden');
+        assert.match(m, /display:\s*table\b/,
+            'die Matrix bleibt eine Blockbox');
+    });
+
+    it('die Matrix waechst mit ihrem Inhalt, nicht mit dem Fenster', () => {
+        const m = CSS_C.match(/\.sq-console \.sq-team-matrix \{([^}]*)\}/);
+        assert.ok(m, '.sq-team-matrix nicht gefunden');
+        assert.match(m[1], /width:\s*auto/,
+            'mit width:100% wird jede Zelle auf einem breiten Schirm '
+            + 'hunderte Pixel breit');
+        // Verankert, sonst trifft das Muster auch "max-width: 100%" —
+        // und das soll ausdruecklich dableiben.
+        assert.ok(!/(^|[^-])width:\s*100%/.test(m[1]),
+            `die Matrix wird wieder auf Fensterbreite gezogen: ${m[1].trim()}`);
+        assert.match(m[1], /max-width:\s*100%/,
+            'ohne max-width laeuft eine breite Matrix aus ihrem Kasten heraus');
+    });
+
+    it('Wert und K.-o.-Zahl stehen nebeneinander, nicht an den Raendern', () => {
+        const m = CSS_C.match(/\.sq-console \.sq-team-deal,\s*\n\s*\.sq-console \.sq-team-take \{([^}]*)\}/);
+        assert.ok(m, 'die Zellen-Innenaufteilung nicht gefunden');
+        assert.ok(!/grid-template-columns:\s*1fr\s+auto/.test(m[1]),
+            '1fr auto schiebt zwei zusammengehoerende Zahlen auf einem '
+            + 'breiten Schirm 1000 px auseinander');
+        assert.match(m[1], /justify-content:\s*start/);
+    });
+
+    /* Live gemessen: der Zeilenkopf stand mit #EEF2FF auf #F8F9FA —
+       fast weiss auf fast weiss. styles.css faerbt jedes <th> mit einem
+       festen hellen Grund, und die Konsole ist dunkel. */
+    it('die Kopfzellen erben keinen hellen Grund', () => {
+        assert.match(CSS_C,
+            /\.sq-console \.sq-team-matrix th,[\s\S]{0,260}?background:\s*transparent/,
+            'die Kopfzellen behalten den hellen Grund aus styles.css — '
+            + 'heller Text auf hellem Grund');
+        assert.match(CSS_C,
+            /\.sq-console \.sq-team-matrix tbody th \{[^}]*background:\s*var\(--sq-deep\)/,
+            'der Zeilenkopf hat keinen eigenen dunklen Grund');
+        // Und er bleibt beim Querscrollen stehen, sonst weiss man auf dem
+        // Handy nach zwei Spalten nicht mehr, wessen Zeile man liest.
+        assert.match(CSS_C,
+            /\.sq-console \.sq-team-matrix tbody th \{[^}]*position:\s*sticky/);
+    });
+
     it('gruen ist, was du austeilst — dieselbe Farbe wie eine Ansicht hoeher', () => {
         // #6fdca0 und #ff8f7a stehen in .sq-mu-bar.is-deal/.is-take. Ein
         // dritter Gruenton fuer dieselbe Bedeutung waere der Anfang davon,

@@ -52,6 +52,21 @@ function luminance(hex) {
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }
 
+/* Ein rgb()/rgba() genau wie einen Hexwert lesen. Durchsichtige
+ * Flaechen (Alpha unter 0,5) zaehlen nicht mit — sie liegen auf dem
+ * Grund darunter und drehen mit ihm. */
+function rgbLum(s) {
+    const m = String(s).match(/rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)\s*(?:[,/]\s*([\d.%]+))?\s*\)/);
+    if (!m) return null;
+    if (m[4] !== undefined) {
+        const a = m[4].endsWith('%') ? parseFloat(m[4]) / 100 : parseFloat(m[4]);
+        if (!(a >= 0.5)) return null;
+    }
+    const [r, g, b] = [m[1], m[2], m[3]].map(Number);
+    if ([r, g, b].some(x => !Number.isFinite(x))) return null;
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+
 /* Fest verdrahtete DUNKLE Textfarben: das, was im Dunkelmodus auf
  * dunklem Grund verschwindet.
  *
@@ -76,6 +91,8 @@ function countHardcodedDarkInk() {
             return total + decls.filter(d => {
                 const val = d.slice(d.indexOf(':') + 1);
                 if (val.includes('var(')) return false;
+                const rgbs = (val.match(/rgba?\(([^)]*)\)/g) || []).map(rgbLum).filter(x => x !== null);
+                if (rgbs.length) return rgbs.every(l => l < 0.30);
                 const hexes = val.match(/#[0-9a-fA-F]{3,6}\b/g);
                 return !!hexes && hexes.every(h => (luminance(h) ?? 1) < 0.30);
             }).length;
@@ -94,6 +111,12 @@ function countHardcodedLightSurfaces() {
                 const val = d.slice(d.indexOf(':') + 1);
                 if (val.includes('var(')) return false;
                 if (/\bwhite\b/.test(val)) return true;
+                /* 02.09.2026: bis dahin sah dieser Zaehler nur Hexwerte.
+                   Ein fest verdrahtetes rgb()/rgba() rutschte durch —
+                   gefunden bei der Abnahme an einer 8-%-Trennlinie im
+                   Meta Call. Ein halber Zaehler meldet halbe Wahrheiten. */
+                const rgbs = (val.match(/rgba?\(([^)]*)\)/g) || []).map(rgbLum).filter(x => x !== null);
+                if (rgbs.length) return rgbs.every(l => l > 0.85);
                 const hexes = val.match(/#[0-9a-fA-F]{3,6}\b/g);
                 return !!hexes && hexes.every(h => (luminance(h) || 0) > 0.85);
             }).length;
@@ -179,8 +202,28 @@ describe('wie weit die Seite dafür ist', () => {
            Kartenbildern. Verlaeufe hatte dieser Zaehler bis dahin
            mitgezaehlt, die Messung im Browser aber nicht — sie las nur
            backgroundColor. Ein Verlauf von Weiss nach Fastweiss ist
-           eine weisse Flaeche. */
-        const BASELINE = 290;
+           eine weisse Flaeche.
+           295 -> 275 am 02.09.2026: die Umschalt-Knoepfe der
+           Meta-Call-Tabelle und die Trennlinie darunter. Sie fielen
+           erst auf, als die ganze Seite in beiden Modi bei 390, 768 und
+           1500 px durchgemessen wurde — auf dem Schreibtisch startet
+           die Zeile zugeklappt, auf dem Telefon aufgeklappt, und dort
+           lagen 25 hellviolette 44x44-Kaesten auf der dunklen Tabelle.
+           Eine Messung bei einer Breite ist eine halbe Messung.
+
+           275 -> 311 in derselben Runde, und die Zahl ist NICHT
+           gestiegen, weil die Seite schlechter geworden waere: der
+           Zaehler sah bis dahin nur Hexwerte. Ein fest verdrahtetes
+           rgb()/rgba() rutschte durch — 36 Stellen ueber zwoelf
+           Dateien, die es die ganze Zeit gab und die dieser Zaehler
+           stillschweigend als "erledigt" gefuehrt hat. Elf davon
+           liegen in der bewusst hellen Anleitungs-Insel und bleiben
+           dort richtig; die uebrigen sind echte Arbeit fuer die
+           naechsten Runden.
+
+           Ein Zaehlerstand, der nur zaehlt, was leicht zu finden ist,
+           faellt genau dann nicht auf, wenn er faellt. */
+        const BASELINE = 311;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);
@@ -202,8 +245,19 @@ describe('wie weit die Seite dafür ist', () => {
            bleibt — dort ist eine feste dunkle Schrift richtig und ein
            drehendes Token waere falsch. Ein Zaehlerstand ist kein
            Selbstzweck; er soll Abdriften melden, und dieser Schritt
-           ist keines. */
-        const BASELINE_INK = 183;
+           ist keines.
+
+           183 -> 176 am 02.09.2026: .mc-pmt-stack stand als #1f4f7a
+           fest verdrahtet und lag im Dunkelmodus auf --surface-2 bei
+           1,93:1 — ueber 72 Segmente die einzige Stelle der ganzen
+           Seite, an der der Dunkelmodus wirklich unlesbar war. Dazu die
+           Umschalt-Knoepfe derselben Tabelle.
+
+           176 -> 182: dieselbe Erweiterung wie beim Flaechenzaehler,
+           sechs Stellen mit fest verdrahtetem rgb()/rgba(). Auch hier
+           ist nichts schlechter geworden, es wird nur ehrlicher
+           gezaehlt. */
+        const BASELINE_INK = 182;
         const now = countHardcodedDarkInk();
         assert.ok(now <= BASELINE_INK,
             `fest verdrahtete dunkle Textfarben: ${now} (erlaubt: ${BASELINE_INK})`);
@@ -220,6 +274,46 @@ describe('wie weit die Seite dafür ist', () => {
             .forEach(re => assert.match(STYLES, re, `nicht umgestellt: ${re}`));
         const cl = fs.readFileSync(path.join(ROOT, 'css', 'city-league.css'), 'utf8');
         assert.match(cl, /\.current-meta-content \{[^}]*background: var\(--surface-1\)/);
+    });
+
+    it('der Meta-Call-Turnierstapel dreht mit', () => {
+        /* Live gemessen am 02.09.2026: 72 Segmente bei 1,93:1. Der
+           Wert kommt jetzt aus --mc-info-dark, den es in dieser Datei
+           seit dem 11.06. in beiden Saetzen gibt (hell 8,49:1, dunkel
+           9,12:1). */
+        const mc = stripComments(fs.readFileSync(path.join(ROOT, 'css', 'meta-call.css'), 'utf8'));
+        const block = mc.slice(mc.indexOf('.mc-pmt-stack {'));
+        const regel = block.slice(0, block.indexOf('}'));
+        assert.match(regel, /color:\s*var\(--mc-info-dark\)/,
+            '.mc-pmt-stack traegt wieder eine feste Schriftfarbe');
+        assert.doesNotMatch(regel, /color:\s*#/);
+
+        /* Der Zwilling. Er stand bei der Live-Messung nicht auf dem
+           Schirm, weil bei der heutigen Datenlage der Stapelpfad
+           gewinnt — eine Messung findet nur, was gerade gerendert
+           wird, und deshalb steht er hier im Quelltext. */
+        const chip = mc.slice(mc.indexOf('.mc-intel-major-chip {'));
+        const chipRegel = chip.slice(0, chip.indexOf('}'));
+        assert.match(chipRegel, /color:\s*var\(--mc-info-dark\)/,
+            '.mc-intel-major-chip traegt wieder eine feste Schriftfarbe');
+    });
+
+    it('die Umschalt-Knoepfe der Meta-Call-Tabelle drehen mit', () => {
+        /* Auf dem Telefon startet die Zeile aufgeklappt. Im
+           Dunkelmodus lagen dadurch 25 hellviolette 44x44-Kaesten auf
+           der dunklen Tabelle — auf dem Schreibtisch unsichtbar, weil
+           dort zugeklappt gestartet wird. */
+        const mc = stripComments(fs.readFileSync(path.join(ROOT, 'css', 'meta-call.css'), 'utf8'));
+        const bloecke = [...mc.matchAll(/\.mc-row-toggle[^{]*\{([^}]*)\}/g)].map(m => m[1]);
+        assert.ok(bloecke.length >= 4, 'die Knopfregeln sind nicht mehr auffindbar');
+        bloecke.forEach((b, i) => {
+            assert.doesNotMatch(b, /(background|border|border-color|color)\s*:[^;]*(#[0-9a-fA-F]{3,6}|rgba?\()/,
+                `.mc-row-toggle-Block ${i + 1} hat wieder einen festen Hexwert: ${b.trim()}`);
+        });
+        // Und die Personal-Linie gibt es in beiden Saetzen.
+        const tokens = mc.slice(0, mc.indexOf('.metacall-wrap'));
+        assert.equal((tokens.match(/--mc-personal-line:/g) || []).length, 2,
+            '--mc-personal-line fehlt in einem der beiden Tokensaetze');
     });
 
     it('die Rangliste holt Fläche und Kante aus der Komponente', () => {

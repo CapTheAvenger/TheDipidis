@@ -137,6 +137,16 @@ describe('Day-2-Schwelle greift auf der angezeigten Zahl', () => {
 });
 
 /* ── Hub-Satz: die Quote kommt aus den Zahlen daneben ────────────── */
+
+/* Das ECHTE Tor aus app-utils.js, nicht eine Attrappe. Es entscheidet,
+   ob die Anzeige die gezaehlten oder die gewichteten Spalten nimmt —
+   mit einer Attrappe liefe der Test genau am Verzweigungspunkt vorbei.
+   Dieselbe Technik wie bei parseLocaleNumber daneben. */
+function echtesTor(pLN) {
+    const stueck = lies('js/app-utils.js').match(/function gezaehlteZeilen\(rows\) \{[\s\S]*?\n\}/)[0];
+    return new Function('parseLocaleNumber', stueck + '\nreturn gezaehlteZeilen;')(pLN);
+}
+
 describe('Der Hub-Satz ist nachrechenbar', () => {
     const HUB = lies('js/meta-analysis-hub.js');
     // app-utils.js laesst sich nicht require-n (es greift beim Laden auf
@@ -149,7 +159,7 @@ describe('Der Hub-Satz ist nachrechenbar', () => {
 
     const modell = (rows, conv) => new Function('window',
         HUB.match(/function answerModel\(rows\) \{[\s\S]*?\n    \}/)[0] +
-        '\nreturn answerModel;')({ parseLocaleNumber, computeConversionPerformance: () => conv })(rows);
+        '\nreturn answerModel;')({ parseLocaleNumber, gezaehlteZeilen: echtesTor(parseLocaleNumber), computeConversionPerformance: () => conv })(rows);
 
     it('72 von 708 ergeben 10,2 % — nicht 10,1 %', () => {
         const conv = {

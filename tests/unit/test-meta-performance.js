@@ -118,7 +118,18 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
 
     it('duenn heisst: zu wenige TURNIER-Antritte', () => {
         // Die Ladder-Spalten sind davon unberuehrt, die stehen auf 2.121.
-        assert.match(TIER, /duenn: !\(antritte >= CONV_THIN_N\)/);
+        /* NACHTRAG 02.09.2026 — das Feld heisst jetzt antritteGew.
+           Die Schwelle stand bis dahin auf derselben Variablen wie die
+           ANZEIGE. Als die Anzeige auf null ging (weil eine halbe Zahl
+           keine Antrittszahl ist), galt `null >= 50` fuer jedes Deck als
+           unerfuellt — 137 von 137 Zeilen wurden blass gezeichnet.
+           Gemessen nach der Trennung: 106 von 137. Was die Zeile blass
+           macht, ist weiter die TURNIER-Zaehlung, nur eben die
+           gewichtete, die immer da ist. */
+        assert.match(TIER, /duenn: !\(antritteGew >= CONV_THIN_N\)/);
+        assert.ok(!/duenn: !\(antritte >= CONV_THIN_N\)/.test(TIER),
+            'die Schwelle haengt wieder am Anzeigewert — dann ist jede '
+            + 'Zeile blass, sobald die gezaehlte Zahl fehlt');
     });
 });
 

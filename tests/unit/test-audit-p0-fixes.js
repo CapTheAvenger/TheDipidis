@@ -110,7 +110,7 @@ pruefe('Meta-Performance: sortierbar nach jeder angezeigten Spalte', () => {
 
 pruefe('Meta-Performance: keine Faktor-Zahl unter der Mindeststichprobe', () => {
     // Diese Pruefung las bis zum 20.08.2026 den QUELLTEXT: sie suchte die
-    // Zeichenfolge `if (!(r.antritte >= CONV_MIN_N))` und war gruen, sobald
+    // Zeichenfolge `if (!(r.antritteGew >= CONV_MIN_N))` und war gruen, sobald
     // sie sie fand. Ein Test, der eine Schranke am Text bezeugt, bezeugt
     // nicht, dass die Schranke wirkt — genau so war die Vorgaengerpruefung
     // an `top8Top` gruen geblieben, nachdem die Rangliste dahinter
@@ -137,12 +137,12 @@ pruefe('Meta-Performance: keine Faktor-Zahl unter der Mindeststichprobe', () => 
     const f = new Function(rumpf)();
 
     // Genau an der Grenze: 20 gewichtete Antritte reichen, 19,9 nicht.
-    const drueber = f({ faktor: 1.4, faktorRoh: 1.9, antritte: 20 }, 'faktor');
+    const drueber = f({ faktor: 1.4, faktorRoh: 1.9, antritteGew: 20 }, 'faktor');
     assert.ok(/1,4-mal/.test(drueber),
         'ab CONV_MIN_N muss der Faktor dastehen, war: ' + drueber);
 
     for (const n of [0, 1, 8, 19, 19.9, null, undefined, NaN]) {
-        const aus = f({ faktor: 1.0, faktorRoh: 1.0, antritte: n }, 'faktor');
+        const aus = f({ faktor: 1.0, faktorRoh: 1.0, antritteGew: n }, 'faktor');
         assert.ok(!/-mal/.test(aus),
             'bei ' + n + ' Antritten steht wieder eine Faktor-Zahl da: ' + aus);
         assert.ok(aus.includes('–'),
@@ -151,7 +151,7 @@ pruefe('Meta-Performance: keine Faktor-Zahl unter der Mindeststichprobe', () => 
 
     // Der gemeldete Fall: 23 Decks ohne einen einzigen Cut standen mit
     // "1,0-mal" und einem Balken auf der Nulllinie da.
-    const ohneCut = f({ faktor: 1.0, faktorRoh: 1.0, antritte: 3, cuts: 0 }, 'faktor');
+    const ohneCut = f({ faktor: 1.0, faktorRoh: 1.0, antritteGew: 3, cuts: 0 }, 'faktor');
     assert.ok(!/ds-bar-fill/.test(ohneCut),
         'ohne Stichprobe darf auch kein Balken gezeichnet werden');
 

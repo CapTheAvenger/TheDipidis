@@ -354,10 +354,23 @@ describe('Halbe gewichtete Antritte werden als halbe gedruckt', () => {
             + 'gewichtet wird nach Aktualität');
         assert.match(TIER, /nach Aktualität gewichtet/,
             'der Hinweis nennt die Gewichtung nicht mehr beim Namen');
-        // Der Fallback-Kopf trägt das Wort — und haengt an der Merkvariablen,
-        // nicht an einer Konstanten.
-        assert.match(TIER, /_antritteRoh \? 'Turnier-Antritte' : 'Turnier-Antritte \(gewichtet\)'/,
-            'die Ueberschrift sagt nicht mehr, wann sie eine gewichtete Zahl traegt');
+        /* NACHTRAG 2, gleicher Tag. Der erste Versuch schrieb "(gewichtet)"
+           in die Ueberschrift und zeigte die gewichtete Summe weiter an.
+           Antwort des Betreibers: "das ist keine reelle Zahl sondern eine
+           Annahme? eine Annahme wofuer? wenn das keine verlaessliche Zahl
+           ist, dann weg damit."
+
+           Recht hat er. Die Gewichtung ist ein Abschlag zugunsten der
+           QUOTE — fuer eine Anzahl ist sie sinnlos. Es steht jetzt ein
+           Strich, bis die gezaehlte Zahl da ist. */
+        assert.ok(!/Turnier-Antritte \(gewichtet\)/.test(TIER),
+            'die gewichtete Summe steht wieder als Anzahl auf dem Schirm, '
+            + 'nur mit einem Wort in Klammern davor');
+        assert.match(TIER, /broughtAnzeige: hatRoh \? broughtRoh : null/,
+            'ohne gezaehlte Zahl faellt die Anzeige wieder auf den gewichteten '
+            + 'Wert zurueck — dann stehen dort wieder 532,5 Antritte');
+        assert.match(TIER, /top8Anzeige:\s+hatRoh \? top8Roh\s+: null/,
+            'dasselbe fuer die Top-8-Spalte');
         assert.match(TIER, /_antritteRoh = hatRoh/,
             'die Merkvariable wird nicht mehr gesetzt — dann steht dauerhaft '
             + '"(gewichtet)" da, auch wenn die rohen Zahlen laengst da sind');

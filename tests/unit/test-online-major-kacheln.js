@@ -330,6 +330,27 @@ describe('Die Kachel haengt nicht an der Bildschirmbreite', () => {
         }
     });
 
+    it('das enge Band wird an der KACHEL gemessen, nicht am Bildschirm', () => {
+        /* Bei 154 bis 162 px Kachelbreite stehen noch zwei Kacheln
+           nebeneinander und der Platz reicht knapp nicht. Gemessen werden
+           MUSS dafuer die Kachel: die Karte ist auch am Schreibtisch nur
+           rund 380 px breit, eine Bildschirmabfrage sagt hier nichts. Genau
+           dieser Fehler ist am 02.09.2026 schon einmal passiert
+           (`@media (min-width: 720px)` fuer ein Kachelproblem). */
+        assert.match(css, /\.arc-tile--geteilt\s*\{[^}]*container-type:\s*inline-size/,
+            'die Kachel ist kein Messbezug mehr — dann kann die Abfrage '
+            + 'unten nur noch den Bildschirm meinen');
+        assert.match(css, /@container\s*\(max-width:\s*\d+px\)/,
+            'die Container-Abfrage fuer das enge Band fehlt');
+        const iC = css.indexOf('@container');
+        const iW = css.indexOf('.arc-halb .arc-tile-value {');
+        assert.ok(iW > 0 && iC > iW,
+            'die Container-Abfrage steht VOR der Regel, die sie ueberschreiben '
+            + 'soll. Eine Container-Abfrage erhoeht die Spezifitaet nicht — '
+            + 'dann greift der Abstand, die Schriftgroesse aber nicht, und die '
+            + 'Regel sieht aus, als wirke sie.');
+    });
+
     it('die Schriftgroesse der Zahlen haengt nicht an vw', () => {
         const regel = rumpf('.arc-halb .arc-tile-value');
         assert.ok(!/vw/.test(regel),
@@ -371,23 +392,32 @@ describe('Die Kachel haengt nicht an der Bildschirmbreite', () => {
     });
 
     it('Herkunft, Wert und Stueckzahl stehen in einer Zeile, die Zeilen untereinander', () => {
+        /* EIN Raster fuer BEIDE Zeilen — das ist der Kern.
+
+           Der erste Anlauf gab jeder Zeile ein eigenes `display: grid` und
+           schrieb daneben, die Felder stuenden "senkrecht in einer Flucht".
+           Sie standen es nie: zwei getrennte Raster teilen keine
+           Spaltenbreiten, also war die Stueckzahl-Spalte in jeder Zeile so
+           breit wie IHRE Zahl. Gemessen auf 380 px Kartenbreite stand die
+           rechte Kante des Werts um 5 bis 14 px versetzt.
+
+           Gemeldet mit Bild: "was das für eine Formatierung? wie sieht denn
+           das aus, die Zahlen sollten schon vernünftig eingerückt sein." */
         const regel = rumpf('.arc-halbe');
-        assert.ok(/grid-template-columns:\s*1fr/.test(regel),
-            'die beiden Herkuenfte stehen wieder nebeneinander — nebeneinander '
-            + 'passen sie in die echte Kartenbreite nicht');
-        // Seit dem 02.09.2026 traegt jede Zeile DREI Felder: woher, wie viel,
-        // worauf es steht. Ein Raster, damit die drei Felder der beiden Zeilen
-        // senkrecht in einer Flucht stehen — dafuer ist die Kachel da.
+        const spalten = /grid-template-columns:\s*([^;]+);/.exec(regel);
+        assert.ok(spalten, '.arc-halbe hat keine gesetzten Spalten');
+        const spaltenText = spalten[1].trim();
+        assert.ok(/max-content\s+minmax\(\s*0\s*,\s*1fr\s*\)\s+max-content/.test(spaltenText),
+            `.arc-halbe steht auf "${spaltenText}". Erwartet werden drei `
+            + 'Spalten "max-content minmax(0, 1fr) max-content": Quelle und '
+            + 'Stueckzahl duerfen nicht schrumpfen (sonst wird "online" unter '
+            + '325 px Kartenbreite zu "ont..."), der Wert dazwischen schon.');
+
         const zeile = rumpf('.arc-halb');
-        assert.ok(/display:\s*grid/.test(zeile),
-            '.arc-halb ist kein Raster mehr — mit space-between wandern die '
-            + 'Felder je nach Textlaenge und die beiden Zeilen fluchten nicht');
-        const spalten = /grid-template-columns:\s*([^;]+);/.exec(zeile);
-        assert.ok(spalten, '.arc-halb hat keine gesetzten Spalten mehr');
-        const n = spalten[1].trim().split(/\s+/).length;
-        assert.strictEqual(n, 3,
-            `.arc-halb hat ${n} Spalten (erwartet 3: Herkunft, Wert, Stueckzahl) `
-            + '— mit zweien faellt die Stueckzahl wieder weg');
+        assert.ok(/display:\s*contents/.test(zeile),
+            '.arc-halb bildet wieder eine eigene Flaeche — damit hat jede '
+            + 'Zeile wieder ihr eigenes Raster, und die Spalten der beiden '
+            + 'Zeilen fluchten nicht mehr. Genau das war der gemeldete Fehler.');
     });
 
     it('das Markup setzt Herkunft, dann Wert, dann Stueckzahl', () => {

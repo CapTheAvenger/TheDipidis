@@ -10880,6 +10880,11 @@ body.arc-open { overflow: hidden; }
     display: flex;
     flex-wrap: wrap;
 }
+.arc-tile--geteilt {
+    /* Messbezug fuer die Container-Abfrage weiter unten: gefragt wird die
+       Breite DIESER Kachel, nicht die des Fensters. */
+    container-type: inline-size;
+}
 .arc-tiles--vier > .arc-tile {
     flex: 1 1 150px;
     min-width: 0;
@@ -10902,22 +10907,50 @@ body.arc-open { overflow: hidden; }
 }
 
 /* Eine Zeile je Herkunft: links woher, rechts die Zahl. */
+/* EIN Raster fuer BEIDE Zeilen (02.09.2026, zweiter Anlauf).
+ *
+ * Der erste Anlauf gab jeder Zeile ihr eigenes `display: grid` mit
+ * `auto 1fr auto` — und schrieb daneben, die drei Felder stuenden damit
+ * "senkrecht in einer Flucht". Sie standen es nie: zwei getrennte Raster
+ * teilen keine Spaltenbreiten. Die Stueckzahl-Spalte war in jeder Zeile
+ * so breit wie IHRE Zahl, also schob "2.754" den Wert weiter nach links
+ * als "172". Gemessen auf echter Kartenbreite (380 px): die rechte Kante
+ * des Werts stand je Kachel um 5 bis 14 px versetzt.
+ *
+ * Gemeldet mit Bild: "was das für eine Formatierung? wie sieht denn das
+ * aus, die Zahlen sollten schon vernünftig eingerückt sein."
+ *
+ * Jetzt traegt `.arc-halbe` das Raster und beide Zeilen haengen per
+ * `display: contents` direkt darin. Damit sind es dieselben drei Spalten
+ * fuer beide Zeilen: die Quelle so breit wie das laengere Wort, die
+ * Stueckzahl so breit wie die groessere Zahl, und der Wert dazwischen
+ * endet in beiden Zeilen an derselben Kante.
+ *
+ * `display: contents` statt `subgrid`, weil `.arc-halb` keine eigene
+ * Flaeche braucht — alle Zustandsregeln (--leer, --duenn) greifen ueber
+ * Nachfahren-Selektoren auf die drei Felder. */
 .arc-halbe {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 3px;
-}
-/* Drei Felder je Zeile seit dem 02.09.2026: Quelle | Wert | Stueckzahl.
-   Raster statt flex, weil die drei Felder der beiden Zeilen senkrecht in
-   einer Flucht stehen muessen — genau dafuer ist die Kachel da. Die
-   Stueckzahl bekommt eine feste Spalte, damit vierstellige Zahlen
-   ("2.754") den Wert daneben nicht verschieben. */
-.arc-halb {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    /* `max-content` fuer Quelle und Stueckzahl, weil beide kurze, feste
+       Zeichenfolgen sind, die vollstaendig lesbar bleiben muessen — mit
+       `auto` schrumpfte die Quelle unter 325 px Kartenbreite um 2 bis 5 px
+       und wurde zu "ont..." und "M...", also genau wieder zu der
+       Abkuerzung, die abgeschafft werden sollte.
+
+       `minmax(0, 1fr)` fuer den Wert: die mittlere Spalte ist in der Regel
+       zwei- bis dreimal so breit wie ihr Text (der Wert steht rechtsbuendig
+       am Ende), sie hat die Reserve. Ohne das `0` als Untergrenze weigert
+       sich auch `1fr`, unter seine Textbreite zu gehen, und der Fehlbetrag
+       landet wieder bei den Nachbarn. */
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
     align-items: baseline;
-    gap: 0 6px;
-    min-width: 0;
+    gap: 3px 8px;
+}
+.arc-halb {
+    display: contents;
+}
+
+
 }
 .arc-halb-anzahl {
     font-size: 0.66rem;
@@ -10936,6 +10969,34 @@ body.arc-open { overflow: hidden; }
        enden — sonst haengt "7,3 %" gegen "22,2 %" versetzt. */
     text-align: right;
 }
+
+/* Das enge Band: Kachelbreite 154 bis 162 px.
+ *
+ * STEHT HINTER `.arc-halb .arc-tile-value`, UND DAS MIT ABSICHT: eine
+ * Container-Abfrage erhoeht die Spezifitaet NICHT. Beim ersten Versuch
+ * stand dieser Block weiter oben, die Schriftgroesse blieb bei 1,05 rem,
+ * und nur der Abstand aenderte sich — die Regel sah aus, als griffe sie,
+ * und tat es halb.
+ *
+ * Gemessen wird die KACHEL, nicht der Bildschirm — genau das war am
+ * 02.09.2026 schon einmal der Fehler: eine `@media (min-width: 720px)`
+ * fuer ein Problem, das an der Kachelbreite haengt. Die Karte ist auch am
+ * Schreibtisch nur rund 380 px breit, die Bildschirmbreite sagt hier gar
+ * nichts.
+ *
+ * In diesem Band stehen noch zwei Kacheln nebeneinander, jede Haelfte
+ * bekommt rund 134 bis 142 px, und "▲54,1 %" braucht bei 1,05 rem 65 px —
+ * zusammen mit "online" (31) und "13.113" (26) plus zwei Abstaenden sind
+ * das 138 px. Es fehlen bis zu 8 px. Darunter (< 154 px) bricht
+ * `.arc-tiles--vier` auf eine Kachel je Zeile um und der Platz ist wieder
+ * reichlich.
+ *
+ * Also nur in diesem Band: engere Abstaende und eine Spur kleinere Zahl.
+ * Keine Abkuerzung, kein abgeschnittenes Wort. */
+@container (max-width: 163px) {
+    .arc-halbe { gap: 3px 5px; }
+    .arc-halb .arc-tile-value { font-size: 0.95rem; }
+
 .arc-halb-quelle {
     color: var(--arc-ink3);
     font-size: var(--fs-xs);

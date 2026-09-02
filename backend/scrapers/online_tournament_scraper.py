@@ -407,21 +407,34 @@ def aggregate(tournaments: List[Dict[str, Any]],
                 "total_brought_weighted": 0.0,
                 "top8_count_weighted": 0.0,
                 "top16_count_weighted": 0.0,
+                # Plain head counts alongside the weighted ones. The
+                # weighting exists so the RATE follows recency; it has no
+                # business in a number the UI labels "entries". Shipped
+                # 02.09.2026 after the operator: "wie kann es hier ,5
+                # Antritte geben? entweder man hat teilgenommen oder nicht
+                # aber halb teilnehmen geht nicht" — and he is right, a
+                # count that reads 532.5 is not a count.
+                "total_brought": 0,
+                "top8_count": 0,
+                "top16_count": 0,
                 "winrate_sum_top8": 0.0,
                 "winrate_n_top8": 0,
                 "last_seen_date": None,
             })
             entry["tournaments_seen"].add(t["id"])
             entry["total_brought_weighted"] += weight
+            entry["total_brought"] += 1
             place = r["placement"]
             if place <= 8:
                 entry["top8_count_weighted"] += weight
+                entry["top8_count"] += 1
                 wr = r.get("winrate")
                 if isinstance(wr, (int, float)):
                     entry["winrate_sum_top8"] += wr
                     entry["winrate_n_top8"] += 1
             if place <= 16:
                 entry["top16_count_weighted"] += weight
+                entry["top16_count"] += 1
             tdate = t.get("date")
             if tdate is not None:
                 cur = entry["last_seen_date"]
@@ -462,6 +475,9 @@ def aggregate(tournaments: List[Dict[str, Any]],
             "total_brought_weighted": round(brought, 3),
             "top8_count_weighted": round(e["top8_count_weighted"], 3),
             "top16_count_weighted": round(e["top16_count_weighted"], 3),
+            "total_brought": e["total_brought"],
+            "top8_count": e["top8_count"],
+            "top16_count": e["top16_count"],
             "top8_conv_rate": round(top8_rate, 4),
             "top16_conv_rate": round(top16_rate, 4),
             "avg_winrate_in_top8": round(avg_wr_top8, 2),
@@ -482,6 +498,10 @@ def write_csv(rows: List[Dict[str, Any]], path: str) -> None:
         "top8_count_weighted", "top16_count_weighted",
         "top8_conv_rate", "top16_conv_rate",
         "avg_winrate_in_top8", "last_seen_date", "source_format",
+        # Angehaengt, nicht eingeschoben: data/_consumers.md — eine Spalte
+        # dazu ist sicher, eine umbenannte oder verschobene bricht andere
+        # Projekte, die diese Datei aus main lesen.
+        "total_brought", "top8_count", "top16_count",
     ]
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", newline="", encoding="utf-8-sig") as f:

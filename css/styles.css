@@ -7763,8 +7763,14 @@ body.battle-journal-open {
         flex-direction: column;
     }
 }
-    padding-top: 5px;
-}
+
+/* Hier standen bis zum 02.09.2026 eine herrenlose Deklaration
+   ("padding-top: 5px;") und eine ueberzaehlige schliessende Klammer —
+   Ueberbleibsel einer Regel, deren Selektor irgendwann verloren ging.
+   Der Browser hat beides als Parserfehler uebersprungen, gewirkt hat es
+   nie. Gefunden beim Nachzaehlen der Klammern, nachdem ein zu frueh
+   abgeschnittener @container-Block genau denselben Schaden angerichtet
+   hatte, nur mit Folgen. */
 
 .top-card-name {
     font-size: 0.72rem;
@@ -10950,8 +10956,6 @@ body.arc-open { overflow: hidden; }
     display: contents;
 }
 
-
-}
 .arc-halb-anzahl {
     font-size: 0.66rem;
     font-weight: 500;
@@ -10996,6 +11000,7 @@ body.arc-open { overflow: hidden; }
 @container (max-width: 163px) {
     .arc-halbe { gap: 3px 5px; }
     .arc-halb .arc-tile-value { font-size: 0.95rem; }
+}
 
 .arc-halb-quelle {
     color: var(--arc-ink3);

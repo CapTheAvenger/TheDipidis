@@ -379,10 +379,30 @@ describe('Halbe gewichtete Antritte werden als halbe gedruckt', () => {
             'die Spalte zeigt wieder den gewichteten Wert statt der Anzeigezahl');
         assert.match(TIER, /cuts:\s+t \? t\.top8Anzeige : null/,
             'die Top-8-Spalte zeigt wieder den gewichteten Wert');
-        // Die QUOTE rechnet weiter gewichtet — dafuer ist die Gewichtung da.
-        assert.match(TIER, /v\.top8ConvPct = v\.brought > 0 \? \(v\.top8 \/ v\.brought\) \* 100 : 0/,
-            'die Quote rechnet nicht mehr mit den gewichteten Zahlen — dann '
-            + 'ist die Aktualitaetsgewichtung ersatzlos weg');
+        /* NACHTRAG 3 (02.09.2026, Abnahme). Hier stand, die QUOTE rechne
+           weiter gewichtet — "dafuer ist die Gewichtung da".
+
+           Das ging nicht mehr auf. Seit die Spalten daneben die
+           GEZAEHLTEN Zahlen zeigen, stand in einer Zeile 120, 1.172 und
+           10,5 % — und 120/1172 sind 10,2 %. Der Eingangsblock sagte
+           fuer dasselbe Deck 10,2 %. Zwei Reiter, zwei Zahlen, und keine
+           der beiden liess sich aus den Zahlen daneben nachrechnen.
+
+           Die gedruckte Quote folgt jetzt den gedruckten Zahlen. Die
+           Gewichtung ist damit NICHT weg: sie steuert weiter die
+           Rangfolge und den Faktor "ggue. Schnitt"
+           (computeConversionPerformance auf den gewichteten Spalten,
+           Zeile 1621 / 1669) — und genau dort gehoert sie hin, denn dort
+           geht es um Guete, nicht um eine Anzahl. Der Faktor sagt in
+           seinem eigenen Tooltip ohnehin, dass er geglaettet und damit
+           nicht direkt nachrechenbar ist. */
+        assert.match(TIER, /v\.top8ConvPct = vB > 0 \? \(vC \/ vB\) \* 100 : 0/,
+            'die gedruckte Quote folgt nicht mehr den gedruckten Zahlen');
+        assert.match(TIER, /const conv = computeConversionPerformance\(t8rows\);/,
+            'die Rangfolge rechnet nicht mehr gewichtet — DANN waere die '
+            + 'Aktualitaetsgewichtung ersatzlos weg');
+        assert.match(TIER, /perfVon = new Map\(\(conv\.decks \|\| \[\]\)\.map\(d => \[d\.name, d\.perfPct\]\)\)/,
+            'der Faktor kommt nicht mehr aus der gewichteten Rechnung');
     });
 });
 

@@ -155,6 +155,11 @@ window.MetaCall = (function () {
   let _snapshotAtMajor   = {};   // normalize(deck) -> share% on (closest available date ≤ _lastMajorDate)
   let _snapshotWeekAgo   = {};   // normalize(deck) -> share% on (closest available date ≤ today-7d)
   let _labsConvByDeck    = {};   // normalize(deck) -> { sum, n } weighted top8_conv_rate (legacy)
+  /* Stehen in online_tournament_top8_decks.csv gezaehlte Antritte und
+   * Cuts fuer JEDE Zeile? Dann zeigt die Intel-Kachel dieselbe Quote
+   * wie Eingangsblock und Meta-Performance-Tabelle. Siehe die lange
+   * Notiz an der Stelle, an der der Schalter gesetzt wird. */
+  let _gezaehlteQuote    = false;
   let _labsQualityByDeck = {};   // normalize(deck) -> { d1: sum, d2: sum } per-deck day1/day2 totals across recent majors
   // Original (pre-filter) ladder + brought shares — populated the first
   // time _applyDateFilter overrides them, restored when the user clears
@@ -5507,6 +5512,11 @@ window.MetaCall = (function () {
       _aliasTurnierZuLadder = await _loadArchetypeAliases();
 
       _tournamentStats = {};
+      /* Zuruecksetzen, bevor geladen wird. Sonst bliebe der Schalter
+         nach einem fehlgeschlagenen Ladevorgang auf dem Stand des
+         vorigen — die einzige Groesse in diesem Block ohne
+         Ruecksetzung, aufgefallen bei der Abnahme am 02.09.2026. */
+      _gezaehlteQuote = false;
       try {
         const tournResp = await fetch('data/online_tournament_top8_decks.csv?t=' + Date.now());
         if (tournResp.ok) {
@@ -5514,6 +5524,29 @@ window.MetaCall = (function () {
           const broughtSum = tournRows.reduce(
             (s, r) => s + parseEU(r.total_brought_weighted || '0'), 0
           ) || 1;
+          /* ── Welche Zahl die Kachel ZEIGT ────────────────────────
+           *
+           * BEFUND (02.09.2026, live im Dunkelmodus gesehen): die
+           * Kachel "Top-8-Quote (Online-Turniere)" sagte fuer Dragapult
+           * 10,5 %, der Eingangsblock und die Meta-Performance-Tabelle
+           * seit PR #625 aber 10,2 %. Der Unterschied: top8_conv_rate
+           * ist nach Aktualitaet gewichtet, die beiden anderen
+           * Ansichten rechnen top8_count / total_brought aus gezaehlten
+           * Antritten.
+           *
+           * Das Tor dafuer steht in app-utils.js — EINE Regel fuer alle
+           * Ansichten. Als es hier noch eine eigene Kopie war, fand die
+           * Abnahme prompt eine vierte Ansicht ohne Tor und eine fuenfte
+           * mit einem lockereren.
+           *
+           * Was hier NICHT passiert: der Prognosemotor bleibt auf
+           * top8Conv. Er ist auf die gewichtete Groesse abgestimmt
+           * (convFactor, labs_t8_boost, die Deckel bei 0,5 und 2,0), und
+           * eine Anzeige geradezuziehen ist kein Grund, eine Vorhersage
+           * zu verschieben. Deshalb ZWEI Felder statt einem. */
+          _gezaehlteQuote = (typeof window !== 'undefined' && typeof window.gezaehlteZeilen === 'function')
+            ? window.gezaehlteZeilen(tournRows).hatRoh
+            : false;
           tournRows.forEach(r => {
             if (!r.deck_name) return;
             const brought = parseEU(r.total_brought_weighted || '0');
@@ -5522,6 +5555,17 @@ window.MetaCall = (function () {
             _tournamentStats[normalize(_kanonName(r.deck_name))] = {
               broughtShare: (brought / broughtSum) * 100,
               top8Conv    : parseEU(r.top8_conv_rate  || '0'),  // 0..1
+              /* Nur fuer die Anzeige, siehe die Notiz oben. */
+              broughtRoh  : parseEU(r.total_brought || '0'),
+              top8Roh     : parseEU(r.top8_count || '0'),
+              /* Auch der RUECKFALL rechnet, statt die fertige Spalte
+                 abzulesen. top8_conv_rate ist auf vier Stellen gerundet
+                 (Dragapult 0,1046 gegen 71/679 = 0,104565) und weicht
+                 bei 53 der 121 Zeilen ab. Das ist winzig, aber es ist
+                 wieder eine zweite Regel fuer dieselbe Zahl — und die
+                 Kachel stuende bei zugefallenem Tor neben einer
+                 Tabelle, die dividiert. Eine Formel, zwei Zustaende. */
+              broughtGew  : parseEU(r.total_brought_weighted || '0'),
               top16Conv   : parseEU(r.top16_conv_rate || '0'),
               top8Count   : parseEU(r.top8_count_weighted  || '0'),
               tournamentsSeen: parseInt(r.tournaments_seen || '0', 10),
@@ -6584,6 +6628,7 @@ window.MetaCall = (function () {
         _activeFormatLabsDecks = new Set();
         _activeFormatTop15Decks = new Set();
         _tournamentStats = {};
+        _gezaehlteQuote = false;
         _labsMajorRows = 0;
         // KEEP _majorSharesByDeck, _lastMajorByDeck, _lastMajorInfo
         // populated even in lag-window — Past Meta needs them for
@@ -7090,6 +7135,7 @@ window.MetaCall = (function () {
         String(_pastMetaFormatKey || '').toUpperCase().endsWith(labsRotationSuffix);
 
       _tournamentStats = {};            // no top8/conv data for past metas
+      _gezaehlteQuote = false;
       if (!formatMatchesLabs) {
         // Cross-rotation past meta — strip labs state to avoid cross-
         // contamination. Same behaviour as before the 2026-06 fix.
@@ -10025,6 +10071,18 @@ window.MetaCall = (function () {
   // any user data (TG WR, journal stats, TG share). Returns '' when
   // the deck has no intel at all so the caller can decide whether to
   // even emit a detail row.
+  /* Die Quote, die ANGEZEIGT wird — gezaehlt, wenn die Daten es
+   * hergeben, sonst die gewichtete Spalte wie bisher. Ein Rueckgabewert
+   * als Anteil (0..1), damit die Aufrufstelle nichts umrechnen muss. */
+  function _quoteFuerAnzeige(stats) {
+    if (!stats) return 0;
+    if (_gezaehlteQuote && stats.broughtRoh > 0) {
+      return stats.top8Roh / stats.broughtRoh;
+    }
+    if (stats.broughtGew > 0) return (stats.top8Count || 0) / stats.broughtGew;
+    return stats.top8Conv || 0;
+  }
+
   function _renderDeckBadge(deckName) {
     if (!_shareList) return '';
     const k = normalize(deckName);
@@ -10032,17 +10090,43 @@ window.MetaCall = (function () {
     if (!entry) return '';
     const stats = _tournamentStats ? _tournamentStats[k] : null;
     const ladderPct = entry.ladderShare || 0;
-    const broughtPct = stats ? stats.broughtShare : 0;
-    const top8Conv  = stats ? stats.top8Conv : 0;
-    // Field-weighted baseline — same calc as in loadData so the badge
-    // shows the same factor that the predictor used. Weighted by
-    // broughtShare so the natural cut rate (~8%) is the 1.0× anchor.
-    const allConvs = _tournamentStats
-      ? Object.values(_tournamentStats).filter(s => s && s.broughtShare > 0)
-      : [];
-    const totalBroughtForConv = allConvs.reduce((a, s) => a + s.broughtShare, 0) || 1;
+    const top8Conv  = _quoteFuerAnzeige(stats);
+    /* ── Alle drei Zahlen der Kachel aus EINER Grundgesamtheit ──
+     *
+     * BEFUND DER ABNAHME (02.09.2026): der Hauptwert war auf gezaehlte
+     * Antritte umgestellt, die beiden Zahlen darunter nicht. Und
+     * `broughtShare` ist nicht einmal "alle Turniere": _applyDateFilter
+     * rechnet es ohne Zutun des Nutzers auf das 28-Tage-Fenster um.
+     * In einer Kachel standen damit drei Zahlen aus drei Basen —
+     * "10,2 %" (gezaehlt, alles), "2,0x ueber dem Schnitt" (gezaehlte
+     * Quoten, gewichtet mit 28-Tage-Anteilen) und "2,0 % aller
+     * Antritte" (28-Tage-Eimer), waehrend die Startseite fuer dieselben
+     * beiden Zahlen 1,6x und 9,3 % zeigte.
+     *
+     * Zwei Zahlen, die sich nicht ineinander umrechnen lassen, sind
+     * schlimmer als eine Zahl allein. Also: steht das Tor offen,
+     * kommen ALLE DREI aus den gezaehlten Spalten — dann rechnet der
+     * Leser die Kachel selbst nach und landet bei der Startseite.
+     * Steht es zu, kommen alle drei wie bisher aus den gewichteten. */
+    const alleStats = _tournamentStats ? Object.values(_tournamentStats).filter(Boolean) : [];
+    const rohSumme = alleStats.reduce((a, s) => a + (s.broughtRoh || 0), 0);
+    const rohBasis = _gezaehlteQuote && rohSumme > 0;
+    const broughtPct = rohBasis
+      ? ((stats && stats.broughtRoh || 0) / rohSumme) * 100
+      : (stats ? stats.broughtShare : 0);
+    // Field-weighted baseline — weighted by broughtShare so the natural
+    // cut rate (~8%) is the 1.0× anchor.
+    //
+    // Der Schnitt kommt aus DERSELBEN Sorte Zahl wie der Hauptwert
+    // darueber. Sonst stuende in der Kachel eine gezaehlte Quote ueber
+    // einem gewichteten Vergleich, und "1,2x ueber dem Schnitt" waere
+    // gegen einen Schnitt gerechnet, den die Zahl daneben gar nicht
+    // meint.
+    const gewicht = (s) => rohBasis ? (s.broughtRoh || 0) : (s.broughtShare || 0);
+    const allConvs = alleStats.filter(s => gewicht(s) > 0);
+    const totalBroughtForConv = allConvs.reduce((a, s) => a + gewicht(s), 0) || 1;
     const meanConv = allConvs.length > 0
-      ? allConvs.reduce((a, s) => a + (s.top8Conv || 0) * s.broughtShare, 0) / totalBroughtForConv
+      ? allConvs.reduce((a, s) => a + _quoteFuerAnzeige(s) * gewicht(s), 0) / totalBroughtForConv
       : 0.08;
     const convFactor = meanConv > 0
       ? Math.max(0.5, Math.min(2.0, top8Conv / meanConv))

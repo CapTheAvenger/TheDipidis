@@ -1499,6 +1499,55 @@ const CONV_PRIOR = 50;      // pseudo-appearances at the field average
 const CONV_THIN_N = 50;     // below this the estimate leans on the prior
 const CONV_MIN_N = 20;      // below this a deck is not worth ranking
 
+/* ── EIN Tor fuer alle Ansichten ──────────────────────────────────
+ *
+ * online_tournament_top8_decks.csv fuehrt zwei Sorten Zahlen:
+ *
+ *   total_brought_weighted / top8_count_weighted  — nach AKTUALITAET
+ *       gewichtet (Turniere bis 7 Tage zaehlen 1,0, aeltere 0,5)
+ *   total_brought / top8_count                    — schlicht GEZAEHLT
+ *
+ * Beide sind richtig. Falsch ist nur, wenn zwei Ansichten derselben
+ * Seite verschiedene nehmen: der Betreiber am 02.09.2026, vor einer
+ * Startseitenkachel und einer Tabellenzeile mit demselben Deck und
+ * zwei Zahlen — "zwei Ansichten, dieselbe Zahl, zwei Regeln".
+ *
+ * Danach ist das dreimal einzeln repariert worden, und beim dritten Mal
+ * fand die Abnahme eine VIERTE Ansicht (die Archetyp-Karte), die noch
+ * die alte Zahl zeigte, und ein LOCKERERES Tor in der fuenften
+ * (app-tier-meta.js: es prueft nur die Summe, nicht jede Zeile). Vier
+ * Kopien einer Regel sind keine Regel.
+ *
+ * Deshalb steht sie ab dem 02.09.2026 genau hier, neben der Funktion,
+ * die alle Ansichten ohnehin schon teilen.
+ *
+ * Alles oder nichts, und zwar je ZEILE: eine einzige kaputte
+ * Scraper-Zeile schaltet den ganzen Block auf die gewichtete Spalte
+ * zurueck. Halb gezaehlt und halb gewichtet waere schlimmer als beides
+ * einzeln — dann stuenden die Zahlen wieder nebeneinander, ohne dass
+ * jemand die Naht sieht.
+ */
+function gezaehlteZeilen(rows) {
+    const ganzeZahl = (v) => /^\d+$/.test(String(v == null ? '' : v).trim());
+    const num = (v) => parseLocaleNumber(v || '0', 0);
+    const brauchbar = (r) => ganzeZahl(r.total_brought) && ganzeZahl(r.top8_count)
+        && num(r.total_brought) > 0
+        && num(r.top8_count) <= num(r.total_brought);
+    const hatRoh = !!rows && rows.length > 0 && rows.every(brauchbar);
+    if (!hatRoh) return { zeilen: rows || [], hatRoh: false };
+    /* Dieselben Zeilen, nur mit den gezaehlten Spalten an der Stelle der
+     * gewichteten. Kein zweiter Rechenweg: computeConversionPerformance
+     * bleibt eine Funktion, und Glaettung, Mindeststichprobe und
+     * Rangfolge gelten unveraendert. */
+    return {
+        hatRoh: true,
+        zeilen: rows.map(r => Object.assign({}, r, {
+            total_brought_weighted: r.total_brought,
+            top8_count_weighted: r.top8_count,
+        })),
+    };
+}
+
 function computeConversionPerformance(rows) {
     const num = (v) => parseLocaleNumber(v || '0', 0);
     let totalBrought = 0, totalTop8 = 0;
@@ -1572,6 +1621,7 @@ function feldGroesseAusAnteilen(zeilen) {
 window.feldGroesseAusAnteilen = feldGroesseAusAnteilen;
 
 window.computeConversionPerformance = computeConversionPerformance;
+window.gezaehlteZeilen = gezaehlteZeilen;
 window.CONV_PRIOR = CONV_PRIOR;
 window.CONV_THIN_N = CONV_THIN_N;
 window.CONV_MIN_N = CONV_MIN_N;

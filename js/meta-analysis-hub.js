@@ -133,31 +133,21 @@
            Geprueft wird auf eine ganze Zahl, nicht auf "nicht leer": ein
            zerschossener Wochenlauf mit "abc" oder "0" lieferte sonst
            keine Rueckfall-, sondern eine falsche Anzeige ("0 von 120"). */
-        const ganzeZahl = (v) => /^\d+$/.test(String(v == null ? '' : v).trim());
-        /* Je Zeile brauchbar, nicht nur in der Summe (Abnahme 02.09.2026).
-
-           Die Summenpruefung allein liess zwei Loecher: eine einzelne
-           Zeile mit `total_brought=0` fiel aus der Rangfolge (die
-           Ueberschrift sprang auf ein anderes Deck, die Kachel zeigte
-           0 Antritte), und `top8_count > total_brought` ergab
-           "1.177 von 1.172 in die Top 8". Beides sind kaputte Daten, und
-           bei kaputten Daten ist der gewichtete Rueckfall die ehrlichere
-           Anzeige als eine unmoegliche Zahl. */
-        const brauchbar = (r) => ganzeZahl(r.total_brought) && ganzeZahl(r.top8_count)
-            && num(r.total_brought) > 0
-            && num(r.top8_count) <= num(r.total_brought);
-        const hatRoh = rows.every(brauchbar);
-
-        /* Dieselben Zeilen, nur mit den gezaehlten Spalten an der Stelle
-           der gewichteten. Kein zweiter Rechenweg — computeConversion-
-           Performance bleibt eine Funktion, und die Glaettung, die
-           Mindeststichprobe und die Rangfolge gelten unveraendert. */
-        const zeilen = hatRoh
-            ? rows.map(r => Object.assign({}, r, {
-                total_brought_weighted: r.total_brought,
-                top8_count_weighted: r.top8_count,
-            }))
-            : rows;
+        /* Das Tor steht seit dem 02.09.2026 in app-utils.js, neben
+           computeConversionPerformance. Vorher stand es hier, in
+           app-tier-meta.js (lockerer: nur die Summe geprueft) und in
+           app-meta-call.js — die Archetyp-Karte hatte gar keins und
+           zeigte deshalb als vierte Ansicht weiter die gewichtete
+           Quote. Vier Kopien einer Regel sind keine Regel. */
+        const tor = (typeof window.gezaehlteZeilen === 'function')
+            ? window.gezaehlteZeilen(rows)
+            /* Faellt app-utils.js aus, bleibt die gewichtete Anzeige —
+               und die Ueberschrift traegt dann das Wort "gewichtet".
+               Ein stiller Absturz waere hier die schlechtere Wahl als
+               die ehrlichere von zwei richtigen Zahlen. */
+            : { zeilen: rows, hatRoh: false };
+        const hatRoh = tor.hatRoh;
+        const zeilen = tor.zeilen;
 
         const conv = window.computeConversionPerformance(zeilen);
         if (!conv || !(conv.expected > 0)) return null;
@@ -321,10 +311,30 @@
         // Wert fielen auf eine Nachkommastelle zusammen. Nachgemessen gilt
         // das fuer GENAU EIN Deck — Dragapult, 1,63 gegen 1,59. Ueber die
         // ganze Tabelle weichen 108 von 120 Zeilen ab, Mega Greninja um den
-        // Faktor 3,3 (roh 0,12-mal, geglaettet 0,4-mal). Gezeigt wird die
-        // geglaettete Zahl, weil sie die belastbare ist; nachrechenbar ist
-        // sie damit NICHT, und der Satz darunter sagt das jetzt auch.
-        const faktor = 1 + (best.perfPct / 100);
+        // Faktor 3,3 (roh 0,12-mal, geglaettet 0,4-mal).
+        //
+        // BEFUND (02.09.2026): danach stand hier die GEGLAETTETE Zahl,
+        // mitten in einem Satz, der die beiden Zahlen nennt, aus denen
+        // sie NICHT folgt: "10,2 % gegen 6,1 % im Schnitt — rund
+        // 1,6-mal so oft". 10,2 durch 6,1 sind 1,7. Der Satz
+        // widersprach sich also selbst, und der Hinweis an der Quote
+        // daneben sagte in derselben Zeile "Nachrechenbar".
+        //
+        // Aufgefallen ist es erst, als die Intel-Kachel des Meta Calls
+        // auf dieselbe Grundgesamtheit gezogen wurde und dort 1,7x
+        // stand — zwei Ansichten, dieselbe Zahl, zwei Regeln, nur eine
+        // Ebene feiner als beim letzten Mal.
+        //
+        // Diese Entscheidung hat das Projekt schon einmal getroffen,
+        // in js/app-archetype-card.js: "Zwei Zahlen, die sich nicht
+        // ineinander umrechnen lassen, sind schlimmer als eine Zahl
+        // allein... Das geglaettete Vielfache bleibt in der Rangliste,
+        // wo es als geglaettet beschriftet ist, seine eigene Spalte hat
+        // und unter der Mindestzahl ehrlich schweigt." Der Satz auf der
+        // Startseite folgt ihr jetzt auch: er zeigt das Vielfache
+        // SEINER EIGENEN beiden Zahlen.
+        const schnittRoh = model.conv.expected * 100;
+        const faktor = schnittRoh > 0 ? (model.headlineConvPct / schnittRoh) : 1;
         const fak = faktor.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
         /* Hier standen bis zum 02.09.2026 `cuts`, `antritte`, `gewichtet`
@@ -488,9 +498,18 @@
                geben — die Quote daneben ist aus genau dieser Zahl
                gerechnet. */
             const antritte = Math.round(d.brought).toLocaleString(loc);
-            const fak = d.perfPct == null ? '' :
-                (1 + d.perfPct / 100).toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-            const verglichen = d.perfPct == null ? '' : (de
+            /* Dasselbe wie im Satz darueber, aus demselben Grund: das
+               Vielfache ist das der beiden Zahlen, die in DIESER Kachel
+               stehen. Bis zum 02.09.2026 stand hier die geglaettete
+               Groesse — "Top-8-Quote 10,2 % · 1,6-mal so oft wie der
+               Schnitt", waehrend der Schnitt daneben 6,1 % ist und
+               10,2 durch 6,1 1,7 ergibt. Das geglaettete Vielfache
+               bleibt in der Rangliste, wo es als geglaettet
+               beschriftet ist und seine eigene Spalte hat. */
+            const schnittFuerKachel = model.conv.expected * 100;
+            const fak = (d.convPct == null || !(schnittFuerKachel > 0)) ? '' :
+                (d.convPct / schnittFuerKachel).toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            const verglichen = !fak ? '' : (de
                 ? `${fak}-mal so oft wie der Schnitt`
                 : `${fak}× as often as average`);
             // Die grosse Zahl ist IMMER der Feldanteil — auch auf der Best-
@@ -788,7 +807,12 @@
        Netz. Nachgerechnet werden kann nur, was man aufrufen kann — die
        vorige Testschicht suchte im Quelltext nach Zeichenketten und
        belegte deshalb nichts. */
-    window._metaHubIntern = { answerModel, answerNenner, answerSentence };
+    /* answerHtml gehoert dazu, seit die Kacheln ihr Vielfaches aus
+       ihren eigenen beiden Zahlen rechnen: eine Zusicherung darueber
+       muss den fertigen Block lesen koennen, sonst prueft sie die
+       Absicht statt des Ergebnisses. Genau daran ist die vorige Runde
+       gescheitert. */
+    window._metaHubIntern = { answerModel, answerNenner, answerSentence, answerHtml };
 
     document.addEventListener('DOMContentLoaded', () => {
         renderTiles();

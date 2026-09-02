@@ -394,6 +394,14 @@ th:nth-last-child(-n+2) .ds-term::before { left: auto; right: 0; }
     cursor: help;
 }
 
+/* Seit dem 02.09.2026 haengt die Erklaerung an der QUOTE statt am
+   Nenner: gewichtet wird die Quote, gezaehlt wird der Nenner. Dieselbe
+   gepunktete Linie, damit man sie als dieselbe Sorte Hinweis erkennt. */
+.mah-quote {
+    border-bottom: 1px dotted var(--ink-3);
+    cursor: help;
+}
+
 /* ── Nachgeladene Anleitung: Warten und Scheitern ──────────────────
  *
  * Die Anleitung steht seit dem 18.08.2026 nicht mehr in index.html,

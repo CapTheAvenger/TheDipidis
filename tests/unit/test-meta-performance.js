@@ -90,9 +90,12 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
         // Der Hinweis behauptete bis zum 02.09.2026, nach TURNIERGROESSE
         // zu gewichten. Gewichtet wird nach Aktualitaet — siehe
         // backend/scrapers/online_tournament_scraper.py:361.
-        assert.match(TIER, /Starts auf Turnieren, nach Aktualität gewichtet/);
         assert.ok(!/nach Turniergröße gewichtet/.test(TIER),
             'die falsche Begruendung ist zurueck');
+        // Die Gewichtung erklaert sich jetzt dort, wo sie noch wirkt: an
+        // der QUOTE. Auf der Antritte-Spalte hat sie nichts mehr zu suchen.
+        assert.match(TIER, /Nach Aktualität gewichtet: Turniere der letzten sieben Tage zählen voll/,
+            'die Quote sagt nicht mehr, dass und wie sie gewichtet ist');
         // Und die Top-8-Spalte sagt, worauf sie sich bezieht — sie hiess
         // "davon Top 8" und wurde als "davon von den Listen links"
         // gelesen: "Heisst es jetzt, dass nur 21 Listen von 2715 Listen

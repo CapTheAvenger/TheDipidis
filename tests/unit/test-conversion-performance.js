@@ -429,15 +429,26 @@ describe('the listing floor', () => {
     it('the floor is applied where the number is printed, not in the maths', () => {
         const zelle = ladeZelle();
         const MIN = compute.CONV_MIN_N;
+        // antritteGew, nicht antritte: die Schwelle liest seit dem
+        // 02.09.2026 den gewichteten Wert, die Anzeige die gezaehlte Zahl.
         const unterGrenze = zelle({ name: 'X', faktor: 1.0, faktorRoh: 0.96,
-                                    antritte: MIN - 0.5 }, 'faktor');
+                                    antritteGew: MIN - 0.5 }, 'faktor');
         assert.ok(!/\d/.test(unterGrenze.replace(/[^>]*>/g, '').trim()),
             'unter der Mindeststichprobe darf keine Faktor-Zahl gedruckt werden: ' + unterGrenze);
         assert.match(unterGrenze, /–/);
 
         const drueber = zelle({ name: 'X', faktor: 1.6, faktorRoh: 1.2,
-                                antritte: MIN }, 'faktor');
+                                antritteGew: MIN }, 'faktor');
         assert.match(drueber, /1,6-mal/);
+
+        /* Der gemeldete Fall vom 02.09.2026: keine gezaehlte Zahl da,
+           aber 640,5 gewichtete Antritte. Die Spalte "ggue. Schnitt"
+           stand trotzdem auf Strich, in jeder einzelnen Zeile. */
+        const ohneZaehlung = zelle({ name: 'X', faktor: 1.6, faktorRoh: 1.2,
+                                     antritte: null, antritteGew: 640.5 }, 'faktor');
+        assert.match(ohneZaehlung, /1,6-mal/,
+            'ohne gezaehlte Startzahl schweigt der Faktor wieder, obwohl '
+            + 'die Stichprobe traegt');
         assert.match(drueber, /roh 1,2-mal/, 'der rohe Wert gehoert in den Titel');
 
         const compFn = utilsChunk(/function computeConversionPerformance\(rows\) \{[\s\S]*?\n\}\n/, 'compute');

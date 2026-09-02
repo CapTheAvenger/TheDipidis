@@ -70,12 +70,29 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
            ANDERE Grundgesamtheit gezaehlt wird als in der Spalte
            "Listen" daneben. Jetzt steht die Herkunft in der
            Ueberschrift. */
-        assert.match(TIER, /de: 'Turnier-Antritte'/);
+        /* NACHTRAG 02.09.2026 — dieselbe Frage kam wieder:
+           "wie kann es hier ,5 Antritte geben? entweder man hat
+           teilgenommen oder nicht aber halb teilnehmen geht nicht."
+
+           Beim ersten Mal wurde die UEBERSCHRIFT umbenannt. Die Zahl
+           blieb halb, also kam die Frage zurueck — zu Recht. Diesmal
+           traegt die Spalte die gezaehlten Starts; die Gewichtung
+           bleibt dort, wo sie hingehoert, in der Quote. */
+        assert.match(TIER, /'Turnier-Antritte'/,
+            'die Herkunft ist wieder aus der Ueberschrift verschwunden');
+        assert.match(TIER, /t\.broughtAnzeige/,
+            'die Spalte zeigt wieder die gewichtete Summe statt der '
+            + 'gezaehlten Starts — die halbe Antrittszahl ist zurueck');
     });
 
     it('jede der beiden Spalten sagt, woher sie kommt', () => {
         assert.match(TIER, /Decklisten auf der Online-Ladder/);
-        assert.match(TIER, /Starts auf Turnieren, nach Turniergröße gewichtet/);
+        // Der Hinweis behauptete bis zum 02.09.2026, nach TURNIERGROESSE
+        // zu gewichten. Gewichtet wird nach Aktualitaet — siehe
+        // backend/scrapers/online_tournament_scraper.py:361.
+        assert.match(TIER, /Starts auf Turnieren, nach Aktualität gewichtet/);
+        assert.ok(!/nach Turniergröße gewichtet/.test(TIER),
+            'die falsche Begruendung ist zurueck');
         // Und die Top-8-Spalte sagt, worauf sie sich bezieht — sie hiess
         // "davon Top 8" und wurde als "davon von den Listen links"
         // gelesen: "Heisst es jetzt, dass nur 21 Listen von 2715 Listen

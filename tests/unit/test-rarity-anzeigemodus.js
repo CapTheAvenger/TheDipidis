@@ -85,7 +85,52 @@ describe('die Anzeige-Wahl fasst kein Deck an', () => {
         assert.match(quelle, /\$\{String\(altSet \|\| ''\)\.toUpperCase\(\)\}\|\$\{String\(altNummer \|\| ''\)\.toUpperCase\(\)\}/);
     });
 
-    it('haelt einen vollen Speicher aus', () => {
-        assert.match(quelle, /try \{[\s\S]*localStorage\.setItem[\s\S]*\} catch/);
+    it('die Artwork-Wahl ueberlebt das Neuladen NICHT', () => {
+        /* ANLASS (02.09.2026): "den print beim neu laden bitte immer wieder
+           auf den aktuellsten low rarity print setzen."
+
+           Vorher lag die Wahl in localStorage. Wer einmal aus Neugier das
+           Gold-Artwork angesehen hatte, bekam es Monate spaeter noch — auf
+           den Kacheln und im erzeugten Bild, das fuer andere gedacht ist.
+
+           Der Speicher muss fluechtig sein. sessionStorage genuegt NICHT:
+           das ueberlebt F5 im selben Tab. */
+        assert.match(DB, /let _anzeigeDrucke = \{\};/,
+            'der fluechtige Speicher fuer die Artwork-Wahl fehlt');
+        const i = DB.indexOf('function waehleAnzeigeDruck');
+        assert.ok(i > 0, 'waehleAnzeigeDruck fehlt');
+        // Bis zum ENDE der Funktion, nicht bis zum ersten
+        // closeRaritySwitcher() — das steht schon in der Waechterzeile.
+        const rumpf = DB.slice(i, DB.indexOf('\n        }', i));
+        assert.ok(!/localStorage\.setItem/.test(rumpf) && !/sessionStorage/.test(rumpf),
+            'die Artwork-Wahl wird wieder dauerhaft gespeichert — dann steht '
+            + 'nach dem Neuladen erneut das Gold-Artwork da statt des '
+            + 'guenstigsten aktuellen Drucks');
+        assert.match(rumpf, /_anzeigeDrucke\[schluessel\] =/,
+            'die Wahl landet nicht mehr im fluechtigen Speicher — dann wirkt '
+            + 'der Stern gar nicht mehr');
+
+        // Und gelesen wird auch nichts Dauerhaftes mehr.
+        const j = DB.indexOf('function ladeAnzeigeDrucke');
+        assert.ok(j > 0, 'ladeAnzeigeDrucke fehlt');
+        const leseRumpf = DB.slice(j, DB.indexOf('function anzeigeDruckFuer', j));
+        assert.ok(!/localStorage\.getItem/.test(leseRumpf) && !/sessionStorage/.test(leseRumpf),
+            'beim Lesen wird wieder ein dauerhafter Speicher befragt');
+
+        // Der Altbestand wird einmal aufgeraeumt.
+        assert.match(DB, /localStorage\.removeItem\(ANZEIGE_DRUCK_KEY\)/,
+            'die alte gespeicherte Wahl wird nicht aufgeraeumt — Bestandsnutzer '
+            + 'tragen sie sonst weiter mit sich herum');
+    });
+
+    it('der Hinweistext sagt, dass die Wahl nur bis zum Neuladen haelt', () => {
+        const i18n = fs.readFileSync(path.join(ROOT, 'js', 'i18n.js'), 'utf8');
+        const treffer = [...i18n.matchAll(/'staples\.printHint':\s*'([^']*)'/g)].map(m => m[1]);
+        assert.strictEqual(treffer.length, 2,
+            `staples.printHint steht ${treffer.length}× in i18n.js, erwartet 2`);
+        assert.ok(treffer.some(t => /Neuladen/.test(t)),
+            'der deutsche Hinweis sagt nicht, dass die Wahl nach dem Neuladen weg ist');
+        assert.ok(treffer.some(t => /reload/i.test(t)),
+            'der englische Hinweis sagt nicht, dass die Wahl nach dem Neuladen weg ist');
     });
 });

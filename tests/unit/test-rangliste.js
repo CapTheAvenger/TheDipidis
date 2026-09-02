@@ -80,7 +80,7 @@ describe('Rangliste — eine statt drei', () => {
            von 2715 Listen Top 8 gekommen sind? Aber das kann ja nicht
            sein." Der Bezug steht jetzt nicht mehr im Wort, sondern in
            der Erklaerung an der Spalte, wo er vollstaendig hinpasst. */
-        assert.match(TIER, /k: 'cuts',[\s\S]{0,80}de: 'Top 8'/);
+        assert.match(TIER, /k: 'cuts',[\s\S]{0,120}de: _antritteRoh \? 'Top 8' : 'Top 8 \(gewichtet\)'/);
         assert.match(TIER, /bezogen auf die Turnier-Antritte links, nicht auf die Listen/);
     });
 

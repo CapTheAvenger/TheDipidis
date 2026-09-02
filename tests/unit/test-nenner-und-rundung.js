@@ -336,11 +336,40 @@ describe('Halbe gewichtete Antritte werden als halbe gedruckt', () => {
         assert.match(TIER, /k === 'antritte'\) return r\.antritte == null \? '–' : fmtHalb/);
         assert.match(TIER, /k === 'cuts'\)\s+return r\.cuts\s+== null \? '–' : fmtHalb/);
     });
-    it('der Spaltenkopf erklaert, warum es halbe Antritte gibt', () => {
-        // Stand bis zum 01.09.2026 im Blocktext ueber der Tabelle — in
-        // einem Absatz von 918 Zeichen. Jetzt am Spaltenkopf, an dem die
-        // halben Zahlen stehen.
-        assert.match(TIER, /nach Turniergröße gewichtet — halbe Werte sind deshalb echt/);
+    it('eine halbe Zahl steht nie unter einer Ueberschrift, die sie verschweigt', () => {
+        /* ZWEI BEFUNDE AM 02.09.2026.
+
+           Erstens: der Hinweis behauptete, gewichtet werde "nach
+           Turniergröße". Falsch — gewichtet wird nach AKTUALITAET
+           (backend/scrapers/online_tournament_scraper.py:361: Turniere der
+           letzten sieben Tage 1,0, aeltere 0,5). Das Wort "Turniergröße"
+           darf hier nicht zurueckkommen.
+
+           Zweitens, gemeldet: "wie kann es hier ,5 Antritte geben? entweder
+           man hat teilgenommen oder nicht aber halb teilnehmen geht nicht."
+           Also zeigt die Spalte die ROHE Zahl, sobald die Datei sie fuehrt.
+           Nur solange nicht, traegt die Ueberschrift das Wort "gewichtet". */
+        assert.ok(!/nach Turniergröße gewichtet/.test(TIER),
+            'der Hinweis behauptet wieder, nach Turniergröße zu gewichten — '
+            + 'gewichtet wird nach Aktualität');
+        assert.match(TIER, /nach Aktualität gewichtet/,
+            'der Hinweis nennt die Gewichtung nicht mehr beim Namen');
+        // Der Fallback-Kopf trägt das Wort — und haengt an der Merkvariablen,
+        // nicht an einer Konstanten.
+        assert.match(TIER, /_antritteRoh \? 'Turnier-Antritte' : 'Turnier-Antritte \(gewichtet\)'/,
+            'die Ueberschrift sagt nicht mehr, wann sie eine gewichtete Zahl traegt');
+        assert.match(TIER, /_antritteRoh = hatRoh/,
+            'die Merkvariable wird nicht mehr gesetzt — dann steht dauerhaft '
+            + '"(gewichtet)" da, auch wenn die rohen Zahlen laengst da sind');
+        // Und die Anzeige greift wirklich auf die rohe Zahl zu.
+        assert.match(TIER, /const antritte = t \? t\.broughtAnzeige : null/,
+            'die Spalte zeigt wieder den gewichteten Wert statt der Anzeigezahl');
+        assert.match(TIER, /cuts:\s+t \? t\.top8Anzeige : null/,
+            'die Top-8-Spalte zeigt wieder den gewichteten Wert');
+        // Die QUOTE rechnet weiter gewichtet — dafuer ist die Gewichtung da.
+        assert.match(TIER, /v\.top8ConvPct = v\.brought > 0 \? \(v\.top8 \/ v\.brought\) \* 100 : 0/,
+            'die Quote rechnet nicht mehr mit den gewichteten Zahlen — dann '
+            + 'ist die Aktualitaetsgewichtung ersatzlos weg');
     });
 });
 

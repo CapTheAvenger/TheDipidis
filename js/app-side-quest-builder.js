@@ -84,6 +84,9 @@
             aktivSetzen: '⚡ Das spiele ich gerade',
             aktivGesetzt: 'Als aktives Team gesetzt.',
             exportL: '📋 Paste kopieren (Limitless & Showdown)',
+            inRechner: '\u2192 Im Rechner \u00f6ffnen',
+            inRechnerTitel: 'Nimmt dieses Team mit in den Team-Rechner \u2014 mit deinen Verteilungen, nicht mit den meistgenutzten Sets.',
+            rechnerFehlt: 'Der Rechner konnte nicht geladen werden \u2014 bitte die Seite neu laden.',
             kopiert: 'In die Zwischenablage kopiert.',
             modalTitel: (n) => `${n} bearbeiten`,
             faehigkeit: 'Fähigkeit',
@@ -127,6 +130,9 @@
             aktivSetzen: '⚡ This is what I play',
             aktivGesetzt: 'Set as the active team.',
             exportL: '📋 Copy paste (Limitless & Showdown)',
+            inRechner: '\u2192 Open in calculator',
+            inRechnerTitel: 'Takes this team into the team calculator \u2014 with your spreads, not the most-used sets.',
+            rechnerFehlt: 'The calculator could not be loaded \u2014 please reload the page.',
             kopiert: 'Copied to clipboard.',
             modalTitel: (n) => `Edit ${n}`,
             faehigkeit: 'Ability',
@@ -416,6 +422,19 @@
             const st = _sets[slug] || standardSet(slug);
             return {
                 name: st.showdown,
+                /* Der Slug wandert mit (02.09.2026, Abnahme).
+
+                   `showdown` ist der Showdown-Namensraum ("Zoroark-Hisui"),
+                   der Rechner ist aber ueber die ANZEIGENAMEN aus
+                   champions_pokedex.json verschluesselt ("Hisuian Zoroark").
+                   25 der 238 Nutzungs-Slugs — alle Regionalformen, die
+                   Tauros-Varianten, Rotom-Heat/-Wash, Basculegion-F,
+                   Gallade-Mega, Vivillon-Fancy — kamen dort als leere Zeile
+                   an, ohne dass irgendwo stand warum.
+
+                   Geraten wird nichts: der Slug ist der Schluessel, unter
+                   dem BEIDE Seiten dasselbe Pokemon fuehren. */
+                slug: slug,
                 item: st.item || '',
                 ability: st.ability || '',
                 nature: st.nature || '',
@@ -556,6 +575,8 @@
             <div class="sqb-export">
                 <div class="sqb-export-btns">
                     <button type="button" class="sqb-exp">${escapeHtml(l.exportL)}</button>
+                    <button type="button" class="sqb-rechner"
+                            title="${escapeHtml(l.inRechnerTitel)}">${escapeHtml(l.inRechner)}</button>
                 </div>
                 <textarea class="sqb-paste" readonly rows="10" spellcheck="false"></textarea>
             </div>
@@ -752,6 +773,30 @@
                 const ta = host.querySelector('.sqb-paste');
                 if (ta) ta.value = text;
                 kopiere(text, l);
+            });
+        });
+        /* Uebergabe in den Team-Rechner (02.09.2026).
+
+           Uebergeben wird alsTeamObjekt() — dieselbe Form, die auch der
+           Export benutzt. Damit rechnet der Rechner mit DEN Verteilungen,
+           die hier gebaut wurden, und nicht mit dem meistgenutzten Set
+           des Formats. Zwei Wege zu denselben Zahlen waeren der Grund,
+           warum die eine Ansicht 2HKO und die andere OHKO sagt. */
+        host.querySelectorAll('.sqb-rechner').forEach(b => {
+            b.addEventListener('click', () => {
+                /* Beide Dateien haengen fest mit defer in index.html —
+                   window.sideQuestMatchups ist da, sobald irgendetwas
+                   klickbar ist. Der Zweig faengt trotzdem ab, aber er
+                   verspricht keine Abhilfe, die nichts aendern wuerde
+                   ("oeffne einmal den Reiter Matchups" tat das): wenn er
+                   je greift, ist ein Skript nicht geladen, und das ist
+                   ein Fehler, keine Bedienfrage. */
+                if (!window.sideQuestMatchups
+                    || typeof window.sideQuestMatchups.oeffneTeamRechner !== 'function') {
+                    melde(l.rechnerFehlt, 'error');
+                    return;
+                }
+                window.sideQuestMatchups.oeffneTeamRechner(alsTeamObjekt());
             });
         });
     }

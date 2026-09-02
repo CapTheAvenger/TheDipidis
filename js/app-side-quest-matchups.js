@@ -55,6 +55,43 @@
     let _calc = null;            // Gegnername, wenn der Rechner offen ist
     let _activated = false;
 
+    /* ── Team-Rechner (02.09.2026) ──────────────────────────────────
+       Der Rechner darueber ist einer gegen einen. Im Doppelkampf steht
+       aber nie ein Paar auf dem Feld, sondern ein Team gegen ein Team,
+       und die Frage ist nicht "was macht A gegen B", sondern "wen von
+       den vieren kann ich ueberhaupt umlegen, und wer legt mich um".
+       Genau das war der Auftrag: eigenes Team, sechs des Gegners, davon
+       die vier mitgebrachten aktiv schalten.
+
+       Die Zahlen kommen aus demselben moveTable()/bestMove() wie die
+       Einzelansicht. Ein zweiter Rechenweg waere der sichere Weg zu
+       zwei verschiedenen Antworten auf dieselbe Frage — der Kopf dieser
+       Datei sagt das ueber sich selbst, und es gilt hier genauso. */
+    let _teamAn = false;         // steht die Team-Ansicht?
+    let _teamMine = [];          // [{ name, set }] — aus dem Builder oder leer
+    let _teamOpp = [];           // [name] — bis zu sechs
+    let _teamAusMine = null;     // Set von Namen, die NICHT im Kampf sind
+    let _teamAusOpp = null;
+    let _teamQ = '';             // Suchfeld fuer die Gegnerbank
+
+    const TEAM_MAX = 6;
+    // Vier ist die Zahl, die man in einen Doppelkampf schickt. Sie ist
+    // hier eine ANZEIGE, keine Sperre: wer sechs durchrechnen will, um
+    // erst danach zu waehlen, soll das duerfen. Gesperrt wuerde das
+    // Werkzeug genau dort unbrauchbar, wo man es am meisten braucht.
+    const TEAM_KAMPF = 4;
+
+    function ausSet(seite) {
+        if (seite === 'opp') { if (!_teamAusOpp) _teamAusOpp = new Set(); return _teamAusOpp; }
+        if (!_teamAusMine) _teamAusMine = new Set();
+        return _teamAusMine;
+    }
+    function istAktiv(seite, name) { return !ausSet(seite).has(name); }
+    function aktiveNamen(seite) {
+        const liste = seite === 'opp' ? _teamOpp : _teamMine.map(m => m.name);
+        return liste.filter(n => istAktiv(seite, n));
+    }
+
     function uiLang() {
         return (typeof window.getLang === 'function' && window.getLang() === 'de') ? 'de' : 'en';
     }
@@ -111,6 +148,37 @@
             noteSet: 'Das Gegner-Set ist jeweils das meistgenutzte Set dieses Formats — im Rechner änderbar.',
             evs: ['KP', 'ANG', 'VER', 'SPA', 'SPV', 'INI'],
             statNames: ['KP', 'Angriff', 'Verteidigung', 'Sp.-Angriff', 'Sp.-Verteidigung', 'Initiative'],
+            teamCalc: 'Team-Rechner',
+            teamBack: '\u2190 zur\u00fcck zu den Matchups',
+            teamMine: 'Dein Team', teamOpp: 'Gegner',
+            teamHint: 'Klick ein Pok\u00e9mon an, um es aus dem Kampf zu nehmen. '
+                    + 'Im Doppelkampf bringt man sechs mit und schickt vier \u2014 '
+                    + 'gerechnet wird nur mit den aktiven.',
+            teamPickOpp: 'Gegner-Pok\u00e9mon hinzuf\u00fcgen \u2026',
+            teamOppEmpty: 'Noch kein Gegner gew\u00e4hlt. Such oben ein Pok\u00e9mon.',
+            teamMineEmpty: 'Kein Team \u00fcbergeben. Bau eins im Team-Builder und '
+                    + 'klick dort auf \u201eIm Rechner \u00f6ffnen\u201c.',
+            teamNoneAktiv: 'Auf einer Seite ist niemand aktiv \u2014 schalte mindestens '
+                    + 'je ein Pok\u00e9mon wieder an.',
+            teamAktivVon: (a, n) => `${a} von ${n} aktiv`,
+            teamZuVieleAktiv: 'mehr als vier aktiv',
+            teamZuVieleTitel: 'Im Doppelkampf schickt man vier. Gerechnet wird trotzdem '
+                    + 'mit allen aktiven \u2014 die Zeile sagt nur, dass es mehr sind, '
+                    + 'als in einen Kampf passen.',
+            teamDeal: 'du teilst aus', teamTake: 'du steckst ein',
+            teamRemove: 'aus dem Kampf nehmen', teamAdd: 'in den Kampf nehmen',
+            teamEntfernen: 'vom Brett nehmen',
+            teamKeinSet: 'kein Set',
+            teamKeineAttacke: 'keine Angriffsattacke',
+            teamSchnell: 'schneller', teamLangsam: 'langsamer', teamGleich: 'gleich schnell',
+            teamZelleTitel: (me, opp) => `${me} gegen ${opp}`,
+            teamOffen: 'Team-Rechner \u00f6ffnen',
+            teamUrteilGut: 'du legst zuerst um',
+            teamUrteilSchlecht: 'er legt zuerst um',
+            teamUrteilPatt: 'unentschieden',
+            teamZelleLeerTitel: 'Zu einem der beiden Pok\u00e9mon liegt in diesem Format kein Set vor \u2014 siehe die Warnung am Chip.',
+            teamZuEinzeln: 'einzeln aufmachen',
+            noteTeam: 'Jede Zelle zeigt die st\u00e4rkste Attacke beider Seiten. Klick sie an, um das Paar einzeln mit allen Attacken und dem Set-Editor zu \u00f6ffnen.',
         },
         en: {
             brand: 'Matchups', doubles: 'Doubles', singles: 'Singles',
@@ -151,6 +219,37 @@
             noteSet: 'The opponent set is that format’s most-used set — editable in the calculator.',
             evs: ['HP', 'ATK', 'DEF', 'SPA', 'SPD', 'SPE'],
             statNames: ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'],
+            teamCalc: 'Team calculator',
+            teamBack: '\u2190 back to the matchups',
+            teamMine: 'Your team', teamOpp: 'Opponent',
+            teamHint: 'Click a Pok\u00e9mon to take it out of the battle. In a double '
+                    + 'battle you bring six and send four \u2014 only the active ones '
+                    + 'are calculated.',
+            teamPickOpp: 'Add an opposing Pok\u00e9mon \u2026',
+            teamOppEmpty: 'No opponent picked yet. Search for a Pok\u00e9mon above.',
+            teamMineEmpty: 'No team handed over. Build one in the team builder and '
+                    + 'click \u201cOpen in calculator\u201d there.',
+            teamNoneAktiv: 'One side has nobody active \u2014 switch at least one '
+                    + 'Pok\u00e9mon back on.',
+            teamAktivVon: (a, n) => `${a} of ${n} active`,
+            teamZuVieleAktiv: 'more than four active',
+            teamZuVieleTitel: 'A double battle sends four. The calculation still uses '
+                    + 'every active Pok\u00e9mon \u2014 the line only says there are '
+                    + 'more than fit into one battle.',
+            teamDeal: 'you deal', teamTake: 'you take',
+            teamRemove: 'take out of the battle', teamAdd: 'put into the battle',
+            teamEntfernen: 'remove from the board',
+            teamKeinSet: 'no set',
+            teamKeineAttacke: 'no damaging move',
+            teamSchnell: 'faster', teamLangsam: 'slower', teamGleich: 'same speed',
+            teamZelleTitel: (me, opp) => `${me} against ${opp}`,
+            teamOffen: 'Open team calculator',
+            teamUrteilGut: 'you knock out first',
+            teamUrteilSchlecht: 'they knock out first',
+            teamUrteilPatt: 'a draw',
+            teamZelleLeerTitel: 'One of the two has no set in this format \u2014 see the warning on its chip.',
+            teamZuEinzeln: 'open one on one',
+            noteTeam: 'Each cell shows the strongest move on both sides. Click it to open that pair on its own, with every move and the set editor.',
         },
     };
     function L() { return LABELS[uiLang()]; }
@@ -707,9 +806,15 @@
             </div>`;
     }
 
-    function noteHtml() {
+    /* `imTeam` laesst den Satz ueber das aenderbare Gegner-Set weg: in der
+       Team-Ansicht gibt es keinen Set-Editor, und eine Fussnote, die auf
+       einen Knopf zeigt, den es dort nicht gibt, schickt den Leser
+       suchen. Stattdessen steht dort, wie man an die volle
+       Attackentabelle kommt. */
+    function noteHtml(imTeam) {
+        const letzter = imTeam ? L().noteTeam : L().noteSet;
         return `<p class="sq-note"><b>${esc(L().noteHead)}:</b> ${esc(L().noteIn)}
-                ${esc(L().noteOut)} ${esc(L().noteSet)}</p>`;
+                ${esc(L().noteOut)} ${esc(letzter)}</p>`;
     }
 
     // ── Rechner ─────────────────────────────────────────────────────
@@ -782,6 +887,278 @@
             </div>`;
     }
 
+    // ── Team-Rechner ────────────────────────────────────────────────
+
+    /* Ein uebergebenes Set gewinnt gegen das meistgenutzte.
+
+       Wer im Builder eine Verteilung baut und dann rechnet, will SEINE
+       Zahlen sehen, nicht die des Durchschnittsspielers. Fehlt zu einem
+       Namen ein uebergebenes Set (oder wurde die Seite ohne Uebergabe
+       geoeffnet), faellt es auf setFor() zurueck — dieselbe Quelle wie
+       die Einzelansicht. */
+    function teamSet(seite, name) {
+        if (seite === 'me') {
+            const eigen = _teamMine.find(m => m.name === name);
+            if (eigen && eigen.set) return eigen.set;
+        }
+        return setFor(name, seite);
+    }
+
+    /* Eine Zelle der Matrix: was ICH gegen dieses Gegner-Pokemon anrichte
+       und was es gegen mich anrichtet, jeweils mit der staerksten Attacke.
+
+       Beide Richtungen in EINER Zelle, weil die Frage im Doppelkampf
+       immer beide zugleich ist — "ich lege es um" ist wertlos, wenn es
+       vorher zieht und mich umlegt. Deshalb steht die Initiative auch
+       nicht in einer eigenen Spalte, sondern als Zeichen in der Zelle. */
+    function teamZelle(meName, oppName) {
+        const meSet = teamSet('me', meName), oppSet = teamSet('opp', oppName);
+        if (!meSet || !oppSet) return null;
+        const meStats = statsOf(meName, meSet), oppStats = statsOf(oppName, oppSet);
+        if (!meStats || !oppStats) return null;
+        return {
+            deal: bestMove(meName, meSet, oppName, oppSet),
+            take: bestMove(oppName, oppSet, meName, meSet),
+            spd: window.ChampionsDamage.speedComparison(meStats.spe, oppStats.spe),
+        };
+    }
+
+    /* BEFUND (Abnahme 02.09.2026, unabhaengiger Pruefer):
+       Das Urteil las `ko.hits` und liess `ko.chance` daneben liegen.
+
+       koChance() gibt als `hits` die KLEINSTE Trefferzahl zurueck, bei der
+       ein K.O. ueberhaupt moeglich ist — die Gluecks­wurfzahl, nicht die
+       wahrscheinliche. Der gemessene Fall: Kingambit legt Blastoise
+       garantiert in zwei Treffern um, Blastoise schafft das zu 3,9 % —
+       beides stand in derselben Zelle, und die Zelle war ROT. Ueber alle
+       85.264 Paare des Kaders: in 30 % der farbigen Zellen stuetzte sich
+       das Urteil auf eine Zahl, die die Zelle selbst als unwahrscheinlich
+       auswies; in 5,4 % sagte die Farbe das Gegenteil des wahrscheinlichen
+       Ausgangs.
+
+       Gewertet wird jetzt ueber den DURCHSCHNITTSWURF: wie viele Treffer
+       braucht es, wenn die Wuerfe normal ausfallen. Das ist dieselbe
+       Spanne, die in der Zelle steht (min–max), und damit die Zahl, die
+       der Leser nachrechnen kann.
+
+       Die Gluecks­wurfzahl bleibt die Untergrenze — realistisch kann es
+       nie SCHNELLER gehen als im besten Fall. Deshalb das Maximum aus
+       beidem. */
+    function realistischeTreffer(range) {
+        if (!range) return Infinity;
+        const min = Number(range.minPct) || 0;
+        const max = Number(range.maxPct) || 0;
+        // 0 % heisst immun oder wirkungslos: davon stirbt nichts.
+        if (!(min > 0) && !(max > 0)) return Infinity;
+        const schnitt = (min + max) / 2;
+        if (!(schnitt > 0)) return Infinity;
+        const ausSchnitt = Math.ceil(100 / schnitt);
+        const glueck = (range.ko && range.ko.hits) || 0;
+        const treffer = Math.max(ausSchnitt, glueck);
+        // Was auch nach KO_MAX_HITS nicht toetet, toetet nicht.
+        const deckel = (window.ChampionsDamage && window.ChampionsDamage.KO_MAX_HITS) || 9;
+        return treffer > deckel ? Infinity : treffer;
+    }
+
+    /* Die Farbe der Zelle sagt, wer das Rennen macht.
+
+       Nicht der Schaden allein entscheidet: 90 % Schaden bei langsamerer
+       Initiative ist eine Niederlage, 55 % bei schnellerer ein sauberer
+       Zweischlag. Gewertet wird deshalb ueber die Trefferzahl — wer
+       weniger braucht, gewinnt; bei Gleichstand entscheidet die
+       Initiative, und ein Initiativgleichstand bleibt unentschieden, weil
+       er ein Muenzwurf ist. */
+    function teamUrteil(z) {
+        if (!z) return 'is-leer';
+        const meineTreffer = realistischeTreffer(z.deal && z.deal.range);
+        const seineTreffer = realistischeTreffer(z.take && z.take.range);
+        if (meineTreffer === Infinity && seineTreffer === Infinity) return 'is-patt';
+        if (meineTreffer < seineTreffer) return 'is-gut';
+        if (meineTreffer > seineTreffer) return 'is-schlecht';
+        if (z.spd.tie) return 'is-patt';
+        return z.spd.faster ? 'is-gut' : 'is-schlecht';
+    }
+
+    function teamPfeil(spd) {
+        if (spd.tie) return { z: '=', t: L().teamGleich };
+        return spd.faster ? { z: '▲', t: L().teamSchnell }
+                          : { z: '▼', t: L().teamLangsam };
+    }
+
+    /* Ein Set kann vollstaendig sein und trotzdem nichts austeilen: vier
+       Statusattacken machen null Schaden. In der Matrix steht dann ein
+       Strich, und ein Strich sieht aus wie ein Fehler. Der Grund gehoert
+       an den Chip — dorthin, wo die Ursache sitzt, genauso wie beim
+       fehlenden Set. */
+    function hatAngriff(set) {
+        if (!set) return false;
+        return (set.moves || []).some(mn => {
+            const mv = moveEntry(mn);
+            return !!(mv && Number(mv.power) > 0);
+        });
+    }
+
+    function teamBank(seite) {
+        const liste = seite === 'opp' ? _teamOpp.slice() : _teamMine.map(m => m.name);
+        const n = liste.length;
+        const aktiv = liste.filter(x => istAktiv(seite, x)).length;
+        if (!n) {
+            return `<p class="sq-empty">${esc(seite === 'opp' ? L().teamOppEmpty : L().teamMineEmpty)}</p>`;
+        }
+        const chips = liste.map(name => {
+            const an = istAktiv(seite, name);
+            const set = teamSet(seite === 'opp' ? 'opp' : 'me', name);
+            const hatSet = !!set;
+            const stumm = hatSet && !hatAngriff(set);
+            const warn = !hatSet ? L().teamKeinSet : (stumm ? L().teamKeineAttacke : '');
+            /* Das Kreuz stand bis zur Abnahme INNERHALB des Schalters.
+               Ein Bedienelement in einem <button> ist ungueltiges HTML,
+               und die Tastatur- und Screenreader-Semantik ist dann
+               undefiniert. Beide liegen jetzt nebeneinander in einer
+               Gruppe: der Schalter nimmt aus dem Kampf, das Kreuz vom
+               Brett. */
+            return `<span class="sq-team-chipgruppe${warn ? ' is-ohne-set' : ''}">
+                    <button type="button" class="sq-team-chip${an ? ' is-an' : ''}"
+                        data-sq-team-toggle="${esc(seite)}" data-sq-team-name="${esc(name)}"
+                        aria-pressed="${an ? 'true' : 'false'}"
+                        title="${esc(an ? L().teamRemove : L().teamAdd)}">
+                        <span class="sq-team-chip-name">${nameHtml(name, 'pokemon')}</span>
+                        ${warn ? `<i class="sq-team-chip-warn">${esc(warn)}</i>` : ''}
+                    </button>
+                    ${seite === 'opp'
+                        ? `<button type="button" class="sq-team-chip-weg"
+                              data-sq-team-weg="${esc(name)}"
+                              title="${esc(L().teamEntfernen)}"
+                              aria-label="${esc(L().teamEntfernen)} — ${esc(name)}">×</button>`
+                        : ''}
+                </span>`;
+        }).join('');
+        const zuViele = aktiv > TEAM_KAMPF
+            ? ` <span class="sq-team-zuviel" title="${esc(L().teamZuVieleTitel)}">${
+                  esc(L().teamZuVieleAktiv)}</span>`
+            : '';
+        return `<div class="sq-team-bank">${chips}</div>
+                <p class="sq-team-zaehler">${esc(L().teamAktivVon(aktiv, n))}${zuViele}</p>`;
+    }
+
+    function teamSuche() {
+        const q = _teamQ.trim().toLowerCase();
+        if (!q) return '';
+        const drin = new Set(_teamOpp);
+        /* Auch der deutsche Name (Abnahme 02.09.2026): die Kadersuche
+           eine Ansicht hoeher filtert laengst ueber localName, hier stand
+           nur der englische. Im deutschen UI fand "Glurak" oben etwas und
+           hier nichts — dasselbe Suchfeld, zwei Ergebnisse. */
+        const treffer = _roster
+            .filter(r => !drin.has(r.name) && (
+                r.name.toLowerCase().includes(q)
+                || String(localName(r.name, 'pokemon') || '').toLowerCase().includes(q)))
+            .slice(0, 8);
+        if (!treffer.length) return `<p class="sq-empty">${esc(L().noHit)}</p>`;
+        return `<div class="sq-team-vorschlag">${treffer.map(r =>
+            `<button type="button" data-sq-team-add="${esc(r.name)}">${
+                nameHtml(r.name, 'pokemon')}</button>`
+        ).join('')}</div>`;
+    }
+
+    function teamMatrix() {
+        const meine = aktiveNamen('me');
+        const gegner = aktiveNamen('opp');
+        if (!meine.length || !gegner.length) {
+            return `<div class="sq-panel"><p class="sq-empty">${esc(L().teamNoneAktiv)}</p></div>`;
+        }
+        const kopf = gegner.map(o => `<th scope="col">${nameHtml(o, 'pokemon')}</th>`).join('');
+        const zeilen = meine.map(m => {
+            const zellen = gegner.map(o => {
+                const z = teamZelle(m, o);
+                if (!z) {
+                    return `<td class="sq-team-zelle is-leer"
+                                title="${esc(L().teamZelleLeerTitel)}">–</td>`;
+                }
+                const pf = teamPfeil(z.spd);
+                const urteil = teamUrteil(z);
+                /* Die Spanne, nicht der Hoechstwurf (Abnahme 02.09.2026).
+                   Hier stand nur maxPct — die Einzelansicht zeigt fuer
+                   dasselbe Paar "42,5–50,7 %", die Matrix zeigte "50,7 %",
+                   ohne dass irgendwo stand, dass das der obere Rand ist.
+                   Zwei Ansichten, dieselbe Zahl, zwei Antworten.
+
+                   Und der Attackenname gehoert dazu: eine Prozentzahl
+                   ohne die Attacke, aus der sie kommt, kann man nicht
+                   nachrechnen. */
+                const seite = (m2, klasse, label) => {
+                    if (!m2) {
+                        return `<span class="${klasse} is-ohne"><i>${esc(label)}</i>
+                                <b>–</b><u>${esc(L().noMove)}</u></span>`;
+                    }
+                    const g = m2.range;
+                    // Immunitaet ist nicht "trifft fuer fast nichts".
+                    // sideCell eine Ansicht hoeher hat dafuer einen eigenen
+                    // Zweig; ohne ihn standen hier 718 Zellen mit "0 %".
+                    if (g.effectiveness === 0) {
+                        return `<span class="${klasse} is-immun"><i>${esc(label)}</i>
+                                <b>${esc(L().immune)}</b><u></u></span>`;
+                    }
+                    return `<span class="${klasse}"><i>${esc(label)}</i>
+                            <b>${esc(num(g.minPct))}–${esc(num(g.maxPct))} %</b>
+                            <u>${esc(koLabel(g.ko))}</u>
+                            <em title="${esc(localName(m2.name, 'moves'))}">${
+                                esc(localName(m2.name, 'moves'))}</em></span>`;
+                };
+                /* Das Urteil hing allein an einem 3px breiten Farbstreifen.
+                   Fuer Rot-Gruen-Schwaeche und fuer Screenreader war die
+                   Zelle damit urteilslos. Es steht jetzt zusaetzlich im
+                   Titel und als unsichtbarer Text. */
+                const urteilTxt = urteil === 'is-gut' ? L().teamUrteilGut
+                    : urteil === 'is-schlecht' ? L().teamUrteilSchlecht
+                    : urteil === 'is-patt' ? L().teamUrteilPatt : '';
+                /* Absprung in die Einzelansicht: die Matrix zeigt je
+                   Richtung die STAERKSTE Attacke. Wer wissen will, was die
+                   anderen drei machen, oder das Set aendern will, braucht
+                   den Rechner darunter — der existiert bereits, es fehlte
+                   nur der Weg dorthin. */
+                return `<td class="sq-team-zelle ${urteil}" role="button" tabindex="0"
+                            data-sq-team-zelle="${esc(o)}" data-sq-team-mein="${esc(m)}"
+                            title="${esc(L().teamZelleTitel(m, o))}${
+                                urteilTxt ? ' — ' + esc(urteilTxt) : ''} · ${
+                                esc(L().teamZuEinzeln)}">
+                        <span class="sq-nur-vorlesen">${esc(urteilTxt)}</span>
+                        <span class="sq-team-pfeil" title="${esc(pf.t)}">${pf.z}</span>
+                        ${seite(z.deal, 'sq-team-deal', L().teamDeal)}
+                        ${seite(z.take, 'sq-team-take', L().teamTake)}
+                    </td>`;
+            }).join('');
+            return `<tr><th scope="row">${nameHtml(m, 'pokemon')}</th>${zellen}</tr>`;
+        }).join('');
+        return `<div class="sq-panel sq-team-matrixwrap">
+                <table class="sq-team-matrix">
+                    <thead><tr><td></td>${kopf}</tr></thead>
+                    <tbody>${zeilen}</tbody>
+                </table>
+            </div>`;
+    }
+
+    function teamCalcHtml() {
+        return `<div class="sq-team">
+                <p class="sq-team-hinweis">${esc(L().teamHint)}</p>
+                <div class="sq-panel">
+                    ${sectionLabel(L().teamMine)}
+                    ${teamBank('me')}
+                </div>
+                <div class="sq-panel">
+                    ${sectionLabel(L().teamOpp)}
+                    <input type="search" class="sq-input" id="sqTeamSuche"
+                           placeholder="${esc(L().teamPickOpp)}"
+                           aria-label="${esc(L().teamPickOpp)}"
+                           value="${esc(_teamQ)}"${_teamOpp.length >= TEAM_MAX ? ' disabled' : ''}>
+                    ${teamSuche()}
+                    ${teamBank('opp')}
+                </div>
+                ${teamMatrix()}
+                ${noteHtml(true)}
+            </div>`;
+    }
+
     // ── Rendern ─────────────────────────────────────────────────────
 
     function render() {
@@ -794,24 +1171,31 @@
         }
         const seg = (val, label) =>
             `<button type="button" data-sq-format="${val}" class="${_format === val ? 'on' : ''}">${esc(label)}</button>`;
-        const back = _calc
-            ? `<button type="button" class="sq-btn sq-back" data-sq-back>${esc(L().back)}</button>`
+        const back = (_calc || _teamAn)
+            ? `<button type="button" class="sq-btn sq-back" data-sq-back>${
+                  esc(_teamAn ? L().teamBack : L().back)}</button>`
             : '';
+        // Der Knopf in den Team-Rechner steht nur da, wo er etwas tut:
+        // in der Matchup-Liste, nicht im Rechner selbst.
+        const teamBtn = (!_calc && !_teamAn)
+            ? `<button type="button" class="sq-btn" data-sq-team-open>${esc(L().teamOffen)}</button>`
+            : '';
+        const marke = _teamAn ? L().teamCalc : (_calc ? L().calc : L().brand);
         host.innerHTML = `
             <div class="sq-console">
                 <div class="sq-top">
-                    <span class="sq-brand">Champions <span>${esc(_calc ? L().calc : L().brand)}</span></span>
-                    ${back}
+                    <span class="sq-brand">Champions <span>${esc(marke)}</span></span>
+                    ${back}${teamBtn}
                     <span class="sq-spacer"></span>
                     <span class="sq-seg">${seg('doubles', L().doubles)}${seg('singles', L().singles)}</span>
                 </div>
-                ${_calc ? calcHtml() : `<div class="sq-grid">
+                ${_teamAn ? teamCalcHtml() : (_calc ? calcHtml() : `<div class="sq-grid">
                     <div class="sq-col-pick">${rosterHtml()}</div>
                     <div class="sq-col-set">${_me && setFor(_me, 'me')
                         ? setEditor('me', _me, setFor(_me, 'me'), L().set)
                         : `<div class="sq-panel"><p class="sq-empty">${esc(L().pickMon)}</p></div>`}</div>
                     <div class="sq-col-table">${tableHtml()}</div>
-                </div>`}
+                </div>`)}
             </div>`;
         wire(host);
     }
@@ -848,7 +1232,11 @@
             });
         });
         const backBtn = host.querySelector('[data-sq-back]');
-        if (backBtn) backBtn.addEventListener('click', () => { _calc = null; render(); });
+        if (backBtn) backBtn.addEventListener('click', () => {
+            if (_teamAn) { _teamAn = false; _teamQ = ''; } else { _calc = null; }
+            render();
+        });
+        wireTeam(host);
 
         const more = host.querySelector('[data-sq-more]');
         if (more) more.addEventListener('click', () => { _limit += ROSTER_STEP; render(); });
@@ -918,6 +1306,210 @@
         });
     }
 
+    /* Die Klickpfade des Team-Rechners.
+
+       Das Kreuz auf einem Gegner-Chip nimmt ihn vom Brett, ein Klick auf
+       den Chip selbst schaltet ihn nur aus dem Kampf. Das sind zwei
+       verschiedene Dinge: ausgeschaltet bleibt er in den sechs, entfernt
+       ist er weg. Damit das Kreuz nicht ausserdem den Chip umschaltet,
+       hoert es die Blase ab. */
+    function wireTeam(host) {
+        host.querySelectorAll('[data-sq-team-open]').forEach(b => {
+            b.addEventListener('click', () => { _teamAn = true; _calc = null; render(); });
+        });
+        host.querySelectorAll('[data-sq-team-weg]').forEach(x => {
+            x.addEventListener('click', () => {
+                const name = x.getAttribute('data-sq-team-weg');
+                _teamOpp = _teamOpp.filter(n => n !== name);
+                ausSet('opp').delete(name);
+                render();
+            });
+        });
+        host.querySelectorAll('[data-sq-team-zelle]').forEach(td => {
+            const auf = () => {
+                _me = td.getAttribute('data-sq-team-mein');
+                _calc = td.getAttribute('data-sq-team-zelle');
+                _teamAn = false;
+                render();
+            };
+            td.addEventListener('click', auf);
+            td.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); auf(); }
+            });
+        });
+        host.querySelectorAll('[data-sq-team-toggle]').forEach(b => {
+            b.addEventListener('click', () => {
+                const seite = b.getAttribute('data-sq-team-toggle');
+                const name = b.getAttribute('data-sq-team-name');
+                const aus = ausSet(seite);
+                if (aus.has(name)) aus.delete(name); else aus.add(name);
+                render();
+            });
+        });
+        host.querySelectorAll('[data-sq-team-add]').forEach(b => {
+            b.addEventListener('click', () => {
+                const name = b.getAttribute('data-sq-team-add');
+                if (_teamOpp.length >= TEAM_MAX || _teamOpp.indexOf(name) !== -1) return;
+                _teamOpp.push(name);
+                _teamQ = '';
+                render();
+            });
+        });
+        const suche = host.querySelector('#sqTeamSuche');
+        if (suche) {
+            suche.addEventListener('input', () => {
+                _teamQ = suche.value;
+                render();
+                // Nach dem Neuzeichnen ist das Feld ein anderes Element.
+                // Ohne das hier verliert es bei jedem Tastendruck den
+                // Fokus und man kann genau einen Buchstaben tippen.
+                const neu = document.querySelector('#sqTeamSuche');
+                if (neu) { neu.focus(); neu.setSelectionRange(neu.value.length, neu.value.length); }
+            });
+        }
+    }
+
+    /* Uebergabe aus dem Team-Builder.
+
+       `team` ist die Form, die alsTeamObjekt() dort schon liefert:
+       { mons: [{ name, nature, moves, evs, item, ability }] }. Die
+       Verteilung kommt als Champions-Text ("HP 12 / Atk 32 / ...") und
+       wird hier in die Form gebracht, die statsOf() erwartet. Ein Bau
+       ohne verwertbares Set faellt nicht heraus — er landet mit
+       set: null in der Bank und traegt dort sichtbar "kein Set", statt
+       stillschweigend zu fehlen. */
+    /* BEFUND (Abnahme 02.09.2026): hier stand ein ZWEITER Parser.
+
+       js/champions-set.js:108 hat mit parseSpread laengst genau diesen —
+       inklusive der deutschen Kuerzel (KP/ANG/VER/SPV/INI) und der
+       Langform "Sp. Atk", die der hiesige nicht lesen konnte. Das ist
+       derselbe Fehler, den der Kopf dieser Datei fuer die RECHNUNG
+       ausschliesst: zwei Wege zu derselben Antwort, und irgendwann geben
+       sie zwei verschiedene.
+
+       Der eigene Weg bleibt nur als Rueckfall, wenn ChampionsSet nicht
+       geladen ist (Tests, die das Modul einzeln laden) — und er versteht
+       dann wenigstens dieselben Kuerzel. */
+    const SP_ALIAS = {
+        hp: 'hp', kp: 'hp',
+        atk: 'atk', ang: 'atk', attack: 'atk',
+        def: 'def', ver: 'def', defense: 'def',
+        spa: 'spa', spatk: 'spa', spattack: 'spa',
+        spd: 'spd', spv: 'spd', spdef: 'spd',
+        spe: 'spe', ini: 'spe', speed: 'spe',
+    };
+
+    function CS() { return window.ChampionsSet || null; }
+
+    function spreadAusText(text) {
+        const cs = CS();
+        if (cs && typeof cs.parseSpread === 'function') return cs.parseSpread(text);
+        const sp = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+        String(text || '').split('/').forEach(teil => {
+            const t = teil.trim();
+            const m = t.match(/^(\d+)\s+(.+)$/) || t.match(/^(.+?)\s+(\d+)$/);
+            if (!m) return;
+            const zahl = /^\d+$/.test(m[1]) ? Number(m[1]) : Number(m[2]);
+            const wort = /^\d+$/.test(m[1]) ? m[2] : m[1];
+            const k = SP_ALIAS[String(wort).replace(/[\s.]/g, '').toLowerCase()];
+            if (k) sp[k] = zahl;
+        });
+        return sp;
+    }
+
+    /* 32 je Wert, Summe 66 — dieselbe Klammer, die der Builder an jedem
+       Regler zieht. Sie fehlte hier, und oeffneTeamRechner ist eine
+       oeffentliche window-Schnittstelle: ein Aufrufer mit "252 Atk"
+       haette einen Angriffswert von 447 statt 205 gerechnet bekommen,
+       und die Zahl haette echt ausgesehen. */
+    function klammereSpread(sp) {
+        const cs = CS();
+        if (cs && typeof cs.clampSpread === 'function') return cs.clampSpread(sp);
+        return clampAlle(sp);
+    }
+
+    function clampAlle(sp) {
+        const out = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+        let rest = SP_BUDGET;
+        ['hp', 'atk', 'def', 'spa', 'spd', 'spe'].forEach(k => {
+            const v = Math.max(0, Math.min(Number(sp && sp[k]) || 0, SP_MAX, rest));
+            out[k] = v;
+            rest -= v;
+        });
+        return out;
+    }
+
+    /* BEFUND (Abnahme 02.09.2026): der Name kam aus dem falschen Namensraum.
+
+       Der Builder schreibt Showdown-Namen ("Zoroark-Hisui"), _dex ist ueber
+       die Anzeigenamen aus champions_pokedex.json verschluesselt ("Hisuian
+       Zoroark"). 25 von 238 Nutzungs-Slugs — saemtliche Regionalformen —
+       kamen als leere Zeile an, und der Chip trug keine Warnung, weil das
+       uebergebene Set ja da war. Genau der "ein Strich sieht aus wie ein
+       Fehler"-Fall.
+
+       Aufgeloest wird ueber den Slug, den beide Seiten fuehren. Ist keiner
+       dabei (fremde Aufrufer der oeffentlichen Schnittstelle), wird der
+       Name direkt gegen _dex gehalten. Trifft auch das nicht, bleibt der
+       Name stehen — und der Chip sagt es, statt still zu schweigen. */
+    function nameAusSlug(slug) {
+        if (!slug || !_roster) return null;
+        const ziel = String(slug).toLowerCase();
+        const treffer = _roster.find(r => usageSlug(r.name) === ziel);
+        return treffer ? treffer.name : null;
+    }
+
+    function loeseNamen(m) {
+        const ausSlug = nameAusSlug(m.slug);
+        if (ausSlug) return ausSlug;
+        if (m.name && _dex[m.name]) return m.name;
+        // Der Showdown-Name als Slug gelesen ist der letzte Versuch:
+        // "Zoroark-Hisui" -> "zoroark-hisui" findet den Nutzungseintrag.
+        const alsSlug = nameAusSlug(String(m.name || '').toLowerCase());
+        return alsSlug || m.name;
+    }
+
+    function uebernimmTeam(team) {
+        const mons = (team && team.mons) || [];
+        _teamMine = mons.filter(m => m && m.name).slice(0, TEAM_MAX).map(m => {
+            const moves = (m.moves || []).filter(Boolean).slice(0, 4);
+            const hatBau = !!(m.nature || moves.length);
+            const name = loeseNamen(m);
+            return {
+                name,
+                set: hatBau ? {
+                    nature: m.nature || 'Hardy',
+                    ability: m.ability || '',
+                    item: m.item || '',
+                    moves,
+                    // Geklammert wie im Builder: 32 je Wert, Summe 66.
+                    // Ohne das koennte ein fremder Aufrufer der
+                    // oeffentlichen Schnittstelle Werte hereingeben, die
+                    // es in Champions nicht gibt (252 Atk ergaebe 447
+                    // statt 205), und der Rechner rechnete sie brav durch.
+                    spread: klammereSpread(spreadAusText(m.evs)),
+                } : null,
+            };
+        });
+        _teamAusMine = new Set();
+        _teamAusOpp = new Set();
+        _teamOpp = [];
+        _teamQ = '';
+        _teamAn = true;
+        _calc = null;
+    }
+
+    /* Von aussen aufgerufen (Team-Builder). Die Ansicht muss dabei erst
+       sichtbar gemacht werden — sonst rechnet der Rechner in einem
+       versteckten Kasten, und der Klick sieht wie ein Fehlschlag aus. */
+    function oeffneTeamRechner(team) {
+        uebernimmTeam(team);
+        if (window.sideQuestResources && typeof window.sideQuestResources.showView === 'function') {
+            window.sideQuestResources.showView('matchups');
+        }
+        activate();
+    }
+
     function activate() {
         if (_activated) { render(); return; }
         _activated = true;
@@ -933,11 +1525,28 @@
         if (host && !host.hidden && _activated) render();
     });
 
-    window.sideQuestMatchups = { activate };
+    window.sideQuestMatchups = { activate, oeffneTeamRechner };
     window._sqMatchupInternals = {
         setData, topSet, clampSpread, spreadTotal, buildRoster, usageSlug,
         moveTable, bestMove, koLabel, effLabel, statsOf, matchup,
         SP_MAX, SP_BUDGET,
+        // Team-Rechner: fuer die Tests einzeln greifbar, damit die
+        // Urteilsregel und die Spread-Uebernahme geprueft werden koennen,
+        // ohne den ganzen Renderer zu starten.
+        TEAM_MAX, TEAM_KAMPF,
+        teamUrteil, teamZelle, teamSet, spreadAusText, uebernimmTeam, hatAngriff,
+        realistischeTreffer, teamCalcHtml, teamMatrix, teamBank, wireTeam,
+        klammereSpread, loeseNamen, nameAusSlug, teamSuche,
+        teamQ: (v) => { _teamQ = v; },
+        aktiveNamen, istAktiv, ausSet,
+        teamState: (patch) => {
+            if (!patch) return { mine: _teamMine, opp: _teamOpp, an: _teamAn };
+            if (patch.mine) _teamMine = patch.mine;
+            if (patch.opp) _teamOpp = patch.opp;
+            if (patch.an != null) _teamAn = patch.an;
+            if (patch.reset) { _teamAusMine = new Set(); _teamAusOpp = new Set(); }
+            return { mine: _teamMine, opp: _teamOpp, an: _teamAn };
+        },
         state: (patch) => { if (patch && patch.format) _format = patch.format;
                             if (patch && patch.me) _me = patch.me; },
     };

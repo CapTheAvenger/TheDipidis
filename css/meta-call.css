@@ -59,6 +59,10 @@
     --mc-tint-warn:      var(--tint-warn);
     --mc-tint-bad:       var(--tint-bad);
     --mc-tint-personal:  #faf6ff;
+    /* Die weiche Linie um die aufgeklappte Zeile. --mc-personal-accent
+       waere dafuer zu laut (er markiert Eingaben), --mc-border zu
+       farblos — die Zeile soll ja als "hier ist offen" lesbar sein. */
+    --mc-personal-line:  #b89ad4;
     --mc-d2-ok:   #166534;
     --mc-d2-mid:  #92400e;
     --mc-d2-weak: #991b1b;
@@ -107,6 +111,7 @@
     --mc-tint-warn:      var(--tint-warn);
     --mc-tint-bad:       var(--tint-bad);
     --mc-tint-personal:  #211738;
+    --mc-personal-line:  #4a3568;
     --mc-d2-ok:   #6ee7a5;
     --mc-d2-mid:  #f0c274;
     --mc-d2-weak: #f79b9b;
@@ -2617,7 +2622,7 @@
     flex: 0 0 auto;
     width: 22px;
     height: 22px;
-    border: 1px solid #d6dee9;
+    border: 1px solid var(--mc-border-strong);
     background: var(--mc-bg-subtle-warm);
     color: var(--mc-text-muted);
     border-radius: 50%;
@@ -2631,14 +2636,14 @@
     transition: transform 0.18s, background 0.15s, border-color 0.15s;
 }
 .mc-row-toggle:hover {
-    background: #e7eef9;
-    border-color: #b9c6d8;
-    color: var(--text-dark);
+    background: var(--mc-tint-info-hover);
+    border-color: var(--mc-border-strong);
+    color: var(--mc-text-heading);
 }
 .mc-row-toggle.is-expanded {
     transform: rotate(180deg);
-    background: #ece4f5;
-    border-color: #c5b3df;
+    background: var(--mc-tint-personal);
+    border-color: var(--mc-personal-line);
     color: var(--mc-personal-accent-dark);
 }
 .mc-row-toggle:focus-visible {
@@ -2723,7 +2728,11 @@
     border: 1px solid var(--mc-bg-info-light);
     border-radius: 6px;
     font-size: 0.82rem;
-    color: #1f4f7a;
+    /* 02.09.2026: derselbe feste Wert wie im Turnierstapel daneben,
+       gefunden von der Abnahme. Er stand nicht auf dem Schirm, weil bei
+       der heutigen Datenlage der Stapelpfad gewinnt — eine Live-Messung
+       findet nur, was gerade gerendert wird. 1,93:1 im Dunkelmodus. */
+    color: var(--mc-info-dark);
     font-variant-numeric: tabular-nums;
 }
 .mc-intel-major-chip-place {
@@ -2754,7 +2763,13 @@
     border: 1px solid var(--mc-bg-info-light);
     border-radius: 6px;
     font-size: 0.78rem;
-    color: #1f4f7a;
+    /* 02.09.2026: stand als fester Hexwert #1f4f7a hier. Im Dunkelmodus
+       lag dieses Dunkelblau auf der dunklen Flaeche (--surface-2) bei
+       1,93:1 — live gemessen ueber 72 Segmente die einzige Stelle der
+       ganzen Seite, an der der Dunkelmodus wirklich unlesbar war.
+       --mc-info-dark gibt es seit dem 11.06. in beiden Saetzen und
+       traegt genau diese Bedeutung: hell 8,49:1, dunkel 9,12:1. */
+    color: var(--mc-info-dark);
     font-variant-numeric: tabular-nums;
 }
 .mc-pmt-row {
@@ -2763,7 +2778,7 @@
     align-items: baseline;
     gap: 6px 10px;
     padding: 2px 0;
-    border-bottom: 1px dashed rgba(13,75,135,0.08);
+    border-bottom: 1px dashed var(--mc-border-faint);
 }
 .mc-pmt-row:last-child { border-bottom: none; }
 .mc-pmt-row-winner {
@@ -3155,19 +3170,26 @@
     height: 20px;
     border-radius: 4px;
     background: var(--mc-tint-info);
-    border: 1px solid #d5dce8;
-    color: #7b8fa8;
+    border: 1px solid var(--mc-border-strong);
+    color: var(--mc-text-muted);
     font-size: 10px;
 }
 .mc-row-toggle:hover {
     background: var(--mc-tint-info-hover);
-    color: #3a5a8c;
-    border-color: #c0ccdf;
+    color: var(--mc-info-dark);
+    border-color: var(--mc-border-strong);
 }
+/* 02.09.2026: stand als #ede8f7 / #b89ad4 / #6b3a9c fest verdrahtet.
+   Die Zeilen starten aufgeklappt, also lagen im Dunkelmodus 25
+   hellviolette Kaesten auf der dunklen Tabelle — bei 390 px 44x44,
+   auf dem Schreibtisch 20x20. Die Messung bei 1500 px hatte sie
+   trotzdem nicht gemeldet, weil sie den Reiter ansieht, bevor die
+   Tabelle steht: nicht die Breite war der Unterschied, sondern der
+   Zeitpunkt. Die Personal-Familie gibt es hier in beiden Saetzen. */
 .mc-row-toggle.is-expanded {
-    background: #ede8f7;
-    border-color: #b89ad4;
-    color: #6b3a9c;
+    background: var(--mc-tint-personal);
+    border-color: var(--mc-personal-line);
+    color: var(--mc-personal-accent-dark);
     transform: rotate(180deg);
 }
 
@@ -3176,7 +3198,7 @@
 .metacall-table tbody tr.mc-row-detail td {
     background: var(--surface-2);
     padding: 10px 14px 12px;
-    border-bottom: 2px solid #e8ecf3;
+    border-bottom: 2px solid var(--mc-border);
 }
 
 /* 12. Tile grid — smaller gaps + cleaner tile chrome */

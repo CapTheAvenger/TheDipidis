@@ -125,7 +125,7 @@
    "PLS 130"
   ]
  },
- "champions_teams": 85,
+ "champions_teams": 106,
  "empty_files": {
   "city_league_analysis.csv": true,
   "city_league_archetypes.csv": true,
@@ -134,13 +134,13 @@
  },
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
-  "cardmarket_id_mapping.csv": 17404,
+  "cardmarket_id_mapping.csv": 17384,
   "cm_expansions.csv": 773,
   "japanese_cards_database.csv": 936,
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-09-01 09:38 UTC",
+ "generated": "2026-09-02 09:37 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -151,15 +151,15 @@
   "SVP": 228
  },
  "price_integrity": {
-  "duplicate_idproducts": 96,
+  "duplicate_idproducts": 94,
   "match_methods": {
-   "live-verified": 5028,
+   "live-verified": 5027,
    "manual-pin": 51,
    "priced-by-all": 141,
-   "priced-by-date": 1171,
-   "unique": 11013
+   "priced-by-date": 1173,
+   "unique": 10992
   },
-  "nonempty_eur_price": 20380,
+  "nonempty_eur_price": 20384,
   "verified_collision_owners": {},
   "verified_collisions": []
  },
@@ -175,9 +175,9 @@
    16.2
   ],
   "ASC": [
-   292,
    295,
-   99.0
+   295,
+   100.0
   ],
   "ASR": [
    246,
@@ -215,9 +215,9 @@
    100.0
   ],
   "BRS": [
+   216,
    224,
-   224,
-   100.0
+   96.4
   ],
   "BS": [
    101,
@@ -285,9 +285,9 @@
    100.0
   ],
   "CRI": [
-   116,
+   119,
    122,
-   95.1
+   97.5
   ],
   "CRZ": [
    230,
@@ -390,9 +390,9 @@
    100.0
   ],
   "EVO": [
-   93,
+   92,
    113,
-   82.3
+   81.4
   ],
   "EVS": [
    237,
@@ -660,9 +660,9 @@
    100.0
   ],
   "PBL": [
-   117,
+   118,
    120,
-   97.5
+   98.3
   ],
   "PFL": [
    130,
@@ -705,9 +705,9 @@
    91.3
   ],
   "POR": [
-   120,
+   121,
    124,
-   96.8
+   97.6
   ],
   "PRC": [
    140,
@@ -800,9 +800,9 @@
    100.0
   ],
   "SSH": [
-   223,
+   215,
    224,
-   99.6
+   96.0
   ],
   "SSP": [
    252,
@@ -815,9 +815,9 @@
    87.9
   ],
   "SUM": [
-   146,
+   144,
    173,
-   84.4
+   83.2
   ],
   "SV": [
    15,
@@ -850,9 +850,9 @@
    100.0
   ],
   "TEU": [
-   167,
+   158,
    207,
-   80.7
+   76.3
   ],
   "TM": [
    101,

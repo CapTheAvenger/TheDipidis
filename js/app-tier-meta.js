@@ -173,6 +173,8 @@
         // Decks widersprachen sich so, das Maximum lag bei 16,7 Prozentpunkten.
         // Mit einer Nachkommastelle, wo der Wert keine ganze Zahl ist, geht die
         // Zeile wieder auf, und die Halbgewichtung wird nebenbei sichtbar.
+        // Traegt die Datei die rohen Antrittszahlen schon? Setzt der Ladevorgang.
+        let _antritteRoh = false;
         const fmtHalb = (n) => {
             const v = Number(n) || 0;
             if (Number.isInteger(v)) return fmtNumDS(v);
@@ -1512,17 +1514,47 @@
                 if (t8resp.ok) {
                     const t8rows = await fetchAndParseCSV(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
                     const totalBrought = t8rows.reduce((s, r) => s + parseLocaleNumber(r.total_brought_weighted || '0', 0), 0) || 1;
+                    /* ZWEI ZAEHLUNGEN, ZWEI AUFGABEN (02.09.2026).
+                       Die Datei fuehrt die Antritte doppelt: einmal roh
+                       (`total_brought`) und einmal nach Aktualitaet
+                       gewichtet (`total_brought_weighted`, Turniere der
+                       letzten sieben Tage zaehlen 1,0, aeltere 0,5).
+
+                       Gemeldet: "wie kann es hier ,5 Antritte geben?
+                       entweder man hat teilgenommen oder nicht aber halb
+                       teilnehmen geht nicht." Zu Recht — 532,5 ist keine
+                       Teilnehmerzahl. Die Gewichtung hat ihren Sinn in der
+                       QUOTE (frische Turniere sollen schwerer wiegen), aber
+                       nichts in einer Zahl, ueber der "Antritte" steht.
+
+                       Also: angezeigt wird die rohe Zahl, gerechnet wird
+                       weiter mit der gewichteten. Solange eine Datei die
+                       rohen Spalten noch nicht hat (sie kommen mit dem
+                       naechsten Wochenlauf), faellt die Anzeige auf den
+                       gewichteten Wert zurueck und die Ueberschrift sagt
+                       das — eine halbe Zahl unter einer Ueberschrift, die
+                       sie nicht erklaert, kommt nicht zurueck. */
+                    const hatRoh = t8rows.some(r =>
+                        r.total_brought != null && String(r.total_brought).trim() !== '');
                     const enriched = t8rows.map(r => {
                         const brought = parseLocaleNumber(r.total_brought_weighted || '0', 0);
                         const top8 = parseLocaleNumber(r.top8_count_weighted || '0', 0);
+                        const broughtRoh = parseLocaleNumber(r.total_brought || '0', 0);
+                        const top8Roh = parseLocaleNumber(r.top8_count || '0', 0);
                         return {
                             name: r.deck_name,
                             broughtPct: (brought / totalBrought) * 100,
                             brought: brought,
                             top8: top8,
+                            // Was auf den Schirm geht. Ohne rohe Spalte der
+                            // gewichtete Wert — dann traegt die Ueberschrift
+                            // das Wort "gewichtet".
+                            broughtAnzeige: hatRoh ? broughtRoh : brought,
+                            top8Anzeige:    hatRoh ? top8Roh    : top8,
                             top8ConvPct: parseLocaleNumber(r.top8_conv_rate || '0', 0) * 100,
                         };
                     });
+                    _antritteRoh = hatRoh;
                     // Hier standen bis zum 20.08.2026 drei Ranglisten
                     // (overallTop, top8Top, convTop) und ein renderRow. Die
                     // drei Tabellen sind am 19.08. in der Meta-Performance
@@ -1691,6 +1723,11 @@
                         if (!v) { turnierVon.set(k, Object.assign({}, d, { name: k })); return; }
                         v.brought += d.brought;
                         v.top8    += d.top8;
+                        // Auch die Anzeigezahlen addieren — sonst zeigt die
+                        // Zeile die Antritte nur EINES der zusammengefassten
+                        // Namen, waehrend die Quote daneben aus beiden kommt.
+                        v.broughtAnzeige += d.broughtAnzeige;
+                        v.top8Anzeige    += d.top8Anzeige;
                         v.broughtPct += d.broughtPct;
                         v.top8ConvPct = v.brought > 0 ? (v.top8 / v.brought) * 100 : 0;
                     });
@@ -1711,7 +1748,10 @@
                     const reihen = [...alleNamen].map(name => {
                         const t = turnierVon.get(name) || null;
                         const l = ladderVon.get(name) || null;
-                        const antritte = t ? t.brought : null;
+                        // Angezeigt wird die rohe Zahl, sobald die Datei sie
+                        // fuehrt — halbe Antritte gibt es nicht. Gerechnet
+                        // wird oben weiter mit der gewichteten.
+                        const antritte = t ? t.broughtAnzeige : null;
                         return {
                             name,
                             listen:  l ? l.new_count : null,
@@ -1720,7 +1760,7 @@
                             wr:      l && l.winrate > 0 ? l.winrate : null,
                             antritte,
                             quote:   t ? t.top8ConvPct : null,
-                            cuts:    t ? t.top8 : null,
+                            cuts:    t ? t.top8Anzeige : null,
                             faktor:  perfVon.has(name) ? 1 + perfVon.get(name) / 100 : null,
                             faktorRoh: rohVon.has(name) ? 1 + rohVon.get(name) / 100 : null,
                             // Duenn heisst hier: zu wenig TURNIER-Antritte, um die
@@ -1752,10 +1792,32 @@
                            von den Turnieren. Deshalb steht die Herkunft
                            jetzt in der Ueberschrift und nicht nur im
                            Fliesstext darunter. */
-                        { k: 'antritte', de: 'Turnier-Antritte', en: 'Tournament entries', num: true,
-                          tip: { de: 'Starts auf Turnieren, nach Turniergröße gewichtet — halbe Werte sind deshalb echt. Eine andere Zählung als die Listen links.',
-                                 en: 'Entries at tournaments, weighted by event size — half values are real. A different count from the lists on the left.' } },
-                        { k: 'cuts',     de: 'Top 8',          en: 'Top 8',      num: true,
+                        /* DIE UEBERSCHRIFT SAGT, WELCHE ZAEHLUNG DARUNTER STEHT.
+                           Bis zum 02.09.2026 stand hier "Turnier-Antritte" und
+                           darunter 532,5 — und der Hinweis behauptete obendrein,
+                           gewichtet werde "nach Turniergröße". Beides falsch:
+                           gewichtet wird nach AKTUALITAET (Turniere der letzten
+                           sieben Tage 1,0, aeltere 0,5, siehe
+                           backend/scrapers/online_tournament_scraper.py:361),
+                           und eine Teilnehmerzahl mit Komma ist keine.
+                           Jetzt steht dort die rohe Zahl; nur solange die Datei
+                           die noch nicht fuehrt, traegt die Ueberschrift das
+                           Wort "gewichtet" — dann erklaert sie wenigstens, was
+                           man sieht. */
+                        { k: 'antritte',
+                          de: _antritteRoh ? 'Turnier-Antritte' : 'Turnier-Antritte (gewichtet)',
+                          en: _antritteRoh ? 'Tournament entries' : 'Tournament entries (weighted)',
+                          num: true,
+                          tip: { de: _antritteRoh
+                                    ? 'Wie oft dieses Deck auf einem Turnier angetreten ist — gezählte Starts. Eine andere Zählung als die Listen links.'
+                                    : 'Starts auf Turnieren, nach Aktualität gewichtet: Turniere der letzten sieben Tage zählen voll, ältere halb. Daher die halben Werte. Die gezählten Starts kommen mit dem nächsten Datenlauf.',
+                                 en: _antritteRoh
+                                    ? 'How often this deck entered a tournament — counted starts. A different count from the lists on the left.'
+                                    : 'Entries at tournaments, weighted by recency: events from the last seven days count fully, older ones half. Hence the half values. Plain counts arrive with the next data run.' } },
+                        { k: 'cuts',
+                          de: _antritteRoh ? 'Top 8' : 'Top 8 (gewichtet)',
+                          en: _antritteRoh ? 'Top 8' : 'Top 8 (weighted)',
+                          num: true,
                           tip: { de: 'davon in die Top 8 — bezogen auf die Turnier-Antritte links, nicht auf die Listen.',
                                  en: 'of those, made top 8 — out of the tournament entries on the left, not the lists.' } },
                         { k: 'quote',    de: 'Top-8-Quote',   en: 'Top-8 rate',  num: true, hilf: 'top8' },

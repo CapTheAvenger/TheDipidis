@@ -507,7 +507,7 @@
         return _majorFeldCache;
     }
 
-    function tileGeteilt(role, tone, label, onlineWert, majorWert, majorLeer, majorQuelle, majorDuenn, tip, pfeil) {
+    function tileGeteilt(role, tone, label, onlineWert, onlineAnzahl, majorWert, majorAnzahl, majorLeer, majorDuenn, tip, pfeil) {
         const de = isDe();
         const hat = !!tip;
         const ttl = hat
@@ -528,21 +528,35 @@
          * Gestapelt passt es in jede Kachelbreite. Und die Ueberschrift
          * steht jetzt oben, wie vom Betreiber vorgeschlagen: sie gilt fuer
          * beide Zahlen, also gehoert sie ueber beide und nicht unter sie. */
-        const halb = (wert, quelle, schwach, duenn) =>
+        /* Drei Felder je Zeile: woher, wie viel, worauf es steht.
+         *
+         * Vorher trug die Quellenbeschriftung die Zahl mit sich —
+         * "Major \u00b7 172 Antritte", "Major \u00b7 1.277 Partien" — und online
+         * stand gar keine. Rueckmeldung vom 02.09.2026: "das Wort Antritte
+         * kannst du weglassen, wenn wir da aber schon eine Zahl hinschreiben
+         * wie viele Leute das Deck genutzt haben, dann sollten wir das bei
+         * Online auch machen \u2026 und dann sollten wir die Online Matches da
+         * auch als Zahl erwaehnen."
+         *
+         * Also dieselbe Aufteilung wie in der Heatmap-Zelle: links die
+         * Quelle, in der Mitte der Wert, rechts die Stueckzahl, auf der er
+         * ruht. Beide Zeilen tragen dieselben drei Felder, damit man
+         * senkrecht vergleichen kann, ohne zu suchen. */
+        const halb = (wert, quelle, anzahl, schwach, duenn) =>
             `<div class="arc-halb${schwach ? ' arc-halb--leer' : ''}${
                 duenn ? ' arc-halb--duenn' : ''}">
                 <span class="arc-halb-quelle">${esc(quelle)}</span>
                 <span class="arc-tile-value">${wert}</span>
+                <span class="arc-halb-anzahl">${anzahl ? esc(anzahl) : ''}</span>
             </div>`;
         return `<div class="arc-tile arc-tile--${role} arc-tile--geteilt arc-tone--${tone}${
                 hat ? ' arc-tile--hinweis' : ''}"${ttl}>
                 <div class="arc-tile-label">${esc(label)}</div>
                 <div class="arc-halbe">
-                    ${halb(arw + onlineWert, L('arc.quelleOnline', 'online'), false)}
-                    ${halb(majorWert || '–',
-                        majorWert
-                            ? (majorQuelle || L('arc.quelleMajor', 'Major'))
-                            : esc(majorLeer || L('arc.quelleMajor', 'Major')),
+                    ${halb(arw + onlineWert, L('arc.quelleOnline', 'online'),
+                        onlineAnzahl, false, false)}
+                    ${halb(majorWert || '–', L('arc.quelleMajor', 'Major'),
+                        majorWert ? majorAnzahl : (majorLeer || ''),
                         !majorWert, majorWert && majorDuenn)}
                 </div>
             </div>`;
@@ -580,13 +594,15 @@
         const rep = d
             ? tileGeteilt('rep', 'neutral', L('arc.repLabel', de ? 'Anteil' : 'Share'),
                 `${esc(fmt(d.share))} %`,
+                /* Rechts steht, worauf der Anteil ruht: online die Zahl der
+                   gemeldeten Listen, beim Major die Zahl der Antritte. Beides
+                   ist "so viele Leute haben das Deck gespielt", nur aus zwei
+                   Quellen — deshalb blanke Zahlen ohne Wort, die Kachel sagt
+                   ueber der Spalte schon, was gemeint ist. */
+                fmtGanz(d.count),
                 m ? `${esc(fmt(m.share))} %` : '',
+                m ? fmtGanz(m.antritte) : '',
                 majorLeer,
-                /* Der Anteil ruht auf ANTRITTEN, nicht auf Partien: "1 von
-                   774" ist auch bei einem Antritt eine belastbare Aussage.
-                   Deshalb keine Partienzahl und keine Daempfung. */
-                m ? L('arc.quelleMajorA', de ? 'Major · {n} Antritte' : 'major · {n} entries')
-                        .replace('{n}', fmtGanz(m.antritte)) : null,
                 false,
                 L('arc.repTip2', de
                     ? '{n} Listen im Meta online. {mj}'
@@ -616,16 +632,15 @@
         const wr = d
             ? tileGeteilt('wr', toneFor(wrDelta), L('arc.wrLabel', 'Win Rate'),
                 `${esc(fmt(d.winRate))} %`,
-                wrMajor,
-                majorLeer,
-                /* Die Partienzahl steht MIT auf der Zeile, nicht nur im
+                /* Die Matchzahl steht MIT auf der Zeile, nicht nur im
                    Hinweis: sie ist die Zahl, an der man entscheidet, ob man
                    der Quote glaubt, und ein Hinweis erscheint erst beim
-                   Verweilen — auf dem Telefon also nie. */
-                m && m.partien > 0
-                    ? L('arc.quelleMajorN', de ? 'Major · {n} Partien' : 'major · {n} games')
-                        .replace('{n}', fmtGanz(m.partien))
-                    : null,
+                   Verweilen — auf dem Telefon also nie. Seit dem 02.09.2026
+                   auch fuer online, vorher stand sie nur beim Major. */
+                fmtGanz(d.partien),
+                wrMajor,
+                (m && m.partien > 0) ? fmtGanz(m.partien) : '',
+                majorLeer,
                 wrDuenn,
                 /* DIE REMISQUOTE STEHT HIER, UND SIE MUSS ES.
                    Beide Zahlen sind Siege durch ALLE Partien — dieselbe
@@ -637,18 +652,18 @@
                    Unentschieden. Ohne diesen Satz liest sich das als
                    Leistungseinbruch — und das waere falsch. */
                 L('arc.wrTip2', de
-                    ? 'Siege geteilt durch alle Partien, auf beiden Seiten gleich gerechnet. Online aus {n} Partien. {mj}'
+                    ? 'Siege geteilt durch alle Matches, auf beiden Seiten gleich gerechnet. Online aus {n} Matches. {mj}'
                     : 'Wins divided by all games, same on both sides. Online from {n} games. {mj}')
                     .replace('{n}', fmtGanz(d.partien))
                     .replace('{mj}', (m && m.partien > 0)
                         ? L('arc.wrTipMajor', de
-                            ? 'Major aus {p} Partien, davon {u} % unentschieden — online sind es 1,3 %. Unentschieden zählen auf beiden Seiten nicht als Sieg, drücken die Major-Spalte also spürbar. Bei dieser Partienzahl liegt der Wert auf ±{k} Punkte genau.'
+                            ? 'Major aus {p} Matches, davon {u} % unentschieden — online sind es 1,3 %. Unentschieden zählen auf beiden Seiten nicht als Sieg, drücken die Major-Spalte also spürbar. Bei dieser Matchzahl liegt der Wert auf ±{k} Punkte genau.'
                             : 'Major from {p} games, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down. At this sample the value is accurate to ±{k} points.')
                             .replace('{p}', fmtGanz(m.partien))
                             .replace('{u}', fmt(m.remisQuote))
                             .replace('{k}', fmt(wrKi, 0))
                         : L('arc.wrTipOhne', de
-                            ? 'Noch keine Präsenzpartien für dieses Deck in diesem Format.'
+                            ? 'Noch keine Major-Matches für dieses Deck in diesem Format.'
                             : 'No in-person games for this deck in this format yet.')),
                 arrow(wrDelta))
             : tile('wr', 'tie', L('arc.wrLabel', 'Win Rate'), '–',
@@ -895,13 +910,13 @@
                              -2,0 pp, davon -1,8 Zaehlweise) steht im Hinweis
                              jeder Zelle. -->
                         <th title="${esc(L('arc.colMajorTip', de
-                            ? 'Präsenzturniere: Matchpunkte (3 Siege + 1 Unentschieden) ÷ (3 × Partien) — eine andere Rechnung als die Win Rate links, weil die Quelle je Paarung keine Bilanz veröffentlicht.'
+                            ? 'Präsenzturniere: Matchpunkte (3 Siege + 1 Unentschieden) ÷ (3 × Matches) — eine andere Rechnung als die Win Rate links, weil die Quelle je Paarung keine Bilanz veröffentlicht.'
                             : 'In-person events: match points (3 wins + 1 tie) ÷ (3 × games) — a different calculation from the win rate on the left, because the source publishes no record per pairing.'))}">${
                             esc(L('arc.colMajor', de ? 'Major-Punkte' : 'Major points'))}</th>
                         <th title="${esc(L('arc.colMajorN', de
                             ? 'Präsenzpartien dieser Paarung'
                             : 'in-person games for this pairing'))}">${
-                            esc(de ? 'M-Partien' : 'M-games')}</th>
+                            esc(de ? 'Major-Matches' : 'Major matches')}</th>
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>

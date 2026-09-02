@@ -4547,12 +4547,35 @@
          */
         const ANZEIGE_DRUCK_KEY = 'anzeigeDruck_v1';
 
+        /* DIE ARTWORK-WAHL HAELT BIS ZUM NEULADEN, NICHT LAENGER (02.09.2026).
+         *
+         * Auftrag: "den print beim neu laden bitte immer wieder auf den
+         * aktuellsten low rarity print setzen."
+         *
+         * Vorher lag die Wahl in localStorage und ueberlebte alles. Wer
+         * einmal aus Neugier das Gold-Artwork angesehen hatte, bekam es
+         * Monate spaeter immer noch — auf den Kacheln UND im erzeugten
+         * Bild, wo die Karte fuer andere gedacht ist.
+         *
+         * Der Standard war nie das Problem: STAPLES_DRUCK steht auf 'min',
+         * und getPreferredVersionForCard sortiert nach Seltenheit
+         * aufsteigend, dann Set absteigend — also genau "neuester Druck der
+         * niedrigsten Seltenheit". Ihn hat nur der gespeicherte Stern
+         * uebersteuert.
+         *
+         * Also: ein Objekt im Modul, kein Speicher. Die Wahl wirkt sofort
+         * und fuer diese Sitzung; nach F5 liefert anzeigeDruckFuer() null
+         * und staplesDruckFuer() nimmt wieder den Standard-Zweig.
+         * sessionStorage waere hier falsch — das ueberlebt F5 im selben
+         * Tab und wuerde die Bitte nur zur Haelfte erfuellen. */
+        let _anzeigeDrucke = {};
+
+        // Einmalig aufraeumen: wer die alte Fassung benutzt hat, traegt die
+        // Wahl sonst weiter mit sich herum, ohne dass sie noch gelesen wird.
+        try { localStorage.removeItem(ANZEIGE_DRUCK_KEY); } catch (_e) { /* egal */ }
+
         function ladeAnzeigeDrucke() {
-            try {
-                const roh = localStorage.getItem(ANZEIGE_DRUCK_KEY);
-                const obj = roh ? JSON.parse(roh) : {};
-                return (obj && typeof obj === 'object') ? obj : {};
-            } catch (_e) { return {}; }
+            return _anzeigeDrucke;
         }
 
         function anzeigeDruckFuer(set, number) {
@@ -4564,11 +4587,10 @@
         function waehleAnzeigeDruck(cardName, altSet, altNummer, neuSet, neuNummer) {
             const schluessel = `${String(altSet || '').toUpperCase()}|${String(altNummer || '').toUpperCase()}`;
             if (schluessel === '|') { closeRaritySwitcher(); return; }
-            try {
-                const alle = ladeAnzeigeDrucke();
-                alle[schluessel] = { set: String(neuSet || '').toUpperCase(), number: String(neuNummer || '').toUpperCase() };
-                localStorage.setItem(ANZEIGE_DRUCK_KEY, JSON.stringify(alle));
-            } catch (_e) { /* voller Speicher: dann eben nur fuer diese Sitzung nicht */ }
+            _anzeigeDrucke[schluessel] = {
+                set: String(neuSet || '').toUpperCase(),
+                number: String(neuNummer || '').toUpperCase(),
+            };
             try {
                 document.dispatchEvent(new CustomEvent('ds:anzeigedruck', {
                     detail: { name: cardName, set: neuSet, number: neuNummer }

@@ -953,7 +953,7 @@ const translations = {
 
     // ── MetaCall ─────────────────────────────────────────────
     'mc.title':                 'Meta Call',
-    'mc.subtitle':              'Meta forecast for your next event, and your Day-2 chance against it.',
+    'mc.subtitle':              'Meta forecast for your next event, and your {ziel} chance against it.',
     'mc.panelSource':           'Source',
     'mc.panelDataSources':      'Data Sources',
     'mc.badgeOptional':         'Optional',
@@ -3451,7 +3451,7 @@ const translations = {
 
     // ── MetaCall ─────────────────────────────────────────────
     'mc.title':                 'Meta Call',
-    'mc.subtitle':              'Meta-Prognose fürs nächste Turnier und deine Day-2-Chance dagegen.',
+    'mc.subtitle':              'Meta-Prognose fürs nächste Turnier und deine {ziel}-Chance dagegen.',
     'mc.panelSource':           'Quelle',
     'mc.panelDataSources':      'Datenquellen',
     'mc.badgeOptional':         'Optional',

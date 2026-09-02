@@ -130,9 +130,25 @@ def load_meta_map(data_dir: str) -> Dict[str, str]:
     return out
 
 
-def scrape_standings_full(tournament_id: str) -> List[Dict]:
+def scrape_standings_full(tournament_id: str) -> Optional[List[Dict]]:
     """Fetch /<tid>/standings and return every row as
     { place, player_name, country, deck_slug, wins, losses, ties }.
+
+    Returns None when the page could NOT BE READ — a 403, a timeout, a
+    hung connection. Returns [] only when the page loaded and genuinely
+    carries no standings table.
+
+    THAT DISTINCTION IS THE WHOLE POINT (02.09.2026).
+    Until now both cases returned []. The caller drops the existing rows
+    for every tournament it is about to re-scrape, so an empty result
+    meant: the rows are gone. Reproduced with fetch_page_bs4 forced to
+    None — 4 rows in, 1 row out, and main() returned 0, i.e. success.
+
+    Limitless throttles bulk scraping from datacenter IPs with 403s
+    (CLAUDE.md, "External sources & rate limits"). Drosselung ist kein
+    Urteil ueber die Daten: the same principle is already spelled out in
+    tests/python/test_price_mapping_verification.py — "403 row untouched
+    — throttled is not a verdict". This scraper did not follow it.
 
     Defensive parser: header columns are discovered by text rather
     than hardcoded indices so a labs layout shuffle doesn't silently
@@ -141,8 +157,9 @@ def scrape_standings_full(tournament_id: str) -> List[Dict]:
     logger.info("  Fetching %s", url)
     soup = fetch_page_bs4(url)
     if not soup:
-        logger.warning("    Standings fetch failed for %s", tournament_id)
-        return []
+        logger.error("    Standings NICHT LESBAR fuer %s — Bestand bleibt "
+                     "unangetastet", tournament_id)
+        return None
 
     table = soup.find('table', attrs={'class': re.compile(r'data-table')})
     if not table:
@@ -320,16 +337,44 @@ def main():
         logger.info("Nothing to do — exit clean.")
         return 0
 
-    # Re-read existing output so we can merge new rows without losing
-    # prior ones (--tournament-id partial runs).
-    all_rows: List[Dict] = []
+    # Bestand einlesen und NACH TURNIER GRUPPIEREN.
+    #
+    # Vorher wurden die Zeilen der Turniere, die gleich neu geholt
+    # werden, hier sofort verworfen. Kam der Abruf dann nicht durch,
+    # waren sie weg — ohne dass irgendetwas es gemeldet haette. Jetzt
+    # bleiben sie liegen, bis ein Abruf tatsaechlich etwas Besseres
+    # liefert.
+    ziel_tids = {str(t.get('tournament_id')) for t in target}
+    fremde_zeilen: List[Dict] = []          # Turniere, die nicht dran sind
+    bestand_je_tid: Dict[str, List[Dict]] = {}
     if os.path.exists(out_path):
         with open(out_path, encoding='utf-8-sig') as f:
             for r in csv.DictReader(f):
-                # Drop rows for tids we're re-scraping
-                if str(r.get('tournament_id')) in {str(t.get('tournament_id')) for t in target}:
-                    continue
-                all_rows.append(r)
+                tid_r = str(r.get('tournament_id') or '')
+                if tid_r in ziel_tids:
+                    bestand_je_tid.setdefault(tid_r, []).append(r)
+                else:
+                    fremde_zeilen.append(r)
+
+    # Was am Ende in der Datei stehen soll — je Turnier entweder das
+    # frisch Geholte oder der unveraenderte Bestand.
+    ergebnis_je_tid: Dict[str, List[Dict]] = {}
+    # Turniere, deren Standings nicht gelesen werden konnten.
+    nicht_lesbar: List[str] = []
+
+    def alle_zeilen() -> List[Dict]:
+        """Fremde Zeilen + entschiedene Turniere + noch nicht bearbeitete.
+
+        Der letzte Teil ist wichtig: bricht der Lauf in der Mitte ab,
+        darf der Zwischenstand die noch nicht angefassten Turniere nicht
+        verlieren."""
+        raus = list(fremde_zeilen)
+        for tid_k in ziel_tids:
+            if tid_k in ergebnis_je_tid:
+                raus.extend(ergebnis_je_tid[tid_k])
+            else:
+                raus.extend(bestand_je_tid.get(tid_k, []))
+        return raus
 
     for i, t in enumerate(target, 1):
         tid = str(t.get('tournament_id')).strip()
@@ -343,10 +388,22 @@ def main():
         logger.info("[%d/%d] tid=%s  %s  %s",
                     i, len(target), tid, date, meta or '(no meta)')
         rows = scrape_standings_full(tid)
+        if rows is None:
+            # NICHT LESBAR — nicht "leer". Der Bestand bleibt stehen.
+            behalten = bestand_je_tid.get(tid, [])
+            ergebnis_je_tid[tid] = behalten
+            nicht_lesbar.append(tid)
+            logger.error("    tid=%s uebersprungen, %d vorhandene Zeilen "
+                         "bleiben unangetastet", tid, len(behalten))
+            if i < len(target):
+                time.sleep(args.delay)
+            continue
+
+        neue = []
         for r in rows:
             slug = r['deck_slug']
             archetype = archetype_map.get(slug, '')
-            all_rows.append({
+            neue.append({
                 'tournament_id': tid,
                 'tournament_date': date,
                 'meta': meta,
@@ -359,15 +416,46 @@ def main():
                 'losses': r['losses'],
                 'ties': r['ties'],
             })
-        # Write checkpoint after every tournament so an interrupt
-        # doesn't lose work
-        write_output(all_rows, out_path)
+
+        # Die Seite war lesbar und traegt keine Standings — dann ist die
+        # Null echt. Hatte das Turnier aber schon einmal Zeilen, ist das
+        # ein Widerspruch, den niemand still aufloesen sollte: melden und
+        # den Bestand behalten.
+        alt_bestand = bestand_je_tid.get(tid, [])
+        if not neue and alt_bestand:
+            logger.error("    tid=%s liefert 0 Zeilen, hatte aber %d. Das "
+                         "ist kein Ergebnis, das ist ein Widerspruch — "
+                         "Bestand bleibt, Turnier gilt als nicht gelesen.",
+                         tid, len(alt_bestand))
+            ergebnis_je_tid[tid] = alt_bestand
+            nicht_lesbar.append(tid)
+        else:
+            ergebnis_je_tid[tid] = neue
+
+        # Zwischenstand nach jedem Turnier, damit ein Abbruch keine
+        # Arbeit kostet.
+        write_output(alle_zeilen(), out_path)
         if i < len(target):
             time.sleep(args.delay)
 
+    endstand = alle_zeilen()
+    write_output(endstand, out_path)
     logger.info("Done — %d rows in %s across %d tournaments",
-                len(all_rows), out_path,
-                len({r['tournament_id'] for r in all_rows}))
+                len(endstand), out_path,
+                len({r['tournament_id'] for r in endstand}))
+
+    if nicht_lesbar:
+        # Der Wochenlauf wertet den Rueckgabewert aus und schreibt ihn in
+        # die Bilanz (.github/workflows/weekly-full-update.yml:426).
+        # Ein stiller Erfolg waere hier das Schlimmste: die Datei saehe
+        # gesund aus, waere aber nicht auf dem Stand, den sie vorgibt.
+        logger.error("%d von %d Turnieren waren nicht lesbar (%s%s). Ihre "
+                     "Zeilen stehen unveraendert in der Datei — der Lauf "
+                     "ist NICHT vollstaendig.",
+                     len(nicht_lesbar), len(target),
+                     ', '.join(nicht_lesbar[:8]),
+                     ' …' if len(nicht_lesbar) > 8 else '')
+        return 1
     return 0
 
 

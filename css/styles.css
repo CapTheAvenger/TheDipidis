@@ -9994,6 +9994,38 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     margin-top: 2px;
     font-variant-numeric: tabular-nums;
 }
+
+/* Die Praesenzzeile in der Heatmap-Zelle (02.09.2026).
+ *
+ * Auftrag: "vll sollten wir auch in der Heatmap in jedem Feld online Win
+ * Rate / Major Win Rate zeigen so hat man immer und ueberall den
+ * Vergleich". Abdeckung nachgemessen: 90 von 90 Zellen des Top-10-Gitters
+ * haben einen Major-Wert, 56 davon mit mindestens 10 Partien.
+ *
+ * Sie steht UNTER der Online-Zahl und traegt ein "M" davor, weil sie eine
+ * andere Rechnung ist: die Labs-Datei liefert je Paarung nur Anzahl und
+ * Matchpunkte, keine Bilanz — auf die Online-Skala laesst sie sich nicht
+ * bringen. Der Unterschied ist klein und systematisch (Median -2,0 pp,
+ * davon -1,8 reine Zaehlweise), steht aber im Hinweis, damit ihn niemand
+ * als Einbruch liest.
+ *
+ * Volle Deckkraft aus demselben Grund wie bei der Partienzahl darueber:
+ * eine gedaempfte Farbe auf gedaempftem Grund fiel schon einmal unter
+ * 4,5:1. Duenn wird ueber Kursivstellung gezeigt, nicht ueber Blaesse. */
+.heatmap-td-major {
+    display: block;
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    opacity: 1;
+    color: var(--heatmap-ink);
+    line-height: 1;
+    margin-top: 1px;
+    font-variant-numeric: tabular-nums;
+    border-top: 1px dotted currentColor;
+    padding-top: 2px;
+}
+.heatmap-td-major-duenn { font-style: italic; }
+
 /* Wenig Partien: gestrichelt, nicht blass.
 
    Vorher trug die Blaesse die Aussage — opacity 0.65 auf dem n und eine

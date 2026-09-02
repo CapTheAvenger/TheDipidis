@@ -13,8 +13,105 @@
         // Matchup data registry (avoids Object.keys(window) scan)
         window._matchupRegistry = window._matchupRegistry || {};
 
+        /* DIE PRAESENZSEITE DER HEATMAP.
+         *
+         * Auftrag des Betreibers (02.09.2026): "vll sollten wir auch in der
+         * Heatmap in jedem Feld online Win Rate / Major Win Rate zeigen so
+         * hat man immer und ueberall den Vergleich".
+         *
+         * Abdeckung nachgemessen am Top-10-Gitter (TEF-PBL, Worlds San
+         * Francisco): 90 von 90 Zellen haben einen Major-Wert, 56 davon
+         * mit mindestens 10 Partien. Das traegt.
+         *
+         * ACHTUNG, ZWEI SKALEN — und das laesst sich hier NICHT aufloesen.
+         * Die Online-Zelle rechnet S/(S+N), die Labs-Datei liefert je
+         * Paarung nur `vs_count` und `vs_win_pct`, und `vs_win_pct` sind
+         * MATCHPUNKTE (3S+U)/3n. Ohne die Unentschieden je Paarung laesst
+         * sich das nicht umrechnen, und die Quelle (labs) veroeffentlicht
+         * sie nicht — der Scraper liest die zwei Zellen, die dastehen
+         * (labs_tournament_scraper.py:1785).
+         *
+         * Wie gross der Unterschied ist, steht deshalb dabei. Gemessen ueber
+         * die 90 Paarungen: Median -2,0 pp. Der reine Skaleneffekt bei
+         * ausgeglichener Bilanz und 11 % Unentschieden (die Major-Quote)
+         * betraegt -1,8 pp. Der Median ist also fast VOLLSTAENDIG Zaehlweise
+         * und nicht Spielstaerke — wer das weiss, kann die Spalten
+         * vergleichen; wer es nicht weiss, liest einen Einbruch, den es
+         * nicht gibt. */
+        window._majorMatchupRegistry = window._majorMatchupRegistry || null;
+        let _majorLaeuft = false;
+
+        async function ladeMajorMatchups() {
+            if (window._majorMatchupRegistry) return window._majorMatchupRegistry;
+            const leer = {};
+            try {
+                const fw = window._formatWindow;
+                const alt = fw && fw.oldest_legal_set ? String(fw.oldest_legal_set).toUpperCase() : '';
+                const neu = fw && fw.current_set ? String(fw.current_set).toUpperCase() : '';
+                if (!alt || !neu) { window._majorMatchupRegistry = leer; return leer; }
+                const key = `${alt}-${neu}`;
+                const stamp = `?t=${Date.now()}`;
+                // Erst das Verzeichnis fragen — sonst steht fuer ein Format
+                // ohne Praesenzturnier bei jedem Seitenaufruf eine 404 in der
+                // Konsole, die keine ist.
+                const v = await fetch(`${BASE_PATH}labs_tournament_matchups_verzeichnis.json${stamp}`)
+                    .then(r => r.ok ? r.json() : null).catch(() => null);
+                if (!v || !Array.isArray(v.meta_keys) || v.meta_keys.indexOf(key) === -1) {
+                    window._majorMatchupRegistry = leer; return leer;
+                }
+                const txt = await fetch(`${BASE_PATH}labs_tournament_matchups_${key}.csv${stamp}`)
+                    .then(r => r.ok ? r.text() : '').catch(() => '');
+                if (!txt) { window._majorMatchupRegistry = leer; return leer; }
+                // KOMMA. Die Labs-Auszuege kommen aus einer anderen Quelle als
+                // die eigenen Exporte; mit ';' zerfaellt die Datei zu Zeilen
+                // mit einem Feld und alles faellt still auf leer zurueck.
+                const parsed = (typeof Papa !== 'undefined' && Papa.parse)
+                    ? Papa.parse(txt, { header: true, delimiter: ',', skipEmptyLines: true })
+                    : { data: [] };
+                const reg = {};
+                for (const r of (parsed.data || [])) {
+                    // Nur die Gesamtsicht, nicht Tag 1 / Tag 2 getrennt —
+                    // sonst zaehlt dieselbe Partie mehrfach.
+                    if (String(r.day_filter || '').trim() !== 'overall') continue;
+                    const a = String(r.my_deck_name || '').trim();
+                    const b = String(r.opponent_deck_name || '').trim();
+                    if (!a || !b) continue;
+                    const anzahl = parseInt(r.vs_count || '0', 10) || 0;
+                    const punkte = parseLocaleNumber(r.vs_win_pct || '0', 0);
+                    if (!anzahl) continue;
+                    if (!reg[a]) reg[a] = {};
+                    reg[a][b] = { anzahl, punkte };
+                }
+                window._majorMatchupRegistry = reg;
+                return reg;
+            } catch (_e) {
+                window._majorMatchupRegistry = leer;
+                return leer;
+            }
+        }
+
         // Render Interactive Matchup Heatmap
         function renderMatchupHeatmap() {
+            /* Die Praesenzdaten einmal holen, dann neu zeichnen.
+             *
+             * Das Zeichnen bleibt synchron — es haengt an jedem Tastendruck
+             * im Suchfeld, und ein `await` mittendrin wuerde die Reihenfolge
+             * zweier schneller Eingaben vertauschen. Also: fehlt das
+             * Register, wird OHNE Major-Zeile gezeichnet, und sobald es da
+             * ist, einmal neu. Der Nutzer sieht die Tabelle sofort und die
+             * zweite Zeile einen Wimpernschlag spaeter — statt einer
+             * leeren Flaeche, bis eine Datei da ist, die er nicht bestellt
+             * hat. */
+            if (!_majorLaeuft && window._majorMatchupRegistry === null
+                && typeof ladeMajorMatchups === 'function') {
+                // Eigene Marke statt `_majorMatchupRegistry = {}`: ein leeres
+                // Objekt ist truthy, und ladeMajorMatchups() haette dann
+                // sofort aufgegeben, ohne je etwas zu holen.
+                _majorLaeuft = true;
+                ladeMajorMatchups().then(() => {
+                    if (document.getElementById('matchupHeatmapContainer')) renderMatchupHeatmap();
+                });
+            }
             try {
                 devLog('Rendering Matchup Heatmap...');
 
@@ -253,7 +350,22 @@
                 devLog(`Heatmap-Decks: X-Achse=${xDecks.length}, Y-Achse=${yDecks.length}`);
                 
                 // 3. HTML GENERIEREN
-                let tableHtml = '<table class="heatmap-table">';
+                /* Die Tabellenbreite haengt jetzt an der SPALTENZAHL.
+                 *
+                 * BEFUND aus der Pruefrunde vom 01.09.2026, live bei 390 px
+                 * nachgestellt: css/current-meta-matchups.css nagelte die
+                 * Tabelle in vier Medienabfragen auf `width: 920px !important`.
+                 * Wer auf zwei Decks filterte, bekam trotzdem 920 px — erste
+                 * Spalte 550, Datenspalte 370, die Antwortzelle begann bei
+                 * x = 579 in einem 332 px breiten Fenster. Sichtbar waren
+                 * fuenf Decknamen und KEINE Zahl, ohne Bildlaufleiste und
+                 * ohne Hinweis. Je genauer gefiltert, desto breiter die
+                 * Spalten (`table-layout: fixed`).
+                 *
+                 * Genau die Frage, fuer die man zwischen zwei Runden zum
+                 * Handy greift — und sie sah aus wie eine fertige Antwort
+                 * ohne Daten. */
+                let tableHtml = `<table class="heatmap-table" style="--heatmap-cols: ${xDecks.length};">`;
                 tableHtml += `<colgroup><col class="heatmap-col-first">${xDecks.map(() => '<col class="heatmap-col-data">').join('')}</colgroup>`;
                 
                 // PERFORMANCE: Pre-compute normalized colDeck names (once per render, not per cell)
@@ -274,6 +386,19 @@
                         Object.entries(rowData).forEach(([k, v]) => lookup.set(normalizeName(k), v));
                     }
                     rowLookupMaps.set(rowDeck, lookup);
+                });
+
+                /* Dieselbe Normalisierung wie fuer die Online-Seite: die
+                   Labs-Namen sind meist deckungsgleich, aber nicht immer
+                   (Apostrophe). Ohne das faende die Major-Zeile nichts und
+                   die Spalte waere still leer — der Fehler, der die
+                   Tier-Liste am 01.09. Worlds nicht sehen liess. */
+                const majorReg = window._majorMatchupRegistry || {};
+                const majorLookup = new Map();
+                Object.keys(majorReg).forEach(a => {
+                    const innen = new Map();
+                    Object.keys(majorReg[a]).forEach(b => innen.set(normalizeName(b), majorReg[a][b]));
+                    majorLookup.set(normalizeName(a), innen);
                 });
                 
                 // Small helper: Pokémon-icon HTML for an archetype, empty
@@ -431,8 +556,32 @@
                             // die ich sehen kann." Also steht da jetzt, was es ist.
                             const sampleHtml = `<small class="${sampleClass}">${totalGames} ${
                                 t('heatmap.gamesShort')}</small>`;
-                            tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)">${(typeof window.formatPercent === 'function')
-                                ? window.formatPercent(winRate) : winRate.toFixed(1) + ' %'}${sampleHtml}</td>`;
+
+                            /* Die Praesenzzeile. Steht unter der Online-Zahl,
+                               kleiner, mit ihrer Partienzahl — und mit einem
+                               Zeichen davor, das sagt, dass es eine ANDERE
+                               Rechnung ist (Matchpunkte statt Siegquote).
+                               Unter 10 Partien gedaempft: von 90 Zellen des
+                               Top-10-Gitters haben 56 mindestens 10. */
+                            const mj = (majorLookup.get(normalizeName(rowDeck)) || new Map())
+                                .get(normalizedColDeckMap.get(colDeck));
+                            const majorDuenn = mj && mj.anzahl < 10;
+                            const majorHtml = mj
+                                ? `<small class="heatmap-td-major${majorDuenn ? ' heatmap-td-major-duenn' : ''}">${
+                                    t('heatmap.majorKurz')} ${
+                                    (typeof window.formatPercent === 'function')
+                                        ? window.formatPercent(mj.punkte) : mj.punkte.toFixed(1) + ' %'} · ${
+                                    mj.anzahl}</small>`
+                                : '';
+                            const majorTip = mj
+                                ? ` · ${t('heatmap.majorTip')
+                                    .replace('{w}', ((typeof window.formatPercent === 'function')
+                                        ? window.formatPercent(mj.punkte) : mj.punkte.toFixed(1) + ' %'))
+                                    .replace('{n}', String(mj.anzahl))}`
+                                : ` · ${t('heatmap.majorFehlt')}`;
+                            const vollTip = tooltip + majorTip;
+                            tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${escAttr(vollTip)}" onclick="showToast('${safeRow} vs ${safeCol}: ${escapeJsStr(vollTip)}', 'info', 5000)">${(typeof window.formatPercent === 'function')
+                                ? window.formatPercent(winRate) : winRate.toFixed(1) + ' %'}${sampleHtml}${majorHtml}</td>`;
                         }
                     });
                     tableHtml += '</tr>';

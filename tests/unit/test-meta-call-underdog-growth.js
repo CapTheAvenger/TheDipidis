@@ -33,6 +33,38 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 
+// ── Gleichlauf mit der Quelle ───────────────────────────────────
+// BEFUND (02.09.2026): der Kopfkommentar dieser Datei sagt seit jeher
+// "keep in lockstep" — durchgesetzt hat den Gleichlauf nichts. Eine
+// Mutationspruefung setzte die Konstante im Motor auf null; die Kopie
+// hier blieb stehen, die Formel unten rechnete weiter mit der Kopie,
+// und die Suite blieb gruen. Die Spiegel bleiben (sie machen die
+// Rechnung unten lesbar), aber sie werden jetzt gegen die Quelle
+// geprueft. Was gerechnet wird, prueft zusaetzlich
+// tests/unit/test-motor-stufen-wirksamkeit.js am echten Quellblock.
+const fs = require('fs');
+const path = require('path');
+const SRC_MC = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'js', 'app-meta-call.js'), 'utf8');
+
+function quellZahl(name) {
+    const m = SRC_MC.match(new RegExp('\\bconst\\s+' + name + '\\s*=\\s*(-?\\d+(?:\\.\\d+)?)\\s*;'));
+    assert.ok(m, name + ' steht nicht mehr als numerische Konstante in '
+        + 'js/app-meta-call.js — umbenannt oder in einen Ausdruck verwandelt. '
+        + 'Beides macht den Gleichlauf blind, deshalb bricht er hier ab.');
+    return Number(m[1]);
+}
+
+function pruefeGleichlauf(spiegel, praefix, ausnahmen) {
+    for (const [kurz, wert] of Object.entries(spiegel)) {
+        const quellName = (ausnahmen && ausnahmen[kurz]) || (praefix + kurz);
+        assert.strictEqual(wert, quellZahl(quellName),
+            `${quellName}: die Quelle sagt ${quellZahl(quellName)}, die Kopie in `
+            + `dieser Datei sagt ${wert}. Solange sie auseinanderlaufen, prueft `
+            + 'diese Datei ihre eigene Kopie und nicht den Motor.');
+    }
+}
+
 // ── Predictor 4.6 — reference formula ───────────────────────────
 // Kept in sync with the constants declared near the top of
 // app-meta-call.js (search "PREDICTOR_4_6_"). If the production
@@ -219,5 +251,47 @@ describe('Predictor 4.6 / 5.4 — constants stay realistic', () => {
         // The hierarchy matters: a fresh underdog title is a stronger
         // signal than a +N pp Δ. Keep cap-ordering invariant.
         assert.ok(P54.BOOST_PP_MAX < P46.BOOST_PP_MAX);
+    });
+});
+
+describe('Predictor 4.6 / 5.4 — Gleichlauf: die Kopien oben sind die Quelle', () => {
+    it('jede gespiegelte 4.6-Konstante deckt sich mit js/app-meta-call.js', () => {
+        pruefeGleichlauf(P46, 'PREDICTOR_4_6_');
+    });
+
+    it('jede gespiegelte 5.4-Konstante deckt sich mit js/app-meta-call.js', () => {
+        // Diese drei standen bis zum 02.09.2026 nirgends gegen die Quelle.
+        // PREDICTOR_5_4_BOOST_PER_PP liess sich auf 0.0 setzen, ohne dass
+        // eine einzige Zusicherung rot wurde — die Formel oben rechnete
+        // mit der Kopie 0.4 weiter.
+        pruefeGleichlauf(P54, 'PREDICTOR_5_4_');
+    });
+
+    it('der Wachstums-Schub ist nicht auf null gestellt', () => {
+        // BELEG (tests/unit/test-stufen-inventur.js): "Am 01.09. hob er
+        // 12 von 43 Decks an, bis +3,33 pp." Die Stufe ist wirksam und
+        // meldet sich nur leise — beim Auszaehlen der toten Stufen stand
+        // sie deshalb faelschlich auf der Liste der stummen.
+        const proPP = quellZahl('PREDICTOR_5_4_BOOST_PER_PP');
+        assert.ok(proPP > 0,
+            `PREDICTOR_5_4_BOOST_PER_PP steht auf ${proPP} — die Stufe rechnet `
+            + 'weiter und liefert fuer jedes Deck 0,00 pp');
+        assert.ok(proPP <= 0.6,
+            `PREDICTOR_5_4_BOOST_PER_PP steht auf ${proPP} — 0,6 injizierte in der `
+            + 'Indy-Kalibrierung +1,2 pp in Online-Hype-Decks (Festival Lead, '
+            + 'Slowking), die in Person nicht erschienen');
+        assert.ok(growthBoostPP(1.5) > 0,
+            'die Lillie-Clefairy-Form (+1,5 pp) bringt keinen Schub mehr');
+    });
+
+    it('der Underdog-Champion-Schub ist nicht auf null gestellt', () => {
+        // Campinas 2026-05-17: Ogerpon Meganium gewann bei ~2,6 % Anteil,
+        // zwei Wochen spaeter stand es in Indianapolis bei 7,9 % an Tag 1.
+        const deckel = quellZahl('PREDICTOR_4_6_BOOST_PP_MAX');
+        assert.ok(deckel > 0,
+            `PREDICTOR_4_6_BOOST_PP_MAX steht auf ${deckel} — der Sprung von 2,6 % `
+            + 'auf 7,9 % wird von keiner Stufe mehr vorweggenommen');
+        assert.ok(underdogBoostPP({ ageDays: 3, shareAtWin: 2.6 }) > 0,
+            'ein frischer Underdog-Titel bringt keinen Schub mehr');
     });
 });

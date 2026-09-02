@@ -198,11 +198,36 @@ describe('Day-2-Empfehlung: die Schrumpfung ordnet, nicht die Markow-Kette', () 
         assert.equal(parseInt(m[1], 10), 30, 'k=30 war der gemessene Wert');
     });
 
+    it('die Mindeststichprobe existiert und ist nicht null', () => {
+        // BEFUND (02.09.2026): der Test unten schob DAY2_MIN_ANKER als
+        // LITERAL 30 in den vm-Kontext. Der Motor durfte die Zahl auf 0
+        // setzen — das Tor fiel, die Geisterempfehlungen kamen zurueck,
+        // und hier blieb alles gruen, weil der Kontext weiter mit 30
+        // rechnete. Seitdem wird die Zahl gelesen, nicht gewusst.
+        //
+        // Wofuer das Tor da ist, steht im Motor: ohne es empfahl der
+        // Motor in 25 von 44 Turnieren ein Deck, das gar nicht antrat.
+        const m = SRC.match(/const DAY2_MIN_ANKER\s*=\s*(\d+)/);
+        assert.ok(m, 'die Mindeststichprobe DAY2_MIN_ANKER fehlt');
+        assert.ok(parseInt(m[1], 10) >= 30,
+            `DAY2_MIN_ANKER steht auf ${m[1]} — unter 30 ausgewerteten Spielern `
+            + 'traegt die geschrumpfte Quote keine Empfehlung (dieselbe Schwelle '
+            + 'wie MIN_ANZEIGE in scripts/build_deckempfehlung.py)');
+    });
+
     it('sie zieht duenne Decks kraeftig zum Feldmittel', () => {
         const m = SRC.match(/function _day2Schrumpfung\(\)[\s\S]*?\n  \}\n/);
         assert.ok(m, 'Funktion nicht herausloesbar');
         function rechne(faelle) {
-            const ctx = { Math, Object, Map, Array, DAY2_SCHRUMPFUNG_K: 30, DAY2_MIN_ANKER: 30,
+            // Beide Konstanten kommen AUS DER QUELLE. Ein Literal hier
+            // machte die Zusicherungen unten blind gegen jede Aenderung
+            // am Motor — genau daran lief die Mutationspruefung vom
+            // 02.09.2026 gruen durch.
+            const kAus = SRC.match(/const DAY2_SCHRUMPFUNG_K\s*=\s*(-?[\d.]+)/);
+            const ankerAus = SRC.match(/const DAY2_MIN_ANKER\s*=\s*(-?[\d.]+)/);
+            assert.ok(kAus && ankerAus, 'DAY2_SCHRUMPFUNG_K / DAY2_MIN_ANKER fehlen in der Quelle');
+            const ctx = { Math, Object, Map, Array,
+                DAY2_SCHRUMPFUNG_K: Number(kAus[1]), DAY2_MIN_ANKER: Number(ankerAus[1]),
                 _majorSharesByDeck: faelle.anteile, _labsDay2ConvByDeck: faelle.conv };
             vm.createContext(ctx);
             new vm.Script(m[0] + '\nglobalThis.__f = _day2Schrumpfung;').runInContext(ctx);

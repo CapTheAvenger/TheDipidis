@@ -18,6 +18,38 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 
+// ── Gleichlauf mit der Quelle ───────────────────────────────────
+// BEFUND (02.09.2026): der Kopfkommentar dieser Datei sagt seit jeher
+// "keep in lockstep" — durchgesetzt hat den Gleichlauf nichts. Eine
+// Mutationspruefung setzte die Konstante im Motor auf null; die Kopie
+// hier blieb stehen, die Formel unten rechnete weiter mit der Kopie,
+// und die Suite blieb gruen. Die Spiegel bleiben (sie machen die
+// Rechnung unten lesbar), aber sie werden jetzt gegen die Quelle
+// geprueft. Was gerechnet wird, prueft zusaetzlich
+// tests/unit/test-motor-stufen-wirksamkeit.js am echten Quellblock.
+const fs = require('fs');
+const path = require('path');
+const SRC_MC = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'js', 'app-meta-call.js'), 'utf8');
+
+function quellZahl(name) {
+    const m = SRC_MC.match(new RegExp('\\bconst\\s+' + name + '\\s*=\\s*(-?\\d+(?:\\.\\d+)?)\\s*;'));
+    assert.ok(m, name + ' steht nicht mehr als numerische Konstante in '
+        + 'js/app-meta-call.js — umbenannt oder in einen Ausdruck verwandelt. '
+        + 'Beides macht den Gleichlauf blind, deshalb bricht er hier ab.');
+    return Number(m[1]);
+}
+
+function pruefeGleichlauf(spiegel, praefix, ausnahmen) {
+    for (const [kurz, wert] of Object.entries(spiegel)) {
+        const quellName = (ausnahmen && ausnahmen[kurz]) || (praefix + kurz);
+        assert.strictEqual(wert, quellZahl(quellName),
+            `${quellName}: die Quelle sagt ${quellZahl(quellName)}, die Kopie in `
+            + `dieser Datei sagt ${wert}. Solange sie auseinanderlaufen, prueft `
+            + 'diese Datei ihre eigene Kopie und nicht den Motor.');
+    }
+}
+
 const P57 = {
     LEADER_DOMINANCE_THRESHOLD: 25.0,
     COUNTER_WR_THRESHOLD:       0.55,
@@ -119,5 +151,28 @@ describe('P5.7 — Dominant family detection', () => {
         };
         // Total = 100; max family = 20 % (FamE). Threshold is 25 %.
         assert.strictEqual(findLeaderFamily(families), null);
+    });
+});
+
+describe('P5.7 — Gleichlauf: die Kopie oben ist die Quelle', () => {
+    it('jede gespiegelte Konstante deckt sich mit js/app-meta-call.js', () => {
+        pruefeGleichlauf(P57, 'PREDICTOR_57_');
+    });
+
+    it('die Stufe ist nicht auf null gestellt', () => {
+        // ANLASS: Indianapolis 2026-05-29 — die Anti-Dragapult-Techwelle
+        // (Hydrapple, Mega Lucario, Basic Box) wurde um 1,5-3,5 pp
+        // unterschaetzt. Steht BOOST_PP_MAX auf 0, kappt Math.min jeden
+        // Schub auf 0 und das folgende `if (boost <= 0.05) return;` wirft
+        // ihn weg: die Stufe laeuft weiter und liefert nichts.
+        const deckel = quellZahl('PREDICTOR_57_BOOST_PP_MAX');
+        assert.ok(deckel > 0,
+            `PREDICTOR_57_BOOST_PP_MAX steht auf ${deckel} — der Anti-Leader-Schub `
+            + 'ist abgeschaltet, die Unterschaetzung von 1,5-3,5 pp ist zurueck');
+        assert.ok(quellZahl('PREDICTOR_57_BOOST_SCALE') > 0,
+            'ohne Steigung ist jeder Winrate-Vorsprung wertlos');
+        // Und der Beleg dafuer, dass die Kopie oben wirklich rechnet:
+        assert.ok(p57BoostFor({ wr: 0.60, fieldShare: 0.9 }) > 0.05,
+            'ein Konter mit 60 % gegen den Leiter bekommt nichts mehr');
     });
 });

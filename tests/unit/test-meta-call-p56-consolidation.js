@@ -19,6 +19,38 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 
+// ── Gleichlauf mit der Quelle ───────────────────────────────────
+// BEFUND (02.09.2026): der Kopfkommentar dieser Datei sagt seit jeher
+// "keep in lockstep" — durchgesetzt hat den Gleichlauf nichts. Eine
+// Mutationspruefung setzte die Konstante im Motor auf null; die Kopie
+// hier blieb stehen, die Formel unten rechnete weiter mit der Kopie,
+// und die Suite blieb gruen. Die Spiegel bleiben (sie machen die
+// Rechnung unten lesbar), aber sie werden jetzt gegen die Quelle
+// geprueft. Was gerechnet wird, prueft zusaetzlich
+// tests/unit/test-motor-stufen-wirksamkeit.js am echten Quellblock.
+const fs = require('fs');
+const path = require('path');
+const SRC_MC = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'js', 'app-meta-call.js'), 'utf8');
+
+function quellZahl(name) {
+    const m = SRC_MC.match(new RegExp('\\bconst\\s+' + name + '\\s*=\\s*(-?\\d+(?:\\.\\d+)?)\\s*;'));
+    assert.ok(m, name + ' steht nicht mehr als numerische Konstante in '
+        + 'js/app-meta-call.js — umbenannt oder in einen Ausdruck verwandelt. '
+        + 'Beides macht den Gleichlauf blind, deshalb bricht er hier ab.');
+    return Number(m[1]);
+}
+
+function pruefeGleichlauf(spiegel, praefix, ausnahmen) {
+    for (const [kurz, wert] of Object.entries(spiegel)) {
+        const quellName = (ausnahmen && ausnahmen[kurz]) || (praefix + kurz);
+        assert.strictEqual(wert, quellZahl(quellName),
+            `${quellName}: die Quelle sagt ${quellZahl(quellName)}, die Kopie in `
+            + `dieser Datei sagt ${wert}. Solange sie auseinanderlaufen, prueft `
+            + 'diese Datei ihre eigene Kopie und nicht den Motor.');
+    }
+}
+
 const P56 = {
     FAMILY_DOMINANCE_THRESHOLD: 20.0,
     MIN_VARIANTS:               3,
@@ -121,5 +153,38 @@ describe('P5.6 — Indianapolis anchor: Dragapult family consolidation', () => {
         const out = p56Apply(shares);
         assert.strictEqual(out['Ogerpon Meganium Hydrapple'], 12.0);
         assert.strictEqual(out['Ogerpon Meganium Arboliva'], 11.0);
+    });
+});
+
+describe('P5.6 — Gleichlauf: die Kopie oben ist die Quelle', () => {
+    it('jede gespiegelte Konstante deckt sich mit js/app-meta-call.js', () => {
+        pruefeGleichlauf(P56, 'PREDICTOR_56_');
+    });
+
+    it('die Stufe ist nicht auf null gestellt', () => {
+        // ANLASS: Indianapolis 2026-05-29 — pures Dragapult ging von
+        // 35,4 % auf 61,5 % Familienanteil, der Motor unterschaetzte es
+        // um 9,45 pp. Bei CONSOLIDATION_RATE 0 wird nichts mehr zur
+        // Leitvariante verschoben. Heimtueckisch: die Leitvariante
+        // waechst trotzdem, weil FAMILY_GROWTH_BOOST_PP unabhaengig
+        // davon addiert wird — die Stufe SIEHT aktiv aus.
+        const rate = quellZahl('PREDICTOR_56_CONSOLIDATION_RATE');
+        assert.ok(rate > 0,
+            `PREDICTOR_56_CONSOLIDATION_RATE steht auf ${rate} — die Konsolidierung `
+            + 'verteilt nichts mehr um, die 9,45 pp Unterschaetzung sind zurueck');
+        assert.ok(rate <= 0.5,
+            `PREDICTOR_56_CONSOLIDATION_RATE steht auf ${rate} — 0,60 kam dem `
+            + 'Leiter naeher, zerdrueckte aber Dusknoir (real 6,29 % in Indy)');
+        // Und der Beleg, dass die Kopie oben wirklich umverteilt:
+        const out = p56Apply({
+            Dragapult: [
+                { deck: 'Dragapult',          share: 10.4 },
+                { deck: 'Dragapult Dusknoir', share: 7.5 },
+                { deck: 'Dragapult Blaziken', share: 6.2 },
+            ],
+            Padding: [{ deck: 'PaddingDeck', share: 75.9 }],
+        });
+        assert.ok(out['Dragapult Dusknoir'] < 7.5,
+            'keine Untervariante gibt mehr ab — die Umverteilung ist tot');
     });
 });

@@ -457,7 +457,19 @@
                     + (isFinite(spec.majorDay2Feld)
                         ? '  ·  ' + L('Schnitt', 'field') + ' ' + num(spec.majorDay2Feld, 1) + ' %'
                         : '')
-                : L('Day 2 (Major): keine Daten', 'day 2 (major): no data'));
+                : (isFinite(spec.majorDay2Antritte) && spec.majorDay2Antritte > 0
+                    /* Unterscheidet "war nicht dabei" von "zu wenige
+                       Antritte" — dieselben zwei Faelle, die die Kachel
+                       auf der Seite auch trennt. Bis zum 02.09.2026
+                       druckte das Bild hier eine harte Prozentzahl, wo
+                       die Seite schwieg. */
+                    ? L('Day 2 (Major): zu wenige Antritte ('
+                            + spec.majorDay2Antritte + ' von '
+                            + (spec.majorDay2MinAntritte || 5) + ')',
+                        'day 2 (major): too few entries ('
+                            + spec.majorDay2Antritte + ' of '
+                            + (spec.majorDay2MinAntritte || 5) + ')')
+                    : L('Day 2 (Major): keine Daten', 'day 2 (major): no data')));
 
         /* ── Körper links: Sprites groß + Herkunft ─────────────────── */
         ctx.fillStyle = C.line; ctx.fillRect(0, bodyY, DC.W, bodyH);

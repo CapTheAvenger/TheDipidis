@@ -116,6 +116,20 @@
        Zahl gedaempft dargestellt, aber sie steht da. */
     const MAJOR_DUENN_PARTIEN = 100;
 
+    /* Unter so vielen Antritten wird keine Day-2-Quote gezeigt.
+     *
+     * "2 von 3" sind 66,7 % und sagen nichts. Im aktuellen Format
+     * (TEF-PBL, Worlds San Francisco, 774 Spieler) haben 26 von 44 Decks
+     * zwischen 1 und 4 Antritte — bei 59 % der Decks waere die Quote
+     * also reines Rauschen.
+     *
+     * Die Zahl stand bis zum 02.09.2026 nur als nacktes `>= 5` in der
+     * Kachel — und das GETEILTE BILD kannte sie gar nicht. Es druckte
+     * "Day 2 (Major) 66,7 %", wo die Seite daneben "zu wenige Antritte"
+     * sagte: das Bild widersprach der Seite, von der es stammt, bei 26
+     * von 44 Decks. Jetzt teilen sich beide diese eine Konstante. */
+    const DAY2_MIN_ANTRITTE = 5;
+
     let _decks = null;          // deck_name -> { share, winRate, count }
     let _conv = null;           // computeConversionPerformance() result
     let _major = null;          // deck_name -> { share, winRate, ... } | {} wenn kein Major
@@ -761,7 +775,7 @@
            (22,2 %) und kommt mit 12,8 % unterdurchschnittlich durch,
            Alakazam Dudunsparce mit 26,4 % ueberdurchschnittlich. */
         const feld = _majorFeld();
-        const d2 = (m && m.day2Quote != null && m.day1 >= 5)
+        const d2 = (m && m.day2Quote != null && m.day1 >= DAY2_MIN_ANTRITTE)
             ? tile('day2', toneFor(feld.day2Quote != null ? m.day2Quote - feld.day2Quote : 0),
                 L('arc.day2Label', de ? 'Day-2-Quote (Major)' : 'Day 2 rate (major)'),
                 `${esc(fmt(m.day2Quote))} %`,
@@ -1138,7 +1152,15 @@
             majorPartien:  m ? m.partien : NaN,
             majorAntritte: m ? m.antritte : NaN,
             majorRemis:    m && m.remisQuote != null ? m.remisQuote : NaN,
-            majorDay2:     m && m.day2Quote != null ? m.day2Quote : NaN,
+            /* DIESELBE SCHRANKE WIE DIE KACHEL. Ohne sie druckte das
+               Bild eine harte Prozentzahl, wo die Seite "zu wenige
+               Antritte" sagt — gemessen bei 26 von 44 Decks. Das Bild
+               ist die Fassung, die die Seite VERLAESST; es darf ihr
+               nicht widersprechen. */
+            majorDay2:     (m && m.day2Quote != null && m.day1 >= DAY2_MIN_ANTRITTE)
+                               ? m.day2Quote : NaN,
+            majorDay2Antritte: m ? m.day1 : NaN,
+            majorDay2MinAntritte: DAY2_MIN_ANTRITTE,
             majorDay2Feld: _majorFeld().day2Quote,
             majorDuennAb:  MAJOR_DUENN_PARTIEN,
         };

@@ -8039,14 +8039,41 @@ window.MetaCall = (function () {
         topMatchups
       };
     }).sort((a, b) => {
-      // Primary: blended day2Prob. Tie-breaker (< 0.02): empirical
-      // labs Day-2 conversion — when two candidates have near-equal
-      // simulation odds, the one with stronger field-tested cut rate
-      // wins. Falls through to avgWR as the final tiebreaker.
-      if (Math.abs(a.day2Prob - b.day2Prob) > 0.02) return b.day2Prob - a.day2Prob;
-      const ac = a.empConv != null ? a.empConv : 0;
-      const bc = b.empConv != null ? b.empConv : 0;
-      if (Math.abs(ac - bc) > 0.05) return bc - ac;
+      /* GERUNDETE SCHLUESSEL, KEINE TOLERANZVERGLEICHE (02.09.2026).
+       *
+       * Hier stand:
+       *     if (Math.abs(a.day2Prob - b.day2Prob) > 0.02) return ...
+       *     if (Math.abs(ac - bc) > 0.05)                 return ...
+       *     return b.avgWR - a.avgWR;
+       *
+       * "Fast gleich" ist keine Aequivalenzrelation: A≈B und B≈C heisst
+       * nicht A≈C. Damit ist der Vergleicher NICHT TRANSITIV, und
+       * Array.prototype.sort liefert eine Reihenfolge, die von der
+       * Eingabereihenfolge abhaengt.
+       *
+       * Nachgerechnet an echten Werten (Majors seit 2026-05-01):
+       *     A Rocket's Honchkrow        empConv 0,1665  WR 41,11 %
+       *     B Ogerpon Meganium Arboliva empConv 0,1490  WR 42,08 %
+       *     C Tera Box                  empConv 0,1000  WR 42,58 %
+       * |A-B| = 0,0174 ≤ 0,05 → WR entscheidet → B vor A
+       * |B-C| = 0,0490 ≤ 0,05 → WR entscheidet → C vor B
+       * |A-C| = 0,0665 > 0,05 → conv entscheidet → A vor C
+       * Zyklus: A < C < B < A. Alle sechs Eingabereihenfolgen
+       * durchgespielt ergaben VIER verschiedene Ausgaben; jedes der drei
+       * Decks landete je nach Eingabe auf Platz 1 ODER Platz 3.
+       *
+       * Und diese Liste wird gleich gegen DAY2_THRESHOLD geschnitten und
+       * im geteilten Bild veroeffentlicht.
+       *
+       * Gerundete Schluessel leisten dasselbe — kleine Unterschiede
+       * zaehlen nicht — sind aber transitiv, weil sie eine echte
+       * Aequivalenzklasse bilden. Die Rasterweiten entsprechen den alten
+       * Toleranzen: 0,02 und 0,05. */
+      const raster = (wert, weite) => Math.round((wert || 0) / weite);
+      const d = raster(b.day2Prob, 0.02) - raster(a.day2Prob, 0.02);
+      if (d !== 0) return d;
+      const c = raster(b.empConv, 0.05) - raster(a.empConv, 0.05);
+      if (c !== 0) return c;
       return b.avgWR - a.avgWR;
     });
 
@@ -8398,6 +8425,26 @@ window.MetaCall = (function () {
     if (type === 'cup')       return 'mc.predictTitleTopCut';
     if (type === 'challenge') return 'mc.predictTitleTopFinish';
     return 'mc.predictTitleDay2';
+  }
+
+  /* Der KURZE Name desselben Ziels — fuer Tabellenkoepfe, Achsen und
+   * Abzeichen.
+   *
+   * Bis zum 02.09.2026 stand an vier Stellen hart "Day 2", obwohl der
+   * Code selbst weiss, dass es den bei Challenge und Cup nicht gibt
+   * (siehe den Kommentar bei _settingsByType: "Die beiden lokalen Typen
+   * (Challenge, Cup) haben keinen zweiten Tag"). Auf dem Cup-Reiter las
+   * man deshalb "≥12 = Day 2" und "{n} Day-2-faehig" — waehrend die
+   * Pille INNERHALB derselben Tabelle laengst typbewusst "Top 8" bzw.
+   * "1.-2." schrieb. Vier Beschriftungen ueber einer Tabelle, die es
+   * besser wusste.
+   *
+   * Ein Schalter, eine Wahrheit. */
+  function _zielKurz() {
+    const type = _settings.tournamentType;
+    if (type === 'cup')       return `Top ${_settings.topCutSize || 8}`;
+    if (type === 'challenge') return '1.-2.';
+    return t('mc.recDay2');
   }
 
   function renderSettingsPanel() {
@@ -9203,7 +9250,8 @@ window.MetaCall = (function () {
         </div>
         <div class="mc-histogram-axis">
           <span>0 ${t('mc.ptsAbbr')}</span>
-          <span style="color:var(--tint-ok-ink)">${t('mc.histDay2Label').replace('{n}', _settings.day2Points)}</span>
+          <span style="color:var(--tint-ok-ink)">${t('mc.histZielLabel')
+              .replace('{n}', _settings.day2Points).replace('{ziel}', esc(_zielKurz()))}</span>
           <span>${maxPts} ${t('mc.ptsAbbr')}</span>
         </div>
       </div>
@@ -9502,9 +9550,8 @@ window.MetaCall = (function () {
             const reasonText = _formatTipReasons(tip);
             // Pill label matches active tournament type so Cup tabs
             // show "Top 4 / Top 8" and Challenge shows "1.-2.".
-            const pillLabel = _settings.tournamentType === 'cup'
-              ? `Top ${_settings.topCutSize || 8}`
-              : (_settings.tournamentType === 'challenge' ? '1.-2.' : t('mc.recDay2'));
+            // Derselbe Schalter wie Kopf, Achse und Abzeichen.
+            const pillLabel = _zielKurz();
             return `<div class="mc-tip-card" tabindex="0"
                   title="${esc(t('mc.recJumpHint'))}"
                   onclick="MetaCall._jumpToDeckAnalysis('${safeNameJs}')">
@@ -9519,12 +9566,12 @@ window.MetaCall = (function () {
       </div>` : '';
 
     const day2Section = split.day2.length ? `
-      <p class="mc-rec-hint">${esc(t('mc.recHintDay2'))}</p>
+      <p class="mc-rec-hint">${esc(t('mc.recHintZiel').replace('{ziel}', _zielKurz()))}</p>
       <table class="mc-rec-table">
         <thead><tr>
           <th>#</th>
           <th>${t('mc.recDeck')}</th>
-          <th>${t('mc.recDay2')}</th>
+          <th>${esc(_zielKurz())}</th>
           <th>${t('mc.recAvgWr')}</th>
           <th>${t('mc.recExpWins')}</th>
           <th class="mc-rec-toggle-th" aria-label="Why?"></th>
@@ -9547,7 +9594,8 @@ window.MetaCall = (function () {
 <div class="metacall-panel mc-rec-panel">
   <div class="metacall-panel-title">
     ${t('mc.panelRecommendations')}
-    <span class="mc-badge">${t('mc.recBadgeDay2Count').replace('{n}',
+    <span class="mc-badge">${t('mc.recBadgeZielCount')
+      .replace('{ziel}', esc(_zielKurz())).replace('{n}',
         (split.day2UeberSchwelle != null ? split.day2UeberSchwelle : split.day2.length))}</span>
     ${shareBtn}
   </div>
@@ -10623,11 +10671,10 @@ window.MetaCall = (function () {
       // misleading "Day-2: 8,2 %". Measure first so the name truncates
       // around it instead of behind it.
       const day2Pct = (tip.day2Prob * 100).toFixed(1);
-      const pillLabel = _settings.tournamentType === 'cup'
-        ? `Top ${_settings.topCutSize || 8}: ${day2Pct}${_mcPz()}`
-        : (_settings.tournamentType === 'challenge'
-            ? `1.-2.: ${day2Pct}${_mcPz()}`
-            : `${t('mc.recDay2')}: ${day2Pct}${_mcPz()}`);
+      // Auch hier der gemeinsame Schalter — dies ist die Fassung, die
+      // im geteilten Bild landet. Bis zum 02.09.2026 trug sie ihre
+      // eigene Kopie der Typ-Unterscheidung.
+      const pillLabel = `${_zielKurz()}: ${day2Pct}${_mcPz()}`;
       ctx.font = 'bold 13px system-ui, sans-serif';
       const pillTextW = ctx.measureText(pillLabel).width;
       const pillW = pillTextW + 16;

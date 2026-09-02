@@ -37,6 +37,11 @@ function containerWidthAusdruck(css) {
     return m[1].replace(/\s+/g, ' ').trim();
 }
 
+/* body traegt links und rechts --page-gutter; auf dem Schreibtisch
+   sind das 20px. Der Elternkasten ist also das Fenster minus 40. */
+const GUTTER = 20;
+const eltern = (fenster) => fenster - 2 * GUTTER;
+
 /* Ein winziger Rechner fuer die drei CSS-Funktionen, die hier
    vorkommen. Er kennt px, vw und % — mehr braucht die Regel nicht,
    und mehr zu kennen wuerde nur verdecken, wenn jemand eine vierte
@@ -59,7 +64,32 @@ function rechne(ausdruck, fensterBreite, elternBreite) {
         if (fn[1] === 'max') return Math.max(...w);
         return Math.min(Math.max(w[0], w[1]), w[2]);   /* clamp(min, val, max) */
     }
-    let m = s.match(/^([\d.]+)px$/);
+    /* var(--page-gutter) und einfache Rechnung. Kam am 02.09.2026 dazu,
+       als .meta-hub-container mit in die Pruefung genommen wurde: dort
+       steht `100% - 2 * var(--page-gutter)`. Bewusst eng gehalten — der
+       Rechner soll bei einer fuenften Einheit weiter abbrechen, statt zu
+       raten. */
+    const VARS = { '--page-gutter': GUTTER };
+    let m = s.match(/^var\((--[\w-]+)\)$/);
+    if (m) {
+        assert.ok(m[1] in VARS, 'unbekannte CSS-Variable: ' + m[1]);
+        return VARS[m[1]];
+    }
+    // Subtraktion auf oberster Ebene, links nach rechts.
+    let tiefe2 = 0;
+    for (let i = s.length - 1; i > 0; i--) {
+        const c = s[i];
+        if (c === ')') tiefe2++;
+        if (c === '(') tiefe2--;
+        if (c === '-' && tiefe2 === 0 && /[\s)%\w]/.test(s[i - 1] || '')) {
+            return rechne(s.slice(0, i), fensterBreite, elternBreite)
+                 - rechne(s.slice(i + 1), fensterBreite, elternBreite);
+        }
+    }
+    m = s.match(/^([\d.]+)\s*\*\s*(.+)$/);
+    if (m) return parseFloat(m[1]) * rechne(m[2], fensterBreite, elternBreite);
+
+    m = s.match(/^([\d.]+)px$/);
     if (m) return parseFloat(m[1]);
     m = s.match(/^([\d.]+)vw$/);
     if (m) return parseFloat(m[1]) / 100 * fensterBreite;
@@ -68,10 +98,6 @@ function rechne(ausdruck, fensterBreite, elternBreite) {
     throw new Error('Einheit unbekannt in der Breitenregel: ' + s);
 }
 
-/* body traegt links und rechts --page-gutter; auf dem Schreibtisch
-   sind das 20px. Der Elternkasten ist also das Fenster minus 40. */
-const GUTTER = 20;
-const eltern = (fenster) => fenster - 2 * GUTTER;
 
 test('der Rechner selbst stimmt (sonst prueft er nichts)', () => {
     assert.strictEqual(rechne('min(100%, 800px)', 1000, 960), 800);
@@ -133,4 +159,80 @@ test('kein zweiter Pixel-Deckel in Meta Call oder City League', () => {
     const clBlock = CSS.slice(j, CSS.indexOf('}', j));
     assert.ok(!/\bwidth:\s*min\([^)]*\d+px/.test(clBlock),
         '.city-league-container hat wieder einen Pixel-Deckel');
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   NACHTRAG 02.09.2026 — der Deckel sass nicht nur an EINER Stelle.
+
+   `.container` war seit dem 01.09. befreit, und der Test hier bewachte
+   genau ihn. Bei der Durchsicht fielen sechs WEITERE Ansichts-Container
+   auf, die weiter auf festen Pixelwerten standen und auf 2560/3440 px
+   nicht mitwuchsen — der Test deckte sie schlicht nicht ab.
+
+   Drei tragen Gitter und Tabellen und wachsen jetzt mit. Zwei bleiben
+   mit Absicht schmal, und das steht hier fest, damit niemand sie aus
+   Versehen "mitrepariert". Eine war tote Regel ohne einen einzigen
+   Benutzer und ist entfernt. */
+
+const TG  = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'css', 'testing-groups.css'), 'utf8');
+const CL  = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'css', 'city-league.css'), 'utf8');
+
+function widthAusRegel(cssRoh, selektor) {
+    /* Kommentare zuerst weg: `.proxy-container {` steht in
+       css/city-league.css:495 zuerst INNERHALB eines Kommentars, der auf
+       eine andere Datei verweist. Ohne diesen Schritt las der Test die
+       Begruendung statt der Regel — derselbe Fehler, der am selben Tag
+       schon test-blueten-kopf.js auf den Kopf gestellt hatte. */
+    const css = cssRoh.replace(/\/\*[\s\S]*?\*\//g, ' ');
+    const i = css.indexOf(selektor + ' {');
+    assert.ok(i > -1, selektor + ' nicht gefunden');
+    const block = css.slice(i, css.indexOf('}', i));
+    const m = block.match(/\bwidth:\s*([^;]+);/);
+    assert.ok(m, 'keine width-Deklaration in ' + selektor);
+    return m[1].replace(/\s+/g, ' ').trim();
+}
+
+test('die Ansichten mit Gittern und Tabellen wachsen ebenfalls mit', () => {
+    const faelle = [
+        ['.meta-hub-container', CSS, 'Kategorie-Kacheln der Meta-Startseite'],
+        ['.tg-wrap',            TG,  'Gruppentabellen der Testing Groups'],
+        ['.proxy-container',    CL,  'Kartengitter des Proxy-Druckers'],
+    ];
+    for (const [sel, css, was] of faelle) {
+        const a = widthAusRegel(css, sel);
+        const b2560 = rechne(a, 2560, eltern(2560));
+        const b3440 = rechne(a, 3440, eltern(3440));
+        assert.ok(b3440 > b2560,
+            `${sel} (${was}) waechst von 2560 auf 3440 nicht mit — ein `
+            + `Pixel-Deckel ist zurueck: ${a}`);
+        assert.ok(b3440 >= 0.88 * 3440,
+            `${sel} laesst auf 3440px ${Math.round(3440 - b3440)}px Rand — `
+            + `zu viel fuer eine Ansicht, die Daten traegt (${a})`);
+    }
+});
+
+test('die Ansichten mit Text und Bedienelementen bleiben schmal', () => {
+    /* Kein Versehen, sondern der Gegenpol: eine Anleitung auf 3440px ist
+       unlesbar, und zwei zusammengehoerende Schalter liegen dort einen
+       halben Meter auseinander. Wer diese beiden "mitrepariert", macht
+       es schlechter — deshalb steht es hier. */
+    assert.match(CL, /\.tutorial-main-container \{[^}]*max-width:\s*\d+px/,
+        'die Anleitung hat ihren Deckel verloren — Fliesstext ueber 2000px '
+        + 'liest niemand');
+    assert.match(CSS, /\.filter-section-main > div:nth-child\(2\) \{[^}]*max-width:\s*\d+px/,
+        'die Filterzeile hat ihren Deckel verloren — dort stehen Suchfeld '
+        + 'und Schalter, keine Daten');
+});
+
+test('die tote 1400er-Regel ist weg und kommt nicht zurueck', () => {
+    /* `.analysis-container` hatte keinen einzigen Benutzer in index.html,
+       js/ oder den Vorlagen, sah aber wie ein echter Deckel aus und stand
+       bei jeder Suche nach "warum waechst das nicht mit" im Weg. Die
+       Ansicht heisst .meta-card-analysis-container. */
+    const ohneKomm = CSS.replace(/\/\*[\s\S]*?\*\//g, ' ');
+    assert.ok(!/(^|[},\s])\.analysis-container\s*\{/.test(ohneKomm),
+        '.analysis-container ist zurueck — eine Regel ohne Benutzer, die '
+        + 'wie ein Deckel aussieht');
 });

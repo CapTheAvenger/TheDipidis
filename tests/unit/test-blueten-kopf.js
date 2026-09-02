@@ -51,11 +51,51 @@ describe('Blüten im Kopf: sie liegen hinter dem Inhalt', () => {
         assert.match(HEADER, /\.cards-header > \* \{[^}]*position:\s*relative/);
     });
 
-    it('die Kopfleiste traegt die Schicht und schneidet sie ab', () => {
-        const kopf = HEADER.slice(HEADER.indexOf('.cards-header {'),
-                                  HEADER.indexOf('}', HEADER.indexOf('.cards-header {')));
-        assert.match(kopf, /position:\s*relative/);
-        assert.match(kopf, /overflow:\s*hidden/);
+    it('die Kopfleiste traegt die Schicht, schneidet sie aber NICHT ab', () => {
+        /* DIESE ZUSAGE STAND BIS ZUM 02.09.2026 AUF DEM KOPF.
+         *
+         * Sie forderte `overflow: hidden` auf `.cards-header` — genau das,
+         * was am 29.08. das Pokeball-Menue unbrauchbar gemacht hatte: der
+         * Kopf ist 97 px hoch, das Menue haengt als absolut positioniertes
+         * Kind darin, ist 689 px hoch und beginnt bei y=102. **674 seiner
+         * 689 Pixel wurden weggeschnitten.** Der Klick oeffnete das Menue
+         * korrekt, sichtbar blieb ein 15-Pixel-Streifen; fuer den Nutzer
+         * sah es aus, als passiere nichts. Auf dem Telefon ist der
+         * Pokeball der einzige Weg zu fuenf Bereichen.
+         *
+         * Gruen war die Zusage nur durch einen Zufall: der Ausschnitt
+         * endete am ersten `}` nach `.cards-header {`, das liegt aber
+         * INNERHALB des Kommentars, und dort steht die Zeichenfolge
+         * "overflow: hidden" — im Satz "KEIN overflow: hidden". Der Test
+         * las seine eigene Begruendung als Erfuellung.
+         *
+         * Deshalb wird jetzt (a) am Kommentar vorbei geschnitten und
+         * (b) das Gegenteil zugesichert. */
+        const nurCode = HEADER.replace(/\/\*[\s\S]*?\*\//g, ' ');
+        const i = nurCode.indexOf('.cards-header {');
+        assert.ok(i >= 0, '.cards-header ist verschwunden');
+        const kopf = nurCode.slice(i, nurCode.indexOf('}', i));
+        assert.match(kopf, /position:\s*relative/,
+            'ohne position: relative haengt die Bluetenschicht nicht mehr '
+            + 'am Kopf');
+        assert.ok(!/overflow:\s*hidden/.test(kopf),
+            'overflow: hidden ist auf .cards-header zurueck — das schneidet '
+            + 'das Pokeball-Menue auf 15 von 689 Pixeln zusammen und macht '
+            + 'auf dem Telefon fuenf Bereiche unerreichbar');
+        assert.match(kopf, /overflow:\s*visible/,
+            'die Freigabe steht nicht mehr ausdruecklich da — ohne sie erbt '
+            + 'der Kopf womoeglich wieder einen Beschnitt');
+
+        // Beschnitten wird die Zierschicht, und zwar von sich selbst.
+        const j = nurCode.indexOf('.cards-header::after');
+        assert.ok(j >= 0, '.cards-header::after ist verschwunden');
+        const schicht = nurCode.slice(j, nurCode.indexOf('}', j));
+        assert.match(schicht, /overflow:\s*hidden/,
+            'die Bluetenschicht beschneidet sich nicht mehr selbst — dann '
+            + 'laeuft sie ueber die runden Ecken des Kopfes');
+        assert.match(schicht, /border-radius:\s*inherit/,
+            'ohne border-radius: inherit passt der Beschnitt nicht zu den '
+            + 'Ecken des Kopfes');
     });
 
     it('sie ist durchscheinend, nicht deckend', () => {

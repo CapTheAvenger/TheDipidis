@@ -3082,11 +3082,55 @@ body.sqp-d-open { overflow: hidden; }
 /* Die Matrix. Breite Tabellen scrollen in ihrem eigenen Kasten, nie
    die Seite — dieselbe Regel wie ueberall sonst im Projekt. */
 .sq-console .sq-team-matrixwrap { overflow-x: auto; }
-/* Kein festes min-width auf der Tabelle: die Zellen bringen mit
-   ihren 122px selbst genug Breite mit, und ein Riegel von 420px
-   waere genau das, was die Spalten auf dem Handy unbeweglich
-   macht. Gescrollt wird im Wrapper darueber. */
-.sq-console .sq-team-matrix { border-collapse: collapse; width: 100%; }
+/* BEFUND (live gemessen, 02.09.2026): mit `width: 100%` und drei
+   Spalten wurde jede Zelle 1144 px breit — die Beschriftung klebte
+   links, die Zahl 1000 px weiter rechts. Auf einem breiten Schirm sah
+   die Matrix aus, als sei sie auseinandergerissen.
+
+   Die Tabelle waechst jetzt mit ihrem Inhalt statt mit dem Fenster.
+   Kein festes min-width: die Zellen bringen ihre Breite selbst mit,
+   und ein Riegel waere genau das, was die Spalten auf dem Handy
+   unbeweglich macht. Gescrollt wird im Wrapper darueber. */
+/* DIE PAUSCHALREGEL AUS styles.css:918 MUSS HIER AUSGENOMMEN WERDEN.
+
+   Dort steht `table { display: block; width: 100% }` und direkt darunter
+   `table thead, table tbody { display: table; width: 100%;
+   table-layout: fixed }`. Damit ist eine <table> keine Tabellenbox mehr:
+   Kopf und Koerper werden ZWEI voneinander unabhaengige Tabellen und
+   loesen ihre Spaltenbreiten getrennt auf. Genau daran ist am 19.08.2026
+   die Heatmap um 280 px verrutscht.
+
+   Live gemessen (02.09.2026): ohne die Ausnahme wurde jede Zelle in
+   einem 3822-px-Fenster 687 px breit, die Beschriftung klebte links und
+   die Zahl weit rechts. `width: auto` allein half nicht — es griff gar
+   nicht, weil die Tabelle eine Blockbox war.
+
+   Mit der Ausnahme waechst die Tabelle mit ihrem INHALT statt mit dem
+   Fenster, und Kopf und Koerper fluchten wieder. */
+.sq-console .sq-team-matrix {
+    display: table; border-collapse: collapse;
+    width: auto; max-width: 100%; overflow: visible; margin: 0;
+}
+.sq-console .sq-team-matrix thead { display: table-header-group; background: none; }
+.sq-console .sq-team-matrix tbody { display: table-row-group; }
+.sq-console .sq-team-matrix tr { display: table-row; }
+/* Und der Grund muss mit. styles.css faerbt jedes <th> mit einem
+   festen `background: #f8f9fa` — fast weiss. Live gemessen
+   (02.09.2026): der Zeilenkopf stand mit #EEF2FF auf #F8F9FA, also
+   fast weiss auf fast weiss, und war schlicht nicht zu lesen. Die
+   Konsole bringt ihren eigenen dunklen Satz mit; er muss hier
+   ausdruecklich gesetzt werden, sonst gewinnt die Pauschalregel. */
+.sq-console .sq-team-matrix th,
+.sq-console .sq-team-matrix td,
+.sq-console .sq-team-matrix thead td {
+    display: table-cell; background: transparent;
+}
+/* Die Ecke oben links traegt nichts und darf deshalb auch keinen
+   Rahmen haben — mit einem sah sie aus wie eine leere Spalte. */
+.sq-console .sq-team-matrix thead td { border: 0; }
+.sq-console .sq-team-matrix tbody th {
+    background: var(--sq-deep); position: sticky; left: 0; z-index: 1;
+}
 .sq-console .sq-team-matrix th,
 .sq-console .sq-team-matrix td {
     border: .8px solid var(--sq-line); padding: 7px 8px; text-align: left; vertical-align: top;
@@ -3101,9 +3145,10 @@ body.sqp-d-open { overflow: hidden; }
 .sq-console .sq-team-matrix thead td { border: 0; }
 
 .sq-console .sq-team-zelle {
-    position: relative; min-width: 122px;
+    position: relative; min-width: 122px; max-width: 230px;
     font-family: var(--sq-num); font-size: 11px;
 }
+.sq-console .sq-team-matrix tbody th { max-width: 190px; }
 /* Die Kante links traegt das Urteil. Eine flaechige Einfaerbung wuerde
    die Zahlen darin schwerer lesbar machen; ein Streifen sagt dasselbe
    und laesst den Text in Ruhe. */
@@ -3115,9 +3160,14 @@ body.sqp-d-open { overflow: hidden; }
 .sq-console .sq-team-pfeil {
     position: absolute; top: 6px; right: 7px; font-size: 10px; color: var(--sq-dim); cursor: help;
 }
+/* Wert und K.-o.-Zahl stehen NEBENEINANDER, nicht an den beiden
+   Raendern: `1fr auto` schob sie auf einem breiten Schirm 1000 px
+   auseinander, und zwei Zahlen, die zusammengehoeren, lasen sich wie
+   zwei verschiedene Angaben. */
 .sq-console .sq-team-deal,
 .sq-console .sq-team-take {
-    display: grid; grid-template-columns: 1fr auto; align-items: baseline;
+    display: grid; grid-template-columns: max-content max-content;
+    justify-content: start; align-items: baseline;
     column-gap: 6px; padding-right: 16px;
 }
 .sq-console .sq-team-deal i,

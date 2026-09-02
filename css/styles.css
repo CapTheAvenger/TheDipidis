@@ -1046,14 +1046,11 @@
             margin-top: 30px;
         }
 
-        .analysis-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-            overflow: hidden;
-        }
+        /* .analysis-container ist am 02.09.2026 entfernt worden: kein
+           einziger Treffer in index.html, js/ oder den Vorlagen. Sie sah
+           wie ein echter 1400er-Deckel aus und stand bei jeder Suche nach
+           "warum waechst das nicht mit" im Weg. Die Ansicht heisst
+           .meta-card-analysis-container. */
 
         .analysis-header {
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
@@ -4419,6 +4416,10 @@
     }
 }
 /* --- Filter Boxen (Cards Tab) max-width auf grossen Bildschirmen --- */
+/* BLEIBT SCHMAL, mit Absicht: hier stehen Suchfeld und Schalter, keine
+   Daten. Auf 3440 px auseinandergezogen liegen zwei zusammengehoerende
+   Bedienelemente einen halben Meter auseinander. Wachsen sollen die
+   Ansichten, die Tabellen und Gitter tragen. */
 .filter-section-main > div:nth-child(2) {
     max-width: 1200px;
     margin: 0 auto;
@@ -10270,7 +10271,11 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     /* Die 32 px in der Breitenformel waren ein zweiter, versteckter
        Seitenrand neben dem Innenabstand. Beide laufen jetzt ueber
        --page-gutter, damit es EINE Stellschraube gibt statt zweier. */
-    width: min(1440px, 100% - 2 * var(--page-gutter));
+    /* Waechst mit dem Fenster (02.09.2026). Der feste 1440er-Deckel liess
+       auf 2560/3440 px links und rechts Leerraum stehen, waehrend die
+       Kategorie-Kacheln in der Mitte gedraengt standen. Der Innenabstand
+       bleibt --page-gutter, damit es EINE Stellschraube gibt. */
+    width: min(100% - 2 * var(--page-gutter), max(1440px, 92vw));
     max-width: none;
     margin-inline: auto;
     padding: var(--s-6) var(--page-gutter) 48px;

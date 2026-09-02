@@ -1,7 +1,11 @@
 {
   "_meta": {
     "description": "Every tunable parameter in the Meta Call predictor as of 2026-06-07. For the Predictor 5.6 redesign abgleich: backtest each lever's contribution to MAE on the 7 TEF-POR Regionals (Prague → Indianapolis), then carry forward the levers that demonstrably move the metric and drop the ones that don't.",
-    "baseline_mae_pp": { "top10": 2.40, "top20": 1.78, "harness": "scripts/predictor_backtest.py" },
+    "baseline_mae_pp": {
+      "top10": 2.4,
+      "top20": 1.78,
+      "harness": "scripts/predictor_backtest.py"
+    },
     "data_sources_currently_consumed": [
       "labs_tournament_decks.csv  (in-person majors: share, day1/day2 share+wr, top1, conv)",
       "labs_tournament_matchups.csv  (pairwise WR for matchup matrix)",
@@ -20,162 +24,452 @@
       "Top-8 distribution per major — labs CSV already has `top8_count`, just not exposed as a separate predictor signal"
     ]
   },
-
   "groups": {
     "mode_a_baseline": {
       "purpose": "Mode A (no labs major data yet): linear combination of ladder + brought + top8 + weekly trend.",
       "code_path": "js/app-meta-call.js — Mode A branch in _shareList.forEach predictor body",
       "parameters": [
-        {"name": "w_ladder", "current": 0.30, "range": [0.20, 0.45], "notes": "Online ladder weight. Higher → trust the ladder more."},
-        {"name": "w_brought", "current": 0.10, "range": [0.05, 0.30], "notes": "Online-tournament brought-share weight."},
-        {"name": "w_top8", "current": 0.50, "range": [0.30, 0.60], "notes": "Top-8-boost weight (= brought × clip(d2/d1, 0.5, 2.0)). Currently dominant signal."},
-        {"name": "w_weekly", "current": 0.10, "range": [0.00, 0.20], "notes": "Weekly trend signal. Falls back to ladder when no week-ago snapshot."}
+        {
+          "name": "w_ladder",
+          "current": 0.3,
+          "range": [
+            0.2,
+            0.45
+          ],
+          "notes": "Online ladder weight. Higher → trust the ladder more."
+        },
+        {
+          "name": "w_brought",
+          "current": 0.1,
+          "range": [
+            0.05,
+            0.3
+          ],
+          "notes": "Online-tournament brought-share weight."
+        },
+        {
+          "name": "w_top8",
+          "current": 0.5,
+          "range": [
+            0.3,
+            0.6
+          ],
+          "notes": "Top-8-boost weight (= brought × clip(d2/d1, 0.5, 2.0)). Currently dominant signal."
+        },
+        {
+          "name": "w_weekly",
+          "current": 0.1,
+          "range": [
+            0.0,
+            0.2
+          ],
+          "notes": "Weekly trend signal. Falls back to ladder when no week-ago snapshot."
+        }
       ]
     },
-
     "phase_beta_major_anchor": {
       "purpose": "Decks with ≥2 majors at ≥2% share use recency-weighted major median × PHASE_B_BLEND + ladder × (1-PHASE_B_BLEND) instead of raw ladder.",
       "parameters": [
-        {"name": "PHASE_B_BLEND_MAJOR", "current": 0.70, "range": [0.50, 0.85], "notes": "Fraction of major-median in the blend. Lower means trust ladder more."},
-        {"name": "phase_b_min_majors", "current": 2, "notes": "Min number of major appearances to qualify."},
-        {"name": "phase_b_min_share", "current": 2.0, "notes": "Min share at those majors (%)."}
+        {
+          "name": "PHASE_B_BLEND_MAJOR",
+          "current": 0.2,
+          "range": [
+            0.1,
+            0.4
+          ],
+          "notes": "Fraction of major-median in the blend. Lower means trust ladder more. Korrigiert am 02.09.2026: der Katalog fuehrte 0.7 mit Bereich [0.5, 0.85] — ein Bereich, der den echten Wert nicht einmal enthielt. Der Code steht seit laengerem auf 0.20, mit Begruendung in js/app-meta-call.js:540-547: Majors sind selten (5-6 je Format), und ein Anker, der staerker als ~20 % zum Major-Mittel zieht, ueberschaetzt Decks, die zwischen den Turnieren verblasst sind."
+        },
+        {
+          "name": "phase_b_min_majors",
+          "current": 2,
+          "notes": "Min number of major appearances to qualify."
+        },
+        {
+          "name": "phase_b_min_share",
+          "current": 2.0,
+          "notes": "Min share at those majors (%)."
+        }
       ]
     },
-
     "predictor_4_2_ladder_damper": {
       "purpose": "Damp the ladder term by per-deck top-8 conv factor. Casual decks have high ladder + low conv → damped.",
       "parameters": [
-        {"name": "PREDICTOR_4_2_LADDER_DAMP_LO", "current": 0.75, "range": [0.70, 0.90]},
-        {"name": "PREDICTOR_4_2_LADDER_DAMP_HI", "current": 1.25, "range": [1.10, 1.30]},
-        {"name": "mode_a_damper_lo", "current": 0.90, "notes": "Tighter bounds in Mode A (no major-anchored conv)."},
-        {"name": "mode_a_damper_hi", "current": 1.10}
+        {
+          "name": "PREDICTOR_4_2_LADDER_DAMP_LO",
+          "current": 0.75,
+          "range": [
+            0.7,
+            0.9
+          ]
+        },
+        {
+          "name": "PREDICTOR_4_2_LADDER_DAMP_HI",
+          "current": 1.25,
+          "range": [
+            1.1,
+            1.3
+          ]
+        },
+        {
+          "name": "mode_a_damper_lo",
+          "current": 0.9,
+          "notes": "Tighter bounds in Mode A (no major-anchored conv)."
+        },
+        {
+          "name": "mode_a_damper_hi",
+          "current": 1.1
+        }
       ]
     },
-
     "predictor_4_6_underdog_champion": {
       "purpose": "Recent <4% regional win at ≥500 players boosts the deck for 14-28 days post-event.",
       "parameters": [
-        {"name": "PREDICTOR_4_6_MAX_SHARE_PCT", "current": 4.0, "range": [3.0, 5.0]},
-        {"name": "PREDICTOR_4_6_MIN_PLAYERS", "current": 500, "range": [300, 800]},
-        {"name": "PREDICTOR_4_6_FULL_DECAY_DAYS", "current": 14, "range": [7, 21]},
-        {"name": "PREDICTOR_4_6_ZERO_DECAY_DAYS", "current": 28, "range": [21, 42]},
-        {"name": "PREDICTOR_4_6_BOOST_PP_MAX", "current": 2.5, "range": [1.0, 4.0]}
+        {
+          "name": "PREDICTOR_4_6_MAX_SHARE_PCT",
+          "current": 4.0,
+          "range": [
+            3.0,
+            5.0
+          ]
+        },
+        {
+          "name": "PREDICTOR_4_6_MIN_PLAYERS",
+          "current": 500,
+          "range": [
+            300,
+            800
+          ]
+        },
+        {
+          "name": "PREDICTOR_4_6_FULL_DECAY_DAYS",
+          "current": 14,
+          "range": [
+            7,
+            21
+          ]
+        },
+        {
+          "name": "PREDICTOR_4_6_ZERO_DECAY_DAYS",
+          "current": 28,
+          "range": [
+            21,
+            42
+          ]
+        },
+        {
+          "name": "PREDICTOR_4_6_BOOST_PP_MAX",
+          "current": 2.5,
+          "range": [
+            1.0,
+            4.0
+          ]
+        }
       ]
     },
-
     "predictor_4_7_online_winner": {
       "purpose": "Recent online-tournament win for an underrated archetype (current ladder < 5%).",
       "parameters": [
-        {"name": "PREDICTOR_4_7_MAX_SHARE_PCT", "current": 5.0, "range": [3.0, 7.0]},
-        {"name": "PREDICTOR_4_7_MIN_PLAYERS", "current": 150, "range": [100, 250]},
-        {"name": "PREDICTOR_4_7_FULL_DECAY_DAYS", "current": 7, "range": [3, 10]},
-        {"name": "PREDICTOR_4_7_ZERO_DECAY_DAYS", "current": 21, "range": [14, 28]},
-        {"name": "PREDICTOR_4_7_BOOST_PP_MAX", "current": 1.0, "range": [0.5, 2.0]}
+        {
+          "name": "PREDICTOR_4_7_MAX_SHARE_PCT",
+          "current": 5.0,
+          "range": [
+            3.0,
+            7.0
+          ]
+        },
+        {
+          "name": "PREDICTOR_4_7_MIN_PLAYERS",
+          "current": 150,
+          "range": [
+            100,
+            250
+          ]
+        },
+        {
+          "name": "PREDICTOR_4_7_FULL_DECAY_DAYS",
+          "current": 7,
+          "range": [
+            3,
+            10
+          ]
+        },
+        {
+          "name": "PREDICTOR_4_7_ZERO_DECAY_DAYS",
+          "current": 21,
+          "range": [
+            14,
+            28
+          ]
+        },
+        {
+          "name": "PREDICTOR_4_7_BOOST_PP_MAX",
+          "current": 1.0,
+          "range": [
+            0.5,
+            2.0
+          ]
+        }
       ]
     },
-
     "predictor_5_4_day2_growth": {
       "purpose": "Reward decks that absolute-pp-grew Day-1 → Day-2 across recent majors.",
       "parameters": [
-        {"name": "PREDICTOR_5_4_MIN_GROWTH_PP", "current": 0.5, "range": [0.3, 1.0]},
-        {"name": "PREDICTOR_5_4_BOOST_PER_PP", "current": 0.4, "range": [0.2, 0.8], "notes": "Reduced 0.6 → 0.4 (Indy calibration)."},
-        {"name": "PREDICTOR_5_4_BOOST_PP_MAX", "current": 1.0, "range": [0.5, 2.0], "notes": "Lowered 1.5 → 1.0 (Indy)."}
+        {
+          "name": "PREDICTOR_5_4_MIN_GROWTH_PP",
+          "current": 0.5,
+          "range": [
+            0.3,
+            1.0
+          ]
+        },
+        {
+          "name": "PREDICTOR_5_4_BOOST_PER_PP",
+          "current": 0.4,
+          "range": [
+            0.2,
+            0.8
+          ],
+          "notes": "Reduced 0.6 → 0.4 (Indy calibration)."
+        },
+        {
+          "name": "PREDICTOR_5_4_BOOST_PP_MAX",
+          "current": 1.0,
+          "range": [
+            0.5,
+            2.0
+          ],
+          "notes": "Lowered 1.5 → 1.0 (Indy)."
+        }
       ]
     },
-
     "predictor_5_5_last_meta_floor": {
       "purpose": "Set-addition rotation only: floor each deck at previous_format full-player-weighted avg × 0.7.",
       "gating": "Only fires when format_window.set_addition_only === true AND previous_format_key set.",
       "parameters": [
-        {"name": "PREDICTOR_5_5_FLOOR_FACTOR", "current": 0.7, "range": [0.5, 0.9], "notes": "Lower → less aggressive floor."},
-        {"name": "PREDICTOR_5_5_DECLINE_THRESHOLD", "current": 0.85, "range": [0.75, 0.95], "notes": "lateShare/earlyShare ratio below which baseline gets damped."},
-        {"name": "PREDICTOR_5_5_DECLINE_DAMPER", "current": 0.85, "range": [0.70, 0.95], "notes": "Damper factor on baseline for declining decks."},
-        {"name": "_alternative_floor_source", "current": "full_player_weighted_avg", "alternatives": ["max_of_early_late", "late_only", "median_of_period"], "notes": "Tried MAX(early,late) — over-pumped Dragapult solo at Indy (19.8% late vs 14.1% full). Reverted."}
-      ]
+        {
+          "name": "PREDICTOR_5_5_FLOOR_FACTOR",
+          "current": 0.7,
+          "range": [
+            0.5,
+            0.9
+          ],
+          "notes": "Lower → less aggressive floor."
+        },
+        {
+          "name": "_alternative_floor_source",
+          "current": "full_player_weighted_avg",
+          "alternatives": [
+            "max_of_early_late",
+            "late_only",
+            "median_of_period"
+          ],
+          "notes": "Tried MAX(early,late) — over-pumped Dragapult solo at Indy (19.8% late vs 14.1% full). Reverted."
+        }
+      ],
+      "removed_parameters": {
+        "note": "Am 02.09.2026 aus der Liste genommen: PREDICTOR_5_5_DECLINE_THRESHOLD und PREDICTOR_5_5_DECLINE_DAMPER haben im Motor keine Entsprechung mehr (grep ueber js/app-meta-call.js: null Treffer). Sie standen hier als \"current 0.85\", also als waeren sie in Betrieb.",
+        "names": [
+          "PREDICTOR_5_5_DECLINE_THRESHOLD",
+          "PREDICTOR_5_5_DECLINE_DAMPER"
+        ]
+      }
     },
-
     "predictor_5_5_5_family_cap": {
       "purpose": "Post-renorm hard cap on family aggregate share.",
       "parameters": [
-        {"name": "FAMILY_CAP_PCT", "current": 28.0, "range": [25.0, 35.0], "notes": "Recent regional Dragapult family: Utrecht 25.1, Indy 29.3, Prague 29.4, Campinas 32.9, LA 31.9. Tune to observed ceiling."},
-        {"name": "FAMILY_CAP_MIN_VARIANTS", "current": 2, "notes": "Solo archetypes pass through untouched."}
+        {
+          "name": "FAMILY_CAP_PCT",
+          "current": 28.0,
+          "range": [
+            25.0,
+            35.0
+          ],
+          "notes": "Recent regional Dragapult family: Utrecht 25.1, Indy 29.3, Prague 29.4, Campinas 32.9, LA 31.9. Tune to observed ceiling."
+        },
+        {
+          "name": "FAMILY_CAP_MIN_VARIANTS",
+          "current": 2,
+          "notes": "Solo archetypes pass through untouched."
+        }
       ]
     },
-
     "predictor_4_5_counter_meta": {
       "purpose": "Boost decks that counter the dominant family (matchup WR > 0.50, family share > 15%).",
       "parameters": [
-        {"name": "PREDICTOR_45_FAMILY_FLOOR_PCT", "current": 15, "range": [10, 25]},
-        {"name": "PREDICTOR_45_FAMILY_EXCESS_DIV", "current": 10},
-        {"name": "PREDICTOR_45_WR_FACTOR_SCALE", "current": 10},
-        {"name": "PREDICTOR_45_BASE_CONTRIB_PP", "current": 0.7},
-        {"name": "PREDICTOR_45_COUNTER_WR_MIN", "current": 0.50},
-        {"name": "PREDICTOR_45_BOOST_CAP_PP", "current": 3.5, "notes": "Raised 2.0 → 3.5 post-Utrecht."}
+        {
+          "name": "PREDICTOR_45_FAMILY_FLOOR_PCT",
+          "current": 15,
+          "range": [
+            10,
+            25
+          ]
+        },
+        {
+          "name": "PREDICTOR_45_FAMILY_EXCESS_DIV",
+          "current": 10
+        },
+        {
+          "name": "PREDICTOR_45_WR_FACTOR_SCALE",
+          "current": 10
+        },
+        {
+          "name": "PREDICTOR_45_BASE_CONTRIB_PP",
+          "current": 0.7
+        },
+        {
+          "name": "PREDICTOR_45_COUNTER_WR_MIN",
+          "current": 0.5
+        },
+        {
+          "name": "PREDICTOR_45_BOOST_CAP_PP",
+          "current": 3.5,
+          "notes": "Raised 2.0 → 3.5 post-Utrecht."
+        }
       ]
     },
-
     "predictor_4_6_family_suppression": {
       "purpose": "Suppress dominant family share when > 20% (anti-monoculture).",
       "parameters": [
-        {"name": "PREDICTOR_46_FAMILY_FLOOR_PCT", "current": 20, "range": [18, 25]},
-        {"name": "PREDICTOR_46_SUPPRESS_PER_PP", "current": 0.30},
-        {"name": "PREDICTOR_46_SUPPRESS_CAP_PP", "current": 6.0}
+        {
+          "name": "PREDICTOR_46_FAMILY_FLOOR_PCT",
+          "current": 20,
+          "range": [
+            18,
+            25
+          ]
+        },
+        {
+          "name": "PREDICTOR_46_SUPPRESS_PER_PP",
+          "current": 0.3
+        },
+        {
+          "name": "PREDICTOR_46_SUPPRESS_CAP_PP",
+          "current": 6.0
+        }
       ]
     },
-
     "predictor_4_7_counter_adoption": {
       "purpose": "Decks whose recent labs brought > recent online ladder (= field is hedging in their direction).",
       "parameters": [
-        {"name": "PREDICTOR_47_DOMINANT_FAMILY_PCT", "current": 25},
-        {"name": "PREDICTOR_47_DELTA_MIN_PP", "current": 0.5},
-        {"name": "PREDICTOR_47_BOOST_PER_PP", "current": 0.50},
-        {"name": "PREDICTOR_47_BOOST_CAP_PP", "current": 1.5}
+        {
+          "name": "PREDICTOR_47_DOMINANT_FAMILY_PCT",
+          "current": 25
+        },
+        {
+          "name": "PREDICTOR_47_DELTA_MIN_PP",
+          "current": 0.5
+        },
+        {
+          "name": "PREDICTOR_47_BOOST_PER_PP",
+          "current": 0.5
+        },
+        {
+          "name": "PREDICTOR_47_BOOST_CAP_PP",
+          "current": 1.5
+        }
       ]
     },
-
     "predictor_5_5_online_presence_floor": {
       "purpose": "Final safety floor for decks that have both verified online + labs presence but were crushed by dampers.",
       "parameters": [
-        {"name": "PREDICTOR_55_PRESENCE_FLOOR_MIN", "current": 3.0, "notes": "Online share must be ≥ this to qualify."},
-        {"name": "PREDICTOR_55_PRESENCE_FLOOR_PCT", "current": 0.60, "notes": "Online-based floor multiplier."},
-        {"name": "PREDICTOR_55_LABS_FLOOR_PCT", "current": 0.85, "notes": "Labs-based floor multiplier."},
-        {"name": "PREDICTOR_55_LABS_FLOOR_MIN_N", "current": 0.5},
-        {"name": "PREDICTOR_55_LABS_FLOOR_MIN_PCT", "current": 1.5},
-        {"name": "PREDICTOR_55_REQUIRE_LABS_N", "current": 1}
+        {
+          "name": "PREDICTOR_55_PRESENCE_FLOOR_MIN",
+          "current": 3.0,
+          "notes": "Online share must be ≥ this to qualify."
+        },
+        {
+          "name": "PREDICTOR_55_PRESENCE_FLOOR_PCT",
+          "current": 0.6,
+          "notes": "Online-based floor multiplier."
+        },
+        {
+          "name": "PREDICTOR_55_LABS_FLOOR_PCT",
+          "current": 0.85,
+          "notes": "Labs-based floor multiplier."
+        },
+        {
+          "name": "PREDICTOR_55_LABS_FLOOR_MIN_N",
+          "current": 0.5
+        },
+        {
+          "name": "PREDICTOR_55_LABS_FLOOR_MIN_PCT",
+          "current": 1.5
+        },
+        {
+          "name": "PREDICTOR_55_REQUIRE_LABS_N",
+          "current": 1
+        }
       ]
     },
-
     "predictor_5_6_format_leader_consolidation": {
       "purpose": "As a format matures, dominant family's lead variant consolidates (Dragapult solo within-family went 35% → 62% at Indy).",
       "parameters": [
-        {"name": "PREDICTOR_56_FAMILY_DOMINANCE_THRESHOLD", "current": 20.0},
-        {"name": "PREDICTOR_56_MIN_VARIANTS", "current": 3},
-        {"name": "PREDICTOR_56_CONSOLIDATION_RATE", "current": 0.40},
-        {"name": "PREDICTOR_56_FAMILY_GROWTH_BOOST_PP", "current": 5.0}
+        {
+          "name": "PREDICTOR_56_FAMILY_DOMINANCE_THRESHOLD",
+          "current": 20.0
+        },
+        {
+          "name": "PREDICTOR_56_MIN_VARIANTS",
+          "current": 3
+        },
+        {
+          "name": "PREDICTOR_56_CONSOLIDATION_RATE",
+          "current": 0.4
+        },
+        {
+          "name": "PREDICTOR_56_FAMILY_GROWTH_BOOST_PP",
+          "current": 5.0
+        }
       ]
     },
-
     "predictor_5_7_anti_leader_tech": {
       "purpose": "Boost hard counters when format-leader share crosses a tech-adoption threshold.",
       "parameters": [
-        {"name": "PREDICTOR_57_LEADER_DOMINANCE_THRESHOLD", "current": 25.0},
-        {"name": "PREDICTOR_57_COUNTER_WR_THRESHOLD", "current": 0.55},
-        {"name": "PREDICTOR_57_COUNTER_MAX_FIELD_SHARE", "current": 5.0},
-        {"name": "PREDICTOR_57_BOOST_SCALE", "current": 8.0},
-        {"name": "PREDICTOR_57_BOOST_PP_MAX", "current": 1.5}
+        {
+          "name": "PREDICTOR_57_LEADER_DOMINANCE_THRESHOLD",
+          "current": 25.0
+        },
+        {
+          "name": "PREDICTOR_57_COUNTER_WR_THRESHOLD",
+          "current": 0.55
+        },
+        {
+          "name": "PREDICTOR_57_COUNTER_MAX_FIELD_SHARE",
+          "current": 5.0
+        },
+        {
+          "name": "PREDICTOR_57_BOOST_SCALE",
+          "current": 8.0
+        },
+        {
+          "name": "PREDICTOR_57_BOOST_PP_MAX",
+          "current": 1.5
+        }
       ]
     },
-
     "hype_damper": {
       "purpose": "When current ladder share runs ≥ 25 % ahead of brought share at a major, treat the gap as online hype and damp 25 %.",
       "gating": "Only fires in Mode B (current-format majors available).",
       "parameters": [
-        {"name": "HYPE_DAMPER_RATIO_MIN", "current": 1.25, "range": [1.15, 1.40]},
-        {"name": "HYPE_DAMPER_FACTOR", "current": 0.75, "range": [0.65, 0.90]}
+        {
+          "name": "HYPE_DAMPER_RATIO_MIN",
+          "current": 1.25,
+          "range": [
+            1.15,
+            1.4
+          ]
+        },
+        {
+          "name": "HYPE_DAMPER_FACTOR",
+          "current": 0.75,
+          "range": [
+            0.65,
+            0.9
+          ]
+        }
       ]
     }
   },
-
   "_next_actions": [
     "Backtest the 5 most-impactful parameters via grid search on 6 TEF-POR Regionals — keep the combinations that move aggregate MAE below 2.0 pp top-10.",
     "Build player-continuity scraper (limitless event pages → player_id → archetype history).",

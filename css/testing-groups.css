@@ -3,7 +3,12 @@
    ============================================================ */
 
 .tg-wrap {
-  max-width: 1400px;
+  /* Waechst mit dem Fenster (02.09.2026) — die Gruppentabellen standen
+     auf breiten Schirmen in einer 1400er-Spalte, links und rechts
+     Leerraum. Dieselbe Regel wie .container in css/styles.css. */
+  width: min(100%, max(1400px, 92vw));
+  max-width: none;
+  margin-inline: auto;
   padding-bottom: 40px;
 }
 

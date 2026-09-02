@@ -1,11 +1,24 @@
 # Block 8 — die Fehlerliste
 
-Sechs Commits, aufsetzend auf Block 7 (`main` = `91fd8a59`, PR #457).
-Nichts davon ist gepusht.
+> **ERLEDIGT — nachgeprüft am 02.09.2026.**
+>
+> Dieser Text sagte bis heute „Nichts davon ist gepusht" und lud dazu
+> ein, `merge-block8.sh` laufen zu lassen. Das ist seit Langem falsch:
+> der Inhalt liegt auf `main`. Belegt an den Funktionsmarken im Code
+> (`_dropTop100MatchupSection` in `js/app-meta-cards.js`, dreimal) und
+> an vier grünen Testdateien — `test-top100-weg.js`,
+> `test-eine-versteckklasse.js`, `test-globale-namen.js`,
+> `test-fussleiste-und-koerper.js`.
+>
+> Wer das Skript heute ausführt, setzt auf einen Stand auf, der über
+> hundert Commits zurückliegt. **Nicht ausführen.**
+>
+> Die Datei bleibt als Begründungsprotokoll stehen — vor allem wegen
+> des Abschnitts direkt darunter: die angekündigten „Zusammenlegungen"
+> wurden mit Messung kassiert, und diese Messung ist der Grund, warum
+> es sie bis heute nicht gibt.
 
-```bash
-bash redesign/offen/block8/merge-block8.sh .
-```
+Sechs Commits, aufsetzend auf Block 7 (`main` = `91fd8a59`, PR #457).
 
 Angenommen auf einem frisch geklonten Repo: **1157 JS-Tests** (vorher
 1115), **373 Python** / 5 übersprungen, `!important` **3356 → 3347**.

@@ -10880,6 +10880,21 @@ body.arc-open { overflow: hidden; }
 .arc-halb--leer .arc-tile-value { color: var(--arc-ink3); font-weight: 600; }
 .arc-halb--leer .arc-halb-quelle { font-style: italic; }
 
+/* Eine duenne Stichprobe wird GEZEIGT, aber leiser.
+ *
+ * Bis zum 02.09.2026 wurde sie stattdessen verschwiegen: unter 40 Partien
+ * stand dort "zu wenige". Das verbarg 27 von 44 Decks und trennte nichts —
+ * Grimmsnarl Froslass (45 Partien, ±15 pp) stand da, Alakazam Dusknoir
+ * (39 Partien, ±16 pp) nicht. Die Partienzahl ist ein Kontinuum von 16 bis
+ * 1.277; ein Schnitt mittendrin macht aus "unsicher" faelschlich "nicht
+ * vorhanden".
+ *
+ * Jetzt entscheidet der Leser: die Zahl steht da, die Partienzahl daneben,
+ * und unter 100 Partien (95-%-Intervall breiter als ±10 Punkte) ist sie
+ * gedaempft. Dieselbe Sprache wie `heatmap-td-thin` in der Heatmap. */
+.arc-halb--duenn .arc-tile-value { opacity: 0.72; font-weight: 600; }
+.arc-halb--duenn .arc-halb-quelle { opacity: 0.85; }
+
 /* Die einfachen Kacheln (Top-8, Day 2) tragen ihre Zahl allein und
    duerfen sie deshalb groesser zeigen — aber auch hier fest, aus
    demselben Grund. */

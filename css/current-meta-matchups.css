@@ -137,6 +137,22 @@
     overflow-y: hidden !important;
     width: 100% !important;
     -webkit-overflow-scrolling: touch;
+    /* Ein Verlauf an der rechten Kante sagt, dass es weitergeht.
+     *
+     * BEFUND aus der Pruefrunde: am Handy ragte die Tabelle 618 px ueber
+     * das 332 px breite Fenster hinaus — "ohne Bildlaufleiste oder
+     * Scroll-Hinweis". Auf Beruehrungsgeraeten blendet das System die
+     * Leiste aus, solange nicht gescrollt wird; wer nicht zufaellig
+     * wischt, haelt die abgeschnittene Tabelle fuer die ganze.
+     *
+     * `background-attachment: local` auf den beiden Verlaeufen laesst sie
+     * mitscrollen und damit am Ende verschwinden — der Hinweis ist genau
+     * dann da, wenn noch etwas kommt, und nur dann. Kein JavaScript. */
+    background:
+        linear-gradient(to right, var(--surface-1) 30%, transparent) left center / 24px 100% no-repeat local,
+        linear-gradient(to left,  var(--surface-1) 30%, transparent) right center / 24px 100% no-repeat local,
+        radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.20), transparent) left center / 12px 100% no-repeat scroll,
+        radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.20), transparent) right center / 12px 100% no-repeat scroll;
 }
 
 /* Die Heatmap ist eine echte Tabelle.
@@ -1267,10 +1283,23 @@
         gap: 10px;
     }
 
+    /* Die Breite folgt der SPALTENZAHL, nicht einer festen Zahl.
+     *
+     * Hier stand `920px !important` — in vier Medienabfragen. Live bei
+     * 390 px nachgemessen: wer auf zwei Decks filterte, bekam trotzdem
+     * 920 px. Erste Spalte 550, Datenspalte 370, die Antwortzelle begann
+     * bei x = 579 in einem 332 px breiten Fenster: fuenf Decknamen
+     * sichtbar, keine Zahl, keine Bildlaufleiste, kein Hinweis. Je genauer
+     * man filterte, desto breiter wurden die Spalten (`table-layout:
+     * fixed` verteilt die feste Breite auf weniger Spalten).
+     *
+     * --heatmap-cols setzt js/app-current-meta.js beim Zeichnen. Zehn
+     * Spalten ergeben wieder 950 px und damit dasselbe Bild wie vorher;
+     * zwei Spalten ergeben 326 px und passen ohne Schieben. */
     #matchupHeatmapContainer .heatmap-table {
-        width: 920px !important;
-        min-width: 920px !important;
-        max-width: 920px !important;
+        width: calc(170px + var(--heatmap-cols, 10) * 78px) !important;
+        min-width: calc(170px + var(--heatmap-cols, 10) * 78px) !important;
+        max-width: none !important;
     }
 
     #currentMetaContent .stats-grid {
@@ -1390,10 +1419,11 @@
 }
 
 @media (max-width: 430px) {
+    /* Siehe oben: die Breite folgt der Spaltenzahl. */
     #matchupHeatmapContainer .heatmap-table {
-        width: 920px !important;
-        min-width: 920px !important;
-        max-width: 920px !important;
+        width: calc(170px + var(--heatmap-cols, 10) * 78px) !important;
+        min-width: calc(170px + var(--heatmap-cols, 10) * 78px) !important;
+        max-width: none !important;
     }
 
     #currentMetaContent .top-cards-container {
@@ -1423,18 +1453,20 @@
 }
 
 @media (max-width: 390px) {
+    /* Siehe oben: die Breite folgt der Spaltenzahl. */
     #matchupHeatmapContainer .heatmap-table {
-        width: 920px !important;
-        min-width: 920px !important;
-        max-width: 920px !important;
+        width: calc(170px + var(--heatmap-cols, 10) * 78px) !important;
+        min-width: calc(170px + var(--heatmap-cols, 10) * 78px) !important;
+        max-width: none !important;
     }
 }
 
 @media (max-width: 360px) {
+    /* Siehe oben: die Breite folgt der Spaltenzahl. */
     #matchupHeatmapContainer .heatmap-table {
-        width: 920px !important;
-        min-width: 920px !important;
-        max-width: 920px !important;
+        width: calc(170px + var(--heatmap-cols, 10) * 78px) !important;
+        min-width: calc(170px + var(--heatmap-cols, 10) * 78px) !important;
+        max-width: none !important;
     }
 
     #matchupHeatmapContainer .heatmap-th-y {

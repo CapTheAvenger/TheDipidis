@@ -70,6 +70,7 @@ const REGISTER = {
     'test-champions-base-stats.js':      'Schema der Statuswerte, keine Zahlenbaender',
     'test-champions-damage.js':          'Rechenwege am Schadensmodell; Baender sind physikalisch (Chance zwischen 0 und 1)',
     'test-champions-matchups.js':        'Struktur der Matchup-Datei, Rechnung an gesetzten Werten',
+    'test-team-rechner.js':              'Team-Rechner: liest data/, um echte Paare zu bilden — welche, ist der Pruefung egal. Verglichen wird die Matrixzelle mit bestMove() auf denselben Daten (Gleichheit zweier Rechenwege), der Spiegelkampf (gilt fuer jedes Pokemon) und die Namensaufloesung ueber den Slug (eine Eigenschaft der Zuordnung). Die EINE Ungleichung ist eine Eigenschaft der Urteilsregel, kein Wochenwert: unter 5 % der farbigen Zellen duerfen sich auf einen K.O. unter 50 % Chance stuetzen. Vor der Korrektur am 02.09.2026 waren es 30 %; die Schranke haelt, solange die Regel ueber den Durchschnittswurf wertet, und faellt, wenn jemand sie auf ko.hits zurueckdreht.',
     'test-champions-speed-tiers.js':     'Sortierlogik an gesetzten Werten; die letzte Zusicherung an der Datenlage ist am 31.08.2026 entfallen',
     'test-champions-sprites.js':         'nur Existenz von Sprite-Eintraegen, keine Ungleichung',
     'test-comparison-csv-comma-parse.js':'Parsebarkeit des Komma-Formats, Struktur',
@@ -88,11 +89,22 @@ const REGISTER = {
     'test-testdaten-wachhund.js':        'dieser Wachhund selbst',
 };
 
-// Stand 31.08.2026, nach dem Aufraeumen der letzten Vorbedingung in
-// test-champions-speed-tiers.js (vorher 61, Stand 28.08.2026).
+// Stand 02.09.2026: 61, um EINE Ungleichung im Team-Rechner (vorher 60,
+// Stand 31.08.2026 nach dem Aufraeumen in test-champions-speed-tiers.js).
+//
+// Die eine: hoechstens 5 % der farbigen Matrixzellen duerfen ihr Urteil
+// auf einen K.O. stuetzen, den die Zelle selbst als unter 50 %
+// wahrscheinlich ausweist. Das ist keine Zahl aus dieser Woche, sondern
+// eine Eigenschaft der Urteilsregel: sie wertet ueber den
+// Durchschnittswurf, und der ist von der Datenlage unabhaengig. Vor der
+// Korrektur am 02.09.2026 waren es 30 % der Zellen, in 5,4 % sagte die
+// Farbe das Gegenteil des wahrscheinlichen Ausgangs. Faellt die Schranke,
+// hat jemand die Regel auf ko.hits zurueckgedreht — genau der Fehler,
+// den die Abnahme gefunden hat.
+//
 // Diese Zahl darf nicht steigen. Wer eine Ungleichung an Live-Daten
 // hinzufuegt, muss hier bewusst hochzaehlen und im Register begruenden.
-const OBERGRENZE = 60;
+const OBERGRENZE = 61;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

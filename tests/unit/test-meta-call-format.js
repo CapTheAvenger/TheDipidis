@@ -457,9 +457,18 @@ describe('Beschriftungen sagen, was gerechnet wurde', () => {
     });
 
     it('die Day-2-Schwelle wird nicht mehr als skalierend beschrieben', () => {
-        assert.doesNotMatch(T.de['mc.recHintDay2'], /skaliert/i);
-        assert.match(T.de['mc.recHintDay2'], /fest bei 20 %/);
-        assert.doesNotMatch(T.en['mc.recHintDay2'], /scales/i);
+        // Der Schluessel heisst seit dem 02.09.2026 mc.recHintZiel: der
+        // Hinweis nennt jetzt das Ziel des aktiven Turniertyps ({ziel})
+        // statt hart "Day 2" — bei Cup und Challenge gibt es keinen
+        // zweiten Tag, und der Code wusste das an der Pille darunter
+        // laengst.
+        assert.doesNotMatch(T.de['mc.recHintZiel'], /skaliert/i);
+        assert.match(T.de['mc.recHintZiel'], /fest bei 20 %/);
+        assert.doesNotMatch(T.en['mc.recHintZiel'], /scales/i);
+        assert.match(T.de['mc.recHintZiel'], /\{ziel\}/,
+            'der Hinweis steht wieder hart auf einem Turnierziel, statt es '
+            + 'vom aktiven Typ einsetzen zu lassen');
+        assert.match(T.en['mc.recHintZiel'], /\{ziel\}/);
     });
 
     it('die d2WR-Beschriftung verspricht keine fuenf Majors mehr', () => {

@@ -428,6 +428,38 @@ def main():
         },
         "entries": entries,
     }
+    # ── Von Hand entschiedene deutsche Namen, ganz zuletzt ────────────
+    #
+    # BEFUND (03.09.2026): diese Datei ist die VIERTE Quelle deutscher
+    # Namen (1.268 Stueck) und war die einzige, die niemand gegen die
+    # anderen gehalten hat — der Melder in scripts/datenluecken.py
+    # vergleicht nur die drei Referenzdateien gegen
+    # champions_names_de.json. Gemessen widersprach sie der Tabelle an
+    # 17 Stellen, darunter neun, die schon einmal entschieden waren
+    # ("Lichtelit" statt Skelabranit, "Wahlglas" statt Wahlbrille).
+    #
+    # Der Pokedex-Bauer wendet die Entscheidungsdatei seit dem 31.08.
+    # selbst an, aus demselben Grund: eine Korrektur, die ein Neubau
+    # ueberschreibt, ist keine Korrektur. Hier fehlte sie noch.
+    ent_pfad = os.path.join(DATA, "champions_namen_entschieden.json")
+    try:
+        ent = json.load(open(ent_pfad, encoding="utf-8")).get("namen") or {}
+        nach_kat = {"item": ent.get("items") or {},
+                    "ability": ent.get("abilities") or {},
+                    "move": ent.get("moves") or {}}
+        gesetzt = 0
+        for e in entries:
+            rec = nach_kat.get(e.get("cat"), {}).get(e.get("en"))
+            de = (rec or {}).get("de")
+            if de and e.get("de") != de:
+                e["de"] = de
+                gesetzt += 1
+        print(f"Entschiedene deutsche Namen angewandt: {gesetzt} korrigiert "
+              f"(von {sum(len(v) for v in nach_kat.values())} belegten)")
+    except Exception as ex:  # noqa: BLE001
+        print(f"WARN: Entscheidungsdatei nicht lesbar ({ex}) — "
+              f"Namen bleiben wie erzeugt")
+
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
     print(f"Wrote {OUT}\n  {len(entries)} entries  {counts}")

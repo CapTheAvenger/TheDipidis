@@ -218,15 +218,12 @@ drei kopierter Renderer, eine Matchup-Komponente, ein Builder-Template,
 Meta Binder + Custom Binder". Statt sie nacheinander zu bauen, wurde
 erst gemessen — Funktionsrümpfe normalisiert (Präfixe `cityLeague` /
 `currentMeta` / `pastMeta` und die i18n-Namensräume neutralisiert), dann
-Blockweise verglichen.
+blockweise verglichen.
 
-**Gebaut wurde genau eine davon**, und zwar die kleinste.
-
-### Gebaut: der Kachelfilter der drei Übersichten
-
+**Gebaut wurde genau eine davon**, und zwar die kleinste:
 `filterOverviewCards`, `filterCurrentMetaOverviewCards` und
-`filterPastMetaOverviewCards` waren zu 88–95 % wortgleich — 3 × 43
-normalisierte Zeilen, nur zwei bzw. vier abweichende Stellen. Sie liegen
+`filterPastMetaOverviewCards` waren zu 88–95 % wortgleich (3 × 43
+normalisierte Zeilen, nur zwei bzw. vier abweichende Stellen). Sie liegen
 jetzt als `uebersichtKachelnFiltern` in `js/deck-analysis-shared.js`; die
 drei Reiter reichen nur noch ihre Kennungen und ihren Typfilter hinein.
 Rund 180 Zeilen weniger.
@@ -239,68 +236,77 @@ war die einzige Stelle im Projekt, die Kacheln per Inline-Stil versteckt,
 und genau dieses Muster steht in `app-city-league.js` (Z. 535 ff.) als
 Falle notiert. Jetzt benutzen alle drei die Klasse.
 
-### Nicht gebaut: `renderDeckGrid` zusammenlegen
+Was in derselben Messung als **schon erledigt** herauskam: Meta Binder
+und Custom Binder teilen sich längst 23 von 27 Funktionen über
+`window._mbShared`, an 79 Stellen. Es bleiben 4,4 % bzw. 4,7 %
+Blockdeckung; der größte verbliebene Paar-Kandidat ist zu 50 % ähnlich.
 
-220 gleiche Zeilen zwischen `renderCityLeagueDeckGrid` und
-`renderCurrentMetaDeckGrid` klingen nach dem größten Gewinn. Sie sind
-aber 30 Divergenz-Blöcke mit **acht echten Verhaltensunterschieden**:
-City League hat einen Vorrang-Nenner (`window.currentCityLeagueTotalDecks`),
-einen Trend-Indikator und die rote Marke über `_markeZahl`; Current Meta
-hat den `__effectiveAvgMap`-Override mit Grundlinie, Pin- und
-Exclude-Marken, den Festpreis für Basisenergie und einen eigenen
-Leerzustand. Sie lesen sogar verschiedene Prozentfelder (`rawPercentage`
-gegen `resolvedPercentage`).
+Und was **ersatzlos wegfällt**, weil die Messung die Annahme nicht
+stützt: über sechs Matchup-Dateien (13.657 Zeilen) und drei
+Builder-Dateien (12.419 Zeilen) findet die Fenstersuche **null**
+gemeinsame Achtzeilen-Blöcke. Auch innerhalb einer Datei sind die vier
+Matchup-Renderer verschieden (höchste Paarähnlichkeit 32 %). „Eine
+Matchup-Komponente" und „ein Builder-Template" sind aus Aufgabe #16
+gestrichen, nicht vertagt.
 
+Zwei Nebenbefunde: `showDeckSections` / `hideDeckSections` in
+`deck-analysis-shared.js` hatten seit ihrer Anlage null Aufrufer und sind
+entfernt. Und `app-current-meta-analysis.js` parst dasselbe Feld
+`total_decks_in_archetype` an zwei Stellen mit zwei verschiedenen Parsern
+(`safeParseFloat` im Raster, `parseLocaleNumber` in der Tabelle) —
+gemeldet, nicht repariert: welcher richtig ist, hängt vom Zahlenformat
+der Quelle ab und braucht eine eigene Messung.
+
+### Die Zusammenlegung von `renderDeckGrid`
+
+**Was geplant war:** `renderCityLeagueDeckGrid` und
+`renderCurrentMetaDeckGrid` zu einer Funktion machen. 220 normalisierte
+Zeilen sind identisch — der größte Einzelposten der ganzen Messung.
+
+**Warum weg:** die 220 gleichen Zeilen sind 30 Divergenz-Blöcke mit acht
+echten Verhaltensunterschieden. City League hat einen Vorrang-Nenner
+(`window.currentCityLeagueTotalDecks`), einen Trend-Indikator und die rote
+Marke über `_markeZahl`; Current Meta hat den
+`__effectiveAvgMap`-Override mit Grundlinie, Pin- und Exclude-Marken, den
+Festpreis für Basisenergie und einen eigenen Leerzustand. Sie lesen sogar
+verschiedene Prozentfelder (`rawPercentage` gegen `resolvedPercentage`).
 Das Ergebnis wäre eine 400-Zeilen-Funktion mit acht Schaltern — mehr
-Verzweigung als heute. Dazu kommt das Risiko: von 31 Dubletten-Kandidaten
-sind nur 11 überhaupt in einer Zusicherung genannt. Eine Zusammenlegung,
-die den Nenner-Vorrang verliert, würde von **keiner einzigen** Zusicherung
-bemerkt — der Schaden landete still im Kartenraster.
+Verzweigung als heute.
 
-### Nicht gebaut: `copyDeckOverview` zusammenlegen
+Dazu das Risiko: von 31 Dubletten-Kandidaten sind nur 11 überhaupt in
+einer Zusicherung genannt. Eine Zusammenlegung, die den Nenner-Vorrang
+verliert, würde von **keiner einzigen** Zusicherung bemerkt — der Schaden
+landete still im Kartenraster.
 
-148 gleiche Zeilen, aber nur zwischen City League und Current Meta;
-`copyPastMetaDeckOverview` gehört nicht dazu (18 Zeilen, kein Set-Code,
-keine Gruppierung, keine 60-Karten-Prüfung — ein anderes Format, kein
-Duplikat). Es bliebe ein Zweierpaar mit ~150 Zeilen Ersparnis bei null
-Zusicherungen auf beiden Seiten.
+**Was anders sein müsste, damit es zurückkommt:** die acht
+Verhaltensunterschiede müssten erst einzeln gepinnt sein. Wer die
+Zusammenlegung will, schreibt zuerst Zusicherungen für Nenner-Vorrang,
+Prozentfeld, Pin-/Exclude-Zeile und Leerzustand je Reiter — dann ist der
+Umbau eine Refaktorierung statt eines Blindflugs. **Nicht gelöscht:**
+beide Funktionen stehen unverändert da.
 
-**Der Befund aus dieser Messung war trotzdem etwas wert** und wurde
-getrennt behoben: die beiden Fassungen schrieben verschiedene Köpfe in
-die Zwischenablage. Siehe `tests/unit/test-decklisten-kopf.js`.
+### Die Zusammenlegung von `copyDeckOverview`
 
-### Schon erledigt: Meta Binder + Custom Binder
+**Was geplant war:** `copyDeckOverview` und `copyCurrentMetaDeckOverview`
+zusammenlegen; 148 normalisierte Zeilen sind gleich.
 
-Die Arbeit ist längst getan. `meta-binder.js` exportiert 27 Funktionen
-über `window._mbShared`, `custom-binder.js` benutzt 23 davon an 79
-Stellen. Es bleiben 4,4 % bzw. 4,7 % Blockdeckung; der größte
-verbliebene Paar-Kandidat ist zu 50 % ähnlich. Zwei Kleinstfunktionen
-(zusammen 36 Zeilen) rechtfertigen keinen Dateiumbau.
+**Warum weg:** `copyPastMetaDeckOverview` gehört trotz Namensfamilie
+nicht dazu — 18 Zeilen, keine Set-Codes, keine Gruppierung, keine
+60-Karten-Prüfung. Es bliebe ein Zweierpaar mit rund 150 Zeilen Ersparnis
+bei null Zusicherungen auf beiden Seiten.
 
-### Fällt weg: „eine Matchup-Komponente" und „ein Builder-Template"
+**Was anders sein müsste, damit es zurückkommt:** eine Zusicherung, die
+das Ausgabeformat selbst prüft — nicht die Funktionsnamen. Die gibt es
+seit dem 03.09.2026 zum Teil: `tests/unit/test-decklisten-kopf.js` pinnt
+den Kopf. Sobald auch Reihenfolge, Gruppierung und die 60-Karten-Meldung
+gepinnt sind, ist die Zusammenlegung sicher. **Nicht gelöscht:** beide
+Funktionen stehen unverändert da.
 
-Beide Teilaufgaben beruhen auf einer Annahme, die die Messung nicht
-stützt.
-
-* **Matchups:** über `app-current-meta-analysis.js`, `app-past-meta.js`,
-  `app-archetype-card.js`, `app-side-quest-matchups.js`,
-  `battle-journal.js` und `app-current-meta.js` (13.657 Zeilen)
-  **null** gemeinsame Achtzeilen-Blöcke. Auch innerhalb einer Datei sind
-  die vier Matchup-Renderer verschieden (höchste Paarähnlichkeit 32 %).
-* **Builder:** `app-deck-builder.js`, `app-profile-deck-builder.js` und
-  `app-side-quest-builder.js` (12.419 Zeilen) — **null** gemeinsame
-  Blöcke, kein Funktionspaar über 45 %.
-
-Es gibt dort nichts zusammenzulegen. Die beiden Punkte sind aus Aufgabe
-#16 gestrichen, nicht vertagt.
-
-### Nebenbefunde aus derselben Messung
-
-* `showDeckSections` / `hideDeckSections` in `deck-analysis-shared.js`
-  hatten seit ihrer Anlage **null** Aufrufer. Entfernt — ein Export ohne
-  Aufrufer ist eine Behauptung über die Architektur, keine Hilfe.
-* `app-current-meta-analysis.js` parst dasselbe Feld
-  `total_decks_in_archetype` an zwei Stellen mit zwei verschiedenen
-  Parsern (`safeParseFloat` im Raster, `parseLocaleNumber` in der
-  Tabelle). Gemeldet, nicht repariert: welcher richtig ist, hängt vom
-  Zahlenformat der Quelle ab und braucht eine eigene Messung.
+**In derselben Runde trotzdem gemacht:** der Vergleich hat einen echten
+Fehler ans Licht gebracht. Die beiden Fassungen schrieben verschiedene
+Köpfe in die Zwischenablage — City League übersetzte sie, schrieb auf
+Deutsch also „Energie: 11", und die Meldung darunter sagt „vor dem Import
+nachsehen". An der Quelle nachgesehen (limitlesstcg.com, Deckliste 22076,
+„Copy to Clipboard"): derselbe englische Kopf, auch wenn man die Seite
+auf Deutsch stellt. Der Kopf gehört zum Austauschformat und wird nicht
+lokalisiert.

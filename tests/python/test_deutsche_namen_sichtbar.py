@@ -279,7 +279,7 @@ def test_mega_steine_enden_auf_nit():
         "Diese Mega-Stein-Namen enden nicht auf -nit: " + str(falsch))
 
 
-def test_jeder_entschiedene_name_der_zweiten_runde_traegt_seine_quelle():
+def test_die_bilanz_der_runden_stimmt_mit_den_eintraegen_ueberein():
     """Ohne Quelle ist ein Name eine Behauptung.
 
     Die _meta-Notiz der zweiten Runde nennt eine Zahl; die muss zu den
@@ -294,10 +294,21 @@ def test_jeder_entschiedene_name_der_zweiten_runde_traegt_seine_quelle():
     assert (zweite["ergebnis"]["falsch"] + zweite["ergebnis"]["richtig"]
             == zweite["ergebnis"]["geprueft"])
 
+    dritte = e["_meta"]["dritte_runde_2026_09_03"]["ergebnis"]
+    assert dritte["widersprueche"] == 18
+    assert (dritte["tabelle_richtig"] + dritte["ressourcendatei_richtig"]
+            == dritte["widersprueche"])
+
     gesamt = sum(len(v) for v in e["namen"].values())
-    assert gesamt == 63 + 20, (
-        f"63 aus der ersten Runde plus 20 aus der zweiten ergibt 83, "
-        f"gezaehlt {gesamt}")
+    # Neun wurden entschieden, aber nur acht sind NEU: Sharp Beak stand
+    # schon seit Runde 1 in der Datei; dort saß der falsche Wert in
+    # de_name_overrides.json und wurde nur ueberdeckt.
+    neu_in_runde_3 = dritte["neu_eingetragen"]
+    assert neu_in_runde_3 == dritte["ressourcendatei_richtig"] - 1
+    assert gesamt == 63 + 20 + neu_in_runde_3, (
+        f"63 (Runde 1) + 20 (Runde 2) + {neu_in_runde_3} (Runde 3) ergibt "
+        f"{63 + 20 + neu_in_runde_3}, gezaehlt {gesamt}. Wer Namen ergaenzt, "
+        f"zieht die Bilanz in _meta nach.")
     ohne = [f"{g}/{en}" for g, paare in e["namen"].items()
             for en, rec in paare.items()
             if not (rec or {}).get("quelle", "").startswith("https://pokewiki.de/")]
@@ -321,3 +332,121 @@ def test_gepruefte_referenz_behauptet_nicht_mehr_als_sie_belegt():
             f"({vermerk[:80]!r})")
         assert "champions_namen_entschieden.json" in vermerk, (
             f"{datei}: der Vermerk verweist nicht auf die Belegdatei")
+
+
+# ── 4. Die vierte Quelle (dritte Runde, 03.09.2026) ──────────────────
+
+KORREKTUREN_RUNDE_3 = {
+    "Focus Band":   "Fokusband",
+    "Shell Bell":   "Muschelglocke",
+    "Wise Glasses": "Schlaubrille",
+    "Ghost Gem":    "Geisterjuwel",
+    "Rock Gem":     "Gesteinsjuwel",
+    "Grass Gem":    "Pflanzenjuwel",
+    "Lagging Tail": "Schwerschweif",
+    "Sharp Beak":   "Spitzer Schnabel",
+}
+
+
+def _resources():
+    return _json("champions_resources.json")["entries"]
+
+
+def test_alle_vier_namensquellen_sind_sich_einig():
+    """Die entscheidende Zusicherung dieser Runde.
+
+    Es gibt VIER Quellen deutscher Namen: die drei Referenzdateien, die
+    Namenstabelle — und champions_resources.json mit 1.268 Eintraegen,
+    mehr als jede andere. Die vierte stand bis zum 03.09.2026 in keinem
+    Vergleich; gemessen widersprach sie der Tabelle an 18 Stellen.
+
+    Hier wird jede Quelle gegen jede gehalten, nicht drei gegen eine.
+    """
+    tab = _json("champions_names_de.json")
+    ref = {g: _json(d)[s] for g, d, s in REFERENZEN}
+    KAT = {"item": "items", "ability": "abilities", "move": "moves"}
+    streit = []
+    for e in _resources():
+        gruppe = KAT.get(e.get("cat"))
+        if not gruppe or not e.get("en") or not e.get("de"):
+            continue
+        t = tab.get(gruppe, {}).get(e["en"])
+        if t and t != e["de"]:
+            streit.append(f"Ressourcen/Tabelle {gruppe}/{e['en']}: "
+                          f"{e['de']!r} vs. {t!r}")
+        r = (ref.get(gruppe, {}).get(e["en"]) or {}).get("de_name")
+        if r and r != e["de"]:
+            streit.append(f"Ressourcen/Referenz {gruppe}/{e['en']}: "
+                          f"{e['de']!r} vs. {r!r}")
+    assert not streit, ("Die vier Namensquellen widersprechen sich wieder: "
+                        + str(streit[:12]))
+
+
+@pytest.mark.parametrize("en,de", sorted(KORREKTUREN_RUNDE_3.items()))
+def test_korrektur_der_dritten_runde_steht_ueberall(en, de, tabelle):
+    """Diese acht kamen aus de_name_overrides.json und waren dort falsch.
+
+    Die Quelle der Overrides ist pokemonexperte.de/items — dort stehen
+    teils abgeschnittene In-Game-Beschriftungen ("Schwerschwf.") und
+    Namen aus der Zeit vor Schwert und Schild ("Hackattack").
+    """
+    ov = _json("de_name_overrides.json")["items"]
+    assert ov[en] == de, f"de_name_overrides.json: {en} steht als {ov[en]!r}"
+    ent = _json("champions_namen_entschieden.json")["namen"]["items"]
+    assert ent[en]["de"] == de
+    assert tabelle["items"][en] == de
+
+
+def test_kein_name_ist_flachgeklopfte_wiki_auszeichnung():
+    """PokeWiki setzt zwei Namen mit <br> untereinander.
+
+    "Name_de=Wandler<br>Verwandler{{tt|...}}" — oben der aktuelle Name,
+    darunter der alte. Der Scraper hat beide plus einen Rest der
+    tt-Vorlage in EIN Feld gelegt: "Wandler  Verwandler (in )". Ueber
+    alle 1.469 Namen der Overrides-Datei war das der einzige Fall; die
+    Suchbedingung bleibt trotzdem stehen, weil derselbe Scraper wieder
+    laufen wird.
+    """
+    import re
+    ov = _json("de_name_overrides.json")
+    kaputt = []
+    for gruppe in ("moves", "items"):
+        for en, de in (ov.get(gruppe) or {}).items():
+            if re.search(r"\s{2,}|\(\s*\)|<|>|\||\[|\]|&[a-z]+;", de or ""):
+                kaputt.append(f"{gruppe}/{en}: {de!r}")
+    assert not kaputt, ("Diese Werte sind keine Namen, sondern Auszeichnung: "
+                        + str(kaputt))
+
+
+def test_der_melder_kennt_die_vierte_quelle():
+    """Ein Melder, der drei von vier Quellen kennt, meldet null Konflikte
+    und liegt trotzdem falsch."""
+    quelle = open(os.path.join(ROOT, "scripts", "datenluecken.py"),
+                  encoding="utf-8").read()
+    i = quelle.index("def namenskonflikte():")
+    j = quelle.index("\ndef ", i + 10)
+    block = quelle[i:j]
+    assert "champions_resources.json" in block, (
+        "scripts/datenluecken.py vergleicht die vierte Namensquelle nicht mehr")
+    assert 'e.get("cat")' in block, (
+        "der Vergleich liest die Kategorie der Ressourceneintraege nicht — "
+        "dann trifft er die falschen Toepfe gegeneinander")
+
+
+def test_der_ressourcen_bauer_setzt_die_entschiedenen_namen_selbst():
+    """Sonst dreht der naechste Neubau die Korrektur zurueck.
+
+    Genau dieser Fehler ist am 31.08. beim Pokedex-Bauer passiert und
+    hat zwei Namen gekostet. Der Ressourcen-Bauer hatte dieselbe Luecke
+    bis zum 03.09.2026.
+    """
+    quelle = open(os.path.join(ROOT, "scripts", "build_champions_resources.py"),
+                  encoding="utf-8").read()
+    assert "champions_namen_entschieden.json" in quelle, (
+        "build_champions_resources.py liest die Entscheidungsdatei nicht — "
+        "ein Neubau ueberschreibt jede Korrektur")
+    i = quelle.index("champions_namen_entschieden.json")
+    j = quelle.index('with open(OUT, "w"', i)
+    block = quelle[i:j]
+    assert 'e["de"] = de' in block, (
+        "die Entscheidungsdatei wird gelesen, aber nicht angewandt")

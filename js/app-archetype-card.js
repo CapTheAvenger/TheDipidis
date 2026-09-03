@@ -413,25 +413,43 @@
                    Gemeldet: "ausgeklappt auf VS Deck Ebene sehe ich nicht
                    das Online und Major jeweils angezeigt wird."
 
-                   ACHTUNG, ANDERE RECHNUNG: `punkte` sind MATCHPUNKTE
-                   (3S+U)/3n. Die Spalte links rechnet S/(S+N). Die
-                   Labs-Datei liefert je Paarung nur Anzahl und Prozent,
-                   keine Bilanz — ohne die Unentschieden laesst sich das
-                   nicht umrechnen, und die Quelle veroeffentlicht sie
-                   nicht. Deshalb traegt die Spalte einen eigenen Namen und
-                   der Kopf sagt, was sie ist.
+                   SEIT DEM 03.09.2026 DIESELBE RECHNUNG WIE LINKS.
+                   Vorher stand hier die Spalte vs_win_pct der Labs-Datei.
+                   Die heisst dort "Win %", ist aber die Matchpunktquote
+                   (3S+U)/(3M) — nachgerechnet an drei Paarungen des
+                   Worlds-Laufs, die sie auf 0,01 Punkte genau treffen,
+                   waehrend S/(S+N) um 1,5 bis 12 Punkte danebenliegt.
+                   Zwei Spalten, zwei Rechnungen: deshalb hiess diese
+                   "Major-P" statt "Major-WR".
 
-                   Gemessen ueber die 90 Paarungen des Top-10-Gitters:
-                   Median -2,0 pp gegen die Online-Spalte, wovon -1,8 pp
-                   reine Zaehlweise sind (11 % Unentschieden am Major). Der
-                   Unterschied ist also fast vollstaendig Konvention. */
-                majorPunkte: null,
+                   Der Scraper holt jetzt die Bilanz je Paarung mit
+                   (vs_wins / vs_losses / vs_ties). Damit rechnet die
+                   Major-Quote S/(S+N) und wird mit demselben
+                   20-Partien-Prior geglaettet wie die Spalte links
+                   (js/matchup-glaettung.js). Erst dadurch ist der Name
+                   "Major-WR" keine Behauptung.
+
+                   Fehlt die Bilanz in einer Zeile, bleibt majorWr null
+                   und die Zelle zeigt einen Strich — die Partienzahl
+                   steht trotzdem daneben. */
+                majorWr: null,
+                majorWrRoh: null,
+                majorSiege: null,
+                majorNiederlagen: null,
+                majorUnentschieden: null,
                 majorAnzahl: null,
             };
         }).map(m => {
             const von = _majorMu ? (_majorMu[findKey(_majorMu, name)] || null) : null;
             const e = von ? (von[findKey(von, m.opponent)] || null) : null;
-            if (e) { m.majorPunkte = e.punkte; m.majorAnzahl = e.anzahl; }
+            if (e) {
+                m.majorWr = (e.wr == null) ? null : e.wr;
+                m.majorWrRoh = (e.wrRoh == null) ? null : e.wrRoh;
+                m.majorSiege = (e.siege == null) ? null : e.siege;
+                m.majorNiederlagen = (e.niederlagen == null) ? null : e.niederlagen;
+                m.majorUnentschieden = (e.unentschieden == null) ? null : e.unentschieden;
+                m.majorAnzahl = e.anzahl;
+            }
             return m;
         }).sort((a, b) => b.winRate - a.winRate);
     }
@@ -893,7 +911,7 @@
            in diesem Format keine vor" — und zeigte in der
            aufgeklappten Vollansicht die Spalten. Zwei Aussagen, ein
            Deck. Die Frage gilt dem DECK, also `all`. */
-        const hatMajor = all.some(m => m.majorPunkte != null || m.majorAnzahl != null);
+        const hatMajor = all.some(m => m.majorWr != null || m.majorAnzahl != null);
         const body = rows.map(m => {
             const shade = shadeFor(m.winRate - 50, m.thin);
             const bar = barFor(m.winRate - 50);
@@ -913,16 +931,24 @@
                     <td class="arc-mu-u">${m.ties == null ? '–' : m.ties}</td>
                     ${!hatMajor ? '' : `<td class="arc-mu-major${
                         (m.majorAnzahl != null && m.majorAnzahl < 10) ? ' arc-mu-major-duenn' : ''
-                    }" title="${esc(m.majorPunkte == null
-                        ? L('arc.muMajorFehlt', de
-                            ? 'Keine Präsenzpartien für diese Paarung.'
-                            : 'No in-person games for this pairing.')
+                    }" title="${esc(m.majorWr == null
+                        ? (m.majorAnzahl == null
+                            ? L('arc.muMajorFehlt', de
+                                ? 'Keine Präsenzpartien für diese Paarung.'
+                                : 'No in-person games for this pairing.')
+                            : L('arc.muMajorOhneBilanz', de
+                                ? '{n} Präsenzpartien, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine Win Rate bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'
+                                : '{n} in-person games, but the source row carries no record — without wins and losses there is no win rate to show. Hence the dash instead of an estimate.')
+                                .replace('{n}', String(m.majorAnzahl)))
                         : L('arc.muMajorTip', de
-                            ? '{w} aus {n} Präsenzpartien. Matchpunkte, nicht Win Rate — die Quelle veröffentlicht je Paarung keine Bilanz. Bei ausgeglichenem Ergebnis liegt der Wert rund 2 Punkte unter der Spalte links.'
-                            : '{w} from {n} in-person games. Match points, not win rate — the source publishes no record per pairing. At an even record it sits about 2 points below the column on the left.')
-                            .replace('{w}', fmt(m.majorPunkte) + ' %')
-                            .replace('{n}', String(m.majorAnzahl)))
-                    }">${m.majorPunkte == null ? '–' : esc(fmt(m.majorPunkte)) + ' %'}</td>
+                            ? '{w} aus {n} Präsenzpartien (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Siege ÷ entschiedene Partien, mit demselben Ausgleich für dünne Paarungen. Roh {r} %.'
+                            : '{w} from {n} in-person games (record {b}). Same calculation as the column on the left: wins ÷ decided games, with the same allowance for thin pairings. Raw {r} %.')
+                            .replace('{w}', fmt(m.majorWr) + ' %')
+                            .replace('{n}', String(m.majorAnzahl))
+                            .replace('{b}', [m.majorSiege, m.majorNiederlagen,
+                                m.majorUnentschieden == null ? '?' : m.majorUnentschieden].join('–'))
+                            .replace('{r}', fmt(m.majorWrRoh)))
+                    }">${m.majorWr == null ? '–' : esc(fmt(m.majorWr)) + ' %'}</td>
                     <td class="arc-mu-major-n${
                         (m.majorAnzahl != null && m.majorAnzahl < 10) ? ' arc-mu-n-low' : ''
                     }">${m.majorAnzahl == null ? '–' : m.majorAnzahl}</td>`}
@@ -957,34 +983,44 @@
                              Szene sagt ohnehin Tie. -->
                         <th title="${esc(de ? 'Unentschieden (Tie) — sie zählen in der Win Rate dieser Tabelle nicht mit'
                                             : 'ties — they do not count in this table\'s win rate')}">T</th>
-                        <!-- DIE PRAESENZSPALTE HEISST ANDERS, WEIL SIE ETWAS
-                             ANDERES IST. Links steht S/(S+N), hier stehen
-                             MATCHPUNKTE (3S+U)/3n — die Labs-Datei liefert je
-                             Paarung nur Anzahl und Prozent, keine Bilanz, und
-                             ohne die Unentschieden laesst sich das nicht
-                             umrechnen. Zwei Spalten mit demselben Namen und
-                             zwei Rechnungen waeren genau der Fehler, den
-                             diese Seite seit Wochen abarbeitet; zwei
-                             verschiedene Namen fuer zwei verschiedene Groessen
-                             sind in Ordnung. Der gemessene Abstand (Median
-                             -2,0 pp, davon -1,8 Zaehlweise) steht im Hinweis
-                             jeder Zelle. -->
+                        <!-- DIE PRAESENZSPALTE HEISST JETZT AUCH WR, WEIL SIE
+                             DASSELBE RECHNET. Bis zum 03.09.2026 hiess sie
+                             "Major-P": sie zeigte die Matchpunktquote
+                             (3S+U)/(3M) der Labs-Datei, weil je Paarung keine
+                             Bilanz vorlag und sich ohne die Unentschieden
+                             nichts umrechnen liess. Zwei Spalten mit
+                             demselben Namen und zwei Rechnungen waeren der
+                             Fehler gewesen, den diese Seite seit Wochen
+                             abarbeitet — also trug sie einen eigenen Namen.
+
+                             Der Betreiber wollte einen Namen: "das sollten
+                             wir auch WR nennen, damit wir hier ueberall
+                             Gleiches benutzen". Der richtige Weg dorthin war
+                             nicht, die Beschriftung zu aendern, sondern die
+                             Zahl: der Scraper holt seit PR #639 die Bilanz je
+                             Paarung mit, und die Spalte rechnet nun S/(S+N)
+                             mit demselben 20-Partien-Prior wie links. Gleicher
+                             Name, gleiche Rechnung.
+
+                             "Major-Matches" statt "Major-M": ausgeschrieben,
+                             wo Platz ist. WR bleibt abgekuerzt, weil es in
+                             der Szene der stehende Begriff ist. -->
                         ${!hatMajor ? '' : `                        <th title="${esc(L('arc.colMajorTip', de
-                            ? 'Präsenzturniere: Matchpunkte (3 Siege + 1 Unentschieden) ÷ (3 × Matches) — eine andere Rechnung als die Win Rate links, weil die Quelle je Paarung keine Bilanz veröffentlicht.'
-                            : 'In-person events: match points (3 wins + 1 tie) ÷ (3 × games) — a different calculation from the win rate on the left, because the source publishes no record per pairing.'))}">${
-                            esc(L('arc.colMajor', de ? 'Major-P' : 'Major-P'))}</th>
+                            ? 'Präsenzturniere: Siege ÷ entschiedene Partien (Unentschieden bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Präsenzturnieren statt online.'
+                            : 'In-person events: wins ÷ decided games (ties left out) — the same calculation and the same smoothing as the WR column on the left, just measured at in-person events instead of online.'))}">${
+                            esc(L('arc.colMajor', 'Major-WR'))}</th>
                         <th title="${esc(L('arc.colMajorN', de
                             ? 'Präsenzpartien dieser Paarung'
                             : 'in-person games for this pairing'))}">${
-                            esc(L('arc.colMajorNKurz', 'Major-M'))}</th>`}
+                            esc(L('arc.colMajorNKurz', de ? 'Major-Matches' : 'Major matches'))}</th>`}
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>
             </div>
             <p class="arc-mu-legende">${esc(hatMajor
                 ? L('arc.muLegende', de
-                    ? 'WR = Win Rate · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-P = Matchpunkte auf Präsenzturnieren, Major-M die Matches dahinter'
-                    : 'WR = win rate · M = matches · W/L/T = wins / losses / ties · Major-P = match points at in-person events, Major-M the matches behind them')
+                    ? 'WR = Win Rate (Siege ÷ entschiedene Partien) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Partien dahinter'
+                    : 'WR = win rate (wins ÷ decided games) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the games behind it')
                 /* Ohne Praesenzdaten sagt EIN Satz, was zwei leere
                    Spalten nicht gesagt haetten: dass es sie gibt und
                    dass hier keine anfallen. */

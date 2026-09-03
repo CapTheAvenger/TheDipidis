@@ -210,3 +210,97 @@ Bildkarte selbst. Ohne Präsenzdaten standen dort dreimal „Major: keine
 Daten" und einmal „Day 2 (Major): keine Daten" untereinander — vier
 Zeilen, die dasselbe sagen, auf einem Bild, das durch Discord wandert.
 Jetzt sagt es ein Satz im Fuß.
+
+## Die Zusammenlegungen aus Aufgabe #16 (03.09.2026)
+
+Aufgabe #16 nannte vier Zusammenlegungen: „eine Deck-Analyse-Shell statt
+drei kopierter Renderer, eine Matchup-Komponente, ein Builder-Template,
+Meta Binder + Custom Binder". Statt sie nacheinander zu bauen, wurde
+erst gemessen — Funktionsrümpfe normalisiert (Präfixe `cityLeague` /
+`currentMeta` / `pastMeta` und die i18n-Namensräume neutralisiert), dann
+Blockweise verglichen.
+
+**Gebaut wurde genau eine davon**, und zwar die kleinste.
+
+### Gebaut: der Kachelfilter der drei Übersichten
+
+`filterOverviewCards`, `filterCurrentMetaOverviewCards` und
+`filterPastMetaOverviewCards` waren zu 88–95 % wortgleich — 3 × 43
+normalisierte Zeilen, nur zwei bzw. vier abweichende Stellen. Sie liegen
+jetzt als `uebersichtKachelnFiltern` in `js/deck-analysis-shared.js`; die
+drei Reiter reichen nur noch ihre Kennungen und ihren Typfilter hinein.
+Rund 180 Zeilen weniger.
+
+Mitgenommen wurde dabei ein echter Unterschied: Current Meta versteckte
+Kacheln per `card.style.display = 'none'`, die beiden anderen per
+`classList.add('d-none')`. Ein Live-Bug war das nicht — auf `.card-item`
+liegt in keiner der beiden CSS-Dateien eine `display`-Regel —, aber es
+war die einzige Stelle im Projekt, die Kacheln per Inline-Stil versteckt,
+und genau dieses Muster steht in `app-city-league.js` (Z. 535 ff.) als
+Falle notiert. Jetzt benutzen alle drei die Klasse.
+
+### Nicht gebaut: `renderDeckGrid` zusammenlegen
+
+220 gleiche Zeilen zwischen `renderCityLeagueDeckGrid` und
+`renderCurrentMetaDeckGrid` klingen nach dem größten Gewinn. Sie sind
+aber 30 Divergenz-Blöcke mit **acht echten Verhaltensunterschieden**:
+City League hat einen Vorrang-Nenner (`window.currentCityLeagueTotalDecks`),
+einen Trend-Indikator und die rote Marke über `_markeZahl`; Current Meta
+hat den `__effectiveAvgMap`-Override mit Grundlinie, Pin- und
+Exclude-Marken, den Festpreis für Basisenergie und einen eigenen
+Leerzustand. Sie lesen sogar verschiedene Prozentfelder (`rawPercentage`
+gegen `resolvedPercentage`).
+
+Das Ergebnis wäre eine 400-Zeilen-Funktion mit acht Schaltern — mehr
+Verzweigung als heute. Dazu kommt das Risiko: von 31 Dubletten-Kandidaten
+sind nur 11 überhaupt in einer Zusicherung genannt. Eine Zusammenlegung,
+die den Nenner-Vorrang verliert, würde von **keiner einzigen** Zusicherung
+bemerkt — der Schaden landete still im Kartenraster.
+
+### Nicht gebaut: `copyDeckOverview` zusammenlegen
+
+148 gleiche Zeilen, aber nur zwischen City League und Current Meta;
+`copyPastMetaDeckOverview` gehört nicht dazu (18 Zeilen, kein Set-Code,
+keine Gruppierung, keine 60-Karten-Prüfung — ein anderes Format, kein
+Duplikat). Es bliebe ein Zweierpaar mit ~150 Zeilen Ersparnis bei null
+Zusicherungen auf beiden Seiten.
+
+**Der Befund aus dieser Messung war trotzdem etwas wert** und wurde
+getrennt behoben: die beiden Fassungen schrieben verschiedene Köpfe in
+die Zwischenablage. Siehe `tests/unit/test-decklisten-kopf.js`.
+
+### Schon erledigt: Meta Binder + Custom Binder
+
+Die Arbeit ist längst getan. `meta-binder.js` exportiert 27 Funktionen
+über `window._mbShared`, `custom-binder.js` benutzt 23 davon an 79
+Stellen. Es bleiben 4,4 % bzw. 4,7 % Blockdeckung; der größte
+verbliebene Paar-Kandidat ist zu 50 % ähnlich. Zwei Kleinstfunktionen
+(zusammen 36 Zeilen) rechtfertigen keinen Dateiumbau.
+
+### Fällt weg: „eine Matchup-Komponente" und „ein Builder-Template"
+
+Beide Teilaufgaben beruhen auf einer Annahme, die die Messung nicht
+stützt.
+
+* **Matchups:** über `app-current-meta-analysis.js`, `app-past-meta.js`,
+  `app-archetype-card.js`, `app-side-quest-matchups.js`,
+  `battle-journal.js` und `app-current-meta.js` (13.657 Zeilen)
+  **null** gemeinsame Achtzeilen-Blöcke. Auch innerhalb einer Datei sind
+  die vier Matchup-Renderer verschieden (höchste Paarähnlichkeit 32 %).
+* **Builder:** `app-deck-builder.js`, `app-profile-deck-builder.js` und
+  `app-side-quest-builder.js` (12.419 Zeilen) — **null** gemeinsame
+  Blöcke, kein Funktionspaar über 45 %.
+
+Es gibt dort nichts zusammenzulegen. Die beiden Punkte sind aus Aufgabe
+#16 gestrichen, nicht vertagt.
+
+### Nebenbefunde aus derselben Messung
+
+* `showDeckSections` / `hideDeckSections` in `deck-analysis-shared.js`
+  hatten seit ihrer Anlage **null** Aufrufer. Entfernt — ein Export ohne
+  Aufrufer ist eine Behauptung über die Architektur, keine Hilfe.
+* `app-current-meta-analysis.js` parst dasselbe Feld
+  `total_decks_in_archetype` an zwei Stellen mit zwei verschiedenen
+  Parsern (`safeParseFloat` im Raster, `parseLocaleNumber` in der
+  Tabelle). Gemeldet, nicht repariert: welcher richtig ist, hängt vom
+  Zahlenformat der Quelle ab und braucht eine eigene Messung.

@@ -83,6 +83,7 @@ const TIER  = read('js/app-tier-meta.js');
 const CL    = read('js/app-city-league.js');
 const CMA   = read('js/app-current-meta-analysis.js');
 const PAST  = read('js/app-past-meta.js');
+const SHARED = read('js/deck-analysis-shared.js');
 const MCARD = read('js/app-meta-cards.js');
 const FEAT  = read('js/app-features.js');
 const SQ    = read('js/app-side-quest.js');
@@ -450,17 +451,34 @@ describe('Befund D — die Pokedex-Suche war an drei Stellen wirkungslos', () =>
             + 'Kopfzeile: ' + kopf.slice(0, 160));
     });
 
-    it('D1 · filterOverviewCards (Japan) hat den Pokedex-Zweig', () => {
-        const fn = ohneKommentare(rumpf(CL, 'filterOverviewCards'));
+    it('D1 · der Kachelfilter hat den Pokedex-Zweig', () => {
+        // 03.09.2026: die drei fast wortgleichen Kachelfilter (City
+        // League, Current Meta, Past Meta) liegen jetzt als EINE Funktion
+        // in js/deck-analysis-shared.js. Die Zusicherung wandert mit —
+        // die Sache, die sie schuetzt, ist dieselbe geblieben.
+        const fn = ohneKommentare(rumpf(SHARED, 'uebersichtKachelnFiltern'));
         assert.ok(fn.includes('cardPokedexSearchValue'),
-            'app-city-league.js: der Pokedex-Zweig fehlt wieder ganz — gemessen fand '
+            'deck-analysis-shared.js: der Pokedex-Zweig fehlt wieder ganz — gemessen fand '
             + 'die Suche nach "887" (Dragapult) und "257" (Blaziken) dort 0 Treffer, '
             + 'waehrend das Feld daneben Pokedex-Suche verspricht');
-        assert.match(fn, /dexNum !== '' && dexNum === searchTerm/,
-            'app-city-league.js: der Vergleich auf die exakte Pokedex-Nummer fehlt');
-        assert.match(fn, /matchesSearch =[\s\S]{0,600}dexNum/,
-            'app-city-league.js: der Pokedex-Wert wird berechnet, aber nicht in die '
+        assert.match(fn, /dexNr !== '' && dexNr === suchbegriff/,
+            'deck-analysis-shared.js: der Vergleich auf die exakte Pokedex-Nummer fehlt');
+        assert.match(fn, /passtSuche =[\s\S]{0,600}dexNr/,
+            'deck-analysis-shared.js: der Pokedex-Wert wird berechnet, aber nicht in die '
             + 'Trefferbedingung eingerechnet — dann ist er wirkungslos');
+    });
+
+    it('D1b · alle drei Uebersichten benutzen diesen einen Filter', () => {
+        // Sonst schuetzt die Zusicherung oben nur noch eine von dreien.
+        for (const [datei, src, fn] of [
+                ['app-city-league.js',           CL,   'filterOverviewCards'],
+                ['app-current-meta-analysis.js', CMA,  'filterCurrentMetaOverviewCards'],
+                ['app-past-meta.js',             PAST, 'filterPastMetaOverviewCards']]) {
+            const q = ohneKommentare(rumpf(src, fn));
+            assert.ok(q.includes('uebersichtKachelnFiltern'),
+                datei + ': ' + fn + ' hat wieder einen eigenen Filterrumpf — '
+                + 'dann gilt jede Zusicherung nur noch fuer die gemeinsame Fassung');
+        }
     });
 
     it('D2 · renderMetaCards liest nicht mehr die leere CSV-Spalte', () => {
@@ -560,15 +578,20 @@ describe('Befund E — die leere Suche widersprach sich', () => {
                 ['app-current-meta-analysis.js', CMA,  'filterCurrentMetaOverviewCards'],
                 ['app-past-meta.js',             PAST, 'filterPastMetaOverviewCards']]) {
             const q = ohneKommentare(rumpf(src, fn));
-            assert.ok(q.includes('uebersichtSuchergebnisMelden'),
-                datei + ': ' + fn + ' meldet das Suchergebnis nicht mehr. Dann stehen '
-                + 'die Abschnittskoepfe mit ihren UNGEFILTERTEN Zahlen weiter da, '
-                + 'waehrend der Zaehler daneben "0 Karten" sagt — die Seite '
-                + 'widerspricht sich.');
-            assert.match(q, /uebersichtSuchergebnisMelden\(\s*gridContainer\s*,\s*visibleCount\s*\)/,
-                datei + ': ' + fn + ' uebergibt nicht den gefilterten Zaehler — mit '
-                + 'einer anderen Zahl meldet der Helfer das Falsche');
+            assert.ok(q.includes('uebersichtKachelnFiltern'),
+                datei + ': ' + fn + ' geht nicht mehr ueber den gemeinsamen Filter — '
+                + 'dann meldet es das Suchergebnis womoeglich gar nicht');
         }
+        // Gemeldet wird an einer Stelle, fuer alle drei.
+        const g = ohneKommentare(rumpf(SHARED, 'uebersichtKachelnFiltern'));
+        assert.ok(g.includes('uebersichtSuchergebnisMelden'),
+            'deck-analysis-shared.js: der Kachelfilter meldet das Suchergebnis nicht '
+            + 'mehr. Dann stehen die Abschnittskoepfe mit ihren UNGEFILTERTEN Zahlen '
+            + 'weiter da, waehrend der Zaehler daneben "0 Karten" sagt — die Seite '
+            + 'widerspricht sich.');
+        assert.match(g, /uebersichtSuchergebnisMelden\(\s*gitter\s*,\s*sichtbar\s*\)/,
+            'deck-analysis-shared.js: der Filter uebergibt nicht den gefilterten '
+            + 'Zaehler — mit einer anderen Zahl meldet der Helfer das Falsche');
     });
 
     it('der Helfer zieht die Abschnittskoepfe mit', () => {

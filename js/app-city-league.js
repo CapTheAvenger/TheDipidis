@@ -4062,75 +4062,18 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             console.info(`[CityLeague] Rendered ${sortedCards.length} overview cards`);
         }
         
+        // Der Filter selbst liegt in js/deck-analysis-shared.js — er war
+        // dreimal fast wortgleich da (88-95 %, Messung am 03.09.2026).
+        // Hier bleibt nur, was sich zwischen den drei Reitern
+        // unterscheidet: die Kennungen und der Typfilter.
         function filterOverviewCards() {
-            const searchInput = document.getElementById('cityLeagueOverviewSearch');
-            if (!searchInput) return;
-            
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            const gridContainer = document.getElementById('cityLeagueDeckGrid');
-            if (!gridContainer) return;
-            
-            const cards = gridContainer.querySelectorAll('.card-item');
-            let visibleCount = 0;
-            
-            cards.forEach(card => {
-                const cardName = card.getAttribute('data-card-name') || '';
-                const cardNameDe = card.getAttribute('data-card-name-de') || '';
-                const cardType = card.getAttribute('data-card-type') || '';
-                const cardSet = card.getAttribute('data-card-set') || '';
-                const cardNumber = card.getAttribute('data-card-number') || '';
-
-                // Check search term filter (name, set+number, Pokedex)
-                const setNumSpace = `${cardSet} ${cardNumber}`;
-                const setNumCombined = `${cardSet}${cardNumber}`;
-                // Befund D (30.08.2026): dieser Filter hatte den
-                // Pokedex-Zweig GAR NICHT, obwohl der Platzhalter darueber
-                // "Name (EN/DE), Set+Nr. oder Pokedex suchen…" verspricht.
-                // Gemessen: die drei Nachbarsuchen fanden ueber die
-                // Pokedex-Nummer, diese hier 0 Treffer. Die Kachel kennt
-                // nur ihren Namen, also faellt der gemeinsame Helfer auf
-                // window.pokedexNumbers zurueck (1064 Eintraege).
-                // 30.08.2026 nachgemessen: die CSV-Spalte pokedex_number
-                // ist NICHT mehr in allen Zeilen leer — in
-                // all_cards_merged.csv sind 15.382 von 20.878 gefuellt.
-                // Fuer diese Kachel aendert das nichts (sie hat nur den
-                // Namen), aber der Satz stimmte nicht mehr.
-                const dexNum = (typeof window.cardPokedexSearchValue === 'function')
-                    ? window.cardPokedexSearchValue({ name: cardName })
-                    : '';
-                const matchesSearch = searchTerm === '' ||
-                    cardName.includes(searchTerm) ||
-                    cardNameDe.includes(searchTerm) ||
-                    setNumSpace.includes(searchTerm) ||
-                    setNumCombined.includes(searchTerm) ||
-                    (dexNum !== '' && dexNum === searchTerm) ||
-                    (searchTerm.length >= 3 && dexNum !== '' && dexNum.includes(searchTerm));
-
-                const matchesType = overviewCardTypeFilter === 'all' || cardType === overviewCardTypeFilter
-                    || (overviewCardTypeFilter === 'Energy' && cardType === 'Basic Energy');
-                
-                // Show card only if it matches both filters
-                if (matchesSearch && matchesType) {
-                    card.classList.remove('d-none');
-                    visibleCount++;
-                } else {
-                    card.classList.add('d-none');
-                }
+            window.uebersichtKachelnFiltern({
+                suchfeldId: 'cityLeagueOverviewSearch',
+                gitterId:   'cityLeagueDeckGrid',
+                zaehlerId:  'cityLeagueCardCount',
+                typFilter:  overviewCardTypeFilter,
+                kartenWort: t('cl.cards'),
             });
-            
-            // Update card count
-            const countElement = document.getElementById('cityLeagueCardCount');
-            if (countElement) {
-                countElement.textContent = `${visibleCount} ${t('cl.cards')}`;
-            }
-
-            // Befund E (30.08.2026): die Abschnittskoepfe zeigten weiter
-            // die ungefilterten Zahlen und blieben bei 0 Treffern stehen;
-            // gemeldet wurde die leere Suche nirgends. Melden, nicht
-            // verschweigen.
-            if (typeof window.uebersichtSuchergebnisMelden === 'function') {
-                window.uebersichtSuchergebnisMelden(gridContainer, visibleCount);
-            }
         }
         
         function setOverviewCardTypeFilter(type) {
@@ -4480,21 +4423,47 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 }
             });
             
-            // Build output text
+            // Build output text.
+            //
+            // DIE UEBERSCHRIFTEN BLEIBEN ENGLISCH — auch auf der deutschen
+            // Oberflaeche. Das ist keine vergessene Uebersetzung, sondern
+            // das Austauschformat.
+            //
+            // BEFUND (03.09.2026): hier stand `t('cl.pokemon')` usw. Auf
+            // Deutsch schrieb das "Energie: 11" in die Zwischenablage —
+            // und die Meldung darunter sagt "vor dem Import nachsehen".
+            // Ein Import mit deutschem Kopf schlaegt fehl.
+            //
+            // An der Quelle nachgesehen statt geraten: limitlesstcg.com
+            // liefert bei "Copy to Clipboard" IMMER "Pokémon: / Trainer: /
+            // Energy:" — auch dann, wenn man die Kartennamen der Seite auf
+            // Deutsch stellt (geprueft an Deckliste 22076, einmal in
+            // englischer und einmal in deutscher Ansicht: identischer
+            // Kopf). Die eigene PTCGL-Ausgabe des Projekts in
+            // app-features.js macht es seit jeher genauso.
+            //
+            // Die Schluessel cl.pokemon / cl.trainer / cl.energy bleiben in
+            // i18n.js stehen — sie werden von
+            // tests/e2e_i18n_language_purity.py als erlaubte englische
+            // Brocken gefuehrt, und Schluessel werden in diesem Projekt
+            // nicht entfernt.
+            const KOPF_POKEMON = 'Pokémon:';
+            const KOPF_TRAINER = 'Trainer:';
+            const KOPF_ENERGIE = 'Energy:';
             let output = '';
-            
+
             if (pokemon.length > 0) {
-                output += `${t('cl.pokemon')} ${pokemonCount}\n`;
+                output += `${KOPF_POKEMON} ${pokemonCount}\n`;
                 output += pokemon.join('\n') + '\n\n';
             }
-            
+
             if (trainer.length > 0) {
-                output += `${t('cl.trainer')} ${trainerCount}\n`;
+                output += `${KOPF_TRAINER} ${trainerCount}\n`;
                 output += trainer.join('\n') + '\n\n';
             }
-            
+
             if (energy.length > 0) {
-                output += `${t('cl.energy')} ${energyCount}\n`;
+                output += `${KOPF_ENERGIE} ${energyCount}\n`;
                 output += energy.join('\n');
             }
             

@@ -1600,68 +1600,18 @@
             }
         }
         
+        // Der Filter selbst liegt in js/deck-analysis-shared.js — er war
+        // dreimal fast wortgleich da (88-95 %, Messung am 03.09.2026).
+        // Hier bleibt nur, was sich zwischen den drei Reitern
+        // unterscheidet: die Kennungen und der Typfilter.
         function filterPastMetaOverviewCards() {
-            const searchInput = document.getElementById('pastMetaOverviewSearch');
-            if (!searchInput) return;
-            
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            const gridContainer = document.getElementById('pastMetaDeckGrid');
-            if (!gridContainer) return;
-            
-            const cards = gridContainer.querySelectorAll('.card-item');
-            let visibleCount = 0;
-            
-            cards.forEach(card => {
-                const cardName = card.getAttribute('data-card-name') || '';
-                const cardNameDe = card.getAttribute('data-card-name-de') || '';
-                const cardType = card.getAttribute('data-card-type') || '';
-                const cardSet = card.getAttribute('data-card-set') || '';
-                const cardNumber = card.getAttribute('data-card-number') || '';
-
-                // Check search term filter (name, set+number, Pokedex)
-                const setNumSpace = `${cardSet} ${cardNumber}`;
-                const setNumCombined = `${cardSet}${cardNumber}`;
-                // Befund N (30.08.2026): hier fehlte der Pokedex-Zweig ganz,
-                // waehrend das Suchfeld daneben Pokedex verspricht. Die
-                // Kachel kennt nur ihren Namen, also faellt der Helfer auf
-                // window.pokedexNumbers zurueck.
-                const dexNum = (typeof window.cardPokedexSearchValue === 'function')
-                    ? window.cardPokedexSearchValue({ name: cardName })
-                    : '';
-                const matchesSearch = searchTerm === '' ||
-                    cardName.includes(searchTerm) ||
-                    cardNameDe.includes(searchTerm) ||
-                    setNumSpace.includes(searchTerm) ||
-                    setNumCombined.includes(searchTerm) ||
-                    (dexNum !== '' && dexNum === searchTerm) ||
-                    (searchTerm.length >= 3 && dexNum !== '' && dexNum.includes(searchTerm));
-
-                const matchesType = pastMetaOverviewCardTypeFilter === 'all' || cardType === pastMetaOverviewCardTypeFilter
-                    || (pastMetaOverviewCardTypeFilter === 'Energy' && cardType === 'Basic Energy');
-                
-                // Show card only if it matches both filters
-                if (matchesSearch && matchesType) {
-                    card.classList.remove('d-none');
-                    visibleCount++;
-                } else {
-                    card.classList.add('d-none');
-                }
+            window.uebersichtKachelnFiltern({
+                suchfeldId: 'pastMetaOverviewSearch',
+                gitterId:   'pastMetaDeckGrid',
+                zaehlerId:  'pastMetaCardCount',
+                typFilter:  pastMetaOverviewCardTypeFilter,
+                kartenWort: t('cl.cards'),
             });
-            
-            // Update card count
-            const countElement = document.getElementById('pastMetaCardCount');
-            if (countElement) {
-                // Befund J (30.08.2026): "Cards" fest verdrahtet.
-                countElement.textContent = `${visibleCount} ${t('cl.cards')}`;
-            }
-
-            // Befund E (30.08.2026): die Abschnittskoepfe zeigten weiter
-            // die ungefilterten Zahlen und blieben bei 0 Treffern stehen;
-            // gemeldet wurde die leere Suche nirgends. Melden, nicht
-            // verschweigen.
-            if (typeof window.uebersichtSuchergebnisMelden === 'function') {
-                window.uebersichtSuchergebnisMelden(gridContainer, visibleCount);
-            }
         }
         
         function setPastMetaRarityMode(mode) {

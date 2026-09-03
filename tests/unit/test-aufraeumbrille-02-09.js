@@ -320,6 +320,29 @@ describe('eine Zahl und ihr Nenner meinen dieselbe Menge', () => {
         assert.equal(boden(0), 0, 'ohne Vorkommen bleibt 0 richtig');
     });
 
+    it('die Bildkarte sagt EINMAL, dass Praesenzdaten fehlen — nicht viermal', () => {
+        /* Gemessen am erzeugten Bild (03.09.2026): die drei Kennzahlen
+           trugen je eine Major-Zeile, und ohne Praesenzdaten stand
+           dreimal "Major: keine Daten" plus "Day 2 (Major): keine
+           Daten" untereinander. Vier Zeilen, die dasselbe sagen, auf
+           einem Bild, das durch Discord wandert.
+           Dieselbe Regel wie bei den leeren Spalten: fehlt die Groesse
+           UEBERALL, sagt ein Satz warum; fehlt sie nur an einer Stelle,
+           bleibt der Hinweis dort. */
+        const SH = ohneKomm(lies('js/ds-share.js'));
+        assert.match(SH, /var majorGarNicht = !hatMajorShare && !hatMajorWr && !hatMajorDay2;/,
+            'der gemeinsame Schalter fehlt');
+        assert.equal((SH.match(/majorGarNicht \? ''/g) || []).length, 3,
+            'nicht alle drei Major-Zeilen haengen am Schalter');
+        assert.match(SH, /Präsenzturniere: für dieses Deck liegen in diesem Format keine vor/,
+            'der EINE Satz im Fuss fehlt');
+        /* Und die Gegenrichtung: liegt IRGENDWO etwas vor, bleibt der
+           Hinweis an der Stelle stehen, an der er etwas sagt. */
+        assert.match(SH, /: L\('Major: keine Daten', 'major: no data'\)/,
+            'der Einzelhinweis ist ganz entfallen — dann schweigt die Karte auch dort, '
+            + 'wo der Nachbar Zahlen hat');
+    });
+
     it('der Rechner zeigt die Nenner, aus denen seine Prozente folgen', () => {
         const CALC = ohneKomm(lies('js/app-calculator.js'));
         ['calc-fuss-draw', 'calc-fuss-prize', 'calc-fuss-topdeck'].forEach(id => {

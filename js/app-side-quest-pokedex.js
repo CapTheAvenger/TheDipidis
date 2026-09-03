@@ -786,13 +786,12 @@
 
     // Most-common SP/EV spread (from real top teams) — German labels.
     const _STAT_LABEL_DE = { HP: 'KP', Atk: 'Ang', Def: 'Vert', SpA: 'SpAng', SpD: 'SpVert', Spe: 'Init' };
-    const _NATURE_DE = {
-        Hardy: 'Robust', Lonely: 'Solo', Brave: 'Mutig', Adamant: 'Hart', Naughty: 'Frech',
-        Bold: 'Kühn', Docile: 'Sanft', Relaxed: 'Locker', Impish: 'Pfiffig', Lax: 'Lasch',
-        Timid: 'Scheu', Hasty: 'Hastig', Serious: 'Ernst', Jolly: 'Froh', Naive: 'Naiv',
-        Modest: 'Mäßig', Mild: 'Mild', Quiet: 'Ruhig', Bashful: 'Zaghaft', Rash: 'Hitzig',
-        Calm: 'Still', Gentle: 'Zart', Sassy: 'Forsch', Careful: 'Sacht', Quirky: 'Kauzig',
-    };
+    // Die 25 Wesen stehen seit dem 03.09.2026 EINMAL, in
+    // js/champions-namen.js. Vorher fuehrten drei Module ihre eigene
+    // Kopie — und die des Team-Builders fehlte ganz, weshalb dort
+    // "Modest" statt "Maessig" stand. Fail-soft: ohne das Modul bleibt
+    // der englische Name stehen.
+    const _NATURE_DE = (window.ChampionsNamen && window.ChampionsNamen.WESEN_DE) || {};
     // Nature → [raised stat, lowered stat]. Makes the ±10 % visible so the
     // bracketed value is self-explanatory (e.g. Timid boosts Speed by 10 %,
     // which is why a 32-SP Timid Pelipper has 128 Speed, not 85+32=117).

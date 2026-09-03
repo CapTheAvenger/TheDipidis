@@ -299,16 +299,20 @@ def test_die_bilanz_der_runden_stimmt_mit_den_eintraegen_ueberein():
     assert (dritte["tabelle_richtig"] + dritte["ressourcendatei_richtig"]
             == dritte["widersprueche"])
 
+    vierte = e["_meta"]["vierte_runde_2026_09_03"]["ergebnis"]
+    assert vierte["ergaenzt"] == vierte["mega_steine"] + vierte["faehigkeiten"], (
+        "die Bilanz der vierten Runde geht nicht auf")
+
     gesamt = sum(len(v) for v in e["namen"].values())
-    # Neun wurden entschieden, aber nur acht sind NEU: Sharp Beak stand
-    # schon seit Runde 1 in der Datei; dort saß der falsche Wert in
+    # Runde 3: neun wurden entschieden, aber nur acht sind NEU. Sharp Beak
+    # stand schon seit Runde 1 in der Datei; der falsche Wert sass in
     # de_name_overrides.json und wurde nur ueberdeckt.
-    neu_in_runde_3 = dritte["neu_eingetragen"]
-    assert neu_in_runde_3 == dritte["ressourcendatei_richtig"] - 1
-    assert gesamt == 63 + 20 + neu_in_runde_3, (
-        f"63 (Runde 1) + 20 (Runde 2) + {neu_in_runde_3} (Runde 3) ergibt "
-        f"{63 + 20 + neu_in_runde_3}, gezaehlt {gesamt}. Wer Namen ergaenzt, "
-        f"zieht die Bilanz in _meta nach.")
+    assert dritte["neu_eingetragen"] == dritte["ressourcendatei_richtig"] - 1
+    soll = 63 + 20 + dritte["neu_eingetragen"] + vierte["ergaenzt"]
+    assert gesamt == soll, (
+        f'63 (Runde 1) + 20 (Runde 2) + {dritte["neu_eingetragen"]} (Runde 3) '
+        f'+ {vierte["ergaenzt"]} (Runde 4) ergibt {soll}, gezaehlt {gesamt}. '
+        f'Wer Namen ergaenzt, zieht die Bilanz in _meta nach.')
     ohne = [f"{g}/{en}" for g, paare in e["namen"].items()
             for en, rec in paare.items()
             if not (rec or {}).get("quelle", "").startswith("https://pokewiki.de/")]

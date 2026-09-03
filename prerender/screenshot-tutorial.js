@@ -72,6 +72,11 @@ const __dirname = path.dirname(__filename);
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const OUTPUT_DIR = path.join(REPO_ROOT, 'images', 'tutorials');
+// Nicht-englische Aufnahmen liegen in einem Unterordner, damit die
+// vorhandenen englischen Pfade unveraendert bleiben.
+function ausgabeWurzel() {
+    return SHOT_LANG === 'en' ? OUTPUT_DIR : path.join(OUTPUT_DIR, SHOT_LANG);
+}
 const PORT = parseInt(process.env.TUTORIAL_SCREENSHOT_PORT || '8765', 10);
 
 // Portrait phone-style for the existing legacy 01-06.png slots; the
@@ -130,13 +135,29 @@ async function newContextFor(browser, { viewport }) {
     });
 }
 
+// Sprache und Farbschema der Aufnahmen.
+//
+// BEFUND (03.09.2026): dieses Skript hat `app_lang` fest auf 'en'
+// gesetzt. Die deutsche Anleitung (tutorial/tutorial.de.html) bekam
+// damit englische Bilder — Ueberschriften, Knoepfe, Filterlabels, alles.
+// Aufgefallen ist es erst, als die drei fehlenden Kapitel (Champions,
+// Team-Builder, Rechner) bebildert werden sollten.
+//
+// SHOT_LANG=de legt die Bilder unter images/tutorials/de/ ab, damit die
+// englischen Pfade unveraendert bleiben und die EN-Anleitung nichts
+// merkt. SHOT_THEME wirkt auf localStorage.theme, das
+// js/inline-init.js liest.
+const SHOT_LANG  = (process.env.SHOT_LANG  || 'en').toLowerCase();
+const SHOT_THEME = (process.env.SHOT_THEME || 'light').toLowerCase();
+
 async function openPage(context, urlPath) {
-    await context.addInitScript(() => {
+    await context.addInitScript(([lang, theme]) => {
         try {
             localStorage.clear();
-            localStorage.setItem('app_lang', 'en');
+            localStorage.setItem('app_lang', lang);
+            localStorage.setItem('theme', theme);
         } catch (_) { /* ignore */ }
-    });
+    }, [SHOT_LANG, SHOT_THEME]);
     const page = await context.newPage();
     page.on('console', (msg) => {
         if (msg.type() === 'error') console.error(`[page] ${msg.text()}`);
@@ -189,7 +210,7 @@ async function navigateViaHash(page, hash, settleSelector) {
 }
 
 async function shoot(page, outFile, options = {}) {
-    const fullPath = path.join(OUTPUT_DIR, outFile);
+    const fullPath = path.join(ausgabeWurzel(), outFile);
     const dir = path.dirname(fullPath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     await page.screenshot({
@@ -221,6 +242,164 @@ async function shoot(page, outFile, options = {}) {
 // If you change a feature's DOM structure, update the matching
 // selector here or this script will fall back to empty-state shots.
 const SHOT_CONFIG = {
+    // ── Vier Bereiche, die die Anleitung gar nicht kannte ────────────
+    //
+    // BEFUND (03.09.2026): tutorial/tutorial.de.html nannte "Champions"
+    // null Mal, "Team-Builder" null Mal, "Rechner" null Mal — und
+    // enthielt insgesamt null Bilder. Die drei groessten Bereiche, die
+    // seit August dazugekommen sind, standen nirgends in der Anleitung.
+    'startseite': [
+        {
+            name: '1-meta.png',
+            hash: 'current-meta',
+            settle: '#currentMetaContent',
+            drive: async (page) => {
+                // Die Startseite laedt ihre Zahlen nach; zu frueh
+                // geschossen zeigt sie leere Kacheln.
+                await page.waitForTimeout(4000);
+                await page.evaluate(() => window.scrollTo(0, 0));
+            },
+        },
+        {
+            name: '2-heatmap.png',
+            hash: 'current-meta',
+            settle: '#currentMetaContent',
+            drive: async (page) => {
+                await page.waitForTimeout(4000);
+                await page.evaluate(() => {
+                    const el = document.querySelector('.matchup-heatmap, [class*="heatmap"]');
+                    if (el) el.scrollIntoView({ block: 'start' });
+                    window.scrollBy(0, -20);
+                });
+                await page.waitForTimeout(800);
+            },
+        },
+    ],
+    'champions': [
+        {
+            name: '1-teams.png',
+            hash: 'champions',
+            settle: '.side-quest-subtab',
+            drive: async (page) => {
+                await page.waitForTimeout(3500);
+                await page.evaluate(() => {
+                    const t = [...document.querySelectorAll('button.side-quest-subtab')]
+                        .find(b => /Teams/i.test(b.textContent));
+                    if (t) t.click();
+                });
+                await page.waitForTimeout(2500);
+                // Auf den KOPF der ersten Teamkarte, nicht auf das erste
+                // Pokemon: sonst schneidet das Bild mitten in eine Karte
+                // und der Replica-Code — der Sinn der Ansicht — fehlt.
+                await page.evaluate(() => {
+                    const mon = document.querySelector('.side-quest-mon');
+                    const karte = mon && mon.closest('[class*="side-quest-team"], article, section');
+                    if (karte) karte.scrollIntoView({ block: 'start' });
+                    window.scrollBy(0, -24);
+                });
+                await page.waitForTimeout(600);
+            },
+        },
+        {
+            name: '2-nutzung.png',
+            hash: 'champions',
+            settle: '.side-quest-subtab',
+            drive: async (page) => {
+                await page.waitForTimeout(3500);
+                await page.evaluate(() => {
+                    const t = [...document.querySelectorAll('button.side-quest-subtab')]
+                        .find(b => /Nutzung|Usage/i.test(b.textContent));
+                    if (t) t.click();
+                });
+                await page.waitForTimeout(2500);
+                await page.evaluate(() => window.scrollTo(0, 260));
+            },
+        },
+        {
+            name: '3-nachschlagen.png',
+            hash: 'champions',
+            settle: '.side-quest-subtab',
+            drive: async (page) => {
+                await page.waitForTimeout(3500);
+                await page.evaluate(() => {
+                    const t = [...document.querySelectorAll('button.side-quest-subtab')]
+                        .find(b => /Nachschlagen|Reference|Look/i.test(b.textContent));
+                    if (t) t.click();
+                });
+                await page.waitForTimeout(2500);
+                await page.evaluate(() => window.scrollTo(0, 300));
+            },
+        },
+    ],
+    'team-builder': [
+        {
+            name: '1-auswahl.png',
+            hash: 'champions',
+            settle: '.side-quest-subtab',
+            drive: async (page) => {
+                await page.waitForTimeout(3500);
+                await page.evaluate(() => {
+                    const t = [...document.querySelectorAll('button.side-quest-subtab')]
+                        .find(b => /Team-Builder/i.test(b.textContent));
+                    if (t) t.click();
+                });
+                await page.waitForTimeout(2000);
+                // Ein Pokemon waehlen, sonst zeigt der Builder nur den
+                // Startzustand — genau das Bild, das nichts erklaert.
+                await page.evaluate(() => {
+                    const k = [...document.querySelectorAll('button,div[role="button"],li')]
+                        .find(e => e.textContent.trim() === 'Pelipper');
+                    if (k) k.click();
+                });
+                await page.waitForTimeout(1500);
+                await page.evaluate(() => window.scrollTo(0, 240));
+            },
+        },
+        {
+            name: '2-gesetzt.png',
+            hash: 'champions',
+            settle: '.side-quest-subtab',
+            drive: async (page) => {
+                await page.waitForTimeout(3500);
+                await page.evaluate(() => {
+                    const t = [...document.querySelectorAll('button.side-quest-subtab')]
+                        .find(b => /Team-Builder/i.test(b.textContent));
+                    if (t) t.click();
+                });
+                await page.waitForTimeout(2000);
+                await page.evaluate(() => {
+                    const k = [...document.querySelectorAll('button,div[role="button"],li')]
+                        .find(e => e.textContent.trim() === 'Pelipper');
+                    if (k) k.click();
+                });
+                await page.waitForTimeout(1200);
+                await page.evaluate(() => {
+                    const b = [...document.querySelectorAll('button')]
+                        .find(e => /Team setzen|Set team/i.test(e.textContent));
+                    if (b) b.click();
+                });
+                await page.waitForTimeout(2000);
+                await page.evaluate(() => window.scrollTo(0, 240));
+            },
+        },
+    ],
+    'team-rechner': [
+        {
+            name: '1-matrix.png',
+            hash: 'champions',
+            settle: '.side-quest-subtab',
+            drive: async (page) => {
+                await page.waitForTimeout(3500);
+                await page.evaluate(() => {
+                    const t = [...document.querySelectorAll('button.side-quest-subtab')]
+                        .find(b => /Matchups/i.test(b.textContent));
+                    if (t) t.click();
+                });
+                await page.waitForTimeout(2500);
+                await page.evaluate(() => window.scrollTo(0, 260));
+            },
+        },
+    ],
     'meta-call': [
         {
             name: '1-field.png',
@@ -525,8 +704,8 @@ async function captureFeature(browser, feature, shots) {
 // ── Main ────────────────────────────────────────────────────────
 
 async function main() {
-    if (!fs.existsSync(OUTPUT_DIR)) {
-        fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+    if (!fs.existsSync(ausgabeWurzel())) {
+        fs.mkdirSync(ausgabeWurzel(), { recursive: true });
     }
     console.log(`[boot] starting static server on :${PORT}`);
     const server = await startStaticServer();

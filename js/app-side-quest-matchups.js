@@ -254,13 +254,12 @@
     };
     function L() { return LABELS[uiLang()]; }
 
-    const NATURE_DE = {
-        Hardy: 'Robust', Lonely: 'Solo', Brave: 'Mutig', Adamant: 'Hart', Naughty: 'Frech',
-        Bold: 'Kühn', Docile: 'Sanft', Relaxed: 'Locker', Impish: 'Pfiffig', Lax: 'Lasch',
-        Timid: 'Scheu', Hasty: 'Hastig', Serious: 'Ernst', Jolly: 'Froh', Naive: 'Naiv',
-        Modest: 'Mäßig', Mild: 'Mild', Quiet: 'Ruhig', Bashful: 'Zaghaft', Rash: 'Hitzig',
-        Calm: 'Still', Gentle: 'Zart', Sassy: 'Forsch', Careful: 'Sacht', Quirky: 'Kauzig',
-    };
+    // Die 25 Wesen stehen seit dem 03.09.2026 EINMAL, in
+    // js/champions-namen.js. Vorher fuehrten drei Module ihre eigene
+    // Kopie — und die des Team-Builders fehlte ganz, weshalb dort
+    // "Modest" statt "Maessig" stand. Fail-soft: ohne das Modul bleibt
+    // der englische Name stehen.
+    const NATURE_DE = (window.ChampionsNamen && window.ChampionsNamen.WESEN_DE) || {};
 
     const TYPES_EN = ['Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting',
         'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon',

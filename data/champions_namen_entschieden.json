@@ -50,6 +50,19 @@
         "Ein Wert war gar kein Name, sondern flachgeklopfte Wiki-Auszeichnung: 'Wandler  Verwandler (in )' fuer Transform. Wo PokeWiki zwei Namen mit <br> untereinander setzt (aktueller und alter), hat der Scraper beide plus einen Rest der tt-Vorlage in ein Feld gelegt. Ueber alle 1.469 Namen der Overrides-Datei gesucht — es war der einzige.",
         "Neun Namen wurden entschieden, aber nur acht sind neu: Sharp Beak stand schon seit Runde 1 als 'Spitzer Schnabel' in dieser Datei — der falsche Wert 'Hackattack' saß in de_name_overrides.json und wurde von der Entscheidung nur ueberdeckt, nicht behoben. Jetzt steht er auch an der Quelle richtig."
       ]
+    },
+    "vierte_runde_2026_09_03": {
+      "anlass": "Beim Bebildern der Anleitung fiel auf, dass die Teamkarten der Champions-Seite Gegenstand, Faehigkeit, Wesen und Attacken englisch zeigten, obwohl daneben deutsche Beschriftungen standen. Die Renderer loesten nur die Art auf. Nach dem Anschliessen der Namenstabelle blieben 22 Werte englisch — sie standen in keiner Quelle.",
+      "umfang": "Alle Werte aus data/champions_replica_teams.json gegen die Namenstabelle gehalten: 22 ohne deutschen Namen, 99 Vorkommen.",
+      "ergebnis": {
+        "ergaenzt": 22,
+        "mega_steine": 21,
+        "faehigkeiten": 1
+      },
+      "bemerkenswert": [
+        "Die Regel aus Runde 2 traegt auch hier: die deutsche Endung ist -nit. Staraptite -> Staraptornit, Tyranitarite -> Despotarnit, Blastoisinite -> Turtoknit. Der Stamm ist die DEUTSCHE Art, nicht die englische — deshalb Sumpexnit (Sumpex) und nicht Swampertnit.",
+        "Good as Gold heisst Goldkoerper. Es ist die einzige Faehigkeit in dieser Runde und kam zehnmal vor."
+      ]
     }
   },
   "namen": {
@@ -94,6 +107,11 @@
         "de": "Feenaura",
         "quelle": "https://pokewiki.de/Fairy_Aura",
         "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Good as Gold": {
+        "de": "Goldkörper",
+        "quelle": "https://pokewiki.de/Good_as_Gold",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
       }
     },
     "moves": {
@@ -450,6 +468,111 @@
         "de": "Schwerschweif",
         "quelle": "https://pokewiki.de/Lagging_Tail",
         "note": "03.09.2026, dritte Runde: die vierte Namensquelle (champions_resources.json) widersprach der Namenstabelle. Hier hatte die Ressourcendatei recht; de_name_overrides.json trug den abgekuerzten oder veralteten Wert."
+      },
+      "Staraptite": {
+        "de": "Staraptornit",
+        "quelle": "https://pokewiki.de/Staraptite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Raichunite Y": {
+        "de": "Raichunit Y",
+        "quelle": "https://pokewiki.de/Raichunite_Y",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Raichunite X": {
+        "de": "Raichunit X",
+        "quelle": "https://pokewiki.de/Raichunite_X",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Tyranitarite": {
+        "de": "Despotarnit",
+        "quelle": "https://pokewiki.de/Tyranitarite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Swampertite": {
+        "de": "Sumpexnit",
+        "quelle": "https://pokewiki.de/Swampertite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Mawilite": {
+        "de": "Flunkifernit",
+        "quelle": "https://pokewiki.de/Mawilite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Scovillainite": {
+        "de": "Halupenjonit",
+        "quelle": "https://pokewiki.de/Scovillainite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Pyroarite": {
+        "de": "Pyroleonit",
+        "quelle": "https://pokewiki.de/Pyroarite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Cameruptite": {
+        "de": "Cameruptnit",
+        "quelle": "https://pokewiki.de/Cameruptite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Blastoisinite": {
+        "de": "Turtoknit",
+        "quelle": "https://pokewiki.de/Blastoisinite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Metagrossite": {
+        "de": "Metagrossnit",
+        "quelle": "https://pokewiki.de/Metagrossite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Dragoninite": {
+        "de": "Dragoranit",
+        "quelle": "https://pokewiki.de/Dragoninite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Meganiumite": {
+        "de": "Meganienit",
+        "quelle": "https://pokewiki.de/Meganiumite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Blazikenite": {
+        "de": "Lohgocknit",
+        "quelle": "https://pokewiki.de/Blazikenite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Abomasite": {
+        "de": "Rexblisarnit",
+        "quelle": "https://pokewiki.de/Abomasite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Gyaradosite": {
+        "de": "Garadosnit",
+        "quelle": "https://pokewiki.de/Gyaradosite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Lopunnite": {
+        "de": "Schlapornit",
+        "quelle": "https://pokewiki.de/Lopunnite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Scraftinite": {
+        "de": "Irokexonit",
+        "quelle": "https://pokewiki.de/Scraftinite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Kangaskhanite": {
+        "de": "Kangamanit",
+        "quelle": "https://pokewiki.de/Kangaskhanite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Clefablite": {
+        "de": "Pixinit",
+        "quelle": "https://pokewiki.de/Clefablite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
+      },
+      "Pidgeotite": {
+        "de": "Taubossnit",
+        "quelle": "https://pokewiki.de/Pidgeotite",
+        "note": "03.09.2026, vierte Runde: stand in KEINER Quelle. Auf den Teamkarten der Champions-Seite erschien der englische Name."
       }
     }
   }

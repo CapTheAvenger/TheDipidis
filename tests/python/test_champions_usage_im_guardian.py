@@ -101,7 +101,14 @@ def test_die_stufen_sind_richtig_verteilt(monkeypatch, tmp_path):
         "eine Liste ueber der Grenze OHNE Markierung heisst: die Quelle hat "
         "ihre Form geaendert und der Scraper hat es nicht gemerkt"
     )
-    assert stufen.get("could NOT pin a single culprit") == "WARN"
+    # GEAENDERT 03.09.2026: dieser Fall ist nicht mehr fest WARN, sondern
+    # haengt an der Richtung — WARN nur, wenn die Zahl gegenueber der
+    # Baseline gewachsen ist (siehe die Beobachtungs-Tests unten). Hier
+    # laeuft die Pruefung ohne Baseline, das ist die Erstmessung.
+    # Unveraendert bleibt die Aussage, auf die es ankommt: markiert und
+    # trotzdem zu hoch ist KEIN Notfall, also niemals CRITICAL.
+    assert stufen.get("could NOT pin a single culprit") in ("INFO", "WARN")
+    assert stufen.get("could NOT pin a single culprit") != "CRITICAL"
     assert stufen.get("carry the same row twice") == "WARN"
     assert stufen.get("stat spread") == "WARN"
 
@@ -202,3 +209,89 @@ def test_genullte_liste_wird_als_solche_gezaehlt(monkeypatch, tmp_path):
     f = _befunde(monkeypatch, tmp_path, _ueber_grenze_mit_nullwert())
     text = " || ".join(t for _, t in f)
     assert "davon 1 mit bereits genulltem Wert" in text, text
+
+
+# ── Beobachten statt jeden Tag dasselbe melden (03.09.2026) ───────────
+#
+# Der Betreiber hat die 22 Listen gegen weitere Quellen gehalten: die
+# Fehler stehen dort auch. Sie sind von hier aus nicht heilbar, und die
+# Hoffnung ist, dass sie sich an der Quelle wieder legen.
+#
+# Eine WARN-Zeile, die jeden Tag dieselbe unveränderliche Zahl meldet,
+# wird nach dem dritten Mal überblättert — und dann fällt auch die
+# Verschlechterung nicht mehr auf. CLAUDE.md hält dieselbe Lehre schon
+# fest: "Absolute quality thresholds produce noise here. Detect *change*
+# against a baseline instead."
+#
+# Also: WARN nur beim Wachstum. Gleichstand und Rückgang sind INFO mit
+# Richtungsangabe, damit sichtbar bleibt, wohin es läuft.
+
+def _n_listen_ueber_grenze(n):
+    """n Wesenslisten, jede über 105 %, jede vom Scraper markiert."""
+    pk = {}
+    for i in range(n):
+        pk[f"mon{i}"] = {"singles": {
+            "_warnungen": ["nature: Anteile summierten sich auf 121.4 %"],
+            "nature": [{"name": "Adamant", "pct": 60.0},
+                       {"name": "Jolly", "pct": 60.0}]}}
+    return {"pokemon": pk}
+
+
+def _stufen_und_text(monkeypatch, tmp_path, daten, vorher):
+    ordner = tmp_path / "data"
+    ordner.mkdir(exist_ok=True)
+    (ordner / "champions_usage.json").write_text(json.dumps(daten), encoding="utf-8")
+    monkeypatch.setattr(guardian, "DATA", str(ordner))
+    f = []
+    rueck = guardian.check_champions_usage(f, vorher)
+    return [s for s, _ in f], " || ".join(t for _, t in f), rueck
+
+
+def test_wachstum_ist_eine_warnung(monkeypatch, tmp_path):
+    stufen, text, _ = _stufen_und_text(
+        monkeypatch, tmp_path, _n_listen_ueber_grenze(5),
+        {"champions_ueber_grenze": 3})
+    assert "WARN" in stufen, f"eine gewachsene Zahl muss warnen: {text}"
+    assert "zuletzt waren es 3, jetzt 5" in text, text
+
+
+def test_gleichstand_warnt_nicht(monkeypatch, tmp_path):
+    stufen, text, _ = _stufen_und_text(
+        monkeypatch, tmp_path, _n_listen_ueber_grenze(5),
+        {"champions_ueber_grenze": 5})
+    assert "WARN" not in stufen, f"unveraendert ist kein Handlungsbedarf: {text}"
+    assert "unveraendert bei 5" in text, text
+
+
+def test_rueckgang_warnt_nicht_und_nennt_die_richtung(monkeypatch, tmp_path):
+    stufen, text, _ = _stufen_und_text(
+        monkeypatch, tmp_path, _n_listen_ueber_grenze(5),
+        {"champions_ueber_grenze": 9})
+    assert "WARN" not in stufen, text
+    assert "zurueck von 9 auf 5" in text, \
+        'ob sich die Fehler legen, ist genau die Frage — die Richtung muss dastehen'
+
+
+def test_erste_messung_ist_kein_alarm(monkeypatch, tmp_path):
+    stufen, text, _ = _stufen_und_text(
+        monkeypatch, tmp_path, _n_listen_ueber_grenze(5), {})
+    assert "WARN" not in stufen, text
+    assert "Erste Messung" in text, text
+
+
+def test_die_zahl_geht_in_die_baseline(monkeypatch, tmp_path):
+    """Ohne Rueckgabewert kann der naechste Lauf nichts vergleichen —
+    dann ist die ganze Beobachtung wirkungslos."""
+    _, _, rueck = _stufen_und_text(
+        monkeypatch, tmp_path, _n_listen_ueber_grenze(7),
+        {"champions_ueber_grenze": 7})
+    assert rueck == 7, f"check_champions_usage muss die Zahl liefern, gab {rueck!r}"
+
+
+def test_baseline_traegt_das_feld():
+    """Die Gegenprobe zum Test darueber: main() muss den Wert auch
+    wirklich wegschreiben."""
+    assert 'champions_ueber_grenze = check_champions_usage(' in GUARD_SRC, \
+        "der Rueckgabewert wird nicht eingesammelt"
+    assert '"champions_ueber_grenze": champions_ueber_grenze,' in GUARD_SRC, \
+        "der Wert landet nicht in der Baseline — der naechste Lauf sieht wieder nichts"

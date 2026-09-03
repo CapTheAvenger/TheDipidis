@@ -176,6 +176,55 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
         }
     });
 
+    it('eine Paarung ohne entschiedene Partie sagt genau das', () => {
+        /* LIVE GEFUNDEN AM 03.09.2026, nach dem Merge von PR #640.
+           25 der 769 Paarungen stehen auf 0-0-1: eine einzige Partie, die
+           unentschieden endete. In der Spalte steht dort zu Recht ein
+           Strich — S/(S+N) ist auf null entschiedenen Partien nicht
+           definiert. Der Hinweis daneben behauptete aber "ohne Bilanz in
+           der Quelle", und das war falsch: die Bilanz ist da, sie hat nur
+           keinen Nenner.
+
+           Zwei verschiedene Gruende fuer denselben Strich brauchen zwei
+           verschiedene Saetze, sonst schickt der eine den Leser auf die
+           Suche nach einem Datenfehler, den es nicht gibt. */
+        const i18n = lies(path.join('js', 'i18n.js'));
+        const e = [...i18n.matchAll(/'arc\.muMajorNurRemis':\s*'([^']*)'/g)].map(x => x[1]);
+        assert.strictEqual(e.length, 2, 'der Hinweis fehlt in einer Sprache');
+        for (const s2 of e) {
+            assert.ok(/unentschieden|drawn/i.test(s2),
+                'der Hinweis nennt den Grund nicht: ' + s2.slice(0, 70));
+            assert.ok(/\{b\}/.test(s2),
+                'der Hinweis zeigt die Bilanz nicht, die den Grund belegt');
+        }
+        const h = [...i18n.matchAll(/'heatmap\.majorNurRemis':\s*'([^']*)'/g)];
+        assert.strictEqual(h.length, 2, 'der Heatmap-Hinweis fehlt in einer Sprache');
+
+        /* Die Oberflaeche muss die beiden Faelle ueberhaupt unterscheiden
+           koennen — sonst haengt der richtige Satz an nichts.
+
+           GENAU HINSEHEN, WO. Die erste Fassung suchte "bilanzDa"
+           irgendwo im Modul und blieb gruen, als das Feld aus dem
+           Register verschwand: der Lesezugriff `mj.bilanzDa` stand ja
+           noch da. Gesucht wird deshalb die ZUWEISUNG im Rumpf von
+           ladeMajorMatchups, und in der Karte die VERZWEIGUNG, die den
+           Satz auswaehlt. Gefunden durch die Mutationsprobe. */
+        const meta = ohneKomm(lies(path.join('js', 'app-current-meta.js')));
+        const a = meta.indexOf('async function ladeMajorMatchups');
+        const rumpf = meta.slice(a, meta.indexOf('window._majorMatchupRegistry = reg;', a));
+        assert.ok(/bilanzDa\s*:/.test(rumpf),
+            'das Register schreibt bilanzDa nicht mehr — dann unterscheidet '
+            + 'niemand "keine Bilanz" von "keine entschiedene Partie"');
+        assert.ok(/m\.majorBilanzDa\s*$|m\.majorBilanzDa\s*\n?\s*\?/m.test(karteK)
+            || /\(m\.majorBilanzDa/.test(karteK),
+            'die Karte verzweigt nicht mehr an majorBilanzDa');
+        const i = karteK.indexOf('arc.muMajorNurRemis');
+        assert.ok(i > 0, 'der Satz fuer "alle unentschieden" wird nicht mehr benutzt');
+        assert.ok(karteK.slice(Math.max(0, i - 400), i).indexOf('majorBilanzDa') >= 0,
+            'der Satz fuer "alle unentschieden" haengt nicht mehr an der '
+            + 'Unterscheidung — dann steht er auch dort, wo die Bilanz fehlt');
+    });
+
     it('ohne Bilanz steht ein Strich, keine geschaetzte Zahl', () => {
         /* Zeilen aus einem Lauf vor PR #639 tragen vs_count, aber keine
            Bilanz. Aus vs_win_pct eine Win Rate zurueckzurechnen ginge nur
@@ -379,6 +428,29 @@ describe('Die Zahlen hinter der Spalte', () => {
                 + `${daneben[0].opponent_deck_name}: ${daneben[0].vs_wins}-`
                 + `${daneben[0].vs_losses}-${daneben[0].vs_ties} gegen `
                 + `${daneben[0].vs_win_pct} %` : ''));
+    });
+
+    it('den Fall "alle unentschieden" gibt es wirklich', () => {
+        /* Die Vorkehrung dafuer (arc.muMajorNurRemis) ist oben zugesichert.
+           Hier steht, dass sie nicht fuer einen erfundenen Fall gebaut
+           wurde: am 03.09.2026 waren es 25 von 769 Paarungen, jede mit
+           genau einer Partie, und die endete unentschieden. */
+        const nurRemis = rows.filter((r) => {
+            const w = parseInt(r.vs_wins, 10) || 0;
+            const l = parseInt(r.vs_losses, 10) || 0;
+            return String(r.vs_wins || '').trim() !== '' && (w + l) === 0
+                && (parseInt(r.vs_count, 10) || 0) > 0;
+        });
+        assert.ok(nurRemis.length > 0,
+            'keine Paarung ohne entschiedene Partie mehr in der Datei — die '
+            + 'Vorkehrung waere dann tot; sie kostet nichts und bleibt richtig, '
+            + 'aber diese Zusicherung belegt nichts mehr');
+        for (const r of nurRemis) {
+            assert.strictEqual(parseInt(r.vs_ties, 10) || 0,
+                (parseInt(r.vs_count, 10) || 0) * (r.my_deck_name === r.opponent_deck_name ? 2 : 1),
+                `${r.my_deck_name} vs ${r.opponent_deck_name}: ohne Siege und `
+                + 'Niederlagen muessen alle Partien Unentschieden sein');
+        }
     });
 
     it('beide Richtungen einer Paarung ergaenzen sich zu 100 Prozent', () => {

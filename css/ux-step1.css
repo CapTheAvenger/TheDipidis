@@ -167,6 +167,16 @@ input[type="text"][id*="search" i],
 input[type="text"][class*="search" i],
 input[type="text"][placeholder*="search" i] {
     background-color: var(--ui-input-bg) !important;
+    /* BEFUND (03.09.2026, live gemessen): diese Regel deckt JEDES
+       Suchfeld der Seite ab und setzte eine drehende Flaeche ohne
+       Textfarbe. Ein <input> erbt `color` nicht — es nimmt die Vorgabe
+       des Browsers, und die ist Schwarz. Gemessen an einem frisch
+       erzeugten Feld mit denselben Klassen: rgb(0,0,0) auf
+       rgb(17,23,48). Auf den bestehenden Feldern fiel es nicht auf,
+       weil sie leer waren; getippter Text waere unsichtbar gewesen.
+       Dieselbe Regel wie bei .calc-input und dem Sortierfeld der
+       Kartendatenbank — die dritte Fundstelle desselben Musters. */
+    color: var(--ink) !important;
     border: 2px solid var(--ui-input-border) !important;
     border-radius: var(--ui-input-radius) !important;
     padding: var(--ui-input-pad-y) var(--ui-input-pad-x) var(--ui-input-pad-y) 38px !important;

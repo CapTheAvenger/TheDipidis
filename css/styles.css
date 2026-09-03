@@ -9824,9 +9824,13 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .tier-trend-chip.tier-trend-down { color: var(--tint-bad-ink); border-color: rgba(231,76,60,0.4); }
 /* 03.09.2026: #95a5a6 war 2,43:1 auf heller Flaeche (19 Chips auf
    Current Meta). Das Gegenstueck zum Toenungs-Befund — eine feste
-   Tinte, die nur im DUNKELmodus haelt. --ink-3 haelt beides:
-   6,15 hell, 5,70 dunkel. */
-.tier-trend-chip.tier-trend-flat { color: var(--ink-3); }
+   Tinte, die nur im DUNKELmodus haelt.
+   Erst auf --ink-3 gesetzt; die Live-Nachmessung zeigte dann 4,14:1,
+   weil der Chip nicht auf dem Seitengrund sitzt, sondern auf dem
+   helleren Deck-Banner (rgb(43,48,73)). Auf dem Papier gerechnet war
+   --ink-3 richtig, auf der Seite nicht — deshalb --ink-2:
+   7,10 hell, 7,19 dunkel, beides am echten Untergrund gemessen. */
+.tier-trend-chip.tier-trend-flat { color: var(--ink-2); }
 
 /* Data-source transparency banner — promoted from a quiet pill to a
    proper trust signal. Sits at the top of the meta tab so new users

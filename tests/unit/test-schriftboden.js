@@ -103,3 +103,45 @@ describe('Der Token, auf den gehoben wurde, existiert', () => {
             `--fs-xs steht auf ${m[1]}px — der Boden wäre dann keiner`);
     });
 });
+
+
+/*
+ * Die Lücke im Boden: em-Ketten (Befund 03.09.2026)
+ * ==================================================
+ * Die Prüfung oben liest FESTE px-Werte. Eine relative Größe sieht sie
+ * nicht — und genau dort ist der Boden durchgebrochen. Im Browser
+ * gemessen (Playwright, 390 px und 1500 px, beide Modi):
+ *
+ *   .current-tab-badge   0.46em auf 16,8 px  ->  7,73 px  (Kopf JEDER Ansicht)
+ *   .top-card-decks      0.72em auf 10,4 px  ->  7,49 px  (Aktuelles Meta, Desktop)
+ *   .top-card-share      0.78em auf 10,4 px  ->  8,11 px  (dieselbe Kachel)
+ *   .header-flex-user    0.78em auf 12,0 px  ->  9,36 px  (Sprachknopf)
+ *   .btn-toggle-item     0.83em auf 12,0 px  ->  9,96 px
+ *
+ * Dieselbe Krankheit, die mobile-responsive.css für Mobil schon
+ * beschreibt ("Ursache ist keine bewusste Wahl, sondern
+ * multiplizierendes em") — dort kuriert, auf Desktop stehengeblieben.
+ *
+ * Statisch ist das nicht allgemein prüfbar: welchen Wert 0.72em ergibt,
+ * weiß nur der Browser. Deshalb hier keine erfundene Allgemeinregel,
+ * sondern die fünf gemessenen Stellen festgenagelt. Die allgemeine
+ * Prüfung gehört in einen gerenderten Lauf; bis dahin ist diese Lücke
+ * wenigstens benannt statt unsichtbar.
+ */
+describe('Schriftboden: em-Ketten tragen einen Boden', () => {
+    const gemessen = [
+        ['pokeball-menu.css', /\.current-tab-badge\s*\{[^}]*font-size:\s*max\(\s*11px\s*,/, '.current-tab-badge (gemessen 7,73 px)'],
+        ['current-meta-matchups.css', /\.top-card-decks\s*\{[^}]*font-size:\s*max\(\s*10px\s*,/, '.top-card-decks (gemessen 7,49 px)'],
+        ['current-meta-matchups.css', /\.top-card-share\s*\{[^}]*font-size:\s*max\(\s*10px\s*,/, '.top-card-share (gemessen 8,11 px)'],
+        ['mobile-responsive.css', /font-size:\s*max\(\s*10px\s*,\s*0\.78em\s*\)\s*!important/, 'Kopf-Nutzerknopf (gemessen 9,36 px)'],
+        ['pokeball-menu.css', /\.btn-toggle-item\s*\{[^}]*font-size:\s*max\(\s*10px\s*,/, '.btn-toggle-item (gemessen 9,96 px)'],
+    ];
+    for (const [datei, muster, was] of gemessen) {
+        it(`${was} behält seinen Boden`, () => {
+            const quelle = fs.readFileSync(path.join(CSS_DIR, datei), 'utf8');
+            assert.ok(muster.test(quelle),
+                `${was} in ${datei} hat den max()-Boden verloren — die Größe fällt dann ` +
+                'wieder unter 10 px, und die px-Prüfung oben sieht das nicht.');
+        });
+    }
+});

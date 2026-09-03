@@ -1849,7 +1849,8 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
-    font-size: 0.78em !important;
+    /* BODEN 03.09.2026: 0.78em ergab beim Sprachknopf gemessene 9,36 px. */
+    font-size: max(10px, 0.78em) !important;
     padding-left: 6px !important;
     padding-right: 6px !important;
   }

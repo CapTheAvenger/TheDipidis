@@ -722,13 +722,23 @@ describe('Befund N — die Pokedex-Suche fand nichts', () => {
     });
 
     it('die beiden DOM-Filter haben den Pokedex-Zweig bekommen', () => {
+        // 03.09.2026: die drei Kachelfilter sind zu einer Funktion in
+        // js/deck-analysis-shared.js zusammengelegt. Geprueft wird
+        // deshalb ZWEIERLEI — dass der gemeinsame Filter den Zweig hat,
+        // und dass die beiden Reiter ihn wirklich benutzen. Nur das
+        // erste zu pruefen waere der alte Fehler in neuer Gestalt: eine
+        // richtige Funktion, die niemand aufruft.
+        const GETEILT = read('js/deck-analysis-shared.js');
+        assert.ok(GETEILT.includes('cardPokedexSearchValue'),
+            'deck-analysis-shared.js: der Pokedex-Zweig fehlt wieder — das Suchfeld '
+            + 'daneben verspricht Pokedex-Suche');
+        assert.ok(/dexNr !== '' && dexNr === suchbegriff/.test(GETEILT),
+            'deck-analysis-shared.js: der Vergleich auf die exakte Pokedex-Nummer fehlt');
         for (const [datei, src] of [['app-current-meta-analysis.js', CMA],
                                     ['app-past-meta.js', PAST]]) {
-            assert.ok(src.includes('cardPokedexSearchValue'),
-                datei + ': der Pokedex-Zweig fehlt wieder — das Suchfeld daneben '
-                + 'verspricht Pokedex-Suche');
-            assert.ok(/dexNum !== '' && dexNum === searchTerm/.test(src),
-                datei + ': der Vergleich auf die exakte Pokedex-Nummer fehlt');
+            assert.ok(src.includes('uebersichtKachelnFiltern'),
+                datei + ': benutzt den gemeinsamen Kachelfilter nicht mehr — '
+                + 'dann gilt die Zusicherung darueber fuer diesen Reiter nicht');
         }
         assert.ok(CARDS.includes('cardPokedexSearchValue'),
             'app-cards-db.js: der Pokedex-Zweig liest wieder nur die leere CSV-Spalte');

@@ -823,8 +823,11 @@ def check_champions_usage(findings):
                     # Ausreisser genullt; wenn die Liste dann IMMER NOCH zu
                     # hoch ist, war es nicht ein Ausreisser, sondern die
                     # ganze Liste. Gemeldet, aber kein Notfall.
+                    hat_genullt = any(e.get("pct") is None for e in liste)
                     (unmarkiert if not block.get("_warnungen")
-                     else trotz_marke).append(f"{name}/{fmt}/{kat} = {summe:.1f} %")
+                     else trotz_marke).append(
+                        f"{name}/{fmt}/{kat} = {summe:.1f} %"
+                        + (" (genullt)" if hat_genullt else ""))
                 namen = [(e.get("name") or "").strip() for e in liste]
                 if len(namen) != len(set(namen)):
                     doppelt.append(f"{name}/{fmt}/{kat}")
@@ -856,13 +859,26 @@ def check_champions_usage(findings):
                          f"{len(doppelt)} champions usage list(s) carry the same row twice: "
                          f"{', '.join(doppelt[:8])}{' …' if len(doppelt) > 8 else ''}"))
     if trotz_marke:
+        # KORRIGIERT 03.09.2026. Hier stand "AFTER the scraper nulled its
+        # outlier" — das beschrieb den falschen Zweig. pruefe_plausibel()
+        # nullt NUR, wenn genau EIN Wert ausser der Reihe steht und sein
+        # Wegfall die Summe rettet; sonst laesst es die Liste bewusst
+        # unveraendert und vermerkt sie nur. Genau das ist bei diesen
+        # Listen passiert: nachgezaehlt am 03.09.2026 trugen 0 von 22
+        # einen genullten Wert (im ganzen Bestand nur 2 Listen ueberhaupt).
+        # Die Meldung behauptete also eine Reparatur, die nie stattfand —
+        # und liess den Leser eine kleinere Luecke sehen als die echte.
+        genullt = sum(1 for e in trotz_marke if "(genullt)" in e)
         findings.append(("WARN",
-                         f"{len(trotz_marke)} champions usage list(s) are still above "
-                         f"{GRENZE:.0f} % AFTER the scraper nulled its outlier: "
+                         f"{len(trotz_marke)} champions usage list(s) sum above "
+                         f"{GRENZE:.0f} % and the scraper could NOT pin a single culprit "
+                         f"(davon {genullt} mit bereits genulltem Wert): "
                          f"{', '.join(trotz_marke[:8])}"
-                         f"{' …' if len(trotz_marke) > 8 else ''} — then it was not one bad "
-                         f"row but the whole list. Measured 25.08.2026: 16 such lists in the "
-                         f"first fresh scrape after 39 days."))
+                         f"{' …' if len(trotz_marke) > 8 else ''} — entweder steht kein Wert "
+                         f"ausser der Reihe, oder es kaemen zwei gleich gut in Frage. Raten "
+                         f"waere schlimmer als die gemeldete Luecke: die fuehrende Zeile (und "
+                         f"damit Buildvorschlag und Schadensrechnung) bleibt korrekt, der "
+                         f"Ueberschuss sitzt im Auslaeufer der Liste."))
     if spreads:
         findings.append(("WARN",
                          f"{len(spreads)} champions stat spread(s) outside {SP_BUDGET} points "
@@ -872,8 +888,10 @@ def check_champions_usage(findings):
     if markiert:
         findings.append(("INFO",
                          f"{markiert} champions usage block(s) carry a plausibility warning "
-                         f"from the scraper — the impossible value was set to unknown, not "
-                         f"guessed. Fixing it needs the source, not this repo."))
+                         f"from the scraper. Wo ein einzelner Ausreisser eindeutig war, "
+                         f"steht er auf unbekannt statt auf einer geratenen Zahl; wo nicht, "
+                         f"ist die Liste unveraendert und nur vermerkt. Beides braucht zum "
+                         f"Beheben die Quelle, nicht dieses Repo."))
 
 
 def check_champions_namen(findings):
@@ -1049,13 +1067,54 @@ def report_unverified_prices(findings):
         except ValueError:
             return 0.0
 
-    pricey = sorted(unver, key=lambda r: -eur(col(r, "eur_price")))
+    # Nach Format trennen (Regel des Betreibers, 03.09.2026): eine
+    # unbestaetigte Zuordnung an einer ROTIERTEN Karte kostet niemanden
+    # etwas — die Karte ist nicht mehr legal, den Preis sieht kaum
+    # jemand. Die Gesamtzahl vermischte beides und war deshalb als
+    # Kennzahl unbrauchbar: am 03.09.2026 waren es 1213 Zeilen, davon
+    # 1108 (91 %) in rotierten Sets. Eine Meldung, deren Zahl zu 91 %
+    # aus Irrelevantem besteht, wird ueberblaettert — zu Recht.
+    #
+    # Die Grenze kommt aus format_window.json, nicht aus einer Liste
+    # hier: sonst zeigt sie nach der naechsten Rotation auf das
+    # vorletzte Format.
+    ordnung, aeltestes = {}, ""
+    try:
+        with open(os.path.join(DATA, "sets.json"), encoding="utf-8") as f:
+            ordnung = json.load(f) or {}
+        with open(os.path.join(DATA, "format_window.json"), encoding="utf-8") as f:
+            aeltestes = ((json.load(f) or {}).get("oldest_legal_set") or "").upper()
+    except (OSError, ValueError):
+        pass
+    grenze = ordnung.get(aeltestes)
+
+    def legal(r):
+        # Ohne brauchbare Grenze lieber alles melden als still nichts.
+        if not grenze:
+            return True
+        return (ordnung.get((col(r, "set") or "").strip().upper()) or 0) >= grenze
+
+    im_format = [r for r in unver if legal(r)]
+    rotiert = len(unver) - len(im_format)
+
+    pricey = sorted(im_format, key=lambda r: -eur(col(r, "eur_price")))
     over5 = [r for r in pricey if eur(col(r, "eur_price")) > 5]
-    findings.append(("WARN",
-                     f"{len(unver)}/{len(rows)} price rows have an unverified product "
-                     f"mapping ({len(over5)} above 5 EUR). Top: "
-                     + ", ".join(f"{col(r, 'set')} {col(r, 'number')} "
-                                 f"{col(r, 'eur_price')}" for r in pricey[:5])))
+    if im_format:
+        umfang = (f"in AKTUELL LEGALEN Sets (>= {aeltestes})" if grenze
+                  else "mit unbestaetigter Zuordnung (Formatgrenze nicht lesbar, "
+                       "deshalb ungefiltert)")
+        findings.append(("WARN",
+                         f"{len(im_format)} Preiszeilen {umfang} haben eine "
+                         f"unbestaetigte Produktzuordnung, {len(over5)} davon "
+                         f"ueber 5 EUR. Top: "
+                         + ", ".join(f"{col(r, 'set')} {col(r, 'number')} "
+                                     f"{col(r, 'eur_price')}" for r in pricey[:5])))
+    if rotiert:
+        findings.append(("INFO",
+                         f"{rotiert} weitere unbestaetigte Zuordnungen betreffen "
+                         f"rotierte Sets ({len(unver)}/{len(rows)} Zeilen insgesamt). "
+                         f"Nicht mehr legal, deshalb keine Warnung — die Zahl steht "
+                         f"hier nur, damit sie nicht als Zuwachs missverstanden wird."))
 
 
 def check_price_integrity(findings, cur, base):

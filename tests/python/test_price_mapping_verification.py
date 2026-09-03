@@ -371,7 +371,16 @@ def test_guardian_reports_the_unverified_worklist(tmp_path, monkeypatch):
     assert len(findings) == 1
     lvl, msg = findings[0]
     assert lvl == 'WARN'
-    assert '2/3' in msg and '1 above 5 EUR' in msg
+    # Wortlaut am 03.09.2026 geaendert: die Meldung zaehlt jetzt nur noch
+    # Zeilen in aktuell legalen Sets (Betreiberregel — eine rotierte Karte
+    # kostet niemanden etwas). Ohne format_window.json/sets.json gibt es
+    # hier keine Grenze, also faellt die Pruefung bewusst auf "alles
+    # melden" zurueck: 2 unbestaetigte von 3 Zeilen, davon 1 ueber 5 EUR.
+    # Geprueft wird weiter die Aussage, nicht der alte Satz.
+    assert msg.startswith('2 Preiszeilen'), msg
+    assert '1 davon ueber 5 EUR' in msg, msg
+    assert 'Formatgrenze nicht lesbar' in msg, \
+        'der Rueckfall muss benannt sein, sonst liest sich die Zahl wie gefiltert'
     assert 'SVP 181' in msg, 'the priciest unverified row must be named first'
 
 

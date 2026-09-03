@@ -7,9 +7,10 @@
     },
     "counts": {
       "moves": 927,
-      "items": 542
+      "items": 563
     },
-    "korrektur_2026_09_03": "Acht Item-Namen gegen die PokeWiki-Infobox korrigiert. Die Quelle pokemonexperte.de/items fuehrt teils abgekuerzte In-Game-Beschriftungen ('Schwerschwf.') und Namen aus der Zeit vor Schwert und Schild ('Hackattack' fuer Sharp Beak). Belege je Name in data/champions_namen_entschieden.json."
+    "korrektur_2026_09_03": "Acht Item-Namen gegen die PokeWiki-Infobox korrigiert. Die Quelle pokemonexperte.de/items fuehrt teils abgekuerzte In-Game-Beschriftungen ('Schwerschwf.') und Namen aus der Zeit vor Schwert und Schild ('Hackattack' fuer Sharp Beak). Belege je Name in data/champions_namen_entschieden.json.",
+    "ergaenzung_2026_09_03": "22 Namen ergaenzt, die in KEINER Quelle standen: 21 Mega-Steine und die Faehigkeit Good as Gold. Sie kamen auf den Teamkarten der Champions-Seite vor — 99 Vorkommen ueber alle Teams — und standen dort englisch. Jeder einzeln ueber die PokeWiki-Infobox belegt."
   },
   "moves": {
     "10,000,000 Volt Thunderbolt": "Tausendfacher Donnerblitz",
@@ -1482,6 +1483,27 @@
     "Yellow Shard": "Gelbstück",
     "Zap Plate": "Blitztafel",
     "Zinc": "Zink",
-    "Zoom Lens": "Zoomlinse"
+    "Zoom Lens": "Zoomlinse",
+    "Staraptite": "Staraptornit",
+    "Raichunite Y": "Raichunit Y",
+    "Raichunite X": "Raichunit X",
+    "Tyranitarite": "Despotarnit",
+    "Swampertite": "Sumpexnit",
+    "Mawilite": "Flunkifernit",
+    "Scovillainite": "Halupenjonit",
+    "Pyroarite": "Pyroleonit",
+    "Cameruptite": "Cameruptnit",
+    "Blastoisinite": "Turtoknit",
+    "Metagrossite": "Metagrossnit",
+    "Dragoninite": "Dragoranit",
+    "Meganiumite": "Meganienit",
+    "Blazikenite": "Lohgocknit",
+    "Abomasite": "Rexblisarnit",
+    "Gyaradosite": "Garadosnit",
+    "Lopunnite": "Schlapornit",
+    "Scraftinite": "Irokexonit",
+    "Kangaskhanite": "Kangamanit",
+    "Clefablite": "Pixinit",
+    "Pidgeotite": "Taubossnit"
   }
 }

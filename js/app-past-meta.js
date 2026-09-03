@@ -88,6 +88,51 @@
                 .trim() || 'Unknown Deck';
         }
 
+        /* ALLE VARIANTEN EINES HAUPTPOKEMON AUF EINMAL (03.09.2026).
+         *
+         * Gemeldet: "ich würde mich auch gerne alle Karten anzeigen lassen
+         * wo Dragapult das Hauptpokemon war. Das dient dazu wirklich alle
+         * Karten in eine Box zu packen wo man dann schnell alle Deck
+         * Varianten zu egal welchen Dragapult Deck schnell nachbauen kann."
+         *
+         * WIE DAS HAUPTPOKEMON BESTIMMT WIRD. Limitless benennt einen
+         * Archetyp nach seinen Pokemon, das wichtigste zuerst: "Dragapult
+         * Dusknoir", "Dragapult LZ Box". Der Kopf einer Familie ist also
+         * der LAENGSTE Archetypname, der Praefix eines anderen ist —
+         * "Dragapult" fuer die zehn Dragapult-Decks.
+         *
+         * WARUM NICHT das erste Wort: es gibt zweiteilige Namen ("Iron
+         * Thorns", "N's Zoroark", "Mega Excadrill"). Das erste Wort waere
+         * dort "Iron", "N's", "Mega" — und wuerde Familien bilden, die es
+         * nicht gibt. Die Praefixregel braucht dagegen keinen
+         * Namenskatalog: sie liest nur, was in den Daten steht.
+         *
+         * NACHGEPRUEFT gegen data/archetype_icons.json, das je Archetyp die
+         * Pokemon in Reihenfolge fuehrt: fuer alle 97 Archetypen, die dort
+         * stehen, nennt die Praefixregel dasselbe Hauptpokemon wie das
+         * erste Icon. 97 Treffer, 0 Abweichungen. Die Icon-Datei deckt aber
+         * nur die Haelfte der 197 Past-Meta-Archetypen ab (sie pflegt das
+         * aktuelle Meta), deshalb ist sie die PROBE und nicht die Quelle.
+         *
+         * WENN DER KOPF NICHT ALLEIN VORKOMMT — etwa "Iron Thorns
+         * Dragapult" ohne ein reines "Iron Thorns" — liefert die Regel den
+         * Namen selbst zurueck. Die Familie hat dann ein Mitglied und wird
+         * gar nicht angeboten. Lieber keine Sammelauswahl als eine falsche.
+         */
+        const FAMILIE_PREFIX = '__familie__|';
+
+        function familienKopf(name, alleNamen) {
+            const n = String(name || '');
+            let best = null;
+            for (const m of alleNamen) {
+                if (m !== n && n.startsWith(m + ' ')
+                    && (best === null || m.length > best.length)) {
+                    best = m;
+                }
+            }
+            return best || n;
+        }
+
         function resetSelectWithPlaceholder(selectEl, placeholderText, placeholderValue, placeholderI18nKey) {
             if (!selectEl) return;
             selectEl.innerHTML = '';
@@ -855,7 +900,49 @@
             // Populate deck select dropdown
             resetSelectWithPlaceholder(deckSelect, typeof t === 'function' ? t('currentMeta.selectDeck') : '-- Select a Deck --', '', 'currentMeta.selectDeck');
             
+            /* Familien aus dem, was NACH dem Filter uebrig ist — nicht aus
+               dem Gesamtbestand. Sonst stuende "Alle Dragapult-Decks (10
+               Varianten)" auch dann da, wenn das gewaehlte Turnier nur zwei
+               davon gesehen hat, und die Zahl waere gelogen. */
+            const alleNamen = archetypes.map(e => e.archetype);
+            const familien = new Map();
             archetypes.forEach(entry => {
+                const kopf = familienKopf(entry.archetype, alleNamen);
+                if (!familien.has(kopf)) familien.set(kopf, []);
+                familien.get(kopf).push(entry);
+            });
+
+            archetypes.forEach(entry => {
+                // Die Sammelauswahl steht direkt VOR ihrem Kopf-Archetyp.
+                // Die Liste ist alphabetisch, der Kopf ist der kuerzeste
+                // Name der Familie und kommt damit zuerst — die Sammelzeile
+                // steht also unmittelbar ueber ihren Mitgliedern statt in
+                // einem eigenen Block, den man erst suchen muss. Und weil
+                // der Familienname im Text steht, findet die Suche im
+                // Auswahlfeld sie mit demselben Wort wie die Varianten.
+                const meine = familien.get(entry.archetype);
+                if (meine && meine.length > 1) {
+                    const turniere = new Set();
+                    let listen = 0;
+                    meine.forEach(e => {
+                        e.tournaments.forEach(d => turniere.add(getPastMetaDeckTournamentKey(d)));
+                        listen += e.totalDecklists || 0;
+                    });
+                    const sammel = document.createElement('option');
+                    sammel.value = FAMILIE_PREFIX + entry.archetype;
+                    // Ein Turnier ist kein "1 Turniere". Zwei Schluessel
+                    // statt einer Zahl im Satz — dieselbe Loesung, die das
+                    // Haus schon fuer die Varianten-Suffixe benutzt.
+                    const turnierText = turniere.size === 1
+                        ? t('pm.familieTurnier')
+                        : t('pm.familieTurniere').replace('{n}', String(turniere.size));
+                    sammel.textContent = t('pm.familieOption')
+                        .replace('{name}', entry.archetype)
+                        .replace('{v}', String(meine.length))
+                        .replace('{t}', turnierText);
+                    deckSelect.appendChild(sammel);
+                }
+
                 const tournamentCount = entry.tournaments.length;
                 const displayName = tournamentCount > 1
                     ? `${entry.archetype} ${t('pm.tournamentsSuffix').replace('{n}', tournamentCount)}`
@@ -921,18 +1008,44 @@
             const formatFilter = document.getElementById('pastMetaFormatFilter').value;
             const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
             
-            // Find all decks with matching archetype (respecting current filters)
-            const matchingDecks = pastMetaDecks.filter(deck => {
-                const matchesArchetype = deck.deck_name === selectedArchetype;
+            /* Eine Sammelauswahl ("Alle Dragapult-Decks") kommt als
+               "__familie__|Dragapult" herein. Dann wird nicht auf
+               Namensgleichheit geprueft, sondern auf denselben
+               Familienkopf — und der wird ueber DIESELBE Menge gebildet,
+               aus der auch das Auswahlfeld gefuellt wurde. Waere die Menge
+               eine andere, koennte "Dragapult LZ Box" hier in einer
+               anderen Familie landen als eine Zeile weiter oben. */
+            const istFamilie = String(selectedArchetype).startsWith(FAMILIE_PREFIX);
+            const familienName = istFamilie
+                ? String(selectedArchetype).slice(FAMILIE_PREFIX.length)
+                : '';
+
+            const imFilter = pastMetaDecks.filter(deck => {
                 const matchesFormat = formatFilter === 'all' || deck.format === formatFilter;
                 const matchesTournament = tournamentFilter === 'all' || deck.tournament_id === tournamentFilter;
-                return matchesArchetype && matchesFormat && matchesTournament;
+                return matchesFormat && matchesTournament;
             });
+            const alleNamen = istFamilie
+                ? Array.from(new Set(imFilter.map(d => d.deck_name).filter(Boolean)))
+                : [];
+
+            const matchingDecks = imFilter.filter(deck => (istFamilie
+                ? familienKopf(deck.deck_name || '', alleNamen) === familienName
+                : deck.deck_name === selectedArchetype));
             
             if (matchingDecks.length === 0) {
                 console.error('No matching decks found for archetype:', selectedArchetype);
                 return;
             }
+
+            // Ab hier ist der Anzeigename gemeint, nicht die Marke aus dem
+            // Auswahlfeld: sie darf in keiner Ueberschrift landen.
+            const anzeigeName = istFamilie
+                ? t('pm.familieTitel').replace('{name}', familienName)
+                : selectedArchetype;
+            const variantenNamen = istFamilie
+                ? Array.from(new Set(matchingDecks.map(d => d.deck_name).filter(Boolean))).sort()
+                : [];
 
             const uniqueTournamentKeys = new Set(matchingDecks.map(deck => getPastMetaDeckTournamentKey(deck)));
             const uniqueTournamentCount = uniqueTournamentKeys.size;
@@ -990,8 +1103,11 @@
             
             // Create a virtual deck object for the aggregated data
             pastMetaCurrentDeck = {
-                deck_name: selectedArchetype,
-                archetype: selectedArchetype,
+                deck_name: anzeigeName,
+                archetype: anzeigeName,
+                istFamilie,
+                familienName,
+                varianten: variantenNamen,
                 format: formatFilter === 'all' ? 'Multi-Format' : formatFilter,
                 tournament_name: tournamentNames.join(', '),
                 tournament_count: uniqueTournamentCount,
@@ -1003,6 +1119,24 @@
             
             // Update stats
             document.getElementById('pastMetaStatsSection').classList.remove('d-none');
+
+            /* Der Hinweis, ohne den die Zahlen darunter falsch gelesen
+               werden. Er nennt auch die Varianten beim Namen — sonst muss
+               der Leser raten, was "alle Dragapult-Decks" umfasst, und
+               kann nicht pruefen, ob eine fehlt. */
+            const famHinweis = document.getElementById('pastMetaFamilieHinweis');
+            if (famHinweis) {
+                if (istFamilie) {
+                    famHinweis.hidden = false;
+                    famHinweis.textContent = t('pm.familieHinweis')
+                        .replace('{n}', String(variantenNamen.length))
+                        .replace('{name}', familienName)
+                        .replace('{liste}', variantenNamen.join(', '));
+                } else {
+                    famHinweis.hidden = true;
+                    famHinweis.textContent = '';
+                }
+            }
             const totalCards = getPastMetaSummaryTotalCount(aggregatedCards);
             document.getElementById('pastMetaStatCards').textContent = `${aggregatedCards.length} / ${Math.round(totalCards)}`;
             
@@ -1019,9 +1153,16 @@
             const deckKachel = document.getElementById('pastMetaStatTournament');
             const dePM = (typeof getLang === 'function' && getLang() === 'de');
             const listenWort = dePM ? 'Tag-2-Decklisten' : 'day-2 decklists';
+            // "74 Tournaments" stand bis zum 03.09.2026 auch in der
+            // deutschen Oberflaeche — ein englisches Wort mitten in einer
+            // deutschen Kachel, direkt neben dem uebersetzten
+            // "Tag-2-Decklisten". Aufgefallen beim Bauen der Sammelbox,
+            // weil die ueber 74 Turniere geht und die Kachel damit zum
+            // ersten Mal die Mehrzahl zeigte.
+            const turnierWort = dePM ? 'Turniere' : 'tournaments';
             deckKachel.textContent = uniqueTournamentCount === 1
                 ? `${tournamentNames[0]} (${totalDecklists} ${listenWort})`
-                : `${uniqueTournamentCount} Tournaments (${totalDecklists} ${listenWort})`;
+                : `${uniqueTournamentCount} ${turnierWort} (${totalDecklists} ${listenWort})`;
             deckKachel.title = dePM
                 ? 'Limitless veroeffentlicht Decklisten erst ab Tag 2. Alle Kartenzahlen dieses '
                   + 'Reiters stammen aus dem Top Cut, nicht aus dem ganzen Meta — Anteile sind '
@@ -1032,7 +1173,7 @@
             document.getElementById('pastMetaStatFormat').textContent = pastMetaCurrentDeck.format;
 
             // Save to window for deck builder
-            window.pastMetaCurrentArchetype = selectedArchetype;
+            window.pastMetaCurrentArchetype = anzeigeName;
 
             // Apply filters and render
             filterPastMetaCards();
@@ -1041,6 +1182,28 @@
             // matrix). Fire-and-forget — first paint shows a loading state,
             // the labs CSV resolves async and re-renders. No-op when the
             // format filter is "all" (per-meta labs CSV is one-format-only).
+            /* BEIDE AUFKLAPPUNGEN KENNEN NUR EINZELNE ARCHETYPEN.
+               Die Turnierbilanz kommt je Archetyp aus den Labs-Dateien,
+               die beste Liste ist EINE Liste. Fuer eine Familie gibt es
+               beides nicht — der Familienkopf einzusetzen waere die
+               bequeme Luege: er ist nur eine der zehn Varianten. Also
+               sagen die Abschnitte, warum sie leer sind, statt still zu
+               verschwinden oder die Zahl einer Variante zu zeigen. */
+            if (istFamilie) {
+                const abschnitt = document.getElementById('pastMetaPerformanceSection');
+                const kacheln = document.getElementById('pastMetaPerformanceCards');
+                const matrix = document.getElementById('pastMetaMatchupBlock');
+                if (abschnitt && kacheln && matrix) {
+                    abschnitt.classList.remove('d-none');
+                    kacheln.innerHTML = '';
+                    matrix.innerHTML = '<p class="past-meta-section-hint past-meta-empty-state">'
+                        + escapeHtml(t('pm.familieKeineBilanz').replace('{name}', familienName))
+                        + '</p>';
+                }
+                const beste = document.getElementById('pastMetaMostSuccessfulSection');
+                if (beste) beste.classList.add('d-none');
+                window.pastMetaMostSuccessfulList = null;
+            } else {
             renderPastMetaPerformance(selectedArchetype, formatFilter, tournamentFilter);
 
             // Most Successful List (Feature A) — surface the single best-
@@ -1050,6 +1213,7 @@
             // pick of the session. Filter handling matches the user's
             // chosen format/tournament dropdowns.
             renderPastMetaMostSuccessfulList(selectedArchetype, formatFilter, tournamentFilter);
+            }
 
             devLog(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${uniqueTournamentCount} tournaments, ${totalDecklists} total decklists)`);
           } catch (err) {

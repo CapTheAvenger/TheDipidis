@@ -147,21 +147,62 @@ def test_die_gepinnten_produkte_gibt_es_wirklich():
         )
 
 
-def test_ein_pin_beantwortet_die_meldung():
-    """Der Pin wirkt erst beim naechsten Mapperlauf. Bis dahin steht die
-    Doppelbelegung weiter in der ausgelieferten Datei — verschweigen waere
-    falsch, unveraendert als CRITICAL melden auch."""
-    warn = _text("WARN")
-    assert "bereits von Hand entschieden" in warn, (
-        "die Pruefung unterscheidet nicht mehr zwischen einer offenen und "
-        "einer bereits beantworteten Doppelbelegung"
+def test_der_pin_ist_angekommen():
+    """Die beiden Karten teilen ihre Produkt-ID nicht mehr.
+
+    DIESE ZUSICHERUNG STAND BIS ZUM 03.09.2026 ANDERSHERUM da und war
+    damit falsch gebaut: sie verlangte die Meldung "bereits von Hand
+    entschieden". Die gibt es aber nur im ZWISCHENZUSTAND — zwischen dem
+    Pin und dem naechsten Lauf von cardmarket_id_mapper.py. Kaum lief der
+    Mapper, war die Meldung weg und der Test rot, obwohl genau das
+    passiert war, was passieren sollte. Eine Zusicherung auf einen
+    voruebergehenden Zustand ist keine.
+
+    Geprueft wird jetzt das Ergebnis: die ausgelieferte Zuordnung gibt
+    jeder der beiden Karten eine eigene ID.
+    """
+    zeilen = {(r["set"], r["number"]): r for r in _mapping()}
+    for karte, nachbar in ((("CRI", "116"), ("CRI", "122")),
+                           (("TWM", "190"), ("TWM", "25"))):
+        a = zeilen.get(karte)
+        b = zeilen.get(nachbar)
+        assert a and b, f"{karte} oder {nachbar} fehlt in der Zuordnung"
+        assert a["cardmarket_product_id"] != b["cardmarket_product_id"], (
+            f"{karte[0]} {karte[1]} traegt wieder dieselbe Produkt-ID wie "
+            f"{nachbar[0]} {nachbar[1]} ({a['cardmarket_product_id']}) — "
+            f"beide zeigen dann denselben Preis, und einer ist falsch"
+        )
+        assert a["match_method"] == "manual-pin", (
+            f"{karte[0]} {karte[1]} steht wieder auf "
+            f"'{a['match_method']}' statt auf dem Pin"
+        )
+    assert "CRI 116" not in _text("CRITICAL") + _text("WARN"), (
+        "CRI 116 wird weiter als Doppelbelegung gemeldet, obwohl der Pin "
+        "in der Zuordnung angekommen ist"
     )
-    assert "CRI 116" in warn and "TWM 190" in warn, (
-        "die beiden gepinnten Faelle stehen nicht mehr in der beantworteten "
-        "Gruppe — dann greift entweder der Pin nicht oder die Erkennung"
+
+
+def test_ein_frischer_pin_wird_als_beantwortet_erkannt():
+    """Zwischen einem Pin und dem naechsten Mapperlauf steht die
+    Doppelbelegung weiter in der ausgelieferten Datei. Sie zu verschweigen
+    waere falsch, sie unveraendert als CRITICAL zu melden auch — genauso
+    trennt es check_verified_collisions() daneben.
+
+    Hier steht nur, dass es diesen Zweig GIBT; ob er gerade feuert, haengt
+    daran, ob zufaellig ein frischer Pin offen ist, und darauf darf keine
+    Zusicherung bauen."""
+    with open(os.path.join(ROOT, "scripts", "data_guardian.py"),
+              encoding="utf-8") as f:
+        quelle = f.read()
+    rumpf = quelle.split("def check_geteilte_produkt_ids", 1)[1] \
+                  .split("\ndef ", 1)[0]
+    assert "_gepinnte_karten()" in rumpf, (
+        "die Pruefung sieht die Handpins nicht mehr an — ein frisch "
+        "gepinnter Fall wuerde bis zum naechsten Mapperlauf als CRITICAL "
+        "gemeldet, obwohl er beantwortet ist"
     )
-    assert "CRI 116" not in _text("CRITICAL"), (
-        "ein bereits entschiedener Fall wird weiter als CRITICAL gemeldet"
+    assert "bereits von Hand entschieden" in rumpf, (
+        "der Zweig fuer beantwortete Doppelbelegungen ist weg"
     )
 
 

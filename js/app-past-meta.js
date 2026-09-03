@@ -106,6 +106,87 @@
             selectEl.appendChild(placeholderOption);
         }
 
+        /* WAEHREND DES LADENS SIEHT MAN, DASS GELADEN WIRD (03.09.2026).
+         *
+         * Gemeldet: "wenn ich in Rotationen auf alle Turniere dauert es
+         * etwas bis wirklich alle Turniere im Turnier-Filter geladen sind.
+         * Das ist natuerlich voll okay, aber wir sollten irgendwie anzeigen,
+         * dass hier gerade noch was geladen wird."
+         *
+         * Der Fehler war nicht die Dauer, sondern die Stille: `-- Alle
+         * Formate --` laedt 13 Auszuege nacheinander, und bis der letzte
+         * durch ist, steht im Turnier-Filter die Liste des vorherigen
+         * Formats. Sie sieht fertig aus. Wer sein Turnier darin nicht
+         * findet, schliesst daraus, dass es fehlt.
+         *
+         * Drei Dinge zugleich, damit es an jeder Stelle auffaellt, an der
+         * man hinsieht: die beiden Auswahlfelder werden gesperrt und
+         * beschriftet, und darunter steht der Fortschritt in Zahlen. Die
+         * Zahlen sind wichtig — "laedt ..." ohne Ende sieht nach Haenger
+         * aus, "3 von 13" nicht.
+         */
+        function pastMetaLadestand(zustand, fertig, gesamt) {
+            const zeile = document.getElementById('pastMetaLadestand');
+            const format = document.getElementById('pastMetaFormatFilter');
+            const turnier = document.getElementById('pastMetaTournamentFilter');
+            const deck = document.getElementById('pastMetaDeckSelect');
+            const anzeige = deck && deck.parentElement
+                && deck.parentElement.querySelector('.searchable-select-display');
+
+            /* AUCH DAS FORMATFELD WIRD GESPERRT. Nicht aus Vorsicht,
+               sondern weil ein zweiter Wechsel waehrend des Ladens einen
+               zweiten Lauf startet: `pastMetaDecks` wuerde zweimal
+               ergaenzt, und das `finally` des ERSTEN Laufs raeumt die
+               Anzeige weg, waehrend der zweite noch laeuft. Dann steht
+               wieder eine halbfertige Liste da, die fertig aussieht —
+               genau der Zustand, den diese Anzeige beheben soll. */
+            const felder = [format, turnier, deck];
+
+            if (zustand === 'aus') {
+                if (zeile) { zeile.hidden = true; zeile.textContent = ''; }
+                felder.forEach((el) => {
+                    if (!el) return;
+                    el.disabled = false;
+                    el.classList.remove('pm-laedt');
+                });
+                // Das durchsuchbare Feld spiegelt das native <select> nicht
+                // von selbst — es baut sich beim naechsten Fuellen neu auf.
+                if (anzeige) {
+                    anzeige.classList.remove('pm-laedt');
+                    anzeige.removeAttribute('aria-disabled');
+                    anzeige.tabIndex = 0;
+                }
+                return;
+            }
+
+            const mit = (schluessel, ersatz) => (gesamt > 1)
+                ? t(schluessel).replace('{n}', String(fertig || 0)).replace('{g}', String(gesamt))
+                : t(ersatz);
+            if (zeile) { zeile.hidden = false; zeile.textContent = mit('pm.ladeFortschritt', 'pm.ladeEinzeln'); }
+            felder.forEach((el) => {
+                if (!el) return;
+                el.disabled = true;
+                el.classList.add('pm-laedt');
+            });
+            if (anzeige) {
+                anzeige.classList.add('pm-laedt');
+                /* GEMESSEN, NICHT ANGENOMMEN (03.09.2026): `disabled` auf
+                   dem versteckten <select> haelt das durchsuchbare Feld
+                   NICHT auf — es ist ein <div>. Der Probelauf klappte es
+                   waehrend des Ladens auf und sah die halb gefuellte
+                   Deckliste, die vollstaendig aussieht. Genau der Zustand,
+                   den diese Anzeige verhindern soll, eine Spalte weiter.
+                   Also Maus (pointer-events, im Stylesheet) UND Tastatur
+                   (tabIndex) zumachen. */
+                anzeige.setAttribute('aria-disabled', 'true');
+                anzeige.tabIndex = -1;
+                // Eigener Satz: unter der Ueberschrift "Archetyp auswaehlen"
+                // ist "Turniere werden geladen" die Antwort auf eine Frage,
+                // die dort niemand gestellt hat.
+                anzeige.textContent = mit('pm.ladeDecks', 'pm.ladeDecksEinzeln');
+            }
+        }
+
         // (2026-06-10 audit) Delegated to window.parseLocaleNumber —
         // see app-utils.js. Keeping the named export as a thin alias so
         // existing call sites (parsePastMetaNumber) keep working without
@@ -414,7 +495,17 @@
                 // Still register format change so user can switch
                 formatSelect.addEventListener('change', async () => {
                     const format = formatSelect.value;
-                    await _loadPastMetaChunksIfNeeded(format, window._pastMetaSetOrderMap, window._pastMetaTournamentsByDate);
+                    pastMetaLadestand('an', 0, 0);
+                    try {
+                        await _loadPastMetaChunksIfNeeded(format, window._pastMetaSetOrderMap,
+                            window._pastMetaTournamentsByDate,
+                            (n, g) => pastMetaLadestand('an', n, g));
+                    } finally {
+                        // IMMER wieder freigeben. Bricht ein Auszug ab, waeren
+                        // die beiden Felder sonst dauerhaft gesperrt — aus
+                        // "es laedt noch" wuerde "es geht nichts mehr".
+                        pastMetaLadestand('aus');
+                    }
                     updatePastMetaTournamentFilter();
                     updatePastMetaDeckList();
                 });
@@ -433,7 +524,14 @@
             // Setup event listeners - Format filter triggers lazy chunk load + update
             formatSelect.addEventListener('change', async () => {
                 const format = formatSelect.value;
-                await _loadPastMetaChunksIfNeeded(format, window._pastMetaSetOrderMap, window._pastMetaTournamentsByDate);
+                pastMetaLadestand('an', 0, 0);
+                try {
+                    await _loadPastMetaChunksIfNeeded(format, window._pastMetaSetOrderMap,
+                        window._pastMetaTournamentsByDate,
+                        (n, g) => pastMetaLadestand('an', n, g));
+                } finally {
+                    pastMetaLadestand('aus');
+                }
                 updatePastMetaTournamentFilter();
                 updatePastMetaDeckList();
             });
@@ -460,14 +558,14 @@
         
         // Lazy-load tournament chunks for a specific format (or all formats).
         // Appends new decks to pastMetaDecks without duplicating already-loaded data.
-        async function _loadPastMetaChunksIfNeeded(format, setOrderMap, tournamentsByDate) {
+        async function _loadPastMetaChunksIfNeeded(format, setOrderMap, tournamentsByDate, onFortschritt) {
             const manifest = window._pastMetaManifest;
             const loaded = window._pastMetaLoadedChunks || new Set();
 
             if (!manifest || !Array.isArray(manifest.chunks)) {
                 // No manifest — fall back to full monolith load (once)
                 if (!loaded.has('__all__')) {
-                    const deckIndex = await streamPastMetaDeckIndex(setOrderMap, tournamentsByDate);
+                    const deckIndex = await streamPastMetaDeckIndex(setOrderMap, tournamentsByDate, null, onFortschritt);
                     pastMetaDecks = Array.from(deckIndex.values());
                     loaded.add('__all__');
                 }
@@ -490,7 +588,7 @@
 
             const chunkUrls = chunksToLoad.map(c => BASE_PATH + c.file);
             devLog(`[Past Meta] Lazy-loading ${chunkUrls.length} chunk(s) for format: ${format}`);
-            const deckIndex = await streamPastMetaDeckIndex(setOrderMap, tournamentsByDate, chunkUrls);
+            const deckIndex = await streamPastMetaDeckIndex(setOrderMap, tournamentsByDate, chunkUrls, onFortschritt);
             const newDecks = Array.from(deckIndex.values());
             pastMetaDecks = pastMetaDecks.concat(newDecks);
 
@@ -503,7 +601,7 @@
         // Uses PapaParse streaming so PapaParse never holds all 429k rows internally.
         // Prefers chunked files via tournament_cards_manifest.json when available.
         // Optional chunkUrls: array of specific chunk URLs to load (for lazy per-format loading).
-        function streamPastMetaDeckIndex(setOrderMap, tournamentsByDate, chunkUrls) {
+        function streamPastMetaDeckIndex(setOrderMap, tournamentsByDate, chunkUrls, onFortschritt) {
             return new Promise(async (resolve, reject) => {
                 const deckMap = new Map();
                 const inferredMeta = new Map(); // deckKey → newest set code
@@ -633,8 +731,12 @@
                     if (chunkUrls && chunkUrls.length > 0) {
                         // Lazy: load only the specified chunk files
                         devLog(`[Past Meta] Loading ${chunkUrls.length} specified chunk(s)`);
+                        let fertig = 0;
+                        if (typeof onFortschritt === 'function') onFortschritt(0, chunkUrls.length);
                         for (const url of chunkUrls) {
                             await streamFile(url);
+                            fertig++;
+                            if (typeof onFortschritt === 'function') onFortschritt(fertig, chunkUrls.length);
                         }
                     } else {
                         // Full load: try chunked loading via manifest, else monolith
@@ -645,8 +747,12 @@
                                 const manifest = await manifestResp.json();
                                 if (manifest && Array.isArray(manifest.chunks) && manifest.chunks.length > 0) {
                                     devLog(`[Past Meta] Loading ${manifest.chunks.length} tournament chunks`);
+                                    let fertigM = 0;
+                                    if (typeof onFortschritt === 'function') onFortschritt(0, manifest.chunks.length);
                                     for (const chunkFile of manifest.chunks) {
                                         await streamFile(BASE_PATH + chunkFile);
+                                        fertigM++;
+                                        if (typeof onFortschritt === 'function') onFortschritt(fertigM, manifest.chunks.length);
                                     }
                                     useChunks = true;
                                 }

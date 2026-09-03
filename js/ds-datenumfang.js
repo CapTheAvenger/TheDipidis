@@ -16,7 +16,7 @@
  * WARUM EIN EIGENES MODUL UND KEIN ZWEITER RECHENWEG
  *
  * Die Zahlen kennt nur js/app-tier-meta.js: es ist die einzige Stelle,
- * die beide Nenner gleichzeitig hat (die Decklisten der Online-Ladder
+ * die beide Nenner gleichzeitig hat (die Decklisten der Online-Turniere
  * und die gewichteten Turnier-Antritte) und die weiss, wie viel
  * Limitless als "Other" wegfallen laesst. Sie dort noch einmal zu
  * rechnen, waere ein zweiter Rechenweg fuer dieselbe Groesse — und
@@ -150,8 +150,8 @@
 
         if (u.listen) {
             var s = de
-                ? g(u.listen) + ' gemeldete Decklisten von der Online-Ladder'
-                : g(u.listen) + ' reported decklists from the online ladder';
+                ? g(u.listen) + ' gemeldete Decklisten aus den Limitless-Online-Turnieren'
+                : g(u.listen) + ' reported decklists from the Limitless online tournaments';
             if (u.archetypen) {
                 s += de ? ', verteilt auf ' + g(u.archetypen) + ' Archetypen'
                         : ', across ' + g(u.archetypen) + ' archetypes';

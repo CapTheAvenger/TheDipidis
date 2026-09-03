@@ -1,4 +1,24 @@
 // ============================================================
+/* NAMENSHINWEIS (03.09.2026): "ladder" in diesem Modul ist ein
+   Bezeichner, kein Sachverhalt.
+
+   Bis heute stand "Online-Ladder" auch in den sichtbaren Texten der Seite.
+   Das war falsch: die Zahlen kommen von play.limitlesstcg.com/decks, und
+   diese Seite schreibt ueber ihre eigene Tabelle "536 tournaments, 39181
+   players, 88857 matches". Eine Ladder fuehrt play.limitlesstcg.com nicht;
+   das Wort steht dort nirgends. Gemeldet vom Betreiber, an der Quelle
+   nachgeprueft, in allen Anzeigetexten ersetzt durch
+   "Limitless-Online-Turniere".
+
+   Die BEZEICHNER hier heissen weiter so — _origLadderShareByDeck,
+   ladderPct, _aliasTurnierZuLadder und rund 260 weitere Stellen. Ein
+   Umbenennen haette keinen Nutzen fuer den Leser der Seite und ein echtes
+   Risiko: der Schluessel `turnier_zu_ladder` steht in
+   data/archetype_aliases.json und ist laut data/_consumers.md eine
+   veroeffentlichte Schnittstelle, die andere Projekte lesen. Wer hier
+   liest: "ladder" heisst durchweg "Anteil aus der Deck-Uebersicht der
+   Limitless-Online-Turniere", im Gegensatz zu "brought" = selbst gezaehlte
+   Antritte aus den Endstaenden. */
 // Meta Call – Tournament Prediction Feature
 // ============================================================
 //

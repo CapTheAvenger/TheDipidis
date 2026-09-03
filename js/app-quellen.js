@@ -83,9 +83,11 @@
                        Satz davor machte ihn zum Widerspruch. Jetzt
                        verspricht der Satz nichts, was der Abschnitt
                        vielleicht nicht halten kann. */
-                    p: ['Die Meta-Ansicht zählt zweimal unabhängig voneinander: einmal die ' +
-                        'gemeldeten Decklisten der Online-Ladder, einmal die gewichteten ' +
-                        'Antritte auf Turnieren.'],
+                    p: ['Die Meta-Ansicht zählt zweimal unabhängig voneinander — beide Male ' +
+                        'aus den Limitless-Online-Turnieren: einmal die gemeldeten Decklisten, ' +
+                        'wie Limitless sie auf seiner Deck-Übersicht ausweist, einmal die ' +
+                        'gewichteten Antritte, die wir selbst aus den Endständen der einzelnen ' +
+                        'Turniere zählen.'],
                     umfang: true,
                     leer: 'Der Umfang steht erst zur Verfügung, wenn die Meta-Ansicht in ' +
                           'dieser Sitzung einmal geladen wurde. Geschätzt wird hier nichts.',
@@ -241,9 +243,10 @@
                 {
                     id: 'umfang', auf: false,
                     h: 'What the numbers rest on',
-                    p: ['The meta view counts twice, independently: once the reported ' +
-                        'decklists on the online ladder, once the weighted entries at ' +
-                        'tournaments.'],
+                    p: ['The meta view counts twice, independently — both times from the ' +
+                        'Limitless online tournaments: once the reported decklists as Limitless ' +
+                        'lists them on its deck breakdown, once the weighted entries we count ' +
+                        'ourselves from the standings of each event.'],
                     umfang: true,
                     leer: 'The scope becomes available once the meta view has loaded in this ' +
                           'session. Nothing here is estimated.',

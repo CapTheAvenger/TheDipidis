@@ -147,14 +147,14 @@
                 // nur fuer 7 von 138 Zeilen. Die uebrigen 131 stehen auf den
                 // gemeldeten Listen der Ladder. Jetzt nennt der Text beide
                 // Nenner, und die sieben Ausnahmen sind in der Spalte markiert.
-                share: 'Anteil an den gemeldeten Listen der Online-Ladder. Decks ohne Ladder-Zeile zeigen stattdessen ihren Anteil an den gewichteten Turnier-Antritten — diese Werte stehen kursiv.',
+                share: 'Anteil an den gemeldeten Listen der Limitless-Online-Turniere. Decks ohne eigene Zeile dort zeigen stattdessen ihren Anteil an den gewichteten Turnier-Antritten — diese Werte stehen kursiv.',
                 top8: 'Wie oft dieses Deck aus seinen Antritten die Top 8 erreicht hat. Nach Aktualität gewichtet: Turniere der letzten sieben Tage zählen voll, ältere halb — damit die Quote das heutige Meta abbildet und nicht die Turniere vom Frühjahr. Das ist eine grobe Stufe, kein Naturgesetz.',
                 vsField: '1,6-mal heißt: erreicht die Top 8 anderthalbmal so oft wie ein durchschnittliches Deck. Kleine Stichproben werden zum Durchschnitt hin geglättet (k = 50) — der rohe Wert steht im Tooltip der Zelle.',
                 prev: 'Anteil im vorherigen Vergleichszeitraum.',
                 delta: 'Veränderung des Anteils in Prozentpunkten. Gelistet ab 0,4 pp.',
             },
             en: {
-                share: 'Share of reported lists on the online ladder. Decks without a ladder row show their share of weighted tournament entries instead — those values are italic.',
+                share: 'Share of reported lists from the Limitless online tournaments. Decks with no row of their own there show their share of weighted tournament entries instead — those values are italic.',
                 top8: 'How often this deck reached top 8 out of its entries. Weighted by recency: events from the last seven days count fully, older ones half, so the rate tracks today\u2019s meta rather than the spring. That is a coarse step, not a law of nature.',
                 vsField: '1.6× means: reaches top 8 one and a half times as often as an average deck. Small samples are smoothed toward the average (k = 50) — the raw value is in the cell tooltip.',
                 prev: 'Share in the previous comparison window.',
@@ -1860,10 +1860,10 @@
                     const SPALTEN = [
                         { k: 'name',     de: 'Deck',          en: 'Deck',        num: false },
                         { k: 'listen',   de: 'Listen',        en: 'Lists',       num: true,
-                          tip: { de: 'Decklisten auf der Online-Ladder', en: 'decklists on the online ladder' } },
+                          tip: { de: 'gemeldete Decklisten aus den Limitless-Online-Turnieren', en: 'reported decklists from the Limitless online tournaments' } },
                         { k: 'anteil',   de: 'Anteil',        en: 'Share',       num: true, hilf: 'share' },
                         { k: 'wr',       de: 'Win Rate',      en: 'Win rate',    num: true,
-                          tip: { de: 'gewonnene Matches auf der Ladder', en: 'games won on the ladder' } },
+                          tip: { de: 'gewonnene Matches in den Limitless-Online-Turnieren — Siege durch alle gespielten Partien', en: 'games won in the Limitless online tournaments — wins over all games played' } },
                         /* DREI UEBERSCHRIFTEN NEU BENANNT AM 01.09.2026.
                            Gemeldet: "was sind denn bitte 618,5 Antritte?
                            Was ist das fuer eine Kennzahl? … 'davon Top 8,
@@ -1949,8 +1949,8 @@
                             const txt = fmtPct(r.anteil);
                             return r.anteilAusTurnier
                                 ? `<em title="${escapeHtml(deR
-                                    ? 'Anteil an den gewichteten Turnier-Antritten — dieses Deck hat keine Ladder-Zeile'
-                                    : 'Share of weighted tournament entries — this deck has no ladder row')}">${txt}</em>`
+                                    ? 'Anteil an den gewichteten Turnier-Antritten — dieses Deck hat keine eigene Zeile in der Online-Turnier-Auswertung'
+                                    : 'Share of weighted tournament entries — this deck has no row of its own in the online-tournament breakdown')}">${txt}</em>`
                                 : txt;
                         }
                         if (k === 'wr')       return r.wr       == null ? '–' : fmtPct(r.wr);
@@ -2028,13 +2028,13 @@
                     const offenHtml = nichtZugeordnet.length
                         ? `<p class="ds-note cm-rang-offen">${escapeHtml(deR
                             ? `${nichtZugeordnet.length} Turniername${nichtZugeordnet.length === 1 ? '' : 'n'} `
-                              + `${nichtZugeordnet.length === 1 ? 'findet' : 'finden'} keine Ladder-Entsprechung und `
+                              + `${nichtZugeordnet.length === 1 ? 'findet' : 'finden'} keine Entsprechung in der Deck-Übersicht und `
                               + `${nichtZugeordnet.length === 1 ? 'steht' : 'stehen'} deshalb als eigene Zeile: `
                               + nichtZugeordnet.join(', ')
                               + '. Die gepflegte Namensbrücke in data/archetype_aliases.json nimmt nur Paare auf, '
                               + 'die einzeln nachgerechnet wurden — ein ähnlicher Name genügt nicht.'
                             : `${nichtZugeordnet.length} tournament name${nichtZugeordnet.length === 1 ? '' : 's'} `
-                              + `${nichtZugeordnet.length === 1 ? 'has' : 'have'} no ladder counterpart and therefore `
+                              + `${nichtZugeordnet.length === 1 ? 'has' : 'have'} no counterpart in the deck breakdown and therefore `
                               + `${nichtZugeordnet.length === 1 ? 'appears' : 'appear'} as separate rows: `
                               + nichtZugeordnet.join(', ')
                               + '. The curated name bridge in data/archetype_aliases.json only takes pairs that were '
@@ -2054,15 +2054,20 @@
                                 const zaehlungDa = hatWert('antritte');
                                 if (deR) {
                                     return zaehlungDa
-                                        ? 'Zwei Zählungen desselben Metas nebeneinander: <strong>Listen</strong> und '
-                                          + '<strong>Anteil</strong> von der Online-Ladder, <strong>Turnier-Antritte</strong> '
-                                          + 'und <strong>Top 8</strong> von den Turnieren. Darum ist der Anteil in beiden fast '
+                                        ? 'Zwei Zählungen desselben Metas nebeneinander — beide aus den '
+                                          + '<strong>Limitless-Online-Turnieren</strong>, aber verschieden gezählt: '
+                                          + '<strong>Listen</strong> und <strong>Anteil</strong> stehen fertig auf der '
+                                          + 'Deck-Übersicht von Limitless, <strong>Turnier-Antritte</strong> und '
+                                          + '<strong>Top 8</strong> zählen wir selbst aus den Endständen der einzelnen '
+                                          + 'Turniere. Darum ist der Anteil in beiden fast '
                                           + 'gleich, die Stückzahlen aber nicht. Ein Strich heißt: das Deck steht in der einen '
                                           + 'Quelle und in der anderen nicht — oder es heißt in den beiden '
                                           + 'Quellen verschieden. Jede Spaltenüberschrift sortiert und erklärt sich selbst. '
                                         : '<strong>Listen</strong>, <strong>Anteil</strong> und <strong>Win Rate</strong> '
-                                          + 'kommen von der Online-Ladder, <strong>Top-8-Quote</strong> und '
-                                          + '<strong>ggü. Schnitt</strong> von den Turnieren. Ein Strich heißt: das Deck steht '
+                                          + 'kommen von der Deck-Übersicht der Limitless-Online-Turniere, '
+                                          + '<strong>Top-8-Quote</strong> und '
+                                          + '<strong>ggü. Schnitt</strong> aus den Endständen derselben Turniere. '
+                                          + 'Ein Strich heißt: das Deck steht '
                                           + 'in der einen Quelle und in der anderen nicht — oder es heißt in den beiden '
                                           + 'Quellen verschieden. Die Stückzahlen (Antritte und Top 8) fehlen noch: die Datei '
                                           + 'führt bisher nur eine gewichtete Summe, und halb teilnehmen geht nicht. Sie '
@@ -2070,15 +2075,19 @@
                                           + 'Jede Spaltenüberschrift sortiert und erklärt sich selbst. ';
                                 }
                                 return zaehlungDa
-                                    ? 'Two counts of the same field side by side: <strong>lists</strong> and '
-                                      + '<strong>share</strong> from the online ladder, <strong>tournament entries</strong> '
-                                      + 'and <strong>top 8</strong> from tournaments. That is why the share matches but the '
+                                    ? 'Two counts of the same field side by side — both from the '
+                                      + '<strong>Limitless online tournaments</strong>, counted differently: '
+                                      + '<strong>lists</strong> and <strong>share</strong> come ready-made from the '
+                                      + 'Limitless deck breakdown, <strong>tournament entries</strong> and '
+                                      + '<strong>top 8</strong> we count ourselves from the standings of each event. '
+                                      + 'That is why the share matches but the '
                                       + 'totals do not. A dash means the deck is in one source and not the other — '
                                       + 'or it goes by a different name in the two sources. Every column heading sorts '
                                       + 'and explains itself. '
                                     : '<strong>Lists</strong>, <strong>share</strong> and <strong>win rate</strong> come '
-                                      + 'from the online ladder, <strong>top-8 rate</strong> and <strong>vs. average</strong> '
-                                      + 'from tournaments. A dash means the deck is in one source and not the other — or it '
+                                      + 'from the Limitless online-tournament deck breakdown, <strong>top-8 rate</strong> '
+                                      + 'and <strong>vs. average</strong> '
+                                      + 'from the standings of the same events. A dash means the deck is in one source and not the other — or it '
                                       + 'goes by a different name in the two sources. The raw counts (entries and top 8) are '
                                       + 'still missing: the file so far carries only a weighted sum, and you cannot '
                                       + 'half-attend. They arrive with the next data run; the rates are already correct. '

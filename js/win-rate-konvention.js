@@ -2,7 +2,7 @@
  * Eine Bilanz, vier Win Rates — und keine, die sagt, welche sie ist.
  *
  * Am 20.08.2026 zeigte Mega Excadrill an einem Nachmittag vier Werte:
- * 49,5 % (Ladder), 49.46 % (dieselbe Quote, andere Rundung), 47,99 %
+ * 49,5 % (Online-Turniere), 49.46 % (dieselbe Quote, andere Rundung), 47,99 %
  * (ungewichteter Mittelwert ueber 20 Matchups) und 48,2 % (EV). Keine
  * nannte die andere, und keine sagte, wie sie Unentschieden behandelt.
  *
@@ -51,6 +51,21 @@
         return (typeof window.getLang === 'function' && window.getLang() === 'de');
     }
 
+    /* "LADDER" GIBT ES HIER NICHT (03.09.2026).
+       Bis zu diesem Tag stand an mehreren Stellen der Seite "Online-Ladder"
+       — als Quelle der Listen, des Anteils und der Win Rate. Das war
+       schlicht falsch: die Zahlen stammen von
+       play.limitlesstcg.com/decks, und diese Seite schreibt ueber ihre
+       eigene Tabelle "536 tournaments, 39181 players, 88857 matches".
+       Das Wort "ladder" kommt dort nirgends vor, und play.limitlesstcg.com
+       fuehrt auch keine. Gemeldet vom Betreiber: "hier geht es um die Win
+       Rate auf Basis der Limitless Online Turniere ... generell geht es
+       hier nie um Ladder sondern immer Limitless Online Tournaments."
+       Nachgeprueft an der Quelle, bevor das Wort ueberall entfernt wurde.
+
+       Achtung beim Suchen: js/app-side-quest-play.js und
+       js/champions-names.js meinen mit "Ladder" die Speed-Ladder des
+       Spiels selbst. Das ist ein anderer Begriff und bleibt. */
     var KONVENTIONEN = {
         matchpunkte: {
             id: 'matchpunkte',

@@ -32,6 +32,24 @@
         "Roseli Berry heisst Hibisbeere — 'Rosolinbeere' gibt es nicht.",
         "Black Glasses heisst Schattenbrille, nicht Schwarzbrille; Fairy Feather Feendaune, nicht Feenfeder; Terrain Extender Feldbeschichtung, nicht Lauffeld."
       ]
+    },
+    "dritte_runde_2026_09_03": {
+      "anlass": "Beim Live-Blick auf den Reiter Nachschlagen fiel auf, dass dort 'Gluraknit Y' stand, bevor die zweite Runde ueberhaupt ausgeliefert war. Es gibt eine VIERTE Namensquelle: data/champions_resources.json mit 1.268 deutschen Namen. Der Melder in scripts/datenluecken.py vergleicht nur die drei Referenzdateien gegen champions_names_de.json — die vierte Quelle hat nie jemand dagegen gehalten.",
+      "umfang": "Alle 1.268 Namen der Ressourcendatei gegen die ausgelieferte Namenstabelle gehalten: 17 Widersprueche. Jeder einzeln ueber die PokeWiki-Infobox entschieden.",
+      "ergebnis": {
+        "widersprueche": 18,
+        "tabelle_richtig": 9,
+        "ressourcendatei_richtig": 9,
+        "neu_eingetragen": 8
+      },
+      "bemerkenswert": [
+        "de_name_overrides.json zieht seine Item-Namen von pokemonexperte.de und uebernimmt dabei abgeschnittene In-Game-Beschriftungen: 'Schwerschwf.' statt Schwerschweif.",
+        "Drei der sieben Juwelen hiessen dort ohne Fugen-n: 'Geistjuwel' statt Geisterjuwel, 'Gesteinjuwel' statt Gesteinsjuwel, 'Pflanzjuwel' statt Pflanzenjuwel.",
+        "Shell Bell stand als 'Seegesang'. Das ist kein erfundener Name — pokewiki.de/Seegesang leitet auf Muschelglocke weiter, es ist also eine aeltere Bezeichnung. Der aktuelle Name der Infobox ist Muschelglocke, und der gehoert auf die Seite.",
+        "Die Ressourcendatei ihrerseits fuehrte neun Namen, die Runde 2 bereits korrigiert hatte ('Lichtelit', 'Mortipotit', 'Wahlglas'). Deshalb wendet build_champions_resources.py die Entscheidungsdatei jetzt selbst an — wie der Pokedex-Bauer seit Runde 1.",
+        "Ein Wert war gar kein Name, sondern flachgeklopfte Wiki-Auszeichnung: 'Wandler  Verwandler (in )' fuer Transform. Wo PokeWiki zwei Namen mit <br> untereinander setzt (aktueller und alter), hat der Scraper beide plus einen Rest der tt-Vorlage in ein Feld gelegt. Ueber alle 1.469 Namen der Overrides-Datei gesucht — es war der einzige.",
+        "Neun Namen wurden entschieden, aber nur acht sind neu: Sharp Beak stand schon seit Runde 1 als 'Spitzer Schnabel' in dieser Datei — der falsche Wert 'Hackattack' saß in de_name_overrides.json und wurde von der Entscheidung nur ueberdeckt, nicht behoben. Jetzt steht er auch an der Quelle richtig."
+      ]
     }
   },
   "namen": {
@@ -198,6 +216,11 @@
       "Weather Ball": {
         "de": "Meteorologe",
         "quelle": "https://pokewiki.de/Weather_Ball"
+      },
+      "Transform": {
+        "de": "Wandler",
+        "quelle": "https://pokewiki.de/Transform",
+        "note": "03.09.2026: die Namenstabelle fuehrte 'Wandler  Verwandler (in )' — eine flachgeklopfte Wiki-Auszeichnung. PokeWiki schreibt 'Name_de=Wandler<br>Verwandler{{tt|...}}': 'Wandler' ist der aktuelle Name, 'Verwandler' der aeltere. Der Scraper hat beide plus einen Rest der tt-Vorlage in einen Wert gelegt. Dieselbe Falle wie bei Snow Warning ('Schneeschauer<br />Hagelalarm')."
       }
     },
     "items": {
@@ -267,7 +290,8 @@
       },
       "Sharp Beak": {
         "de": "Spitzer Schnabel",
-        "quelle": "https://pokewiki.de/Sharp_Beak"
+        "quelle": "https://pokewiki.de/Sharp_Beak",
+        "note": "03.09.2026, dritte Runde: die vierte Namensquelle (champions_resources.json) widersprach der Namenstabelle. Hier hatte die Ressourcendatei recht; de_name_overrides.json trug den abgekuerzten oder veralteten Wert."
       },
       "Shuca Berry": {
         "de": "Schukebeere",
@@ -391,6 +415,41 @@
         "de": "Hibisbeere",
         "quelle": "https://pokewiki.de/Roseli_Berry",
         "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Focus Band": {
+        "de": "Fokusband",
+        "quelle": "https://pokewiki.de/Focus_Band",
+        "note": "03.09.2026, dritte Runde: die vierte Namensquelle (champions_resources.json) widersprach der Namenstabelle. Hier hatte die Ressourcendatei recht; de_name_overrides.json trug den abgekuerzten oder veralteten Wert."
+      },
+      "Shell Bell": {
+        "de": "Muschelglocke",
+        "quelle": "https://pokewiki.de/Shell_Bell",
+        "note": "03.09.2026, dritte Runde: die vierte Namensquelle (champions_resources.json) widersprach der Namenstabelle. Hier hatte die Ressourcendatei recht; de_name_overrides.json trug den abgekuerzten oder veralteten Wert."
+      },
+      "Wise Glasses": {
+        "de": "Schlaubrille",
+        "quelle": "https://pokewiki.de/Wise_Glasses",
+        "note": "03.09.2026, dritte Runde: die vierte Namensquelle (champions_resources.json) widersprach der Namenstabelle. Hier hatte die Ressourcendatei recht; de_name_overrides.json trug den abgekuerzten oder veralteten Wert."
+      },
+      "Ghost Gem": {
+        "de": "Geisterjuwel",
+        "quelle": "https://pokewiki.de/Ghost_Gem",
+        "note": "03.09.2026, dritte Runde: die vierte Namensquelle (champions_resources.json) widersprach der Namenstabelle. Hier hatte die Ressourcendatei recht; de_name_overrides.json trug den abgekuerzten oder veralteten Wert."
+      },
+      "Rock Gem": {
+        "de": "Gesteinsjuwel",
+        "quelle": "https://pokewiki.de/Rock_Gem",
+        "note": "03.09.2026, dritte Runde: die vierte Namensquelle (champions_resources.json) widersprach der Namenstabelle. Hier hatte die Ressourcendatei recht; de_name_overrides.json trug den abgekuerzten oder veralteten Wert."
+      },
+      "Grass Gem": {
+        "de": "Pflanzenjuwel",
+        "quelle": "https://pokewiki.de/Grass_Gem",
+        "note": "03.09.2026, dritte Runde: die vierte Namensquelle (champions_resources.json) widersprach der Namenstabelle. Hier hatte die Ressourcendatei recht; de_name_overrides.json trug den abgekuerzten oder veralteten Wert."
+      },
+      "Lagging Tail": {
+        "de": "Schwerschweif",
+        "quelle": "https://pokewiki.de/Lagging_Tail",
+        "note": "03.09.2026, dritte Runde: die vierte Namensquelle (champions_resources.json) widersprach der Namenstabelle. Hier hatte die Ressourcendatei recht; de_name_overrides.json trug den abgekuerzten oder veralteten Wert."
       }
     }
   }

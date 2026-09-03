@@ -240,3 +240,79 @@ def test_rohe_limitless_url_loest_nichts_aus(g, tmp_path, monkeypatch):
     findings = []
     g.check_proxy_karte_gegen_bestand(findings)
     assert findings == []
+
+
+# ── Preiszuordnung nach Format getrennt (Regel 03.09.2026) ────────────
+#
+# ANLASS: die Meldung nannte 1213 unbestaetigte Preiszeilen. 1108 davon
+# (91 %) lagen in ROTIERTEN Sets — Karten, die niemand mehr legal spielt.
+# Eine Kennzahl, die zu 91 % aus Irrelevantem besteht, wird ueberblaettert,
+# und dann faellt auch der relevante Rest nicht mehr auf. Betreiberregel:
+# wichtig ist nur, dass aktuell legale Karten korrekt gezogen werden.
+
+def _preislage(tmp_path, zeilen, aeltestes='TEF', ordnung=None):
+    import json as _json
+    (tmp_path / 'price_data.csv').write_text(
+        'set,number,eur_price,mapping_status\n' +
+        # Preise in Anfuehrungszeichen: sie tragen ein Dezimalkomma und
+        # wuerden sonst die Spalte sprengen (genau das ist mir hier beim
+        # ersten Anlauf passiert — mapping_status wurde zu '00').
+        ''.join(f'{s},{n},"{p}",{m}\n' for s, n, p, m in zeilen), encoding='utf-8')
+    (tmp_path / 'sets.json').write_text(
+        _json.dumps(ordnung or {'ALT': 10, 'TEF': 139, 'PBL': 158}), encoding='utf-8')
+    (tmp_path / 'format_window.json').write_text(
+        _json.dumps({'oldest_legal_set': aeltestes}), encoding='utf-8')
+    return tmp_path
+
+
+def test_rotierte_sets_warnen_nicht(g, tmp_path, monkeypatch):
+    _preislage(tmp_path, [('ALT', '1', '99,00', 'unverified')])
+    monkeypatch.setattr(g, 'DATA', str(tmp_path))
+    findings = []
+    g.report_unverified_prices(findings)
+    assert 'WARN' not in stufen(findings), \
+        'eine rotierte Karte darf keine Warnung ausloesen'
+    assert 'INFO' in stufen(findings), 'sie soll aber nachweisbar bleiben'
+
+
+def test_legales_set_warnt(g, tmp_path, monkeypatch):
+    _preislage(tmp_path, [('PBL', '1', '44,00', 'unverified')])
+    monkeypatch.setattr(g, 'DATA', str(tmp_path))
+    findings = []
+    g.report_unverified_prices(findings)
+    assert 'WARN' in stufen(findings)
+    assert 'PBL 1' in texte(findings)
+
+
+def test_die_warnung_zaehlt_nur_das_legale(g, tmp_path, monkeypatch):
+    """Der Kern: die Zahl in der WARN-Zeile darf die rotierten nicht
+    mitzaehlen — sonst ist sie wieder die alte 1213er-Zahl."""
+    zeilen = [('ALT', str(i), '1,00', 'unverified') for i in range(20)]
+    zeilen += [('TEF', '7', '9,00', 'unverified')]
+    _preislage(tmp_path, zeilen)
+    monkeypatch.setattr(g, 'DATA', str(tmp_path))
+    findings = []
+    g.report_unverified_prices(findings)
+    warn = [t for s, t in findings if s == 'WARN']
+    assert len(warn) == 1
+    assert warn[0].startswith('1 Preiszeilen'), warn[0]
+    assert '20 weitere' in texte(findings)
+
+
+def test_ohne_formatfenster_wird_alles_gemeldet(g, tmp_path, monkeypatch):
+    """Faellt die Grenze aus, lieber zu viel melden als still nichts."""
+    import json as _json
+    _preislage(tmp_path, [('ALT', '1', '9,00', 'unverified')])
+    (tmp_path / 'format_window.json').write_text(_json.dumps({}), encoding='utf-8')
+    monkeypatch.setattr(g, 'DATA', str(tmp_path))
+    findings = []
+    g.report_unverified_prices(findings)
+    assert 'WARN' in stufen(findings)
+
+
+def test_bestaetigte_zuordnung_schweigt(g, tmp_path, monkeypatch):
+    _preislage(tmp_path, [('PBL', '1', '44,00', 'ok')])
+    monkeypatch.setattr(g, 'DATA', str(tmp_path))
+    findings = []
+    g.report_unverified_prices(findings)
+    assert findings == []

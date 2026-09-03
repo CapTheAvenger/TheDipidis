@@ -78,7 +78,12 @@ def test_der_guardian_findet_alle_drei_fehlerarten(monkeypatch, tmp_path):
     f = _befunde(monkeypatch, tmp_path, _kaputter_stand())
     text = " || ".join(t for _, t in f)
     assert "sum to more than" in text, f"die Summenregel schweigt: {text}"
-    assert "still above" in text, f"'markiert und trotzdem zu hoch' fehlt: {text}"
+    # Wortlaut am 03.09.2026 korrigiert (siehe unten): "still above ...
+    # AFTER the scraper nulled its outlier" behauptete eine Reparatur, die
+    # in diesem Zweig nie stattfindet. Geprueft wird deshalb die Aussage,
+    # nicht mehr der alte Satz.
+    assert "could NOT pin a single culprit" in text, \
+        f"'markiert und trotzdem zu hoch' fehlt: {text}"
     assert "carry the same row twice" in text, f"doppelte Zeile nicht erkannt: {text}"
     assert "stat spread" in text, f"der Spread-Fehler fehlt: {text}"
 
@@ -88,7 +93,7 @@ def test_die_stufen_sind_richtig_verteilt(monkeypatch, tmp_path):
     f = _befunde(monkeypatch, tmp_path, _kaputter_stand())
     stufen = {}
     for stufe, text in f:
-        for marke in ("sum to more than", "still above",
+        for marke in ("sum to more than", "could NOT pin a single culprit",
                       "carry the same row twice", "stat spread"):
             if marke in text:
                 stufen[marke] = stufe
@@ -96,7 +101,7 @@ def test_die_stufen_sind_richtig_verteilt(monkeypatch, tmp_path):
         "eine Liste ueber der Grenze OHNE Markierung heisst: die Quelle hat "
         "ihre Form geaendert und der Scraper hat es nicht gemerkt"
     )
-    assert stufen.get("still above") == "WARN"
+    assert stufen.get("could NOT pin a single culprit") == "WARN"
     assert stufen.get("carry the same row twice") == "WARN"
     assert stufen.get("stat spread") == "WARN"
 
@@ -150,3 +155,50 @@ def test_die_datenpruefungen_sind_nicht_ins_gate_zurueckgewandert():
             f"{name}: der Guardian wird im Gate ausgefuehrt. Dann muss er "
             f"dort schweigen — und jeder echte Befund ist wieder eine Sperre"
         )
+
+
+# ── Die Meldung darf keine Reparatur behaupten (Befund 03.09.2026) ────
+#
+# Der Meldungstext lautete "still above 105 % AFTER the scraper nulled its
+# outlier". Nachgezaehlt am 03.09.2026: von den 22 gemeldeten Listen trug
+# KEINE einen genullten Wert; im ganzen Bestand waren es zwei. Der Text
+# beschrieb den falschen Zweig von pruefe_plausibel(): genullt wird nur,
+# wenn GENAU EIN Wert ausser der Reihe steht und sein Wegfall die Summe
+# rettet. Sonst bleibt die Liste absichtlich unveraendert.
+#
+# Eine Meldung, die eine nicht erfolgte Reparatur behauptet, laesst den
+# Leser eine kleinere Luecke sehen als die echte — deshalb steht sie hier
+# fest.
+
+def _ueber_grenze_ohne_nullwert():
+    """Summe 121,4 %, absteigend sortiert, kein Wert genullt — genau die
+    Lage von beartic/singles/nature am 03.09.2026."""
+    return {"pokemon": {"beartic": {"singles": {
+        "_warnungen": ["nature: Anteile summierten sich auf 121.4 %"],
+        "nature": [{"name": "Adamant", "pct": 57.2}, {"name": "Jolly", "pct": 34.5},
+                   {"name": "Brave", "pct": 7.6}, {"name": "Naughty", "pct": 7.6},
+                   {"name": "Careful", "pct": 7.5}, {"name": "Lonely", "pct": 7.0}]}}}}
+
+
+def _ueber_grenze_mit_nullwert():
+    return {"pokemon": {"absol": {"singles": {
+        "_warnungen": ["nature: Anteile summierten sich auf 130.0 %"],
+        "nature": [{"name": "Adamant", "pct": 60.0}, {"name": "Jolly", "pct": 50.0},
+                   {"name": "Brave", "pct": None}]}}}}
+
+
+def test_meldung_behauptet_keine_nullung(monkeypatch, tmp_path):
+    f = _befunde(monkeypatch, tmp_path, _ueber_grenze_ohne_nullwert())
+    text = " || ".join(t for _, t in f)
+    assert "nulled its outlier" not in text, \
+        "die Meldung behauptet wieder eine Reparatur, die nicht stattgefunden hat"
+    assert "davon 0 mit bereits genulltem Wert" in text, \
+        f"die Zahl der genullten Werte fehlt oder stimmt nicht: {text}"
+
+
+def test_genullte_liste_wird_als_solche_gezaehlt(monkeypatch, tmp_path):
+    """Die Gegenprobe: steht wirklich ein Nullwert drin, muss die Zahl
+    mitgehen — sonst ist sie eine Konstante und sagt nichts."""
+    f = _befunde(monkeypatch, tmp_path, _ueber_grenze_mit_nullwert())
+    text = " || ".join(t for _, t in f)
+    assert "davon 1 mit bereits genulltem Wert" in text, text

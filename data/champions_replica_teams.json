@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-09-02",
+    "last_updated": "2026-09-03",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-B",
@@ -4537,6 +4537,105 @@
     },
     {
       "rank": 47,
+      "replica_code": "QTDFDF4D2B",
+      "team_name": "Owe's Worlds 2026 Top 32 Team",
+      "tournament": "Worlds 2026 San Francisco",
+      "trainer": "Oliver Eskolin",
+      "format": "VGC Champions",
+      "regulation": "M-B",
+      "sheet_rank": "25th",
+      "date_shared": "1 Sep 2026",
+      "pokepaste_url": "https://pokepast.es/1b37249d9ac7dbe4",
+      "pokemon": [
+        {
+          "name": "Tyranitar",
+          "item": "Tyranitarite",
+          "ability": "Sand Stream",
+          "tera_type": "",
+          "evs": "25 HP / 16 Atk / 25 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Rock Slide",
+            "Knock Off",
+            "Dragon Dance",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Excadrill",
+          "item": "Focus Sash",
+          "ability": "Sand Rush",
+          "tera_type": "",
+          "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Iron Head",
+            "High Horsepower",
+            "Rock Slide",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Staraptor",
+          "item": "Staraptite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "2 HP / 27 Atk / 5 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Brave Bird",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sinistcha",
+          "item": "Colbur Berry",
+          "ability": "Hospitality",
+          "tera_type": "",
+          "evs": "29 HP / 11 Def / 25 SpD / 1 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Matcha Gotcha",
+            "Trick Room",
+            "Rage Powder",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Milotic",
+          "item": "Sitrus Berry",
+          "ability": "Competitive",
+          "tera_type": "",
+          "evs": "32 HP / 21 Def / 11 SpA / 2 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Scald",
+            "Ice Beam",
+            "Haze",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Gholdengo",
+          "item": "Life Orb",
+          "ability": "Good as Gold",
+          "tera_type": "",
+          "evs": "7 HP / 16 Def / 11 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Make It Rain",
+            "Shadow Ball",
+            "Nasty Plot",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 48,
       "replica_code": "YMS21RYBD6",
       "team_name": "Paul's Worlds 2026 Top 32 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -4635,7 +4734,7 @@
       "strategy": []
     },
     {
-      "rank": 48,
+      "rank": 49,
       "replica_code": "ERKNUQ31CF",
       "team_name": "Jonotv's Worlds 2026 Top 32 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -4734,7 +4833,7 @@
       "strategy": []
     },
     {
-      "rank": 49,
+      "rank": 50,
       "replica_code": "34T1N61VVA",
       "team_name": "Lexicon's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -4833,7 +4932,7 @@
       "strategy": []
     },
     {
-      "rank": 50,
+      "rank": 51,
       "replica_code": "MGM9CLXSK5",
       "team_name": "Ryoma's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -4932,7 +5031,7 @@
       "strategy": []
     },
     {
-      "rank": 51,
+      "rank": 52,
       "replica_code": "0KR782A4BV",
       "team_name": "fevermajin's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5031,7 +5130,7 @@
       "strategy": []
     },
     {
-      "rank": 52,
+      "rank": 53,
       "replica_code": "NK704Y2TR4",
       "team_name": "koota's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5130,7 +5229,7 @@
       "strategy": []
     },
     {
-      "rank": 53,
+      "rank": 54,
       "replica_code": "CGFCYQP9MY",
       "team_name": "Penguin's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5229,7 +5328,7 @@
       "strategy": []
     },
     {
-      "rank": 54,
+      "rank": 55,
       "replica_code": "7LCRJVT2M6",
       "team_name": "Caleb Wijesinha's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5328,7 +5427,7 @@
       "strategy": []
     },
     {
-      "rank": 55,
+      "rank": 56,
       "replica_code": "XG6T3UULGB",
       "team_name": "YT's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5427,7 +5526,7 @@
       "strategy": []
     },
     {
-      "rank": 56,
+      "rank": 57,
       "replica_code": "FJKMK3U9H9",
       "team_name": "Kae-ru's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5526,7 +5625,7 @@
       "strategy": []
     },
     {
-      "rank": 57,
+      "rank": 58,
       "replica_code": "QDR9F6QYKS",
       "team_name": "Behzad's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5625,7 +5724,7 @@
       "strategy": []
     },
     {
-      "rank": 58,
+      "rank": 59,
       "replica_code": "TW7MB1736R",
       "team_name": "bdogplatinum's Worlds 2026 Top 64 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5724,7 +5823,7 @@
       "strategy": []
     },
     {
-      "rank": 59,
+      "rank": 60,
       "replica_code": "SHP5N8MWCE",
       "team_name": "Rinya's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5823,7 +5922,7 @@
       "strategy": []
     },
     {
-      "rank": 60,
+      "rank": 61,
       "replica_code": "CMT10DHN5U",
       "team_name": "tuna_pokemon's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -5922,7 +6021,7 @@
       "strategy": []
     },
     {
-      "rank": 61,
+      "rank": 62,
       "replica_code": "NHH1KE4BM0",
       "team_name": "carr0quin's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6021,7 +6120,7 @@
       "strategy": []
     },
     {
-      "rank": 62,
+      "rank": 63,
       "replica_code": "0MJQ04LTEP",
       "team_name": "jit_vgc's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6120,7 +6219,7 @@
       "strategy": []
     },
     {
-      "rank": 63,
+      "rank": 64,
       "replica_code": "ENCHNJYSDD",
       "team_name": "kazuki's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6219,7 +6318,7 @@
       "strategy": []
     },
     {
-      "rank": 64,
+      "rank": 65,
       "replica_code": "VBFYAWU9BP",
       "team_name": "bicho's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6318,7 +6417,7 @@
       "strategy": []
     },
     {
-      "rank": 65,
+      "rank": 66,
       "replica_code": "KUBKS2QHTE",
       "team_name": "Drew Bliss' Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6417,7 +6516,7 @@
       "strategy": []
     },
     {
-      "rank": 66,
+      "rank": 67,
       "replica_code": "7UVABKL5VY",
       "team_name": "badviolist's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6516,7 +6615,7 @@
       "strategy": []
     },
     {
-      "rank": 67,
+      "rank": 68,
       "replica_code": "3WCUNY2GC2",
       "team_name": "kim0227poke's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6615,7 +6714,7 @@
       "strategy": []
     },
     {
-      "rank": 68,
+      "rank": 69,
       "replica_code": "VGWWN1GDUG",
       "team_name": "MichaelderBeste's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6714,7 +6813,7 @@
       "strategy": []
     },
     {
-      "rank": 69,
+      "rank": 70,
       "replica_code": "QJRQCMSWEL",
       "team_name": "an555gelvgc's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6813,7 +6912,7 @@
       "strategy": []
     },
     {
-      "rank": 70,
+      "rank": 71,
       "replica_code": "3MM2G4AKMV",
       "team_name": "alaninepoke's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -6912,7 +7011,7 @@
       "strategy": []
     },
     {
-      "rank": 71,
+      "rank": 72,
       "replica_code": "5C97N0UH7B",
       "team_name": "yunuponnu's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7011,7 +7110,7 @@
       "strategy": []
     },
     {
-      "rank": 72,
+      "rank": 73,
       "replica_code": "EXWVNF13F5",
       "team_name": "dizvgc's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7110,7 +7209,7 @@
       "strategy": []
     },
     {
-      "rank": 73,
+      "rank": 74,
       "replica_code": "6WQRAMYUDQ",
       "team_name": "chefrich100's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7209,7 +7308,7 @@
       "strategy": []
     },
     {
-      "rank": 74,
+      "rank": 75,
       "replica_code": "DAUKC1HDUV",
       "team_name": "Shuuka's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7308,7 +7407,7 @@
       "strategy": []
     },
     {
-      "rank": 75,
+      "rank": 76,
       "replica_code": "9EB082N91B",
       "team_name": "Peter's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7407,7 +7506,7 @@
       "strategy": []
     },
     {
-      "rank": 76,
+      "rank": 77,
       "replica_code": "BF1UTV2C4R",
       "team_name": "soungrull's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7506,7 +7605,7 @@
       "strategy": []
     },
     {
-      "rank": 77,
+      "rank": 78,
       "replica_code": "XS7K6NJ8UG",
       "team_name": "kinop_oke6's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7605,7 +7704,7 @@
       "strategy": []
     },
     {
-      "rank": 78,
+      "rank": 79,
       "replica_code": "E7Y8E2QU1B",
       "team_name": "Betty's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7704,7 +7803,7 @@
       "strategy": []
     },
     {
-      "rank": 79,
+      "rank": 80,
       "replica_code": "TJDSWUJ30J",
       "team_name": "gahaku's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7803,7 +7902,7 @@
       "strategy": []
     },
     {
-      "rank": 80,
+      "rank": 81,
       "replica_code": "1SVSU2K211",
       "team_name": "ir_poke's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -7902,7 +8001,7 @@
       "strategy": []
     },
     {
-      "rank": 81,
+      "rank": 82,
       "replica_code": "HTP018G29Y",
       "team_name": "watakkou's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8001,7 +8100,7 @@
       "strategy": []
     },
     {
-      "rank": 82,
+      "rank": 83,
       "replica_code": "K10867DEY5",
       "team_name": "smallyee's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8100,7 +8199,7 @@
       "strategy": []
     },
     {
-      "rank": 83,
+      "rank": 84,
       "replica_code": "8REWUBSB3N",
       "team_name": "rika_poke_'s Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8199,7 +8298,7 @@
       "strategy": []
     },
     {
-      "rank": 84,
+      "rank": 85,
       "replica_code": "6XXRSTFQSB",
       "team_name": "dyl's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8298,7 +8397,7 @@
       "strategy": []
     },
     {
-      "rank": 85,
+      "rank": 86,
       "replica_code": "RSELGAFL1F",
       "team_name": "akiakaba's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8397,7 +8496,7 @@
       "strategy": []
     },
     {
-      "rank": 86,
+      "rank": 87,
       "replica_code": "EV3WD5UMM7",
       "team_name": "ansena's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8496,7 +8595,7 @@
       "strategy": []
     },
     {
-      "rank": 87,
+      "rank": 88,
       "replica_code": "PGNSJMF205",
       "team_name": "Bruneaux's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8595,7 +8694,7 @@
       "strategy": []
     },
     {
-      "rank": 88,
+      "rank": 89,
       "replica_code": "F9SLXGA4MH",
       "team_name": "Y0PON's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8694,7 +8793,7 @@
       "strategy": []
     },
     {
-      "rank": 89,
+      "rank": 90,
       "replica_code": "PRR9GLY1BT",
       "team_name": "YurinePTCG's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8793,7 +8892,7 @@
       "strategy": []
     },
     {
-      "rank": 90,
+      "rank": 91,
       "replica_code": "0S4TSH9VBA",
       "team_name": "UNREALITY's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8892,7 +8991,7 @@
       "strategy": []
     },
     {
-      "rank": 91,
+      "rank": 92,
       "replica_code": "QTDFDF4D2B",
       "team_name": "Multi boy's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -8991,7 +9090,7 @@
       "strategy": []
     },
     {
-      "rank": 92,
+      "rank": 93,
       "replica_code": "QFAVJ8EWFW",
       "team_name": "Angelohunter's Worlds 2026 Team",
       "tournament": "Worlds 2026 San Francisco",
@@ -9090,7 +9189,7 @@
       "strategy": []
     },
     {
-      "rank": 93,
+      "rank": 94,
       "replica_code": "JPC6CTT2GR",
       "team_name": "noahampalaya's Worlds 2026 Top 8 Team (Seniors)",
       "tournament": "Worlds 2026 San Francisco",
@@ -9189,7 +9288,7 @@
       "strategy": []
     },
     {
-      "rank": 94,
+      "rank": 95,
       "replica_code": "6WAAYVGX0W",
       "team_name": "Ryu's Worlds 2026 Team (Seniors)",
       "tournament": "Worlds 2026 San Francisco",
@@ -9288,7 +9387,7 @@
       "strategy": []
     },
     {
-      "rank": 95,
+      "rank": 96,
       "replica_code": "74H41249PF",
       "team_name": "barudoru's Abomasnow Camerupt Team",
       "tournament": "-",
@@ -9387,7 +9486,7 @@
       "strategy": []
     },
     {
-      "rank": 96,
+      "rank": 97,
       "replica_code": "NVXSN6PK2V",
       "team_name": "fruitmanvgc's Mawile Chandelure Team",
       "tournament": "-",
@@ -9486,7 +9585,7 @@
       "strategy": []
     },
     {
-      "rank": 97,
+      "rank": 98,
       "replica_code": "BP25STHPSF",
       "team_name": "punihina1334's Charizard-Y Mawile Team",
       "tournament": "-",
@@ -9585,7 +9684,7 @@
       "strategy": []
     },
     {
-      "rank": 98,
+      "rank": 99,
       "replica_code": "44KL4FYB0Y",
       "team_name": "AndyBakes' Scovillain Maushold Rain Team",
       "tournament": "-",
@@ -9656,7 +9755,7 @@
       "strategy": []
     },
     {
-      "rank": 99,
+      "rank": 100,
       "replica_code": "7527Q6A7FK",
       "team_name": "NatusPKMN's Tinkaton Sand Team",
       "tournament": "-",
@@ -9755,7 +9854,7 @@
       "strategy": []
     },
     {
-      "rank": 100,
+      "rank": 101,
       "replica_code": "Y1PNKVEBEU",
       "team_name": "Jaylun's Meganium Aerodactyl Team",
       "tournament": "-",
@@ -9854,7 +9953,7 @@
       "strategy": []
     },
     {
-      "rank": 101,
+      "rank": 102,
       "replica_code": "M277RUKC6P",
       "team_name": "gahaku's Solo Staraptor Team",
       "tournament": "-",
@@ -9953,7 +10052,7 @@
       "strategy": []
     },
     {
-      "rank": 102,
+      "rank": 103,
       "replica_code": "MWBU6J634G",
       "team_name": "Gworf's Pidgeot Sun Team V2",
       "tournament": "-",
@@ -10052,7 +10151,7 @@
       "strategy": []
     },
     {
-      "rank": 103,
+      "rank": 104,
       "replica_code": "LWQHQ2D9X0",
       "team_name": "Narsus' Gengar Dragonite Sand Team",
       "tournament": "-",
@@ -10151,7 +10250,7 @@
       "strategy": []
     },
     {
-      "rank": 104,
+      "rank": 105,
       "replica_code": "MVJFPY7N87",
       "team_name": "tantomisso's Charizard-Y Venusaur Rain Team",
       "tournament": "-",
@@ -10250,7 +10349,7 @@
       "strategy": []
     },
     {
-      "rank": 105,
+      "rank": 106,
       "replica_code": "CE5LY7J9N6",
       "team_name": "MemeGuy924's Charizard-Y Aerodactyl Team",
       "tournament": "-",
@@ -10343,105 +10442,6 @@
             "Stomping Tantrum",
             "Dragon Claw",
             "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 106,
-      "replica_code": "4HGXV756EG",
-      "team_name": "Jhin's Charizard-Y Tyranitar TR Team",
-      "tournament": "-",
-      "trainer": "Jhin",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "19 Aug 2026",
-      "pokepaste_url": "https://pokepast.es/aefa6c1985c14b43",
-      "pokemon": [
-        {
-          "name": "Staraptor",
-          "item": "Choice Scarf",
-          "ability": "Reckless",
-          "tera_type": "",
-          "evs": "32 HP / 5 Atk / 29 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Brave Bird",
-            "Close Combat",
-            "Final Gambit",
-            "U-turn"
-          ]
-        },
-        {
-          "name": "Whimsicott",
-          "item": "Focus Sash",
-          "ability": "Infiltrator",
-          "tera_type": "",
-          "evs": "32 HP / 11 Def / 23 SpA",
-          "nature": "Quiet",
-          "moves": [
-            "Moonblast",
-            "Energy Ball",
-            "Trick Room",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Tyranitar",
-          "item": "Tyranitarite",
-          "ability": "Sand Stream",
-          "tera_type": "",
-          "evs": "32 HP / 32 Atk / 2 SpD",
-          "nature": "Brave",
-          "moves": [
-            "Rock Slide",
-            "Knock Off",
-            "Ice Punch",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Excadrill",
-          "item": "Iron Ball",
-          "ability": "Sand Force",
-          "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Def",
-          "nature": "Brave",
-          "moves": [
-            "High Horsepower",
-            "Iron Head",
-            "Rock Slide",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Charizard",
-          "item": "Charizardite Y",
-          "ability": "Blaze",
-          "tera_type": "",
-          "evs": "32 HP / 23 Def / 11 SpA",
-          "nature": "Quiet",
-          "moves": [
-            "Heat Wave",
-            "Weather Ball",
-            "Ancient Power",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Sylveon",
-          "item": "Fairy Feather",
-          "ability": "Pixilate",
-          "tera_type": "",
-          "evs": "17 HP / 16 Def / 32 SpA / 1 SpD",
-          "nature": "Quiet",
-          "moves": [
-            "Hyper Voice",
-            "Hyper Beam",
-            "Quick Attack",
-            "Detect"
           ]
         }
       ],

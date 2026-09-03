@@ -17,7 +17,12 @@
        Grenze fuer Fliesstext. --ink-3 ist derselbe Graublauton, nur
        so weit nachgezogen, dass er haelt (5,25 hell, 5,4 dunkel). */
     --mc-text-muted:          var(--ink-3);
-    --mc-text-faint:          #8b9bb0;
+    /* 03.09.2026, live im Hellmodus gemessen: #8b9bb0 ergab 2,83:1
+       auf Weiss — dieselbe Luecke, die am 29.08. eine Zeile hoeher
+       fuer --mc-text-muted geschlossen wurde, nur eine Stufe blasser
+       und deshalb uebersehen. Der Dunkelmodus stand schon auf
+       --ink-3; jetzt beide (6,15 hell, 5,70 dunkel). */
+    --mc-text-faint:          var(--ink-3);
 
     /* Borders — light-to-strong on the same blue-grey axis */
     --mc-border-faint:        #f0f3f7;

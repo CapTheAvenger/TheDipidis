@@ -361,6 +361,23 @@
         var hatMajorWr = isFinite(spec.majorWinRate) && isFinite(spec.majorPartien)
             && spec.majorPartien > 0;
 
+        /* ── Dreimal "keine Daten" ist zweimal zu viel ────────────
+         *
+         * Die drei Kennzahlen tragen je eine Major-Zeile. Liegen fuer
+         * dieses Deck gar keine Praesenzdaten vor — bei der heutigen
+         * Datenlage der Normalfall —, stand dreimal untereinander
+         * "Major: keine Daten" und einmal "Day 2 (Major): keine Daten".
+         * Vier Zeilen, die dasselbe sagen, auf einem Bild, das durch
+         * Discord wandert.
+         *
+         * Dieselbe Regel wie bei den leeren Spalten der Matchup-Tabelle
+         * (js/app-archetype-card.js): fehlt die Groesse UEBERALL, sagt
+         * ein Satz warum; fehlt sie nur an EINER Stelle, bleibt der
+         * Hinweis dort stehen, weil die Nachbarn zeigen, wogegen. */
+        var hatMajorDay2 = isFinite(spec.majorDay2)
+            || (isFinite(spec.majorDay2Antritte) && spec.majorDay2Antritte > 0);
+        var majorGarNicht = !hatMajorShare && !hatMajorWr && !hatMajorDay2;
+
         var hasShare = isFinite(spec.share);
         statCol(cols[0], C.dvZero,
             hasShare ? num(spec.share, 2) + ' %' : '–',
@@ -371,7 +388,7 @@
             hatMajorShare
                 ? 'Major ' + num(spec.majorShare, 2) + ' %  ·  '
                     + num(spec.majorAntritte, 0) + ' ' + L('Antritte', 'entries')
-                : L('Major: keine Daten', 'major: no data'));
+                : (majorGarNicht ? '' : L('Major: keine Daten', 'major: no data')));
 
         var wrDelta = isFinite(spec.winRate) ? spec.winRate - 50 : null;
         statCol(cols[1],
@@ -405,7 +422,7 @@
                     + (isFinite(spec.majorRemis)
                         ? '  ·  ' + num(spec.majorRemis, 1) + ' % ' + L('unentsch.', 'ties')
                         : '')
-                : L('Major: keine Daten', 'major: no data'));
+                : (majorGarNicht ? '' : L('Major: keine Daten', 'major: no data')));
 
         /* DAS BILD ZEIGTE NOCH DIE ZAHL, DIE DIE KARTE AUFGEGEBEN HAT.
            ---------------------------------------------------------------
@@ -469,7 +486,8 @@
                         'day 2 (major): too few entries ('
                             + spec.majorDay2Antritte + ' of '
                             + (spec.majorDay2MinAntritte || 5) + ')')
-                    : L('Day 2 (Major): keine Daten', 'day 2 (major): no data')));
+                    : (majorGarNicht ? ''
+                        : L('Day 2 (Major): keine Daten', 'day 2 (major): no data'))));
 
         /* ── Körper links: Sprites groß + Herkunft ─────────────────── */
         ctx.fillStyle = C.line; ctx.fillRect(0, bodyY, DC.W, bodyH);
@@ -654,6 +672,13 @@
         ctx.textBaseline = 'middle';
         ctx.fillText([spec.spaceLabel, spec.format, spec.source].filter(Boolean).join(' · '),
                      DC.PAD + 16, DC.H - DC.FOOT / 2 + 1);
+        if (majorGarNicht) {
+            ctx.fillText('·  ' + L('Präsenzturniere: für dieses Deck liegen in diesem Format keine vor.',
+                                   'In-person events: none on record for this deck in this format.'),
+                         DC.PAD + 16 + ctx.measureText(
+                             [spec.spaceLabel, spec.format, spec.source].filter(Boolean).join(' · ')).width + 10,
+                         DC.H - DC.FOOT / 2 + 1);
+        }
         ctx.textAlign = 'right';
         ctx.fillText(L('Stand ', 'As of ') + (spec.stand || '–') + ' · thedipidis.app',
                      DC.W - DC.PAD, DC.H - DC.FOOT / 2 + 1);

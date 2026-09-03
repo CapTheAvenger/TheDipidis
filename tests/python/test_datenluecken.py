@@ -345,10 +345,12 @@ def test_jeder_entschiedene_name_traegt_seine_quelle(entschieden):
     erste  = entschieden["_meta"]["ergebnis"]["gesamt"]
     zweite = entschieden["_meta"]["zweite_runde_2026_09_03"]["ergebnis"]["falsch"]
     dritte = entschieden["_meta"]["dritte_runde_2026_09_03"]["ergebnis"]["neu_eingetragen"]
+    vierte = entschieden["_meta"]["vierte_runde_2026_09_03"]["ergebnis"]["ergaenzt"]
     assert erste == 63, f"erste Runde soll 63 Faelle nennen, nennt {erste}"
-    assert gesamt == erste + zweite + dritte, (
+    soll = erste + zweite + dritte + vierte
+    assert gesamt == soll, (
         f"{gesamt} entschiedene Namen, aber die Bilanz in _meta sagt "
-        f"{erste} + {zweite} + {dritte} = {erste + zweite + dritte}")
+        f"{erste} + {zweite} + {dritte} + {vierte} = {soll}")
 
 
 def test_die_entschiedenen_namen_stehen_auch_in_den_daten(entschieden):

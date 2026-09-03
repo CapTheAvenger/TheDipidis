@@ -1593,6 +1593,25 @@ MATCHUP_CSV_HEADER = [
     'opponent_deck_name',
     'vs_count',              # games played vs this opponent (aggregated)
     'vs_win_pct',            # win % vs this opponent (aggregated)
+    # BILANZ JE PAARUNG (03.09.2026). Bis hierher haben wir nur Anzahl und
+    # Prozent geholt — und die Oberflaeche musste deshalb Matchpunkte
+    # anzeigen, wo sie eine Win Rate zeigen wollte.
+    #
+    # Denn labs' Spalte "Win %" ist KEINE Win Rate, sondern
+    # (3S + U) / (3M). Nachgerechnet an drei Paarungen des Worlds-Laufs,
+    # dreimal auf zwei Nachkommastellen exakt:
+    #     17-2-1   -> 86,67 %   (S/M waere 85,00)
+    #     17-5-2   -> 73,61 %   (S/M waere 70,83)
+    #     34-50-22 -> 38,99 %   (S/M waere 32,08)
+    # Die Beschriftung der Quelle ist also irrefuehrend; die Zahl selbst
+    # ist in Ordnung, nur eben eine andere Groesse.
+    #
+    # Die Bilanz steht auf derselben Seite in der Spalte daneben. Mit ihr
+    # kann die Oberflaeche S/M rechnen — dieselbe Formel wie fuer die
+    # Online-Spalte — und die beiden Spalten sind endlich vergleichbar.
+    'vs_wins',               # W aus der Record-Spalte "W - L - T"
+    'vs_losses',             # L
+    'vs_ties',               # T
     'day_filter',            # 'overall' | 'day1' | 'day2'
     'scraped_at',
 ]
@@ -1632,6 +1651,108 @@ def _parse_player_summary(soup) -> Dict[str, float]:
             out['overall_win_pct'] = round(float(m.group(5).replace(',', '.')), 4)
             return out
     return out
+
+
+def parse_matchup_table(soup, summary=None):
+    """Die Matchup-Tabelle EINER Archetyp-Seite lesen.
+
+    HERAUSGELOEST 03.09.2026. Das Parsen stand mitten in
+    scrape_archetype_matchups(), also hinter einem Netzaufruf — und
+    tests/python/test_labs_matchup_parser.py hat es deshalb NACHGEBAUT
+    statt aufgerufen. Ein Test, der eine Kopie prueft, bleibt gruen,
+    waehrend der ausgelieferte Parser bricht; genau diese Bauart hat in
+    diesem Repo schon einmal zwei Mutationen ueberlebt.
+
+    Jetzt ruft der Test dieselbe Funktion auf, die auch der Wochenlauf
+    benutzt.
+    """
+    if summary is None:
+        summary = _parse_player_summary(soup)
+    # Find the matchup table — prefer .data-table (matches the deck-list
+    # scraper's selector) and fall back to any table whose header row
+    # contains "Win %" / "#".
+    table = soup.find('table', attrs={'class': re.compile(r'data-table')})
+    if not table:
+        for cand in soup.find_all('table'):
+            header_txt = cand.get_text(' ', strip=True).lower()
+            if 'win %' in header_txt or 'win%' in header_txt:
+                table = cand
+                break
+    if not table:
+        logger.debug("    Keine Matchup-Tabelle auf dieser Seite")
+        return {'summary': summary, 'matchups': []}
+
+    matchups: List[Dict] = []
+    for row in table.select('tbody tr') if table.find('tbody') else table.find_all('tr')[1:]:
+        cells = row.find_all('td')
+        if len(cells) < 3:
+            continue
+        # Deck-name cell: prefer the one with an <a>; opponent slug is the
+        # last segment of href.
+        link = None
+        name_cell_idx = None
+        for idx, c in enumerate(cells):
+            a = c.find('a')
+            if a and a.get('href'):
+                link = a
+                name_cell_idx = idx
+                break
+        if not link or name_cell_idx is None:
+            continue
+        opp_name = link.get_text(strip=True)
+        if not opp_name:
+            continue
+        opp_href = link.get('href', '')
+        opp_slug = opp_href.rsplit('/', 1)[-1].split('?')[0] if opp_href else ''
+
+        # Count + Win% are the two trailing numeric cells after the name
+        # cell. Walk from the right so we don't depend on header order.
+        trailing = cells[name_cell_idx + 1:]
+        count_val = 0
+        win_pct_val = 0.0
+        wins = losses = ties = None
+        for c in trailing:
+            txt = c.get_text(strip=True)
+            # Die Bilanz: "17 - 2 - 1".
+            #
+            # KORRIGIERT 03.09.2026: hier stand, sie muesse VOR der
+            # Zaehlung geprueft werden, sonst werde ihre erste Zahl als
+            # Partienzahl gelesen. Das ist nicht wahr — der Test dazu
+            # blieb gruen, als die Reihenfolge vertauscht wurde, und die
+            # Nachfrage ergab warum: _parse_int_count('17 - 2 - 1') gibt
+            # 0 zurueck, weil die bereinigte Zeichenkette nicht aus
+            # lauter Ziffern besteht. Die Spaltenreihenfolge der Quelle
+            # ist dem Parser also egal.
+            #
+            # Die Pruefung steht trotzdem zuerst, weil sie die
+            # spezifischere ist; das `continue` spart den Rest. Der Test
+            # mit vertauschten Spalten bleibt stehen — er sichert jetzt
+            # die Unabhaengigkeit von der Reihenfolge zu, statt eine
+            # Begruendung zu behaupten, die nicht traegt.
+            rec = re.match(r'^(\d+)\s*-\s*(\d+)\s*-\s*(\d+)$', txt)
+            if rec and wins is None:
+                wins, losses, ties = (int(rec.group(1)), int(rec.group(2)), int(rec.group(3)))
+                continue
+            if '%' in txt and win_pct_val == 0.0:
+                try:
+                    win_pct_val = round(float(txt.replace('%', '').replace(',', '.').strip()), 4)
+                except ValueError:
+                    pass
+            elif txt and count_val == 0 and not '%' in txt:
+                count_val = _parse_int_count(txt)
+        if count_val <= 0 and win_pct_val == 0.0:
+            continue
+        matchups.append({
+            'opponent_slug': opp_slug,
+            'opponent_name': opp_name,
+            'vs_count'     : count_val,
+            'vs_win_pct'   : win_pct_val,
+            'vs_wins'      : wins,
+            'vs_losses'    : losses,
+            'vs_ties'      : ties,
+        })
+
+    return {'summary': summary, 'matchups': matchups}
 
 
 def scrape_archetype_matchups(
@@ -1720,70 +1841,8 @@ def scrape_archetype_matchups(
 
     summary = _parse_player_summary(soup)
 
-    # Find the matchup table — prefer .data-table (matches the deck-list
-    # scraper's selector) and fall back to any table whose header row
-    # contains "Win %" / "#".
-    table = soup.find('table', attrs={'class': re.compile(r'data-table')})
-    if not table:
-        for cand in soup.find_all('table'):
-            header_txt = cand.get_text(' ', strip=True).lower()
-            if 'win %' in header_txt or 'win%' in header_txt:
-                table = cand
-                break
-    if not table:
-        logger.debug("    No matchup table for %s (tids=%s)", deck_slug, tids_sorted)
-        return {
-            'summary': summary,
-            'matchups': [],
-            'day_filter': day_filter,
-            'tournaments_used': tids_sorted,
-        }
-
-    matchups: List[Dict] = []
-    for row in table.select('tbody tr') if table.find('tbody') else table.find_all('tr')[1:]:
-        cells = row.find_all('td')
-        if len(cells) < 3:
-            continue
-        # Deck-name cell: prefer the one with an <a>; opponent slug is the
-        # last segment of href.
-        link = None
-        name_cell_idx = None
-        for idx, c in enumerate(cells):
-            a = c.find('a')
-            if a and a.get('href'):
-                link = a
-                name_cell_idx = idx
-                break
-        if not link or name_cell_idx is None:
-            continue
-        opp_name = link.get_text(strip=True)
-        if not opp_name:
-            continue
-        opp_href = link.get('href', '')
-        opp_slug = opp_href.rsplit('/', 1)[-1].split('?')[0] if opp_href else ''
-
-        # Count + Win% are the two trailing numeric cells after the name
-        # cell. Walk from the right so we don't depend on header order.
-        trailing = cells[name_cell_idx + 1:]
-        count_val = 0
-        win_pct_val = 0.0
-        for c in trailing:
-            txt = c.get_text(strip=True)
-            if '%' in txt and win_pct_val == 0.0:
-                try:
-                    win_pct_val = round(float(txt.replace('%', '').replace(',', '.').strip()), 4)
-                except ValueError:
-                    pass
-            elif txt and count_val == 0 and not '%' in txt:
-                count_val = _parse_int_count(txt)
-        if count_val <= 0 and win_pct_val == 0.0:
-            continue
-        matchups.append({
-            'opponent_slug': opp_slug,
-            'opponent_name': opp_name,
-            'vs_count'     : count_val,
-            'vs_win_pct'   : win_pct_val,
-        })
+    zerlegt = parse_matchup_table(soup, summary)
+    matchups = zerlegt['matchups']
 
     return {
         'summary': summary,
@@ -1826,6 +1885,13 @@ def build_matchup_rows(
             'opponent_deck_name'    : m.get('opponent_name', ''),
             'vs_count'              : m.get('vs_count', 0),
             'vs_win_pct'            : m.get('vs_win_pct', 0.0),
+            # Leer statt 0, wenn die Quelle keine Bilanz liefert: 0-0-0
+            # waere eine Aussage ("kein Sieg"), die Leere ist die richtige
+            # ("nicht bekannt"). Die Oberflaeche faellt dann auf die
+            # Matchpunkte zurueck.
+            'vs_wins'               : '' if m.get('vs_wins') is None else m['vs_wins'],
+            'vs_losses'             : '' if m.get('vs_losses') is None else m['vs_losses'],
+            'vs_ties'               : '' if m.get('vs_ties') is None else m['vs_ties'],
             'day_filter'            : day_filter,
             'scraped_at'            : scraped_at,
         })

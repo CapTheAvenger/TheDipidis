@@ -6895,7 +6895,7 @@ details[open] > .tier-trending-summary::after {
 /* ── Tournament Block ─── */
 .bj-tournament-block {
     margin-bottom: 6px;
-    border-left: 3px solid var(--accent, #2563eb);
+    border-left: 3px solid var(--brand, #3B4CCA);
     padding-left: 10px;
 }
 .bj-tournament-header {
@@ -11540,4 +11540,26 @@ body.arc-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
     .pm-ladestand::before { animation: none; border-top-color: currentColor; }
+}
+
+/* SAMMELAUSWAHL "ALLE X-DECKS" (03.09.2026)
+   ----------------------------------------
+   Der Hinweis erklaert, dass die Prozentzahlen darunter auf ALLEN
+   Varianten zusammen stehen. Er ist kein Zierrat: ohne ihn liest man
+   eine Karte, die in einer Variante Pflicht ist, als selten.
+
+   Farbe aus den Tokens, damit er in beiden Modi lesbar bleibt — kein
+   eigener Grauton (am 02.09.2026 kostete genau das 3,42:1). Die Kante
+   links nimmt die Akzentfarbe und macht den Absatz zu einem Hinweis
+   statt zu Fliesstext, ohne eine Flaeche einzufaerben. */
+.pm-familie-hinweis {
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-left: 3px solid var(--brand, #3B4CCA);
+    background: var(--surface-2, rgba(127, 127, 127, 0.08));
+    border-radius: 0 6px 6px 0;
+    color: var(--ink-2, #4d5566);
+    font-size: 0.88em;
+    line-height: 1.5;
+    max-width: 78ch;
 }

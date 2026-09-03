@@ -1,281 +1,397 @@
 {
- "_meta": {
-  "zweck": "Entschiedene deutsche Namen fuer die 63 Faelle, in denen sich unsere Dateien widersprachen.",
-  "verfahren": "Geprueft wurde von der belastbaren Seite aus: pokewiki.de/<englischer Name> leitet auf den deutschen Artikel weiter, und dessen Titel ist der offizielle deutsche Name. Beide Kandidaten aus unseren Daten wurden dabei NICHT vorausgesetzt — das war noetig, denn in zwei Faellen war keiner von beiden richtig.",
-  "gelesen_am": "2026-08-31",
-  "ergebnis": {
-   "tabelle_richtig": 61,
-   "referenz_richtig": 1,
-   "keiner_richtig": 1,
-   "gesamt": 63
+  "_meta": {
+    "zweck": "Entschiedene deutsche Namen fuer die 63 Faelle, in denen sich unsere Dateien widersprachen.",
+    "verfahren": "Geprueft wurde von der belastbaren Seite aus: pokewiki.de/<englischer Name> leitet auf den deutschen Artikel weiter, und dessen Titel ist der offizielle deutsche Name. Beide Kandidaten aus unseren Daten wurden dabei NICHT vorausgesetzt — das war noetig, denn in zwei Faellen war keiner von beiden richtig.",
+    "gelesen_am": "2026-08-31",
+    "ergebnis": {
+      "tabelle_richtig": 61,
+      "referenz_richtig": 1,
+      "keiner_richtig": 1,
+      "gesamt": 63
+    },
+    "bemerkenswert": [
+      "Snow Warning heisst Schneeschauer — weder 'Diamantstaub' (Referenz) noch 'Hagelalarm' (Tabelle) stimmte.",
+      "Sharp Beak heisst Spitzer Schnabel; 'Hackattack' war der Name vor Schwert und Schild und stand noch in der Namenstabelle.",
+      "Die Referenzdateien hatten bei fast allen Typ-Resistenzbeeren die Namen systematisch vertauscht: 'Prunusbeere' stand bei Sitrus (das ist Lum), 'Babiribeere' bei Shuca (das ist Babiri), 'Kerzalbeere' bei Colbur (das ist Wacan).",
+      "Throat Chop heisst auf Deutsch tatsaechlich 'Neck Strike' — ein englisch klingender Name in der deutschen Lokalisierung, kein Uebersetzungsfehler.",
+      "Poltergeist heisst in beiden Sprachen gleich."
+    ],
+    "warnung": "Drei Agentenlaeufe hatten vier dieser Namen falsch gemeldet (Chilan Berry, Triple Axel, Weather Ball, Snow Warning). Jeder Eintrag hier ist deshalb einzeln nachgeschlagen worden. Wer diese Datei erweitert, macht es genauso.",
+    "zweite_runde_2026_09_03": {
+      "anlass": "Die Runde vom 31.08. hat nur die 63 Namen geprueft, die sich zwischen Referenz und Tabelle WIDERSPRACHEN. Namen, die in beiden Dateien gleich falsch standen oder nur in der Referenz existierten, waren damit unsichtbar — und die Referenzdateien behaupteten trotzdem, jeder Name sei einzeln geprueft.",
+      "umfang": "Alle 204 de_name-Werte der drei Referenzdateien (66 Items, 102 Attacken, 36 Faehigkeiten), einzeln ueber die PokeWiki-API abgefragt.",
+      "ergebnis": {
+        "geprueft": 204,
+        "falsch": 20,
+        "richtig": 184
+      },
+      "verfahren": "pokewiki.de/api.php?action=parse&page=<englischer Name>&redirects=1 — aus dem Wikitext werden Name_de und Name_en der Infobox gelesen. Der Name gilt nur als belegt, wenn Name_en genau der gesuchte englische Name ist. Die Weiterleitung allein reicht nicht: 'Psychic' leitet auf 'Psycho' (den Typ) weiter, 'Chilan Berry' auf einen Artikel ueber die dritte Generation ohne Infobox. Beide Namen ('Psychokinese', 'Latchibeere') waren bei uns richtig und blieben unangetastet.",
+      "bemerkenswert": [
+        "Zwoelf von dreizehn Mega-Steinen waren falsch gebildet: die deutsche Endung ist -nit, nicht -it. Aus 'Glurakit Y' wird 'Gluraknit Y', aus 'Bisaflorit' 'Bisaflornit'. Nur 'Lucarionit' war zufaellig richtig.",
+        "Vier Mega-Steine trugen ausserdem die falsche Art: 'Lichtelit' statt Skelabranit (Chandelure heisst Skelabra), 'Mortipotit' statt Lumifloranit, 'Florgessit' statt Floetteonit, 'Trampanit' statt Sen-Longnit.",
+        "Roseli Berry heisst Hibisbeere — 'Rosolinbeere' gibt es nicht.",
+        "Black Glasses heisst Schattenbrille, nicht Schwarzbrille; Fairy Feather Feendaune, nicht Feenfeder; Terrain Extender Feldbeschichtung, nicht Lauffeld."
+      ]
+    }
   },
-  "bemerkenswert": [
-   "Snow Warning heisst Schneeschauer — weder 'Diamantstaub' (Referenz) noch 'Hagelalarm' (Tabelle) stimmte.",
-   "Sharp Beak heisst Spitzer Schnabel; 'Hackattack' war der Name vor Schwert und Schild und stand noch in der Namenstabelle.",
-   "Die Referenzdateien hatten bei fast allen Typ-Resistenzbeeren die Namen systematisch vertauscht: 'Prunusbeere' stand bei Sitrus (das ist Lum), 'Babiribeere' bei Shuca (das ist Babiri), 'Kerzalbeere' bei Colbur (das ist Wacan).",
-   "Throat Chop heisst auf Deutsch tatsaechlich 'Neck Strike' — ein englisch klingender Name in der deutschen Lokalisierung, kein Uebersetzungsfehler.",
-   "Poltergeist heisst in beiden Sprachen gleich."
-  ],
-  "warnung": "Drei Agentenlaeufe hatten vier dieser Namen falsch gemeldet (Chilan Berry, Triple Axel, Weather Ball, Snow Warning). Jeder Eintrag hier ist deshalb einzeln nachgeschlagen worden. Wer diese Datei erweitert, macht es genauso."
- },
- "namen": {
-  "abilities": {
-   "Adaptability": {
-    "de": "Anpassung",
-    "quelle": "https://pokewiki.de/Adaptability"
-   },
-   "Competitive": {
-    "de": "Unbeugsamkeit",
-    "quelle": "https://pokewiki.de/Competitive"
-   },
-   "Cursed Body": {
-    "de": "Tastfluch",
-    "quelle": "https://pokewiki.de/Cursed_Body"
-   },
-   "Gale Wings": {
-    "de": "Orkanschwingen",
-    "quelle": "https://pokewiki.de/Gale_Wings"
-   },
-   "Hospitality": {
-    "de": "Gastlichkeit",
-    "quelle": "https://pokewiki.de/Hospitality"
-   },
-   "No Guard": {
-    "de": "Schildlos",
-    "quelle": "https://pokewiki.de/No_Guard"
-   },
-   "Snow Warning": {
-    "de": "Schneeschauer",
-    "quelle": "https://pokewiki.de/Snow_Warning"
-   },
-   "Stamina": {
-    "de": "Zähigkeit",
-    "quelle": "https://pokewiki.de/Stamina"
-   },
-   "Toxic Debris": {
-    "de": "Giftbelag",
-    "quelle": "https://pokewiki.de/Toxic_Debris"
-   }
-  },
-  "moves": {
-   "Aqua Jet": {
-    "de": "Wasserdüse",
-    "quelle": "https://pokewiki.de/Aqua_Jet"
-   },
-   "Bone Rush": {
-    "de": "Knochenhatz",
-    "quelle": "https://pokewiki.de/Bone_Rush"
-   },
-   "Clangorous Soul": {
-    "de": "Seelentanz",
-    "quelle": "https://pokewiki.de/Clangorous_Soul"
-   },
-   "Dire Claw": {
-    "de": "Unheilsklauen",
-    "quelle": "https://pokewiki.de/Dire_Claw"
-   },
-   "Dual Wingbeat": {
-    "de": "Doppelflügel",
-    "quelle": "https://pokewiki.de/Dual_Wingbeat"
-   },
-   "Electro Shot": {
-    "de": "Stromstrahl",
-    "quelle": "https://pokewiki.de/Electro_Shot"
-   },
-   "Flip Turn": {
-    "de": "Rollwende",
-    "quelle": "https://pokewiki.de/Flip_Turn"
-   },
-   "Flower Trick": {
-    "de": "Blumentrick",
-    "quelle": "https://pokewiki.de/Flower_Trick"
-   },
-   "Freeze-Dry": {
-    "de": "Gefriertrockner",
-    "quelle": "https://pokewiki.de/Freeze-Dry"
-   },
-   "Headlong Rush": {
-    "de": "Schmetterramme",
-    "quelle": "https://pokewiki.de/Headlong_Rush"
-   },
-   "Hydro Cannon": {
-    "de": "Aquahaubitze",
-    "quelle": "https://pokewiki.de/Hydro_Cannon"
-   },
-   "Hyper Voice": {
-    "de": "Schallwelle",
-    "quelle": "https://pokewiki.de/Hyper_Voice"
-   },
-   "Kowtow Cleave": {
-    "de": "Kniefallspalter",
-    "quelle": "https://pokewiki.de/Kowtow_Cleave"
-   },
-   "Light of Ruin": {
-    "de": "Lux Calamitatis",
-    "quelle": "https://pokewiki.de/Light_of_Ruin"
-   },
-   "Liquidation": {
-    "de": "Aquadurchstoß",
-    "quelle": "https://pokewiki.de/Liquidation"
-   },
-   "Matcha Gotcha": {
-    "de": "Quirlschuss",
-    "quelle": "https://pokewiki.de/Matcha_Gotcha"
-   },
-   "Meteor Mash": {
-    "de": "Sternenhieb",
-    "quelle": "https://pokewiki.de/Meteor_Mash"
-   },
-   "Parting Shot": {
-    "de": "Abgangstirade",
-    "quelle": "https://pokewiki.de/Parting_Shot"
-   },
-   "Poison Jab": {
-    "de": "Gifthieb",
-    "quelle": "https://pokewiki.de/Poison_Jab"
-   },
-   "Poltergeist": {
-    "de": "Poltergeist",
-    "quelle": "https://pokewiki.de/Poltergeist"
-   },
-   "Power Whip": {
-    "de": "Blattgeißel",
-    "quelle": "https://pokewiki.de/Power_Whip"
-   },
-   "Rock Tomb": {
-    "de": "Felsgrab",
-    "quelle": "https://pokewiki.de/Rock_Tomb"
-   },
-   "Scale Shot": {
-    "de": "Schuppenschuss",
-    "quelle": "https://pokewiki.de/Scale_Shot"
-   },
-   "Shadow Sneak": {
-    "de": "Schattenstoß",
-    "quelle": "https://pokewiki.de/Shadow_Sneak"
-   },
-   "Stomping Tantrum": {
-    "de": "Fruststampfer",
-    "quelle": "https://pokewiki.de/Stomping_Tantrum"
-   },
-   "Sucker Punch": {
-    "de": "Tiefschlag",
-    "quelle": "https://pokewiki.de/Sucker_Punch"
-   },
-   "Throat Chop": {
-    "de": "Neck Strike",
-    "quelle": "https://pokewiki.de/Throat_Chop"
-   },
-   "Triple Axel": {
-    "de": "Dreifach-Axel",
-    "quelle": "https://pokewiki.de/Triple_Axel"
-   },
-   "Wave Crash": {
-    "de": "Wellentackle",
-    "quelle": "https://pokewiki.de/Wave_Crash"
-   },
-   "Weather Ball": {
-    "de": "Meteorologe",
-    "quelle": "https://pokewiki.de/Weather_Ball"
-   }
-  },
-  "items": {
-   "Babiri Berry": {
-    "de": "Babiribeere",
-    "quelle": "https://pokewiki.de/Babiri_Berry"
-   },
-   "Black Sludge": {
-    "de": "Giftschleim",
-    "quelle": "https://pokewiki.de/Black_Sludge"
-   },
-   "Charti Berry": {
-    "de": "Chiaribeere",
-    "quelle": "https://pokewiki.de/Charti_Berry"
-   },
-   "Chilan Berry": {
-    "de": "Latchibeere",
-    "quelle": "https://pokewiki.de/Chilan_Berry"
-   },
-   "Chople Berry": {
-    "de": "Rospelbeere",
-    "quelle": "https://pokewiki.de/Chople_Berry"
-   },
-   "Coba Berry": {
-    "de": "Kobabeere",
-    "quelle": "https://pokewiki.de/Coba_Berry"
-   },
-   "Colbur Berry": {
-    "de": "Burleobeere",
-    "quelle": "https://pokewiki.de/Colbur_Berry"
-   },
-   "Haban Berry": {
-    "de": "Terirobeere",
-    "quelle": "https://pokewiki.de/Haban_Berry"
-   },
-   "Kasib Berry": {
-    "de": "Zitarzbeere",
-    "quelle": "https://pokewiki.de/Kasib_Berry"
-   },
-   "Kebia Berry": {
-    "de": "Grarzbeere",
-    "quelle": "https://pokewiki.de/Kebia_Berry"
-   },
-   "Lum Berry": {
-    "de": "Prunusbeere",
-    "quelle": "https://pokewiki.de/Lum_Berry"
-   },
-   "Occa Berry": {
-    "de": "Koakobeere",
-    "quelle": "https://pokewiki.de/Occa_Berry"
-   },
-   "Passho Berry": {
-    "de": "Foepasbeere",
-    "quelle": "https://pokewiki.de/Passho_Berry"
-   },
-   "Payapa Berry": {
-    "de": "Pyapabeere",
-    "quelle": "https://pokewiki.de/Payapa_Berry"
-   },
-   "Rindo Berry": {
-    "de": "Grindobeere",
-    "quelle": "https://pokewiki.de/Rindo_Berry"
-   },
-   "Rocky Helmet": {
-    "de": "Beulenhelm",
-    "quelle": "https://pokewiki.de/Rocky_Helmet"
-   },
-   "Sharp Beak": {
-    "de": "Spitzer Schnabel",
-    "quelle": "https://pokewiki.de/Sharp_Beak"
-   },
-   "Shuca Berry": {
-    "de": "Schukebeere",
-    "quelle": "https://pokewiki.de/Shuca_Berry"
-   },
-   "Sitrus Berry": {
-    "de": "Tsitrubeere",
-    "quelle": "https://pokewiki.de/Sitrus_Berry"
-   },
-   "Smooth Rock": {
-    "de": "Glattbrocken",
-    "quelle": "https://pokewiki.de/Smooth_Rock"
-   },
-   "Tanga Berry": {
-    "de": "Tanigabeere",
-    "quelle": "https://pokewiki.de/Tanga_Berry"
-   },
-   "Wacan Berry": {
-    "de": "Kerzalbeere",
-    "quelle": "https://pokewiki.de/Wacan_Berry"
-   },
-   "White Herb": {
-    "de": "Schlohkraut",
-    "quelle": "https://pokewiki.de/White_Herb"
-   },
-   "Yache Berry": {
-    "de": "Kiroyabeere",
-    "quelle": "https://pokewiki.de/Yache_Berry"
-   }
+  "namen": {
+    "abilities": {
+      "Adaptability": {
+        "de": "Anpassung",
+        "quelle": "https://pokewiki.de/Adaptability"
+      },
+      "Competitive": {
+        "de": "Unbeugsamkeit",
+        "quelle": "https://pokewiki.de/Competitive"
+      },
+      "Cursed Body": {
+        "de": "Tastfluch",
+        "quelle": "https://pokewiki.de/Cursed_Body"
+      },
+      "Gale Wings": {
+        "de": "Orkanschwingen",
+        "quelle": "https://pokewiki.de/Gale_Wings"
+      },
+      "Hospitality": {
+        "de": "Gastlichkeit",
+        "quelle": "https://pokewiki.de/Hospitality"
+      },
+      "No Guard": {
+        "de": "Schildlos",
+        "quelle": "https://pokewiki.de/No_Guard"
+      },
+      "Snow Warning": {
+        "de": "Schneeschauer",
+        "quelle": "https://pokewiki.de/Snow_Warning"
+      },
+      "Stamina": {
+        "de": "Zähigkeit",
+        "quelle": "https://pokewiki.de/Stamina"
+      },
+      "Toxic Debris": {
+        "de": "Giftbelag",
+        "quelle": "https://pokewiki.de/Toxic_Debris"
+      },
+      "Fairy Aura": {
+        "de": "Feenaura",
+        "quelle": "https://pokewiki.de/Fairy_Aura",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      }
+    },
+    "moves": {
+      "Aqua Jet": {
+        "de": "Wasserdüse",
+        "quelle": "https://pokewiki.de/Aqua_Jet"
+      },
+      "Bone Rush": {
+        "de": "Knochenhatz",
+        "quelle": "https://pokewiki.de/Bone_Rush"
+      },
+      "Clangorous Soul": {
+        "de": "Seelentanz",
+        "quelle": "https://pokewiki.de/Clangorous_Soul"
+      },
+      "Dire Claw": {
+        "de": "Unheilsklauen",
+        "quelle": "https://pokewiki.de/Dire_Claw"
+      },
+      "Dual Wingbeat": {
+        "de": "Doppelflügel",
+        "quelle": "https://pokewiki.de/Dual_Wingbeat"
+      },
+      "Electro Shot": {
+        "de": "Stromstrahl",
+        "quelle": "https://pokewiki.de/Electro_Shot"
+      },
+      "Flip Turn": {
+        "de": "Rollwende",
+        "quelle": "https://pokewiki.de/Flip_Turn"
+      },
+      "Flower Trick": {
+        "de": "Blumentrick",
+        "quelle": "https://pokewiki.de/Flower_Trick"
+      },
+      "Freeze-Dry": {
+        "de": "Gefriertrockner",
+        "quelle": "https://pokewiki.de/Freeze-Dry"
+      },
+      "Headlong Rush": {
+        "de": "Schmetterramme",
+        "quelle": "https://pokewiki.de/Headlong_Rush"
+      },
+      "Hydro Cannon": {
+        "de": "Aquahaubitze",
+        "quelle": "https://pokewiki.de/Hydro_Cannon"
+      },
+      "Hyper Voice": {
+        "de": "Schallwelle",
+        "quelle": "https://pokewiki.de/Hyper_Voice"
+      },
+      "Kowtow Cleave": {
+        "de": "Kniefallspalter",
+        "quelle": "https://pokewiki.de/Kowtow_Cleave"
+      },
+      "Light of Ruin": {
+        "de": "Lux Calamitatis",
+        "quelle": "https://pokewiki.de/Light_of_Ruin"
+      },
+      "Liquidation": {
+        "de": "Aquadurchstoß",
+        "quelle": "https://pokewiki.de/Liquidation"
+      },
+      "Matcha Gotcha": {
+        "de": "Quirlschuss",
+        "quelle": "https://pokewiki.de/Matcha_Gotcha"
+      },
+      "Meteor Mash": {
+        "de": "Sternenhieb",
+        "quelle": "https://pokewiki.de/Meteor_Mash"
+      },
+      "Parting Shot": {
+        "de": "Abgangstirade",
+        "quelle": "https://pokewiki.de/Parting_Shot"
+      },
+      "Poison Jab": {
+        "de": "Gifthieb",
+        "quelle": "https://pokewiki.de/Poison_Jab"
+      },
+      "Poltergeist": {
+        "de": "Poltergeist",
+        "quelle": "https://pokewiki.de/Poltergeist"
+      },
+      "Power Whip": {
+        "de": "Blattgeißel",
+        "quelle": "https://pokewiki.de/Power_Whip"
+      },
+      "Rock Tomb": {
+        "de": "Felsgrab",
+        "quelle": "https://pokewiki.de/Rock_Tomb"
+      },
+      "Scale Shot": {
+        "de": "Schuppenschuss",
+        "quelle": "https://pokewiki.de/Scale_Shot"
+      },
+      "Shadow Sneak": {
+        "de": "Schattenstoß",
+        "quelle": "https://pokewiki.de/Shadow_Sneak"
+      },
+      "Stomping Tantrum": {
+        "de": "Fruststampfer",
+        "quelle": "https://pokewiki.de/Stomping_Tantrum"
+      },
+      "Sucker Punch": {
+        "de": "Tiefschlag",
+        "quelle": "https://pokewiki.de/Sucker_Punch"
+      },
+      "Throat Chop": {
+        "de": "Neck Strike",
+        "quelle": "https://pokewiki.de/Throat_Chop"
+      },
+      "Triple Axel": {
+        "de": "Dreifach-Axel",
+        "quelle": "https://pokewiki.de/Triple_Axel"
+      },
+      "Wave Crash": {
+        "de": "Wellentackle",
+        "quelle": "https://pokewiki.de/Wave_Crash"
+      },
+      "Weather Ball": {
+        "de": "Meteorologe",
+        "quelle": "https://pokewiki.de/Weather_Ball"
+      }
+    },
+    "items": {
+      "Babiri Berry": {
+        "de": "Babiribeere",
+        "quelle": "https://pokewiki.de/Babiri_Berry"
+      },
+      "Black Sludge": {
+        "de": "Giftschleim",
+        "quelle": "https://pokewiki.de/Black_Sludge"
+      },
+      "Charti Berry": {
+        "de": "Chiaribeere",
+        "quelle": "https://pokewiki.de/Charti_Berry"
+      },
+      "Chilan Berry": {
+        "de": "Latchibeere",
+        "quelle": "https://pokewiki.de/Chilan_Berry"
+      },
+      "Chople Berry": {
+        "de": "Rospelbeere",
+        "quelle": "https://pokewiki.de/Chople_Berry"
+      },
+      "Coba Berry": {
+        "de": "Kobabeere",
+        "quelle": "https://pokewiki.de/Coba_Berry"
+      },
+      "Colbur Berry": {
+        "de": "Burleobeere",
+        "quelle": "https://pokewiki.de/Colbur_Berry"
+      },
+      "Haban Berry": {
+        "de": "Terirobeere",
+        "quelle": "https://pokewiki.de/Haban_Berry"
+      },
+      "Kasib Berry": {
+        "de": "Zitarzbeere",
+        "quelle": "https://pokewiki.de/Kasib_Berry"
+      },
+      "Kebia Berry": {
+        "de": "Grarzbeere",
+        "quelle": "https://pokewiki.de/Kebia_Berry"
+      },
+      "Lum Berry": {
+        "de": "Prunusbeere",
+        "quelle": "https://pokewiki.de/Lum_Berry"
+      },
+      "Occa Berry": {
+        "de": "Koakobeere",
+        "quelle": "https://pokewiki.de/Occa_Berry"
+      },
+      "Passho Berry": {
+        "de": "Foepasbeere",
+        "quelle": "https://pokewiki.de/Passho_Berry"
+      },
+      "Payapa Berry": {
+        "de": "Pyapabeere",
+        "quelle": "https://pokewiki.de/Payapa_Berry"
+      },
+      "Rindo Berry": {
+        "de": "Grindobeere",
+        "quelle": "https://pokewiki.de/Rindo_Berry"
+      },
+      "Rocky Helmet": {
+        "de": "Beulenhelm",
+        "quelle": "https://pokewiki.de/Rocky_Helmet"
+      },
+      "Sharp Beak": {
+        "de": "Spitzer Schnabel",
+        "quelle": "https://pokewiki.de/Sharp_Beak"
+      },
+      "Shuca Berry": {
+        "de": "Schukebeere",
+        "quelle": "https://pokewiki.de/Shuca_Berry"
+      },
+      "Sitrus Berry": {
+        "de": "Tsitrubeere",
+        "quelle": "https://pokewiki.de/Sitrus_Berry"
+      },
+      "Smooth Rock": {
+        "de": "Glattbrocken",
+        "quelle": "https://pokewiki.de/Smooth_Rock"
+      },
+      "Tanga Berry": {
+        "de": "Tanigabeere",
+        "quelle": "https://pokewiki.de/Tanga_Berry"
+      },
+      "Wacan Berry": {
+        "de": "Kerzalbeere",
+        "quelle": "https://pokewiki.de/Wacan_Berry"
+      },
+      "White Herb": {
+        "de": "Schlohkraut",
+        "quelle": "https://pokewiki.de/White_Herb"
+      },
+      "Yache Berry": {
+        "de": "Kiroyabeere",
+        "quelle": "https://pokewiki.de/Yache_Berry"
+      },
+      "Charizardite Y": {
+        "de": "Gluraknit Y",
+        "quelle": "https://pokewiki.de/Charizardite_Y",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Charizardite X": {
+        "de": "Gluraknit X",
+        "quelle": "https://pokewiki.de/Charizardite_X",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Venusaurite": {
+        "de": "Bisaflornit",
+        "quelle": "https://pokewiki.de/Venusaurite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Floettite": {
+        "de": "Floetteonit",
+        "quelle": "https://pokewiki.de/Floettite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Gengarite": {
+        "de": "Gengarnit",
+        "quelle": "https://pokewiki.de/Gengarite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Aerodactylite": {
+        "de": "Aerodactylonit",
+        "quelle": "https://pokewiki.de/Aerodactylite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Chandelurite": {
+        "de": "Skelabranit",
+        "quelle": "https://pokewiki.de/Chandelurite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Delphoxite": {
+        "de": "Fennexisnit",
+        "quelle": "https://pokewiki.de/Delphoxite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Drampanite": {
+        "de": "Sen-Longnit",
+        "quelle": "https://pokewiki.de/Drampanite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Froslassite": {
+        "de": "Frosdedjenit",
+        "quelle": "https://pokewiki.de/Froslassite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Glimmoranite": {
+        "de": "Lumifloranit",
+        "quelle": "https://pokewiki.de/Glimmoranite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Golurkite": {
+        "de": "Golgantesnit",
+        "quelle": "https://pokewiki.de/Golurkite",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Choice Specs": {
+        "de": "Wahlbrille",
+        "quelle": "https://pokewiki.de/Choice_Specs",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Eject Pack": {
+        "de": "Fluchttasche",
+        "quelle": "https://pokewiki.de/Eject_Pack",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Booster Energy": {
+        "de": "Energiekapsel",
+        "quelle": "https://pokewiki.de/Booster_Energy",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Black Glasses": {
+        "de": "Schattenbrille",
+        "quelle": "https://pokewiki.de/Black_Glasses",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Fairy Feather": {
+        "de": "Feendaune",
+        "quelle": "https://pokewiki.de/Fairy_Feather",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Terrain Extender": {
+        "de": "Feldbeschichtung",
+        "quelle": "https://pokewiki.de/Terrain_Extender",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      },
+      "Roseli Berry": {
+        "de": "Hibisbeere",
+        "quelle": "https://pokewiki.de/Roseli_Berry",
+        "note": "03.09.2026: stand nie im Widerspruch und wurde deshalb am 31.08. nicht geprueft. Die PokeWiki-Infobox nennt Name_de und Name_en nebeneinander; unser Wert war falsch."
+      }
+    }
   }
- }
 }

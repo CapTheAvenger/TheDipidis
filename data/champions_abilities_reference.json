@@ -1,155 +1,155 @@
 {
- "_meta": {
-  "version": 1,
-  "format": "Pokémon Champions · Regulation M-A (Apr–Jun 2026)",
-  "description": "Verifizierte Namens- und Effekt-Referenz für Fähigkeiten, die im aktuellen Top-20-Champions-Pool auftauchen. Wird genau wie die Move/Item-Referenzen vom Strategie-Generator als Faktenblock in den System-Prompt injiziert. Ziel: keine englischen Fähigkeits-Namen im deutschen Guide stehen lassen, und die exakte Mechanik (was die Fähigkeit tut) korrekt zitieren.",
-  "lookup_keys": "Sowohl der englische Showdown-Name (key) als auch der deutsche Lokalisationsname (de_name) sind durchsuchbar; case-insensitive.",
-  "de_namen_geprueft": "Die deutschen Namen sind am 31.08.2026 einzeln gegen pokewiki.de geprueft worden; Herkunft je Name: data/champions_namen_entschieden.json."
- },
- "abilities": {
-  "Intimidate": {
-   "de_name": "Bedroher",
-   "effect": "Senkt beim Einwechseln den Angriff aller direkten Gegner um 1 Stufe."
+  "_meta": {
+    "version": 1,
+    "format": "Pokémon Champions · Regulation M-A (Apr–Jun 2026)",
+    "description": "Verifizierte Namens- und Effekt-Referenz für Fähigkeiten, die im aktuellen Top-20-Champions-Pool auftauchen. Wird genau wie die Move/Item-Referenzen vom Strategie-Generator als Faktenblock in den System-Prompt injiziert. Ziel: keine englischen Fähigkeits-Namen im deutschen Guide stehen lassen, und die exakte Mechanik (was die Fähigkeit tut) korrekt zitieren.",
+    "lookup_keys": "Sowohl der englische Showdown-Name (key) als auch der deutsche Lokalisationsname (de_name) sind durchsuchbar; case-insensitive.",
+    "de_namen_geprueft": "Am 03.09.2026 wurde JEDER de_name dieser Datei gegen die PokeWiki-Infobox geprueft (Name_de/Name_en muessen zum gesuchten englischen Namen passen), nicht nur die Streitfaelle vom 31.08. Ergebnis dieses Durchgangs steht in data/champions_namen_entschieden.json."
   },
-  "Prankster": {
-   "de_name": "Strolch",
-   "effect": "Status-Attacken erhalten Vorrang (Priorität +1) — wirkungslos gegen Unlicht-Typen."
-  },
-  "Levitate": {
-   "de_name": "Schwebe",
-   "effect": "Der Träger ist immun gegen Boden-Attacken, Stachler, Tarnsteine und Giftspitzen."
-  },
-  "Gale Wings": {
-   "de_name": "Orkanschwingen",
-   "effect": "Flug-Attacken erhalten Vorrang (Priorität +1), aber NUR wenn der Träger volle KP hat."
-  },
-  "Snow Warning": {
-   "de_name": "Schneeschauer",
-   "effect": "Lässt es beim Einwechseln 5 Runden schneien (8 mit Eisbrocken)."
-  },
-  "Drought": {
-   "de_name": "Dürre",
-   "effect": "Erzeugt beim Einwechseln 5 Runden harsches Sonnenlicht (8 mit Heißbrocken)."
-  },
-  "Drizzle": {
-   "de_name": "Niesel",
-   "effect": "Erzeugt beim Einwechseln 5 Runden Regen (8 mit Nassbrocken)."
-  },
-  "Sand Stream": {
-   "de_name": "Sandsturm",
-   "effect": "Erzeugt beim Einwechseln 5 Runden Sandsturm (8 mit Glättstein)."
-  },
-  "Blaze": {
-   "de_name": "Großbrand",
-   "effect": "Feuer-Attacken machen 50 % mehr Schaden, wenn die KP des Trägers ≤ 1/3 sind."
-  },
-  "Overgrow": {
-   "de_name": "Notdünger",
-   "effect": "Pflanzen-Attacken machen 50 % mehr Schaden bei KP ≤ 1/3."
-  },
-  "Solar Power": {
-   "de_name": "Solarkraft",
-   "effect": "Bei harschem Sonnenlicht: Spez.-Angriff ×1,5, aber 1/8 KP-Verlust pro Runde."
-  },
-  "Chlorophyll": {
-   "de_name": "Chlorophyll",
-   "effect": "Initiative ×2 bei harschem Sonnenlicht."
-  },
-  "Flash Fire": {
-   "de_name": "Feuerfänger",
-   "effect": "Immun gegen Feuer-Attacken; eigene Feuer-Attacken werden danach um 50 % stärker."
-  },
-  "Defiant": {
-   "de_name": "Siegeswille",
-   "effect": "Wenn ein Wert des Trägers durch den Gegner gesenkt wird: Angriff +2."
-  },
-  "Competitive": {
-   "de_name": "Unbeugsamkeit",
-   "effect": "Wenn ein Wert des Trägers durch den Gegner gesenkt wird: Spez.-Angriff +2."
-  },
-  "Inner Focus": {
-   "de_name": "Konzentrator",
-   "effect": "Immun gegen Zurückzucken; immun gegen Bedroher beim Einwechseln."
-  },
-  "Stamina": {
-   "de_name": "Zähigkeit",
-   "effect": "Verteidigung +1, wenn der Träger von einer Attacke getroffen wird."
-  },
-  "Berserk": {
-   "de_name": "Wutausbruch",
-   "effect": "Spez.-Angriff +1, wenn die KP des Trägers das erste Mal unter 1/2 fallen."
-  },
-  "Adaptability": {
-   "de_name": "Anpassung",
-   "effect": "STAB (Typenbonus) ist ×2 statt ×1,5."
-  },
-  "Pixilate": {
-   "de_name": "Feenschicht",
-   "effect": "Normal-Attacken des Trägers werden zu Fee-Attacken und +20 % Schaden."
-  },
-  "Liquid Voice": {
-   "de_name": "Plätscherstimme",
-   "effect": "Schall-Attacken (z. B. Hyperstimme) des Trägers werden zu Wasser-Attacken."
-  },
-  "Fairy Aura": {
-   "de_name": "Feen-Aura",
-   "effect": "Alle Fee-Attacken (auch gegnerische) machen 33 % mehr Schaden."
-  },
-  "No Guard": {
-   "de_name": "Schildlos",
-   "effect": "Alle Attacken treffen IMMER — vom Träger und gegen ihn."
-  },
-  "Rough Skin": {
-   "de_name": "Rauhaut",
-   "effect": "Kontaktangreifer verlieren 1/8 max. KP."
-  },
-  "Toxic Debris": {
-   "de_name": "Giftbelag",
-   "effect": "Legt eine Lage Giftspitzen auf die Gegnerseite, wenn der Träger physischen Schaden erleidet."
-  },
-  "Poison Touch": {
-   "de_name": "Giftgriff",
-   "effect": "30 % Chance, ein Ziel zu vergiften, das per Kontakt getroffen wird."
-  },
-  "Unburden": {
-   "de_name": "Entlastung",
-   "effect": "Initiative ×2, sobald das getragene Item verbraucht wurde."
-  },
-  "Mirror Armor": {
-   "de_name": "Spiegelrüstung",
-   "effect": "Werte-Senkungen werden auf den Verursacher reflektiert."
-  },
-  "Armor Tail": {
-   "de_name": "Schweifrüstung",
-   "effect": "Vorzugsangriffe gegen den Träger oder seine Verbündeten schlagen fehl."
-  },
-  "Queenly Majesty": {
-   "de_name": "Majestät",
-   "effect": "Vorzugsangriffe gegen den Träger oder seine Verbündeten schlagen fehl."
-  },
-  "Soundproof": {
-   "de_name": "Lärmschutz",
-   "effect": "Immun gegen alle Schall-Attacken (z. B. Hyperstimme, Lärmbringer)."
-  },
-  "Cursed Body": {
-   "de_name": "Tastfluch",
-   "effect": "30 % Chance, eine treffende Attacke des Gegners für 4 Runden zu sperren."
-  },
-  "Unnerve": {
-   "de_name": "Anspannung",
-   "effect": "Gegner können während des Kampfes keine Beeren essen."
-  },
-  "Hospitality": {
-   "de_name": "Gastlichkeit",
-   "effect": "Beim Einwechseln: Verbündeter heilt 1/4 max. KP."
-  },
-  "Flower Veil": {
-   "de_name": "Blütenhülle",
-   "effect": "Verbündete Pflanzen-Pokémon können keine Statusprobleme erleiden und keine Werte-Senkungen durch den Gegner."
-  },
-  "Stance Change": {
-   "de_name": "Taktikwechsel",
-   "effect": "Aegislash wechselt zwischen Schild- und Klingen-Form je nach eingesetzter Attacke (Angriff → Klinge, Königsschild → Schild)."
+  "abilities": {
+    "Intimidate": {
+      "de_name": "Bedroher",
+      "effect": "Senkt beim Einwechseln den Angriff aller direkten Gegner um 1 Stufe."
+    },
+    "Prankster": {
+      "de_name": "Strolch",
+      "effect": "Status-Attacken erhalten Vorrang (Priorität +1) — wirkungslos gegen Unlicht-Typen."
+    },
+    "Levitate": {
+      "de_name": "Schwebe",
+      "effect": "Der Träger ist immun gegen Boden-Attacken, Stachler, Tarnsteine und Giftspitzen."
+    },
+    "Gale Wings": {
+      "de_name": "Orkanschwingen",
+      "effect": "Flug-Attacken erhalten Vorrang (Priorität +1), aber NUR wenn der Träger volle KP hat."
+    },
+    "Snow Warning": {
+      "de_name": "Schneeschauer",
+      "effect": "Lässt es beim Einwechseln 5 Runden schneien (8 mit Eisbrocken)."
+    },
+    "Drought": {
+      "de_name": "Dürre",
+      "effect": "Erzeugt beim Einwechseln 5 Runden harsches Sonnenlicht (8 mit Heißbrocken)."
+    },
+    "Drizzle": {
+      "de_name": "Niesel",
+      "effect": "Erzeugt beim Einwechseln 5 Runden Regen (8 mit Nassbrocken)."
+    },
+    "Sand Stream": {
+      "de_name": "Sandsturm",
+      "effect": "Erzeugt beim Einwechseln 5 Runden Sandsturm (8 mit Glättstein)."
+    },
+    "Blaze": {
+      "de_name": "Großbrand",
+      "effect": "Feuer-Attacken machen 50 % mehr Schaden, wenn die KP des Trägers ≤ 1/3 sind."
+    },
+    "Overgrow": {
+      "de_name": "Notdünger",
+      "effect": "Pflanzen-Attacken machen 50 % mehr Schaden bei KP ≤ 1/3."
+    },
+    "Solar Power": {
+      "de_name": "Solarkraft",
+      "effect": "Bei harschem Sonnenlicht: Spez.-Angriff ×1,5, aber 1/8 KP-Verlust pro Runde."
+    },
+    "Chlorophyll": {
+      "de_name": "Chlorophyll",
+      "effect": "Initiative ×2 bei harschem Sonnenlicht."
+    },
+    "Flash Fire": {
+      "de_name": "Feuerfänger",
+      "effect": "Immun gegen Feuer-Attacken; eigene Feuer-Attacken werden danach um 50 % stärker."
+    },
+    "Defiant": {
+      "de_name": "Siegeswille",
+      "effect": "Wenn ein Wert des Trägers durch den Gegner gesenkt wird: Angriff +2."
+    },
+    "Competitive": {
+      "de_name": "Unbeugsamkeit",
+      "effect": "Wenn ein Wert des Trägers durch den Gegner gesenkt wird: Spez.-Angriff +2."
+    },
+    "Inner Focus": {
+      "de_name": "Konzentrator",
+      "effect": "Immun gegen Zurückzucken; immun gegen Bedroher beim Einwechseln."
+    },
+    "Stamina": {
+      "de_name": "Zähigkeit",
+      "effect": "Verteidigung +1, wenn der Träger von einer Attacke getroffen wird."
+    },
+    "Berserk": {
+      "de_name": "Wutausbruch",
+      "effect": "Spez.-Angriff +1, wenn die KP des Trägers das erste Mal unter 1/2 fallen."
+    },
+    "Adaptability": {
+      "de_name": "Anpassung",
+      "effect": "STAB (Typenbonus) ist ×2 statt ×1,5."
+    },
+    "Pixilate": {
+      "de_name": "Feenschicht",
+      "effect": "Normal-Attacken des Trägers werden zu Fee-Attacken und +20 % Schaden."
+    },
+    "Liquid Voice": {
+      "de_name": "Plätscherstimme",
+      "effect": "Schall-Attacken (z. B. Hyperstimme) des Trägers werden zu Wasser-Attacken."
+    },
+    "Fairy Aura": {
+      "de_name": "Feenaura",
+      "effect": "Alle Fee-Attacken (auch gegnerische) machen 33 % mehr Schaden."
+    },
+    "No Guard": {
+      "de_name": "Schildlos",
+      "effect": "Alle Attacken treffen IMMER — vom Träger und gegen ihn."
+    },
+    "Rough Skin": {
+      "de_name": "Rauhaut",
+      "effect": "Kontaktangreifer verlieren 1/8 max. KP."
+    },
+    "Toxic Debris": {
+      "de_name": "Giftbelag",
+      "effect": "Legt eine Lage Giftspitzen auf die Gegnerseite, wenn der Träger physischen Schaden erleidet."
+    },
+    "Poison Touch": {
+      "de_name": "Giftgriff",
+      "effect": "30 % Chance, ein Ziel zu vergiften, das per Kontakt getroffen wird."
+    },
+    "Unburden": {
+      "de_name": "Entlastung",
+      "effect": "Initiative ×2, sobald das getragene Item verbraucht wurde."
+    },
+    "Mirror Armor": {
+      "de_name": "Spiegelrüstung",
+      "effect": "Werte-Senkungen werden auf den Verursacher reflektiert."
+    },
+    "Armor Tail": {
+      "de_name": "Schweifrüstung",
+      "effect": "Vorzugsangriffe gegen den Träger oder seine Verbündeten schlagen fehl."
+    },
+    "Queenly Majesty": {
+      "de_name": "Majestät",
+      "effect": "Vorzugsangriffe gegen den Träger oder seine Verbündeten schlagen fehl."
+    },
+    "Soundproof": {
+      "de_name": "Lärmschutz",
+      "effect": "Immun gegen alle Schall-Attacken (z. B. Hyperstimme, Lärmbringer)."
+    },
+    "Cursed Body": {
+      "de_name": "Tastfluch",
+      "effect": "30 % Chance, eine treffende Attacke des Gegners für 4 Runden zu sperren."
+    },
+    "Unnerve": {
+      "de_name": "Anspannung",
+      "effect": "Gegner können während des Kampfes keine Beeren essen."
+    },
+    "Hospitality": {
+      "de_name": "Gastlichkeit",
+      "effect": "Beim Einwechseln: Verbündeter heilt 1/4 max. KP."
+    },
+    "Flower Veil": {
+      "de_name": "Blütenhülle",
+      "effect": "Verbündete Pflanzen-Pokémon können keine Statusprobleme erleiden und keine Werte-Senkungen durch den Gegner."
+    },
+    "Stance Change": {
+      "de_name": "Taktikwechsel",
+      "effect": "Aegislash wechselt zwischen Schild- und Klingen-Form je nach eingesetzter Attacke (Angriff → Klinge, Königsschild → Schild)."
+    }
   }
- }
 }

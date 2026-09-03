@@ -44,6 +44,14 @@ RESOURCES_PATH = os.path.join(ROOT, "data", "champions_resources.json")
 ABILITY_OVERRIDES_PATH = os.path.join(ROOT, "data", "champions_ability_overrides.json")
 MEGA_ABILITY_PATH = os.path.join(ROOT, "data", "champions_mega_faehigkeiten.json")
 NAMEN_ENTSCHIEDEN_PATH = os.path.join(ROOT, "data", "champions_namen_entschieden.json")
+# Die drei Mechanik-Referenzen. Sie fuehren zu jedem Eintrag ein de_name-Feld;
+# write_names_de() nimmt daraus die Namen, die in der grossen Namenstabelle
+# fehlen (siehe Kommentar dort).
+REFERENZ_PFADE = {
+    "moves":     (os.path.join(ROOT, "data", "champions_moves_reference.json"), "moves"),
+    "items":     (os.path.join(ROOT, "data", "champions_items_reference.json"), "items"),
+    "abilities": (os.path.join(ROOT, "data", "champions_abilities_reference.json"), "abilities"),
+}
 OUT_PATH = os.path.join(ROOT, "data", "champions_pokedex.json")
 NAMES_DE_OUT = os.path.join(ROOT, "data", "champions_names_de.json")
 
@@ -494,6 +502,37 @@ def write_names_de(pokemon_names_de):
     except Exception as e:  # noqa: BLE001
         print(f"WARN: names_de — ability overrides unavailable ({e})")
     out["pokemon"] = {k: v for k, v in (pokemon_names_de or {}).items() if v}
+
+    # ── Luecken aus den Mechanik-Referenzen fuellen ───────────────────
+    #
+    # BEFUND (03.09.2026): die Oberflaeche liest AUSSCHLIESSLICH diese
+    # Tabelle. js/app-side-quest-pokedex.js deName() hat keinen Rueckfall
+    # auf das de_name-Feld der Referenzdateien — was hier fehlt, steht auf
+    # der deutschen Seite englisch da. Betroffen waren 23 Eintraege, davon
+    # 22 Gegenstaende, die in echten Teams vorkommen: alle dreizehn
+    # Mega-Steine (Gluraknit Y, Bisaflornit, Skelabranit ...), die
+    # Hibisbeere, die Schattenbrille, die Feendaune. Ein Spieler, der die
+    # Seite auf Deutsch liest, sah dort "Charizardite Y".
+    #
+    # Die Referenz ist hier die schwaechere Quelle und wird deshalb nur
+    # als LUECKENFUELLER benutzt: sie ueberschreibt nichts, was schon in
+    # der Tabelle steht. Die Entscheidungsdatei unten gewinnt weiterhin
+    # gegen beide.
+    for gruppe, (pfad, schluessel) in REFERENZ_PFADE.items():
+        try:
+            ref = json.load(open(pfad, encoding="utf-8")).get(schluessel) or {}
+        except Exception as e:  # noqa: BLE001
+            print(f"WARN: names_de — Referenz {gruppe} nicht lesbar ({e})")
+            continue
+        gefuellt = 0
+        for en, eintrag in ref.items():
+            de = (eintrag or {}).get("de_name")
+            if de and not out.setdefault(gruppe, {}).get(en):
+                out[gruppe][en] = de
+                gefuellt += 1
+        if gefuellt:
+            print(f"Aus Referenz {gruppe} nachgetragen: {gefuellt} deutsche Namen, "
+                  f"die in der Tabelle fehlten")
 
     # ── Von Hand entschiedene deutsche Namen, ganz zuletzt ────────────
     #

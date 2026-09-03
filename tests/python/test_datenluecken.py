@@ -317,12 +317,20 @@ def entschieden():
 
 
 def test_jeder_entschiedene_name_traegt_seine_quelle(entschieden):
-    """63 Faelle, jeder einzeln nachgeschlagen.
+    """Jeder Fall einzeln nachgeschlagen.
 
     Drei Agentenlaeufe hatten vier davon falsch gemeldet — Chilan Berry,
     Triple Axel, Weather Ball und Snow Warning. Deshalb steht hier je
     Name die Adresse, unter der er nachzulesen ist, und nicht bloss das
     Ergebnis.
+
+    Die Gesamtzahl stand hier bis zum 03.09.2026 als 63 im Test. Das war
+    die erste Runde (die 63 Widersprueche vom 31.08.); die zweite Runde
+    hat alle 204 de_name-Werte geprueft und 20 weitere korrigiert. Eine
+    fest eingetragene Zahl haette jede weitere Runde rot gemacht, ohne
+    dass etwas kaputt ist — deshalb wird jetzt gegen die Bilanz in
+    _meta gerechnet. Damit muss auch weiterhin jemand aufraeumen: wer
+    Namen ergaenzt, ohne die Bilanz nachzuziehen, faellt hier um.
     """
     gesamt = 0
     for topf, eintraege in entschieden["namen"].items():
@@ -333,7 +341,12 @@ def test_jeder_entschiedene_name_traegt_seine_quelle(entschieden):
             assert rec["quelle"] == "https://pokewiki.de/" + en.replace(" ", "_"), (
                 f"{topf}/{en}: die Quelle zeigt nicht auf den englischen Namen"
             )
-    assert gesamt == 63, f"{gesamt} statt 63 entschiedene Namen"
+    erste = entschieden["_meta"]["ergebnis"]["gesamt"]
+    zweite = entschieden["_meta"]["zweite_runde_2026_09_03"]["ergebnis"]["falsch"]
+    assert erste == 63, f"erste Runde soll 63 Faelle nennen, nennt {erste}"
+    assert gesamt == erste + zweite, (
+        f"{gesamt} entschiedene Namen, aber die Bilanz in _meta sagt "
+        f"{erste} + {zweite} = {erste + zweite}")
 
 
 def test_die_entschiedenen_namen_stehen_auch_in_den_daten(entschieden):

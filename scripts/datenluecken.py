@@ -109,6 +109,21 @@ def nutzungsdaten():
 # Deshalb wird hier kein Sieger ausgerufen. Die Luecke nennt beide
 # Werte und verlinkt die Nachschlageseite; entschieden wird im
 # Admin-Bereich, nicht hier.
+#
+# BLINDER FLECK, benannt am 03.09.2026: `if not a or not b: continue`
+# ueberspringt jeden Namen, den nur EINE Seite fuehrt. Genau davon gab
+# es 23 — Namen, die nur in einer Referenzdatei standen und deshalb auf
+# der deutschen Seite englisch erschienen (alle dreizehn Mega-Steine,
+# die Hibisbeere, die Schattenbrille). Ein Widerspruch entsteht eben
+# nur, wenn zwei Quellen etwas sagen.
+#
+# Der Fleck bleibt hier absichtlich stehen: dieser Melder beantwortet
+# die Frage "welcher von zwei Namen stimmt", und ein fehlender Name ist
+# keine solche Frage. Geschlossen wird die Luecke an der Wurzel —
+# build_champions_pokedex.write_names_de() traegt fehlende Namen aus
+# den Referenzen nach — und bewacht von
+# tests/python/test_deutsche_namen_sichtbar.py, das in CI umfaellt,
+# sobald wieder ein Name nur in der Referenz steht.
 NAMENSQUELLEN = [
     ("champions_moves_reference.json", "moves", "moves", "Attacke"),
     ("champions_items_reference.json", "items", "items", "Item"),

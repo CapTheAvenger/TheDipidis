@@ -1,275 +1,275 @@
 {
- "_meta": {
-  "version": 2,
-  "format": "Pokémon Champions · Regulation M-A (Apr–Jun 2026)",
-  "description": "Verifizierte Mechanik-Referenz für Items, die häufig in Champions-VGC-Teams getragen werden. v2 (2026-06-13): erweitert um alle Mega-Steine, die im aktuellen Top-20-Champions-Pool auftauchen (Aerodactylite, Chandelurite, Delphoxite, Drampanite, Floettite, Froslassite, Gengarite, Glimmoranite, Golurkite, Lucarionite, Venusaurite — Champions erweitert Mega-Evolution auf viele Pokémon, die in den Mainline-Spielen keine haben). Glimmorite (das frühere Trap-Item) wurde entfernt: Glimmora HAT in Champions eine Mega-Form (Item-Name: Glimmoranite).",
-  "lookup_keys": "Sowohl der englische Showdown-Name (key) als auch der deutsche Lokalisationsname (de_name) sind durchsuchbar; case-insensitive. Mega-Steine sind alle mit 'Mega-Stein:' im effect-Feld markiert — der Validator nutzt diese Konvention, um zu erkennen, wann ein Pokémon legitim mega-evolvieren kann.",
-  "de_namen_geprueft": "Die deutschen Namen sind am 31.08.2026 einzeln gegen pokewiki.de geprueft worden; Herkunft je Name: data/champions_namen_entschieden.json."
- },
- "items": {
-  "Charizardite Y": {
-   "de_name": "Glurakit Y",
-   "effect": "Mega-Stein: Charizard wird beim Einsatz zu Mega-Glurak Y mit Fähigkeit Dürre (erzeugt 5 Runden harsches Sonnenlicht beim Erscheinen)."
-  },
-  "Charizardite X": {
-   "de_name": "Glurakit X",
-   "effect": "Mega-Stein: Charizard wird zu Mega-Glurak X (Typ Feuer/Drache, Fähigkeit Felsbrecher)."
-  },
-  "Venusaurite": {
-   "de_name": "Bisaflorit",
-   "effect": "Mega-Stein: Bisaflor wird zu Mega-Bisaflor (Fähigkeit Dickes Fett)."
-  },
-  "Floettite": {
-   "de_name": "Florgessit",
-   "effect": "Mega-Stein: Floette-Eternal wird zu Mega-Florges (massiver Spez.-Angriff-Boost, Fee/Fee)."
-  },
-  "Lucarionite": {
-   "de_name": "Lucarionit",
-   "effect": "Mega-Stein: Lucario wird zu Mega-Lucario (Fähigkeit Adaptivität — STAB ×2 statt ×1,5)."
-  },
-  "Gengarite": {
-   "de_name": "Gengarit",
-   "effect": "Mega-Stein: Gengar wird zu Mega-Gengar (Fähigkeit Schattenraub — sperrt Wechsel des Gegners)."
-  },
-  "Aerodactylite": {
-   "de_name": "Aerodactylit",
-   "effect": "Mega-Stein: Aerodactyl wird zu Mega-Aerodactyl (Fähigkeit Steinhaupt — Rückstoßresistenz)."
-  },
-  "Chandelurite": {
-   "de_name": "Lichtelit",
-   "effect": "Mega-Stein (Champions-exklusiv): Chandelure (Skelabra) wird zu Mega-Skelabra."
-  },
-  "Delphoxite": {
-   "de_name": "Fennexit",
-   "effect": "Mega-Stein (Champions-exklusiv): Delphox (Fennexis) wird zu Mega-Fennexis."
-  },
-  "Drampanite": {
-   "de_name": "Trampanit",
-   "effect": "Mega-Stein (Champions-exklusiv): Drampa (Trampelle) wird zu Mega-Trampelle."
-  },
-  "Froslassite": {
-   "de_name": "Frosdedjeit",
-   "effect": "Mega-Stein (Champions-exklusiv): Froslass (Frosdedje) wird zu Mega-Frosdedje."
-  },
-  "Glimmoranite": {
-   "de_name": "Mortipotit",
-   "effect": "Mega-Stein (Champions-exklusiv): Glimmora (Mortipot) wird zu Mega-Mortipot."
-  },
-  "Golurkite": {
-   "de_name": "Golgantesit",
-   "effect": "Mega-Stein (Champions-exklusiv): Golurk (Golgantes) wird zu Mega-Golgantes."
-  },
-  "Life Orb": {
-   "de_name": "Leben-Orb",
-   "effect": "Erhöht den Schaden aller Angriffe um 30 %, kostet aber 1/10 max. KP pro erfolgreichem Treffer."
-  },
-  "Choice Band": {
-   "de_name": "Wahlband",
-   "effect": "Physischer Angriff ×1,5, dafür kann nur die zuerst eingesetzte Attacke verwendet werden bis zum Auswechseln."
-  },
-  "Choice Specs": {
-   "de_name": "Wahlglas",
-   "effect": "Spez.-Angriff ×1,5, dafür auf eine Attacke fixiert bis Auswechsel."
-  },
-  "Choice Scarf": {
-   "de_name": "Wahlschal",
-   "effect": "Initiative ×1,5, dafür auf eine Attacke fixiert bis Auswechsel."
-  },
-  "Assault Vest": {
-   "de_name": "Offensivweste",
-   "effect": "Spez.-Verteidigung ×1,5, dafür können keine Status-Attacken eingesetzt werden."
-  },
-  "Focus Sash": {
-   "de_name": "Fokusgurt",
-   "effect": "Überlebt mit vollen KP einen ein-treffenden KO-Hit mit 1 KP. Einmalig pro Kampf, verbraucht sich."
-  },
-  "Leftovers": {
-   "de_name": "Überreste",
-   "effect": "Heilt am Ende jeder Runde 1/16 max. KP."
-  },
-  "Black Sludge": {
-   "de_name": "Giftschleim",
-   "effect": "Heilt 1/16 max. KP/Runde bei Gift-Typen; 1/8 Schaden/Runde bei allen anderen."
-  },
-  "Rocky Helmet": {
-   "de_name": "Beulenhelm",
-   "effect": "Kontaktangreifer verlieren 1/6 ihrer max. KP."
-  },
-  "Eject Pack": {
-   "de_name": "Schleudermodul",
-   "effect": "Wechselt den Träger automatisch aus, sobald einer seiner Werte gesenkt wird. Einmalig."
-  },
-  "Eject Button": {
-   "de_name": "Fluchtknopf",
-   "effect": "Wechselt den Träger automatisch aus, wenn er von einer Attacke getroffen wird. Einmalig."
-  },
-  "Weakness Policy": {
-   "de_name": "Schwächenschutz",
-   "effect": "Bei einem super-effektiven Treffer: Angriff und Spez.-Angriff +2. Einmalig."
-  },
-  "Booster Energy": {
-   "de_name": "Energiebooster",
-   "effect": "Einmalig: aktiviert Quark-Trieb/Protosynthese außerhalb von Elektrofeld/Sonne und boostet den höchsten Wert um 30 %."
-  },
-  "Sitrus Berry": {
-   "de_name": "Tsitrubeere",
-   "effect": "Stellt 25 % der max. KP wieder her, wenn die KP unter 50 % fallen. Einmalig."
-  },
-  "Lum Berry": {
-   "de_name": "Prunusbeere",
-   "effect": "Heilt JEDEN Status (Brand, Gift, Paralyse, Schlaf, Frost, Verwirrung) sofort. Einmalig."
-  },
-  "Mental Herb": {
-   "de_name": "Mentalkraut",
-   "effect": "Einmalig: heilt Verhöhner/Anziehung/Zugabe/Folterknecht/Heilblockade sofort."
-  },
-  "White Herb": {
-   "de_name": "Schlohkraut",
-   "effect": "Einmalig: stellt alle gesenkten Werte des Trägers wieder her."
-  },
-  "Power Herb": {
-   "de_name": "Energiekraut",
-   "effect": "Einmalig: erlaubt zweirundige Attacken (Solarstrahl, Phantomkraft etc.) ohne Aufladerunde."
-  },
-  "Mystic Water": {
-   "de_name": "Zauberwasser",
-   "effect": "Wasser-Attacken des Trägers +20 % Schaden."
-  },
-  "Magnet": {
-   "de_name": "Magnet",
-   "effect": "Elektro-Attacken des Trägers +20 % Schaden."
-  },
-  "Never-Melt Ice": {
-   "de_name": "Ewiges Eis",
-   "effect": "Eis-Attacken des Trägers +20 % Schaden."
-  },
-  "Hard Stone": {
-   "de_name": "Granitstein",
-   "effect": "Gestein-Attacken des Trägers +20 % Schaden."
-  },
-  "Spell Tag": {
-   "de_name": "Bannsticker",
-   "effect": "Geist-Attacken des Trägers +20 % Schaden."
-  },
-  "Dragon Fang": {
-   "de_name": "Drachenzahn",
-   "effect": "Drachen-Attacken des Trägers +20 % Schaden."
-  },
-  "Sharp Beak": {
-   "de_name": "Spitzer Schnabel",
-   "effect": "Flug-Attacken des Trägers +20 % Schaden."
-  },
-  "Black Glasses": {
-   "de_name": "Schwarzbrille",
-   "effect": "Unlicht-Attacken des Trägers +20 % Schaden."
-  },
-  "Fairy Feather": {
-   "de_name": "Feenfeder",
-   "effect": "Fee-Attacken des Trägers +20 % Schaden."
-  },
-  "Light Clay": {
-   "de_name": "Lichtlehm",
-   "effect": "Verlängert Lichtschild / Reflektor / Auroraschleier von 5 auf 8 Runden."
-  },
-  "Terrain Extender": {
-   "de_name": "Lauffeld",
-   "effect": "Verlängert das vom Träger gesetzte Terrain (Elektro/Gras/Psycho/Nebel) von 5 auf 8 Runden."
-  },
-  "Heat Rock": {
-   "de_name": "Heißbrocken",
-   "effect": "Verlängert Sonnentag des Trägers von 5 auf 8 Runden."
-  },
-  "Damp Rock": {
-   "de_name": "Nassbrocken",
-   "effect": "Verlängert Regentanz des Trägers von 5 auf 8 Runden."
-  },
-  "Smooth Rock": {
-   "de_name": "Glattbrocken",
-   "effect": "Verlängert Sandsturm des Trägers von 5 auf 8 Runden."
-  },
-  "Icy Rock": {
-   "de_name": "Eisbrocken",
-   "effect": "Verlängert Schneelandschaft des Trägers von 5 auf 8 Runden."
-  },
-  "Toxic Orb": {
-   "de_name": "Toxik-Orb",
-   "effect": "Vergiftet den Träger schwer am Rundenende (für Setups mit Heilfluch/Guts/etc.)."
-  },
-  "Flame Orb": {
-   "de_name": "Heiß-Orb",
-   "effect": "Verbrennt den Träger am Rundenende (für Guts-/Heilfluch-Setups)."
-  },
-  "Roseli Berry": {
-   "de_name": "Rosolinbeere",
-   "effect": "Halbiert den Schaden eines super-effektiven Fee-Treffers. Einmalig."
-  },
-  "Occa Berry": {
-   "de_name": "Koakobeere",
-   "effect": "Halbiert den Schaden eines super-effektiven Feuer-Treffers. Einmalig."
-  },
-  "Passho Berry": {
-   "de_name": "Foepasbeere",
-   "effect": "Halbiert super-effektiven Wasser-Treffer. Einmalig."
-  },
-  "Wacan Berry": {
-   "de_name": "Kerzalbeere",
-   "effect": "Halbiert super-effektiven Elektro-Treffer. Einmalig."
-  },
-  "Rindo Berry": {
-   "de_name": "Grindobeere",
-   "effect": "Halbiert super-effektiven Pflanzen-Treffer. Einmalig."
-  },
-  "Yache Berry": {
-   "de_name": "Kiroyabeere",
-   "effect": "Halbiert super-effektiven Eis-Treffer. Einmalig."
-  },
-  "Chople Berry": {
-   "de_name": "Rospelbeere",
-   "effect": "Halbiert super-effektiven Kampf-Treffer. Einmalig."
-  },
-  "Kebia Berry": {
-   "de_name": "Grarzbeere",
-   "effect": "Halbiert super-effektiven Gift-Treffer. Einmalig."
-  },
-  "Shuca Berry": {
-   "de_name": "Schukebeere",
-   "effect": "Halbiert super-effektiven Boden-Treffer. Einmalig."
-  },
-  "Coba Berry": {
-   "de_name": "Kobabeere",
-   "effect": "Halbiert super-effektiven Flug-Treffer. Einmalig."
-  },
-  "Payapa Berry": {
-   "de_name": "Pyapabeere",
-   "effect": "Halbiert super-effektiven Psycho-Treffer. Einmalig."
-  },
-  "Tanga Berry": {
-   "de_name": "Tanigabeere",
-   "effect": "Halbiert super-effektiven Käfer-Treffer. Einmalig."
-  },
-  "Charti Berry": {
-   "de_name": "Chiaribeere",
-   "effect": "Halbiert super-effektiven Gestein-Treffer. Einmalig."
-  },
-  "Kasib Berry": {
-   "de_name": "Zitarzbeere",
-   "effect": "Halbiert super-effektiven Geist-Treffer. Einmalig."
-  },
-  "Haban Berry": {
-   "de_name": "Terirobeere",
-   "effect": "Halbiert super-effektiven Drachen-Treffer. Einmalig."
-  },
-  "Colbur Berry": {
-   "de_name": "Burleobeere",
-   "effect": "Halbiert super-effektiven Unlicht-Treffer. Einmalig."
-  },
-  "Babiri Berry": {
-   "de_name": "Babiribeere",
-   "effect": "Halbiert super-effektiven Stahl-Treffer. Einmalig."
-  },
-  "Chilan Berry": {
-   "de_name": "Latchibeere",
-   "effect": "Halbiert den Schaden EINER Normal-Attacke (nicht nur super-effektiv). Einmalig."
+  "_meta": {
+    "version": 2,
+    "format": "Pokémon Champions · Regulation M-A (Apr–Jun 2026)",
+    "description": "Verifizierte Mechanik-Referenz für Items, die häufig in Champions-VGC-Teams getragen werden. v2 (2026-06-13): erweitert um alle Mega-Steine, die im aktuellen Top-20-Champions-Pool auftauchen (Aerodactylite, Chandelurite, Delphoxite, Drampanite, Floettite, Froslassite, Gengarite, Glimmoranite, Golurkite, Lucarionite, Venusaurite — Champions erweitert Mega-Evolution auf viele Pokémon, die in den Mainline-Spielen keine haben). Glimmorite (das frühere Trap-Item) wurde entfernt: Glimmora HAT in Champions eine Mega-Form (Item-Name: Glimmoranite).",
+    "lookup_keys": "Sowohl der englische Showdown-Name (key) als auch der deutsche Lokalisationsname (de_name) sind durchsuchbar; case-insensitive. Mega-Steine sind alle mit 'Mega-Stein:' im effect-Feld markiert — der Validator nutzt diese Konvention, um zu erkennen, wann ein Pokémon legitim mega-evolvieren kann.",
+    "de_namen_geprueft": "Am 03.09.2026 wurde JEDER de_name dieser Datei gegen die PokeWiki-Infobox geprueft (Name_de/Name_en muessen zum gesuchten englischen Namen passen), nicht nur die Streitfaelle vom 31.08. Ergebnis dieses Durchgangs steht in data/champions_namen_entschieden.json."
+  },
+  "items": {
+    "Charizardite Y": {
+      "de_name": "Gluraknit Y",
+      "effect": "Mega-Stein: Charizard wird beim Einsatz zu Mega-Glurak Y mit Fähigkeit Dürre (erzeugt 5 Runden harsches Sonnenlicht beim Erscheinen)."
+    },
+    "Charizardite X": {
+      "de_name": "Gluraknit X",
+      "effect": "Mega-Stein: Charizard wird zu Mega-Glurak X (Typ Feuer/Drache, Fähigkeit Felsbrecher)."
+    },
+    "Venusaurite": {
+      "de_name": "Bisaflornit",
+      "effect": "Mega-Stein: Bisaflor wird zu Mega-Bisaflor (Fähigkeit Dickes Fett)."
+    },
+    "Floettite": {
+      "de_name": "Floetteonit",
+      "effect": "Mega-Stein: Floette-Eternal wird zu Mega-Florges (massiver Spez.-Angriff-Boost, Fee/Fee)."
+    },
+    "Lucarionite": {
+      "de_name": "Lucarionit",
+      "effect": "Mega-Stein: Lucario wird zu Mega-Lucario (Fähigkeit Adaptivität — STAB ×2 statt ×1,5)."
+    },
+    "Gengarite": {
+      "de_name": "Gengarnit",
+      "effect": "Mega-Stein: Gengar wird zu Mega-Gengar (Fähigkeit Schattenraub — sperrt Wechsel des Gegners)."
+    },
+    "Aerodactylite": {
+      "de_name": "Aerodactylonit",
+      "effect": "Mega-Stein: Aerodactyl wird zu Mega-Aerodactyl (Fähigkeit Steinhaupt — Rückstoßresistenz)."
+    },
+    "Chandelurite": {
+      "de_name": "Skelabranit",
+      "effect": "Mega-Stein (Champions-exklusiv): Chandelure (Skelabra) wird zu Mega-Skelabra."
+    },
+    "Delphoxite": {
+      "de_name": "Fennexisnit",
+      "effect": "Mega-Stein (Champions-exklusiv): Delphox (Fennexis) wird zu Mega-Fennexis."
+    },
+    "Drampanite": {
+      "de_name": "Sen-Longnit",
+      "effect": "Mega-Stein (Champions-exklusiv): Drampa (Trampelle) wird zu Mega-Trampelle."
+    },
+    "Froslassite": {
+      "de_name": "Frosdedjenit",
+      "effect": "Mega-Stein (Champions-exklusiv): Froslass (Frosdedje) wird zu Mega-Frosdedje."
+    },
+    "Glimmoranite": {
+      "de_name": "Lumifloranit",
+      "effect": "Mega-Stein (Champions-exklusiv): Glimmora (Mortipot) wird zu Mega-Mortipot."
+    },
+    "Golurkite": {
+      "de_name": "Golgantesnit",
+      "effect": "Mega-Stein (Champions-exklusiv): Golurk (Golgantes) wird zu Mega-Golgantes."
+    },
+    "Life Orb": {
+      "de_name": "Leben-Orb",
+      "effect": "Erhöht den Schaden aller Angriffe um 30 %, kostet aber 1/10 max. KP pro erfolgreichem Treffer."
+    },
+    "Choice Band": {
+      "de_name": "Wahlband",
+      "effect": "Physischer Angriff ×1,5, dafür kann nur die zuerst eingesetzte Attacke verwendet werden bis zum Auswechseln."
+    },
+    "Choice Specs": {
+      "de_name": "Wahlbrille",
+      "effect": "Spez.-Angriff ×1,5, dafür auf eine Attacke fixiert bis Auswechsel."
+    },
+    "Choice Scarf": {
+      "de_name": "Wahlschal",
+      "effect": "Initiative ×1,5, dafür auf eine Attacke fixiert bis Auswechsel."
+    },
+    "Assault Vest": {
+      "de_name": "Offensivweste",
+      "effect": "Spez.-Verteidigung ×1,5, dafür können keine Status-Attacken eingesetzt werden."
+    },
+    "Focus Sash": {
+      "de_name": "Fokusgurt",
+      "effect": "Überlebt mit vollen KP einen ein-treffenden KO-Hit mit 1 KP. Einmalig pro Kampf, verbraucht sich."
+    },
+    "Leftovers": {
+      "de_name": "Überreste",
+      "effect": "Heilt am Ende jeder Runde 1/16 max. KP."
+    },
+    "Black Sludge": {
+      "de_name": "Giftschleim",
+      "effect": "Heilt 1/16 max. KP/Runde bei Gift-Typen; 1/8 Schaden/Runde bei allen anderen."
+    },
+    "Rocky Helmet": {
+      "de_name": "Beulenhelm",
+      "effect": "Kontaktangreifer verlieren 1/6 ihrer max. KP."
+    },
+    "Eject Pack": {
+      "de_name": "Fluchttasche",
+      "effect": "Wechselt den Träger automatisch aus, sobald einer seiner Werte gesenkt wird. Einmalig."
+    },
+    "Eject Button": {
+      "de_name": "Fluchtknopf",
+      "effect": "Wechselt den Träger automatisch aus, wenn er von einer Attacke getroffen wird. Einmalig."
+    },
+    "Weakness Policy": {
+      "de_name": "Schwächenschutz",
+      "effect": "Bei einem super-effektiven Treffer: Angriff und Spez.-Angriff +2. Einmalig."
+    },
+    "Booster Energy": {
+      "de_name": "Energiekapsel",
+      "effect": "Einmalig: aktiviert Quark-Trieb/Protosynthese außerhalb von Elektrofeld/Sonne und boostet den höchsten Wert um 30 %."
+    },
+    "Sitrus Berry": {
+      "de_name": "Tsitrubeere",
+      "effect": "Stellt 25 % der max. KP wieder her, wenn die KP unter 50 % fallen. Einmalig."
+    },
+    "Lum Berry": {
+      "de_name": "Prunusbeere",
+      "effect": "Heilt JEDEN Status (Brand, Gift, Paralyse, Schlaf, Frost, Verwirrung) sofort. Einmalig."
+    },
+    "Mental Herb": {
+      "de_name": "Mentalkraut",
+      "effect": "Einmalig: heilt Verhöhner/Anziehung/Zugabe/Folterknecht/Heilblockade sofort."
+    },
+    "White Herb": {
+      "de_name": "Schlohkraut",
+      "effect": "Einmalig: stellt alle gesenkten Werte des Trägers wieder her."
+    },
+    "Power Herb": {
+      "de_name": "Energiekraut",
+      "effect": "Einmalig: erlaubt zweirundige Attacken (Solarstrahl, Phantomkraft etc.) ohne Aufladerunde."
+    },
+    "Mystic Water": {
+      "de_name": "Zauberwasser",
+      "effect": "Wasser-Attacken des Trägers +20 % Schaden."
+    },
+    "Magnet": {
+      "de_name": "Magnet",
+      "effect": "Elektro-Attacken des Trägers +20 % Schaden."
+    },
+    "Never-Melt Ice": {
+      "de_name": "Ewiges Eis",
+      "effect": "Eis-Attacken des Trägers +20 % Schaden."
+    },
+    "Hard Stone": {
+      "de_name": "Granitstein",
+      "effect": "Gestein-Attacken des Trägers +20 % Schaden."
+    },
+    "Spell Tag": {
+      "de_name": "Bannsticker",
+      "effect": "Geist-Attacken des Trägers +20 % Schaden."
+    },
+    "Dragon Fang": {
+      "de_name": "Drachenzahn",
+      "effect": "Drachen-Attacken des Trägers +20 % Schaden."
+    },
+    "Sharp Beak": {
+      "de_name": "Spitzer Schnabel",
+      "effect": "Flug-Attacken des Trägers +20 % Schaden."
+    },
+    "Black Glasses": {
+      "de_name": "Schattenbrille",
+      "effect": "Unlicht-Attacken des Trägers +20 % Schaden."
+    },
+    "Fairy Feather": {
+      "de_name": "Feendaune",
+      "effect": "Fee-Attacken des Trägers +20 % Schaden."
+    },
+    "Light Clay": {
+      "de_name": "Lichtlehm",
+      "effect": "Verlängert Lichtschild / Reflektor / Auroraschleier von 5 auf 8 Runden."
+    },
+    "Terrain Extender": {
+      "de_name": "Feldbeschichtung",
+      "effect": "Verlängert das vom Träger gesetzte Terrain (Elektro/Gras/Psycho/Nebel) von 5 auf 8 Runden."
+    },
+    "Heat Rock": {
+      "de_name": "Heißbrocken",
+      "effect": "Verlängert Sonnentag des Trägers von 5 auf 8 Runden."
+    },
+    "Damp Rock": {
+      "de_name": "Nassbrocken",
+      "effect": "Verlängert Regentanz des Trägers von 5 auf 8 Runden."
+    },
+    "Smooth Rock": {
+      "de_name": "Glattbrocken",
+      "effect": "Verlängert Sandsturm des Trägers von 5 auf 8 Runden."
+    },
+    "Icy Rock": {
+      "de_name": "Eisbrocken",
+      "effect": "Verlängert Schneelandschaft des Trägers von 5 auf 8 Runden."
+    },
+    "Toxic Orb": {
+      "de_name": "Toxik-Orb",
+      "effect": "Vergiftet den Träger schwer am Rundenende (für Setups mit Heilfluch/Guts/etc.)."
+    },
+    "Flame Orb": {
+      "de_name": "Heiß-Orb",
+      "effect": "Verbrennt den Träger am Rundenende (für Guts-/Heilfluch-Setups)."
+    },
+    "Roseli Berry": {
+      "de_name": "Hibisbeere",
+      "effect": "Halbiert den Schaden eines super-effektiven Fee-Treffers. Einmalig."
+    },
+    "Occa Berry": {
+      "de_name": "Koakobeere",
+      "effect": "Halbiert den Schaden eines super-effektiven Feuer-Treffers. Einmalig."
+    },
+    "Passho Berry": {
+      "de_name": "Foepasbeere",
+      "effect": "Halbiert super-effektiven Wasser-Treffer. Einmalig."
+    },
+    "Wacan Berry": {
+      "de_name": "Kerzalbeere",
+      "effect": "Halbiert super-effektiven Elektro-Treffer. Einmalig."
+    },
+    "Rindo Berry": {
+      "de_name": "Grindobeere",
+      "effect": "Halbiert super-effektiven Pflanzen-Treffer. Einmalig."
+    },
+    "Yache Berry": {
+      "de_name": "Kiroyabeere",
+      "effect": "Halbiert super-effektiven Eis-Treffer. Einmalig."
+    },
+    "Chople Berry": {
+      "de_name": "Rospelbeere",
+      "effect": "Halbiert super-effektiven Kampf-Treffer. Einmalig."
+    },
+    "Kebia Berry": {
+      "de_name": "Grarzbeere",
+      "effect": "Halbiert super-effektiven Gift-Treffer. Einmalig."
+    },
+    "Shuca Berry": {
+      "de_name": "Schukebeere",
+      "effect": "Halbiert super-effektiven Boden-Treffer. Einmalig."
+    },
+    "Coba Berry": {
+      "de_name": "Kobabeere",
+      "effect": "Halbiert super-effektiven Flug-Treffer. Einmalig."
+    },
+    "Payapa Berry": {
+      "de_name": "Pyapabeere",
+      "effect": "Halbiert super-effektiven Psycho-Treffer. Einmalig."
+    },
+    "Tanga Berry": {
+      "de_name": "Tanigabeere",
+      "effect": "Halbiert super-effektiven Käfer-Treffer. Einmalig."
+    },
+    "Charti Berry": {
+      "de_name": "Chiaribeere",
+      "effect": "Halbiert super-effektiven Gestein-Treffer. Einmalig."
+    },
+    "Kasib Berry": {
+      "de_name": "Zitarzbeere",
+      "effect": "Halbiert super-effektiven Geist-Treffer. Einmalig."
+    },
+    "Haban Berry": {
+      "de_name": "Terirobeere",
+      "effect": "Halbiert super-effektiven Drachen-Treffer. Einmalig."
+    },
+    "Colbur Berry": {
+      "de_name": "Burleobeere",
+      "effect": "Halbiert super-effektiven Unlicht-Treffer. Einmalig."
+    },
+    "Babiri Berry": {
+      "de_name": "Babiribeere",
+      "effect": "Halbiert super-effektiven Stahl-Treffer. Einmalig."
+    },
+    "Chilan Berry": {
+      "de_name": "Latchibeere",
+      "effect": "Halbiert den Schaden EINER Normal-Attacke (nicht nur super-effektiv). Einmalig."
+    }
   }
- }
 }

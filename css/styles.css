@@ -10871,6 +10871,21 @@ body.arc-open { overflow: hidden; }
     gap: 10px;
     align-items: start;
 }
+/* DIE KARTE DARF NICHT BREITER WERDEN ALS IHRE SPALTE.
+   Eine Gitterzelle steht ohne diese Zeile auf `min-width: auto` und
+   schrumpft nicht unter ihren Mindestinhalt. Der Mindestinhalt der Karte
+   ist die Matchup-Tabelle mit ihrer `min-width: 433px`. Auf einem Telefon
+   mit 440 px Fensterbreite ist die Spalte aber nur 412 px breit: die
+   Karte wurde 435 px breit, ragte 23 px nach rechts hinaus, und
+   `.ds-sec { overflow-x: hidden }` schnitt sie dort ab — ohne Balken,
+   ohne Rollweg, unwiederbringlich. Abgeschnitten waren die letzte
+   Tabellenspalte und der rechte Rand der Kacheln.
+   Gemessen am 03.09.2026 auf 440 x 956 (iPhone 17 Pro Max): Karte 435 px
+   in einer 412-px-Spalte, rechter Rand 9 px hinter dem Fensterrand.
+   Mit `min-width: 0` ist die Karte 412 px breit und steht vollstaendig
+   im Bild. Was dann noch nicht passt, faengt die Tabellenhuelle mit
+   ihrem eigenen Rollweg ab — sichtbar statt weggeschnitten. */
+.arc-inline-list > * { min-width: 0; }
 
 @media (max-width: 860px) {
     .arc-inline-list { grid-template-columns: 1fr; }
@@ -11464,10 +11479,44 @@ body.arc-open { overflow: hidden; }
     #currentMetaContent .arc-mu-table th,
     #archetypeCardOverlay .arc-mu-table th { font-size: 0.7rem; }
     .arc-mu-note, .arc-empty { font-size: 0.72rem; }
+    /* DER SPALTENPLAN FUER DAS TELEFON. Er muss in die Karte passen,
+       nicht in irgendeine Wunschbreite.
+       Bis zum 03.09.2026 stand hier `width: 62px` fuer die WR-Spalte und
+       `n+3 { width: 36px }` OHNE obere Grenze. Zwei Fehler in vier
+       Zeilen:
+       (a) `n+3` nahm den beiden Praesenzspalten die 58 und 66 px wieder
+           weg, die ihnen die Grundregeln geben. Die Summe fiel auf
+           372 px, `min-width: 433px` zog die Tabelle wieder auseinander,
+           und alle acht Spalten wuchsen anteilig auf 42 px — zu wenig
+           fuer die Ueberschriften: "MAJOR-WR" braucht 46 px,
+           "MAJOR-MATCHES" 57. Beide standen ueber ihrer Zelle.
+       (b) Die Summe 433 war ohnehin groesser als die Karte. Auf einem
+           440-px-Telefon ist die Karte 412 px breit (siehe
+           `.arc-inline-list > *`), die Tabelle rollte also um 23 px —
+           die letzte Spalte lag ausserhalb.
+       Der Plan hier summiert auf 400 px und laesst der Tabelle ihre
+       Mindestbreite los; gemessen ergibt das 89 + 57 + 4x35 + 59 + 67
+       = 412, genau die Karte. Rollweg 0, kein Kopf und keine Zelle mehr
+       ueber ihrer Spalte, Deckname weiter in hoechstens drei Zeilen.
+       Gemeldet mit Bild vom iPhone 17 Pro Max: "man sieht nicht alle
+       Infos in der Tier List auf einen Blick". */
+    #currentMetaContent .arc-card .mobile-table-scroll .arc-mu-table { min-width: 0; }
+    #currentMetaContent .arc-mu-table th:nth-child(1),
+    #currentMetaContent .arc-mu-table td:nth-child(1) { width: 88px; }
     #currentMetaContent .arc-mu-table th:nth-child(2),
-    #currentMetaContent .arc-mu-table td:nth-child(2) { width: 62px; }
-    #currentMetaContent .arc-mu-table th:nth-child(n+3),
-    #currentMetaContent .arc-mu-table td:nth-child(n+3) { width: 36px; }
+    #currentMetaContent .arc-mu-table td:nth-child(2) { width: 56px; }
+    #currentMetaContent .arc-mu-table th:nth-child(n+3):nth-child(-n+6),
+    #currentMetaContent .arc-mu-table td:nth-child(n+3):nth-child(-n+6) { width: 34px; }
+    #currentMetaContent .arc-mu-table th:nth-child(7),
+    #currentMetaContent .arc-mu-table td:nth-child(7) { width: 58px; }
+    #currentMetaContent .arc-mu-table th:nth-child(8),
+    #currentMetaContent .arc-mu-table td:nth-child(8) { width: 66px; }
+    /* 8 -> 6 px links und rechts: die zwei Pixel je Seite sind genau
+       das, was die beiden Praesenzueberschriften ueber ihrer Zelle
+       fehlten. Der Schriftboden aus tests/unit/test-schriftboden.js
+       bleibt unberuehrt — kleiner gesetzt wird hier nichts. */
+    #currentMetaContent .arc-mu-table th { padding-left: 6px; padding-right: 6px; }
+    #currentMetaContent .arc-mu-table td { padding-left: 6px; padding-right: 6px; }
 }
 
 /* Auf sehr schmalen Geraeten holt der Innenabstand die letzten Pixel.

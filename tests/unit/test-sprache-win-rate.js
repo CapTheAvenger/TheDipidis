@@ -96,13 +96,19 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {
             || /arc\.muLegende/.test(I18N);
         assert.ok(legende,
             'die Legende unter der Matchup-Tabelle ist weg. Dann stehen dort '
-            + 'nur noch Kuerzel (WR, M, Major-P), die nichts aufloest');
+            + 'nur noch Kuerzel (WR, M, Major-WR), die nichts aufloest');
+        /* "Major-P" stand hier bis zum 03.09.2026 und wurde nach
+           "Matchpunkte" aufgeloest. Die Spalte rechnet seit dem die
+           gewoehnliche Win Rate und heisst "Major-WR"; aufzuloesen ist
+           jetzt, WORAUF sie sich bezieht (Praesenzturniere) und WIE sie
+           rechnet (entschiedene Partien). */
         for (const [kuerzel, wort] of [['WR', 'Win Rate'], ['M', 'Matches'],
-                                        ['Major-P', 'Matchpunkte']]) {
+                                        ['Major-WR', 'Präsenzturnieren'],
+                                        ['Major-Matches', 'Partien']]) {
             const zeilen = [...I18N.matchAll(/'arc\.muLegende':\s*'([^']*)'/g)]
                 .map(m => m[1]);
             assert.ok(zeilen.length >= 1, 'arc.muLegende fehlt in i18n.js');
-            const de_zeile = zeilen.find(z => /Matchpunkte/.test(z)) || zeilen[0];
+            const de_zeile = zeilen.find(z => /Siege/.test(z)) || zeilen[0];
             assert.ok(de_zeile.includes(kuerzel) && de_zeile.includes(wort),
                 `die Legende loest "${kuerzel}" nicht mehr nach "${wort}" auf`);
         }

@@ -87,8 +87,44 @@
                     const anzahl = parseInt(r.vs_count || '0', 10) || 0;
                     const punkte = parseLocaleNumber(r.vs_win_pct || '0', 0);
                     if (!anzahl) continue;
+                    /* DIE BILANZ JE PAARUNG (03.09.2026).
+                       Bis hierher stand in der Major-Spalte `punkte` — die
+                       Spalte vs_win_pct der Labs-Datei. Die heisst dort
+                       "Win %", ist aber nachweislich die Matchpunktquote
+                       (3S+U)/(3M): drei Paarungen aus dem Worlds-Lauf
+                       treffen sie auf 0,01 Punkte genau, die Win Rate
+                       S/(S+N) verfehlt sie um 1,5 bis 12 Punkte. Deshalb
+                       hiess die Spalte anders als die daneben.
+
+                       Jetzt scrapen wir die Bilanz mit (vs_wins /
+                       vs_losses / vs_ties, backend/scrapers/
+                       labs_tournament_scraper.py). Damit laesst sich die
+                       Major-Quote MIT DERSELBEN RECHNUNG bilden wie die
+                       Online-Spalte links: S/(S+N), geglaettet mit
+                       demselben 20-Partien-Prior (js/matchup-glaettung.js).
+                       Erst dadurch darf die Spalte "Major-WR" heissen.
+
+                       LEER IST LEER: fehlt die Bilanz (Zeile aus einem
+                       Lauf vor dieser Aenderung), bleibt `wr` null und die
+                       Oberflaeche zeigt einen Strich. Aus `punkte` eine
+                       Win Rate zu schaetzen waere eine Behauptung. */
+                    const ganz = (v) => {
+                        const n = parseInt(String(v == null ? '' : v).trim(), 10);
+                        return Number.isFinite(n) && n >= 0 ? n : null;
+                    };
+                    const siege = ganz(r.vs_wins);
+                    const niederlagen = ganz(r.vs_losses);
+                    const unentschieden = ganz(r.vs_ties);
+                    const hatBilanz = siege != null && niederlagen != null;
+                    const entschieden = hatBilanz ? siege + niederlagen : 0;
+                    const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;
+                    const wr = (hatBilanz && entschieden > 0 && G && typeof G.quote === 'function')
+                        ? G.quote(siege, niederlagen)
+                        : (hatBilanz && entschieden > 0 ? (siege / entschieden) * 100 : null);
+                    const wrRoh = (hatBilanz && entschieden > 0)
+                        ? (siege / entschieden) * 100 : null;
                     if (!reg[a]) reg[a] = {};
-                    reg[a][b] = { anzahl, punkte };
+                    reg[a][b] = { anzahl, punkte, siege, niederlagen, unentschieden, wr, wrRoh };
                 }
                 window._majorMatchupRegistry = reg;
                 return reg;
@@ -588,12 +624,14 @@
                                sich merken zu m\u00fcssen, welche Spalte welche ist,
                                kostet bei jedem Blick.
 
-                               Der Major-Wert sind Matchpunkte, keine Siegquote
-                               — die Quelle liefert je Paarung nur Anzahl und
-                               Punkte. Der Versatz ist klein und systematisch
-                               (Median -2,0 pp, davon -1,8 reine Z\u00e4hlweise) und
-                               steht \u00fcber der Heatmap wie im Tooltip jeder
-                               Zelle. Unter 10 Matches: kursiv. */
+                               Beide Werte sind seit dem 03.09.2026 DIESELBE
+                               Rechnung: S/(S+N), geglaettet mit demselben
+                               20-Partien-Prior. Vorher stand rechts die
+                               Matchpunktquote der Labs-Datei, weil je Paarung
+                               keine Bilanz vorlag \u2014 sie wird jetzt
+                               mitgescrapt. Fehlt sie in einer Zeile, steht ein
+                               Strich statt einer geschaetzten Zahl.
+                               Unter 10 Matches: kursiv. */
                             const mj = (majorLookup.get(normalizeName(rowDeck)) || new Map())
                                 .get(normalizedColDeckMap.get(colDeck));
                             const majorDuenn = !!(mj && mj.anzahl < 10);
@@ -610,17 +648,22 @@
                                     (typeof window.formatPercent === 'function')
                                         ? window.formatPercent(winRate) : winRate.toFixed(1) + ' %'}</span>`
                                 + `<span class="heatmap-zelle-wr${dk}">${
-                                    mj ? pctTxt(mj.punkte) : '\u2013'}</span>`
+                                    (mj && mj.wr != null) ? pctTxt(mj.wr) : '\u2013'}</span>`
                                 + `<span class="heatmap-zelle-kennzahl">${t('heatmap.gamesShort')}</span>`
                                 + `<span class="heatmap-zelle-n">${totalGames}</span>`
                                 + `<span class="heatmap-zelle-n${dk}">${
                                     mj ? mj.anzahl : '\u2013'}</span>`
                                 + `</span>`;
-                            const majorTip = mj
+                            const majorTip = (mj && mj.wr != null)
                                 ? ` \u00b7 ${t('heatmap.majorTip')
-                                    .replace('{w}', pctTxt(mj.punkte))
-                                    .replace('{n}', String(mj.anzahl))}`
-                                : ` \u00b7 ${t('heatmap.majorFehlt')}`;
+                                    .replace('{w}', pctTxt(mj.wr))
+                                    .replace('{n}', String(mj.anzahl))
+                                    .replace('{b}', [mj.siege, mj.niederlagen,
+                                        mj.unentschieden == null ? '?' : mj.unentschieden
+                                    ].join('\u2013'))}`
+                                : (mj
+                                    ? ` \u00b7 ${t('heatmap.majorOhneBilanz').replace('{n}', String(mj.anzahl))}`
+                                    : ` \u00b7 ${t('heatmap.majorFehlt')}`);
                             const vollTip = tooltip + majorTip;
                             tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${escAttr(vollTip)}" onclick="showToast('${safeRow} vs ${safeCol}: ${escapeJsStr(vollTip)}', 'info', 5000)">${zellenHtml}</td>`;
                         }

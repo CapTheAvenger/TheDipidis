@@ -1598,11 +1598,38 @@ function computeConversionPerformance(rows) {
  * Eingrenzung, kommt 0 zurueck — dann faellt der Aufrufer auf die Summe
  * zurueck und schreibt keine Zahl hin, die er nicht belegen kann.
  *
+ * EINE ZEILE DARF NICHT ALLES KIPPEN (03.09.2026).
+ *
+ * Der harte Schnitt ueber ALLE Zeilen tat aber genau das. Am 03.09.2026
+ * lieferte der Wochenlauf Wailord mit 112 Listen bei 0,28 % — daraus
+ * folgt N >= 39.298, waehrend Alakazam Dudunsparce (2.259 bei 5,77 %)
+ * N <= 39.185 verlangt. Zwei Zeilen, kein gemeinsames N, Rueckgabe 0 —
+ * und der Donut verlor seinen Nenner, obwohl 134 der 135 Zeilen sich
+ * einig waren. limitless_meta_stats.json meldete 39.181, also genau das,
+ * worauf sich die 134 einigten.
+ *
+ * Die Ursache liegt in der Quelle, nicht in der Rechnung: 112/39.181 =
+ * 0,2859 %, was zu 0,29 gerundet haette. Mit 111 Listen waeren es
+ * 0,2833 % und damit die angezeigten 0,28. Zwischen dem Lesen der
+ * Anteilsspalte und dem Lesen der Zahl ist dort eine Liste dazugekommen.
+ * Auf einer Seite, die sich waehrend des Abrufs weiterdreht, ist das
+ * normal und wird wieder vorkommen.
+ *
+ * Deshalb schneidet die Rechnung jetzt nicht mehr blind, sondern sucht
+ * das N, auf das sich die MEISTEN Zeilen einigen — ein Durchlauf ueber
+ * die sortierten Intervallgrenzen. Zeilen, die dagegenstehen, fallen
+ * heraus und werden gezaehlt. Sind es mehr als ein Fuenftel, ist die
+ * Datei wirklich uneinig und die Rueckgabe bleibt 0. Die Schaerfe der
+ * Methode geht dabei nicht verloren: der gefundene Bereich ist der
+ * Schnitt der uebereinstimmenden Zeilen, nicht ein Mittelwert.
+ *
  * @param {Array<{anteil:number,anzahl:number}>} zeilen
  * @returns {number} gerundete Feldgroesse, oder 0
  */
 function feldGroesseAusAnteilen(zeilen) {
-    let unten = 0, oben = Infinity, gelistet = 0, anteilSumme = 0;
+    let gelistet = 0, anteilSumme = 0;
+    const marken = [];   // {x, d} — d=+1 Intervallbeginn, d=-1 Intervallende
+    let intervalle = 0;
     for (const z of (zeilen || [])) {
         const s = Number(z && z.anteil) || 0;
         const c = Number(z && z.anzahl) || 0;
@@ -1610,12 +1637,36 @@ function feldGroesseAusAnteilen(zeilen) {
         gelistet += c;
         anteilSumme += s;
         if (!(s > 0.005)) continue;
-        unten = Math.max(unten, c / ((s + 0.005) / 100));
-        oben  = Math.min(oben,  c / ((s - 0.005) / 100));
+        const u = c / ((s + 0.005) / 100);
+        const o = c / ((s - 0.005) / 100);
+        if (!(u > 0) || !isFinite(o) || o < u) continue;
+        marken.push({ x: u, d: 1 }, { x: o, d: -1 });
+        intervalle++;
     }
     if (!(anteilSumme > 50) || anteilSumme >= 99.5) return 0;
-    if (!(unten > 0) || !isFinite(oben) || oben < unten) return 0;
-    const n = Math.round((unten + oben) / 2);
+    if (!intervalle) return 0;
+
+    /* Beginn vor Ende bei gleicher Koordinate: zwei Intervalle, die sich
+       nur in einem Punkt beruehren, gelten als ueberlappend. Andernfalls
+       zaehlte ein exakt anschliessendes Intervall nicht mit. */
+    marken.sort((a, b) => (a.x - b.x) || (b.d - a.d));
+    let offen = 0, best = 0, bestVon = 0, bestBis = 0;
+    for (let i = 0; i < marken.length; i++) {
+        offen += marken[i].d;
+        if (marken[i].d === 1 && offen > best) {
+            best = offen;
+            bestVon = marken[i].x;
+            // Das Ende des maximalen Bereichs ist die naechste schliessende Marke.
+            let j = i + 1;
+            while (j < marken.length && marken[j].d === 1) j++;
+            bestBis = j < marken.length ? marken[j].x : marken[i].x;
+        }
+    }
+    // Mehr als ein Fuenftel Widerspruch heisst: die Datei ist uneinig,
+    // nicht die Quelle unruhig. Dann lieber keine Zahl.
+    if (best < Math.ceil(intervalle * 0.8)) return 0;
+    if (!(bestBis >= bestVon)) return 0;
+    const n = Math.round((bestVon + bestBis) / 2);
     return n > gelistet ? n : 0;
 }
 window.feldGroesseAusAnteilen = feldGroesseAusAnteilen;

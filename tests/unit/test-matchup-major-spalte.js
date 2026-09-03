@@ -617,9 +617,27 @@ describe('Die acht Spalten passen, oder die Tabelle scrollt', () => {
             + 'Deckspalte auf 25 px zusammen');
         // Sie muss zur Summe der acht Spaltenbreiten passen, sonst
         // schrumpft der Browser wieder irgendeine davon zusammen.
-        const breiten = [...css.matchAll(
+        // NUR DIE GRUNDREGELN. Seit dem 03.09.2026 steht im
+        // Telefonblock (@media max-width: 620px) ein zweiter,
+        // schmalerer Spaltenplan — der summiert sich bewusst auf
+        // WENIGER als diese Mindestbreite und laesst sie dort los.
+        // Ohne diese Trennung zaehlte die Zusicherung beide Plaene
+        // zusammen und verlangte eine Mindestbreite von 833 px.
+        // Was der Telefonplan halten muss, prueft
+        // tests/unit/test-tierliste-telefon-breite.js.
+        const grund = css.slice(0, css.indexOf('@media (max-width: 620px)'));
+        const breiten = [...grund.matchAll(
             /#currentMetaContent \.arc-mu-table th:nth-child\((\d+)\)[\s\S]{0,400}?\{\s*(?:[^}]*?)width:\s*(\d+)px/g)]
             .map(m => Number(m[2]));
+        // Die Suche findet fuenf Regeln, nicht acht: Spalte 3 kommt aus
+        // einer Sammelregel (`nth-child(n+3)...`), und 4, 5 und 6 teilen
+        // sich eine. Der Wert der Zusicherung liegt im Vergleich unten;
+        // diese Zeile faengt nur den Fall ab, dass der Ausdruck gar
+        // nichts mehr findet und die Summe stillschweigend 0 wird.
+        assert.ok(breiten.length >= 5,
+            `im Grundteil stehen nur ${breiten.length} Spaltenbreiten — `
+            + 'entweder sind die Regeln hinter den Telefonblock gerutscht, '
+            + 'oder ihre Schreibweise passt nicht mehr zum Ausdruck');
         const summe = breiten.reduce((a, b) => a + b, 0);
         assert.ok(Number(mb[1]) >= summe,
             `die Mindestbreite steht auf ${mb[1]} px, die gesetzten `

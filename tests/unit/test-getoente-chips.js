@@ -233,3 +233,41 @@ describe('Feste Tinten, die nur im Dunkelmodus hielten', () => {
         }
     });
 });
+
+
+/*
+ * Beschriftung und Aufklapp-Pfeil dürfen sich nicht berühren
+ * (Befund 03.09.2026, live gemessen)
+ *
+ * `.cards-filter-header` ist ein Flex mit space-between und hatte KEINEN
+ * gap. In der schmalen Filterspalte (120 px gemessen) endete der Text von
+ * "Deck-Abdeckung" bei x=1787, der Pfeil begann bei x=1783 — die letzte
+ * Letter berührte das Dreieck.
+ *
+ * Zwei Dinge fehlten, und beide braucht es:
+ *   gap        hält die Flex-Kinder auseinander.
+ *   min-width:0 lässt die Beschriftung schrumpfen. Ohne das ignoriert ein
+ *              Flex-Kind seine zugewiesene Breite und quillt weiter über
+ *              den eigenen Kasten hinaus — der gap allein hätte den
+ *              Zusammenstoß nur verschoben, nicht behoben.
+ */
+describe('Filterkopf der Kartendatenbank', () => {
+    const st = fs.readFileSync(path.join(cssVerzeichnis, 'styles.css'), 'utf8');
+    const block = /\.cards-filter-header \{[^}]*\}/.exec(st);
+
+    it('die Flex-Kinder haben einen Abstand', () => {
+        assert.ok(block, '.cards-filter-header nicht gefunden');
+        assert.match(block[0], /gap:\s*\d/,
+            'ohne gap läuft die Beschriftung wieder in den Aufklapp-Pfeil');
+    });
+
+    it('die Beschriftung darf schrumpfen statt überzulaufen', () => {
+        const kind = /\.cards-filter-header > :first-child \{[^}]*\}/.exec(st);
+        assert.ok(kind, 'die Regel für das erste Flex-Kind fehlt');
+        assert.match(kind[0], /min-width:\s*0/,
+            'ohne min-width:0 quillt das Flex-Kind über seinen Kasten hinaus — ' +
+            'der gap allein verschiebt den Zusammenstoß nur');
+        assert.match(kind[0], /text-overflow:\s*ellipsis/,
+            'schrumpfen ohne Ellipse schneidet den Text hart ab');
+    });
+});

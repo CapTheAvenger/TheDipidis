@@ -329,7 +329,8 @@ def test_jeder_entschiedene_name_traegt_seine_quelle(entschieden):
     hat alle 204 de_name-Werte geprueft und 20 weitere korrigiert. Eine
     fest eingetragene Zahl haette jede weitere Runde rot gemacht, ohne
     dass etwas kaputt ist — deshalb wird jetzt gegen die Bilanz in
-    _meta gerechnet. Damit muss auch weiterhin jemand aufraeumen: wer
+    _meta gerechnet. Eine dritte Runde kam am selben Tag noch dazu: die
+    vierte Namensquelle (champions_resources.json), acht weitere Namen. Damit muss auch weiterhin jemand aufraeumen: wer
     Namen ergaenzt, ohne die Bilanz nachzuziehen, faellt hier um.
     """
     gesamt = 0
@@ -341,12 +342,13 @@ def test_jeder_entschiedene_name_traegt_seine_quelle(entschieden):
             assert rec["quelle"] == "https://pokewiki.de/" + en.replace(" ", "_"), (
                 f"{topf}/{en}: die Quelle zeigt nicht auf den englischen Namen"
             )
-    erste = entschieden["_meta"]["ergebnis"]["gesamt"]
+    erste  = entschieden["_meta"]["ergebnis"]["gesamt"]
     zweite = entschieden["_meta"]["zweite_runde_2026_09_03"]["ergebnis"]["falsch"]
+    dritte = entschieden["_meta"]["dritte_runde_2026_09_03"]["ergebnis"]["neu_eingetragen"]
     assert erste == 63, f"erste Runde soll 63 Faelle nennen, nennt {erste}"
-    assert gesamt == erste + zweite, (
+    assert gesamt == erste + zweite + dritte, (
         f"{gesamt} entschiedene Namen, aber die Bilanz in _meta sagt "
-        f"{erste} + {zweite} = {erste + zweite}")
+        f"{erste} + {zweite} + {dritte} = {erste + zweite + dritte}")
 
 
 def test_die_entschiedenen_namen_stehen_auch_in_den_daten(entschieden):

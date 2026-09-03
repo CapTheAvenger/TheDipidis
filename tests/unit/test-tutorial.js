@@ -172,3 +172,95 @@ describe('Sprache: die Seite startet deutsch', () => {
         assert.ok(!/v46/.test(HTML), 'Die v46-Angabe ist zurueck in index.html.');
     });
 });
+
+/* ══ Die drei fehlenden Kapitel (03.09.2026) ═══════════════════
+
+   BEFUND: die Anleitung nannte "Champions" null Mal, "Team-Builder"
+   null Mal, "Rechner" null Mal — und enthielt insgesamt NULL Bilder.
+   Die drei groessten Bereiche, die seit August dazugekommen sind,
+   standen nirgends drin, und der Bildmechanismus
+   (js/ds-tutorial.js, data-tutorial-img) war gebaut, aber unbenutzt.
+
+   Geprueft wird hier nicht, dass die Woerter irgendwo vorkommen —
+   das waere mit einem Satz im Fliesstext erfuellt —, sondern dass
+   jedes Kapitel eine eigene Ueberschrift UND ein eigenes Bild hat,
+   und dass die Bilddateien wirklich auf der Platte liegen. */
+
+const { describe: beschreibe2, it: es2 } = require('node:test');
+const behaupte2 = require('node:assert');
+const fs2 = require('node:fs');
+const pfad2 = require('node:path');
+
+const WURZEL2 = pfad2.join(__dirname, '..', '..');
+const DE2 = fs2.readFileSync(pfad2.join(WURZEL2, 'tutorial', 'tutorial.de.html'), 'utf8');
+const EN2 = fs2.readFileSync(pfad2.join(WURZEL2, 'tutorial', 'tutorial.en.html'), 'utf8');
+
+beschreibe2('Die Anleitung deckt Champions, Team-Builder, Rechner und Startseite ab', () => {
+
+    const KAPITEL = [
+        ['Champions · Teams',   /Replica-Code/,        /replica code/i],
+        ['Champions · Nutzung', /In-Game-Analyse/,     /in-game analysis/i],
+        ['Team-Builder',        /Team setzen/,         /Set team/i],
+        ['Team-Rechner',        /K\.-o\.-Zahl/,        /hits to KO/i],
+        ['Startseite',          /Ansicht zurücksetzen/, /Reset view/i],
+    ];
+
+    for (const [name, reDe, reEn] of KAPITEL) {
+        es2(`${name}: steht in der deutschen Fassung`, () => {
+            behaupte2.ok(reDe.test(DE2),
+                `Das Kapitel "${name}" fehlt in tutorial.de.html`);
+        });
+        es2(`${name}: steht in der englischen Fassung`, () => {
+            behaupte2.ok(reEn.test(EN2),
+                `Das Kapitel "${name}" fehlt in tutorial.en.html`);
+        });
+    }
+
+    es2('jede Fassung bindet ihre eigenen Bilder ein', () => {
+        // Die deutsche Anleitung mit englischen Screenshots waere
+        // schlechter als gar keine: der Leser sucht Knoepfe, die auf
+        // dem Bild anders heissen.
+        const deBilder = [...DE2.matchAll(/data-tutorial-img="([^"]+)"/g)].map(m => m[1]);
+        const enBilder = [...EN2.matchAll(/data-tutorial-img="([^"]+)"/g)].map(m => m[1]);
+        behaupte2.ok(deBilder.length >= 5,
+            `nur ${deBilder.length} Bilder in der deutschen Anleitung`);
+        behaupte2.ok(enBilder.length >= 5,
+            `nur ${enBilder.length} Bilder in der englischen Anleitung`);
+        for (const b of deBilder) {
+            behaupte2.ok(b.startsWith('images/tutorials/de/'),
+                `die deutsche Anleitung bindet ein nicht-deutsches Bild ein: ${b}`);
+        }
+        for (const b of enBilder) {
+            behaupte2.ok(!b.startsWith('images/tutorials/de/'),
+                `die englische Anleitung bindet ein deutsches Bild ein: ${b}`);
+        }
+    });
+
+    es2('jedes eingebundene Bild liegt auch auf der Platte', () => {
+        // Der Rueckfall von ds-tutorial.js ist ein Farbverlauf mit
+        // Beschriftung — sichtbar kaputt genug, dass es niemandem
+        // auffaellt, und genau deshalb wird es hier gezaehlt.
+        const alle = [...DE2.matchAll(/data-tutorial-img="([^"]+)"/g),
+                      ...EN2.matchAll(/data-tutorial-img="([^"]+)"/g)].map(m => m[1]);
+        const fehlend = alle.filter(b => !fs2.existsSync(pfad2.join(WURZEL2, b)));
+        behaupte2.deepStrictEqual(fehlend, [],
+            'diese Bilder sind eingebunden, liegen aber nicht im Repo: ' + fehlend.join(', '));
+    });
+
+    es2('die Querformat-Aufnahmen bekommen auch einen Querformat-Rahmen', () => {
+        // 1280x720 in einem 9:16-Rahmen schrumpft auf ein Drittel der
+        // Hoehe; die Schrift ist dann nicht mehr zu lesen.
+        const css = fs2.readFileSync(pfad2.join(WURZEL2, 'css', 'city-league.css'), 'utf8');
+        behaupte2.ok(/\.tutorial-screenshot-frame--breit\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9/.test(css),
+            'die Klasse tutorial-screenshot-frame--breit fehlt oder ist nicht 16/9');
+        for (const [name, quelle] of [['de', DE2], ['en', EN2]]) {
+            const rahmen = [...quelle.matchAll(/tutorial-screenshot-frame([^"]*)"[\s\S]{0,120}?data-tutorial-img/g)];
+            behaupte2.ok(rahmen.length >= 5, `${name}: nur ${rahmen.length} Rahmen`);
+            for (const r of rahmen) {
+                behaupte2.ok(r[1].includes('--breit'),
+                    `${name}: ein Bildrahmen ohne --breit — die Querformat-Aufnahme `
+                    + 'wird darin unlesbar klein');
+            }
+        }
+    });
+});

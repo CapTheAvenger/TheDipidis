@@ -146,6 +146,32 @@ describe('gesperrt heisst wirklich gesperrt', () => {
             'ein Screenreader erfaehrt nicht, dass das Feld gerade nicht geht');
     });
 
+    it('das Attribut hidden versteckt die Zeile wirklich', () => {
+        /* LIVE GEFUNDEN AM 03.09.2026, in einem Bildschirmfoto bei 390 px —
+           nachdem alle Zusicherungen gruen waren.
+
+           Unter dem Turnier-Filter drehte sich ein Ladekreis, dauerhaft,
+           ohne Text und ohne dass etwas geladen hat. `hidden` war korrekt
+           gesetzt (die Messung sagte hidden=true), nur wirkungslos: das
+           Attribut wirkt allein ueber die Voreinstellung des Browsers
+           (`display: none`), und die verliert gegen JEDE Autorenregel mit
+           `display`. `.pm-ladestand` setzt `display: flex` — also gewann
+           flex, und der Ring drehte sich weiter.
+
+           Gemessen vor dem Fix: hidden=true, display=flex, Hoehe 16 px.
+           Danach: display=none, Hoehe 0. */
+        assert.match(CSS, /\.pm-ladestand\[hidden\]\s*\{[^}]*display:\s*none/,
+            'die Regel fuer [hidden] fehlt — dann steht der Ladekreis wieder '
+            + 'dauerhaft unter dem Turnier-Filter, weil display:flex das '
+            + 'Attribut schlaegt');
+        // Und die Regel muss auch gewinnen: gleiche Spezifitaet, aber sie
+        // steht als erste in der Datei. Deshalb !important, nicht Reihenfolge.
+        const i = CSS.indexOf('.pm-ladestand[hidden]');
+        assert.match(CSS.slice(i, CSS.indexOf('}', i)), /!important/,
+            'ohne !important entscheidet die Reihenfolge im Stylesheet, und die '
+            + 'ist beim naechsten Umsortieren eine andere');
+    });
+
     it('die Anzeige nimmt ihre Farbe aus den Tokens', () => {
         /* Kein eigener Grauton. Genau so ist am 02.09.2026 ein Kontrast von
            3,42:1 entstanden — die Farbe stimmte gegen den Seitengrund und

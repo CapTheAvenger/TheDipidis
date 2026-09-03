@@ -15,7 +15,7 @@
  *       672,5 gewichtete TURNIER-Antritte, 31 davon Top 8
  *       Summe: 8.574
  *   data/limitless_online_decks.csv
- *       2.121 DECKLISTEN auf der Online-Ladder, 49,46 % Win Rate
+ *       2.121 DECKLISTEN aus den Online-Turnieren, 49,46 % Win Rate
  *       Summe: 26.319
  *
  * Der Anteil ist in beiden fast gleich — 7,8 gegen 7,75 %. Dasselbe Feld,
@@ -27,7 +27,7 @@
  *   1  Mega Excadrill   2.121   7,8 %    49,5 %       673     31   4,6 %  0,8-mal
  *
  * Damit fielen zwei Abschnitte weg:
- *   "Vollstaendige Tabelle" — zeigte genau die Ladder-Spalten
+ *   "Vollstaendige Tabelle" — zeigte genau die Spalten der Deck-Uebersicht
  *   "Ueberblick"            — drei lila Kacheln auf Englisch; die einzige
  *                             Angabe daraus, die sonst nirgends stand
  *                             (199 Turniere, 14.026 Spieler, 31.411 Partien),
@@ -86,7 +86,16 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
     });
 
     it('jede der beiden Spalten sagt, woher sie kommt', () => {
-        assert.match(TIER, /Decklisten auf der Online-Ladder/);
+        /* 03.09.2026: "Online-Ladder" -> "Limitless-Online-Turniere". Der
+           Betreiber hat die Bezeichnung beanstandet, und die Quelle gibt
+           ihm recht: play.limitlesstcg.com/decks schreibt ueber seine
+           eigene Tabelle "536 tournaments, 39181 players, 88857 matches"
+           und kennt keine Ladder. Die Zusicherung bleibt dieselbe — die
+           Spalte muss ihre Herkunft nennen —, nur heisst die Herkunft
+           jetzt so, wie sie heisst. */
+        assert.match(TIER, /Decklisten aus den Limitless-Online-Turnieren/);
+        assert.ok(!/Online-Ladder/.test(TIER),
+            'die erfundene Quelle "Online-Ladder" ist zurueck');
         // Der Hinweis behauptete bis zum 02.09.2026, nach TURNIERGROESSE
         // zu gewichten. Gewichtet wird nach Aktualitaet — siehe
         // backend/scrapers/online_tournament_scraper.py:361.
@@ -110,14 +119,14 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
     });
 
     it('und schreibt einen Strich, wo eine Quelle nichts hat', () => {
-        // 7 Decks stehen nur in der Turnierdatei, 18 nur auf der Ladder. Eine
+        // 7 Decks stehen nur in der Turnierdatei, 18 nur in der Deck-Uebersicht. Eine
         // erfundene Null waere schlimmer als ein Strich.
         assert.match(TIER, /r\.listen\s+== null \? '–'/);
         assert.match(TIER, /r\.antritte == null \? '–'/);
     });
 
     it('duenn heisst: zu wenige TURNIER-Antritte', () => {
-        // Die Ladder-Spalten sind davon unberuehrt, die stehen auf 2.121.
+        // Die Spalten der Deck-Uebersicht sind davon unberuehrt, die stehen auf 2.121.
         /* NACHTRAG 02.09.2026 — das Feld heisst jetzt antritteGew.
            Die Schwelle stand bis dahin auf derselben Variablen wie die
            ANZEIGE. Als die Anzeige auf null ging (weil eine halbe Zahl

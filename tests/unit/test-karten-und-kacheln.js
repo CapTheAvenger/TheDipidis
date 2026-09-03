@@ -117,7 +117,15 @@ describe('Der Datenumfang — von der Startseite nach Quellen & Methodik', () =>
         const z = api.saetze(true).join(' | ');
         assert.match(z, /26\.319 gemeldete Decklisten/);
         assert.match(z, /138 Archetypen/);
-        assert.ok(!/Turniere/.test(z), 'eine unbekannte Zahl wurde trotzdem gedruckt');
+        /* Gemeint ist: keine ZAHL zu einer Groesse, die nicht gesetzt wurde.
+           Bis zum 03.09.2026 stand hier schlicht !/Turniere/ — das ging gut,
+           solange kein Satz das Wort aus einem anderen Grund enthielt. Seit
+           die Quelle richtig benannt wird ("gemeldete Decklisten aus den
+           Limitless-Online-Turnieren") tut es einer, und die Zusicherung
+           fiel, ohne dass irgendetwas kaputt war. Jetzt sucht sie das, was
+           sie meint: eine Zahl direkt vor dem Wort. */
+        assert.ok(!/[\d][\d.,\s]*Turniere/.test(z),
+            'eine unbekannte Zahl wurde trotzdem gedruckt: ' + z);
         assert.ok(!/null|undefined|NaN/.test(z), z);
     });
 

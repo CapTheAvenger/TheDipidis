@@ -124,7 +124,17 @@
                     const wrRoh = (hatBilanz && entschieden > 0)
                         ? (siege / entschieden) * 100 : null;
                     if (!reg[a]) reg[a] = {};
-                    reg[a][b] = { anzahl, punkte, siege, niederlagen, unentschieden, wr, wrRoh };
+                    /* DREI ZUSTAENDE, NICHT ZWEI (03.09.2026, live gefunden).
+                       25 der 769 Paarungen stehen auf 0-0-1: eine einzige
+                       Partie, und die endete unentschieden. Die Bilanz IST
+                       da, sie hat nur keinen Nenner — S/(S+N) ist auf null
+                       entschiedenen Partien nicht definiert. Der erste
+                       Wurf zeigte dafuer den Hinweis "ohne Bilanz in der
+                       Quelle", was schlicht falsch war. `bilanzDa`
+                       unterscheidet die beiden Faelle, damit die
+                       Oberflaeche sagen kann, welcher vorliegt. */
+                    reg[a][b] = { anzahl, punkte, siege, niederlagen, unentschieden,
+                                  wr, wrRoh, bilanzDa: hatBilanz };
                 }
                 window._majorMatchupRegistry = reg;
                 return reg;
@@ -662,7 +672,8 @@
                                         mj.unentschieden == null ? '?' : mj.unentschieden
                                     ].join('\u2013'))}`
                                 : (mj
-                                    ? ` \u00b7 ${t('heatmap.majorOhneBilanz').replace('{n}', String(mj.anzahl))}`
+                                    ? ` \u00b7 ${t(mj.bilanzDa ? 'heatmap.majorNurRemis' : 'heatmap.majorOhneBilanz')
+                                        .replace('{n}', String(mj.anzahl))}`
                                     : ` \u00b7 ${t('heatmap.majorFehlt')}`);
                             const vollTip = tooltip + majorTip;
                             tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${escAttr(vollTip)}" onclick="showToast('${safeRow} vs ${safeCol}: ${escapeJsStr(vollTip)}', 'info', 5000)">${zellenHtml}</td>`;

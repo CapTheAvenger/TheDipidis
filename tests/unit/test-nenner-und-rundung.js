@@ -286,7 +286,7 @@ describe('EV-Rechner: die Bedienung ueberlebt ein innerHTML darunter', () => {
 describe('Meta-Performance: die Spalte "Anteil" nennt beide Herkuenfte', () => {
     it('der Glossartext beschreibt nicht mehr nur den Nenner von 7 der 138 Zeilen', () => {
         assert.doesNotMatch(TIER, /gemessen an allen gewichteten Antritten des Zeitraums/);
-        assert.match(TIER, /Anteil an den gemeldeten Listen der Online-Ladder/);
+        assert.match(TIER, /Anteil an den gemeldeten Listen der Limitless-Online-Turniere/);
     });
     it('die Turnier-Anteile sind in der Zelle markiert', () => {
         assert.match(TIER, /anteilAusTurnier: !l && !!t/);

@@ -434,6 +434,7 @@
                    steht trotzdem daneben. */
                 majorWr: null,
                 majorWrRoh: null,
+                majorBilanzDa: false,
                 majorSiege: null,
                 majorNiederlagen: null,
                 majorUnentschieden: null,
@@ -448,6 +449,7 @@
                 m.majorSiege = (e.siege == null) ? null : e.siege;
                 m.majorNiederlagen = (e.niederlagen == null) ? null : e.niederlagen;
                 m.majorUnentschieden = (e.unentschieden == null) ? null : e.unentschieden;
+                m.majorBilanzDa = !!e.bilanzDa;
                 m.majorAnzahl = e.anzahl;
             }
             return m;
@@ -936,10 +938,17 @@
                             ? L('arc.muMajorFehlt', de
                                 ? 'Keine Präsenzpartien für diese Paarung.'
                                 : 'No in-person games for this pairing.')
-                            : L('arc.muMajorOhneBilanz', de
-                                ? '{n} Präsenzpartien, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine Win Rate bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'
-                                : '{n} in-person games, but the source row carries no record — without wins and losses there is no win rate to show. Hence the dash instead of an estimate.')
-                                .replace('{n}', String(m.majorAnzahl)))
+                            : (m.majorBilanzDa
+                                ? L('arc.muMajorNurRemis', de
+                                    ? '{n} Präsenzpartien, alle unentschieden ({b}). Diese Win Rate zählt Siege gegen entschiedene Partien — entschieden ist hier keine. Ein Wert stünde für nichts.'
+                                    : '{n} in-person games, all drawn ({b}). This win rate counts wins against decided games — none here were decided. A number would stand for nothing.')
+                                    .replace('{n}', String(m.majorAnzahl))
+                                    .replace('{b}', [m.majorSiege, m.majorNiederlagen,
+                                        m.majorUnentschieden == null ? '?' : m.majorUnentschieden].join('–'))
+                                : L('arc.muMajorOhneBilanz', de
+                                    ? '{n} Präsenzpartien, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine Win Rate bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'
+                                    : '{n} in-person games, but the source row carries no record — without wins and losses there is no win rate to show. Hence the dash instead of an estimate.')
+                                    .replace('{n}', String(m.majorAnzahl))))
                         : L('arc.muMajorTip', de
                             ? '{w} aus {n} Präsenzpartien (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Siege ÷ entschiedene Partien, mit demselben Ausgleich für dünne Paarungen. Roh {r} %.'
                             : '{w} from {n} in-person games (record {b}). Same calculation as the column on the left: wins ÷ decided games, with the same allowance for thin pairings. Raw {r} %.')

@@ -11552,6 +11552,27 @@ body.arc-open { overflow: hidden; }
    eigener Grauton (am 02.09.2026 kostete genau das 3,42:1). Die Kante
    links nimmt die Akzentfarbe und macht den Absatz zu einem Hinweis
    statt zu Fliesstext, ohne eine Flaeche einzufaerben. */
+/* EIN FLEX-KIND SCHRUMPFT NICHT UNTER SEINEN INHALT (03.09.2026).
+   ---------------------------------------------------------------
+   Gemessen bei 390 px, nachdem die Sammelbox live war: die Zeile
+   "★ Alle Dragapult-Decks zusammen (4 Varianten, 1 Turnier)" machte das
+   Deckfeld 463 px breit — in einem 390 px breiten Fenster. Labels und
+   Auswahlfeld ragten 101 px nach rechts hinaus.
+
+   Die Ursache lag NICHT am neuen Text. `.control-row` ist ein Flex-Kind
+   und traegt `min-width: auto`; ein Flex-Kind darf damit nicht unter
+   seine Inhaltsbreite schrumpfen, und `overflow: hidden` am Auswahlfeld
+   darunter kommt nie zum Zug. Jeder ausreichend lange Deckname haette
+   dasselbe getan — der neue Text war nur der erste, der lang genug war.
+
+   `min-width: 0` gibt die Kette frei; erst dann greift das
+   `overflow: hidden` von `.searchable-select-display`. Dieselbe Lehre
+   steht schon einmal in diesem Projekt ("gap allein reicht nicht,
+   min-width:0 gehoert dazu") — hier ist sie wieder. */
+.control-row {
+    min-width: 0;
+}
+
 .pm-familie-hinweis {
     margin: 0 0 14px;
     padding: 10px 14px;

@@ -11501,6 +11501,16 @@ body.arc-open { overflow: hidden; }
    --ink-2 steht hell auf #4d5566 und dunkel auf #b9c1e0, beides ueber
    7:1 gegen den jeweiligen Untergrund. Kein eigener Grauton — genau so
    ist am 02.09. schon einmal ein Kontrast von 3,42:1 entstanden. */
+/* `hidden` MUSS GEWINNEN (03.09.2026, live gefunden).
+   Das Attribut `hidden` wirkt nur ueber die Voreinstellung des Browsers
+   (`display: none`) — und die verliert gegen JEDE Autorenregel mit
+   `display`. Die Zeile darunter setzt `display: flex`, also stand der
+   Ladekreis dauerhaft unter dem Turnier-Filter: ein sich drehender Ring
+   ohne Text, der nichts laedt. Gesehen im Bildschirmfoto bei 390 px,
+   nachdem alle Zusicherungen gruen waren — `hidden` war korrekt gesetzt,
+   nur wirkungslos. */
+.pm-ladestand[hidden] { display: none !important; }
+
 .pm-ladestand {
     margin: 6px 0 0;
     font-size: 0.85em;

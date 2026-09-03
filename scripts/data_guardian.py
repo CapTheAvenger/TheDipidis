@@ -771,7 +771,7 @@ def check_kartentext_bericht(findings):
         f"Bericht, aendert keine Zuordnung)."))
 
 
-def check_champions_usage(findings):
+def check_champions_usage(findings, vorher=None):
     """Anteilslisten, die sich nicht auf 100 % addieren koennen.
 
     Ein Pokemon traegt genau EIN Item und hat genau EIN Wesen; die
@@ -859,26 +859,54 @@ def check_champions_usage(findings):
                          f"{len(doppelt)} champions usage list(s) carry the same row twice: "
                          f"{', '.join(doppelt[:8])}{' …' if len(doppelt) > 8 else ''}"))
     if trotz_marke:
-        # KORRIGIERT 03.09.2026. Hier stand "AFTER the scraper nulled its
-        # outlier" — das beschrieb den falschen Zweig. pruefe_plausibel()
-        # nullt NUR, wenn genau EIN Wert ausser der Reihe steht und sein
-        # Wegfall die Summe rettet; sonst laesst es die Liste bewusst
-        # unveraendert und vermerkt sie nur. Genau das ist bei diesen
-        # Listen passiert: nachgezaehlt am 03.09.2026 trugen 0 von 22
-        # einen genullten Wert (im ganzen Bestand nur 2 Listen ueberhaupt).
-        # Die Meldung behauptete also eine Reparatur, die nie stattfand —
-        # und liess den Leser eine kleinere Luecke sehen als die echte.
+        # KORRIGIERT 03.09.2026 (zweimal am selben Tag, beide Male aus
+        # demselben Grund: die Meldung sagte nicht, was der Fall ist).
+        #
+        # Erstens stand hier "AFTER the scraper nulled its outlier" — das
+        # beschrieb den falschen Zweig. pruefe_plausibel() nullt NUR, wenn
+        # genau EIN Wert ausser der Reihe steht und sein Wegfall die Summe
+        # rettet; sonst laesst es die Liste bewusst unveraendert. Von den
+        # 22 gemeldeten Listen trug keine einen genullten Wert.
+        #
+        # Zweitens, und wichtiger: die Meldung nannte eine ABSOLUTE Zahl.
+        # Der Fehler sitzt an der Quelle (vom Betreiber gegen weitere
+        # Quellen gegengeprueft, 03.09.2026) und ist von hier aus nicht
+        # heilbar. Eine Warnung, die jeden Tag dieselben 22 meldet, ohne
+        # dass jemand etwas tun kann, ist genau die Sorte Dauerrauschen,
+        # die dieses Repo an anderer Stelle schon abgeschafft hat
+        # (CLAUDE.md: "Absolute quality thresholds produce noise here.
+        # Detect *change* against a baseline instead.").
+        #
+        # Also: WARN nur, wenn die Zahl WAECHST — dann ist eine Liste neu
+        # kaputtgegangen und die Quelle hat sich weiter verschlechtert.
+        # Bleibt sie gleich oder faellt sie, ist das eine Beobachtung,
+        # kein Handlungsbedarf: INFO mit Richtungsangabe, damit sichtbar
+        # bleibt, ob sich die Fehler wieder legen.
         genullt = sum(1 for e in trotz_marke if "(genullt)" in e)
-        findings.append(("WARN",
-                         f"{len(trotz_marke)} champions usage list(s) sum above "
-                         f"{GRENZE:.0f} % and the scraper could NOT pin a single culprit "
-                         f"(davon {genullt} mit bereits genulltem Wert): "
-                         f"{', '.join(trotz_marke[:8])}"
-                         f"{' …' if len(trotz_marke) > 8 else ''} — entweder steht kein Wert "
-                         f"ausser der Reihe, oder es kaemen zwei gleich gut in Frage. Raten "
-                         f"waere schlimmer als die gemeldete Luecke: die fuehrende Zeile (und "
-                         f"damit Buildvorschlag und Schadensrechnung) bleibt korrekt, der "
-                         f"Ueberschuss sitzt im Auslaeufer der Liste."))
+        jetzt = len(trotz_marke)
+        frueher = (vorher or {}).get("champions_ueber_grenze")
+        rumpf = (f"{jetzt} champions usage list(s) sum above {GRENZE:.0f} % and the "
+                 f"scraper could NOT pin a single culprit (davon {genullt} mit bereits "
+                 f"genulltem Wert). Entweder steht kein Wert ausser der Reihe, oder es "
+                 f"kaemen zwei gleich gut in Frage; Raten waere schlimmer als die "
+                 f"gemeldete Luecke. Die fuehrende Zeile — und damit Buildvorschlag und "
+                 f"Schadensrechnung — bleibt korrekt, der Ueberschuss sitzt im "
+                 f"Auslaeufer der Liste.")
+        if frueher is None:
+            findings.append(("INFO", rumpf + " Erste Messung; ab jetzt wird die "
+                                             "Veraenderung beobachtet."))
+        elif jetzt > frueher:
+            findings.append((
+                "WARN",
+                f"{rumpf} NEU: zuletzt waren es {frueher}, jetzt {jetzt} "
+                f"(+{jetzt - frueher}) — die Quelle hat sich weiter verschlechtert. "
+                f"Betroffen: {', '.join(trotz_marke[:8])}"
+                f"{' …' if len(trotz_marke) > 8 else ''}"))
+        else:
+            richtung = (f"unveraendert bei {jetzt}" if jetzt == frueher
+                        else f"zurueck von {frueher} auf {jetzt} (-{frueher - jetzt})")
+            findings.append(("INFO", f"{rumpf} Beobachtung: {richtung}."))
+
     if spreads:
         findings.append(("WARN",
                          f"{len(spreads)} champions stat spread(s) outside {SP_BUDGET} points "
@@ -892,6 +920,10 @@ def check_champions_usage(findings):
                          f"steht er auf unbekannt statt auf einer geratenen Zahl; wo nicht, "
                          f"ist die Liste unveraendert und nur vermerkt. Beides braucht zum "
                          f"Beheben die Quelle, nicht dieses Repo."))
+
+    # Fuer die Baseline: nur diese eine Zahl, damit der naechste Lauf die
+    # RICHTUNG kennt statt wieder nur den Stand.
+    return len(trotz_marke)
 
 
 def check_champions_namen(findings):
@@ -1666,7 +1698,7 @@ def main():
     check_ace_liste(findings)
     check_kartentext_bericht(findings)
     check_meta_preiszuordnung(findings)
-    check_champions_usage(findings)
+    champions_ueber_grenze = check_champions_usage(findings, baseline)
     check_champions_namen(findings)
     check_champions_freshness(findings)
     champions_teams = check_champions_teams(findings, baseline.get("champions_teams"))
@@ -1709,6 +1741,7 @@ def main():
                 "tote_spalten": tot,
                 "jp_set_rows": jp_sets or {},
                 "champions_teams": champions_teams,
+                "champions_ueber_grenze": champions_ueber_grenze,
             }, f, ensure_ascii=False, indent=1, sort_keys=True)
         print(f"  Baseline updated -> {BASELINE}")
 

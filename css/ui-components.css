@@ -1238,7 +1238,23 @@ img[src*="limitlesstcg"] {
 .mb-40 { margin-bottom: 40px !important; }
 .mb-20 { margin-bottom: 20px !important; }
 .px-10 { padding-left: 10px !important; padding-right: 10px !important; }
-.bg-white { background: #fff !important; }
+/* ── `bg-white` heisst hier "die Panelfarbe", nicht "die Farbe Weiss"
+ *
+ * BEFUND (03.09.2026, live auf dem Profil-Reiter gemessen): diese
+ * Klasse steht an neun Stellen, sechsmal zusammen mit `.color-dark`.
+ * `.color-dark` ist `var(--ink)` — die dreht im Dunkelmodus auf
+ * Fastweiss. Zusammen ergab das WEISS AUF WEISS: die beiden
+ * Auswahlfelder der Sammlung (`#collection-sort`, `#collection-filter`)
+ * waren bei 1,05:1 nicht zu lesen.
+ *
+ * Der Reiter war den bisherigen Messungen entgangen, weil er ohne
+ * Anmeldung fast leer ist — im Sandkasten 11 sichtbare Elemente, live
+ * angemeldet 103.
+ *
+ * Alle neun Fundstellen sind Bedienflaechen (Auswahlfelder, ein
+ * Trenner), keine Bedeutungsfarben. Sie sollen mitdrehen. Die Klasse
+ * stand ausserdem DREIMAL in dieser Datei — jetzt einmal. */
+.bg-white { background: var(--surface-1) !important; }
 .pos-rel { position: relative !important; }
 .z-1 { z-index: 1 !important; }
 .w-28 { width: 28px !important; }
@@ -1541,7 +1557,6 @@ img[src*="limitlesstcg"] {
 .ta-center { text-align: center; }
 .color-blue { color: var(--dv-pos-ink); }
 
-.bg-white { background: #fff; }
 .bg-none { background: none; }
 .border-none { border: none; }
 .pointer { cursor: pointer; }
@@ -1611,7 +1626,6 @@ img[src*="limitlesstcg"] {
 .box-shadow-red { box-shadow: 0 3px 10px rgba(231,76,60,0.35) !important; }
 .px-16 { padding-left: 16px !important; padding-right: 16px !important; }
 .fs-13 { font-size: 13px !important; }
-.bg-white { background: #fff !important; }
 
 .select-blue { border: 2px solid #667eea !important; }
 .fs-80 { font-size: 0.8em !important; }

@@ -1860,13 +1860,13 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
               : `<div style="font-size: 0.8em; color: var(--ink-3); margin-top: 4px;">${priceDisplay}</div>`}${priceTrustBadge(card, cmUrl)}
             ${lowDisplay ? `<div style="font-size: 0.7em; color: var(--ink-3); margin-top: 2px;">${lowDisplay}</div>` : ''}
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
-              <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">Max:</span>
+              <span style="font-size: 0.72em; color: var(--profil-decks-ink); font-weight: 600;">Max:</span>
               <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
                 aria-label="Maximum price for ${safeNameHtml}"
-                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; color: #8e44ad; text-align: right; outline: none; box-sizing: border-box;"
-                onfocus="this.style.borderColor='#8e44ad'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
+                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; background: var(--surface-1); color: var(--profil-decks-ink); text-align: right; outline: none; box-sizing: border-box;"
+                onfocus="this.style.borderColor='var(--profil-decks-ink)'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
-              <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">€</span>
+              <span style="font-size: 0.72em; color: var(--profil-decks-ink); font-weight: 600;">€</span>
             </div>
             ${buildWishlistTargetPill(wishlistPriceRaw, maxPrice)}
           </div>

@@ -461,14 +461,17 @@ html.is-standalone .container {
    Small banner that surfaces the Firestore offline-cache state and
    exposes a manual "force resync" trigger. Sits above the four user
    stat cards on the Profile tab. */
+/* 03.09.2026: ein 3.514 px breiter heller Streifen quer durch eine
+   sonst dunkle Seite. Die Schrift darauf war fest dunkel, also fuer
+   sich lesbar — die Flaeche war der Fehler. */
 .cloud-sync-status {
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
     border-radius: 10px;
     padding: 10px 14px;
     margin: 0 0 14px;
     font: 500 13px/1.4 system-ui, -apple-system, sans-serif;
-    color: #0f172a;
+    color: var(--ink);
 }
 .cloud-sync-status .cloud-sync-row {
     display: flex;
@@ -482,7 +485,7 @@ html.is-standalone .container {
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 0.04em;
-    color: #475569;
+    color: var(--ink-3);
 }
 .cloud-sync-status .cloud-sync-detail {
     font-size: 13px;

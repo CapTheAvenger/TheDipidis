@@ -370,7 +370,7 @@ ASC,274,869885,live-verified,Mega Feraligatr ex
 ASC,275,869886,live-verified,Mega Froslass ex
 ASC,276,869888,live-verified,Pikachu ex
 ASC,277,869887,live-verified,Pikachu ex
-ASC,278,869889,priced-by-date(3↔3),Mega Eelektross ex
+ASC,278,869889,manual-pin,Mega Eelektross ex
 ASC,279,869890,live-verified,Iono's Bellibolt ex
 ASC,280,869891,live-verified,Lillie's Clefairy ex
 ASC,281,869892,live-verified,Team Rocket's Mewtwo ex
@@ -1187,7 +1187,7 @@ BLK,148,836219,live-verified,Pidove
 BLK,149,836221,live-verified,Tranquill
 BLK,150,836222,live-verified,Unfezant
 BLK,151,836223,live-verified,Audino
-BLK,152,836224,priced-by-date(2↔2),Minccino
+BLK,152,836224,manual-pin,Minccino
 BLK,153,836226,live-verified,Cinccino
 BLK,154,836228,live-verified,Rufflet
 BLK,155,836229,live-verified,Braviary
@@ -1201,7 +1201,7 @@ BLK,162,836236,live-verified,Fennel
 BLK,163,836237,live-verified,N's Plan
 BLK,164,836238,live-verified,Serperior ex
 BLK,165,836239,live-verified,Kyurem ex
-BLK,166,836240,priced-by-date(4↔4),Zekrom ex
+BLK,166,836240,manual-pin,Zekrom ex
 BLK,167,836241,live-verified,Meloetta ex
 BLK,168,836242,live-verified,Excadrill ex
 BLK,169,836243,live-verified,Genesect ex
@@ -8768,8 +8768,8 @@ MEG,174,851245,live-verified,Premium Power Pro
 MEG,175,851246,live-verified,Rare Candy
 MEG,176,851247,live-verified,Wally's Compassion
 MEG,177,851248,live-verified,Mega Venusaur ex
-MEG,178,851249,priced-by-all(4↔4),Mega Gardevoir ex
-MEG,179,851250,priced-by-all(4↔4),Mega Lucario ex
+MEG,178,851249,manual-pin,Mega Gardevoir ex
+MEG,179,851250,manual-pin,Mega Lucario ex
 MEG,180,851251,live-verified,Mega Absol ex
 MEG,181,851252,live-verified,Mega Latias ex
 MEG,182,851253,live-verified,Mega Kangaskhan ex
@@ -8777,10 +8777,10 @@ MEG,183,851254,live-verified,Acerola's Mischief
 MEG,184,851255,live-verified,Lillie's Determination
 MEG,185,851256,live-verified,Lt. Surge's Bargain
 MEG,186,851257,live-verified,Wally's Compassion
-MEG,187,851258,priced-by-all(4↔4),Mega Gardevoir ex
-MEG,188,851259,priced-by-all(4↔4),Mega Lucario ex
+MEG,187,851258,manual-pin,Mega Gardevoir ex
+MEG,188,851259,manual-pin,Mega Lucario ex
 MEP,1,851043,live-verified,Meganium
-MEP,2,851045,priced-by-date(1↔2),Inteleon
+MEP,2,851045,manual-pin,Inteleon
 MEP,3,851047,live-verified,Alakazam
 MEP,4,851050,priced-by-date(1↔2),Lunatone
 MEP,5,851051,unique,Drifloon
@@ -8793,9 +8793,9 @@ MEP,11,851066,priced-by-date(1↔2),Mega Latias ex
 MEP,12,858146,live-verified,Mega Lucario ex
 MEP,13,859012,priced-by-date(1↔2),Mega Venusaur ex
 MEP,14,857390,live-verified,Ceruledge
-MEP,15,857393,priced-by-date(1↔2),Zacian
-MEP,16,857396,priced-by-date(1↔2),Flygon
-MEP,17,857400,priced-by-date(1↔2),Toxtricity
+MEP,15,857393,manual-pin,Zacian
+MEP,16,857396,manual-pin,Flygon
+MEP,17,857400,manual-pin,Toxtricity
 MEP,18,859021,unique,Cottonee
 MEP,19,859022,unique,Whimsicott
 MEP,20,859024,unique,Sneasel
@@ -8806,7 +8806,7 @@ MEP,24,859036,unique,Oricorio ex
 MEP,25,859039,priced-by-date(1↔2),Mega Kangaskhan ex
 MEP,26,855284,unique,Meloetta
 MEP,27,855283,unique,Haunter
-MEP,28,850977,priced-by-date(1↔2),Celebratory Fanfare
+MEP,28,850977,manual-pin,Celebratory Fanfare
 MEP,29,873692,live-verified,Mega Charizard X ex
 MEP,30,873699,unique,Mega Charizard Y ex
 MEP,31,873702,live-verified,N's Zekrom
@@ -8834,7 +8834,7 @@ MEP,52,886621,unique,Grookey
 MEP,53,886622,unique,Scorbunny
 MEP,54,886623,unique,Sobble
 MEP,64,877543,live-verified,Serperior
-MEP,65,877544,priced-by-date(1↔2),Barbaracle
+MEP,65,877544,manual-pin,Barbaracle
 MEP,66,877545,live-verified,Tyrantrum
 MEP,67,877546,live-verified,Doublade
 MEP,68,879250,unique,Makuhita
@@ -8851,10 +8851,10 @@ MEP,78,888609,unique,Toxel
 MEP,79,888607,unique,Charmeleon
 MEP,80,888506,live-verified,Fennekin
 MEP,81,885517,live-verified,Mega Greninja ex
-MEP,82,894261,priced-by-date(1↔2),Miraidon
+MEP,82,894261,manual-pin,Miraidon
 MEP,83,894262,priced-by-date(1↔2),Slowbro
-MEP,84,894263,priced-by-date(1↔2),Dhelmise
-MEP,85,894264,priced-by-date(1↔2),Bastiodon
+MEP,84,894263,manual-pin,Dhelmise
+MEP,85,894264,manual-pin,Bastiodon
 MEP,86,898176,unique,Slowpoke
 MEP,87,898177,unique,Binacle
 MEP,88,895779,live-verified,Zarude
@@ -14257,7 +14257,7 @@ SSP,216,794589,live-verified,Scovillain ex
 SSP,217,794590,live-verified,Milotic ex
 SSP,218,794591,live-verified,Black Kyurem ex
 SSP,219,794592,live-verified,Pikachu ex
-SSP,220,794593,priced-by-date(3↔5),Latias ex
+SSP,220,794593,manual-pin,Latias ex
 SSP,221,794594,live-verified,Palossand ex
 SSP,222,794595,live-verified,Flygon ex
 SSP,223,794596,live-verified,Hydreigon ex
@@ -15224,7 +15224,7 @@ TEF,159,760789,unique,Rescue Board
 TEF,160,760790,live-verified,Salvatore
 TEF,161,760791,unique,Mist Energy
 TEF,162,760792,unique,Neo Upper Energy
-TEF,163,760793,priced-by-date(2↔2),Shiftry
+TEF,163,760793,manual-pin,Shiftry
 TEF,164,760794,live-verified,Grotle
 TEF,165,760795,live-verified,Deerling
 TEF,166,760796,live-verified,Sawsbuck

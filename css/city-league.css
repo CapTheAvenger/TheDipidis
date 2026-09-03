@@ -68,6 +68,16 @@
     padding: 16px;
     position: relative;
 }
+/* Die Aufnahmen der Anleitung waren bis zum 03.09.2026 ausnahmslos
+   Hochformat (720x1280), daher das 9:16 oben. Die Kapitel zu Champions,
+   Team-Builder, Rechner und Startseite zeigen Tabellen und Matrizen —
+   die liest man im Querformat. 1280x720 in einen 9:16-Rahmen gelegt
+   heisst: das Bild schrumpft auf ein Drittel der Rahmenhoehe und die
+   Schrift ist nicht mehr zu lesen. */
+.tutorial-screenshot-frame--breit {
+    aspect-ratio: 16 / 9;
+}
+
 .tutorial-screenshot-frame[data-tutorial-img] {
     /* Browser sets this background-image from the attribute via JS
      * at boot time — see app-init.js. If the file 404s, the gradient

@@ -92,6 +92,45 @@ describe('Formularelemente bekommen mit der Flaeche auch eine Textfarbe', () => 
             'das Datumsfeld traegt wieder eine feste Schriftfarbe (gemessen 1,12:1)');
     });
 
+    it('sie erben auch `background` nicht', () => {
+        /* BEFUND DER ABNAHME (03.09.2026, LIVE auf dem Profil-Reiter —
+           der war den bisherigen Messungen entgangen, weil er ohne
+           Anmeldung fast leer ist: 11 sichtbare Elemente im Sandkasten
+           gegen 103 angemeldet).
+           Dasselbe Muster, gespiegelt: 146 Eingabefelder der Wunschliste
+           setzten inline eine feste Schriftfarbe und KEINE Flaeche — ein
+           <input> nimmt dann die Vorgabe des Browsers, und die ist
+           Weiss. 146 weisse Kaesten in einer dunklen Seite. */
+        const FC = ohneKomm(lies('js/firebase-collection.js'));
+        assert.doesNotMatch(FC, /color: #8e44ad/,
+            'die feste Schriftfarbe der Wunschlisten-Eingabe ist zurueck');
+        assert.match(FC, /background: var\(--surface-1\); color: var\(--profil-decks-ink\)/,
+            'das Eingabefeld setzt keine drehende Flaeche — dann ist es wieder weiss');
+    });
+
+    it('eine feste helle Flaeche und drehende Schrift kommen nicht zusammen vor', () => {
+        /* `.bg-white` war fest weiss, `.color-dark` ist var(--ink) und
+           dreht — zusammen an sechs Stellen im Markup ergab das im
+           Dunkelmodus WEISS AUF WEISS (gemessen 1,05:1 an den beiden
+           Auswahlfeldern der Sammlung). Die Klasse stand ausserdem
+           dreimal in derselben Datei. */
+        const UI = ohneKomm(lies('css/ui-components.css'));
+        const treffer = [...UI.matchAll(/^\.bg-white\s*\{([^}]*)\}/gm)];
+        assert.equal(treffer.length, 1,
+            `.bg-white ist ${treffer.length}-mal definiert — eine Klasse, eine Regel`);
+        assert.match(treffer[0][1], /var\(--surface-1\)/,
+            '.bg-white ist wieder fest weiss, waehrend .color-dark mitdreht');
+        /* Und jede Stelle, die bg-white traegt, braucht eine drehende
+           Schriftfarbe dazu — sonst steht die Vorgabe des Browsers
+           (Schwarz) auf der dunklen Flaeche. */
+        const html = lies('index.html');
+        const stellen = [...html.matchAll(/class="([^"]*\bbg-white\b[^"]*)"/g)].map(m => m[1]);
+        assert.ok(stellen.length > 0, 'bg-white kommt im Markup nicht mehr vor');
+        const ohneFarbe = stellen.filter(k => !/\bcolor-\w/.test(k) && /select|input/.test(k));
+        assert.deepEqual(ohneFarbe, [],
+            'Bedienelemente mit bg-white ohne Schriftfarbe:\n  ' + ohneFarbe.join('\n  '));
+    });
+
     it('und es kommt keine vierte dazu', () => {
         /* Diese Zahl darf nicht steigen. Sie steht auf 0, weil die drei
            gefundenen Stellen die einzigen waren — wer eine neue baut,

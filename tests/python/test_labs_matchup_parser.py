@@ -50,61 +50,23 @@ def test_player_summary_handles_missing_soup():
     }
 
 
-def _parse_matchup_table(html_str):
-    """Helper that injects the synthetic HTML and returns the parser
-    output without the fetch step."""
-    s = bs4.BeautifulSoup(html_str, "lxml")
-    summary = labs_scraper._parse_player_summary(s)
-    # Mirror the body of scrape_archetype_matchups starting from the
-    # `table = soup.find(...)` line — we need to test the parsing
-    # logic, not the HTTP fetch.
-    table = s.find("table", attrs={"class": "data-table"})
-    if not table:
-        return {"summary": summary, "matchups": [], "day_filter": "overall"}
-    rows = []
-    for row in table.select("tbody tr"):
-        cells = row.find_all("td")
-        if len(cells) < 3:
-            continue
-        link = None
-        name_idx = None
-        for idx, c in enumerate(cells):
-            a = c.find("a")
-            if a and a.get("href"):
-                link = a
-                name_idx = idx
-                break
-        if not link:
-            continue
-        opp_name = link.get_text(strip=True)
-        opp_slug = link.get("href", "").rsplit("/", 1)[-1].split("?")[0]
-        trailing = cells[name_idx + 1:]
-        count_val = 0
-        win_pct_val = 0.0
-        for c in trailing:
-            txt = c.get_text(strip=True)
-            if "%" in txt and win_pct_val == 0.0:
-                try:
-                    win_pct_val = round(float(txt.replace("%", "").replace(",", ".").strip()), 4)
-                except ValueError:
-                    pass
-            elif txt and count_val == 0 and "%" not in txt:
-                count_val = labs_scraper._parse_int_count(txt)
-        if count_val <= 0 and win_pct_val == 0.0:
-            continue
-        rows.append({
-            "opponent_slug": opp_slug,
-            "opponent_name": opp_name,
-            "vs_count": count_val,
-            "vs_win_pct": win_pct_val,
-        })
-    return {"summary": summary, "matchups": rows, "day_filter": "overall"}
+# NACHGEBAUTER PARSER ENTFERNT (03.09.2026).
+#
+# Hier stand eine Kopie des Parsers: derselbe Ablauf, noch einmal
+# abgetippt. Ein Test, der eine Kopie prueft, bleibt gruen, waehrend der
+# ausgelieferte Code bricht — und genau das ist hier passiert, als der
+# echte Parser eine Bilanzspalte dazubekam und diese Datei nichts davon
+# mitbekam.
+#
+# Das Parsen ist deshalb aus scrape_archetype_matchups() herausgeloest
+# (es stand hinter einem Netzaufruf, weshalb der Test es ueberhaupt
+# nachbauen musste). Ab jetzt ruft der Test dieselbe Funktion auf, die
+# auch der Wochenlauf benutzt.
 
 
 @pytest.fixture(scope="module")
 def parsed(soup):
-    with open(FIXTURE_PATH, encoding="utf-8") as f:
-        return _parse_matchup_table(f.read())
+    return labs_scraper.parse_matchup_table(soup)
 
 
 def test_matchup_row_count(parsed):
@@ -240,3 +202,128 @@ def test_scrape_archetype_matchups_empty_tid_list(monkeypatch):
     assert called["fetch"] == 0
     assert result["matchups"] == []
     assert result["tournaments_used"] == []
+
+
+# ── Bilanz je Paarung (Befund 03.09.2026) ────────────────────────────
+#
+# ANLASS: die Oberflaeche zeigte in der Major-Spalte MATCHPUNKTE, wo sie
+# eine Win Rate zeigen wollte — weil wir je Paarung nur Anzahl und
+# Prozent geholt haben und aus einer Prozentzahl ohne Bilanz keine
+# andere Groesse zu rechnen ist.
+#
+# Dass labs' "Win %" keine Win Rate ist, laesst sich an der Bilanz
+# nachrechnen, die auf derselben Seite steht. Drei Paarungen des
+# Worlds-Laufs, jedes Mal auf zwei Nachkommastellen exakt die
+# Matchpunkte (3S + U) / (3M) und NICHT S/M:
+#
+#     17-2-1    86,67 %   (S/M waere 85,00)
+#     17-5-2    73,61 %   (S/M waere 70,83)
+#     34-50-22  38,99 %   (S/M waere 32,08)
+#
+# Genau diese drei Zeilen stehen in der Vorlage. Damit haelt der Test
+# nicht nur den Parser fest, sondern auch den Befund selbst: geht die
+# Bilanz verloren, faellt auf, WARUM sie gebraucht wird.
+
+FIXTURE_BILANZ = os.path.join(REPO_ROOT, "tests", "python", "fixtures",
+                              "labs_archetype_matchup_mit_bilanz.html")
+
+
+@pytest.fixture(scope="module")
+def soup_bilanz():
+    assert os.path.isfile(FIXTURE_BILANZ), f"Vorlage fehlt: {FIXTURE_BILANZ}"
+    with open(FIXTURE_BILANZ, encoding="utf-8") as f:
+        return bs4.BeautifulSoup(f.read(), "lxml")
+
+
+@pytest.fixture(scope="module")
+def parsed_bilanz(soup_bilanz):
+    return labs_scraper.parse_matchup_table(soup_bilanz)
+
+
+def test_bilanz_wird_gelesen(parsed_bilanz):
+    m = {x["opponent_name"]: x for x in parsed_bilanz["matchups"]}
+    assert set(m) == {"Mega Excadrill", "Slowking", "Dragapult"}, list(m)
+    assert (m["Mega Excadrill"]["vs_wins"], m["Mega Excadrill"]["vs_losses"],
+            m["Mega Excadrill"]["vs_ties"]) == (17, 2, 1)
+    assert (m["Dragapult"]["vs_wins"], m["Dragapult"]["vs_losses"],
+            m["Dragapult"]["vs_ties"]) == (34, 50, 22)
+
+
+def test_die_bilanz_frisst_nicht_die_partienzahl(parsed_bilanz):
+    """Die Bilanz steht VOR der Prozentspalte und beginnt mit einer Zahl.
+    Wird sie nicht als Ganzes erkannt, landet ihre erste Zahl in
+    vs_count — dann stimmt die Partienzahl nicht mehr."""
+    m = {x["opponent_name"]: x for x in parsed_bilanz["matchups"]}
+    assert m["Mega Excadrill"]["vs_count"] == 20, "17 statt 20 heisst: Bilanz als Anzahl gelesen"
+    assert m["Slowking"]["vs_count"] == 24
+    assert m["Dragapult"]["vs_count"] == 106
+
+
+def test_win_pct_bleibt_die_zahl_der_quelle(parsed_bilanz):
+    m = {x["opponent_name"]: x for x in parsed_bilanz["matchups"]}
+    assert abs(m["Mega Excadrill"]["vs_win_pct"] - 86.67) < 0.01
+    assert abs(m["Dragapult"]["vs_win_pct"] - 38.99) < 0.01
+
+
+def test_die_quelle_meint_matchpunkte_nicht_win_rate(parsed_bilanz):
+    """Der eigentliche Befund, als Rechnung festgehalten: labs' 'Win %'
+    trifft (3S+U)/3M und nicht S/M. Sollte die Quelle das eines Tages
+    umstellen, faellt es hier auf — und die Oberflaeche muss dann nicht
+    mehr selbst rechnen."""
+    for x in parsed_bilanz["matchups"]:
+        s, n, u = x["vs_wins"], x["vs_losses"], x["vs_ties"]
+        m = x["vs_count"]
+        matchpunkte = (3 * s + u) / (3 * m) * 100
+        winrate = s / m * 100
+        assert abs(x["vs_win_pct"] - matchpunkte) < 0.02, (
+            f"{x['opponent_name']}: {x['vs_win_pct']} trifft nicht die "
+            f"Matchpunkte {matchpunkte:.2f}")
+        assert abs(x["vs_win_pct"] - winrate) > 0.5, (
+            f"{x['opponent_name']}: Quelle sieht plötzlich wie S/M aus — "
+            f"dann ist der Umbau vom 03.09.2026 zu pruefen")
+
+
+def test_ohne_bilanzspalte_bleibt_es_leer(parsed):
+    """Die aeltere Seitenform ohne Record-Spalte muss weiter durchgehen —
+    dann steht die Bilanz auf None und die Oberflaeche faellt auf die
+    Matchpunkte zurueck, statt eine 0-Bilanz zu erfinden."""
+    for x in parsed["matchups"]:
+        assert x.get("vs_wins") is None, x
+        assert x["vs_count"] > 0
+
+
+def test_bilanz_wird_auch_vor_der_zaehlung_erkannt():
+    """Die Reihenfolge der Spalten ist die der Quelle, nicht unsere.
+
+    Dieser Test ist aus einer widerlegten Behauptung entstanden. Im Code
+    stand, die Bilanz muesse VOR der Partienzahl geprueft werden, sonst
+    werde ihre erste Zahl als Partienzahl gelesen. Die Mutation dazu —
+    Pruefung ans Ende verschoben — blieb gruen. Grund:
+    _parse_int_count('17 - 2 - 1') gibt 0 zurueck, weil die bereinigte
+    Zeichenkette nicht aus lauter Ziffern besteht.
+
+    Die Begruendung war also falsch, die Unabhaengigkeit von der
+    Spaltenreihenfolge aber echt — und ungeprueft. Genau die sichert
+    dieser Test jetzt zu: taeuscht die Quelle die Spalten um, bleiben
+    Partienzahl und Bilanz richtig zugeordnet.
+    """
+    html = """
+    <table class="data-table">
+      <thead><tr><th></th><th>Deck</th><th>Record</th><th>#</th><th>Win %</th></tr></thead>
+      <tbody>
+        <tr>
+          <td></td>
+          <td><a href="/decks/mega-excadrill">Mega Excadrill</a></td>
+          <td>17 - 2 - 1</td>
+          <td>20</td>
+          <td>86.67%</td>
+        </tr>
+      </tbody>
+    </table>"""
+    s = bs4.BeautifulSoup(html, "lxml")
+    m = labs_scraper.parse_matchup_table(s)["matchups"]
+    assert len(m) == 1, m
+    assert m[0]["vs_count"] == 20, (
+        f"vs_count={m[0]['vs_count']} — die Bilanz wurde als Partienzahl gelesen")
+    assert (m[0]["vs_wins"], m[0]["vs_losses"], m[0]["vs_ties"]) == (17, 2, 1)
+    assert abs(m[0]["vs_win_pct"] - 86.67) < 0.01

@@ -131,6 +131,25 @@ describe('Formularelemente bekommen mit der Flaeche auch eine Textfarbe', () => 
             'Bedienelemente mit bg-white ohne Schriftfarbe:\n  ' + ohneFarbe.join('\n  '));
     });
 
+    it('die gemeinsame Suchfeld-Regel setzt eine Textfarbe', () => {
+        /* BEFUND (03.09.2026, live): diese eine Regel deckt JEDES
+           Suchfeld der Seite ab (.ui-search-input und fuenf
+           Geschwister). Sie setzte eine drehende Flaeche und keine
+           Schrift — gemessen an einem frisch erzeugten Feld mit
+           denselben Klassen: rgb(0,0,0) auf rgb(17,23,48). Auf den
+           bestehenden Feldern fiel es nicht auf, weil sie leer waren;
+           getippter Text waere unsichtbar gewesen. Genau deshalb sieht
+           der Zaehler oben in den Quelltext statt nur auf den Schirm. */
+        const UX = ohneKomm(lies('css/ux-step1.css'));
+        const i = UX.indexOf('.ui-search-input');
+        assert.notEqual(i, -1, 'die Suchfeld-Regel ist nicht mehr auffindbar');
+        const regel = UX.slice(UX.indexOf('{', i), UX.indexOf('}', i));
+        assert.match(regel, /background-color:\s*var\(--ui-input-bg\)/);
+        assert.match(regel, /(?<![-a-zA-Z])color:\s*var\(--ink\)/,
+            'die Suchfelder haben wieder keine Textfarbe — dann ist getippter Text '
+            + 'im Dunkelmodus schwarz auf dunkelblau');
+    });
+
     it('und es kommt keine vierte dazu', () => {
         /* Diese Zahl darf nicht steigen. Sie steht auf 0, weil die drei
            gefundenen Stellen die einzigen waren — wer eine neue baut,

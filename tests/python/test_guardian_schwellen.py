@@ -176,3 +176,67 @@ def test_die_vier_stillen_funktionen_haben_jetzt_aufrufer():
         assert f'g.{name}(' in hier, (
             f'{name} wird von dieser Datei nicht mehr aufgerufen — dann steht '
             'sie wieder ohne jede Zusicherung da')
+
+
+# ── check_proxy_karte_gegen_bestand (Befund 03.09.2026) ────────────────
+#
+# ANLASS: pokemonproxies.com hatte das Set M5 abgeraeumt. Die URL-Karte
+# behielt die 79 toten Adressen, die ausgelieferten Kartendateien trugen
+# sie mit — 79 kaputte Kartenbilder auf der Seite. Beide Dateien waren
+# in sich schluessig, nur zueinander nicht mehr. Genau diese Fuge prueft
+# S17b, und zwar ohne Netz.
+
+def _proxy_lage(tmp_path, karten_urls, datei_inhalt):
+    """Legt eine Mini-DATA-Ablage an und gibt die findings zurueck."""
+    import json as _json
+    (tmp_path / 'pokemonproxies_url_map.json').write_text(
+        _json.dumps({'_meta': {'entry_count': len(karten_urls)},
+                     'urls': karten_urls}), encoding='utf-8')
+    (tmp_path / 'cards_chunk_standard.json').write_text(
+        datei_inhalt, encoding='utf-8')
+    return tmp_path
+
+
+def test_kartendatei_zeigt_auf_unbekannte_proxy_url_ist_kritisch(g, tmp_path, monkeypatch):
+    lebt = 'https://www.pokemonproxies.com/assets/6a-001-Heracross-AAAA.png'
+    tot = 'https://www.pokemonproxies.com/assets/5a-001-Tropius-BBBB.png'
+    _proxy_lage(tmp_path, {'M6_1': lebt},
+                '[{"image_url":"%s"},{"image_url":"%s"}]' % (lebt, tot))
+    monkeypatch.setattr(g, 'DATA', str(tmp_path))
+    findings = []
+    g.check_proxy_karte_gegen_bestand(findings)
+    assert 'CRITICAL' in stufen(findings)
+    assert tot in texte(findings)
+
+
+def test_kartendatei_deckungsgleich_ist_still(g, tmp_path, monkeypatch):
+    lebt = 'https://www.pokemonproxies.com/assets/6a-001-Heracross-AAAA.png'
+    _proxy_lage(tmp_path, {'M6_1': lebt}, '[{"image_url":"%s"}]' % lebt)
+    monkeypatch.setattr(g, 'DATA', str(tmp_path))
+    findings = []
+    g.check_proxy_karte_gegen_bestand(findings)
+    assert findings == []
+
+
+def test_karte_darf_mehr_kennen_als_gebraucht_wird(g, tmp_path, monkeypatch):
+    """Der umgekehrte Fall ist harmlos und darf nicht anschlagen."""
+    a = 'https://www.pokemonproxies.com/assets/6a-001-Heracross-AAAA.png'
+    b = 'https://www.pokemonproxies.com/assets/6a-002-Surskit-CCCC.png'
+    _proxy_lage(tmp_path, {'M6_1': a, 'M6_2': b}, '[{"image_url":"%s"}]' % a)
+    monkeypatch.setattr(g, 'DATA', str(tmp_path))
+    findings = []
+    g.check_proxy_karte_gegen_bestand(findings)
+    assert findings == []
+
+
+def test_rohe_limitless_url_loest_nichts_aus(g, tmp_path, monkeypatch):
+    """Der Rueckfall auf den japanischen Scan ist der gewollte Zustand
+    fuer ein abgeraeumtes Set — er darf nicht als Fehler gelten."""
+    lebt = 'https://www.pokemonproxies.com/assets/6a-001-Heracross-AAAA.png'
+    roh = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M5/M5_1_R_JP_LG.png'
+    _proxy_lage(tmp_path, {'M6_1': lebt},
+                '[{"image_url":"%s"},{"image_url":"%s"}]' % (lebt, roh))
+    monkeypatch.setattr(g, 'DATA', str(tmp_path))
+    findings = []
+    g.check_proxy_karte_gegen_bestand(findings)
+    assert findings == []

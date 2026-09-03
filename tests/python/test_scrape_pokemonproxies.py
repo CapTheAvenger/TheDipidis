@@ -23,6 +23,7 @@ from scrape_pokemonproxies_urls import (    # noqa: E402
     extract_urls,
     load_existing,
     merge_into_map,
+    pruefe_bestand,
     write_map,
     BASE_URL,
     PREFIX_TO_SET,
@@ -286,3 +287,79 @@ class TestPrefixMap:
         assert PREFIX_TO_SET["5a"] == "M5"
         assert "3a" in PREFIX_TO_SET
         assert "4a" in PREFIX_TO_SET
+
+
+# ── Bestandspruefung (Befund 03.09.2026) ─────────────────────────
+
+class _FakeResp:
+    def __init__(self, status_code):
+        self.status_code = status_code
+
+    def close(self):
+        pass
+
+
+class _FakeSession:
+    """Antwortet je URL mit einem vorgegebenen Status; ``None`` als
+    Status wirft, um Timeout/Verbindungsfehler nachzustellen."""
+
+    def __init__(self, plan):
+        self.plan = plan
+        self.head_calls = []
+        self.get_calls = []
+
+    def head(self, url, timeout=None, allow_redirects=None):
+        self.head_calls.append(url)
+        code = self.plan[url]
+        if code is None:
+            raise OSError("boom")
+        return _FakeResp(code)
+
+    def get(self, url, timeout=None, stream=None):
+        self.get_calls.append(url)
+        return _FakeResp(self.plan.get(url + "#get", 200))
+
+
+class TestPruefeBestand:
+    """Der Kern des Befunds: ein Eintrag faellt NUR, wenn die
+    Fremdseite ihn nachweislich nicht mehr kennt."""
+
+    def test_200_bleibt_404_faellt_fehler_bleibt(self):
+        kandidaten = {
+            "M6_1": "https://x/a.png",     # lebt
+            "M5_1": "https://x/b.png",     # weg
+            "M5_2": "https://x/c.png",     # unklar
+        }
+        sess = _FakeSession({
+            "https://x/a.png": 200,
+            "https://x/b.png": 404,
+            "https://x/c.png": None,
+        })
+        behalten, entfernt, unklar = pruefe_bestand(sess, kandidaten)
+        assert set(behalten) == {"M6_1"}
+        assert set(entfernt) == {"M5_1"}
+        assert set(unklar) == {"M5_2"}
+
+    def test_410_zaehlt_wie_404(self):
+        sess = _FakeSession({"https://x/g.png": 410})
+        behalten, entfernt, unklar = pruefe_bestand(sess, {"M5_9": "https://x/g.png"})
+        assert set(entfernt) == {"M5_9"}
+        assert not behalten and not unklar
+
+    def test_500_loescht_nicht(self):
+        # Ein Serverfehler ist keine Auskunft ueber den Bestand.
+        sess = _FakeSession({"https://x/h.png": 500})
+        behalten, entfernt, unklar = pruefe_bestand(sess, {"M5_9": "https://x/h.png"})
+        assert not entfernt
+        assert set(unklar) == {"M5_9"}
+
+    def test_405_faellt_auf_get_zurueck(self):
+        # Manche CDNs beantworten HEAD nicht; dann muss GET entscheiden.
+        sess = _FakeSession({"https://x/i.png": 405, "https://x/i.png#get": 404})
+        behalten, entfernt, unklar = pruefe_bestand(sess, {"M5_9": "https://x/i.png"})
+        assert sess.get_calls == ["https://x/i.png"]
+        assert set(entfernt) == {"M5_9"}
+
+    def test_leere_kandidaten(self):
+        sess = _FakeSession({})
+        assert pruefe_bestand(sess, {}) == ({}, {}, {})

@@ -424,7 +424,7 @@ def apply_live_verification(mappings: list, data_dir: str):
     return corrected, confirmed
 
 
-def apply_manual_overrides(mappings: list, data_dir: str):
+def apply_manual_overrides(mappings: list, data_dir: str, cards: list = None):
     """Highest-precedence pins from data/cardmarket_mapping_manual.csv.
 
     The escape hatch for everything automation cannot decide: a human
@@ -465,11 +465,14 @@ def apply_manual_overrides(mappings: list, data_dir: str):
         return 0
 
     applied = 0
+    getroffen = set()
     for row in mappings:
-        pin = pins.get((row['set'].upper(), row['number']))
+        schluessel = (row['set'].upper(), row['number'])
+        pin = pins.get(schluessel)
         if pin is None:
             continue
         pid, source = pin
+        getroffen.add(schluessel)
         if int(row['cardmarket_product_id']) != pid:
             level = logger.warning if row['match_method'] == 'live-verified' else logger.info
             level("manual pin overrides %s %s: %s -> %s (was %s%s)",
@@ -478,8 +481,62 @@ def apply_manual_overrides(mappings: list, data_dir: str):
         row['cardmarket_product_id'] = pid
         row['match_method'] = 'manual-pin'
         applied += 1
-    logger.info("Manual pins: %s applied (%s in file)", applied, len(pins))
-    return applied
+
+    # EIN PIN, DER NICHTS TRIFFT, TUT NICHTS — UND SAGTE ES NICHT
+    # (03.09.2026).
+    #
+    # Bis hierher aenderte diese Funktion nur VORHANDENE Zeilen. Fuer eine
+    # Karte, zu der der Mapper gar keinen Kandidaten gefunden hat, fiel der
+    # Pin still unter den Tisch: er stand in der Datei, sah richtig aus und
+    # wirkte nie. Aufgefallen an SFA 98 und SFA 99 (Darkness- und
+    # Metal-Energy, Secret Rare, 36,14 und 34,66 EUR) — beide standen auf
+    # "unmapped", beide bekamen einen belegten Pin, und nach dem Lauf
+    # standen sie unveraendert auf "unmapped".
+    #
+    # Ein Pin ist die einzige Quelle, bei der ein Mensch das Produkt
+    # WIRKLICH angesehen hat. Wenn die Automatik nichts gefunden hat, ist
+    # er nicht weniger wert, sondern mehr. Also darf er eine Zeile
+    # anlegen — aber nur fuer eine Karte, die es in der Kartendatenbank
+    # ueberhaupt gibt. Ein Pin auf eine erfundene Nummer bleibt ein Fehler
+    # und wird gemeldet, nicht erfuellt.
+    erzeugt = 0
+    offen = sorted(k for k in pins if k not in getroffen)
+    if offen:
+        bekannt = {}
+        for c in (cards or []):
+            sc = (c.get('set') or '').strip().upper()
+            num = (c.get('number') or '').strip()
+            if sc and num:
+                bekannt.setdefault((sc, num), c)
+        ohne_karte = []
+        for schluessel in offen:
+            karte = bekannt.get(schluessel)
+            pid, source = pins[schluessel]
+            if karte is None:
+                ohne_karte.append(schluessel)
+                continue
+            mappings.append({
+                'set': schluessel[0], 'number': schluessel[1],
+                'cardmarket_product_id': pid,
+                'match_method': 'manual-pin',
+                'base_name': (karte.get('name_en') or karte.get('name')
+                              or karte.get('name_de') or ''),
+            })
+            erzeugt += 1
+            logger.info("manual pin creates %s %s -> %s (Mapper hatte keinen "
+                        "Kandidaten%s)", schluessel[0], schluessel[1], pid,
+                        f", pinned by {source}" if source else "")
+        if ohne_karte:
+            logger.warning(
+                "%s manual pin(s) match no card in the DB and were NOT applied: %s "
+                "— eine Zeile in cardmarket_mapping_manual.csv, die auf keine "
+                "existierende Karte zeigt, wirkt nie und ist vermutlich ein "
+                "Tippfehler in set/number",
+                len(ohne_karte), ", ".join(f"{a} {b}" for a, b in ohne_karte[:12]))
+
+    logger.info("Manual pins: %s applied, %s created, %s in file",
+                applied, erzeugt, len(pins))
+    return applied + erzeugt
 
 
 def write_mapping(mappings: list, out_path: str):
@@ -515,7 +572,7 @@ def main():
 
     mappings, stats = map_cards_to_products(cards, singles, set_to_exp, price_guide)
     apply_live_verification(mappings, data_dir)
-    apply_manual_overrides(mappings, data_dir)
+    apply_manual_overrides(mappings, data_dir, cards)
     total_cards = sum(1 for c in cards if c.get('number'))
     coverage = len(mappings) / total_cards * 100 if total_cards else 0
     logger.info("Card mapping: %s of %s cards (%.1f%%) | %s",

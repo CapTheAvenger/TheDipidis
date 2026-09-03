@@ -320,3 +320,51 @@ function werte(schluessel) {
         `${schluessel} steht ${out.length}x in i18n.js, erwartet 2 (de und en)`);
     return out;
 }
+
+describe('ein langer Name sprengt die Zeile nicht', () => {
+    it('.control-row darf unter seine Inhaltsbreite schrumpfen', () => {
+        /* GEMESSEN AM 03.09.2026, nachdem die Sammelbox live war. Bei
+           390 px machte "★ Alle Dragapult-Decks zusammen (4 Varianten,
+           1 Turnier)" das Deckfeld 463 px breit — in einem 390 px breiten
+           Fenster. Labels und Auswahlfeld ragten 101 px nach rechts
+           hinaus. Nach dem Fix: 334 px, rechte Kante bei 362.
+
+           DIE URSACHE LAG NICHT AM TEXT. `.control-row` ist ein Flex-Kind
+           und trug `min-width: auto`; ein Flex-Kind darf damit nicht unter
+           seine Inhaltsbreite schrumpfen, und das `overflow: hidden` am
+           Auswahlfeld darunter kam nie zum Zug. Jeder ausreichend lange
+           Deckname haette dasselbe getan — der neue Text war nur der
+           erste, der lang genug war. Die Zusicherung gehoert deshalb
+           hierher, aber sie schuetzt mehr als diese eine Zeile. */
+        /* ALLE Bloecke ansehen, nicht den ersten. `.control-row {` steht
+           in styles.css viermal, dreimal davon in einem @media-Block —
+           `indexOf` traf den ersten und meldete das Fehlen einer Regel,
+           die zwanzig Zeilen weiter unten stand. */
+        const bloecke = [...CSS.matchAll(/\.control-row\s*\{([^}]*)\}/g)]
+            .map(m => m[1]);
+        assert.ok(bloecke.length > 0,
+            'die Regel fuer .control-row ist weg — dann traegt sie wieder '
+            + 'min-width:auto und ein langer Deckname schiebt die Zeile aus '
+            + 'dem Fenster');
+        assert.ok(bloecke.some(b => /min-width:\s*0/.test(b)),
+            'min-width:0 fehlt an .control-row. Ohne sie kann die Kette '
+            + 'nicht schrumpfen und das overflow:hidden des Auswahlfelds '
+            + 'greift nicht — gemessen: 463 px breite Zeile in einem '
+            + '390 px breiten Fenster');
+    });
+
+    it('das Auswahlfeld schneidet ab, statt zu wachsen', () => {
+        // Die zweite Haelfte desselben Mechanismus: erst beide zusammen
+        // halten die Zeile im Fenster.
+        const ui = lies(path.join('css', 'ui-components.css'));
+        const i = ui.indexOf('.searchable-select-display {');
+        assert.ok(i > 0, 'die Regel fuer das Auswahlfeld fehlt');
+        const rumpf = ui.slice(i, ui.indexOf('}', i));
+        assert.match(rumpf, /overflow:\s*hidden/,
+            'das Auswahlfeld schneidet nicht mehr ab');
+        assert.match(rumpf, /white-space:\s*nowrap/,
+            'das Auswahlfeld bricht den Text jetzt um statt abzuschneiden — '
+            + 'dann waechst es in die Hoehe statt in die Breite, was die '
+            + 'Zeile ebenfalls verschiebt');
+    });
+});

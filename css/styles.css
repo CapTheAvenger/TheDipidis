@@ -1696,6 +1696,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            /* BEFUND 03.09.2026, live gemessen: ohne Abstand lief die
+               Beschriftung in den Aufklapp-Pfeil. In der schmalen
+               Filterspalte (120 px) endete der Text von
+               "Deck-Abdeckung" bei x=1787, der Pfeil begann bei
+               x=1783 — vier Pixel Ueberlappung, die letzte Letter
+               beruehrte das Dreieck.
+               gap haelt die beiden auseinander, min-width:0 laesst die
+               Beschriftung schrumpfen statt ueber ihren Kasten
+               hinauszulaufen (ohne das ignoriert ein Flex-Kind seine
+               eigene Breite und quillt weiter). */
+            gap: 8px;
             padding: 8px 12px;
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
@@ -1713,9 +1724,17 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         
+        .cards-filter-header > :first-child {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .cards-filter-header .toggle-icon {
             font-size: 14px;
             transition: transform 0.3s;
+            flex: 0 0 auto;
         }
         
         .cards-filter-header.collapsed .toggle-icon {

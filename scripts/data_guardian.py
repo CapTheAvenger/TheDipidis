@@ -726,6 +726,182 @@ def check_meta_preiszuordnung(findings):
             f"zurueck. Betrag je Karte im Centbereich."))
 
 
+def check_geteilte_produkt_ids(findings):
+    """Zwei Karten auf einer Produkt-ID, obwohl Cardmarket beide fuehrt.
+
+    check_verified_collisions() daneben faengt nur den Fall, dass BEIDE
+    Zeilen 'live-verified' sind. Der haeufigere Fall ist ein anderer und
+    rutschte bis zum 03.09.2026 durch: eine bestaetigte Zeile
+    ('live-verified' oder 'manual-pin') und eine erratene
+    ('priced-by-date', 'priced-by-all') teilen sich eine ID. Gemessen an
+    diesem Tag: 93 Produkt-IDs an 186 Karten, davon 82 nach genau diesem
+    Muster.
+
+    NICHT JEDE TEILUNG IST EIN FEHLER. Fuer Paldean Tauros (SSP 18/39),
+    Chikorita (MEP 46/69) und Deoxys (CRI 32/34) fuehrt Cardmarket in der
+    Erweiterung nur EIN Produkt fuer beide Nummern — dann ist die
+    gemeinsame ID richtig und wir haben nichts Besseres anzubieten.
+
+    Trennbar ist eine Teilung erst, wenn Cardmarket unter derselben
+    Metacard mindestens so viele Produkte fuehrt wie wir Kartennummern
+    haben. Genau das wird hier geprueft, und nur das wird gemeldet.
+
+    DER FALL, DER DIESE PRUEFUNG AUSGELOEST HAT: CRI 116 (Special Art
+    Rare) und CRI 122 (Secret Rare) trugen beide 886515 und zeigten beide
+    135,45 EUR. Cardmarket fuehrt fuer Mega Greninja ex in CRI vier
+    Produkte; drei waren bestaetigt, 886509 (169,10 EUR) lag unbenutzt
+    herum. Der Fehler war also nicht nur eine doppelte ID, sondern eine
+    um 34 EUR falsche Zahl auf einer teuren Karte.
+    """
+    map_pfad = os.path.join(DATA, "cardmarket_id_mapping.csv")
+    prod_pfad = os.path.join(DATA, "products_singles_6.json")
+    if not (os.path.isfile(map_pfad) and os.path.isfile(prod_pfad)):
+        return
+    BESTAETIGT = ("live-verified", "manual-pin")
+    try:
+        with open(prod_pfad, encoding="utf-8") as f:
+            roh = json.load(f)
+        produkte = roh.get("products") if isinstance(roh, dict) else roh
+        nach_meta, pid_meta = {}, {}
+        for p in (produkte or []):
+            schluessel = (p.get("idExpansion"), p.get("idMetacard"))
+            nach_meta.setdefault(schluessel, []).append(p)
+            pid_meta[p.get("idProduct")] = schluessel
+
+        preise = {}
+        guide_pfad = os.path.join(DATA, "price_guide_6.json")
+        if os.path.isfile(guide_pfad):
+            with open(guide_pfad, encoding="utf-8") as f:
+                for r in (json.load(f) or {}).get("priceGuides") or []:
+                    preise[r.get("idProduct")] = r.get("trend")
+
+        gruppen = {}
+        with open(map_pfad, encoding="utf-8-sig", newline="") as f:
+            for r in csv.DictReader(f):
+                pid = (r.get("cardmarket_product_id") or "").strip()
+                if not pid.isdigit():
+                    continue
+                gruppen.setdefault(int(pid), []).append(r)
+    except (OSError, ValueError, csv.Error) as e:
+        findings.append(("WARN", f"Geteilte Produkt-IDs nicht pruefbar: {e}"))
+        return
+
+    # Formatgrenze wie in report_unverified_prices — nur legale Sets
+    # rechtfertigen eine harte Meldung.
+    ordnung, aeltestes = {}, ""
+    try:
+        with open(os.path.join(DATA, "sets.json"), encoding="utf-8") as f:
+            ordnung = json.load(f) or {}
+        with open(os.path.join(DATA, "format_window.json"), encoding="utf-8") as f:
+            aeltestes = ((json.load(f) or {}).get("oldest_legal_set") or "").upper()
+    except (OSError, ValueError):
+        pass
+    grenze = ordnung.get(aeltestes)
+
+    def legal(zeile):
+        if not grenze:
+            return True
+        return (ordnung.get((zeile.get("set") or "").strip().upper()) or 0) >= grenze
+
+    # Ein Pin wirkt erst beim naechsten Lauf von cardmarket_id_mapper.py.
+    # Bis dahin steht die Doppelbelegung weiter in der ausgelieferten
+    # Datei. Sie deshalb zu verschweigen waere falsch, sie unveraendert
+    # als CRITICAL zu melden aber auch — genauso trennt es
+    # check_verified_collisions() daneben schon.
+    gepinnt = _gepinnte_karten()
+    # Ab welchem Betrag eine Doppelbelegung laut wird. Darunter ist sie
+    # richtig gemeldet, aber nicht dringend: PRE 97/99 unterscheiden sich
+    # um 0,03 EUR, CRI 116/122 um 34 EUR.
+    SPUERBAR = 1.0
+    trennbar_legal, trennbar_alt, trennbar_klein = [], [], []
+    unteilbar, erledigt = 0, []
+    for pid, zeilen in gruppen.items():
+        if len(zeilen) < 2:
+            continue
+        schluessel = pid_meta.get(pid)
+        if not schluessel:
+            continue
+        # Wie viele Kartennummern haengen insgesamt an dieser Metacard?
+        nummern = {(z.get("set"), z.get("number")) for z in zeilen}
+        verwandt = {p.get("idProduct") for p in nach_meta.get(schluessel, [])}
+        if len(verwandt) < len(nummern):
+            unteilbar += 1
+            continue
+        methoden = {(z.get("match_method") or "").split("(")[0] for z in zeilen}
+        if not (methoden & set(BESTAETIGT)):
+            continue          # zwei Ratewerte: das faengt report_unverified_prices
+        frei = sorted(verwandt - {int((z.get("cardmarket_product_id") or 0)) for z in zeilen})
+        spanne, groesste = "", 0.0
+        werte = [preise.get(x) for x in frei if isinstance(preise.get(x), (int, float))]
+        jetzt = preise.get(pid)
+        if werte and isinstance(jetzt, (int, float)) and jetzt:
+            groesste = max(abs(w - jetzt) for w in werte)
+            spanne = f", unbenutzt daneben bis {groesste:.2f} EUR daneben"
+        text = ("/".join(f"{z.get('set')} {z.get('number')}" for z in zeilen)
+                + f" auf {pid}" + (f" (frei: {', '.join(str(x) for x in frei)}{spanne})" if frei else ""))
+        # Genuegt EIN Pin: er nimmt der geratenen Zeile die fremde ID weg,
+        # und damit ist die Teilung aufgeloest.
+        if any(((z.get("set") or "").strip().upper(),
+                (z.get("number") or "").strip()) in gepinnt
+               and (z.get("match_method") or "").split("(")[0] not in BESTAETIGT
+               for z in zeilen):
+            erledigt.append(text)
+            continue
+        if not any(legal(z) for z in zeilen):
+            trennbar_alt.append(text)
+        elif groesste >= SPUERBAR:
+            trennbar_legal.append(text)
+        else:
+            # Dieselbe Doppelbelegung, aber im Centbereich. Als CRITICAL
+            # gemeldet wuerde sie neben einem 34-EUR-Fehler stehen und
+            # dessen Dringlichkeit verwaessern — die Hausregel gegen
+            # absolute Schwellen gilt auch fuer die eigene Lautstaerke.
+            trennbar_klein.append(text)
+
+    if trennbar_legal:
+        findings.append((
+            "CRITICAL",
+            f"{len(trennbar_legal)} Produkt-ID(s) sind an mehrere Karten aus "
+            f"AKTUELL LEGALEN Sets vergeben, obwohl Cardmarket unter derselben "
+            f"Metacard genug eigene Produkte fuehrt, um sie zu trennen: "
+            + "; ".join(sorted(trennbar_legal)[:8])
+            + (" …" if len(trennbar_legal) > 8 else "")
+            + ". Beide Karten zeigen denselben Preis, und mindestens einer ist "
+              "falsch. Die freie Produkt-ID daneben ist der Kandidat; belegbare "
+              "Faelle gehoeren nach data/cardmarket_mapping_manual.csv."))
+    if trennbar_klein:
+        findings.append((
+            "WARN",
+            f"{len(trennbar_klein)} trennbare Doppelbelegung(en) in legalen Sets "
+            f"bewegen weniger als {SPUERBAR:.2f} EUR: "
+            + "; ".join(sorted(trennbar_klein)[:5])
+            + (" …" if len(trennbar_klein) > 5 else "")
+            + ". Richtig ist es trotzdem nicht — nur nicht dringend."))
+    if trennbar_alt:
+        findings.append((
+            "WARN",
+            f"{len(trennbar_alt)} weitere trennbare Doppelbelegung(en) betreffen "
+            f"nur rotierte Sets: " + "; ".join(sorted(trennbar_alt)[:5])
+            + (" …" if len(trennbar_alt) > 5 else "")
+            + ". Nicht mehr legal, deshalb keine harte Meldung."))
+    if erledigt:
+        findings.append((
+            "WARN",
+            f"{len(erledigt)} trennbare Doppelbelegung(en) sind in "
+            f"cardmarket_mapping_manual.csv bereits von Hand entschieden "
+            f"({'; '.join(sorted(erledigt)[:5])}"
+            f"{' …' if len(erledigt) > 5 else ''}). Der Pin wirkt beim naechsten "
+            f"Lauf von cardmarket_id_mapper.py; verschwindet die Meldung danach "
+            f"nicht, greift er nicht."))
+    if unteilbar:
+        findings.append((
+            "INFO",
+            f"{unteilbar} Doppelbelegung(en) sind KEIN Fehler: Cardmarket fuehrt "
+            f"dort unter der Metacard weniger Produkte als wir Kartennummern "
+            f"haben (z. B. Paldean Tauros SSP 18/39). Die gemeinsame ID ist dann "
+            f"die richtige Antwort, nicht die bequeme."))
+
+
 def check_kartentext_bericht(findings):
     """data/card_text_resolution.csv gegen die Menge, die sie beschreibt.
 
@@ -1698,6 +1874,7 @@ def main():
     check_ace_liste(findings)
     check_kartentext_bericht(findings)
     check_meta_preiszuordnung(findings)
+    check_geteilte_produkt_ids(findings)
     champions_ueber_grenze = check_champions_usage(findings, baseline)
     check_champions_namen(findings)
     check_champions_freshness(findings)

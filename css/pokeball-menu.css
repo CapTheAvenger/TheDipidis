@@ -175,7 +175,11 @@
    Abzeichen wird dadurch praesenter, was ihm auch zusteht — es sagt,
    in welcher Ansicht man gerade ist. */
 .current-tab-badge {
-    font-size: 0.46em;
+    /* BODEN 03.09.2026: bei 390 px ergab 0.46em gemessene 7,73 px — und
+       das im Kopf JEDER Ansicht. Das Abzeichen sagt, wo man gerade ist
+       (siehe Notiz darueber); in 7,7 px Versalien mit Sperrung sagt es
+       das niemandem. Auf Desktop bleiben die 12,5 px erhalten. */
+    font-size: max(11px, 0.46em);
     background: var(--gold);
     color: var(--on-light);
     padding: 4px 10px;
@@ -263,7 +267,9 @@
 .btn-toggle-group { display: flex; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
 .btn-toggle-item {
     background: transparent; border: none; border-right: 1px solid var(--line-strong);
-    padding: 7px 13px; font-weight: 700; color: var(--ink-2); cursor: pointer; font-size: 0.83em;
+    padding: 7px 13px; font-weight: 700; color: var(--ink-2); cursor: pointer;
+    /* BODEN 03.09.2026: 0.83em auf einem 12-px-Elternwert = 9,96 px. */
+    font-size: max(10px, 0.83em);
     transition: all 0.2s ease; font-family: 'Nunito', sans-serif;
 }
 .btn-toggle-item:last-child { border-right: none; }

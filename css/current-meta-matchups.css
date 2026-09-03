@@ -536,7 +536,7 @@
        Die Kachel braucht ein anderes Layout, nicht eine andere
        Schriftgroesse. Bis dahin bleibt es klein, und der Ueberlauf
        steht als eigener Punkt auf der Mangelliste. */
-    font-size: 0.78em;
+    font-size: max(10px, 0.78em);
     font-weight: 700;
     /* Gemessen 28.08.2026 im Dunkelmodus: #2563eb stand mit 3,4:1 auf
      * der Kachel. Der Wert traegt die Kernaussage und muss lesbar sein.
@@ -551,7 +551,16 @@
     /* 0.72em ergibt gemessene 7,49 px. Wie bei .top-card-share darueber
        am 22.08.2026 auf den Token gehoben und wieder zurueckgenommen —
        die Kachel ist zu schmal dafuer. Siehe dort. */
-    font-size: 0.72em;
+    /* BODEN 03.09.2026. Gemessen im Browser, nicht im Editor: der
+       em-Faktor multipliziert sich mit einem ohnehin kleinen
+       Elternwert nach unten. Genau die Krankheit, die weiter unten
+       in mobile-responsive.css schon beschrieben ist ('Ursache ist
+       keine bewusste Wahl, sondern multiplizierendes em') — dort
+       fuer Mobil kuriert, auf Desktop stehengeblieben.
+       max() haelt die gewollte Skalierung nach oben und zieht nur
+       den Boden ein; test-schriftboden.js sieht feste px-Werte, aber
+       keine em-Kette. */
+    font-size: max(10px, 0.72em);
     font-weight: 600;
     /* 3,7:1 im Dunkeln, gemessen am selben Tag. */
     color: var(--ink-3);

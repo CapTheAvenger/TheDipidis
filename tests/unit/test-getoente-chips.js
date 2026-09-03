@@ -194,3 +194,42 @@ describe('Profil und Leerzustand: feste Hellmodus-Werte', () => {
             'ohne grid-column quetscht ein umgebendes Raster die Tafel in eine Spalte');
     });
 });
+
+
+/*
+ * Das Gegenstueck: feste Tinten, die nur im DUNKELmodus halten.
+ *
+ * Beim Nachmessen im Hellmodus (03.09.2026) blieben zwei Stellen
+ * uebrig — spiegelbildlich zum Befund oben, nur ohne Toenung:
+ * `.tier-trend-chip.tier-trend-flat` bei 2,43:1 (19 Chips auf Current
+ * Meta) und `--mc-text-faint` bei 2,83:1.
+ *
+ * Warum hier EINZELNE Zusicherungen stehen und keine gerechnete Regel
+ * wie oben: ohne Toenung steht die Flaeche eines Elements fast nie im
+ * selben Regelblock wie seine Tinte. Dieselbe Rechnung auf alle
+ * `color:`-Regeln angewandt meldete 181 Treffer, von denen die
+ * allermeisten (weisse Schrift auf einer woanders gesetzten farbigen
+ * Flaeche) keine sind. Eine Zusicherung mit 95 % Fehlalarm ist
+ * schlimmer als keine — sie wird abgeschaltet. Gemessen wurde
+ * stattdessen live, und festgehalten wird, was die Messung ergab.
+ */
+describe('Feste Tinten, die nur im Dunkelmodus hielten', () => {
+    it('.tier-trend-flat traegt keine feste Tinte mehr', () => {
+        const st = fs.readFileSync(path.join(cssVerzeichnis, 'styles.css'), 'utf8');
+        const regel = /\.tier-trend-chip\.tier-trend-flat\s*\{[^}]*\}/.exec(st);
+        assert.ok(regel, '.tier-trend-chip.tier-trend-flat nicht gefunden');
+        assert.ok(!/#[0-9a-fA-F]{3,6}/.test(regel[0]),
+            'wieder eine feste Tinte — im Hellmodus waren das 19 Chips bei 2,43:1');
+    });
+
+    it('--mc-text-faint ist in BEIDEN Modi ein Token', () => {
+        const mc = fs.readFileSync(path.join(cssVerzeichnis, 'meta-call.css'), 'utf8');
+        const zeilen = mc.split('\n').filter(z => /--mc-text-faint\s*:/.test(z));
+        assert.strictEqual(zeilen.length, 2,
+            `--mc-text-faint ist ${zeilen.length}x gesetzt, erwartet 2 (hell + dunkel)`);
+        for (const z of zeilen) {
+            assert.ok(!/#[0-9a-fA-F]{3,6}/.test(z),
+                `feste Farbe in "${z.trim()}" — der Hellmodus stand damit auf 2,83:1`);
+        }
+    });
+});

@@ -6183,12 +6183,16 @@ details[open] > .tier-trending-summary::after {
     flex-wrap: wrap;
 }
 
+/* 03.09.2026, live auf dem Profil-Reiter gemessen: Flaeche fest
+   rgba(255,255,255,.72), Schrift aus der Tokenschicht — im Dunkelmodus
+   Fastweiss auf Fastweiss. Dieselbe Paarung wie bei .toolbar-metric am
+   Vortag: die eine Haelfte dreht, die andere nicht. */
 .battle-journal-profile-stat {
     min-width: 120px;
-    background: rgba(255, 255, 255, 0.72);
+    background: var(--surface-2);
     border-radius: 12px;
     padding: 10px 12px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--line);
 }
 
 .battle-journal-profile-stat span {

@@ -31,6 +31,7 @@ import datetime as dt
 import glob
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1253,6 +1254,59 @@ def check_proxy_frische(findings):
             f"{', '.join(sorted((meta.get('set_breakdown') or {}).keys())) or '—'}."))
 
 
+def check_proxy_karte_gegen_bestand(findings):
+    """S17b — zeigen die Kartendateien auf Proxy-URLs, die die Karte
+    gar nicht mehr kennt?
+
+    Befund 03.09.2026. pokemonproxies.com hatte das Set M5 komplett
+    abgeraeumt. Die URL-Karte trug die 79 alten Adressen weiter, und
+    all_cards_merged.{json,csv} sowie cards_chunk_standard.json trugen
+    sie mit — auf der Seite standen 79 kaputte Kartenbilder. Auffallen
+    konnte das nur im Browser: die Dateien selbst waren in sich
+    schluessig.
+
+    Diese Pruefung braucht kein Netz. Sie haelt die ausgelieferten
+    Kartendateien gegen die Karte, aus der ihre Proxy-URLs stammen:
+
+      * URL in der Kartendatei, aber nicht in der Karte  -> die Karte
+        wurde nachgezogen, prepare_card_data.py aber nicht. Genau die
+        Luecke, durch die tote Bilder ueberleben.
+
+    Umgekehrt ist harmlos: die Karte darf mehr kennen, als gerade
+    gebraucht wird.
+    """
+    kartenpfad = os.path.join(DATA, "pokemonproxies_url_map.json")
+    if not os.path.exists(kartenpfad):
+        return
+    try:
+        with open(kartenpfad, encoding="utf-8") as f:
+            bekannt = set(((json.load(f) or {}).get("urls") or {}).values())
+    except Exception:                                       # noqa: BLE001
+        return          # Lesbarkeit meldet bereits check_proxy_frische
+
+    muster = re.compile(r"https?://[^\s\"',]*pokemonproxies\.com/[^\s\"',]+")
+    for name in ("all_cards_merged.json", "all_cards_merged.csv",
+                 "cards_chunk_standard.json"):
+        pfad = os.path.join(DATA, name)
+        if not os.path.exists(pfad):
+            continue
+        try:
+            with open(pfad, encoding="utf-8") as f:
+                inhalt = f.read()
+        except Exception:                                   # noqa: BLE001
+            continue
+        verwaist = {u for u in muster.findall(inhalt) if u not in bekannt}
+        if verwaist:
+            beispiel = sorted(verwaist)[:3]
+            findings.append((
+                "CRITICAL",
+                f"{name}: {len(verwaist)} Proxy-Bild-URLs stehen nicht "
+                f"(mehr) in pokemonproxies_url_map.json. Die Karte wurde "
+                f"nachgezogen, die Kartendatei nicht — diese Bilder zeigen "
+                f"ins Leere. Abhilfe: backend/core/prepare_card_data.py "
+                f"laufen lassen. Beispiele: {', '.join(beispiel)}"))
+
+
 def check_uebersicht_gegen_chunks(findings):
     """S20 — die Turnieruebersicht gegen die Chunkdateien halten.
 
@@ -1559,6 +1613,7 @@ def main():
     champions_teams = check_champions_teams(findings, baseline.get("champions_teams"))
     check_uebersicht_gegen_chunks(findings)
     check_proxy_frische(findings)
+    check_proxy_karte_gegen_bestand(findings)
     jp_sets = check_jp_setbestand(findings)
     if not first_run:
         check_jp_setbestand_vergleich(findings, jp_sets, baseline.get("jp_set_rows"))

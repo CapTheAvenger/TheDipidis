@@ -51,6 +51,21 @@ way; each one exists because breaking it cost real time.
    commit and one CI run. The clean alternative is a PAT with push rights —
    the user has to create it, and the assistant must never handle it.
 
+## Meldungstexte sind verdrahtet — ueber Sprachgrenzen hinweg
+
+Mehrere Tests pruefen den **Wortlaut** von Meldungen in
+`scripts/data_guardian.py`, und einige davon sind **JS-Tests**
+(`tests/unit/test-scraper-selbstkontrolle.js` liest die Python-Datei als
+Text). Wer eine Waechtermeldung umformuliert, muss deshalb **beide** Suiten
+fahren — `python3 -m pytest tests/python -q` UND
+`bash scripts/run-js-unit-tests.sh`.
+
+Gekostet hat mich das am 03.09.2026 einen roten Deploy: PR #634 aenderte nur
+Python, die Python-Suite war gruen (1070), und der `test`-Job im
+Deploy-Workflow fiel auf einer JS-Zusicherung um. `build` und `deploy` werden
+dann uebersprungen — die Seite haengt auf dem alten Stand, ohne dass etwas
+"kaputt" aussieht.
+
 ## Data rules
 
 * **Never join card data by name.** Names are not unique within a set. PBL has

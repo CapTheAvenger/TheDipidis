@@ -171,7 +171,17 @@ describe('data_guardian fängt ab, was der Scraper nicht kennt', () => {
             'die Regel gegen doppelte Zeilen fehlt im Guardian');
         assert.ok(/SP_BUDGET, SP_MAX = 66, 32/.test(G),
             'die Spread-Regel (66 Punkte / 32 je Wert) fehlt im Guardian');
-        assert.ok(/still above/.test(G),
+        // Wortlaut am 03.09.2026 korrigiert: "still above ... AFTER the
+        // scraper nulled its outlier" behauptete eine Reparatur, die in
+        // diesem Zweig nie stattfindet (nachgezaehlt: 0 von 22 Listen
+        // trugen einen genullten Wert). Geprueft wird deshalb die
+        // Aussage, nicht mehr der alte Satz.
+        //
+        // Dass diese Zusicherung hier in einem JS-Test auf eine
+        // PYTHON-Zeichenkette schaut, hat mich den Deploy gekostet: die
+        // Python-Suite war gruen, die JS-Suite lief nicht mehr. Wer eine
+        // Waechtermeldung umformuliert, muss BEIDE Suiten fahren.
+        assert.ok(/could NOT pin a single culprit/.test(G),
             'eine trotz Markierung zu hohe Liste wird nicht gemeldet');
     });
 

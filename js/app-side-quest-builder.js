@@ -517,7 +517,18 @@
     }
 
     // ── Bau-Ansicht und Editor ──────────────────────────────────────────────
-    function spOptionen(liste, aktuell, l) {
+    // Deutsche Anzeige fuer Gegenstand, Faehigkeit, Attacke, Wesen.
+    // Der WERT bleibt englisch — er steckt im Zustand und im Export
+    // (Showdown/Limitless), und der wird von einer Maschine gelesen.
+    // Uebersetzt wird nur, was ein Mensch liest. Siehe
+    // js/champions-namen.js.
+    function nm(en, art) {
+        return (window.ChampionsNamen && typeof window.ChampionsNamen.anzeige === 'function')
+            ? window.ChampionsNamen.anzeige(en, art)
+            : (en || '');
+    }
+
+    function spOptionen(liste, aktuell, l, art) {
         const raus = [];
         const gesehen = new Set();
         (liste || []).forEach(x => {
@@ -525,10 +536,10 @@
             if (!n || gesehen.has(n)) return;
             gesehen.add(n);
             const pct = (x && typeof x.pct === 'number') ? ` (${String(x.pct).replace('.', ',')} %)` : '';
-            raus.push(`<option value="${escapeHtml(n)}"${n === aktuell ? ' selected' : ''}>${escapeHtml(n + pct)}</option>`);
+            raus.push(`<option value="${escapeHtml(n)}"${n === aktuell ? ' selected' : ''}>${escapeHtml(nm(n, art) + pct)}</option>`);
         });
         if (aktuell && !gesehen.has(aktuell)) {
-            raus.unshift(`<option value="${escapeHtml(aktuell)}" selected>${escapeHtml(aktuell)}</option>`);
+            raus.unshift(`<option value="${escapeHtml(aktuell)}" selected>${escapeHtml(nm(aktuell, art))}</option>`);
         }
         raus.unshift(`<option value=""${aktuell ? '' : ' selected'}>—</option>`);
         return raus.join('');
@@ -543,15 +554,15 @@
                 ${icon(slug)}
                 <div class="sqb-set-title">
                     <strong>${escapeHtml(displayName(slug))}</strong>
-                    <span class="sqb-set-item">${escapeHtml(st.item || '—')}</span>
+                    <span class="sqb-set-item">${escapeHtml(st.item ? nm(st.item, 'items') : '—')}</span>
                 </div>
                 <button type="button" class="sqb-edit" data-edit="${escapeHtml(slug)}">${escapeHtml(l.bearbeiten)}</button>
             </div>
             <dl class="sqb-set-grid">
-                <dt>${escapeHtml(l.faehigkeit)}</dt><dd>${escapeHtml(st.ability || '—')}</dd>
-                <dt>${escapeHtml(l.wesen)}</dt><dd>${escapeHtml(st.nature || '—')}</dd>
+                <dt>${escapeHtml(l.faehigkeit)}</dt><dd>${escapeHtml(st.ability ? nm(st.ability, 'abilities') : '—')}</dd>
+                <dt>${escapeHtml(l.wesen)}</dt><dd>${escapeHtml(st.nature ? nm(st.nature, 'nature') : '—')}</dd>
                 <dt>${escapeHtml(l.punkte)}</dt><dd class="sqb-set-sp">${escapeHtml(CSx.toChampionsText(st.sp) || '—')}</dd>
-                <dt>${escapeHtml(l.attacken)}</dt><dd>${moves.length ? escapeHtml(moves.join(' · ')) : '—'}</dd>
+                <dt>${escapeHtml(l.attacken)}</dt><dd>${moves.length ? escapeHtml(moves.map(m => nm(m, 'moves')).join(' · ')) : '—'}</dd>
             </dl>
             ${st.sicher ? '' : `<p class="sqb-warn">${escapeHtml(l.nameUnklar)}</p>`}
         </div>`;
@@ -600,7 +611,7 @@
         }).join('');
         const attacken = [0, 1, 2, 3].map(i =>
             `<select class="sqb-move" data-i="${i}" aria-label="${escapeHtml(l.attacken)} ${i + 1}">
-                ${spOptionen(b.move, (st.moves || [])[i] || '', l)}
+                ${spOptionen(b.move, (st.moves || [])[i] || '', l, 'moves')}
              </select>`).join('');
         const leer = !(b.move || []).length && !(b.held_item || []).length;
         return `<div class="sqb-modal" id="sqbSetModal" role="dialog" aria-modal="true">
@@ -612,11 +623,11 @@
                 ${leer ? `<p class="sqb-warn">${escapeHtml(l.keineDaten)}</p>` : ''}
                 <div class="sqb-modal-body">
                     <label class="sqb-field"><span>${escapeHtml(l.faehigkeit)}</span>
-                        <select class="sqb-ability">${spOptionen(b.ability, st.ability, l)}</select></label>
+                        <select class="sqb-ability">${spOptionen(b.ability, st.ability, l, 'abilities')}</select></label>
                     <label class="sqb-field"><span>${escapeHtml(l.item)}</span>
-                        <select class="sqb-item">${spOptionen(b.held_item, st.item, l)}</select></label>
+                        <select class="sqb-item">${spOptionen(b.held_item, st.item, l, 'items')}</select></label>
                     <label class="sqb-field"><span>${escapeHtml(l.wesen)}</span>
-                        <select class="sqb-nature">${spOptionen(naturen, st.nature, l)}</select></label>
+                        <select class="sqb-nature">${spOptionen(naturen, st.nature, l, 'nature')}</select></label>
                     <div class="sqb-field sqb-field--moves"><span>${escapeHtml(l.attacken)}</span>
                         <div class="sqb-moves">${attacken}</div></div>
                     <div class="sqb-field sqb-field--sp">
@@ -808,7 +819,14 @@
     async function activate() {
         const host = document.getElementById(HOST_ID);
         if (host && !_loaded) host.innerHTML = '<p class="sqb-loading">…</p>';
-        await Promise.all([load(), loadDe(), loadDex()]);
+        // Die Namenstabelle kommt mit in denselben Wurf — sonst zeichnet
+        // der Builder einmal auf Englisch und erst der zweite Aufbau
+        // deutsch.
+        await Promise.all([
+            load(), loadDe(), loadDex(),
+            (window.ChampionsNamen && window.ChampionsNamen.laden)
+                ? window.ChampionsNamen.laden() : Promise.resolve(null),
+        ]);
         _activated = true;
         render();
     }

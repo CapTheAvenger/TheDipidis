@@ -398,10 +398,20 @@
         return `<img class="tcg-pokemon-icon tcg-pokemon-icon--md" src="${url}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.style.display='none'">`;
     }
 
+    // Gegenstand, Faehigkeit, Attacke, Wesen auf Deutsch — wenn die
+    // Oberflaeche deutsch ist und ein belegter Name vorliegt. Sonst
+    // unveraendert englisch; ein leeres Feld waere schlechter als ein
+    // englisches. Siehe js/champions-namen.js fuer den Befund.
+    function nm(en, art) {
+        return (window.ChampionsNamen && typeof window.ChampionsNamen.anzeige === 'function')
+            ? window.ChampionsNamen.anzeige(en, art)
+            : (en || '');
+    }
+
     function renderPokemon(p) {
         const moves = (p.moves || []).slice(0, 4);
         const movesHtml = moves.map(m =>
-            `<li class="side-quest-move">${escapeHtml(m)}</li>`
+            `<li class="side-quest-move">${escapeHtml(nm(m, 'moves'))}</li>`
         ).join('');
         const tera = p.tera_type ? `<span class="side-quest-tera">Tera: ${escapeHtml(p.tera_type)}</span>` : '';
         const icon = pokemonIcon(p.name);
@@ -414,7 +424,13 @@
         // vereinheitlicht (Audit 2, F20). Das Showdown-Round-Trip-Format
         // (Export ~Z.705, Import ~Z.1118, Placeholder ~Z.127/183) bleibt 'EVs:'.
         const evs = p.evs ? `<div class="side-quest-evs"><span class="side-quest-evs-label">Statuswertpunkte:</span> ${escapeHtml(p.evs)}</div>` : '';
-        const nature = p.nature ? `<div class="side-quest-nature">${escapeHtml(p.nature)} Nature</div>` : '';
+        // "Modest Nature" ist auf einer deutschen Seite zweimal englisch:
+        // der Wert und das Wort dahinter. Deutsch heisst es "Wesen: Mäßig".
+        const nature = p.nature
+            ? (uiLang() === 'de'
+                ? `<div class="side-quest-nature">Wesen: ${escapeHtml(nm(p.nature, 'nature'))}</div>`
+                : `<div class="side-quest-nature">${escapeHtml(p.nature)} Nature</div>`)
+            : '';
         return `
             <div class="side-quest-mon">
                 <div class="side-quest-mon-head">
@@ -425,8 +441,8 @@
                     ${tera}
                 </div>
                 <div class="side-quest-mon-meta">
-                    ${p.ability ? `<span class="side-quest-ability">${escapeHtml(p.ability)}</span>` : ''}
-                    ${p.item ? `<span class="side-quest-item">@ ${escapeHtml(p.item)}</span>` : ''}
+                    ${p.ability ? `<span class="side-quest-ability">${escapeHtml(nm(p.ability, 'abilities'))}</span>` : ''}
+                    ${p.item ? `<span class="side-quest-item">@ ${escapeHtml(nm(p.item, 'items'))}</span>` : ''}
                 </div>
                 ${evs}
                 ${nature}
@@ -1394,7 +1410,14 @@
         // flash "Loading…".
         // Befund C (30.08.2026): festes 'Loading…'.
         if (status && !_loaded) status.textContent = t('sideQuest.loading');
-        const [data] = await Promise.all([loadData(), loadStrategies(), loadDeNames()]);
+        // ChampionsNamen.laden() kommt mit in denselben Wurf: die
+        // Teamkarten rendern direkt danach, und ein nachgereichter
+        // Namensspeicher haette die erste Zeichnung schon verpasst.
+        const [data] = await Promise.all([
+            loadData(), loadStrategies(), loadDeNames(),
+            (window.ChampionsNamen && window.ChampionsNamen.laden)
+                ? window.ChampionsNamen.laden() : Promise.resolve(null),
+        ]);
         const meta  = data._meta || {};
         const teams = Array.isArray(data.teams) ? data.teams : [];
         if (status) status.textContent = '';

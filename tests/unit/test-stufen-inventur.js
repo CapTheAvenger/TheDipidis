@@ -67,9 +67,15 @@ const ohneKomm = quelle
 describe('Stillgelegte Stufen — abgeschaltet, aber nicht gelöscht', () => {
 
     for (const [name, schalter] of [
-        ['Meta-Dynamik (4.0a / 4.5)', 'META_DYN_AKTIV'],
-        ['Live-Share-Boden (6.1)',    'LIVE_SHARE_FLOOR_AKTIV'],
-        ['Hype-Damper (5.2)',         'HYPE_DAMPER_AKTIV'],
+        ['Meta-Dynamik (4.0a / 4.5)',     'META_DYN_AKTIV'],
+        ['Live-Share-Boden (6.1)',        'LIVE_SHARE_FLOOR_AKTIV'],
+        ['Hype-Damper (5.2)',             'HYPE_DAMPER_AKTIV'],
+        // Zweite Runde, 03.09.2026 — jede einzeln durchgemessen, indem
+        // der Motor je Stufe zweimal ueber denselben Datenstand lief
+        // (Modus B, 43 Decks) und predictedShare je Deck verglichen wurde.
+        ['Counter-Adoption-Boost (4.7b)', 'ADOPTION_BOOST_AKTIV'],
+        ['Qualitaetsboden (5.2a)',        'QUALITY_FLOOR_AKTIV'],
+        ['Tier-1-Konvergenz (6.0)',       'TIER1_AKTIV'],
     ]) {
         it(`${name} ist abgeschaltet`, () => {
             const re = new RegExp(schalter + '\\s*=\\s*false');
@@ -92,6 +98,107 @@ describe('Stillgelegte Stufen — abgeschaltet, aber nicht gelöscht', () => {
             assert.ok(quelle.includes(beleg),
                 `der Beleg "${beleg}" ist aus dem Code verschwunden`);
         }
+    });
+
+    it('die Messungen der zweiten Runde stehen bei ihrer Stufe', () => {
+        // Eine Stilllegung ohne Zahl daneben ist eine Meinung. Jede der
+        // drei am 03.09.2026 abgeschalteten Stufen muss ihre eigene
+        // Messung im Kommentar tragen — und zwar IN IHREM Block, nicht
+        // irgendwo in der Datei.
+        const belege = [
+            ['const ADOPTION_BOOST_AKTIV', '0,000 pp'],
+            ['const QUALITY_FLOOR_AKTIV',  '0,9118'],
+            ['const TIER1_AKTIV',          '333'],
+        ];
+        for (const [marke, zahl] of belege) {
+            const i = quelle.indexOf(marke);
+            assert.ok(i > 0, `${marke} ist verschwunden`);
+            // Der Kommentarblock steht VOR der Konstante.
+            const block = quelle.slice(Math.max(0, i - 2600), i);
+            assert.ok(block.includes(zahl),
+                `bei ${marke} fehlt die gemessene Zahl "${zahl}" — ohne sie `
+                + 'ist die Stilllegung nicht nachprüfbar');
+            assert.ok(/STILLGELEGT 03\.09\.2026/.test(block),
+                `bei ${marke} fehlt der datierte Stilllegungsvermerk`);
+        }
+    });
+
+    it('auch die zweite Runde hat nur stillgelegt, nicht gelöscht', () => {
+        for (const marke of ['_computeCounterAdoptionBoost', 'QUALITY_FLOOR_RATIO_MIN',
+                             'TIER1_MIN_DAY1_PILOTS', 'famConvProjection']) {
+            assert.ok(quelle.includes(marke), `${marke} wurde gelöscht statt stillgelegt`);
+        }
+    });
+
+    it('der Tier-1-Schalter räumt seine Marken am Deck auf', () => {
+        // Ein Schalter, der `_tier1Eligible` aus einem früheren Lauf am
+        // Deck stehen lässt, schaltet nichts ab: der Familienboden weiter
+        // unten sucht genau nach dieser Marke.
+        const i = ohneKomm.indexOf('if (!TIER1_AKTIV)');
+        assert.ok(i > 0, 'das TIER1_AKTIV-Tor ist verschwunden');
+        const block = ohneKomm.slice(i, i + 400);
+        for (const feld of ['_tier1Eligible', '_tier1Diag', '_tier1ConvProjection']) {
+            assert.ok(block.includes(feld),
+                `der abgeschaltete Zweig setzt ${feld} nicht zurück`);
+        }
+    });
+});
+
+describe('Die Wache auf den Prognosekern', () => {
+
+    // BEFUND (03.09.2026): in Modus B gilt `predicted = _kernWert`, und
+    // der Kern kennt 43 von 43 Decks. Fünf nummerierte Stufen (3.0, 4.2,
+    // 4.4, 4.4b, 5.0) leben ausschließlich im Rückfallzweig darunter und
+    // erreichen deshalb nichts — gemessen 0,000 pp. Im künstlich
+    // erzwungenen Rückfall verschieben sie sehr wohl etwas (3.0 bis
+    // 1,074 pp, 4.4b bis 1,453 pp).
+    //
+    // Sinkt die Abdeckung, wachen fünf lange ungeprüfte Stufen
+    // gleichzeitig auf. Ohne Meldung merkt das niemand.
+
+    it('die Abdeckung wird gezählt', () => {
+        assert.ok(/_kernAbdeckung\s*=\s*\{/.test(ohneKomm),
+            'der Zähler für die Kernabdeckung fehlt');
+        assert.ok(/_kernAbdeckung\.getroffen\+\+/.test(ohneKomm),
+            'der Treffer-Zweig zählt nicht mit');
+        assert.ok(/_kernAbdeckung\.rueckfall\.push/.test(ohneKomm),
+            'der Rückfall-Zweig merkt sich die Decks nicht');
+    });
+
+    it('der Zähler wird je Lauf zurückgesetzt', () => {
+        // Sonst summiert sich die Abdeckung über mehrere
+        // Neuberechnungen und die Quote bleibt bei 100 %, auch wenn
+        // gerade ein Deck durchfällt.
+        assert.ok(/_kernAbdeckung\.getroffen\s*=\s*0/.test(ohneKomm),
+            'der Trefferzähler wird nie zurückgesetzt');
+        assert.ok(/_kernAbdeckung\.rueckfall\.length\s*=\s*0/.test(ohneKomm),
+            'die Rückfall-Liste wird nie geleert');
+    });
+
+    it('die Wache wird auch aufgerufen', () => {
+        const stellen = ohneKomm.split('_meldeKernAbdeckung').length - 1;
+        assert.ok(stellen >= 2,
+            `_meldeKernAbdeckung steht nur ${stellen}× im Code — `
+            + 'geschrieben, aber nicht aufgerufen');
+    });
+
+    it('die Meldung nennt die fünf Stufen, die dann aufwachen', () => {
+        const i = quelle.indexOf('function _meldeKernAbdeckung');
+        assert.ok(i > 0, 'die Wache ist verschwunden');
+        const block = quelle.slice(i, i + 1400);
+        for (const stufe of ['3.0', '4.2', '4.4', '4.4b', '5.0']) {
+            assert.ok(block.includes(stufe),
+                `die Meldung nennt Stufe ${stufe} nicht — dann weiß der `
+                + 'Leser nicht, was gerade wieder mitrechnet');
+        }
+    });
+
+    it('die Wache schweigt bei voller Abdeckung', () => {
+        // Eine Meldung, die jeden Lauf erscheint, liest bald niemand mehr.
+        const i = ohneKomm.indexOf('function _meldeKernAbdeckung');
+        const block = ohneKomm.slice(i, i + 900);
+        assert.ok(/rueckfall\.length\s*===\s*0\)\s*return/.test(block),
+            'die Wache meldet sich auch dann, wenn der Kern jedes Deck kennt');
     });
 });
 

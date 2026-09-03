@@ -624,6 +624,32 @@ window.MetaCall = (function () {
   const TIER1_CONV_DAMPING          = 0.4;   // same damping the post-NAIC analysis used
   const TIER1_BLEND_WEIGHT          = 0.5;   // 50/50 blend with existing predicted
 
+  // STILLGELEGT 03.09.2026 — die beiden Tore schliessen sich aus.
+  //
+  // Gemessen ueber den Datenstand vom 03.09. (Modus B, 43 Decks):
+  // NULL Familien kommen durch, die Stufe verschiebt 0,000 pp. Das
+  // ist kein Zufall dieses einen Tages, sondern Arithmetik:
+  //
+  //   • TIER1_MIN_DAY1_PILOTS = 300 schafft im aktuellen Fenster
+  //     genau EINE Familie — Dragapult mit 333 Piloten. Alle uebrigen
+  //     haben hoechstens 58.
+  //   • Dragapult scheitert dann am Konversionstor: conv 0,123 gegen
+  //     geforderte 0,238 (Feldmittel × 1,15).
+  //
+  // Die Bedingungen widersprechen einander, solange es je Format nur
+  // EIN Major gibt: 300 Piloten erreicht nur, wer schon dominiert —
+  // und wer dominiert, verduennt seine eigene Konversionsrate, weil
+  // seine 333 Piloten dieselben Day-2-Plaetze teilen. Das Absenken
+  // von TIER1_CONVERGENCE_THRESHOLD (5,0 auf 1,0) aendert daran
+  // nichts; gemessen, nicht geschaetzt.
+  //
+  // Bezahlt wird das mit drei Codebloecken (Familienskalierung,
+  // Familienboden, Deckelausnahme) fuer null Ausloesungen. Sie
+  // bleiben stehen, aber hinter diesem Schalter: sobald ein Format
+  // zwei Majors hat, ist die Stufe wieder eine ernsthafte Kandidatin
+  // — dann aber mit neu gemessenen Toren.
+  const TIER1_AKTIV                 = false;
+
   // Long-tail-preference redistribution. When the Tier-1 floor (or
   // the Live-Share floor below) lifts a meta-relevant deck, the
   // extra pp first comes out of the LONG TAIL — decks below 2 %
@@ -788,6 +814,10 @@ window.MetaCall = (function () {
   const PREDICTOR_47_DELTA_MIN_PP        = 0.5;  // brought - ladder must exceed this to be a signal
   const PREDICTOR_47_BOOST_PER_PP        = 0.50; // 50 % of (brought - ladder) gets added as a pp boost
   const PREDICTOR_47_BOOST_CAP_PP        = 1.5;  // hard cap per deck
+  // STILLGELEGT 03.09.2026 — Begruendung mit Messung an der Aufrufstelle
+  // (Suche: "STILLGELEGT 03.09.2026" im Block "Predictor 4.7"). Kurz:
+  // 0,000 pp bei 43 Decks, im Standard- UND im Gegen-Modus.
+  const ADOPTION_BOOST_AKTIV             = false;
   let _adoptionBoostLastLogId = null;
 
   // ── Predictor 5.5 — Online-Presence Floor ──────────────────
@@ -2769,6 +2799,7 @@ window.MetaCall = (function () {
   // captures decks 4.5 missed (matchup WR < 50 %) but which the
   // tournament-floor data clearly shows as adopted counters.
   function _computeCounterAdoptionBoost() {
+    if (!ADOPTION_BOOST_AKTIV) return;
     if (!_shareList || _shareList.length === 0) return;
     if (!_tournamentStats) return;
     // Gated by the Meta Call mode toggle. Standard mode treats the
@@ -3187,6 +3218,47 @@ window.MetaCall = (function () {
     } catch (_e) { /* dev log only */ }
   }
 
+  // ── Wache: erreicht der V3-Kern noch jedes Deck? ──────────────────
+  //
+  // BEFUND (03.09.2026, beim Durchmessen aller Prognosestufen): in
+  // Modus B gilt `predicted = _kernWert`, und der Kern kennt zurzeit
+  // 43 von 43 Decks. Der gewichtete Rueckfallzweig darunter laeuft
+  // deshalb NIE — und mit ihm laufen fuenf nummerierte Stufen nie:
+  // 3.0 Verlaufssignale, 4.2 Ladder-Bias-Daempfer, 4.4 Familien-Anker,
+  // 4.4b Day-1-zu-Day-2-Rueckfall, 5.0 Mehrschnappschuss-Grundlinie.
+  //
+  // Sie sind nicht kaputt. Gemessen im kuenstlich erzwungenen
+  // Rueckfall verschieben sie sehr wohl etwas (3.0: 40 von 43 Decks,
+  // bis 1,074 pp; 4.4b: bis 1,453 pp). Sie erreichen nur nichts,
+  // solange der Kern vollstaendig ist.
+  //
+  // Das ist genau die Sorte Zustand, die still kippt: beim ersten
+  // Turnier einer neuen Epoche kennt der Kern die neuen Decks nicht,
+  // fuenf jahrelang ungeprueft schlafende Stufen wachen gleichzeitig
+  // auf, und niemand weiss davon. Darum diese Zeile — sie meldet die
+  // Abdeckung, sobald sie unter 100 % faellt, und nennt die Decks.
+  const _kernAbdeckung = { getroffen: 0, rueckfall: [] };
+  let _kernAbdeckungLetzteMeldung = null;
+
+  function _meldeKernAbdeckung() {
+    const gesamt = _kernAbdeckung.getroffen + _kernAbdeckung.rueckfall.length;
+    if (gesamt === 0) return;
+    const kennung = `${_lastMajorInfo && _lastMajorInfo.id}|${gesamt}|`
+                  + `${_kernAbdeckung.rueckfall.length}`;
+    if (kennung === _kernAbdeckungLetzteMeldung) return;
+    _kernAbdeckungLetzteMeldung = kennung;
+    if (_kernAbdeckung.rueckfall.length === 0) return;
+    const quote = (_kernAbdeckung.getroffen / gesamt) * 100;
+    console.warn(
+      `[Prognosekern] Abdeckung ${quote.toFixed(1)} % `
+      + `(${_kernAbdeckung.getroffen}/${gesamt}). `
+      + `${_kernAbdeckung.rueckfall.length} Deck(s) laufen ueber den `
+      + `gewichteten Rueckfallzweig — damit sind die Stufen 3.0, 4.2, `
+      + `4.4, 4.4b und 5.0 wieder aktiv, die bei voller Abdeckung `
+      + `nichts tun: ${_kernAbdeckung.rueckfall.slice(0, 8).join(', ')}`
+      + (_kernAbdeckung.rueckfall.length > 8 ? ' …' : ''));
+  }
+
   // ── Diagnostic: Counter Coverage vs Dominant Family ────────
   // Surfaces decks that should have a matchup row vs the
   // dominant family but don't, or whose WR falls below the 4.5
@@ -3555,6 +3627,11 @@ window.MetaCall = (function () {
     // family-level eligibility without recomputing.
     _famLadderAgg    = Object.create(null); // famKey → Σ rawLadderPct across variants
     _famLastMajorAgg = Object.create(null); // famKey → { share, day1Players, conv, … }
+    // Zaehler der Kern-Wache je Lauf zuruecksetzen — sonst summiert
+    // sich die Abdeckung ueber mehrere Neuberechnungen und die Quote
+    // bleibt auch dann bei 100 %, wenn gerade ein Deck durchfaellt.
+    _kernAbdeckung.getroffen = 0;
+    _kernAbdeckung.rueckfall.length = 0;
     _famMedianAgg    = Object.create(null); // famKey → family-level median share across recent majors
     if (_shareList && totalLadder > 0) {
       // (a) Ladder + last-major aggregation per family.
@@ -3911,7 +3988,9 @@ window.MetaCall = (function () {
       const _kernWert = _prognoseKernCache ? _prognoseKernCache.get(k) : undefined;
       if (_predictorMode === 'B' && typeof _kernWert === 'number' && _kernWert > 0) {
         predicted = _kernWert;
+        _kernAbdeckung.getroffen++;
       } else if (_predictorMode === 'B') {
+        _kernAbdeckung.rueckfall.push(d.name);
         // Mode B (Predictor 3.0 + 4.2 + 4.4): labs majors authoritative
         // + conv-rate weighted, plus post-major and weekly trend signals
         // from the online ladder. Ladder term damped by 4.2; labs term
@@ -4390,7 +4469,20 @@ window.MetaCall = (function () {
     //     instead of estimating it inside the variant loop
     //   • variant splits stay determined by the existing 6-signal
     //     blend, not by the last-major distribution alone
-    if (_shareList && _shareList.length > 0 && _meanDay2Conv > 0) {
+    //
+    // TIER1_AKTIV steht seit dem 03.09.2026 auf false — Begruendung mit
+    // Messung im Konstantenblock oben. Die Felder werden trotzdem
+    // zurueckgesetzt: `_tier1Eligible` haengt sonst aus einem frueheren
+    // Lauf am Deck, und der Familienboden weiter unten sucht genau
+    // danach. Ein Schalter, der alte Zustaende stehen laesst, schaltet
+    // nichts ab.
+    if (!TIER1_AKTIV) {
+      (_shareList || []).forEach(d => {
+        d._tier1Eligible       = false;
+        d._tier1Diag           = null;
+        d._tier1ConvProjection = null;
+      });
+    } else if (_shareList && _shareList.length > 0 && _meanDay2Conv > 0) {
       const famAggCurrent = Object.create(null);   // famKey → Σ predictedShareRaw
       _shareList.forEach(d => {
         const fk = d._tier1FamKey;
@@ -4482,10 +4574,38 @@ window.MetaCall = (function () {
     // predictor wrote them off entirely because their ladder/labs
     // signals stayed sub-noise. Floor scales with the conv ratio
     // and caps at 2 % so a freak outlier can't hijack the field.
+    //
+    // STILLGELEGT 03.09.2026 — doppelt tot, beides gemessen.
+    //
+    // ERSTENS kommt sie gar nicht bis zur Rechnung. Das Tor
+    // `q.n < QUALITY_FLOOR_MIN_N` vergleicht `_day2Q.n` gegen 1, aber
+    // `_day2Q.n` ist keine Stichprobenzahl, sondern eine
+    // Rezenz-Gewichtssumme: sie steht bei ALLEN 13 Decks mit
+    // Day-2-Daten auf 0,9118. Kein Deck kommt durch.
+    //
+    // ZWEITENS traegt sie auch mit geoeffnetem Tor nichts. Gegenprobe
+    // mit `q.n > 0`: 0 von 43 Decks, 0,000 pp. Der berechnete Boden
+    // liegt bei keinem Deck ueber dem Rohwert. Der staerkste Kandidat
+    // ist Crustle (Konversion 40 % gegen Feldmittel 20,7 %, Verhaeltnis
+    // 1,93) — sein Boden waere 0,93, sein Rohwert liegt darueber.
+    //
+    // Warum die Stufe verhungert ist, steht eine Zeile weiter unten:
+    // `Math.pow(floorPct, d.concentrationExp)` sollte den Boden in
+    // denselben ^exp-Raum heben, in dem die konzentrationsverstaerkten
+    // Anteile leben. Diesen Raum gibt es seit dem 23.08.2026 nicht
+    // mehr — `concentrationExp` ist konstant 1,00, die Potenz also die
+    // Identitaet. Der Boden konkurriert seither mit unverstaerkten
+    // Werten und verliert jedes Mal.
+    //
+    // Das n-Tor bleibt als Befund bestehen (siehe 5.1/5.3a weiter
+    // unten, wo derselbe Vergleich 1,13 pp Wirkung blockiert). Hier
+    // aendert seine Reparatur nichts, deshalb wird die Stufe
+    // stillgelegt statt geflickt.
     const QUALITY_FLOOR_RATIO_MIN  = 1.5;   // ≥ 1.5× field-mean conv
     const QUALITY_FLOOR_MAX_PCT    = 2.0;   // hard cap on the floor
     const QUALITY_FLOOR_MIN_N      = 1;     // works from 1 major of data
-    if (_meanDay2Conv > 0) {
+    const QUALITY_FLOOR_AKTIV      = false; // stillgelegt 03.09.2026, s.o.
+    if (QUALITY_FLOOR_AKTIV && _meanDay2Conv > 0) {
       _shareList.forEach(d => {
         const k = normalize(d.name);
         const q = _labsDay2ConvByDeck[k];
@@ -4536,7 +4656,32 @@ window.MetaCall = (function () {
     // so the boost lands on post-suppression raw values; renorm
     // step then redistributes the freed share from the dominant
     // family into these adopted counters.
-    _computeCounterAdoptionBoost();
+    //
+    // STILLGELEGT 03.09.2026 — gemessen, nicht vermutet.
+    //
+    // Die Stufe wurde einzeln durchgemessen: Motor einmal mit, einmal
+    // ohne sie ueber den Datenstand vom 03.09. (Modus B, 43 Decks),
+    // Vergleich von predictedShare je Deck.
+    //
+    //   Standard-Modus: 0 von 43 Decks, 0,000 pp  — erwartet, sie ist
+    //                   dort per `_metaCallMode !== 'counter'` aus.
+    //   Gegen-Modus:    0 von 43 Decks, 0,000 pp  — NICHT erwartet.
+    //
+    // Sie ist damit die einzige Stufe, die selbst dort nichts tut, wo
+    // sie ausdruecklich dafuer eingeschaltet wird. Zum Vergleich: 4.6,
+    // das im selben Modus laeuft, erklaert die GANZE Modusdifferenz
+    // (18 von 43 Decks, bis 1,897 pp). 4.7 addiert null dazu.
+    //
+    // Der Grund steckt in der Reihenfolge: 4.7 verlangt
+    // `brought_share > ladder_share + 0,5 pp`, liest brought_share aber
+    // aus derselben Labs-Quelle, aus der der V3-Kern die Vorhersage
+    // ohnehin schon gebaut hat. Was 4.7 als "Adaption" nachtragen will,
+    // steht zu diesem Zeitpunkt bereits im Wert.
+    //
+    // Der Rechenweg bleibt stehen — er ist nicht kaputt, er ist
+    // ueberholt. Wer ihn wiederbelebt, misst vorher: kommt eine Zahl
+    // ungleich 0,000 pp heraus, hat sich die Datenlage geaendert.
+    _computeCounterAdoptionBoost();   // laeuft ins ADOPTION_BOOST_AKTIV-Tor, s. o.
 
     // Predictor 5.6 — Format-Leader Within-Family Consolidation
     // and 5.7 — Anti-Leader Tech-Boost. Both target the
@@ -4573,6 +4718,7 @@ window.MetaCall = (function () {
 
     // Diagnostic — surfaces matchup-coverage gaps once per major.
     _logCounterCoverageGaps();
+    _meldeKernAbdeckung();
 
     // Renormalise predicted shares to sum 100% so the field-composition
     // budget logic works unchanged.

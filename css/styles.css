@@ -11271,7 +11271,11 @@ body.arc-open { overflow: hidden; }
 #archetypeCardOverlay .arc-card .mobile-table-scroll .arc-mu-table,
 #currentMetaContent .mobile-table-scroll .arc-mu-table,
 #archetypeCardOverlay .mobile-table-scroll .arc-mu-table {
-    min-width: 411px;
+    /* 411 -> 433: die beiden Praesenzspalten wurden am 03.09.2026 um
+       6 bzw. 16 px breiter (laengere Ueberschriften). Ohne die
+       Mindestbreite wuerde die Tabelle stattdessen die Deck-Spalte
+       zusammendruecken. */
+    min-width: 433px;
 }
 #currentMetaContent .arc-mu-table thead,
 #archetypeCardOverlay .arc-mu-table thead { display: table-header-group; }
@@ -11352,15 +11356,20 @@ body.arc-open { overflow: hidden; }
 #archetypeCardOverlay .arc-mu-table th:nth-child(6),
 #archetypeCardOverlay .arc-mu-table td:nth-child(6) { width: 40px; }
 /* Die beiden Praesenzspalten: breit genug fuer eine zweizeilige
-   Ueberschrift ("Major" / "Punkte") und Werte wie "100,0 %". */
+   Ueberschrift und Werte wie "100,0 %".
+   03.09.2026 verbreitert, weil die Ueberschriften laenger wurden:
+   "Major-P" -> "Major-WR" und "Major-M" -> "Major-Matches" (englisch
+   "Major matches"). Bei 390 px gemessen lief die zweite Zeile "MATCHES"
+   ueber ihre 50 px hinaus — die Kopfzelle steht auf uppercase, und
+   "MATCHES" braucht bei 11,2 px fett rund 58 px. */
 #currentMetaContent .arc-mu-table th:nth-child(7),
 #currentMetaContent .arc-mu-table td:nth-child(7),
 #archetypeCardOverlay .arc-mu-table th:nth-child(7),
-#archetypeCardOverlay .arc-mu-table td:nth-child(7) { width: 52px; }
+#archetypeCardOverlay .arc-mu-table td:nth-child(7) { width: 58px; }
 #currentMetaContent .arc-mu-table th:nth-child(8),
 #currentMetaContent .arc-mu-table td:nth-child(8),
 #archetypeCardOverlay .arc-mu-table th:nth-child(8),
-#archetypeCardOverlay .arc-mu-table td:nth-child(8) { width: 50px; }
+#archetypeCardOverlay .arc-mu-table td:nth-child(8) { width: 66px; }
 /* Ohne Ausrufezeichen: der einzige Gegenspieler ist `table thead` aus
    css/styles.css:839 mit Element-Spezifitaet (0,0,1). Diese Regel hier
    liegt bei (1,1,1) und gewinnt ohnehin. */

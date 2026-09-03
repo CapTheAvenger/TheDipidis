@@ -161,4 +161,52 @@ nicht in einem Gesprächsverlauf verschwinden.
   Deckel 32, belegt im Kopf von `js/champions-set.js`). `toShowdownText()`
   und `showdownUeberschuss()` sind ersatzlos entfallen — es gibt nur noch
   EINE Serialisierung für beide Ziele.
-* **Alle übrigen Reiter** mit derselben Aufräumbrille durchgehen.
+* ~~**Alle übrigen Reiter** mit derselben Aufräumbrille durchgehen.~~
+  **Erledigt am 02./03.09.2026.** Zwei Prüfagenten über zwölf Reiter,
+  34 Befunde; eine dritte Runde über das Ergebnis noch einmal 19,
+  darunter drei Regressionen aus dem Reparieren selbst. Zwei Muster
+  zogen sich durch und stehen jetzt als Regel im Test, nicht als
+  Einzelfall: Formularelemente erben `color` nicht (fünf Stellen
+  zwischen 1,10:1 und 1,19:1 im Dunkelmodus), und eine
+  Kurzform-Eigenschaft im Mobilblock löscht eine gezielte Angabe aus
+  einer anderen Datei (`padding: 9px` nahm der Lupe ihren Platz,
+  `min-height: 38px !important` machte aus einem Boden einen Deckel).
+
+## Der Post-Baukasten (`ds-post.js`)
+
+**Was geplant war:** die fünf Bildpainter aus `js/ds-share.js` zu einem
+Baukasten mit sieben austauschbaren Körpern zusammenzufassen —
+Kartengitter (Staples / Deck / Deck+Tech), Tafel (Meta Call / Day 2 /
+Battle Journal), Heatmap-Bild, Archetyp-Karte.
+
+**Warum nicht gebaut:** die drei Vorlagen, die der Auftraggeber benannt
+hat (Deck-Analysekarte nach @poke_hive, Decklisten-Darstellung,
+Ergebnisbild ohne Foto), sind alle drei gebaut, verdrahtet und am
+03.09.2026 einzeln nachgemessen: `deckCardCanvas` 1200×675,
+`metaCallPostCanvas` und `staplesPostCanvas` 1080×1350,
+`resultCardCanvas` 1080×1080, `postCardCanvas` 1080×1350 — alle
+erzeugen ein gefülltes Bild. Die Abnahme aus dem Handbuch ist erfüllt:
+jede Quote auf der Karte trägt ihren Nenner (`2.846 Listen`,
+`120 / 1.172`, `S/(S+N+U)`, `Antritte mit Top-8-Schnitt 12.590`).
+
+Die „sieben Körper" waren eine Zerlegung des Umbaus, kein zusätzliches
+Können. Sie zusammenzulegen ist ein Umbau ohne sichtbaren Gewinn an
+einer Stelle, die funktioniert — und das ist genau die Sorte Arbeit,
+die diese Datei sonst als Grund zum Weglassen nennt.
+
+**Was gut daran war:** die Beobachtung stimmt. Fünf Painter teilen sich
+Kopf, Fuß, Blüten, Logo und Sprite-Fallback bereits über gemeinsame
+Funktionen (`malPostKopf`, `malMetaCallFuss`, `malGrund`, `sprite`) —
+der Rest ist je Bild verschieden, und das ist er zu Recht.
+
+**Was anders sein müsste, damit es zurückkommt:** ein *sechster* Körper,
+der wirklich gebraucht wird. Kandidaten aus dem Handbuch: das
+Heatmap-Bild (die Ansicht, die auf dem Telefon heute gar nicht
+existiert) und die Day-2-Tafel. Sobald zwei neue Körper anstehen, lohnt
+der Baukasten; für den fünften allein lohnt er nicht.
+
+**In derselben Runde trotzdem gemacht:** die Aufräumbrille auf die
+Bildkarte selbst. Ohne Präsenzdaten standen dort dreimal „Major: keine
+Daten" und einmal „Day 2 (Major): keine Daten" untereinander — vier
+Zeilen, die dasselbe sagen, auf einem Bild, das durch Discord wandert.
+Jetzt sagt es ein Satz im Fuß.

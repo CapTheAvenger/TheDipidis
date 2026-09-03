@@ -92,7 +92,16 @@ describe('Dezimalpunkte in deutschen Zahlen', () => {
         const CDB = ohneKomm(lies('js/app-cards-db.js'));
         assert.ok(!/\? '<0\.1' : percentage\.toFixed\(1\)/.test(CDB),
             '"1.9% Coverage" mit Punkt ist zurück');
-        assert.match(CDB, /_kommaZahl\(percentage, 1\)/);
+        /* Der Helfer hiess bis zum 02.09.2026 _kommaZahl und stand
+           lokal in der Deckungs-Rechnung. Die Abnahme fand, dass der
+           PREIS zwei Zeilen darueber dieselbe Frage NICHT stellte —
+           im englischen Modus standen "Ø 322,40 €" und "1.0% Coverage"
+           auf derselben Kachel. Jetzt fragt eine Funktion fuer beide,
+           und sie heisst nach dem, was sie tut. */
+        assert.match(CDB, /_zahlNachSprache\(percentage, 1\)/);
+        assert.match(CDB, /Ø \$\{_zahlNachSprache\(price, 2\)\} €/,
+            'der Preis geht nicht durch dieselbe Funktion — dann stehen auf einer '
+            + 'Kachel wieder zwei Dezimaltrenner');
     });
 
     it('die Win Rate der Deck-Analyse liest die Zahlenspalte', () => {

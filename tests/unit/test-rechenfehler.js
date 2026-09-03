@@ -495,13 +495,38 @@ describe('Ø-Platzierung: fehlende Platzierungen zaehlen nirgends mit', () => {
             ${block}
             return avgPlacement;
         `;
+        /* Seit dem 02.09.2026 laeuft der Mittelwert durch zahlLokal:
+           er stand auf der deutschen Seite als "14.83" da, waehrend
+           daneben "Ø 1,20x", "100,0%" und "4,16 €" mit Komma stehen —
+           und derselbe Wert im Reiter nebenan als "14,83".
+           Der Sandkasten bekommt die ECHTE Funktion aus app-utils.js,
+           damit hier nicht die Attrappe geprueft wird. */
+        /* BEFUND DER ABNAHME (03.09.2026): der erste Anlauf liess
+           /^3[.,]00$/ zu — also genau den Punkt, dessen Beseitigung der
+           Anlass war. Nachgewiesen: mit zahlLokal wieder auf toFixed(2)
+           zurueckgedreht blieben beide Testdateien gruen.
+           zahlLokal liest `getLang` ausserdem als FREIE Variable, nicht
+           ueber window — sie muss also als Argument in den Sandkasten,
+           sonst faellt der Zweig still auf de-DE und die
+           Sprachabhaengigkeit wird nie geprueft. */
+        const zahlLokalQuelle = lies('js/app-utils.js')
+            .match(/function zahlLokal\(wert, stellen\) \{[\s\S]*?\n\}/)[0];
+        const bauZahlLokal = (lang) => new Function('getLang',
+            zahlLokalQuelle + '\nreturn zahlLokal;')(() => lang);
         // eslint-disable-next-line no-new-func
-        const f = new Function('eingabe', rumpf);
-        assert.equal(f([{ placement: '2' }, { placement: '4' }, { placement: '' }]), '3.00',
-            'ein leeres Feld zieht den Mittelwert wieder nach unten');
-        assert.equal(f([{ placement: '' }, { placement: null }]), '-',
+        const f = new Function('eingabe', 'window', rumpf);
+        const deutsch = f([{ placement: '2' }, { placement: '4' }, { placement: '' }],
+            { zahlLokal: bauZahlLokal('de') });
+        assert.equal(deutsch, '3,00',
+            `auf der deutschen Seite gehoert ein Komma dahin (war "${deutsch}")`);
+        const englisch = f([{ placement: '2' }, { placement: '4' }, { placement: '' }],
+            { zahlLokal: bauZahlLokal('en') });
+        assert.equal(englisch, '3.00',
+            `auf der englischen Seite gehoert ein Punkt dahin (war "${englisch}")`);
+        const fenster = { zahlLokal: bauZahlLokal('de') };
+        assert.equal(f([{ placement: '' }, { placement: null }], fenster), '-',
             'ohne eine einzige Platzierung darf keine Zahl dastehen');
-        assert.equal(f([]), '-');
+        assert.equal(f([], fenster), '-');
     });
 });
 

@@ -66,6 +66,40 @@ Deploy-Workflow fiel auf einer JS-Zusicherung um. `build` und `deploy` werden
 dann uebersprungen — die Seite haengt auf dem alten Stand, ohne dass etwas
 "kaputt" aussieht.
 
+## Auch DOKUMENTE sind verdrahtet, nicht nur Meldungstexte
+
+Am 03.09.2026 habe ich einen roten Deploy ausgeloest, indem ich
+`docs/geparkte-features.md` NACH dem letzten Suitenlauf ergaenzt und dann
+ausgeliefert habe. `tests/unit/test-aufraeumen-startseite.js` liest diese
+Datei und verlangt von JEDEM `###`-Eintrag zwei Dinge: einen Abschnitt
+"Warum weg" und einen Satz dazu, was an einer Rueckkehr anders sein
+muesste. Meine neuen Abschnitte hatten beides nicht.
+
+Folge: `test` rot, `build` und `deploy` uebersprungen, `main` haengt
+16 Minuten auf dem alten Stand — und es sieht nichts kaputt aus. Behoben
+hat es zufaellig der naechste PR, nicht ich.
+
+**Die Regel ist nicht "Markdown ist harmlos", sondern: was ein Test
+liest, ist Code.** Vor dem Ausliefern gilt deshalb dieselbe Reihenfolge
+wie bei Quelltext — erst aendern, DANN die Suiten fahren, dann hochladen.
+Ein Suitenlauf, der vor der letzten Aenderung liegt, zaehlt nicht.
+
+Bekannte Dateien dieser Art, Stand 03.09.2026:
+
+| Datei | wird gelesen von |
+| --- | --- |
+| `docs/geparkte-features.md` | `tests/unit/test-aufraeumen-startseite.js` |
+| `scripts/data_guardian.py` | `tests/unit/test-scraper-selbstkontrolle.js` |
+| `scripts/datenluecken.py` | `tests/python/test_deutsche_namen_sichtbar.py` |
+| `js/app-meta-call.js` (Kommentare!) | `tests/unit/test-stufen-inventur.js` |
+| `data/champions_namen_entschieden.json` (`_meta`-Bilanz) | zwei Python-Suiten |
+| `tutorial/tutorial.*.html` | `test-tutorial.js` und vier weitere |
+| `images/tutorials/**` | `test-tutorial.js` (Datei muss existieren) |
+
+Die Liste ist nicht vollstaendig — `docs/geparkte-features.md` allein wird
+von ueber zehn Testdateien gelesen. `grep -rl "<dateiname>" tests/` vor
+dem Aendern kostet zwei Sekunden.
+
 ## Data rules
 
 * **Never join card data by name.** Names are not unique within a set. PBL has

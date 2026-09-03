@@ -136,6 +136,34 @@
         const topdeckResEl = document.getElementById('res-topdeck');
         if (topdeckResEl) topdeckResEl.textContent = _calcPct(topdeckProb);
 
+        /* ── Die Nenner auf den Bildschirm ──────────────────────────
+         *
+         * BEFUND DER ABNAHME (02.09.2026): der Rechner ermittelt
+         * `remaining` (Deck nach Hand und Preisen) und schreibt es in
+         * ein Element `calc-remaining-deck`, das es in index.html gar
+         * nicht gibt — die Zahl wurde also berechnet und weggeworfen.
+         * Auf dem Bildschirm standen drei Prozentwerte ohne jede
+         * Bezugsgroesse: "Topdeck-Chance 1,89 %" ist copiesLeft/unseen,
+         * die Beschriftung klang aber nach den 47 Restkarten.
+         * Nachrechnen konnte das niemand.
+         *
+         * Dieselbe Regel wie ueberall sonst auf dieser Seite: neben der
+         * Zahl steht, woraus sie folgt. */
+        var de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+        var setzeFuss = function (id, text) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+        setzeFuss('calc-fuss-draw', de
+            ? copies + ' von ' + deckSize + ' Karten, ' + drawn + ' gezogen'
+            : copies + ' of ' + deckSize + ' cards, ' + drawn + ' drawn');
+        setzeFuss('calc-fuss-prize', de
+            ? copiesLeft + ' übrig in ' + prizePool + ' ungesehenen Karten, 6 davon Preiskarten'
+            : copiesLeft + ' left among ' + prizePool + ' unseen cards, 6 of them prizes');
+        setzeFuss('calc-fuss-topdeck', de
+            ? copiesLeft + ' von ' + unseen + ' ungesehenen Karten'
+            : copiesLeft + ' of ' + unseen + ' unseen cards');
+
         // Farbe der Hauptanzeige
             const drawEl = document.getElementById('res-draw');
             if (drawEl) {

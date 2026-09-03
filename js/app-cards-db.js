@@ -2559,7 +2559,7 @@
                 const emptyTitle = _cdbT('cdb.noCardsFound', 'No Cards Found');
                 const emptyDesc = _cdbT('cdb.adjustFilters', 'Try adjusting your filter settings');
                 const zeroLabel = _cdbT('cdb.zeroCardsFound', '0 cards found');
-                content.innerHTML = `<div style="text-align: center; padding: 40px; color: #444;"><h2>${emptyTitle}</h2><p style="font-weight: 500;">${emptyDesc}</p></div>`;
+                content.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--ink-2);"><h2>${emptyTitle}</h2><p style="font-weight: 500;">${emptyDesc}</p></div>`;
                 resultsInfo.textContent = zeroLabel;
                 return;
             }
@@ -2620,13 +2620,47 @@
             // Calculate pagination
             let cardsToShow, totalPages, startIndex, endIndex;
 
+            /* ── Zaehler und Nenner meinten zwei verschiedene Mengen ──
+             *
+             * BEFUND DER ABNAHME (02.09.2026): "14.990 Karten gefunden
+             * (Seite 1 von 241)". 14.990 / 63 sind 238 Seiten, nicht
+             * 241. Der Zaehler nimmt bewusst `realCardsCount` (die
+             * echten Karten, damit er dieselbe Menge meint wie "Namen
+             * kopieren"), die Seitenzahl rechnete mit `cards.length` —
+             * also einschliesslich der 140 gestempelten
+             * Prize-Pack-Kacheln, die weiter oben eingefuegt werden.
+             * Nachgemessen: die letzte Seite trug 10 Kacheln,
+             * 240 x 63 + 10 = 15.130.
+             *
+             * Beide Zahlen sind fuer sich richtig, und keine darf
+             * weichen: der Zaehler haengt an "Namen kopieren", die
+             * Seiten haengen an dem, was wirklich gezeichnet wird.
+             * Falsch war nur, dass der Satz sie nebeneinanderstellte,
+             * als waeren sie dieselbe Menge.
+             *
+             * Also steht die zweite Menge jetzt dabei — aber nur, wenn
+             * es sie gibt. Ohne gestempelte Drucke bleibt der Satz so
+             * kurz wie bisher. */
+            const kachelZahl = cards.length;
+            const zusatz = kachelZahl - realCardsCount;
+            /* Einer ist kein Plural. Gemessen mit Filter "Pikachu":
+               "185 tiles incl. 1 stamped Prize Pack prints". */
+            const kachelSatz = zusatz > 0
+                ? ' ' + _cdbT(zusatz === 1 ? 'cdb.kachelZusatz1' : 'cdb.kachelZusatz',
+                              zusatz === 1 ? '· {k} tiles incl. 1 stamped Prize Pack print'
+                                           : '· {k} tiles incl. {z} stamped Prize Pack prints')
+                    .replace('{k}', kachelZahl.toLocaleString(_cdbLocale))
+                    .replace('{z}', zusatz.toLocaleString(_cdbLocale))
+                : '';
+
             if (showAllCards) {
                 cardsToShow = cards;
                 totalPages = 1;
                 startIndex = 0;
                 endIndex = cards.length;
                 const allShownTpl = _cdbT('cdb.cardsFoundAllShown', '{n} cards found (all shown)');
-                resultsInfo.textContent = allShownTpl.replace('{n}', realCardsCount.toLocaleString(_cdbLocale));
+                resultsInfo.textContent = allShownTpl.replace('{n}', realCardsCount.toLocaleString(_cdbLocale))
+                    + kachelSatz;
             } else {
                 totalPages = Math.ceil(cards.length / cardsPerPage);
                 startIndex = (currentCardsPage - 1) * cardsPerPage;
@@ -2636,7 +2670,8 @@
                 resultsInfo.textContent = pageTpl
                     .replace('{n}', realCardsCount.toLocaleString(_cdbLocale))
                     .replace('{page}', String(currentCardsPage))
-                    .replace('{total}', String(totalPages));
+                    .replace('{total}', String(totalPages))
+                    + kachelSatz;
             }
             
             // Create pagination controls
@@ -3020,7 +3055,7 @@
             const price = parseLocaleNumber(card.eur_price, 0);
             if (card.eur_price && !isNaN(price) && price > 0 && marketUrl) {
                 priceButton = `<a href="${escapeHtmlAttr(marketUrl)}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="Prize Pack price on Cardmarket">
-                    <span class="card-database-price-value">Ø ${price.toFixed(2).replace('.', ',')} €</span>
+                    <span class="card-database-price-value">Ø ${_zahlNachSprache(price, 2)} €</span>
                 </a>`;
             } else {
                 priceButton = `<div class="card-database-price-placeholder" title="No Cardmarket price found">No Price</div>`;
@@ -3049,7 +3084,7 @@
                 <div class="card-database-info">
                     <div class="card-database-name">${displayName}</div>
                     <div class="card-database-meta">
-                        <span class="card-database-set">Prize Pack Serie ${escapeHtml(series)} · ${baseRef}</span>
+                        <span class="card-database-set">${escapeHtml(t('cards.prizePackSeries'))} ${escapeHtml(series)} · ${baseRef}</span>
                     </div>
                     <div class="card-database-button-row">
                         ${priceButton}
@@ -3172,13 +3207,11 @@
                 /* BEFUND (Schlussabnahme 30.08.2026): "1.9% Coverage" mit
                    Punkt, waehrend der Preis zwei Zeilen darueber das
                    Komma richtig setzt. Auf einer Seite 60-mal. */
-                const _kommaZahl = (v, st) => {
-                    const txt = Number(v).toFixed(st);
-                    return (typeof getLang === 'function' && getLang() === 'en') ? txt : txt.replace('.', ',');
-                };
+                /* Dieselbe Funktion wie beim Preis daneben — siehe die
+                   Notiz an _zahlNachSprache am Dateiende. */
                 const coveragePctLabel = (percentage > 0 && percentage < 0.1)
-                    ? _kommaZahl(0.1, 1).replace(/^/, '<')
-                    : _kommaZahl(percentage, 1);
+                    ? _zahlNachSprache(0.1, 1).replace(/^/, '<')
+                    : _zahlNachSprache(percentage, 1);
                 coverageDisplay = `<div class="card-database-coverage" style="background: ${coverageColor};" title="${deckCount} Decks / ${archetypeCount} Archetypes${maxCount > 0 ? ' · Max: ' + maxCount + 'x copies per deck' : ''}">
                     ${coverageIcon} ${coveragePctLabel}% Coverage${maxCountText}
                 </div>`;
@@ -4206,7 +4239,7 @@
                             </div>
                             <div class="rarity-option-info">
                                 <div><strong>${t('rarity.prizePackPrint')}</strong></div>
-                                <div class="rarity-option-rarity">Prize Pack Serie ${e.series} · ${v.set} ${v.number}</div>
+                                <div class="rarity-option-rarity">${escapeHtml(t('cards.prizePackSeries'))} ${e.series} · ${v.set} ${v.number}</div>
                             </div>
                             <div class="rarity-badge" style="--rarity-badge-bg:#c0392b;">Prize Pack</div>
                         `;
@@ -4855,3 +4888,22 @@ document.addEventListener('languageChanged', () => {
         console.warn('[i18n] Kartendatenbank konnte nicht neu gezeichnet werden:', err);
     }
 });
+
+
+/* ── Eine Zahl, eine Sprache ────────────────────────────────────────
+ *
+ * BEFUND DER ABNAHME (02.09.2026): auf DERSELBEN Kachel standen im
+ * englischen Modus "Ø 322,40 €" (Komma) und "1.0% Coverage" (Punkt).
+ * Der Preis wurde bedingungslos eingedeutscht
+ * (`toFixed(2).replace('.', ',')`), die Deckungsangabe fuenfzig Zeilen
+ * weiter fragte nach der Sprache. Der Kommentar dort beschreibt genau
+ * diesen Fehler — die Korrektur war nur an einer der beiden Stellen
+ * angebracht worden.
+ *
+ * Jetzt fragt EINE Funktion, und beide benutzen sie.
+ */
+function _zahlNachSprache(wert, stellen) {
+    const txt = Number(wert || 0).toFixed(stellen);
+    const en = (typeof getLang === 'function' && getLang() === 'en');
+    return en ? txt : txt.replace('.', ',');
+}

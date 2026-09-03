@@ -869,6 +869,31 @@
                 : 'No matchup data for this deck.'))}</p>`;
         }
         const rows = (preview && all.length > preview) ? all.slice(0, preview) : all;
+        /* ── Eine Spalte ohne Zahlen ist keine Spalte ────────────────
+         *
+         * Der Betreiber am 02.09.2026, vor drei Spalten voller Striche:
+         * "Wenn die Zahlen da leer sind brauchen wir die Spalten denn
+         * ueberhaupt?"
+         *
+         * Major-P und Major-M stehen leer, wenn es fuer dieses Deck in
+         * diesem Format keine Praesenzpartien gibt — bei den heutigen
+         * Daten also fuer JEDE Zeile. Zwei Spalten Striche kosten
+         * waagerechten Platz, lassen die Tabelle unvollstaendig
+         * aussehen und sagen nichts, was ein Satz nicht besser sagt.
+         *
+         * Fehlt die Zahl nur in EINZELNEN Zeilen, bleiben beide
+         * Spalten stehen: dann traegt der Strich eine Aussage
+         * ("dieses Paar gab es dort nicht"), und die Nachbarzeilen
+         * zeigen, wogegen. Weg ist die Spalte nur, wenn sie in KEINER
+         * Zeile etwas zu sagen hat. */
+        /* BEFUND DER ABNAHME (03.09.2026): das stand auf `rows`, also
+           auf der bei preview:8 gekuerzten Liste. Ein Deck, dessen
+           erste acht Matchups keine Praesenzdaten haben, waehrend
+           Zeile 9 welche hat, bekam den Satz "fuer dieses Deck liegen
+           in diesem Format keine vor" — und zeigte in der
+           aufgeklappten Vollansicht die Spalten. Zwei Aussagen, ein
+           Deck. Die Frage gilt dem DECK, also `all`. */
+        const hatMajor = all.some(m => m.majorPunkte != null || m.majorAnzahl != null);
         const body = rows.map(m => {
             const shade = shadeFor(m.winRate - 50, m.thin);
             const bar = barFor(m.winRate - 50);
@@ -886,7 +911,7 @@
                     <td class="arc-mu-w">${m.wins == null ? '–' : m.wins}</td>
                     <td class="arc-mu-l">${m.losses == null ? '–' : m.losses}</td>
                     <td class="arc-mu-u">${m.ties == null ? '–' : m.ties}</td>
-                    <td class="arc-mu-major${
+                    ${!hatMajor ? '' : `<td class="arc-mu-major${
                         (m.majorAnzahl != null && m.majorAnzahl < 10) ? ' arc-mu-major-duenn' : ''
                     }" title="${esc(m.majorPunkte == null
                         ? L('arc.muMajorFehlt', de
@@ -900,7 +925,7 @@
                     }">${m.majorPunkte == null ? '–' : esc(fmt(m.majorPunkte)) + ' %'}</td>
                     <td class="arc-mu-major-n${
                         (m.majorAnzahl != null && m.majorAnzahl < 10) ? ' arc-mu-n-low' : ''
-                    }">${m.majorAnzahl == null ? '–' : m.majorAnzahl}</td>
+                    }">${m.majorAnzahl == null ? '–' : m.majorAnzahl}</td>`}
                 </tr>`;
         }).join('');
         const thinCount = rows.filter(m => m.thin).length;
@@ -944,21 +969,28 @@
                              sind in Ordnung. Der gemessene Abstand (Median
                              -2,0 pp, davon -1,8 Zaehlweise) steht im Hinweis
                              jeder Zelle. -->
-                        <th title="${esc(L('arc.colMajorTip', de
+                        ${!hatMajor ? '' : `                        <th title="${esc(L('arc.colMajorTip', de
                             ? 'Präsenzturniere: Matchpunkte (3 Siege + 1 Unentschieden) ÷ (3 × Matches) — eine andere Rechnung als die Win Rate links, weil die Quelle je Paarung keine Bilanz veröffentlicht.'
                             : 'In-person events: match points (3 wins + 1 tie) ÷ (3 × games) — a different calculation from the win rate on the left, because the source publishes no record per pairing.'))}">${
                             esc(L('arc.colMajor', de ? 'Major-P' : 'Major-P'))}</th>
                         <th title="${esc(L('arc.colMajorN', de
                             ? 'Präsenzpartien dieser Paarung'
                             : 'in-person games for this pairing'))}">${
-                            esc(L('arc.colMajorNKurz', 'Major-M'))}</th>
+                            esc(L('arc.colMajorNKurz', 'Major-M'))}</th>`}
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>
             </div>
-            <p class="arc-mu-legende">${esc(L('arc.muLegende', de
-                ? 'WR = Win Rate · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-P = Matchpunkte auf Präsenzturnieren, Major-M die Matches dahinter'
-                : 'WR = win rate · M = matches · W/L/T = wins / losses / ties · Major-P = match points at in-person events, Major-M the matches behind them'))}</p>${note}`;
+            <p class="arc-mu-legende">${esc(hatMajor
+                ? L('arc.muLegende', de
+                    ? 'WR = Win Rate · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-P = Matchpunkte auf Präsenzturnieren, Major-M die Matches dahinter'
+                    : 'WR = win rate · M = matches · W/L/T = wins / losses / ties · Major-P = match points at in-person events, Major-M the matches behind them')
+                /* Ohne Praesenzdaten sagt EIN Satz, was zwei leere
+                   Spalten nicht gesagt haetten: dass es sie gibt und
+                   dass hier keine anfallen. */
+                : L('arc.muLegendeOhneMajor', de
+                    ? 'WR = Win Rate · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden. Präsenzturniere sind hier nicht dabei — für dieses Deck liegen in diesem Format keine vor.'
+                    : 'WR = win rate · M = matches · W/L/T = wins / losses / ties. In-person events are not included — there are none for this deck in this format.'))}</p>${note}`;
         if (!collapsed) return table;
         // Closed by default inline: the tiles are the scroll content, the
         // table is a reference you open when you need it. Otherwise a

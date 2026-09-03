@@ -2152,7 +2152,11 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 .map(row => parseInt(row.placement, 10))
                 .filter(p => Number.isFinite(p) && p > 0);
             const avgPlacement = platzierungen.length > 0
-                ? (platzierungen.reduce((sum, p) => sum + p, 0) / platzierungen.length).toFixed(2)
+                /* 02.09.2026: stand als toFixed(2) da und schrieb auf der
+                   deutschen Seite "14.83", waehrend direkt daneben
+                   "Ø 1,20x", "100,0%" und "4,16 €" mit Komma stehen.
+                   Dieselbe Zahl steht im Reiter nebenan als "14,83". */
+                ? window.zahlLokal((platzierungen.reduce((sum, p) => sum + p, 0) / platzierungen.length), 2)
                 : '-';
 
             return {
@@ -2292,6 +2296,39 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             const hintLabel = (typeof t === 'function' ? t('filter.availableRange') : 'Available') + `: ${rangeText}`;
             ensureHint(fromEl, hintLabel);
             ensureHint(toEl,   hintLabel);
+
+            /* ── Ein Filter, der nichts zu filtern hat ────────────────
+             *
+             * BEFUND DER ABNAHME (02.09.2026): bei einem einzigen
+             * Turniertag standen min und max beider Felder auf demselben
+             * Datum. Zwei Eingabefelder, die nichts auswaehlen koennen,
+             * mit einem Hinweis darunter, der zweimal dasselbe Datum
+             * nennt ("Verfuegbar: 6.6.2026 – 6.6.2026").
+             *
+             * Die Hausregel steht in js/ds-filter.js: "Ein Knopf, der
+             * nichts zu waehlen hat, ist eine Luege ueber die Daten."
+             * Dort wird der Schalter durch ein Schild ersetzt. Hier
+             * jetzt auch. */
+            const einTag = minISO === maxISO;
+            const behaelter = fromEl.closest('.date-range-container');
+            if (behaelter) behaelter.classList.toggle('is-ein-tag', einTag);
+            let schild = document.getElementById('clDatumEinTag');
+            if (einTag) {
+                if (!schild && behaelter) {
+                    schild = document.createElement('p');
+                    schild.id = 'clDatumEinTag';
+                    schild.className = 'ds-note cl-datum-ein-tag';
+                    behaelter.insertAdjacentElement('beforebegin', schild);
+                }
+                if (schild) {
+                    const de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+                    schild.textContent = de
+                        ? ('Ein Turniertag: ' + fmt(minISO) + ' — es gibt nichts einzugrenzen.')
+                        : ('One tournament day: ' + fmt(minISO) + ' — there is nothing to narrow down.');
+                }
+            } else if (schild) {
+                schild.remove();
+            }
         }
 
         function resetCityLeagueDateFilter() {
@@ -2992,6 +3029,41 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             // M/B percentages stay capped at 100 %.
             window.currentCityLeagueTotalDecks = cardStatsDenom;
             devLog(`Stored global card-stats denom: ${window.currentCityLeagueTotalDecks}`);
+
+            /* ── Zwei Zahlen, und nur eine stand da ──────────────────
+             *
+             * BEFUND DER ABNAHME (02.09.2026): die Kachel sagte
+             * "Verwendete Decks 6", darunter stand in jeder Kartenzeile
+             * "5/5 (100,0 %)" und "Ø 1,20x" — 6 Kopien auf 5 Listen.
+             * Wer 6 x 100 % rechnet, erwartet sechs Listen mit dieser
+             * Karte; es sind fuenf.
+             *
+             * Der Grund steht seit langem im Kommentar zwanzig Zeilen
+             * weiter oben: der Analyse-Scraper hat eine Obergrenze je
+             * Turnier, die Platzierungsliste nicht. Die Luecke ist
+             * bekannt und ohne Aenderung der Scraper-Regel nicht zu
+             * schliessen — aber sie gehoerte auf den Bildschirm, nicht
+             * nur in den Quelltext. Ein Kommentar erklaert dem
+             * Entwickler, warum die Zahlen auseinandergehen; dem Leser
+             * erklaert er nichts.
+             *
+             * Also: stimmen beide ueberein, steht nichts da. Gehen sie
+             * auseinander, steht die kleinere Zahl daneben und sagt,
+             * worauf sich die Prozente beziehen. */
+            (function () {
+                var el = document.getElementById('cityLeagueStatDecksNote');
+                if (!el) return;
+                var anzeige = parseInt(displayDecksCount, 10);
+                var nenner = parseInt(cardStatsDenom, 10);
+                var auseinander = Number.isFinite(anzeige) && Number.isFinite(nenner)
+                    && nenner > 0 && anzeige > 0 && nenner !== anzeige;
+                if (!auseinander) { el.hidden = true; el.textContent = ''; return; }
+                var de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+                el.hidden = false;
+                el.textContent = de
+                    ? ('davon ' + nenner + ' mit veröffentlichter Liste — die Kartenanteile beziehen sich auf diese ' + nenner + '.')
+                    : ('of which ' + nenner + ' have a published list — the card shares are based on those ' + nenner + '.');
+            }());
 
             // Update stats — Decks Used shows the dropdown count
             // (matches what the user picked) instead of the analysis
@@ -3867,8 +3939,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                         <div class="card-image-container city-league-card-image-container">
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
                             ${usageBarHtml}
-                            <!-- Red badge: Max Count (top-right) -->
-                            <div class="city-league-card-badge city-league-card-badge-max">${finalMaxCount}</div>
+                            <!-- Rote Marke oben rechts: wie viele Kopien man
+                                 in einer typischen Liste findet. -->
+                            <div class="city-league-card-badge city-league-card-badge-max" title="${escapeHtml(_markeHinweis(avgCountOverallValue, avgCountInUsedValue, finalMaxCount, decksWithCard, totalDecksInArchetype))}">${_markeZahl(avgCountOverallValue, avgCountInUsedValue, finalMaxCount, decksWithCard, totalDecksInArchetype)}</div>
                             ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
@@ -4738,6 +4811,47 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             if (summaryEl) {
                 summaryEl.textContent = `/ ${filteredTotal} ${t('cl.total')}`;
             }
+            _markenSummeVermerken();
+        }
+
+        /* ── Was die roten Marken zusammen ergeben ────────────────────
+         *
+         * BEFUND DER ABNAHME (02.09.2026): die Marken summierten sich
+         * auf 74 Kopien, waehrend die Kachel darueber "33 / 60" sagte.
+         * Seit die Marke den repraesentativen Schnitt zeigt statt des
+         * Maximums, sind es 67 — besser, aber immer noch nicht 60, und
+         * das bleibt so: jede Marke ist ein GERUNDETER Durchschnitt je
+         * Karte, und gerundete Summanden ergeben nicht die Summe der
+         * ungerundeten. Ø 1,20 und Ø 2,80 werden zu 1 und 3.
+         *
+         * Die Zahl kleinzurechnen waere falsch — dann stimmte keine
+         * einzelne Marke mehr. Sie zu verschweigen ist es auch: wer die
+         * Marken addiert, will wissen, warum es nicht aufgeht. Also
+         * steht es da, und zwar nur dann, wenn es nicht aufgeht. */
+        function _markenSummeVermerken() {
+            const gitter = document.getElementById('cityLeagueDeckVisual')
+                || document.getElementById('cityLeagueDeckGrid');
+            if (!gitter) return;
+            const marken = [...document.querySelectorAll(
+                '#city-league-analysis .city-league-card-badge-max')];
+            let hinweis = document.getElementById('clMarkenSumme');
+            if (!marken.length) { if (hinweis) hinweis.remove(); return; }
+            const summe = marken.reduce((a, e) => a + (parseInt(e.textContent, 10) || 0), 0);
+            const kachel = document.getElementById('cityLeagueStatCards');
+            const soll = kachel ? parseInt(String(kachel.textContent).split('/')[1], 10) : 0;
+            if (!(soll > 0) || summe === soll) { if (hinweis) hinweis.remove(); return; }
+            if (!hinweis) {
+                hinweis = document.createElement('p');
+                hinweis.id = 'clMarkenSumme';
+                hinweis.className = 'ds-note cl-marken-summe';
+                gitter.insertAdjacentElement('beforebegin', hinweis);
+            }
+            const de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+            hinweis.textContent = de
+                ? ('Die roten Marken sind gerundete Durchschnitte je Karte. Zusammen ergeben sie '
+                   + summe + ', nicht die ' + soll + ' einer einzelnen Liste.')
+                : ('The red badges are rounded per-card averages. Together they come to '
+                   + summe + ', not the ' + soll + ' of a single list.');
         }
         
         // Add filter change listener
@@ -4803,3 +4917,79 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
         });
 
 
+/* ── Die rote Marke sagt auf beiden Reitern dasselbe ────────────────
+ *
+ * BEFUND DER ABNAHME (02.09.2026): dieselbe CSS-Klasse
+ * (.city-league-card-badge-max) trug an derselben Kartenecke auf zwei
+ * Reitern zwei verschiedene Rechnungen.
+ *
+ *   city-league-analysis: min(legalMax, max_count) — die hoechste je
+ *       in EINER Liste gesehene Kopienzahl.
+ *   past-meta:            max(1, round(average_count_overall)) — der
+ *       repraesentative Mittelwert.
+ *
+ * Gemessen: die Marken von "Dragapult Blaziken" summierten sich auf 74
+ * Kopien, waehrend die Kachel darueber "33 / 60" sagte. Genau diese 74
+ * sind der Wert, den js/app-city-league.js weiter unten schon einmal
+ * als Fehler beschreibt — fuer die Zwischenablage ist er am 30.08.2026
+ * behoben worden, auf den Kaertchen stand er noch. Beispiele aus dem
+ * Lauf: Meowth ex trug "2" bei Ø 1,20x, Rare Candy "4" bei Ø 2,80x.
+ *
+ * Wer die Marken addiert, erwartet eine Liste. Also zeigt die Marke
+ * jetzt auf BEIDEN Reitern die repraesentative Zahl — dieselbe Regel
+ * wie getPastMetaDisplayCount, samt Boden bei 1 — und nennt das
+ * Maximum im Hinweis, wo es niemanden mehr in die Irre fuehrt.
+ */
+function _markeZahl(schnittGesamt, schnittEnthalten, maximum, inListen, listen) {
+    var g = Number(schnittGesamt) || 0;
+    var e = Number(schnittEnthalten) || 0;
+    var m = Number(maximum) || 0;
+    var n = Number(listen) || 0;
+    var k = Number(inListen) || 0;
+
+    /* Bei einer einzigen Liste IST das Maximum die Liste — dann waere
+       ein Mittelwert eine Erfindung. */
+    if (!(n > 1)) return m;
+
+    /* BEFUND DER ABNAHME (03.09.2026): der erste Entwurf nahm
+       average_count_overall, also den Schnitt ueber ALLE Listen des
+       Archetyps — auch die ohne diese Karte. Nachgerechnet ueber
+       data/city_league_analysis_past.csv: acht Karten bekamen dadurch
+       eine Zahl, die in KEINER Liste vorkommt. Cyrano steht in zwei von
+       fuenf Ogerpon-Box-Listen, dort immer dreimal; die Marke haette
+       "1" gesagt.
+       Ein zweiter Anlauf mit einer Schwelle bei der Haelfte liess drei
+       davon stehen (Dhelmise Banette, 1 von 2 Listen — genau die
+       Haelfte). Schwellen sind hier der falsche Weg.
+
+       Die Marke beantwortet die Frage "wie viele spiele ich davon,
+       wenn ich sie spiele" — und das ist average_count, der Schnitt
+       ueber die Listen, die die Karte WIRKLICH enthalten. Der
+       Gesamtschnitt beantwortet eine andere Frage ("wie viele finde
+       ich in einer beliebigen Liste") und gehoert deshalb in den
+       Hinweis, nicht auf die Marke. Er bleibt der Rueckfall, falls die
+       Quelle die Spalte nicht fuehrt. */
+    var basis = e > 0 ? e : g;
+    if (basis > 0) return Math.max(1, Math.min(m || Infinity, Math.round(basis)));
+    return m;
+}
+
+function _markeHinweis(schnittGesamt, schnittEnthalten, maximum, inListen, listen) {
+    var de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+    var g = Number(schnittGesamt) || 0;
+    var e = Number(schnittEnthalten) || 0;
+    var m = Number(maximum) || 0;
+    var k = Number(inListen) || 0;
+    var n = Number(listen) || 0;
+    var z = function (x, st) {
+        return (typeof window !== 'undefined' && typeof window.zahlLokal === 'function')
+            ? window.zahlLokal(x, st) : Number(x).toFixed(st).replace('.', ',');
+    };
+    /* Der Hinweis nennt beide Schnitte, wenn sie auseinandergehen —
+       sonst steht neben der Marke ein Wert, aus dem sie nicht folgt. */
+    return de
+        ? ('In ' + k + ' von ' + n + ' Listen, dort Ø ' + z(e, 2) + ' Kopien (über alle Listen Ø '
+           + z(g, 2) + '), höchstens ' + m + ' in einer einzelnen.')
+        : ('In ' + k + ' of ' + n + ' lists, averaging ' + z(e, 2) + ' copies there (over all lists '
+           + z(g, 2) + '), at most ' + m + ' in a single one.');
+}

@@ -5,6 +5,11 @@
         // PAST META - Deck Analysis & Builder
         // ====================================
         
+        /* Die Matchsumme aus der Leistungskachel. Sie stammt aus
+           labs_tournament_decks.csv, die Matchup-Matrix darunter aus
+           labs_tournament_matchups_*.csv. Beide Zahlen sind richtig,
+           aber sie sind nicht dieselbe — siehe die Notiz an der Matrix. */
+        let _pmMatchesGesamt = 0;
         let pastMetaAllData = [];
         let pastMetaDecks = [];
         let pastMetaTournaments = [];
@@ -372,6 +377,16 @@
                 // Default to newest format for fast initial load (~17MB instead of ~100MB)
                 defaultFormat = sortedKeys[0];
                 formatSelect.value = defaultFormat;
+                /* BEFUND DER ABNAHME (02.09.2026): 60 px unter diesem
+                   Auswahlfeld baut ds-filter.js eine Knopfleiste, die
+                   denselben Wert zeigen soll. Sie liest ihn einmal beim
+                   Bauen und horcht danach auf `change` — eine Zuweisung
+                   per JavaScript loest aber kein `change` aus. Folge:
+                   die Leiste sagte "-- Alle Formate --", waehrend das
+                   Feld darueber "Temporal Forces -> PBL" stand und
+                   geladen wurde. Zwei Angaben zum selben Zeitraum,
+                   nebeneinander, verschieden. */
+                formatSelect.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
             // Load only the selected format's chunk (lazy)
@@ -987,6 +1002,9 @@
             // Englisch, waehrend die City-League-Ansicht an derselben
             // Stelle bereits "33 Karten / 60 Gesamt" schreibt.
             document.getElementById('pastMetaCardCount').textContent = `${sortedCards.length} ${t('cl.cards')}`;
+            /* Der Trenner bekommt links Luft. Zusammengesetzt las sich das
+            // als "42 Karten/ 60 Gesamt" — der Schraegstrich klebte am
+            // Wort davor, weil die beiden Spans direkt aneinanderstiessen. */
             document.getElementById('pastMetaCardCountSummary').textContent = `/ ${Math.round(totalCards)} ${t('cl.total')}`;
             
             // Render based on view mode
@@ -1656,6 +1674,9 @@
                 if (tid) seenTournaments.add(tid);
             }
             const games = wins + losses + ties;
+            /* Fuer den Abgleich mit der Matchup-Matrix darunter, die aus
+               einer ANDEREN Datei kommt — siehe die Notiz dort. */
+            _pmMatchesGesamt = games;
             const WK = window.WinRateKonvention;
             const winPct = WK
                 ? WK.KONVENTIONEN.matchpunkte.rechne(wins, losses, ties)
@@ -1841,6 +1862,34 @@
                 </tr>`;
             }).join('');
 
+            /* ── Was die Spalte NICHT enthaelt ────────────────────────
+             *
+             * BEFUND DER ABNAHME (02.09.2026): die Kachel "Record
+             * (W-L-T)" sagte 218-159-70, also 447 Matches. Die Spalte
+             * "Matches" der Matrix darunter summierte 421. 26 Matches
+             * (5,8 %) tauchten in keiner Zeile auf, ohne dass irgendwo
+             * stand warum — Gegner, deren Archetyp die Quelle nicht
+             * erkannt hat.
+             *
+             * Gerade weil der Rest nachrechenbar ist (Matchpunkte 54,0 %
+             * und Day-2-Conversion 26,4 % gehen beide exakt auf), faellt
+             * die eine Luecke auf, sobald jemand die Spalte addiert. Die
+             * Zahl selbst ist nicht falsch; sie war nur unerklaert. */
+            const _matrixRestZeile = function (zeilen) {
+                var summe = (zeilen || []).reduce(function (a, o) { return a + (Number(o.games) || 0); }, 0);
+                var rest = Math.round(_pmMatchesGesamt - summe);
+                if (!(_pmMatchesGesamt > 0) || rest <= 0) return '';
+                var de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+                return '<p class="past-meta-section-hint">' + (de
+                    ? ('Die Spalte summiert ' + Math.round(summe) + ' der ' + Math.round(_pmMatchesGesamt)
+                       + ' Matches aus der Bilanz oben. Die übrigen ' + rest
+                       + ' liefen gegen Gegner, deren Archetyp die Quelle nicht zugeordnet hat.')
+                    : ('The column sums ' + Math.round(summe) + ' of the ' + Math.round(_pmMatchesGesamt)
+                       + ' matches in the record above. The remaining ' + rest
+                       + ' were against opponents whose archetype the source did not resolve.'))
+                    + '</p>';
+            };
+
             const _muVorbehalt = _muFormatweit
                 ? `<p class="past-meta-mu-vorbehalt">${
                     (typeof t === 'function' ? t('pm.matchupFormatWide') : '')
@@ -1854,6 +1903,7 @@
                     (typeof getLang === 'function' && getLang() === 'de')
                         ? `Unter ${MU_MIN_GAMES} Matches ausgegraut und ohne Farbe.`
                         : `Below ${MU_MIN_GAMES} games: faded and shown without colour.`}</p>
+                ${_matrixRestZeile(opps)}
                 <div class="past-meta-matchup-table-wrap">
                     <table class="past-meta-matchup-table">
                         <thead><tr>
@@ -2244,3 +2294,54 @@
         window.copyMostSuccessfulList = copyMostSuccessfulList;
 
         // Generic function to render deck analysis tables
+
+
+/* ── Die Kartenzaehler beim Sprachwechsel ────────────────────────────
+ *
+ * BEFUND DER ABNAHME (03.09.2026): der erste Versuch haengte
+ * `data-i18n` an die beiden Spans, damit der Platzhalter nicht englisch
+ * bleibt. Das war schlimmer als das Problem: updateTranslationsInDOM
+ * setzt fuer jedes [data-i18n] ohne Kindelemente el.innerHTML — also
+ * wurde die GEZEICHNETE Zahl bei jedem Sprachwechsel auf "0 cards"
+ * zurueckgesetzt und blieb es. Gemessen: "33 Karten / 60 Gesamt" wurde
+ * nach switchLanguage('en') zu "0 cards / 0 total".
+ *
+ * Richtig ist, die Zahl zu behalten und nur das Wort zu tauschen. Auf
+ * city-league faengt der eigene languageChanged-Neuzeichner das ab,
+ * auf past-meta gab es nichts.
+ */
+document.addEventListener('languageChanged', function () {
+    /* Die Preisfelder tragen bewusst KEIN data-i18n: sie werden zur
+       Laufzeit mit dem echten Deckpreis beschrieben, und ein
+       data-i18n haette ihn beim Sprachwechsel geloescht — genau der
+       Fehler, den die Abnahme am 03.09.2026 an den Kartenzaehlern
+       gefunden hat. Hier wird nur das Trennzeichen nachgezogen. */
+    ['cityLeagueDeckPrice', 'currentMetaDeckPrice', 'pastMetaDeckPrice',
+     'profile-collection-value'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var m = String(el.textContent).match(/(-?[\d.,]+)/);
+        if (!m) return;
+        var zahl = Number(m[1].replace(/\.(?=\d{3}\b)/g, '').replace(',', '.'));
+        if (!Number.isFinite(zahl)) return;
+        var txt = (typeof window.zahlLokal === 'function')
+            ? window.zahlLokal(zahl, 2)
+            : zahl.toFixed(2);
+        el.textContent = txt + ' €';
+    });
+
+    var paare = [
+        ['pastMetaCardCount', 'cl.cards'],
+        ['cityLeagueCardCount', 'cl.cards'],
+        ['pastMetaCardCountSummary', 'cl.total'],
+        ['cityLeagueCardCountSummary', 'cl.total'],
+    ];
+    paare.forEach(function (paar) {
+        var el = document.getElementById(paar[0]);
+        if (!el) return;
+        var zahl = (el.textContent.match(/[\d.,]+/) || ['0'])[0];
+        var wort = (typeof t === 'function') ? t(paar[1]) : '';
+        var schraeg = /Summary$/.test(paar[0]) ? '/ ' : '';
+        el.textContent = schraeg + zahl + ' ' + wort;
+    });
+});

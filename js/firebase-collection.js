@@ -4817,7 +4817,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
     const a = aggA.get(key) || { count: 0, label: '' };
     const b = aggB.get(key) || { count: 0, label: '' };
     const labelBase = a.label || b.label || key;
-    const label = `${escapeHtml(labelBase)}${(mode === 'functional' && (a.collapsedPrints || b.collapsedPrints)) ? ' <span title="Int-Prints zusammengefasst" style="color:#b8860b;">(prints merged)</span>' : ''}`;
+    const label = `${escapeHtml(labelBase)}${(mode === 'functional' && (a.collapsedPrints || b.collapsedPrints)) ? ' <span title="Int-Prints zusammengefasst" style="color:var(--vorbehalt);">(prints merged)</span>' : ''}`;
 
     if (a.count > 0 && b.count === 0) {
       onlyA.push(`${label} x${a.count}`);

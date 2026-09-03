@@ -54,7 +54,14 @@
           quelle: 'cityLeagueFormatSelect', zweiteDe: 'Zeitraum', zweiteEn: 'Period' },
         { key: 'gl',   tab: 'current-meta', de: '🌐 Global',    en: '🌐 Global',
           quelle: null, zweiteDe: 'Format', zweiteEn: 'Format' },
-        { key: 'past', tab: 'past-meta',   de: '📦 Vergangen', en: '📦 Past',
+        /* BEFUND DER ABNAHME (02.09.2026): dieser Raum hiess "Vergangen"
+           und stand 300 px neben "Vergangenes Meta" aus der
+           Zeitraum-Spalte daneben — zwei verschiedene Datensaetze, fast
+           derselbe Name. "Vergangen" ist ein anderer KARTENPOOL
+           (abgeschlossene Rotationen), "Vergangenes Meta" ein anderer
+           ZEITRAUM innerhalb Japans. Der Raum heisst jetzt nach dem,
+           was ihn unterscheidet. */
+        { key: 'past', tab: 'past-meta',   de: '📦 Rotationen', en: '📦 Rotations',
           quelle: 'pastMetaFormatFilter', zweiteDe: 'Format', zweiteEn: 'Format' },
     ];
 
@@ -241,6 +248,75 @@
         } else {
             anker.parentElement.insertBefore(neu, anker.nextSibling);
         }
+
+        /* ── Das Original verstecken, wo die Zeile steht ──────────────
+         *
+         * Diese Datei sagt im Kopf ausdruecklich: "Sie baut kein zweites
+         * Bedienelement neben das vorhandene." Genau das war aber der
+         * sichtbare Zustand — BEFUND DER ABNAHME (02.09.2026): auf
+         * city-league stand #cityLeagueFormatSelect oben rechts, und
+         * 40 px darunter bot die Zeile dieselbe Wahl noch einmal als
+         * ZEITRAUM · [Aktuelles Meta] [Vergangenes Meta].
+         *
+         * Das Auswahlfeld bleibt das Original — es wird weiter gelesen
+         * und beschrieben, und es bleibt fuer Hilfsmittel erreichbar.
+         * Es wird nur nicht mehr zweimal gezeigt. Faellt diese Datei
+         * aus, ist es sofort wieder da: versteckt wird hier, nicht in
+         * einer Stilvorlage. */
+        RAEUME.forEach(function (r) {
+            if (!r.quelle) return;
+            var q = document.getElementById(r.quelle);
+            if (!q) return;
+            /* BEFUND DER ABNAHME (03.09.2026), zweiter Anlauf: das
+               Auswahlfeld selbst zu verdecken haelt nicht. Ueber
+               `select`, `.control-input` und `.tab-content select`
+               liegen mehrere Breitenregeln mit `!important` aus
+               verschiedenen Dateien; eine davon zog den absolut
+               positionierten Kasten immer wieder auf volle Breite, und
+               past-meta scrollte seitlich. Jede einzeln auszunehmen
+               waere ein Wettlauf, den man nicht gewinnt.
+               Also eine Huelle: ein <span> trifft keine dieser Regeln.
+               Sie entsteht einmal und bleibt, damit das Feld beim
+               Wechseln nicht durch den Baum wandert. */
+            var behaelter = q.closest('.cl-format-container');
+            if (!behaelter) {
+                behaelter = q.closest('.ds-filter-huelle');
+                if (!behaelter) {
+                    behaelter = document.createElement('span');
+                    behaelter.className = 'ds-filter-huelle';
+                    q.parentElement.insertBefore(behaelter, q);
+                    behaelter.appendChild(q);
+                }
+            }
+            var zeigen = (r.key !== raum.key);
+            behaelter.classList.toggle('ds-filter-verdeckt', !zeigen);
+            /* Das Etikett gehoert zum Feld. BEFUND DER ABNAHME
+               (03.09.2026): auf past-meta hat das Auswahlfeld keinen
+               .cl-format-container, also wurde nur IT selbst aus dem
+               Fluss genommen — "Meta/Format Filter:" blieb sichtbar
+               ueber einem Loch stehen. Ein Etikett, das auf nichts
+               zeigt, ist schlechter als das doppelte Feld. */
+            if (behaelter.classList.contains('ds-filter-huelle')) {
+                var lab = document.querySelector('label[for="' + r.quelle + '"]');
+                if (lab) lab.classList.toggle('ds-filter-verdeckt', !zeigen);
+            }
+            /* Und es darf den Fokus nicht fangen: ein unsichtbares
+               <select> im Tabulator-Lauf, auf dem Pfeiltasten das Format
+               wechseln, ist schlimmer als zwei sichtbare Felder. Die
+               Filterzeile daneben ist das bedienbare Element. */
+            if (!zeigen) {
+                if (!q.hasAttribute('data-ds-tabindex-alt')) {
+                    q.setAttribute('data-ds-tabindex-alt', q.getAttribute('tabindex') || '');
+                }
+                q.setAttribute('tabindex', '-1');
+                q.setAttribute('aria-hidden', 'true');
+            } else if (q.hasAttribute('data-ds-tabindex-alt')) {
+                var alt2 = q.getAttribute('data-ds-tabindex-alt');
+                if (alt2) q.setAttribute('tabindex', alt2); else q.removeAttribute('tabindex');
+                q.removeAttribute('aria-hidden');
+                q.removeAttribute('data-ds-tabindex-alt');
+            }
+        });
     }
 
     function start() {

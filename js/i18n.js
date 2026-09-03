@@ -243,6 +243,7 @@ const translations = {
     'btn.matchupData':        'Matchup Data',
     'btn.deckToProxy':        'Deck → Proxy',
     'btn.loadMetaAnalysis':   'Load Meta Analysis',
+    'btn.reloadMetaAnalysis': 'Reload Meta Analysis',
 
     // ── Section headings ─────────────────────────────────────
     'section.deckBuilder':    'Deck Builder',
@@ -299,7 +300,14 @@ const translations = {
     'modal.copied':             'Copied!',
 
     // ── app-core.js — proxy ──────────────────────────────────────
-    'proxy.queueEmpty':         'Queue empty — add cards with the "Proxy" buttons.',
+    /* BEFUND DER ABNAHME (02.09.2026): der Satz nannte die
+       "Proxy"-Knoepfe. Die stehen auf dem Reiter Kartendatenbank; hier
+       heissen sie "Deckliste zur Warteschlange hinzufuegen" und "Karte
+       hinzufuegen". Ein Leerzustand, der auf Knoepfe zeigt, die man
+       nicht sieht, ist schlechter als gar keiner. */
+    'proxy.queueEmpty':         'Queue empty — paste a decklist or add cards above.',
+    'emptyState.proxyQueueText':'Add a decklist or single cards to start building your print queue.',
+    'emptyState.proxyQueueBtn': 'Add Decklist',
     'proxy.noPrint':            'No print specified',
     'proxy.remove':             'Remove',
     'proxy.addedToQueue':       'Added to proxy queue:',
@@ -598,6 +606,7 @@ const translations = {
     'cl.thAction':              'Action',
     'cl.addBtn':                '+ Add',
     'cl.total':                 'Total',
+    'cards.prizePackSeries':    'Prize Pack Series',
     'cl.pokemon':               'Pokémon:',
     'cl.trainer':               'Trainer:',
     'cl.energy':                'Energy:',
@@ -1036,6 +1045,7 @@ const translations = {
     'arc.matchupTitle':         'Matchups',
     'arc.colOpponent':          'Deck',
     'arc.muLegende':            'WR = win rate \u00b7 M = matches \u00b7 W/L/T = wins / losses / ties \u00b7 Major-P = match points at in-person events, Major-M the matches behind them',
+    'arc.muLegendeOhneMajor':   'WR = win rate \u00b7 M = matches \u00b7 W/L/T = wins / losses / ties. In-person events are not included \u2014 there are none for this deck in this format.',
     'arc.colGamesKurz':         'M',
     'arc.colMajorNKurz':        'Major-M',
     'arc.colWinRate':           'WR',
@@ -2206,6 +2216,8 @@ const translations = {
     'cdb.zeroCardsFound':         '0 cards found',
     'cdb.cardsFoundAllShown':     '{n} cards found (all shown)',
     'cdb.cardsFoundPage':         '{n} cards found (page {page} of {total})',
+    'cdb.kachelZusatz':           '\u00b7 {k} tiles incl. {z} stamped Prize Pack prints',
+    'cdb.kachelZusatz1':          '\u00b7 {k} tiles incl. 1 stamped Prize Pack print',
     'cdb.noCardsLoaded':          'No Cards Loaded',
     'cdb.noCardsLoadedDesc':      'Check your data files or reload the page.',
 
@@ -2729,6 +2741,7 @@ const translations = {
     'btn.matchupData':        'Matchup-Daten',
     'btn.deckToProxy':        'Deck → Proxy',
     'btn.loadMetaAnalysis':   'Meta-Analyse laden',
+    'btn.reloadMetaAnalysis': 'Meta-Analyse neu laden',
 
     // ── Section headings ─────────────────────────────────────
     'section.deckBuilder':    'Deckbau',
@@ -2785,7 +2798,9 @@ const translations = {
     'modal.copied':             'Kopiert!',
 
     // ── app-core.js — proxy ──────────────────────────────────────
-    'proxy.queueEmpty':         'Warteschlange leer — Karten über die „Proxy“-Knöpfe hinzufügen.',
+    'proxy.queueEmpty':         'Warteschlange leer — Deckliste einfügen oder Karten oben hinzufügen.',
+    'emptyState.proxyQueueText':'Deckliste einfügen oder einzelne Karten hinzufügen, um die Druckliste zu füllen.',
+    'emptyState.proxyQueueBtn': 'Deckliste einfügen',
     'proxy.noPrint':            'Kein Druck angegeben',
     'proxy.remove':             'Entfernen',
     'proxy.addedToQueue':       'Zur Proxy-Warteschlange hinzugefügt:',
@@ -3085,6 +3100,7 @@ const translations = {
     'cl.thAction':              'Aktion',
     'cl.addBtn':                '+ Hinzufügen',
     'cl.total':                 'Gesamt',
+    'cards.prizePackSeries':    'Prize-Pack-Serie',
     'cl.pokemon':               'Pokémon:',
     'cl.trainer':               'Trainer:',
     'cl.energy':                'Energie:',
@@ -3111,7 +3127,11 @@ const translations = {
 
     // ── CL/CM/PM gemeinsame Deck-UI-Keys ─────────────────────
     'cl.cardOverview':          'Kartenübersicht',
-    'cl.deckBuilder':           'Deck Builder',
+    /* 02.09.2026: der Abschnitt hiess auf past-meta "Deck Builder"
+       mitten in deutscher Oberflaeche, waehrend der Nachbarreiter
+       ihn seit langem "Deckbau" nennt (section.deckBuilder) — und
+       die Kopfzeile der Seite ebenfalls. */
+    'cl.deckBuilder':           'Deckbau',
     'cl.yourDeck':              'Dein Deck',
     'cl.addCard':               'Karte hinzufügen',
     'cl.metaCardAnalysis':      'Meta-Karten-Analyse',
@@ -3138,7 +3158,10 @@ const translations = {
     'cl.typeTool':              'Tool',
     'cl.typeStadium':           'Stadion',
     'cl.typeEnergy':            'Energie',
-    'cl.typeSpecEnergy':        'Spezial-Energie',
+    /* Auf filter.typeSpecEnergy vereinheitlicht. Die kuerzere Form
+       steht dort, weil der Knopf in einer Reihe mit fuenf anderen
+       sitzt und "Spezial-Energie" sie auf dem Telefon umbrach. */
+    'cl.typeSpecEnergy':        'Spez. Energie',
     'cl.typeAceSpec':           'Ace Spec',
     'mb.filterTypeAll':         'Alle Typen',
     'mb.filterSetAll':          'Alle Sets',
@@ -3153,7 +3176,12 @@ const translations = {
     'cl.typePokemonDragon':     'Pokémon: Drache',
     'cl.typePokemonColorless':  'Pokémon: Farblos',
     'cl.typeBasicEnergy':       'Basis-Energie',
-    'cl.rarityAll':             'Alle Prints',
+    /* 02.09.2026: derselbe Knopf hiess auf city-league-analysis
+       "Alle Drucke" und auf past-meta "Alle Prints". Ein Werkzeug,
+       zwei Reiter, zwei Woerter. Vereinheitlicht auf "Alle Drucke",
+       weil der Nachbarschluessel filter.allPrints das seit langem so
+       schreibt und die uebrige Oberflaeche mitzieht. */
+    'cl.rarityAll':             'Alle Drucke',
     'cl.rarityLow':             'Niedrige Seltenheit',
     'cl.rarityMax':             'Max. Seltenheit',
     'cl.generate':              'Generieren:',
@@ -3534,6 +3562,7 @@ const translations = {
     'arc.matchupTitle':         'Matchups',
     'arc.colOpponent':          'Gegner-Deck',
     'arc.muLegende':            'WR = Win Rate \u00b7 M = Matches \u00b7 W/L/T = Siege / Niederlagen / Unentschieden \u00b7 Major-P = Matchpunkte auf Pr\u00e4senzturnieren, Major-M die Matches dahinter',
+    'arc.muLegendeOhneMajor':   'WR = Win Rate \u00b7 M = Matches \u00b7 W/L/T = Siege / Niederlagen / Unentschieden. Präsenzturniere sind hier nicht dabei \u2014 für dieses Deck liegen in diesem Format keine vor.',
     'arc.colGamesKurz':         'M',
     'arc.colMajorNKurz':        'Major-M',
     'arc.colWinRate':           'WR',
@@ -4693,6 +4722,8 @@ const translations = {
     'cdb.zeroCardsFound':         '0 Karten gefunden',
     'cdb.cardsFoundAllShown':     '{n} Karten gefunden (alle angezeigt)',
     'cdb.cardsFoundPage':         '{n} Karten gefunden (Seite {page} von {total})',
+    'cdb.kachelZusatz':           '\u00b7 {k} Kacheln, davon {z} gestempelte Prize-Pack-Drucke',
+    'cdb.kachelZusatz1':          '\u00b7 {k} Kacheln, davon 1 gestempelter Prize-Pack-Druck',
     'cdb.noCardsLoaded':          'Keine Karten geladen',
     'cdb.noCardsLoadedDesc':      'Prüfe deine Datendateien oder lade die Seite neu.',
 

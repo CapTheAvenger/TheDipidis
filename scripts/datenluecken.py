@@ -170,6 +170,53 @@ def namenskonflikte():
                     "basisFaehigkeiten": [],
                 },
             })
+    # ── Die vierte Quelle ────────────────────────────────────────────
+    #
+    # BEFUND (03.09.2026): data/champions_resources.json fuehrt 1.268
+    # deutsche Namen — mehr als jede Referenzdatei — und stand bis dahin
+    # in keinem Vergleich. Gemessen widersprach sie der Namenstabelle an
+    # 18 Stellen, davon neun, die schon einmal entschieden waren
+    # ("Lichtelit" statt Skelabranit, "Wahlglas" statt Wahlbrille).
+    #
+    # Ein Melder, der drei von vier Quellen kennt, meldet null Konflikte
+    # und liegt trotzdem falsch. Die vierte kommt deshalb hier dazu.
+    try:
+        res = _lies("champions_resources.json")
+    except FileNotFoundError:
+        res = None
+    if res:
+        KAT = {"item": ("items", "Item"),
+               "ability": ("abilities", "F\u00e4higkeit"),
+               "move": ("moves", "Attacke")}
+        for e in res.get("entries", []):
+            topf_art = KAT.get(e.get("cat"))
+            if not topf_art:
+                continue
+            topf, art = topf_art
+            en = (e.get("en") or "").strip()
+            a = (e.get("de") or "").strip()
+            b = (namen.get(topf, {}).get(en) or "").strip()
+            if not en or not a or not b or a == b:
+                continue
+            luecken.append({
+                "id": "namenskonflikt/res/" + en.lower().replace(" ", "-"),
+                "klasse": "namenskonflikt",
+                "titel": "%s %s \u2014 zwei deutsche Namen" % (art, en),
+                "titelEn": "%s %s \u2014 two German names" % (art, en),
+                "wo": "data/champions_resources.json \u2192 %s.de  vs.  "
+                      "data/champions_names_de.json \u2192 %s" % (en, topf),
+                "ansicht": "side-quest",
+                "vorschlag": {
+                    "wert": b,
+                    "quelle": "https://pokewiki.de/" + en.replace(" ", "_"),
+                    "einstufung": "mehrdeutig",
+                    "begruendung": "Die Ressourcendatei schreibt \u201e%s\u201c, die "
+                                   "Namenstabelle \u201e%s\u201c. Welcher stimmt, "
+                                   "entscheidet die Nachschlageseite." % (a, b),
+                    "grundform": "",
+                    "basisFaehigkeiten": [],
+                },
+            })
     return luecken
 
 

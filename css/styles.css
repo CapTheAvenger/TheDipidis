@@ -11490,3 +11490,54 @@ body.arc-open { overflow: hidden; }
     color: var(--accent, #2563eb);
     font-weight: 600;
 }
+
+/* LADEANZEIGE IM TURNIER-FILTER (03.09.2026)
+   ------------------------------------------
+   Gemeldet: "wenn ich in Rotationen auf alle Turniere dauert es etwas bis
+   wirklich alle Turniere im Turnier-Filter geladen sind ... wir sollten
+   irgendwie anzeigen, dass hier gerade noch was geladen wird."
+
+   Farbe aus den Tokens, damit die Zeile in beiden Modi lesbar bleibt:
+   --ink-2 steht hell auf #4d5566 und dunkel auf #b9c1e0, beides ueber
+   7:1 gegen den jeweiligen Untergrund. Kein eigener Grauton — genau so
+   ist am 02.09. schon einmal ein Kontrast von 3,42:1 entstanden. */
+.pm-ladestand {
+    margin: 6px 0 0;
+    font-size: 0.85em;
+    color: var(--ink-2, #4d5566);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.pm-ladestand::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    animation: pm-ladekreis 0.9s linear infinite;
+}
+@keyframes pm-ladekreis { to { transform: rotate(360deg); } }
+
+/* Gesperrte Felder sollen gesperrt AUSSEHEN. Ohne das wirkt ein
+   disabled <select> in manchen Browsern fast unveraendert, und der
+   Nutzer klickt darauf, ohne zu verstehen, warum nichts passiert.
+   Nicht unter 4.5:1 druecken — deshalb Deckkraft nur bis 0,65 und die
+   Schrift unveraendert. */
+.control-input.pm-laedt,
+.searchable-select-display.pm-laedt {
+    opacity: 0.65;
+    cursor: progress;
+    font-style: italic;
+}
+/* Das durchsuchbare Feld ist ein <div> — `disabled` auf dem versteckten
+   <select> haelt es nicht auf. Im Probelauf klappte es waehrend des
+   Ladens auf und zeigte die halb gefuellte Deckliste. */
+.searchable-select-display.pm-laedt { pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .pm-ladestand::before { animation: none; border-top-color: currentColor; }
+}

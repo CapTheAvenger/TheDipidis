@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-09-02 14:39:14+00:00",
+ "erzeugt": "2026-09-03 10:21:15+00:00",
  "format": "TEF-PBL",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -15,12 +15,12 @@
  ],
  "ankerspieler_gesamt": 774,
  "online_abdeckung": {
-  "schnappschuss": "2026-09-02",
-  "anteil_unbekannt": 12.17,
+  "schnappschuss": "2026-09-03",
+  "anteil_unbekannt": 12.16,
   "groesste_unbekannte": [
    {
     "deck": "Beedrill",
-    "anteil": 1.09
+    "anteil": 1.08
    },
    {
     "deck": "Manectric Eelektrik",
@@ -28,11 +28,11 @@
    },
    {
     "deck": "Hop's Trevenant",
-    "anteil": 0.72
+    "anteil": 0.73
    },
    {
     "deck": "Ceruledge",
-    "anteil": 0.62
+    "anteil": 0.63
    },
    {
     "deck": "Mega Starmie",

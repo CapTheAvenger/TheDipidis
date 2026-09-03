@@ -2507,6 +2507,148 @@
                             </div>
                         </article>
 
+
+                        <div class="feature-section-divider">Side Quest · Pokémon Champions</div>
+
+                        <!-- ── Champions · Teams ──
+                             Bebildert am 03.09.2026. Die Bilder liegen unter
+                             images/tutorials/de/ und werden von
+                             js/ds-tutorial.js ueber data-tutorial-img
+                             nachgeladen; faellt eines aus, bleibt der Verlauf
+                             mit Beschriftung stehen. -->
+                        <article class="feature-banner banner-asymmetric">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Ein zweites Spiel, dieselbe Denkweise</span>
+                                <h2 class="feature-banner-title">Die Teams, die bei Worlds gespielt wurden — mit Replica-Code zum Abtippen.</h2>
+                                <p class="feature-banner-tagline">
+                                    Pokémon Champions ist kein TCG-Bereich, sondern der Doppelkampf-Ableger. Die Seite führt die Top-Teams der aktuellen Regulation mit vollständigem Bau: Fähigkeit, Item, Wesen, Statuswertpunkte und vier Attacken je Pokémon. Der Replica-Code oben rechts ist der, den du im Spiel eingibst.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Replica-Code kopieren</strong> — ein Tipp auf den Code legt ihn in die Zwischenablage. Kein Abtippen, kein Vertipper.</li>
+                                    <li><strong>Als eigenes übernehmen</strong> — legt das Team unter „Meine Teams" ab, wo du es ändern kannst, ohne die Vorlage zu verlieren.</li>
+                                    <li><strong>Das spiele ich</strong> — markiert genau ein Team als aktiv. Der Rechner und die Matchup-Ansicht rechnen danach gegen dieses Team.</li>
+                                    <li><strong>Export (Showdown / Limitless)</strong> — derselbe Bau als Paste. <em>Bleibt englisch</em>, auch wenn die Seite deutsch ist: den Text liest ein Teambuilder, kein Mensch.</li>
+                                    <li><strong>Teams mit …</strong> — filtert auf Teams, die <em>alle</em> gewählten Pokémon enthalten. Nützlich, wenn zwei Pokémon feststehen und der Rest offen ist.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Seit dem 03.09.2026 stehen Gegenstände, Fähigkeiten, Attacken und Wesen auf der deutschen Seite auch auf Deutsch — „Fokusgurt", „Niesel", „Rundumschutz", „Wesen: Mäßig". Belegt ist jeder Name einzeln über pokewiki.de; nachzulesen in <code>data/champions_namen_entschieden.json</code>.
+                                </div>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/de/champions/1-teams.png">
+                                    <span class="tutorial-screenshot-label">Teams · Regulation M-B</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- ── Champions · Nutzung + Nachschlagen ── -->
+                        <article class="feature-banner banner-asymmetric banner-reverse">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Woher die Zahlen kommen</span>
+                                <h2 class="feature-banner-title">Nutzung aus dem Spiel selbst — nicht aus vierzig Turnier-Pastes.</h2>
+                                <p class="feature-banner-tagline">
+                                    Der Reiter „Nutzung" zeigt die In-Game-Analyse: welches Wesen, welche Statuswertpunkte, welches Item, welche Attacken und welche Teampartner ein Pokémon in der laufenden Saison wirklich trägt. Quelle ist championsbattledata.com, ein öffentlicher Spiegel genau dieser Auswertung.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Warum nicht Turnier-Pastes</strong> — die frühere Quelle aggregierte rund 40 Top-Team-Pastes. Das ist eine kleine, schiefe Stichprobe: sie sagte „Scheu" für Pelipper, das Spiel sagt „Mäßig", und zwar deutlich.</li>
+                                    <li><strong>Doppel und Einzel getrennt</strong> — beide Formate haben eigene Listen. Was im Doppelkampf Standard ist, ist im Einzelkampf oft unbrauchbar.</li>
+                                    <li><strong>Nachschlagen</strong> — die zweisprachige Referenz: Gegenstände, Fähigkeiten, Attacken und Feldeffekte mit deutschem <em>und</em> englischem Namen nebeneinander. Ein ✓ markiert jede von Hand geprüfte deutsche Beschreibung.</li>
+                                    <li><strong>Statuszustände</strong> — die Tabelle hinter „steigt stark" und „sinkt drastisch": +1/+2/+3 sind 150/200/250 %, Maximum +6 = 400 %; −1/−2/−3 sind 66/50/40 %, Minimum −6 = 25 %. Genauigkeit, Fluchtwert und Volltrefferquote folgen ausdrücklich einer eigenen, flacheren Tabelle.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Ehrlich gesagt:</strong> Wo die Quelle sich widerspricht — eine Prozentliste summiert über 105 % —, steht der Wert auf „unbekannt" statt auf einer geratenen Zahl. Der Wächter meldet solche Blöcke, statt sie stillschweigend glattzurechnen.
+                                </div>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/de/champions/3-nachschlagen.png">
+                                    <span class="tutorial-screenshot-label">Nachschlagen · DE + EN</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- ── Team-Builder ── -->
+                        <article class="feature-banner banner-asymmetric">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Vom Pokémon zum fertigen Team</span>
+                                <h2 class="feature-banner-title">Wähl eines. Der Builder sagt dir, womit es gespielt wird.</h2>
+                                <p class="feature-banner-tagline">
+                                    Sechs Schritte, keiner davon Raten. Jede Wahl grenzt die nächste ein: es bleiben nur Pokémon übrig, die mit <em>allen</em> bereits gewählten zusammen gespielt werden — sortiert danach, auf wie vielen Partnerlisten sie stehen.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>1 · Starten</strong> — ein Pokémon aus der Liste der meistgespielten, oder über die Suche. Die Suche findet den deutschen wie den englischen Namen.</li>
+                                    <li><strong>2 · Eingrenzen</strong> — „Passt dazu" zeigt die Überschneidung in Prozent. Bis zu sechs Pokémon.</li>
+                                    <li><strong>3 · Team setzen</strong> — baut aus der Nutzungsanalyse für jedes Pokémon einen Vorschlag: Fähigkeit, Item, Wesen, vier Attacken und die Statuswertpunkte.</li>
+                                    <li><strong>4 · Bearbeiten</strong> — jeder Wert ist ein Auswahlfeld mit der Nutzungsquote daneben. Du siehst also nicht nur die Alternativen, sondern auch, wie oft sie wirklich gespielt werden.</li>
+                                    <li><strong>5 · Aktiv schalten</strong> — „Das spiele ich gerade" macht das Team zur Grundlage für Rechner und Matchups.</li>
+                                    <li><strong>6 · Ausgeben</strong> — „Paste kopieren" für Limitless und Showdown, „Als eigenes Team speichern" fürs Profil, „Im Rechner öffnen" für die Schadensrechnung.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Die Vorschläge kommen aus der In-Game-Analyse, nicht aus einer Meinung. Wo ein Wert fehlt, steht ein Strich — nie ein geratener Standardwert.
+                                </div>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/de/team-builder/2-gesetzt.png">
+                                    <span class="tutorial-screenshot-label">Team-Builder · Schritt 3</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- ── Team-Rechner ── -->
+                        <article class="feature-banner banner-asymmetric banner-reverse">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Sechs gegen sechs, beide Richtungen</span>
+                                <h2 class="feature-banner-title">Der Team-Rechner sagt dir nicht „stark", sondern wie viele Treffer.</h2>
+                                <p class="feature-banner-tagline">
+                                    Die Matrix stellt dein Team den sechs des Gegners gegenüber und rechnet je Paar <em>beide</em> Richtungen: Schadensspanne, K.-o.-Zahl, Attackenname und wer zuerst dran ist. Ein Klick auf eine Zelle öffnet das Paar einzeln mit allen Attacken und dem Set-Editor.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Beide Richtungen</strong> — „Ich schlage es in zwei" ist nur die halbe Auskunft, wenn es dich in einem schlägt. Deshalb steht immer beides da.</li>
+                                    <li><strong>Spanne statt Mittelwert</strong> — Pokémon-Schaden streut. Der Rechner zeigt die Spanne und die daraus folgende K.-o.-Zahl, nicht eine glatte Zahl, die es so nie gibt.</li>
+                                    <li><strong>Initiative</strong> — wer zuerst angreift, entscheidet oft das Paar. Die Zeile nennt es ausdrücklich.</li>
+                                    <li><strong>Ein Rechenweg</strong> — Matrix und Einzelansicht benutzen dieselbe Funktion. Ein zweiter Rechenweg wäre der sichere Weg zu zwei Antworten auf dieselbe Frage.</li>
+                                    <li><strong>Übergabe</strong> — aus dem Team-Builder über „Im Rechner öffnen", aus dem Rechner zurück über den Set-Editor.</li>
+                                </ul>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/de/team-rechner/1-matrix.png">
+                                    <span class="tutorial-screenshot-label">Matchups · Matrix</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <div class="feature-section-divider">Die Startseite selbst</div>
+
+                        <!-- ── Startseite ── -->
+                        <article class="feature-banner banner-asymmetric">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Wo jede Sitzung anfängt</span>
+                                <h2 class="feature-banner-title">Sechs Abschnitte, alle zuklappbar — und jede Quote trägt ihren Nenner.</h2>
+                                <p class="feature-banner-tagline">
+                                    Die Startseite ist keine Kacheltapete, sondern eine Reihenfolge: Datenraum wählen, Format wählen, dann von oben nach unten lesen. Was du zuklappst, bleibt zugeklappt; „Ansicht zurücksetzen" stellt den Ausgangszustand wieder her.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Datenraum</strong> — Japan, Global oder Rotationen. Die Auswahl gilt für alles darunter.</li>
+                                    <li><strong>Top 15 / Top 30</strong> — die meistgespielten Karten des Formats, mit Anteil und Archetypenzahl. Das Herz legt eine Karte auf die Wunschliste, der Stern wählt ein anderes Artwork.</li>
+                                    <li><strong>Die meistgespielten Decks</strong> — je Familie die Variantenzahl, der Anteil und die Win Rate. Ein Klick führt in die Deck-Analyse.</li>
+                                    <li><strong>Matchup-Heatmap</strong> — jede Zelle trägt zwei Zeilen: online und Major. Beide rechnen gleich (Siege ÷ entschiedene Partien, gleich geglättet), und rechts steht die Zahl der Matches, auf denen der Wert steht. Unter zehn Matches steht der Wert kursiv.</li>
+                                    <li><strong>Meta-Performance</strong> — zwei Zählungen desselben Metas nebeneinander: Listen (aus der Deck-Übersicht) und Turnier-Antritte. Die Anteile sind fast gleich, die Stückzahlen nicht — jede Spaltenüberschrift sortiert und erklärt sich selbst.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Unter „Rotationen → alle Turniere" dauert das Füllen des Turnier-Filters einen Moment. Die Seite sagt es jetzt: die Auswahlfelder sind gesperrt und zeigen den Fortschritt, statt still und halb gefüllt dazustehen.
+                                </div>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/de/startseite/2-heatmap.png">
+                                    <span class="tutorial-screenshot-label">Matchup-Heatmap</span>
+                                </div>
+                            </div>
+                        </article>
+
                         <!-- ── Closing CTA ── -->
                         <section class="tutorial-cta">
                             <h2>Du hast die Werkzeuge gesehen. Jetzt geh das Regional gewinnen.</h2>

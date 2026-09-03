@@ -2523,6 +2523,147 @@
                             </div>
                         </article>
 
+
+                        <div class="feature-section-divider">Side Quest · Pokémon Champions</div>
+
+                        <!-- ── Champions · Teams ──
+                             Illustrated 2026-09-03. Images live in
+                             images/tutorials/ and are loaded by
+                             js/ds-tutorial.js via data-tutorial-img; if one
+                             is missing, the gradient placeholder stays. -->
+                        <article class="feature-banner banner-asymmetric">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">A second game, the same way of thinking</span>
+                                <h2 class="feature-banner-title">The teams that were played at Worlds — with a replica code you can type in.</h2>
+                                <p class="feature-banner-tagline">
+                                    Pokémon Champions is not a TCG section; it is the doubles spin-off. The page carries the top teams of the current regulation with the full build: ability, item, nature, stat points and four moves per Pokémon. The replica code in the corner is the one you enter in the game.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Copy the replica code</strong> — one tap puts it on the clipboard. No typing, no typos.</li>
+                                    <li><strong>Take as your own</strong> — files the team under "My Teams", where you can edit it without losing the original.</li>
+                                    <li><strong>I play this</strong> — marks exactly one team as active. The calculator and the matchup view then compute against it.</li>
+                                    <li><strong>Export (Showdown / Limitless)</strong> — the same build as a paste. It stays English even on the German page: a teambuilder reads that text, not a person.</li>
+                                    <li><strong>Teams with …</strong> — filters to teams containing <em>all</em> selected Pokémon. Useful when two slots are fixed and the rest is open.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro tip:</strong> Since 2026-09-03 items, abilities, moves and natures also read in German on the German page. Every name is sourced individually from pokewiki.de; the record is in <code>data/champions_namen_entschieden.json</code>.
+                                </div>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/champions/1-teams.png">
+                                    <span class="tutorial-screenshot-label">Teams · Regulation M-B</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- ── Champions · Usage + Reference ── -->
+                        <article class="feature-banner banner-asymmetric banner-reverse">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Where the numbers come from</span>
+                                <h2 class="feature-banner-title">Usage from the game itself — not from forty tournament pastes.</h2>
+                                <p class="feature-banner-tagline">
+                                    The "Usage" tab shows the in-game analysis: which nature, which stat points, which item, which moves and which teammates a Pokémon actually carries this season. The source is championsbattledata.com, a public mirror of exactly that panel.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Why not tournament pastes</strong> — the previous source aggregated about 40 top-team pastes. That is a small, biased slice: it said Timid for Pelipper; the game says Modest, by a wide margin.</li>
+                                    <li><strong>Doubles and singles kept apart</strong> — both formats have their own lists. What is standard in doubles is often unplayable in singles.</li>
+                                    <li><strong>Reference</strong> — the bilingual look-up: items, abilities, moves and field effects with the German <em>and</em> English name side by side. A ✓ marks every hand-verified German description.</li>
+                                    <li><strong>Stat stages</strong> — the table behind "rose sharply" and "fell drastically": +1/+2/+3 are 150/200/250 %, maximum +6 = 400 %; −1/−2/−3 are 66/50/40 %, minimum −6 = 25 %. Accuracy, evasion and critical rate deliberately follow their own, flatter table.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Being honest about it:</strong> where the source contradicts itself — a percentage list summing above 105 % — the value reads "unknown" rather than a guessed number. The guardian reports such blocks instead of quietly smoothing them.
+                                </div>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/champions/3-nachschlagen.png">
+                                    <span class="tutorial-screenshot-label">Reference · DE + EN</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- ── Team Builder ── -->
+                        <article class="feature-banner banner-asymmetric">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">From one Pokémon to a finished team</span>
+                                <h2 class="feature-banner-title">Pick one. The builder tells you what it is played with.</h2>
+                                <p class="feature-banner-tagline">
+                                    Six steps, none of them guesswork. Every pick narrows the next: only Pokémon played alongside <em>all</em> of your current picks remain — sorted by how many partner lists they appear on.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>1 · Start</strong> — a Pokémon from the most-played list, or via search. Search matches the German and the English name.</li>
+                                    <li><strong>2 · Narrow</strong> — "Fits with" shows the overlap as a percentage. Up to six Pokémon.</li>
+                                    <li><strong>3 · Set team</strong> — builds a proposal per Pokémon from the usage analysis: ability, item, nature, four moves and the stat points.</li>
+                                    <li><strong>4 · Edit</strong> — every value is a select with its usage share beside it. So you see not only the alternatives but how often they are actually played.</li>
+                                    <li><strong>5 · Make it active</strong> — "I'm playing this" makes the team the basis for the calculator and matchups.</li>
+                                    <li><strong>6 · Output</strong> — "Copy paste" for Limitless and Showdown, "Save as my team" for the profile, "Open in calculator" for damage numbers.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro tip:</strong> the proposals come from the in-game analysis, not from an opinion. Where a value is missing you get a dash — never a guessed default.
+                                </div>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/team-builder/2-gesetzt.png">
+                                    <span class="tutorial-screenshot-label">Team Builder · step 3</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- ── Team calculator ── -->
+                        <article class="feature-banner banner-asymmetric banner-reverse">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Six against six, both directions</span>
+                                <h2 class="feature-banner-title">The team calculator does not say "strong" — it says how many hits.</h2>
+                                <p class="feature-banner-tagline">
+                                    The matrix puts your team against the opponent's six and computes <em>both</em> directions per pair: damage range, hits to KO, move name and who moves first. Clicking a cell opens that pair on its own with every move and the set editor.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Both directions</strong> — "I beat it in two" is half an answer if it beats you in one. So both are always shown.</li>
+                                    <li><strong>Range, not average</strong> — Pokémon damage rolls. The calculator shows the range and the resulting KO count, not a tidy number that never actually occurs.</li>
+                                    <li><strong>Speed</strong> — who attacks first often decides the pair. The row states it explicitly.</li>
+                                    <li><strong>One code path</strong> — matrix and single view use the same function. A second one would be the reliable way to get two answers to the same question.</li>
+                                    <li><strong>Handover</strong> — from the team builder via "Open in calculator", back via the set editor.</li>
+                                </ul>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/team-rechner/1-matrix.png">
+                                    <span class="tutorial-screenshot-label">Matchups · matrix</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <div class="feature-section-divider">The home page itself</div>
+
+                        <!-- ── Home page ── -->
+                        <article class="feature-banner banner-asymmetric">
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Where every session starts</span>
+                                <h2 class="feature-banner-title">Six sections, all collapsible — and every rate carries its denominator.</h2>
+                                <p class="feature-banner-tagline">
+                                    The home page is not a wall of tiles but an order of operations: choose the data space, choose the format, then read top to bottom. What you collapse stays collapsed; "Reset view" restores the default.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Data space</strong> — Japan, Global or Rotations. The choice applies to everything below.</li>
+                                    <li><strong>Top 15 / Top 30</strong> — the most-played cards of the format, with share and archetype count. The heart adds a card to the wishlist, the star picks a different artwork.</li>
+                                    <li><strong>Most-played decks</strong> — per family the variant count, the share and the win rate. One click leads into the deck analysis.</li>
+                                    <li><strong>Matchup heatmap</strong> — every cell carries two rows: online and major. Both compute the same way (wins ÷ decided games, smoothed identically), and the number of matches the value rests on sits to the right. Below ten matches the value is italic.</li>
+                                    <li><strong>Meta performance</strong> — two counts of the same meta side by side: lists (from the deck overview) and tournament entries. The shares are nearly identical, the counts are not — every column header sorts and explains itself.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro tip:</strong> under "Rotations → all tournaments" the tournament filter takes a moment to fill. The page now says so: the selects are locked and show progress instead of sitting there half-populated and silent.
+                                </div>
+                            </div>
+                            <div class="tutorial-screenshot">
+                                <div class="tutorial-screenshot-frame tutorial-screenshot-frame--breit"
+                                     data-tutorial-img="images/tutorials/startseite/2-heatmap.png">
+                                    <span class="tutorial-screenshot-label">Matchup heatmap</span>
+                                </div>
+                            </div>
+                        </article>
+
                         <!-- ── Closing CTA ── -->
                         <section class="tutorial-cta">
                             <h2>You've seen the tools. Now go win the regional.</h2>

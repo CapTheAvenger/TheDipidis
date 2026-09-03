@@ -238,8 +238,11 @@ describe('Die Zelle zeigt beide Zahlen mit ihrer Herkunft', () => {
             /heatmap-zelle-wr[^"]*">\$\{([\s\S]*?)\}<\/span>/g)].map(m => m[1]);
         assert.strictEqual(wrFelder.length, 2,
             `die Zelle zeichnet ${wrFelder.length} Win-Rate-Felder, erwartet 2`);
-        assert.ok(/mj\s*\?/.test(wrFelder[1]) && /mj\.punkte/.test(wrFelder[1]),
-            'das Major-Win-Rate-Feld haengt nicht am Major-Wert');
+        assert.ok(/mj\s*&&\s*mj\.wr != null/.test(wrFelder[1]),
+            'das Major-Win-Rate-Feld haengt nicht daran, dass eine Bilanz da '
+            + 'ist — ohne die Bilanz gibt es keine Win Rate zu zeigen');
+        assert.ok(/mj\.wr\b/.test(wrFelder[1]) && !/mj\.punkte/.test(wrFelder[1]),
+            'das Major-Feld zeigt nicht mj.wr, sondern wieder die Matchpunkte');
         assert.ok(/heatmap\.majorLabel/.test(rumpf) && /heatmap\.onlineLabel/.test(rumpf),
             'die Quellen sind in der gebauten Zelle nicht beschriftet');
     });
@@ -258,29 +261,44 @@ describe('Die Zelle zeigt beide Zahlen mit ihrer Herkunft', () => {
             + 'Kontrast (3,42:1)');
     });
 
-    it('der Hinweis nennt die Zaehlweise', () => {
-        // DAS ist die Zusage, an der alles haengt: zwei Skalen nebeneinander
-        // ohne Erklaerung ist genau der Fehler, den diese Seite seit Wochen
-        // abarbeitet.
-        // BEIDE Sprachen pruefen. Die erste Fassung dieser Zusage nahm den
-        // ersten Treffer — das ist der englische Eintrag — und suchte darin
-        // nach "Matchpunkte".
+    it('der Hinweis belegt die Zahl mit der Bilanz', () => {
+        /* BIS ZUM 03.09.2026 stand hier das Gegenteil: der Hinweis MUSSTE
+           sagen, dass die Major-Zahl Matchpunkte rechnet — die einzige
+           ehrliche Loesung, solange zwei Skalen nebeneinander standen.
+
+           Seit der Scraper die Bilanz je Paarung mitholt, rechnen beide
+           Zeilen S/(S+N) mit derselben Glaettung. Zwei Skalen gibt es nicht
+           mehr, also darf der Hinweis sie auch nicht mehr behaupten. Was
+           bleibt, ist die schaerfere Zusage: die Zelle zeigt die Bilanz,
+           aus der ihre Quote kommt. */
         const i18n = lies(path.join('js', 'i18n.js'));
         const eintraege = [...i18n.matchAll(/'heatmap\.majorTip':\s*'([^']*)'/g)].map(m => m[1]);
         assert.strictEqual(eintraege.length, 2,
-            `der Hinweis zur Major-Zahl steht ${eintraege.length}× in i18n.js, `
+            `der Hinweis zur Major-Zahl steht ${eintraege.length}x in i18n.js, `
             + 'erwartet 2 (deutsch und englisch)');
-        const [en, de2] = eintraege[0].includes('Matchpunkte')
-            ? [eintraege[1], eintraege[0]] : eintraege;
-        assert.ok(/Matchpunkte/.test(de2) && /match points/i.test(en),
-            'der Hinweis sagt nicht mehr in beiden Sprachen, dass die '
-            + 'Major-Zahl Matchpunkte rechnet — dann stehen zwei Skalen '
-            + 'nebeneinander und laden zum Vergleichen ein, der so nicht stimmt');
-        for (const s of [de2, en]) {
-            assert.ok(/2 (Punkte|points)/.test(s),
-                'der Hinweis beziffert den systematischen Abstand nicht mehr '
-                + '(gemessen Median -2,0 pp, davon -1,8 reine Zaehlweise): ' + s.slice(0, 80));
+        for (const s2 of eintraege) {
+            assert.ok(!/Matchpunkte|match points/i.test(s2),
+                'der Hinweis behauptet weiter Matchpunkte: ' + s2.slice(0, 80));
+            assert.ok(/\{b\}/.test(s2),
+                'der Hinweis zeigt die Bilanz nicht — sie ist der Beleg dafuer, '
+                + 'dass die Major-Zahl auf derselben Skala steht wie die '
+                + 'Online-Zahl darueber: ' + s2.slice(0, 80));
+            assert.ok(/entschiedene|decided/i.test(s2),
+                'der Hinweis nennt die Zaehlweise nicht mehr — "Win Rate" ist '
+                + 'im Haus eine von drei Konventionen: ' + s2.slice(0, 80));
         }
+        const ohne = [...i18n.matchAll(/'heatmap\.majorOhneBilanz':\s*'([^']*)'/g)];
+        assert.strictEqual(ohne.length, 2,
+            'der Hinweis fuer Zellen ohne Bilanz fehlt in einer Sprache — eine '
+            + 'Zeile aus einem Lauf vor PR #639 hat vs_count, aber keine Bilanz');
+    });
+
+    it('die Zelle zeigt die Win Rate, nicht die Matchpunkte', () => {
+        assert.ok(/mj\.wr != null/.test(jsK),
+            'die Zelle prueft nicht mehr auf mj.wr — dann steht dort wieder '
+            + 'die Matchpunktquote unter der Ueberschrift "WR"');
+        assert.ok(!/mj\.punkte/.test(jsK),
+            'mj.punkte ist zurueck in der Ausgabe der Heatmap-Zelle');
     });
 });
 

@@ -137,7 +137,30 @@ const REGISTER = {
 // Kachel mit Quote und Vielfachem". Ohne sie liefe die Gleichung
 // stillschweigend leer, und der Test meldete gruen, obwohl er nichts
 // mehr liest.
-const OBERGRENZE = 68;
+// 68 -> 69 am 03.09.2026: eine Vorpruefung in
+// test-nenner-und-rundung.js. Sie steht vor der eigentlichen Zusage
+// ("fuenf um je eine Liste driftende Zeilen aendern den Nenner nicht")
+// und lautet "die Livedaten liefern ueberhaupt einen Nenner". Ohne sie
+// waere die Zusage erfuellt, sobald beide Seiten 0 sind — also genau
+// dann, wenn der Nenner kaputt ist. Sie behauptet keinen Wochenwert:
+// sie faellt nur, wenn die Datei so uneinig ist, dass gar nichts mehr
+// belegt werden kann, und dann soll sie fallen.
+//
+// ANLASS war der rote Deploy desselben Tages: der Wochenlauf lieferte
+// Wailord mit 112 Listen bei 0,28 %, unvereinbar mit dem Rest, und der
+// harte Schnitt in feldGroesseAusAnteilen gab 0 zurueck. Nicht die
+// Woche war anders — die Rechnung vertrug keine unruhige Quelle.
+//
+// OFFENER BEFUND vom selben Tag, hier notiert statt verschwiegen:
+// dieser Wachhund sieht nur 22 von 55 Testdateien, die aus data/ lesen.
+// `liestLiveDaten` verlangt readFileSync UND den Pfad in derselben
+// Zeile; jede Datei mit einer eigenen `lies()`-Hilfsfunktion — darunter
+// test-matchup-major-spalte.js mit 17 Ungleichungen — faellt durch.
+// In den unsichtbaren 33 Dateien stehen 212 weitere Ungleichungen an
+// Live-Daten. Der Wachhund bewacht also ein Viertel dessen, was er zu
+// bewachen behauptet. Wird in einem eigenen Schritt geschlossen; die
+// Obergrenze ist danach neu zu setzen.
+const OBERGRENZE = 69;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

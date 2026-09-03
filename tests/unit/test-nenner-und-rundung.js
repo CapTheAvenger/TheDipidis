@@ -143,6 +143,65 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
         assert.equal(fn([{ anteil: 90, anzahl: 90 }, { anteil: 5, anzahl: 500 }]), 0);
     });
 
+    it('eine driftende Zeile kippt den Nenner nicht mehr', () => {
+        /* ANLASS (03.09.2026, roter Deploy). Der Wochenlauf lieferte
+           Wailord mit 112 Listen bei 0,28 % — daraus folgt N >= 39.298,
+           waehrend Alakazam Dudunsparce (2.259 bei 5,77 %) N <= 39.185
+           verlangt. Der harte Schnitt ueber alle Zeilen fand kein
+           gemeinsames N und gab 0 zurueck; der Donut verlor seinen
+           Nenner, obwohl 134 von 135 Zeilen sich einig waren.
+
+           Ursache in der Quelle: 112/39.181 = 0,2859 % haette 0,29
+           ergeben, 111/39.181 = 0,2833 % ergibt die angezeigten 0,28.
+           Zwischen dem Lesen der Anteilsspalte und dem der Zahl kam eine
+           Liste dazu. Das wird wieder passieren, also muss die Rechnung
+           es aushalten — und genau das wird hier gemessen, an den
+           echten Livedaten plus einer kuenstlich driftenden Zeile. */
+        const UTILS = lies('js/app-utils.js');
+        const quelle = stueck(UTILS,
+            /function feldGroesseAusAnteilen\(zeilen\) \{[\s\S]*?\n\}/, 'feldGroesse');
+        // eslint-disable-next-line no-new-func
+        const fn = new Function(quelle + '\nreturn feldGroesseAusAnteilen;')();
+
+        const csv = fs.readFileSync(path.join(ROOT, 'data', 'limitless_online_decks.csv'), 'utf8')
+            .replace(/^\uFEFF/, '').trim().split('\n');
+        const kopf = csv[0].split(';');
+        const zeilen = csv.slice(1).map(l => {
+            const f = l.split(';'); const o = {};
+            kopf.forEach((k, i) => { o[k] = f[i]; });
+            return { anteil: parseFloat(String(o.share_numeric).replace(',', '.')),
+                     anzahl: parseInt(o.count, 10) };
+        }).filter(z => z.anzahl > 0);
+        const echt = fn(zeilen);
+        assert.ok(echt > 0, 'schon die Livedaten liefern keinen Nenner');
+
+        // Fuenf Zeilen driften um je eine Liste — der Nenner bleibt derselbe.
+        const gedriftet = zeilen.map((z, i) => ([3, 10, 20, 40, 60].indexOf(i) >= 0
+            ? { anteil: z.anteil, anzahl: z.anzahl + 1 } : z));
+        assert.strictEqual(fn(gedriftet), echt,
+            `fuenf um eine Liste driftende Zeilen aendern den Nenner von ${echt} `
+            + `auf ${fn(gedriftet)} — eine unruhige Quelle darf ihn nicht bewegen`);
+
+        /* Aber die Nachsicht hat eine Grenze. Die Probe dafuer muss ein
+           GESPALTENES Feld sein, nicht ein kaputtes: 45 % der Zeilen
+           nennen den halben Anteil und einigen sich damit sauber auf das
+           doppelte N, 55 % bleiben beim echten. Es gibt dann zwei
+           Lager und eine knappe Mehrheit — und eine knappe Mehrheit ist
+           kein Beleg. Erwartet wird 0.
+
+           Die erste Fassung dieser Probe verdoppelte stattdessen die
+           Listenzahlen. Sie kam auch auf 0, aber aus dem falschen Grund:
+           die Summe der gelisteten Decks wuchs ueber den Nenner, und die
+           Schlusspruefung `n > gelistet` griff. Eine zu nachsichtige
+           Schwelle waere durchgerutscht — gefunden durch die
+           Mutationsprobe, nicht durch Nachdenken. */
+        const gespalten = zeilen.map((z, i) => (i % 20 < 9
+            ? { anteil: z.anteil / 2, anzahl: z.anzahl } : z));
+        assert.strictEqual(fn(gespalten), 0,
+            'bei 55 zu 45 gespaltenen Zeilen kommt noch eine Zahl heraus — '
+            + 'dann folgt der Nenner einer knappen Mehrheit statt einem Beleg');
+    });
+
     it('die City League braucht keine: dort IST die Summe das Feld', () => {
         assert.match(lies('js/app-city-league.js'), /renderMetaChart\('cityLeague', sorted\)/);
     });

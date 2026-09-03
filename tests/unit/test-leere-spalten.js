@@ -7,7 +7,7 @@
  *
  * Gemessen wurde danach die ganze Seite: von vierzehn Reitern trugen
  * die Matchup-Tabellen der Archetyp-Karte zwei Spalten, in denen JEDE
- * Zelle ein Strich war — Major-P und Major-M, die Praesenzturniere.
+ * Zelle ein Strich war — Major-WR und Major-Matches, die Praesenzturniere.
  * Fuer die heutige Datenlage gibt es dort keine einzige Paarung.
  *
  * Zwei Spalten Striche kosten waagerechten Platz, lassen die Tabelle
@@ -98,8 +98,17 @@ function tabelleMit(zeilen) {
 const zeile = (gegner, extra) => Object.assign({
     opponent: gegner, winRate: 52, winRateRoh: 52, games: 40,
     wins: 20, losses: 18, ties: 2, thin: false,
-    majorPunkte: null, majorAnzahl: null,
+    majorWr: null, majorWrRoh: null, majorSiege: null,
+    majorNiederlagen: null, majorUnentschieden: null, majorAnzahl: null,
 }, extra || {});
+
+/* HTML-KOMMENTARE ZUERST WEG. Die Kopfzeile traegt eine lange Begruendung
+   im Markup, und die nennt die Spaltennamen beim Namen ("Major-Matches
+   statt Major-M"). Eine Zusicherung, die im rohen Text sucht, findet sie
+   dort und meldet eine Spalte, die gar nicht gerendert wird — genau der
+   Fehler, den tests/unit/test-matchup-major-spalte.js schon einmal
+   gemacht hat. */
+const sichtbar = (html) => String(html).replace(/<!--[\s\S]*?-->/g, ' ');
 
 function spaltenZaehlen(html) {
     const kopf = (html.match(/<th\b/g) || []).length;
@@ -111,9 +120,9 @@ function spaltenZaehlen(html) {
 describe('die Praesenzspalten verschwinden, wenn sie leer waeren', () => {
     it('ohne eine einzige Praesenzpartie fallen Kopf UND Zellen weg', () => {
         const html = tabelleMit([zeile('A'), zeile('B'), zeile('C')])('X', {});
-        assert.doesNotMatch(html, /Major-P/, 'die Kopfzelle Major-P steht noch da');
-        assert.doesNotMatch(html, /Major-M/, 'die Kopfzelle Major-M steht noch da');
-        assert.doesNotMatch(html, /arc-mu-major/, 'die Datenzellen stehen noch da');
+        assert.doesNotMatch(sichtbar(html), /Major-WR/, 'die Kopfzelle Major-WR steht noch da');
+        assert.doesNotMatch(sichtbar(html), /Major-Matches/, 'die Kopfzelle Major-Matches steht noch da');
+        assert.doesNotMatch(sichtbar(html), /arc-mu-major/, 'die Datenzellen stehen noch da');
     });
 
     it('und der Satz darunter sagt, warum', () => {
@@ -124,10 +133,12 @@ describe('die Praesenzspalten verschwinden, wenn sie leer waeren', () => {
 
     it('eine einzige Paarung mit Zahlen haelt beide Spalten', () => {
         const html = tabelleMit([
-            zeile('A'), zeile('B'), zeile('C', { majorPunkte: 48.5, majorAnzahl: 30 }),
+            zeile('A'), zeile('B'),
+            zeile('C', { majorWr: 48.5, majorWrRoh: 47.0, majorSiege: 14,
+                         majorNiederlagen: 16, majorUnentschieden: 0, majorAnzahl: 30 }),
         ])('X', {});
-        assert.match(html, /Major-P/);
-        assert.match(html, /Major-M/);
+        assert.match(sichtbar(html), /Major-WR/);
+        assert.match(sichtbar(html), /Major-Matches/);
         // Und die Zeilen OHNE Zahlen tragen dort weiter ihren Strich —
         // der sagt dann etwas, weil daneben Zahlen stehen.
         assert.match(html, /arc-mu-major[^>]*>–</);
@@ -141,8 +152,8 @@ describe('Kopf und Zeile bleiben gleich breit', () => {
        falsch waere. */
     [
         ['ohne Praesenzdaten', [zeile('A'), zeile('B')]],
-        ['mit Praesenzdaten', [zeile('A', { majorPunkte: 50, majorAnzahl: 12 }), zeile('B')]],
-        ['nur die letzte Zeile hat Daten', [zeile('A'), zeile('B', { majorPunkte: 44, majorAnzahl: 9 })]],
+        ['mit Praesenzdaten', [zeile('A', { majorWr: 50, majorWrRoh: 50, majorSiege: 6, majorNiederlagen: 6, majorUnentschieden: 0, majorAnzahl: 12 }), zeile('B')]],
+        ['nur die letzte Zeile hat Daten', [zeile('A'), zeile('B', { majorWr: 44, majorWrRoh: 44, majorSiege: 4, majorNiederlagen: 5, majorUnentschieden: 0, majorAnzahl: 9 })]],
     ].forEach(([name, zeilen]) => {
         it(name, () => {
             const html = tabelleMit(zeilen)('X', {});
@@ -157,7 +168,7 @@ describe('Kopf und Zeile bleiben gleich breit', () => {
         const html = tabelleMit([zeile('A'), zeile('B')])('X', {});
         const { kopf } = spaltenZaehlen(html);
         assert.equal(kopf, 6, `ohne Praesenzspalten muessen sechs bleiben, gezaehlt: ${kopf}`);
-        const mit = spaltenZaehlen(tabelleMit([zeile('A', { majorPunkte: 50, majorAnzahl: 12 })])('X', {}));
+        const mit = spaltenZaehlen(tabelleMit([zeile('A', { majorWr: 50, majorWrRoh: 50, majorSiege: 6, majorNiederlagen: 6, majorUnentschieden: 0, majorAnzahl: 12 })])('X', {}));
         assert.equal(mit.kopf, 8, `mit Praesenzspalten muessen acht stehen, gezaehlt: ${mit.kopf}`);
     });
 });

@@ -7,22 +7,31 @@
  * Betreiber: "ausgeklappt auf VS Deck Ebene sehe ich nicht das Online und
  * Major jeweils angezeigt wird."
  *
- * ZWEI SPALTEN MIT ZWEI NAMEN, WEIL ES ZWEI GROESSEN SIND.
+ * ZWEI SPALTEN, EINE RECHNUNG — SEIT DEM 03.09.2026.
  *
- * Links steht S/(S+N) — Siege durch entschiedene Partien, geglaettet.
- * Rechts stehen MATCHPUNKTE (3S+U)/3n. Das ist keine Nachlaessigkeit,
- * sondern die Grenze der Quelle: `labs_tournament_matchups_*.csv` fuehrt je
- * Paarung nur `vs_count` und `vs_win_pct` und KEINE Bilanz. Ohne die
- * Unentschieden je Paarung laesst sich das nicht auf die Online-Skala
- * bringen, und labs veroeffentlicht sie nicht — der Scraper liest die zwei
- * Zellen, die dastehen (labs_tournament_scraper.py:1785).
+ * Bis dahin hiess die rechte Spalte "Major-P" und zeigte MATCHPUNKTE
+ * (3S+U)/(3M), waehrend links S/(S+N) stand. Das war keine
+ * Nachlaessigkeit, sondern die Grenze der Quelle:
+ * `labs_tournament_matchups_*.csv` fuehrte je Paarung nur `vs_count` und
+ * `vs_win_pct` und KEINE Bilanz. Ohne die Unentschieden je Paarung liess
+ * sich das nicht auf die Online-Skala bringen.
  *
- * Zwei Spalten mit demselben Namen und zwei Rechnungen waeren genau der
- * Fehler, den diese Seite seit Wochen abarbeitet. Zwei VERSCHIEDENE Namen
- * fuer zwei verschiedene Groessen sind in Ordnung — solange der Kopf sagt,
- * was jede ist. Der gemessene Abstand steht im Hinweis jeder Zelle:
- * Median -2,0 pp, davon -1,8 pp reine Zaehlweise (11 % Unentschieden am
- * Major gegen 1,3 % online).
+ * Der Betreiber wollte einen Namen ("das sollten wir auch WR nennen,
+ * damit wir hier ueberall Gleiches benutzen"). Der Weg dorthin war nicht,
+ * die Beschriftung zu aendern, sondern die Zahl: seit PR #639 scrapt
+ * labs_tournament_scraper.py die Bilanz je Paarung mit (vs_wins /
+ * vs_losses / vs_ties). Die Spalte rechnet jetzt S/(S+N) mit demselben
+ * 20-Partien-Prior wie links und heisst deshalb "Major-WR".
+ *
+ * DIE ZUSICHERUNG DREHT SICH DAMIT UM. Vorher stand hier: "die Quelle
+ * fuehrt je Paarung wirklich keine Bilanz" — mit dem Hinweis, dass die
+ * ganze Begruendung hinfaellig ist, sobald sie es doch tut. Genau das ist
+ * eingetreten. Jetzt steht hier: die Bilanz IST da, und sie passt zur
+ * Partienzahl daneben.
+ *
+ * `vs_win_pct` bleibt in der Datei und bleibt geprueft (Matchpunkte) —
+ * nicht, weil es angezeigt wird, sondern weil ein stiller Griff danach
+ * wieder zwei Rechnungen unter einem Namen erzeugen wuerde.
  *
  * ABDECKUNG, gemessen an Mega Excadrill: 15 von 20 Paarungen haben einen
  * Major-Wert, 7 davon unter 10 Partien. Grimmsnarl Froslass steht mit
@@ -71,57 +80,153 @@ describe('Die Datei wird nur einmal gelesen', () => {
     });
 });
 
-describe('Die beiden Spalten heissen verschieden', () => {
+describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
 
-    it('die Praesenzspalte heisst nicht "Win Rate"', () => {
-        /* Links steht S/(S+N), rechts stehen MATCHPUNKTE (3S+U)/3n. Zwei
-           Spalten mit demselben Namen und zwei Rechnungen waeren genau der
-           Fehler, den diese Seite seit Wochen abarbeitet.
+    it('die Praesenzspalte heisst Major-WR', () => {
+        /* Bis zum 02.09.2026 hiess sie "Major-P", und diese Zusicherung
+           verbot ihr den Namen "Win Rate" — zu Recht, solange sie
+           Matchpunkte zeigte. Seit die Bilanz je Paarung mitgescrapt wird,
+           rechnet sie S/(S+N) wie die Spalte links, und der gleiche Name
+           ist nicht mehr irrefuehrend, sondern die Zusage.
 
-           Seit dem 02.09.2026 heisst die Spalte kurz "Major-P" — die
-           Kopfzeile hat in einer 411 px breiten Karte keinen Platz fuer
-           mehr. Aufgeloest wird das Kuerzel in der Legende direkt unter
-           der Tabelle; ein Kuerzel ohne Legende bleibt verboten. */
+           Die Zusicherung bleibt scharf: sie verlangt WR im Namen UND
+           weiter unten, dass die Zelle wirklich aus der Bilanz rechnet.
+           Nur eines von beidem waere der alte Fehler mit vertauschten
+           Vorzeichen. */
         const I18N = lies(path.join('js', 'i18n.js'));
         const werte = [...I18N.matchAll(/'arc\.colMajor':\s*'([^']*)'/g)].map(m => m[1]);
-        assert.ok(werte.length >= 1, 'arc.colMajor fehlt in i18n.js');
+        assert.strictEqual(werte.length, 2, 'arc.colMajor fehlt in einer Sprache');
         for (const w of werte) {
-            assert.ok(!/win\s*rate/i.test(w),
-                `die Praesenzspalte heisst "${w}" — dieselbe Ueberschrift `
-                + 'wie die Siegquote links, obwohl es Matchpunkte sind');
+            assert.ok(/WR/.test(w),
+                `die Praesenzspalte heisst "${w}" — sie rechnet dieselbe `
+                + 'Win Rate wie links und soll auch so heissen');
+            assert.ok(/Major/i.test(w),
+                `"${w}" sagt nicht mehr, dass es die Praesenzturniere sind`);
         }
-        const leg = [...I18N.matchAll(/'arc\.muLegende':\s*'([^']*)'/g)].map(m => m[1]);
-        assert.strictEqual(leg.length, 2,
-            `arc.muLegende steht ${leg.length}× in i18n.js, erwartet 2`);
-        const deL = leg.find(z => /Matchpunkte/.test(z));
-        assert.ok(deL, 'die deutsche Legende nennt die Matchpunkte nicht mehr');
-        assert.ok(/Major-P/.test(deL),
-            'die Legende loest "Major-P" nicht mehr auf');
     });
 
-    it('der Spaltenkopf erklaert die Rechnung', () => {
+    it('die Partienspalte ist ausgeschrieben, nicht abgekuerzt', () => {
+        /* Betreiber: "ausschreiben immer besser als Abkuerzungen. Aber da,
+           wo wir Abkuerzungen nutzen, ... WR ist ja 'n Standard fuer
+           Winrate, also Major WR kann man schon machen, aber MajorM
+           koennte schon wie Major Matches oder Major Games heissen."
+
+           WR bleibt also erlaubt, "Major-M" nicht. */
+        const I18N = lies(path.join('js', 'i18n.js'));
+        const werte = [...I18N.matchAll(/'arc\.colMajorNKurz':\s*'([^']*)'/g)].map(m => m[1]);
+        assert.strictEqual(werte.length, 2, 'arc.colMajorNKurz fehlt in einer Sprache');
+        for (const w of werte) {
+            assert.ok(/match/i.test(w),
+                `"${w}" schreibt die Matches nicht aus — "Major-M" war genau `
+                + 'die Abkuerzung, die der Betreiber beanstandet hat');
+            assert.ok(w.length > 8,
+                `"${w}" ist wieder auf ein Kuerzel geschrumpft`);
+        }
+    });
+
+    it('die Legende loest beide Spalten auf', () => {
+        const I18N = lies(path.join('js', 'i18n.js'));
+        const leg = [...I18N.matchAll(/'arc\.muLegende':\s*'([^']*)'/g)].map(m => m[1]);
+        assert.strictEqual(leg.length, 2,
+            `arc.muLegende steht ${leg.length}x in i18n.js, erwartet 2`);
+        for (const z of leg) {
+            assert.ok(/Major-WR/.test(z),
+                'die Legende loest "Major-WR" nicht auf');
+            assert.ok(/Major[- ][Mm]atches/.test(z),
+                'die Legende loest die Partienspalte nicht auf');
+        }
+        const deL = leg.find(z => /Siege/.test(z));
+        assert.ok(deL, 'keine deutsche Legende gefunden');
+        assert.ok(/entschiedene Partien/.test(deL),
+            'die deutsche Legende sagt nicht mehr, WAS die Win Rate rechnet — '
+            + 'ohne das steht "WR" fuer eine von drei Konventionen im Haus');
+    });
+
+    it('der Spaltenkopf nennt die Rechnung und die Unentschieden', () => {
         const i18n = lies(path.join('js', 'i18n.js'));
         const eintraege = [...i18n.matchAll(/'arc\.colMajorTip':\s*'([^']*)'/g)].map(x => x[1]);
         assert.strictEqual(eintraege.length, 2, 'der Hinweis fehlt in einer Sprache');
-        for (const s of eintraege) {
-            assert.ok(/Matchpunkte|match points/i.test(s),
-                'der Kopf sagt nicht mehr, dass die Spalte Matchpunkte rechnet');
-            assert.ok(/Bilanz|record/i.test(s),
-                'der Kopf sagt nicht mehr, WARUM sie es tut (die Quelle liefert '
-                + 'je Paarung keine Bilanz) — ohne den Grund liest es sich wie '
-                + 'eine Nachlaessigkeit');
+        for (const s2 of eintraege) {
+            assert.ok(!/Matchpunkte|match points/i.test(s2),
+                'der Kopf behauptet weiter Matchpunkte — die Spalte rechnet '
+                + 'seit dem 03.09.2026 S/(S+N)');
+            assert.ok(/entschiedene|decided/i.test(s2),
+                'der Kopf sagt nicht, dass die Unentschieden aussen vor bleiben — '
+                + 'das ist der ganze Unterschied zwischen zwei der drei '
+                + 'Hauskonventionen');
+            assert.ok(/links|left/i.test(s2),
+                'der Kopf stellt den Bezug zur Spalte links nicht mehr her');
         }
     });
 
-    it('jede Zelle nennt den Abstand zur Spalte links', () => {
+    it('jede Zelle zeigt die Bilanz, aus der die Quote kommt', () => {
         const i18n = lies(path.join('js', 'i18n.js'));
         const eintraege = [...i18n.matchAll(/'arc\.muMajorTip':\s*'([^']*)'/g)].map(x => x[1]);
         assert.strictEqual(eintraege.length, 2, 'der Zellen-Hinweis fehlt in einer Sprache');
-        for (const s of eintraege) {
-            assert.ok(/2 (Punkte|points)/.test(s),
-                'der Hinweis beziffert den systematischen Abstand nicht mehr '
-                + '(gemessen Median -2,0 pp, davon -1,8 reine Zaehlweise)');
+        for (const s2 of eintraege) {
+            assert.ok(/\{b\}/.test(s2),
+                'der Hinweis zeigt die Bilanz nicht mehr — sie ist der Beleg '
+                + 'dafuer, dass die Zahl daneben eine Win Rate ist');
+            assert.ok(/\{r\}/.test(s2),
+                'der Rohwert fehlt im Hinweis — geglaettet ohne roh ist eine '
+                + 'Zahl ohne Herkunft');
+            assert.ok(!/2 (Punkte|points)/.test(s2),
+                'der Hinweis beziffert weiter einen systematischen Abstand — '
+                + 'den gab es, solange rechts Matchpunkte standen');
         }
+    });
+
+    it('ohne Bilanz steht ein Strich, keine geschaetzte Zahl', () => {
+        /* Zeilen aus einem Lauf vor PR #639 tragen vs_count, aber keine
+           Bilanz. Aus vs_win_pct eine Win Rate zurueckzurechnen ginge nur
+           mit einer Annahme ueber die Unentschieden — also gar nicht. */
+        assert.ok(/arc\.muMajorOhneBilanz/.test(karte),
+            'der Hinweis fuer Zeilen ohne Bilanz fehlt');
+        const i18n = lies(path.join('js', 'i18n.js'));
+        const e = [...i18n.matchAll(/'arc\.muMajorOhneBilanz':\s*'([^']*)'/g)].map(x => x[1]);
+        assert.strictEqual(e.length, 2, 'der Hinweis fehlt in einer Sprache');
+        assert.ok(/m\.majorWr == null \? '–'/.test(karteK),
+            'eine Paarung ohne Bilanz zeigt keinen Strich mehr');
+    });
+});
+
+describe('Die Zahl kommt aus der Bilanz, nicht aus vs_win_pct', () => {
+
+    it('das Register liest die drei Bilanzspalten', () => {
+        const meta = ohneKomm(lies(path.join('js', 'app-current-meta.js')));
+        for (const feld of ['vs_wins', 'vs_losses', 'vs_ties']) {
+            assert.ok(meta.indexOf(feld) >= 0,
+                `${feld} wird nicht mehr gelesen — dann kann die Spalte keine `
+                + 'Win Rate sein, egal wie sie heisst');
+        }
+    });
+
+    it('die Quote entsteht mit derselben Glaettung wie links', () => {
+        /* NUR IM REGISTER SUCHEN, nicht in der ganzen Datei. Die erste
+           Fassung dieser Zusicherung suchte "DsGlaettung" im gesamten
+           Modul — und blieb gruen, als die Glaettung aus der Major-Quote
+           entfernt wurde, weil die Online-Zahl sie an anderer Stelle
+           weiter benutzt. Gefunden durch die Mutationsprobe, nicht durch
+           Nachdenken. */
+        const meta = ohneKomm(lies(path.join('js', 'app-current-meta.js')));
+        const a = meta.indexOf('async function ladeMajorMatchups');
+        assert.ok(a > 0, 'ladeMajorMatchups ist weg');
+        const rumpf = meta.slice(a, meta.indexOf('window._majorMatchupRegistry = reg;', a));
+        assert.ok(rumpf.length > 200, 'der Rumpf von ladeMajorMatchups ist leer');
+        assert.ok(/DsGlaettung/.test(rumpf),
+            'die Major-Quote wird nicht mehr geglaettet — dann steht ein 2-0 '
+            + 'als 100 % neben einer geglaetteten Online-Zahl, und der '
+            + 'Vergleich nebeneinander ist genau der Zweck der Zelle');
+        assert.ok(/niederlagen/.test(rumpf) && /siege/.test(rumpf),
+            'Siege und Niederlagen kommen im Register nicht mehr vor');
+    });
+
+    it('die Karte zeigt majorWr, nicht die Matchpunkte', () => {
+        assert.ok(/m\.majorWr/.test(karteK),
+            'die Zelle liest majorWr nicht mehr');
+        assert.ok(!/majorPunkte/.test(karteK),
+            'majorPunkte ist zurueck in der Ausgabe — das sind Matchpunkte '
+            + 'unter der Ueberschrift "Major-WR"');
     });
 });
 
@@ -145,7 +250,7 @@ describe('Die Partienzahl steht daneben', () => {
     });
 
     it('fehlende Paarungen zeigen einen Strich, keine Null', () => {
-        assert.ok(/m\.majorPunkte == null \? '–'/.test(karteK),
+        assert.ok(/m\.majorWr == null \? '–'/.test(karteK),
             'eine fehlende Praesenzpaarung wird nicht mehr als fehlend gezeigt — '
             + 'eine 0 liest sich als "nie gewonnen"');
         assert.ok(/arc\.muMajorFehlt/.test(karte),
@@ -173,17 +278,177 @@ describe('Die Zahlen hinter der Spalte', () => {
         kopf.forEach((k, i) => { o[k] = (c[i] || '').trim(); }); return o; })
         .filter(r => r.day_filter === 'overall');
 
-    it('die Quelle fuehrt je Paarung wirklich keine Bilanz', () => {
-        // Wenn sie es doch tut, ist die ganze Begruendung hinfaellig — dann
-        // gehoert die Spalte auf die Online-Skala gebracht statt erklaert.
-        for (const feld of ['vs_wins', 'vs_losses', 'vs_ties', 'vs_record']) {
-            assert.ok(kopf.indexOf(feld) === -1,
-                `die Datei fuehrt jetzt "${feld}" — dann laesst sich die `
-                + 'Praesenzspalte auf S/(S+N) umrechnen, und die zweite Spalte '
-                + 'mit eigenem Namen ist nicht mehr noetig');
+    it('die Quelle fuehrt je Paarung eine Bilanz', () => {
+        /* DIESE ZUSICHERUNG STAND BIS ZUM 03.09.2026 ANDERSHERUM da: sie
+           verlangte, dass die Datei KEINE Bilanz fuehrt, mit dem Hinweis
+           "wenn sie es doch tut, ist die ganze Begruendung hinfaellig".
+           Genau das ist eingetreten — der Scraper holt die Bilanz jetzt
+           ab. Faellt sie wieder weg, faellt die Win-Rate-Spalte mit ihr,
+           und dieser Test sagt es sofort. */
+        for (const feld of ['vs_wins', 'vs_losses', 'vs_ties']) {
+            assert.ok(kopf.indexOf(feld) >= 0,
+                `die Datei fuehrt "${feld}" nicht mehr — ohne die Bilanz ist `
+                + '"Major-WR" eine Ueberschrift ohne Zahl dahinter');
         }
         assert.ok(kopf.indexOf('vs_count') >= 0 && kopf.indexOf('vs_win_pct') >= 0,
-            'vs_count oder vs_win_pct fehlen — die Spalte hat keine Quelle mehr');
+            'vs_count oder vs_win_pct fehlen');
+    });
+
+    it('die Bilanz addiert sich zur Partienzahl daneben', () => {
+        /* Drei Zahlen in einer Zeile, die sich nicht addieren, waren in
+           limitless_online_decks_matchups.csv in 423 von 1.546 Zeilen der
+           Fall. Hier muessen sie es tun, sonst rechnet der Nenner der
+           Win Rate ueber einer anderen Grundgesamtheit als die Zahl, die
+           in der Spalte daneben steht. */
+        const mit = rows.filter(r => String(r.vs_wins || '').trim() !== '');
+        assert.ok(mit.length >= 20,
+            `nur ${mit.length} Paarungen tragen eine Bilanz — zu wenig fuer `
+            + 'eine Spalte, die eine Win Rate verspricht');
+        const spiegel = (r) => r.my_deck_name === r.opponent_deck_name;
+        const schief = mit.filter((r) => {
+            if (spiegel(r)) return false;
+            const w = parseInt(r.vs_wins, 10) || 0;
+            const l = parseInt(r.vs_losses, 10) || 0;
+            const t2 = parseInt(r.vs_ties, 10) || 0;
+            return (w + l + t2) !== (parseInt(r.vs_count, 10) || 0);
+        });
+        assert.strictEqual(schief.length, 0,
+            `${schief.length} von ${mit.length} Paarungen haben eine Bilanz, die `
+            + 'nicht zu vs_count passt, z. B. '
+            + (schief[0] ? `${schief[0].my_deck_name} vs ${schief[0].opponent_deck_name}: `
+                + `${schief[0].vs_wins}-${schief[0].vs_losses}-${schief[0].vs_ties} `
+                + `bei vs_count=${schief[0].vs_count}` : ''));
+    });
+
+    it('im Spiegel zaehlt die Quelle beide Sitze — genau doppelt', () => {
+        /* GEFUNDEN AM 03.09.2026 durch die Zusicherung darueber: 15 von 769
+           Paarungen addierten sich nicht zu vs_count. Alle 15 waren Spiegel
+           (Dragapult gegen Dragapult), und alle 15 lagen exakt beim Faktor
+           2,0 — Dragapult 124-124-24 auf 136 Partien.
+
+           Das ist kein Fehler, sondern die Natur der Sache: in einer
+           Spiegelpartie sitzt dasselbe Deck auf beiden Seiten, also wird
+           jede Partie einmal als Sieg UND einmal als Niederlage gebucht.
+           Die Win Rate ist damit per Konstruktion 50 %, und das ist die
+           richtige Antwort.
+
+           Die Zusicherung haelt den Faktor fest. Waere er nicht mehr genau
+           2, waere die Symmetrie gebrochen — dann zaehlt die Quelle
+           Spiegel anders, und 50 % waere dort eine Behauptung statt einer
+           Tautologie. */
+        const sp = rows.filter(r => r.my_deck_name === r.opponent_deck_name
+            && String(r.vs_wins || '').trim() !== '');
+        assert.ok(sp.length >= 5, `nur ${sp.length} Spiegelpaarungen gefunden`);
+        for (const r of sp) {
+            const w = parseInt(r.vs_wins, 10) || 0;
+            const l = parseInt(r.vs_losses, 10) || 0;
+            const t2 = parseInt(r.vs_ties, 10) || 0;
+            const c = parseInt(r.vs_count, 10) || 0;
+            assert.strictEqual(w, l,
+                `${r.my_deck_name} im Spiegel: ${w} Siege gegen ${l} Niederlagen — `
+                + 'im Spiegel muessen sie gleich sein, sonst schlaegt ein Deck sich selbst');
+            assert.strictEqual(w + l + t2, 2 * c,
+                `${r.my_deck_name} im Spiegel: ${w}-${l}-${t2} bei vs_count=${c} — `
+                + 'erwartet wird der Faktor 2 (beide Sitze gebucht)');
+        }
+    });
+
+    it('die Bilanz erklaert vs_win_pct — sonst gehoert sie nicht zusammen', () => {
+        /* Die schaerfste Probe: aus der gescrapten Bilanz muss sich die
+           Prozentzahl derselben Zeile nachrechnen lassen. Trifft sie nicht,
+           stammen Bilanz und Prozentwert aus verschiedenen Zeilen der
+           Quelltabelle — und dann ist die Win Rate daneben falsch, ohne
+           dass man es ihr ansieht. */
+        const mit = rows.filter(r => String(r.vs_wins || '').trim() !== ''
+            && (parseInt(r.vs_count, 10) || 0) > 0);
+        assert.ok(mit.length >= 20, 'zu wenige Zeilen mit Bilanz fuer die Pruefung');
+        // Spiegel duerfen mit: die Prozentzahl rechnet dort ueber DIE
+        // GEDOPPELTE Bilanz und kommt genau deshalb auf 50 %.
+        const daneben = mit.filter((r) => {
+            const w = parseInt(r.vs_wins, 10) || 0;
+            const l = parseInt(r.vs_losses, 10) || 0;
+            const t2 = parseInt(r.vs_ties, 10) || 0;
+            const g = w + l + t2;
+            if (!g) return true;
+            return Math.abs(((3 * w + t2) / (3 * g)) * 100 - zahl(r.vs_win_pct)) > 0.02;
+        });
+        assert.strictEqual(daneben.length, 0,
+            `${daneben.length} von ${mit.length} Paarungen: die Bilanz ergibt nicht `
+            + 'die Prozentzahl derselben Zeile'
+            + (daneben[0] ? `, z. B. ${daneben[0].my_deck_name} vs `
+                + `${daneben[0].opponent_deck_name}: ${daneben[0].vs_wins}-`
+                + `${daneben[0].vs_losses}-${daneben[0].vs_ties} gegen `
+                + `${daneben[0].vs_win_pct} %` : ''));
+    });
+
+    it('beide Richtungen einer Paarung ergaenzen sich zu 100 Prozent', () => {
+        /* GEFUNDEN AM 03.09.2026 beim Ansehen der Heatmap: Dragapult gegen
+           Mega Excadrill steht auf 51,6 %, Mega Excadrill gegen Dragapult
+           auf 48,4 %. Das ist kein Zufall, sondern eine Eigenschaft der
+           Glaettung: (S+k/2)/(S+N+k) + (N+k/2)/(S+N+k) = 1, weil der
+           Nenner in beiden Richtungen derselbe ist.
+
+           Damit ist das hier die schaerfste Probe, die diese Datei
+           zulaesst: die Bilanz der einen Richtung muss die gespiegelte
+           Bilanz der anderen sein. Waere auch nur eine Zeile beim Scrapen
+           der falschen Paarung zugeordnet worden, faellt es hier auf —
+           an einer Summe, die nicht 100 ergibt. Ohne die Bilanz war diese
+           Probe nicht moeglich; mit den Matchpunkten summiert sie sich
+           NICHT auf 100 (Unentschieden zaehlen beiden Seiten nur einen
+           Punkt), was die alte Spalte auch nicht pruefbar machte. */
+        const nach = {};
+        for (const r of rows) {
+            if (String(r.vs_wins || '').trim() === '') continue;
+            (nach[r.my_deck_name] = nach[r.my_deck_name] || {})[r.opponent_deck_name] = r;
+        }
+        let geprueft = 0;
+        const schief = [];
+        for (const a of Object.keys(nach)) {
+            for (const b of Object.keys(nach[a])) {
+                if (a === b) continue;
+                const hin = nach[a][b];
+                const zurueck = (nach[b] || {})[a];
+                if (!zurueck) continue;
+                geprueft++;
+                const w1 = parseInt(hin.vs_wins, 10) || 0;
+                const l1 = parseInt(hin.vs_losses, 10) || 0;
+                const t1 = parseInt(hin.vs_ties, 10) || 0;
+                const w2 = parseInt(zurueck.vs_wins, 10) || 0;
+                const l2 = parseInt(zurueck.vs_losses, 10) || 0;
+                const t2b = parseInt(zurueck.vs_ties, 10) || 0;
+                if (w1 !== l2 || l1 !== w2 || t1 !== t2b) {
+                    schief.push(`${a} vs ${b}: ${w1}-${l1}-${t1} gegen `
+                        + `${b} vs ${a}: ${w2}-${l2}-${t2b}`);
+                }
+            }
+        }
+        assert.ok(geprueft >= 50,
+            `nur ${geprueft} Paarungen liegen in beiden Richtungen vor`);
+        assert.strictEqual(schief.length, 0,
+            `${schief.length} von ${geprueft} Paarungen sind nicht spiegelbildlich, `
+            + `z. B. ${schief[0] || ''} — dann ist mindestens eine Bilanz der `
+            + 'falschen Paarung zugeordnet');
+    });
+
+    it('Win Rate und Matchpunkte sind wirklich zwei Zahlen', () => {
+        /* Waeren sie dasselbe, waere die ganze Umstellung folgenlos — und
+           der alte Zustand (Matchpunkte unter dem Namen WR) waere nie ein
+           Fehler gewesen. Er war einer: bei 11 % Unentschieden am Major
+           liegen die beiden Zahlen systematisch auseinander. */
+        const mit = rows.filter(r => String(r.vs_wins || '').trim() !== ''
+            && (parseInt(r.vs_count, 10) || 0) >= 10);
+        assert.ok(mit.length >= 10, 'zu wenige belastbare Paarungen fuer die Probe');
+        const abstaende = mit.map((r) => {
+            const w = parseInt(r.vs_wins, 10) || 0;
+            const l = parseInt(r.vs_losses, 10) || 0;
+            const wr = (w + l) > 0 ? (w / (w + l)) * 100 : NaN;
+            return Math.abs(wr - zahl(r.vs_win_pct));
+        }).filter(Number.isFinite).sort((a, b) => a - b);
+        const median = abstaende[Math.floor(abstaende.length / 2)];
+        assert.ok(median > 0.5,
+            `die Bilanz-Win-Rate weicht im Median nur ${median.toFixed(2)} Punkte `
+            + 'von vs_win_pct ab — dann fuehrt die Quelle doch S/(S+N), und die '
+            + 'Kommentare im Haus, die vs_win_pct Matchpunkte nennen, sind falsch');
     });
 
     it('genug Paarungen tragen einen Wert', () => {
@@ -241,12 +506,12 @@ describe('Die acht Spalten passen, oder die Tabelle scrollt', () => {
            gab jeder Spalte ab der vierten 42 px — gedacht fuer W, L und T
            mit ihren ein- bis dreistelligen Zahlen. Die beiden
            Major-Spalten aus PR #611 erbten das stillschweigend, und
-           "Major-Punkte" braucht einlagig 96 px. */
+           "Major-Matches" braucht einlagig 96 px. */
         assert.ok(!/arc-mu-table th:nth-child\(n\+4\)/.test(css),
             'die Sammelregel ab Spalte 4 ist zurueck — dann erben die '
             + 'Major-Spalten wieder die 42 px fuer einstellige Zahlen');
         assert.match(css, /arc-mu-table th:nth-child\(7\)/,
-            'die Major-Punkte-Spalte hat keine eigene Breite mehr');
+            'die Major-WR-Spalte hat keine eigene Breite mehr');
         assert.match(css, /arc-mu-table th:nth-child\(8\)/,
             'die Major-Matches-Spalte hat keine eigene Breite mehr');
     });
@@ -257,7 +522,7 @@ describe('Die acht Spalten passen, oder die Tabelle scrollt', () => {
         const rumpf = css.slice(i, css.indexOf('}', i));
         assert.match(rumpf, /white-space:\s*normal/,
             'die Kopfzellen stehen wieder auf nowrap — dann laeuft '
-            + '"Major-Punkte" ueber statt umzubrechen');
+            + '"Major-Matches" ueber statt umzubrechen');
         assert.ok(!/overflow-wrap:\s*anywhere/.test(rumpf),
             'overflow-wrap: anywhere ist zurueck — das bricht MITTEN im '
             + 'Wort ("Maj/or/punk/te") und ist schlimmer als der Ueberlauf');

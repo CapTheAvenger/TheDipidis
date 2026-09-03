@@ -169,6 +169,14 @@ def test_die_beiden_belege_des_betreibers_stimmen(pins):
 CM_NAME_WEICHT_AB = {("PBL", "55"), ("POR", "52"), ("CRI", "32")}
 
 
+def _setcodes():
+    """Alle bekannten Set-Codes. Cardmarket haengt sie manchen
+    Produktnamen als Marke an ("| SV", "| UPR"); sie sind kein
+    Kartentext und duerfen die Gegenprobe nicht kippen."""
+    with io.open(os.path.join(DATEN, "sets.json"), encoding="utf-8") as f:
+        return set(json.load(f) or {})
+
+
 def test_der_kartentext_widerspricht_keinem_pin(pins):
     """Gegenprobe aus einer Quelle, die Cardmarket nie beruehrt hat: wo
     der Cardmarket-Produktname die Attacken in Klammern fuehrt, muessen
@@ -196,8 +204,18 @@ def test_der_kartentext_widerspricht_keinem_pin(pins):
         klammer = name[name.index("[") + 1:name.rindex("]")]
         # Der Set-Code steht bei manchen Produkten mit in der Klammer
         # ("Chimchar [Flare | UPR]"); er gehoert nicht zum Kartentext.
+        #
+        # UND ES IST NICHT IMMER DER SET-CODE DES PINS (03.09.2026).
+        # Bis dahin wurde nur r["set"] herausgefiltert. Der Pin BLK-152
+        # fiel darueber: das Produkt heisst "Minccino [Tail Slap | SV]",
+        # und "SV" ist die Aera-Marke, nicht der Set-Code der Karte.
+        # 19 der 172 BLK-Produkte tragen sie — es ist eine Klasse, keine
+        # Ausnahme, und gehoert deshalb in die Regel und nicht in
+        # CM_NAME_WEICHT_AB. Herausgefiltert wird jetzt jeder
+        # Klammer-Teil, der ueberhaupt ein bekannter Set-Code ist.
+        setcodes = {c.lower() for c in _setcodes()}
         aus_cm = [w for w in worte(klammer)
-                  if w != r["set"].strip().lower()]
+                  if w != r["set"].strip().lower() and w not in setcodes]
         assert worte(unser) == aus_cm, (
             f'{r["set"]}-{r["number"]}: unser Kartentext {unser!r} passt '
             f'nicht zum Cardmarket-Produktnamen {name!r}')

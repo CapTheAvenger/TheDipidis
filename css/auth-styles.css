@@ -152,7 +152,12 @@
     padding: 12px 24px;
     font-size: 16px;
     cursor: pointer;
-    color: #666;
+    /* BEFUND 03.09.2026, live im angemeldeten Profil gemessen: #666
+       ist eine Hellmodus-Tinte auf einer drehenden Flaeche. Im
+       Dunkelmodus standen alle 13 Reiterbeschriftungen bei 3,08:1.
+       --ink-2 ist die gedaempfte Tinte, die mitdreht: 7,48:1 hell,
+       9,90:1 dunkel — in beiden Modi besser als #666 je war. */
+    color: var(--ink-2);
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
 }

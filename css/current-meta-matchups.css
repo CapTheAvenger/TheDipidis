@@ -929,7 +929,7 @@
 }
 .uv-diff-rem-label {
     background: rgba(239, 68, 68, 0.12);
-    color: #b91c1c;
+    color: var(--tint-bad-ink);
     border-left: 3px solid #ef4444;
 }
 .uv-card-diff-list {

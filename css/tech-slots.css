@@ -114,7 +114,7 @@
     height: 22px;
     border: none;
     background: rgba(229, 62, 62, 0.1);
-    color: #c53030;
+    color: var(--tint-bad-ink);
     border-radius: 50%;
     cursor: pointer;
     line-height: 1;
@@ -297,7 +297,7 @@
 
 .tvn-delta-negative {
     background: rgba(245, 101, 101, 0.16);
-    color: #c53030;
+    color: var(--tint-bad-ink);
 }
 
 .tech-vs-normal-diff {

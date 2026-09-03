@@ -4544,17 +4544,17 @@ h3:first-child {
 /* Spezifische Heatmap-Farben (Falls dein JS CSS-Klassen nutzt) */
 .heatmap-favorable { 
     background-color: rgba(76, 175, 80, 0.15) !important; 
-    color: #1b5e20; 
+    color: var(--tint-ok-ink); 
     font-weight: 700; 
 }
 .heatmap-unfavorable { 
     background-color: rgba(244, 67, 54, 0.15) !important; 
-    color: #b71c1c; 
+    color: var(--tint-bad-ink); 
     font-weight: 700; 
 }
 .heatmap-neutral { 
     background-color: rgba(255, 235, 59, 0.15) !important; 
-    color: #8a5a00;  /* war #f57f17 = 2,56:1 auf der getoenten Zelle; jetzt 5,72:1, passend zu den 5,40:1 der roten Zelle */ 
+    color: var(--tint-warn-ink);  /* war #f57f17 = 2,56:1 auf der getoenten Zelle; jetzt 5,72:1, passend zu den 5,40:1 der roten Zelle */ 
 }
 .heatmap-mirror { 
     background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #fafafa 10px, #fafafa 20px); 
@@ -5869,7 +5869,7 @@ details[open] > .tier-trending-summary::after {
  * stealing focus from the share/WR headline. */
 .stat-badge.stat-labs {
     background: rgba(255, 193, 7, 0.18);
-    color: #8a5a00;
+    color: var(--tint-warn-ink);
     font-weight: 600;
 }
 
@@ -6383,12 +6383,12 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-status-badge.is-offline {
     background: rgba(231, 76, 60, 0.12);
-    color: #b42318;
+    color: var(--tint-bad-ink);
 }
 
 .battle-journal-status-badge.is-syncing {
     background: rgba(243, 156, 18, 0.16);
-    color: #8a5800;
+    color: var(--tint-warn-ink);
 }
 
 .battle-journal-status-badge.is-success {
@@ -6626,13 +6626,13 @@ details[open] > .tier-trending-summary::after {
 .battle-journal-choice-loss.is-selected {
     border-color: #e74c3c;
     background: rgba(231, 76, 60, 0.12);
-    color: #b42318;
+    color: var(--tint-bad-ink);
 }
 
 .battle-journal-choice-tie.is-selected {
     border-color: #f39c12;
     background: rgba(243, 156, 18, 0.16);
-    color: #8a5800;
+    color: var(--tint-warn-ink);
 }
 
 .battle-journal-actions {
@@ -7288,7 +7288,7 @@ details[open] > .tier-trending-summary::after {
 }
 .ma-heatmap-good {
     background: rgba(31,139,77,.15);
-    color: #15703d;
+    color: var(--tint-ok-ink);
 }
 .ma-heatmap-mid {
     background: rgba(230,126,34,.12);
@@ -7296,7 +7296,7 @@ details[open] > .tier-trending-summary::after {
 }
 .ma-heatmap-bad {
     background: rgba(192,57,43,.12);
-    color: #962d22;
+    color: var(--tint-bad-ink);
 }
 
 /* Ranking lists */
@@ -7591,7 +7591,7 @@ details[open] > .tier-trending-summary::after {
 .beginner-tooltip-source {
     font-size: 11px;
     font-weight: 700;
-    color: #8a5800;
+    color: var(--tint-warn-ink);
     background: rgba(243, 156, 18, 0.14);
     border-radius: 999px;
     padding: 4px 8px;
@@ -7691,12 +7691,12 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-result-pill.is-loss {
     background: rgba(231, 76, 60, 0.12);
-    color: #b42318;
+    color: var(--tint-bad-ink);
 }
 
 .battle-journal-result-pill.is-tie {
     background: rgba(243, 156, 18, 0.16);
-    color: #8a5800;
+    color: var(--tint-warn-ink);
 }
 
 .battle-journal-empty-state {
@@ -9210,7 +9210,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 }
 .bj-brick-badge {
     background: rgba(230,126,34,.15);
-    color: #c0392b;
+    color: var(--tint-warn-ink);
     border: 1px solid rgba(192,57,43,.25);
 }
 .bj-mulligan-badge {
@@ -9389,9 +9389,9 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     font-variant-numeric: tabular-nums;
     min-width: 62px;
 }
-.ma-wr-good { background: rgba(31,139,77,.18);  color: #15703d; }
+.ma-wr-good { background: rgba(31,139,77,.18);  color: var(--tint-ok-ink); }
 .ma-wr-mid  { background: rgba(230,126,34,.18); color: #b35c10; }
-.ma-wr-bad  { background: rgba(192,57,43,.18);  color: #962d22; }
+.ma-wr-bad  { background: rgba(192,57,43,.18);  color: var(--tint-bad-ink); }
 
 @media (max-width: 600px) {
     .ma-matchup-row {
@@ -9838,7 +9838,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-left: 4px solid #2980b9;
     border-radius: 10px;
     font-size: 0.95rem;
-    color: #14365b;
+    color: var(--tint-info-ink);
     margin-bottom: 18px;
     max-width: 100%;
     box-shadow: 0 1px 4px rgba(52,152,219,0.10);

@@ -81,7 +81,7 @@
     border: 0;
     border-radius: 999px;
     background: rgba(40, 52, 76, 0.06);
-    color: #3a4964;
+    color: var(--tint-info-ink);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -99,7 +99,7 @@
 
 .ui-modal-close:hover {
     background: rgba(206, 60, 60, 0.12);
-    color: #b43232;
+    color: var(--tint-bad-ink);
     transform: scale(1.04);
 }
 

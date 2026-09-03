@@ -132,8 +132,15 @@ describe('data_guardian fängt ab, was der Scraper nicht kennt', () => {
     const G = lies('scripts/data_guardian.py');
 
     it('die Champions-Prüfung ist verdrahtet', () => {
-        assert.ok(/def check_champions_usage\(findings\):/.test(G));
-        assert.ok(/\n    check_champions_usage\(findings\)\n/.test(G),
+        // Die Zusicherung prüft "definiert UND aufgerufen", nicht die
+        // Argumentliste. Sie stand bis 03.09.2026 auf der exakten
+        // Signatur `(findings)` und fiel um, als die Prüfung eine
+        // Baseline dazubekam — obwohl an ihrer Aussage nichts falsch
+        // geworden war. Eine Zusicherung, die bei jeder harmlosen
+        // Erweiterung rot wird, wird irgendwann gelockert statt gelesen.
+        assert.ok(/def check_champions_usage\(findings[^)]*\):/.test(G),
+            'die Prüfung ist nicht mehr definiert');
+        assert.ok(/\n    (?:\w+ = )?check_champions_usage\(findings[^)]*\)\n/.test(G),
             'definiert, aber nie aufgerufen');
     });
 

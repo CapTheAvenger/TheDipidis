@@ -1194,3 +1194,47 @@ html.is-signed-out [onclick*="radelist"]:hover {
    (Gehoert nicht nach tokens.css: die Datei traegt nur Token, und ein
    Test haelt das fest.) */
 a:not([class]) { color: var(--link); }
+
+/* Das Original-Auswahlfeld, wo die Filterzeile es bereits zeigt. Es
+   bleibt im Baum und fuer Hilfsmittel erreichbar — siehe die Notiz in
+   js/ds-filter.js. */
+/* BEFUND DER ABNAHME (03.09.2026), zwei Stueck an dieser Regel:
+ *
+ * 1. `width: 1px` stand gegen `.control-input { width: 100% }` aus
+ *    styles.css — gleiche Spezifitaet, styles.css laedt spaeter, also
+ *    gewann sie. Das "versteckte" Feld war ein absolut positionierter
+ *    Kasten in voller Seitenbreite und machte aus past-meta einen
+ *    Reiter, der seitlich scrollt: scrollWidth 417 bei 390 px Fenster.
+ *
+ * 2. Es blieb im Tabulator-Lauf. Ein <select>, auf dem die Pfeiltasten
+ *    das Format wechseln und einen Nachladevorgang anstossen, ohne dass
+ *    irgendwo ein Fokusring steht. Das erledigt js/ds-filter.js mit
+ *    tabindex="-1" und aria-hidden.
+ *
+ * Gewonnen wird hier ueber SPEZIFITAET, nicht ueber !important: diese
+ * Datei ist die Bauteilschicht und kommt ohne aus (tests/unit/
+ * test-design-components.js haelt das fest). Zwei Klassen schlagen
+ * eine — .ds-filter-verdeckt.control-input ist (0,2,0) gegen (0,1,0).
+ */
+.ds-filter-huelle { display: contents; }
+.ds-filter-huelle.ds-filter-verdeckt { display: inline-block; }
+
+.ds-filter-verdeckt,
+.ds-filter-verdeckt.control-input,
+.ds-filter-verdeckt.cl-format-select,
+.ds-filter-verdeckt > .control-input,
+.ds-filter-verdeckt > .cl-format-select,
+.ds-filter-verdeckt > select,
+.ds-filter-verdeckt > label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-width: 0;
+    max-width: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}

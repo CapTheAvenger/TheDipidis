@@ -1,3 +1,16 @@
+/* ── Dunkelmodus: diese Datei hatte keinen ──────────────────────────
+ *
+ * BEFUND DER ABNAHME (02.09.2026): der ganze Block "Meta-Karten-Analyse"
+ * blieb im Dunkelmodus hell. Gemessen bei 1500 px und 390 px behielten
+ * vier Behaelter reines Weiss, darunter ein 1354 px breites Kartengitter
+ * — eine weisse Flaeche mitten in einer dunklen Seite, mit Text in
+ * rgb(238,242,255) darauf. Die Datei enthielt null Vorkommen von
+ * data-theme oder prefers-color-scheme.
+ *
+ * Repariert wird das nicht mit einem zweiten Stylesheet, sondern so wie
+ * ueberall sonst in diesem Projekt: die festen Werte weichen den Token
+ * aus css/tokens.css, und der Dunkelmodus faellt als Nebenwirkung an.
+ */
 /*
  * Modular CSS for Meta Card Analysis block (City League)
  * Extracted from inline styles in index.html
@@ -6,9 +19,13 @@
 .meta-card-analysis-container {
     margin-top: 30px;
     padding: 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    /* Der Verlauf war von Fastweiss nach Hellgrau — im Dunkelmodus
+       eine weisse Flaeche. Die farbigen Zustandsknoepfe darunter
+       (gruen/gelb/blau) bleiben absichtlich, sie kodieren Bedeutung
+       und sehen im Hellen genauso aus. */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border-radius: 10px;
-    border: 2px solid #dee2e6;
+    border: 2px solid var(--line);
 }
 
 .meta-card-analysis-header-row {
@@ -26,7 +43,7 @@
 
 .meta-card-analysis-count {
     font-size: 1em;
-    color: #333;
+    color: var(--ink-2);
     font-weight: 600;
 }
 
@@ -42,9 +59,9 @@
     justify-content: flex-start;
     gap: 8px;
     padding: 8px;
-    border: 1px solid #dbe5f2;
+    border: 1px solid var(--line);
     border-radius: 12px;
-    background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
 }
 
 .meta-card-analysis-share-filter,
@@ -52,19 +69,19 @@
     display: flex;
     gap: 5px;
     flex-wrap: wrap;
-    border: 1px solid #ddd;
+    border: 1px solid var(--line);
     padding: 5px;
     border-radius: 6px;
-    background: #fff;
+    background: var(--surface-1);
 }
 
 #city-league-analysis .meta-card-analysis-share-filter,
 #city-league-analysis .meta-card-analysis-type-filter,
 #city-league-analysis .meta-card-analysis-sort-filter {
-    border-color: #d4deec;
+    border-color: var(--line);
     border-radius: 10px;
     padding: 4px;
-    background: #ffffff;
+    background: var(--surface-1);
 }
 
 .meta-card-analysis-share-btn,
@@ -108,6 +125,10 @@
 }
 
 #cityLeagueMetaShare90 { background: #208838; }
+/* Die farbigen Zustandsknoepfe behalten ihre Bedeutung in beiden
+   Modi — Gelb heisst Gelb. Eine feste helle Flaeche braucht deshalb
+   eine FESTE dunkle Schrift: --ink-2 kippt im Dunkelmodus mit und
+   laege auf diesem Gelb bei 1,09:1. */
 #cityLeagueMetaShare70 { background: #ffc107; color: #333; }
 #cityLeagueMetaShare50 { background: #128193; }
 #cityLeagueMetaTypeTrainer { background: #208838; }
@@ -179,14 +200,14 @@
     width: 100%;
     max-width: 500px;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--line);
     border-radius: 6px;
     font-size: 1em;
 }
 
 .meta-card-analysis-empty {
     text-align: center;
-    color: #666;
+    color: var(--ink-3);
     padding: 40px;
     grid-column: 1 / -1;
 }

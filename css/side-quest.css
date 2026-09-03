@@ -895,7 +895,11 @@
     height: 2rem;
     padding: 0;
     border-radius: 9px;
-    border: 1px solid #e0e0e0;
+    /* 02.09.2026: stand fest auf #e0e0e0 — ein helles Grau als Ring auf
+       einer Flaeche, die dreht. Die Schrift dieser Knoepfe ist ein
+       Farb-Emoji und deshalb vom Modus unabhaengig; der Ring war es
+       nicht. */
+    border: 1px solid var(--line);
     background: var(--surface-2);
     cursor: pointer;
     font-size: 0.95rem;

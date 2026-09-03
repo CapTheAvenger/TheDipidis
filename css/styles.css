@@ -3627,14 +3627,19 @@
             }
 
             .card-item .city-league-card-set-stats-row .city-league-card-stats-mobile {
-                color: #b8860b !important;
+                /* 02.09.2026: #b8860b ("dark goldenrod") stand an elf Stellen als
+   Bedeutungsfarbe fuer Anteile und Vorbehalte. Auf Weiss sind das
+   3,25:1 bei 10-12 px — unter der Grenze, und im Dunkelmodus drehte es
+   ohnehin nicht. --vorbehalt traegt dieselbe Bedeutung in beiden
+   Saetzen und haelt 5,56 hell und 9,35 dunkel. */
+                color: var(--vorbehalt) !important;
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
             }
 
             .card-item .city-league-card-avg-mobile {
-                color: #b8860b !important;
+                color: var(--vorbehalt) !important;
             }
 
             .card-item .card-info-text > div:nth-child(4) {
@@ -10214,10 +10219,16 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .meta-card-skeleton-section.meta-card-skeleton-niche .meta-card-skeleton-title {
     margin: 0;
 }
+/* BEFUND DER ABNAHME (02.09.2026), der seltene umgekehrte Fall: beide
+   Farben sind fuer eine DUNKLE Flaeche entworfen, sitzen aber in
+   city-league-analysis auf #f8f9fa. Gemessen im HELLMODUS: die "23"
+   bei 1,32:1, der Zusatz "(Staples + erster Ace Spec)" bei 2,43:1. Im
+   Dunkelmodus stimmte beides. Ueber Token stimmen jetzt beide in
+   beiden Modi. */
 .meta-card-skeleton-hint {
     font-size: 0.72rem;
     font-weight: 500;
-    color: #95a5a6;
+    color: var(--ink-3);
     margin-left: 6px;
 }
 .meta-card-skeleton-count {
@@ -10225,8 +10236,8 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-weight: 700;
     padding: 1px 8px;
     border-radius: 999px;
-    background: rgba(255,255,255,0.10);
-    color: #cfdce9;
+    background: var(--surface-2);
+    color: var(--ink-2);
     margin-left: auto;
 }
 .meta-card-skeleton-grid {

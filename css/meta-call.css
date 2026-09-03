@@ -1334,7 +1334,7 @@
   line-height: 18px;
   border-radius: 50%;
   background: rgba(46,204,113,0.18);
-  color: #186a3b;
+  color: var(--tint-ok-ink);
   font-weight: 700;
   font-size: 0.7rem;
   flex: 0 0 auto;
@@ -1694,7 +1694,7 @@
   border-radius: 999px;
   font-size: 0.78em;
   font-weight: 600;
-  color: #1e6091;
+  color: var(--brand-ink);
 }
 .mc-predictor-banner-trend {
   display: inline-block;
@@ -1705,7 +1705,7 @@
   border-radius: 999px;
   font-size: 0.78em;
   font-weight: 600;
-  color: #186a3b;
+  color: var(--tint-ok-ink);
 }
 .mc-predictor-banner-accuracy {
   display: inline-block;
@@ -2047,7 +2047,7 @@
     padding: 2px 7px;
     border-radius: 999px;
     background: rgba(243, 156, 18, 0.18);
-    color: #9a5b00;
+    color: var(--tint-warn-ink);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     cursor: help;
@@ -3429,7 +3429,7 @@
   margin-left: 8px;
   padding: 2px 8px;
   background: rgba(122, 90, 24, 0.12);
-  color: #7a5a18;
+  color: var(--tint-warn-ink);
   border-radius: 12px;
   font-size: 0.78rem;
   font-weight: 600;

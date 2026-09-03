@@ -626,9 +626,9 @@
   color: #9aa6b8;
   font-style: italic;
 }
-.tg-cell-good { background: rgba(39,174,96,0.14);  color: #15703d; }
+.tg-cell-good { background: rgba(39,174,96,0.14);  color: var(--tint-ok-ink); }
 .tg-cell-mid  { background: rgba(243,156,18,0.14); color: #b35c10; }
-.tg-cell-bad  { background: rgba(192,57,43,0.14);  color: #962d22; }
+.tg-cell-bad  { background: rgba(192,57,43,0.14);  color: var(--tint-bad-ink); }
 
 /* Input fills the cell and centers its value — this way both readonly
    cells (bare number) and editable cells (input) render at exactly the

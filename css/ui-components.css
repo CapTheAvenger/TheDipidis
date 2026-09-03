@@ -216,10 +216,22 @@ img[src*="limitlesstcg"] {
     justify-content: center;
     padding: 48px 24px;
     text-align: center;
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    /* BEFUND 03.09.2026: der Verlauf war fest hell und drehte nicht
+       mit. Im Dunkelmodus blieb eine helle Tafel stehen, auf der die
+       Beschreibung (--ink-3, hell) bei 2,87:1 lag. Gemessen wurde das
+       erst, als die Pruefung auch background-IMAGE las — vorher sah
+       sie nur background-COLOR und damit an jedem Verlauf vorbei.
+       Jetzt drehen Flaeche und Rand mit; hell bleibt der Eindruck
+       nahezu gleich (#fff -> #f0f6ff statt #f8faff -> #eef2ff). */
+    background: linear-gradient(135deg, var(--surface-1) 0%, var(--tint-info) 100%);
     border-radius: 16px;
-    border: 2px dashed rgba(59, 76, 202, 0.15);
+    border: 2px dashed var(--line);
     margin: 16px 0;
+    /* Leerzustaende sitzen oft IN einem Kartenraster (z. B.
+       .collection-grid). Ohne diese Zeile quetscht das Raster die
+       Tafel in EINE Spalte: live gemessen 153 px breit, 505 px hoch.
+       Ausserhalb eines Rasters ist die Zeile wirkungslos. */
+    grid-column: 1 / -1;
 }
 .empty-state-icon {
     width: 100px;
@@ -230,7 +242,10 @@ img[src*="limitlesstcg"] {
 .empty-state-title {
     font-size: 1.15em;
     font-weight: 800;
-    color: #1a1a2e;
+    /* Muss mit der Flaeche darueber mitdrehen — sonst steht dunkle
+       Schrift auf dunkler Tafel (der Fehler, den der Verlauf oben
+       bis 03.09.2026 verdeckt hat). */
+    color: var(--ink);
     margin: 0 0 8px 0;
 }
 .empty-state-desc {
@@ -4133,7 +4148,7 @@ img[src*="limitlesstcg"] {
     padding: 0 8px;
     border-radius: 999px;
     background: rgba(59, 76, 202, 0.14);
-    color: #263252;
+    color: var(--tint-info-ink);
     font-size: 0.75rem;
     font-weight: 800;
 }
@@ -4209,7 +4224,7 @@ img[src*="limitlesstcg"] {
 
 .meta-binder-delta-dropped {
     background: rgba(231, 76, 60, 0.12);
-    color: #b42318;
+    color: var(--tint-bad-ink);
 }
 
 .meta-binder-filters {
@@ -4260,7 +4275,7 @@ img[src*="limitlesstcg"] {
 
 .meta-binder-badge-dropped {
     background: rgba(231, 76, 60, 0.12);
-    color: #b42318;
+    color: var(--tint-bad-ink);
     padding: 2px 6px;
     border-radius: 4px;
     font-size: var(--fs-xs);
@@ -4915,7 +4930,7 @@ img[src*="limitlesstcg"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #3b4cca;
+    color: var(--tint-info-ink);
     background: rgba(59, 76, 202, 0.10);
 }
 .empty-state__icon svg { width: 24px; height: 24px; }

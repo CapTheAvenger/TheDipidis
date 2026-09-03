@@ -227,6 +227,58 @@ def _fetch(session, url: str, debug: bool = False) -> Optional[str]:
         return None
 
 
+# ───────────────────── Bestandspruefung ──────────────────────────
+
+
+def pruefe_bestand(session, kandidaten, debug: bool = False):
+    """Fuer jede URL, die dieser Lauf NICHT gefunden hat: liefert die
+    Fremdseite sie noch aus?
+
+    Hintergrund (Befund 03.09.2026). Bis hierher galt: was ein Lauf
+    nicht findet, ist deswegen nicht verschwunden — der Bestand blieb
+    stehen. Fuer einen wackligen Lauf ist das richtig. Fuer ein Set,
+    das die Fremdseite abgeraeumt hat, ist es falsch: pokemonproxies
+    hatte M5 komplett entfernt, unsere Karte trug die 79 alten URLs
+    weiter, und auf der Seite standen 79 kaputte Kartenbilder — sechs
+    Wochenlaeufe lang, weil zusaetzlich die Mengenbremse jede
+    Schrumpfung als Teilergebnis abwies und gar nichts mehr schrieb.
+
+    Der Unterschied zwischen beiden Faellen ist nicht die Menge,
+    sondern die Antwort der Fremdseite. Also fragen wir sie:
+
+      * HTTP 200  -> Eintrag bleibt (der Lauf hat ihn nur uebersehen)
+      * HTTP 404/410 -> Eintrag faellt (die Seite kennt ihn nicht mehr)
+      * alles andere (Timeout, 5xx, Verbindungsfehler) -> unklar,
+        Eintrag bleibt. Wir loeschen nur, was nachweislich weg ist.
+
+    Rueckgabe: (behalten, entfernt, unklar) — drei dicts.
+    """
+    behalten, entfernt, unklar = {}, {}, {}
+    for schluessel, url in sorted(kandidaten.items()):
+        try:
+            resp = session.head(url, timeout=15, allow_redirects=True)
+            code = resp.status_code
+            # Manche CDNs beantworten HEAD nicht sauber; dann GET.
+            if code in (403, 405, 501):
+                resp = session.get(url, timeout=20, stream=True)
+                code = resp.status_code
+                resp.close()
+        except Exception as e:                      # noqa: BLE001
+            if debug:
+                print(f"  [bestand] EXC {schluessel}: {e}", file=sys.stderr)
+            unklar[schluessel] = url
+            continue
+        if debug:
+            print(f"  [bestand] {code} {schluessel}", file=sys.stderr)
+        if code == 200:
+            behalten[schluessel] = url
+        elif code in (404, 410):
+            entfernt[schluessel] = url
+        else:
+            unklar[schluessel] = url
+        time.sleep(0.15)
+    return behalten, entfernt, unklar
+
 # ─────────────────────────── parsing ─────────────────────────────
 
 
@@ -490,31 +542,61 @@ def main(argv: List[str]) -> int:
               "site structure may have changed. Keeping existing map.")
         return 1
 
-    # Regressionsbremse (Muster aus scrape_champions_usage.py:444-447).
-    # Ein Lauf, der deutlich weniger findet als der letzte, hat kein
-    # kleineres Ergebnis — er hat ein Problem. Genau so hat die
-    # japanische Kartendatenbank im August 2026 drei Sets verloren:
-    # ein Teilergebnis wurde als vollstaendiges geschrieben.
-    if existing and len(scraped) < len(existing) * 0.8:
-        print(f"::error::pokemonproxies: nur {len(scraped)} von zuletzt "
-              f"{len(existing)} Eintraegen gefunden (< 80 %). Die Karte "
-              f"bleibt unveraendert — ein Teilergebnis ueberschreibt hier "
-              f"nichts.")
-        return 1
+    # Zusammenlegen statt ersetzen — aber nicht blind. Was dieser Lauf
+    # nicht gefunden hat, ist entweder uebersehen (bleibt) oder von der
+    # Fremdseite abgeraeumt (faellt). Diese Frage beantwortet nicht die
+    # Menge, sondern die Fremdseite selbst: siehe pruefe_bestand().
+    #
+    # Vorher stand hier eine reine Mengenbremse (< 80 % -> gar nichts
+    # schreiben). Sie hat den Befund vom 03.09.2026 verursacht: die
+    # Seite hatte M5 entfernt, der Lauf fand nur noch die 73 M6-Bilder,
+    # 73 < 152*0.8 -> Abbruch. Sechs Wochenlaeufe schrieben nichts, die
+    # Karte trug 79 tote URLs weiter, und auf der Seite standen 79
+    # kaputte Kartenbilder. Eine Bremse, die auch den Normalfall
+    # blockiert, schuetzt nichts — sie friert nur ein.
+    fehlend = {k: v for k, v in existing.items() if k not in scraped}
+    behalten_map, entfernt, unklar = ({}, {}, {})
+    if fehlend:
+        behalten_map, entfernt, unklar = pruefe_bestand(
+            _build_session(), fehlend, debug=args.debug)
+        print(f"Bestandspruefung: {len(behalten_map)} noch da, "
+              f"{len(entfernt)} von der Seite entfernt, "
+              f"{len(unklar)} unklar (bleiben).")
 
-    # Zusammenlegen statt ersetzen. Die Karte ist ein Bestand, kein
-    # Abbild eines einzelnen Laufs: was diesmal nicht gefunden wurde,
-    # ist deswegen nicht verschwunden. Neue und geaenderte URLs
-    # gewinnen, alles andere bleibt stehen.
     zusammengelegt = dict(existing)
+    for k in entfernt:                       # nur nachweislich Totes faellt
+        zusammengelegt.pop(k, None)
     zusammengelegt.update(scraped)
 
     new_keys = set(scraped) - set(existing)
     changed_urls = {k for k in (set(scraped) & set(existing)) if scraped[k] != existing[k]}
-    behalten = set(existing) - set(scraped)
+    behalten = set(behalten_map) | set(unklar)
     print(f"New keys:     {len(new_keys)}  "
           f"Changed URLs: {len(changed_urls)}  "
-          f"Behalten:     {len(behalten)}")
+          f"Behalten:     {len(behalten)}  "
+          f"Entfernt:     {len(entfernt)}")
+
+    # Die Bremse bleibt — aber sie misst jetzt das Richtige. Nicht
+    # "ist die Karte kleiner geworden?" (ein abgeraeumtes Set macht sie
+    # zu Recht kleiner), sondern "hat der Lauf Eintraege verloren, die
+    # es auf der Seite noch gibt?". Genau das ist ein Teilergebnis.
+    # "unklar" zaehlt hier mit: ein Eintrag, den wir nicht pruefen
+    # konnten, bleibt im Bestand — also gehoert er auch in die Menge,
+    # gegen die der Lauf gemessen wird. Zaehlte nur das nachweislich
+    # Lebende, dann liesse ein Netzausfall waehrend der
+    # Bestandspruefung jedes Teilergebnis als gesunden Lauf durch.
+    lebend = len(scraped) + len(behalten_map) + len(unklar)
+    if existing and len(scraped) < lebend * 0.8:
+        print(f"::error::pokemonproxies: der Lauf fand {len(scraped)} "
+              f"Eintraege, aber {len(behalten_map) + len(unklar)} weitere "
+              f"stehen weiter im Bestand (80 %-Schwelle). Das ist ein "
+              f"Teilergebnis — die Karte behaelt sie.")
+        # Kein return: geloescht wird ohnehin nur Nachgewiesenes, und
+        # der neue Stand ist besser als der alte. Der Rueckgabewert
+        # unten meldet den Fehlschlag trotzdem an den Wochenlauf.
+        teilergebnis = True
+    else:
+        teilergebnis = False
 
     if args.dry_run:
         print("(dry-run — not writing)")
@@ -522,19 +604,24 @@ def main(argv: List[str]) -> int:
             print(f"  + {k}  →  {scraped[k]}")
         for k in sorted(changed_urls)[:8]:
             print(f"  ~ {k}")
+        for k in sorted(entfernt)[:8]:
+            print(f"  - {k}  (Seite antwortet 404)")
         return 0
 
-    if not new_keys and not changed_urls and existing:
+    if not new_keys and not changed_urls and not entfernt and existing:
         # Same data — still rewrite for the scraped_at timestamp so
         # the freshness gate downstream is happy. But skip the noise.
+        # Entfernungen zaehlen hier mit: eine Karte, aus der 79 tote
+        # Eintraege fallen, hat sich sehr wohl geaendert.
         write_map(OUTPUT_PATH, zusammengelegt)
         print(f"No data changes; refreshed timestamp on {OUTPUT_PATH}.")
-        return 0
+        return 1 if teilergebnis else 0
 
     write_map(OUTPUT_PATH, zusammengelegt)
     print(f"Wrote {OUTPUT_PATH} ({len(zusammengelegt)} entries, "
-          f"davon {len(behalten)} aus dem Bestand uebernommen).")
-    return 0
+          f"davon {len(behalten)} aus dem Bestand uebernommen, "
+          f"{len(entfernt)} entfernt).")
+    return 1 if teilergebnis else 0
 
 
 if __name__ == "__main__":

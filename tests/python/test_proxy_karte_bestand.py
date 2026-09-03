@@ -43,17 +43,70 @@ def _karte(m):
         return json.load(f)["urls"]
 
 
+def _ungeprueft(m):
+    """Bestandspruefung ohne Netz: nichts ist nachweislich tot.
+
+    Ab 03.09.2026 fragt main() die Fremdseite nach den Eintraegen, die
+    der Lauf nicht gefunden hat. In einem Unit-Test darf das nicht
+    passieren — hier steht der Fall "keine Auskunft", und der bedeutet:
+    alles bleibt.
+    """
+    m.pruefe_bestand = lambda session, kandidaten, debug=False: ({}, {}, dict(kandidaten))
+
+
 def test_teilergebnis_ueberschreibt_den_bestand_nicht(proxy, capsys):
+    """Ein Lauf, der viel weniger findet als im Bestand steht, meldet
+    sich als Fehlschlag — und verliert dabei keinen einzigen Eintrag.
+
+    GEAENDERT 03.09.2026: frueher schrieb dieser Fall gar nichts. Das
+    war zu grob. Als pokemonproxies das Set M5 abraeumte, fand der Lauf
+    nur noch die 73 M6-Bilder, 73 < 152*0.8 -> Abbruch; sechs
+    Wochenlaeufe schrieben nichts, und die Karte trug 79 tote URLs
+    weiter. Neu gefundene Eintraege gehen jetzt in die Karte, der
+    Bestand bleibt vollstaendig stehen, und der Rueckgabewert meldet
+    den Fehlschlag trotzdem. Der Schutz dieses Tests ist damit
+    unveraendert: kein Eintrag darf verschwinden.
+    """
+    _ungeprueft(proxy)
+    vorher = dict(_karte(proxy))
     proxy.run_scrape = lambda debug=False: {
         f"M6_{i:03d}": f"https://neu/{i}.png" for i in range(50)}
     rc = proxy.main(["x"])
     ausgabe = capsys.readouterr().out
     assert rc == 1
     assert "::error::" in ausgabe and "80" in ausgabe
-    assert len(_karte(proxy)) == 100, "der Bestand wurde angetastet"
+    danach = _karte(proxy)
+    for k, v in vorher.items():
+        assert danach.get(k) == v, f"Bestandseintrag {k} wurde angetastet"
+
+
+def test_abgeraeumtes_set_faellt_aus_der_karte(proxy, capsys):
+    """Der Befund vom 03.09.2026, andersherum: was die Fremdseite mit
+    404 beantwortet, MUSS verschwinden — sonst zeigen die Kartenbilder
+    ins Leere."""
+    proxy.pruefe_bestand = lambda session, kandidaten, debug=False: (
+        {}, dict(kandidaten), {})
+    proxy.run_scrape = lambda debug=False: {
+        f"M6_{i:03d}": f"https://neu/{i}.png" for i in range(90)}
+    proxy.main(["x"])
+    danach = _karte(proxy)
+    assert not any(k.startswith("M5_") for k in danach), \
+        "die toten Eintraege stehen weiter in der Karte"
+    assert len(danach) == 90
+
+
+def test_unerreichbarer_eintrag_wird_nicht_geloescht(proxy):
+    """Loeschen nur bei Nachweis. Ein Timeout ist kein Nachweis."""
+    _ungeprueft(proxy)
+    proxy.run_scrape = lambda debug=False: {
+        f"M6_{i:03d}": f"https://neu/{i}.png" for i in range(90)}
+    proxy.main(["x"])
+    danach = _karte(proxy)
+    assert sum(1 for k in danach if k.startswith("M5_")) == 100
 
 
 def test_gesunder_lauf_legt_zusammen(proxy):
+    _ungeprueft(proxy)
     alt = _karte(proxy)
     neu = {k: v for k, v in list(alt.items())[:90]}
     neu.update({f"M6_{i:03d}": f"https://neu/{i}.png" for i in range(10)})
@@ -67,6 +120,7 @@ def test_gesunder_lauf_legt_zusammen(proxy):
 
 
 def test_geaenderte_url_gewinnt(proxy):
+    _ungeprueft(proxy)
     alt = dict(_karte(proxy))
     alt["M5_000"] = "https://neu/hash.png"
     proxy.run_scrape = lambda debug=False: alt

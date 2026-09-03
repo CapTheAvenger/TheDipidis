@@ -342,7 +342,7 @@
     align-items: center;
     justify-content: center;
     background: rgba(59, 76, 202, 0.12);
-    color: #3b4cca;
+    color: var(--tint-info-ink);
     font-weight: 800;
 }
 .deck-builder-algo-hint .algo-hint-body {
@@ -369,7 +369,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #3b4cca;
+    color: var(--tint-info-ink);
     background: rgba(59, 76, 202, 0.1);
 }
 .deck-builder-empty-icon svg {

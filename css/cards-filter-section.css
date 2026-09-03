@@ -82,14 +82,19 @@
     color: var(--ink-2);
     font-size: 12px;
 }
+/* 02.09.2026: hier fehlte `color`. Ein <select> erbt sie nicht, nimmt
+   also Schwarz — im Dunkelmodus 1,19:1 auf --surface-1. Das Label
+   darueber lag bei 9,90:1, der Knopf daneben bei 5,77:1; genau das
+   eine Bedienelement fiel heraus. */
 .cards-filter-sort select {
     padding: 7px 12px;
-    border: 1px solid #b6c3d6;
+    border: 1px solid var(--line-strong);
     border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     background: var(--surface-1);
+    color: var(--ink);
 }
 /* Print-view toggle as a segmented control (no gap between halves)
    so the user reads it as ONE switch with two states, not two
@@ -173,8 +178,15 @@
 }
 
 @media (max-width: 430px) {
+    /* BEFUND DER ABNAHME (02.09.2026): hier stand die KURZFORM
+       `padding: 9px`. Sie setzt alle vier Seiten und loescht damit die
+       38 px linken Einzug, die css/ux-step1.css fuer die Lupe
+       freihaelt (Symbol bei x = 12-28 px). Gemessen bei 390 px begann
+       der Platzhalter 19 px UNTER dem Symbol: "⊘g. Charizard,
+       Pikachu…". Eine Kurzform ist nie eine kleine Aenderung — sie
+       schreibt immer alle vier Werte. */
     #cards .cards-filter-search-input {
-        padding: 9px !important;
+        padding: 9px 9px 9px 38px !important;
         font-size: 14px !important;
     }
 
@@ -254,5 +266,19 @@
     #cards .cards-filter-results-info {
         font-size: 12px !important;
         padding: 8px !important;
+    }
+}
+
+/* BEFUND DER ABNAHME (03.09.2026): der Satz mit der Kachelzahl ist auf
+   dem Schreibtisch richtig und auf dem Telefon zu lang. Gemessen bei
+   390 px: 620 px Inhalt in 364 px Kasten mit `white-space: nowrap` und
+   `overflow-x: clip` — abgeschnitten wurde mitten im Wort, und zwar
+   ausgerechnet die Seitenzahl, die der Zusatz erklaeren sollte.
+   Ab hier bricht die Zeile um, statt zu verschwinden. */
+@media (max-width: 560px) {
+    #cardResultsInfo,
+    .cards-results-info {
+        white-space: normal !important;
+        line-height: 1.35;
     }
 }

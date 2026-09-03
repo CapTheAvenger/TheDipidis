@@ -4398,9 +4398,32 @@ img[src*="limitlesstcg"] {
 .calc-params h3 { margin: 0 0 16px; font-size: 1.1rem; color: var(--text-dark, #2c3e50); }
 .calc-field { margin-bottom: 14px; }
 .calc-field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: var(--text-dark, #333); }
-.calc-input { width: 100%; padding: 10px 12px; font-size: 1rem; border: 2px solid #dde3ea; border-radius: 8px; background: var(--bg-light, #f8fafc); transition: border-color .2s; }
+/* ── Formularelemente erben `color` NICHT ────────────────────────
+ *
+ * Ein <div> mit drehender Flaeche ist im Dunkelmodus fertig: seine
+ * Schrift kommt vom Vorfahren und dreht mit. Ein <input>, <select> oder
+ * <textarea> tut das nicht — es nimmt die Vorgabe des Browsers, und die
+ * ist Schwarz. Wer ihm eine Flaeche aus der Tokenschicht gibt und die
+ * Textfarbe weglaesst, bekommt darum genau dort Schwarz auf Dunkelblau.
+ *
+ * Gemessen am 02.09.2026 ueber alle vierzehn Reiter in beiden Modi:
+ * vier solcher Stellen, zwischen 1,10:1 und 1,19:1. Sie fielen keiner
+ * der bisherigen Messungen auf, weil die Flaechenzaehler nur Flaechen
+ * sehen und die Textzaehler nur feste Farben — hier fehlte die Farbe
+ * ganz. */
+.calc-input { width: 100%; padding: 10px 12px; font-size: 1rem; border: 2px solid var(--line); border-radius: 8px; background: var(--surface-1); color: var(--ink); transition: border-color .2s; }
 .calc-input:focus { border-color: var(--pokemon-blue, #3498db); outline: none; }
 .calc-results { display: flex; flex-direction: column; gap: 14px; }
+/* Der Nenner unter dem Prozentwert. Er steht dort, damit die Zahl
+   darueber nachrechenbar ist — siehe die Notiz in
+   js/app-calculator.js. */
+/* BEFUND DER ABNAHME (03.09.2026): `opacity: .85` nahm genau das
+   zurueck, wofuer die Flaechentoene gewaehlt sind — --solid-ok und
+   --solid-bad tragen im Kommentar von tokens.css "weiss darauf 5,03:1"
+   bzw. "4,99:1", also gerade ueber der Grenze. Mit der Daempfung lagen
+   die drei neuen Fussnoten bei 4,11 / 4,34 / 3,96. Die Fussnote steht
+   unter einer 38-px-Zahl; sie braucht keine zusaetzliche Daempfung. */
+.calc-result-fuss { font-variant-numeric: tabular-nums; }
 .calc-result-card { border-radius: 12px; padding: 20px; text-align: center; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
 .calc-result-draw { background: linear-gradient(135deg, var(--solid-ok), var(--solid-ok)); }
 .calc-result-prize { background: linear-gradient(135deg, #c0392b, var(--solid-bad)); }

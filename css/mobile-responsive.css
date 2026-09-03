@@ -723,7 +723,27 @@
     }
 }
 
-/* === STEP 3: TOUCH TARGETS (>=38px) === */
+/* === STEP 3: TOUCH TARGETS (>=38px) ===
+ *
+ * BEFUND DER ABNAHME (02.09.2026), zwei Stueck an derselben Regel:
+ *
+ * 1. Der Boden ist als UNTERGRENZE gedacht, wirkt durch `!important`
+ *    aber auch als DECKEL. Das Decklistenfeld auf dem Proxy-Reiter
+ *    bringt bewusst 140 px mit, damit sein vierzeiliges Beispielformat
+ *    hineinpasst; auf dem Telefon blieben davon 60 px, und 55 der
+ *    115 px Platzhaltertext waren abgeschnitten — genau der Teil, der
+ *    das Format zeigt, und genau dort, wo man ihn am ehesten braucht.
+ *    Ein Boden darf heben, nicht senken; Felder, die selbst mehr
+ *    verlangen, sind darum ausgenommen.
+ *
+ * 2. Die Liste fasst `.btn`, `.btn-modern` und Verwandte. Das
+ *    Seitenblaettern der Kartendatenbank traegt `btn-blue btn-outline
+ *    btn-sm` und faellt durch: gemessen bei 390 px waren die
+ *    Seitenzahlen 30 x 30 px, "Alle anzeigen" 72 x 30. Fuer 238 Seiten
+ *    ist das der Hauptweg durch die Datenbank. Die Filter derselben
+ *    Seite sind bewusst auf 44 px gesetzt — die Paginierung war
+ *    schlicht vergessen worden.
+ */
 @media (max-width: 768px) {
     .btn-modern,
     .tab-btn,
@@ -740,8 +760,11 @@
     .setup-modal-textarea,
     input:not([type="hidden"]),
     select,
-    textarea {
+    textarea:not(.proxy-decklist-input) {
         min-height: 38px !important;
+    }
+    .proxy-decklist-input {
+        min-height: 140px !important;
     }
 
     .btn-modern,
@@ -772,6 +795,17 @@
     #inpIonoP2 {
         min-height: 44px !important;
         font-size: 16px !important;
+    }
+
+    /* Siehe Punkt 2 im Kopf dieses Blocks. */
+    #cards .pagination-controls button,
+    #cards .pagination-controls a,
+    #cards .cards-pagination button,
+    #cards .cards-pagination a,
+    #proxy .btn,
+    #proxy .btn-modern,
+    #proxy button {
+        min-height: 44px !important;
     }
 }
 
@@ -1324,10 +1358,16 @@
         max-width: none !important;
     }
 
-    #current-analysis select.control-input,
-    #past-meta select.control-input,
-    #city-league-analysis select.control-input,
-    .tab-content select {
+    /* BEFUND DER ABNAHME (03.09.2026): das `!important` hier zog auch
+       das Auswahlfeld wieder auf, das js/ds-filter.js verdeckt, weil
+       die Filterzeile es bereits zeigt — ein absoluter Kasten in voller
+       Breite, und past-meta scrollte seitlich (scrollWidth 417 bei
+       390 px). Eine Breitenregel fuer sichtbare Felder soll nicht auf
+       verdeckte zugreifen. */
+    #current-analysis select.control-input:not(.ds-filter-verdeckt),
+    #past-meta select.control-input:not(.ds-filter-verdeckt),
+    #city-league-analysis select.control-input:not(.ds-filter-verdeckt),
+    .tab-content select:not(.ds-filter-verdeckt) {
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
@@ -2155,7 +2195,7 @@
   }
   .city-league-card-avg-mobile {
     font-size: 0.6em;
-    color: #b8860b !important;
+    color: var(--vorbehalt) !important;
     line-height: 1.15 !important;
     margin-bottom: 1px !important;
     white-space: nowrap !important;
@@ -2271,7 +2311,7 @@
   #cityLeagueMetaGrid .city-league-card-set-stats-row .city-league-card-stats-mobile,
   #currentMetaMetaGrid .city-league-card-set-stats-row .city-league-card-stats-mobile {
     font-size: 1em;
-    color: #b8860b !important;
+    color: var(--vorbehalt) !important;
   }
 
   /* ── Avg line (3rd child): gold ── */
@@ -2280,7 +2320,7 @@
   #cityLeagueMetaGrid .city-league-card-avg-mobile,
   #currentMetaMetaGrid .city-league-card-avg-mobile {
     font-size: 0.9em;
-    color: #b8860b !important;
+    color: var(--vorbehalt) !important;
     line-height: 1.15 !important;
   }
 

@@ -153,7 +153,7 @@
 .wl-bot-import-table tr.is-odd { background: #f7f7f7; }
 .wl-bot-import-table .ta-c { text-align: center; }
 
-.wl-bot-import-warn { color: #b8860b; cursor: help; }
+.wl-bot-import-warn { color: var(--vorbehalt); cursor: help; }
 
 .wl-bot-import-details { margin-bottom: 12px; font-size: 12px; }
 .wl-bot-import-details summary {

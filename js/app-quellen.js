@@ -72,9 +72,20 @@
                 {
                     id: 'umfang', auf: false,
                     h: 'Worauf die Zahlen beruhen',
+                    /* BEFUND DER ABNAHME (02.09.2026): der Satz endete auf
+                       "Beide Nenner stehen hier." — und direkt darunter
+                       stand der Leerzustand "Der Umfang steht erst zur
+                       Verfuegung, wenn die Meta-Ansicht in dieser
+                       Sitzung einmal geladen wurde." Wer diese Seite
+                       oeffnet, ohne vorher auf der Meta-Ansicht gewesen
+                       zu sein — also der Regelfall — las beides
+                       nacheinander. Der Leerzustand selbst ist gut; der
+                       Satz davor machte ihn zum Widerspruch. Jetzt
+                       verspricht der Satz nichts, was der Abschnitt
+                       vielleicht nicht halten kann. */
                     p: ['Die Meta-Ansicht zählt zweimal unabhängig voneinander: einmal die ' +
                         'gemeldeten Decklisten der Online-Ladder, einmal die gewichteten ' +
-                        'Antritte auf Turnieren. Beide Nenner stehen hier.'],
+                        'Antritte auf Turnieren.'],
                     umfang: true,
                     leer: 'Der Umfang steht erst zur Verfügung, wenn die Meta-Ansicht in ' +
                           'dieser Sitzung einmal geladen wurde. Geschätzt wird hier nichts.',
@@ -232,7 +243,7 @@
                     h: 'What the numbers rest on',
                     p: ['The meta view counts twice, independently: once the reported ' +
                         'decklists on the online ladder, once the weighted entries at ' +
-                        'tournaments. Both denominators are stated here.'],
+                        'tournaments.'],
                     umfang: true,
                     leer: 'The scope becomes available once the meta view has loaded in this ' +
                           'session. Nothing here is estimated.',
@@ -253,8 +264,23 @@
                          'The deck’s top-8 rate compared to that of an average deck with a ' +
                          'recognised archetype. The comparison value is smoothed, the rate ' +
                          'beside it is raw — on small samples the two diverge.'],
+                        /* BEFUND DER ABNAHME (02.09.2026): hier stand "ties
+                           counted as half" — genau die Variante, die
+                           js/win-rate-konvention.js als die ERFUNDENE
+                           vierte fuehrt und ausdruecklich nicht
+                           auffuehrt ("wer sie braucht, soll erklaeren,
+                           warum"; Medianabweichung 2,38 Punkte, maximal
+                           12,5). Die deutsche Fassung daneben sagte das
+                           Gegenteil und rechnete es vor. Zwei Sprachen,
+                           zwei Definitionen derselben Groesse — und die
+                           englische beschrieb eine Rechnung, die das
+                           Haus verworfen hat. Jetzt woertlich dieselbe
+                           Aussage samt Beleg. */
                         ['Win rate',
-                         'Games won divided by games played, ties counted as half.'],
+                         'Matches won divided by all matches played. Ties count in the ' +
+                         'denominator, not as half a win. Example: a record of 6,430 wins, ' +
+                         '6,666 losses and 110 ties is 13,206 matches and therefore 48.7 % — ' +
+                         'the same arithmetic Limitless uses.'],
                         ['Tier',
                          'Grouping by share and success. The thresholds are stated in the ' +
                          'tier list itself.'],

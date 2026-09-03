@@ -199,17 +199,26 @@
     margin: 0 !important;
 }
 
+/* BEFUND DER ABNAHME (02.09.2026): `white-space: nowrap` ohne
+   Breitendeckel. Der Chip "Prize Pack Serie 9 · ASC 22" reichte bis
+   x = 336 px, die Kachel endete bei 312 — 24 px hingen ueber und
+   wurden hart abgeschnitten, zu lesen war "… · ASC" ohne die Nummer.
+   nowrap bleibt richtig (ein Setcode gehoert nicht umgebrochen), aber
+   dann braucht er eine Grenze und Auslassungspunkte. */
 #cards .card-database-set,
 #cards .card-database-type {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     min-height: 15px !important;
+    max-width: 100% !important;
     border-radius: 999px !important;
     font-size: var(--fs-xs) !important;
     font-weight: 700 !important;
     padding: 1px 5px !important;
     white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 #cards .card-database-set {
@@ -251,9 +260,17 @@
     text-align: center !important;
     line-height: 1.15 !important;
     padding: 1px 3px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    /* BEFUND DER ABNAHME (02.09.2026): `text-overflow: ellipsis`
+       zusammen mit `white-space: normal` tut nichts — Auslassungspunkte
+       gibt es nur bei einzeiligem Text. `overflow: hidden` schnitt
+       stattdessen hart ab: die Plakette ist 62 px breit, ihr Inhalt
+       72 px ("Prize-Pack-Print (gestempelt)"), zu lesen war
+       "Prize-Pack-Print gestempelt" ohne schliessende Klammer.
+       Zwei Zeilen statt einer abgeschnittenen: der Text ist kurz genug,
+       um umzubrechen, und die Reihe ist ohnehin ein Gitter. */
+    overflow: visible !important;
     white-space: normal !important;
+    overflow-wrap: anywhere !important;
 }
 
 #cards .card-database-price-btn {

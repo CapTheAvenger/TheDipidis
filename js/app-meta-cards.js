@@ -684,6 +684,21 @@
             const grid = document.getElementById(gridId);
             const countSpan = document.getElementById(countId);
             clearGridLoadingSkeleton(grid);
+
+            /* BEFUND DER ABNAHME (02.09.2026): der Knopf unter dem
+               Gitter hiess weiter "Meta-Analyse laden", auch wenn zwoelf
+               Kacheln darueber standen. Eine Aufschrift, die einen
+               Zustand beschreibt, der vorbei ist. Sobald geladen ist,
+               heisst er, was er dann tut. */
+            (function () {
+                var knopf = document.getElementById(
+                    source === 'cityLeague' ? 'cityLeagueMetaReloadBtn' : 'currentMetaMetaReloadBtn');
+                if (!knopf) return;
+                var geladen = !!(metaCardData[source] && metaCardData[source].length);
+                var schluessel = geladen ? 'btn.reloadMetaAnalysis' : 'btn.loadMetaAnalysis';
+                knopf.setAttribute('data-i18n', schluessel);
+                if (typeof t === 'function') knopf.textContent = t(schluessel);
+            }());
             
             if (!metaCardData[source] || metaCardData[source].length === 0) {
                 // Gar keine Daten geladen - nicht dasselbe wie "der
@@ -877,7 +892,7 @@
                                 <div class="card-info-text mb-6">
                                     <div class="fw-bold mb-2 nowrap ellipsis">${card.card_name}</div>
                                     <div class="color-grey fs-09">${setCode} ${setNumber}</div>
-                                    ${card.metaShare > 0 ? `<div class="karten-metaanteil fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
+                                    ${card.metaShare > 0 ? `<div class="karten-metaanteil fw-600 mb-1" title="${escapeHtml(_anteilHinweis(card))}">${_kommaZahl(card.metaShare, 1)} % ${trendIndicator} | Ø ${_kommaZahl(_kopienBoden(card.avgCount), _kopienBoden(card.avgCount) % 1 ? 2 : 0)}x</div>` : ''}
                                 </div>
                                 
                                 <!-- Card Actions: Row 1 = ★ + | Row 2 = L P price -->
@@ -1956,3 +1971,51 @@ document.addEventListener('languageChanged', () => {
         }
     }
 });
+
+
+/* ── Drei Befunde der Abnahme vom 02.09.2026 an EINER Zeile ─────────
+ *
+ * Die Zeile unter dem Kartennamen lautete: `63.3% ↑ | Ø 1x`.
+ *
+ * 1. Punkt statt Komma, waehrend zwei Abschnitte hoeher "100,0%" und
+ *    "Ø 1,20x" stehen — auf derselben deutschen Seite.
+ * 2. "Secret Box: 30.0% | Ø 0x". Eine Karte, die in 30 % der Listen
+ *    steht, bekam "durchschnittlich 0 Kopien" auf den Ausweis, weil
+ *    Math.round(0,3) null ist. Eine Karte, die vorkommt, kommt nicht
+ *    null mal vor.
+ * 3. Kein Hinweis, worauf sich die beiden Zahlen beziehen.
+ *
+ * Der Reiter "Vergangenes Meta" hat fuer genau denselben Fall seit
+ * langem einen Boden und einen Erklaertext (getPastMetaDisplayCount in
+ * js/app-past-meta.js). Hier fehlte beides — dieselbe Groesse, zwei
+ * Reiter, zwei Regeln.
+ */
+function _kommaZahl(wert, stellen) {
+    if (typeof window !== 'undefined' && typeof window.zahlLokal === 'function') {
+        return window.zahlLokal(wert, stellen);
+    }
+    return Number(wert || 0).toFixed(stellen).replace('.', ',');
+}
+function _kopienBoden(schnitt) {
+    var z = Number(schnitt) || 0;
+    if (z <= 0) return 0;
+    /* Unter einer halben Kopie im Schnitt rundet die kaufmaennische
+       Regel auf null. Dann steht die genaue Zahl da statt der
+       gerundeten Null — "Ø 0,3x" ist wahr, "Ø 0x" ist es nicht. */
+    /* BEFUND DER ABNAHME (03.09.2026): Math.round(z*100)/100 liefert
+       fuer z = 0,004 wieder 0 — bei ueber ~250 ausgewerteten Listen
+       waere "Ø 0x" zurueck. Unter einer Hundertstel steht deshalb
+       nicht die gerundete Null, sondern die Aussage "kleiner als". */
+    if (z < 0.005) return 0.01;
+    return z < 0.5 ? Math.round(z * 100) / 100 : Math.round(z);
+}
+function _anteilHinweis(card) {
+    var de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+    var a = Number(card && card.metaShare) || 0;
+    var c = Number(card && card.avgCount) || 0;
+    return de
+        ? ('In ' + _kommaZahl(a, 1) + ' % der ausgewerteten Listen, dort im Schnitt '
+           + _kommaZahl(c, 2) + ' Kopien.')
+        : ('In ' + _kommaZahl(a, 1) + ' % of the analysed lists, averaging '
+           + _kommaZahl(c, 2) + ' copies there.');
+}

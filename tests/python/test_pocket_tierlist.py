@@ -161,8 +161,34 @@ def test_ohne_qr_auf_der_seite_gibt_es_keine_erfundene_adresse(mod):
 
 # ── Die Gegenprobe ────────────────────────────────────────────────────
 
+QR_BIBLIOTHEKEN = ("segno", "zxingcpp", "PIL")
+
+
+def _qr_noetig():
+    """Die Proben unten brauchen die QR-Bibliotheken.
+
+    ANLASS (04.09.2026, roter Deploy). Sie standen ohne Weiche da und
+    liefen hier durch, weil die Bibliotheken im Bausandkasten
+    installiert sind. Der Testschritt in deploy-pages.yml installiert
+    dagegen nur pytest, beautifulsoup4, requests und lxml — dort fiel
+    der erste Import mit ModuleNotFoundError um, `build` und `deploy`
+    wurden uebersprungen, und die Seite hing.
+
+    Uebersprungen zu werden ist aber die ZWEITBESTE Loesung: die
+    Gegenprobe ist die ganze Sicherheit hinter den Scan-Codes, und ein
+    stiller Uebersprung waere so gut wie keine Pruefung. Deshalb steht
+    unten test_der_testschritt_installiert_die_qr_bibliotheken und
+    verlangt, dass sie in CI tatsaechlich LAUFEN.
+    """
+    for name in QR_BIBLIOTHEKEN:
+        pytest.importorskip(
+            name,
+            reason=f"{name} fehlt — die QR-Gegenprobe kann hier nicht laufen")
+
+
 def test_die_gegenprobe_besteht_fuer_echte_inhalte(mod):
     """Auslesen, neu erzeugen, wieder auslesen — dasselbe?"""
+    _qr_noetig()
     for inhalt in ["https://ptcgp.example/d?x=AB12",
                    "PTCGP1|A1-234,A2b-011|x2y3",
                    "".join(chr(65 + i % 26) for i in range(180))]:
@@ -184,6 +210,7 @@ def test_die_gegenprobe_bemerkt_einen_unterschied(mod):
     absichtlich ein Zeichen mehr kodiert. Wer den Vergleich entfernt,
     faellt hier um.
     """
+    _qr_noetig()
     import segno
 
     def verfaelscht(inhalt, **kw):
@@ -314,3 +341,224 @@ def test_die_abhaengigkeiten_stehen_in_requirements():
             f"{paket} steht in keiner Anforderungszeile von requirements.txt "
             f"— der Lauf auf dem Github-Laeufer bricht dann beim ersten Deck "
             f"mit einem ImportError ab")
+
+
+# ── Die Abruf-Leiter ──────────────────────────────────────────────────
+#
+# ANLASS (04.09.2026, zweiter CI-Lauf). Die erste Fassung der Leiter fiel
+# nur weiter, wenn eine BIBLIOTHEK fehlte. Auf dem Laeufer war
+# cloudscraper installiert und antwortete mit HTTP 202 — Cloudflares
+# "Pruefung laeuft". Damit war Schluss, curl_cffi kam nie an die Reihe,
+# und der Lauf brach ab, obwohl die naechste Sprosse ungefragt danebenlag.
+#
+# Diese Zusicherungen haengen an gesetzten Antworten, nicht am Netz: sie
+# gelten auf dem Laeufer genauso wie im Bausandkasten ohne Netz.
+
+class _Antwort:
+    def __init__(self, code, text="<html>ok</html>"):
+        self.status_code = code
+        self.text = text
+        self.content = text.encode("utf-8")
+
+
+class _Sprosse:
+    """Eine erfundene Sitzung, die eine feste Folge von Antworten gibt."""
+
+    def __init__(self, *antworten):
+        self.antworten = list(antworten)
+        self.gefragt = 0
+
+    def get(self, url, **kw):
+        self.gefragt += 1
+        a = self.antworten[min(self.gefragt - 1, len(self.antworten) - 1)]
+        if isinstance(a, Exception):
+            raise a
+        return a
+
+
+def _leiter(mod, monkeypatch, bauplan, schlaf=True):
+    """Die Leiter mit erfundenen Sprossen bestuecken."""
+    gebaut = {}
+
+    def baue(art):
+        wert = bauplan[art]
+        if isinstance(wert, Exception):
+            raise wert
+        gebaut[art] = wert
+        return wert
+
+    monkeypatch.setattr(mod, "_baue", baue)
+    monkeypatch.setattr(mod, "_GEMERKT", None, raising=False)
+    if schlaf:
+        monkeypatch.setattr(mod.time, "sleep", lambda *_: None)
+    return gebaut
+
+
+def test_eine_abweisung_reicht_die_leiter_weiter(mod, monkeypatch):
+    """HTTP 202 ist der Fall, der den zweiten CI-Lauf gekostet hat."""
+    zweite = _Sprosse(_Antwort(200, "<html>echt</html>"))
+    _leiter(mod, monkeypatch, {
+        "cloudscraper": _Sprosse(_Antwort(202)),
+        "curl_cffi": zweite,
+        "requests": _Sprosse(_Antwort(200, "<html>zu spaet</html>")),
+    })
+    assert mod.hole("https://beispiel.test/x") == "<html>echt</html>"
+    assert zweite.gefragt == 1
+
+
+def test_bei_einer_abweisung_wird_nicht_nachgebohrt(mod, monkeypatch):
+    """Wer 403 sagt, sagt es auch beim dritten Mal.
+
+    Ohne diese Zusicherung darf `_frage` die Abweisung wie einen
+    Netzfehler behandeln und dreimal fragen. Das kostet bei rund hundert
+    Abrufen Minuten und macht aus einer hoeflichen Absage eine Belaestigung.
+    """
+    erste = _Sprosse(_Antwort(403))
+    _leiter(mod, monkeypatch, {
+        "cloudscraper": erste,
+        "curl_cffi": _Sprosse(_Antwort(200)),
+        "requests": _Sprosse(_Antwort(200)),
+    })
+    mod.hole("https://beispiel.test/x")
+    assert erste.gefragt == 1, (
+        f"die abweisende Sprosse wurde {erste.gefragt}-mal gefragt")
+
+
+def test_ein_netzfehler_wird_dagegen_wiederholt(mod, monkeypatch):
+    """Ein abgerissener Aufbau ist kein Nein — da lohnt der zweite Versuch."""
+    erste = _Sprosse(OSError("Verbindung abgerissen"),
+                     OSError("Verbindung abgerissen"),
+                     _Antwort(200, "<html>doch noch</html>"))
+    _leiter(mod, monkeypatch, {
+        "cloudscraper": erste,
+        "curl_cffi": _Sprosse(_Antwort(200, "<html>falsch</html>")),
+        "requests": _Sprosse(_Antwort(200)),
+    })
+    assert mod.hole("https://beispiel.test/x") == "<html>doch noch</html>"
+    assert erste.gefragt == 3
+
+
+def test_die_durchgekommene_sprosse_wird_gemerkt(mod, monkeypatch):
+    """Sonst laeuft jede der rund hundert Deck-Seiten die Leiter von vorn."""
+    erste = _Sprosse(_Antwort(202))
+    zweite = _Sprosse(_Antwort(200, "<html>a</html>"), _Antwort(200, "<html>b</html>"))
+    _leiter(mod, monkeypatch, {
+        "cloudscraper": erste,
+        "curl_cffi": zweite,
+        "requests": _Sprosse(_Antwort(200)),
+    })
+    assert mod.hole("https://beispiel.test/1") == "<html>a</html>"
+    assert mod.hole("https://beispiel.test/2") == "<html>b</html>"
+    assert erste.gefragt == 1, (
+        "die abgewiesene Sprosse wurde beim zweiten Abruf erneut gefragt — "
+        "dann wird nicht gemerkt, welche durchkommt")
+
+
+def test_kippt_die_gemerkte_sprosse_wird_die_leiter_neu_gegangen(mod, monkeypatch):
+    """Cloudflare kann mitten im Lauf anspringen.
+
+    Merken darf nicht heissen: fuer immer festlegen. Sonst faellt der
+    ganze Lauf aus, sobald der Schutz nach dreissig Deck-Seiten zuschlaegt
+    — obwohl die naechste Sprosse noch durchkaeme.
+    """
+    erste = _Sprosse(_Antwort(200, "<html>erst ja</html>"), _Antwort(403))
+    zweite = _Sprosse(_Antwort(200, "<html>uebernommen</html>"))
+    _leiter(mod, monkeypatch, {
+        "cloudscraper": erste,
+        "curl_cffi": zweite,
+        "requests": _Sprosse(_Antwort(200)),
+    })
+    assert mod.hole("https://beispiel.test/1") == "<html>erst ja</html>"
+    assert mod.hole("https://beispiel.test/2") == "<html>uebernommen</html>"
+
+
+def test_eine_fehlende_bibliothek_haelt_die_leiter_nicht_auf(mod, monkeypatch):
+    _leiter(mod, monkeypatch, {
+        "cloudscraper": ImportError("kein cloudscraper"),
+        "curl_cffi": ImportError("kein curl_cffi"),
+        "requests": _Sprosse(_Antwort(200, "<html>nackt</html>")),
+    })
+    assert mod.hole("https://beispiel.test/x") == "<html>nackt</html>"
+
+
+def test_kommt_niemand_durch_steht_jede_antwort_im_fehler(mod, monkeypatch):
+    """Der erste CI-Lauf meldete nur "keine Tier-Tabelle gefunden".
+
+    Die Ursache — Bot-Schutz — war daraus nicht zu erkennen und kostete
+    einen ganzen Durchgang. Wer scheitert, muss sagen, WORAN.
+    """
+    _leiter(mod, monkeypatch, {
+        "cloudscraper": _Sprosse(_Antwort(202)),
+        "curl_cffi": ImportError("nicht installiert"),
+        "requests": _Sprosse(_Antwort(403)),
+    })
+    with pytest.raises(RuntimeError) as fehler:
+        mod.hole("https://beispiel.test/x")
+    text = str(fehler.value)
+    for stueck in ["cloudscraper", "202", "curl_cffi", "nicht installiert",
+                   "requests", "403", "Cloudflare"]:
+        assert stueck in text, (
+            f"'{stueck}' fehlt in der Fehlermeldung — dann beginnt die Suche "
+            f"beim naechsten Ausfall wieder bei null. Meldung: {text}")
+
+
+def test_die_leiter_faengt_bei_cloudscraper_an_und_endet_bei_requests(mod):
+    """Die Reihenfolge ist eine Entscheidung, keine Laune.
+
+    cloudscraper zuerst, weil sechs andere Scraper dieses Projekts damit
+    seit Monaten durchkommen. curl_cffi dahinter, weil es den
+    TLS-Fingerabdruck nachahmt und damit gegen den Schutz reicht, an dem
+    cloudscraper scheitert. requests zuletzt, weil es keinen Schutz
+    ueberwindet und nur dafuer da ist, dass das Skript ueberhaupt anlaeuft.
+    """
+    assert mod.SPROSSEN == ("cloudscraper", "curl_cffi", "requests")
+    assert 202 in mod.ABGEWIESEN, (
+        "202 fehlt unter den Abweisungen — genau dieser Code hat den "
+        "zweiten CI-Lauf gekostet, und er sieht keinem Fehler aehnlich")
+
+
+# ── Der Testschritt in CI ─────────────────────────────────────────────
+
+def test_der_testschritt_installiert_die_qr_bibliotheken():
+    """Sonst wird die Gegenprobe in CI still uebersprungen.
+
+    ANLASS (04.09.2026). `probe()` importierte numpy; der Testschritt in
+    deploy-pages.yml installiert nur vier Pakete, also fiel der Import
+    um und der Deploy stand. numpy ist inzwischen ganz weg — zxing-cpp
+    nimmt ein PIL-Bild unmittelbar entgegen.
+
+    Damit waere der Deploy gerettet und die Pruefung verloren: ohne
+    segno, zxingcpp und Pillow greift `_qr_noetig()` und die Gegenprobe
+    wird uebersprungen. Ein gruener Lauf hiesse dann nur noch, dass
+    niemand hingesehen hat — und der Scan-Code ist der ganze Zweck des
+    Reiters. Also muss der Testschritt sie mitbringen, und diese
+    Zusicherung haelt das fest.
+    """
+    pfad = os.path.join(WURZEL, ".github", "workflows", "deploy-pages.yml")
+    text = open(pfad, encoding="utf-8").read()
+    zeilen = [z for z in text.splitlines() if "pip install" in z]
+    assert zeilen, "in deploy-pages.yml steht kein pip-install-Schritt mehr"
+    zusammen = " ".join(zeilen)
+    for paket in ["zxing-cpp", "segno", "pillow"]:
+        assert paket in zusammen.lower(), (
+            f"{paket} fehlt in den pip-install-Zeilen von deploy-pages.yml. "
+            f"Dann ueberspringt pytest die QR-Gegenprobe still, der Lauf ist "
+            f"gruen, und niemand hat geprueft, ob die Scan-Codes das "
+            f"Neu-Erzeugen ueberleben. Zeilen: {zeilen}")
+
+
+def test_der_scraper_braucht_kein_numpy():
+    """Eine Abhaengigkeit weniger ist eine Fehlerquelle weniger.
+
+    Nachgemessen am 04.09.2026: zxing-cpp liest aus einem PIL-Bild
+    denselben Inhalt wie aus np.array(bild). Der Umweg brachte nichts
+    und kostete einen Deploy.
+    """
+    text = open(SKRIPT, encoding="utf-8").read()
+    zeilen = [z.strip() for z in text.splitlines()
+              if z.strip().startswith(("import ", "from "))]
+    treffer = [z for z in zeilen if "numpy" in z]
+    assert not treffer, (
+        f"der Scraper importiert wieder numpy: {treffer}. Der Testschritt in "
+        f"deploy-pages.yml installiert es nicht — genau daran hing der "
+        f"Deploy am 04.09.2026")

@@ -39,5 +39,14 @@ google-api-core!=2.35.0,<3
 # champions-replica-scrape.yml via scripts/generate_team_strategies.py)
 anthropic>=0.40,<2
 
+# Pokemon TCG Pocket: die Scan-Codes (2D-Muster) aus Game8 auslesen und
+# neu erzeugen. scripts/scrape_pocket_tierlist.py braucht beide:
+#   zxing-cpp  liest den QR aus dem heruntergeladenen Bild,
+#   segno      erzeugt ihn fuer die Gegenprobe neu.
+# Ohne diese zwei faellt der Lauf in der ersten Zeile um, und zwar mit
+# einem ImportError statt mit einem Befund.
+zxing-cpp>=2.2,<3
+segno>=1.6,<2
+
 # Optional: For better performance
 urllib3>=2.0.0,<3

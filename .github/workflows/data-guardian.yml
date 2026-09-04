@@ -114,6 +114,7 @@ jobs:
             verify-cardmarket-mapping.yml
             cardmarket-card-images.yml
             prizepack-official-images.yml
+            pocket-tierlist.yml
           "
           rot=0
           for wf in $WORKFLOWS; do

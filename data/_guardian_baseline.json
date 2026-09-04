@@ -125,8 +125,8 @@
    "PLS 130"
   ]
  },
- "champions_teams": 106,
- "champions_ueber_grenze": 22,
+ "champions_teams": 114,
+ "champions_ueber_grenze": 17,
  "empty_files": {
   "city_league_analysis.csv": true,
   "city_league_archetypes.csv": true,
@@ -135,13 +135,13 @@
  },
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
-  "cardmarket_id_mapping.csv": 17384,
+  "cardmarket_id_mapping.csv": 17386,
   "cm_expansions.csv": 773,
   "japanese_cards_database.csv": 936,
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-09-03 09:37 UTC",
+ "generated": "2026-09-04 09:37 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -152,12 +152,12 @@
   "SVP": 228
  },
  "price_integrity": {
-  "duplicate_idproducts": 93,
+  "duplicate_idproducts": 90,
   "match_methods": {
-   "live-verified": 5027,
-   "manual-pin": 51,
-   "priced-by-all": 141,
-   "priced-by-date": 1173,
+   "live-verified": 5026,
+   "manual-pin": 78,
+   "priced-by-all": 137,
+   "priced-by-date": 1153,
    "unique": 10992
   },
   "nonempty_eur_price": 20384,
@@ -761,9 +761,9 @@
    17.9
   ],
   "SFA": [
-   97,
    99,
-   98.0
+   99,
+   100.0
   ],
   "SHF": [
    194,

@@ -1,0 +1,430 @@
+{
+ "_meta": {
+  "zweck": "Tier-Liste und Set-Decks für Pokémon TCG Pocket, mit geprüftem Scan-Code je Deck.",
+  "quelle": "game8.co",
+  "quelle_url": "https://game8.co/games/Pokemon-TCG-Pocket/archives/477754",
+  "quelle_hinweis": "Die Tier-Einstufung ist die redaktionelle Einschätzung von Game8, keine von uns gemessene Zahl. Die Oberfläche muss das anschreiben.",
+  "code_hinweis": "Der Scan-Code ist der ausgelesene Inhalt des 2D-Musters, nicht Game8s Bild. Gelesen wurde jedes Muster auf fünf Wegen; übernommen nur, wenn mindestens zwei denselben Inhalt ergaben und keiner widersprach. Danach wurde geprüft, dass der Inhalt unsere eigene Darstellung übersteht — neu erzeugt und wieder ausgelesen ergibt denselben Inhalt. Das Zweite sagt nichts über die Echtheit, nur über die Darstellbarkeit; die Echtheit sichert das Erste.",
+  "abgerufen": "2026-09-04T16:23:41+00:00",
+  "anzahl": 33,
+  "uebersicht": {
+   "tier_tabelle": 25,
+   "set_tabelle": 27,
+   "angegangen": 52
+  },
+  "ohne_code": [
+   {
+    "name": "Mega Absol ex and Hydreigon [hm_101]",
+    "grund": "der Anker hm_101 zeigt auf keinen Deck-Abschnitt, und der Name 'Mega Absol ex and Hydreigon' trifft keinen der 11 Abschnitte eindeutig"
+   },
+   {
+    "name": "Mega Altaria ex and Greninja [hm_104]",
+    "grund": "der Anker hm_104 zeigt auf keinen Deck-Abschnitt, und der Name 'Mega Altaria ex and Greninja' trifft keinen der 8 Abschnitte eindeutig"
+   }
+  ],
+  "zusammengelegt": [
+   {
+    "art": "erwartet",
+    "behalten": "Mega Altaria ex and PD Espeon",
+    "aufgegangen_in": "483458#hm_101",
+    "verloren": "Mega Altaria ex and PD Espeon",
+    "verlorene_stelle": "483458",
+    "verlorene_stufe": "S"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "TRA Garchomp and Mantyke",
+    "aufgegangen_in": "617536#hm_101",
+    "verloren": "TRA Garchomp and Mantyke",
+    "verlorene_stelle": "617536",
+    "verlorene_stufe": "C"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Chien-Pao ex and Baxcalibur",
+    "aufgegangen_in": "583149#hm_102",
+    "verloren": "Chien-Pao ex and Baxcalibur",
+    "verlorene_stelle": "583149",
+    "verlorene_stufe": "S"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Mega Altaria ex and PD Espeon",
+    "aufgegangen_in": "483458#hm_101",
+    "verloren": "Mega Altaria ex and PD Espeon",
+    "verlorene_stelle": "562097",
+    "verlorene_stufe": "S"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Chien-Pao ex and Baxcalibur",
+    "aufgegangen_in": "583149#hm_102",
+    "verloren": "Chien-Pao ex and Baxcalibur",
+    "verlorene_stelle": "583154",
+    "verlorene_stufe": "S"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Hoopa ex and Darkrai ex",
+    "aufgegangen_in": "613775#hm_104",
+    "verloren": "Hoopa ex and Darkrai ex",
+    "verlorene_stelle": "497272",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Hoopa ex and Darkrai ex",
+    "aufgegangen_in": "613775#hm_104",
+    "verloren": "Hoopa ex and Darkrai ex",
+    "verlorene_stelle": "613775",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "RS Heliolisk and Mega Manectric ex",
+    "aufgegangen_in": "613945#hm_101",
+    "verloren": "RS Heliolisk and Mega Manectric ex",
+    "verlorene_stelle": "613945",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Magnezone ex and Pom-Pom Oricorio",
+    "aufgegangen_in": "597251#hm_101",
+    "verloren": "Magnezone ex and Pom-Pom Oricorio",
+    "verlorene_stelle": "597251",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Meowscarada ex and Teal Mask Ogerpon ex",
+    "aufgegangen_in": "583155#hm_102",
+    "verloren": "Meowscarada ex and Teal Mask Ogerpon ex",
+    "verlorene_stelle": "577125",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Magnezone ex and Pom-Pom Oricorio",
+    "aufgegangen_in": "597251#hm_101",
+    "verloren": "Magnezone ex and Pom-Pom Oricorio",
+    "verlorene_stelle": "519066",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Miraidon ex and CB Magnezone",
+    "aufgegangen_in": "602565#hm_101",
+    "verloren": "Miraidon ex and CB Magnezone",
+    "verlorene_stelle": "571718",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Miraidon ex and CB Magnezone",
+    "aufgegangen_in": "602565#hm_101",
+    "verloren": "Miraidon ex and CB Magnezone",
+    "verlorene_stelle": "602565",
+    "verlorene_stufe": "A"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Mega Sharpedo ex and Chien-Pao ex",
+    "aufgegangen_in": "489335#hm_101",
+    "verloren": "Mega Sharpedo ex and Chien-Pao ex",
+    "verlorene_stelle": "489335",
+    "verlorene_stufe": "C"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Flygon ex",
+    "aufgegangen_in": "597227#hm_101",
+    "verloren": "Flygon ex",
+    "verlorene_stelle": "597227",
+    "verlorene_stufe": "C"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Ariados and Whimsicott ex",
+    "aufgegangen_in": "571731#hm_101",
+    "verloren": "Ariados and Whimsicott ex",
+    "verlorene_stelle": "562129",
+    "verlorene_stufe": "B"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Ariados and Whimsicott ex",
+    "aufgegangen_in": "571731#hm_101",
+    "verloren": "Ariados and Whimsicott ex",
+    "verlorene_stelle": "571731",
+    "verlorene_stufe": "B"
+   }
+  ]
+ },
+ "decks": [
+  {
+   "name": "Chien-Pao ex and Baxcalibur",
+   "tier": "S",
+   "archiv": "583149",
+   "anker": "hm_102",
+   "quelle_liste": "beide",
+   "code": "DZiWnpiWnpiYYJiYYJiXopiXopiZtJiWqJiWqJiYLpiaXpic6JicrAcAPGQAPEYAPEYAPFoAPFoAKKAAKKABAw=="
+  },
+  {
+   "name": "Mega Lucario ex and Hitmonlee",
+   "tier": "S",
+   "archiv": "597144",
+   "anker": "hm_103",
+   "quelle_liste": "tier",
+   "code": "DZiWnpiWnpiapJibgJicFpiWqJiWqJiXKpiXwJiYLpiaXpiblJibxgcADogADogADpIARDQARDQABgQARBYBBg=="
+  },
+  {
+   "name": "Mega Altaria ex and PD Espeon",
+   "tier": "S",
+   "archiv": "483458",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "code": "CpiWnpiWnpicFpiWqJiWqJiXKpiXwJiaXpiaXpia9AoAQDgAQDgAMXQAMXQAR64AR64AKfQAKfQAMewALkABBQ=="
+  },
+  {
+   "name": "Hoopa ex and Darkrai ex",
+   "tier": "A+",
+   "archiv": "613775",
+   "anker": "hm_104",
+   "quelle_liste": "beide",
+   "code": "EJiWlJiWnpiWnpiY4piapJiapJibgJiccJiccJiWqJiWqJiXwJiXwJiX8piYLpiaXgQAD0YAUKAAUKAAMCoBBw=="
+  },
+  {
+   "name": "RS Heliolisk and Mega Manectric ex",
+   "tier": "A+",
+   "archiv": "613945",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "code": "DJiWnpiWnpiY4piacpiacpicIJiWqJiWqJiahpiahpiaXpic6AgANBIANBIATvwATvwAPooAPooAP8AAP8ABBA=="
+  },
+  {
+   "name": "Vespiquen ex and Shuckle ex",
+   "tier": "A+",
+   "archiv": "613778",
+   "anker": "hm_102",
+   "quelle_liste": "tier",
+   "code": "DJiWlJibgJibgJiYfpiYfpiWqJiWqJiXwJiaXpiaXpibvJibvAgATP4ATP4AC64ATQgATQgANgYAIkIAIkIBAQ=="
+  },
+  {
+   "name": "Magnezone ex and Pom-Pom Oricorio",
+   "tier": "A+",
+   "archiv": "597251",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "code": "C5iWnpiWnpiapJiauJiWqJiWqJiXKpiXwJiahpiaXpiaaAkAM+oAM+oAA9QAA9QAM/4AQyYAGUYAGUYANgYBBA=="
+  },
+  {
+   "name": "Team Rocket's Weezing ex and Hoopa ex",
+   "tier": "A",
+   "archiv": "498391",
+   "anker": "hm_102",
+   "quelle_liste": "tier",
+   "code": "DZiWlJiWnpiWnpiY4piapJiapJibgJiccJiccJiWqJiWqJiXwJiaXgcAD0YAUKAAUKAAVC4AVC4AVDgAVDgBBw=="
+  },
+  {
+   "name": "Mega Rayquaza ex & Gouging Fire",
+   "tier": "A",
+   "archiv": "613767",
+   "anker": "hm_102",
+   "quelle_liste": "tier",
+   "code": "DZiWnpiWnpib2piWqJiWqJiXKpiXwJiaSpiaXpiaXpib+JictpictgcAUUoAQKYAQKYAUSwAUSwASQIASQICBAI="
+  },
+  {
+   "name": "Mega Sceptile ex and EW Butterfree",
+   "tier": "A",
+   "archiv": "597145",
+   "anker": "hm_104",
+   "quelle_liste": "tier",
+   "code": "CpiYYJiafJiafJibgJiWqJiWqJiXwJiaXpibvJibvAoASmAASmAASmoASmoASnQASnQAQTwAQUYAQVoALoYBAQ=="
+  },
+  {
+   "name": "Mega Sceptile ex and Greninja",
+   "tier": "A",
+   "archiv": "597145",
+   "anker": "hm_103",
+   "quelle_liste": "tier",
+   "code": "DJiWnpiWnpiYYJiYYJicFpiWqJiWqJiXwJiaXpiaXpib7pibvAgAA2YAA3oAQTwAQTwAQUYAQVoAHUIATHwBAQ=="
+  },
+  {
+   "name": "Miraidon ex and CB Magnezone",
+   "tier": "A",
+   "archiv": "602565",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "code": "DJiWnpiWnpiXopiWqJiWqJiXKpiXwJiahpiYLpiaXpiaaJicAggAM+oAM+oAA9QAA9QAM/4AR6QAGUYAGUYBBA=="
+  },
+  {
+   "name": "Meowscarada ex and Teal Mask Ogerpon ex",
+   "tier": "A",
+   "archiv": "583155",
+   "anker": "hm_102",
+   "quelle_liste": "beide",
+   "code": "DZiYYJiYYJiapJiYfpiYfpiWqJiWqJiW7piXwJiaSpiaXpibvJibvAcAE9gAE9gAOwYAFIwAOxAAOxAANgYBAQ=="
+  },
+  {
+   "name": "Ariados and Whimsicott ex",
+   "tier": "B",
+   "archiv": "571731",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "code": "DJiafJiafJicypicypicFpiWqJiWqJiXwJiaXpiaXpibvJibvAgAMzYAMzYAM0AAM0AAKtoAKtoAKuQAKuQBAQ=="
+  },
+  {
+   "name": "Mega Sableye ex and Greninja",
+   "tier": "B",
+   "archiv": "607397",
+   "anker": "hm_101",
+   "quelle_liste": "tier",
+   "code": "C5iWnpiWnpiYYJiYYJibipicFpiWqJiWqJiXwJiaXpiaXgkAD0YAA2YAA2YAA3oAA3oALoYALoYAMCoAS74BBw=="
+  },
+  {
+   "name": "Mega Blaziken ex and Greninja",
+   "tier": "B",
+   "archiv": "477472",
+   "anker": "hm_104",
+   "quelle_liste": "tier",
+   "code": "DJiWnpiWnpiYYJiYYJiaDpiWqJiWqJiXwJiaXpiaXpib7pibdggAK44AK44AK5gAK6wAA2YAA3oAK/wAQfoBAg=="
+  },
+  {
+   "name": "Mega Altaria ex and Gourgeist",
+   "tier": "B",
+   "archiv": "562097",
+   "anker": "hm_106",
+   "quelle_liste": "tier",
+   "code": "CZiWnpiWqJiWqJiXwJiXwJiX8piaXpiaaJia9AsAOCIAOCIAOCwAOCwAGdIALmgALoYAMewAMewALkAALkABBQ=="
+  },
+  {
+   "name": "Mega Charizard Y ex and Entei ex",
+   "tier": "B",
+   "archiv": "571690",
+   "anker": "hm_102",
+   "quelle_liste": "tier",
+   "code": "DZiWnpiWnpiaDpiaDpiXopiauJiWqJiWqJiaXpiaXpicopictpictgcAJ+IAJ+IAFJYAFJYAPwwAPwwAM4YBAg=="
+  },
+  {
+   "name": "TRA Garchomp and Mantyke",
+   "tier": "C",
+   "archiv": "617536",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "code": "DZiWnpiWnpiYYJiYYJicFpiWqJiWqJiXwJiX1JiX1JiaXpiaXpictgcAUpQAUpQAUp4AVJIAVJIAKLQAKLQCAwY="
+  },
+  {
+   "name": "Mega Sharpedo ex and Chien-Pao ex",
+   "tier": "C",
+   "archiv": "489335",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "code": "CZiWnpiWnpiWqJiWqJiXwJiaXpiaaJicPpicPgsATe4ATe4ATfgATfgACQYACQYAIzIAIzIAPGQAKLQAKLQBAw=="
+  },
+  {
+   "name": "Hoopa ex and Zoroark ex",
+   "tier": "C",
+   "archiv": "613775",
+   "anker": "hm_103",
+   "quelle_liste": "tier",
+   "code": "DJiWnpiWnpibgJiccJiccJiWqJiWqJiXKpiXwJiYLpiaXpiaXggAUKAAUKAAMCoARYgARSQARSQARS4ARS4BBw=="
+  },
+  {
+   "name": "Mega Diancie ex and Mega Gardevoir ex",
+   "tier": "C",
+   "archiv": "607291",
+   "anker": "hm_101",
+   "quelle_liste": "tier",
+   "code": "C5iWnpiWnpiYYJiWqJiWqJiXwJiaXpiaXpiazJibCJibCAkAS2QAOBgAOBgADaIADaIAN9wAN/AAN/AANGIBBQ=="
+  },
+  {
+   "name": "Flygon ex",
+   "tier": "C",
+   "archiv": "597227",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "code": "D5iWnpiYYJiYYJiapJiapJiXrJiWqJiWqJiXwJiXwJiYzpiaXpiaXpib7pictgUARAIARAIARewARfYARfYCBgE="
+  },
+  {
+   "name": "Team Rocket's Articuno ex and 18 Trainers",
+   "tier": "B",
+   "archiv": "617434",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "EpiWnpiapJiapJiXrJiXrJiXopiWqJiWqJiW+JiW+JiXKpiXwJiX8piX/JiX/JiaXpicrJicrAIAUzQAUzQBAw=="
+  },
+  {
+   "name": "Team Rocket's Zapdos ex and Heliolisk",
+   "tier": "B",
+   "archiv": "617481",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "D5iWnpiWnpiacpiacpibEpibgJiXopiXopiWqJiWqJiXwJiahpiahpiaXpic6AUANBIANBIATvwATvwAU3ABBA=="
+  },
+  {
+   "name": "Team Rocket's Weezing ex and Team Rocket's Magmar",
+   "tier": "B",
+   "archiv": "498391",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "DJiWnpiWnpicypicypiYdJiYdJiWqJiWqJiXwJiaXpic3pic3ggAVOwAVOwAUvgAUvgAVC4AVC4AVDgAVDgBBw=="
+  },
+  {
+   "name": "Team Rocket's Slowking ex and Sylveon ex",
+   "tier": "B",
+   "archiv": "498410",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "C5iWnpiWnpicIJicIJiWqJiWqJiXKpiXwJiX8pia1pibCAkAMXQAMXQAIFgAIE4AIFgAU5gAU5gAU6IAU6IBBQ=="
+  },
+  {
+   "name": "Team Rocket's Raticate ex and Alolan Ninetales ex",
+   "tier": "B",
+   "archiv": "617527",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "DJiWnpiWnpiY4picIJiWqJiWqJiXKpiXwJiaXpiaXpicrJia9AgAGEIAGEIANn4ANn4AVLoAVLoAVMQAVMQBAw=="
+  },
+  {
+   "name": "Team Rocket's Moltres ex",
+   "tier": "D",
+   "archiv": "617473",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "EJiWnpiWnpiaDpiaDpiapJiXopiXopicFpiWqJiWqJiXKpiXwJiYLpiaXpictpictgQAUwIAUwIAQgQAQgQBAg=="
+  },
+  {
+   "name": "Greninja ex and Suicune ex",
+   "tier": "S",
+   "archiv": "546553",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "DJiWnpiWnpiYYJiYYJiXopiWqJiWqJiXwJiXwJiX8piX/Jia/ggALQoALQoAA3oAA3oALR4AKKAAKKAALv4BAw=="
+  },
+  {
+   "name": "Zoroark ex and Mega Absol ex",
+   "tier": "A+",
+   "archiv": "562115",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "DJiWnpiWnpiapJiYdJiYdJiWqJiWqJiXKpiXwJiaXpiaXpibdggAJiAAMCoARYgAHm4ARSQARSQARS4ARS4BBw=="
+  },
+  {
+   "name": "Alolan Ninetales ex and Crawdaunt",
+   "tier": "B",
+   "archiv": "577001",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "CpiWnpiWnpiZtJiWqJiWqJiXwJiaXpiaXpia1pia9AoANnQANnQANn4ANn4AI8gAI8gAI9IAI9IAKLQAKLQBAw=="
+  },
+  {
+   "name": "Mega Altaria ex and Sylveon ex",
+   "tier": "B",
+   "archiv": "532008",
+   "anker": null,
+   "quelle_liste": "set",
+   "code": "CZiWnpiYYJiWqJiWqJiXwJiX8piYOJiaaJiaaAsAMXQAMXQAIFgAIFgAMewAMewALkAALkAALv4ALkoADcoBBQ=="
+  }
+ ]
+}

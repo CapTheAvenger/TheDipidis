@@ -80,8 +80,17 @@ jobs:
           # Kein numpy: zxing-cpp nimmt ein PIL-Bild unmittelbar
           # entgegen. Der Umweg ueber np.array() hat am 04.09.2026 den
           # Deploy angehalten und nichts gebracht.
+          #
+          # PyYAML kam am 04.09.2026 dazu (dritte Abnahme). Drei
+          # Zusicherungen lesen .github/workflows/pocket-tierlist.yml als
+          # YAML und halten fest, dass ein Abbruch dort rot wird, dass
+          # nach einem Abbruch nicht committet wird und dass die Eingabe
+          # aus dem Actions-Dialog nicht als Shell-Text laeuft. Ohne
+          # PyYAML werden genau diese drei still uebersprungen — und der
+          # Fehler, den sie festhalten, hat einen roten Lauf gruen
+          # gefaerbt.
           pip install pytest beautifulsoup4 requests lxml
-          pip install zxing-cpp segno Pillow
+          pip install zxing-cpp segno Pillow PyYAML
 
       - name: Run Python unit tests
         run: |

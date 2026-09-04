@@ -1,46 +1,794 @@
-<!-- Ausschnitt der Game8-Uebersichtsseite, abgerufen am 04.09.2026 aus
-     dem Browser und auf die zwei Tabellen gekuerzt, die
-     scripts/scrape_pocket_tierlist.py liest. Die Adressen sind ohne
-     Abfrageteil, die Attribute auf das Noetige reduziert.
+<!doctype html>
+<!--
+  AUSSCHNITT AUS DER ECHTEN GAME8-SEITE, WORTGETREU.
 
-     Zweck: der Parser bekommt eine Zusicherung, die OHNE Netz laeuft.
-     game8.co ist aus dem Sandkasten nicht erreichbar, und ein Parser,
-     den nur CI pruefen kann, wird nicht geprueft. -->
-<html><body>
-<table class="a-table">
- <tbody>
-  <tr><th><div><img alt="S Tier" data-src="https://img.game8.co/3997840/a.png/show"><b>Tier</b></div></th></tr>
-  <tr><td><div>
-    <a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/583149#hm_102"><img alt="Chien-Pao ex and Baxcalibur Deck" data-src="https://img.game8.co/4425248/b.png/show"></a>
-    <a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/597144#hm_103"><img alt="Mega Lucario ex and Hitmonlee Deck" data-src="https://img.game8.co/4546988/c.png/show"></a>
-    <a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/483458#hm_101"><img alt="Mega Altaria ex and PD Espeon Deck" data-src="https://img.game8.co/4517502/d.png/show"></a>
-  </div></td></tr>
-  <tr><th><div><img alt="A+ Tier" data-src="https://img.game8.co/4033295/e.png/show"><b>Tier</b></div></th></tr>
-  <tr><td><div>
-    <a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/613775#hm_1"><img alt="Hoopa ex and Darkrai ex Deck" data-src="https://img.game8.co/1/f.png/show"></a>
-    <a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/613945#hm_2"><img alt="Heliolisk and Mega Manectric ex Deck" data-src="https://img.game8.co/2/g.png/show"></a>
-  </div></td></tr>
-  <tr><th><div><img alt="B Tier" data-src="https://img.game8.co/3/h.png/show"><b>Tier</b></div></th></tr>
-  <tr><td><div>
-    <a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/617434#hm_9"><img alt="TR Articuno ex Deck" data-src="https://img.game8.co/4/i.png/show"></a>
-  </div></td></tr>
- </tbody>
+  Quelle: https://game8.co/games/Pokemon-TCG-Pocket/archives/477754
+  Geholt: 04.09.2026
+
+  Enthalten sind genau die beiden Tabellen, um die es geht — die
+  Tier-Liste und die Decks des aktuellen Sets —, Zeichen fuer Zeichen
+  so, wie Game8 sie ausliefert. NICHTS ist begradigt, insbesondere
+  nicht der Fehler, um den es geht:
+
+      alt="Team Rocket" s articuno ex data-src="..."
+
+  Game8 gibt den Apostroph als Anfuehrungszeichen aus; das Attribut
+  endet danach. Wer diese Datei "aufraeumt", macht die Zusicherungen
+  wertlos, die genau das festhalten.
+
+  Der VORGAENGER dieser Datei war von mir selbst zurechtgeschnitten und
+  hat deshalb meine eigene Annahme belegt statt der Seite: er trennte
+  beide Tabellen sauber, hatte keinen Apostroph-Fehler und nur ein
+  Muster je Deck-Seite. Alle drei Annahmen waren falsch.
+-->
+<html><head><meta charset="utf-8"><title>Best Decks Tier List</title></head>
+<body>
+<!-- Reihenfolge wie auf der echten Seite: die Set-Tabelle steht ZUERST.
+     Genau daran ist die alte Tabellensuche gescheitert — sie nahm die
+     erste Tabelle, auf die ihre zu weite Regel passte. Wer hier
+     umsortiert, macht diese Falle unsichtbar. -->
+<h2>New Team Rocket's Ambition Decks</h2>
+<table class="a-table a-table " style="">
+<tr>
+<th colspan="4">New Team Rocket's Ambition Decks</th>
+</tr>
+<tr>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/483458"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="PD Espeon" data-src="https://img.game8.co/4517504/87d3dbf9e7f4460d0ee732d83c269fc1.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="S Tier" data-src="https://img.game8.co/3514273/9036345e24863eba759662fd2e623faa.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/617434"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Team Rocket" s articuno ex data-src="https://img.game8.co/4602833/0b7679002be20adc37cfe401b7010cf7.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3514276/d25190f20464e27d65798699db251900.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/617481"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Team Rocket" s zapdos ex data-src="https://img.game8.co/4603074/5d99e839d292240ada48f9c47d109430.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3514276/d25190f20464e27d65798699db251900.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/498391"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Team Rocket" s weezing ex data-src="https://img.game8.co/4603298/428645b74baa1a18a0c3590d2129cc79.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3514276/d25190f20464e27d65798699db251900.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+</tr>
+<tr>
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/498410"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Team Rocket" s slowking ex data-src="https://img.game8.co/4602796/590f205008982db77cb8c19eb2071b44.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3514276/d25190f20464e27d65798699db251900.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/617527"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Team Rocket" s raticate ex data-src="https://img.game8.co/4603444/4de59651c488d11b61bd0fa0e457a996.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3514276/d25190f20464e27d65798699db251900.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/617536"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="TRA Garchomp" data-src="https://img.game8.co/4603467/8b22e6a890362c6a46b86ec627723f2c.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="C Tier" data-src="https://img.game8.co/3517914/aafc852339d21849a7c86b2e45fc1288.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/617473"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Team Rocket" s moltres ex data-src="https://img.game8.co/4603053/92beca25e9cbf8917da9a691c6925fff.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="D Tier" data-src="https://img.game8.co/4163113/a184caf1dc0f9a84ea43788ed5d97ffb.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+</tr>
+<tr>
+
+
+
+</tr>
+
+<tr>
+<th colspan="4">Old Decks Updated with Team Rocket's Ambition</th>
+</tr>
+<tr>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/546553"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Suicune ex" data-src="https://img.game8.co/4258741/90f7fbd3484b12a06a02d090e1a916d5.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="S Tier" data-src="https://img.game8.co/3514273/9036345e24863eba759662fd2e623faa.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/583149"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Chien-Pao ex" data-src="https://img.game8.co/4425243/b161c0bc6b71ddcd7a36c3f70b2e8e58.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="S Tier" data-src="https://img.game8.co/3514273/9036345e24863eba759662fd2e623faa.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/562097"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Altaria ex" data-src="https://img.game8.co/4318137/ec4a9358f9da1c3504b8f732b51c8984.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="S Tier" data-src="https://img.game8.co/3514273/9036345e24863eba759662fd2e623faa.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/583154"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Baxcalibur" data-src="https://img.game8.co/4425285/810eee6612ecec4332a458229d27a31f.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="S Tier" data-src="https://img.game8.co/3514273/9036345e24863eba759662fd2e623faa.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+</tr>
+<tr>
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/497272"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Darkrai ex" data-src="https://img.game8.co/4149295/c1b0beb1108c1f49418f12e4402a21f6.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="A+ Tier" data-src="https://img.game8.co/4033295/ff111cff9f70ea2f9bc1a04ac5d55a15.png/show" width="18" style="height: 0; padding-bottom: calc(px*15/18); padding-bottom: calc(min(100%,18px)*15/18);">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/562115"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Absol ex" data-src="https://img.game8.co/4320752/98998a9f0891be539ea9829c1d06a803.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="A+ Tier" data-src="https://img.game8.co/4033295/ff111cff9f70ea2f9bc1a04ac5d55a15.png/show" width="18" style="height: 0; padding-bottom: calc(px*15/18); padding-bottom: calc(min(100%,18px)*15/18);">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/613775"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Hoopa ex" data-src="https://img.game8.co/4573020/56cbb7d9c3c904abdb61890eacaf5724.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="A+ Tier" data-src="https://img.game8.co/4033295/ff111cff9f70ea2f9bc1a04ac5d55a15.png/show" width="18" style="height: 0; padding-bottom: calc(px*15/18); padding-bottom: calc(min(100%,18px)*15/18);">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/613945"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="RS Heliolisk" data-src="https://img.game8.co/4574675/038576a921687c427a36aaa783bd490c.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="A+ Tier" data-src="https://img.game8.co/4033295/ff111cff9f70ea2f9bc1a04ac5d55a15.png/show" width="18" style="height: 0; padding-bottom: calc(px*15/18); padding-bottom: calc(min(100%,18px)*15/18);">
+
+
+
+
+</td>
+
+
+</tr>
+<tr>
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/597251"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Magnezone ex" data-src="https://img.game8.co/4480598/e19630924a34fbcb271fb7fc8fde6e63.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="A+ Tier" data-src="https://img.game8.co/4033295/ff111cff9f70ea2f9bc1a04ac5d55a15.png/show" width="18" style="height: 0; padding-bottom: calc(px*15/18); padding-bottom: calc(min(100%,18px)*15/18);">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/577125"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Teal Mask Ogerpon ex" data-src="https://img.game8.co/4398811/fe0ccf8c86645b6331ce752ac275abb1.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="A+ Tier" data-src="https://img.game8.co/4033295/ff111cff9f70ea2f9bc1a04ac5d55a15.png/show" width="18" style="height: 0; padding-bottom: calc(px*15/18); padding-bottom: calc(min(100%,18px)*15/18);">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/519066"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Pom-Pom Oricorio" data-src="https://img.game8.co/4162468/0afb9bb05bb9badd7fbfcb587c748d46.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="A+ Tier" data-src="https://img.game8.co/4033295/ff111cff9f70ea2f9bc1a04ac5d55a15.png/show" width="18" style="height: 0; padding-bottom: calc(px*15/18); padding-bottom: calc(min(100%,18px)*15/18);">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/571718"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="CB Magnezone" data-src="https://img.game8.co/4370268/ec2a185bfb4fee5debe4e8079b57fcfa.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="A+ Tier" data-src="https://img.game8.co/4033295/ff111cff9f70ea2f9bc1a04ac5d55a15.png/show" width="18" style="height: 0; padding-bottom: calc(px*15/18); padding-bottom: calc(min(100%,18px)*15/18);">
+
+
+
+
+</td>
+
+
+</tr>
+<tr>
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/602565"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Miraidon ex" data-src="https://img.game8.co/4516388/e78ec26d169ee46aebd8147a93df6efa.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="A Tier" data-src="https://img.game8.co/3514279/eee23a20ae81edefe42c20c7d1d38fcd.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/489335"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Sharpedo ex" data-src="https://img.game8.co/4573070/829028c38520d02ece82d96cbeb5d083.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="C Tier" data-src="https://img.game8.co/3517914/aafc852339d21849a7c86b2e45fc1288.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/597227"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Flygon ex" data-src="https://img.game8.co/4480488/8d40d6b8a3cf274a55673e72b038b806.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="C Tier" data-src="https://img.game8.co/3517914/aafc852339d21849a7c86b2e45fc1288.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/577001"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Alolan Ninetales ex" data-src="https://img.game8.co/4398947/75b80a1c51ac1bcc5f42a71237b965f7.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3514276/d25190f20464e27d65798699db251900.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+</tr>
+<tr>
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/562129"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Whimsicott ex" data-src="https://img.game8.co/4321561/aa7ff2e2fe23ff645cde699d0682fa10.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3514276/d25190f20464e27d65798699db251900.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/571731"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Ariados" data-src="https://img.game8.co/4370442/18dcd79e6fbcfb9af4a748b57725d4bf.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3514276/d25190f20464e27d65798699db251900.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+<td width="25%" class="center">
+
+
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/532008"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Sylveon ex" data-src="https://img.game8.co/4205142/6025e6e636a6575f0e4aaa06b65d4595.png/show" width="120" style="height: 0; padding-bottom: calc(120px*79/120); padding-bottom: calc(min(100%,120px)*79/120);"></a>
+
+
+
+
+
+
+
+
+<hr class="a-table__line">
+
+
+ <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3514276/d25190f20464e27d65798699db251900.png/show" width="15" height="15">
+
+
+
+
+</td>
+
+
+
+
+<th colspan="4"></th>
+</tr>
 </table>
+<h2>Pokemon TCG Pocket Tier List</h2>
+<table class="a-table a-table " style="">
+<tr>
+<th><div class="align">
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="S Tier" data-src="https://img.game8.co/3997840/8e4ca34799483f1086a2241551695cd1.png/show" width="30" height="30"> <b class="a-bold">Tier</b>
+</div></th>
+</tr>
+<tr>
+<td>
+<div class="align">
 
-<table class="a-table">
- <tbody>
-  <tr><th colspan="4">New Team Rocket's Ambition Decks</th></tr>
-  <tr>
-    <td><a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/483458"><img alt="PD Espeon Deck" data-src="https://img.game8.co/5/j.png/show"></a><img alt="S Tier" data-src="https://img.game8.co/6/k.png/show"></td>
-    <td><a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/617434"><img alt="TR Articuno ex Deck" data-src="https://img.game8.co/7/l.png/show"></a><img alt="B Tier" data-src="https://img.game8.co/8/m.png/show"></td>
-    <td><a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/617481"><img alt="TR Zapdos ex Deck" data-src="https://img.game8.co/9/n.png/show"></a><img alt="B Tier" data-src="https://img.game8.co/10/o.png/show"></td>
-    <td><a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/498391"><img alt="Team Rocket's Weezing ex Deck" data-src="https://img.game8.co/11/p.png/show"></a><img alt="B Tier" data-src="https://img.game8.co/12/q.png/show"></td>
-  </tr>
-  <tr><th colspan="4">Old Decks Updated with Team Rocket's Ambition</th></tr>
-  <tr>
-    <td><a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/500001"><img alt="Suicune ex Deck" data-src="https://img.game8.co/13/r.png/show"></a><img alt="S Tier" data-src="https://img.game8.co/14/s.png/show"></td>
-    <td><a href="https://game8.co/games/Pokemon-TCG-Pocket/archives/583149"><img alt="Chien-Pao ex Deck" data-src="https://img.game8.co/15/t.png/show"></a><img alt="S Tier" data-src="https://img.game8.co/16/u.png/show"></td>
-  </tr>
- </tbody>
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/583149#hm_102"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Chien-Pao ex and Baxcalibur Deck" data-src="https://img.game8.co/4425248/09955761bf9fd67e9e57eaa7516e9ea6.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/597144#hm_103"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Lucario ex and Hitmonlee Deck" data-src="https://img.game8.co/4546988/60ab1b9e36a826dd62acb82171bac9e8.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/483458#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Altaria ex and PD Espeon Deck" data-src="https://img.game8.co/4517502/7d302032a5070856690848e9b84df08a.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a>
+
+</div>
+</td>
+</tr>
+<tr>
+<th><div class="align">
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="A+ Tier" data-src="https://img.game8.co/4033295/ff111cff9f70ea2f9bc1a04ac5d55a15.png/show" width="37" style="height: 0; padding-bottom: calc(px*30/37); padding-bottom: calc(min(100%,37px)*30/37);"> <b class="a-bold">Tier</b>
+</div></th>
+</tr>
+<tr>
+<td>
+<div class="align">
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/613775#hm_104"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Hoopa ex and Darkrai ex Deck" data-src="https://img.game8.co/4582054/70a8135285ddb13fdcff94cad18112e8.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/613945#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Heliolisk and Mega Manectric ex Deck" data-src="https://img.game8.co/4574693/d35fb862b4111736ae7a3ec9d0737422.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/613778#hm_102"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Vespiquen ex and Shuckle ex Deck" data-src="https://img.game8.co/4574985/3346df2b794ee58306fd32cc20462719.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/562115#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Absol ex and Hydreigon Deck" data-src="https://img.game8.co/4321396/a9221c1d6655f7eb62b7647a589125d1.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/597251#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Magnezone ex and Pom-Pom Oricorio Deck" data-src="https://img.game8.co/4480614/d6ce79730bb1175d871662b798a7a18e.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a>
+
+</div>
+</td>
+</tr>
+<tr>
+<th><div class="align">
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="A Tier" data-src="https://img.game8.co/3997842/503c7dd6957d5bb357f209cd77587c4b.png/show" width="30" height="30"> <b class="a-bold">Tier</b>
+</div></th>
+</tr>
+<tr>
+<td>
+<div class="align">
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/498391#hm_102"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Team Rocket" s weezing ex and hoopa deck data-src="https://img.game8.co/4603296/c870ff9fd0ad8dbf4800fe4d75dbc8e8.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/613767#hm_102"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Rayquaza ex and Gouging Fire Deck" data-src="https://img.game8.co/4574951/3e4646ca9177acc320d97a3c028dbd53.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/597145#hm_104"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Sceptile ex and EW Butterfree Deck" data-src="https://img.game8.co/4547007/d269573f17076e2c19be4be4b6951d9e.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/597145#hm_103"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Sceptile ex and Greninja Deck" data-src="https://img.game8.co/4548907/68d313e278ca60c78bed70314e0a6132.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/602565#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Miraidon ex and CB Magnezone Deck" data-src="https://img.game8.co/4516389/cf501a872ffcea261114d26bfe118f06.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/583155#hm_102"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Meowscarada ex and Teal Mask Ogerpon ex Deck" data-src="https://img.game8.co/4505678/a0c3cfc788a898db2ec47d5555b203f1.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/562097#hm_104"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Altaria ex and Greninja Deck" data-src="https://img.game8.co/4362132/b75e638dd657856e3504efe0be23d137.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a>
+
+</div>
+</td>
+</tr>
+<tr>
+<th><div class="align">
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="B Tier" data-src="https://img.game8.co/3997841/9bf0f6f09e8b1063b1bc971679062fa8.png/show" width="30" height="30"> <b class="a-bold">Tier</b>
+</div></th>
+</tr>
+<tr>
+<td>
+<div class="align">
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/571731#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Ariados and Whimsicott ex Deck" data-src="https://img.game8.co/4370443/f00ee2b1e780752b085e7c79cf1a53d9.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/607397#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Sableye ex and Greninja Deck" data-src="https://img.game8.co/4546400/557e37f481d92c6e7f754f2b2000e38c.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/477472#hm_104"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Blaziken ex and Greninja Deck" data-src="https://img.game8.co/4541089/f8247ab519b42316d461e6f20a756b68.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/562097#hm_106"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Altaria ex and Gourgeist Deck" data-src="https://img.game8.co/4410359/6b5723fa0cc8fb1541d5591d8593e734.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/571690#hm_102"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Charizard Y ex and Entei ex Deck" data-src="https://img.game8.co/4373843/bb56a8c2c839c75588dfe718a4e15881.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a>
+
+</div>
+</td>
+</tr>
+<tr>
+<th><div class="align">
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy" alt="C Tier" data-src="https://img.game8.co/4122806/587a750142b128c1fd6b2d73627fa2bf.png/show" width="30" height="30"> <b class="a-bold">Tier</b>
+</div></th>
+</tr>
+<tr>
+<td>
+<div class="align">
+
+<a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/617536#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="TRA Garchomp and Mantyke Deck" data-src="https://img.game8.co/4603465/ebd8733bb4fa762947d063105569f172.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/489335#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Sharpedo ex and Chien-Pao ex Deck" data-src="https://img.game8.co/4573127/6ceff1d5eab7cb954e5a6a3d892b36f4.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/613775#hm_103"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Hoopa ex and Zoroark ex Deck" data-src="https://img.game8.co/4573492/3f48e3e7f917f3d82f6fc8830fe9e625.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/607291#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Mega Diancie ex and Mega Gardevoir ex Deck" data-src="https://img.game8.co/4545879/237248158b08ddaf8875964db428d88e.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a><a class="a-link" href="https://game8.co/games/Pokemon-TCG-Pocket/archives/597227#hm_101"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="a-img lazy lazy-non-square" alt="Flygon ex Deck" data-src="https://img.game8.co/4480488/8d40d6b8a3cf274a55673e72b038b806.png/show" width="110" style="height: 0; padding-bottom: calc(110px*72/110); padding-bottom: calc(min(100%,110px)*72/110);"></a>
+
+</div>
+</td>
+</tr>
+<tr>
+</tr>
 </table>
 </body></html>

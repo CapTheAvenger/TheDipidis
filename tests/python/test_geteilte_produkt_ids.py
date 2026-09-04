@@ -207,16 +207,36 @@ def test_ein_frischer_pin_wird_als_beantwortet_erkannt():
 
 
 def test_centbetraege_sind_nicht_dringend():
-    """PRE 97/99 unterscheiden sich um 0,03 EUR, CRI 116/122 um 34 EUR.
-    Beides als CRITICAL zu melden verwaessert die Dringlichkeit des
-    zweiten — dieselbe Hausregel wie gegen absolute Schwellen."""
+    """Eine Doppelbelegung im Centbereich ist ein Befund, aber kein
+    dringender. CRI 116/122 unterscheiden sich um 34 EUR, PRE 97/99
+    unterschieden sich um 0,03 — beides als CRITICAL zu melden
+    verwaessert die Dringlichkeit des ersten. Dieselbe Hausregel wie
+    gegen absolute Schwellen.
+
+    STAND 04.09.2026: PRE 97/99 ist ENTSCHIEDEN und deshalb aus der
+    Meldung verschwunden. Der Betreiber hat auf die offene Frage eine
+    Regel gegeben — "wenn nur Cent Betraege dann den guenstigeren" —,
+    und die vier gleichnamigen "Black Belt's Training"-Produkte sind
+    seither als Bijektion in cardmarket_mapping_manual.csv festgelegt
+    (siehe tests/python/test_cent_regel_zuordnung.py).
+
+    Diese Zusicherung hat bis dahin verlangt, dass PRE 97 als WARN
+    dasteht. Sie war richtig, solange der Fall offen war, und ist mit
+    seiner Loesung hinfaellig geworden — sie beschrieb einen Zustand,
+    nicht eine Regel. Was hier bleibt, ist die Regel: KEIN Centfall
+    darf als CRITICAL gemeldet werden.
+    """
     assert "PRE 97" not in _text("CRITICAL"), (
         "eine Doppelbelegung im Centbereich wird wieder als CRITICAL "
         "gemeldet"
     )
-    assert "PRE 97" in _text("WARN"), (
-        "PRE 97/99 wird gar nicht mehr gemeldet — richtig ist es trotzdem "
-        "nicht, nur nicht dringend"
+    # Und der geloeste Fall bleibt geloest: taucht er ueberhaupt wieder
+    # auf, hat entweder jemand den Pin entfernt oder der Mapper hat ihn
+    # nicht angewandt.
+    assert "PRE 97" not in _text("WARN"), (
+        "PRE 97/99 wird wieder als Doppelbelegung gemeldet — der Pin aus "
+        "cardmarket_mapping_manual.csv greift nicht mehr. Neu bauen mit "
+        "python backend/scrapers/cardmarket_id_mapper.py"
     )
 
 

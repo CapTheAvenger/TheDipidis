@@ -8852,7 +8852,7 @@ MEP,79,888607,unique,Charmeleon
 MEP,80,888506,live-verified,Fennekin
 MEP,81,885517,live-verified,Mega Greninja ex
 MEP,82,894261,manual-pin,Miraidon
-MEP,83,894262,priced-by-date(1↔2),Slowbro
+MEP,83,894262,manual-pin,Slowbro
 MEP,84,894263,manual-pin,Dhelmise
 MEP,85,894264,manual-pin,Bastiodon
 MEP,86,898176,unique,Slowpoke
@@ -11994,10 +11994,10 @@ PRE,92,805484,live-verified,Terapagos ex
 PRE,93,805487,live-verified,Amarys
 PRE,94,805488,unique,Area Zero Underdepths
 PRE,95,805489,unique,Binding Mochi
-PRE,96,805493,priced-by-date(4↔4),Black Belt's Training
-PRE,97,805491,live-verified,Black Belt's Training
-PRE,98,805492,priced-by-date(4↔4),Black Belt's Training
-PRE,99,805491,priced-by-date(4↔4),Black Belt's Training
+PRE,96,805493,manual-pin,Black Belt's Training
+PRE,97,805491,manual-pin,Black Belt's Training
+PRE,98,805492,manual-pin,Black Belt's Training
+PRE,99,805490,manual-pin,Black Belt's Training
 PRE,100,805494,unique,Briar
 PRE,101,805495,unique,Buddy-Buddy Poffin
 PRE,102,805496,unique,Bug Catching Set

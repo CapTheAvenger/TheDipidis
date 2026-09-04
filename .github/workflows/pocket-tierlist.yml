@@ -88,28 +88,51 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Pocket tier-list scraper
+        env:
+          # Über die Umgebung, nicht per ${{ }} in die Shell hinein.
+          # Vorher stand `--nur ${{ inputs.nur }}` direkt in der
+          # Befehlszeile: was jemand ins Actions-Feld tippt, lief damit
+          # als Shell-Text mit (dritte Abnahme, 04.09.2026).
+          NUR: ${{ inputs.nur }}
+          TROCKEN: ${{ inputs.trocken }}
         run: |
           set +e
-          echo "::group::scripts/scrape_pocket_tierlist.py"
           args=""
-          if [ -n "${{ inputs.nur }}" ]; then args="$args --nur ${{ inputs.nur }}"; fi
-          if [ "${{ inputs.trocken }}" = "true" ]; then args="$args --trocken"; fi
-          python scripts/scrape_pocket_tierlist.py $args
-          rc=$?
-          echo "::endgroup::"
-          # Ein Fehlschlag ist ein Befund, kein Grund, den Lauf rot zu
-          # färben und damit die Mailflut auszulösen — die Meldungen aus
-          # dem Skript stehen als ::warning:: bzw. ::error:: im Protokoll,
-          # und der Commit-Schritt unten schreibt nur, wenn es etwas zu
-          # schreiben gibt.
+          if [ -n "$NUR" ]; then args="$args --nur $NUR"; fi
+          if [ "$TROCKEN" = "true" ]; then args="$args --trocken"; fi
+          # NICHT in ::group:: — eine zugeklappte Gruppe ist der falsche
+          # Ort für einen Abbruch. Vorher verschwand der Rückfall
+          # ("keine Set-Tabelle gefunden") in einer zugeklappten Gruppe
+          # und im Protokoll stand nur "Scraper endete mit 1".
+          python scripts/scrape_pocket_tierlist.py $args 2>&1 | tee /tmp/pocket.log
+          rc=${PIPESTATUS[0]}
+
+          # WARUM DIESER SCHRITT JETZT ROT WERDEN DARF
+          # -----------------------------------------
+          # Hier stand `exit 0` mit der Begründung, ein Fehlschlag sei
+          # ein Befund und kein Grund für eine Mailflut. Das galt, solange
+          # der Ablauf jede Nacht lief. Er läuft jetzt nur noch auf
+          # Knopfdruck (siehe oben) — dann ist genau EIN Mensch da, der
+          # das Ergebnis sehen will, und ein grüner Haken über einem
+          # Abbruch belügt ihn.
+          #
+          # Konkret neutralisierte das `exit 0` die harten Abbrüche im
+          # Skript: fehlende Set-Tabelle, Quote unter zwei Dritteln,
+          # Rechnung geht nicht auf. Alle drei sind dafür gebaut, dass
+          # jemand hinsieht.
           if [ $rc -ne 0 ]; then
-            echo "::warning::Scraper endete mit $rc — siehe Gruppe oben"
+            letzte="$(grep -m1 '::error::' /tmp/pocket.log | sed 's/^::error:://' || true)"
+            echo "::error::Pocket-Scraper abgebrochen (Code $rc): ${letzte:-siehe Protokoll oben}"
+            exit $rc
           fi
-          exit 0
 
       - name: Commit + push
         id: commit
-        if: ${{ inputs.trocken != true }}
+        # `success() &&` ist hier nicht überflüssig: ein eigenes `if:`
+        # ersetzt die sonst stillschweigende Bedingung success(). Ohne
+        # das würde nach einem Abbruch des Scrapers trotzdem committet —
+        # genau das, was die Abbrüche verhindern sollen.
+        if: ${{ success() && inputs.trocken != true }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
@@ -155,7 +178,7 @@ jobs:
       # haben — sonst stiesse jeder unveraenderte Tageslauf einen Deploy
       # an, der nichts ausliefert.
       - name: Deploy anstossen (GITHUB_TOKEN-Push triggert ihn nicht)
-        if: steps.commit.outputs.pushed == 'true'
+        if: ${{ success() && steps.commit.outputs.pushed == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run deploy-pages.yml --ref main

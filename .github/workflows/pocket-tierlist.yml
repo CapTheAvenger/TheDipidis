@@ -1,0 +1,142 @@
+name: Pocket Tier List
+
+# Pokémon TCG Pocket: Tier-Liste und die Decks des aktuellen Sets, je mit
+# geprüftem Scan-Code. Schreibt data/pocket_tierlist.json — die Datei, die
+# der Pocket-Reiter liest.
+#
+# WARUM DIESER LAUF IN CI SEIN MUSS
+# ---------------------------------
+# game8.co und img.game8.co sind aus dem Bausandkasten nicht erreichbar
+# (der Egress-Proxy antwortet mit 403). Der Scraper lässt sich dort also
+# schreiben und gegen tests/fixtures/ prüfen, aber nicht gegen die echte
+# Seite laufen. Genau dafür ist dieser Ablauf da — und für den ersten
+# Beweis, dass sich Game8s 2D-Muster überhaupt auslesen lassen.
+#
+# TEMPO
+# -----
+# Rund 50 Deck-Seiten plus 50 QR-Bilder, mit 1,2 s Pause dazwischen: gut
+# zwei Minuten reine Wartezeit. Das ist Absicht — Game8 schuldet uns
+# nichts.
+#
+# Anstoß: täglich um 05:20 UTC ODER GitHub → Actions → Pocket Tier List
+#         → Run workflow
+
+on:
+  schedule:
+    # 05:20 UTC, also nach dem Champions-Lauf (04:00) und vor dem
+    # Preislauf. Versetzt, damit sich zwei Läufe nicht um denselben
+    # Push auf main streiten.
+    - cron: '20 5 * * *'
+  workflow_dispatch:
+    inputs:
+      nur:
+        description: 'Nur die ersten N Decks (Probelauf; leer = alle)'
+        type: string
+        default: ''
+      trocken:
+        description: 'Nichts schreiben, nur berichten'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions:  write
+
+concurrency:
+  group: pocket-tierlist
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Pocket tier-list scraper
+        run: |
+          set +e
+          echo "::group::scripts/scrape_pocket_tierlist.py"
+          args=""
+          if [ -n "${{ inputs.nur }}" ]; then args="$args --nur ${{ inputs.nur }}"; fi
+          if [ "${{ inputs.trocken }}" = "true" ]; then args="$args --trocken"; fi
+          python scripts/scrape_pocket_tierlist.py $args
+          rc=$?
+          echo "::endgroup::"
+          # Ein Fehlschlag ist ein Befund, kein Grund, den Lauf rot zu
+          # färben und damit die Mailflut auszulösen — die Meldungen aus
+          # dem Skript stehen als ::warning:: bzw. ::error:: im Protokoll,
+          # und der Commit-Schritt unten schreibt nur, wenn es etwas zu
+          # schreiben gibt.
+          if [ $rc -ne 0 ]; then
+            echo "::warning::Scraper endete mit $rc — siehe Gruppe oben"
+          fi
+          exit 0
+
+      - name: Commit + push
+        id: commit
+        if: ${{ inputs.trocken != true }}
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          echo "pushed=false" >> "$GITHUB_OUTPUT"
+          if [ ! -f data/pocket_tierlist.json ]; then
+            echo "keine Ausgabe — nichts zu committen"
+            exit 0
+          fi
+          git add data/pocket_tierlist.json
+          if git diff --cached --quiet; then
+            echo "unverändert — kein Push."
+            exit 0
+          fi
+          ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          git commit -m "Auto: Pocket-Tier-Liste — ${ts}
+
+          Quelle: game8.co (redaktionelle Einstufung)
+          Triggered by .github/workflows/pocket-tierlist.yml
+          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main && break
+            sleep $((i * 5))
+          done
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "pushed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Push $i fehlgeschlagen — neu aufsetzen und erneut"
+            git pull --rebase --autostash origin main || true
+            sleep $((i * 5))
+          done
+          echo "::error::Push nach drei Versuchen fehlgeschlagen"
+          exit 1
+
+      # Ohne diesen Schritt veraltet die Seite still: ein Push mit dem
+      # GITHUB_TOKEN loest `on: push` NICHT aus (Rekursionsschutz von
+      # GitHub Actions). Dieselbe Zeile steht in jedem Datenlauf, der
+      # nach main pusst; tests/python/test_deploy_dispatch.py haelt das
+      # fest.
+      #
+      # `if` bindet den Deploy an Laeufe, die wirklich etwas gepusht
+      # haben — sonst stiesse jeder unveraenderte Tageslauf einen Deploy
+      # an, der nichts ausliefert.
+      - name: Deploy anstossen (GITHUB_TOKEN-Push triggert ihn nicht)
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-pages.yml --ref main

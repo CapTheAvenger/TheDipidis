@@ -315,13 +315,21 @@ def qr_adresse(html):
     return (img.get("data-src") or img.get("src") or "").split("?")[0] or None
 
 
+# KEIN numpy. zxing-cpp nimmt ein PIL-Bild unmittelbar entgegen; der
+# Umweg über np.array() kostete eine weitere Abhängigkeit — und genau die
+# hat am 04.09.2026 den Deploy angehalten: der Testschritt in
+# deploy-pages.yml installiert nur pytest, beautifulsoup4, requests und
+# lxml, also fiel `import numpy` dort um, während er hier durchlief.
+# Nachgemessen: mit PIL-Bild und mit np.array() liest zxing-cpp denselben
+# Inhalt.
+
+
 def lies_qr(daten):
     """Den Inhalt eines QR-Bildes auslesen. None, wenn keiner gefunden."""
-    import numpy as np
     import zxingcpp
     from PIL import Image
-    bild = Image.open(io.BytesIO(daten)).convert("L")
-    treffer = zxingcpp.read_barcodes(np.array(bild))
+    treffer = zxingcpp.read_barcodes(
+        Image.open(io.BytesIO(daten)).convert("L"))
     return treffer[0].text if treffer else None
 
 
@@ -338,7 +346,6 @@ def probe(inhalt, erzeuge=None):
     belegen, dass die Probe einen Unterschied ÜBERHAUPT bemerkt — sie
     könnte ebenso gut nur prüfen, ob irgendein Code lesbar ist.
     """
-    import numpy as np
     import segno
     import zxingcpp
     from PIL import Image
@@ -346,7 +353,7 @@ def probe(inhalt, erzeuge=None):
     (erzeuge or segno.make)(inhalt, error="m").save(
         puffer, kind="png", scale=8, border=4)
     puffer.seek(0)
-    treffer = zxingcpp.read_barcodes(np.array(Image.open(puffer).convert("L")))
+    treffer = zxingcpp.read_barcodes(Image.open(puffer).convert("L"))
     return bool(treffer) and treffer[0].text == inhalt
 
 

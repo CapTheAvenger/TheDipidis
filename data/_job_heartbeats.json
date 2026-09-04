@@ -7,17 +7,17 @@
   },
   "scrapers/labs_tournament_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-03T10:20:44Z",
-    "zuletzt_gelaufen": "2026-09-03T10:20:44Z"
+    "zuletzt_erfolgreich": "2026-09-04T06:32:39Z",
+    "zuletzt_gelaufen": "2026-09-04T06:32:39Z"
   },
   "scrapers/per_decklist_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-03T10:20:44Z",
-    "zuletzt_gelaufen": "2026-09-03T10:20:44Z"
+    "zuletzt_erfolgreich": "2026-09-04T06:32:39Z",
+    "zuletzt_gelaufen": "2026-09-04T06:32:39Z"
   },
   "scrapers/player_continuity_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-03T10:20:44Z",
-    "zuletzt_gelaufen": "2026-09-03T10:20:44Z"
+    "zuletzt_erfolgreich": "2026-09-04T06:32:39Z",
+    "zuletzt_gelaufen": "2026-09-04T06:32:39Z"
   }
 }

@@ -161,8 +161,34 @@ def test_ohne_qr_auf_der_seite_gibt_es_keine_erfundene_adresse(mod):
 
 # ── Die Gegenprobe ────────────────────────────────────────────────────
 
+QR_BIBLIOTHEKEN = ("segno", "zxingcpp", "PIL")
+
+
+def _qr_noetig():
+    """Die Proben unten brauchen die QR-Bibliotheken.
+
+    ANLASS (04.09.2026, roter Deploy). Sie standen ohne Weiche da und
+    liefen hier durch, weil die Bibliotheken im Bausandkasten
+    installiert sind. Der Testschritt in deploy-pages.yml installiert
+    dagegen nur pytest, beautifulsoup4, requests und lxml — dort fiel
+    der erste Import mit ModuleNotFoundError um, `build` und `deploy`
+    wurden uebersprungen, und die Seite hing.
+
+    Uebersprungen zu werden ist aber die ZWEITBESTE Loesung: die
+    Gegenprobe ist die ganze Sicherheit hinter den Scan-Codes, und ein
+    stiller Uebersprung waere so gut wie keine Pruefung. Deshalb steht
+    unten test_der_testschritt_installiert_die_qr_bibliotheken und
+    verlangt, dass sie in CI tatsaechlich LAUFEN.
+    """
+    for name in QR_BIBLIOTHEKEN:
+        pytest.importorskip(
+            name,
+            reason=f"{name} fehlt — die QR-Gegenprobe kann hier nicht laufen")
+
+
 def test_die_gegenprobe_besteht_fuer_echte_inhalte(mod):
     """Auslesen, neu erzeugen, wieder auslesen — dasselbe?"""
+    _qr_noetig()
     for inhalt in ["https://ptcgp.example/d?x=AB12",
                    "PTCGP1|A1-234,A2b-011|x2y3",
                    "".join(chr(65 + i % 26) for i in range(180))]:
@@ -184,6 +210,7 @@ def test_die_gegenprobe_bemerkt_einen_unterschied(mod):
     absichtlich ein Zeichen mehr kodiert. Wer den Vergleich entfernt,
     faellt hier um.
     """
+    _qr_noetig()
     import segno
 
     def verfaelscht(inhalt, **kw):
@@ -488,3 +515,50 @@ def test_die_leiter_faengt_bei_cloudscraper_an_und_endet_bei_requests(mod):
     assert 202 in mod.ABGEWIESEN, (
         "202 fehlt unter den Abweisungen — genau dieser Code hat den "
         "zweiten CI-Lauf gekostet, und er sieht keinem Fehler aehnlich")
+
+
+# ── Der Testschritt in CI ─────────────────────────────────────────────
+
+def test_der_testschritt_installiert_die_qr_bibliotheken():
+    """Sonst wird die Gegenprobe in CI still uebersprungen.
+
+    ANLASS (04.09.2026). `probe()` importierte numpy; der Testschritt in
+    deploy-pages.yml installiert nur vier Pakete, also fiel der Import
+    um und der Deploy stand. numpy ist inzwischen ganz weg — zxing-cpp
+    nimmt ein PIL-Bild unmittelbar entgegen.
+
+    Damit waere der Deploy gerettet und die Pruefung verloren: ohne
+    segno, zxingcpp und Pillow greift `_qr_noetig()` und die Gegenprobe
+    wird uebersprungen. Ein gruener Lauf hiesse dann nur noch, dass
+    niemand hingesehen hat — und der Scan-Code ist der ganze Zweck des
+    Reiters. Also muss der Testschritt sie mitbringen, und diese
+    Zusicherung haelt das fest.
+    """
+    pfad = os.path.join(WURZEL, ".github", "workflows", "deploy-pages.yml")
+    text = open(pfad, encoding="utf-8").read()
+    zeilen = [z for z in text.splitlines() if "pip install" in z]
+    assert zeilen, "in deploy-pages.yml steht kein pip-install-Schritt mehr"
+    zusammen = " ".join(zeilen)
+    for paket in ["zxing-cpp", "segno", "pillow"]:
+        assert paket in zusammen.lower(), (
+            f"{paket} fehlt in den pip-install-Zeilen von deploy-pages.yml. "
+            f"Dann ueberspringt pytest die QR-Gegenprobe still, der Lauf ist "
+            f"gruen, und niemand hat geprueft, ob die Scan-Codes das "
+            f"Neu-Erzeugen ueberleben. Zeilen: {zeilen}")
+
+
+def test_der_scraper_braucht_kein_numpy():
+    """Eine Abhaengigkeit weniger ist eine Fehlerquelle weniger.
+
+    Nachgemessen am 04.09.2026: zxing-cpp liest aus einem PIL-Bild
+    denselben Inhalt wie aus np.array(bild). Der Umweg brachte nichts
+    und kostete einen Deploy.
+    """
+    text = open(SKRIPT, encoding="utf-8").read()
+    zeilen = [z.strip() for z in text.splitlines()
+              if z.strip().startswith(("import ", "from "))]
+    treffer = [z for z in zeilen if "numpy" in z]
+    assert not treffer, (
+        f"der Scraper importiert wieder numpy: {treffer}. Der Testschritt in "
+        f"deploy-pages.yml installiert es nicht — genau daran hing der "
+        f"Deploy am 04.09.2026")

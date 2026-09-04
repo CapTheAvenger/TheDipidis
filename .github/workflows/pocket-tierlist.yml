@@ -21,12 +21,31 @@ name: Pocket Tier List
 # Anstoß: täglich um 05:20 UTC ODER GitHub → Actions → Pocket Tier List
 #         → Run workflow
 
+# KEIN ZEITPLAN — UND DAS IST EIN BEFUND, KEINE BEQUEMLICHKEIT
+# -----------------------------------------------------------
+# Hier stand `cron: '20 5 * * *'`. Drei Läufe am 04.09.2026 haben gezeigt,
+# dass er nie etwas liefern kann: Game8 antwortet dem Github-Läufer auf
+# JEDEN Weg mit HTTP 202 — Cloudflares "Prüfung läuft".
+#
+#     cloudscraper: HTTP 202 | curl_cffi: HTTP 202 | requests: HTTP 202
+#
+# Auch curl_cffi mit Chrome-TLS-Fingerabdruck (chrome120), also das
+# Mittel, mit dem sechs andere Scraper dieses Repos durchkommen. Es liegt
+# nicht an der Bibliothek, sondern am Rechenzentrums-Adressbereich.
+#
+# Ein Zeitplan hätte also jede Nacht eine Warnung erzeugt und nie eine
+# Zeile Daten. Das ist schlimmer als kein Zeitplan: man gewöhnt sich an
+# die Meldung und übersieht die echte.
+#
+# Woher die Daten stattdessen kommen: aus einer Arbeitssitzung, in der
+# game8.co über die Domain-Zulassungsliste erreichbar ist. Das passt zur
+# Sache — eine Tier-Liste ändert sich mit dem Set, nicht über Nacht.
+#
+# Der Ablauf bleibt hier stehen, weil er dann sofort wieder greift, wenn
+# Game8 den Läufer eines Tages durchlässt. Ein Probelauf über
+# `workflow_dispatch` sagt das in fünfzig Sekunden.
+
 on:
-  schedule:
-    # 05:20 UTC, also nach dem Champions-Lauf (04:00) und vor dem
-    # Preislauf. Versetzt, damit sich zwei Läufe nicht um denselben
-    # Push auf main streiten.
-    - cron: '20 5 * * *'
   workflow_dispatch:
     inputs:
       nur:

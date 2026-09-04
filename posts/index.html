@@ -90,13 +90,65 @@ button.tun.leise{background:transparent;color:var(--creme);border:1px solid var(
 button.tun.leise:hover{background:var(--flaeche-2)}
 .knopfreihe{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 
-.buehne{position:sticky;top:24px}
+.buehne{position:sticky;top:24px;align-self:start}
 canvas{width:100%;max-width:540px;height:auto;display:block;border-radius:10px;
        border:1px solid var(--linie-stark);background:#150c1b}
 .mass{font-family:var(--mono);font-size:11px;color:var(--matt);margin:8px 0 0}
 fieldset{border:1px solid var(--linie);border-radius:8px;padding:12px;margin:0 0 16px}
 legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
        color:var(--holz);padding:0 6px}
+
+/* ── Der Datenquellen-Wähler ──────────────────────────────────────────
+   Kein eigenes Aussehen: er ist ein Auswahlfeld wie jedes andere. Was
+   ihn heraushebt, ist die Zeile darunter, die sagt, woher die Zahlen
+   kommen und ob sie noch stimmen. */
+.quelle{border-color:var(--holz)}
+.herkunft{font-size:12px;color:var(--matt);margin:-9px 0 14px;min-height:1.5em}
+.herkunft b{color:var(--creme);font-weight:600}
+.herkunft.laedt{color:var(--holz)}
+.herkunft.fehler{color:#E8908F}
+.geaendert{font-size:12px;color:var(--holz);margin:0 0 12px}
+.geaendert button{background:none;border:none;color:var(--holz);font:inherit;
+  text-decoration:underline;cursor:pointer;padding:0}
+/* GEFÜLLTE REITER MARKIEREN — NICHT DIE ANDEREN AUSBLENDEN.
+   Erste Fassung hat Feature und Ansage auf opacity:.55 gesetzt. Blass
+   heisst in jeder Oberflaeche "gesperrt"; wer nichts sperren will, darf
+   dieses Zeichen nicht setzen (Abnahme 04.09.2026). Also andersherum. */
+.reiter button.gefuellt::after{content:' ●';color:var(--holz);font-size:9px;
+  vertical-align:middle}
+.reiter button[aria-pressed=true].gefuellt::after{color:#20142a}
+
+.warnung{font-size:12px;color:#E8908F;margin:8px 0 0}
+
+/* ── Telefon ──────────────────────────────────────────────────────────
+   BEFUND (04.09.2026): `.buehne{position:sticky}` klebt nur innerhalb
+   der eigenen Rasterzelle — und die beginnt einspaltig ERST HINTER dem
+   Formular. Unter 900 px tippte der Betreiber also blind und musste
+   nach jeder Aenderung ganz nach unten scrollen. Mit `order:-1` wandert
+   die Vorschau nach oben und klebt dort wirklich. */
+@media (max-width:900px){
+  main{padding:16px;gap:14px}
+  /* FLEX STATT GRID, DAMIT DAS KLEBEN ÜBERHAUPT GREIFT.
+     In einem Raster ist der Bezugsrahmen eines klebenden Feldes seine
+     eigene Rasterzelle — und die ist einspaltig genau so hoch wie die
+     Vorschau selbst. Gemessen am 04.09.2026: nach 209 px war sie
+     wieder weg. Im Flexkasten ist der Bezugsrahmen der ganze Kasten,
+     und `order:-1` holt die Vorschau zugleich nach oben. */
+  main{display:flex;flex-direction:column}
+  /* `align-self:start` zurueckdrehen: im senkrechten Flexkasten
+     schrumpft das die Leiste auf Inhaltsbreite, und das Formular
+     scrollt neben der Vorschau durch. */
+  .buehne{order:-1;align-self:stretch;position:sticky;top:0;z-index:2;
+          background:var(--grund);padding:8px 0 10px;
+          border-bottom:1px solid var(--linie)}
+  canvas{max-height:38vh;width:auto;margin:0 auto}
+  .mass{text-align:center;margin:6px 0 0}
+  /* Antippflaechen. 44 px ist die Grenze, unter der man daneben tippt;
+     die Reiter lagen bei rund 36, die Knoepfe bei rund 40. */
+  .reiter button{padding:14px 12px}
+  button.tun{padding:14px 18px}
+  input[type=text],textarea,select{padding:12px 11px}
+}
 </style>
 </head>
 <body>
@@ -117,6 +169,27 @@ legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transfor
       <button type="button" data-vorlage="liste"   aria-pressed="false">Liste</button>
       <button type="button" data-vorlage="text"    aria-pressed="false">Ansage</button>
     </div>
+
+    <!-- DER WÄHLER STEHT UNTER DEN REITERN, NICHT DARÜBER.
+         Der UX-Entwurf wollte ihn davor, weil der Betreiber "je nach
+         Thema" sagt. Dagegen stand: nach drei Wochen sucht er die vier
+         Knöpfe, die er kennt, und scrollt an einem zugeklappten
+         Auswahlfeld vorbei. Entschieden hat die Kostenrechnung —
+         übersieht er den Wähler, war der ganze Bau umsonst; klickt er
+         einen Reiter zu viel, kostet es einen Klick. Und Kicker, Titel
+         und Fußzeile stehen ohnehin hier und gelten für alle vier
+         Vorlagen. (Abnahme 04.09.2026) -->
+    <label class="feld"><span>Womit füllen?</span>
+      <select id="quelle" class="quelle"></select></label>
+    <p class="herkunft" id="herkunft">Zahlen von der Seite holen, statt sie
+      abzutippen. Alles bleibt überschreibbar.</p>
+
+    <label class="feld" id="deckFeld" hidden><span>Deck</span>
+      <input type="text" id="deck" list="deckliste" autocomplete="off"
+             placeholder="tippen zum Suchen">
+      <datalist id="deckliste"></datalist></label>
+
+    <p class="geaendert" id="geaendert" hidden></p>
 
     <label class="feld"><span>Kicker (klein, oben)</span>
       <input type="text" id="kicker" value="TEF-PBL · Was die Seite kann"></label>
@@ -145,9 +218,13 @@ Jede Quote mit ihrem Nenner
       <label class="feld"><span>Wofür sie steht</span>
         <input type="text" id="zahlLabel" value="Anteil von Dragapult"></label>
       <label class="feld"><span>Grundlage — Pflicht</span>
-        <input type="text" id="zahlNenner" value="aus 2.908 Listen im Meta online"></label>
+        <textarea id="zahlNenner" rows="2">aus 2.908 Listen im Meta online</textarea></label>
       <p class="hilf">Ohne Nenner keine Quote. Auf einem Bild, das durch Instagram
-      wandert, kann niemand nachschlagen, worauf sich der Prozentwert bezieht.</p>
+      wandert, kann niemand nachschlagen, worauf sich der Prozentwert bezieht.
+      <strong>Zwei Zeilen</strong> — die dritte wirft die Vorlage weg, ohne es
+      anzuzeigen. Dies war bis zum 04.09.2026 ein einzeiliges Feld; ein
+      <code style="font-family:var(--mono)">&lt;input&gt;</code> schluckt jeden
+      Zeilenumbruch, und zwei Sätze klebten im Bild aneinander.</p>
     </fieldset>
 
     <fieldset id="gListe" hidden>
@@ -159,6 +236,8 @@ Mega Gardevoir | 5,9 %
 Raging Bolt | 5,1 %
 Mega Lucario | 4,7 %
 Grimmsnarl | 4,2 %</textarea></label>
+      <label class="feld"><span>Spaltenkopf links</span>
+        <input type="text" id="listeKopfLinks" value="Deck"></label>
       <label class="feld"><span>Spaltenkopf rechts</span>
         <input type="text" id="listeKopf" value="Share online"></label>
     </fieldset>
@@ -176,7 +255,26 @@ Und daneben die Zahl der Partien, damit man sieht, worauf sie steht.</textarea><
 
     <div class="knopfreihe">
       <button type="button" class="tun" id="btnPng">PNG herunterladen</button>
+      <!-- TEILEN STATT HERUNTERLADEN, WENN DAS GERÄT ES KANN.
+           Der Betreiber hat am 28.08.2026 vom iPhone gemeldet: "wenn ich
+           auf Speichern drücke, dann wird's nicht immer in der Foto
+           Mediathek gespeichert." `<a download>` auf einer Blob-Adresse
+           ist in iOS Safari unzuverlässig. js/ds-bildvorschau.js macht es
+           auf der Hauptseite längst richtig; hier fehlte es. -->
+      <button type="button" class="tun leise" id="btnTeilen" hidden>Teilen</button>
       <button type="button" class="tun leise" id="btnAlle">Alle vier als PNG</button>
+    </div>
+    <p class="warnung" id="warnung" hidden></p>
+
+    <!-- DIE BILDUNTERSCHRIFT IST DIE ZWEITE HÄLFTE DER ARBEIT.
+         Ohne sie tippt der Betreiber nach dem Bild dieselben Zahlen ein
+         zweites Mal ab — er pflegt sie heute getrennt in
+         anleitung/texte/posts-final.md. Sie kommt aus derselben Quelle
+         wie das Bild und trägt damit denselben Nenner. -->
+    <label class="feld" style="margin-top:18px"><span>Bildunterschrift</span>
+      <textarea id="caption" rows="4"></textarea></label>
+    <div class="knopfreihe">
+      <button type="button" class="tun leise" id="btnText">Text kopieren</button>
     </div>
   </form>
 
@@ -186,6 +284,14 @@ Und daneben die Zahl der Partien, damit man sieht, worauf sie steht.</textarea><
   </div>
 </main>
 
+<!-- OHNE ?v=-TOKEN, UND DAS IST ABSICHT.
+     `bump-version.sh` schreibt nur index.html, service-worker.js und
+     version.json — `posts/` kommt in beiden Bump-Skripten nicht vor. Ein
+     Token hier würde beim ersten Schreiben einfrieren und die Datei für
+     immer aus dem Cache bedienen. Der Service Worker holt `/js/` ohnehin
+     netzwerk-zuerst-strikt, also ist das hier sicher. -->
+<script src="../js/matchup-glaettung.js"></script>
+<script src="../js/ds-post-quellen.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════════════
  * Die Marke. Eins zu eins aus js/ds-share.js — siehe Kommentar oben.
@@ -229,20 +335,53 @@ function fMono(s, w) { return (w || 400) + ' ' + s + 'px ' + MONO; }
    stehen im Post fast in Originalgröße.
    Die Schreibtischaufnahmen bleiben in der Liste — für Ansichten, von
    denen es (noch) keine Telefonfassung gibt. */
+/* JEDE AUFNAHME BRINGT IHREN TEXT MIT.
+ *
+ * Vorher stand hier nur [Pfad, Name] — der Betreiber waehlte eine
+ * Aufnahme und tippte danach vier Stichpunkte von Hand. Genau das ist
+ * das "live eingeben", das weg sollte. Jetzt ist die Aufnahme selbst
+ * eine Quelle: ein Griff, Post fertig.
+ *
+ * [Pfad, Name, Kicker, Titel, Stichpunkte] */
 var SHOTS = [
-    ['../images/posts/de/meta-uebersicht.png',              'Telefon · Aktuelles Meta'],
-    ['../images/posts/de/meta-performance.png',             'Telefon · Meta-Performance'],
-    ['../images/posts/de/meta-call.png',                    'Telefon · Meta Call'],
-    ['../images/posts/de/champions.png',                    'Telefon · Champions'],
-    ['../images/posts/de/kartendatenbank.png',              'Telefon · Kartendatenbank'],
-    ['../images/tutorials/de/startseite/1-meta.png',        'Schreibtisch · Startseite Meta'],
-    ['../images/tutorials/de/startseite/2-heatmap.png',     'Schreibtisch · Heatmap'],
-    ['../images/tutorials/de/champions/1-teams.png',        'Schreibtisch · Champions Teams'],
-    ['../images/tutorials/de/champions/2-nutzung.png',      'Schreibtisch · Champions Nutzung'],
-    ['../images/tutorials/de/champions/3-nachschlagen.png', 'Schreibtisch · Nachschlagen'],
-    ['../images/tutorials/de/team-builder/1-auswahl.png',   'Schreibtisch · Team-Builder'],
-    ['../images/tutorials/de/team-builder/2-gesetzt.png',   'Schreibtisch · Team gesetzt'],
-    ['../images/tutorials/de/team-rechner/1-matrix.png',    'Schreibtisch · Team-Rechner']
+    ['../images/posts/de/meta-uebersicht.png', 'Telefon · Aktuelles Meta',
+     'Was die Seite kann', 'Das aktuelle Meta',
+     'Alle Decks nach Anteil und Win Rate\nOnline und Präsenzturniere getrennt\n' +
+     'Jede Quote mit ihrem Nenner\n20 Matchups je Deck, aufklappbar'],
+    ['../images/posts/de/meta-performance.png', 'Telefon · Meta-Performance',
+     'Was die Seite kann', 'Wer wirklich gewinnt',
+     'Win Rate neben dem Anteil\nKonversion in die Top 8\n' +
+     'Gegen den Feldschnitt gerechnet\nAb 20 Antritten, sonst kein Wert'],
+    ['../images/posts/de/meta-call.png', 'Telefon · Meta Call',
+     'Was die Seite kann', 'Der Meta Call',
+     'Welches Feld dich am Turniertag erwartet\nAus Anmeldungen und Vorwoche\n' +
+     'Je Deck ein prognostizierter Anteil\nMit dem Vorbehalt, was unbekannt ist'],
+    ['../images/posts/de/champions.png', 'Telefon · Champions',
+     'Pokémon Champions', 'Die Champions-Datenbank',
+     'Replica-Codes zum Antippen\nTeams aus echten Turnieren\n' +
+     'Nutzung je Pokémon\nPokédex mit Werten und Fähigkeiten'],
+    ['../images/posts/de/kartendatenbank.png', 'Telefon · Kartendatenbank',
+     'Was die Seite kann', 'Die Kartendatenbank',
+     'Jede Karte des Formats\nPreise von Cardmarket\n' +
+     'Deutsche und japanische Drucke\nFilter nach Set, Seltenheit, Typ'],
+    ['../images/tutorials/de/startseite/1-meta.png', 'Schreibtisch · Startseite Meta',
+     'Was die Seite kann', 'Die Startseite', ''],
+    ['../images/tutorials/de/startseite/2-heatmap.png', 'Schreibtisch · Heatmap',
+     'Was die Seite kann', 'Die Matchup-Heatmap',
+     'Jedes Deck gegen jedes\nWin Rate und Partienzahl je Zelle\n' +
+     'Geglättet, damit drei Partien keine 100 % ergeben'],
+    ['../images/tutorials/de/champions/1-teams.png', 'Schreibtisch · Champions Teams',
+     'Pokémon Champions', 'Die Teams', ''],
+    ['../images/tutorials/de/champions/2-nutzung.png', 'Schreibtisch · Champions Nutzung',
+     'Pokémon Champions', 'Die Nutzung', ''],
+    ['../images/tutorials/de/champions/3-nachschlagen.png', 'Schreibtisch · Nachschlagen',
+     'Pokémon Champions', 'Nachschlagen', ''],
+    ['../images/tutorials/de/team-builder/1-auswahl.png', 'Schreibtisch · Team-Builder',
+     'Pokémon Champions', 'Der Team-Builder', ''],
+    ['../images/tutorials/de/team-builder/2-gesetzt.png', 'Schreibtisch · Team gesetzt',
+     'Pokémon Champions', 'Team gesetzt', ''],
+    ['../images/tutorials/de/team-rechner/1-matrix.png', 'Schreibtisch · Team-Rechner',
+     'Pokémon Champions', 'Der Team-Rechner', '']
 ];
 
 function bild(pfad) {
@@ -476,7 +615,18 @@ function malListe(ctx, spec) {
     if (!zeilen.length) return;
 
     var x = 26, breite = MP.W - 52, oben = 560;
-    var kopfH = 62, zeilenH = Math.min(78, Math.floor((MP.H - 180 - oben - kopfH) / zeilen.length));
+    var kopfH = 62;
+    /* KURZE LISTEN FÜLLEN IHRE FLÄCHE.
+     *
+     * Die Zeilenhöhe war fest auf höchstens 78 gedeckelt. Bei der
+     * Pocket-Tier-Liste (vier Zeilen, weil an der Stufengrenze
+     * geschnitten wird) stand die Tafel damit oben und ließ 236 px
+     * leer — genau die "halbleere Kachel", die der Betreiber am
+     * 02.09.2026 ausdrücklich beanstandet hat. Jetzt wächst die Zeile,
+     * bis die Fläche voll ist, und wird bei 104 gedeckelt, damit vier
+     * Zeilen nicht wie Plakatschrift wirken. */
+    var platzListe = MP.H - 180 - oben - kopfH;
+    var zeilenH = Math.min(136, Math.floor(platzListe / zeilen.length));
     var hoehe = kopfH + zeilen.length * zeilenH;
 
     ctx.save();
@@ -488,9 +638,13 @@ function malListe(ctx, spec) {
     ctx.fillStyle = F.creme;
     ctx.font = fMono(24, 600);
     ctx.textBaseline = 'middle';
-    ctx.fillText('Deck', x + 28, oben + kopfH / 2);
+    /* NICHT ÜBERALL "Deck".
+     * Über Karten, Pokémon oder Gegnern ist das schlicht falsch — und
+     * es fällt erst beim Hinsehen auf, nicht im Test. */
+    ctx.fillText(clip(ctx, spec.listeKopfLinks || 'Deck', 300),
+                 x + 28, oben + kopfH / 2);
     ctx.textAlign = 'right';
-    ctx.fillText(clip(ctx, spec.listeKopf, 340), x + breite - 28, oben + kopfH / 2);
+    ctx.fillText(clip(ctx, spec.listeKopf, 380), x + breite - 28, oben + kopfH / 2);
     ctx.textAlign = 'left';
 
     zeilen.forEach(function (z, i) {
@@ -500,18 +654,42 @@ function malListe(ctx, spec) {
         ctx.strokeStyle = F.linie; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(x, y + zeilenH - .5); ctx.lineTo(x + breite, y + zeilenH - .5); ctx.stroke();
 
-        ctx.fillStyle = F.matt;
-        ctx.font = fMono(26, 600);
-        ctx.fillText(String(i + 1).padStart(2, '0'), x + 28, y + zeilenH / 2);
+        /* DIE ZIFFER BEHAUPTET EINE RANGFOLGE.
+         * Bei einer Tier-Liste gibt es innerhalb einer Stufe keine —
+         * "01 Chien-Pao, 02 Greninja" wäre eine Ordnung, die in der
+         * Quelle nicht existiert. Deshalb darf eine Quelle sie
+         * abbestellen (Abnahme 04.09.2026). */
+        var nameX = x + 96;
+        if (!spec.ohneRang) {
+            ctx.fillStyle = F.matt;
+            ctx.font = fMono(26, 600);
+            ctx.fillText(String(i + 1).padStart(2, '0'), x + 28, y + zeilenH / 2);
+        } else {
+            nameX = x + 28;
+        }
 
         ctx.fillStyle = F.name;
         ctx.font = fSans(34, 700);
-        ctx.fillText(clip(ctx, z[0], breite - 340), x + 96, y + zeilenH / 2);
+        ctx.fillText(clip(ctx, z[0], breite - (spec.ohneRang ? 312 : 380)),
+                     nameX, y + zeilenH / 2);
 
         ctx.fillStyle = F.wert;
         ctx.font = fMono(34, 700);
         ctx.textAlign = 'right';
-        ctx.fillText(clip(ctx, z[1], 220), x + breite - 28, y + zeilenH / 2);
+        /* WERTSPALTE: 260 px, NICHT 220.
+         *
+         * BEFUND (zweite Abnahme, 04.09.2026): bei 220 px fasst Mono
+         * 34/700 genau ZEHN Zeichen, und "52 % · 1049" hat elf. Eine
+         * vierstellige Partienzahl wurde also stumm abgeschnitten —
+         * gemessen an Mega Excadrill gegen Dragapult, 1049 Partien.
+         * Dasselbe traefe "100 von 114" bei Champions, sobald ein
+         * Pokemon dreistellig wird.
+         *
+         * Der Platz war da: der laengste Deckname aller neun Quellen
+         * ("Mega Lucario ex and Hitmonlee") misst 606 px, die
+         * Namensspalte hatte 688. Mit 260 px fuer den Wert bleiben ihr
+         * 648 — immer noch 42 px Luft. */
+        ctx.fillText(clip(ctx, z[1], 260), x + breite - 28, y + zeilenH / 2);
         ctx.textAlign = 'left';
     });
     ctx.restore();
@@ -534,6 +712,9 @@ var KOERPER = { feature: malFeature, zahl: malZahl, liste: malListe, text: malTe
 /* ── Zusammenbau ──────────────────────────────────────────────────── */
 var teile = { logo: null, blueten: [], shots: {} };
 var aktuelle = 'feature';
+var ohneRang = false;
+var zahlTitel = null;   /* der Titel, den die Quelle fuer die Zahl-Vorlage vorschlaegt */
+var listeTitel = null;
 
 function spec() {
     return {
@@ -547,8 +728,10 @@ function spec() {
         zahlNenner: document.getElementById('zahlNenner').value,
         zeilen:     document.getElementById('zeilen').value,
         listeKopf:  document.getElementById('listeKopf').value,
+        listeKopfLinks: document.getElementById('listeKopfLinks').value,
         freitext:   document.getElementById('freitext').value,
-        fuss:       document.getElementById('fuss').value
+        fuss:       document.getElementById('fuss').value,
+        ohneRang:   !!ohneRang
     };
 }
 
@@ -565,9 +748,16 @@ function zeichne() {
     male(cv.getContext('2d'), spec());
 }
 
-function dateiname(s) {
-    return ('dipidis-' + s.vorlage + '-' + (s.titel || 'post'))
-        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) + '.png';
+/* DIE REIHENFOLGE MUSS IM NAMEN STEHEN.
+ * `Alle vier als PNG` erzeugt feature, zahl, liste, text — alphabetisch
+ * sortiert die Galerie sie danach als feature, liste, text, zahl. Wer
+ * sie am Telefon in dieser Reihenfolge ins Karussell laedt, merkt den
+ * Dreher erst, wenn der Post draussen ist. */
+var REIHE = { feature: 1, zahl: 2, liste: 3, text: 4 };
+function dateiname(s, mitNummer) {
+    var kern = ('dipidis-' + s.vorlage + '-' + (s.titel || 'post'))
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 56);
+    return (mitNummer ? '0' + (REIHE[s.vorlage] || 9) + '-' : '') + kern + '.png';
 }
 function liefere(cv, name) {
     cv.toBlob(function (blob) {
@@ -579,24 +769,49 @@ function liefere(cv, name) {
     }, 'image/png');
 }
 
+/* TEILEN STATT HERUNTERLADEN.
+ *
+ * `<a download>` auf einer Blob-Adresse ist in iOS Safari
+ * unzuverlaessig; der Betreiber hat das am 28.08.2026 gemeldet ("wenn
+ * ich auf Speichern druecke, dann wird's nicht immer in der Foto
+ * Mediathek gespeichert"). js/ds-bildvorschau.js macht es auf der
+ * Hauptseite laengst so — hier fehlte es.
+ *
+ * Der Hinweis darunter ist noetig, weil Instagram Feed-Posts aus den
+ * FOTOS nimmt, nicht aus dem Teilen-Blatt. Ohne ihn sucht man dort
+ * vergeblich nach Instagram. */
+/* HEISST NICHT `teile`. Die Variable `teile` haelt auf dieser Seite die
+ * Bildteile (Logo, Blueten, Aufnahmen); js/app-archetype-card.js hat
+ * ausserdem einen CSV-Zerleger dieses Namens. Wer hier `teile` schreibt,
+ * ueberschreibt die Bildteile und die Seite zeichnet leer.
+ * tests/unit/test-post-quellen.js haelt das fest. */
+function teilen(cv, name) {
+    cv.toBlob(function (blob) {
+        var datei = new File([blob], name, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [datei] })) {
+            navigator.share({ files: [datei] }).catch(function () { });
+        } else {
+            liefere(cv, name);
+        }
+    }, 'image/png');
+}
+
 /* ── Bedienung ────────────────────────────────────────────────────── */
 document.querySelectorAll('.reiter button').forEach(function (b) {
-    b.addEventListener('click', function () {
-        aktuelle = b.dataset.vorlage;
-        document.querySelectorAll('.reiter button').forEach(function (o) {
-            o.setAttribute('aria-pressed', String(o === b));
-        });
-        ['feature', 'zahl', 'liste', 'text'].forEach(function (v) {
-            document.getElementById('g' + v[0].toUpperCase() + v.slice(1)).hidden = (v !== aktuelle);
-        });
-        zeichne();
-    });
+    b.addEventListener('click', function () { schalteVorlage(b.dataset.vorlage); });
 });
-document.getElementById('form').addEventListener('input', zeichne);
+document.getElementById('form').addEventListener('input', function () {
+    pruefeGeaendert();
+    zeichne();
+});
 
 document.getElementById('btnPng').addEventListener('click', function () {
     var s = spec();
     liefere(document.getElementById('cv'), dateiname(s));
+});
+document.getElementById('btnTeilen').addEventListener('click', function () {
+    var s = spec();
+    teilen(document.getElementById('cv'), dateiname(s));
 });
 document.getElementById('btnAlle').addEventListener('click', function () {
     ['feature', 'zahl', 'liste', 'text'].forEach(function (v, i) {
@@ -605,10 +820,353 @@ document.getElementById('btnAlle').addEventListener('click', function () {
             cv.width = MP.W; cv.height = MP.H;
             var s = spec(); s.vorlage = v;
             male(cv.getContext('2d'), s);
-            liefere(cv, dateiname(s));
+            liefere(cv, dateiname(s, true));
         }, i * 350);   /* nacheinander — Browser blocken vier Downloads auf einmal */
     });
 });
+document.getElementById('btnText').addEventListener('click', function () {
+    var t = document.getElementById('caption');
+    var knopf = this, alt = knopf.textContent;
+    function fertig() {
+        knopf.textContent = 'kopiert';
+        setTimeout(function () { knopf.textContent = alt; }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t.value).then(fertig, function () {
+            t.select(); document.execCommand('copy'); fertig();
+        });
+    } else {
+        t.select(); document.execCommand('copy'); fertig();
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+ * DER DATENQUELLEN-WÄHLER
+ * ══════════════════════════════════════════════════════════════════════
+ *
+ * Eine Quelle füllt die Felder und tritt danach zurück — sie sperrt
+ * nichts. Was sie schuldig bleibt, ist die Antwort auf zwei Fragen, die
+ * der Betreiber nach drei Wochen stellt:
+ *
+ *   "Woher kommen diese acht Zeilen?"  -> die Herkunftszeile
+ *   "Habe ich da was verstellt?"        -> die Geändert-Zeile
+ *
+ * Ohne beide ist der wahrscheinlichste Ausgang, dass er die Seite
+ * zumacht und wieder von Hand tippt, weil er seinem Getippten wenigstens
+ * traut (Abnahme 04.09.2026).
+ * ══════════════════════════════════════════════════════════════════ */
+
+var FELDER = ['kicker', 'titel', 'punkte', 'zahl', 'zahlLabel', 'zahlNenner',
+              'zeilen', 'listeKopf', 'listeKopfLinks', 'freitext', 'fuss', 'caption'];
+var geladenStand = null;   /* was die Quelle geschrieben hat */
+var vorQuelle = null;      /* was VOR der Quelle dastand — der Rückweg */
+var aktQuelle = '';
+var aktErgebnis = null;
+var imCache = {};
+
+function feldWert(id) {
+    var e = document.getElementById(id);
+    return e ? e.value : '';
+}
+function setzeFeld(id, wert) {
+    var e = document.getElementById(id);
+    if (!e || wert == null) return;
+    /* AUCH DAS FELD, IN DEM DER CURSOR STEHT, WIRD GESCHRIEBEN.
+     *
+     * Erste Fassung uebersprang es, damit ihm nichts unter den Fingern
+     * weggefressen wird. Der Preis war schlimmer (zweite Abnahme,
+     * 04.09.2026): stand der Cursor in der Fußzeile und er wechselte die
+     * Quelle, blieb der ALTE Nenner stehen — "aus 39.842 Listen ·
+     * Limitless" ueber 114 Champions-Teams. Beide Sicherungen waren
+     * blind: die Herkunftszeile nannte die neue Quelle, und die
+     * Geändert-Zeile sah keine Abweichung, weil `geladenStand` erst
+     * danach genommen wurde.
+     *
+     * Ein Feld beim Quellenwechsel zu verlieren ist ärgerlich; ein
+     * falscher Nenner auf dem Bild ist ein Fehler. */
+    e.value = wert;
+}
+function standNehmen() {
+    var o = {};
+    FELDER.forEach(function (f) { o[f] = feldWert(f); });
+    return o;
+}
+
+function textHerkunft(txt, klasse) {
+    var h = document.getElementById('herkunft');
+    h.className = 'herkunft' + (klasse ? ' ' + klasse : '');
+    h.innerHTML = txt;
+}
+
+/* WAS HAT ER GEÄNDERT — EIN SATZ, NICHT ACHT STRICHE.
+ *
+ * Der erste Entwurf gab jedem geänderten Feld einen goldenen Balken.
+ * Gold ist auf dieser Seite aber schon die Farbe für "aktiv" (Reiter,
+ * Knopf), und bei acht Zeilen wird daraus ein gestreifter Block. Ein
+ * Satz sagt dasselbe und lässt sich anklicken. */
+function pruefeGeaendert() {
+    var zeile = document.getElementById('geaendert');
+    if (!geladenStand) { zeile.hidden = true; return; }
+    var abweichend = FELDER.filter(function (f) {
+        return geladenStand[f] != null && feldWert(f) !== geladenStand[f];
+    });
+    if (!abweichend.length) { zeile.hidden = true; }
+    else {
+        zeile.hidden = false;
+        zeile.innerHTML = abweichend.length + (abweichend.length === 1
+            ? ' Feld von dir geändert · ' : ' Felder von dir geändert · ');
+        var k = document.createElement('button');
+        k.type = 'button';
+        k.textContent = 'auf die Quelle zurücksetzen';
+        k.addEventListener('click', function () {
+            FELDER.forEach(function (f) {
+                if (geladenStand[f] != null) {
+                    var e = document.getElementById(f);
+                    if (e) e.value = geladenStand[f];
+                }
+            });
+            pruefeGeaendert(); pruefeNenner(); zeichne();
+        });
+        zeile.appendChild(k);
+    }
+    pruefeNenner();
+}
+
+/* DIE HAUSREGEL, ALS HINWEIS UND NICHT ALS SPERRE.
+ *
+ * Löscht er die Zahl aus der Fußzeile, ist der Nenner weg — und auf
+ * einem Bild, das durch Instagram wandert, kann ihn niemand
+ * nachschlagen. Der Knopf bleibt trotzdem klickbar: es ist seine Seite,
+ * manchmal weiß er es besser. */
+function pruefeNenner() {
+    var w = document.getElementById('warnung');
+    if (!aktQuelle || !geladenStand) { w.hidden = true; return; }
+    if (/\d/.test(feldWert('fuss'))) { w.hidden = true; return; }
+    w.hidden = false;
+    w.innerHTML = 'In der Fußzeile steht nicht mehr, worauf die Zahlen beruhen. ';
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.className = 'tun leise';
+    k.style.cssText = 'font-size:12px;padding:4px 10px;margin-left:4px';
+    k.textContent = 'Grundlage wieder einsetzen';
+    k.addEventListener('click', function () {
+        document.getElementById('fuss').value = geladenStand.fuss;
+        pruefeGeaendert(); zeichne();
+    });
+    w.appendChild(k);
+}
+
+function markiereReiter(vorlagen) {
+    document.querySelectorAll('.reiter button').forEach(function (b) {
+        b.classList.toggle('gefuellt',
+            !!vorlagen && vorlagen.indexOf(b.dataset.vorlage) >= 0);
+    });
+}
+
+/* ERST ALLES RECHNEN, DANN SCHREIBEN.
+ *
+ * BEFUND (zweite Abnahme, 04.09.2026): `uebernimm` schrieb Zeilen,
+ * Kicker, Titel, Fuß und Bildunterschrift — und erst DANACH lief
+ * `zahlFuer`. Warf das (und seit dieser Runde wirft es bei jeder
+ * fehlenden Zahl), stand die Meldung "die Felder sind unverändert" ueber
+ * einem Formular, in dem die Haelfte schon getauscht war.
+ *
+ * `felderBauen` rechnet alles vorher zusammen; geschrieben wird nur,
+ * wenn nichts geworfen hat. */
+function felderBauen(erg, deckName) {
+    var f = {
+        zeilen: erg.zeilen,
+        listeKopf: erg.listeKopf,
+        listeKopfLinks: erg.listeKopfLinks || 'Deck',
+        kicker: erg.kicker,
+        titel: erg.titel,
+        fuss: erg.fuss,
+        caption: erg.caption
+    };
+    if (erg.zahlFuer && deckName) {
+        var z = erg.zahlFuer(deckName);
+        if (z) {
+            f.zahl = z.zahl; f.zahlLabel = z.zahlLabel; f.zahlNenner = z.zahlNenner;
+            f._zahlTitel = z.titel || null;
+        }
+    }
+    return f;
+}
+
+function uebernimm(erg, quelleName, felder) {
+    ohneRang = !!erg.ohneRang;
+    Object.keys(felder).forEach(function (k) {
+        if (k.charAt(0) !== '_') setzeFeld(k, felder[k]);
+    });
+    zahlTitel = felder._zahlTitel || null;
+    listeTitel = erg.titel;
+    geladenStand = standNehmen();
+    markiereReiter(erg.vorlagen);
+
+    var zeilen = String(erg.zeilen || '').split('\n').filter(Boolean).length;
+    textHerkunft('Aus: <b>' + quelleName + '</b> · ' + zeilen + ' Zeilen · ' +
+                 erg.fuss);
+    pruefeGeaendert();
+
+    /* EINMAL AUF DIE PASSENDE VORLAGE SPRINGEN — und es dazusagen.
+     * Springt der Reiter stumm, denkt er, er habe etwas verstellt. */
+    if (erg.vorlagen && erg.vorlagen.indexOf(aktuelle) < 0) {
+        schalteVorlage(erg.vorlagen[0]);
+    } else {
+        zeichne();
+    }
+}
+
+function deckListeFuellen(namen) {
+    var dl = document.getElementById('deckliste');
+    dl.innerHTML = '';
+    (namen || []).forEach(function (n) {
+        var o = document.createElement('option');
+        o.value = n;
+        dl.appendChild(o);
+    });
+    document.getElementById('deckFeld').hidden = !(namen && namen.length);
+}
+
+function quelleAnwenden(deckName) {
+    var erg = aktErgebnis, rez = window.DsPostQuellen.REZEPTE[aktQuelle];
+    if (!erg || !rez) return;
+    var name = deckName || (erg.decks && erg.decks[0]) || null;
+
+    /* DER UNBEKANNTE DECKNAME.
+     * Das Feld ist Freitext mit Vorschlagsliste. Ein Tippfehler ergab
+     * vorher ein leeres Bild mit erfundenem Titel ("Wogegen Gibt Es
+     * Nicht gewinnt") und einem aktiven Herunterladen-Knopf. */
+    if (erg.decks && name && erg.decks.indexOf(name) < 0) {
+        textHerkunft('„' + name + '" steht nicht in dieser Quelle. Tipp einen ' +
+            'Namen aus der Vorschlagsliste — die Felder sind unverändert.',
+            'fehler');
+        return;
+    }
+
+    try {
+        var quelle = erg.proDeck ? erg.proDeck(name) : erg;
+        var felder = felderBauen(quelle, erg.proDeck ? null : name);
+        uebernimm(quelle, rez.name + (name && erg.proDeck ? ' · ' + name : ''),
+                  felder);
+    } catch (e) {
+        meldeFehler(rez, e);
+    }
+}
+
+/* Eine Stelle für jeden Fehlschlag — vorher gab es zwei, und der
+ * Cache-Weg lief an beiden vorbei (zweite Abnahme, 04.09.2026): eine
+ * Ausnahme aus `proDeck` entkam als `pageerror`, während die
+ * Herkunftszeile Erfolg meldete und der Knopf aktiv blieb. */
+function meldeFehler(rez, e) {
+    knoepfe(true);
+    aktQuelle = ''; aktErgebnis = null; geladenStand = null; ohneRang = false;
+    markiereReiter(null);
+    document.getElementById('quelle').value = '';
+    document.getElementById('deckFeld').hidden = true;
+    document.getElementById('geaendert').hidden = true;
+    document.getElementById('warnung').hidden = true;
+    textHerkunft((rez ? rez.name : 'Die Quelle') + ' liefert gerade kein ' +
+        'brauchbares Bild: ' + String((e && e.message) || e) +
+        ' — die Felder sind unverändert.', 'fehler');
+}
+
+function quelleWaehlen(id) {
+    var w = document.getElementById('warnung');
+    if (!id) {
+        /* ZURÜCK HEISST WIEDERHERSTELLEN, NICHT LEEREN.
+         * Frisst ein Griff an den Wähler das Getippte unwiederbringlich,
+         * fasst er ihn nach dem ersten Mal nie wieder an. */
+        if (vorQuelle) {
+            FELDER.forEach(function (f) {
+                var e = document.getElementById(f);
+                if (e && vorQuelle[f] != null) e.value = vorQuelle[f];
+            });
+            vorQuelle = null;
+        }
+        aktQuelle = ''; aktErgebnis = null; geladenStand = null; ohneRang = false;
+        markiereReiter(null);
+        document.getElementById('deckFeld').hidden = true;
+        document.getElementById('geaendert').hidden = true;
+        w.hidden = true;
+        textHerkunft('Zahlen von der Seite holen, statt sie abzutippen. ' +
+                     'Alles bleibt überschreibbar.');
+        zeichne();
+        return;
+    }
+
+    var rez = window.DsPostQuellen.REZEPTE[id];
+    if (!rez) return;
+    if (!vorQuelle) vorQuelle = standNehmen();
+    aktQuelle = id;
+    w.hidden = true;
+
+    if (imCache[id]) {
+        aktErgebnis = imCache[id];
+        try { nachLaden(rez); } catch (e) { meldeFehler(rez, e); }
+        return;
+    }
+
+    /* Der Wähler IST die Fortschrittsanzeige. Die Größe steht nur bei
+     * den großen Dateien dabei — sonst lässt sie schnelle Ladungen
+     * langsam wirken. */
+    textHerkunft('Lädt: ' + rez.name + ' …' +
+        (rez.groesse ? ' ' + rez.groesse + ', das dauert einen Moment.' : ''),
+        'laedt');
+    knoepfe(false);
+
+    window.DsPostQuellen.lade(id).then(function (erg) {
+        imCache[id] = erg;
+        aktErgebnis = erg;
+        knoepfe(true);
+        nachLaden(rez);
+    }).catch(function (e) {   /* faengt auch, was nachLaden wirft */
+        /* BEI EINEM FEHLER BLEIBT JEDES FELD UNANGETASTET.
+         * Halb gefüllte Felder mit altem Nenner neben frischen Zahlen
+         * sind schlimmer als gar nichts. */
+        meldeFehler(rez, e);
+    });
+}
+
+function nachLaden(rez) {
+    var erg = aktErgebnis;
+    if (erg.decks && erg.decks.length) {
+        deckListeFuellen(erg.decks);
+        var feld = document.getElementById('deck');
+        if (!feld.value || erg.decks.indexOf(feld.value) < 0) {
+            feld.value = erg.decks[0];
+        }
+        quelleAnwenden(feld.value);
+    } else {
+        deckListeFuellen(null);
+        quelleAnwenden(null);
+    }
+}
+
+function knoepfe(an) {
+    ['btnPng', 'btnAlle', 'btnTeilen'].forEach(function (id) {
+        var b = document.getElementById(id);
+        if (b) b.disabled = !an;
+    });
+}
+
+function schalteVorlage(v) {
+    /* Der Titel wechselt mit der Vorlage, wenn die Quelle zwei kennt. */
+    if (aktQuelle && zahlTitel) {
+        var tf = document.getElementById('titel');
+        if (aktuelle === 'zahl' && v !== 'zahl' && listeTitel) tf.value = listeTitel;
+        else if (v === 'zahl' && aktuelle !== 'zahl') { listeTitel = tf.value; tf.value = zahlTitel; }
+        if (geladenStand) geladenStand.titel = tf.value;
+    }
+    aktuelle = v;
+    document.querySelectorAll('.reiter button').forEach(function (o) {
+        o.setAttribute('aria-pressed', String(o.dataset.vorlage === v));
+    });
+    ['feature', 'zahl', 'liste', 'text'].forEach(function (n) {
+        document.getElementById('g' + n[0].toUpperCase() + n.slice(1)).hidden = (n !== v);
+    });
+    zeichne();
+}
 
 /* ── Start ────────────────────────────────────────────────────────── */
 (function () {
@@ -618,6 +1176,53 @@ document.getElementById('btnAlle').addEventListener('click', function () {
         o.value = s[0]; o.textContent = s[1];
         sel.appendChild(o);
     });
+
+    /* Der Aufnahme-Wähler ist selbst eine Quelle. */
+    sel.addEventListener('change', function () {
+        var s = SHOTS.filter(function (x) { return x[0] === sel.value; })[0];
+        if (!s || !s[2]) return;
+        document.getElementById('kicker').value = s[2];
+        document.getElementById('titel').value = s[3];
+        if (s[4]) document.getElementById('punkte').value = s[4];
+        pruefeGeaendert();
+        zeichne();
+    });
+
+    /* Der Quellen-Wähler, nach Themen gruppiert. */
+    var q = document.getElementById('quelle');
+    var leer = document.createElement('option');
+    leer.value = ''; leer.textContent = 'Nichts — ich tippe selbst';
+    q.appendChild(leer);
+    var gruppen = {};
+    window.DsPostQuellen.liste().forEach(function (e) {
+        if (!gruppen[e.gruppe]) {
+            gruppen[e.gruppe] = document.createElement('optgroup');
+            gruppen[e.gruppe].label = e.gruppe;
+            q.appendChild(gruppen[e.gruppe]);
+        }
+        var o = document.createElement('option');
+        o.value = e.id;
+        o.textContent = e.name + (e.groesse ? ' (' + e.groesse + ')' : '');
+        gruppen[e.gruppe].appendChild(o);
+    });
+    q.addEventListener('change', function () { quelleWaehlen(q.value); });
+    document.getElementById('deck').addEventListener('change', function () {
+        if (aktQuelle) quelleAnwenden(this.value);
+    });
+    /* Der Teilen-Knopf erscheint nur, wenn das Geraet Dateien teilen
+     * kann — am Schreibtisch bleibt er weg. */
+    if (navigator.canShare) {
+        try {
+            var probe = new File([new Blob([''])], 'p.png', { type: 'image/png' });
+            if (navigator.canShare({ files: [probe] })) {
+                document.getElementById('btnTeilen').hidden = false;
+                document.getElementById('btnTeilen').title =
+                    'In Fotos sichern, dann in Instagram posten — ' +
+                    'Instagram nimmt Feed-Posts aus den Fotos, nicht aus dem Teilen-Blatt.';
+            }
+        } catch (e) { /* kein File-Konstruktor: dann eben herunterladen */ }
+    }
+
     Promise.all([
         marke('logo'),
         Promise.all(BLUETEN.map(function (b) { return marke(b[0]); })),

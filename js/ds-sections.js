@@ -97,9 +97,32 @@
     function gemerkt() {
         try {
             var v = JSON.parse(localStorage.getItem(STORE));
-            if (Array.isArray(v)) return v;
+            if (Array.isArray(v)) return nurBekannte(v);
         } catch (e) { /* kein Speicher, kein Problem */ }
         return null;
+    }
+
+    /* Gespeicherte Abschnitte, die es nicht mehr gibt, fliegen raus.
+     *
+     * BEFUND (04.09.2026, live auf der Startseite): dort stand
+     * "7 von 6 Abschnitten offen". Der Abschnitt "Auf- und Absteiger"
+     * ist am 01.09.2026 aus SECTIONS verschwunden, seine ID stand aber
+     * weiter im localStorage jedes Besuchers, der die Seite vorher
+     * benutzt hatte. Gezaehlt wurde die gespeicherte Liste, verglichen
+     * wurde gegen die aktuelle — daher mehr offene Abschnitte als
+     * ueberhaupt vorhanden.
+     *
+     * Zwei Folgen, beide sichtbar: die unsinnige Zahl, und ein
+     * "Ansicht zuruecksetzen", das nie wieder verschwindet, weil
+     * `gleich` in zeichneReset() mit einer Geister-ID nie zutreffen
+     * kann.
+     *
+     * Der Filter gehoert ans LESEN, nicht ans Schreiben: die alten
+     * Eintraege liegen schon in fremden Browsern, und die erreicht man
+     * nur beim naechsten Laden. */
+    function nurBekannte(ids) {
+        var bekannt = SECTIONS.map(function (s) { return s.id; });
+        return ids.filter(function (id) { return bekannt.indexOf(id) > -1; });
     }
 
     function merken(offen) {

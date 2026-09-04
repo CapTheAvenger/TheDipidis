@@ -85,7 +85,8 @@ const REGISTER = {
     'test-kartenart-und-drucke.js':      'Kartentypen und Drucke: Struktur; ein weites Band auf Ultra-Ball-Drucke',
     'test-metacall-boden-verhalten.js': 'rechnet Boden- und Klebrigkeits-Aggregation gegen data/, behauptet aber KEINE Wochenwerte: geprueft werden Eigenschaften der Rechnung (bei einem Turnier ist jede Klebrigkeit null), Richtungen (die Huerde kappt keine Spitze) und Konsistenz zwischen Kommentar und Zahl. Genau diese Datei existiert, weil eine reine Quelltext-Zusage eine falsche Begruendung nicht bemerken konnte',
     'test-metacall-namensbruecke.js': 'liest data/archetype_aliases.json — eine gepflegte Namensliste, keine Wochenzahlen; sie aendert sich nur, wenn jemand ein Paar von Hand eintraegt',
-    'test-nenner-und-rundung.js':        'Rundungsvertrag; Abweichungen sind Toleranzen der Rechnung, keine Feldwerte',
+    'test-nenner-und-rundung.js':        'Rundungsvertrag; Abweichungen sind Toleranzen der Rechnung, keine Feldwerte. Seit dem 04.09.2026 ausserdem eine Probe an einem GESETZTEN Feld: aus einem bekannten N und dessen eigenen gerundeten Anteilen muss wieder N herauskommen. Die fing eine Mutation, an der alle Livedaten-Proben vorbeiliefen.',
+    'test-labs-trennzeichen.js':         'Trennzeichen und Wirkung des Labs-Gewichts. STEHT HIER FREIWILLIG: liestLiveDaten() findet die Datei nicht, weil sie den Pfad erst in eine Konstante legt und danach liest — dieselbe Luecke, die weiter unten als "ein Viertel dessen, was er zu bewachen behauptet" beschrieben ist. Ihre Zusicherungen sind Eigenschaften des Motors, keine Wochenwerte: dass die Labs-Daten viele Bewertungen bewegen und mindestens eine um einen ganzen Punkt. Die frueher hier stehende Behauptung "ein Deck kommt NEU in Tier 1" war ein Wochenwert und hat am 04.09.2026 den Deploy angehalten; an ihrer Stelle steht jetzt eine Probe an gesetzten Werten, die das Gewicht exakt nachrechnet.',
     'test-side-quest-play.js':           'Rechenwege am Nutzungsmodell, Toleranzen auf selbst gesetzten Anteilen',
     'test-side-quest-usage.js':          'Struktur der Nutzungsdatei plus weite Untergrenzen (mindestens 10 Teams)',
     'test-top100-weg.js':                'prueft, dass eine entfernte Ansicht nicht zurueckkommt',
@@ -160,7 +161,24 @@ const REGISTER = {
 // Live-Daten. Der Wachhund bewacht also ein Viertel dessen, was er zu
 // bewachen behauptet. Wird in einem eigenen Schritt geschlossen; die
 // Obergrenze ist danach neu zu setzen.
-const OBERGRENZE = 69;
+/* 04.09.2026: 69 -> 70. In test-nenner-und-rundung.js stand eine
+ * `strictEqual` gegen die Livedaten — der Nenner musste unter fuenf
+ * driftenden Zeilen auf die Einheit genau derselbe bleiben. Der
+ * Wochenlauf verschob ihn um 1 auf 39.842, der Test wurde rot, und der
+ * Deploy hing: genau die Bauart, die dieser Wachhund verhindern soll,
+ * nur dass er sie nicht sieht — er zaehlt Ungleichungen, und eine
+ * Gleichheit ist strenger als jede Ungleichung.
+ *
+ * An ihre Stelle tritt ein Band von 0,02 % mit Begruendung. Gemessen
+ * wurden 0,005 %; ein Rueckfall auf 0 oder ein verdoppelter Nenner sind
+ * 100 %. Die Zahl haelt also nicht nur vier Wochen, sondern solange der
+ * Nenner die Mitte eines Ueberlappungsbereichs ist — die Toleranz folgt
+ * aus der Rechnung, nicht aus dem Feld dieser Woche.
+ *
+ * Netto ist das eine Verbesserung: eine harte Gleichheit weniger, eine
+ * begruendete Weite mehr. Die Obergrenze steigt trotzdem um eins, weil
+ * der Zaehler nur die eine Richtung kennt. */
+const OBERGRENZE = 70;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

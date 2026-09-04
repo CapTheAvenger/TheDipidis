@@ -264,3 +264,122 @@ beschreibe2('Die Anleitung deckt Champions, Team-Builder, Rechner und Startseite
         }
     });
 });
+
+/* ══════════════════════════════════════════════════════════════════════
+ * DIE KURZFASSUNG AM ANFANG (04.09.2026)
+ * ══════════════════════════════════════════════════════════════════════
+ *
+ * Aufgabe #121 nannte zwei Teile: die Langfassung bebildern (erledigt in
+ * PR #652) und "eine Kurzfassung als Einstieg". Der zweite Teil hing
+ * bisher an Aufgabe #120, weil er "dieselben Kacheln wie Instagram"
+ * verwenden sollte. Auf Nachfrage am 04.09.2026: "was halt sinnvoll ist
+ * um den Leuten die Seite gut zu erklären und schmackhaft zu machen" —
+ * die Bindung an die Kacheln war damit gelöst.
+ *
+ * Gebaut wurde eine Textkurzfassung ganz oben, aus drei Gründen, die
+ * hier als Zusicherungen stehen, damit sie nicht stillschweigend
+ * rückgängig gemacht werden:
+ *
+ *   1. Sie steht VOR der Langfassung. Ein Einstieg hinter 3.200 Zeilen
+ *      ist kein Einstieg.
+ *   2. Sie trägt KEIN Bild. Bilder machen einen Einstieg länger, nicht
+ *      kürzer; die Aufnahmen stehen unten bei ihren Kapiteln.
+ *   3. Sie trägt KEINE Datenzahl. Eine Zahl in einem festen
+ *      HTML-Fragment veraltet still — und diese Seite hat sich gerade
+ *      erst von Zahlen ohne Nenner freigearbeitet.
+ */
+
+const behaupte3 = require('node:assert');
+const fs3 = require('node:fs');
+const pfad3 = require('node:path');
+
+const WURZEL3 = pfad3.join(__dirname, '..', '..');
+const DE3 = fs3.readFileSync(pfad3.join(WURZEL3, 'tutorial', 'tutorial.de.html'), 'utf8');
+const EN3 = fs3.readFileSync(pfad3.join(WURZEL3, 'tutorial', 'tutorial.en.html'), 'utf8');
+
+/* Der Block: vom Trenner bis zum Ende seines <article>. */
+function kurzfassung(quelle, trenner) {
+    const i = quelle.indexOf(`<div class="feature-section-divider">${trenner}</div>`);
+    if (i < 0) return null;
+    const ende = quelle.indexOf('</article>', i);
+    return ende < 0 ? null : quelle.slice(i, ende);
+}
+
+const FASSUNGEN = [
+    ['deutsch',  DE3, 'Worum es hier geht', 'Erste Schritte',
+     /Kostenlos, ohne Anmeldung/],
+    ['englisch', EN3, 'What this is',       'Get Started',
+     /Free, no sign-up needed/],
+];
+
+beschreibe2('Die Anleitung hat eine Kurzfassung als Einstieg', () => {
+
+    for (const [name, quelle, trenner, langTrenner, kern] of FASSUNGEN) {
+
+        es2(`${name}: die Kurzfassung steht da`, () => {
+            const block = kurzfassung(quelle, trenner);
+            behaupte2.ok(block,
+                `der Abschnitt "${trenner}" fehlt — die Anleitung beginnt `
+                + 'wieder mit der Langfassung');
+            behaupte2.match(block, kern,
+                'die Kurzfassung sagt nicht mehr, dass die Seite kostenlos '
+                + 'und ohne Anmeldung nutzbar ist — das ist der Satz, der '
+                + 'jemanden zum Weiterlesen bringt');
+        });
+
+        es2(`${name}: sie steht VOR der Langfassung`, () => {
+            const kurz = quelle.indexOf(`>${trenner}</div>`);
+            const lang = quelle.indexOf(`>${langTrenner}</div>`);
+            behaupte2.ok(kurz > 0 && lang > 0, 'einer der beiden Trenner fehlt');
+            behaupte2.ok(kurz < lang,
+                `die Kurzfassung steht hinter "${langTrenner}". Ein Einstieg `
+                + 'hinter dreitausend Zeilen ist kein Einstieg');
+        });
+
+        es2(`${name}: sie trägt kein Bild`, () => {
+            const block = kurzfassung(quelle, trenner);
+            behaupte2.ok(!/data-tutorial-img|<img/.test(block),
+                'in der Kurzfassung steht ein Bild. Bilder machen einen '
+                + 'Einstieg länger, nicht kürzer — die Aufnahmen gehören '
+                + 'zu den Kapiteln unten');
+        });
+
+        es2(`${name}: sie trägt keine Datenzahl, die veralten kann`, () => {
+            const block = kurzfassung(quelle, trenner);
+            const text = block.replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]+>/g, ' ');
+            const zahlen = text.match(/\d[\d.,]*\s*%|\d{1,3}[.,]\d{3}\b|\b\d{4,}\b/g) || [];
+            behaupte2.deepStrictEqual(zahlen, [],
+                `in der Kurzfassung stehen Zahlen: ${zahlen.join(', ')}. Ein `
+                + 'fester Wert in einem statischen Fragment veraltet still — '
+                + 'und diese Seite hat sich gerade erst von Zahlen ohne '
+                + 'Nenner freigearbeitet');
+        });
+
+        es2(`${name}: sie nennt, woher die Zahlen kommen`, () => {
+            const block = kurzfassung(quelle, trenner);
+            for (const quellName of ['Limitless', 'City League', 'Cardmarket']) {
+                behaupte2.ok(block.includes(quellName),
+                    `die Kurzfassung nennt ${quellName} nicht mehr. Wer neu `
+                    + 'hier ist, will zuerst wissen, woher die Zahlen kommen');
+            }
+        });
+    }
+
+    es2('sie kollidiert nicht mit den "ersten 60 Sekunden" weiter unten', () => {
+        /* Beide Abschnitte hießen im ersten Entwurf fast gleich. Der eine
+           sagt, worum es geht; der andere gibt drei Schritte zum
+           Mitmachen. Zwei Namen, die sich nur in einem Wort
+           unterscheiden, sind einer zu viel. */
+        // Den TRENNER prüfen, nicht den Namen irgendwo im Text: der
+        // Kommentar der Kurzfassung nennt ihn selbst, und damit wäre die
+        // Zusicherung auch dann grün, wenn der Abschnitt weg ist.
+        behaupte2.ok(DE3.includes('<div class="feature-section-divider">Die ersten 60 Sekunden</div>'),
+            'der Schnellstart-Abschnitt ist verschwunden');
+        behaupte2.ok(!DE3.includes('>In 60 Sekunden<'),
+            'die Kurzfassung heißt wieder fast wie der Schnellstart darunter');
+        behaupte2.ok(EN3.includes('<div class="feature-section-divider">First 60 seconds</div>'),
+            'the quick-start section is gone');
+        behaupte2.ok(!EN3.includes('>In 60 seconds<'),
+            'the short version is named almost like the quick start below it again');
+    });
+});

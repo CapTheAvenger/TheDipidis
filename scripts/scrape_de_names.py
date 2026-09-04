@@ -15,6 +15,35 @@ build sandbox, so this only runs in CI):
 
 Fail-soft: if a source can't be fetched/parsed, that section is left
 empty and the caller keeps the previously-committed overrides.
+
+DIE ENTSCHEIDUNGSDATEI HAT DAS LETZTE WORT
+==========================================
+BEFUND (04.09.2026, ein roter Deploy). Der Lauf um 04:09 UTC hat diese
+Datei neu geschrieben und dabei ACHT von Hand geprüfte Namen wieder auf
+die falschen Werte der Quelle gesetzt — "Schwerschwf." statt
+Schwerschweif, "Hackattack" statt Spitzer Schnabel, "Gesteinjuwel" statt
+Gesteinsjuwel. Samt der Notiz, die das festhielt.
+
+Das war kein Zufall, sondern der Aufbau: PR #651 hat die Werte in eine
+ERZEUGTE Datei geschrieben. Der nächste Lauf musste sie überschreiben.
+Danach war `main` rot (test-Job), `build` und `deploy` übersprungen, und
+die Seite hing auf dem alten Stand — sichtbar wurde es erst am nächsten
+Deploy, eine Stunde später.
+
+pokemonexperte.de führt teils abgekürzte In-Game-Beschriftungen
+("Schwerschwf.") und Namen aus der Zeit vor Schwert und Schild
+("Hackattack"). Die Quelle ist also nicht falsch benutzt, sie ist an
+diesen Stellen schlicht nicht die beste.
+
+Deshalb gilt hier jetzt dieselbe Ordnung wie in
+build_champions_pokedex.py und build_champions_resources.py:
+
+    Quelle  →  vorheriger Stand (fail-soft)  →  ENTSCHEIDUNGSDATEI
+
+data/champions_namen_entschieden.json trägt je Name den Beleg
+(PokeWiki-Infobox, Name_de UND Name_en geprüft). Wer dort etwas ändert,
+ändert es überall; wer hier etwas von Hand einträgt, verliert es beim
+nächsten Lauf.
 """
 
 import json
@@ -23,7 +52,9 @@ import re
 import urllib.request
 
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36"}
-OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "de_name_overrides.json")
+DATEN = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+OUT = os.path.join(DATEN, "de_name_overrides.json")
+ENTSCHIEDEN = os.path.join(DATEN, "champions_namen_entschieden.json")
 POKEWIKI_API = ("https://www.pokewiki.de/api.php?action=parse&format=json&prop=wikitext"
                 "&page=Liste_der_Attackennamen_in_anderen_Sprachen")
 POKEMONEXPERTE = "https://pokemonexperte.de/items/"
@@ -104,13 +135,36 @@ def main():
         items = prev.get("items", {})
         print("  items: kept previous (scrape empty)")
 
+    # Die Entscheidungsdatei zuletzt: sie schlägt die Quelle UND den
+    # vorherigen Stand. Fehlt sie oder ist sie kaputt, läuft der Rest
+    # weiter — aber laut, denn dann fehlen geprüfte Namen.
+    entschieden = {"moves": 0, "items": 0}
+    try:
+        namen = json.load(open(ENTSCHIEDEN, encoding="utf-8")).get("namen") or {}
+        for abschnitt, ziel in (("moves", moves), ("items", items)):
+            for en, eintrag in (namen.get(abschnitt) or {}).items():
+                de = (eintrag or {}).get("de")
+                if de and ziel.get(en) != de:
+                    ziel[en] = de
+                    entschieden[abschnitt] += 1
+        print(f"  entschieden angewandt: moves={entschieden['moves']}, "
+              f"items={entschieden['items']}")
+    except Exception as e:  # noqa: BLE001
+        print(f"  WARN: {ENTSCHIEDEN} nicht lesbar ({e}) — geprüfte Namen "
+              f"fehlen in dieser Ausgabe")
+
     out = {
         "_meta": {
             "description": "Authoritative DE↔EN name maps (move/item) for "
                            "build_champions_resources.py. Current in-game German names.",
             "sources": {"moves": "PokeWiki (Liste der Attackennamen in anderen Sprachen)",
-                        "items": "pokemonexperte.de/items"},
+                        "items": "pokemonexperte.de/items",
+                        "letztes_wort": "data/champions_namen_entschieden.json"},
             "counts": {"moves": len(moves), "items": len(items)},
+            # Wie viele Namen die Entscheidungsdatei diesmal korrigiert
+            # hat. Steht die Zahl auf 0, obwohl die Datei Eintraege hat,
+            # greift die Anwendung nicht mehr.
+            "aus_entscheidungsdatei": entschieden,
         },
         "moves": dict(sorted(moves.items())),
         "items": dict(sorted(items.items())),

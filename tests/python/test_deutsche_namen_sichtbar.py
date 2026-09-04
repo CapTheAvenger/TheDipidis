@@ -454,3 +454,105 @@ def test_der_ressourcen_bauer_setzt_die_entschiedenen_namen_selbst():
     block = quelle[i:j]
     assert 'e["de"] = de' in block, (
         "die Entscheidungsdatei wird gelesen, aber nicht angewandt")
+
+
+def test_der_namens_scraper_laesst_die_entscheidungsdatei_gewinnen():
+    """DER FEHLER, DEN DIESE ZUSICHERUNG FESTHAELT (04.09.2026)
+
+    Der naechtliche Lauf um 04:09 UTC hat data/de_name_overrides.json neu
+    geschrieben und dabei ACHT von Hand geprüfte Namen wieder auf die
+    falschen Werte der Quelle gesetzt: "Schwerschwf." statt Schwerschweif,
+    "Hackattack" statt Spitzer Schnabel, "Gesteinjuwel" statt
+    Gesteinsjuwel. Beim Nachrechnen waren es sogar 49 — samtliche 21
+    Mega-Steine aus PR #648 standen danach gar nicht mehr in der Datei,
+    weil pokemonexperte.de sie nicht fuehrt.
+
+    Folge: der test-Job im Deploy fiel um, `build` und `deploy` wurden
+    uebersprungen, und die Seite hing auf dem alten Stand.
+
+    Die Ursache war nicht der Scraper, sondern wo die Korrektur lag: PR
+    #651 hat die Werte in eine ERZEUGTE Datei geschrieben. Der naechste
+    Lauf musste sie ueberschreiben — es war eine Frage der Zeit, nicht
+    des Zufalls.
+
+    Dieselbe Zusicherung wie fuer den Pokedex- und den Ressourcen-Bauer
+    eine Etage tiefer: die Entscheidungsdatei hat das letzte Wort, und
+    zwar NACH der Quelle und NACH dem Rueckfall auf den vorherigen Stand.
+    """
+    pfad = os.path.join(ROOT, "scripts", "scrape_de_names.py")
+    quelle = open(pfad, encoding="utf-8").read()
+
+    # Die ZUWEISUNG pruefen, nicht das Vorkommen: der Name der Datei
+    # steht auch im Erklaertext darueber, und damit waere die
+    # Zusicherung gruen, obwohl der Pfad ins Leere zeigt.
+    assert re.search(r'ENTSCHIEDEN\s*=\s*os\.path\.join\([^)]*'
+                     r'"champions_namen_entschieden\.json"\)', quelle), (
+        "scrape_de_names.py zeigt nicht mehr auf die Entscheidungsdatei — "
+        "der naechste naechtliche Lauf ueberschreibt jede geprueft "
+        "Korrektur, und der Deploy faellt um")
+
+    # Reihenfolge: erst der Rueckfall auf den vorherigen Stand, dann die
+    # Entscheidungsdatei. Andersherum gewaenne der alte Stand.
+    #
+    # Gesucht wird die ANWENDUNG (die Zuweisung), nicht der Name der
+    # Konstante — der steht schon oben bei den Pfaden und saesse damit
+    # immer vor allem anderen.
+    i_rueckfall = quelle.find('prev.get("items"')
+    i_anwenden = quelle.find("ziel[en] = de")
+    i_schreiben = quelle.find('with open(OUT, "w"')
+    assert i_rueckfall > 0 and i_anwenden > 0 and i_schreiben > 0, (
+        f"eine der drei Stellen fehlt (Rueckfall {i_rueckfall}, "
+        f"Anwendung {i_anwenden}, Schreiben {i_schreiben})")
+    assert i_rueckfall < i_anwenden < i_schreiben, (
+        "die Entscheidungsdatei wird nicht zwischen Rueckfall und "
+        "Schreiben angewandt — steht sie davor, ueberschreibt der "
+        "fail-soft-Rueckfall auf den alten Stand sie wieder")
+
+    block = quelle[i_anwenden - 700:i_schreiben]
+    assert "ziel[en] = de" in block, (
+        "die Entscheidungsdatei wird gelesen, aber nicht angewandt")
+
+    # Und sie muss laut sein, wenn sie ausfaellt: eine still leere
+    # Anwendung sieht aus wie ein gelungener Lauf.
+    assert "WARN" in block, (
+        "faellt die Entscheidungsdatei aus, sagt das niemand — dann "
+        "fehlen geprueft Namen und der Lauf meldet Erfolg")
+
+
+def test_die_ausgabe_traegt_die_zahl_der_angewandten_entscheidungen():
+    """Eine Bilanz, die man nachrechnen kann.
+
+    Steht dort 0, obwohl die Entscheidungsdatei Eintraege hat, greift die
+    Anwendung nicht mehr — und das faellt sonst erst auf, wenn ein Name
+    auf der Seite wieder englisch ist.
+    """
+    with open(os.path.join(ROOT, "data", "de_name_overrides.json"),
+              encoding="utf-8") as f:
+        ov = json.load(f)
+    bilanz = (ov.get("_meta") or {}).get("aus_entscheidungsdatei")
+    assert isinstance(bilanz, dict), (
+        "de_name_overrides.json fuehrt keine Bilanz der angewandten "
+        "Entscheidungen mehr")
+    assert bilanz.get("items", 0) > 0, (
+        f"die Entscheidungsdatei hat diesmal keinen Item-Namen korrigiert "
+        f"({bilanz}) — entweder greift die Anwendung nicht, oder die "
+        f"Quelle ist ploetzlich in allen Faellen einig, was zu schoen waere")
+
+    # Gegenprobe an der Sache selbst, nicht an der Bilanz: die acht
+    # Namen, die der Lauf vom 04.09. verloren hatte.
+    verloren = {
+        "Focus Band": "Fokusband",
+        "Lagging Tail": "Schwerschweif",
+        "Rock Gem": "Gesteinsjuwel",
+        "Sharp Beak": "Spitzer Schnabel",
+        "Shell Bell": "Muschelglocke",
+        "Wise Glasses": "Schlaubrille",
+        "Ghost Gem": "Geisterjuwel",
+        "Grass Gem": "Pflanzenjuwel",
+    }
+    items = ov.get("items") or {}
+    falsch = {en: items.get(en) for en, de in verloren.items() if items.get(en) != de}
+    assert not falsch, (
+        f"diese Namen stehen wieder auf dem Wert der Quelle: {falsch}. "
+        f"pokemonexperte.de fuehrt teils abgekuerzte In-Game-Beschriftungen "
+        f"und Namen aus der Zeit vor Schwert und Schild")

@@ -62,7 +62,26 @@ jobs:
 
       - name: Install Python test dependencies
         run: |
+          # pytest, beautifulsoup4, requests, lxml: das Grundgeruest.
+          #
+          # zxing-cpp, segno, Pillow kamen am 04.09.2026 dazu. Sie tragen
+          # die Gegenprobe hinter den Pokemon-Pocket-Scan-Codes: einen
+          # Code auslesen, neu erzeugen, WIEDER auslesen und beide
+          # Inhalte vergleichen. Ohne sie ueberspringt pytest genau diese
+          # Pruefung still (tests/python/test_pocket_tierlist.py,
+          # _qr_noetig) — der Lauf waere gruen und niemand haette
+          # geprueft, ob ein Code beim Rendern zu etwas anderem wird.
+          # Der Nutzer scannt dann ins Leere, und der Scan-Code ist der
+          # ganze Zweck des Reiters.
+          #
+          # test_der_testschritt_installiert_die_qr_bibliotheken haelt
+          # diese Zeile fest. Wer hier kuerzt, faellt dort um.
+          #
+          # Kein numpy: zxing-cpp nimmt ein PIL-Bild unmittelbar
+          # entgegen. Der Umweg ueber np.array() hat am 04.09.2026 den
+          # Deploy angehalten und nichts gebracht.
           pip install pytest beautifulsoup4 requests lxml
+          pip install zxing-cpp segno Pillow
 
       - name: Run Python unit tests
         run: |

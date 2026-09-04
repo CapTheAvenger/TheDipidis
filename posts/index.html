@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<!-- Wie index.html: ein leeres Datenschema statt einer Datei, damit der
+     Browser nicht auf gut Glück /favicon.ico anfragt und 404 bekommt. -->
+<link rel="icon" href="data:,">
+<title>Post-Vorlagen · The Dipidis</title>
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  POST-VORLAGEN — 1080 × 1350 für Instagram (@thedipidis)
+  ══════════════════════════════════════════════════════════════════════
+
+  ANLASS (04.09.2026). Betreiber: "ich baue den Kanal erst jetzt auf
+  sobald alles steht. @thedipidis — und ich werde da immer posten wollen
+  worauf ich gerade Lust habe und was gerade natürlich relevant ist.
+  Erstelle mal ein paar Vorlagen, das Grund Design steht ja schon."
+
+  Aufgabe #120 nennt das Format: "Pro Feature ein Karussell im Format
+  4:5 (1080x1350): Screenshot plus Stichpunkte, einheitliches Layout,
+  deutsch. Als PNG-Dateien zum Posten und Weiterschicken in WhatsApp."
+
+  WARUM EIGENE SEITE UND NICHT js/ds-share.js
+  -------------------------------------------
+  ds-share.js malt Bilder AUS DATEN, die gerade auf dem Bildschirm
+  stehen — Meta Call, Staples, Archetyp-Karte. Diese Seite malt Bilder
+  aus TEXT, den der Betreiber eintippt, und sie muss ohne den Rest der
+  Anwendung laufen (kein Login, keine Datenladung, kein i18n). Das ist
+  ein anderer Zweck, kein sechster Körper im Baukasten.
+  docs/geparkte-features.md sagt zum Post-Baukasten ausdrücklich: erst
+  bei zwei neuen Körpern lohnt der Umbau. Hier ist es einer, und er
+  gehört nicht einmal in dieselbe Datei.
+
+  WAS ÜBERNOMMEN IST, DAMIT ES NICHT ZWEI GESTALTUNGEN WERDEN
+  -----------------------------------------------------------
+  Grund, Blütenlage B1, Logo im screen-Modus, Kopfzeile, Fuß und die
+  Farbtafel stammen eins zu eins aus js/ds-share.js (MC_FARBEN,
+  MC_BLUETEN, malGrund, malPostKopf, malMetaCallFuss). Die Zahlen stehen
+  hier noch einmal, weil diese Seite ohne die Anwendung lädt —
+  tests/unit/test-post-vorlagen.js hält beide Fassungen gegeneinander
+  und wird rot, sobald eine der beiden wandert.
+
+  DIE HAUSREGEL GILT AUCH HIER: JEDE QUOTE TRÄGT IHREN NENNER.
+  Die Vorlage "Zahl" hat deshalb ein Pflichtfeld für die Grundlage
+  ("aus 2.908 Listen"). Ein Prozentwert ohne Nenner ist auf einem Bild,
+  das durch Instagram wandert, noch weniger nachprüfbar als auf der
+  Seite.
+-->
+<style>
+:root{
+  --grund:#150c1b; --flaeche:#20142a; --flaeche-2:#2b1b38;
+  --linie:#3d2a4c; --linie-stark:#57406a;
+  --creme:#F7EFE4; --matt:#A38FA8; --holz:#E3B276; --blau:#2F7FBF;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--grund);color:var(--creme);font-family:var(--sans);
+     font-size:14px;line-height:1.5}
+header{padding:22px 24px 18px;border-bottom:1px solid var(--linie)}
+h1{margin:0 0 6px;font-size:22px;font-weight:800;letter-spacing:-.01em}
+header p{margin:0;color:var(--matt);max-width:70ch}
+header code{font-family:var(--mono);font-size:12px;color:var(--holz)}
+main{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:24px;
+     align-items:start;padding:24px}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+
+.feld{display:block;margin:0 0 14px}
+.feld > span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+             text-transform:uppercase;color:var(--matt);margin-bottom:5px}
+input[type=text],textarea,select{width:100%;background:var(--flaeche);color:var(--creme);
+  border:1px solid var(--linie-stark);border-radius:7px;padding:9px 11px;
+  font-family:var(--sans);font-size:14px}
+textarea{resize:vertical;min-height:92px;line-height:1.45}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{
+  outline:2px solid var(--holz);outline-offset:2px}
+.hilf{font-size:12px;color:var(--matt);margin:-9px 0 14px}
+
+.reiter{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+.reiter button{flex:1 1 auto;background:var(--flaeche);color:var(--matt);
+  border:1px solid var(--linie-stark);border-radius:7px;padding:9px 12px;
+  font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer}
+.reiter button[aria-pressed=true]{background:var(--holz);color:#20142a;border-color:var(--holz)}
+
+button.tun{background:var(--holz);color:#20142a;border:none;border-radius:7px;
+  padding:11px 18px;font-family:var(--sans);font-size:14px;font-weight:800;cursor:pointer}
+button.tun.leise{background:transparent;color:var(--creme);border:1px solid var(--linie-stark)}
+button.tun.leise:hover{background:var(--flaeche-2)}
+.knopfreihe{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+
+.buehne{position:sticky;top:24px}
+canvas{width:100%;max-width:540px;height:auto;display:block;border-radius:10px;
+       border:1px solid var(--linie-stark);background:#150c1b}
+.mass{font-family:var(--mono);font-size:11px;color:var(--matt);margin:8px 0 0}
+fieldset{border:1px solid var(--linie);border-radius:8px;padding:12px;margin:0 0 16px}
+legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+       color:var(--holz);padding:0 6px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Post-Vorlagen</h1>
+  <p>Vier Vorlagen im Format 1080 × 1350 für <code>@thedipidis</code>. Grund, Blüten,
+  Logo, Kopf und Fuß sind dieselben wie bei den Bildern, die die Seite selbst
+  erzeugt — wer über Instagram kommt, erkennt die Seite wieder. Text eintippen,
+  Bild herunterladen.</p>
+</header>
+
+<main>
+  <form id="form" onsubmit="return false">
+    <div class="reiter" role="group" aria-label="Vorlage wählen">
+      <button type="button" data-vorlage="feature" aria-pressed="true">Feature</button>
+      <button type="button" data-vorlage="zahl"    aria-pressed="false">Zahl</button>
+      <button type="button" data-vorlage="liste"   aria-pressed="false">Liste</button>
+      <button type="button" data-vorlage="text"    aria-pressed="false">Ansage</button>
+    </div>
+
+    <label class="feld"><span>Kicker (klein, oben)</span>
+      <input type="text" id="kicker" value="TEF-PBL · Was die Seite kann"></label>
+    <label class="feld"><span>Titel</span>
+      <input type="text" id="titel" value="Die Tier-Liste"></label>
+
+    <fieldset id="gFeature">
+      <legend>Feature</legend>
+      <label class="feld"><span>Screenshot</span>
+        <select id="shot"></select></label>
+      <p class="hilf">Die Aufnahmen aus der Anleitung — deutsche Oberfläche, 2560 × 1440.</p>
+      <label class="feld"><span>Stichpunkte (eine Zeile je Punkt, höchstens vier)</span>
+        <textarea id="punkte">Alle Decks nach Anteil und Win Rate
+Online und Präsenzturniere getrennt
+Jede Quote mit ihrem Nenner
+20 Matchups je Deck, aufklappbar</textarea></label>
+    </fieldset>
+
+    <fieldset id="gZahl" hidden>
+      <legend>Zahl</legend>
+      <label class="feld"><span>Die Zahl</span>
+        <input type="text" id="zahl" value="7,4 %"></label>
+      <label class="feld"><span>Wofür sie steht</span>
+        <input type="text" id="zahlLabel" value="Anteil von Dragapult"></label>
+      <label class="feld"><span>Grundlage — Pflicht</span>
+        <input type="text" id="zahlNenner" value="aus 2.908 Listen im Meta online"></label>
+      <p class="hilf">Ohne Nenner keine Quote. Auf einem Bild, das durch Instagram
+      wandert, kann niemand nachschlagen, worauf sich der Prozentwert bezieht.</p>
+    </fieldset>
+
+    <fieldset id="gListe" hidden>
+      <legend>Liste</legend>
+      <label class="feld"><span>Zeilen — <code style="font-family:var(--mono)">Name | Wert</code>, höchstens acht</span>
+        <textarea id="zeilen">Dragapult | 7,4 %
+Gholdengo | 6,8 %
+Mega Gardevoir | 5,9 %
+Raging Bolt | 5,1 %
+Mega Lucario | 4,7 %
+Grimmsnarl | 4,2 %</textarea></label>
+      <label class="feld"><span>Spaltenkopf rechts</span>
+        <input type="text" id="listeKopf" value="Share online"></label>
+    </fieldset>
+
+    <fieldset id="gText" hidden>
+      <legend>Ansage</legend>
+      <label class="feld"><span>Text</span>
+        <textarea id="freitext" rows="6">Ab heute steht in der Matchup-Tabelle neben jeder Online-Win-Rate auch die von den Präsenzturnieren — dieselbe Rechnung, dieselbe Glättung, nur andere Partien.
+
+Und daneben die Zahl der Partien, damit man sieht, worauf sie steht.</textarea></label>
+    </fieldset>
+
+    <label class="feld"><span>Fußzeile links</span>
+      <input type="text" id="fuss" value="Stand 04.09.2026 · Quelle: Limitless"></label>
+
+    <div class="knopfreihe">
+      <button type="button" class="tun" id="btnPng">PNG herunterladen</button>
+      <button type="button" class="tun leise" id="btnAlle">Alle vier als PNG</button>
+    </div>
+  </form>
+
+  <div class="buehne">
+    <canvas id="cv" width="1080" height="1350" aria-label="Vorschau des Posts"></canvas>
+    <p class="mass" id="mass">1080 × 1350 · 4:5</p>
+  </div>
+</main>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+ * Die Marke. Eins zu eins aus js/ds-share.js — siehe Kommentar oben.
+ * ══════════════════════════════════════════════════════════════════ */
+var MP = { W: 1080, H: 1350 };
+var F = {
+    creme:  '#F7EFE4',
+    matt:   '#A38FA8',
+    holz:   '#E3B276',
+    kopf:   '#1A2640',
+    zeileA: '#FFFFFF',
+    zeileB: '#F7F8FB',
+    name:   '#1A2640',
+    wert:   '#2F7FBF',
+    linie:  'rgba(26,38,64,.10)'
+};
+/* Blütenlage B1 — die vom Betreiber freigegebene.
+   [Datei, x, y, Breite, Drehung in Grad, Deckung] */
+var BLUETEN = [
+    ['b0', 812, -46, 234, -12, 0.95],
+    ['b3', 700,  96, 168,  22, 0.88],
+    ['b5', 968, 128, 132, -28, 0.90],
+    ['p1', 636,  16,  86,  34, 0.70],
+    ['p3', 560, 176,  62, -18, 0.55],
+    ['p0', 452,  60,  54,  12, 0.40],
+    ['p4', 386, 214,  44, -34, 0.30]
+];
+var SANS = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+var MONO = 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace';
+function fSans(s, w) { return (w || 400) + ' ' + s + 'px ' + SANS; }
+function fMono(s, w) { return (w || 400) + ' ' + s + 'px ' + MONO; }
+
+/* Die Aufnahmen, die in deutscher Oberfläche vorliegen. Englische
+   Screenshots kämen auf einem deutschen Post falsch. */
+/* TELEFONAUFNAHMEN ZUERST — sie sind lesbar, die anderen nicht.
+   Gemessen am 04.09.2026 an der ersten Fassung dieser Vorlage: eine
+   Schreibtischaufnahme (2560 px breit) sitzt im Post 968 px breit, ihr
+   Text steht damit auf gut ein Drittel geschrumpft. Erkennbar war die
+   Form der Ansicht, nicht ihr Inhalt. Die Hochkantaufnahmen aus
+   prerender/screenshot-posts.js sind 440 px breit aufgenommen und
+   stehen im Post fast in Originalgröße.
+   Die Schreibtischaufnahmen bleiben in der Liste — für Ansichten, von
+   denen es (noch) keine Telefonfassung gibt. */
+var SHOTS = [
+    ['../images/posts/de/meta-uebersicht.png',              'Telefon · Aktuelles Meta'],
+    ['../images/posts/de/meta-performance.png',             'Telefon · Meta-Performance'],
+    ['../images/posts/de/meta-call.png',                    'Telefon · Meta Call'],
+    ['../images/posts/de/champions.png',                    'Telefon · Champions'],
+    ['../images/posts/de/kartendatenbank.png',              'Telefon · Kartendatenbank'],
+    ['../images/tutorials/de/startseite/1-meta.png',        'Schreibtisch · Startseite Meta'],
+    ['../images/tutorials/de/startseite/2-heatmap.png',     'Schreibtisch · Heatmap'],
+    ['../images/tutorials/de/champions/1-teams.png',        'Schreibtisch · Champions Teams'],
+    ['../images/tutorials/de/champions/2-nutzung.png',      'Schreibtisch · Champions Nutzung'],
+    ['../images/tutorials/de/champions/3-nachschlagen.png', 'Schreibtisch · Nachschlagen'],
+    ['../images/tutorials/de/team-builder/1-auswahl.png',   'Schreibtisch · Team-Builder'],
+    ['../images/tutorials/de/team-builder/2-gesetzt.png',   'Schreibtisch · Team gesetzt'],
+    ['../images/tutorials/de/team-rechner/1-matrix.png',    'Schreibtisch · Team-Rechner']
+];
+
+function bild(pfad) {
+    return new Promise(function (ok) {
+        var i = new Image();
+        i.onload = function () { ok(i); };
+        i.onerror = function () { ok(null); };   /* fällt ein Bild aus, bleibt sein Platz leer */
+        i.src = pfad;
+    });
+}
+function marke(name) { return bild('../images/marke/' + name + '.webp'); }
+
+function clip(ctx, text, maxW) {
+    text = String(text == null ? '' : text);
+    if (ctx.measureText(text).width <= maxW) return text;
+    while (text.length && ctx.measureText(text + '…').width > maxW) text = text.slice(0, -1);
+    return text + '…';
+}
+/* Umbruch auf Wortgrenzen. Gibt die Zeilen zurück, damit der Aufrufer
+   die Höhe kennt, bevor er malt. */
+function umbruch(ctx, text, maxW) {
+    var zeilen = [];
+    String(text || '').split('\n').forEach(function (absatz) {
+        if (!absatz.trim()) { zeilen.push(''); return; }
+        var zeile = '';
+        absatz.split(/\s+/).forEach(function (wort) {
+            var probe = zeile ? zeile + ' ' + wort : wort;
+            if (ctx.measureText(probe).width > maxW && zeile) { zeilen.push(zeile); zeile = wort; }
+            else zeile = probe;
+        });
+        if (zeile) zeilen.push(zeile);
+    });
+    return zeilen;
+}
+
+function malGrund(ctx) {
+    var lin = ctx.createLinearGradient(MP.W * 0.18, 0, MP.W * 0.82, MP.H);
+    lin.addColorStop(0,    '#241530');
+    lin.addColorStop(0.58, '#160C1B');
+    lin.addColorStop(1,    '#100810');
+    ctx.fillStyle = lin;
+    ctx.fillRect(0, 0, MP.W, MP.H);
+    var rad = ctx.createRadialGradient(MP.W * 0.76, MP.H * 0.03, 0,
+                                       MP.W * 0.76, MP.H * 0.03, MP.W * 0.95);
+    rad.addColorStop(0, 'rgba(74,45,85,.80)');
+    rad.addColorStop(1, 'rgba(74,45,85,0)');
+    ctx.fillStyle = rad;
+    ctx.fillRect(0, 0, MP.W, MP.H);
+}
+function malBluete(ctx, img, lage) {
+    if (!img) return;
+    var w = lage[3], h = w * (img.height / img.width);
+    ctx.save();
+    ctx.globalAlpha = lage[5];
+    ctx.translate(lage[1] + w / 2, lage[2] + h / 2);
+    ctx.rotate(lage[4] * Math.PI / 180);
+    ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 8;
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+}
+/* Das Logo liegt auf schwarzem Grund; 'screen' lässt das Schwarz
+   verschwinden. Kann der Browser den Modus nicht, entsteht das Bild
+   trotzdem — nur mit dunklem Kasten. */
+function malLogo(ctx, img, x, y, w) {
+    if (!img) return;
+    var h = w * (img.height / img.width);
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.drawImage(img, x, y, w, h);
+    ctx.restore();
+}
+function malKopf(ctx, spec, logo) {
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = F.holz;
+    var gesperrt = String(spec.kicker || '').toUpperCase().split('').join(' ');
+    var kg = 24;
+    ctx.font = fMono(kg, 600);
+    while (ctx.measureText(gesperrt).width > 660 && kg > 15) { kg -= 1; ctx.font = fMono(kg, 600); }
+    ctx.fillText(clip(ctx, gesperrt, 660), 56, 322);
+
+    ctx.fillStyle = F.creme;
+    var gr = 72;
+    ctx.font = fSans(gr, 800);
+    while (ctx.measureText(String(spec.titel || '')).width > 560 && gr > 40) {
+        gr -= 3; ctx.font = fSans(gr, 800);
+    }
+    ctx.fillText(String(spec.titel || ''), 56, 322 + 14 + gr);
+    malLogo(ctx, logo, MP.W - 44 - 286, 300, 286);
+}
+function malFuss(ctx, links) {
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = F.matt;
+    ctx.font = fMono(22, 400);
+    ctx.fillText(clip(ctx, String(links || ''), 640), 56, MP.H - 50);
+    ctx.fillStyle = F.holz;
+    ctx.font = fMono(24, 600);
+    ctx.textAlign = 'right';
+    ctx.fillText('thedipidis.app', MP.W - 56, MP.H - 50);
+    ctx.textAlign = 'left';
+}
+function rundesRechteck(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y,     x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x,     y + h, r);
+    ctx.arcTo(x,     y + h, x,     y,     r);
+    ctx.arcTo(x,     y,     x + w, y,     r);
+    ctx.closePath();
+}
+
+/* ── Körper 1 · Feature: Aufnahme plus Stichpunkte ──────────────────
+ *
+ * Zwei Anordnungen, und welche gilt, entscheidet die Aufnahme selbst:
+ *
+ *   quer (16:9, Schreibtisch)  Bild über die volle Breite, Punkte darunter.
+ *   hoch (Telefon)             Bild links, Punkte rechts daneben.
+ *
+ * Ein Hochkantbild über die volle Breite wäre 1700 px hoch und passte
+ * nicht ins Feld; ein Querbild in einer schmalen Spalte wäre briefmarken-
+ * groß. Deshalb richtet sich die Anordnung nach dem Seitenverhältnis und
+ * nicht nach einer Einstellung, die jemand vergessen kann.
+ *
+ * DER FUSS IST DIE GRENZE. Die erste Fassung setzte die Punkte auf feste
+ * Abstände und schob den vierten unter die Fußzeile — gemessen am
+ * 04.09.2026 am ersten Entwurf: "20 Matchups je Deck, aufklappbar" war
+ * halb abgeschnitten. Jetzt wird der Block erst vermessen und dann
+ * gemalt; was nicht mehr passt, entfällt ganz, statt halb dazustehen.
+ */
+var FUSS_OBEN = MP.H - 110;   /* darunter beginnt die Fußzeile */
+
+function punkteBlock(ctx, text, maxW, schrift, zeilenH) {
+    var block = [];
+    String(text || '').split('\n').map(function (s) { return s.trim(); })
+        .filter(Boolean).slice(0, 5).forEach(function (p) {
+            ctx.font = fSans(schrift, 600);
+            block.push(umbruch(ctx, p, maxW));
+        });
+    return block.map(function (zeilen) {
+        return { zeilen: zeilen, hoehe: zeilen.length * zeilenH + 26 };
+    });
+}
+
+function malPunkte(ctx, punkte, x, y, schrift, zeilenH, grenze) {
+    punkte.forEach(function (p) {
+        if (y + p.hoehe - 26 > grenze) return;   /* lieber weglassen als anschneiden */
+        ctx.fillStyle = F.holz;
+        ctx.font = fSans(schrift, 800);
+        ctx.fillText('·', x, y);
+        ctx.fillStyle = F.creme;
+        ctx.font = fSans(schrift, 600);
+        p.zeilen.forEach(function (z, i) { ctx.fillText(z, x + schrift, y + i * zeilenH); });
+        y += p.hoehe;
+    });
+}
+
+function malRahmen(ctx, shot, x, y, w, h) {
+    ctx.save();
+    rundesRechteck(ctx, x, y, w, h, 16);
+    ctx.fillStyle = '#0b0f1e';
+    ctx.fill();
+    ctx.clip();
+    if (shot) ctx.drawImage(shot, x, y, w, h);
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(247,239,228,.22)';
+    ctx.lineWidth = 2;
+    rundesRechteck(ctx, x, y, w, h, 16);
+    ctx.stroke();
+}
+
+function malFeature(ctx, spec, shot) {
+    var x = 56, breite = MP.W - 112, oben = 545;
+    var hoch = shot && shot.height > shot.width;
+
+    if (hoch) {
+        /* Das Bild bekommt die Höhe, die bis zum Fuß da ist, und daraus
+           seine Breite — so bleibt das Seitenverhältnis unangetastet. */
+        var bh = FUSS_OBEN - oben - 20;
+        var bw = Math.round(bh * (shot.width / shot.height));
+        if (bw > breite * 0.5) { bw = Math.round(breite * 0.5); bh = Math.round(bw * (shot.height / shot.width)); }
+        malRahmen(ctx, shot, x, oben, bw, bh);
+
+        var spalte = x + bw + 40;
+        var maxW = MP.W - 56 - spalte;
+        var punkte = punkteBlock(ctx, spec.punkte, maxW - 28, 27, 35);
+        var gesamt = punkte.reduce(function (a, p) { return a + p.hoehe; }, 0) - 26;
+        var start = Math.max(oben + 44, oben + Math.round((bh - gesamt) / 2));
+        malPunkte(ctx, punkte, spalte, start, 27, 35, FUSS_OBEN);
+        return;
+    }
+
+    /* Quer: erst den Punkteblock vermessen, dann bekommt das Bild, was
+       übrig bleibt — höchstens seine natürlichen 16:9. */
+    var punkteQ = punkteBlock(ctx, spec.punkte, breite - 40, 30, 38);
+    var blockH = punkteQ.reduce(function (a, p) { return a + p.hoehe; }, 0);
+    var platz = FUSS_OBEN - oben - blockH - 56;
+    var bhQ = Math.min(Math.round(breite * 9 / 16), platz);
+    malRahmen(ctx, shot, x, oben, breite, bhQ);
+    malPunkte(ctx, punkteQ, x + 4, oben + bhQ + 58, 30, 38, FUSS_OBEN);
+}
+
+/* ── Körper 2 · Zahl: eine Zahl, ihr Name, ihr Nenner ─────────────── */
+function malZahl(ctx, spec) {
+    var mitte = MP.H * 0.60;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = F.creme;
+    var gr = 220;
+    ctx.font = fSans(gr, 800);
+    while (ctx.measureText(String(spec.zahl || '')).width > MP.W - 140 && gr > 90) {
+        gr -= 6; ctx.font = fSans(gr, 800);
+    }
+    ctx.fillText(String(spec.zahl || ''), MP.W / 2, mitte);
+
+    ctx.fillStyle = F.holz;
+    ctx.font = fSans(40, 700);
+    ctx.fillText(clip(ctx, spec.zahlLabel, MP.W - 140), MP.W / 2, mitte + 74);
+
+    /* Der Nenner. Hausregel: keine Quote ohne ihre Grundlage. */
+    ctx.fillStyle = F.matt;
+    ctx.font = fMono(26, 400);
+    umbruch(ctx, spec.zahlNenner, MP.W - 200).slice(0, 2).forEach(function (z, i) {
+        ctx.fillText(z, MP.W / 2, mitte + 130 + i * 36);
+    });
+    ctx.textAlign = 'left';
+}
+
+/* ── Körper 3 · Liste: Tafel im Zuschnitt der Feldtabelle ─────────── */
+function malListe(ctx, spec) {
+    var zeilen = String(spec.zeilen || '').split('\n')
+        .map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 8)
+        .map(function (s) { var t = s.split('|'); return [ (t[0]||'').trim(), (t[1]||'').trim() ]; });
+    if (!zeilen.length) return;
+
+    var x = 26, breite = MP.W - 52, oben = 560;
+    var kopfH = 62, zeilenH = Math.min(78, Math.floor((MP.H - 180 - oben - kopfH) / zeilen.length));
+    var hoehe = kopfH + zeilen.length * zeilenH;
+
+    ctx.save();
+    rundesRechteck(ctx, x, oben, breite, hoehe, 14);
+    ctx.clip();
+
+    ctx.fillStyle = F.kopf;
+    ctx.fillRect(x, oben, breite, kopfH);
+    ctx.fillStyle = F.creme;
+    ctx.font = fMono(24, 600);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Deck', x + 28, oben + kopfH / 2);
+    ctx.textAlign = 'right';
+    ctx.fillText(clip(ctx, spec.listeKopf, 340), x + breite - 28, oben + kopfH / 2);
+    ctx.textAlign = 'left';
+
+    zeilen.forEach(function (z, i) {
+        var y = oben + kopfH + i * zeilenH;
+        ctx.fillStyle = (i % 2) ? F.zeileB : F.zeileA;
+        ctx.fillRect(x, y, breite, zeilenH);
+        ctx.strokeStyle = F.linie; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, y + zeilenH - .5); ctx.lineTo(x + breite, y + zeilenH - .5); ctx.stroke();
+
+        ctx.fillStyle = F.matt;
+        ctx.font = fMono(26, 600);
+        ctx.fillText(String(i + 1).padStart(2, '0'), x + 28, y + zeilenH / 2);
+
+        ctx.fillStyle = F.name;
+        ctx.font = fSans(34, 700);
+        ctx.fillText(clip(ctx, z[0], breite - 340), x + 96, y + zeilenH / 2);
+
+        ctx.fillStyle = F.wert;
+        ctx.font = fMono(34, 700);
+        ctx.textAlign = 'right';
+        ctx.fillText(clip(ctx, z[1], 220), x + breite - 28, y + zeilenH / 2);
+        ctx.textAlign = 'left';
+    });
+    ctx.restore();
+    ctx.textBaseline = 'alphabetic';
+}
+
+/* ── Körper 4 · Ansage: nur Text ──────────────────────────────────── */
+function malText(ctx, spec) {
+    var x = 56, breite = MP.W - 112, y = 600;
+    ctx.fillStyle = F.creme;
+    ctx.font = fSans(36, 500);
+    umbruch(ctx, spec.freitext, breite).forEach(function (z) {
+        if (z) ctx.fillText(z, x, y);
+        y += z ? 50 : 26;
+    });
+}
+
+var KOERPER = { feature: malFeature, zahl: malZahl, liste: malListe, text: malText };
+
+/* ── Zusammenbau ──────────────────────────────────────────────────── */
+var teile = { logo: null, blueten: [], shots: {} };
+var aktuelle = 'feature';
+
+function spec() {
+    return {
+        vorlage:    aktuelle,
+        kicker:     document.getElementById('kicker').value,
+        titel:      document.getElementById('titel').value,
+        punkte:     document.getElementById('punkte').value,
+        shot:       document.getElementById('shot').value,
+        zahl:       document.getElementById('zahl').value,
+        zahlLabel:  document.getElementById('zahlLabel').value,
+        zahlNenner: document.getElementById('zahlNenner').value,
+        zeilen:     document.getElementById('zeilen').value,
+        listeKopf:  document.getElementById('listeKopf').value,
+        freitext:   document.getElementById('freitext').value,
+        fuss:       document.getElementById('fuss').value
+    };
+}
+
+function male(ctx, s) {
+    malGrund(ctx);
+    BLUETEN.forEach(function (lage, i) { malBluete(ctx, teile.blueten[i], lage); });
+    malKopf(ctx, s, teile.logo);
+    (KOERPER[s.vorlage] || malText)(ctx, s, teile.shots[s.shot]);
+    malFuss(ctx, s.fuss);
+}
+
+function zeichne() {
+    var cv = document.getElementById('cv');
+    male(cv.getContext('2d'), spec());
+}
+
+function dateiname(s) {
+    return ('dipidis-' + s.vorlage + '-' + (s.titel || 'post'))
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) + '.png';
+}
+function liefere(cv, name) {
+    cv.toBlob(function (blob) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    }, 'image/png');
+}
+
+/* ── Bedienung ────────────────────────────────────────────────────── */
+document.querySelectorAll('.reiter button').forEach(function (b) {
+    b.addEventListener('click', function () {
+        aktuelle = b.dataset.vorlage;
+        document.querySelectorAll('.reiter button').forEach(function (o) {
+            o.setAttribute('aria-pressed', String(o === b));
+        });
+        ['feature', 'zahl', 'liste', 'text'].forEach(function (v) {
+            document.getElementById('g' + v[0].toUpperCase() + v.slice(1)).hidden = (v !== aktuelle);
+        });
+        zeichne();
+    });
+});
+document.getElementById('form').addEventListener('input', zeichne);
+
+document.getElementById('btnPng').addEventListener('click', function () {
+    var s = spec();
+    liefere(document.getElementById('cv'), dateiname(s));
+});
+document.getElementById('btnAlle').addEventListener('click', function () {
+    ['feature', 'zahl', 'liste', 'text'].forEach(function (v, i) {
+        setTimeout(function () {
+            var cv = document.createElement('canvas');
+            cv.width = MP.W; cv.height = MP.H;
+            var s = spec(); s.vorlage = v;
+            male(cv.getContext('2d'), s);
+            liefere(cv, dateiname(s));
+        }, i * 350);   /* nacheinander — Browser blocken vier Downloads auf einmal */
+    });
+});
+
+/* ── Start ────────────────────────────────────────────────────────── */
+(function () {
+    var sel = document.getElementById('shot');
+    SHOTS.forEach(function (s) {
+        var o = document.createElement('option');
+        o.value = s[0]; o.textContent = s[1];
+        sel.appendChild(o);
+    });
+    Promise.all([
+        marke('logo'),
+        Promise.all(BLUETEN.map(function (b) { return marke(b[0]); })),
+        Promise.all(SHOTS.map(function (s) { return bild(s[0]); }))
+    ]).then(function (a) {
+        teile.logo = a[0];
+        teile.blueten = a[1];
+        SHOTS.forEach(function (s, i) { teile.shots[s[0]] = a[2][i]; });
+        zeichne();
+    });
+    zeichne();
+})();
+</script>
+</body>
+</html>

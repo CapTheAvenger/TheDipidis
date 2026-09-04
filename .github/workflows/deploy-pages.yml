@@ -160,6 +160,13 @@ jobs:
           # Fehlerzustand. Das Verzeichnis MUSS hier stehen: _site wird
           # aus einer Positivliste gebaut, nicht aus dem Repo-Inhalt.
           cp -r tutorial _site/tutorial
+          # Die Post-Vorlagen (04.09.2026). Eigene Seite unter
+          # thedipidis.app/posts/ — nicht verlinkt, aber ausgeliefert.
+          # Dieselbe Falle wie bei tutorial/ eine Zeile darueber: _site
+          # wird aus einer Positivliste gebaut. Ohne diese Zeile ist die
+          # Seite im Repo da und live 404, und das faellt niemandem auf,
+          # weil sie in keinem Menue steht.
+          cp -r posts _site/posts
           cp pokemon_sets_mapping.csv _site/ 2>/dev/null || true
           mkdir -p _site/config
           cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true

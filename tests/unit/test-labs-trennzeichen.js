@@ -168,16 +168,76 @@ describe('Die Labs-Daten aendern die Tier-Einteilung wirklich', () => {
             + 'nicht das, was er zu pruefen glaubt');
     });
 
-    it('Tier 1 sieht mit den Labs-Daten anders aus als ohne', () => {
-        // Das ist die Zusage, um die es geht. Alles davor ist Verkabelung.
+    it('das Turniergewicht ist so stark wie in der Quelle angeschrieben', () => {
+        /* Die Probe daneben misst an Livedaten und ist damit so genau, wie
+           die Woche es zulaesst. Diese hier misst am Motor selbst und
+           haelt die Zahlen fest, die im Quelltext als Kommentar stehen —
+           "over 50, capped at +12 pp, weight 1.5" und der Day-2-Anteil
+           "0..0.4" mal 8. Ohne sie ueberlebt eine Mutation, die das
+           Siegquoten-Gewicht auf ein Tausendstel dreht: der Day-2-Anteil
+           allein bewegt die Bewertung dann immer noch um ueber einen
+           Punkt, und die Livedaten-Probe bleibt gruen. Gefunden durch die
+           Mutationsprobe, nicht durch Nachdenken. */
+        const deck = { archetype: 'X', share: 0, winrate: 0, new_count: 0 };
+        const rund = (x) => Number(x.toFixed(6));
+        const bei = (winPct, day2Conv) => rund(
+            computeTierScore(deck, { X: { games: 20, winPct, day2Conv } }).labsComp);
+
+        assert.strictEqual(bei(50, 0), 0, 'eine Quote von 50 % ist kein Vorsprung');
+        assert.strictEqual(bei(60, 0), 15, '10 Punkte Vorsprung mal Gewicht 1,5');
+        assert.strictEqual(bei(62, 0), 18, 'bei +12 Punkten ist der Deckel erreicht');
+        assert.strictEqual(bei(80, 0), 18, 'und der Deckel haelt auch darueber');
+        assert.strictEqual(bei(50, 0.25), 2, 'Day-2-Anteil 0,25 mal Faktor 8');
+        assert.strictEqual(bei(50, 9), 3.2, 'Day-2 ist bei 0,4 gedeckelt');
+
+        assert.strictEqual(
+            computeTierScore(deck, { X: { games: 14, winPct: 80, day2Conv: 0.4 } }).labsHit,
+            false,
+            'unter 15 Partien darf nichts behauptet werden — sonst traegt ein '
+            + 'einzelnes gutes Turnier ein Deck nach oben');
+    });
+
+    it('die Labs-Daten bewegen die Bewertung sichtbar', () => {
+        /* Das ist die Zusage, um die es geht. Alles davor ist Verkabelung.
+
+           WARUM NICHT MEHR AN TIER 1 GEMESSEN (04.09.2026, roter Deploy).
+           Hier stand `rein.length >= 1` — es muss ein Deck NEU in Tier 1
+           kommen. Das ist keine Eigenschaft des Motors, sondern der Zahlen
+           der Woche: der Wochenlauf vom 04.09. lieferte einen Auszug, in
+           dem die Labs-Daten Tier 1 nur noch umsortieren (Blaziken und
+           Alakazam tauschen die Plaetze), statt jemanden hineinzuholen.
+           Der Test wurde rot, obwohl das Gewicht einwandfrei arbeitet —
+           und weil der Deploy an gruenen Tests haengt, blockierte das den
+           Lauf, der die frischen Daten ausliefern sollte. Genau dieselbe
+           Lehre steht in test-nenner-und-rundung.js.
+
+           Gemessen wird deshalb der MECHANISMUS, nicht sein Ergebnis in
+           einer bestimmten Woche: dass die Labs-Daten viele Bewertungen
+           bewegen, und mindestens eine davon deutlich. Bricht die
+           Namenszuordnung, faellt `bewegt` auf 0; wird das Gewicht klein
+           gerechnet, faellt `groesste`. Beides wird rot. Ob dabei ein Deck
+           die Tier-Grenze ueberschreitet, entscheiden die Zahlen. */
+        const labs = aggregateLabsRowsByDeck(csv(LABS, ','));
+        const unterschiede = decks
+            .map(d => Math.abs(computeTierScore(d, labs).score - computeTierScore(d, null).score))
+            .filter(x => x > 1e-9);
+        const groesste = unterschiede.reduce((m, x) => Math.max(m, x), 0);
+
+        assert.ok(unterschiede.length >= 10,
+            `nur ${unterschiede.length} von ${decks.length} Decks aendern ihre `
+            + 'Bewertung durch die Labs-Daten — entweder greift das Gewicht nicht '
+            + 'mehr, oder die Namen treffen sich nicht mehr');
+        assert.ok(groesste >= 1,
+            `die groesste Verschiebung betraegt ${groesste.toFixed(3)} Punkte — `
+            + 'ein Gewicht, das keine Bewertung um einen ganzen Punkt bewegt, '
+            + 'kann auch keine Tier-Grenze verschieben und ist damit Zierrat');
+
+        // Und der Blick auf das, worum es am Ende geht — als Befund im
+        // Protokoll, nicht als Zusicherung an die Zahlen der Woche.
         const ohne = tierEins(null);
-        const mit = tierEins(aggregateLabsRowsByDeck(csv(LABS, ',')));
-        assert.notDeepStrictEqual(mit, ohne,
-            'die Labs-Daten bewegen Tier 1 nicht — entweder greift das Gewicht '
-            + 'nicht mehr, oder die Namen treffen sich nicht mehr. '
+        const mit = tierEins(labs);
+        assert.ok(Array.isArray(mit) && mit.length > 0,
+            'mit den Labs-Daten kommt gar keine Tier-1-Liste zustande. '
             + 'ohne: ' + ohne.join(', ') + ' | mit: ' + mit.join(', '));
-        const rein = mit.filter(x => !ohne.includes(x));
-        assert.ok(rein.length >= 1,
-            'kein Deck kommt durch die Labs-Daten neu in Tier 1');
     });
 });

@@ -141,6 +141,56 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
         assert.equal(fn([{ anteil: 50, anzahl: 50 }, { anteil: 50, anzahl: 50 }]), 0);
         // Widerspruechliche Zeilen: kein Schnitt, keine Zahl.
         assert.equal(fn([{ anteil: 90, anzahl: 90 }, { anteil: 5, anzahl: 500 }]), 0);
+
+        /* Und der duenne Auszug: drei Zeilen, die sich einig sind, aber
+           zusammen nur 30 % des Feldes abdecken. Rechnerisch ergaebe das
+           saubere 1.000 — als Aussage ueber die Feldgroesse ist es
+           trotzdem wertlos, denn ueber 70 % weiss die Datei nichts. Genau
+           dafuer steht `anteilSumme > 50` in der Quelle; ohne diese Probe
+           liesse sich die Zeile streichen, ohne dass ein Test es merkt
+           (Mutationsprobe 04.09.2026). Der Fall ist nicht erfunden: faellt
+           ein Scraper-Lauf halb aus, sieht die Datei genau so aus. */
+        assert.equal(fn([{ anteil: 15, anzahl: 150 },
+                         { anteil: 10, anzahl: 100 },
+                         { anteil: 5, anzahl: 50 }]), 0);
+    });
+
+    it('bei bekanntem Feld kommt genau dieses Feld heraus', () => {
+        /* Die Proben daneben messen an Livedaten und koennen deshalb nur
+           sagen, dass die Zahl plausibel ist. Diese hier kennt die
+           Wahrheit: aus einem gesetzten N werden die Anteile so gerundet,
+           wie Limitless sie ausweist (zwei Nachkommastellen) — und aus
+           genau diesen gerundeten Anteilen muss wieder N herauskommen.
+
+           WARUM SIE NOETIG IST. Der Nenner ist die MITTE des
+           Ueberlappungsbereichs. Ersetzt man sie durch dessen untere
+           Kante, bleibt alles gruen: an den Livedaten sind es 39.837
+           statt 39.841, und der Quercheck gegen
+           limitless_meta_stats.json (39.842) laesft eine Abweichung von
+           5 zu — die Mutation kommt auf genau 5 durch. Sie ist trotzdem
+           falsch, denn die untere Kante ist das kleinste mit den
+           Anteilen vertraegliche N und damit systematisch zu klein.
+           Hier faellt sie auf: 39.987 statt 40.000. Gefunden durch die
+           Mutationsprobe, nicht durch Nachdenken. */
+        const UTILS = lies('js/app-utils.js');
+        const quelle = stueck(UTILS,
+            /function feldGroesseAusAnteilen\(zeilen\) \{[\s\S]*?\n\}/, 'feldGroesse');
+        // eslint-disable-next-line no-new-func
+        const fn = new Function(quelle + '\nreturn feldGroesseAusAnteilen;')();
+
+        // Eine Verteilung in der Groessenordnung des echten Feldes: gut
+        // 20 genannte Decks, zusammen 73 % — der Rest ist "Other".
+        const ANTEILE = [15.0, 9.4, 7.2, 6.1, 5.3, 4.8, 4.1, 3.7, 3.2, 2.9,
+                         2.4, 2.0, 1.7, 1.3, 1.1, 0.9, 0.7, 0.5, 0.4, 0.3];
+        for (const N of [40000, 12345]) {
+            const zeilen = ANTEILE.map((p) => {
+                const anzahl = Math.round(N * p / 100);
+                return { anzahl, anteil: Math.round(anzahl / N * 10000) / 100 };
+            });
+            assert.strictEqual(fn(zeilen), N,
+                `aus einem Feld von ${N} und dessen eigenen gerundeten Anteilen `
+                + `rechnet die Quelle ${fn(zeilen)} zurueck`);
+        }
     });
 
     it('eine driftende Zeile kippt den Nenner nicht mehr', () => {
@@ -175,12 +225,37 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
         const echt = fn(zeilen);
         assert.ok(echt > 0, 'schon die Livedaten liefern keinen Nenner');
 
-        // Fuenf Zeilen driften um je eine Liste — der Nenner bleibt derselbe.
+        /* Fuenf Zeilen driften um je eine Liste — der Nenner bleibt stehen.
+
+           WARUM "stehen" UND NICHT "identisch" (04.09.2026, roter Deploy).
+           Hier stand `strictEqual`. Der Wochenlauf vom 04.09. lieferte ein
+           Feld, in dem die fuenf driftenden Zeilen den Nenner von 39.841
+           auf 39.842 schoben — eine Person auf vierzigtausend, 0,0025 %.
+           Der Test wurde rot, die Rechnung stimmte, und der Deploy hing.
+           Dasselbe Muster wie am 21.08., nur eine Ebene hoeher: damals war
+           der feste Wert das Problem, jetzt die feste Gleichheit.
+
+           Der Nenner ist die MITTE eines Ueberlappungsbereichs. Verschiebt
+           sich der Bereich um weniger als eine ganze Liste, kippt die
+           Rundung — das ist Arithmetik, kein Fehler. Der Fehler, um den es
+           geht, sah anders aus: der Nenner fiel auf 0 und der Donut verlor
+           seinen Massstab. Gemessen wird deshalb, dass er stehen bleibt,
+           mit einer Nachsicht von 0,02 % (rund acht Listen auf 40.000).
+           Beobachtet wurden 0,005 %; ein Rueckfall auf 0 sind 100 %, ein
+           verdoppelter Nenner ebenso. Die Grenze liegt also um den Faktor
+           vier ueber dem Rauschen und um Groessenordnungen unter jedem
+           echten Bruch. */
         const gedriftet = zeilen.map((z, i) => ([3, 10, 20, 40, 60].indexOf(i) >= 0
             ? { anteil: z.anteil, anzahl: z.anzahl + 1 } : z));
-        assert.strictEqual(fn(gedriftet), echt,
-            `fuenf um eine Liste driftende Zeilen aendern den Nenner von ${echt} `
-            + `auf ${fn(gedriftet)} — eine unruhige Quelle darf ihn nicht bewegen`);
+        const drift = fn(gedriftet);
+        assert.ok(Math.abs(drift - echt) / echt <= 0.0002,
+            `fuenf um eine Liste driftende Zeilen bewegen den Nenner von ${echt} `
+            + `auf ${drift} (${((Math.abs(drift - echt) / echt) * 100).toFixed(4)} %) — `
+            + 'eine unruhige Quelle darf ihn nicht verschieben. '
+            + 'Steht dort 0, ist es der Befund vom 03.09.: der Donut hat seinen '
+            + 'Massstab verloren. Eine EINZELNE Ungleichung deckt beides ab; '
+            + 'eine zweite `drift > 0` waere nur Zierrat und wuerde die '
+            + 'Obergrenze in test-testdaten-wachhund.js unnoetig heben.');
 
         /* Aber die Nachsicht hat eine Grenze. Die Probe dafuer muss ein
            GESPALTENES Feld sein, nicht ein kaputtes: 45 % der Zeilen

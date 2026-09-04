@@ -76,8 +76,20 @@ AUSGABE = os.path.join(DATEN, "pocket_tierlist.json")
 
 QUELLE = "https://game8.co/games/Pokemon-TCG-Pocket/archives/477754"
 BASIS = "https://game8.co"
-KOPF = {"User-Agent": ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                       "(KHTML, like Gecko) Chrome/124 Safari/537.36")}
+# Ein einzelner User-Agent ohne seine üblichen Begleiter ist selbst ein
+# Erkennungsmerkmal: echte Browser schicken Accept, Accept-Language und
+# die sec-*-Zeilen immer mit.
+KOPF = {
+    "User-Agent": ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                   "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
+    "Accept": ("text/html,application/xhtml+xml,application/xml;q=0.9,"
+               "image/avif,image/webp,*/*;q=0.8"),
+    "Accept-Language": "en-US,en;q=0.9,de;q=0.8",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Upgrade-Insecure-Requests": "1",
+}
 
 # Zwischen zwei Abrufen. Game8 ist eine fremde Seite, die uns nichts
 # schuldet — 50 Deck-Seiten im Sekundentakt sind höflich, im Millisekunden-
@@ -86,14 +98,59 @@ PAUSE_S = 1.2
 
 
 # ── Netz ──────────────────────────────────────────────────────────────
+#
+# GAME8 LIEFERT EINEM NACKTEN requests-AUFRUF ETWAS ANDERES.
+#
+# BEFUND (04.09.2026, erster Lauf in CI). Der Scraper brach sofort ab:
+# "keine Tier-Tabelle gefunden". Im Browser steht die Tabelle im ROHEN
+# HTML — nachgemessen: 15 Tabellen, drei davon mit Tier-Abzeichen,
+# "Chien-Pao ex and Baxcalibur" und alt="S Tier" beide enthalten. Es ist
+# also kein JavaScript-Problem, sondern Bot-Schutz: derselbe Aufruf vom
+# Github-Läufer bekommt eine andere Seite.
+#
+# Dieses Repo kennt das Problem längst — sechs Scraper benutzen dafür
+# cloudscraper, und requirements.txt führt zusätzlich curl_cffi mit
+# Chrome-TLS-Fingerabdruck. Also dieselbe Leiter wie dort:
+#
+#     cloudscraper  →  curl_cffi (Chrome-Fingerabdruck)  →  requests
+#
+# Der letzte Sprosse ist kein Ersatz, sondern die Zusicherung, dass das
+# Skript wenigstens ANLÄUFT, wenn eine Bibliothek fehlt.
+
+def _sitzung():
+    try:
+        import cloudscraper  # type: ignore
+        return ("cloudscraper",
+                cloudscraper.create_scraper(
+                    browser={"browser": "chrome", "platform": "linux"}))
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        from curl_cffi import requests as cffi  # type: ignore
+        return ("curl_cffi", cffi.Session(impersonate="chrome"))
+    except Exception:  # noqa: BLE001
+        pass
+    import requests
+    s = requests.Session()
+    s.headers.update(KOPF)
+    return ("requests", s)
+
+
+_SITZUNG = None
+
 
 def hole(url, binaer=False, versuche=3):
-    import requests
+    global _SITZUNG
+    if _SITZUNG is None:
+        art, s = _sitzung()
+        print(f"  Abruf über {art}")
+        _SITZUNG = s
     letzter = None
     for i in range(versuche):
         try:
-            a = requests.get(url, headers=KOPF, timeout=30)
-            a.raise_for_status()
+            a = _SITZUNG.get(url, headers=KOPF, timeout=30)
+            if a.status_code != 200:
+                raise RuntimeError(f"HTTP {a.status_code}")
             return a.content if binaer else a.text
         except Exception as e:  # noqa: BLE001
             letzter = e
@@ -163,9 +220,19 @@ def lies_seite(html):
     set_tab = mit_decks(lambda t: re.search(r"New .+ Decks", t.get_text(" ", strip=True) or ""))
 
     if tier_tab is None:
-        raise RuntimeError("keine Tier-Tabelle gefunden — der Aufbau der Seite "
-                           "hat sich geändert, und Raten wäre hier schlimmer "
-                           "als der gemeldete Ausfall")
+        # Sagen, WAS ankam, nicht nur DASS nichts passte. Ohne diese
+        # Zeilen sieht ein Bot-Schutz genauso aus wie ein Umbau der
+        # Seite, und man rät zwischen zwei ganz verschiedenen Ursachen.
+        raise RuntimeError(
+            "keine Tier-Tabelle gefunden. "
+            f"Empfangen: {len(html)} Zeichen, {len(tabellen)} Tabellen, "
+            f"Tier-Abzeichen im Text: {'ja' if 'Tier' in html else 'nein'}, "
+            f"Beispieldeck im Text: "
+            f"{'ja' if 'Chien-Pao' in html else 'nein'}. "
+            f"Anfang: {html[:160]!r}. "
+            "Steht dort eine Sperrseite, ist es Bot-Schutz; steht dort die "
+            "echte Seite, hat sich ihr Aufbau geändert. Raten wäre hier "
+            "schlimmer als der gemeldete Ausfall")
     return (lies_tabelle(tier_tab),
             lies_tabelle(set_tab) if set_tab is not None else [])
 

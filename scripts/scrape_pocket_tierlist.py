@@ -109,53 +109,114 @@ PAUSE_S = 1.2
 # Github-Läufer bekommt eine andere Seite.
 #
 # Dieses Repo kennt das Problem längst — sechs Scraper benutzen dafür
-# cloudscraper, und requirements.txt führt zusätzlich curl_cffi mit
-# Chrome-TLS-Fingerabdruck. Also dieselbe Leiter wie dort:
+# cloudscraper, und `_curl_cffi_fetch` in backend/core/card_scraper_shared.py
+# hängt curl_cffi mit Chrome-TLS-Fingerabdruck dahinter. Genau diese
+# Leiter wird hier nachgebaut.
 #
-#     cloudscraper  →  curl_cffi (Chrome-Fingerabdruck)  →  requests
+# ZWEITER BEFUND (04.09.2026, zweiter Lauf in CI). Die erste Fassung der
+# Leiter fiel nur weiter, wenn eine Bibliothek FEHLTE. cloudscraper war
+# da, lieferte aber HTTP 202 — Cloudflares "Prüfung läuft" —, und damit
+# war Schluss: curl_cffi kam nie an die Reihe.
 #
-# Der letzte Sprosse ist kein Ersatz, sondern die Zusicherung, dass das
+# Die Leiter muss also an der ANTWORT hängen, nicht am Import:
+#
+#     cloudscraper  →  curl_cffi (chrome120)  →  requests
+#
+# Wer 202, 403, 429 oder 503 antwortet, hat uns abgewiesen; ein zweiter
+# Versuch mit derselben Sprosse ändert daran nichts, also sofort zur
+# nächsten. Wer 200 liefert, wird gemerkt und für alle weiteren rund
+# hundert Abrufe benutzt — sonst würde jede Deck-Seite die ganze Leiter
+# von vorn durchlaufen. Kippt die gemerkte Sprosse später doch noch (der
+# Schutz kann mitten im Lauf anspringen), wird sie vergessen und die
+# Leiter einmal neu gegangen.
+#
+# Die letzte Sprosse ist kein Ersatz, sondern die Zusicherung, dass das
 # Skript wenigstens ANLÄUFT, wenn eine Bibliothek fehlt.
+#
+# Und wenn ALLE Sprossen abgewiesen werden, steht im Fehler, was JEDE
+# einzelne geantwortet hat. Ohne das beginnt die Suche beim nächsten Mal
+# wieder bei null — genau der Fehler des ersten Laufs.
 
-def _sitzung():
-    try:
+SPROSSEN = ("cloudscraper", "curl_cffi", "requests")
+
+# Antworten, die "wir lassen dich nicht" heißen. 202 ist der wichtigste:
+# Cloudflare schickt ihn, während es seine Prüfung ausspielt, und er
+# sieht keinem Fehler ähnlich.
+ABGEWIESEN = (202, 401, 403, 429, 503)
+
+
+def _baue(art):
+    """Eine Sprosse bauen. Wirft, wenn die Bibliothek fehlt."""
+    if art == "cloudscraper":
         import cloudscraper  # type: ignore
-        return ("cloudscraper",
-                cloudscraper.create_scraper(
-                    browser={"browser": "chrome", "platform": "linux"}))
-    except Exception:  # noqa: BLE001
-        pass
-    try:
+        return cloudscraper.create_scraper(
+            browser={"browser": "chrome", "platform": "linux"})
+    if art == "curl_cffi":
         from curl_cffi import requests as cffi  # type: ignore
-        return ("curl_cffi", cffi.Session(impersonate="chrome"))
-    except Exception:  # noqa: BLE001
-        pass
+        # chrome120 ist das Ziel, das backend/core/card_scraper_shared.py
+        # seit Monaten benutzt — also eines, von dem wir wissen, dass die
+        # hier installierte Fassung es kennt. Die anderen sind da, falls
+        # curl_cffi eines Tages alte Ziele fallen lässt.
+        letzter = None
+        for ziel in ("chrome120", "chrome124", "chrome"):
+            try:
+                return cffi.Session(impersonate=ziel)
+            except Exception as e:  # noqa: BLE001
+                letzter = e
+        raise RuntimeError(f"keine bekannte Chrome-Nachahmung ({letzter})")
     import requests
     s = requests.Session()
     s.headers.update(KOPF)
-    return ("requests", s)
+    return s
 
 
-_SITZUNG = None
-
-
-def hole(url, binaer=False, versuche=3):
-    global _SITZUNG
-    if _SITZUNG is None:
-        art, s = _sitzung()
-        print(f"  Abruf über {art}")
-        _SITZUNG = s
+def _frage(sitzung, url, binaer, versuche):
+    """Eine Sprosse fragen. Gibt (inhalt, None) oder (None, Grund)."""
     letzter = None
     for i in range(versuche):
         try:
-            a = _SITZUNG.get(url, headers=KOPF, timeout=30)
-            if a.status_code != 200:
-                raise RuntimeError(f"HTTP {a.status_code}")
-            return a.content if binaer else a.text
+            a = sitzung.get(url, headers=KOPF, timeout=30)
+            if a.status_code == 200:
+                return (a.content if binaer else a.text), None
+            letzter = f"HTTP {a.status_code}"
+            if a.status_code in ABGEWIESEN:
+                return None, letzter          # Abweisung — nicht nachbohren
         except Exception as e:  # noqa: BLE001
-            letzter = e
-            time.sleep(1.5 * (i + 1))
-    raise RuntimeError(f"{url}: {letzter}")
+            letzter = f"{type(e).__name__}: {e}"
+        time.sleep(1.5 * (i + 1))
+    return None, letzter
+
+
+_GEMERKT = None   # (Art, Sitzung) der Sprosse, die zuletzt 200 lieferte
+
+
+def hole(url, binaer=False, versuche=3):
+    global _GEMERKT
+    if _GEMERKT is not None:
+        inhalt, grund = _frage(_GEMERKT[1], url, binaer, versuche)
+        if inhalt is not None:
+            return inhalt
+        print(f"  {_GEMERKT[0]} antwortet nicht mehr ({grund}) — Leiter neu")
+        _GEMERKT = None
+
+    berichte = []
+    for art in SPROSSEN:
+        try:
+            sitzung = _baue(art)
+        except Exception as e:  # noqa: BLE001
+            berichte.append(f"{art}: nicht verfügbar ({e})")
+            continue
+        inhalt, grund = _frage(sitzung, url, binaer, versuche)
+        if inhalt is not None:
+            print(f"  Abruf über {art}")
+            _GEMERKT = (art, sitzung)
+            return inhalt
+        berichte.append(f"{art}: {grund}")
+
+    raise RuntimeError(
+        f"{url}: keine Sprosse kam durch — " + " | ".join(berichte)
+        + ". HTTP 202 heißt Cloudflare-Prüfung, 403 heißt abgewiesen; "
+        "beides ist Bot-Schutz und kein Fehler im Aufbau der Seite.")
 
 
 # ── Die zwei Tabellen lesen ───────────────────────────────────────────

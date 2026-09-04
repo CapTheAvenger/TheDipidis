@@ -90,6 +90,7 @@ const REGISTER = {
     'test-side-quest-play.js':           'Rechenwege am Nutzungsmodell, Toleranzen auf selbst gesetzten Anteilen',
     'test-side-quest-usage.js':          'Struktur der Nutzungsdatei plus weite Untergrenzen (mindestens 10 Teams)',
     'test-top100-weg.js':                'prueft, dass eine entfernte Ansicht nicht zurueckkommt',
+    'test-post-quellen.js':              'ZWEITE ABNAHME 04.09.2026, zwei Runden: 28 Ungleichungen. Runde eins liess elf von 22 Mutationen gruen passieren (alle sechs Sortierungen, eine Glaettung die Rohwerte durchliess); Runde zwei fand, dass die Reparaturen NEUE Loecher gerissen hatten (leere Tafel bei durchgehendem Gleichstand, Fusszeile 58 von 48 Zeichen bei einem Regional, fehlender Wurf ohne Spalte tournament_id). Im Wiederholungslauf sind alle 25 Mutationen rot. Die Datenquellen des Post-Baukastens. Ein Mutationslauf hatte elf von 22 Aenderungen am Produktivcode gruen passieren lassen, darunter ALLE SECHS vertauschten Sortierungen und eine Glaettung, die in Wahrheit Rohwerte durchliess (3-0 stand als "100 %" im Bild). Die neuen Zusicherungen schliessen das; im Wiederholungslauf werden 14 von 14 Mutationen rot. Die Datenquellen des Post-Baukastens. Liest data/, behauptet aber keine Wochenwerte: geprueft werden EIGENSCHAFTEN DES LESERS (BOM weg, CR weg, Komma in Anfuehrungszeichen trennt keine Spalte, Dezimalkomma wird gelesen), GLEICHUNGEN gegen die Datei (der ausgegebene Anteil ist der aus der Spalte share_numeric, der Nenner ist limitless_meta_stats.players) und VERTRAEGE DES BILDES (kein Wert ueber zehn Zeichen, keine Fusszeile ueber 48, kein Nenner ueber zwei Zeilen — das sind Feldbreiten der Vorlage, keine Feldwerte des Metas). Welche Decks diese Woche oben stehen, ist jeder Zusicherung egal. Die Vorpruefungen ("die Datei hat heute mindestens eine Zeile mit share=0", "mindestens 20 Zeilen mit Anfuehrungszeichen", "win_pct und Siegquote unterscheiden sich um mehr als einen Punkt") sind absichtlich da: ohne sie koennte die jeweilige Zusicherung leer bestehen und gruen melden, obwohl sie nichts mehr liest.',
     'test-testdaten-wachhund.js':        'dieser Wachhund selbst',
 };
 
@@ -178,7 +179,121 @@ const REGISTER = {
  * Netto ist das eine Verbesserung: eine harte Gleichheit weniger, eine
  * begruendete Weite mehr. Die Obergrenze steigt trotzdem um eins, weil
  * der Zaehler nur die eine Richtung kennt. */
-const OBERGRENZE = 70;
+/* 04.09.2026, zweite Erhoehung des Tages: 70 -> 81. Elf Ungleichungen
+ * in der neuen tests/unit/test-post-quellen.js.
+ *
+ * WARUM SIE HIER TEURER SIND ALS SONST — UND TROTZDEM RICHTIG.
+ * Was diese Datei bewacht, wird zu einem PNG und wandert durch
+ * Instagram. Dort gibt es keine Fussnote und keine Korrektur. Ein
+ * falscher Nenner auf der Seite ist ein Fehler; auf einem geposteten
+ * Bild ist er eine Behauptung. Die Abnahme desselben Tages hat drei
+ * Wege gefunden, auf denen genau das passiert waere:
+ *
+ *   - die Summe der Zeilen (38.398) statt der erfassten Spieler
+ *     (39.842) als Nenner: Dragapult haette mit 7,77 % statt 7,49 %
+ *     dagestanden;
+ *   - die Spalte win_pct (Matchpunkte, 46,41) statt der Siegquote
+ *     (42,4) — vier Punkte, zwei Geschichten;
+ *   - perfPct aus computeConversionPerformance (+68,0 %) statt der
+ *     Top-8-Quote (10,7 %). Faktor sechs, und derselbe Etikettenfehler
+ *     steht in js/ds-share.js:520 schon einmal beschrieben.
+ *
+ * KEINE DER ELF BEHAUPTET EINEN WOCHENWERT. Sie zerfallen in drei
+ * Sorten, und alle drei ueberleben den naechsten Wochenlauf:
+ *
+ *   1. Feldbreiten der Vorlage (5): kein Wert ueber zehn Zeichen, keine
+ *      Fusszeile ueber 48, kein Spaltenkopf ueber 23, kein Nenner ueber
+ *      zwei Zeilen a 60. Das sind Eigenschaften des Zeichencodes —
+ *      `clip(ctx, wert, 220)` bei Mono 34 —, nicht des Feldes. Sie
+ *      fallen, wenn ein Rezept zu lang schreibt, und genau dann sollen
+ *      sie fallen: sonst schneidet die Vorlage stumm ab.
+ *   2. Vorpruefungen (4): "die Datei hat heute mindestens eine
+ *      Zombie-Zeile", "mindestens 20 Zeilen mit Anfuehrungszeichen",
+ *      "Summe und erfasste Spielerzahl liegen mehr als 100
+ *      auseinander", "win_pct und Siegquote unterscheiden sich um mehr
+ *      als einen Punkt". Ohne sie koennte die jeweilige Zusicherung
+ *      leer bestehen. Dieselbe Bauart wie in
+ *      test-vier-ansichten-eine-quote.js, und aus demselben Grund.
+ *   3. Eigenschaften einer Quote (2): jeder ausgegebene Wert liegt
+ *      zwischen 0 und 100, jede share_pct-Spalte unter 100. Das ist
+ *      Arithmetik, kein Feld.
+ *
+ * Der Zaehler steht damit bei 81. Netto sind vier weitere Zeilen dieser
+ * Datei aus der Zaehlung gefallen, weil sie nie Ungleichungen waren,
+ * sondern "steht nicht in der Liste" — als `!namen.includes(x)`
+ * geschrieben sagen sie dasselbe deutlicher.
+ *
+ * Der offene Befund vom 03.09.2026 gilt weiter: dieser Wachhund sieht
+ * nur ein Viertel dessen, was er zu bewachen behauptet. */
+/* 04.09.2026, VIERTE Erhoehung des Tages: 92 -> 98. Sechs weitere
+ * Ungleichungen in tests/unit/test-post-quellen.js.
+ *
+ * ANLASS ist wieder ein Mutationslauf — der zweite, auf den Reparaturen
+ * des ersten. Er hat gezeigt, dass meine Reparaturen NEUE Loecher
+ * gerissen hatten:
+ *
+ *   - `ohneGleichstand` gab bei durchgehendem Gleichstand die LEERE
+ *     Liste zurueck. `malListe` bricht dann ab, waehrend Titel,
+ *     Spaltenkopf und Nenner weiter gemalt werden — genau der Zustand,
+ *     gegen den die Leere-Datei-Wuerfe geschrieben sind.
+ *   - `kurzTurnier` kannte genau einen Praefix. Mit einem Regional als
+ *     Anker lief die Fusszeile auf 58 von 48 Zeichen, und der NENNER
+ *     fiel vom Bild.
+ *   - der Turnierfilter hatte keinen Wurf fuer die fehlende Spalte
+ *     `tournament_id` — ohne sie war die Datei wieder ungefiltert.
+ *
+ * Die sechs neuen Ungleichungen sind Vorpruefungen und Feldbreiten,
+ * derselben Sorte wie die bisherigen:
+ *
+ *   - "mindestens zehn Turniernamen in data/" und "hoechstens 35 % davon
+ *     passen auch gekuerzt nicht" — die zweite ist ein weites Band ueber
+ *     eine gepflegte Namensliste, kein Wochenwert; sie faellt, wenn ein
+ *     Praefix in TURNIER_KURZ fehlt.
+ *   - "mindestens 20 Decks geprueft" (Gleichstand ueber alle Matchups),
+ *     "mindestens ein Fall mit doppelten Werten", "Fusszeile hoechstens
+ *     48 Zeichen" an zwei Stellen, "Meldung laenger als 30 Zeichen".
+ *   - "Feldschnitt zwischen 0 und 100" — Arithmetik.
+ *
+ * Der offene Befund vom 03.09.2026 gilt weiter: dieser Wachhund sieht
+ * nur ein Viertel dessen, was er zu bewachen behauptet.
+ *
+ * 04.09.2026, dritte Erhoehung des Tages: 81 -> 92. Elf weitere
+ * Ungleichungen in tests/unit/test-post-quellen.js.
+ *
+ * ANLASS ist ein Mutationslauf, kein neues Feature. Ein Pruefagent hat
+ * 22 Aenderungen in js/ds-post-quellen.js gesetzt; ELF blieben gruen:
+ *
+ *   - alle SECHS vertauschten Sortierungen. Es gab bis dahin keine
+ *     einzige Sortier-Zusicherung, obwohl sechs Rezepte im Spaltenkopf
+ *     eine Rangfolge behaupten.
+ *   - die Glaettung liess sich ausbauen: der Aufruf griff ohnehin
+ *     daneben (falsche Feldnamen, Rueckgabe ist eine Zahl und kein
+ *     Objekt), sodass die ROHWERTE im Bild standen — "100 % · 3" unter
+ *     einer Fusszeile mit "geglaettet k=20".
+ *   - der Zombie-Filter, der Worlds-Nenner und die Tag-2-Schwelle.
+ *
+ * Die elf neuen Ungleichungen sind derselben drei Sorten wie die
+ * bisherigen — keine behauptet einen Wochenwert:
+ *
+ *   1. Vorpruefungen (6): "mindestens fuenf duenne Paarungen ueber
+ *      95 %", "mindestens drei Karten mit mehreren Drucken",
+ *      "mindestens drei Decks unter der Tag-2-Schwelle", "mindestens
+ *      ein Team ohne Turnierangabe", "mindestens zwei Zeilen zum
+ *      Sortieren", "mindestens drei duenne Zeilen erreichten die
+ *      Ausgabe". Ohne sie kann die jeweilige Zusicherung leer bestehen
+ *      — genau der Fehler, den dieser Wachhund verhindern soll.
+ *   2. Eigenschaften der Glaettung (2): keine ausgegebene Quote
+ *      erreicht 100 %, und auf hoechstens sechs Partien bleibt sie
+ *      unter 70 %. Beides folgt aus k=20, nicht aus dem Feld dieser
+ *      Woche: mit sechs Partien kann eine Glaettung gegen zwanzig
+ *      Pseudopartien rechnerisch nicht hoeher kommen.
+ *   3. Feldbreiten der Vorlage (3): der Nenner passt in zwei gemalte
+ *      Zeilen, die Fusszeile in 48 Zeichen, der Spaltenkopf in 23.
+ *      Eigenschaften des Zeichencodes.
+ *
+ * Der offene Befund vom 03.09.2026 gilt weiter: dieser Wachhund sieht
+ * nur ein Viertel dessen, was er zu bewachen behauptet. */
+const OBERGRENZE = 98;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

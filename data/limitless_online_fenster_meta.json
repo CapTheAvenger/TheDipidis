@@ -1,0 +1,10 @@
+{
+  "fenster_von": "2026-08-21",
+  "fenster_bis": "2026-09-04",
+  "fenster_tage": 14,
+  "decks_im_fenster": 10042,
+  "decks_differenz_roh": 10074,
+  "nicht_im_fenster_entstanden": 32,
+  "decks_kumulativ": 38398,
+  "staende_vorhanden": 66
+}

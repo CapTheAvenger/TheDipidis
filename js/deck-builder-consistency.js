@@ -67,6 +67,80 @@
     { maxPlace: Infinity, weight: 0.1 },  // Day-1-only floor
   ];
 
+  /* DIE ABSOLUTEN BAENDER WAREN BEI GROSSEN TURNIEREN WIRKUNGSLOS
+     (05.09.2026).
+
+     Gemessen an data/tournament_decklists_per_player.csv: alle drei
+     Turniere im Bestand veroeffentlichen rund 18-19 % ihres Feldes.
+
+         Turnier          Feld    Listen   Plaetze   davon auf 0,1
+         Worlds 2026       774       143     1-143    111  (78 %)
+         NAIC 2026       3.743       675     1-675    643  (95 %)
+         Turin           2.032       383     1-383    351  (92 %)
+
+     (Feldgroessen aus labs_tournament_decks.csv `total_players` — das
+     ist die Quelle, aus der _loadTournamentSizes liest. Die Spalte
+     `players` in tournament_cards_data_overview.csv zaehlt anders und
+     ist hier NICHT gemeint.)
+
+     Ueber 32 hinaus vergibt die Tabelle oben nur noch den Notwert 0,1 —
+     also trugen rund neun von zehn veroeffentlichten Listen dasselbe
+     Gewicht. Fuer Mega Excadrill bei Worlds lagen ALLE acht Listen
+     (Plaetze 37-122) im selben Band; `weightedShare` war damit exakt
+     n/8, und die Regel "Erfolg zaehlt mehr" trug null bei. Genau
+     daraus entstanden die Gleichstaende, bei denen am Ende die
+     Zeilenreihenfolge der CSV entschied.
+
+     Der Fehler ist die absolute Skala: Platz 37 von 774 ist das obere
+     4,8 % eines Weltmeisterschaftsfeldes, Platz 37 von 120 ist Mittelfeld
+     eines Regionals. Beides als "ausserhalb der Top 32" zu behandeln
+     wirft die Information weg, um die es geht.
+
+     Deshalb zusaetzlich eine feldrelative Skala — und zwar als
+     MAXIMUM beider, nie als Ersatz:
+
+         gewicht = max(absolut(platz), perzentil(platz / feldgroesse))
+
+     Das ist bewusst monoton: ein Gewicht kann dadurch nur STEIGEN, nie
+     fallen. Ein Sieg bei einem kleinen Turnier behaelt seine 1,0 ueber
+     das absolute Band; ein Platz 37 bei Worlds steigt von 0,1 auf 0,6.
+     Waere es ein Ersatz, wuerde Platz 4 von 60 (= 6,7 %) auf 0,6
+     abgewertet — ein Turniersieg zaehlte weniger als vorher, und das
+     will niemand.
+
+     Ist die Feldgroesse unbekannt (0) ODER der Platz ungueltig, bleibt
+     es beim absoluten Band — dann ist der Perzentilwert nicht definiert
+     und darf nicht geraten werden. Der Platz ist dabei der subtilere
+     Fall: `Number(place) || 999` macht aus einem fehlenden Platz eine
+     999, und 999 geteilt durch ein Feld ueber 3.995 ergibt ein Quantil
+     unter 0,25 — eine FEHLENDE Platzierung wuerde bei sehr grossen
+     Turnieren also auf 0,2 aufgewertet. Live tritt das nicht auf (das
+     groesste Feld im Bestand hat 3.743 Spieler, und alle 1.201 Plaetze
+     sind gueltig), aber es kippt beim naechsten Feld ueber 4.000.
+
+     WAS DIE AENDERUNG WIRKLICH BEWIRKT, gegengeprueft auf dem Live-Pfad
+     (mit Formattor minDate = in_person_legal_date), 12 Archetypen mit
+     Ergebnis: Gleichstaende 7 -> 3. Verbessert bei fuenf, VERSCHLECHTERT
+     bei zwei (Dragapult Dusknoir und N's Zoroark bekommen je einen neuen
+     Gleichstand), neun von zwoelf Decks aendern ihre Kartenliste. Im
+     vorigen Format ueber 31 Archetypen: 11 -> 3, verschlechtert bei zwei.
+     Die Richtung stimmt in beiden Formaten, die Wirkung ist aber nicht
+     einseitig — wer hier "beseitigt Gleichstaende" liest, liest zu viel.
+
+     Der Preis, ebenfalls gemessen: die Spreizung der Listengewichte
+     sinkt (Crustle 8,0 -> 5,7, Dragapult 11,4 -> 5,7). Die Gewichtung
+     gewinnt Aufloesung und verliert Dynamik — sie haengt dafuer an mehr
+     Listen (effektive Stichprobe nach Kish, Mittel ueber 29 Archetypen:
+     75,3 % -> 78,1 %). */
+  const PLACEMENT_PERCENTILE_BANDS = [
+    { maxQuantil: 0.01, weight: 1.0 },   // oberstes Prozent
+    { maxQuantil: 0.02, weight: 0.8 },
+    { maxQuantil: 0.05, weight: 0.6 },
+    { maxQuantil: 0.10, weight: 0.4 },
+    { maxQuantil: 0.25, weight: 0.2 },
+    { maxQuantil: Infinity, weight: 0.1 },
+  ];
+
   // Spec rule 4: log(players)/log(2000), capped at 1.0.
   const SIZE_WEIGHT_REFERENCE = 2000;  // IC-scale tournaments hit 1.0
   const SIZE_WEIGHT_FLOOR     = 0.5;   // tournaments without size info
@@ -138,12 +212,26 @@
     return String(s || '').trim().toLowerCase();
   }
 
-  function _placementWeight(place) {
-    const p = Number(place) || 999;
+  function _placementWeight(place, feldgroesse) {
+    // Ist der Platz gueltig, oder ist er nur der 999-Ersatzwert?
+    const roh = Number(place);
+    const platzBekannt = Number.isFinite(roh) && roh >= 1;
+    const p = platzBekannt ? roh : 999;
+    let absolut = PLACEMENT_WEIGHT_BANDS[PLACEMENT_WEIGHT_BANDS.length - 1].weight;
     for (const band of PLACEMENT_WEIGHT_BANDS) {
-      if (p <= band.maxPlace) return band.weight;
+      if (p <= band.maxPlace) { absolut = band.weight; break; }
     }
-    return PLACEMENT_WEIGHT_BANDS[PLACEMENT_WEIGHT_BANDS.length - 1].weight;
+    const feld = Number(feldgroesse) || 0;
+    // Unbekannte Feldgroesse UND unbekannter Platz fallen beide auf das
+    // absolute Band zurueck: ein Quantil aus einem geratenen Zaehler
+    // waere eine erfundene Zahl, keine gemessene.
+    if (feld <= 0 || !platzBekannt) return absolut;
+    const q = p / feld;
+    let relativ = PLACEMENT_PERCENTILE_BANDS[PLACEMENT_PERCENTILE_BANDS.length - 1].weight;
+    for (const band of PLACEMENT_PERCENTILE_BANDS) {
+      if (q <= band.maxQuantil) { relativ = band.weight; break; }
+    }
+    return Math.max(absolut, relativ);
   }
 
   function _sizeWeight(players) {
@@ -156,8 +244,9 @@
   // every weighted aggregation downstream so rule 2 (success matters
   // more) is enforced uniformly.
   function _listWeight(list, tournamentSizes) {
-    const pl = _placementWeight(list.place);
-    const sz = _sizeWeight(tournamentSizes.get(list.tournament_id) || 0);
+    const feld = tournamentSizes.get(list.tournament_id) || 0;
+    const pl = _placementWeight(list.place, feld);
+    const sz = _sizeWeight(feld);
     return pl * sz;
   }
 

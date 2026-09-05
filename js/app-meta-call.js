@@ -7212,9 +7212,25 @@ window.MetaCall = (function () {
             const vsS = _labsGanz(r.vs_wins);
             const vsN = _labsGanz(r.vs_losses);
             const vsU = _labsGanz(r.vs_ties);
-            if (vsS == null || vsN == null) continue;
-            const vsEntschieden = vsS + vsN;
-            if (vsEntschieden <= 0) continue;
+            const hatBilanz = vsS != null && vsN != null && (vsS + vsN) > 0;
+            /* DIE ZWOELF ABGESCHLOSSENEN EPOCHEN TRAGEN KEINE BILANZ
+               (gemessen 05.09.2026: von 47.896 Zeilen haben 1.776 eine,
+               und die alle aus TEF-PBL). Sie hier zu ueberspringen hat
+               den Past-Meta-Zweig leergeraeumt — der Vorab-Renderer des
+               Telegram-Bots hat das gemeldet und den Deploy angehalten:
+               "Past meta TEF-CRI has no matchup pairs loaded — the
+               resulting PNG would show identical 50/50 placeholder
+               recommendations."
+
+               Also werden beide Faelle gefuehrt und AUSEINANDERGEHALTEN:
+               wo die Bilanz da ist, wird S/(S+N) gerechnet und die
+               Konvention 'ohneUnentschieden' vermerkt; wo nicht, bleibt
+               es bei den Matchpunkten der Quelle mit der Konvention
+               'matchpunkte'. Das ist fuer die abgeschlossenen Formate
+               genau der Stand von vorher — nur heisst er jetzt, wie er
+               heisst, statt sich als Win Rate auszugeben. */
+            const vsPunkte = parseLocaleNumber(r.vs_win_pct || '0', 0);
+            if (!hatBilanz && !Number.isFinite(vsPunkte)) continue;
             const d = normalize(myName);
             const o = normalize(opName);
             let bucket;
@@ -7232,11 +7248,19 @@ window.MetaCall = (function () {
             }
             if (!bucket[meta]) bucket[meta] = {};
             if (!bucket[meta][d]) bucket[meta][d] = {};
-            if (!bucket[meta][d][o]) bucket[meta][d][o] = { games: 0, siege: 0, niederlagen: 0, unentschieden: 0 };
-            bucket[meta][d][o].games += games;
-            bucket[meta][d][o].siege += vsS;
-            bucket[meta][d][o].niederlagen += vsN;
-            bucket[meta][d][o].unentschieden += (vsU || 0);
+            if (!bucket[meta][d][o]) bucket[meta][d][o] = {
+              games: 0, siege: 0, niederlagen: 0, unentschieden: 0,
+              mitBilanz: 0, punkteSumme: 0,
+            };
+            const z = bucket[meta][d][o];
+            z.games += games;
+            if (hatBilanz) {
+              z.mitBilanz += games;
+              z.siege += vsS;
+              z.niederlagen += vsN;
+              z.unentschieden += (vsU || 0);
+            }
+            z.punkteSumme += games * (Number.isFinite(vsPunkte) ? vsPunkte : 0);
           }
           const _collapseAgg = (agg, minGames) => {
             const out = {};
@@ -7248,24 +7272,38 @@ window.MetaCall = (function () {
                   const a = agg[meta][d][o];
                   if (a.games < minGames) continue;
                   const entschieden = a.siege + a.niederlagen;
-                  if (entschieden <= 0) continue;
-                  /* Dieselbe Glaettung wie die Heatmap (k = 20, Prior
-                     50 %), damit eine Paarung aus 11 Partien nicht wie
-                     eine aus 1.049 aussieht. Ohne das Modul faellt es
-                     auf die rohe Quote zurueck. */
-                  const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;
-                  const winPct = (G && typeof G.quote === 'function')
-                    ? G.quote(a.siege, a.niederlagen)
-                    : (a.siege / entschieden) * 100;
+                  const hatBilanz = a.mitBilanz > 0 && entschieden > 0;
+                  let winPct, konvention, roh;
+                  if (hatBilanz) {
+                    /* Dieselbe Glaettung wie die Heatmap (k = 20, Prior
+                       50 %), damit eine Paarung aus 11 Partien nicht wie
+                       eine aus 1.049 aussieht. Ohne das Modul faellt es
+                       auf die rohe Quote zurueck. */
+                    const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;
+                    roh = (a.siege / entschieden) * 100;
+                    winPct = (G && typeof G.quote === 'function')
+                      ? G.quote(a.siege, a.niederlagen)
+                      : roh;
+                    konvention = 'ohneUnentschieden';
+                  } else {
+                    // Nur Matchpunkte — abgeschlossene Epochen.
+                    if (!(a.games > 0)) continue;
+                    winPct = a.punkteSumme / a.games;
+                    roh = winPct;
+                    konvention = 'matchpunkte';
+                  }
+                  if (!Number.isFinite(winPct)) continue;
                   if (!out[meta][d]) out[meta][d] = {};
                   out[meta][d][o] = {
                     games  : a.games,
                     winPct,
-                    roh    : (a.siege / entschieden) * 100,
-                    siege  : a.siege,
-                    niederlagen : a.niederlagen,
-                    unentschieden : a.unentschieden,
-                    entschieden,
+                    roh,
+                    konvention,
+                    nurPunkte : !hatBilanz,
+                    siege  : hatBilanz ? a.siege : null,
+                    niederlagen : hatBilanz ? a.niederlagen : null,
+                    unentschieden : hatBilanz ? a.unentschieden : null,
+                    entschieden : hatBilanz ? entschieden : null,
                     source : 'major',
                   };
                   pairs += 1;
@@ -7766,6 +7804,13 @@ window.MetaCall = (function () {
       }
       const reverse = map[key2]?.[key1];
       if (reverse) {
+        /* Bei reinen Matchpunkten (abgeschlossene Epochen) gilt die
+           Spiegelung nicht: wp(A,B) + wp(B,A) = 100 - 100·U/(3n).
+           Gemessen ueber die TEF-PBL-Paare mit vs_count >= 10:
+           Ueberschaetzung im Mittel 3,54 pp, maximal 10,26. Dort wird
+           lieber gar keine Zahl geliefert als eine geschoente — der
+           Aufrufer faellt dann auf die naechste Quelle zurueck. */
+        if (reverse.nurPunkte) return null;
         /* `100 - x` GILT JETZT WIRKLICH (05.09.2026).
            Solange hier Matchpunkte standen, war die Spiegelung falsch:
            wp(A,B) + wp(B,A) = 100 - 100·U/(3n), nicht 100. Gemessen

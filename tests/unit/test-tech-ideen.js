@@ -73,7 +73,13 @@ describe('Tech-Ideen — Idee, nicht Beleg', () => {
             'die Kartenart wandert nicht mit');
         assert.match(QUELLE, /energie:\s*rec \? \(rec\.energy_type/,
             'der Energietyp wandert nicht mit');
-        assert.match(BAUER, /karte\.textContent = v\.karte \+ \(art \? /,
+        /* Seit dem Gruppieren gleicher Gründe (06.09.2026) steht in
+           einer Zeile mehr als eine Karte — die Art muss trotzdem an
+           JEDER hängen, sonst weiß der Leser bei der zweiten nicht
+           mehr, ob da ein Angreifer steht. */
+        assert.match(BAUER, /const art = \[v\.art, v\.energie\]\.filter\(Boolean\)\.join/,
+            'Kartenart und Energie werden nicht mehr zusammengesetzt');
+        assert.match(BAUER, /return v\.karte \+ \(art \? '  \(' \+ art \+ '\)' : ''\);/,
             'die Kartenart wird nicht angezeigt');
     });
 
@@ -200,5 +206,68 @@ describe('Tech-Ideen — Idee, nicht Beleg', () => {
             'ein Ausfall der Datenquellen wirft statt leer zurückzugeben');
         assert.match(BAUER, /catch \(e\) \{[\s\S]{0,120}TechIdeen/,
             'der Aufruf im Dialog ist nicht abgesichert');
+    });
+
+    it('derselbe Grund steht einmal da, nicht dreimal', () => {
+        /* GEFUNDEN BEIM HINSEHEN am 06.09.2026, nicht von einer
+           Zusicherung: gegen Toucannon standen drei Zeilen, und alle
+           drei sagten dasselbe — nur mit einem anderen Kartennamen
+           davor. Drei Träger derselben Regel. Richtig, aber es liest
+           sich wie Füllmaterial.
+
+           Diese Zusicherung GREIFT den Gruppierer aus dem Quelltext und
+           lässt ihn wirklich laufen, statt nach Stichworten zu suchen. */
+        const quelle = BAUER.slice(
+            BAUER.indexOf('const grosz = (x)'),
+            BAUER.indexOf('gruppen.forEach(gr => {'));
+        assert.ok(quelle.length > 200, 'der Gruppierer wurde nicht gefunden');
+
+        const gruppiere = new Function('vorschlaege', quelle
+            .replace('g.vorschlaege.forEach', 'vorschlaege.forEach')
+            + '\n return gruppen;');
+
+        /* Der Fall, der den Befund ausgelöst hat. */
+        const drei = gruppiere([
+            { karte: 'Crustle', sicherheit: 'high', art: 'Stage 1', energie: 'Grass',
+              satz: 'Crustle ignoriert Pikachu exs Resolute Heart — effekt-immuner Schaden.' },
+            { karte: 'Dudunsparce ex', sicherheit: 'high', art: 'Stage 1', energie: 'Colorless',
+              satz: 'Dudunsparce ex ignoriert Pikachu exs Resolute Heart — effekt-immuner Schaden.' },
+            { karte: 'Iron Crown ex', sicherheit: 'high', art: 'Basic', energie: 'Psychic',
+              satz: 'Iron Crown ex ignoriert Pikachu exs Resolute Heart — effekt-immuner Schaden.' }
+        ]);
+        assert.strictEqual(drei.length, 1,
+            `${drei.length} Gründe für drei Träger derselben Regel — der Grund wird wiederholt`);
+        assert.strictEqual(drei[0].karten.length, 3, 'nicht alle drei Träger stehen in der Gruppe');
+        assert.ok(!/^Crustle/.test(drei[0].grund),
+            'der Kartenname steht noch vor dem Grund und macht ihn kartenspezifisch');
+        assert.match(drei[0].grund, /^Ignoriert Pikachu exs Resolute Heart/,
+            'der Grund wurde beim Kürzen beschädigt');
+
+        /* Verschiedene Gründe bleiben getrennt — sonst wäre die
+           Zusammenfassung eine Unterschlagung. */
+        const zwei = gruppiere([
+            { karte: 'A', sicherheit: 'high', satz: 'A ignoriert X.' },
+            { karte: 'B', sicherheit: 'high', satz: 'B sperrt Y.' }
+        ]);
+        assert.strictEqual(zwei.length, 2, 'zwei verschiedene Gründe wurden zusammengeworfen');
+
+        /* Gleicher Satz, andere Sicherheit: getrennt, weil die
+           Sicherheit mit angezeigt wird. */
+        const sicher = gruppiere([
+            { karte: 'A', sicherheit: 'high', satz: 'A ignoriert X.' },
+            { karte: 'B', sicherheit: 'low', satz: 'B ignoriert X.' }
+        ]);
+        assert.strictEqual(sicher.length, 2,
+            'unterschiedliche Sicherheit wurde unter einer Angabe zusammengefasst');
+
+        /* Beginnt der Satz NICHT mit dem Kartennamen, wird nicht
+           gekürzt und nicht gruppiert — lieber eine Wiederholung als
+           ein verstümmelter Satz. */
+        const roh = gruppiere([
+            { karte: 'A', sicherheit: 'high', satz: 'Gegen X hilft A.' },
+            { karte: 'B', sicherheit: 'high', satz: 'Gegen X hilft B.' }
+        ]);
+        assert.strictEqual(roh.length, 2, 'ein Satz ohne führenden Kartennamen wurde gruppiert');
+        assert.strictEqual(roh[0].grund, 'Gegen X hilft A.', 'der Satz wurde trotzdem gekürzt');
     });
 });

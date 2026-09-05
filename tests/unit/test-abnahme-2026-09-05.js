@@ -71,41 +71,151 @@ describe('Meta Call: die Bilanz statt der Matchpunktspalte', () => {
         assert.match(METACALL, /if \(s == null \|\| n == null\) return null;/);
     });
 
-    it('die Paarquote kommt aus vs_wins/vs_losses, nicht aus vs_win_pct', () => {
-        assert.ok(!/parseLocaleNumber\(r\.vs_win_pct/.test(METACALL),
-            'vs_win_pct wird wieder als Quote gelesen — das sind Matchpunkte');
+    it('die Paarquote nimmt die Bilanz, wo es eine gibt', () => {
         assert.match(METACALL, /const vsS = _labsGanz\(r\.vs_wins\);/);
         assert.match(METACALL, /const vsN = _labsGanz\(r\.vs_losses\);/);
-        // Aggregiert wird die Bilanz, nicht eine gewichtete Quotensumme.
-        // (`weightedSum` gibt es weiterhin in _labsDay2ConvByDeck — dort
-        // ist es eine Gewichtung von Konversionsquoten, keine Win Rate.)
-        const paarBlock = METACALL.slice(
-            METACALL.indexOf('const aggOverall = {}'),
-            METACALL.indexOf('const _collapseAgg'));
-        assert.ok(!/weightedSum/.test(paarBlock),
-            'die alte Quoten-Aggregation (weightedSum) ist in der Paar-Aggregation zurück');
-        assert.match(METACALL, /bucket\[meta\]\[d\]\[o\]\.siege \+= vsS;/);
+        assert.match(METACALL, /const hatBilanz = vsS != null && vsN != null && \(vsS \+ vsN\) > 0;/);
+        assert.match(METACALL, /z\.siege \+= vsS;/);
     });
 
-    it('die Paarquote wird geglättet wie die Heatmap', () => {
+    it('sie wirft die Paare der abgeschlossenen Epochen NICHT weg', () => {
+        /* Gemessen 05.09.2026: von 47.896 Zeilen in
+           data/labs_tournament_matchups.csv tragen 1.776 eine Bilanz,
+           und die alle aus TEF-PBL. Die Zeilen ohne Bilanz zu
+           ueberspringen hat den Past-Meta-Zweig leergeraeumt und den
+           Deploy angehalten:
+             "Past meta TEF-CRI has no matchup pairs loaded — the
+              resulting PNG would show identical 50/50 placeholder
+              recommendations."
+           TEF-CRI hat 690 Paare mit vs_count >= 10; die duerfen nicht
+           verschwinden, nur weil sie eine andere Konvention tragen. */
+        assert.match(METACALL, /z\.punkteSumme \+= games \* \(Number\.isFinite\(vsPunkte\) \? vsPunkte : 0\);/);
+        assert.match(METACALL, /winPct = a\.punkteSumme \/ a\.games;/);
+    });
+
+    it('beide Fälle tragen ihre Konvention', () => {
+        assert.match(METACALL, /konvention = 'ohneUnentschieden';/);
+        assert.match(METACALL, /konvention = 'matchpunkte';/);
+        assert.match(METACALL, /nurPunkte : !hatBilanz,/);
+    });
+
+    it('mit Bilanz wird geglättet wie die Heatmap', () => {
         // Ohne denselben Prior sähe eine Paarung aus 11 Partien aus wie
         // eine aus 1.049.
         assert.match(METACALL, /G\.quote\(a\.siege, a\.niederlagen\)/);
     });
 
-    it('die Rückgabe trägt die Bilanz mit', () => {
-        for (const feld of ['roh', 'siege', 'niederlagen', 'unentschieden', 'entschieden']) {
-            assert.ok(new RegExp(`\\b${feld}\\b`).test(METACALL),
-                `das Feld ${feld} fehlt — ohne Bilanz ist die Quote nicht nachrechenbar`);
-        }
+    it('die Rückgabe trägt die Bilanz mit — oder ehrlich null', () => {
+        assert.match(METACALL, /siege {2}: hatBilanz \? a\.siege : null,/);
+        assert.match(METACALL, /entschieden : hatBilanz \? entschieden : null,/);
     });
 
-    it('die Spiegelung 100 - x steht nur noch auf einer echten Win Rate', () => {
+    it('die Spiegelung 100 - x gilt nicht für Matchpunkte', () => {
         // Für Matchpunkte gilt wp(A,B) + wp(B,A) = 100 - 100·U/(3n).
-        // Gemessen über die 120 TEF-PBL-Paare mit vs_count >= 10:
+        // Gemessen über die TEF-PBL-Paare mit vs_count >= 10:
         // `100 - wp_rev` überschätzte im Mittel um 3,54 pp, maximal 10,26.
+        // Dort wird lieber gar nichts geliefert als eine geschönte Zahl.
+        assert.match(METACALL, /if \(reverse\.nurPunkte\) return null;/);
         assert.match(METACALL, /100 - reverse\.winPct/);
-        assert.match(METACALL, /summieren sich die beiden Richtungen[\s\S]{0,80}exakt auf 100/);
+    });
+});
+
+describe('Meta Call: die Paar-Aggregation an der echten Datei', () => {
+
+    /* Diese Probe hat der rote Deploy vom 05.09.2026 erzwungen. Die
+       erste Fassung der Reparatur uebersprang jede Zeile ohne Bilanz —
+       und die zwoelf abgeschlossenen Epochen tragen keine. Der
+       Vorab-Renderer des Telegram-Bots hat es gemeldet und den Deploy
+       angehalten, nicht ein Test.
+
+       Geprueft wird eine EIGENSCHAFT: dass die Aggregation fuer ein
+       abgeschlossenes Format ueberhaupt Paare liefert und fuer das
+       laufende Format die Bilanz nimmt. Welche Zahlen dort stehen, ist
+       der Pruefung egal. */
+    const csv = lies('data/labs_tournament_matchups.csv').replace(/^\uFEFF/, '');
+
+    function aggregiere(minGames) {
+        // Anfuehrungszeichen-bewusst wie parseCSVQuoted im Motor: die
+        // Turniernamen enthalten Kommas ("NAIC 2026, New Orleans").
+        const zerlege = (zeile) => {
+            const raus = [];
+            let feld = '';
+            let inZitat = false;
+            for (let i = 0; i < zeile.length; i++) {
+                const c = zeile[i];
+                if (inZitat) {
+                    if (c === '"') {
+                        if (zeile[i + 1] === '"') { feld += '"'; i += 1; }
+                        else inZitat = false;
+                    } else feld += c;
+                } else if (c === '"') inZitat = true;
+                else if (c === ',') { raus.push(feld); feld = ''; }
+                else feld += c;
+            }
+            raus.push(feld);
+            return raus;
+        };
+        const zeilen = csv.split(/\r?\n/).filter(Boolean);
+        const kopf = zerlege(zeilen[0]);
+        const bei = (n) => kopf.indexOf(n);
+        const ganz = (v) => {
+            const t = String(v == null ? '' : v).trim();
+            if (t === '') return null;
+            const n = parseInt(t, 10);
+            return Number.isFinite(n) && n >= 0 ? n : null;
+        };
+        const agg = {};
+        for (let i = 1; i < zeilen.length; i++) {
+            const f = zerlege(zeilen[i]);
+            if (f.length < kopf.length) continue;
+            if (String(f[bei('day_filter')] || 'overall').trim().toLowerCase() !== 'overall') continue;
+            const meta = String(f[bei('meta')] || '').trim().toUpperCase();
+            const a = String(f[bei('my_deck_name')] || '').trim();
+            const b = String(f[bei('opponent_deck_name')] || '').trim();
+            if (!meta || !a || !b) continue;
+            const games = parseInt(f[bei('vs_count')] || '0', 10);
+            if (!Number.isFinite(games) || games <= 0) continue;
+            const S = ganz(f[bei('vs_wins')]);
+            const N = ganz(f[bei('vs_losses')]);
+            const hatBilanz = S != null && N != null && (S + N) > 0;
+            agg[meta] = agg[meta] || {};
+            const k = a + '\u0000' + b;
+            const z = agg[meta][k] = agg[meta][k] || { games: 0, mit: 0 };
+            z.games += games;
+            if (hatBilanz) z.mit += games;
+        }
+        const raus = {};
+        for (const meta of Object.keys(agg)) {
+            let paare = 0, mit = 0;
+            for (const k of Object.keys(agg[meta])) {
+                const z = agg[meta][k];
+                if (z.games < minGames) continue;
+                paare += 1;
+                if (z.mit > 0) mit += 1;
+            }
+            raus[meta] = { paare, mit };
+        }
+        return raus;
+    }
+
+    it('ein abgeschlossenes Format behält seine Paare', () => {
+        // MAJOR_MATCHUP_MIN_GAMES_PAST = 3
+        const a = aggregiere(3);
+        assert.ok(a['TEF-CRI'] && a['TEF-CRI'].paare > 0,
+            'TEF-CRI hat keine Paare mehr — genau der Zustand, den der '
+            + 'Vorab-Renderer als "no matchup pairs loaded" gemeldet und '
+            + 'mit dem er den Deploy angehalten hat');
+        assert.equal(a['TEF-CRI'].mit, 0,
+            'TEF-CRI hätte plötzlich Bilanzspalten — dann stimmt die '
+            + 'Begründung im Quelltext nicht mehr');
+    });
+
+    it('das laufende Format rechnet aus der Bilanz', () => {
+        const a = aggregiere(10);
+        assert.ok(a['TEF-PBL'] && a['TEF-PBL'].paare > 0, 'TEF-PBL hat keine Paare');
+        assert.equal(a['TEF-PBL'].mit, a['TEF-PBL'].paare,
+            'nicht alle TEF-PBL-Paare tragen eine Bilanz — dann fiele ein '
+            + 'Teil des laufenden Formats auf Matchpunkte zurück');
     });
 });
 

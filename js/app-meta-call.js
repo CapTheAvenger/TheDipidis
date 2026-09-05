@@ -7664,10 +7664,18 @@ window.MetaCall = (function () {
    */
   let _junkWrCacheQuelle = null;
   let _junkWrCacheWert = null;
+  /* DER SAMMELPOSTEN TRUG ALS EINZIGE ZEILE KEINEN NENNER
+     (05.09.2026, Abnahme). 24 von 25 Zeilen der Begegnungsliste
+     bekamen ihre Partienzahl, "Sonstige" nicht — und auch keinen
+     Ersatztext. Ihr Nenner ist ein anderer als bei den Decks: die
+     Quote ist der anteilsgewichtete Schnitt ueber die Decks jenseits
+     der Top N, also zaehlt hier die Zahl dieser Decks. */
+  let _junkDeckZahl = 0;
   function _junkWinRatePct() {
     if (_junkWrCacheQuelle === _shareList && _junkWrCacheWert != null) {
       return _junkWrCacheWert;
     }
+    _junkDeckZahl = 0;
     let wert = _settings.junkWinRate;
     try {
       if (Array.isArray(_shareList) && _shareList.length > TOP_N) {
@@ -7681,6 +7689,7 @@ window.MetaCall = (function () {
           // Ihre Quote ist die Gegenquote meiner. Geklemmt, damit ein
           // kaputter Datentag nicht 0 oder 100 durchreicht.
           wert = Math.min(70, Math.max(30, 100 - wrRest));
+          _junkDeckZahl = rest.length;
         }
       }
     } catch (_e) { /* Rueckfall bleibt die Voreinstellung */ }
@@ -7944,7 +7953,7 @@ window.MetaCall = (function () {
   function getMatchup(myDeck, opponent) {
     if (opponent === '_junk') {
       const wr = _junkWinRatePct() / 100;
-      return { pWin: wr, pTie: 0.02, pLoss: Math.max(0, 1 - wr - 0.02) };
+      return { pWin: wr, pTie: 0.02, pLoss: Math.max(0, 1 - wr - 0.02), junkDecks: _junkDeckZahl };
     }
     // Manual override (user-entered) takes top priority. Use normalize-
     // aware lookup so that e.g. 'N's Zoroark' stored via Testing Groups
@@ -9644,9 +9653,11 @@ window.MetaCall = (function () {
          bekommen keinen Nenner, sondern werden als solche gekennzeichnet. */
       const wrN    = m.handEingestellt
         ? ' · ' + t('mc.wrManuell')
-        : (m.ohneMessung
-            ? ' · ' + t('mc.wrOhneMessung')
-            : ((m.partien > 0) ? ' · ' + window.zahlLokal(m.partien) : ''));
+        : (m.junkDecks > 0
+            ? ' · ' + t('mc.wrJunkDecks').replace('{n}', window.zahlLokal(m.junkDecks))
+            : (m.ohneMessung
+                ? ' · ' + t('mc.wrOhneMessung')
+                : ((m.partien > 0) ? ' · ' + window.zahlLokal(m.partien) : '')));
       const wrCls  = wrPct >= 55 ? 'favorable' : wrPct <= 45 ? 'unfavorable' : 'even';
       const barW   = Math.round((lambda / maxEnc) * 100);
       const name   = deck.name === '_junk' ? t('mc.junkDecks') : deck.name;

@@ -544,6 +544,29 @@
                         image_url: cardData.image_url,
                         totalDecksWithCard: Math.round(totalDecksWithCard),
                         metaShare: parseFloat(correctedMetaShare.toFixed(1)),
+                        /* DER ECHTE LISTENANTEIL — DANEBEN, NICHT STATT
+                           (05.09.2026, Abnahme).
+
+                           `metaShare` ist NICHT "in X % der Listen". Es ist
+                           der ungewichtete Mittelwert der Nutzungsanteile
+                           ueber die Top-10-Archetypen (Zeile 524:
+                           sumOfArchetypeUsagePcts / metaShareDenominator) —
+                           ein Archetyp mit einer Liste zaehlt darin so viel
+                           wie einer mit fuenf.
+
+                           Der Hinweistext vom selben Tag hat die Zahl aber
+                           als Listenanteil beschriftet, und damit gingen
+                           seine eigenen drei Zahlen nicht mehr auf:
+                             Secret Box  30,0 % x 1,00 = 0,30, gezeigt 0,12
+                             (echter Listenanteil 12 %)
+                           Also wird der echte Anteil hier mitgerechnet und
+                           im Hinweis getrennt genannt. Die Kachel behaelt
+                           `metaShare` — die Umstellung waere eine andere
+                           Entscheidung als diese Korrektur. */
+                        listenAnteil: safeTotalDecksInTop10 > 0
+                            ? (totalDecksWithCard / safeTotalDecksInTop10) * 100 : null,
+                        listenMit: Math.round(totalDecksWithCard),
+                        listenGesamt: Math.round(safeTotalDecksInTop10),
                         avgCount: Math.min(legalMaxCopies, safeTotalDecksInTop10 > 0 ? totalCopies / safeTotalDecksInTop10 : 0),
                         avgCountWhenUsed: Math.min(legalMaxCopies, totalDecksWithCard > 0 ? totalCopies / totalDecksWithCard : 0),
                         archetypes: archetypes
@@ -629,6 +652,21 @@
                         image_url: bestVariant.image_url,
                         totalDecksWithCard: Math.round(Math.max(...variants.map(v => v.totalDecksWithCard))),
                         metaShare: combined.combinedShare,
+                        /* Die Listenzahlen ueberleben die Variantenfusion.
+                           Ohne sie faellt der Hinweis genau bei den
+                           zusammengelegten Karten auf den alten,
+                           grundgesamtheits-vermischten Satz zurueck —
+                           und das sind die haeufigsten. Genommen wird
+                           die Variante mit den meisten Listen; die
+                           Nenner der Varianten sind identisch (dieselben
+                           Top-10-Listen). */
+                        listenMit: Math.round(Math.max(...variants.map(v => v.listenMit || 0))),
+                        listenGesamt: Math.max(...variants.map(v => v.listenGesamt || 0)),
+                        listenAnteil: (function () {
+                            const ges = Math.max(...variants.map(v => v.listenGesamt || 0));
+                            const mit = Math.max(...variants.map(v => v.listenMit || 0));
+                            return ges > 0 ? (mit / ges) * 100 : null;
+                        })(),
                         avgCount: Math.min(combined.legalMax, combined.combinedAvgWhenUsed * (combined.combinedShare / 100)),
                         avgCountWhenUsed: combined.combinedAvgWhenUsed,
                         recommendedCount: combined.recommendedCount,
@@ -2029,19 +2067,36 @@ function _anteilHinweis(card) {
     var a = Number(card && card.metaShare) || 0;
     var gesamt = Number(card && card.avgCount) || 0;
     var dort = Number(card && card.avgCountWhenUsed) || 0;
-    // Ohne das "dort"-Feld (aeltere Aufrufer) bleibt nur der Gesamtschnitt.
-    if (!(dort > 0)) {
-        return de
-            ? ('In ' + _kommaZahl(a, 1) + ' % der ausgewerteten Listen. '
-               + 'Über alle Listen gerechnet ' + _kommaZahl(gesamt, 2) + ' Kopien.')
-            : ('In ' + _kommaZahl(a, 1) + ' % of the analysed lists. '
-               + 'Across all lists that averages ' + _kommaZahl(gesamt, 2) + ' copies.');
+    var la = (card && card.listenAnteil != null) ? Number(card.listenAnteil) : null;
+    var mit = (card && card.listenMit != null) ? Number(card.listenMit) : null;
+    var ges = (card && card.listenGesamt != null) ? Number(card.listenGesamt) : null;
+
+    /* DREI ZAHLEN, DIE ZUSAMMENPASSEN MUESSEN (05.09.2026, Abnahme).
+       Der Anteil vorn ist ein Mittel ueber Archetypen, die beiden
+       Kopienzahlen sind Mittel ueber Listen. Wer sie multipliziert,
+       kommt nicht auf die Kachel — also steht jetzt daneben, welche
+       Zahl welche Grundgesamtheit hat, statt dass eine so tut, als
+       waere sie die andere. */
+    var teile = [];
+    if (la != null && mit != null && ges != null && ges > 0) {
+        teile.push(de
+            ? ('In ' + mit + ' von ' + ges + ' Listen (' + _kommaZahl(la, 1) + ' %).')
+            : ('In ' + mit + ' of ' + ges + ' lists (' + _kommaZahl(la, 1) + ' %).'));
     }
-    return de
-        ? ('In ' + _kommaZahl(a, 1) + ' % der ausgewerteten Listen, dort im Schnitt '
-           + _kommaZahl(dort, 2) + ' Kopien. Über alle Listen gerechnet '
-           + _kommaZahl(gesamt, 2) + ' — das ist die Zahl auf der Kachel.')
-        : ('In ' + _kommaZahl(a, 1) + ' % of the analysed lists, averaging '
-           + _kommaZahl(dort, 2) + ' copies there. Across all lists that is '
-           + _kommaZahl(gesamt, 2) + ' — the number on the tile.');
+    if (dort > 0) {
+        teile.push(de
+            ? ('Dort im Schnitt ' + _kommaZahl(dort, 2) + ' Kopien.')
+            : ('Averaging ' + _kommaZahl(dort, 2) + ' copies there.'));
+    }
+    teile.push(de
+        ? ('Über alle Listen ' + _kommaZahl(gesamt, 2) + ' — das ist die Zahl auf der Kachel.')
+        : ('Across all lists ' + _kommaZahl(gesamt, 2) + ' — the number on the tile.'));
+    teile.push(de
+        ? ('Die ' + _kommaZahl(a, 1) + ' % davor sind etwas anderes: der Mittelwert '
+           + 'der Nutzungsanteile über die Top-10-Archetypen — ein Archetyp mit '
+           + 'einer Liste zählt darin so viel wie einer mit fünf.')
+        : ('The ' + _kommaZahl(a, 1) + ' % in front is something else: the mean of '
+           + 'the per-archetype usage shares across the top 10 archetypes — an '
+           + 'archetype with one list counts as much as one with five.'));
+    return teile.join(' ');
 }

@@ -2947,23 +2947,53 @@
                 if (c === 'medium') return t('matchup.techConfidenceMedium') || 'medium confidence';
                 return t('matchup.techConfidenceLow') || 'low confidence';
             };
+            /* SEIT DIE GEGENRICHTUNG ZAEHLT, MUSS SIE AUCH DASTEHEN.
+               Am 05.09.2026 wurde die Rechnung repariert: `defender_wins`
+               (der Gegner schaltet unseren Plan ab) zaehlt seither in
+               dieselbe Summe wie unsere Siege. Diese Liste hier bekam
+               aber weiter nur `data.matchups` — also nur die Siege. Fuer
+               einen Gegner, bei dem AUSSCHLIESSLICH die Gegenrichtung
+               feuert, stand deshalb eine Ueberschrift ueber einer leeren
+               Liste, und die Zaehlung oben ("Erkannte Tech-Interaktionen
+               (16)") zaehlte ihn mit. Live gefunden: 16 von 19 Gegnern
+               mit leerer Liste und einem Minus, das niemand erklaeren
+               konnte.
+
+               Jetzt werden beide Richtungen gerendert, jede mit ihrem
+               Vorzeichen — und wer gar nichts Anzeigbares hat, faellt aus
+               der Liste UND aus der Zaehlung. */
             const items = [];
+            let gezaehlt = 0;
             for (const [oppName, data] of capabilityData.entries()) {
-                const bonusBadge = data.winsBonus > 0
-                    ? ` <span class="uv-tech-bonus">+${data.winsBonus}pts</span>`
+                const siege  = data.matchups || [];
+                const gegen  = data.gegenrichtung || [];
+                if (siege.length === 0 && gegen.length === 0) continue;
+                gezaehlt += 1;
+                const b = data.winsBonus;
+                const bonusBadge = (typeof b === 'number' && b !== 0)
+                    ? ` <span class="uv-tech-bonus${b < 0 ? ' uv-tech-bonus-neg' : ''}">${
+                        b > 0 ? '+' : ''}${String(b).replace('.', ',')}pts</span>`
                     : '';
+                const zeile = (m, richtung) =>
+                    `<li class="uv-tech-line uv-tech-${m.confidence} uv-tech-${richtung}">`
+                    + `${escapeHtml(m.narrative)} <span class="uv-tech-meta">(${
+                        escapeHtml(confidenceLabel(m.confidence))})</span></li>`;
                 items.push(`<li class="uv-tech-opp"><strong>vs ${escapeHtml(oppName)}</strong>${bonusBadge}<ul class="uv-tech-list">${
-                    data.matchups.map(m =>
-                        `<li class="uv-tech-line uv-tech-${m.confidence}">${escapeHtml(m.narrative)} <span class="uv-tech-meta">(${escapeHtml(confidenceLabel(m.confidence))})</span></li>`
-                    ).join('')
+                    siege.map(m => zeile(m, 'pro')).join('')
+                    + gegen.map(m => zeile(m, 'contra')).join('')
                 }</ul></li>`);
+            }
+            if (items.length === 0) {
+                container.innerHTML = '';
+                return;
             }
             container.innerHTML = `
                 <div class="uv-tech-section">
-                    <h4 class="uv-tech-title">${escapeHtml(header)} <span class="uv-tech-count">(${capabilityData.size})</span></h4>
+                    <h4 class="uv-tech-title">${escapeHtml(header)} <span class="uv-tech-count">(${gezaehlt})</span></h4>
                     <ul class="uv-tech-opp-list">${items.join('')}</ul>
                 </div>`;
-            console.log('[CapabilityDetector] rendered section:', capabilityData.size, 'opponent groups');
+            console.log('[CapabilityDetector] rendered section:', gezaehlt, 'of',
+                capabilityData.size, 'opponent groups (rest had nothing to show)');
         }
 
         // Card-by-card diff between the user's current deck and the

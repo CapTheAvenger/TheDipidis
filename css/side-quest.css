@@ -2692,6 +2692,33 @@ body.sqp-d-open { overflow: hidden; }
     box-shadow: inset 0 0 0 .8px var(--sq-accent);
 }
 
+/* AM TELEFON WAR DER UMSCHALTER NICHT ERREICHBAR
+   (05.09.2026, gemessen bei 390 px Fensterbreite).
+
+   .sq-top ist eine Flexzeile ohne Umbruch; .sq-console hat
+   `overflow: hidden`. Gemessen: Konsole clientWidth 364,
+   scrollWidth 473 — der Umschalter "Doppel / Einzel" lag bei
+   left 361 / right 486. Sichtbar blieben 13,5 px von "Doppel",
+   von "Einzel" 0 px. Und weil die Konsole `hidden` ist statt
+   `auto`, kann der Finger dort auch nicht wischen: die Auswahl
+   zwischen Doppel- und Einzelformat war am Telefon schlicht nicht
+   bedienbar, ohne dass etwas darauf hinweist.
+
+   Die Kopfzeile bricht jetzt um, statt zu verschwinden. Der
+   Abstandshalter faellt dabei weg — sonst schoebe er den Umschalter
+   in eine eigene Zeile ganz rechts —, und die Antippziele wachsen
+   auf die 44 px, die der Rest der Seite am Telefon einhaelt. */
+@media (max-width: 720px) {
+    .sq-console .sq-top {
+        flex-wrap: wrap;
+        gap: 8px 10px;
+        padding: 8px 12px 10px;
+    }
+    .sq-console .sq-spacer { flex: 0 0 100%; height: 0; }
+    .sq-console .sq-seg { margin-left: auto; }
+    .sq-console .sq-seg button { min-height: 44px; padding: 6px 16px; }
+}
+
 .sq-console .sq-grid {
     display: grid; grid-template-columns: 212px 288px minmax(0, 1fr);
     gap: 14px; padding: 14px; align-items: start;

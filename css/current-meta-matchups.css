@@ -788,6 +788,78 @@
     font-style: italic;
     border-left-color: #fbbf24;
 }
+/* ── Zwei Listen nebeneinander: die Zahl, an der man entscheidet ─────
+ *
+ * Betreiber am 05.09.2026: "Zwei Listen nebeneinander", Hauptzahl
+ * P(>=6 Siege), erwartete Siege als Stützzeile.
+ *
+ * Der Block sitzt UNTER den drei Pillen und nicht daneben: die Pillen
+ * sind die Zwischengröße (gewichtete Win Rate), das hier ist die
+ * Antwort. Eine Antwort gehört nicht in dieselbe Zeile wie ihre
+ * Zwischenschritte.
+ *
+ * Die Werte stehen in Tabellenziffern (`tabular-nums`), damit die drei
+ * Spalten untereinander fluchten — sonst tanzen "8,4 %" und "11,7 %"
+ * gegeneinander und der Vergleich, um den es geht, wird schwerer. */
+.uv-tag2-block {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--line-2, rgba(0, 0, 0, 0.12));
+}
+.uv-tag2-titel {
+    font-size: 0.82em;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 10px;
+    cursor: help;
+}
+.uv-tag2-reihe {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+}
+.uv-tag2-spalte {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 118px;
+}
+.uv-tag2-kopf {
+    font-size: 0.8em;
+    color: var(--ink-3);
+}
+.uv-tag2-wert {
+    font-size: 1.45em;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+}
+/* NUR DIE FARBE, NICHT DIE FLAECHE.
+   `.wr-pos` traegt weiter unten (Z. 1225) einen gruenen Hintergrund —
+   der ist fuer die Heatmap-Zellen gedacht und laesst die Delta-Zahl
+   hier wie eine markierte Textstelle aussehen. Gesehen im gerenderten
+   Block am 05.09.2026. */
+.uv-tag2-wert.wr-pos    { color: var(--tint-ok-ink); background: none; }
+.uv-tag2-wert.wr-neg    { color: #b91c1c; background: none; }
+.uv-tag2-wert.wr-neutral { color: var(--ink-2); background: none; }
+.uv-tag2-stuetze {
+    font-size: 0.8em;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+}
+/* Der Satz, der sagt, was die Zahl NICHT ist. Er steht kursiv und
+   klein, aber er steht da — eine Zahl, an der eine Deckentscheidung
+   hängt, ohne ihren Vorbehalt wäre der Fehler, den die Hausregel
+   "jede Quote trägt ihren Nenner" verhindern soll. */
+.uv-tag2-fuss {
+    margin-top: 10px;
+    font-size: 0.78em;
+    font-style: italic;
+    color: var(--ink-3);
+    line-height: 1.45;
+}
+
 @media (max-width: 768px) {
     .uv-summary-row {
         flex-direction: column;
@@ -796,6 +868,15 @@
     .uv-arrow {
         transform: rotate(90deg);
         align-self: center;
+    }
+    /* Drei Spalten nebeneinander sind auf dem Telefon drei Spalten mit
+       je 40 Punkten Breite. Untereinander bleibt jede lesbar. */
+    .uv-tag2-reihe {
+        gap: 12px;
+    }
+    .uv-tag2-spalte {
+        flex: 1 1 46%;
+        min-width: 0;
     }
 }
 

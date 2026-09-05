@@ -1819,11 +1819,42 @@ def scrape_archetype_matchups(
 
     url = f"{BASE_URL}/decks/{deck_slug}?tournaments={','.join(tids_sorted)}"
     # Day-filter query flag — user confirmed `&d2` for Day 2 on 2026-05-25.
-    # `&d1` for Day 1 is inferred from the symmetric pattern (the labs UI
-    # exposes Overall / Day 1 / Day 2 tabs on the meta summary page); if
-    # the assumed flag is wrong, the scraped page will fall back to the
-    # Overall view and rows are still valid — just mis-labeled as day1.
-    # Confirm the d1 pattern when we first see a populated day1 scrape.
+    #
+    # `&d1` WAR EINE VERMUTUNG, UND SIE IST WIDERLEGT (05.09.2026).
+    #
+    # Hier stand: "`&d1` for Day 1 is inferred from the symmetric pattern
+    # ... Confirm the d1 pattern when we first see a populated day1
+    # scrape." Die populierten day1-Laeufe sind da, und sie widerlegen die
+    # Vermutung:
+    #
+    #   • data/labs_tournament_matchups_TEF-PBL.csv — alle 769 Paare unter
+    #     day_filter='day1' sind byteweise identisch mit denen unter
+    #     'overall'. TEF-CRI ebenso: 2.528 von 2.528.
+    #   • Der Beweis, dass 'day1' nicht echt sein KANN: in 238 von 238
+    #     Paaren, die in allen drei Filtern stehen, gilt
+    #     day1 + day2 > overall. Eine echte Tag-1-Teilmenge kann zusammen
+    #     mit Tag 2 nicht mehr Spiele haben als das Ganze.
+    #   • day2 weicht dagegen in 205 von 238 Paaren ab — `&d2` wirkt.
+    #
+    # Die Quelle ignoriert `&d1` offenbar und liefert die Overall-Ansicht.
+    # Der alte Kommentar nannte das "still valid — just mis-labeled", und
+    # genau das war der Fehler in der Einschaetzung: die Oberflaeche mischt
+    # Day-2 mit 0,45 und Day-1 mit 0,35 (js/app-meta-call.js), Overall ist
+    # nur Rueckfall. Ist "Day 1" in Wahrheit Overall — und Overall enthaelt
+    # die Tag-2-Spiele —, dann zaehlen die Tag-2-Ergebnisse zweimal. Eine
+    # falsche Beschriftung ist hier keine Kosmetik, sondern ein
+    # Rechenfehler auf jedem Deck.
+    #
+    # Bis das richtige Flag bekannt ist, faengt die Oberflaeche den Fall
+    # ab (_day1IstKopie in js/app-meta-call.js verwirft eine Day-1-Karte,
+    # die Paar fuer Paar Overall ist). Das ist ein Verband, keine Heilung.
+    #
+    # WAS ZU TUN IST: die Labs-Seite von Hand oder per workflow_dispatch
+    # abrufen und sehen, welches Flag die Tag-1-Ansicht liefert (der
+    # Sandkasten erreicht labs.limitlesstcg.com nicht — CLAUDE.md sieht
+    # fuer genau diesen Fall den CI-Lauf vor). Bis dahin bitte NICHT
+    # einfach ein anderes Flag raten: dieser Kommentar existiert, weil das
+    # letzte Raten vier Monate lang unbemerkt geblieben ist.
     if day_filter == MATCHUP_DAY_DAY2:
         url += '&d2'
     elif day_filter == MATCHUP_DAY_DAY1:

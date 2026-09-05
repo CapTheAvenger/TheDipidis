@@ -350,13 +350,55 @@ describe('Grundgesamtheiten: Spieler sind keine Turniere', () => {
         assert.match(EMPFEHLUNG, /gz\(v\.turniere\)/);
     });
 
+    it('der Kartenhinweis nennt drei Grundgesamtheiten getrennt', () => {
+        /* ABNAHME 05.09.2026: der erste Anlauf hat die beiden
+           Kopienzahlen getrennt, die Prozentzahl davor aber weiter als
+           Listenanteil beschriftet. `metaShare` ist der ungewichtete
+           Mittelwert der Nutzungsanteile ueber die Top-10-Archetypen
+           (app-meta-cards.js:524), kein Listenanteil — Secret Box:
+           30,0 % x 1,00 = 0,30, auf der Kachel stehen 0,12, echter
+           Listenanteil 12 %. Die eigenen drei Zahlen gingen nicht auf. */
+        assert.match(METACARDS, /listenAnteil: safeTotalDecksInTop10 > 0/);
+        assert.match(METACARDS, /listenMit: Math\.round\(totalDecksWithCard\)/);
+        // Auch nach der Variantenfusion, sonst fehlt es bei den haeufigsten Karten.
+        assert.match(METACARDS, /listenMit: Math\.round\(Math\.max\(\.\.\.variants\.map/);
+        assert.match(METACARDS, /Die ' \+ _kommaZahl\(a, 1\) \+ ' % davor sind etwas anderes/);
+        assert.match(METACARDS, /Mittelwert '\s*\+ 'der Nutzungsanteile über die Top-10-Archetypen/);
+    });
+
+    it('die Ace-Spec-Zeile widerspricht ihrem eigenen Satz nicht mehr', () => {
+        /* ABNAHME 05.09.2026: der Fliesstext sagte "Unfair Stamp steht
+           in 86,7 % der ausgewerteten Praesenzlisten", die Zeile direkt
+           darunter "Major: not played · Online 86.7% share". Dieselbe
+           Zahl, zwei Beschriftungen, eine davon falsch. */
+        assert.match(BAUER, /const _y2 = !!acePick\.quelle_text;/);
+        assert.match(BAUER, /parts\.push\(`Präsenz \$\{/);
+        assert.match(BAUER, /if \(!_y2\) parts\.push\(`Online /);
+    });
+
+    it('der Sammelposten "Sonstige" trägt seinen eigenen Nenner', () => {
+        // 24 von 25 Zeilen hatten ihre Partienzahl, diese nicht.
+        assert.match(METACALL, /junkDecks: _junkDeckZahl/);
+        assert.match(METACALL, /t\('mc\.wrJunkDecks'\)/);
+        const i18n = lies('js/i18n.js');
+        assert.equal(i18n.split("'mc.wrJunkDecks'").length - 1, 2);
+    });
+
+    it('die Day-2-Schwelle steht im Tooltip', () => {
+        // Clefairy Ogerpon (3 Day-2-Spieler) bekommt keine Rate — das
+        // ist richtig, stand aber nirgends.
+        const i18n = lies('js/i18n.js');
+        assert.match(i18n, /weniger als 5 Day-2-Spielern dieses Decks bleiben ganz draußen/);
+        assert.match(i18n, /fewer than 5 Day-2 players of this deck are left out entirely/);
+    });
+
     it('"dort im Schnitt" liest das Feld für "dort"', () => {
         // avgCount ist totalCopies / alle Listen — daraus wurde
         // "dort im Schnitt 0,12 Kopien". Eine Karte, die in einer Liste
         // IST, ist dort mindestens einmal drin.
         assert.match(METACARDS, /var dort = Number\(card && card\.avgCountWhenUsed\) \|\| 0;/);
-        assert.match(METACARDS, /dort im Schnitt '\s*\+ _kommaZahl\(dort, 2\)/);
-        assert.match(METACARDS, /Über alle Listen gerechnet/);
+        assert.match(METACARDS, /Dort im Schnitt ' \+ _kommaZahl\(dort, 2\)/);
+        assert.match(METACARDS, /Über alle Listen ' \+ _kommaZahl\(gesamt, 2\)/);
     });
 });
 

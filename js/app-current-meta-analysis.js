@@ -2616,11 +2616,38 @@
 
             const vanillaWr = paired.reduce((s, p) => s + p.wr * p.fieldShare, 0) / totalShare;
             const userWr    = paired.reduce((s, p) => s + p.userWr * p.fieldShare, 0) / totalShare;
-            const delta     = userWr - vanillaWr;
 
             const decimal = (getLang() === 'de') ? ',' : '.';
             const fmt = (v, d = 1) => v.toFixed(d).replace('.', decimal);
             const signed = (v) => (v >= 0 ? `+${fmt(v)}` : fmt(v));
+
+            /* ── DIE DREI SPALTEN MUESSEN SICH NACHRECHNEN LASSEN ────
+             *
+             * Live gesehen am 06.09.2026, direkt nach dem Ausliefern:
+             * Vanilla 19,1 %, Dein Build 21,5 %, Delta +2,5 pp. Wer
+             * die beiden Spalten voneinander abzieht, bekommt 2,4 —
+             * und traut dann zu Recht keiner der drei Zahlen mehr.
+             *
+             * Der Grund ist keine falsche Rechnung, sondern zwei
+             * getrennte Rundungen: die Spalten runden je fuer sich auf
+             * eine Stelle (19,06 → 19,1; 21,54 → 21,5), das Delta
+             * rundet die ungerundete Differenz (2,48 → 2,5). Beide
+             * Zahlen sind fuer sich korrekt; nebeneinander sind sie
+             * unlesbar.
+             *
+             * Deshalb wird hier ZUERST auf die angezeigte Stelle
+             * gerundet und DANN differenziert. Das Delta ist damit
+             * exakt die Differenz, die der Leser im Kopf bildet. Der
+             * Preis ist ein Rundungsfehler von bis zu 0,05 pp gegenueber
+             * der exakten Differenz — unterhalb der Stelle, die
+             * ueberhaupt angezeigt wird, und ein sehr guenstiger Tausch
+             * gegen drei Zahlen, die zueinander passen.
+             *
+             * Pfeil und Farbe haengen an derselben gerundeten Zahl,
+             * sonst zeigt ein Block mit "+0,0 pp" einen gruenen Pfeil
+             * nach oben. */
+            const auf1 = (v) => Math.round(v * 10) / 10;
+            const delta = auf1(userWr) - auf1(vanillaWr);
             const arrow = delta >= 0.05 ? '↑' : delta <= -0.05 ? '↓' : '→';
             const deltaClass = delta >= 0.5 ? 'wr-pos' : delta <= -0.5 ? 'wr-neg' : 'wr-neutral';
 
@@ -2715,7 +2742,10 @@
             const pUser    = siegVerteilung(o => o.userWr);
             const sVanilla = RUNDEN * vanillaWr / 100;
             const sUser    = RUNDEN * userWr / 100;
-            const pDelta   = pUser - pVanilla;
+            /* Gerundet vor der Differenz — siehe `auf1` oben. Gilt fuer
+               die Prozentzeile UND fuer die erwarteten Siege darunter. */
+            const pDelta   = auf1(pUser) - auf1(pVanilla);
+            const sDelta   = auf1(sUser) - auf1(sVanilla);
             const pDeltaCls = pDelta >= 0.5 ? 'wr-pos' : pDelta <= -0.5 ? 'wr-neg' : 'wr-neutral';
 
             const matchedOpponents  = paired.filter(p => p.bonus > 0).length;
@@ -2759,7 +2789,7 @@
                         <div class="uv-tag2-spalte">
                             <span class="uv-tag2-kopf">${escapeHtml(t('matchup.userVsVanillaDelta') || 'Delta')}</span>
                             <span class="uv-tag2-wert ${pDeltaCls}">${signed(pDelta)}pp</span>
-                            <span class="uv-tag2-stuetze">${escapeHtml(t('matchup.uvTag2Siege').replace('{n}', signed(sUser - sVanilla)))}</span>
+                            <span class="uv-tag2-stuetze">${escapeHtml(t('matchup.uvTag2Siege').replace('{n}', signed(sDelta)))}</span>
                         </div>
                     </div>
                     <div class="uv-tag2-fuss">${escapeHtml(t('matchup.uvTag2Fuss'))}</div>

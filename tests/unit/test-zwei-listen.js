@@ -172,4 +172,50 @@ describe('Zwei Listen nebeneinander', () => {
         assert.match(CSS, /\.uv-tag2-stuetze[\s\S]{0,160}tabular-nums/,
             'die Stützzeile steht nicht in Tabellenziffern');
     });
+
+    it('die drei Spalten lassen sich nachrechnen', () => {
+        /* GEFUNDEN BEIM HINSEHEN, nicht von einer Zusicherung: live
+           stand da Vanilla 19,1 %, Dein Build 21,5 %, Delta +2,5 pp.
+           19,1 + 2,5 ist 21,6. Zwei getrennte Rundungen — die Spalten
+           runden je fuer sich, das Delta rundete die ungerundete
+           Differenz. Beide Zahlen fuer sich richtig, nebeneinander
+           unbrauchbar.
+
+           Die Zusicherung rechnet das nach, statt den Quelltext
+           abzugrasen: sie baut die Rundung nach und prueft, dass die
+           angezeigte Differenz die Differenz der angezeigten Werte
+           IST — an genau den Werten, die den Fehler ausgeloest haben,
+           und an einer Reihe zufaelliger Paare. */
+        const auf1 = (v) => Math.round(v * 10) / 10;
+        const zeig = (v) => v.toFixed(1);
+
+        const paare = [[19.06, 21.54], [46.54, 48.04], [50.0, 50.0],
+                       [12.349, 12.351], [33.35, 30.05], [7.04, 6.96]];
+        for (let i = 0; i < 300; i++) {
+            paare.push([Math.random() * 100, Math.random() * 100]);
+        }
+
+        for (const [a, b] of paare) {
+            const gezeigtA = zeig(auf1(a));
+            const gezeigtB = zeig(auf1(b));
+            const gezeigtD = zeig(auf1(b) - auf1(a));
+            const nachgerechnet = zeig(parseFloat(gezeigtB) - parseFloat(gezeigtA));
+            assert.strictEqual(gezeigtD, nachgerechnet,
+                `${gezeigtB} - ${gezeigtA} liest sich als ${nachgerechnet}, ` +
+                `angezeigt wird aber ${gezeigtD}`);
+        }
+
+        /* Und der Quelltext muss diese Rundung auch wirklich benutzen —
+           fuer BEIDE Zeilen des Blocks und fuer die Kopfzeile darueber. */
+        assert.match(QUELLE, /const auf1 = \(v\) => Math\.round\(v \* 10\) \/ 10;/,
+            'die Rundung auf die angezeigte Stelle fehlt');
+        assert.match(QUELLE, /const delta\s*=\s*auf1\(userWr\) - auf1\(vanillaWr\)/,
+            'die Kopfzeile bildet die Differenz weiterhin ungerundet');
+        assert.match(QUELLE, /const pDelta\s*=\s*auf1\(pUser\) - auf1\(pVanilla\)/,
+            'die Prozentspalte bildet die Differenz weiterhin ungerundet');
+        assert.match(QUELLE, /const sDelta\s*=\s*auf1\(sUser\) - auf1\(sVanilla\)/,
+            'die erwarteten Siege bilden die Differenz weiterhin ungerundet');
+        assert.ok(!/signed\(sUser - sVanilla\)/.test(QUELLE),
+            'die alte ungerundete Differenz steht noch in der Ausgabe');
+    });
 });

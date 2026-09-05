@@ -3644,15 +3644,59 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .replace('{n}', String(g.partien));
                 wrap.appendChild(kopf);
 
+                /* ── EIN GRUND, EINMAL ────────────────────────────
+                 *
+                 * BEFUND beim Hinsehen am 06.09.2026, direkt nach dem
+                 * Ausliefern: gegen Toucannon standen drei Zeilen
+                 * untereinander, und alle drei sagten dasselbe —
+                 * "Crustle ignoriert Pikachu exs Resolute Heart …",
+                 * "Dudunsparce ex ignoriert Pikachu exs Resolute Heart
+                 * …", "Iron Crown ex ignoriert Pikachu exs Resolute
+                 * Heart …". Drei Karten, EINE Regel. Der Leser liest
+                 * denselben Satz dreimal und haelt den Block fuer
+                 * Fuellmaterial, obwohl der Inhalt richtig ist: es sind
+                 * drei Traeger derselben Wirkung, und er soll sich
+                 * einen aussuchen.
+                 *
+                 * Also: Karten nebeneinander, Grund darunter, einmal.
+                 * Gruppiert wird an dem, was der Satz OHNE den
+                 * fuehrenden Kartennamen sagt — das ist der Teil, der
+                 * aus der Regel kommt und nicht aus dem Traeger.
+                 * Beginnt ein Satz nicht mit dem Kartennamen (andere
+                 * Regelform, andere Sprache), bleibt er ungekuerzt und
+                 * die Karte steht fuer sich. Es wird nichts
+                 * umformuliert und nichts weggelassen — nur nicht
+                 * wiederholt. */
+                const grosz = (x) => x ? x.charAt(0).toUpperCase() + x.slice(1) : x;
+                const gruppen = [];
                 g.vorschlaege.forEach(v => {
+                    const satz = String(v.satz || '');
+                    const rest = satz.startsWith(v.karte + ' ')
+                        ? grosz(satz.slice(v.karte.length + 1))
+                        : null;
+                    const schluessel = (rest === null)
+                        ? '\u0000einzeln:' + v.karte
+                        : rest + '|' + v.sicherheit;
+                    let gr = gruppen.find(x => x.schluessel === schluessel);
+                    if (!gr) {
+                        gr = { schluessel, grund: rest === null ? satz : rest,
+                               sicherheit: v.sicherheit, karten: [] };
+                        gruppen.push(gr);
+                    }
+                    gr.karten.push(v);
+                });
+
+                gruppen.forEach(gr => {
                     const row = document.createElement('div');
                     row.className = 'build-info-alt-row build-info-ideen-row';
                     const karte = document.createElement('div');
                     karte.className = 'build-info-alt-card';
                     /* Kartenart dazu, sonst liest sich "Crustle" wie
                        eine Tech-Karte und ist ein ganzer Angreifer. */
-                    const art = [v.art, v.energie].filter(Boolean).join(' · ');
-                    karte.textContent = v.karte + (art ? '  (' + art + ')' : '');
+                    karte.textContent = gr.karten.map(v => {
+                        const art = [v.art, v.energie].filter(Boolean).join(' · ');
+                        return v.karte + (art ? '  (' + art + ')' : '');
+                    }).join('   ·   ');
                     const detail = document.createElement('div');
                     detail.className = 'build-info-alt-detail';
                     /* Der Satz kommt aus der Regelbasis und nennt beide
@@ -3660,10 +3704,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                        einzige Zahlangabe, die hier hingehört, weil sie
                        eine Aussage ÜBER DIE ABLEITUNG ist und nicht
                        über die Karte. */
-                    detail.textContent = v.satz + ' · '
+                    detail.textContent = gr.grund + ' · '
                         + t('buildInfo.techIdeenSicherheit' + (
-                            v.sicherheit === 'high' ? 'Hoch'
-                          : v.sicherheit === 'medium' ? 'Mittel' : 'Niedrig'));
+                            gr.sicherheit === 'high' ? 'Hoch'
+                          : gr.sicherheit === 'medium' ? 'Mittel' : 'Niedrig'));
                     row.appendChild(karte);
                     row.appendChild(detail);
                     wrap.appendChild(row);

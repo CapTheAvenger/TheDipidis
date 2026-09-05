@@ -168,11 +168,48 @@ jobs:
               fi
           fi
           echo "Running with args: $ARGS"
+          # Stand VOR dem Lauf festhalten — sonst laesst sich hinterher
+          # nicht unterscheiden, ob es nichts Neues gab oder ob der
+          # Scraper nicht angesprungen ist. Beides sah bis zum 05.09.2026
+          # gleich aus: ein gruener Lauf von 50 Sekunden ohne Commit,
+          # zehnmal hintereinander.
+          vorher=0
+          vorher_t=0
+          if [ -f backend/core/data/tournament_decklists_per_player.csv ]; then
+              vorher=$(( $(wc -l < backend/core/data/tournament_decklists_per_player.csv) - 1 ))
+              vorher_t=$(tail -n +2 backend/core/data/tournament_decklists_per_player.csv | cut -d, -f1 | sort -u | wc -l)
+          fi
+          echo "vorher=$vorher Zeilen, $vorher_t Turniere"
           python backend/scrapers/per_decklist_scraper.py $ARGS
           rc=$?
           echo "::endgroup::"
+          nachher=0
+          nachher_t=0
+          if [ -f backend/core/data/tournament_decklists_per_player.csv ]; then
+              nachher=$(( $(wc -l < backend/core/data/tournament_decklists_per_player.csv) - 1 ))
+              nachher_t=$(tail -n +2 backend/core/data/tournament_decklists_per_player.csv | cut -d, -f1 | sort -u | wc -l)
+          fi
+          {
+            echo "### Per-Decklist-Lauf"
+            echo ""
+            echo "| | vorher | nachher |"
+            echo "| --- | ---: | ---: |"
+            echo "| Zeilen | $vorher | $nachher |"
+            echo "| Turniere | $vorher_t | $nachher_t |"
+            echo ""
+            echo "Rueckgabewert des Scrapers: \`$rc\` · Argumente: \`$ARGS\`"
+          } >> "$GITHUB_STEP_SUMMARY"
           if [ "$rc" -ne 0 ]; then
               echo "::warning::per_decklist_scraper exited with $rc"
+              echo "FAIL scrapers/per_decklist_scraper.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scrapers/per_decklist_scraper.py" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+          if [ "$rc" -eq 0 ] && [ "$nachher_t" -eq "$vorher_t" ]; then
+              # Kein Fehler, aber auch kein neues Turnier. Das ist der
+              # Normalfall zwischen zwei Praesenzturnieren — und genau
+              # deshalb muss es DASTEHEN, statt wie ein Erfolg auszusehen.
+              echo "::notice::Kein neues Turnier gefunden ($nachher_t unveraendert). Das ist zwischen zwei Majors normal; auffaellig wird es erst, wenn nach einem Major nichts dazukommt."
           fi
           exit 0  # never block — partial data is still data
 

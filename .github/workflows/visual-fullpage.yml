@@ -1,9 +1,23 @@
 name: Visual Fullpage Coverage
 
+# KEIN naechtlicher Lauf mehr (05.09.2026).
+#
+# Der cron '0 3 * * *' stand hier seit dem 22.05.2026 — dem Tag, an dem
+# tests/e2e/visual-full-page-coverage.spec.js auf 0 Byte fiel. Seitdem
+# startete dieser Lauf jede Nacht, installierte Node und Chromium, fand
+# dank `--pass-with-no-tests` keinen Test und meldete gruen. Rund 105
+# Laeufe, die nichts geprueft und das Gegenteil behauptet haben.
+#
+# Der Aufrufer weigert sich jetzt, auf einer leeren Suite gruen zu
+# melden (tests/e2e/run-visual-fullpage-ci.js). Damit waere der cron ab
+# sofort jede Nacht rot — eine Meldung, an der niemand etwas tun kann,
+# und nach der dritten Nacht liest sie ohnehin keiner mehr. Also bleibt
+# der Lauf von Hand ausloesbar und schweigt, bis die Suite Inhalt hat.
+#
+# Was zurueckkommen muesste, damit der cron zurueckkommt, steht in
+# docs/geparkte-features.md unter "Die naechtliche Ganzseiten-Suite".
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 3 * * *'
 
 jobs:
   visual-fullpage:

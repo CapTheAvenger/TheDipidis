@@ -966,9 +966,11 @@ describe('Stufe 5.3 — die Matchup-Korrektur: Turnierpiloten statt Online-Enthu
     const RECHNUNG = CLIP + '\n' + funktionAusQuelle('_computeMatchupAdjustments')
         + '\nglobalThis.__f = _computeMatchupAdjustments;';
 
+    // Endmarke seit 05.09.2026: die Rueckgabe traegt zusaetzlich den
+    // Nenner (`partien`), damit die Begegnungsliste ihn anzeigen kann.
     const ANWENDUNG = CLIP + '\n' + blockAusQuelle(
         'const adjA = _deckWRAdjustment[a] || 0;',
-        'return { pWin, pTie, pLoss };')
+        'return { pWin, pTie, pLoss, partien: base.partien || 0 };')
         + 'return { pWin, pTie, pLoss };';
 
     function rechne(decks, letzteMajors, ersetzen) {

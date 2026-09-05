@@ -59,7 +59,14 @@ describe('Die neuen Formulierungen stehen in beiden Sprachen', () => {
         [EMPF, "'schafft Day 2'", "'makes Day 2'"],
         [EMPF, "'Day-2-Rate bisher'", "'Day 2 rate so far'"],
         [EMPF, "'Schnitt aller Decks '", "'average across all decks '"],
-        [EMPF, "'Und trotzdem: in '", "'And still: at '"],
+        // 05.09.2026: der Satz nannte eine SPIELER-Quote als
+        // TURNIER-Anteil ("in 75 % der Turniere ist nach Day 1
+        // Schluss"). `empfehlung_mittel` ist der Anteil der Spieler
+        // dieses Decks, die Day 2 erreichen; die Datei sagt daneben
+        // `day2_ueberhaupt_erreicht: 43` von `turniere: 44` — in 2,3 %
+        // der Turniere war Schluss, nicht in 75 %. Faktor 33.
+        [EMPF, "'Und trotzdem: von je vier Spielern dieses Decks scheitern rund '", "'And still: about '"],
+        [EMPF, "' % der Antritte, gemittelt über '", "' % of entries, averaged over '"],
         [EMPF, "' % vom Feld sind neu.</strong> '", null],
         [HUB, "'Was gerade läuft'", "'What is running right now'"],
     ];

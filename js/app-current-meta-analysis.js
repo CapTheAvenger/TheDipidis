@@ -2594,7 +2594,12 @@
             if (capabilityData && capabilityData.size > 0) {
                 paired.forEach(p => {
                     const d = capabilityData.get(p.opponent);
-                    if (!d || d.winsBonus <= 0) return;
+                    // `<= 0` stand hier bis zum 05.09.2026 und war die zweite
+                    // Haelfte desselben Fehlers: selbst wenn die Rechnung oben
+                    // ein Minus geliefert haette, waere es hier verworfen
+                    // worden. Jetzt faellt nur die echte Null durch — die
+                    // aendert ohnehin nichts.
+                    if (!d || !d.winsBonus) return;
                     const before = p.userWr;
                     p.userWr = Math.max(0, Math.min(100, p.userWr + d.winsBonus));
                     p.bonus  = (p.bonus || 0) + d.winsBonus;
@@ -2622,7 +2627,11 @@
             const vanillaClass = wrColorClass(vanillaWr);
             const userClass = wrColorClass(userWr);
 
-            const matchedOpponents = paired.filter(p => p.bonus > 0).length;
+            const matchedOpponents  = paired.filter(p => p.bonus > 0).length;
+            // Gegner, bei denen die Kartentext-Pruefung gegen UNS ausgeht.
+            // Bis zum 05.09.2026 gab es diese Zahl nicht, weil es den Fall
+            // nicht geben konnte.
+            const belasteteOpponents = paired.filter(p => (p._capabilityWinsBonus || 0) < 0).length;
             const userCounterCount = Array.from(userByCat.values()).reduce((s, set) => s + set.size, 0);
 
             summaryEl.innerHTML = `
@@ -2677,6 +2686,23 @@
             breakdownLines.push(
                 (t('matchup.userVsVanillaBreakdownMatched') || 'Bonus applied vs {m}/{n} opponents in the predicted field.')
                     .replace('{m}', matchedOpponents).replace('{n}', paired.length)
+            );
+            if (belasteteOpponents > 0) {
+                breakdownLines.push(
+                    (t('matchup.userVsVanillaBreakdownGegen')
+                        || 'Against {m} of {n} opponents the card text goes the other way — that is subtracted here.')
+                        .replace('{m}', belasteteOpponents).replace('{n}', paired.length)
+                );
+            }
+            /* Der wichtigste Satz an dieser Stelle: was die Zahl NICHT weiss.
+               Sie vergleicht Kartentexte gegen das erwartete Feld — den Preis
+               dafuer, dass eine Tech-Karte einen Sucher verdraengt, kennt sie
+               nicht. Ohne diesen Hinweis liest sich "+6,2 pts" wie ein
+               Nettogewinn, und genau daran zerlegt jemand seine konsistente
+               Liste (Feature-Review vom 05.09.2026). */
+            breakdownLines.push(
+                t('matchup.userVsVanillaBreakdownKeinPreis')
+                    || 'This number does not include the consistency cost: a tech card takes a slot away from a search card. Compare it with the consistency score of your build before swapping.'
             );
             breakdownLines.push(
                 t('matchup.userVsVanillaHeuristicNote') || 'Heuristic estimate (+3pts per matched threat category, cap +9pts/matchup).'
@@ -2842,30 +2868,55 @@
             log('detected matchups for opponents:', detected ? detected.size : 0);
             if (!detected || detected.size === 0) return new Map();
 
-            // Build the per-opponent display-and-bonus tuples. Only
-            // attacker_wins interactions count — defender_wins are
-            // opponent counters against the user (e.g. Shaymin
-            // shutting down our bench-snipe attack), neutral
-            // interactions are ambiguous outcomes. Both are filtered
-            // out so this section reads cleanly as "your techs
-            // against the field". For the WR bonus, the same
-            // interaction tag fired by multiple attacker cards
-            // counts once (having two ignores_effects attackers
-            // isn't double the win, just more redundant access).
+            /* BIS ZUM 05.09.2026 KONNTE DIESE ZAHL NICHT FALLEN.
+               Hier stand `matchups.filter(m => m.result === 'attacker_wins')`
+               und darunter `if (wins.length === 0) continue`. Beides zusammen
+               warf die Gegenrichtung weg, BEVOR gerechnet wurde: eine
+               `defender_wins`-Zeile — der Gegner schaltet unseren Plan ab —
+               konnte den Wert nicht mehr erreichen. data/card_capability_
+               interactions.json enthaelt genau so eine Zeile
+               (attack.bench_damage vs. ability.bench_protection,
+               matchup_value -3), und sie ist nie angekommen.
+
+               Zusammen mit dem stets nicht-negativen Kategorienbonus weiter
+               oben war das angezeigte Delta damit MATHEMATISCH nie negativ.
+               Die Zweige fuer den fallenden Pfeil und die rote Pille waren
+               toter Code. Wer zehn Tech-Karten anheftet, sah eine gruene
+               Pille — auch fuer ein Deck, das gerade seine Sucher verloren
+               hat.
+
+               Jetzt zaehlen beide Richtungen in dieselbe Summe, und der
+               Deckel gilt symmetrisch. Getrennt bleibt nur die ANZEIGE:
+               die Erzaehlliste darunter heisst "deine Techs gegen das Feld"
+               und zeigt weiter die Siege; die Gegenrichtung steht als eigene
+               Liste daneben, damit ein Minus nicht unerklaert im Raum haengt.
+               `neutral` bleibt draussen — ein mehrdeutiger Ausgang ist keine
+               Aussage.
+
+               Was diese Zahl weiterhin NICHT enthaelt: den Konsistenzpreis
+               der Tech-Karten. Vier Tech-Slots sind vier gestrichene Sucher,
+               und das steht in __totalConsistencyScore, nicht hier. Der
+               Hinweistext sagt das jetzt ausdruecklich. */
             const out = new Map();
             for (const [oppName, matchups] of detected.entries()) {
-                const wins = matchups.filter(m => m.result === 'attacker_wins');
-                if (wins.length === 0) continue;
+                const wins     = matchups.filter(m => m.result === 'attacker_wins');
+                const verluste = matchups.filter(m => m.result === 'defender_wins');
+                if (wins.length === 0 && verluste.length === 0) continue;
+                // Derselbe Interaktions-Tag, von mehreren Karten ausgeloest,
+                // zaehlt einmal: zwei ignores_effects-Angreifer sind nicht
+                // der doppelte Sieg, nur der redundantere Zugriff.
                 const seenInteractions = new Set();
                 let totalBonus = 0;
-                for (const m of wins) {
+                for (const m of wins.concat(verluste)) {
                     if (seenInteractions.has(m.interactionTag)) continue;
                     seenInteractions.add(m.interactionTag);
                     totalBonus += (m.matchupValue || 0);
                 }
-                const capped = Math.min(totalBonus, _CAPABILITY_BONUS_CAP);
+                const capped = Math.max(-_CAPABILITY_BONUS_CAP,
+                                        Math.min(totalBonus, _CAPABILITY_BONUS_CAP));
                 out.set(oppName, {
                     matchups: wins,
+                    gegenrichtung: verluste,
                     winsBonus: capped,
                     winsBonusRaw: totalBonus,
                 });

@@ -611,8 +611,36 @@
     // scraper provides it; otherwise the synthesized aggregate fallback.
     if (ref.isReal) {
       const games = (ref.wins || 0) + (ref.losses || 0) + (ref.ties || 0);
-      const recordBlock = games > 0
-        ? `<span class="past-meta-best-record">${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${(ref.win_pct || 0).toFixed(1).replace('.', ',')}%</span>`
+      /* DIE VIERTE KONVENTION, DIE DAS HAUS VERWORFEN HAT (05.09.2026).
+         Bis heute stand hier `ref.win_pct` aus
+         data/online_best_decklists.json unveraendert auf dem Schirm.
+         Der Scraper rechnet dort (S + 0,5·U) / Partien
+         (backend/scrapers/current_meta_analysis_scraper.py:_win_pct) —
+         genau die Formel, die js/win-rate-konvention.js als ERFUNDEN
+         kennzeichnet und die aus app-tier-meta.js und app-past-meta.js
+         entfernt wurde.
+
+         Nachgerechnet ueber die 11 Eintraege mit Unentschieden:
+           Dragapult Blaziken 13-0-1   angezeigt 96,4   Matchpunkte 95,2
+           Mega Froslass       2-3-1   angezeigt 41,7   Matchpunkte 38,9
+           Other               7-3-1   angezeigt 68,2   Matchpunkte 66,7
+         Keine der drei Hauskonventionen trifft die angezeigte Zahl.
+
+         Die Major-Kachel 20 Zeilen weiter oben rechnet seit dem
+         30.08. Matchpunkte und traegt den Konventionshinweis im
+         `title`. Zwei Kacheln mit demselben Aussehen
+         (`past-meta-best-record`) duerfen nicht zwei verschiedene
+         Formeln zeigen — hier steht jetzt dieselbe. */
+      const _oWK = window.WinRateKonvention;
+      const _oWpVal = _oWK
+        ? _oWK.KONVENTIONEN.matchpunkte.rechne(ref.wins || 0, ref.losses || 0, ref.ties || 0)
+        : NaN;
+      const _oWpStr = Number.isFinite(_oWpVal)
+        ? _oWpVal.toFixed(1).replace('.', ',') + '%'
+        : '';
+      const _oWpHinweis = _oWK ? _oWK.hinweis('matchpunkte') : '';
+      const recordBlock = (games > 0 && _oWpStr)
+        ? `<span class="past-meta-best-record"${_oWpHinweis ? ` title="${_escHtml(_oWpHinweis)}"` : ''}>${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${_oWpStr}</span>`
         : '';
       return `
         <div class="past-meta-best-header" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">

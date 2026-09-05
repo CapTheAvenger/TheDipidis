@@ -1272,12 +1272,32 @@
                 else if (supertype === 'Energy') energy.push(line);
             }
 
+            /* DIE ABSCHNITTSZAHLEN WAREN ZEILEN, NICHT KARTEN
+               (05.09.2026). `pokemon.length` ist die Zahl der ZEILEN,
+               das PTCGL-Format erwartet die Zahl der KARTEN im
+               Abschnitt. Gemessen an einem gebauten Dragapult-Blaziken-
+               Deck mit 60 Karten:
+
+                 Pokémon: 12      tatsaechlich 22 Pokemon-Karten
+                 Trainer: 14      tatsaechlich 30 Trainer-Karten
+                 Energy: 3        tatsaechlich  8 Energie-Karten
+                 Total Cards: 60
+
+               12+14+3 = 29 und widerspricht der Zeile direkt darunter.
+               Der eigene Importer ignoriert die Kopfzeilen (Rundreise
+               geprueft: 60 -> 60, null Unterschiede) — jeder fremde
+               Importer liest sie. */
+            const _summe = (zeilen) => zeilen.reduce((a, z) => {
+                const n = parseInt(String(z).trim(), 10);
+                return a + (Number.isFinite(n) ? n : 0);
+            }, 0);
+
             // Build PTCGL format
-            let ptcglText = `Pokémon: ${pokemon.length}\n`;
+            let ptcglText = `Pokémon: ${_summe(pokemon)}\n`;
             ptcglText += pokemon.join('\n');
-            ptcglText += '\n\nTrainer: ' + trainers.length + '\n';
+            ptcglText += '\n\nTrainer: ' + _summe(trainers) + '\n';
             ptcglText += trainers.join('\n');
-            ptcglText += '\n\nEnergy: ' + energy.length + '\n';
+            ptcglText += '\n\nEnergy: ' + _summe(energy) + '\n';
             ptcglText += energy.join('\n');
             ptcglText += '\n\nTotal Cards: ' + total;
 

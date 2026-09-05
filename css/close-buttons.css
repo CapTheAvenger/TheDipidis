@@ -138,7 +138,36 @@
   pointer-events: none;
 }
 
-/* Make parent relative for label positioning */
+/* DAS LABEL BRAUCHT EINEN ANKER — NICHT `position: relative`
+   (05.09.2026, live gefunden und gemessen).
+
+   Diese Regel setzte `position: relative` auf ALLE Schliessknoepfe,
+   damit sich das ::after-Label darunter haengen kann. Vier davon sind
+   in ihrer eigenen Bauteil-CSS aber `absolute` bzw. `fixed`:
+
+     .help-modal-close     css/styles.css:8065      absolute 12/16
+     .draw-sim-close-btn   css/ui-components.css:3822  absolute 12/16
+     .auth-modal-close     css/auth-styles.css:59   absolute 15/15
+     .fullscreen-close     css/styles.css:4418      fixed 20/20
+
+   Weil close-buttons.css spaeter geladen wird, gewann `relative` — der
+   40x40-Knopf fiel damit zurueck in den Textfluss und legte sich ueber
+   die zentrierte Ueberschrift daneben. Gemessen im Starthand-Simulator
+   (390 px und 1520 px, hell wie dunkel):
+
+     Titel "Starthand-Simulator"  x 753-938, y  93-119
+     Schliessknopf                x 809-849, y  65-105
+     -> Ueberschneidung           x 809-849, y  93-105
+
+   und im Hilfe-Fenster bei 390 px: Knopf 36x36 an (44|148), Ueberschrift
+   266x32 an (59|174) — 24 x 12 px Ueberschneidung. Dazu stand das
+   Wort "Schliessen" (bottom: -14px) quer auf der Grundlinie des Titels.
+
+   Fuer den Anker reicht IRGENDEIN positionierter Vorfahr: `absolute`
+   und `fixed` leisten das genauso wie `relative`. Die vier bleiben
+   deshalb bei ihrer eigenen Positionierung; `relative` bekommen nur
+   noch die, die von sich aus `static` sind. `overflow: visible` gilt
+   weiter fuer alle — ohne das wird das Label abgeschnitten. */
 .btn-escape-rope,
 .auth-modal-close,
 .image-view-close,
@@ -148,8 +177,17 @@
 .battle-journal-close,
 .draw-sim-close-btn,
 .help-modal-close {
-  position: relative;
   overflow: visible;
+}
+
+/* Nur diese sind in ihrer Bauteil-CSS nicht positioniert und brauchen
+   den Anker hier. */
+.btn-escape-rope,
+.image-view-close,
+.bj-edit-modal-close,
+.ma-modal-close,
+.battle-journal-close {
+  position: relative;
 }
 /* single-card-close uses position:fixed — only add overflow */
 .single-card-close {

@@ -1807,7 +1807,12 @@
             top: 100%;
             left: 0;
             right: 0;
-            background: white;
+            /* Kein festes Weiss mehr: im Dunkelmodus stand hier eine
+               weisse Flaeche mitten in einer dunklen Seite
+               (05.09.2026). Die Token kommen aus dem Gestaltungssystem
+               und wechseln mit dem Modus. */
+            background: var(--surface-1, white);
+            color: var(--text-primary, inherit);
             border: 2px solid var(--accent);
             border-top: none;
             border-radius: 0 0 6px 6px;
@@ -1832,16 +1837,38 @@
         }
         
         .cards-autocomplete-item:hover {
-            background: #f0f4ff;
+            background: var(--surface-2, #f0f4ff);
         }
         
         .cards-autocomplete-item:last-child {
             border-bottom: none;
         }
         
+        /* !important, WEIL SPEZIFITAETS-GLEICHSTAND HIER VERLIERT
+           (05.09.2026, live gefunden).
+
+           `img[src*="limitlesstcg"] { width:100%; height:auto }` in
+           css/ui-components.css:19 hat dieselbe Spezifitaet (0,1,1) wie
+           dieser Selektor, und ui-components.css wird in index.html
+           SPAETER geladen (Zeile 161 nach Zeile 160). Bei Gleichstand
+           entscheidet die Quellreihenfolge — also gewann 100 %.
+
+           Gemessen an der laufenden Seite: nach dem Tippen von
+           "Psyduck" rendert der Vorschlag sein Bild mit
+           1517 x 2124 px, der Eintrag misst 1687 x 2145 px, der Kasten
+           ist auf max-height 400px beschnitten. Auf dem Bildschirm
+           stand eine weisse Flaeche ueber der halben Trefferliste, in
+           der ein Bildausschnitt lag; kein Vorschlag war lesbar oder
+           anklickbar. Die Kacheln der Kartendatenbank sind vor
+           derselben Regel geschuetzt (css/cards-tabs.css:99 mit
+           !important) — die Autovervollstaendigung war es nicht.
+
+           `aspect-ratio` wird mit zurueckgesetzt, sonst rechnet die
+           CLS-Regel weiterhin 2,5:3,5 auf die 50 px Breite. */
         .cards-autocomplete-item img {
-            width: 50px;
-            height: auto;
+            width: 50px !important;
+            height: auto !important;
+            aspect-ratio: auto !important;
             border-radius: 4px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }

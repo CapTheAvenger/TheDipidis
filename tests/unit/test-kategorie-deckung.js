@@ -92,7 +92,10 @@ describe('Die Zeile sagt, welche Zahl woher kommt', () => {
     const stelle = (() => {
         const i = ui.indexOf('const katAudit = []');
         assert.ok(i > 0, 'die Kategorie-Zeile ist aus der Oberflaeche verschwunden');
-        return ui.slice(i, i + 3000);
+        // 05.09.2026 von 3000 auf 6000 erweitert: davor stand ein
+        // Kommentarblock und die neue Meldung fuer den Fall, dass die
+        // Typaufloesung nichts liefert (kats._unbestimmt).
+        return ui.slice(i, i + 6000);
     })();
 
     it('beide Zahlen stehen mit ihrem Nenner da', () => {

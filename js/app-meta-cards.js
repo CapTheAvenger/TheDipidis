@@ -2009,13 +2009,39 @@ function _kopienBoden(schnitt) {
     if (z < 0.005) return 0.01;
     return z < 0.5 ? Math.round(z * 100) / 100 : Math.round(z);
 }
+/* "DORT IM SCHNITT 0,12 KOPIEN" WAR ARITHMETISCH UNMOEGLICH
+   (05.09.2026, live gefunden an Secret Box).
+
+   Eine Karte, die in einer Liste IST, ist dort mindestens einmal drin.
+   Ein Schnitt "dort" unter 1,00 kann es nicht geben. Der Satz las
+   `card.avgCount` — und das ist laut app-meta-cards.js:547
+   `totalCopies / safeTotalDecksInTop10`, also der Schnitt ueber ALLE
+   ausgewerteten Listen. Das Feld fuer "dort" heisst
+   `avgCountWhenUsed` (Zeile 548) und wurde nirgends benutzt.
+
+   Gegenprobe an Ultra Ball: Kachel "Ø 4x", Hinweis "im Schnitt 3,56
+   Kopien" — 3,56 ist der Gesamtschnitt; "dort" waeren 3,56/0,90 ≈ 3,96.
+
+   Beide Zahlen sind richtig, sie beantworten nur verschiedene Fragen.
+   Der Hinweis nennt sie jetzt getrennt und mit ihrer Grundgesamtheit. */
 function _anteilHinweis(card) {
     var de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
     var a = Number(card && card.metaShare) || 0;
-    var c = Number(card && card.avgCount) || 0;
+    var gesamt = Number(card && card.avgCount) || 0;
+    var dort = Number(card && card.avgCountWhenUsed) || 0;
+    // Ohne das "dort"-Feld (aeltere Aufrufer) bleibt nur der Gesamtschnitt.
+    if (!(dort > 0)) {
+        return de
+            ? ('In ' + _kommaZahl(a, 1) + ' % der ausgewerteten Listen. '
+               + 'Über alle Listen gerechnet ' + _kommaZahl(gesamt, 2) + ' Kopien.')
+            : ('In ' + _kommaZahl(a, 1) + ' % of the analysed lists. '
+               + 'Across all lists that averages ' + _kommaZahl(gesamt, 2) + ' copies.');
+    }
     return de
         ? ('In ' + _kommaZahl(a, 1) + ' % der ausgewerteten Listen, dort im Schnitt '
-           + _kommaZahl(c, 2) + ' Kopien.')
+           + _kommaZahl(dort, 2) + ' Kopien. Über alle Listen gerechnet '
+           + _kommaZahl(gesamt, 2) + ' — das ist die Zahl auf der Kachel.')
         : ('In ' + _kommaZahl(a, 1) + ' % of the analysed lists, averaging '
-           + _kommaZahl(c, 2) + ' copies there.');
+           + _kommaZahl(dort, 2) + ' copies there. Across all lists that is '
+           + _kommaZahl(gesamt, 2) + ' — the number on the tile.');
 }

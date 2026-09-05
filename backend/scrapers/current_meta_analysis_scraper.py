@@ -746,12 +746,33 @@ def build_best_online_decklists(limitless_decks: list, recent_days: int = 7) -> 
         return int(m.group(1)) if m else None
 
     def _win_pct(score_str):
+        """Matchpunktquote (3S+U)/(3n) — die Konvention des Hauses.
+
+        BIS ZUM 05.09.2026 STAND HIER (S + 0,5*U) / n. Das ist die
+        vierte Win-Rate-Konvention, die js/win-rate-konvention.js
+        ausdruecklich als ERFUNDEN kennzeichnet und die aus
+        app-tier-meta.js (17.08.) und app-past-meta.js (20.08.) wieder
+        entfernt wurde. Ueber diesen Umweg stand sie weiter auf dem
+        Bildschirm: das Panel "Latest Online" reichte win_pct
+        unveraendert durch. Nachgerechnet ueber die 11 Eintraege mit
+        Unentschieden — Dragapult Blaziken 13-0-1 stand mit 96,4 statt
+        95,2, Mega Froslass 2-3-1 mit 41,7 statt 38,9.
+
+        Der Rueckgabewert ist ausserdem ein Sortierschluessel
+        (`key = (rank, -wp, ...)`). Matchpunkte sind dafuer die richtige
+        Groesse: sie sind genau das, was ueber die Platzierung
+        entscheidet, und der Schluessel sortiert Platzierungen.
+
+        Ein nicht lesbarer Score gibt weiterhin 0.0 zurueck — die
+        Anzeige rechnet inzwischen selbst aus der Bilanz und zeigt
+        nichts, wenn die Bilanz fehlt (js/current-meta-quickref.js).
+        """
         m = re.match(r'^\s*(\d+)\s*-\s*(\d+)\s*-\s*(\d+)\s*$', str(score_str or ''))
         if not m:
             return 0.0
         w, l, t = int(m.group(1)), int(m.group(2)), int(m.group(3))
         g = w + l + t
-        return ((w + 0.5 * t) / g * 100.0) if g else 0.0
+        return ((3 * w + t) / (3 * g) * 100.0) if g else 0.0
 
     def _date_num(date_iso):
         try:

@@ -112,8 +112,24 @@ describe('Predictor 6.2: die Zahlen kommen aus den Daten, nicht aus der Luft', (
     });
 
     it('Zeilen ohne Messung ziehen den Schnitt nicht nach unten', () => {
-        assert.match(MC, /if \(wr > 0\) \{ lastMetaAgg\[k\]\.wSum \+= wr \* players/);
+        // Seit dem 05.09.2026 kann `wr` auch null sein — dann fehlt die
+        // Bilanz in der Zeile, und null ist etwas anderes als 0.
+        assert.match(MC, /if \(wr != null && wr > 0\) \{ lastMetaAgg\[k\]\.wSum \+= wr \* players/);
         assert.match(MC, /if \(d2c > 0\) \{ lastMetaAgg\[k\]\.dSum \+= d2c \* players/);
+    });
+
+    it('die Win Rate kommt aus der Bilanz, nicht aus win_pct', () => {
+        // win_pct in labs_tournament_decks.csv ist die MATCHPUNKTQUOTE
+        // (3S+U)/3n — gemessen 05.09.2026 ueber alle 4.711 Zeilen:
+        // 0,0025 Punkte Abweichung davon, 2,1476 von S/(S+N).
+        // Der Formatschnitt darf deshalb nicht aus dieser Spalte kommen.
+        assert.match(MC, /const wr = _labsDeckWr\(r, ''\);/);
+        assert.doesNotMatch(MC, /const wr = parseEU\(r\.win_pct/);
+        // Und die Spalten duerfen ueberhaupt nicht mehr direkt als
+        // Quote gelesen werden.
+        assert.doesNotMatch(MC, /parseEU\(r\.win_pct \|\| '0'\)/);
+        assert.doesNotMatch(MC, /parseEU\(r\.day1_win_pct \|\| '0'\)/);
+        assert.doesNotMatch(MC, /parseEU\(r\.day2_win_pct \|\| '0'\)/);
     });
 
     it('Win Rate und Day-2-Quote landen am Deck', () => {

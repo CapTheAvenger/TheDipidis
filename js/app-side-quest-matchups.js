@@ -1204,9 +1204,36 @@
         return { name, set: name ? setFor(name, side) : null };
     }
 
+    /* EIN ZUHOERER JE ELEMENT UND EREIGNIS (05.09.2026).
+
+       Live gemessen auf thedipidis.app: beim Tippen von "Charizar" ins
+       Suchfeld dauerte das input-Ereignis 1, 1, 1, 2, 1, 3, 6, 8 ms —
+       eine Verdopplung je Tastendruck. Danach das Feld leeren (200
+       Zeilen): 813 ms in EINEM Ereignis; in einer zweiten Messung
+       1.878 ms fuer einen einzelnen Tastendruck, mit haengendem
+       Hauptfaden.
+
+       Ursache: der input-Zuhoerer unten ruft `wire(...)` erneut auf,
+       und `wire` hing seinen eigenen Zuhoerer wieder an DASSELBE
+       Eingabefeld. Jedes Ereignis rief alle vorhandenen Zuhoerer, jeder
+       rief `wire` — 2^n nach n Zeichen. Nach acht Zeichen liefen 256
+       vollstaendige Neuaufbauten der Liste je Tastendruck.
+
+       Zwei Riegel, beide noetig: `wire` wird nur noch auf den wirklich
+       ersetzten Teilbaum angewendet, UND jede Bindung merkt sich am
+       Element, dass sie schon steht. Der zweite Riegel haelt auch
+       dann, wenn spaeter jemand die Struktur umbaut. */
+    function binde(el, typ, fn) {
+        if (!el) return;
+        const marke = '_sqGebunden_' + typ;
+        if (el.dataset && el.dataset[marke] === '1') return;
+        if (el.dataset) el.dataset[marke] = '1';
+        el.addEventListener(typ, fn);
+    }
+
     function wire(host) {
         host.querySelectorAll('[data-sq-format]').forEach(b => {
-            b.addEventListener('click', () => {
+            binde(b, 'click', () => {
                 _format = b.getAttribute('data-sq-format');
                 _limit = ROSTER_STEP;
                 render();
@@ -1218,15 +1245,15 @@
                 _limit = ROSTER_STEP;
                 render();
             };
-            r.addEventListener('click', pick);
-            r.addEventListener('keydown', (e) => {
+            binde(r, 'click', pick);
+            binde(r, 'keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
             });
         });
         host.querySelectorAll('[data-sq-opp]').forEach(r => {
             const open = () => { _calc = r.getAttribute('data-sq-opp'); render(); };
-            r.addEventListener('click', open);
-            r.addEventListener('keydown', (e) => {
+            binde(r, 'click', open);
+            binde(r, 'keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
             });
         });
@@ -1238,15 +1265,15 @@
         wireTeam(host);
 
         const more = host.querySelector('[data-sq-more]');
-        if (more) more.addEventListener('click', () => { _limit += ROSTER_STEP; render(); });
+        binde(more, 'click', () => { _limit += ROSTER_STEP; render(); });
 
         const typeSel = host.querySelector('[data-sq-opptype]');
-        if (typeSel) typeSel.addEventListener('change', () => {
+        binde(typeSel, 'change', () => {
             _oppType = typeSel.value; _limit = ROSTER_STEP; render();
         });
 
         host.querySelectorAll('[data-sq-sort]').forEach(b => {
-            b.addEventListener('click', () => {
+            binde(b, 'click', () => {
                 _sort = b.getAttribute('data-sq-sort'); _limit = ROSTER_STEP; render();
             });
         });
@@ -1255,7 +1282,7 @@
         // dem ersten Buchstaben den Fokus. Nur die Liste wird ersetzt.
         const q = host.querySelector('[data-sq-q]');
         if (q) {
-            q.addEventListener('input', () => {
+            binde(q, 'input', () => {
                 _q = q.value;
                 const panel = q.closest('.sq-panel');
                 const list = panel && panel.querySelector('.sq-mu-list');
@@ -1263,7 +1290,10 @@
                 const tmp = document.createElement('div');
                 tmp.innerHTML = rosterHtml();
                 const fresh = tmp.querySelector('.sq-mu-list');
-                if (fresh) { list.innerHTML = fresh.innerHTML; wire(panel); }
+                // Nur der ersetzte Teilbaum wird neu verdrahtet — das
+                // Suchfeld selbst steht ausserhalb von .sq-mu-list und
+                // behaelt seinen einen Zuhoerer.
+                if (fresh) { list.innerHTML = fresh.innerHTML; wire(list); }
             });
         }
 

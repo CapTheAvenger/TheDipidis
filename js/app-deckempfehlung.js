@@ -146,11 +146,32 @@
         // das beste Deck reicht meistens nicht. Wer wissen will, warum
         // das am Format liegt und nicht an der Rechnung, findet es unter
         // Quellen & Methodik.
+        /* DIE GRUNDGESAMTHEIT WAR VERTAUSCHT — FAKTOR 33 (05.09.2026).
+           Hier stand "in 75 % der TURNIERE ist nach Day 1 Schluss".
+           `empfehlung_mittel` ist aber keine Turnierquote:
+           scripts/build_deckempfehlung.py:196 setzt
+           `out[k] = zahl(r.get("day1_to_day2_conv")) * 100.0`, also den
+           Anteil der SPIELER dieses Decks, die Day 2 erreichen —
+           gemittelt ueber 44 nachgerechnete Turniere.
+
+           Die Datei sagt im selben Objekt, wie die Turnierzahl wirklich
+           aussieht: `day2_ueberhaupt_erreicht: 43` von `turniere: 44`.
+           In 2,3 % der Turniere war fuer das empfohlene Deck nach Day 1
+           Schluss, nicht in 75 %. Der Satz war um den Faktor 33 falsch —
+           und er ist ausdruecklich "der wichtigste Satz der ganzen
+           Karte".
+
+           Jetzt steht die Quote an ihrer eigenen Grundgesamtheit, und
+           der Nenner steht daneben. */
         return de()
-            ? 'Und trotzdem: in ' + pz(100 - v.empfehlung_mittel, 0)
-              + ' % der Turniere ist nach Day 1 Schluss.'
-            : 'And still: at ' + pz(100 - v.empfehlung_mittel, 0)
-              + ' % of tournaments it is over after Day 1.';
+            ? 'Und trotzdem: von je vier Spielern dieses Decks scheitern rund '
+              + gz(Math.round((100 - v.empfehlung_mittel) / 25)) + ' an Day 1 — '
+              + pz(100 - v.empfehlung_mittel, 0) + ' % der Antritte, gemittelt über '
+              + gz(v.turniere) + ' Turniere.'
+            : 'And still: about ' + gz(Math.round((100 - v.empfehlung_mittel) / 25))
+              + ' in 4 players on this deck fall short of Day 2 — '
+              + pz(100 - v.empfehlung_mittel, 0) + ' % of entries, averaged over '
+              + gz(v.turniere) + ' tournaments.';
     }
 
     // satzBeleg() stand hier bis zum 30.08.2026: die Nachrechnung

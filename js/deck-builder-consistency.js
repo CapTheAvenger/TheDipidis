@@ -1067,12 +1067,45 @@
 
   // ── Phase 6: data-quality validation ──────────────────────────────
   function _assessDataQuality(lists, scoredCards, totalW, trace) {
+    /* WORAUF DER BAU WIRKLICH STEHT (05.09.2026).
+       "8 decklists analyzed" ist keine Angabe, sondern eine halbe.
+       Live gemessen fuer Mega Excadrill: die 8 Listen sind ALLE aus
+       EINEM Turnier (Worlds 2026, 28.08., Plaetze 37-122). Das stand
+       nirgends — die Zeile trug einen gruenen Haken und `level: info`.
+       Die Herkunft ist in `lists` vorhanden und wird deshalb
+       mitgegeben: Zahl der Turniere, ihre Namen, das juengste Datum
+       und die Spanne der Platzierungen. Der Aufrufer kann daraus
+       einen ehrlichen Satz bauen. */
+    const _turnierNamen = [];
+    const _turnierIds = new Set();
+    let _juengstes = '';
+    let _platzMin = null, _platzMax = null;
+    for (const l of lists) {
+      const tid = String(l.tournament_id || '').trim();
+      if (tid && !_turnierIds.has(tid)) {
+        _turnierIds.add(tid);
+        const nm = String(l.tournament_name || '').trim();
+        if (nm) _turnierNamen.push(nm);
+      }
+      const d = String(l.tournament_date || '').trim().slice(0, 10);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d) && d > _juengstes) _juengstes = d;
+      const p = Number(l.place);
+      if (Number.isFinite(p) && p > 0) {
+        if (_platzMin == null || p < _platzMin) _platzMin = p;
+        if (_platzMax == null || p > _platzMax) _platzMax = p;
+      }
+    }
     const dq = {
       n_lists:               lists.length,
       total_weight:          totalW,
       n_distinct_cards:      scoredCards.length,
       sufficient:            lists.length >= MIN_WEIGHTED_LISTS,
       warning:               '',
+      n_turniere:            _turnierIds.size,
+      turniere:              _turnierNamen.slice(0, 5),
+      juengstes_turnier:     _juengstes,
+      platz_von:             _platzMin,
+      platz_bis:             _platzMax,
     };
     if (!dq.sufficient) {
       dq.warning = `Only ${lists.length} decklist(s) for this archetype — `
@@ -1255,8 +1288,45 @@
    * dem Aggregat und wird im Aufrufer erganzt; sie ist eine Naeherung
    * (Summe der Einzelkarten-Anteile), und das muss dort dranstehen. */
   function _kategorieDeckung(lists, deck) {
+    /* ZWEI FEHLER, DIE SICH GEGENSEITIG VERSTECKT HABEN
+       (05.09.2026, nachgestellt mit dem echten Modul unter node).
+
+       1. `kat(e)` bekam einen DECK-EINTRAG `{card, count, slotType}`.
+          `e.type` gibt es dort nicht — `kat` las `''` und gab
+          'Pokemon' zurueck. Richtig ist `kat(e.card)`.
+       2. Auch die Listenseite war blind: `l.cards[].type` kommt aus der
+          Spalte `type` von data/tournament_decklists_per_player.csv,
+          und die ist in ALLEN 30.459 Zeilen leer (gemessen; auch in
+          allen 163 Mega-Excadrill-Zeilen). `_enrichCard` laeuft nur
+          auf einer Kopie in `_computeCardScores`, nicht auf `l.cards`.
+
+       Ergebnis am laufenden Modul, Archetyp Mega Excadrill:
+       `kategorien = {"Pokemon":{"listenMit":8,"listen":8,"gebaut":60}}`
+       — ein einziger Eintrag, alle 60 Karten als Pokemon.
+
+       Damit feuerte die Zeile in js/app-deck-builder.js:7060, die genau
+       deswegen gebaut wurde ("18 von 28 Decks spielen ein Stadion, der
+       Bau spielt keins"), NIE: pMajor war immer 100 %, pOnline durch
+       `Math.min(roh, onlineListen)` ebenfalls, `|0| < 15` -> continue.
+       Die Frage des Betreibers vom 01.09. ist bis heute unbeantwortet —
+       und sie ist bei Mega Excadrill akut: der Bau hat kein Stadion,
+       das Online-Feld spielt zu rund 30 % Gravity Mountain.
+
+       Jetzt werden BEIDE Seiten angereichert, und wenn die
+       Anreicherung nichts findet, wird das gemeldet statt behauptet
+       (`unbestimmt: true`) — eine Kategorie-Deckung ohne Typen ist
+       keine Aussage. */
+    const cardDb = _getCardDb();
+    const typVon = (c) => {
+      if (!c) return '';
+      if (c.type) return String(c.type);
+      if (!cardDb || !c.set_code || !c.set_number) return '';
+      const key = `${c.set_code}-${c.set_number}`;
+      const meta = cardDb.get(key) || cardDb.get(String(key).toLowerCase());
+      return meta && meta.type ? String(meta.type) : '';
+    };
     const kat = (c) => {
-      const typ = String((c && c.type) || '');
+      const typ = typVon(c);
       if (!typ) return 'Pokemon';
       const k = typ.toLowerCase();
       if (k.indexOf('special energy') !== -1) return 'Special Energy';
@@ -1279,11 +1349,19 @@
       }
     }
     for (const e of (deck || [])) {
-      const k = kat(e);
+      const k = kat(e && e.card ? e.card : e);
       raus[k] = raus[k] || { listenMit: 0, listen: n, gebaut: 0 };
       raus[k].gebaut += (e.count || 0);
     }
     for (const k of Object.keys(raus)) raus[k].listen = n;
+    /* Der ehrliche Rueckfall: bleibt am Ende genau eine Kategorie
+       uebrig und ist das ausgerechnet 'Pokemon', dann hat die
+       Typaufloesung nichts geliefert. Ein Deck aus 60 Pokemon gibt es
+       nicht — das ist kein Befund, sondern eine fehlende Angabe. */
+    const schluessel = Object.keys(raus);
+    if (schluessel.length <= 1 && (schluessel.length === 0 || schluessel[0] === 'Pokemon')) {
+      raus._unbestimmt = true;
+    }
     return raus;
   }
 

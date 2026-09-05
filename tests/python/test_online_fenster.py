@@ -538,3 +538,82 @@ def test_das_gepflegte_datum_traegt_eine_rotation_ohne_zaehlersturz(welt, tmp_pa
         "es sagt — bei einer Rotation ohne Zaehlersturz ist es die einzige "
         "Wache")
     assert zeilen[0]["count_fenster"] == 1000
+
+
+def test_der_trend_vergleicht_zwei_gleich_lange_fenster(welt):
+    """Neben "Online-Anteil (14 Tage)" stand "Trend (7 Tage) -0,0 %".
+
+    Der alte Trend war share_change der Vergleichsdatei — die
+    Wochenbewegung des KUMULATIVSTANDS. Der ist um Groessenordnungen
+    traeger: mittlerer Betrag 0,019 pp gegen 0,181 pp, fuer Mega
+    Excadrill -0,03 gegen -1,88. Eine 14-Tage-Zahl neben einer
+    Bewegung, die eine andere Uhr liest.
+    """
+    m, ordner = welt
+    _stand(ordner, "2026-08-01", [("Alpha", 100), ("Beta", 100)])
+    _stand(ordner, "2026-08-15", [("Alpha", 400), ("Beta", 200)])   # Vorfenster
+    _stand(ordner, "2026-08-29", [("Alpha", 500), ("Beta", 600)])   # Fenster
+
+    (zeilen, meta), fehler = m.baue(fenster_tage=14)
+    assert fehler is None, fehler
+    nach = {r["deck_name"]: r for r in zeilen}
+
+    # Vorfenster: Alpha 300 von 400 = 75 %, Beta 100 von 400 = 25 %.
+    # Fenster:    Alpha 100 von 500 = 20 %, Beta 400 von 500 = 80 %.
+    assert nach["Alpha"]["share_vorfenster"] == 75.0
+    assert nach["Beta"]["share_vorfenster"] == 25.0
+    assert nach["Alpha"]["trend_fenster"] == -55.0
+    assert nach["Beta"]["trend_fenster"] == 55.0
+    assert meta["vorfenster_von"] == "2026-08-01"
+
+
+def test_ohne_vorfenster_bleibt_der_trend_leer_statt_null(welt):
+    """Null hiesse "keine Bewegung", leer heisst "nicht messbar"."""
+    m, ordner = welt
+    _stand(ordner, "2026-08-15", [("Alpha", 100)])
+    _stand(ordner, "2026-08-29", [("Alpha", 400)])
+    (zeilen, meta), fehler = m.baue(fenster_tage=14)
+    assert fehler is None
+    assert "trend_fenster" not in zeilen[0] or zeilen[0].get("trend_fenster") is None
+    assert meta["vorfenster_von"] is None
+
+
+def test_die_geschriebene_datei_traegt_den_trend_als_komma_oder_leer(welt):
+    m, ordner = welt
+    _stand(ordner, "2026-08-01", [("Alpha", 100), ("Beta", 100)])
+    _stand(ordner, "2026-08-15", [("Alpha", 400), ("Beta", 200)])
+    _stand(ordner, "2026-08-29", [("Alpha", 500), ("Beta", 600)])
+    (zeilen, meta), fehler = m.baue(fenster_tage=14)
+    assert fehler is None
+    m.schreibe(zeilen, meta)
+    with io.open(m.ZIEL, encoding="utf-8-sig") as f:
+        f.readline()
+        rows = list(csv.DictReader(f, delimiter=";"))
+    assert "trend_fenster" in rows[0] and "share_vorfenster" in rows[0]
+    assert "." not in rows[0]["trend_fenster"], "englischer Dezimalpunkt in der CSV"
+
+
+def test_die_echte_datei_traegt_einen_messbaren_trend():
+    """Nachpruefung an der ausgelieferten Datei.
+
+    Der ganze Punkt der Aenderung: der Trend muss GROESSER sein als der
+    Wochentrend des Kumulativstands, sonst hat sich nichts geaendert.
+    """
+    import os
+    pfad = os.path.join(WURZEL, "data", "limitless_online_fenster.csv")
+    if not os.path.exists(pfad):
+        pytest.skip("noch nicht erzeugt")
+    with io.open(pfad, encoding="utf-8-sig") as f:
+        f.readline()
+        rows = list(csv.DictReader(f, delimiter=";"))
+    werte = [abs(float(r["trend_fenster"].replace(",", ".")))
+             for r in rows if r.get("trend_fenster")]
+    assert len(werte) > 20, "fast keine Zeile traegt einen Trend"
+    schnitt = sum(werte) / len(werte)
+    assert schnitt > 0.05, (
+        f"der mittlere Trendbetrag ist {schnitt:.3f} pp — so klein war schon "
+        f"der kumulative Wochentrend (0,019 pp), der ersetzt werden sollte")
+    # Und die Vorfensteranteile summieren sich auf rund 100 %.
+    vor = [float(r["share_vorfenster"].replace(",", "."))
+           for r in rows if r.get("share_vorfenster")]
+    assert 99.0 <= sum(vor) <= 101.0, f"Vorfensteranteile summieren auf {sum(vor)}"

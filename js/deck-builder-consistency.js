@@ -948,17 +948,49 @@
 
     // Group-level score = max(card.weightedShare) within the group —
     // the strongest signal in the package pulls the whole package up.
+    //
+    /* BEI GLEICHSTAND ENTSCHIED BIS ZUM 05.09.2026 DIE ZEILENNUMMER.
+       `Array.prototype.sort` ist stabil, also gewann bei identischem
+       `score` schlicht, wer in der CSV weiter oben stand. Live gemessen
+       an Mega Excadrill: `switch` (0,75) nahm 10 der 13 Tech-Slots,
+       `ultra ball` (0,625) die restlichen 3 — und Brock's Scouting
+       (0,625) und Shaymin (0,625) kamen nie an die Reihe. Brock's
+       Scouting steht in 5 der 8 Worlds-Listen mit im Schnitt 2,8
+       Kopien; es fiel also kein Randslot heraus, sondern ein Sucher,
+       den die Mehrheit der Day-2-Piloten dreifach spielt.
+
+       WAS HIER BEWUSST NICHT PASSIERT: die Reihenfolge bei Gleichstand
+       umzudrehen. Ausprobiert am 05.09.2026 mit der Regel "bei gleichem
+       Anteil zaehlen mehr Kopien" — dann kommt Brock's Scouting mit 3
+       hinein, und dafuer fallen Ultra Ball (2) UND Fezandipiti ex (1)
+       heraus. Fezandipiti ex ist ein BASIS-Pokemon; es wegzulassen hebt
+       die Mulligan-Quote, und die zu senken ist der ganze Zweck dieses
+       Bauers. Vier Karten mit identischem Anteil bewerben sich hier um
+       drei Slots — welche davon gehen soll, ist eine Deckbau-Frage und
+       keine Sortierfrage. Ein Werkzeug, das sie still fuer den Spieler
+       beantwortet, hat schon einmal Brock's Scouting verschluckt.
+
+       Also: die Reihenfolge bleibt, wie sie ist, aber sie ist jetzt
+       AUSDRUECKLICH das erste Auftreten und nicht mehr ein Nebeneffekt
+       der Sortierstabilitaet — und der Gleichstand selbst wird
+       protokolliert (siehe `tech_gleichstand` weiter unten). Der Spieler
+       sieht damit, dass hier eine Muenze geworfen wurde, und kann selbst
+       tauschen. */
     const groupRanking = Array.from(groups.entries())
       .map(([gid, cards]) => ({
         gid,
         cards,
         score: Math.max(...cards.map(c => c.weightedShare)),
+        // Der Tiebreak-Wert der Gruppe: die meisten Kopien, die eine
+        // ihrer Karten im Feld hat.
+        kopienImFeld: Math.max(...cards.map(c => c.weightedAvgCount || 0)),
         totalCount: cards.reduce(
           (s, c) => s + Math.max(1, Math.round(c.weightedAvgCount)),
           0
         ),
       }))
-      .sort((a, b) => b.score - a.score);
+      .map((g, i) => ({ ...g, _idx: i }))
+      .sort((a, b) => (b.score - a.score) || (a._idx - b._idx));
 
     const tech = [];
     const tracePicks = [];
@@ -991,14 +1023,43 @@
       tracePicks.push({ name: c.name, count: placed, share: c.weightedShare, package: packageId || c.key });
     };
 
+    /* WAS NICHT HINEINPASST, VERSCHWAND BISHER SPURLOS.
+       Der `break` unten verliess die Schleife, sobald die Slots voll
+       waren — ohne Spur. Im Bericht stand danach, was gewaehlt wurde,
+       aber nie, was knapp daneben lag. Genau das ist die Frage, die ein
+       Spieler stellt, wenn er die Liste mit echten Decklisten
+       vergleicht: "warum fehlt Brock's Scouting?"
+
+       CLAUDE.md sagt dazu: melden, nicht stillschweigend reparieren. Der
+       Bauer entscheidet weiterhin selbst — aber er sagt jetzt, wen er
+       nicht mehr unterbringen konnte und wie knapp es war. */
+    const nichtPlatziert = [];
     for (const g of groupRanking) {
-      if (used >= slotsRemaining) break;
+      if (used >= slotsRemaining) {
+        for (const c of g.cards) {
+          nichtPlatziert.push({
+            name: c.name,
+            share: c.weightedShare,
+            wunschAnzahl: Math.max(1, Math.round(c.weightedAvgCount)),
+            grund: 'keine Slots mehr frei',
+          });
+        }
+        continue;
+      }
       // Will this whole group fit?
       if (used + g.totalCount > slotsRemaining) {
         // Try a single-card pick from the group if possible
         for (const c of g.cards) {
           const cnt = Math.max(1, Math.round(c.weightedAvgCount));
-          if (used + cnt > slotsRemaining) continue;
+          if (used + cnt > slotsRemaining) {
+            nichtPlatziert.push({
+              name: c.name,
+              share: c.weightedShare,
+              wunschAnzahl: cnt,
+              grund: `braucht ${cnt}, frei sind noch ${slotsRemaining - used}`,
+            });
+            continue;
+          }
           const placed = Math.min(cnt, c.is_basic_energy ? 59 : 4);
           _emitTech(c, placed, g.gid !== c.key ? g.gid : null);
           used += cnt;
@@ -1020,6 +1081,48 @@
       cardsCountSum: tech.reduce((s, e) => s + e.count, 0),
       picks: tracePicks,
     });
+    /* Wer hat gegen wen eine Muenze verloren? Ein Gleichstand ist nur
+       dann eine Information, wenn er BEIDE Seiten nennt: die Karte, die
+       hineinkam, und die, die bei identischem Anteil draussen blieb. */
+    const nichtGesetzt = new Set(nichtPlatziert.map(k => k.name));
+    const gleichstaende = [];
+    for (const g of groupRanking) {
+      const gleich = groupRanking.filter(x => x.gid !== g.gid && x.score === g.score);
+      if (gleich.length === 0) continue;
+      const drin  = g.cards.filter(c => !nichtGesetzt.has(c.name)).map(c => c.name);
+      const raus  = gleich.flatMap(x => x.cards)
+                          .filter(c => nichtGesetzt.has(c.name)).map(c => c.name);
+      if (drin.length > 0 && raus.length > 0) {
+        gleichstaende.push({ share: g.score, drin, raus });
+      }
+    }
+    if (gleichstaende.length > 0) {
+      trace.push({
+        phase: 4, decision: 'tech_gleichstand',
+        faelle: gleichstaende,
+        detail: 'Bei identischem Anteil entscheidet die Reihenfolge des '
+              + 'ersten Auftretens — das ist eine Setzung, keine Wertung. '
+              + 'Wer hier draussen steht, ist nicht schlechter belegt als '
+              + 'der, der drin steht. Genau diese Karten sind es wert, von '
+              + 'Hand gegeneinander abzuwaegen.',
+      });
+    }
+    if (nichtPlatziert.length > 0) {
+      // Absteigend nach Anteil: was am naechsten dran war, zuerst.
+      nichtPlatziert.sort((a, b) => (b.share - a.share)
+                                 || (b.wunschAnzahl - a.wunschAnzahl));
+      trace.push({
+        phase: 4, decision: 'tech_nicht_platziert',
+        slotsRemaining,
+        anzahl: nichtPlatziert.length,
+        karten: nichtPlatziert,
+        detail: 'Diese Karten standen im Kandidatenfeld, haben aber nicht '
+              + 'mehr in die Tech-Slots gepasst. Die erste davon ist die '
+              + 'knappste Entscheidung des ganzen Baus — wer die Liste mit '
+              + 'echten Decklisten vergleicht, findet genau hier die '
+              + 'Abweichung.',
+      });
+    }
     return tech;
   }
 

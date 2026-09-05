@@ -3578,6 +3578,65 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 modal.appendChild(altWrap);
             }
 
+            /* KNAPP DANEBEN — die Karten, die es nicht mehr in die
+               Tech-Slots geschafft haben. Diese Liste ist der ehrlichste
+               Teil des Berichts: sie zeigt, wo der Bauer eine Entscheidung
+               getroffen hat, die genauso gut anders haette ausfallen
+               koennen. Nur die obersten fuenf, sonst liest sie niemand —
+               darunter stehen ohnehin Karten mit Anteilen um 12 %. */
+            const nearMisses = Array.isArray(report.near_misses) ? report.near_misses : [];
+            const gleichFaelle = Array.isArray(report.gleichstaende) ? report.gleichstaende : [];
+            if (nearMisses.length > 0) {
+                const nmWrap = document.createElement('div');
+                nmWrap.className = 'build-info-near-misses';
+                const nmTitle = document.createElement('h4');
+                const _nmT = t('buildInfo.nearMissTitle');
+                nmTitle.textContent = (_nmT && _nmT !== 'buildInfo.nearMissTitle')
+                    ? _nmT : 'Knapp nicht hineingepasst';
+                nmWrap.appendChild(nmTitle);
+
+                const nmIntro = document.createElement('p');
+                nmIntro.className = 'build-info-alt-intro';
+                const _nmI = t('buildInfo.nearMissIntro');
+                nmIntro.textContent = (_nmI && _nmI !== 'buildInfo.nearMissIntro')
+                    ? _nmI
+                    : 'Diese Karten standen im Kandidatenfeld, die Tech-Slots waren aber voll. '
+                    + 'Wer die Liste mit echten Decklisten vergleicht, findet hier die Abweichung — '
+                    + 'und kann von Hand tauschen.';
+                nmWrap.appendChild(nmIntro);
+
+                nearMisses.slice(0, 5).forEach(k => {
+                    const row = document.createElement('div');
+                    row.className = 'build-info-alt-row build-info-near-miss-row';
+                    const card = document.createElement('div');
+                    card.className = 'build-info-alt-card';
+                    card.textContent = `${k.wunschAnzahl}× ${k.name}`;
+                    const detail = document.createElement('div');
+                    detail.className = 'build-info-alt-detail';
+                    const pct = Math.round((k.share || 0) * 100);
+                    detail.textContent = `in ${pct} % der gewichteten Listen · ${k.grund || ''}`;
+                    row.appendChild(card);
+                    row.appendChild(detail);
+                    nmWrap.appendChild(row);
+                });
+
+                // Gleichstand ausdruecklich benennen: wer hier draussen
+                // steht, ist NICHT schlechter belegt als wer drin steht.
+                gleichFaelle.slice(0, 2).forEach(f => {
+                    const row = document.createElement('div');
+                    row.className = 'build-info-alt-detail build-info-gleichstand';
+                    row.textContent =
+                        `Gleichstand bei ${Math.round((f.share || 0) * 100)} %: `
+                        + `${(f.drin || []).join(', ')} kam hinein, `
+                        + `${(f.raus || []).join(', ')} nicht — bei identischem Anteil `
+                        + `entscheidet die Reihenfolge, nicht die Qualität. `
+                        + `Diese Karten lohnt es, von Hand gegeneinander abzuwägen.`;
+                    nmWrap.appendChild(row);
+                });
+
+                modal.appendChild(nmWrap);
+            }
+
             // Card reasoning list — one row per card, badges explain
             // which layer(s) contributed.
             const list = document.createElement('div');
@@ -7450,6 +7509,20 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     ace_spec_pick:    acePick,
                     quality_audit:    { findings: auditFindings },
                     alt_suggestions:  altSuggestions,
+                    /* WAS KNAPP NICHT HINEINPASSTE (05.09.2026).
+                       Bis heute endete die Tech-Auswahl mit einem `break`,
+                       sobald die Slots voll waren — ohne Spur. Der Bericht
+                       nannte, was gewaehlt wurde, nie was daneben lag.
+                       Genau danach fragt aber jeder, der die gebaute Liste
+                       mit echten Decklisten vergleicht: bei Mega Excadrill
+                       faellt so Brock's Scouting heraus, das 5 von 8
+                       Worlds-Listen mit im Schnitt 2,8 Kopien spielen. */
+                    near_misses: (result.trace || [])
+                        .filter(ev => ev.phase === 4 && ev.decision === 'tech_nicht_platziert')
+                        .flatMap(ev => ev.karten || []),
+                    gleichstaende: (result.trace || [])
+                        .filter(ev => ev.phase === 4 && ev.decision === 'tech_gleichstand')
+                        .flatMap(ev => ev.faelle || []),
                     // Raw trace stashed for power-users / dev tools —
                     // not rendered by the modal but invaluable in
                     // console when debugging "why did THIS land?"

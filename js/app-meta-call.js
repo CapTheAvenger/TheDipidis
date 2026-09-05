@@ -10268,6 +10268,28 @@ window.MetaCall = (function () {
 </div>`;
   }
 
+  /* DIESE SPALTE HIESS "Win %" UND MEINTE ETWAS ANDERES ALS DER REST.
+     Live gefunden am 05.09.2026: fuer TEF-CRI/Dragapult (4.475-3.323-1.411)
+     zeigte "Vergangenes Meta" 53,7 % und diese Tabelle 48,6 % — dasselbe
+     Deck, dasselbe Format, dasselbe Wort. 53,7 % sind (3S+U)/3n, 48,6 %
+     sind S/(S+N+U).
+
+     Beide Rechnungen sind richtig, und Limitless nennt BEIDE "Win %" —
+     die Labs-Tabelle die eine, die Online-Tabelle die andere. Im Haus
+     kann das Wort aber nur einmal vergeben sein: seit dem 05.09.2026
+     gehoert "Win %" der Konvention (3S+U)/3n, weil der Betreiber die
+     Limitless-Labs-Bezeichnung uebernommen hat.
+
+     Was diese Spalte rechnet (Zeile ~1567: `agg.wins / games`), heisst im
+     Haus "Siege je Match" — und genau so heisst sie jetzt. Die Rechnung
+     bleibt unveraendert; sie war nie falsch, sie war nur falsch
+     beschriftet. Der Hinweis traegt die Formel und den Nenner, wie bei
+     jeder anderen Quote auch. */
+  function _frozenWrHinweis() {
+    const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
+    return W ? W.hinweis('mitUnentschieden') : 'S / (S + N + U)';
+  }
+
   function renderFrozenRecommendationsPanel() {
     if (!_pastMetaFormatKey) return '';
     const cached = _pastMetaLabsCache.get(_pastMetaFormatKey);
@@ -10329,7 +10351,7 @@ window.MetaCall = (function () {
       <th>#</th>
       <th>${t('mc.recDeck')}</th>
       <th title="${esc(t('mc.frozenColScoreHint'))}">${t('mc.frozenColScore')}</th>
-      <th>${t('mc.frozenColWinPct')}</th>
+      <th title="${esc(_frozenWrHinweis())}">${t('mc.frozenColWinPct')}</th>
       <th>${t('mc.frozenColDay2Conv')}</th>
       <th>${t('mc.frozenColPlayers')}</th>
     </tr></thead>

@@ -3394,6 +3394,34 @@ img[src*="limitlesstcg"] {
     background: rgba(255, 255, 255, 0.04);
     border-left: 3px solid #d6a14a;
 }
+/* "Knapp nicht hineingepasst" — dieselbe Bauform wie die
+   Alternativvorschlaege daneben, aber in einem kuehleren Ton: das hier
+   ist keine Empfehlung, sondern eine Offenlegung. Blau statt Gold,
+   damit die beiden Kaesten nicht wie derselbe Ratschlag aussehen. */
+.build-info-near-misses {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid #2f3a55;
+    border-radius: 8px;
+    background: rgba(70, 110, 180, 0.08);
+}
+.build-info-near-misses h4 {
+    margin: 0 0 6px;
+    color: #7fa8dd;
+    font-size: 0.92rem;
+}
+.build-info-near-miss-row {
+    border-left-color: #7fa8dd;
+}
+.build-info-gleichstand {
+    margin-top: 8px;
+    padding: 6px 8px;
+    border-left: 3px solid #7fa8dd;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    line-height: 1.45;
+}
+
 .build-info-alt-row.build-info-alt-up   { border-left-color: #6ab66a; }
 .build-info-alt-row.build-info-alt-down { border-left-color: #c97a5a; }
 .build-info-alt-card {

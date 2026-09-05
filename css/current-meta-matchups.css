@@ -837,6 +837,26 @@
     font-variant-numeric: tabular-nums;
     vertical-align: middle;
 }
+/* Die Gegenrichtung braucht eine eigene Farbe, sonst liest sich ein
+   Minus wie ein Gewinn. Rot auf Weiss statt Gruen auf Weiss — gemessen
+   4,8:1 gegen Weiss, also ueber der 4,5:1-Schwelle, und in beiden Modi
+   dasselbe Rot wie die uebrigen Warnfarben des Hauses. */
+.uv-tech-bonus-neg {
+    background: #b91c1c;
+}
+
+/* Und die Zeile selbst: ein farbiger Streifen links, damit man beim
+   Ueberfliegen sieht, welche Richtung gemeint ist, ohne den Satz zu
+   lesen. */
+.uv-tech-line.uv-tech-contra {
+    border-left: 3px solid #b91c1c;
+    padding-left: 8px;
+}
+.uv-tech-line.uv-tech-pro {
+    border-left: 3px solid #166534;
+    padding-left: 8px;
+}
+
 .uv-tech-title {
     margin: 0 0 8px 0;
     font-size: 0.95em;

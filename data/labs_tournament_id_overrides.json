@@ -38,6 +38,10 @@
     "461": {
       "labs_tournament_id": "0009",
       "reason": "LAIC 2024-25 abbreviation vs labs 'International Championship São Paulo' — same event 2024-11-15"
+    },
+    "515": {
+      "labs_tournament_id": "0071",
+      "reason": "Worlds 2026 — limitless 'World Championships 2026' vs labs 'World Championship San Francisco'. Die Normalisierung bricht hier doppelt: aus dem Limitless-Namen bleibt '2026', aus dem Labs-Namen 'san francisco' — es gibt kein gemeinsames Wort mehr. Derselbe Bruch wie bei Worlds 2025 (500 -> 0035), nur mit einer anderen Stadt. Belegt am 05.09.2026: player_continuity.csv fuehrt tid=0071 mit tournament_date 2026-08-28, und labs_tournament_decks_TEF-PBL.csv nennt fuer dieses Turnier 774 Spieler. WAS DER FEHLENDE EINTRAG GEKOSTET HAT: _loadTournamentSizes findet ueber die leere labs_tournament_id keine Groesse, _sizeWeight(0) vergibt den Notwert 0,5 statt log(774)/log(2000)=0,875. Alle acht Worlds-Listen liegen ausserdem auf Platz 37-122, also im selben 0,1-Platzband — dadurch war das Listengewicht fuer JEDE der acht identisch und die gesamte Gewichtung des Deckbaus wirkungslos (weightedShare = n/8). Zusaetzlich lief in per_decklist_scraper.py der Bilanz-Rueckfall nicht (er verlangt einen labs_tid), weshalb alle 143 Worlds-Listen wins/losses/ties=0 tragen."
     }
   },
   "intentionally_unmapped": {

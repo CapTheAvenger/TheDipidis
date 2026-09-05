@@ -108,6 +108,48 @@ window.MetaCall = (function () {
                             // PREDICTED share once Predictor 2.0 has run; the raw ladder
                             // share is kept on each entry as `ladderShare` for the badge.
 
+  /* Das 14-Tage-Fenster der Online-Anteile (§1b weiter unten).
+     `_fensterMeta` ist null, solange nichts geladen ist ODER einer der
+     fuenf Waechter angeschlagen hat — dann rechnet die Seite mit dem
+     Kumulativstand und sagt es in der Konsole. Wer die Zahl anzeigt,
+     muss diesen Wert lesen, damit die Quote ihren Nenner traegt. */
+  let _fensterMeta = null;
+  const FENSTER_MAX_ALTER_TAGE = 10;    // aelter -> eingefroren, verwerfen
+  const FENSTER_MIN_DECKUNG    = 0.8;   // weniger Namensdeckung -> verwerfen
+  const FENSTER_MIN_DECKS      = 1500;  // duennere Stichprobe -> verwerfen
+  const FENSTER_MAX_TAGE       = 21;    // gestrecktes Fenster -> verwerfen
+  /* Untergrenze, weil `Number(x) || 0` bei fehlender Angabe auf 0
+     faellt und `0 > FENSTER_MAX_TAGE` falsch ist — ohne sie liefe die
+     Seite mit der Beschriftung "Online-Anteil (0 Tage)". Drei Tage
+     sind auch die kuerzeste Spanne, die nach einer Rotation ueberhaupt
+     sinnvoll ist. */
+  const FENSTER_MIN_TAGE       = 3;
+
+  /* Der KUMULATIVE Anteil eines Decks — der Wert, der vor der
+     Fensterumstellung in `ladderShare` stand.
+
+     BEFUND DER GEGENPRUEFUNG (05.09.2026): der Motor haelt `ladderPct`
+     an mehreren Stellen gegen einen Tagesstand aus
+     data/online_share_history/. Diese Staende sind KUMULATIV. Traegt
+     die linke Seite den Fensterwert und die rechte den Kumulativstand,
+     misst die Differenz nicht mehr Bewegung, sondern den Nennersprung:
+
+       Alakazam Dudunsparce  Basis 5,74  ->  Signal 6,28 wird zu 9,83
+       Festival Lead         Basis 6,43  ->  Signal 5,82 wird zu 2,94
+
+     Der Clip in _trendSignal saettigte dadurch bei 68 von 129 Decks
+     statt bei 9 — fuer die halbe Liste haette der Trendterm gar keinen
+     Trend mehr gemessen. Und Predictor 4.0a haette aus demselben
+     Versatz drei Surge-Decks erfunden, die nicht gestiegen sind.
+
+     Deshalb: wer gegen einen kumulativen Tagesstand rechnet, liest
+     diesen Helfer, nicht `ladderShare`. Ohne Fenster liefert er
+     denselben Wert wie vorher, die Rechnung bleibt also unveraendert. */
+  function _kumulativAnteil(d) {
+    if (!d) return 0;
+    return (d.ladderShareKumulativ != null) ? d.ladderShareKumulativ : (d.ladderShare || 0);
+  }
+
   // Meta bucket labels — Limitless aggregates everything below their
   // archetype-classification threshold into a single "Other" row.
   // Treating it as an archetype produces nonsense everywhere (the
@@ -2578,7 +2620,11 @@ window.MetaCall = (function () {
     if (decay <= 0) return;
 
     // Renormalise both share basises to %.
-    const totalLadder = _shareList.reduce((s, d) => s + (d.ladderShare || 0), 0) || 1;
+    // Nur der KUMULATIVE Nenner — 4.0a vergleicht ausschliesslich gegen
+    // _snapshotAtMajor, und der ist kumulativ (siehe currentPct unten).
+    // Der Fenster-Nenner stand hier bis zum 05.09.2026 und wurde nach
+    // der Umstellung nirgends mehr gelesen.
+    const totalLadderKumSurge = _shareList.reduce((s, d) => s + _kumulativAnteil(d), 0) || 1;
     const totalSnap   = Object.values(_snapshotAtMajor).reduce((s, e) => s + e.share, 0) || 1;
 
     // Find surge decks: current online share - share-at-major.
@@ -2587,7 +2633,14 @@ window.MetaCall = (function () {
       const k = normalize(d.name);
       const baselineSnap = _snapshotAtMajor[k];
       if (!baselineSnap) return; // no baseline → can't measure surge
-      const currentPct  = (d.ladderShare / totalLadder) * 100;
+      /* baselineSnap.share kommt aus online_share_history und ist
+         KUMULATIV. Der aktuelle Wert muss deshalb auch kumulativ sein —
+         sonst meldet 4.0a den Nennersprung des 14-Tage-Fensters als
+         Anstieg. Gemessen am 05.09.2026 ohne diese Zeile: drei erfundene
+         Surge-Decks (Dragapult +1,25 pp, Alakazam Dudunsparce +1,82 pp,
+         Lopunny Dusknoir +1,29 pp), von denen keines gestiegen war —
+         und jeder KONTER dieser drei haette einen Aufschlag bekommen. */
+      const currentPct  = (_kumulativAnteil(d) / totalLadderKumSurge) * 100;
       const baselinePct = (baselineSnap.share / totalSnap) * 100;
       const delta = currentPct - baselinePct;
       if (delta >= PREDICTOR_4_SURGE_PP) {
@@ -3649,6 +3702,10 @@ window.MetaCall = (function () {
     // gets overwritten by the predicted value at the end of the run, so
     // re-running would compound if we read from it.
     const totalLadder = _shareList.reduce((s, d) => s + (d.ladderShare || 0), 0) || 1;
+    /* Derselbe Nenner, aber kumulativ — fuer jede Rechnung, die gegen
+       einen Tagesstand aus online_share_history haelt. Ohne Fenster ist
+       er mit totalLadder identisch. */
+    const totalLadderKum = _shareList.reduce((s, d) => s + _kumulativAnteil(d), 0) || 1;
 
     // Field-WEIGHTED mean top-8 conversion — equals total_top8 /
     // total_brought ≈ 8/100 = 0.08 for an 8-cut at 100-player events.
@@ -3828,6 +3885,7 @@ window.MetaCall = (function () {
       // gerechnet), die Nachvollziehbarkeit schon.
       d.hypeDamperApplied = false;
       const rawLadderPct = (d.ladderShare / totalLadder) * 100;
+      const rawLadderPctKum = (_kumulativAnteil(d) / totalLadderKum) * 100;
       // Phase β — Major-First-Anchor. For decks that are "in-person
       // established" (≥2 recent majors at ≥2 % share), replace the
       // online ladder share with a 70 / 30 blend of the recency-
@@ -3957,8 +4015,19 @@ window.MetaCall = (function () {
       const majBaselinePct = majSnap ? (majSnap.share / totalSnapAtMajor) * 100 : 0;
       const wkBaselinePct  = wkSnap  ? (wkSnap.share  / totalSnapWeekAgo) * 100
                                      // Fallback: comparison.csv carries last-week's share inline.
-                                     : Math.max(0, ladderPct - trendPct);
-      const postMajorSignal = _trendSignal(ladderPct, majBaselinePct);
+                                     // trendPct ist die share_change-Spalte
+                                     // der Vergleichsdatei — kumulativ. Der
+                                     // Minuend muss es auch sein.
+                                     : Math.max(0, rawLadderPctKum - trendPct);
+      /* Beide Trendsignale rechnen gegen KUMULATIVE Tagesstaende
+         (majSnap/wkSnap/_computeWeightedBaseline lesen alle die
+         share-Spalte aus online_share_history). Der Zaehler muss
+         deshalb denselben Nenner tragen — siehe _kumulativAnteil.
+         Ohne Fenster ist ladderPctKum identisch mit ladderPct. */
+      const ladderPctKum = (_fensterMeta && totalLadderKum > 0)
+        ? (_kumulativAnteil(d) / totalLadderKum) * 100
+        : ladderPct;
+      const postMajorSignal = _trendSignal(ladderPctKum, majBaselinePct);
 
       // Predictor 5.0: prefer the recency-weighted multi-snapshot baseline
       // over the single week-ago point. Every available daily snapshot
@@ -3968,8 +4037,8 @@ window.MetaCall = (function () {
       // (fresh install / scraper hasn't run yet).
       const weightedBaselinePct = _computeWeightedBaseline(_allHistorySnapshots, _todayISO(), k);
       const weeklySignal = (weightedBaselinePct != null)
-        ? _trendSignal(ladderPct, weightedBaselinePct)
-        : _trendSignal(ladderPct, wkBaselinePct);
+        ? _trendSignal(ladderPctKum, weightedBaselinePct)
+        : _trendSignal(ladderPctKum, wkBaselinePct);
 
       // Labs cut-performance boost. Two signals, in priority order:
       //   (1) top8_conv_rate (Predictor 3.0 default) — when populated,
@@ -5763,6 +5832,229 @@ window.MetaCall = (function () {
         }))
         .filter(d => d.onlineShare > 0)
         .sort((a, b) => b.onlineShare - a.onlineShare);
+
+      /* ── §1b  14-Tage-Fenster statt Kumulativstand ─────────────────
+       *
+       * BEFUND (05.09.2026): limitless_online_decks_comparison.csv
+       * fuehrt KUMULATIVE Zaehlstaende seit Formatbeginn. Ein Deck, das
+       * im Juli stark war und seit drei Wochen verschwunden ist, steht
+       * dort weiter oben — der Ladder-Anteil, mit dem der Praediktor
+       * rechnet, beschreibt dann eine Vergangenheit, die niemand mehr
+       * spielt. Genau das trifft das prognostizierte Feld an der
+       * empfindlichsten Stelle: `ladderPctDamped` traegt je nach Zweig
+       * 12 bis 30 % des vorhergesagten Anteils.
+       *
+       * WAS DAS FENSTER NICHT ANFASST: alles, was gegen einen
+       * kumulativen Tagesstand aus data/online_share_history/ rechnet —
+       * die beiden Trendsignale und die Surge-Erkennung von Predictor
+       * 4.0a. Die lesen weiter `_kumulativAnteil(d)`. Eine Umstellung
+       * NUR auf der linken Seite haette dort den Nennersprung als
+       * Bewegung gemessen: der Clip in _trendSignal saettigte in der
+       * Nachrechnung bei 68 von 129 Decks statt bei 9, und 4.0a
+       * meldete drei Surge-Decks, von denen keines gestiegen war.
+       *
+       * Gemessen am 05.09.2026 (Fenster 21.08.–04.09., 10.042 Decks).
+       * Die kumulative Spalte ist die, die die Kachel zeigt — new_share
+       * aus limitless_online_decks_comparison.csv. ACHTUNG: die
+       * Fensterdatei fuehrt daneben eine eigene Spalte
+       * `share_kumulativ` mit einem ANDEREN Nenner (38.398 statt
+       * 39.826, weil die Tagesstaende und die Vergleichsdatei nicht
+       * dieselbe Menge zaehlen). Wer die Zahlen unten nachschlaegt,
+       * muss die Vergleichsdatei nehmen, sonst landet er 0,2 pp daneben.
+       *
+       *   Toucannon             2,55 % kumulativ  ->  0,82 % im Fenster  (18 Raenge tiefer)
+       *   Festival Lead         5,90 % kumulativ  ->  4,21 % im Fenster  ( 5 Raenge tiefer)
+       *   Alakazam Dudunsparce  5,79 % kumulativ  ->  7,59 % im Fenster  ( 2 Raenge hoeher)
+       *   Dragapult Dusknoir    5,58 % kumulativ  ->  6,44 % im Fenster  ( 3 Raenge hoeher)
+       *   Mega Excadrill        7,40 % kumulativ  ->  6,38 % im Fenster  ( 2 Raenge tiefer)
+       *
+       * Toucannon ist der Fall, um den es geht: kumulativ Platz 11 und
+       * damit mitten im prognostizierten Feld, in den letzten 14 Tagen
+       * aber praktisch nicht mehr gespielt.
+       *
+       * data/limitless_online_fenster.csv ist die Differenz zweier
+       * GEMESSENER Tagesstaende (heute minus vor 14 Tagen) aus
+       * data/online_share_history/ — keine Glaettung, keine Schaetzung,
+       * eine Subtraktion. scripts/build_online_fenster.py baut sie im
+       * Wochenlauf.
+       *
+       * WARUM 14 TAGE: vom Betreiber so entschieden (05.09.2026). Sieben
+       * Tage waeren bei ~700 Decks/Tag zwar noch tragfaehig, schwanken
+       * aber sichtbar mit einzelnen Ladder-Wochenenden; kumulativ ist
+       * der Fehler oben.
+       *
+       * WAS NICHT AUS DEM FENSTER KOMMT: die Siegquote. Aus zwei
+       * kumulativen Quoten laesst sich die Fensterquote nicht
+       * rekonstruieren (die Bilanz dahinter steht nicht in der Datei).
+       * `onlineWinPct` bleibt deshalb kumulativ — und traegt in der
+       * Anzeige weiter seinen eigenen Nenner.
+       *
+       * DIE FUENF WAECHTER, ohne die das hier gefaehrlich waere
+       * (drei davon kamen erst aus der Gegenpruefung am 05.09.2026):
+       *
+       *  (a) Deckungsgrad. `ladderShare` speist `presenceCap` weiter
+       *      unten; ein Deck ohne Fensterzeile bekaeme 0 und fiele
+       *      lautlos aus dem Feld. Unter 80 % Deckung wird das Fenster
+       *      deshalb komplett verworfen statt halb angewandt. (Am
+       *      05.09.2026 gemessen: 131 von 131 Namen decken sich —
+       *      _shareList fuehrt 131 der 135 Vergleichszeilen, die
+       *      uebrigen vier haben keinen Anteil.) Der Waechter zaehlt
+       *      NAMEN, nicht Werte; gegen eine duenne Stichprobe steht
+       *      deshalb FENSTER_MIN_DECKS daneben.
+       *  (b) Alter. Ein eingefrorener Fensterstand waere schlimmer als
+       *      der Kumulativstand, weil er frisch aussieht. Aelter als
+       *      FENSTER_MAX_ALTER_TAGE -> verworfen.
+       *  (c) Formatstart. Der schlimmste Fall: bei jeder Rotation setzt
+       *      die Quelle ihren Zaehler auf null, das Bauskript bricht ab
+       *      und schreibt nichts — die ALTE Datei bleibt liegen. An
+       *      zwoelf von 65 durchgespielten Tagen speiste so ein Fenster
+       *      aus dem abgelaufenen Format den Praediktor, und die
+       *      Waechter (a) und (b) sahen dabei nichts: Decknamen
+       *      ueberleben eine Rotation, und der Stand war frisch.
+       *  (d) Umfang. Der Deckungswaechter zaehlt NAMEN — 122 Namen mit
+       *      je zwei Listen decken sich zu 100 %. FENSTER_MIN_DECKS
+       *      sieht die duenne Stichprobe, die (a) nicht sehen kann.
+       *  (e) Spanne. Fehlen Staende, kann aus 14 Tagen 40 werden; dann
+       *      traegt die Umstellung ihre eigene Begruendung nicht mehr.
+       *
+       * In JEDEM dieser Faelle faellt die Seite auf den Kumulativstand
+       * zurueck und sagt es in der Konsole — auch wenn die Datei
+       * schlicht fehlt (404 laesst fetch normal aufloesen, der catch
+       * greift dort nicht). */
+      _fensterMeta = null;
+      try {
+        /* format_window.json wird hier EIGENS geholt, obwohl §3 es
+           weiter unten ohnehin laedt: §1b laeuft davor, und eine
+           Rotationspruefung gegen ein noch leeres _formatWindow waere
+           ein Waechter, den ein Test als vorhanden bestaetigt und der
+           nie feuert. Die Datei ist wenige hundert Byte gross. */
+        const [fRes, fMetaRes, fwRes] = await Promise.all([
+          fetch('data/limitless_online_fenster.csv?t=' + Date.now()),
+          fetch('data/limitless_online_fenster_meta.json?t=' + Date.now()),
+          fetch('data/format_window.json?t=' + Date.now()).catch(() => null),
+        ]);
+        if (!fRes.ok || !fMetaRes.ok) {
+          /* Der WAHRSCHEINLICHSTE Ausfall: die Datei ist nicht
+             ausgeliefert, der Pfad stimmt nicht, oder der Wochenlauf
+             hat den Bauschritt uebersprungen. fetch loest dabei normal
+             auf (ok === false), der catch unten greift also nicht — und
+             ohne diesen Zweig waere ausgerechnet dieser Fall der
+             einzige, der nichts sagt. */
+          console.warn(
+            '[MetaCall] Online-Fenster nicht abrufbar (CSV %s, Meta %s) — es gilt der Kumulativstand.',
+            fRes.status, fMetaRes.status
+          );
+        } else {
+          const roh = await fRes.text();
+          // Die Datei beginnt mit einer Kommentarzeile (# Fenster ...),
+          // die den Nenner traegt. parseCSV kennt sie nicht — abschneiden.
+          const ohneKopf = roh.replace(/^\uFEFF?#[^\n]*\n/, '');
+          const fRows = parseCSV(ohneKopf, ';');
+          const meta  = await fMetaRes.json();
+
+          const fenster = new Map();
+          fRows.forEach(r => {
+            if (!r.deck_name) return;
+            fenster.set(normalize(r.deck_name), parseEU(r.share_fenster || '0'));
+          });
+
+          const alter = Math.floor(
+            (Date.now() - Date.parse(meta.fenster_bis + 'T00:00:00Z')) / 86400000
+          );
+          const getroffen = _shareList.filter(d => fenster.has(normalize(d.name))).length;
+          const deckung   = _shareList.length ? getroffen / _shareList.length : 0;
+
+          const umfang = Number(meta.decks_im_fenster) || 0;
+          const tage    = Number(meta.fenster_tage) || 0;
+
+          /* Der Formatstart, gegen den das Fenster gehalten wird. Ohne
+             die Datei bleibt er leer und der Waechter greift nicht —
+             das ist gewollt: lieber kein Rotationsschutz als einer,
+             der auf einem geratenen Datum steht. */
+          let formatstart = '';
+          try {
+            if (fwRes && fwRes.ok) {
+              const fw = await fwRes.json();
+              const d = String(fw && fw.set_release_date || '');
+              if (/^\d{4}-\d{2}-\d{2}$/.test(d)) formatstart = d;
+            }
+          } catch (_e) { /* egal — dann eben ohne Rotationsschutz */ }
+
+          if (formatstart && meta.fenster_von && meta.fenster_von < formatstart) {
+            /* DER gefaehrlichste Fall, gefunden bei der Gegenpruefung
+               am 05.09.2026: der Zaehler der Quelle wird bei jeder
+               Rotation auf null gesetzt (23.05. und 17.07. in den 66
+               Staenden). Das Bauskript bricht dann ab und schreibt
+               NICHTS — die alte Datei bleibt liegen. Ohne diesen
+               Waechter speiste an zwoelf von 65 durchgespielten Tagen
+               ein Fenster aus dem ABGELAUFENEN Format den Praediktor,
+               unter einem Etikett, das Frische behauptet. Alter,
+               Deckung, Umfang und Spanne sahen dabei alle in Ordnung
+               aus: Decknamen ueberleben eine Rotation.
+
+               Das ist genau der Fehler, gegen den diese ganze
+               Umstellung antritt — nur schlimmer, weil er sich als
+               aktuell ausgibt. Dieselbe Wache faehrt Predictor 5.5 in
+               _effectiveDateCutoff(). */
+            console.warn(
+              '[MetaCall] Online-Fenster verworfen: es beginnt am %s und damit vor dem Formatstart %s. Es gilt der Kumulativstand.',
+              meta.fenster_von, formatstart
+            );
+          } else if (!Number.isFinite(alter) || alter > FENSTER_MAX_ALTER_TAGE) {
+            console.warn(
+              '[MetaCall] Online-Fenster verworfen: Stand %s ist %s Tage alt (erlaubt: %d). Es gilt der Kumulativstand.',
+              meta.fenster_bis, alter, FENSTER_MAX_ALTER_TAGE
+            );
+          } else if (!(tage >= FENSTER_MIN_TAGE) || tage > FENSTER_MAX_TAGE) {
+            /* Fehlt im Verlauf ein Stand, nimmt das Bauskript den
+               naechstaelteren — aus 14 Tagen koennen so 40 werden. Es
+               weist das zwar aus, aber dann traegt die Umstellung ihre
+               eigene Begruendung nicht mehr ("kumulativ ist zu alt"). */
+            console.warn(
+              '[MetaCall] Online-Fenster verworfen: es umfasst %s Tage (erlaubt: %d bis %d) — im Verlauf fehlen Staende, oder die Angabe fehlt ganz. Es gilt der Kumulativstand.',
+              meta.fenster_tage, FENSTER_MIN_TAGE, FENSTER_MAX_TAGE
+            );
+          } else if (umfang < FENSTER_MIN_DECKS) {
+            /* Der Deckungswaechter zaehlt NAMEN und sieht eine duenne
+               Stichprobe nicht: 122 Namen mit je zwei Listen deckten
+               sich zu 100 %. Bei 10.042 Decks liegt die Aufloesung bei
+               0,01 pp, bei 500 schon bei 0,2 pp — und der Anteil
+               springt dann mit einzelnen Listen. */
+            console.warn(
+              '[MetaCall] Online-Fenster verworfen: nur %d Decks im Fenster (noetig: %d). Es gilt der Kumulativstand.',
+              umfang, FENSTER_MIN_DECKS
+            );
+          } else if (deckung < FENSTER_MIN_DECKUNG) {
+            console.warn(
+              '[MetaCall] Online-Fenster verworfen: nur %d von %d Decks haben eine Fensterzeile (%s %%, noetig: %d %%). Es gilt der Kumulativstand.',
+              getroffen, _shareList.length, (deckung * 100).toFixed(0),
+              FENSTER_MIN_DECKUNG * 100
+            );
+          } else {
+            _shareList.forEach(d => {
+              d.ladderShareKumulativ = d.ladderShare;
+              const f = fenster.get(normalize(d.name));
+              d.ladderShare = (f == null) ? 0 : f;
+              d.onlineShare = d.ladderShare;
+            });
+            /* Nach ladderShare sortieren, nicht nach onlineShare: die
+               beiden tragen hier zwar denselben Wert, aber onlineShare
+               ist das Feld, in das der Motor am Ende seine PROGNOSE
+               spiegelt. Wer es im Ladeblock liest, baut den Pfad, ueber
+               den der Motor sich beim zweiten Lauf selbst liest — genau
+               den Fehler, den tests/unit/test-motor-rechenfehler.js (S6)
+               bewacht. */
+            _shareList.sort((a, b) => b.ladderShare - a.ladderShare);
+            _fensterMeta = meta;
+            console.info(
+              '[MetaCall] Online-Anteile aus dem %d-Tage-Fenster %s bis %s (%d Decks). Kumulativ steht als ladderShareKumulativ daneben.',
+              tage, meta.fenster_von, meta.fenster_bis, umfang
+            );
+          }
+        }
+      } catch (e) {
+        console.warn('[MetaCall] Online-Fenster nicht lesbar (%s) — es gilt der Kumulativstand.', e && e.message);
+      }
 
       // Online tournament top-8 stats (Stage-1 scraper output). Optional —
       // missing file means we run pure-ladder. Predictor 2.0 will then
@@ -7570,6 +7862,14 @@ window.MetaCall = (function () {
 
       _tournamentStats = {};            // no top8/conv data for past metas
       _gezaehlteQuote = false;
+      /* Auch das Fensteretikett faellt hier weg. _shareList wird gleich
+         durch _pastMetaToShareList ersetzt — dort traegt ladderShare
+         einen TURNIERANTEIL aus der Aggregation, kein Online-Fenster.
+         Bliebe _fensterMeta stehen, hiesse die Kachel weiter
+         "Online-Anteil (14 Tage)" ueber einer Zahl, die das nicht ist,
+         und die Kumulativzeile darunter fiele weg (ladderShareKumulativ
+         ist im Past-Pfad undefined) — ein Nenner ohne Deckung. */
+      _fensterMeta = null;
       if (!formatMatchesLabs) {
         // Cross-rotation past meta — strip labs state to avoid cross-
         // contamination. Same behaviour as before the 2026-06 fix.
@@ -10687,7 +10987,22 @@ window.MetaCall = (function () {
 
     // ── Public-data stat tiles (3-col grid) ──
     const tiles = [];
-    tiles.push(_intelStatTile(t('mc.intelOnlineShareToday'), `${fmt(ladderPct, 1)} %`));
+    /* Jede Quote traegt ihren Nenner. Laeuft die Seite auf dem
+       14-Tage-Fenster, sagt das Etikett das — und der Kumulativstand
+       steht als zweite Zeile daneben, damit der Unterschied sichtbar
+       ist und niemand zwei Zahlen fuer dieselbe haelt. Faellt das
+       Fenster aus (siehe die Waechter in §1b), steht wieder nur der
+       Kumulativstand da, ohne Fensteretikett. */
+    if (_fensterMeta) {
+      const kum = entry.ladderShareKumulativ;
+      tiles.push(_intelStatTile(
+        t('mc.intelOnlineShareFenster').replace('{tage}', _fensterMeta.fenster_tage),
+        `${fmt(ladderPct, 1)} %`,
+        (kum == null) ? '' : t('mc.intelOnlineShareKumulativ').replace('{wert}', fmt(kum, 1))
+      ));
+    } else {
+      tiles.push(_intelStatTile(t('mc.intelOnlineShareToday'), `${fmt(ladderPct, 1)} %`));
+    }
     if (broughtPct > 0) {
       // Beschriftung und Hauptwert passten nicht zusammen.
       //

@@ -238,6 +238,22 @@ describe('Meta Call: jede Quote trägt ihren Nenner', () => {
         assert.match(METACALL, /WR \$\{wrPct\}\$\{_mcPz\(\)\}\$\{wrN\}/);
     });
 
+    it('ein Paar ohne Messung bekommt keine Verschiebung und sagt es', () => {
+        /* Live gemessen am 05.09.2026 nach dem ersten Durchgang:
+           "Seaking Festival Lead WR 7 %" und "Alakazam Dusknoir WR 24 %"
+           standen neben Zeilen mit 1.101 Partien — zu beiden Paarungen
+           liegt aber KEINE Partie vor. Die Zahlen entstanden allein aus
+           der Predictor-5.3-Verschiebung auf den 50/50-Platzhalter.
+           Fuer 33,5 % des erwarteten Gegnerfelds gibt es online keine
+           Quote. */
+        assert.match(METACALL, /ohneMessung: true \}/);
+        assert.match(METACALL, /if \(base\.ohneMessung\) return base;/);
+        assert.match(METACALL, /t\('mc\.wrOhneMessung'\)/);
+        const i18n = lies('js/i18n.js');
+        const n = i18n.split("'mc.wrOhneMessung'").length - 1;
+        assert.equal(n, 2, `mc.wrOhneMessung steht ${n}-mal statt zweimal in i18n.js`);
+    });
+
     it('ein von Hand gesetzter Wert wird als solcher gekennzeichnet', () => {
         assert.match(METACALL, /handEingestellt: true/);
         assert.match(METACALL, /t\('mc\.wrManuell'\)/);

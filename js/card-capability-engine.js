@@ -246,6 +246,15 @@
                             const combinedConf = _minConfidence(um.confidence, ot.confidence, ix.confidence);
                             detected.push({
                                 attackerCard:   um.cardName,
+                                /* Der Schluessel wandert mit. Ohne ihn
+                                   muss der Aufrufer die Karte ueber
+                                   ihren NAMEN nachschlagen, und Namen
+                                   sind in diesem Format nicht eindeutig
+                                   (CLAUDE.md: PBL fuehrt vier Produkte
+                                   "Mega Darkrai ex"). Gebraucht wird er
+                                   von js/tech-ideen.js, um Kartenart und
+                                   Energie danebenzuschreiben. */
+                                attackerKey:    um.cardKey,
                                 attackerSource: um.source,
                                 defenderCard:   oppRec.name,
                                 defenderSource: ot.source,

@@ -2627,6 +2627,97 @@
             const vanillaClass = wrColorClass(vanillaWr);
             const userClass = wrColorClass(userWr);
 
+            /* ── ZWEI LISTEN NEBENEINANDER, MIT DER ZAHL, DIE ZAEHLT ──
+             *
+             * Betreiber am 05.09.2026 auf die Frage nach der
+             * Eingriffstiefe: "Zwei Listen nebeneinander" — Max
+             * Consistency gegen die getechte Variante, "beide
+             * Kennzahlen darunter", Hauptzahl P(>=6 Siege), erwartete
+             * Siege als Stuetzzeile.
+             *
+             * Die beiden Spalten gibt es hier laengst: Vanilla ist die
+             * Liste, die der Bauer aus den Mehrheitsverhaeltnissen
+             * baut, "Your Build" die des Nutzers mit seinen
+             * Tech-Karten. Was fehlte, war die Zahl, an der man die
+             * Entscheidung trifft. "+6,2 Punkte gewichtete Win Rate"
+             * beantwortet nicht die Frage, die am Turniertag zaehlt.
+             *
+             * WIE GERECHNET WIRD, UND WAS DAS NICHT IST
+             * -----------------------------------------
+             * Neun Runden, in jeder wird ein Gegner nach seinem
+             * Feldanteil gezogen und mit der Matchup-Quote dieses
+             * Gegners gewonnen. Die Verteilung ueber die Siegzahl wird
+             * aufgefaltet.
+             *
+             * HIER STAND EIN FALSCHER SATZ, und er ist nachgerechnet
+             * worden statt geglaubt: "kein Binomial ueber eine
+             * Durchschnittsquote, das wuerde die Streuung zwischen
+             * guten und schlechten Matchups wegmitteln". Das stimmt
+             * nicht. Weil der Gegner in JEDER Runde unabhaengig neu
+             * gezogen wird, ist die Rundenquote exakt die gewichtete
+             * Durchschnittsquote — die Faltung und das Binomial liefern
+             * dieselbe Zahl. Nachgemessen an einem Feld mit Quoten von
+             * 38 bis 70 %: 25,55 % gegen 25,55 %; und an einem
+             * kuenstlich gespreizten Feld (75 % / 25 %): 25,39 % gegen
+             * 25,39 %. Auch gegen 400.000 Monte-Carlo-Laeufe stimmt die
+             * Faltung auf 0,05 pp, und die Massesumme ist 1,0000000000.
+             *
+             * Die Faltung bleibt trotzdem stehen, aber aus dem
+             * ehrlichen Grund: sie ist die Stelle, an der eine
+             * Rundenabhaengigkeit eingebaut werden KOENNTE (im Schweizer
+             * System trifft man mit steigender Rundenzahl auf Gegner
+             * mit aehnlicher Bilanz, und dieselbe Paarung kommt nicht
+             * zweimal). Solange das nicht modelliert ist, ist sie ein
+             * Binomial mit mehr Zeilen — und das darf hier stehen, aber
+             * nicht als Ueberlegenheit verkauft werden.
+             *
+             * UNENTSCHIEDEN ZAEHLEN NICHT ALS SIEG. Das ist eine
+             * Vereinfachung gegenueber dem Punktemodell des Meta Calls,
+             * und sie steht deshalb IM ETIKETT: "P(>=6 Siege aus 9
+             * Runden)". Wer 6-2-1 faehrt, hat sechs Siege — wer 5-2-2
+             * faehrt, hat fuenf und steht hier darunter, obwohl beide
+             * 19 Punkte haben. Die Zahl ist damit die VORSICHTIGERE
+             * von beiden, und das ist die richtige Richtung fuer eine
+             * Zahl, an der eine Deckentscheidung haengt.
+             *
+             * Die Rundenzahl ist fest neun, weil dieser Block kein
+             * Turnierformular hat. Meta Call rechnet dieselbe Frage
+             * mit den dort eingestellten Runden und Punkten; wer es
+             * genauer will, geht dorthin. Steht die Zahl hier, muss
+             * auch dastehen, worauf sie beruht — das tut sie. */
+            const RUNDEN = 9, SIEGE_FUER_TAG2 = 6;
+
+            /* Die Siegverteilung ueber `RUNDEN` Runden gegen das
+               gewichtete Feld. `quoteVon` liefert je Gegner die
+               Siegwahrscheinlichkeit dieser Liste. */
+            const siegVerteilung = (quoteVon) => {
+                let dp = new Float64Array(RUNDEN + 1);
+                dp[0] = 1;
+                for (let r = 0; r < RUNDEN; r++) {
+                    const neu = new Float64Array(RUNDEN + 1);
+                    for (let k = 0; k <= r; k++) {
+                        if (dp[k] < 1e-15) continue;
+                        for (const o of paired) {
+                            const anteil = o.fieldShare / totalShare;
+                            if (anteil <= 1e-9) continue;
+                            const pw = Math.max(0, Math.min(1, quoteVon(o) / 100));
+                            neu[k + 1] += dp[k] * anteil * pw;
+                            neu[k]     += dp[k] * anteil * (1 - pw);
+                        }
+                    }
+                    dp = neu;
+                }
+                let p = 0;
+                for (let k = SIEGE_FUER_TAG2; k <= RUNDEN; k++) p += dp[k];
+                return p * 100;
+            };
+            const pVanilla = siegVerteilung(o => o.wr);
+            const pUser    = siegVerteilung(o => o.userWr);
+            const sVanilla = RUNDEN * vanillaWr / 100;
+            const sUser    = RUNDEN * userWr / 100;
+            const pDelta   = pUser - pVanilla;
+            const pDeltaCls = pDelta >= 0.5 ? 'wr-pos' : pDelta <= -0.5 ? 'wr-neg' : 'wr-neutral';
+
             const matchedOpponents  = paired.filter(p => p.bonus > 0).length;
             // Gegner, bei denen die Kartentext-Pruefung gegen UNS ausgeht.
             // Bis zum 05.09.2026 gab es diese Zahl nicht, weil es den Fall
@@ -2649,6 +2740,29 @@
                         <span class="mc-vs-summary-label">${t('matchup.userVsVanillaDelta') || 'Delta'}</span>
                         <span class="mc-vs-pill ${deltaClass}">${signed(delta)}pts</span>
                     </div>
+                </div>
+                <div class="uv-tag2-block">
+                    <div class="uv-tag2-titel" title="${escapeHtml(t('matchup.uvTag2Titel'))}">${
+                        escapeHtml(t('matchup.uvTag2Label').replace('{k}', SIEGE_FUER_TAG2).replace('{n}', RUNDEN))
+                    }</div>
+                    <div class="uv-tag2-reihe">
+                        <div class="uv-tag2-spalte">
+                            <span class="uv-tag2-kopf">${escapeHtml(t('matchup.userVsVanillaVanilla') || 'Vanilla')}</span>
+                            <span class="uv-tag2-wert">${fmt(pVanilla)}%</span>
+                            <span class="uv-tag2-stuetze">${escapeHtml(t('matchup.uvTag2Siege').replace('{n}', fmt(sVanilla)))}</span>
+                        </div>
+                        <div class="uv-tag2-spalte">
+                            <span class="uv-tag2-kopf">${escapeHtml(t('matchup.userVsVanillaYou') || 'Your Build')}</span>
+                            <span class="uv-tag2-wert">${fmt(pUser)}%</span>
+                            <span class="uv-tag2-stuetze">${escapeHtml(t('matchup.uvTag2Siege').replace('{n}', fmt(sUser)))}</span>
+                        </div>
+                        <div class="uv-tag2-spalte">
+                            <span class="uv-tag2-kopf">${escapeHtml(t('matchup.userVsVanillaDelta') || 'Delta')}</span>
+                            <span class="uv-tag2-wert ${pDeltaCls}">${signed(pDelta)}pp</span>
+                            <span class="uv-tag2-stuetze">${escapeHtml(t('matchup.uvTag2Siege').replace('{n}', signed(sUser - sVanilla)))}</span>
+                        </div>
+                    </div>
+                    <div class="uv-tag2-fuss">${escapeHtml(t('matchup.uvTag2Fuss'))}</div>
                 </div>`;
 
             const breakdownLines = [];

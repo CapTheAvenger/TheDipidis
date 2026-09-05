@@ -3578,7 +3578,107 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 modal.appendChild(altWrap);
             }
 
-            /* KNAPP DANEBEN — die Karten, die es nicht mehr in die
+            /* "vom 2026-05-15" in einem deutschen Satz liest sich wie ein
+           durchgereichter Datenbankwert, weil es einer ist. Die
+           Oberflaeche spricht die Sprache des Lesers, auch bei Datumen.
+           Englisch bleibt das ISO-Format stehen — dort ist es die
+           uebliche Schreibweise fuer eine Versionsangabe. */
+        function _ideenDatum(iso) {
+            const s = String(iso || '').trim();
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+            if (!m) return s || '?';
+            const de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+            return de ? `${m[3]}.${m[2]}.${m[1]}` : s;
+        }
+
+        /* Zeichnet den Ideen-Block. Getrennt von der Dialogfunktion,
+           weil er asynchron nachlädt und der Dialog schon steht. */
+        async function _maleTechIdeen(wrap, report) {
+            let erg = null, stand = null;
+            try {
+                stand = await window.TechIdeen.datenstand();
+                erg = await window.TechIdeen.ideen({
+                    archetyp: report.archetype,
+                    eigeneKarten: (report.deck || []).map(c => ({
+                        key: c.card_identifier || c.key || '',
+                        name: c.name || c.card_name || ''
+                    })),
+                    lang: (typeof getLang === 'function' ? getLang() : 'de')
+                });
+            } catch (e) {
+                devLog('[TechIdeen] nicht gerechnet:', e);
+                return;
+            }
+            if (!erg || !erg.gegner || !erg.gegner.length) {
+                /* AUCH DAS LEERE ERGEBNIS BEKOMMT EINEN SATZ — aber nur,
+                   wenn wir den Datenstand kennen. "Nichts gefunden" und
+                   "nichts gesucht" sind zwei verschiedene Aussagen, und
+                   die Regelbasis ist mit fünf Paarungen aus dem Mai so
+                   dünn, dass der Unterschied zählt. */
+                if (stand && stand.interaktionen) {
+                    const p = document.createElement('p');
+                    p.className = 'build-info-alt-detail';
+                    p.textContent = t('buildInfo.techIdeenLeer')
+                        .replace('{n}', stand.interaktionen)
+                        .replace('{datum}', _ideenDatum(stand.datum));
+                    wrap.appendChild(p);
+                }
+                return;
+            }
+
+            const h = document.createElement('h4');
+            h.textContent = t('buildInfo.techIdeenTitel');
+            wrap.appendChild(h);
+
+            const intro = document.createElement('p');
+            intro.className = 'build-info-alt-intro';
+            intro.textContent = t('buildInfo.techIdeenIntro');
+            wrap.appendChild(intro);
+
+            erg.gegner.forEach(g => {
+                const kopf = document.createElement('div');
+                kopf.className = 'build-info-ideen-gegner';
+                kopf.textContent = t('buildInfo.techIdeenGegner')
+                    .replace('{deck}', g.name)
+                    .replace('{quote}', String(Math.round(g.quote * 10) / 10).replace('.', ','))
+                    .replace('{n}', String(g.partien));
+                wrap.appendChild(kopf);
+
+                g.vorschlaege.forEach(v => {
+                    const row = document.createElement('div');
+                    row.className = 'build-info-alt-row build-info-ideen-row';
+                    const karte = document.createElement('div');
+                    karte.className = 'build-info-alt-card';
+                    /* Kartenart dazu, sonst liest sich "Crustle" wie
+                       eine Tech-Karte und ist ein ganzer Angreifer. */
+                    const art = [v.art, v.energie].filter(Boolean).join(' · ');
+                    karte.textContent = v.karte + (art ? '  (' + art + ')' : '');
+                    const detail = document.createElement('div');
+                    detail.className = 'build-info-alt-detail';
+                    /* Der Satz kommt aus der Regelbasis und nennt beide
+                       Karten. Dahinter die Sicherheit — sie ist die
+                       einzige Zahlangabe, die hier hingehört, weil sie
+                       eine Aussage ÜBER DIE ABLEITUNG ist und nicht
+                       über die Karte. */
+                    detail.textContent = v.satz + ' · '
+                        + t('buildInfo.techIdeenSicherheit' + (
+                            v.sicherheit === 'high' ? 'Hoch'
+                          : v.sicherheit === 'medium' ? 'Mittel' : 'Niedrig'));
+                    row.appendChild(karte);
+                    row.appendChild(detail);
+                    wrap.appendChild(row);
+                });
+            });
+
+            const fuss = document.createElement('p');
+            fuss.className = 'build-info-alt-detail build-info-ideen-fuss';
+            fuss.textContent = t('buildInfo.techIdeenFuss')
+                .replace('{n}', String((stand && stand.interaktionen) || 0))
+                .replace('{datum}', _ideenDatum(stand && stand.datum));
+            wrap.appendChild(fuss);
+        }
+
+        /* KNAPP DANEBEN — die Karten, die es nicht mehr in die
                Tech-Slots geschafft haben. Diese Liste ist der ehrlichste
                Teil des Berichts: sie zeigt, wo der Bauer eine Entscheidung
                getroffen hat, die genauso gut anders haette ausfallen
@@ -3635,6 +3735,39 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 });
 
                 modal.appendChild(nmWrap);
+            }
+
+            /* ── ZWEITER BLOCK: IDEE, NICHT BELEG ────────────────────
+             *
+             * Betreiber am 05.09.2026: "naja wenn es nichts gibt dann
+             * gibt es nichts aber vorschlagen kann man ja trotzdem
+             * Karten weil vll kommt man ja so auf Ideen für eine Deck
+             * Anpassung" — und auf die Rückfrage nach der Reichweite:
+             * "Auch formatweit vorschlagen".
+             *
+             * Der Block darüber ("Knapp nicht hineingepasst") ist
+             * BELEG: Karten, die andere in diesem Archetyp auf einem
+             * Major gespielt haben, mit Anteil. Dieser hier ist IDEE:
+             * Karten, die im Archetyp niemand spielt und für die es
+             * folglich keinen Anteil gibt.
+             *
+             * Die Trennung ist der ganze Punkt, und sie wird an drei
+             * Stellen gehalten:
+             *   — eigene Überschrift, eigener Rahmen, eigene Farbe;
+             *   — der Einleitungssatz sagt ausdrücklich "kein Beleg";
+             *   — es steht KEINE Zahl an den Vorschlägen. Ein Anteil
+             *     oder eine Siegquote daneben würde genau die
+             *     Belegkraft vortäuschen, die fehlt.
+             *
+             * Nachgeladen wird das asynchron: der Dialog soll nicht auf
+             * zwei CSV-Dateien und die Musterbibliothek warten. Kommt
+             * nichts zurück, bleibt der Block weg — eine Überschrift
+             * über einer leeren Liste ist schlimmer als kein Block. */
+            if (window.TechIdeen && report && report.archetype) {
+                const ideenWrap = document.createElement('div');
+                ideenWrap.className = 'build-info-tech-ideen';
+                modal.appendChild(ideenWrap);
+                _maleTechIdeen(ideenWrap, report);
             }
 
             // Card reasoning list — one row per card, badges explain

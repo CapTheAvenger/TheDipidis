@@ -273,4 +273,50 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
     assert.ok(/d\.ladderShareKumulativ != null\) \? d\.ladderShareKumulativ : \(d\.ladderShare \|\| 0\)/.test(QUELLE),
       'ohne Fenster liefert der Helfer nicht denselben Wert wie vorher');
   });
+
+  it('die Trendkachel liest dieselbe Uhr wie der Anteil', () => {
+    /* BEFUND beim Ansehen der ausgelieferten Seite (05.09.2026): neben
+       "Online-Anteil (14 Tage) 6,4 %" stand "Trend (7 Tage) -0,0 %".
+       `d.trend` ist die Wochenbewegung des KUMULATIVSTANDS und damit um
+       Groessenordnungen traeger — mittlerer Betrag 0,019 pp gegen
+       0,181 pp im Fenster, fuer Mega Excadrill -0,03 gegen -1,88. */
+    assert.ok(QUELLE.includes('d.trendFenster = (tf == null) ? undefined : tf;'),
+      'der Fenstertrend wird beim Laden nicht mitgenommen');
+    assert.ok(QUELLE.includes("t('mc.intelTrendFenster')"),
+      'die Kachel traegt kein Fensteretikett fuer den Trend');
+    assert.ok(QUELLE.includes("t('mc.intelTrend7d')"),
+      'der Rueckfall auf den Wochentrend fehlt');
+    /* LEER IST NICHT NULL: eine Zeile ohne messbaren Trend darf nicht
+       als "keine Bewegung" durchgehen. */
+    assert.ok(/String\(r\.trend_fenster \|\| ''\)\.trim\(\) !== ''/.test(QUELLE),
+      'ein leeres Trendfeld wird als 0 gelesen');
+    assert.ok(/typeof entry\.trendFenster === 'number'/.test(QUELLE),
+      'die Kachel unterscheidet nicht zwischen fehlendem und null');
+    /* Pfeil, Vorzeichen und Farbe muessen aus DER ZAHL kommen, die die
+       Kachel zeigt. Vorher standen sie oben und rechneten immer mit dem
+       Wochentrend — ein Deck mit -1,88 im Fenster haette einen
+       Aufwaertspfeil bekommen, wenn der Wochentrend positiv war. */
+    // `trendSign` allein wuerde auch `_trendSignal` treffen — das ist
+    // der Trendterm der Prognose und bleibt absichtlich stehen.
+    assert.ok(!/\btrendArrow\b|\btrendSign\b(?!al)|\btrendCls\b/.test(QUELLE),
+      'Pfeil/Vorzeichen/Farbe kommen wieder aus dem Wochentrend');
+    for (const key of ['mc.intelTrendFenster']) {
+      const n = (I18N.match(new RegExp("'" + key.replace('.', '\\.') + "'", 'g')) || []).length;
+      assert.strictEqual(n, 2, `${key} fehlt in einer der beiden Sprachen`);
+    }
+  });
+
+  it('der Praediktor rechnet weiter mit dem Wochentrend', () => {
+    /* BEWUSST NICHT MITGEAENDERT. `0.10 * trendPct` ist auf dem
+       kumulativen Wochentrend kalibriert; ein zwanzigfach groesserer
+       Term waere eine Modelaenderung und keine Anzeigekorrektur. Diese
+       Zusage haelt die Trennung fest, damit sie nicht versehentlich
+       faellt. */
+    assert.ok(/0\.10 \* trendPct/.test(QUELLE),
+      'der Trendterm der Prognose wurde mitgeaendert — das ist eine '
+      + 'Modelaenderung und braucht ihre eigene Messung');
+    const block = fensterBlock();
+    assert.ok(!/trendPct/.test(block),
+      '§1b fasst den Prognose-Trendterm an');
+  });
 });

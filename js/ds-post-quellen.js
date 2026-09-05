@@ -60,10 +60,20 @@
 (function () {
 'use strict';
 
-/* DEUTSCH, BEVOR IRGENDETWAS RECHNET. Siehe Kopfkommentar. */
+/* EINE SPRACHE, BEVOR IRGENDETWAS RECHNET. Siehe Kopfkommentar.
+ *
+ * Seit dem 05.09.2026 ist das ENGLISCH: die Posts gehen auf Instagram,
+ * und der Betreiber hat entschieden, dass sie dort englisch laufen.
+ * Damit wechselt auch die Zahlenschreibweise — "7.49 %" und "39,842",
+ * nicht "7,49 %" und "39.842". Eine englische Ueberschrift ueber
+ * deutschen Dezimalkommas liest sich wie ein Tippfehler, und bei
+ * Tausendertrennern ist es schlimmer als das: "39.842" heisst fuer
+ * einen englischen Leser NEUNUNDDREISSIG KOMMA ACHT, also ein
+ * Tausendstel des Nenners. */
 if (typeof window.getLang !== 'function') {
-    window.getLang = function () { return 'de'; };
+    window.getLang = function () { return 'en'; };
 }
+function _en() { return window.getLang() !== 'de'; }
 
 var WURZEL = '../';
 
@@ -128,7 +138,32 @@ function zahlAus(s) {
      *
      * Leerzeichen werden nur aussen entfernt, nicht innen: "12 34"
      * klebte sonst zu 1234 zusammen. */
-    if (t.indexOf(',') >= 0) t = t.replace(/\./g, '').replace(',', '.');
+    /* NACHGESCHAERFT AM 05.09.2026, ALS DIE POSTS ENGLISCH WURDEN.
+     *
+     * `tausend()` schreibt den Tausendertrenner jetzt als KOMMA
+     * ("39,842"). Die Regel darueber las genau das als Dezimalkomma und
+     * machte daraus 39,842 — ein Tausendstel des Nenners. Gefangen hat
+     * es keine Zusage ueber diese Funktion, sondern eine ueber die
+     * Glaettung: sie fand ploetzlich null duenne Zeilen, weil jede
+     * Partienzahl auf einen Bruchteil geschrumpft war.
+     *
+     * Die Unterscheidung geht ohne Sprachwissen, weil ein
+     * Tausendertrenner IMMER von genau drei Ziffern gefolgt wird und
+     * ein Dezimaltrenner (in diesen Daten) nie. "39,842" ist damit ein
+     * Trenner, "7,49" ein Dezimalkomma — und "1.234,5" bleibt, was es
+     * war. Bleibt der Fall "1,234" mit exakt drei Nachkommastellen
+     * mehrdeutig; er kommt in data/ nicht vor, und `ganzzahl()` faengt
+     * ihn dort ab, wo ein Zaehler erwartet wird. */
+    var dreiNach = /[.,]\d{3}(?!\d)/;
+    if (t.indexOf(',') >= 0 && t.indexOf('.') >= 0) {
+        /* Beide da: der HINTERE ist das Dezimalzeichen. */
+        t = (t.lastIndexOf(',') > t.lastIndexOf('.'))
+            ? t.replace(/\./g, '').replace(',', '.')
+            : t.replace(/,/g, '');
+    } else if (t.indexOf(',') >= 0) {
+        /* Nur Kommas: Trenner, wenn drei Ziffern folgen. */
+        t = dreiNach.test(t) ? t.replace(/,/g, '') : t.replace(',', '.');
+    }
     var n = parseFloat(t);
     return isNaN(n) ? NaN : n;
 }
@@ -172,7 +207,8 @@ function prozent(n, stellen) {
      * (zweite Abnahme, 04.09.2026). */
     if (typeof n !== 'number' || !isFinite(n)) throw new Error(
         'eine Quote fehlt, die auf das Bild soll — die Quelle liefert sie nicht');
-    return n.toFixed(stellen == null ? 2 : stellen).replace('.', ',') + ' %';
+    var t = n.toFixed(stellen == null ? 2 : stellen);
+    return (_en() ? t : t.replace('.', ',')) + ' %';
 }
 function tausend(n) {
     /* "NaN" im Bild ist schlimmer als ein gemeldeter Ausfall. Fehlt eine
@@ -180,7 +216,7 @@ function tausend(n) {
      * dem Post (Abnahme 04.09.2026). */
     if (typeof n !== 'number' || !isFinite(n)) throw new Error(
         'eine Zahl fehlt, die auf das Bild soll — die Quelle liefert sie nicht');
-    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, _en() ? ',' : '.');
 }
 /* DER NAME MUSS IN DIE FUSSZEILE PASSEN — JEDER NAME.
  *
@@ -274,8 +310,8 @@ function ohneGleichstand(reihe, wert) {
 }
 
 function kopfMitAnteil(was, gezeigt, gesamt) {
-    return gesamt > gezeigt ? was + ' · ' + gezeigt + ' von ' + gesamt
-                            : was + ' · alle ' + gesamt;
+    return gesamt > gezeigt ? was + ' · ' + gezeigt + ' of ' + gesamt
+                            : was + ' · all ' + gesamt;
 }
 
 /* ── Die Rezepte ──────────────────────────────────────────────────────
@@ -287,8 +323,8 @@ var REZEPTE = {};
 
 /* ── 1 · Meistgespielt online ──────────────────────────────────────── */
 REZEPTE['meta-online'] = {
-    name: 'Meistgespielt online',
-    gruppe: 'Meta online',
+    name: 'Most played online',
+    gruppe: 'Online meta',
     brauchtDeck: true,
     lade: function () {
         return Promise.all([
@@ -345,12 +381,12 @@ REZEPTE['meta-online'] = {
                 zeilen: zeilenText(acht.map(function (d) {
                     return [d.name, prozent(d.anteil, 2)];
                 })),
-                listeKopf: kopfMitAnteil('Anteil', acht.length, decks.length),
-                kicker: 'Meta online · Limitless',
-                titel: 'Die meistgespielten Decks',
-                fuss: 'aus ' + tausend(nenner) + ' Listen · Limitless online · ' + stand,
-                caption: 'Die ' + acht.length + ' meistgespielten Decks online — Stand ' +
-                    stand + ' aus ' + tausend(nenner) + ' Listen von ' +
+                listeKopf: kopfMitAnteil('Share', acht.length, decks.length),
+                kicker: 'Online meta · Limitless',
+                titel: 'The most played decks',
+                fuss: 'from ' + tausend(nenner) + ' lists · Limitless online · ' + stand,
+                caption: 'The ' + acht.length + ' most played decks online — as of ' +
+                    stand + ' from ' + tausend(nenner) + ' lists across ' +
                     tausend(stat.tournaments) + ' Turnieren.',
                 vorlagen: ['liste', 'zahl'],
                 decks: decks.map(function (d) { return d.name; }),
@@ -360,9 +396,9 @@ REZEPTE['meta-online'] = {
                     return {
                         zahl: prozent(d.anteil, 2),
                         titel: d.name,
-                        zahlLabel: 'Anteil von ' + d.name,
-                        zahlNenner: tausend(d.listen) + ' von ' + tausend(nenner) +
-                            ' Listen im Meta online\nWin Rate ' +
+                        zahlLabel: d.name + "'s share",
+                        zahlNenner: tausend(d.listen) + ' of ' + tausend(nenner) +
+                            ' lists in the online meta\nWin rate ' +
                             prozent(d.winrate, 1) + ' — Unentschieden zählen mit'
                     };
                 }
@@ -373,8 +409,8 @@ REZEPTE['meta-online'] = {
 
 /* ── 2 · Matchups eines Decks ──────────────────────────────────────── */
 REZEPTE['matchups-online'] = {
-    name: 'Matchups eines Decks (online)',
-    gruppe: 'Meta online',
+    name: "A deck's matchups (online)",
+    gruppe: 'Online meta',
     brauchtDeck: true,
     deckPflicht: true,
     groesse: '88 KB',
@@ -462,18 +498,18 @@ REZEPTE['matchups-online'] = {
                          * belastbare Nachkommastelle. */
                         return [m.gegner, Math.round(m.quote) + ' % · ' + Math.round(m.partien)];
                     })),
-                    listeKopf: 'geglättet · ' + acht.length + ' von ' + reihe.length,
-                    listeKopfLinks: 'Gegner',
+                    listeKopf: 'smoothed · ' + acht.length + ' of ' + reihe.length,
+                    listeKopfLinks: 'Opponent',
                     kicker: 'Matchups · ' + deck,
-                    titel: 'Wogegen ' + deck + ' gewinnt',
+                    titel: 'What ' + deck + ' beats',
                     /* 8 VON 20 BEKANNTEN, NICHT 8 VON ALLEN.
                      * Die Datei fuehrt je Deck nur die haeufigsten
                      * Gegner. Ohne diesen Satz haelt der Leser die acht
                      * fuer die besten ueberhaupt. */
-                    fuss: 'geglättet k=20 · ' + acht.length + ' von ' + reihe.length +
+                    fuss: 'smoothed k=20 · ' + acht.length + ' of ' + reihe.length +
                         ' erfassten Gegnern',
-                    caption: 'Die besten Matchups von ' + deck +
-                        ' online — geglättet, mit der Partienzahl je Zeile. ' +
+                    caption: "The best matchups for " + deck +
+                        ' online — smoothed, with the game count per row. ' +
                         'Erfasst sind die ' + reihe.length + ' häufigsten Gegner.',
                     vorlagen: ['liste']
                 };
@@ -588,8 +624,8 @@ function labsLaden() {
 }
 
 REZEPTE['worlds-tag1'] = {
-    name: 'Meistgespielt auf den Worlds',
-    gruppe: 'Turniere',
+    name: 'Most played at Worlds',
+    gruppe: 'Events',
     brauchtDeck: true,
     lade: function () {
         return labsLaden().then(function (d) {
@@ -618,15 +654,15 @@ REZEPTE['worlds-tag1'] = {
                      * bezieht. Ein nackter Prozentwert kann das nie. */
                     return [r.name, String(Math.round(r.spieler))];
                 })),
-                listeKopf: 'Spieler · von ' + tausend(d.gesamt),
+                listeKopf: 'players · of ' + tausend(d.gesamt),
                 /* AUS DER DATEI, NICHT FEST VERDRAHTET. Vorher stand hier
                  * 'Worlds San Francisco', waehrend die Fusszeile aus der
                  * Datei kam — beim Nachstellen mit TEF-POR standen zwei
                  * verschiedene Turniere auf einem Bild. */
                 kicker: d.kurz,
                 titel: d.datum ? d.kurz + ', Tag 1' : d.kurz,
-                fuss: fussZeile(d.kurz + ', ' + d.datum, tausend(d.gesamt) + ' Spieler'),
-                caption: 'Die meistgespielten Decks bei ' + d.turnier + ' am ' + d.datum +
+                fuss: fussZeile(d.kurz + ', ' + d.datum, tausend(d.gesamt) + ' players'),
+                caption: 'The most played decks at ' + d.turnier + ' on ' + d.datum +
                     ' — ' + tausend(d.gesamt) + ' Spieler, ein Turnier.',
                 vorlagen: ['liste', 'zahl'],
                 decks: reihe.map(function (r) { return r.name; }),
@@ -643,8 +679,8 @@ REZEPTE['worlds-tag1'] = {
                          * ("Siegquote 42,4 % …") wird Zeile drei und
                          * ohne Auslassungszeichen weggeworfen. Genau die
                          * Zahl, fuer die die win_pct-Reparatur da ist. */
-                        zahlNenner: Math.round(r.spieler) + ' von ' + tausend(d.gesamt) +
-                            ' Spielern, ' + d.kurz + '\nSiegquote ' +
+                        zahlNenner: Math.round(r.spieler) + ' of ' + tausend(d.gesamt) +
+                            ' players, ' + d.kurz + '\nWin rate ' +
                             prozent(100 * r.siege / r.partien, 1) +
                             ' — Unentschieden zählen mit'
                     };
@@ -667,8 +703,8 @@ REZEPTE['worlds-tag1'] = {
  * Betrachters. */
 var TAG2_MIN = 30;
 REZEPTE['tag2'] = {
-    name: 'Wer es in Tag 2 schaffte',
-    gruppe: 'Turniere',
+    name: 'Who made Day 2',
+    gruppe: 'Events',
     lade: function () {
         return labsLaden().then(function (d) {
             var alle = d.decks.map(function (r) {
@@ -690,20 +726,20 @@ REZEPTE['tag2'] = {
                     /* ZÄHLER UND NENNER IN DER WERTSPALTE — neun Zeichen.
                      * "14 von 53" braucht keinen Prozentwert und keine
                      * Fussnote. */
-                    return [r.name, Math.round(r.tag2) + ' von ' + Math.round(r.tag1)];
+                    return [r.name, Math.round(r.tag2) + ' of ' + Math.round(r.tag1)];
                 })),
                 /* NACH QUOTE SORTIERT, ALS BRUCH GEZEIGT — das muss
                  * dastehen. Sonst liest "01 Alakazam 14 von 53" ueber
                  * "07 Dragapult 22 von 172" wie ein Fehler (zweite
                  * Abnahme, 04.09.2026). */
-                listeKopf: kopfMitAnteil('nach Quote', acht.length, reihe.length),
+                listeKopf: kopfMitAnteil('by rate', acht.length, reihe.length),
                 kicker: d.kurz,
-                titel: 'Wer Tag 2 schaffte',
-                fuss: fussZeile(d.kurz + ', ' + d.datum, 'ab ' + TAG2_MIN + ' Spielern'),
+                titel: 'Who made Day 2',
+                fuss: fussZeile(d.kurz + ', ' + d.datum, TAG2_MIN + '+ players'),
                 /* Die Zeilen sind nach Quote sortiert, aber gezeigt wird
                  * der Bruch — der Spaltenkopf sagt jetzt, wie viele
                  * Decks die Schwelle ueberhaupt genommen haben. */
-                caption: 'Wer bei ' + d.turnier + ' den zweiten Tag erreicht hat — ' +
+                caption: 'Who reached the second day at ' + d.turnier + ' — ' +
                     'gezählt ab ' + TAG2_MIN + ' Spielern am Deck, sonst entscheidet ' +
                     'ein einzelner Spieler die Quote.',
                 vorlagen: ['liste']
@@ -734,8 +770,8 @@ REZEPTE['tag2'] = {
  * Auf das Bild kommt deshalb die ECHTE Quote aus derselben Datei, und
  * der Feldschnitt steht daneben — sonst bedeutet 10,7 % nichts. */
 REZEPTE['top8'] = {
-    name: 'Wie oft ein Deck in die Top 8 kommt',
-    gruppe: 'Turniere',
+    name: 'How often a deck makes Top 8',
+    gruppe: 'Events',
     brauchtDeck: true,
     lade: function () {
         return hole('data/online_tournament_top8_decks.csv').then(function (t) {
@@ -797,11 +833,11 @@ REZEPTE['top8'] = {
                     return [r.name, prozent(r.quote, 1)];
                 })),
                 listeKopf: kopfMitAnteil('Top 8', acht.length, reihe.length),
-                kicker: 'Online · Turniere',
-                titel: 'Wer es in die Top 8 schafft',
+                kicker: 'Online · Events',
+                titel: 'Who makes Top 8',
                 fuss: 'Feld: ' + prozent(feldschnitt, 1) + ' · ab ' + MIN +
                     ' Antritten · ' + spanne,
-                caption: 'Wie oft ein Deck online in die Top 8 kommt. Der Feldschnitt ' +
+                caption: 'How often a deck makes Top 8 online. The field average ' +
                     'liegt bei ' + prozent(feldschnitt, 1) + ' — gezählt ab ' + MIN +
                     ' Antritten, weil darunter ein einzelnes Turnier die Quote macht.',
                 vorlagen: ['liste', 'zahl'],
@@ -813,7 +849,7 @@ REZEPTE['top8'] = {
                         zahl: prozent(r.quote, 1),
                         titel: name,
                         zahlLabel: name + ' — Top 8',
-                        zahlNenner: 'aus ' + r.antritte.toFixed(1).replace('.', ',') +
+                        zahlNenner: 'from ' + r.antritte.toFixed(1) +
                             ' gewichteten Antritten online\nDer Feldschnitt liegt bei ' +
                             prozent(feldschnitt, 1)
                     };
@@ -836,8 +872,8 @@ REZEPTE['top8'] = {
  * "Meta Play!" (1.154). Ueber beide gezaehlt ist der Nenner eine Zahl,
  * die es nirgends gibt. */
 REZEPTE['staples'] = {
-    name: 'Format-Staples',
-    gruppe: 'Karten',
+    name: 'Format staples',
+    gruppe: 'Cards',
     groesse: '788 KB',
     lade: function () {
         return hole('data/current_meta_card_data.csv').then(function (t) {
@@ -880,15 +916,15 @@ REZEPTE['staples'] = {
             var acht = ohneGleichstand(reihe, function (r) { return r.zahl; });
             return {
                 zeilen: zeilenText(acht.map(function (r) {
-                    return [r.name, r.zahl + ' von ' + gesamt];
+                    return [r.name, r.zahl + ' of ' + gesamt];
                 })),
-                listeKopf: 'Archetypen · von ' + gesamt,
-                listeKopfLinks: 'Karte',
-                kicker: 'Karten · Format-Staples',
-                titel: 'In fast jedem Deck',
-                fuss: 'in wie vielen der ' + gesamt + ' Archetypen · Meta Live',
-                caption: 'Die Karten, die in fast jedem Archetyp stecken — gezählt in ' +
-                    gesamt + ' Archetypen mit Deckliste im aktuellen Meta.',
+                listeKopf: 'archetypes · of ' + gesamt,
+                listeKopfLinks: 'Card',
+                kicker: 'Cards · Format staples',
+                titel: 'In almost every deck',
+                fuss: 'in how many of ' + gesamt + ' archetypes · Meta Live',
+                caption: 'The cards that sit in almost every archetype — counted across ' +
+                    gesamt + ' archetypes with a decklist in the current meta.',
                 vorlagen: ['liste']
             };
         });
@@ -910,7 +946,7 @@ REZEPTE['staples'] = {
  * bis vier Teams. Das gehoert in den Fuss, sonst liest sich die Liste
  * als "so sah ein Turnier aus". */
 REZEPTE['champions'] = {
-    name: 'Champions-Teams',
+    name: 'Champions teams',
     gruppe: 'Champions',
     groesse: '295 KB',
     lade: function () {
@@ -948,16 +984,16 @@ REZEPTE['champions'] = {
             var reg = (d._meta && d._meta.current_regulation) || '';
             return {
                 zeilen: zeilenText(acht.map(function (r) {
-                    return [r.name, r.zahl + ' von ' + n];
+                    return [r.name, r.zahl + ' of ' + n];
                 })),
-                listeKopf: 'Teams · von ' + n,
+                listeKopf: 'teams · of ' + n,
                 listeKopfLinks: 'Pokémon',
                 kicker: 'Pokémon Champions' + (reg ? ' · ' + reg : ''),
-                titel: 'Die meistgespielten Pokémon',
+                titel: 'The most played Pokémon',
                 fuss: n + ' Teams, ' + tz + ' Turniere' +
                     (ohneTurnier ? ' + ' + ohneTurnier + ' ohne' : '') +
                     ' · ' + kurzDatum(d._meta && d._meta.last_updated),
-                caption: 'Die meistgespielten Pokémon in ' + n +
+                caption: 'The most played Pokémon in ' + n +
                     ' Replica-Teams aus ' + tz + ' Turnieren' +
                     (ohneTurnier ? ' (' + ohneTurnier + ' Teams ohne Turnierangabe)' : '') +
                     ' — von den Worlds bis zu kleinen Community-Cups.',
@@ -987,7 +1023,7 @@ REZEPTE['champions'] = {
  * von uns gemessene Zahl. Die Oberflaeche muss das anschreiben." */
 var TIER_ORDNUNG = ['S', 'A+', 'A', 'B', 'C', 'D'];
 REZEPTE['pocket'] = {
-    name: 'Pocket-Tier-Liste',
+    name: 'Pocket tier list',
     gruppe: 'Pocket',
     lade: function () {
         return hole('data/pocket_tierlist.json', true).then(function (d) {
@@ -1039,14 +1075,14 @@ REZEPTE['pocket'] = {
                 zeilen: zeilenText(genommen.map(function (dk) {
                     return [dk.name, dk.tier];
                 })),
-                listeKopf: 'Game8-Tier · ' + genommen.length + ' von ' + decks.length,
+                listeKopf: 'Game8 tier · ' + genommen.length + ' of ' + decks.length,
                 ohneRang: true,
-                kicker: 'Pocket · Tier-Liste Game8',
-                titel: 'Stufe ' + stufen.join(' und '),
+                kicker: 'Pocket · Game8 tier list',
+                titel: 'Tier ' + stufen.join(' and '),
                 fuss: 'Game8s Einschätzung, nicht gemessen · ' + stand,
-                caption: 'Die Decks der Stufe ' + stufen.join(' und ') +
+                caption: 'The decks in tier ' + stufen.join(' and ') +
                     ' in Pokémon TCG Pocket — die redaktionelle Einschätzung von ' +
-                    'Game8, keine von uns gemessene Zahl. Stand ' + stand,
+                    'Game8, not a number we measured. As of ' + stand,
                 vorlagen: ['liste']
             };
         });
@@ -1067,8 +1103,8 @@ REZEPTE['pocket'] = {
  * Achtel des Onlinefelds ist neu, gegen diese Decks ist der Pick
  * ungetestet. */
 REZEPTE['day2-prognose'] = {
-    name: 'Day-2-Chance (Prognose)',
-    gruppe: 'Turniere',
+    name: 'Day-2 chance (forecast)',
+    gruppe: 'Events',
     brauchtDeck: true,
     lade: function () {
         return hole('data/deckempfehlung.json', true).then(function (d) {
@@ -1099,11 +1135,11 @@ REZEPTE['day2-prognose'] = {
                     return [r.name, prozent(r.wert, 1)];
                 })),
                 listeKopf: kopfMitAnteil('Day 2', gezeigt.length, reihe.length),
-                kicker: 'Prognose · ' + kurzTurnier(anker.name),
-                titel: 'Day-2-Chance',
-                fuss: fussZeile('Prognose · ' + kurzTurnier(anker.name),
+                kicker: 'Forecast · ' + kurzTurnier(anker.name),
+                titel: 'Day-2 chance',
+                fuss: fussZeile('Forecast · ' + kurzTurnier(anker.name),
                                 'ab ' + schwelle + ' Spielern'),
-                caption: 'Die geschätzte Day-2-Chance je Deck — ein Modell, keine ' +
+                caption: 'The estimated Day-2 chance per deck — a model, not a ' +
                     'Messung. Gerechnet ab ' + schwelle + ' Spielern am Deck. ' +
                     (vorbehalt ? vorbehalt + '.' : ''),
                 vorlagen: ['liste', 'zahl'],
@@ -1119,7 +1155,7 @@ REZEPTE['day2-prognose'] = {
                          * 56 Zeichen; mit "World Championship San
                          * Francisco" waren es 69, und die dritte Zeile
                          * wirft malZahl ohne Auslassungszeichen weg. */
-                        zahlNenner: Math.round(r.spieler) + ' von ' +
+                        zahlNenner: Math.round(r.spieler) + ' of ' +
                             tausend(anker.spieler || 0) + ' Spielern, ' +
                             kurzTurnier(anker.name) + ', geschrumpft' +
                             (vorbehalt ? '\n' + vorbehalt : '')

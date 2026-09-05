@@ -54,6 +54,15 @@ function fenster() {
 
 const Q = fenster().window.DsPostQuellen;
 
+/* DER BRUCHVERBINDER STEHT AN EINER STELLE.
+ *
+ * Die Quellen schreiben Werte als "47 of 112". Bis zum 05.09.2026 hiess
+ * das " von " — die Posts waren deutsch. Neun Zusagen lasen das Literal
+ * einzeln, und die Umstellung machte sechs davon rot, obwohl an der
+ * Rechnung nichts falsch war. Jetzt kostet der naechste Wechsel eine
+ * Zeile. */
+const BRUCH = ' of ';
+
 function zeilenVon(erg) {
     return String(erg.zeilen || '').split('\n').filter(Boolean).map((z) => {
         const t = z.split('|');
@@ -133,7 +142,12 @@ test('eine fehlende Zahl wird gemeldet, nicht als "NaN" gemalt', () => {
     assert.throws(() => Q.tausend(NaN),
         'tausend(NaN) wirft nicht — dann steht "NaN" auf dem Bild');
     assert.throws(() => Q.tausend(undefined));
-    assert.equal(Q.tausend(39842), '39.842');
+    /* ENGLISCHE SCHREIBWEISE seit dem 05.09.2026 — die Posts gehen auf
+       Instagram und laufen dort englisch. Der Trenner ist damit das
+       Komma. Das ist keine Kosmetik: "39.842" liest ein englischer
+       Leser als NEUNUNDDREISSIG KOMMA ACHT und damit als ein
+       Tausendstel des Nenners. */
+    assert.equal(Q.tausend(39842), '39,842');
 });
 
 /* ── Der Nenner ───────────────────────────────────────────────────── */
@@ -293,7 +307,7 @@ test('Champions zeigt einen Bruch, keine Balkenlaenge', async () => {
     const d = JSON.parse(fs.readFileSync(D('data/champions_replica_teams.json'), 'utf8'));
     const erg = await Q.lade('champions');
     const erste = zeilenVon(erg)[0];
-    assert.ok(erste.wert.includes(' von ' + d.teams.length),
+    assert.ok(erste.wert.includes(BRUCH + d.teams.length),
         `der Wert nennt nicht die Teamzahl: ${erste.wert}`);
     assert.ok(!/100\s*%/.test(erste.wert),
         `der Wert ist eine Balkenlänge und keine Häufigkeit: ${erste.wert}`);
@@ -303,11 +317,11 @@ test('Champions zeigt einen Bruch, keine Balkenlaenge', async () => {
 
 test('Staples zaehlt Archetypen und nennt sie so', async () => {
     const erg = await Q.lade('staples');
-    assert.ok(/Archetypen/.test(erg.listeKopf) && /Archetypen/.test(erg.fuss),
-        'weder Spaltenkopf noch Fußzeile nennen den Nenner "Archetypen" — ' +
+    assert.ok(/archetypes/i.test(erg.listeKopf) && /archetypes/i.test(erg.fuss),
+        'weder Spaltenkopf noch Fußzeile nennen den Nenner "archetypes" — ' +
         `"100 % der Decks" wäre falsch: ${erg.listeKopf} / ${erg.fuss}`);
     zeilenVon(erg).forEach((z) => {
-        assert.ok(/^\d+ von \d+$/.test(z.wert),
+        assert.ok(new RegExp('^\\d+' + BRUCH + '\\d+$').test(z.wert),
             `${z.name} traegt "${z.wert}" statt eines Bruchs`);
     });
     assert.ok(/Meta Live/.test(erg.fuss),
@@ -364,7 +378,7 @@ test('Pocket schneidet keine Stufe an und erfindet keine Rangfolge', async () =>
 test('die Day-2-Prognose nennt sich Prognose und haelt ihre Schwelle', async () => {
     const d = JSON.parse(fs.readFileSync(D('data/deckempfehlung.json'), 'utf8'));
     const erg = await Q.lade('day2-prognose');
-    assert.ok(/Prognose/i.test(erg.fuss) || /Prognose/i.test(erg.kicker),
+    assert.ok(/(Prognose|forecast)/i.test(erg.fuss) || /(Prognose|forecast)/i.test(erg.kicker),
         `weder Fußzeile noch Kicker nennen es eine Prognose: ${erg.fuss}`);
     const namen = zeilenVon(erg).map((z) => z.name);
     /* Die vollstaendige Rangliste beginnt mit Crustle auf zwanzig
@@ -429,19 +443,26 @@ test('der Nenner der Zahl-Vorlage passt in zwei Zeilen', async () => {
     }
 });
 
-test('jede Quote steht mit deutschem Dezimalkomma da', async () => {
-    /* Der Test, der ein fehlendes window.getLang faengt: formatPercent
-     * faellt sonst auf "7.5%" zurueck — englischer Punkt in einem
-     * deutschen Post. */
+test('jede Quote steht in EINER Schreibweise da, und es ist die englische', async () => {
+    /* Bis zum 05.09.2026 stand hier das Gegenteil: deutsches
+     * Dezimalkomma. Der Betreiber hat die Posts auf Englisch
+     * umgestellt ("Instagram auf englisch machen macht schon mehr
+     * sinn"), und damit wechselt die Schreibweise mit.
+     *
+     * Der Zweck der Zusage bleibt derselbe und ist der eigentliche
+     * Punkt: dass NICHT BEIDE nebeneinander stehen. Faellt
+     * `window.getLang` aus, mischt die Datei die Schreibweisen — und
+     * "7,49 %" neben "39,842 lists" ist auf einem Bild, das durch
+     * Instagram wandert, nicht mehr aufzuloesen. */
     for (const e of Q.liste()) {
         let erg = await Q.lade(e.id);
         if (erg.proDeck) erg = erg.proDeck(erg.decks[0]);
         zeilenVon(erg).forEach((z) => {
-            assert.ok(!/\d\.\d/.test(z.wert),
-                `${e.name}: "${z.wert}" trägt einen englischen Dezimalpunkt`);
+            assert.ok(!/\d,\d/.test(z.wert),
+                `${e.name}: "${z.wert}" trägt ein deutsches Dezimalkomma`);
         });
-        assert.ok(!/\d\.\d\s*%/.test(erg.fuss),
-            `${e.name}: die Fußzeile trägt einen englischen Dezimalpunkt: ${erg.fuss}`);
+        assert.ok(!/\d,\d\s*%/.test(erg.fuss),
+            `${e.name}: die Fußzeile trägt ein deutsches Dezimalkomma: ${erg.fuss}`);
     }
 });
 
@@ -480,11 +501,11 @@ const SORTIERT = {
     'meta-online':   (z) => Q.zahlAus(z.wert),
     'worlds-tag1':   (z) => Q.zahlAus(z.wert),
     'top8':          (z) => Q.zahlAus(z.wert),
-    'staples':       (z) => Q.zahlAus(z.wert.split(' von ')[0]),
-    'champions':     (z) => Q.zahlAus(z.wert.split(' von ')[0]),
+    'staples':       (z) => Q.zahlAus(z.wert.split(BRUCH)[0]),
+    'champions':     (z) => Q.zahlAus(z.wert.split(BRUCH)[0]),
     'day2-prognose': (z) => Q.zahlAus(z.wert),
     'tag2':          (z) => {
-        const t = z.wert.split(' von ');
+        const t = z.wert.split(BRUCH);
         return Q.zahlAus(t[0]) / Q.zahlAus(t[1]);
     },
     'matchups-online': (z) => Q.zahlAus(z.wert.split(' % ')[0])
@@ -581,7 +602,7 @@ test('ein Bild zeigt ein Turnier, nicht mehrere', async () => {
     /* Die Summe der gezeigten Spielerzahlen darf den genannten Nenner
      * nicht ueberschreiten. Beim Mischen tat sie genau das. */
     const erg = await Q.lade('worlds-tag1');
-    const nenner = Q.zahlAus(erg.listeKopf.split(' von ')[1]);
+    const nenner = Q.zahlAus(erg.listeKopf.split(BRUCH)[1]);
     const summe = zeilenVon(erg).reduce((a, z) => a + Q.zahlAus(z.wert), 0);
     assert.ok(summe <= nenner,
         `die acht gezeigten Decks haben zusammen ${summe} Spieler, der Nenner ` +
@@ -632,7 +653,7 @@ test('der Zombie-Filter wirkt dort, wo er wirken muss', async () => {
 
     const erg = await Q.lade('meta-online');
     /* 1. Im Spaltenkopf: "8 von N" muss die Zahl OHNE Zombies sein. */
-    const n = Q.zahlAus(erg.listeKopf.split(' von ')[1]);
+    const n = Q.zahlAus(erg.listeKopf.split(BRUCH)[1]);
     assert.equal(n, mitAnteil.length,
         `der Kopf nennt ${n} Decks, ohne Zombies sind es ${mitAnteil.length} ` +
         `(mit: ${roh.filter((r) => r.deck_name).length})`);
@@ -736,7 +757,11 @@ test('keine Liste schneidet mitten in einen Gleichstand', async () => {
     let geprueftDecks = 0;
     for (const deck of erg2.decks) {
         const zeilen = zeilenVon(erg2.proDeck(deck));
-        const gesamt = Q.zahlAus((erg2.proDeck(deck).listeKopf.match(/von (\d+)/) || [])[1]);
+        /* Der Kopf heisst seit dem 05.09.2026 "smoothed · 8 of 20"
+           statt "... 8 von 20". Die Zahl dahinter zaehlt, nicht das
+           Wort davor. */
+        const gesamt = Q.zahlAus(
+            (erg2.proDeck(deck).listeKopf.match(/(?:von|of)\s+(\d+)/) || [])[1]);
         if (!isFinite(gesamt) || gesamt <= zeilen.length) continue;
         geprueftDecks++;
         const letzte = zeilen[zeilen.length - 1].wert;
@@ -758,7 +783,7 @@ test('keine Liste schneidet mitten in einen Gleichstand', async () => {
     /* Und der harte Fall, an dem es aufgefallen ist: */
     const ch = await Q.lade('champions');
     const zeilen = zeilenVon(ch);
-    const letzterWert = Q.zahlAus(zeilen[zeilen.length - 1].wert.split(' von ')[0]);
+    const letzterWert = Q.zahlAus(zeilen[zeilen.length - 1].wert.split(BRUCH)[0]);
     const d = JSON.parse(fs.readFileSync(D('data/champions_replica_teams.json'), 'utf8'));
     const zaehl = {};
     d.teams.forEach((t) => {
@@ -804,7 +829,7 @@ test('Staples spaltet keine Karte ueber ihre Drucke', async () => {
     const erg = await Q.lade('staples');
     zeilenVon(erg).forEach((z) => {
         const soll = proName[z.name].size;
-        const ist = Q.zahlAus(z.wert.split(' von ')[0]);
+        const ist = Q.zahlAus(z.wert.split(BRUCH)[0]);
         assert.equal(ist, soll,
             `${z.name} steht mit ${ist} im Bild, ueber alle Drucke sind es ${soll}`);
     });
@@ -903,7 +928,7 @@ test('mehrere Turniere in einer Datei ergeben trotzdem ein Bild', async () => {
         `der Kicker nennt das falsche Turnier: ${erg.kicker}`);
 
     const z = erg.zahlFuer('Alpha');
-    assert.equal(z.zahl, '60,0 %', `120 von 200 sind 60 %, nicht ${z.zahl}`);
+    assert.equal(z.zahl, '60.0 %', `120 von 200 sind 60 %, nicht ${z.zahl}`);
 });
 
 test('ein Gleichstand an der achten Stelle wird nicht angeschnitten', async () => {
@@ -946,10 +971,10 @@ test('eine Karte mit zwei Drucken wird einmal gezaehlt', async () => {
     const erg = await Q2.lade('staples');
     const nach = {};
     zeilenVon(erg).forEach((z) => { nach[z.name] = z.wert; });
-    assert.equal(nach['Doppeldruck'], '3 von 4',
+    assert.equal(nach['Doppeldruck'], '3' + BRUCH + '4',
         `ein zweiter Druck im selben Archetyp wurde mitgezaehlt: ` +
         JSON.stringify(nach));
-    assert.equal(nach['Einzeldruck'], '4 von 4');
+    assert.equal(nach['Einzeldruck'], '4' + BRUCH + '4');
 });
 
 test('auch Staples schneidet keinen Gleichstand an', async () => {
@@ -980,17 +1005,19 @@ test('auch Staples schneidet keinen Gleichstand an', async () => {
      * "6 von 400" waere die Zahl aller Karten des Formats — die haelt
      * ohnehin niemand fuer den Inhalt eines Achterbildes, anders als bei
      * "8 von 131 Decks". */
-    assert.ok(/von \d+/.test(erg.listeKopf),
+    assert.ok(new RegExp(BRUCH.trim() + '\\s*\\d+').test(erg.listeKopf),
         `der Kopf nennt den Nenner der Werte nicht: ${erg.listeKopf}`);
 });
 
 test('keine Tag-2-Zeile steht unter der Schwelle, die im Kopf genannt ist', async () => {
     const erg = await Q.lade('tag2');
-    const schwelle = Q.zahlAus((erg.fuss.match(/ab (\d+)/) || [])[1]);
+    /* "ab 30 Spielern" hiess es bis zum 05.09.2026, jetzt "30+ players".
+       Geprueft wird die ZAHL, nicht das Wort davor. */
+    const schwelle = Q.zahlAus((erg.fuss.match(/(?:ab\s+)?(\d+)\+?\s*(?:Spielern|players)/i) || [])[1]);
     assert.ok(isFinite(schwelle) && schwelle > 1,
         `die Fusszeile nennt keine Schwelle: ${erg.fuss}`);
     zeilenVon(erg).forEach((z) => {
-        const nenner = Q.zahlAus(z.wert.split(' von ')[1]);
+        const nenner = Q.zahlAus(z.wert.split(BRUCH)[1]);
         assert.ok(nenner >= schwelle,
             `${z.name} steht mit ${z.wert} im Bild, die Fusszeile verspricht ` +
             `"ab ${schwelle} Spielern"`);
@@ -1088,7 +1115,9 @@ test('eine zu lange Fusszeile verliert ihren Nenner nicht', async () => {
             `${id}: der Nenner ist aus der Fusszeile gefallen: ${erg.fuss}`);
     }
     const erg = await Q2.lade('worlds-tag1');
-    assert.ok(erg.fuss.includes('1.970'),
+    /* Englische Schreibweise seit dem 05.09.2026 — siehe die Zusage
+       zu tausend() weiter oben. Die Zahl steht als 1,970 da. */
+    assert.ok(erg.fuss.includes('1,970'),
         `die Feldgroesse steht nicht mehr in der Fusszeile: ${erg.fuss}`);
 });
 

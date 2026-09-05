@@ -88,6 +88,7 @@ FENSTER_TAGE = 14
 SPALTEN = [
     "deck_name", "rank_fenster", "count_fenster", "share_fenster",
     "count_kumulativ", "share_kumulativ", "rang_kumulativ", "rang_versatz",
+    "share_vorfenster", "trend_fenster",
 ]
 
 
@@ -252,6 +253,32 @@ def baue(fenster_tage=FENSTER_TAGE):
     heute, basis = _lies(heute_pfad), _lies(basis_pfad)
     if not heute:
         return None, f"{heute_stamm}.csv ist leer"
+
+    # ── Das Fenster DAVOR, fuer den Trend ──────────────────────────
+    #
+    # BEFUND (05.09.2026, beim Ansehen der ausgelieferten Seite): neben
+    # "Online-Anteil (14 Tage) 6,4 %" stand "Trend (7 Tage) -0,0 %".
+    # Der Trend kam aus share_change der Vergleichsdatei — der
+    # Wochenbewegung des KUMULATIVSTANDS. Der ist um Groessenordnungen
+    # traeger als das Fenster: fuer Mega Excadrill -0,03 Punkte gegen
+    # -1,39 im Fenster, im Mittel Faktor 23. Der Leser sah eine
+    # 14-Tage-Zahl und daneben eine Bewegung, die eine andere Uhr las.
+    #
+    # Der ehrliche Trend ist die Differenz zweier gleich langer,
+    # gleich gerechneter Fenster: das aktuelle gegen das unmittelbar
+    # davor. Beide aus gemessenen Tagesstaenden, beide mit ihrem
+    # eigenen Nenner — also wieder eine Subtraktion und keine
+    # Schaetzung.
+    #
+    # Fehlt der Stand von vor zwei Fensterlaengen (frisches Format,
+    # Luecke im Verlauf), bleibt der Trend LEER statt null. Null hiesse
+    # "keine Bewegung"; leer heisst "nicht messbar", und das ist der
+    # Unterschied, um den es hier geht.
+    vor_dt = basis_dt - timedelta(days=spanne)
+    vor_kand = [(st, pf) for st, pf in staende
+                if datetime.strptime(st, "%Y-%m-%d") <= vor_dt and _taugt(st, pf)]
+    vorher = _lies(vor_kand[-1][1]) if vor_kand else None
+    vor_stamm = vor_kand[-1][0] if vor_kand else None
 
     ges_heute = sum(_zahl(v.get("count")) for v in heute.values())
     ges_basis = sum(_zahl(v.get("count")) for v in basis.values())
@@ -442,6 +469,19 @@ def baue(fenster_tage=FENSTER_TAGE):
     # rohe Differenz auseinanderlaufen — zwei Tore fuer dieselbe Groesse
     # haetten sich nur gegenseitig verdeckt.
 
+    # ── Trend: dieses Fenster gegen das davor ─────────────────────
+    if vorher is not None:
+        vor_neu = {}
+        for name, v in basis.items():
+            alt = _zahl((vorher.get(name) or {}).get("count"))
+            vor_neu[name] = max(0, _zahl(v.get("count")) - alt)
+        vor_gesamt = sum(vor_neu.values())
+        if vor_gesamt > 0:
+            for r in zeilen:
+                vor_anteil = vor_neu.get(r["deck_name"], 0) / vor_gesamt * 100
+                r["share_vorfenster"] = round(vor_anteil, 2)
+                r["trend_fenster"] = round(r["share_fenster"] - vor_anteil, 2)
+
     zeilen.sort(key=lambda r: (-r["count_fenster"], r["deck_name"]))
     for i, r in enumerate(zeilen, start=1):
         r["rank_fenster"] = i
@@ -453,6 +493,7 @@ def baue(fenster_tage=FENSTER_TAGE):
         "fenster_tage": spanne,
         "decks_im_fenster": neu_gesamt,
         "decks_differenz_roh": roh_differenz,
+        "vorfenster_von": vor_stamm,
         "nicht_im_fenster_entstanden": nicht_im_fenster,
         "decks_kumulativ": ges_heute,
         "staende_vorhanden": len(staende),
@@ -473,8 +514,12 @@ def schreibe(zeilen, meta):
         w.writeheader()
         for r in zeilen:
             r = dict(r)
-            for k in ("share_fenster", "share_kumulativ"):
-                r[k] = str(r[k]).replace(".", ",")
+            for k in ("share_fenster", "share_kumulativ",
+                      "share_vorfenster", "trend_fenster"):
+                if r.get(k) is None or r.get(k) == "":
+                    r[k] = ""      # nicht messbar — und das steht auch so da
+                else:
+                    r[k] = str(r[k]).replace(".", ",")
             w.writerow(r)
     with io.open(ZIEL.replace(".csv", "_meta.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=2)

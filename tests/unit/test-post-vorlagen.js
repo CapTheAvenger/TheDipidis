@@ -144,7 +144,11 @@ describe('Die Vorlagen halten die Hausregeln ein', () => {
         assert.match(seite, /id="zahlNenner"/,
             'das Feld für die Grundlage ist weg. Ein Prozentwert ohne '
             + 'Nenner ist auf einem geteilten Bild nicht nachprüfbar');
-        assert.match(seite, /Grundlage — Pflicht/,
+        /* Die Seite ist seit dem 05.09.2026 englisch (Instagram). Die
+           Zusage prueft deshalb die BEDEUTUNG, nicht mehr den deutschen
+           Wortlaut: die Beschriftung muss das Feld als Pflicht
+           ausweisen. */
+        assert.match(seite, /(Grundlage — Pflicht|Basis — required)/,
             'die Beschriftung sagt nicht mehr, dass der Nenner Pflicht ist');
         const koerper = /function malZahl\(([\s\S]*?)\n\}/.exec(seite);
         assert.ok(koerper, 'malZahl fehlt');
@@ -153,17 +157,23 @@ describe('Die Vorlagen halten die Hausregeln ein', () => {
             + 'Formular und nicht auf dem Bild');
     });
 
-    it('die Aufnahmen sind deutsche Aufnahmen', () => {
+    it('die Aufnahmen sprechen dieselbe Sprache wie der Post', () => {
+        /* UMGEDREHT AM 05.09.2026. Bis dahin verlangte diese Zusage
+           deutsche Aufnahmen, weil die Posts deutsch waren. Der
+           Betreiber hat sie auf Englisch umgestellt ("Instagram auf
+           englisch machen macht schon mehr sinn") — und damit ist eine
+           DEUTSCHE Aufnahme jetzt der Fehler.
+           Der Zweck der Zusage ist unveraendert: Bild und Text duerfen
+           nicht in zwei Sprachen dastehen. Geprueft wird deshalb
+           weiter der Pfad, nur eben in die andere Richtung. */
         const liste = /var SHOTS = \[([\s\S]*?)\];/.exec(seite);
         assert.ok(liste, 'die Liste der Aufnahmen fehlt');
         const pfade = [...liste[1].matchAll(/'([^']+\.png)'/g)].map(m => m[1]);
         assert.ok(pfade.length >= 5, `nur ${pfade.length} Aufnahmen in der Liste`);
-        const englisch = pfade.filter(p => !/\/de\//.test(p));
-        assert.deepStrictEqual(englisch, [],
-            'diese Aufnahmen liegen nicht unter einem /de/-Pfad und zeigen '
-            + `damit die englische Oberfläche: ${englisch.join(', ')} — auf `
-            + 'einem deutschen Post ist das derselbe Fehler wie eine '
-            + 'vergessene Übersetzung');
+        const fremd = pfade.filter(p => !/\/en\//.test(p));
+        assert.deepStrictEqual(fremd, [],
+            'diese Aufnahmen liegen nicht unter einem /en/-Pfad und zeigen '
+            + `damit eine andere Sprache als der Post: ${fremd.join(', ')}`);
     });
 
     it('jede genannte Aufnahme liegt auch im Repo', () => {
@@ -241,10 +251,19 @@ describe('Die Vorlagen halten die Hausregeln ein', () => {
         const skript = lies('prerender', 'screenshot-posts.js');
         assert.match(skript, /width: 440, height: 956/,
             'das Aufnahmeskript schießt nicht mehr im Telefonmaß');
-        // Der Aufruf selbst, nicht irgendein 'de' in einem Pfad.
-        assert.match(skript, /setItem\(\s*'app_lang'\s*,\s*'de'\s*\)/,
-            'das Aufnahmeskript stellt die Oberfläche nicht mehr auf Deutsch — '
-            + 'genau dieser Fehler hat am 03.09.2026 fast englische Bilder '
-            + 'in die deutsche Anleitung gebracht');
+        /* Das Skript kennt seit dem 05.09.2026 beide Sprachen und
+           schreibt nach images/posts/<sprache>/. Die Vorgabe ist
+           Englisch, weil die Posts es sind; `... de` erneuert die
+           deutschen Aufnahmen fuer die Anleitung.
+           Geprueft wird, dass die Sprache ueberhaupt GESETZT wird —
+           ohne das erbt die Aufnahme, was gerade im Speicher steht,
+           und genau dieser Fehler hat am 03.09.2026 fast englische
+           Bilder in die deutsche Anleitung gebracht. */
+        assert.match(skript, /setItem\(\s*'app_lang'\s*,\s*LANG\s*\)/,
+            'das Aufnahmeskript setzt die Sprache nicht mehr');
+        assert.match(skript, /const SPRACHE = [\s\S]{0,120}'de'[\s\S]{0,40}'en'/,
+            'der Sprachschalter mit der englischen Vorgabe fehlt');
+        assert.match(skript, /'images', 'posts', SPRACHE/,
+            'die Aufnahmen landen nicht mehr im Ordner ihrer Sprache');
     });
 });

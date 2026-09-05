@@ -237,6 +237,9 @@ const translations = {
     'buildInfo.techIdeenSicherheitMittel':  'medium confidence',
     'buildInfo.techIdeenSicherheitNiedrig': 'low confidence',
     'buildInfo.techIdeenFuss':   'Derived from {n} rules dated {datum}, applied to the cards actually played in this format. Nothing here means nothing these rules know — not nothing at all.',
+    'buildInfo.techIdeenBasis':         'Basic',
+    'buildInfo.techIdeenBasisEnergie':  'Basic Energy',
+    'buildInfo.techIdeenEntwickelt':    'Evolves from {name}',
     'buildInfo.techIdeenLeer':   'No card-text idea against your worst matchups either. The rule base holds {n} pairings dated {datum} — that is a start, not full coverage.',
     'buildInfo.nearMissIntro':   'These cards were in the candidate pool but the tech slots were full. This is where a generated list diverges from real decklists — swap by hand if you disagree.',
     'buildInfo.altSuggestionsIntro': 'For these cards the field plurality plays a different copy count than the naive round — AND that plurality group places clearly better. The builder did NOT auto-adjust; review each suggestion and decide whether to override manually.',
@@ -2702,6 +2705,11 @@ const translations = {
     'buildInfo.techIdeenSicherheitMittel':  'mittlere Sicherheit',
     'buildInfo.techIdeenSicherheitNiedrig': 'geringe Sicherheit',
     'buildInfo.techIdeenFuss':   'Abgeleitet aus {n} Regeln vom {datum}, angewandt auf die Karten, die in diesem Format wirklich gespielt werden. Nichts hier heißt: nichts, was diese Regeln kennen — nicht: nichts.',
+    /* Kartenart in der Sprache des Lesers. Der Pokemon-Name in
+       {name} bleibt, wie er auf der Karte steht. */
+    'buildInfo.techIdeenBasis':         'Basis',
+    'buildInfo.techIdeenBasisEnergie':  'Basis-Energie',
+    'buildInfo.techIdeenEntwickelt':    'Entwickelt sich aus {name}',
     'buildInfo.techIdeenLeer':   'Auch laut Kartentext keine Idee gegen deine schlechtesten Matchups. Die Regelbasis kennt {n} Paarungen vom {datum} — das ist ein Anfang, keine Formatabdeckung.',
     'buildInfo.nearMissIntro':   'Diese Karten standen im Kandidatenfeld, die Tech-Slots waren aber voll. Genau hier weicht eine gebaute Liste von echten Decklisten ab — tausche von Hand, wenn du anderer Meinung bist.',
     'buildInfo.altSuggestionsIntro': 'Bei diesen Karten spielt die Mehrheit des Metas eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich deutlich besser. Der Builder hat NICHT automatisch angepasst, schau dir jeden Vorschlag an und entscheide selbst ob du manuell übernimmst.',

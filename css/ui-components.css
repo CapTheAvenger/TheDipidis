@@ -3455,6 +3455,12 @@ img[src*="limitlesstcg"] {
 .build-info-ideen-row {
     border-left: 3px dashed #b39ddb;
 }
+/* Mehrere Traeger derselben Regel stehen untereinander, nicht
+   nebeneinander — nebeneinander brach die Zeile mitten in einer
+   Klammer um. Gesehen im gerenderten Block am 06.09.2026. */
+.build-info-ideen-karte + .build-info-ideen-karte {
+    margin-top: 2px;
+}
 .build-info-ideen-fuss {
     margin-top: 10px;
     padding-top: 8px;

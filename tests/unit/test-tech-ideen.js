@@ -38,6 +38,7 @@ const QUELLE = lies('js', 'tech-ideen.js');
 const BAUER  = lies('js', 'app-deck-builder.js');
 const I18N   = lies('js', 'i18n.js');
 const ENGINE = lies('js', 'card-capability-engine.js');
+const CSS    = lies('css', 'ui-components.css');
 
 describe('Tech-Ideen — Idee, nicht Beleg', () => {
 
@@ -77,9 +78,9 @@ describe('Tech-Ideen — Idee, nicht Beleg', () => {
            einer Zeile mehr als eine Karte — die Art muss trotzdem an
            JEDER hängen, sonst weiß der Leser bei der zweiten nicht
            mehr, ob da ein Angreifer steht. */
-        assert.match(BAUER, /const art = \[v\.art, v\.energie\]\.filter\(Boolean\)\.join/,
+        assert.match(BAUER, /const art = _ideenArt\(v\);/,
             'Kartenart und Energie werden nicht mehr zusammengesetzt');
-        assert.match(BAUER, /return v\.karte \+ \(art \? '  \(' \+ art \+ '\)' : ''\);/,
+        assert.match(BAUER, /zeile\.textContent = v\.karte \+ \(art \? '  \(' \+ art \+ '\)' : ''\);/,
             'die Kartenart wird nicht angezeigt');
     });
 
@@ -269,5 +270,71 @@ describe('Tech-Ideen — Idee, nicht Beleg', () => {
         ]);
         assert.strictEqual(roh.length, 2, 'ein Satz ohne führenden Kartennamen wurde gruppiert');
         assert.strictEqual(roh[0].grund, 'Gegen X hilft A.', 'der Satz wurde trotzdem gekürzt');
+    });
+
+    it('Kartenart und Energie stehen in der Sprache des Lesers', () => {
+        /* GEFUNDEN BEIM HINSEHEN am 06.09.2026: "Crustle (Evolves from
+           Dwebble · Grass)" mitten in einem durchgehend deutschen
+           Absatz. Derselbe Fehler wie am 30.08.2026 im Kartenfilter,
+           wo die Energietypen als einzige Liste englisch blieben.
+
+           Die Zusicherung GREIFT den Uebersetzer aus dem Quelltext und
+           laesst ihn laufen — mit einem Wortschatz, der die echten
+           Schluessel benutzt. */
+        const quelle = BAUER.slice(BAUER.indexOf('function _ideenArt(v) {'));
+        const ende = quelle.indexOf('\n        }\n');
+        assert.ok(ende > 100, 'die Funktion _ideenArt wurde nicht gefunden');
+        const koerper = quelle.slice(quelle.indexOf('{') + 1, ende);
+
+        const wortschatz = {
+            'buildInfo.techIdeenBasis': 'Basis',
+            'buildInfo.techIdeenBasisEnergie': 'Basis-Energie',
+            'buildInfo.techIdeenEntwickelt': 'Entwickelt sich aus {name}',
+            'cards.energyGrass': 'Pflanze',
+            'cards.energyColorless': 'Farblos',
+            'cards.energyPsychic': 'Psycho'
+        };
+        const art = new Function('v', 't', 'getLang',
+            koerper.replace(/\bt\(/g, '__t(').replace('__t(', 't(')
+                   .replace(/__t\(/g, 't('));
+        const t = (k) => (k in wortschatz ? wortschatz[k] : k);
+        const de = () => 'de';
+
+        assert.strictEqual(art({ karte: 'Crustle', art: 'Evolves from Dwebble', energie: 'Grass' }, t, de),
+            'Entwickelt sich aus Dwebble · Pflanze',
+            'die Entwicklungsangabe bleibt englisch');
+        assert.strictEqual(art({ karte: 'Iron Crown ex', art: 'Basic', energie: 'Psychic' }, t, de),
+            'Basis · Psycho', '"Basic" wird nicht uebersetzt');
+        assert.strictEqual(art({ karte: 'X', art: '', energie: 'Colorless' }, t, de),
+            'Farblos', 'ohne Kartenart bleibt der Energietyp nicht allein stehen');
+        assert.strictEqual(art({ karte: 'X', art: '', energie: '' }, t, de), '',
+            'ohne Angaben entsteht ein leerer Klammerausdruck');
+
+        /* Ein unbekannter Wert wird durchgereicht, nicht erfunden. */
+        assert.strictEqual(art({ karte: 'X', art: 'Fossil', energie: 'Nonesuch' }, t, de),
+            'Fossil · Nonesuch',
+            'ein unbekannter Wert wird veraendert statt unveraendert stehenzubleiben');
+
+        /* Und die drei neuen Schluessel muessen in BEIDEN Sprachen
+           stehen — ein fehlender Schluessel faellt sonst still auf den
+           Schluesselnamen zurueck. */
+        for (const key of ['buildInfo.techIdeenBasis', 'buildInfo.techIdeenBasisEnergie',
+                           'buildInfo.techIdeenEntwickelt']) {
+            const n = (I18N.match(new RegExp("'" + key.replace(/\./g, '\\.') + "'", 'g')) || []).length;
+            assert.strictEqual(n, 2, `${key} fehlt in einer der beiden Sprachen`);
+        }
+        assert.match(I18N, /'buildInfo\.techIdeenEntwickelt':\s*'Entwickelt sich aus \{name\}'/,
+            'die deutsche Entwicklungsangabe fehlt');
+    });
+
+    it('mehrere Träger stehen untereinander, nicht in einer Zeile', () => {
+        /* Nebeneinander mit Trennpunkt brach die Zeile mitten in einer
+           Klammer um — "Evolves from Dunsparce ·" / "Colorless)". */
+        assert.match(BAUER, /zeile\.className = 'build-info-ideen-karte'/,
+            'die Träger bekommen keine eigene Zeile');
+        assert.ok(!/\.join\('   ·   '\)/.test(BAUER),
+            'die Träger werden weiterhin in eine Zeile geschrieben');
+        assert.match(CSS, /\.build-info-ideen-karte \+ \.build-info-ideen-karte/,
+            'die gestapelten Träger haben keinen Abstand');
     });
 });

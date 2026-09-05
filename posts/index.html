@@ -7,7 +7,7 @@
 <!-- Wie index.html: ein leeres Datenschema statt einer Datei, damit der
      Browser nicht auf gut Glück /favicon.ico anfragt und 404 bekommt. -->
 <link rel="icon" href="data:,">
-<title>Post-Vorlagen · The Dipidis</title>
+<title>Post templates · The Dipidis</title>
 <!--
   ══════════════════════════════════════════════════════════════════════
   POST-VORLAGEN — 1080 × 1350 für Instagram (@thedipidis)
@@ -117,6 +117,21 @@ legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transfor
 .reiter button.gefuellt::after{content:' ●';color:var(--holz);font-size:9px;
   vertical-align:middle}
 .reiter button[aria-pressed=true].gefuellt::after{color:#20142a}
+/* Die Layoutwahl sind Radios, keine Knoepfe — drei Zustaende, von denen
+   genau einer gilt. Sie sehen aus wie die Reiter darueber, damit die
+   Seite nicht zwei Formsprachen fuer dieselbe Sache hat. */
+#layoutWahl{gap:8px}
+#layoutWahl label{flex:1 1 auto;display:flex;align-items:center;justify-content:center;
+  gap:7px;background:var(--flaeche);border:1px solid var(--linie-stark);border-radius:7px;
+  padding:9px 10px;font-size:13px;font-weight:700;color:var(--matt);cursor:pointer}
+#layoutWahl label:has(input:checked){background:var(--holz);color:#20142a;border-color:var(--holz)}
+/* GEMESSEN, NICHT GERATEN: ohne eigene Masse standen die Radios mit
+   0 x 0 Punkten da (Chromium, 05.09.2026) — sichtbar war nur die
+   Beschriftung, und antippen liess sich das Feld selbst nicht. Ein
+   Bedienelement, das man nur ueber sein Etikett trifft, ist auf dem
+   Telefon eines zu wenig. */
+#layoutWahl input{appearance:auto;-webkit-appearance:radio;flex:none;
+  width:16px;height:16px;min-width:16px;margin:0;accent-color:var(--holz)}
 
 .warnung{font-size:12px;color:#E8908F;margin:8px 0 0}
 
@@ -154,20 +169,20 @@ legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transfor
 <body>
 
 <header>
-  <h1>Post-Vorlagen</h1>
-  <p>Vier Vorlagen im Format 1080 × 1350 für <code>@thedipidis</code>. Grund, Blüten,
-  Logo, Kopf und Fuß sind dieselben wie bei den Bildern, die die Seite selbst
-  erzeugt — wer über Instagram kommt, erkennt die Seite wieder. Text eintippen,
-  Bild herunterladen.</p>
+  <h1>Post templates</h1>
+  <p>Four templates at 1080 × 1350 for <code>@thedipidis</code>. Background,
+  blossoms, logo, header and footer are the same ones the site uses for the
+  images it generates itself — anyone arriving from Instagram recognises the
+  site. Pick a source, adjust the text, download the image.</p>
 </header>
 
 <main>
   <form id="form" onsubmit="return false">
-    <div class="reiter" role="group" aria-label="Vorlage wählen">
+    <div class="reiter" role="group" aria-label="Choose a template">
       <button type="button" data-vorlage="feature" aria-pressed="true">Feature</button>
-      <button type="button" data-vorlage="zahl"    aria-pressed="false">Zahl</button>
-      <button type="button" data-vorlage="liste"   aria-pressed="false">Liste</button>
-      <button type="button" data-vorlage="text"    aria-pressed="false">Ansage</button>
+      <button type="button" data-vorlage="zahl"    aria-pressed="false">Number</button>
+      <button type="button" data-vorlage="liste"   aria-pressed="false">Ranking</button>
+      <button type="button" data-vorlage="text"    aria-pressed="false">Statement</button>
     </div>
 
     <!-- DER WÄHLER STEHT UNTER DEN REITERN, NICHT DARÜBER.
@@ -179,90 +194,105 @@ legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transfor
          einen Reiter zu viel, kostet es einen Klick. Und Kicker, Titel
          und Fußzeile stehen ohnehin hier und gelten für alle vier
          Vorlagen. (Abnahme 04.09.2026) -->
-    <label class="feld"><span>Womit füllen?</span>
+    <label class="feld"><span>Fill from</span>
       <select id="quelle" class="quelle"></select></label>
-    <p class="herkunft" id="herkunft">Zahlen von der Seite holen, statt sie
-      abzutippen. Alles bleibt überschreibbar.</p>
+    <p class="herkunft" id="herkunft">Numbers come from the site, not from typing.
+      Everything stays editable.</p>
 
     <label class="feld" id="deckFeld" hidden><span>Deck</span>
       <input type="text" id="deck" list="deckliste" autocomplete="off"
-             placeholder="tippen zum Suchen">
+             placeholder="type to search">
       <datalist id="deckliste"></datalist></label>
 
     <p class="geaendert" id="geaendert" hidden></p>
 
-    <label class="feld"><span>Kicker (klein, oben)</span>
-      <input type="text" id="kicker" value="TEF-PBL · Was die Seite kann"></label>
-    <label class="feld"><span>Titel</span>
-      <input type="text" id="titel" value="Die Tier-Liste"></label>
+    <label class="feld"><span>Kicker (small, top)</span>
+      <input type="text" id="kicker" value="TEF-PBL · What the site does"></label>
+    <label class="feld"><span>Title</span>
+      <input type="text" id="titel" value="The tier list"></label>
 
     <fieldset id="gFeature">
       <legend>Feature</legend>
       <label class="feld"><span>Screenshot</span>
         <select id="shot"></select></label>
-      <p class="hilf">Alles deutsche Oberfläche, dunkler Modus.
-      <strong>Telefon</strong> (440 × 956) steht im Post hochkant neben den
-      Stichpunkten und ist lesbar; <strong>Schreibtisch</strong> (2560 × 1440)
-      liegt quer darüber und zeigt eher die Form der Ansicht als ihren Inhalt.</p>
-      <label class="feld"><span>Stichpunkte (eine Zeile je Punkt, höchstens vier)</span>
-        <textarea id="punkte">Alle Decks nach Anteil und Win Rate
-Online und Präsenzturniere getrennt
-Jede Quote mit ihrem Nenner
-20 Matchups je Deck, aufklappbar</textarea></label>
+      <p class="hilf">English interface, dark mode. <strong>Phone</strong>
+      (440 × 956) stands upright next to the bullets and stays readable;
+      <strong>Desktop</strong> (2560 × 1440) lies across the top and shows the
+      shape of a view rather than its content.</p>
+      <label class="feld"><span>Bullets (one per line, four at most)</span>
+        <textarea id="punkte">Every deck by share and win rate
+Online and in-person kept apart
+Every rate carries its denominator
+20 matchups per deck, expandable</textarea></label>
     </fieldset>
 
     <fieldset id="gZahl" hidden>
-      <legend>Zahl</legend>
-      <label class="feld"><span>Die Zahl</span>
-        <input type="text" id="zahl" value="7,4 %"></label>
-      <label class="feld"><span>Wofür sie steht</span>
-        <input type="text" id="zahlLabel" value="Anteil von Dragapult"></label>
-      <label class="feld"><span>Grundlage — Pflicht</span>
-        <textarea id="zahlNenner" rows="2">aus 2.908 Listen im Meta online</textarea></label>
-      <p class="hilf">Ohne Nenner keine Quote. Auf einem Bild, das durch Instagram
-      wandert, kann niemand nachschlagen, worauf sich der Prozentwert bezieht.
-      <strong>Zwei Zeilen</strong> — die dritte wirft die Vorlage weg, ohne es
-      anzuzeigen. Dies war bis zum 04.09.2026 ein einzeiliges Feld; ein
-      <code style="font-family:var(--mono)">&lt;input&gt;</code> schluckt jeden
-      Zeilenumbruch, und zwei Sätze klebten im Bild aneinander.</p>
+      <legend>Number</legend>
+      <label class="feld"><span>The number</span>
+        <input type="text" id="zahl" value="7.5 %"></label>
+      <label class="feld"><span>What it stands for</span>
+        <input type="text" id="zahlLabel" value="Dragapult's share"></label>
+      <label class="feld"><span>Basis — required</span>
+        <textarea id="zahlNenner" rows="2">from 2,983 lists in the online meta</textarea></label>
+      <p class="hilf">No rate without its denominator. On an image travelling
+      through Instagram nobody can look up what a percentage refers to.
+      <strong>Two lines</strong> — a third is dropped silently. This was a
+      one-line field until 04.09.2026; an
+      <code style="font-family:var(--mono)">&lt;input&gt;</code> swallows every
+      line break, and two sentences ran together in the image.</p>
     </fieldset>
 
     <fieldset id="gListe" hidden>
-      <legend>Liste</legend>
-      <label class="feld"><span>Zeilen — <code style="font-family:var(--mono)">Name | Wert</code>, höchstens acht</span>
-        <textarea id="zeilen">Dragapult | 7,4 %
-Gholdengo | 6,8 %
-Mega Gardevoir | 5,9 %
-Raging Bolt | 5,1 %
-Mega Lucario | 4,7 %
-Grimmsnarl | 4,2 %</textarea></label>
-      <label class="feld"><span>Spaltenkopf links</span>
+      <legend>Ranking</legend>
+      <!-- DREI ZUSCHNITTE, EINER DAVON DIE VORGABE.
+           Betreiber am 05.09.2026 zu den beiden Bildern, die die Seite
+           selbst erzeugt: "sieht als Liste einfach besser aus". Also
+           steht die Rangliste vorn und die weisse Tafel hinten. -->
+      <label class="feld"><span>Layout</span></label>
+      <div class="reiter" role="radiogroup" aria-label="List layout" id="layoutWahl">
+        <label><input type="radio" name="listeLayout" value="rang" checked> Bars</label>
+        <label><input type="radio" name="listeLayout" value="klar"> Plain</label>
+        <label><input type="radio" name="listeLayout" value="tafel"> Table</label>
+      </div>
+      <p class="hilf"><strong>Bars</strong> shows each value against the largest
+      one — right for shares that add up to a field. <strong>Plain</strong>
+      drops the bar, for numbers whose ratio says nothing (a 21.7 % Day-2
+      chance next to 17.1 % is not a bar). <strong>Table</strong> is the white
+      board, right when a row carries two values.</p>
+      <label class="feld"><span>Rows — <code style="font-family:var(--mono)">Name | Value</code>, ten at most</span>
+        <textarea id="zeilen">Dragapult | 8.8 %
+Alakazam Dudunsparce | 7.6 %
+Dragapult Dusknoir | 6.4 %
+Mega Excadrill | 6.4 %
+Slowking | 6.2 %
+N's Zoroark | 5.6 %</textarea></label>
+      <label class="feld"><span>Left column header</span>
         <input type="text" id="listeKopfLinks" value="Deck"></label>
-      <label class="feld"><span>Spaltenkopf rechts</span>
+      <label class="feld"><span>Right column header</span>
         <input type="text" id="listeKopf" value="Share online"></label>
     </fieldset>
 
     <fieldset id="gText" hidden>
-      <legend>Ansage</legend>
+      <legend>Statement</legend>
       <label class="feld"><span>Text</span>
-        <textarea id="freitext" rows="6">Ab heute steht in der Matchup-Tabelle neben jeder Online-Win-Rate auch die von den Präsenzturnieren — dieselbe Rechnung, dieselbe Glättung, nur andere Partien.
+        <textarea id="freitext" rows="6">From today the matchup table carries the in-person win rate next to the online one — same formula, same smoothing, different games.
 
-Und daneben die Zahl der Partien, damit man sieht, worauf sie steht.</textarea></label>
+And the number of games beside it, so you can see what it rests on.</textarea></label>
     </fieldset>
 
-    <label class="feld"><span>Fußzeile links</span>
-      <input type="text" id="fuss" value="Stand 04.09.2026 · Quelle: Limitless"></label>
+    <label class="feld"><span>Footer, left</span>
+      <input type="text" id="fuss" value="Source: Limitless"></label>
 
     <div class="knopfreihe">
-      <button type="button" class="tun" id="btnPng">PNG herunterladen</button>
+      <button type="button" class="tun" id="btnPng">Download PNG</button>
       <!-- TEILEN STATT HERUNTERLADEN, WENN DAS GERÄT ES KANN.
            Der Betreiber hat am 28.08.2026 vom iPhone gemeldet: "wenn ich
            auf Speichern drücke, dann wird's nicht immer in der Foto
            Mediathek gespeichert." `<a download>` auf einer Blob-Adresse
            ist in iOS Safari unzuverlässig. js/ds-bildvorschau.js macht es
            auf der Hauptseite längst richtig; hier fehlte es. -->
-      <button type="button" class="tun leise" id="btnTeilen" hidden>Teilen</button>
-      <button type="button" class="tun leise" id="btnAlle">Alle vier als PNG</button>
+      <button type="button" class="tun leise" id="btnTeilen" hidden>Share</button>
+      <button type="button" class="tun leise" id="btnAlle">All four as PNG</button>
     </div>
     <p class="warnung" id="warnung" hidden></p>
 
@@ -271,15 +301,15 @@ Und daneben die Zahl der Partien, damit man sieht, worauf sie steht.</textarea><
          zweites Mal ab — er pflegt sie heute getrennt in
          anleitung/texte/posts-final.md. Sie kommt aus derselben Quelle
          wie das Bild und trägt damit denselben Nenner. -->
-    <label class="feld" style="margin-top:18px"><span>Bildunterschrift</span>
+    <label class="feld" style="margin-top:18px"><span>Caption</span>
       <textarea id="caption" rows="4"></textarea></label>
     <div class="knopfreihe">
-      <button type="button" class="tun leise" id="btnText">Text kopieren</button>
+      <button type="button" class="tun leise" id="btnText">Copy caption</button>
     </div>
   </form>
 
   <div class="buehne">
-    <canvas id="cv" width="1080" height="1350" aria-label="Vorschau des Posts"></canvas>
+    <canvas id="cv" width="1080" height="1350" aria-label="Post preview"></canvas>
     <p class="mass" id="mass">1080 × 1350 · 4:5</p>
   </div>
 </main>
@@ -324,8 +354,13 @@ var MONO = 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace
 function fSans(s, w) { return (w || 400) + ' ' + s + 'px ' + SANS; }
 function fMono(s, w) { return (w || 400) + ' ' + s + 'px ' + MONO; }
 
-/* Die Aufnahmen, die in deutscher Oberfläche vorliegen. Englische
-   Screenshots kämen auf einem deutschen Post falsch. */
+/* DIE AUFNAHMEN SIND ENGLISCH, WEIL DIE POSTS ES SIND.
+   Betreiber am 05.09.2026: "thedipidis posts kann doch ruhig auf
+   englisch sein, weil Instagram auf englisch machen macht schon mehr
+   sinn". Eine deutsche Aufnahme auf einem englischen Post waere
+   derselbe Bruch, den die erste Fassung fuer die andere Richtung
+   vermieden hat. `node prerender/screenshot-posts.js` erzeugt sie
+   nach images/posts/en/, `... de` weiterhin nach de/. */
 /* TELEFONAUFNAHMEN ZUERST — sie sind lesbar, die anderen nicht.
    Gemessen am 04.09.2026 an der ersten Fassung dieser Vorlage: eine
    Schreibtischaufnahme (2560 px breit) sitzt im Post 968 px breit, ihr
@@ -344,44 +379,30 @@ function fMono(s, w) { return (w || 400) + ' ' + s + 'px ' + MONO; }
  *
  * [Pfad, Name, Kicker, Titel, Stichpunkte] */
 var SHOTS = [
-    ['../images/posts/de/meta-uebersicht.png', 'Telefon · Aktuelles Meta',
-     'Was die Seite kann', 'Das aktuelle Meta',
-     'Alle Decks nach Anteil und Win Rate\nOnline und Präsenzturniere getrennt\n' +
-     'Jede Quote mit ihrem Nenner\n20 Matchups je Deck, aufklappbar'],
-    ['../images/posts/de/meta-performance.png', 'Telefon · Meta-Performance',
-     'Was die Seite kann', 'Wer wirklich gewinnt',
-     'Win Rate neben dem Anteil\nKonversion in die Top 8\n' +
-     'Gegen den Feldschnitt gerechnet\nAb 20 Antritten, sonst kein Wert'],
-    ['../images/posts/de/meta-call.png', 'Telefon · Meta Call',
-     'Was die Seite kann', 'Der Meta Call',
-     'Welches Feld dich am Turniertag erwartet\nAus Anmeldungen und Vorwoche\n' +
-     'Je Deck ein prognostizierter Anteil\nMit dem Vorbehalt, was unbekannt ist'],
-    ['../images/posts/de/champions.png', 'Telefon · Champions',
-     'Pokémon Champions', 'Die Champions-Datenbank',
-     'Replica-Codes zum Antippen\nTeams aus echten Turnieren\n' +
-     'Nutzung je Pokémon\nPokédex mit Werten und Fähigkeiten'],
-    ['../images/posts/de/kartendatenbank.png', 'Telefon · Kartendatenbank',
-     'Was die Seite kann', 'Die Kartendatenbank',
-     'Jede Karte des Formats\nPreise von Cardmarket\n' +
-     'Deutsche und japanische Drucke\nFilter nach Set, Seltenheit, Typ'],
-    ['../images/tutorials/de/startseite/1-meta.png', 'Schreibtisch · Startseite Meta',
-     'Was die Seite kann', 'Die Startseite', ''],
-    ['../images/tutorials/de/startseite/2-heatmap.png', 'Schreibtisch · Heatmap',
-     'Was die Seite kann', 'Die Matchup-Heatmap',
-     'Jedes Deck gegen jedes\nWin Rate und Partienzahl je Zelle\n' +
-     'Geglättet, damit drei Partien keine 100 % ergeben'],
-    ['../images/tutorials/de/champions/1-teams.png', 'Schreibtisch · Champions Teams',
-     'Pokémon Champions', 'Die Teams', ''],
-    ['../images/tutorials/de/champions/2-nutzung.png', 'Schreibtisch · Champions Nutzung',
-     'Pokémon Champions', 'Die Nutzung', ''],
-    ['../images/tutorials/de/champions/3-nachschlagen.png', 'Schreibtisch · Nachschlagen',
-     'Pokémon Champions', 'Nachschlagen', ''],
-    ['../images/tutorials/de/team-builder/1-auswahl.png', 'Schreibtisch · Team-Builder',
-     'Pokémon Champions', 'Der Team-Builder', ''],
-    ['../images/tutorials/de/team-builder/2-gesetzt.png', 'Schreibtisch · Team gesetzt',
-     'Pokémon Champions', 'Team gesetzt', ''],
-    ['../images/tutorials/de/team-rechner/1-matrix.png', 'Schreibtisch · Team-Rechner',
-     'Pokémon Champions', 'Der Team-Rechner', '']
+    ['../images/posts/en/meta-uebersicht.png', 'Phone · Current meta',
+     'What the site does', 'The current meta',
+     'Every deck by share and win rate\nOnline and in-person kept apart\n' +
+     'Every rate carries its denominator\n20 matchups per deck, expandable'],
+    ['../images/posts/en/meta-performance.png', 'Phone · Meta performance',
+     'What the site does', 'Who actually wins',
+     'Win rate next to the share\nTop-8 conversion\n' +
+     'Measured against the field average\nFrom 20 entries, otherwise no value'],
+    ['../images/posts/en/heatmap.png', 'Phone · Matchup heatmap',
+     'What the site does', 'The matchup heatmap',
+     'Every deck against every other\nOnline and Major in the same cell\n' +
+     'Win rate and the games behind it\nSmoothed, so three games are not 100 %'],
+    ['../images/posts/en/meta-call.png', 'Phone · Meta Call',
+     'What the site does', 'The Meta Call',
+     'The field you will face on the day\nFrom online play and recent Majors\n' +
+     'A forecast share per deck\nAnd your Day-2 chance against it'],
+    ['../images/posts/en/champions.png', 'Phone · Champions',
+     'Pokémon Champions', 'The Champions database',
+     'Replica codes to tap\nTeams from real tournaments\n' +
+     'Usage per Pokémon\nA Pokédex with stats and abilities'],
+    ['../images/posts/en/kartendatenbank.png', 'Phone · Card database',
+     'What the site does', 'The card database',
+     'Every card in the format\nPrices from Cardmarket\n' +
+     'English and Japanese prints\nFilter by set, rarity, type']
 ];
 
 function bild(pfad) {
@@ -607,8 +628,156 @@ function malZahl(ctx, spec) {
     ctx.textAlign = 'left';
 }
 
-/* ── Körper 3 · Liste: Tafel im Zuschnitt der Feldtabelle ─────────── */
-function malListe(ctx, spec) {
+/* ── Körper 3 · Liste ─────────────────────────────────────────────────
+ *
+ * DREI ZUSCHNITTE, EINE DATENQUELLE.
+ *
+ * Betreiber am 05.09.2026: "der Liste Post wäre 2 optionen besser wie
+ * der andere Screenshot im Anhang, sieht als Liste einfach besser aus".
+ * Gemeint waren die beiden Bilder, die die Seite selbst erzeugt — die
+ * Meta-Call-Rangliste mit Balken und die Day-2-Rangliste ohne. Beide
+ * sind dunkel, tragen die Ziffern 01..10 und lassen den Grund
+ * durchscheinen; die weisse Tafel daneben wirkt wie eine
+ * herauskopierte Tabelle.
+ *
+ * Die Tafel BLEIBT trotzdem — sie ist der richtige Zuschnitt, wenn
+ * links Namen und rechts zwei Werte stehen (Champions: "100 von 114").
+ * Auf einem durchscheinenden Grund waere so eine Zeile schlechter
+ * lesbar, nicht besser.
+ *
+ * Welcher wann:
+ *   rang    (Vorgabe) — eine Quote je Zeile, Balken zeigt das Verhaeltnis
+ *   klar              — eine Zahl je Zeile, kein Balken; fuer Werte,
+ *                       deren Verhaeltnis nichts aussagt (Day-2-Chance:
+ *                       21,7 % gegen 17,1 % ist kein Balkenverhaeltnis)
+ *   tafel             — zwei Spalten, weisse Flaeche
+ */
+
+/* Die Zeilen einlesen. Eine Zeile ist `Name | Wert`. */
+function listeZeilen(spec) {
+    return String(spec.zeilen || '').split('\n')
+        .map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 10)
+        .map(function (s) { var t = s.split('|'); return [ (t[0]||'').trim(), (t[1]||'').trim() ]; });
+}
+
+/* Aus "7,4 %" die Zahl ziehen — fuer die Balkenlaenge. Gibt NaN
+ * zurueck, wenn nichts Zaehlbares drinsteht; dann faellt der Balken
+ * weg, statt eine Laenge zu erfinden. */
+function wertZahl(text) {
+    var m = String(text || '').replace(/\s/g, '').match(/-?\d+(?:[.,]\d+)?/);
+    return m ? parseFloat(m[0].replace(',', '.')) : NaN;
+}
+
+/* ── 3a · Rangliste ───────────────────────────────────────────────────
+ * Der Zuschnitt der beiden Bilder, die die Seite selbst erzeugt.     */
+function malRangliste(ctx, spec, mitBalken) {
+    var zeilen = listeZeilen(spec);
+    if (!zeilen.length) return;
+
+    var links = 56, rechts = MP.W - 56, breite = rechts - links;
+    var oben = 540;
+    /* Die Liste fuellt ihre Flaeche. Bei sechs Zeilen stuende sie
+       sonst oben und liesse ein Drittel des Bildes leer — genau die
+       "halbleere Kachel" vom 02.09.2026. */
+    var platz = MP.H - 150 - oben;
+    var zeilenH = Math.min(126, Math.floor(platz / zeilen.length));
+
+    /* Der groesste Wert setzt die Balkenlaenge. Nicht 100 %: bei einem
+       Feld, dessen groesstes Deck 8,8 % hat, waeren alle Balken
+       Striche. */
+    var zahlen = zeilen.map(function (z) { return wertZahl(z[1]); });
+    var maxWert = Math.max.apply(null, zahlen.filter(function (n) { return isFinite(n) && n > 0; }).concat([0]));
+    var balkenTauglich = mitBalken && maxWert > 0;
+
+    /* Spaltenmasse. Die Wertspalte ist so breit wie ihr laengster
+       Eintrag, damit die Balken bei allen Zeilen gleich enden. */
+    ctx.font = fMono(34, 700);
+    var wertBreite = 0;
+    zeilen.forEach(function (z) {
+        wertBreite = Math.max(wertBreite, ctx.measureText(z[1]).width);
+    });
+    wertBreite = Math.min(Math.ceil(wertBreite) + 8, 300);
+
+    var rangBreite = spec.ohneRang ? 0 : 62;
+
+    /* DER NAME SETZT DIE BREITE, NICHT DER BALKEN.
+     *
+     * Erste Fassung gab dem Balken bis zu 360 Punkte und liess dem
+     * Namen den Rest — "Alakazam Dudunsparce" stand damit als
+     * "Alakazam Dud…" da. Ein abgeschnittener Deckname ist auf einem
+     * Bild, das durch Instagram wandert, nicht mehr aufzuloesen; eine
+     * um 80 Punkte kuerzere Balkenspur dagegen sieht kein Mensch.
+     *
+     * Also: erst messen, was der laengste Name braucht, dann bekommt
+     * der Balken, was uebrig bleibt. Faellt fuer ihn zu wenig ab, wird
+     * er ganz weggelassen — ein 60 Punkte langer Stummel behauptet
+     * Verhaeltnisse, die er nicht zeigen kann. */
+    var lueckeName = 28, lueckeBalken = 28;
+    ctx.font = fSans(Math.min(38, zeilenH - 44), 700);
+    var nameBedarf = 0;
+    zeilen.forEach(function (z) {
+        nameBedarf = Math.max(nameBedarf, ctx.measureText(z[0]).width);
+    });
+    var frei = breite - rangBreite - wertBreite - lueckeName;
+    var nameBreite = Math.min(Math.ceil(nameBedarf) + 4, frei);
+    var balkenBreite = 0;
+    if (balkenTauglich) {
+        var rest = frei - nameBreite - lueckeBalken;
+        if (rest >= 130) balkenBreite = Math.min(300, rest);
+        else balkenTauglich = false;
+    }
+
+    ctx.textBaseline = 'middle';
+    zeilen.forEach(function (z, i) {
+        var mitte = oben + i * zeilenH + zeilenH / 2;
+        var x = links;
+
+        if (!spec.ohneRang) {
+            ctx.fillStyle = 'rgba(163,143,168,.75)';
+            ctx.font = fMono(24, 600);
+            ctx.textAlign = 'left';
+            ctx.fillText(String(i + 1).padStart(2, '0'), x, mitte);
+            x += rangBreite;
+        }
+
+        ctx.fillStyle = F.creme;
+        ctx.font = fSans(Math.min(38, zeilenH - 44), 700);
+        ctx.textAlign = 'left';
+        ctx.fillText(clip(ctx, z[0], nameBreite + 2), x, mitte);
+
+        if (balkenTauglich) {
+            var bx = rechts - wertBreite - 28 - balkenBreite;
+            var bh = 12, by = mitte - bh / 2;
+            var anteil = isFinite(zahlen[i]) && zahlen[i] > 0 ? zahlen[i] / maxWert : 0;
+            ctx.fillStyle = 'rgba(247,239,228,.14)';
+            rundesRechteck(ctx, bx, by, balkenBreite, bh, bh / 2); ctx.fill();
+            if (anteil > 0) {
+                ctx.fillStyle = F.holz;
+                rundesRechteck(ctx, bx, by, Math.max(bh, balkenBreite * anteil), bh, bh / 2);
+                ctx.fill();
+            }
+        }
+
+        ctx.fillStyle = F.holz;
+        ctx.font = fMono(Math.min(34, zeilenH - 48), 700);
+        ctx.textAlign = 'right';
+        ctx.fillText(clip(ctx, z[1], wertBreite + 8), rechts, mitte);
+
+        /* Eine haarfeine Linie UNTER jeder Zeile ausser der letzten.
+           Ohne sie laufen zehn Zeilen ineinander; mit einer kraeftigen
+           saehe es aus wie eine Tabelle, und dann koennte man gleich
+           die Tafel nehmen. */
+        if (i < zeilen.length - 1) {
+            ctx.fillStyle = 'rgba(247,239,228,.08)';
+            ctx.fillRect(links, oben + (i + 1) * zeilenH - 0.5, breite, 1);
+        }
+    });
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+
+/* ── 3c · Tafel: der Zuschnitt der Feldtabelle ─────────────────────── */
+function malTafel(ctx, spec) {
     var zeilen = String(spec.zeilen || '').split('\n')
         .map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 8)
         .map(function (s) { var t = s.split('|'); return [ (t[0]||'').trim(), (t[1]||'').trim() ]; });
@@ -707,12 +876,29 @@ function malText(ctx, spec) {
     });
 }
 
+/* Der Verteiler fuer die Liste. `listeLayout` kommt aus der
+ * Oberflaeche; faellt es aus, gilt die Rangliste mit Balken — der
+ * Zuschnitt, den der Betreiber ausgesucht hat. */
+function malListe(ctx, spec) {
+    if (spec.listeLayout === 'tafel') return malTafel(ctx, spec);
+    if (spec.listeLayout === 'klar')  return malRangliste(ctx, spec, false);
+    return malRangliste(ctx, spec, true);
+}
+
 var KOERPER = { feature: malFeature, zahl: malZahl, liste: malListe, text: malText };
 
 /* ── Zusammenbau ──────────────────────────────────────────────────── */
 var teile = { logo: null, blueten: [], shots: {} };
 var aktuelle = 'feature';
 var ohneRang = false;
+/* Die Quelle, mit der die Rangliste startet. `meta-online` ist die
+   einzige, die IMMER Zeilen liefert — sie haengt nur an
+   limitless_online_decks.csv, das der Wochenlauf zweimal die Woche neu
+   schreibt. Turnier- und Champions-Quellen koennen zwischen zwei
+   Events leer sein, und eine leere Rangliste waere schlimmer als eine
+   abgetippte. */
+var LISTE_VORGABE = 'meta-online';
+var listeQuelleGesetzt = false;
 var zahlTitel = null;   /* der Titel, den die Quelle fuer die Zahl-Vorlage vorschlaegt */
 var listeTitel = null;
 
@@ -729,6 +915,7 @@ function spec() {
         zeilen:     document.getElementById('zeilen').value,
         listeKopf:  document.getElementById('listeKopf').value,
         listeKopfLinks: document.getElementById('listeKopfLinks').value,
+        listeLayout: (document.querySelector('input[name="listeLayout"]:checked') || {}).value || 'rang',
         freitext:   document.getElementById('freitext').value,
         fuss:       document.getElementById('fuss').value,
         ohneRang:   !!ohneRang
@@ -828,7 +1015,7 @@ document.getElementById('btnText').addEventListener('click', function () {
     var t = document.getElementById('caption');
     var knopf = this, alt = knopf.textContent;
     function fertig() {
-        knopf.textContent = 'kopiert';
+        knopf.textContent = 'copied';
         setTimeout(function () { knopf.textContent = alt; }, 1600);
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -917,7 +1104,7 @@ function pruefeGeaendert() {
             ? ' Feld von dir geändert · ' : ' Felder von dir geändert · ');
         var k = document.createElement('button');
         k.type = 'button';
-        k.textContent = 'auf die Quelle zurücksetzen';
+        k.textContent = 'reset to source';
         k.addEventListener('click', function () {
             FELDER.forEach(function (f) {
                 if (geladenStand[f] != null) {
@@ -943,12 +1130,12 @@ function pruefeNenner() {
     if (!aktQuelle || !geladenStand) { w.hidden = true; return; }
     if (/\d/.test(feldWert('fuss'))) { w.hidden = true; return; }
     w.hidden = false;
-    w.innerHTML = 'In der Fußzeile steht nicht mehr, worauf die Zahlen beruhen. ';
+    w.innerHTML = 'The footer no longer says what the numbers rest on. ';
     var k = document.createElement('button');
     k.type = 'button';
     k.className = 'tun leise';
     k.style.cssText = 'font-size:12px;padding:4px 10px;margin-left:4px';
-    k.textContent = 'Grundlage wieder einsetzen';
+    k.textContent = 'put the basis back';
     k.addEventListener('click', function () {
         document.getElementById('fuss').value = geladenStand.fuss;
         pruefeGeaendert(); zeichne();
@@ -1089,7 +1276,7 @@ function quelleWaehlen(id) {
         document.getElementById('deckFeld').hidden = true;
         document.getElementById('geaendert').hidden = true;
         w.hidden = true;
-        textHerkunft('Zahlen von der Seite holen, statt sie abzutippen. ' +
+        textHerkunft('Numbers come from the site, not from typing. ' +
                      'Alles bleibt überschreibbar.');
         zeichne();
         return;
@@ -1162,9 +1349,42 @@ function schalteVorlage(v) {
     document.querySelectorAll('.reiter button').forEach(function (o) {
         o.setAttribute('aria-pressed', String(o.dataset.vorlage === v));
     });
+
     ['feature', 'zahl', 'liste', 'text'].forEach(function (n) {
         document.getElementById('g' + n[0].toUpperCase() + n.slice(1)).hidden = (n !== v);
     });
+
+    /* WER DIE RANGLISTE WAEHLT, MEINT ECHTE ZAHLEN.
+     *
+     * Betreiber am 05.09.2026: "es ist wichtig das immer die aktuellen
+     * Daten auch für Liste von der Website gezogen werden. Klar wäre es
+     * gut die Daten noch bearbeiten zu können, aber erstmal sollen die
+     * Daten von der Seite kommen."
+     *
+     * Also holt die Rangliste sich beim ersten Aufruf eine Quelle,
+     * statt mit sechs abgetippten Zeilen dazustehen. Ueberschreibbar
+     * bleibt alles — die Geaendert-Zeile zeigt jede Abweichung an und
+     * bietet das Zuruecksetzen an.
+     *
+     * NUR BEIM ERSTEN MAL: hat der Betreiber die Quelle bewusst auf
+     * "Nothing" gestellt, waere ein erneutes Nachladen beim naechsten
+     * Reiterwechsel ein Uebergriff. `listeQuelleGesetzt` merkt sich das.
+     *
+     * UND ERST HIER, NACH DEM SICHTBARMACHEN. Die erste Fassung stand
+     * weiter oben und sprang mit `return` aus der Funktion, sobald sie
+     * eine Quelle geladen hatte — die Schleife darueber lief dann nie,
+     * und der Rangliste-Block blieb `hidden`. Sichtbar war eine
+     * Vorschau mit richtigen Zahlen ueber einem leeren Formular.
+     * Gefunden beim Nachsehen im Browser, nicht von einem Test. */
+    if (v === 'liste' && !aktQuelle && !listeQuelleGesetzt) {
+        listeQuelleGesetzt = true;
+        var qw = document.getElementById('quelle');
+        if (qw && [].some.call(qw.options, function (o) { return o.value === LISTE_VORGABE; })) {
+            qw.value = LISTE_VORGABE;
+            quelleWaehlen(LISTE_VORGABE);   /* zeichnet selbst */
+            return;
+        }
+    }
     zeichne();
 }
 
@@ -1191,7 +1411,7 @@ function schalteVorlage(v) {
     /* Der Quellen-Wähler, nach Themen gruppiert. */
     var q = document.getElementById('quelle');
     var leer = document.createElement('option');
-    leer.value = ''; leer.textContent = 'Nichts — ich tippe selbst';
+    leer.value = ''; leer.textContent = 'Nothing — I will type it';
     q.appendChild(leer);
     var gruppen = {};
     window.DsPostQuellen.liste().forEach(function (e) {

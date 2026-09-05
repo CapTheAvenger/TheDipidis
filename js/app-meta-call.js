@@ -7736,11 +7736,28 @@ window.MetaCall = (function () {
       return { pWin: 0.50, pTie: MAJOR_MATCHUP_TIE_RATE, pLoss: 0.48 };
     }
 
+    /* EIN PLATZHALTER IST KEINE MESSUNG (05.09.2026).
+
+       Fehlt die Paarung in beiden Richtungen, war die Antwort schon
+       immer ein ehrliches 50/50. Weiter unten schiebt Predictor 5.3
+       aber `(adjA - adjB)` auf JEDES pWin — auch auf diesen
+       Platzhalter. Live gemessen am 05.09.: "Seaking Festival Lead
+       WR 7 %" und "Alakazam Dusknoir WR 24 %" standen in der
+       Begegnungsliste neben Zeilen mit 1.101 Partien, obwohl zu beiden
+       Paarungen KEINE einzige Partie vorliegt — die Zahlen entstanden
+       allein aus der Verschiebung auf die 50.
+
+       B3 hat den Umfang gemessen: fuer 33,5 % des erwarteten
+       Gegnerfelds gibt es online keine Quote, darunter Crustle (2,0 %)
+       und Alakazam Dusknoir (2,0 %, stark steigend).
+
+       Ein ungemessenes Paar wird deshalb markiert, die Korrektur
+       laesst es in Ruhe, und die Anzeige sagt es. */
     const hit = _matchupMap?.[a]?.[b];
     const rev = !hit ? _matchupMap?.[b]?.[a] : null;
     let base = hit ? hit
-      : rev ? { pWin: rev.pLoss, pTie: rev.pTie, pLoss: rev.pWin }
-      : { pWin: 0.50, pTie: 0.02, pLoss: 0.48 };
+      : rev ? { pWin: rev.pLoss, pTie: rev.pTie, pLoss: rev.pWin, partien: rev.partien }
+      : { pWin: 0.50, pTie: 0.02, pLoss: 0.48, partien: 0, ohneMessung: true };
 
     // 3-source matchup blend (Day-2 45 % / Day-1 35 % / Online 20 % —
     // user-flagged 2026-06). Fires per-pair when at least one labs-side
@@ -7910,6 +7927,9 @@ window.MetaCall = (function () {
     // matchup (zero or certain).
     const adjA = _deckWRAdjustment[a] || 0;
     const adjB = _deckWRAdjustment[b] || 0;
+    // Auf einen Platzhalter wird nichts geschoben — sonst wird aus
+    // "wir wissen es nicht" eine Zahl mit Nachkommastelle.
+    if (base.ohneMessung) return base;
     if (adjA === 0 && adjB === 0) return base;
     const shift = (adjA - adjB) / 100;
     const pWin = _clip(base.pWin + shift, 0.05, 0.95);
@@ -7955,7 +7975,9 @@ window.MetaCall = (function () {
       const blendedWin  = (metaBase.pWin * META_CONFIDENCE + journalWR * js.total) / totalWeight;
       const pTie        = metaBase.pTie;
       return { pWin: blendedWin, pTie, pLoss: Math.max(0, 1 - blendedWin - pTie),
-               partien: (metaBase.partien || 0) + js.total, eigene: js.total };
+               partien: (metaBase.partien || 0) + js.total, eigene: js.total,
+               // Mit eigenen Partien ist es keine reine Behauptung mehr.
+               ohneMessung: metaBase.ohneMessung && !(js.total > 0) };
     }
     return metaBase;
   }
@@ -9622,7 +9644,9 @@ window.MetaCall = (function () {
          bekommen keinen Nenner, sondern werden als solche gekennzeichnet. */
       const wrN    = m.handEingestellt
         ? ' · ' + t('mc.wrManuell')
-        : ((m.partien > 0) ? ' · ' + window.zahlLokal(m.partien) : '');
+        : (m.ohneMessung
+            ? ' · ' + t('mc.wrOhneMessung')
+            : ((m.partien > 0) ? ' · ' + window.zahlLokal(m.partien) : ''));
       const wrCls  = wrPct >= 55 ? 'favorable' : wrPct <= 45 ? 'unfavorable' : 'even';
       const barW   = Math.round((lambda / maxEnc) * 100);
       const name   = deck.name === '_junk' ? t('mc.junkDecks') : deck.name;

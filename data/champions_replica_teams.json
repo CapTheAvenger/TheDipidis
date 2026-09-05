@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-09-04",
+    "last_updated": "2026-09-05",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-B",
@@ -10,7 +10,7 @@
       "M-B",
       "M-A"
     ],
-    "team_count": 114
+    "team_count": 112
   },
   "teams": [
     {
@@ -11035,204 +11035,6 @@
             "Shadow Ball",
             "Sludge Bomb",
             "Substitute",
-            "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 113,
-      "replica_code": "MVJFPY7N87",
-      "team_name": "tantomisso's Charizard-Y Venusaur Rain Team",
-      "tournament": "-",
-      "trainer": "tantomisso",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "21 Aug 2026",
-      "pokepaste_url": "https://pokepast.es/450aaffdbefd171b",
-      "pokemon": [
-        {
-          "name": "Charizard",
-          "item": "Charizardite Y",
-          "ability": "Blaze",
-          "tera_type": "",
-          "evs": "16 HP / 18 Def / 11 SpA / 21 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Heat Wave",
-            "Solar Beam",
-            "Weather Ball",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Archaludon",
-          "item": "Leftovers",
-          "ability": "Stamina",
-          "tera_type": "",
-          "evs": "27 HP / 1 Def / 5 SpA / 27 SpD / 6 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Protect",
-            "Dragon Pulse",
-            "Flash Cannon",
-            "Electro Shot"
-          ]
-        },
-        {
-          "name": "Grimmsnarl",
-          "item": "Light Clay",
-          "ability": "Prankster",
-          "tera_type": "",
-          "evs": "31 HP / 20 Def / 15 SpD",
-          "nature": "Careful",
-          "moves": [
-            "Light Screen",
-            "Spirit Break",
-            "Reflect",
-            "Parting Shot"
-          ]
-        },
-        {
-          "name": "Venusaur",
-          "item": "Venusaurite",
-          "ability": "Chlorophyll",
-          "tera_type": "",
-          "evs": "22 HP / 26 SpA / 18 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Sludge Bomb",
-            "Giga Drain",
-            "Earth Power",
-            "Sleep Powder"
-          ]
-        },
-        {
-          "name": "Basculegion",
-          "item": "Choice Scarf",
-          "ability": "Adaptability",
-          "tera_type": "",
-          "evs": "32 Atk / 2 Def / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Wave Crash",
-            "Last Respects",
-            "Aqua Jet",
-            "Flip Turn"
-          ]
-        },
-        {
-          "name": "Pelipper",
-          "item": "Sitrus Berry",
-          "ability": "Drizzle",
-          "tera_type": "",
-          "evs": "31 HP / 1 Def / 5 SpA / 19 SpD / 10 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Weather Ball",
-            "Tailwind",
-            "Hurricane",
-            "Wide Guard"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 114,
-      "replica_code": "CE5LY7J9N6",
-      "team_name": "MemeGuy924's Charizard-Y Aerodactyl Team",
-      "tournament": "-",
-      "trainer": "MemeGuy924",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "21 Aug 2026",
-      "pokepaste_url": "https://pokepast.es/3c6bff457cc525f9",
-      "pokemon": [
-        {
-          "name": "Aerodactyl",
-          "item": "Aerodactylite",
-          "ability": "Unnerve",
-          "tera_type": "",
-          "evs": "16 HP / 18 Atk / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Rock Slide",
-            "Dual Wingbeat",
-            "Tailwind",
-            "Wide Guard"
-          ]
-        },
-        {
-          "name": "Kingambit",
-          "item": "Focus Sash",
-          "ability": "Defiant",
-          "tera_type": "",
-          "evs": "32 Atk / 2 SpD / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Kowtow Cleave",
-            "Sucker Punch",
-            "Iron Head",
-            "Low Kick"
-          ]
-        },
-        {
-          "name": "Farigiraf",
-          "item": "Sitrus Berry",
-          "ability": "Armor Tail",
-          "tera_type": "",
-          "evs": "29 HP / 20 Def / 17 SpD",
-          "nature": "Relaxed",
-          "moves": [
-            "Twin Beam",
-            "Thunderbolt",
-            "Trick Room",
-            "Helping Hand"
-          ]
-        },
-        {
-          "name": "Sylveon",
-          "item": "Fairy Feather",
-          "ability": "Pixilate",
-          "tera_type": "",
-          "evs": "14 HP / 25 Def / 20 SpA / 7 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Hyper Voice",
-            "Moonblast",
-            "Quick Attack",
-            "Detect"
-          ]
-        },
-        {
-          "name": "Charizard",
-          "item": "Charizardite Y",
-          "ability": "Blaze",
-          "tera_type": "",
-          "evs": "22 HP / 20 Def / 11 SpA / 13 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Heat Wave",
-            "Weather Ball",
-            "Solar Beam",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Garchomp",
-          "item": "Life Orb",
-          "ability": "Rough Skin",
-          "tera_type": "",
-          "evs": "6 HP / 28 Atk / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Earthquake",
-            "Stomping Tantrum",
-            "Dragon Claw",
             "Protect"
           ]
         }

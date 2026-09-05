@@ -3591,6 +3591,52 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return de ? `${m[3]}.${m[2]}.${m[1]}` : s;
         }
 
+        /* ── KARTENART UND ENERGIE IN DER SPRACHE DES LESERS ────
+         *
+         * BEFUND beim Ansehen des gerenderten Blocks am 06.09.2026:
+         * "Crustle (Evolves from Dwebble · Grass)" stand mitten in
+         * einem sonst durchgehend deutschen Absatz. Genau derselbe
+         * Fehler wie am 30.08.2026 im Kartenfilter, wo die
+         * Energietypen als einzige Liste englisch blieben — und
+         * derselbe wie beim ISO-Datum eine Zeile weiter unten: ein
+         * durchgereichter Datenbankwert, weil es einer ist.
+         *
+         * `card_type` ist KEINE saubere Aufzaehlung, sondern traegt
+         * bei Entwicklungen den Namen der Vorstufe ("Evolves from
+         * Dwebble"). Diese Angabe ist wertvoll — sie sagt dem Leser,
+         * dass die Karte eine Vorstufe braucht — also wird sie NICHT
+         * weggeworfen, sondern nur ihr Vorspann uebersetzt. Der
+         * Pokemon-Name bleibt stehen, wie er auf der Karte steht.
+         *
+         * Was nicht erkannt wird, bleibt unveraendert stehen. Lieber
+         * ein englischer Rest als eine erfundene Uebersetzung. */
+        function _ideenArt(v) {
+            const de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+            const teile = [];
+            const art = String(v.art || '').trim();
+            if (art) {
+                const m = /^Evolves from\s+(.+)$/.exec(art);
+                if (m) {
+                    teile.push(t('buildInfo.techIdeenEntwickelt').replace('{name}', m[1]));
+                } else if (art === 'Basic') {
+                    teile.push(t('buildInfo.techIdeenBasis'));
+                } else if (art === 'Basic Energy') {
+                    teile.push(t('buildInfo.techIdeenBasisEnergie'));
+                } else {
+                    teile.push(art);
+                }
+            }
+            const e = String(v.energie || '').trim();
+            if (e) {
+                /* Die Energietypen haben laengst deutsche Namen im
+                   Wortschatz — sie stehen so auf den Karten. */
+                const schluessel = 'cards.energy' + e;
+                const wort = t(schluessel);
+                teile.push((de && wort && wort !== schluessel) ? wort : e);
+            }
+            return teile.join(' · ');
+        }
+
         /* Zeichnet den Ideen-Block. Getrennt von der Dialogfunktion,
            weil er asynchron nachlädt und der Dialog schon steht. */
         async function _maleTechIdeen(wrap, report) {
@@ -3691,12 +3737,21 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     row.className = 'build-info-alt-row build-info-ideen-row';
                     const karte = document.createElement('div');
                     karte.className = 'build-info-alt-card';
-                    /* Kartenart dazu, sonst liest sich "Crustle" wie
+                    /* EINE KARTE JE ZEILE. Nebeneinander mit Trennpunkt
+                       gesetzt (erster Versuch, 06.09.2026) brach die
+                       Zeile mitten in einer Klammer um — "Evolves from
+                       Dunsparce ·" / "Colorless)". Drei Traeger sind
+                       eine Liste, keine Aufzaehlung im Fliesstext.
+
+                       Kartenart dazu, sonst liest sich "Crustle" wie
                        eine Tech-Karte und ist ein ganzer Angreifer. */
-                    karte.textContent = gr.karten.map(v => {
-                        const art = [v.art, v.energie].filter(Boolean).join(' · ');
-                        return v.karte + (art ? '  (' + art + ')' : '');
-                    }).join('   ·   ');
+                    gr.karten.forEach(v => {
+                        const zeile = document.createElement('div');
+                        zeile.className = 'build-info-ideen-karte';
+                        const art = _ideenArt(v);
+                        zeile.textContent = v.karte + (art ? '  (' + art + ')' : '');
+                        karte.appendChild(zeile);
+                    });
                     const detail = document.createElement('div');
                     detail.className = 'build-info-alt-detail';
                     /* Der Satz kommt aus der Regelbasis und nennt beide

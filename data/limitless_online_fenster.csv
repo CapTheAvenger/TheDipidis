@@ -1,0 +1,137 @@
+﻿# Fenster 2026-08-21 bis 2026-09-04 (14 Tage) · 10042 Decks im Fenster · 38398 kumulativ seit Formatbeginn. count_fenster ist die Differenz zweier gemessener Kumulativstaende, keine Schaetzung. Erzeugt von scripts/build_online_fenster.py
+deck_name;rank_fenster;count_fenster;share_fenster;count_kumulativ;share_kumulativ;rang_kumulativ;rang_versatz
+Dragapult;1;887;8,83;2983;7,77;1;0
+Alakazam Dudunsparce;2;762;7,59;2305;6,0;4;2
+Dragapult Dusknoir;3;647;6,44;2224;5,79;6;3
+Mega Excadrill;4;641;6,38;2948;7,68;2;-2
+Slowking;5;620;6,17;2202;5,73;7;2
+N's Zoroark;6;558;5,56;2068;5,39;8;2
+Dragapult Blaziken;7;525;5,23;2295;5,98;5;-2
+Festival Lead;8;423;4,21;2349;6,12;3;-5
+Dhelmise;9;377;3,75;1580;4,11;10;1
+Grimmsnarl Froslass;10;328;3,27;1669;4,35;9;-1
+Raging Bolt Ogerpon;11;286;2,85;868;2,26;12;1
+Mega Lucario;12;248;2,47;803;2,09;13;1
+Lucario Hariyama;13;216;2,15;713;1,86;14;1
+Basic Box;14;215;2,14;657;1,71;15;1
+Lopunny Dusknoir;15;195;1,94;275;0,72;31;16
+Ogerpon Meganium Hydrapple;16;155;1,54;556;1,45;17;1
+Crustle;17;140;1,39;363;0,95;23;6
+Cynthia's Garchomp;18;136;1,35;488;1,27;19;1
+Mega Greninja;19;127;1,26;606;1,58;16;-3
+Rocket's Mewtwo;20;122;1,21;329;0,86;24;4
+Rocket's Honchkrow;21;114;1,14;503;1,31;18;-3
+Lopunny Dudunsparce;22;113;1,13;265;0,69;32;10
+Ogerpon Meganium Arboliva;23;105;1,05;229;0,6;35;12
+Mega Chandelure;24;101;1,01;455;1,18;20;-4
+Starmie Froslass;25;89;0,89;278;0,72;30;5
+Beedrill;26;87;0,87;428;1,11;21;-5
+Hop's Trevenant;27;85;0,85;291;0,76;28;1
+Greninja;28;82;0,82;296;0,77;26;-2
+Toucannon;29;82;0,82;1015;2,64;11;-18
+Kangaskhan Bouffalant;30;80;0,8;318;0,83;25;-5
+Sharpedo Toxtricity;31;77;0,77;127;0,33;45;14
+Dragapult Dudunsparce;32;72;0,72;225;0,59;36;4
+Manectric Eelektrik;33;68;0,68;295;0,77;27;-6
+Starmie Dusknoir;34;62;0,62;181;0,47;39;5
+Ethan's Typhlosion;35;60;0,6;283;0,74;29;-6
+Toxtricity Box;36;58;0,58;262;0,68;33;-3
+Alakazam Dusknoir;37;56;0,56;86;0,22;54;17
+Ceruledge;38;55;0,55;247;0,64;34;-4
+Mega Venusaur;39;45;0,45;221;0,58;37;-2
+Mega Absol Box;40;42;0,42;380;0,99;22;-18
+Mega Starmie;41;42;0,42;181;0,47;38;-3
+Cinccino;42;41;0,41;163;0,42;41;-1
+Steven's Metagross;43;39;0,39;131;0,34;44;1
+Clefairy Ogerpon;44;38;0,38;116;0,3;46;2
+Mega Charizard X;45;34;0,34;90;0,23;53;8
+Mega Darkrai;46;33;0,33;176;0,46;40;-6
+Mega Froslass;47;33;0,33;101;0,26;51;4
+Okidogi Barbaracle;48;32;0,32;103;0,27;49;1
+Hydreigon;49;29;0,29;73;0,19;59;10
+Lillie's Clefairy;50;29;0,29;107;0,28;48;-2
+Seaking Festival Lead;51;29;0,29;32;0,08;78;27
+Azumarill;52;26;0,26;42;0,11;72;20
+Blaziken Zoroark;53;26;0,26;136;0,35;42;-11
+Toxtricity;54;25;0,25;133;0,35;43;-11
+Hop's Zacian;55;23;0,23;63;0,16;63;8
+Flareon Noctowl;56;22;0,22;81;0,21;56;0
+Metagross;57;20;0,2;85;0,22;55;-2
+Alakazam;58;18;0,18;24;0,06;82;24
+Palafin;59;18;0,18;53;0,14;68;9
+Tera Box;60;18;0,18;72;0,19;61;1
+Mega Abomasnow;61;17;0,17;93;0,24;52;-9
+Diancie Dusknoir;62;16;0,16;73;0,19;60;-2
+Froslass Munkidori;63;16;0,16;103;0,27;50;-13
+Mega Dragonite;64;16;0,16;79;0,21;57;-7
+Bronzong;65;15;0,15;45;0,12;70;5
+Doublade;66;15;0,15;75;0,2;58;-8
+Mamoswine;67;14;0,14;20;0,05;92;25
+Dudunsparce Control;68;11;0,11;21;0,05;86;18
+Ogerpon Meganium;69;11;0,11;49;0,13;69;0
+Mega Camerupt;70;10;0,1;31;0,08;79;9
+Wailord;71;10;0,1;112;0,29;47;-24
+Sinistcha Ogerpon;72;9;0,09;20;0,05;89;17
+Sylveon;73;9;0,09;18;0,05;95;22
+Decidueye;74;8;0,08;37;0,1;76;2
+Joltik Box;75;8;0,08;25;0,07;80;5
+Marnie's Grimmsnarl;76;8;0,08;64;0,17;62;-14
+Ursaluna Lunatone;77;8;0,08;41;0,11;73;-4
+Dragapult Zoroark;78;6;0,06;8;0,02;108;30
+Froslass Dudunsparce;79;6;0,06;57;0,15;65;-14
+Terapagos Noctowl;80;6;0,06;17;0,04;97;17
+Blaziken;81;5;0,05;21;0,05;88;7
+Eelektrik;82;5;0,05;20;0,05;90;8
+Ethan's Magcargo;83;5;0,05;20;0,05;91;8
+Jellicent Dusknoir;84;5;0,05;24;0,06;83;-1
+Mega Latias;85;5;0,05;8;0,02;109;24
+Yanmega;86;5;0,05;34;0,09;77;-9
+Zygarde Barbaracle;87;5;0,05;56;0,15;66;-21
+Archaludon Dudunsparce;88;4;0,04;22;0,06;85;-3
+Archaludon Zoroark;89;4;0,04;23;0,06;84;-5
+Dragapult Froslass;90;4;0,04;21;0,05;87;-3
+Greninja Blaziken;91;4;0,04;19;0,05;93;2
+Iono's Bellibolt;92;4;0,04;45;0,12;71;-21
+Iron Thorns;93;4;0,04;56;0,15;67;-26
+Mega Feraligatr;94;4;0,04;40;0,1;75;-19
+Mega Zygarde;95;4;0,04;17;0,04;96;1
+Erika's Victreebel;96;3;0,03;58;0,15;64;-32
+Mega Diancie;97;3;0,03;5;0,01;115;18
+Mega Gengar;98;3;0,03;11;0,03;105;7
+Mega Sharpedo;99;3;0,03;8;0,02;110;11
+Raging Bolt Bellibolt;100;3;0,03;10;0,03;106;6
+Blissey;101;2;0,02;18;0,05;94;-7
+Luxray;102;2;0,02;6;0,02;112;10
+Rocket's Spidops;103;2;0,02;14;0,04;101;-2
+Scizor;104;2;0,02;12;0,03;103;-1
+Toxtricity Brute Bonnet;105;2;0,02;4;0,01;119;14
+Archaludon;106;1;0,01;40;0,1;74;-32
+Cinderace;107;1;0,01;5;0,01;117;10
+Feraligatr;108;1;0,01;12;0,03;102;-6
+Flareon;109;1;0,01;5;0,01;118;9
+Flygon;110;1;0,01;10;0,03;107;-3
+Gengar;111;1;0,01;17;0,04;98;-13
+Heatran Metang;112;1;0,01;2;0,01;130;18
+Incineroar;113;1;0,01;2;0,01;126;13
+Mega Lopunny;114;1;0,01;11;0,03;104;-10
+Mega Manectric;115;1;0,01;5;0,01;114;-1
+Misty's Gyarados;116;1;0,01;16;0,04;99;-17
+Rocket's Porygon-Z;117;1;0,01;2;0,01;125;8
+Scovillain;118;1;0,01;6;0,02;111;-7
+Tyranitar;119;1;0,01;3;0,01;120;1
+Zoroark Crustle;120;1;0,01;6;0,02;113;-7
+Alolan Exeggutor ex;121;0;0,0;2;0,01;124;3
+Bloodmoon Ursaluna;122;0;0,0;3;0,01;123;1
+Cornerstone Mask Ogerpon;123;0;0,0;3;0,01;121;-2
+Dragonite Eelektrik;124;0;0,0;5;0,01;116;-8
+Future Box;125;0;0,0;1;0,0;135;10
+Hydrapple;126;0;0,0;2;0,01;131;5
+Hydrapple Ogerpon;127;0;0,0;2;0,01;129;2
+Milotic;128;0;0,0;1;0,0;133;5
+Okidogi;129;0;0,0;3;0,01;122;-7
+Paldean Tauros;130;0;0,0;16;0,04;100;-30
+Raging Bolt;131;0;0,0;2;0,01;128;-3
+Rocket's Nidoking;132;0;0,0;24;0,06;81;-51
+Salamence;133;0;0,0;1;0,0;134;1
+Slaking;134;0;0,0;2;0,01;127;-7
+Zoroark Lucario;135;0;0,0;1;0,0;132;-3

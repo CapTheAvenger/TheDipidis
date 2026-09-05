@@ -81,7 +81,16 @@ jobs:
 
       # Rebuild the Pokédex (also writes data/champions_names_de.json from the
       # committed German name sources). Fail-soft: keeps committed JSON.
+      # BEFUND 05.09.2026: der Schritt darueber wurde am 21.08. scharf
+      # gestellt (id + output + Schlussgatter unten), dieser hier nicht.
+      # Er konnte also weiter Nacht fuer Nacht scheitern, die committete
+      # Datei zurueckrollen und den Lauf gruen lassen — genau der Zustand,
+      # den der Kommentar oben fuer den Nachbarschritt beschreibt. Er
+      # bekommt jetzt dasselbe Gatter: die Wiederherstellung bleibt (ein
+      # duenner Pokedex waere schlimmer als ein alter), der gruene Haken
+      # geht.
       - name: Build Champions Pokédex
+        id: pokedex
         run: |
           set +e
           python -u scripts/build_champions_pokedex.py
@@ -89,7 +98,15 @@ jobs:
           if [ "$rc" -ne 0 ]; then
               echo "::warning::build_champions_pokedex exited with $rc — pokedex JSON kept as-is"
               git checkout -- data/champions_pokedex.json data/champions_names_de.json 2>/dev/null
+              echo "failed=$rc" >> "$GITHUB_OUTPUT"
+          else
+              echo "failed=0" >> "$GITHUB_OUTPUT"
           fi
+          {
+            echo "### champions-usage: nicht blockierende Schritte"
+            echo ""
+            echo "- build_champions_pokedex: rc=$rc"
+          } >> "$GITHUB_STEP_SUMMARY"
           exit 0
 
       # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
@@ -158,4 +175,10 @@ jobs:
         if: steps.usage.outputs.failed != '0'
         run: |
           echo "::error::champions usage scrape exited ${{ steps.usage.outputs.failed }} — data/champions_usage.json was NOT refreshed."
+          exit 1
+
+      - name: Fail the run if the Pokédex build died
+        if: steps.pokedex.outputs.failed != '0'
+        run: |
+          echo "::error::build_champions_pokedex exited ${{ steps.pokedex.outputs.failed }} — data/champions_pokedex.json und data/champions_names_de.json wurden NICHT neu gebaut."
           exit 1

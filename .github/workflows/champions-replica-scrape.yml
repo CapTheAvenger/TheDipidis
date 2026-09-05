@@ -118,8 +118,12 @@ jobs:
           echo "::endgroup::"
           if [ "$rc" -ne 0 ]; then
               echo "::warning::champions_replica_scraper exited with $rc"
+              echo "FAIL scrapers/champions_replica_scraper.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scrapers/champions_replica_scraper.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
-          exit 0  # never block — scraper is fail-soft, JSON is kept
+          exit 0  # never block — scraper is fail-soft, JSON is kept.
+                  # Der rc steht jetzt in der Bilanz weiter unten (S5).
 
       - name: Copy output back to data/
         run: |
@@ -167,9 +171,13 @@ jobs:
         run: |
           set +e
           python -u scripts/scrape_de_names.py
-          if [ "$?" -ne 0 ]; then
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
               echo "::warning::scrape_de_names failed — keeping committed de_name_overrides.json"
               git checkout -- data/de_name_overrides.json 2>/dev/null
+              echo "FAIL scripts/scrape_de_names.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/scrape_de_names.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           exit 0
 
@@ -180,9 +188,13 @@ jobs:
         run: |
           set +e
           python -u scripts/scrape_champions_items.py
-          if [ "$?" -ne 0 ]; then
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
               echo "::warning::scrape_champions_items failed — keeping committed champions_available_items.json"
               git checkout -- data/champions_available_items.json 2>/dev/null
+              echo "FAIL scripts/scrape_champions_items.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/scrape_champions_items.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           exit 0
 
@@ -198,6 +210,9 @@ jobs:
           if [ "$rc" -ne 0 ]; then
               echo "::warning::build_champions_resources exited with $rc — resources JSON kept as-is"
               git checkout -- data/champions_resources.json 2>/dev/null
+              echo "FAIL scripts/build_champions_resources.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/build_champions_resources.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           exit 0
 
@@ -207,9 +222,13 @@ jobs:
         run: |
           set +e
           python -u scripts/scrape_champions_roster.py
-          if [ "$?" -ne 0 ]; then
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
               echo "::warning::scrape_champions_roster failed — keeping committed champions_roster_extra.json"
               git checkout -- data/champions_roster_extra.json 2>/dev/null
+              echo "FAIL scripts/scrape_champions_roster.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/scrape_champions_roster.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           exit 0
 
@@ -224,9 +243,13 @@ jobs:
         run: |
           set +e
           python -u scripts/scrape_champions_usage.py
-          if [ "$?" -ne 0 ]; then
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
               echo "::warning::scrape_champions_usage failed — keeping committed champions_usage.json"
               git checkout -- data/champions_usage.json 2>/dev/null
+              echo "FAIL scripts/scrape_champions_usage.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/scrape_champions_usage.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           exit 0
 
@@ -239,9 +262,13 @@ jobs:
         run: |
           set +e
           python -u scripts/scrape_pokemonproxies.py
-          if [ "$?" -ne 0 ]; then
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
               echo "::warning::scrape_pokemonproxies failed — keeping committed pokemonproxies_index.json"
               git checkout -- data/pokemonproxies_index.json 2>/dev/null
+              echo "FAIL scripts/scrape_pokemonproxies.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/scrape_pokemonproxies.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           exit 0
 
@@ -256,6 +283,85 @@ jobs:
           if [ "$rc" -ne 0 ]; then
               echo "::warning::build_champions_pokedex exited with $rc — pokedex JSON kept as-is"
               git checkout -- data/champions_pokedex.json 2>/dev/null
+              echo "FAIL scripts/build_champions_pokedex.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/build_champions_pokedex.py" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+          exit 0
+
+      - name: Bilanz der nicht blockierenden Schritte (S5)
+        if: always()
+        # ACHT Schritte dieses Laufs enden mit einem bedingungslosen
+        # `exit 0` — absichtlich: ein einzelner Cloudflare-Treffer soll
+        # keinen Achter-Stapel toeten, und jeder von ihnen stellt bei
+        # einem Fehler die committete Datei wieder her. Bis zum
+        # 05.09.2026 hinterliessen sie dabei aber nichts ausser einer
+        # ::warning::-Zeile im Protokoll: acht Schritte konnten Nacht
+        # fuer Nacht scheitern, waehrend der Lauf gruen blieb und acht
+        # Dateien still alt wurden. Genau dieser Zustand ist im
+        # Wochenlauf am 21.08.2026 aufgefallen und dort repariert
+        # worden; hier stand er noch.
+        #
+        # Dieser Schritt liest und meldet nur, er bricht nichts ab: ab
+        # zwei Ausfaellen faerbt ein ::error:: den Lauf rot (das loest
+        # die Standard-Benachrichtigung an den Betreiber aus), ein
+        # einzelner bleibt eine Warnung. Der Stand landet zusaetzlich in
+        # data/_job_heartbeats.json — derselben Datei, die der
+        # Wochenlauf fuehrt —, damit "der Schritt lief" und "die Datei
+        # hat sich geaendert" getrennt sichtbar bleiben.
+        run: |
+          set +e
+          bilanz="$RUNNER_TEMP/rc_extra.txt"
+          if [ ! -f "$bilanz" ]; then
+              echo "::warning::Kein rc-Protokoll der nicht blockierenden Schritte gefunden."
+              exit 0
+          fi
+          echo "── Bilanz nicht blockierender Schritte ──"
+          cat "$bilanz"
+          fails=$(grep -c '^FAIL ' "$bilanz")
+          echo "  fehlgeschlagen=$fails"
+          {
+            echo "### Nicht blockierende Schritte (champions-replica)"
+            echo ""
+            echo '```'
+            cat "$bilanz"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$bilanz" <<'PYHEARTBEAT'
+          import json, os, sys, datetime
+          pfad = os.path.join('data', '_job_heartbeats.json')
+          try:
+              with open(pfad, encoding='utf-8') as f:
+                  stand = json.load(f)
+          except Exception:
+              stand = {}
+          if not isinstance(stand, dict):
+              stand = {}
+          jetzt = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+          with open(sys.argv[1], encoding='utf-8') as f:
+              for zeile in f:
+                  teile = zeile.split()
+                  if len(teile) < 2:
+                      continue
+                  status, name = teile[0], teile[1]
+                  eintrag = stand.get(name) or {}
+                  eintrag['zuletzt_gelaufen'] = jetzt
+                  eintrag['status'] = status
+                  if status == 'OK':
+                      eintrag['zuletzt_erfolgreich'] = jetzt
+                  stand[name] = eintrag
+          stand['_hinweis'] = ('Wann lief welcher nicht blockierende Schritt zuletzt, '
+                               'und mit welchem Ergebnis. Getrennt von der Frage, ob '
+                               'sich die zugehoerige Datei geaendert hat.')
+          os.makedirs('data', exist_ok=True)
+          with open(pfad, 'w', encoding='utf-8') as f:
+              json.dump(stand, f, ensure_ascii=False, indent=2, sort_keys=True)
+          print(f'  Herzschlag geschrieben: {pfad}')
+          PYHEARTBEAT
+          if [ "$fails" -ge 2 ]; then
+              echo "::error::champions-replica: $fails nicht blockierende Schritte sind gescheitert. Die zugehoerigen Dateien sind damit von diesem Lauf unberuehrt."
+          elif [ "$fails" -eq 1 ]; then
+              echo "::warning::champions-replica: ein nicht blockierender Schritt ist gescheitert (siehe Bilanz oben)."
           fi
           exit 0
 
@@ -281,6 +387,23 @@ jobs:
                   data/champions_available_items.json \
                   data/de_name_overrides.json \
                   data/pokemonproxies_index.json
+          # BEFUND 05.09.2026: champions_speed_corpus.json wurde in jedem
+          # naechtlichen Lauf gebaut, nach data/ kopiert (Schritt "Copy
+          # output back to data/") — und dann weggeworfen, weil sie in
+          # dieser Liste fehlte. Der letzte tatsaechlich ausgelieferte
+          # Stand kam vom 25.08.2026 aus dem Wochenlauf. Zehn Tage lang
+          # rechnete das Side-Quest-Play-Panel mit einer Stichprobe, die
+          # nichts von den Teams der letzten anderthalb Wochen wusste,
+          # ohne dass ein einziger Lauf rot wurde. Die Datei entsteht erst
+          # nach einem erfolgreichen Speed-Lauf, deshalb die Pruefung.
+          if [ -f data/champions_speed_corpus.json ]; then
+            git add data/champions_speed_corpus.json
+          fi
+          # Der Herzschlag der nicht blockierenden Schritte (s. u.) —
+          # sonst bleibt die Bilanz im Runner und erreicht niemanden.
+          if [ -f data/_job_heartbeats.json ]; then
+            git add data/_job_heartbeats.json
+          fi
           # Strategies file only exists once the ANTHROPIC_API_KEY
           # secret is set and the generator ran at least once.
           if [ -f data/champions_team_strategies.json ]; then

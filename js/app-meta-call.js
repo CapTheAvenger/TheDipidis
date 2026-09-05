@@ -5953,9 +5953,18 @@ window.MetaCall = (function () {
           const meta  = await fMetaRes.json();
 
           const fenster = new Map();
+          const trends  = new Map();
           fRows.forEach(r => {
             if (!r.deck_name) return;
-            fenster.set(normalize(r.deck_name), parseEU(r.share_fenster || '0'));
+            const k = normalize(r.deck_name);
+            fenster.set(k, parseEU(r.share_fenster || '0'));
+            /* LEER IST NICHT NULL. Steht in der Spalte nichts, war der
+               Trend nicht messbar (kein Stand von vor zwei
+               Fensterlaengen). Null hiesse "keine Bewegung" — ein
+               Unterschied, den die Kachel zeigen koennen muss. */
+            if (String(r.trend_fenster || '').trim() !== '') {
+              trends.set(k, parseEU(r.trend_fenster));
+            }
           });
 
           const alter = Math.floor(
@@ -6036,6 +6045,12 @@ window.MetaCall = (function () {
               const f = fenster.get(normalize(d.name));
               d.ladderShare = (f == null) ? 0 : f;
               d.onlineShare = d.ladderShare;
+              /* Der Trend AUS DEMSELBEN FENSTER — siehe die Begruendung
+                 an der Kachel weiter unten. `undefined`, wenn die Datei
+                 ihn nicht messen konnte; die Kachel faellt dann auf den
+                 Wochentrend zurueck. */
+              const tf = trends.get(normalize(d.name));
+              d.trendFenster = (tf == null) ? undefined : tf;
             });
             /* Nach ladderShare sortieren, nicht nach onlineShare: die
                beiden tragen hier zwar denselben Wert, aber onlineShare
@@ -10979,10 +10994,11 @@ window.MetaCall = (function () {
     const convFactor = meanConv > 0 ? (top8Conv / meanConv) : 1.0;
     // top8Conv ist ein Anteil (0,101), die Kachel zeigt Prozent.
     const convPct = (top8Conv || 0) * 100;
+    /* Nur noch der Rueckfallwert. Pfeil, Vorzeichen und Farbe werden
+       unten aus der Zahl gebildet, die die Kachel wirklich zeigt —
+       vorher standen sie hier oben und rechneten immer mit dem
+       Wochentrend, auch wenn die Kachel den Fenstertrend zeigte. */
     const trendPct  = entry.trend || 0;
-    const trendArrow = trendPct > 0 ? '↑' : (trendPct < 0 ? '↓' : '→');
-    const trendSign  = trendPct > 0 ? '+' : '';
-    const trendCls   = trendPct > 0.05 ? ' mc-intel-trend-pos' : (trendPct < -0.05 ? ' mc-intel-trend-neg' : '');
     const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
 
     // ── Public-data stat tiles (3-col grid) ──
@@ -11022,10 +11038,41 @@ window.MetaCall = (function () {
           + `${fmt(broughtPct, 1)} % ${t('mc.intelTop8BroughtSuffix')}`
       ));
     }
-    if (Math.abs(trendPct) > 0.05 || _baselineSnapshotDate) {
+    /* ── DER TREND LIEST DIESELBE UHR WIE DER ANTEIL ────────────────
+     *
+     * BEFUND (05.09.2026, beim Ansehen der ausgelieferten Seite): neben
+     * "Online-Anteil (14 Tage) 6,4 %" stand "Trend (7 Tage) ↓ −0,0 %".
+     * `d.trend` ist share_change aus der Vergleichsdatei — die
+     * Wochenbewegung des KUMULATIVSTANDS, und der ist um
+     * Groessenordnungen traeger als das Fenster. Gemessen: mittlerer
+     * Betrag 0,019 pp gegen 0,181 pp, fuer Mega Excadrill −0,03 gegen
+     * −1,88. Der Leser sah eine 14-Tage-Zahl und daneben eine Bewegung,
+     * die eine andere Uhr las — und fuer ein Deck, das in genau diesen
+     * 14 Tagen fast zwei Punkte verloren hat, stand da "−0,0 %".
+     *
+     * `trend_fenster` ist dieses Fenster gegen das unmittelbar davor,
+     * beide gleich lang und gleich gerechnet. Fehlt es, gilt weiter der
+     * Wochentrend — und die Beschriftung sagt dann auch, dass es sieben
+     * Tage sind.
+     *
+     * WAS SICH NICHT AENDERT: der Praediktor. `0.10 * trendPct` in der
+     * Modus-A/B-Formel rechnet weiter mit dem kumulativen Wochentrend,
+     * auf dem er kalibriert ist. Ein zwanzigfach groesserer Term dort
+     * waere eine Modelaenderung und keine Anzeigekorrektur; sie braucht
+     * ihre eigene Messung. Notiert in claude/ als offener Punkt. */
+    const tFenster = (_fensterMeta && typeof entry.trendFenster === 'number')
+      ? entry.trendFenster : null;
+    const tWert  = (tFenster != null) ? tFenster : trendPct;
+    const tPfeil = tWert > 0 ? '↑' : (tWert < 0 ? '↓' : '→');
+    const tVor   = tWert > 0 ? '+' : (tWert < 0 ? '−' : '');
+    const tCls   = tWert > 0.05 ? ' mc-intel-trend-pos'
+                 : (tWert < -0.05 ? ' mc-intel-trend-neg' : '');
+    if (Math.abs(tWert) > 0.05 || _baselineSnapshotDate) {
       tiles.push(_intelStatTile(
-        t('mc.intelTrend7d'),
-        `<span class="mc-intel-tile-value-emph${trendCls}">${trendArrow} ${trendSign}${fmt(trendPct, 1)} %</span>`
+        (tFenster != null)
+          ? t('mc.intelTrendFenster').replace('{tage}', _fensterMeta.fenster_tage)
+          : t('mc.intelTrend7d'),
+        `<span class="mc-intel-tile-value-emph${tCls}">${tPfeil} ${tVor}${fmt(Math.abs(tWert), 1)} %</span>`
       ));
     }
 

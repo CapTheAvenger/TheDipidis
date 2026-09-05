@@ -1113,6 +1113,45 @@
         async function _cmMajorLeerGrund() {
             const de = (typeof getLang === 'function' && getLang() === 'de');
             const format = await _cmFormatSchluessel();
+            /* DIE ANTWORT HING AN EINER VARIABLEN, DIE MEIST LEER WAR
+               (05.09.2026, live gefunden).
+
+               `currentMetaTournamentCardsDataRaw` wird nur an EINER
+               Stelle gefuellt (weiter oben in dieser Datei), und die
+               sitzt hinter zwei Waechtern: `currentMetaFormatFilter ===
+               'play'` UND `filteredData.length === 0`. Beim Filter
+               "Alle" laeuft sie deshalb nie. `roh.length === 0` hiess
+               dann nicht "es gibt keine Major-Daten", sondern "es hat
+               noch niemand nachgesehen" — und die Statuszeile schrieb
+               fuer TEF-PBL "es gibt noch keine Major-Daten", waehrend
+               der Knopf daneben 35 Major-Archetypen zeigte.
+
+               Nachgemessen: data/tournament_cards_data_cards_TEF-PBL.csv
+               hat 879 Zeilen (Worlds 2026, 28.08., 797 Spieler), ist im
+               Manifest gelistet und live mit HTTP 200 erreichbar.
+
+               Also wird hier nachgeladen, bevor geurteilt wird. Nur ein
+               Ladeversuch, der wirklich stattgefunden hat, darf zu
+               "kein Major im Format" fuehren. */
+            if (!Array.isArray(window.currentMetaTournamentCardsDataRaw)) {
+                try {
+                    const rohGeladen = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
+                    window.currentMetaTournamentCardsDataRaw = Array.isArray(rohGeladen) ? rohGeladen : [];
+                    if (!Array.isArray(window.currentMetaTournamentCardsData)) {
+                        window.currentMetaTournamentCardsData =
+                            filterTournamentRowsByMetaDate(window.currentMetaTournamentCardsDataRaw);
+                    }
+                } catch (e) {
+                    /* Ein gescheiterter Ladeversuch ist NICHT "kein
+                       Major im Format" — das waere dieselbe
+                       Verwechslung noch einmal. */
+                    console.warn('[Current Meta] Major-Rohdaten nicht ladbar:', e);
+                    return {
+                        grund: 'unbekannt',
+                        text: (typeof t === 'function' ? t('currentMeta.majorLeerUnbekannt') : '')
+                    };
+                }
+            }
             const roh = Array.isArray(window.currentMetaTournamentCardsDataRaw)
                 ? window.currentMetaTournamentCardsDataRaw : [];
             const gefiltert = Array.isArray(window.currentMetaTournamentCardsData)
@@ -3580,6 +3619,34 @@
                     const finalAvgBaseline = Math.min(legalMaxCopies, _baselineDisplay);
                     const maxCount = finalMaxCount;
 
+                    /* DER DRITTE REITER WURDE VERGESSEN (05.09.2026).
+                       Am 02./03.09. ist die rote Marke auf City League
+                       und Past Meta vom rohen Maximum auf die
+                       repraesentative Zahl umgestellt worden — der
+                       Kommentar in js/app-city-league.js:4889 sagt
+                       woertlich "Also zeigt die Marke jetzt auf BEIDEN
+                       Reitern die repraesentative Zahl". Hier stand
+                       weiter `finalMaxCount`.
+
+                       Gemessen am 05.09.2026 auf der Live-Seite: 67
+                       Marken, Summe 138, ueber einer Kachel, die
+                       "66 Karten / 60 Gesamt" sagt. Auf City League
+                       summieren sich dieselben Marken auf 69 und der
+                       Satz darunter erklaert, warum es nicht 60 sind.
+                       Und: dort trugen alle 33 Marken einen erklaerenden
+                       `title`, hier keine einzige von 67.
+
+                       Dieselben zwei Funktionen wie dort — sie sind
+                       global und app-city-league.js wird vorher geladen
+                       (index.html:3777 vor :3791). Fehlen sie wider
+                       Erwarten, bleibt es beim alten Verhalten. */
+                    const _markeWert = (typeof _markeZahl === 'function')
+                        ? _markeZahl(finalAvgOverall, finalAvgUsed, finalMaxCount, decksWithCard, totalDecksInArchetype)
+                        : maxCount;
+                    const _markeTitel = (typeof _markeHinweis === 'function')
+                        ? ` title="${escapeHtml(_markeHinweis(finalAvgOverall, finalAvgUsed, finalMaxCount, decksWithCard, totalDecksInArchetype))}"`
+                        : '';
+
                     // Defensive 100 % cap mirrors the data-merge cap so a
                     // stray row with deck_count > total_decks_in_archetype
                     // can never render as e.g. 117 % on the card overview.
@@ -3686,7 +3753,7 @@
                             <div class="card-image-container city-league-card-image-container">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
                                 ${usageBarHtml}
-                                <div class="city-league-card-badge city-league-card-badge-max">${maxCount}</div>
+                                <div class="city-league-card-badge city-league-card-badge-max"${_markeTitel}>${_markeWert}</div>
                                 ${pinBadgeHtml}
                                 ${excludeBadgeHtml}
                                 ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}

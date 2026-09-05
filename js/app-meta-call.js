@@ -1126,6 +1126,101 @@ window.MetaCall = (function () {
     return window.parseLocaleNumber(str, 0);
   }
 
+  /* ══════════════════════════════════════════════════════════════════
+     MATCHPUNKTE SIND KEINE WIN RATE — AUCH HIER NICHT (05.09.2026)
+
+     Die Spalten `win_pct`, `day1_win_pct`, `day2_win_pct` in
+     data/labs_tournament_decks.csv und `vs_win_pct` in
+     data/labs_tournament_matchups.csv heissen "Win %", sind aber die
+     MATCHPUNKTQUOTE (3S+U)/(3·Partien). Nachgemessen am 05.09.2026
+     ueber alle 4.711 Deckzeilen:
+
+         gegen (3S+U)/3n   mittlere Abweichung  0,0025 Punkte
+         gegen S/(S+N)     mittlere Abweichung  2,1476 Punkte
+
+     Die Heatmap (js/app-current-meta.js:92), das Past Meta
+     (js/app-past-meta.js:2065) und die Post-Bilder
+     (js/ds-post-quellen.js:600) sind deswegen am 03./04.09. auf die
+     Bilanz umgestellt worden. DER META CALL WURDE NICHT MITGEZOGEN —
+     und hier wird die Zahl nicht nur angezeigt, sondern in die
+     Day-2-Chance weitergerechnet. Live gefunden am 05.09.2026 von zwei
+     unabhaengigen Pruefrunden:
+
+       * Crustle stand auf Platz 1 der Empfehlungen mit "gegen
+         Dragapult 87 % WR". Belegbar sind: online geglaettet 63,0 %,
+         online roh S/(S+N) 65,1 %, Major S/(S+N) 85,2 % aus 27
+         entschiedenen Partien. 87 % ist keiner dieser Werte — er
+         entsteht aus Matchpunkten plus einer Verschiebung, die selbst
+         aus einer Einheitenverwechslung stammt (siehe unten).
+
+       * Dragapult schloss Worlds-Day-2 mit 43-42-11 ab — mehr Siege
+         als Niederlagen — und wurde mit "48,6 % Win Rate" in die
+         schwache Klasse einsortiert. S/(S+N+U) sind 44,8 %,
+         S/(S+N) sind 50,6 %; 48,6 sind die Matchpunkte.
+
+       * `_computeMatchupAdjustments` zog eine Matchpunktquote von
+         einer Win Rate ab. Ueber alle 1.155 Zeilen mit day1_players
+         >= 20 ist diese Differenz IN JEDER EINZELNEN ZEILE positiv
+         (Mittel +5,11 pp) — die 1,0-pp-Rauschsperre darunter greift
+         bei 99,91 % der Zeilen nicht. Was als "Elite-Piloten-Effekt"
+         gedacht war, war zum grossen Teil eine Einheitenumrechnung.
+
+     WAS JETZT GILT. Die Bilanzspalten sind vollstaendig da — in allen
+     4.711 Deckzeilen (wins/losses/ties, day1_*, day2_*) und in den
+     1.776 TEF-PBL-Zeilen der Matchup-Datei (vs_wins/vs_losses/vs_ties).
+     Gerechnet wird deshalb aus der Bilanz, und zwar in DERSELBEN
+     Konvention wie die Zahl, neben der sie steht:
+
+       Deckebene  -> S/(S+N+U), wie data/limitless_online_decks.csv
+                     (win_rate_numeric). Nur so darf die Labs-Zahl von
+                     der Online-Zahl abgezogen werden.
+       Paarebene  -> S/(S+N), wie
+                     data/limitless_online_decks_matchups.csv und wie
+                     die Heatmap. Unentschieden werden separat ueber
+                     pTie modelliert; sie doppelt zu zaehlen war der
+                     zweite Fehler an derselben Stelle.
+
+     LEER IST LEER. Fehlt die Bilanz (die zwoelf abgeschlossenen
+     Epochen der Matchup-Datei tragen sie nicht), bleibt der Wert
+     `null` und der Aufrufer faellt auf die Online-Zahl zurueck. Aus
+     Matchpunkten eine Win Rate zu schaetzen waere eine Behauptung.
+     ══════════════════════════════════════════════════════════════════ */
+
+  /** Ganze Zahl aus einer CSV-Zelle, oder null wenn die Zelle leer ist. */
+  function _labsGanz(v) {
+    var s = String(v == null ? '' : v).trim();
+    if (s === '') return null;
+    var n = parseInt(s, 10);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  }
+
+  /**
+   * Siegquote aus der Bilanz einer Labs-Deckzeile.
+   * @param {object} r        Zeile aus labs_tournament_decks.csv
+   * @param {string} praefix  '', 'day1_' oder 'day2_'
+   * @returns {number|null}   S/(S+N+U) in Prozent, oder null ohne Bilanz
+   */
+  function _labsDeckWr(r, praefix) {
+    var p = praefix || '';
+    var s = _labsGanz(r[p + 'wins']);
+    var n = _labsGanz(r[p + 'losses']);
+    var u = _labsGanz(r[p + 'ties']);
+    if (s == null || n == null) return null;
+    var partien = s + n + (u || 0);
+    if (partien <= 0) return null;
+    return (s / partien) * 100;
+  }
+
+  /** Partienzahl hinter _labsDeckWr — der Nenner, der mitgetragen wird. */
+  function _labsDeckPartien(r, praefix) {
+    var p = praefix || '';
+    var s = _labsGanz(r[p + 'wins']);
+    var n = _labsGanz(r[p + 'losses']);
+    var u = _labsGanz(r[p + 'ties']);
+    if (s == null || n == null) return 0;
+    return s + n + (u || 0);
+  }
+
   // Load a city_league_archetypes_comparison*.csv and return
   // { normalize(deck) -> share% } using the `new_meta_share` column.
   // Missing file = empty object (feature is opt-in, absence is fine).
@@ -6250,8 +6345,10 @@ window.MetaCall = (function () {
               // Predictor 6.2 — Leistung im alten Meta, spielergewichtet.
               // Zeilen ohne Messung zaehlen nicht mit; ein fehlender Wert
               // darf den Schnitt nicht nach unten ziehen.
-              const wr = parseEU(r.win_pct || '0');
-              if (wr > 0) { lastMetaAgg[k].wSum += wr * players; lastMetaAgg[k].wP += players; }
+              // Aus der Bilanz, nicht aus win_pct — siehe den Block
+              // "MATCHPUNKTE SIND KEINE WIN RATE" bei parseEU().
+              const wr = _labsDeckWr(r, '');
+              if (wr != null && wr > 0) { lastMetaAgg[k].wSum += wr * players; lastMetaAgg[k].wP += players; }
               const d2c = parseEU(r.day1_to_day2_conv || '0');
               if (d2c > 0) { lastMetaAgg[k].dSum += d2c * players; lastMetaAgg[k].dP += players; }
               if (isLate) {
@@ -6512,12 +6609,15 @@ window.MetaCall = (function () {
                 // WR + share, conv, top-1 marker so the renderer can
                 // ✓ a deck that won the event.
                 players:       parseInt(r.player_count || '0', 10) || 0,
-                winPct:        parseEU(r.win_pct || '0'),
+                winPct:        _labsDeckWr(r, ''),
+                winPctPartien: _labsDeckPartien(r, ''),
                 day1Share:     parseEU(r.day1_share_pct || '0'),
-                day1WinPct:    parseEU(r.day1_win_pct || '0'),
+                day1WinPct:    _labsDeckWr(r, 'day1_'),
+                day1Partien:   _labsDeckPartien(r, 'day1_'),
                 day1Players:   parseInt(r.day1_players || '0', 10) || 0,
                 day2Share:     parseEU(r.day2_share_pct || '0'),
-                day2WinPct:    parseEU(r.day2_win_pct || '0'),
+                day2WinPct:    _labsDeckWr(r, 'day2_'),
+                day2Partien:   _labsDeckPartien(r, 'day2_'),
                 day2Players:   parseInt(r.day2_players || '0', 10) || 0,
                 dayConv:       parseEU(r.day1_to_day2_conv || '0'),
                 top1Count:     parseInt(r.top1_count || '0', 10) || 0,
@@ -6642,9 +6742,14 @@ window.MetaCall = (function () {
             // d2WR multiplier. Skip rows where day2_players is too
             // small to give a meaningful WR (< 5 players = 4 games at
             // most, way too noisy).
-            const day2Wr = parseEU(r.day2_win_pct || '0');
+            // Der d2WR-Multiplikator (_d2WrMultiplier) zentriert auf
+            // 50 %. Mit Matchpunkten lag die Skala systematisch ~5 pp zu
+            // hoch (gemessen ueber 867 Zeilen mit day2_players >= 5:
+            // mittlere Multiplikator-Differenz +0,234) — der Hebel war
+            // verschoben, nicht nur die Anzeige.
+            const day2Wr = _labsDeckWr(r, 'day2_');
             const day2Players = parseInt(r.day2_players || '0', 10) || 0;
-            if (day2Wr > 0 && day2Players >= 5) {
+            if (day2Wr != null && day2Wr > 0 && day2Players >= 5) {
               if (!_labsDay2WrByDeck[k]) {
                 _labsDay2WrByDeck[k] = { sum: 0, n: 0, samples: [] };
               }
@@ -6683,14 +6788,17 @@ window.MetaCall = (function () {
             if (latestId && (r.tournament_id || '').trim() === latestId) {
               _lastMajorByDeck[k] = {
                 share:        share,
-                winPct:       parseEU(r.win_pct || '0'),
+                winPct:       _labsDeckWr(r, ''),
+                winPctPartien: _labsDeckPartien(r, ''),
                 players:      parseInt(r.player_count || '0', 10) || 0,
                 day1Players:  parseInt(r.day1_players || '0', 10) || 0,
                 day1Share:    parseEU(r.day1_share_pct || '0'),
-                day1WinPct:   parseEU(r.day1_win_pct || '0'),
+                day1WinPct:   _labsDeckWr(r, 'day1_'),
+                day1Partien:  _labsDeckPartien(r, 'day1_'),
                 day2Players:  parseInt(r.day2_players || '0', 10) || 0,
                 day2Share:    parseEU(r.day2_share_pct || '0'),
-                day2WinPct:   parseEU(r.day2_win_pct || '0'),
+                day2WinPct:   _labsDeckWr(r, 'day2_'),
+                day2Partien:  _labsDeckPartien(r, 'day2_'),
                 dayConv:      parseEU(r.day1_to_day2_conv || '0')
               };
             }
@@ -6968,7 +7076,23 @@ window.MetaCall = (function () {
           pTie  = 0.02;
           pLoss = Math.max(0, 1 - pWin - pTie);
         }
-        _matchupMap[dk][ok] = { pWin, pTie, pLoss };
+        /* DER NENNER WIRD MITGEFUEHRT (05.09.2026). Die Spalte
+           total_games steht in derselben CSV-Zeile und wurde bis heute
+           weggeworfen. In der Begegnungsliste stand deshalb "WR 13 %"
+           neben "WR 73 %", ohne dass erkennbar war, dass die eine auf
+           737 Partien und die andere auf 9 steht — und genau aus diesen
+           Werten wird die Day-2-Chance gerechnet. */
+        const partien = (function () {
+          const n = parseInt(String(r.total_games || '').trim(), 10);
+          if (Number.isFinite(n) && n > 0) return n;
+          if (r.record && r.record.includes('-')) {
+            const q = r.record.split(/\s*-\s*/).map(x => parseInt(String(x).trim(), 10) || 0);
+            const sum = (q[0] || 0) + (q[1] || 0) + (q[2] || 0);
+            return sum > 0 ? sum : 0;
+          }
+          return 0;
+        })();
+        _matchupMap[dk][ok] = { pWin, pTie, pLoss, partien };
       });
 
       // Predictor 5.3 — Per-Variant Matchup Adjustments. The online
@@ -7063,7 +7187,7 @@ window.MetaCall = (function () {
           //   _majorMatchupMapDay2[meta][myKey][oppKey]  = Day-2 WR
           // All three maps share the same aggregation logic; only
           // which day_filter rows feed which bucket differs.
-          const aggOverall = {}; // meta -> norm(deck) -> norm(opp) -> { games, weightedSum }
+          const aggOverall = {}; // meta -> norm(deck) -> norm(opp) -> { games, siege, niederlagen, unentschieden }
           const aggDay1    = {};
           const aggDay2    = {};
           let rowsConsumedOverall = 0;
@@ -7076,9 +7200,21 @@ window.MetaCall = (function () {
             const opName = (r.opponent_deck_name || '').trim();
             if (!meta || !myName || !opName) continue;
             const games = parseInt(r.vs_count || '0', 10);
-            const wpRaw = parseLocaleNumber(r.vs_win_pct || '0', 0);
             if (!Number.isFinite(games) || games <= 0) continue;
-            if (!Number.isFinite(wpRaw)) continue;
+            /* DIE BILANZ, NICHT vs_win_pct (05.09.2026).
+               vs_win_pct sind Matchpunkte (siehe den Block bei
+               parseEU()). Die Paarquote muss dieselbe Rechnung sein
+               wie die Online-Spalte, gegen die sie gemischt wird:
+               S/(S+N), Unentschieden separat ueber pTie. Fehlt die
+               Bilanz — die zwoelf abgeschlossenen Epochen tragen sie
+               nicht —, wird die Zeile uebersprungen und der Aufrufer
+               faellt auf die Online-Zahl zurueck. */
+            const vsS = _labsGanz(r.vs_wins);
+            const vsN = _labsGanz(r.vs_losses);
+            const vsU = _labsGanz(r.vs_ties);
+            if (vsS == null || vsN == null) continue;
+            const vsEntschieden = vsS + vsN;
+            if (vsEntschieden <= 0) continue;
             const d = normalize(myName);
             const o = normalize(opName);
             let bucket;
@@ -7096,9 +7232,11 @@ window.MetaCall = (function () {
             }
             if (!bucket[meta]) bucket[meta] = {};
             if (!bucket[meta][d]) bucket[meta][d] = {};
-            if (!bucket[meta][d][o]) bucket[meta][d][o] = { games: 0, weightedSum: 0 };
+            if (!bucket[meta][d][o]) bucket[meta][d][o] = { games: 0, siege: 0, niederlagen: 0, unentschieden: 0 };
             bucket[meta][d][o].games += games;
-            bucket[meta][d][o].weightedSum += games * wpRaw;
+            bucket[meta][d][o].siege += vsS;
+            bucket[meta][d][o].niederlagen += vsN;
+            bucket[meta][d][o].unentschieden += (vsU || 0);
           }
           const _collapseAgg = (agg, minGames) => {
             const out = {};
@@ -7109,11 +7247,25 @@ window.MetaCall = (function () {
                 for (const o of Object.keys(agg[meta][d])) {
                   const a = agg[meta][d][o];
                   if (a.games < minGames) continue;
-                  const winPct = a.weightedSum / a.games; // 0..100
+                  const entschieden = a.siege + a.niederlagen;
+                  if (entschieden <= 0) continue;
+                  /* Dieselbe Glaettung wie die Heatmap (k = 20, Prior
+                     50 %), damit eine Paarung aus 11 Partien nicht wie
+                     eine aus 1.049 aussieht. Ohne das Modul faellt es
+                     auf die rohe Quote zurueck. */
+                  const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;
+                  const winPct = (G && typeof G.quote === 'function')
+                    ? G.quote(a.siege, a.niederlagen)
+                    : (a.siege / entschieden) * 100;
                   if (!out[meta][d]) out[meta][d] = {};
                   out[meta][d][o] = {
                     games  : a.games,
                     winPct,
+                    roh    : (a.siege / entschieden) * 100,
+                    siege  : a.siege,
+                    niederlagen : a.niederlagen,
+                    unentschieden : a.unentschieden,
+                    entschieden,
                     source : 'major',
                   };
                   pairs += 1;
@@ -7425,6 +7577,16 @@ window.MetaCall = (function () {
     _shareList.forEach(d => {
       const k = normalize(d.name);
       const lm = _lastMajorByDeck[k];
+      /* BEIDE SEITEN IN DERSELBEN KONVENTION (05.09.2026).
+         `lm.winPct` kommt jetzt aus der Bilanz als S/(S+N+U) — genau
+         die Rechnung, mit der auch `d.onlineWinPct` aus
+         limitless_online_decks.csv (win_rate_numeric) gebildet ist.
+         Vorher stand hier die Matchpunktquote gegen eine Win Rate:
+         ueber alle 1.155 Zeilen mit day1_players >= 20 war diese
+         Differenz IN JEDER ZEILE positiv (Mittel +5,11 pp), die
+         1,0-pp-Rauschsperre unten griff bei 99,91 % der Zeilen nicht.
+         Der "Elite-Piloten-Effekt" war zum grossen Teil eine
+         Einheitenumrechnung. */
       if (!lm || !(lm.day1Players >= 20) || !(lm.winPct > 0)) return;
       const onlineWr = d.onlineWinPct || 0;
       if (onlineWr <= 0) return;
@@ -7604,6 +7766,18 @@ window.MetaCall = (function () {
       }
       const reverse = map[key2]?.[key1];
       if (reverse) {
+        /* `100 - x` GILT JETZT WIRKLICH (05.09.2026).
+           Solange hier Matchpunkte standen, war die Spiegelung falsch:
+           wp(A,B) + wp(B,A) = 100 - 100·U/(3n), nicht 100. Gemessen
+           ueber die 120 TEF-PBL-Paare mit vs_count >= 10 ueberschaetzte
+           `100 - wp_rev` im Mittel um 3,54 pp, im Maximum um 10,26 pp
+           (js/app-past-meta.js:2065 fuehrt denselben Beweis: 16.707 von
+           38.259 Paaren summieren sich nicht auf 100).
+           Mit S/(S+N) — und mit demselben symmetrischen Prior in
+           DsGlaettung.quote — summieren sich die beiden Richtungen
+           exakt auf 100, weil S_ab = N_ba und N_ab = S_ba. Erst
+           dadurch ist die Spiegelung eine Rechnung statt einer
+           Naeherung. */
         return { winPct: 100 - reverse.winPct, games: reverse.games, reversed: true };
       }
       return null;
@@ -7668,6 +7842,9 @@ window.MetaCall = (function () {
         pWin : blendedWin,
         pTie ,
         pLoss: Math.max(0, 1 - blendedWin - pTie),
+        // Der Nenner der gemischten Quote: Online-Partien plus die
+        // Major-Partien, die wirklich eingeflossen sind.
+        partien: (base.partien || 0) + sources.reduce((a, x) => a + (x.games || 0), 0),
         // Diagnostic — read by the matchup tooltip / debug overlay.
         // Carries the normalised weight per source so a future UI can
         // show "Day-2 45 % (8 games) + Day-1 35 % (24) + Online 20 %".
@@ -7693,7 +7870,7 @@ window.MetaCall = (function () {
     const pWin = _clip(base.pWin + shift, 0.05, 0.95);
     const pTie = base.pTie;
     const pLoss = Math.max(0, 1 - pWin - pTie);
-    return { pWin, pTie, pLoss };
+    return { pWin, pTie, pLoss, partien: base.partien || 0 };
   }
 
   // Personal-blended matchup — folds in Testing Group win-rate overrides
@@ -7711,7 +7888,7 @@ window.MetaCall = (function () {
     const ov = _findByNormalized(_winRateOverrides, opponent);
     if (ov !== undefined && ov !== '') {
       const pWin = Math.min(0.98, Math.max(0, ov / 100));
-      return { pWin, pTie: 0.02, pLoss: Math.max(0, 1 - pWin - 0.02) };
+      return { pWin, pTie: 0.02, pLoss: Math.max(0, 1 - pWin - 0.02), handEingestellt: true };
     }
     // Base meta rate — go through getBaseMatchup() so the Past-Meta
     // branch (labs-majors-only matchup matrix), the W3 major×online
@@ -7732,7 +7909,8 @@ window.MetaCall = (function () {
       const totalWeight = META_CONFIDENCE + js.total;
       const blendedWin  = (metaBase.pWin * META_CONFIDENCE + journalWR * js.total) / totalWeight;
       const pTie        = metaBase.pTie;
-      return { pWin: blendedWin, pTie, pLoss: Math.max(0, 1 - blendedWin - pTie) };
+      return { pWin: blendedWin, pTie, pLoss: Math.max(0, 1 - blendedWin - pTie),
+               partien: (metaBase.partien || 0) + js.total, eigene: js.total };
     }
     return metaBase;
   }
@@ -9393,6 +9571,13 @@ window.MetaCall = (function () {
       const lambda = _settings.rounds * deck.finalShare / 100;
       const m      = getMatchup(_settings.myDeck, deck.name);
       const wrPct  = Math.round(m.pWin * 100);
+      /* JEDE QUOTE TRAEGT IHREN NENNER (05.09.2026). Aus genau diesen
+         Zeilen entsteht die Day-2-Chance; ohne Partienzahl war "WR 13 %"
+         von "WR 73 %" nicht zu unterscheiden. Handeingestellte Werte
+         bekommen keinen Nenner, sondern werden als solche gekennzeichnet. */
+      const wrN    = m.handEingestellt
+        ? ' · ' + t('mc.wrManuell')
+        : ((m.partien > 0) ? ' · ' + window.zahlLokal(m.partien) : '');
       const wrCls  = wrPct >= 55 ? 'favorable' : wrPct <= 45 ? 'unfavorable' : 'even';
       const barW   = Math.round((lambda / maxEnc) * 100);
       const name   = deck.name === '_junk' ? t('mc.junkDecks') : deck.name;
@@ -9407,7 +9592,7 @@ window.MetaCall = (function () {
       return `<div class="mc-encounter-row">
         <div>
           <div class="mc-enc-name" title="${esc(deck.name)}">${esc(name)}${jTag}</div>
-          <div class="mc-enc-wr ${wrCls}">WR ${wrPct}${_mcPz()} · P(1×) ${p1.toFixed(0)}${_mcPz()} · P(2×) ${p2.toFixed(0)}${_mcPz()}</div>
+          <div class="mc-enc-wr ${wrCls}" title="${esc(t('mc.wrNennerTitel'))}">WR ${wrPct}${_mcPz()}${wrN} · P(1×) ${p1.toFixed(0)}${_mcPz()} · P(2×) ${p2.toFixed(0)}${_mcPz()}</div>
         </div>
         <div class="mc-enc-bar-bg"><div class="mc-enc-bar-fill" style="width:${barW}%"></div></div>
         <div class="mc-enc-val">∅ ${_mcNum(lambda, 2)}</div>
@@ -10294,9 +10479,24 @@ window.MetaCall = (function () {
     const meanConv = allConvs.length > 0
       ? allConvs.reduce((a, s) => a + _quoteFuerAnzeige(s) * gewicht(s), 0) / totalBroughtForConv
       : 0.08;
-    const convFactor = meanConv > 0
-      ? Math.max(0.5, Math.min(2.0, top8Conv / meanConv))
-      : 1.0;
+    /* DER DECKEL STAND IN DER ANZEIGE, NICHT NUR IM MODELL
+       (05.09.2026). `Math.max(0.5, Math.min(2.0, …))` ist als
+       Daempfung fuer die Prognose gedacht — hier wurde damit aber die
+       ANGEZEIGTE Vergleichszahl geklemmt. Gemessen gegen
+       data/online_tournament_top8_decks.csv (Feldschnitt 5,9262 %):
+
+         Mega Excadrill            22/929 = 2,368 %  ->  0,400x, gezeigt 0,5x
+         Toxtricity Brute Bonnet    0/2   = 0,000 %  ->  0,000x, gezeigt 0,5x
+         Seaking Festival Lead      2/15  = 13,33 %  ->  2,250x, gezeigt 2,0x
+
+       Bei Toxtricity stand "0,0 % · 0,5x ueber dem Schnitt" in
+       derselben Kachel — eine Quote von null neben "halb so oft wie
+       der Schnitt" widerspricht sich selbst. Startseite und Hub zeigen
+       fuer dieselben Decks die ungeklemmten Werte (Mega Excadrill
+       0,4-mal). Die Anzeige zeigt jetzt ebenfalls den echten Faktor;
+       die Daempfung bleibt dort, wo sie hingehoert — in
+       _computeShares (`_clip(top8Conv / meanConv, _dampLo, _dampHi)`). */
+    const convFactor = meanConv > 0 ? (top8Conv / meanConv) : 1.0;
     // top8Conv ist ein Anteil (0,101), die Kachel zeigt Prozent.
     const convPct = (top8Conv || 0) * 100;
     const trendPct  = entry.trend || 0;
@@ -10382,7 +10582,7 @@ window.MetaCall = (function () {
       if (hasDaySplit) {
         majorChipHtml = _intelMajorChip(where, lm);
       } else {
-        const wr = lm.winPct > 0 ? ` (WR ${fmt(lm.winPct, 0)} %)` : '';
+        const wr = _wrChip(lm.winPct, lm.winPctPartien);
         majorChipHtml = `<div class="mc-intel-major-chip mc-intel-major-chip-legacy" title="${esc(headerLabel)}">
           <span class="mc-intel-major-chip-place">${esc(where)}</span>
           <span class="mc-intel-major-chip-sep">·</span>
@@ -10439,6 +10639,19 @@ window.MetaCall = (function () {
   // Helper: render a single stat tile (label + big value + optional
   // small extra). Used for the public-data and personal-data grids
   // inside the expanded detail row.
+  /* JEDE QUOTE TRAEGT IHREN NENNER — auch die kleinen Chips
+     (05.09.2026). Bis heute stand hier "(WR 46 %)" ohne Partienzahl,
+     obwohl die Bilanz im selben Objekt liegt. 46 % aus 1.181 Partien
+     und 46 % aus 9 sahen gleich aus. */
+  function _wrChip(wert, partien) {
+    if (wert == null || !(wert > 0)) return '';
+    const z = wert.toFixed(0).replace('.', ',');
+    const n = (typeof partien === 'number' && partien > 0)
+      ? ' · ' + window.zahlLokal(partien)
+      : '';
+    return ` (WR ${z} %${n})`;
+  }
+
   function _intelStatTile(label, value, extra, extraCls) {
     const cls = 'mc-intel-tile' + (extraCls ? ' ' + extraCls : '');
     const extraHtml = extra ? `<span class="mc-intel-tile-extra">${esc(extra)}</span>` : '';
@@ -10472,10 +10685,10 @@ window.MetaCall = (function () {
       const dateStr = _formatShortDate(ev.date);
       const where = ev.shortName || ev.tournamentName || '—';
       const day1Val = ev.day1Share > 0 ? `${fmt(ev.day1Share, 1)} %` : '—';
-      const day1Wr  = ev.day1WinPct > 0 ? ` (WR ${fmt(ev.day1WinPct, 0)} %)` : '';
+      const day1Wr  = _wrChip(ev.day1WinPct, ev.day1Partien);
       const day2Made = ev.day2Players > 0;
       const day2Val = day2Made ? `${fmt(ev.day2Share, 1)} %` : '—';
-      const day2Wr  = (day2Made && ev.day2WinPct > 0) ? ` (WR ${fmt(ev.day2WinPct, 0)} %)` : '';
+      const day2Wr  = day2Made ? _wrChip(ev.day2WinPct, ev.day2Partien) : '';
       const conv = (ev.dayConv && ev.dayConv > 0)
         ? ev.dayConv
         : (ev.day1Players > 0 ? ev.day2Players / ev.day1Players : 0);
@@ -10501,9 +10714,9 @@ window.MetaCall = (function () {
       ? lm.dayConv
       : (lm.day1Players > 0 ? lm.day2Players / lm.day1Players : 0);
     const day1Val = lm.day1Share > 0 ? `${fmt(lm.day1Share, 1)} %` : '—';
-    const day1Wr  = lm.day1WinPct > 0 ? ` (WR ${fmt(lm.day1WinPct, 0)} %)` : '';
+    const day1Wr  = _wrChip(lm.day1WinPct, lm.day1Partien);
     const day2Val = made ? `${fmt(lm.day2Share, 1)} %` : '—';
-    const day2Wr  = (made && lm.day2WinPct > 0) ? ` (WR ${fmt(lm.day2WinPct, 0)} %)` : '';
+    const day2Wr  = made ? _wrChip(lm.day2WinPct, lm.day2Partien) : '';
     const convVal = conv > 0 ? `${fmt(conv * 100, 1)} %` : '—';
     return `<div class="mc-intel-major-chip" title="${esc(t('mc.intelLastMajor'))}">
       <span class="mc-intel-major-chip-place">📍 ${esc(where)}</span>

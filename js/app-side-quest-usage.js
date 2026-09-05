@@ -60,6 +60,8 @@
             moves: 'Attacken', item: 'Item', ability: 'Fähigkeit', nature: 'Wesen',
             spread: 'Statuswertpunkte', mates: 'Teampartner',
             noShare: 'ohne Anteilswerte', more: (n) => `+${n} weitere`,
+            summeUeber: (v) => `Quelle summiert auf ${v} % — mehr als eins geht nicht`,
+            summeUnter: (v) => `Quelle deckt nur ${v} % ab`,
             loading: 'Lade Nutzungsdaten …',
             noType: 'Kein Pokémon mit diesem Typ.',
             noUsage: 'Für dieses Pokémon liegen in diesem Format keine Nutzungsdaten vor.',
@@ -77,6 +79,8 @@
             moves: 'Moves', item: 'Held item', ability: 'Ability', nature: 'Nature',
             spread: 'Stat points', mates: 'Teammates',
             noShare: 'no share values', more: (n) => `+${n} more`,
+            summeUeber: (v) => `source sums to ${v} % — more than one is impossible`,
+            summeUnter: (v) => `source covers only ${v} %`,
             loading: 'Loading usage data …',
             noType: 'No Pokémon of that type.',
             noUsage: 'No usage data for this Pokémon in this format.',
@@ -163,13 +167,79 @@
             .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
     }
 
-    // The usage file keys by slug, and two of its records — basculegion-male
-    // and basculegion-female — share one display name. Prefer whichever
-    // exists; showing the name twice in a ranking would imply two Pokémon.
+    /* 17 VON 86 ZEILEN FANDEN IHRE DATEN NICHT (05.09.2026).
+
+       Die Rangliste kommt aus champions_replica_teams.json und traegt
+       Showdown-Namen ("Ninetales-Alola", "Lycanroc-Dusk"), die
+       Nutzungsdatei kommt von championsbattledata.com und schluesselt
+       andersherum ("alolan-ninetales", "lycanroc-dusk-form"). Die reine
+       Slugbildung traf beides nicht — auf dem Bildschirm stand
+       "#11 Floette-Eternal · 21 Team-Auftritte — Für dieses Pokémon
+       liegen in diesem Format keine Nutzungsdaten vor.", obwohl die
+       Daten da sind.
+
+       Betroffen waren alle Regionalformen und alle Mega-Formen:
+       Ninetales-Alola, Arcanine-Hisui, Decidueye-Hisui, Zoroark-Hisui,
+       Maushold-Four, Floette-Eternal und die Mega-Reihe.
+
+       Die Umrechnung existierte schon im Repo (js/champions-names.js,
+       REGION + AUSNAHMEN) — dieser Reiter hat sie nur nicht benutzt.
+       Statt sie zu verdrahten, werden hier mehrere Schreibweisen
+       nacheinander probiert und die erste genommen, die es wirklich
+       gibt. Findet sich keine, bleibt die ehrliche Meldung stehen. */
+    var USAGE_REGION = { alola: 'alolan', galar: 'galarian', hisui: 'hisuian', paldea: 'paldean' };
+
+    function usageKandidaten(name) {
+        const roh = String(name || '').toLowerCase().trim();
+        const base = roh.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        const teile = base.split('-').filter(Boolean);
+        const aus = [base];
+        if (teile.length >= 2) {
+            const kopf = teile[0];
+            const rest = teile.slice(1);
+            const letzte = rest[rest.length - 1];
+            // "ninetales-alola" -> "alolan-ninetales"
+            if (USAGE_REGION[letzte]) aus.push(USAGE_REGION[letzte] + '-' + kopf);
+            // "tauros-paldea-aqua" -> "paldean-tauros-aqua-breed"
+            for (let i = 0; i < rest.length; i++) {
+                const reg = USAGE_REGION[rest[i]];
+                if (!reg) continue;
+                const uebrig = rest.filter((_, j) => j !== i);
+                const vorn = reg + '-' + kopf;
+                if (uebrig.length) {
+                    aus.push(vorn + '-' + uebrig.join('-'));
+                    aus.push(vorn + '-' + uebrig.join('-') + '-breed');
+                    aus.push(vorn + '-' + uebrig.join('-') + '-form');
+                }
+                aus.push(vorn);
+            }
+            // "charizard-mega-y" / "gallade-mega" -> "mega-gallade"
+            if (rest.indexOf('mega') !== -1) {
+                aus.push('mega-' + kopf);
+                aus.push(['mega', kopf].concat(rest.filter(x => x !== 'mega')).join('-'));
+            }
+            // "lycanroc-dusk" -> "lycanroc-dusk-form"
+            aus.push(base + '-form');
+            aus.push(base + '-forme');
+            // "maushold-four" -> "maushold-family-of-four"
+            aus.push(kopf + '-family-of-' + letzte);
+            // Letzter Ausweg: die Art allein. Nur wenn es die Form
+            // nicht gibt — sonst stuende die Zahl der Grundform unter
+            // dem Namen einer anderen.
+            aus.push(kopf);
+        }
+        return aus;
+    }
+
     function usageSlug(name) {
-        const base = String(name || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
-        if (_usage && _usage[base]) return base;
+        const kandidaten = usageKandidaten(name);
+        const base = kandidaten[0];
         if (!_usage) return base;
+        for (const k of kandidaten) {
+            if (k && _usage[k]) return k;
+        }
+        // basculegion-male / -female teilen einen Anzeigenamen: der
+        // Praefix-Treffer bleibt als letzter Versuch stehen.
         const hit = Object.keys(_usage).find(k => k === base || k.startsWith(base + '-'));
         return hit || base;
     }
@@ -203,11 +273,55 @@
             </div>`;
     }
 
-    function barPanel(title, list, labelFn) {
+    /* WAS DIE QUELLE WEGLAESST, MUSS AUCH DASTEHEN (05.09.2026).
+
+       `tailNote` nennt, was ein Top-N-Schnitt weglaesst. Was die QUELLE
+       weglaesst oder doppelt zaehlt, stand nirgends. Gemessen ueber
+       data/champions_usage.json:
+
+         50 Verteilungen summieren sich auf ueber 100,5 % —
+             Wesen/Doppel 22 (banette 121,3 · lycanroc 117,6 ·
+             corviknight 112,0), Wesen/Einzel 18 (grimmsnarl 111,8),
+             Item 10. Wesen und getragenes Item sind ausschliessend;
+             mehr als eins geht nicht.
+         66 Attacken-Datensaetze liegen unter 200 % — bei vier Attacken
+             je Pokémon waeren ~400 % zu erwarten. Der schlimmste Fall,
+             basculegion-male/Doppel, deckt 16,4 % ab. Aerodactyl/Einzel
+             zeigte fuenf Attacken mit zusammen 72,6 % so, wie es sonst
+             eine vollstaendige Verteilung zeigt.
+
+       Der Scraper merkt das teilweise selbst (`_warnungen`, 23
+       Eintraege) und setzt vier klar unmoegliche Werte auf null — die
+       uebrigen bleiben stehen. Also sagt es die Anzeige.
+
+       Die Erwartung haengt an der Sorte: von Wesen, Item und Faehigkeit
+       hat ein Pokémon genau EINS (Summe ~100 %), Attacken hat es vier
+       (Summe ~400 %). Deshalb nimmt barPanel die erwartete Summe als
+       Argument. */
+    function summenNote(list, erwartet) {
+        if (!Array.isArray(list) || !list.length || !erwartet) return '';
+        let summe = 0;
+        let hatWert = false;
+        for (const e of list) {
+            const v = Number(e && e.pct);
+            if (Number.isFinite(v)) { summe += v; hatWert = true; }
+        }
+        if (!hatWert) return '';
+        const z = (x) => (typeof window !== 'undefined' && window.zahlLokal)
+            ? window.zahlLokal(x, 1) : x.toFixed(1);
+        // Grosszuegige Toleranz: Rundung je Zeile darf nicht anschlagen.
+        if (summe > erwartet + 0.5) return L().summeUeber(z(summe));
+        if (summe < erwartet * 0.9) return L().summeUnter(z(summe));
+        return '';
+    }
+
+    function barPanel(title, list, labelFn, erwarteteSumme) {
         const rows = (list || []).slice(0, TOP_N);
         if (!rows.length) return '';
+        const hinweise = [tailNote(list, rows.length), summenNote(list, erwarteteSumme)]
+            .filter(Boolean).join(' · ');
         return `<div class="sq-panel">
-                ${sectionLabel(title, tailNote(list, rows.length))}
+                ${sectionLabel(title, hinweise)}
                 ${rows.map(labelFn).join('')}
             </div>`;
     }
@@ -325,12 +439,12 @@
         return `${head}
             <div class="sq-cols">
                 <div class="sq-stack">
-                    ${barPanel(L().moves, block.move, moveRow)}
-                    ${barPanel(L().item, block.held_item, moveRow)}
+                    ${barPanel(L().moves, block.move, moveRow, 400)}
+                    ${barPanel(L().item, block.held_item, moveRow, 100)}
                 </div>
                 <div class="sq-stack">
-                    ${barPanel(L().ability, block.ability, moveRow)}
-                    ${barPanel(L().nature, block.nature, natRow)}
+                    ${barPanel(L().ability, block.ability, moveRow, 100)}
+                    ${barPanel(L().nature, block.nature, natRow, 100)}
                     ${spreadPanel(block.stat_points)}
                     ${matesPanel(block.teammate)}
                 </div>

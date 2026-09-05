@@ -3431,7 +3431,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const summary = document.createElement('p');
                 summary.className = 'build-info-ace-summary';
                 const weight = (typeof acePick.major_weight === 'number') ? acePick.major_weight : 0;
-                if (acePick.has_major_anchor && weight > 0) {
+                /* Der Y.2-Pfad rechnet auf einer anderen Datenlage als
+                   der Alt-Pfad: er hat echte Praesenzlisten statt
+                   Aggregat-Anteile, und deshalb kein `major_share` je
+                   Kandidat. Er liefert seinen Satz selbst mit — sonst
+                   stuende hier eine Erklaerung mit lauter Strichen.
+                   (05.09.2026) */
+                if (acePick.quelle_text) {
+                    summary.textContent = acePick.quelle_text;
+                } else if (acePick.has_major_anchor && weight > 0) {
                     const winner = acePick.candidates[0];
                     const winnerShare = (winner && winner.major_share != null) ? `${winner.major_share}%` : '—';
                     const winnerDecks = (winner && winner.major_deck_count > 0 && acePick.major_total_decks > 0)
@@ -6826,6 +6834,124 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         // Returns:
         //   { applied: true }                 — built + applied to UI
         //   { applied: false, reason: '…' }   — caller falls back to legacy
+        /**
+         * Ausschluss, Anheftung und Tech-Slots auf ein fertiges
+         * Builder-Ergebnis anwenden. Aendert `result.deck` an Ort und
+         * Stelle und haelt die 60 ein.
+         *
+         * Reihenfolge und Begruendung:
+         *   1. AUSSCHLUSS zuerst — eine ausgeschlossene Karte darf auch
+         *      dann nicht drin sein, wenn sie zugleich angeheftet ist
+         *      (die Oberflaeche schliesst das aus, aber ein alter
+         *      localStorage-Stand kann beides tragen).
+         *   2. ANHEFTUNG und TECH-SLOTS danach, jeweils mit einer Kopie,
+         *      wenn die Karte fehlt. Mehr als eine waere geraten.
+         *   3. AUFFUELLEN/TRIMMEN auf 60 ueber die schwaechsten
+         *      Tech-Slots. Kernkarten und die Ace Spec bleiben
+         *      unangetastet — sie sind der Teil, der belegt ist.
+         *
+         * Was NICHT passiert: es wird nichts erfunden. Eine angeheftete
+         * Karte, die im Archetyp gar nicht vorkommt, hat keine
+         * Kartendaten (Set, Nummer) — die kann dieser Pfad nicht
+         * setzen, und sie wird als nicht anwendbar protokolliert statt
+         * halb eingebaut.
+         */
+        function _nutzerwuensche(source, result) {
+            const protokoll = [];
+            const schluessel = (n) => String(n || '').toLowerCase().trim();
+            const deck = Array.isArray(result && result.deck) ? result.deck : null;
+            if (!deck) return { geaendert: false, protokoll };
+
+            const nameVon = (e) => (e && e.card && e.card.name) || '';
+            const zaehle  = () => deck.reduce((a, e) => a + (e.count || 0), 0);
+
+            const ausgeschlossen = (typeof getExcludedCardNames === 'function')
+                ? getExcludedCardNames(source) : new Set();
+            const angeheftet = (typeof getPinnedCardNames === 'function')
+                ? getPinnedCardNames(source) : new Set();
+            const techNamen = (typeof getTechSlotNames === 'function')
+                ? getTechSlotNames(source) : [];
+
+            let geaendert = false;
+
+            // 1. Ausschluss
+            if (ausgeschlossen && ausgeschlossen.size > 0) {
+                for (let i = deck.length - 1; i >= 0; i--) {
+                    if (ausgeschlossen.has(schluessel(nameVon(deck[i])))) {
+                        protokoll.push('raus: ' + nameVon(deck[i]) + ' x' + (deck[i].count || 0));
+                        deck.splice(i, 1);
+                        geaendert = true;
+                    }
+                }
+            }
+
+            // 2. Anheftung und Tech-Slots — je eine Kopie, falls sie fehlen.
+            //    Die Kartendaten kommen aus scoredCards; ohne sie kann
+            //    diese Stelle die Karte nicht bauen und sagt das.
+            const nachSchluessel = new Map();
+            for (const c of (result.scoredCards || [])) {
+                const k = schluessel(c && c.name);
+                if (k && !nachSchluessel.has(k)) nachSchluessel.set(k, c);
+            }
+            const gewuenscht = [];
+            angeheftet.forEach(k => gewuenscht.push(k));
+            for (const n of techNamen) {
+                const k = schluessel(n);
+                if (k && gewuenscht.indexOf(k) === -1) gewuenscht.push(k);
+            }
+            for (const k of gewuenscht) {
+                if (!k) continue;
+                if (ausgeschlossen && ausgeschlossen.has(k)) continue;
+                if (deck.some(e => schluessel(nameVon(e)) === k)) continue;
+                const karte = nachSchluessel.get(k);
+                if (!karte) {
+                    protokoll.push('nicht anwendbar (keine Kartendaten im Archetyp): ' + k);
+                    continue;
+                }
+                deck.push({ card: karte, count: 1, slotType: 'tech' });
+                protokoll.push('rein: ' + (karte.name || k) + ' x1');
+                geaendert = true;
+            }
+
+            if (!geaendert) return { geaendert: false, protokoll };
+
+            // 3. Auf 60 bringen. Geschnitten und aufgefuellt wird nur an
+            //    den Tech-Slots, und dort an den schwaechsten zuerst.
+            const staerke = (e) => Number(e && e.card && e.card.weightedShare) || 0;
+            const istFrei = (e) => {
+                if (!e) return false;
+                if (e.slotType === 'core' || e.slotType === 'ace_spec') return false;
+                if (angeheftet.has(schluessel(nameVon(e)))) return false;
+                if (techNamen.some(n => schluessel(n) === schluessel(nameVon(e)))) return false;
+                return true;
+            };
+            let wache = 0;
+            while (zaehle() > 60 && wache++ < 200) {
+                const frei = deck.filter(istFrei).sort((a, b) => staerke(a) - staerke(b));
+                if (frei.length === 0) break;
+                const ziel = frei[0];
+                ziel.count -= 1;
+                if (ziel.count <= 0) deck.splice(deck.indexOf(ziel), 1);
+            }
+            while (zaehle() < 60 && wache++ < 200) {
+                // Auffuellen ueber die staerkste Karte, die noch unter
+                // ihrem gemessenen Schnitt liegt — nicht ueber
+                // irgendeine. Findet sich keine, bleibt das Deck unter
+                // 60 und der Zaehler sagt es.
+                const kandidaten = deck
+                    .filter(e => e.slotType !== 'ace_spec')
+                    .filter(e => {
+                        const max = (e.card && e.card.is_basic_energy) ? 59 : 4;
+                        return (e.count || 0) < max;
+                    })
+                    .sort((a, b) => staerke(b) - staerke(a));
+                if (kandidaten.length === 0) break;
+                kandidaten[0].count += 1;
+            }
+            protokoll.push('Summe ' + zaehle());
+            return { geaendert: true, protokoll };
+        }
+
         async function _runMostConsistencyBuilderPath(source, archetype) {
             const builder = window.MostConsistencyBuilder;
             if (!builder || typeof builder.build !== 'function') {
@@ -6840,7 +6966,30 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // the legacy stages' Major gate entirely. With all lists
             // gated away the builder declines and the legacy path (which
             // uses current online data) takes over.
-            const _fw = (source === 'currentMeta')
+            /* DAS TOR STAND NUR AUF EINEM REITER (05.09.2026).
+               Der Kommentar direkt darueber begruendet, warum ohne
+               minDate "the OLD format's deck" gebaut wird — und genau
+               das passierte auf City League und Vergangenes Meta, weil
+               die Bedingung `source === 'currentMeta'` lautete.
+
+               Nachgemessen an data/tournament_decklists_per_player.csv
+               (Grenze in_person_legal_date = 2026-07-31 aus
+               data/format_window.json):
+
+                 Dragapult Blaziken, City League : 55 Listen, davon 44
+                     aus TEF-CRI (Turin 06.06. + NAIC 10.06.) = 80 %
+                 Alakazam Dudunsparce, Past Meta : 75 Listen, davon 61
+                     aus TEF-CRI = 81 %
+                 Dragapult, Current Meta         : 22 Listen, 0 Vorformat
+
+               City League zeigt das laufende Format — dort gilt
+               dasselbe Tor wie im Current Meta. Vergangenes Meta zeigt
+               absichtlich ein altes Format; dort waere die Grenze des
+               HEUTIGEN Fensters falsch, also bleibt sie aus — dafuer
+               nennt der Warum?-Kasten jetzt die Herkunft der Listen
+               (Turnierzahl, juengstes Datum), damit die Mischung
+               sichtbar ist statt stillzuschweigen. */
+            const _fw = (source === 'currentMeta' || source === 'cityLeague')
                 ? await _loadFormatWindowForBuilder() : null;
             let result;
             try {
@@ -6878,6 +7027,42 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 console.info(`  Phase ${event.phase}: ${event.decision}`, event);
             }
             console.groupEnd();
+
+            /* ═══════════════════════════════════════════════════════
+               VIER BEDIENELEMENTE WAREN STUMM (05.09.2026, live gemessen)
+
+               Sobald MostConsistencyBuilder greift, kehrt dieser Pfad
+               mit `return` zurueck — und alles, was in den Alt-Stufen
+               darunter steht, laeuft nie. Darunter stehen aber die
+               Einspeisung der Tech-Slots (getTechSlotNames) und der
+               Ausschlussfilter (_excludedSet). `_runMostConsistencyBuilderPath`
+               las weder getTechSlotNames noch pinnedCards noch
+               excludedCards — grep ueber den ganzen Funktionskoerper:
+               null Treffer.
+
+               Gemessen an der Live-Seite, Archetyp Dragapult:
+                 techSlots.currentMeta = ["Rabsca","Rellor","Shaymin"]
+                   -> keine davon im Deck
+                 isExcludedCard('currentMeta','Crushing Hammer') = true
+                   -> 4x Crushing Hammer im Deck
+                 isPinnedCard('currentMeta','Judge') = true
+                   -> kein Judge im Deck
+               Und die Oberflaeche meldete dazu "Build complete".
+
+               Ein Ursachenknoten, der vier Bedienelemente ohne
+               Fehlermeldung abschaltet — mit einer Erfolgsmeldung
+               obendrauf. Jetzt werden Ausschluss, Anheftung und
+               Tech-Slots NACH dem Bau auf das Ergebnis angewandt,
+               bevor es in die Oberflaeche geht. Der Bau selbst bleibt
+               unangetastet; das ist Absicht: er soll die
+               Referenzliste liefern, und der Nutzer entscheidet
+               darueber.
+               ═══════════════════════════════════════════════════════ */
+            const _wunsch = _nutzerwuensche(source, result);
+            if (_wunsch.geaendert) {
+                console.info('[MostConsistencyBuilder] Nutzerwünsche angewandt:',
+                    _wunsch.protokoll.join(' · '));
+            }
 
             // Apply to the live UI. Mirrors the legacy path's clear →
             // populate → save pattern. The UI re-renders off the
@@ -7010,13 +7195,58 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const cands = Array.isArray(_aceTraceEntry.candidates)
                         ? _aceTraceEntry.candidates
                         : [{ name: _aceTraceEntry.chosen, weightedShare: _aceTraceEntry.weightedShare, topCutFreq: _aceTraceEntry.topCutFreq }];
+                    /* "NO RECENT MAJOR IN SCOPE" STAND IMMER DA
+                       (05.09.2026). `has_major_anchor` war hier fest
+                       auf false verdrahtet, also nahm der Renderer
+                       (js/app-deck-builder.js, ACE-SPEC-Abschnitt)
+                       unter allen Umstaenden den Else-Zweig — und
+                       beschriftete Major-Daten als "Online".
+
+                       Live gegengerechnet: die 8 ausgewerteten
+                       Dragapult-Listen sind ausschliesslich
+                       Worlds-2026-Listen vom 28.08.2026 — acht Tage vor
+                       dem Prüftag, mitten in dem 28-Tage-Fenster, das
+                       der Satz selbst nennt. Auf demselben Bildschirm
+                       stand darueber "USED IN TOP 256 22× · World
+                       Championships 2026 (28th August 2026)".
+
+                       Die Listen dieses Pfades kommen ausnahmslos aus
+                       data/tournament_decklists_per_player.csv, also aus
+                       Praesenzturnieren. Der Anker ist damit genau
+                       dann da, wenn das juengste ausgewertete Turnier
+                       im Fenster liegt. */
+                    const _dqA = result.dataQuality || {};
+                    const _ankerDatum = String(_dqA.juengstes_turnier || '').slice(0, 10);
+                    let _ankerAlter = null;
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(_ankerDatum)) {
+                        const _ms = Date.now() - Date.parse(_ankerDatum + 'T00:00:00Z');
+                        if (Number.isFinite(_ms)) _ankerAlter = Math.floor(_ms / 86400000);
+                    }
+                    const _hatAnker = _ankerAlter != null && _ankerAlter >= 0 && _ankerAlter <= 28;
                     acePick = {
                         chosen:              _aceTraceEntry.chosen || (cands[0] && cands[0].name) || '',
-                        has_major_anchor:    false,
-                        major_weight:        0,
-                        major_total_decks:   0,
-                        major_date:          '',
-                        major_age_days:      null,
+                        has_major_anchor:    _hatAnker,
+                        major_weight:        _hatAnker ? Number(_dqA.total_weight || 0) : 0,
+                        major_total_decks:   _hatAnker ? Number(_dqA.n_lists || 0) : 0,
+                        major_date:          _hatAnker ? _ankerDatum : '',
+                        major_age_days:      _ankerAlter,
+                        quelle_text: (function () {
+                            const _n = Number(_dqA.n_lists || 0);
+                            const _t = Number(_dqA.n_turniere || 0);
+                            const _nm = (_dqA.turniere && _dqA.turniere[0]) ? _dqA.turniere[0] : '';
+                            const _wo = _t === 1
+                                ? `aus ${_n} Listen eines einzigen Turniers${_nm ? ` (${_nm}` : ''}${_ankerDatum ? `${_nm ? ', ' : ' ('}${_ankerDatum}` : ''}${_nm || _ankerDatum ? ')' : ''}`
+                                : `aus ${_n} Listen von ${_t} Turnieren${_ankerDatum ? `, zuletzt ${_ankerDatum}` : ''}`;
+                            const _alt = (cands.length > 1)
+                                ? ` Die nächste Wahl war ${cands[1].name || '—'} mit `
+                                  + `${Number(((cands[1].weightedShare || 0) * 100)).toFixed(1).replace('.', ',')} %.`
+                                : '';
+                            return `${_aceTraceEntry.chosen || ''} steht in `
+                                 + `${Number(((cands[0] && cands[0].weightedShare || 0) * 100)).toFixed(1).replace('.', ',')} % `
+                                 + `der ausgewerteten Präsenzlisten — ${_wo}.`
+                                 + (_ankerAlter != null ? ` Das ist ${_ankerAlter} Tage her.` : '')
+                                 + _alt;
+                        })(),
                         candidates: cands.map(c => ({
                             card_name:        c.name || '',
                             archetype_share:  Number(((c.weightedShare || 0) * 100).toFixed(1)),
@@ -7032,11 +7262,51 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // backed the build.
                 const auditFindings = [];
                 if (_dqEntry) {
+                    /* EIN GRUENER HAKEN WAR DIE FALSCHE ANTWORT
+                       (05.09.2026). Hier stand "✓ Data quality: 8
+                       decklists analyzed (weight 0.40)" auf
+                       `level: info` unter der Ueberschrift
+                       "BUILD-QUALITÄTS-CHECK". Acht Listen sind keine
+                       bestandene Pruefung, sondern die Warnung selbst —
+                       und dass sie ALLE aus EINEM Turnier stammen
+                       (Worlds 28.08., Plaetze 37-122), stand nirgends.
+
+                       Der Bau ist deswegen nicht falsch: 47 der 60
+                       Karten bewegen sich in keinem Szenario. Aber die
+                       letzten Tech-Plaetze sind eine Momentaufnahme,
+                       und wer das nicht weiss, faehrt mit einem
+                       falschen Gefuehl von Sicherheit zum Turnier. */
+                    const _dqq = result.dataQuality || {};
+                    const _nT  = Number(_dqq.n_turniere || 0);
+                    const _nL  = Number(_dqEntry.n_lists || _dqq.n_lists || 0);
+                    const _teile = [];
+                    if (_nT === 1) {
+                        _teile.push('alle aus EINEM Turnier'
+                            + (_dqq.turniere && _dqq.turniere[0] ? ` (${_dqq.turniere[0]})` : '')
+                            + (_dqq.juengstes_turnier ? `, ${_dqq.juengstes_turnier}` : ''));
+                    } else if (_nT > 1) {
+                        _teile.push(`aus ${_nT} Turnieren`
+                            + (_dqq.juengstes_turnier ? `, zuletzt ${_dqq.juengstes_turnier}` : ''));
+                    }
+                    if (_dqq.platz_von != null && _dqq.platz_bis != null) {
+                        _teile.push(`Plätze ${_dqq.platz_von}–${_dqq.platz_bis}`);
+                    }
+                    // Duenn ist: zu wenige Listen ODER alles aus einem Turnier.
+                    const _duenn = _dqEntry.decision === 'data_too_thin' || _nT === 1 || _nL < 12;
                     auditFindings.push({
-                        level:   _dqEntry.decision === 'data_too_thin' ? 'warn' : 'info',
-                        message: `Data quality: ${_dqEntry.n_lists || result.dataQuality.n_lists || 0} decklists analyzed`
-                               + (result.dataQuality.total_weight != null ? ` (weight ${Number(result.dataQuality.total_weight).toFixed(2)})` : ''),
-                        hint:    _coreEntry ? `Core threshold landed at ${(result.coreThreshold * 100).toFixed(0) }% — ${_coreEntry.slots ? _coreEntry.slots.length : 0} cards qualified as Core.` : '',
+                        level:   _duenn ? 'warn' : 'info',
+                        message: `Datenbasis: ${_nL} Listen`
+                               + (_teile.length ? ' — ' + _teile.join(' · ') : '')
+                               + (_dqq.total_weight != null ? ` (Gewicht ${Number(_dqq.total_weight).toFixed(2)})` : ''),
+                        hint:    (_duenn
+                                    ? 'Eine Stichprobe dieser Größe trägt die Kernkarten, '
+                                      + 'nicht die letzten Tech-Plätze — die sind hier eine '
+                                      + 'Momentaufnahme, keine Empfehlung. '
+                                    : '')
+                               + (_coreEntry
+                                    ? `Kern-Schwelle bei ${(result.coreThreshold * 100).toFixed(0)} % — `
+                                      + `${_coreEntry.slots ? _coreEntry.slots.length : 0} Karten sind Kern.`
+                                    : ''),
                     });
                 }
 
@@ -7072,9 +7342,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         if (ges > onlineListen) onlineListen = ges;
                         onlineJeKat[k] = (onlineJeKat[k] || 0) + drin;
                     }
+                    /* Wenn die Typaufloesung nichts geliefert hat, ist die
+                       Kategorie-Deckung keine Aussage — dann steht das da,
+                       statt einer Zeile, die "Pokemon 8/8" behauptet.
+                       (05.09.2026: bis dahin lieferte _kategorieDeckung
+                       genau diesen einen Eintrag, weil die Spalte `type`
+                       in allen 30.459 CSV-Zeilen leer ist.) */
+                    if (kats._unbestimmt) {
+                        katAudit.push({
+                            level: 'info',
+                            message: 'Kategorie-Deckung nicht bestimmbar — '
+                                   + 'zu den Karten dieser Listen liegt kein Kartentyp vor.',
+                            hint: 'Die Spalte `type` der Listen-Datei ist leer; die '
+                                + 'Typen kommen sonst aus der Kartendatenbank. Ist der '
+                                + 'Reiter Karten in dieser Sitzung noch nicht geladen '
+                                + 'worden, fehlt die Zuordnung.',
+                        });
+                    }
                     for (const k of Object.keys(kats)) {
+                        if (k === '_unbestimmt') continue;
                         const e = kats[k];
-                        if (!e.listen) continue;
+                        if (!e || !e.listen) continue;
                         const pMajor = (e.listenMit / e.listen) * 100;
                         if (!onlineListen) continue;
                         // Gedeckelt: die Summe kann ueber die Listenzahl

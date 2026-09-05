@@ -310,3 +310,55 @@ nachsehen". An der Quelle nachgesehen (limitlesstcg.com, Deckliste 22076,
 „Copy to Clipboard"): derselbe englische Kopf, auch wenn man die Seite
 auf Deutsch stellt. Der Kopf gehört zum Austauschformat und wird nicht
 lokalisiert.
+
+---
+
+## 05.09.2026 — Der naechtliche Lauf, der nichts geprueft hat
+
+### Die naechtliche Ganzseiten-Suite
+
+**Was:** Der Workflow `Visual Fullpage Coverage`
+(`.github/workflows/visual-fullpage.yml`) lief jede Nacht um 03:00 UTC,
+installierte Node und Chromium und rief
+`tests/e2e/visual-full-page-coverage.spec.js` auf.
+
+**Warum weg:** Die Spec-Datei ist seit dem **22.05.2026 null Byte
+gross**. Playwright bricht auf einer Datei ohne Test normalerweise ab —
+`--pass-with-no-tests` im Aufrufer hat genau das unterdrückt. Rund 105
+Nächte lang setzte der Lauf also einen grünen Haken unter eine Prüfung,
+die es nicht gab. Das ist nicht „falsch gerechnet", sondern „gar nicht
+gerechnet" — und die grüne Meldung machte es unsichtbar. Der Aufrufer
+weigert sich seitdem, auf einer leeren Suite grün zu melden; damit wäre
+der cron ab sofort jede Nacht rot, und eine Meldung, an der niemand
+etwas tun kann, wird nach drei Nächten ohnehin nicht mehr gelesen. Der
+Lauf bleibt von Hand auslösbar.
+
+**Was gut war:** Die Idee dahinter fehlt der Seite wirklich. Die
+Schwester-Suite (`visual-regression.spec.js`) vergleicht **Ausschnitte** —
+Knopfreihen, ein Dropdown, eine Tabelle — und ihre Pixelvergleiche laufen
+ausserdem nur unter Windows (`RUN_PIXEL_SNAPSHOTS = platform === 'win32'`),
+weil die Grundbilder auf einem anderen System entstanden sind. Was
+niemand prüft, ist die **ganze Seite je Reiter**: rendert das Panel
+überhaupt, läuft die Seite seitlich über, ragt etwas aus dem Sichtfeld.
+Genau das war am 02.09. und am 04.09.2026 zweimal ein echter Befund.
+
+**Was anders sein müsste, damit es zurückkommt:** Zwei Dinge, und beide
+sind am 05.09.2026 beim Versuch aufgelaufen, die Suite eben schnell zu
+schreiben:
+
+1. **Ein verlässlicher Weg, einen Reiter anzusteuern.** `window.switchTab`
+   ist es nicht: `switchTab('meta-analysis-hub')` verlässt die Seite (danach
+   ist `window.switchTab` undefiniert), und ein Aufruf mit `#<tab-id>` in
+   der Adresse aktiviert das Panel nicht — gemessen über alle 15
+   `.tab-content`-Knoten. Ohne diesen Weg misst die Suite ein Panel, das
+   gar nicht offen ist, und meldet „leer" über etwas Funktionierendes.
+2. **Eine Konsolenprüfung, die im Bausatz überhaupt möglich ist.** Der
+   Sandkasten erreicht keine externen Hosts; jeder Reiter liefert dort
+   `ERR_TUNNEL_CONNECTION_FAILED`. Eine Zusicherung „die Konsole bleibt
+   still" ist dort nicht prüfbar und müsste die Netzfehler sauber von den
+   eigenen trennen — sonst ist sie entweder immer rot oder eine
+   Generalamnestie.
+
+Eine Suite ohne diese zwei Punkte wäre schlechter als die leere Datei:
+sie sähe nach Prüfung aus und wäre wieder nur eine Behauptung.
+

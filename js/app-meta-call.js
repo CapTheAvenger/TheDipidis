@@ -7312,6 +7312,36 @@ window.MetaCall = (function () {
             }
             return { map: out, pairs };
           };
+          /* Ist die Day-1-Karte eines Formats Paar fuer Paar dieselbe wie
+             die Overall-Karte? Verglichen werden Spielzahl und Bilanz,
+             nicht die geglaettete Quote — die Glaettung wuerde zwei
+             verschiedene Bilanzen auf denselben Wert ziehen koennen.
+             Ein Format zaehlt nur als Kopie, wenn es ueberhaupt Paare
+             hat und JEDES davon uebereinstimmt. */
+          const _day1IstKopie = (d1Map, ovMap) => {
+            const betroffen = [];
+            for (const m of Object.keys(d1Map || {})) {
+              const d1 = d1Map[m] || {};
+              const ov = (ovMap && ovMap[m]) || {};
+              let paare = 0, gleich = 0;
+              for (const dk of Object.keys(d1)) {
+                for (const ok of Object.keys(d1[dk] || {})) {
+                  paare += 1;
+                  const a = d1[dk][ok];
+                  const b = ov[dk] && ov[dk][ok];
+                  if (b && a.games === b.games
+                        && a.siege === b.siege
+                        && a.niederlagen === b.niederlagen
+                        && a.unentschieden === b.unentschieden) {
+                    gleich += 1;
+                  }
+                }
+              }
+              if (paare > 0 && gleich === paare) betroffen.push(m);
+            }
+            return betroffen;
+          };
+
           // Keep Overall at ≥ MAJOR_MATCHUP_MIN_GAMES_PAST so Past Meta
           // has a usable map; the higher current-meta threshold is
           // re-applied at query time in getBaseMatchup.
@@ -7319,6 +7349,54 @@ window.MetaCall = (function () {
           _majorMatchupMap = overall.map;
           const day1 = _collapseAgg(aggDay1, MAJOR_MATCHUP_MIN_GAMES_DAY1);
           _majorMatchupMapDay1 = day1.map;
+
+          /* DIE DAY-1-KARTE IST MANCHMAL NUR EINE KOPIE VON OVERALL
+             (05.09.2026).
+
+             Gemessen an data/labs_tournament_matchups_TEF-PBL.csv: alle
+             769 Paare unter day_filter='day1' sind byteweise identisch
+             mit denen unter 'overall'. In TEF-CRI ebenso (2.528 von
+             2.528). Dass 'day1' dort nicht echt sein KANN, zeigt eine
+             Ungleichung: in 238 von 238 Paaren, die in allen drei
+             Filtern stehen, gilt day1 + day2 > overall. Eine echte
+             Tag-1-Teilmenge kann zusammen mit Tag 2 nicht mehr Spiele
+             haben als das Ganze.
+
+             Die Ursache steht im Scraper (backend/scrapers/
+             labs_tournament_scraper.py, Block bei der URL-Bildung): das
+             Abfrage-Flag `&d1` wurde geraten — "inferred from the
+             symmetric pattern ... Confirm the d1 pattern when we first
+             see a populated day1 scrape". `&d2` wurde am 25.05.2026 vom
+             Betreiber bestaetigt und wirkt nachweislich. `&d1` wird von
+             der Quelle offenbar ignoriert, und die Seite liefert die
+             Overall-Ansicht zurueck.
+
+             WARUM DAS HIER WEHTUT, und nicht nur haesslich ist: die
+             Mischung unten gewichtet Day-2 mit 0,45 und Day-1 mit 0,35,
+             und Overall ist nur Rueckfall, wenn keine der beiden
+             greift. Ist "Day 1" in Wahrheit Overall — und Overall
+             enthaelt die Tag-2-Spiele —, dann zaehlen die
+             Tag-2-Ergebnisse zweimal: einmal mit ihrem eigenen Gewicht
+             und noch einmal versteckt im Day-1-Anteil. Auf jedem Deck.
+
+             Solange das Flag nicht bestaetigt ist, ist die ehrlichste
+             Antwort, die Karte fallen zu lassen, wenn sie eine Kopie
+             ist: dann greift der Overall-Rueckfall mit dem kombinierten
+             Gewicht, und dieselben Spiele werden genau einmal gezaehlt.
+             Ist die Karte eines Tages echt (weil das Flag stimmt oder
+             die Quelle sich aendert), bleibt sie unveraendert stehen —
+             diese Pruefung dreht sich von selbst um. */
+          const _kopieVonOverall = _day1IstKopie(_majorMatchupMapDay1, _majorMatchupMap);
+          if (_kopieVonOverall.length > 0) {
+            for (const m of _kopieVonOverall) delete _majorMatchupMapDay1[m];
+            console.warn(
+              '[MetaCall] Day-1-Matchupkarte verworfen fuer ' + _kopieVonOverall.join(', ')
+              + ' — sie ist Paar fuer Paar identisch mit Overall, also keine '
+              + 'Tag-1-Auswahl. Ohne das Verwerfen wuerden die Tag-2-Spiele '
+              + 'doppelt gewichtet (0,45 als Day 2 + ihr Anteil in 0,35 als '
+              + '"Day 1"). Ursache: das geratene Flag &d1 im Labs-Scraper.'
+            );
+          }
           // Day-2 uses the lower MAJOR_MATCHUP_MIN_GAMES_DAY2 floor
           // because cut samples are inherently smaller (~10-20 % of
           // Day-1 player counts → 3-15 games per pair is typical).

@@ -304,10 +304,60 @@ describe('S6 — 4.7 las seine eigene Vorprognose', () => {
         // damper.js). Damit wird die Zusage strenger statt schwaecher:
         // gibt es GAR KEINE Zuweisung, kann es auch keinen Weg geben,
         // auf dem die Prognose nach ladderShare zurueckfliesst.
-        const alle = (MC.match(/[A-Za-z_$][\w$]*\.ladderShare\s*=[^=][^;\n]*/g) || []);
-        assert.deepEqual(alle, [],
-            `${alle.length} Zuweisung(en) an ladderShare — der Wert kommt aus ` +
-            `der Ladder-CSV und wird nirgends sonst gesetzt: ${alle.join(' | ')}`);
+        //
+        // 05.09.2026: EINE Zuweisung ist wieder erlaubt, und zwar
+        // ausschliesslich im Ladeblock §1b. Dort ersetzt der
+        // 14-Tage-Fensterstand aus data/limitless_online_fenster.csv den
+        // kumulativen Ladder-Anteil — eine ZWEITE QUELLE, gelesen bevor
+        // der Praediktor ueberhaupt laeuft. Das ist der Gegenpol zur
+        // Rueckkopplung, nicht ihr Wiedereinzug: der Wert kommt weiter
+        // von aussen und nie aus einem Ergebnis dieses Motors.
+        //
+        // Die Zusage wird dadurch nicht schwaecher, sondern praeziser.
+        // Sie verlangt jetzt DREIERLEI, statt nur zu zaehlen:
+        //   (1) ausserhalb von §1b keine einzige Zuweisung — genau die
+        //       alte Strenge, unveraendert;
+        //   (2) in §1b hoechstens eine, damit kein zweiter Pfad
+        //       darunter mitwaechst;
+        //   (3) §1b selbst kommt ohne predictedShare aus und liest
+        //       nirgends .onlineShare — waere eines davon drin, waere
+        //       es wieder die Rueckkopplung, nur an neuer Stelle.
+        //
+        // Der Blockrand wird an CODE festgemacht, nicht an der
+        // Ueberschrift: MC ist kommentarfrei (siehe oben), und ein
+        // Kommentarrand waere ohnehin die falsche Grenze — er liesse
+        // sich durch Verschieben eines Kommentars aufziehen.
+        const iFenster = MC.indexOf("limitless_online_fenster.csv?t=");
+        const eFenster = iFenster === -1 ? -1
+            : MC.indexOf('_aliasTurnierZuLadder = await', iFenster);
+        assert.ok(iFenster !== -1 && eFenster > iFenster,
+            'der Ladeblock §1b ist nicht mehr auffindbar — die Zusage kann '
+            + 'ihre Grenze nicht ziehen und waere damit wertlos');
+        const inFenster = (i) => i > iFenster && i < eFenster;
+
+        const drinnen = [], draussen = [];
+        for (const m of MC.matchAll(/[A-Za-z_$][\w$]*\.ladderShare\s*=[^=][^;\n]*/g)) {
+            (inFenster(m.index) ? drinnen : draussen).push(m[0].trim());
+        }
+        assert.deepEqual(draussen, [],
+            `${draussen.length} Zuweisung(en) an ladderShare AUSSERHALB des ` +
+            `Ladeblocks §1b — der Wert kommt aus der Ladder-CSV oder dem ` +
+            `14-Tage-Fenster und wird nirgends sonst gesetzt: ${draussen.join(' | ')}`);
+        assert.ok(drinnen.length <= 1,
+            `${drinnen.length} Zuweisungen in §1b — erlaubt ist genau eine ` +
+            `(der Fensterstand): ${drinnen.join(' | ')}`);
+
+        if (drinnen.length === 1) {
+            const block = MC.slice(iFenster, eFenster);
+            assert.ok(!/predictedShare/.test(block),
+                '§1b liest die Prognose — damit waere die Rueckkopplung zurueck, '
+                + 'nur eine Ebene tiefer');
+            const liest = [...block.matchAll(/[A-Za-z_$][\w$]*\.onlineShare(?!\s*=[^=])/g)]
+                .map(m => block.slice(Math.max(0, m.index - 40), m.index + 20).trim());
+            assert.deepEqual(liest, [],
+                '§1b LIEST onlineShare — das traegt am Ende des Laufs die '
+                + 'Prognose: ' + liest.join(' | '));
+        }
     });
 });
 

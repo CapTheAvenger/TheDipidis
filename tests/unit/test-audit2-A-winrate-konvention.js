@@ -46,7 +46,7 @@ function schneide(src, von, bis) {
 }
 
 describe('F24 (Past Meta) — MostSuccessfulList nennt die Konvention', () => {
-    it('die angezeigte Quote ist Matchpunkte und trägt einen Konventionshinweis', () => {
+    it('die angezeigte Quote rechnet (3S+U)/3n und nennt sich "Win %"', () => {
         const src = read('js/app-past-meta.js');
         const wpBlock = schneide(src,
             'const _WK = window.WinRateKonvention;',
@@ -60,16 +60,20 @@ describe('F24 (Past Meta) — MostSuccessfulList nennt die Konvention', () => {
         const r = fn({ WinRateKonvention: WK }, { wins: 6, losses: 2, ties: 1 },
             (s) => String(s), () => 0);
 
-        assert.equal(r.wpStr, ERWARTET_STR, 'die Quote ist nicht die Matchpunkte-Quote');
-        assert.match(r.wpHinweis, /Matchpunkte/, 'kein Konventionshinweis');
+        assert.equal(r.wpStr, ERWARTET_STR, 'die Quote rechnet nicht (3S+U)/3n');
+        // 05.09.2026: der angezeigte Name dieser Konvention ist "Win %" (von
+        // Limitless uebernommen). Die Formel steht weiter im selben Hinweis.
+        assert.match(r.wpHinweis, /Win %/, 'kein Konventionshinweis');
+        assert.match(r.wpHinweis, /\(3S \+ U\)/, 'der Hinweis nennt die Formel nicht mehr');
+        assert.doesNotMatch(r.wpHinweis, /Matchpunkte/, 'der alte Name steht wieder da');
         assert.match(r.recordBlock, /title="/, 'der Hinweis hängt nicht als title an der Zahl');
-        assert.match(r.recordBlock, /Matchpunkte/);
+        assert.match(r.recordBlock, /Win %/);
         assert.match(r.recordBlock, /6-2-1 · 70,4%/);
     });
 });
 
 describe('F24 (Quickref) — Record-Block nennt die Konvention', () => {
-    it('die angezeigte Quote ist Matchpunkte und trägt einen Konventionshinweis', () => {
+    it('die angezeigte Quote rechnet (3S+U)/3n und nennt sich "Win %"', () => {
         const src = read('js/current-meta-quickref.js');
         const wpBlock = schneide(src,
             'const _qWK = window.WinRateKonvention;',
@@ -83,8 +87,10 @@ describe('F24 (Quickref) — Record-Block nennt die Konvention', () => {
         const r = fn({ WinRateKonvention: WK }, { wins: 6, losses: 2, ties: 1 },
             (s) => String(s), () => 0);
 
-        assert.equal(r.wpStr, ERWARTET_STR, 'die Quote ist nicht die Matchpunkte-Quote');
-        assert.match(r.wpHinweis, /Matchpunkte/, 'kein Konventionshinweis');
+        assert.equal(r.wpStr, ERWARTET_STR, 'die Quote rechnet nicht (3S+U)/3n');
+        assert.match(r.wpHinweis, /Win %/, 'kein Konventionshinweis');
+        assert.match(r.wpHinweis, /\(3S \+ U\)/, 'der Hinweis nennt die Formel nicht mehr');
+        assert.doesNotMatch(r.wpHinweis, /Matchpunkte/, 'der alte Name steht wieder da');
         assert.match(r.recordBlock, /title="/, 'der Hinweis hängt nicht als title an der Zahl');
         assert.match(r.recordBlock, /6-2-1 · 70,4%/);
     });

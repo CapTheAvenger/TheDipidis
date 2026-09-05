@@ -14,7 +14,7 @@
  * DREI KONVENTIONEN SIND ECHT. Alle drei wurden gegen die Rohdaten
  * nachgewiesen:
  *
- *   MATCHPUNKTE      (3S + U) / (3 · Partien)
+ *   MATCHPUNKTE      (3S + U) / (3 · Partien)      — angezeigt als "Win %"
  *       Was ueber die Platzierung entscheidet. Ein Unentschieden ist
  *       ein Punkt statt drei. So rechnen die Labs-Dateien: ueber alle
  *       4.667 Zeilen von data/labs_tournament_decks.csv weicht deren
@@ -70,14 +70,30 @@
         matchpunkte: {
             id: 'matchpunkte',
             formel: '(3S + U) / (3 · Matches)',
-            kurzDe: 'Matchpunkte',
-            kurzEn: 'Match points',
-            langDe: 'Matchpunkte: ein Sieg zaehlt 3, ein Unentschieden 1, '
-                  + 'eine Niederlage 0 — das ist, was über die Platzierung entscheidet. '
-                  + 'Bei Unentschieden liegt der Gleichstand deshalb unter 50 %.',
-            langEn: 'Match points: a win counts 3, a tie 1, a loss 0 — this is what '
-                  + 'decides standings. With ties present, an even record therefore '
-                  + 'sits below 50 %.',
+            /* DER NAME KOMMT VON DER QUELLE (05.09.2026).
+               Bis heute hiess diese Konvention im Haus "Matchpunkte" — richtig
+               gerechnet, aber ein Wort, das ausserhalb dieser Seite niemand
+               benutzt. Limitless selbst nennt genau diese Spalte "Win %", und
+               aus Limitless kommen die Zahlen. Angeordnet vom Betreiber:
+               "lass uns einfach ueberall die Bezeichnung von limitless dafuer
+               uebernehmen Win % ... matchpunkte klingt naemlich doof".
+
+               Der Name ist damit in beiden Sprachen derselbe — er ist von der
+               Quelle uebernommen, nicht uebersetzt. Die Formel bleibt im
+               Hinweis stehen, denn "Win %" allein waere im Haus wieder eine
+               von drei Konventionen; der Nenner bleibt Pflicht.
+               Der interne Bezeichner heisst weiter 'matchpunkte': er steht in
+               ueber 30 Kommentaren und in vier Testdateien, und ihn
+               umzubenennen aendert keine einzige angezeigte Zahl. */
+            kurzDe: 'Win %',
+            kurzEn: 'Win %',
+            langDe: 'Win % — so nennt Limitless diese Spalte: ein Sieg zaehlt 3, '
+                  + 'ein Unentschieden 1, eine Niederlage 0. Das ist, was über die '
+                  + 'Platzierung entscheidet. Bei Unentschieden liegt der '
+                  + 'Gleichstand deshalb unter 50 %.',
+            langEn: 'Win % — the label Limitless uses for this column: a win counts 3, '
+                  + 'a tie 1, a loss 0. This is what decides standings. With ties '
+                  + 'present, an even record therefore sits below 50 %.',
             rechne: function (s, n, u) {
                 var p = (s || 0) + (n || 0) + (u || 0);
                 return p > 0 ? ((3 * (s || 0) + (u || 0)) / (3 * p)) * 100 : NaN;
@@ -139,10 +155,10 @@
         var k = hol(id);
         if (!k) return '';
         var zusatz = de()
-            ? { matchpunkte: 'Sieg 3, Unentschieden 1',
+            ? { matchpunkte: 'Win % · Sieg 3, Unentschieden 1',
                 mitUnentschieden: 'Unentschieden zählen mit',
                 ohneUnentschieden: 'ohne Unentschieden' }
-            : { matchpunkte: 'win 3, tie 1',
+            : { matchpunkte: 'Win % · win 3, tie 1',
                 mitUnentschieden: 'ties count in the denominator',
                 ohneUnentschieden: 'ties left out' };
         return k.formel + ' · ' + (zusatz[k.id] || '');

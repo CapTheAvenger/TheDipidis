@@ -2418,8 +2418,8 @@
                             // Bilanz. Trainer Hill macht das vor und schreibt die
                             // Formel neben die Zahl.
                             const _labsTitle = (getLang() === 'de'
-                                ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Matches · Win Rate = W/(W+L+U) · Matchpunkte ${fmtPct(ent.matchPointPct)}`
-                                : `Limitless Labs tournament data · ${ent.tournaments} tournaments, ${ent.games} games · win rate = W/(W+L+T) · match points ${fmtPct(ent.matchPointPct)}`);
+                                ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Matches · angezeigt: Siege je Match = S/(S+N+U) · Limitless-Spalte "Win %" = (3S+U)/3n: ${fmtPct(ent.matchPointPct)}`
+                                : `Limitless Labs tournament data · ${ent.tournaments} tournaments, ${ent.games} games · shown: wins per game = W/(W+L+T) · Limitless column "Win %" = (3W+T)/3n: ${fmtPct(ent.matchPointPct)}`);
                             labsBadge = `<span class="stat-badge stat-labs" title="${escapeHtml(_labsTitle)}">🏆 ${fmtPct(ent.winPct)} WR · ${ent.tournaments}T</span>`;
                         }
                     }

@@ -133,7 +133,21 @@ describe('Jede Konvention kann sich benennen', () => {
         for (const id of ['matchpunkte', 'mitUnentschieden', 'ohneUnentschieden']) {
             assert.ok(de.kurz(id).length > 3, id);
             assert.ok(en.kurz(id).length > 3, id);
-            assert.notEqual(de.kurz(id), en.kurz(id), id + ' ist in beiden Sprachen gleich');
+            /* "Win %" ist in beiden Sprachen dasselbe Wort — und das ist kein
+               vergessener Uebersetzungsstring, sondern der Punkt: der Name ist
+               am 05.09.2026 woertlich von Limitless uebernommen worden, damit
+               niemand zwei Namen fuer dieselbe Spalte lernen muss. Die
+               Uebersetzung steckt im langen Hinweis, der unten geprueft wird.
+               Fuer die beiden anderen Konventionen gilt die Regel weiter. */
+            if (id !== 'matchpunkte') {
+                assert.notEqual(de.kurz(id), en.kurz(id), id + ' ist in beiden Sprachen gleich');
+            } else {
+                assert.equal(de.kurz(id), 'Win %', 'der Kurzname folgt nicht mehr Limitless');
+                assert.equal(en.kurz(id), 'Win %', 'der Kurzname folgt nicht mehr Limitless');
+                assert.notEqual(de.hinweis(id), en.hinweis(id),
+                    'der lange Hinweis ist unuebersetzt — dann ist der Name '
+                    + 'zwar von der Quelle, die Erklaerung aber nur einsprachig');
+            }
             assert.ok(de.hinweis(id).includes(de.KONVENTIONEN[id].formel));
             assert.ok(en.hinweis(id).includes(en.KONVENTIONEN[id].formel));
             assert.ok(de.kurzHinweis(id).length < 70, 'zu lang für eine Kachel: ' + de.kurzHinweis(id));
@@ -164,11 +178,51 @@ describe('Die Anzeigen nennen ihre Konvention', () => {
         assert.match(PAST, /winPctHinweis = WK \? WK\.hinweis\('matchpunkte'\)/);
     });
 
-    it('die Matchup-Spalte heisst nicht mehr "Sieg %"', () => {
+    it('die Matchup-Spalte heisst nicht mehr "Sieg %", sondern wie bei Limitless', () => {
+        /* 05.09.2026: aus "Matchpunkte %" wurde "Win %" — der Name, unter dem
+           dieselbe Spalte bei Limitless steht. Die Rechnung dahinter ist
+           unveraendert (3S+U)/3n; geaendert hat sich nur das Wort, und zwar
+           in beiden Sprachen gleich. */
         const I18N = lies('js/i18n.js');
-        assert.match(I18N, /'pm\.matchupColWinPct':\s+'Matchpunkte %'/);
-        assert.match(I18N, /'pm\.matchupColWinPct':\s+'Match points %'/);
+        assert.doesNotMatch(I18N, /'pm\.matchupColWinPct':\s+'Matchpunkte %'/);
+        assert.doesNotMatch(I18N, /'pm\.matchupColWinPct':\s+'Match points %'/);
+        assert.strictEqual(
+            [...I18N.matchAll(/'pm\.matchupColWinPct':\s+'Win %'/g)].length, 2,
+            'die Spalte heisst nicht in beiden Sprachen "Win %"');
+        assert.strictEqual(
+            [...I18N.matchAll(/'pm\.perfStatWinPct':\s+'Win %/g)].length, 2,
+            'die kumulierte Statistik traegt noch den alten Namen');
         assert.match(lies('js/app-past-meta.js'), /wrTitel = wkMatch \? wkMatch\.hinweis\('matchpunkte'\)/);
+    });
+
+    it('das Wort "Matchpunkte" steht in keinem angezeigten Text mehr', () => {
+        /* ANGEORDNET AM 05.09.2026: "lass uns einfach ueberall die Bezeichnung
+           von limitless dafuer uebernehmen Win % ... matchpunkte klingt
+           naemlich doof, etwas mit win ist schon besser".
+
+           Geprueft wird, was der Leser sieht: die Textbausteine in i18n.js und
+           die Namen/Hinweise des Konventionsmoduls. Im Quelltext DARF das Wort
+           weiter stehen — ueber 30 Kommentare erklaeren damit die Rechnung,
+           und der interne Bezeichner heisst weiter 'matchpunkte'. */
+        const I18N = lies('js/i18n.js');
+        const texte = [...I18N.matchAll(/^\s*'[\w.]+':\s*'([^']*)',?\s*$/gm)]
+            .map((m) => m[1]);
+        assert.ok(texte.length > 500, 'die Textbausteine wurden nicht gefunden: ' + texte.length);
+        const treffer = texte.filter((t) => /Matchpunkt|match points/i.test(t));
+        assert.deepStrictEqual(treffer, [],
+            'diese angezeigten Texte tragen noch den alten Namen: ' + treffer.join(' | '));
+
+        for (const sprache of ['de', 'en']) {
+            const W = ladeModul(sprache);
+            assert.doesNotMatch(W.kurz('matchpunkte'), /Matchpunkt|match points/i, sprache);
+            assert.doesNotMatch(W.hinweis('matchpunkte'), /Matchpunkt|match points/i, sprache);
+            assert.doesNotMatch(W.kurzHinweis('matchpunkte'), /Matchpunkt|match points/i, sprache);
+        }
+
+        /* Und die Zahl selbst bleibt, was sie war — der Name ist geaendert,
+           nicht die Rechnung. 6-2-1 = 19/27 = 70,37 %. */
+        const W = ladeModul('de');
+        assert.ok(Math.abs(W.KONVENTIONEN.matchpunkte.rechne(6, 2, 1) - 70.37) < 0.01);
     });
 
     it('die Archetyp-Karte zeigt die Unentschieden', () => {

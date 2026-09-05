@@ -359,6 +359,31 @@ jobs:
         continue-on-error: true
         run: python3 scripts/pruefe_archetyp_icons.py
 
+      # ── 14-Tage-Fenster der Online-Anteile ─────────────────────
+      #
+      # Der Limitless-Online-Scraper liefert nur KUMULATIVE Zaehlstaende
+      # seit Formatbeginn. Ein Deck, das im Juli stark war und seit
+      # Wochen verschwunden ist, steht dort weiter oben — der Anteil
+      # beschreibt eine Vergangenheit, die niemand mehr spielt.
+      # Gemessen am 05.09.2026 (Anteile aus
+      # limitless_online_decks_comparison.csv, wie sie die Seite zeigt):
+      # Toucannon 2,55 % kumulativ, aber nur 0,82 % in den letzten
+      # 14 Tagen — 18 Raenge tiefer; Festival Lead 5,90 % gegen 4,21 %;
+      # Alakazam Dudunsparce umgekehrt 5,79 % gegen 7,59 %.
+      #
+      # Das Skript zieht die Differenz zweier GEMESSENER Tagesstaende
+      # (heute minus vor 14 Tagen) aus data/online_share_history/ —
+      # keine Schaetzung, eine Subtraktion. Es laeuft nach dem
+      # Online-Scraper, damit der Stand von heute schon geschrieben ist.
+      #
+      # Nicht blockierend: fehlt der Verlauf (frisches Format, geloeschte
+      # Staende), schreibt es ::warning:: und endet mit 0. Die Seite
+      # faellt dann auf den Kumulativstand zurueck, der weiter in
+      # derselben Datei steht.
+      - name: Online-Fenster (14 Tage) bauen
+        continue-on-error: true
+        run: python3 scripts/build_online_fenster.py --apply
+
       - name: Run labs tournament scraper (deck list + matchups)
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core

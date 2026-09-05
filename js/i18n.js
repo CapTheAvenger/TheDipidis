@@ -729,7 +729,7 @@ const translations = {
     'pm.perfStatTournaments':   'Tournaments',
     'pm.perfStatPlayers':       'Players',
     'pm.perfStatRecord':        'Record (W-L-T)',
-    'pm.perfStatWinPct':        'Match points % (cumulative)',
+    'pm.perfStatWinPct':        'Win % (cumulative)',
     'pm.perfStatDay2Conv':      'Day-2 Conversion',
     'pm.day2Thin':              'thin',
     'pm.day2NoBasis':           'no day-1 figures',
@@ -742,7 +742,7 @@ const translations = {
     'pm.matchupFormatWide':     'Not for the selected tournament: Labs publishes matchups per format, not per event. These figures are the average across all {n} tournaments of this format. The cumulative panel above does respect the selection.',
     'pm.matchupColOpponent':    'Opponent',
     'pm.matchupColGames':       'Games',
-    'pm.matchupColWinPct':      'Match points %',
+    'pm.matchupColWinPct':      'Win %',
 
     // ── Matchup extras ───────────────────────────────────────
     'matchup.searchOpponent':   'Search opponent...',
@@ -3265,7 +3265,7 @@ const translations = {
     'pm.perfStatTournaments':   'Turniere',
     'pm.perfStatPlayers':       'Spieler',
     'pm.perfStatRecord':        'Record (W-L-T)',
-    'pm.perfStatWinPct':        'Matchpunkte % (kumuliert)',
+    'pm.perfStatWinPct':        'Win % (kumuliert)',
     'pm.perfStatDay2Conv':      'Day-2-Conversion',
     'pm.day2Thin':              'dünn',
     'pm.day2NoBasis':           'keine Day-1-Zahlen',
@@ -3278,7 +3278,7 @@ const translations = {
     'pm.matchupFormatWide':     'Nicht für das gewählte Turnier: Labs veröffentlicht Matchups je Format, nicht je Veranstaltung. Diese Zahlen sind der Schnitt über alle {n} Turniere dieses Formats. Die Kacheln darüber berücksichtigen die Auswahl sehr wohl.',
     'pm.matchupColOpponent':    'Gegner',
     'pm.matchupColGames':       'Matches',
-    'pm.matchupColWinPct':      'Matchpunkte %',
+    'pm.matchupColWinPct':      'Win %',
 
     // ── Matchup extras ───────────────────────────────────────
     'matchup.searchOpponent':   'Gegner suchen...',

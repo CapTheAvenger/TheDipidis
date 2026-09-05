@@ -3478,7 +3478,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const statCell = document.createElement('span');
                     statCell.className = 'build-info-ace-stats';
                     const parts = [];
-                    if (c.major_share != null) {
+                    /* "MAJOR: NOT PLAYED" DIREKT UNTER "STEHT IN 86,7 %
+                       DER PRÄSENZLISTEN" (05.09.2026, Abnahme).
+
+                       Der Y.2-Pfad rechnet auf echten Praesenzlisten und
+                       hat deshalb kein `major_share` je Kandidat — die
+                       Zeile fiel damit in den Else-Zweig und behauptete
+                       "Major: not played" fuer genau die Karte, die der
+                       Satz darueber in 86,7 % der Praesenzlisten
+                       verortet. Dieselbe Zahl einmal als Praesenz-,
+                       einmal als Online-Anteil beschriftet.
+
+                       Traegt der Bau seinen eigenen Erklaertext
+                       (`quelle_text`), beschriftet die Zeile ihre Zahl
+                       als das, was sie ist: der Anteil an den
+                       ausgewerteten Praesenzlisten. */
+                    const _y2 = !!acePick.quelle_text;
+                    if (_y2) {
+                        const n = acePick.major_total_decks > 0
+                            ? ` von ${acePick.major_total_decks} Listen` : '';
+                        parts.push(`Präsenz ${c.archetype_share != null ? c.archetype_share + ' %' : '—'}${n}`);
+                    } else if (c.major_share != null) {
                         const fraction = (c.major_deck_count > 0 && acePick.major_total_decks > 0)
                             ? `${c.major_deck_count}/${acePick.major_total_decks}`
                             : '—';
@@ -3494,7 +3514,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const onlinePieces = [];
                     if (c.archetype_share != null) onlinePieces.push(`${c.archetype_share}% share`);
                     onlinePieces.push(`score ${c.consistency_score}`);
-                    parts.push(`Online ${onlinePieces.join(', ')}`);
+                    // Auf dem Y.2-Pfad ist die Zahl NICHT der
+                    // Online-Aggregatanteil — sie steht schon vorn und
+                    // waere hier ein zweites Mal, falsch beschriftet.
+                    if (!_y2) parts.push(`Online ${onlinePieces.join(', ')}`);
                     statCell.textContent = parts.join('  ·  ');
                     row.appendChild(statCell);
                     table.appendChild(row);

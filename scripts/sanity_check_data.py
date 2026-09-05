@@ -56,6 +56,14 @@ THRESHOLDS: Dict[str, int] = {
     'limitless_online_decks_comparison.csv': 50,    # 118 observed
     'limitless_online_decks_matchups.csv':   500,   # 1128 observed
 
+    # 14-Tage-Fenster der Online-Anteile (scripts/build_online_fenster.py).
+    # Speist im Meta Call `ladderShare` und damit 12-30 % des
+    # prognostizierten Anteils. Faellt die Datei auf wenige Zeilen
+    # zusammen, laeuft die Seite zwar in den Rueckfall (der
+    # Deckungswaechter schlaegt an), aber die Datei soll gar nicht erst
+    # so eingecheckt werden. 135 beobachtet am 05.09.2026.
+    'limitless_online_fenster.csv':          50,    # 135 observed
+
     # ── Online tournament dated cards: Latest Online · Typical Build
     # source on Deck Analysis (Global). Was at the centre of the
     # 2026-06 Mega Greninja "1 deck 120 cards" bug.

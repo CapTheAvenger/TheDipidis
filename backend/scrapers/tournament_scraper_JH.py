@@ -15,6 +15,7 @@ import urllib.parse
 import time
 import json
 import os
+import stat
 import sys
 import logging
 import threading
@@ -33,7 +34,7 @@ from card_scraper_shared import (
     setup_console_encoding, get_app_path, get_data_dir, load_scraped_ids,
     save_scraped_ids, CardDatabaseLookup, is_trainer_or_energy, is_valid_card,
     fetch_page_bs4, setup_logging, load_settings, load_set_order,
-    extract_cards_from_decklist_soup
+    extract_cards_from_decklist_soup, atomic_write_file
 )
 # Dieselbe Regel wie in der Bestandsreparatur — card_scraper_shared liegt
 # neben ace_spec_regel, der Pfad ist zu diesem Zeitpunkt also schon gesetzt.
@@ -880,6 +881,235 @@ def _pruefe_kartenzeilen(rows, ziel):
         )
 
 
+class KopfzeileUnlesbar(RuntimeError):
+    """Die Zieldatei ist da, laesst sich aber nicht lesen.
+
+    Bewusst eine eigene Ausnahme und bewusst KEIN stiller Rueckfall auf
+    "dann eben neu schreiben": ein Lesefehler und "die Datei gibt es noch
+    nicht" sehen fuer den Aufrufer sonst gleich aus, und der Neuschreib-Weg
+    wuerde einen Bestand von 111 MB durch die paar Zeilen des aktuellen
+    Laufs ersetzen — ohne eine einzige Meldung. Lieber laut abbrechen:
+    ein gemeldetes Loch ist behebbar, ein stiller Totalverlust nicht.
+    (Angemerkt von der unabhaengigen Pruefung am 06.09.2026.)
+    """
+
+
+def _vorhandene_kopfzeile(pfad: str):
+    """Die Spaltennamen der schon vorhandenen Datei.
+
+    Rueckgabe:
+      * ``None``  — die Datei gibt es nicht
+      * ``[]``    — die Datei ist da, aber leer (hat also keine Kopfzeile)
+      * ``[...]`` — die Spaltennamen
+
+    Wirft ``KopfzeileUnlesbar``, wenn die Datei da ist und sich nicht lesen
+    laesst. Siehe die Ausnahme selbst fuer die Begruendung.
+    """
+    if not os.path.exists(pfad):
+        return None
+    try:
+        with open(pfad, newline="", encoding="utf-8-sig") as f:
+            return next(csv.reader(f, delimiter=";"), [])
+    except Exception as e:  # noqa: BLE001
+        raise KopfzeileUnlesbar(
+            "%s ist vorhanden, aber die Kopfzeile ist nicht lesbar (%s). "
+            "Der Lauf bricht ab, statt den Bestand zu ueberschreiben."
+            % (pfad, e)
+        ) from e
+
+
+# Ueberzaehlige Werte einer beschaedigten Zeile sammelt csv.DictReader unter
+# diesem Schluessel. Ein eigenes Objekt statt einer Zeichenkette: eine
+# Kopfzeilenspalte koennte genauso heissen wie jeder Name, den man hier
+# einsetzt, und eine heile Datei mit dieser Spalte waere dann faelschlich
+# als beschaedigt gemeldet worden. Ein object() kann keine Kopfzeilenspalte
+# sein — csv liest Kopfzeilenfelder immer als str.
+# (Angemerkt von der unabhaengigen Pruefung am 06.09.2026.)
+_UEBERZAEHLIG = object()
+
+
+def _pruefe_felder(rows: list, felder: list, pfad: str):
+    """Wirft, wenn eine Zeile ein Feld traegt, das die Kopfzeile nicht kennt.
+
+    Dieselbe Fehlerklasse, gegen die der ganze Helfer antritt — nur
+    innerhalb EINER Charge statt zwischen zwei Laeufen. Der alte
+    csv.DictWriter stand auf "raise" und hat das bemerkt; hier faellt es
+    nur frueher auf, naemlich bevor die erste Zeile auf der Platte steht.
+    """
+    bekannt = set(felder)
+    for i, r in enumerate(rows):
+        fremd = [k for k in r if k not in bekannt]
+        if fremd:
+            raise ValueError(
+                "%s: Zeile %d traegt Felder, die die Kopfzeile nicht kennt: %s"
+                % (os.path.basename(pfad), i, ", ".join(sorted(fremd)))
+            )
+
+
+def _zaehle_ueberzaehlige(pfad: str) -> list:
+    """Liest den Bestand und wirft, wenn eine Zeile mehr Werte traegt als
+    die Kopfzeile Spalten hat.
+
+    Genau so sieht aus, was die alte Falle hinterlassen hat. Beim
+    Neuschreiben liessen sich diese Werte keiner Spalte zuordnen — sie
+    waeren nach dem ersten Lauf endgueltig weg. "Report, don't silently
+    repair" (CLAUDE.md). Gibt bei heiler Datei die gelesenen Zeilen
+    zurueck, damit der Schreibweg sie nicht ein zweites Mal liest.
+    """
+    with open(pfad, newline="", encoding="utf-8-sig") as f:
+        bestand = list(csv.DictReader(f, delimiter=";", restkey=_UEBERZAEHLIG))
+    kaputt = sum(1 for r in bestand if r.get(_UEBERZAEHLIG))
+    if kaputt:
+        raise KopfzeileUnlesbar(
+            "%s: %d von %d vorhandenen Zeilen tragen mehr Werte als die "
+            "Kopfzeile Spalten hat. Diese Werte liessen sich beim "
+            "Neuschreiben keiner Spalte zuordnen und waeren danach weg. "
+            "Der Lauf bricht ab — die Datei gehoert erst repariert."
+            % (pfad, kaputt, len(bestand))
+        )
+    return bestand
+
+
+def _pruefe_ziel_schreibbar(pfad: str, rows: list, append_mode: bool):
+    """Alles pruefen, was `_schreibe_csv_kopftreu` spaeter zum Abbruch
+    bringen koennte — ohne eine Datei anzufassen.
+
+    Damit ein Abbruch an der ZWEITEN Zieldatei kein halb geschriebenes
+    Turnier hinterlaesst. Die Pruefung ist bewusst dieselbe, die der
+    Schreibweg selbst noch einmal macht: hier darf sie nicht das Ergebnis
+    bestimmen, sondern nur den Zeitpunkt vorziehen.
+    """
+    if not rows:
+        return
+    neue_felder = list(rows[0].keys())
+    kopf_alt = _vorhandene_kopfzeile(pfad) if append_mode else None   # wirft ggf.
+    if kopf_alt is not None and kopf_alt == neue_felder:
+        _pruefe_felder(rows, neue_felder, pfad)
+        return
+    if kopf_alt:
+        felder = list(kopf_alt) + [k for k in neue_felder if k not in kopf_alt]
+        _zaehle_ueberzaehlige(pfad)                                   # wirft ggf.
+    else:
+        felder = neue_felder
+    _pruefe_felder(rows, felder, pfad)
+
+
+def _schreibe_csv_kopftreu(pfad: str, rows: list, append_mode: bool):
+    """Anhaengen, ohne die Spalten gegen die Kopfzeile zu verschieben.
+
+    DIE ALTE FASSUNG WAR EINE FALLE (gefunden am 06.09.2026).
+
+        fields = list(rows[0].keys())
+        mode = "a" if append_mode and os.path.exists(f_path) else "w"
+        ...
+        if mode == "w": writer.writeheader()
+
+    Die Spaltenliste kam aus der ERSTEN NEUEN ZEILE, die Kopfzeile aus dem
+    letzten Lauf. Solange beide zufaellig uebereinstimmten, ging es gut.
+    Kam oben ein Feld dazu — oder aenderte sich nur die Reihenfolge der
+    Schluessel im dict, was in Python die Spaltenreihenfolge bestimmt —,
+    landeten die angehaengten Zeilen um eine Stelle verschoben unter einer
+    Kopfzeile, die etwas anderes verspricht. Beim SCHREIBEN faellt das
+    nicht auf; der Lauf meldet Erfolg.
+
+    Genau das ist am selben Tag in per_decklist_scraper.py passiert, als
+    PR #687 dort eine Spalte hinzufuegte: "seite" stand danach in der
+    Spalte "scraped_at". Diese Datei hier hatte dieselbe Bauart, nur
+    schaerfer — dort war die Spaltenliste wenigstens fest verdrahtet.
+
+    Jetzt gilt:
+      * Passt die vorhandene Kopfzeile, wird angehaengt (schneller
+        Normalfall, liest nur die erste Zeile).
+      * Weicht sie ab, wird die GANZE Datei neu geschrieben: Kopfzeile aus
+        der Vereinigung beider Spaltenmengen, alte Zeilen werden
+        uebernommen, fehlende Felder bleiben LEER statt zu verrutschen.
+      * Traegt eine alte Zeile MEHR Werte als die Kopfzeile Spalten hat —
+        so sieht aus, was die alte Falle hinterlassen hat —, bricht der
+        Lauf ab. Diese Werte liessen sich beim Neuschreiben keiner Spalte
+        zuordnen; sie waeren beim ersten Lauf nach der Auslieferung
+        endgueltig weg. "Report, don't silently repair" (CLAUDE.md).
+      * `_pruefe_kartenzeilen` prueft weiterhin die WERTE; das hier prueft
+        die SPALTEN. Beides ist noetig — die Wertepruefung haette den
+        Versatz nie bemerkt.
+
+    Was hier BEWUSST NICHT steht: `extrasaction="ignore"`. Der alte
+    DictWriter stand auf dem Vorgabewert "raise", und eine neue Zeile mit
+    einem Feld, das die Kopfzeile nicht kennt, soll weiterhin laut
+    umfallen — das ist derselbe Fehler, gegen den diese Funktion antritt,
+    nur innerhalb einer Charge. test_jh_reassembly_header.py haelt einen
+    echten Vorfall fest, bei dem genau diese Ausnahme den Fehler sichtbar
+    gemacht hat.
+    """
+    neue_felder = list(rows[0].keys())
+    kopf_alt = _vorhandene_kopfzeile(pfad) if append_mode else None
+
+    if kopf_alt is not None and kopf_alt == neue_felder:
+        # Erst pruefen, DANN oeffnen. Der Anhaengeweg ist als einziger
+        # nicht atomar — er schreibt in die echte Datei. Wuerde der
+        # DictWriter erst bei Zeile 40 einer Charge wegen eines
+        # unbekannten Feldes umfallen, staenden 39 Zeilen schon drin und
+        # der naechste Lauf haenge sie ein zweites Mal an. Das ist der
+        # Grund, warum die Ausnahme VOR dem Oeffnen faellt.
+        _pruefe_felder(rows, neue_felder, pfad)
+        with open(pfad, "a", newline="", encoding="utf-8-sig") as f:
+            csv.DictWriter(f, fieldnames=neue_felder,
+                           delimiter=";").writerows(rows)
+        return
+
+    bestand = []
+    if kopf_alt:                       # vorhanden UND nicht leer
+        felder = list(kopf_alt) + [k for k in neue_felder if k not in kopf_alt]
+        logger.warning(
+            "[JH] Kopfzeile von %s weicht ab (%d statt %d Spalten) — Datei "
+            "wird neu geschrieben, alte Zeilen werden uebernommen.",
+            os.path.basename(pfad), len(kopf_alt), len(neue_felder)
+        )
+        bestand = _zaehle_ueberzaehlige(pfad)
+    else:
+        if kopf_alt == []:
+            logger.warning("[JH] %s ist leer — Kopfzeile wird neu gesetzt.",
+                           os.path.basename(pfad))
+        felder = neue_felder
+
+    # Rechte der vorhandenen Datei merken: atomic_write_file legt die
+    # Zwischendatei ueber tempfile.mkstemp an, und die entsteht mit 0600.
+    # Ohne das hier wuerde ein Neuschreiben die Rechte stillschweigend
+    # verengen — eine Aenderung, die niemand angemeldet hat.
+    try:
+        alte_rechte = stat.S_IMODE(os.stat(pfad).st_mode)
+    except OSError:
+        # Es gibt noch keine Datei. Dann sind die Rechte die, die ein
+        # schlichtes open(pfad, "w") gegeben haette — 0o666 abzueglich der
+        # umask. Ohne das hier bekaeme eine FRISCH angelegte Datei die
+        # 0o600 von mkstemp, also enger als bisher. Angemerkt von der
+        # unabhaengigen Pruefung am 06.09.2026.
+        _umask = os.umask(0)
+        os.umask(_umask)
+        alte_rechte = 0o666 & ~_umask
+
+    def _schreibe(f):
+        w = csv.DictWriter(f, fieldnames=felder, delimiter=";")
+        w.writeheader()
+        # Alte Zeilen auf die neue Spaltenliste abbilden: fehlende Felder
+        # werden LEER, nie verschoben. Der Sammelschluessel darf nicht
+        # mitgeschrieben werden (oben ist sichergestellt, dass er leer ist).
+        for r in bestand:
+            w.writerow({k: r.get(k, "") for k in felder})
+        # Neue Zeilen unveraendert durch den DictWriter — mit "raise".
+        w.writerows(rows)
+
+    # atomic_write_file statt eines eigenen tmp/replace: es benutzt
+    # tempfile.mkstemp (kein fester Name, der bei zwei Laeufen kollidiert)
+    # und raeumt die Zwischendatei im Fehlerfall weg. Bei einer Datei von
+    # 111 MB ist beides kein Schoenheitsfehler.
+    atomic_write_file(pfad, _schreibe, mode="w", encoding="utf-8-sig",
+                      newline="")
+    try:
+        os.chmod(pfad, alte_rechte)
+    except OSError:
+        pass
+
+
 def save_csv_files(data: list, output_file: str, append_mode: bool):
     overview_f = os.path.join(get_data_dir(), output_file.replace(".csv", "_overview.csv"))
     cards_f    = os.path.join(get_data_dir(), output_file.replace(".csv", "_cards.csv"))
@@ -918,19 +1148,29 @@ def save_csv_files(data: list, output_file: str, append_mode: bool):
 
     _pruefe_kartenzeilen(c_rows, cards_f)
 
-    for f_path, rows in [(overview_f, o_rows), (cards_f, c_rows)]:
-        if not rows:
-            continue
-        fields = list(rows[0].keys())
-        mode = "a" if append_mode and os.path.exists(f_path) else "w"
-        with open(f_path, mode, newline="", encoding="utf-8-sig") as f:
-            writer = csv.DictWriter(f, fieldnames=fields, delimiter=";")
-            if mode == "w":
-                writer.writeheader()
-            writer.writerows(rows)
+    zu_schreiben = [(f, r) for f, r in [(overview_f, o_rows), (cards_f, c_rows)] if r]
 
-            formats_for_catalog = [str(row.get("format", "") or "") for row in o_rows]
-            update_formats_catalog(formats_for_catalog)
+    # ERST beide Ziele pruefen, DANN in das erste schreiben.
+    #
+    # Ohne diese Runde konnte ein Abbruch an der ZWEITEN Datei ein halbes
+    # Turnier hinterlassen: die Uebersicht traegt die Zeile mit
+    # `total_cards`, die Kartendatei nicht — und weil save_scraped_tournaments
+    # die Kennung schon vermerkt hat, holt auch kein spaeterer Lauf sie
+    # nach. Nachgestellt von der unabhaengigen Pruefung am 06.09.2026.
+    # Die Vorpruefung schreibt nichts; faellt sie um, ist noch keine Datei
+    # angefasst.
+    for f_path, rows in zu_schreiben:
+        _pruefe_ziel_schreibbar(f_path, rows, append_mode)
+
+    for f_path, rows in zu_schreiben:
+        _schreibe_csv_kopftreu(f_path, rows, append_mode)
+
+        # Unveraendert: stand vorher im with-Block und lief damit einmal je
+        # Datei. Die Wiederholung ist ueberfluessig, aber sie zu entfernen
+        # waere eine Verhaltensaenderung an einer Stelle, die ich hier nicht
+        # pruefe — der Umbau betrifft nur das Schreiben der Spalten.
+        formats_for_catalog = [str(row.get("format", "") or "") for row in o_rows]
+        update_formats_catalog(formats_for_catalog)
 
     return overview_f, cards_f
 

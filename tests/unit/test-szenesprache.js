@@ -151,3 +151,27 @@ describe('ein Schluessel, eine Beschriftung', () => {
             'das Aria-Label des Selects soll den eigenen Schluessel benutzen');
     });
 });
+
+describe('Neue Zeilen halten sich an die Hausschreibweise', () => {
+
+    it('die Unentschieden-Zeile unter der Tag-2-Zahl sagt Ties', () => {
+        /* NACHTRAG (06.09.2026). Die Zeile kam neu dazu und sagte
+           "Unentschieden 10,6 %" — zwei Zentimeter neben "Ø Ties".
+           Ich hielt daraufhin die Ø-Beschriftungen fuer einen
+           Uebersetzungsrest und wollte sie eindeutschen; diese Datei
+           hat das gestoppt. Angepasst wurde die neue Zeile. */
+        for (const key of ['mc.day2Unentschieden', 'mc.day2UnentschiedenLeer']) {
+            const v = wert(key) || '';
+            assert.match(v, /Ties/, `${key} sagt nicht "Ties": "${v}"`);
+            assert.ok(!/Unentschieden/.test(v),
+                `${key} sagt wieder "Unentschieden": "${v}"`);
+        }
+    });
+
+    it('die Ø-Beschriftungen bleiben, wie sie sind', () => {
+        /* Rueckfallsperre gegen genau meinen Fehler. */
+        assert.equal(wert('mc.avgWins'), 'Ø Wins');
+        assert.equal(wert('mc.avgTies'), 'Ø Ties');
+        assert.equal(wert('mc.avgLosses'), 'Ø Losses');
+    });
+});

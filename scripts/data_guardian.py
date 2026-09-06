@@ -1791,13 +1791,19 @@ FRONTEND_PFLICHTSPALTEN = {
 # Dieselbe Bauart wie bei den vier leeren City-League-Dateien: bekannter Zustand,
 # trotzdem sichtbar, aber nicht als Alarm.
 BEKANNT_LEER = {
-    "tournament_decklists_per_player.csv": {
-        "type": "extract_cards_from_decklist_soup() in backend/core/"
-                "card_scraper_shared.py gibt `type` gar nicht zurueck (siehe "
-                "dessen Docstring), waehrend per_decklist_scraper.py:246 "
-                "verspricht, es kaeme von dort. Gemessen 06.09.2026: 30.459 "
-                "von 30.459 Zeilen leer. Behebbar nur im Extraktor.",
-    },
+    # Leer, und das ist der Zielzustand.
+    #
+    # Bis zum 06.09.2026 stand hier `tournament_decklists_per_player.csv:
+    # type` — 30.459 von 30.459 Zeilen ohne Kartentyp, weil der Extraktor
+    # das Feld nie zurueckgab. Behoben in zwei Schritten: der Extraktor
+    # liefert den Typ jetzt ueber (set, number), und
+    # scripts/fuelle_kartentyp.py hat den Bestand nachgezogen.
+    #
+    # Der Eintrag wurde entfernt, nicht umformuliert. Eine als "bekannt
+    # leer" gefuehrte Spalte, die wieder Werte traegt, ist eine Luege im
+    # Waechter — tests/python/test_herzschlag.py haelt das fest. Und
+    # solange hier nichts steht, wird JEDE leerlaufende Spalte wieder zum
+    # CRITICAL, was der richtige Grundzustand ist.
 }
 
 

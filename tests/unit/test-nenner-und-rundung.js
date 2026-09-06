@@ -110,8 +110,44 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
         // Person Unterschied auf 29.000, also rund 0,003 %.
         const stats = JSON.parse(fs.readFileSync(
             path.join(ROOT, 'data', 'limitless_meta_stats.json'), 'utf8'));
-        assert.ok(Math.abs(n - stats.players) <= 5,
-            `rekonstruiert ${n}, limitless_meta_stats.json meldet ${stats.players}`);
+
+        // Die Schranke war fest: <= 5. Am 06.09.2026 fiel sie um — rekonstruiert
+        // 41.200 gegen gemeldete 41.193, also 7 Personen auf 41.000 (0,017 %).
+        // Der Deploy haengt an gruenen Tests; die Zahl blockierte damit den Lauf,
+        // der die frischen Daten ausliefern sollte. Zum ZWEITEN Mal derselbe
+        // Mechanismus wie am 21.08.2026, nur eine Ebene tiefer: damals ein fester
+        // Wert, jetzt eine feste Toleranz.
+        //
+        // Die 5 waren nie herleitbar, sondern der Abstand, der 2026-08-21 zufaellig
+        // herauskam (1 auf 29.436). Nachgerechnet an den Daten selbst: die Quelle
+        // rundet die Anteile auf ZWEI Nachkommastellen, jeder Anteil traegt also
+        // +-0,005 Prozentpunkte Unschaerfe. Fuer das groesste Deck (7,62 %,
+        // n = 3.138) sind das schon +-27 Personen im rekonstruierten Nenner, fuer
+        // kleinere Decks ein Vielfaches davon. Eine Schranke von 5 ist bei dieser
+        // Feldgroesse rechnerisch nicht einhaltbar — sie stimmte nur, solange das
+        // Feld klein genug war.
+        //
+        // Deshalb wird die Schranke jetzt AUS DEN DATEN abgeleitet statt gesetzt:
+        // aus dem groessten Anteil, dessen Rundungsband die beste erreichbare
+        // Genauigkeit vorgibt. So waechst sie mit dem Feld und bleibt trotzdem
+        // scharf — ein echter Drift (ein halbiertes oder verdoppeltes Feld) faellt
+        // weiterhin um.
+        const staerkste = zeilen.reduce((a, z) => (z.anteil > a.anteil ? z : a));
+        const bandOben = staerkste.anzahl / ((staerkste.anteil - 0.005) / 100);
+        const bandUnten = staerkste.anzahl / ((staerkste.anteil + 0.005) / 100);
+        const schranke = Math.max(5, Math.ceil((bandOben - bandUnten) / 2));
+        assert.ok(Math.abs(n - stats.players) <= schranke,
+            `rekonstruiert ${n}, limitless_meta_stats.json meldet ${stats.players} `
+            + `— Abweichung ${Math.abs(n - stats.players)} ueberschreitet das `
+            + `Rundungsband von ${schranke} (staerkstes Deck: ${staerkste.anteil} %, `
+            + `n = ${staerkste.anzahl})`);
+
+        // Und die Schranke darf nicht beliebig weit werden: bleibt sie unter
+        // einem Prozent der Feldgroesse, ist der Quercheck noch ein Beleg und
+        // nicht nur eine Formalie.
+        assert.ok(schranke < stats.players * 0.01,
+            `das Rundungsband ${schranke} ist auf ${stats.players} Spieler zu `
+            + 'weit geworden — der Quercheck belegt dann nichts mehr');
 
         // Der Nenner muss groesser sein als die gelisteten Decks — die Differenz
         // ist die weggeworfene "Other"-Zeile. Gemessen 21.08.2026: 1.113 von

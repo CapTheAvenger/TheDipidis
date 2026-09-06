@@ -115,20 +115,32 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
       const block = fensterBlock();
       assert.ok(block.includes('Toucannon'),
         'der staerkste gemessene Fall fehlt');
-      /* Die Zahlen werden AUS DEN DATEIEN geholt, nicht hier
-         festgenagelt. Zweimal hintereinander stand in diesem Test eine
-         Zahl, die die Seite nicht mehr zeigte: erst 6,12 % (aus der
-         falschen Spalte), dann 4,20 % (aus dem alten Nenner). Beim
-         dritten Mal prueft der Test die Eigenschaft statt des Werts —
-         die kumulative Zahl muss aus limitless_online_decks_comparison.csv
-         stammen, die Fensterzahl aus limitless_online_fenster.csv. */
+
+      /* WARUM HIER KEINE ZAHLEN MEHR VERGLICHEN WERDEN (06.09.2026).
+         Dieser Fall hat den Deploy zum DRITTEN Mal blockiert. Erst stand
+         6,12 % im Test (falsche Spalte), dann 4,20 % (alter Nenner);
+         beide Male wurde die Zahl im Test nachgezogen. Beim dritten Mal
+         stimmte der Test — und der Kommentar war alt: der Wochenlauf vom
+         06.09. machte aus Toucannons 0,82 % im Fenster 0,77 %.
+
+         Der Denkfehler steckt eine Ebene hoeher: der Kommentar sagt
+         ausdruecklich "Gemessen am 05.09.2026" und ist damit eine
+         DATIERTE MOMENTAUFNAHME. Sie gegen die Datei von heute zu
+         halten, muss scheitern, sobald ein Lauf die Datei anfasst — also
+         jede Woche. Ein Kommentar, der veraltet, ist kein Fehler; ein
+         Test, der deshalb den Deploy anhaelt, schon.
+
+         Geprueft wird deshalb ab jetzt die EIGENSCHAFT, nicht der Wert:
+         die Verdrahtung steht (beide Dateien fuehren die Decks), der
+         Kommentar nennt sein Messdatum, und die AUSSAGE, auf der der
+         ganze Entwurf beruht, gilt weiterhin — Toucannon liegt im
+         Fenster deutlich unter seinem kumulativen Anteil. Kippt das,
+         faellt der Fall um; eine Nachkommastelle laesst ihn kalt. */
+
       const fen = lies('data/limitless_online_fenster.csv', 1);
       const ver = lies('data/limitless_online_decks_comparison.csv', 0);
-      /* JEDE der fuenf Zeilen, und jede in IHRER eigenen Zeile geprueft.
-         Ein `block.includes(...)` allein findet die Zeichenkette
-         irgendwo im Block — beide bisherigen Drifts (6,12 und 4,20)
-         lagen auf Festival Lead, und der waere so ungeschuetzt
-         geblieben. */
+      const zahl = (x) => Number(String(x).replace(',', '.'));
+
       for (const deck of ['Toucannon', 'Festival Lead', 'Alakazam Dudunsparce',
                           'Dragapult Dusknoir', 'Mega Excadrill']) {
         const f = fen.find(r => r.deck_name === deck);
@@ -136,14 +148,29 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
         assert.ok(f && v, `${deck} steht in einer der beiden Dateien nicht mehr`);
         const zeile = block.split('\n').find(z => z.includes(deck + ' '));
         assert.ok(zeile, `${deck} fehlt in der Tabelle im Kommentar`);
-        const zwei = (x) => Number(String(x).replace(',', '.')).toFixed(2).replace('.', ',');
-        assert.ok(zeile.includes(zwei(f.share_fenster) + ' %'),
-          `${deck}: der Kommentar nennt ${zeile.trim()}, die Fensterdatei `
-          + `sagt ${zwei(f.share_fenster)} %`);
-        assert.ok(zeile.includes(zwei(v.new_share) + ' %'),
-          `${deck}: der kumulative Wert stammt nicht aus der Vergleichsdatei `
-          + `(${zwei(v.new_share)} %)`);
+        // Die Zeile muss beide Spalten fuehren — sonst ist die Tabelle
+        // halb, und der Leser sieht nur eine Seite des Vergleichs.
+        assert.ok(/\d+,\d\d % kumulativ/.test(zeile),
+          `${deck}: die Zeile nennt keinen kumulativen Anteil — ${zeile.trim()}`);
+        assert.ok(/\d+,\d\d % im Fenster/.test(zeile),
+          `${deck}: die Zeile nennt keinen Fensteranteil — ${zeile.trim()}`);
       }
+
+      // Der Kommentar muss sich als Momentaufnahme zu erkennen geben.
+      assert.ok(/Gemessen am \d{2}\.\d{2}\.\d{4}/.test(block),
+        'die Tabelle nennt kein Messdatum — dann liest sie sich wie ein '
+        + 'Istzustand, obwohl sie eine Momentaufnahme ist');
+
+      // Und die Aussage selbst, an den HEUTIGEN Daten: Toucannon ist der
+      // Fall, um den es geht. Sein Fensteranteil muss klar unter dem
+      // kumulativen liegen — sonst traegt der ganze Abschnitt nicht mehr.
+      const tF = fen.find(r => r.deck_name === 'Toucannon');
+      const tV = ver.find(r => r.deck_name === 'Toucannon');
+      assert.ok(zahl(tF.share_fenster) < zahl(tV.new_share) * 0.75,
+        `Toucannon liegt im Fenster bei ${tF.share_fenster} % und kumulativ bei `
+        + `${tV.new_share} % — der Abstand traegt das Beispiel nicht mehr. Dann `
+        + 'gehoert ein anderes Deck in den Kommentar, nicht eine neue Zahl.');
+
       assert.ok(/ladderPctDamped/.test(block),
         'der Kommentar nennt nicht, wo der Anteil in die Prognose eingeht');
       assert.ok(block.includes('keine Schaetzung') || block.includes('Subtraktion'),

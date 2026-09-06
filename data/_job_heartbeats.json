@@ -7,18 +7,18 @@
   },
   "scrapers/labs_tournament_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-04T06:32:39Z",
-    "zuletzt_gelaufen": "2026-09-04T06:32:39Z"
+    "zuletzt_erfolgreich": "2026-09-06T15:42:03Z",
+    "zuletzt_gelaufen": "2026-09-06T15:42:03Z"
   },
   "scrapers/per_decklist_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-04T06:32:39Z",
-    "zuletzt_gelaufen": "2026-09-04T06:32:39Z"
+    "zuletzt_erfolgreich": "2026-09-06T15:42:03Z",
+    "zuletzt_gelaufen": "2026-09-06T15:42:03Z"
   },
   "scrapers/player_continuity_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-04T06:32:39Z",
-    "zuletzt_gelaufen": "2026-09-04T06:32:39Z"
+    "zuletzt_erfolgreich": "2026-09-06T15:42:03Z",
+    "zuletzt_gelaufen": "2026-09-06T15:42:03Z"
   },
   "scripts/build_champions_pokedex.py": {
     "status": "OK",

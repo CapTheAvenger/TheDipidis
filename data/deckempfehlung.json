@@ -1,42 +1,42 @@
 {
- "erzeugt": "2026-09-04 06:33:24+00:00",
+ "erzeugt": "2026-09-06 15:42:38+00:00",
  "format": "TEF-PBL",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
  "schrumpfung_k": 30,
- "feldkonversion_anker": 18.22,
+ "feldkonversion_anker": 17.94,
  "anker": [
   {
    "id": "0071",
    "name": "World Championship San Francisco",
    "datum": "2026-08-28",
-   "spieler": 774
+   "spieler": 797
   }
  ],
- "ankerspieler_gesamt": 774,
+ "ankerspieler_gesamt": 797,
  "online_abdeckung": {
-  "schnappschuss": "2026-09-04",
-  "anteil_unbekannt": 12.09,
+  "schnappschuss": "2026-09-06",
+  "anteil_unbekannt": 11.58,
   "groesste_unbekannte": [
    {
     "deck": "Beedrill",
     "anteil": 1.07
    },
    {
-    "deck": "Manectric Eelektrik",
-    "anteil": 0.74
-   },
-   {
     "deck": "Hop's Trevenant",
     "anteil": 0.73
    },
    {
-    "deck": "Ceruledge",
-    "anteil": 0.62
+    "deck": "Manectric Eelektrik",
+    "anteil": 0.73
    },
    {
-    "deck": "Mega Starmie",
-    "anteil": 0.45
+    "deck": "Ceruledge",
+    "anteil": 0.61
+   },
+   {
+    "deck": "Starmie Dusknoir",
+    "anteil": 0.46
    }
   ]
  },
@@ -44,45 +44,45 @@
  "empfehlung": {
   "deck": "Alakazam Dudunsparce",
   "schluessel": "alakazamdudunsparce",
-  "ankerspieler": 53,
-  "day2_roh": 26.42,
-  "day2_geschrumpft": 23.46
+  "ankerspieler": 54,
+  "day2_roh": 25.93,
+  "day2_geschrumpft": 23.08
  },
  "rangliste": [
   {
    "deck": "Alakazam Dudunsparce",
    "schluessel": "alakazamdudunsparce",
-   "ankerspieler": 53,
-   "day2_roh": 26.42,
-   "day2_geschrumpft": 23.46
+   "ankerspieler": 54,
+   "day2_roh": 25.93,
+   "day2_geschrumpft": 23.08
   },
   {
    "deck": "Basic Box",
    "schluessel": "basicbox",
-   "ankerspieler": 73,
-   "day2_roh": 24.66,
-   "day2_geschrumpft": 22.78
+   "ankerspieler": 74,
+   "day2_roh": 24.32,
+   "day2_geschrumpft": 22.48
   },
   {
    "deck": "Mega Excadrill",
    "schluessel": "megaexcadrill",
    "ankerspieler": 32,
    "day2_roh": 25.0,
-   "day2_geschrumpft": 21.72
+   "day2_geschrumpft": 21.58
   },
   {
    "deck": "Slowking",
    "schluessel": "slowking",
    "ankerspieler": 47,
    "day2_roh": 23.4,
-   "day2_geschrumpft": 21.38
+   "day2_geschrumpft": 21.27
   },
   {
    "deck": "N's Zoroark",
    "schluessel": "nszoroark",
-   "ankerspieler": 58,
-   "day2_roh": 20.69,
-   "day2_geschrumpft": 19.85
+   "ankerspieler": 60,
+   "day2_roh": 20.0,
+   "day2_geschrumpft": 19.31
   }
  ],
  "rangliste_vollstaendig": [
@@ -91,175 +91,175 @@
    "schluessel": "crustle",
    "ankerspieler": 20,
    "day2_roh": 40.0,
-   "day2_geschrumpft": 26.93
+   "day2_geschrumpft": 26.77
   },
   {
    "deck": "Alakazam Dudunsparce",
    "schluessel": "alakazamdudunsparce",
-   "ankerspieler": 53,
-   "day2_roh": 26.42,
-   "day2_geschrumpft": 23.46
+   "ankerspieler": 54,
+   "day2_roh": 25.93,
+   "day2_geschrumpft": 23.08
   },
   {
    "deck": "Basic Box",
    "schluessel": "basicbox",
-   "ankerspieler": 73,
-   "day2_roh": 24.66,
-   "day2_geschrumpft": 22.78
+   "ankerspieler": 74,
+   "day2_roh": 24.32,
+   "day2_geschrumpft": 22.48
   },
   {
    "deck": "Lopunny Dudunsparce",
    "schluessel": "lopunnydudunsparce",
    "ankerspieler": 3,
    "day2_roh": 66.67,
-   "day2_geschrumpft": 22.62
+   "day2_geschrumpft": 22.37
   },
   {
    "deck": "Lucario Hariyama",
    "schluessel": "lucariohariyama",
    "ankerspieler": 3,
    "day2_roh": 66.67,
-   "day2_geschrumpft": 22.62
+   "day2_geschrumpft": 22.37
   },
   {
    "deck": "Alakazam Dusknoir",
    "schluessel": "alakazamdusknoir",
    "ankerspieler": 4,
    "day2_roh": 50.0,
-   "day2_geschrumpft": 21.96
+   "day2_geschrumpft": 21.71
   },
   {
    "deck": "Mega Excadrill",
    "schluessel": "megaexcadrill",
    "ankerspieler": 32,
    "day2_roh": 25.0,
-   "day2_geschrumpft": 21.72
+   "day2_geschrumpft": 21.58
   },
   {
    "deck": "Slowking",
    "schluessel": "slowking",
    "ankerspieler": 47,
    "day2_roh": 23.4,
-   "day2_geschrumpft": 21.38
-  },
-  {
-   "deck": "Clefairy Ogerpon",
-   "schluessel": "clefairyogerpon",
-   "ankerspieler": 10,
-   "day2_roh": 30.0,
-   "day2_geschrumpft": 21.16
+   "day2_geschrumpft": 21.27
   },
   {
    "deck": "Sharpedo Toxtricity",
    "schluessel": "sharpedotoxtricity",
    "ankerspieler": 1,
    "day2_roh": 100.0,
-   "day2_geschrumpft": 20.86
+   "day2_geschrumpft": 20.59
+  },
+  {
+   "deck": "Clefairy Ogerpon",
+   "schluessel": "clefairyogerpon",
+   "ankerspieler": 11,
+   "day2_roh": 27.27,
+   "day2_geschrumpft": 20.44
   },
   {
    "deck": "Mega Chandelure",
    "schluessel": "megachandelure",
    "ankerspieler": 2,
    "day2_roh": 50.0,
-   "day2_geschrumpft": 20.2
-  },
-  {
-   "deck": "Rocket's Mewtwo",
-   "schluessel": "rocketsmewtwo",
-   "ankerspieler": 2,
-   "day2_roh": 50.0,
-   "day2_geschrumpft": 20.2
+   "day2_geschrumpft": 19.95
   },
   {
    "deck": "Toxtricity Box",
    "schluessel": "toxtricitybox",
    "ankerspieler": 2,
    "day2_roh": 50.0,
-   "day2_geschrumpft": 20.2
+   "day2_geschrumpft": 19.95
   },
   {
    "deck": "Festival Lead",
    "schluessel": "festivallead",
-   "ankerspieler": 22,
-   "day2_roh": 22.73,
-   "day2_geschrumpft": 20.13
-  },
-  {
-   "deck": "N's Zoroark",
-   "schluessel": "nszoroark",
-   "ankerspieler": 58,
-   "day2_roh": 20.69,
-   "day2_geschrumpft": 19.85
+   "ankerspieler": 23,
+   "day2_roh": 21.74,
+   "day2_geschrumpft": 19.59
   },
   {
    "deck": "Dhelmise",
    "schluessel": "dhelmise",
    "ankerspieler": 8,
    "day2_roh": 25.0,
-   "day2_geschrumpft": 19.65
+   "day2_geschrumpft": 19.43
   },
   {
    "deck": "Lopunny Dusknoir",
    "schluessel": "lopunnydusknoir",
    "ankerspieler": 3,
    "day2_roh": 33.33,
-   "day2_geschrumpft": 19.59
+   "day2_geschrumpft": 19.34
   },
   {
    "deck": "Mega Venusaur",
    "schluessel": "megavenusaur",
    "ankerspieler": 3,
    "day2_roh": 33.33,
-   "day2_geschrumpft": 19.59
+   "day2_geschrumpft": 19.34
   },
   {
-   "deck": "Dragapult Dudunsparce",
-   "schluessel": "dragapultdudunsparce",
-   "ankerspieler": 4,
-   "day2_roh": 25.0,
-   "day2_geschrumpft": 19.02
+   "deck": "Rocket's Mewtwo",
+   "schluessel": "rocketsmewtwo",
+   "ankerspieler": 3,
+   "day2_roh": 33.33,
+   "day2_geschrumpft": 19.34
+  },
+  {
+   "deck": "N's Zoroark",
+   "schluessel": "nszoroark",
+   "ankerspieler": 60,
+   "day2_roh": 20.0,
+   "day2_geschrumpft": 19.31
   },
   {
    "deck": "Lillie's Clefairy",
    "schluessel": "lilliesclefairy",
    "ankerspieler": 4,
    "day2_roh": 25.0,
-   "day2_geschrumpft": 19.02
+   "day2_geschrumpft": 18.77
   },
   {
    "deck": "Seaking Festival Lead",
    "schluessel": "seakingfestivallead",
    "ankerspieler": 4,
    "day2_roh": 25.0,
-   "day2_geschrumpft": 19.02
+   "day2_geschrumpft": 18.77
+  },
+  {
+   "deck": "Dragapult Dudunsparce",
+   "schluessel": "dragapultdudunsparce",
+   "ankerspieler": 5,
+   "day2_roh": 20.0,
+   "day2_geschrumpft": 18.24
+  },
+  {
+   "deck": "Other",
+   "schluessel": "other",
+   "ankerspieler": 5,
+   "day2_roh": 20.0,
+   "day2_geschrumpft": 18.24
   },
   {
    "deck": "Dudunsparce Control",
    "schluessel": "dudunsparcecontrol",
    "ankerspieler": 1,
    "day2_roh": 0.0,
-   "day2_geschrumpft": 17.63
+   "day2_geschrumpft": 17.36
   },
   {
    "deck": "Greninja",
    "schluessel": "greninja",
    "ankerspieler": 1,
    "day2_roh": 0.0,
-   "day2_geschrumpft": 17.63
+   "day2_geschrumpft": 17.36
   },
   {
    "deck": "Mega Absol Box",
    "schluessel": "megaabsolbox",
    "ankerspieler": 1,
    "day2_roh": 0.0,
-   "day2_geschrumpft": 17.63
-  },
-  {
-   "deck": "Mega Greninja",
-   "schluessel": "megagreninja",
-   "ankerspieler": 1,
-   "day2_roh": 0.0,
-   "day2_geschrumpft": 17.63
+   "day2_geschrumpft": 17.36
   }
  ],
  "vertrauen": {
@@ -301,12 +301,12 @@
   },
   "B": {
    "turniere": 23,
-   "empfehlung_mittel": 21.27,
-   "feld_mittel": 14.79,
+   "empfehlung_mittel": 21.25,
+   "feld_mittel": 14.77,
    "bestmoeglich_mittel": 39.84,
-   "vorsprung": 6.48,
+   "vorsprung": 6.47,
    "vorsprung_standardfehler": 2.39,
-   "anteil_am_erreichbaren": 25.9,
+   "anteil_am_erreichbaren": 25.8,
    "median": 18.33,
    "quartil_unten": 13.33,
    "quartil_oben": 31.15,

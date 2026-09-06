@@ -48,8 +48,57 @@ describe('Pokéball-Menü — die Höhe kommt aus dem Platz, der da ist', () => 
         const f = /function menueHoeheAnpassen\(drop\) \{[\s\S]*?\n\}/.exec(JS)[0];
         assert.match(f, /getBoundingClientRect\(\)/,
             'ohne Messung der Position ist es wieder eine Rechnung gegen 100vh');
-        assert.match(f, /window\.innerHeight\s*-\s*oben/,
+        assert.match(f, /sicht\s*-\s*oben/,
             'die Höhe muss die tatsächliche Oberkante abziehen');
+    });
+
+    it('gerechnet wird mit der SICHTBAREN Höhe, nicht mit window.innerHeight', () => {
+        /* BEFUND (06.09.2026, Bildschirmfoto vom Betreiber): auf dem
+           iPhone lief das Menü unten aus dem Bild, die letzten vier
+           Einträge lagen über dem Seiteninhalt.
+
+           `window.innerHeight` meldet in Safari auf iOS die GROSSE
+           Ansichtshöhe — die mit eingeklappten Browserleisten. Wer nach
+           unten gescrollt hat, sieht genau die; tippt er dann auf das
+           Menü, fahren die Leisten wieder aus und es bleiben rund 100px
+           weniger. Der Deckel war da schon gesetzt.
+
+           `visualViewport.height` meldet, was wirklich zu sehen ist.
+           innerHeight bleibt als Rückfall erlaubt — aber nur als
+           Rückfall. */
+        const f = /function menueHoeheAnpassen\(drop\) \{[\s\S]*?\n\}/.exec(JS)[0];
+        assert.match(f, /visualViewport[\s\S]{0,60}height/,
+            'ohne visualViewport rechnet das Menü auf iOS gegen eine Höhe, '
+            + 'die der Nutzer gar nicht sieht');
+        assert.match(f, /\|\|\s*window\.innerHeight/,
+            'innerHeight muss als Rückfall bleiben — nicht jeder Browser '
+            + 'kennt visualViewport');
+    });
+
+    it('die eigene Tableiste wird vom Platz abgezogen', () => {
+        /* Sie ist fixiert und liegt über dem Seitenende. Ohne Abzug
+           endet das Menü unter ihr — die untersten Einträge sind dann
+           weder zu sehen noch zu treffen. */
+        const f = /function menueHoeheAnpassen\(drop\) \{[\s\S]*?\n\}/.exec(JS)[0];
+        assert.match(f, /dsTabbarHost/,
+            'die Tableiste wird nicht gemessen');
+        assert.match(f, /-\s*leisteHoch/,
+            'die Höhe der Tableiste wird gemessen, aber nicht abgezogen');
+        assert.match(f, /display\s*!==\s*'none'/,
+            'auf dem Desktop gibt es die Leiste nicht — dort darf nichts '
+            + 'abgezogen werden');
+    });
+
+    it('bei geänderter Sichthöhe wird nachgerechnet', () => {
+        /* Auf iOS fahren die Browserleisten beim Tippen und Rollen ein
+           und aus. `window.resize` feuert dabei NICHT — visualViewport
+           schon. Ohne das Nachrechnen bliebe der Deckel auf dem Wert
+           stehen, der beim Öffnen galt. */
+        assert.match(JS, /visualViewport\.addEventListener\('resize'/,
+            'ohne dieses Nachrechnen bleibt der Deckel auf dem Wert vom Öffnen');
+        assert.match(JS, /visualViewport\.removeEventListener\('resize'/,
+            'die Beobachtung wird nie beendet — sie rechnet dann für ein '
+            + 'Menü weiter, das niemand sieht');
     });
 
     it('ragt das Menü oben aus dem Bild, wird zurückgescrollt statt abgeschnitten', () => {

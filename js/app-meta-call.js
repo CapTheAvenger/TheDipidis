@@ -10338,6 +10338,34 @@ window.MetaCall = (function () {
       // history block. Threshold tiers chosen to match the
       // tipReasonConv "Strong ≥ 0.15" cutoff: good ≥ 25 %, mid ≥ 15 %,
       // weak otherwise.
+      /* ── DIE ZAHL DER MAJORS GEHOERT DANEBEN ─────────────────
+       *
+       * BEFUND (Team A, 06.09.2026, beim Durchgang durch alle Ansichten):
+       * die Zeile las sich "Majors: D2-Conv. 40,0 % · D2-WR 41,7 %" —
+       * ohne jede Angabe, worauf das beruht. Nachgemessen an
+       * labs_tournament_decks.csv war das bei Crustle die Bilanz EINES
+       * Turniers: 8 von 20 Spielern, Worlds SF. Ein 95-%-Intervall von
+       * rund 19 bis 64 %.
+       *
+       * "40,0 %" allein liest sich wie eine Eigenschaft des Decks. Mit
+       * "über 1 Major" daneben liest es sich als das, was es ist: eine
+       * Beobachtung. Genau dafuer gibt es die Hausregel "jede Quote
+       * traegt ihren Nenner", und genau dieser Fall — eine Rogue-Zahl
+       * aus wenigen Partien — stand schon einmal auf der Maengelliste.
+       *
+       * Der Nenner ist die Zahl der Turniere, ueber die der
+       * rangewichtete Mittelwert laeuft (`samples`), NICHT `q.n`: das
+       * ist die Summe der Recency-Gewichte und im aktuellen Fenster
+       * konstant 0,5 je Turnier. Der Kommentar 200 Zeilen weiter unten
+       * beschreibt, was dieselbe Verwechslung dort schon angerichtet
+       * hat. */
+      const _majors = (() => {
+        const q = _labsDay2ConvByDeck[normalize(name)];
+        const n = (q && Array.isArray(q.samples)) ? q.samples.length : 0;
+        if (n <= 0) return '';
+        return ' ' + t(n === 1 ? 'mc.histAusMajor' : 'mc.histAusMajors').replace('{n}', n);
+      })();
+
       const d2ConvHtml = (r.empConv != null && r.empConv > 0)
         ? (() => {
             const pct = r.empConv * 100;
@@ -10346,7 +10374,7 @@ window.MetaCall = (function () {
                       : 'mc-rec-d2wr-weak';
             return `<div class="mc-rec-d2wr ${cls}" title="${esc(t('mc.d2ConvTooltip'))}">
               <span class="mc-rec-d2wr-label">${esc(t('mc.d2ConvLabel'))}:</span>
-              <span class="mc-rec-d2wr-value">${pct.toFixed(1).replace('.', ',')} %</span>
+              <span class="mc-rec-d2wr-value">${pct.toFixed(1).replace('.', ',')} %${esc(_majors)}</span>
             </div>`;
           })()
         : '';
@@ -10358,7 +10386,7 @@ window.MetaCall = (function () {
       // post-cut win rate, both from labs majors.
       const historyParts = [];
       if (r.empConv != null && r.empConv > 0) {
-        historyParts.push(`${t('mc.histD2Conv')} ${(r.empConv * 100).toFixed(1).replace('.', ',')} %`);
+        historyParts.push(`${t('mc.histD2Conv')} ${(r.empConv * 100).toFixed(1).replace('.', ',')} %${_majors}`);
       }
       if (r.d2WrPct != null) {
         historyParts.push(`${t('mc.histD2Wr')} ${r.d2WrPct.toFixed(1).replace('.', ',')} %`);

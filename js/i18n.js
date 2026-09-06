@@ -1108,6 +1108,8 @@ const translations = {
     'mc.d2ConvLabel':           'Day-2 Major conversion',
     'mc.d2ConvTooltip':         'How often this deck makes the Day-2 cut at major in-person tournaments (regionals + special events), recency-weighted. Empirical companion to the simulated Day-2 odds above.',
     'mc.histD2Conv':            'D2-Conv.',
+    'mc.histAusMajor':          'from 1 major',
+    'mc.histAusMajors':         'from {n} majors',
     'mc.histD2Wr':              'D2-WR',
     'mc.histPrefix':            'Majors:',
     'mc.reasonVs':              'vs.',
@@ -3667,6 +3669,11 @@ const translations = {
     'mc.d2ConvLabel':           'Day-2-Major-Conversion',
     'mc.d2ConvTooltip':         'Wie häufig dieses Deck den Day-2-Cut bei Major-In-Person-Turnieren (Regionals + Special Events) erreicht, recency-gewichtet. Empirisches Gegenstück zur simulierten Day-2-Chance oben.',
     'mc.histD2Conv':            'D2-Conv.',
+    /* Der Nenner der Konversionsquote: ueber wie viele Majors der
+       rangewichtete Mittelwert laeuft. Bei einem einzigen Turnier ist
+       die Quote eine Beobachtung, keine Eigenschaft. */
+    'mc.histAusMajor':          'aus 1 Major',
+    'mc.histAusMajors':         'aus {n} Majors',
     'mc.histD2Wr':              'D2-WR',
     'mc.histPrefix':            'Majors:',
     'mc.reasonVs':              'gegen',

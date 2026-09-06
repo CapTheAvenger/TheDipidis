@@ -82,6 +82,13 @@ function load() {
         gustSet[0],
         extractTopLevel(src, '_classifyHpTier'),
         extractTopLevel(src, '_resolveMainPokemonHp'),
+        /* Seit dem 06.09.2026 zeigt _topMatchupsForDeck die
+           HAUSKONVENTION S/(S+N) statt der Kettenwahrscheinlichkeit
+           S/(S+N+U) — 523 von 1.702 Paarungen wichen ab, bis zu
+           26,67 pp. Der Helfer gehoert deshalb in die Sandbox; ein
+           Nachbau hier wuerde die beiden Rechnungen wieder
+           auseinanderlaufen lassen. */
+        extractTopLevel(src, '_anzeigeQuote'),
         extractTopLevel(src, '_topMatchupsForDeck'),
         extractTopLevel(src, '_computeArchetypeDoctrine'),
     ].join('\n\n');

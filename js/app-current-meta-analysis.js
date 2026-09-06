@@ -2489,7 +2489,34 @@
             return result;
         }
 
+        /* ── WER ZULETZT STARTET, SCHREIBT ──────────────────────
+         *
+         * Diese Funktion wartet zweimal: auf `active_threats.json`
+         * (Z. ~2531) und auf die Motorlaeufe ueber das ganze Feld
+         * (Z. ~2593, kalt mehrere hundert Millisekunden). Sie wird
+         * bei JEDER Deckmutation angestossen — bei einem Bau also
+         * mehrfach kurz hintereinander.
+         *
+         * Ohne Zaehler gilt "wer zuletzt FERTIG wird, schreibt": ein
+         * aelterer Lauf hat sein Deck bei Z. ~2536 eingefroren, haengt
+         * dann im Motor und malt danach ueber einen juengeren Lauf.
+         * Der Leser sieht Zahlen zu einem Deck, das nicht mehr im
+         * Bauer steht — und nichts an der Anzeige sagt ihm das.
+         *
+         * Der Zaehler dreht das um: nach jedem `await` prueft ein
+         * Lauf, ob er noch der juengste ist, und schreibt sonst gar
+         * nichts. Kein Abbruch der laufenden Rechnung — nur kein
+         * Schreiben. Das ist der billige Teil und der sichere.
+         *
+         * Gefunden am 06.09.2026 bei der Ursachensuche zu "Kein Deck
+         * geladen nach dem Bau". Das war ein ANDERER Fehler (der
+         * Y.2-Pfad rief gar nicht an, siehe app-deck-builder.js), aber
+         * dieser hier stand daneben und wartete. */
+        let _uvvLauf = 0;
+
         async function renderUserVsVanillaPanel(archetype) {
+            const meinLauf = ++_uvvLauf;
+            const ueberholt = () => meinLauf !== _uvvLauf;
             const section = document.getElementById('currentMetaUserVsVanillaSection');
             const summaryEl = document.getElementById('currentMetaUserVsVanillaSummary');
             const detailEl = document.getElementById('currentMetaUserVsVanillaDetail');
@@ -2529,6 +2556,7 @@
             if (Object.keys(wrByOpp).length === 0) return hide(`no matchup rows for ${archetype}`);
 
             const intel = await _loadActiveThreats();
+            if (ueberholt()) return;
             if (!intel) return hide('active_threats.json unavailable');
 
             const archetypeThreatCats = _archetypeThreatCategoryMap(intel);
@@ -2591,6 +2619,7 @@
             // 'attacker_wins', capped per opponent to prevent any
             // single matchup from swinging WR by more than 15 pts.
             const capabilityData = await _computeCapabilityBonuses(paired);
+            if (ueberholt()) return;
             if (capabilityData && capabilityData.size > 0) {
                 paired.forEach(p => {
                     const d = capabilityData.get(p.opponent);

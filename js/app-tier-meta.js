@@ -1338,6 +1338,46 @@
                         ? (getLang() === 'de' ? 'Variante' : 'Variant')
                         : (getLang() === 'de' ? 'Varianten' : 'Variants');
 
+                    /* ── JEDE QUOTE TRAEGT IHREN NENNER ──────────────────
+                     *
+                     * BEFUND (Team A, 06.09.2026, beim Durchgang durch alle
+                     * fuenfzehn Ansichten): die fuenf Kacheln der Startseite
+                     * zeigten "WR 52,4 %" ohne jede Angabe, worauf die Zahl
+                     * beruht. Der Tooltip sagte "Gewichtete durchschnittliche
+                     * Win Rate" — also WAS gerechnet wurde, aber nicht
+                     * WORUEBER.
+                     *
+                     * Das sind die prominentesten Zahlen der ganzen Seite:
+                     * das Erste, was ein Besucher sieht. Und die Hausregel
+                     * dieses Projekts lautet "jede Quote traegt ihren
+                     * Nenner" — sie steht seit Monaten in der Heatmap, in
+                     * den Tier-Kacheln und in den Matchup-Zeilen. Hier
+                     * fehlte sie.
+                     *
+                     * Der Nenner ist `totalCount`: die Zahl der Antritte,
+                     * mit der die Win Rate oben auch gewichtet wird
+                     * (`weightedWinrateSum += winrate * deckCount`). Damit
+                     * steht neben der Zahl genau die Menge, aus der sie
+                     * gebildet ist — nicht irgendeine andere.
+                     *
+                     * Ohne Antritte (0) bleibt der Zusatz weg statt eine
+                     * Null zu behaupten: "WR 52,4 % · 0" waere schlimmer
+                     * als gar nichts. */
+                    const antritte = Number(item.totalCount) || 0;
+                    /* `fmtHalb`, nicht gerundet: halbe Antritte sind in dieser
+                       Datei echt (Turniere der zweiten Woche zaehlen 0,5) —
+                       der Kommentar bei der Funktion oben erklaert, was das
+                       Runden hier schon einmal angerichtet hat. */
+                    const nZahl = antritte > 0 ? fmtHalb(antritte) : '';
+                    const nText = antritte > 0 ? `· ${nZahl}` : '';
+                    const wrTitel = getLang() === 'de'
+                        ? (antritte > 0
+                            ? `Gewichtete durchschnittliche Win Rate über ${nZahl} Antritte`
+                            : 'Gewichtete durchschnittliche Win Rate')
+                        : (antritte > 0
+                            ? `Weighted average win rate across ${nZahl} entries`
+                            : 'Weighted average win rate');
+
                     heroHtml += `
                         <div class="tier-hero-card" role="button" tabindex="0"
                              onclick="navigateToCMAnalysisWithCombinedDeck('${combinedMainEscaped}', '${combinedVariantsJsonEscaped}')"
@@ -1356,7 +1396,7 @@
                                             : `Sum across ${variantCount} variants — the individual variant is smaller and listed in the table below.`)
                                         : (getLang() === 'de' ? 'Eine einzelne Variante' : 'Single variant')}">${
                                         fmtPct(parseFloat(shareText))}</span>
-                                    <span class="stat-badge" title="${getLang() === 'de' ? 'Gewichtete durchschnittliche Win Rate' : 'Weighted average winrate'}">WR ${fmtPct(parseFloat(winrateText))}</span>
+                                    <span class="stat-badge" title="${wrTitel}">WR ${fmtPct(parseFloat(winrateText))} <span class="stat-badge-nenner">${nText}</span></span>
                                 </div>
                             </div>
                         </div>`;

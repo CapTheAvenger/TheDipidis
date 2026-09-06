@@ -145,6 +145,10 @@ def test_stabiler_schluessel_landet_in_der_zeile(pcs):
         'Ohne player_id bleibt der Name der Schluessel — genau das, was '
         'CLAUDE.md fuer Karten verbietet und fuer Spieler genauso gilt.')
     assert z['day2'] == 1
+    assert z['topcut'] == 1, (
+        'Ohne topcut laesst sich top8_conv_rate nie aus dieser Datei '
+        'rechnen — labs_tournament_scraper.py:1224 wartet seit langem '
+        'genau darauf.')
     assert z['points'] == 49
     assert z['dropped'] == 0
     assert z['dqed'] == 0
@@ -189,7 +193,8 @@ def test_ohne_nutzlast_wird_die_tabelle_gelesen(pcs, monkeypatch):
     zeilen = pcs.scrape_standings_full('0070')
     assert len(zeilen) == 3
     for z in zeilen:
-        for feld in ('player_id', 'points', 'day2', 'dropped', 'drop_round', 'dqed'):
+        for feld in ('player_id', 'points', 'day2', 'topcut', 'dropped',
+                     'drop_round', 'dqed'):
             assert feld in z, (
                 'Der Rueckfallweg muss die neuen Felder mitfuehren, sonst '
                 'faellt der DictWriter beim ersten Turnier ohne Nutzlast um.')
@@ -235,6 +240,7 @@ def test_die_elf_alten_spalten_stehen_unveraendert_vorn(pcs, tmp_path):
         'data/_consumers.md: eine Spalte ergaenzen ist gefahrlos, eine '
         'umbenennen bricht fremde Projekte.')
     assert 'player_id' in kopf
+    assert 'topcut' in kopf
 
 
 def test_zusatzfelder_stolpern_den_writer_nicht(pcs, tmp_path):

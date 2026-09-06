@@ -136,12 +136,12 @@
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
   "cardmarket_id_mapping.csv": 17386,
-  "cm_expansions.csv": 773,
+  "cm_expansions.csv": 774,
   "japanese_cards_database.csv": 936,
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-09-05 09:33 UTC",
+ "generated": "2026-09-06 09:33 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -160,7 +160,7 @@
    "priced-by-date": 1153,
    "unique": 10992
   },
-  "nonempty_eur_price": 20384,
+  "nonempty_eur_price": 20387,
   "verified_collision_owners": {},
   "verified_collisions": []
  },

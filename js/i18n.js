@@ -1266,8 +1266,8 @@ const translations = {
     // Simulation ein Praesenzturnier mit der Online-Unentschieden-Quote
     // von 2 % — auf Papier sind es rund 11 %. Wer die Zahl liest, muss
     // sehen, mit welcher Annahme sie entstanden ist.
-    'mc.day2Unentschieden':     'Unentschieden {q} — gemessen an {n} Partien ({meta})',
-    'mc.day2UnentschiedenLeer': 'Unentschieden {q} (Rueckfall — fuer dieses Format ist keine Bilanz gemessen)',
+    'mc.day2Unentschieden':     'Ties {q} — measured across {n} games ({meta})',
+    'mc.day2UnentschiedenLeer': 'Ties {q} (fallback — no record measured for this format)',
     'mc.avgWins':               'Avg. Wins',
     'mc.avgTies':               'Avg. Ties',
     'mc.avgLosses':             'Avg. Losses',
@@ -3844,8 +3844,18 @@ const translations = {
     'mc.journalWeightHint':     '(Meta = Gewicht 30 · Journal = Spielanzahl)',
     'mc.day2Chance':            'Day-2-Chance',
     'mc.day2Sub':               '{pts} Pkt. in {r} R. · {n} Spieler',
-    'mc.day2Unentschieden':     'Unentschieden {q} — gemessen an {n} Partien ({meta})',
-    'mc.day2UnentschiedenLeer': 'Unentschieden {q} (Rückfall — für dieses Format ist keine Bilanz gemessen)',
+    'mc.day2Unentschieden':     'Ties {q} — gemessen an {n} Partien ({meta})',
+    'mc.day2UnentschiedenLeer': 'Ties {q} (Rückfall — für dieses Format ist keine Bilanz gemessen)',
+    // "Ø Wins / Ø Ties / Ø Losses" ist KEIN Uebersetzungsrest, sondern die
+    // Hausschreibweise: Szenesprache bleibt englisch, angeordnet am
+    // 28.08.2026 ("Sieg ist Win, Niederlage ist Loss, Unentschieden ist
+    // Tie"). tests/unit/test-szenesprache.js haelt das fest — und hat
+    // meinen Eindeutschungsversuch am 06.09.2026 sofort gestoppt.
+    //
+    // Der Widerspruch, der mir dabei auffiel, war ein echter, nur an der
+    // anderen Stelle: meine neue Zeile darunter sagte "Unentschieden",
+    // zwei Zentimeter neben "Ø Ties". Angepasst wurde deshalb meine
+    // Zeile, nicht diese hier.
     'mc.avgWins':               'Ø Wins',
     'mc.avgTies':               'Ø Ties',
     'mc.avgLosses':             'Ø Losses',

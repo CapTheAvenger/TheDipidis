@@ -74,12 +74,34 @@ def test_die_echte_kaputte_zeile_wird_abgewiesen():
 
 
 def test_die_pruefung_haengt_vor_dem_schreiben():
+    """Die Wertpruefung muss vor JEDEM Schreiben liegen.
+
+    Der Anker war bis zum 06.09.2026 `writer.writerows(rows)` und wurde
+    ueber die GANZE Datei gesucht. Seit das Schreiben in
+    `_schreibe_csv_kopftreu` liegt — der Helfer, der die Spalten gegen die
+    vorhandene Kopfzeile abgleicht —, gibt es diese Zeile dort nicht mehr,
+    und der Helfer steht ausserdem OBERHALB von save_csv_files. Ueber die
+    ganze Datei gemessen waere die Reihenfolge damit scheinbar verletzt,
+    obwohl sie stimmt.
+
+    Deshalb wird jetzt innerhalb von save_csv_files gemessen. Das ist
+    schaerfer als vorher: ein Schreibaufruf, der irgendwo anders in der
+    Datei auftaucht, kann die Zusicherung nicht mehr erfuellen."""
     quelle = io.open(
         os.path.join(ROOT, "backend", "scrapers", "tournament_scraper_JH.py"),
         encoding="utf-8-sig").read()
-    aufruf = quelle.index("_pruefe_kartenzeilen(c_rows, cards_f)")
-    schreiben = quelle.index("writer.writerows(rows)")
+    a = quelle.index("def save_csv_files(")
+    block = quelle[a:]
+    aufruf = block.index("_pruefe_kartenzeilen(c_rows, cards_f)")
+    schreiben = block.index("_schreibe_csv_kopftreu(f_path, rows, append_mode)")
     assert aufruf < schreiben, "die Pruefung laeuft erst nach dem Schreiben"
+
+    # Und: es gibt in save_csv_files keinen zweiten, ungeprueften Schreibweg.
+    ende = block.index("return overview_f, cards_f")
+    rumpf = block[:ende]
+    assert "csv.DictWriter" not in rumpf, (
+        "save_csv_files schreibt wieder selbst, statt ueber den kopftreuen "
+        "Helfer — dann greift weder die Wert- noch die Spaltenpruefung.")
 
 
 def test_der_chunk_ist_wieder_sauber():

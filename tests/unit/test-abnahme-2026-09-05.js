@@ -223,7 +223,7 @@ describe('Meta Call: jede Quote trägt ihren Nenner', () => {
 
     it('der Nenner der Online-Paarung wird nicht mehr weggeworfen', () => {
         // total_games steht in derselben CSV-Zeile.
-        assert.match(METACALL, /_matchupMap\[dk\]\[ok\] = \{ pWin, pTie, pLoss, partien \};/);
+        assert.match(METACALL, /_matchupMap\[dk\]\[ok\] = \{ pWin, pTie, pLoss, partien, quote, roh \};/);
     });
 
     it('er überlebt Mischung, Journal und Korrektur', () => {

@@ -125,33 +125,43 @@ describe('Die Majors-Zeile im Meta Call nennt ihren Nenner', () => {
         assert.ok(anfang >= 0 && ende > anfang, 'die Stelle wurde nicht gefunden');
         const stueck = MC.slice(anfang, ende + 5);
 
-        const bauen = new Function('name', '_labsDay2ConvByDeck', 'normalize', 't',
+        /* HEREINGEREICHT WIRD DIE ZEILE `r`, KEIN `name`-PARAMETER.
+           Die erste Fassung dieser Zusicherung gab `name` als Argument
+           herein — und deckte damit genau den Fehler zu, den sie fangen
+           sollte: im Quelltext stand `normalize(name)`, in der echten
+           Funktion gibt es diese Variable nicht, also griff dort
+           `window.name` (meist der leere String). Die Suite war gruen,
+           die Live-Seite zeigte nichts.
+
+           Mit `r` als einzigem Bezug faellt jeder Griff auf eine
+           Variable auf, die es in der echten Umgebung nicht gibt. */
+        const bauen = new Function('r', '_labsDay2ConvByDeck', 'normalize', 't',
             stueck + ' return _majors;');
-        const norm = (x) => String(x).toLowerCase();
+        const norm = (x) => String(x == null ? '' : x).toLowerCase();
         const wort = {
             'mc.histAusMajor':  'aus 1 Major',
             'mc.histAusMajors': 'aus {n} Majors',
         };
         const t = (k) => (k in wort ? wort[k] : k);
 
-        const einer = bauen('Crustle', { crustle: { n: 0.5, samples: [{ date: '2026-08-28', conv: 0.4 }] } }, norm, t);
+        const einer = bauen({ name: 'Crustle' }, { crustle: { n: 0.5, samples: [{ date: '2026-08-28', conv: 0.4 }] } }, norm, t);
         assert.strictEqual(einer, ' aus 1 Major',
             `bei einem Turnier steht "${einer}" — die Einzahl fehlt oder der Text stimmt nicht`);
 
-        const drei = bauen('Dragapult', { dragapult: { n: 1.5, samples: [{}, {}, {}] } }, norm, t);
+        const drei = bauen({ name: 'Dragapult' }, { dragapult: { n: 1.5, samples: [{}, {}, {}] } }, norm, t);
         assert.strictEqual(drei, ' aus 3 Majors',
             `bei drei Turnieren steht "${drei}"`);
 
         /* Ohne Beobachtungen bleibt der Zusatz weg statt "aus 0 Majors". */
         for (const leer of [undefined, { n: 0 }, { n: 1, samples: [] }, { n: 1, samples: null }]) {
-            const r = bauen('X', leer === undefined ? {} : { x: leer }, norm, t);
+            const r = bauen({ name: 'X' }, leer === undefined ? {} : { x: leer }, norm, t);
             assert.strictEqual(r, '',
                 `bei ${JSON.stringify(leer)} entsteht "${r}" statt nichts`);
         }
 
         /* Und die Zahl darf NICHT aus q.n kommen — das würde bei zwei
            Majors "aus 1 Major" schreiben. */
-        const falle = bauen('Y', { y: { n: 1.0, samples: [{}, {}] } }, norm, t);
+        const falle = bauen({ name: 'Y' }, { y: { n: 1.0, samples: [{}, {}] } }, norm, t);
         assert.strictEqual(falle, ' aus 2 Majors',
             'die Zahl kommt aus dem Gewicht statt aus der Zahl der Turniere');
     });
@@ -164,6 +174,27 @@ describe('Die Majors-Zeile im Meta Call nennt ihren Nenner', () => {
             'die immer sichtbare Zeile nennt die Zahl der Majors nicht');
         assert.match(MC, /mc-rec-d2wr-value">\$\{pct\.toFixed\(1\)\.replace\('\.', ','\)\} %\$\{esc\(_majors\)\}/,
             'das aufgeklappte Feld nennt die Zahl der Majors nicht');
+    });
+
+    it('der Deckname kommt aus der Zeile, nicht aus window.name', () => {
+        /* DER FEHLER, DEN DIESE DATEI IHREN NAMEN VERDANKT. Die erste
+           Fassung schrieb `normalize(name)`. In `renderRow(r, i)` gibt
+           es kein `name` — also griff `window.name`, der leere String.
+           Kein Fehler, keine Ausnahme, nur ein Zusatz, der immer leer
+           blieb. Aufgefallen erst beim Nachsehen auf der Live-Seite. */
+        const anfang = MC.indexOf('const _majors = (() => {');
+        const ende   = MC.indexOf('})();', anfang);
+        const stueck = MC.slice(anfang, ende);
+        assert.match(stueck, /normalize\(r\.name\)/,
+            'der Deckname kommt nicht aus der Zeile');
+        assert.ok(!/normalize\(name\)/.test(stueck),
+            'der Griff auf window.name ist zurueck — er scheitert still');
+
+        /* Und die Zeile, in der der Block steht, muss `r` wirklich
+           fuehren. Sonst waere die Pruefung oben wertlos. */
+        const fn = MC.lastIndexOf('const renderRow = (r, i) => {', anfang);
+        assert.ok(fn >= 0 && fn < anfang,
+            'der Block steht nicht mehr in renderRow(r, i) — der Bezug r ist unklar');
     });
 
     it('_majors steht vor seiner Verwendung', () => {

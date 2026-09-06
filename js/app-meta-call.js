@@ -10360,7 +10360,17 @@ window.MetaCall = (function () {
        * beschreibt, was dieselbe Verwechslung dort schon angerichtet
        * hat. */
       const _majors = (() => {
-        const q = _labsDay2ConvByDeck[normalize(name)];
+        /* `r.name`, NICHT `name`. Die erste Fassung schrieb `name` — in
+           dieser Funktion gibt es keine solche Variable, also griff
+           `window.name` (der Name des Browserfensters, meist der leere
+           String). Kein Fehler, keine Ausnahme, nur ein stiller
+           Fehlschlag: `_labsDay2ConvByDeck['']` ist undefined, der
+           Zusatz blieb leer, und die Zeile sah aus wie vor der
+           Aenderung. Gefunden erst beim Nachsehen auf der LIVE-Seite —
+           die Suiten waren gruen, weil die Zusicherung die Funktion mit
+           einem eigenen `name`-Parameter aufrief und damit genau den
+           Fehler ueberdeckte. */
+        const q = _labsDay2ConvByDeck[normalize(r.name)];
         const n = (q && Array.isArray(q.samples)) ? q.samples.length : 0;
         if (n <= 0) return '';
         return ' ' + t(n === 1 ? 'mc.histAusMajor' : 'mc.histAusMajors').replace('{n}', n);

@@ -118,8 +118,15 @@
      * braucht deshalb ihren eigenen Abstand, sonst liegt sie
      * dauerhaft unter der fixierten Leiste und ist nicht
      * wegscrollbar — gemessen am 29.08.2026 in 11 von 13 Ansichten. */
-    .tabs-container { padding-bottom: 64px; }
-    .footer { padding-bottom: 64px; }
+    /* 64px waren die reine Knopfhoehe (56) plus Luft. Die Leiste selbst
+     * waechst aber um env(safe-area-inset-bottom) (:93) — auf einem
+     * iPhone mit Home-Indikator sind das 34px, die Leiste ist dort also
+     * 90px hoch und verdeckte 26px Inhalt. Gemeldet am 06.09.2026 mit
+     * Bildschirmfoto: die untere Zeile der Deck-Kacheln (Anteil und
+     * Siegquote) lag unter der Leiste. Der Abstand muss deshalb
+     * dieselbe Groesse mitrechnen wie die Leiste. */
+    .tabs-container { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+    .footer { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ── Der Datenraum-Ausweis ────────────────────────────────────────────

@@ -3395,7 +3395,7 @@
                  * sonst zuruecksetzen. Wer hier wieder "padding: 15px"
                  * schreibt, versteckt das Datum der letzten
                  * Aktualisierung dauerhaft unter der Leiste. */
-                padding: 15px 15px 64px;
+                padding: 15px 15px calc(64px + env(safe-area-inset-bottom, 0px));
             }
 
             /* Grid-Layouts optimiert */

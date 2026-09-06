@@ -71,8 +71,15 @@
     transition: opacity 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
                 visibility 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
                 transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    /* Rueckfall ohne JavaScript; menueHoeheAnpassen setzt den echten Wert. */
+    /* Rueckfall ohne JavaScript; menueHoeheAnpassen setzt den echten Wert.
+     *
+     * svh statt vh (06.09.2026): 100vh ist in Safari auf iOS die GROSSE
+     * Ansichtshoehe, also die mit eingeklappten Browserleisten. Der
+     * Rueckfall war damit auf dem Telefon rund 100px zu hoch und lief
+     * unten aus dem Bild. 100svh ist die kleine — die, die immer da
+     * ist. Wo svh fehlt, greift die vh-Zeile darueber. */
     max-height: calc(100vh - 90px);
+    max-height: calc(100svh - 90px);
     overflow-y: auto;
 }
 .main-menu-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }

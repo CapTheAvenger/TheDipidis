@@ -91,8 +91,35 @@ function menueHoeheAnpassen(drop) {
         r = drop.getBoundingClientRect();
     }
     const oben = Math.max(r.top, 8);
+
+    /* SICHTBARE Hoehe, nicht window.innerHeight.
+     *
+     * BEFUND (06.09.2026, vom Betreiber mit Bildschirmfoto gemeldet):
+     * auf dem iPhone lief das Menue unten aus dem Bild und die letzten
+     * vier Eintraege (Mein Profil, Side Quest, Anleitung, Quellen &
+     * Methodik) lagen ueber dem Seiteninhalt statt im Kasten.
+     *
+     * `window.innerHeight` meldet in Safari auf iOS die GROSSE
+     * Ansichtshoehe — die, die gaelte, wenn die Adresszeile und die
+     * untere Browserleiste eingeklappt sind. Wer nach unten gescrollt
+     * hat, sieht genau das; tippt er dann auf das Menue, fahren die
+     * Leisten wieder aus und es bleiben rund 100px weniger uebrig. Der
+     * Deckel war da schon gesetzt und blieb zu gross.
+     *
+     * `visualViewport.height` meldet, was WIRKLICH zu sehen ist, und
+     * aendert sich mit den Leisten. Der Rueckfall bleibt innerHeight
+     * fuer Browser ohne visualViewport.
+     *
+     * Dazu die eigene Tableiste: sie ist fixiert und liegt ueber dem
+     * Seitenende. Ohne sie abzuziehen endet das Menue unter ihr.
+     */
+    const sicht = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    const leiste = document.getElementById('dsTabbarHost');
+    const leisteHoch = (leiste && getComputedStyle(leiste).display !== 'none')
+        ? Math.round(leiste.getBoundingClientRect().height)
+        : 0;
     // 240 als Boden: lieber ein rollbares Menue als ein zweizeiliges.
-    const platz = Math.max(240, Math.round(window.innerHeight - oben - 16));
+    const platz = Math.max(240, Math.round(sicht - oben - leisteHoch - 8));
     drop.style.maxHeight = platz + 'px';
 
     /* Auf eine ganze Zeile abrunden.
@@ -167,13 +194,41 @@ function menueBeobachtungStarten(drop) {
 }
 function menueBeobachtungBeenden() {
     if (_menueBeobachter) { _menueBeobachter.disconnect(); _menueBeobachter = null; }
+    _sichtBeobachtungBeenden();
+}
+
+/* Nachrechnen, wenn sich die SICHTBARE Hoehe aendert.
+ *
+ * Auf iOS fahren Adresszeile und untere Leiste beim Tippen und Rollen
+ * ein und aus; visualViewport meldet das, window.resize NICHT. Ohne
+ * dieses Nachrechnen bliebe der Deckel auf dem Wert stehen, der beim
+ * Oeffnen galt — genau der Fall aus dem Bildschirmfoto vom 06.09.2026.
+ *
+ * Beendet wird die Beobachtung beim Schliessen, sonst rechnet sie
+ * weiter fuer ein Menue, das niemand sieht.
+ */
+var _sichtHandler = null;
+function _sichtBeobachtungStarten(drop) {
+    if (!window.visualViewport) return;
+    _sichtBeobachtungBeenden();
+    _sichtHandler = function () {
+        if (drop.classList.contains('show')) menueHoeheAnpassen(drop);
+    };
+    window.visualViewport.addEventListener('resize', _sichtHandler);
+    window.visualViewport.addEventListener('scroll', _sichtHandler);
+}
+function _sichtBeobachtungBeenden() {
+    if (!_sichtHandler || !window.visualViewport) { _sichtHandler = null; return; }
+    window.visualViewport.removeEventListener('resize', _sichtHandler);
+    window.visualViewport.removeEventListener('scroll', _sichtHandler);
+    _sichtHandler = null;
 }
 
 function toggleMainMenu() {
     const drop = document.getElementById('mainMenuDropdown');
     const trig = document.getElementById('mainMenuTrigger');
     const open = drop.classList.toggle('show');
-    if (open) { menueHoeheAnpassen(drop); menueBeobachtungStarten(drop); }
+    if (open) { menueHoeheAnpassen(drop); menueBeobachtungStarten(drop); _sichtBeobachtungStarten(drop); }
     else { menueBeobachtungBeenden(); }
     trig.classList.toggle('open', open);
     // aria-expanded stand fest auf "false" im Markup und wurde nie

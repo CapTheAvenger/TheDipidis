@@ -191,7 +191,7 @@ describe('Mobil: die Tableiste verdeckt die Fusszeile nicht', () => {
         // Fusszeile steht dahinter (index.html: main endet 2882,
         // footer folgt 2889) und lag deshalb dauerhaft unter der
         // fixierten Leiste, nicht wegscrollbar.
-        assert.match(NAV, /\.footer \{ padding-bottom: 64px; \}/,
+        assert.match(NAV, /\.footer \{ padding-bottom: calc\(64px \+ env\(safe-area-inset-bottom/,
             'die Fusszeile liegt wieder unter der Tableiste');
     });
 
@@ -209,9 +209,27 @@ describe('Mobil: die Tableiste verdeckt die Fusszeile nicht', () => {
         // 48px nicht. Diese Zusage haelt die Zahlen aneinander.
         const knopf = NAV.match(/\.ds-tabbar-btn \{[^}]*min-height:\s*(\d+)px/);
         assert.ok(knopf, 'min-height der Tabbar-Knoepfe nicht mehr auffindbar');
-        const abstand = NAV.match(/\.footer \{ padding-bottom: (\d+)px; \}/);
+        const abstand = NAV.match(/\.footer \{ padding-bottom: calc\((\d+)px \+ ([^)]*\)[^;]*)\); \}/);
+        assert.ok(abstand, 'die .footer-Regel in ds-nav.css ist nicht mehr auffindbar');
         assert.ok(Number(abstand[1]) > Number(knopf[1]),
             `Abstand ${abstand[1]}px deckt Leiste von ${knopf[1]}px nicht ab`);
+
+        /* Und der sichere Bereich muss mitgerechnet werden.
+         *
+         * BEFUND (06.09.2026, Bildschirmfoto vom Betreiber): die Leiste
+         * selbst waechst um env(safe-area-inset-bottom) (ds-nav.css bei
+         * .ds-tabbar), der Abstand tat es nicht. Auf einem iPhone mit
+         * Home-Indikator sind das 34px — die Leiste ist dort 90px hoch,
+         * reserviert waren 64px, also lagen 26px Inhalt darunter. Die
+         * untere Zeile der Deck-Kacheln (Anteil, Siegquote) war
+         * abgeschnitten. Eine feste Zahl kann das nicht abdecken, weil
+         * die Groesse vom Geraet kommt. */
+        assert.match(abstand[2], /safe-area-inset-bottom/,
+            'der Abstand rechnet den sicheren Bereich nicht mit — auf Geraeten '
+            + 'mit Home-Indikator waechst die Leiste darum, der Abstand nicht');
+        assert.match(NAV, /\.ds-tabbar \{[\s\S]*?padding-bottom: env\(safe-area-inset-bottom/,
+            'die Leiste rechnet den sicheren Bereich nicht mehr mit — dann ist '
+            + 'der Zuschlag im Abstand falsch und gehoert ebenfalls weg');
     });
 
     it('die 430px-Regel setzt den Abstand nicht wieder zurueck', () => {
@@ -232,9 +250,19 @@ describe('Mobil: die Tableiste verdeckt die Fusszeile nicht', () => {
         const werte = kurz[1].trim().split(/\s+/);
         assert.ok(werte.length >= 3,
             `"padding: ${kurz[1].trim()}" setzt den unteren Abstand wieder auf denselben Wert`);
-        const unten = Number(String(werte[2]).replace('px', ''));
+        // Seit dem 06.09.2026 steht dort calc(64px + env(...)); die drei
+        // Werte sind also "15px", "15px", "calc(64px" … — der untere
+        // Wert wird deshalb aus dem calc() gelesen, nicht aus dem
+        // dritten Feld.
+        const untenRoh = kurz[1].trim();
+        const ausCalc = untenRoh.match(/calc\((\d+)px \+ ([^)]*\)[^)]*)\)\s*$/);
+        const unten = ausCalc ? Number(ausCalc[1]) : Number(String(werte[2]).replace('px', ''));
         const knopf = Number(NAV.match(/\.ds-tabbar-btn \{[^}]*min-height:\s*(\d+)px/)[1]);
         assert.ok(unten > knopf,
             `unterer Abstand ${unten}px deckt Leiste von ${knopf}px nicht ab`);
+        assert.ok(ausCalc && /safe-area-inset-bottom/.test(ausCalc[2]),
+            'auch die Kurzschreibweise im 430px-Block muss den sicheren '
+            + 'Bereich mitrechnen — sie laedt spaeter und gewinnt sonst gegen '
+            + 'die Regel in ds-nav.css');
     });
 });

@@ -2545,13 +2545,63 @@
                 const v = parseLocaleNumber(s || '0', 0);
                 return Number.isFinite(v) ? v : 0;
             };
+            /* ── BEIDE RICHTUNGEN LESEN ──────────────────────────
+             *
+             * BEFUND (Agententeam B, 06.09.2026, nachgemessen).
+             * Dieser Block las nur Zeilen, in denen UNSER Deck in der
+             * Spalte `deck_name` steht. Die Datei fuehrt ein Paar aber
+             * nicht immer beidseitig: die grossen Decks bekommen eine
+             * volle Matchup-Tabelle, kleinere nur eine Zeile gegen die
+             * grossen. Fuer Mega Excadrill hiess das gemessen:
+             *
+             *   20 Gegner vorwaerts  = 74,16 % des Feldes
+             *   78 Gegner rueckwaerts, davon 76 mit Feldanteil
+             *                        = 25,42 % des Feldes, weggeworfen
+             *   zusammen             = 99,58 %
+             *
+             * Weggeworfen wurden ausgerechnet die SCHLECHTESTEN
+             * Matchups: Ethan's Typhlosion 19,0 % auf 100 Partien,
+             * Ceruledge 22,5 % auf 80, Lopunny Dusknoir 35,8 % auf 67
+             * (und von 0,03 % auf 1,94 % Feldanteil gewachsen). Der
+             * Nenner wurde ueber den Rest normiert, die Zahl sah also
+             * vollstaendig aus.
+             *
+             * Es entschied nicht die Datenlage, sondern die
+             * Zeilenrichtung in einer CSV. Meta Call macht es laengst
+             * richtig (`getBaseMatchup`), dieses Panel nicht.
+             *
+             * Wo ein Paar DOCH beidseitig steht, sind die Zahlen exakt
+             * spiegelbildlich — nachgemessen ueber alle 20 gemeinsamen
+             * Gegner von Mega Excadrill: groesste Abweichung zwischen
+             * `wr` und `100 - wr_rueck` ist 0,000 pp. Die
+             * Vorwaertszeile hat trotzdem Vorrang, weil sie die
+             * Originalrichtung ist. */
+            const _bilanzAus = (txt) => {
+                const m = /^\s*(\d+)\s*-\s*(\d+)\s*-\s*(\d+)\s*$/.exec(String(txt || ''));
+                if (!m) return null;
+                return { s: +m[1], n: +m[2], u: +m[3] };
+            };
             const wrByOpp = {};
+            const _eintragen = (key, name, wr, bilanz, richtung) => {
+                if (!key || !Number.isFinite(wr)) return;
+                const da = wrByOpp[key];
+                if (da && da.richtung === 'vor') return;   // Vorwaerts gewinnt
+                wrByOpp[key] = { opponent: name, wr, bilanz, richtung };
+            };
             rows.forEach(r => {
                 const d = String(r.deck_name || '').trim().toLowerCase();
-                if (d !== target && d !== stripped) return;
-                const opp = String(r.opponent || '').trim();
+                const o = String(r.opponent  || '').trim().toLowerCase();
                 const wr = parseWr(r.win_rate);
-                if (opp && Number.isFinite(wr)) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
+                const bil = _bilanzAus(r.record);
+                if (d === target || d === stripped) {
+                    _eintragen(o, String(r.opponent || '').trim(), wr, bil, 'vor');
+                } else if (o === target || o === stripped) {
+                    /* Gespiegelt: unsere Quote ist die Gegenquote, und in
+                       der Bilanz tauschen Siege und Niederlagen die
+                       Plaetze. Unentschieden bleiben Unentschieden. */
+                    _eintragen(d, String(r.deck_name || '').trim(), 100 - wr,
+                               bil ? { s: bil.n, n: bil.s, u: bil.u } : null, 'rueck');
+                }
             });
             if (Object.keys(wrByOpp).length === 0) return hide(`no matchup rows for ${archetype}`);
 
@@ -2597,6 +2647,7 @@
                         opponentKey: k,
                         fieldShare:  d.finalShare || 0,
                         wr:          hit.wr,
+                        bilanz:      hit.bilanz || null,
                         userWr:      Math.max(0, Math.min(100, hit.wr + bonus)),
                         matchedCats: matchedNames,
                         bonus,
@@ -2727,50 +2778,134 @@
              * Binomial mit mehr Zeilen — und das darf hier stehen, aber
              * nicht als Ueberlegenheit verkauft werden.
              *
-             * UNENTSCHIEDEN ZAEHLEN NICHT ALS SIEG. Das ist eine
-             * Vereinfachung gegenueber dem Punktemodell des Meta Calls,
-             * und sie steht deshalb IM ETIKETT: "P(>=6 Siege aus 9
-             * Runden)". Wer 6-2-1 faehrt, hat sechs Siege — wer 5-2-2
-             * faehrt, hat fuenf und steht hier darunter, obwohl beide
-             * 19 Punkte haben. Die Zahl ist damit die VORSICHTIGERE
-             * von beiden, und das ist die richtige Richtung fuer eine
-             * Zahl, an der eine Deckentscheidung haengt.
+             * HIER STAND DER NAECHSTE FALSCHE SATZ (06.09.2026).
+             * ------------------------------------------------
+             * Er lautete: "UNENTSCHIEDEN ZAEHLEN NICHT ALS SIEG. Wer
+             * 6-2-1 faehrt, hat sechs Siege — wer 5-2-2 faehrt, hat
+             * fuenf und steht hier darunter, obwohl beide 19 Punkte
+             * haben. Die Zahl ist damit die VORSICHTIGERE von beiden."
+             *
+             * Daran war ZWEIERLEI falsch, beides nachgerechnet:
+             *
+             * 1. 5-2-2 hat nicht 19 Punkte, sondern 17 (3x5 + 2). Der
+             *    Satz stand woertlich so auch im Fusstext AUF DER
+             *    SEITE. Die einzige Bilanz mit 19 Punkten und unter
+             *    sechs Siegen ist 5-0-4 — vier Unentschieden aus neun
+             *    Runden, bei einer gemessenen Quote von 0,9 % ein
+             *    praktisch unmoeglicher Fall.
+             *
+             * 2. Damit war "vorsichtiger" die GENAUE UMKEHRUNG.
+             *    ">=19 Punkte" ist praktisch eine echte Teilmenge von
+             *    ">=6 Siege". Gemessen an einer Rundenquote von 47,9 %:
+             *
+             *      U-Quote     P(>=6 Siege)   P(>=19 Punkte)
+             *        0,9 %        21,4 %          8,1 %      2,6x
+             *       11,0 %        21,4 %         14,4 %      1,5x
+             *
+             *    Der Fall, der NUR bei Punkten zaehlt, hat 0,000 %
+             *    Wahrscheinlichkeit; der Fall, der nur bei Siegen
+             *    zaehlt (6-3-0: sechs Siege, aber nur 18 Punkte), hat
+             *    13,3 %. Die Siegzaehlung war also nicht die
+             *    vorsichtige Lesart, sondern die um Faktor 2,6
+             *    grosszuegigere — an einer Zahl, an der eine
+             *    Deckentscheidung haengt.
+             *
+             * WAS JETZT GERECHNET WIRD: die Frage selbst.
+             * -------------------------------------------
+             * Tag 2 haengt an PUNKTEN, nicht an Siegen, und die Seite
+             * weiss das laengst — `MAJOR_DAY2_POINTS = { 8: 16, 9: 19 }`
+             * in js/app-meta-call.js. Also faltet dieser Block jetzt
+             * ueber Punkte: Sieg 3, Unentschieden 1, Niederlage 0,
+             * Schwelle 19 aus neun Runden. Dieselbe Rechnung wie
+             * `calcDay2()` dort.
+             *
+             * DIE UNENTSCHIEDENQUOTE IST DIE GROESSTE STELLSCHRAUBE,
+             * weil ein Unentschieden einen Punkt bringt. Sie wird
+             * deshalb GEMESSEN — aus den Bilanzen der Gegner, die
+             * dieses Panel ohnehin liest, nach Feldanteil gewichtet.
+             * Fuer Mega Excadrill sind das 0,9 %.
+             *
+             * Und das ist zugleich die ehrliche Vorsicht, die der alte
+             * Satz nur behauptet hat: online wird kaum unentschieden
+             * gespielt (1,3 % ueber 175.000 Partien), auf
+             * Praesenzturnieren sehr viel oefter (Worlds SF 11,0 %,
+             * alle Majors zusammen 15,3 %). Weil Unentschieden Punkte
+             * bringen, faellt die Chance mit der niedrigen
+             * Onlinequote NIEDRIGER aus — 8,1 % statt 14,4 %. Diesmal
+             * ist "vorsichtiger" gemessen und nicht behauptet, und der
+             * Fusstext sagt dem Leser genau das.
              *
              * Die Rundenzahl ist fest neun, weil dieser Block kein
              * Turnierformular hat. Meta Call rechnet dieselbe Frage
              * mit den dort eingestellten Runden und Punkten; wer es
              * genauer will, geht dorthin. Steht die Zahl hier, muss
              * auch dastehen, worauf sie beruht — das tut sie. */
-            const RUNDEN = 9, SIEGE_FUER_TAG2 = 6;
+            /* Neun Runden, Schwelle 19 Punkte. Die Quelle dieser
+               Regel ist `MAJOR_DAY2_POINTS = { 8: 16, 9: 19 }` in
+               js/app-meta-call.js — sie steht dort als Modulkonstante
+               und laesst sich nicht importieren, deshalb hier
+               gespiegelt. `test-zwei-listen.js` prueft, dass beide
+               Fassungen uebereinstimmen. */
+            const RUNDEN = 9, PUNKTE_FUER_TAG2 = 19;
 
-            /* Die Siegverteilung ueber `RUNDEN` Runden gegen das
-               gewichtete Feld. `quoteVon` liefert je Gegner die
-               Siegwahrscheinlichkeit dieser Liste. */
-            const siegVerteilung = (quoteVon) => {
-                let dp = new Float64Array(RUNDEN + 1);
+            /* Die gemessene Unentschiedenquote — aus genau den
+               Bilanzen, die dieses Panel ohnehin liest, nach
+               Feldanteil gewichtet. Kein fester Wert: eine erfundene
+               Quote waere hier die groesste Fehlerquelle von allen,
+               weil ein Unentschieden einen Punkt bringt. */
+            let uGew = 0, uNenner = 0;
+            paired.forEach(o => {
+                if (!o.bilanz) return;
+                const n = o.bilanz.s + o.bilanz.n + o.bilanz.u;
+                if (n <= 0) return;
+                const gew = o.fieldShare / totalShare;
+                uGew    += gew * (o.bilanz.u / n);
+                uNenner += gew;
+            });
+            const pUnentschieden = uNenner > 0 ? (uGew / uNenner) : 0;
+
+            /* Die Punkteverteilung ueber `RUNDEN` Runden gegen das
+               gewichtete Feld. Sieg 3, Unentschieden 1, Niederlage 0 —
+               dieselbe Rechnung wie `calcDay2()` im Meta Call.
+               `quoteVon` liefert je Gegner die Siegwahrscheinlichkeit
+               dieser Liste; die Unentschiedenquote ist gemessen und
+               fuer alle Gegner gleich, weil die Datei sie nicht je
+               Paarung belastbar hergibt. */
+            const punktVerteilung = (quoteVon) => {
+                const MAXP = RUNDEN * 3;
+                let dp = new Float64Array(MAXP + 1);
                 dp[0] = 1;
                 for (let r = 0; r < RUNDEN; r++) {
-                    const neu = new Float64Array(RUNDEN + 1);
-                    for (let k = 0; k <= r; k++) {
+                    const neu = new Float64Array(MAXP + 1);
+                    for (let k = 0; k <= MAXP; k++) {
                         if (dp[k] < 1e-15) continue;
                         for (const o of paired) {
                             const anteil = o.fieldShare / totalShare;
                             if (anteil <= 1e-9) continue;
+                            /* Die Matchup-Quote der Datei ist S/(S+N) —
+                               Unentschieden sind dort schon aus dem
+                               Nenner gestrichen. Sie beschreibt also
+                               die ENTSCHIEDENEN Partien, und genau so
+                               wird sie hier auf den Rest verteilt. */
                             const pw = Math.max(0, Math.min(1, quoteVon(o) / 100));
-                            neu[k + 1] += dp[k] * anteil * pw;
-                            neu[k]     += dp[k] * anteil * (1 - pw);
+                            const rest = 1 - pUnentschieden;
+                            neu[Math.min(MAXP, k + 3)] += dp[k] * anteil * rest * pw;
+                            neu[Math.min(MAXP, k + 1)] += dp[k] * anteil * pUnentschieden;
+                            neu[k]                     += dp[k] * anteil * rest * (1 - pw);
                         }
                     }
                     dp = neu;
                 }
                 let p = 0;
-                for (let k = SIEGE_FUER_TAG2; k <= RUNDEN; k++) p += dp[k];
+                for (let k = PUNKTE_FUER_TAG2; k <= MAXP; k++) p += dp[k];
                 return p * 100;
             };
-            const pVanilla = siegVerteilung(o => o.wr);
-            const pUser    = siegVerteilung(o => o.userWr);
-            const sVanilla = RUNDEN * vanillaWr / 100;
-            const sUser    = RUNDEN * userWr / 100;
+            const pVanilla = punktVerteilung(o => o.wr);
+            const pUser    = punktVerteilung(o => o.userWr);
+            /* Erwartete Punkte statt erwarteter Siege — dieselbe
+               Waehrung wie die Kopfzahl darueber. */
+            const sVanilla = RUNDEN * ((1 - pUnentschieden) * 3 * vanillaWr / 100 + pUnentschieden);
+            const sUser    = RUNDEN * ((1 - pUnentschieden) * 3 * userWr    / 100 + pUnentschieden);
             /* Gerundet vor der Differenz — siehe `auf1` oben. Gilt fuer
                die Prozentzeile UND fuer die erwarteten Siege darunter. */
             const pDelta   = auf1(pUser) - auf1(pVanilla);
@@ -2802,7 +2937,7 @@
                 </div>
                 <div class="uv-tag2-block">
                     <div class="uv-tag2-titel" title="${escapeHtml(t('matchup.uvTag2Titel'))}">${
-                        escapeHtml(t('matchup.uvTag2Label').replace('{k}', SIEGE_FUER_TAG2).replace('{n}', RUNDEN))
+                        escapeHtml(t('matchup.uvTag2Label').replace('{k}', PUNKTE_FUER_TAG2).replace('{n}', RUNDEN))
                     }</div>
                     <div class="uv-tag2-reihe">
                         <div class="uv-tag2-spalte">
@@ -2821,7 +2956,7 @@
                             <span class="uv-tag2-stuetze">${escapeHtml(t('matchup.uvTag2Siege').replace('{n}', signed(sDelta)))}</span>
                         </div>
                     </div>
-                    <div class="uv-tag2-fuss">${escapeHtml(t('matchup.uvTag2Fuss'))}</div>
+                    <div class="uv-tag2-fuss">${escapeHtml(t('matchup.uvTag2Fuss').replace('{u}', fmt(pUnentschieden * 100)))}</div>
                 </div>`;
 
             const breakdownLines = [];

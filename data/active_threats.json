@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T15:36:42Z",
+  "generated_at": "2026-09-06T16:33:33Z",
   "format_window": "PBL",
   "format_label": "TEF-PBL",
   "legal_format_min_set": "TEF",
@@ -39,7 +39,7 @@
             {
               "archetype": "Cynthia's Garchomp",
               "share_in_archetype": 0.25,
-              "meta_share": 0.0122
+              "meta_share": 0.0123
             },
             {
               "archetype": "Manectric Eelektrik",
@@ -59,7 +59,7 @@
             {
               "archetype": "Toxtricity Box",
               "share_in_archetype": 0.55,
-              "meta_share": 0.0065
+              "meta_share": 0.0066
             },
             {
               "archetype": "Dragapult Dudunsparce",
@@ -117,7 +117,7 @@
             {
               "archetype": "Dragapult Blaziken",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0571
+              "meta_share": 0.057
             },
             {
               "archetype": "Dragapult Dusknoir",
@@ -132,7 +132,7 @@
             {
               "archetype": "Mega Lucario",
               "share_in_archetype": 0.4,
-              "meta_share": 0.0204
+              "meta_share": 0.0203
             },
             {
               "archetype": "Lucario Hariyama",
@@ -164,7 +164,7 @@
       ]
     },
     "ability_lock": {
-      "weighted_meta_share": 0.1129,
+      "weighted_meta_share": 0.113,
       "cards": [
         {
           "card_id": "DRI|180",
@@ -178,7 +178,7 @@
             {
               "archetype": "Dragapult Blaziken",
               "share_in_archetype": 0.35,
-              "meta_share": 0.0571
+              "meta_share": 0.057
             },
             {
               "archetype": "Dragapult Dusknoir",
@@ -193,14 +193,14 @@
             {
               "archetype": "Toxtricity Box",
               "share_in_archetype": 0.9,
-              "meta_share": 0.0065
+              "meta_share": 0.0066
             }
           ]
         }
       ]
     },
     "retreat_lock": {
-      "weighted_meta_share": 0.206,
+      "weighted_meta_share": 0.2061,
       "cards": [
         {
           "card_id": "MEG|1",
@@ -230,7 +230,7 @@
             {
               "archetype": "Lopunny Dusknoir",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0069
+              "meta_share": 0.007
             }
           ]
         },

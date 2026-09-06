@@ -434,16 +434,97 @@ CSV_FIELDS = [
 ]
 
 
+def _bestand_lesen(out_path: str) -> Tuple[List[str], List[Dict]]:
+    """Kopfzeile und Zeilen der vorhandenen Datei. Leere Rueckgabe,
+    wenn es sie nicht gibt."""
+    if not os.path.exists(out_path):
+        return [], []
+    with open(out_path, newline='', encoding='utf-8') as f:
+        rd = csv.DictReader(f)
+        return list(rd.fieldnames or []), list(rd)
+
+
+def _schluessel(r: Dict) -> Tuple[str, str, str]:
+    """Die Einheit, die ein erneuter Lauf ersetzt: die Deckliste EINES
+    Spielers bei EINEM Turnier.
+
+    Nicht die einzelne Karte. Beim Aufraeumen am 06.09.2026 habe ich
+    zuerst `(Turnier, Spieler, Deck, Kartenname)` genommen und damit
+    beinahe 122 echte Zeilen geloescht: ein Spieler fuehrt sehr wohl
+    2x Abra TWM 80 UND 2x Abra MEG 54 — derselbe Name, zwei Drucke,
+    zwei berechtigte Zeilen. Genau die Unterscheidung, die dieser
+    Scraper seit PR #687 ueberhaupt erst sichtbar macht.
+
+    Den Druck in den Schluessel zu nehmen, hilft aber auch nicht: beim
+    Neulauf AENDERT sich der Druck (ASC 207 -> DRI 176), die alte Zeile
+    haette einen anderen Schluessel und bliebe stehen. Ersetzt wird
+    deshalb die ganze Deckliste auf einmal.
+    """
+    return (
+        str(r.get('limitless_tournament_id', '') or ''),
+        str(r.get('player_name', '') or ''),
+        str(r.get('deck_slug', '') or ''),
+    )
+
+
 def write_rows(rows: List[Dict], out_path: str, append: bool = True) -> None:
-    """Append rows to the output CSV. Header written when file is new
-    or when append=False."""
-    write_header = (not append) or (not os.path.exists(out_path))
-    mode = 'a' if append and os.path.exists(out_path) else 'w'
-    with open(out_path, mode, newline='', encoding='utf-8') as f:
+    """Schreibt `rows` in die Ausgabedatei.
+
+    Zwei Fallen, die am 06.09.2026 im echten Lauf zugeschnappt sind und
+    seitdem hier abgefangen werden:
+
+    1. **Kopfzeile veraltet.** Das alte `write_rows` haengte mit dem
+       AKTUELLEN `CSV_FIELDS` an eine Datei an, deren Kopfzeile noch
+       die alte Spaltenliste trug. Als PR #687 `druck_quelle` einfuehrte,
+       schrieb der naechste Lauf 21-Feld-Zeilen unter eine 20-Feld-
+       Kopfzeile: `seite` landete in der Spalte `scraped_at`, alles
+       dahinter war verschoben. Die Datei sah nur beim Lesen kaputt aus,
+       nicht beim Schreiben — der Lauf meldete Erfolg.
+       Jetzt gilt: weicht die vorhandene Kopfzeile von `CSV_FIELDS` ab,
+       wird die GANZE Datei neu geschrieben und die alten Zeilen werden
+       mitgenommen (fehlende Felder bleiben leer, statt zu verrutschen).
+
+    2. **Anhaengen verdoppelt.** Ein Lauf ohne `--resume` holt Turniere
+       neu, die schon in der Datei stehen. Angehaengt standen sie danach
+       zweimal drin — einmal mit den alten falschen Drucken, einmal mit
+       den richtigen. 889 Schluessel doppelt, gemessen am 06.09.2026.
+       Jetzt ersetzt ein neu geschriebenes Deck das alte mit demselben
+       Schluessel (Turnier, Spieler, Deck) — siehe `_schluessel`.
+
+    `append=False` schreibt weiterhin kompromisslos neu.
+    """
+    kopf_alt, bestand = _bestand_lesen(out_path) if append else ([], [])
+    kopf_passt = (kopf_alt == CSV_FIELDS)
+
+    if append and bestand and kopf_passt:
+        # Kopfzeile stimmt: nur die ersetzten Schluessel herausnehmen und
+        # anhaengen. Das ist der schnelle Normalfall.
+        neue = {_schluessel(r) for r in rows}
+        ueberlebende = [r for r in bestand if _schluessel(r) not in neue]
+        if len(ueberlebende) == len(bestand):
+            with open(out_path, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
+                for r in rows:
+                    writer.writerow({k: r.get(k, '') for k in CSV_FIELDS})
+            return
+        ersetzt = len(bestand) - len(ueberlebende)
+        logger.info("    %d vorhandene Zeile(n) werden durch neue ersetzt", ersetzt)
+        auszugeben = ueberlebende + rows
+    elif append and bestand and not kopf_passt:
+        logger.warning(
+            "    Kopfzeile der vorhandenen Datei weicht ab (%d statt %d Spalten) — "
+            "Datei wird komplett neu geschrieben, alte Zeilen werden uebernommen",
+            len(kopf_alt), len(CSV_FIELDS))
+        neue = {_schluessel(r) for r in rows}
+        ueberlebende = [r for r in bestand if _schluessel(r) not in neue]
+        auszugeben = ueberlebende + rows
+    else:
+        auszugeben = list(rows)
+
+    with open(out_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
-        if write_header:
-            writer.writeheader()
-        for r in rows:
+        writer.writeheader()
+        for r in auszugeben:
             # Restrict to known fields (writer would raise on extras)
             writer.writerow({k: r.get(k, '') for k in CSV_FIELDS})
 

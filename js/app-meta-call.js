@@ -2210,12 +2210,14 @@ window.MetaCall = (function () {
       if (opp.name === '_junk') continue;
       const ok = normalize(opp.name);
       if (ok === deckKey) continue;
+      let paarung = null;
       let pWin;
       let source = 'online';
       let games  = 0;
       if (useBlended) {
         const blended = getBaseMatchup(deckKey, ok);
         if (!blended || typeof blended.pWin !== 'number') continue;
+        paarung = blended;
         pWin = blended.pWin;
         // Diagnostic for tooltip surfacing: stringify the source list
         // so the per-deck Top / Worst rows can describe whether the
@@ -2232,11 +2234,13 @@ window.MetaCall = (function () {
       } else {
         const m = matchupMap?.[deckKey]?.[ok];
         if (!m || typeof m.pWin !== 'number') continue;
+        paarung = m;
         pWin = m.pWin;
       }
       // Round to 1 decimal — IEEE-754 noise (0.55 → 55.00000000000001)
-      // would otherwise leak into renderers.
-      const wr = Math.round(pWin * 1000) / 10;
+      // would otherwise leak into renderers. Angezeigt wird die
+      // Hauskonvention S/(S+N), nicht die Kettenwahrscheinlichkeit.
+      const wr = Math.round(_anzeigeQuote(paarung) * 10) / 10;
       const share = opp.predictedShare || opp.onlineShare || 0;
       if (share < 0.5) continue;
       candidates.push({ opponent: opp.name, wr, share, source, games });
@@ -7374,17 +7378,57 @@ window.MetaCall = (function () {
         const dk = normalize(r.deck_name);
         const ok = normalize(r.opponent);
         if (!_matchupMap[dk]) _matchupMap[dk] = {};
-        let pWin, pTie, pLoss;
+        /* ══════════════════════════════════════════════════════════
+           ZWEI FEHLER AN EINER STELLE (06.09.2026, gemessen an
+           data/limitless_online_decks_matchups.csv, 1.702 Zeilen).
+
+           1. EIN 3-0 KAM ALS 100 % IN DIE KETTE. Diese Karte wurde als
+              einzige nie geglaettet. js/matchup-glaettung.js gibt es
+              seit dem 19.08.2026, sein Kopf nennt woertlich die Faelle,
+              die hier standen — "Sylveon vs Mega Excadrill 0-4 ->
+              0,0 %" —, und die Heatmap wie auch die Major-Karte
+              (_collapseAgg, :7661) benutzen es. Der Meta Call nicht.
+
+              Gemessen: 22 Paarungen erreichten calcDay2 mit pWin =
+              100 %, 59 mit 0 %. Alle auf 3 bis 13 Partien. In einer
+              Kette ueber acht Runden heisst 100 %: dieses Match ist
+              schon gewonnen, bevor es gespielt wurde.
+
+           2. DIE ANGEZEIGTE QUOTE WAR EINE ANDERE ALS IN DER HEATMAP.
+              pWin = S/(S+N+U) ist fuer die KETTE richtig — drei
+              Ausgaenge muessen sich zu eins addieren. Nur wurde
+              derselbe Wert auch als "WR" hingeschrieben
+              (Begegnungsliste, Quotentabelle), wo das Haus S/(S+N)
+              rechnet. 523 von 1.702 Zeilen (30,7 %) weichen ab, Median
+              0,93 pp, Maximum 26,67 pp: Steven's Metagross vs
+              Cynthia's Garchomp steht auf 2-1-2 und las sich als
+              40,0 % statt 66,7 %.
+
+           BEIDES LOEST DERSELBE SCHRITT. Die belastbare Groesse ist die
+           geglaettete Quote S/(S+N) — dieselbe Zahl wie in der Heatmap.
+           Sie wird als `quote` mitgefuehrt und ANGEZEIGT; die
+           Kettenwahrscheinlichkeiten werden aus ihr und dem
+           Unentschieden-Anteil abgeleitet. Der Rohwert bleibt als `roh`
+           erhalten, damit der Tooltip ihn weiter zeigen kann.
+           ══════════════════════════════════════════════════════════ */
+        let pWin, pTie, pLoss, quote, roh;
+        const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;
         if (r.record && r.record.includes('-')) {
           const parts = r.record.split(/\s*-\s*/).map(s => parseInt(s.trim(), 10));
           const W = parts[0] || 0, L = parts[1] || 0, T = parts[2] || 0;
           const tot = W + L + T;
-          pWin  = tot > 0 ? W / tot : 0.50;
+          const entschieden = W + L;
+          roh = entschieden > 0 ? (W / entschieden) * 100 : 50;
+          quote = (G && typeof G.quote === 'function') ? G.quote(W, L) : roh;
           pTie  = tot > 0 ? T / tot : 0.02;
-          pLoss = tot > 0 ? L / tot : 0.48;
+          const rest = Math.max(0, 1 - pTie);
+          pWin  = (quote / 100) * rest;
+          pLoss = Math.max(0, rest - pWin);
         } else {
-          pWin  = parseEU(r.win_rate) / 100;
+          roh   = parseEU(r.win_rate);
+          quote = roh;
           pTie  = 0.02;
+          pWin  = (quote / 100) * (1 - pTie);
           pLoss = Math.max(0, 1 - pWin - pTie);
         }
         /* DER NENNER WIRD MITGEFUEHRT (05.09.2026). Die Spalte
@@ -7403,7 +7447,7 @@ window.MetaCall = (function () {
           }
           return 0;
         })();
-        _matchupMap[dk][ok] = { pWin, pTie, pLoss, partien };
+        _matchupMap[dk][ok] = { pWin, pTie, pLoss, partien, quote, roh };
       });
 
       // Predictor 5.3 — Per-Variant Matchup Adjustments. The online
@@ -8183,6 +8227,41 @@ window.MetaCall = (function () {
     return wert;
   }
   if (typeof window !== 'undefined') window._mcJunkWinRatePct = _junkWinRatePct;
+
+  /**
+   * Die Quote, die ANGEZEIGT wird — in der Hauskonvention S/(S+N).
+   *
+   * Warum das nicht dasselbe ist wie pWin: die Kette braucht drei
+   * Wahrscheinlichkeiten, die sich zu eins addieren, also S/(S+N+U).
+   * Die Heatmap, die Archetypkarte und die Matchup-Tabelle rechnen
+   * S/(S+N) und fuehren die Unentschieden getrennt. Beide Zahlen sind
+   * richtig, sie beantworten nur verschiedene Fragen — und bis zum
+   * 06.09.2026 stand die eine dort, wo die andere hingehoert: 523 von
+   * 1.702 Paarungen wichen ab, bis zu 26,67 pp.
+   *
+   * Aus pWin und pLoss zurueckgerechnet und nicht durchgereicht, weil
+   * das Verhaeltnis alle Zwischenschritte ueberlebt — die Mischung aus
+   * Online und Major, die Predictor-5.3-Korrektur und die Umstellung
+   * auf die Praesenz-Unentschieden-Quote lassen es unangetastet.
+   */
+  function _anzeigeQuote(m) {
+    if (!m) return 50;
+    if (!Number.isFinite(m.pWin)) {
+      return Number.isFinite(m.quote) ? m.quote : 50;
+    }
+    /* Fehlt pLoss, wird es aus dem Rest gebildet — eine Paarung, die
+       nur pWin fuehrt, hat keine bekannten Unentschieden, und dann
+       sind S/(S+N) und S/(S+N+U) dieselbe Zahl. Ohne diesen Zweig
+       teilt der Helfer durch pWin allein und macht aus jedem Wert
+       100 %. */
+    const pLoss = Number.isFinite(m.pLoss)
+      ? m.pLoss
+      : Math.max(0, 1 - m.pWin - (m.pTie || 0));
+    const sn = m.pWin + pLoss;
+    if (sn > 0) return (m.pWin / sn) * 100;
+    return Number.isFinite(m.quote) ? m.quote : 50;
+  }
+  if (typeof window !== 'undefined') window._mcAnzeigeQuote = _anzeigeQuote;
 
   function getBaseMatchup(deckA, deckB) {
     if (deckB === '_junk') {
@@ -10140,7 +10219,7 @@ window.MetaCall = (function () {
     const field = buildField().filter(d => d.name !== '_junk');
     const rows  = field.map(deck => {
       const m   = getMatchup(_settings.myDeck, deck.name);
-      const wr  = Math.round(m.pWin * 100);
+      const wr  = Math.round(_anzeigeQuote(m));
       const ind = wr >= 55 ? 'favorable' : wr <= 45 ? 'unfavorable' : 'even';
       const lbl = wr >= 55 ? t('mc.favorable') : wr <= 45 ? t('mc.unfavorable') : t('mc.even');
       const ov  = _winRateOverrides[deck.name];
@@ -10215,7 +10294,7 @@ window.MetaCall = (function () {
     const encRows  = topDecks.map(deck => {
       const lambda = _settings.rounds * deck.finalShare / 100;
       const m      = getMatchup(_settings.myDeck, deck.name);
-      const wrPct  = Math.round(m.pWin * 100);
+      const wrPct  = Math.round(_anzeigeQuote(m));
       /* JEDE QUOTE TRAEGT IHREN NENNER (05.09.2026). Aus genau diesen
          Zeilen entsteht die Day-2-Chance; ohne Partienzahl war "WR 13 %"
          von "WR 73 %" nicht zu unterscheiden. Handeingestellte Werte
@@ -12474,7 +12553,7 @@ window.MetaCall = (function () {
       const isJunk   = deck.name === '_junk';
       const isCustom = !!deck.isCustom;
       const m        = getMatchup(_settings.myDeck, deck.name);
-      const wr       = Math.round(m.pWin * 100);
+      const wr       = Math.round(_anzeigeQuote(m));
       const lambda   = _settings.rounds * deck.finalShare / 100;
 
       if (i % 2 === 0) {

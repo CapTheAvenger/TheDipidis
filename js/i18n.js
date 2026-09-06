@@ -1661,6 +1661,18 @@ const translations = {
     'draw.remaining':           'remaining',
     'draw.comboTitle':          'Combo Probability',
     'draw.comboDesc':           'Select up to 4 cards — Calculated via Monte Carlo simulation (10,000 iterations)',
+    /* Der Starthand-Streifen im Deckbauer. Bis zum 06.09.2026 stand er
+       fest verdrahtet im Quelltext (js/app-features.js) und blieb
+       deshalb auch in der deutschen Oberflaeche englisch — ohne
+       data-i18n sieht die CI-Pruefung "Sprachreinheit" so etwas nicht.
+       "Mulligan" bleibt in BEIDEN Sprachen englisch: Szenesprache,
+       angeordnet am 28.08.2026. */
+    'draw.openingHand':         'Opening hand (7 cards):',
+    'draw.basicInHand':         'Basic in hand:',
+    'draw.basicInHandTitle':    'P(at least 1 Basic Pokémon in the opening 7)',
+    'draw.mulliganLabel':       'Mulligan:',
+    'draw.mulliganTitle':       'P(no Basic Pokémon = forced mulligan)',
+    'draw.basicsOfCards':       '({b} Basics / {n} cards)',
     'draw.calculate':           'Calculate Chance',
     'draw.clearSelection':      'Clear Selection',
     'draw.noCardsLeft':         'No cards left in deck!',
@@ -4242,6 +4254,14 @@ const translations = {
     'draw.remaining':           'verbleibend',
     'draw.comboTitle':          'Combo-Wahrscheinlichkeit',
     'draw.comboDesc':           'Wähle bis zu 4 Karten — Berechnung per Monte-Carlo-Simulation (10.000 Iterationen)',
+    /* Siehe den Kommentar im englischen Block: dieser Streifen war bis
+       zum 06.09.2026 nicht uebersetzt. "Mulligan" bleibt englisch. */
+    'draw.openingHand':         'Starthand (7 Karten):',
+    'draw.basicInHand':         'Basis auf der Hand:',
+    'draw.basicInHandTitle':    'P(mindestens 1 Basis-Pokémon in den ersten 7)',
+    'draw.mulliganLabel':       'Mulligan:',
+    'draw.mulliganTitle':       'P(kein Basis-Pokémon = Mulligan erzwungen)',
+    'draw.basicsOfCards':       '({b} Basis-Pokémon / {n} Karten)',
     'draw.calculate':           'Berechne Chance',
     'draw.clearSelection':      'Auswahl löschen',
     'draw.noCardsLeft':         'Keine Karten mehr im Deck!',
@@ -5216,13 +5236,40 @@ if (!I18N_SUPPORTED.includes(currentLang)) currentLang = i18nPreferredLang();
 /**
  * Return the translated string for `key` in the current language.
  * Falls back to English, then returns the key itself if nothing found.
+ *
+ * `vars` fuellt die Platzhalter `{name}` im Text. Das war bis zum
+ * 06.09.2026 NICHT so: `t(key)` nahm nur ein Argument und verwarf ein
+ * zweites stillschweigend. Ein Aufruf der Form
+ *
+ *     t(schluessel, { q: '10,6 %', n: '2.905' })
+ *
+ * sah richtig aus und lieferte das rohe Template mit `{q}` darin.
+ *
+ * (Der Schluessel wird hier bewusst NICHT ausgeschrieben: mehrere Tests
+ * zaehlen, wie oft ein Schluessel in dieser Datei vorkommt, und
+ * erwarten genau zwei Treffer — einen je Sprachtabelle. Ein Beispiel im
+ * Kommentar waere der dritte und hat die Suite am 06.09.2026 prompt
+ * rot gemacht. Der Test hat recht, das Beispiel war entbehrlich.)
+ * Gefunden hat das ein Pruefagent am 06.09.2026 — nicht ein Nutzer,
+ * und nicht der Test, der genau so aufgerufen hat.
+ *
+ * Die bestehenden Aufrufstellen ersetzen ihre Platzhalter weiter selbst
+ * per `.replace()` (z. B. js/app-meta-call.js:10341). Das bleibt gueltig:
+ * ohne `vars` verhaelt sich `t()` exakt wie vorher, Zeichen fuer Zeichen.
+ * Ein unbekannter Platzhalter bleibt stehen statt zu `undefined` zu
+ * werden — eine sichtbare Luecke ist besser als ein erfundener Wert.
  */
-function t(key) {
+function t(key, vars) {
   const lang = translations[currentLang];
-  if (lang && lang[key] !== undefined) return lang[key];
-  const fallback = translations[I18N_FALLBACK_LANG];
-  if (fallback && fallback[key] !== undefined) return fallback[key];
-  return key;                     // last resort: show the key
+  let s;
+  if (lang && lang[key] !== undefined) s = lang[key];
+  else {
+    const fallback = translations[I18N_FALLBACK_LANG];
+    s = (fallback && fallback[key] !== undefined) ? fallback[key] : key;
+  }
+  if (!vars || typeof s !== 'string') return s;   // last resort: show the key
+  return s.replace(/\{(\w+)\}/g, (ganz, name) =>
+    Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : ganz);
 }
 
 /**

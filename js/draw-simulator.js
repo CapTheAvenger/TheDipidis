@@ -408,8 +408,8 @@ function runComboCalculation() {
         let zusatz = '';
         if (erg && erg.mulliganAngewendet) {
             zusatz = de
-                ? ` · mit Mulligan-Regel (${(erg.mulliganRate || 0).toFixed(0)} % neu gezogen)`
-                : ` · mulligan rule applied (${(erg.mulliganRate || 0).toFixed(0)} % redrawn)`;
+                ? ` · mit Mulligan-Regel (${window.formatPercent(erg.mulliganRate || 0, 0)} neu gezogen)`
+                : ` · mulligan rule applied (${window.formatPercent(erg.mulliganRate || 0, 0)} redrawn)`;
         } else if (erg && erg.grund === 'keine-basis') {
             zusatz = de
                 ? ' · ohne Mulligan-Regel — im Deck steht kein Basis-Pokémon'
@@ -419,7 +419,11 @@ function runComboCalculation() {
                 ? ' · ohne Mulligan-Regel — Kartendaten nicht geladen'
                 : ' · without the mulligan rule — card data not loaded';
         }
-        display.textContent = `${chance}% ${de ? 'Chance' : 'chance'}`;
+        /* formatPercent, nicht String-Verkettung: die Zahl kommt als
+           "47.1" aus dem Worker und stand dadurch als "47.1% Chance"
+           neben "0,66€" in derselben Ansicht. Gefunden bei der
+           Live-Pruefung am 06.09.2026. */
+        display.textContent = `${window.formatPercent(wert, 1)} ${de ? 'Chance' : 'chance'}`;
         const hinweisId = 'comboResultHinweis';
         let hinweis = document.getElementById(hinweisId);
         if (!hinweis) {

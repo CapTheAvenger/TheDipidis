@@ -652,12 +652,32 @@
           <div class="past-meta-best-sub">${_escHtml(tournName || 'Limitless Online')} · ${_escHtml(ref.tournament_date)} · ${total} ${_escHtml(cardsLbl)}</div>
         </div>`;
     }
+    /* WIE VIELE LISTEN STEHEN HINTER DIESEM "TYPISCHEN BUILD"?
+       BEFUND (Agententeam B, 06.09.2026): fuer Mega Excadrill stand
+       dort woertlich "Amyverse PTCG Live Weekly #10 · 1 Decks · 60
+       Karten" unter der Ueberschrift "Aktuelles Online · Typischer
+       Build". Bei n = 1 gibt es nichts zu aggregieren — der Erklaertext
+       darueber sagt selbst "der typische AGGREGIERTE Build".
+
+       Zwei Dinge daran: der feste Plural ("1 Decks"), und die stille
+       Behauptung. Der Nenner stand ehrlich da, die Ueberschrift
+       widersprach ihm. Also wird bei einer einzigen Liste gesagt, dass
+       es eine einzige Liste ist. Ausserdem faellt das `|| 0` weg — "0
+       Decks" waere ein typischer Build aus nichts; fehlt die Angabe,
+       steht dort gar nichts statt einer Null. */
+    const _nRoh = Number(ref.total_decks_in_archetype);
+    const _n = Number.isFinite(_nRoh) && _nRoh > 0 ? _nRoh : null;
+    const _decksLbl = _n === null
+      ? _tt('cm.quickRefListenUnbekannt', 'list count unknown')
+      : _n === 1
+        ? _tt('cm.quickRefEineListe', 'a single list — not an aggregate')
+        : `${_n} ${_tt('cm.quickRefListen', 'lists')}`;
     return `
       <div class="past-meta-best-header" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
         <div class="past-meta-best-headline">
           <span class="past-meta-best-name">${_escHtml(tournName || 'Limitless Online')}</span>
         </div>
-        <div class="past-meta-best-sub">${_escHtml(ref.tournament_date)} · ${ref.total_decks_in_archetype || 0} Decks · ${total} ${_escHtml(cardsLbl)}</div>
+        <div class="past-meta-best-sub">${_escHtml(ref.tournament_date)} · ${_escHtml(_decksLbl)} · ${total} ${_escHtml(cardsLbl)}</div>
       </div>`;
   }
 

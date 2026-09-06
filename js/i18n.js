@@ -241,6 +241,11 @@ const translations = {
     'buildInfo.techIdeenBasisEnergie':  'Basic Energy',
     'buildInfo.techIdeenEntwickelt':    'Evolves from {name}',
     'buildInfo.techIdeenLeer':   'No card-text idea against your worst matchups either. The rule base holds {n} pairings dated {datum} — that is a start, not full coverage.',
+    // Die Lücke, benannt statt verschwiegen. Sie erscheint NEBEN den
+    // gefundenen Ideen, nicht statt ihrer — eine Idee gegen ein Randdeck
+    // darf die Warnung zu den Hauptgegnern nicht unterdrücken.
+    'buildInfo.techIdeenOhne':   'Nothing found against: {liste}. The rule base holds {n} pairings dated {datum} — these matchups are not covered.',
+    'buildInfo.techIdeenOhneEintrag': '{name} ({wr}, {n} games)',
     'buildInfo.nearMissIntro':   'These cards were in the candidate pool but the tech slots were full. This is where a generated list diverges from real decklists — swap by hand if you disagree.',
     'buildInfo.altSuggestionsIntro': 'For these cards the field plurality plays a different copy count than the naive round — AND that plurality group places clearly better. The builder did NOT auto-adjust; review each suggestion and decide whether to override manually.',
     'btn.import':             'Import',
@@ -1257,6 +1262,12 @@ const translations = {
     'mc.journalWeightHint':     '(Meta = weight 30 · Journal = game count)',
     'mc.day2Chance':            'Day 2 Chance',
     'mc.day2Sub':               '{pts} pts in {r} R. · {n} Players',
+    // Der Nenner unter der Tag-2-Zahl. Bis zum 06.09.2026 rechnete die
+    // Simulation ein Praesenzturnier mit der Online-Unentschieden-Quote
+    // von 2 % — auf Papier sind es rund 11 %. Wer die Zahl liest, muss
+    // sehen, mit welcher Annahme sie entstanden ist.
+    'mc.day2Unentschieden':     'Unentschieden {q} — gemessen an {n} Partien ({meta})',
+    'mc.day2UnentschiedenLeer': 'Unentschieden {q} (Rueckfall — fuer dieses Format ist keine Bilanz gemessen)',
     'mc.avgWins':               'Avg. Wins',
     'mc.avgTies':               'Avg. Ties',
     'mc.avgLosses':             'Avg. Losses',
@@ -1847,6 +1858,9 @@ const translations = {
     'cm.quickRefHint':          'The latest tournament\'s reference lists side-by-side — Major is one specific player\'s best-placed deck (from per-decklist scrape), Online is the typical aggregated build. "3-way Compare" diffs your built deck against both at once.',
     'cm.quickRefMajor':         'Latest Major · Best Placement',
     'cm.quickRefOnline':        'Latest Online · Typical Build',
+    'cm.quickRefListen':        'lists',
+    'cm.quickRefEineListe':     'a single list — not an aggregate',
+    'cm.quickRefListenUnbekannt': 'number of lists unknown',
     'cm.quickRef3way':          '3-way Compare (Builder · Major · Online)',
     'cm.quickRefNoMajor':       'No per-decklist data for this archetype yet — only Regional / Special-Event majors are scraped at decklist granularity (window: latest 10 events).',
     'cm.quickRefNoOnline':      'No online tournament card data for this archetype yet.',
@@ -1955,7 +1969,14 @@ const translations = {
     'antiTech.buildBtn':              'Build with 0 cards',
     'antiTech.buildBtnCount':         'Build with {n} cards',
     'antiTech.chipsEmpty':            'No targets picked yet. Tap a quick pick below or type a deck name.',
-    'antiTech.cardsEmpty':            'No counter cards found for the selected targets. Try a different aggression preset or pick a more meta-relevant target.',
+    // Der Satz nannte die Ursache nicht, sondern schob sie dem Leser zu.
+    // BEFUND (Agententeam B, 06.09.2026): für Alakazam Dudunsparce —
+    // mit 7,8 % das RELEVANTESTE Ziel im Feld — riet er, "ein
+    // meta-relevanteres Target" zu wählen. Der wahre Grund ist, dass
+    // data/active_threats.json diesen Archetyp gar nicht führt (25
+    // Archetypen erfasst, Alakazam nicht). Der englische Rückfall im
+    // Quelltext nannte die Datei; die ausgelieferten Fassungen nicht.
+    'antiTech.cardsEmpty':            'No counter cards for these targets — data/active_threats.json does not list them. That is a gap in our data, not a bad pick.',
     'antiTech.cardsLoading':          'Loading suggested counters…',
     'antiTech.cardsCap':              'Tech slots are capped at {n}. Uncheck one before adding another.',
     'antiTech.toastInjected':         'Loaded {n} tech card(s) into your slots — generating build now.',
@@ -2713,6 +2734,8 @@ const translations = {
     'buildInfo.techIdeenBasisEnergie':  'Basis-Energie',
     'buildInfo.techIdeenEntwickelt':    'Entwickelt sich aus {name}',
     'buildInfo.techIdeenLeer':   'Auch laut Kartentext keine Idee gegen deine schlechtesten Matchups. Die Regelbasis kennt {n} Paarungen vom {datum} — das ist ein Anfang, keine Formatabdeckung.',
+    'buildInfo.techIdeenOhne':   'Nichts gefunden gegen: {liste}. Die Regelbasis kennt {n} Paarungen vom {datum} — diese Matchups sind nicht abgedeckt.',
+    'buildInfo.techIdeenOhneEintrag': '{name} ({wr}, {n} Partien)',
     'buildInfo.nearMissIntro':   'Diese Karten standen im Kandidatenfeld, die Tech-Slots waren aber voll. Genau hier weicht eine gebaute Liste von echten Decklisten ab — tausche von Hand, wenn du anderer Meinung bist.',
     'buildInfo.altSuggestionsIntro': 'Bei diesen Karten spielt die Mehrheit des Metas eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich deutlich besser. Der Builder hat NICHT automatisch angepasst, schau dir jeden Vorschlag an und entscheide selbst ob du manuell übernimmst.',
     'buildInfo.title':        'Warum dieses Deck?',
@@ -3821,6 +3844,8 @@ const translations = {
     'mc.journalWeightHint':     '(Meta = Gewicht 30 · Journal = Spielanzahl)',
     'mc.day2Chance':            'Day-2-Chance',
     'mc.day2Sub':               '{pts} Pkt. in {r} R. · {n} Spieler',
+    'mc.day2Unentschieden':     'Unentschieden {q} — gemessen an {n} Partien ({meta})',
+    'mc.day2UnentschiedenLeer': 'Unentschieden {q} (Rückfall — für dieses Format ist keine Bilanz gemessen)',
     'mc.avgWins':               'Ø Wins',
     'mc.avgTies':               'Ø Ties',
     'mc.avgLosses':             'Ø Losses',
@@ -4399,6 +4424,9 @@ const translations = {
     'cm.quickRefHint':          'Die Referenz-Listen vom aktuellsten Turnier nebeneinander — Major ist die best-platzierte Decklist eines konkreten Spielers (aus dem Per-Decklist-Scrape), Online ist der typische aggregierte Build. „3-Wege-Vergleich" zeigt den Diff deiner Builder-Liste gegen beide auf einmal.',
     'cm.quickRefMajor':         'Aktuelles Major · Beste Platzierung',
     'cm.quickRefOnline':        'Aktuelles Online · Typischer Build',
+    'cm.quickRefListen':        'Listen',
+    'cm.quickRefEineListe':     'eine einzelne Liste — kein Aggregat',
+    'cm.quickRefListenUnbekannt': 'Listenzahl unbekannt',
     'cm.quickRef3way':          '3-Wege-Vergleich (Builder · Major · Online)',
     'cm.quickRefNoMajor':       'Noch keine Per-Decklist-Daten für diesen Archetyp — nur Regionals / Special-Events werden auf Decklist-Ebene gescraped (Fenster: letzte 10 Events).',
     'cm.quickRefNoOnline':      'Noch keine Online-Turnier-Kartendaten für diesen Archetyp.',
@@ -4508,7 +4536,7 @@ const translations = {
     'antiTech.buildBtn':              'Build mit 0 Karten',
     'antiTech.buildBtnCount':         'Build mit {n} Karten',
     'antiTech.chipsEmpty':            'Noch keine Targets gewählt. Tippe auf einen Quick Pick unten oder gib einen Deck-Namen ein.',
-    'antiTech.cardsEmpty':            'Keine Counter-Karten für die gewählten Targets gefunden. Versuche eine andere Aggression oder ein meta-relevanteres Target.',
+    'antiTech.cardsEmpty':            'Keine Counter-Karten zu diesen Zielen — data/active_threats.json führt sie nicht. Das ist eine Lücke in unseren Daten, keine schlechte Wahl.',
     'antiTech.cardsLoading':          'Lade Counter-Vorschläge…',
     'antiTech.cardsCap':              'Tech-Slots sind auf {n} begrenzt. Eine andere abwählen bevor du weitere hinzufügst.',
     'antiTech.toastInjected':         '{n} Tech-Karte(n) in deine Slots geladen — Build wird generiert.',

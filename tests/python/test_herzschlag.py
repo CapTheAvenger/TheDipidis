@@ -256,35 +256,59 @@ def test_bekannt_leer_beschreibt_nur_wirklich_leere_spalten():
                 f"Lesen noch etwas zu erklaeren")
 
 
-def test_bekannter_leerstand_wird_gemeldet_statt_verschwiegen():
+# Bis zum 06.09.2026 hingen die beiden folgenden Zusicherungen am echten
+# Eintrag `tournament_decklists_per_player.csv: type`. Der ist weg — die
+# Spalte ist gefuellt (Extraktor plus scripts/fuelle_kartentyp.py), und
+# ein "bekannt leer", das nicht mehr zutrifft, waere eine Luege im
+# Bericht. Geprueft wird deshalb jetzt der MECHANISMUS mit einem
+# eingesetzten Eintrag, nicht mehr ein bestimmter Befund. Die Zusicherung
+# darueber (test_bekannt_leer_beschreibt_nur_wirklich_leere_spalten)
+# haelt weiterhin fest, dass jeder echte Eintrag auch stimmen muss.
+_GRUND = ("Erfundener Fall fuer diese Zusicherung. Der Text muss lang genug "
+          "sein, um beim naechsten Lesen noch etwas zu erklaeren, und er "
+          "nennt die Ursache: erfundenes_modul.py liefert die Spalte nicht.")
+
+
+def test_bekannter_leerstand_wird_gemeldet_statt_verschwiegen(monkeypatch):
     """Bekannt heisst sichtbar, nicht stumm.
 
     Sonst waere die Spalte in einem halben Jahr vergessen — dieselbe Lehre wie
     bei den vier leeren City-League-Dateien, die der Waechter mit Datum meldet.
     """
     g = _guardian()
-    cur = {"tournament_decklists_per_player.csv": ["type"]}
-    base = {"tournament_decklists_per_player.csv": ["type"]}   # laengst bekannt
+    monkeypatch.setattr(g, "BEKANNT_LEER", {"erfunden.csv": {"kennung": _GRUND}})
+    cur = {"erfunden.csv": ["kennung"]}
+    base = {"erfunden.csv": ["kennung"]}   # laengst bekannt
     findings = []
     g.check_tote_spalten(findings, cur, base)
     assert findings, "ein bekannter Leerstand wird gar nicht gemeldet"
     assert all(s == "WARN" for s, _ in findings), \
         f"ein bekannter Leerstand eskaliert: {findings}"
-    assert "type" in findings[0][1] and "card_scraper_shared" in findings[0][1], \
+    assert "kennung" in findings[0][1] and "erfundenes_modul" in findings[0][1], \
         "die Meldung nennt die Ursache nicht"
 
 
-def test_neu_leergelaufene_spalte_bleibt_kritisch():
+def test_neu_leergelaufene_spalte_bleibt_kritisch(monkeypatch):
     """Bekannt darf nicht heissen, dass ALLES durchgeht."""
     g = _guardian()
-    cur = {"tournament_decklists_per_player.csv": ["type", "card_name"]}
-    base = {"tournament_decklists_per_player.csv": ["type"]}
+    monkeypatch.setattr(g, "BEKANNT_LEER", {"erfunden.csv": {"kennung": _GRUND}})
+    cur = {"erfunden.csv": ["kennung", "card_name"]}
+    base = {"erfunden.csv": ["kennung"]}
     findings = []
     g.check_tote_spalten(findings, cur, base)
     kritisch = [t for s, t in findings if s == "CRITICAL"]
     assert len(kritisch) == 1, f"erwartet genau ein CRITICAL: {findings}"
-    assert "card_name" in kritisch[0] and "type" not in kritisch[0], \
+    assert "card_name" in kritisch[0] and "kennung" not in kritisch[0], \
         "die kritische Meldung vermischt neuen und bekannten Leerstand"
+
+
+def test_ohne_bekannte_leerstaende_ist_jede_leere_spalte_kritisch(monkeypatch):
+    """Der Grundzustand, den der leere BEKANNT_LEER herstellt."""
+    g = _guardian()
+    monkeypatch.setattr(g, "BEKANNT_LEER", {})
+    findings = []
+    g.check_tote_spalten(findings, {"x.csv": ["a"]}, {"x.csv": []})
+    assert [s for s, _ in findings] == ["CRITICAL"], findings
 
 
 def test_matchup_bilanzen_kritisch_nur_beim_laufenden_format(tmp_path, monkeypatch):

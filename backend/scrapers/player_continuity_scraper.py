@@ -151,8 +151,8 @@ def _leerzeile():
     Der HTML-Rueckfallweg muss sie mitfuehren, sonst faellt der
     DictWriter beim ersten Turnier ohne Nutzlast auf die Nase."""
     return {
-        'player_id': '', 'points': '', 'day2': '', 'dropped': '',
-        'drop_round': '', 'dqed': '', 'deck_name_roh': '',
+        'player_id': '', 'points': '', 'day2': '', 'topcut': '',
+        'dropped': '', 'drop_round': '', 'dqed': '', 'deck_name_roh': '',
     }
 
 
@@ -169,6 +169,13 @@ def _zeile_aus_eintrag(e: Dict) -> Dict:
         'player_id': str(e.get('player_id') or '').strip(),
         'points': _ganz(e.get('points'), ''),
         'day2': _ganz(e.get('day2')),
+        # Der Schnitt. Damit laesst sich top8_conv_rate spaeter aus DIESER
+        # Datei rechnen statt aus einem weiteren Abruf —
+        # backend/scrapers/labs_tournament_scraper.py:1224 haelt seit
+        # laengerem fest, dass die Spalte 0 bleibt, "until/unless we add a
+        # standings-page scraper that counts each deck's Top-8 placements
+        # explicitly". Genau die Zaehlung steht hier jetzt zeilenweise da.
+        'topcut': _ganz(e.get('topcut')),
         'dropped': _ganz(e.get('dropped')),
         'drop_round': '' if e.get('drop_round') is None else _ganz(e.get('drop_round'), ''),
         'dqed': _ganz(e.get('dqed')),
@@ -446,8 +453,8 @@ def write_output(rows: List[Dict], out_path: str):
     fieldnames = ['tournament_id', 'tournament_date', 'meta', 'place',
                   'player_name', 'country', 'deck_slug', 'deck_archetype',
                   'wins', 'losses', 'ties',
-                  'player_id', 'points', 'day2', 'dropped', 'drop_round',
-                  'dqed']
+                  'player_id', 'points', 'day2', 'topcut', 'dropped',
+                  'drop_round', 'dqed']
     tmp_path = out_path + '.tmp'
     with open(tmp_path, 'w', encoding='utf-8', newline='') as f:
         w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
@@ -604,6 +611,7 @@ def main():
                 'player_id': r.get('player_id', ''),
                 'points': r.get('points', ''),
                 'day2': r.get('day2', ''),
+                'topcut': r.get('topcut', ''),
                 'dropped': r.get('dropped', ''),
                 'drop_round': r.get('drop_round', ''),
                 'dqed': r.get('dqed', ''),

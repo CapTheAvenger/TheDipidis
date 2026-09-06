@@ -558,6 +558,12 @@ class CardDatabaseLookup:
 
     def __init__(self, csv_path: Optional[str] = None):
         self.cards: Dict[str, List[CardVariant]] = {}
+        # (SET, Nummer) -> Kartensatz. Der Schluessel, den CLAUDE.md
+        # unter "Data rules" verlangt: *Never join card data by name.*
+        # get_card() lief bisher als lineare Suche ueber alle Varianten
+        # — bei 30.000 Kartenzeilen je Lauf ist das kein Nachschlagen
+        # mehr, sondern ein Grund, es gar nicht erst zu versuchen.
+        self.nach_druck: Dict[str, CardVariant] = {}
         self.manager = self  # Duck-typing for backward compatibility
         self.SET_ORDER = self._load_dynamic_set_order()
         self._load_databases()
@@ -604,23 +610,48 @@ class CardDatabaseLookup:
             supertype = 'Energy' if 'energy' in c_type.lower() else \
                         'Trainer' if any(t in c_type.lower() for t in ['trainer','item','supporter','stadium','tool']) else \
                         'Pokemon'
-            self.cards[norm].append({
+            eintrag = {
                 'name': name, 'set_code': sc, 'set_number': sn, 'number': sn,
                 'rarity': row.get('rarity', ''), 'type': c_type, 'supertype': supertype,
                 'image_url': row.get('image_url', ''), '_source': source
-            })
+            }
+            self.cards[norm].append(eintrag)
+            if sc and sn:
+                self.nach_druck.setdefault(
+                    self.druckschluessel(sc, sn), eintrag)
 
     def normalize_name(self, name: str) -> str:
         norm = name.strip().lower().replace("'", "").replace("`", "").replace("\u2019", "").replace("-", " ").replace(".", "")
         return ' '.join(norm.split())
 
+    @staticmethod
+    def druckschluessel(set_code: str, number: str) -> str:
+        return f"{str(set_code).strip().upper()}-{str(number).strip()}"
+
     def get_card(self, set_code: str, number: str) -> Optional[Dict[str, str]]:
-        """Manager API compatibility."""
-        for variants in self.cards.values():
-            for v in variants:
-                if v['set_code'].upper() == set_code.upper() and v['number'] == number:
-                    return {'set_name': '', 'rarity': v['rarity'], 'type': v['type'], 'image_url': v['image_url']}
-        return None
+        """Manager API compatibility — jetzt ueber den Druckindex."""
+        v = self.nach_druck.get(self.druckschluessel(set_code, number))
+        if not v:
+            return None
+        return {'set_name': '', 'rarity': v['rarity'], 'type': v['type'],
+                'image_url': v['image_url']}
+
+    def typ_von_druck(self, set_code: str, number: str) -> str:
+        """Der feine Kartentyp zu genau diesem Druck, oder ''.
+
+        WARUM NICHT DIE SPALTENUEBERSCHRIFT (06.09.2026):
+        Die Decklisten-Seite gruppiert nur in "Pokémon", "Trainer" und
+        "Energy". Genau diese drei Woerter in die Spalte `type` zu
+        schreiben waere SCHLECHTER als sie leer zu lassen: das Frontend
+        (js/deck-builder-consistency.js, `kat()`) liest `c.type` zuerst
+        und faellt nur bei leerem Wert auf die Kartendatenbank zurueck.
+        Ein "Trainer" dort trifft keinen seiner Zweige und landet im
+        Sammelfall 'Pokemon' — die Kategorie-Deckung saehe dann
+        vollstaendig aus und waere falsch. Deshalb wird hier der
+        feine Typ ueber (set, number) aufgeloest oder gar nichts
+        geschrieben."""
+        v = self.nach_druck.get(self.druckschluessel(set_code, number))
+        return str(v.get('type') or '') if v else ''
 
     def get_card_info(self, card_name: str) -> Optional[Dict[str, str]]:
         norm = self.normalize_name(card_name)
@@ -769,6 +800,20 @@ def is_valid_card(card_name: str) -> bool:
 # ============================================================================
 # SHARED DECK HTML EXTRACTION
 # ============================================================================
+def _feiner_typ(card_db, set_code, set_number) -> str:
+    """Typ ueber (set, number), ohne dass ein fremdes card_db-Objekt
+    den Lauf kostet. Aeltere Aufrufer reichen Attrappen herein, die
+    typ_von_druck nicht kennen — dann bleibt das Feld leer, was der
+    Zustand von vorher ist und nichts kaputt macht."""
+    holen = getattr(card_db, 'typ_von_druck', None)
+    if not callable(holen):
+        return ''
+    try:
+        return holen(set_code, set_number) or ''
+    except Exception:
+        return ''
+
+
 def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
     """Extract cards from a Limitless-style decklist HTML (BeautifulSoup object).
 
@@ -778,7 +823,16 @@ def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
       3. <span class="set"> or <span class="card-set">
     Trainer/Energy cards are resolved via *card_db*.
 
-    Returns a list of ``{name, count, set_code, set_number}`` dicts.
+    Returns a list of ``{name, count, set_code, set_number, type}`` dicts.
+
+    ``type`` ist der FEINE Kartentyp aus der Kartendatenbank, ueber
+    (set, number) aufgeloest — 'Supporter', 'Item', 'Stadium', 'Tool',
+    'Basic Energy', oder bei Pokemon der Energietyp. NICHT die
+    Spaltenueberschrift der Decklistenseite: die kennt nur "Pokémon",
+    "Trainer", "Energy", und diese drei Woerter in die Spalte zu
+    schreiben waere schlechter als sie leer zu lassen (siehe
+    CardDatabaseLookup.typ_von_druck). Findet die Datenbank den Druck
+    nicht, bleibt das Feld leer — gemeldet statt geraten.
     """
     cards: list = []
     for column in soup.select('.decklist-column'):
@@ -832,11 +886,17 @@ def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
                 if set_code == 'PR-SV':
                     set_code = 'SVP'
                 if set_code and set_number:
-                    cards.append({'name': card_name, 'count': count, 'set_code': set_code, 'set_number': set_number})
+                    cards.append({'name': card_name, 'count': count,
+                                  'set_code': set_code, 'set_number': set_number,
+                                  'type': _feiner_typ(card_db, set_code, set_number)})
             else:
                 latest = card_db.get_latest_low_rarity_version(card_name)
                 if latest:
-                    cards.append({'name': card_name, 'count': count, 'set_code': latest.set_code, 'set_number': latest.number})
+                    cards.append({'name': card_name, 'count': count,
+                                  'set_code': latest.set_code,
+                                  'set_number': latest.number,
+                                  'type': _feiner_typ(card_db, latest.set_code,
+                                                      latest.number)})
     return cards
 
 

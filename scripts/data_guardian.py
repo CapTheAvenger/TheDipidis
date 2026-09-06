@@ -137,10 +137,91 @@ CONTENT_DRIVEN = {
     "prizepack_official_images.csv": 60,
 }
 
-# TODO(heartbeat): data/_job_heartbeats.json mit {job: iso-zeitstempel}, von jedem
-# Datenjob bei Erfolg geschrieben. Erst damit lässt sich ein toter Job von einer
-# ruhigen Quelle unterscheiden — für CONTENT_DRIVEN ist das die einzige ehrliche
-# Prüfung. Bewusst nicht in dieser Änderung: es fasst sechs Workflows an.
+# Der Herzschlag, den das TODO an dieser Stelle bis zum 06.09.2026 nur
+# beschrieben hat. data/_job_heartbeats.json existiert seit dem 04.09. und wird
+# von den nicht blockierenden Schritten geschrieben — GELESEN hat sie bis heute
+# niemand. Gefunden von Agententeam C am 06.09.2026, und der Befund war teuer:
+# scrapers/champions_replica_scraper.py stand auf zuletzt_erfolgreich
+# 2026-08-25, also ZWOELF TAGE, bei einem Job, der taeglich um 04:00 laeuft.
+# Niemand hat das gemeldet.
+#
+# Warum das die einzige ehrliche Pruefung ist: das Alter einer Datei beantwortet
+# die Frage "hat sich etwas geaendert", nicht die Frage "lief der Job". Fuer
+# CONTENT_DRIVEN faellt beides auseinander (der Build ist absichtlich
+# inkrementell), und fuer die Turnierdateien ebenfalls — zwischen zwei Turnieren
+# aendert sich nichts, obwohl der Scraper sauber laeuft. Umgekehrt beweist ein
+# ausbleibender Herzschlag den toten Job unabhaengig davon, ob die Quelle etwas
+# Neues hatte.
+#
+# Die Schwelle folgt der Kadenz des Jobs, DER DEN HERZSCHLAG SCHREIBT — dieselbe
+# Regel wie bei REFRESH_DRIVEN oben, aus demselben Grund: ein woechentlicher Job
+# mit einer Tagesschwelle feuert strukturell garantiert falsch.
+HEARTBEAT_DATEI = "_job_heartbeats.json"
+HERZSCHLAG = {
+    # Job-Schluessel in der Datei: (max_alter_in_tagen, Kadenz)
+    "scrapers/champions_replica_scraper.py": (3,  "taeglich 04:00 -> 2 Tage Luft"),
+    "scrapers/labs_tournament_scraper.py":   (5,  "weekly-full-update Di+Fr -> max. Luecke 4 Tage"),
+    "scrapers/per_decklist_scraper.py":      (5,  "weekly-full-update Di+Fr + per-decklist-scrape Di"),
+    "scrapers/player_continuity_scraper.py": (5,  "weekly-full-update Di+Fr"),
+}
+
+
+def check_heartbeat(findings):
+    """Lief der Job — unabhaengig davon, ob sich seine Datei geaendert hat.
+
+    Drei getrennte Befunde, weil sie drei verschiedene Dinge bedeuten:
+      * Datei fehlt oder ist unlesbar -> WARN (die Pruefung selbst ist blind)
+      * Eintrag fehlt                 -> WARN (Job schreibt keinen Herzschlag)
+      * Herzschlag zu alt / Status
+        nicht OK                      -> CRITICAL (der Job ist tot)
+    """
+    p = os.path.join(DATA, HEARTBEAT_DATEI)
+    if not os.path.exists(p):
+        findings.append(("WARN",
+                         f"data/{HEARTBEAT_DATEI} fehlt — ob die Datenjobs ueberhaupt "
+                         f"laufen, laesst sich damit nicht mehr feststellen"))
+        return
+    try:
+        with open(p, encoding="utf-8") as f:
+            schlaege = json.load(f)
+    except (OSError, ValueError) as e:
+        findings.append(("WARN",
+                         f"data/{HEARTBEAT_DATEI} nicht lesbar ({e}) — die "
+                         f"Herzschlagpruefung faellt aus"))
+        return
+
+    jetzt = dt.datetime.now(dt.timezone.utc)
+    for job, (max_alter, kadenz) in sorted(HERZSCHLAG.items()):
+        eintrag = schlaege.get(job)
+        if not isinstance(eintrag, dict):
+            findings.append(("WARN",
+                             f"kein Herzschlag fuer {job} in data/{HEARTBEAT_DATEI} — "
+                             f"der Job schreibt keinen, also sagt sein Schweigen nichts"))
+            continue
+
+        status = str(eintrag.get("status", "")).strip().upper()
+        roh = str(eintrag.get("zuletzt_erfolgreich", "")).strip()
+        try:
+            stempel = dt.datetime.fromisoformat(roh.replace("Z", "+00:00"))
+            if stempel.tzinfo is None:
+                stempel = stempel.replace(tzinfo=dt.timezone.utc)
+        except ValueError:
+            findings.append(("WARN",
+                             f"Herzschlag von {job} hat keinen lesbaren Zeitstempel "
+                             f"({roh!r})"))
+            continue
+
+        alter = (jetzt - stempel).days
+        if alter > max_alter:
+            findings.append(("CRITICAL",
+                             f"{job} war zuletzt vor {alter} Tagen erfolgreich "
+                             f"(erlaubt sind {max_alter}, {kadenz}) — der Job ist "
+                             f"gestorben, unabhaengig davon ob sich seine Datei "
+                             f"geaendert hat"))
+        elif status and status != "OK":
+            findings.append(("CRITICAL",
+                             f"{job} meldet Status {status!r} im Herzschlag "
+                             f"(zuletzt erfolgreich vor {alter} Tagen)"))
 
 COVERAGE_DROP_PP = 10.0   # percentage points a set may lose before we flag it
 SHRINK_PCT = 10.0         # % of rows a consumer file may lose before we flag it
@@ -1677,9 +1758,52 @@ def check_uebersicht_gegen_chunks(findings):
             + ("; …" if len(ohne_chunk) > 8 else "")))
 
 
+# Dateien, die KEINE Consumer sind, aber vom Frontend namentlich gelesen werden.
+# Damit greift die Tote-Spalten-Pruefung auch dort.
+#
+# BEFUND (Agententeam C, 06.09.2026): `tote_spalten()` schleifte nur ueber
+# CONSUMERS — sechs Dateien. Gemessen an diesem Tag, alles unsichtbar fuer den
+# Waechter:
+#
+#   tournament_decklists_per_player.csv  `type`      30.459 / 30.459 leer (100 %)
+#   labs_tournament_matchups.csv         `vs_wins`   46.120 / 47.896 leer (96,3 %)
+#
+# Die `type`-Luecke ist im Frontend schon verbandet
+# (js/deck-builder-consistency.js:1490 beschreibt sie im Klartext: alle 60 Karten
+# als Pokemon eingestuft), die Quelle ist es nicht.
+FRONTEND_PFLICHTSPALTEN = {
+    "tournament_decklists_per_player.csv": [
+        "tournament_name", "player_name", "place", "card_name", "count", "type",
+    ],
+    "labs_tournament_matchups.csv": [
+        "my_deck_name", "opponent_deck_name", "vs_win_pct",
+    ],
+    "player_continuity.csv": [
+        "tournament_id", "place", "player_name", "deck_archetype",
+    ],
+}
+
+# Spalten, von denen wir WISSEN, dass sie leer sind, samt Grund und Messung.
+# Sie werden nicht stillschweigend in die Grundlinie geschrieben — dann waeren
+# sie vergessen — sondern bei JEDEM Lauf als WARN gemeldet. Erst wenn eine NEUE
+# Spalte leerlaeuft, wird daraus ein CRITICAL.
+#
+# Dieselbe Bauart wie bei den vier leeren City-League-Dateien: bekannter Zustand,
+# trotzdem sichtbar, aber nicht als Alarm.
+BEKANNT_LEER = {
+    "tournament_decklists_per_player.csv": {
+        "type": "extract_cards_from_decklist_soup() in backend/core/"
+                "card_scraper_shared.py gibt `type` gar nicht zurueck (siehe "
+                "dessen Docstring), waehrend per_decklist_scraper.py:246 "
+                "verspricht, es kaeme von dort. Gemessen 06.09.2026: 30.459 "
+                "von 30.459 Zeilen leer. Behebbar nur im Extraktor.",
+    },
+}
+
+
 def tote_spalten():
-    """{Datei: [Spalte, ...]} — Pflichtspalten der Consumer-Dateien, in denen
-    KEINE einzige Zeile einen Wert traegt.
+    """{Datei: [Spalte, ...]} — Pflichtspalten der Consumer- UND Frontenddateien,
+    in denen KEINE einzige Zeile einen Wert traegt.
 
     Warum das fehlte: check_schema prueft nur, dass der Spaltenname im Kopf
     steht. Eine Spalte darf danach zu 100 % leer sein und gilt trotzdem als
@@ -1693,7 +1817,10 @@ def tote_spalten():
     jeher leer ist, ist ein bekannter Zustand. Neu leer geworden ist ein
     Ereignis."""
     out = {}
-    for datei, eintrag in CONSUMERS.items():
+    quellen = dict(CONSUMERS)
+    for datei, spalten in FRONTEND_PFLICHTSPALTEN.items():
+        quellen.setdefault(datei, {"required": spalten})
+    for datei, eintrag in quellen.items():
         # CONSUMERS ist {Datei: {"required": [...], "purpose": "..."}} —
         # die Pflichtspalten stehen eine Ebene tiefer. Die erste Fassung
         # iterierte ueber die Schluessel des inneren Wortverzeichnisses und
@@ -1714,16 +1841,114 @@ def tote_spalten():
     return out
 
 
+# Die drei Bilanzspalten, die js/app-meta-call.js:7519 und js/app-current-meta.js:115
+# namentlich lesen.
+MATCHUP_BILANZ = ("vs_wins", "vs_losses", "vs_ties")
+
+
+def _aktuelles_meta():
+    """Das Format, das die Seite gerade zeigt — aus data/format_window.json."""
+    p = os.path.join(DATA, "format_window.json")
+    try:
+        with open(p, encoding="utf-8") as f:
+            w = json.load(f)
+    except (OSError, ValueError):
+        return None
+    # Das Metakuerzel ist nirgends als eigenes Feld gefuehrt — es entsteht aus
+    # den beiden Enden des Fensters, genau wie in den Dateinamen der Auszuege:
+    # TEF (aeltestes legales Set) + PBL (aktuelles) = TEF-PBL.
+    aeltestes = str(w.get("oldest_legal_set") or "").strip()
+    aktuelles = str(w.get("current_set") or "").strip()
+    if aeltestes and aktuelles:
+        return f"{aeltestes}-{aktuelles}"
+    return None
+
+
+def check_matchup_bilanzen(findings):
+    """Traegt der Auszug des AKTUELLEN Formats seine Matchup-Bilanzen?
+
+    BEFUND (Agententeam C, 06.09.2026): 46.120 von 47.896 Zeilen in
+    labs_tournament_matchups.csv haben keine Bilanzspalten. Aufgeschluesselt je
+    Meta-Auszug ist das Bild eindeutig:
+
+        labs_tournament_matchups_TEF-PBL.csv   1.776 Zeilen,   0 leer
+        die zwoelf aelteren Auszuege          46.120 Zeilen, 46.120 leer
+
+    Das ist mit hoher Wahrscheinlichkeit KEIN Ausfall, sondern Geschichte: der
+    Scraper holt die Bilanzen erst seit kurzem und traegt sie nicht nach. Ein
+    Alarm ueber zwoelf historische Dateien waere genau das Rauschen, vor dem der
+    Modulkommentar warnt — und der naechste echte Befund ginge darin unter.
+
+    Was zaehlt, ist der Auszug des Formats, das die Seite ZEIGT. Verliert der
+    seine Bilanzen, laufen die Kacheln im Meta Call leer, ohne dass etwas kaputt
+    aussieht. Genau das wird hier geprueft; der historische Rest steht als eine
+    einzige Zeile daneben, damit er nicht vergessen wird.
+    """
+    meta = _aktuelles_meta()
+    dateien = sorted(glob.glob(os.path.join(DATA, "labs_tournament_matchups_*.csv")))
+    if not dateien:
+        return
+
+    leere, gefuellte = [], []
+    for pfad in dateien:
+        zeilen = list(read_csv(pfad))
+        if not zeilen:
+            continue
+        ohne = all(
+            not any((col(r, sp) or "").strip() for sp in MATCHUP_BILANZ)
+            for r in zeilen
+        )
+        (leere if ohne else gefuellte).append(os.path.basename(pfad))
+
+    if meta:
+        aktuell = f"labs_tournament_matchups_{meta}.csv"
+        if aktuell in leere:
+            findings.append(("CRITICAL",
+                             f"data/{aktuell} traegt in KEINER Zeile "
+                             f"{list(MATCHUP_BILANZ)} — das ist der Auszug des "
+                             f"laufenden Formats {meta}, und app-meta-call.js liest "
+                             f"diese Spalten namentlich. Die Kacheln laufen leer, "
+                             f"ohne dass etwas kaputt aussieht"))
+        elif aktuell not in gefuellte:
+            findings.append(("WARN",
+                             f"kein Matchup-Auszug fuer das laufende Format {meta} "
+                             f"(erwartet data/{aktuell})"))
+    else:
+        findings.append(("WARN",
+                         "data/format_window.json nennt kein laufendes Format — "
+                         "die Bilanzpruefung der Matchup-Auszuege faellt aus"))
+
+    if leere:
+        findings.append(("INFO",
+                         f"{len(leere)} von {len(leere) + len(gefuellte)} "
+                         f"Matchup-Auszuegen fuehren keine Bilanzspalten "
+                         f"{list(MATCHUP_BILANZ)}: {', '.join(sorted(leere))}. "
+                         f"Historischer Bestand — der Scraper holt sie erst seit "
+                         f"kurzem und traegt nichts nach. Kein Befund, solange das "
+                         f"laufende Format sie hat"))
+
+
 def check_tote_spalten(findings, cur, base):
     if cur is None or base is None:
         return
     for datei in sorted(set(cur) | set(base)):
+        bekannt = BEKANNT_LEER.get(datei, {})
         neu_leer = sorted(set(cur.get(datei, [])) - set(base.get(datei, [])))
         wieder_da = sorted(set(base.get(datei, [])) - set(cur.get(datei, [])))
-        if neu_leer:
+
+        # Bekannte Leerstaende sind kein Alarm, aber sie duerfen auch nicht
+        # verschwinden — sonst waeren sie in einem halben Jahr vergessen.
+        unerwartet = [sp for sp in neu_leer if sp not in bekannt]
+        erwartet   = [sp for sp in cur.get(datei, []) if sp in bekannt]
+
+        if unerwartet:
             findings.append(("CRITICAL",
-                             f"{datei}: Pflichtspalte(n) {neu_leer} sind jetzt in JEDER "
+                             f"{datei}: Pflichtspalte(n) {unerwartet} sind jetzt in JEDER "
                              f"Zeile leer — der Header steht noch, der Inhalt ist weg"))
+        for sp in sorted(erwartet):
+            findings.append(("WARN",
+                             f"{datei}: Spalte '{sp}' ist in jeder Zeile leer. "
+                             f"Bekannter Fall: {bekannt[sp]}"))
         if wieder_da:
             findings.append(("INFO",
                              f"{datei}: {wieder_da} traegt/tragen wieder Werte"))
@@ -1854,6 +2079,8 @@ def main():
     findings = []
     check_schema(findings)
     check_freshness(findings)
+    check_heartbeat(findings)
+    check_matchup_bilanzen(findings)
     check_set_order(findings)
     check_shrink(findings, rows, base_rows)
     report_unverified_prices(findings)

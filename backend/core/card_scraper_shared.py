@@ -817,11 +817,48 @@ def _feiner_typ(card_db, set_code, set_number) -> str:
 def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
     """Extract cards from a Limitless-style decklist HTML (BeautifulSoup object).
 
-    Uses a 3-method set-code detection for Pokémon cards:
+    Der Druck (set, number) wird fuer JEDE Karte von der Seite gelesen:
       1. href link  (/cards/SET/NUMBER)
       2. data-set / data-number attributes
       3. <span class="set"> or <span class="card-set">
-    Trainer/Energy cards are resolved via *card_db*.
+    Nur wenn die Seite nichts hergibt, wird ueber den Namen auf den
+    juengsten Druck niedriger Seltenheit ausgewichen — und das wird
+    protokolliert.
+
+    WARUM DAS FRUEHER ANDERS WAR UND WAS ES GEKOSTET HAT (06.09.2026).
+    Bis heute galt der Seitenabgriff nur fuer Pokemon; Trainer und
+    Energie wurden AUSSCHLIESSLICH ueber den Namen aufgeloest
+    (get_latest_low_rarity_version). CLAUDE.md, "Data rules", verbietet
+    genau das: *Never join card data by name.*
+
+    Nachgemessen an zehn Decklisten von limitlesstcg.com, 232
+    Kartenzeilen:
+
+        Pokemon          85 von 85 richtig
+        Trainer/Energie  70 von 147 FALSCH  (47,6 %)
+
+    Betroffen sind 19.003 der 30.459 Zeilen in
+    data/tournament_decklists_per_player.csv (62,4 %).
+
+    Und die Seite liefert die richtige Angabe die ganze Zeit mit. An
+    Boming Wangs Mega-Excadrill-Liste (Worlds, Platz 37) nachgesehen:
+
+        <div class="decklist-card" data-set="DRI" data-number="176">
+            Team Rocket's Petrel
+
+    Wir schrieben ASC 207. Ebenso Lillie's Determination (MEG 119 ->
+    ASC 192), Buddy-Buddy Poffin (TEF 144 -> ASC 184), Metal Energy
+    (MEE 8 -> EVO 98) — acht von elf Trainer-/Energiezeilen dieser
+    einen Liste.
+
+    WAS DAS KOSTET. Der Preis nicht viel: der Namensweg waehlte
+    absichtlich den guenstigsten Druck, fuer diese Liste 5,25 statt
+    4,90 EUR. Der Schaden liegt woanders — falsches Kartenbild im
+    Deckbauer und im Proxy-Druck, keine Aussage darueber, WELCHEN Druck
+    die Spieler wirklich spielen, und eine Zuordnung, die genau dann
+    teuer wird, wenn ein Name mehrere Drucke mit sehr verschiedenen
+    Preisen hat. CLAUDE.md nennt das Beispiel selbst: vier Produkte
+    "Mega Darkrai ex" zu 1,03 / 9,69 / 184,03 / 331,99 EUR.
 
     Returns a list of ``{name, count, set_code, set_number, type}`` dicts.
 
@@ -839,8 +876,10 @@ def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
         heading_elem = column.select_one('.decklist-column-heading')
         if not heading_elem:
             continue
-        category = heading_elem.get_text(strip=True).lower()
-        is_pokemon = 'trainer' not in category and 'energy' not in category
+        # Die Spalteneinteilung wird nicht mehr gebraucht: der Druck
+        # kommt fuer JEDE Karte von der Seite. Sie stand hier, weil der
+        # Trainer-Zweig frueher ueber den Namen aufloeste — genau der
+        # Fehler, den dieser Docstring beschreibt.
 
         for card_div in column.select('.decklist-card'):
             count_elem = card_div.select_one('.card-count')
@@ -854,7 +893,7 @@ def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
                 continue
 
             set_code, set_number = "", ""
-            if is_pokemon:
+            if card_div is not None:
                 # METHOD 1: href link
                 link_elem = card_div.find('a', href=True) or name_elem.find('a', href=True)
                 if link_elem:
@@ -888,15 +927,27 @@ def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
                 if set_code and set_number:
                     cards.append({'name': card_name, 'count': count,
                                   'set_code': set_code, 'set_number': set_number,
-                                  'type': _feiner_typ(card_db, set_code, set_number)})
+                                  'type': _feiner_typ(card_db, set_code, set_number),
+                                  'druck_quelle': 'seite'})
+                    continue
+            # RUECKFALL: die Seite gibt nichts her. Erst hier darf ueber
+            # den Namen aufgeloest werden — und es wird gezaehlt, damit
+            # niemand die Ausnahme fuer den Normalfall haelt.
+            latest = card_db.get_latest_low_rarity_version(card_name)
+            if latest:
+                logger.info("    Druck fuer '%s' nicht auf der Seite — ueber "
+                            "den Namen aufgeloest auf %s %s",
+                            card_name, latest.set_code, latest.number)
+                cards.append({'name': card_name, 'count': count,
+                              'set_code': latest.set_code,
+                              'set_number': latest.number,
+                              'type': _feiner_typ(card_db, latest.set_code,
+                                                  latest.number),
+                              'druck_quelle': 'name'})
             else:
-                latest = card_db.get_latest_low_rarity_version(card_name)
-                if latest:
-                    cards.append({'name': card_name, 'count': count,
-                                  'set_code': latest.set_code,
-                                  'set_number': latest.number,
-                                  'type': _feiner_typ(card_db, latest.set_code,
-                                                      latest.number)})
+                logger.warning("    Druck fuer '%s' weder auf der Seite noch "
+                               "in der Kartendatenbank — Zeile faellt weg",
+                               card_name)
     return cards
 
 

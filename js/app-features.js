@@ -1451,11 +1451,20 @@
             const probBrick = 1 - probBasic;
             const basicColor = probBasic >= 0.90 ? '#27ae60' : probBasic >= 0.75 ? '#e67e22' : '#e74c3c';
             const brickColor = probBrick <= 0.10 ? '#27ae60' : probBrick <= 0.25 ? '#e67e22' : '#e74c3c';
+            /* Bis zum 06.09.2026 stand dieser Block komplett englisch in
+               der deutschen Oberflaeche — ohne data-i18n, weshalb die
+               CI-Pruefung "Sprachreinheit" ihn nicht sah. "Mulligan"
+               bleibt englisch: Szenesprache, angeordnet am 28.08.2026.
+               Die Prozentwerte laufen jetzt ueber formatPercent, sonst
+               stuende "83.7%" neben "0,66€" in derselben Ansicht. */
+            const _pz = (v) => (typeof window.formatPercent === 'function')
+                ? window.formatPercent(v * 100, 1)
+                : (v * 100).toFixed(1) + '%';
             el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:0.85em;">
-                <span style="font-weight:600;color:#555;">&#127922; Opening Hand (7 cards):</span>
-                <span title="P(at least 1 Basic Pokémon in opening 7)" style="background:${basicColor};color:white;padding:3px 12px;border-radius:12px;font-weight:700;cursor:default;">Basic in hand: ${(probBasic*100).toFixed(1)}%</span>
-                <span title="P(no Basic Pokémon = forced mulligan)" style="background:${brickColor};color:white;padding:3px 12px;border-radius:12px;font-weight:700;cursor:default;">Mulligan: ${(probBrick*100).toFixed(1)}%</span>
-                <span style="color:#999;">(${basicCount} Basics / ${N} cards)</span>
+                <span style="font-weight:600;color:#555;">&#127922; ${t('draw.openingHand')}</span>
+                <span title="${t('draw.basicInHandTitle')}" style="background:${basicColor};color:white;padding:3px 12px;border-radius:12px;font-weight:700;cursor:default;">${t('draw.basicInHand')} ${_pz(probBasic)}</span>
+                <span title="${t('draw.mulliganTitle')}" style="background:${brickColor};color:white;padding:3px 12px;border-radius:12px;font-weight:700;cursor:default;">${t('draw.mulliganLabel')} ${_pz(probBrick)}</span>
+                <span style="color:#999;">${t('draw.basicsOfCards').replace('{b}', basicCount).replace('{n}', N)}</span>
             </div>`;
             el.style.display = 'block';
         }

@@ -10259,7 +10259,11 @@ window.MetaCall = (function () {
     }
 
     const { day2Prob, dp, expWin, expTie, expLoss, unentschieden } = calcDay2(field);
-    const pct    = (day2Prob * 100).toFixed(1);
+    /* _mcNum, nicht toFixed. Die Runde vom 30.08.2026 hat 36 Stellen auf
+       das deutsche Komma gezogen und diese hier uebersehen: der Block
+       schrieb "16.1 %" ueber "Ties 10,6 %" — zwei Zahlformate in
+       derselben Kachel, gefunden bei der Live-Pruefung am 06.09.2026. */
+    const pct    = _mcNum(day2Prob * 100, 1);
     const cls    = day2Prob >= 0.6 ? '' : day2Prob >= 0.4 ? ' pct-mid' : ' pct-low';
     const maxPts = _settings.rounds * 3;
 
@@ -10287,7 +10291,7 @@ window.MetaCall = (function () {
       </div>`;
     }).join('');
 
-    const thresholdPct = (_settings.day2Points / maxPts * 100).toFixed(1);
+    const thresholdPct = _mcNum(_settings.day2Points / maxPts * 100, 1);
 
     const topDecks = [...field].sort((a, b) => b.finalShare - a.finalShare).slice(0, TOP_N);
     const maxEnc   = Math.max(...topDecks.map(d => _settings.rounds * d.finalShare / 100), 0.1);
@@ -10364,15 +10368,15 @@ window.MetaCall = (function () {
       <div class="mc-day2-sub mc-day2-unentschieden">${_uqText}</div>
       <div class="mc-day2-stats">
         <div class="mc-day2-stat">
-          <div class="mc-day2-stat-val" style="color:var(--tint-ok-ink)">${expWin.toFixed(1)}</div>
+          <div class="mc-day2-stat-val" style="color:var(--tint-ok-ink)">${_mcNum(expWin, 1)}</div>
           <div class="mc-day2-stat-lbl">${t('mc.avgWins')}</div>
         </div>
         <div class="mc-day2-stat">
-          <div class="mc-day2-stat-val" style="color:#f39c12">${expTie.toFixed(1)}</div>
+          <div class="mc-day2-stat-val" style="color:#f39c12">${_mcNum(expTie, 1)}</div>
           <div class="mc-day2-stat-lbl">${t('mc.avgTies')}</div>
         </div>
         <div class="mc-day2-stat">
-          <div class="mc-day2-stat-val" style="color:var(--tint-bad-ink)">${expLoss.toFixed(1)}</div>
+          <div class="mc-day2-stat-val" style="color:var(--tint-bad-ink)">${_mcNum(expLoss, 1)}</div>
           <div class="mc-day2-stat-lbl">${t('mc.avgLosses')}</div>
         </div>
       </div>
@@ -10539,7 +10543,7 @@ window.MetaCall = (function () {
       const icon = (typeof window.ArchetypeIcons !== 'undefined')
         ? window.ArchetypeIcons.getIconHtml(r.name, { size: 'sm', layout: 'inline' })
         : '';
-      const day2Pct = (r.day2Prob * 100).toFixed(1).replace('.', ',');
+      const day2Pct = _mcNum(r.day2Prob * 100, 1);
       const wrPct   = r.avgWR.toFixed(1).replace('.', ',');
       // Aufgefuellte Zeilen als solche kennzeichnen: die Liste ist immer
       // zehn Zeilen lang, auch wenn weniger Decks die 20 % erreichen.
@@ -10723,7 +10727,7 @@ window.MetaCall = (function () {
             const icon = (typeof window.ArchetypeIcons !== 'undefined')
               ? window.ArchetypeIcons.getIconHtml(tip.name, { size: 'sm', layout: 'inline' })
               : '';
-            const day2Pct = (tip.day2Prob * 100).toFixed(1).replace('.', ',');
+            const day2Pct = _mcNum(tip.day2Prob * 100, 1);
             const reasonText = _formatTipReasons(tip);
             // Pill label matches active tournament type so Cup tabs
             // show "Top 4 / Top 8" and Challenge shows "1.-2.".
@@ -11911,11 +11915,14 @@ window.MetaCall = (function () {
       ctx.fillText(label, originX + padL + 30, y + ROW_H / 2);
 
       // Day-2 / Top-Cut / 1-2 chance — the headline number.
-      const probPct = (r.day2Prob * 100).toFixed(1);
+      /* Auch das geteilte Bild traegt das Zahlformat der Oberflaeche.
+         Bis zum 06.09.2026 stand hier "16.1%" — im selben Bild, in dem
+         die Win Rate darunter "52,4 %" schrieb. */
+      const probPct = _mcNum(r.day2Prob * 100, 1);
       ctx.fillStyle = r.day2Prob >= 0.5 ? '#2ecc71' : (r.day2Prob >= 0.3 ? '#f1c40f' : '#e74c3c');
       ctx.font = 'bold 17px system-ui, sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText(probPct + '%', originX + columnW - padR - 70, y + ROW_H / 2);
+      ctx.fillText(probPct + _mcPz(), originX + columnW - padR - 70, y + ROW_H / 2);
 
       // Avg win-rate
       ctx.fillStyle = '#cbd5e1';
@@ -11982,7 +11989,7 @@ window.MetaCall = (function () {
       // a Cup share image reads "Top 4: 8,2 %" instead of the
       // misleading "Day-2: 8,2 %". Measure first so the name truncates
       // around it instead of behind it.
-      const day2Pct = (tip.day2Prob * 100).toFixed(1);
+      const day2Pct = _mcNum(tip.day2Prob * 100, 1);
       // Auch hier der gemeinsame Schalter — dies ist die Fassung, die
       // im geteilten Bild landet. Bis zum 02.09.2026 trug sie ihre
       // eigene Kopie der Typ-Unterscheidung.
@@ -12436,7 +12443,7 @@ window.MetaCall = (function () {
     if (!field.length) return;
 
     const { day2Prob, expWin, expTie, expLoss } = calcDay2(field);
-    const pct = (day2Prob * 100).toFixed(1);
+    const pct = _mcNum(day2Prob * 100, 1);
     const day1WR = _settings.rounds > 0 ? (expWin / _settings.rounds) * 100 : 0;
 
     // ALL matchups (sorted desc by final share), not just the top 10 —
@@ -12475,7 +12482,12 @@ window.MetaCall = (function () {
     const cardH = 170;
 
     const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
-    const pctNum = parseFloat(pct);
+    /* Aus der ZAHL rechnen, nicht aus dem formatierten Text. `pct` traegt
+       seit dem 06.09.2026 im Deutschen ein Komma, und parseFloat('16,1')
+       ist 16 — die Farbschwelle waere beim Umstellen des Zahlformats
+       stillschweigend verrutscht. Beim Einbau selbst passiert und
+       sofort behoben; die Zusicherung darunter haelt es fest. */
+    const pctNum = day2Prob * 100;
     if (pctNum >= 60) {
       cardGrad.addColorStop(0, '#27ae60'); cardGrad.addColorStop(1, '#16a085');
     } else if (pctNum >= 40) {
@@ -12498,7 +12510,7 @@ window.MetaCall = (function () {
     const leftCx = cardX + cardW / 4;
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 58px system-ui, -apple-system, sans-serif';
-    ctx.fillText(pct + '%', leftCx, cardY + 66);
+    ctx.fillText(pct + _mcPz(), leftCx, cardY + 66);
     ctx.font = 'bold 14px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
     ctx.fillText(t(_predictTitleKey()).toUpperCase(), leftCx, cardY + 108);
@@ -12510,7 +12522,7 @@ window.MetaCall = (function () {
     const rightCx = cardX + cardW * 3 / 4;
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 58px system-ui, -apple-system, sans-serif';
-    ctx.fillText(day1WR.toFixed(1) + '%', rightCx, cardY + 66);
+    ctx.fillText(_mcNum(day1WR, 1) + _mcPz(), rightCx, cardY + 66);
     ctx.font = 'bold 14px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
     ctx.fillText(t('mc.day1WinRate').toUpperCase(), rightCx, cardY + 108);

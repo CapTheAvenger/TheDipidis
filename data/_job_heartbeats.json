@@ -2,8 +2,8 @@
   "_hinweis": "Wann lief welcher nicht blockierende Schritt zuletzt, und mit welchem Ergebnis. Getrennt von der Frage, ob sich die zugehoerige Datei geaendert hat.",
   "scrapers/champions_replica_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-08-25T06:22:39Z",
-    "zuletzt_gelaufen": "2026-08-25T06:22:39Z"
+    "zuletzt_erfolgreich": "2026-09-06T04:08:06Z",
+    "zuletzt_gelaufen": "2026-09-06T04:08:06Z"
   },
   "scrapers/labs_tournament_scraper.py": {
     "status": "OK",
@@ -19,5 +19,40 @@
     "status": "OK",
     "zuletzt_erfolgreich": "2026-09-04T06:32:39Z",
     "zuletzt_gelaufen": "2026-09-04T06:32:39Z"
+  },
+  "scripts/build_champions_pokedex.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-09-06T04:08:06Z",
+    "zuletzt_gelaufen": "2026-09-06T04:08:06Z"
+  },
+  "scripts/build_champions_resources.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-09-06T04:08:06Z",
+    "zuletzt_gelaufen": "2026-09-06T04:08:06Z"
+  },
+  "scripts/scrape_champions_items.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-09-06T04:08:06Z",
+    "zuletzt_gelaufen": "2026-09-06T04:08:06Z"
+  },
+  "scripts/scrape_champions_roster.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-09-06T04:08:06Z",
+    "zuletzt_gelaufen": "2026-09-06T04:08:06Z"
+  },
+  "scripts/scrape_champions_usage.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-09-06T04:08:06Z",
+    "zuletzt_gelaufen": "2026-09-06T04:08:06Z"
+  },
+  "scripts/scrape_de_names.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-09-06T04:08:06Z",
+    "zuletzt_gelaufen": "2026-09-06T04:08:06Z"
+  },
+  "scripts/scrape_pokemonproxies.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-09-06T04:08:06Z",
+    "zuletzt_gelaufen": "2026-09-06T04:08:06Z"
   }
 }

@@ -327,6 +327,20 @@ describe('dieselbe Zahl, dasselbe Format', () => {
             'die grosse Variantenzahl fehlt jetzt ganz');
         assert.doesNotMatch(TIER, /stat-badge-suffix/,
             'die kleine Wiederholung hinter der Prozentzahl ist zurueck');
+        /* PRAEZISIERT AM 06.09.2026. Die Anordnung galt der DOPPELTEN
+           Variantenzahl, nicht jedem Zusatz: seit demselben Tag steht
+           hinter der Win Rate ihr Nenner (`.stat-badge-nenner`), weil
+           "WR 52,4 %" ohne Bezugsmenge gegen die aeltere Hausregel
+           verstiess. Das ist keine Wiederholung, sondern die fehlende
+           Haelfte. Damit die alte Anordnung trotzdem bewacht bleibt,
+           wird hier ausdruecklich geprueft, dass der Nenner NICHT die
+           Variantenzahl zeigt. */
+        const kachel = TIER.slice(TIER.indexOf('const antritte = Number(item.totalCount)'),
+                                  TIER.indexOf('heroHtml +=', TIER.indexOf('const antritte =')));
+        assert.doesNotMatch(kachel, /variantCount|variantLabel/,
+            'der Nenner hinter der Quote zeigt wieder die Variantenzahl');
+        assert.match(kachel, /item\.totalCount/,
+            'der Nenner kommt nicht aus der Antrittszahl');
         // Die Erklaerung bleibt — nur eben im Titel, nicht als zweite Zeile.
         assert.match(TIER, /Summe über \$\{variantCount\} Varianten/);
     });

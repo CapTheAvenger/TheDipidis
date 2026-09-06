@@ -59,6 +59,10 @@ window.MetaCall = (function () {
   let _majorMatchupMap     = null; // overall day_filter (legacy / fallback anchor)
   let _majorMatchupMapDay1 = null; // day_filter='day1' rows — full Swiss field
   let _majorMatchupMapDay2 = null; // day_filter='day2' rows — cut-qualifying field
+  /* meta -> { quote, partien } — die GEMESSENE Unentschieden-Quote auf
+     Papier. Siehe den Block bei aggUnentschieden weiter unten. null,
+     solange nichts geladen ist. */
+  let _praesenzUnentschieden = null;
                                    // All three labs maps share the same shape:
                                    //   { meta: { normDeck: { normOpp: { games, winPct, source } } } }
                                    // Loaded from data/labs_tournament_matchups.csv
@@ -7497,6 +7501,61 @@ window.MetaCall = (function () {
           const aggOverall = {}; // meta -> norm(deck) -> norm(opp) -> { games, siege, niederlagen, unentschieden }
           const aggDay1    = {};
           const aggDay2    = {};
+          /* Die Unentschieden-Quote des PRAESENZFELDES, je Meta.
+             Sie wird hier nebenbei mitgezaehlt, weil die Zeilen ohnehin
+             durchlaufen — und weil sie an genau einer Stelle gebraucht
+             wird, an der bis zum 06.09.2026 eine Konstante stand.
+
+             DER BEFUND (Agententeam B, 06.09.2026). calcDay2 rechnet ein
+             PRAESENZTURNIER, zieht seine Unentschieden-Quote aber aus
+             der ONLINE-Matrix (`base.pTie`) bzw. aus
+             MAJOR_MATCHUP_TIE_RATE = 0,02. Gemessen:
+
+                 Limitless Online      1,28 %   (2.248 von 174.954)
+                 Worlds SF (TEF-PBL)  10,95 %   (aus dieser Datei)
+                 alle Majors zusammen 15,30 %
+
+             Auf Papier wird also fuenf- bis zwoelfmal haeufiger
+             unentschieden gespielt als online.
+
+             WIE GROSS DIE WIRKUNG WIRKLICH IST — und warum die erste
+             Schaetzung dazu falsch war. Der Befund kam mit der Rechnung
+             "15,0 % werden rund 21 %". Nachgerechnet ueber dieselbe
+             Markow-Kette, 8 Runden, 16 Punkte:
+
+               Unentschieden gehen NUR von den Niederlagen ab
+               (pWin bleibt 0,47):        12,9 %  ->  20,5 %
+               Unentschieden gehen von BEIDEN ab
+               (S:N bleibt, wie gemessen): 12,9 %  ->  14,0 %
+
+             Die erste Zeile ist die, aus der die 21 % stammen — und sie
+             ist keine Modellierung, sondern ein Geschenk: sie hebt die
+             erwarteten Punkte je Runde von 1,430 auf 1,520, weil jede
+             neue Unentschieden-Partie aus einer Niederlage entsteht und
+             nie aus einem Sieg. Eine Partie laeuft aber auch aus der
+             Zeit, wenn man vorne liegt.
+
+             Also gilt die zweite Zeile: das Verhaeltnis Sieg zu
+             Niederlage bleibt, wie es gemessen wurde. Die erwarteten
+             Punkte SINKEN dabei leicht (1,430 -> 1,391, ein
+             Unentschieden ist einen Punkt wert statt drei) — die
+             Tag-2-Chance steigt trotzdem, weil die Verteilung schmaler
+             wird und weniger Runden auf null Punkten enden.
+
+             Der Gewinn ist damit rund +1,1 pp, nicht +8. Die Luecke
+             zwischen der simulierten Zahl und der bei Worlds GEMESSENEN
+             Konversion von 25,0 % erklaert diese Konstante NICHT. Sie
+             bleibt offen und gehoert nicht weggerechnet.
+
+             Nebenbei nicht monoton: bei 15,3 % Unentschieden faellt die
+             Chance wieder auf 13,1 %. Mehr Unentschieden verschmaelert
+             die Verteilung (hilft) und senkt den Mittelwert (schadet);
+             welches ueberwiegt, haengt an der Schwelle.
+
+             js/i18n.js kennt die gemessenen Quoten laengst und schreibt
+             sie beim Tag-2-Baustein des Deckbauers hin. Sie standen nur
+             nicht dort, wo gerechnet wird. */
+          const aggUnentschieden = {}; // meta -> { siege, niederlagen, unentschieden }
           let rowsConsumedOverall = 0;
           let rowsConsumedDay1    = 0;
           let rowsConsumedDay2    = 0;
@@ -7566,6 +7625,19 @@ window.MetaCall = (function () {
               z.siege += vsS;
               z.niederlagen += vsN;
               z.unentschieden += (vsU || 0);
+              /* Nur aus `overall` zaehlen. day1 und day2 waeren
+                 dieselben Partien ein zweites und drittes Mal — und
+                 day1 ist in diesem Format ohnehin eine Kopie von
+                 overall (siehe die Meldung in _matchupMap). */
+              if (dayFilter === 'overall') {
+                if (!aggUnentschieden[meta]) {
+                  aggUnentschieden[meta] = { siege: 0, niederlagen: 0, unentschieden: 0 };
+                }
+                const u = aggUnentschieden[meta];
+                u.siege += vsS;
+                u.niederlagen += vsN;
+                u.unentschieden += (vsU || 0);
+              }
             }
             z.punkteSumme += games * (Number.isFinite(vsPunkte) ? vsPunkte : 0);
           }
@@ -7654,6 +7726,26 @@ window.MetaCall = (function () {
           // re-applied at query time in getBaseMatchup.
           const overall = _collapseAgg(aggOverall, MAJOR_MATCHUP_MIN_GAMES_PAST);
           _majorMatchupMap = overall.map;
+          /* Jede Partie steht in dieser Datei ZWEIMAL — einmal aus Sicht
+             jedes Decks. Die Quote ist davon unberuehrt (Zaehler und
+             Nenner werden gleich doppelt gezaehlt), die Partienzahl
+             nicht: sie wird halbiert, damit der Nenner, den wir dem
+             Leser hinschreiben, die Zahl der wirklich gespielten
+             Partien ist. */
+          _praesenzUnentschieden = {};
+          for (const m of Object.keys(aggUnentschieden)) {
+            const u = aggUnentschieden[m];
+            const ges = u.siege + u.niederlagen + u.unentschieden;
+            if (ges > 0) {
+              _praesenzUnentschieden[m] = {
+                quote  : u.unentschieden / ges,
+                partien: Math.round(ges / 2),
+              };
+            }
+          }
+          if (typeof window !== 'undefined') {
+            window._mcPraesenzUnentschieden = _praesenzUnentschieden;
+          }
           const day1 = _collapseAgg(aggDay1, MAJOR_MATCHUP_MIN_GAMES_DAY1);
           _majorMatchupMapDay1 = day1.map;
 
@@ -8523,6 +8615,72 @@ window.MetaCall = (function () {
     });
   }
 
+  /**
+   * Die Unentschieden-Quote, mit der die Tag-2-Rechnung laufen muss.
+   *
+   * DER BEFUND (Agententeam B, 06.09.2026). calcDay2 rechnet ein
+   * PRAESENZTURNIER, bezog seine Unentschieden-Quote aber aus der
+   * Online-Matrix — dort steht 1,28 %, weil online kaum unentschieden
+   * gespielt wird. Auf Papier sind es 10,95 % (gemessen in
+   * data/labs_tournament_matchups_TEF-PBL.csv, 6.121 Partien).
+   *
+   * Wirkung, nachgerechnet (8 Runden, 16 Punkte, S:N wie gemessen):
+   * 12,9 % -> 14,0 %, also rund +1,1 pp. Die Rechnung, die daraus
+   * +8 pp machte, laesst die Unentschieden nur von den Niederlagen
+   * abgehen und hebt damit die erwarteten Punkte je Runde von 1,430 auf
+   * 1,520 — sie modelliert nicht, sie schenkt. Siehe den ausfuehrlichen
+   * Block bei aggUnentschieden.
+   *
+   * Die Luecke zur bei Worlds GEMESSENEN Konversion von 25,0 % bleibt
+   * damit offen. Sie ist ein eigener Befund und wird hier nicht
+   * weggerechnet.
+   *
+   * Warum eine EINZIGE Quote und nicht die Quote je Paarung: online
+   * liegt der Schnitt bei 1,28 %, die meisten Paarungen haben null
+   * Unentschieden. Diese Nullen mit Faktor neun hochzuskalieren waere
+   * Rauschen mit Vorzeichen. Eine gemessene Feldquote ist die ehrlichere
+   * Aussage.
+   *
+   * @returns {{quote:number, partien:number, meta:string, gemessen:boolean}}
+   */
+  function _unentschiedenQuote() {
+    const rueckfall = {
+      quote: MAJOR_MATCHUP_TIE_RATE, partien: 0, meta: '', gemessen: false,
+    };
+    if (!_praesenzUnentschieden) return rueckfall;
+    const schluessel = Object.keys(_praesenzUnentschieden);
+    if (!schluessel.length) return rueckfall;
+    // Steht ein Vergangenheitsformat an, gilt dessen Quote.
+    const gewuenscht = (_metaSource === 'past' && _pastMetaFormatKey)
+      ? String(_pastMetaFormatKey).trim().toUpperCase()
+      : schluessel.find(k => _istLaufenderMeta(k)) || '';
+    let gewaehlt = gewuenscht && _praesenzUnentschieden[gewuenscht] ? gewuenscht : '';
+    if (!gewaehlt) {
+      // Sonst das Format mit der breitesten Messung. Kein Raten: die
+      // Quote steht in der Anzeige mit ihrem Format daneben.
+      gewaehlt = schluessel.reduce((a, b) =>
+        (_praesenzUnentschieden[b].partien > (a ? _praesenzUnentschieden[a].partien : -1)) ? b : a, '');
+    }
+    const e = gewaehlt ? _praesenzUnentschieden[gewaehlt] : null;
+    if (!e || !(e.partien > 0)) return rueckfall;
+    return { quote: e.quote, partien: e.partien, meta: gewaehlt, gemessen: true };
+  }
+  if (typeof window !== 'undefined') window._mcUnentschiedenQuote = _unentschiedenQuote;
+
+  /**
+   * Eine Paarung auf die Praesenz-Unentschieden-Quote umstellen.
+   * Das Verhaeltnis Sieg zu Niederlage bleibt, wie es gemessen wurde —
+   * nur der Anteil, der auf Unentschieden entfaellt, waechst.
+   */
+  function _mitPraesenzUnentschieden(m, quote) {
+    const pTie = Math.max(0, Math.min(0.5, quote));
+    const rest = 1 - pTie;
+    const sn = (m.pWin || 0) + (m.pLoss || 0);
+    if (!(sn > 0)) return { pWin: rest / 2, pTie, pLoss: rest / 2 };
+    const pWin = (m.pWin / sn) * rest;
+    return { pWin, pTie, pLoss: Math.max(0, rest - pWin) };
+  }
+
   // ── Markov Chain – Day 2 Probability ──────────────────────
   function calcDay2(field, deckOverride) {
     const { rounds, day2Points } = _settings;
@@ -8530,7 +8688,25 @@ window.MetaCall = (function () {
     // or base-only when computing recommendations for alternative decks
     // where personal overrides don't apply.
     const myDeck     = deckOverride || _settings.myDeck;
-    const matchupFn  = deckOverride ? getBaseMatchup : getMatchup;
+    const roheFn     = deckOverride ? getBaseMatchup : getMatchup;
+    /* Der Meta Call rechnet immer ein Turnier auf Papier — alle fuenf
+       Turniertypen sind Praesenzveranstaltungen. Deshalb wird JEDE
+       Paarung auf die gemessene Praesenzquote umgestellt, bevor sie in
+       die Kette geht. Vorher trug sie die Online-Quote.
+
+       NUR WENN WIRKLICH GEMESSEN. Liegt keine Bilanz vor, bleiben die
+       Paarungen unangetastet — eine Umstellung auf einen Rueckfallwert
+       waere eine Behauptung, und die Kette soll das Punktesystem
+       anwenden, nicht ihre Eingaben umschreiben. Dieselbe Bedingung
+       haelt die Kette in den Zusicherungen pruefbar: dort gibt es keine
+       Messung, also geht die eingesetzte Paarung unveraendert durch. */
+    const uq = (typeof _unentschiedenQuote === 'function')
+      ? _unentschiedenQuote()
+      : { quote: 0.02, partien: 0, meta: '', gemessen: false };
+    const _stelleUm = (uq.gemessen && typeof _mitPraesenzUnentschieden === 'function')
+      ? (m) => _mitPraesenzUnentschieden(m, uq.quote)
+      : (m) => m;
+    const matchupFn = (a, b) => _stelleUm(roheFn(a, b));
     const maxPts = rounds * 3;
     let dp = new Float64Array(maxPts + 1);
     dp[0] = 1.0;
@@ -8547,7 +8723,7 @@ window.MetaCall = (function () {
           // matches contribute neutral but we treat them as ties).
           const isMirror = normalize(deck.name) === normalize(myDeck);
           const m = isMirror
-            ? { pWin: 0.45, pTie: 0.10, pLoss: 0.45 } // mirror approx
+            ? _stelleUm({ pWin: 0.45, pTie: 0.10, pLoss: 0.45 }) // Spiegel
             : matchupFn(myDeck, deck.name);
           if (pts + 3 <= maxPts) newDp[pts + 3] += p * share * m.pWin;
           if (pts + 1 <= maxPts) newDp[pts + 1] += p * share * m.pTie;
@@ -8565,13 +8741,13 @@ window.MetaCall = (function () {
       const share = deck.finalShare / 100;
       const isMirror = normalize(deck.name) === normalize(myDeck);
       const m = isMirror
-        ? { pWin: 0.45, pTie: 0.10, pLoss: 0.45 }
+        ? _stelleUm({ pWin: 0.45, pTie: 0.10, pLoss: 0.45 })
         : matchupFn(myDeck, deck.name);
       expWin  += rounds * share * m.pWin;
       expTie  += rounds * share * m.pTie;
       expLoss += rounds * share * m.pLoss;
     }
-    return { day2Prob, dp, expWin, expTie, expLoss };
+    return { day2Prob, dp, expWin, expTie, expLoss, unentschieden: uq };
   }
 
   // ── Recommendations engine ─────────────────────────────────
@@ -10003,7 +10179,7 @@ window.MetaCall = (function () {
 </div>`;
     }
 
-    const { day2Prob, dp, expWin, expTie, expLoss } = calcDay2(field);
+    const { day2Prob, dp, expWin, expTie, expLoss, unentschieden } = calcDay2(field);
     const pct    = (day2Prob * 100).toFixed(1);
     const cls    = day2Prob >= 0.6 ? '' : day2Prob >= 0.4 ? ' pct-mid' : ' pct-low';
     const maxPts = _settings.rounds * 3;
@@ -10077,6 +10253,19 @@ window.MetaCall = (function () {
       .replace('{r}',   _settings.rounds)
       .replace('{n}',   zahlLokal(_settings.totalPlayers));
 
+    /* Die Unentschieden-Annahme gehoert unter die Zahl, nicht in den
+       Quelltext. Sie verschiebt das Ergebnis um mehrere Prozentpunkte
+       und war bis zum 06.09.2026 falsch gesetzt — genau die Art
+       Konstante, die niemand nachprueft, solange sie niemand sieht. */
+    const _uq = unentschieden || _unentschiedenQuote();
+    const _uqText = _uq.gemessen
+      ? t('mc.day2Unentschieden')
+          .replace('{q}', _mcNum(_uq.quote * 100, 1) + _mcPz())
+          .replace('{n}', zahlLokal(_uq.partien))
+          .replace('{meta}', esc(_uq.meta))
+      : t('mc.day2UnentschiedenLeer')
+          .replace('{q}', _mcNum(_uq.quote * 100, 1) + _mcPz());
+
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">
@@ -10093,6 +10282,7 @@ window.MetaCall = (function () {
       <div class="mc-day2-pct${cls}">${pct}${_mcPz()}</div>
       <div class="mc-day2-label">${t(_predictTitleKey())}</div>
       <div class="mc-day2-sub">${day2Sub}</div>
+      <div class="mc-day2-sub mc-day2-unentschieden">${_uqText}</div>
       <div class="mc-day2-stats">
         <div class="mc-day2-stat">
           <div class="mc-day2-stat-val" style="color:var(--tint-ok-ink)">${expWin.toFixed(1)}</div>

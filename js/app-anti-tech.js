@@ -621,7 +621,7 @@
 
         if (_suggestedCards.length === 0) {
             list.innerHTML = `<div class="anti-tech-card-empty">${
-                _t('antiTech.cardsEmpty', 'No counter cards found for the selected targets in active_threats.json. Try a different aggression preset or add a more meta-relevant target.')
+                _t('antiTech.cardsEmpty', 'No counter cards for these targets — data/active_threats.json does not list them. That is a gap in our data, not a bad pick.')
             }</div>`;
             return;
         }

@@ -3655,6 +3655,36 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 devLog('[TechIdeen] nicht gerechnet:', e);
                 return;
             }
+            /* DIE LÜCKE ZUERST — sie gilt auch dann, wenn Ideen gefunden
+               wurden.
+
+               BEFUND (Agententeam B, 06.09.2026). Für Mega Excadrill
+               zeigte der Baustein genau einen Gegner: Toucannon, 2,55 %
+               des Feldes. Nicht gezeigt wurden Alakazam Dudunsparce
+               (25,6 % auf 743 Partien), Slowking (37,3 %) und Dragapult
+               Blaziken (38,7 %) — zusammen 17,1 % des Feldes. Der
+               ehrliche Satz dafür existierte, wurde aber nur bei einem
+               GANZ leeren Ergebnis gezeigt. Toucannon hat ihn
+               unterdrückt: die Warnung verschwand genau dann, wenn sie
+               gebraucht wurde. */
+            const _ohne = (erg && Array.isArray(erg.ohneIdee)) ? erg.ohneIdee : [];
+            const _maleLuecke = () => {
+                if (!_ohne.length || !stand || !stand.interaktionen) return;
+                const liste = _ohne.slice(0, 5).map(g =>
+                    t('buildInfo.techIdeenOhneEintrag')
+                        .replace('{name}', g.name)
+                        .replace('{wr}', (Number(g.quote) || 0).toFixed(1).replace('.', ',') + ' %')
+                        .replace('{n}', String(Number(g.partien) || 0))
+                ).join(', ');
+                const p = document.createElement('p');
+                p.className = 'build-info-alt-detail build-info-tech-luecke';
+                p.textContent = t('buildInfo.techIdeenOhne')
+                    .replace('{liste}', liste)
+                    .replace('{n}', stand.interaktionen)
+                    .replace('{datum}', _ideenDatum(stand.datum));
+                wrap.appendChild(p);
+            };
+
             if (!erg || !erg.gegner || !erg.gegner.length) {
                 /* AUCH DAS LEERE ERGEBNIS BEKOMMT EINEN SATZ — aber nur,
                    wenn wir den Datenstand kennen. "Nichts gefunden" und
@@ -3768,6 +3798,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     wrap.appendChild(row);
                 });
             });
+
+            /* Und zum Schluss, was NICHT gefunden wurde. Unter den
+               Ideen, nicht statt ihrer. */
+            _maleLuecke();
 
             const fuss = document.createElement('p');
             fuss.className = 'build-info-alt-detail build-info-ideen-fuss';

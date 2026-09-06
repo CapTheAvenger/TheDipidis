@@ -259,8 +259,34 @@ function _schlechteGegner(daten, archetyp) {
  *     stand: {version, datum, interaktionen},
  *     gegner: [{name, quote, partien, vorschlaege: [{
  *         karte, quelle, gegenKarte, gegenQuelle, sicherheit, satz
- *     }]}]
+ *     }]}],
+ *     ohneIdee: [{name, quote, partien}]
  * }>
+ *
+ * `ohneIdee` sind die schlechten Matchups, zu denen die Regelbasis
+ * NICHTS hergibt.
+ *
+ * BEFUND (Agententeam B, 06.09.2026, Spielersicht Mega Excadrill).
+ * Der Baustein zeigte genau einen Gegner: Toucannon, 2,55 % des
+ * Online-Feldes und bei Worlds zwei Spieler. Nicht gezeigt wurden die
+ * drei Gegner, an denen das Deck wirklich scheitert:
+ *
+ *     Alakazam Dudunsparce   25,6 %   743 Partien   5,79 % des Feldes
+ *     Slowking               37,3 %   811 Partien   5,53 %
+ *     Dragapult Blaziken     38,7 %   833 Partien   5,76 %
+ *
+ * Zusammen 17,1 % des Feldes, und zwei von drei Partien verloren. Alle
+ * drei erfüllen beide Schwellen dieses Moduls (< 47 %, >= 30 Partien) —
+ * sie fielen nur heraus, weil die Regelbasis (v0.1, fünf Paarungen)
+ * nichts zu ihnen kennt.
+ *
+ * Der ehrliche Satz dafür EXISTIERTE bereits (buildInfo.techIdeenLeer),
+ * wurde aber nur gezeigt, wenn das Ergebnis GANZ leer war. Toucannon
+ * hat ihn unterdrückt — die Warnung verschwand genau dann, wenn sie
+ * gebraucht wurde. Der Leser sieht eine Tech-Idee und hält sie für die
+ * Antwort auf seine Frage.
+ *
+ * Deshalb wird die Lücke jetzt mitgeliefert statt verschwiegen.
  *
  * `eigeneKarten` sind die Karten, die schon im Deck stehen — sie
  * fallen als Vorschlag weg, sonst schlägt der Baustein vor, was der
@@ -270,12 +296,12 @@ function ideen(opts) {
     opts = opts || {};
     var archetyp = String(opts.archetyp || '').trim();
     var lang = opts.lang || 'de';
-    if (!archetyp) return Promise.resolve({ stand: STAND, gegner: [] });
+    if (!archetyp) return Promise.resolve({ stand: STAND, gegner: [], ohneIdee: [] });
 
     return _laden().then(function (daten) {
         var E = window.CardCapabilityEngine;
         if (!E || !daten.effekte || !daten.effekte.size) {
-            return { stand: STAND, gegner: [] };
+            return { stand: STAND, gegner: [], ohneIdee: [] };
         }
 
         /* AUSSCHLUSSMENGE: alles, was der Archetyp ohnehin spielt, plus
@@ -314,10 +340,19 @@ function ideen(opts) {
          * je Gegner nachgesehen, ob seine Karten überhaupt einen Tag
          * tragen, den eine Regel kennt — das spart die teuren Läufe
          * für die Gegner, bei denen ohnehin nichts herauskommen kann. */
-        var gegner = _schlechteGegner(daten, archetyp)
+        var alleSchlechten = _schlechteGegner(daten, archetyp);
+        var _knapp = function (m) {
+            return { name: m.gegner, quote: m.quote, partien: m.partien };
+        };
+        var gegner = alleSchlechten
             .filter(function (g) { return _hatAnsatzpunkt(daten, g.gegnerKey); })
             .slice(0, MAX_GEGNER);
-        if (!gegner.length || !kandidaten.length) return { stand: STAND, gegner: [] };
+        if (!gegner.length || !kandidaten.length) {
+            return {
+                stand: STAND, gegner: [],
+                ohneIdee: alleSchlechten.map(_knapp)
+            };
+        }
 
         /* Für jeden schlechten Gegner EINEN Lauf der Engine, mit dem
            Formatpool als "eigenem Deck". Die Engine liefert dann alle
@@ -391,20 +426,28 @@ function ideen(opts) {
         });
 
         return Promise.all(laeufe).then(function (reihe) {
+            /* Gegner ohne einen einzigen Vorschlag fallen raus. Eine
+               Überschrift über einer leeren Liste ist genau der
+               Fehler, der am 05.09.2026 in den erkannten
+               Tech-Interaktionen gefunden wurde: 16 von 19 Gegnern
+               mit leerer Liste und einem Minus, das niemand
+               erklären konnte. */
+            var mitVorschlag = reihe.filter(function (g) { return g.vorschlaege.length > 0; });
+            var benannt = new Set(mitVorschlag.map(function (g) { return g.name; }));
             return {
                 stand: STAND,
-                /* Gegner ohne einen einzigen Vorschlag fallen raus. Eine
-                   Überschrift über einer leeren Liste ist genau der
-                   Fehler, der am 05.09.2026 in den erkannten
-                   Tech-Interaktionen gefunden wurde: 16 von 19 Gegnern
-                   mit leerer Liste und einem Minus, das niemand
-                   erklären konnte. */
-                gegner: reihe.filter(function (g) { return g.vorschlaege.length > 0; })
+                gegner: mitVorschlag,
+                /* Was ueberhaupt nicht geprueft werden konnte PLUS was
+                   geprueft wurde und nichts ergab. Beides ist fuer den
+                   Leser dasselbe: gegen diesen Gegner steht hier nichts. */
+                ohneIdee: alleSchlechten
+                    .filter(function (m) { return !benannt.has(m.gegner); })
+                    .map(_knapp)
             };
         });
     }).catch(function (e) {
         console.warn('[TechIdeen] nicht gerechnet:', e && e.message);
-        return { stand: STAND, gegner: [] };
+        return { stand: STAND, gegner: [], ohneIdee: [] };
     });
 }
 

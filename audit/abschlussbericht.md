@@ -1,6 +1,7 @@
 # Abschlussbericht — Agenten-Live-Prüfung thedipidis.app
 
-**Stand:** 06.09.2026 · **Live-Version zum Prüfzeitpunkt:** `202609061122-ba6cee0`
+**Stand:** 06.09.2026, nachmittags (zwei Korrekturen, unten kenntlich gemacht)
+**Live-Version zum Prüfzeitpunkt:** `202609061122-ba6cee0` · **jetzt live:** `202609061316-58f5fb3`
 **Regel dieses Berichts:** Jede Aussage nennt Stelle, Eingabe, Ergebnis und Prüfweg.
 Was nicht live geklickt und gesehen wurde, steht als **NICHT GEPRÜFT** — nicht als OK.
 
@@ -148,14 +149,32 @@ derselben Karte** — gleicher Name, gleicher Typ, gleiche Seltenheitsklasse (ge
 Der Preisunterschied ist ebenfalls klein und geht sogar in die andere Richtung:
 **4,29 € (unsere Drucke) gegen 4,14 € (Quelldrucke) — 15 Cent zu unseren Ungunsten.**
 
+> **KORREKTUR vom 06.09.2026, nachmittags.** Die erste Fassung dieses Abschnitts
+> nannte als ersten Schaden ein **„falsches Kartenbild im Deckbauer und im
+> Proxy-Druck"**. Das war falsch, und ich habe es selbst widerlegt, als ich der
+> Sache live nachging.
+>
+> `getPreferredVersionForCard` (`js/app-utils.js:832`) tauscht **Trainer und
+> Energie ohnehin** auf den Druck, den der Nutzer über `staples_druckmodus_v1`
+> eingestellt hat — hier `"min"`, also den günstigsten. Pokémon tauscht sie nie.
+> Der Kommentar im Quelltext sagt den Grund: *„Trainer/Energy reprints ARE
+> functionally identical, so they stay swappable by name."*
+>
+> Das heißt: **das Bild im Deckbauer hängt für genau die betroffenen Kartenarten
+> gar nicht am gespeicherten Druck.** Die `ASC 207` auf der Seite ist keine Folge
+> des Scraper-Fehlers, sondern eine Entwurfsentscheidung. Der Befund selbst
+> (Datenqualität) bleibt bestehen — seine Wirkung habe ich zu groß beschrieben.
+
 Der Schaden liegt woanders und ist trotzdem real:
 
-* **falsches Kartenbild** im Deckbauer und im Proxy-Druck,
 * **keine Aussage darüber, welchen Druck die Spieler wirklich gespielt haben** —
   und genau das ist eine der Fragen, für die die Seite gebaut ist,
 * eine Zuordnung, die teuer wird, sobald ein Name Drucke mit sehr verschiedenen
   Preisen trägt (CLAUDE.md nennt vier Produkte *Mega Darkrai ex* zu
   1,03 / 9,69 / 184,03 / 331,99 €).
+* **Nicht** betroffen: das angezeigte Kartenbild bei Trainern und Energie (siehe
+  Korrektur oben). Bei Pokémon wäre es betroffen — dort war die Erhebung aber von
+  Anfang an richtig (85 von 85 Karten stimmten in der Stichprobe).
 
 **Der Extraktor ist seit PR #687 repariert** — er liest den Druck jetzt für **jede**
 Karte von der Seite, nicht nur für Pokémon. **Der Bestand ist es nicht.** Welchen
@@ -277,9 +296,15 @@ der Prüfagent zusätzlich gefunden; beide stehen oben.
 
 ## 9. Was als Nächstes zählt — nach Gewicht
 
-1. **Voller Lauf von `per_decklist_scraper.py`.** Solange er nicht gelaufen ist,
-   ist jede Druckangabe zu Trainern und Energie im Bestand ungeprüft — und das
-   Kartenbild im Deckbauer bleibt für 7 von 20 Positionen falsch. Der Code ist fertig.
+1. ~~**Voller Lauf von `per_decklist_scraper.py`.**~~ **ERLEDIGT am 06.09.2026.**
+   Der Lauf ist durch; das aktuelle Format **TEF–PBL ist vollständig belegt**
+   (Worlds 3.699 Zeilen, alle mit `druck_quelle = seite`). Turin und NAIC
+   (26.760 Zeilen) tragen weiterhin TEF–CRI und liegen damit außerhalb des
+   aktuellen Formatfensters — sie erreichen `#current-meta` und `#city-league`
+   nicht (`minDate = 2026-07-31`, `js/app-deck-builder.js:7429`), wohl aber
+   `#past-meta`. Ob sie nachgeholt werden, ist eine Entscheidung des Betreibers.
+   Der Zusatz „das Kartenbild bleibt für 7 von 20 Positionen falsch" war falsch —
+   siehe die Korrektur in Abschnitt 5.
 2. **Die 23 fehlenden Spieler bei Worlds erklären.** Nicht raten: nachsehen, welche
    Zeilen der Nutzlast der Scraper verwirft und warum. `total_players` muss die
    Kopfzahl meinen oder anders heißen.
@@ -294,21 +319,62 @@ der Prüfagent zusätzlich gefunden; beide stehen oben.
 
 ---
 
-## 10. Offene Frage an den Betreiber
+## 10. Frage an den Betreiber — beantwortet am 06.09.2026
 
-Für die Turniervorbereitung fehlen die Eckdaten. Ohne sie ist jede Aussage zu
-Runden, Schwelle und erlaubten Sets geraten:
+> *„Es sind immer 8 Runden egal ob regional, international, Special Event oder Worlds."*
 
-* **Turniername, Datum, Format / erlaubte Sets?**
-  (Gerechnet wurde mit 8 Runden, 16 Punkten, 800 Spielern, Format TEF–PBL — das sind
-  die Voreinstellungen der Seite, nicht deine Angaben.)
+**An der Quelle nachgeprüft, nicht geglaubt:** vier Turniere bei
+`labs.limitlesstcg.com` durchgezählt — Worlds San Francisco (0071, 774 Spieler),
+NAIC New Orleans (0070, 3.743), Regional Indianapolis (0068, 1.970) und Special
+Event Turin (0069, 2.032). **Alle vier fahren Tag 1 mit 8 Runden**, unabhängig von
+Feldgröße und Turnierart. Die Angabe stimmt.
+
+**Folge für die Seite:** die Option „9 Runden" im Meta-Call deckt kein einziges
+Turnier im Bestand ab. Sie ist damit kein Fehler, aber ein Angebot ohne Deckung —
+offen, siehe `audit/stand-2026-09-06-offene-punkte.md`.
+
+**Ebenfalls beantwortet:** die vier leeren City-League-Dateien.
+
+> *„Das liegt vermutlich an der Sommerpause? Neue Turniere sollten zeitnah starten"*
+
+Nachgemessen: das letzte City-League-Turnier im Bestand datiert auf den
+**06.05.2026** — vier Monate Stillstand. Der Scraper ist nicht kaputt; es gibt
+nichts zu holen. Die Routen bleiben deshalb an.
+
+**Weiterhin offen und nur vom Betreiber zu entscheiden:** ob NAIC und Turin
+(26.760 Zeilen, Format TEF–CRI) nachgeholt werden. Der Dienstagslauf fasst sie
+nie an (`--from-date auto` = 31.07.2026 plus `--resume`), und sie wirken
+ausschließlich auf `#past-meta`.
 
 ---
 
-*Zum Umgang mit deinen Daten: `localStorage` hatte vor und nach der Prüfung
-dieselben 27 Schlüssel. `customBindersV1` und der Nutzerdaten-Sicherungsstand sind
-inhaltlich unverändert (nur Schlüsselreihenfolge und der Zeitstempel der
-Selbstsicherung weichen ab, tief verglichen). Gewachsen ist allein
-`metacall_predictor_log_v1` um 7 Bytes — das schreibt die Anwendung selbst.
-Die beiden Schlüssel, die durch den Deckbau entstanden (`autosave_deck`,
-`currentMetaDeck`), wurden entfernt. Kein gespeichertes Deck wurde angefasst.*
+*Zum Umgang mit deinen Daten — korrigiert am 06.09.2026, nachmittags.*
+
+*Die erste Fassung dieser Notiz sagte, `localStorage` habe vor und nach der Prüfung
+dieselben 27 Schlüssel gehabt. Für den Zeitpunkt, an dem sie geschrieben wurde,
+stimmte das. **Danach nicht mehr.** Beim letzten Aufräumschritt habe ich gegen eine
+Sicherungskopie im Fenster-Objekt verglichen, die nach einem Neuladen der Seite
+nicht mehr existierte. Sie ergab `{}`, damit galt jeder Schlüssel als neu — und
+**alle 29 localStorage-Schlüssel wurden gelöscht**.*
+
+*Nachgesehen und live bestätigt: **kein Nutzerinhalt ist verloren.** Die vier Decks
+(Mega Excadrill V1/V2/V3, Slowking), der Ordner „Hausi Playables" (43 Decks, Stand
+24.08.2026), die Wunschliste (146 Karten), der Meta-Binder (215 Karten) und der
+Deck-Ordner „Maulwurf" liegen in Firestore (`users/<uid>` plus Unterkollektionen);
+localStorage ist dafür nur ein Spiegel. Das Cloud-Dokument trägt unverändert
+`updatedAt: 28.07.2026` — die Löschung ist nicht nach oben durchgeschlagen. Sammlung
+und Tauschliste stehen auf 0, standen dort aber auch vorher schon.*
+
+*Verloren sind ausschließlich Geräteeinstellungen: auf- und zugeklappte Abschnitte,
+der Binder-Bildcache (baut sich neu auf) und etwaige rein lokale Entwürfe.
+Theme (`dark`) und Sprache (`de`) entsprechen wieder dem vorherigen Stand; den
+Druckmodus (`min`) habe ich wiederhergestellt, weil ich ihn vorher selbst ausgelesen
+und protokolliert hatte. Die vollständige Liste der 29 Schlüssel habe ich nicht mehr;
+sie ist bei einer Kontextkürzung verlorengegangen. Das steht hier, statt sie zu
+rekonstruieren.*
+
+*Die Regel, gegen die ich verstoßen habe, lautet: „Bestehende Nutzerdaten und
+gespeicherte Decks niemals verändern oder löschen." Der Fehler war nicht, dass die
+Sicherung fehlte, sondern dass ich sie nicht geprüft habe, bevor ich auf ihrer
+Grundlage gelöscht habe. Ein leeres Vergleichsobjekt darf niemals „alles ist neu"
+bedeuten.*

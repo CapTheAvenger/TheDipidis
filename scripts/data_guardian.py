@@ -1876,6 +1876,65 @@ def _aktuelles_meta():
 KONTINUITAET_VOLLSTAENDIG_AB = 0.90
 
 
+def check_druck_herkunft(findings):
+    """Stammt der Druck (set, number) von der Quelle oder aus einem Namen?
+
+    BEFUND (Agententeam DATEN, 06.09.2026). `extract_cards_from_decklist_soup`
+    las den Druck nur fuer Pokemon von der Decklistenseite. Trainer und
+    Energie wurden ueber den Kartennamen aufgeloest — genau das, was
+    CLAUDE.md unter "Data rules" verbietet.
+
+    An zehn Listen von limitlesstcg.com nachgemessen, 232 Kartenzeilen:
+    85 von 85 Pokemon richtig, 70 von 147 Trainer-/Energiezeilen FALSCH.
+    Boming Wangs Mega-Excadrill-Liste trug acht von elf Trainer-Zeilen
+    auf dem falschen Druck; die Seite lieferte den richtigen die ganze
+    Zeit als `data-set` mit.
+
+    Der Extraktor ist behoben. Der BESTAND bleibt falsch, bis
+    per_decklist_scraper.py die Zeilen neu schreibt — und anders als
+    beim Kartentyp laesst sich das NICHT lokal nachziehen: welchen
+    Druck ein Spieler gespielt hat, steht nur auf der Quellseite.
+
+    Diese Pruefung zaehlt, wie viele Zeilen ihre Herkunft nicht
+    ausweisen. Sie meldet WARN, nicht CRITICAL: die Zeilen sind nicht
+    kaputt, sie sind ungeprueft — und der Unterschied gehoert in die
+    Meldung, sonst gewoehnt man sich an einen roten Waechter.
+    """
+    pfad = os.path.join(DATA, "tournament_decklists_per_player.csv")
+    if not os.path.exists(pfad):
+        return
+    gesamt = 0
+    ohne = 0
+    ueber_namen = 0
+    for r in read_csv(pfad):
+        gesamt += 1
+        q = (col(r, "druck_quelle") or "").strip().lower()
+        if not q:
+            ohne += 1
+        elif q == "name":
+            ueber_namen += 1
+    if gesamt <= 0:
+        return
+    if ohne:
+        findings.append((
+            "WARN",
+            f"tournament_decklists_per_player.csv: {ohne} von {gesamt} Zeilen "
+            f"weisen nicht aus, woher ihr Druck stammt. Sie stammen aus der "
+            f"Zeit vor dem 06.09.2026, als Trainer und Energie ueber den "
+            f"KARTENNAMEN aufgeloest wurden — in der Stichprobe waren davon "
+            f"70 von 147 falsch. Behebt sich erst durch einen vollen Lauf von "
+            f"per_decklist_scraper.py; lokal nachziehen geht hier nicht, der "
+            f"gespielte Druck steht nur auf der Quellseite"))
+    if ueber_namen:
+        findings.append((
+            "WARN",
+            f"tournament_decklists_per_player.csv: {ueber_namen} von {gesamt} "
+            f"Zeilen haben ihren Druck ueber den Kartennamen bekommen, weil "
+            f"die Quellseite keinen auswies. Das ist der erlaubte Rueckfall, "
+            f"aber CLAUDE.md nennt ihn zu Recht gefaehrlich — die Zahl gehoert "
+            f"beobachtet"))
+
+
 def check_kontinuitaet_vollstaendig(findings):
     """Fuehrt player_continuity.csv jedes Turnier GANZ?
 
@@ -2179,6 +2238,7 @@ def main():
     check_heartbeat(findings)
     check_matchup_bilanzen(findings)
     check_kontinuitaet_vollstaendig(findings)
+    check_druck_herkunft(findings)
     check_set_order(findings)
     check_shrink(findings, rows, base_rows)
     report_unverified_prices(findings)

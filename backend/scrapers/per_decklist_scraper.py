@@ -422,6 +422,14 @@ CSV_FIELDS = [
     'count',
     'type',
     'is_ace_spec',
+    # Woher der Druck (set, number) stammt: 'seite' = von der
+    # Decklistenseite abgegriffen, 'name' = ueber den Kartennamen
+    # aufgeloest, weil die Seite nichts hergab. Leer = vor dem
+    # 06.09.2026 geschrieben, als der Trainerzweig IMMER ueber den
+    # Namen ging (70 von 147 Trainer-/Energiezeilen der Stichprobe
+    # falsch). Der Waechter zaehlt die leeren Zeilen, damit der Rest
+    # des Bestands nicht als geprueft durchgeht.
+    'druck_quelle',
     'scraped_at',
 ]
 
@@ -553,6 +561,7 @@ def scrape_one_tournament(
                     'set_number':                set_number,
                     'count':                     c.get('count', 0),
                     'type':                      c.get('type', '') or c.get('card_type', ''),
+                    'druck_quelle':              c.get('druck_quelle', ''),
                     # Belegt statt geraten — siehe backend/core/ace_spec_regel.py.
                     'is_ace_spec':               ('Yes' if c.get('is_ace_spec')
                                                   else entscheide_zeile(

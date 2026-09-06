@@ -138,8 +138,22 @@ describe('Tech-Ideen — Idee, nicht Beleg', () => {
         /* Genau der Fehler, der am 05.09.2026 in den erkannten
            Tech-Interaktionen gefunden wurde: 16 von 19 Gegnern mit
            leerer Liste und einem Minus, das niemand erklären konnte. */
-        assert.match(QUELLE, /gegner: reihe\.filter\(function \(g\) \{ return g\.vorschlaege\.length > 0/,
+        assert.match(QUELLE, /var mitVorschlag = reihe\.filter\(function \(g\) \{ return g\.vorschlaege\.length > 0; \}\);/,
             'Gegner ohne Vorschlag bleiben in der Liste stehen');
+        assert.match(QUELLE, /gegner: mitVorschlag,/,
+            'die gefilterte Liste wird nicht ausgeliefert');
+    });
+
+    it('aber er verschwindet nicht — er steht in ohneIdee', () => {
+        /* NACHTRAG (Agententeam B, 06.09.2026). Herausfiltern war
+           richtig, verschweigen nicht. Für Mega Excadrill blieb genau
+           Toucannon übrig (2,55 % des Feldes), während Alakazam
+           Dudunsparce (25,6 % auf 743 Partien), Slowking und Dragapult
+           Blaziken — zusammen 17,1 % des Feldes — spurlos wegfielen. */
+        assert.match(QUELLE, /var benannt = new Set\(mitVorschlag\.map\(function \(g\) \{ return g\.name; \}\)\);/,
+            'es wird nicht gemerkt, welche Gegner benannt wurden');
+        assert.match(QUELLE, /ohneIdee: alleSchlechten\s*\n\s*\.filter\(function \(m\) \{ return !benannt\.has\(m\.gegner\); \}\)/,
+            'die weggefallenen Gegner werden nicht mitgeliefert');
     });
 
     it('die Oberfläche nennt die Regelbasis mit Zahl und Datum', () => {

@@ -7266,6 +7266,90 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return { geaendert: true, protokoll };
         }
 
+        /* Schreibt nach einem Bau ueber den Y.2-Pfad denselben
+           Schnappschuss, den die Legacy-Stufen am Ende schreiben, und
+           stoesst dieselben zwei Bloecke an. Absichtlich EIGENSTAENDIG:
+           der Legacy-Block lebt von Ortsvariablen (`consistencyDeck`,
+           `currentArchetype`, `_techSlotNames`), die es hier nicht gibt.
+           Die Punktzahl kommt aus dem Bericht, den der Y.2-Pfad ohnehin
+           nach `window.lastConsistencyBuild` schreibt.
+
+           Warum nicht den Legacy-Block herausloesen und teilen: er
+           haengt an fuenf Ortsvariablen aus vier verschiedenen Stufen.
+           Ein gemeinsamer Aufrufer waere die groessere Aenderung, und
+           die gehoert nicht in einen Fehlerfix, der eine Zeile Anzeige
+           reparieren soll. Steht dieselbe Rechnung damit zweimal da?
+           Ja — und deshalb prueft `test-y2-schnappschuss.js`, dass
+           beide Fassungen dieselbe Grundlinie erzeugen. */
+        function _schnappBauSchnappschuss(source, antiTechTarget) {
+            const lebendDeck =
+                source === 'cityLeague' ? window.cityLeagueDeck :
+                source === 'currentMeta' ? window.currentMetaDeck :
+                source === 'pastMeta' ? window.pastMetaDeck : null;
+            if (!lebendDeck) return;
+
+            const bericht = (window.lastConsistencyBuild || {})[source] || null;
+
+            /* Kartenname OHNE Set-Klammer — genau wie im Legacy-Block,
+               weil der Vergleichsblock auf Namen zusammenfuehrt. */
+            const grundlinie = {};
+            Object.entries(lebendDeck).forEach(([schluessel, anzahl]) => {
+                if ((anzahl || 0) <= 0) return;
+                const m = String(schluessel).match(/^(.+?)\s*\(/);
+                const name = (m ? m[1] : schluessel).trim();
+                if (!name) return;
+                grundlinie[name] = (grundlinie[name] || 0) + anzahl;
+            });
+
+            grundlinie.__archetype  = (bericht && bericht.archetype) || null;
+            grundlinie.__capturedAt = Date.now();
+
+            /* Gesamtpunktzahl wie im Legacy-Block: Punkt je Karte mal
+               Anzahl. Der Y.2-Bericht fuehrt `consistency_score` je
+               Karte, also wird daraus nachgeschlagen statt geraten.
+               Fehlt der Bericht, bleibt das Feld weg — eine erfundene
+               Null waere im Vergleichsblock eine Aussage. */
+            if (bericht && Array.isArray(bericht.cards)) {
+                const punkte = new Map();
+                bericht.cards.forEach(k => {
+                    const nm = String((k && k.card_name) || '').trim().toLowerCase();
+                    if (!nm) return;
+                    punkte.set(nm, Number(k.consistency_score) || 0);
+                });
+                let summe = 0;
+                Object.entries(grundlinie).forEach(([nm, anzahl]) => {
+                    if (nm.startsWith('__')) return;
+                    summe += (punkte.get(String(nm).toLowerCase()) || 0) * (Number(anzahl) || 0);
+                });
+                grundlinie.__totalConsistencyScore = summe;
+            }
+
+            /* Ein Tech-Bau darf den Vanilla-Eimer NICHT ueberschreiben —
+               das ist die Grundlinie, gegen die verglichen wird. */
+            const techNamen = (typeof getTechSlotNames === 'function')
+                ? (getTechSlotNames(source) || []) : [];
+            const warTechBau = !!antiTechTarget || techNamen.length > 0;
+            grundlinie.__wasTechBuild   = warTechBau;
+            grundlinie.__antiTechTarget = antiTechTarget || null;
+
+            if (warTechBau) {
+                if (!window.lastTechDeck) window.lastTechDeck = {};
+                window.lastTechDeck[source] = grundlinie;
+            } else {
+                if (!window.lastVanillaDeck) window.lastVanillaDeck = {};
+                window.lastVanillaDeck[source] = grundlinie;
+            }
+
+            if (source === 'currentMeta' && typeof window.refreshUserVsVanillaPanel === 'function') {
+                try { window.refreshUserVsVanillaPanel(); }
+                catch (e) { /* Panel ist best-effort */ }
+            }
+            if (typeof window.refreshTechVsNormalPanel === 'function') {
+                try { window.refreshTechVsNormalPanel(source); }
+                catch (e) { /* dito */ }
+            }
+        }
+
         async function _runMostConsistencyBuilderPath(source, archetype) {
             const builder = window.MostConsistencyBuilder;
             if (!builder || typeof builder.build !== 'function') {
@@ -8202,6 +8286,48 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     );
                     if (_newPath && _newPath.applied) {
                         console.info('[autoCompleteConsistency] ✓ Phase Y.2 (MostConsistencyBuilder) used — legacy stages bypassed.');
+                        /* ── DIESES `return` SPRINGT UEBER DEN ABSCHLUSS ──
+                         *
+                         * BEFUND 06.09.2026, live nachgemessen: nach
+                         * einem Y.2-Bau stand im Block "Dein Build vs
+                         * Vanilla" weiterhin "Kein Deck geladen" —
+                         * obwohl `_userDeckCardNames()` 21 Namen fand
+                         * und `window.currentMetaDeck` gefuellt war.
+                         * Ein Aufruf von Hand
+                         * (`window.refreshUserVsVanillaPanel()`) malte
+                         * den Block sofort richtig.
+                         *
+                         * Die Ursache ist dieses `return`. Der
+                         * Abschlussblock der Legacy-Stufen (Z. ~10611
+                         * bis ~10676) macht ZWEI Dinge, die der
+                         * Y.2-Pfad nie erreicht:
+                         *
+                         *   1. Er schreibt den Vanilla-Schnappschuss
+                         *      (`window.lastVanillaDeck[source]`).
+                         *      Ohne ihn sagt der Karten-Diff dauerhaft
+                         *      "erst Consistency Generate laufen
+                         *      lassen" — direkt NACH dem Bau.
+                         *      Nachgeprueft: `window.lastVanillaDeck`
+                         *      war `undefined`, obwohl der Bau lief.
+                         *   2. Er stoesst den Vergleichsblock an.
+                         *
+                         * Ohne beides haengt der Block allein an der
+                         * rAF-Kette ueber `updateDeckDisplay`
+                         * (`scheduleDeckDisplayUpdate` → Z. ~1307).
+                         * Die feuert manchmal frueh genug und manchmal
+                         * nicht — daher sah es wie ein Wettlauf aus.
+                         * Es ist keiner: der direkte Aufruf fehlt
+                         * schlicht.
+                         *
+                         * Der Schnappschuss steht hier statt in
+                         * `_runMostConsistencyBuilderPath`, weil
+                         * `_antiTechTarget` eine Ortsvariable DIESER
+                         * Funktion ist. Ein Tech-Bau darf den
+                         * Vanilla-Eimer nicht ueberschreiben — das
+                         * waere genau die Grundlinie, gegen die der
+                         * Nutzer vergleichen will. */
+                        try { _schnappBauSchnappschuss(source, _antiTechTarget); }
+                        catch (e) { devLog('[autoCompleteConsistency] Y.2-Schnappschuss fehlgeschlagen:', e); }
                         return;
                     }
                     console.info('[autoCompleteConsistency] Phase Y.2 declined, falling back to legacy stages:', _newPath?.reason);

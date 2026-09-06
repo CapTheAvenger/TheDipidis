@@ -847,6 +847,15 @@
   color: var(--mc-text-muted);
   margin-bottom: 14px;
 }
+/* Die Unentschieden-Annahme steht direkt unter dem Turnierrahmen, eine
+   Spur leiser: sie ist eine Fussnote zur Zahl, keine zweite Ueberschrift.
+   Der Abstand der Zeile darueber faellt weg, damit beide als ein Block
+   gelesen werden. */
+.mc-day2-sub + .mc-day2-unentschieden {
+  margin-top: -12px;
+  opacity: 0.8;
+  font-size: 0.72rem;
+}
 .mc-day2-stats {
   display: flex;
   justify-content: center;

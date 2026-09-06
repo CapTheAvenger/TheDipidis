@@ -3481,6 +3481,18 @@ img[src*="limitlesstcg"] {
     color: #99a;
     line-height: 1.4;
 }
+/* Die Lücke, nicht der Vorschlag. Sie steht unter den Ideen und muss
+   sich von ihnen absetzen, sonst liest sie sich wie eine weitere
+   Empfehlung. Warnfarbe, kein Alarm — es ist eine fehlende Angabe,
+   kein Fehler. */
+.build-info-tech-luecke {
+    margin-top: 10px;
+    padding: 7px 10px;
+    border-left: 3px solid #b8860b;
+    background: rgba(184, 134, 11, 0.08);
+    border-radius: 0 4px 4px 0;
+    color: #c9b37a;
+}
 
 /* ── ACE-SPEC pick rationale section ─────────────────────── */
 .build-info-ace-pick {

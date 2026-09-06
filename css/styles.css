@@ -5924,6 +5924,26 @@ details[open] > .tier-trending-summary::after {
  * surface the variant count so the user understands why the
  * Tier-Card share doesn't match the Full Comparison Table's per-
  * variant rows. */
+/* Der NENNER hinter einer Quote — nicht zu verwechseln mit
+ * `.stat-badge-suffix` darunter, der einmal die Variantenzahl
+ * wiederholte und deshalb am 01.09.2026 von der Kachel geflogen ist
+ * ("einmal das in Groß reicht auf jeden Fall aus").
+ *
+ * Das hier ist keine Wiederholung, sondern die fehlende Hälfte: die
+ * Menge, aus der die Win Rate gebildet ist. Hausregel dieses Projekts —
+ * jede Quote trägt ihren Nenner. Deshalb eigene Klasse, damit die
+ * Zusicherung zur alten Anordnung weiter greifen kann.
+ *
+ * Bewusst blasser und kleiner als die Quote selbst: er soll sie
+ * einordnen, nicht mit ihr konkurrieren. */
+.stat-badge .stat-badge-nenner {
+    margin-left: 3px;
+    opacity: 0.6;
+    font-weight: 500;
+    font-size: var(--fs-xs);
+    font-variant-numeric: tabular-nums;
+}
+
 .stat-badge .stat-badge-suffix {
     margin-left: 4px;
     opacity: 0.75;

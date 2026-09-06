@@ -1864,6 +1864,97 @@ def _aktuelles_meta():
     return None
 
 
+# Wie nah die Zeilenzahl je Turnier am gemeldeten Feld liegen muss.
+# Bewusst grosszuegig: labs zaehlt im Seitenkopf gelegentlich ein paar
+# Spieler mehr, als in den Standings stehen.
+KONTINUITAET_VOLLSTAENDIG_AB = 0.90
+
+
+def check_kontinuitaet_vollstaendig(findings):
+    """Fuehrt player_continuity.csv jedes Turnier GANZ?
+
+    BEFUND (06.09.2026): elf der zwoelf Turniere standen mit exakt 512
+    Zeilen in der Datei, das zwoelfte mit 499 — weil es nur 499
+    Teilnehmer hatte. 512 ist keine Eigenschaft eines Turniers, sondern
+    die Deckelung der HTML-Ansicht auf labs ("top 512 filter ON").
+    Gegen die gemeldeten Teilnehmerzahlen aus labs_tournaments.json
+    fehlten 15.075 Spieler.
+
+    Warum das keine absolute Schwelle ist (Modulkommentar: absolute
+    Schwellen erzeugen hier Rauschen): geprueft wird nicht "genug
+    Zeilen", sondern der Abgleich JE TURNIER gegen die Zahl, die die
+    Quelle selbst nennt. Ein kleines Turnier mit 300 Zeilen ist
+    vollstaendig; ein grosses mit 512 ist es nicht.
+
+    Zweite Pruefung, gleiche Ursache: Zeilen ohne `player_id` stammen
+    aus dem HTML-Rueckfallweg. Sie sind fachlich aermer (die Bilanz
+    fehlt dort oft und wurde als 0-0-0 geschrieben) und lassen sich
+    ueber Turniergrenzen nur ueber den Namen verknuepfen — genau das,
+    was CLAUDE.md unter "Data rules" verbietet."""
+    pfad = os.path.join(DATA, "player_continuity.csv")
+    index = os.path.join(DATA, "labs_tournaments.json")
+    if not os.path.exists(pfad) or not os.path.exists(index):
+        return
+    try:
+        with open(index, encoding="utf-8") as f:
+            turniere = json.load(f)
+    except Exception as e:
+        findings.append(("WARN",
+                         f"labs_tournaments.json nicht lesbar ({e}) — die "
+                         f"Vollstaendigkeit von player_continuity.csv ist "
+                         f"nicht pruefbar"))
+        return
+
+    feld = {}
+    for t in turniere if isinstance(turniere, list) else []:
+        tid = str(t.get("tournament_id") or "").strip()
+        try:
+            feld[tid] = int(t.get("total_players") or 0)
+        except (TypeError, ValueError):
+            feld[tid] = 0
+
+    je_tid = {}
+    ohne_id = 0
+    gesamt = 0
+    for r in read_csv(pfad):
+        tid = (col(r, "tournament_id") or "").strip()
+        if not tid:
+            continue
+        je_tid[tid] = je_tid.get(tid, 0) + 1
+        gesamt += 1
+        if not (col(r, "player_id") or "").strip():
+            ohne_id += 1
+
+    if not je_tid:
+        return
+
+    kurz = []
+    fehlend = 0
+    for tid, n in sorted(je_tid.items()):
+        soll = feld.get(tid, 0)
+        if soll <= 0:
+            continue
+        if n < soll * KONTINUITAET_VOLLSTAENDIG_AB:
+            kurz.append(f"{tid}: {n}/{soll}")
+            fehlend += soll - n
+
+    if kurz:
+        findings.append((
+            "CRITICAL",
+            f"player_continuity.csv unvollstaendig — {len(kurz)} von "
+            f"{len(je_tid)} Turnieren unter "
+            f"{int(KONTINUITAET_VOLLSTAENDIG_AB * 100)} % des gemeldeten "
+            f"Feldes, zusammen {fehlend} fehlende Spieler "
+            f"({', '.join(kurz[:6])}{' …' if len(kurz) > 6 else ''})"))
+
+    if ohne_id:
+        findings.append((
+            "WARN",
+            f"player_continuity.csv: {ohne_id} von {gesamt} Zeilen ohne "
+            f"player_id — sie stammen aus dem HTML-Rueckfallweg und lassen "
+            f"sich nur ueber den Namen verknuepfen"))
+
+
 def check_matchup_bilanzen(findings):
     """Traegt der Auszug des AKTUELLEN Formats seine Matchup-Bilanzen?
 
@@ -2081,6 +2172,7 @@ def main():
     check_freshness(findings)
     check_heartbeat(findings)
     check_matchup_bilanzen(findings)
+    check_kontinuitaet_vollstaendig(findings)
     check_set_order(findings)
     check_shrink(findings, rows, base_rows)
     report_unverified_prices(findings)

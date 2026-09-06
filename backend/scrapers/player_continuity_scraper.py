@@ -130,6 +130,120 @@ def load_meta_map(data_dir: str) -> Dict[str, str]:
     return out
 
 
+# Der Nutzlast-Block, den die Seite selbst schon mitliefert.
+# labs ist eine SvelteKit-Anwendung: sie bettet die Antwort ihrer
+# eigenen Datenschnittstelle als <script data-sveltekit-fetched> in das
+# HTML ein, DAMIT der Browser sie nicht ein zweites Mal holen muss.
+PAYLOAD_MARKE = "/labs/data/tcg/standings"
+
+
+def _ganz(wert, ersatz=0):
+    """int() ohne Ausnahme — None und Unsinn werden zu `ersatz`."""
+    try:
+        return int(wert)
+    except (TypeError, ValueError):
+        return ersatz
+
+
+def _leerzeile():
+    """Die Felder, die NUR die Nutzlast kennt, als Leerwerte.
+
+    Der HTML-Rueckfallweg muss sie mitfuehren, sonst faellt der
+    DictWriter beim ersten Turnier ohne Nutzlast auf die Nase."""
+    return {
+        'player_id': '', 'points': '', 'day2': '', 'dropped': '',
+        'drop_round': '', 'dqed': '', 'deck_name_roh': '',
+    }
+
+
+def _zeile_aus_eintrag(e: Dict) -> Dict:
+    platz = e.get('placement')
+    return {
+        'place': _ganz(platz, '') if platz is not None else '',
+        'player_name': fix_mojibake(str(e.get('name') or '').strip()),
+        'country': str(e.get('country') or '').strip(),
+        'deck_slug': str(e.get('deck_id') or '').strip(),
+        'wins': _ganz(e.get('wins')),
+        'losses': _ganz(e.get('losses')),
+        'ties': _ganz(e.get('ties')),
+        'player_id': str(e.get('player_id') or '').strip(),
+        'points': _ganz(e.get('points'), ''),
+        'day2': _ganz(e.get('day2')),
+        'dropped': _ganz(e.get('dropped')),
+        'drop_round': '' if e.get('drop_round') is None else _ganz(e.get('drop_round'), ''),
+        'dqed': _ganz(e.get('dqed')),
+        'deck_name_roh': str(e.get('deck_name') or '').strip(),
+    }
+
+
+def standings_aus_nutzlast(soup, tournament_id: str) -> Optional[List[Dict]]:
+    """Die eingebettete JSON-Nutzlast lesen statt der HTML-Tabelle.
+
+    WARUM DAS DER RICHTIGE WEG IST (06.09.2026 gemessen an tid=0070,
+    International Championship New Orleans):
+
+      HTML-Tabelle:  512 Zeilen  — die Seite schaltet oben einen
+                     Filter "top 512" EIN und blendet den Rest aus;
+                     ein Knopf "Show all players" baut die restlichen
+                     Zeilen erst im Browser nach. Ein Parser ohne
+                     JavaScript sieht diesen Knopf, aber nie die Daten.
+      Nutzlast:      3752 Zeilen — alle Teilnehmer des Turniers.
+
+    Gemessen wurde nicht nur die Zeilenzahl:
+
+      * 0 von 3752 Zeilen ohne Bilanz (die HTML-Tabelle laesst die
+        Record-Spalte fuer viele Zeilen leer, was der alte Parser als
+        0-0-0 in die Datei schrieb — 71,4 % der Zeilen im Bestand);
+      * 0 von 3752 ohne Land (die Flaggenspalte im HTML traegt eine
+        leere Kopfzeile und musste ueber ein <img alt>-Muster geraten
+        werden);
+      * 3752 verschiedene `player_id` — ein STABILER Schluessel.
+        CLAUDE.md, "Data rules": *Never join card data by name.*
+        Dieselbe Falle steht bei Spielern: Namen sind weder eindeutig
+        noch schreibstabil. Die Kontinuitaet ueber Turniere hinweg ist
+        genau die Auswertung, die einen echten Schluessel braucht.
+
+    Es ist ausserdem KEIN zusaetzlicher Abruf: die Nutzlast steckt in
+    demselben HTML, das der Scraper ohnehin schon geholt hat. Die
+    Drosselungsregeln aus CLAUDE.md bleiben unberuehrt.
+
+    Gibt None zurueck, wenn die Seite keine brauchbare Nutzlast fuehrt
+    — dann greift der HTML-Rueckfallweg."""
+    # Defensiv: ein Objekt ohne find_all darf den ganzen Lauf nicht
+    # kosten. Der Rueckfallweg auf die Tabelle steht direkt dahinter,
+    # und ein Turnier zu verlieren waere teurer als 512 Zeilen davon.
+    finde_alle = getattr(soup, 'find_all', None)
+    if not callable(finde_alle):
+        return None
+    for skript in finde_alle('script', attrs={'data-sveltekit-fetched': True}):
+        url = skript.get('data-url') or ''
+        if PAYLOAD_MARKE not in url:
+            continue
+        roh = skript.get_text() or ''
+        try:
+            huelle = json.loads(roh)
+        except ValueError:
+            logger.warning("    tid=%s: Nutzlast ist kein JSON", tournament_id)
+            continue
+        if _ganz(huelle.get('status')) != 200:
+            continue
+        koerper = huelle.get('body')
+        if isinstance(koerper, str):
+            try:
+                koerper = json.loads(koerper)
+            except ValueError:
+                continue
+        if not isinstance(koerper, dict) or not koerper.get('ok'):
+            continue
+        eintraege = koerper.get('message')
+        if not isinstance(eintraege, list) or not eintraege:
+            continue
+        zeilen = [_zeile_aus_eintrag(e) for e in eintraege if isinstance(e, dict)]
+        logger.info("    Nutzlast gelesen: %d Zeilen", len(zeilen))
+        return zeilen
+    return None
+
+
 def scrape_standings_full(tournament_id: str) -> Optional[List[Dict]]:
     """Fetch /<tid>/standings and return every row as
     { place, player_name, country, deck_slug, wins, losses, ties }.
@@ -161,10 +275,20 @@ def scrape_standings_full(tournament_id: str) -> Optional[List[Dict]]:
                      "unangetastet", tournament_id)
         return None
 
+    # Zuerst die eingebettete Nutzlast — sie fuehrt ALLE Teilnehmer.
+    # Die HTML-Tabelle darunter ist nur die im Browser gefilterte
+    # Ansicht (top 512) und bleibt als Rueckfallweg stehen.
+    aus_nutzlast = standings_aus_nutzlast(soup, tournament_id)
+    if aus_nutzlast:
+        return aus_nutzlast
+
     table = soup.find('table', attrs={'class': re.compile(r'data-table')})
     if not table:
         logger.warning("    No standings data-table for %s", tournament_id)
         return []
+    logger.warning("    tid=%s: keine Nutzlast gefunden — lese die HTML-"
+                   "Tabelle. Sie zeigt hoechstens die besten 512 Spieler.",
+                   tournament_id)
 
     headers_raw = [th.get_text(strip=True).lower() for th in table.select('thead th')]
     # Discover column indices defensively. Labs has used various headers
@@ -248,7 +372,7 @@ def scrape_standings_full(tournament_id: str) -> Optional[List[Dict]]:
                 losses = int(m.group(2))
                 ties = int(m.group(3) or 0)
 
-        out.append({
+        zeile = {
             'place': place,
             'player_name': player_name,
             'country': country,
@@ -256,35 +380,77 @@ def scrape_standings_full(tournament_id: str) -> Optional[List[Dict]]:
             'wins': wins,
             'losses': losses,
             'ties': ties,
-        })
+        }
+        zeile.update(_leerzeile())
+        out.append(zeile)
 
     logger.info("    → %d standings rows captured", len(out))
     return out
 
 
-def load_existing_output(out_path: str) -> set:
-    """Return set of tournament_ids already in the output file so
-    --resume can skip them."""
-    seen = set()
+def bestand_je_turnier(out_path: str) -> Dict[str, List[Dict]]:
+    """tid -> die vorhandenen Zeilen. Grundlage fuer --resume."""
+    raus: Dict[str, List[Dict]] = {}
     if not os.path.exists(out_path):
-        return seen
+        return raus
     with open(out_path, encoding='utf-8-sig') as f:
         for r in csv.DictReader(f):
             tid = (r.get('tournament_id') or '').strip()
             if tid:
-                seen.add(tid)
-    return seen
+                raus.setdefault(tid, []).append(r)
+    return raus
+
+
+# Wie nah am gemeldeten Teilnehmerfeld ein Bestand liegen muss, um als
+# fertig zu gelten. Nicht 1,0: labs zaehlt im Kopf der Turnierseite
+# gelegentlich ein, zwei Spieler mehr als in den Standings stehen.
+VOLLSTAENDIG_AB = 0.95
+
+
+def bestand_ist_fertig(zeilen: List[Dict], teilnehmer: int) -> tuple:
+    """Darf --resume dieses Turnier ueberspringen?
+
+    WARUM DAS NICHT "ist schon da" HEISSEN DARF (06.09.2026):
+    --resume hat bisher jede tid uebersprungen, die IRGENDEINE Zeile
+    hatte. Elf der zwoelf Turniere standen mit exakt 512 Zeilen in der
+    Datei — der Deckelung der HTML-Ansicht. Der Wochenlauf fuhr
+    `--resume`, sprang also jedes Mal ueber genau die Turniere hinweg,
+    deren Daten unvollstaendig waren. Ein Fehler, der sich selbst
+    konserviert: je oefter der Lauf gruen durchlief, desto sicherer
+    blieb der Rumpf stehen.
+
+    Dasselbe gilt fuer einen Schemawechsel. Zeilen ohne `player_id`
+    stammen aus dem HTML-Rueckfallweg und sind fachlich aermer, auch
+    wenn ihre Anzahl stimmt.
+
+    Gibt (fertig, grund) zurueck — der Grund wird protokolliert, damit
+    nachvollziehbar bleibt, warum ein Turnier neu geholt wird."""
+    if not zeilen:
+        return False, 'keine Zeilen'
+    ohne_id = sum(1 for r in zeilen if not (r.get('player_id') or '').strip())
+    if ohne_id:
+        return False, ('%d von %d Zeilen ohne player_id — alter Aufbau'
+                       % (ohne_id, len(zeilen)))
+    if teilnehmer > 0 and len(zeilen) < teilnehmer * VOLLSTAENDIG_AB:
+        return False, ('%d Zeilen bei %d gemeldeten Teilnehmern'
+                       % (len(zeilen), teilnehmer))
+    return True, ''
 
 
 def write_output(rows: List[Dict], out_path: str):
     """Atomic write: temp file then rename. Avoids half-written CSV on
     interrupt."""
+    # Nur ERGAENZT, nie umbenannt: data/_consumers.md haelt fest, dass
+    # eine neue Spalte gefahrlos ist, eine umbenannte fremde Projekte
+    # bricht. Die ersten elf Namen stehen deshalb unveraendert.
     fieldnames = ['tournament_id', 'tournament_date', 'meta', 'place',
                   'player_name', 'country', 'deck_slug', 'deck_archetype',
-                  'wins', 'losses', 'ties']
+                  'wins', 'losses', 'ties',
+                  'player_id', 'points', 'day2', 'dropped', 'drop_round',
+                  'dqed']
     tmp_path = out_path + '.tmp'
     with open(tmp_path, 'w', encoding='utf-8', newline='') as f:
-        w = csv.DictWriter(f, fieldnames=fieldnames)
+        w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
         w.writeheader()
         for r in rows:
             w.writerow(r)
@@ -327,10 +493,21 @@ def main():
         target.append(t)
 
     if args.resume:
-        already = load_existing_output(out_path)
+        vorhanden = bestand_je_turnier(out_path)
         before = len(target)
-        target = [t for t in target if str(t.get('tournament_id')) not in already]
-        logger.info("--resume: %d / %d tids already scraped, %d to fetch",
+        behalten = []
+        for t in target:
+            tid_r = str(t.get('tournament_id'))
+            fertig, grund = bestand_ist_fertig(
+                vorhanden.get(tid_r, []), _ganz(t.get('total_players')))
+            if fertig:
+                continue
+            if vorhanden.get(tid_r):
+                logger.info("--resume: tid=%s wird trotz Bestand neu geholt "
+                            "(%s)", tid_r, grund)
+            behalten.append(t)
+        target = behalten
+        logger.info("--resume: %d / %d tids fertig, %d zu holen",
                     before - len(target), before, len(target))
 
     if not target:
@@ -400,9 +577,18 @@ def main():
             continue
 
         neue = []
+        aus_nutzlast_benannt = 0
         for r in rows:
             slug = r['deck_slug']
             archetype = archetype_map.get(slug, '')
+            if not archetype and r.get('deck_name_roh'):
+                # Kein Raten: das ist der Name, den labs selbst neben
+                # denselben Slug schreibt. labs_tournament_decks.csv
+                # fuehrt nur die Decks der vorderen Plaetze, deshalb
+                # trifft die Karte bei einem Feld von 3752 Spielern
+                # zwangslaeufig oft ins Leere.
+                archetype = r['deck_name_roh']
+                aus_nutzlast_benannt += 1
             neue.append({
                 'tournament_id': tid,
                 'tournament_date': date,
@@ -415,7 +601,16 @@ def main():
                 'wins': r['wins'],
                 'losses': r['losses'],
                 'ties': r['ties'],
+                'player_id': r.get('player_id', ''),
+                'points': r.get('points', ''),
+                'day2': r.get('day2', ''),
+                'dropped': r.get('dropped', ''),
+                'drop_round': r.get('drop_round', ''),
+                'dqed': r.get('dqed', ''),
             })
+        if aus_nutzlast_benannt:
+            logger.info("    %d Archetypnamen kamen aus der Nutzlast, nicht "
+                        "aus labs_tournament_decks.csv", aus_nutzlast_benannt)
 
         # Die Seite war lesbar und traegt keine Standings — dann ist die
         # Null echt. Hatte das Turnier aber schon einmal Zeilen, ist das

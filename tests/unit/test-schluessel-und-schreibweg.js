@@ -216,18 +216,38 @@ describe('Deck-Builder: die Turniergroesse wird auch unter der Limitless-ID gefu
         assert.match(BUILDER, /if \(sizes\.has\(labs\)\) sizes\.set\(limitless, sizes\.get\(labs\)\)/);
     });
 
-    it('das Turnier, um das es geht, hat wirklich eine leere Kennung', () => {
-        // NAIC 2026: 675 Listen, 3.743 Spieler — und tournament_id leer.
-        // Der Fallback greift auf limitless_tournament_id '518', das in
+    it('die leeren Kennungen sind weg — die Bruecke bleibt trotzdem', () => {
+        // WAR (bis 06.09.2026): NAIC 2026 stand mit 675 Listen und
+        // 3.743 Spielern in der Datei — und `tournament_id` war LEER.
+        // Der Fallback griff auf `limitless_tournament_id` '518', das in
         // keiner Labs-Datei steht; _sizeWeight(0) vergab still 0,5.
+        //
+        // IST: der volle Neulauf am 06.09.2026 hat die Kennungen gefuellt,
+        // nachdem `data/labs_tournaments.json` wieder alle zwoelf Turniere
+        // fuehrte (PR #692 — vorher fehlten vier, und ohne Eintrag konnte
+        // die Aufloesung 518 -> 0070 nicht greifen). Gemessen: 0 Zeilen
+        // ohne Kennung, NAIC steht auf '0070', Turin auf '0069',
+        // Worlds auf '0071'.
+        //
+        // Die Bruecke in app-deck-builder.js bleibt: sie kostet nichts,
+        // wenn die Kennungen stimmen, und faengt genau diesen Rueckfall
+        // ab. Die Zusicherung darauf steht oben und ist unveraendert.
         const zeilen = lies('data/tournament_decklists_per_player.csv').split('\n');
         const kopf = zeilen[0].replace(/^﻿/, '').split(',');
         const iTid = kopf.indexOf('tournament_id');
         const iLim = kopf.indexOf('limitless_tournament_id');
         assert.ok(iTid >= 0 && iLim >= 0);
-        const leer = zeilen.slice(1).filter(z => z && z.split(',')[iTid] === '' );
-        assert.ok(leer.length > 0, 'die leere Kennung ist weg — die Bruecke kann entfallen');
-        assert.equal(leer[0].split(',')[iLim], '518');
+        const leer = zeilen.slice(1).filter(z => z && z.split(',')[iTid] === '');
+        assert.equal(leer.length, 0,
+            `${leer.length} Zeile(n) ohne tournament_id — der Rueckfall auf `
+            + `limitless_tournament_id ist zurueck und _sizeWeight vergibt `
+            + `wieder still 0,5. Erste betroffene Limitless-ID: `
+            + (leer.length ? leer[0].split(',')[iLim] : '-'));
+        // Und die Zuordnung stimmt inhaltlich, nicht nur formal:
+        const naic = zeilen.slice(1).find(z => z && z.split(',')[iLim] === '518');
+        assert.ok(naic, 'NAIC (518) ist nicht mehr in der Datei');
+        assert.equal(naic.split(',')[iTid], '0070',
+            'NAIC traegt eine andere Labs-Kennung als 0070');
     });
 
     it('und die Uebersetzung 518 -> 0070 ist dokumentiert', () => {

@@ -1,4 +1,4 @@
-# Stand 06.09.2026, nachmittags — was steht, was offen ist
+# Stand 06.09.2026 — was steht, was offen ist
 
 Ersetzt die Fassung von 13:15 vollständig. Dort ging es um PR #690, der
 inzwischen zusammengeführt ist.
@@ -93,64 +93,93 @@ die Kopfzahl in der Turnierliste ist die knappere Angabe.
 
 ---
 
-## 3. Offen — mit Zahl, ohne Vermutung
+## 3. Nachtrag vom Abend: beide Entscheidungen umgesetzt
 
-### 3.1 Regional Orlando (tid 0060): 2.233 Zeilen fehlen
+Der Betreiber hat beide offenen Punkte entschieden — **Labs-Scraper laufen
+lassen** und **NAIC/Turin nachziehen**. Beides ist durch und nachgemessen.
 
-Die einzige Zeile in der Tabelle oben, die sich nicht bewegt hat.
+### 3.1 Druckherkunft: von 3.699 auf 30.459 Zeilen
 
-**Gemessen an der Quelle:** die eingebettete Nutzlast von
-`labs.limitlesstcg.com/0060/standings` führt **2.745 Einträge**. Unsere Datei
-hat 512 — und zwar die alten, aus dem HTML-Rückfallweg, ohne `player_id`. Es
-sind genau diese 512 Zeilen, die der Wächter jetzt als WARN meldet.
+| | vorher | nachher |
+| --- | ---: | ---: |
+| Zeilen mit `druck_quelle = seite` | 3.699 | **30.459** |
+| Zeilen ohne Herkunft | 26.760 | **0** |
 
-**Ursache:** `0060` steht **nicht** in `data/labs_tournaments.json`. Der
-Continuity-Scraper zieht seine Zielliste aus dieser Datei, hat das Turnier also
-nie angefasst; seine 512 Altzeilen wurden als „fremde Zeilen" unverändert
-mitgeschrieben (`player_continuity_scraper.py:530-540` — richtig so, sonst wären
-sie weg).
+Der erste Versuch (Lauf #18) lief grün und tat nichts: ich hatte das
+Datumsfeld **geleert**, weil die Beschreibung „leer = Filter aus" sagt.
+GitHub setzte für das leere Feld den Vorgabewert `auto` ein — und `auto`
+heißt 31.07.2026. NAIC (12.06.) und Turin (06.06.) liegen davor, also
+passte kein Turnier. 30.459 rein, 30.459 raus, grüner Haken. Mit einem
+ausdrücklichen Datum (`2026-01-01`) lief es.
 
-**Warum es nicht in der Liste steht — Hinweis, nicht Beweis:** auf der
-Indexseite von Labs ist `0060` vorhanden und heißt *Regional Championship
-Orlando, **April 3–5, 2026***. Das Nachbarturnier `0061` (Querétaro) läuft
-*April 4–5* und steht in der Liste. Ein Datumsfilter auf dem ersten Turniertag
-würde genau diesen Unterschied erklären. **NICHT GEPRÜFT** — dafür müsste
-`labs_tournament_scraper.py` laufen, und der überschreibt
-`labs_tournaments.json` vollständig (`:1976`, `:2031`).
+Der **zweite** Lauf war nötig, weil beim ersten sechs von 675
+NAIC-Spielern nicht geholt wurden (156 Zeilen). Ihre alten Zeilen blieben
+unverändert stehen — richtig so, der Schreibweg ersetzt je
+(Turnier × Spieler × Deck) und wirft nichts weg. Nach dem zweiten Lauf: 0.
 
-**Entscheidung nötig:** einen Lauf des Labs-Turnierscrapers anstoßen (er
-schreibt die Turnierliste neu und zieht dabei auch `labs_tournament_decks.csv`
-und die Matchups nach) — oder es so lassen. Ich stoße ihn nicht von mir aus an:
-er überschreibt mehr als diese eine Lücke.
+### 3.2 Regional Orlando: von 512 auf 2.745 Zeilen
 
-### 3.2 NAIC und Turin im alten Format — Entscheidung des Betreibers
+Die Ursache war nicht der Lauf, sondern die **Einstellung** — und ein
+zweiter Mechanismus, den erst die unabhängige Prüfung fand.
 
-26.760 der 30.459 Zeilen in `tournament_decklists_per_player.csv` tragen
-`meta = TEF-CRI` und keine Druckherkunft. Sie liegen **außerhalb** des aktuellen
-Formatfensters und erreichen `#current-meta` und `#city-league` nicht
-(`minDate = format_window.in_person_legal_date` = 31.07.2026,
-`js/app-deck-builder.js:7429`). Auf `#past-meta` wirken sie.
+`data/labs_tournaments.json` pendelte wochenlang zwischen acht und elf
+Einträgen. Der Filter (`from_date: 2026-04-24`, `tournament_types` ohne
+`special`) ließ nur acht durch; der **Gap-Fill** (`:2306-2318`) sammelte
+aus dem Fenster `[max_tid-10 .. max_tid+5]` nachträglich wieder ein, ohne
+Datums- und Typfilter. Solange `max_tid` 0070 war, fing das Fenster 0060
+Orlando mit auf. Mit 0071 Worlds rutschte es heraus.
 
-Der Dienstagslauf fasst sie **nie** an: `--from-date auto` löst auf 31.07.2026
-auf, dazu `--resume`. Ein Nachziehen bräuchte einen ausdrücklichen Lauf.
+**PR #692** setzt `from_date` auf `2026-04-01` und ergänzt `special`.
+Die Zahl ist nicht gegriffen: der Wochenlauf fährt den Continuity-Scraper
+seit jeher mit `--from-date 2026-04-01`; diese Einstellung war die einzige
+Stelle, die davon abwich.
 
-**Das aktuelle Format ist vollständig belegt:** Worlds 3.699 Zeilen, alle mit
-`druck_quelle = seite`.
+| | vorher | nachher |
+| --- | ---: | ---: |
+| Turniere in `labs_tournaments.json` | 8 | **12** |
+| Zeilen in `player_continuity.csv` | 19.066 | **21.299** |
+| Zeilen ohne `player_id` | 512 | **0** |
+| 0060 Orlando | 512 | **2.745** |
 
-### 3.3 Kleinere Befunde, alle nachgemessen, keiner behoben
+### 3.3 Drei rote Tests, die den Deploy anhielten
 
-| | Stelle | Maß |
-| --- | --- | --- |
-| Tippziele unter 44 px | `#cards` | 112 Knöpfe à 24 × 24 px, 7 je Kartenkachel |
-| `tier-hero-bg` steht über | `#current-meta`, `#city-league` | 3 px |
-| Zahlformat hart verdrahtet | 90 Stellen `.toFixed(1).replace('.', ',')` | im Deutschen richtig, im Englischen falsch |
-| „9 Runden" ohne Deckung | Meta-Call | kein Turnier im Bestand fährt 9 Runden (an vier Turnieren gezählt) |
-| Herzschlag fehlt | `per_decklist_scraper.py` bei manuellem Dispatch | schreibt keinen |
-| leere Testdateien | `tests/` | 15 Stück |
-| Archiv wird öffentlich ausgeliefert | `data/_archive` | 21 MB |
-| Verweise auf den Wächter | 4 von 24 Workflows | — |
+Nach den Datenläufen war `main` rot — und weil der Deploy an grünen Tests
+hängt, hing die Seite auf dem alten Stand, ohne dass etwas kaputt aussah.
 
----
+1. **`test-schluessel-und-schreibweg.js`** verlangte, dass NAIC eine
+   **leere** `tournament_id` hat — die Umgehung, die es dafür gab. Der
+   Neulauf hat sie gefüllt (0070/0069/0071, 0 leere Zeilen). Der Fall
+   prüft jetzt den geheilten Zustand; die Brücke im Deckbauer bleibt als
+   Rückfallschutz.
+2. **`test-nenner-und-rundung.js`** verglich eine Rekonstruktion aus
+   gerundeten Anteilen mit einer festen Schranke von **5**. Nachgerechnet:
+   die Quelle rundet auf zwei Nachkommastellen, allein daraus ergibt sich
+   für das stärkste Deck (7,62 %, n = 3.138) ein Band von **±27**. Eine 5
+   war bei 41.193 Spielern rechnerisch nicht einhaltbar; sie stimmte nur,
+   solange das Feld klein war. Die Schranke wird jetzt **aus den Daten
+   abgeleitet** (hier 28, also 0,068 % des Feldes) — ein Drift von 0,1 %
+   fällt weiterhin um.
+3. **`test-online-fenster-verdrahtung.js`** hielt einen **datierten
+   Kommentar** („Gemessen am 05.09.2026") gegen die Datei von heute. Das
+   muss jede Woche scheitern. Zum dritten Mal derselbe Mechanismus: zweimal
+   wurde die Zahl nachgezogen, beim dritten Mal ist die Prüfung auf die
+   **Eigenschaft** umgestellt — Verdrahtung steht, Kommentar nennt sein
+   Messdatum, und die Aussage selbst (Toucannon liegt im Fenster deutlich
+   unter kumulativ) gilt an den heutigen Daten.
+
+### 3.4 `is_ace_spec`
+
+Beide Datenläufe lösten die bekannte Drift aus (9.437 bzw. 5.158 Felder).
+Zweimal den Workflow „Daten reparieren" mit `schreiben=true` gefahren —
+der ist wiederholbar und rührt nur diese eine Spalte an.
+
+### 3.5 Endstand
+
+* **Wächter: 0 CRITICAL, 9 WARN** (vorher 11) — beide Scraper-Warnungen weg.
+* Suiten: Python **1396**, JS **4038**.
+* Live `202609061738-b964228`: 21.299 Kontinuitätszeilen, 12 Turniere in
+  der Liste, Orlando dabei. PC und Telefon (375 × 812) geprüft, acht
+  Routen ohne Querlauf, keine Konsolenfehler.
 
 ## 4. Was ich in diesem Durchgang NICHT geprüft habe
 

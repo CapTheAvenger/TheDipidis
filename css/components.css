@@ -729,9 +729,9 @@ html.is-signed-out [onclick*="radelist"]:hover {
 .ds-filter {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
-    gap: var(--s-6);
-    padding: var(--s-3) var(--s-4);
+    align-items: center;
+    gap: var(--s-2) var(--s-6);
+    padding: var(--s-2) var(--s-4);
     margin-bottom: var(--s-3);
     background: var(--surface-1);
     border: 1px solid var(--line);
@@ -739,10 +739,37 @@ html.is-signed-out [onclick*="radelist"]:hover {
     box-shadow: var(--e-1);
 }
 
+/* BESCHRIFTUNG LINKS, NICHT DARUEBER (11.09.2026).
+   ------------------------------------------------
+   Gemeldet mit Bildschirmfoto vom Telefon: „Und koennen wir den
+   Kopfbereich irgendwie noch optimieren? Bis die ersten Daten losgehen,
+   verlieren wir so viel Platz … die Menuefuehrung geht kompakter und
+   platztechnisch optimierter."
+
+   GEMESSEN bei 430 px, vom Seitenanfang bis zur ersten Datenzeile:
+   503 px, davon 171 auf diesem Block. Jede der beiden Gruppen
+   (Datenraum, Format) trug ihre Beschriftung ueber dem Bedienelement —
+   also vier Zeilen fuer zwei Bedienelemente.
+
+   Nebeneinander misst der Block 125 px statt 171. Vier Entwuerfe
+   gerendert und verglichen:
+     A  nur Abstaende gekuerzt, Beschriftung oben     161 px
+     B  Beschriftung links  (dieser hier)             125 px
+     C  Beschriftung ganz weg                         119 px
+     D  Gruppen ohne Streckung, Beschriftung links    123 px
+   C spart sechs Pixel mehr und nimmt dafuer beide Beschriftungen —
+   „Rotationen" allein sagt nicht, wovon. Die sechs Pixel sind das nicht
+   wert.
+
+   Auf einer Zeile bekommt man beide Gruppen bei 430 px NICHT unter: die
+   drei Datenraum-Knoepfe messen zusammen 234 px, die Formatwahl braucht
+   mindestens 120, dazu zwei Beschriftungen. Das steht hier, damit es
+   niemand noch einmal ausprobiert. */
 .ds-filter-group {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--s-2);
     min-width: 0;
 }
 
@@ -752,6 +779,11 @@ html.is-signed-out [onclick*="radelist"]:hover {
     font-weight: var(--lbl-weight);
     text-transform: uppercase;
     color: var(--ink-3);
+    /* Steht jetzt neben dem Bedienelement, nicht darueber — ohne das
+       bricht „DATENRAUM" auf schmalen Geraeten um und frisst die
+       gesparte Zeile wieder auf. */
+    white-space: nowrap;
+    flex: 0 0 auto;
 }
 
 .ds-filter-seg {
@@ -769,7 +801,15 @@ html.is-signed-out [onclick*="radelist"]:hover {
    zuverlaessig zu treffen. 44 px ist die Untergrenze, unter der ein
    Daumen daneben landet. */
 .ds-filter-btn {
-    padding: 6px 13px;
+    padding: 6px 11px;
+    /* 44 px BLEIBEN. Ein Versuch mit 40 sparte ueber beide Zeilen acht
+       Pixel und fiel bei zwei Zusicherungen um —
+       tests/unit/test-ui-tippziele-kontrast.js („auf jeder Datenseite
+       das erste Bedienelement") und tests/unit/test-meta-filter.js, das
+       verlangt, dass das feste Schild dieselbe Hoehe hat wie der Knopf.
+       Beide haben recht: acht Pixel sind keine Tippflaeche wert. Die
+       Ersparnis dieses Blocks kommt aus der Beschriftung neben statt
+       ueber dem Bedienelement, nicht aus kleineren Knoepfen. */
     min-height: 44px;
     border: 0;
     border-radius: 999px;

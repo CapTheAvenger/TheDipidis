@@ -839,6 +839,42 @@ jobs:
         run: |
           python3 scripts/fuelle_kartentyp.py --schreiben
 
+      - name: Kartentext-Bericht neu erzeugen
+        # WOZU: data/card_text_resolution.csv haelt fest, welche
+        # Cardmarket-Produktzuordnung unser EIGENER Kartentext belegt —
+        # Cardmarket fuehrt die Attacken im Produktnamen
+        # ("Deoxys [Psyspear]"), wir haben sie aus der Karte selbst.
+        # Der Bericht ist die Arbeitsliste fuer jede offene Zuordnung.
+        #
+        # BEFUND 11.09.2026: die Datei wurde von Hand angestossen und
+        # driftete zwischen zwei Anstoessen stumm von den Daten weg, die
+        # sie beschreibt. Gemessen an jenem Tag: der committete Stand
+        # trug Preise eines aelteren Laufs und 264 veraltete
+        # `current_product_id`, weil derselbe Wochenlauf
+        # cardmarket_id_mapping.csv neu gebaut hatte. Der Bericht sagte
+        # also etwas ueber eine Zuordnung, die es nicht mehr gab.
+        #
+        # Deshalb hier: NACH dem Neubau der Zuordnung und VOR dem Commit.
+        # Das Skript schreibt ausschliesslich seine eigene Datei (es hat
+        # ein --apply, das nur ablehnt und erklaert); es kann also nichts
+        # ueberschreiben, was ein Scraper gerade gelegt hat.
+        #
+        # Zwischen zwei Wochenlaeufen kann der taegliche Preislauf die
+        # Datei erneut altern lassen. Das bleibt sichtbar: der Waechter
+        # (scripts/data_guardian.py) vergleicht ihre Zeilenzahl mit
+        # price_data.csv und meldet die Differenz.
+        #
+        # Weich: faellt der Lauf um, bleibt der committete Stand stehen.
+        run: |
+          set +e
+          python3 -u scripts/resolve_by_card_text.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::resolve_by_card_text exited with $rc — Bericht unveraendert"
+              git checkout -- data/card_text_resolution.csv 2>/dev/null
+          fi
+          exit 0
+
       - name: Frischepruefung — was ist wirklich aktuell?
         # WOZU DIESER SCHRITT DA IST
         # --------------------------

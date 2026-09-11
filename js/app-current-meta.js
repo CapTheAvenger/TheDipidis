@@ -434,7 +434,16 @@
                     }
                     const emptyHtml = `
                         <div id="matchupHeatmapContainer" class="matchup-heatmap-container heatmap-container-std">
-                            <h2 class="heatmap-title heatmap-title-std"><span class="heatmap-title-icon"></span> ${t('heatmap.title')}</h2>
+                            ${/* Keine eigene Ueberschrift mehr — der Abschnitt
+                                 heisst bereits „Matchups" (js/ds-sections.js).
+                                 Betreiber am 11.09.2026: „Matchup Heatmap
+                                 einfach als Ueberschrift und nicht noch mit
+                                 ner weiteren Unterueberschrift arbeiten."
+                                 HIER bleiben die Achsenfelder aber OBEN: in
+                                 diesem Zweig gibt es keine Tabelle, unter die
+                                 sie rutschen koennten — und sie sind das
+                                 einzige, womit man die leere Suche wieder
+                                 aufmacht. */ ''}
                             ${searchControlsHtml}
                             <p class="heatmap-empty-reason">${emptyReason}</p>
                         </div>
@@ -747,7 +756,27 @@
                 // Wrapper HTML
                 let html = `
                     <div id="matchupHeatmapContainer" class="heatmap-container">
-                        <h2 class="heatmap-title"><span style="font-size: 1.2em;"></span> ${t('heatmap.title')}</h2>
+                        ${/* ── KEINE ZWEITE UEBERSCHRIFT, UND DIE ERKLAERUNG NACH UNTEN ──
+                             Betreiber am 11.09.2026 mit Bildschirmfoto:
+                             „Matchup Heatmap einfach als Ueberschrift und
+                             nicht noch mit ner weiteren Unterueberschrift
+                             arbeiten. Ueberschrift und dann sofort starten mit
+                             der Heatmap. Erklaerung und Decks fuer x oder y
+                             Achse auswaehlen gerne unter die Heatmap setzen
+                             und vll sogar einklappen damit das Durchscrollen
+                             der Daten smoother wird."
+
+                             Gemessen auf einem Telefon standen ueber der
+                             ersten Datenzeile: Abschnittsueberschrift
+                             „Matchups", Ueberschrift „Matchup Heatmap",
+                             drei Farbmarken mit Legende, und zwei
+                             Suchfelder. Fuenf Bloecke, bevor eine Zahl kommt.
+
+                             Die Ueberschrift ist weg (der Abschnitt traegt
+                             sie schon), Legende und Achsenwahl stehen jetzt
+                             zugeklappt UNTER der Tabelle. Die lange
+                             Erlaeuterung liegt wie bisher hinter dem
+                             Info-Knopf an der Abschnittsueberschrift. */ ''}
                         <!-- Beschreibung links, Legende rechts.
                              Rechts oben stand bisher nichts (mit rotem Kreis
                              markiert gemeldet), waehrend im Gitter 100-mal
@@ -799,14 +828,6 @@
                              (heatmapQuotenHinweis) und ist die Stelle, an der
                              ein Zweifel sofort aufgeloest wird, ohne den
                              Dialog zu oeffnen. -->
-                        <div class="heatmap-kopf">
-                            <p class="heatmap-desc heatmap-desc-kurz">
-                                <span class="heatmap-key heatmap-key-fav"></span> ${t('heatmap.favorable')} (≥ 55 %),
-                                <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45–54,9 %),
-                                <span class="heatmap-key heatmap-key-unfav"></span> ${t('heatmap.unfavorable')} (≤ 45 %)
-                                <span class="heatmap-kuerzel"><b title="${escAttr(heatmapQuotenHinweis('ohneUnentschieden'))}" data-quote-konvention="ohneUnentschieden">${t('heatmap.wrLabel')}</b> ${heatmapMitQuote(t('heatmap.legendeWr'), 'ohneUnentschieden')} · <b>${t('heatmap.gamesShort')}</b> ${t('heatmap.legendeM')}</span>
-                            </p>
-                        </div>
                         ${(function () {
                             /* Die lange Fassung wandert hinter den Knopf an der
                                Abschnittsueberschrift "Matchups".
@@ -833,7 +854,6 @@
                             });
                             return '';
                         })()}
-                        ${searchControlsHtml}
                         <div class="heatmap-table-scroll">
                             ${tableHtml}
                         </div>
@@ -842,9 +862,29 @@
                                 ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
                             </button>
                         </div>
-                        <p class="heatmap-hint">
-                            ${t('heatmap.hint')}
-                        </p>
+                        ${/* Zugeklappt, ABER: sobald eine Achsensuche laeuft,
+                             steht der Block offen. Sonst waere das Feld, das
+                             die Tabelle gerade auf drei Zeilen eingekocht hat,
+                             unsichtbar — und niemand faende den Weg zurueck.
+                             Der `open`-Zustand ueberlebt das Neuzeichnen nicht
+                             von selbst (die Tabelle wird bei jedem Tastendruck
+                             neu gebaut), deshalb haengt er an der Suche und
+                             nicht am Klick des Nutzers. */ ''}
+                        <details class="heatmap-details"${(rawSearchY || rawSearchX) ? ' open' : ''}>
+                            <summary class="heatmap-details-summary">${t('heatmap.detailsSummary')}</summary>
+                            <div class="heatmap-details-body">
+                                <p class="heatmap-desc heatmap-desc-kurz">
+                                    <span class="heatmap-key heatmap-key-fav"></span> ${t('heatmap.favorable')} (≥ 55 %),
+                                    <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45–54,9 %),
+                                    <span class="heatmap-key heatmap-key-unfav"></span> ${t('heatmap.unfavorable')} (≤ 45 %)
+                                    <span class="heatmap-kuerzel"><b title="${escAttr(heatmapQuotenHinweis('ohneUnentschieden'))}" data-quote-konvention="ohneUnentschieden">${t('heatmap.wrLabel')}</b> ${heatmapMitQuote(t('heatmap.legendeWr'), 'ohneUnentschieden')} · <b>${t('heatmap.gamesShort')}</b> ${t('heatmap.legendeM')}</span>
+                                </p>
+                                ${searchControlsHtml}
+                                <p class="heatmap-hint">
+                                    ${t('heatmap.hint')}
+                                </p>
+                            </div>
+                        </details>
                     </div>
                 `;
                 

@@ -12095,6 +12095,32 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     return k || 'S / (S + N)';
   }
 
+  /* Der Satz, der sagt, was die Zahl NICHT ist.
+     -------------------------------------------------------------------
+     Er stand bis zum 11.09.2026 in js/ds-ev-rechner.js und ist mit der
+     Rechnung hierher gezogen. Er ist noetig, weil Limitless dieselbe
+     Spalte anders rechnet: „Win %" sind dort die Matchpunkte
+     (3S + U) / (3n), hier steht S/(S+N). Wer beide Seiten offen hat und
+     zwei verschiedene Zahlen sieht, soll nicht raten muessen, welche
+     kaputt ist.
+
+     ZWEI FASSUNGEN, NICHT EINE MIT L(): der deutsche Satz nennt „Win %"
+     WOERTLICH, weil er es abgrenzt.
+     tests/unit/test-w3-ev-und-abschnitt.js laesst genau EINE solche
+     Fundstelle zu — eine zweite waere keine Abgrenzung mehr, sondern
+     eine Beschriftung. Der englische Satz holt den Namen deshalb zur
+     Laufzeit aus dem Modul. */
+  function _evAbgrenzungDe() {
+    return ' Die gezeigte Quote führt die Unentschieden nicht im Nenner; '
+         + 'das ist NICHT die Größe, die Limitless "Win %" nennt.';
+  }
+  function _evAbgrenzungEn() {
+    const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
+    const mp = (W && typeof W.kurz === 'function') ? W.kurz('matchpunkte') : 'match points';
+    return ' The rate shown does not carry ties in the denominator; this is NOT what '
+         + 'Limitless calls "' + mp + '".';
+  }
+
   /**
    * Jede Zeile des erwarteten Feldes mit der Quote deines Decks dagegen.
    * @param field Ergebnis von buildField()
@@ -12485,7 +12511,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       + 'eigenen Werten. „Sonstige" und Paarungen ohne Daten bleiben draußen und werden nicht mit '
       + '50 % aufgefüllt — darum steht die Abdeckung daneben. Das Band ist ±1,96 '
       + 'Standardabweichungen aus der Streuung der einzelnen Paarungen; es nimmt die Anteile als '
-      + 'bekannt an.' + eigenSatz,
+      + 'bekannt an.' + _evAbgrenzungDe() + eigenSatz,
       'The sum is <strong>share × ' + _evQuotenName() + '</strong> over every opponent of the meta you '
       + 'expect that we have a rate for. The shares are the "Final %" column of the composition '
       + 'above — the forecast, or your estimate where you entered one. The rates come from the '
@@ -12493,7 +12519,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       + 'smoothed, with your journal and your own values. "Others" and pairings without data are '
       + 'left out, not filled in at 50 % — which is why coverage is stated. The band is ±1.96 '
       + 'standard deviations from the spread of the individual pairings; it treats the shares as '
-      + 'known.' + eigenSatz);
+      + 'known.' + _evAbgrenzungEn() + eigenSatz);
 
     return `
 <div class="metacall-panel mc-ev-panel">
@@ -12513,6 +12539,84 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
   ${tabelle}
   <p class="mc-ev-fuss">${fuss}</p>
 </div>`;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * VON AUSSEN HIERHER — MIT DECK
+   * ═══════════════════════════════════════════════════════════════════
+   *
+   * BESTELLT (Betreiber, 11.09.2026, abends): „sinnvoller waere in der
+   * Tier List je Deck einen Button archetype vs the Meta oder Deck vs
+   * Meta oder irgendwie sowas und dann springt man zum Meta Call zu dem
+   * Feature und das Deck ist dann schon ausgewaehlt."
+   *
+   * Der Reiter laedt seine Daten erst beim ersten Oeffnen, und das
+   * dauert. Ein `_onMyDeck(name)` direkt nach dem Reiterwechsel liefe
+   * deshalb ins Leere — `_shareList` ist dann noch null, und der Name
+   * waere still verloren. Der Wunsch wird gemerkt und eingeloest, sobald
+   * die Liste steht.
+   *
+   * WARUM NICHT EINFACH WARTEN, BIS init() FERTIG IST: init() ist
+   * mehrfach aufrufbar und kann mitten in einem laufenden Ladevorgang
+   * ankommen; sein Versprechen sagt nichts darueber, ob DIESER Aufruf
+   * die Daten gebracht hat. Auf den Zustand zu schauen ist die Frage,
+   * die wirklich beantwortet werden muss.
+   */
+  let _wunschDeck = '';
+
+  function oeffneMitDeck(name) {
+    const wunsch = String(name || '').trim();
+    if (!wunsch) return;
+    _wunschDeck = wunsch;
+    if (typeof window.switchTabAndUpdateMenu === 'function') {
+      window.switchTabAndUpdateMenu('meta-call');
+    } else if (typeof window.switchTab === 'function') {
+      window.switchTab('meta-call');
+    }
+    try { init(); } catch (_e) { /* laeuft ohnehin ueber den Reiterwechsel */ }
+    _wunschEinloesen(0);
+  }
+
+  function _wunschEinloesen(versuch) {
+    if (!_wunschDeck) return;
+    if (!_shareList || !_shareList.length) {
+      /* 60 x 500 ms = 30 Sekunden. Danach ist es kein Ladevorgang mehr,
+         sondern ein Fehler, und ein Wunsch, der stundenlang wartet,
+         loest sich irgendwann bei einer ganz anderen Handlung ein. */
+      if (versuch > 60) { _wunschDeck = ''; return; }
+      setTimeout(() => _wunschEinloesen(versuch + 1), 500);
+      return;
+    }
+    const gesucht = _wunschDeck;
+    _wunschDeck = '';
+    /* Ueber normalize(), nicht ueber Gleichheit: die Tier-Liste und die
+       Anteilsdatei schreiben denselben Archetyp gelegentlich mit
+       verschiedenen Apostrophen („N's Zoroark"). */
+    const treffer = _shareList.find(d => normalize(d.name) === normalize(gesucht));
+    if (!treffer) {
+      /* Kein Deck mit Paarungsdaten — das ist eine Aussage, keine
+         Panne, und der Nutzer soll sie sehen statt auf einen leeren
+         Block zu schauen. */
+      const de = _mcIstDeutsch();
+      if (typeof window.showToast === 'function') {
+        window.showToast(de
+          ? `Zu „${gesucht}" liegen im Meta Call keine Anteile vor — wähle dein Deck unten von Hand.`
+          : `No shares on record for "${gesucht}" in the Meta Call — pick your deck below by hand.`,
+          'info', 6000);
+      }
+      return;
+    }
+    _onMyDeck(treffer.name);
+    /* Ans Ergebnis springen, nicht an den Reiteranfang: der Block steht
+       weit unten, und wer auf „Gegen das Meta" drueckt, will ihn sehen
+       und nicht erst suchen. Zwei Bilder Verzoegerung, damit der Block
+       nach _onMyDeck wirklich im Baum steht. */
+    setTimeout(() => {
+      const el = document.querySelector('.mc-ev-panel');
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 450);
   }
 
   function _setEvUmfang(id) {
@@ -16495,6 +16599,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _onBrickFilter,
     _setEvUmfang,
     _onEvEinzelDeck,
+    /* Einstieg von aussen: die Deck-Karten der Tier-Liste springen
+       hierher (js/app-archetype-card.js, Knopf „Gegen das Meta"). */
+    oeffneMitDeck,
     _setFeldVorwahl,
     _toggleFeldDeck,
     _onFeldSuche,

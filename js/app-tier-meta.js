@@ -3144,6 +3144,33 @@
                 .slice(0, STAPLES_ART_MAX);
         }
 
+        /**
+         * WELCHE KARTEN GERADE GEZEIGT WERDEN — die EINE Quelle dafuer.
+         *
+         * BEFUND 11.09.2026, vom Betreiber gemeldet: nach dem Umschalten
+         * auf "Pokémon" standen unter den Bildern die richtigen Namen
+         * (Shaymin, Meowth ex, Fezandipiti ex …), die BILDER daneben
+         * waren aber Night Stretcher, Boss's Orders, Lillie's
+         * Determination — die Karten der ungefilterten Liste.
+         *
+         * Ursache: es gab zwei Stellen, die die Auswahl trafen.
+         * renderTopCardsWidget() beruecksichtigte die Art, staplesListe()
+         * nicht — die nahm weiter `daten.slice(0, staplesAnzahl())`. Und
+         * zeichneStaplesBilderNeu() paart beide NACH POSITION:
+         * `liste[i]` zur i-ten Kachel. Sobald die Auswahl auseinanderlief,
+         * bekam jede Kachel das Bild einer fremden Karte.
+         *
+         * Deshalb steht die Regel jetzt genau einmal hier, und beide
+         * rufen sie. Eine Auswahl, die an zwei Stellen gerechnet wird,
+         * laeuft frueher oder spaeter auseinander — hier hat es einen Tag
+         * gedauert. */
+        function staplesAuswahl(daten) {
+            const art = staplesArt();
+            return art
+                ? staplesNachArt(daten || [], art)
+                : (daten || []).slice(0, staplesAnzahl());
+        }
+
         /** Wie viele Karten jede Art gerade hergibt — fuer die Knopfzeile. */
         function staplesArtZaehlung(daten) {
             const out = {};
@@ -3208,7 +3235,7 @@
 
         function staplesListe() {
             const daten = _staplesDaten || [];
-            return daten.slice(0, staplesAnzahl()).map((card, i) => {
+            return staplesAuswahl(daten).map((card, i) => {
                 const d = staplesDruckFuer(card, STAPLES_DRUCK);
                 return {
                     rang: i + 1, name: card.name, share: card.global_share,
@@ -3338,10 +3365,12 @@
                Stufen 15/30 — die Liste ist so lang, wie die Schwelle
                hergibt, hoechstens zehn. */
             ladeStaplesArt();
+            ladeStaplesAnzahl();
             const artJetzt = staplesArt();
-            const gezeigt = artJetzt
-                ? staplesNachArt(topCards, artJetzt)
-                : topCards.slice(0, ladeStaplesAnzahl());
+            /* Dieselbe Auswahl wie staplesListe() — siehe den Kopf von
+               staplesAuswahl(). Getrennt gerechnet ergab das am
+               11.09.2026 Bilder fremder Karten unter richtigen Namen. */
+            const gezeigt = staplesAuswahl(topCards);
             const deLbl = getLang() === 'de';
             // Der Nenner der Prozente sind die Archetypen, nicht die Decklisten.
             // Er wird einmal als Untertitel ausgewiesen ("von N Archetypen"),

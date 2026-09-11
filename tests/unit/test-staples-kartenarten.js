@@ -178,7 +178,13 @@ describe('Die Knopfzeile im Widget', () => {
             staplesArt: () => art,
             staplesNachArt: (d, id) => lade()._waehle(d, id),
             staplesArtZaehlung: (d) => lade()._zaehl(d),
-            STAPLES_ARTEN: lade()._arten
+            STAPLES_ARTEN: lade()._arten,
+            /* Seit dem 11.09.2026 trifft EINE Funktion die Auswahl fuer
+               das Markup und fuer die Bilder — vorher liefen beide
+               auseinander und die Kacheln zeigten fremde Bilder
+               (tests/unit/test-staples-bild-und-name.js). Die Attrappe
+               bildet sie mit denselben Attrappen nach. */
+            staplesAuswahl: (d) => (art ? lade()._waehle(d, art) : (d || []).slice(0, 15))
         };
         return new Function(...Object.keys(attrappen),
             WIDGET + '\nreturn renderTopCardsWidget;')(...Object.values(attrappen))(daten);

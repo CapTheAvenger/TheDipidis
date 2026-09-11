@@ -297,11 +297,44 @@
   //   11 der 21 Vorschlaege, die die anderen Regeln durchlassen
   //   (bei MIN_GAP = 0 waeren es 21 in 14 Archetypen).
   //
-  //   Sie sitzt aber auch nicht auf einer Kante: der naechste
-  //   gemessene Abstand darunter ist 42, der naechste darueber 64.
-  //   Jede Schwelle zwischen 43 und 64 ergibt exakt dieselben 10
-  //   Vorschlaege. Innerhalb dieses Fensters ist die genaue Zahl
-  //   folgenlos — was die 50 gerade noch traegt, ohne sie zu belegen.
+  //   Sie sass am 10.09.2026 auch nicht auf einer Kante: der naechste
+  //   gemessene Abstand darunter war 42, der naechste darueber 64.
+  //
+  // WAS SICH AM 11.09.2026 GEAENDERT HAT
+  // ------------------------------------
+  // Der Wochenlauf brachte neue Turnierlisten, und damit rutschte ein
+  // Kandidat auf GENAU 50 (Kangaskhan Bouffalant -> Mega Kangaskhan ex,
+  // 16 Listen). Eine unbelegte Zahl entschied damit einen einzelnen
+  // Vorschlag per Gleichstand — der Fall, fuer den
+  // tests/unit/test-alt-vorschlag-schwelle.js gebaut wurde.
+  //
+  // Die Antwort ist NICHT, die 50 zu verschieben. Beim Nachmessen aller
+  // 41 Kandidaten faellt etwas anderes auf: die meisten beruhen auf
+  // einer Handvoll Listen. Der groesste gemessene Abstand ueberhaupt
+  // (275,5 Plaetze, Steven's Metagross ex) stammt aus NEUN Listen,
+  // davon sechs mit der Mehrheitszahl — ein Median aus sechs
+  // Platzierungen. Solche Zahlen sind Einzelergebnisse, keine Tendenz,
+  // und die Schwelle, an der sie gemessen werden, ist dann gleichgueltig.
+  //
+  // ALT_SUGGESTION_MIN_SAMPLE steigt deshalb von 5 auf 30. Gemessen an
+  // data/tournament_decklists_per_player.csv (Stand 11.09.2026, Lauf
+  // 06:52 UTC) bleiben von 41 Kandidaten 9 uebrig:
+  //
+  //     durchgelassen (Abstand >= 50):
+  //       Dragapult  -> Crispin              560 Listen, Abstand 114,5
+  //       Slowking   -> Mega Kangaskhan ex   139 Listen, Abstand 113,5
+  //     unterdrueckt: 7 weitere, Abstaende 26 / 24 / 20 / 5 / -12 /
+  //                   -35,5 / -75,5
+  //
+  // Das Tor traegt damit weiter in beide Richtungen, und die 50 sitzt
+  // wieder frei: naechster Abstand darunter 26, darueber 113,5.
+  // Weggefallen sind acht Vorschlaege aus 6 bis 16 Listen — darunter
+  // der Gleichstandsfall, der diesen Absatz ausgeloest hat.
+  //
+  // Auch die 30 ist GEWAEHLT, nicht hergeleitet. Der Unterschied zur
+  // 50 ist, dass ihre Wirkung gemessen und hier benannt ist, und dass
+  // sie in die vorsichtige Richtung wirkt: sie nimmt Vorschlaege weg,
+  // sie erfindet keine.
   //
   // Der Vorschlag aendert den Bau NICHT; er steht als Zeile im
   // Warum-Dialog. Das ist der Grund, warum eine gegriffene Zahl hier
@@ -309,7 +342,7 @@
   const ALT_SUGGESTION_FRAC_MIN     = 0.30;
   const ALT_SUGGESTION_FRAC_MAX     = 0.70;
   const ALT_SUGGESTION_MIN_SHARE    = 0.50;
-  const ALT_SUGGESTION_MIN_SAMPLE   = 5;
+  const ALT_SUGGESTION_MIN_SAMPLE   = 30;  // GEWAEHLT, Wirkung gemessen — siehe oben.
   const ALT_SUGGESTION_MIN_GAP      = 50;  // GEGRIFFEN, siehe oben.
 
   // Hard rules from the game:

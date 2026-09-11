@@ -3647,14 +3647,34 @@
    der Quote „EST.". Eine Beschriftung, die der Position folgt statt der
    Spalte, ist bei der zweiten Tabelle immer falsch. */
 .mc-ev-tabelle-wrap { overflow-x: auto; }
-.mc-ev-tabelle {
+/* ZWEI KLASSEN, NICHT EINE — und das ist kein Schoenheitsfehler.
+   css/styles.css:8956 ff. setzt fuer JEDE Tabelle in einem Reiter
+   `.tab-content table { border-collapse: separate; white-space: nowrap;
+   font-size: 0.85em }` und macht die erste Spalte klebrig. Das ist
+   (0,1,1) und schlaegt ein blosses `.mc-ev-tabelle` (0,1,0). Live
+   nachgemessen am 11.09.2026 nach dem Deploy: die Kopfzeile trug im
+   ersten Feld eine deckende Flaeche (rgb(11,15,30)) und einen
+   Schlagschatten, waehrend die uebrigen durchsichtig waren — ein
+   sichtbarer Absatz mitten in der Kopfzeile, an einer Tabelle, die gar
+   nicht waagerecht scrollt. */
+.metacall-wrap .mc-ev-tabelle {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 0.88rem;
+  white-space: normal;
   margin-top: 8px;
 }
-.mc-ev-tabelle th {
+/* Die klebrige erste Spalte bringt hier nichts: die Tabelle passt in
+   ihren Rahmen, und auf dem Telefon wird sie zur Karte. */
+.metacall-wrap .mc-ev-tabelle th:first-child,
+.metacall-wrap .mc-ev-tabelle td:first-child {
+  position: static;
+  z-index: auto;
+  background-color: transparent;
+  box-shadow: none;
+}
+.metacall-wrap .mc-ev-tabelle th {
   text-align: left;
   padding: 8px 10px;
   border-bottom: 2px solid var(--mc-border);
@@ -3665,25 +3685,25 @@
   color: var(--on-dark);
   white-space: nowrap;
 }
-.mc-ev-tabelle th[title] { cursor: help; }
-.mc-ev-tabelle td {
+.metacall-wrap .mc-ev-tabelle th[title] { cursor: help; }
+.metacall-wrap .mc-ev-tabelle td {
   padding: 7px 10px;
   border-bottom: 1px solid var(--mc-border-faint);
   vertical-align: middle;
 }
-.mc-ev-tabelle tr:last-child td { border-bottom: none; }
-.mc-ev-tabelle tbody tr:hover td { background: var(--mc-bg-subtle); }
-.mc-ev-tabelle th:nth-child(1), .mc-ev-tabelle td:nth-child(1) { width: 26%; }
-.mc-ev-tabelle th:nth-child(2), .mc-ev-tabelle td:nth-child(2) { width: 11%; }
-.mc-ev-tabelle th:nth-child(3), .mc-ev-tabelle td:nth-child(3) { width: 10%; }
-.mc-ev-tabelle th:nth-child(4), .mc-ev-tabelle td:nth-child(4) { width: 26%; }
-.mc-ev-tabelle th:nth-child(5), .mc-ev-tabelle td:nth-child(5) { width: 17%; }
-.mc-ev-tabelle th:nth-child(6), .mc-ev-tabelle td:nth-child(6) { width: 10%; }
+.metacall-wrap .mc-ev-tabelle tr:last-child td { border-bottom: none; }
+.metacall-wrap .mc-ev-tabelle tbody tr:hover td { background: var(--mc-bg-subtle); }
+.metacall-wrap .mc-ev-tabelle th:nth-child(1), .metacall-wrap .mc-ev-tabelle td:nth-child(1) { width: 26%; }
+.metacall-wrap .mc-ev-tabelle th:nth-child(2), .metacall-wrap .mc-ev-tabelle td:nth-child(2) { width: 11%; }
+.metacall-wrap .mc-ev-tabelle th:nth-child(3), .metacall-wrap .mc-ev-tabelle td:nth-child(3) { width: 10%; }
+.metacall-wrap .mc-ev-tabelle th:nth-child(4), .metacall-wrap .mc-ev-tabelle td:nth-child(4) { width: 26%; }
+.metacall-wrap .mc-ev-tabelle th:nth-child(5), .metacall-wrap .mc-ev-tabelle td:nth-child(5) { width: 17%; }
+.metacall-wrap .mc-ev-tabelle th:nth-child(6), .metacall-wrap .mc-ev-tabelle td:nth-child(6) { width: 10%; }
 .mc-ev-num { text-align: right; font-variant-numeric: tabular-nums; }
 /* Der Kopf steht rechts, wo die Zahl rechts steht. Gemessen am
    11.09.2026 im gerenderten Entwurf, als er es noch nicht tat:
    „GAMES" bei x = 1223, die Zahlen darunter bei x = 1360. */
-.mc-ev-tabelle th.mc-ev-num { text-align: right; }
+.metacall-wrap .mc-ev-tabelle th.mc-ev-num { text-align: right; }
 .mc-ev-td-deck { color: var(--mc-text-heading); }
 /* Der Name steht in einer eigenen Zeile mit fester Ikonenspalte: ein
    Deck mit zwei Pokemon haette den Namen sonst weiter eingerueckt als
@@ -3703,7 +3723,7 @@
    gerenderten Probe standen dadurch drei verschiedene Einrueckungen
    untereinander. */
 .mc-ev-deckzelle > *:only-child { grid-column: 2; }
-.mc-ev-deckwort { font-weight: 600; overflow-wrap: anywhere; }
+.mc-ev-deckwort { font-weight: 600; overflow-wrap: break-word; }
 
 /* Abstand zur 50 — dieselbe Zahl wie in der Spalte davor, als Bild. */
 .mc-ev-td-balken { padding-right: 14px !important; }
@@ -3728,9 +3748,9 @@
 }
 .mc-ev-balken.is-pos { background: var(--color-success); }
 .mc-ev-balken.is-neg { background: var(--color-danger); }
-.mc-ev-tabelle tr.is-duenn td { opacity: 0.55; }
-.mc-ev-tabelle .is-gut { color: var(--color-success); font-weight: 700; }
-.mc-ev-tabelle .is-schlecht { color: var(--color-danger); font-weight: 700; }
+.metacall-wrap .metacall-wrap .mc-ev-tabelle tr.is-duenn td { opacity: 0.55; }
+.metacall-wrap .mc-ev-tabelle .is-gut { color: var(--color-success); font-weight: 700; }
+.metacall-wrap .mc-ev-tabelle .is-schlecht { color: var(--color-danger); font-weight: 700; }
 .mc-ev-eigen-punkt {
   margin-left: 5px;
   /* 0,65rem = 10,4 px. Der Schriftboden der Seite liegt bei 10 px
@@ -3782,12 +3802,22 @@
      mit ihren Etiketten aus data-label. Der Balken faellt weg — er
      zeigt dieselbe Zahl, die zwei Zeilen darueber als Ziffer steht. */
   .mc-ev-tabelle-wrap { overflow-x: visible; }
-  .mc-ev-tabelle, .mc-ev-tabelle tbody, .mc-ev-tabelle tr, .mc-ev-tabelle td {
+  .metacall-wrap .mc-ev-tabelle, .metacall-wrap .mc-ev-tabelle tbody, .metacall-wrap .mc-ev-tabelle tr, .metacall-wrap .mc-ev-tabelle td {
     display: block;
     width: auto;
   }
-  .mc-ev-tabelle thead { display: none; }
-  .mc-ev-tabelle tbody tr {
+  /* Die Spaltenbreiten von oben MUESSEN hier weg.
+     In der Kartenansicht ist jede Zelle ein Rasterfeld; eine Breite in
+     Prozent wird dann zur festen Breite INNERHALB des Feldes. Gemessen
+     am 11.09.2026 auf 390 px: das Raster stand auf 153 px je Spalte,
+     die Zelle darin aber auf 82 px (26 % von 316) — der Deckname brach
+     mitten im Wort um, „Alakazam Dudunsparc / e". Die Regeln oben
+     tragen nth-child und damit eine Klasse mehr; ohne gleich starke
+     Gegenregel gewinnen sie auch hier. */
+  .metacall-wrap .mc-ev-tabelle th:nth-child(n),
+  .metacall-wrap .mc-ev-tabelle td:nth-child(n) { width: auto; }
+  .metacall-wrap .mc-ev-tabelle thead { display: none; }
+  .metacall-wrap .mc-ev-tabelle tbody tr {
     border: 1px solid var(--mc-border-faint);
     border-radius: 10px;
     padding: 8px 10px;
@@ -3796,39 +3826,54 @@
     grid-template-columns: 1fr 1fr;
     gap: 2px 10px;
   }
-  .mc-ev-tabelle tbody tr:hover td { background: none; }
-  .mc-ev-tabelle tbody td {
+  .metacall-wrap .mc-ev-tabelle tbody tr:hover td { background: none; }
+  .metacall-wrap .mc-ev-tabelle tbody td {
     border: none;
     padding: 1px 0;
     text-align: left;
     font-size: 0.8rem;
   }
-  .mc-ev-tabelle tbody td.mc-ev-td-deck {
+  /* Etikett und Wert in EINER Zeile.
+     Ohne das bricht der Wert unter sein Etikett, sobald die Zelle
+     schmaler ist als beide zusammen — gemessen am 11.09.2026: die Karte
+     wuchs dadurch von vier auf acht Zeilen und die ganze Tabelle von
+     4.167 auf 5.463 px. Flex statt nowrap, damit ein langer Deckname
+     weiter umbrechen darf; nur die Zahlenzellen bleiben einzeilig. */
+  .metacall-wrap .mc-ev-tabelle tbody td[data-label] {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .metacall-wrap .mc-ev-tabelle tbody td[data-label]::before {
+    flex: 0 0 auto;
+  }
+  .metacall-wrap .mc-ev-tabelle tbody td.mc-ev-td-deck {
     grid-column: 1 / -1;
     font-size: 0.9rem;
     margin-bottom: 2px;
   }
-  .mc-ev-tabelle tbody td.mc-ev-td-balken { display: none; }
+  .metacall-wrap .mc-ev-tabelle tbody td.mc-ev-td-balken { display: none; }
   /* Herkunft und Matches teilen sich eine Zeile, wie „wie oft" und die
      Quote darueber. Ueber die ganze Breite gezogen schoebe die Herkunft
      die Matches-Zahl auf eine vierte Zeile und machte aus 25 Karten
      rund 800 px zusaetzlichen Lauf. */
-  .mc-ev-tabelle tbody td.mc-ev-td-quelle { grid-column: 1; }
-  .mc-ev-tabelle tbody td[data-label]::before {
-    content: attr(data-label) ' ';
+  .metacall-wrap .mc-ev-tabelle tbody td.mc-ev-td-quelle { grid-column: 1; }
+  .metacall-wrap .mc-ev-tabelle tbody td[data-label]::before {
+    content: attr(data-label);
     font-size: 0.66rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--mc-text-muted);
-    margin-right: 5px;
   }
   .mc-ev-quelle { padding: 1px 6px; font-size: 0.68rem; }
   /* Auf 390 px ist der Platz fuer den Namen knapp; die Ikonen kosten
      42 px und tragen hier nichts, was der Name nicht schon sagt. */
   .mc-ev-deckzelle { grid-template-columns: 1fr; }
-  .mc-ev-tabelle .tcg-pokemon-icon,
-  .mc-ev-tabelle .tcg-pokemon-icon-group { display: none; }
+  .metacall-wrap .mc-ev-tabelle .tcg-pokemon-icon,
+  .metacall-wrap .mc-ev-tabelle .tcg-pokemon-icon-group { display: none; }
 }
 
 /* ── Die vier Schritte des Ablaufs ─────────────────────────────────

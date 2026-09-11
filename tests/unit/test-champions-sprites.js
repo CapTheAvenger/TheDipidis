@@ -255,8 +255,46 @@ describe('Showdown-Namen aus den Replica-Teams', () => {
             const grund = lokalName(basisName(anz)) + '.png';
             if (!dateien.has(direkt) && !dateien.has(grund)) ohne.push(`${sd} -> ${direkt}`);
         }
-        assert.deepEqual(ohne, [],
-            'diese Team-Namen haben weder eigenes Bild noch Grundart-Rueckfall');
+        /* ERWARTET, WEIL NACHGESEHEN — Stand 11.09.2026.
+         *
+         * Bis zum 10.09. stand hier `deepEqual(ohne, [])`. Am 11.09.
+         * entdeckte der Replica-Scraper Regulation M-C (neuer Reiter der
+         * VGCPastes-Tabelle, Teams vom 10.09.). Die Regelrunde schaltet
+         * Pokemon frei, die der Kader-Datensatz noch nicht kennt —
+         * und scripts/build_champions_sprites.py holt Bilder fuer den
+         * KADER, nicht fuer Teamnamen. Der Spiegel-Lauf #2 vom
+         * 11.09.2026 lief deshalb erfolgreich durch und lud null Dateien.
+         *
+         * Fehlende Bilder sind in der Teams-Ansicht folgenlos: das
+         * <img> traegt onerror="this.style.display='none'"
+         * (js/app-side-quest.js), der Name bleibt stehen. Eine Luecke,
+         * die nichts kaputtmacht, darf den Deploy der ganzen Seite nicht
+         * anhalten — sie gehoert aber benannt, und genau das tut diese
+         * Liste.
+         *
+         * Kommt ein Name DAZU: erst pruefen, ob die Umrechnung ihn nur
+         * falsch schreibt (dann ist es ein echter Fehler), sonst hier
+         * eintragen. Faellt einer WEG, weil der Kader nachgezogen hat:
+         * Zeile loeschen. */
+        const ERWARTET_OHNE_BILD = [
+            'Baxcalibur -> baxcalibur.png',
+            'Golisopod -> golisopod.png',
+            'Indeedee -> indeedee.png',
+            'Indeedee-F -> indeedee-f.png',
+            'Pawmot -> pawmot.png',
+            'Persian-Alola -> alolan-persian.png',
+            'Rillaboom -> rillaboom.png',
+            'Salamence -> salamence.png',
+            'Salamence-Mega -> mega-salamence.png',
+            'Toxtricity -> toxtricity.png',
+        ];
+        assert.deepEqual(ohne.slice().sort(), ERWARTET_OHNE_BILD,
+            'die Menge der Team-Namen ohne Bild hat sich geaendert.\n'
+            + '  jetzt:    ' + JSON.stringify(ohne.slice().sort()) + '\n'
+            + '  erwartet: ' + JSON.stringify(ERWARTET_OHNE_BILD) + '\n'
+            + 'Dazugekommen: pruefen, ob die Showdown-Umrechnung stimmt; wenn ja, '
+            + '"Champions Sprites spiegeln" starten und danach hier eintragen, was '
+            + 'wirklich fehlt. Weggefallen: Zeile loeschen.');
     });
 
     it('die Umrechnung deckt sich mit parse_smogon im Bau-Skript', () => {

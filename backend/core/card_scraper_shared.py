@@ -1079,7 +1079,8 @@ def aggregate_card_data(all_decks: List[DeckEntry], card_db: CardDatabaseLookup,
                 # 10.09.2026 waren das 770 von 4501 Zeilen allein hier.
                 'is_ace_spec': ('Yes' if card_db.is_ace_spec_by_name(name)
                                 else entscheide(name, lade_ace_liste(),
-                                                *belege_aus_bestand()))
+                                                *belege_aus_bestand(),
+                                                typ=c_info.get('type', '')))
             }
 
             if group_by_tournament_date:

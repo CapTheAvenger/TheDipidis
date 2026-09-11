@@ -211,8 +211,9 @@ describe('ALT_SUGGESTION_MIN_GAP — die Rolle der Zahl an den echten Daten', ()
     if (!MESSUNG) return;
     /* Laege ein gemessener Abstand unmittelbar neben der Schwelle,
        entschiede eine GEGRIFFENE Zahl ueber einen einzelnen Vorschlag.
-       Gemessen 10.09.2026: naechster Abstand darunter 42, darueber 64 —
-       jede Schwelle zwischen 43 und 64 ergibt dasselbe Ergebnis. */
+       Gemessen 11.09.2026: naechster Abstand darunter 26, darueber
+       113,5 — jede Schwelle zwischen 27 und 113 ergibt dasselbe
+       Ergebnis. */
     const g = SCHWELLEN.MIN_GAP;
     const darunter = MESSUNG.abstaende.filter(x => x < g);
     const darueber = MESSUNG.abstaende.filter(x => x >= g);
@@ -230,8 +231,8 @@ describe('ALT_SUGGESTION_MIN_GAP — die Rolle der Zahl an den echten Daten', ()
        gemessenen Abstand sitzt. Tritt das ein, entscheidet eine Zahl
        ohne Beleg einen einzelnen Fall per Gleichstand — dann MUSS der
        Test rot werden, denn dann ist die fehlende Begruendung nicht mehr
-       folgenlos. Gemessener Sicherheitsabstand am 10.09.2026: 8 Plaetze
-       nach unten (42), 14 nach oben (64). */
+       folgenlos. Gemessener Sicherheitsabstand am 11.09.2026: 24
+       Plaetze nach unten (26), 63,5 nach oben (113,5). */
     assert.ok(abstandZurKante > 0,
       `ALT_SUGGESTION_MIN_GAP = ${g} liegt jetzt GENAU auf einem gemessenen `
       + 'Abstand. Damit entscheidet eine Zahl ohne Beleg einen einzelnen Vorschlag '
@@ -258,14 +259,23 @@ describe('das Tor wirkt in der richtigen Richtung — von Hand gerechnet', () =>
      wenn jemand die 50 begruendet aendert. */
   function fall(abstand) {
     const g = SCHWELLEN.MIN_GAP;
-    /* Sechs Listen: vier spielen 3 Kopien (die Mehrheit, 67 % > 50 %),
-       zwei spielen 2 (die naive Rundung). Mediane so gelegt, dass
-       naiveMedian - pluralityMedian genau `abstand` ergibt. */
-    const perListCounts = [
-      { count: 3, place: 10 }, { count: 3, place: 10 },
-      { count: 3, place: 10 }, { count: 3, place: 10 },
-      { count: 2, place: 10 + abstand }, { count: 2, place: 10 + abstand },
-    ];
+    /* Zwei Drittel der Listen spielen 3 Kopien (die Mehrheit, 67 % >
+       50 %), ein Drittel spielt 2 (die naive Rundung). Mediane so
+       gelegt, dass naiveMedian - pluralityMedian genau `abstand` ergibt.
+       Beide Mediane sind konstant, der Fall bleibt also exakt.
+
+       DIE ANZAHL KOMMT AUS DEM MODUL, nicht aus einer festen Sechs.
+       Bis zum 11.09.2026 standen hier sechs Listen fest im Test — bei
+       ALT_SUGGESTION_MIN_SAMPLE = 5 ging das auf. Mit der Anhebung auf
+       30 fiel der Fall still an der Stichprobenregel durch und der Test
+       meldete "kein Vorschlag", obwohl das Tor selbst in Ordnung war.
+       Eine abgeschriebene Zahl im Test misst dann etwas anderes als das
+       Modul tut. */
+    const n = Math.max(6, SCHWELLEN.MIN_SAMPLE);
+    const nMehrheit = Math.ceil(n * 2 / 3);
+    const perListCounts = [];
+    for (let i = 0; i < nMehrheit; i++) perListCounts.push({ count: 3, place: 10 });
+    for (let i = nMehrheit; i < n; i++) perListCounts.push({ count: 2, place: 10 + abstand });
     return { g, karte: { name: 'Probe', weightedAvgCount: 2.5, _perListCounts: perListCounts } };
   }
 

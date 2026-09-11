@@ -1824,6 +1824,20 @@
     line-height: 1.5;
     margin: 0 0 0.7rem;
 }
+/* Der Hinweis auf Pokemon, die die Kader-Quelle noch nicht fuehrt.
+   Sichtbar, aber kein Alarm: es ist eine Auskunft, kein Fehler. Er
+   erscheint nur, solange wirklich etwas fehlt (js/app-side-quest-pokedex.js,
+   OHNE_EINTRAG) — zieht die Quelle nach, ist die Zeile weg. */
+.sqp-luecke {
+    color: var(--ink-2);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin: 0 0 0.7rem;
+    padding: 0.5rem 0.7rem;
+    border-left: 3px solid var(--line-strong);
+    background: var(--surface-2);
+    border-radius: 0 8px 8px 0;
+}
 .sqp-search {
     width: 100%;
     box-sizing: border-box;

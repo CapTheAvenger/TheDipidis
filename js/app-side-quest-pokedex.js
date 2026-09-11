@@ -62,6 +62,9 @@
         de: {
             tab: 'Pokémon',
             intro: 'Alle in Pokémon Champions verfügbaren Pokémon — sortier- und filterbar. Pro Statistik: Basiswert, Lv.-50-Wert und Spanne. Such nach deutschem oder englischem Namen oder Pokédex-Nummer.',
+            luecke: (n) => `${n} Pokémon aus den aktuellen Replica-Teams fehlen hier noch: `
+                + 'sie wurden mit einer neuen Regelrunde freigeschaltet, und die Kader-Quelle '
+                + 'führt sie noch nicht. Sie erscheinen, sobald die Quelle nachzieht.',
             searchPh: '🔎 Suche: „Knakrack", „Garchomp", „445" …',
             allTypes: 'Alle Typen',
             allForms: 'Alle Formen',
@@ -157,6 +160,9 @@
         en: {
             tab: 'Pokémon',
             intro: 'Every Pokémon available in Pokémon Champions — sortable and filterable. Per stat: base stat, Lv. 50 value and range. Search by German or English name, or Pokédex number.',
+            luecke: (n) => `${n} Pokémon from the current replica teams are still missing here: `
+                + 'a new regulation unlocked them and the roster source has not caught up yet. '
+                + 'They will appear once it does.',
             searchPh: '🔎 Search: "Garchomp", "Knakrack", "445" …',
             allTypes: 'All types',
             allForms: 'All forms',
@@ -659,6 +665,33 @@
         }));
         return map;
     }
+
+    /* Teamnamen, zu denen es GAR KEINEN Pokedex-Eintrag gibt.
+     *
+     * Am 11.09.2026 entdeckte der Replica-Scraper Regulation M-C: elf
+     * Pokemon, die beide Quellen des Kaders noch nicht fuehren
+     * (otterlyclueless/pokemon-champions-data und pokebase.app). Sie
+     * werden gespielt, stehen aber in keinem Eintrag — und ohne diese
+     * Zeile wuerde der Pokedex das einfach verschweigen. Die Zahl wird
+     * bei jedem Laden neu gerechnet; zieht die Quelle nach, verschwindet
+     * der Hinweis von selbst.
+     *
+     * Gezaehlt werden Namen, keine Auftritte: "Salamence" und
+     * "Salamence-Mega" sind zwei fehlende Eintraege. */
+    function ohneEintrag() {
+        if (!_teamRang || !Array.isArray(_entries) || !_entries.length) return [];
+        const bekannt = new Set();
+        _entries.forEach(e => {
+            bekannt.add(normName(showdownName(e.en)));
+            bekannt.add(normName(e.en));
+        });
+        const fehlt = [];
+        _teamRang.forEach((_, schluessel) => {
+            if (!bekannt.has(schluessel)) fehlt.push(schluessel);
+        });
+        return fehlt.sort();
+    }
+    const OHNE_EINTRAG = ohneEintrag;
 
     function teamAuftritte(e) {
         if (!_teamRang || !e) return 0;
@@ -1796,6 +1829,12 @@
         host.innerHTML = `
             <div class="sqp">
                 <p class="sqp-intro">${escapeHtml(l.intro)}</p>
+                ${(() => {
+                    const fehlt = OHNE_EINTRAG();
+                    return fehlt.length
+                        ? `<p class="sqp-luecke">${escapeHtml(l.luecke(fehlt.length))}</p>`
+                        : '';
+                })()}
                 <input id="sqpSearch" class="sqp-search" type="search"
                        placeholder="${escapeHtml(l.searchPh)}" value="${escapeHtml(_query)}"
                        autocomplete="off" spellcheck="false" aria-label="${escapeHtml(l.tab)}">

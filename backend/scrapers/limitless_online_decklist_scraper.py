@@ -537,7 +537,8 @@ def baue_zeilen(turnier: dict, standing: dict, karten: list, gestempelt: str) ->
             # PR #738 hat card_scraper_shared.py und limitless_dated.py
             # am 10.09.2026 umgestellt; diese Datei war uebersehen und
             # schrieb weiter nach der schwachen Regel in DIESELBE CSV.
-            "is_ace_spec":             entscheide(k["name"], ace, *_belege()),
+            "is_ace_spec":             entscheide(k["name"], ace, *_belege(),
+                                                  typ=k["type"]),
             "quelle":                  QUELLE_ONLINE,
             # Gemessen an `data-players` der Turnierliste, nicht
             # geschaetzt. 0 heisst: das Attribut fehlte — dann

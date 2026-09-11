@@ -214,3 +214,40 @@ def test_die_liste_traegt_ihren_stand():
     assert j.get("source"), "ace_specs.json ohne Quelle"
     assert len(set(j["ace_specs"])) == len(j["ace_specs"]), "Dubletten in der Liste"
     assert j.get("total_count") == len(j["ace_specs"])
+
+
+# ── Der Zeilentyp als Rueckfall (11.09.2026) ─────────────────────────
+
+
+def test_zeilentyp_entscheidet_wenn_der_bestand_die_karte_noch_nicht_kennt(ace):
+    """Eine Karte, die zum ersten Mal ueberhaupt gespielt wird, steht im
+    Bestand noch nicht — der Bestand wird VOR dem Schreiben gelesen.
+
+    Gemessen am 11.09.2026 an genau einer Zeile: Iono's Electrode
+    (JTG 48, Stage 1), erste und einzige Nennung, aus dem Wochenlauf um
+    06:52 UTC. `entscheide` schwieg, obwohl in derselben Zeile "Stage 1"
+    stand, und der Deploy der ganzen Seite blieb daran haengen.
+    """
+    # Ohne Zeilentyp: der Bestand weiss nichts, die Regel schweigt.
+    assert entscheide("Iono's Electrode", ace, set(), {}) == ""
+    # Mit Zeilentyp: entschieden, ohne zu raten.
+    assert entscheide("Iono's Electrode", ace, set(), {}, typ="Stage 1") == "No"
+
+
+def test_zeilentyp_kommt_dazu_und_ersetzt_den_bestand_nicht(ace):
+    """Widersprechen sich Bestand und Zeile, schweigt die Regel weiter.
+
+    Das ist die vorsichtige Seite: zwei sich widersprechende Belege sind
+    kein Beleg, und ein erfundenes "No" saehe genauso aus wie ein
+    belegtes."""
+    typen = {"zwitter": {"Item"}}
+    assert entscheide("Zwitter", ace, set(), typen, typ="Stage 1") == ""
+    # Deckt sich beides, bleibt es bei der Entscheidung.
+    assert entscheide("Cleffa", ace, set(), {"cleffa": {"Basic"}}, typ="Basic") == "No"
+
+
+def test_zeilentyp_schlaegt_die_ace_liste_nicht(ace):
+    """Die kanonische Liste bleibt die staerkste Aussage. Stuende in einer
+    Zeile versehentlich ein Pokemon-Typ an einer echten ACE SPEC, darf
+    das die Liste nicht ueberstimmen."""
+    assert entscheide("Prime Catcher", ace, set(), {}, typ="Stage 1") == "Yes"

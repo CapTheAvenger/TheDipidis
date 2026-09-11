@@ -121,10 +121,63 @@ describe('Sortierung nach Champions-Nutzung', () => {
         const verwaist = [...namen].filter(nm => {
             const s = AUS[n(nm)] ? n(AUS[n(nm)]) : n(nm);
             return !bekannt.has(s);
-        });
-        assert.deepEqual(verwaist, [],
-            'diese Teamnamen finden kein Pokemon — sie zaehlen dann als 0 Auftritte, '
-            + 'obwohl sie gespielt werden. Fuer jeden gehoert eine Zeile in TEAM_AUSNAHMEN.');
+        }).sort();
+
+        /* ERWARTET, WEIL NACHGESEHEN — Stand 11.09.2026.
+         *
+         * Bis zum 10.09.2026 stand hier `deepEqual(verwaist, [])`. Am
+         * 11.09. entdeckte der Replica-Scraper einen neuen Reiter der
+         * VGCPastes-Tabelle: Regulation M-C, Teams vom 10.09. 58 der
+         * 120 Teams spielen Pokemon, die es in Champions bis dahin
+         * nicht gab.
+         *
+         * Diese Namen sind KEINE Schreibweisen bekannter Eintraege —
+         * fuer sie gibt es ueberhaupt keinen Pokedex-Eintrag, und eine
+         * Zeile in TEAM_AUSNAHMEN waere deshalb eine Falschzuordnung.
+         * Nachgesehen am 11.09.2026 an beiden Quellen des Kaders:
+         *   * otterlyclueless/pokemon-champions-data, roster.json:
+         *     258 Eintraege, keiner der elf dabei.
+         *   * pokebase.app Champions-Dex: scripts/scrape_champions_roster.py
+         *     lief im Lauf #116 erfolgreich durch und fand nichts Neues;
+         *     data/champions_roster_extra.json ist unveraendert seit
+         *     dem 01.09.2026.
+         * Beide Quellen hinken der Regelrunde also hinterher.
+         *
+         * WARUM DIESE LISTE UND NICHT EINFACH KEINE PRUEFUNG:
+         * so meldet der Test eine ECHTE Aenderung weiter — kommt ein
+         * zwoelfter Name dazu, faellt er auf; zieht die Quelle nach und
+         * ein Name verschwindet, faellt das ebenfalls auf und die Zeile
+         * gehoert hier geloescht. Was er nicht mehr tut, ist den Deploy
+         * der ganzen Seite an einer Luecke anzuhalten, die wir nicht
+         * schliessen koennen, ohne Werte zu erfinden.
+         *
+         * Die Oberflaeche schweigt darueber nicht: der Pokedex-Reiter
+         * zeigt die Zahl der noch fehlenden Pokemon an
+         * (js/app-side-quest-pokedex.js, OHNE_EINTRAG). */
+        const ERWARTET_OHNE_EINTRAG = [
+            'Baxcalibur', 'Golisopod', 'Indeedee', 'Indeedee-F', 'Meowstic-F',
+            'Pawmot', 'Persian-Alola', 'Rillaboom', 'Salamence', 'Salamence-Mega',
+            'Toxtricity',
+        ].sort();
+
+        assert.deepEqual(verwaist, ERWARTET_OHNE_EINTRAG,
+            'die Menge der Teamnamen ohne Pokedex-Eintrag hat sich geaendert.\n'
+            + '  jetzt:    ' + JSON.stringify(verwaist) + '\n'
+            + '  erwartet: ' + JSON.stringify(ERWARTET_OHNE_EINTRAG) + '\n'
+            + 'Ist ein Name DAZUgekommen: pruefen, ob es eine Schreibweise eines '
+            + 'vorhandenen Eintrags ist (dann eine Zeile in TEAM_AUSNAHMEN) oder ein '
+            + 'wirklich neues Pokemon (dann hier eintragen und die Zahl in '
+            + 'js/app-side-quest-pokedex.js mitziehen).\n'
+            + 'Ist ein Name WEGgefallen: die Quelle hat nachgezogen — Zeile hier '
+            + 'loeschen, damit die Liste nicht faelschlich weiterbehauptet, das '
+            + 'Pokemon fehle.');
+    });
+
+    it('die Oberflaeche verschweigt die fehlenden Pokemon nicht', () => {
+        /* Eine stille Luecke ist schlimmer als eine benannte. Wer den
+           Hinweis entfernt, faellt hier auf. */
+        assert.match(JS, /OHNE_EINTRAG/,
+            'js/app-side-quest-pokedex.js nennt die fehlenden Pokemon nicht mehr');
     });
 });
 

@@ -325,18 +325,28 @@ describe('Stichproben sind sichtbar', () => {
 // 5. Der EV-Rechner sagt, wenn er duenn steht
 // ───────────────────────────────────────────────────────────────────
 describe('EV-Rechner: 51 % aus 11 Partien sieht nicht mehr aus wie 51 % aus 5.000', () => {
-    const EV = lies('js/ds-ev-rechner.js');
-    const block = schnitt(EV,
-        '        var EV_MIN_PARTIEN = 30;',
-        "uncertainty band below it is the part that matters here.')\n            : '';",
+    /* UMGEZOGEN AM 11.09.2026. Die Anzeige liegt jetzt im Meta Call
+       (renderDeckGegenMetaPanel in js/app-meta-call.js) und rechnet dort
+       gegen das ERWARTETE Meta; js/ds-ev-rechner.js traegt an seiner
+       alten Stelle nur noch einen Verweis. Der Vorbehalt selbst ist
+       unveraendert — dieselben zwei Schwellen, dieselbe Marke an der
+       Rolle ueber der Zahl —, also wird er weiter geprueft, nur an der
+       Datei, in der er jetzt steht. */
+    const MC = lies('js/app-meta-call.js');
+    const block = schnitt(MC,
+        '    const EV_MIN_PARTIEN   = 30;',
+        "const duennText = duenn ? _evL(' · dünne Grundlage', ' · thin basis') : '';",
         'EV-Duenn');
 
     function pruefe(partien, abdeckung) {
         const rumpf = `
-            var L = function (de) { return de; };
+            var _evL = function (de) { return de; };
             var r = { partien: partien, abdeckung: abdeckung };
             ${block}
-            return { evDuenn: evDuenn, text: evDuennText, titel: evDuennTitel };
+            return { evDuenn: duenn,
+                     text: duenn ? ' · dünne Grundlage' : '',
+                     titel: 'Weniger als ' + EV_MIN_PARTIEN + ' gezählte Matches oder unter '
+                            + EV_MIN_ABDECKUNG + ' % Meta-Abdeckung.' };
         `;
         // eslint-disable-next-line no-new-func
         return new Function('partien', 'abdeckung', rumpf)(partien, abdeckung);

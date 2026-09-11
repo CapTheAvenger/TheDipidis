@@ -19,6 +19,24 @@
  *
  * Vorbild: Metagross-EV (reillycooper.com/metagross-ev, MIT).
  * Uebernommen ist die Rechnung, nicht die Zahl.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ * NACHTRAG 11.09.2026 — DIE DARSTELLUNG IST UMGEZOGEN
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * Der Betreiber hat den Block in den Meta Call verlegt: dort wird nicht
+ * mehr gegen das GEMESSENE Online-Feld gewichtet, sondern gegen das
+ * ERWARTETE — die Spalte „Final %" der Zusammensetzung, also Prognose
+ * oder eigene Schaetzung. js/ds-ev-rechner.js traegt an seiner alten
+ * Stelle nur noch einen Verweis.
+ *
+ * WAS DIESE DATEI DESHALB PRUEFT: weiter die Rechnung `rechne()` — sie
+ * ist unveraendert, oeffentlich und gegen ein gemessenes Feld gueltig —
+ * und den Verweis. Die Zusagen an die DARSTELLUNG (Kacheln, Tabelle,
+ * Fussnote, Bedienung) sind mit der Darstellung umgezogen und stehen
+ * jetzt in tests/unit/test-mc-deck-gegen-meta.js. Sie hier gegen eine
+ * Datei zu pruefen, die sie nicht mehr enthaelt, waere eine Zusage ohne
+ * Gegenstand — und schlimmer als keine, weil sie gruen bliebe.
  */
 
 const { describe, it } = require('node:test');
@@ -218,30 +236,52 @@ describe('EV-Rechner — Einbau', () => {
         assert.match(KARTE, /window\.getArchetypeShares\s*=/);
     });
 
-    it('liest die Feldanteile nicht selbst aus der CSV', () => {
+    it('liest keine Datendatei selbst', () => {
         // Eine zweite Lesestelle fuer dieselbe Datei ist eine zweite
         // Zahl fuer dieselbe Sache, sobald eine davon angefasst wird.
+        // `rechne()` bekommt die Anteile uebergeben, der Verweis braucht
+        // ueberhaupt keine.
         assert.doesNotMatch(CODE, /limitless_online_decks\.csv|fetch\(/);
-        assert.match(CODE, /getArchetypeShares/);
+    });
+
+    it('der Verweis zeigt auf den Meta Call und nennt den Grund', () => {
+        /* Ersatzlos zu verschwinden waere fuer jemanden, der den
+           Abschnitt kennt, dasselbe wie kaputt. Und ein Verweis, der nur
+           „umgezogen" sagt, beantwortet die Frage nicht, die der Leser
+           dann hat: warum, und was ist dort anders? */
+        assert.match(CODE, /meta-call/, 'der Verweis nennt sein Ziel nicht');
+        assert.match(CODE, /Meta Call/, 'der Verweis nennt den Bereich nicht beim Namen');
+        assert.match(CODE, /erwartest|expect/,
+            'der Verweis sagt nicht, was dort anders gerechnet wird');
+    });
+
+    it('der Verweis haengt an keiner geladenen Datei', () => {
+        /* Er rechnet nichts. Ihn trotzdem auf window._matchupRegistry
+           oder getArchetypeShares warten zu lassen hiesse: wer mit
+           langsamer Leitung kommt, sieht an dieser Stelle gar nichts und
+           erfaehrt nie, wohin das Feature gezogen ist. */
+        const b = CODE.slice(CODE.indexOf('function baue()'),
+                             CODE.indexOf('function beobachte()'));
+        assert.doesNotMatch(b, /_matchupRegistry|getArchetypeShares/,
+            'der Verweis wartet auf Daten, die er nicht braucht');
+    });
+
+    it('die Rechnung bleibt oeffentlich', () => {
+        // `rechne()` ist geprueft und gegen ein gemessenes Feld gueltig.
+        // Sie mit der Darstellung wegzuwerfen waere ein Verlust ohne Not.
+        assert.match(CODE, /window\.DsEvRechner = \{/);
+        assert.match(CODE, /rechne: rechne/);
     });
 });
 
 describe('EV-Rechner — gebaut aus den Bausteinen', () => {
     it('bringt keine eigene CSS-Klasse fuers Aussehen mit', () => {
         // Die Abnahmebedingung von css/components.css: ein neuer Screen
-        // ohne eine einzige neue Sonderregel. Was fehlte, war die
-        // Bedienzeile — die ist jetzt Baustein, nicht Sonderfall.
-        /* 'ds-bar-track' stand hier bis zum 11.09.2026. Der Balken in
-           der Spalte "traegt bei" ist auf Ansage des Betreibers
-           weggefallen ("son komisches Diagramm, versteh ich nicht,
-           brauch ich nicht") — was er zeigte, steht jetzt als Satz ueber
-           der Tabelle. Ein Baustein, den der Abschnitt nicht mehr
-           braucht, gehoert nicht in seine Pflichtliste; die
-           Abnahmebedingung war "keine EIGENE Regel", nicht "benutze
-           jeden Baustein". */
-        for (const k of ['ds-panel', 'ds-label', 'ds-note', 'ds-stat-row',
-                         'ds-stat', 'ds-table', 'ds-controls',
-                         'ds-field', 'ds-select', 'ds-number']) {
+        // ohne eine einzige neue Sonderregel. Sie gilt fuer den Verweis
+        // genauso wie fuer den Rechner, der hier stand — die Liste der
+        // benutzten Bausteine ist nur kuerzer geworden, weil ein Verweis
+        // weniger braucht als eine Tabelle mit drei Kacheln.
+        for (const k of ['ds-panel', 'ds-note', 'ds-controls']) {
             assert.ok(CODE.includes(k), 'benutzt ' + k + ' nicht');
         }
         // ds-ev-* nur als Griff fuer den Code, nie mit einer Regel dahinter.
@@ -262,17 +302,27 @@ describe('EV-Rechner — gebaut aus den Bausteinen', () => {
         assert.equal((block.match(/!important/g) || []).length, 0);
     });
 
-    it('nennt den Datenraum und die Herkunft der Methode', () => {
-        // Ein Bild ohne Datenraum war der teuerste Befund des Audits.
-        assert.match(CODE, /Global\/EN/);
-        assert.match(CODE, /Limitless Online/);
-        assert.match(ROH, /metagross-ev/i);   /* im Kopfkommentar, mit Lizenz */
+    it('nennt weiter die Herkunft der Methode', () => {
+        /* Der Datenraum („Global/EN, Limitless Online") stand in der
+           Fussnote unter den Zahlen und ist mit ihnen in den Meta Call
+           gezogen — dort steht er unter der neuen Tabelle. Was hier
+           bleiben MUSS, ist die Herkunft der Rechnung selbst samt
+           Lizenz: sie steht im Kopfkommentar, weil `rechne()` hier
+           liegt. */
+        assert.match(ROH, /metagross-ev/i);
         assert.match(ROH, /MIT/);
     });
 
-    it('sagt in der Fussnote, dass fehlende Paarungen weggelassen werden', () => {
+    it('sagt, dass fehlende Paarungen weggelassen werden — auch im Verweis', () => {
+        /* Der eine Satz, der diese Rechnung von jeder anderen
+           unterscheidet. Er darf beim Umzug nicht verlorengehen: wer den
+           Verweis liest und drueben landet, muss dieselbe Zusage
+           vorfinden, die hier galt. */
         assert.match(CODE, /nicht mit 50 % aufgefüllt|not filled in at 50 %/);
         assert.match(CODE, /Abdeckung|coverage/);
+        const MC = stripJs(read('js/app-meta-call.js'));
+        assert.match(MC, /nicht mit 50 % aufgefüllt|not filled in at 50 %/,
+            'die Zusage steht am neuen Ort nicht mehr');
     });
 
     it('kommt ohne Ausrufezeichen und ohne rohe Farbe aus', () => {
@@ -294,8 +344,13 @@ describe('EV-Rechner — der Block kommt wieder, wenn er weggeraeumt wird', () =
         assert.match(CODE, /if \(_baut\) return Promise\.resolve\(false\);/);
     });
 
-    it('prueft nach dem await noch einmal, ob inzwischen jemand gebaut hat', () => {
-        const nachAwait = CODE.slice(CODE.indexOf('getArchetypeShares().then'));
+    it('prueft nach dem Warteschlangenzug noch einmal, ob jemand gebaut hat', () => {
+        /* Frueher lag hier ein await auf getArchetypeShares(). Der
+           Verweis holt keine Daten mehr, aber er baut weiter in einem
+           spaeteren Zug der Warteschlange — und genau dazwischen kann
+           der Beobachter ein zweites Mal ausgeloest haben. */
+        const nachAwait = CODE.slice(CODE.indexOf('Promise.resolve().then'));
+        assert.ok(nachAwait.length > 0, 'der Aufbau laeuft nicht mehr verzoegert');
         assert.match(nachAwait, /host\.querySelector\('\.' \+ BLOCK\)/);
     });
 

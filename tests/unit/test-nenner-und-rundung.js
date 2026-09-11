@@ -26,6 +26,7 @@ const FEATURES = lies('js/app-features.js');
 const TIER     = lies('js/app-tier-meta.js');
 const PAST     = lies('js/app-past-meta.js');
 const EV       = lies('js/ds-ev-rechner.js');
+const MCALL    = lies('js/app-meta-call.js');
 const HUB      = lies('js/meta-analysis-hub.js');
 // Die Texte in app-quellen.js sind ueber mehrere Quellzeilen
 // zusammengesetzt ('… deck ' + 'with a recognised archetype'). Geprueft
@@ -357,53 +358,52 @@ describe('Der "Other"-Eimer wird ausgewiesen', () => {
     });
 });
 
+/* ═══════════════════════════════════════════════════════════════════
+ * UMGEZOGEN AM 11.09.2026
+ * ═══════════════════════════════════════════════════════════════════
+ * Die Darstellung des EV-Rechners liegt seit dem 11.09.2026 im Meta
+ * Call (renderDeckGegenMetaPanel in js/app-meta-call.js) und rechnet
+ * dort gegen das ERWARTETE Meta statt gegen das gemessene Online-Feld.
+ * js/ds-ev-rechner.js traegt an seiner alten Stelle nur noch einen
+ * Verweis.
+ *
+ * Die Zusagen unten sind deshalb nicht weggefallen, sondern
+ * mitgezogen: dieselben Fragen, gestellt an die Datei, in der die
+ * Spalten jetzt entstehen. Was NICHT mehr geprueft wird, ist die
+ * Ereignis-Delegation am Dokument — sie war noetig, weil
+ * js/app-meta-cards.js currentMetaContent.innerHTML ersetzt und dabei
+ * jeden am Block haengenden Handler mitnahm. Der Meta Call zeichnet
+ * seinen Wirt selbst und baut die Knoepfe bei jedem Durchgang neu; ein
+ * Verweis ohne Bedienelemente hat nichts zu delegieren. */
 describe('EV-Rechner: die Spalte heisst, was sie zeigt', () => {
-    it('nicht mehr "Anteil am Feld" — und seit 11.09.2026 auch nicht "Gewicht hier"', () => {
+    it('nicht "Anteil am Feld" und nicht "Gewicht hier", sondern "wie oft"', () => {
         /* "Anteil am Feld" war falsch (gerendert wird das normierte
            Gewicht). "Gewicht hier" war richtig, aber niemand wusste, was
            es heisst — Betreiber am 11.09.2026: "Was heisst 'n das Gewicht
            hier? Geht's darum, wie oft man erwartet es zu treffen?" Ja,
-           innerhalb dieses Meta-Bildes. Genau das steht jetzt da, und die
-           Legende unter der Tabelle loest es auf. */
-        assert.doesNotMatch(EV, /'Anteil am Feld'/);
-        assert.doesNotMatch(EV, /'Gewicht hier'/);
-        assert.match(EV, /'wie oft', 'how often'/);
-        assert.match(EV, /wie oft = Anteil dieses Gegners/,
-            'die Legende unter der Tabelle loest "wie oft" nicht mehr auf');
+           innerhalb dieses Meta-Bildes. Genau das steht jetzt da. */
+        assert.doesNotMatch(MCALL, /'Anteil am Feld'/);
+        assert.doesNotMatch(MCALL, /'Gewicht hier'/);
+        assert.match(MCALL, /_evL\('wie oft', 'how often'\)/);
     });
     it('der Tooltip nennt die Normierung', () => {
-        assert.match(EV, /auf 100 % normiert/);
+        /* Ohne diesen Satz liest sich "wie oft" als Meta-Anteil des
+           Decks. Er ist es nicht: die Spalte ist auf die Gegner
+           normiert, zu denen ueberhaupt eine Quote vorliegt. */
+        assert.match(MCALL, /auf 100 % normiert/);
     });
     it('die Abdeckungs-Kachel nennt den wirklich gerechneten Ausschnitt', () => {
-        assert.match(EV, /gerechnet: feldSumme > 0/);
-        assert.match(EV, /in dieser Rechnung nur/);
+        /* Die Abdeckung wird gegen das GANZE erwartete Feld gebildet,
+           „Sonstige" eingeschlossen — sonst behauptet sie eine
+           Vollstaendigkeit, die nur aus der eigenen Auswahl stammt. */
+        assert.match(MCALL, /abdeckung: feldSumme > 0/);
+        assert.match(MCALL, /Abdeckung des erwarteten Metas/);
     });
-    it('"Top 8" heisst jetzt, was es ist: die groessten Gegner MIT DATEN', () => {
-        assert.doesNotMatch(EV, /'Nur Top 8 Archetypes'/);
-        /* 11.09.2026: die Zahl steht jetzt im Namen ("Nur die 8
-           groessten"), der Zusatz "mit Paarungsdaten" bleibt — er ist
-           der ganze Grund, warum die Menge nicht die acht groessten des
-           Metas sind. */
-        assert.match(EV, /'Nur die 8 größten Gegner mit Paarungsdaten'/);
-        assert.match(EV, /r\.gegner < 8/);
-    });
-});
-
-describe('EV-Rechner: die Bedienung ueberlebt ein innerHTML darunter', () => {
-    // Gemessen am 20.08.2026 im Browser: Deckwahl, Feldbild und Rundenzahl
-    // waren tot. Der Block hing seine Handler an sich selbst, und
-    // js/app-meta-cards.js setzt currentMetaContent.innerHTML neu — das
-    // Markup ueberlebt, die Handler nicht. Seit 05:49 desselben Tages live.
-    it('haengt nicht mehr am Block selbst', () => {
-        assert.doesNotMatch(EV, /block\.addEventListener/);
-    });
-    it('sondern delegiert am Dokument', () => {
-        assert.match(EV, /document\.addEventListener\('change', reagiere\)/);
-        assert.match(EV, /document\.addEventListener\('input', reagiere\)/);
-        assert.match(EV, /ziel\.closest\('\.' \+ BLOCK\)/);
-    });
-    it('und nur einmal', () => {
-        assert.match(EV, /if \(_delegiert\) return;/);
+    it('"nur die 8 groessten" heisst, was es ist, und sagt es, wenn es weniger sind', () => {
+        assert.doesNotMatch(MCALL, /'Nur Top 8 Archetypes'/);
+        assert.match(MCALL, /Nur die ' \+ EV_TOP_N \+ ' größten/);
+        assert.match(MCALL, /r\.gegner < EV_TOP_N/,
+            'die Zeile sagt nicht mehr, wenn es weniger als acht Gegner mit Daten sind');
     });
 });
 

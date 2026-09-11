@@ -105,7 +105,7 @@ function overrideUmgebung(paarung, override) {
         'function _wrKonventionsTitel(konventionId)',
         'function _wrVollname(text, konventionId)',
         'function _wrKurzform(text)',
-        'function _wrZweiKonventionen(idA, wasA, idB, wasB)',
+        'function _wrEineKonvention(id, wasA, wasB)',
         'function getMatchup(myDeck, opponent)',
         'function _findByNormalized(obj, name)',
         'function _mcIstDeutsch()',
@@ -131,7 +131,27 @@ function overrideUmgebung(paarung, override) {
     return ctx;
 }
 
-describe('W2 — der Override-Kasten: zwei Spalten, zwei Konventionen', () => {
+/* ══ NACHTRAG 11.09.2026 — AUS ZWEI KONVENTIONEN WURDE EINE ═══════
+ *
+ * W2 hatte die zwei Konventionen des Override-Kastens gefunden und
+ * BESCHRIFTET: links S/(S+N), im Eingabefeld S/(S+N+U), beide Koepfe
+ * mit Namen und Formel, darueber ein Satz, dass es zwei sind.
+ *
+ * Beschriften genuegt an einer Stelle nicht, an der der Nutzer eine
+ * Zahl EINGIBT. Er liest links 55 %, tippt 55, und zwei Zeilen weiter
+ * steht 56 %. Am 11.09.2026 hat der Betreiber die eigene
+ * Matchup-Quote zum Hauptbedienelement des Meta Calls bestellt, mit
+ * der Auflage, gemessene und eigene Werte nie unklar zu vermischen —
+ * eine Zeile, die „deine Zahl 81,6 %" schreibt, wo 80 eingetippt
+ * wurde, tut genau das.
+ *
+ * getMatchup setzt die getippte Zahl seitdem als S/(S+N) ein. Die
+ * Pruefungen unten bleiben in ihrer Bauart unveraendert — sie rechnen
+ * weiter aus der zurueckgegebenen Verteilung, welche Konvention die
+ * getippte Zahl reproduziert. Nur die erwartete Antwort ist eine
+ * andere, und der Satz ueber der Tabelle sagt jetzt, dass es EINE
+ * ist. */
+describe('W2 — der Override-Kasten: zwei Spalten, dieselbe Konvention', () => {
 
     it('„WR (gemischt)" zeigt S/(S+N) und sagt es auch', () => {
         // Gesetzte Paarung: 55 Siege, 35 Niederlagen, 10 Unentschieden
@@ -159,26 +179,34 @@ describe('W2 — der Override-Kasten: zwei Spalten, zwei Konventionen', () => {
             'die Formel fehlt im Hinweis — ohne sie ist „WR" wieder ein Hausname');
     });
 
-    it('„Manuelle WR" nimmt S/(S+N+U) entgegen und sagt es auch', () => {
-        /* Was der Nutzer tippt, landet in getMatchup als pWin:
-             const pWin = Math.min(0.98, Math.max(0, ov / 100));
-           Der Rest verteilt sich auf pTie und pLoss. Die getippte Zahl
-           ist damit der Anteil an ALLEN Partien, nicht an den
-           entschiedenen — bis zum 08.09.2026 stand daneben derselbe
-           Name wie ueber der Spalte links, die S/(S+N) zeigt. */
+    it('„Manuelle WR" nimmt dieselbe Groesse entgegen, die links steht', () => {
+        /* DER KERN DES NACHTRAGS. Was der Nutzer tippt, muss die Zahl
+           sein, die er daneben liest — sonst ist die Spalte links
+           keine Vorbelegung, sondern eine Falle.
+
+           Geprueft wird nicht der Quelltext, sondern das Ergebnis: aus
+           der von getMatchup zurueckgegebenen Verteilung wird eine
+           Bilanz je 10.000 Partien gebaut, und gefragt, welche der drei
+           Konventionen die GETIPPTE Zahl daraus reproduziert. Faellt
+           jemand auf pWin = ov/100 zurueck, trifft wieder
+           'mitUnentschieden' und dieser Test faellt. */
         const ctx = overrideUmgebung({ pWin: 0.50, pTie: 0.02, pLoss: 0.48 }, 55);
         const m = ctx.getMatchup('Mein Deck', 'Gegner A');
         assert.equal(m.handEingestellt, true, 'der handgesetzte Wert greift nicht mehr');
 
-        // Aus der zurueckgegebenen Verteilung eine Bilanz je 10.000
-        // Partien machen und fragen, welche Konvention die GETIPPTE
-        // Zahl reproduziert.
         const s = Math.round(m.pWin * 10000);
         const u = Math.round(m.pTie * 10000);
         const n = 10000 - s - u;
         const id = eindeutig(s, n, u, 55, 0.05);
-        assert.equal(id, 'mitUnentschieden',
-            'die getippte Zahl wird nicht mehr als S/(S+N+U) eingesetzt');
+        assert.equal(id, 'ohneUnentschieden',
+            'die getippte Zahl wird nicht als S/(S+N) eingesetzt — dann steht in der '
+            + 'Begegnungsliste wieder eine andere Zahl, als der Nutzer eingetragen hat');
+
+        /* Und die Probe aufs Exempel an der Stelle, an der es auffaellt:
+           _anzeigeQuote ist das, was jede Anzeige des Reiters aus der
+           Paarung macht. Sie muss die 55 unveraendert zurueckgeben. */
+        assert.ok(Math.abs(ctx._anzeigeQuote(m) - 55) < 0.01,
+            'die Anzeige macht aus der getippten 55 eine ' + ctx._anzeigeQuote(m));
 
         const html = ctx.renderOverrideTable();
         const kopf = html.match(/<th title="([^"]*)"[^>]*>Manuelle WR<\/th>/);
@@ -187,16 +215,21 @@ describe('W2 — der Override-Kasten: zwei Spalten, zwei Konventionen', () => {
         assert.ok(kopf[1].includes(WK.KONVENTIONEN[id].formel));
     });
 
-    it('und ueber der Tabelle steht, dass es zwei verschiedene sind', () => {
-        /* Ohne diesen Satz liest sich der Unterschied zwischen den
-           beiden Spalten als Spielstaerke. Er ist aber zum Teil eine
-           Einheitenfrage: auf Papier enden rund 11 % der Partien
-           unentschieden, online rund 1 %. */
+    it('und ueber der Tabelle steht, dass beide dasselbe meinen', () => {
+        /* Der Satz bleibt, seine Aussage kehrt sich um. Ihn ersatzlos
+           zu streichen hiesse, die Frage „rechnen die beiden Spalten
+           dasselbe?" wieder unbeantwortet zu lassen — und genau diese
+           Frage war der Befund. */
         const ctx = overrideUmgebung({ pWin: 0.55, pTie: 0.10, pLoss: 0.35 });
         const html = ctx.renderOverrideTable();
         const satz = html.match(/<p class="mc-wr-konventionen"[^>]*>([^<]*)<\/p>/);
-        assert.ok(satz, 'der Satz ueber den zwei Konventionen fehlt:\n' + html);
-        for (const id of ['ohneUnentschieden', 'mitUnentschieden']) {
+        assert.ok(satz, 'der Satz ueber den Konventionen fehlt:\n' + html);
+        assert.ok(satz[1].includes(WK.KONVENTIONEN.ohneUnentschieden.formel),
+            'der Satz nennt die Formel nicht:\n' + satz[1]);
+        assert.ok(!satz[1].includes(WK.kurz('mitUnentschieden')),
+            'der Satz nennt weiter eine zweite Konvention, obwohl es nur noch eine gibt:\n'
+            + satz[1]);
+        for (const id of ['ohneUnentschieden']) {
             assert.ok(satz[1].includes(WK.kurz(id)),
                 `der Satz nennt ${id} nicht beim Namen: ` + satz[1]);
             assert.ok(satz[1].includes(WK.KONVENTIONEN[id].formel),

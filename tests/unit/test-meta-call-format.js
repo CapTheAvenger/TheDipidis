@@ -224,16 +224,46 @@ describe('Junk-Win-Rate: gerechnet statt geraten', () => {
         '  }\n  if (typeof window !== \'undefined\') window._mcJunkWinRatePct',
         'junkWinRate');
 
+    /* Seit dem 11.09.2026 fragt _junkWinRatePct nicht mehr selbst
+       `slice(TOP_N)`, sondern _feldTeilung — dieselbe Stelle, die auch
+       buildField fragt. Das ist der Punkt: der Nutzer kann waehlen,
+       welche Decks einzeln im Feld stehen, und die Sammelquote muss den
+       Topf beschreiben, der dadurch wirklich entsteht.
+       Die drei Helfer werden WOERTLICH aus der Quelle geschnitten, nicht
+       nachgebaut — eine Kopie liefe beim naechsten Umbau auseinander. */
+    /* `schnitt` liefert den Endanker MIT — und beide Endanker sind hier
+       giftig: der eine ist ein oeffnender Kommentar (`/**`), der den
+       Rest des zusammengebauten Rumpfes verschluckt, der andere eine
+       angefangene Deklaration. Also abschneiden. */
+    const ohneAnker = (x, anker) => x.slice(0, x.length - anker.length);
+    const A1 = '\n  /** Kennung der aktuellen Auswahl';
+    const A2 = '\n  const MAX_CUSTOM';
+    const teilungBlock = ohneAnker(
+        schnitt(MC, '  function _feldSortiert() {', A1, 'feldTeilung'), A1);
+    const schluesselBlock = ohneAnker(
+        schnitt(MC, '  function _feldAuswahlSchluessel() {', A2, 'feldAuswahlSchluessel'), A2);
+
+    /* Die Vorlagen tragen jetzt Namen. _feldTeilung teilt nach Namen
+       auf, und acht namenlose Zeilen waeren fuer sie ein einziges Deck. */
+    const benannt = (liste) => liste.map((d, i) =>
+        Object.assign({ name: d.name || ('Deck ' + i) }, d));
+
     function baue(shareList, fallback = 55, topN = 25) {
         const rumpf = `
             const _shareList = shareList;
             const _settings = { junkWinRate: fallback };
             const TOP_N = topN;
-            ${block.replace(/\}\s*if \(typeof window[\s\S]*$/, '}')}
+            let _feldAuswahl = null;
+            let _junkWrCacheQuelle = null, _junkWrCacheWert = null, _junkWrCacheSchluessel = null;
+            let _junkDeckZahl = 0;
+            ${teilungBlock}
+            ${schluesselBlock}
+            ${block.replace(/^[\s\S]*?function _junkWinRatePct/, 'function _junkWinRatePct')
+                   .replace(/\}\s*if \(typeof window[\s\S]*$/, '}')}
             return _junkWinRatePct;
         `;
         // eslint-disable-next-line no-new-func
-        return new Function('shareList', 'fallback', 'topN', rumpf)(shareList, fallback, topN);
+        return new Function('shareList', 'fallback', 'topN', rumpf)(benannt(shareList), fallback, topN);
     }
 
     it('faellt auf die Voreinstellung zurueck, wenn das Feld kuerzer als TOP_N ist', () => {

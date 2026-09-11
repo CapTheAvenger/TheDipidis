@@ -154,17 +154,31 @@ describe('Das Bild zeigt dieselbe Groesse wie die Karte', () => {
 
 describe('Der Nenner in der Seitenspalte ist richtig benannt', () => {
 
-    it('7.178 heisst nicht mehr "Meta gesamt"', () => {
-        const i = bildK.indexOf('spec.totalBrought');
-        assert.ok(i > 0, 'die Zeile ist verschwunden');
-        const rumpf = bildK.slice(Math.max(0, i - 300), i + 200);
-        assert.ok(!/Meta gesamt|Meta total/.test(rumpf),
-            'die Summe der gewichteten Antritte heisst wieder "Meta gesamt". '
-            + 'Sie ist der Nenner der TOP-8-QUOTE (7.178), nicht der des '
-            + 'Anteils (37.749) — Faktor fuenf, und sie steht direkt neben '
-            + 'einem Anteil');
-        assert.ok(/Top-8-Schnitt|cut events/.test(rumpf),
-            'die Zeile sagt nicht mehr, was sie zaehlt');
+    /* ── DIE ZEILE IST GANZ WEG (11.09.2026) ────────────────────────
+       Sie hiess zuletzt „Antritte mit Top-8-Schnitt" und trug 12.331 —
+       die Summe der Spalte total_brought ueber alle Zeilen von
+       data/online_tournament_top8_decks.csv. Die Zahl war richtig, aber
+       auf dem Bild ohne Bezugspunkt: gemeldet als „ist es denn wirklich
+       zwoelftausenddreihundert Top-acht-Dings? Guck mal, ob das
+       irgendwie klar ist."
+
+       Erst recht, seit die Uebergabe repariert ist: darunter steht jetzt
+       „Schnitt aller Decks 6,4 %" statt „189 / 1.289", also gibt es auf
+       dem Bild nichts mehr, wozu 12.331 der Nenner waere.
+
+       Die alte Zusicherung („heisst nicht mehr Meta gesamt") ist damit
+       gegenstandslos — sie haette eine Zeile bewacht, die es nicht gibt.
+       An ihre Stelle tritt die schaerfere: die Zahl darf nicht
+       zurueckkommen, ohne dass jemand diesen Absatz liest. */
+    it('die Summe aller Antritte steht nicht mehr auf dem Bild', () => {
+        assert.ok(bildK.indexOf('spec.totalBrought') < 0,
+            'die Zeile mit der Antrittssumme ist zurueck. Sie hatte auf dem '
+            + 'Bild keinen Bezugspunkt — weder „Meta gesamt" noch „Antritte '
+            + 'mit Top-8-Schnitt" sagte einem Leser, wovon 12.331 der Nenner '
+            + 'sein soll. Wenn sie wiederkommt, braucht sie die Zahl daneben, '
+            + 'auf die sie sich bezieht.');
+        assert.ok(!/Meta gesamt|Meta total/.test(bildK),
+            'die falsche Beschriftung von 2026-09-01 ist zurueck');
     });
 
     it('die Zahl selbst stimmt noch mit der Quelle ueberein', () => {

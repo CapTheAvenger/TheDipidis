@@ -888,6 +888,12 @@ describe('Die Schwelle steht sichtbar unter der Tabelle', () => {
             schneideAus(karte, 'function praesenzBilanz(m)'),
             schneideAus(karte, 'function praesenzZelle(m, de)'),
             schneideAus(karte, 'function praesenzZellen(m, de)'),
+            /* Seit dem 11.09.2026 steht die Kuerzel-Legende in einer
+               eigenen Funktion: in der Tier-Liste wandert sie hinter den
+               Info-Knopf des Abschnitts, im Ueberlagerungsfenster bleibt
+               sie unter der Tabelle. matchupTableHtml ruft sie auf. */
+            schneideAus(karte, 'function legendeText(hatMajor)'),
+            schneideAus(karte, 'function legendeHtml(hatMajor, variante)'),
             schneideAus(karte, 'function matchupTableHtml(name, opts)'),
             'return matchupTableHtml;',
         ].join('\n');

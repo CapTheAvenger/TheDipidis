@@ -94,6 +94,8 @@
     var KONVENTIONEN = {
         matchpunkte: {
             id: 'matchpunkte',
+            kuerzelDe: 'Win %',
+            kuerzelEn: 'Win %',
             formel: '(3S + U) / (3 · Matches)',
             /* DER NAME KOMMT VON DER QUELLE (05.09.2026).
                Bis heute hiess diese Konvention im Haus "Matchpunkte" — richtig
@@ -141,6 +143,8 @@
         },
         mitUnentschieden: {
             id: 'mitUnentschieden',
+            kuerzelDe: 'WR*',
+            kuerzelEn: 'WR*',
             formel: 'S / (S + N + U)',
             /* DIE KURZNAMEN MUESSEN AUSEINANDERZUHALTEN SEIN (07.09.2026).
                Bis heute hiessen die beiden Nicht-Win-%-Konventionen
@@ -185,6 +189,8 @@
         },
         ohneUnentschieden: {
             id: 'ohneUnentschieden',
+            kuerzelDe: 'WR',
+            kuerzelEn: 'WR',
             formel: 'S / (S + N)',
             kurzDe: 'Siegquote ohne Unentschieden',
             kurzEn: 'Win share excluding ties',
@@ -222,6 +228,35 @@
         var k = hol(id);
         if (!k) return '';
         return de() ? k.kurzDe : k.kurzEn;
+    }
+
+    /**
+     * Das Kuerzel fuer eine ENGE Spaltenueberschrift — nur zulaessig,
+     * wenn direkt darunter eine Legende steht, die es aufloest.
+     *
+     * WARUM ES DAS GIBT (11.09.2026)
+     * ------------------------------
+     * Der volle Name ist praezise und lang: "Siegquote ohne
+     * Unentschieden" fuellt in der EV-Tabelle eine Spalte, die eine Zahl
+     * zeigt. Der Betreiber am 11.09.2026: "da auch wieder einfach WR,
+     * also Winrate, das haben wir jetzt ja ueberall schon gleich."
+     *
+     * Die Hausregel dazu steht seit dem 02.09.2026 in
+     * tests/unit/test-sprache-win-rate.js: ein Kuerzel ist erlaubt, WENN
+     * eine Legende es aufloest — so haelt es die Matchup-Tabelle der
+     * Archetyp-Karte mit "WR", "M" und "Major-WR". Ein Kuerzel OHNE
+     * Legende faellt dort durch, und das bleibt so.
+     *
+     * Das Kuerzel steht hier und nicht in der aufrufenden Datei, aus
+     * demselben Grund wie der lange Name: es gibt drei Konventionen, und
+     * ein abgeschriebenes "WR" wuerde fuer irgendeine von ihnen stehen.
+     * Deshalb traegt mitUnentschieden bewusst "WR*" — sie sieht aus wie
+     * WR, ist es aber nicht.
+     */
+    function kuerzel(id) {
+        var k = hol(id);
+        if (!k) return '';
+        return de() ? k.kuerzelDe : k.kuerzelEn;
     }
 
     /** Vollstaendiger Hinweistext samt Formel — gehoert an jede Quote. */
@@ -331,6 +366,7 @@
         KONVENTIONEN: KONVENTIONEN,
         hol: hol,
         kurz: kurz,
+        kuerzel: kuerzel,
         hinweis: hinweis,
         kurzHinweis: kurzHinweis,
         bilanz: bilanz,

@@ -45,6 +45,38 @@
  * Gebaut ausschliesslich aus den Bausteinen in css/components.css. Keine
  * neue CSS-Regel, kein !important. Das war die Abnahmebedingung der
  * Entwurfsphase und ist hier zum ersten Mal ein echter Test.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ * UMGEZOGEN AM 11.09.2026 — WAS HIER NOCH STEHT UND WARUM
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * Der Betreiber, mit der Vorlage daneben: „für das dein Deck gegen das
+ * Meta Feature kannst du noch mal ein umfassendes Rework machen … Das
+ * bestehende Konzept soll nicht länger als isolierter Analysebereich
+ * neben der eigentlichen Meta-Analyse bestehen. Stattdessen soll die
+ * Funktion in den bestehenden Bereich Meta Call integriert werden."
+ *
+ * Der Grund ist inhaltlich, nicht baulich. Dieser Block gewichtete jede
+ * Paarung mit dem Anteil, den der Gegner im GEMESSENEN Online-Feld hat.
+ * Diese Zahl beantwortet „wie stünde ich, wenn heute Abend online
+ * gespielt würde". Die Frage vor einem Turnier ist eine andere: gegen
+ * das Meta, das ich DORT erwarte. Genau diese Anteile führt der Meta
+ * Call in seiner Spalte „Final %" — Prognose, oder die eigene Schätzung
+ * des Nutzers, wo er eine eingetragen hat.
+ *
+ * Die Rechnung ist deshalb dorthin gezogen (renderDeckGegenMetaPanel in
+ * js/app-meta-call.js) und rechnet dort mit denselben Grundsätzen:
+ * fehlende Paarungen werden weggelassen statt mit 50 % aufgefüllt, die
+ * Abdeckung steht daneben, das Band kommt aus derselben Beta-Varianz.
+ * Dazu kann sie, was hier nie ging: die eigenen Quoten des Nutzers
+ * berücksichtigen und deren Herkunft je Zeile ausweisen.
+ *
+ * WAS AN DIESER STELLE BLEIBT: ein Verweis. Ersatzlos zu verschwinden
+ * wäre für jemanden, der den Abschnitt kennt, dasselbe wie kaputt.
+ *
+ * WAS IM MODUL BLEIBT: `rechne()`. Sie ist die geprüfte Rechnung gegen
+ * ein gemessenes Feld und hängt an nichts, was mit der Darstellung zu
+ * tun hat; sie steht weiter unter window.DsEvRechner zur Verfügung.
  */
 (function () {
     'use strict';
@@ -71,34 +103,6 @@
         return 'S / (S + N)';
     }
 
-    /* Das Kuerzel fuer die enge Spaltenueberschrift. Es kommt aus
-       demselben Modul wie der lange Name — ein abgeschriebenes Kuerzel
-       stuende fuer irgendeine der drei Konventionen. Erlaubt ist es nur,
-       weil unter der Tabelle eine Legende steht, die es aufloest
-       (Hausregel seit 02.09.2026, tests/unit/test-sprache-win-rate.js).
-       Faellt das Modul aus, steht dort die Formel — die ist immer
-       richtig, ein Kuerzel nie. */
-    function quotenKuerzel(konvention) {
-        var K = window.WinRateKonvention;
-        if (K && typeof K.kuerzel === 'function') {
-            var k = K.kuerzel(konvention || EV_KONVENTION);
-            if (k) return k;
-        }
-        return quotenFormel(konvention);
-    }
-
-    /* Der Formatschluessel fuer die Beschriftung des Meta-Bildes
-       ("Ganzes Meta TEF–PBL"). Er kommt aus derselben Quelle wie ueberall
-       sonst auf der Seite (data/format_window.json ueber
-       window._formatWindow) — abgeschrieben waere er nach der naechsten
-       Rotation falsch, und zwar still. */
-    function metaSchluessel() {
-        var fw = (typeof window !== 'undefined' && window._formatWindow) || {};
-        var a = String(fw.oldest_legal_set || '').toUpperCase();
-        var b = String(fw.current_set || '').toUpperCase();
-        return (a && b) ? (a + '\u2013' + b) : '';
-    }
-
     /* `formel` ist KEINE Funktion des Moduls, sondern ein Feld des
        Eintrags, den hol() liefert (js/win-rate-konvention.js:333 —
        exportiert sind hol/kurz/kuerzel/hinweis/kurzHinweis/bilanz/…). */
@@ -106,6 +110,23 @@
         var K = window.WinRateKonvention;
         var e = (K && typeof K.hol === 'function') ? K.hol(konvention || EV_KONVENTION) : null;
         return (e && e.formel) ? e.formel : 'S / (S + N)';
+    }
+
+    /* Dieselbe Aussage auf Englisch — und der Grund, warum es zwei
+       Funktionen sind statt einer mit L().
+
+       Der deutsche Satz enthaelt den Hausnamen „Win %" WOERTLICH, weil
+       er ihn abgrenzt: „das ist NICHT die Groesse, die Limitless Win %
+       nennt". tests/unit/test-w3-ev-und-abschnitt.js laesst genau EINE
+       solche Fundstelle im Quelltext zu — eine zweite waere keine
+       Abgrenzung mehr, sondern eine Beschriftung. Der englische Satz
+       holt den Namen deshalb zur Laufzeit aus dem Modul. */
+    function quotenHinweisEn(konvention) {
+        var K = window.WinRateKonvention;
+        var mp = (K && typeof K.kurz === 'function') ? K.kurz('matchpunkte') : 'match points';
+        return quotenName(konvention) + ' (' + quotenFormel(konvention) + ')'
+            + ', smoothed with k = 20 (js/matchup-glaettung.js). Ties are not in the'
+            + ' denominator; this is NOT what Limitless calls "' + mp + '".';
     }
 
     function quotenHinweis(konvention) {
@@ -118,25 +139,6 @@
 
     var HOST_ID = 'currentMetaContent';
     var BLOCK   = 'ds-ev-block';
-    /* v2 seit dem 01.09.2026, und der Sprung ist der Zweck.
-     *
-     * Der Startwert der Rundenzahl ist von 9 auf 8 gefallen (siehe
-     * RUNDEN_STD). Ein Startwert greift aber nur bei jemandem, der noch
-     * nie hier war — wer den Rechner schon einmal geoeffnet hatte, trug
-     * die 9 in localStorage und haette sie behalten. LIVE NACHGEMESSEN
-     * am 01.09.2026 nach dem Deploy: die Seite zeigte weiter 9, obwohl
-     * der Startwert auf 8 stand. Der Betreiber, der die Aenderung
-     * gemeldet hat, gehoert zu genau dieser Gruppe — fuer ihn haette
-     * sich nichts geaendert, und die Meldung waere zu Recht ein zweites
-     * Mal gekommen.
-     *
-     * Ein neuer Schluessel setzt die gemerkte Wahl einmalig zurueck. Das
-     * kostet jeden eine erneute Einstellung von Deck und Feldbild — der
-     * Preis dafuer, dass die korrigierte Zahl auch bei denen ankommt,
-     * die die Seite schon kennen. Wer weiter mit 9 Runden rechnet, traegt
-     * sie einmal ein und behaelt sie. */
-    var STORE   = 'ds_ev_wahl_v2';
-
     /* Die drei Meta-Bilder. "Ganzes Meta" ist die Messung; die beiden
        anderen sind Was-waere-wenn und als solche beschriftet.
 
@@ -192,17 +194,6 @@
         return String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
-    function zahl(v, n) {
-        if (v === null || v === undefined || !isFinite(v)) return '–';
-        var d = (n === undefined) ? 1 : n;
-        return Number(v).toLocaleString(de() ? 'de-DE' : 'en-GB',
-            { minimumFractionDigits: d, maximumFractionDigits: d });
-    }
-    function vorzeichen(v, n) {
-        if (v === null || v === undefined || !isFinite(v)) return '–';
-        return (v >= 0 ? '+' : '−') + zahl(Math.abs(v), n);
     }
 
     /* ── Rechnung ─────────────────────────────────────────────────── */
@@ -318,288 +309,54 @@
         };
     }
 
-    /* ── Darstellung ──────────────────────────────────────────────── */
-
-    function wahl() {
-        try {
-            var v = JSON.parse(localStorage.getItem(STORE));
-            if (v && typeof v === 'object') return v;
-        } catch (e) { /* kein Speicher, kein Problem */ }
-        return {};
-    }
-    function merke(v) {
-        try { localStorage.setItem(STORE, JSON.stringify(v)); } catch (e) {}
-    }
-
-    /**
-     * Die zwei Zeilen ueber der Tabelle: worauf du dich vorbereiten
-     * solltest, und was fuer dich laeuft.
+    /* Der Verweis, der an dieser Stelle stehen bleibt.
      *
-     * WARUM SIE DIE SPALTEN "traegt bei" UND "Punkte" ERSETZEN
-     * -------------------------------------------------------
-     * Betreiber am 11.09.2026: "Traegt bei, da ist jetzt son komisches
-     * Diagramm, versteh ich nicht, brauch ich nicht. Und Punkte versteh
-     * ich nicht, brauch ich auch nicht. Also das soll ja irgendwie eine
-     * tiefen Analyse sein, um sich son bisschen vorzubereiten."
+     * Er benutzt dieselben Bausteine wie der Block vorher (ds-panel,
+     * ds-note, ds-controls) und bringt keine eigene Regel mit — die
+     * Abnahmebedingung aus der Entwurfsphase gilt fuer einen Verweis
+     * genauso wie fuer einen Rechner.
      *
-     * Die Groesse dahinter war richtig und heisst `beitrag`:
-     * Anteil x (Quote - 50). Sie beantwortet "welche Paarung zieht mein
-     * Ergebnis am staerksten" — das ist genau die Vorbereitungsfrage.
-     * Falsch war nur, sie als Zahl mit zwei Nachkommastellen und einen
-     * Balken ohne Skala hinzustellen: beides sagt einem Leser nichts.
+     * Er traegt .ds-btn — den Knopf-Baustein aus css/components.css, den
+     * auch die Abschnittskoepfe benutzen. `ds-ev-ziel` steht nur als
+     * Griff daneben und hat bewusst keine Regel hinter sich; die
+     * Abnahmebedingung dieses Moduls ist „keine eigene CSS-Regel", und
+     * ein Verweis ist kein Grund, sie zu brechen.
      *
-     * Hier wird dieselbe Groesse benutzt, aber nie gezeigt. Sie sortiert
-     * nur, und was dasteht, sind die Zahlen, die der Leser ohnehin
-     * versteht: wie oft du dem Deck begegnest und wie du gegen es stehst.
-     *
-     * Gezeigt werden hoechstens drei je Seite, und nur Paarungen, die
-     * ueberhaupt in eine Richtung ziehen (Quote != 50). Ein Deck, gegen
-     * das es 50:50 steht, gehoert in keine der beiden Zeilen.
-     */
-    var VORBEREITUNG_MAX = 3;
+     * Der Knopf schaltet den Reiter um, statt einen Link zu setzen: die
+     * Seite ist eine einzelne Anwendung, und `switchTab` ist der Weg,
+     * den auch das Menue nimmt. Faellt die Funktion aus (frueher
+     * Ladezustand), bleibt der Anker mit #meta-call stehen — der wird
+     * von js/inline-init.js beim naechsten Durchlauf aufgeloest. */
+    function verweisHtml() {
+        var text = L(
+            'Diese Rechnung ist in den <strong>Meta Call</strong> gezogen. Dort gewichtet '
+            + 'sie jede Paarung nicht mehr mit dem gemessenen Online-Anteil des Gegners, '
+            + 'sondern mit dem Anteil, den du für dein nächstes Turnier erwartest — und sie '
+            + 'kennt die Quoten, die du selbst eingetragen hast. Fehlende Paarungen werden '
+            + 'dort wie hier weggelassen und nicht mit 50 % aufgefüllt; die Abdeckung steht '
+            + 'daneben. Gezeigt wird ' + quotenHinweis(),
+            'This calculation has moved into the <strong>Meta Call</strong>. There it weights '
+            + 'each pairing not by the opponent\'s measured online share but by the share you '
+            + 'expect at your next tournament — and it knows the rates you entered yourself. '
+            + 'Pairings without data are left out there as they were here, not filled in at '
+            + '50 %; coverage is stated next to the result. The figure shown is '
+            + quotenHinweisEn());
 
-    function vorbereitungHtml(zeilen) {
-        if (!zeilen || !zeilen.length) return '';
-
-        function satz(liste) {
-            return liste.map(function (z) {
-                return '<strong>' + esc(z.gegner) + '</strong> ('
-                     + esc(quotenKuerzel()) + ' ' + esc(zahl(z.quote, 0)) + ' %, '
-                     + esc(zahl(z.gewicht * 100, 1)) + ' %)';
-            }).join(', ');
-        }
-
-        /* Eigene Kopie, eigene Sortierung. Die Tabelle darunter steht
-           nach "wie oft"; sich auf deren Reihenfolge zu verlassen waere
-           genau die stille Kopplung, die diesen Abschnitt schon einmal
-           auseinandergebracht hat. */
-        var nachBeitrag = zeilen.slice().sort(function (a, b) {
-            return b.beitrag - a.beitrag;
-        });
-        var schlecht = nachBeitrag.filter(function (z) { return z.beitrag < 0; })
-                                  .slice(-VORBEREITUNG_MAX).reverse();
-        var gut = nachBeitrag.filter(function (z) { return z.beitrag > 0; })
-                             .slice(0, VORBEREITUNG_MAX);
-
-        var teile = [];
-        if (schlecht.length) {
-            teile.push('<p class="ds-note ds-ev-warauf"><span class="ds-stat-label">'
-                + esc(L('Darauf vorbereiten', 'Prepare for these')) + '</span> '
-                + satz(schlecht) + '</p>');
-        }
-        if (gut.length) {
-            teile.push('<p class="ds-note ds-ev-laeuft"><span class="ds-stat-label">'
-                + esc(L('Das läuft für dich', 'These run in your favour')) + '</span> '
-                + satz(gut) + '</p>');
-        }
-        if (!teile.length) return '';
-        /* Die Klammerzahlen brauchen dieselbe Aufloesung wie die Tabelle
-           darunter — sonst steht hier ein Kuerzel ohne Legende. */
-        teile.push('<p class="ds-note ds-ev-vorblegende">' + esc(L(
-            'In Klammern: ' + quotenKuerzel() + ' gegen dieses Deck und wie oft du ihm '
-              + 'in diesem Meta-Bild begegnest. Sortiert danach, wie stark die Paarung '
-              + 'dein Ergebnis zieht — also beides zusammen, nicht nur die Quote.',
-            'In brackets: ' + quotenKuerzel() + ' against that deck and how often you meet it in '
-              + 'this picture of the meta. Sorted by how strongly the pairing pulls your '
-              + 'result — both together, not one of the two alone.')) + '</p>');
-        return teile.join('');
-    }
-
-    function ergebnisHtml(r, runden) {
-        if (!r) {
-            return '<p class="ds-note">' + esc(L(
-                'Zu diesem Deck liegen keine Paarungen vor — für das Meta, das wir messen, hat es noch nicht gespielt.',
-                'No matchups on record for this deck yet.')) + '</p>';
-        }
-        var siege = (r.ev / 100) * runden;
-        var siegeUnten = (r.unten / 100) * runden;
-        var siegeOben  = (r.oben / 100) * runden;
-        /* Nur zeigen, wenn die Rechnung wirklich auf einem engeren
-           Ausschnitt steht als die Abdeckung behauptet. Bei "Jedes Deck
-           gleich oft" sind die Gewichte ohnehin kuenstlich, und die Zeile
-           unter der Auswahl sagt das. */
-        var engerAusschnitt = isFinite(r.gerechnet)
-            && r.gerechnet > 0 && (r.abdeckung - r.gerechnet) >= 1;
-
-        /* Eine duenne Rechnung sieht aus wie eine dicke (20.08.2026).
-
-           Das Unsicherheitsband unter der Zahl ist rechnerisch in Ordnung —
-           es traegt die Varianz jedes Gegners gewichtet weiter. Aber die
-           Zahl selbst steht in derselben Groesse da, ob 11 Partien oder
-           5.000 dahinterstehen, und ein Band liest sich anders als eine
-           Warnung. Gemeldet wurde genau dieser Fall: 51,0 % aus 11 Partien
-           bei 16 % Meta-Abdeckung.
-
-           Die Kachel bekommt deshalb einen Vorbehalt an der Rolle, wenn
-           entweder zu wenige Partien gezaehlt oder zu wenig Feld gerechnet
-           wurde. 30 Partien ist bewusst niedrig angesetzt: es geht nicht
-           darum, die Zahl zu verstecken, sondern darum, dass sie nicht
-           aussieht wie eine gesicherte. */
-        var EV_MIN_PARTIEN = 30;
-        var EV_MIN_ABDECKUNG = 25;
-        var evDuenn = (r.partien > 0 && r.partien < EV_MIN_PARTIEN)
-            || (isFinite(r.abdeckung) && r.abdeckung > 0 && r.abdeckung < EV_MIN_ABDECKUNG);
-        var evDuennText = evDuenn
-            ? L(' · dünne Grundlage', ' · thin basis')
-            : '';
-        var evDuennTitel = evDuenn
-            ? L('Weniger als ' + EV_MIN_PARTIEN + ' gezählte Matches oder unter '
-                + EV_MIN_ABDECKUNG + ' % Meta-Abdeckung. Die Zahl steht da, aber das '
-                + 'Unsicherheitsband darunter ist hier der wichtigere Teil.',
-                'Fewer than ' + EV_MIN_PARTIEN + ' games counted, or under '
-                + EV_MIN_ABDECKUNG + ' % meta coverage. The number is shown, but the '
-                + 'uncertainty band below it is the part that matters here.')
-            : '';
-
-        var kacheln =
-            '<div class="ds-stat-row">'
-            + '<div class="ds-stat ' + (r.ev >= 50 ? 'is-pos' : 'is-neg')
-              + (evDuenn ? ' is-duenn' : '') + '"'
-              + (evDuenn ? ' title="' + esc(evDuennTitel) + '"' : '') + '>'
-              + '<span class="ds-stat-role">'
-              + esc(L('gegen dieses Meta', 'against this meta') + evDuennText) + '</span>'
-              + '<span class="ds-stat-label">' + esc(L('Erwartete ' + quotenName(), 'Expected ' + quotenName())) + '</span>'
-              + '<span class="ds-stat-value">' + esc(zahl(r.ev, 1)) + '<span class="ds-stat-unit"> %</span></span>'
-              + '<span class="ds-stat-context">' + esc(L(
-                  'Unsicherheitsband ' + zahl(r.unten, 1) + ' bis ' + zahl(r.oben, 1) + ' %',
-                  'uncertainty band ' + zahl(r.unten, 1) + ' to ' + zahl(r.oben, 1) + ' %'))
-              + '</span>'
-            + '</div>'
-            + '<div class="ds-stat">'
-              + '<span class="ds-stat-role">' + esc(L('bei ' + runden + ' Runden', 'over ' + runden + ' rounds')) + '</span>'
-              + '<span class="ds-stat-label">' + esc(L('Erwartete Siege', 'Expected wins')) + '</span>'
-              + '<span class="ds-stat-value">' + esc(zahl(siege, 1)) + '</span>'
-              + '<span class="ds-stat-context">' + esc(L(
-                  zahl(siegeUnten, 1) + ' bis ' + zahl(siegeOben, 1) + ' Siege · Runden × ' + quotenName() + ', kein Turniermodell',
-                  zahl(siegeUnten, 1) + ' to ' + zahl(siegeOben, 1) + ' wins · rounds × ' + quotenName() + ', not a tournament model'))
-              + '</span>'
-            + '</div>'
-            + '<div class="ds-stat">'
-              + '<span class="ds-stat-role">' + esc(L('Wovon die Zahl kommt', 'What the number rests on')) + '</span>'
-              + '<span class="ds-stat-label">' + esc(L('Abdeckung des Metas', 'Meta coverage')) + '</span>'
-              + '<span class="ds-stat-value">' + esc(zahl(r.abdeckung, 0)) + '<span class="ds-stat-unit"> %</span></span>'
-              + '<span class="ds-stat-context">' + esc(L(
-                  r.gegner + ' Gegner-Decks · ' + r.partien.toLocaleString('de-DE') + ' gezählte Matches'
-                    + (r.duenn ? ' · ' + r.duenn + ' davon unter 20 Matches' : '')
-                    + (engerAusschnitt
-                        ? ' · in dieser Rechnung nur ' + zahl(r.gerechnet, 1) + ' % des Metas'
-                        : ''),
-                  r.gegner + ' opponent decks · ' + r.partien.toLocaleString('en-GB') + ' games counted'
-                    + (r.duenn ? ' · ' + r.duenn + ' of them under 20 games' : '')
-                    + (engerAusschnitt
-                        ? ' · this calculation uses only ' + zahl(r.gerechnet, 1) + ' % of the meta'
-                        : '')))
-              + '</span>'
-            + '</div>'
-            + '</div>';
-
-        /* SORTIERT NACH "wie oft" — nicht mehr nach dem Beitrag.
-           Bis zum 11.09.2026 stand die Tabelle in der Reihenfolge der
-           Spalte "Punkte". Die ist weggefallen, und damit waere die
-           Reihenfolge eine, die der Leser nirgends mehr ablesen kann:
-           Crustle stuende auf Platz 4, obwohl es 1,6 % des Metas ist.
-           Eine Sortierung, deren Schluessel nicht in der Tabelle steht,
-           sieht aus wie keine. Jetzt steht oben, wem man am haeufigsten
-           begegnet — und wer am staerksten zieht, steht in den zwei
-           Zeilen darueber. */
-        var zeilen = r.zeilen.slice().sort(function (a, b) {
-            return b.gewicht - a.gewicht;
-        }).map(function (z) {
-            return '<tr class="' + (z.partien < 20 ? 'is-muted' : '') + '">'
-                 + '<td>' + esc(z.gegner) + '</td>'
-                 + '<td class="ds-num">' + esc(zahl(z.gewicht * 100, 1)) + ' %</td>'
-                 + '<td class="ds-num">' + esc(zahl(z.quote, 1)) + ' %</td>'
-                 + '<td class="ds-num">' + esc(String(z.partien)) + '</td>'
-                 + '</tr>';
-        }).join('');
-
-        /* VIER SPALTEN, DAZU EINE LEGENDE — und warum nicht mehr.
-           Die Tabelle trug bis zum 11.09.2026 sechs Spalten, zwei davon
-           hat der Betreiber als unverstaendlich gemeldet ("trägt bei",
-           "Punkte"). Was sie zeigten, steht jetzt als Satz ueber der
-           Tabelle (vorbereitungHtml) — dieselbe Groesse, nur lesbar.
-
-           Die drei verbliebenen Zahlenspalten tragen Kuerzel. Das ist
-           erlaubt, weil die Legende direkt darunter sie aufloest — die
-           Hausregel dazu (tests/unit/test-sprache-win-rate.js) hat der
-           Betreiber am 02.09.2026 selbst vorgeschlagen, und die
-           Matchup-Tabelle der Archetyp-Karte haelt es genauso.
-
-           "wie oft" statt frueher "Gewicht hier": gerendert wird der
-           Anteil unter den GERECHNETEN Gegnern, auf 100 % normiert. Das
-           ist genau die Frage, die der Betreiber dazu gestellt hat
-           ("Geht's darum, wie oft man erwartet es zu treffen?") — ja,
-           innerhalb dieses Meta-Bildes. Der gemessene Meta-Anteil des
-           Decks steht in der Meta-Performance-Tabelle und kann davon
-           abweichen; die Legende sagt das. */
-        var tabelle =
-            '<div class="mobile-table-scroll">'
-            + '<table class="ds-table ds-ev-tabelle">'
-            + '<thead><tr>'
-              + '<th>' + esc(L('Gegner-Deck', 'Opponent deck')) + '</th>'
-              + '<th class="ds-num" title="' + esc(L(
-                  'Anteil unter den Gegnern, mit denen hier gerechnet wird — auf 100 % normiert, weil '
-                    + 'fehlende Paarungen weggelassen statt mit 50 % aufgefüllt werden. Der gemessene '
-                    + 'Meta-Anteil dieses Decks steht in der Meta-Performance-Tabelle.',
-                  'Share among the opponents this calculation uses — normalised to 100 % because missing '
-                    + 'pairings are left out rather than filled in at 50 %. The measured meta share '
-                    + 'is in the meta performance table.'))
-                + '">' + esc(L('wie oft', 'how often')) + '</th>'
-              + '<th class="ds-num" title="' + esc(L(
-                  quotenHinweis() + ' Ein 3-0 zählt hier deshalb nicht als 100 %.',
-                  quotenHinweis() + ' A 3-0 therefore does not count as 100 % here.'))
-                + '">' + esc(quotenKuerzel()) + '</th>'
-              + '<th class="ds-num" title="' + esc(L(
-                  'Gezählte Matches zwischen deinem Deck und diesem Gegner. Darauf beruht die Quote daneben.',
-                  'Games counted between your deck and this opponent. The rate next to it rests on them.'))
-                + '">' + esc(L('M', 'G')) + '</th>'
-            + '</tr></thead>'
-            + '<tbody>' + zeilen + '</tbody>'
-            + '</table></div>'
-            + '<p class="ds-note ds-ev-legende">' + esc(L(
-                'wie oft = Anteil dieses Gegners an den Runden, mit denen hier gerechnet wird · '
-                  + quotenKuerzel() + ' = ' + quotenName() + ', ' + quotenFormel() + ' · '
-                  + 'M = gezählte Matches, auf denen diese Quote beruht. '
-                  + 'Blasse Zeilen stehen auf weniger als 20 Matches.',
-                'how often = this opponent\u2019s share of the rounds this calculation uses · '
-                  + quotenKuerzel() + ' = ' + quotenName() + ', ' + quotenFormel() + ' · '
-                  + 'G = games counted behind that rate. '
-                  + 'Faded rows rest on fewer than 20 games.'))
-            + '</p>';
-
-        return kacheln + vorbereitungHtml(r.zeilen) + tabelle;
-    }
-
-    function rahmenHtml(decks, gewaehlt, feld, runden) {
-        var deckOpt = decks.map(function (d) {
-            return '<option value="' + esc(d) + '"' + (d === gewaehlt ? ' selected' : '') + '>'
-                 + esc(d) + '</option>';
-        }).join('');
-        /* Nur der kurze Name in die Auswahl. Die Erlaeuterung stand
-           zuerst mit im <option>-Text — auf 390 px war davon
-           "Das ganze Meta — gewichtet nach geme…" uebrig, und der Teil,
-           der etwas erklaert, war genau der abgeschnittene. Sie steht
-           jetzt als Zeile unter der Auswahl und wechselt mit ihr. */
-        var feldOpt = FELDER.map(function (f) {
-            return '<option value="' + f.id + '"' + (f.id === feld ? ' selected' : '') + '>'
-                 + esc(de() ? f.de : f.en) + '</option>';
-        }).join('');
-
-        /* Der Erklaersatz wandert hinter den Info-Knopf der
-           Abschnittsueberschrift (10.09.2026). Er nennt den Hausnamen
-           der Quote zur Laufzeit (quotenName()) — deshalb gemeldet und
-           nicht abgeschrieben. Ohne Register bleibt er stehen, wo er
-           war: eine Erklaerung ersatzlos zu verlieren waere schlimmer
-           als eine Zeile zu viel. */
+        /* Der Erklaersatz hinter dem Info-Knopf der
+           Abschnittsueberschrift bleibt gemeldet — ohne ihn traegt der
+           Abschnitt eine Ueberschrift ohne Erklaerung. Er nennt den
+           Hausnamen der Quote zur Laufzeit (quotenName()) und ist
+           deshalb gemeldet und nicht abgeschrieben. */
         var evText = L(
-            'Die Heatmap sagt, wer wen schlägt. Hier steht, was daraus für <em>dich</em> folgt: '
-            + 'du wählst dein Deck, und die Seite gewichtet jede Paarung mit dem Anteil, den der '
-            + 'Gegner im Meta hat. Heraus kommt die ' + quotenName() + ', mit der du über ein ganzes Turnier '
-            + 'rechnen kannst — nicht gegen ein Deck, sondern gegen alle auf einmal.',
-            'The heatmap says who beats whom. This says what that means for <em>you</em>: pick your '
-            + 'deck and every matchup is weighted by how much of the meta that opponent is. The '
-            + 'result is the ' + quotenName() + ' to expect across a whole tournament — not against one deck, '
-            + 'but against all of them at once.');
+            'Die Heatmap sagt, wer wen schlägt. Was daraus für <em>dich</em> folgt, steht im '
+            + 'Meta Call: du wählst dein Deck, und die Seite gewichtet jede Paarung mit dem '
+            + 'Anteil, den du für den Gegner erwartest. Heraus kommt die ' + quotenName()
+            + ', mit der du über ein ganzes Turnier rechnen kannst — nicht gegen ein Deck, '
+            + 'sondern gegen alle auf einmal.',
+            'The heatmap says who beats whom. What that means for <em>you</em> is in the Meta '
+            + 'Call: pick your deck and every matchup is weighted by the share you expect that '
+            + 'opponent to hold. The result is the ' + quotenName() + ' to expect across a '
+            + 'whole tournament — not against one deck, but against all of them at once.');
         var evGemeldet = false;
         if (typeof window !== 'undefined' && window.DsAbschnittInfo) {
             window.DsAbschnittInfo.melde('ev', {
@@ -610,88 +367,20 @@
         }
 
         return ''
-        /* Die eigene Ueberschrift ist am 11.09.2026 weggefallen.
-           Der Abschnitt traegt seit der Umstellung auf ds-sections.js
-           bereits eine Ueberschrift ("Dein Deck gegen das Meta"); diese
-           hier stand direkt darunter und sagte fast dasselbe noch einmal.
-           Betreiber: "der Untertext gegen welches Meta kann weg, das
-           ergibt doch an der Stelle keinen erhoehten Mehrwert."
-
-           Der Rueckfall bleibt: ohne ds-sections (alte Ansicht, Test,
-           kaputtes Register) gaebe es sonst gar keine Ueberschrift. */
         + '<div class="ds-panel ' + BLOCK + '">'
         + (evGemeldet ? '' : '<h3 class="ds-label">🎯 '
             + esc(L('Dein Deck gegen das Meta', 'Your deck vs. the meta')) + '</h3>')
-        + (evGemeldet ? '' : '<p class="ds-note">' + evText + '</p>')
+        + '<p class="ds-note">' + text + '</p>'
         + '<div class="ds-controls">'
-          + '<label class="ds-field is-wide"><span class="ds-stat-label">'
-            + esc(L('Dein Deck', 'Your deck')) + '</span>'
-            + '<select class="ds-select ds-ev-deck">' + deckOpt + '</select></label>'
-          + '<label class="ds-field is-wide"><span class="ds-stat-label">'
-            + esc(L('Das Meta', 'The meta')) + '</span>'
-            + '<select class="ds-select ds-ev-feldwahl">' + feldOpt + '</select></label>'
-          + '<label class="ds-field is-narrow"><span class="ds-stat-label">'
-            + esc(L('Runden', 'Rounds')) + '</span>'
-            + '<input class="ds-number ds-ev-runden" type="number" min="1" max="20" step="1" value="'
-            + runden + '"></label>'
+          + '<a class="ds-btn ds-ev-ziel" href="#meta-call" '
+            + 'onclick="if (typeof switchTabAndUpdateMenu === \'function\') '
+            + '{ switchTabAndUpdateMenu(\'meta-call\'); return false; } '
+            + 'if (typeof switchTab === \'function\') { switchTab(\'meta-call\'); return false; }">'
+            + esc(L('Im Meta Call öffnen →', 'Open in the Meta Call →'))
+          + '</a>'
         + '</div>'
-        + '<p class="ds-note ds-ev-feldnote"></p>'
-        + '<div class="ds-ev-ergebnis"></div>'
-        + '<p class="ds-note ds-ev-fuss"></p>'
         + '</div>';
     }
-
-    function fussHtml(r) {
-        if (!r) return '';
-        return L(
-            'Gerechnet wird <strong>Anteil × ' + quotenName() + '</strong> (' + quotenFormel() + '), aufsummiert über alle Gegner, zu denen '
-            + 'Daten vorliegen. Die Quoten sind geglättet (Beta-Binomial, k = 20), damit ein 3-0 nicht '
-            + 'als 100 % durchgeht. Das Band ist ±1,96 Standardabweichungen aus der Streuung der '
-            + 'einzelnen Paarungen; es nimmt die Meta-Anteile als bekannt an und ist deshalb eher zu '
-            + 'schmal als zu breit. Paarungen ohne Daten werden weggelassen, nicht mit 50 % aufgefüllt '
-            + '— darum steht die Abdeckung daneben. Datenraum: Global/EN, Limitless Online.',
-            'The sum is <strong>share × ' + quotenName() + '</strong> (' + quotenFormel() + ') over every opponent we have data for. Rates '
-            + 'are smoothed (beta-binomial, k = 20) so a 3-0 does not pass as 100 %. The band is ±1.96 '
-            + 'standard deviations from the spread of the individual matchups; it treats the meta '
-            + 'shares as known and is therefore narrow rather than wide. Pairings without data are '
-            + 'left out, not filled in at 50 % — which is why coverage is stated. Data space: '
-            + 'Global/EN, Limitless Online.');
-    }
-
-    function zeichne(block, shares) {
-        var deck   = block.querySelector('.ds-ev-deck').value;
-        var feld   = block.querySelector('.ds-ev-feldwahl').value;
-        var rEl    = block.querySelector('.ds-ev-runden');
-        var runden = Math.max(1, Math.min(20, parseInt(rEl.value, 10) || RUNDEN_STD));
-        if (String(runden) !== rEl.value) rEl.value = runden;
-
-        var f = FELDER.filter(function (x) { return x.id === feld; })[0] || FELDER[0];
-        var r = rechne(deck, shares, feld);
-        var sub = (de() ? f.deSub : f.enSub);
-        if (feld === 'top8' && r && r.gegner < 8) {
-            sub = de()
-                ? 'nur ' + r.gegner + ' Gegner haben Paarungen mit diesem Deck — mehr gibt es nicht'
-                : 'only ' + r.gegner + ' opponents have pairings with this deck — there are no more';
-        }
-        /* Der Formatschluessel gehoert an das GEMESSENE Meta-Bild, nicht
-           an die beiden Was-waere-wenn. Betreiber am 11.09.2026: "hier
-           steht jetzt zwar das ganze Meta, aber was genau heisst es?"
-           Ab jetzt: "Ganzes Meta TEF–PBL — alle Gegner, zu denen …".
-           Fehlt window._formatWindow (frueher Ladezustand), bleibt der
-           Name ohne Schluessel stehen statt mit einem falschen. */
-        var name = (de() ? f.de : f.en);
-        if (feld === 'alle') {
-            var schluessel = metaSchluessel();
-            if (schluessel) name += ' ' + schluessel;
-        }
-        block.querySelector('.ds-ev-feldnote').textContent = name + ' — ' + sub + '.';
-
-        block.querySelector('.ds-ev-ergebnis').innerHTML = ergebnisHtml(r, runden);
-        block.querySelector('.ds-ev-fuss').innerHTML = fussHtml(r);
-        merke({ deck: deck, feld: feld, runden: runden });
-    }
-
-    /* ── Einhängen ────────────────────────────────────────────────── */
 
     /* Nur "laeuft gerade", nicht "war schon mal da": ob der Block
        existiert, sagt der Baum, und nur der. Eine Merkvariable dafuer
@@ -701,87 +390,30 @@
        Sitzung leer. */
     var _baut = false;
 
-    /* Die Feldanteile liegen beim Bauen vor, gebraucht werden sie bei
-       jedem Klick. Weil die Bedienung ueber das Dokument delegiert wird
-       (siehe unten), muss der Handler sie irgendwo finden. */
-    var _shares = null;
-
-    /* EINMAL am Dokument, nicht am Block.
-     *
-     * Der Block hing seine beiden Handler an sich selbst. Das haelt genau
-     * so lange, bis jemand den Inhalt der Meta-Ansicht als Text neu setzt
-     * — und das passiert: js/app-meta-cards.js ersetzt
-     * currentMetaContent.innerHTML, js/app-tier-meta.js liest an einer
-     * Stelle den vorhandenen Inhalt zurueck und schreibt ihn wieder hin.
-     * Das Markup ueberlebt Zeichen fuer Zeichen, jeder daran haengende
-     * Handler nicht. js/ds-sections.js traegt denselben Befund schon im
-     * Kopfkommentar und loest ihn genauso.
-     *
-     * Gemessen am 20.08.2026 im Browser: Deckwahl, Feldbild und
-     * Rundenzahl waren allesamt tot — die Auswahl sprang um, die Zahlen
-     * darunter blieben stehen. Der Block war seit dem 20.08. 05:49 live.
-     *
-     * Delegation am Dokument ueberlebt jedes innerHTML darunter, weil das
-     * Dokument selbst nie ersetzt wird.
-     */
-    var _delegiert = false;
-    function delegiere() {
-        if (_delegiert) return;
-        _delegiert = true;
-        var reagiere = function (e) {
-            var ziel = e.target;
-            if (!ziel || typeof ziel.closest !== 'function') return;
-            var block = ziel.closest('.' + BLOCK);
-            if (!block || !_shares) return;
-            if (e.type === 'input' && !ziel.classList.contains('ds-ev-runden')) return;
-            zeichne(block, _shares);
-        };
-        document.addEventListener('change', reagiere);
-        document.addEventListener('input', reagiere);
-    }
-
     function baue() {
         var host = document.getElementById(HOST_ID);
         if (!host) return Promise.resolve(false);
         if (host.querySelector('.' + BLOCK)) return Promise.resolve(false);
         if (_baut) return Promise.resolve(false);   // Aufbau laeuft schon
-        if (!window._matchupRegistry || !Object.keys(window._matchupRegistry).length) {
-            return Promise.resolve(false);          // Register noch nicht da
-        }
-        if (typeof window.getArchetypeShares !== 'function') return Promise.resolve(false);
 
+        /* KEINE Datenbedingung mehr.
+         *
+         * Bis zum 11.09.2026 wartete der Block auf window._matchupRegistry
+         * und window.getArchetypeShares — er rechnete ja selbst. Der
+         * Verweis rechnet nichts, und ihn trotzdem von geladenen Daten
+         * abhaengig zu machen hiesse: wer mit langsamer Leitung kommt,
+         * sieht an dieser Stelle gar nichts und erfaehrt nie, wohin das
+         * Feature gezogen ist. */
         _baut = true;
-        return window.getArchetypeShares().then(function (shares) {
-            _shares = shares;
-            var reg = window._matchupRegistry || {};
-            /* Auswahlliste nach Feldanteil, nicht alphabetisch: das
-               meistgespielte Deck steht oben, weil es am haeufigsten
-               gesucht wird. */
-            var anteilVon = {};
-            Object.keys(shares || {}).forEach(function (k) {
-                anteilVon[k.toLowerCase()] = (shares[k] && shares[k].share) || 0;
-            });
-            var decks = Object.keys(reg).sort(function (a, b) {
-                var d = (anteilVon[b.toLowerCase()] || 0) - (anteilVon[a.toLowerCase()] || 0);
-                return d !== 0 ? d : a.localeCompare(b);
-            });
-            if (!decks.length) { _baut = false; return false; }
-            /* Zwischen dem Aufruf und hier liegt ein await. Wenn in der
-               Zeit jemand anders gebaut hat, nicht zweimal. */
+        return Promise.resolve().then(function () {
+            /* Zwischen dem Aufruf und hier liegt ein Zug der Warteschlange.
+               Wenn in der Zeit jemand anders gebaut hat, nicht zweimal. */
             if (host.querySelector('.' + BLOCK)) { _baut = false; return false; }
 
-            var w = wahl();
-            var deck = decks.indexOf(w.deck) > -1 ? w.deck : decks[0];
-            var feld = FELDER.some(function (f) { return f.id === w.feld; }) ? w.feld : 'alle';
-            var runden = (w.runden >= 1 && w.runden <= 20) ? w.runden : RUNDEN_STD;
-
             var wrap = document.createElement('div');
-            wrap.innerHTML = rahmenHtml(decks, deck, feld, runden);
+            wrap.innerHTML = verweisHtml();
             var block = wrap.firstElementChild;
             host.appendChild(block);
-
-            delegiere();
-            zeichne(block, shares);
 
             /* Die Abschnitte werden von js/ds-sections.js gebildet; der
                Block muss nur existieren, damit er eingesammelt wird. */

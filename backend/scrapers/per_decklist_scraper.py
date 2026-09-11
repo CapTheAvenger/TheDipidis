@@ -86,6 +86,7 @@ from card_scraper_shared import (
 )
 # Dieselbe Regel wie in der Bestandsreparatur.
 from ace_spec_regel import entscheide_zeile, lade_ace_liste
+from turnier_legalitaet import zweiter_freitag_nach
 
 # Reuse the JH scraper's name → labs-tid resolver + format/meta derivation
 # so per-decklist rows carry the same canonical labels as the existing
@@ -933,9 +934,15 @@ def _vorformat_fenster(data_dir):
 
     previous_format_key steht in format_window.json und wird bei jeder
     Rotation von Hand gepflegt (z. B. "TEF-CRI"). Die neuere Haelfte
-    davon ist das Set, dessen Erscheinungsdatum plus lag_days den
-    Beginn des damaligen Praesenzfensters ergibt — dieselbe Rechnung
-    wie fuer das laufende Format.
+    davon ist das Set, dessen Praesenzfenster damals begann — dieselbe
+    Rechnung wie fuer das laufende Format: der zweite Freitag nach dem
+    Erscheinen (backend/core/turnier_legalitaet.py).
+
+    NICHT lag_days aus format_window.json nehmen. Die Zahl gehoert seit
+    dem 11.09.2026 zum LAUFENDEN Set (sie wird aus dessen Datum
+    abgeleitet und ist bei einem Mittwochs-Release neun statt vierzehn
+    Tage). Auf das Erscheinungsdatum eines ANDEREN Sets angewandt ergibt
+    sie einen Tag, den es nie gab.
     """
     try:
         with open(os.path.join(data_dir, 'format_window.json'), encoding='utf-8') as f:
@@ -957,12 +964,10 @@ def _vorformat_fenster(data_dir):
     erschienen = str(eintrag.get('release_date') or '').strip()
     if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', erschienen):
         return None, schluessel
-    try:
-        tage = int(fw.get('lag_days') or 14)
-    except (TypeError, ValueError):
-        tage = 14
-    d = date.fromisoformat(erschienen) + timedelta(days=tage)
-    return d.isoformat(), schluessel
+    grenze = zweiter_freitag_nach(erschienen)
+    if not grenze:
+        return None, schluessel
+    return grenze, schluessel
 
 
 def _schreibe_atomar(pfad: str, kopf: List[str], zeilen: List[Dict]) -> None:

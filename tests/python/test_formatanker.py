@@ -36,7 +36,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 import backend.core.update_sets as update_sets  # noqa: E402
 import backend.scrapers.limitless_api_scraper as api  # noqa: E402
 from backend.core.update_sets import (  # noqa: E402
-    ANKER_MIN_KARTEN, _pick_current_set, anker_belegt,
+    ANKER_MIN_KARTEN, ANKER_MIN_TURNIERE, _pick_current_set, anker_belegt,
 )
 
 SPALTEN = ["tournament_id", "date", "meta", "archetype_id", "group", "set",
@@ -109,6 +109,145 @@ def test_die_schwelle_liegt_im_gemessenen_graben():
     Erweiterung (27) liegt der Graben. Wandert die Schwelle heraus,
     trennt sie nicht mehr."""
     assert 8 < ANKER_MIN_KARTEN < 27
+
+
+# ── Tor 2: die Turniere selbst ───────────────────────────────────────
+#
+# NACHGETRAGEN 11.09.2026. Tor 1 fragt, ob das Feld die KARTEN eines
+# Sets spielt. Das ist ein Stellvertreter — die Frage ist, ob das Feld
+# unter diesem FORMAT spielt, und darauf antwortet Limitless direkt:
+# jede Turnierzeile traegt ihren Formatschluessel in der Spalte `meta`,
+# und die kommt aus der API (tournament_scraper_JH.py:602), nicht aus
+# unserem format_window.json.
+#
+# Ohne dieses Tor gab es eine Luecke, die genau anders herum weh tut als
+# die urspruengliche: faellt Tor 1 aus, benennen die Scraper ihre
+# Dateien trotzdem schon nach dem neuen Schluessel — sie lesen `meta`.
+# Die Seite haette weiter das alte Format gelesen, waehrend die frischen
+# Daten unter dem neuen landen.
+
+def _turnierdatei(verzeichnis, formatschluessel, turniere, praesenz=False):
+    """Eine Kartendatei, deren Zeilen `formatschluessel` als meta tragen.
+
+    praesenz=True schreibt den Praesenzbestand
+    (tournament_cards_data_cards_*.csv), sonst den Online-Bestand.
+    """
+    if praesenz:
+        pfad = os.path.join(verzeichnis,
+                            f"tournament_cards_data_cards_{formatschluessel}.csv")
+        spalten = ["tournament_id", "tournament_name", "meta", "tournament_date",
+                   "archetype", "card_name"]
+        fest = {"tournament_name": "T", "tournament_date": "2026-09-26",
+                "archetype": "a", "card_name": "K"}
+    else:
+        pfad = os.path.join(verzeichnis, f"online_api_cards_{formatschluessel}.csv")
+        spalten = SPALTEN
+        fest = {"date": "2026-09-26", "archetype_id": "a", "group": "pokemon",
+                "set": "30C", "number": "1", "card": "K", "copies_total": 4,
+                "lists_with_card": 1, "lists_total": 1, "avg_count": 4.0,
+                "inclusion_rate": 1.0}
+    with open(pfad, "w", encoding="utf-8", newline="") as datei:
+        w = csv.DictWriter(datei, fieldnames=spalten, delimiter=";",
+                           extrasaction="ignore")
+        w.writeheader()
+        for i in range(turniere):
+            zeile = dict(fest)
+            zeile["tournament_id"] = f"T{i}"
+            zeile["meta"] = formatschluessel
+            w.writerow(zeile)
+    return pfad
+
+
+def test_turniere_unter_dem_neuen_format_belegen_den_anker(tmp_path):
+    """Der Fall, fuer den Tor 2 gebaut ist.
+
+    30C spielt (noch) niemand kartenseitig — aber es laufen bereits
+    Turniere, die Limitless TEF-30C nennt. Dann ist der Wechsel faellig:
+    unter genau diesem Schluessel entstehen gerade die Dateien.
+    """
+    _kartendatei(str(tmp_path), {"PBL": 40, "30C": 0})
+    _turnierdatei(str(tmp_path), "TEF-30C", ANKER_MIN_TURNIERE)
+    belegt, zahl, grund = anker_belegt(str(tmp_path), "30C", "TEF")
+    assert belegt, f"Tor 2 greift nicht: {grund}"
+    assert zahl == ANKER_MIN_TURNIERE
+    assert "TEF-30C" in grund, "der Grund muss den Formatschluessel nennen"
+
+
+def test_auch_der_praesenzbestand_zaehlt(tmp_path):
+    """Beide Bestaende fuehren die Spalte `meta` — beide zaehlen."""
+    _kartendatei(str(tmp_path), {"PBL": 40, "30C": 0})
+    _turnierdatei(str(tmp_path), "TEF-30C", ANKER_MIN_TURNIERE, praesenz=True)
+    belegt, _, grund = anker_belegt(str(tmp_path), "30C", "TEF")
+    assert belegt, f"der Praesenzbestand wird nicht gelesen: {grund}"
+
+
+def test_ein_einzelnes_turnier_legt_das_format_nicht_um(tmp_path):
+    """Eine falsche Beschriftung darf den Bestand nicht umwerfen."""
+    _kartendatei(str(tmp_path), {"PBL": 40, "30C": 0})
+    _turnierdatei(str(tmp_path), "TEF-30C", 1)
+    belegt, _, grund = anker_belegt(str(tmp_path), "30C", "TEF")
+    assert not belegt, "ein einziges Turnier hat gereicht"
+    assert "1 Turniere" in grund, f"der Grund verschweigt die Zahl: {grund}"
+
+
+def test_dieselben_turniere_unter_ANDEREM_format_zaehlen_nicht(tmp_path):
+    """Gezaehlt wird der fertige Schluessel, nicht das Set allein.
+
+    Sonst haetten die laufenden TEF-PBL-Turniere jeden beliebigen
+    Wechsel belegt.
+    """
+    _kartendatei(str(tmp_path), {"PBL": 40, "30C": 0})
+    _turnierdatei(str(tmp_path), "TEF-PBL", 50)
+    belegt, _, _ = anker_belegt(str(tmp_path), "30C", "TEF")
+    assert not belegt
+
+
+def test_eine_andere_rotation_belegt_den_wechsel_nicht(tmp_path):
+    """Gesucht wird der VOLLE Schluessel, nicht die neuere Haelfte.
+
+    Turniere unter BRS-30C sagen nichts darueber, ob TEF-30C laeuft —
+    das ist ein anderes Format mit einem anderen Kartenpool. Wer hier
+    nur auf die Endung prueft, laesst eine alte Rotation den heutigen
+    Wechsel belegen.
+    """
+    _kartendatei(str(tmp_path), {"PBL": 40, "30C": 0})
+    _turnierdatei(str(tmp_path), "BRS-30C", 50)
+    belegt, _, _ = anker_belegt(str(tmp_path), "30C", "TEF")
+    assert not belegt, "eine fremde Rotation hat den Wechsel belegt"
+
+
+def test_ohne_oldest_legal_bleibt_es_bei_tor_1(tmp_path):
+    """Ohne die aeltere Haelfte gibt es keinen Schluessel zum Suchen."""
+    _kartendatei(str(tmp_path), {"PBL": 40, "30C": 0})
+    _turnierdatei(str(tmp_path), "TEF-30C", 50)
+    belegt, _, _ = anker_belegt(str(tmp_path), "30C")
+    assert not belegt, "ohne oldest_legal_set darf Tor 2 nicht raten"
+
+
+def test_ein_sammlerset_kommt_durch_KEINES_der_tore(tmp_path):
+    """Der Schutz, um den es urspruenglich ging, steht weiter.
+
+    Ein Set, das den legalen Pool nicht veraendert, bekommt von
+    Limitless gar keinen eigenen Formatschluessel — es taucht also
+    weder kartenseitig noch turnierseitig auf.
+    """
+    _kartendatei(str(tmp_path), {"PBL": 40, "30C": 0})
+    _turnierdatei(str(tmp_path), "TEF-PBL", 200)
+    belegt, _, grund = anker_belegt(str(tmp_path), "30C", "TEF")
+    assert not belegt
+    assert "25" in grund and str(ANKER_MIN_TURNIERE) in grund, (
+        "der Grund muss beide Tore nennen, sonst sucht der Betreiber am "
+        f"falschen Ende: {grund}")
+
+
+def test_die_turnierschwelle_bleibt_klein_aber_nicht_eins():
+    """Eins waere eine Panne, zehn waere zu spaet.
+
+    Online ist ein Set mit dem Erscheinen legal; zwei Turniere sammeln
+    sich binnen eines Tages (data/online_api_cards_TEF-PBL.csv fuehrt
+    199 fuer das laufende Format).
+    """
+    assert 1 < ANKER_MIN_TURNIERE <= 5
 
 
 # ── Warum der Riegel ueberhaupt noetig ist ───────────────────────────

@@ -25,7 +25,6 @@ const lies = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const FEATURES = lies('js/app-features.js');
 const TIER     = lies('js/app-tier-meta.js');
 const PAST     = lies('js/app-past-meta.js');
-const EV       = lies('js/ds-ev-rechner.js');
 const MCALL    = lies('js/app-meta-call.js');
 const HUB      = lies('js/meta-analysis-hub.js');
 // Die Texte in app-quellen.js sind ueber mehrere Quellzeilen
@@ -364,8 +363,9 @@ describe('Der "Other"-Eimer wird ausgewiesen', () => {
  * Die Darstellung des EV-Rechners liegt seit dem 11.09.2026 im Meta
  * Call (renderDeckGegenMetaPanel in js/app-meta-call.js) und rechnet
  * dort gegen das ERWARTETE Meta statt gegen das gemessene Online-Feld.
- * js/ds-ev-rechner.js traegt an seiner alten Stelle nur noch einen
- * Verweis.
+ * js/ds-ev-rechner.js ist am selben Abend ganz entfallen: der Verweis,
+ * der dort uebrig blieb, war ein Abschnitt ohne Inhalt. Der Weg in den
+ * Meta Call fuehrt jetzt ueber den Knopf an der Deck-Karte.
  *
  * Die Zusagen unten sind deshalb nicht weggefallen, sondern
  * mitgezogen: dieselben Fragen, gestellt an die Datei, in der die

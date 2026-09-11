@@ -8,8 +8,8 @@
  * waren (gemeldet von zwei Parallelagenten als "ausserhalb meines
  * Pakets"):
  *
- *   js/ds-ev-rechner.js:319  "Erwartete Win Rate"
- *   js/ds-ev-rechner.js:389  "Deine Win Rate"
+ *   js/ds-ev-rechner.js:319  "Erwartete Win Rate"   (Datei entfallen)
+ *   js/ds-ev-rechner.js:389  "Deine Win Rate"        (Datei entfallen)
  *   js/ds-sections.js:83     "Listen, Win Rate und Top-8-Quote je Deck"
  *
  * "Win %" durfte dort NICHT hin. Nachgemessen:
@@ -40,7 +40,20 @@ const vm     = require('node:vm');
 const WURZEL = path.join(__dirname, '..', '..');
 const lies   = (p) => fs.readFileSync(path.join(WURZEL, p), 'utf8');
 
-const EV       = lies('js/ds-ev-rechner.js');
+/* Die EV-Anzeige lag bis zum 11.09.2026 in js/ds-ev-rechner.js. Sie ist
+   in den Meta Call gezogen (renderDeckGegenMetaPanel), und die Datei ist
+   am selben Abend entfallen — der Verweis, der dort uebrig blieb, war
+   ein Abschnitt ohne Inhalt. Geprueft wird deshalb jetzt der Block, in
+   dem die Zahl entsteht. Die Zusagen selbst sind unveraendert: kein
+   Hausname im angezeigten Text, die Konvention an genau einer Stelle
+   festgelegt, "Win %" nur als Abgrenzung. */
+const MCALL    = lies('js/app-meta-call.js');
+const EV       = (function () {
+    const a = MCALL.indexOf('const EV_UMFANG_KEY');
+    const b = MCALL.indexOf('// Recommendations panel — top N decks ranked');
+    assert.ok(a > -1 && b > a, 'der EV-Block steht nicht mehr in js/app-meta-call.js');
+    return MCALL.slice(a, b);
+}());
 const SEKTION  = lies('js/ds-sections.js');
 const SHARE    = lies('js/ds-share.js');
 
@@ -100,13 +113,13 @@ function ohneBezeichner(quelle) {
 
 const HAUSNAMEN = /(Win\s*Rate|Win-Rate|Winrate|win\s+rate|\bWR\b|Siegrate|Gewinnrate)/;
 
-test('js/ds-ev-rechner.js traegt keinen Hausnamen mehr', () => {
+test('der EV-Block traegt keinen Hausnamen mehr', () => {
     const rumpf = ohneBezeichner(ohneKommentare(EV));
     const treffer = rumpf.split('\n')
         .map((z, i) => ({ nr: i + 1, z }))
         .filter(o => HAUSNAMEN.test(o.z));
     assert.deepStrictEqual(treffer.map(o => `${o.nr}: ${o.z.trim()}`), [],
-        'Hausname im ausgelieferten Teil von js/ds-ev-rechner.js');
+        'Hausname im ausgelieferten Teil des EV-Blocks in js/app-meta-call.js');
 });
 
 test('js/ds-sections.js traegt keinen Hausnamen mehr', () => {
@@ -141,22 +154,28 @@ test('der EV-Rechner nennt genau diese Konvention, in beiden Sprachen', () => {
         const falsch = K.kurz('matchpunkte');           // "Win %"
         const auchFalsch = K.kurz('mitUnentschieden');
 
-        assert.ok(EV.includes("var EV_KONVENTION = 'ohneUnentschieden';"),
-            'js/ds-ev-rechner.js legt die Konvention nicht mehr fest');
+        /* Die Konvention steht an EINER Stelle und wird von dort geholt.
+           Im Meta Call ist das `_evQuotenName()`, das
+           WinRateKonvention.kurz('ohneUnentschieden') fragt. */
+        assert.ok(/_evQuotenName\(\)[\s\S]{0,400}kurz\('ohneUnentschieden'\)/.test(EV),
+            'der EV-Block legt seine Konvention nicht mehr fest');
         // Der Name wird zur Laufzeit geholt, nicht abgeschrieben.
         assert.ok(!EV.includes(`'${soll}'`) && !EV.includes(`"${soll}"`),
-            `der Name "${soll}" steht abgeschrieben in js/ds-ev-rechner.js `
+            `der Name "${soll}" steht abgeschrieben im EV-Block `
             + '- er muss aus WinRateKonvention.kurz() kommen');
         /* "Win %" darf hier GENAU EINMAL vorkommen: in dem Satz, der
            dem Leser sagt, dass die gezeigte Zahl das eben NICHT ist.
            Das ist eine Abgrenzung, keine Beschriftung. Jede weitere
            Fundstelle waere eine Beschriftung und ist verboten. */
+        /* Mit Umlaut: der Satz steht seit dem Umzug im Meta Call und
+           damit in einem angezeigten Text — „Groesse" waere dort eine
+           ASCII-Ersatzschreibung auf einer deutschen Seite. */
         const ABGRENZUNG =
-            'das ist NICHT die Groesse, die Limitless "Win %" nennt';
+            'das ist NICHT die Größe, die Limitless "Win %" nennt';
         const rumpfEV = ohneKommentare(EV);
         const winProzentStellen = (rumpfEV.match(/Win %/g) || []).length;
         assert.strictEqual(winProzentStellen, 1,
-            `"${falsch}" steht ${winProzentStellen}-mal in js/ds-ev-rechner.js; `
+            `"${falsch}" steht ${winProzentStellen}-mal im EV-Block; `
             + 'erlaubt ist allein der Abgrenzungssatz');
         /* Der Satz ist im Quelltext ueber mehrere Zeilen mit ' + '
            zusammengesetzt. Zum Vergleich werden die Nahtstellen und

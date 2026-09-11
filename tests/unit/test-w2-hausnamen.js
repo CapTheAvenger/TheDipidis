@@ -226,6 +226,19 @@ const POSITIVLISTE = [
              + 'WK.KONVENTIONEN.matchpunkte.rechne() auf — sie rechnet also wirklich '
              + 'Matchpunkte, und „Win %" ist deren reservierter Name.',
     },
+
+{
+        datei: 'js/app-meta-call.js',
+        beginnt: 'das ist NICHT die Größe',
+        grund: 'Abgrenzungssatz unter der Erwartungstabelle „Dein Deck gegen das '
+             + 'Meta". Er vergibt keinen Hausnamen, sondern nimmt einen weg: die '
+             + 'Quote darueber rechnet S/(S+N) (WinRateKonvention ohneUnentschieden), '
+             + 'und der Satz grenzt sie ausdruecklich gegen die Matchpunkte ab, die '
+             + 'Limitless „Win %" nennt. Stand bis zum 11.09.2026 in '
+             + 'js/ds-ev-rechner.js, das mit dem Umzug der Rechnung in den Meta Call '
+             + 'entfallen ist. tests/unit/test-w3-ev-und-abschnitt.js laesst genau '
+             + 'EINE solche Fundstelle zu.',
+    },
 ];
 
 function erlaubt(datei, text) {

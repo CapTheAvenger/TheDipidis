@@ -73,12 +73,30 @@ def entscheide_zeile(name, ace, max_count=None, typ=None) -> str:
     return ""
 
 
-def entscheide(name, ace, mehrfach=None, typen=None) -> str:
+def entscheide(name, ace, mehrfach=None, typen=None, typ=None) -> str:
     """Entscheidung mit Belegen aus dem gesamten Bestand: `mehrfach` ist die
     Menge der Namen, die IRGENDWO mehrfach gespielt wurden, `typen` bildet
     Name -> alle je beobachteten type-Werte ab. Das ist strenger als die
     zeilenweise Form: eine Karte, die in dieser einen Zeile einmal liegt,
-    anderswo aber zweimal, wird auch hier zu "No"."""
+    anderswo aber zweimal, wird auch hier zu "No".
+
+    `typ` ist der Typ AUS DER ZEILE, die gerade geschrieben wird.
+
+    WARUM ER GEBRAUCHT WIRD (gemessen 11.09.2026)
+    ---------------------------------------------
+    Der Bestand wird VOR dem Schreiben gelesen. Eine Karte, die zum
+    ersten Mal ueberhaupt in einer Liste auftaucht, steht deshalb in
+    `typen` noch nicht — `ts` ist None, und die Regel schwieg, obwohl in
+    derselben Zeile "Stage 1" stand. Gefunden an genau einer Zeile:
+    Iono's Electrode (JTG 48), Stage 1, erste und einzige Nennung, aus
+    dem Wochenlauf vom 11.09.2026 06:52 UTC. Der Deploy stand daran.
+    `entscheide_zeile` haette sie entschieden, `entscheide` nicht — die
+    STAERKERE Regel war an dieser Stelle die schwaechere.
+
+    Der Zeilentyp kommt zu den beobachteten dazu, er ersetzt sie nicht.
+    Widersprechen sich beide (Bestand sagt "Item", die Zeile "Stage 1"),
+    ist die Vereinigung kein Teil von KEINE_ACE_TYPEN und die Regel
+    schweigt weiter — das ist die vorsichtige Seite und die richtige."""
     n = (name or "").strip().lower()
     if not n:
         return ""
@@ -86,8 +104,11 @@ def entscheide(name, ace, mehrfach=None, typen=None) -> str:
         return "Yes"
     if mehrfach and n in mehrfach:
         return "No"
-    ts = (typen or {}).get(n)
-    if ts and set(ts) <= KEINE_ACE_TYPEN:
+    ts = set((typen or {}).get(n) or ())
+    t = (typ or "").strip()
+    if t:
+        ts.add(t)
+    if ts and ts <= KEINE_ACE_TYPEN:
         return "No"
     return ""
 

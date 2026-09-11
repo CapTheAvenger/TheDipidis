@@ -196,6 +196,45 @@
             }
         }
 
+        /* Den Erklaerblock unter der Heatmap auf- und zuklappen.
+         *
+         * OHNE NEUZEICHNEN, mit Absicht. Der Knopf sitzt neben „Alle Decks
+         * zeigen", und der zeichnet neu — hier waere das aber falsch: die
+         * Tabelle wird bei jedem Tastendruck in den Achsenfeldern neu
+         * gebaut, ein Neubau beim Aufklappen wuerde also Scrollstand und
+         * Eingabefokus wegwerfen, obwohl sich an den Daten nichts aendert.
+         *
+         * Der Zustand steht am `window` und nicht im DOM: das naechste
+         * Neuzeichnen (durch die Suche, den Sprachwechsel oder „Alle Decks
+         * zeigen") baut den Block sonst wieder zu, obwohl der Nutzer ihn
+         * gerade geoeffnet hat.
+         *
+         * Laeuft eine Achsensuche, ist der Block ohnehin offen (siehe
+         * `infoOffen` beim Bauen). Zuklappen wuerde dann das Feld
+         * verstecken, das die Tabelle gerade eingekocht hat — deshalb
+         * steigt die Funktion in diesem Fall aus, statt den Weg zurueck
+         * zu verbergen.
+         */
+        function toggleHeatmapInfo() {
+            const block = document.getElementById('heatmapDetails');
+            const knopf = document.getElementById('heatmapInfoBtn');
+            if (!block || !knopf) return;
+            const sucheLaeuft = !!(
+                (document.getElementById('heatmapSearchY') || {}).value ||
+                (document.getElementById('heatmapSearchX') || {}).value
+            );
+            if (sucheLaeuft && !block.hidden) {
+                if (typeof showToast === 'function') {
+                    showToast(t('heatmap.detailsGesperrt'), 'info', 4000);
+                }
+                return;
+            }
+            window.heatmapInfoOffen = !!block.hidden;
+            block.hidden = !window.heatmapInfoOffen;
+            knopf.setAttribute('aria-expanded', window.heatmapInfoOffen ? 'true' : 'false');
+        }
+        if (typeof window !== 'undefined') window.toggleHeatmapInfo = toggleHeatmapInfo;
+
         // Render Interactive Matchup Heatmap
         function renderMatchupHeatmap() {
             /* Die Praesenzdaten einmal holen, dann neu zeichnen.
@@ -235,6 +274,12 @@
                 // Initialize expanded state if not set
                 if (typeof window.heatmapExpanded === 'undefined') {
                     window.heatmapExpanded = false;
+                }
+                /* Der Erklaerblock unter der Tabelle: standardmaessig zu.
+                   Die Wahl des Nutzers steht am window und nicht im DOM,
+                   weil die Tabelle bei jedem Tastendruck neu gebaut wird. */
+                if (typeof window.heatmapInfoOffen === 'undefined') {
+                    window.heatmapInfoOffen = false;
                 }
                 
                 // Collect matchup data from registry (fast path) or fallback to window scan
@@ -752,7 +797,14 @@
                     tableHtml += '</tr>';
                 });
                 tableHtml += '</tbody></table>';
-                
+
+                /* Steht der Erklaerblock offen?
+                   Die eigene Wahl (window.heatmapInfoOffen) — ausser es
+                   laeuft eine Achsensuche: dann MUSS er offen sein, sonst
+                   ist das Feld, das die Tabelle gerade eingekocht hat,
+                   unsichtbar und der Weg zurueck verschwunden. */
+                const infoOffen = !!window.heatmapInfoOffen || !!(rawSearchY || rawSearchX);
+
                 // Wrapper HTML
                 let html = `
                     <div id="matchupHeatmapContainer" class="heatmap-container">
@@ -857,21 +909,44 @@
                         <div class="heatmap-table-scroll">
                             ${tableHtml}
                         </div>
+                        ${/* Zwei Knoepfe in EINER Zeile.
+
+                             Vorher stand unter der Tabelle erst diese Zeile
+                             und darunter noch eine aufklappbare Ueberschrift —
+                             zwei Bedienelemente untereinander, die dasselbe
+                             taten (etwas oeffnen). Gemeldet am 11.09.2026:
+                             „Koennen wir unter der Heatmap neben Show all
+                             Decks ein Button mit Info oder Details machen, was
+                             dann die Legende und die Suche einblendet? Dann
+                             sieht der Bereich da drunter nicht so abgehackt
+                             und lang aus."
+
+                             Der Info-Knopf zeichnet NICHT neu. Die Tabelle
+                             wird bei jedem Tastendruck in den Suchfeldern neu
+                             gebaut; ein Neuzeichnen beim Aufklappen wuerde
+                             den Scrollstand und den Eingabefokus verwerfen.
+                             Er schaltet deshalb nur `hidden` um — siehe
+                             toggleHeatmapInfo() weiter unten. */ ''}
                         <div class="heatmap-btn-row">
                             <button class="ds-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
                                 ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
                             </button>
+                            <button type="button" class="ds-btn heatmap-info-btn" id="heatmapInfoBtn"
+                                    aria-expanded="${infoOffen ? 'true' : 'false'}"
+                                    aria-controls="heatmapDetails"
+                                    title="${escAttr(t('heatmap.detailsSummary'))}"
+                                    onclick="toggleHeatmapInfo();">
+                                ${t('heatmap.detailsBtn')}
+                            </button>
                         </div>
-                        ${/* Zugeklappt, ABER: sobald eine Achsensuche laeuft,
-                             steht der Block offen. Sonst waere das Feld, das
-                             die Tabelle gerade auf drei Zeilen eingekocht hat,
-                             unsichtbar — und niemand faende den Weg zurueck.
-                             Der `open`-Zustand ueberlebt das Neuzeichnen nicht
-                             von selbst (die Tabelle wird bei jedem Tastendruck
-                             neu gebaut), deshalb haengt er an der Suche und
-                             nicht am Klick des Nutzers. */ ''}
-                        <details class="heatmap-details"${(rawSearchY || rawSearchX) ? ' open' : ''}>
-                            <summary class="heatmap-details-summary">${t('heatmap.detailsSummary')}</summary>
+                        ${/* Zu, ABER: sobald eine Achsensuche laeuft, steht der
+                             Block offen. Sonst waere das Feld, das die Tabelle
+                             gerade auf drei Zeilen eingekocht hat, unsichtbar —
+                             und niemand faende den Weg zurueck. Anders als
+                             beim frueheren <details> ueberlebt die eigene
+                             Wahl das Neuzeichnen jetzt trotzdem, weil sie in
+                             window.heatmapInfoOffen steht und nicht im DOM. */ ''}
+                        <div class="heatmap-details" id="heatmapDetails"${infoOffen ? '' : ' hidden'}>
                             <div class="heatmap-details-body">
                                 <p class="heatmap-desc heatmap-desc-kurz">
                                     <span class="heatmap-key heatmap-key-fav"></span> ${t('heatmap.favorable')} (≥ 55 %),
@@ -884,7 +959,7 @@
                                     ${t('heatmap.hint')}
                                 </p>
                             </div>
-                        </details>
+                        </div>
                     </div>
                 `;
                 

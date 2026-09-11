@@ -118,20 +118,83 @@ describe('Heatmap: Überschrift, dann sofort Daten', () => {
     });
 
     it('Legende und Achsenwahl liegen IM eingeklappten Block', () => {
-        const a = block.indexOf('<details class="heatmap-details"');
-        const b = block.indexOf('</details>', a);
-        assert.ok(a > -1 && b > a);
-        const drin = block.slice(a, b);
+        const a = block.indexOf('<div class="heatmap-details" id="heatmapDetails"');
+        const b = block.indexOf('// Insert or replace heatmap');
+        assert.ok(a > -1, 'der Block heißt nicht mehr .heatmap-details#heatmapDetails');
+        const drin = block.slice(a, b > a ? b : block.length);
         assert.match(drin, /heatmap-key-fav/, 'die Farblegende steht nicht drin');
         assert.match(drin, /\$\{searchControlsHtml\}/, 'die Achsenfelder stehen nicht drin');
+    });
+
+    /* ── Der Knopf statt der aufklappbaren Zeile (11.09.2026) ────────
+       Gemeldet: „Können wir unter der Heatmap neben Show all Decks ein
+       Button mit Info oder Details machen, was dann die Legende und die
+       Suche einblendet? Dann sieht der Bereich da drunter nicht so
+       abgehackt und lang aus."
+       Vorher: eine <details>-Zeile UNTER der Knopfzeile — zwei
+       Bedienelemente untereinander, die beide etwas öffneten. */
+
+    it('der Öffner steht als Knopf IN der Zeile neben „Alle Decks zeigen"', () => {
+        const a = block.indexOf('<div class="heatmap-btn-row">');
+        const b = block.indexOf('</div>', block.indexOf('heatmap-info-btn'));
+        assert.ok(a > -1, 'die Knopfzeile fehlt');
+        const zeile = block.slice(a, b);
+        assert.match(zeile, /heatmap\.showAll/, '„Alle Decks zeigen" steht nicht mehr in der Zeile');
+        assert.match(zeile, /class="ds-btn heatmap-info-btn"/, 'der Info-Knopf steht nicht in der Zeile');
+        // Nur echtes Markup, nicht das Wort im Kommentar darüber.
+        assert.ok(!/<details[ >]|<\/details>/.test(block.replace(/\/\*[\s\S]*?\*\//g, '')),
+            'die aufklappbare Zeile ist zurück — dann stehen wieder zwei Öffner untereinander');
+    });
+
+    it('der Knopf sagt Screenreadern, was er öffnet und ob es offen ist', () => {
+        const i = block.indexOf('heatmap-info-btn');
+        const knopf = block.slice(block.lastIndexOf('<button', i), block.indexOf('</button>', i));
+        assert.match(knopf, /aria-controls="heatmapDetails"/, 'aria-controls fehlt');
+        assert.match(knopf, /aria-expanded="\$\{infoOffen \? 'true' : 'false'\}"/,
+            'aria-expanded steht fest statt am Zustand');
+        assert.match(knopf, /type="button"/, 'ohne type="button" schickt er ein Formular ab');
     });
 
     it('er steht offen, sobald eine Achsensuche läuft', () => {
         /* Sonst wäre das Feld, das die Tabelle gerade auf drei Zeilen
            eingekocht hat, unsichtbar — und niemand fände den Weg
            zurück. */
-        assert.match(block, /<details class="heatmap-details"\$\{\(rawSearchY \|\| rawSearchX\) \? ' open' : ''\}>/,
+        assert.match(HEATMAP,
+            /const infoOffen = !!window\.heatmapInfoOffen \|\| !!\(rawSearchY \|\| rawSearchX\);/,
             'der Block bleibt auch bei aktiver Suche zugeklappt');
+    });
+
+    it('die eigene Wahl überlebt das Neuzeichnen', () => {
+        /* Die Tabelle wird bei JEDEM Tastendruck neu gebaut. Stünde der
+           Zustand nur im DOM, klappte der Block beim nächsten Zeichnen
+           wieder zu, obwohl der Nutzer ihn gerade geöffnet hat. */
+        assert.match(HEATMAP, /window\.heatmapInfoOffen = !!block\.hidden;/,
+            'der Zustand wird nicht am window gemerkt');
+        assert.match(HEATMAP, /if \(typeof window\.heatmapInfoOffen === 'undefined'\) \{/,
+            'der Startzustand wird nicht gesetzt');
+    });
+
+    it('das Umschalten zeichnet NICHT neu', () => {
+        /* Ein Neubau würde Scrollstand und Eingabefokus wegwerfen,
+           obwohl sich an den Daten nichts ändert. */
+        const a = HEATMAP.indexOf('function toggleHeatmapInfo()');
+        const b = HEATMAP.indexOf('\n        }', a);
+        assert.ok(a > -1, 'toggleHeatmapInfo() fehlt');
+        const fn = HEATMAP.slice(a, b);
+        assert.ok(!/renderMatchupHeatmap\(\)/.test(fn),
+            'der Info-Knopf zeichnet die ganze Heatmap neu');
+        assert.match(fn, /block\.hidden = /, 'er schaltet nicht hidden um');
+    });
+
+    it('bei laufender Suche lässt er sich nicht zuklappen', () => {
+        /* Sonst verschwände genau das Feld, mit dem man die Suche
+           wieder aufmacht — und die Tabelle bliebe eingekocht. */
+        const a = HEATMAP.indexOf('function toggleHeatmapInfo()');
+        const fn = HEATMAP.slice(a, HEATMAP.indexOf('\n        }', a));
+        assert.match(fn, /sucheLaeuft && !block\.hidden/,
+            'er klappt auch bei laufender Suche zu');
+        assert.match(fn, /heatmap\.detailsGesperrt/,
+            'er tut es wortlos — der Nutzer klickt dann zweimal und gibt auf');
     });
 
     it('der Leerfall behält seine Achsenfelder oben', () => {

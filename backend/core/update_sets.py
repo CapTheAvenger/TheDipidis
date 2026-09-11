@@ -49,9 +49,29 @@ _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_ROOT = os.path.normpath(os.path.join(_THIS_DIR, '..', '..'))
 _CONFIG_DIR = os.path.join(_PROJECT_ROOT, 'config')
 
-# Days between online release and in-person tournament legality.
-# Confirmed by user — Limitless online accepts new sets immediately on
-# release, in-person majors apply a fixed two-week lag.
+# Wann ein neues Set auf Praesenzturnieren legal wird: der ZWEITE
+# Freitag nach dem Erscheinen. Die Regel steht in
+# backend/core/turnier_legalitaet.py, samt Beleg, warum hier bis zum
+# 11.09.2026 eine feste Frist von vierzehn Tagen stand und warum die
+# bei einem Mittwochs-Release falsch rechnet.
+#
+# Online ist ein Set sofort mit Erscheinen legal — das aendert sich
+# nicht, betroffen ist nur die Praesenzgrenze.
+#
+# Zwei Wege hinein, weil diese Datei auf zwei Arten geladen wird: als
+# Skript (`python core/update_sets.py` im Wochenlauf, dann liegt der
+# eigene Ordner auf sys.path) und als Modul (`import
+# backend.core.update_sets` in tests/python/test_formatanker.py, dann
+# nicht).
+try:
+    from .turnier_legalitaet import zweiter_freitag_nach, abstand_in_tagen
+except ImportError:
+    _TL_DIR = os.path.dirname(os.path.abspath(__file__))
+    if _TL_DIR not in sys.path:
+        sys.path.insert(0, _TL_DIR)
+    from turnier_legalitaet import zweiter_freitag_nach, abstand_in_tagen
+
+# Rueckfall, falls ein Datum nicht lesbar ist. NICHT die Regel.
 IN_PERSON_LEGAL_LAG_DAYS = 14
 
 # Hardcoded fallback release dates for recent JP sets (Limitless
@@ -439,6 +459,55 @@ def _pick_current_set(release_dates: dict) -> str:
 ANKER_MIN_KARTEN = 25
 
 
+# Wie viele VERSCHIEDENE Turniere den Formatschluessel tragen muessen,
+# damit er als Rotationsanker durchgeht — das zweite Tor neben
+# ANKER_MIN_KARTEN.
+#
+# Zwei, nicht eins: ein einzelnes falsch beschriftetes Turnier darf das
+# Format des ganzen Bestandes nicht umlegen. Zwei unabhaengige sind
+# keine Panne mehr, sondern eine Entscheidung von Limitless.
+#
+# Erreichbar ist die Zahl schnell: online ist ein Set mit dem
+# Erscheinen legal, und data/online_api_cards_TEF-PBL.csv fuehrt heute
+# 198 Turniere. Ein echtes Hauptset sammelt zwei binnen eines Tages.
+ANKER_MIN_TURNIERE = 2
+
+
+def _turniere_je_format(data_dir: str) -> dict:
+    """{Formatschluessel: Zahl verschiedener Turniere, die ihn tragen}.
+
+    Quelle ist die Spalte `meta` der Turnierzeilen. Die kommt von
+    Limitless selbst (tournament_scraper_JH.py:602 — `api_format or
+    "Past Meta"`), NICHT aus data/format_window.json. Genau darum
+    taugt sie als Tor: sie sagt uns, wie das Feld das Format nennt,
+    unabhaengig davon, was wir gerade glauben.
+
+    Gelesen werden beide Bestaende, die eine solche Spalte fuehren:
+      data/tournament_cards_data_cards_<FORMAT>.csv   (Praesenz)
+      data/online_api_cards_<FORMAT>.csv              (online)
+
+    Leeres dict heisst "keine Auskunft", nicht "kein Turnier".
+    """
+    heraus: dict = {}
+    try:
+        namen = [n for n in os.listdir(data_dir)
+                 if (n.startswith('tournament_cards_data_cards_')
+                     or n.startswith('online_api_cards_')) and n.endswith('.csv')]
+    except OSError:
+        return {}
+    for name in namen:
+        try:
+            with open(os.path.join(data_dir, name), encoding='utf-8-sig', newline='') as f:
+                for zeile in csv.DictReader(f, delimiter=';'):
+                    schluessel = (zeile.get('meta') or '').strip().upper()
+                    tid = (zeile.get('tournament_id') or '').strip()
+                    if schluessel and tid:
+                        heraus.setdefault(schluessel, set()).add(tid)
+        except (OSError, csv.Error):
+            continue
+    return {k: len(v) for k, v in heraus.items()}
+
+
 def _gespielte_karten_je_set(data_dir: str) -> dict:
     """{Set-Code: Zahl verschiedener im Feld gespielter Karten}.
 
@@ -466,10 +535,37 @@ def _gespielte_karten_je_set(data_dir: str) -> dict:
     return {k: len(v) for k, v in heraus.items()}
 
 
-def anker_belegt(data_dir: str, set_code: str) -> tuple:
-    """Ist `set_code` durch echte Turnierlisten als Rotationsanker belegt?
+def anker_belegt(data_dir: str, set_code: str, oldest_legal: str = '') -> tuple:
+    """Ist `set_code` durch echte Turnierdaten als Rotationsanker belegt?
 
     Gibt (belegt, zahl, grund) zurueck.
+
+    ZWEI TORE, ODER-VERKNUEPFT
+    --------------------------
+    1. KARTEN — werden >= ANKER_MIN_KARTEN verschiedene Karten des Sets
+       im Feld gespielt? (seit 08.09.2026)
+    2. TURNIERE — tragen >= ANKER_MIN_TURNIERE Turniere den fertigen
+       Formatschluessel <oldest_legal>-<set_code> in ihrer Spalte
+       `meta`? (seit 11.09.2026)
+
+    Warum das zweite Tor dazukam: Tor 1 fragt, ob das Feld die KARTEN
+    spielt. Das ist ein guter Stellvertreter, aber es ist nicht die
+    Frage. Die Frage ist, ob das Feld unter diesem FORMAT spielt — und
+    darauf gibt es eine direkte Antwort, weil Limitless jedes Turnier
+    selbst mit seinem Format beschriftet.
+
+    Der Unterschied ist nicht theoretisch. Faellt Tor 1 aus (ein Set,
+    dessen Karten sich langsam durchsetzen), schrieben die Scraper
+    trotzdem schon Dateien unter dem neuen Schluessel — sie benennen
+    nach `meta`, nicht nach format_window.json. Die Seite haette dann
+    weiter das alte Format gelesen, waehrend die frischen Daten unter
+    dem neuen landen: zwei Bestaende, und der angezeigte friert ein.
+    Tor 2 schliesst genau diese Luecke.
+
+    Umgekehrt bleibt der Schutz stehen, um den es urspruenglich ging:
+    ein Sammlerset, das den legalen Kartenpool nicht veraendert,
+    bekommt von Limitless gar keinen eigenen Formatschluessel — es
+    kommt also durch KEINES der beiden Tore.
 
     WARUM ES DIESEN RIEGEL GIBT
     ---------------------------
@@ -492,6 +588,17 @@ def anker_belegt(data_dir: str, set_code: str) -> tuple:
     code = (set_code or '').strip().upper()
     if not code:
         return (False, 0, 'kein Set-Code')
+
+    # Tor 2 zuerst: die direkte Antwort schlaegt den Stellvertreter.
+    aeltestes = (oldest_legal or '').strip().upper()
+    turniere = 0
+    if aeltestes:
+        schluessel = f'{aeltestes}-{code}'
+        turniere = _turniere_je_format(data_dir).get(schluessel, 0)
+        if turniere >= ANKER_MIN_TURNIERE:
+            return (True, turniere,
+                    f'{turniere} Turniere tragen bereits das Format {schluessel}')
+
     gezaehlt = _gespielte_karten_je_set(data_dir)
     if not gezaehlt:
         # Keine Auskunft ist keine Ablehnung: laeuft das Projekt ohne
@@ -500,8 +607,13 @@ def anker_belegt(data_dir: str, set_code: str) -> tuple:
     n = gezaehlt.get(code, 0)
     if n >= ANKER_MIN_KARTEN:
         return (True, n, f'{n} verschiedene Karten im Feld')
+
+    nachsatz = ''
+    if aeltestes:
+        nachsatz = (f'; {turniere} Turniere unter {aeltestes}-{code} '
+                    f'(noetig: {ANKER_MIN_TURNIERE})')
     return (False, n, f'nur {n} verschiedene Karten im Feld '
-                      f'(noetig: {ANKER_MIN_KARTEN})')
+                      f'(noetig: {ANKER_MIN_KARTEN}){nachsatz}')
 
 
 def _extract_iso_date(text: str) -> str:
@@ -841,7 +953,21 @@ def write_format_window(sets_metadata_path: str,
         print("[Update Sets] ! Could not resolve EN current set — skipping format_window.json")
         return ''
 
-    in_person_legal = _add_days(en_release, IN_PERSON_LEGAL_LAG_DAYS)
+    # Der zweite Freitag nach dem Erscheinen (turnier_legalitaet.py).
+    # `lag_days` wird daraus ABGELEITET statt vorgegeben: die Zahl
+    # bleibt fuer ihre Verbraucher erhalten (js/app-meta-call.js
+    # rechnet die Altersgrenze des Lag-Fensters daraus,
+    # tests/python/test_data_integrity.py prueft den Zusammenhang),
+    # ist aber jetzt das Ergebnis der Regel und nicht ihr Eingang.
+    in_person_legal = zweiter_freitag_nach(en_release)
+    lag_days = abstand_in_tagen(en_release, in_person_legal)
+    if not in_person_legal or lag_days is None:
+        # Unlesbares Datum: lieber die alte feste Frist als gar nichts.
+        # Gemeldet wird es trotzdem, sonst rutscht es durch.
+        print(f"[Update Sets] ! Erscheinungsdatum {en_release!r} nicht lesbar — "
+              f"Praesenzgrenze faellt auf {IN_PERSON_LEGAL_LAG_DAYS} Tage zurueck")
+        in_person_legal = _add_days(en_release, IN_PERSON_LEGAL_LAG_DAYS)
+        lag_days = IN_PERSON_LEGAL_LAG_DAYS
 
     # oldest_legal_set: the OLDEST half of the current rotation key,
     # e.g. 'TEF' out of 'TEF-CRI'. Downstream readers (the bot index
@@ -857,7 +983,7 @@ def write_format_window(sets_metadata_path: str,
         'oldest_legal_set':     oldest_legal,
         'set_release_date':     en_release,
         'in_person_legal_date': in_person_legal,
-        'lag_days':             IN_PERSON_LEGAL_LAG_DAYS,
+        'lag_days':             lag_days,
         'current_set_jp':       jp_current,
         'jp_release_date':      jp_release,
         '_note': (
@@ -868,8 +994,10 @@ def write_format_window(sets_metadata_path: str,
             'time POR shipped to EN on 2026-03-27, JP was already on M4 '
             '(Ninja Spinner, 2026-03-13). City League scrapers track '
             'jp_release_date; the EN-side scrapers track set_release_date '
-            'and (for in-person majors) in_person_legal_date = release + '
-            'lag_days. _pick_current_set() keeps these in sync without a '
+            'and (for in-person majors) in_person_legal_date = the SECOND '
+            'FRIDAY after the release (backend/core/turnier_legalitaet.py); '
+            'lag_days is the resulting distance in days, derived, not an '
+            'input. _pick_current_set() keeps these in sync without a '
             'human edit when the next set drops.'
         ),
     }
@@ -938,7 +1066,11 @@ def write_format_window(sets_metadata_path: str,
         alt_set = str(existing.get('current_set') or '').strip().upper()
         neu_set = str(out.get('current_set') or '').strip().upper()
         if alt_set and neu_set and neu_set != alt_set:
-            belegt, zahl, grund = anker_belegt(data_dir, neu_set)
+            # oldest_legal_set mitgeben: erst daraus entsteht der
+            # fertige Formatschluessel, nach dem Tor 2 in den
+            # Turnierdaten sucht.
+            belegt, zahl, grund = anker_belegt(
+                data_dir, neu_set, str(out.get('oldest_legal_set') or ''))
             if not belegt:
                 print(f"[Update Sets] ! Formatwechsel {alt_set} -> {neu_set} "
                       f"nicht belegt: {grund}. Es wird NICHTS geschrieben.")

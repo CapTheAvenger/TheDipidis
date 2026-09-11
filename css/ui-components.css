@@ -955,7 +955,16 @@ img[src*="limitlesstcg"] {
     width: 100% !important;
     -webkit-overflow-scrolling: touch;
 }
+/* Seit dem 11.09.2026 stehen hier ZWEI Knoepfe: „Alle Decks zeigen"
+   und „Details". text-align allein reicht dafuer nicht — auf schmalen
+   Telefonen sassen sie sonst ohne Abstand aneinander, sobald sie
+   umbrechen. */
 .heatmap-btn-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
     text-align: center !important;
     margin-top: 15px !important;
 }

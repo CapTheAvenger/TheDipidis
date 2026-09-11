@@ -1292,29 +1292,28 @@ a:not([class]) { color: var(--link); }
 /* Der zugeklappte Block UNTER der Heatmap (js/app-current-meta.js).
    Farben, Kürzel und die Achsenwahl standen bis zum 11.09.2026 darüber
    — zusammen mit einer zweiten Überschrift fünf Blöcke, bevor die erste
-   Zahl kam. */
+   Zahl kam.
+
+   Seit dem Abend des 11.09.2026 hängt er an einem Knopf NEBEN „Alle
+   Decks zeigen" statt an einer eigenen aufklappbaren Zeile darunter.
+   Gemeldet: „Dann sieht der Bereich da drunter nicht so abgehackt und
+   lang aus." Vorher waren es zwei Bedienelemente untereinander, die
+   beide etwas öffneten — jetzt eine Zeile mit zwei Knöpfen. */
 .heatmap-details {
     margin-top: var(--s-3, 12px);
+    padding-top: var(--s-3, 12px);
     border-top: 1px solid var(--line);
 }
-.heatmap-details-summary {
-    list-style: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: var(--s-2, 8px);
-    min-height: 44px;
-    padding: var(--s-2, 8px) 0;
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    color: var(--ink-2);
-}
-.heatmap-details-summary::-webkit-details-marker { display: none; }
-.heatmap-details-summary::before {
+.heatmap-details-body { padding-bottom: var(--s-2, 8px); }
+
+/* Der Knopf trägt denselben Winkel, den vorher die Zusammenfassung
+   trug — er ist die einzige Stelle, an der man sieht, ob der Block
+   offen ist, ohne zu scrollen. */
+.heatmap-info-btn::before {
     content: '▸';
+    display: inline-block;
+    margin-right: var(--s-1, 4px);
     font-size: var(--fs-xs);
     transition: transform .15s ease;
 }
-.heatmap-details[open] > .heatmap-details-summary::before { transform: rotate(90deg); }
-.heatmap-details-summary:hover { color: var(--brand-ink); }
-.heatmap-details-body { padding-bottom: var(--s-2, 8px); }
+.heatmap-info-btn[aria-expanded="true"]::before { transform: rotate(90deg); }

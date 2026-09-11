@@ -2,6 +2,7 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a9f6e4dab080c8c957fdba8,2026-09-10,PBL,156,N's Zoroark,27.0
 6aa0d9e1ab080c8c957fed59,2026-09-10,PBL,108,N's Zoroark,18.0
 6aa17dbaab080c8c957ff0fd,2026-09-10,PBL,102,Lucario Hariyama,21.0
 6a99789aab080c8c957f8ad7,2026-09-09,PBL,128,Clefairy Ogerpon,19.0
@@ -99,5 +100,3 @@ worlds-2026-day-one,2026-08-15,PBL,909,Dragapult Dusknoir,24.0
 6a7e14e22b308b6067b53026,2026-08-15,PBL,211,Arboliva Ogerpon,28.0
 6a7a2978cdc0391d7fa63281,2026-08-14,PBL,133,Dragapult,25.0
 6a43872683fd320299bd4942,2026-08-14,PBL,110,Clefairy Ogerpon,25.0
-6a7a97fa2b308b6067b50d7f,2026-08-13,PBL,127,Dhelmise Banette,27.0
-6a7a21622b308b6067b5051d,2026-08-13,PBL,169,Dragapult,30.0

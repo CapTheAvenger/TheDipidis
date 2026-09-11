@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-09-10 18:13:32+00:00",
+ "erzeugt": "2026-09-11 06:52:37+00:00",
  "format": "TEF-PBL",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -15,12 +15,12 @@
  ],
  "ankerspieler_gesamt": 797,
  "online_abdeckung": {
-  "schnappschuss": "2026-09-10",
-  "anteil_unbekannt": 11.51,
+  "schnappschuss": "2026-09-11",
+  "anteil_unbekannt": 11.45,
   "groesste_unbekannte": [
    {
     "deck": "Beedrill",
-    "anteil": 1.05
+    "anteil": 1.04
    },
    {
     "deck": "Hop's Trevenant",
@@ -36,7 +36,7 @@
    },
    {
     "deck": "Mega Darkrai",
-    "anteil": 0.48
+    "anteil": 0.47
    }
   ]
  },

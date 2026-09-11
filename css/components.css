@@ -1288,3 +1288,33 @@ a:not([class]) { color: var(--link); }
     white-space: nowrap;
     border: 0;
 }
+
+/* Der zugeklappte Block UNTER der Heatmap (js/app-current-meta.js).
+   Farben, Kürzel und die Achsenwahl standen bis zum 11.09.2026 darüber
+   — zusammen mit einer zweiten Überschrift fünf Blöcke, bevor die erste
+   Zahl kam. */
+.heatmap-details {
+    margin-top: var(--s-3, 12px);
+    border-top: 1px solid var(--line);
+}
+.heatmap-details-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--s-2, 8px);
+    min-height: 44px;
+    padding: var(--s-2, 8px) 0;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink-2);
+}
+.heatmap-details-summary::-webkit-details-marker { display: none; }
+.heatmap-details-summary::before {
+    content: '▸';
+    font-size: var(--fs-xs);
+    transition: transform .15s ease;
+}
+.heatmap-details[open] > .heatmap-details-summary::before { transform: rotate(90deg); }
+.heatmap-details-summary:hover { color: var(--brand-ink); }
+.heatmap-details-body { padding-bottom: var(--s-2, 8px); }

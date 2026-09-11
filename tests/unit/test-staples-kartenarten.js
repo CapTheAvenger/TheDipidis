@@ -78,11 +78,22 @@ function karte(name, type, share) {
 describe('Die Auswahlregel je Kartenart', () => {
     const R = lade();
 
-    it('die sechs Arten des Betreibers sind da, in seiner Reihenfolge', () => {
+    it('die sechs Arten des Betreibers sind da, in seiner Reihenfolge — und ACE SPEC dahinter', () => {
+        /* Am 11.09.2026 kam eine siebte Schaltflaeche dazu, und sie ist
+           bewusst KEINE siebte Kartenart: ACE SPEC waehlt ueber ein
+           Kennzeichen aus und schneidet die anderen sechs, statt sie
+           auszuschliessen (Item, Ausruestung, Stadion, Spezial-Energie).
+           Deshalb steht sie hinten, und deshalb prueft die Schleife
+           darunter `typen` nur fuer die sechs. */
         assert.deepEqual(R._arten.map(a => a.id),
-            ['pokemon', 'supporter', 'item', 'tool', 'stadion', 'energie']);
+            ['pokemon', 'supporter', 'item', 'tool', 'stadion', 'energie', 'ace']);
         R._arten.forEach(a => {
             assert.ok(a.de && a.en, 'Beschriftung fehlt bei ' + a.id);
+            if (a.kennzeichen) {
+                assert.ok(!a.typen,
+                    a.id + ' waehlt ueber ein Kennzeichen UND ueber Typen — eines von beidem');
+                return;
+            }
             assert.ok(Array.isArray(a.typen) && a.typen.length, 'keine Typen bei ' + a.id);
         });
     });

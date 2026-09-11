@@ -385,30 +385,38 @@ const FENSTER = 600;
 
 const REGISTER = [
     { datei: 'js/app-meta-call.js', schluessel: 'mc.adjustWinRates',
-      konvention: null, marken: ['_wrZweiKonventionen'], ohneMarke: 1,
-      grund: 'Die Schaltflaeche beschriftet keine Zahl, sondern oeffnet einen Kasten '
-           + 'mit ZWEI Konventionen. Sie traegt deshalb einen title, der beide nennt. '
-           + 'Die eine Fundstelle ohne Heilmittel ist _toggleOverrides: die Funktion '
-           + 'dreht nur den Pfeil in der bereits gesetzten Beschriftung um und ist in '
-           + 'tests/unit/test-r5-win-prozent-namen.js daraufhin festgeschrieben; '
+      konvention: null, marken: ['_wrEineKonvention'], ohneMarke: 2,
+      grund: 'Die Schaltflaeche beschriftet keine Zahl, sondern oeffnet einen Kasten. '
+           + 'Dessen beide Spalten meinen seit dem 11.09.2026 DIESELBE Konvention '
+           + '(getMatchup setzt die getippte Zahl als S/(S+N) ein); der Satz darueber '
+           + 'kommt aus _wrEineKonvention und nennt sie. Bis dahin waren es zwei, und '
+           + 'die Marke hiess _wrZweiKonventionen. ZWEI Fundstellen ohne Heilmittel: '
+           + '(1) _toggleOverrides dreht nur den Pfeil in der bereits gesetzten '
+           + 'Beschriftung um und ist in tests/unit/test-r5-win-prozent-namen.js '
+           + 'daraufhin festgeschrieben; (2) _mcKnopfQuoten liest denselben Schluessel, '
+           + 'um den Knopf in den Ablauftexten beim Namen zu nennen, ohne ihn '
+           + 'abzuschreiben — es entsteht dadurch keine zweite beschriftete Zahl, '
+           + 'sondern nur ein Verweis auf eine bereits vorhandene Schaltflaeche. '
            + 'js/i18n.js gehoert in diesem Durchgang einem anderen Arbeitspaket.' },
 
     { datei: 'js/app-meta-call.js', schluessel: 'mc.colWrBlended',
-      konvention: 'ohneUnentschieden', marken: ['_titelGemischt', '_wrZweiKonventionen'],
+      konvention: 'ohneUnentschieden', marken: ['_titelGemischt', '_wrEineKonvention'],
       grund: 'Die Spalte zeigt _anzeigeQuote(m) = pWin/(pWin+pLoss) = S/(S+N). Das '
            + 'Kuerzel bleibt (schmale Spalte), Name und Formel haengen als title.' },
 
     { datei: 'js/app-meta-call.js', schluessel: 'mc.colManualWr',
-      konvention: 'mitUnentschieden', marken: ['_titelManuell', '_wrZweiKonventionen'],
-      grund: 'Was hier eingetippt wird, setzt getMatchup als pWin ein — der Anteil an '
-           + 'ALLEN Partien, also S/(S+N+U). Die Spalte links rechnet anders; beide '
-           + 'tragen jetzt ihren Hinweis, und darueber steht der Satz, dass es zwei '
-           + 'Konventionen sind.' },
+      konvention: 'ohneUnentschieden', marken: ['_titelManuell', '_wrEineKonvention'],
+      grund: 'Seit dem 11.09.2026 setzt getMatchup die eingetippte Zahl als S/(S+N) ein '
+           + '— dieselbe Groesse, die die Spalte links zeigt. Vorher landete sie direkt '
+           + 'als pWin, also als Anteil an ALLEN Partien: wer 55 tippte, weil links 55 % '
+           + 'stand, bekam 56 % zurueck. Beide Spalten tragen denselben Hinweis, und '
+           + 'darueber steht der Satz, dass es EINE Konvention ist.' },
 
     { datei: 'js/app-meta-call.js', schluessel: 'mc.overrideHint',
-      konvention: 'mitUnentschieden', marken: ['_titelManuell'],
+      konvention: 'ohneUnentschieden', marken: ['_titelManuell'],
       grund: 'Der Satz ueber der Tabelle spricht von der manuellen Spalte und traegt '
-           + 'deren Hinweis.' },
+           + 'deren Hinweis — seit dem 11.09.2026 dieselbe Konvention wie die Spalte '
+           + 'daneben.' },
 
     { datei: 'js/app-meta-call.js', schluessel: 'mc.wrNennerTitel',
       konvention: 'ohneUnentschieden', marken: ['_wrVollname'],

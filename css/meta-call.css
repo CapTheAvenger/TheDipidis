@@ -3493,3 +3493,403 @@
   cursor: help;
   border-bottom: 1px dotted #c8d1da;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   DEIN DECK GEGEN DAS ERWARTETE META  (renderDeckGegenMetaPanel)
+   ══════════════════════════════════════════════════════════════════
+   Gebaut aus den Bausteinen, die dieser Reiter schon hat: dieselben
+   Rahmen-, Flaechen- und Textmarken wie .metacall-panel und
+   .metacall-table. Kein !important, keine neue Farbe — die drei
+   Zustaende (gut / schlecht / eigene Zahl) benutzen die
+   Semantikfarben, die auch die Day-2-Kachel benutzt. */
+.mc-ev-panel .metacall-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.mc-ev-deckname {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--mc-text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.mc-ev-lead {
+  margin: 0 0 14px 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--mc-text-muted);
+  max-width: 76ch;
+}
+
+/* Ausschnitt-Wahl */
+.mc-ev-umfang {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.mc-ev-umfang-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mc-text-muted);
+}
+.mc-ev-pille {
+  min-height: 44px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--mc-border);
+  background: var(--surface-1);
+  color: var(--mc-text-heading);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mc-ev-pille:hover { border-color: var(--mc-accent, #6b21a8); }
+.mc-ev-pille.is-aktiv {
+  border-color: var(--mc-accent, #6b21a8);
+  box-shadow: inset 0 0 0 1px var(--mc-accent, #6b21a8);
+}
+.mc-ev-einzel {
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--mc-border);
+  background: var(--surface-1);
+  color: var(--mc-text-heading);
+  font-size: 0.85rem;
+  max-width: 100%;
+}
+.mc-ev-umfang-note {
+  margin: 0 0 16px 0;
+  font-size: 0.78rem;
+  color: var(--mc-text-muted);
+  line-height: 1.45;
+}
+
+/* Die drei Kacheln */
+.mc-ev-kacheln {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.mc-ev-kachel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--mc-border);
+  border-radius: 12px;
+  background: var(--surface-1);
+  border-top: 3px solid var(--mc-border);
+}
+.mc-ev-kachel.is-pos { border-top-color: var(--color-success); }
+.mc-ev-kachel.is-neg { border-top-color: var(--color-danger); }
+.mc-ev-kachel.is-duenn { border-top-style: dashed; }
+.mc-ev-rolle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mc-text-muted);
+}
+.mc-ev-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--mc-text-heading);
+}
+.mc-ev-wert {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--mc-text-heading);
+  font-variant-numeric: tabular-nums;
+}
+.mc-ev-einheit { font-size: 1rem; font-weight: 600; }
+.mc-ev-kontext {
+  font-size: 0.74rem;
+  color: var(--mc-text-muted);
+  line-height: 1.4;
+}
+
+/* Die zwei Zeilen ueber der Tabelle */
+.mc-ev-zeile {
+  margin: 0 0 6px 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--mc-text-heading);
+}
+.mc-ev-zeile-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mc-text-muted);
+  margin-right: 6px;
+}
+.mc-ev-warauf .mc-ev-zeile-label { color: var(--color-danger); }
+.mc-ev-laeuft .mc-ev-zeile-label { color: var(--color-success); }
+
+/* Tabelle — EIGENE Klasse, nicht .metacall-table.
+   Der Reiter hat fuer .metacall-table eine mobile Kartenansicht, die
+   ihre Beschriftungen ueber ::before an der SPALTENPOSITION haengt
+   (td:nth-child(2)::before { content: 'Online' } usw., Zeile ~1630).
+   Diese Tabelle hat andere Spalten in denselben Positionen — gerendert
+   auf 390 px stand ueber ihrer „wie oft"-Zahl deshalb „ONLINE" und ueber
+   der Quote „EST.". Eine Beschriftung, die der Position folgt statt der
+   Spalte, ist bei der zweiten Tabelle immer falsch. */
+.mc-ev-tabelle-wrap { overflow-x: auto; }
+.mc-ev-tabelle {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.88rem;
+  margin-top: 8px;
+}
+.mc-ev-tabelle th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--mc-border);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--on-dark);
+  white-space: nowrap;
+}
+.mc-ev-tabelle th[title] { cursor: help; }
+.mc-ev-tabelle td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--mc-border-faint);
+  vertical-align: middle;
+}
+.mc-ev-tabelle tr:last-child td { border-bottom: none; }
+.mc-ev-tabelle tbody tr:hover td { background: var(--mc-bg-subtle); }
+.mc-ev-tabelle th:nth-child(1), .mc-ev-tabelle td:nth-child(1) { width: 26%; }
+.mc-ev-tabelle th:nth-child(2), .mc-ev-tabelle td:nth-child(2) { width: 11%; }
+.mc-ev-tabelle th:nth-child(3), .mc-ev-tabelle td:nth-child(3) { width: 10%; }
+.mc-ev-tabelle th:nth-child(4), .mc-ev-tabelle td:nth-child(4) { width: 26%; }
+.mc-ev-tabelle th:nth-child(5), .mc-ev-tabelle td:nth-child(5) { width: 17%; }
+.mc-ev-tabelle th:nth-child(6), .mc-ev-tabelle td:nth-child(6) { width: 10%; }
+.mc-ev-num { text-align: right; font-variant-numeric: tabular-nums; }
+/* Der Kopf steht rechts, wo die Zahl rechts steht. Gemessen am
+   11.09.2026 im gerenderten Entwurf, als er es noch nicht tat:
+   „GAMES" bei x = 1223, die Zahlen darunter bei x = 1360. */
+.mc-ev-tabelle th.mc-ev-num { text-align: right; }
+.mc-ev-td-deck { color: var(--mc-text-heading); }
+/* Der Name steht in einer eigenen Zeile mit fester Ikonenspalte: ein
+   Deck mit zwei Pokemon haette den Namen sonst weiter eingerueckt als
+   eines mit einem, und bei fehlgeschlagenem Bild (onerror blendet aus)
+   springt er wieder zurueck. In der gerenderten Probe standen dadurch
+   drei Einrueckungen untereinander. */
+.mc-ev-deckzelle {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+}
+/* Ohne die feste erste Spalte haengt der Textanfang davon ab, wie viele
+   Pokemon der Archetyp fuehrt (ein Bild oder zwei) und ob die Bilder
+   ueberhaupt geladen haben — onerror blendet sie einzeln aus. In der
+   gerenderten Probe standen dadurch drei verschiedene Einrueckungen
+   untereinander. */
+.mc-ev-deckzelle > *:only-child { grid-column: 2; }
+.mc-ev-deckwort { font-weight: 600; overflow-wrap: anywhere; }
+
+/* Abstand zur 50 — dieselbe Zahl wie in der Spalte davor, als Bild. */
+.mc-ev-td-balken { padding-right: 14px !important; }
+.mc-ev-spur {
+  position: relative;
+  display: block;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--mc-bg-subtle);
+  min-width: 60px;
+}
+.mc-ev-mitte {
+  position: absolute;
+  left: 50%; top: -2px; bottom: -2px;
+  width: 1px;
+  background: var(--mc-border);
+}
+.mc-ev-balken {
+  position: absolute;
+  top: 0; bottom: 0;
+  border-radius: 5px;
+}
+.mc-ev-balken.is-pos { background: var(--color-success); }
+.mc-ev-balken.is-neg { background: var(--color-danger); }
+.mc-ev-tabelle tr.is-duenn td { opacity: 0.55; }
+.mc-ev-tabelle .is-gut { color: var(--color-success); font-weight: 700; }
+.mc-ev-tabelle .is-schlecht { color: var(--color-danger); font-weight: 700; }
+.mc-ev-eigen-punkt {
+  margin-left: 5px;
+  /* 0,65rem = 10,4 px. Der Schriftboden der Seite liegt bei 10 px
+     (tests/unit/test-schriftboden.js); 0,6rem waeren 9,6 px gewesen. */
+  font-size: 0.65rem;
+  color: var(--mc-accent, #6b21a8);
+  cursor: help;
+}
+.mc-ev-quelle {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid var(--mc-border);
+  color: var(--mc-text-muted);
+  cursor: help;
+  white-space: nowrap;
+}
+.mc-ev-quelle.is-eigen {
+  border-color: var(--mc-accent, #6b21a8);
+  color: var(--mc-accent, #6b21a8);
+}
+.mc-ev-quelle.is-journal {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+.mc-ev-fuss {
+  margin: 10px 0 0 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--mc-text-muted);
+  max-width: 90ch;
+}
+
+@media (max-width: 700px) {
+  .mc-ev-wert { font-size: 1.6rem; }
+  .mc-ev-umfang-label { width: 100%; }
+  .mc-ev-einzel { width: 100%; }
+  /* KEINE Spalte faellt weg. Die Herkunft ist der Teil, der die vier
+     Faelle (gemessen / Journal / deine Zahl / keine Daten)
+     unterscheidbar haelt; sie auf dem Telefon auszublenden hiesse,
+     genau dort eine Zahl ohne Herkunft zu zeigen, wo am ehesten nur
+     die Zahl gelesen wird. Stattdessen werden die Spalten schmaler,
+     und wenn es nicht reicht, scrollt der Rahmen (.metacall-table-wrap
+     traegt overflow-x: auto). */
+  /* Sechs Spalten passen nicht auf 390 px. Statt zu scrollen wird jede
+     Zeile zu einer Karte: Deckname als Ueberschrift, darunter die Werte
+     mit ihren Etiketten aus data-label. Der Balken faellt weg — er
+     zeigt dieselbe Zahl, die zwei Zeilen darueber als Ziffer steht. */
+  .mc-ev-tabelle-wrap { overflow-x: visible; }
+  .mc-ev-tabelle, .mc-ev-tabelle tbody, .mc-ev-tabelle tr, .mc-ev-tabelle td {
+    display: block;
+    width: auto;
+  }
+  .mc-ev-tabelle thead { display: none; }
+  .mc-ev-tabelle tbody tr {
+    border: 1px solid var(--mc-border-faint);
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 10px;
+  }
+  .mc-ev-tabelle tbody tr:hover td { background: none; }
+  .mc-ev-tabelle tbody td {
+    border: none;
+    padding: 1px 0;
+    text-align: left;
+    font-size: 0.8rem;
+  }
+  .mc-ev-tabelle tbody td.mc-ev-td-deck {
+    grid-column: 1 / -1;
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+  }
+  .mc-ev-tabelle tbody td.mc-ev-td-balken { display: none; }
+  /* Herkunft und Matches teilen sich eine Zeile, wie „wie oft" und die
+     Quote darueber. Ueber die ganze Breite gezogen schoebe die Herkunft
+     die Matches-Zahl auf eine vierte Zeile und machte aus 25 Karten
+     rund 800 px zusaetzlichen Lauf. */
+  .mc-ev-tabelle tbody td.mc-ev-td-quelle { grid-column: 1; }
+  .mc-ev-tabelle tbody td[data-label]::before {
+    content: attr(data-label) ' ';
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--mc-text-muted);
+    margin-right: 5px;
+  }
+  .mc-ev-quelle { padding: 1px 6px; font-size: 0.68rem; }
+  /* Auf 390 px ist der Platz fuer den Namen knapp; die Ikonen kosten
+     42 px und tragen hier nichts, was der Name nicht schon sagt. */
+  .mc-ev-deckzelle { grid-template-columns: 1fr; }
+  .mc-ev-tabelle .tcg-pokemon-icon,
+  .mc-ev-tabelle .tcg-pokemon-icon-group { display: none; }
+}
+
+/* ── Die vier Schritte des Ablaufs ─────────────────────────────────
+   Sie sind Wegmarken, keine Kacheln: kein Rahmen, keine Flaeche, nur
+   die Nummer und zwei Zeilen. Wuerden sie wie .metacall-panel
+   aussehen, waeren es vier weitere gleich aussehende Bloecke in einem
+   Reiter, dessen Problem genau das war. */
+.mc-schritt {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 12px;
+  align-items: start;
+  margin: 26px 0 10px 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--mc-border-faint);
+}
+.mc-schritt:first-of-type { border-top: none; padding-top: 0; margin-top: 14px; }
+.mc-schritt-nr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--mc-accent, #6b21a8);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.mc-schritt-titel {
+  margin: 3px 0 2px 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--mc-text-heading);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.mc-schritt-satz {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--mc-text-muted);
+  max-width: 84ch;
+}
+@media (max-width: 700px) {
+  .mc-schritt { grid-template-columns: 26px 1fr; gap: 9px; margin: 20px 0 8px 0; }
+  .mc-schritt-nr { width: 26px; height: 26px; font-size: 0.8rem; }
+  .mc-schritt-titel { font-size: 0.98rem; }
+  .mc-schritt-satz { font-size: 0.8rem; }
+}
+
+/* Der gemessene Online-Anteil, direkt unter der Prognose in derselben
+   Zelle. Leiser gesetzt: die Prognose ist die Zahl, mit der die Seite
+   rechnet; diese hier ist die Herkunft, gegen die man sie prüft. */
+.mc-share-gemessen {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--mc-text-muted);
+  cursor: help;
+  white-space: nowrap;
+}

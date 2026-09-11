@@ -85,9 +85,15 @@
            einmal. Betreiber: "Feld wird immer und ueberall als Meta
            bezeichnet." Der Name sagt jetzt, was man hier einstellt: sein
            eigenes Deck, und wogegen. */
+        /* Der Abschnitt traegt seit dem 11.09.2026 nur noch einen
+           Verweis: die Rechnung ist in den Meta Call gezogen und
+           gewichtet dort mit dem Anteil, den der Nutzer ERWARTET, statt
+           mit dem gemessenen Online-Anteil (js/ds-ev-rechner.js, Kopf).
+           Der Untertitel sagt das, damit niemand aufklappt und den
+           Rechner sucht, der bis gestern hier stand. */
         { id: 'ev',      auf: false, nimm: ['div.ds-ev-block'],
-          de: ['Dein Deck gegen das Meta', 'was dein Deck über ein ganzes Turnier holt'],
-          en: ['Your deck vs. the meta', 'what your deck scores across a whole tournament'] },
+          de: ['Dein Deck gegen das Meta', 'umgezogen in den Meta Call — dort mit den Anteilen, die du erwartest'],
+          en: ['Your deck vs. the meta', 'moved into the Meta Call — there with the shares you expect'] },
         { id: 'tiers',   auf: false, nimm: ['__tiers__'],
           de: ['Tier-Liste', 'alle Archetypen nach Stärke gruppiert'],
           en: ['Tier list', 'all archetypes grouped by strength'] },

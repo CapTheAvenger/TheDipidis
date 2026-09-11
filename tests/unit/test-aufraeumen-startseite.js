@@ -37,6 +37,9 @@ const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
 const SEC    = read('js/ds-sections.js');
 const EV     = read('js/ds-ev-rechner.js');
+/* Die Anzeige ist am 11.09.2026 in den Meta Call gezogen; die Zusagen
+   an sie werden dort geprueft. */
+const MC     = read('js/app-meta-call.js');
 const PARKEN = read('docs/geparkte-features.md');
 
 // ───────────────────────────────────────────────────────────────────
@@ -147,42 +150,56 @@ describe('Der EV-Rechner rechnet über ein echtes Turnier', () => {
        auf 8 Runden sein und nicht auf 9."
 
        Neun kam aus der Rundenformel grosser Turniere und gilt erst ab
-       513 Spielern. Der Unterschied ist nicht kosmetisch: bei 54 % Win
-       Rate sind es 4,86 statt 4,32 erwartete Siege — eine ganze
-       Rundendifferenz in der Erwartung, und danach entscheidet sich, ob
-       jemand Day 2 für erreichbar hält. */
+       513 Spielern. Der Unterschied ist nicht kosmetisch: bei 54 %
+       erwarteter Quote sind es 4,86 statt 4,32 erwartete Siege — eine
+       ganze Rundendifferenz in der Erwartung, und danach entscheidet
+       sich, ob jemand Day 2 für erreichbar hält.
+
+       NACHTRAG 11.09.2026: die Anzeige ist in den Meta Call gezogen
+       (renderDeckGegenMetaPanel in js/app-meta-call.js). Die Zusage
+       bleibt dieselbe und wird deshalb weiter geprüft — nur an dem Ort,
+       an dem die Zahl jetzt entsteht. js/ds-ev-rechner.js führt die
+       Rundenzahl weiter als RUNDEN_STD, weil `rechne()` dort geblieben
+       ist und Aufrufer einen Startwert brauchen. */
     const STD = Number(/var RUNDEN_STD = (\d+);/.exec(EV)[1]);
 
     it('startet mit acht Runden', () => {
         assert.equal(STD, 8, `der Startwert steht auf ${STD} Runden`);
+        // Und der Meta Call, der die Zahl jetzt anzeigt, ebenso.
+        const m = /rounds\s*:\s*(\d+),/.exec(MC);
+        assert.ok(m, 'der Meta Call führt keine Rundenzahl mehr in _settings');
+        assert.equal(Number(m[1]), 8,
+            `der Meta Call startet mit ${m[1]} Runden statt mit 8`);
     });
 
     it('und die erwarteten Siege folgen dieser Zahl', () => {
-        // Die Rechnung selbst, aus der Anzeigefunktion geschnitten:
-        // Siege = EV/100 * Runden. Mit 9 käme 4,86 heraus, mit 8: 4,32.
+        // Die Rechnung: Siege = EV/100 * Runden. Mit 9 käme 4,86
+        // heraus, mit 8: 4,32.
         const siege = (ev, runden) => (ev / 100) * runden;
         assert.equal(siege(54, STD).toFixed(2), '4.32');
         assert.notEqual(siege(54, STD).toFixed(2), '4.86');
-        assert.match(EV, /var siege = \(r\.ev \/ 100\) \* runden;/,
-            'die Rechnung ist nicht mehr Quote mal Runden');
-    });
-
-    it('und der Startwert erreicht auch, wer schon einmal hier war', () => {
-        /* Ein Startwert greift nur bei einem leeren Speicher. Wer den
-           Rechner vorher geöffnet hatte, trug die 9 in localStorage —
-           live nachgemessen nach dem Deploy: die Seite zeigte weiter 9.
-           Darunter ausgerechnet der Betreiber, der die Änderung
-           gemeldet hat; ohne den Schlüsselsprung hätte sich für ihn
-           nichts geändert. */
-        assert.match(EV, /var STORE\s*=\s*'ds_ev_wahl_v2'/,
-            'der Speicherschlüssel steht wieder auf v1 — dann behalten alte Besucher ihre 9');
+        assert.match(MC, /const siege\s*=\s*\(r\.ev \/ 100\) \* runden;/,
+            'die Rechnung im Meta Call ist nicht mehr Quote mal Runden');
+        assert.match(MC, /const runden = _settings\.rounds;/,
+            'die Rundenzahl kommt nicht aus den Turniereinstellungen — dann zeigt der '
+            + 'Block eine andere Zahl als die Kachel darüber');
     });
 
     it('bleibt aber änderbar — die Zahl ist ein Startwert, kein Gesetz', () => {
         // Wer neun Runden spielt, soll neun eintragen können, und die
-        // Eingabe soll den nächsten Besuch überleben.
-        assert.match(EV, /class="ds-number ds-ev-runden" type="number" min="1" max="20"/);
-        assert.match(EV, /merke\(\{ deck: deck, feld: feld, runden: runden \}\)/);
+        // Eingabe soll den nächsten Besuch überleben. Das Feld steht in
+        // den Turniereinstellungen und wird je Turniertyp gemerkt.
+        assert.match(MC, /id="mc-rounds"/, 'das Eingabefeld für die Runden fehlt');
+        assert.match(MC, /const TOURNAMENT_SETTINGS_KEY = 'metacall_tournament_settings_v1'/,
+            'die Eingabe überlebt den nächsten Besuch nicht mehr');
+    });
+
+    it('neun Runden verschieben auch das Punkteziel mit', () => {
+        /* Die Rundenzahl allein genügt nicht: 16 Punkte sind 5-2-1 aus
+           acht Runden, aus neun wären es 19 (6-2-1). Stünde die Leiter
+           nicht daneben, rechnete jemand mit neun Runden gegen ein
+           Achter-Ziel. */
+        assert.match(MC, /const MAJOR_DAY2_POINTS = \{ 8: 16, 9: 19 \};/);
     });
 });
 

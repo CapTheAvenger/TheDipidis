@@ -7119,9 +7119,34 @@ window.MetaCall = (function () {
             const k = normalize(r.deck_name);
             const share = parseEU(r.share_pct || '0');
             const w = _recencyWeight(_rowISO(r));
-            if (!labsRowsByDeck[k]) labsRowsByDeck[k] = { name: r.deck_name, share: 0, n: 0 };
+            if (!labsRowsByDeck[k]) {
+              labsRowsByDeck[k] = { name: r.deck_name, share: 0, n: 0,
+                                    partien: 0, antritte: 0, turniere: new Set() };
+            }
             labsRowsByDeck[k].share += share * w;
             labsRowsByDeck[k].n += w;
+
+            /* ── WIE VIELE PARTIEN DAVON AUF PAPIER GESPIELT WURDEN ──
+             *
+             * BESTELLT (Betreiber, 11.09.2026, §4): „8.757 Games" soll
+             * lesbar sein als „davon X online, Y Präsenzturniere".
+             *
+             * RAH, NICHT GEWICHTET. `w` ist ein Aktualitätsgewicht für
+             * die ANTEILSPROGNOSE — ein Turnier von vor drei Wochen
+             * zählt dort weniger. Eine Partie, die gespielt wurde, ist
+             * aber gespielt worden; sie mit 0,4 zu zählen wäre eine
+             * Zahl, die es nie gab. Die Prognose bleibt gewichtet, der
+             * Nenner darunter nicht.
+             *
+             * Die Zeilen sind an dieser Stelle bereits durch beide
+             * Format-Filter gelaufen (Datum und meta-Suffix), es sind
+             * also genau die Präsenzturniere des laufenden Formats. */
+            const _pW = parseFloat(r.wins   || '0') || 0;
+            const _pN = parseFloat(r.losses || '0') || 0;
+            const _pU = parseFloat(r.ties   || '0') || 0;
+            labsRowsByDeck[k].partien  += _pW + _pN + _pU;
+            labsRowsByDeck[k].antritte += parseInt(r.player_count || '0', 10) || 0;
+            if (_tid) labsRowsByDeck[k].turniere.add(_tid);
 
             // Phase α / β capture — collect per-(deck, tournament) data
             // for the active-meta presence / top-15 / recency-weighted
@@ -8988,8 +9013,43 @@ window.MetaCall = (function () {
     // 'N's Zoroark' with a curly apostrophe.
     const ov = _findByNormalized(_winRateOverrides, opponent);
     if (ov !== undefined && ov !== '') {
-      const pWin = Math.min(0.98, Math.max(0, ov / 100));
-      return { pWin, pTie: 0.02, pLoss: Math.max(0, 1 - pWin - 0.02), handEingestellt: true };
+      /* WAS DER NUTZER TIPPT, IST DIE ZAHL, DIE ER DANEBEN SIEHT
+         (11.09.2026).
+
+         Bis heute landete die getippte Zahl direkt als `pWin`, also als
+         Anteil an ALLEN Partien — waehrend die Spalte links daneben und
+         jede andere Quote dieses Reiters S/(S+N) zeigen, die
+         Unentschieden also herausrechnen. Wer 55 eintippte, weil links
+         55 % stand, bekam in der Begegnungsliste 56 % zurueck. Befund W2
+         vom 08.09.2026 hatte das gefunden und BESCHRIFTET statt
+         behoben — zwei Spaltenkoepfe mit zwei Konventionsnamen.
+
+         Das genuegt nicht mehr. Der Betreiber hat am 11.09.2026 die
+         eigene Matchup-Quote zum Hauptbedienelement des Meta Calls
+         bestellt, mit der ausdruecklichen Auflage, gemessene und
+         eigene Werte nie unklar zu vermischen. Eine Zeile, die
+         „deine Zahl 81,6 %" schreibt, wo 80 eingetippt wurde,
+         vermischt genau das.
+
+         Die getippte Zahl ist jetzt S/(S+N) — dieselbe Groesse wie
+         ueberall sonst. Der Unentschieden-Anteil daneben ist nur ein
+         Platzhalter: calcDay2 stellt jede Paarung ohnehin ueber
+         _mitPraesenzUnentschieden auf die gemessene
+         Praesenz-Unentschieden-Quote um, und diese Umstellung laesst
+         S/(S+N) unveraendert. Die eingetippte Quote kommt also
+         unveraendert bis in die Day-2-Rechnung durch.
+
+         WAS SICH DAMIT AENDERT: wer bisher 80 eintrug, rechnete mit
+         einer Siegwahrscheinlichkeit von 80 % je Partie; jetzt sind es
+         80 % der entschiedenen Partien, also rund 78 % je Partie. Die
+         Day-2-Zahl solcher Nutzer faellt um wenige Zehntel. Das ist die
+         Korrektur, nicht ihr Preis. */
+      const HAND_UNENTSCHIEDEN = 0.02;
+      const quote = Math.min(0.98, Math.max(0, ov / 100));   // S/(S+N)
+      const rest  = 1 - HAND_UNENTSCHIEDEN;
+      const pWin  = quote * rest;
+      return { pWin, pTie: HAND_UNENTSCHIEDEN, pLoss: Math.max(0, rest - pWin),
+               handEingestellt: true };
     }
     // Base meta rate — go through getBaseMatchup() so the Past-Meta
     // branch (labs-majors-only matchup matrix), the W3 major×online
@@ -10548,6 +10608,42 @@ window.MetaCall = (function () {
                 class="mc-personal-input${hasPersonal ? ' has-value' : ''}" data-deck="${esc(deck.name)}"
                 oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)">`;
     const onlineDisplay = isCustom ? '—' : _mcPct(deck.onlineShare, 2);
+    /* ── DER GEMESSENE ANTEIL STEHT JETZT UNTER DER PROGNOSE ────────
+     *
+     * BESTELLT (Betreiber, 11.09.2026, §5 und §12): „Die Oberfläche
+     * soll klar zwischen zwei Ebenen unterscheiden: AKTUELL BEOBACHTET
+     * und ERWARTET … Was sehen wir aktuell in den Daten? Was glaube
+     * ich, wird beim nächsten Turnier relevant sein?"
+     *
+     * Beide Zahlen gab es schon, aber nicht nebeneinander: die Prognose
+     * stand in der Spalte, der gemessene Online-Anteil versteckt in der
+     * aufklappbaren Detailzeile. Wer die Tabelle las, ohne aufzuklappen,
+     * sah eine Modellausgabe und hielt sie fuer die Messung — genau der
+     * Befund vom 18.08.2026, der dieser Spalte ihren Namen gegeben hat.
+     * Ein Spaltenname allein hat es nicht behoben; die Vergleichszahl
+     * musste danebenstehen.
+     *
+     * ES BLEIBT EINE ZELLE, KEINE SIEBTE SPALTE. Die Tabelle traegt auf
+     * dem Telefon eine Kartenansicht, deren Beschriftungen an der
+     * Spaltenposition haengen (css/meta-call.css:1630 ff.), dazu eine
+     * colgroup und einen Bild-Export, der die Spalten zeichnet. Eine
+     * Spalte einzufuegen haette alle drei stillschweigend verschoben.
+     *
+     * `ladderShare` liegt auf _shareList, nicht auf dem Feld: das Feld
+     * fuehrt nur die gerechneten Groessen. Fehlt der Eintrag (eigenes
+     * Deck), steht nichts da statt einer Null. */
+    const _sl = _shareList && _shareList.find(d => normalize(d.name) === normalize(deck.name));
+    const _gemessen = (_sl && Number.isFinite(_sl.ladderShare) && _sl.ladderShare > 0)
+      ? _sl.ladderShare : null;
+    const gemessenHtml = (isJunk || isCustom || _gemessen == null) ? '' :
+      `<span class="mc-share-gemessen" title="${esc(_mcIstDeutsch()
+        ? 'Der aktuell gemessene Online-Anteil dieses Decks — die Zahl, aus der die Prognose '
+          + 'darüber entsteht. Sie weicht bewusst ab: das Modell gewichtet sie mit '
+          + 'Turnier-Conversion, Trend und Format.'
+        : 'The currently measured online share of this deck — the number the forecast above is '
+          + 'built from. It differs by design: the model weights it with tournament conversion, '
+          + 'trend and format.')}">${esc(_mcIstDeutsch() ? 'gemessen ' : 'measured ')}${
+        _mcPct(_gemessen, 1)}</span>`;
     const intelHtml = (isJunk || isCustom) ? '' : _renderDeckBadge(deck.name);
     const k = normalize(deck.name);
     const expanded = _isDetailExpanded(k);
@@ -10564,7 +10660,7 @@ window.MetaCall = (function () {
         <span class="mc-deck-name">${label}</span>
         ${toggleHtml}
       </td>
-      <td class="mc-cell-online"><span class="mc-share-online">${onlineDisplay}</span></td>
+      <td class="mc-cell-online"><span class="mc-share-online">${onlineDisplay}</span>${gemessenHtml}</td>
       <td class="mc-cell-est">${personalCell}</td>
       <td class="mc-cell-final"><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${_mcPct(deck.finalShare, 2)}</span></td>
       <td class="mc-cell-players"><span class="mc-players-count">${zahlLokal(deck.count)}</span></td>
@@ -10959,9 +11055,10 @@ window.MetaCall = (function () {
       <datalist id="mc-my-deck-options">${options}</datalist>
     </div>
     <button class="mc-override-toggle" onclick="MetaCall._toggleOverrides()" id="mc-override-btn"
-            title="${esc(_wrZweiKonventionen(
-              'ohneUnentschieden', _wrKurzform(t('mc.colWrBlended')),
-              'mitUnentschieden',  _wrKurzform(t('mc.colManualWr'))))}">
+            title="${esc(_wrEineKonvention(
+              'ohneUnentschieden',
+              _wrKurzform(t('mc.colWrBlended')),
+              _wrKurzform(t('mc.colManualWr'))))}">
       ${t('mc.adjustWinRates')}
     </button>
     <div class="mc-brick-filter-wrap">
@@ -10988,7 +11085,7 @@ window.MetaCall = (function () {
     }
     const field = buildField().filter(d => d.name !== '_junk');
     const _titelGemischtZelle = _wrKonventionsTitel('ohneUnentschieden');
-    const _titelManuellZelle  = _wrKonventionsTitel('mitUnentschieden');
+    const _titelManuellZelle  = _wrKonventionsTitel('ohneUnentschieden');
     const rows  = field.map(deck => {
       const m   = getMatchup(_settings.myDeck, deck.name);
       const wr  = Math.round(_anzeigeQuote(m));
@@ -11002,9 +11099,12 @@ window.MetaCall = (function () {
         : '';
       /* Jede der beiden Zahlen traegt ihre Konvention selbst — der
          Spaltenkopf ist auf dem Telefon nicht mehr im Blick, wenn die
-         Zeile gelesen wird. Die Vorbelegung des Eingabefelds bleibt
-         `wr`, weil es keinen besseren Anhaltspunkt gibt; der Hinweis
-         sagt, dass die eingetippte Zahl anders gerechnet wird. */
+         Zeile gelesen wird. Seit dem 11.09.2026 ist es DIESELBE
+         Konvention: die getippte Zahl wird als S/(S+N) eingesetzt, so
+         wie die Zahl links daneben gerechnet ist (siehe getMatchup).
+         Die Vorbelegung des Eingabefelds ist deshalb nicht mehr nur der
+         beste verfuegbare Anhaltspunkt, sondern genau der Wert, den das
+         Feld ersetzt. */
       return `<tr>
         <td style="font-size:0.85rem;font-weight:600">${esc(deck.name)}${badge}</td>
         <td><span class="mc-wr-meta" title="${esc(_titelGemischtZelle)}" data-hinweis="${esc(_titelGemischtZelle)}">${wr}%</span></td>
@@ -11018,27 +11118,26 @@ window.MetaCall = (function () {
       </tr>`;
     }).join('');
 
-    /* ── ZWEI SPALTEN, ZWEI KONVENTIONEN (BEFUND W2, 08.09.2026) ──
+    /* ── ZWEI SPALTEN, EINE KONVENTION (seit 11.09.2026) ──
      *
-     * Beide Spalten hiessen „WR" und rechnen NICHT dasselbe:
+     * Befund W2 vom 08.09.2026 hatte hier zwei verschiedene Groessen
+     * gefunden — links S/(S+N), im Eingabefeld S/(S+N+U) — und sie
+     * beschriftet. Beschriften genuegt an einer Stelle nicht, an der
+     * der Nutzer eine Zahl EINGIBT: er liest links 55 %, tippt 55, und
+     * zwei Zeilen weiter steht 56 %. Die Ursache ist jetzt behoben
+     * (getMatchup setzt die getippte Zahl als S/(S+N) ein), und beide
+     * Spalten tragen denselben Konventionsnamen.
      *
-     *   „WR (gemischt)"  ist `_anzeigeQuote(m)` = pWin / (pWin + pLoss),
-     *                    also S/(S+N) — die Unentschieden sind heraus.
-     *   „Manuelle WR"    wird in `getMatchup` als pWin eingesetzt
-     *                    (`const pWin = Math.min(0.98, ov / 100)`, der
-     *                    Rest verteilt sich auf pTie 0,02 und pLoss),
-     *                    ist also S/(S+N+U).
-     *
-     * Wer 55 in das Feld tippt, weil links 55 % steht, verschiebt die
-     * Paarung deshalb um rund einen Punkt nach unten. Beide Koepfe
-     * behalten das Kuerzel — die Spalten sind schmal —, tragen aber
-     * jetzt Namen und Formel als Hinweis, und darueber steht ein Satz,
-     * der sagt, dass es zwei sind. */
+     * Der Satz darueber bleibt — er sagt jetzt, dass beide Spalten
+     * dieselbe Groesse meinen, und nennt sie. Ihn ersatzlos zu
+     * streichen hiesse, die Frage „rechnen die beiden dasselbe?" wieder
+     * unbeantwortet zu lassen. */
     const _titelGemischt = _wrKonventionsTitel('ohneUnentschieden');
-    const _titelManuell  = _wrKonventionsTitel('mitUnentschieden');
-    const _zweiKonv = _wrZweiKonventionen(
-      'ohneUnentschieden', _wrKurzform(t('mc.colWrBlended')),
-      'mitUnentschieden',  _wrKurzform(t('mc.colManualWr')));
+    const _titelManuell  = _wrKonventionsTitel('ohneUnentschieden');
+    const _zweiKonv = _wrEineKonvention(
+      'ohneUnentschieden',
+      _wrKurzform(t('mc.colWrBlended')),
+      _wrKurzform(t('mc.colManualWr')));
 
     return `
 <p style="font-size:0.78rem;color:#888;margin:10px 0 8px" title="${esc(_titelManuell)}" data-hinweis="${esc(_titelManuell)}">${t('mc.overrideHint')}</p>
@@ -11248,10 +11347,90 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
   }
 
   // ── Full Render ────────────────────────────────────────────
+  /* ── DER ABLAUF, ALS ABLAUF SICHTBAR ──────────────────────────────
+   *
+   * BEFUND (Betreiber, 11.09.2026, mit der Metagross-EV-Seite daneben):
+   * „auf der Metagross EV Seite sieht es ja viel viel besser aus und ist
+   * auch definitiv deutlich besser verständlich … Jetzt verstehe ich
+   * auch was das Feature soll, aber von unserer Seite war mir das nicht
+   * klar."
+   *
+   * Der Unterschied zwischen den beiden Seiten ist nicht die Rechnung.
+   * Die Vorlage rechnet dasselbe und hat sogar weniger Daten. Sie
+   * nummeriert nur ihre Schritte und schreibt über jeden einen Satz in
+   * Alltagssprache. Dieser Reiter hatte bis heute acht gleich
+   * aussehende Kacheln ohne Reihenfolge: „Turniereinstellungen",
+   * „Zusammensetzung des Metas", „Eigene Decks", „Mein Deck",
+   * „Ergebnis", „Empfohlene Decks". Jede für sich verständlich, keine
+   * sagt, dass sie aufeinander aufbauen — und genau das war die
+   * Information, die gefehlt hat.
+   *
+   * Die Kacheln bleiben, wo sie sind. Dazwischen stehen jetzt vier
+   * Überschriften, die sagen, an welcher Stelle des Ablaufs man ist und
+   * was der Schritt von einem will. */
+  /* Der Knopf, hinter dem die eigenen Quoten liegen — beim Namen
+     genannt, aber nicht abgeschrieben. Er heisst zur Laufzeit
+     t('mc.adjustWinRates'); eine Kopie davon im Quelltext waere nach
+     der naechsten Umbenennung ein Verweis auf einen Knopf, den es
+     nicht mehr gibt, und traegt ausserdem einen Hausnamen fuer eine
+     Quote in den angezeigten Text (Hausregel seit 02.09.2026,
+     tests/unit/test-w2-hausnamen.js). Der Pfeil am Ende gehoert zum
+     Knopf, nicht zu seinem Namen. */
+  function _mcKnopfQuoten() {
+    return String(t('mc.adjustWinRates') || '').replace(/[\u25b2\u25bc]/g, '').trim();
+  }
+
+  function _mcSchritt(n, titel, satz) {
+    return `
+  <div class="mc-schritt">
+    <span class="mc-schritt-nr" aria-hidden="true">${n}</span>
+    <div class="mc-schritt-text">
+      <h3 class="mc-schritt-titel">${esc(titel)}</h3>
+      <p class="mc-schritt-satz">${esc(satz)}</p>
+    </div>
+  </div>`;
+  }
+
+  function _mcSchritte() {
+    const d = _mcIstDeutsch();
+    return d ? [
+      { t: 'Das Turnier',
+        s: 'Wofür rechnest du? Turnierart, Rundenzahl und Datenbasis setzen den Rahmen für '
+         + 'alles darunter.' },
+      { t: 'Das Meta, das du erwartest',
+        s: 'Links steht, was das Modell für das nächste Turnier erwartet. In „Meine Schätzung" '
+         + 'trägst du deine eigene Erwartung ein — sie ersetzt die Prognose für dieses Deck. '
+         + 'Alles Weitere rechnet mit der Spalte „Final %".' },
+      { t: 'Dein Deck',
+        s: 'Wähle dein Deck. Unter „' + _mcKnopfQuoten() + '" kannst du jede Paarung selbst '
+         + 'setzen; daneben steht immer, was die gemessenen Daten sagen.' },
+      { t: 'Dein Ergebnis',
+        s: 'Erst deine erwartete ' + _evQuotenName() + ' gegen genau dieses Meta, dann die '
+         + 'Chance, aus dem Swiss aufzusteigen — und zum Schluss, welche Decks in diesem Meta '
+         + 'besser stünden.' },
+    ] : [
+      { t: 'The tournament',
+        s: 'What are you calculating for? Tournament type, round count and data window set the '
+         + 'frame for everything below.' },
+      { t: 'The meta you expect',
+        s: 'On the left is what the model expects for the next tournament. In "My estimate" you '
+         + 'enter your own expectation — it replaces the forecast for that deck. Everything '
+         + 'below works off the "Final %" column.' },
+      { t: 'Your deck',
+        s: 'Pick your deck. Under "' + _mcKnopfQuoten() + '" you can set any pairing yourself; '
+         + 'the measured number is always shown next to it.' },
+      { t: 'Your result',
+        s: 'First your expected ' + _evQuotenName() + ' against exactly this meta, then your '
+         + 'chance of making it out of the Swiss — and finally which decks would do better in '
+         + 'this meta.' },
+    ];
+  }
+
   function renderAll() {
     const container = document.getElementById('metaCallHost');
     if (!container || !_shareList) return;
     const field = buildField();
+    const _SCHRITTE = _mcSchritte();
     // Date-window control — duplicates the picker in Card Analysis so
     // users on the Meta Call tab can narrow the predictor's input
     // window without context-switching. Both inputs read/write the
@@ -11307,6 +11486,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     ${renderScenariosBar()}
     ${dateBanner}
   </div>
+  ${_inFrozenPastMode() ? '' : _mcSchritt(1, _SCHRITTE[0].t, _SCHRITTE[0].s)}
   ${_inFrozenPastMode() ? _renderFrozenSourceOnlyPanel() : _renderCombinedConfigPanel()}
   ${renderSettingsPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
@@ -11328,10 +11508,14 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
        weiter, und im sichtbaren Text steht davon kein Wort.
        Die Diagnose-Marken (Quelle, aktive Rotation) sind dabei
        ausgeblendet — sonst waere das derselbe Fehler wie oben. */ ''}
+  ${_inFrozenPastMode() ? '' : _mcSchritt(2, _SCHRITTE[1].t, _SCHRITTE[1].s)}
   ${_inFrozenPastMode() ? '' : renderPredictorBanner()}
   ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
+  ${_inFrozenPastMode() ? '' : _mcSchritt(3, _SCHRITTE[2].t, _SCHRITTE[2].s)}
   ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}
+  ${_inFrozenPastMode() ? '' : _mcSchritt(4, _SCHRITTE[3].t, _SCHRITTE[3].s)}
+  ${_inFrozenPastMode() ? '' : renderDeckGegenMetaPanel(field)}
   ${_inFrozenPastMode() ? '' : renderResultsPanel(field)}
   ${_inFrozenPastMode() ? renderFrozenSharePanel() : ''}
   ${_inFrozenPastMode() ? renderFrozenRecommendationsPanel() : renderRecommendationsPanel(field)}
@@ -11350,6 +11534,554 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     return _metaSource === 'past'
       && !!_pastMetaFormatKey
       && _isPastMetaFrozen(_pastMetaFormatKey);
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * DEIN DECK GEGEN DAS ERWARTETE META
+   * ═══════════════════════════════════════════════════════════════════
+   *
+   * BESTELLT (Betreiber, 11.09.2026, mit der Metagross-EV-Seite als
+   * Vorlage): „für das dein Deck gegen das Meta Feature kannst du noch
+   * mal ein umfassendes Rework machen … Jetzt verstehe ich auch was das
+   * Feature soll, aber von unserer Seite war mir das nicht klar."
+   *
+   * WAS FALSCH WAR, UND ES WAR NICHT DIE RECHNUNG
+   * ---------------------------------------------
+   * Der Block lag in js/ds-ev-rechner.js im Reiter „Aktuelles Meta" und
+   * gewichtete jede Paarung mit dem Anteil, den der Gegner im GEMESSENEN
+   * Online-Feld hat. Diese Zahl beantwortet die Frage „wie stünde ich,
+   * wenn heute Abend online gespielt würde". Die stellt vor einem
+   * Turnier niemand.
+   *
+   * Die Frage lautet: gegen das Meta, das ich DORT erwarte. Und genau
+   * diese Zahl steht in diesem Reiter seit jeher zwei Tabellen weiter
+   * oben — die Spalte „Final %", also Prognose oder, wo der Nutzer eine
+   * eigene Schätzung eingetragen hat, seine Schätzung. Sie war nur nie
+   * mit den Paarungen verrechnet.
+   *
+   * Hier wird deshalb keine neue Datenquelle angezapft und kein neues
+   * Modell gebaut. Verrechnet werden zwei Dinge, die beide schon da
+   * waren:
+   *
+   *     EV = Σ_i  w_i · q_i
+   *
+   *   w_i — der Anteil aus buildField(): erwartete Anteile, auf die
+   *         Gegner normiert, zu denen überhaupt eine Quote vorliegt.
+   *   q_i — getMatchup(meinDeck, Gegner) → _anzeigeQuote(), also
+   *         S/(S+N). Dieselbe Kette wie in der Begegnungsliste des
+   *         Ergebnisses: Papier/Online-Mischung (80/20), Predictor-5.3-
+   *         Schub, Journal-Beimischung, und ganz oben die von Hand
+   *         eingestellte Quote, wenn es eine gibt.
+   *
+   * DREI DINGE, DIE HIER BEWUSST NICHT PASSIEREN
+   * --------------------------------------------
+   * 1. „Sonstige" zählt nicht mit. Der Restposten ist kein Gegner,
+   *    sondern ein Eimer; seine Quote ist eine Modellannahme
+   *    (_junkWinRatePct). Eine Modellannahme mit 17 % Gewicht in eine
+   *    Zahl zu rechnen, die nach Messung aussieht, ist genau der
+   *    Fehler, den die Abdeckung daneben verhindern soll. Paarungen
+   *    ohne Messung fallen aus demselben Grund heraus — nicht mit 50 %
+   *    aufgefüllt, sondern weggelassen und in der Abdeckung genannt.
+   *
+   * 2. Das Band gilt nur für den gemessenen Teil. Var(EV) = Σ w_i²·Var_i
+   *    mit der Beta-Varianz aus js/matchup-glaettung.js; Zeilen, die der
+   *    Nutzer selbst gesetzt hat, tragen keine Varianz bei, weil es für
+   *    eine Behauptung keine Stichprobe gibt. Wie viel Gewicht auf
+   *    solchen Zeilen steht, sagt die Fußzeile — sonst stünde ein enges
+   *    Band unter einer Zahl, die zur Hälfte aus dem Bauch kommt.
+   *
+   * 3. Der Ausschnitt ändert nur die GEWICHTE, nie die Quoten. Und er
+   *    ändert auch nichts an der Day-2-Rechnung darunter: würde er die
+   *    Decks 9 bis 25 in den „Sonstige"-Eimer schieben, liefe die
+   *    Day-2-Zahl still über eine Modellannahme statt über gemessene
+   *    Paarungen. Der Ausschnitt sitzt deshalb an DIESEM Block und
+   *    nirgends sonst.
+   */
+
+  const EV_UMFANG_KEY = 'metacall_ev_umfang_v1';
+  const EV_TOP_N      = 8;
+  const EV_BAND_Z     = 1.96;   // ±1,96 SD ≈ 95 %
+  const EV_VORBEREITUNG_MAX = 3;
+
+  let _evUmfang = 'alle';   // 'alle' | 'top8' | 'einzel'
+  let _evEinzel = '';       // Deckname, nur bei 'einzel'
+
+  (function _evWahlLaden() {
+    try {
+      const w = JSON.parse(localStorage.getItem(EV_UMFANG_KEY) || 'null');
+      if (!w || typeof w !== 'object') return;
+      if (w.umfang === 'alle' || w.umfang === 'top8' || w.umfang === 'einzel') _evUmfang = w.umfang;
+      if (typeof w.einzel === 'string') _evEinzel = w.einzel;
+    } catch (_e) { /* kein Speicher, kein Problem */ }
+  }());
+
+  function _evWahlMerken() {
+    try {
+      localStorage.setItem(EV_UMFANG_KEY, JSON.stringify({ umfang: _evUmfang, einzel: _evEinzel }));
+    } catch (_e) { /* kein Speicher, kein Problem */ }
+  }
+
+  function _evL(de, en) { return _mcIstDeutsch() ? de : en; }
+
+  /* Der Hausname der Quote kommt zur Laufzeit aus
+     js/win-rate-konvention.js — abgeschrieben stünde hier irgendeine
+     der drei Konventionen, und welche, sähe niemand. */
+  function _evQuotenName() {
+    const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
+    return (W && typeof W.kurz === 'function') ? W.kurz('ohneUnentschieden') : 'S / (S + N)';
+  }
+  function _evQuotenKuerzel() {
+    const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
+    const k = (W && typeof W.kuerzel === 'function') ? W.kuerzel('ohneUnentschieden') : '';
+    return k || 'S / (S + N)';
+  }
+
+  /**
+   * Jede Zeile des erwarteten Feldes mit der Quote deines Decks dagegen.
+   * @param field Ergebnis von buildField()
+   */
+  function _evKandidaten(field) {
+    const meins = _settings.myDeck;
+    if (!meins || !Array.isArray(field)) return [];
+    return field
+      .filter(d => d && d.name && d.name !== '_junk'
+                && Number.isFinite(d.finalShare) && d.finalShare > 0)
+      .map(d => {
+        const m = getMatchup(meins, d.name) || {};
+        return {
+          name:      d.name,
+          feldAnteil: d.finalShare,
+          /* Woher der ANTEIL kommt — nicht zu verwechseln mit der
+             Herkunft der QUOTE weiter unten. Beides kann vom Nutzer
+             stammen, und beides muss getrennt ausgewiesen sein. */
+          anteilEigen: d.personalShare !== undefined,
+          quote:     _anzeigeQuote(m),
+          partien:   Number(m.partien) || 0,
+          hand:      !!m.handEingestellt,
+          eigene:    Number(m.eigene) || 0,
+          ohneMessung: !!m.ohneMessung,
+        };
+      })
+      .filter(k => k.hand || !k.ohneMessung);
+  }
+
+  function _evRechne(field) {
+    const alle = _evKandidaten(field);
+    if (!alle.length) return null;
+
+    let genommen = alle.slice().sort((a, b) => b.feldAnteil - a.feldAnteil);
+    if (_evUmfang === 'top8') {
+      genommen = genommen.slice(0, EV_TOP_N);
+    } else if (_evUmfang === 'einzel') {
+      const ziel = normalize(_evEinzel || (genommen[0] && genommen[0].name) || '');
+      genommen = genommen.filter(k => normalize(k.name) === ziel);
+    }
+
+    const summe = genommen.reduce((s, k) => s + k.feldAnteil, 0);
+    if (!genommen.length || summe <= 0) return null;
+    genommen.forEach(k => { k.gewicht = k.feldAnteil / summe; });
+
+    const ev = genommen.reduce((s, k) => s + k.gewicht * k.quote, 0);
+
+    /* Das Band. Die gemischte Quote trägt keine Bilanz mit sich, wohl
+       aber ihren Nenner (`partien`). Die Beta-Varianz wird deshalb aus
+       Quote × Nenner gebildet — dieselbe Streuung, die eine Bilanz
+       dieser Größe hätte. Das ist eine Näherung und wird als solche in
+       der Fußzeile genannt; die Alternative wäre gar kein Band, und ein
+       Erwartungswert ohne Streuung ist die unehrlichere Zahl. */
+    const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;
+    let varSumme = 0;
+    let ohneBand = 0;
+    genommen.forEach(k => {
+      const messbar = !k.hand && k.partien > 0 && G && typeof G.varianz === 'function';
+      if (!messbar) { k.varianz = null; ohneBand += k.gewicht; return; }
+      const q = k.quote / 100;
+      k.varianz = G.varianz(q * k.partien, (1 - q) * k.partien);
+      varSumme += k.gewicht * k.gewicht * k.varianz;
+    });
+    const sd = Math.sqrt(varSumme) * 100;
+
+    /* Abdeckung IMMER gegen das ganze erwartete Feld, „Sonstige"
+       eingeschlossen — sonst behauptet die Zahl eine Vollständigkeit,
+       die nur aus der eigenen Auswahl stammt. */
+    const feldSumme = field.reduce(
+      (s, d) => s + ((d && Number.isFinite(d.finalShare)) ? d.finalShare : 0), 0);
+
+    genommen.forEach(k => { k.beitrag = k.gewicht * (k.quote - 50); });
+
+    return {
+      deck:      _settings.myDeck,
+      ev, sd,
+      unten:     Math.max(0, ev - EV_BAND_Z * sd),
+      oben:      Math.min(100, ev + EV_BAND_Z * sd),
+      zeilen:    genommen,
+      gegner:    genommen.length,
+      abdeckung: feldSumme > 0 ? (summe / feldSumme) * 100 : 0,
+      partien:   genommen.reduce((s, k) => s + (k.hand ? 0 : k.partien), 0),
+      ohneBand:  ohneBand * 100,
+      eigene:    genommen.filter(k => k.hand).length,
+      umfang:    _evUmfang,
+    };
+  }
+
+  /* Die zwei Zeilen über der Tabelle. Sortiert wird nach `beitrag` =
+     Anteil × (Quote − 50) — die Größe beantwortet „welche Paarung zieht
+     mein Ergebnis am stärksten", also genau die Vorbereitungsfrage.
+     Gezeigt wird sie nie: der Betreiber hat sie am 11.09.2026 als Spalte
+     abgelehnt („trägt bei … versteh ich nicht, brauch ich nicht"), und
+     zu Recht — eine Zahl mit zwei Nachkommastellen sagt niemandem
+     etwas. Was dasteht, sind die zwei Zahlen, die jeder versteht. */
+  /* Die Spalte „gegen 50 %" — dieselbe Zahl wie daneben, nur als
+     Abstand zur Mitte. Sie traegt keine neue Information und soll auch
+     keine: eine Tabelle mit fuenf schmalen Spalten auf 1.300 px laesst
+     den Leser die Zeilen nicht vergleichen, weil 54,9 und 38,8 in
+     derselben Schriftgroesse nebeneinanderstehen. Der Balken macht den
+     Unterschied sichtbar, ohne eine zweite Groesse einzufuehren.
+
+     Die Skala ist FEST (±EV_BALKEN_SPANNE Punkte) und nicht auf das
+     jeweils groesste Deck normiert. Eine mitwachsende Skala haette
+     dieselbe Paarung je nach Deckwahl mal halb und mal ganz gefuellt
+     gezeigt — dann misst der Balken die Nachbarschaft und nicht die
+     Paarung. Was darueber hinausgeht, stoesst sichtbar an den Rand;
+     der Hinweis am Spaltenkopf sagt es. */
+  const EV_BALKEN_SPANNE = 25;
+
+  function _evBalken(quote) {
+    const d = Math.max(-EV_BALKEN_SPANNE, Math.min(EV_BALKEN_SPANNE, quote - 50));
+    const breite = (Math.abs(d) / EV_BALKEN_SPANNE) * 50;   // % der halben Spur
+    const seite = d >= 0 ? 'left: 50%;' : 'right: 50%;';
+    const klasse = d >= 0 ? 'is-pos' : 'is-neg';
+    return `<span class="mc-ev-spur" aria-hidden="true">`
+         + `<span class="mc-ev-mitte"></span>`
+         + `<span class="mc-ev-balken ${klasse}" style="${seite} width: ${breite.toFixed(1)}%"></span>`
+         + `</span>`;
+  }
+
+  function _evVorbereitungHtml(zeilen) {
+    if (!zeilen || !zeilen.length) return '';
+    const satz = (liste) => liste.map(z =>
+      `<strong>${esc(z.name)}</strong> (${esc(_evQuotenKuerzel())} ${_mcNum(z.quote, 0)}${_mcPz()}, `
+      + `${_mcNum(z.gewicht * 100, 1)}${_mcPz()})`).join(', ');
+
+    const nachBeitrag = zeilen.slice().sort((a, b) => b.beitrag - a.beitrag);
+    const schlecht = nachBeitrag.filter(z => z.beitrag < 0).slice(-EV_VORBEREITUNG_MAX).reverse();
+    const gut      = nachBeitrag.filter(z => z.beitrag > 0).slice(0, EV_VORBEREITUNG_MAX);
+
+    const teile = [];
+    if (schlecht.length) {
+      teile.push(`<p class="mc-ev-zeile mc-ev-warauf"><span class="mc-ev-zeile-label">`
+        + esc(_evL('Darauf vorbereiten', 'Prepare for these')) + `</span> ${satz(schlecht)}</p>`);
+    }
+    if (gut.length) {
+      teile.push(`<p class="mc-ev-zeile mc-ev-laeuft"><span class="mc-ev-zeile-label">`
+        + esc(_evL('Das läuft für dich', 'These run in your favour')) + `</span> ${satz(gut)}</p>`);
+    }
+    if (!teile.length) return '';
+    teile.push(`<p class="mc-ev-fuss">` + esc(_evL(
+      'In Klammern: ' + _evQuotenKuerzel() + ' gegen dieses Deck und wie oft du ihm in dem Meta '
+        + 'begegnest, das du erwartest. Sortiert danach, wie stark die Paarung dein Ergebnis '
+        + 'zieht — also beides zusammen, nicht nur die Quote.',
+      'In brackets: ' + _evQuotenKuerzel() + ' against that deck and how often you meet it in the '
+        + 'meta you expect. Sorted by how strongly the pairing pulls your result — both '
+        + 'together, not one of the two alone.')) + `</p>`);
+    return teile.join('');
+  }
+
+  /* Woher die QUOTE dieser Zeile kommt. Vier Fälle, vier Wörter — §17
+     der Bestellung: „Keine dieser Kategorien darf unklar vermischt
+     werden." */
+  function _evHerkunft(z) {
+    if (z.hand) {
+      return { text: _evL('deine Zahl', 'your number'), klasse: 'is-eigen',
+               titel: _evL('Von dir unter „' + _mcKnopfQuoten() + '" eingetragen. Sie ersetzt die '
+                           + 'gemessene Quote vollständig und trägt kein Unsicherheitsband.',
+                           'Entered by you under "' + _mcKnopfQuoten() + '". It replaces the '
+                           + 'measured rate entirely and carries no uncertainty band.') };
+    }
+    if (z.eigene > 0) {
+      return { text: _evL('gemessen + Journal', 'measured + journal'), klasse: 'is-journal',
+               titel: _evL('Gemessene Quote, bayesianisch mit deinen ' + z.eigene
+                           + ' Journalpartien gemischt (Meta als 30-Partien-Vorwissen).',
+                           'Measured rate, blended Bayesian-style with your ' + z.eigene
+                           + ' journal games (meta as a 30-game prior).') };
+    }
+    return { text: _evL('gemessen', 'measured'), klasse: 'is-gemessen',
+             titel: _evL('Papier und Online gemischt (80 / 20), geglättet; der Nenner steht '
+                         + 'in der Spalte daneben.',
+                         'Paper and online blended (80 / 20), smoothed; the denominator is in '
+                         + 'the column next to it.') };
+  }
+
+  function _evUmfangZeile(r) {
+    if (_evUmfang === 'top8') {
+      return (r && r.gegner < EV_TOP_N)
+        ? _evL('Nur ' + r.gegner + ' Gegner haben Paarungen mit diesem Deck — mehr gibt es nicht.',
+               'Only ' + r.gegner + ' opponents have pairings with this deck — there are no more.')
+        : _evL('Was-wäre-wenn für einen harten Tisch: nur die ' + EV_TOP_N + ' größten Gegner '
+               + 'deines erwarteten Metas, untereinander gewichtet.',
+               'What-if for a hard table: only the ' + EV_TOP_N + ' largest opponents of the meta '
+               + 'you expect, weighted among themselves.');
+    }
+    if (_evUmfang === 'einzel') {
+      return _evL('Eine einzelne Paarung — kein Turnierschnitt, sondern die Quote gegen genau '
+                  + 'dieses Deck.',
+                  'A single pairing — not a tournament average, but the rate against exactly '
+                  + 'this deck.');
+    }
+    return _evL('Alle Gegner deines erwarteten Metas, zu denen Paarungen vorliegen — jeder mit '
+                + 'dem Anteil aus „Final %" weiter oben.',
+                'Every opponent of the meta you expect that we have pairings for — each weighted '
+                + 'by its "Final %" share above.');
+  }
+
+  function renderDeckGegenMetaPanel(field) {
+    if (_inFrozenPastMode()) return '';
+    const titel = _evL('Dein Deck gegen das Meta, das du erwartest',
+                       'Your deck vs. the meta you expect');
+
+    if (!_settings.myDeck) {
+      return `
+<div class="metacall-panel mc-ev-panel">
+  <div class="metacall-panel-title">${esc(titel)}</div>
+  <p class="mc-ev-lead">${esc(_evL(
+    'Wähle oben dein Deck — dann steht hier die ' + _evQuotenName() + ', mit der du über ein '
+    + 'ganzes Turnier rechnen kannst. Nicht gegen ein Deck, sondern gegen alle auf einmal, '
+    + 'jedes mit dem Anteil, den du in Schritt 2 erwartest.',
+    'Pick your deck above — then this shows the ' + _evQuotenName() + ' to expect across a whole '
+    + 'tournament. Not against one deck, but against all of them at once, each weighted by the '
+    + 'share you set in step 2.'))}</p>
+</div>`;
+    }
+
+    const r = _evRechne(field);
+    if (!r) {
+      return `
+<div class="metacall-panel mc-ev-panel">
+  <div class="metacall-panel-title">${esc(titel)}</div>
+  <p class="mc-ev-lead">${esc(_evL(
+    'Zu ' + _settings.myDeck + ' liegt gegen keinen einzigen Gegner deines erwarteten Metas eine '
+    + 'gemessene Paarung vor. Trage unter „' + _mcKnopfQuoten() + '" eigene Quoten ein, dann '
+    + 'rechnet die Seite damit — und schreibt daneben, dass die Zahlen von dir kommen.',
+    'There is not a single measured pairing for ' + _settings.myDeck + ' against the meta you '
+    + 'expect. Enter your own rates under "' + _mcKnopfQuoten() + '" and the page will use '
+    + 'them — and say next to the result that the numbers are yours.'))}</p>
+</div>`;
+    }
+
+    const runden = _settings.rounds;
+    const siege  = (r.ev / 100) * runden;
+    const sUnten = (r.unten / 100) * runden;
+    const sOben  = (r.oben / 100) * runden;
+
+    /* Auswahlliste für „Nur ein Deck": dieselben Gegner, die auch
+       gerechnet werden — sonst steht in der Liste ein Deck, das nach
+       der Auswahl ein leeres Ergebnis gibt. */
+    const wahlListe = _evKandidaten(field).slice().sort((a, b) => b.feldAnteil - a.feldAnteil);
+    const einzelAktiv = _evEinzel || (wahlListe[0] && wahlListe[0].name) || '';
+    const einzelHtml = (_evUmfang !== 'einzel') ? '' : `
+    <select class="mc-ev-einzel" onchange="MetaCall._onEvEinzelDeck(this.value)"
+            aria-label="${esc(_evL('Gegner-Deck', 'Opponent deck'))}">
+      ${wahlListe.map(k => `<option value="${esc(k.name)}"${
+        normalize(k.name) === normalize(einzelAktiv) ? ' selected' : ''}>${esc(k.name)}</option>`).join('')}
+    </select>`;
+
+    const pille = (id, text) => `<button type="button" class="mc-ev-pille${
+      _evUmfang === id ? ' is-aktiv' : ''}" onclick="MetaCall._setEvUmfang('${id}')">${esc(text)}</button>`;
+
+    const umfangHtml = `
+  <div class="mc-ev-umfang">
+    <span class="mc-ev-umfang-label">${esc(_evL('Gegen welchen Ausschnitt?', 'Against which part?'))}</span>
+    ${pille('alle',  _evL('Ganzes erwartetes Meta', 'The whole expected meta'))}
+    ${pille('top8',  _evL('Nur die ' + EV_TOP_N + ' größten', 'Only the ' + EV_TOP_N + ' largest'))}
+    ${pille('einzel', _evL('Nur ein Deck', 'A single deck'))}
+    ${einzelHtml}
+  </div>
+  <p class="mc-ev-umfang-note">${esc(_evUmfangZeile(r))}</p>`;
+
+    /* Eine dünne Rechnung sieht aus wie eine dicke. Der Vorbehalt hängt
+       an der Rolle über der Zahl, nicht in einer Fußnote — die liest
+       niemand, der die Zahl schon gelesen hat. */
+    const EV_MIN_PARTIEN   = 30;
+    const EV_MIN_ABDECKUNG = 25;
+    const duenn = (r.partien > 0 && r.partien < EV_MIN_PARTIEN)
+               || (r.abdeckung > 0 && r.abdeckung < EV_MIN_ABDECKUNG);
+    const duennText = duenn ? _evL(' · dünne Grundlage', ' · thin basis') : '';
+
+    const bandText = (r.sd > 0)
+      ? _evL('Band ' + _mcNum(r.unten, 1) + ' bis ' + _mcNum(r.oben, 1) + ' %',
+             'band ' + _mcNum(r.unten, 1) + ' to ' + _mcNum(r.oben, 1) + '%')
+      : _evL('kein Band — keine der gerechneten Quoten ist gemessen',
+             'no band — none of the rates used is measured');
+
+    const kacheln = `
+  <div class="mc-ev-kacheln">
+    <div class="mc-ev-kachel ${r.ev >= 50 ? 'is-pos' : 'is-neg'}${duenn ? ' is-duenn' : ''}">
+      <span class="mc-ev-rolle">${esc(_evL('gegen dein erwartetes Meta', 'against the meta you expect') + duennText)}</span>
+      <span class="mc-ev-label">${esc(_evL('Erwartete ', 'Expected ') + _evQuotenName())}</span>
+      <span class="mc-ev-wert">${_mcNum(r.ev, 1)}<span class="mc-ev-einheit">${_mcPz()}</span></span>
+      <span class="mc-ev-kontext">${esc(bandText)}</span>
+    </div>
+    <div class="mc-ev-kachel">
+      <span class="mc-ev-rolle">${esc(_evL('bei ' + runden + ' Runden', 'over ' + runden + ' rounds'))}</span>
+      <span class="mc-ev-label">${esc(_evL('Erwartete Siege', 'Expected wins'))}</span>
+      <span class="mc-ev-wert">${_mcNum(siege, 1)}</span>
+      <span class="mc-ev-kontext">${esc(_evL(
+        _mcNum(sUnten, 1) + ' bis ' + _mcNum(sOben, 1) + ' Siege · Runden × Quote, kein Turniermodell',
+        _mcNum(sUnten, 1) + ' to ' + _mcNum(sOben, 1) + ' wins · rounds × rate, not a tournament model'))}</span>
+    </div>
+    <div class="mc-ev-kachel">
+      <span class="mc-ev-rolle">${esc(_evL('Wovon die Zahl kommt', 'What the number rests on'))}</span>
+      <span class="mc-ev-label">${esc(_evL('Abdeckung des erwarteten Metas', 'Coverage of the expected meta'))}</span>
+      <span class="mc-ev-wert">${_mcNum(r.abdeckung, 0)}<span class="mc-ev-einheit">${_mcPz()}</span></span>
+      <span class="mc-ev-kontext">${esc(_evL(
+        r.gegner + ' Gegner-Decks · ' + zahlLokal(r.partien) + ' gezählte Matches'
+          + (r.eigene ? ' · ' + r.eigene + ' Quote(n) von dir' : ''),
+        r.gegner + ' opponent decks · ' + zahlLokal(r.partien) + ' games counted'
+          + (r.eigene ? ' · ' + r.eigene + ' rate(s) from you' : '')))}</span>
+    </div>
+  </div>`;
+
+    /* Die Spaltennamen an EINER Stelle: der Kopf und das Etikett an der
+       Zelle (fuer die Kartenansicht auf dem Telefon) muessen dasselbe
+       sagen, sonst heisst dieselbe Spalte je nach Bildschirmbreite
+       anders. */
+    const S = {
+      deck:     _evL('Gegner-Deck', 'Opponent deck'),
+      wieOft:   _evL('wie oft', 'how often'),
+      quote:    _evQuotenKuerzel(),
+      balken:   _evL('gegen 50 %', 'vs. 50%'),
+      herkunft: _evL('Herkunft', 'Source'),
+      matches:  _evL('Matches', 'Games'),
+    };
+
+    /* Sortiert nach „wie oft". Eine Sortierung, deren Schlüssel nicht in
+       der Tabelle steht, sieht aus wie keine — wer am stärksten zieht,
+       steht in den zwei Zeilen darüber. */
+    const zeilen = r.zeilen.slice().sort((a, b) => b.gewicht - a.gewicht).map(z => {
+      const h = _evHerkunft(z);
+      const wrCls = z.quote >= 55 ? 'is-gut' : z.quote <= 45 ? 'is-schlecht' : '';
+      /* data-label traegt den Spaltennamen an der Zelle selbst. Auf dem
+         Telefon faellt der Tabellenkopf weg und jede Zeile wird zur
+         Karte; ohne das Etikett stuenden dort vier nackte Zahlen. Es an
+         der Zelle zu fuehren statt im Stylesheet ist der Unterschied
+         zwischen „die Beschriftung folgt der Spalte" und „die
+         Beschriftung folgt der Position" — die zweite Sorte ist genau
+         die, die hier schon einmal fremde Namen angezeigt hat. */
+      return `<tr class="${(!z.hand && z.partien > 0 && z.partien < 20) ? 'is-duenn' : ''}">
+        <td class="mc-ev-td-deck"><span class="mc-ev-deckzelle">${_mcIconHtml(z.name)}<span class="mc-ev-deckwort">${esc(z.name)}</span>${
+          z.anteilEigen ? `<span class="mc-ev-eigen-punkt" title="${esc(_evL(
+            'Anteil von dir gesetzt („Meine Schätzung")', 'Share set by you ("My estimate")'))}">●</span>` : ''}</span></td>
+        <td class="mc-ev-num" data-label="${esc(S.wieOft)}">${_mcNum(z.gewicht * 100, 1)}${_mcPz()}</td>
+        <td class="mc-ev-num ${wrCls}" data-label="${esc(S.quote)}">${_mcNum(z.quote, 1)}${_mcPz()}</td>
+        <td class="mc-ev-td-balken" data-label="${esc(S.balken)}">${_evBalken(z.quote)}</td>
+        <td class="mc-ev-td-quelle" data-label="${esc(S.herkunft)}"><span class="mc-ev-quelle ${h.klasse}" title="${esc(h.titel)}">${esc(h.text)}</span></td>
+        <td class="mc-ev-num" data-label="${esc(S.matches)}">${z.hand ? '—' : zahlLokal(z.partien)}</td>
+      </tr>`;
+    }).join('');
+
+    const tabelle = `
+  <div class="mc-ev-tabelle-wrap">
+    <table class="mc-ev-tabelle">
+      <thead><tr>
+        <th>${esc(S.deck)}</th>
+        <th class="mc-ev-num" title="${esc(_evL(
+          'Anteil unter den Gegnern, mit denen hier gerechnet wird — auf 100 % normiert, weil '
+          + 'Paarungen ohne Daten weggelassen statt mit 50 % aufgefüllt werden.',
+          'Share among the opponents this calculation uses — normalised to 100 % because pairings '
+          + 'without data are left out rather than filled in at 50 %.'))}">${esc(S.wieOft)}</th>
+        <th class="mc-ev-num" title="${esc(_evL(
+          _evQuotenName() + ' deines Decks gegen diesen Gegner. Ein 3-0 zählt hier nicht als 100 %.',
+          _evQuotenName() + ' of your deck against this opponent. A 3-0 does not count as 100 % here.'))}">${
+          esc(S.quote)}</th>
+        <th title="${esc(_evL(
+          'Dieselbe Quote als Abstand zur 50. Die Skala reicht bis ±' + EV_BALKEN_SPANNE
+            + ' Punkte; was darüber hinausgeht, stößt an den Rand.',
+          'The same rate as a distance from 50. The scale runs to ±' + EV_BALKEN_SPANNE
+            + ' points; anything beyond hits the edge.'))}">${esc(S.balken)}</th>
+        <th title="${esc(_evL('Woher diese Quote kommt.', 'Where this rate comes from.'))}">${
+          esc(S.herkunft)}</th>
+        <th class="mc-ev-num" title="${esc(_evL(
+          'Gezählte Matches hinter dieser Quote.', 'Games counted behind this rate.'))}">${
+          esc(S.matches)}</th>
+      </tr></thead>
+      <tbody>${zeilen}</tbody>
+    </table>
+  </div>`;
+
+    const eigenSatz = (r.ohneBand >= 1)
+      ? ' ' + _evL(_mcNum(r.ohneBand, 0) + ' % des Gewichts stehen auf Quoten, die du selbst gesetzt '
+                   + 'hast oder hinter denen keine gezählten Matches stehen; für die rechnet die '
+                   + 'Seite keine Unsicherheit, das Band ist deshalb eher zu schmal.',
+                   _mcNum(r.ohneBand, 0) + '% of the weight rests on rates you set yourself or '
+                   + 'that have no games counted behind them; no uncertainty is computed for '
+                   + 'those, so the band is narrow rather than wide.')
+      : '';
+
+    const fuss = _evL(
+      'Gerechnet wird <strong>Anteil × ' + _evQuotenName() + '</strong>, aufsummiert über alle Gegner '
+      + 'deines erwarteten Metas, zu denen eine Quote vorliegt. Die Anteile sind die Spalte '
+      + '„Final %" aus der Zusammensetzung oben — also Prognose, oder deine Schätzung, wo du eine '
+      + 'eingetragen hast. Die Quoten kommen aus derselben Kette wie die Begegnungsliste im '
+      + 'Ergebnis: Papier und Online gemischt (80 / 20), geglättet, mit deinem Journal und deinen '
+      + 'eigenen Werten. „Sonstige" und Paarungen ohne Daten bleiben draußen und werden nicht mit '
+      + '50 % aufgefüllt — darum steht die Abdeckung daneben. Das Band ist ±1,96 '
+      + 'Standardabweichungen aus der Streuung der einzelnen Paarungen; es nimmt die Anteile als '
+      + 'bekannt an.' + eigenSatz,
+      'The sum is <strong>share × ' + _evQuotenName() + '</strong> over every opponent of the meta you '
+      + 'expect that we have a rate for. The shares are the "Final %" column of the composition '
+      + 'above — the forecast, or your estimate where you entered one. The rates come from the '
+      + 'same chain as the encounter list in the results: paper and online blended (80 / 20), '
+      + 'smoothed, with your journal and your own values. "Others" and pairings without data are '
+      + 'left out, not filled in at 50 % — which is why coverage is stated. The band is ±1.96 '
+      + 'standard deviations from the spread of the individual pairings; it treats the shares as '
+      + 'known.' + eigenSatz);
+
+    return `
+<div class="metacall-panel mc-ev-panel">
+  <div class="metacall-panel-title">${esc(titel)}
+    <span class="mc-ev-deckname">${_mcIconHtml(_settings.myDeck)}${esc(_settings.myDeck)}</span>
+  </div>
+  <p class="mc-ev-lead">${esc(_evL(
+    'Die Heatmap sagt, wer wen schlägt. Hier steht, was daraus für dich folgt: jede Paarung deines '
+    + 'Decks, gewichtet mit dem Anteil, den du für dieses Turnier erwartest — nicht mit dem, was '
+    + 'online gerade gespielt wird.',
+    'The heatmap says who beats whom. This says what that means for you: every pairing of your '
+    + 'deck, weighted by the share you expect at this tournament — not by what is being played '
+    + 'online right now.'))}</p>
+  ${umfangHtml}
+  ${kacheln}
+  ${_evVorbereitungHtml(r.zeilen)}
+  ${tabelle}
+  <p class="mc-ev-fuss">${fuss}</p>
+</div>`;
+  }
+
+  function _setEvUmfang(id) {
+    if (id !== 'alle' && id !== 'top8' && id !== 'einzel') return;
+    _evUmfang = id;
+    _evWahlMerken();
+    _evPanelNeu();
+  }
+
+  function _onEvEinzelDeck(name) {
+    _evEinzel = String(name || '');
+    _evWahlMerken();
+    _evPanelNeu();
+  }
+
+  /* Nur diesen einen Block neu zeichnen. renderAll() würde den ganzen
+     Reiter ersetzen und dabei jeden offenen Eingabefokus mitnehmen —
+     derselbe Befund wie am 07.09.2026 bei „Meine Schätzung". */
+  function _evPanelNeu() {
+    const container = document.getElementById('metaCallHost');
+    if (!container || !_shareList) return;
+    const alt = container.querySelector('.mc-ev-panel');
+    if (!alt) { renderAll(); return; }
+    const tmp = document.createElement('div');
+    tmp.innerHTML = renderDeckGegenMetaPanel(buildField());
+    const neu = tmp.querySelector('.mc-ev-panel');
+    if (neu) alt.innerHTML = neu.innerHTML;
   }
 
   // Recommendations panel — top N decks ranked by Day-2 probability
@@ -12395,6 +13127,53 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
           + `${fmt(broughtPct, 1)} % ${t('mc.intelTop8BroughtSuffix')}`
       ));
     }
+    /* ── WIE VIELE PARTIEN, UND WO GESPIELT (11.09.2026) ────────────
+     *
+     * BESTELLT (§4): die blosse Partienzahl soll aufgeschluesselt sein
+     * nach Online und Praesenz. Beides liegt vor und wird hier zum
+     * ersten Mal nebeneinandergestellt:
+     *
+     *   online   = Siege + Niederlagen + Unentschieden aus
+     *              data/limitless_online_decks.csv (kumulativ seit
+     *              Formatbeginn, dieselbe Erhebung wie der
+     *              Online-Anteil in der Kachel darueber)
+     *   praesenz = dieselbe Summe aus den Zeilen von
+     *              data/labs_tournament_decks.csv, die beide
+     *              Format-Filter passiert haben — also genau die
+     *              Praesenzturniere des laufenden Formats.
+     *
+     * WAS DIE KACHEL NICHT TUT: die beiden Zahlen addieren und als eine
+     * ausgeben. Sie sind nicht dieselbe Groesse — auf Papier enden rund
+     * 11 % der Partien unentschieden, online rund 1,3 %, und ein
+     * Praesenzturnier wiegt in jeder Hinsicht anders als eine
+     * Online-Runde. Eine Summe daraus waere eine dritte Zahl, die
+     * nirgends gemessen wurde. Sie stehen deshalb nebeneinander, jede
+     * mit ihrem Ort.
+     *
+     * Fehlt eine der beiden Quellen, steht nur die andere da — und
+     * dann auch nur mit ihrem Namen, nie als „gesamt". */
+    const _onlineB = _onlineBilanzByDeck && _onlineBilanzByDeck[k];
+    const _labsB   = _labsRowsByDeck && _labsRowsByDeck[k];
+    const _pOnline = _onlineB ? (_onlineB.s + _onlineB.n + (_onlineB.u || 0)) : 0;
+    const _pPapier = (_labsB && Number.isFinite(_labsB.partien)) ? Math.round(_labsB.partien) : 0;
+    if (_pOnline > 0 || _pPapier > 0) {
+      const _de = _mcIstDeutsch();
+      const _tz = (_labsB && _labsB.turniere && _labsB.turniere.size) || 0;
+      const _tzWort = _de ? (_tz === 1 ? 'Turnier' : 'Turniere') : (_tz === 1 ? 'event' : 'events');
+      const _papierText = _pPapier > 0
+        ? zahlLokal(_pPapier) + (_de ? ' auf Präsenzturnieren' : ' at in-person events')
+          + (_tz ? ' (' + _tz + ' ' + _tzWort + ')' : '')
+        : (_de ? 'keine Präsenzpartien im laufenden Format'
+               : 'no in-person games in the current format');
+      tiles.push(_intelStatTile(
+        _de ? 'Gezählte Partien im Format' : 'Games counted this format',
+        _pOnline > 0
+          ? zahlLokal(_pOnline) + (_de ? ' online' : ' online')
+          : zahlLokal(_pPapier) + (_de ? ' Präsenz' : ' in person'),
+        _pOnline > 0 ? _papierText : ''
+      ));
+    }
+
     /* ── DER TREND LIEST DIESELBE UHR WIE DER ANTEIL ────────────────
      *
      * BEFUND (05.09.2026, beim Ansehen der ausgelieferten Seite): neben
@@ -12616,30 +13395,42 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     return String(text == null ? '' : text).replace(_WR_HAUSNAME, 'WR');
   }
 
-  /* Zwei Konventionen NEBENEINANDER — der Satz, der sagt, dass es zwei
-     sind. Auf Papier enden rund 11 % der Partien unentschieden
-     (684 von 6.192 in data/labs_tournament_matchups_TEF-PBL.csv),
-     online rund 1,3 % (2.322 von 180.414 in
-     data/limitless_online_decks.csv). Zwei Quoten nebeneinander, von
-     denen die eine die Unentschieden im Nenner fuehrt und die andere
-     nicht, unterscheiden sich deshalb um mehrere Punkte, ohne dass
-     eines der beiden Decks besser gespielt haette. Ohne diesen Satz
-     liest sich der Abstand als Spielstaerke. */
-  function _wrZweiKonventionen(idA, wasA, idB, wasB) {
+  /* Zwei Spalten, die DIESELBE Groesse meinen, und der Satz, der das
+     sagt.
+     -----------------------------------------------------------------
+     Hier stand bis zum 11.09.2026 _wrZweiKonventionen — der Satz, dass
+     die beiden Spalten der Override-Tabelle VERSCHIEDENE Konventionen
+     fuehren (links S/(S+N), im Eingabefeld S/(S+N+U)). Das war die
+     Antwort auf Befund W2 vom 08.09.2026: der Unterschied wurde
+     beschriftet statt behoben. An einer Stelle, an der der Nutzer eine
+     Zahl EINGIBT, genuegt das nicht — er liest links 55 %, tippt 55,
+     und zwei Zeilen weiter steht 56 %. getMatchup setzt die getippte
+     Zahl deshalb jetzt als S/(S+N) ein, und die Frage „meinen die
+     beiden dasselbe?" hat eine andere Antwort.
+
+     Sie bleibt eine Frage, die beantwortet werden muss: auf Papier
+     enden rund 11 % der Partien unentschieden (684 von 6.192 in
+     data/labs_tournament_matchups_TEF-PBL.csv), online rund 1,3 %
+     (2.322 von 180.414 in data/limitless_online_decks.csv). Zwischen
+     zwei Quoten, von denen die eine die Unentschieden im Nenner fuehrt
+     und die andere nicht, liegen deshalb mehrere Punkte, ohne dass
+     eines der Decks besser gespielt haette.
+
+     Der Name der Konvention kommt zur Laufzeit aus
+     js/win-rate-konvention.js — abgeschrieben waere er nach der
+     naechsten Umbenennung still falsch. */
+  function _wrEineKonvention(id, wasA, wasB) {
     const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
     if (!W) return '';
-    const kA = W.hol(idA), kB = W.hol(idB);
-    if (!kA || !kB) return '';
-    const de = _mcIstDeutsch();
-    return de
-      ? wasA + ': ' + W.kurz(idA) + ' (' + kA.formel + ') · '
-        + wasB + ': ' + W.kurz(idB) + ' (' + kB.formel + '). '
-        + 'Zwei verschiedene Konventionen — der Abstand zwischen ihnen ist '
-        + 'zum Teil eine Einheitenfrage, nicht Spielstaerke.'
-      : wasA + ': ' + W.kurz(idA) + ' (' + kA.formel + ') · '
-        + wasB + ': ' + W.kurz(idB) + ' (' + kB.formel + '). '
-        + 'Two different conventions — part of the gap between them is a '
-        + 'question of units, not of play strength.';
+    const k = W.hol(id);
+    if (!k) return '';
+    const name = W.kurz(id);
+    return _mcIstDeutsch()
+      ? `${wasA} und ${wasB} meinen dieselbe Größe: ${name} (${k.formel}). `
+        + 'Was du einträgst, ist genau die Zahl, die links daneben steht — '
+        + 'Unentschieden zählen in beiden nicht mit.'
+      : `${wasA} and ${wasB} mean the same thing: ${name} (${k.formel}). `
+        + 'What you enter is exactly the number shown next to it — ties count in neither.';
   }
 
   /* Dieselbe Aussage als Zeile fuer ein geteiltes Bild: dort gibt es
@@ -12896,6 +13687,18 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       tmp.innerHTML = renderResultsPanel(field);
       const newPanel = tmp.querySelector('.metacall-panel');
       if (newPanel) resultsWrap.innerHTML = newPanel.innerHTML;
+    }
+    /* Der EV-Block haengt am selben Feld wie die Day-2-Zahl: aendert
+       sich eine erwartete Anteilszahl oben, aendert sich hier das
+       Gewicht jeder Paarung. Ohne diese Zeilen stuende die erwartete
+       Siegquote auf dem Feld von vorhin, direkt neben einer Day-2-Zahl,
+       die schon das neue kennt. */
+    const evPanel = container.querySelector('.mc-ev-panel');
+    if (evPanel) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = renderDeckGegenMetaPanel(field);
+      const neu = tmp.querySelector('.mc-ev-panel');
+      if (neu) evPanel.innerHTML = neu.innerHTML;
     }
     // Recommendations panel — re-runs calcRecommendations with the
     // updated field. Day-2 numbers shift whenever the field shifts so
@@ -15214,6 +16017,10 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _onPersonalShare,
     _onWrOverride,
     _onBrickFilter,
+    _setEvUmfang,
+    _onEvEinzelDeck,
+    /* Nur fuer Tests und Konsole: die Rechnung ohne Darstellung. */
+    _evRechne: (field) => _evRechne(field || buildField()),
     _toggleOverrides,
     _toggleGroup,
     _toggleGroupField,

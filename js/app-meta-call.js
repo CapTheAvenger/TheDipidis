@@ -1143,6 +1143,91 @@ window.MetaCall = (function () {
   let _journalStats     = {};  // opponent -> {wins, losses, ties, total, winRate}
 
   const TOP_N = 25;              // show top N decks; everything else rolls into Junk
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * WELCHE DECKS EINZELN IM FELD STEHEN
+   * ═══════════════════════════════════════════════════════════════════
+   *
+   * BESTELLT (Betreiber, 11.09.2026, §3 mit der Metagross-EV-Seite als
+   * Vorlage): „Die Deck-Auswahl soll deutlich visueller und intuitiver
+   * werden … Deck erkennen → Share verstehen → Datenbasis verstehen →
+   * Erwartung definieren."
+   *
+   * Bis dahin war das Feld fest: die groessten TOP_N Decks bekamen eine
+   * eigene Zeile, alles andere fiel in den Restposten. Wer ein Deck
+   * loswerden wollte, das er auf seinem Turnier nicht erwartet, konnte
+   * nur seine Schaetzung auf 0 setzen — und selbst dann stand es weiter
+   * in der Tabelle.
+   *
+   * `null` heisst: die Voreinstellung, also genau das bisherige
+   * Verhalten. Ein Set heisst: der Nutzer hat ausgewaehlt. Diese
+   * Unterscheidung ist wichtiger, als sie aussieht — eine leere Auswahl
+   * ist eine gueltige Wahl („keine Decks einzeln, alles in den
+   * Restposten") und darf nicht als „noch nichts gewaehlt" gelesen
+   * werden.
+   *
+   * WAS ABWAEHLEN WIRKLICH TUT: das Deck verschwindet nicht aus dem
+   * Turnier, es wandert in den Restposten. Dessen Quote ist eine
+   * Sammelgroesse (_junkWinRatePct) und keine gemessene Paarung. Je
+   * mehr dort landet, desto mehr steht die Day-2-Zahl auf einer
+   * Schaetzung — deshalb sagt die Zeile unter der Auswahl, wie viel
+   * Prozent des Metas gerade im Restposten sitzt, und der EV-Block
+   * laesst den Restposten ganz draussen und meldet es als Abdeckung. */
+  const FELD_AUSWAHL_KEY = 'metacall_feldauswahl_v1';
+  const FELD_VORWAHLEN   = [8, 16, 25];
+  let _feldAuswahl = null;   // null | Set<string>
+  let _feldSuche   = '';
+  let _feldAlle    = false;  // Kachelraster ganz ausgeklappt?
+  /* Was buildField() beim letzten Lauf tun musste. Gelesen von der
+     Summenzeile unter der Tabelle — eine stille Kuerzung ist genau die
+     Sorte Zahl, die niemand nachprueft, solange sie niemand sieht. */
+  let _feldBilanz  = null;
+
+  (function _feldAuswahlLaden() {
+    try {
+      const roh = JSON.parse(localStorage.getItem(FELD_AUSWAHL_KEY) || 'null');
+      if (roh && Array.isArray(roh.decks)) _feldAuswahl = new Set(roh.decks.map(String));
+    } catch (_e) { /* kein Speicher, kein Problem */ }
+  }());
+
+  function _feldAuswahlMerken() {
+    try {
+      if (!_feldAuswahl) localStorage.removeItem(FELD_AUSWAHL_KEY);
+      else localStorage.setItem(FELD_AUSWAHL_KEY, JSON.stringify({ decks: [..._feldAuswahl] }));
+    } catch (_e) { /* kein Speicher, kein Problem */ }
+  }
+
+  /** Alle Decks, normiert auf 100 % und nach gemessenem Anteil sortiert. */
+  function _feldSortiert() {
+    if (!_shareList) return [];
+    const summe = _shareList.reduce((s, d) => s + d.onlineShare, 0) || 1;
+    return [..._shareList]
+      .map(d => ({ name: d.name, onlineShare: (d.onlineShare / summe) * 100 }))
+      .sort((a, b) => b.onlineShare - a.onlineShare);
+  }
+
+  /**
+   * Die eine Stelle, an der entschieden wird, wer eine eigene Zeile
+   * bekommt und wer in den Restposten faellt. buildField() und
+   * _junkWinRatePct() muessen DIESELBE Antwort bekommen — sonst
+   * beschreibt die Sammelquote einen anderen Topf als den, der im Feld
+   * steht, und niemand sieht es.
+   */
+  function _feldTeilung(sortiert) {
+    const liste = sortiert || _feldSortiert();
+    if (!_feldAuswahl) {
+      return { genannt: liste.slice(0, TOP_N), rest: liste.slice(TOP_N) };
+    }
+    const genannt = [], rest = [];
+    liste.forEach(d => { (_feldAuswahl.has(d.name) ? genannt : rest).push(d); });
+    return { genannt, rest };
+  }
+
+  /** Kennung der aktuellen Auswahl — fuer den Zwischenspeicher der Restquote. */
+  function _feldAuswahlSchluessel() {
+    return _feldAuswahl ? [..._feldAuswahl].sort().join('\u0001') : '*';
+  }
+
   const MAX_CUSTOM = 10;         // max custom decks the user can add
   const SCENARIOS_STORAGE_KEY = 'metacall_scenarios_v1';
   const PREDICTOR_LOG_KEY      = 'metacall_predictor_log_v1';
@@ -8660,6 +8745,11 @@ window.MetaCall = (function () {
    */
   let _junkWrCacheQuelle = null;
   let _junkWrCacheWert = null;
+  /* Die Deckauswahl gehoert in den Zwischenspeicher-Schluessel: sie
+     aendert, welche Decks im Restposten sitzen, ohne _shareList
+     anzufassen. Ohne diese Zeile bliebe die Sammelquote nach einer
+     Umwahl auf dem Wert des alten Topfes stehen. */
+  let _junkWrCacheSchluessel = null;
   /* DER SAMMELPOSTEN TRUG ALS EINZIGE ZEILE KEINEN NENNER
      (05.09.2026, Abnahme). 24 von 25 Zeilen der Begegnungsliste
      bekamen ihre Partienzahl, "Sonstige" nicht — und auch keinen
@@ -8668,16 +8758,32 @@ window.MetaCall = (function () {
      der Top N, also zaehlt hier die Zahl dieser Decks. */
   let _junkDeckZahl = 0;
   function _junkWinRatePct() {
-    if (_junkWrCacheQuelle === _shareList && _junkWrCacheWert != null) {
+    /* ── DIE SAMMELQUOTE BESCHREIBT DEN TOPF, DER WIRKLICH DA IST ──
+     *
+     * Hier stand bis zum 11.09.2026 `slice(TOP_N)` — der Restposten war
+     * fest die Menge hinter den groessten 25. Seit der Nutzer selbst
+     * waehlen kann, welche Decks einzeln im Feld stehen (§3 der
+     * Bestellung), ist das nicht mehr dieselbe Menge: waehlt er acht
+     * Decks, sitzen 108 im Restposten, und eine Quote, die nur die
+     * hinteren 91 beschreibt, waere eine Zahl ueber einen anderen Topf
+     * als den, der im Feld steht. Gesehen haette das niemand — sie
+     * bleibt in ihrem plausiblen Bereich.
+     *
+     * _feldTeilung ist deshalb die EINE Stelle, die entscheidet, und
+     * buildField wie diese Funktion fragen sie beide. */
+    const schluessel = _feldAuswahlSchluessel();
+    if (_junkWrCacheQuelle === _shareList
+        && _junkWrCacheSchluessel === schluessel
+        && _junkWrCacheWert != null) {
       return _junkWrCacheWert;
     }
     _junkDeckZahl = 0;
     let wert = _settings.junkWinRate;
     try {
-      if (Array.isArray(_shareList) && _shareList.length > TOP_N) {
-        const rest = [..._shareList]
-          .sort((a, b) => (b.onlineShare || 0) - (a.onlineShare || 0))
-          .slice(TOP_N)
+      if (Array.isArray(_shareList) && _shareList.length) {
+        const restNamen = new Set(_feldTeilung().rest.map(d => d.name));
+        const rest = _shareList
+          .filter(d => restNamen.has(d.name))
           .filter(d => (d.onlineShare || 0) > 0 && (d.onlineWinPct || 0) > 0);
         const gewicht = rest.reduce((s, d) => s + d.onlineShare, 0);
         if (gewicht > 0 && rest.length >= 5) {
@@ -8690,6 +8796,7 @@ window.MetaCall = (function () {
       }
     } catch (_e) { /* Rueckfall bleibt die Voreinstellung */ }
     _junkWrCacheQuelle = _shareList;
+    _junkWrCacheSchluessel = schluessel;
     _junkWrCacheWert = wert;
     return wert;
   }
@@ -9099,13 +9206,14 @@ window.MetaCall = (function () {
     if (!_shareList) return [];
 
     // Normalize online shares so the full list sums to 100
-    const totalOnline = _shareList.reduce((s, d) => s + d.onlineShare, 0) || 1;
-    const sorted = [..._shareList]
-      .map(d => ({ name: d.name, onlineShare: (d.onlineShare / totalOnline) * 100 }))
-      .sort((a, b) => b.onlineShare - a.onlineShare);
+    const sorted = _feldSortiert();
 
-    const topDecks  = sorted.slice(0, TOP_N);
-    const restDecks = sorted.slice(TOP_N);
+    /* Wer eine eigene Zeile bekommt, entscheidet _feldTeilung — die
+       Voreinstellung sind weiter die groessten TOP_N, aber der Nutzer
+       kann seit dem 11.09.2026 selbst waehlen. */
+    const teilung   = _feldTeilung(sorted);
+    const topDecks  = teilung.genannt;
+    const restDecks = teilung.rest;
     const restShare = restDecks.reduce((s, d) => s + d.onlineShare, 0);
 
     // Baseline allocation
@@ -9126,21 +9234,47 @@ window.MetaCall = (function () {
     const customs = _customDecks.filter(c => c && c.name && Number(c.share) > 0);
     customs.forEach(c => { junk -= Number(c.share); });
 
-    // Junk slider = minimum floor (pulls from non-overridden top decks if needed)
+    /* Junk slider = minimum floor (pulls from non-overridden top decks if needed).
+       ── DER ANTEIL EINES DECKS KANN NICHT UNTER NULL FALLEN ──────────
+       BEFUND (11.09.2026, beim Nachmessen der Summenzeile): wer sich
+       vertippt und zwei Decks auf je 60 % setzt, schickt `junk` auf
+       −90,4. Diese Bedingung ist dann `0 > −90,4` und damit wahr — der
+       Block lief, obwohl der Schieber auf 0 steht, und zog den
+       Fehlbetrag OHNE Untergrenze von den uebrigen Decks ab. Gemessen:
+       „Prognose −20,0 %" in der Summenzeile, und in der Tabelle stand
+       fuer einzelne Decks ein negativer „Final %"-Wert. Der Block
+       darunter, der genau dafuer eine Untergrenze hat, kam nie dran,
+       weil `junk` schon auf 0 stand.
+       Zwei Aenderungen: der Block laeuft nur noch, wenn der Schieber
+       wirklich einen Boden verlangt, und er klemmt wie sein
+       Gegenstueck bei 0. */
     const junkFloor = Math.max(0, Math.min(100, Number(_settings.junkPct) || 0));
-    if (junkFloor > junk) {
+    if (junkFloor > 0 && junkFloor > junk) {
       const needed = junkFloor - junk;
       const nonOv  = topDecks.filter(d => _personalShares[d.name] === undefined);
       const nonOvSum = nonOv.reduce((s, d) => s + alloc[d.name], 0);
       if (nonOvSum > 0) {
-        nonOv.forEach(d => { alloc[d.name] -= (alloc[d.name] / nonOvSum) * needed; });
+        nonOv.forEach(d => {
+          alloc[d.name] = Math.max(0, alloc[d.name] - (alloc[d.name] / nonOvSum) * needed);
+        });
       }
       junk = junkFloor;
     }
 
-    // Cap negative junk (user over-allocated) by reducing non-overridden top decks
+    /* Cap negative junk (user over-allocated) by reducing non-overridden top decks.
+       ── UND SAGEN, DASS ES PASSIERT IST (11.09.2026) ──────────────────
+       Betreiber, §6 der Bestellung: „Wenn die Nutzerwerte zusammen nicht
+       100 % ergeben, soll das System klar darauf reagieren … Nicht
+       stillschweigend falsche Werte weiterrechnen."
+       Bis heute lief genau das still: wer sich vertippt und 40 statt 4
+       eintraegt, sieht in „Final %" fuer JEDES andere Deck eine Zahl,
+       die er nie eingestellt hat, ohne einen Hinweis darauf, woher sie
+       kommt. Gekuerzt wird weiter — ein Feld, das 112 % ergibt, ist kein
+       Feld —, aber die Summenzeile unter der Tabelle sagt es jetzt. */
+    let gekuerztUm = 0;
     if (junk < 0) {
       const overshoot = -junk;
+      gekuerztUm = overshoot;
       const nonOv     = topDecks.filter(d => _personalShares[d.name] === undefined);
       const nonOvSum  = nonOv.reduce((s, d) => s + alloc[d.name], 0);
       if (nonOvSum > 0) {
@@ -9150,6 +9284,58 @@ window.MetaCall = (function () {
       }
       junk = 0;
     }
+
+    /* ── EIN FELD KANN NUR 100 % HABEN ────────────────────────────────
+     *
+     * Nach den beiden Kuerzungen oben steht `junk` auf 0 und jedes nicht
+     * selbst gesetzte Deck ebenfalls — aber die EIGENEN Eintraege sind
+     * unangetastet. Traegt jemand zwei Decks mit je 60 % ein, summiert
+     * sich das Feld auf 120 %. Gemessen am 11.09.2026: die
+     * Begegnungserwartung sprang auf 1,2 Gegner je Runde, calcDay2
+     * rechnete mit Wahrscheinlichkeiten ueber eins, und die Spielerzahl
+     * der Tabelle ergab 3.240 bei 2.700 Teilnehmern.
+     *
+     * §6 der Bestellung laesst drei Wege zu und verlangt den fachlich
+     * saubersten. Er ist die proportionale Normierung: sie haelt das
+     * VERHAELTNIS, das der Nutzer ausgedrueckt hat („doppelt so viel
+     * Dragapult wie Basic Box"), und stellt nur die Einheit richtig. Die
+     * beiden Alternativen sind schlechter — die Eingabe abzulehnen
+     * verwirft eine Aussage, die er gerade erst getroffen hat, und sie
+     * unnormiert weiterzurechnen liefert Zahlen, die nirgends stimmen.
+     *
+     * Und weil eine Normierung, die man nicht sieht, dasselbe ist wie
+     * ein Fehler, steht sie in der Summenzeile — mit der Zahl, die er
+     * eingetragen hat, und der, mit der gerechnet wird. */
+    let normiertVon = 0;
+    const vorNormierung = topDecks.reduce((sum, d) => sum + alloc[d.name], 0)
+      + customs.reduce((sum, c) => sum + Number(c.share), 0) + junk;
+    if (vorNormierung > 100.05) {
+      const faktor = 100 / vorNormierung;
+      normiertVon = vorNormierung;
+      topDecks.forEach(d => { alloc[d.name] *= faktor; });
+      customs.forEach(c => { c._normiert = Number(c.share) * faktor; });
+      junk *= faktor;
+    }
+
+    _feldBilanz = {
+      normiertVon,
+      eingetragen: topDecks.reduce(
+        (sum, d) => sum + (_personalShares[d.name] !== undefined ? _personalShares[d.name] : 0), 0)
+        + customs.reduce((sum, c) => sum + Number(c.share), 0),
+      genannt    : topDecks.length,
+      gesamt     : sorted.length,
+      /* Der gemessene Anteil der genannten Decks — die Zahl, die sagt,
+         wie viel des Metas ueberhaupt eine eigene Paarung bekommt. */
+      abgedeckt  : topDecks.reduce((s, d) => s + d.onlineShare, 0),
+      eigenZahl  : topDecks.filter(d => _personalShares[d.name] !== undefined).length,
+      summeEigen : topDecks.reduce(
+        (s, d) => s + (_personalShares[d.name] !== undefined ? alloc[d.name] : 0), 0),
+      summeModell: topDecks.reduce(
+        (s, d) => s + (_personalShares[d.name] === undefined ? alloc[d.name] : 0), 0),
+      summeCustom: customs.reduce((s, c) => s + Number(c.share), 0),
+      junk       : junk,
+      gekuerztUm : gekuerztUm,
+    };
 
     // Assemble field
     const field = [];
@@ -9165,12 +9351,16 @@ window.MetaCall = (function () {
 
     customs.forEach(c => {
       const share = Number(c.share);
+      /* `personalShare` bleibt die EINGETRAGENE Zahl — sie steht im
+         Eingabefeld und darf sich nicht unter dem Cursor aendern.
+         `finalShare` ist die gerechnete, also die normierte. */
+      const gerechnet = Number.isFinite(c._normiert) ? c._normiert : share;
       field.push({
         name         : c.name,
         onlineShare  : 0,
         personalShare: share,
-        finalShare   : share,
-        count        : Math.round(_settings.totalPlayers * share / 100),
+        finalShare   : gerechnet,
+        count        : Math.round(_settings.totalPlayers * gerechnet / 100),
         isCustom     : true,
       });
     });
@@ -10944,7 +11134,274 @@ window.MetaCall = (function () {
       <tbody>${rows}</tbody>
     </table>
   </div>
+  ${_feldSummeHtml()}
 </div>`;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * SCHRITT 2a — DIE DECK-AUSWAHL
+   * ═══════════════════════════════════════════════════════════════════
+   *
+   * BESTELLT (§3): „Die Deck-Auswahl soll deutlich visueller und
+   * intuitiver werden … Pokémon-Sprite, Deckname, aktueller beobachteter
+   * Meta Share, relevante Game-Anzahl. Das Ziel ist die gleiche
+   * Klarheit: Deck erkennen → Share verstehen → Datenbasis verstehen →
+   * Erwartung definieren."
+   *
+   * Die Kacheln zeigen NUR gemessene Zahlen: den beobachteten
+   * Online-Anteil und die Partien, auf denen er beruht. Die Prognose und
+   * die eigene Schaetzung stehen eine Tabelle weiter unten — hier geht
+   * es um die Frage davor, „wem begegne ich ueberhaupt", und die
+   * beantwortet man an der Messung, nicht am Modell.
+   */
+
+  const FELD_KACHELN_KURZ = 36;   // ohne Ausklappen sichtbare Kacheln
+
+  function _feldKachelPartien(name) {
+    const k = normalize(name);
+    const b = _onlineBilanzByDeck && _onlineBilanzByDeck[k];
+    if (!b) return 0;
+    return (b.s || 0) + (b.n || 0) + (b.u || 0);
+  }
+
+  function renderDeckAuswahlPanel() {
+    if (_inFrozenPastMode() || !_shareList) return '';
+    const de = _mcIstDeutsch();
+    const L = (d, e) => (de ? d : e);
+
+    const sortiert = _feldSortiert();
+    const teilung  = _feldTeilung(sortiert);
+    const gewaehlt = new Set(teilung.genannt.map(d => d.name));
+    const abgedeckt = teilung.genannt.reduce((s, d) => s + d.onlineShare, 0);
+    const rest      = Math.max(0, 100 - abgedeckt);
+
+    const suche = _feldSuche.trim().toLowerCase();
+    const gefiltert = suche
+      ? sortiert.filter(d => d.name.toLowerCase().includes(suche))
+      : sortiert;
+    const sichtbar = (_feldAlle || suche) ? gefiltert : gefiltert.slice(0, FELD_KACHELN_KURZ);
+
+    const pille = (id, text, aktiv) =>
+      `<button type="button" class="mc-feld-pille${aktiv ? ' is-aktiv' : ''}"
+               onclick="MetaCall._setFeldVorwahl('${id}')">${esc(text)}</button>`;
+
+    /* „Top 8" ist genau dann aktiv, wenn die Auswahl die groessten acht
+       IST — nicht, wenn sie acht Decks umfasst. Ein Nutzer, der acht
+       beliebige Decks waehlt, soll keine Pille leuchten sehen, die
+       etwas anderes behauptet. */
+    const istVorwahl = (n) => {
+      if (!_feldAuswahl) return n === TOP_N;
+      if (_feldAuswahl.size !== n) return false;
+      return sortiert.slice(0, n).every(d => _feldAuswahl.has(d.name));
+    };
+    const istAlle  = !!_feldAuswahl && _feldAuswahl.size === sortiert.length;
+    const istKeine = !!_feldAuswahl && _feldAuswahl.size === 0;
+
+    const pillen = FELD_VORWAHLEN.map(n =>
+      pille(String(n), L('Top ' + n, 'Top ' + n), istVorwahl(n))).join('')
+      + pille('alle', L('Alle ' + sortiert.length, 'All ' + sortiert.length), istAlle)
+      + pille('keine', L('Keine', 'None'), istKeine);
+
+    /* DIE ZAHL AUF DER KACHEL IST DIE GEMESSENE, NICHT DIE PROGNOSE.
+       `d.onlineShare` traegt nach dem Praediktorlauf die Modellausgabe
+       (siehe die Notiz bei `d.onlineShare = d.predictedShare`) — genau
+       die Verwechslung, die dieser Spalte am 18.08.2026 ihren Namen
+       gekostet hat. §3 der Bestellung verlangt hier ausdruecklich den
+       „aktuellen beobachteten Meta Share"; der steht auf `ladderShare`.
+       Die REIHENFOLGE und die Vorwahl „Top 8" bleiben auf der Prognose,
+       damit die Auswahl dieselbe Rangfolge hat wie die Tabelle
+       darunter. */
+    const gemessenVon = {};
+    (_shareList || []).forEach(d => {
+      if (Number.isFinite(d.ladderShare)) gemessenVon[normalize(d.name)] = d.ladderShare;
+    });
+
+    const kacheln = sichtbar.map(d => {
+      const an = gewaehlt.has(d.name);
+      const partien = _feldKachelPartien(d.name);
+      const gemessen = gemessenVon[normalize(d.name)];
+      return `
+      <button type="button" class="mc-feld-kachel${an ? ' is-an' : ''}"
+              role="checkbox" aria-checked="${an ? 'true' : 'false'}"
+              onclick="MetaCall._toggleFeldDeck('${escJs(d.name)}')">
+        <span class="mc-feld-haken" aria-hidden="true">${an ? '✓' : ''}</span>
+        <span class="mc-feld-bild">${_mcIconHtml(d.name)}</span>
+        <span class="mc-feld-text">
+          <span class="mc-feld-name">${esc(d.name)}</span>
+          <span class="mc-feld-zahlen">${esc(L('gemessen ', 'measured '))}${
+            Number.isFinite(gemessen) ? _mcPct(gemessen, 1) : '—'}${
+            partien > 0 ? ' · ' + zahlLokal(partien) + ' ' + L('Partien', 'games') : ''}</span>
+        </span>
+      </button>`;
+    }).join('');
+
+    const mehr = (!_feldAlle && !suche && gefiltert.length > FELD_KACHELN_KURZ)
+      ? `<button type="button" class="mc-feld-mehr" onclick="MetaCall._feldAlleZeigen()">${
+          esc(L('alle ' + gefiltert.length + ' Decks zeigen',
+                'show all ' + gefiltert.length + ' decks'))}</button>`
+      : '';
+
+    const leer = sichtbar.length ? '' :
+      `<p class="mc-feld-leer">${esc(L('Kein Deck mit diesem Namen.', 'No deck by that name.'))}</p>`;
+
+    /* Was das Abwaehlen kostet, in einer Zeile. Ohne sie sieht der
+       Nutzer nur, dass die Tabelle kuerzer wird — nicht, dass die
+       Day-2-Zahl dafuer auf einer Sammelquote statt auf gemessenen
+       Paarungen steht. */
+    const restWarnung = rest >= 30
+      ? ` <strong class="mc-feld-warnung">${esc(L(
+          'Das ist viel: für „Sonstige" gibt es keine gemessenen Paarungen, sondern nur eine '
+          + 'Sammelquote. Die Day-2-Zahl darunter steht damit zu einem großen Teil auf einer '
+          + 'Schätzung.',
+          'That is a lot: "Others" has no measured pairings, only a pooled rate. The Day-2 number '
+          + 'below then rests largely on an estimate.'))}</strong>`
+      : '';
+
+    const bilanz = `${esc(L(
+      teilung.genannt.length + ' von ' + sortiert.length + ' Decks stehen einzeln im Feld · '
+        + 'zusammen ' + _mcNum(abgedeckt, 1) + ' % des prognostizierten Metas · „Sonstige" '
+        + _mcNum(rest, 1) + ' %',
+      teilung.genannt.length + ' of ' + sortiert.length + ' decks are listed individually · '
+        + _mcNum(abgedeckt, 1) + '% of the forecast meta between them · "Others" '
+        + _mcNum(rest, 1) + '%'))}${restWarnung}`;
+
+    return `
+<div class="metacall-panel mc-feld-auswahl-panel">
+  <div class="metacall-panel-title">${esc(L('Welche Decks erwartest du?', 'Which decks do you expect?'))}</div>
+  <p class="mc-feld-lead">${esc(L(
+    'Jedes gewählte Deck bekommt eine eigene Zeile in der Tabelle darunter und eine eigene '
+    + 'Paarung in der Rechnung. Was du abwählst, verschwindet nicht aus dem Turnier — es wandert '
+    + 'in „Sonstige", und dort steht nur noch eine Sammelquote statt gemessener Paarungen.',
+    'Every deck you pick gets its own row in the table below and its own pairing in the '
+    + 'calculation. What you unpick does not vanish from the tournament — it moves into "Others", '
+    + 'where only a pooled rate remains instead of measured pairings.'))}</p>
+  <div class="mc-feld-leiste">
+    ${pillen}
+    <input type="search" class="mc-feld-suche" value="${esc(_feldSuche)}"
+           placeholder="${esc(L('Deck suchen…', 'Search decks…'))}"
+           aria-label="${esc(L('Deck suchen', 'Search decks'))}"
+           oninput="MetaCall._onFeldSuche(this.value)">
+  </div>
+  <p class="mc-feld-bilanz">${bilanz}</p>
+  <div class="mc-feld-raster">${kacheln}</div>
+  ${leer}
+  ${mehr}
+</div>`;
+  }
+
+  /** Die Summenzeile unter der Feldtabelle — §6 der Bestellung. */
+  function _feldSummeHtml() {
+    const b = _feldBilanz;
+    if (!b) return '';
+    const de = _mcIstDeutsch();
+    const L = (d, e) => (de ? d : e);
+    const summe = b.summeEigen + b.summeModell + b.summeCustom + b.junk;
+
+    const teile = [
+      L('Summe ', 'Total ') + _mcNum(summe, 1) + _mcPz(),
+      (b.eigenZahl > 0 || b.summeCustom > 0)
+        ? L('deine Schätzungen ', 'your estimates ')
+          + _mcNum(b.summeEigen + b.summeCustom, 1) + _mcPz()
+        : '',
+      L('Prognose ', 'forecast ') + _mcNum(b.summeModell, 1) + _mcPz(),
+      L('Sonstige ', 'Others ') + _mcNum(b.junk, 1) + _mcPz(),
+    ].filter(Boolean);
+
+    /* Der Fall, den §6 meint. Zwei Stufen, weil zwei verschiedene Dinge
+       passiert sein koennen — und beide sind fuer den Leser unsichtbar,
+       wenn es hier nicht steht. */
+    let warnung = '';
+    if (b.normiertVon > 100.05) {
+      warnung = `<span class="mc-feld-summe-warnung">${esc(L(
+        'Deine Einträge ergeben zusammen ' + _mcNum(b.eingetragen, 1) + ' %, das Feld damit '
+        + _mcNum(b.normiertVon, 1) + ' %. Mehr als 100 % kann ein Turnierfeld nicht haben — '
+        + 'alle Anteile sind deshalb proportional auf 100 % heruntergerechnet. Dein Verhältnis '
+        + 'zwischen den Decks bleibt dabei erhalten, die Zahlen in „Final %" sind aber kleiner '
+        + 'als das, was du eingetragen hast.',
+        'Your entries add up to ' + _mcNum(b.eingetragen, 1) + '%, the field to '
+        + _mcNum(b.normiertVon, 1) + '%. A tournament field cannot exceed 100 % — every share '
+        + 'has therefore been scaled down proportionally to 100 %. The ratio between your decks '
+        + 'is kept, but the numbers in "Final %" are smaller than what you entered.'))}</span>`;
+    } else if (b.gekuerztUm > 0.05) {
+      warnung = `<span class="mc-feld-summe-warnung">${esc(L(
+        'Deine Einträge beanspruchen ' + _mcNum(b.gekuerztUm, 1) + ' Punkte mehr, als „Sonstige" '
+        + 'hergibt. Die nicht selbst gesetzten Decks wurden entsprechend gekürzt; „Sonstige" '
+        + 'steht dabei auf 0.',
+        'Your entries claim ' + _mcNum(b.gekuerztUm, 1) + ' points more than "Others" can give. '
+        + 'The decks you did not set yourself were cut accordingly; "Others" sits at 0.'))}</span>`;
+    }
+
+    return `<p class="mc-feld-summe${warnung ? ' is-gekuerzt' : ''}" id="mc-feld-summe">`
+      + esc(teile.join(' · ')) + warnung + '</p>';
+  }
+
+  function _setFeldVorwahl(id) {
+    const sortiert = _feldSortiert();
+    if (id === 'alle')       _feldAuswahl = new Set(sortiert.map(d => d.name));
+    else if (id === 'keine') _feldAuswahl = new Set();
+    else {
+      const n = parseInt(id, 10);
+      if (!(n > 0)) return;
+      _feldAuswahl = new Set(sortiert.slice(0, n).map(d => d.name));
+    }
+    _feldAuswahlMerken();
+    _feldNeu();
+  }
+
+  function _toggleFeldDeck(name) {
+    const sortiert = _feldSortiert();
+    /* Beim ersten Klick aus der Voreinstellung heraus wird sie zuerst
+       ausgeschrieben — sonst waere „Dragapult abwaehlen" gleichbedeutend
+       mit „nur Dragapult waehlen". */
+    if (!_feldAuswahl) _feldAuswahl = new Set(sortiert.slice(0, TOP_N).map(d => d.name));
+    if (_feldAuswahl.has(name)) _feldAuswahl.delete(name);
+    else _feldAuswahl.add(name);
+    _feldAuswahlMerken();
+    _feldNeu();
+  }
+
+  function _onFeldSuche(wert) {
+    _feldSuche = String(wert || '');
+    clearTimeout(_feldSuche.__t);
+    _feldSucheNeu();
+  }
+
+  function _feldAlleZeigen() {
+    _feldAlle = true;
+    _feldSucheNeu();
+  }
+
+  /* Nur das Auswahlpanel neu zeichnen — die Eingabestelle des Nutzers
+     ist das Suchfeld, und renderAll() wuerde ihm den Fokus nehmen
+     (derselbe Befund wie am 07.09.2026 bei „Meine Schaetzung"). */
+  function _feldSucheNeu() {
+    const container = document.getElementById('metaCallHost');
+    const alt = container && container.querySelector('.mc-feld-auswahl-panel');
+    if (!alt) return;
+    const aktiv = document.activeElement;
+    const warSuche = aktiv && aktiv.classList && aktiv.classList.contains('mc-feld-suche');
+    const stand = warSuche ? aktiv.selectionStart : null;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = renderDeckAuswahlPanel();
+    const neu = tmp.querySelector('.mc-feld-auswahl-panel');
+    if (!neu) return;
+    alt.innerHTML = neu.innerHTML;
+    if (warSuche) {
+      const wieder = alt.querySelector('.mc-feld-suche');
+      if (wieder) {
+        wieder.focus();
+        try { if (stand != null) wieder.setSelectionRange(stand, stand); } catch (_e) {}
+      }
+    }
+  }
+
+  /* Eine Umwahl aendert das ganze Feld: Tabelle, Ergebnis, Empfehlungen
+     und den EV-Block. Der Zwischenspeicher der Sammelquote haengt am
+     Auswahlschluessel und loest sich selbst auf. */
+  function _feldNeu() {
+    _feldSucheNeu();
+    refreshResults();
   }
 
   function renderCustomDecksPanel() {
@@ -11510,6 +11967,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
        ausgeblendet — sonst waere das derselbe Fehler wie oben. */ ''}
   ${_inFrozenPastMode() ? '' : _mcSchritt(2, _SCHRITTE[1].t, _SCHRITTE[1].s)}
   ${_inFrozenPastMode() ? '' : renderPredictorBanner()}
+  ${_inFrozenPastMode() ? '' : renderDeckAuswahlPanel()}
   ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
   ${_inFrozenPastMode() ? '' : _mcSchritt(3, _SCHRITTE[2].t, _SCHRITTE[2].s)}
@@ -13659,6 +14117,16 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         alterKopf.innerHTML = neuerKopf.innerHTML;
         alterKopf.title = neuerKopf.title;
       }
+      /* Die Summenzeile steht UNTER dem tbody und wird vom Tausch oben
+         nicht erfasst. Ohne diese Zeilen meldete sie die Summe von
+         vorhin — und gerade sie ist der Hinweis darauf, dass gekuerzt
+         wurde. */
+      const neueSumme = tmp.querySelector('#mc-feld-summe');
+      const alteSumme = container.querySelector('#mc-feld-summe');
+      if (neueSumme && alteSumme) {
+        alteSumme.innerHTML = neueSumme.innerHTML;
+        alteSumme.className = neueSumme.className;
+      }
     }
     // Player-count badge in the field-panel header is rendered alongside
     // the panel title (not inside the tbody we just swapped). Sync it
@@ -15458,6 +15926,11 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       winRateOverrides : { ..._winRateOverrides },
       customDecks      : _customDecks.map(c => ({ name: c.name, share: c.share })),
       groupByMain      : _groupByMain,
+      /* null heisst „Voreinstellung", und das ist etwas anderes als
+         eine leere Auswahl. Beides muss ein Szenario unterscheiden
+         koennen, sonst laedt „keine Decks einzeln" als „die groessten
+         25" zurueck. */
+      feldAuswahl      : _feldAuswahl ? [..._feldAuswahl] : null,
     };
   }
 
@@ -15470,6 +15943,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       ? state.customDecks.map(c => ({ name: c.name || '', share: Number(c.share) || 0 }))
       : [];
     _groupByMain      = !!state.groupByMain;
+    _feldAuswahl      = Array.isArray(state.feldAuswahl)
+      ? new Set(state.feldAuswahl.map(String)) : null;
+    _feldAuswahlMerken();
 
     // Rebuild journal stats for the new deck if one is set
     _journalStats = {};
@@ -16019,6 +16495,10 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _onBrickFilter,
     _setEvUmfang,
     _onEvEinzelDeck,
+    _setFeldVorwahl,
+    _toggleFeldDeck,
+    _onFeldSuche,
+    _feldAlleZeigen,
     /* Nur fuer Tests und Konsole: die Rechnung ohne Darstellung. */
     _evRechne: (field) => _evRechne(field || buildField()),
     _toggleOverrides,

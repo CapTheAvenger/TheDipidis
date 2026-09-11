@@ -3938,3 +3938,174 @@
   cursor: help;
   white-space: nowrap;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   DIE DECK-AUSWAHL  (renderDeckAuswahlPanel)
+   ══════════════════════════════════════════════════════════════════ */
+.mc-feld-lead {
+  margin: 0 0 12px 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--mc-text-muted);
+  max-width: 84ch;
+}
+.mc-feld-leiste {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.mc-feld-pille {
+  min-height: 44px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--mc-border);
+  background: var(--surface-1);
+  color: var(--mc-text-heading);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mc-feld-pille:hover { border-color: var(--mc-accent, #6b21a8); }
+.mc-feld-pille.is-aktiv {
+  border-color: var(--mc-accent, #6b21a8);
+  box-shadow: inset 0 0 0 1px var(--mc-accent, #6b21a8);
+}
+.mc-feld-suche {
+  flex: 1 1 180px;
+  min-width: 140px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--mc-border);
+  background: var(--surface-1);
+  color: var(--mc-text-heading);
+  font-size: 0.88rem;
+}
+.mc-feld-bilanz {
+  margin: 0 0 12px 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--mc-text-muted);
+}
+.mc-feld-warnung { color: var(--color-warning); font-weight: 600; }
+
+/* Das Kachelraster. Eine feste Hoehe mit eigenem Lauf, damit 116 Decks
+   den Reiter nicht um mehrere Bildschirme verlaengern — die Auswahl ist
+   ein Werkzeug, keine Leseflaeche. */
+.mc-feld-raster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(252px, 1fr));
+  gap: 6px;
+  max-height: 330px;
+  overflow-y: auto;
+  padding: 2px;
+}
+.mc-feld-kachel {
+  display: grid;
+  grid-template-columns: 18px 34px 1fr;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--mc-border-faint);
+  border-radius: 10px;
+  background: var(--surface-1);
+  color: var(--mc-text-muted);
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.55;
+}
+.mc-feld-kachel:hover { border-color: var(--mc-border); opacity: 0.8; }
+.mc-feld-kachel.is-an {
+  opacity: 1;
+  border-color: var(--mc-accent, #6b21a8);
+  background: var(--mc-bg-subtle);
+}
+.mc-feld-haken {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid var(--mc-border);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.mc-feld-kachel.is-an .mc-feld-haken {
+  border-color: var(--mc-accent, #6b21a8);
+  background: var(--mc-accent, #6b21a8);
+  color: #fff;
+}
+.mc-feld-bild {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+}
+.mc-feld-text { display: block; min-width: 0; }
+.mc-feld-name {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--mc-text-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mc-feld-zahlen {
+  display: block;
+  font-size: 0.71rem;
+  color: var(--mc-text-muted);
+  font-variant-numeric: tabular-nums;
+  /* Einzeilig. Bricht „17.386 Partien" auf eine zweite Zeile um, wird
+     jede Kachel zwei Zeilen hoch und das Raster doppelt so lang — bei
+     116 Decks ist das der Unterschied zwischen einem Werkzeug und einer
+     Wand. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mc-feld-mehr {
+  margin-top: 10px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--mc-border);
+  background: var(--surface-1);
+  color: var(--mc-text-heading);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mc-feld-leer { margin: 10px 0 0 0; font-size: 0.84rem; color: var(--mc-text-muted); }
+
+/* Die Summenzeile unter der Feldtabelle */
+.mc-feld-summe {
+  margin: 10px 0 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--mc-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.mc-feld-summe.is-gekuerzt {
+  padding: 8px 12px;
+  border-left: 3px solid var(--color-warning);
+  background: var(--mc-bg-subtle);
+  border-radius: 0 8px 8px 0;
+}
+.mc-feld-summe-warnung {
+  display: block;
+  margin-top: 3px;
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .mc-feld-raster { grid-template-columns: 1fr; max-height: 300px; }
+  .mc-feld-suche { flex-basis: 100%; }
+  .mc-feld-lead, .mc-feld-bilanz { font-size: 0.8rem; }
+}

@@ -4650,12 +4650,25 @@ h3:first-child {
         font-size: 0.9rem;
     }
 
-    /* Daumen-freundliche Buttons (Mindestens 44px Höhe für Touch) */
+    /* Daumen-freundliche Buttons (Mindestens 44px Höhe für Touch)
+     *
+     * NUR die Höhe. Bis zum 11.09.2026 stand hier zusätzlich
+     * `display: inline-flex; align-items: center; justify-content: center`
+     * — und genau das `justify-content: center` hat jeden Knopf zentriert,
+     * der seine Ausrichtung nicht selbst erklärt. Betroffen war unter
+     * anderem `.ds-sec-hd`, der Klapp-Knopf jeder Abschnittsüberschrift:
+     * er setzt `display: flex` und `text-align: left` selbst, aber kein
+     * `justify-content` — auf 390 px begann seine Überschrift deshalb bei
+     * x = 59 statt bei x = 0.
+     *
+     * Die drei Zeilen waren auch nicht nötig. Ein <button> zentriert
+     * seinen Inhalt von sich aus: waagerecht über `text-align: center`
+     * aus dem Browser-Stylesheet, senkrecht über die eigene
+     * Inhaltsbox. Nachgemessen auf 390 px an 1.768 Knöpfen aus 16
+     * Reitern: ohne die drei Zeilen ändert sich an einem Knopf ohne
+     * eigene Ausrichtung weder die Lage seines Inhalts noch seine Höhe. */
     button, .btn, .nav-btn, .action-btn {
         min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
     }
 
     /* Tier-Listen Überschriften auf dem Handy anpassen */
@@ -6173,7 +6186,20 @@ details[open] > .tier-trending-summary::after {
    Die Zahl am Knopf ist kleiner und blasser als die Beschriftung: sie
    sagt, wie viele Karten diese Art hergibt, und ist eine Nebenangabe.
    "Tools 2" soll nach einer Auskunft aussehen, nicht nach einem Fehler. */
-.top-cards-arten {
+/* WARUM ZWEI KLASSEN IM SELEKTOR (gemessen 11.09.2026)
+   ----------------------------------------------------
+   `.btn-toggle-group` setzt in css/pokeball-menu.css `overflow: hidden`.
+   Beide Selektoren waren gleich stark (eine Klasse), und
+   pokeball-menu.css wird NACH styles.css geladen (index.html Z. 160
+   und 163) — also gewann `hidden`. Nachgemessen auf 390 px:
+   `getComputedStyle(.top-cards-arten).overflowX === "hidden"`,
+   scrollWidth 634 bei clientWidth 344. Die Zeile wischte nicht, sie
+   war abgeschnitten: "Ausruestung", "Stadion" und "Spezial-Energie"
+   waren auf dem Telefon nicht erreichbar.
+
+   `.btn-toggle-group.top-cards-arten` zaehlt zwei Klassen und schlaegt
+   die eine — unabhaengig von der Ladereihenfolge der Dateien. */
+.btn-toggle-group.top-cards-arten {
     margin: 0 0 14px 0;
     max-width: 100%;
     overflow-x: auto;
@@ -6181,7 +6207,7 @@ details[open] > .tier-trending-summary::after {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
 }
-.top-cards-arten::-webkit-scrollbar { display: none; }
+.btn-toggle-group.top-cards-arten::-webkit-scrollbar { display: none; }
 .top-cards-arten .btn-toggle-item {
     white-space: nowrap;
     flex: 0 0 auto;

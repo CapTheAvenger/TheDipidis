@@ -36,7 +36,6 @@ const ROOT = path.join(__dirname, '..', '..');
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
 const SEC    = read('js/ds-sections.js');
-const EV     = read('js/ds-ev-rechner.js');
 /* Die Anzeige ist am 11.09.2026 in den Meta Call gezogen; die Zusagen
    an sie werden dort geprueft. */
 const MC     = read('js/app-meta-call.js');
@@ -161,15 +160,19 @@ describe('Der EV-Rechner rechnet über ein echtes Turnier', () => {
        an dem die Zahl jetzt entsteht. js/ds-ev-rechner.js führt die
        Rundenzahl weiter als RUNDEN_STD, weil `rechne()` dort geblieben
        ist und Aufrufer einen Startwert brauchen. */
-    const STD = Number(/var RUNDEN_STD = (\d+);/.exec(EV)[1]);
+    /* Die Zahl steht seit dem 11.09.2026 nur noch an EINER Stelle.
+       js/ds-ev-rechner.js führte sie als RUNDEN_STD und ist entfallen —
+       erst zog die Rechnung in den Meta Call, dann der letzte Verweis.
+       Gelesen wird deshalb direkt der Startwert, mit dem die Seite
+       rechnet. */
+    const STD = (function () {
+        const m = /rounds\s*:\s*(\d+),/.exec(MC);
+        assert.ok(m, 'der Meta Call führt keine Rundenzahl mehr in _settings');
+        return Number(m[1]);
+    }());
 
     it('startet mit acht Runden', () => {
         assert.equal(STD, 8, `der Startwert steht auf ${STD} Runden`);
-        // Und der Meta Call, der die Zahl jetzt anzeigt, ebenso.
-        const m = /rounds\s*:\s*(\d+),/.exec(MC);
-        assert.ok(m, 'der Meta Call führt keine Rundenzahl mehr in _settings');
-        assert.equal(Number(m[1]), 8,
-            `der Meta Call startet mit ${m[1]} Runden statt mit 8`);
     });
 
     it('und die erwarteten Siege folgen dieser Zahl', () => {

@@ -1646,7 +1646,30 @@
             ? `<button type="button" class="arc-mu-more" data-deck="${esc(name)}">${
                 esc(L('arc.showAll', de ? 'Alle {n}' : 'All {n}').replace('{n}', String(total)))
               }</button>` : '';
-        const goto = `<div class="arc-actions">${moreBtn}<button type="button" class="arc-goto" data-deck="${esc(name)}">
+        /* ── DER WEG IN DEN META CALL, AN EINEM KONKRETEN DECK ──────────
+           BESTELLT (Betreiber, 11.09.2026): „sinnvoller waere in der Tier
+           List je Deck einen Button archetype vs the Meta oder Deck vs
+           Meta oder irgendwie sowas und dann springt man zum Meta Call
+           zu dem Feature und das Deck ist dann schon ausgewaehlt."
+
+           Vorher gab es dafuer einen eigenen Abschnitt im Reiter
+           „Aktuelles Meta", der nach dem Umzug der Rechnung nur noch
+           einen Verweis trug — ein leerer Block, an dem kein Deck hing.
+           Hier haengt er an genau dem Deck, das man gerade ansieht.
+
+           Der Knopf steht in der Aktionszeile und damit in der Karte der
+           Tier-Liste (inline) und im Ueberlagerungsfenster (overlay), das
+           die kompakten Kacheln des Trending-Blocks oeffnen. Die
+           eingebettete Variante der Deck-Analyse hat keine Aktionszeile;
+           dort steht die Heatmap ohnehin daneben. */
+        const metaBtn = `<button type="button" class="arc-meta" data-deck="${esc(name)}"
+                    title="${esc(L('arc.gotoMetaCallTip', de
+                        ? 'Im Meta Call öffnen — dort wird jede Paarung dieses Decks mit dem Anteil gewichtet, den du für dein nächstes Turnier erwartest'
+                        : 'Open in the Meta Call — there every pairing of this deck is weighted by the share you expect at your next tournament'))}">
+                    ${esc(L('arc.gotoMetaCall', de
+                        ? 'Gegen das Meta →' : 'Vs. the meta →'))}
+                </button>`;
+        const goto = `<div class="arc-actions">${moreBtn}${metaBtn}<button type="button" class="arc-goto" data-deck="${esc(name)}">
                     ${esc(L('arc.gotoAnalysis', de
                         ? 'Volle Analyse →' : 'Full analysis →'))}
                 </button></div>`;
@@ -1687,6 +1710,24 @@
             e.preventDefault();
             const deck = share.getAttribute('data-deck');
             if (deck && window.DsShare) window.DsShare.shareDeckCard(deck);
+            return;
+        }
+        /* Vor .arc-goto pruefen: beide sitzen in derselben Zeile, und
+           die Karte darunter faengt jeden Klick ab, der nicht vorher
+           gestoppt wird. */
+        const meta = e.target.closest && e.target.closest('.arc-meta');
+        if (meta) {
+            e.stopPropagation();
+            e.preventDefault();
+            const deck = meta.getAttribute('data-deck');
+            if (deck && window.MetaCall && typeof window.MetaCall.oeffneMitDeck === 'function') {
+                window.MetaCall.oeffneMitDeck(deck);
+            } else if (typeof window.switchTabAndUpdateMenu === 'function') {
+                /* Ohne das Modul wenigstens den Reiter — ein Knopf, der
+                   gar nichts tut, ist schlimmer als einer, der einen
+                   Schritt weniger schafft. */
+                window.switchTabAndUpdateMenu('meta-call');
+            }
             return;
         }
         const more = e.target.closest && e.target.closest('.arc-mu-more');
@@ -1823,10 +1864,18 @@
     window.getArchetypeMatchups = function (name) {
         return load().then(() => matchupsFor(name));
     };
-    // Die Feldanteile, so wie diese Datei sie ohnehin schon geparst hat.
-    // js/ds-ev-rechner.js braucht sie, um das Feld zu gewichten — und
-    // holt sich dieselbe CSV NICHT ein zweites Mal: zwei Parser fuer eine
-    // Datei sind zwei Zahlen fuer eine Sache, sobald einer angefasst wird.
+    /* Die Feldanteile, so wie diese Datei sie ohnehin schon geparst hat.
+       Sie entstand fuer js/ds-ev-rechner.js, damit dieselbe CSV nicht ein
+       zweites Mal geparst wird — zwei Parser fuer eine Datei sind zwei
+       Zahlen fuer eine Sache, sobald einer angefasst wird.
+
+       DER AUFRUFER IST AM 11.09.2026 ENTFALLEN. Die Rechnung liegt im
+       Meta Call und arbeitet dort mit dem ERWARTETEN Feld
+       (buildField()), nicht mit dem gemessenen. Die Funktion bleibt
+       trotzdem stehen: sie ist die einzige Stelle, an der die
+       Feldanteile ohne einen zweiten Parser zu haben sind, und sie
+       kostet nichts, solange niemand sie ruft. Wer sie wieder braucht,
+       soll sie vorfinden statt sie nachzubauen. */
     window.getArchetypeShares = function () {
         return load().then(() => {
             const out = {};

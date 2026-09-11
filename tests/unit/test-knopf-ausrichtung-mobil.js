@@ -135,7 +135,22 @@ describe('Die Artenzeile bleibt wischbar', () => {
             + 'sind auf dem Telefon nicht mehr erreichbar'
         );
         const r = rumpf(STYLES, '.btn-toggle-group.top-cards-arten');
-        assert.match(r, /overflow-x:\s*auto/);
-        assert.match(r, /overflow-y:\s*hidden/);
+        /* NACHTRAG 11.09.2026: die Zeile wischt nicht mehr, sie bricht um.
+           Betreiber: „schön wäre es die Filter auf Einzel Karten Typen
+           ohne links rechts scrollen zu sehen." Eine Wischzeile versteckt
+           ihre hinteren Einträge genauso wie ein abgeschnittener Block —
+           man sieht nicht, dass es sie gibt.
+           Die ZUSAGE bleibt dieselbe und ist der Grund für diesen Test:
+           `.btn-toggle-group` setzt in css/pokeball-menu.css
+           `overflow: hidden`, und diese Datei wird NACH styles.css
+           geladen. Ohne die zweite Klasse gewinnt sie wieder — dann sind
+           die umgebrochenen Knöpfe der zweiten Zeile abgeschnitten statt
+           sichtbar. */
+        assert.match(r, /flex-wrap:\s*wrap/,
+            'die Artenzeile bricht nicht mehr um');
+        assert.match(r, /overflow:\s*visible/,
+            'ohne overflow: visible schneidet .btn-toggle-group die zweite Zeile ab');
+        assert.doesNotMatch(r, /overflow-x:\s*auto/,
+            'die Zeile wischt wieder seitwärts');
     });
 });

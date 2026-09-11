@@ -16,8 +16,8 @@
  * -------------------------
  * 1. Ohne Meldung kein Knopf. Ein Knopf, der einen leeren Dialog
  *    oeffnet, ist schlimmer als kein Knopf.
- * 2. Alle sechs Abschnitte der Meta-Ansicht bekommen einen, sobald
- *    gemeldet wurde — und wenn ein siebter dazukommt, sagt der Test
+ * 2. Alle Abschnitte der Meta-Ansicht bekommen einen, sobald
+ *    gemeldet wurde — und wenn einer dazukommt, sagt der Test
  *    seinen Namen.
  * 3. Die erste Ueberschrift heisst "Archetypen", nicht mehr "Decks".
  *    Die Kacheln darunter zeigen Archetypen mit ihren Varianten
@@ -62,10 +62,15 @@ const REGISTER_QUELLE = read('js/ds-abschnitt-info.js');
 const SEKTIONEN_QUELLE = read('js/ds-sections.js');
 const QUELLEN_QUELLE = read('js/app-quellen.js');
 
-/* Die sechs Abschnitte, so wie sie am 10.09.2026 in SECTIONS stehen.
-   Diese Liste ist der Wachhund: kommt ein siebter dazu, faellt der Test
-   und nennt ihn beim Namen. */
-const BEKANNTE_ABSCHNITTE = ['top', 'heatmap', 'cards', 'ev', 'tiers', 'rang'];
+/* Die Abschnitte, so wie sie in SECTIONS stehen — in DIESER Reihenfolge.
+   Diese Liste ist der Wachhund: kommt einer dazu oder wandert einer,
+   faellt der Test und nennt ihn beim Namen.
+
+   Stand 11.09.2026: der Rechner-Abschnitt ist entfallen (die Rechnung
+   sitzt im Meta Call, der Weg dorthin am Knopf „Gegen das Meta" jeder
+   Deck-Karte), und 'cards' steht hinten statt an dritter Stelle —
+   beides auf Ansage des Betreibers vom selben Abend. */
+const BEKANNTE_ABSCHNITTE = ['top', 'heatmap', 'tiers', 'rang', 'cards'];
 
 // ── Ein Platz zum Ausfuehren ────────────────────────────────────────
 //
@@ -153,9 +158,9 @@ describe('Das Register — ohne Meldung kein Knopf', () => {
         // Die Erzeuger melden erneut, wenn ihre Daten nachkommen. Zwei
         // Fassungen nebeneinander waeren zwei Wahrheiten.
         const p = platz();
-        p.register.melde('ev', { titel: 'Alt', html: '<p>alt</p>' });
-        p.register.melde('ev', { titel: 'Neu', html: '<p>neu</p>' });
-        const hol = p.register.hol('ev');
+        p.register.melde('rang', { titel: 'Alt', html: '<p>alt</p>' });
+        p.register.melde('rang', { titel: 'Neu', html: '<p>neu</p>' });
+        const hol = p.register.hol('rang');
         // deepStrictEqual scheitert ueber Kontextgrenzen (andere
         // Prototypkette), deshalb Feld fuer Feld.
         assert.equal(hol.titel, 'Neu');
@@ -164,9 +169,9 @@ describe('Das Register — ohne Meldung kein Knopf', () => {
 
     it('eine Meldung ohne html aendert nichts', () => {
         const p = platz();
-        p.register.melde('ev', { titel: 'Da', html: '<p>da</p>' });
-        p.register.melde('ev', { titel: 'Leer' });
-        assert.equal(p.register.hol('ev').html, '<p>da</p>',
+        p.register.melde('rang', { titel: 'Da', html: '<p>da</p>' });
+        p.register.melde('rang', { titel: 'Leer' });
+        assert.equal(p.register.hol('rang').html, '<p>da</p>',
             'ein leerer Nachschlag darf einen vorhandenen Text nicht loeschen');
     });
 
@@ -200,7 +205,7 @@ describe('Das Register — ohne Meldung kein Knopf', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-describe('Die Meta-Ansicht — sechs Abschnitte, sechs Knoepfe', () => {
+describe('Die Meta-Ansicht — ein Knopf je Abschnitt', () => {
     it('vor der ersten Meldung traegt kein Abschnitt einen Knopf', () => {
         const p = platz();
         p.ctx.zeichneInfoKnoepfe(p.host);
@@ -231,7 +236,7 @@ describe('Die Meta-Ansicht — sechs Abschnitte, sechs Knoepfe', () => {
         assert.deepStrictEqual(mit, ['rang']);
     });
 
-    it('ein siebter Abschnitt wird benannt, nicht stillschweigend uebergangen', () => {
+    it('ein weiterer Abschnitt wird benannt, nicht stillschweigend uebergangen', () => {
         // DIE WICHTIGSTE ZUSICHERUNG DIESER DATEI.
         //
         // Wer SECTIONS erweitert, baut einen Abschnitt, den niemand
@@ -276,7 +281,7 @@ describe('Die Meta-Ansicht — sechs Abschnitte, sechs Knoepfe', () => {
         // Bauen des Markups aus, ein Aufruf bedeutet also ein
         // Schreiben. (innerHTML ist im Sandkasten nicht ueberschreibbar.)
         const p = platz();
-        p.register.melde('ev', { titel: 'x', html: '<p>x</p>' });
+        p.register.melde('tiers', { titel: 'x', html: '<p>x</p>' });
         let gebaut = 0;
         const echt = p.ctx.DsAbschnittInfo;
         p.ctx.DsAbschnittInfo = {
@@ -285,11 +290,11 @@ describe('Die Meta-Ansicht — sechs Abschnitte, sechs Knoepfe', () => {
         };
         p.ctx.zeichneInfoKnoepfe(p.host);
         assert.equal(gebaut, 1, 'der erste Durchlauf baut den einen gemeldeten Knopf');
-        const vorher = slotVon(p.host, 'ev').innerHTML;
+        const vorher = slotVon(p.host, 'tiers').innerHTML;
         p.ctx.zeichneInfoKnoepfe(p.host);
         p.ctx.zeichneInfoKnoepfe(p.host);
         assert.equal(gebaut, 1, 'die Marke greift nicht — jeder Durchlauf schreibt neu');
-        assert.equal(slotVon(p.host, 'ev').innerHTML, vorher);
+        assert.equal(slotVon(p.host, 'tiers').innerHTML, vorher);
     });
 });
 
@@ -309,7 +314,7 @@ describe('Die Ueberschrift heisst Archetypen', () => {
             'die englische Fassung sagt weiter "decks"');
     });
 
-    it('jeder der sechs Abschnitte hat beide Sprachen', () => {
+    it('jeder Abschnitt hat beide Sprachen', () => {
         const p = platz();
         const leer = Array.from(p.ctx.SECTIONS)
             .filter((s) => !s.de || !s.de[0] || !s.en || !s.en[0])
@@ -429,11 +434,16 @@ describe('Quellen & Methodik sagt, wo die Erklaerungen stehen', () => {
         assert.match(EN, /description, figures and legend/);
     });
 
-    it('er nennt alle sechs Auswertungen beim Namen', () => {
+    it('er nennt alle Auswertungen beim Namen — und keine, die es nicht mehr gibt', () => {
         const NAMEN_DE = ['Die meistgespielten Archetypen', 'Matchups', 'Meistgespielte Karten',
-                          'Gegen welches Meta?', 'Tier-Liste', 'Meta-Performance'];
+                          'Tier-Liste', 'Meta-Performance'];
         const NAMEN_EN = ['Most played archetypes', 'Matchups', 'Most played cards',
-                          'Against which field?', 'Tier list', 'Meta performance'];
+                          'Tier list', 'Meta performance'];
+        // „Gegen welches Meta?" stand hier bis zum 11.09.2026. Der
+        // Abschnitt ist weg; eine Quellenseite, die ihn weiter nennt,
+        // schickt den Leser an eine Ueberschrift, die es nicht gibt.
+        assert.ok(DE.indexOf('Gegen welches Meta?') < 0, 'der entfallene Abschnitt wird weiter genannt');
+        assert.ok(EN.indexOf('Against which field?') < 0, 'der entfallene Abschnitt wird weiter genannt');
         const fehltDe = NAMEN_DE.filter((n) => DE.indexOf(n) < 0);
         const fehltEn = NAMEN_EN.filter((n) => EN.indexOf(n) < 0);
         assert.deepStrictEqual(fehltDe, [], 'auf Deutsch nicht genannt: ' + fehltDe.join(' | '));

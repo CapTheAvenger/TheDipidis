@@ -6199,15 +6199,23 @@ details[open] > .tier-trending-summary::after {
 
    `.btn-toggle-group.top-cards-arten` zaehlt zwei Klassen und schlaegt
    die eine — unabhaengig von der Ladereihenfolge der Dateien. */
+/* UMBRECHEN STATT WISCHEN (11.09.2026)
+   -------------------------------------
+   Die Zeile wischte seitwaerts, und das war besser als abgeschnitten —
+   aber der Betreiber hat den eigentlichen Punkt gemeldet: „schoen waere
+   es die Filter auf Einzel Karten Typen ohne links rechts scrollen zu
+   sehen." Eine waagerechte Wischzeile versteckt ihre hinteren Eintraege
+   genauso wie ein Abschnitt: man sieht nicht, dass es sie gibt.
+   Acht Knoepfe in zwei Zeilen kosten auf 390 px rund 50 px Hoehe und
+   zeigen dafuer alle Kartenarten auf einen Blick. */
 .btn-toggle-group.top-cards-arten {
     margin: 0 0 14px 0;
     max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    overflow: visible;
 }
-.btn-toggle-group.top-cards-arten::-webkit-scrollbar { display: none; }
 .top-cards-arten .btn-toggle-item {
     white-space: nowrap;
     flex: 0 0 auto;
@@ -11651,13 +11659,17 @@ td.arc-mu-major.arc-mu-major-bilanz {
     padding: 8px 12px 10px;
     background: var(--arc-bg0);
 }
-.arc-mu-more, .arc-goto {
+.arc-mu-more, .arc-goto, .arc-meta {
     padding: 7px 12px; min-height: 36px;
     border: 1px solid var(--arc-line-strong); border-radius: 7px;
     background: var(--arc-s1); color: var(--arc-brand-ink);
     font-size: 0.76rem; font-weight: 600; cursor: pointer;
 }
-.arc-mu-more:hover, .arc-goto:hover { background: var(--arc-s2); }
+.arc-mu-more:hover, .arc-goto:hover, .arc-meta:hover { background: var(--arc-s2); }
+/* Der Sprung in den Meta Call ist die Handlung, wegen der man diese
+   Karte aufmacht, wenn man ein Turnier vorbereitet — er bekommt den
+   Rahmen der Marke, „Volle Analyse" bleibt der ruhige Nachbar. */
+.arc-meta { border-color: var(--arc-brand, var(--arc-line-strong)); }
 
 /* Auf dem Telefon nichts unter 11 px.
    Die Werte hier standen bis zum 20.08.2026 bei 0,5rem (8 px) und

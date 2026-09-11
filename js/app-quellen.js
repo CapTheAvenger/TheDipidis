@@ -139,9 +139,9 @@
                         'den Professor-Eich-Knopf. Dahinter stehen Beschreibung, Zahlen ' +
                         'und Legende genau dieser Auswertung. Die Ansicht selbst bleibt ' +
                         'dadurch kurz und zeigt die Zahlen, nicht den Beipackzettel.',
-                        'Sechs Auswertungen sind das: Die meistgespielten Archetypen, ' +
-                        'Matchups, Meistgespielte Karten, Gegen welches Meta?, Tier-Liste ' +
-                        'und Meta-Performance. Wo eine Auswertung nichts gemeldet hat, ' +
+                        'Fünf Auswertungen sind das: Die meistgespielten Archetypen, ' +
+                        'Matchups, Tier-Liste, Meta-Performance und Meistgespielte ' +
+                        'Karten. Wo eine Auswertung nichts gemeldet hat, ' +
                         'steht auch kein Knopf — einer, der einen leeren Kasten öffnet, ' +
                         'wäre schlimmer als keiner.',
                         'Diese Texte stehen mit Absicht nicht hier abgeschrieben. Sie ' +
@@ -330,9 +330,9 @@
                         'next to its heading. Behind it stand the description, figures and ' +
                         'legend of exactly that view. That is what keeps the view itself ' +
                         'short — it shows the numbers, not the leaflet.',
-                        'Six views have one: Most played archetypes, Matchups, ' +
-                        'Most played cards, Against which field?, Tier list and ' +
-                        'Meta performance. Where a view has reported nothing, there is no ' +
+                        'Five views have one: Most played archetypes, Matchups, ' +
+                        'Tier list, Meta performance and Most played cards. ' +
+                        'Where a view has reported nothing, there is no ' +
                         'button either — one that opens an empty box would be worse ' +
                         'than none.',
                         'These texts are deliberately not copied out here. They quote ' +

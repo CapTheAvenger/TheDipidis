@@ -48,7 +48,7 @@ describe('Bausteine — Aufbau', () => {
         assert.match(SW, /'\.\/js\/ds-sections\.js'/);
     });
 
-    it('sieben Abschnitte, jeder in beiden Sprachen benannt', () => {
+    it('fuenf Abschnitte, jeder in beiden Sprachen benannt', () => {
         const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE);
         assert.ok(block, 'SECTIONS nicht gefunden');
         const ids = [...block[1].matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
@@ -66,32 +66,53 @@ describe('Bausteine — Aufbau', () => {
         // Und am 01.09.2026 einer weniger: 'movers' ("Auf- und
         // Absteiger") ist entfernt. Gemeldet: "ich glaube, das ist
         // mittlerweile auch eine Sache, die wir wegnehmen koennen."
-        assert.strictEqual(ids.length, 6, 'gefunden: ' + ids.join(', '));
-        assert.strictEqual(new Set(ids).size, 6, 'doppelte id');
+        // Und am 11.09.2026 noch einer weniger: 'ev' ist entfallen.
+        // Die Rechnung war zuvor in den Meta Call gezogen, hier stand
+        // nur noch ein Verweis. Gemeldet: "Der your Deck vs the Meta
+        // Bereich ergibt auf der aktuellen Meta Seite so ja gar kein
+        // Sinn mehr." Der Weg dorthin fuehrt jetzt ueber den Knopf
+        // "Gegen das Meta" an jeder Deck-Karte der Tier-Liste.
+        assert.strictEqual(ids.length, 5, 'gefunden: ' + ids.join(', '));
+        assert.strictEqual(new Set(ids).size, 5, 'doppelte id');
+        assert.ok(!ids.includes('ev'),
+            'der leere Verweis-Abschnitt ist zurueck: ' + ids.join(', '));
         const de = (block[1].match(/de:\s*\[/g) || []).length;
         const en = (block[1].match(/en:\s*\[/g) || []).length;
-        assert.strictEqual(de, 6);
-        assert.strictEqual(en, 6);
+        assert.strictEqual(de, 5);
+        assert.strictEqual(en, 5);
     });
 
-    it('die ersten drei sind offen, der Rest zu', () => {
-        const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE)[1];
-        const flags = [...block.matchAll(/auf:\s*(true|false)/g)].map(m => m[1] === 'true');
-        assert.deepStrictEqual(flags.slice(0, 3), [true, true, true]);
-        assert.deepStrictEqual(flags.slice(3), [false, false, false]);
-    });
-
-    it('die Antwort steht vorn: Decks, Matchups, Karten — dann der Rest', () => {
+    it('offen ist, was man zuerst liest — und die Karten am Ende', () => {
+        // Bis zum 11.09.2026: die ersten drei offen, der Rest zu. Die
+        // dritte Stelle hatten die Karten; sie stehen jetzt hinten
+        // (siehe unten). Offen bleiben sie trotzdem: unter ihnen kommt
+        // nichts mehr, also schiebt ihre Hoehe niemanden weg, und die
+        // Filterzeile ist ohne zweiten Klick zu sehen — genau darum
+        // hatte der Betreiber am selben Abend gebeten.
         const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE)[1];
         const ids = [...block.matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
-        assert.deepStrictEqual(ids.slice(0, 3), ['top', 'heatmap', 'cards'],
+        const flags = [...block.matchAll(/auf:\s*(true|false)/g)].map(m => m[1] === 'true');
+        assert.strictEqual(flags.length, ids.length, 'jeder Abschnitt braucht auf:');
+        const auf = {};
+        ids.forEach((id, i) => { auf[id] = flags[i]; });
+        assert.deepStrictEqual(auf,
+            { top: true, heatmap: true, tiers: false, rang: false, cards: true });
+    });
+
+    it('die Antwort steht vorn: Decks, Matchups — die Karten ganz hinten', () => {
+        const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE)[1];
+        const ids = [...block.matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
+        assert.deepStrictEqual(ids.slice(0, 2), ['top', 'heatmap'],
             'die Heatmap stand vorher 7,3 Bildschirme tief');
+        // BESTELLT am 11.09.2026: „Most played cards als letzten Punkt
+        // auf die Seite setzen, weil das ist ja mehr eine Side Info zum
+        // Meta als wirklich relevant." Vorher standen die Karten an
+        // dritter Stelle, also mitten zwischen Heatmap und Tier-Liste.
+        assert.strictEqual(ids[ids.length - 1], 'cards',
+            'die Karten sind Nebeninformation und gehoeren ans Ende');
         // 'full' gibt es nicht mehr — die vollstaendige Tabelle ist in die
         // Rangliste aufgegangen. Seit dem 01.09.2026 auch 'movers' nicht
-        // mehr; ans Ende gehoert jetzt die Rangliste, die als einzige
-        // JEDEN Archetyp fuehrt und deshalb am seltensten gebraucht wird.
-        assert.strictEqual(ids[ids.length - 1], 'rang',
-            'der am wenigsten dringende Abschnitt gehoert ans Ende');
+        // mehr.
         assert.ok(!ids.includes('full') && !ids.includes('overview')
                   && !ids.includes('movers'),
             'aufgeloeste Abschnitte sind zurueck: ' + ids.join(', '));

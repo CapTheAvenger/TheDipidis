@@ -384,6 +384,18 @@ const POSITIVLISTE = [
              + 'wirklich Matchpunkte (WK.KONVENTIONEN.matchpunkte.rechne), und '
              + '"Win %" ist genau deren reservierter Name.',
     },
+
+{
+        datei: 'js/app-meta-call.js',
+        beginnt: 'das ist NICHT die Größe',
+        grund: 'Abgrenzungssatz unter der Erwartungstabelle „Dein Deck gegen das '
+             + 'Meta". Er vergibt keinen Namen, sondern nimmt einen weg: die Quote '
+             + 'darueber rechnet S/(S+N), und der Satz sagt ausdruecklich, dass das '
+             + 'NICHT die Matchpunkte sind, die Limitless „Win %" nennt. Stand bis '
+             + 'zum 11.09.2026 in js/ds-ev-rechner.js (entfallen). '
+             + 'tests/unit/test-w3-ev-und-abschnitt.js laesst genau EINE solche '
+             + 'Fundstelle zu — eine zweite waere keine Abgrenzung mehr.',
+    },
 ];
 
 function erlaubt(datei, text) {

@@ -64,7 +64,6 @@ const JS_ANZEIGE = [
     'js/app-archetype-card.js',
     'js/ds-share.js',
     'js/app-tier-meta.js',
-    'js/ds-ev-rechner.js',
     'js/ds-sections.js',
 ].map(p => ({ p, src: read(p) }));
 
@@ -195,14 +194,18 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {
            `ohneUnentschieden`, nicht die Groesse, die Limitless
            "Win %" nennt. Bewacht wird das ausfuehrlich in
            tests/unit/test-w3-ev-und-abschnitt.js — hier steht nur, dass
-           der Hausname weg ist und der Name aus dem Modul kommt. */
-        const EVR = read('js/ds-ev-rechner.js');
-        assert.match(EVR, /var EV_KONVENTION = 'ohneUnentschieden';/,
-            'js/ds-ev-rechner.js legt seine Konvention nicht mehr fest');
-        assert.ok(!/esc\(L\('Erwartete Win Rate'/.test(EVR),
-            'der Hausname "Erwartete Win Rate" steht wieder in js/ds-ev-rechner.js');
-        assert.ok(!/esc\(L\('Deine Win Rate'/.test(EVR),
-            'der Hausname "Deine Win Rate" steht wieder in js/ds-ev-rechner.js');
+           der Hausname weg ist und der Name aus dem Modul kommt.
+
+           NACHTRAG 11.09.2026: js/ds-ev-rechner.js ist entfallen. Die
+           Rechnung liegt im Meta Call (renderDeckGegenMetaPanel), und
+           der Name kommt dort aus _evQuotenName(). */
+        const MCALL = read('js/app-meta-call.js');
+        assert.match(MCALL, /function _evQuotenName\(\)[\s\S]{0,400}kurz\('ohneUnentschieden'\)/,
+            'der EV-Block im Meta Call holt seinen Namen nicht mehr aus dem Modul');
+        assert.ok(!/_evL\('Erwartete Win Rate'/.test(MCALL),
+            'der Hausname "Erwartete Win Rate" steht wieder im EV-Block');
+        assert.ok(!/_evL\('Deine Win Rate'/.test(MCALL),
+            'der Hausname "Deine Win Rate" steht wieder im EV-Block');
     });
 
     it('die Uebersetzungsschluessel bleiben unangetastet', () => {

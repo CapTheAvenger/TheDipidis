@@ -165,7 +165,10 @@ describe('Meta-Performance — was dafuer wegfiel', () => {
         assert.ok(!/id: 'full'/.test(SEC));
         const ids = [...SEC.matchAll(/id: '([a-z]+)'/g)].map(m => m[1]);
         // 'movers' fiel am 01.09.2026 weg — siehe docs/geparkte-features.md.
-        assert.deepEqual(ids, ['top', 'heatmap', 'cards', 'ev', 'tiers', 'rang'],
+        // 'ev' am 11.09.2026: die Rechnung sitzt im Meta Call, hier stand
+        // nur noch ein Verweis. Und 'cards' wanderte am selben Abend ans
+        // Ende — „mehr eine Side Info zum Meta als wirklich relevant".
+        assert.deepEqual(ids, ['top', 'heatmap', 'tiers', 'rang', 'cards'],
             'Abschnitte: ' + ids.join(', '));
     });
 

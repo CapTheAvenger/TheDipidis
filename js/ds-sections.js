@@ -76,24 +76,16 @@
         { id: 'heatmap', auf: true,  nimm: ['#matchupHeatmapContainer'],
           de: ['Matchups', ''],
           en: ['Matchups', ''] },
-        { id: 'cards',   auf: true,  nimm: ['div.top-cards-container'],
-          de: ['Meistgespielte Karten', ''],
-          en: ['Most played cards', ''] },
-        /* Hiess bis zum 11.09.2026 deutsch "Gegen welches Meta?" und
-           englisch "Against which field?" — zwei Namen fuer denselben
-           Abschnitt, und im Block darunter stand die Frage gleich noch
-           einmal. Betreiber: "Feld wird immer und ueberall als Meta
-           bezeichnet." Der Name sagt jetzt, was man hier einstellt: sein
-           eigenes Deck, und wogegen. */
-        /* Der Abschnitt traegt seit dem 11.09.2026 nur noch einen
-           Verweis: die Rechnung ist in den Meta Call gezogen und
-           gewichtet dort mit dem Anteil, den der Nutzer ERWARTET, statt
-           mit dem gemessenen Online-Anteil (js/ds-ev-rechner.js, Kopf).
-           Der Untertitel sagt das, damit niemand aufklappt und den
-           Rechner sucht, der bis gestern hier stand. */
-        { id: 'ev',      auf: false, nimm: ['div.ds-ev-block'],
-          de: ['Dein Deck gegen das Meta', 'umgezogen in den Meta Call — dort mit den Anteilen, die du erwartest'],
-          en: ['Your deck vs. the meta', 'moved into the Meta Call — there with the shares you expect'] },
+        /* „Dein Deck gegen das Meta" stand bis zum 11.09.2026 hier.
+           Erst zog die Rechnung in den Meta Call, dann blieb an dieser
+           Stelle ein Abschnitt, der nur noch einen Verweis trug — und
+           genau den hat der Betreiber am selben Abend gemeldet: „Der
+           your Deck vs the Meta Bereich ergibt auf der aktuellen Meta
+           Seite so ja gar kein Sinn mehr."
+           Der Weg dorthin fuehrt jetzt ueber den Knopf „Gegen das Meta"
+           an jeder Deck-Karte der Tier-Liste — dort ist er an einem
+           konkreten Deck, statt als leerer Abschnitt herumzustehen.
+           js/ds-ev-rechner.js ist damit entfallen. */
         { id: 'tiers',   auf: false, nimm: ['__tiers__'],
           de: ['Tier-Liste', 'alle Archetypen nach Stärke gruppiert'],
           en: ['Tier list', 'all archetypes grouped by strength'] },
@@ -109,6 +101,19 @@
         { id: 'rang',    auf: false, nimm: ['div.cm-rangliste-block'],
           de: ['Meta-Performance', 'Listen, {quote:mitUnentschieden} und Top-8-Quote je Deck — sortierbar'],
           en: ['Meta performance', 'lists, {quote:mitUnentschieden} and top-8 rate per deck — sortable'] },
+        /* GANZ NACH UNTEN (11.09.2026). Betreiber: „Most played cards
+           als letzten Punkt auf die Seite setzen, weil das ist ja mehr
+           eine Side Info zum Meta als wirklich relevant."
+           Der Abschnitt stand an dritter Stelle, direkt hinter den
+           Matchups — zwischen der Heatmap und der Tier-Liste, also
+           mitten in dem, was man beim Vorbereiten wirklich
+           hintereinander liest. Die Reihenfolge dieser Liste ist die
+           Reihenfolge auf der Seite (resektionieren haengt die
+           Abschnitte danach um), also genuegt es, ihn hier zu
+           verschieben. */
+        { id: 'cards',   auf: true,  nimm: ['div.top-cards-container'],
+          de: ['Meistgespielte Karten', ''],
+          en: ['Most played cards', ''] },
         // Der Abschnitt "Auf- und Absteiger" stand hier bis zum
         // 01.09.2026. Seine beiden Bloecke werden nicht mehr erzeugt
         // (js/app-tier-meta.js), also gaebe es hier nichts mehr

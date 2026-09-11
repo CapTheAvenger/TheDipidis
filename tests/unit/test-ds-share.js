@@ -263,8 +263,17 @@ describe('ds-share: ein Turnier ist die Gruppe seiner Partien', () => {
         // Bei 2-1-1 waren das 62,5 % im Bild gegen 50 % in der Zeile daneben.
         assert.match(SHARE, /winRate: scored \? \(w \/ scored\) \* 100 : NaN/);
         assert.doesNotMatch(SHARE, /\(w \+ t \/ 2\) \/ scored/);
-        // Und die Fussnote nennt genau diese Konvention.
-        assert.match(SHARE, /kurzHinweis\('mitUnentschieden'\)/);
+        /* DIE FUSSNOTE MIT DER FORMEL IST SEIT DEM 11.09.2026 WEG.
+           Gemeldet: „bei den Bildern die Bezeichnung mit dem S durch S
+           plus N plus U, Unentschieden sehen wir, das kann da auch weg."
+           Was bleibt, ist die Zusicherung, auf die es ankommt: die
+           Konvention wird weiterhin BENANNT, und der Name kommt aus
+           js/win-rate-konvention.js statt abgeschrieben zu sein.
+           SHARE_KONVENTION ist die Vorgabe von quotenName(). */
+        assert.match(SHARE, /var SHARE_KONVENTION = 'mitUnentschieden';/,
+            'die Bildkarte legt nicht mehr fest, welche Konvention sie benennt');
+        assert.doesNotMatch(SHARE, /kurzHinweis\(/,
+            'die ausgeschriebene Formel steht wieder unter der Kachel');
     });
 
     it('sucht die Platzierung in der ganzen Gruppe, nicht im ersten Eintrag', () => {

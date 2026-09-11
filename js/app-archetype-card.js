@@ -162,6 +162,66 @@
      * muss, ab wann eine Zahl erscheint. */
     const MIN_PRAESENZ_PARTIEN = 30;
 
+    /* Wie viele Paarungen die zugeklappte Karte in der Tier-Liste zeigt.
+     *
+     * Waren acht, sind zwoelf (11.09.2026). Platz dafuer ist da: der
+     * Zeitraumsatz (drei Zeilen) und die Kuerzel-Legende (zwei bis drei)
+     * stehen jetzt hinter dem Info-Knopf des Abschnitts. Gemeldet:
+     * „vielleicht koennen wir den freigewordenen Platz irgendwie ja
+     * dafuer nutzen". Eine Zeile misst 34 px, die beiden Absaetze
+     * zusammen rund 130 — das sind knapp vier Zeilen, und zwoelf statt
+     * acht kostet vier. */
+    const MU_VORSCHAU = 12;
+
+    /* ── WELCHE PAARUNGEN DIE VORSCHAU ZEIGT ─────────────────────────
+     *
+     * Bis zum 11.09.2026: `all.slice(0, 8)` — die acht mit der hoechsten
+     * Quote. Zwei Dinge waren daran falsch.
+     *
+     * ERSTENS fehlten die schlechten Paarungen vollstaendig. Wer sich
+     * auf ein Turnier vorbereitet, will genau die sehen; die guten
+     * braucht er nicht zu ueben.
+     *
+     * ZWEITENS entschied allein die Quote, wer drankommt. Gemeldet:
+     * „ich seh ja jetzt hier zum Beispiel gegen Mega Greninja 197
+     * Matches, eine 63-prozentige Winrate. Vielleicht sollten wir denn,
+     * wenn wir hier schon nur sag mal zehn Matches hinschreiben koennen,
+     * die fuenf positive und fuenf negative, dann sollten wir auf jeden
+     * Fall von den fuenf Positiven die auch hinschreiben mit den meisten
+     * Begegnungen … weil ich glaube, da gibt's bestimmt noch andere
+     * Decks, wo man auch eine positive Winrate hat, aber mehr als 200
+     * Matches hatte."
+     *
+     * Das Argument traegt: eine 68-%-Paarung, die man zweimal trifft,
+     * zaehlt fuer die Vorbereitung weniger als eine 61-%-Paarung, die
+     * staendig kommt. Also wird JE SEITE nach Begegnungszahl ausgewaehlt
+     * und die Auswahl danach wieder nach Quote sortiert — man liest sie
+     * weiterhin von gut nach schlecht, aber es stehen die drin, die man
+     * wirklich trifft.
+     *
+     * Die Haelften sind bewusst gleich gross: sonst entschiede die Zahl
+     * der guten Paarungen eines Decks darueber, wie viele schlechte man
+     * zu sehen bekommt. Reicht eine Seite nicht, fuellt die andere auf —
+     * ein Deck mit nur drei schlechten Paarungen verschenkt sonst
+     * Zeilen.
+     */
+    function vorschauAuswahl(alle, wieViele) {
+        if (!Array.isArray(alle) || alle.length <= wieViele) return alle || [];
+        const n = (m) => (Number.isFinite(m.games) ? m.games : 0);
+        const gut = alle.filter(m => m.winRate >= 50).slice().sort((a, b) => n(b) - n(a));
+        const schlecht = alle.filter(m => m.winRate < 50).slice().sort((a, b) => n(b) - n(a));
+        const haelfte = Math.floor(wieViele / 2);
+        let ausGut = gut.slice(0, haelfte);
+        let ausSchlecht = schlecht.slice(0, wieViele - haelfte);
+        // Auffuellen, wenn eine Seite zu duenn ist.
+        if (ausGut.length + ausSchlecht.length < wieViele) {
+            const fehlt = wieViele - ausGut.length - ausSchlecht.length;
+            if (gut.length > ausGut.length) ausGut = gut.slice(0, ausGut.length + fehlt);
+            else ausSchlecht = schlecht.slice(0, ausSchlecht.length + fehlt);
+        }
+        return ausGut.concat(ausSchlecht).sort((a, b) => b.winRate - a.winRate);
+    }
+
     let _decks = null;          // deck_name -> { share, winRate, count }
     let _conv = null;           // computeConversionPerformance() result
     /* Stehen hinter _conv gezaehlte oder gewichtete Antritte? Der
@@ -778,6 +838,56 @@
         return _majorFeldCache;
     }
 
+    /* ── AUS WELCHEM FORMAT STAMMEN DIE PRAESENZZAHLEN? ──────────────
+     *
+     * BESTELLT (Betreiber, 11.09.2026, mit Blick auf den Formatwechsel
+     * zu TEF-30C am 25.09.): „sobald das Format wechselt, dann halt
+     * irgendwie den Hinweis geben, dass die Major-Daten noch vom alten
+     * Format sind. Wenn die Major-Daten im gleichen Format sind, dann
+     * ist es egal … sodass man halt vielleicht noch mal neben dem Major
+     * dann halt hinschreibt, in welchem Format das war."
+     *
+     * Genau so: im Normalfall steht weiter schlicht „Major" da. Nur wenn
+     * der Auszug, aus dem die Praesenzzahlen kommen, ein ANDERES Format
+     * traegt als das laufende, wird der Formatschluessel angehaengt —
+     * dann vergleicht die Zeile naemlich zwei verschiedene Kartenpools,
+     * und das muss dastehen, wo die Zahl steht.
+     *
+     * Beides kommt aus den Daten, nicht aus einer Liste: der Schluessel
+     * des Auszugs aus _majorZeitraum.key (gesetzt beim Laden der
+     * data/labs_tournament_decks_<Format>.csv), das laufende Format aus
+     * window.getCurrentMetaFormat() (gespeist von
+     * data/format_window.json). Ist eines von beiden unbekannt, wird
+     * nichts behauptet.
+     */
+    function majorFormatFremd() {
+        const z = _majorZeitraum;
+        const auszug = (z && z.key) ? String(z.key).trim().toUpperCase() : '';
+        const jetzt = (typeof window !== 'undefined'
+            && typeof window.getCurrentMetaFormat === 'function')
+            ? String(window.getCurrentMetaFormat() || '').trim().toUpperCase() : '';
+        if (!auszug || !jetzt || auszug === jetzt) return '';
+        return auszug;
+    }
+
+    /* Die Day-2-Kachel ist die einzige, die NUR Praesenzzahlen zeigt —
+       ohne Online-Zeile daneben, an der man das Format ablesen koennte.
+       Steht der Auszug in einem anderen Format, gehoert der Schluessel
+       deshalb in die Ueberschrift selbst. */
+    function day2Label() {
+        const de = isDe();
+        const grund = L('arc.day2Label', de ? 'Day-2-Quote (Major)' : 'Day 2 rate (major)');
+        const fremd = majorFormatFremd();
+        return fremd ? grund.replace(/\)$/, ' · ' + fremd + ')') : grund;
+    }
+
+    function majorQuelle() {
+        const fremd = majorFormatFremd();
+        return fremd
+            ? L('arc.quelleMajor', 'Major') + ' · ' + fremd
+            : L('arc.quelleMajor', 'Major');
+    }
+
     function tileGeteilt(role, tone, label, onlineWert, onlineAnzahl, majorWert, majorAnzahl, majorLeer, majorDuenn, tip, pfeil) {
         const de = isDe();
         const hat = !!tip;
@@ -826,7 +936,7 @@
                 <div class="arc-halbe">
                     ${halb(arw + onlineWert, L('arc.quelleOnline', 'online'),
                         onlineAnzahl, false, false)}
-                    ${halb(majorWert || '–', L('arc.quelleMajor', 'Major'),
+                    ${halb(majorWert || '–', majorQuelle(),
                         majorWert ? majorAnzahl : (majorLeer || ''),
                         !majorWert, majorWert && majorDuenn)}
                 </div>
@@ -908,7 +1018,18 @@
                    beim Major die Zahl der Antritte (deren Nenner im Hinweis
                    steht). Beides ist "so viele Leute haben das Deck
                    gespielt", nur aus zwei Quellen. */
-                _oFeld.listen ? `${fmtGanz(d.count)} / ≈ ${fmtGanz(_oFeld.listen)}` : fmtGanz(d.count),
+                /* NUR EINE ZAHL JE ZEILE (11.09.2026).
+                   Hier stand „3.683 / ≈ 45.591" — Zaehler und
+                   hochgerechneter Nenner. Gemeldet: „irgendwie stehen da
+                   bei online zwei verschiedene Zahlen. Also da auf jeden
+                   Fall nur eine Zahl schreiben."
+                   Es bleibt die GEZAEHLTE: die Listen dieses Decks. Der
+                   hochgerechnete Nenner war ohnehin der fragwuerdigere
+                   der beiden und steht unveraendert im Hinweis, samt
+                   Rechenweg und Spanne. Damit tragen beide Zeilen
+                   dasselbe: wie viele Leute das Deck gespielt haben,
+                   online und auf Praesenzturnieren. */
+                fmtGanz(d.count),
                 m ? `${esc(fmt(m.share))} %` : '',
                 m ? fmtGanz(m.antritte) : '',
                 majorLeer,
@@ -1150,7 +1271,7 @@
         const feld = _majorFeld();
         const d2 = (m && m.day2Quote != null && m.day1 >= DAY2_MIN_ANTRITTE)
             ? tile('day2', toneFor(feld.day2Quote != null ? m.day2Quote - feld.day2Quote : 0),
-                L('arc.day2Label', de ? 'Day-2-Quote (Major)' : 'Day 2 rate (major)'),
+                day2Label(),
                 `${esc(fmt(m.day2Quote))} %`,
                 esc(feld.day2Quote != null
                     ? L('arc.day2Ctx', de ? 'Schnitt aller Decks {s} %' : 'field average {s} %')
@@ -1163,7 +1284,7 @@
                     .replace('{d1}', fmtGanz(m.day1)),
                 arrow(feld.day2Quote != null ? m.day2Quote - feld.day2Quote : 0))
             : tile('day2', 'tie',
-                L('arc.day2Label', de ? 'Day-2-Quote (Major)' : 'Day 2 rate (major)'),
+                day2Label(),
                 '–',
                 esc(m
                     ? L('arc.day2Duenn', de ? 'zu wenige Antritte' : 'too few entries')
@@ -1177,8 +1298,26 @@
                         ? 'Für dieses Format gibt es noch kein Präsenzturnier mit diesem Deck. Day 2 ist eine reine Präsenzgröße.'
                         : 'No in-person event with this deck in this format yet. Day 2 is in-person only.'));
 
+        /* DER ZEITRAUMSATZ STEHT NICHT MEHR AUF DER KARTE (11.09.2026).
+           Gemeldet: „Dann haben wir hier irgendwie so ne
+           Zeitraumbeschreibung drinne. Die Zeitraumbeschreibung, die
+           kann auf jeden Fall komplett weg, und dann wuerd ich lieber
+           gucken, dass wir den freigewordenen Platz irgendwie sinnvoller
+           nutzen."
+
+           Er ist nicht geloescht, sondern umgezogen: derselbe Text stand
+           WORTGLEICH unter jeder der 29 Karten — er beschreibt das
+           Format, nicht das Deck. Einmal hinter dem Info-Knopf des
+           Abschnitts „Tier-Liste" sagt er dasselbe und kostet nichts.
+           Gemeldet wird er von erklaerungHtml() weiter unten. */
+        /* EINE AUSNAHME: die eingebettete Fassung in der Deck-Analyse.
+           Dort gibt es das Bedienelement „Daten ab", auf das sich der
+           letzte Satz bezieht — und KEINEN Abschnitts-Info-Knopf, hinter
+           den der Text sonst wandert. Ihn dort wegzunehmen hiesse, die
+           Antwort auf „wirkt mein Datenfenster hier?" ersatzlos zu
+           streichen. */
         return `<div class="arc-tiles arc-tiles--vier">${rep}${wr}${conv}${d2}</div>`
-             + zeitraumHtml(variante);
+             + (variante === 'embed' ? zeitraumHtml(variante) : '');
     }
 
     /* ── WELCHEN ZEITRAUM ZEIGEN DIESE VIER KACHELN? ────────────────────
@@ -1217,6 +1356,15 @@
      * Bedienelement, auf das er sich bezieht.
      */
     function zeitraumHtml(variante) {
+        const text = zeitraumText(variante);
+        /* Der Stil steht inline, weil css/ in dieser Runde gesperrt war.
+           Sobald es eine Regel .arc-zeitraum gibt, gehoert er dorthin. */
+        return `<p class="arc-zeitraum" title="${esc(text)}"`
+             + ` style="margin:8px 0 0;font-size:0.72em;line-height:1.35;color:var(--ink-2, #555);">`
+             + `${esc(text)}</p>`;
+    }
+
+    function zeitraumText(variante) {
         const de = isDe();
         const z = _majorZeitraum;
         /* BEFUND B2 (07.09.2026): HIER STAND „Win %". Die Kachel daneben
@@ -1272,12 +1420,7 @@
                 : ' The “data from” window above the card overview does not affect these four tiles — '
                   + 'the underlying files carry no per-row date.')
             : '';
-        const text = (de ? 'Zeitraum: ' : 'Period: ') + online + ' ' + major + fenster;
-        /* Der Stil steht inline, weil css/ in dieser Runde gesperrt ist.
-           Sobald es eine Regel .arc-zeitraum gibt, gehoert er dorthin. */
-        return `<p class="arc-zeitraum" title="${esc(text)}"`
-             + ` style="margin:8px 0 0;font-size:0.72em;line-height:1.35;color:var(--ink-2, #555);">`
-             + `${esc(text)}</p>`;
+        return (de ? 'Zeitraum: ' : 'Period: ') + online + ' ' + major + fenster;
     }
 
     // Four quantised steps, not a ramp: at every step the text colour is
@@ -1428,17 +1571,64 @@
                 m.majorAnzahl == null ? '–' : m.majorAnzahl}</td>`;
     }
 
+    /* Die Kuerzel-Legende unter der Matchup-Tabelle.
+     *
+     * SIE STEHT SEIT DEM 11.09.2026 NUR NOCH IN DER DECK-ANALYSE unter
+     * der Tabelle; in der Tier-Liste wandert sie hinter den Info-Knopf
+     * des Abschnitts. Gemeldet: „und wenn man das aufgeklappt hat, auch
+     * da unten den Text weg, dann lieber irgendwie neben Tier eins oder
+     * generell irgendwie neben Tierliste den Info-Button hinmachen, der
+     * dann alle Erklaerungssachen irgendwie dahinschreibt. Weil es ist
+     * sonst irgendwann zu viel Text, und zu viel Text verwirrt die
+     * Leute."
+     *
+     * Der Text ist derselbe geblieben — er steht nur noch EINMAL statt
+     * unter jeder der 29 aufgeklappten Tabellen. Die Hausregel aus
+     * tests/unit/test-sprache-win-rate.js bleibt gewahrt: ein Kuerzel
+     * ist erlaubt, WENN eine Legende es aufloest. Sie loest es weiterhin
+     * auf, nur an einer Stelle, die man einmal liest statt neunundzwanzig
+     * Mal ueberspringt.
+     */
+    function legendeText(hatMajor) {
+        const de = isDe();
+        return hatMajor
+            ? mitQuote(L('arc.muLegende', de
+                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Partien dahinter'
+                : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the games behind it'), 'ohneUnentschieden')
+            /* Ohne Praesenzdaten sagt EIN Satz, was zwei leere
+               Spalten nicht gesagt haetten: dass es sie gibt und
+               dass hier keine anfallen. */
+            : mitQuote(L('arc.muLegendeOhneMajor', de
+                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden. Präsenzturniere sind hier nicht dabei — für dieses Deck liegen in diesem Format keine vor.'
+                : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties. In-person events are not included — there are none for this deck in this format.'), 'ohneUnentschieden');
+    }
+
+    function legendeHtml(hatMajor, variante) {
+        /* NUR NOCH IM UEBERLAGERUNGSFENSTER.
+           In der Tier-Liste (inline) steht der Abschnitt „Tier-Liste"
+           mit seinem Info-Knopf darueber — dort wandert die Legende hin
+           (erklaerungHtml() weiter unten meldet sie).
+           Das Ueberlagerungsfenster, das die Trending-Kacheln oeffnen,
+           hat keinen solchen Knopf: es ist ein Fenster ueber der Seite,
+           nicht ein Abschnitt darin. Dort bliebe die Legende sonst
+           ersatzlos weg, und „WR" stuende unaufgeloest da — genau das
+           verbietet tests/unit/test-sprache-win-rate.js. */
+        if (variante === 'inline') return '';
+        return `<p class="arc-mu-legende">${esc(legendeText(hatMajor))}</p>`;
+    }
+
     function matchupTableHtml(name, opts) {
         const de = isDe();
         const collapsed = !!(opts && opts.collapsible);
         const preview = (opts && opts.preview) || 0;
+        const variante = (opts && opts.variante) || 'overlay';
         const all = matchupsFor(name);
         if (!all.length) {
             return `<p class="arc-empty">${esc(L('arc.noMatchups', de
                 ? 'Für dieses Deck liegen keine Matchup-Daten vor.'
                 : 'No matchup data for this deck.'))}</p>`;
         }
-        const rows = (preview && all.length > preview) ? all.slice(0, preview) : all;
+        const rows = (preview && all.length > preview) ? vorschauAuswahl(all, preview) : all;
         /* ── Eine Spalte ohne Zahlen ist keine Spalte ────────────────
          *
          * Der Betreiber am 02.09.2026, vor drei Spalten voller Striche:
@@ -1577,16 +1767,7 @@
                     <tbody>${body}</tbody>
                 </table>
             </div>
-            <p class="arc-mu-legende">${esc(hatMajor
-                ? mitQuote(L('arc.muLegende', de
-                    ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Partien dahinter'
-                    : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the games behind it'), 'ohneUnentschieden')
-                /* Ohne Praesenzdaten sagt EIN Satz, was zwei leere
-                   Spalten nicht gesagt haetten: dass es sie gibt und
-                   dass hier keine anfallen. */
-                : mitQuote(L('arc.muLegendeOhneMajor', de
-                    ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden. Präsenzturniere sind hier nicht dabei — für dieses Deck liegen in diesem Format keine vor.'
-                    : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties. In-person events are not included — there are none for this deck in this format.'), 'ohneUnentschieden'))}</p>${note}${praesenzNote}`;
+            ${legendeHtml(hatMajor, variante)}${note}${praesenzNote}`;
         if (!collapsed) return table;
         // Closed by default inline: the tiles are the scroll content, the
         // table is a reference you open when you need it. Otherwise a
@@ -1636,13 +1817,13 @@
             return `${head}${tilesHtml(name, v)}`;
         }
         const matchups = (v === 'inline')
-            ? matchupTableHtml(name, { collapsible: true, preview: 8 })
+            ? matchupTableHtml(name, { collapsible: true, preview: MU_VORSCHAU, variante: 'inline' })
             : `<h4 class="arc-mu-title">${esc(L('arc.matchupTitle', de ? 'Matchups' : 'Matchups'))}</h4>`
-              + matchupTableHtml(name);
+              + matchupTableHtml(name, { variante: v });
         // One row of actions, not two: separate rows for "all matchups"
         // and "full analysis" cost 108 px of a 595 px card on a phone.
         const total = matchupsFor(name).length;
-        const moreBtn = (v === 'inline' && total > 8)
+        const moreBtn = (v === 'inline' && total > MU_VORSCHAU)
             ? `<button type="button" class="arc-mu-more" data-deck="${esc(name)}">${
                 esc(L('arc.showAll', de ? 'Alle {n}' : 'All {n}').replace('{n}', String(total)))
               }</button>` : '';
@@ -1826,6 +2007,17 @@
             share:   d ? d.share : NaN,
             winRate: d ? d.winRate : NaN,
             count:   d ? d.count : NaN,
+            /* Die Online-Partien. Die Kachel auf der Seite zeigt sie
+               seit dem 02.09.2026 neben der Quote; das Bild trug sie
+               bis zum 11.09.2026 nicht — dort stand an der Stelle
+               "+3,30 ggue. 50 %", eine Zahl, die man der Quote daneben
+               ansieht. Gemeldet: "dieses Plus drei Komma drei gegenueber
+               fuenfzig Prozent, das kann da auch weg … dann haben wir
+               hier in dem Bild extrem viel Freiraum. Den Freiraum
+               sollten wir dann auch vielleicht nutzen, um einmal zu
+               zeigen Matches online, Winrate online und dann Matches
+               Major und Winrate Major." */
+            partien: d ? d.partien : NaN,
             perfPct: c ? c.perfPct : NaN,
             rawPct:  c ? c.rawPct : NaN,
             top8:    c ? c.top8 : NaN,
@@ -1855,11 +2047,69 @@
             majorDay2MinAntritte: DAY2_MIN_ANTRITTE,
             majorDay2Feld: _majorFeld().day2Quote,
             majorDuennAb:  MAJOR_DUENN_PARTIEN,
+            /* Leer, solange der Praesenzauszug im laufenden Format
+               liegt; sonst dessen Formatschluessel. Das Bild verlaesst
+               die Seite — wenn dort Major-Zahlen aus einem anderen
+               Kartenpool stehen, muss das AUF dem Bild stehen und nicht
+               nur daneben auf der Seite. */
+            majorFormat: majorFormatFremd(),
         };
     }
 
+    /* ── ALLES, WAS FRUEHER UNTER JEDER KARTE STAND ──────────────────
+     *
+     * Der Zeitraumsatz und die Kuerzel-Legende beschreiben das FORMAT,
+     * nicht das Deck: sie standen wortgleich unter jeder der 29 Karten.
+     * Seit dem 11.09.2026 stehen sie einmal hinter dem Info-Knopf des
+     * Abschnitts „Tier-Liste". Gemeldet: „dann lieber irgendwie neben
+     * Tier eins oder generell irgendwie neben Tierliste den Info-Button
+     * hinmachen, der dann alle Erklaerungssachen irgendwie dahinschreibt.
+     * Weil es ist sonst irgendwann zu viel Text, und zu viel Text
+     * verwirrt die Leute."
+     *
+     * GEMELDET, NICHT KOPIERT: die Saetze tragen Zahlen aus dem
+     * laufenden Datenstand (Turnierzahl, Zeitraum, Formatschluessel) und
+     * den Quotennamen aus js/win-rate-konvention.js. Eine Abschrift in
+     * js/ds-abschnitt-info.js waere beim naechsten Datenlauf falsch.
+     *
+     * js/app-tier-meta.js haengt das Ergebnis an seine eigene Meldung an
+     * — melde() ERSETZT, zwei Melder auf derselben Kennung wuerden sich
+     * gegenseitig loeschen.
+     */
+    window.getArchetypeErklaerung = function () {
+        const de = isDe();
+        const hatMajor = Object.keys(_major || {}).length > 0;
+        const fremd = majorFormatFremd();
+        let html = '';
+        if (fremd) {
+            /* Der Hinweis steht VORN, nicht in einer Fussnote: er
+               aendert, wie man jede Major-Zahl auf der Seite liest. */
+            html += '<p><strong>' + esc(de
+                ? 'Die Präsenzzahlen stammen aus einem anderen Format: ' + fremd + '.'
+                : 'The in-person figures come from a different format: ' + fremd + '.')
+                + '</strong> ' + esc(de
+                ? 'Online läuft bereits das aktuelle Format. Major-Anteil, Major-WR und Day-2-Quote vergleichen deshalb zwei verschiedene Kartenpools — dort steht der Formatschlüssel jeweils daneben.'
+                : 'Online already runs the current format. Major share, major WR and the day-2 rate therefore compare two different card pools — the format key is shown next to each of them.')
+                + '</p>';
+        }
+        html += '<p>' + esc(zeitraumText()) + '</p>';
+        html += '<p>' + esc(legendeText(hatMajor)) + '</p>';
+        html += '<p>' + esc(de
+            ? 'Die zugeklappte Karte zeigt ' + MU_VORSCHAU + ' Paarungen: je zur Hälfte die mit den meisten Begegnungen über und unter 50 %, danach nach Quote sortiert. Nicht die besten und schlechtesten — eine Paarung, die man zweimal trifft, zählt für die Vorbereitung weniger als eine, die ständig kommt. „Alle" zeigt die vollständige Liste.'
+            : 'The collapsed card shows ' + MU_VORSCHAU + ' pairings: half of them the most-played above 50 %, half the most-played below, then sorted by rate. Not the best and worst — a pairing you meet twice matters less for preparation than one you meet constantly. “All” shows the full list.')
+            + '</p>';
+        return html;
+    };
+
     window.getArchetypeFacts = function (name) {
         return load().then(() => factsFor(name));
+    };
+    /* Dieselbe Auswahlregel fuer das Bild (js/ds-share.js).
+       Eine zweite Fassung dort waere die naechste Stelle, die
+       auseinanderlaeuft — das Bild ist die Fassung, die die Seite
+       VERLAESST, und darf ihr nicht widersprechen. */
+    window.getArchetypeMatchupAuswahl = function (alle, wieViele) {
+        return vorschauAuswahl(alle, wieViele);
     };
     window.getArchetypeMatchups = function (name) {
         return load().then(() => matchupsFor(name));

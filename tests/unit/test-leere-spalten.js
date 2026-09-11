@@ -103,6 +103,11 @@ function tabelleMit(zeilen) {
         schneide('praesenzBilanz'),
         schneide('praesenzZelle'),
         schneide('praesenzZellen'),
+        /* Seit dem 11.09.2026 eigene Funktionen: die Kuerzel-Legende
+           steht in der Tier-Liste hinter dem Info-Knopf des Abschnitts
+           und nur im Ueberlagerungsfenster unter der Tabelle. */
+        schneide('legendeText'),
+        schneide('legendeHtml'),
         schneide('matchupTableHtml'),
         'return matchupTableHtml;',
     ].join('\n');

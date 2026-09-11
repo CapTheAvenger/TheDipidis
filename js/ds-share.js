@@ -51,6 +51,21 @@
         return 'S / (S + N + U)';
     }
 
+    /* Das KUERZEL derselben Konvention — fuer Spaltenkoepfe, in die der
+       ausgeschriebene Name nicht passt.
+       BEFUND 11.09.2026, im gerenderten Bild gesehen: der Spaltenkopf
+       zog „Siegquote ohne Unentschieden" rechtsbuendig bei x = 1174 und
+       lief damit ueber „Record" bei x = 1042 — zwei Beschriftungen
+       uebereinander. label() klippt nicht.
+       js/win-rate-konvention.js fuehrt seit dem 11.09.2026 eigens
+       kuerzel() dafuer. Die Hausregel (ein Kuerzel braucht eine Legende)
+       ist gewahrt: die Legende steht unter der Tabelle im selben Bild. */
+    function quotenKuerzel(konvention) {
+        var K = window.WinRateKonvention;
+        if (K && typeof K.kuerzel === 'function') return K.kuerzel(konvention || SHARE_KONVENTION);
+        return quotenName(konvention);
+    }
+
     function quotenFormel(konvention) {
         var K = window.WinRateKonvention;
         var e = (K && typeof K.hol === 'function') ? K.hol(konvention || SHARE_KONVENTION) : null;
@@ -429,8 +444,18 @@
             isFinite(spec.winRate) ? num(spec.winRate, 2) + ' %' : '–',
             C.ink,
             quotenName(),   /* Name aus js/win-rate-konvention.js, nicht abgeschrieben */
-            wrDelta === null ? L('keine Daten', 'no data')
-                : signed(wrDelta, 2) + ' ' + L('ggü. 50 %', 'vs 50%'),
+            /* HIER STAND „+3,30 ggue. 50 %" (bis 11.09.2026).
+               Gemeldet: „dieses Plus drei Komma drei gegenueber fuenfzig
+               Prozent, das kann da auch weg. Also das ist ja Quatsch,
+               weil das dreiundfuenfzig Prozent drei Komma drei mehr sind
+               als fuenfzig Prozent, das sieht man ja sofort."
+               Stimmt — der Abstand zu 50 ist die Zahl darueber minus 50.
+               An der Stelle steht jetzt, worauf die Quote ruht: die
+               Partien. Dieselbe Angabe traegt die Kachel auf der Seite
+               seit dem 02.09.2026 rechts neben der Quote. */
+            isFinite(spec.partien) && spec.partien > 0
+                ? num(spec.partien, 0) + ' ' + L('Partien', 'games')
+                : (wrDelta === null ? L('keine Daten', 'no data') : ''),
             /* Die Fussnote beschrieb eine vierte Konvention, die hier
                niemand rechnet. spec.winRate ist die Deck-Win-Rate aus
                data/limitless_online_decks.csv (win_rate_numeric), und die
@@ -440,10 +465,16 @@
                Konvention ohne Unentschieden. Dieselbe Zahl liefert das
                Battle Journal (js/battle-journal.js), das ebenfalls hier
                hineinzeichnet. */
-            (window.WinRateKonvention
-                ? window.WinRateKonvention.kurzHinweis('mitUnentschieden')
-                : L('Siege ÷ alle gespielten Matches',
-                    'wins ÷ all games played')),
+            /* DIE FORMEL STAND HIER, JETZT NICHT MEHR (11.09.2026).
+               Gemeldet: „bei den Bildern die Bezeichnung mit dem S durch
+               S plus N plus U, Unentschieden sehen wir, das kann da auch
+               weg." Der NAME der Konvention steht weiter als
+               Kachelbeschriftung darueber (quotenName(), aus
+               js/win-rate-konvention.js) — was wegfaellt, ist die
+               ausgeschriebene Formel darunter. Ein Bild fuer Instagram
+               ist kein Methodenteil; wer die Formel braucht, findet sie
+               auf der Seite hinter dem Info-Knopf. */
+            '',
             /* Beide Seiten rechnen Siege durch ALLE Partien — dieselbe
                Formel. Was sie trennt, ist die Remisquote: am Major rund
                11 %, online 1,3 %. Das drueckt die rechte Zahl um etwa
@@ -492,12 +523,18 @@
                     ? L('Schnitt aller Decks ', 'field average ') + num(convFeld, 2) + ' %'
                     : num(spec.top8, 0) + ' / ' + num(spec.brought, 0))
                 : L('zu wenig Daten', 'not enough data'),
+            /* „empirisch-bayessche Glaettung, K=50" ist weg (11.09.2026).
+               Gemeldet: „acht Komma vier sechs Prozent, Top-acht-Quote
+               online — da kann auch der letzte Satz einfach nur weg."
+               Der Hinweis auf eine DUENNE Grundlage bleibt: der sagt
+               nicht, wie gerechnet wird, sondern dass man der Zahl hier
+               weniger trauen soll. Und „Deck fehlt in der Top-Cut-Datei"
+               bleibt auch — ohne ihn stuende dort ein Strich ohne Grund. */
             hasConv
                 ? (spec.thin
-                    ? L('n unter 50 — zum Meta hin geglättet (K=50)',
-                        'n below 50 — smoothed toward the field (K=50)')
-                    : L('empirisch-bayessche Glättung, K=50',
-                        'empirical-Bayes shrinkage, K=50'))
+                    ? L('kleine Stichprobe — zum Feld hin geglättet',
+                        'small sample — smoothed toward the field')
+                    : '')
                 : L('Deck fehlt in der Top-Cut-Datei', 'deck absent from the top-cut file'),
             /* Day 2 hat KEINE Online-Seite — Online-Turniere haben keinen
                zweiten Tag. Deshalb steht sie hier als eigene Zeile unter
@@ -548,7 +585,30 @@
             [L('Datenraum', 'Data space'), spec.spaceLabel || '–'],
             [L('Format', 'Format'), spec.format || '–'],
             [L('Quelle', 'Source'), spec.source || '–'],
-            /* "META GESAMT 7.178" WAR EINE FALSCHE BESCHRIFTUNG.
+            /* HIER STAND „ANTRITTE MIT TOP-8-SCHNITT 12.331".
+               ----------------------------------------------------------
+               Gemeldet am 11.09.2026: „Dann hast Du hier noch einmal
+               Antritte mit Top-acht-Schnitt. Ist es denn wirklich
+               zwoelftausenddreihundert Top-acht-Dings? Guck mal, ob das
+               irgendwie klar ist."
+
+               Nachgerechnet: die Zahl ist richtig — Summe der Spalte
+               total_brought ueber alle 123 Zeilen von
+               data/online_tournament_top8_decks.csv = 12.331, also alle
+               Antritte auf Turnieren mit gewertetem Schnitt. Sie ist nur
+               nicht LESBAR: seit die Uebergabe repariert ist, steht unter
+               der Top-8-Quote „Schnitt aller Decks 6,4 %" und nicht mehr
+               „189 / 1.289" — damit hat die 12.331 auf dem Bild keinen
+               Bezugspunkt mehr. Eine Zahl ohne Bezug ist keine Auskunft,
+               sondern ein Raetsel.
+
+               An ihrer Stelle steht jetzt das Format der Praesenzzahlen,
+               wenn es vom laufenden abweicht (Bestellung vom selben
+               Abend). Die alte Warnung von unten bleibt hier stehen,
+               damit sie nicht noch einmal jemand als „Meta gesamt"
+               zurueckholt:
+
+               "META GESAMT 7.178" WAR EINE FALSCHE BESCHRIFTUNG.
                ----------------------------------------------------------
                spec.totalBrought ist die Summe von `total_brought_weighted`
                aus online_tournament_top8_decks.csv — der Nenner der
@@ -562,10 +622,21 @@
                Der Nenner des Anteils steht ohnehin schon oben in der
                ersten Spalte ("2.849 Listen") — hier fehlte nur, dass
                diese Zahl etwas anderes zaehlt. */
-            [L('Antritte mit Top-8-Schnitt', 'Entries at cut events'),
-             isFinite(spec.totalBrought) ? num(spec.totalBrought, 0) : '–'],
             [L('Stand', 'As of'), spec.stand || '–']
         ];
+        /* BESTELLT (11.09.2026): „bei Datenraum dann vielleicht auch noch
+           mal schreiben Global plus online, und wenn sich das letzte
+           Major in einem anderen Format findet, dann noch mal
+           dazuschreiben, dass das Major aus dem anderen Format ist als
+           online."
+           Der Datenraum sagt das erste schon („Global · Online +
+           Majors"). Das zweite kommt nur dazu, wenn es zutrifft — steht
+           der Praesenzauszug im laufenden Format, waere der Zusatz
+           Laerm. */
+        if (spec.majorFormat) {
+            lines.splice(3, 0, [L('Major-Daten aus', 'Major data from'),
+                String(spec.majorFormat)]);
+        }
         for (var li = 0; li < lines.length; li++) {
             label(ctx, lines[li][0], DC.PAD, ly + 12);
             ctx.font = fSans(13, 600);
@@ -594,7 +665,7 @@
         ctx.textAlign = 'right';
         label(ctx, L('Matches', 'Games'), xGames, ty);
         label(ctx, L('Record', 'Record'), xRecord, ty);
-        label(ctx, quotenName('ohneUnentschieden'), wrX + wrW - 10, ty);
+        label(ctx, quotenKuerzel('ohneUnentschieden'), wrX + wrW - 10, ty);
         ctx.textAlign = 'start';
         ctx.fillStyle = C.line;
         ctx.fillRect(tx, ty + 8, DC.W - 20 - tx, 1);
@@ -610,10 +681,50 @@
         var mus = all;
         var cutAfter = -1;
         if (all.length > maxRows) {
-            var head = Math.ceil((maxRows - 1) / 2);
-            var tail = (maxRows - 1) - head;
-            mus = all.slice(0, head).concat(all.slice(all.length - tail));
-            cutAfter = head - 1;
+            /* ── NICHT MEHR KOPF UND FUSS DER QUOTENLISTE ────────────
+               Bis zum 11.09.2026: die besten fuenf und die schlechtesten
+               vier. Gemeldet: „ich seh ja jetzt hier zum Beispiel gegen
+               Mega Greninja 197 Matches, eine 63-prozentige Winrate.
+               Vielleicht sollten wir denn, wenn wir hier schon nur sag
+               mal zehn Matches hinschreiben koennen, die fuenf positive
+               und fuenf negative, dann sollten wir auf jeden Fall von den
+               fuenf Positiven die auch hinschreiben mit den meisten
+               Begegnungen … weil ich glaube, da gibt's bestimmt noch
+               andere Decks, wo man auch eine positive Winrate hat, aber
+               mehr als zweihundert Matches hatte."
+
+               Genau: eine 68-%-Paarung, die man zweimal trifft, zaehlt
+               fuer die Vorbereitung weniger als eine 61-%-Paarung, die
+               staendig kommt. Ausgewaehlt wird jetzt je Seite nach
+               Begegnungszahl, angezeigt weiter nach Quote sortiert.
+
+               Die Regel steht in js/app-archetype-card.js und wird von
+               dort geholt — dieselbe Auswahl wie auf der Karte. Faellt
+               das Modul aus, bleibt es bei Kopf und Fuss: eine zweite
+               Abschrift der Regel waere schlimmer als die alte. */
+            /* Die Auswahl kommt womoeglich schon fertig mit: shareDeckCard()
+               trifft sie VOR dem Laden der Symbole, damit jede Zeile ihr
+               eigenes bekommt. Zweimal auswaehlen hiesse, dass die beiden
+               Stellen auseinanderlaufen koennen — also hat die
+               mitgelieferte Vorrang. */
+            var sel = (spec.matchupAuswahl && spec.matchupAuswahl.length)
+                ? spec.matchupAuswahl
+                : ((typeof window !== 'undefined'
+                    && typeof window.getArchetypeMatchupAuswahl === 'function')
+                    ? window.getArchetypeMatchupAuswahl(all, maxRows - 1) : null);
+            if (sel && sel.length) {
+                mus = sel;
+                /* Die Trennlinie sitzt, wo die Quote unter 50 faellt. */
+                cutAfter = -1;
+                for (var ci = 0; ci < mus.length; ci++) {
+                    if (mus[ci].winRate >= 50) cutAfter = ci;
+                }
+            } else {
+                var head = Math.ceil((maxRows - 1) / 2);
+                var tail = (maxRows - 1) - head;
+                mus = all.slice(0, head).concat(all.slice(all.length - tail));
+                cutAfter = head - 1;
+            }
         }
         var hidden = all.length - mus.length;
         var ry = ty + 14;
@@ -680,10 +791,17 @@
             var note = mus.some(function (m) { return m.thin; })
                 ? L('Graue Zeilen: unter ' + (spec.thinGames || 20) + ' Matches — die Quote ist dort noch ein Gerücht.',
                     'Grey rows: fewer than ' + (spec.thinGames || 20) + ' games — that rate is still a rumour.')
-                : L('Sortiert nach ' + quotenName('ohneUnentschieden') + ' ('
-                      + quotenFormel('ohneUnentschieden') + '). Jede Zeile trägt ihre Matchzahl.',
-                    'Sorted by ' + quotenName('ohneUnentschieden') + ' ('
-                      + quotenFormel('ohneUnentschieden') + '). Every row carries its game count.');
+                /* Loest das Spaltenkuerzel auf UND sagt, wonach ausgewaehlt
+                   wurde. Das zweite ist seit dem 11.09.2026 noetig: es
+                   sind nicht mehr die besten und schlechtesten, sondern
+                   je Seite die meistgespielten — wer das nicht weiss,
+                   haelt eine fehlende Paarung fuer einen Fehler. */
+                : L(quotenKuerzel('ohneUnentschieden') + ' = ' + quotenName('ohneUnentschieden')
+                      + ' (' + quotenFormel('ohneUnentschieden') + '). '
+                      + 'Gezeigt sind die meistgespielten Paarungen über und unter 50 %, sortiert nach Quote.',
+                    quotenKuerzel('ohneUnentschieden') + ' = ' + quotenName('ohneUnentschieden')
+                      + ' (' + quotenFormel('ohneUnentschieden') + '). '
+                      + 'Showing the most-played pairings above and below 50 %, sorted by rate.');
             ctx.font = fSans(11, 400);
             ctx.fillStyle = C.ink3;
             ctx.textBaseline = 'alphabetic';
@@ -1034,8 +1152,46 @@
             return {
                 name: name,
                 share: f.share, winRate: f.winRate, count: f.count,
+                partien: f.partien,
                 perfPct: f.perfPct, top8: f.top8, brought: f.brought, thin: f.thin,
                 totalBrought: f.totalBrought,
+                /* ── BEFUND 11.09.2026: DAS BILD BEKAM DIE HAELFTE NICHT ──
+                   deckCardCanvas() liest seit dem 02.09.2026 spec.majorShare,
+                   spec.majorWinRate, spec.majorPartien, spec.majorAntritte,
+                   spec.majorDay2 … und spec.expected. factsFor() liefert sie
+                   alle. NUR: diese Stelle hat sie nie abgeschrieben — sie
+                   zaehlt jedes Feld einzeln auf.
+
+                   Folge, live im Bild sichtbar: `hatMajorShare` und
+                   `hatMajorWr` waren immer falsch, also blieben alle
+                   Praesenzzeilen leer und die Fusszeile behauptete „fuer
+                   dieses Deck liegen in diesem Format keine vor" — waehrend
+                   die Kachel daneben auf der Seite 22,3 % aus 178 Antritten
+                   zeigte. Und `convFeld` blieb NaN, weshalb unter der
+                   Top-8-Quote „189 / 1.289" stand statt „Schnitt aller Decks
+                   6,4 %".
+
+                   Das war auch der „extrem viele Freiraum", der gemeldet
+                   wurde: drei Zeilen, die nie gezeichnet wurden.
+
+                   tests/unit/test-bild-online-major.js pruefte beide Enden —
+                   dass factsFor die Felder fuehrt und dass die Zeichenroutine
+                   sie liest — aber nicht die Uebergabe dazwischen. Der neue
+                   Test in tests/unit/test-bildkarte-uebergabe.js schliesst
+                   genau diese Luecke: jedes spec.X, das die Zeichenroutine
+                   liest, muss hier gesetzt werden. */
+                expected: f.expected,
+                majorShare: f.majorShare,
+                majorWinRate: f.majorWinRate,
+                majorPartien: f.majorPartien,
+                majorAntritte: f.majorAntritte,
+                majorRemis: f.majorRemis,
+                majorDay2: f.majorDay2,
+                majorDay2Antritte: f.majorDay2Antritte,
+                majorDay2MinAntritte: f.majorDay2MinAntritte,
+                majorDay2Feld: f.majorDay2Feld,
+                majorDuennAb: f.majorDuennAb,
+                majorFormat: f.majorFormat,
                 matchups: mus,
                 thinGames: f.thinGames || 20,
                 space: sp,
@@ -1146,7 +1302,22 @@
                         'The numbers for this deck are missing.'), 'warning');
                 return false;
             }
-            var mus = (spec.matchups || []).slice(0, 12);
+            /* SYMBOLE FUER GENAU DIE ZEILEN, DIE GEZEICHNET WERDEN.
+               Bis zum 11.09.2026 wurden die Symbole der ERSTEN ZWOELF der
+               nach Quote sortierten Liste geladen, das Bild adressierte
+               sie aber mit dem Index der AUSGEWAEHLTEN Zeilen
+               (art.mIcons[r]). Bei mehr als zehn Paarungen trugen die
+               unteren Zeilen damit fremde Symbole — ein Deck mit dem
+               Bild eines anderen daneben.
+               Also erst auswaehlen, dann laden. Die Zahl der Zeilen
+               rechnet deckCardCanvas() aus der Bildhoehe; zehn ist der
+               heutige Wert, mit Luft nach oben. */
+            var alleMus = (spec.matchups || []);
+            var sel = (typeof window.getArchetypeMatchupAuswahl === 'function'
+                && alleMus.length > 10)
+                ? window.getArchetypeMatchupAuswahl(alleMus, 9) : alleMus.slice(0, 12);
+            var mus = sel;
+            spec.matchupAuswahl = sel;
             return Promise.all([
                 loadIcons(spec.name, 2),
                 Promise.all(mus.map(function (m) {

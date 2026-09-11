@@ -196,12 +196,29 @@ describe('A-F4.7 — die Kacheln sagen, welchen Zeitraum sie zeigen', () => {
         await w.renderArchetypeCardInto(wirt, 'Dragapult');   // Variante 'embed'
         assert.match(wirt.innerHTML, /Daten ab/,
             'der Satz zum Datenfenster fehlt genau dort, wo das Bedienelement steht');
-        // In der Tierliste gibt es kein solches Bedienelement — dort waere
-        // der Satz nur Laerm.
+        /* IN DER TIERLISTE STEHT DER SATZ SEIT DEM 11.09.2026 GAR NICHT
+           MEHR AUF DER KARTE.
+           Er beschreibt das Format, nicht das Deck, und stand deshalb
+           wortgleich unter jeder der 29 Karten. Gemeldet: „die
+           Zeitraumbeschreibung, die kann auf jeden Fall komplett weg,
+           und dann wuerd ich lieber gucken, dass wir den freigewordenen
+           Platz irgendwie sinnvoller nutzen." Er ist nicht geloescht,
+           sondern hinter dem Info-Knopf des Abschnitts „Tier-Liste"
+           gelandet — getGetArchetypeErklaerung() liefert ihn dorthin,
+           js/app-tier-meta.js haengt ihn an seine Meldung.
+
+           In der EINGEBETTETEN Fassung bleibt er, und das ist der Grund:
+           dort steht das Bedienelement „Daten ab", auf das er sich
+           bezieht, und es gibt keinen Abschnitts-Info-Knopf. */
         const inline = w._archetypeCardInternals.render('Dragapult', 'inline');
-        assert.match(inline, /class="arc-zeitraum"/);
-        assert.doesNotMatch(inline, /Daten ab/,
-            'die Tierlisten-Fassung spricht von einem Bedienelement, das dort nicht existiert');
+        assert.doesNotMatch(inline, /class="arc-zeitraum"/,
+            'der Zeitraumsatz steht wieder unter jeder Karte der Tier-Liste');
+        const erkl = w.getArchetypeErklaerung();
+        assert.match(erkl, /limitless_online_decks\.csv/,
+            'der Text ist nicht hinter dem Info-Knopf gelandet, sondern verschwunden');
+        assert.match(erkl, /labs_tournament_decks_TEF-PBL\.csv/);
+        assert.doesNotMatch(erkl, /Daten ab/,
+            'die Abschnitts-Fassung spricht von einem Bedienelement, das dort nicht existiert');
     });
 
     it('ohne Praesenz-Auszug wird kein Zeitraum erfunden', async () => {

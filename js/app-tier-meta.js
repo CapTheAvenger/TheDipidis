@@ -348,9 +348,20 @@
                Der Rueckgabewert bleibt ein leerer String statt null:
                die Aufrufer haengen ihn per `+` an ihr HTML. */
             if (typeof window !== 'undefined' && window.DsAbschnittInfo) {
+                /* ANGEHAENGT, NICHT ERSETZT (11.09.2026).
+                   js/app-archetype-card.js hatte seinen Erklaertext bis
+                   dahin unter JEDE der 29 Deck-Karten gedruckt —
+                   Zeitraum, Quelldateien, Kuerzel-Legende, wortgleich.
+                   Er beschreibt das Format, nicht das Deck, und gehoert
+                   deshalb hierher. melde() ERSETZT: beide Melder auf
+                   derselben Kennung wuerden sich gegenseitig loeschen,
+                   also holt diese Stelle den fremden Teil ab und haengt
+                   ihn an. Fehlt das Modul, bleibt es bei diesem Satz. */
+                const fremd = (typeof window.getArchetypeErklaerung === 'function')
+                    ? (window.getArchetypeErklaerung() || '') : '';
                 window.DsAbschnittInfo.melde('tiers', {
                     titel: de ? 'Tier-Liste' : 'Tier list',
-                    html: '<p>' + sicher + '</p>'
+                    html: '<p>' + sicher + '</p>' + fremd
                 });
             }
             return '';

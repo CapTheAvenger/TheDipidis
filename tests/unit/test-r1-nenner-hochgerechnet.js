@@ -184,13 +184,31 @@ describe('B1 — der Nenner der Anteilskachel steht als HOCHGERECHNET da', () =>
         assert.equal(Math.round(feld.otherSpanne.bis * 10) / 10, 1702.5);
     });
 
-    it('an gesetzten Zahlen: die Kachel schreibt "≈" vor den Nenner', () => {
+    /* ── DER NENNER STEHT SEIT DEM 11.09.2026 NICHT MEHR AUF DER KACHEL
+       Gemeldet: „Einmal hier die Werte, die bei Share stehen, hast Du ja
+       online acht Komma eins Prozent. Da neben stehen dann irgendwelche
+       Zahlen, die koennen weg … irgendwie stehen da bei online zwei
+       verschiedene Zahlen. Also da auf jeden Fall nur eine Zahl
+       schreiben."
+
+       Geblieben ist die GEZAEHLTE: die Listen dieses Decks. Der
+       hochgerechnete Nenner war ohnehin der fragwuerdigere der beiden —
+       er steht unveraendert im Hinweis, samt Rechenweg, Spanne und
+       „HOCHGERECHNET". Die Zusicherung dreht sich damit um: auf der
+       Kachel darf er NICHT mehr stehen, im Hinweis muss er.
+
+       Der Grund, warum das keine Verschlechterung ist: eine Zahl, der
+       man ihre Herkunft nur im Hinweis ansieht, stand vorne wie eine
+       gezaehlte. Jetzt steht vorne nur Gezaehltes. */
+    it('auf der Kachel steht NUR die gezaehlte Zahl', () => {
         const sb = ladeKarte('de');
         const api = sb._archetypeCardInternals;
         api.setData(alsDecks(GESETZT), null);
         const html = api.tilesHtml('Alpha', 'embed');
-        assert.equal(anzahlZelle(html), '2.000 / ≈ 10.000',
-            'auf der Kachel steht der hochgerechnete Nenner ohne Kennzeichen');
+        assert.equal(anzahlZelle(html), '2.000',
+            'auf der Kachel stehen wieder zwei Zahlen');
+        assert.ok(!/≈/.test(anzahlZelle(html)),
+            'der hochgerechnete Nenner ist auf die Kachel zurueckgekehrt');
     });
 
     it('an gesetzten Zahlen: der Hinweis nennt Rechenweg, Spanne und "rund"', () => {
@@ -254,8 +272,8 @@ describe('B1 — der Nenner der Anteilskachel steht als HOCHGERECHNET da', () =>
 
         const erste = DECKS[0];
         const html = api.tilesHtml(erste.deck_name, 'embed');
-        assert.equal(anzahlZelle(html), `${gross(zahl(erste.count))} / ≈ ${gross(feld.listen)}`,
-            'die Kachel schreibt den hochgerechneten Nenner wieder wie eine gezaehlte Zahl');
+        assert.equal(anzahlZelle(html), gross(zahl(erste.count)),
+            'die Kachel schreibt wieder mehr als die eine gezaehlte Zahl');
 
         const txt = hinweis(html);
         assert.ok(txt.includes(`≈ ${gross(feld.listen)} Listen (eingegrenzt auf `

@@ -2961,13 +2961,32 @@
                         type: card.type || '',
                         rarity: card.rarity || '',
                         set_code: card.set_code || '',
-                        set_number: card.set_number || ''
+                        set_number: card.set_number || '',
+                        /* ACE SPEC ist eine Eigenschaft der KARTE, nicht
+                           eines Drucks — jeder Druck von "Unfair Stamp"
+                           ist eine. Diese Aufstellung fasst ohnehin nach
+                           Namen zusammen, also steht das Kennzeichen auf
+                           derselben Ebene. Gemessen an
+                           data/current_meta_card_data.csv (11.09.2026):
+                           23 Namen mit "Yes", 498 mit "No", 7 leer — und
+                           KEIN Name mit widerspruechlichen Werten. */
+                        is_ace_spec: ''
                     };
                 }
                 
                 // Add archetype to set (for unique deck count)
                 globalCardStats[cardName].archetypes.add(card.archetype);
                 globalCardStats[cardName].total_appearances++;
+                /* Ein einziges "Yes" genuegt; ein leeres Feld
+                   ueberschreibt ein gesetztes nie. Die Regel dahinter
+                   steht in backend/core/ace_spec_regel.py und laesst das
+                   Feld bewusst leer, wo sie nichts belegen kann — ein
+                   leeres Feld heisst "unbekannt", nicht "nein". */
+                if (String(card.is_ace_spec || '').trim().toLowerCase() === 'yes') {
+                    globalCardStats[cardName].is_ace_spec = 'Yes';
+                } else if (!globalCardStats[cardName].is_ace_spec && card.is_ace_spec) {
+                    globalCardStats[cardName].is_ace_spec = String(card.is_ace_spec).trim();
+                }
             });
             
             // Calculate global share and convert to array
@@ -2994,7 +3013,8 @@
                     type: card.type,
                     rarity: card.rarity,
                     set_code: card.set_code,
-                    set_number: card.set_number
+                    set_number: card.set_number,
+                    is_ace_spec: card.is_ace_spec
                 };
             });
             
@@ -3073,6 +3093,12 @@
          *     Item             17     Special Energy     3
          *     Supporter        14     Tool               2
          *
+         * Dazu seit dem 11.09.2026 die Querliste ACE SPEC: 6 Karten
+         * ueber der Schwelle (Unfair Stamp 53,2 %, Secret Box 50,0 %,
+         * Hero's Cape 41,9 %, Prime Catcher 30,6 %, Precious Trolley
+         * und Legacy Energy je 25,8 %) — nachgerechnet an derselben
+         * Datei, mit derselben Zusammenfassung nach Namen wie im Widget.
+         *
          * Genau der gewuenschte Effekt: Pokemon und Item fuellen die
          * Zehn, Tool zeigt zwei. Zum Vergleich lagen die anderen
          * geprueften Schwellen daneben — bei 10 % kaeme fast jede Art
@@ -3112,7 +3138,23 @@
             { id: 'stadion', typen: ['Stadium'],
               de: 'Stadion',         en: 'Stadiums' },
             { id: 'energie', typen: ['Special Energy'],
-              de: 'Spezial-Energie', en: 'Special Energy' }
+              de: 'Spezial-Energie', en: 'Special Energy' },
+            /* ACE SPEC steht QUER zu den anderen (11.09.2026, auf Wunsch
+               des Betreibers: "ruhig die ACE Spec in der jeweiligen
+               Kategorie anzeigen wo sie hingehoeren aber fuer Ace Spec
+               gesamt auch zeigen").
+               Sie ist keine Kartenart, sondern ein Kennzeichen: gemessen
+               an data/current_meta_card_data.csv (11.09.2026) verteilen
+               sich die 23 ACE-SPEC-Karten des Metas auf Item (14),
+               Ausruestung (4), Spezial-Energie (3) und Stadion (2). Sie
+               bleiben deshalb dort stehen, wo sie hingehoeren, UND
+               bekommen diese eigene Liste. Eine Karte steht damit
+               bewusst in zwei Listen — der Erklaertext hinter dem
+               Professor-Eich-Knopf sagt das.
+               `typen` fehlt hier absichtlich; ausgewaehlt wird ueber das
+               Kennzeichen, siehe staplesNachArt(). */
+            { id: 'ace', kennzeichen: 'ace_spec',
+              de: 'ACE SPEC', en: 'ACE SPEC' }
         ];
         let _staplesArt = null;
 
@@ -3136,10 +3178,25 @@
         function staplesNachArt(daten, artId) {
             const art = STAPLES_ARTEN.filter(a => a.id === artId)[0];
             if (!art) return [];
-            const menge = {};
-            art.typen.forEach(t => { menge[t] = true; });
+            /* Zwei Auswahlwege, und der Eintrag sagt welchen: `typen`
+               vergleicht die Spalte `type`, `kennzeichen` fragt ein
+               eigenes Feld ab. ACE SPEC ist der zweite Fall — es ist
+               keine Kartenart, sondern eine Eigenschaft, die quer zu
+               ihnen liegt.
+               Das Feld kennt drei Werte: "Yes", "No" und LEER. Leer
+               heisst "die Regel konnte es nicht belegen", nicht "nein"
+               (backend/core/ace_spec_regel.py). Hier zaehlt deshalb nur
+               ein ausdrueckliches "Yes" — eine Karte ohne Beleg in die
+               ACE-SPEC-Liste zu stellen waere geraten. */
+            const passt = art.kennzeichen === 'ace_spec'
+                ? (c => String(c.is_ace_spec || '').trim().toLowerCase() === 'yes')
+                : (() => {
+                    const menge = {};
+                    (art.typen || []).forEach(t => { menge[t] = true; });
+                    return c => menge[String(c.type || '').trim()] === true;
+                })();
             return (daten || [])
-                .filter(c => menge[String(c.type || '').trim()] === true)
+                .filter(passt)
                 .filter(c => Number(c.global_share) >= STAPLES_ART_SCHWELLE)
                 .slice(0, STAPLES_ART_MAX);
         }
@@ -3455,6 +3512,13 @@
                            + 'zehn: es gibt schlicht nicht mehr Karten, die so viele '
                            + 'Archetypen teilen. Eine auf zehn aufgefüllte Liste würde zehn '
                            + 'geteilte Karten behaupten, wo es zwei gibt.</p>'
+                           + '<p><strong>ACE SPEC</strong> ist keine Kartenart, sondern ein '
+                           + 'Kennzeichen: eine ACE SPEC darf nur einmal je Deck liegen. Diese '
+                           + 'Karten stehen deshalb doppelt — in ihrer Art (Item, Ausrüstung, '
+                           + 'Stadion, Spezial-Energie) <em>und</em> in der eigenen Liste. Gezählt '
+                           + 'wird nur, was ausdrücklich als ACE SPEC belegt ist; wo die Regel '
+                           + 'nichts belegen kann, bleibt die Karte draußen statt geraten '
+                           + 'dazuzukommen.</p>'
                            + '<p>Gerade über der Schwelle: ' + escapeHtml(artZeilen) + '.</p>')
                         : ('<p>The percentage under each card is the share of '
                            + '<strong>archetypes</strong> that play it — not the share of all '
@@ -3466,6 +3530,12 @@
                            + '. That is why a list is sometimes shorter than ten: there simply '
                            + 'are no more cards shared that widely. Padding to ten would claim '
                            + 'ten shared cards where there are two.</p>'
+                           + '<p><strong>ACE SPEC</strong> is not a card type but a marker: only '
+                           + 'one ACE SPEC may sit in a deck. Those cards therefore appear twice — '
+                           + 'in their own type (item, tool, stadium, special energy) <em>and</em> '
+                           + 'in the ACE SPEC list. Only cards explicitly marked as ACE SPEC are '
+                           + 'counted; where the rule cannot establish it, the card stays out '
+                           + 'rather than being guessed in.</p>'
                            + '<p>Currently above the threshold: ' + escapeHtml(artZeilen) + '.</p>')
                 });
             }

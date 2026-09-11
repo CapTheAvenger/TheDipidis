@@ -358,9 +358,18 @@ describe('Der "Other"-Eimer wird ausgewiesen', () => {
 });
 
 describe('EV-Rechner: die Spalte heisst, was sie zeigt', () => {
-    it('nicht mehr "Anteil am Feld"', () => {
+    it('nicht mehr "Anteil am Feld" — und seit 11.09.2026 auch nicht "Gewicht hier"', () => {
+        /* "Anteil am Feld" war falsch (gerendert wird das normierte
+           Gewicht). "Gewicht hier" war richtig, aber niemand wusste, was
+           es heisst — Betreiber am 11.09.2026: "Was heisst 'n das Gewicht
+           hier? Geht's darum, wie oft man erwartet es zu treffen?" Ja,
+           innerhalb dieses Meta-Bildes. Genau das steht jetzt da, und die
+           Legende unter der Tabelle loest es auf. */
         assert.doesNotMatch(EV, /'Anteil am Feld'/);
-        assert.match(EV, /'Gewicht hier', 'Weight here'/);
+        assert.doesNotMatch(EV, /'Gewicht hier'/);
+        assert.match(EV, /'wie oft', 'how often'/);
+        assert.match(EV, /wie oft = Anteil dieses Gegners/,
+            'die Legende unter der Tabelle loest "wie oft" nicht mehr auf');
     });
     it('der Tooltip nennt die Normierung', () => {
         assert.match(EV, /auf 100 % normiert/);
@@ -371,7 +380,11 @@ describe('EV-Rechner: die Spalte heisst, was sie zeigt', () => {
     });
     it('"Top 8" heisst jetzt, was es ist: die groessten Gegner MIT DATEN', () => {
         assert.doesNotMatch(EV, /'Nur Top 8 Archetypes'/);
-        assert.match(EV, /'Die größten Gegner mit Daten'/);
+        /* 11.09.2026: die Zahl steht jetzt im Namen ("Nur die 8
+           groessten"), der Zusatz "mit Paarungsdaten" bleibt — er ist
+           der ganze Grund, warum die Menge nicht die acht groessten des
+           Metas sind. */
+        assert.match(EV, /'Nur die 8 größten Gegner mit Paarungsdaten'/);
         assert.match(EV, /r\.gegner < 8/);
     });
 });

@@ -71,9 +71,37 @@
         return 'S / (S + N)';
     }
 
+    /* Das Kuerzel fuer die enge Spaltenueberschrift. Es kommt aus
+       demselben Modul wie der lange Name — ein abgeschriebenes Kuerzel
+       stuende fuer irgendeine der drei Konventionen. Erlaubt ist es nur,
+       weil unter der Tabelle eine Legende steht, die es aufloest
+       (Hausregel seit 02.09.2026, tests/unit/test-sprache-win-rate.js).
+       Faellt das Modul aus, steht dort die Formel — die ist immer
+       richtig, ein Kuerzel nie. */
+    function quotenKuerzel(konvention) {
+        var K = window.WinRateKonvention;
+        if (K && typeof K.kuerzel === 'function') {
+            var k = K.kuerzel(konvention || EV_KONVENTION);
+            if (k) return k;
+        }
+        return quotenFormel(konvention);
+    }
+
+    /* Der Formatschluessel fuer die Beschriftung des Meta-Bildes
+       ("Ganzes Meta TEF–PBL"). Er kommt aus derselben Quelle wie ueberall
+       sonst auf der Seite (data/format_window.json ueber
+       window._formatWindow) — abgeschrieben waere er nach der naechsten
+       Rotation falsch, und zwar still. */
+    function metaSchluessel() {
+        var fw = (typeof window !== 'undefined' && window._formatWindow) || {};
+        var a = String(fw.oldest_legal_set || '').toUpperCase();
+        var b = String(fw.current_set || '').toUpperCase();
+        return (a && b) ? (a + '\u2013' + b) : '';
+    }
+
     /* `formel` ist KEINE Funktion des Moduls, sondern ein Feld des
        Eintrags, den hol() liefert (js/win-rate-konvention.js:333 —
-       exportiert sind hol/kurz/hinweis/kurzHinweis/bilanz/…). */
+       exportiert sind hol/kurz/kuerzel/hinweis/kurzHinweis/bilanz/…). */
     function quotenFormel(konvention) {
         var K = window.WinRateKonvention;
         var e = (K && typeof K.hol === 'function') ? K.hol(konvention || EV_KONVENTION) : null;
@@ -109,23 +137,36 @@
      * sie einmal ein und behaelt sie. */
     var STORE   = 'ds_ev_wahl_v2';
 
-    /* Feldbilder. "Ganzes Feld" ist die Messung; die beiden anderen sind
-       Was-waere-wenn und als solche beschriftet. */
+    /* Die drei Meta-Bilder. "Ganzes Meta" ist die Messung; die beiden
+       anderen sind Was-waere-wenn und als solche beschriftet.
+
+       WORTWAHL (Betreiber, 11.09.2026): "Feld wird immer und ueberall als
+       Meta bezeichnet." Stimmt — und in diesem Abschnitt stand bis dahin
+       beides nebeneinander: die deutsche Ueberschrift sagte "Meta", die
+       englische "field", die erste Auswahl "Das ganze Meta", ihre
+       Erlaeuterung "the whole field". Ein Leser musste raten, ob das
+       dasselbe ist. Es heisst jetzt durchgehend Meta / meta.
+
+       ZUM NAMEN DER ZWEITEN: sie hiess einmal "Nur Top 8 Archetypes".
+       Genommen werden aber die acht groessten Gegner MIT DATEN, nicht die
+       acht groessten des Metas — bei 25 von 100 Decks ist das nicht
+       dieselbe Menge, und 16 Decks haben ueberhaupt keine acht Gegner mit
+       Daten, drei nur drei. Die Zahl steht deshalb im Namen, der Zusatz
+       "mit Paarungsdaten" bleibt, und wenn es weniger als acht sind,
+       sagt es die Zeile darunter. */
     var FELDER = [
-        { id: 'alle',  de: 'Das ganze Meta',      en: 'The whole field',
-          deSub: 'gewichtet nach gemessenem Anteil', enSub: 'weighted by measured share' },
-        /* Hiess "Nur Top 8 Archetypes". Genommen werden aber die acht
-           groessten Gegner MIT DATEN, nicht die acht groessten des Feldes
-           — bei 25 von 100 Decks ist das nicht dieselbe Menge, und 16
-           Decks haben ueberhaupt keine acht Gegner mit Daten, drei nur
-           drei. Der Name sagt das jetzt, und wenn es weniger als acht
-           sind, steht die echte Zahl in der Zeile darunter. */
-        { id: 'top8',  de: 'Die größten Gegner mit Daten', en: 'Largest opponents with data',
-          deSub: 'die acht größten, zu denen Paarungen vorliegen, untereinander gewichtet',
-          enSub: 'the eight largest we have pairings for, weighted among themselves' },
+        { id: 'alle',  de: 'Ganzes Meta',      en: 'The whole meta',
+          deSub: 'alle Gegner, zu denen Paarungen vorliegen — jeder mit dem Anteil, '
+               + 'den er im gemessenen Meta wirklich hat',
+          enSub: 'every opponent we have pairings for — each weighted by the share it '
+               + 'actually holds in the measured meta' },
+        { id: 'top8',  de: 'Nur die 8 größten Gegner mit Paarungsdaten',
+          en: 'Only the 8 largest opponents with pairing data',
+          deSub: 'Was-wäre-wenn für einen harten Tisch: nur diese acht, untereinander gewichtet',
+          enSub: 'what-if for a hard table: only those eight, weighted among themselves' },
         { id: 'gleich', de: 'Jedes Deck gleich oft', en: 'Every deck equally likely',
-          deSub: 'ignoriert den Anteil — zeigt die reine Kartenstärke',
-          enSub: 'ignores share — shows raw matchup strength' },
+          deSub: 'Was-wäre-wenn: ignoriert den Anteil — zeigt die reine Kartenstärke',
+          enSub: 'what-if: ignores share — shows raw matchup strength' },
     ];
 
     /* Acht, nicht neun.
@@ -290,13 +331,78 @@
         try { localStorage.setItem(STORE, JSON.stringify(v)); } catch (e) {}
     }
 
-    function balken(beitrag, groesster) {
-        var anteil = groesster > 0 ? Math.min(1, Math.abs(beitrag) / groesster) : 0;
-        var breite = (anteil * 50).toFixed(1);
-        var seite = beitrag >= 0 ? 'is-pos' : 'is-neg';
-        return '<span class="ds-bar-track is-diverging">'
-             + '<span class="ds-bar-fill ' + seite + '" style="width:' + breite + '%"></span>'
-             + '</span>';
+    /**
+     * Die zwei Zeilen ueber der Tabelle: worauf du dich vorbereiten
+     * solltest, und was fuer dich laeuft.
+     *
+     * WARUM SIE DIE SPALTEN "traegt bei" UND "Punkte" ERSETZEN
+     * -------------------------------------------------------
+     * Betreiber am 11.09.2026: "Traegt bei, da ist jetzt son komisches
+     * Diagramm, versteh ich nicht, brauch ich nicht. Und Punkte versteh
+     * ich nicht, brauch ich auch nicht. Also das soll ja irgendwie eine
+     * tiefen Analyse sein, um sich son bisschen vorzubereiten."
+     *
+     * Die Groesse dahinter war richtig und heisst `beitrag`:
+     * Anteil x (Quote - 50). Sie beantwortet "welche Paarung zieht mein
+     * Ergebnis am staerksten" — das ist genau die Vorbereitungsfrage.
+     * Falsch war nur, sie als Zahl mit zwei Nachkommastellen und einen
+     * Balken ohne Skala hinzustellen: beides sagt einem Leser nichts.
+     *
+     * Hier wird dieselbe Groesse benutzt, aber nie gezeigt. Sie sortiert
+     * nur, und was dasteht, sind die Zahlen, die der Leser ohnehin
+     * versteht: wie oft du dem Deck begegnest und wie du gegen es stehst.
+     *
+     * Gezeigt werden hoechstens drei je Seite, und nur Paarungen, die
+     * ueberhaupt in eine Richtung ziehen (Quote != 50). Ein Deck, gegen
+     * das es 50:50 steht, gehoert in keine der beiden Zeilen.
+     */
+    var VORBEREITUNG_MAX = 3;
+
+    function vorbereitungHtml(zeilen) {
+        if (!zeilen || !zeilen.length) return '';
+
+        function satz(liste) {
+            return liste.map(function (z) {
+                return '<strong>' + esc(z.gegner) + '</strong> ('
+                     + esc(quotenKuerzel()) + ' ' + esc(zahl(z.quote, 0)) + ' %, '
+                     + esc(zahl(z.gewicht * 100, 1)) + ' %)';
+            }).join(', ');
+        }
+
+        /* Eigene Kopie, eigene Sortierung. Die Tabelle darunter steht
+           nach "wie oft"; sich auf deren Reihenfolge zu verlassen waere
+           genau die stille Kopplung, die diesen Abschnitt schon einmal
+           auseinandergebracht hat. */
+        var nachBeitrag = zeilen.slice().sort(function (a, b) {
+            return b.beitrag - a.beitrag;
+        });
+        var schlecht = nachBeitrag.filter(function (z) { return z.beitrag < 0; })
+                                  .slice(-VORBEREITUNG_MAX).reverse();
+        var gut = nachBeitrag.filter(function (z) { return z.beitrag > 0; })
+                             .slice(0, VORBEREITUNG_MAX);
+
+        var teile = [];
+        if (schlecht.length) {
+            teile.push('<p class="ds-note ds-ev-warauf"><span class="ds-stat-label">'
+                + esc(L('Darauf vorbereiten', 'Prepare for these')) + '</span> '
+                + satz(schlecht) + '</p>');
+        }
+        if (gut.length) {
+            teile.push('<p class="ds-note ds-ev-laeuft"><span class="ds-stat-label">'
+                + esc(L('Das läuft für dich', 'These run in your favour')) + '</span> '
+                + satz(gut) + '</p>');
+        }
+        if (!teile.length) return '';
+        /* Die Klammerzahlen brauchen dieselbe Aufloesung wie die Tabelle
+           darunter — sonst steht hier ein Kuerzel ohne Legende. */
+        teile.push('<p class="ds-note ds-ev-vorblegende">' + esc(L(
+            'In Klammern: ' + quotenKuerzel() + ' gegen dieses Deck und wie oft du ihm '
+              + 'in diesem Meta-Bild begegnest. Sortiert danach, wie stark die Paarung '
+              + 'dein Ergebnis zieht — also beides zusammen, nicht nur die Quote.',
+            'In brackets: ' + quotenKuerzel() + ' against that deck and how often you meet it in '
+              + 'this picture of the meta. Sorted by how strongly the pairing pulls your '
+              + 'result — both together, not one of the two alone.')) + '</p>');
+        return teile.join('');
     }
 
     function ergebnisHtml(r, runden) {
@@ -308,9 +414,6 @@
         var siege = (r.ev / 100) * runden;
         var siegeUnten = (r.unten / 100) * runden;
         var siegeOben  = (r.oben / 100) * runden;
-        var groesster = r.zeilen.reduce(function (m, z) {
-            return Math.max(m, Math.abs(z.beitrag)); }, 0);
-
         /* Nur zeigen, wenn die Rechnung wirklich auf einem engeren
            Ausschnitt steht als die Abdeckung behauptet. Bei "Jedes Deck
            gleich oft" sind die Gewichte ohnehin kuenstlich, und die Zeile
@@ -344,7 +447,7 @@
                 + EV_MIN_ABDECKUNG + ' % Meta-Abdeckung. Die Zahl steht da, aber das '
                 + 'Unsicherheitsband darunter ist hier der wichtigere Teil.',
                 'Fewer than ' + EV_MIN_PARTIEN + ' games counted, or under '
-                + EV_MIN_ABDECKUNG + ' % field coverage. The number is shown, but the '
+                + EV_MIN_ABDECKUNG + ' % meta coverage. The number is shown, but the '
                 + 'uncertainty band below it is the part that matters here.')
             : '';
 
@@ -384,59 +487,87 @@
                   r.gegner + ' opponent decks · ' + r.partien.toLocaleString('en-GB') + ' games counted'
                     + (r.duenn ? ' · ' + r.duenn + ' of them under 20 games' : '')
                     + (engerAusschnitt
-                        ? ' · this calculation uses only ' + zahl(r.gerechnet, 1) + ' % of the field'
+                        ? ' · this calculation uses only ' + zahl(r.gerechnet, 1) + ' % of the meta'
                         : '')))
               + '</span>'
             + '</div>'
             + '</div>';
 
-        var zeilen = r.zeilen.map(function (z) {
+        /* SORTIERT NACH "wie oft" — nicht mehr nach dem Beitrag.
+           Bis zum 11.09.2026 stand die Tabelle in der Reihenfolge der
+           Spalte "Punkte". Die ist weggefallen, und damit waere die
+           Reihenfolge eine, die der Leser nirgends mehr ablesen kann:
+           Crustle stuende auf Platz 4, obwohl es 1,6 % des Metas ist.
+           Eine Sortierung, deren Schluessel nicht in der Tabelle steht,
+           sieht aus wie keine. Jetzt steht oben, wem man am haeufigsten
+           begegnet — und wer am staerksten zieht, steht in den zwei
+           Zeilen darueber. */
+        var zeilen = r.zeilen.slice().sort(function (a, b) {
+            return b.gewicht - a.gewicht;
+        }).map(function (z) {
             return '<tr class="' + (z.partien < 20 ? 'is-muted' : '') + '">'
                  + '<td>' + esc(z.gegner) + '</td>'
                  + '<td class="ds-num">' + esc(zahl(z.gewicht * 100, 1)) + ' %</td>'
                  + '<td class="ds-num">' + esc(zahl(z.quote, 1)) + ' %</td>'
                  + '<td class="ds-num">' + esc(String(z.partien)) + '</td>'
-                 + '<td>' + balken(z.beitrag, groesster) + '</td>'
-                 + '<td class="ds-num">' + esc(vorzeichen(z.beitrag, 2)) + '</td>'
                  + '</tr>';
         }).join('');
 
+        /* VIER SPALTEN, DAZU EINE LEGENDE — und warum nicht mehr.
+           Die Tabelle trug bis zum 11.09.2026 sechs Spalten, zwei davon
+           hat der Betreiber als unverstaendlich gemeldet ("trägt bei",
+           "Punkte"). Was sie zeigten, steht jetzt als Satz ueber der
+           Tabelle (vorbereitungHtml) — dieselbe Groesse, nur lesbar.
+
+           Die drei verbliebenen Zahlenspalten tragen Kuerzel. Das ist
+           erlaubt, weil die Legende direkt darunter sie aufloest — die
+           Hausregel dazu (tests/unit/test-sprache-win-rate.js) hat der
+           Betreiber am 02.09.2026 selbst vorgeschlagen, und die
+           Matchup-Tabelle der Archetyp-Karte haelt es genauso.
+
+           "wie oft" statt frueher "Gewicht hier": gerendert wird der
+           Anteil unter den GERECHNETEN Gegnern, auf 100 % normiert. Das
+           ist genau die Frage, die der Betreiber dazu gestellt hat
+           ("Geht's darum, wie oft man erwartet es zu treffen?") — ja,
+           innerhalb dieses Meta-Bildes. Der gemessene Meta-Anteil des
+           Decks steht in der Meta-Performance-Tabelle und kann davon
+           abweichen; die Legende sagt das. */
         var tabelle =
             '<div class="mobile-table-scroll">'
             + '<table class="ds-table ds-ev-tabelle">'
             + '<thead><tr>'
               + '<th>' + esc(L('Gegner-Deck', 'Opponent deck')) + '</th>'
-              /* Hier stand "Anteil am Feld" mit dem Untertitel "Wie oft du
-                 diesem Deck begegnest". Gerendert wird aber das GEWICHT:
-                 der Anteil unter den abgedeckten Gegnern, normiert auf
-                 100 %. Bei Terapagos Noctowl (16 % Abdeckung) lagen
-                 Beschriftung und Inhalt um den Faktor 6,5 auseinander.
-                 Die Zahl bleibt — sie muss auf 100 % summieren, sonst
-                 stimmt die Punkte-Spalte daneben nicht mehr. Nur der Name
-                 sagt jetzt, was sie ist. */
               + '<th class="ds-num" title="' + esc(L(
-                  'Anteil unter den Gegnern, zu denen Daten vorliegen — auf 100 % normiert, weil '
+                  'Anteil unter den Gegnern, mit denen hier gerechnet wird — auf 100 % normiert, weil '
                     + 'fehlende Paarungen weggelassen statt mit 50 % aufgefüllt werden. Der gemessene '
                     + 'Meta-Anteil dieses Decks steht in der Meta-Performance-Tabelle.',
-                  'Share among the opponents we have data for — normalised to 100 % because missing '
-                    + 'pairings are left out rather than filled in at 50 %. The measured field share '
+                  'Share among the opponents this calculation uses — normalised to 100 % because missing '
+                    + 'pairings are left out rather than filled in at 50 %. The measured meta share '
                     + 'is in the meta performance table.'))
-                + '">' + esc(L('Gewicht hier', 'Weight here')) + '</th>'
+                + '">' + esc(L('wie oft', 'how often')) + '</th>'
               + '<th class="ds-num" title="' + esc(L(
                   quotenHinweis() + ' Ein 3-0 zählt hier deshalb nicht als 100 %.',
                   quotenHinweis() + ' A 3-0 therefore does not count as 100 % here.'))
-                + '">' + esc(L('Deine ' + quotenName(), 'Your ' + quotenName())) + '</th>'
-              + '<th class="ds-num">' + esc(L('Matches', 'Games')) + '</th>'
-              + '<th>' + esc(L('trägt bei', 'contributes')) + '</th>'
+                + '">' + esc(quotenKuerzel()) + '</th>'
               + '<th class="ds-num" title="' + esc(L(
-                  'Anteil × (' + quotenName() + ' − 50). Die Summe dieser Spalte ist genau der Abstand deiner erwarteten ' + quotenName() + ' von 50 %. ' + quotenHinweis(),
-                  'Share × (' + quotenName() + ' − 50). This column sums to exactly how far your expected ' + quotenName() + ' sits from 50 %. ' + quotenHinweis()))
-                + '">' + esc(L('Punkte', 'Points')) + '</th>'
+                  'Gezählte Matches zwischen deinem Deck und diesem Gegner. Darauf beruht die Quote daneben.',
+                  'Games counted between your deck and this opponent. The rate next to it rests on them.'))
+                + '">' + esc(L('M', 'G')) + '</th>'
             + '</tr></thead>'
             + '<tbody>' + zeilen + '</tbody>'
-            + '</table></div>';
+            + '</table></div>'
+            + '<p class="ds-note ds-ev-legende">' + esc(L(
+                'wie oft = Anteil dieses Gegners an den Runden, mit denen hier gerechnet wird · '
+                  + quotenKuerzel() + ' = ' + quotenName() + ', ' + quotenFormel() + ' · '
+                  + 'M = gezählte Matches, auf denen diese Quote beruht. '
+                  + 'Blasse Zeilen stehen auf weniger als 20 Matches.',
+                'how often = this opponent\u2019s share of the rounds this calculation uses · '
+                  + quotenKuerzel() + ' = ' + quotenName() + ', ' + quotenFormel() + ' · '
+                  + 'G = games counted behind that rate. '
+                  + 'Faded rows rest on fewer than 20 games.'))
+            + '</p>';
 
-        return kacheln + tabelle;
+        return kacheln + vorbereitungHtml(r.zeilen) + tabelle;
     }
 
     function rahmenHtml(decks, gewaehlt, feld, runden) {
@@ -466,21 +597,31 @@
             + 'Gegner im Meta hat. Heraus kommt die ' + quotenName() + ', mit der du über ein ganzes Turnier '
             + 'rechnen kannst — nicht gegen ein Deck, sondern gegen alle auf einmal.',
             'The heatmap says who beats whom. This says what that means for <em>you</em>: pick your '
-            + 'deck and every matchup is weighted by how much of the field that opponent is. The '
+            + 'deck and every matchup is weighted by how much of the meta that opponent is. The '
             + 'result is the ' + quotenName() + ' to expect across a whole tournament — not against one deck, '
             + 'but against all of them at once.');
         var evGemeldet = false;
         if (typeof window !== 'undefined' && window.DsAbschnittInfo) {
             window.DsAbschnittInfo.melde('ev', {
-                titel: L('Gegen welches Meta?', 'Against which field?'),
+                titel: L('Dein Deck gegen das Meta', 'Your deck vs. the meta'),
                 html: '<p>' + evText + '</p>'
             });
             evGemeldet = true;
         }
 
         return ''
+        /* Die eigene Ueberschrift ist am 11.09.2026 weggefallen.
+           Der Abschnitt traegt seit der Umstellung auf ds-sections.js
+           bereits eine Ueberschrift ("Dein Deck gegen das Meta"); diese
+           hier stand direkt darunter und sagte fast dasselbe noch einmal.
+           Betreiber: "der Untertext gegen welches Meta kann weg, das
+           ergibt doch an der Stelle keinen erhoehten Mehrwert."
+
+           Der Rueckfall bleibt: ohne ds-sections (alte Ansicht, Test,
+           kaputtes Register) gaebe es sonst gar keine Ueberschrift. */
         + '<div class="ds-panel ' + BLOCK + '">'
-        + '<h3 class="ds-label">🎯 ' + esc(L('Gegen welches Meta?', 'Against which meta?')) + '</h3>'
+        + (evGemeldet ? '' : '<h3 class="ds-label">🎯 '
+            + esc(L('Dein Deck gegen das Meta', 'Your deck vs. the meta')) + '</h3>')
         + (evGemeldet ? '' : '<p class="ds-note">' + evText + '</p>')
         + '<div class="ds-controls">'
           + '<label class="ds-field is-wide"><span class="ds-stat-label">'
@@ -511,7 +652,7 @@
             + '— darum steht die Abdeckung daneben. Datenraum: Global/EN, Limitless Online.',
             'The sum is <strong>share × ' + quotenName() + '</strong> (' + quotenFormel() + ') over every opponent we have data for. Rates '
             + 'are smoothed (beta-binomial, k = 20) so a 3-0 does not pass as 100 %. The band is ±1.96 '
-            + 'standard deviations from the spread of the individual matchups; it treats the field '
+            + 'standard deviations from the spread of the individual matchups; it treats the meta '
             + 'shares as known and is therefore narrow rather than wide. Pairings without data are '
             + 'left out, not filled in at 50 % — which is why coverage is stated. Data space: '
             + 'Global/EN, Limitless Online.');
@@ -532,8 +673,18 @@
                 ? 'nur ' + r.gegner + ' Gegner haben Paarungen mit diesem Deck — mehr gibt es nicht'
                 : 'only ' + r.gegner + ' opponents have pairings with this deck — there are no more';
         }
-        block.querySelector('.ds-ev-feldnote').textContent =
-            (de() ? f.de : f.en) + ' — ' + sub + '.';
+        /* Der Formatschluessel gehoert an das GEMESSENE Meta-Bild, nicht
+           an die beiden Was-waere-wenn. Betreiber am 11.09.2026: "hier
+           steht jetzt zwar das ganze Meta, aber was genau heisst es?"
+           Ab jetzt: "Ganzes Meta TEF–PBL — alle Gegner, zu denen …".
+           Fehlt window._formatWindow (frueher Ladezustand), bleibt der
+           Name ohne Schluessel stehen statt mit einem falschen. */
+        var name = (de() ? f.de : f.en);
+        if (feld === 'alle') {
+            var schluessel = metaSchluessel();
+            if (schluessel) name += ' ' + schluessel;
+        }
+        block.querySelector('.ds-ev-feldnote').textContent = name + ' — ' + sub + '.';
 
         block.querySelector('.ds-ev-ergebnis').innerHTML = ergebnisHtml(r, runden);
         block.querySelector('.ds-ev-fuss').innerHTML = fussHtml(r);

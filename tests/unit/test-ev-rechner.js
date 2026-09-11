@@ -231,8 +231,16 @@ describe('EV-Rechner — gebaut aus den Bausteinen', () => {
         // Die Abnahmebedingung von css/components.css: ein neuer Screen
         // ohne eine einzige neue Sonderregel. Was fehlte, war die
         // Bedienzeile — die ist jetzt Baustein, nicht Sonderfall.
+        /* 'ds-bar-track' stand hier bis zum 11.09.2026. Der Balken in
+           der Spalte "traegt bei" ist auf Ansage des Betreibers
+           weggefallen ("son komisches Diagramm, versteh ich nicht,
+           brauch ich nicht") — was er zeigte, steht jetzt als Satz ueber
+           der Tabelle. Ein Baustein, den der Abschnitt nicht mehr
+           braucht, gehoert nicht in seine Pflichtliste; die
+           Abnahmebedingung war "keine EIGENE Regel", nicht "benutze
+           jeden Baustein". */
         for (const k of ['ds-panel', 'ds-label', 'ds-note', 'ds-stat-row',
-                         'ds-stat', 'ds-table', 'ds-bar-track', 'ds-controls',
+                         'ds-stat', 'ds-table', 'ds-controls',
                          'ds-field', 'ds-select', 'ds-number']) {
             assert.ok(CODE.includes(k), 'benutzt ' + k + ' nicht');
         }

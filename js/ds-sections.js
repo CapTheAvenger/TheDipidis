@@ -79,9 +79,15 @@
         { id: 'cards',   auf: true,  nimm: ['div.top-cards-container'],
           de: ['Meistgespielte Karten', ''],
           en: ['Most played cards', ''] },
+        /* Hiess bis zum 11.09.2026 deutsch "Gegen welches Meta?" und
+           englisch "Against which field?" — zwei Namen fuer denselben
+           Abschnitt, und im Block darunter stand die Frage gleich noch
+           einmal. Betreiber: "Feld wird immer und ueberall als Meta
+           bezeichnet." Der Name sagt jetzt, was man hier einstellt: sein
+           eigenes Deck, und wogegen. */
         { id: 'ev',      auf: false, nimm: ['div.ds-ev-block'],
-          de: ['Gegen welches Meta?', 'was dein Deck über ein ganzes Turnier holt'],
-          en: ['Against which field?', 'what your deck scores across a whole tournament'] },
+          de: ['Dein Deck gegen das Meta', 'was dein Deck über ein ganzes Turnier holt'],
+          en: ['Your deck vs. the meta', 'what your deck scores across a whole tournament'] },
         { id: 'tiers',   auf: false, nimm: ['__tiers__'],
           de: ['Tier-Liste', 'alle Archetypen nach Stärke gruppiert'],
           en: ['Tier list', 'all archetypes grouped by strength'] },

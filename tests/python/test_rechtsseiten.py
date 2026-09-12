@@ -83,24 +83,38 @@ def test_die_seiten_nennen_die_wirklich_benutzten_dienste():
         'zu ihnen gehoert ins Impressum')
 
 
-def test_die_erklaerung_behauptet_nichts_ueber_schriften_was_nicht_stimmt():
+def test_die_erklaerung_beschreibt_die_schriften_so_wie_sie_sind():
     """Der teuerste Fehler waere hier eine Aussage, die nicht zur Seite passt.
 
-    Die Erklaerung sagt, Nunito liege lokal. Solange index.html die
-    Schrift noch von fonts.googleapis.com laedt, ist das falsch — und
-    eine falsche Datenschutzerklaerung ist schlechter als eine
-    unangenehme richtige.
+    Eine falsche Datenschutzerklaerung ist schlechter als eine
+    unangenehme richtige: sie sieht richtig aus. Diese Pruefung haelt
+    deshalb BEIDE Richtungen fest und zwingt dazu, den Absatz
+    nachzuziehen, sobald die Schrift umgezogen ist.
+
+    Die erste Fassung suchte den Satz als eine Zeile und war gruen,
+    obwohl die Behauptung falsch war — im HTML steht er ueber zwei
+    Zeilen. Deshalb wird hier Leerraum normalisiert.
     """
-    # Leerraum normalisieren: der Satz steht im HTML ueber zwei Zeilen,
-    # und die erste Fassung dieser Pruefung suchte ihn als eine — sie
-    # war deshalb gruen, waehrend die Behauptung falsch war. Genau der
-    # Fehler, den sie verhindern soll.
     ds = re.sub(r'\s+', ' ', _lies('datenschutz.html'))
     index = _lies('index.html')
-    sagt_lokal = 'liegt seit dem 12.09.2026 auf unserem eigenen Server' in ds
     laedt_extern = 'fonts.googleapis.com/css2' in index
-    assert not (sagt_lokal and laedt_extern), (
-        'datenschutz.html behauptet, die Schrift liege lokal — index.html '
-        'laedt sie aber weiter von fonts.googleapis.com. Entweder den '
-        'Ablauf "Schriften spiegeln" laufen lassen und index.html '
-        'umstellen, oder den Satz in der Erklaerung zuruecknehmen.')
+    sagt_extern = ('wird derzeit noch über' in ds
+                   and 'fonts.googleapis.com' in ds)
+    sagt_lokal = 'auf unserem eigenen Server' in ds and 'keine Verbindung' in ds
+
+    if laedt_extern:
+        assert sagt_extern, (
+            'index.html laedt die Schrift von fonts.googleapis.com, die '
+            'Datenschutzerklaerung sagt das aber nicht. Entweder den '
+            'Absatz zuruecknehmen oder den Ablauf "Schriften spiegeln" '
+            'laufen lassen und index.html umstellen.')
+        assert not sagt_lokal, (
+            'Die Erklaerung behauptet, die Schrift liege lokal — '
+            'index.html laedt sie weiter bei Google.')
+    else:
+        assert not sagt_extern, (
+            'Die Schrift liegt lokal, die Erklaerung behauptet aber '
+            'weiter einen Abruf bei Google. Absatz nachziehen.')
+        assert sagt_lokal, (
+            'Die Schrift liegt lokal, die Erklaerung sagt es nicht. Das '
+            'ist die gute Nachricht, und sie gehoert hinein.')

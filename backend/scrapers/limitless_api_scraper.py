@@ -195,6 +195,42 @@ def formatfenster(datenverzeichnis: str = "data") -> List[Tuple[str, str]]:
         datum = eintrag.get("release_date")
         if datum:
             heraus.append((schluessel, datum))
+
+    # DAS LAUFENDE FENSTER KOMMT AUS format_window.json, NICHT AUS DER
+    # HANDLISTE.
+    #
+    # ROTATIONEN ist eine gepflegte Liste — und genau deshalb ist sie in
+    # dem Moment leer, in dem es zaehlt: am Tag der Rotation steht das
+    # neue Format noch nicht drin. Bis 12.09.2026 ordnete
+    # formatschluessel() dann ALLE Turniere danach weiter dem alten
+    # Fenster zu, und `fehlendes_fenster()` meldete das als
+    # ::warning:: — auf einem taeglichen Lauf liest das niemand.
+    #
+    # Der laufende Schluessel ist ableitbar: <oldest_legal>-<current>
+    # aus format_window.json, Fensterbeginn ist das Release des
+    # obersten Sets. Dieselbe Datei, die update_sets.py mit zwei
+    # Riegeln (Monotonie, Anker) gegen Fehlwechsel schuetzt.
+    #
+    # Konkreter Anlass: 30C erscheint am 16.09.2026, wird am 25.09.
+    # legal, Frankfurt ist am 26.09. — die Handliste haette eine Nacht
+    # Zeit gehabt.
+    try:
+        with open(os.path.join(datenverzeichnis, "format_window.json"),
+                  encoding="utf-8") as datei:
+            fw = json.load(datei)
+        laufend_set = str(fw.get("current_set") or "").strip().upper()
+        laufend_alt = str(fw.get("oldest_legal_set") or "").strip().upper()
+        laufend_datum = str(
+            (meta.get(laufend_set) or {}).get("release_date") or "").strip()
+        if laufend_set and laufend_alt and laufend_datum:
+            laufend = f"{laufend_alt}-{laufend_set}"
+            if laufend not in {k for k, _ in heraus}:
+                heraus.append((laufend, laufend_datum))
+    except (OSError, ValueError, KeyError):
+        # Fehlt oder ist kaputt: dann gilt die Handliste allein. Das ist
+        # der Stand von vor dieser Aenderung, nicht schlechter.
+        pass
+
     heraus.sort(key=lambda x: x[1], reverse=True)
     _fenster_zwischenspeicher = heraus
     return heraus
@@ -267,7 +303,18 @@ def fehlendes_fenster(datenverzeichnis: str = "data") -> Optional[Tuple[str, str
         except (OSError, csv.Error):
             continue
 
+    # Auch das abgeleitete laufende Fenster zaehlt als bekannt — sonst
+    # meldet der Waechter genau das Set, das gerade richtig eingeordnet
+    # wird.
     bekannt = {s for _, s in ROTATIONEN}
+    try:
+        with open(os.path.join(datenverzeichnis, "format_window.json"),
+                  encoding="utf-8") as datei:
+            bekannt.add(str((json.load(datei)).get("current_set")
+                            or "").strip().upper())
+    except (OSError, ValueError):
+        pass
+    bekannt.discard("")
     for code, eintrag in meta.items():
         datum = (eintrag or {}).get("release_date")
         if not datum or datum <= juengstes or code in bekannt:
@@ -850,6 +897,33 @@ def zeilen_fuer_turnier(turnier: dict, details: dict,
         "format": turnier.get("format", ""),
         "players": spieler, "organizer_id": turnier.get("organizerId", ""),
         "is_online": details.get("isOnline", ""),
+        # ANGABE DER QUELLE, NICHT NACHGEPRUEFT — nicht danach filtern.
+        #
+        # `has_decklists` ist woertlich das Feld `decklists` aus
+        # /tournaments/{id}/details. Es sagt, was Limitless ueber das
+        # Turnier BEHAUPTET, nicht, was wir an Listen bekommen haben.
+        # Wir schreiben es unveraendert weiter (Hausregel "Report,
+        # don't silently repair"): ein Widerspruch zwischen Behauptung
+        # und Bestand ist eine Aussage ueber die Quelle und darf nicht
+        # wegkorrigiert werden.
+        #
+        # GEMESSEN AM 12.09.2026 ueber data/online_api_tournaments.csv
+        # (410 Turniere) gegen data/online_api_cards_TEF-PBL.csv:
+        #   True  199   davon 199 mit Kartenzeilen
+        #   False   1   MIT 816 Kartenzeilen (Turnier
+        #               6a8c23ae8302ae761e5fb0bc, SEASAC League
+        #               Challenge #24, 126 Standings-Zeilen)
+        #   leer  210   = alle Turniere mit depth='archetypen'. Dort
+        #               wird /details gar nicht erst geholt (siehe
+        #               main(): `details = {}`), das Feld ist also
+        #               nicht "nein", sondern "nicht gefragt".
+        # Umgekehrt gibt es 0 Turniere mit has_decklists=True und ohne
+        # Kartenzeilen.
+        #
+        # Wer wissen will, ob Decklisten VORLIEGEN, zaehlt die Zeilen in
+        # online_api_cards_<FENSTER>.csv zur tournament_id — das ist die
+        # gemessene Antwort. `has_decklists` beantwortet diese Frage
+        # nachweislich falsch.
         "has_decklists": details.get("decklists", ""),
         "swiss_rounds": swiss, "phases": len(phasen),
         "standings_rows": len(standings), "pairings_rows": len(pairings),

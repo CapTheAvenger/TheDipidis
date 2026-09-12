@@ -61,22 +61,41 @@ CONSUMERS = {
     # Rotation kann die Seite auf ein Set schalten, fuer das es keine
     # Kartendaten gibt.
     #
-    # ACHTUNG, gemessen beim Eintragen: diese vier Dateien sind
-    # SEMIKOLON-getrennt, der Spaltenpruefer dieses Waechters liest
+    # ACHTUNG, gemessen beim Eintragen (09.09.2026): diese vier Dateien
+    # sind SEMIKOLON-getrennt, der Spaltenpruefer dieses Waechters las
     # Komma. Mit einer required-Liste meldete er prompt "Pflichtspalten
     # in JEDER Zeile leer" — fuer Dateien, die vollstaendig gefuellt
-    # sind. Deshalb hier bewusst OHNE Spaltenvertrag: geprueft werden
-    # Vorhandensein und Nicht-Leere, und das ist genau das, was gefehlt
-    # hat. Wer den Vertrag will, muss dem Pruefer erst das Trennzeichen
-    # beibringen — das ist ein eigener Eingriff, kein Nebenbei.
+    # sind. Sie standen deshalb ohne Spaltenvertrag da, mit dem Vermerk:
+    # "Wer den Vertrag will, muss dem Pruefer erst das Trennzeichen
+    # beibringen."
+    #
+    # NACHGEHOLT 12.09.2026. `consumer_sep()` liest das Trennzeichen
+    # jetzt aus dem `sep`-Feld der Datei, `check_schema` und
+    # `tote_spalten` benutzen es. Die Spaltenlisten unten sind KEINE
+    # Wunschliste, sondern die Kopfzeile der echten Datei, am
+    # 12.09.2026 abgelesen:
+    #
+    #   online_api_tournaments.csv        15 Spalten,    410 Zeilen
+    #   online_api_archetypes.csv         16 Spalten, 17.980 Zeilen
+    #   online_api_cards_TEF-PBL.csv      13 Spalten, 274.897 Zeilen
+    #   online_api_matchups_TEF-PBL.csv   11 Spalten,  84.463 Zeilen
+    #
+    # Eingetragen ist jeweils der SCHLUESSEL- und Nutzkern, nicht jede
+    # Spalte: ein Vertrag, der auch die letzte Randspalte einschliesst,
+    # wird beim ersten harmlosen Umbau abgeschaltet statt gelesen.
     "online_api_tournaments.csv": {
-        "required": [],
+        "sep": ";",
+        "required": ["tournament_id", "name", "date", "meta", "format",
+                     "players", "swiss_rounds", "standings_rows", "scraped_at"],
         "purpose": ("Gedaechtnis des inkrementellen Scrapers "
                     "(bekannte_turniere) und Quelle der Turnier-Metadaten. "
                     "Semikolon-getrennt."),
     },
     "online_api_archetypes.csv": {
-        "required": [],
+        "sep": ";",
+        "required": ["tournament_id", "date", "meta", "archetype_id",
+                     "archetype_name", "lists", "share", "wins", "losses",
+                     "matches", "win_rate", "win_rate_convention"],
         "purpose": ("Feld-Siegquoten je Turnier und Archetyp; Grundlage von "
                     "scripts/build_meta_prognose.py. Semikolon-getrennt."),
     },
@@ -125,13 +144,23 @@ CONSUMERS = {
     # nicht mehr gibt — und das ist Absicht: dann muss jemand hinsehen,
     # ob der neue Auszug wirklich entstanden ist.
     "online_api_cards_TEF-PBL.csv": {
-        "required": [],
+        "sep": ";",
+        # `set` und `number` sind der Riegel: backend/core/update_sets.py
+        # liest sie, um zu pruefen, ob es fuer ein neues Set ueberhaupt
+        # Kartenzeilen gibt, bevor data/format_window.json weitergestellt
+        # wird. Fallen sie weg, faellt der Riegel.
+        "required": ["tournament_id", "date", "meta", "archetype_id",
+                     "set", "number", "card", "copies_total",
+                     "lists_with_card", "lists_total", "inclusion_rate"],
         "purpose": ("Kartenzeilen je Online-Turnier. Traegt ueber "
                     "backend/core/update_sets.py den Riegel fuer "
                     "data/format_window.json. Semikolon-getrennt."),
     },
     "online_api_matchups_TEF-PBL.csv": {
-        "required": [],
+        "sep": ";",
+        "required": ["tournament_id", "date", "meta", "archetype_id",
+                     "opponent_id", "wins", "losses", "matches",
+                     "win_rate", "win_rate_convention"],
         "purpose": ("Direktvergleiche je Online-Turnier. "
                     "Semikolon-getrennt."),
     },
@@ -377,9 +406,31 @@ SHRINK_PCT = 10.0         # % of rows a consumer file may lose before we flag it
 MIN_CARDS_FOR_COVERAGE = 5
 
 
-def read_csv(path):
+def consumer_sep(fn):
+    """Trennzeichen einer Vertragsdatei — Komma, wenn nichts anderes steht.
+
+    NACHGETRAGEN 12.09.2026. Bis heute las JEDER Spaltenpruefer dieses
+    Waechters mit Komma. Fuer die vier semikolongetrennten
+    online_api_*-Dateien heisst das: `csv.DictReader.fieldnames` liefert
+    EINEN Feldnamen ("tournament_id;name;date;..."), also gilt jede
+    Pflichtspalte als fehlend und jede als leer. Genau deshalb standen
+    diese vier Dateien seit dem 09.09.2026 mit `"required": []` da — ohne
+    Spaltenvertrag, obwohl data/_consumers.md einen behauptet.
+
+    Das Trennzeichen gehoert zum Vertrag, nicht in einen Kommentar: es
+    steht jetzt als `sep` an der Datei.
+    """
+    spec = CONSUMERS.get(fn)
+    if isinstance(spec, dict):
+        return spec.get("sep", ",")
+    return ","
+
+
+def read_csv(path, sep=None):
+    if sep is None:
+        sep = consumer_sep(os.path.basename(path))
     with open(path, encoding="utf-8-sig", newline="") as f:
-        return list(csv.DictReader(f))
+        return list(csv.DictReader(f, delimiter=sep))
 
 
 def col(row, name):
@@ -424,7 +475,7 @@ def check_schema(findings):
             findings.append(("CRITICAL", f"consumer file missing: data/{fn}"))
             continue
         with open(p, encoding="utf-8-sig", newline="") as f:
-            header = csv.DictReader(f).fieldnames or []
+            header = csv.DictReader(f, delimiter=consumer_sep(fn)).fieldnames or []
         missing = [c for c in spec["required"] if c not in header]
         if missing:
             findings.append(("CRITICAL",

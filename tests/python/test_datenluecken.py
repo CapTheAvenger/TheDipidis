@@ -51,6 +51,13 @@ def pokedex():
     return _json(os.path.join(DATA, "champions_pokedex.json"))
 
 
+@pytest.fixture(scope="module")
+def usage():
+    """Die Nutzungsdatei — sie sagt, welche Arten das Feld ueberhaupt
+    kennt. Gebraucht von _neue_megas() weiter unten."""
+    return _json(os.path.join(DATA, "champions_usage.json"))
+
+
 # ── Das Inventar ───────────────────────────────────────────────────
 
 def test_inventar_stimmt_mit_dem_erzeuger_ueberein(inventar):
@@ -192,18 +199,67 @@ def test_uebernommene_werte_stehen_im_pokedex(quellen, pokedex):
             )
 
 
-def test_alle_sechzehn_megas_sind_belegt(quellen, pokedex):
+def _neue_megas(pokedex, usage):
+    """Mega-Formen, deren GRUNDFORM die Nutzungsdatei noch nicht kennt.
+
+    NEU IST ERLAUBT, ZURUECKGENOMMEN NICHT (12.09.2026).
+
+    Am 12.09.2026 um 05:12 UTC schrieb der Lauf "Champions Usage
+    Refresh" drei neue Mega-Formen in den Pokedex — Baxcalibur,
+    Salamence, Golisopod. Faehigkeiten hatten sie noch keine; die
+    entstehen erst, wenn pokebase.app sie fuehrt.
+
+    Drei Zusicherungen fielen darueber um, der Deploy fiel mit, und die
+    Seite hing den ganzen Vormittag auf dem Stand von gestern — ohne
+    dass irgendetwas kaputt aussah.
+
+    Die Wachhunde bleiben scharf fuer das, wofuer sie gebaut wurden:
+    eine Uebernahme, die ZURUECKGENOMMEN wird. Unterschieden wird an der
+    Nutzungsdatei — kennt sie die Grundform nicht, ist die Art dort
+    insgesamt neu.
+
+    Entschieden vom Betreiber am 12.09.2026.
+    """
+    slugs = usage.get("pokemon") or usage
+    raus = []
+    for e in pokedex.get("entries", []):
+        if e.get("form") != "Mega":
+            continue
+        slug = str((e.get("meta") or {}).get("slug") or "")
+        if slug:
+            grund = re.sub(r"-mega(-[xyz])?$", "", slug)
+        else:
+            # LEERER SLUG IST SELBST DAS SIGNAL: der Nutzungsbau hat die
+            # Form nicht zuordnen koennen, also kennt er sie nicht. Der
+            # Grundname kommt dann aus dem englischen Namen, damit die
+            # Pruefung trotzdem sagen kann, ob die ART neu ist.
+            grund = e["en"].replace("Mega ", "").strip().lower().replace(" ", "-")
+        if grund not in slugs:
+            raus.append(e["en"])
+    return raus
+
+
+def test_alle_sechzehn_megas_sind_belegt(quellen, pokedex, usage):
     """Der Stand, den der 31.08.2026 hergestellt hat.
 
-    Waechst die Zahl der offenen wieder, ist entweder eine Form
-    dazugekommen oder eine Uebernahme zurueckgenommen worden. Beides
-    soll auffallen.
+    Waechst die Zahl der offenen wieder, ist eine Uebernahme
+    zurueckgenommen worden. Das soll auffallen. Eine Form, die erst
+    seit dem letzten Lauf im Pokedex steht, ist etwas anderes — siehe
+    _neue_megas().
     """
     assert len(quellen["eintraege"]) == 16
     offen = [n for n, e in quellen["eintraege"].items() if not e.get("uebernommen")]
     assert offen == [], "wieder ohne Beleg: " + ", ".join(offen)
-    assert pokedex["_meta"]["megaAbilityMissing"] == []
+    neu = set(_neue_megas(pokedex, usage))
+    fehlt = [n for n in pokedex["_meta"]["megaAbilityMissing"] if n not in neu]
+    assert fehlt == [], (
+        "diese Mega-Formen haben ihre Faehigkeit verloren: " + ", ".join(fehlt)
+    )
     assert len(pokedex["_meta"]["megaAbilityBelegt"]) == 16
+    assert len(neu) <= 5, (
+        f"{len(neu)} Mega-Formen sind neu und ohne Daten ({', '.join(sorted(neu))}) "
+        "— das sind zu viele fuer 'neu dazugekommen'"
+    )
 
 
 def test_offene_megas_stehen_im_inventar_die_belegten_nicht(inventar, quellen):
@@ -254,9 +310,20 @@ def test_namenskonflikte_nennen_beide_werte(inventar):
         )
 
 
-def test_jede_offene_mega_luecke_traegt_ihren_vorschlag(inventar):
+def test_jede_offene_mega_luecke_traegt_ihren_vorschlag(inventar, pokedex, usage):
+    neu = {n.lower().replace(" ", "-") for n in _neue_megas(pokedex, usage)}
     for l in inventar["luecken"]:
         if l["klasse"] != "mega-faehigkeit":
+            continue
+        if l["id"].split("/", 1)[1] in neu:
+            # Eine Form, die es seit heute Nacht gibt, hat noch keinen
+            # Vorschlag — pokebase.app fuehrt sie schlicht noch nicht.
+            # Der Eintrag steht trotzdem im Inventar, damit die Luecke
+            # benannt ist und nicht schweigend verschwindet.
+            assert l.get("vorschlag") is None, (
+                f"{l['id']}: neu im Pokedex, traegt aber schon einen Vorschlag "
+                "— dann ist sie nicht neu und gehoert in die Pruefung darunter"
+            )
             continue
         v = l.get("vorschlag")
         assert v, f"{l['id']}: kein Vorschlag — dann fehlt der Admin-Bereich der Sinn"

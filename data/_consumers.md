@@ -174,6 +174,20 @@ later be deepened.
 > "already fetched, do not fetch again". Delete a row and the next run
 > re-fetches that tournament — and appends its rows a second time.
 
+> **`has_decklists` is the source's claim, not a verified fact — do not
+> filter on it.** The column is the API's `decklists` field from
+> `/tournaments/{id}/details`, written through unchanged. Measured
+> 2026-09-12 over all 410 rows against `online_api_cards_TEF-PBL.csv`:
+> 199 `True` (all of them with card rows), **1 `False` that has 816 card
+> rows** (tournament `6a8c23ae8302ae761e5fb0bc`, 126 standings rows),
+> and 210 empty — those are exactly the `depth=archetypen` rows, where
+> `/details` is never requested, so the empty cell means "not asked",
+> not "no". To find out whether decklists actually exist for a
+> tournament, count its rows in `online_api_cards_<WINDOW>.csv`; that is
+> the measured answer. The claim is kept rather than corrected because a
+> disagreement between claim and holdings is information about the
+> source (see the repo rule "report, don't silently repair").
+
 ### `online_api_archetypes.csv`
 `tournament_id, date, meta, players, archetype_id, archetype_name, lists, lists_total, share, wins, losses, ties, matches, win_rate, win_rate_convention, record_source`
 

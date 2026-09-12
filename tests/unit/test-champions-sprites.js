@@ -276,16 +276,19 @@ describe('Showdown-Namen aus den Replica-Teams', () => {
          * falsch schreibt (dann ist es ein echter Fehler), sonst hier
          * eintragen. Faellt einer WEG, weil der Kader nachgezogen hat:
          * Zeile loeschen. */
+        /* Stand 12.09.2026. Sechs Zeilen sind weggefallen, weil
+         * "Champions Sprites spiegeln" die Bilder geholt hat
+         * (Baxcalibur, Golisopod, Pawmot, Rillaboom, Salamence,
+         * Salamence-Mega). Dazugekommen ist Dragalge: die Umrechnung
+         * schreibt es richtig, die GRUNDFORM steht seit dem Wochenlauf
+         * nur nicht mehr im Champions-Pokedex — Mega Dragalge schon
+         * (images/champions/mega-dragalge.png). Also dieselbe Art von
+         * Luecke wie Indeedee und Toxtricity, kein Umrechnungsfehler. */
         const ERWARTET_OHNE_BILD = [
-            'Baxcalibur -> baxcalibur.png',
-            'Golisopod -> golisopod.png',
+            'Dragalge -> dragalge.png',
             'Indeedee -> indeedee.png',
             'Indeedee-F -> indeedee-f.png',
-            'Pawmot -> pawmot.png',
             'Persian-Alola -> alolan-persian.png',
-            'Rillaboom -> rillaboom.png',
-            'Salamence -> salamence.png',
-            'Salamence-Mega -> mega-salamence.png',
             'Toxtricity -> toxtricity.png',
         ];
         assert.deepEqual(ohne.slice().sort(), ERWARTET_OHNE_BILD,

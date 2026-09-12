@@ -3165,7 +3165,20 @@
                `typen` fehlt hier absichtlich; ausgewaehlt wird ueber das
                Kennzeichen, siehe staplesNachArt(). */
             { id: 'ace', kennzeichen: 'ace_spec',
-              de: 'ACE SPEC', en: 'ACE SPEC' }
+              de: 'ACE SPEC', en: 'ACE SPEC' },
+            /* DAS NEUESTE SET — auch keine Kartenart (11.09.2026).
+               Bestellt: „wir koennen noch einen weiteren Filter machen,
+               All used cards newest Set … damit man alle wichtigen
+               Karten des neuen Sets sieht."
+               Das Set-Kuerzel steht NICHT hier: es kommt zur Laufzeit
+               aus window._formatWindow (gespeist von
+               data/format_window.json), sonst waere der Filter bei der
+               naechsten Rotation falsch — und beim Wechsel auf TEF-30C
+               am 25.09. ist genau das der Fall. Die Beschriftung traegt
+               deshalb das Kuerzel mit, damit man sieht, WELCHES Set
+               gemeint ist. */
+            { id: 'neuesSet', kennzeichen: 'neues_set',
+              de: 'Neues Set', en: 'Newest set' }
         ];
         let _staplesArt = null;
 
@@ -3201,6 +3214,25 @@
                ACE-SPEC-Liste zu stellen waere geraten. */
             const passt = art.kennzeichen === 'ace_spec'
                 ? (c => String(c.is_ace_spec || '').trim().toLowerCase() === 'yes')
+                : art.kennzeichen === 'neues_set'
+                ? (() => {
+                    /* `typeof window` statt `window`: die Auswahlregel
+                       laeuft in tests/unit/test-staples-kartenarten.js in
+                       einem vm-Kontext ohne Fenster. Ein ReferenceError
+                       dort ist kein Testproblem, sondern der Beweis,
+                       dass die Funktion mehr voraussetzt als sie
+                       braucht. */
+                    const fw = (typeof window !== 'undefined' && window._formatWindow)
+                        ? window._formatWindow : {};
+                    const neu = String(fw.current_set || '').trim().toUpperCase();
+                    /* Ohne bekanntes Set trifft NICHTS zu — der Knopf
+                       erscheint dann gar nicht erst (er wird nur
+                       gezeichnet, wenn die Zaehlung ueber null liegt).
+                       Alles durchzulassen waere schlimmer: der Filter
+                       hiesse „Neues Set" und zeigte das ganze Format. */
+                    if (!neu) return () => false;
+                    return c => String(c.set_code || '').trim().toUpperCase() === neu;
+                })()
                 : (() => {
                     const menge = {};
                     (art.typen || []).forEach(t => { menge[t] = true; });
@@ -3555,9 +3587,17 @@
                 .map(a => {
                     const n = zaehlung[a.id];
                     const aktiv = artJetzt === a.id;
+                    /* „Neues Set" allein sagt nicht, welches. Das Kuerzel
+                       steht deshalb dabei — und kommt aus dem
+                       Formatfenster, nicht aus dieser Datei. */
+                    const setKurz = a.kennzeichen === 'neues_set'
+                        ? String(((typeof window !== 'undefined' && window._formatWindow)
+                            || {}).current_set || '').trim().toUpperCase()
+                        : '';
+                    const lbl = (deLbl ? a.de : a.en) + (setKurz ? ' ' + setKurz : '');
                     return `<button type="button" class="btn-toggle-item${aktiv ? ' active' : ''}"
                         aria-pressed="${aktiv ? 'true' : 'false'}"
-                        onclick="setStaplesArt('${a.id}')">${escapeHtml(deLbl ? a.de : a.en)}
+                        onclick="setStaplesArt('${a.id}')">${escapeHtml(lbl)}
                         <span class="top-cards-artzahl">${n}</span></button>`;
                 }).join('');
             const alleKnopf = `<button type="button" class="btn-toggle-item${

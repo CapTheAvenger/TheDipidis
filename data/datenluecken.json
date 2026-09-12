@@ -1,9 +1,11 @@
 {
  "_meta": {
-  "erzeugt": "2026-09-11T06:52:37Z",
+  "erzeugt": "2026-09-12T06:59:58Z",
   "erzeuger": "scripts/datenluecken.py",
-  "anzahl": 0,
-  "jeKlasse": {},
+  "anzahl": 3,
+  "jeKlasse": {
+   "mega-faehigkeit": 3
+  },
   "klassen": {
    "mega-faehigkeit": {
     "de": "Mega-Fähigkeit ohne Beleg",
@@ -24,5 +26,33 @@
   },
   "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten."
  },
- "luecken": []
+ "luecken": [
+  {
+   "id": "mega-faehigkeit/mega-baxcalibur",
+   "klasse": "mega-faehigkeit",
+   "titel": "Espinodon (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Baxcalibur — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Baxcalibur].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": null
+  },
+  {
+   "id": "mega-faehigkeit/mega-golisopod",
+   "klasse": "mega-faehigkeit",
+   "titel": "Tectass (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Golisopod — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Golisopod].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": null
+  },
+  {
+   "id": "mega-faehigkeit/mega-salamence",
+   "klasse": "mega-faehigkeit",
+   "titel": "Brutalanda (Mega) — Mega-Fähigkeit fehlt",
+   "titelEn": "Mega Salamence — mega ability missing",
+   "wo": "data/champions_pokedex.json → entries[en=Mega Salamence].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": null
+  }
+ ]
 }

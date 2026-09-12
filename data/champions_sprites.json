@@ -4,10 +4,26 @@
   "quelle": "https://www.pokewiki.de/Liste_der_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions",
   "rechte": "Die Icons sind Spiel-Screenshots. Rechteinhaber: The Pokémon Company / Nintendo / GAME FREAK. PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG; die dortige CC-BY-SA-Lizenz gilt nur fuer den Wiki-Text, nicht fuer diese Bilder.",
   "erzeuger": "scripts/build_champions_sprites.py",
-  "anzahl": 292,
-  "bytes": 4282093
+  "anzahl": 299,
+  "bytes": 4405055
  },
  "sprites": {
+  "Garchomp (Mega-Z)": {
+   "datei": "images/champions/garchomp-mega-z.png",
+   "formschluessel": "445m2",
+   "quelle": "https://www.pokewiki.de/images/c/c5/Pok%C3%A9mon-Icon_445m2_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14637
+  },
+  "Mega Baxcalibur": {
+   "datei": "images/champions/mega-baxcalibur.png",
+   "formschluessel": "998m1",
+   "quelle": "https://www.pokewiki.de/images/c/c8/Pok%C3%A9mon-Icon_998m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12794
+  },
   "Mega Dragonite": {
    "datei": "images/champions/mega-dragonite.png",
    "formschluessel": "149m1",
@@ -31,6 +47,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 20151
+  },
+  "Mega Salamence": {
+   "datei": "images/champions/mega-salamence.png",
+   "formschluessel": "373m1",
+   "quelle": "https://www.pokewiki.de/images/8/8c/Pok%C3%A9mon-Icon_373m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15148
   },
   "Mega Tyranitar": {
    "datei": "images/champions/mega-tyranitar.png",
@@ -128,6 +152,14 @@
    "hoehe": 128,
    "bytes": 15333
   },
+  "Mega Golisopod": {
+   "datei": "images/champions/mega-golisopod.png",
+   "formschluessel": "768m1",
+   "quelle": "https://www.pokewiki.de/images/a/a2/Pok%C3%A9mon-Icon_768m1_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 22686
+  },
   "Mega Greninja": {
    "datei": "images/champions/mega-greninja.png",
    "formschluessel": "658m1",
@@ -151,6 +183,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 18202
+  },
+  "Lucario (Mega-Z)": {
+   "datei": "images/champions/lucario-mega-z.png",
+   "formschluessel": "448m2",
+   "quelle": "https://www.pokewiki.de/images/b/bc/Pok%C3%A9mon-Icon_448m2_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18167
   },
   "Mega Glimmora": {
    "datei": "images/champions/mega-glimmora.png",
@@ -271,6 +311,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 18742
+  },
+  "Baxcalibur": {
+   "datei": "images/champions/baxcalibur.png",
+   "formschluessel": "998",
+   "quelle": "https://www.pokewiki.de/images/2/22/Pok%C3%A9mon-Icon_998_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14124
   },
   "Dragapult": {
    "datei": "images/champions/dragapult.png",
@@ -399,6 +447,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 15252
+  },
+  "Salamence": {
+   "datei": "images/champions/salamence.png",
+   "formschluessel": "373",
+   "quelle": "https://www.pokewiki.de/images/a/ad/Pok%C3%A9mon-Icon_373_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14075
   },
   "Tyranitar": {
    "datei": "images/champions/tyranitar.png",
@@ -599,6 +655,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 12166
+  },
+  "Absol (Mega-Z)": {
+   "datei": "images/champions/absol-mega-z.png",
+   "formschluessel": "359m2",
+   "quelle": "https://www.pokewiki.de/images/6/64/Pok%C3%A9mon-Icon_359m2_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 18244
   },
   "Mega Absol": {
    "datei": "images/champions/mega-absol.png",
@@ -888,6 +952,14 @@
    "hoehe": 128,
    "bytes": 18641
   },
+  "Golisopod": {
+   "datei": "images/champions/golisopod.png",
+   "formschluessel": "768",
+   "quelle": "https://www.pokewiki.de/images/1/12/Pok%C3%A9mon-Icon_768_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 23266
+  },
   "Greninja": {
    "datei": "images/champions/greninja.png",
    "formschluessel": "658",
@@ -944,13 +1016,13 @@
    "hoehe": 128,
    "bytes": 15887
   },
-  "Sceptile": {
-   "datei": "images/champions/sceptile.png",
-   "formschluessel": "254",
-   "quelle": "https://www.pokewiki.de/images/9/9a/Pok%C3%A9mon-Icon_254_CMP.png",
+  "Rillaboom": {
+   "datei": "images/champions/rillaboom.png",
+   "formschluessel": "812",
+   "quelle": "https://www.pokewiki.de/images/1/14/Pok%C3%A9mon-Icon_812_CMP.png",
    "breite": 128,
    "hoehe": 128,
-   "bytes": 16450
+   "bytes": 17550
   },
   "Skeledirge": {
    "datei": "images/champions/skeledirge.png",
@@ -1232,14 +1304,6 @@
    "hoehe": 128,
    "bytes": 14533
   },
-  "Eelektross": {
-   "datei": "images/champions/eelektross.png",
-   "formschluessel": "604",
-   "quelle": "https://www.pokewiki.de/images/4/48/Pok%C3%A9mon-Icon_604_CMP.png",
-   "breite": 128,
-   "hoehe": 128,
-   "bytes": 17233
-  },
   "Roserade": {
    "datei": "images/champions/roserade.png",
    "formschluessel": "407",
@@ -1383,14 +1447,6 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 9823
-  },
-  "Pyroar": {
-   "datei": "images/champions/pyroar.png",
-   "formschluessel": "668",
-   "quelle": "https://www.pokewiki.de/images/3/3e/Pok%C3%A9mon-Icon_668_CMP.png",
-   "breite": 128,
-   "hoehe": 128,
-   "bytes": 15017
   },
   "Tinkaton": {
    "datei": "images/champions/tinkaton.png",
@@ -1728,6 +1784,14 @@
    "hoehe": 128,
    "bytes": 15044
   },
+  "Pawmot": {
+   "datei": "images/champions/pawmot.png",
+   "formschluessel": "923",
+   "quelle": "https://www.pokewiki.de/images/d/d4/Pok%C3%A9mon-Icon_923_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12483
+  },
   "Reuniclus": {
    "datei": "images/champions/reuniclus.png",
    "formschluessel": "579",
@@ -1783,14 +1847,6 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 11304
-  },
-  "Scrafty": {
-   "datei": "images/champions/scrafty.png",
-   "formschluessel": "560",
-   "quelle": "https://www.pokewiki.de/images/2/2f/Pok%C3%A9mon-Icon_560_CMP.png",
-   "breite": 128,
-   "hoehe": 128,
-   "bytes": 11512
   },
   "Lycanroc": {
    "datei": "images/champions/lycanroc.png",

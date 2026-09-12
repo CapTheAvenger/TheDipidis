@@ -388,6 +388,8 @@ REZEPTE['meta-online'] = {
                 caption: 'The ' + acht.length + ' most played decks online — as of ' +
                     stand + ' from ' + tausend(nenner) + ' lists across ' +
                     tausend(stat.tournaments) + ' Turnieren.',
+                tags: hashtags(['metagame', 'decklists', 'onlinetournaments']
+                    .concat(acht.slice(0, 5).map(function (d) { return d.name; }))),
                 vorlagen: ['liste', 'zahl'],
                 decks: decks.map(function (d) { return d.name; }),
                 zahlFuer: function (name) {
@@ -511,6 +513,8 @@ REZEPTE['matchups-online'] = {
                     caption: "The best matchups for " + deck +
                         ' online — smoothed, with the game count per row. ' +
                         'Erfasst sind die ' + reihe.length + ' häufigsten Gegner.',
+                    tags: hashtags(['matchups', 'deckguide', deck]
+                        .concat(acht.slice(0, 4).map(function (r) { return r.gegner; }))),
                     vorlagen: ['liste']
                 };
             }
@@ -525,6 +529,65 @@ REZEPTE['matchups-online'] = {
  * das mit seiner City League, und ein Worlds-Feld wird nach Punkten
  * eingeladen. Sobald ein zweites Turnier drinsteht, darf die
  * Ueberschrift wachsen — vorher nicht. */
+/* ══ HASHTAGS ══════════════════════════════════════════════════════
+ *
+ * BESTELLT (Betreiber, 11.09.2026): „Dann fuer die Instagram-Posts, die
+ * ich machen will ueber die thedipidis.app/posts/ immer alles mit
+ * entsprechenden Beschreibungen und Hashtags."
+ *
+ * Es gab hier bis dahin KEINE — kein Feld, keine Liste, kein Treffer im
+ * ganzen Bestand. Bildunterschriften dagegen schon: jedes Rezept liefert
+ * `caption`. Die Hashtags folgen genau demselben Weg.
+ *
+ * ════════════════════════════════════════════════════════════════════
+ * HIER AENDERST DU DEINE BASIS-TAGS — diese eine Liste, sonst nichts.
+ * ════════════════════════════════════════════════════════════════════
+ * Sie stehen unter JEDEM Beitrag. Entschieden am 11.09.2026: „feste
+ * Basis + Inhalt". Die Basis unten ist mein Vorschlag, nicht deine
+ * Ansage — du hast mir keine genannt, und einen Satz zu erfinden und als
+ * deinen auszugeben waere schlimmer als einer, den du in zehn Sekunden
+ * austauschst. Sie sind bewusst breit und englisch: die Beitraege laufen
+ * auf Instagram englisch (siehe Sprachweiche oben).
+ */
+var HASHTAG_BASIS = [
+    'pokemontcg', 'ptcg', 'pokemontcgcompetitive', 'tcgmeta',
+    'thedipidis'
+];
+
+/* Aus Namen Hashtags machen: Kleinschreibung, nur Buchstaben und
+ * Ziffern, Umlaute aufgeloest. „N's Zoroark" -> nszoroark,
+ * „Mega Excadrill" -> megaexcadrill. Instagram erlaubt keine
+ * Satzzeichen im Tag; ein Tag mit Apostroph verlinkt ins Leere. */
+function tagAus(text) {
+    return String(text == null ? '' : text)
+        .toLowerCase()
+        .replace(/\u00e4/g, 'ae').replace(/\u00f6/g, 'oe').replace(/\u00fc/g, 'ue')
+        .replace(/\u00df/g, 'ss')
+        /* Alles Uebrige mit Akzent auf seinen Grundbuchstaben: sonst
+           wird aus „Pokémon" das Tag #pokmon, und das verlinkt ins
+           Leere. NFD zerlegt é in e + Akzent, der Bereich danach wirft
+           die Akzente weg. */
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+
+/* Die fertige Zeile: Basis zuerst, dann der Inhalt, ohne Dopplungen und
+ * ohne Leere. Instagram wertet mehr als 30 Tags als Spam — deshalb die
+ * Grenze, und sie schneidet den INHALT ab, nicht die Basis: die Basis
+ * ist die Entscheidung des Betreibers, der Rest ist meine Ableitung. */
+var HASHTAG_MAX = 25;
+
+function hashtags(inhalt) {
+    var raus = [], gesehen = {};
+    HASHTAG_BASIS.concat(inhalt || []).forEach(function (t) {
+        var tag = tagAus(t);
+        if (!tag || tag.length < 3 || gesehen[tag]) return;
+        gesehen[tag] = 1;
+        raus.push('#' + tag);
+    });
+    return raus.slice(0, HASHTAG_MAX).join(' ');
+}
+
 function labsLaden() {
     return hole('data/labs_tournament_decks_TEF-PBL.csv').then(function (t) {
         var roh = liesCsv(t, ',');            /* KOMMA, mit Anfuehrungszeichen */
@@ -662,6 +725,8 @@ REZEPTE['worlds-tag1'] = {
                 kicker: d.kurz,
                 titel: d.datum ? d.kurz + ', Tag 1' : d.kurz,
                 fuss: fussZeile(d.kurz + ', ' + d.datum, tausend(d.gesamt) + ' players'),
+                tags: hashtags(['tournament', 'majors', d.turnier]
+                    .concat(acht.slice(0, 4).map(function (x) { return x.name; }))),
                 caption: 'The most played decks at ' + d.turnier + ' on ' + d.datum +
                     ' — ' + tausend(d.gesamt) + ' Spieler, ein Turnier.',
                 vorlagen: ['liste', 'zahl'],
@@ -739,6 +804,7 @@ REZEPTE['tag2'] = {
                 /* Die Zeilen sind nach Quote sortiert, aber gezeigt wird
                  * der Bruch — der Spaltenkopf sagt jetzt, wie viele
                  * Decks die Schwelle ueberhaupt genommen haben. */
+                tags: hashtags(['day2', 'tournament', d.turnier]),
                 caption: 'Who reached the second day at ' + d.turnier + ' — ' +
                     'gezählt ab ' + TAG2_MIN + ' Spielern am Deck, sonst entscheidet ' +
                     'ein einzelner Spieler die Quote.',
@@ -837,6 +903,7 @@ REZEPTE['top8'] = {
                 titel: 'Who makes Top 8',
                 fuss: 'Feld: ' + prozent(feldschnitt, 1) + ' · ab ' + MIN +
                     ' Antritten · ' + spanne,
+                tags: hashtags(['top8', 'conversion', 'onlinetournaments']),
                 caption: 'How often a deck makes Top 8 online. The field average ' +
                     'liegt bei ' + prozent(feldschnitt, 1) + ' — gezählt ab ' + MIN +
                     ' Antritten, weil darunter ein einzelnes Turnier die Quote macht.',
@@ -871,12 +938,54 @@ REZEPTE['top8'] = {
  * UND NUR EIN META. Die Datei mischt "Meta Live" (3.248 Zeilen) mit
  * "Meta Play!" (1.154). Ueber beide gezaehlt ist der Nenner eine Zahl,
  * die es nirgends gibt. */
+/* ══ DIE KARTENARTEN — EINE LISTE, ZWEI ORTE ══════════════════════
+ *
+ * Dieselbe Einteilung wie auf der Seite (STAPLES_ARTEN in
+ * js/app-tier-meta.js). Sie steht hier ein zweites Mal, und das ist
+ * KEINE Nachlaessigkeit: posts/ laeuft bewusst ohne den Rest der
+ * Anwendung (kein i18n, kein Login, keine Datenladung — siehe Kopf von
+ * posts/index.html). js/app-tier-meta.js zu laden hiesse, die halbe
+ * Seite mitzuladen.
+ *
+ * tests/unit/test-post-kartenfilter.js vergleicht beide Listen Eintrag
+ * fuer Eintrag, damit sie nicht auseinanderlaufen.
+ *
+ * ACE SPEC steht QUER zu den anderen: keine Kartenart, sondern ein
+ * Kennzeichen (nur eine je Deck). Karten stehen deshalb in ihrer Art
+ * UND hier — genau wie auf der Seite.
+ *
+ * „Neues Set" ist der Filter vom 11.09.2026: „wir koennen noch einen
+ * weiteren Filter machen, All used cards newest Set … damit man alle
+ * wichtigen Karten des neuen Sets sieht". Er fragt nicht nach der Art,
+ * sondern nach dem Set-Kuerzel, und holt sich das laufende Set zur
+ * Laufzeit aus data/format_window.json — ein eingetragenes Kuerzel
+ * waere bei der naechsten Rotation falsch. */
+var POST_ARTEN = [
+    { id: 'pokemon',   name: 'Pokémon',
+      typen: ['Basic', 'Stage 1', 'Stage 2', 'V-UNION', 'VMAX', 'VSTAR', 'Level Up'] },
+    { id: 'supporter', name: 'Supporters',     typen: ['Supporter'] },
+    { id: 'item',      name: 'Items',          typen: ['Item'] },
+    { id: 'tool',      name: 'Tools',          typen: ['Tool'] },
+    { id: 'stadion',   name: 'Stadiums',       typen: ['Stadium'] },
+    { id: 'energie',   name: 'Special Energy', typen: ['Special Energy'] },
+    { id: 'acespec',   name: 'ACE SPEC',       aceSpec: true },
+    { id: 'neuesSet',  name: 'Newest set',     neuesSet: true }
+];
+
 REZEPTE['staples'] = {
     name: 'Format staples',
     gruppe: 'Cards',
     groesse: '788 KB',
     lade: function () {
-        return hole('data/current_meta_card_data.csv').then(function (t) {
+        return Promise.all([
+            hole('data/current_meta_card_data.csv'),
+            /* Das laufende Set fuer den Filter „Newest set". Faellt die
+               Datei aus, entfaellt NUR dieser Filter — die anderen sieben
+               haengen nicht daran. */
+            hole('data/format_window.json', true).catch(function () { return null; })
+        ]).then(function (a) {
+            var t = a[0], fw = a[1] || {};
+            var neuesSet = String(fw.current_set || '').trim().toUpperCase();
             var roh = liesCsv(t, ';').filter(function (r) {
                 return r.meta === 'Meta Live' && r.archetype && r.archetype !== 'Other'
                     && r.card_name;
@@ -903,30 +1012,104 @@ REZEPTE['staples'] = {
                  * derselben Karte sind fuer diese Frage dieselbe Karte,
                  * und gezaehlt werden ohnehin ARCHETYPEN, nicht Zeilen —
                  * ein Archetyp mit beiden Drucken zaehlt einmal. */
-                if (!karten[r.card_name]) karten[r.card_name] = { name: r.card_name, in: {} };
-                karten[r.card_name].in[r.archetype] = 1;
+                if (!karten[r.card_name]) karten[r.card_name] = {
+                    name: r.card_name, in: {}, typen: {}, sets: {}, ace: false
+                };
+                var k = karten[r.card_name];
+                k.in[r.archetype] = 1;
+                /* Art, Set und ACE-SPEC-Kennzeichen sammeln sich ueber
+                   ALLE Drucke desselben Namens — aus demselben Grund,
+                   aus dem oben die Archetypen je Name gezaehlt werden.
+                   Eine Karte, die in einem Druck als ACE SPEC belegt ist,
+                   ist eine ACE SPEC. */
+                if (r.type) k.typen[String(r.type).trim()] = 1;
+                if (r.set_code) k.sets[String(r.set_code).trim().toUpperCase()] = 1;
+                if (String(r.is_ace_spec || '').trim().toLowerCase() === 'yes') k.ace = true;
             });
             var gesamt = Object.keys(archetypen).length;
-            var reihe = Object.keys(karten).map(function (k) {
-                return { name: karten[k].name, zahl: Object.keys(karten[k].in).length };
+
+            /* Je Filter EINE fertige Liste. Gerechnet wird einmal, nicht
+               bei jedem Klick: die Datei ist 788 KB, und die Auswahl
+               soll sich anfuehlen wie auf der Seite. */
+            function reiheFuer(pruef) {
+                var r = Object.keys(karten).filter(function (k) {
+                    return !pruef || pruef(karten[k]);
+                }).map(function (k) {
+                    return { name: karten[k].name, zahl: Object.keys(karten[k].in).length };
+                });
+                r.sort(function (x, y) {
+                    return y.zahl - x.zahl || x.name.localeCompare(y.name, 'de');
+                });
+                return r;
+            }
+
+            function bau(reihe, artName) {
+                if (!reihe.length) throw new Error(
+                    'fuer „' + artName + '" steht in current_meta_card_data.csv keine '
+                    + 'Karte — eine leere Tafel unter einem Nenner ist schlimmer als '
+                    + 'ein gemeldeter Ausfall');
+                var acht = ohneGleichstand(reihe, function (r) { return r.zahl; });
+                /* GROSS IM BILD STEHT, WAS MAN SIEHT (11.09.2026).
+                   Bestellt: „Wenn man den Post generiert ueber einen
+                   Filter, dann Format Staples neben das Format schreiben
+                   und in gross dann, was man sieht — in meinem Beispiel
+                   hier waere es dann ACE SPEC."
+                   Also: der Kicker traegt „Format staples" neben dem
+                   Format, und die Ueberschrift traegt den Filter. */
+                var alle = !artName;
+                return {
+                    zeilen: zeilenText(acht.map(function (r) {
+                        return [r.name, r.zahl + ' of ' + gesamt];
+                    })),
+                    listeKopf: 'archetypes · of ' + gesamt,
+                    listeKopfLinks: 'Card',
+                    kicker: 'Format staples' + (neuesSet ? ' · ' + neuesSet : ''),
+                    titel: alle ? 'In almost every deck' : artName,
+                    /* Der Filtername steht schon gross als Ueberschrift
+                       — hier waere er die zweite Abschrift und schoebe
+                       die Fusszeile ueber die Klippgrenze. */
+                    fuss: 'in how many of ' + gesamt + ' archetypes · Meta Live',
+                    caption: (alle
+                        ? 'The cards that sit in almost every archetype'
+                        : artName + ' — the ones that sit in the most archetypes')
+                        + ' — counted across ' + gesamt
+                        + ' archetypes with a decklist in the current meta.',
+                    tags: hashtags(['staples', 'deckbuilding']
+                        .concat(alle ? [] : [artName])
+                        .concat(acht.slice(0, 5).map(function (r) { return r.name; }))),
+                    vorlagen: ['liste']
+                };
+            }
+
+            /* Nur Filter anbieten, hinter denen wirklich Karten stehen —
+               ein leerer Eintrag in der Auswahl ist ein Versprechen, das
+               beim Klick bricht. */
+            var verfuegbar = [{ id: '', name: 'All cards' }];
+            POST_ARTEN.forEach(function (a) {
+                if (a.neuesSet && !neuesSet) return;
+                if (reiheFuer(pruefFuer(a)).length) verfuegbar.push({ id: a.id, name: a.name });
             });
-            reihe.sort(function (x, y) {
-                return y.zahl - x.zahl || x.name.localeCompare(y.name, 'de');
-            });
-            var acht = ohneGleichstand(reihe, function (r) { return r.zahl; });
-            return {
-                zeilen: zeilenText(acht.map(function (r) {
-                    return [r.name, r.zahl + ' of ' + gesamt];
-                })),
-                listeKopf: 'archetypes · of ' + gesamt,
-                listeKopfLinks: 'Card',
-                kicker: 'Cards · Format staples',
-                titel: 'In almost every deck',
-                fuss: 'in how many of ' + gesamt + ' archetypes · Meta Live',
-                caption: 'The cards that sit in almost every archetype — counted across ' +
-                    gesamt + ' archetypes with a decklist in the current meta.',
-                vorlagen: ['liste']
+
+            function pruefFuer(a) {
+                if (!a) return null;
+                if (a.aceSpec) return function (k) { return k.ace; };
+                if (a.neuesSet) return function (k) { return k.sets[neuesSet]; };
+                var erlaubt = {};
+                a.typen.forEach(function (t) { erlaubt[t] = 1; });
+                return function (k) {
+                    return Object.keys(k.typen).some(function (t) { return erlaubt[t]; });
+                };
+            }
+
+            var erg = bau(reiheFuer(null), null);
+            erg.filter = verfuegbar;
+            erg.proFilter = function (id) {
+                if (!id) return bau(reiheFuer(null), null);
+                var a = POST_ARTEN.filter(function (x) { return x.id === id; })[0];
+                if (!a) throw new Error('unbekannter Kartenfilter: ' + id);
+                return bau(reiheFuer(pruefFuer(a)), a.name);
             };
+            return erg;
         });
     }
 };
@@ -993,6 +1176,7 @@ REZEPTE['champions'] = {
                 fuss: n + ' Teams, ' + tz + ' Turniere' +
                     (ohneTurnier ? ' + ' + ohneTurnier + ' ohne' : '') +
                     ' · ' + kurzDatum(d._meta && d._meta.last_updated),
+                tags: hashtags(['pokemonchampions', 'teambuilding']),
                 caption: 'The most played Pokémon in ' + n +
                     ' Replica-Teams aus ' + tz + ' Turnieren' +
                     (ohneTurnier ? ' (' + ohneTurnier + ' Teams ohne Turnierangabe)' : '') +
@@ -1080,6 +1264,7 @@ REZEPTE['pocket'] = {
                 kicker: 'Pocket · Game8 tier list',
                 titel: 'Tier ' + stufen.join(' and '),
                 fuss: 'Game8s Einschätzung, nicht gemessen · ' + stand,
+                tags: hashtags(['pokemontcgpocket', 'tierlist']),
                 caption: 'The decks in tier ' + stufen.join(' and ') +
                     ' in Pokémon TCG Pocket — die redaktionelle Einschätzung von ' +
                     'Game8, not a number we measured. As of ' + stand,
@@ -1139,6 +1324,7 @@ REZEPTE['day2-prognose'] = {
                 titel: 'Day-2 chance',
                 fuss: fussZeile('Forecast · ' + kurzTurnier(anker.name),
                                 'ab ' + schwelle + ' Spielern'),
+                tags: hashtags(['day2', 'forecast', 'tournamentprep']),
                 caption: 'The estimated Day-2 chance per deck — a model, not a ' +
                     'Messung. Gerechnet ab ' + schwelle + ' Spielern am Deck. ' +
                     (vorbehalt ? vorbehalt + '.' : ''),
@@ -1195,6 +1381,249 @@ function rangPruefen(erg) {
 }
 
 /* ── Nach aussen ──────────────────────────────────────────────────── */
+/* ── 10 · Die Matchup-Heatmap als Gitter ───────────────────────────
+ *
+ * BESTELLT (Betreiber, 11.09.2026) als eine der vier neuen Beitragsarten.
+ *
+ * WARUM ACHT UND NICHT ZEHN: bei 1080 px Breite und einer Namensspalte
+ * von 220 px bleiben 860 px fuer die Gegner. Acht Spalten sind 107 px je
+ * Zelle — genug fuer „51,2" in lesbarer Groesse. Bei zehn waeren es 86,
+ * und die Zahl muesste schrumpfen, bis sie auf dem Telefon niemand mehr
+ * liest. Die Heatmap auf der Seite kann scrollen; ein Bild nicht.
+ *
+ * GEZEIGT WIRD DIE GEGLAETTETE QUOTE, wie auf der Seite — dieselbe
+ * Rechnung aus js/matchup-glaettung.js, damit Bild und Seite nicht
+ * auseinandergehen. Die Diagonale bleibt leer: ein Deck gegen sich
+ * selbst ist per Definition 50 % und traegt keine Auskunft.
+ */
+REZEPTE['heatmap'] = {
+    name: 'Matchup heatmap',
+    gruppe: 'Online meta',
+    groesse: '88 KB',
+    lade: function () {
+        return Promise.all([
+            hole('data/limitless_online_decks.csv'),
+            hole('data/limitless_online_decks_matchups.csv')
+        ]).then(function (a) {
+            var decks = liesCsv(a[0], ';').filter(function (r) {
+                return r.deck_name && zahlAus(r.share_numeric) > 0;
+            }).map(function (r) {
+                return { name: r.deck_name, anteil: zahlAus(r.share_numeric) };
+            });
+            if (!decks.length) throw new Error(
+                'limitless_online_decks.csv hat keine Zeile mit einem Anteil ueber null');
+            decks.sort(function (x, y) { return y.anteil - x.anteil; });
+            var N = 8;
+            var oben = decks.slice(0, N).map(function (d) { return d.name; });
+            if (oben.length < 3) throw new Error(
+                'weniger als drei Decks mit Anteil — fuer ein Gitter zu wenig');
+
+            var paare = {};
+            liesCsv(a[1], ';').forEach(function (r) {
+                if (!r.deck_name || !r.opponent) return;
+                var G = window.DsGlaettung;
+                var quote = (G && typeof G.ausEintrag === 'function')
+                    ? G.ausEintrag({ record: r.record, win_rate: r.win_rate,
+                                     total_games: r.total_games })
+                    : zahlAus(r.win_rate);
+                if (quote == null || !isFinite(quote)) return;
+                paare[r.deck_name + '\u0001' + r.opponent] = {
+                    quote: quote, partien: zahlAus(r.total_games) || 0
+                };
+            });
+
+            var gitter = oben.map(function (zeile) {
+                return {
+                    deck: zeile,
+                    zellen: oben.map(function (spalte) {
+                        if (zeile === spalte) return null;
+                        var p = paare[zeile + '\u0001' + spalte];
+                        return p ? { quote: p.quote, partien: p.partien } : null;
+                    })
+                };
+            });
+            var gefuellt = 0, moeglich = 0;
+            gitter.forEach(function (z, i) {
+                z.zellen.forEach(function (c, j) {
+                    if (i === j) return;
+                    moeglich++;
+                    if (c) gefuellt++;
+                });
+            });
+            if (!gefuellt) throw new Error(
+                'keine einzige Paarung der acht groessten Decks steht in '
+                + 'limitless_online_decks_matchups.csv');
+
+            var stand = kurzDatum(new Date().toISOString());
+            return {
+                gitter: gitter,
+                gitterKoepfe: oben,
+                kicker: 'Online meta · matchups',
+                titel: 'Who beats whom',
+                /* KURZ GENUG FUER DIE FUSSZEILE.
+                   malFuss() in posts/index.html klippt bei 640 px — in
+                   fMono 22 sind das rund fuenfzig Zeichen. Der erste
+                   Entwurf war 78 lang und stand als „… 56 of…" da.
+                   Was wegfaellt, steht in der Bildunterschrift. */
+                fuss: oben.length + ' decks · k=20 · ' + gefuellt + '/' + moeglich
+                    + ' measured · ' + stand,
+                caption: 'The matchup grid of the ' + oben.length
+                    + ' most played decks online. Read it row by row: the row is your '
+                    + 'deck, the column is the opponent. Smoothed with k=20, '
+                    + gefuellt + ' of ' + moeglich + ' pairings measured.',
+                tags: hashtags(['matchups', 'heatmap', 'metagame', 'tournamentprep']
+                    .concat(oben.slice(0, 4))),
+                vorlagen: ['gitter']
+            };
+        });
+    }
+};
+
+/* ── 11 · Ein Deck, seine Zahlen, seine Paarungen ──────────────────
+ *
+ * BESTELLT (Betreiber, 11.09.2026): „Daten aus Tierlist je Deck, also
+ * ich waehle in Posts das Deck, dann wird fuer das Deck Beschreibung und
+ * Hashtags generiert. Zu sehen sollte die Image Card von dem Deck sein."
+ *
+ * NICHT die Bildkarte selbst: die baut js/ds-share.js in 1200 × 675 und
+ * braucht den Anwendungsrahmen (i18n, Login, Datenladung) — genau den
+ * hat diese Seite mit Absicht nicht. Gebaut wird stattdessen DERSELBE
+ * INHALT im Hochformat 1080 × 1350: die vier Kennzahlen oben, die
+ * Paarungen darunter.
+ *
+ * Und mit derselben Auswahlregel wie Karte und Bildkarte seit dem
+ * 11.09.2026: je Seite die meistgespielten Paarungen, nicht die besten
+ * und schlechtesten. Eine Paarung, die man zweimal trifft, zaehlt fuer
+ * die Vorbereitung weniger als eine, die staendig kommt.
+ */
+REZEPTE['deck-bilanz'] = {
+    name: 'A deck vs. the meta',
+    gruppe: 'Online meta',
+    brauchtDeck: true,
+    deckPflicht: true,
+    groesse: '88 KB',
+    lade: function () {
+        return Promise.all([
+            hole('data/limitless_online_decks.csv'),
+            hole('data/limitless_online_decks_matchups.csv'),
+            hole('data/limitless_meta_stats.json', true),
+            hole('data/online_tournament_top8_decks.csv').catch(function () { return ''; })
+        ]).then(function (a) {
+            var decks = {};
+            liesCsv(a[0], ';').forEach(function (r) {
+                if (!r.deck_name || !(zahlAus(r.share_numeric) > 0)) return;
+                decks[r.deck_name] = {
+                    name: r.deck_name,
+                    anteil: zahlAus(r.share_numeric),
+                    listen: zahlAus(r.count),
+                    quote: zahlAus(r.win_rate_numeric),
+                    partien: (zahlAus(r.wins) || 0) + (zahlAus(r.losses) || 0)
+                        + (zahlAus(r.ties) || 0)
+                };
+            });
+            var namen = Object.keys(decks).sort(function (x, y) {
+                return decks[y].anteil - decks[x].anteil;
+            });
+            if (!namen.length) throw new Error(
+                'limitless_online_decks.csv hat keine Zeile mit einem Anteil ueber null');
+
+            var stat = a[2] || {};
+            var nenner = ganzzahl(stat.players, 'players');
+            var stand = kurzDatum(stat.generated_at);
+
+            /* Top-8-Quote je Deck, wenn die Datei da ist. Fehlt sie,
+               bleibt die Kachel leer statt geraten. */
+            var top8 = {};
+            liesCsv(a[3] || '', ';').forEach(function (r) {
+                var n = r.deck_name || r.deck || r.archetype;
+                var gebracht = zahlAus(r.total_brought), schnitt = zahlAus(r.top8_count);
+                if (n && gebracht > 0 && schnitt != null) {
+                    top8[n] = { quote: (schnitt / gebracht) * 100, antritte: gebracht };
+                }
+            });
+
+            var paare = {};
+            liesCsv(a[1], ';').forEach(function (r) {
+                if (!r.deck_name || !r.opponent) return;
+                var G = window.DsGlaettung;
+                var quote = (G && typeof G.ausEintrag === 'function')
+                    ? G.ausEintrag({ record: r.record, win_rate: r.win_rate,
+                                     total_games: r.total_games })
+                    : zahlAus(r.win_rate);
+                if (quote == null || !isFinite(quote)) return;
+                (paare[r.deck_name] = paare[r.deck_name] || []).push({
+                    gegner: r.opponent, quote: quote,
+                    partien: zahlAus(r.total_games) || 0
+                });
+            });
+
+            /* Dieselbe Regel wie vorschauAuswahl() in
+               js/app-archetype-card.js — je Seite nach Begegnungszahl,
+               angezeigt nach Quote. */
+            function auswahl(alle, wieViele) {
+                if (!alle || alle.length <= wieViele) {
+                    return (alle || []).slice().sort(function (x, y) { return y.quote - x.quote; });
+                }
+                var n = function (m) { return isFinite(m.partien) ? m.partien : 0; };
+                var gut = alle.filter(function (m) { return m.quote >= 50; })
+                    .sort(function (x, y) { return n(y) - n(x); });
+                var schlecht = alle.filter(function (m) { return m.quote < 50; })
+                    .sort(function (x, y) { return n(y) - n(x); });
+                var h = Math.floor(wieViele / 2);
+                var ausGut = gut.slice(0, h), ausSchlecht = schlecht.slice(0, wieViele - h);
+                if (ausGut.length + ausSchlecht.length < wieViele) {
+                    var fehlt = wieViele - ausGut.length - ausSchlecht.length;
+                    if (gut.length > ausGut.length) ausGut = gut.slice(0, ausGut.length + fehlt);
+                    else ausSchlecht = schlecht.slice(0, ausSchlecht.length + fehlt);
+                }
+                return ausGut.concat(ausSchlecht)
+                    .sort(function (x, y) { return y.quote - x.quote; });
+            }
+
+            var ZEILEN = 10;
+            function fuer(name) {
+                var d = decks[name];
+                if (!d) throw new Error('„' + name + '" steht nicht in limitless_online_decks.csv');
+                var alle = paare[name] || [];
+                var zeigen = auswahl(alle, ZEILEN);
+                var t8 = top8[name] || null;
+                return {
+                    kacheln: [
+                        { wert: prozent(d.anteil, 2), label: 'Share · online',
+                          notiz: tausend(d.listen) + ' lists' },
+                        { wert: prozent(d.quote, 1), label: 'Win rate · ties count',
+                          notiz: tausend(d.partien) + ' games' },
+                        t8 ? { wert: prozent(t8.quote, 1), label: 'Top-8 rate · online',
+                               notiz: tausend(t8.antritte) + ' entries' }
+                           : { wert: '–', label: 'Top-8 rate · online', notiz: 'no data' }
+                    ],
+                    matchups: zeigen.map(function (m) {
+                        return { name: m.gegner, quote: m.quote, partien: m.partien };
+                    }),
+                    kicker: 'Online meta · ' + name,
+                    titel: name,
+                    /* Siehe Heatmap: die Fusszeile klippt bei rund
+                       fuenfzig Zeichen. Der Nenner steht in der ersten
+                       Kachel („3.683 lists"), muss hier also nicht
+                       noch einmal. */
+                    fuss: zeigen.length + ' of ' + alle.length + ' pairings · k=20'
+                        + (stand ? ' · ' + stand : ''),
+                    caption: name + ' against the field: ' + prozent(d.anteil, 2)
+                        + ' share, ' + prozent(d.quote, 1) + ' win rate over '
+                        + tausend(d.partien) + ' games. Shown are the most-played '
+                        + 'pairings above and below 50 % — not the best and worst, '
+                        + 'because a matchup you meet twice matters less than one you '
+                        + 'meet constantly.',
+                    tags: hashtags(['deckguide', 'matchups', 'tournamentprep', name]
+                        .concat(zeigen.slice(0, 3).map(function (m) { return m.name; }))),
+                    vorlagen: ['deckkarte']
+                };
+            }
+            return { decks: namen, proDeck: fuer, vorlagen: ['deckkarte'] };
+        });
+    }
+};
+
 window.DsPostQuellen = {
     REZEPTE: REZEPTE,
     /* Fuer die Tests und fuer die Oberflaeche. */

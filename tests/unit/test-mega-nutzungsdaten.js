@@ -45,12 +45,68 @@ const NAMEN = JSON.parse(lies('data/champions_names_de.json'));
 const MEGAS = (POKEDEX.entries || []).filter(e => e.form === 'Mega');
 const SLUGS = USAGE.pokemon || USAGE;
 
+/* ── „NEU IST ERLAUBT, VERLOREN NICHT" (12.09.2026) ─────────────────
+ *
+ * Entschieden vom Betreiber, nachdem der Lauf „Champions Usage Refresh"
+ * um 05:12 UTC drei neue Mega-Formen in den Pokedex geschrieben hatte —
+ * Baxcalibur, Salamence, Golisopod. Weder Nutzungszahlen noch
+ * Faehigkeiten waren da; beides entsteht erst spaeter. Drei
+ * Zusicherungen fielen um, der Deploy fiel mit, und die Seite hing den
+ * ganzen Vormittag auf dem Stand von gestern, ohne dass etwas kaputt
+ * aussah.
+ *
+ * Die Wachhunde bleiben scharf fuer das, wofuer sie gebaut wurden — eine
+ * Form, die ihre Zahlen VERLIERT. Erkannt wird der Unterschied an der
+ * Nutzungsdatei: kennt sie die Grundform nicht, ist die Art dort
+ * insgesamt neu. Kennt sie die Grundform, fehlt etwas, das da sein
+ * muesste.
+ */
+const grundformSlug = (e) => String((e.meta && e.meta.slug) || '')
+    .replace(/-mega(-[xyz])?$/, '');
+const istNeu = (e) => !SLUGS[grundformSlug(e)];
+const NEUE = MEGAS.filter(istNeu).map(e => e.en);
+
 describe('Mega-Formen erben die Zahlen der Grundform — mit Beleg', () => {
     it('fast jede Mega-Form hat jetzt Nutzungsdaten', () => {
         assert.ok(MEGAS.length >= 60, `nur ${MEGAS.length} Mega-Formen gefunden`);
         const ohne = MEGAS.filter(e => !e.meta || !SLUGS[e.meta.slug]);
-        assert.deepEqual(ohne.map(e => e.en), [],
-            'diese Mega-Formen zeigen weiterhin "keine Nutzungsdaten"');
+
+        /* ── NEU IST ERLAUBT, VERLOREN NICHT (12.09.2026) ──────────────
+         *
+         * Am 12.09.2026 um 05:12 UTC schrieb der Lauf „Champions Usage
+         * Refresh" drei neue Mega-Formen in den Pokedex — Baxcalibur,
+         * Salamence, Golisopod. Nutzungszahlen hatten sie noch keine:
+         * die entstehen erst, wenn das Feld sie spielt.
+         *
+         * Diese Zusicherung fiel deshalb um, der Deploy fiel mit, und
+         * die Seite hing den ganzen Vormittag auf dem Stand von gestern
+         * — ohne dass irgendetwas kaputt aussah. Genau das Muster, das
+         * CLAUDE.md unter „Auch DOKUMENTE sind verdrahtet" beschreibt.
+         *
+         * Der Wachhund bleibt, aber er bewacht die richtige Sache: eine
+         * Form, die ihre Zahlen VERLIERT, ist ein Datenausfall. Eine
+         * Form, die noch nie welche hatte, ist ein neues Set.
+         *
+         * Unterschieden wird an der Nutzungsdatei selbst: kennt sie die
+         * GRUNDFORM nicht, ist die Art dort insgesamt neu. Kennt sie die
+         * Grundform, hat die Mega-Form ihre Zahlen verloren — und dann
+         * faellt der Test wie bisher.
+         *
+         * Entschieden vom Betreiber am 12.09.2026 („Zusicherung auf
+         * ‚neu ist erlaubt'"). */
+        const nurNeu = ohne.filter(istNeu);
+        const verloren = ohne.filter(e => !istNeu(e));
+
+        assert.deepEqual(verloren.map(e => e.en), [],
+            'diese Mega-Formen zeigen "keine Nutzungsdaten", obwohl ihre Grundform '
+            + 'welche hat — das ist ein Datenausfall, kein neues Set');
+
+        /* Und die Zahl bleibt klein. Zehn neue Formen auf einmal waeren
+           kein neues Set mehr, sondern ein Fehler im Bau. */
+        assert.ok(nurNeu.length <= 5,
+            `${nurNeu.length} Mega-Formen ohne Nutzungsdaten (${
+                nurNeu.map(e => e.en).join(', ')}) — das sind zu viele fuer `
+            + '"neu dazugekommen"');
     });
 
     it('geerbt wird nur, wenn die Grundform den Stein wirklich haelt', () => {
@@ -156,7 +212,13 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
         // gebe keine oeffentliche Quelle, war falsch) — vier trugen den
         // Einzelbeleg allein. Die uebrigen zwoelf hat der Betreiber
         // noch am selben Tag bestaetigt. Die Luecke ist damit zu.
-        assert.deepEqual(POKEDEX._meta.megaAbilityMissing || [], [],
+        /* Dieselbe Trennung wie oben: eine Form, die erst seit dem
+           letzten Lauf im Pokedex steht, darf hier stehen — fuer eine
+           Faehigkeit braucht es eine Quelle, und die entsteht nicht in
+           derselben Nacht. Jede andere ist der alte Befund. */
+        const fehlt = (POKEDEX._meta.megaAbilityMissing || [])
+            .filter(n => NEUE.indexOf(n) < 0);
+        assert.deepEqual(fehlt, [],
             'eine Mega-Form steht wieder ohne belegte Faehigkeit da — ' +
             'nachsehen, warum, und die Begruendung im Bauer nachziehen');
         assert.equal((POKEDEX._meta.megaAbilityBelegt || []).length, 16,
@@ -184,9 +246,15 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
     });
 
     it('jede Mega-Form fuehrt jetzt eine Faehigkeit', () => {
-        const ohne = MEGAS.filter(e => !(e.megaAbility || '').trim()).map(e => e.en);
+        const ohne = MEGAS.filter(e => !(e.megaAbility || '').trim())
+            .map(e => e.en).filter(n => NEUE.indexOf(n) < 0);
         assert.deepEqual(ohne, [],
             'ohne Faehigkeit steht in der Oberflaeche wieder ein Platzhalter: ' + ohne);
+        /* Und die Neuen bleiben sichtbar, statt stillschweigend
+           durchzurutschen: waechst ihre Zahl ueber eine Handvoll, ist
+           das kein neues Set mehr, sondern ein Fehler im Bau. */
+        assert.ok(NEUE.length <= 5,
+            `${NEUE.length} Mega-Formen sind neu und ohne Daten (${NEUE.join(', ')})`);
     });
 
     it('die Luecke wird nicht mehr als quellenlos beschrieben', () => {

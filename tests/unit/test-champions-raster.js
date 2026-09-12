@@ -154,10 +154,20 @@ describe('Sortierung nach Champions-Nutzung', () => {
          * Die Oberflaeche schweigt darueber nicht: der Pokedex-Reiter
          * zeigt die Zahl der noch fehlenden Pokemon an
          * (js/app-side-quest-pokedex.js, OHNE_EINTRAG). */
+        /* NACHGEZOGEN AM 12.09.2026, in beide Richtungen.
+           Der Wochenlauf „Champions Usage Refresh" (05:12 UTC) hat
+           SECHS der elf Namen in den Pokedex geschrieben — Baxcalibur,
+           Golisopod, Pawmot, Rillaboom, Salamence und Salamence-Mega.
+           Sie stehen hier nicht mehr, sonst behauptete die Liste
+           weiter eine Luecke, die es nicht mehr gibt (genau das, wovor
+           der Fehlertext unten warnt).
+           Gleichzeitig sind DREI neu aufgetaucht: Dragalge, Pyroar und
+           Scrafty stehen jetzt in Replica-Teams, ohne einen Eintrag zu
+           haben. Sie sind keine Schreibweise eines vorhandenen
+           Eintrags — im Pokedex gibt es sie unter keinem Namen. */
         const ERWARTET_OHNE_EINTRAG = [
-            'Baxcalibur', 'Golisopod', 'Indeedee', 'Indeedee-F', 'Meowstic-F',
-            'Pawmot', 'Persian-Alola', 'Rillaboom', 'Salamence', 'Salamence-Mega',
-            'Toxtricity',
+            'Dragalge', 'Indeedee', 'Indeedee-F', 'Meowstic-F',
+            'Persian-Alola', 'Pyroar', 'Scrafty', 'Toxtricity',
         ].sort();
 
         assert.deepEqual(verwaist, ERWARTET_OHNE_EINTRAG,

@@ -100,6 +100,26 @@ FORM_UEBERSTEUERUNG = {
     # dort NUR 670e und 670m1 — keine gewoehnliche Floette. Das deckt
     # sich mit der Werte-Korrektur in build_champions_pokedex.py.
     "Floette": "670e",
+    # ── MEGA-Z (12.09.2026) ────────────────────────────────────────
+    # Der Wochenlauf hat drei Eintraege "(Mega-Z)" in den Pokedex
+    # geschrieben. Es sind eigene Formen, keine Dubletten: Absol
+    # (Mega-Z) ist Unlicht/Geist, das gewoehnliche Mega Absol
+    # Unlicht/Fee; Garchomp (Mega-Z) ist reiner Drache, Mega Garchomp
+    # Drache/Boden.
+    #
+    # QUELLE, vom Betreiber genannt: pokewiki.de. Er hat den Schluessel
+    # an einem Beispiel belegt —
+    #   https://www.pokewiki.de/Lucario/Sprites_und_3D-Modelle
+    #   .../Pok%C3%A9mon-Icon_448m2_CMP.png
+    # also Dexnummer + "m2" fuer die zweite Mega-Form. Dasselbe Muster
+    # benutzt schluessel() schon fuer Mega Y (siehe unten); fuer diese
+    # drei gibt es kein X/Y, ihre gewoehnliche Mega-Form traegt m1.
+    #
+    # Geraten ist hier nichts: das Skript laedt jede Datei und bricht
+    # ab, wenn sie fehlt — ein falscher Schluessel faellt sofort auf.
+    "Garchomp (Mega-Z)": "445m2",
+    "Lucario (Mega-Z)":  "448m2",
+    "Absol (Mega-Z)":    "359m2",
 }
 
 REGION_PRAEFIX = ("Alolan ", "Galarian ", "Hisuian ", "Paldean ")

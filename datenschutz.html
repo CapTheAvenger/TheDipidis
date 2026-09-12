@@ -92,7 +92,7 @@ footer a{margin-right:var(--s-3)}
 <p><span class="platzhalter">BITTE_EINTRAGEN</span> — Name, Anschrift und
    E-Mail wie im <a href="/impressum.html">Impressum</a>.</p>
 <p>Ein Datenschutzbeauftragter ist nicht bestellt; die Voraussetzungen des
-   Art. 37 DSGUO bzw. § 38 BDSG liegen nicht vor (keine Beschäftigten, keine
+   Art. 37 DSGVO bzw. § 38 BDSG liegen nicht vor (keine Beschäftigten, keine
    umfangreiche Verarbeitung besonderer Kategorien).</p>
 
 <h2>3 · Was beim bloßen Aufruf passiert</h2>
@@ -116,15 +116,24 @@ footer a{margin-right:var(--s-3)}
    <a href="https://docs.github.com/site-policy/privacy-policies/github-privacy-statement" rel="noopener">docs.github.com</a></p>
 
 <h3>Schriften und Programmbibliotheken</h3>
-<p>Die verwendete Schrift <strong>Nunito</strong> liegt seit dem 12.09.2026
-   auf unserem eigenen Server. Beim Aufruf der Seite geht deshalb
-   <strong>keine</strong> Verbindung zu Google-Schriftservern und keine
-   IP-Adresse an Google.</p>
-<p>Einzelne Programmbibliotheken werden noch von den Content-Delivery-Netzen
+<p>Die verwendete Schrift <strong>Nunito</strong> wird derzeit noch über
+   <code>fonts.googleapis.com</code> von Servern der Google Ireland Limited
+   geladen. Dabei erhält Google deine IP-Adresse. Ebenso werden einzelne
+   Programmbibliotheken von den Content-Delivery-Netzen
    <code>cdn.jsdelivr.net</code> und <code>cdnjs.cloudflare.com</code>
-   geladen. Dabei erhält der jeweilige Betreiber deine IP-Adresse.
-   Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (funktionsfähige,
-   schnell ladende Seite).</p>
+   geladen; auch dort fällt deine IP-Adresse an.</p>
+<ul>
+  <li><strong>Zweck:</strong> einheitliche Darstellung, funktionsfähige und
+      schnell ladende Seite.</li>
+  <li><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO.</li>
+</ul>
+<p><strong>Das wird umgestellt.</strong> Die Schrift wird auf unseren eigenen
+   Server verlegt, damit dieser Abruf vollständig entfällt — Anlass ist das
+   Urteil des LG München I vom 20.01.2022 (3 O 17493/20), das die Einbindung
+   von Google Fonts ohne Einwilligung als Verletzung des allgemeinen
+   Persönlichkeitsrechts gewertet hat. Dieser Absatz beschreibt bewusst den
+   tatsächlichen Zustand und nicht den gewünschten; sobald die Umstellung
+   erledigt ist, steht hier, dass keine Verbindung mehr zu Google besteht.</p>
 
 <h2>4 · Wenn du ein Konto anlegst</h2>
 <p>Konten, gespeicherte Decks, Tauschlisten und das Kampftagebuch laufen über

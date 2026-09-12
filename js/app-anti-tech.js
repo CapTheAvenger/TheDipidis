@@ -30,6 +30,22 @@
     let _suggestedCards = [];          // [{name, threatCategories, targets, counterScore}]
     let _selectedCards  = new Set();   // lower-cased card names
 
+    /* BEDROHUNGEN OHNE BEKANNTE ANTWORT — Map kategorie → Set(Zielname)
+     *
+     * BEFUND 12.09.2026: data/active_threats.json fuehrt vier
+     * Bedrohungskategorien, aber nur DREI davon haben einen
+     * `counters`-Eintrag. `ability_lock` steht mit 11,1 %
+     * gewichtetem Metaanteil in `threats` und fehlt in `counters`
+     * vollstaendig. Die Schleife in _computeSuggestedCards lief
+     * ueber eine leere Konterliste und ging weiter — die Kategorie
+     * fiel STILL aus der Oberflaeche.
+     *
+     * Das ist genau der Fall, den die Hausregel "Report, don't
+     * silently repair" verbietet: eine Luecke, die wie ein
+     * "gibt es nicht" aussieht. Sie wird jetzt hier gesammelt und
+     * unter der Liste benannt. */
+    let _ohneAntwort    = new Map();
+
     function _t(key, fallback) {
         return (typeof t === 'function' ? t(key) : null) || fallback;
     }
@@ -652,6 +668,7 @@
                          : 0.15;
 
         const byCard = new Map(); // nameLower → {name, threatCategories, targets, counterScore}
+        _ohneAntwort = new Map(); // je Lauf neu — sonst haengen alte Ziele nach
 
         // For every selected target, find threat categories the
         // target uses, then collect counters from those categories.
@@ -680,6 +697,16 @@
                 const counters = (intel.counters && Array.isArray(intel.counters[cat]))
                     ? intel.counters[cat]
                     : [];
+                /* Kategorie ohne einen einzigen Konter: merken statt
+                   stillschweigend weiterlaufen. Der Nutzer spielt
+                   gegen diese Bedrohung — er soll lesen, dass die
+                   Datenbasis KEINE Antwort kennt, nicht, dass die
+                   Bedrohung nicht existiert. */
+                if (counters.length === 0) {
+                    if (!_ohneAntwort.has(cat)) _ohneAntwort.set(cat, new Set());
+                    _ohneAntwort.get(cat).add(target);
+                    continue;
+                }
                 for (const c of counters) {
                     const name = String(c.card_name || '').trim();
                     if (!name) continue;
@@ -899,9 +926,33 @@
         const gedeckt = new Set();
         _suggestedCards.forEach(c => (c.targets || new Set())
             .forEach(t => gedeckt.add(String(t || '').toLowerCase())));
+        /* BEDROHUNG ERKANNT, ANTWORT UNBEKANNT — eigene Zeile.
+           Eine Kategorie, die das Zieldeck nachweislich spielt und zu
+           der data/active_threats.json KEINEN Konter fuehrt, ist etwas
+           anderes als "zu diesem Ziel liegt nichts vor". Sie wird
+           deshalb getrennt benannt und faellt aus der
+           "keine Daten"-Zeile heraus. */
+        const ohneAntwortZiele = new Set();
+        const ohneAntwortText = [];
+        for (const [kat, ziele] of (_ohneAntwort || new Map()).entries()) {
+            const liste = Array.from(ziele || []);
+            liste.forEach(z => ohneAntwortZiele.add(String(z || '').toLowerCase()));
+            ohneAntwortText.push(`${kat} (${liste.join(', ')})`);
+        }
+        const ohneAntwortHtml = ohneAntwortText.length
+            ? `<div class="anti-tech-beleg-ohne-antwort" style="display:block;margin-top:8px;font-size:0.85em;line-height:1.35;opacity:0.85">${_esc(
+                _tf('antiTech.belegOhneAntwort', 'keine bekannte Antwort') + ': '
+                + _tf('antiTech.belegOhneAntwortSatz',
+                     '{liste} — diese Bedrohung spielt das Zieldeck, aber in diesem Format '
+                   + 'kennt die Bedrohungsdatei keinen Konter dagegen. Die Kategorie fehlt '
+                   + 'nicht, sie ist unbeantwortet.')
+                    .replace('{liste}', ohneAntwortText.join(' · ')))}</div>`
+            : '';
+
         const ohneDaten = Array.from(_targets)
             .map(k => _targetDisplay.get(k) || k)
-            .filter(n => !gedeckt.has(String(n || '').toLowerCase()));
+            .filter(n => !gedeckt.has(String(n || '').toLowerCase()))
+            .filter(n => !ohneAntwortZiele.has(String(n || '').toLowerCase()));
         const ohneHtml = ohneDaten.length
             ? `<div class="anti-tech-beleg-keine" style="display:block;margin-top:8px;font-size:0.85em;line-height:1.35;opacity:0.85">${_esc(
                 _tf('antiTech.belegKeineDaten', 'keine Daten') + ': '
@@ -914,7 +965,7 @@
         if (_suggestedCards.length === 0) {
             list.innerHTML = kopfHtml + `<div class="anti-tech-card-empty">${
                 _t('antiTech.cardsEmpty', 'No counter cards for these targets — data/active_threats.json does not list them. That is a gap in our data, not a bad pick.')
-            }</div>` + ohneHtml;
+            }</div>` + ohneAntwortHtml + ohneHtml;
             return;
         }
 
@@ -942,7 +993,7 @@
                     <span class="anti-tech-card-beleg anti-tech-beleg-${c.beleg === 'paarung' ? 'ja' : 'nein'}" style="display:block;margin-top:2px;font-size:0.8em;line-height:1.3;opacity:0.85">${_esc(_belegSatz(c))}</span>
                 </span>
             </label>`;
-        }).join('') + ohneHtml;
+        }).join('') + ohneAntwortHtml + ohneHtml;
         list.querySelectorAll('.anti-tech-card-check').forEach(box => {
             box.addEventListener('change', () => _toggleSuggestedCard(box.dataset.card, box.checked));
         });
@@ -1022,6 +1073,7 @@
         _targets = new Set();
         _targetDisplay = new Map();
         _suggestedCards = [];
+        _ohneAntwort = new Map();
         _selectedCards = new Set();
 
         modal.classList.remove('d-none');
@@ -1055,6 +1107,7 @@
         _targets = new Set();
         _targetDisplay = new Map();
         _suggestedCards = [];
+        _ohneAntwort = new Map();
         _selectedCards = new Set();
     }
 
@@ -1074,6 +1127,7 @@
         } catch (e) {
             _devLog('compute failed:', e);
             _suggestedCards = [];
+            _ohneAntwort = new Map();
         }
         // Pre-select top 3 across all targets so the user sees a
         // reasonable starting build without having to click through

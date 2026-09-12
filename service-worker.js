@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202609121448
+// v202609121901
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
 //   Data files        → Network-first  (fresh scraper output; fall back to cache offline)
 
-const CACHE_NAME = 'tcg-analysis-v202609121448';
+const CACHE_NAME = 'tcg-analysis-v202609121901';
 
 // Static shell — cached on install.
 //
@@ -44,6 +44,10 @@ const SHELL_ASSETS = [
   './index.html',
   './css/tokens.css',
   './css/components.css',
+  // Lokale Schrift (12.09.2026). Gehoert in die Shell, sonst laedt die
+  // Seite offline ohne Schrift — und der Rueckfall auf Segoe UI
+  // verschiebt jedes Layout.
+  './css/schriften.css',
   './css/styles.css',
   './css/ui-components.css',
   './css/auth-styles.css',

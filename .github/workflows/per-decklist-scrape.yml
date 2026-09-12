@@ -229,12 +229,28 @@ jobs:
       # commits a month and churn the service worker's CACHE_NAME, which makes
       # the activate handler drop every client cache several times a day.
 
+      # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN (12.09.2026)
+      #
+      # `build_data_stand.py` schreibt den Stand einer Datei nur fort,
+      # wenn der LAUFENDE Job sie angefasst hat (`geaendert()` liest
+      # `git status --porcelain`). Faellt der Schritt hier weg, commitet
+      # der Job neue Daten und laesst `data/_datenstand.json` auf dem
+      # alten Datum stehen — die Seite schreibt dann ein Datum an die
+      # Zahlen, das nicht zu ihnen gehoert.
+      #
+      # Gefunden am 12.09.2026: `test_datenstand_abdeckung.py` war auf
+      # `main` rot, weil `price_data.csv` im Stand den 11.09. trug und
+      # im Git-Verlauf den 12.09. 14 von 17 Ablaeufen, die nach data/
+      # commiten, fehlte dieser Schritt.
+      - name: Datenstaende fortschreiben
+        run: python3 scripts/build_data_stand.py
+
       - name: Commit + push
         id: commit
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
-          git add data/tournament_decklists_per_player.csv
+          git add data/tournament_decklists_per_player.csv data/data_stand.json
           if git diff --cached --quiet; then
             echo "No changes — skipping push."
             echo "pushed=false" >> "$GITHUB_OUTPUT"

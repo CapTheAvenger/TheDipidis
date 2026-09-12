@@ -178,6 +178,39 @@ jobs:
           cp service-worker.js _site/
           cp .nojekyll _site/
           cp CNAME _site/ 2>/dev/null || true
+          # Auffindbarkeit (12.09.2026). Beide Dateien gab es bis dahin
+          # nicht — die Seite nannte Suchmaschinen also weder, was sie
+          # NICHT indizieren sollen (data/ mit rund 500 MB CSV), noch
+          # wo die Seitenkarte liegt.
+          cp robots.txt _site/
+          cp sitemap.xml _site/
+          # IMPRESSUM UND DATENSCHUTZERKLAERUNG — MIT RIEGEL.
+          #
+          # Pflicht nach § 5 DDG und DSGVO Art. 13, sobald Konten
+          # angelegt werden koennen; die Seite fuehrt Anmeldung und
+          # gespeicherte Decks ueber Firebase. Beide Seiten fehlten bis
+          # zum 12.09.2026 ganz.
+          #
+          # Drei Angaben koennen nur vom Betreiber kommen (Name,
+          # ladungsfaehige Anschrift, Kontakt-E-Mail). Solange sie als
+          # BITTE_EINTRAGEN dastehen, wird die Datei NICHT ausgeliefert:
+          # ein unvollstaendiges Impressum im Netz ist abmahnfaehig, ein
+          # fehlendes auf einer nicht beworbenen Seite ist das kleinere
+          # Risiko.
+          #
+          # Sobald die Platzhalter ersetzt sind, geht die Seite beim
+          # naechsten Deploy von selbst mit — ohne dass jemand hier
+          # etwas aendern muss.
+          for seite in impressum.html datenschutz.html; do
+            if [ ! -f "$seite" ]; then
+              echo "::warning::$seite fehlt — nicht ausgeliefert."
+            elif grep -q "BITTE_EINTRAGEN" "$seite"; then
+              echo "::warning::$seite traegt noch Platzhalter (BITTE_EINTRAGEN) und wird NICHT ausgeliefert. Name, Anschrift und E-Mail eintragen, dann geht sie beim naechsten Deploy live."
+            else
+              cp "$seite" _site/
+              echo "$seite ausgeliefert."
+            fi
+          done
           cp -r css _site/css
           cp -r js _site/js
           cp -r images _site/images 2>/dev/null || true

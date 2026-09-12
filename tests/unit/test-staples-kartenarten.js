@@ -78,15 +78,20 @@ function karte(name, type, share) {
 describe('Die Auswahlregel je Kartenart', () => {
     const R = lade();
 
-    it('die sechs Arten des Betreibers sind da, in seiner Reihenfolge — und ACE SPEC dahinter', () => {
-        /* Am 11.09.2026 kam eine siebte Schaltflaeche dazu, und sie ist
-           bewusst KEINE siebte Kartenart: ACE SPEC waehlt ueber ein
-           Kennzeichen aus und schneidet die anderen sechs, statt sie
-           auszuschliessen (Item, Ausruestung, Stadion, Spezial-Energie).
-           Deshalb steht sie hinten, und deshalb prueft die Schleife
+    it('die sechs Arten des Betreibers sind da, in seiner Reihenfolge — dahinter die zwei Kennzeichen', () => {
+        /* Am 11.09.2026 kamen zwei Schaltflaechen dazu, und beide sind
+           bewusst KEINE Kartenarten: sie waehlen ueber ein Kennzeichen
+           aus und schneiden die sechs Arten, statt sie auszuschliessen.
+
+             ACE SPEC   eine Karte je Deck; sie steht in ihrer Art UND hier
+             Neues Set  alle gespielten Karten des laufenden Sets
+                        („All used cards newest Set", Bestellung vom
+                        11.09.2026)
+
+           Deshalb stehen sie hinten, und deshalb prueft die Schleife
            darunter `typen` nur fuer die sechs. */
         assert.deepEqual(R._arten.map(a => a.id),
-            ['pokemon', 'supporter', 'item', 'tool', 'stadion', 'energie', 'ace']);
+            ['pokemon', 'supporter', 'item', 'tool', 'stadion', 'energie', 'ace', 'neuesSet']);
         R._arten.forEach(a => {
             assert.ok(a.de && a.en, 'Beschriftung fehlt bei ' + a.id);
             if (a.kennzeichen) {

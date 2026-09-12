@@ -97,8 +97,24 @@ describe('ACE SPEC ist eine eigene Liste, keine siebte Kartenart', () => {
 
     it('sie steht hinter den sechs Arten', () => {
         /* Eine Querliste gehoert ans Ende: davor stehen die Arten, die
-           einander ausschliessen, danach die eine, die sie schneidet. */
-        assert.equal(ARTEN[ARTEN.length - 1].id, 'ace');
+           einander ausschliessen, danach die, die sie schneiden.
+           Seit dem 11.09.2026 sind es zwei solcher Querlisten — „Neues
+           Set" kam dazu. Beide waehlen ueber ein Kennzeichen; geprueft
+           wird deshalb, dass ACE SPEC hinter allen sechs ARTEN steht,
+           nicht dass sie die allerletzte ist. */
+        const sechs = ['pokemon', 'supporter', 'item', 'tool', 'stadion', 'energie'];
+        const iAce = ARTEN.findIndex(a => a.id === 'ace');
+        assert.ok(iAce > -1, 'ACE SPEC fehlt ganz');
+        sechs.forEach((id) => {
+            const i = ARTEN.findIndex(a => a.id === id);
+            assert.ok(i > -1 && i < iAce,
+                `„${id}" steht hinter ACE SPEC — die Arten gehoeren nach vorn`);
+        });
+        ARTEN.slice(iAce).forEach((a) => {
+            assert.ok(a.kennzeichen,
+                `hinter ACE SPEC steht „${a.id}" ohne Kennzeichen — dort gehoeren `
+                + 'nur Querlisten hin');
+        });
     });
 
     it('nimmt genau die belegten ACE SPEC ueber der Schwelle', () => {

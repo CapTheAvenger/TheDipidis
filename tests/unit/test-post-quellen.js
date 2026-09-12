@@ -193,8 +193,19 @@ test('jede Quelle schreibt eine Zahl in ihre Fusszeile', async () => {
         if (erg.proDeck) erg = erg.proDeck(erg.decks[0]);
         assert.ok(/\d/.test(erg.fuss),
             `${e.name} hat keine Zahl in der Fußzeile: ${JSON.stringify(erg.fuss)}`);
-        assert.ok(erg.listeKopf && erg.listeKopf.length,
-            `${e.name} hat keinen Spaltenkopf`);
+        /* SEIT DEM 11.09.2026 NICHT MEHR FUER JEDE QUELLE.
+           Zwei Beitragsarten zeichnen kein Ranking: „Matchup heatmap"
+           malt ein 8 × 8-Gitter, „A deck vs. the meta" drei Kacheln und
+           eine Paarungsliste. Beide haben keine Wertspalte, also auch
+           keinen Spaltenkopf — ihn zu fordern hiesse, ein Feld zu
+           verlangen, das nirgends gezeichnet wird.
+           Die Zusicherung gilt unveraendert fuer alles, was eine Liste
+           liefert; was stattdessen geprueft wird, steht weiter unten
+           unter „die zwei datengetriebenen Vorlagen". */
+        if (erg.zeilen) {
+            assert.ok(erg.listeKopf && erg.listeKopf.length,
+                `${e.name} liefert Zeilen, aber keinen Spaltenkopf`);
+        }
     }
 });
 
@@ -417,9 +428,11 @@ test('keine Fusszeile und kein Spaltenkopf laeuft ueber', async () => {
         assert.ok(erg.fuss.length <= 48,
             `${e.name}: die Fußzeile hat ${erg.fuss.length} Zeichen (Grenze 48): ` +
             erg.fuss);
-        assert.ok(erg.listeKopf.length <= 23,
-            `${e.name}: der Spaltenkopf hat ${erg.listeKopf.length} Zeichen ` +
-            `(Grenze 23): ${erg.listeKopf}`);
+        if (erg.zeilen) {
+            assert.ok(erg.listeKopf.length <= 23,
+                `${e.name}: der Spaltenkopf hat ${erg.listeKopf.length} Zeichen ` +
+                `(Grenze 23): ${erg.listeKopf}`);
+        }
     }
 });
 

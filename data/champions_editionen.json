@@ -12,10 +12,184 @@
    "green-japan": "japanische Erstausgabe ohne eigene deutsche Fassung",
    "blue-japan": "gleicher deutscher Name wie die internationale Ausgabe"
   },
-  "arten": 204,
+  "arten": 209,
   "ohne_eintrag": []
  },
  "editionen": {
+  "445": [
+   {
+    "schluessel": "diamond",
+    "de": "Diamant",
+    "en": "Diamond"
+   },
+   {
+    "schluessel": "pearl",
+    "de": "Perl",
+    "en": "Pearl"
+   },
+   {
+    "schluessel": "platinum",
+    "de": "Platin",
+    "en": "Platinum"
+   },
+   {
+    "schluessel": "heartgold",
+    "de": "HeartGold",
+    "en": "HeartGold"
+   },
+   {
+    "schluessel": "soulsilver",
+    "de": "SoulSilver",
+    "en": "SoulSilver"
+   },
+   {
+    "schluessel": "black",
+    "de": "Schwarz",
+    "en": "Black"
+   },
+   {
+    "schluessel": "white",
+    "de": "Weiß",
+    "en": "White"
+   },
+   {
+    "schluessel": "black-2",
+    "de": "Schwarz 2",
+    "en": "Black 2"
+   },
+   {
+    "schluessel": "white-2",
+    "de": "Weiß 2",
+    "en": "White 2"
+   },
+   {
+    "schluessel": "x",
+    "de": "X",
+    "en": "X"
+   },
+   {
+    "schluessel": "y",
+    "de": "Y",
+    "en": "Y"
+   },
+   {
+    "schluessel": "omega-ruby",
+    "de": "Omega Rubin",
+    "en": "Omega Ruby"
+   },
+   {
+    "schluessel": "alpha-sapphire",
+    "de": "Alpha Saphir",
+    "en": "Alpha Sapphire"
+   },
+   {
+    "schluessel": "sun",
+    "de": "Sonne",
+    "en": "Sun"
+   },
+   {
+    "schluessel": "moon",
+    "de": "Mond",
+    "en": "Moon"
+   },
+   {
+    "schluessel": "ultra-sun",
+    "de": "Ultrasonne",
+    "en": "Ultra Sun"
+   },
+   {
+    "schluessel": "ultra-moon",
+    "de": "Ultramond",
+    "en": "Ultra Moon"
+   },
+   {
+    "schluessel": "lets-go-pikachu",
+    "de": "Let’s Go, Pikachu!",
+    "en": "Let’s Go, Pikachu!"
+   },
+   {
+    "schluessel": "lets-go-eevee",
+    "de": "Let’s Go, Evoli!",
+    "en": "Let’s Go, Eevee!"
+   },
+   {
+    "schluessel": "sword",
+    "de": "Schwert",
+    "en": "Sword"
+   },
+   {
+    "schluessel": "shield",
+    "de": "Schild",
+    "en": "Shield"
+   },
+   {
+    "schluessel": "the-isle-of-armor-sword",
+    "de": "Schwert: Die Insel der Rüstung",
+    "en": "Sword: The Isle of Armor"
+   },
+   {
+    "schluessel": "the-crown-tundra-sword",
+    "de": "Schwert: Die Schneelande der Krone",
+    "en": "Sword: The Crown Tundra"
+   },
+   {
+    "schluessel": "brilliant-diamond",
+    "de": "Strahlender Diamant",
+    "en": "Brilliant Diamond"
+   },
+   {
+    "schluessel": "shining-pearl",
+    "de": "Leuchtende Perle",
+    "en": "Shining Pearl"
+   },
+   {
+    "schluessel": "legends-arceus",
+    "de": "Legenden: Arceus",
+    "en": "Legends: Arceus"
+   },
+   {
+    "schluessel": "scarlet",
+    "de": "Karmesin",
+    "en": "Scarlet"
+   },
+   {
+    "schluessel": "violet",
+    "de": "Purpur",
+    "en": "Violet"
+   },
+   {
+    "schluessel": "the-teal-mask-scarlet",
+    "de": "Karmesin: Die Türkisgrüne Maske",
+    "en": "Scarlet: The Teal Mask"
+   },
+   {
+    "schluessel": "the-indigo-disk-scarlet",
+    "de": "Karmesin: Die Indigoblaue Scheibe",
+    "en": "Scarlet: The Indigo Disk"
+   }
+  ],
+  "998": [
+   {
+    "schluessel": "scarlet",
+    "de": "Karmesin",
+    "en": "Scarlet"
+   },
+   {
+    "schluessel": "violet",
+    "de": "Purpur",
+    "en": "Violet"
+   },
+   {
+    "schluessel": "the-teal-mask-scarlet",
+    "de": "Karmesin: Die Türkisgrüne Maske",
+    "en": "Scarlet: The Teal Mask"
+   },
+   {
+    "schluessel": "the-indigo-disk-scarlet",
+    "de": "Karmesin: Die Indigoblaue Scheibe",
+    "en": "Scarlet: The Indigo Disk"
+   }
+  ],
   "149": [
    {
     "schluessel": "red",
@@ -223,7 +397,32 @@
     "en": "Scarlet: The Indigo Disk"
    }
   ],
-  "445": [
+  "376": [
+   {
+    "schluessel": "ruby",
+    "de": "Rubin",
+    "en": "Ruby"
+   },
+   {
+    "schluessel": "sapphire",
+    "de": "Saphir",
+    "en": "Sapphire"
+   },
+   {
+    "schluessel": "emerald",
+    "de": "Smaragd",
+    "en": "Emerald"
+   },
+   {
+    "schluessel": "firered",
+    "de": "Feuerrot",
+    "en": "FireRed"
+   },
+   {
+    "schluessel": "leafgreen",
+    "de": "Blattgrün",
+    "en": "LeafGreen"
+   },
    {
     "schluessel": "diamond",
     "de": "Diamant",
@@ -375,7 +574,7 @@
     "en": "Scarlet: The Indigo Disk"
    }
   ],
-  "376": [
+  "373": [
    {
     "schluessel": "ruby",
     "de": "Rubin",
@@ -2249,6 +2448,73 @@
     "en": "Scarlet: The Indigo Disk"
    }
   ],
+  "768": [
+   {
+    "schluessel": "sun",
+    "de": "Sonne",
+    "en": "Sun"
+   },
+   {
+    "schluessel": "moon",
+    "de": "Mond",
+    "en": "Moon"
+   },
+   {
+    "schluessel": "ultra-sun",
+    "de": "Ultrasonne",
+    "en": "Ultra Sun"
+   },
+   {
+    "schluessel": "ultra-moon",
+    "de": "Ultramond",
+    "en": "Ultra Moon"
+   },
+   {
+    "schluessel": "lets-go-pikachu",
+    "de": "Let’s Go, Pikachu!",
+    "en": "Let’s Go, Pikachu!"
+   },
+   {
+    "schluessel": "lets-go-eevee",
+    "de": "Let’s Go, Evoli!",
+    "en": "Let’s Go, Eevee!"
+   },
+   {
+    "schluessel": "sword",
+    "de": "Schwert",
+    "en": "Sword"
+   },
+   {
+    "schluessel": "shield",
+    "de": "Schild",
+    "en": "Shield"
+   },
+   {
+    "schluessel": "the-isle-of-armor-sword",
+    "de": "Schwert: Die Insel der Rüstung",
+    "en": "Sword: The Isle of Armor"
+   },
+   {
+    "schluessel": "the-crown-tundra-sword",
+    "de": "Schwert: Die Schneelande der Krone",
+    "en": "Sword: The Crown Tundra"
+   },
+   {
+    "schluessel": "brilliant-diamond",
+    "de": "Strahlender Diamant",
+    "en": "Brilliant Diamond"
+   },
+   {
+    "schluessel": "shining-pearl",
+    "de": "Leuchtende Perle",
+    "en": "Shining Pearl"
+   },
+   {
+    "schluessel": "legends-arceus",
+    "de": "Legenden: Arceus",
+    "en": "Legends: Arceus"
+   }
+  ],
   "658": [
    {
     "schluessel": "x",
@@ -2590,28 +2856,6 @@
     "en": "Scarlet: The Indigo Disk"
    }
   ],
-  "970": [
-   {
-    "schluessel": "scarlet",
-    "de": "Karmesin",
-    "en": "Scarlet"
-   },
-   {
-    "schluessel": "violet",
-    "de": "Purpur",
-    "en": "Violet"
-   },
-   {
-    "schluessel": "the-teal-mask-scarlet",
-    "de": "Karmesin: Die Türkisgrüne Maske",
-    "en": "Scarlet: The Teal Mask"
-   },
-   {
-    "schluessel": "the-indigo-disk-scarlet",
-    "de": "Karmesin: Die Indigoblaue Scheibe",
-    "en": "Scarlet: The Indigo Disk"
-   }
-  ],
   "448": [
    {
     "schluessel": "diamond",
@@ -2743,6 +2987,28 @@
     "de": "Legenden: Arceus",
     "en": "Legends: Arceus"
    },
+   {
+    "schluessel": "scarlet",
+    "de": "Karmesin",
+    "en": "Scarlet"
+   },
+   {
+    "schluessel": "violet",
+    "de": "Purpur",
+    "en": "Violet"
+   },
+   {
+    "schluessel": "the-teal-mask-scarlet",
+    "de": "Karmesin: Die Türkisgrüne Maske",
+    "en": "Scarlet: The Teal Mask"
+   },
+   {
+    "schluessel": "the-indigo-disk-scarlet",
+    "de": "Karmesin: Die Indigoblaue Scheibe",
+    "en": "Scarlet: The Indigo Disk"
+   }
+  ],
+  "970": [
    {
     "schluessel": "scarlet",
     "de": "Karmesin",
@@ -12523,6 +12789,63 @@
     "en": "Scarlet: The Indigo Disk"
    }
   ],
+  "812": [
+   {
+    "schluessel": "sword",
+    "de": "Schwert",
+    "en": "Sword"
+   },
+   {
+    "schluessel": "shield",
+    "de": "Schild",
+    "en": "Shield"
+   },
+   {
+    "schluessel": "the-isle-of-armor-sword",
+    "de": "Schwert: Die Insel der Rüstung",
+    "en": "Sword: The Isle of Armor"
+   },
+   {
+    "schluessel": "the-crown-tundra-sword",
+    "de": "Schwert: Die Schneelande der Krone",
+    "en": "Sword: The Crown Tundra"
+   },
+   {
+    "schluessel": "brilliant-diamond",
+    "de": "Strahlender Diamant",
+    "en": "Brilliant Diamond"
+   },
+   {
+    "schluessel": "shining-pearl",
+    "de": "Leuchtende Perle",
+    "en": "Shining Pearl"
+   },
+   {
+    "schluessel": "legends-arceus",
+    "de": "Legenden: Arceus",
+    "en": "Legends: Arceus"
+   },
+   {
+    "schluessel": "scarlet",
+    "de": "Karmesin",
+    "en": "Scarlet"
+   },
+   {
+    "schluessel": "violet",
+    "de": "Purpur",
+    "en": "Violet"
+   },
+   {
+    "schluessel": "the-teal-mask-scarlet",
+    "de": "Karmesin: Die Türkisgrüne Maske",
+    "en": "Scarlet: The Teal Mask"
+   },
+   {
+    "schluessel": "the-indigo-disk-scarlet",
+    "de": "Karmesin: Die Indigoblaue Scheibe",
+    "en": "Scarlet: The Indigo Disk"
+   }
+  ],
   "911": [
    {
     "schluessel": "scarlet",
@@ -19125,6 +19448,28 @@
     "de": "Legenden: Arceus",
     "en": "Legends: Arceus"
    },
+   {
+    "schluessel": "scarlet",
+    "de": "Karmesin",
+    "en": "Scarlet"
+   },
+   {
+    "schluessel": "violet",
+    "de": "Purpur",
+    "en": "Violet"
+   },
+   {
+    "schluessel": "the-teal-mask-scarlet",
+    "de": "Karmesin: Die Türkisgrüne Maske",
+    "en": "Scarlet: The Teal Mask"
+   },
+   {
+    "schluessel": "the-indigo-disk-scarlet",
+    "de": "Karmesin: Die Indigoblaue Scheibe",
+    "en": "Scarlet: The Indigo Disk"
+   }
+  ],
+  "923": [
    {
     "schluessel": "scarlet",
     "de": "Karmesin",

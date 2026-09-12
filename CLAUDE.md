@@ -100,6 +100,46 @@ Die Liste ist nicht vollstaendig — `docs/geparkte-features.md` allein wird
 von ueber zehn Testdateien gelesen. `grep -rl "<dateiname>" tests/` vor
 dem Aendern kostet zwei Sekunden.
 
+## Ein Arbeitsablauf, der Dateien holt, gehoert auf den ZWEIG
+
+Am 12.09.2026 stand die Deploy-Kette von `main` fuenf Stunden, weil der
+naechtliche `Champions Usage Refresh` fuenf Arten ergaenzt hatte und elf
+Zusicherungen jede Abweichung verboten — auch Zuwachs. Drei davon
+brauchten Bilddateien, die **nur CI holen kann** (die Sandkiste kommt an
+pokewiki.de nicht heran, der Proxy antwortet 403 auf CONNECT).
+
+Der Reflex ist, den PR zu mergen und den Spiegellauf danach auf `main` zu
+starten. Das haelt die Kette weiter rot, bis der Lauf durch ist.
+
+**Richtig ist: den Arbeitsablauf per `workflow_dispatch` auf dem ZWEIG
+starten.** Er schiebt seinen Commit dorthin, der PR wird gruen, und `main`
+sieht nur den fertigen Zustand. `champions-sprites.yml` kann das — im
+Dialog „Run workflow" den Zweig waehlen (das versteckte Feld `branch` im
+Formular traegt ihn).
+
+Ebenso beim Lockern eines Waechters: die Frage ist nie „jede Abweichung
+verbieten", sondern **welche Richtung ein Fehler ist**. Bei den
+Kaderlisten heisst das „neu ist erlaubt, verloren nicht" — ein Verlust
+bleibt rot, Zuwachs nicht.
+
+## Eine Zusicherung, die Text liest, prueft die Schreibweise — nicht das Verhalten
+
+Am 12.09.2026 habe ich eine frisch geschriebene Zusicherung verfaelscht,
+um sie zu pruefen: aus `if (erg.gitter && erg.gitter.length)` wurde
+`if (false && erg.gitter.length)`. **Sie blieb gruen** — das gesuchte
+Muster kam im verfaelschten Text weiter vor.
+
+Wo das VERHALTEN zaehlt, muss die Funktion ausgefuehrt werden. Dafuer muss
+sie eine eigene Funktion sein, die eine Pruefung aus der Datei schneiden
+und in einem `vm`-Kontext aufrufen kann (Muster:
+`schneideFunktion` in `tests/unit/test-feld-abdeckung.js`). Eine
+Textzusicherung ist richtig fuer Dinge, die WIRKLICH Text sind — eine
+Meldung, ein CSS-Regelname, ein vorhandener Aufruf.
+
+**Und jede neue Zusicherung bekommt eine Verfaelschungsprobe**, bevor sie
+als Sicherung zaehlt. Kostet eine Minute; ohne sie weiss niemand, ob sie
+ueberhaupt beisst.
+
 ## Data rules
 
 * **Never join card data by name.** Names are not unique within a set. PBL has

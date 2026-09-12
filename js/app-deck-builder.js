@@ -9765,7 +9765,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // ──────────────────────────────────────────────────────────
             // ACE SPEC checker — hoisted up here so the Tech-Audit
             // counter-allocation sort below can use it. Before commit
-            // 9XXXXXX it lived in the BUILD-DECK section (line ~4565)
+            // ffb4ad19 (06.05.2026, "fix(deck-builder): TDZ on
+            // isAceSpecCard breaks autoCompleteConsistency") it lived in
+            // the BUILD-DECK section (line ~4565)
             // and the tech-audit comparator hit a TDZ ReferenceError
             // when sort actually fired with ≥2 candidates per category
             // (the snapshot-mode aggregation surfaced more of those

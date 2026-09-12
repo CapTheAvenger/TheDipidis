@@ -51,6 +51,22 @@ jobs:
           SHOTS: ${{ inputs.shots }}
         run: node prerender/screenshot-tutorial.js
 
+      # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN (12.09.2026)
+      #
+      # `build_data_stand.py` schreibt den Stand einer Datei nur fort,
+      # wenn der LAUFENDE Job sie angefasst hat (`geaendert()` liest
+      # `git status --porcelain`). Faellt der Schritt hier weg, commitet
+      # der Job neue Daten und laesst `data/data_stand.json` auf dem
+      # alten Datum stehen — die Seite schreibt dann ein Datum an die
+      # Zahlen, das nicht zu ihnen gehoert.
+      #
+      # Gefunden am 12.09.2026: `test_datenstand_abdeckung.py` war auf
+      # `main` rot, weil `price_data.csv` im Stand den 11.09. trug und
+      # im Git-Verlauf den 12.09. 14 von 17 Ablaeufen, die nach data/
+      # commiten, fehlte dieser Schritt.
+      - name: Datenstaende fortschreiben
+        run: python3 scripts/build_data_stand.py
+
       - name: Commit new screenshots
         run: |
           git config user.name 'github-actions[bot]'
@@ -58,7 +74,7 @@ jobs:
           # Recurse into per-feature subdirs added by the multi-shot
           # script. `git add` of a directory picks up nested PNGs that
           # the old `images/tutorials/*.png` glob missed.
-          git add images/tutorials/
+          git add images/tutorials/ data/data_stand.json
           if git diff --cached --quiet; then
             echo "No screenshot changes to commit."
           else

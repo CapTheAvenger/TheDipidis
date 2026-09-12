@@ -99,9 +99,32 @@ def test_vorwaerts_wird_geschrieben(fenster_ordner):
     danach = _gelesen(fenster_ordner)
     assert danach["current_set"] == "XYZ"
     assert danach["current_set_jp"] == "M7"
-    # Die manuellen Felder ueberleben die Rotation.
-    assert danach["previous_format_key"] == "TEF-CRI"
-    assert danach["set_addition_only"] is True
+    # AB 12.09.2026 WERDEN DIE BEIDEN FELDER ABGELEITET, NICHT BEWAHRT.
+    #
+    # Bis dahin stand hier `== "TEF-CRI"` — also: der alte Wert
+    # ueberlebt die Rotation. Genau das war der Fehler. Beim echten
+    # Wechsel PBL -> 30C am 25.09.2026 waere "TEF-CRI" ZWEI Formate
+    # zurueck gewesen, und die Predictor-Stufen 5.5/5.6/5.8/5.9 haetten
+    # in der Woche vor Frankfurt (26.09.) die Anteile eines laengst
+    # vorbeigezogenen Formats gezogen.
+    #
+    # Richtig ist das Format, das gerade abgeloest wurde:
+    # <altes oldest_legal>-<altes current> = TEF-PBL.
+    assert danach["previous_format_key"] == "TEF-PBL", (
+        "das Vorformat muss das gerade abgeloeste sein, nicht das "
+        "davor")
+
+    # set_addition_only faellt hier auf false, weil dieser Fall kein
+    # neues oldest_legal_set liefert (kein Kartenbestand im Ordner).
+    # Unbekannt -> false ist die VORSICHTIGE Richtung: false schaltet
+    # die Stufen aus. Ein faelschliches true wuerde sie mit den
+    # Anteilen eines Formats fuettern, dessen Schluesselkarten
+    # herausrotiert sein koennen.
+    assert danach["set_addition_only"] is False, (
+        "ohne bekanntes neues oldest_legal_set gehoeren die Stufen aus, "
+        "nicht an")
+
+    # Die _note_*-Felder des Betreibers bleiben unangetastet.
     assert danach["_note_previous_format"] == "von Hand gepflegt"
 
 

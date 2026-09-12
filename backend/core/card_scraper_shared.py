@@ -464,7 +464,28 @@ def normalize_archetype_name(archetype: str) -> str:
     # of single-quote characters Limitless and our parsing pipeline
     # might emit.
     name = re.sub(r"(?<=\w)(['‘’‛´])S\b", r"\1s", name)
-    name = re.sub(r'^Ns?\s+', '', name, flags=re.IGNORECASE)
+    # KORREKTUR 12.09.2026 — vorher stand hier
+    #     re.sub(r'^Ns?\s+', '', name, flags=re.IGNORECASE)
+    # also ein ersatzloses LOESCHEN eines fuehrenden "N "/"Ns ".
+    # Das ist an genau der Stelle falsch, an der es ueberhaupt
+    # greifen kann: "N" ist kein Rauschen, sondern ein Trainername.
+    # "N Zoroark"/"Ns Zoroark" sind Schreibweisen von "N's Zoroark",
+    # und data/archetype_icons.json fuehrt "N's Zoroark" und
+    # "Zoroark" als ZWEI Archetypen. Das Loeschen haette beide auf
+    # denselben Namen gelegt und ihre Turnierstatistik verschmolzen.
+    #
+    # Richtig ist dieselbe Regel, die
+    # current_meta_analysis_scraper._POSSESSIVE_TRAINERS schon fuer
+    # alle anderen Trainer faehrt ("rockets-honchkrow" ->
+    # "Rocket's Honchkrow"): den Apostroph HERSTELLEN, nicht den
+    # Trainer wegwerfen. Eine Apostroph-Form ("N's Zoroark") wird
+    # nicht angefasst — dort steht hinter dem N kein Leerzeichen.
+    #
+    # Gegen den heutigen Datenbestand aendert das NICHTS: ueber alle
+    # 829 Archetyp-/Deck-Rohwerte in data/*.csv matcht weder die alte
+    # noch die neue Fassung ein einziges Mal (gemessen 12.09.2026,
+    # siehe tests/python/test_archetyp_normalisierung_keine_kollision.py).
+    name = re.sub(r"^Ns?\s+", "N's ", name, flags=re.IGNORECASE)
     name = re.sub(r'(\w+)-Mega\b', r'Mega \1', name, flags=re.IGNORECASE)
     return name.strip()
 

@@ -62,6 +62,34 @@ Diese Datei ist als REGRESSIONS-STOLPERDRAHT gedacht: aendert jemand
 den Regex kuenftig so, dass er auch Bindestrich- oder Apostroph-Formen
 faengt, faellt test_keine_kollision_im_gesamten_datenbestand um, bevor
 zwei verschiedene Decks in main als ein Archetyp gezaehlt werden.
+
+NACHTRAG 12.09.2026 — DIE URSACHE IST JETZT WEG, NICHT NUR UNGEFAEHRLICH
+
+Der Befund oben bleibt richtig: der Regex greift gegen den heutigen
+Datenbestand nirgends. Er war aber eine geladene Waffe. Sobald
+IRGENDEIN Zulieferer "N Zoroark" mit Leerzeichen liefert — und genau
+das tut `slug_to_archetype("n-zoroark")`, das aus dem Bindestrich ein
+Leerzeichen macht —, haette die alte Fassung daraus "Zoroark"
+gemacht und zwei Archetypen verschmolzen, die
+data/archetype_icons.json getrennt fuehrt ("N's Zoroark" UND
+"Zoroark").
+
+Geaendert wurde deshalb die RICHTUNG, nicht die Reichweite:
+
+    alt:  re.sub(r'^Ns?\\s+', '',      name)   # Trainer wegwerfen
+    neu:  re.sub(r'^Ns?\\s+', "N's ",  name)   # Apostroph herstellen
+
+Das ist dieselbe Regel, die
+`current_meta_analysis_scraper._POSSESSIVE_TRAINERS` fuer alle anderen
+Trainer schon faehrt ("rockets-honchkrow" -> "Rocket's Honchkrow");
+dort steht `"n": "N's"` woertlich drin.
+
+GEGENPROBE UEBER DIE ECHTEN DATEN (12.09.2026): alle 829 eindeutigen
+Rohwerte aus 16 Spalten einmal mit der alten und einmal mit der neuen
+Fassung gerechnet — 0 Rohwerte mit abweichendem Ergebnis, 0
+Kollisionen vorher wie nachher, 828 eindeutige Namen vorher wie
+nachher. An der heutigen Zuordnung aendert sich NICHTS; entfernt ist
+nur die Moeglichkeit.
 """
 
 import csv
@@ -179,3 +207,44 @@ def test_keine_kollision_im_gesamten_datenbestand():
         + "\n".join(f"  {out!r} <- {sorted(rohs)}"
                      for out, rohs in sorted(kollisionen.items()))
     )
+
+
+def test_ein_fuehrendes_n_wird_zum_trainer_und_nicht_weggeworfen():
+    """Die eigentliche Korrektur vom 12.09.2026.
+
+    Kommt der Name je mit LEERZEICHEN an — `slug_to_archetype`
+    macht aus jedem Bindestrich eines —, dann darf daraus nicht
+    "Zoroark" werden. "N" ist ein Trainername, kein Rauschen."""
+    assert norm("N Zoroark") == "N's Zoroark"
+    assert norm("Ns Zoroark") == "N's Zoroark"
+    assert norm("n zoroark") == "N's Zoroark"
+    # Der Fehlerfall, den es zu verhindern gilt:
+    assert norm("N Zoroark") != norm("Zoroark"), (
+        "ein fuehrendes 'N ' wird wieder ersatzlos gestrichen — "
+        "N's Zoroark und Zoroark fallen dann zusammen")
+
+
+def test_beide_zoroark_archetypen_stehen_getrennt_in_den_icons():
+    """Vorpruefung: der Schaden waere real, nicht theoretisch.
+
+    data/archetype_icons.json ist die kanonische Namensliste der
+    Seite. Fuehrt sie beide Namen, ist ein Zusammenfallen ein
+    Datenfehler und keine Vereinfachung."""
+    import json
+    pfad = os.path.join(DATEN, "archetype_icons.json")
+    with open(pfad, encoding="utf-8") as f:
+        icons = json.load(f)
+    namen = set(icons.get("archetypes", icons).keys())
+    assert "N's Zoroark" in namen, "Vorpruefung: der Trainer-Archetyp fehlt in den Icons"
+    assert "Zoroark" in namen, "Vorpruefung: der blanke Archetyp fehlt in den Icons"
+
+
+def test_die_apostroph_form_wird_nicht_doppelt_angefasst():
+    """Kein 'N's N's Zoroark': die Apostroph-Form hat kein Leerzeichen
+    nach dem N und matcht deshalb gar nicht erst."""
+    assert norm("N's Zoroark") == "N's Zoroark"
+    assert norm("N's Zorua") == "N's Zorua"
+    assert norm("n-zoroark") == "N-Zoroark"
+    # Und ein Pokemon, das zufaellig mit N anfaengt, bleibt heil.
+    for name in ("Nidoking", "Noivern", "Ninetales Duskull"):
+        assert norm(name) == name, f"{name} wurde angefasst: {norm(name)}"

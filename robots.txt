@@ -1,0 +1,22 @@
+# thedipidis.app — Meta-Analyse zum Pokémon-Sammelkartenspiel
+#
+# Was hier steht und was nicht:
+#
+# Die Seite ist eine Einzelseiten-Anwendung. Alles Sichtbare haengt an
+# der Wurzel-URL; /data/ traegt die Rohdaten, aus denen die Seite ihre
+# Zahlen rechnet. Die Rohdaten sind oeffentlich und sollen es bleiben
+# (data/_consumers.md ist eine veroeffentlichte Schnittstelle, fremde
+# Projekte lesen sie) — sie gehoeren aber nicht in einen Suchindex:
+# eine CSV in den Ergebnissen hilft niemandem und verdraengt die Seite
+# selbst.
+#
+# /redesign/ und /audit/ nimmt der Pages-Build ohnehin nicht mit.
+
+User-agent: *
+Allow: /
+Disallow: /data/
+Disallow: /tests/
+Disallow: /backend/
+Disallow: /scripts/
+
+Sitemap: https://thedipidis.app/sitemap.xml

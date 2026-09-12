@@ -184,9 +184,21 @@ ein pauschales CRITICAL hätte am 18.08. **drei Fehlalarme** erzeugt. Deshalb zw
   **WARN** nach 60 Tagen, mit dem ausdrücklichen Hinweis, erst den Workflow-Lauf zu prüfen.
 
 Sauber unterscheiden ließe sich das nur mit einem **Heartbeat**: jeder Job schreibt bei Erfolg
-einen Zeitstempel, unabhängig vom Inhalt. Als `TODO(heartbeat)` im Code vermerkt — bewusst
-nicht in diesem Paket, es fasst sechs Workflows an. **Das ist die erste Aufgabe in Teil G,
-wenn jemand die Job-Überwachung wirklich dichtmachen will.**
+einen Zeitstempel, unabhängig vom Inhalt.
+
+> **Richtiggestellt 12.09.2026.** Hier stand bis heute: „Als `TODO(heartbeat)` im Code
+> vermerkt — bewusst nicht in diesem Paket, es fasst sechs Workflows an. Das ist die erste
+> Aufgabe in Teil G." Beides ist überholt. Den Heartbeat **gibt es**, und er läuft:
+> `data/_job_heartbeats.json` liegt seit dem 22.08.2026 im Repo (die schreibenden Schritte
+> kamen mit `5ac8b70a`, 21.08.), **gelesen** wird sie seit dem 06.09.2026 — `HEARTBEAT_DATEI`
+> und `check_heartbeat()` in `scripts/data_guardian.py`, aufgerufen im Hauptlauf, ergänzt am
+> 07.09. um die Online-Scraper. Ein `TODO(heartbeat)` steht nirgendwo mehr im Code;
+> `grep -rn "TODO(heartbeat)"` findet nichts. Gemessen 12.09.2026: die Datei führt 36 Jobs mit
+> `status` und `zuletzt_erfolgreich`, und `HERZSCHLAG` im Wächter hält für jeden davon eine
+> Altersschwelle samt Begründung der Kadenz. Der ursprüngliche Fund, der das nötig machte
+> (Agententeam C, 06.09.2026): `scrapers/champions_replica_scraper.py` stand zwölf Tage auf
+> demselben `zuletzt_erfolgreich`, bei einem Job, der täglich um 04:00 läuft — geschrieben
+> wurde die Datei, gelesen hatte sie niemand.
 
 Neu außerdem `check_emptiness`: eine header-only CSV ist die Signatur eines Scrapers, der
 lief, nichts fand und das leere Ergebnis trotzdem schrieb. `check_shrink` konnte das nie sehen

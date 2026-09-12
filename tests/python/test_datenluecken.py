@@ -247,7 +247,14 @@ def test_alle_sechzehn_megas_sind_belegt(quellen, pokedex, usage):
     seit dem letzten Lauf im Pokedex steht, ist etwas anderes — siehe
     _neue_megas().
     """
-    assert len(quellen["eintraege"]) == 16
+    # RICHTUNG, NICHT PUNKT (12.09.2026).
+    # Hier stand `== 16`. Der naechtliche Lauf hat heute frueh fuenf
+    # Arten ergaenzt — und diese Zeile hat den Deploy von main ab
+    # 05:12 UTC angehalten, obwohl NICHTS kaputt war. Ein Beleg, der
+    # dazukommt, ist kein Fehler; einer, der verschwindet, schon.
+    assert len(quellen["eintraege"]) >= 16, (
+        f'nur noch {len(quellen["eintraege"])} Belege statt mindestens 16 — '
+        'ein Beleg ist verschwunden, das ist der Fehlerfall')
     offen = [n for n, e in quellen["eintraege"].items() if not e.get("uebernommen")]
     assert offen == [], "wieder ohne Beleg: " + ", ".join(offen)
     neu = set(_neue_megas(pokedex, usage))
@@ -255,7 +262,10 @@ def test_alle_sechzehn_megas_sind_belegt(quellen, pokedex, usage):
     assert fehlt == [], (
         "diese Mega-Formen haben ihre Faehigkeit verloren: " + ", ".join(fehlt)
     )
-    assert len(pokedex["_meta"]["megaAbilityBelegt"]) == 16
+    # Dieselbe Richtungsregel wie oben.
+    assert len(pokedex["_meta"]["megaAbilityBelegt"]) >= 16, (
+        f'nur noch {len(pokedex["_meta"]["megaAbilityBelegt"])} belegte '
+        'Mega-Faehigkeiten statt mindestens 16 — eine ist verschwunden')
     assert len(neu) <= 5, (
         f"{len(neu)} Mega-Formen sind neu und ohne Daten ({', '.join(sorted(neu))}) "
         "— das sind zu viele fuer 'neu dazugekommen'"

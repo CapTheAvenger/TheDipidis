@@ -243,10 +243,32 @@ weder aus dem Bausandkasten (Egress-Proxy, 403) noch vom Rechner des
 Betreibers aus erreichbar. Der Rechenteil des Scrapers ist deshalb
 netzfrei gebaut und vollständig ohne Netz prüfbar.
 
-**NICHT GEPRÜFT:** ob der GitHub-Läufer bei `play.limitlesstcg.com`
+~~**NICHT GEPRÜFT:** ob der GitHub-Läufer bei `play.limitlesstcg.com`
 durchkommt. Der Sandkasten kann es nicht messen. Deshalb hat der Ablauf
 vorerst **keinen Zeitplan** – erst ein grüner Lauf von Hand, dann ein
-cron. Dieselbe Regel wie bei `online-decklists.yml`.
+cron. Dieselbe Regel wie bei `online-decklists.yml`.~~
+
+> **Richtiggestellt 12.09.2026 — der Satz oben ist seit dem 08.09.2026
+> überholt.** Die Bedingung („erst ein grüner Lauf von Hand, dann ein cron")
+> ist eingelöst worden: Commit `44647bbf` vom **08.09.2026**, *Taeglicher
+> Zeitplan fuer den API-Lauf, unter Aufsicht*, hat
+> `.github/workflows/limitless-api-scrape.yml` den Zeitplan
+> **`cron: '40 3 * * *'`** gegeben — täglich 03:40 UTC, zwischen dem
+> Champions-Lauf (04:00) und dem Preis-Lauf (08:00). Belegt im Repo, nicht
+> aus der Actions-Historie: `git log --follow -p` zeigt die Zeile
+> `- cron: '40 3 * * *'` erstmals in genau diesem Commit, und seither
+> unverändert.
+>
+> Die Begründung des Commits, mit den Zahlen, die dafür gemessen wurden:
+> fünf Läufe von Hand, alle grün, 396 Turniere geschrieben, kein einziges
+> 429; der längste (186 Turniere in voller Tiefe) lief 26 min 24 s. Täglich
+> statt zweimal die Woche, weil 26 Turniere je Woche ab 100 Spielern bei
+> zwei bis drei Anfragen je Turnier rund acht Anfragen pro Tag ergeben —
+> dieselbe Wochenlast, nur verteilt.
+>
+> Die zweite Hälfte des alten Satzes trifft weiter zu: der Sandkasten kann
+> `play.limitlesstcg.com` nicht erreichen. Nur ist das kein Grund mehr
+> gegen einen Zeitplan, sondern der Grund, warum die Gegenprobe in CI liegt.
 
 **NICHT GEPRÜFT:** die Rate-Limit-Header. Aus dem Browser sind sie wegen
 CORS nicht lesbar. Der Scraper wertet `x-ratelimit-remaining` und

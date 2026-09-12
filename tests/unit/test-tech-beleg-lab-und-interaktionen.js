@@ -415,6 +415,7 @@ describe('i18n: kein deutscher Rueckfall in englischer Oberflaeche', () => {
         'antiTech.belegStand', 'antiTech.belegDatumUnbekannt', 'antiTech.belegPartien',
         'antiTech.belegOhnePartien', 'antiTech.belegKopf', 'antiTech.belegKeineDaten',
         'antiTech.belegKeineDatenSatz',
+        'antiTech.belegOhneAntwort', 'antiTech.belegOhneAntwortSatz',
         'techLab.belegJa', 'techLab.belegNein', 'techLab.belegHeuristik',
         'techLab.belegNutzer', 'techLab.belegNutzerSatz', 'techLab.belegStand',
         'techLab.belegDatumUnbekannt', 'techLab.belegOhnePartien', 'techLab.belegKopf',
@@ -448,6 +449,7 @@ describe('i18n: kein deutscher Rueckfall in englischer Oberflaeche', () => {
         assert.strictEqual(woerterbuch.de['antiTech.belegOhnePartien'],
             'Partienzahl des Matchups nicht bekannt');
         assert.strictEqual(woerterbuch.de['antiTech.belegKeineDaten'], 'keine Daten');
+        assert.strictEqual(woerterbuch.de['antiTech.belegOhneAntwort'], 'keine bekannte Antwort');
         assert.strictEqual(woerterbuch.de['buildInfo.belegKeine'], 'keine Daten');
         assert.strictEqual(woerterbuch.de['techLab.belegNutzer'], 'vom Nutzer eingetragen');
         assert.strictEqual(woerterbuch.de['techLab.belegOhnePartien'],
@@ -459,7 +461,8 @@ describe('i18n: kein deutscher Rueckfall in englischer Oberflaeche', () => {
          ['buildInfo.belegPartien', ['{n}']],
          ['antiTech.belegKopf', ['{datei}', '{version}', '{datum}', '{n}']],
          ['techLab.belegKopf', ['{datei}', '{version}', '{datum}', '{n}']],
-         ['antiTech.belegKeineDatenSatz', ['{liste}']]
+         ['antiTech.belegKeineDatenSatz', ['{liste}']],
+         ['antiTech.belegOhneAntwortSatz', ['{liste}']]
         ].forEach(([k, platz]) => {
             platz.forEach(p => {
                 assert.ok(woerterbuch.en[k].includes(p), `${k} (en) braucht ${p}`);

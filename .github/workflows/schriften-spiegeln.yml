@@ -1,0 +1,82 @@
+name: Schriften spiegeln
+
+# Holt Nunito von Google nach css/fonts/ und schreibt css/schriften.css.
+#
+# WARUM VON HAND AUSGELOEST
+#
+# Die Schrift aendert sich nicht. Der Lauf ist dafuer da, sie EINMAL
+# herzuholen — und spaeter, falls je ein Schnitt dazukommt.
+#
+# WICHTIG: auf dem ZWEIG starten, nicht auf main. Dann schiebt der Lauf
+# seinen Commit dorthin, der PR wird gruen, und main sieht nur den
+# fertigen Zustand (CLAUDE.md, Abschnitt "Ein Arbeitsablauf, der
+# Dateien holt, gehoert auf den ZWEIG").
+#
+# Ausloesen: GitHub → Actions → "Schriften spiegeln" → Run workflow.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  # actions: write erlaubt den `gh workflow run`-Anstoss unten. Ohne ihn
+  # scheitert der Dispatch mit 403 — der Lauf bliebe gruen und der
+  # Deploy einfach aus.
+  actions: write
+
+concurrency:
+  group: schriften-spiegeln
+  cancel-in-progress: false
+
+jobs:
+  spiegeln:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+
+      - name: Schrift holen
+        run: python3 scripts/fetch_fonts.py
+
+      - name: Bestand melden
+        run: |
+          python3 scripts/fetch_fonts.py --pruefen
+          echo "Groesse: $(du -sh css/fonts | cut -f1)"
+
+      - name: Commit + push
+        id: commit
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add css/fonts css/schriften.css
+          if git diff --cached --quiet; then
+            echo "Nichts geaendert — kein Push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          n="$(git diff --cached --name-only | wc -l)"
+          git commit -m "Auto: Nunito lokal gespiegelt (${n} Dateien)
+
+          Damit geht keine Besucher-IP mehr an fonts.googleapis.com.
+          Erzeugt von scripts/fetch_fonts.py; Herkunft und Lizenz stehen
+          im Kopf von css/schriften.css."
+          git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # GitHub unterdrueckt `on: push`-Workflows fuer Pushes mit
+      # GITHUB_TOKEN (Rekursionsschutz). Die Schriften sind
+      # browsersichtbar — ohne diesen Schritt laegen sie im Repo und die
+      # Seite laedt weiter von Google. Genau der Fehler vom 21.08.2026,
+      # den tests/python/test_deploy_dispatch.py seither abfaengt.
+      #
+      # Nur auf main: auf einem Zweig gibt es nichts zu deployen, und
+      # ein Anstoss auf main waere dort der falsche Stand.
+      - name: Deploy anstossen (GITHUB_TOKEN-Push triggert ihn nicht)
+        if: ${{ steps.commit.outputs.pushed == 'true' && github.ref == 'refs/heads/main' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-pages.yml --ref main

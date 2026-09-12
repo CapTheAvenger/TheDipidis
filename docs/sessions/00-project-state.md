@@ -1,8 +1,35 @@
 # Project State — TheDipidis
 
-> Restart anchor. If a session crashes, **read this file first** instead of
+> ## ⚠️ STAND-VERMERK — geprüft am 12.09.2026: dieses Dokument ist DREI MONATE ALT
+>
+> **Inhaltlich zuletzt gepflegt am 16.06.2026** (letzter Commit an dieser
+> Datei: `Fix illegal 'Latest Online · Typical Build' decks`, 16.06.2026).
+> Seither ist es nicht mehr angefasst worden, während das Projekt
+> weiterlief. Es beschreibt eine Momentaufnahme vom Juni, keinen aktuellen
+> Zustand — **als Wiedereinstiegsanker taugt es nur noch für die
+> Grundlagen** (was das Projekt ist, die Arbeitsregeln, die Bauart der
+> Datenpipeline).
+>
+> **Nicht mehr verlässlich, ohne im Code nachzusehen:**
+> * jede Liste unter „Bugs found & their status", „Approved backlog",
+>   „STILL OPEN" und „Open questions" — sie stehen auf dem Stand vom
+>   16.06.2026. Mehrere als offen geführte Punkte sind seither erledigt
+>   (stichprobenartig nachgemessen, siehe die eingerückten Vermerke
+>   „**Stand 12.09.2026**" weiter unten), andere sind überholt.
+> * der „Active dev branch" — siehe unten, der Zweig ist tot.
+>
+> **Die heutige Quelle der Hausregeln ist `CLAUDE.md` im Wurzelverzeichnis**,
+> nicht dieses Dokument; `CLAUDE.md` wird laufend gepflegt. Für den
+> tagesaktuellen Stand der Datenverträge gilt `data/_consumers.md`, für die
+> Gesundheit der Pipeline `scripts/data_guardian.py`.
+>
+> Wer dieses Dokument wieder zum Anker machen will, schreibt es neu — ein
+> Nachpflegen Zeile für Zeile ist bei drei Monaten Abstand teurer als eine
+> frische Bestandsaufnahme.
+
+> Restart anchor. If a session crashes, read this file first instead of
 > re-deriving the whole project. Keep it updated at the end of every session.
-> Last updated: 2026-06-15.
+> Last updated: 2026-06-15. **Nicht mehr gepflegt — siehe Stand-Vermerk oben.**
 
 ## What this project is
 Pokémon TCG analysis platform (thedipidis.app). Python scrapers pull data from
@@ -18,7 +45,13 @@ A Telegram bot (Render) + Puppeteer prerender are companions.
 - Philosophy: stable before complex, useful before perfect, automation over manual.
 - Always work on a feature branch, never commit to `main` unasked, run tests
   before declaring done. Treat recovered-session notes as **hints, verify in code**.
-- Active dev branch: `claude/dipidis-project-overview-cf6b95`.
+- ~~Active dev branch: `claude/dipidis-project-overview-cf6b95`.~~
+  **Stand 12.09.2026: toter Zweig.** Er existiert noch auf `origin`, sein
+  letzter Commit ist vom 14.07.2026 (`Remove temporary play.pokemon.com
+  image-CDN probe`), und er ist **nicht** in `main` enthalten
+  (`git merge-base --is-ancestor … main` sagt nein). Gearbeitet wird heute
+  auf kurzlebigen Zweigen, die per PR nach `main` gehen — siehe `CLAUDE.md`,
+  Abschnitt „Shipping frontend changes".
 
 ## Data pipeline (the part that bites)
 Three tournament pipelines, each with its own "scraped-ids" ledger:
@@ -174,6 +207,10 @@ regenerates them through the new validator.
 P3 (own sessions): Firebase v9→v10 modular · monolith code-split per tab.
 
 ## Open questions for the maintainer
+> **Stand 12.09.2026:** beide Fragen stammen vom 16.06.2026 und sind durch den
+> Verlauf überholt — sie stehen hier nur noch als Protokoll. Nicht als offene
+> Entscheidung behandeln, ohne vorher im Code nachzusehen.
+
 - **Past Meta NAIC**: it's in labs but not (yet) on limitlesstcg.com/JH. Should
   Past Meta fall back to labs data for in-person majors, or do we wait for
   limitlesstcg.com to publish? (The JH code fix is in either way.)
@@ -204,16 +241,33 @@ STILL OPEN (prioritized, need Chrome-verify before merge — GitHub MCP was down
 - 🔴 Remaining DE/EN mix: tier subtitles (Meta Dominators/Strong Contenders/
   Niche Picks, config objects in app-tier-meta.js), "Trade List" → "Tauschliste",
   deck search placeholder, badge strings.
+  > **Stand 12.09.2026, nachgemessen:** die Tier-Untertitel sind ERLEDIGT —
+  > `js/i18n.js` führt sie im deutschen Wörterbuch als „Beherrschen das
+  > Meta" / „Starke Herausforderer" / „Spielbare Optionen" (`tier.sub1`–
+  > `tier.sub3`). **Offen geblieben ist `profile.tradelist`**: der Eintrag
+  > steht in BEIDEN Wörterbüchern auf `'Trade List'`, also auch in der
+  > deutschen Oberfläche.
 - 🟠 Glossary tooltips for jargon (Day-2, KONV., WR, brought share, Avg. Enc.,
   Counter-Meta, Cooking) — the maintainer's report has ready 1-sentence DE texts.
 - 🟠 Unify date format to TT.MM.JJJJ (the ISO "Datenfenster ab: ≥ 2026-05-22"
   still shows ISO; the major-stack date was already fixed to day.month).
+  > **Stand 12.09.2026: erledigt.** `js/app-meta-call.js` setzt den Text des
+  > Datenfensters über `_datumLesbar()` zusammen (`mc.dateWindowActive` /
+  > `mc.dateWindowAuto`), die ISO-Form steht nur noch im `<input type="date">`,
+  > wo der Browser das Format vorgibt.
 - 🟠 Mobile: Meta Call table horizontal-scrolls, last col (Avg. Enc.) hidden;
   start-page 3-col grid too tight at ~500px → needs responsive CSS + browser test.
 - 🟡 Onboarding: "new here? start with Meta Call" entry point; a 1-line
   "expected field → bring techs vs X" action summary on Meta Call.
 
-## Firebase compat bump (P3, 2026-06-16) — PREPARED, needs verification
+## Firebase compat bump (P3, 2026-06-16) — ~~PREPARED, needs verification~~ AUSGELIEFERT
+> **Stand 12.09.2026: in `main`.** `js/vendor/firebase-app-compat.js` trägt
+> `SDK_VERSION = "10.14.1"` — der Sprung von v9.22.0 ist nicht mehr nur
+> vorbereitet, er ist die Fassung, die die Seite ausliefert. Der unten
+> geforderte Browser-Gegentest ist damit nachträglich beantwortet: die Seite
+> läuft seit Monaten mit dieser Fassung, Login und Deck-Speichern
+> eingeschlossen.
+
 Vendored Firebase compat SDK bumped v9.22.0 → **v10.14.1** (drop-in: same compat
 API, so the ~107 call sites in firebase-*.js are unchanged). Files replaced:
 js/vendor/firebase-{app,auth,firestore}-compat.js (pulled via `npm pack

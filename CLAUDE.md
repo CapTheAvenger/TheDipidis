@@ -140,6 +140,61 @@ Meldung, ein CSS-Regelname, ein vorhandener Aufruf.
 als Sicherung zaehlt. Kostet eine Minute; ohne sie weiss niemand, ob sie
 ueberhaupt beisst.
 
+## Ressourcen: was ein Durchgang kosten darf
+
+Gemessen am 12.09.2026 in einer einzigen Sitzung, weil der Betreiber
+zu Recht gefragt hat, wo sein Wochenlimit hingeht:
+
+| Posten | Kosten | vermeidbar |
+| --- | --- | --- |
+| Pruefagenten (3 Stueck) | **793.000 Token** | fast vollstaendig |
+| Ausliefern ueber den Browser | 44 Aufrufe je grossem PR | vollstaendig, siehe unten |
+| Screenshots | ~2.000 Token je Bild | etwa die Haelfte |
+| Testlaeufe (8.319 Zusicherungen) | ~90 Token | **nichts — hier NICHT sparen** |
+
+Die Pruefungen sind das Billigste am ganzen Ablauf. Teuer sind
+Agentenrunden und der Browser.
+
+### Die vier Regeln
+
+1. **Kein Pruefagent im Bauauftrag.** Agenten sind fuer Fragen quer
+   ueber das Projekt ("was ist offen", "wo widerspricht sich Doku und
+   Code") — nicht fuer "stimmt dieses Feature". Im Wochenaudit EINER,
+   nicht drei.
+2. **Layout erst als Entwurf, dann erst im Zweig.** Zwei bis drei
+   eigenstaendige Test-HTML mit ECHTEN Zahlen, Screenshot bei 1280
+   und 390, dem Betreiber vorlegen. Er entscheidet, dann wird
+   eingebaut — im selben Auftrag, ohne neuen Anlauf.
+3. **Suiten immer, Screenshots selten.** Die drei Suiten vor jedem
+   Ausliefern; sie kosten fast nichts und fangen echte Fehler.
+   Screenshots nur, wenn es ums AUSSEHEN geht. Fuer Zahlen und
+   Zustaende im Browser messen und eine Zeile zurueckgeben lassen,
+   nicht ein Bild.
+4. **Ein Auftrag, ein PR, ein Bericht.** Funde unterwegs kommen unter
+   "Nebenbefunde" ans Ende der Antwort — nicht umsetzen. Der Betreiber
+   entscheidet, ob sie in diesen oder den naechsten Auftrag gehoeren.
+   Am 12.09. ist ein Auftrag ohne diese Regel auf sieben PRs
+   angewachsen.
+
+### Der Schreibweg
+
+`git push` antwortet 403, und die GitHub-Anbindung ist **lesend**
+angemeldet: `get_me` geht, `create_branch` gibt
+`403 Resource not accessible by integration`. Deshalb laeuft das
+Ausliefern ueber die Weboberflaeche.
+
+**Das ist eine Einstellung, kein Limit.** Stellt der Betreiber unter
+GitHub → Settings → Applications → Installed GitHub Apps → Claude →
+Configure → Repository permissions die Rechte **Contents**,
+**Pull requests** und **Workflows** auf *Read and write*, ersetzt
+`mcp__Github__push_files` den ganzen Browserweg: ein Aufruf statt
+vierundvierzig. **Workflows wird dabei gern vergessen** — ohne sie
+sind Aenderungen an `.github/workflows/` gesperrt, und daran arbeiten
+wir staendig.
+
+Vor jedem Browserweg deshalb einmal `mcp__Github__create_branch`
+probieren: geht es, ist der teure Weg unnoetig.
+
 ## Data rules
 
 * **Never join card data by name.** Names are not unique within a set. PBL has

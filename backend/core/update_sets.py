@@ -1093,9 +1093,59 @@ def write_format_window(sets_metadata_path: str,
                   f"abgebrochen.")
             return ''
 
-        for k in ('previous_format_key', 'set_addition_only'):
-            if k in existing and k not in out:
-                out[k] = existing[k]
+        # ── DIE BEIDEN HANDFELDER BEI EINER ROTATION ABLEITEN ──────
+        #
+        # Bis 12.09.2026 wurden sie nur BEWAHRT. Das ist richtig, solange
+        # sich nichts dreht — und falsch in genau dem Moment, auf den es
+        # ankommt. Beim Wechsel PBL -> 30C am 25.09.2026 bliebe
+        # previous_format_key auf "TEF-CRI" stehen: ZWEI Formate zurueck
+        # statt eins. Die Predictor-Stufen 5.5/5.6/5.8/5.9 zoegen dann
+        # die Archetypanteile eines Formats, das laengst vorbei ist —
+        # und zwar in der Woche vor Frankfurt (26.09.2026).
+        #
+        # Beide Werte sind ABLEITBAR, nicht zu raten:
+        #   previous_format_key = <altes oldest_legal>-<altes current>
+        #     Genau der Schluessel, unter dem die Dateien des gerade
+        #     abgeloesten Formats im Repo liegen.
+        #   set_addition_only  = blieb das aelteste legale Set gleich?
+        #     Bleibt TEF unten stehen, wurde nur ergaenzt (true). Rutscht
+        #     es hoch, ist ein Set herausrotiert (false) — dann taugen
+        #     die Anteile des Vorformats nichts, und die Stufen gehoeren
+        #     aus.
+        alt_aeltest = str(existing.get('oldest_legal_set') or '').strip().upper()
+        neu_aeltest = str(out.get('oldest_legal_set') or '').strip().upper()
+        rotiert = bool(alt_set and neu_set and neu_set != alt_set)
+
+        if rotiert and alt_aeltest and alt_set:
+            abgeleitet = f'{alt_aeltest}-{alt_set}'
+            nur_ergaenzt = bool(neu_aeltest) and (alt_aeltest == neu_aeltest)
+            vorher = str(existing.get('previous_format_key') or '')
+            out['previous_format_key'] = abgeleitet
+            out['set_addition_only'] = nur_ergaenzt
+            print(f"[Update Sets] Rotation {alt_set} -> {neu_set}: "
+                  f"previous_format_key {vorher or '(leer)'} -> {abgeleitet}, "
+                  f"set_addition_only -> {str(nur_ergaenzt).lower()} "
+                  f"(aeltestes Set {alt_aeltest} -> {neu_aeltest or '?'}).")
+        else:
+            for k in ('previous_format_key', 'set_addition_only'):
+                if k in existing and k not in out:
+                    out[k] = existing[k]
+
+        # RIEGEL: das Vorformat darf nie das laufende sein.
+        #
+        # Passiert, wenn jemand von Hand nachzieht und dabei den neuen
+        # statt den alten Schluessel eintraegt. Der Fehler ist still —
+        # die Stufen rechnen dann das laufende Format gegen sich selbst
+        # und melden gar keine Veraenderung.
+        laufend = (f'{neu_aeltest}-{neu_set}'
+                   if neu_aeltest and neu_set else '')
+        if laufend and str(out.get('previous_format_key') or '') == laufend:
+            print(f"::error::update_sets: previous_format_key ist "
+                  f"{laufend} — das ist das LAUFENDE Format, nicht das "
+                  f"vorherige. Die Predictor-Stufen 5.5/5.6/5.8/5.9 "
+                  f"rechnen damit das Format gegen sich selbst. Es wird "
+                  f"NICHTS geschrieben.")
+            return ''
         # Preserve _note_* operator documentation
         for k, v in existing.items():
             if k.startswith('_note_') and k not in out:

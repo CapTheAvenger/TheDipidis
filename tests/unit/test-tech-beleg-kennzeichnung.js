@@ -318,6 +318,10 @@ describe('Build-vs: Kopf und "keine Daten" stehen in der Liste', () => {
             "const BELEG_QUELLE = 'data/card_capability_interactions.json';",
             `let _regelstand = ${JSON.stringify(STAND)};`,
             'const _suggestedCards = suggestedCards;',
+            /* Modulzustand seit 12.09.2026: Bedrohungskategorien ohne
+               bekannten Konter. Hier leer — diese Suite prueft die
+               "keine Daten"-Zeile. */
+            'const _ohneAntwort = new Map();',
             "const _source = 'currentMeta';",
             funktion(ANTI, '    function _t(key, fallback) {'),
             funktion(ANTI, '    function _tf(key, fallback) {'),
@@ -713,6 +717,162 @@ describe('Tech-Ideen: Herkunft und Luecke kommen aus dem Baustein selbst', () =>
         const erg = await ladeBaustein().ideen({ archetyp: 'Mega Excadrill', lang: 'de' });
         assert.ok(erg.gegner.length > 0 && erg.ohneIdee.length > 0,
             'ein gefundener Vorschlag darf die Luecke nicht verdecken');
+    });
+
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// BEDROHUNG OHNE BEKANNTE ANTWORT — die Kategorie faellt nicht heraus
+//
+// BEFUND 12.09.2026 an den echten Daten: data/active_threats.json
+// fuehrt VIER Bedrohungskategorien in `threats`, aber nur DREI in
+// `counters`. `ability_lock` hat 11,1 % gewichteten Metaanteil und
+// keinen einzigen Konter. Die Schleife in `_computeSuggestedCards`
+// holte sich eine leere Konterliste und lief weiter — die Kategorie
+// verschwand lautlos, und die Oberflaeche sah aus, als gaebe es die
+// Bedrohung nicht.
+//
+// Hier laeuft die ECHTE Funktion (aus dem Quelltext geschnitten, im
+// Sandkasten ausgefuehrt) gegen eine synthetische Bedrohungsdatei
+// derselben Form. Keine Datei aus data/ wird gelesen: die Zahl der
+// unbeantworteten Kategorien aendert sich mit jedem Scraperlauf, das
+// VERHALTEN nicht.
+// ─────────────────────────────────────────────────────────────────────
+describe('Build-vs: eine Bedrohung ohne Konter wird benannt, nicht verschluckt', () => {
+
+    const INTEL = {
+        threats: {
+            hand_disruption: {
+                weighted_meta_share: 0.26,
+                cards: [{ card_id: 'X|1', card_name: 'Iono',
+                          archetypes: [{ archetype: 'Dragapult', share_in_archetype: 0.9 }] }]
+            },
+            ability_lock: {
+                weighted_meta_share: 0.1109,
+                cards: [{ card_id: 'DRI|180', card_name: "Team Rocket's Watchtower",
+                          archetypes: [{ archetype: 'Dragapult', share_in_archetype: 0.3 }] }]
+            }
+        },
+        counters: {
+            hand_disruption: [{ card_id: 'Y|2', card_name: 'Kieran', counter_score: 3 }]
+            // ability_lock fehlt — genau wie in der echten Datei
+        }
+    };
+
+    /* Laesst _computeSuggestedCards und danach _renderTechSuggestions
+       im Sandkasten laufen. Beide kommen aus dem Quelltext, nur die
+       Zulieferer (Datei laden, Aggression lesen, Kartentext-Pfad) sind
+       Attrappen. */
+    async function lauf(intel, ziele, pool) {
+        const geschrieben = {};
+        const element = (id) => ({
+            id,
+            set innerHTML(v) { geschrieben[id] = v; },
+            get innerHTML() { return geschrieben[id] || ''; },
+            set textContent(v) { geschrieben[id] = v; },
+            querySelectorAll: () => []
+        });
+        const knoten = {
+            antiTechCardList: element('antiTechCardList'),
+            antiTechStep2Targets: element('antiTechStep2Targets')
+        };
+        const code = [
+            "const BELEG_QUELLE = 'data/card_capability_interactions.json';",
+            `let _regelstand = ${JSON.stringify(STAND)};`,
+            "const _source = 'currentMeta';",
+            'let _suggestedCards = [];',
+            'let _ohneAntwort = new Map();',
+            'const _devLog = () => {};',
+            'const _ensureRegelstand = async () => {};',
+            'const _ensureActiveThreats = async () => intel;',
+            "const _readAggression = () => 'standard';",
+            'const _computeCapabilityTechSuggestions = async () => [];',
+            'const _archetypeCardsFromMap = () => pool;',
+            funktion(ANTI, '    function _t(key, fallback) {'),
+            funktion(ANTI, '    function _tf(key, fallback) {'),
+            funktion(ANTI, '    function _stripEx(name) {'),
+            funktion(ANTI, '    function _getCurrentArchetype() {'),
+            funktion(ANTI, '    function _esc(s) {'),
+            funktion(ANTI, '    function _belegDatum(iso) {'),
+            funktion(ANTI, '    function _partienByOpponentForUser() {'),
+            funktion(ANTI, '    function _belegPartien(entry) {'),
+            funktion(ANTI, '    function _belegSatz(entry) {'),
+            funktion(ANTI, '    function _cardImageUrl(cardId) {'),
+            funktion(ANTI, '    async function _computeSuggestedCards() {'),
+            funktion(ANTI, '    function _renderTechSuggestions() {'),
+            'return (async () => {',
+            '    _suggestedCards = await _computeSuggestedCards();',
+            '    _renderTechSuggestions();',
+            '    return { html: lies(), karten: _suggestedCards.map(c => c.name) };',
+            '})();'
+        ].join('\n');
+        const welt = { currentMetaMatchupData: MATCHUPS, currentMetaArchetype: 'Mega Excadrill' };
+        return new Function('intel', 'pool', '_targets', '_targetDisplay', '_selectedCards',
+            'document', 'window', 'getLang', 't', 'lies', code)(
+            intel, pool,
+            new Set(ziele.map(z => z.toLowerCase())),
+            new Map(ziele.map(z => [z.toLowerCase(), z])),
+            new Set(),
+            { getElementById: (id) => knoten[id] || null },
+            welt, () => 'de', undefined,
+            () => geschrieben.antiTechCardList || '');
+    }
+
+    const POOL = [{ key: 'Y|2', name: 'Kieran' }];
+
+    it('die Kategorie ohne Konter steht mit Namen unter der Liste', async () => {
+        const { html } = await lauf(INTEL, ['Dragapult'], POOL);
+        assert.ok(html.includes('keine bekannte Antwort'),
+            `der Satz fehlt: ${html.slice(-600)}`);
+        assert.ok(html.includes('ability_lock'),
+            'und zwar mit dem Namen der Kategorie');
+        assert.ok(html.includes('Dragapult'),
+            'und mit dem Ziel, das diese Bedrohung spielt');
+    });
+
+    it('die beantwortete Kategorie kommt weiter als Karte durch', async () => {
+        const { karten } = await lauf(INTEL, ['Dragapult'], POOL);
+        assert.deepStrictEqual(karten, ['Kieran'],
+            'der Hinweis darf den normalen Weg nicht abschneiden');
+    });
+
+    it('sind alle Kategorien beantwortet, steht kein Hinweis herum', async () => {
+        const voll = JSON.parse(JSON.stringify(INTEL));
+        voll.counters.ability_lock = [{ card_id: 'Y|2', card_name: 'Kieran', counter_score: 2 }];
+        const { html } = await lauf(voll, ['Dragapult'], POOL);
+        assert.ok(!html.includes('keine bekannte Antwort'),
+            'ein Hinweis ohne Anlass ist genauso schlecht wie eine stille Leerstelle');
+    });
+
+    it('ein unbeantwortetes Ziel wird NICHT als "keine Daten" abgetan', async () => {
+        /* Ziel spielt NUR ability_lock: ueber das Deck ist etwas
+           bekannt — nur die Antwort nicht. Die beiden Saetze duerfen
+           sich nicht widersprechen. */
+        const nur = JSON.parse(JSON.stringify(INTEL));
+        delete nur.threats.hand_disruption;
+        const { html } = await lauf(nur, ['Dragapult'], POOL);
+        assert.ok(html.includes('keine bekannte Antwort'), 'der richtige Satz steht da');
+        assert.ok(!html.includes('keine Daten'),
+            'zu diesem Ziel LIEGT etwas vor — es fehlt nur der Konter');
+        /* Hier steht KEINE Kartenzeile in der Liste — taucht der Name
+           trotzdem auf, dann aus dem Hinweis selbst. Ohne diese
+           Zusicherung ueberlebt ein Mutant, der die Ziele aus dem
+           Hinweis streicht (gemessen 12.09.2026). */
+        assert.ok(html.includes('Dragapult'),
+            'der Hinweis muss sagen, WELCHES Ziel die unbeantwortete Bedrohung spielt');
+        assert.ok(html.includes('ability_lock'), 'und welche Bedrohung es ist');
+    });
+
+    it('ein Kategoriename aus der Datei wird maskiert', async () => {
+        /* Die Kategorienamen kommen aus data/active_threats.json.
+           Niemand hat ihnen versprochen, dass sie harmlos sind. */
+        const boese = JSON.parse(JSON.stringify(INTEL));
+        boese.threats['<img src=x onerror=alert(1)>'] = boese.threats.ability_lock;
+        delete boese.threats.ability_lock;
+        const { html } = await lauf(boese, ['Dragapult'], POOL);
+        assert.ok(html.includes('&lt;img src=x onerror=alert(1)&gt;'), html.slice(-500));
+        assert.ok(!html.includes('<img src=x'),
+            'ein Wert aus der Datei darf nicht als Markup landen');
     });
 
 });

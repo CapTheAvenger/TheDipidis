@@ -264,6 +264,37 @@ test('die Seite zeigt den Filter nur, wenn die Quelle einen hat', () => {
 
 /* ══ 3 · DIE ZWEI DATENGETRIEBENEN VORLAGEN ════════════════════════ */
 
+test('die Herkunftszeile meldet die Einheit, die die Quelle liefert', () => {
+    // Gefunden am 12.09.2026 LIVE auf thedipidis.app/posts/: die Zeile
+    // sagte „0 Zeilen", waehrend daneben das vollstaendige 8x8-Gitter
+    // stand. Sie soll die Frage „woher kommen diese Zahlen?"
+    // beantworten — mit „0" beantwortet sie sie falsch.
+    //
+    // Die Funktion wird AUSGEFUEHRT, nicht gelesen: eine Textzusicherung
+    // haette `if (false && ...)` nicht gemerkt (probiert, sie blieb
+    // gruen).
+    const treffer = /function\s+mengeAus\s*\(/.exec(SEITE);
+    assert.ok(treffer, 'mengeAus() gibt es nicht mehr');
+    const auf = SEITE.indexOf('{', treffer.index);
+    let tiefe = 0, koerper = '';
+    for (let i = auf; i < SEITE.length; i++) {
+        if (SEITE[i] === '{') tiefe++;
+        else if (SEITE[i] === '}' && --tiefe === 0) {
+            koerper = SEITE.slice(treffer.index, i + 1); break;
+        }
+    }
+    const ctx = vm.createContext({});
+    vm.runInContext(koerper + '\nthis.f = mengeAus;', ctx);
+
+    const gitter = [[null,1],[1,null]];
+    assert.equal(ctx.f({ gitter, zeilen: '' }), '2×2 Gitter',
+        'ein Gitter wird als 0 Zeilen gemeldet');
+    assert.equal(ctx.f({ matchups: [1, 2, 3], zeilen: '' }), '3 Paarungen',
+        'Paarungen werden als 0 Zeilen gemeldet');
+    assert.equal(ctx.f({ zeilen: 'a | 1\nb | 2' }), '2 Zeilen',
+        'der gewoehnliche Listenfall zaehlt nicht mehr richtig');
+});
+
 test('die Heatmap liefert ein vollstaendiges Gitter', async () => {
     const erg = await Q.lade('heatmap');
     assert.ok(Array.isArray(erg.gitterKoepfe) && erg.gitterKoepfe.length >= 3,

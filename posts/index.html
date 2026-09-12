@@ -1358,6 +1358,30 @@ document.getElementById('btnBeides').addEventListener('click', function () {
  * traut (Abnahme 04.09.2026).
  * ══════════════════════════════════════════════════════════════════ */
 
+/* WAS DIE QUELLE GELIEFERT HAT — in der Einheit, die sie liefert.
+ *
+ * Bis 12.09.2026 stand in der Herkunftszeile immer „N Zeilen". Die zwei
+ * neuen Quellen liefern aber gar keine Liste: die Heatmap ein Gitter,
+ * die Deckkarte Kacheln und Paarungen. Die Zeile meldete deshalb
+ * „0 Zeilen" — und das liest sich wie „nichts geladen", obwohl das Bild
+ * daneben vollstaendig dasteht. Genau die Frage, die diese Zeile
+ * beantworten soll, hat sie damit falsch beantwortet.
+ *
+ * Eigene Funktion, damit eine Pruefung sie AUSFUEHREN kann statt nur den
+ * Quelltext zu lesen — eine Textzusicherung haette die Verfaelschung
+ * `if (false && ...)` nicht gemerkt. */
+function mengeAus(erg) {
+    erg = erg || {};
+    if (erg.gitter && erg.gitter.length) {
+        return erg.gitter.length + '×' + erg.gitter.length + ' Gitter';
+    }
+    if (erg.matchups && erg.matchups.length) {
+        return erg.matchups.length + ' Paarungen';
+    }
+    return String(erg.zeilen || '').split('\n').filter(Boolean).length
+         + ' Zeilen';
+}
+
 var FELDER = ['kicker', 'titel', 'punkte', 'zahl', 'zahlLabel', 'zahlNenner',
               'zeilen', 'listeKopf', 'listeKopfLinks', 'freitext', 'fuss', 'caption',
               /* 11.09.2026: die Hashtags gehen denselben Weg wie die
@@ -1517,8 +1541,15 @@ function uebernimm(erg, quelleName, felder) {
     geladenStand = standNehmen();
     markiereReiter(erg.vorlagen);
 
-    var zeilen = String(erg.zeilen || '').split('\n').filter(Boolean).length;
-    textHerkunft('Aus: <b>' + quelleName + '</b> · ' + zeilen + ' Zeilen · ' +
+    /* WAS DIE QUELLE GELIEFERT HAT — in der Einheit, die sie liefert.
+     *
+     * Bis 12.09.2026 stand hier immer „N Zeilen". Die zwei neuen
+     * Quellen liefern aber gar keine Liste: die Heatmap ein Gitter, die
+     * Deckkarte Kacheln und Paarungen. Die Zeile meldete deshalb
+     * „0 Zeilen" — und das liest sich wie „nichts geladen", obwohl das
+     * Bild daneben vollstaendig dasteht. Genau die Frage, die diese
+     * Zeile beantworten soll, hat sie damit falsch beantwortet. */
+    textHerkunft('Aus: <b>' + quelleName + '</b> · ' + mengeAus(erg) + ' · ' +
                  erg.fuss);
     pruefeGeaendert();
 

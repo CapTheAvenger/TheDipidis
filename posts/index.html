@@ -67,6 +67,8 @@ main{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:24px;
      align-items:start;padding:24px}
 @media (max-width:900px){main{grid-template-columns:1fr}}
 
+[hidden]{display:none !important}   /* .feld/.gruppe setzen display und
+                                       schlagen sonst das hidden-Attribut */
 .feld{display:block;margin:0 0 14px}
 .feld > span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
              text-transform:uppercase;color:var(--matt);margin-bottom:5px}
@@ -183,6 +185,10 @@ legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transfor
       <button type="button" data-vorlage="zahl"    aria-pressed="false">Number</button>
       <button type="button" data-vorlage="liste"   aria-pressed="false">Ranking</button>
       <button type="button" data-vorlage="text"    aria-pressed="false">Statement</button>
+      <!-- ZWEI NEUE (11.09.2026). Sie zeichnen aus Quelldaten statt aus
+           Textfeldern — siehe KOERPER weiter unten. -->
+      <button type="button" data-vorlage="gitter"    aria-pressed="false">Heatmap</button>
+      <button type="button" data-vorlage="deckkarte" aria-pressed="false">Deck card</button>
     </div>
 
     <!-- DER WÄHLER STEHT UNTER DEN REITERN, NICHT DARÜBER.
@@ -198,6 +204,16 @@ legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transfor
       <select id="quelle" class="quelle"></select></label>
     <p class="herkunft" id="herkunft">Numbers come from the site, not from typing.
       Everything stays editable.</p>
+
+    <!-- DER KARTENFILTER (11.09.2026).
+         Bestellt: „Meta Cards mit den gleichen Filtermöglichkeiten wie
+         auf der Seite." Dieselbe Einteilung wie STAPLES_ARTEN in
+         js/app-tier-meta.js, gehalten in POST_ARTEN — beide vergleicht
+         tests/unit/test-post-kartenfilter.js.
+         Er erscheint nur, wenn die gewählte Quelle Filter anbietet;
+         eine leere Auswahl wäre ein Versprechen, das beim Klick bricht. -->
+    <label class="feld" id="filterFeld" hidden><span>Card filter</span>
+      <select id="filter" class="quelle"></select></label>
 
     <label class="feld" id="deckFeld" hidden><span>Deck</span>
       <input type="text" id="deck" list="deckliste" autocomplete="off"
@@ -280,6 +296,25 @@ N's Zoroark | 5.6 %</textarea></label>
 And the number of games beside it, so you can see what it rests on.</textarea></label>
     </fieldset>
 
+    <!-- DIE ZWEI NEUEN VORLAGEN HABEN KEINE EIGENEN TEXTFELDER.
+         Ein 8 × 8-Gitter oder zehn Paarungen samt Partienzahl liessen
+         sich nicht sinnvoll von Hand tippen. Kicker, Titel, Fuss und
+         Bildunterschrift bleiben trotzdem editierbar — die stehen wie
+         bei allen anderen ausserhalb dieser Bloecke. -->
+    <fieldset id="gGitter" hidden>
+      <legend>Heatmap</legend>
+      <p class="herkunft">The grid comes from the source „Matchup heatmap" —
+      the eight most played decks against each other. Rows and columns are
+      not typed; pick the source above and the grid fills itself.</p>
+    </fieldset>
+
+    <fieldset id="gDeckkarte" hidden>
+      <legend>Deck card</legend>
+      <p class="herkunft">Pick the source „A deck vs. the meta" and a deck.
+      Share, win rate, top-8 rate and the most-played pairings come from the
+      same files the site reads.</p>
+    </fieldset>
+
     <label class="feld"><span>Footer, left</span>
       <input type="text" id="fuss" value="Source: Limitless"></label>
 
@@ -303,8 +338,20 @@ And the number of games beside it, so you can see what it rests on.</textarea></
          wie das Bild und trägt damit denselben Nenner. -->
     <label class="feld" style="margin-top:18px"><span>Caption</span>
       <textarea id="caption" rows="4"></textarea></label>
+
+    <!-- HASHTAGS — DIE DRITTE HÄLFTE DER ARBEIT (11.09.2026).
+         Bestellt: „immer alles mit entsprechenden Beschreibungen und
+         Hashtags." Es gab hier bis dahin keine; die Bildunterschrift
+         kam schon aus der Quelle, die Tags jetzt genauso.
+         Feste Basis + Inhalt, entschieden am selben Abend. Die Basis
+         steht in js/ds-post-quellen.js in HASHTAG_BASIS — EINE Liste,
+         an einer Stelle zu ändern. -->
+    <label class="feld"><span>Hashtags</span>
+      <textarea id="tags" rows="2"></textarea></label>
     <div class="knopfreihe">
       <button type="button" class="tun leise" id="btnText">Copy caption</button>
+      <button type="button" class="tun leise" id="btnTags">Copy hashtags</button>
+      <button type="button" class="tun leise" id="btnBeides">Copy caption + hashtags</button>
     </div>
   </form>
 
@@ -670,6 +717,210 @@ function wertZahl(text) {
 
 /* ── 3a · Rangliste ───────────────────────────────────────────────────
  * Der Zuschnitt der beiden Bilder, die die Seite selbst erzeugt.     */
+/* ── Körper 5 · Das Matchup-Gitter ──────────────────────────────────
+ *
+ * BESTELLT (Betreiber, 11.09.2026) als eine der vier neuen Beitragsarten.
+ *
+ * ACHT MAL ACHT, und die Zahl ist gemessen, nicht geschätzt: bei 1080 px
+ * abzüglich 2 × 40 px Rand und 250 px Namensspalte bleiben 700 px für
+ * acht Spalten — 87 px je Zelle. Darin steht „51" in 28 px, lesbar auch
+ * auf einem Telefon, das das Bild auf 400 px anzeigt. Bei zehn Spalten
+ * wären es 70 px, und die Schrift müsste unter 24 — die Grenze aus
+ * tests/unit/test-schriftboden.js gibt es für Bildschirme, für ein
+ * Instagram-Bild ist sie noch großzügig.
+ *
+ * DIE FÄRBUNG IST DIESELBE WIE AUF DER SEITE: ≥ 55 % gut, ≤ 45 %
+ * schlecht, dazwischen ausgeglichen. Zwei Skalen für dieselbe Frage
+ * wären der Fehler, den diese Seite seit Wochen abarbeitet.
+ *
+ * DIE DIAGONALE BLEIBT LEER. Ein Deck gegen sich selbst ist per
+ * Definition 50 % und trägt keine Auskunft; eine 50 dort hinzuschreiben
+ * sähe aus wie eine Messung.
+ */
+function gitterFarbe(quote) {
+    if (quote >= 55) return { flaeche: 'rgba(47,127,191,.92)', schrift: '#FFFFFF' };
+    if (quote <= 45) return { flaeche: 'rgba(188,74,90,.92)',  schrift: '#FFFFFF' };
+    return { flaeche: 'rgba(247,239,228,.90)', schrift: F.kopf };
+}
+
+/* Lange Decknamen kürzen, ohne sie unkenntlich zu machen: „Alakazam
+ * Dudunsparce" -> „Alakazam Dud…". Der Kopf über der Spalte bekommt
+ * dieselbe Behandlung, damit Zeile und Spalte denselben Namen tragen. */
+function kurzName(ctx, name, maxW) {
+    if (ctx.measureText(name).width <= maxW) return name;
+    var t = name;
+    while (t.length > 3 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+    return t + '…';
+}
+
+function malGitter(ctx, spec) {
+    var g = spec.gitter, koepfe = spec.gitterKoepfe;
+    if (!g || !g.length || !koepfe || !koepfe.length) {
+        ctx.fillStyle = F.matt;
+        ctx.font = fSans(30, 600);
+        ctx.fillText('Keine Paarungen geladen.', 56, 620);
+        return;
+    }
+    var links = 40, rechts = MP.W - 40;
+    var nameW = 250;
+    var spalten = koepfe.length;
+    var zelleW = Math.floor((rechts - links - nameW) / spalten);
+    var oben = 470;
+    /* Die Kopfzeile trägt die Namen senkrecht gestellt — waagerecht
+       bräuchte „Alakazam Dudunsparce" 210 px in einer 87-px-Spalte. */
+    var kopfH = 150;
+    var platz = FUSS_OBEN - 30 - (oben + kopfH);
+    var zelleH = Math.min(76, Math.floor(platz / g.length));
+
+    /* Kopfzeile: gedrehte Namen. */
+    ctx.save();
+    ctx.font = fSans(21, 700);
+    koepfe.forEach(function (n, i) {
+        var cx = links + nameW + i * zelleW + zelleW / 2;
+        ctx.save();
+        ctx.translate(cx, oben + kopfH - 12);
+        ctx.rotate(-Math.PI / 3);
+        ctx.textAlign = 'start';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = F.creme;
+        ctx.fillText(kurzName(ctx, n, kopfH + 40), 0, 0);
+        ctx.restore();
+    });
+    ctx.restore();
+
+    var y = oben + kopfH;
+    ctx.textBaseline = 'middle';
+    g.forEach(function (zeile) {
+        /* Deckname links. */
+        ctx.textAlign = 'start';
+        ctx.font = fSans(23, 700);
+        ctx.fillStyle = F.creme;
+        ctx.fillText(kurzName(ctx, zeile.deck, nameW - 14), links, y + zelleH / 2);
+
+        zeile.zellen.forEach(function (c, i) {
+            var x = links + nameW + i * zelleW;
+            if (!c) {
+                /* Diagonale oder ungemessene Paarung: ein Strich, keine Zahl. */
+                ctx.fillStyle = 'rgba(247,239,228,.08)';
+                rundesRechteck(ctx, x + 2, y + 2, zelleW - 4, zelleH - 4, 8);
+                ctx.fill();
+                ctx.textAlign = 'center';
+                ctx.font = fSans(24, 600);
+                ctx.fillStyle = 'rgba(247,239,228,.45)';
+                ctx.fillText('–', x + zelleW / 2, y + zelleH / 2);
+                return;
+            }
+            var f = gitterFarbe(c.quote);
+            ctx.fillStyle = f.flaeche;
+            rundesRechteck(ctx, x + 2, y + 2, zelleW - 4, zelleH - 4, 8);
+            ctx.fill();
+            ctx.textAlign = 'center';
+            ctx.font = fMono(28, 700);
+            ctx.fillStyle = f.schrift;
+            ctx.fillText(String(Math.round(c.quote)), x + zelleW / 2, y + zelleH / 2 - 1);
+        });
+        y += zelleH;
+    });
+    ctx.textAlign = 'start';
+
+    /* Legende. Ohne sie ist eine gefärbte Zahl eine Behauptung. */
+    ctx.font = fSans(22, 600);
+    ctx.fillStyle = F.matt;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('Row = your deck · column = opponent · blue ≥ 55 % · red ≤ 45 %',
+        links, y + 40);
+}
+
+/* ── Körper 6 · Ein Deck gegen das Feld ────────────────────────────
+ *
+ * Derselbe Inhalt wie die Bildkarte der Deck-Analyse (js/ds-share.js),
+ * aber im Hochformat: drei Kennzahlen oben, die Paarungen darunter.
+ *
+ * NICHT dieselbe Zeichenroutine. Die baut 1200 × 675 und braucht den
+ * Anwendungsrahmen, den diese Seite mit Absicht nicht hat (siehe Kopf
+ * der Datei). Was geteilt wird, ist die AUSWAHLREGEL der Paarungen —
+ * die steht in js/ds-post-quellen.js und spiegelt vorschauAuswahl()
+ * aus js/app-archetype-card.js.
+ */
+function malDeckkarte(ctx, spec) {
+    var links = 56, rechts = MP.W - 56, breite = rechts - links;
+    var kacheln = spec.kacheln || [], mus = spec.matchups || [];
+
+    /* Drei Kennzahlkacheln nebeneinander. */
+    var kh = 168, luecke = 16;
+    var kw = Math.floor((breite - luecke * (Math.max(kacheln.length, 1) - 1))
+        / Math.max(kacheln.length, 1));
+    var ky = 470;
+    kacheln.forEach(function (k, i) {
+        var x = links + i * (kw + luecke);
+        ctx.fillStyle = 'rgba(247,239,228,.07)';
+        rundesRechteck(ctx, x, ky, kw, kh, 14);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(247,239,228,.16)';
+        ctx.lineWidth = 2;
+        rundesRechteck(ctx, x, ky, kw, kh, 14);
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = F.holz;
+        ctx.font = fSans(19, 700);
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(kurzName(ctx, k.label || '', kw - 20), x + kw / 2, ky + 38);
+        ctx.fillStyle = F.creme;
+        ctx.font = fMono(52, 800);
+        ctx.fillText(k.wert || '–', x + kw / 2, ky + 100);
+        ctx.fillStyle = F.matt;
+        ctx.font = fSans(20, 600);
+        ctx.fillText(kurzName(ctx, k.notiz || '', kw - 20), x + kw / 2, ky + 138);
+    });
+    ctx.textAlign = 'start';
+
+    if (!mus.length) return;
+
+    /* Die Paarungen darunter — Name, Quote, Partienzahl. Die Partien
+       stehen MIT: eine 68-%-Zeile über neun Partien und eine über 300
+       sind nicht dasselbe Argument. */
+    var oben = ky + kh + 46;
+    var platz = FUSS_OBEN - 30 - oben;
+    var zh = Math.min(72, Math.floor(platz / mus.length));
+    var quoteW = 130, partienW = 140;
+    var y = oben;
+    mus.forEach(function (m, i) {
+        if (i % 2 === 0) {
+            ctx.fillStyle = 'rgba(247,239,228,.05)';
+            rundesRechteck(ctx, links, y, breite, zh - 4, 10);
+            ctx.fill();
+        }
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = F.creme;
+        ctx.font = fSans(27, 600);
+        ctx.fillText(kurzName(ctx, m.name, breite - quoteW - partienW - 30),
+            links + 14, y + zh / 2 - 2);
+
+        var f = gitterFarbe(m.quote);
+        ctx.fillStyle = f.flaeche;
+        rundesRechteck(ctx, rechts - quoteW - partienW - 10, y + 6, quoteW, zh - 16, 8);
+        ctx.fill();
+        ctx.textAlign = 'center';
+        ctx.font = fMono(28, 700);
+        ctx.fillStyle = f.schrift;
+        ctx.fillText(Math.round(m.quote) + ' %',
+            rechts - quoteW - partienW - 10 + quoteW / 2, y + zh / 2 - 2);
+
+        ctx.textAlign = 'right';
+        ctx.font = fMono(24, 400);
+        ctx.fillStyle = F.matt;
+        ctx.fillText(String(Math.round(m.partien)), rechts - 6, y + zh / 2 - 2);
+        ctx.textAlign = 'start';
+        y += zh;
+    });
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = fSans(21, 600);
+    ctx.fillStyle = F.matt;
+    ctx.fillText('win rate · games behind it · most-played pairings above and below 50 %',
+        links, y + 34);
+}
+
 function malRangliste(ctx, spec, mitBalken) {
     var zeilen = listeZeilen(spec);
     if (!zeilen.length) return;
@@ -885,7 +1136,17 @@ function malListe(ctx, spec) {
     return malRangliste(ctx, spec, true);
 }
 
-var KOERPER = { feature: malFeature, zahl: malZahl, liste: malListe, text: malText };
+var KOERPER = {
+    feature: malFeature, zahl: malZahl, liste: malListe, text: malText,
+    /* Zwei neue am 11.09.2026 (Bestellung des Betreibers). Sie holen
+       ihre Daten NICHT aus den Textfeldern: ein 8 × 8-Gitter oder zehn
+       Paarungen samt Partienzahl liessen sich nicht sinnvoll von Hand
+       tippen — und was man nicht tippt, kann man auch nicht
+       verschlimmbessern. Sie zeichnen, was die Quelle geliefert hat,
+       und alles drumherum (Kicker, Titel, Fuss, Bildunterschrift)
+       bleibt wie bei den anderen vier editierbar. */
+    gitter: malGitter, deckkarte: malDeckkarte
+};
 
 /* ── Zusammenbau ──────────────────────────────────────────────────── */
 var teile = { logo: null, blueten: [], shots: {} };
@@ -901,6 +1162,10 @@ var LISTE_VORGABE = 'meta-online';
 var listeQuelleGesetzt = false;
 var zahlTitel = null;   /* der Titel, den die Quelle fuer die Zahl-Vorlage vorschlaegt */
 var listeTitel = null;
+/* Die Daten der zwei neuen Vorlagen. Sie stehen am Modul und nicht im
+   Formular — ein 8 × 8-Gitter hat kein Textfeld. */
+var gitterDaten = null, gitterKoepfe = null;
+var deckKacheln = null, deckMatchups = null;
 
 function spec() {
     return {
@@ -918,7 +1183,12 @@ function spec() {
         listeLayout: (document.querySelector('input[name="listeLayout"]:checked') || {}).value || 'rang',
         freitext:   document.getElementById('freitext').value,
         fuss:       document.getElementById('fuss').value,
-        ohneRang:   !!ohneRang
+        ohneRang:   !!ohneRang,
+        /* Vom Rezept gehalten, nicht vom Formular: siehe KOERPER. */
+        gitter:       gitterDaten,
+        gitterKoepfe: gitterKoepfe,
+        kacheln:      deckKacheln,
+        matchups:     deckMatchups
     };
 }
 
@@ -940,7 +1210,7 @@ function zeichne() {
  * sortiert die Galerie sie danach als feature, liste, text, zahl. Wer
  * sie am Telefon in dieser Reihenfolge ins Karussell laedt, merkt den
  * Dreher erst, wenn der Post draussen ist. */
-var REIHE = { feature: 1, zahl: 2, liste: 3, text: 4 };
+var REIHE = { feature: 1, zahl: 2, liste: 3, text: 4, gitter: 5, deckkarte: 6 };
 function dateiname(s, mitNummer) {
     var kern = ('dipidis-' + s.vorlage + '-' + (s.titel || 'post'))
         .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 56);
@@ -1001,7 +1271,7 @@ document.getElementById('btnTeilen').addEventListener('click', function () {
     teilen(document.getElementById('cv'), dateiname(s));
 });
 document.getElementById('btnAlle').addEventListener('click', function () {
-    ['feature', 'zahl', 'liste', 'text'].forEach(function (v, i) {
+    ['feature', 'zahl', 'liste', 'text', 'gitter', 'deckkarte'].forEach(function (v, i) {
         setTimeout(function () {
             var cv = document.createElement('canvas');
             cv.width = MP.W; cv.height = MP.H;
@@ -1011,20 +1281,65 @@ document.getElementById('btnAlle').addEventListener('click', function () {
         }, i * 350);   /* nacheinander — Browser blocken vier Downloads auf einmal */
     });
 });
-document.getElementById('btnText').addEventListener('click', function () {
-    var t = document.getElementById('caption');
-    var knopf = this, alt = knopf.textContent;
+/* EIN KOPIERWEG FUER DREI KNOEPFE.
+ *
+ * Die erste Fassung hatte ihn nur fuer die Bildunterschrift. Mit
+ * Hashtags waeren daraus drei Abschriften desselben Ablaufs geworden —
+ * samt dreimal demselben Rueckfall fuer Browser ohne Zwischenablage-API.
+ *
+ * Der Rueckfall braucht ein echtes Feld zum Markieren: `execCommand`
+ * kopiert die Auswahl, nicht eine Zeichenkette. Fuer „beides" gibt es
+ * kein solches Feld — deshalb ein unsichtbares, das nur in diesem Fall
+ * gefuellt und sofort wieder geleert wird. */
+function kopiere(knopf, text, quellFeld) {
+    var alt = knopf.textContent;
     function fertig() {
         knopf.textContent = 'copied';
         setTimeout(function () { knopf.textContent = alt; }, 1600);
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(t.value).then(fertig, function () {
-            t.select(); document.execCommand('copy'); fertig();
-        });
-    } else {
-        t.select(); document.execCommand('copy'); fertig();
+    function ausFeld() {
+        var f = quellFeld;
+        if (!f) {
+            f = document.getElementById('kopierHilfe');
+            if (!f) {
+                f = document.createElement('textarea');
+                f.id = 'kopierHilfe';
+                f.setAttribute('aria-hidden', 'true');
+                f.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+                document.body.appendChild(f);
+            }
+            f.value = text;
+        }
+        f.select();
+        document.execCommand('copy');
+        if (!quellFeld) f.value = '';
+        fertig();
     }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(fertig, ausFeld);
+    } else {
+        ausFeld();
+    }
+}
+
+document.getElementById('btnText').addEventListener('click', function () {
+    var t = document.getElementById('caption');
+    kopiere(this, t.value, t);
+});
+
+document.getElementById('btnTags').addEventListener('click', function () {
+    var t = document.getElementById('tags');
+    kopiere(this, t.value, t);
+});
+
+/* Der Knopf, den er wirklich druecken wird: Instagram will beides in
+   EINEM Feld, und zweimal einfuegen heisst zweimal umschalten. Zwei
+   Leerzeilen dazwischen — so steht es in jedem Beitrag, den die Szene
+   postet, und die Tags rutschen unter das „mehr anzeigen". */
+document.getElementById('btnBeides').addEventListener('click', function () {
+    var c = document.getElementById('caption').value.trim();
+    var h = document.getElementById('tags').value.trim();
+    kopiere(this, h ? (c + '\n\n' + h) : c, null);
 });
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -1044,7 +1359,11 @@ document.getElementById('btnText').addEventListener('click', function () {
  * ══════════════════════════════════════════════════════════════════ */
 
 var FELDER = ['kicker', 'titel', 'punkte', 'zahl', 'zahlLabel', 'zahlNenner',
-              'zeilen', 'listeKopf', 'listeKopfLinks', 'freitext', 'fuss', 'caption'];
+              'zeilen', 'listeKopf', 'listeKopfLinks', 'freitext', 'fuss', 'caption',
+              /* 11.09.2026: die Hashtags gehen denselben Weg wie die
+                 Bildunterschrift — aus der Quelle, überschreibbar, und
+                 die Geändert-Zeile zählt sie mit. */
+              'tags'];
 var geladenStand = null;   /* was die Quelle geschrieben hat */
 var vorQuelle = null;      /* was VOR der Quelle dastand — der Rückweg */
 var aktQuelle = '';
@@ -1168,7 +1487,8 @@ function felderBauen(erg, deckName) {
         kicker: erg.kicker,
         titel: erg.titel,
         fuss: erg.fuss,
-        caption: erg.caption
+        caption: erg.caption,
+        tags: erg.tags || ''
     };
     if (erg.zahlFuer && deckName) {
         var z = erg.zahlFuer(deckName);
@@ -1182,6 +1502,13 @@ function felderBauen(erg, deckName) {
 
 function uebernimm(erg, quelleName, felder) {
     ohneRang = !!erg.ohneRang;
+    /* Die Daten der zwei neuen Vorlagen. Sie liegen am Modul, nicht im
+       Formular — null bedeutet „diese Quelle liefert kein Gitter", und
+       die Zeichenroutine sagt das dann auch, statt leer zu bleiben. */
+    gitterDaten   = erg.gitter || null;
+    gitterKoepfe  = erg.gitterKoepfe || null;
+    deckKacheln   = erg.kacheln || null;
+    deckMatchups  = erg.matchups || null;
     Object.keys(felder).forEach(function (k) {
         if (k.charAt(0) !== '_') setzeFeld(k, felder[k]);
     });
@@ -1251,6 +1578,7 @@ function meldeFehler(rez, e) {
     markiereReiter(null);
     document.getElementById('quelle').value = '';
     document.getElementById('deckFeld').hidden = true;
+    document.getElementById('filterFeld').hidden = true;
     document.getElementById('geaendert').hidden = true;
     document.getElementById('warnung').hidden = true;
     textHerkunft((rez ? rez.name : 'Die Quelle') + ' liefert gerade kein ' +
@@ -1274,6 +1602,7 @@ function quelleWaehlen(id) {
         aktQuelle = ''; aktErgebnis = null; geladenStand = null; ohneRang = false;
         markiereReiter(null);
         document.getElementById('deckFeld').hidden = true;
+        document.getElementById('filterFeld').hidden = true;
         document.getElementById('geaendert').hidden = true;
         w.hidden = true;
         textHerkunft('Numbers come from the site, not from typing. ' +
@@ -1315,8 +1644,54 @@ function quelleWaehlen(id) {
     });
 }
 
+/* Der Kartenfilter — derselbe Bau wie die Deckliste, nur mit einer
+   festen Auswahl statt einer Vorschlagsliste: die Arten sind bekannt und
+   endlich, Decknamen sind es nicht. */
+function filterFuellen(eintraege) {
+    var sel = document.getElementById('filter');
+    sel.innerHTML = '';
+    (eintraege || []).forEach(function (e) {
+        var o = document.createElement('option');
+        o.value = e.id;
+        o.textContent = e.name;
+        sel.appendChild(o);
+    });
+    document.getElementById('filterFeld').hidden = !(eintraege && eintraege.length);
+}
+
+function filterAnwenden(id) {
+    var erg = aktErgebnis, rez = window.DsPostQuellen.REZEPTE[aktQuelle];
+    if (!erg || !rez || !erg.proFilter) return;
+    try {
+        var quelle = erg.proFilter(id);
+        /* filter/proFilter mitnehmen: die naechste Wahl braucht beides,
+           und `uebernimm` arbeitet auf dem uebergebenen Objekt. */
+        quelle.filter = erg.filter;
+        quelle.proFilter = erg.proFilter;
+        quelle.decks = erg.decks;
+        aktErgebnis = quelle;
+        var eintrag = (erg.filter || []).filter(function (e) { return e.id === id; })[0];
+        uebernimm(quelle, rez.name + (eintrag && eintrag.id ? ' · ' + eintrag.name : ''),
+                  felderBauen(quelle, null));
+    } catch (e) {
+        meldeFehler(rez, e);
+    }
+}
+
 function nachLaden(rez) {
     var erg = aktErgebnis;
+    /* Der Filter zuerst: hat die Quelle einen, entscheidet er, welche
+       Zeilen ueberhaupt entstehen. */
+    if (erg.filter && erg.filter.length && erg.proFilter) {
+        filterFuellen(erg.filter);
+        var fs = document.getElementById('filter');
+        var wahl = erg.filter.some(function (e) { return e.id === fs.value; })
+            ? fs.value : erg.filter[0].id;
+        fs.value = wahl;
+        filterAnwenden(wahl);
+        return;
+    }
+    filterFuellen(null);
     if (erg.decks && erg.decks.length) {
         deckListeFuellen(erg.decks);
         var feld = document.getElementById('deck');
@@ -1329,6 +1704,10 @@ function nachLaden(rez) {
         quelleAnwenden(null);
     }
 }
+
+document.getElementById('filter').addEventListener('change', function () {
+    filterAnwenden(this.value);
+});
 
 function knoepfe(an) {
     ['btnPng', 'btnAlle', 'btnTeilen'].forEach(function (id) {
@@ -1350,7 +1729,7 @@ function schalteVorlage(v) {
         o.setAttribute('aria-pressed', String(o.dataset.vorlage === v));
     });
 
-    ['feature', 'zahl', 'liste', 'text'].forEach(function (n) {
+    ['feature', 'zahl', 'liste', 'text', 'gitter', 'deckkarte'].forEach(function (n) {
         document.getElementById('g' + n[0].toUpperCase() + n.slice(1)).hidden = (n !== v);
     });
 

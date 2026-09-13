@@ -284,11 +284,30 @@ describe('Showdown-Namen aus den Replica-Teams', () => {
          * nur nicht mehr im Champions-Pokedex — Mega Dragalge schon
          * (images/champions/mega-dragalge.png). Also dieselbe Art von
          * Luecke wie Indeedee und Toxtricity, kein Umrechnungsfehler. */
+        /* Stand 13.09.2026. Sechs Zeilen dazu, keine weg — und KEIN
+         * Spiegel-Lauf noetig: der holt Bilder fuer den KADER (siehe
+         * oben), und genau dort stehen diese sechs nicht. Jede einzeln
+         * an beiden Kaderquellen nachgesehen (otterlyclueless/roster.json
+         * mit 258 Eintraegen; pokebase.app ueber
+         * data/champions_roster_extra.json mit 111 Schluesseln) — keine
+         * ist in einer von beiden. Die Umrechnung schreibt alle sechs
+         * richtig, es sind schlichte Artnamen ohne Formzusatz.
+         *
+         * Ausloeser ist derselbe Kaderwechsel, der an diesem Tag die
+         * Deploy-Kette vier Stunden angehalten hat: pokebase.app hat
+         * sieben Schluessel getauscht, und die VGCPastes-Teams spielen
+         * Arten, die beide Kaderquellen (noch) nicht fuehren. */
         const ERWARTET_OHNE_BILD = [
+            'Cinderace -> cinderace.png',
             'Dragalge -> dragalge.png',
+            'Gogoat -> gogoat.png',
             'Indeedee -> indeedee.png',
             'Indeedee-F -> indeedee-f.png',
+            'Malamar -> malamar.png',
             'Persian-Alola -> alolan-persian.png',
+            'Pincurchin -> pincurchin.png',
+            'Sirfetch\u2019d -> sirfetch-d.png',
+            'Thievul -> thievul.png',
             'Toxtricity -> toxtricity.png',
         ];
         assert.deepEqual(ohne.slice().sort(), ERWARTET_OHNE_BILD,

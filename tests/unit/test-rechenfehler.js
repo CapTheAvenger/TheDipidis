@@ -15,7 +15,7 @@
  *     sind 93,8 %.
  *   * 332 von 21.336 Kombinationen meldeten "5+HKO 0 %", obwohl schon
  *     der niedrigste Wurf fuenfmal toetet.
- *   * 33 Schadensattacken im Champions-Pool sind Flaechenattacken
+ *   * 34 Schadensattacken im Champions-Pool sind Flaechenattacken
  *     (32 bei der Messung, +1 seit dem Attacken-Nachtrag vom
  *     09.09.2026: Make It Rain / Goldrausch, target 11).
  *   * Mulligan-Regel: senkt eine Kombo-Wahrscheinlichkeit um 1,4 bis
@@ -226,7 +226,16 @@ describe('Doppelmodus: der 0,75-Abzug fuer Flaechenattacken', () => {
             'die Begruendung der Ausnahme steht nicht mehr in den Daten');
     });
 
-    it('33 Schadensattacken sind Flaechenattacken', () => {
+    it('34 Schadensattacken sind Flaechenattacken', () => {
+        // 13.09.2026: von 33 auf 34. Dazugekommen ist Overdrive
+        // (Toxtricity-Signaturattacke, target 11 = alle Gegner). Grund
+        // ist derselbe Kaderwechsel, der an diesem Tag die Deploy-Kette
+        // angehalten hat: der naechtliche Lauf hat 32 Arten in die
+        // Nutzungsdaten geschrieben, darunter toxtricity und
+        // toxtricity-low-key-form. Overdrive traegt wie Make It Rain
+        // nachgetragen=true, weil der inChampions-Schalter der Quelle
+        // auch bei ihr falsch steht.
+        //
         // 09.09.2026: von 32 auf 33. Dazugekommen ist Make It Rain
         // (Goldrausch, target 11 = alle Gegner) — eine von sechs
         // Attacken, die der Bauer seit diesem Tag aus den
@@ -238,8 +247,14 @@ describe('Doppelmodus: der 0,75-Abzug fuer Flaechenattacken', () => {
         // Ziel-Zuordnung still aendert. Wer sie anpasst, muss vorher
         // wissen, welche Attacke dazugekommen oder weggefallen ist.
         const n = attacken.filter(m => m.power && m.spread).length;
-        assert.equal(n, 33);
-        assert.equal(RES._meta.counts.spread, 33, 'die Zaehlung im _meta passt nicht dazu');
+        assert.equal(n, 34);
+        assert.equal(RES._meta.counts.spread, 34, 'die Zaehlung im _meta passt nicht dazu');
+        const ov = attacken.find(m => m.en === 'Overdrive');
+        assert.ok(ov, 'Overdrive fehlt in den Attackendaten');
+        assert.equal(ov.spread, true);
+        assert.equal(ov.type, 'Electric');
+        assert.equal(ov.nachgetragen, true,
+            'Overdrive muss als nachgetragen markiert bleiben');
         assert.equal(RES._meta.counts.target_unknown, 0);
         const mir = attacken.find(m => m.en === 'Make It Rain');
         assert.ok(mir, 'Make It Rain fehlt in den Attackendaten');

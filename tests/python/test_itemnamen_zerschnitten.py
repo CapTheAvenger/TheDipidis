@@ -20,6 +20,7 @@ der Name ohne Leerzeichen dort genau einen Treffer hat. Kein Raten.
 
 import json
 import os
+import re
 
 import pytest
 
@@ -64,6 +65,27 @@ def _kanonisch():
 #         waere jede Zuordnung geraten.
 GEDULDET_UNBEKANNT = {"WUE"}
 
+# ── Eine KLASSE, kein Einzelname (13.09.2026) ──────────────────────
+#
+# Am 13.09.2026 lieferte championsbattledata.com fuer einen Teil der
+# gehaltenen Gegenstaende keinen Namen mehr, sondern "Unknown Item 542".
+# Gemessen: 20 verschiedene Nummern, 174 betroffene Eintraege; im Stand
+# vom 12.09. keine einzige. Zwanzig Zeilen in GEDULDET_UNBEKANNT waeren
+# hier falsch — nicht weil es zu viele sind, sondern weil sie den Fall
+# als zwanzig Einzelfaelle beschreiben wuerden. Es ist EIN Ausfall, und
+# morgen traegt er andere Nummern.
+#
+# GEPRUEFT UND VERWORFEN: PokeAPI-Item-IDs sind es nicht. Die Gegenprobe
+# gegen data/v2/csv/item_names.csv ergibt fuer 542/230/253/267 Poke-Floete,
+# Muschelglocke, Zoomlinse und Kraftguertel — nichts davon haelt jemand in
+# einem Wettkampfformat. Jede Zuordnung waere geraten.
+#
+# Geduldet ist die Klasse deshalb nur unter zwei Bedingungen, die beide
+# unten geprueft werden: sie darf nicht wachsen, und sie muss im
+# Luecken-Inventar stehen, also im Admin-Bereich sichtbar sein.
+UNBENANNT = re.compile(r"^Unknown Item \d+$")
+UNBENANNT_HOECHSTENS = 25      # gemessen am 13.09.2026: 20
+
 
 def test_jeder_gehaltene_gegenstand_steht_in_der_referenzliste():
     """Ein Name, den die Referenzliste nicht kennt, ist entweder neu
@@ -78,7 +100,7 @@ def test_jeder_gehaltene_gegenstand_steht_in_der_referenzliste():
                 continue
             for it in (blk.get("held_item") or []):
                 n = (it.get("name") or "").strip()
-                if n and n not in erlaubt:
+                if n and n not in erlaubt and not UNBENANNT.match(n):
                     unbekannt.setdefault(n, []).append(f"{slug}/{fmt}")
     assert not unbekannt, (
         "NEUE Gegenstaende ausserhalb der Referenzliste: "
@@ -206,4 +228,63 @@ def test_kein_geduldeter_name_ist_in_wahrheit_reparierbar():
                    if n.replace(" ", "").lower() in ohne]
     assert not reparierbar, (
         f"geduldet, obwohl reparierbar: {reparierbar}"
+    )
+
+
+def _unbenannte():
+    usage = _lade("champions_usage.json")
+    pk = usage.get("pokemon") or usage
+    nummern, treffer = set(), 0
+    for _slug, rec in pk.items():
+        for _fmt, blk in rec.items():
+            if not isinstance(blk, dict):
+                continue
+            for it in (blk.get("held_item") or []):
+                n = (it.get("name") or "").strip()
+                if UNBENANNT.match(n):
+                    nummern.add(n)
+                    treffer += 1
+    return nummern, treffer
+
+
+def test_die_namenlosen_gegenstaende_wachsen_nicht():
+    """Geduldet heisst nicht unbeobachtet.
+
+    Waechst die Zahl der Nummern deutlich, ist es kein Aussetzer mehr,
+    sondern die Quelle hat die Namen ganz aufgegeben — und dann ist der
+    Gegenstandsblock im Modal wertlos, statt nur luckenhaft.
+    """
+    nummern, _treffer = _unbenannte()
+    assert len(nummern) <= UNBENANNT_HOECHSTENS, (
+        f"{len(nummern)} namenlose Gegenstaende statt hoechstens "
+        f"{UNBENANNT_HOECHSTENS} — die Quelle liefert immer weniger Namen. "
+        "Nachsehen, ob es noch einen Weg zum Namen gibt, BEVOR die Grenze "
+        "angehoben wird."
+    )
+
+
+def test_der_ausfall_steht_im_luecken_inventar():
+    """Ein geduldeter Fehler, den niemand sieht, ist ein verschwiegener.
+
+    Die Gegenprobe zur Duldung oben: solange die Quelle Nummern
+    liefert, MUSS der Admin-Bereich das anzeigen. Verschwindet der
+    Eintrag aus dem Inventar, faellt dieser Test — nicht der Nutzer.
+    """
+    nummern, _treffer = _unbenannte()
+    inventar = _lade("datenluecken.json")
+    eintraege = [l for l in inventar["luecken"] if l["klasse"] == "gegenstandsname"]
+    if not nummern:
+        assert not eintraege, (
+            "die Quelle liefert wieder Namen — der Inventar-Eintrag gehoert weg "
+            "('python3 scripts/datenluecken.py')"
+        )
+        return
+    assert eintraege, (
+        f"{len(nummern)} namenlose Gegenstaende, aber kein Eintrag der Klasse "
+        "'gegenstandsname' in data/datenluecken.json — neu erzeugen mit "
+        "'python3 scripts/datenluecken.py'"
+    )
+    assert str(len(nummern)) in eintraege[0]["titel"], (
+        "der Inventar-Eintrag nennt eine andere Zahl als gemessen — "
+        "data/datenluecken.json ist veraltet"
     )

@@ -165,9 +165,31 @@ describe('Sortierung nach Champions-Nutzung', () => {
            Scrafty stehen jetzt in Replica-Teams, ohne einen Eintrag zu
            haben. Sie sind keine Schreibweise eines vorhandenen
            Eintrags — im Pokedex gibt es sie unter keinem Namen. */
+        /* NACHGEZOGEN AM 13.09.2026 — der Kader der Quelle hat sich
+           GEDREHT, nicht nur ergaenzt.
+           scripts/scrape_champions_roster.py las pokebase.app zweimal
+           (04:06 und 08:54 UTC, beide Status OK) und lieferte beide Male
+           denselben Stand: weiter 111 Schluessel, aber SIEBEN getauscht.
+           Raus: Annihilape, Charizard-Mega-X, Golurk, Kangaskhan,
+           Mamoswine, Rotom-Heat, Vileplume. Rein: Aegislash, Chandelure,
+           Crabominable, Crabominable-Mega, Dragapult, Kleavor, Snorlax.
+           Der Pokedex ging dadurch von 299 auf 296 (die vier anderen
+           stehen in otterlyclueless/roster.json und ueberleben das).
+           Acht Namen kommen dadurch hier dazu; jeder einzeln an BEIDEN
+           Kaderquellen nachgesehen, keiner ist dort zu finden:
+             * Annihilape  — stand bis heute im Pokedex, jetzt raus
+             * Basculegion-F, Indeedee-F, Meowstic-F sind eigene Formen
+               mit eigenen Basiswerten, keine Schreibweise (Basculegion
+               selbst STEHT im Pokedex)
+             * Malamar — kurios, aber belegt: 'Mega Malamar' steht im
+               Pokedex, die Grundform nicht
+             * Cinderace, Gogoat, Pincurchin, Sirfetch'd, Thievul —
+               neu in den Replica-Teams, in keiner der beiden Quellen */
         const ERWARTET_OHNE_EINTRAG = [
-            'Dragalge', 'Indeedee', 'Indeedee-F', 'Meowstic-F',
-            'Persian-Alola', 'Pyroar', 'Scrafty', 'Toxtricity',
+            'Annihilape', 'Basculegion-F', 'Cinderace', 'Dragalge',
+            'Gogoat', 'Indeedee', 'Indeedee-F', 'Malamar', 'Meowstic-F',
+            'Persian-Alola', 'Pincurchin', 'Pyroar', 'Scrafty',
+            'Sirfetch\u2019d', 'Thievul', 'Toxtricity',
         ].sort();
 
         assert.deepEqual(verwaist, ERWARTET_OHNE_EINTRAG,

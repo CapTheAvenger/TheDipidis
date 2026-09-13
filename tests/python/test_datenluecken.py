@@ -54,7 +54,7 @@ def pokedex():
 @pytest.fixture(scope="module")
 def usage():
     """Die Nutzungsdatei — sie sagt, welche Arten das Feld ueberhaupt
-    kennt. Gebraucht von _neue_megas() weiter unten."""
+    kennt. Gebraucht von den Nutzungsdaten-Pruefungen weiter unten."""
     return _json(os.path.join(DATA, "champions_usage.json"))
 
 
@@ -199,53 +199,53 @@ def test_uebernommene_werte_stehen_im_pokedex(quellen, pokedex):
             )
 
 
-def _neue_megas(pokedex, usage):
-    """Mega-Formen, deren GRUNDFORM die Nutzungsdatei noch nicht kennt.
+def _ohne_beleg(quellen):
+    """Mega-Formen, die noch nie eine Faehigkeit hatten — benannt, mit Datum.
 
-    NEU IST ERLAUBT, ZURUECKGENOMMEN NICHT (12.09.2026).
+    NIE GEHABT IST NICHT VERLOREN (13.09.2026).
 
-    Am 12.09.2026 um 05:12 UTC schrieb der Lauf "Champions Usage
-    Refresh" drei neue Mega-Formen in den Pokedex — Baxcalibur,
-    Salamence, Golisopod. Faehigkeiten hatten sie noch keine; die
-    entstehen erst, wenn pokebase.app sie fuehrt.
+    Bis heute stand hier _neue_megas(): "neu" hiess, die Nutzungsdatei
+    kenne die GRUNDFORM noch nicht. Das war am 12.09. richtig gedacht und
+    am 13.09. abgelaufen — der naechtliche Lauf schrieb baxcalibur,
+    golisopod und salamence in die Nutzungsdaten, die drei Mega-Formen
+    galten damit nicht mehr als neu, und diese Datei meldete
+    "Faehigkeit verloren" fuer Werte, die es nie gegeben hat.
 
-    Drei Zusicherungen fielen darueber um, der Deploy fiel mit, und die
-    Seite hing den ganzen Vormittag auf dem Stand von gestern — ohne
-    dass irgendetwas kaputt aussah.
-
-    Die Wachhunde bleiben scharf fuer das, wofuer sie gebaut wurden:
-    eine Uebernahme, die ZURUECKGENOMMEN wird. Unterschieden wird an der
-    Nutzungsdatei — kennt sie die Grundform nicht, ist die Art dort
-    insgesamt neu.
-
-    Entschieden vom Betreiber am 12.09.2026.
+    Eine Zeitkruecke ist kein Beleg. Die Liste steht jetzt in
+    data/champions_mega_faehigkeiten.json unter _meta.ohne_beleg, mit
+    Datum und Begruendung je Form, und wird in BEIDE Richtungen
+    geprueft — waechst sie, hat niemand nachgeschlagen; schrumpft sie,
+    gehoert der Wert nach eintraege.
     """
-    slugs = usage.get("pokemon") or usage
-    raus = []
-    for e in pokedex.get("entries", []):
-        if e.get("form") != "Mega":
-            continue
-        slug = str((e.get("meta") or {}).get("slug") or "")
-        if slug:
-            grund = re.sub(r"-mega(-[xyz])?$", "", slug)
-        else:
-            # LEERER SLUG IST SELBST DAS SIGNAL: der Nutzungsbau hat die
-            # Form nicht zuordnen koennen, also kennt er sie nicht. Der
-            # Grundname kommt dann aus dem englischen Namen, damit die
-            # Pruefung trotzdem sagen kann, ob die ART neu ist.
-            grund = e["en"].replace("Mega ", "").strip().lower().replace(" ", "-")
-        if grund not in slugs:
-            raus.append(e["en"])
-    return raus
+    return dict(((quellen.get("_meta") or {}).get("ohne_beleg") or {}).get("formen") or {})
 
 
-def test_alle_sechzehn_megas_sind_belegt(quellen, pokedex, usage):
+def test_die_liste_ohne_beleg_ist_gepflegt(quellen, pokedex):
+    """Eine Ausnahmeliste ohne Pflege ist eine stille Genehmigung."""
+    formen = _ohne_beleg(quellen)
+    gemessen = sorted(pokedex["_meta"]["megaAbilityMissing"])
+    assert sorted(formen) == gemessen, (
+        "die benannte Liste _meta.ohne_beleg und der gemessene Stand gehen "
+        f"auseinander.\n  benannt:   {sorted(formen)}\n  gemessen:  {gemessen}\n"
+        "Dazugekommen: nachschlagen und MIT Datum eintragen. Weggefallen: "
+        "Wert nach eintraege, Zeile hier loeschen."
+    )
+    for name, e in formen.items():
+        assert (e.get("seit") or "").strip(), f"{name}: kein Datum"
+        assert len(e.get("grund") or "") > 60, (
+            f"{name}: Begruendung zu duenn — sie muss sagen, WO nachgesehen wurde"
+        )
+        assert name not in quellen["eintraege"], (
+            f"{name} steht in beiden Listen — entweder belegt oder offen, nicht beides"
+        )
+
+
+def test_alle_sechzehn_megas_sind_belegt(quellen, pokedex):
     """Der Stand, den der 31.08.2026 hergestellt hat.
 
     Waechst die Zahl der offenen wieder, ist eine Uebernahme
-    zurueckgenommen worden. Das soll auffallen. Eine Form, die erst
-    seit dem letzten Lauf im Pokedex steht, ist etwas anderes — siehe
-    _neue_megas().
+    zurueckgenommen worden. Das soll auffallen. Eine Form, die noch nie
+    einen Wert hatte, ist etwas anderes — siehe _ohne_beleg().
     """
     # RICHTUNG, NICHT PUNKT (12.09.2026).
     # Hier stand `== 16`. Der naechtliche Lauf hat heute frueh fuenf
@@ -257,18 +257,20 @@ def test_alle_sechzehn_megas_sind_belegt(quellen, pokedex, usage):
         'ein Beleg ist verschwunden, das ist der Fehlerfall')
     offen = [n for n, e in quellen["eintraege"].items() if not e.get("uebernommen")]
     assert offen == [], "wieder ohne Beleg: " + ", ".join(offen)
-    neu = set(_neue_megas(pokedex, usage))
-    fehlt = [n for n in pokedex["_meta"]["megaAbilityMissing"] if n not in neu]
+    benannt = set(_ohne_beleg(quellen))
+    fehlt = [n for n in pokedex["_meta"]["megaAbilityMissing"] if n not in benannt]
     assert fehlt == [], (
         "diese Mega-Formen haben ihre Faehigkeit verloren: " + ", ".join(fehlt)
+        + " — sie stehen nicht in _meta.ohne_beleg von "
+        "data/champions_mega_faehigkeiten.json, hatten also schon einen Wert"
     )
     # Dieselbe Richtungsregel wie oben.
     assert len(pokedex["_meta"]["megaAbilityBelegt"]) >= 16, (
         f'nur noch {len(pokedex["_meta"]["megaAbilityBelegt"])} belegte '
         'Mega-Faehigkeiten statt mindestens 16 — eine ist verschwunden')
-    assert len(neu) <= 5, (
-        f"{len(neu)} Mega-Formen sind neu und ohne Daten ({', '.join(sorted(neu))}) "
-        "— das sind zu viele fuer 'neu dazugekommen'"
+    assert len(benannt) <= 5, (
+        f"{len(benannt)} Mega-Formen ohne Beleg ({', '.join(sorted(benannt))}) "
+        "— das sind zu viele fuer eine Ausnahme"
     )
 
 
@@ -320,8 +322,8 @@ def test_namenskonflikte_nennen_beide_werte(inventar):
         )
 
 
-def test_jede_offene_mega_luecke_traegt_ihren_vorschlag(inventar, pokedex, usage):
-    neu = {n.lower().replace(" ", "-") for n in _neue_megas(pokedex, usage)}
+def test_jede_offene_mega_luecke_traegt_ihren_vorschlag(inventar, quellen):
+    neu = {n.lower().replace(" ", "-") for n in _ohne_beleg(quellen)}
     for l in inventar["luecken"]:
         if l["klasse"] != "mega-faehigkeit":
             continue

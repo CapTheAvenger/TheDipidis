@@ -61,7 +61,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 5928,,Terastal Festival ex,2024-10-25,,237
 6409,,,2025-12-01,,236
 3776,,Tag Team GX: Tag All Stars,2021-03-01,,235
-3143,RCL,Rebel Clash,2020-04-07,tcg,233
+3143,RCL,Rebel Clash,2020-04-07,tcg,234
 6310,,CSVE2C: Battle Party Shining Dream Set 1,2025-09-30,,232
 3199,DAA,Darkness Ablaze,2020-05-20,tcg,227
 1745,SUM,Sun & Moon,2016-11-09,tcg,226
@@ -87,6 +87,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6342,,CSM1bC: Storming Emergence - Verdant,2024-11-14,,204
 6311,,CSVE1C: Battle Party Dream Together Set 1,2025-04-24,,202
 5431,PPS3,Play! Pokémon Prize Pack Series Three,2023-08-02,pps,201
+6604,,30th Celebration Indonesian & Thai,2026-06-02,,200
 6298,,CS1bC: Dynamax Clash - Flame,2024-07-24,,199
 6391,,,2025-11-19,,199
 6447,,CBB4C: Gem Pack Vol. 4,2026-01-13,,196
@@ -101,6 +102,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 3984,,The Best of XY,2021-03-18,,188
 5313,PPS2,Play! Pokémon Prize Pack Series Two,2023-03-20,pps,188
 6209,MEG,Mega Evolution 24,2025-07-11,tcg,188
+6601,,30th Celebration,2026-06-02,,188
 6694,,,2026-08-12,,187
 1538,E3,Skyridge,0000-00-00,tcg,186
 2514,HIF,Hidden Fates,2019-07-02,tcg,186
@@ -120,6 +122,8 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6130,,Black Bolt JP,2025-05-05,,174
 6131,,White Flare JP,2025-05-05,,174
 6135,WHT,White Flare,2025-05-07,tcg,173
+6602,,30th Celebration JP,2026-06-02,,173
+6603,,30th Celebration Simplified Chinese,2026-06-02,,173
 6134,BLK,Black Bolt,2025-05-07,tcg,172
 6250,,CS6bC: Azure Shadow - Pursuit,2024-09-10,,172
 1536,E1,Expedition Base Set,0000-00-00,tcg,169
@@ -491,6 +495,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6330,,,2025-11-17,,50
 5914,,M Master Deck Build Box Speed Style,2021-03-19,,49
 5915,,M Master Deck Build Box Power Style,2021-03-19,,49
+6628,,30th Celebration Espeon ex and Umbreon ex Premium Deck Set,2026-06-09,,49
 4196,,National Pokédex Beginning Set,2021-04-27,,48
 4355,,,2021-07-02,,48
 4463,,Pokémon Jungle,2021-11-12,,48

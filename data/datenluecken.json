@@ -1,10 +1,12 @@
 {
  "_meta": {
-  "erzeugt": "2026-09-12T06:59:58Z",
+  "erzeugt": "2026-09-13T09:46:11Z",
   "erzeuger": "scripts/datenluecken.py",
-  "anzahl": 3,
+  "anzahl": 5,
   "jeKlasse": {
-   "mega-faehigkeit": 3
+   "gegenstandsname": 1,
+   "mega-faehigkeit": 3,
+   "nutzungsdaten": 1
   },
   "klassen": {
    "mega-faehigkeit": {
@@ -22,11 +24,24 @@
    "fehlender-bereich": {
     "de": "Bereich fehlt ganz",
     "en": "Whole area missing"
+   },
+   "gegenstandsname": {
+    "de": "Gegenstand ohne Namen",
+    "en": "Held item without a name"
    }
   },
   "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten."
  },
  "luecken": [
+  {
+   "id": "gegenstandsname/quelle-liefert-nummern",
+   "klasse": "gegenstandsname",
+   "titel": "20 Gegenstände kommen nur als Nummer (174 Einträge): Unknown Item 185, Unknown Item 186, Unknown Item 188, Unknown Item 190, Unknown Item 192, Unknown Item 193, Unknown Item 194, Unknown Item 197 …",
+   "titelEn": "20 held items arrive as a bare number (174 entries): Unknown Item 185, Unknown Item 186, Unknown Item 188, Unknown Item 190, Unknown Item 192, Unknown Item 193, Unknown Item 194, Unknown Item 197 …",
+   "wo": "data/champions_usage.json → pokemon[*][*].held_item[].name",
+   "ansicht": "side-quest",
+   "vorschlag": null
+  },
   {
    "id": "mega-faehigkeit/mega-baxcalibur",
    "klasse": "mega-faehigkeit",
@@ -51,6 +66,15 @@
    "titel": "Brutalanda (Mega) — Mega-Fähigkeit fehlt",
    "titelEn": "Mega Salamence — mega ability missing",
    "wo": "data/champions_pokedex.json → entries[en=Mega Salamence].megaAbility",
+   "ansicht": "side-quest",
+   "vorschlag": null
+  },
+  {
+   "id": "nutzungsdaten/vivillon",
+   "klasse": "nutzungsdaten",
+   "titel": "Vivillon — kein Nutzungsdatensatz",
+   "titelEn": "Vivillon — no usage record",
+   "wo": "data/champions_usage.json → pokemon[Vivillon]",
    "ansicht": "side-quest",
    "vorschlag": null
   }

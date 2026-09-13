@@ -20,6 +20,12 @@
       "de_effect": "Das Pokémon schwebt über dem Boden und ist dadurch immun gegen Boden-Attacken, Stachler, Giftspitzen und Klebenetz. Wenn dieses Pokémon ein Pokémon besiegt, wird sein höchster Statuswert um 1 Stufe erhöht.",
       "en_effect": "This Pokemon floats above the ground, making it immune to Ground-type moves, Spikes, Toxic Spikes and Sticky Web. When it knocks out a Pokemon, its highest stat is raised by 1 stage.",
       "_source": "Mega-Zapplarang (Mega Eelektross), Champions-Originalfähigkeit. Bisafans Fähigkeitendex (emporwindung.php)."
+    },
+    "Thermal Exchange": {
+      "de": "Thermowandel",
+      "de_effect": "Erhöht den Angriff um eine Stufe, wenn das Pokémon von einer Feuer-Attacke getroffen wird. Es kann außerdem nicht verbrannt werden.",
+      "en_effect": "Boosts the Attack stat when the Pokemon is hit by a Fire-type move. The Pokemon also cannot be burned.",
+      "_source": "Mainline-Faehigkeit, die in champions_resources.json fehlt (191 von PokeAPI uebernommene Faehigkeiten, Thermal Exchange nicht darunter). Deutscher Name aus PokeAPI ability_names.csv, ability_id 270, local_language_id 6 -> Thermowandel; englischer Wirkungstext aus ability_flavor_text.csv derselben ID. Gebraucht seit dem 13.09.2026, weil Mega Baxcalibur die Faehigkeit traegt."
     }
   }
 }

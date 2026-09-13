@@ -1,11 +1,10 @@
 {
  "_meta": {
-  "erzeugt": "2026-09-13T14:22:58Z",
+  "erzeugt": "2026-09-13T18:40:06Z",
   "erzeuger": "scripts/datenluecken.py",
-  "anzahl": 3,
+  "anzahl": 2,
   "jeKlasse": {
    "gegenstandsname": 1,
-   "mega-faehigkeit": 1,
    "nutzungsdaten": 1
   },
   "klassen": {
@@ -41,25 +40,6 @@
    "wo": "data/champions_usage.json → pokemon[*][*].held_item[].name",
    "ansicht": "side-quest",
    "vorschlag": null
-  },
-  {
-   "id": "mega-faehigkeit/mega-baxcalibur",
-   "klasse": "mega-faehigkeit",
-   "titel": "Espinodon (Mega) — Mega-Fähigkeit fehlt",
-   "titelEn": "Mega Baxcalibur — mega ability missing",
-   "wo": "data/champions_pokedex.json → entries[en=Mega Baxcalibur].megaAbility",
-   "ansicht": "side-quest",
-   "vorschlag": {
-    "wert": "Thermal Exchange",
-    "quelle": "https://pokebase.app/pokemon-champions/pokemon/baxcalibur-mega",
-    "einstufung": "mehrdeutig",
-    "begruendung": "Thermal Exchange steht auch bei Baxcalibur selbst — und anders als bei Mega Metagross NICHT mit einem kleinen Anteil, der zu den Mega-Nutzern passen würde, sondern mit 97,2 % (Doppelkämpfe) bzw. 98,2 % (Einzelkämpfe). Der Prozentwert im Bildschirmfoto (rund 97 %) deckt sich damit fast exakt; genau das lässt offen, ob die Seite die Fähigkeit DIESER Form zeigt oder die Verteilung der Grundform. Zweiter Grund gegen die sofortige Übernahme: data/champions_names_de.json kennt für Thermal Exchange keinen deutschen Namen — übernommen stünde im Modal ein englischer Begriff. Beleg: pokebase.app-Seite Mega Baxcalibur (#998), vom Betreiber am 13.09.2026 als Bildschirmfoto geliefert.",
-    "grundform": "Baxcalibur",
-    "basisFaehigkeiten": [
-     "Thermal Exchange",
-     "Ice Body"
-    ]
-   }
   },
   {
    "id": "nutzungsdaten/vivillon",

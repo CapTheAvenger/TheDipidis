@@ -150,7 +150,7 @@
             closeLabel: 'Schließen',
             megaAbility: 'Mega-Fähigkeit',
             spriteGrundform: 'Bild der Grundform — für diese Mega-Form führt unsere Bildquelle keine eigene Darstellung.',
-            megaAbilityUnknown: 'Vorschlag liegt vor, Bestätigung steht aus — bis dahin steht hier nichts. Geraten wird nicht.',
+            megaAbilityUnknown: 'Keine belegte Angabe. Was dazu offen ist, steht im Admin-Bereich — geraten wird nichts.',
             viaBase: (basis, stein, pct) =>
                 `Nutzungsdaten von ${basis} — ${pct}\u00a0% der ${basis}-Builds halten ${stein}.`,
             usageSeasonLbl: (s) => `Saison: ${s} · Quelle: championsbattledata.com · Stand unbekannt`,
@@ -246,7 +246,7 @@
             closeLabel: 'Close',
             megaAbility: 'Mega ability',
             spriteGrundform: 'Base form artwork — our sprite source carries no separate picture for this Mega form.',
-            megaAbilityUnknown: 'A proposal exists, confirmation is pending — until then nothing stands here. We don\u2019t guess.',
+            megaAbilityUnknown: 'No sourced value. What is open on this is listed in the admin area \u2014 we don\u2019t guess.',
             viaBase: (basis, stein, pct) =>
                 `Usage data from ${basis} — ${pct}\u00a0% of ${basis} builds hold ${stein}.`,
             usageSeasonLbl: (s) => `Season: ${s} · Source: championsbattledata.com · date unknown`,
@@ -1627,12 +1627,27 @@
     //
     // NACHTRAG 31.08.2026: pokebase.app fuehrt die Werte doch. Vier der
     // 16 sind damit belegt und stehen jetzt normal in der Zeile (siehe
-    // data/champions_mega_faehigkeiten.json). Die uebrigen zwoelf tragen
+    // data/champions_mega_faehigkeiten.json). Die uebrigen zwoelf trugen
     // einen Vorschlag, der einzeln nicht traegt, weil derselbe Name auch
-    // bei der Grundform steht; sie warten im Admin-Bereich (#admin) auf
-    // Bestaetigung. Bis dahin bleibt die Zeile leer — ein Vorschlag ist
-    // kein Beleg, und die Oberflaeche behauptet nichts, was wir nicht
-    // belegen koennen.
+    // bei der Grundform steht; der Betreiber hat sie noch am selben Tag
+    // bestaetigt.
+    //
+    // KORREKTUR 13.09.2026, beim Hinsehen nach dem Deploy gefunden: hier
+    // stand „Vorschlag liegt vor, Bestaetigung steht aus". Das war am
+    // 31.08. wahr und ist es seitdem nicht mehr. Heute sind die einzigen
+    // drei Formen ohne Angabe — Mega Baxcalibur, Mega Golisopod, Mega
+    // Salamence — solche, fuer die pokebase.app ueberhaupt KEINEN Wert
+    // fuehrt. Es liegt also kein Vorschlag vor, und der Text behauptete
+    // das Gegenteil. Alle Suiten waren dabei gruen: keine Zusicherung
+    // hat je den Wortlaut gegen die Datenlage gehalten.
+    //
+    // Der neue Wortlaut sagt nur, was die Seite belegen kann — es gibt
+    // keine belegte Angabe, und wo es klemmt, steht im Admin-Bereich
+    // (#admin). Er bleibt in beiden Faellen wahr, ob ein Vorschlag
+    // aussteht oder gar keiner existiert.
+    //
+    // Ein Vorschlag ist kein Beleg, und die Oberflaeche behauptet
+    // nichts, was wir nicht belegen koennen.
     function megaAbilityBadge(en) {
         const l = t();
         if (!en) {

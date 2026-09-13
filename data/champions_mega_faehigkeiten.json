@@ -39,12 +39,8 @@
       "zweck": "Mega-Formen, die im Pokedex stehen und fuer die pokebase.app KEINE Faehigkeit fuehrt. Sie sind KEIN Datenausfall — sie hatten nie einen Wert. Die Unterscheidung ist der ganze Punkt: eine Form, die ihren Wert VERLIERT, ist ein Fehler und muss rot werden.",
       "warum_hier": "Bis zum 13.09.2026 wurde 'neu' daran erkannt, ob die Nutzungsdatei die GRUNDFORM schon kennt. Diese Kruecke lief am 13.09. ab: der naechtliche Lauf schrieb baxcalibur, golisopod und salamence in die Nutzungsdaten, die drei Mega-Formen galten damit nicht mehr als neu — und vier Zusicherungen meldeten 'Faehigkeit verloren' fuer Werte, die es nie gab. Eine Zeitkruecke ist kein Beleg; hier steht stattdessen eine benannte Liste mit Datum.",
       "regel": "Waechst diese Liste, hat niemand die neue Form nachgeschlagen. Schrumpft sie, ist ein Beleg aufgetaucht — dann gehoert der Wert nach 'eintraege' und die Zeile hier weg. Beide Richtungen sind rot.",
-      "formen": {
-        "Mega Baxcalibur": {
-          "seit": "2026-09-12",
-          "grund": "Am 12.09.2026 vom Wochenlauf in den Pokédex geschrieben. pokebase.app nennt Thermal Exchange (Bildschirmfoto des Betreibers, 13.09.2026), aber der Wert ist zugleich Baxcaliburs eigene Fähigkeit mit 97,2 % Anteil — der Einzelbeleg trägt ihn deshalb nicht allein. Er steht als Vorschlag im Admin-Bereich und wartet auf Bestätigung."
-        }
-      }
+      "formen": {},
+      "stand": "Leer seit dem 13.09.2026: der Betreiber hat Mega Baxcalibur bestätigt, die letzte offene Form. Wächst die Liste wieder, hat der Kader eine Mega-Form dazubekommen, die noch niemand nachgeschlagen hat."
     }
   },
   "eintraege": {
@@ -336,8 +332,15 @@
         "Ice Body"
       ],
       "einstufung": "mehrdeutig",
-      "uebernommen": false,
-      "begruendung": "Thermal Exchange steht auch bei Baxcalibur selbst — und anders als bei Mega Metagross NICHT mit einem kleinen Anteil, der zu den Mega-Nutzern passen würde, sondern mit 97,2 % (Doppelkämpfe) bzw. 98,2 % (Einzelkämpfe). Der Prozentwert im Bildschirmfoto (rund 97 %) deckt sich damit fast exakt; genau das lässt offen, ob die Seite die Fähigkeit DIESER Form zeigt oder die Verteilung der Grundform. Zweiter Grund gegen die sofortige Übernahme: data/champions_names_de.json kennt für Thermal Exchange keinen deutschen Namen — übernommen stünde im Modal ein englischer Begriff. Beleg: pokebase.app-Seite Mega Baxcalibur (#998), vom Betreiber am 13.09.2026 als Bildschirmfoto geliefert."
+      "uebernommen": true,
+      "begruendung": "Thermal Exchange steht auch bei Baxcalibur selbst — und anders als bei Mega Metagross NICHT mit einem kleinen Anteil, der zu den Mega-Nutzern passen würde, sondern mit 97,2 % (Doppelkämpfe) bzw. 98,2 % (Einzelkämpfe). Der Prozentwert im Bildschirmfoto (rund 97 %) deckt sich damit fast exakt; der Einzelbeleg allein lässt deshalb offen, ob die Seite die Fähigkeit dieser Form zeigt oder die Verteilung der Grundform. Der Betreiber hat das am 13.09.2026 aufgelöst: Grundform und Mega-Form tragen dieselbe Fähigkeit. Beleg: pokebase.app-Seite Mega Baxcalibur (#998).",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-09-13",
+        "wortlaut": "baxcalibur und mega baxcalibur haben die gleiche Fähigkeit",
+        "wirkung": "Damit ist der zweite Beleg da, der dem Einzelfund gefehlt hat. Die Einstufung bleibt „mehrdeutig“ — sie beschreibt, was der Einzelbeleg hergibt, und daran ändert eine Bestätigung nichts.",
+        "gegenprobe": "Der deutsche Name fehlte in champions_resources.json (191 Fähigkeiten von PokéAPI, Thermal Exchange nicht darunter). Ohne ihn stünde im Modal ein englischer Begriff. Nachgetragen in champions_ability_overrides.json aus PokéAPI ability_names.csv, ability_id 270, local_language_id 6 → Thermowandel."
+      }
     }
   }
 }

@@ -143,6 +143,65 @@ Meldung, ein CSS-Regelname, ein vorhandener Aufruf.
 als Sicherung zaehlt. Kostet eine Minute; ohne sie weiss niemand, ob sie
 ueberhaupt beisst.
 
+## EINE KARENZ GEHOERT AN EINEN BELEG, NICHT AN DIE ZEIT
+
+Am 12.09.2026 wurde richtig entschieden: „neu ist erlaubt, verloren
+nicht". Umgesetzt wurde es mit einer Kruecke — eine Mega-Form galt als
+neu, **solange die Nutzungsdatei ihre Grundform nicht kennt**.
+
+Die Kruecke lief am 13.09.2026 um 04:07 UTC ab. Der naechtliche Lauf
+schrieb `baxcalibur`, `golisopod` und `salamence` in die Nutzungsdaten;
+die drei Mega-Formen galten damit nicht mehr als neu, und vier
+Zusicherungen meldeten **„Faehigkeit verloren" fuer Werte, die es nie
+gegeben hat**. Die Kette stand sechs Stunden, ohne dass etwas kaputt war.
+
+Eine Faehigkeit entsteht nicht mit der Zeit, sondern mit einem Beleg.
+
+**Die Regel:** wo eine Luecke geduldet wird, wird sie BENANNT und
+DATIERT — in den Daten, nicht im Testcode —, und die Liste wird in
+BEIDE Richtungen geprueft. Waechst sie, hat niemand nachgeschlagen.
+Schrumpft sie, gehoert der Wert in die Daten und die Zeile weg.
+
+Beispiele im Bestand, Stand 13.09.2026:
+
+| Ort | was er benennt |
+| --- | --- |
+| `data/champions_mega_faehigkeiten.json` → `_meta.ohne_beleg` | Mega-Formen, fuer die keine Quelle einen Wert fuehrt |
+| `scripts/build_champions_sprites.py` → `AUSGESCHIEDEN` | Sprite-Schluessel von Formen, die der Kader nicht mehr fuehrt |
+| `data/datenluecken.json` | alles Uebrige, sichtbar im Admin-Bereich (`#admin`) |
+
+Und die Gegenprobe gehoert dazu: ein Name in `AUSGESCHIEDEN` darf nicht
+im Pokedex stehen, eine Form in `ohne_beleg` nicht schon einen Wert
+haben. Ohne die zweite Richtung ist so eine Liste ein Friedhof.
+
+**Ein Verlust wird nie stillschweigend geloescht.** Wer eine verwaiste
+Zeile wegwirft, vernichtet die nachgeschlagene Quelle — und beim
+naechsten Auftauchen schlaegt sie jemand erneut nach.
+
+## EIN SATZ, DER EINE TATSACHE BEHAUPTET, IST CODE
+
+Am 13.09.2026 stand nach einem gruenen Deploy im Pokedex-Modal:
+
+> „Vorschlag liegt vor, Bestätigung steht aus — bis dahin steht hier
+> nichts. Geraten wird nicht."
+
+Der Satz war am 31.08.2026 wahr. Zum Fundzeitpunkt lag fuer die drei
+offenen Mega-Formen **gar kein Vorschlag** vor. Alle Suiten waren gruen:
+geprueft war, DASS der Schluessel `megaAbilityUnknown` in beiden Sprachen
+vorkommt — nicht, OB er stimmt.
+
+Gefunden hat ihn nicht ein Test, sondern das Hinsehen nach dem Deploy.
+
+**Die Regel:** ein Oberflaechentext, der eine Tatsache ueber die Datenlage
+behauptet, braucht eine Zusicherung, die ihn GEGEN DIE DATEN haelt — nicht
+gegen sich selbst. Die Form ist nie „dieser Satz ist verboten", sondern
+„dieser Satz darf X nur behaupten, wenn die Daten X hergeben"
+(siehe `tests/unit/test-mega-nutzungsdaten.js`, „der Platzhalter behauptet
+keinen Vorschlag, den es nicht gibt").
+
+Dieselbe Regel wie „eine Aussage ueber die Umgebung ist eine Messung oder
+sie ist nichts" — nur fuer das, was der Nutzer liest.
+
 ## Ressourcen: was ein Durchgang kosten darf
 
 Gemessen am 12.09.2026 in einer einzigen Sitzung, weil der Betreiber
@@ -228,6 +287,25 @@ ueber die Weboberflaeche ausliefern. Kein dritter Weg, keine Tokens.
 Billiger wird der Weg nur ueber **weniger PRs**, nicht ueber ein anderes
 Werkzeug: die Kosten haengen an der Zahl der beruehrten Verzeichnisse
 je PR.
+
+#### Zwei Fallen im Upload-Formular (gemessen 13.09.2026)
+
+**Die versteckten Felder NIE setzen.** Beide Versuche haben je einen
+Anlauf gekostet und nichts committet:
+
+| Feld | was es wirklich ist | Folge beim Ueberschreiben |
+| --- | --- | --- |
+| `input[name="quick_pull"]` | die **Basis** (`main`), nicht der neue Zweig | Vergleichsseite gegen einen Zweig, den es nicht gibt — kein Commit |
+| `input[name="target_branch"]` | vorgegebener Zweigname, **signiert** | **Server Error** — kein Commit |
+
+Den vorgegebenen Namen `CapTheAvenger-patch-NNNNNN` stehen lassen. Zu
+setzen sind nur `input[name="message"]`, `textarea[name="description"]`
+und der Knopf `input[name="commit-choice"][value="quick-pull"]`.
+
+**Der Merge-Knopf braucht einen echten Klick.** Ein `dispatchEvent` auf
+„Merge pull request" oeffnet den Bestaetigungsdialog nicht; er kommt erst
+ueber `computer left_click` auf die Koordinate. Danach „Confirm merge",
+ebenfalls per echtem Klick.
 
 ## EINE AUSSAGE UEBER DIE UMGEBUNG IST EINE MESSUNG ODER SIE IST NICHTS
 

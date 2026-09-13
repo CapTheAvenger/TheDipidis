@@ -48,8 +48,11 @@ way; each one exists because breaking it cost real time.
    The fix costs nothing: on the first upload pick *"Create a new branch for
    this commit and start a pull request"*, then upload the remaining
    directories to `.../upload/<branch>/<dir>`, then merge. `main` sees one
-   commit and one CI run. The clean alternative is a PAT with push rights —
-   the user has to create it, and the assistant must never handle it.
+   commit and one CI run.
+   **Kein PAT.** Frueher stand hier, ein Token mit Schreibrecht sei die
+   saubere Alternative. Das ist falsch und wurde am 21.08.2026 gemessen:
+   der Proxy blockt **repo-basiert**, nicht credential-basiert — ein
+   Token aendert nichts. Siehe „Der Schreibweg — und die Sackgassen".
 
 ## Meldungstexte sind verdrahtet — ueber Sprachgrenzen hinweg
 
@@ -176,24 +179,75 @@ Agentenrunden und der Browser.
    Am 12.09. ist ein Auftrag ohne diese Regel auf sieben PRs
    angewachsen.
 
-### Der Schreibweg
+### Der Schreibweg — und die Sackgassen
 
-`git push` antwortet 403, und die GitHub-Anbindung ist **lesend**
-angemeldet: `get_me` geht, `create_branch` gibt
-`403 Resource not accessible by integration`. Deshalb laeuft das
-Ausliefern ueber die Weboberflaeche.
+**Ausliefern geht NUR ueber die GitHub-Weboberflaeche in Chrome.** Das
+ist seit dem 21.08.2026 mehrfach geprueft und steht in mindestens drei
+Projektdokumenten. Es ist keine offene Frage.
 
-**Das ist eine Einstellung, kein Limit.** Stellt der Betreiber unter
-GitHub → Settings → Applications → Installed GitHub Apps → Claude →
-Configure → Repository permissions die Rechte **Contents**,
-**Pull requests** und **Workflows** auf *Read and write*, ersetzt
-`mcp__Github__push_files` den ganzen Browserweg: ein Aufruf statt
-vierundvierzig. **Workflows wird dabei gern vergessen** — ohne sie
-sind Aenderungen an `.github/workflows/` gesperrt, und daran arbeiten
-wir staendig.
+```
+git push                    -> 403
+mcp__Github__create_branch  -> 403 Resource not accessible by integration
+mcp__Github__push_files     -> 403
+mcp__Github__merge_pull_request -> 403
+```
 
-Vor jedem Browserweg deshalb einmal `mcp__Github__create_branch`
-probieren: geht es, ist der teure Weg unnoetig.
+**Die Ursache ist die Freigabeliste DIESER SITZUNG**, nicht eine
+Einstellung des Betreibers. Die Fehlermeldung sagt es woertlich:
+*„not in this session's authorized repository set"*. **In Cowork laesst
+sich das nicht einstellen.**
+
+Am 13.09.2026 hat der Betreiber einen Screenshot seiner
+GitHub-App-Einstellungen geschickt: die App „Claude" hat
+*Read and **write** access to actions, checks, **code**, discussions,
+issues, **pull requests**, repository hooks, and **workflows**«* und
+Zugriff auf *All repositories*. **Die Rechte sind erteilt. Trotzdem 403.**
+
+#### Diese vier Wege sind geprueft und tot — nicht erneut vorschlagen
+
+| Weg | warum er nicht geht |
+| --- | --- |
+| Berechtigungen der GitHub-App aendern | schon auf *read and write*, Screenshot 13.09.2026 |
+| Eigene Zugangsdaten in der Push-URL | der Proxy blockt **repo-basiert**, nicht credential-basiert |
+| Token anlegen und ueber Chrome injizieren | vom Sicherheits-Klassifikator geblockt — und der Assistent legt ohnehin **nie** Tokens an |
+| `device_bash` auf dem Rechner des Betreibers | kein Netzzugang von dort, also kein git-Remote |
+
+**Der Einzeiler, der diese Regel traegt:** die Fehlermeldung 403 beweist
+*dass* Schreiben nicht geht — sie beweist **nicht warum**. Wer aus ihr
+eine Ursache ableitet, ohne sie zu messen, produziert genau die
+Diskussion, die dieses Projekt am 13.09.2026 zum zehnten Mal gefuehrt
+hat.
+
+#### Was bleibt
+
+Ein `create_branch` gegen einen Wegwerf-Namen am Anfang einer Sitzung
+kostet einen Aufruf und sagt, ob sich etwas geaendert hat. Geht es
+nicht — und das ist der Normalfall —, dann **ohne weitere Diskussion**
+ueber die Weboberflaeche ausliefern. Kein dritter Weg, keine Tokens.
+
+Billiger wird der Weg nur ueber **weniger PRs**, nicht ueber ein anderes
+Werkzeug: die Kosten haengen an der Zahl der beruehrten Verzeichnisse
+je PR.
+
+## EINE AUSSAGE UEBER DIE UMGEBUNG IST EINE MESSUNG ODER SIE IST NICHTS
+
+Am 13.09.2026 habe ich dem Betreiber empfohlen, eine
+GitHub-Berechtigung umzustellen. Getestet hatte ich, **dass** Schreiben
+403 gibt. Die **Ursache** hatte ich mir dazugedacht — und sie war
+falsch, was ein Screenshot in zehn Sekunden zeigte.
+
+Das ist dieselbe Regel, die fuer Daten laengst gilt („Report, don't
+silently repair", „NICHT GEPRUEFT statt OK") — sie galt nur nie fuer
+Aussagen ueber die eigene Umgebung.
+
+**Vor jeder Aussage darueber, was geht oder nicht geht, und warum:**
+
+1. `project_search` im Projekt. 179 Dokumente, drei Wochen Vorarbeit.
+   Das kostet einen Aufruf und ist fast immer schon beantwortet.
+2. Messung und Schlussfolgerung trennen. „403" ist eine Messung.
+   „Das liegt an X" ist eine Behauptung und braucht einen eigenen Beleg.
+3. Ohne Beleg: **NICHT GEPRUEFT** hinschreiben, nicht die
+   wahrscheinlichste Ursache als Tatsache verkaufen.
 
 ## Data rules
 

@@ -123,7 +123,9 @@ def test_die_regel_je_formart(mod, dex, en, erwartet):
     ("Paldean Tauros (Blaze Breed)", "128b"),
     ("Paldean Tauros (Aqua Breed)", "128c"),
     # pokewiki.de/Rotom/Sprites_und_3D-Modelle
-    ("Rotom (Heat)", "479a"),
+    # (Rotom (Heat) stand hier bis zum 13.09.2026 — die Quelle fuehrt die
+    #  Form nicht mehr; der Schluessel liegt in mod.AUSGESCHIEDEN und wird
+    #  von test_ausgeschiedene_formen_bleiben_ausgeschieden geprueft.)
     ("Rotom (Wash)", "479b"),
     # pokewiki.de/Wolwerock/Sprites_und_3D-Modelle
     ("Lycanroc (Dusk)", "745b"),
@@ -154,7 +156,40 @@ def test_jede_uebersteuerung_gehoert_zu_einem_echten_eintrag(mod, dex):
     mehr prueft — und die beim naechsten Umbau falsch angewandt wird."""
     da = {e["en"] for e in dex}
     verwaist = sorted(set(mod.FORM_UEBERSTEUERUNG) - da)
-    assert verwaist == [], verwaist
+    assert verwaist == [], (
+        f"{verwaist} zeigt ins Leere. Wenn die Quelle die Form wirklich "
+        "nicht mehr fuehrt, gehoert der Schluessel MIT Datum und Beleg "
+        "nach AUSGESCHIEDEN — nicht in den Papierkorb."
+    )
+
+
+def test_ausgeschiedene_formen_bleiben_ausgeschieden(mod, dex):
+    """Die Gegenrichtung: taucht eine ausgeschiedene Form wieder im
+    Pokedex auf, muss ihr Schluessel zurueck in die Uebersteuerung.
+
+    Ohne diese Zusicherung waere AUSGESCHIEDEN ein Friedhof, an dem
+    niemand mehr vorbeikommt — und die zurueckgekehrte Form bekaeme
+    still das nach der Regel gebaute (falsche) Bild.
+    """
+    da = {e["en"] for e in dex}
+    zurueck = sorted(set(mod.AUSGESCHIEDEN) & da)
+    assert zurueck == [], (
+        f"{zurueck} steht wieder im Pokedex — Schluessel aus AUSGESCHIEDEN "
+        "zurueck nach FORM_UEBERSTEUERUNG holen."
+    )
+    for name, wert in mod.AUSGESCHIEDEN.items():
+        assert isinstance(wert, tuple), f"{name}: erwartet (Schluessel, Grund)"
+        # Eine falsche Laenge faellt beim Entpacken von selbst um. Absicht:
+        # ein `len(wert) == 2` waere fuer den Wachhund in
+        # test_eingefrorene_datenwerte_wachhund.py ein eingefrorener
+        # Datenwert — und er hat recht, Formpruefungen gehoeren nicht als
+        # Zahlenvergleich geschrieben.
+        schluessel, grund = wert
+        assert schluessel, f"{name}: kein Schluessel aufbewahrt"
+        assert len(grund) > 30, f"{name}: Begruendung zu duenn — Datum und Quelle nennen"
+        assert name not in mod.FORM_UEBERSTEUERUNG, (
+            f"{name} steht in BEIDEN Tabellen — das ist ein Widerspruch"
+        )
 
 
 # ── Die Dateipruefung ──────────────────────────────────────────────

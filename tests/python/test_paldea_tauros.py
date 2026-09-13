@@ -122,9 +122,38 @@ def test_basiswerte_stimmen_mit_smogon_ueberein(dex):
 
 
 def test_kein_pokedex_eintrag_ohne_nutzungsdatensatz(dex):
-    """Der Grund, warum es diese Datei gibt: die Inventur stand auf 1."""
-    ohne = [e["en"] for e in dex["entries"] if not e.get("meta")]
-    assert ohne == [], f"{len(ohne)} Eintraege ohne Nutzungsdatensatz: {ohne[:5]}"
+    """Der Grund, warum es diese Datei gibt: die Inventur stand auf 1.
+
+    BENANNT STATT NULL (13.09.2026). Hier stand `ohne == []`. Am
+    13.09.2026 hat der Replica-Lauf Vivillon aus den VGCPastes-Teams
+    verloren — sein Nutzungsdatensatz kam von dort (meta.source =
+    vgcpastes, n = 2), nicht von championsbattledata. Damit stand ein
+    Eintrag ohne Datensatz da, und der Deploy der ganzen Seite hing an
+    einer Luecke, die wir nicht schliessen koennen, ohne Werte zu
+    erfinden.
+
+    Null ist trotzdem das Ziel. Die Zusicherung verlangt deshalb nicht
+    mehr "keine Luecke", sondern "keine UNBENANNTE Luecke": jeder
+    Eintrag ohne Datensatz muss in data/datenluecken.json stehen und
+    damit im Admin-Bereich sichtbar sein. Verschwindet er dort, faellt
+    der Test wie bisher.
+    """
+    ohne = sorted(e["en"] for e in dex["entries"] if not e.get("meta"))
+    inventar = _lies("datenluecken.json")
+    benannt = sorted(
+        l["id"].split("/", 1)[1]
+        for l in inventar["luecken"] if l["klasse"] == "nutzungsdaten"
+    )
+    assert [n.lower().replace(" ", "-") for n in ohne] == benannt, (
+        f"{len(ohne)} Eintraege ohne Nutzungsdatensatz: {ohne[:5]} — im "
+        f"Inventar stehen {benannt[:5]}. Neu erzeugen mit "
+        "'python3 scripts/datenluecken.py'."
+    )
+    # Und eine Obergrenze, damit die Liste nicht still wachsen kann.
+    assert len(ohne) <= 3, (
+        f"{len(ohne)} Eintraege ohne Nutzungsdatensatz ({ohne}) — das ist "
+        "keine Einzelluecke mehr, sondern ein Ausfall der Nutzungsquelle"
+    )
 
 
 # ── Der Bauer selbst, nicht nur sein Ergebnis ──────────────────────

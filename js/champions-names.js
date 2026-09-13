@@ -44,6 +44,16 @@
         'kommo-o': 'Kommo-o',
         // Punkt und Leerzeichen lassen sich aus einem Slug nicht ableiten.
         'mr-rime': 'Mr. Rime',
+        // Dieselbe Klasse, gemessen am 13.09.2026: der naechtliche Lauf hat
+        // 32 Arten ergaenzt, drei davon tragen ein Satzzeichen im Artnamen.
+        // Ohne diese Zeilen faellt die Art in der Speed-Leiter STILL heraus
+        // (app-side-quest-play.js ueberspringt sie mit `continue`) — genau
+        // der Fehler, gegen den diese Datei gebaut wurde.
+        'mr-mime': 'Mr. Mime',
+        // Der Apostroph wird im Slug zu '-d'. Aus 'farfetch-d' wuerde die
+        // Regel 'Farfetch-D' bauen; das gibt es nicht.
+        'farfetch-d': 'Farfetch\u2019d',
+        'sirfetch-d': 'Sirfetch\u2019d',
         // Die weibliche Form hat ANDERE Basiswerte (Ang 92 statt 112). Ohne
         // diesen Eintrag landet sie auf den Werten des Männchens.
         'basculegion-female': 'Basculegion-F',

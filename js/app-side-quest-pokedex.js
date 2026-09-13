@@ -1443,12 +1443,23 @@
     // Derselbe Name als reiner Text — fuer Saetze, die als Ganzes
     // maskiert werden. Bevorzugt die Sprache der Oberflaeche und faellt
     // auf Englisch zurueck, statt einen leeren Platzhalter zu zeigen.
+    // Hat die Quelle gar keinen Namen geliefert ("Unknown Item 542"),
+    // steht hier die Luecke statt eines Pseudonamens. Die Regel dazu
+    // steht EINMAL in js/champions-namen.js; hier wird sie nur gefragt.
+    function unbenannt(en) {
+        return !!(window.ChampionsNamen && window.ChampionsNamen.istUnbenannt
+            && window.ChampionsNamen.istUnbenannt(en));
+    }
     function nmText(en, kind) {
         if (!en) return '';
+        if (unbenannt(en)) return window.ChampionsNamen.anzeige(en, kind);
         const de = uiLang() === 'de' ? deName(en, kind) : null;
         return de || en;
     }
     function nmHtml(en, kind) {
+        // Einsprachig: der Platzhalter ist kein Name, also steht daneben
+        // auch keine Uebersetzung.
+        if (unbenannt(en)) return escapeHtml(window.ChampionsNamen.anzeige(en, kind));
         const de = uiLang() === 'de' ? deName(en, kind) : null;
         return de && de !== en
             ? `${escapeHtml(en)}<span class="sqp-d-de">${escapeHtml(de)}</span>`

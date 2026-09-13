@@ -475,7 +475,14 @@
                     <p class="sq-empty">${esc(L().noUsage)}</p>
                 </div>`;
         }
-        const moveRow = (m) => barRow(esc(m.name), m.pct);
+        // Die Quelle liefert seit dem 13.09.2026 fuer einen Teil der
+        // gehaltenen Gegenstaende keinen Namen, sondern "Unknown Item 542".
+        // Ein Pseudoname liest sich wie eine Angabe und ist keine — die
+        // Regel dafuer steht EINMAL in js/champions-namen.js.
+        const zeigName = (x) => (window.ChampionsNamen
+            && typeof window.ChampionsNamen.anzeige === 'function')
+            ? window.ChampionsNamen.anzeige(x, 'items') : String(x || '');
+        const moveRow = (m) => barRow(esc(zeigName(m.name)), m.pct);
         const natRow = (n) => barRow(esc(n.name), n.pct,
             (n.up && n.down) ? `${n.up}↑ ${n.down}↓` : '');
         return `${head}

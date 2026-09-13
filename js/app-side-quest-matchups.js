@@ -291,6 +291,12 @@
     // steht daneben — genauso wie im Pokédex-Subtab.
     function localName(en, kind) {
         if (!en) return '';
+        // Kein Pseudoname fuer einen Gegenstand, den die Quelle nicht
+        // benannt hat — die Regel steht in js/champions-namen.js.
+        if (window.ChampionsNamen && window.ChampionsNamen.istUnbenannt
+            && window.ChampionsNamen.istUnbenannt(en)) {
+            return window.ChampionsNamen.anzeige(en, kind);
+        }
         if (!de()) return en;
         const map = kind === 'nature' ? NATURE_DE : (_namesDe && _namesDe[kind]);
         const d = map && map[en];

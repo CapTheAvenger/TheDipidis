@@ -295,6 +295,45 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
         }
     });
 
+    it('der Platzhalter behauptet keinen Vorschlag, den es nicht gibt', () => {
+        /* GEFUNDEN AM 13.09.2026 BEIM HINSEHEN, nicht von einer
+           Zusicherung. Im Modal stand „Vorschlag liegt vor, Bestaetigung
+           steht aus" — waehrend fuer alle drei offenen Formen gar kein
+           Vorschlag existiert, weil pokebase.app keinen Wert fuehrt.
+           Alle Suiten waren gruen: keine Zusicherung hat je den Wortlaut
+           gegen die Datenlage gehalten. Diese tut es.
+
+           Die Regel ist nicht „dieser Satz ist verboten", sondern: ein
+           Text darf einen Vorschlag nur behaupten, wenn im Inventar auch
+           einer steht. Traegt spaeter wieder eine Luecke einen Vorschlag,
+           darf der Satz zurueck. */
+        const inventar = JSON.parse(lies('data/datenluecken.json'));
+        const offene = (inventar.luecken || [])
+            .filter(l => l.klasse === 'mega-faehigkeit');
+        const mitVorschlag = offene.filter(l => l.vorschlag);
+        const i = JS.indexOf('megaAbilityUnknown:');
+        assert.notEqual(i, -1, 'megaAbilityUnknown ist verschwunden');
+        const texte = [...JS.matchAll(/megaAbilityUnknown:\s*'((?:[^'\\]|\\.)*)'/g)]
+            .map(m => m[1]);
+        assert.equal(texte.length, 2, `${texte.length} statt 2 Sprachfassungen`);
+        if (!mitVorschlag.length) {
+            for (const txt of texte) {
+                assert.ok(!/Vorschlag|proposal/i.test(txt),
+                    'der Platzhalter spricht von einem Vorschlag, aber keine ' +
+                    'der offenen Mega-Luecken traegt einen: ' + txt);
+            }
+        }
+        /* Und die Gegenprobe in die andere Richtung: solange es offene
+           Luecken GIBT, muss der Text auf den Admin-Bereich zeigen —
+           sonst weiss der Leser nicht, wo das Fehlende benannt ist. */
+        if (offene.length) {
+            for (const txt of texte) {
+                assert.ok(/Admin-Bereich|admin area/i.test(txt),
+                    'der Platzhalter sagt nicht, wo die Luecke benannt ist: ' + txt);
+            }
+        }
+    });
+
     it('die Luecke wird nicht mehr als quellenlos beschrieben', () => {
         // Der alte Wortlaut ("keine oeffentliche Quelle fuehrt sie") war
         // eine Aussage ueber die Welt, und sie stimmt seit dem

@@ -1,0 +1,316 @@
+{
+  "_meta": {
+    "zweck": "Belegte Mega-Faehigkeiten fuer die 16 Champions-eigenen (M-B) Mega-Formen. Weder otterlyclueless/roster.json noch championsbattledata.com fuehren sie; scripts/build_champions_pokedex.py laesst die Zeile deshalb leer und benennt die Luecke. Diese Datei ist der Ort, an dem ein Wert MIT Quelle nachgetragen wird.",
+    "regel": "Kein Wert ohne Quelle und Lesedatum. Uebernommen wird nur, was 'uebernommen': true traegt. Alles andere ist ein Vorschlag und steht im Admin-Bereich zur Pruefung.",
+    "quelle": "https://pokebase.app/pokemon-champions/pokemon/<slug>",
+    "gelesen_am": "2026-08-31",
+    "seitenaufbau": "Eine pokebase-Pokemonseite hat ZWEI Faehigkeiten-Bloecke. (a) Der Kasten oben nennt die Faehigkeit DIESER Form, mit Beschreibung und ohne Prozentwert. (b) Weiter unten steht eine Nutzungsverteilung MIT Prozentwerten; sie gehoert zur Grundform und enthaelt auch die Mega-Nutzer. 'wert' unten stammt ausschliesslich aus (a), 'basisFaehigkeiten' aus (b) bzw. aus (a) der Grundform-Seite.",
+    "kalibrierung": {
+      "frage": "Ist Block (a) auf einer Mega-Seite wirklich die Mega-Faehigkeit — oder faellt er auf die Grundform zurueck?",
+      "pruefung": "Gegen 11 Mega-Formen geprueft, deren megaAbility championsbattledata.com unabhaengig fuehrt. Block (a) traf in 11 von 11 Faellen den bekannten Wert.",
+      "kontrollen": {
+        "Mega Manectric": "Intimidate",
+        "Mega Abomasnow": "Snow Warning",
+        "Mega Venusaur": "Thick Fat",
+        "Mega Excadrill": "Piercing Drill",
+        "Mega Medicham": "Pure Power",
+        "Mega Banette": "Prankster",
+        "Mega Audino": "Healer",
+        "Mega Chimecho": "Levitate",
+        "Mega Steelix": "Sand Force",
+        "Mega Gengar": "Shadow Tag",
+        "Mega Scizor": "Technician"
+      },
+      "haerte": "Bei Manectric, Medicham, Banette, Audino, Chimecho und Steelix ist die Mega-Faehigkeit ZUGLEICH eine Faehigkeit der Grundform. Block (a) lieferte trotzdem den richtigen Wert — ein blosser Rueckfall auf die Grundform ist damit ausgeschlossen.",
+      "zweitbeleg": "Unabhaengig davon stimmen Basiswerte und Typen aller 16 Formen bei pokebase mit unseren Daten ueberein (16/16, geprueft 31.08.2026)."
+    },
+    "einstufung": {
+      "eindeutig": "Der Wert taucht in der Faehigkeitenliste der Grundform NICHT auf. Er kann deshalb kein Rueckfall auf die Grundform sein und wird uebernommen.",
+      "mehrdeutig": "Der Wert taucht auch bei der Grundform auf. Nach der Kalibrierung oben ist er sehr wahrscheinlich richtig, aber der Einzelbeleg traegt ihn nicht allein — er wartet auf Bestaetigung im Admin-Bereich."
+    },
+    "bestaetigung": {
+      "von": "Betreiber",
+      "am": "2026-08-31",
+      "wortlaut": "Mega Metagross hat als Mega-Faehigkeit Krallenwucht und Mega Falinks hat Defiant — das ist alles korrekt.",
+      "wirkung": "Damit sind auch die zwoelf mehrdeutigen Vorschlaege bestaetigt. Sie stehen jetzt in den Daten und tragen 'bestaetigt': true. Die Einstufung 'mehrdeutig' bleibt stehen — sie beschreibt, was der Einzelbeleg hergibt, und das aendert sich durch die Bestaetigung nicht. Uebernommen wird ab jetzt, was ENTWEDER eindeutig belegt ODER vom Betreiber bestaetigt ist.",
+      "gegenprobe": "Krallenwucht ist in data/champions_names_de.json die deutsche Entsprechung von Tough Claws — die Bestaetigung deckt sich also mit dem, was pokebase fuer Mega Metagross fuehrt."
+    },
+    "ohne_beleg": {
+      "zweck": "Mega-Formen, die im Pokedex stehen und fuer die pokebase.app KEINE Faehigkeit fuehrt. Sie sind KEIN Datenausfall — sie hatten nie einen Wert. Die Unterscheidung ist der ganze Punkt: eine Form, die ihren Wert VERLIERT, ist ein Fehler und muss rot werden.",
+      "warum_hier": "Bis zum 13.09.2026 wurde 'neu' daran erkannt, ob die Nutzungsdatei die GRUNDFORM schon kennt. Diese Kruecke lief am 13.09. ab: der naechtliche Lauf schrieb baxcalibur, golisopod und salamence in die Nutzungsdaten, die drei Mega-Formen galten damit nicht mehr als neu — und vier Zusicherungen meldeten 'Faehigkeit verloren' fuer Werte, die es nie gab. Eine Zeitkruecke ist kein Beleg; hier steht stattdessen eine benannte Liste mit Datum.",
+      "regel": "Waechst diese Liste, hat niemand die neue Form nachgeschlagen. Schrumpft sie, ist ein Beleg aufgetaucht — dann gehoert der Wert nach 'eintraege' und die Zeile hier weg. Beide Richtungen sind rot.",
+      "formen": {
+        "Mega Baxcalibur": {
+          "seit": "2026-09-12",
+          "grund": "Am 12.09.2026 um 05:12 UTC vom Wochenlauf aus champions_roster_extra.json in den Pokedex geschrieben. pokebase.app fuehrt die Form, nennt aber keine Mega-Faehigkeit; otterlyclueless/roster.json kennt sie gar nicht. Nachgesehen am 13.09.2026."
+        },
+        "Mega Golisopod": {
+          "seit": "2026-09-12",
+          "grund": "Wie Mega Baxcalibur: selber Lauf, selbe Quellenlage. Nachgesehen am 13.09.2026."
+        },
+        "Mega Salamence": {
+          "seit": "2026-09-12",
+          "grund": "Wie Mega Baxcalibur: selber Lauf, selbe Quellenlage. Nachgesehen am 13.09.2026."
+        }
+      }
+    }
+  },
+  "eintraege": {
+    "Mega Eelektross": {
+      "wert": "Eelevate",
+      "slug": "eelektross-mega",
+      "grundform": "Eelektross",
+      "basisFaehigkeiten": [
+        "Levitate"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Eelevate ist keine Fähigkeit von Eelektross und existiert außerhalb von Pokémon Champions nicht."
+    },
+    "Mega Pyroar": {
+      "wert": "Fire Mane",
+      "slug": "pyroar-mega",
+      "grundform": "Pyroar",
+      "basisFaehigkeiten": [
+        "Rivalry",
+        "Unnerve",
+        "Moxie"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Fire Mane ist keine Fähigkeit von Pyroar und existiert außerhalb von Pokémon Champions nicht."
+    },
+    "Mega Scolipede": {
+      "wert": "Shell Armor",
+      "slug": "scolipede-mega",
+      "grundform": "Scolipede",
+      "basisFaehigkeiten": [
+        "Poison Point",
+        "Swarm",
+        "Speed Boost"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Shell Armor steht in keiner Fähigkeitenliste von Scolipede."
+    },
+    "Mega Mawile": {
+      "wert": "Huge Power",
+      "slug": "mawile-mega",
+      "grundform": "Mawile",
+      "basisFaehigkeiten": [
+        "Hyper Cutter",
+        "Intimidate",
+        "Sheer Force"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Huge Power steht in keiner Fähigkeitenliste von Mawile."
+    },
+    "Mega Metagross": {
+      "wert": "Tough Claws",
+      "slug": "metagross-mega",
+      "grundform": "Metagross",
+      "basisFaehigkeiten": [
+        "Clear Body",
+        "Tough Claws",
+        "Light Metal"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Tough Claws steht auch bei Metagross — dort allerdings mit rund 3 %, was zu den Mega-Nutzern passt.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Swampert": {
+      "wert": "Swift Swim",
+      "slug": "swampert-mega",
+      "grundform": "Swampert",
+      "basisFaehigkeiten": [
+        "Torrent",
+        "Damp",
+        "Swift Swim"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Swift Swim steht auch bei Swampert — dort mit rund 3 %.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Blaziken": {
+      "wert": "Speed Boost",
+      "slug": "blaziken-mega",
+      "grundform": "Blaziken",
+      "basisFaehigkeiten": [
+        "Speed Boost",
+        "Blaze",
+        "Multiscale"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Speed Boost ist auch eine Fähigkeit von Blaziken.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Sceptile": {
+      "wert": "Lightning Rod",
+      "slug": "sceptile-mega",
+      "grundform": "Sceptile",
+      "basisFaehigkeiten": [
+        "Overgrow",
+        "Unburden",
+        "Lightning Rod"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Lightning Rod steht auch bei Sceptile — dort mit rund 4 %.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Barbaracle": {
+      "wert": "Tough Claws",
+      "slug": "barbaracle-mega",
+      "grundform": "Barbaracle",
+      "basisFaehigkeiten": [
+        "Tough Claws",
+        "Sniper",
+        "Pickpocket"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Tough Claws ist eine reguläre Fähigkeit von Barbaracle.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Dragalge": {
+      "wert": "Regenerator",
+      "slug": "dragalge-mega",
+      "grundform": "Dragalge",
+      "basisFaehigkeiten": [
+        "Adaptability",
+        "Poison Point",
+        "Poison Touch",
+        "Regenerator"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Regenerator steht auch bei Dragalge — dort mit rund 2 %.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Scrafty": {
+      "wert": "Intimidate",
+      "slug": "scrafty-mega",
+      "grundform": "Scrafty",
+      "basisFaehigkeiten": [
+        "Shed Skin",
+        "Moxie",
+        "Intimidate"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Intimidate ist auch eine Fähigkeit von Scrafty.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Raichu X": {
+      "wert": "Electric Surge",
+      "slug": "raichu-mega-x",
+      "grundform": "Raichu",
+      "basisFaehigkeiten": [
+        "Lightning Rod",
+        "Static",
+        "No Guard",
+        "Electric Surge"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Electric Surge taucht in der Nutzungsliste von Raichu auf (unter 1 %) — das sind sehr wahrscheinlich die Mega-X-Nutzer selbst, aber die Liste allein trennt das nicht.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Raichu Y": {
+      "wert": "No Guard",
+      "slug": "raichu-mega-y",
+      "grundform": "Raichu",
+      "basisFaehigkeiten": [
+        "Lightning Rod",
+        "Static",
+        "No Guard",
+        "Electric Surge"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "No Guard taucht in der Nutzungsliste von Raichu auf (rund 2 %) — sehr wahrscheinlich die Mega-Y-Nutzer selbst, aber die Liste allein trennt das nicht.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Staraptor": {
+      "wert": "Contrary",
+      "slug": "staraptor-mega",
+      "grundform": "Staraptor",
+      "basisFaehigkeiten": [
+        "Intimidate",
+        "Reckless",
+        "Contrary"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Contrary taucht in der Nutzungsliste von Staraptor auf (rund 2 %).",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Malamar": {
+      "wert": "Contrary",
+      "slug": "malamar-mega",
+      "grundform": "Malamar",
+      "basisFaehigkeiten": [
+        "Contrary",
+        "Suction Cups",
+        "Infiltrator"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Contrary ist die Standardfähigkeit von Malamar.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    },
+    "Mega Falinks": {
+      "wert": "Defiant",
+      "slug": "falinks-mega",
+      "grundform": "Falinks",
+      "basisFaehigkeiten": [
+        "Battle Armor",
+        "Defiant"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": true,
+      "begruendung": "Defiant ist die meistgenutzte Fähigkeit von Falinks.",
+      "bestaetigt": {
+        "von": "Betreiber",
+        "am": "2026-08-31"
+      }
+    }
+  }
+}

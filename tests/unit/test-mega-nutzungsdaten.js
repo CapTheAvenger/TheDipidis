@@ -66,6 +66,28 @@ const grundformSlug = (e) => String((e.meta && e.meta.slug) || '')
 const istNeu = (e) => !SLUGS[grundformSlug(e)];
 const NEUE = MEGAS.filter(istNeu).map(e => e.en);
 
+/* ── „NIE GEHABT IST NICHT VERLOREN" (13.09.2026) ───────────────────
+ *
+ * NEUE oben beantwortet eine Frage ueber NUTZUNGSZAHLEN und beantwortet
+ * sie richtig: kennt die Nutzungsdatei die Grundform nicht, gibt es fuer
+ * die Mega-Form noch keine Zahlen.
+ *
+ * Fuer die FAEHIGKEITEN war dieselbe Kruecke falsch, und am 13.09.2026
+ * ist sie abgelaufen: der naechtliche Lauf schrieb baxcalibur, golisopod
+ * und salamence in die Nutzungsdaten. Die drei Mega-Formen galten damit
+ * nicht mehr als neu — und zwei Zusicherungen meldeten „Faehigkeit
+ * verloren" fuer Werte, die es nie gegeben hat. Vier Stunden roter
+ * Deploy, ohne dass etwas kaputt war.
+ *
+ * Eine Faehigkeit entsteht nicht mit der Zeit, sondern mit einem Beleg.
+ * Deshalb steht die Liste jetzt benannt und datiert in den Daten selbst
+ * (data/champions_mega_faehigkeiten.json, _meta.ohne_beleg) und wird von
+ * tests/python/test_datenluecken.py in beide Richtungen gegen den
+ * gemessenen Stand gehalten. */
+const FAEHIGKEITSQUELLEN = JSON.parse(lies('data/champions_mega_faehigkeiten.json'));
+const OHNE_BELEG = Object.keys(
+    ((FAEHIGKEITSQUELLEN._meta || {}).ohne_beleg || {}).formen || {});
+
 describe('Mega-Formen erben die Zahlen der Grundform — mit Beleg', () => {
     it('fast jede Mega-Form hat jetzt Nutzungsdaten', () => {
         assert.ok(MEGAS.length >= 60, `nur ${MEGAS.length} Mega-Formen gefunden`);
@@ -217,10 +239,18 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
            Faehigkeit braucht es eine Quelle, und die entsteht nicht in
            derselben Nacht. Jede andere ist der alte Befund. */
         const fehlt = (POKEDEX._meta.megaAbilityMissing || [])
-            .filter(n => NEUE.indexOf(n) < 0);
+            .filter(n => OHNE_BELEG.indexOf(n) < 0);
         assert.deepEqual(fehlt, [],
             'eine Mega-Form steht wieder ohne belegte Faehigkeit da — ' +
-            'nachsehen, warum, und die Begruendung im Bauer nachziehen');
+            'nachsehen, warum, und sie MIT Datum in _meta.ohne_beleg von ' +
+            'data/champions_mega_faehigkeiten.json eintragen');
+        /* Gegenrichtung: eine benannte Form, die laengst einen Wert hat,
+           darf nicht als Ausnahme stehenbleiben. */
+        const ueberfluessig = OHNE_BELEG
+            .filter(n => (POKEDEX._meta.megaAbilityMissing || []).indexOf(n) < 0);
+        assert.deepEqual(ueberfluessig, [],
+            'diese Formen stehen in _meta.ohne_beleg, fuehren aber eine ' +
+            'Faehigkeit — Zeile dort loeschen: ' + ueberfluessig);
         assert.equal((POKEDEX._meta.megaAbilityBelegt || []).length, 16,
             'die Zahl der nachtraeglich belegten hat sich geaendert');
     });
@@ -247,14 +277,22 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
 
     it('jede Mega-Form fuehrt jetzt eine Faehigkeit', () => {
         const ohne = MEGAS.filter(e => !(e.megaAbility || '').trim())
-            .map(e => e.en).filter(n => NEUE.indexOf(n) < 0);
+            .map(e => e.en).filter(n => OHNE_BELEG.indexOf(n) < 0);
         assert.deepEqual(ohne, [],
             'ohne Faehigkeit steht in der Oberflaeche wieder ein Platzhalter: ' + ohne);
-        /* Und die Neuen bleiben sichtbar, statt stillschweigend
+        /* Und die benannten bleiben sichtbar, statt stillschweigend
            durchzurutschen: waechst ihre Zahl ueber eine Handvoll, ist
-           das kein neues Set mehr, sondern ein Fehler im Bau. */
-        assert.ok(NEUE.length <= 5,
-            `${NEUE.length} Mega-Formen sind neu und ohne Daten (${NEUE.join(', ')})`);
+           das keine Ausnahme mehr, sondern ein Fehler im Bau. */
+        assert.ok(OHNE_BELEG.length <= 5,
+            `${OHNE_BELEG.length} Mega-Formen ohne Beleg (${OHNE_BELEG.join(', ')})`);
+        /* Jede benannte Form traegt Datum und Begruendung — eine
+           Ausnahmeliste ohne Grund ist eine stille Genehmigung. */
+        const formen = ((FAEHIGKEITSQUELLEN._meta || {}).ohne_beleg || {}).formen || {};
+        for (const [name, e] of Object.entries(formen)) {
+            assert.ok((e.seit || '').trim(), `${name}: kein Datum`);
+            assert.ok((e.grund || '').length > 60,
+                `${name}: Begruendung zu duenn — sie muss sagen, WO nachgesehen wurde`);
+        }
     });
 
     it('die Luecke wird nicht mehr als quellenlos beschrieben', () => {

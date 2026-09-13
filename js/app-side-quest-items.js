@@ -166,7 +166,16 @@
         return map;
     }
 
+    // Die Quelle liefert seit dem 13.09.2026 fuer einen Teil der
+    // gehaltenen Gegenstaende keinen Namen, sondern "Unknown Item 542".
+    // Ein Pseudoname liest sich wie eine Angabe und ist keine — die Regel
+    // dafuer steht EINMAL in js/champions-namen.js, damit die fuenf
+    // Anzeigeflaechen nicht fuenf Wahrheiten fuehren.
     function deName(en) {
+        if (window.ChampionsNamen && window.ChampionsNamen.istUnbenannt
+            && window.ChampionsNamen.istUnbenannt(en)) {
+            return window.ChampionsNamen.anzeige(en, 'items');
+        }
         const e = _res && _res.get(en);
         return (uiLang() === 'de' && e && e.de) ? e.de : en;
     }

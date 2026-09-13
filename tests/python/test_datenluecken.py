@@ -235,8 +235,13 @@ def test_die_liste_ohne_beleg_ist_gepflegt(quellen, pokedex):
         assert len(e.get("grund") or "") > 60, (
             f"{name}: Begruendung zu duenn — sie muss sagen, WO nachgesehen wurde"
         )
-        assert name not in quellen["eintraege"], (
-            f"{name} steht in beiden Listen — entweder belegt oder offen, nicht beides"
+        # PRAEZISIERT 13.09.2026: ein VORSCHLAG neben der Nennung ist kein
+        # Widerspruch, sondern der Normalfall — genau dafuer gibt es den
+        # Admin-Bereich. Der Widerspruch ist "uebernommen UND offen".
+        q = quellen["eintraege"].get(name) or {}
+        assert not q.get("uebernommen"), (
+            f"{name} ist uebernommen und steht trotzdem in _meta.ohne_beleg — "
+            "entweder belegt oder offen, nicht beides"
         )
 
 
@@ -255,8 +260,19 @@ def test_alle_sechzehn_megas_sind_belegt(quellen, pokedex):
     assert len(quellen["eintraege"]) >= 16, (
         f'nur noch {len(quellen["eintraege"])} Belege statt mindestens 16 — '
         'ein Beleg ist verschwunden, das ist der Fehlerfall')
-    offen = [n for n, e in quellen["eintraege"].items() if not e.get("uebernommen")]
-    assert offen == [], "wieder ohne Beleg: " + ", ".join(offen)
+    # NACHGEZOGEN 13.09.2026. Hier stand `offen == []` — richtig, solange
+    # jeder Eintrag auch uebernommen war. Seit Mega Baxcalibur einen
+    # VORSCHLAG traegt, der bewusst nicht uebernommen ist, ist die leere
+    # Menge die falsche Erwartung. Die Zusicherung prueft jetzt das, was
+    # sie immer schon meinte: kein Eintrag verliert seine Uebernahme,
+    # ohne dass die Form zugleich in _meta.ohne_beleg benannt ist.
+    benannt_roh = set(_ohne_beleg(quellen))
+    offen = [n for n, e in quellen["eintraege"].items()
+             if not e.get("uebernommen") and n not in benannt_roh]
+    assert offen == [], (
+        "wieder ohne Beleg, ohne in _meta.ohne_beleg benannt zu sein: "
+        + ", ".join(offen)
+    )
     benannt = set(_ohne_beleg(quellen))
     fehlt = [n for n in pokedex["_meta"]["megaAbilityMissing"] if n not in benannt]
     assert fehlt == [], (
@@ -328,14 +344,26 @@ def test_jede_offene_mega_luecke_traegt_ihren_vorschlag(inventar, quellen):
         if l["klasse"] != "mega-faehigkeit":
             continue
         if l["id"].split("/", 1)[1] in neu:
-            # Eine Form, die es seit heute Nacht gibt, hat noch keinen
-            # Vorschlag — pokebase.app fuehrt sie schlicht noch nicht.
-            # Der Eintrag steht trotzdem im Inventar, damit die Luecke
-            # benannt ist und nicht schweigend verschwindet.
-            assert l.get("vorschlag") is None, (
-                f"{l['id']}: neu im Pokedex, traegt aber schon einen Vorschlag "
-                "— dann ist sie nicht neu und gehoert in die Pruefung darunter"
-            )
+            # KORRIGIERT 13.09.2026: hier stand, eine benannte Form duerfe
+            # KEINEN Vorschlag tragen. Das war am 12.09. wahr (fuer die drei
+            # gab es keinen) und als Regel falsch — ein Vorschlag neben der
+            # Nennung ist genau der Zustand, fuer den der Admin-Bereich
+            # gebaut ist: der Wert liegt vor, der Einzelbeleg traegt ihn
+            # nicht, ein Mensch entscheidet.
+            #
+            # Was hier wirklich zaehlt: traegt sie einen Vorschlag, muss der
+            # vollstaendig sein — und er darf nicht "eindeutig" heissen,
+            # denn eindeutig UND nicht uebernommen waere ein Widerspruch.
+            v = l.get("vorschlag")
+            if v:
+                for feld in ("wert", "quelle", "einstufung"):
+                    assert (str(v.get(feld) or "")).strip(), (
+                        f"{l['id']}: Vorschlag ohne {feld}"
+                    )
+                assert v["einstufung"] != "eindeutig", (
+                    f"{l['id']}: eindeutiger Vorschlag, aber nicht uebernommen "
+                    "— dann fehlt der Grund, warum nicht"
+                )
             continue
         v = l.get("vorschlag")
         assert v, f"{l['id']}: kein Vorschlag — dann fehlt der Admin-Bereich der Sinn"

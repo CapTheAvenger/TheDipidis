@@ -42,15 +42,7 @@
       "formen": {
         "Mega Baxcalibur": {
           "seit": "2026-09-12",
-          "grund": "Am 12.09.2026 um 05:12 UTC vom Wochenlauf aus champions_roster_extra.json in den Pokedex geschrieben. pokebase.app fuehrt die Form, nennt aber keine Mega-Faehigkeit; otterlyclueless/roster.json kennt sie gar nicht. Nachgesehen am 13.09.2026."
-        },
-        "Mega Golisopod": {
-          "seit": "2026-09-12",
-          "grund": "Wie Mega Baxcalibur: selber Lauf, selbe Quellenlage. Nachgesehen am 13.09.2026."
-        },
-        "Mega Salamence": {
-          "seit": "2026-09-12",
-          "grund": "Wie Mega Baxcalibur: selber Lauf, selbe Quellenlage. Nachgesehen am 13.09.2026."
+          "grund": "Am 12.09.2026 vom Wochenlauf in den Pokédex geschrieben. pokebase.app nennt Thermal Exchange (Bildschirmfoto des Betreibers, 13.09.2026), aber der Wert ist zugleich Baxcaliburs eigene Fähigkeit mit 97,2 % Anteil — der Einzelbeleg trägt ihn deshalb nicht allein. Er steht als Vorschlag im Admin-Bereich und wartet auf Bestätigung."
         }
       }
     }
@@ -311,6 +303,41 @@
         "von": "Betreiber",
         "am": "2026-08-31"
       }
+    },
+    "Mega Golisopod": {
+      "wert": "Tough Claws",
+      "slug": "golisopod-mega",
+      "grundform": "Golisopod",
+      "basisFaehigkeiten": [
+        "Emergency Exit"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Tough Claws kommt bei Golisopod nicht vor. Die Nutzungsverteilung der Grundform in data/champions_usage.json führt ausschließlich Emergency Exit (100 % in Doppel- UND Einzelkämpfen), also kann der Wert kein Rückfall auf die Grundform sein. Beleg: pokebase.app-Seite Mega Golisopod (#768), vom Betreiber am 13.09.2026 als Bildschirmfoto geliefert."
+    },
+    "Mega Salamence": {
+      "wert": "Aerilate",
+      "slug": "salamence-mega",
+      "grundform": "Salamence",
+      "basisFaehigkeiten": [
+        "Intimidate",
+        "Moxie"
+      ],
+      "einstufung": "eindeutig",
+      "uebernommen": true,
+      "begruendung": "Aerilate kommt bei Salamence nicht vor — die Nutzungsverteilung der Grundform führt Intimidate (98,9 %) und Moxie (1,1 %). Zweitbeleg außerhalb von Champions: Mega-Brutalanda trägt Aerilate auch in den Hauptreihenspielen. Beleg: pokebase.app-Seite Mega Salamence (#373), vom Betreiber am 13.09.2026 als Bildschirmfoto geliefert."
+    },
+    "Mega Baxcalibur": {
+      "wert": "Thermal Exchange",
+      "slug": "baxcalibur-mega",
+      "grundform": "Baxcalibur",
+      "basisFaehigkeiten": [
+        "Thermal Exchange",
+        "Ice Body"
+      ],
+      "einstufung": "mehrdeutig",
+      "uebernommen": false,
+      "begruendung": "Thermal Exchange steht auch bei Baxcalibur selbst — und anders als bei Mega Metagross NICHT mit einem kleinen Anteil, der zu den Mega-Nutzern passen würde, sondern mit 97,2 % (Doppelkämpfe) bzw. 98,2 % (Einzelkämpfe). Der Prozentwert im Bildschirmfoto (rund 97 %) deckt sich damit fast exakt; genau das lässt offen, ob die Seite die Fähigkeit DIESER Form zeigt oder die Verteilung der Grundform. Zweiter Grund gegen die sofortige Übernahme: data/champions_names_de.json kennt für Thermal Exchange keinen deutschen Namen — übernommen stünde im Modal ein englischer Begriff. Beleg: pokebase.app-Seite Mega Baxcalibur (#998), vom Betreiber am 13.09.2026 als Bildschirmfoto geliefert."
     }
   }
 }

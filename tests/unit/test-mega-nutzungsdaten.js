@@ -251,8 +251,16 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
         assert.deepEqual(ueberfluessig, [],
             'diese Formen stehen in _meta.ohne_beleg, fuehren aber eine ' +
             'Faehigkeit — Zeile dort loeschen: ' + ueberfluessig);
-        assert.equal((POKEDEX._meta.megaAbilityBelegt || []).length, 16,
-            'die Zahl der nachtraeglich belegten hat sich geaendert');
+        /* RICHTUNG, NICHT PUNKT (13.09.2026). Hier stand `=== 16`. Der
+           Betreiber hat am 13.09. die Bildschirmfotos der pokebase-Seiten
+           von Mega Golisopod und Mega Salamence geliefert; beide Werte
+           sind eindeutig belegt und damit uebernommen — die Liste ist auf
+           18 gewachsen. Ein Beleg, der DAZUkommt, ist kein Fehler; einer,
+           der verschwindet, schon. Die Python-Seite prueft dasselbe
+           (tests/python/test_datenluecken.py, `>= 16`). */
+        assert.ok((POKEDEX._meta.megaAbilityBelegt || []).length >= 16,
+            `nur noch ${(POKEDEX._meta.megaAbilityBelegt || []).length} belegte `
+            + 'Mega-Faehigkeiten statt mindestens 16 — eine ist verschwunden');
     });
 
     it('jeder nachgetragene Wert traegt, woher er kommt', () => {

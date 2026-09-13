@@ -83,6 +83,29 @@ ERWARTETE_KANTE = 128   # alle CMP-Icons sind 128x128
 # ein falsches Kuerzel liefert ein Bild, das laedt und trotzdem das
 # falsche Pokémon zeigt — der teuerste Fehler, den diese Datei machen
 # kann.
+# AUSGESCHIEDEN — Formen, die der Kader NICHT MEHR fuehrt
+# ---------------------------------------------------------------------
+# Ein Verlust ist ein Befund, kein Aufraeumen. Wer eine Zeile aus
+# FORM_UEBERSTEUERUNG einfach loescht, weil sie ins Leere zeigt,
+# vernichtet die nachgeschlagene Quelle — und beim naechsten Auftauchen
+# der Form schlaegt sie jemand erneut nach.
+#
+# Deshalb wandert der Schluessel hierher, mit Datum und Beleg. Die
+# Pruefung in tests/python/test_champions_sprites.py haelt das in BEIDE
+# Richtungen: ein Name hier darf nicht im Pokedex stehen, und ein
+# verwaister Name in FORM_UEBERSTEUERUNG muss hier stehen.
+AUSGESCHIEDEN = {
+    # 13.09.2026: scrape_champions_roster.py hat zweimal hintereinander
+    # (04:06 UTC und 08:54 UTC, beide mit Status OK) denselben Stand von
+    # pokebase.app gelesen — 111 Schluessel, darunter NICHT mehr
+    # Rotom-Heat, Annihilape und Vileplume. Der Pokedex ging dadurch von
+    # 299 auf 296. Kein Scraper-Aussetzer, sondern ein Kaderwechsel der
+    # Quelle.
+    "Rotom (Heat)": ("479a", "raus am 13.09.2026, pokebase.app fuehrt die "
+                             "Form nicht mehr; Schluessel belegt ueber "
+                             "pokewiki.de/Rotom/Sprites_und_3D-Modelle"),
+}
+
 FORM_UEBERSTEUERUNG = {
     # pokewiki.de/Liste_der_Pokémon_in_Pokémon_Champions nennt die drei
     # Varianten namentlich; die Farben der Icons bestaetigen es
@@ -91,7 +114,6 @@ FORM_UEBERSTEUERUNG = {
     "Paldean Tauros (Blaze Breed)":  "128b",   # Flammenvariante
     "Paldean Tauros (Aqua Breed)":   "128c",   # Flutenvariante
     # pokewiki.de/Rotom/Sprites_und_3D-Modelle
-    "Rotom (Heat)": "479a",                    # Hitze-Rotom
     "Rotom (Wash)": "479b",                    # Wasch-Rotom
     # pokewiki.de/Wolwerock/Sprites_und_3D-Modelle:
     # 745 Tagform, 745a Nachtform, 745b Zwielichtform

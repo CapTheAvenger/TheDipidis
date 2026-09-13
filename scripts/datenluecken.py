@@ -23,6 +23,7 @@ Luecken-Dicts zurueckgibt, und sie unten in PRUEFUNGEN eintragen.
 """
 import json
 import os
+import re
 from datetime import datetime, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -251,8 +252,61 @@ def fehlende_bereiche():
             if not os.path.exists(os.path.join(DATA, b.get("datei") or ""))]
 
 
+# ── Pruefung 5: Gegenstaende, die die Quelle nur als Nummer liefert ─
+#
+# BEFUND 13.09.2026: championsbattledata.com hat aufgehoert, fuer einen
+# Teil der gehaltenen Gegenstaende Namen zu liefern, und schreibt
+# stattdessen "Unknown Item 542". Gemessen im Stand vom 13.09.: 20
+# verschiedene Nummern, 158 betroffene Eintraege; im Stand vom 12.09.
+# war es keine einzige.
+#
+# GEPRUEFT UND VERWORFEN: die Nummern sind KEINE PokeAPI-Item-IDs. Die
+# Gegenprobe gegen data/v2/csv/item_names.csv ergibt Poke-Floete,
+# Festivalticket, EP-Teiler und Rosenrauchwerk — Gegenstaende, die in
+# einem Wettkampfformat niemand haelt. Eine Zuordnung waere also
+# geraten, und geraten wird hier nichts (CLAUDE.md: "Report, don't
+# silently repair").
+#
+# Deshalb steht der Befund hier: eine Luecke je Nummer waere Rauschen,
+# also EIN Eintrag fuer den Ausfall, mit den Nummern im Text.
+UNBENANNT = re.compile(r"^Unknown Item \d+$")
+
+
+def gegenstandsnamen():
+    try:
+        usage = _lies("champions_usage.json")
+    except FileNotFoundError:
+        return []
+    pk = usage.get("pokemon") or usage
+    nummern, treffer = set(), 0
+    for _slug, rec in pk.items():
+        for _fmt, blk in rec.items():
+            if not isinstance(blk, dict):
+                continue
+            for it in (blk.get("held_item") or []):
+                n = (it.get("name") or "").strip()
+                if UNBENANNT.match(n):
+                    nummern.add(n)
+                    treffer += 1
+    if not nummern:
+        return []
+    liste = ", ".join(sorted(nummern, key=lambda x: int(x.rsplit(" ", 1)[1]))[:8])
+    mehr = " …" if len(nummern) > 8 else ""
+    return [{
+        "id": "gegenstandsname/quelle-liefert-nummern",
+        "klasse": "gegenstandsname",
+        "titel": f"{len(nummern)} Gegenstände kommen nur als Nummer "
+                 f"({treffer} Einträge): {liste}{mehr}",
+        "titelEn": f"{len(nummern)} held items arrive as a bare number "
+                   f"({treffer} entries): {liste}{mehr}",
+        "wo": "data/champions_usage.json → pokemon[*][*].held_item[].name",
+        "ansicht": "side-quest",
+        "vorschlag": None,
+    }]
+
+
 PRUEFUNGEN = [mega_faehigkeiten, nutzungsdaten, namenskonflikte,
-              fehlende_bereiche]
+              fehlende_bereiche, gegenstandsnamen]
 
 KLASSEN = {
     "mega-faehigkeit": {
@@ -270,6 +324,10 @@ KLASSEN = {
     "fehlender-bereich": {
         "de": "Bereich fehlt ganz",
         "en": "Whole area missing",
+    },
+    "gegenstandsname": {
+        "de": "Gegenstand ohne Namen",
+        "en": "Held item without a name",
     },
 }
 

@@ -126,7 +126,7 @@
   ]
  },
  "champions_teams": 120,
- "champions_ueber_grenze": 7,
+ "champions_ueber_grenze": 39,
  "empty_files": {
   "city_league_analysis.csv": true,
   "city_league_archetypes.csv": true,
@@ -138,22 +138,22 @@
   "cardmarket_card_images.csv": 1295,
   "cardmarket_id_mapping.csv": 17386,
   "cardmarket_mapping_verified.csv": 6342,
-  "champions_editionen.json": 24257,
+  "champions_editionen.json": 24028,
   "champions_resources.json": 0,
   "champions_type_chart.json": 183,
-  "cm_expansions.csv": 774,
+  "cm_expansions.csv": 779,
   "japanese_cards_database.csv": 973,
-  "online_api_archetypes.csv": 17980,
-  "online_api_cards_TEF-PBL.csv": 274897,
-  "online_api_matchups_TEF-PBL.csv": 84463,
-  "online_api_tournaments.csv": 410,
+  "online_api_archetypes.csv": 18134,
+  "online_api_cards_TEF-PBL.csv": 280190,
+  "online_api_matchups_TEF-PBL.csv": 86352,
+  "online_api_tournaments.csv": 413,
   "opgg_champions_moves.json": 2336,
   "pokemon_go_liste.json": 981,
   "pokemon_go_shiny.json": 993,
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-09-12 09:34 UTC",
+ "generated": "2026-09-13 10:02 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -164,7 +164,7 @@
   "SVP": 228
  },
  "price_integrity": {
-  "duplicate_idproducts": 90,
+  "duplicate_idproducts": 89,
   "match_methods": {
    "live-verified": 5026,
    "manual-pin": 78,

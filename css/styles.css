@@ -8111,7 +8111,26 @@ details[open] > .tier-trending-summary::after {
 /* Help button: keeps the original Prof. Oak avatar (the user prefers
    it over a generic "?" — fits the Pokémon brand language). Hover/
    focus states added in Round-3 are kept since they help the icon
-   read as interactive rather than purely decorative. */
+   read as interactive rather than purely decorative.
+
+   BEFUND 13.09.2026, vom Betreiber gemeldet ("hat eine komische
+   Farbe"). Gemessen, nicht geraten: images/professor_oak_icon.png war
+   259 x 194 px, also 4:3, und OHNE Alphakanal — der Bildhintergrund
+   war deckendes Weiss. Der Knopf ist 32 x 32 und rund.
+
+   Daraus wurden drei Fehler auf einmal:
+     * `contain` passte 4:3 in 1:1 ein -> das Bild sass als 32 x 24
+       mittig, oben und unten blieben je 4 px Flaechenfarbe stehen;
+     * der weisse Bildhintergrund stand als HELLER BLOCK im dunklen
+       Kreis — im dunklen Thema ist --surface-1 rgb(17,23,48);
+     * bei 32 px war vom Gesicht nichts mehr zu erkennen, uebrig blieb
+       die gruenliche Haarfarbe auf Weiss. Genau das hat er gesehen.
+
+   Das Bild ist jetzt 128 x 128, quadratisch, auf den Kopf
+   zugeschnitten und freigestellt. Freigestellt wurde per Flutfuellung
+   VOM RAND her, nicht per "alles Weisse raus" — sonst waeren Loecher
+   in den Laborkittel gerissen worden, der ebenfalls weiss ist.
+   Geprueft in tests/unit/test-hilfe-knopf.js. */
 .tab-help-btn {
     border: none;
     background-color: var(--surface-1);
@@ -8130,6 +8149,15 @@ details[open] > .tier-trending-summary::after {
     vertical-align: middle;
     position: relative;
     overflow: visible;
+    /* RIEGEL GEGEN DAS EI (13.09.2026). Gemessen bei 760 px: 28 breit,
+       44 hoch — ein Oval mit border-radius: 50 %. Grund: die
+       Tippziel-Sammelregeln setzen `min-height: 44px` schon ab 768 px,
+       `min-width: 44px` aber erst ab 480 px. Zwischen 481 und 768 px
+       klafft die Luecke. `aspect-ratio` haelt den Knopf rund, egal
+       welche Sammelregel als naechstes an einer der beiden Achsen
+       zieht — eine Grenze mehr zu verschieben haette den naechsten
+       Fall nur verlagert. */
+    aspect-ratio: 1 / 1;
 }
 .tab-help-btn:hover {
     transform: scale(1.1);
@@ -8285,6 +8313,9 @@ details[open] > .tier-trending-summary::after {
     .tab-help-btn {
         width: 28px;
         height: 28px;
+        /* Dieselbe Grenze wie min-height, damit der Knopf quadratisch
+           bleibt statt oval zu werden — siehe den Riegel oben. */
+        min-width: 44px;
     }
 
     #toast-container {

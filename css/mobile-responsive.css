@@ -690,10 +690,12 @@
         min-width: 64px !important;
     }
     #matchupHeatmapContainer .heatmap-table { min-width: 0 !important; }
-    #matchupHeatmapContainer .heatmap-table-scroll {
-        /* Damit sichtbar ist, dass es seitwaerts weitergeht. */
-        scrollbar-width: thin;
-    }
+    /* `scrollbar-width: thin` stand hier und galt damit nur unter
+       768 px. Seit dem 13.09.2026 steht es ohne Medienabfrage in
+       css/current-meta-matchups.css — die Tabelle passt bei KEINER
+       Breite, also gehoert der Hinweis auch an keine Breite gebunden.
+       Die Zeile hier ist deshalb weg; `.heatmap-table { min-width: 0 }`
+       darueber bleibt, das ist wirklich eine Handy-Regel. */
 }
 
 /* === MARGIN & PADDING SCALE === */

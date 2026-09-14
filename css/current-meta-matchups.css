@@ -153,6 +153,63 @@
         linear-gradient(to left,  var(--surface-1) 30%, transparent) right center / 24px 100% no-repeat local,
         radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.20), transparent) left center / 12px 100% no-repeat scroll,
         radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.20), transparent) right center / 12px 100% no-repeat scroll;
+
+    /* DER PLATZMANGEL KENNT KEINE 768 PX (13.09.2026).
+     *
+     * Der Betreiber hat den Browser auf dem Bildschirm halbiert und
+     * gemeldet, die Heatmap sehe komisch aus. Gemessen wurde daraufhin,
+     * WIE VIEL jeweils versteckt ist:
+     *
+     *     1600 px Fenster ->   27 px versteckt
+     *     1400 px         ->   99 px
+     *     1100 px         ->  399 px
+     *      900 px         ->  599 px   (42 % der Tabelle)
+     *
+     * Die Tabelle ist mit `calc(170px + Spalten * 126px)` fest gebaut
+     * und passt deshalb bei KEINER Breite ganz. Das seitliche Scrollen
+     * ist also kein Sonderfall fuers Handy, sondern der Normalfall.
+     *
+     * Die Vorkehrungen dafuer standen trotzdem in
+     * `@media (max-width: 768px)`: `scrollbar-width: thin` und
+     * `.heatmap-table { min-width: 0 }`. Dazwischen — zwischen 769 px
+     * und der Breite, bei der die Tabelle passen wuerde — lag ein Band
+     * von ueber 600 px, in dem sie nicht passt und nichts es sagt.
+     * Chromium blendet die Overlay-Leiste aus, solange nicht gescrollt
+     * wird (gemessen: `offsetHeight - clientHeight` = 0 bei JEDER
+     * Breite), und die halb abgeschnittene Spalte am rechten Rand liest
+     * sich wie ein Darstellungsfehler, nicht wie "hier geht es weiter".
+     *
+     * Dieselbe Klasse Fehler wie die abgelaufene Mega-Karenz vom selben
+     * Tag: eine Regel an ein Band gehaengt statt an die Bedingung, die
+     * sie eigentlich meint. */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(120, 140, 200, .55) transparent;
+}
+
+/* DIE DECKSPALTE BLEIBT STEHEN.
+ *
+ * Ohne das ist die Tabelle nach dem Scrollen unbrauchbar: bei 900 px
+ * sind 599 px versteckt, und wer nach rechts wischt, sieht Zahlen ohne
+ * zu wissen, zu welchem Deck sie gehoeren. Die erste Spalte traegt
+ * genau diese Auskunft.
+ *
+ * Der Schatten nach rechts macht sichtbar, dass die Spalte ueber dem
+ * Rest liegt — ohne ihn wirken die durchlaufenden Zeilenlinien, als
+ * waere die Spalte Teil des scrollenden Bereichs.
+ *
+ * z-index 4 fuer den Kopf, damit die Ecke oben links ueber BEIDEN
+ * klebrigen Achsen liegt. */
+#matchupHeatmapContainer .heatmap-table th:first-child,
+#matchupHeatmapContainer .heatmap-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--surface-1);
+    box-shadow: 1px 0 0 rgba(120, 140, 200, .28),
+                6px 0 8px -6px rgba(0, 0, 0, .35);
+}
+#matchupHeatmapContainer .heatmap-table thead th:first-child {
+    z-index: 4;
 }
 
 /* Die Heatmap ist eine echte Tabelle.

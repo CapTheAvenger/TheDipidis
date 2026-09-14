@@ -157,6 +157,19 @@ jobs:
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
 
+      # DAS LUECKEN-INVENTAR MITZIEHEN (14.09.2026)
+      #
+      # Derselbe Anspruch wie beim Datenstand darueber: dieser Lauf
+      # schreibt champions_pokedex.json und champions_mega_faehigkeiten
+      # .json — beides sind Quellen, aus denen scripts/datenluecken.py
+      # sein Inventar rechnet. Wer sie aendert, laesst sonst ein
+      # Inventar stehen, das ueber den alten Stand urteilt.
+      #
+      # `git add data` weiter unten nimmt die Datei ohnehin mit.
+      # Fail-soft wie nebenan: faellt es um, bleibt das alte Inventar.
+      - name: Luecken-Inventar fortschreiben
+        run: python3 scripts/datenluecken.py || true
+
       - name: Committen
         id: commit
         if: ${{ inputs.schreiben }}

@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt": "2026-09-13T18:40:06Z",
+  "erzeugt": "2026-09-14T20:23:13Z",
   "erzeuger": "scripts/datenluecken.py",
   "anzahl": 2,
   "jeKlasse": {
@@ -35,8 +35,8 @@
   {
    "id": "gegenstandsname/quelle-liefert-nummern",
    "klasse": "gegenstandsname",
-   "titel": "20 Gegenstände kommen nur als Nummer (174 Einträge): Unknown Item 185, Unknown Item 186, Unknown Item 188, Unknown Item 190, Unknown Item 192, Unknown Item 193, Unknown Item 194, Unknown Item 197 …",
-   "titelEn": "20 held items arrive as a bare number (174 entries): Unknown Item 185, Unknown Item 186, Unknown Item 188, Unknown Item 190, Unknown Item 192, Unknown Item 193, Unknown Item 194, Unknown Item 197 …",
+   "titel": "20 Gegenstände kommen nur als Nummer (197 Einträge): Unknown Item 185, Unknown Item 186, Unknown Item 188, Unknown Item 190, Unknown Item 192, Unknown Item 193, Unknown Item 194, Unknown Item 197 …",
+   "titelEn": "20 held items arrive as a bare number (197 entries): Unknown Item 185, Unknown Item 186, Unknown Item 188, Unknown Item 190, Unknown Item 192, Unknown Item 193, Unknown Item 194, Unknown Item 197 …",
    "wo": "data/champions_usage.json → pokemon[*][*].held_item[].name",
    "ansicht": "side-quest",
    "vorschlag": null

@@ -160,12 +160,43 @@ jobs:
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
 
+      # DAS LUECKEN-INVENTAR MITZIEHEN (14.09.2026)
+      #
+      # BEFUND: `test_inventar_stimmt_mit_dem_erzeuger_ueberein` war auf
+      # `main` rot. Kein Defekt — `data/datenluecken.json` nennt unter
+      # anderem, WIE VIELE Eintraege der Quellfehler "Unknown Item NNN"
+      # betrifft, und diese Zahl waechst mit jedem Nutzungslauf: 174 am
+      # 13.09. abends, 197 am 14.09. frueh. Erzeugt wurde die Datei aber
+      # nur im WOCHENLAUF (weekly-full-update.yml). Zwischen zwei
+      # Wochenlaeufen lief das Inventar der Wirklichkeit hinterher, und
+      # die Zusicherung hielt den Deploy an.
+      #
+      # Dieselbe Klasse Fehler wie die abgelaufene Mega-Karenz und die
+      # an 768 px gehaengte Heatmap-Vorkehrung: eine Regel an den
+      # falschen Takt gehaengt. Wer die Daten schreibt, schreibt das
+      # Inventar darueber mit.
+      #
+      # Muss NACH den Scrapern und VOR dem Commit stehen. Fail-soft:
+      # faellt es um, bleibt das alte Inventar stehen — ein veraltetes
+      # Inventar ist besser als ein abgebrochener Lauf.
+      - name: Luecken-Inventar fortschreiben
+        run: |
+          set +e
+          python3 -u scripts/datenluecken.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::datenluecken exited with $rc — datenluecken.json unveraendert"
+              git checkout -- data/datenluecken.json 2>/dev/null
+          fi
+          exit 0
+
       - name: Commit + push
         id: commit
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           git add data/champions_usage.json data/data_stand.json \
+                  data/datenluecken.json \
                   data/champions_pokedex.json \
                   data/champions_names_de.json \
                   data/champions_resources.json

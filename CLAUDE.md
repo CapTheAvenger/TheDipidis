@@ -202,6 +202,65 @@ keinen Vorschlag, den es nicht gibt").
 Dieselbe Regel wie „eine Aussage ueber die Umgebung ist eine Messung oder
 sie ist nichts" — nur fuer das, was der Nutzer liest.
 
+## DEIN EIGENER KOMMENTAR MACHT DIE VERFAELSCHUNGSPROBE BLIND
+
+Am 13. und 14.09.2026 **dreimal derselbe Fehler**, jedes Mal in einer
+frisch geschriebenen Zusicherung:
+
+| Probe | blieb gruen, weil |
+| --- | --- |
+| `Unknown Item`-Muster aus der Flaeche entfernt | mein Kommentar darueber erklaerte das Muster und nannte es woertlich |
+| `scrollbar-width: thin` aus der Regel entfernt | mein Kommentar im selben Block zitierte die alte Fassung |
+| `border-radius: 50%` entfernt | mein Kommentar erklaerte, warum der Knopf rund bleiben muss |
+
+Das Muster ist heimtueckisch, weil es sich mit Sorgfalt VERSCHLIMMERT:
+je ausfuehrlicher der Kommentar den Fall erklaert, desto sicherer
+enthaelt er die gesuchte Zeichenkette — und desto blinder wird die
+Probe.
+
+**Die Regel:** eine Zusicherung, die Quelltext nach einer Zeichenkette
+durchsucht, schneidet vorher die Kommentare heraus.
+
+```js
+const ohneKommentare = (s) => s
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+```
+
+Und dazu die **Gegenprobe zum Ausschneiden selbst** — sonst wirft es im
+Zweifel alles weg und die Zusicherung prueft gar nichts mehr:
+
+```js
+assert.ok(ohneKommentare(text).length > text.length * 0.3,
+    'das Ausschneiden hat zu viel entfernt');
+```
+
+Muster im Bestand: `tests/unit/test-gegenstand-ohne-namen.js` und
+`tests/unit/test-hilfe-knopf-und-heatmap.js`.
+
+## EINE REGEL GEHOERT AN IHRE BEDINGUNG, NICHT AN EIN BAND ODER EINEN TAKT
+
+Vier Faelle in drei Tagen, alle mit demselben Bauplan — und alle vier
+haben `main` angehalten oder etwas falsch aussehen lassen:
+
+| Regel hing an | sie meinte | was passierte |
+| --- | --- | --- |
+| „Nutzungsdatei kennt die Grundform nicht" | „es gibt keinen Beleg" | Karenz lief ueber Nacht ab, vier Zusicherungen meldeten Verlust fuer nie dagewesene Werte (12./13.09.) |
+| `@media (max-width: 768px)` | „die Tabelle passt nicht" | zwischen 769 px und 1600 px kein Scroll-Hinweis, 42 % der Heatmap unsichtbar (13.09.) |
+| `min-height` ohne `min-width` | „der Knopf ist quadratisch" | zwischen 481 und 768 px ein Oval mit `border-radius: 50%` (13.09.) |
+| Wochenlauf | „die Daten haben sich geaendert" | `datenluecken.json` lief taeglich der Wirklichkeit hinterher (14.09.) |
+
+**Die Frage vor jeder neuen Grenze:** *Was ist die Bedingung, die ich
+eigentlich meine — und kann ich sie direkt hinschreiben?*
+
+`aspect-ratio: 1/1` statt zweier Breakpoints. Eine benannte,
+datierte Liste statt einer Zeitkruecke. Der Scroll-Hinweis in der
+Grundregel, weil die Tabelle bei KEINER Breite passt. Der Erzeuger im
+selben Ablauf wie die Daten.
+
+Wenn eine Bedingung sich nicht direkt hinschreiben laesst, gehoert die
+Grenze mit einer Messung begruendet — nicht mit „das ist Handy".
+
 ## Ressourcen: was ein Durchgang kosten darf
 
 Gemessen am 12.09.2026 in einer einzigen Sitzung, weil der Betreiber

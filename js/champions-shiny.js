@@ -21,9 +21,37 @@
  * weil ein zweites Geraet nichts davon weiss. Loeschen geht deshalb nur
  * ueber den bewussten Klick auf einen gesetzten Stern.
  *
- * SCHLUESSEL: "<dex>|<form>", z. B. "38|Regional" fuer Vulnona (Alola)
- * und "38|Base" fuer Vulnona. Die Pokedex-Nummer allein reicht nicht —
- * das Roster fuehrt 292 Eintraege auf 204 Arten.
+ * SCHLUESSEL: "<dex>|Base" fuer eine Art samt ALLEN ihren Mega-Formen,
+ * "<dex>|R:<englischer Name>" fuer eine Regionalform.
+ *
+ * WARUM MEGA MIT DER GRUNDFORM ZUSAMMENFAELLT (15.09.2026)
+ * -------------------------------------------------------
+ * Der Betreiber hat es entschieden, und die Begruendung ist die des
+ * Spiels: "sobald ich eine Form markiere soll das automatisch fuer alle
+ * gelten, da es ja das gleiche Pokemon ist und sich nur durch ein Item
+ * entwickelt". Eine Mega-Form faengt man nicht — man entwickelt sie aus
+ * der Art, die man schon hat. Wer Mega-Tandrak besitzt, besitzt Tandrak.
+ *
+ * Der Stern beantwortet "habe ich das Vieh", und darauf gibt es je Art
+ * genau eine Antwort. Das ist nicht bloss Bequemlichkeit: der Filter
+ * "noch offen" soll sagen, was man BESORGEN muss — und eine Mega-Form
+ * besorgt man nicht.
+ *
+ * WARUM REGIONALFORMEN NICHT ZUSAMMENFALLEN
+ * ----------------------------------------
+ * Alola-Vulnona ist kein Vulnona, das man mit einem Item umwandelt; es
+ * ist ein eigenes Vieh, das man eigens besorgen muss. Dieselbe
+ * Pokedex-Nummer, andere Sache. Die drei Paldea-Tauros teilen sich sogar
+ * Nummer UND Form-Kennung ("128|Regional") — deshalb steht bei
+ * Regionalformen der Name im Schluessel und nicht die Form-Kennung.
+ *
+ * MESSUNG, die dem zugrunde liegt (Stand 306 Eintraege):
+ *   form "Base"      213   darunter die drei Mega-Z-Eintraege, die schon
+ *                          vorher mit ihrer Grundform zusammenfielen
+ *   form "Mega"       78   KEINER davon traegt einen Regionalnamen — das
+ *                          Zusammenfallen kann also keine Regionalform
+ *                          verschlucken
+ *   form "Regional"   15   davon drei Paldea-Tauros auf einer Nummer
  */
 (function () {
     'use strict';
@@ -38,7 +66,69 @@
         if (!e) return '';
         var dex = (e.dex != null) ? e.dex : '';
         var form = e.form || 'Base';
-        return dex + '|' + form;
+        // Eine Regionalform ist ein eigenes Vieh; ihr Name steht im
+        // Schluessel, weil die drei Paldea-Tauros sich Nummer UND
+        // Form-Kennung teilen.
+        if (form === 'Regional') return dex + '|R:' + (e.en || '');
+        // Alles andere — Grundform, Mega, Mega X/Y/Z — ist dieselbe Art.
+        return dex + '|Base';
+    }
+
+    /* ALTE STERNE MITNEHMEN, NICHT WEGWERFEN.
+     *
+     * Bis zum 15.09.2026 hiess der Schluessel "<dex>|<form>". Wer die
+     * Sterne einfach neu schluesselt, ohne die alten umzuschreiben,
+     * loescht den Bestand — und ein Stern ist eine Aussage ueber die
+     * Wirklichkeit ("ich habe das Vieh"), die nicht verschwindet, weil
+     * sich ein Datenformat geaendert hat (siehe Kopf dieser Datei).
+     *
+     *   "<dex>|Base"      bleibt, wie es ist
+     *   "<dex>|Mega"      wird zu "<dex>|Base"  — genau die Regel, die
+     *                     der Betreiber bestellt hat
+     *   "<dex>|Regional"  laesst sich OHNE den Pokedex nicht aufloesen;
+     *                     welche Regionalform gemeint war, steht im alten
+     *                     Schluessel nicht drin. Er bleibt deshalb stehen
+     *                     und wird von aufloesen() nachgezogen, sobald
+     *                     der Pokedex da ist.
+     */
+    var ALT_MEGA = /^(\d+)\|Mega$/;
+    var ALT_REGIONAL = /^(\d+)\|Regional$/;
+
+    function wandleAlte(s) {
+        var geaendert = false;
+        [...s].forEach(function (k) {
+            var m = ALT_MEGA.exec(k);
+            if (!m) return;
+            s.delete(k);
+            s.add(m[1] + '|Base');
+            geaendert = true;
+        });
+        return geaendert;
+    }
+
+    /* Die verbliebenen "<dex>|Regional" aufloesen, sobald der Pokedex
+     * vorliegt. Eine Nummer kann mehrere Regionalformen tragen (128 traegt
+     * drei); dann galten vorher ALLE als markiert, weil sie sich einen
+     * Schluessel teilten. Genau das wird uebernommen — der Nutzer hat
+     * diesen Zustand gesehen, und ihm hier still einen Stern wegzunehmen
+     * waere schlimmer als einer zu viel. */
+    function aufloesen(eintraege) {
+        var s = lies();
+        var geaendert = false;
+        [...s].forEach(function (k) {
+            var m = ALT_REGIONAL.exec(k);
+            if (!m) return;
+            var nummer = Number(m[1]);
+            var treffer = (eintraege || []).filter(function (e) {
+                return e && Number(e.dex) === nummer && (e.form || 'Base') === 'Regional';
+            });
+            if (!treffer.length) return;   // ohne Treffer bleibt der alte Schluessel stehen
+            s.delete(k);
+            treffer.forEach(function (e) { s.add(eintragSchluessel(e)); });
+            geaendert = true;
+        });
+        if (geaendert) { schreibeLokal(); schreibeWolke(); }
+        return geaendert;
     }
 
     function lies() {
@@ -51,6 +141,7 @@
                 if (Array.isArray(arr)) arr.forEach(function (k) { _set.add(String(k)); });
             }
         } catch (_e) { /* privater Modus, geleerter Speicher — leer ist ok */ }
+        if (wandleAlte(_set)) schreibeLokal();
         return _set;
     }
 
@@ -78,8 +169,17 @@
 
     function hat(e) { return lies().has(eintragSchluessel(e)); }
 
-    function umschalten(e) {
-        var k = eintragSchluessel(e);
+    function umschalten(e) { return umschaltenSchluessel(eintragSchluessel(e)); }
+
+    /* Umschalten ueber den fertigen Schluessel.
+     *
+     * Die Oberflaeche traegt ihn ohnehin am Sternknopf (data-sqp-stern) —
+     * und sie MUSS ihn tragen: seit eine Regionalform ihren Namen im
+     * Schluessel hat, laesst er sich aus "<dex>|<form>" nicht mehr
+     * zurueckrechnen. Wer ihn aus zwei Bruchstuecken neu baut, erzeugt
+     * fuer jede Regionalform "<dex>|R:" ohne Namen — einen Schluessel, der
+     * auf alles und nichts passt. */
+    function umschaltenSchluessel(k) {
         if (!k) return false;
         var s = lies();
         if (s.has(k)) s.delete(k); else s.add(k);
@@ -108,6 +208,10 @@
                 var s = lies();
                 var vorher = s.size;
                 fern.forEach(function (k) { s.add(String(k)); });
+                // Ein zweites Geraet kann noch mit dem alten Stand laufen
+                // und alte Schluessel schicken; die werden hier genauso
+                // umgeschrieben wie die aus dem lokalen Speicher.
+                wandleAlte(s);
                 if (s.size !== vorher) {
                     schreibeLokal();
                     try {
@@ -129,8 +233,10 @@
         schluessel: eintragSchluessel,
         hat: hat,
         umschalten: umschalten,
+        umschaltenSchluessel: umschaltenSchluessel,
         anzahl: anzahl,
         alle: function () { return [...lies()]; },
+        aufloesen: aufloesen,
         ausWolkeLaden: ausWolkeLaden,
         _speicherSchluessel: SCHLUESSEL,
         _feld: FELD,

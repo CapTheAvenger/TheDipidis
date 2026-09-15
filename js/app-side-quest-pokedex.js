@@ -567,6 +567,13 @@
             .then(r => r.ok ? r.json() : null)
             .then(json => {
                 _entries = (json && Array.isArray(json.entries)) ? json.entries : [];
+                /* Alte Shiny-Schluessel der Bauart "<dex>|Regional" lassen
+                 * sich erst aufloesen, wenn der Pokedex da ist — vorher
+                 * weiss niemand, WELCHE Regionalform gemeint war. Genau
+                 * hier ist der erste Zeitpunkt, an dem er da ist. */
+                if (window.ChampionsShiny && window.ChampionsShiny.aufloesen) {
+                    try { window.ChampionsShiny.aufloesen(_entries); } catch (_e) { /* fail-soft */ }
+                }
                 return _entries;
             })
             .catch(() => { _entries = []; return _entries; });
@@ -954,7 +961,9 @@
         const an = !!(window.ChampionsShiny && window.ChampionsShiny.hat(e));
         const titel = an ? l.sternAn : l.sternAus;
         return `<button type="button" class="sqp-stern${an ? ' is-an' : ''}"
-                    data-sqp-stern="${escapeHtml(String(e.dex))}|${escapeHtml(e.form || 'Base')}"
+                    data-sqp-stern="${escapeHtml((window.ChampionsShiny
+                        && window.ChampionsShiny.schluessel(e))
+                        || (String(e.dex) + '|Base'))}"
                     aria-pressed="${an ? 'true' : 'false'}"
                     title="${escapeHtml(titel)}" aria-label="${escapeHtml(titel)}">★</button>`;
     }
@@ -1084,11 +1093,23 @@
             TYPES_EN.map(ty => `<option value="${ty}"${_typeFilter === ty ? ' selected' : ''}>${escapeHtml(uiLang() === 'de' ? deType(ty) : ty)}</option>`).join('');
         const formOpts = [['all', l.allForms], ['Base', l.formBase], ['Mega', l.formMega], ['Regional', l.formRegional]]
             .map(([v, lab]) => `<option value="${v}"${_formFilter === v ? ' selected' : ''}>${escapeHtml(lab)}</option>`).join('');
-        const shinyN = (window.ChampionsShiny && window.ChampionsShiny.anzahl()) || 0;
-        /* Die Zahl der offenen wird GEZAEHLT, nicht gerechnet.
-         * "alle minus markierte" waere falsch, sobald jemand eine Marke
-         * fuer einen Eintrag traegt, den der Pokedex gerade nicht fuehrt —
-         * und der Kader der Quelle dreht sich woechentlich. */
+        /* BEIDE Zahlen zaehlen EINTRAEGE, nicht Marken.
+         *
+         * Bis zum 15.09.2026 stand links die Zahl der MARKEN
+         * (ChampionsShiny.anzahl()) und rechts die der offenen EINTRAEGE.
+         * Seit eine Marke fuer eine Art samt allen Mega-Formen gilt, sind
+         * das zwei verschiedene Dinge: live gemessen standen 31 Marken
+         * neben 270 offenen — zusammen 301 statt 306. Zwei Zahlen
+         * nebeneinander, die sich nicht zur Gesamtzahl addieren, laden
+         * zum Nachrechnen ein und stimmen dann nicht.
+         *
+         * Gezaehlt wird ausserdem, nicht gerechnet: "alle minus markierte"
+         * waere falsch, sobald eine Marke fuer einen Eintrag existiert, den
+         * der Pokedex gerade nicht fuehrt — und der Kader dreht sich
+         * woechentlich. */
+        const shinyN = (window.ChampionsShiny && _entries)
+            ? _entries.filter(e => window.ChampionsShiny.hat(e)).length
+            : 0;
         const offenN = (window.ChampionsShiny && _entries)
             ? _entries.filter(e => !window.ChampionsShiny.hat(e)).length
             : ((_entries && _entries.length) || 0);
@@ -2010,11 +2031,30 @@
                 ev.preventDefault();
                 ev.stopPropagation();
                 if (!window.ChampionsShiny) return;
-                const [dex, form] = String(btn.getAttribute('data-sqp-stern') || '').split('|');
-                const an = window.ChampionsShiny.umschalten({ dex: parseInt(dex, 10), form: form });
-                btn.classList.toggle('is-an', an);
-                btn.setAttribute('aria-pressed', an ? 'true' : 'false');
-                btn.title = an ? t().sternAn : t().sternAus;
+                /* EIN STERN GILT FUER MEHRERE KACHELN.
+                 *
+                 * Seit dem 15.09.2026 faellt eine Mega-Form mit ihrer
+                 * Grundform zusammen — der Betreiber: "sobald ich eine Form
+                 * markiere soll das automatisch fuer alle gelten, da es ja
+                 * das gleiche Pokemon ist". Tandrak und Tandrak (Mega)
+                 * teilen sich also EINEN Schluessel und muessen beide
+                 * umspringen; nur den geklickten Stern zu aendern, hiesse
+                 * dass die Nachbarkachel bis zum naechsten Neuaufbau das
+                 * Gegenteil behauptet.
+                 *
+                 * Der Schluessel steht fertig am Knopf und wird NICHT aus
+                 * dex und form neu gebaut: eine Regionalform traegt ihren
+                 * Namen darin, und der laesst sich aus zwei Bruchstuecken
+                 * nicht zurueckrechnen. */
+                const k = String(btn.getAttribute('data-sqp-stern') || '');
+                const an = window.ChampionsShiny.umschaltenSchluessel(k);
+                const titel = an ? t().sternAn : t().sternAus;
+                host.querySelectorAll('.sqp-stern').forEach(b => {
+                    if (b.getAttribute('data-sqp-stern') !== k) return;
+                    b.classList.toggle('is-an', an);
+                    b.setAttribute('aria-pressed', an ? 'true' : 'false');
+                    b.title = titel;
+                });
                 /* BEIDE Zahlen nachziehen, nicht nur die erste.
                  *
                  * Hier stand `host.querySelector('.sqp-shinyfilter b')` —
@@ -2028,7 +2068,10 @@
                  * Bestand; eine, die dem Bestand hinterherlaeuft, ist
                  * schlechter als keine. */
                 const meineZ = host.querySelector('[data-sqp-shiny="meine"] b');
-                if (meineZ) meineZ.textContent = String(window.ChampionsShiny.anzahl());
+                if (meineZ && _entries) {
+                    meineZ.textContent = String(
+                        _entries.filter(x => window.ChampionsShiny.hat(x)).length);
+                }
                 const offenZ = host.querySelector('[data-sqp-shiny="offen"] b');
                 if (offenZ && _entries) {
                     offenZ.textContent = String(

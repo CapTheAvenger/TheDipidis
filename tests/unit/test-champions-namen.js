@@ -202,8 +202,14 @@ describe('Die Champions-Ansichten uebersetzen ihre Werte', () => {
             assert.ok(new RegExp(`'${art}'`).test(q),
                 `der Builder reicht die Art ${art} nirgends an nm()/spOptionen() weiter`);
         }
-        assert.ok(/function spOptionen\(liste, aktuell, l, art\)/.test(q),
-            'spOptionen kennt die Art nicht mehr — dann kann es nicht uebersetzen');
+        // Die Stelle der Art ist das, was zaehlt — nicht die Gesamtzahl der
+        // Parameter. Seit dem 15.09.2026 nimmt spOptionen einen fuenften
+        // (`zusatz`, fuer Wesenswirkung und Vorrang); die Zusicherung darf
+        // daran nicht umfallen, muss aber weiter umfallen, wenn `art`
+        // verschwindet oder an eine andere Stelle rutscht.
+        assert.ok(/function spOptionen\(liste, aktuell, l, art\b/.test(q),
+            'spOptionen kennt die Art nicht mehr an vierter Stelle — dann '
+            + 'kann es nicht uebersetzen');
     });
 });
 
@@ -239,8 +245,17 @@ describe('Der Export bleibt englisch', () => {
         const block = q.slice(i, i + 1200);
         assert.ok(/value="\$\{escapeHtml\(n\)\}"/.test(block),
             'der option-Wert wird nicht mehr aus dem Rohnamen gebildet');
-        assert.ok(/>\$\{escapeHtml\(nm\(n, art\) \+ pct\)\}</.test(block),
+        // Seit dem 15.09.2026 haengt zwischen Namen und Prozentwert ein
+        // dritter Teil (`zus`: Wesenswirkung bzw. Vorrang). Geprueft wird
+        // deshalb, was der Punkt dieser Zusicherung ist — die Beschriftung
+        // laeuft durch nm(n, art) —, nicht die genaue Anzahl der Summanden.
+        assert.ok(/>\$\{escapeHtml\(nm\(n, art\)[^<]*\)\}</.test(block),
             'die option-Beschriftung wird nicht uebersetzt');
+        // Und die Gegenprobe zum Zusatz: er darf NUR in die Beschriftung,
+        // nie in den Wert. Ein "Adamant · ANG ↑ SPA ↓" im value landete
+        // ueber den Zustand im Showdown-Export und waere dort unlesbar.
+        assert.ok(!/value="[^"]*\bzus\b/.test(block),
+            'der Zusatz ist in den option-Wert gerutscht');
     });
 });
 

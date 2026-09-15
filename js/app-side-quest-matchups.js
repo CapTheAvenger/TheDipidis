@@ -1541,7 +1541,9 @@
     function loeseNamen(m) {
         const ausSlug = nameAusSlug(m.slug);
         if (ausSlug) return ausSlug;
-        if (m.name && _dex[m.name]) return m.name;
+        // `_dex` ist null, solange load() nicht durch ist. Der Zugriff
+        // darauf war der Absturz vom 15.09.2026 (siehe oeffneTeamRechner).
+        if (m.name && _dex && _dex[m.name]) return m.name;
         // Der Showdown-Name als Slug gelesen ist der letzte Versuch:
         // "Zoroark-Hisui" -> "zoroark-hisui" findet den Nutzungseintrag.
         const alsSlug = nameAusSlug(String(m.name || '').toLowerCase());
@@ -1580,13 +1582,39 @@
 
     /* Von aussen aufgerufen (Team-Builder). Die Ansicht muss dabei erst
        sichtbar gemacht werden — sonst rechnet der Rechner in einem
-       versteckten Kasten, und der Klick sieht wie ein Fehlschlag aus. */
+       versteckten Kasten, und der Klick sieht wie ein Fehlschlag aus.
+
+       DER KNOPF TAT BIS ZUM 15.09.2026 GAR NICHTS.
+       -------------------------------------------
+       Gemeldet: "im Rechner öffnen macht noch nichts". Nachgestellt im
+       Browser: der Klick warf
+       `TypeError: Cannot read properties of null (reading 'Rillaboom')`,
+       die Matchup-Ansicht blieb versteckt (Hoehe 0), der Builder stehen.
+
+       Die Reihenfolge war schuld. Hier stand uebernimmTeam(team) ZUERST
+       — und das laeuft ueber loeseNamen() in `_dex`, das erst load()
+       fuellt. Wer den Rechner in dieser Sitzung noch nicht geoeffnet
+       hatte, traf also immer auf null. Wer ihn vorher einmal offen
+       hatte, bei dem ging es; deshalb ist es so lange durchgerutscht.
+
+       Jetzt: Ansicht zeigen, Ladezustand zeichnen, DANN laden, DANN das
+       Team uebernehmen und neu zeichnen. Der Klick tut damit sofort
+       etwas Sichtbares, auch wenn die Dateien noch unterwegs sind.
+
+       Gibt ein Promise zurueck, damit der Aufrufer einen Fehlschlag
+       melden kann statt ihn zu verschlucken. */
     function oeffneTeamRechner(team) {
-        uebernimmTeam(team);
         if (window.sideQuestResources && typeof window.sideQuestResources.showView === 'function') {
             window.sideQuestResources.showView('matchups');
         }
-        activate();
+        _activated = true;
+        render();
+        return load().then(() => {
+            uebernimmTeam(team);
+            if (!_me && _roster && _roster.length) _me = _roster[0].name;
+            render();
+            return true;
+        });
     }
 
     function activate() {

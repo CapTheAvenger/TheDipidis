@@ -1798,6 +1798,54 @@
                 kachel.setAttribute('aria-label', text);
             }
             const fussId = wertId + 'Fussnote';
+            /* DIE ERKLAERUNG WANDERT HINTER DEN KNOPF (15.09.2026).
+               ----------------------------------------------------
+               Gemeldet, mit Bildschirmfoto genau dieser Kacheln: "bei
+               Decks ist noch zu viel Decks, alles was so erklärungskram
+               ist auf der Seite, entweder hinter das Prof Eich Icon
+               packen … aber ich will die Seite nicht mit Erklärungen
+               vollballern. Die Daten die zu sehen sind sollen eindeutig
+               sein und dann brauchen wir auch nicht so massive
+               Erklärungen."
+
+               Angestrichen waren drei Kacheln mit zusammen ueber 1.200
+               Zeichen Fliesstext unter drei Zahlen.
+
+               Der Text bleibt vollstaendig und wird weiter hier gebaut —
+               er nennt gerechnete Werte, die kein Vorrat kennt. Er steht
+               ab jetzt im Register von js/ds-abschnitt-info.js und
+               erscheint auf Knopfdruck. Das title/aria-label an der
+               Kachel bleibt zusaetzlich, damit die Auskunft auch ohne
+               Klick erreichbar ist.
+
+               Kein Register geladen? Dann bleibt der sichtbare Absatz.
+               Eine Erklaerung ersatzlos zu streichen, weil ein Skript
+               fehlt, waere der schlechtere Tausch. */
+            const AI = (typeof window !== 'undefined') ? window.DsAbschnittInfo : null;
+            const de = (typeof getLang === 'function') && getLang() === 'de';
+            if (AI && typeof AI.melde === 'function' && typeof AI.knopfHtml === 'function') {
+                const id = 'cm-kennzahl-' + wertId;
+                const titel = (kachel && kachel.querySelector)
+                    ? ((kachel.querySelector('h3, h4, .current-meta-stat-label') || {}).textContent || '').trim()
+                    : '';
+                const ueberschrift = titel || (de ? 'Zu dieser Zahl' : 'About this figure');
+                AI.melde(id, { titel: ueberschrift, html: '<p>' + _cmEsc(text) + '</p>' });
+                const alterAbsatz = document.getElementById(fussId);
+                if (alterAbsatz && alterAbsatz.parentNode) alterAbsatz.parentNode.removeChild(alterAbsatz);
+                const knopfId = fussId + 'Knopf';
+                let knopfHuelle = document.getElementById(knopfId);
+                if (!knopfHuelle) {
+                    if (typeof document.createElement !== 'function') return null;
+                    knopfHuelle = document.createElement('div');
+                    knopfHuelle.id = knopfId;
+                    knopfHuelle.className = 'cm-stat-info';
+                    knopfHuelle.setAttribute('style', 'margin-top:6px;');
+                    if (kachel && typeof kachel.appendChild === 'function') kachel.appendChild(knopfHuelle);
+                    else return null;
+                }
+                knopfHuelle.innerHTML = AI.knopfHtml(id, ueberschrift);
+                return knopfHuelle;
+            }
             let fuss = document.getElementById(fussId);
             if (!fuss) {
                 if (typeof document.createElement !== 'function') return null;
@@ -1811,6 +1859,16 @@
             }
             fuss.textContent = text;
             return fuss;
+        }
+
+        /* Maskieren fuer den Dialog. Der Text ist Fliesstext aus dem
+           eigenen Quelltext plus gerechnete Zahlen — trotzdem maskiert,
+           weil er hier zum ersten Mal als HTML eingesetzt wird und nicht
+           mehr als textContent. */
+        function _cmEsc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+                return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+            });
         }
 
         /**

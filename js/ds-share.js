@@ -290,6 +290,25 @@
         KEY_W: 300, PAD: 24
     };
 
+    /* WIE VIELE MATCHUP-ZEILEN DIE KARTE TRAEGT — EINE RECHNUNG.
+       ---------------------------------------------------------
+       Sie stand an zwei Stellen: deckCardCanvas() rechnete sie aus der
+       Bildhoehe, shareDeckCard() waehlte mit den fest hingeschriebenen
+       Zahlen 9/10/12 aus. Der Kommentar dort warnte selbst davor
+       ("zehn ist der heutige Wert, mit Luft nach oben") — und genau das
+       ist am 15.09.2026 eingetreten: mit zwei Spalten traegt die Karte
+       zwanzig Zeilen, die Auswahl haette weiter neun geliefert.
+       Zwei Rechnungen fuer dieselbe Zahl laufen auseinander, sobald
+       eine angefasst wird. Also eine. */
+    var MU_ZEILE_H = 34;
+
+    function muBudget(anzahl) {
+        var kopfY = DC.HEAD + DC.STATS + 30;
+        var proSpalte = Math.floor((DC.H - DC.FOOT - (kopfY + 14) - 26) / MU_ZEILE_H);
+        var spalten = (anzahl > proSpalte) ? 2 : 1;
+        return { proSpalte: proSpalte, spalten: spalten, max: proSpalte * spalten };
+    }
+
     function deckCardCanvas(spec, art) {
         var cv = document.createElement('canvas');
         cv.width = DC.W; cv.height = DC.H;
@@ -656,22 +675,65 @@
         ctx.fillRect(mx, bodyY, DC.W - mx, bodyH);
 
         var tx = mx + 20;
-        var xGames  = mx + 600;
-        var xRecord = mx + 740;
-        var wrX = DC.W - 20 - 116, wrW = 116;
         var ty = bodyY + 30;
+        var rowH = MU_ZEILE_H;
+        var budget = muBudget((spec.matchups || []).length);
+        var zeilenProSpalte = budget.proSpalte;
 
-        label(ctx, L('Gegner', 'Opponent'), tx, ty);
-        ctx.textAlign = 'right';
-        label(ctx, L('Matches', 'Games'), xGames, ty);
-        label(ctx, L('Record', 'Record'), xRecord, ty);
-        label(ctx, quotenKuerzel('ohneUnentschieden'), wrX + wrW - 10, ty);
-        ctx.textAlign = 'start';
-        ctx.fillStyle = C.line;
-        ctx.fillRect(tx, ty + 8, DC.W - 20 - tx, 1);
+        /* ZWEI SPALTEN STATT EINER (15.09.2026).
+           -------------------------------------
+           Gemeldet: "Außerdem sollten doch in das generierte Bild mehr
+           Daten eingearbeitet werden".
 
-        var rowH = 34;
-        var maxRows = Math.floor((bodyY + bodyH - (ty + 14) - 26) / rowH);
+           Gemessen an der alten Karte: zehn Zeilen passten, die
+           Matchup-Liste hat zwanzig Paarungen — auf dem Bild stand
+           "· · · 11 weitere Matchups ausgelassen · · ·". Die Haelfte der
+           Auskunft fehlte also.
+
+           Mehr Zeilen durch kleinere Schrift waeren der falsche Tausch
+           gewesen (13 px sind auf einem Instagram-Bild ohnehin die
+           Untergrenze). Der Platz lag woanders: die Namensspalte war
+           440 px breit, gebraucht werden rund 150. Zwei Spalten zu je
+           439 px nehmen dieselbe Flaeche und tragen zwanzig Zeilen —
+           die vollstaendige Liste, ohne Auslassung.
+
+           Eine Spalte bleibt es, solange alles hineinpasst: zehn Zeilen
+           links und eine leere Haelfte rechts saehen aus wie ein
+           Darstellungsfehler. */
+        var spalten = budget.spalten;
+
+        var rechterRand = DC.W - 20;
+        var spaltenLuecke = spalten > 1 ? 24 : 0;
+        var spaltenB = (rechterRand - tx - spaltenLuecke * (spalten - 1)) / spalten;
+
+        /* Die vier Spaltenkanten EINER Tabellenspalte, relativ zu ihrem
+           linken Rand. Bei zwei Tabellenspalten ist weniger Platz, also
+           ruecken Zahlenspalten und Quotenfeld zusammen — die Werte sind
+           an der schmalsten Fassung (439 px) nachgerechnet:
+           22 Symbol + 8 Abstand + Name + 52 Matches + 66 Record + 96 Quote. */
+        function kanten(x0) {
+            var quoteB = spalten > 1 ? 96 : 116;
+            return {
+                x: x0,
+                games: x0 + spaltenB - quoteB - 66 - 8,
+                record: x0 + spaltenB - quoteB - 8,
+                wrX: x0 + spaltenB - quoteB,
+                wrW: quoteB
+            };
+        }
+
+        function kopf(k) {
+            label(ctx, L('Gegner', 'Opponent'), k.x, ty);
+            ctx.textAlign = 'right';
+            label(ctx, L('Matches', 'Games'), k.games, ty);
+            label(ctx, L('Record', 'Record'), k.record, ty);
+            label(ctx, quotenKuerzel('ohneUnentschieden'), k.wrX + k.wrW - 10, ty);
+            ctx.textAlign = 'start';
+            ctx.fillStyle = C.line;
+            ctx.fillRect(k.x, ty + 8, k.x + spaltenB - k.x, 1);
+        }
+
+        var maxRows = budget.max;
 
         /* Beste UND schlechteste Matchups, nicht die besten elf.
          * Eine Bildkarte, die nur die Oberseite der sortierten Liste
@@ -727,22 +789,33 @@
             }
         }
         var hidden = all.length - mus.length;
-        var ry = ty + 14;
+
+        for (var sp = 0; sp < spalten; sp++) { kopf(kanten(tx + sp * (spaltenB + spaltenLuecke))); }
 
         for (var r = 0; r < mus.length; r++) {
             var m = mus[r];
+            /* Die Auslassungszeile kostet EINE Bildzeile. Sie steht in
+               der Spalte, in der sie faellt; alles danach rutscht um eine
+               Zeile weiter. `bildZeile` ist deshalb der Zaehler, nicht
+               `r`. */
+            var bildZeile = r + ((hidden > 0 && cutAfter >= 0 && r > cutAfter) ? 1 : 0);
+            var sp2 = Math.floor(bildZeile / zeilenProSpalte);
+            if (sp2 >= spalten) break;
+            var k = kanten(tx + sp2 * (spaltenB + spaltenLuecke));
+            var ry = ty + 14 + (bildZeile % zeilenProSpalte) * rowH;
             var cy = ry + rowH / 2;
-            sprite(ctx, (art.mIcons && art.mIcons[r]) || null, tx, cy - 11, 22, initials(m.opponent));
+
+            sprite(ctx, (art.mIcons && art.mIcons[r]) || null, k.x, cy - 11, 22, initials(m.opponent));
             ctx.font = fSans(13, 500);
             ctx.fillStyle = m.thin ? C.ink3 : C.ink;
             ctx.textBaseline = 'middle';
-            ctx.fillText(clip(ctx, m.opponent, xGames - 110 - (tx + 30)), tx + 30, cy);
+            ctx.fillText(clip(ctx, m.opponent, k.games - 46 - (k.x + 30)), k.x + 30, cy);
 
             ctx.textAlign = 'right';
             ctx.font = fMono(13, 400);
             ctx.fillStyle = C.ink3;
-            ctx.fillText(num(m.games, 0), xGames, cy);
-            ctx.fillText((m.wins || 0) + '–' + (m.losses || 0), xRecord, cy);
+            ctx.fillText(num(m.games, 0), k.games, cy);
+            ctx.fillText((m.wins || 0) + '–' + (m.losses || 0), k.record, cy);
             ctx.textAlign = 'start';
 
             /* Getönte Zelle statt farbigem Text: der Kontrast bleibt
@@ -750,32 +823,34 @@
             var d = m.winRate - 50;
             ctx.fillStyle = m.thin ? 'rgba(135,145,184,.10)'
                           : (d >= 0 ? C.dvPosBg : C.dvNegBg);
-            rr(ctx, wrX, cy - 13, wrW, 26, 6); ctx.fill();
+            rr(ctx, k.wrX, cy - 13, k.wrW, 26, 6); ctx.fill();
             ctx.font = fMono(14, 700);
             ctx.fillStyle = m.thin ? C.ink3 : C.ink;
             ctx.textAlign = 'right';
             ctx.textBaseline = 'middle';
-            ctx.fillText(num(m.winRate, 1) + ' %', wrX + wrW - 10, cy);
+            ctx.fillText(num(m.winRate, 1) + ' %', k.wrX + k.wrW - 10, cy);
             ctx.textAlign = 'start';
 
             ctx.fillStyle = 'rgba(37,48,87,.55)';
-            ctx.fillRect(tx, ry + rowH - 1, DC.W - 20 - tx, 1);
-            ry += rowH;
+            ctx.fillRect(k.x, ry + rowH - 1, spaltenB, 1);
 
             if (r === cutAfter && hidden > 0) {
-                ctx.font = fSans(12, 400);
-                ctx.fillStyle = C.ink3;
-                ctx.textBaseline = 'middle';
-                ctx.fillText('· · ·  ' + hidden + ' ' + L('weitere Matchups ausgelassen',
-                    'more matchups omitted') + '  · · ·', tx, ry + rowH / 2);
-                ctx.fillStyle = 'rgba(37,48,87,.55)';
-                ctx.fillRect(tx, ry + rowH - 1, DC.W - 20 - tx, 1);
-                /* Kein r++: die Auslassung kostet eine Bildzeile, aber
-                 * keinen Listeneintrag — mus ist bereits um genau diese
-                 * eine Zeile gekürzt. */
-                ry += rowH;
+                var aZeile = bildZeile + 1;
+                var aSp = Math.floor(aZeile / zeilenProSpalte);
+                if (aSp < spalten) {
+                    var ak = kanten(tx + aSp * (spaltenB + spaltenLuecke));
+                    var ay = ty + 14 + (aZeile % zeilenProSpalte) * rowH;
+                    ctx.font = fSans(12, 400);
+                    ctx.fillStyle = C.ink3;
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('· · ·  ' + hidden + ' ' + L('weitere Matchups ausgelassen',
+                        'more matchups omitted') + '  · · ·', ak.x, ay + rowH / 2);
+                    ctx.fillStyle = 'rgba(37,48,87,.55)';
+                    ctx.fillRect(ak.x, ay + rowH - 1, spaltenB, 1);
+                }
             }
         }
+        var ry = ty + 14 + Math.min(mus.length, zeilenProSpalte) * rowH;
 
         if (!mus.length) {
             ctx.font = fSans(14, 400);
@@ -1309,13 +1384,18 @@
                (art.mIcons[r]). Bei mehr als zehn Paarungen trugen die
                unteren Zeilen damit fremde Symbole — ein Deck mit dem
                Bild eines anderen daneben.
-               Also erst auswaehlen, dann laden. Die Zahl der Zeilen
-               rechnet deckCardCanvas() aus der Bildhoehe; zehn ist der
-               heutige Wert, mit Luft nach oben. */
+               Also erst auswaehlen, dann laden. Wie viele Zeilen die
+               Karte traegt, rechnet muBudget() — dieselbe Funktion, die
+               auch deckCardCanvas() benutzt. */
             var alleMus = (spec.matchups || []);
+            var b = muBudget(alleMus.length);
+            /* maxRows - 1: eine Bildzeile geht fuer den Hinweis
+               "… weitere Matchups ausgelassen" drauf. Passt alles, wird
+               nichts ausgelassen und die Zeile faellt weg. */
             var sel = (typeof window.getArchetypeMatchupAuswahl === 'function'
-                && alleMus.length > 10)
-                ? window.getArchetypeMatchupAuswahl(alleMus, 9) : alleMus.slice(0, 12);
+                && alleMus.length > b.max)
+                ? window.getArchetypeMatchupAuswahl(alleMus, b.max - 1)
+                : alleMus.slice(0, b.max);
             var mus = sel;
             spec.matchupAuswahl = sel;
             return Promise.all([

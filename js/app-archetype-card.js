@@ -1355,8 +1355,40 @@
      * erscheint nur in der eingebetteten Fassung; nur dort gibt es das
      * Bedienelement, auf das er sich bezieht.
      */
+    /* DER SATZ WANDERT HINTER DEN KNOPF (15.09.2026).
+       ----------------------------------------------
+       Gemeldet, mit Bildschirmfoto der Deck-Seite: "bei Decks ist noch
+       zu viel Decks, alles was so erklärungskram ist auf der Seite,
+       entweder hinter das Prof Eich Icon packen oder halt in den extra
+       Bereich, aber ich will die Seite nicht mit Erklärungen
+       vollballern."
+
+       Der Text bleibt Wort fuer Wort derselbe und wird weiter HIER
+       gebaut, aus denselben Daten wie die Kacheln — genau so, wie
+       js/ds-abschnitt-info.js es verlangt ("der Erzeuger baut seinen
+       Text weiter dort, wo die Zahlen sind, und MELDET ihn hierher").
+       Was sich aendert, ist nur der Ort: Knopf statt Flaeche.
+
+       Ohne das Register bleibt der Absatz stehen. Einen Satz ueber die
+       Datengrundlage ersatzlos zu streichen, weil ein Skript fehlt,
+       waere schlimmer als ein Absatz zu viel. */
     function zeitraumHtml(variante) {
         const text = zeitraumText(variante);
+        const de = isDe();
+        const AI = (typeof window !== 'undefined') ? window.DsAbschnittInfo : null;
+        if (AI && typeof AI.melde === 'function' && typeof AI.knopfHtml === 'function') {
+            const id = 'arc-zeitraum-' + (variante || 'overlay');
+            const titel = de ? 'Zeitraum und Quellen' : 'Period and sources';
+            AI.melde(id, { titel: titel, html: `<p>${esc(text)}</p>` });
+            const knopf = AI.knopfHtml(id, titel);
+            if (knopf) {
+                return `<p class="arc-zeitraum arc-zeitraum--knopf"`
+                     + ` style="margin:8px 0 0;font-size:0.72em;line-height:1.35;`
+                     + `color:var(--ink-2, #555);display:flex;align-items:center;gap:6px;">`
+                     + `<span>${esc(de ? 'Zeitraum und Quellen' : 'Period and sources')}</span>`
+                     + knopf + `</p>`;
+            }
+        }
         /* Der Stil steht inline, weil css/ in dieser Runde gesperrt war.
            Sobald es eine Regel .arc-zeitraum gibt, gehoert er dorthin. */
         return `<p class="arc-zeitraum" title="${esc(text)}"`
@@ -1772,10 +1804,25 @@
         // Closed by default inline: the tiles are the scroll content, the
         // table is a reference you open when you need it. Otherwise a
         // dozen decks with 19 opponents each is 25 000 px of page.
+        /* DIE ZAHL AM KNOPF IST DIE ZAHL DER ZEILEN DAHINTER (15.09.2026).
+           ----------------------------------------------------------------
+           Gemeldet: "wenn ich in der Tierlist auf Matchup anzeigen (20)
+           druecke werden immer nur 12 angezeigt. das doch irrefuehrend und
+           quatsch … entweder schreibst du 20 und zeigst 20 oder halt eine
+           andere Zahl und zeigst dann auch so viele."
+
+           Hier stand `all.length` — die Zahl ALLER Paarungen —, waehrend
+           die Tabelle darunter aus `rows` gebaut wird, also aus der auf
+           MU_VORSCHAU (12) gekuerzten Auswahl. Der Knopf versprach 20 und
+           lieferte 12.
+
+           Die vollstaendige Liste ist damit nicht weg: der Knopf "Alle {n}"
+           unter der Karte (moreBtn) fuehrt dorthin und traegt seinerseits
+           `all.length`. Zwei Knoepfe, zwei Zahlen, beide wahr. */
         return `<details class="arc-mu-details">
                 <summary class="arc-mu-summary">${esc(
                     L('arc.matchupsToggle', de ? 'Matchups anzeigen ({n})' : 'Show matchups ({n})')
-                        .replace('{n}', String(all.length)))}</summary>
+                        .replace('{n}', String(rows.length)))}</summary>
                 ${table}
             </details>`;
     }

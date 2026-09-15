@@ -37,13 +37,19 @@
  * "noch offen" soll sagen, was man BESORGEN muss — und eine Mega-Form
  * besorgt man nicht.
  *
- * WARUM REGIONALFORMEN NICHT ZUSAMMENFALLEN
- * ----------------------------------------
+ * WARUM REGIONAL- UND GESCHLECHTSFORMEN NICHT ZUSAMMENFALLEN
+ * ---------------------------------------------------------
  * Alola-Vulnona ist kein Vulnona, das man mit einem Item umwandelt; es
  * ist ein eigenes Vieh, das man eigens besorgen muss. Dieselbe
  * Pokedex-Nummer, andere Sache. Die drei Paldea-Tauros teilen sich sogar
  * Nummer UND Form-Kennung ("128|Regional") — deshalb steht bei
  * Regionalformen der Name im Schluessel und nicht die Form-Kennung.
+ *
+ * Seit dem 15.09.2026 gilt dasselbe fuer Geschlechtsformen. Ein
+ * weibliches Salmagnis entsteht nicht aus einem maennlichen: es hat
+ * eigene Basiswerte (Angriff 92 statt 112, Spezial-Angriff 100 statt 80)
+ * und eine eigene Zeile in der Ranglistenauswertung. Wer beide besitzen
+ * will, muss beide besorgen — also zwei Sterne.
  *
  * MESSUNG, die dem zugrunde liegt (Stand 306 Eintraege):
  *   form "Base"      213   darunter die drei Mega-Z-Eintraege, die schon
@@ -52,6 +58,10 @@
  *                          Zusammenfallen kann also keine Regionalform
  *                          verschlucken
  *   form "Regional"   15   davon drei Paldea-Tauros auf einer Nummer
+ *
+ * Seit dem 15.09.2026 kommt form "Geschlecht" dazu (3 Eintraege:
+ * Salmagnis, Servol und Psiaugon je weiblich); der Pokedex fuehrt
+ * seither 316 Eintraege.
  */
 (function () {
     'use strict';
@@ -62,14 +72,24 @@
     var _set = null;          // Set<string> — null solange nicht geladen
     var _wolkeGelesen = false;
 
+    /* FORMEN, DIE MAN EIGENS BESORGEN MUSS.
+     *
+     * Regionalform: Alola-Vulnona ist kein Vulnona mit Item.
+     * Geschlechtsform: ein weibliches Salmagnis wird nicht aus einem
+     *   maennlichen; es hat eigene Basiswerte (Angriff 92 statt 112,
+     *   Spezial-Angriff 100 statt 80) und eine eigene Nutzungszeile.
+     *   Aufgenommen am 15.09.2026 mit der Trennung der Geschlechter.
+     *
+     * Beide tragen deshalb ihren NAMEN im Schluessel — nicht die
+     * Form-Kennung. Die drei Paldea-Tauros teilen sich Nummer UND
+     * Kennung; ueber die Kennung waeren sie ein einziger Stern. */
+    var EIGENE_ART = { Regional: 1, Geschlecht: 1 };
+
     function eintragSchluessel(e) {
         if (!e) return '';
         var dex = (e.dex != null) ? e.dex : '';
         var form = e.form || 'Base';
-        // Eine Regionalform ist ein eigenes Vieh; ihr Name steht im
-        // Schluessel, weil die drei Paldea-Tauros sich Nummer UND
-        // Form-Kennung teilen.
-        if (form === 'Regional') return dex + '|R:' + (e.en || '');
+        if (EIGENE_ART[form]) return dex + '|R:' + (e.en || '');
         // Alles andere — Grundform, Mega, Mega X/Y/Z — ist dieselbe Art.
         return dex + '|Base';
     }

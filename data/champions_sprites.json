@@ -4,8 +4,8 @@
   "quelle": "https://www.pokewiki.de/Liste_der_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions",
   "rechte": "Die Icons sind Spiel-Screenshots. Rechteinhaber: The Pokémon Company / Nintendo / GAME FREAK. PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG; die dortige CC-BY-SA-Lizenz gilt nur fuer den Wiki-Text, nicht fuer diese Bilder.",
   "erzeuger": "scripts/build_champions_sprites.py",
-  "anzahl": 299,
-  "bytes": 4405055
+  "anzahl": 298,
+  "bytes": 4395417
  },
  "sprites": {
   "Garchomp (Mega-Z)": {
@@ -1248,14 +1248,6 @@
    "hoehe": 128,
    "bytes": 16927
   },
-  "Rotom (Heat)": {
-   "datei": "images/champions/rotom-heat.png",
-   "formschluessel": "479a",
-   "quelle": "https://www.pokewiki.de/images/c/ca/Pok%C3%A9mon-Icon_479a_CMP.png",
-   "breite": 128,
-   "hoehe": 128,
-   "bytes": 9846
-  },
   "Rotom (Wash)": {
    "datei": "images/champions/rotom-wash.png",
    "formschluessel": "479b",
@@ -1840,13 +1832,13 @@
    "hoehe": 128,
    "bytes": 12900
   },
-  "Vileplume": {
-   "datei": "images/champions/vileplume.png",
-   "formschluessel": "045",
-   "quelle": "https://www.pokewiki.de/images/f/f8/Pok%C3%A9mon-Icon_045_CMP.png",
+  "Scrafty": {
+   "datei": "images/champions/scrafty.png",
+   "formschluessel": "560",
+   "quelle": "https://www.pokewiki.de/images/2/2f/Pok%C3%A9mon-Icon_560_CMP.png",
    "breite": 128,
    "hoehe": 128,
-   "bytes": 11304
+   "bytes": 11512
   },
   "Lycanroc": {
    "datei": "images/champions/lycanroc.png",

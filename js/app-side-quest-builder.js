@@ -36,6 +36,24 @@
     // kann. Der Vorgabebau kommt aus derselben Nutzungsquelle wie die
     // Vorschlaege — was am haeufigsten gespielt wird, steht schon da.
     const DEX_URL = 'data/pokemon_battle_data.json';
+    /* Attackenwerte fuer den Set-Editor (15.09.2026).
+     *
+     * ANLASS (Betreiber): "bei den Attacken waere gut wenn man da sehen
+     * kann ob es eine Prio Attacke ist oder ob die sonst was cooles kann.
+     * […] Ich lerne gerade erst alles und brauche daher eine optimale
+     * Versorgung an Informationen."
+     *
+     * champions_resources.json fuehrt je Attacke Typ, Kategorie, Staerke,
+     * Genauigkeit, AP, Vorrang, Flaechenwirkung und den deutschen
+     * Wirkungstext. Gemessen am 15.09.2026: 513 Attacken, KEINE ohne
+     * de_effect und keine ohne Staerkeangabe, 39 mit Vorrang ungleich 0,
+     * 41 mit Flaechenwirkung.
+     *
+     * Die Datei ist 500 KB und wird schon von vier anderen Modulen
+     * geladen; der Browser liefert sie aus seinem Zwischenspeicher. Faellt
+     * sie aus, bleibt der Editor genau so, wie er vorher war — die
+     * Zusatzzeilen fehlen dann, die Auswahl funktioniert weiter. */
+    const RES_URL = 'data/champions_resources.json';
     let _raw = {};          // slug → Rohblock aus champions_usage.json
     let _dex = {}, _dexLoaded = false;
     let _sets = {};         // slug → { showdown, item, ability, nature, moves[], sp{} }
@@ -96,6 +114,15 @@
             punkte: 'Statuswertpunkte',
             punkteHint: (b, m) => `0–${m} je Wert, zusammen höchstens ${b}.`,
             budget: (n, b) => `${n} / ${b}`,
+            verteilung: 'Meistgespielte Verteilung',
+            eigeneVerteilung: 'Eigene Verteilung',
+            verteilungHint: 'Wähl eine Verteilung aus der Nutzungsanalyse — oder dreh danach an den Reglern, dann steht hier „Eigene Verteilung“.',
+            vorrang: 'Vorrang',
+            flaeche: 'trifft beide Gegner',
+            kat: { Physical: 'Physisch', Special: 'Speziell', Status: 'Status' },
+            staerke: 'Stärke',
+            genauigkeit: 'Genauigkeit',
+            ap: 'AP',
             budgetVoll: 'Budget ausgeschöpft',
             standard: 'Auf Standard zurücksetzen',
             fertig: 'Fertig',
@@ -142,6 +169,15 @@
             punkte: 'Stat points',
             punkteHint: (b, m) => `0–${m} per stat, ${b} in total.`,
             budget: (n, b) => `${n} / ${b}`,
+            verteilung: 'Most-played spread',
+            eigeneVerteilung: 'Custom spread',
+            verteilungHint: 'Pick a spread from the usage analysis — or move the sliders afterwards, then this reads "Custom spread".',
+            vorrang: 'Priority',
+            flaeche: 'hits both opponents',
+            kat: { Physical: 'Physical', Special: 'Special', Status: 'Status' },
+            staerke: 'Power',
+            genauigkeit: 'Accuracy',
+            ap: 'PP',
             budgetVoll: 'Budget spent',
             standard: 'Reset to default',
             fertig: 'Done',
@@ -198,6 +234,24 @@
             if (r.ok) { const j = await r.json(); if (j && typeof j === 'object') _dex = j; }
         } catch (err) { /* zuShowdown faellt dann auf "ungeprueft" zurueck */ }
         _dexLoaded = true;
+    }
+
+    let _mv = null;           // EN-Name -> Attackensatz aus champions_resources.json
+    let _mvLoaded = false;
+    async function loadRes() {
+        if (_mvLoaded) return;
+        try {
+            const r = await fetch(`${RES_URL}?t=${Date.now()}`);
+            if (r.ok) {
+                const j = await r.json();
+                const idx = {};
+                ((j && j.entries) || []).forEach(e => {
+                    if (e && e.cat === 'move' && e.en) idx[e.en] = e;
+                });
+                if (Object.keys(idx).length) _mv = idx;
+            }
+        } catch (err) { /* fail-soft: der Editor zeigt dann keine Werte */ }
+        _mvLoaded = true;
     }
 
     async function loadDe() {
@@ -528,7 +582,27 @@
             : (en || '');
     }
 
-    function spOptionen(liste, aktuell, l, art) {
+    /* ── WAS IN DER AUSKLAPPLISTE STEHEN MUSS UND WAS DARUNTER ──────────
+     *
+     * ANLASS (Betreiber, 15.09.2026): "Koennen wir beim Wesen auch
+     * aufzeigen was das macht? […] Es geht hier insgesamt schon darum die
+     * Leute optimal abzuholen vor allem wenn die wie ich nicht alle Infos
+     * im Kopf haben."
+     *
+     * Die Trennlinie ist keine Geschmacksfrage, sondern eine des Geraets:
+     * eine <option> kann KEINE Auszeichnung tragen, und am Telefon malt
+     * das Betriebssystem die Liste selbst. Was beim AUSWAEHLEN sichtbar
+     * sein muss, hat deshalb nur einen Platz — den Beschriftungstext.
+     *
+     *   Wesen   -> in die Option. Welcher Wert steigt und welcher faellt,
+     *             ist genau die Frage, die man BEIM Waehlen hat.
+     *   Vorrang -> in die Option. Dasselbe: eine Vorrangattacke waehlt man
+     *             wegen des Vorrangs, nicht nachdem man sie gewaehlt hat.
+     *   Staerke, Genauigkeit, AP, Wirkungstext -> unter das Feld. Das
+     *             liest man zum gewaehlten Eintrag, nicht im Vorbeiscrollen,
+     *             und es waere in der Liste eine Textwand.
+     */
+    function spOptionen(liste, aktuell, l, art, zusatz) {
         const raus = [];
         const gesehen = new Set();
         (liste || []).forEach(x => {
@@ -536,12 +610,100 @@
             if (!n || gesehen.has(n)) return;
             gesehen.add(n);
             const pct = (x && typeof x.pct === 'number') ? ` (${String(x.pct).replace('.', ',')} %)` : '';
-            raus.push(`<option value="${escapeHtml(n)}"${n === aktuell ? ' selected' : ''}>${escapeHtml(nm(n, art) + pct)}</option>`);
+            const zus = (typeof zusatz === 'function') ? (zusatz(x, l) || '') : '';
+            raus.push(`<option value="${escapeHtml(n)}"${n === aktuell ? ' selected' : ''}>${escapeHtml(nm(n, art) + zus + pct)}</option>`);
         });
         if (aktuell && !gesehen.has(aktuell)) {
             raus.unshift(`<option value="${escapeHtml(aktuell)}" selected>${escapeHtml(nm(aktuell, art))}</option>`);
         }
         raus.unshift(`<option value=""${aktuell ? '' : ' selected'}>—</option>`);
+        return raus.join('');
+    }
+
+    /** Der deutsche Reglername zu einem Statuswert, wie die Nutzungsdaten ihn schreiben. */
+    function wertKurz(bezeichnung) {
+        const CN = window.ChampionsNamen;
+        const k = CN && CN.WERT_SCHLUESSEL && CN.WERT_SCHLUESSEL[bezeichnung];
+        if (!k) return bezeichnung || '';
+        const CSx = CS();
+        const tabelle = uiLang() === 'de' ? CSx.LABEL_DE : CSx.LABEL;
+        return (tabelle && tabelle[k]) || bezeichnung;
+    }
+
+    /** "· ANG ↑ SPA ↓" — oder nichts, wenn das Wesen neutral ist. */
+    function wesenZusatz(x) {
+        if (!x || !x.up || !x.down) return '';
+        return ` · ${wertKurz(x.up)} ↑ ${wertKurz(x.down)} ↓`;
+    }
+
+    /** "· Vorrang +2" — nur bei Attacken, die wirklich Vorrang haben. */
+    function attackeZusatz(x, l) {
+        const r = _mv && _mv[(x && x.name) || ''];
+        const p = r && Number(r.priority);
+        if (!r || !p) return '';
+        return ` · ${l.vorrang} ${p > 0 ? '+' : ''}${p}`;
+    }
+
+    /* Die Zeile unter einem Attackenfeld: Typ, Kategorie, Zahlen, Wirkung.
+     * Ohne geladene Ressourcendatei kommt eine leere Zeichenkette zurueck —
+     * der Editor sieht dann aus wie vorher, statt eine leere Zeile zu malen. */
+    function attackeZeile(en, l) {
+        const r = _mv && _mv[en];
+        if (!r) return '';
+        const CN = window.ChampionsNamen;
+        const typDe = (uiLang() === 'de' && CN && CN.TYPEN_DE && CN.TYPEN_DE[r.type]) || r.type || '';
+        const marken = [];
+        // Dieselbe Typmarke wie im Pokédex-Reiter (.sqp-type plus die
+        // Farbklasse aus dem Spielfeld), damit ein Typ auf der ganzen Seite
+        // gleich aussieht statt zweimal anders.
+        if (typDe) marken.push(`<span class="sqp-type sq-play-type-${escapeHtml(String(r.type || '').toLowerCase())}">${escapeHtml(typDe)}</span>`);
+        const kat = (l.kat && l.kat[r.damage_class]) || r.damage_class;
+        if (kat) marken.push(`<span class="sqb-mv-kat">${escapeHtml(kat)}</span>`);
+        const p = Number(r.priority);
+        if (p) marken.push(`<span class="sqb-mv-prio">${escapeHtml(l.vorrang)} ${p > 0 ? '+' : ''}${p}</span>`);
+        if (r.spread) marken.push(`<span class="sqb-mv-flaeche">${escapeHtml(l.flaeche)}</span>`);
+
+        const zahlen = [];
+        const kraft = Number(r.power);
+        // Bei einer Status-Attacke steht "Staerke —" da, wo nichts steht —
+        // und die Marke "Status" daneben sagt dasselbe schon. Also weg.
+        if (kraft > 0) zahlen.push(`${escapeHtml(l.staerke)} ${kraft}`);
+        if (typeof r.accuracy === 'number') zahlen.push(`${escapeHtml(l.genauigkeit)} ${r.accuracy} %`);
+        if (typeof r.pp === 'number') zahlen.push(`${escapeHtml(l.ap)} ${r.pp}`);
+
+        const wirkung = (uiLang() === 'de' ? (r.de_effect || r.en_effect) : (r.en_effect || r.de_effect)) || '';
+        return `<div class="sqb-mv-info">
+                <div class="sqb-mv-marken">${marken.join('')}</div>
+                <div class="sqb-mv-zahlen">${zahlen.join(' · ')}</div>
+                ${wirkung ? `<p class="sqb-mv-text">${escapeHtml(wirkung)}</p>` : ''}
+            </div>`;
+    }
+
+    /* Die Verteilungs-Auswahl ueber den Reglern.
+     *
+     * ANLASS (Betreiber): "bei den Stats sollten wir auch anzeigen was oft
+     * genutzt wird und dann kann man das waehlen […] die meist genutzten
+     * statusverteilungen mit prozentualer Nutzung wie bei den Attacken".
+     *
+     * Der Wert einer Option ist der Punkte-Satz als JSON, nicht ein Index:
+     * ein Index waere an die Reihenfolge der Liste gebunden, und die kommt
+     * woechentlich neu aus dem Scraper. */
+    function verteilungOptionen(liste, aktuell, l) {
+        const CSx = CS();
+        const jetzt = JSON.stringify(CSx.KEYS.map(k => Number(aktuell && aktuell[k]) || 0));
+        let getroffen = false;
+        const raus = (liste || []).map(x => {
+            const punkte = CSx.clampSpread((x && x.points) || {});
+            const wert = JSON.stringify(CSx.KEYS.map(k => punkte[k]));
+            const ist = !getroffen && wert === jetzt;
+            if (ist) getroffen = true;
+            const text = CSx.KEYS.filter(k => punkte[k] > 0)
+                .map(k => `${punkte[k]} ${(uiLang() === 'de' ? CSx.LABEL_DE : CSx.LABEL)[k]}`)
+                .join(' / ') || '—';
+            const pct = (x && typeof x.pct === 'number') ? ` — ${String(x.pct).replace('.', ',')} %` : '';
+            return `<option value="${escapeHtml(wert)}"${ist ? ' selected' : ''}>${escapeHtml(text + pct)}</option>`;
+        });
+        raus.unshift(`<option value=""${getroffen ? '' : ' selected'}>${escapeHtml(l.eigeneVerteilung)}</option>`);
         return raus.join('');
     }
 
@@ -609,10 +771,15 @@
                 <output class="sqb-sp-val" data-out="${k}">${st.sp[k]}</output>
             </label>`;
         }).join('');
-        const attacken = [0, 1, 2, 3].map(i =>
-            `<select class="sqb-move" data-i="${i}" aria-label="${escapeHtml(l.attacken)} ${i + 1}">
-                ${spOptionen(b.move, (st.moves || [])[i] || '', l, 'moves')}
-             </select>`).join('');
+        const attacken = [0, 1, 2, 3].map(i => {
+            const gewaehlt = (st.moves || [])[i] || '';
+            return `<div class="sqb-mv">
+                <select class="sqb-move" data-i="${i}" aria-label="${escapeHtml(l.attacken)} ${i + 1}">
+                    ${spOptionen(b.move, gewaehlt, l, 'moves', attackeZusatz)}
+                </select>
+                <div class="sqb-mv-slot" data-mv="${i}">${gewaehlt ? attackeZeile(gewaehlt, l) : ''}</div>
+            </div>`;
+        }).join('');
         const leer = !(b.move || []).length && !(b.held_item || []).length;
         return `<div class="sqb-modal" id="sqbSetModal" role="dialog" aria-modal="true">
             <div class="sqb-modal-box">
@@ -627,7 +794,7 @@
                     <label class="sqb-field"><span>${escapeHtml(l.item)}</span>
                         <select class="sqb-item">${spOptionen(b.held_item, st.item, l, 'items')}</select></label>
                     <label class="sqb-field"><span>${escapeHtml(l.wesen)}</span>
-                        <select class="sqb-nature">${spOptionen(naturen, st.nature, l, 'nature')}</select></label>
+                        <select class="sqb-nature">${spOptionen(naturen, st.nature, l, 'nature', wesenZusatz)}</select></label>
                     <div class="sqb-field sqb-field--moves"><span>${escapeHtml(l.attacken)}</span>
                         <div class="sqb-moves">${attacken}</div></div>
                     <div class="sqb-field sqb-field--sp">
@@ -635,6 +802,11 @@
                             <em class="sqb-budget${summe >= CSx.SP_BUDGET ? ' is-full' : ''}">${escapeHtml(l.budget(summe, CSx.SP_BUDGET))}</em>
                         </span>
                         <p class="sqb-hint">${escapeHtml(l.punkteHint(CSx.SP_BUDGET, CSx.SP_MAX))}</p>
+                        ${(b.stat_points || []).length ? `<label class="sqb-vt">
+                            <span class="sqb-vt-titel">${escapeHtml(l.verteilung)}</span>
+                            <select class="sqb-spread">${verteilungOptionen(b.stat_points, st.sp, l)}</select>
+                            <span class="sqb-hint">${escapeHtml(l.verteilungHint)}</span>
+                        </label>` : ''}
                         <div class="sqb-sp-grid">${regler}</div>
                     </div>
                 </div>
@@ -677,34 +849,71 @@
         box.querySelector('.sqb-ability').addEventListener('change', e => { st.ability = e.target.value; });
         box.querySelector('.sqb-item').addEventListener('change', e => { st.item = e.target.value; });
         box.querySelector('.sqb-nature').addEventListener('change', e => { st.nature = e.target.value; });
+        const lJetzt = t();
         box.querySelectorAll('.sqb-move').forEach(sel => {
             sel.addEventListener('change', e => {
                 const i = Number(e.target.getAttribute('data-i'));
                 st.moves = st.moves || [];
                 st.moves[i] = e.target.value;
+                // Die Zeile unter dem Feld gehoert zur GEWAEHLTEN Attacke.
+                // Ohne diesen Nachzug stuenden dort die Werte der vorigen,
+                // und das waere schlimmer als gar keine Werte.
+                const slot = box.querySelector(`.sqb-mv-slot[data-mv="${i}"]`);
+                if (slot) slot.innerHTML = e.target.value ? attackeZeile(e.target.value, lJetzt) : '';
             });
         });
+
+        /* ── Verteilung waehlen, Regler nachziehen — und umgekehrt ────────
+         *
+         * Beide Richtungen sind noetig, sonst luegt eine der beiden
+         * Anzeigen: wer eine Verteilung waehlt, will sie an den Reglern
+         * sehen; wer danach an einem Regler dreht, spielt nicht mehr die
+         * gewaehlte Verteilung, und dann darf oben nicht weiter ihr Name
+         * stehen. */
+        const spreadSel = box.querySelector('.sqb-spread');
+        const budgetEl0 = box.querySelector('.sqb-budget');
+        function reglerZeigen() {
+            CSx.KEYS.forEach(k => {
+                const r = box.querySelector(`.sqb-sp[data-k="${k}"]`);
+                const o = box.querySelector(`[data-out="${k}"]`);
+                if (r) r.value = st.sp[k];
+                if (o) o.textContent = st.sp[k];
+            });
+            const summe = CSx.spreadTotal(st.sp);
+            if (budgetEl0) {
+                budgetEl0.textContent = t().budget(summe, CSx.SP_BUDGET);
+                budgetEl0.classList.toggle('is-full', summe >= CSx.SP_BUDGET);
+            }
+        }
+        function verteilungAbgleichen() {
+            if (!spreadSel) return;
+            const jetzt = JSON.stringify(CSx.KEYS.map(k => Number(st.sp[k]) || 0));
+            const treffer = [...spreadSel.options].find(o => o.value === jetzt);
+            spreadSel.value = treffer ? treffer.value : '';
+        }
+        if (spreadSel) {
+            spreadSel.addEventListener('change', () => {
+                if (!spreadSel.value) return;   // "Eigene Verteilung" aendert nichts
+                let werte;
+                try { werte = JSON.parse(spreadSel.value); } catch (err) { return; }
+                if (!Array.isArray(werte)) return;
+                const roh = {};
+                CSx.KEYS.forEach((k, i) => { roh[k] = Number(werte[i]) || 0; });
+                st.sp = CSx.clampSpread(roh);
+                reglerZeigen();
+            });
+        }
         // Die Regler rechnen live gegen das Budget. clampSpread schneidet den
         // Ueberschuss ab, statt ihn umzuverteilen — deshalb muss die Anzeige
         // danach zurueckgeschrieben werden, sonst zeigt der Regler 32 und der
         // Bau traegt 12.
-        const budgetEl = box.querySelector('.sqb-budget');
         box.querySelectorAll('.sqb-sp').forEach(inp => {
             inp.addEventListener('input', () => {
                 const roh = Object.assign({}, st.sp);
                 roh[inp.getAttribute('data-k')] = Number(inp.value);
                 st.sp = CSx.clampSpread(roh);
-                CSx.KEYS.forEach(k => {
-                    const r = box.querySelector(`.sqb-sp[data-k="${k}"]`);
-                    const o = box.querySelector(`[data-out="${k}"]`);
-                    if (r) r.value = st.sp[k];
-                    if (o) o.textContent = st.sp[k];
-                });
-                const summe = CSx.spreadTotal(st.sp);
-                if (budgetEl) {
-                    budgetEl.textContent = t().budget(summe, CSx.SP_BUDGET);
-                    budgetEl.classList.toggle('is-full', summe >= CSx.SP_BUDGET);
-                }
+                reglerZeigen();
+                verteilungAbgleichen();
             });
         });
     }
@@ -825,7 +1034,7 @@
         // der Builder einmal auf Englisch und erst der zweite Aufbau
         // deutsch.
         await Promise.all([
-            load(), loadDe(), loadDex(),
+            load(), loadDe(), loadDex(), loadRes(),
             (window.ChampionsNamen && window.ChampionsNamen.laden)
                 ? window.ChampionsNamen.laden() : Promise.resolve(null),
         ]);

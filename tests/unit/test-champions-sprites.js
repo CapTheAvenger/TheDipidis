@@ -105,12 +105,16 @@ const lokalName = new Function(
  * Spiegel-Lauf durch und die Zeilen gehoeren geloescht — dann faellt der
  * Test und erinnert daran.
  *
- * NAECHSTER SCHRITT: "Champions Sprites spiegeln" auf main starten, das
- * Ergebnis holen, diese Liste leeren. */
-const NOCH_OHNE_BILD = [
-    'Barbaracle', 'Dragalge', 'Eelektross', 'Falinks',
-    'Malamar', 'Pyroar', 'Sceptile', 'Scolipede',
-].sort();
+ * ERLEDIGT am 15.09.2026, 19:2x UTC: der Spiegel-Lauf auf main hat sieben
+ * Dateien geholt, und danach fuehrt das Manifest alle 306 Pokedex-
+ * Eintraege. Die Liste ist leer — und bleibt es, bis wieder ein Eintrag
+ * ohne Bild hereinkommt. Dann faellt der Test und sagt, welcher.
+ *
+ * Sie steht absichtlich weiter hier und nicht als `assert.deepEqual(ohne,
+ * [])`: eine leere BENANNTE Liste sagt "hier war schon einmal eine Luecke,
+ * so wird sie geschlossen". Die naechste faellt damit nicht in ein
+ * Verfahren, das erst jemand erfinden muss. */
+const NOCH_OHNE_BILD = [];
 
 describe('die gespiegelten Bilder', () => {
     it('jeder Pokédex-Eintrag hat eine gespiegelte Datei', () => {
@@ -351,14 +355,20 @@ describe('Showdown-Namen aus den Replica-Teams', () => {
          * demselben Grund schon vorher hier stand.
          * tests/unit/test-champions-raster.js fuehrt dieselben beiden
          * Namen als "ohne Pokedex-Eintrag" — das ist kein Zufall,
-         * sondern dieselbe Luecke einen Schritt frueher. */
+         * sondern dieselbe Luecke einen Schritt frueher.
+         *
+         * NACHTRAG 15.09.2026, spaeter Abend: Malamar ist weg. Es kam
+         * mit der Regel "ohne Grundform keine Mega-Form" in den Pokedex
+         * (nur Mega Malamar stand dort), und damit hat der Spiegel-Lauf
+         * nach ihm gesucht und es gefunden. Derselbe Weg, denselben Tag
+         * schon einmal gegangen — der Kader entscheidet, wonach gesucht
+         * wird. */
         const ERWARTET_OHNE_BILD = [
             'Cinderace -> cinderace.png',
             'Gogoat -> gogoat.png',
             'Houndstone -> houndstone.png',
             'Indeedee -> indeedee.png',
             'Indeedee-F -> indeedee-f.png',
-            'Malamar -> malamar.png',
             'Pincurchin -> pincurchin.png',
             'Sirfetch\u2019d -> sirfetch-d.png',
             'Thievul -> thievul.png',

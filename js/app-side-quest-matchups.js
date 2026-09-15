@@ -300,6 +300,13 @@
         if (!de()) return en;
         const map = kind === 'nature' ? NATURE_DE : (_namesDe && _namesDe[kind]);
         const d = map && map[en];
+        // Der Kommentar darueber stand hier schon, seit dem 05.09.2026 —
+        // der Code hat ihn nur nie eingeloest: zurueck kam der deutsche
+        // Name ALLEIN. Zusammengesetzt wird jetzt in champions-namen.js,
+        // damit alle Champions-Flaechen dieselbe Form zeigen.
+        if (window.ChampionsNamen && typeof window.ChampionsNamen.beide === 'function') {
+            return window.ChampionsNamen.beide(en, d);
+        }
         return (d && d !== en) ? d : en;
     }
 

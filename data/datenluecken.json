@@ -1,9 +1,12 @@
 {
  "_meta": {
-  "erzeugt": "2026-09-15T06:50:07Z",
+  "erzeugt": "2026-09-15T16:17:32Z",
   "erzeuger": "scripts/datenluecken.py",
-  "anzahl": 0,
-  "jeKlasse": {},
+  "anzahl": 2,
+  "jeKlasse": {
+   "gegenstandsname": 1,
+   "nutzungsdaten": 1
+  },
   "klassen": {
    "mega-faehigkeit": {
     "de": "Mega-Fähigkeit ohne Beleg",
@@ -24,9 +27,32 @@
    "gegenstandsname": {
     "de": "Gegenstand ohne Namen",
     "en": "Held item without a name"
+   },
+   "deutscher-name": {
+    "de": "Kein deutscher Name",
+    "en": "No German name"
    }
   },
   "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten."
  },
- "luecken": []
+ "luecken": [
+  {
+   "id": "gegenstandsname/quelle-liefert-nummern",
+   "klasse": "gegenstandsname",
+   "titel": "20 Gegenstände kommen nur als Nummer (197 Einträge): Unknown Item 185, Unknown Item 186, Unknown Item 188, Unknown Item 190, Unknown Item 192, Unknown Item 193, Unknown Item 194, Unknown Item 197 …",
+   "titelEn": "20 held items arrive as a bare number (197 entries): Unknown Item 185, Unknown Item 186, Unknown Item 188, Unknown Item 190, Unknown Item 192, Unknown Item 193, Unknown Item 194, Unknown Item 197 …",
+   "wo": "data/champions_usage.json → pokemon[*][*].held_item[].name",
+   "ansicht": "side-quest",
+   "vorschlag": null
+  },
+  {
+   "id": "nutzungsdaten/vivillon",
+   "klasse": "nutzungsdaten",
+   "titel": "Vivillon — kein Nutzungsdatensatz",
+   "titelEn": "Vivillon — no usage record",
+   "wo": "data/champions_usage.json → pokemon[Vivillon]",
+   "ansicht": "side-quest",
+   "vorschlag": null
+  }
+ ]
 }

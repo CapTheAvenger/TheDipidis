@@ -26,6 +26,118 @@
       "de_effect": "Erhöht den Angriff um eine Stufe, wenn das Pokémon von einer Feuer-Attacke getroffen wird. Es kann außerdem nicht verbrannt werden.",
       "en_effect": "Boosts the Attack stat when the Pokemon is hit by a Fire-type move. The Pokemon also cannot be burned.",
       "_source": "Mainline-Faehigkeit, die in champions_resources.json fehlt (191 von PokeAPI uebernommene Faehigkeiten, Thermal Exchange nicht darunter). Deutscher Name aus PokeAPI ability_names.csv, ability_id 270, local_language_id 6 -> Thermowandel; englischer Wirkungstext aus ability_flavor_text.csv derselben ID. Gebraucht seit dem 13.09.2026, weil Mega Baxcalibur die Faehigkeit traegt."
+    },
+    "Battle Armor": {
+      "de": "Kampfpanzer",
+      "de_effect": "Wehrt gegnerische Volltreffer mit einem harten Panzer ab.",
+      "en_effect": "Hard armor protects the Pokémon from critical hits.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 4, local_language_id 6 -> Kampfpanzer. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Battle_Armor (Artikeltitel Kampfpanzer, Name_en Battle Armor). Wirkungstext aus ability_flavor_text.csv, ability_id 4, language_id 6, language_id 9."
+    },
+    "Effect Spore": {
+      "de": "Sporenwirt",
+      "de_effect": "Wird dieses Pokémon durch eine direkte Attacke angegriffen, kann das beim Gegner Paralyse, Vergiftung oder Schlaf auslösen.",
+      "en_effect": "Contact with the Pokémon may inflict poison, sleep, or paralysis on the attacker.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 27, local_language_id 6 -> Sporenwirt. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Effect_Spore (Artikeltitel Sporenwirt, Name_en Effect Spore). Wirkungstext aus ability_flavor_text.csv, ability_id 27, language_id 6, language_id 9."
+    },
+    "Emergency Exit": {
+      "de": "Rückzug",
+      "de_effect": "Fallen seine KP auf die Hälfte des Maximalwerts oder weniger, bringt es sich in Sicherheit.",
+      "en_effect": "The Pokémon, sensing danger, switches out when its HP becomes half or less.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 194, local_language_id 6 -> Rückzug. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Emergency_Exit (Artikeltitel Rückzug, Name_en Emergency Exit). Wirkungstext aus ability_flavor_text.csv, ability_id 194, language_id 6, language_id 9."
+    },
+    "Fluffy": {
+      "de": "Flauschigkeit",
+      "de_effect": "Halbiert den Schaden, den es durch direkte Attacken nimmt, aber verdoppelt dafür den durch Feuer-Attacken erlittenen Schaden.",
+      "en_effect": "Halves the damage taken from moves that make direct contact, but doubles that of Fire-type moves.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 218, local_language_id 6 -> Flauschigkeit. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Fluffy (Artikeltitel Flauschigkeit, Name_en Fluffy). Wirkungstext aus ability_flavor_text.csv, ability_id 218, language_id 6, language_id 9."
+    },
+    "Forewarn": {
+      "de": "Vorwarnung",
+      "de_effect": "Gibt bei Kampfantritt Auskunft über eine Attacke aus dem gegnerischen Repertoire.",
+      "en_effect": "When it enters a battle, the Pokémon can tell one of the moves an opposing Pokémon has.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 108, local_language_id 6 -> Vorwarnung. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Forewarn (Artikeltitel Vorwarnung, Name_en Forewarn). Wirkungstext aus ability_flavor_text.csv, ability_id 108, language_id 6, language_id 9."
+    },
+    "Grass Pelt": {
+      "de": "Pflanzenpelz",
+      "de_effect": "Erhöht die Verteidigung, wenn Grasfeld aktiv ist.",
+      "en_effect": "Boosts the Pokémon's Defense stat on Grassy Terrain.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 179, local_language_id 6 -> Pflanzenpelz. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Grass_Pelt (Artikeltitel Pflanzenpelz, Name_en Grass Pelt). Wirkungstext aus ability_flavor_text.csv, ability_id 179, language_id 6, language_id 9."
+    },
+    "Grassy Surge": {
+      "de": "Gras-Erzeuger",
+      "de_effect": "Erzeugt bei Kampfantritt ein Grasfeld.",
+      "en_effect": "Turns the ground into Grassy Terrain when the Pokémon enters a battle.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 229, local_language_id 6 -> Gras-Erzeuger. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Grassy_Surge (Artikeltitel Gras-Erzeuger, Name_en Grassy Surge). Wirkungstext aus ability_flavor_text.csv, ability_id 229, language_id 6, language_id 9."
+    },
+    "Guard Dog": {
+      "de": "Wachhund",
+      "en_effect": "Boosts the Pokémon’s Attack stat if intimidated. Moves and items that would force the Pokémon to switch out also fail to work.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 275, local_language_id 6 -> Wachhund. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Guard_Dog (Artikeltitel Wachhund, Name_en Guard Dog). Wirkungstext aus ability_flavor_text.csv, ability_id 275, language_id 9."
+    },
+    "Libero": {
+      "de": "Libero",
+      "de_effect": "Das Pokémon nimmt bei Einsatz einer Attacke deren Typ an.",
+      "en_effect": "Changes the Pokémon's type to the type of the move it's about to use. This works only once each time the Pokémon enters battle.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 236, local_language_id 6 -> Libero. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Libero (Artikeltitel Libero, Name_en Libero). Wirkungstext aus ability_flavor_text.csv, ability_id 236, language_id 6, language_id 9."
+    },
+    "Liquid Ooze": {
+      "de": "Kloakensoße",
+      "de_effect": "Angreifer, die durch Saug-Attacken Kloakensoße in sich aufgenommen haben, nehmen durch deren widerwärtigen Gestank Schaden.",
+      "en_effect": "The strong stench of the Pokémon's oozed liquid damages attackers that use HP-draining moves.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 64, local_language_id 6 -> Kloakensoße. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Liquid_Ooze (Artikeltitel Kloakensoße, Name_en Liquid Ooze). Wirkungstext aus ability_flavor_text.csv, ability_id 64, language_id 6, language_id 9."
+    },
+    "Psychic Surge": {
+      "de": "Psycho-Erzeuger",
+      "de_effect": "Erzeugt bei Kampfantritt ein Psychofeld.",
+      "en_effect": "Turns the ground into Psychic Terrain when the Pokémon enters a battle.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 227, local_language_id 6 -> Psycho-Erzeuger. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Psychic_Surge (Artikeltitel Psycho-Erzeuger, Name_en Psychic Surge). Wirkungstext aus ability_flavor_text.csv, ability_id 227, language_id 6, language_id 9."
+    },
+    "Punk Rock": {
+      "de": "Punk Rock",
+      "de_effect": "Erhöht die Stärke von eigenen Lärm-Attacken und halbiert den Schaden, den das Pokémon selbst durch Lärm-Attacken erleidet.",
+      "en_effect": "Boosts the power of sound-based moves. The Pokémon also takes half the damage from these kinds of moves.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 244, local_language_id 6 -> Punk Rock. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Punk_Rock (Artikeltitel Punk Rock, Name_en Punk Rock). Wirkungstext aus ability_flavor_text.csv, ability_id 244, language_id 6, language_id 9."
+    },
+    "Rattled": {
+      "de": "Hasenfuß",
+      "de_effect": "Wird es von einer Unlicht-, Geister- oder Käfer-Attacke getroffen, bekommt es Angst und seine Initiative steigt.",
+      "en_effect": "The Pokémon gets scared when hit by a Dark-, Ghost-, or Bug-type attack or if intimidated, which boosts its Speed stat.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 155, local_language_id 6 -> Hasenfuß. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Rattled (Artikeltitel Hasenfuß, Name_en Rattled). Wirkungstext aus ability_flavor_text.csv, ability_id 155, language_id 6, language_id 9."
+    },
+    "Run Away": {
+      "de": "Angsthase",
+      "de_effect": "Die Flucht vor wilden Pokémon gelingt immer.",
+      "en_effect": "Enables a sure getaway from wild Pokémon.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 50, local_language_id 6 -> Angsthase. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Run_Away (Artikeltitel Angsthase, Name_en Run Away). Wirkungstext aus ability_flavor_text.csv, ability_id 50, language_id 6, language_id 9."
+    },
+    "Seed Sower": {
+      "de": "Streusaat",
+      "en_effect": "Turns the ground into Grassy Terrain when the Pokémon is hit by an attack.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 269, local_language_id 6 -> Streusaat. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Seed_Sower (Artikeltitel Streusaat, Name_en Seed Sower). Wirkungstext aus ability_flavor_text.csv, ability_id 269, language_id 9."
+    },
+    "Stakeout": {
+      "de": "Beschattung",
+      "de_effect": "Bewirkt bei Angriffen auf neu eingewechselte Ziele doppelten Schaden.",
+      "en_effect": "Doubles the damage dealt to a target that has just switched into battle.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 198, local_language_id 6 -> Beschattung. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Stakeout (Artikeltitel Beschattung, Name_en Stakeout). Wirkungstext aus ability_flavor_text.csv, ability_id 198, language_id 6, language_id 9."
+    },
+    "Steely Spirit": {
+      "de": "Stählerner Wille",
+      "de_effect": "Erhöht die Stärke von Stahl-Attacken auf Mitstreiterseite.",
+      "en_effect": "Powers up the Steel-type moves of the Pokémon and its allies.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 252, local_language_id 6 -> Stählerner Wille. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Steely_Spirit (Artikeltitel Stählerner Wille, Name_en Steely Spirit). Wirkungstext aus ability_flavor_text.csv, ability_id 252, language_id 6, language_id 9."
+    },
+    "Suction Cups": {
+      "de": "Saugnapf",
+      "de_effect": "Blockt Attacken und Items, die Pokémon austauschen, indem es sich mit einem Saugnapf am Boden verankert.",
+      "en_effect": "The Pokémon uses suction cups to stay in one spot. This protects it from moves and items that would force it to switch out.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 21, local_language_id 6 -> Saugnapf. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Suction_Cups (Artikeltitel Saugnapf, Name_en Suction Cups). Wirkungstext aus ability_flavor_text.csv, ability_id 21, language_id 6, language_id 9."
+    },
+    "Vital Spirit": {
+      "de": "Munterkeit",
+      "de_effect": "Das Pokémon ist so munter, dass es nicht einschlafen kann.",
+      "en_effect": "The Pokémon is full of vitality, and that prevents it from falling asleep.",
+      "_source": "Deutscher Name aus PokeAPI data/v2/csv/ability_names.csv, ability_id 72, local_language_id 6 -> Munterkeit. Unabhaengig bestaetigt am 15.09.2026 ueber https://www.pokewiki.de/Vital_Spirit (Artikeltitel Munterkeit, Name_en Vital Spirit). Wirkungstext aus ability_flavor_text.csv, ability_id 72, language_id 6, language_id 9."
     }
   }
 }

@@ -542,10 +542,18 @@ describe('Champions-Nutzung: unmögliche und unvollständige Verteilungen', () =
     });
 
     it('die Erwartung hängt an der Sorte — vier Attacken, ein Wesen', () => {
+        // 15.09.2026: aus dem einen `moveRow` sind drei Zeilenbauer
+        // geworden (moveRow / itemRow / abilityRow). Der Grund steht in
+        // js/app-side-quest-usage.js — dieselbe Funktion für drei Sorten
+        // hieß, dass Attacken und Fähigkeiten im GEGENSTANDS-Topf
+        // nachgeschlagen wurden und auf der deutschen Seite englisch
+        // blieben. Der Punkt DIESER Zusicherung ist unverändert: die
+        // erwartete Summe hängt an der Sorte, 400 für vier Attacken, 100
+        // für das eine Wesen und den einen Gegenstand.
         assert.match(NUTZUNG, /barPanel\(L\(\)\.moves, block\.move, moveRow, 400\)/);
         assert.match(NUTZUNG, /barPanel\(L\(\)\.nature, block\.nature, natRow, 100\)/);
-        assert.match(NUTZUNG, /barPanel\(L\(\)\.item, block\.held_item, moveRow, 100\)/);
-        assert.match(NUTZUNG, /barPanel\(L\(\)\.ability, block\.ability, moveRow, 100\)/);
+        assert.match(NUTZUNG, /barPanel\(L\(\)\.item, block\.held_item, itemRow, 100\)/);
+        assert.match(NUTZUNG, /barPanel\(L\(\)\.ability, block\.ability, abilityRow, 100\)/);
     });
 
     it('beide Sprachen haben die Sätze', () => {

@@ -453,11 +453,16 @@ def test_jeder_entschiedene_name_traegt_seine_quelle(entschieden):
     zweite = entschieden["_meta"]["zweite_runde_2026_09_03"]["ergebnis"]["falsch"]
     dritte = entschieden["_meta"]["dritte_runde_2026_09_03"]["ergebnis"]["neu_eingetragen"]
     vierte = entschieden["_meta"]["vierte_runde_2026_09_03"]["ergebnis"]["ergaenzt"]
+    # Runde 5 (15.09.2026) hat 21 Namen ergaenzt, davon aber nur die zwei
+    # Attacken HIER; die 19 Faehigkeiten liegen in
+    # data/champions_ability_overrides.json. Gezaehlt wird deshalb
+    # "hier_eingetragen" und nicht "ergaenzt".
+    fuenfte = entschieden["_meta"]["fuenfte_runde_2026_09_15"]["ergebnis"]["hier_eingetragen"]
     assert erste == 63, f"erste Runde soll 63 Faelle nennen, nennt {erste}"
-    soll = erste + zweite + dritte + vierte
+    soll = erste + zweite + dritte + vierte + fuenfte
     assert gesamt == soll, (
         f"{gesamt} entschiedene Namen, aber die Bilanz in _meta sagt "
-        f"{erste} + {zweite} + {dritte} + {vierte} = {soll}")
+        f"{erste} + {zweite} + {dritte} + {vierte} + {fuenfte} = {soll}")
 
 
 def test_die_entschiedenen_namen_stehen_auch_in_den_daten(entschieden):

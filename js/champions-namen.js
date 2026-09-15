@@ -117,10 +117,71 @@
         return UNBENANNT.test(String(en || '').trim());
     }
 
+    /* ── BEIDE NAMEN, NICHT NUR EINER (15.09.2026) ──────────────────
+     *
+     * ANLASS (Betreiber, mit Bildschirmfoto aus dem Team-Builder): "in
+     * der deutschen Version bitte immer englischen und deutschen Namen
+     * anzeigen — weil die Fähigkeit emergency exit heißt auf Deutsch
+     * sicher anders".
+     *
+     * Er hat damit zwei verschiedene Dinge getroffen, die gleich
+     * aussehen:
+     *
+     *   1. "Emergency Exit" stand englisch da, WEIL kein deutscher Name
+     *      vorlag. Gemessen am 15.09.2026 gegen data/champions_usage.json:
+     *      19 von 202 benutzten Faehigkeiten und 2 von 423 Attacken
+     *      hatten keinen. Das ist Datenarbeit und steckt jetzt in
+     *      data/champions_ability_overrides.json bzw.
+     *      data/champions_namen_entschieden.json.
+     *   2. Selbst wo ein deutscher Name vorlag, stand NUR er da. Wer ein
+     *      Set nachbaut, gibt es aber in ein englisches Spiel und in ein
+     *      englisches Turnierformular ein — der englische Name ist nicht
+     *      Beiwerk, er ist der, den man braucht.
+     *
+     * Deshalb: englisch fuehrt, deutsch steht daneben. Dieselbe
+     * Reihenfolge, die der Pokédex-Reiter schon zeigt.
+     *
+     * WARUM DER HALBGEVIERTSTRICH UND KEIN PUNKT
+     * Verglichen wurden vier Fassungen im echten Set-Editor bei 390 px
+     * (Bildschirmfotos im Durchgang vom 15.09.):
+     *   "Grassy Surge (Gras-Erzeuger) (99,9 %)"  zwei Klammerpaare
+     *                                            hintereinander
+     *   "Gras-Erzeuger (Grassy Surge) (99,9 %)"  dito, und englisch
+     *                                            steht hinten
+     *   "Grassy Surge · Gras-Erzeuger (99,9 %)"  liest sich gut, aber
+     *                                            der Mittelpunkt IST
+     *                                            schon das Trennzeichen
+     *                                            der Attackenliste
+     *                                            (join(' · ')) — vier
+     *                                            Attacken zweisprachig
+     *                                            haetten acht gleich
+     *                                            getrennte Glieder
+     *   "Grassy Surge – Gras-Erzeuger (99,9 %)"  ein Klammerpaar, und
+     *                                            der Mittelpunkt bleibt
+     *                                            der Liste  ← gewaehlt
+     */
+    const TRENNER = ' \u2013 ';
+
     /**
-     * Der Name, wie er auf der Seite stehen soll: deutsch, wenn die
-     * Oberflaeche deutsch ist und ein deutscher Name da ist — sonst
-     * unveraendert englisch. NIE ein leerer Platzhalter.
+     * Englischer Name, und daneben der deutsche — wenn die Oberflaeche
+     * deutsch ist, ein deutscher Name vorliegt und er sich vom
+     * englischen unterscheidet. Sonst genau der englische Name.
+     *
+     * Fuer die Flaechen, die ihren deutschen Namen aus einer eigenen
+     * Quelle ziehen (Gegenstands-Reiter aus champions_resources.json,
+     * Matchups aus der schon geladenen Namenstabelle): die geben ihn
+     * hier herein, damit die ZUSAMMENSETZUNG an einer Stelle steht.
+     */
+    function beide(en, deName) {
+        if (!en) return '';
+        if (!istDeutsch()) return en;
+        return (deName && deName !== en) ? en + TRENNER + deName : en;
+    }
+
+    /**
+     * Der Name, wie er auf der Seite stehen soll: englisch, und in der
+     * deutschen Oberflaeche der deutsche daneben. NIE ein leerer
+     * Platzhalter.
      *
      * Ausnahme: hat die Quelle gar keinen Namen geliefert, steht hier
      * die Luecke statt eines Pseudonamens — siehe oben.
@@ -133,9 +194,9 @@
                 ? 'Von der Quelle nicht benannt (Nr. ' + unbenannt[1] + ')'
                 : 'Not named by the source (no. ' + unbenannt[1] + ')';
         }
-        if (!istDeutsch()) return en;
-        return de(en, art) || en;
+        return beide(en, de(en, art));
     }
 
-    window.ChampionsNamen = { laden, de, anzeige, istDeutsch, istUnbenannt, WESEN_DE };
+    window.ChampionsNamen = { laden, de, anzeige, beide, istDeutsch, istUnbenannt,
+                              WESEN_DE, TRENNER };
 })();

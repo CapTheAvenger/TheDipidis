@@ -1075,10 +1075,75 @@
 .current-meta-mydeck-title {
     margin: 0;
 }
+/* DIE WERKZEUGLEISTE IST NICHT DER INHALT (15.09.2026).
+   -----------------------------------------------------
+   Gemeldet: "in mein Deck passt das verhältnis der Buttons zum Rest
+   nicht, was ist das alter, wie kann man denn optisch sowas freigeben?"
+
+   Gerendert und nachgemessen (Deck-Analyse, Dragapult, 1440 px): neun
+   Knoepfe, jeder 38 px hoch bei 14 px Schrift, zusammen 987 px breit —
+   in einer Kopfzeile ueber einem Gitter aus Kacheln von 110 px Breite.
+   Die Leiste war damit breiter und schwerer als alles, was sie
+   bedient, und alle neun Knoepfe schrien gleich laut.
+
+   Zwei Aenderungen, beide an derselben Ursache:
+
+   1. EINE Hauptaktion. "Speichern" bleibt gruen und gross — das ist
+      der Knopf, den man sucht. Die uebrigen acht sind Werkzeuge und
+      sehen jetzt auch so aus: kleiner, ohne Schatten, auf dem Grund
+      der Flaeche statt auf Weiss.
+   2. Sie ruecken nach rechts und duerfen umbrechen, ohne die
+      Ueberschrift zu verdraengen.
+
+   Gemessen nach der Umstellung: 28 px hoch, 12,5 px Schrift. */
 .current-meta-mydeck-btns {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
+    justify-content: flex-end;
+    flex: 1 1 auto;
+    /* UEBER DIE MARKEN, NICHT GEGEN DAS !important.
+       css/ux-step1.css setzt fuer JEDEN .btn-modern padding, font-size,
+       font-weight und border-radius mit !important — aus Marken
+       (--ui-btn-*). Ein eigenes padding hier waere wirkungslos gewesen
+       (nachgemessen: die Leiste blieb bei 38 px hoch und 987 px breit).
+       Wer !important mit !important beantwortet, gewinnt einmal und
+       verliert beim naechsten Mal; wer die Marke umsetzt, bleibt im
+       System. */
+    --ui-btn-pad-y: 5px;
+    --ui-btn-pad-x: 10px;
+    --ui-btn-font-size: 12.5px;
+    --ui-btn-radius: 8px;
+}
+.current-meta-mydeck-btns .btn-modern {
+    box-shadow: none;
+    background: var(--surface-2);
+    border-color: var(--line);
+    color: var(--ink-2);
+}
+.current-meta-mydeck-btns .btn-modern:hover {
+    background: var(--surface-1);
+    border-color: var(--ink-3);
+    color: var(--ink);
+    transform: none;
+    box-shadow: none;
+}
+/* Die eine Hauptaktion behaelt ihr Gewicht. Ohne diese Zeile wuerde die
+   Regel darueber auch sie einebnen — dann saehe die Leiste ruhig aus
+   und niemand faende den Knopf, um den es geht. */
+.current-meta-mydeck-btns .btn-modern.success {
+    background: var(--color-success);
+    border-color: #219653;
+    color: #fff;
+    /* Eigene Marken, damit die Hauptaktion etwas groesser bleibt als die
+       Werkzeuge daneben — dieselbe Mechanik wie oben. */
+    --ui-btn-pad-y: 7px;
+    --ui-btn-pad-x: 15px;
+    --ui-btn-font-size: 13.5px;
+}
+.current-meta-mydeck-btns .btn-modern.success:hover {
+    background: #1c7f47;
+    color: #fff;
 }
 .current-meta-stats-title {
     font-size: 1.3em;
@@ -1335,18 +1400,35 @@
     flex-wrap: wrap;
     padding: 4px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid #e0e5f0;
+    /* DERSELBE BEFUND WIE BEI DEN BEIDEN ZWILLINGEN — nur hier blieb er
+       bis zum 15.09.2026 stehen.
+       ------------------------------------------------------------
+       Gemeldet: "in der Kartenübersicht sind die Filter nicht optimal
+       lesbar", mit Bildschirmfoto der Deck-Analyse: eine hellgraue
+       Leiste mitten in der dunklen Ansicht, darauf graue Schrift.
+
+       Die Ursache steht seit dem 30.08.2026 bei
+       .city-league-card-type-filter und .past-meta-cards-type-filter
+       beschrieben und war dort behoben: rgba(255,255,255,0.7) ist kein
+       Farbwert, sondern "etwas heller als der Grund" — und das bleibt im
+       Dunkelmodus weiss. Genau dafuer gibt es --surface-2, in beiden
+       Modi. Diese dritte Leiste wurde damals uebersehen.
+
+       Dazu die doppelte Kontrastbremse am Knopf: --ink-3 UND
+       opacity: 0.7. Die Deckkraft multipliziert sich auf jede Farbe
+       darunter; gemessen wurde sie an den Zwillingen mit 1,39:1. Die
+       Ruhe kommt jetzt aus der Farbe selbst (--ink-2). */
+    background: var(--surface-2);
+    border: 1px solid var(--line);
 }
 .current-meta-cards-type-btn {
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: var(--ink-3);
+    color: var(--ink-2);
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    opacity: 0.7;
     font-weight: 700;
     transition: all 0.2s ease;
     font-family: 'Nunito', sans-serif;
@@ -1397,8 +1479,11 @@
     background: transparent;
     /* ohne diese Zeile bliebe das #fff der Hervorhebung stehen (0,2,0 gegen
        0,1,0 der Grundregel) — weisse Schrift auf durchsichtigem Grund.
-       Derselbe Wert wie in der Grundregel darueber. */
-    color: var(--ink-3);
+       Derselbe Wert wie in der Grundregel darueber — mitgezogen am
+       15.09.2026, als die Grundregel von --ink-3 auf --ink-2 ging.
+       tests/unit/test-knopf-hervorhebung.js haelt genau diese Gleichheit
+       fest: ein abgewaehlter Knopf muss aussehen wie ein nie gewaehlter. */
+    color: var(--ink-2);
     /* .btn-inactive in css/ui-components.css:638 setzt box-shadow: none
        zwar mit !important, aber nur mit 0,1,0 — gegen das !important der
        Hervorhebung darueber (0,2,0) verliert es. Also hier, gleiche
@@ -1610,18 +1695,23 @@
     flex-wrap: wrap;
     padding: 4px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid #e0e5f0;
+    /* Dieselbe Kontrastbremse wie bei .current-meta-cards-type-filter
+       (15.09.2026) — siehe die Begruendung dort. Weiss ist kein
+       Farbwert, sondern "heller als der Grund": --surface-2. */
+    background: var(--surface-2);
+    border: 1px solid var(--line);
 }
 .city-league-meta-share-btn {
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: var(--ink-3);
+    /* --ink-3 plus opacity: 0.7 war die doppelte Bremse, die an den
+       Zwillingen mit 1,39:1 gemessen wurde. Die Ruhe kommt aus der
+       Farbe, nicht aus der Deckkraft. */
+    color: var(--ink-2);
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    opacity: 0.7;
     font-weight: 700;
     transition: all 0.2s ease;
     font-family: 'Nunito', sans-serif;
@@ -1643,18 +1733,23 @@
     flex-wrap: wrap;
     padding: 4px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid #e0e5f0;
+    /* Dieselbe Kontrastbremse wie bei .current-meta-cards-type-filter
+       (15.09.2026) — siehe die Begruendung dort. Weiss ist kein
+       Farbwert, sondern "heller als der Grund": --surface-2. */
+    background: var(--surface-2);
+    border: 1px solid var(--line);
 }
 .city-league-meta-type-btn {
     padding: 5px 10px;
     font-size: 0.8em;
     background: transparent;
-    color: var(--ink-3);
+    /* --ink-3 plus opacity: 0.7 war die doppelte Bremse, die an den
+       Zwillingen mit 1,39:1 gemessen wurde. Die Ruhe kommt aus der
+       Farbe, nicht aus der Deckkraft. */
+    color: var(--ink-2);
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    opacity: 0.7;
     font-weight: 700;
     transition: all 0.2s ease;
     font-family: 'Nunito', sans-serif;

@@ -2181,14 +2181,33 @@ img[src*="limitlesstcg"] {
  * beim Deckbau tatsaechlich geschaut wird, und der einzige Knopf, der
  * die Seite verlaesst. Deshalb der staerkste Kontrast, den die Palette
  * hergibt — und keine Farbe, die anderswo schon etwas bedeutet. */
+/* NACHGEMESSEN UND KORRIGIERT AM 15.09.2026.
+ * ------------------------------------------
+ * Gemeldet: "Auch das Preis Tag fast in der gleichen Farbe wie die
+ * Karte, das sieht voll komisch aus."
+ *
+ * Gerendert und angesehen (Deck-Analyse, Dragapult, 1440 px): auf jeder
+ * Kachel standen ZWEI schwarze Bloecke direkt uebereinander — der
+ * Datenstreifen ueber dem Bild ("100,0 % | Ø 1,05x") und unmittelbar
+ * darunter das Preisschild, beide rgb(22,26,35). Bei 25 Karten sind das
+ * 50 schwarze Balken auf einem Bildschirm; die Kachel sieht aus, als
+ * haette sie zwei Beschriftungsleisten statt einer Angabe und einer
+ * Aktion.
+ *
+ * Die Absicht von oben bleibt richtig: der Preis ist die eine Zahl, auf
+ * die beim Deckbau geschaut wird. Sie braucht dafuer aber keinen
+ * schwarzen Block, sondern eine eigene FORM. Das Schild steht jetzt als
+ * umrandete Marke auf dem Kachelgrund — starker Textkontrast wie vorher,
+ * aber klar unterscheidbar vom Datenstreifen darueber. Dass es die Seite
+ * verlaesst, sagt weiterhin die Markenfarbe beim Ueberfahren. */
 .city-league-card-market-btn {
     min-height: 24px;
     min-width: 0;
     padding: 0 var(--s-1);
-    border: 1px solid var(--ink);
+    border: 1px solid var(--ink-3);
     border-radius: var(--r-sm);
-    background: var(--ink);
-    color: var(--surface-1);
+    background: var(--surface-1);
+    color: var(--ink);
     font-family: var(--font-num);
     font-size: var(--fs-xs);
     font-weight: 700;
@@ -2205,6 +2224,10 @@ img[src*="limitlesstcg"] {
 .city-league-card-market-btn[data-market-cursor="pointer"]:hover {
     background: var(--brand);
     border-color: var(--brand);
+    /* Der Grund wird beim Ueberfahren dunkel — die Schrift muss mit,
+       sonst steht Tinte auf Marke. Stand hier bisher nicht, weil die
+       Ruhefarbe schon hell war. */
+    color: #fff;
 }
 /* Kein Preis bekannt: gedaempft und nicht anklickbar. Vorher ein grauer
  * Verlauf, der genauso aussah wie ein Knopf, der etwas tut. */

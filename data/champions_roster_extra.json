@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "description": "Champions roster additions not in the otterlyclueless M-A dataset. Base species from pokebase.app Champions dex; new Mega Evolutions from official M-B coverage. Stats/types resolved from Smogon; German names from PokéAPI. Kuratierte Einzelformen (EXTRA_FORMEN in scripts/scrape_champions_roster.py), deren pokebase-Slug nicht auf einen Smogon-Schluessel abbildet, kommen zuletzt.",
+  "description": "Champions roster additions not in the otterlyclueless M-A dataset. Base species from pokebase.app Champions dex; new Mega Evolutions from official M-B coverage. Stats/types resolved from Smogon; German names from PokéAPI. Kuratierte Einzelformen (EXTRA_FORMEN in scripts/scrape_champions_roster.py), deren pokebase-Slug nicht auf einen Smogon-Schluessel abbildet, kommen zuletzt. Dazu seit dem 15.09.2026: Arten aus den Replica-Teams, die die Kaderquelle noch nicht fuehrt (aus_teams), und Geschlechtsformen mit eigener Nutzungszeile (geschlechtsformen) — beide abgeleitet in scripts/scrape_champions_roster.py, beide nur mit Smogon-Basiswerten.",
   "sources": [
    "https://pokebase.app/pokemon-champions/pokemon",
    "official M-B Mega coverage",
@@ -19,7 +19,24 @@
    "Pyroar",
    "Sceptile",
    "Scolipede"
-  ]
+  ],
+  "aus_teams": [
+   "Cinderace",
+   "Gogoat",
+   "Houndstone",
+   "Indeedee",
+   "Indeedee-F",
+   "Meowstic-F",
+   "Pincurchin",
+   "Sirfetch’d",
+   "Thievul"
+  ],
+  "aus_teams_count": 9,
+  "aus_teams_ohne_werte": [],
+  "geschlechtsformen": [
+   "Basculegion-F"
+  ],
+  "geschlechtsformen_count": 1
  },
  "smogonKeys": [
   "Absol",
@@ -139,6 +156,16 @@
   "Staraptor-Mega",
   "Swampert-Mega",
   "Tyranitar-Mega",
-  "Venusaur-Mega"
+  "Venusaur-Mega",
+  "Cinderace",
+  "Gogoat",
+  "Houndstone",
+  "Indeedee",
+  "Pincurchin",
+  "Sirfetch’d",
+  "Thievul",
+  "Indeedee-F",
+  "Meowstic-F",
+  "Basculegion-F"
  ]
 }

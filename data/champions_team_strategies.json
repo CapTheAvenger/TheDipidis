@@ -104,7 +104,7 @@
         "roles": [
           {
             "name": "Incineroar",
-            "role": "Dein Anker und Support. Beim Einwechseln senkt seine Fähigkeit Bedroher (Intimidate) den Angriff aller Gegner um 1 Stufe. Mit Mogelhieb (Fake Out) lässt es einen Gegner eine Runde zucken und mit Standpauke (Parting Shot) schwächt es das Ziel und holt einen Angreifer rein."
+            "role": "Dein Anker und Support. Beim Einwechseln senkt seine Fähigkeit Bedroher (Intimidate) den Angriff aller Gegner um 1 Stufe. Mit Mogelhieb (Fake Out) lässt es einen Gegner eine Runde zurückschrecken und mit Standpauke (Parting Shot) schwächt es das Ziel und holt einen Angreifer rein."
           },
           {
             "name": "Gengar",
@@ -116,7 +116,7 @@
           },
           {
             "name": "Sneasler",
-            "role": "Schneller Angreifer mit Vorzugsangriff. Mogelhieb (Fake Out) lässt einen Gegner zucken, Schreckenskralle (Dire Claw) hat 50 % Chance auf Vergiftung, Paralyse oder Schlaf. Sein Eiskraut (White Herb) stellt nach Nahkampf (Close Combat) die gesenkte Verteidigung wieder her und löst seine Fähigkeit Entlastung (Unburden) aus — danach ist es doppelt so schnell."
+            "role": "Schneller Angreifer mit Vorzugsangriff. Mogelhieb (Fake Out) lässt einen Gegner zurückschrecken, Schreckenskralle (Dire Claw) hat 50 % Chance auf Vergiftung, Paralyse oder Schlaf. Sein Eiskraut (White Herb) stellt nach Nahkampf (Close Combat) die gesenkte Verteidigung wieder her und löst seine Fähigkeit Entlastung (Unburden) aus — danach ist es doppelt so schnell."
           },
           {
             "name": "Kommo-o",
@@ -191,7 +191,7 @@
         "roles": [
           {
             "name": "Incineroar",
-            "role": "Dein Helfer im Hintergrund. Beim Einwechseln senkt Bedroher (Intimidate) den Angriff beider Gegner um 1 Stufe. Mit Mogelhieb (Fake Out) lässt du einen Gegner 1 Runde zucken, und mit Standpauke (Parting Shot) schwächst du einen Gegner (−1 Angriff & Spez.-Angriff) und wechselst gleichzeitig zu einem besseren Pokémon."
+            "role": "Dein Helfer im Hintergrund. Beim Einwechseln senkt Bedroher (Intimidate) den Angriff beider Gegner um 1 Stufe. Mit Mogelhieb (Fake Out) lässt du einen Gegner 1 Runde zurückschrecken, und mit Standpauke (Parting Shot) schwächst du einen Gegner (−1 Angriff & Spez.-Angriff) und wechselst gleichzeitig zu einem besseren Pokémon."
           },
           {
             "name": "Sinistcha",
@@ -555,7 +555,7 @@
           },
           {
             "name": "Incineroar",
-            "role": "Dein Support-Anker. Beim Einwechseln senkt Bedroher (Intimidate) den Angriff beider Gegner um 1. Mogelhieb (Fake Out) — Vorzugsangriff in der ersten Runde nach dem Einwechseln, lässt das Ziel zucken (verliert die Runde). Standpauke (Parting Shot) senkt Angriff und Spezial-Angriff des Ziels um 1 und wechselt dich danach aus. Die Prunusbeere (Sitrus Berry) heilt 25 % KP, sobald es unter die Hälfte fällt."
+            "role": "Dein Support-Anker. Beim Einwechseln senkt Bedroher (Intimidate) den Angriff beider Gegner um 1. Mogelhieb (Fake Out) — Vorzugsangriff in der ersten Runde nach dem Einwechseln, lässt das Ziel zurückschrecken (verliert die Runde). Standpauke (Parting Shot) senkt Angriff und Spezial-Angriff des Ziels um 1 und wechselt dich danach aus. Die Prunusbeere (Sitrus Berry) heilt 25 % KP, sobald es unter die Hälfte fällt."
           },
           {
             "name": "Charizard",
@@ -731,7 +731,7 @@
           },
           {
             "name": "Garchomp",
-            "role": "Robuster Allround-Angreifer. Steinhagel (Rock Slide) trifft beide Gegner und lässt sie zu 30 % zucken. Drachenklaue (Dragon Claw) und Stampftanz (Stomping Tantrum) sind verlässliche Einzelhits. Seine Fähigkeit Rauhaut (Rough Skin) zwickt jeden, der es mit Kontakt angreift, um 1/8 KP."
+            "role": "Robuster Allround-Angreifer. Steinhagel (Rock Slide) trifft beide Gegner und lässt sie zu 30 % zurückschrecken. Drachenklaue (Dragon Claw) und Stampftanz (Stomping Tantrum) sind verlässliche Einzelhits. Seine Fähigkeit Rauhaut (Rough Skin) zwickt jeden, der es mit Kontakt angreift, um 1/8 KP."
           },
           {
             "name": "Farigiraf",
@@ -812,7 +812,7 @@
         "roles": [
           {
             "name": "Aerodactyl",
-            "role": "Dein Tempo-Geber. Es bringt mit Rückenwind (Tailwind) für 4 Runden doppelte Initiative für dein ganzes Team und drückt mit Steinhagel (Rock Slide) auf beide Gegner – das hat 30 % Chance, sie zucken zu lassen. Mit dem Aerodactylit (Aerodactylite) wird es zu Mega-Aerodactyl mit der Fähigkeit Steinhaupt (Rock Head, kein Rückstoßschaden)."
+            "role": "Dein Tempo-Geber. Es bringt mit Rückenwind (Tailwind) für 4 Runden doppelte Initiative für dein ganzes Team und drückt mit Steinhagel (Rock Slide) auf beide Gegner – das hat 30 % Chance, sie zurückschrecken zu lassen. Mit dem Aerodactylit (Aerodactylite) wird es zu Mega-Aerodactyl mit der Fähigkeit Steinhaupt (Rock Head, kein Rückstoßschaden)."
           },
           {
             "name": "Sylveon",
@@ -820,7 +820,7 @@
           },
           {
             "name": "Incineroar",
-            "role": "Dein Stör- und Schutz-Pokémon. Beim Einwechseln senkt Bedroher (Intimidate) den Angriff beider Gegner um 1 Stufe. Mit Mogelhieb (Fake Out) lässt du in der ersten Runde nach Einwechseln einen Gegner zucken, und mit Standpauke (Parting Shot) schwächst du das Ziel und wechselst sicher aus."
+            "role": "Dein Stör- und Schutz-Pokémon. Beim Einwechseln senkt Bedroher (Intimidate) den Angriff beider Gegner um 1 Stufe. Mit Mogelhieb (Fake Out) lässt du in der ersten Runde nach Einwechseln einen Gegner zurückschrecken, und mit Standpauke (Parting Shot) schwächst du das Ziel und wechselst sicher aus."
           },
           {
             "name": "Basculegion",
@@ -1012,7 +1012,7 @@
           },
           {
             "name": "Garchomp",
-            "role": "Solider Allrounder mit Flächenschaden. Erdbeben (Earthquake) trifft alle anderen auf dem Feld — auch deinen eigenen Partner, also vorsichtig! Steinhagel (Rock Slide) trifft beide Gegner und kann sie zucken lassen. Rauhaut (Rough Skin) zwackt Angreifern bei Kontakt 1/8 KP ab."
+            "role": "Solider Allrounder mit Flächenschaden. Erdbeben (Earthquake) trifft alle anderen auf dem Feld — auch deinen eigenen Partner, also vorsichtig! Steinhagel (Rock Slide) trifft beide Gegner und kann sie zurückschrecken lassen. Rauhaut (Rough Skin) zwackt Angreifern bei Kontakt 1/8 KP ab."
           }
         ],
         "game_plan": [
@@ -1170,11 +1170,11 @@
           },
           {
             "name": "Garchomp",
-            "role": "Robuster körperlicher Angreifer für Flächenschaden. Erdbeben (Earthquake) trifft alle anderen auf dem Feld (auch den eigenen Partner!), Steinhagel (Rock Slide) trifft beide Gegner und kann sie zucken lassen. Die Prunusbeere (Sitrus Berry) heilt es einmalig um 25 % KP, wenn es unter die Hälfte fällt."
+            "role": "Robuster körperlicher Angreifer für Flächenschaden. Erdbeben (Earthquake) trifft alle anderen auf dem Feld (auch den eigenen Partner!), Steinhagel (Rock Slide) trifft beide Gegner und kann sie zurückschrecken lassen. Die Prunusbeere (Sitrus Berry) heilt es einmalig um 25 % KP, wenn es unter die Hälfte fällt."
           },
           {
             "name": "Sneasler",
-            "role": "Blitzschneller Brecher. Mogelhieb (Fake Out) lässt in der ersten Runde nach dem Einwechseln einen Gegner zucken. Sobald sein Mentalkraut (Mental Herb) verbraucht ist, verdoppelt Entlastung (Unburden) seine Initiative — dann ist es extrem schnell. Schreckenskralle (Dire Claw) kann mit 50 % einen Status verpassen, Nahkampf (Close Combat) ist der harte Treffer."
+            "role": "Blitzschneller Brecher. Mogelhieb (Fake Out) lässt in der ersten Runde nach dem Einwechseln einen Gegner zurückschrecken. Sobald sein Mentalkraut (Mental Herb) verbraucht ist, verdoppelt Entlastung (Unburden) seine Initiative — dann ist es extrem schnell. Schreckenskralle (Dire Claw) kann mit 50 % einen Status verpassen, Nahkampf (Close Combat) ist der harte Treffer."
           },
           {
             "name": "Floette-Eternal",
@@ -1259,7 +1259,7 @@
           },
           {
             "name": "Aerodactyl",
-            "role": "Dein Tempo-Geber und Beschützer. Rückenwind (Tailwind) verdoppelt 4 Runden lang die Initiative deiner ganzen Seite. Rundumschutz (Wide Guard) blockt 1 Runde lang Attacken, die beide treffen. Steinhagel (Rock Slide) trifft beide Gegner mit 30 % Chance, sie zucken zu lassen. Der Fokusgurt (Focus Sash) lässt es einen tödlichen Treffer mit 1 KP überleben."
+            "role": "Dein Tempo-Geber und Beschützer. Rückenwind (Tailwind) verdoppelt 4 Runden lang die Initiative deiner ganzen Seite. Rundumschutz (Wide Guard) blockt 1 Runde lang Attacken, die beide treffen. Steinhagel (Rock Slide) trifft beide Gegner mit 30 % Chance, sie zurückschrecken zu lassen. Der Fokusgurt (Focus Sash) lässt es einen tödlichen Treffer mit 1 KP überleben."
           },
           {
             "name": "Garchomp",
@@ -1362,7 +1362,7 @@
           },
           {
             "name": "Sneasler",
-            "role": "Druckmacher und Tempo-Störer. Mogelhieb (Fake Out) lässt ein Ziel in der ersten Runde zucken (Vorrang +3). Felswurf (Rock Tomb) senkt die Initiative des Ziels. Nahkampf (Close Combat) trifft sehr hart. Wenn das Eiskraut (White Herb) verbraucht wird (es stellt gesenkte Werte wieder her), verdoppelt Entlastung (Unburden) die Initiative."
+            "role": "Druckmacher und Tempo-Störer. Mogelhieb (Fake Out) lässt ein Ziel in der ersten Runde zurückschrecken (Vorrang +3). Felswurf (Rock Tomb) senkt die Initiative des Ziels. Nahkampf (Close Combat) trifft sehr hart. Wenn das Eiskraut (White Herb) verbraucht wird (es stellt gesenkte Werte wieder her), verdoppelt Entlastung (Unburden) die Initiative."
           }
         ],
         "game_plan": [
@@ -1443,7 +1443,7 @@
           },
           {
             "name": "Incineroar",
-            "role": "Dein Kontroll-Pokémon. Beim Einwechseln senkt Bedroher (Intimidate) den Angriff beider Gegner um 1 Stufe. Mogelhieb (Fake Out) lässt einen Gegner in der ersten Runde zucken, Standpauke (Parting Shot) schwächt einen Gegner (−1 Angriff & Spez.-Angriff) und wechselt dich raus. Die Prunusbeere (Sitrus Berry) heilt es einmalig."
+            "role": "Dein Kontroll-Pokémon. Beim Einwechseln senkt Bedroher (Intimidate) den Angriff beider Gegner um 1 Stufe. Mogelhieb (Fake Out) lässt einen Gegner in der ersten Runde zurückschrecken, Standpauke (Parting Shot) schwächt einen Gegner (−1 Angriff & Spez.-Angriff) und wechselt dich raus. Die Prunusbeere (Sitrus Berry) heilt es einmalig."
           },
           {
             "name": "Garchomp",
@@ -1451,7 +1451,7 @@
           },
           {
             "name": "Sneasler",
-            "role": "Schneller physischer Angreifer. Mogelhieb (Fake Out) lässt einen Gegner zucken, Nahkampf (Close Combat) trifft sehr hart (senkt aber eigene Verteidigung). Das Eiskraut (White Herb) stellt diese gesenkten Werte sofort wieder her. Seine Fähigkeit Entlastung (Unburden) verdoppelt seine Initiative, sobald das Item verbraucht ist."
+            "role": "Schneller physischer Angreifer. Mogelhieb (Fake Out) lässt einen Gegner zurückschrecken, Nahkampf (Close Combat) trifft sehr hart (senkt aber eigene Verteidigung). Das Eiskraut (White Herb) stellt diese gesenkten Werte sofort wieder her. Seine Fähigkeit Entlastung (Unburden) verdoppelt seine Initiative, sobald das Item verbraucht ist."
           }
         ],
         "game_plan": [
@@ -1522,7 +1522,7 @@
           },
           {
             "name": "Sneasler",
-            "role": "Schneller Nahkämpfer. Mogelhieb (Fake Out) lässt einen Gegner in der ersten Runde zucken, danach drückt es mit Nahkampf (Close Combat) und Schreckenskralle (Dire Claw) hohen Schaden durch. Sobald sein Eiskraut (White Herb) verbraucht ist, verdoppelt Entlastung (Unburden) sein Tempo."
+            "role": "Schneller Nahkämpfer. Mogelhieb (Fake Out) lässt einen Gegner in der ersten Runde zurückschrecken, danach drückt es mit Nahkampf (Close Combat) und Schreckenskralle (Dire Claw) hohen Schaden durch. Sobald sein Eiskraut (White Herb) verbraucht ist, verdoppelt Entlastung (Unburden) sein Tempo."
           },
           {
             "name": "Milotic",
@@ -1530,11 +1530,11 @@
           },
           {
             "name": "Garchomp",
-            "role": "Harter Allrounder. Steinhagel (Rock Slide) trifft beide Gegner und lässt sie eventuell zucken, Erdbeben (Earthquake) trifft alle anderen auf dem Feld – also Vorsicht beim eigenen Partner. Drachenklaue (Dragon Claw) ist der verlässliche Einzel-Hit."
+            "role": "Harter Allrounder. Steinhagel (Rock Slide) trifft beide Gegner und lässt sie eventuell zurückschrecken, Erdbeben (Earthquake) trifft alle anderen auf dem Feld – also Vorsicht beim eigenen Partner. Drachenklaue (Dragon Claw) ist der verlässliche Einzel-Hit."
           },
           {
             "name": "Incineroar",
-            "role": "Der Störer. Bedroher (Intimidate) senkt beim Einwechseln den Angriff der Gegner. Mogelhieb (Fake Out) lässt einen Gegner zucken, und Standpauke (Parting Shot) schwächt einen Gegner und tauscht dabei sicher aus."
+            "role": "Der Störer. Bedroher (Intimidate) senkt beim Einwechseln den Angriff der Gegner. Mogelhieb (Fake Out) lässt einen Gegner zurückschrecken, und Standpauke (Parting Shot) schwächt einen Gegner und tauscht dabei sicher aus."
           },
           {
             "name": "Venusaur",
@@ -1609,7 +1609,7 @@
           },
           {
             "name": "Garchomp",
-            "role": "Dein Allrounder mit Flächenschaden. Steinhagel (Rock Slide) trifft beide Gegner und lässt sie zu 30 % zucken, Erdbeben (Earthquake) trifft alles am Boden — auch deinen eigenen Partner, also aufpassen. Rauhaut (Rough Skin) schadet jedem, der es berührt (1/8 KP)."
+            "role": "Dein Allrounder mit Flächenschaden. Steinhagel (Rock Slide) trifft beide Gegner und lässt sie zu 30 % zurückschrecken, Erdbeben (Earthquake) trifft alles am Boden — auch deinen eigenen Partner, also aufpassen. Rauhaut (Rough Skin) schadet jedem, der es berührt (1/8 KP)."
           },
           {
             "name": "Basculegion",
@@ -1621,7 +1621,7 @@
           },
           {
             "name": "Sneasler",
-            "role": "Dein Störer und Schnellangreifer. Mogelhieb (Fake Out) lässt einen Gegner sofort zucken (verliert die Runde), nur direkt nach dem Einwechseln. Nahkampf (Close Combat) trifft sehr hart. Mit Entlastung (Unburden) wird es doppelt so schnell, sobald sein Item (Eiskraut/White Herb) verbraucht ist."
+            "role": "Dein Störer und Schnellangreifer. Mogelhieb (Fake Out) lässt einen Gegner sofort zurückschrecken (verliert die Runde), nur direkt nach dem Einwechseln. Nahkampf (Close Combat) trifft sehr hart. Mit Entlastung (Unburden) wird es doppelt so schnell, sobald sein Item (Eiskraut/White Herb) verbraucht ist."
           },
           {
             "name": "Floette-Eternal",

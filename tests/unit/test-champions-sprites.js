@@ -138,10 +138,14 @@ const lokalName = new Function(
  * (Salmagnis 902/902a, Servol 876/876a, Psiaugon 678/678a/678m1); die
  * Begruendung steht in scripts/build_champions_sprites.py. Was fehlt,
  * ist die gespiegelte DATEI, nicht die Zuordnung. */
-const NOCH_OHNE_BILD = [
-    'Basculegion (F)', 'Cinderace', 'Gogoat', 'Houndstone', 'Indeedee',
-    'Indeedee (F)', 'Meowstic (F)', 'Pincurchin', 'Sirfetch’d', 'Thievul',
-];
+/* ERLEDIGT am 15.09.2026, 22:2x UTC — noch am selben Abend.
+ * Der Spiegel-Lauf #6 auf main (Commit c0f6614) hat die zehn fehlenden
+ * Dateien geholt; das Manifest fuehrt jetzt alle 316 Pokedex-Eintraege,
+ * nachgezaehlt gegen data/champions_pokedex.json.
+ *
+ * Die Liste bleibt leer stehen, nicht weg: sie ist das VERFAHREN fuer
+ * die naechste Luecke, nicht nur der Eintrag fuer diese. */
+const NOCH_OHNE_BILD = [];
 
 describe('die gespiegelten Bilder', () => {
     it('jeder Pokédex-Eintrag hat eine gespiegelte Datei', () => {
@@ -390,16 +394,24 @@ describe('Showdown-Namen aus den Replica-Teams', () => {
          * nach ihm gesucht und es gefunden. Derselbe Weg, denselben Tag
          * schon einmal gegangen — der Kader entscheidet, wonach gesucht
          * wird. */
-        const ERWARTET_OHNE_BILD = [
-            'Cinderace -> cinderace.png',
-            'Gogoat -> gogoat.png',
-            'Houndstone -> houndstone.png',
-            'Indeedee -> indeedee.png',
-            'Indeedee-F -> indeedee-f.png',
-            'Pincurchin -> pincurchin.png',
-            'Sirfetch\u2019d -> sirfetch-d.png',
-            'Thievul -> thievul.png',
-        ];
+        /* LEER AM 15.09.2026, 22:2x UTC — und zwar auf demselben Weg,
+           den der Absatz darueber beschreibt.
+           ---------------------------------------------------------
+           Dort stand: "Es fehlt nicht am Namen, sondern eine Stufe
+           frueher: Houndstone steht in keiner der beiden Kaderquellen
+           und deshalb nicht im Pokedex. Der Spiegel-Lauf geht die
+           POKEDEX-Eintraege durch — wer dort fehlt, wird nie gesucht,
+           und ein zweiter Lauf wuerde daran nichts aendern."
+
+           Genau diese Stufe ist jetzt geschlossen: alle acht (plus
+           Meowstic-F und Basculegion (F)) stehen im Pokedex, abgeleitet
+           aus den Replica-Teams und Smogon-Basiswerten. Der Spiegel-Lauf
+           #6 hat danach gesucht und alle gefunden — das Manifest fuehrt
+           316 von 316 Eintraegen.
+
+           Die Liste bleibt leer stehen: waechst sie wieder, sagt der
+           Fehlertext darunter, in welcher Reihenfolge zu arbeiten ist. */
+        const ERWARTET_OHNE_BILD = [];
         assert.deepEqual(ohne.slice().sort(), ERWARTET_OHNE_BILD,
             'die Menge der Team-Namen ohne Bild hat sich geaendert.\n'
             + '  jetzt:    ' + JSON.stringify(ohne.slice().sort()) + '\n'

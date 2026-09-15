@@ -63,6 +63,22 @@
         "Die Regel aus Runde 2 traegt auch hier: die deutsche Endung ist -nit. Staraptite -> Staraptornit, Tyranitarite -> Despotarnit, Blastoisinite -> Turtoknit. Der Stamm ist die DEUTSCHE Art, nicht die englische — deshalb Sumpexnit (Sumpex) und nicht Swampertnit.",
         "Good as Gold heisst Goldkoerper. Es ist die einzige Faehigkeit in dieser Runde und kam zehnmal vor."
       ]
+    },
+    "fuenfte_runde_2026_09_15": {
+      "anlass": "Der Betreiber meldete aus dem Team-Builder: \"die Faehigkeit emergency exit heisst auf Deutsch sicher anders\". Sie tut es (Rueckzug) — nur stand sie in keiner unserer Dateien.",
+      "umfang": "Alle Namen aus data/champions_usage.json gegen data/champions_names_de.json gehalten: 19 von 202 benutzten Faehigkeiten und 2 von 423 Attacken hatten keinen deutschen Namen. Die 73 Gegenstaende ohne deutschen Namen bleiben offen: es sind fast durchweg Mega-Steine des Formats, also Erfindungen des Spiels ohne nachschlagbaren deutschen Namen.",
+      "ergebnis": {
+        "ergaenzt": 21,
+        "faehigkeiten": 19,
+        "attacken": 2,
+        "hier_eingetragen": 2,
+        "in_ability_overrides": 19
+      },
+      "bemerkenswert": [
+        "Die 19 Faehigkeiten stehen NICHT hier, sondern in data/champions_ability_overrides.json — dort gehoeren Faehigkeiten hin, die der Champions-Datensatz nicht fuehrt, und dort steht auch ihr Wirkungstext. Hier stehen nur die beiden Attacken.",
+        "Forest's Curse ist durch alle automatischen Quellen gefallen, weil PokeAPI den typografischen Apostroph schreibt (Forest’s Curse) und die Nutzungsdaten den geraden.",
+        "Jeder der 21 Namen wurde doppelt belegt: PokeAPI-Lokalisierungsdump UND pokewiki.de. Beide Quellen stimmten bei allen 21 ueberein."
+      ]
     }
   },
   "namen": {
@@ -239,6 +255,16 @@
         "de": "Wandler",
         "quelle": "https://pokewiki.de/Transform",
         "note": "03.09.2026: die Namenstabelle fuehrte 'Wandler  Verwandler (in )' — eine flachgeklopfte Wiki-Auszeichnung. PokeWiki schreibt 'Name_de=Wandler<br>Verwandler{{tt|...}}': 'Wandler' ist der aktuelle Name, 'Verwandler' der aeltere. Der Scraper hat beide plus einen Rest der tt-Vorlage in einen Wert gelegt. Dieselbe Falle wie bei Snow Warning ('Schneeschauer<br />Hagelalarm')."
+      },
+      "Chilly Reception": {
+        "de": "Eisige Stimmung",
+        "quelle": "https://pokewiki.de/Chilly_Reception",
+        "beleg": "Artikeltitel \"Eisige Stimmung\", Name_en \"Chilly Reception\", gelesen am 15.09.2026. Zweitbeleg: PokeAPI data/v2/csv/move_names.csv, move_id 881, local_language_id 6 -> Eisige Stimmung."
+      },
+      "Forest's Curse": {
+        "de": "Waldesfluch",
+        "quelle": "https://pokewiki.de/Forest's_Curse",
+        "beleg": "Artikeltitel \"Waldesfluch\", Name_en \"Forest’s Curse\", gelesen am 15.09.2026 (abgerufen als https://www.pokewiki.de/Forest%27s_Curse). Zweitbeleg: PokeAPI data/v2/csv/move_names.csv, move_id 571, local_language_id 6 -> Waldesfluch. ACHTUNG: PokeAPI schreibt den Namen mit typografischem Apostroph (Forest’s Curse), unsere Nutzungsdaten mit geradem (Forest's Curse) — daran ist der Name durch alle automatischen Quellen gefallen."
       }
     },
     "items": {

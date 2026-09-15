@@ -211,11 +211,32 @@ describe('Sortierung nach Champions-Nutzung', () => {
            Dasselbe gilt fuer Dragalge (Tandrak), das der Betreiber
            gemeldet hatte — es stand hier gar nicht mehr, weil es schon
            vormittags aus der Liste gefallen war. */
-        const ERWARTET_OHNE_EINTRAG = [
-            'Cinderace', 'Gogoat', 'Houndstone', 'Indeedee', 'Indeedee-F',
-            'Meowstic-F', 'Pincurchin',
-            'Sirfetch\u2019d', 'Thievul',
-        ].sort();
+        /* LEER AM 15.09.2026, dritter Durchgang des Tages — die Luecke
+           ist geschlossen, nicht vertagt.
+           ----------------------------------------------------------
+           Alle neun Namen stehen jetzt im Pokedex. Nicht weil die
+           Kaderquelle nachgezogen haette, sondern abgeleitet, mit
+           demselben Beleg wie die acht Grundformen vom Vormittag:
+
+             * Sie werden in den Replica-Teams GESPIELT — echte
+               Top-Teams aus dem Spielbetrieb, taeglich gescrapt.
+             * data/pokemon_battle_data.json (Smogon) fuehrt fuer JEDEN
+               von ihnen Basiswerte. Wer dort fehlt, kommt NICHT herein,
+               sondern wird als Warnung gemeldet; gemessen war das keiner.
+
+           Die Regel steht als aus_teams() in
+           scripts/scrape_champions_roster.py und haengt an ihrer
+           Bedingung, nicht an dieser Namensliste: zieht die Quelle
+           nach, findet sie die Art ohnehin schon vor.
+
+           Anlass war der Auftrag "bei Salmagnis müssen wir einen
+           unterschied zwischen männlich und weiblich machen" — dabei
+           fiel auf, dass Indeedee-F mit 23 Team-Auftritten das
+           zweithaeufigste der neun fehlenden war.
+
+           Die Liste bleibt stehen, leer: waechst sie wieder, sagt der
+           Fehlertext unten, was zu tun ist. */
+        const ERWARTET_OHNE_EINTRAG = [];
 
         assert.deepEqual(verwaist, ERWARTET_OHNE_EINTRAG,
             'die Menge der Teamnamen ohne Pokedex-Eintrag hat sich geaendert.\n'

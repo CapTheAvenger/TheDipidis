@@ -376,8 +376,22 @@ describe('Die Tabellenbreite folgt der Spaltenzahl', () => {
         assert.ok(treffer >= 4,
             `--heatmap-cols steht nur ${treffer}× im Stylesheet — es gab vier `
             + 'Medienabfragen mit der festen Breite, jede braucht den Ersatz');
-        assert.ok(/calc\(170px \+ var\(--heatmap-cols/.test(css),
+        /* Die 170 px standen hier als Zahl. Seit dem 15.09.2026 steht
+           die Breite der Deckspalte als Marke --heatmap-deckspalte an
+           EINER Stelle, weil die Datenspalte auf 150 px verbreitert
+           werden musste und dieselbe Zahl sonst an vier Orten gepflegt
+           worden waere (gemessen: ALLE 90 Zellen liefen in 126 px ueber).
+
+           Geprueft wird deshalb die Eigenschaft, nicht die Ziffer: die
+           Breite ist Deckspalte + Spaltenzahl x Datenspalte, und beide
+           Summanden sind Marken. */
+        assert.ok(/calc\(var\(--heatmap-deckspalte\) \+ var\(--heatmap-cols/.test(css),
             'die Breite rechnet nicht mehr aus erster Spalte plus Datenspalten');
+        assert.ok(/var\(--heatmap-cols, 10\) \* var\(--heatmap-datenspalte\)/.test(css),
+            'die Datenspalte kommt nicht aus der Marke — dann laufen die Zellen '
+            + 'beim naechsten Wert wieder auseinander');
+        assert.ok(/--heatmap-datenspalte:\s*\d+px/.test(css),
+            'die Marke --heatmap-datenspalte ist nirgends gesetzt');
     });
 
     it('die Spaltenzahl wird beim Zeichnen gesetzt', () => {

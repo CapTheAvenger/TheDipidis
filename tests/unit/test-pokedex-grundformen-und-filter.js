@@ -102,11 +102,51 @@ describe('Ohne Grundform keine Mega-Form', () => {
     it('jede ergaenzte Grundform hat Smogon-Werte', () => {
         const extra = json('data/champions_roster_extra.json');
         const smogon = json('data/pokemon_battle_data.json');
-        const ohne = (extra._meta.aus_mega || [])
-            .filter(n => !(smogon[n] && smogon[n].baseStats));
+        /* Drei Ableitungen, eine Bedingung: ohne Basiswerte kommt
+           nichts herein. Am 15.09.2026 sind aus_teams und
+           geschlechtsformen dazugekommen — sie stehen hier mit drin,
+           damit die Regel nicht fuer die eine Quelle gilt und fuer die
+           anderen beiden nicht. */
+        const ableitungen = []
+            .concat(extra._meta.aus_mega || [])
+            .concat(extra._meta.aus_teams || [])
+            .concat(extra._meta.geschlechtsformen || []);
+        assert.ok(ableitungen.length >= 8,
+            `nur ${ableitungen.length} abgeleitete Schluessel — Datenlage pruefen`);
+        const ohne = ableitungen.filter(n => !(smogon[n] && smogon[n].baseStats));
         assert.deepEqual(ohne, [],
             'Ohne Basiswerte waere der Eintrag eine leere Zeile. Wer dort '
             + 'fehlt, kommt NICHT herein.');
+        // Und jeder abgeleitete Schluessel steht auch wirklich in der Liste.
+        const fehlt = ableitungen.filter(n => extra.smogonKeys.indexOf(n) === -1);
+        assert.deepEqual(fehlt, [],
+            'im _meta genannt, aber nicht in smogonKeys — dann behauptet die '
+            + 'Datei eine Ableitung, die sie nicht ausliefert');
+    });
+
+    it('eine Geschlechtsform kommt nur mit eigener Nutzungszeile herein', () => {
+        /* Bestellt am 15.09.2026: "bei Salmagnis müssen wir einen
+           unterschied zwischen männlich und weiblich machen. Generell da
+           wo männlich und weiblich unterschiedliche Statuswerte und
+           entsprechend unterschiedliche Nutzung haben."
+
+           Der belegbare Teil davon ist die NUTZUNG: fuehrt
+           championsbattledata.com eine eigene Zeile, wird die Form
+           getrennt gespielt. Ohne diese Bedingung kaeme Oinkologne-F
+           herein — Smogon kennt es, das Spiel offenbar nicht. */
+        const extra = json('data/champions_roster_extra.json');
+        const usage = json('data/champions_usage.json');
+        const zeilen = Object.keys(usage.pokemon || {});
+        const formen = extra._meta.geschlechtsformen || [];
+        assert.ok(formen.length >= 1, 'keine Geschlechtsform abgeleitet');
+        formen.forEach(n => {
+            assert.ok(zeilen.indexOf(n.toLowerCase()) !== -1,
+                `${n} hat keine eigene Nutzungszeile`);
+        });
+        assert.ok(extra.smogonKeys.indexOf('Oinkologne-F') === -1,
+            'Oinkologne-F hat keine Nutzungszeile und darf nicht im Kader stehen');
+        assert.match(SCRAPER, /if form\.lower\(\) not in zeilen:/,
+            'die Bedingung fehlt im Scraper — dann kommt sie beim naechsten Lauf weg');
     });
 
     it('die Regel steht im SCRAPER, nicht nur in der erzeugten Datei', () => {
@@ -118,8 +158,21 @@ describe('Ohne Grundform keine Mega-Form', () => {
         assert.match(SCRAPER, /aus_mega = \[\]/,
             'Die Ableitung fehlt im Scraper.');
         assert.match(SCRAPER, /grundform = k\.split\("-Mega"\)\[0\]/);
-        assert.match(SCRAPER, /for k in base \+ aus_mega \+ megas \+ formen:/,
-            'Die abgeleiteten Grundformen landen nicht in der Schluesselliste.');
+        /* Die Reihenfolge der Summanden ist gleichgueltig, die
+           ANWESENHEIT nicht: fiele `aus_mega` aus der Liste, waere die
+           Ableitung darueber folgenlos. Seit dem 15.09.2026 stehen zwei
+           weitere Quellen daneben (aus Teams, Geschlechtsformen); eine
+           auf die Schreibweise gepinnte Zusicherung haette das
+           verboten, ohne eine Eigenschaft zu pruefen. */
+        /* Am Aufbau der Liste verankert, nicht an der ersten `for`-Zeile
+           der Datei: die traf beim ersten Anlauf die Mega-Schleife
+           darueber und meldete prompt "base fehlt". */
+        const liste = /seen, keys = set\(\), \[\][\s\S]{0,80}?for k in ([^:]+):/.exec(SCRAPER);
+        assert.ok(liste, 'die Schluesselliste wird nicht mehr zusammengesetzt');
+        ['base', 'aus_mega', 'megas', 'formen'].forEach(teil => {
+            assert.ok(liste[1].indexOf(teil) !== -1,
+                `${teil} landet nicht in der Schluesselliste.`);
+        });
         assert.match(SCRAPER, /if grundform in smogon and "baseStats" in smogon\[grundform\]/,
             'Ohne diese Bedingung kaeme eine Grundform ohne Werte herein.');
         assert.match(SCRAPER, /ohne_werte/,

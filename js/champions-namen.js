@@ -49,6 +49,34 @@
         Calm: 'Still', Gentle: 'Zart', Sassy: 'Forsch', Careful: 'Sacht', Quirky: 'Kauzig',
     };
 
+    /* DIE 18 TYPEN, EINMAL.
+     *
+     * Dieselbe Tabelle steht heute in fuenf Modulen (matchups, play,
+     * pokedex, resources, status) — jedes mit eigener Schreibweise. Neue
+     * Leser holen sie ab hier; die fuenf Kopien sind ein eigener
+     * Aufraeumpunkt und werden hier NICHT nebenbei angefasst.
+     */
+    const TYPEN_DE = {
+        Normal: 'Normal', Fire: 'Feuer', Water: 'Wasser', Electric: 'Elektro',
+        Grass: 'Pflanze', Ice: 'Eis', Fighting: 'Kampf', Poison: 'Gift',
+        Ground: 'Boden', Flying: 'Flug', Psychic: 'Psycho', Bug: 'Käfer',
+        Rock: 'Gestein', Ghost: 'Geist', Dragon: 'Drache', Dark: 'Unlicht',
+        Steel: 'Stahl', Fairy: 'Fee',
+    };
+
+    /* DIE SECHS STATUSWERTE, WIE DIE NUTZUNGSDATEN SIE SCHREIBEN.
+     *
+     * champions_usage.json fuehrt je Wesen `up` und `down` als "Attack",
+     * "Sp. Atk", "Speed" — die Oberflaeche beschriftet die Regler aber mit
+     * ANG, SPA, INI (ChampionsSet.LABEL_DE). Ohne diese Bruecke stuende am
+     * Wesen ein anderes Wort als am Regler darunter, und der Leser muesste
+     * beide Schreibweisen im Kopf zusammenbringen.
+     */
+    const WERT_SCHLUESSEL = {
+        'HP': 'hp', 'Attack': 'atk', 'Defense': 'def',
+        'Sp. Atk': 'spa', 'Sp. Def': 'spd', 'Speed': 'spe',
+    };
+
     let _tabelle = null;
     let _versucht = false;
 
@@ -198,5 +226,5 @@
     }
 
     window.ChampionsNamen = { laden, de, anzeige, beide, istDeutsch, istUnbenannt,
-                              WESEN_DE, TRENNER };
+                              WESEN_DE, TYPEN_DE, WERT_SCHLUESSEL, TRENNER };
 })();

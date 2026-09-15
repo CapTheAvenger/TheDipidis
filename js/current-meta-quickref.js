@@ -202,6 +202,36 @@
     let lists = (builder.listsForArchetype(archetype) || []).slice();
     if (lists.length === 0) return null;
 
+    /* NUR PRAESENZTURNIERE. EIN MAJOR IST EIN MAJOR (15.09.2026).
+     * ---------------------------------------------------------
+     * Gemeldet: "das deck was bei letztes Major steht ist gar kein Major
+     * Deck, sondern ein Online Deck".
+     *
+     * Gemessen in data/tournament_decklists_per_player.csv: die Datei
+     * fuehrt BEIDE Welten in derselben Tabelle und trennt sie ueber die
+     * Spalte `quelle` — 68.892 Zeilen "online", 30.459 Zeilen "papier".
+     * Diese Funktion nahm einfach das juengste Datum ueber ALLE Zeilen,
+     * und das war am 15.09.2026 das Online-Turnier "Vault Of Games |
+     * NOT SO Midnight Madness #4" (quelle=online, Feld 65). Das
+     * juengste PRAESENZturnier lag auf dem 28.08.2026.
+     *
+     * Der Kasten heisst "Aktuelles Major". Er darf deshalb nur aus
+     * `papier` schoepfen; gibt es dort nichts, ist die ehrliche Antwort
+     * die leere — nicht die naechstbeste Liste aus der anderen Welt.
+     * Die Online-Seite hat ihren eigenen Kasten und ihre eigene Quelle.
+     *
+     * `quelle` steht am Listenobjekt selbst (js/deck-builder-consistency.js
+     * baut es mit), also gibt es hier keine zweite Ladung. */
+    const vorFilter = lists.length;
+    lists = lists.filter(l => String(l.quelle || '').trim() === 'papier');
+    if (lists.length === 0) {
+        // Der Unterschied zaehlt: "es gibt zu diesem Deck ueberhaupt keine
+        // Listen" ist etwas anderes als "es gibt welche, aber nur online".
+        // Ein Satz, der das Zweite als das Erste ausgibt, schickt den Leser
+        // auf die Suche nach Daten, die er schon sieht.
+        return vorFilter ? { nurOnline: true } : null;
+    }
+
     // Narrow to the latest tournament_date.
     const latestDate = lists.reduce((acc, l) => {
       const d = (l.tournament_date || '');
@@ -560,9 +590,16 @@
       majorBody.innerHTML = _renderRefHeader(majorRes.value, 'major') + _renderCardGrid(majorRes.value.cards);
     } else {
       global.currentMetaBestMajor = null;
+      const deM2 = (typeof getLang === 'function') ? getLang() === 'de' : true;
+      const nurOnline = majorRes.status === 'fulfilled'
+        && majorRes.value && majorRes.value.nurOnline;
       const msg = majorRes.status === 'rejected'
         ? _tt('cm.quickRefLoadError', 'Could not load reference data.')
-        : _tt('cm.quickRefNoMajor', 'No per-decklist data for this archetype yet.');
+        : nurOnline
+          ? (deM2
+              ? 'Für dieses Deck liegt bisher keine Liste von einem Präsenzturnier vor — nur Online-Listen, und die stehen rechts.'
+              : 'No in-person list for this deck yet — only online lists, and those are on the right.')
+          : _tt('cm.quickRefNoMajor', 'No per-decklist data for this archetype yet.');
       majorBody.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${_escHtml(msg)}</p>`;
     }
 

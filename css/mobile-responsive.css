@@ -680,14 +680,32 @@
         background: var(--surface-1);
         box-shadow: 1px 0 0 var(--line);
     }
-    #matchupHeatmapContainer .heatmap-col-first { width: 116px !important; }
-    /* Die Datenspalten duerfen schmaler werden, damit ohne Scrollen
-     * mehr als zwei Gegner ins Bild passen. Die Zahl bleibt lesbar;
-     * das n darunter wird kleiner, nicht unsichtbar. */
+    #matchupHeatmapContainer .heatmap-col-first {
+        width: var(--heatmap-deckspalte) !important;
+    }
+    /* HIER STANDEN 64 px — UND DAS WAR DER GEMELDETE FEHLER (15.09.2026).
+     *
+     * Die alte Begruendung ("die Datenspalten duerfen schmaler werden,
+     * damit ohne Scrollen mehr als zwei Gegner ins Bild passen") stammt
+     * aus der Zeit, als in einer Zelle EINE Zahl stand. Seit dem
+     * 02.09.2026 steht dort ein Kreuz aus vier Zahlen und drei
+     * Beschriftungen (online / Major, WR, M) — freigestellt gemessen
+     * braucht es 137 px. In 64 px passt davon nicht einmal die Haelfte;
+     * `overflow: hidden` schneidet den Rest ab, und genau das hat der
+     * Betreiber als "überlappen / verschlucken sich da Daten" gemeldet.
+     *
+     * Die Regel hing ausserdem an 768 px, waehrend eine zweite Regel bei
+     * 360 px wieder 126 px setzte — zwischen 361 und 768 px galt also
+     * die engste Fassung. Zwei Regeln fuer dieselbe Frage, und die
+     * schlechtere gewann im groessten Band.
+     *
+     * Jetzt gilt ueberall dieselbe Zahl aus --heatmap-datenspalte. Die
+     * Tabelle scrollt dafuer waagerecht — das tut sie bei jeder Breite,
+     * und der Verlauf an der Kante sagt es. */
     #matchupHeatmapContainer .heatmap-td,
     #matchupHeatmapContainer .heatmap-th-y {
-        width: 64px !important;
-        min-width: 64px !important;
+        width: var(--heatmap-datenspalte) !important;
+        min-width: var(--heatmap-datenspalte) !important;
     }
     #matchupHeatmapContainer .heatmap-table { min-width: 0 !important; }
     /* `scrollbar-width: thin` stand hier und galt damit nur unter

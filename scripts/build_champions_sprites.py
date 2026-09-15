@@ -161,6 +161,22 @@ def schluessel(e):
         return dex + "m1"
     if en.startswith(REGION_PRAEFIX):
         return dex + "a"
+    # ── GESCHLECHTSFORMEN (15.09.2026) ─────────────────────────────
+    #
+    # Nachgeschlagen, nicht geraten — dieselbe Quelle wie fuer jeden
+    # anderen Schluessel hier, je Art einzeln geoeffnet:
+    #   pokewiki.de/Salmagnis/Sprites_und_3D-Modelle  902  / 902a
+    #   pokewiki.de/Servol/Sprites_und_3D-Modelle     876  / 876a
+    #   pokewiki.de/Psiaugon/Sprites_und_3D-Modelle   678  / 678a  (+678m1)
+    # Die weibliche Form traegt also dasselbe "a" wie eine Regionalform.
+    #
+    # Das ist nur solange gefahrlos, wie eine Art nicht BEIDES hat —
+    # sonst zeigten zwei Eintraege dasselbe Bild. Auf Verdacht verlassen
+    # wird sich darauf nicht: test_keine_zwei_eintraege_teilen_sich_ein_bild
+    # faellt in dem Fall um, und dann gehoert der Fall in
+    # FORM_UEBERSTEUERUNG. Heute trifft es keine der drei Arten.
+    if e.get("form") == "Geschlecht":
+        return dex + "a"
     if "(" in en:
         # Eine Klammerform ohne Eintrag oben waere geraten. Lieber laut
         # abbrechen als ein plausibles falsches Bild spiegeln.

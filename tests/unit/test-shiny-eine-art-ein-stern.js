@@ -138,6 +138,41 @@ describe('Eine Art, ein Stern', () => {
         assert.ok(geprueft > 0, 'keine Regionalform hat eine Grundform im Pokedex — Test wirkungslos');
     });
 
+    it('eine Geschlechtsform bekommt einen eigenen Stern', () => {
+        /* Bestellt am 15.09.2026: "bei Salmagnis müssen wir einen
+           unterschied zwischen männlich und weiblich machen."
+
+           Ein weibliches Salmagnis entsteht nicht aus einem maennlichen
+           — anders als eine Mega-Form. Es hat eigene Basiswerte und eine
+           eigene Nutzungszeile; wer beide will, muss beide besorgen. */
+        const { CS } = lade();
+        const paare = DEX.entries.filter(e => (e.form || 'Base') === 'Geschlecht');
+        assert.ok(paare.length >= 3,
+            `nur ${paare.length} Geschlechtsformen im Pokedex — Datenlage pruefen`);
+        let geprueft = 0;
+        paare.forEach(w => {
+            const basis = DEX.entries.find(e => e.dex === w.dex && (e.form || 'Base') === 'Base');
+            if (!basis) return;
+            geprueft++;
+            assert.notStrictEqual(CS.schluessel(w), CS.schluessel(basis),
+                `${w.en} und ${basis.en} duerfen sich keinen Stern teilen`);
+        });
+        assert.ok(geprueft >= 3, 'keine Geschlechtsform hat eine Grundform — Test wirkungslos');
+    });
+
+    it('eine Geschlechtsform faellt auch NICHT mit der Mega-Form zusammen', () => {
+        // Psiaugon hat beides: eine Mega-Form (faellt mit der Grundform
+        // zusammen) und eine weibliche Form (faellt NICHT zusammen).
+        // Genau hier trennen sich die beiden Regeln.
+        const { CS } = lade();
+        const basis = eintrag('Meowstic');
+        const mega = eintrag('Mega Meowstic');
+        const weiblich = eintrag('Meowstic (F)');
+        assert.ok(basis && mega && weiblich, 'Psiaugon-Eintraege fehlen im Pokedex');
+        assert.strictEqual(CS.schluessel(mega), CS.schluessel(basis));
+        assert.notStrictEqual(CS.schluessel(weiblich), CS.schluessel(basis));
+    });
+
     it('die drei Paldea-Tauros bekommen drei verschiedene Schluessel', () => {
         const { CS } = lade();
         const tauros = DEX.entries.filter(e => e.dex === 128 && (e.form || 'Base') === 'Regional');
@@ -161,10 +196,10 @@ describe('Eine Art, ein Stern', () => {
             const nummern = new Set(liste.map(e => String(e.dex)));
             assert.strictEqual(nummern.size, 1,
                 `Schluessel ${k} deckt mehrere Pokedex-Nummern: ${[...nummern].join(', ')}`);
-            const regional = liste.filter(e => (e.form || 'Base') === 'Regional');
-            assert.ok(regional.length <= 1,
-                `Schluessel ${k} deckt mehrere Regionalformen: `
-                + regional.map(e => e.en).join(', '));
+            const eigene = liste.filter(e => ['Regional', 'Geschlecht'].indexOf(e.form || 'Base') !== -1);
+            assert.ok(eigene.length <= 1,
+                `Schluessel ${k} deckt mehrere eigenstaendige Formen: `
+                + eigene.map(e => e.en).join(', '));
         });
     });
 });

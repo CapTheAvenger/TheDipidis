@@ -804,8 +804,17 @@ describe('Team-Rechner — Uebergabe aus dem Builder', () => {
         assert.match(BUILDER_C, /rechnerFehlt/,
             'ohne geladenen Rechner passiert beim Klick nichts und niemand '
             + 'erfaehrt warum');
-        assert.match(BUILDER, /Der Rechner konnte nicht geladen werden/);
-        assert.match(BUILDER, /The calculator could not be loaded/);
+        /* Der Knopf heisst seit dem 15.09.2026 "Damage Calc" und die
+           Meldung nennt ihn beim selben Namen. Gemeldet: "auch damage
+           Culc den Button bennen weil mit Rechner öffnen kann ja keiner
+           was anfangen."
+           Geprueft wird die Eigenschaft — es gibt eine Meldung, sie
+           nennt das Ding beim Namen, und zwar in beiden Sprachen —,
+           nicht der alte Wortlaut. */
+        assert.match(BUILDER, /Der Damage Calc konnte nicht geladen werden/);
+        assert.match(BUILDER, /The Damage Calc could not be loaded/);
+        assert.match(BUILDER_C, /inRechner: '\\u2192 Damage Calc'/,
+            'der Knopf traegt nicht mehr den Namen, den die Meldung nennt');
     });
 });
 

@@ -111,6 +111,24 @@ function bau(art, anzahl) {
         staplesAnzahl: () => anzahl,
         ladeStaplesArt: () => _staplesArt,
         staplesArt: () => _staplesArt,
+        /* Seit dem 15.09.2026 faellt renderTopCardsWidget() auf "Alle"
+           zurueck, wenn die gemerkte Art gerade keine Karte ueber der
+           Schwelle hat — sonst stand die Flaeche leer da, ohne dass ein
+           Knopf hervorgehoben war (gemeldet: "warum sind denn die
+           meistgespielten Karten leer?").
+           Die Attrappe muss das mitmachen, sonst ruft der Sandkasten
+           eine Funktion auf, die es hier nicht gibt. */
+        setzeStaplesArt: (id) => { _staplesArt = id || null; return _staplesArt; },
+        staplesNachArt: (daten, artId) => {
+            const art = ARTEN.filter(a => a.id === artId)[0];
+            if (!art) return [];
+            const menge = {};
+            (art.typen || []).forEach(t => { menge[t] = true; });
+            return (daten || [])
+                .filter(c => menge[String(c.type || '').trim()] === true)
+                .filter(c => Number(c.global_share) >= SCHWELLE)
+                .slice(0, ART_MAX);
+        },
         staplesArtZaehlung: () => ({}),
         /* Die Druckwahl ist hier nicht die Sache: sie gibt den Druck
            aus der Karte zurueck, damit der Vergleich die AUSWAHL misst

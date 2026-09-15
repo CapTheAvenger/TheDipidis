@@ -90,10 +90,56 @@ describe('Navigation — fuenf Ziele, auf beiden Breiten dieselben', () => {
         assert.ok(!/id:\s*'start'/.test(g));
     });
 
-    it('die fuenf heissen Meta, Decks, Turnier, Karten, Champions', () => {
+    it('die fuenf heissen Meta, Decks, Meta Call, Champions, Pocket', () => {
+        /* UMGESTELLT AM 15.09.2026, auf Ansage des Betreibers:
+           "Event sollte in Meta Prognose oder Meta Call oder so benannt
+           werden weil Event / Turnier könnte verwirren. Dann kann Cards
+           aus der Schnellwahl weg weil wir das ja oben noch über die
+           Icons haben … und denn Platz den wir dadurch gewinnen können
+           wir dann neben Champions noch Pocket anzeigen."
+
+           Die KENNUNG der dritten Gruppe bleibt `turnier` — sie steht in
+           gespeicherten Zustaenden und in groupForTab(); sichtbar ist das
+           LABEL, und das wird eine Zeile tiefer geprueft. */
         const g = /var GROUPS = \[([\s\S]*?)\n    \];/.exec(NAV)[1];
         const ids = [...g.matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
-        assert.deepStrictEqual(ids, ['meta', 'decks', 'turnier', 'karten', 'champions']);
+        assert.deepStrictEqual(ids, ['meta', 'decks', 'turnier', 'champions', 'pocket']);
+    });
+
+    it('die dritte Gruppe heisst in BEIDEN Sprachen "Meta Call"', () => {
+        // "Turnier"/"Event" zeigte auf eine Vorhersage und las sich wie
+        // eine Veranstaltungsliste. Der Reiter dahinter ist `meta-call`.
+        const l = /var LABELS = \{([\s\S]*?)\n    \};/.exec(NAV)[1];
+        assert.match(l, /de:\s*\{[^}]*turnier:\s*'Meta Call'/);
+        assert.match(l, /en:\s*\{[^}]*turnier:\s*'Meta Call'/);
+        assert.ok(!/turnier:\s*'(Turnier|Event)'/.test(l),
+            'die alten Beschriftungen duerfen nicht danebenstehen');
+    });
+
+    it('"Karten" ist weg, und der Weg dorthin steht trotzdem im Kopf', () => {
+        // Eine Tuer weniger ist nur dann in Ordnung, wenn die andere da
+        // ist. Der Kopf traegt den Knopf "Database" auf jede Seite.
+        const g = /var GROUPS = \[([\s\S]*?)\n    \];/.exec(NAV)[1];
+        assert.ok(!/id:\s*'karten'/.test(g), 'die Gruppe "karten" steht noch in GROUPS');
+        assert.match(HTML, /switchTab(?:AndUpdateMenu)?\('cards'\)/,
+            'ohne den Database-Knopf im Kopf waere die Kartendatenbank nur noch '
+            + 'ueber das Pokeball-Menue erreichbar');
+    });
+
+    it('Pocket ist ein eigenes Ziel, nicht an Champions angehaengt', () => {
+        const g = /var GROUPS = \[([\s\S]*?)\n    \];/.exec(NAV)[1];
+        assert.match(g, /id:\s*'pocket',[\s\S]*?tabs:\s*\['pocket'\]/);
+        // Und Champions traegt Pocket NICHT mit: sonst leuchtete beim
+        // Betreten von #pocket "CHAMPIONS" (Befund vom 07.09.2026).
+        const champ = /\{ id: 'champions'[\s\S]*?\}/.exec(g)[0];
+        assert.ok(!/pocket/.test(champ));
+    });
+
+    it('zwischen Kartenspiel und den anderen Spielen steht EIN Strich', () => {
+        // Beide abgesetzten Ziele stehen hinter demselben Trenner. Ohne
+        // die Pruefung auf den Vorgaenger bekaeme jedes seinen eigenen.
+        assert.match(NAV, /!\(GROUPS\[i - 1\] \|\| \{\}\)\.alt/,
+            'der Trenner wuerde vor JEDEM abgesetzten Ziel stehen');
     });
 
     it('der Hub gehoert jetzt zur Gruppe Meta', () => {

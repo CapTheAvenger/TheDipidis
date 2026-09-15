@@ -2320,8 +2320,27 @@
                     const SPALTEN_SICHTBAR = SPALTEN.filter(c =>
                         (c.k !== 'antritte' && c.k !== 'cuts') || hatWert(c.k));
 
+                    /* DAS BILD GEHOERT ZUM DECKNAMEN (15.09.2026).
+                       -----------------------------------------------
+                       Gemeldet: "warum fehlen in der Meta performance
+                       die Pokemon Sprites?" — weil diese Zelle als
+                       einzige Deck-Zelle der Seite blosses escapeHtml()
+                       war. Jede andere Tabelle (City League, Tier-Liste,
+                       Heatmap) setzt das Symbol ueber ArchetypeIcons
+                       davor; hier stand seit jeher nur der Text.
+
+                       Der Rueckfall ist ein leerer String, nicht ein
+                       Platzhalterbild: ein Deck ohne hinterlegtes Symbol
+                       bekommt dann seinen Namen allein, und das ist
+                       richtiger als ein graues Kaestchen, das eine
+                       fehlende Datei behauptet. */
+                    const deckIcon = (name) => (typeof window !== 'undefined'
+                        && window.ArchetypeIcons
+                        && typeof window.ArchetypeIcons.getIconHtml === 'function')
+                        ? window.ArchetypeIcons.getIconHtml(name, { size: 'sm', layout: 'inline', alt: '' })
+                        : '';
                     const zelle = (r, k) => {
-                        if (k === 'name')     return escapeHtml(r.name);
+                        if (k === 'name')     return deckIcon(r.name) + escapeHtml(r.name);
                         if (k === 'listen')   return r.listen   == null ? '–' : fmtNumDS(r.listen);
                         if (k === 'anteil') {
                             if (r.anteil == null) return '–';
@@ -3184,6 +3203,19 @@
 
         function staplesArt() { return _staplesArt; }
 
+        /* Art setzen UND merken — eine Stelle fuer beides.
+           `null` raeumt den Speichereintrag weg, statt "null" als Text
+           hineinzuschreiben; sonst laege beim naechsten Laden eine
+           Zeichenkette dort, die keiner Art entspricht. */
+        function setzeStaplesArt(id) {
+            _staplesArt = id || null;
+            try {
+                if (_staplesArt) localStorage.setItem(STAPLES_ART_KEY, _staplesArt);
+                else localStorage.removeItem(STAPLES_ART_KEY);
+            } catch (_e) { /* privater Modus: die Auswahl gilt fuer diese Sitzung */ }
+            return _staplesArt;
+        }
+
         function ladeStaplesArt() {
             try {
                 const v = localStorage.getItem(STAPLES_ART_KEY);
@@ -3427,11 +3459,10 @@
         async function setStaplesArt(id) {
             const wert = (id === null || id === 'null' || id === '') ? null : String(id);
             if (wert !== null && !STAPLES_ARTEN.some(a => a.id === wert)) return;
-            _staplesArt = wert;
-            try {
-                if (wert === null) localStorage.removeItem(STAPLES_ART_KEY);
-                else localStorage.setItem(STAPLES_ART_KEY, wert);
-            } catch (_e) { /* egal */ }
+            /* Setzen und Merken steht in setzeStaplesArt() — EINE Stelle.
+               Hier stand dieselbe Schreiblogik ein zweites Mal; als der
+               Rueckfall auf "Alle" dazukam, waeren es drei gewesen. */
+            setzeStaplesArt(wert);
             const behaelter = document.querySelector('.top-cards-container');
             if (behaelter && _staplesDaten) {
                 behaelter.outerHTML = renderTopCardsWidget(_staplesDaten);
@@ -3466,6 +3497,34 @@
                hergibt, hoechstens zehn. */
             ladeStaplesArt();
             ladeStaplesAnzahl();
+            /* EINE GEMERKTE ART, DIE ES NICHT MEHR GIBT, LEERT DIE LISTE.
+               ----------------------------------------------------------
+               BEFUND 15.09.2026, vom Betreiber gemeldet ("warum sind denn
+               die meistgespielten Karten leer? was denn da los?") und hier
+               nachgestellt: mit staples_art_v1 = "neuesSet" im Speicher
+               standen die sieben Knoepfe mit ihren Zahlen da, das Gitter
+               hatte NULL Kacheln, und KEIN Knopf war hervorgehoben — auch
+               "Alle" nicht, denn eine Art war ja gewaehlt.
+
+               Der Weg dahin: die Knopfzeile zeichnet nur Arten mit
+               mindestens einer Karte (richtig so — ein Knopf ins Leere ist
+               eine Enttaeuschung). Faellt die gemerkte Art unter die
+               Schwelle, verschwindet ihr Knopf — die Auswahl bleibt aber
+               stehen und filtert weiter. Ergebnis: eine leere Flaeche ohne
+               Hinweis und ohne sichtbaren Weg zurueck.
+
+               Das passiert nicht selten: "Neues Set" wechselt bei JEDER
+               Formatrotation den Satz Karten, und ACE SPEC, Stadion und
+               Ausruestung liegen ohnehin knapp ueber der Schwelle.
+
+               ladeStaplesArt() kann das nicht entscheiden — beim Lesen aus
+               dem Speicher sind die Daten noch nicht da. Hier sind sie es.
+               Die Auswahl faellt deshalb genau hier auf "Alle" zurueck und
+               wird auch im Speicher aufgeraeumt, damit der naechste Aufruf
+               nicht wieder in dieselbe Grube faellt. */
+            if (staplesArt() && staplesNachArt(topCards, staplesArt()).length === 0) {
+                setzeStaplesArt(null);
+            }
             const artJetzt = staplesArt();
             /* Dieselbe Auswahl wie staplesListe() — siehe den Kopf von
                staplesAuswahl(). Getrennt gerechnet ergab das am

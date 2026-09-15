@@ -350,7 +350,18 @@ const REGISTER = {
    Laenge des gerenderten HTML, Reihenfolge der beiden Wirte in
    index.html). Keine Wochenwerte: die Prognose fuehrt
    ueber hundert Archetypen, das Modell sechs Anker. */
-const OBERGRENZE = 112;
+/* 15.09.2026: 112 -> 113. test-champions-matchups.js bekommt eine
+   Vorpruefung gegen leeres Bestehen: „mindestens 3 Geschlechtsformen im
+   Kader". Sie gehoert zur Trennung von maennlich und weiblich
+   (Betreiberauftrag, "bei Salmagnis müssen wir einen unterschied
+   zwischen männlich und weiblich machen") — ohne sie waere die
+   Zusicherung darunter gruen, sobald GAR KEINE Geschlechtsform mehr im
+   Kader steht, also genau im Fehlerfall.
+   Kein Wochenwert: die drei (Salmagnis, Servol, Psiaugon je weiblich)
+   haengen an Smogon-Basiswerten und eigenen Nutzungszeilen, nicht an der
+   Rangliste dieser Woche. Faellt eine davon weg, SOLL der Test
+   umfallen. */
+const OBERGRENZE = 113;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

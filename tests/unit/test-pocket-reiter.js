@@ -166,17 +166,31 @@ describe('Pocket-Reiter: die Farbentscheidung und die Leiste', () => {
             'auch wenn kein h-Element mehr benutzt wird');
     });
 
-    it('pocket steht NICHT in den Gruppen der unteren Leiste', () => {
-        // Bewusste Entscheidung vom 07.09.2026: als Mitglied der Gruppe
-        // "champions" leuchtete unten CHAMPIONS, waehrend oben die
-        // Pocket-Liste stand — zwei verschiedene Spiele in einem Bild.
-        // Wo der Nutzer ist, sagt das Abzeichen im Kopf.
+    it('pocket ist eine EIGENE Gruppe, nicht Teil von Champions', () => {
+        /* UMGEDREHT AM 15.09.2026, auf Ansage des Betreibers: "den Platz
+           den wir dadurch gewinnen können wir dann neben Champions noch
+           Pocket anzeigen."
+
+           Die Zusicherung stand hier vorher andersherum ("pocket steht
+           NICHT in den Gruppen"). Sie war richtig fuer den Fehler, den
+           sie meinte — am 07.09.2026 war Pocket der Gruppe `champions`
+           zugeschlagen, und beim Betreten des Pocket-Reiters leuchtete
+           unten CHAMPIONS. Sie war aber zu weit gefasst: verboten war
+           nicht "pocket in GROUPS", sondern "pocket leuchtet als
+           Champions".
+
+           Genau das wird jetzt geprueft — und zwar so, dass ein
+           Rueckfall auffliegt: Pocket hat eine eigene Kennung und einen
+           eigenen Reiter, und die Champions-Gruppe traegt ihn nicht mit. */
         const i = NAV.indexOf('var GROUPS = [');
         const block = NAV.slice(i, NAV.indexOf('];', i));
-        const gruppen = block.split('\n').filter(z => !z.trim().startsWith('//')).join('\n');
-        assert.doesNotMatch(gruppen, /'pocket'/,
-            "'pocket' steht wieder in GROUPS — dann leuchtet beim Betreten des " +
-            'Pocket-Reiters ein Knopf, der ein anderes Spiel benennt');
+        assert.match(block, /id:\s*'pocket',[\s\S]*?tabs:\s*\['pocket'\]/,
+            'pocket fehlt als eigene Gruppe — dann gibt es ausserhalb des '
+            + 'Pokeball-Menues wieder keinen sichtbaren Weg dorthin');
+        const champ = /\{ id: 'champions'[\s\S]*?\}/.exec(block)[0];
+        assert.doesNotMatch(champ, /pocket/,
+            'die Champions-Gruppe traegt pocket wieder mit — dann leuchtet beim '
+            + 'Betreten des Pocket-Reiters ein Knopf, der ein anderes Spiel benennt');
     });
 });
 

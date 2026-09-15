@@ -83,10 +83,58 @@ describe('der Kader', () => {
         assert.ok(roster[0].count > 0, 'der erste Eintrag hat keine Auftritte');
     });
 
-    it('führt Basculegion genau einmal', () => {
+    it('führt beide Salmagnis — und jedes mit EIGENEM Nutzungsdatensatz', () => {
+        /* Hier stand bis zum 15.09.2026 "führt Basculegion genau
+           einmal". Die Zusicherung war fuer ihren Anlass richtig (eine
+           Art, ein Eintrag) und fuer die Sache falsch: sie nagelte eine
+           ZAHL fest, wo die Eigenschaft "jeder Eintrag hat seinen
+           eigenen Datensatz" gemeint war.
+
+           Seit der Trennung der Geschlechter gibt es zwei Salmagnis mit
+           messbar verschiedenen Werten und Sets — Angriff 112 gegen 92,
+           Spezial-Angriff 80 gegen 100, Adamant gegen Modest. Die alte
+           Zusicherung haette genau diese Trennung verboten.
+
+           Was wirklich nie passieren darf: zwei Kadereintraege, die sich
+           einen Nutzungsdatensatz teilen. Dann zeigte die Oberflaeche
+           zweimal dieselben Sets unter zwei Namen. */
         const hits = roster.filter(r => r.name.indexOf('Basculegion') === 0);
-        assert.equal(hits.length, 1, hits.map(h => h.name).join(', '));
-        assert.ok(hits[0].slug.startsWith('basculegion'));
+        assert.equal(hits.length, 2, hits.map(h => h.name).join(', '));
+        const slugs = Array.from(hits.map(h => h.slug)).sort();
+        assert.deepStrictEqual(slugs, ['basculegion', 'basculegion-f']);
+    });
+
+    it('KEINE Geschlechtsform erbt den Datensatz ihrer Grundform', () => {
+        /* Die Gegenprobe zur Zeile darueber, ueber alle Geschlechter.
+
+           Bewusst NICHT "kein Slug wird zweimal benutzt": das waere
+           falsch. Die drei Mega-Z-Eintraege tragen form "Base" und holen
+           sich absichtlich den Datensatz ihrer Grundform (Absol,
+           Garchomp, Lucario) — fuer sie fuehrt die Rangliste keine
+           eigene Zeile. Beim ersten Anlauf dieser Zusicherung sind genau
+           die drei aufgeschlagen; eine zu weit gefasste Regel haette
+           hier drei richtige Zeilen als Fehler gemeldet.
+
+           Bei einer Geschlechtsform ist es umgekehrt: sie kommt nur
+           herein, WEIL sie eine eigene Zeile hat (siehe
+           geschlechtsformen() in scripts/scrape_champions_roster.py).
+           Teilt sie sich trotzdem den Slug der Grundform, ist die
+           Verknuepfung gerissen und die Oberflaeche zeigte zweimal
+           dasselbe Set. */
+        const dex = new Map(DATA.dex.entries.map(e => [e.en, e]));
+        const geschlecht = roster.filter(r => (dex.get(r.name) || {}).form === 'Geschlecht');
+        assert.ok(geschlecht.length >= 3,
+            `nur ${geschlecht.length} Geschlechtsformen im Kader — Datenlage pruefen`);
+        geschlecht.forEach(g => {
+            const e = dex.get(g.name);
+            const basis = roster.find(r => {
+                const b = dex.get(r.name);
+                return b && b.dex === e.dex && b.form === 'Base';
+            });
+            assert.ok(basis, `${g.name} ohne Grundform im Kader`);
+            assert.notStrictEqual(g.slug, basis.slug,
+                `${g.name} teilt sich den Nutzungsdatensatz mit ${basis.name}`);
+        });
     });
 });
 

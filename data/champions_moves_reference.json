@@ -147,7 +147,7 @@
       "de_name": "Mogelhieb",
       "type": "Normal",
       "category": "Physical",
-      "effect": "Vorzugsangriff (Prio +3), nur in der ersten Runde nach Einwechseln. Lässt das Ziel zucken (verliert die Runde)."
+      "effect": "Vorzugsangriff (Prio +3), nur in der ersten Runde nach Einwechseln. Lässt das Ziel zurückschrecken (verliert die Runde)."
     },
     "Quick Attack": {
       "de_name": "Ruckzuckhieb",
@@ -213,7 +213,7 @@
       "de_name": "Luftschnitt",
       "type": "Flying",
       "category": "Special",
-      "effect": "30 % Chance, das Ziel zucken zu lassen."
+      "effect": "30 % Chance, das Ziel zurückschrecken zu lassen."
     },
     "Thunderbolt": {
       "de_name": "Donnerblitz",
@@ -373,7 +373,7 @@
       "de_name": "Steinhagel",
       "type": "Rock",
       "category": "Physical",
-      "effect": "Trifft beide Gegner; 30 % Chance, sie zucken zu lassen."
+      "effect": "Trifft beide Gegner; 30 % Chance, sie zurückschrecken zu lassen."
     },
     "Rock Tomb": {
       "de_name": "Felsgrab",
@@ -418,7 +418,7 @@
       "de_name": "Eisenschädel",
       "type": "Steel",
       "category": "Physical",
-      "effect": "30 % Chance, das Ziel zucken zu lassen."
+      "effect": "30 % Chance, das Ziel zurückschrecken zu lassen."
     },
     "Flash Cannon": {
       "de_name": "Lichtkanone",

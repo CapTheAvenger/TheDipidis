@@ -102,9 +102,15 @@
             aktivSetzen: '⚡ Das spiele ich gerade',
             aktivGesetzt: 'Als aktives Team gesetzt.',
             exportL: '📋 Paste kopieren (Limitless & Showdown)',
-            inRechner: '\u2192 Im Rechner \u00f6ffnen',
-            inRechnerTitel: 'Nimmt dieses Team mit in den Team-Rechner \u2014 mit deinen Verteilungen, nicht mit den meistgenutzten Sets.',
-            rechnerFehlt: 'Der Rechner konnte nicht geladen werden \u2014 bitte die Seite neu laden.',
+            /* "Im Rechner oeffnen" HIESS NICHTS (15.09.2026).
+               Gemeldet: "auch damage Culc den Button bennen weil mit
+               Rechner öffnen kann ja keiner was anfangen." Der Knopf
+               fuehrt in den Schadensrechner; "Damage Calc" ist der
+               Begriff, den die Szene benutzt, und er steht in beiden
+               Sprachen gleich da. */
+            inRechner: '\u2192 Damage Calc',
+            inRechnerTitel: 'Rechnet dieses Team gegen das Feld durch \u2014 Schaden, K.-o.-Reichweite und Initiative, mit DEINEN Verteilungen statt den meistgenutzten Sets.',
+            rechnerFehlt: 'Der Damage Calc konnte nicht geladen werden \u2014 bitte die Seite neu laden.',
             kopiert: 'In die Zwischenablage kopiert.',
             modalTitel: (n) => `${n} bearbeiten`,
             faehigkeit: 'Fähigkeit',
@@ -157,9 +163,9 @@
             aktivSetzen: '⚡ This is what I play',
             aktivGesetzt: 'Set as the active team.',
             exportL: '📋 Copy paste (Limitless & Showdown)',
-            inRechner: '\u2192 Open in calculator',
-            inRechnerTitel: 'Takes this team into the team calculator \u2014 with your spreads, not the most-used sets.',
-            rechnerFehlt: 'The calculator could not be loaded \u2014 please reload the page.',
+            inRechner: '\u2192 Damage Calc',
+            inRechnerTitel: 'Runs this team against the field \u2014 damage, KO range and speed, with YOUR spreads instead of the most-used sets.',
+            rechnerFehlt: 'The Damage Calc could not be loaded \u2014 please reload the page.',
             kopiert: 'Copied to clipboard.',
             modalTitel: (n) => `Edit ${n}`,
             faehigkeit: 'Ability',
@@ -1018,7 +1024,24 @@
                     melde(l.rechnerFehlt, 'error');
                     return;
                 }
-                window.sideQuestMatchups.oeffneTeamRechner(alsTeamObjekt());
+                /* EIN FEHLSCHLAG WIRD GEMELDET, NICHT VERSCHLUCKT.
+                   Bis zum 15.09.2026 stand hier ein nackter Aufruf. Als
+                   oeffneTeamRechner() an einem null-Verweis abstuerzte,
+                   passierte genau nichts Sichtbares — der Knopf sah
+                   kaputt aus, und der Fehler stand nur in der Konsole.
+                   Seitdem gibt oeffneTeamRechner ein Promise zurueck. */
+                try {
+                    const p = window.sideQuestMatchups.oeffneTeamRechner(alsTeamObjekt());
+                    if (p && typeof p.catch === 'function') {
+                        p.catch(err => {
+                            console.warn('[sqb] Damage Calc:', err && err.message);
+                            melde(l.rechnerFehlt, 'error');
+                        });
+                    }
+                } catch (err) {
+                    console.warn('[sqb] Damage Calc:', err && err.message);
+                    melde(l.rechnerFehlt, 'error');
+                }
             });
         });
     }

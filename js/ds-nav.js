@@ -1,4 +1,4 @@
-/* ds-nav.js — die sechs Ziele der Hauptnavigation und der Datenraum-Ausweis.
+/* ds-nav.js — die fuenf Ziele der Hauptnavigation und der Datenraum-Ausweis.
  *
  * WARUM ES DAS GIBT
  * Bis zum 17.08.2026 hatte die Seite faktisch keine sichtbare Navigation:
@@ -9,15 +9,20 @@
  * waren von dort aus unerreichbar.
  *
  * DER SCHNITT
- * Die sechs Ziele folgen den vier Fragen, die die Seite ohnehin
- * beantwortet — belegt durch das Funktionsinventar vom 17.08.:
- *   Start    Was ist gerade stark?
- *   Meta     Wie sieht das Feld aus?
- *   Decks    Wie sieht die Liste dazu aus?
- *   Turnier  Was steht am Samstag im Feld?
- *   Karten   Was muss ich davon besitzen?
- * Champions steht abgesetzt: Pokémon Champions ist ein anderes Spiel, und
- * das stand bisher nirgends.
+ * Die Ziele folgen den Fragen, die die Seite ohnehin beantwortet —
+ * belegt durch das Funktionsinventar vom 17.08.:
+ *   Meta       Wie sieht das Feld aus?
+ *   Decks      Wie sieht die Liste dazu aus?
+ *   Meta Call  Was steht am Samstag im Feld?
+ * Dahinter, durch einen Strich abgesetzt, die beiden ANDEREN SPIELE:
+ * Champions und Pocket. Sie stehen nicht in derselben Reihe, weil ihre
+ * Zahlen nichts mit dem Sammelkartenspiel zu tun haben.
+ *
+ * "Karten" stand hier bis zum 15.09.2026 als fuenftes Ziel. Es ist
+ * weggefallen, weil der Kopf der Seite den Knopf "Database" traegt —
+ * zwei Tueren in denselben Raum, und die Leiste hat nur fuenf Spalten.
+ * Der frei gewordene Platz ging an Pocket, das bis dahin ueberhaupt
+ * keinen sichtbaren Weg ausserhalb des Pokeball-Menues hatte.
  *
  * WIE ES SICH EINFÜGT
  * Kein neuer Router. Jedes Ziel ruft `switchTabAndUpdateMenu` mit einem
@@ -52,35 +57,66 @@
           tabs: ['current-meta', 'city-league', 'past-meta', 'meta-analysis-hub'] },
         { id: 'decks',     go: 'current-analysis',  gl: '▤',
           tabs: ['current-analysis', 'city-league-analysis'] },
+        /* "Turnier" / "Event" HIESS FALSCH (15.09.2026).
+           ---------------------------------------------
+           Gemeldet: "Event sollte in Meta Prognose oder Meta Call oder
+           so benannt werden weil Event / Turnier könnte verwirren."
+
+           Und er hat recht: der Knopf fuehrt auf den Reiter `meta-call`
+           — eine VORHERSAGE, welche Decks am Wochenende im Feld stehen.
+           "Turnier" las sich wie eine Turnierverwaltung oder eine Liste
+           kommender Veranstaltungen, also wie etwas anderes, als dort
+           steht. Der Bereich heisst im Produkt seit jeher Meta Call; die
+           Leiste sagt das jetzt auch. Die Gruppenkennung bleibt
+           `turnier`, damit gespeicherte Zustaende und Tests nicht an
+           einer Umbenennung haengen — sichtbar ist das Wort, nicht die
+           Kennung. */
         { id: 'turnier',   go: 'meta-call',         gl: '★',
           tabs: ['meta-call'] },            // Profil ist geteilt, siehe unten
-        { id: 'karten',    go: 'cards',             gl: '◫',
-          tabs: ['cards', 'proxy', 'calculator'] },
-        // 'pocket' steht hier ABSICHTLICH NICHT.
-        //
-        // Der erste Entwurf (07.09.2026) hat ihn der Champions-Gruppe
-        // zugeschlagen, damit beim Betreten von #pocket wenigstens
-        // etwas leuchtet. Im Bild war das Ergebnis: die Pocket-Liste
-        // steht da, und unten leuchtet "CHAMPIONS". Das ist genau die
-        // Vermischung, die diese Leiste vermeiden soll (siehe oben:
-        // "Pokémon Champions ist ein anderes Spiel").
-        //
-        // Nichts leuchten zu lassen ist hier kein Sonderfall: tutorial,
-        // quellen und profile machen es seit jeher so. Wo der Nutzer
-        // ist, sagt ihm das Abzeichen im Kopf ("Side Quest: Pokémon TCG
-        // Pocket"), nicht die Leiste. Ein sechster Knopf kommt nicht in
-        // Frage — css/ds-nav.css teilt mobil in fuenf Spalten, und
-        // tests/unit/test-startseite-meta.js nagelt die fuenf
-        // Gruppen-Kennungen fest.
+        /* "Karten" IST HIER WEG (15.09.2026).
+           ---------------------------------
+           Gemeldet: "Dann kann Cards aus der Schnellwahl weg weil wir
+           das ja oben noch über die Icons haben das reicht und denn
+           Platz den wir dadurch gewinnen können wir dann neben Champions
+           noch Pocket anzeigen."
+
+           Nachgesehen, bevor etwas entfernt wurde: der Kopf der Seite
+           traegt den Knopf "Database" (index.html, .header-icon-btn mit
+           switchTab('cards')) — die Kartendatenbank bleibt also von
+           jeder Seite aus einen Klick entfernt, dazu ueber das
+           Pokeball-Menue. Nur die zweite Tuer daneben faellt weg.
+
+           Was das kostet: `cards`, `proxy` und `calculator` haben damit
+           keine Gruppe mehr, es leuchtet dort also kein Knopf. Das ist
+           kein Sonderfall — tutorial, quellen und profile machen es seit
+           jeher so, und das Abzeichen im Kopf sagt ohnehin, wo man ist.
+           Das Profil faellt fuer seine Karten-Untertabs in denselben
+           Zustand (siehe groupForTab weiter unten). */
         { id: 'champions', go: 'side-quest',        gl: '◆', alt: true,
-          tabs: ['side-quest'] }
+          tabs: ['side-quest'] },
+        /* POCKET BEKOMMT DEN FREI GEWORDENEN PLATZ (15.09.2026).
+           ----------------------------------------------------
+           Bis heute stand hier die Begruendung, warum Pocket NICHT in
+           die Leiste passt: "Ein sechster Knopf kommt nicht in Frage —
+           css/ds-nav.css teilt mobil in fuenf Spalten." Das war richtig,
+           solange fuenf Ziele um fuenf Spalten konkurrierten. Mit dem
+           Wegfall von "Karten" sind es wieder fuenf, und der alte
+           Einwand faellt mit seiner Voraussetzung.
+
+           Der zweite Einwand von damals galt der VERMISCHUNG: Pocket der
+           Champions-Gruppe zuzuschlagen liess beim Betreten von #pocket
+           "CHAMPIONS" leuchten. Auch der faellt — Pocket ist jetzt eine
+           eigene Gruppe mit eigenem Knopf und leuchtet fuer sich. Beide
+           stehen hinter dem Trenner, weil beide andere Spiele sind. */
+        { id: 'pocket',    go: 'pocket',            gl: '◇', alt: true,
+          tabs: ['pocket'] }
     ];
 
     var LABELS = {
-        de: { meta: 'Meta', decks: 'Decks', turnier: 'Turnier',
-              karten: 'Karten', champions: 'Champions' },
-        en: { meta: 'Meta', decks: 'Decks', turnier: 'Event',
-              karten: 'Cards', champions: 'Champions' }
+        de: { meta: 'Meta', decks: 'Decks', turnier: 'Meta Call',
+              champions: 'Champions', pocket: 'Pocket' },
+        en: { meta: 'Meta', decks: 'Decks', turnier: 'Meta Call',
+              champions: 'Champions', pocket: 'Pocket' }
     };
 
     // Datenraum je Tab. Region, Format und Quelle sind strukturelle
@@ -151,9 +187,14 @@
         // dieser Liste — es hat einen eigenen Tab und damit einen eigenen
         // Eintrag oben.
         if (tabId === 'profile') {
+            // Das Battle Journal ist Turniervorbereitung und gehoert zu
+            // Meta Call. Die uebrigen Profil-Untertabs (Decks,
+            // Wunschliste, Sammlung) gehoerten zu "Karten" — diese Gruppe
+            // gibt es seit dem 15.09.2026 nicht mehr, also leuchtet dort
+            // nichts. Siehe die Begruendung oben bei GROUPS.
             var sub = document.querySelector('.profile-tab-btn.active');
             var key = sub && (sub.dataset.profileTab || sub.getAttribute('onclick') || '');
-            return /journal/i.test(key || '') ? 'turnier' : 'karten';
+            return /journal/i.test(key || '') ? 'turnier' : null;
         }
         if (tabId === 'tutorial') return 'start';
         return null;
@@ -166,7 +207,14 @@
         var L = LABELS[lang()];
 
         host.innerHTML = GROUPS.map(function (g, i) {
-            var sep = (g.alt && i > 0) ? '<span class="ds-nav-sep" aria-hidden="true"></span>' : '';
+            /* Der Trenner steht vor dem ERSTEN abgesetzten Ziel, nicht
+               vor jedem. Seit Pocket dazugekommen ist, waeren es sonst
+               zwei Striche — einer zwischen Meta Call und Champions,
+               einer zwischen Champions und Pocket. Die beiden anderen
+               Spiele stehen zusammen auf der anderen Seite EINES
+               Strichs. */
+            var sep = (g.alt && i > 0 && !(GROUPS[i - 1] || {}).alt)
+                ? '<span class="ds-nav-sep" aria-hidden="true"></span>' : '';
             return sep + '<button type="button" class="ds-nav-btn' + (g.alt ? ' is-alt' : '') +
                 '" data-ds-group="' + g.id + '">' + esc(L[g.id]) + '</button>';
         }).join('');

@@ -59,6 +59,115 @@ EXTRA_FORMEN = [
     "Tauros-Paldea-Aqua",    # pokebase: tauros-paldea-aqua-breed,  Kampf/Wasser
 ]
 
+TEAMS_PATH = os.path.join(ROOT, "data", "champions_replica_teams.json")
+USAGE_PATH = os.path.join(ROOT, "data", "champions_usage.json")
+
+# Teamnamen, die eine Form meinen, die der Pokedex unter der Grundform
+# fuehrt. Ohne diese Zeilen wuerden sie als "fehlt" gelesen und ein
+# zweites Mal angelegt. Dieselben zwei Faelle kennt auch
+# js/app-side-quest-pokedex.js (TEAM_AUSNAHMEN) — dort fuer die
+# Auftrittszaehlung, hier fuer die Kaderergaenzung.
+TEAM_UNTER_GRUNDFORM = {
+    "Floette-Eternal": "Floette",
+    "Maushold-Four": "Maushold",
+}
+
+
+def _lade(pfad):
+    try:
+        with open(pfad, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:  # noqa: BLE001
+        print("WARN: %s nicht lesbar (%s)" % (pfad, e), file=sys.stderr)
+        return None
+
+
+def team_arten(teams):
+    """Die Smogon-Namen aller Pokemon aus den Replica-Teams."""
+    raus = []
+    for t in (teams or {}).get("teams", []):
+        for p in t.get("pokemon", []):
+            nm = str((p or {}).get("name") or "").strip()
+            if not nm:
+                continue
+            nm = TEAM_UNTER_GRUNDFORM.get(nm, nm)
+            if nm not in raus:
+                raus.append(nm)
+    return raus
+
+
+def aus_teams(vorhanden, smogon, teams):
+    """WER IN DEN TOP-TEAMS STEHT, GEHOERT IN DEN KADER.
+
+    BEFUND 15.09.2026: der Pokedex meldete selbst "9 Pokémon aus den
+    aktuellen Replica-Teams fehlen hier noch" — darunter Indeedee-F mit
+    23 Auftritten, das zweithaeufigste der fehlenden. Der Hinweis war
+    ehrlich, aber er wartete auf eine Quelle, die nicht nachzieht.
+
+    Dieselbe Regel wie bei aus_mega() darueber, nur mit einem anderen
+    Beleg: die Replica-Teams sind echte Top-Teams aus dem Spielbetrieb
+    (data/champions_replica_teams.json, taeglich gescrapt). Wer dort
+    gespielt wird, ist im Spiel. Die Basiswerte kommen aus derselben
+    Smogon-Datei wie bei jedem anderen Schluessel; wer dort fehlt, kommt
+    NICHT herein, sondern wird gemeldet.
+
+    Die Regel haengt an ihrer Bedingung, nicht an einer Namensliste:
+    zieht die Kaderquelle nach, findet die Art sich ohnehin schon in
+    `vorhanden` und wird nicht doppelt angelegt.
+    """
+    neu, ohne = [], []
+    for nm in team_arten(teams):
+        if nm in vorhanden or nm in neu:
+            continue
+        if nm in smogon and "baseStats" in smogon[nm]:
+            neu.append(nm)
+        else:
+            ohne.append(nm)
+    return neu, ohne
+
+
+def geschlechtsformen(vorhanden, smogon, usage):
+    """MAENNLICH UND WEIBLICH SIND ZWEI VIECHER, WENN DIE DATEN ES SAGEN.
+
+    Bestellt am 15.09.2026: "bei Salmagnis müssen wir einen unterschied
+    zwischen männlich und weiblich machen. Generell da wo männlich und
+    weiblich unterschiedliche Statuswerte und entsprechend
+    unterschiedliche Nutzung haben."
+
+    Gemessen in data/pokemon_battle_data.json und
+    data/champions_usage.json:
+
+        Basculegion-F   Atk 112 -> 92, SpA 80 -> 100   eigene Nutzungszeile
+        Indeedee-F      KP 60 -> 70, SpA 105 -> 95     eigene Nutzungszeile
+        Meowstic-F      Werte gleich                   eigene Nutzungszeile
+        Oinkologne-F    Werte anders                   KEINE Nutzungszeile
+
+    Aufgenommen wird, WER EINE EIGENE NUTZUNGSZEILE HAT. Das ist der
+    belegbare Teil von "unterschiedliche Nutzung": championsbattledata.com
+    fuehrt die Form getrennt, also wird sie getrennt gespielt. Ob die
+    Werte dazu auch abweichen, entscheidet nicht ueber die Aufnahme —
+    Meowstic-F hat dieselben Werte und trotzdem eigene Faehigkeiten,
+    Attacken und Wesen (Modest 51 % gegen Adamant 57 % beim maennlichen
+    Salmagnis). Eine gemeinsame Zeile wuerde die eine Haelfte davon
+    verschweigen.
+
+    Oinkologne-F bleibt draussen: ohne Nutzungszeile ist nicht belegt,
+    dass die Form in Champions ueberhaupt spielbar ist.
+    """
+    zeilen = set((usage or {}).get("pokemon", {}).keys())
+    neu = []
+    for k in list(vorhanden):
+        for endung in ("-F", "-M"):
+            form = k + endung
+            if form in vorhanden or form in neu:
+                continue
+            if form not in smogon or "baseStats" not in smogon[form]:
+                continue
+            if form.lower() not in zeilen:
+                continue
+            neu.append(form)
+    return neu
+
 
 def slug_to_smogon(slug):
     """pokebase slug → Smogon species name. 'ninetales-alola' →
@@ -150,9 +259,28 @@ def main():
         print("WARN: Mega-Form ohne Grundform UND ohne Smogon-Werte: %s"
               % ", ".join("%s -> %s" % t for t in ohne_werte), file=sys.stderr)
 
+    # Was die Top-Teams spielen und der Kader noch nicht fuehrt.
+    vorhanden = vorhanden | set(aus_mega)
+    teams_neu, teams_ohne = aus_teams(vorhanden, smogon, _lade(TEAMS_PATH))
+    if teams_neu:
+        print("Aus den Replica-Teams ergaenzt (%d): %s"
+              % (len(teams_neu), ", ".join(sorted(teams_neu))))
+    if teams_ohne:
+        # Benannt, nicht verschwiegen: hier wird etwas gespielt, wofuer
+        # keine Basiswerte vorliegen.
+        print("WARN: in Teams gespielt, ohne Smogon-Werte: %s"
+              % ", ".join(sorted(teams_ohne)), file=sys.stderr)
+
+    # Geschlechtsformen mit eigener Nutzungszeile.
+    vorhanden = vorhanden | set(teams_neu)
+    geschlecht = geschlechtsformen(vorhanden, smogon, _lade(USAGE_PATH))
+    if geschlecht:
+        print("Geschlechtsformen mit eigener Nutzungszeile (%d): %s"
+              % (len(geschlecht), ", ".join(sorted(geschlecht))))
+
     # Stable, de-duplicated key list (base first, then megas, then forms).
     seen, keys = set(), []
-    for k in base + aus_mega + megas + formen:
+    for k in base + aus_mega + teams_neu + geschlecht + megas + formen:
         if k not in seen:
             seen.add(k)
             keys.append(k)
@@ -172,11 +300,17 @@ def main():
             "mega_count": len(megas),
             "form_count": len(formen),
             "aus_mega": sorted(aus_mega),
+            "aus_teams": sorted(teams_neu),
+            "aus_teams_count": len(teams_neu),
+            "aus_teams_ohne_werte": sorted(teams_ohne),
+            "geschlechtsformen": sorted(geschlecht),
+            "geschlechtsformen_count": len(geschlecht),
         },
         "smogonKeys": keys,
     }
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"Wrote {OUT} — {len(base)} base + {len(aus_mega)} aus Mega-Formen "
+          f"+ {len(teams_neu)} aus Teams + {len(geschlecht)} Geschlechtsformen "
           f"+ {len(megas)} mega + {len(formen)} Formen = {len(keys)} keys")
     return 0
 

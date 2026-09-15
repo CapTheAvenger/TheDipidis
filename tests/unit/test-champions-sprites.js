@@ -113,8 +113,35 @@ const lokalName = new Function(
  * Sie steht absichtlich weiter hier und nicht als `assert.deepEqual(ohne,
  * [])`: eine leere BENANNTE Liste sagt "hier war schon einmal eine Luecke,
  * so wird sie geschlossen". Die naechste faellt damit nicht in ein
- * Verfahren, das erst jemand erfinden muss. */
-const NOCH_OHNE_BILD = [];
+ * Verfahren, das erst jemand erfinden muss.
+ *
+ * WIEDER OFFEN am 15.09.2026, abends — und genau so war es gemeint.
+ * -----------------------------------------------------------------
+ * Zehn Eintraege sind neu in den Pokedex gekommen:
+ *
+ *   neun aus den Replica-Teams, die der Pokedex selbst als fehlend
+ *   gemeldet hatte ("9 Pokémon aus den aktuellen Replica-Teams fehlen
+ *   hier noch") — Cinderace, Gogoat, Houndstone, Indeedee, Indeedee (F),
+ *   Meowstic (F), Pincurchin, Sirfetch’d, Thievul;
+ *
+ *   dazu Basculegion (F), weil der Betreiber die Geschlechter getrennt
+ *   haben wollte ("bei Salmagnis müssen wir einen unterschied zwischen
+ *   männlich und weiblich machen").
+ *
+ * Die Reihenfolge ist zwingend und nicht zu drehen: der Spiegel-Lauf
+ * geht die POKEDEX-Eintraege durch, kann also erst suchen, nachdem diese
+ * zehn drin stehen. Und er laeuft nur in CI — die Sandkiste bekommt von
+ * pokewiki.de 403 auf CONNECT.
+ *
+ * Die Formschluessel selbst sind NICHT geraten: fuer die drei
+ * Geschlechtsformen wurde je eine pokewiki-Seite geoeffnet
+ * (Salmagnis 902/902a, Servol 876/876a, Psiaugon 678/678a/678m1); die
+ * Begruendung steht in scripts/build_champions_sprites.py. Was fehlt,
+ * ist die gespiegelte DATEI, nicht die Zuordnung. */
+const NOCH_OHNE_BILD = [
+    'Basculegion (F)', 'Cinderace', 'Gogoat', 'Houndstone', 'Indeedee',
+    'Indeedee (F)', 'Meowstic (F)', 'Pincurchin', 'Sirfetch’d', 'Thievul',
+];
 
 describe('die gespiegelten Bilder', () => {
     it('jeder Pokédex-Eintrag hat eine gespiegelte Datei', () => {

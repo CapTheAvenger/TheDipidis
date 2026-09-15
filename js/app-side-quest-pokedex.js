@@ -35,7 +35,7 @@
     let _activated = false;
     let _query = '';
     let _typeFilter = '';            // '' = all, else EN type
-    let _formFilter = 'all';         // all | Base | Mega | Regional
+    let _formFilter = 'all';         // all | Base | Mega | Regional | Geschlecht
     let _sortKey = 'total';          // total|hp|atk|def|spa|spd|spe|bulkPhys|bulkSpec|dex|name|nutzung
     let _sortDir = -1;               // 1 asc, -1 desc
     let _ansicht = 'raster';         // 'raster' | 'tabelle'
@@ -82,6 +82,11 @@
             allTypes: 'Alle Typen',
             allForms: 'Alle Formen',
             formBase: 'Normal', formMega: 'Mega', formRegional: 'Regionalform',
+            /* Seit dem 15.09.2026 fuehrt der Pokedex Geschlechtsformen
+               getrennt, wo sie eigene Werte ODER eine eigene Nutzungszeile
+               haben (Salmagnis, Servol, Psiaugon je weiblich). Ohne diesen
+               Eintrag waeren sie zwar im Raster, aber nicht filterbar. */
+            formGeschlecht: 'Geschlechtsform',
             sortHead: 'Hauptsortierung:',
             sTotal: 'Basiswertsumme', sHp: 'KP', sAtk: 'Angriff', sDef: 'Verteidigung',
             sSpa: 'Sp.-Angriff', sSpd: 'Sp.-Vert.', sSpe: 'Initiative',
@@ -182,6 +187,7 @@
             allTypes: 'All types',
             allForms: 'All forms',
             formBase: 'Base', formMega: 'Mega', formRegional: 'Regional',
+            formGeschlecht: 'Gender form',
             sortHead: 'Main sort:',
             sTotal: 'Base stat total', sHp: 'HP', sAtk: 'Attack', sDef: 'Defense',
             sSpa: 'Sp. Atk', sSpd: 'Sp. Def', sSpe: 'Speed',
@@ -1091,7 +1097,8 @@
         const l = t();
         const typeOpts = `<option value="">${escapeHtml(l.allTypes)}</option>` +
             TYPES_EN.map(ty => `<option value="${ty}"${_typeFilter === ty ? ' selected' : ''}>${escapeHtml(uiLang() === 'de' ? deType(ty) : ty)}</option>`).join('');
-        const formOpts = [['all', l.allForms], ['Base', l.formBase], ['Mega', l.formMega], ['Regional', l.formRegional]]
+        const formOpts = [['all', l.allForms], ['Base', l.formBase], ['Mega', l.formMega],
+                          ['Regional', l.formRegional], ['Geschlecht', l.formGeschlecht]]
             .map(([v, lab]) => `<option value="${v}"${_formFilter === v ? ' selected' : ''}>${escapeHtml(lab)}</option>`).join('');
         /* BEIDE Zahlen zaehlen EINTRAEGE, nicht Marken.
          *

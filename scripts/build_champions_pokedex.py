@@ -170,6 +170,11 @@ ROSTER_WERTE_AUS_SMOGON = {
     "Floette": "Floette-Eternal",
 }
 
+# Smogon-Endung -> deutsche Formbeschriftung. Die Endung steht im
+# englischen Namen ("Basculegion (F)"), weil daran die Verknuepfung zur
+# Ranglistenzeile haengt; die deutsche Seite schreibt das Wort aus.
+GESCHLECHT_SUFFIX = {"F": "weiblich", "M": "männlich"}
+
 # Base species whose canonical name contains a hyphen (not a form suffix).
 HYPHEN_BASE = {"Kommo-o", "Hakamo-o", "Jangmo-o", "Ho-Oh", "Porygon-Z",
                "Type-Null", "Mr-Mime", "Mime-Jr", "Mr-Rime",
@@ -202,6 +207,34 @@ def parse_smogon(nm):
         if suf in REGION_SUFFIX:
             pre, de, kind = REGION_SUFFIX[suf]
             return (f"{pre} {b}", b, de, kind)
+        # ── Geschlechtsformen ──────────────────────────────────────
+        #
+        # Bestellt am 15.09.2026: "bei Salmagnis müssen wir einen
+        # unterschied zwischen männlich und weiblich machen."
+        #
+        # Ohne diesen Zweig fiel "Basculegion-F" in die Alt-Form-Zeile
+        # darunter und wurde "Basculegion (F)" mit form="Base" — mit
+        # richtiger Beschriftung, aber falscher FORMART. Und die Form
+        # entscheidet an drei Stellen mit:
+        #   * der Sternspeicher (js/champions-shiny.js) laesst alles
+        #     ausser Regionalformen mit der Grundform zusammenfallen —
+        #     ein weibliches Salmagnis haette damit denselben Stern
+        #     bekommen wie das maennliche, obwohl man es eigens fangen
+        #     muss;
+        #   * die Nutzungszuordnung weiter unten erlaubt nur fuer
+        #     form="Base" den Rueckfall auf die Grundform — die
+        #     weibliche Form haette also die Sets der maennlichen
+        #     geerbt, wenn ihre eigene Zeile einmal fehlt;
+        #   * der Formfilter der Oberflaeche.
+        #
+        # Der ENGLISCHE Name bleibt "<Art> (F)": _norm davon ist
+        # "basculegionf" und damit genau der Nutzungs-Slug
+        # "basculegion-f". Die Verknuepfung zur Ranglistenzeile haengt an
+        # dieser Schreibweise (dieselbe Mechanik wie bei den drei
+        # Paldea-Tauros weiter oben).
+        if suf in GESCHLECHT_SUFFIX:
+            de_label = GESCHLECHT_SUFFIX[suf]
+            return (f"{b} ({suf})", b, de_label, "Geschlecht")
         return (f"{b} ({suf})", b, suf, "Base")   # alt form (Rotom-Heat, …)
     return (nm, nm, "", "Base")
 
@@ -689,7 +722,15 @@ def main():
         types = sm.get("types") or []
         t1 = types[0] if types else ""
         t2 = types[1] if len(types) > 1 else ""
+        # BEFUND 15.09.2026: "Sirfetch’d" kam mit dex=None herein.
+        # data/pokemon_dex_numbers.json ist ueber reine Kleinbuchstaben
+        # verschluesselt ("sirfetchd"); base.lower() traegt das
+        # typografische Apostroph mit und traf deshalb nichts. Eine
+        # fehlende Nummer ist kein kleiner Schoenheitsfehler: die
+        # Oberflaeche sortiert und sucht darueber.
         dex = dexnums.get(base.lower())
+        if dex is None:
+            dex = dexnums.get(re.sub(r"[^a-z0-9]", "", base.lower()))
         entries.append(make_entry(en, name_de, dex, kind, t1, t2, sm["baseStats"]))
         have.add(norm_en(en))
         added += 1

@@ -222,9 +222,42 @@ def test_parse_smogon_bleibt_fuer_alle_smogon_schluessel_stabil():
         return (nm, nm, "", "Base")
 
     anders = sorted(k for k in smogon if alt(k) != mod.parse_smogon(k))
-    assert anders == ["Tauros-Paldea-Aqua", "Tauros-Paldea-Blaze",
+    # Am 15.09.2026 sind die Geschlechtsformen dazugekommen. Bestellt:
+    # "bei Salmagnis müssen wir einen unterschied zwischen männlich und
+    # weiblich machen."
+    #
+    # Was sich fuer sie aendert, ist AUSDRUECKLICH NICHT der englische
+    # Name: "Basculegion-F" heisst vorher wie nachher "Basculegion (F)",
+    # und daran haengt die Verknuepfung zur Ranglistenzeile
+    # ("basculegion-f"). Neu sind nur die deutsche Beschriftung
+    # ("weiblich" statt "F") und die Formart ("Geschlecht" statt "Base").
+    # Die Gegenprobe darunter haelt genau das fest.
+    assert anders == ["Basculegion-F", "Indeedee-F", "Meowstic-F",
+                      "Nidoran-F", "Nidoran-M", "Oinkologne-F",
+                      "Tauros-Paldea-Aqua", "Tauros-Paldea-Blaze",
                       "Tauros-Paldea-Combat"], (
         f"unerwartete Aenderungen: {anders}")
+
+
+def test_geschlechtsformen_behalten_ihren_englischen_namen():
+    """Der englische Name traegt die Verknuepfung zur Ranglistenzeile.
+
+    _norm("Basculegion (F)") ist genau _norm("basculegion-f"). Wer den
+    Namen auf "Female Basculegion" oder "Basculegion-F" umstellt, kappt
+    sie — und die Form stuende ohne Sets da, ohne dass irgendwo etwas
+    rot wird. Dieselbe Falle wie bei den drei Paldea-Tauros oben.
+    """
+    mod = _bauer()
+    for key, art_de in (("Basculegion-F", "weiblich"),
+                        ("Indeedee-F", "weiblich"),
+                        ("Meowstic-F", "weiblich"),
+                        ("Nidoran-M", "männlich")):
+        en, basis, label, art = mod.parse_smogon(key)
+        vorne, endung = key.rsplit("-", 1)
+        assert en == f"{vorne} ({endung})", f"{key} heisst englisch {en!r}"
+        assert basis == vorne
+        assert label == art_de
+        assert art == "Geschlecht", f"{key} hat die Formart {art!r}"
 
 
 def test_die_umbenennung_des_sammelnamens_steht_im_bauer():

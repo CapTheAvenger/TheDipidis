@@ -39,7 +39,20 @@
     let _sortKey = 'total';          // total|hp|atk|def|spa|spd|spe|bulkPhys|bulkSpec|dex|name|nutzung
     let _sortDir = -1;               // 1 asc, -1 desc
     let _ansicht = 'raster';         // 'raster' | 'tabelle'
-    let _nurShiny = false;           // Filter: nur was der Nutzer als Shiny hat
+    /* DREI ZUSTAENDE, NICHT ZWEI (15.09.2026).
+     *
+     * ANLASS (Betreiber): "und auch als Filter alle nicht shiny markierten
+     * Pokemon anzeigen damit ich weiß was ich noch besorgen muss".
+     *
+     * Der Filter hatte bisher zwei Zustaende: alle / nur meine. Das
+     * beantwortet "was habe ich", nicht "was fehlt mir noch" — und die
+     * zweite Frage ist die, mit der man vor dem Spiel sitzt.
+     *
+     * 'alle' | 'meine' | 'offen'. Zwei Knoepfe statt eines dreistufigen:
+     * jeder traegt seine EIGENE Zahl, und genau die ist die Auskunft
+     * ("31 habe ich, 275 fehlen"). Ein Knopf mit wechselnder Beschriftung
+     * koennte immer nur eine der beiden Zahlen zeigen. */
+    let _shinyFilter = 'alle';       // alle | meine | offen
     let _editionen = null;           // { dex: [{schluessel,de,en}] }
     let _go = null;                  // { basis:[dex], regional:{region:[dex]}, _meta }
     let _herkunftLaedt = null;
@@ -77,6 +90,8 @@
             ansichtLabel: 'Ansicht', ansichtRaster: 'Raster', ansichtTabelle: 'Tabelle',
             nurShiny: 'nur meine Shinys',
             nurShinyHint: 'Zeigt nur Pokémon, die du mit dem Stern als Shiny im Besitz markiert hast.',
+            nochOffen: 'noch offen',
+            nochOffenHint: 'Zeigt alle Pokémon, die du NICHT als Shiny markiert hast — also das, was dir noch fehlt.',
             sternAn: 'Als Shiny im Besitz markiert — nochmal tippen zum Entfernen',
             sternAus: 'Als Shiny im Besitz markieren',
             auftritte: (n) => n === 1 ? '1 Team-Auftritt' : `${n} Team-Auftritte`,
@@ -175,6 +190,8 @@
             ansichtLabel: 'View', ansichtRaster: 'Grid', ansichtTabelle: 'Table',
             nurShiny: 'my shinies only',
             nurShinyHint: 'Shows only Pokémon you starred as owned shiny.',
+            nochOffen: 'still missing',
+            nochOffenHint: 'Shows every Pokémon you have NOT starred as an owned shiny — what is still missing.',
             sternAn: 'Marked as owned shiny — tap again to remove',
             sternAus: 'Mark as owned shiny',
             auftritte: (n) => n === 1 ? '1 team appearance' : `${n} team appearances`,
@@ -793,7 +810,12 @@
         const list = _entries
             .filter(e => !_typeFilter || e.t1 === _typeFilter || e.t2 === _typeFilter)
             .filter(e => _formFilter === 'all' || e.form === _formFilter)
-            .filter(e => !_nurShiny || (window.ChampionsShiny && window.ChampionsShiny.hat(e)))
+            .filter(e => {
+                if (_shinyFilter === 'alle') return true;
+                const CS = window.ChampionsShiny;
+                if (!CS) return true;           // ohne Modul kein Filter, keine leere Liste
+                return _shinyFilter === 'meine' ? CS.hat(e) : !CS.hat(e);
+            })
             .filter(e => matches(e, q));
         if (_sortKey === 'name') {
             list.sort((a, b) => sortValue(a).localeCompare(sortValue(b), lang) * _sortDir);
@@ -1063,13 +1085,22 @@
         const formOpts = [['all', l.allForms], ['Base', l.formBase], ['Mega', l.formMega], ['Regional', l.formRegional]]
             .map(([v, lab]) => `<option value="${v}"${_formFilter === v ? ' selected' : ''}>${escapeHtml(lab)}</option>`).join('');
         const shinyN = (window.ChampionsShiny && window.ChampionsShiny.anzahl()) || 0;
+        /* Die Zahl der offenen wird GEZAEHLT, nicht gerechnet.
+         * "alle minus markierte" waere falsch, sobald jemand eine Marke
+         * fuer einen Eintrag traegt, den der Pokedex gerade nicht fuehrt —
+         * und der Kader der Quelle dreht sich woechentlich. */
+        const offenN = (window.ChampionsShiny && _entries)
+            ? _entries.filter(e => !window.ChampionsShiny.hat(e)).length
+            : ((_entries && _entries.length) || 0);
         return `
             <div class="sqp-ansicht" role="group" aria-label="${escapeHtml(l.ansichtLabel)}">
                 <button type="button" class="sqp-ansicht-btn${_ansicht === 'raster' ? ' is-active' : ''}" data-sqp-ansicht="raster">${escapeHtml(l.ansichtRaster)}</button>
                 <button type="button" class="sqp-ansicht-btn${_ansicht === 'tabelle' ? ' is-active' : ''}" data-sqp-ansicht="tabelle">${escapeHtml(l.ansichtTabelle)}</button>
                 <span class="sqp-ansicht-spacer"></span>
-                <button type="button" class="sqp-shinyfilter${_nurShiny ? ' is-active' : ''}" data-sqp-nurshiny="1"
+                <button type="button" class="sqp-shinyfilter${_shinyFilter === 'meine' ? ' is-active' : ''}" data-sqp-shiny="meine"
                         title="${escapeHtml(l.nurShinyHint)}">\u2605 ${escapeHtml(l.nurShiny)} <b>${shinyN}</b></button>
+                <button type="button" class="sqp-shinyfilter sqp-shinyfilter--offen${_shinyFilter === 'offen' ? ' is-active' : ''}" data-sqp-shiny="offen"
+                        title="${escapeHtml(l.nochOffenHint)}">\u2606 ${escapeHtml(l.nochOffen)} <b>${offenN}</b></button>
             </div>
             <div class="sqp-presets">
                 <span class="sqp-presets-label">${escapeHtml(l.sortHead)}</span>
@@ -1961,8 +1992,14 @@
                 render();
             });
         });
-        const shinyBtn = host.querySelector('.sqp-shinyfilter');
-        if (shinyBtn) shinyBtn.addEventListener('click', () => { _nurShiny = !_nurShiny; render(); });
+        host.querySelectorAll('[data-sqp-shiny]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const wunsch = btn.getAttribute('data-sqp-shiny');
+                // Nochmal auf denselben Knopf: zurueck auf "alle".
+                _shinyFilter = (_shinyFilter === wunsch) ? 'alle' : wunsch;
+                render();
+            });
+        });
 
         /* Der Stern sitzt NEBEN der Kachel, nicht darin — ein Knopf im Knopf
          * ist ungueltiges HTML und faengt den Klick der Kachel mit ab. Beides
@@ -1978,10 +2015,27 @@
                 btn.classList.toggle('is-an', an);
                 btn.setAttribute('aria-pressed', an ? 'true' : 'false');
                 btn.title = an ? t().sternAn : t().sternAus;
-                const z = host.querySelector('.sqp-shinyfilter b');
-                if (z) z.textContent = String(window.ChampionsShiny.anzahl());
+                /* BEIDE Zahlen nachziehen, nicht nur die erste.
+                 *
+                 * Hier stand `host.querySelector('.sqp-shinyfilter b')` —
+                 * das traf ab dem zweiten Knopf nur noch den ersten. Seit
+                 * dem 15.09.2026 gibt es zwei, und "noch offen" blieb
+                 * stehen: gemessen zeigte er 306, waehrend drei Marken
+                 * gesetzt waren und 303 richtig gewesen waeren. Erst der
+                 * naechste Neuaufbau holte es nach.
+                 *
+                 * Die Zahl neben einem Filter ist eine AUSSAGE ueber den
+                 * Bestand; eine, die dem Bestand hinterherlaeuft, ist
+                 * schlechter als keine. */
+                const meineZ = host.querySelector('[data-sqp-shiny="meine"] b');
+                if (meineZ) meineZ.textContent = String(window.ChampionsShiny.anzahl());
+                const offenZ = host.querySelector('[data-sqp-shiny="offen"] b');
+                if (offenZ && _entries) {
+                    offenZ.textContent = String(
+                        _entries.filter(x => !window.ChampionsShiny.hat(x)).length);
+                }
                 // Im Shiny-Filter verschwindet ein abgewaehlter Eintrag sofort.
-                if (_nurShiny && !an) render();
+                if (_shinyFilter !== 'alle') render();
             });
         });
         host.querySelectorAll('.sqp-kachel').forEach(btn => {

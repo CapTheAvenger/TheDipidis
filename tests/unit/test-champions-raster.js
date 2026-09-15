@@ -202,9 +202,18 @@ describe('Sortierung nach Champions-Nutzung', () => {
            einen Schritt weiter: der Spiegel-Lauf um 17:45 UTC geht die
            POKEDEX-Eintraege durch, und wer dort fehlt, wird nie
            gesucht. */
+        /* NACHGEZOGEN AM 15.09.2026, zweiter Durchgang des Tages.
+           Malamar und Pyroar sind weg, weil sie jetzt IM Pokedex stehen —
+           beide hatten dort eine Mega-Form ohne Grundform, und die Regel
+           "ohne Grundform keine Mega-Form" hat die Grundform ergaenzt
+           (scripts/scrape_champions_roster.py). Belegt ist das doppelt:
+           die Spielmechanik, und Nutzungszeilen in champions_usage.json.
+           Dasselbe gilt fuer Dragalge (Tandrak), das der Betreiber
+           gemeldet hatte — es stand hier gar nicht mehr, weil es schon
+           vormittags aus der Liste gefallen war. */
         const ERWARTET_OHNE_EINTRAG = [
             'Cinderace', 'Gogoat', 'Houndstone', 'Indeedee', 'Indeedee-F',
-            'Malamar', 'Meowstic-F', 'Pincurchin', 'Pyroar',
+            'Meowstic-F', 'Pincurchin',
             'Sirfetch\u2019d', 'Thievul',
         ].sort();
 

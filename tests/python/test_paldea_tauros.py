@@ -260,7 +260,12 @@ def test_die_beiden_varianten_stehen_kuratiert_im_scraper():
         assert key in quelle, f"{key} steht nicht in scrape_champions_roster.py"
     # Gelesen UND in die Ausgabe uebernommen.
     assert re.search(r"formen\s*=\s*\[f for f in EXTRA_FORMEN", quelle)
-    assert re.search(r"base\s*\+\s*megas\s*\+\s*formen", quelle), (
+    # Seit dem 15.09.2026 haengt zwischen `base` und `megas` noch
+    # `aus_mega` (Grundformen, die aus einer vorhandenen Mega-Form
+    # abgeleitet wurden). Geprueft wird deshalb, dass `formen` am Ende der
+    # Summe steht — das ist der Punkt dieser Zeile —, nicht die genaue
+    # Zahl der Summanden.
+    assert re.search(r"for k in base(\s*\+\s*\w+)*\s*\+\s*formen:", quelle), (
         "die kuratierten Formen landen nicht in der Schluesselliste")
 
 

@@ -308,11 +308,38 @@ def test_die_bilanz_der_runden_stimmt_mit_den_eintraegen_ueberein():
     # stand schon seit Runde 1 in der Datei; der falsche Wert sass in
     # de_name_overrides.json und wurde nur ueberdeckt.
     assert dritte["neu_eingetragen"] == dritte["ressourcendatei_richtig"] - 1
-    soll = 63 + 20 + dritte["neu_eingetragen"] + vierte["ergaenzt"]
+
+    # Runde 5 (15.09.2026): 21 Namen ergaenzt, aber nur zwei davon stehen
+    # HIER. Die 19 Faehigkeiten gehoeren nach
+    # data/champions_ability_overrides.json — dort steht auch ihr
+    # Wirkungstext. Die Bilanz muss deshalb beides auseinanderhalten,
+    # sonst zaehlt sie 21 und findet 2.
+    fuenfte = e["_meta"]["fuenfte_runde_2026_09_15"]["ergebnis"]
+    assert fuenfte["ergaenzt"] == fuenfte["faehigkeiten"] + fuenfte["attacken"], (
+        "die Bilanz der fuenften Runde geht nicht auf")
+    assert (fuenfte["hier_eingetragen"] + fuenfte["in_ability_overrides"]
+            == fuenfte["ergaenzt"]), (
+        "die fuenfte Runde verteilt ihre Namen auf zwei Dateien; die Summe "
+        "muss die Gesamtzahl ergeben")
+    assert fuenfte["in_ability_overrides"] == fuenfte["faehigkeiten"]
+
+    soll = (63 + 20 + dritte["neu_eingetragen"] + vierte["ergaenzt"]
+            + fuenfte["hier_eingetragen"])
     assert gesamt == soll, (
         f'63 (Runde 1) + 20 (Runde 2) + {dritte["neu_eingetragen"]} (Runde 3) '
-        f'+ {vierte["ergaenzt"]} (Runde 4) ergibt {soll}, gezaehlt {gesamt}. '
+        f'+ {vierte["ergaenzt"]} (Runde 4) + {fuenfte["hier_eingetragen"]} (Runde 5) '
+        f'ergibt {soll}, gezaehlt {gesamt}. '
         f'Wer Namen ergaenzt, zieht die Bilanz in _meta nach.')
+
+    # Und die 19 aus Runde 5 muessen auch wirklich in der anderen Datei
+    # liegen — sonst behauptet die Bilanz etwas ueber eine Datei, die sie
+    # nie aufmacht.
+    ov = _json("champions_ability_overrides.json")["abilities"]
+    fehlend = [en for en in ov if not (ov[en] or {}).get("de")]
+    assert not fehlend, f"Faehigkeits-Ueberschreibungen ohne deutschen Namen: {fehlend}"
+    assert len(ov) >= fuenfte["in_ability_overrides"], (
+        f'Runde 5 nennt {fuenfte["in_ability_overrides"]} Faehigkeiten in '
+        f'champions_ability_overrides.json, die Datei fuehrt {len(ov)}.')
     ohne = [f"{g}/{en}" for g, paare in e["namen"].items()
             for en, rec in paare.items()
             if not (rec or {}).get("quelle", "").startswith("https://pokewiki.de/")]

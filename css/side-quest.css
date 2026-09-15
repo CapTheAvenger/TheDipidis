@@ -2589,20 +2589,50 @@
     position: fixed; inset: 0; z-index: 2400;
     background: rgba(15, 23, 42, 0.55);
     display: flex; align-items: flex-start; justify-content: center;
-    padding: 24px 14px; overflow-y: auto;
+    padding: max(1rem, env(safe-area-inset-top)) 14px max(1rem, env(safe-area-inset-bottom));
+    overflow-y: auto;
     /* Der Bildlauf bleibt in diesem Fenster. Ohne das reicht eine Geste
        ueber das Ende des Inhalts hinaus an die Seite dahinter weiter
        (Scroll-Verkettung) — am Telefon der haeufigste Weg, wie sich
        der Hintergrund doch noch bewegt. */
     overscroll-behavior: contain;
 }
+/* KOPF UND FUSS BLEIBEN STEHEN, DER INHALT ROLLT.
+ *
+ * BEFUND (15.09.2026, gemeldet vom Betreiber mit Bildschirmfoto): "im Team
+ * builder nach dem ich mein Team gesetzt habe komme ich danach nicht ueber
+ * das x zurueck". Das X war nicht kaputt und auch nicht verdeckt — es war
+ * weggerollt. Der Kasten ist hoeher als jedes Telefon, und gerollt hat
+ * bisher das ganze Fenster (.sqb-modal), also Kopf und Fuss mit.
+ *
+ * GEMESSEN lokal an 127.0.0.1:8000, Set-Editor geoeffnet, danach bis ans
+ * Ende des Kastens gerollt (Kastenhoehe durchgehend 990 px):
+ *
+ *   Fenster     Ueberhang   Oberkante des X    im Bild?
+ *   390x844     166 px      -142 px            nein
+ *   412x732     278 px      -254 px            nein
+ *   390x664     346 px      -322 px            nein
+ *   360x640     370 px      -346 px            nein
+ *
+ * An der Stelle, an der der Betreiber getippt hat (oben rechts, y ~ 34),
+ * lag dann je nach Fenster ein .sqb-field, ein .sqb-move oder ein
+ * .sqb-nature — also ein Auswahlfeld statt des Schliessen-Knopfs.
+ *
+ * Der Aufbau unten ist derselbe, den .sq-play-picker-panel schon traegt
+ * (css/side-quest.css, Sprite-Auswahl): Kasten auf die SICHTBARE Hoehe
+ * deckeln (dvh, nicht vh — die Adressleiste des Telefons zaehlt mit),
+ * Kopf und Fuss stehen lassen, und nur .sqb-modal-body rollen. */
 .sqb-modal-box {
     background: var(--surface-1); border-radius: 14px; width: min(560px, 100%);
     box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - max(1rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom)));
+    display: flex; flex-direction: column; min-height: 0;
 }
 .sqb-modal-head {
     display: flex; align-items: center; gap: 12px;
     padding: 14px 18px; border-bottom: 1px solid var(--line);
+    flex: 0 0 auto;
 }
 .sqb-modal-head h3 { margin: 0; font-size: 1rem; color: var(--ink); }
 .sqb-modal-x {
@@ -2610,7 +2640,14 @@
     font-size: 1.5rem; line-height: 1; color: var(--ink-3); cursor: pointer;
 }
 .sqb-modal-x:hover { color: var(--tint-bad-ink); }
-.sqb-modal-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.sqb-modal-body {
+    padding: 16px 18px; display: flex; flex-direction: column; gap: 14px;
+    /* Nur dieser Teil rollt. min-height: 0 ist noetig, sonst weigert sich
+       ein Flex-Kind, kleiner als sein Inhalt zu werden, und der Kasten
+       waere trotz max-height wieder zu hoch. */
+    flex: 1 1 auto; min-height: 0; overflow-y: auto;
+    overscroll-behavior: contain;
+}
 .sqb-field { display: flex; flex-direction: column; gap: 5px; }
 .sqb-field > span {
     font-size: 0.76rem; font-weight: 800; text-transform: uppercase;
@@ -2639,6 +2676,7 @@
 .sqb-modal-foot {
     display: flex; gap: 8px; justify-content: flex-end;
     padding: 12px 18px; border-top: 1px solid var(--line);
+    flex: 0 0 auto;
 }
 .sqb-reset, .sqb-done {
     font-size: 0.84rem; font-weight: 800; padding: 8px 16px;
@@ -2653,7 +2691,9 @@
    nebeneinander sind auf 390px je 150px breit und schneiden die Namen ab. */
 @media (max-width: 560px) {
     .sqb-moves { grid-template-columns: 1fr; }
-    .sqb-modal { padding: 10px 8px; }
+    /* Nur seitlich enger. Oben und unten bleibt der Rand aus der Grundregel
+       stehen, sonst passt er nicht mehr zum max-height des Kastens. */
+    .sqb-modal { padding-left: 8px; padding-right: 8px; }
     .sqb-save-btns, .sqb-export-btns { width: 100%; }
     .sqb-do-save, .sqb-do-active, .sqb-exp { flex: 1 1 auto; }
 }

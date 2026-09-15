@@ -261,14 +261,32 @@ describe('Shiny-Stern', () => {
             'die Regel gehoert in den Kopf, sonst dreht sie der naechste um');
     });
 
-    it('haelt Form und Nummer auseinander', () => {
-        // 292 Eintraege auf 204 Arten: die Nummer allein wuerde Vulnona und
-        // Vulnona (Alola) zu einem Stern zusammenfassen.
-        assert.match(SHINY, /return dex \+ '\|' \+ form;/);
+    it('haelt Regionalformen auseinander und Mega-Formen zusammen', () => {
+        /* Hier stand bis zum 15.09.2026 eine Zusicherung auf die
+           Schreibweise `return dex + '|' + form;`. Sie prueft die falsche
+           Sache: der Betreiber hat entschieden, dass eine Mega-Form mit
+           ihrer Grundform ZUSAMMENFAELLT ("es ist ja das gleiche Pokemon
+           und entwickelt sich nur durch ein Item"), waehrend eine
+           Regionalform ein eigenes Vieh bleibt. Welche Zeichenkette das
+           erreicht, ist gleichgueltig — das Verhalten nicht.
+
+           Das Verhalten selbst wird in
+           tests/unit/test-shiny-eine-art-ein-stern.js im vm-Kontext
+           gefahren; hier bleibt nur die Frage, ob der Formteil ueberhaupt
+           noch gebraucht wird. */
+        assert.match(SHINY, /'\|R:'/,
+            'eine Regionalform braucht ihren Namen im Schluessel — die drei '
+            + 'Paldea-Tauros teilen sich Nummer UND Form-Kennung');
         const arten = new Set(DEX.entries.map(e => e.dex));
         assert.ok(DEX.entries.length > arten.size,
             'wenn jede Art nur einen Eintrag haette, waere der Formteil unnoetig — '
             + 'dann gehoert dieser Test weg');
+        const regionalAufEinerNummer = DEX.entries
+            .filter(e => (e.form || 'Base') === 'Regional')
+            .reduce((m, e) => m.set(e.dex, (m.get(e.dex) || 0) + 1), new Map());
+        assert.ok([...regionalAufEinerNummer.values()].some(n => n > 1),
+            'ohne eine Nummer mit mehreren Regionalformen waere der Name im '
+            + 'Schluessel unnoetig — dann gehoert diese Zusicherung weg');
     });
 
     it('ist verdrahtet und wird vor der Ansicht geladen', () => {

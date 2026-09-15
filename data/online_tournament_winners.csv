@@ -2,6 +2,17 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a9f13b4ab080c8c957fd34a,2026-09-14,PBL,211,Dragapult Dusknoir,19.0
+6aa6db0938886b36383beef2,2026-09-14,PBL,255,Mega Excadrill,21.0
+6aa75259f1243e65f9800b72,2026-09-14,PBL,135,Alakazam Dudunsparce,28.0
+6aa38dfaab080c8c95800d97,2026-09-14,PBL,263,Crustle,30.0
+6aa2e21aab080c8c958002e4,2026-09-13,PBL,173,Clefairy Ogerpon,28.0
+6a63ce2252c24ac2da64ae00,2026-09-13,PBL,117,Dragapult,25.0
+6a99a15fa4272c53be645cd9,2026-09-12,PBL,355,Sharpedo Toxtricity,33.0
+6aa2e234a4272c53be64d0b0,2026-09-12,PBL,126,Marnie's Grimmsnarl,27.0
+sparkling-water,2026-09-12,PBL,511,Festival Lead,34.0
+6a9eece8a4272c53be649d53,2026-09-11,PBL,119,Dragapult,24.0
+6aa18cb7a4272c53be64bcbb,2026-09-11,PBL,102,Grimmsnarl Froslass,27.0
 6a9f6e4dab080c8c957fdba8,2026-09-10,PBL,156,N's Zoroark,27.0
 6aa0d9e1ab080c8c957fed59,2026-09-10,PBL,108,N's Zoroark,18.0
 6aa17dbaab080c8c957ff0fd,2026-09-10,PBL,102,Lucario Hariyama,21.0
@@ -31,6 +42,7 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a91f055abb9482237502b21,2026-09-04,PBL,137,Alakazam Dusknoir,15.0
 6a952da0629039f77d8a6535,2026-09-04,PBL,173,Dhelmise Banette,30.0
 6a923dbbabb9482237502ead,2026-09-04,PBL,145,Dragapult Blaziken,27.0
+6a6aced3937230b102d48cf4,2026-09-04,PBL,100,Lopunny Dudunsparce,21.0
 6a93143eabb94822375033d9,2026-09-03,PBL,252,Dragapult Blaziken,40.0
 6a952d6fabb9482237504678,2026-09-03,PBL,168,Dragapult Blaziken,31.0
 6a8fa6e80580a332c8420d42,2026-09-02,PBL,128,Dragapult Dusknoir,21.0
@@ -85,18 +97,3 @@ season-3,2026-08-22,PBL,548,Dragapult Dusknoir,34.0
 6a7e005ecdc0391d7fa65824,2026-08-19,PBL,122,Dragapult Dudunsparce,21.0
 6a7a215f2b308b6067b5051b,2026-08-18,PBL,163,Clefairy Ogerpon,30.0
 6a819f1978baaa6d1c22139a,2026-08-18,PBL,178,N's Zoroark,18.0
-6a8314365a30714095572e93,2026-08-18,PBL,118,Raging Bolt Ogerpon,18.0
-6a791dd8cdc0391d7fa62496,2026-08-17,PBL,209,Cynthia's Garchomp,24.0
-6a82476c5a3071409557297b,2026-08-17,PBL,259,Raging Bolt Ogerpon,24.0
-6a7f2c0978baaa6d1c21f0cb,2026-08-17,PBL,182,Dragapult,28.0
-6a7e153e2b308b6067b53028,2026-08-17,PBL,168,Dragapult Blaziken,27.0
-6a7219f62b308b6067b49d9b,2026-08-16,PBL,172,Raging Bolt Ogerpon,35.0
-6a81729a78baaa6d1c22128e,2026-08-16,PBL,197,Dragapult Blaziken,24.0
-worlds-of-doom-day-two,2026-08-16,PBL,163,Arboliva Ogerpon,28.0
-6a7ea49f2b308b6067b53832,2026-08-16,PBL,164,Dragapult Blaziken,29.0
-6a7b1904cdc0391d7fa63d42,2026-08-15,PBL,346,Greninja,30.0
-worlds-2026-day-one,2026-08-15,PBL,909,Dragapult Dusknoir,24.0
-6a7d35cfcdc0391d7fa65386,2026-08-15,PBL,102,Dragapult Dudunsparce,30.0
-6a7e14e22b308b6067b53026,2026-08-15,PBL,211,Arboliva Ogerpon,28.0
-6a7a2978cdc0391d7fa63281,2026-08-14,PBL,133,Dragapult,25.0
-6a43872683fd320299bd4942,2026-08-14,PBL,110,Clefairy Ogerpon,25.0

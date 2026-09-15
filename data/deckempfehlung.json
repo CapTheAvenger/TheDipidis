@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-09-11 06:52:37+00:00",
+ "erzeugt": "2026-09-15 06:50:07+00:00",
  "format": "TEF-PBL",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -15,24 +15,24 @@
  ],
  "ankerspieler_gesamt": 797,
  "online_abdeckung": {
-  "schnappschuss": "2026-09-11",
-  "anteil_unbekannt": 11.45,
+  "schnappschuss": "2026-09-15",
+  "anteil_unbekannt": 11.3,
   "groesste_unbekannte": [
    {
     "deck": "Beedrill",
-    "anteil": 1.04
+    "anteil": 1.02
    },
    {
     "deck": "Hop's Trevenant",
-    "anteil": 0.74
+    "anteil": 0.73
    },
    {
     "deck": "Manectric Eelektrik",
-    "anteil": 0.68
+    "anteil": 0.66
    },
    {
     "deck": "Ceruledge",
-    "anteil": 0.58
+    "anteil": 0.56
    },
    {
     "deck": "Mega Darkrai",

@@ -98,9 +98,61 @@ def main():
     fehlend = [f for f in EXTRA_FORMEN if f not in smogon]
     if fehlend:
         print(f"WARN: kuratierte Formen ohne Smogon-Eintrag: {fehlend}", file=sys.stderr)
+    # ── OHNE GRUNDFORM KEINE MEGA-FORM ──────────────────────────────
+    #
+    # BEFUND 15.09.2026, gemeldet vom Betreiber: "wieso wird Tandrak bei
+    # Pokemon nicht angezeigt? weil ohne Tandrak kein Mega Tandrak".
+    #
+    # Er hat recht, und zwar nicht als Geschmacksfrage: eine Mega-Form
+    # ENTSTEHT aus ihrer Grundform. Wer Mega-Tandrak spielt, hat Tandrak.
+    # Der Pokedex fuehrte trotzdem acht Mega-Formen ohne ihre Grundform:
+    #
+    #   Sceptile-Mega, Scolipede-Mega, Eelektross-Mega, Pyroar-Mega,
+    #   Malamar-Mega, Barbaracle-Mega, Dragalge-Mega, Falinks-Mega
+    #
+    # Ursache ist die Quelle, nicht wir: pokebase.app fuehrt die
+    # Mega-Seiten, die Grundform-Seiten aber (noch) nicht. Aus der Liste
+    # der gelesenen Slugs fielen sie deshalb heraus.
+    #
+    # GERATEN WIRD HIER NICHTS. Zwei unabhaengige Belege, beide am
+    # 15.09.2026 gemessen:
+    #   1. Die Spielmechanik: eine Mega-Form ohne Grundform gibt es nicht.
+    #   2. data/champions_usage.json — championsbattledata.com fuehrt fuer
+    #      ALLE ACHT Grundformen echte Nutzungszeilen aus dem Ranglisten-
+    #      betrieb. Sie werden also gespielt, nicht nur abgeleitet.
+    # Die Basiswerte kommen aus derselben Smogon-Datei, aus der auch jeder
+    # andere Schluessel dieser Liste seine bezieht; wer dort fehlt, kommt
+    # NICHT herein.
+    #
+    # Die Regel haengt bewusst an ihrer Bedingung und nicht an einer Liste
+    # von acht Namen: der Kader der Quelle dreht sich woechentlich
+    # (CLAUDE.md, "Eine Regel gehoert an ihre Bedingung"). Eine Handliste
+    # waere in einer Woche falsch — in beide Richtungen.
+    vorhanden = set(base) | set(megas) | set(formen)
+    aus_mega = []
+    ohne_werte = []
+    for k in megas + base:
+        if "-Mega" not in k:
+            continue
+        grundform = k.split("-Mega")[0]
+        if grundform in vorhanden or grundform in aus_mega:
+            continue
+        if grundform in smogon and "baseStats" in smogon[grundform]:
+            aus_mega.append(grundform)
+        else:
+            ohne_werte.append((k, grundform))
+    if aus_mega:
+        print("Grundformen aus vorhandenen Mega-Formen ergaenzt (%d): %s"
+              % (len(aus_mega), ", ".join(sorted(aus_mega))))
+    if ohne_werte:
+        # Nicht still uebergehen: hier fehlt eine Grundform, die es geben
+        # MUSS, und wir haben keine Werte dafuer.
+        print("WARN: Mega-Form ohne Grundform UND ohne Smogon-Werte: %s"
+              % ", ".join("%s -> %s" % t for t in ohne_werte), file=sys.stderr)
+
     # Stable, de-duplicated key list (base first, then megas, then forms).
     seen, keys = set(), []
-    for k in base + megas + formen:
+    for k in base + aus_mega + megas + formen:
         if k not in seen:
             seen.add(k)
             keys.append(k)
@@ -116,14 +168,16 @@ def main():
                            "nicht auf einen Smogon-Schluessel abbildet, kommen zuletzt.",
             "sources": [POKEBASE, "official M-B Mega coverage", "Smogon (pokemon-showdown)"],
             "base_count": len(base),
+            "aus_mega_count": len(aus_mega),
             "mega_count": len(megas),
             "form_count": len(formen),
+            "aus_mega": sorted(aus_mega),
         },
         "smogonKeys": keys,
     }
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print(f"Wrote {OUT} — {len(base)} base + {len(megas)} mega "
-          f"+ {len(formen)} Formen = {len(keys)} keys")
+    print(f"Wrote {OUT} — {len(base)} base + {len(aus_mega)} aus Mega-Formen "
+          f"+ {len(megas)} mega + {len(formen)} Formen = {len(keys)} keys")
     return 0
 
 

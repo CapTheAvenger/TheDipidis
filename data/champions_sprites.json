@@ -4,8 +4,8 @@
   "quelle": "https://www.pokewiki.de/Liste_der_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions",
   "rechte": "Die Icons sind Spiel-Screenshots. Rechteinhaber: The Pokémon Company / Nintendo / GAME FREAK. PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG; die dortige CC-BY-SA-Lizenz gilt nur fuer den Wiki-Text, nicht fuer diese Bilder.",
   "erzeuger": "scripts/build_champions_sprites.py",
-  "anzahl": 298,
-  "bytes": 4395417
+  "anzahl": 306,
+  "bytes": 4516279
  },
  "sprites": {
   "Garchomp (Mega-Z)": {
@@ -1024,6 +1024,14 @@
    "hoehe": 128,
    "bytes": 17550
   },
+  "Sceptile": {
+   "datei": "images/champions/sceptile.png",
+   "formschluessel": "254",
+   "quelle": "https://www.pokewiki.de/images/9/9a/Pok%C3%A9mon-Icon_254_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16450
+  },
   "Skeledirge": {
    "datei": "images/champions/skeledirge.png",
    "formschluessel": "911",
@@ -1296,6 +1304,14 @@
    "hoehe": 128,
    "bytes": 14533
   },
+  "Eelektross": {
+   "datei": "images/champions/eelektross.png",
+   "formschluessel": "604",
+   "quelle": "https://www.pokewiki.de/images/4/48/Pok%C3%A9mon-Icon_604_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17233
+  },
   "Roserade": {
    "datei": "images/champions/roserade.png",
    "formschluessel": "407",
@@ -1440,6 +1456,14 @@
    "hoehe": 128,
    "bytes": 9823
   },
+  "Pyroar": {
+   "datei": "images/champions/pyroar.png",
+   "formschluessel": "668",
+   "quelle": "https://www.pokewiki.de/images/3/3e/Pok%C3%A9mon-Icon_668_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15017
+  },
   "Tinkaton": {
    "datei": "images/champions/tinkaton.png",
    "formschluessel": "959",
@@ -1503,6 +1527,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 20462
+  },
+  "Barbaracle": {
+   "datei": "images/champions/barbaracle.png",
+   "formschluessel": "689",
+   "quelle": "https://www.pokewiki.de/images/3/31/Pok%C3%A9mon-Icon_689_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 20581
   },
   "Clawitzer": {
    "datei": "images/champions/clawitzer.png",
@@ -1695,6 +1727,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 14958
+  },
+  "Dragalge": {
+   "datei": "images/champions/dragalge.png",
+   "formschluessel": "691",
+   "quelle": "https://www.pokewiki.de/images/2/29/Pok%C3%A9mon-Icon_691_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11464
   },
   "Gourgeist": {
    "datei": "images/champions/gourgeist.png",
@@ -1904,6 +1944,14 @@
    "hoehe": 128,
    "bytes": 14296
   },
+  "Scolipede": {
+   "datei": "images/champions/scolipede.png",
+   "formschluessel": "545",
+   "quelle": "https://www.pokewiki.de/images/5/5d/Pok%C3%A9mon-Icon_545_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11461
+  },
   "Spiritomb": {
    "datei": "images/champions/spiritomb.png",
    "formschluessel": "442",
@@ -1959,6 +2007,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 15700
+  },
+  "Malamar": {
+   "datei": "images/champions/malamar.png",
+   "formschluessel": "687",
+   "quelle": "https://www.pokewiki.de/images/c/cb/Pok%C3%A9mon-Icon_687_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15049
   },
   "Espathra": {
    "datei": "images/champions/espathra.png",
@@ -2119,6 +2175,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 10290
+  },
+  "Falinks": {
+   "datei": "images/champions/falinks.png",
+   "formschluessel": "870",
+   "quelle": "https://www.pokewiki.de/images/2/2c/Pok%C3%A9mon-Icon_870_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13607
   },
   "Klefki": {
    "datei": "images/champions/klefki.png",

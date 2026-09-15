@@ -4,8 +4,8 @@
   "quelle": "https://www.pokewiki.de/Liste_der_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions",
   "rechte": "Die Icons sind Spiel-Screenshots. Rechteinhaber: The Pokémon Company / Nintendo / GAME FREAK. PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG; die dortige CC-BY-SA-Lizenz gilt nur fuer den Wiki-Text, nicht fuer diese Bilder.",
   "erzeuger": "scripts/build_champions_sprites.py",
-  "anzahl": 306,
-  "bytes": 4516279
+  "anzahl": 316,
+  "bytes": 4635476
  },
  "sprites": {
   "Garchomp (Mega-Z)": {
@@ -888,6 +888,14 @@
    "hoehe": 128,
    "bytes": 15582
   },
+  "Gogoat": {
+   "datei": "images/champions/gogoat.png",
+   "formschluessel": "673",
+   "quelle": "https://www.pokewiki.de/images/6/64/Pok%C3%A9mon-Icon_673_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12647
+  },
   "Aggron": {
    "datei": "images/champions/aggron.png",
    "formschluessel": "306",
@@ -903,6 +911,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 17972
+  },
+  "Basculegion (F)": {
+   "datei": "images/champions/basculegion-f.png",
+   "formschluessel": "902a",
+   "quelle": "https://www.pokewiki.de/images/4/48/Pok%C3%A9mon-Icon_902a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 17364
   },
   "Blastoise": {
    "datei": "images/champions/blastoise.png",
@@ -927,6 +943,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 18899
+  },
+  "Cinderace": {
+   "datei": "images/champions/cinderace.png",
+   "formschluessel": "815",
+   "quelle": "https://www.pokewiki.de/images/2/2f/Pok%C3%A9mon-Icon_815_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11554
   },
   "Decidueye": {
    "datei": "images/champions/decidueye.png",
@@ -1464,6 +1488,14 @@
    "hoehe": 128,
    "bytes": 15017
   },
+  "Sirfetch’d": {
+   "datei": "images/champions/sirfetch-d.png",
+   "formschluessel": "865",
+   "quelle": "https://www.pokewiki.de/images/1/12/Pok%C3%A9mon-Icon_865_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10803
+  },
   "Tinkaton": {
    "datei": "images/champions/tinkaton.png",
    "formschluessel": "959",
@@ -1872,6 +1904,14 @@
    "hoehe": 128,
    "bytes": 12900
   },
+  "Houndstone": {
+   "datei": "images/champions/houndstone.png",
+   "formschluessel": "972",
+   "quelle": "https://www.pokewiki.de/images/f/fb/Pok%C3%A9mon-Icon_972_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16134
+  },
   "Scrafty": {
    "datei": "images/champions/scrafty.png",
    "formschluessel": "560",
@@ -2128,6 +2168,22 @@
    "hoehe": 128,
    "bytes": 8480
   },
+  "Indeedee": {
+   "datei": "images/champions/indeedee.png",
+   "formschluessel": "876",
+   "quelle": "https://www.pokewiki.de/images/9/93/Pok%C3%A9mon-Icon_876_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9827
+  },
+  "Indeedee (F)": {
+   "datei": "images/champions/indeedee-f.png",
+   "formschluessel": "876a",
+   "quelle": "https://www.pokewiki.de/images/7/74/Pok%C3%A9mon-Icon_876a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10919
+  },
   "Manectric": {
    "datei": "images/champions/manectric.png",
    "formschluessel": "310",
@@ -2216,6 +2272,14 @@
    "hoehe": 128,
    "bytes": 12502
   },
+  "Meowstic (F)": {
+   "datei": "images/champions/meowstic-f.png",
+   "formschluessel": "678a",
+   "quelle": "https://www.pokewiki.de/images/f/fd/Pok%C3%A9mon-Icon_678a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11197
+  },
   "Absol": {
    "datei": "images/champions/absol.png",
    "formschluessel": "359",
@@ -2288,6 +2352,14 @@
    "hoehe": 128,
    "bytes": 6597
   },
+  "Thievul": {
+   "datei": "images/champions/thievul.png",
+   "formschluessel": "828",
+   "quelle": "https://www.pokewiki.de/images/9/9a/Pok%C3%A9mon-Icon_828_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10380
+  },
   "Araquanid": {
    "datei": "images/champions/araquanid.png",
    "formschluessel": "752",
@@ -2343,6 +2415,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 8840
+  },
+  "Pincurchin": {
+   "datei": "images/champions/pincurchin.png",
+   "formschluessel": "871",
+   "quelle": "https://www.pokewiki.de/images/7/79/Pok%C3%A9mon-Icon_871_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 8372
   },
   "Dedenne": {
    "datei": "images/champions/dedenne.png",

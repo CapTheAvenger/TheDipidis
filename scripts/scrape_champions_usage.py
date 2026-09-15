@@ -36,6 +36,7 @@ import sys
 import time
 import urllib.parse
 import urllib.request
+from collections import defaultdict
 import urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -467,6 +468,91 @@ def pruefe_plausibel(block):
 # ein Pokemon traegt EIN Item, hat EIN Wesen, hat EINE Faehigkeit. Bei
 # Attacken und Mitstreitern ist eine Summe ueber 100 % normal (vier
 # Attacken, fuenf Mitstreiter je Team).
+# ── EINE FORM, EIN SCHLUESSEL ──────────────────────────────────────
+#
+# BEFUND 15.09.2026: die Quelle hat ihre Formschluessel umbenannt und
+# liefert seither BEIDE Schreibweisen nebeneinander. Gemessen gegen den
+# Stand vom 14.09. (a3b05526):
+#
+#     14.09.   266 Schluessel
+#     15.09.   295 Schluessel, davon 18 Gruppen mit ZEILE FUER ZEILE
+#              identischem Inhalt — nur der Schluessel unterscheidet sich
+#
+#     alolan-ninetales      + ninetales-alola
+#     lycanroc-dusk-form    + lycanroc-dusk
+#     gourgeist-large-var.. + gourgeist-large
+#     paldean-tauros-…-breed+ tauros-paldea-…
+#     aegislash-shield-forme+ aegislash            … und 13 weitere
+#
+# Das ist nicht kosmetisch. Beide Schluessel tragen denselben
+# Anzeigenamen, und das Item-Raster ordnet nach Namen — zwei Zeilen
+# "Gourgeist (Large)", die dasselbe sagen und sich nicht unterscheiden
+# lassen. tests/unit/test-item-nutzung.js faellt genau darueber um, und
+# mit ihm der ganze Deploy. Am 15.09. stand die Seite deswegen seit
+# 05:13 UTC auf dem alten Stand, ohne dass jemand etwas geaendert haette:
+# die Bot-Commits der Ablaeufe loesen keinen Deploy aus, also faellt es
+# erst beim naechsten echten Push auf.
+#
+# WELCHER SCHLUESSEL BLEIBT — und warum nicht "der neuere":
+#   1. Der, den data/champions_pokedex.json fuehrt. Daran haengt der
+#      Rest des Projekts; ein Schluessel, den der Pokedex nicht kennt,
+#      findet dort keinen Eintrag.
+#   2. Kennt der Pokedex keinen von beiden: der kuerzere. Gemessen
+#      stimmt er in allen sieben solchen Faellen mit der
+#      Showdown-Schreibweise ueberein, an der die Bilder und die
+#      Team-Zuordnung haengen (basculegion-f, indeedee-f, meowstic-f,
+#      gourgeist-super …).
+#
+# GEFALTET WIRD NUR BEI IDENTISCHEM INHALT. Sagen zwei Schluessel etwas
+# Verschiedenes, ist das keine Dopplung, sondern ein Widerspruch — dann
+# bleiben beide stehen und der Lauf sagt es laut. Geraten wird hier
+# nichts: es geht um Zahlen, die jemand in ein Turnier mitnimmt
+# (CLAUDE.md, "Report, don't silently repair").
+
+
+def _ohne_schluessel(rec):
+    return json.dumps({k: v for k, v in rec.items() if k != "slug"},
+                      sort_keys=True)
+
+
+def falte_doppelte_schluessel(pokemon, dex_slugs=frozenset()):
+    """Schluessel mit identischem Inhalt auf einen zusammenziehen.
+
+    Gibt (gefaltet, behalten) zurueck — welche Schluessel entfernt wurden
+    und welcher je Gruppe stehen blieb. Gruppen mit unterschiedlichem
+    Inhalt werden NICHT angefasst; die faellt hier gar nicht erst auf,
+    weil nur bei Gleichheit gruppiert wird.
+    """
+    gruppen = defaultdict(list)
+    for slug, rec in pokemon.items():
+        gruppen[_ohne_schluessel(rec)].append(slug)
+    gefaltet, behalten = [], []
+    for _inhalt, slugs in gruppen.items():
+        if len(slugs) < 2:
+            continue
+        im_dex = sorted(s for s in slugs if s in dex_slugs)
+        bleibt = im_dex[0] if im_dex else sorted(slugs, key=lambda s: (len(s), s))[0]
+        behalten.append(bleibt)
+        for s in slugs:
+            if s != bleibt:
+                gefaltet.append(s)
+    for s in gefaltet:
+        del pokemon[s]
+    return sorted(gefaltet), sorted(behalten)
+
+
+def lies_pokedex_slugs():
+    """Die Schluessel, die der Pokedex fuehrt — fail-soft."""
+    try:
+        pfad = os.path.join(os.path.dirname(OUT), "champions_pokedex.json")
+        dex = json.load(open(pfad, encoding="utf-8"))
+        return {(e.get("meta") or {}).get("slug") for e in dex.get("entries", [])}
+    except Exception as e:  # noqa: BLE001
+        print("WARN: Pokedex-Schluessel nicht lesbar (%s) — gefaltet wird "
+              "dann nach Laenge" % e)
+        return frozenset()
+
+
 def unmoegliche_bloecke(pokemon):
     """Was ist unmoeglich UND von der Selbstkontrolle nicht bemerkt worden?
 
@@ -692,6 +778,15 @@ def main():
                     print(f"  [{done}/{len(pending)}] {name}: doubles top nature="
                           f"{nat.get('name')} {nat.get('pct')}%")
         pending = failed
+    # Doppelte Regionalform-Schluessel falten, BEVOR gezaehlt wird: der
+    # Rueckschritt-Schutz unten vergleicht mit dem committeten Stand, und
+    # der kennt nur die Praefix-Schreibweise. Zwei Schluessel je Form
+    # wuerden die Zahl kuenstlich heben und den Schutz blind machen.
+    gefaltet, behalten = falte_doppelte_schluessel(pokemon, lies_pokedex_slugs())
+    if gefaltet:
+        print("%d doppelte Schluessel gefaltet (%d Gruppen). Entfernt z. B.: %s"
+              % (len(gefaltet), len(behalten), ", ".join(gefaltet[:5])))
+
     ok = len(pokemon)
     if nicht_vorhanden:
         print(f"{len(nicht_vorhanden)} Slugs stehen in der Sitemap, aber die "

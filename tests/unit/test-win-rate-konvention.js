@@ -97,19 +97,52 @@ describe('Die drei Konventionen sind die ihrer Quellen', () => {
         assert.ok(max < 0.02, 'Abweichung: ' + max);
     });
 
+    /* EINE BENANNTE ZEILE STATT EINER WEITEN TOLERANZ (15.09.2026).
+     *
+     * Hier stand `max < 0.2` ueber ALLE Zeilen. Am 15.09. kam die Datei
+     * auf 0,2105 und der Deploy stand. Gemessen, Zeile fuer Zeile:
+     *
+     *   138 der 139 Zeilen treffen die Konvention auf 0,005 genau
+     *     1 Zeile weicht ab: Wailord
+     *         14.09.  171 /275 /1  Quelle 38,37  Konvention 38,255  (0,115)
+     *         15.09.  180 /287 /2  Quelle 38,59  Konvention 38,3795 (0,211)
+     *
+     *   Und zwar nicht zufaellig: (180 + 2/2) / 469 = 38,593. Die Quelle
+     *   rechnet in DIESER einen Zeile die Unentschieden halb, ueberall
+     *   sonst gar nicht. Mit einem Unentschieden fiel das unter die alte
+     *   Toleranz, mit zweien nicht mehr.
+     *
+     * Die Toleranz weiter aufzumachen waere die falsche Antwort: sie
+     * wuerde mit jedem weiteren Unentschieden wieder reissen und dabei
+     * nebenbei jede ECHTE Abweichung durchlassen. Deshalb steht die
+     * Ausnahme jetzt mit Namen da. Kommt eine zweite dazu, faellt der
+     * Test; verschwindet diese, faellt er auch — beides will man wissen.
+     */
+    const BEKANNTE_AUSREISSER = new Set(['Wailord']);
+
     it('Mit Unentschieden = die Konvention der Ladder-Datei', () => {
         const rows = csv('data/limitless_online_decks.csv', ';');
-        let max = 0, n = 0;
+        let n = 0, maxNormal = 0;
+        const ausreisser = [];
         for (const r of rows) {
             const s = zahl(r.wins), l = zahl(r.losses), u = zahl(r.ties);
             const quelle = zahl(r.win_rate_numeric);
             if (!isFinite(quelle) || !(s + l + u > 0)) continue;
             n++;
-            max = Math.max(max,
-                Math.abs(W.KONVENTIONEN.mitUnentschieden.rechne(s, l, u) - quelle));
+            const ab = Math.abs(W.KONVENTIONEN.mitUnentschieden.rechne(s, l, u) - quelle);
+            const name = String(r.deck_name || '').trim();
+            if (ab >= 0.02) ausreisser.push(`${name} (${ab.toFixed(4)})`);
+            else maxNormal = Math.max(maxNormal, ab);
         }
         assert.ok(n > 100, 'zu wenige Zeilen: ' + n);
-        assert.ok(max < 0.2, 'Abweichung: ' + max);
+        assert.ok(maxNormal < 0.02,
+            'auch ausserhalb der benannten Ausnahme weicht eine Zeile ab: ' + maxNormal);
+        const namen = ausreisser.map(a => a.replace(/ \(.*$/, '')).sort();
+        assert.deepEqual(namen, [...BEKANNTE_AUSREISSER].sort(),
+            'die Menge der Zeilen, die der Quelle nach einer ANDEREN Konvention '
+            + 'folgen, hat sich geaendert.\n  jetzt: ' + JSON.stringify(ausreisser)
+            + '\n  Dazugekommen: nachrechnen, welche Formel die Quelle dort benutzt, '
+            + 'und erst dann eintragen. Weggefallen: aus BEKANNTE_AUSREISSER loeschen.');
     });
 
     it('und die drei liefern für dieselbe Bilanz drei Zahlen', () => {

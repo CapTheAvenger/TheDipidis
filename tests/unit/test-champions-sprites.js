@@ -297,18 +297,37 @@ describe('Showdown-Namen aus den Replica-Teams', () => {
          * Deploy-Kette vier Stunden angehalten hat: pokebase.app hat
          * sieben Schluessel getauscht, und die VGCPastes-Teams spielen
          * Arten, die beide Kaderquellen (noch) nicht fuehren. */
+        /* Stand 15.09.2026. Drei Zeilen weg, eine dazu — und der
+         * Spiegel-Lauf ist diesmal wirklich gelaufen (17:45 UTC,
+         * workflow_dispatch, Ergebnis "2 Dateien").
+         *
+         * WEG: Dragalge, Persian-Alola und Toxtricity. Der
+         * Replica-Scrape um 04:10 UTC hat sie in den Kader
+         * zurueckgeschrieben, damit standen sie im Pokedex, damit hat
+         * der Spiegel-Lauf nach ihnen gesucht und sie gefunden.
+         *
+         * DAZU: Houndstone. Die Umrechnung schreibt es richtig — ein
+         * schlichter Artname ohne Formzusatz, houndstone.png ist die
+         * erwartete Datei. Es fehlt nicht am Namen, sondern eine Stufe
+         * frueher: Houndstone steht in keiner der beiden Kaderquellen
+         * und deshalb nicht im Pokedex (298 Eintraege, unter keinem
+         * Namen). Der Spiegel-Lauf geht die POKEDEX-Eintraege durch —
+         * wer dort fehlt, wird nie gesucht, und ein zweiter Lauf wuerde
+         * daran nichts aendern. Dasselbe gilt fuer Thievul, das aus
+         * demselben Grund schon vorher hier stand.
+         * tests/unit/test-champions-raster.js fuehrt dieselben beiden
+         * Namen als "ohne Pokedex-Eintrag" — das ist kein Zufall,
+         * sondern dieselbe Luecke einen Schritt frueher. */
         const ERWARTET_OHNE_BILD = [
             'Cinderace -> cinderace.png',
-            'Dragalge -> dragalge.png',
             'Gogoat -> gogoat.png',
+            'Houndstone -> houndstone.png',
             'Indeedee -> indeedee.png',
             'Indeedee-F -> indeedee-f.png',
             'Malamar -> malamar.png',
-            'Persian-Alola -> alolan-persian.png',
             'Pincurchin -> pincurchin.png',
             'Sirfetch\u2019d -> sirfetch-d.png',
             'Thievul -> thievul.png',
-            'Toxtricity -> toxtricity.png',
         ];
         assert.deepEqual(ohne.slice().sort(), ERWARTET_OHNE_BILD,
             'die Menge der Team-Namen ohne Bild hat sich geaendert.\n'

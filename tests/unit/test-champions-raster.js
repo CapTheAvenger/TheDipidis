@@ -185,11 +185,27 @@ describe('Sortierung nach Champions-Nutzung', () => {
                Pokedex, die Grundform nicht
              * Cinderace, Gogoat, Pincurchin, Sirfetch'd, Thievul —
                neu in den Replica-Teams, in keiner der beiden Quellen */
+        /* NACHGEZOGEN AM 15.09.2026, wieder in beide Richtungen.
+           Der Lauf „Champions Replica Scrape" (04:10 UTC) und der
+           „Champions Usage Refresh" (05:13 UTC) haben SECHS der sechzehn
+           Namen in den Pokedex geschrieben: Annihilape, Basculegion-F,
+           Dragalge, Persian-Alola, Scrafty und Toxtricity. Annihilape
+           kommt damit zurueck, nachdem es am 13.09. aus dem Kader
+           gefallen war — der Kader der Quelle dreht sich, er waechst
+           nicht bloss.
+           Neu dazu kommen ZWEI: Houndstone und Thievul stehen in
+           Replica-Teams, aber in keiner der beiden Kaderquellen —
+           gemessen gegen data/champions_pokedex.json (298 Eintraege),
+           unter keinem Namen zu finden. Thievul stand schon vorher hier;
+           Houndstone ist der einzige echte Neuzugang.
+           Dass fuer beide auch kein Bild da ist, ist dieselbe Luecke
+           einen Schritt weiter: der Spiegel-Lauf um 17:45 UTC geht die
+           POKEDEX-Eintraege durch, und wer dort fehlt, wird nie
+           gesucht. */
         const ERWARTET_OHNE_EINTRAG = [
-            'Annihilape', 'Basculegion-F', 'Cinderace', 'Dragalge',
-            'Gogoat', 'Indeedee', 'Indeedee-F', 'Malamar', 'Meowstic-F',
-            'Persian-Alola', 'Pincurchin', 'Pyroar', 'Scrafty',
-            'Sirfetch\u2019d', 'Thievul', 'Toxtricity',
+            'Cinderace', 'Gogoat', 'Houndstone', 'Indeedee', 'Indeedee-F',
+            'Malamar', 'Meowstic-F', 'Pincurchin', 'Pyroar',
+            'Sirfetch\u2019d', 'Thievul',
         ].sort();
 
         assert.deepEqual(verwaist, ERWARTET_OHNE_EINTRAG,

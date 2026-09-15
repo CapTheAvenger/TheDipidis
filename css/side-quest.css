@@ -2659,6 +2659,67 @@
     font-size: 0.86rem; background: var(--surface-1); color: var(--ink); width: 100%;
 }
 .sqb-moves { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* ── Was eine Attacke kann, unter dem Feld ──────────────────────────────
+ *
+ * ANLASS (Betreiber, 15.09.2026): "bei den Attacken waere gut wenn man da
+ * sehen kann ob es eine Prio Attacke ist oder ob die sonst was cooles
+ * kann. […] Ich lerne gerade erst alles."
+ *
+ * Der Vorrang steht ZUSAETZLICH im Beschriftungstext der Option — eine
+ * <option> kann keine Auszeichnung tragen, und am Telefon malt das
+ * Betriebssystem die Liste selbst. Was beim Waehlen sichtbar sein muss,
+ * hat dort seinen einzigen Platz. Alles andere steht hier, zum gewaehlten
+ * Eintrag. */
+.sqb-mv { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.sqb-mv-info {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 6px 9px 7px;
+    border-radius: 8px;
+    background: var(--surface-2, rgba(120, 140, 200, .08));
+    border: 1px solid var(--line);
+}
+.sqb-mv-info:empty { display: none; }
+.sqb-mv-marken { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.sqb-mv-kat, .sqb-mv-prio, .sqb-mv-flaeche {
+    display: inline-block; padding: 0.12rem 0.45rem; border-radius: 6px;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em;
+    border: 1px solid var(--line-strong); color: var(--ink-2);
+}
+/* Der Vorrang ist der einzige Wert, den der Betreiber namentlich genannt
+   hat, und der einzige, der eine Attacke im Kampf VORZIEHT. Er bekommt
+   deshalb als einziger Farbe — sonst waere die Zeile ein Streifenmuster,
+   in dem nichts mehr heraussticht. */
+.sqb-mv-prio {
+    border-color: var(--gold, #ffcb05);
+    background: var(--vorbehalt-bg, rgba(255, 203, 5, .12));
+    color: var(--vorbehalt, #8a6d00);
+}
+.sqb-mv-zahlen {
+    font-size: 0.74rem; color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+}
+.sqb-mv-text { margin: 0; font-size: 0.76rem; line-height: 1.35; color: var(--ink-2); }
+
+/* ── Die meistgespielte Verteilung ueber den Reglern ────────────────────
+ *
+ * ANLASS (Betreiber): "bei den Stats sollten wir auch anzeigen was oft
+ * genutzt wird und dann kann man das waehlen […] die meist genutzten
+ * statusverteilungen mit prozentualer Nutzung wie bei den Attacken".
+ *
+ * Die Regler bleiben darunter stehen und sichtbar — er hat beide Wege
+ * genannt, und der offene ist der, bei dem man sieht, was die Auswahl
+ * gerade getan hat. */
+.sqb-vt { display: flex; flex-direction: column; gap: 5px; margin: 10px 0 12px; }
+.sqb-vt-titel {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--ink-3);
+}
+.sqb-vt select {
+    padding: 8px 10px; border-radius: 9px; border: 1px solid var(--line-strong);
+    font-size: 0.86rem; background: var(--surface-1); color: var(--ink); width: 100%;
+    font-variant-numeric: tabular-nums;
+}
 .sqb-budget {
     font-style: normal; font-weight: 800; font-variant-numeric: tabular-nums;
     color: var(--gruen, var(--tint-ok-ink)); font-size: 0.8rem;

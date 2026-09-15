@@ -75,13 +75,31 @@ const TABELLE = {
 
 describe('ChampionsNamen — das gemeinsame Namensmodul', () => {
 
-    it('gibt den deutschen Namen, wenn die Oberflaeche deutsch ist', async () => {
+    /* GEAENDERTE ABSICHT, NICHT VERLORENE WIRKUNG (15.09.2026).
+     *
+     * Bis heute stand hier "gibt den deutschen Namen" und geprueft wurde
+     * 'Fokusgurt'. Der Betreiber hat das umgestellt: "in der deutschen
+     * Version bitte immer englischen und deutschen Namen anzeigen".
+     * Begruendung dort — wer ein Set nachbaut, gibt es in ein englisches
+     * Spiel ein.
+     *
+     * Die Zusicherung wird deshalb nicht gelockert, sondern gedreht: sie
+     * verlangt jetzt BEIDE Haelften. Wer versehentlich auf eine Sprache
+     * zurueckfaellt, faellt hier um — in welche Richtung auch immer. */
+    it('zeigt auf Deutsch beide Namen: englisch fuehrend, deutsch daneben', async () => {
         const M = ladeModul({ lang: 'de', tabelle: TABELLE });
         await M.laden();
-        assert.strictEqual(M.anzeige('Focus Sash', 'items'), 'Fokusgurt');
-        assert.strictEqual(M.anzeige('Drizzle', 'abilities'), 'Niesel');
-        assert.strictEqual(M.anzeige('Weather Ball', 'moves'), 'Meteorologe');
-        assert.strictEqual(M.anzeige('Modest', 'nature'), 'Mäßig');
+        assert.strictEqual(M.anzeige('Focus Sash', 'items'), 'Focus Sash – Fokusgurt');
+        assert.strictEqual(M.anzeige('Drizzle', 'abilities'), 'Drizzle – Niesel');
+        assert.strictEqual(M.anzeige('Weather Ball', 'moves'), 'Weather Ball – Meteorologe');
+        assert.strictEqual(M.anzeige('Modest', 'nature'), 'Modest – Mäßig');
+        // Keine der beiden Haelften darf fehlen — die Gegenprobe zur Zeile darueber.
+        for (const [en, de] of [['Focus Sash', 'Fokusgurt'], ['Drizzle', 'Niesel']]) {
+            const art = en === 'Drizzle' ? 'abilities' : 'items';
+            const raus = M.anzeige(en, art);
+            assert.ok(raus.includes(en), `"${raus}" fuehrt den englischen Namen nicht`);
+            assert.ok(raus.includes(de), `"${raus}" fuehrt den deutschen Namen nicht`);
+        }
     });
 
     it('laesst Englisch stehen, wenn die Oberflaeche englisch ist', async () => {

@@ -479,20 +479,32 @@
         // gehaltenen Gegenstaende keinen Namen, sondern "Unknown Item 542".
         // Ein Pseudoname liest sich wie eine Angabe und ist keine — die
         // Regel dafuer steht EINMAL in js/champions-namen.js.
-        const zeigName = (x) => (window.ChampionsNamen
+        //
+        // DIE ART GEHOERT ZUR ZEILE, NICHT ZUR FUNKTION (15.09.2026).
+        // Bis heute stand hier fest 'items' — und dieselbe Zeilenfunktion
+        // hat Attacken, Gegenstaende UND Faehigkeiten gemalt. Eine
+        // Attacke in der Gegenstandstabelle nachzuschlagen findet nie
+        // etwas, also blieben auf der deutschen Seite Attacken- und
+        // Faehigkeitsnamen englisch. Gemessen an data/champions_names_de.json:
+        // 930 Attacken und 215 Faehigkeiten liegen deutsch vor und kamen
+        // in dieser Ansicht nie an. Wesen wurden gar nicht gefragt.
+        const zeigName = (x, art) => (window.ChampionsNamen
             && typeof window.ChampionsNamen.anzeige === 'function')
-            ? window.ChampionsNamen.anzeige(x, 'items') : String(x || '');
-        const moveRow = (m) => barRow(esc(zeigName(m.name)), m.pct);
-        const natRow = (n) => barRow(esc(n.name), n.pct,
+            ? window.ChampionsNamen.anzeige(x, art) : String(x || '');
+        const zeile = (art) => (m) => barRow(esc(zeigName(m.name, art)), m.pct);
+        const moveRow = zeile('moves');
+        const itemRow = zeile('items');
+        const abilityRow = zeile('abilities');
+        const natRow = (n) => barRow(esc(zeigName(n.name, 'nature')), n.pct,
             (n.up && n.down) ? `${n.up}↑ ${n.down}↓` : '');
         return `${head}
             <div class="sq-cols">
                 <div class="sq-stack">
                     ${barPanel(L().moves, block.move, moveRow, 400)}
-                    ${barPanel(L().item, block.held_item, moveRow, 100)}
+                    ${barPanel(L().item, block.held_item, itemRow, 100)}
                 </div>
                 <div class="sq-stack">
-                    ${barPanel(L().ability, block.ability, moveRow, 100)}
+                    ${barPanel(L().ability, block.ability, abilityRow, 100)}
                     ${barPanel(L().nature, block.nature, natRow, 100)}
                     ${spreadPanel(block.stat_points)}
                     ${matesPanel(block.teammate)}

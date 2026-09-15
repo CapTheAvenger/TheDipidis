@@ -1450,10 +1450,17 @@
         return !!(window.ChampionsNamen && window.ChampionsNamen.istUnbenannt
             && window.ChampionsNamen.istUnbenannt(en));
     }
+    // Ohne Auszeichnung (Titel, Vorlesetexte, Auswahlfelder): dieselbe
+    // Zweisprachigkeit wie in nmHtml, nur als reiner Text — englisch
+    // fuehrt, deutsch steht daneben. Zusammengesetzt in
+    // js/champions-namen.js, damit es eine Form gibt und nicht zwei.
     function nmText(en, kind) {
         if (!en) return '';
         if (unbenannt(en)) return window.ChampionsNamen.anzeige(en, kind);
         const de = uiLang() === 'de' ? deName(en, kind) : null;
+        if (window.ChampionsNamen && typeof window.ChampionsNamen.beide === 'function') {
+            return window.ChampionsNamen.beide(en, de);
+        }
         return de || en;
     }
     function nmHtml(en, kind) {

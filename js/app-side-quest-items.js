@@ -177,6 +177,18 @@
             return window.ChampionsNamen.anzeige(en, 'items');
         }
         const e = _res && _res.get(en);
+        /* HIER NICHT ZWEISPRACHIG ZUSAMMENSETZEN.
+         *
+         * Dieser Reiter zeigt beide Namen schon (itemHtml: .sqi-name
+         * traegt den deutschen, .sqi-en den englischen darunter), und
+         * derselbe Wert traegt noch zwei weitere Aufgaben: die Suche
+         * (i.de.includes) und die alphabetische Sortierung
+         * (a.de.localeCompare). Ein zusammengesetztes "Sitrus Berry –
+         * Tsitrubeere" wuerde den englischen Namen doppelt anzeigen und
+         * die Liste nach der englischen Haelfte sortieren.
+         *
+         * Was hier gebraucht wird, ist der deutsche Name allein; die
+         * Zweisprachigkeit macht die Ansicht selbst. */
         return (uiLang() === 'de' && e && e.de) ? e.de : en;
     }
     function wirkung(en) {

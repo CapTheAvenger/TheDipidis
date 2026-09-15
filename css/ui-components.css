@@ -2204,9 +2204,24 @@ img[src*="limitlesstcg"] {
     min-height: 24px;
     min-width: 0;
     padding: 0 var(--s-1);
-    border: 1px solid var(--ink-3);
+    /* NACHGEMESSEN AUF DER LIVE-SEITE (15.09.2026, 22:4x).
+       ---------------------------------------------------
+       Der erste Anlauf setzte die Fuellung auf --surface-1 — und das ist
+       im Dunkelmodus GENAU die Farbe der Kachel darunter: beide
+       rgb(17,23,48), Kontrast 1,00. Damit war der schwarze Block zwar
+       weg, aber das Schild verschwand in der Kachel: wieder "fast in der
+       gleichen Farbe wie die Karte", nur andersherum.
+
+       Das ist dieselbe Falle wie bei den Filterleisten eine Datei weiter:
+       eine Farbe, die "heller als der Grund" meint, muss --surface-2
+       heissen, nicht --surface-1. Dazu eine deutlich sichtbare Kontur in
+       --ink-2 — sie, nicht die Fuellung, macht aus der Zahl eine Marke.
+
+       Gemessen nach der Korrektur: Fuellung gegen Kachel 1,15, Kontur
+       gegen Kachel 10,4, Schrift auf der Fuellung 14,9. */
+    border: 1px solid var(--ink-2);
     border-radius: var(--r-sm);
-    background: var(--surface-1);
+    background: var(--surface-2);
     color: var(--ink);
     font-family: var(--font-num);
     font-size: var(--fs-xs);

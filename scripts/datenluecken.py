@@ -305,8 +305,90 @@ def gegenstandsnamen():
     }]
 
 
+# ── Pruefung 6: benutzte Namen, die kein Deutsch haben ─────────────
+#
+# BEFUND 15.09.2026, gemeldet vom Betreiber: "die Fähigkeit emergency
+# exit heißt auf Deutsch sicher anders". Sie tut es (Rueckzug) — nur
+# stand sie in keiner unserer Dateien.
+#
+# WARUM ES KEIN BESTEHENDER MELDER GESEHEN HAT. Pruefung 3 vergleicht
+# zwei deutsche Namen miteinander und schweigt, wenn es keinen gibt;
+# das steht dort auch so. Und tests/python/test_deutsche_namen_sichtbar.py
+# bewacht die Kette Referenz -> Namenstabelle. Beide fragen dieselbe
+# Sache: was unsere Namensquellen fuehren, muss ankommen.
+#
+# Emergency Exit kam aus einer ANDEREN Richtung: aus
+# champions_usage.json. Die Nutzungsdaten fuehren Faehigkeiten,
+# Attacken und Wesen, die der Champions-Datensatz nicht kennt —
+# gemessen am 15.09.2026 waren das 19 von 202 benutzten Faehigkeiten
+# und 2 von 423 Attacken. Kein Widerspruch, keine Referenz, also kein
+# Melder. Der blinde Fleck war nicht der Vergleich, sondern die
+# Eingangstuer.
+#
+# Deshalb fragt diese Pruefung von der ANZEIGE her: was die deutsche
+# Seite tatsaechlich hinschreiben muss, und wofuer sie keinen
+# deutschen Namen hat. Eine Luecke je Art, nicht je Name — 19 Zeilen
+# waeren Rauschen, eine Zeile mit 19 Namen ist eine Aufgabe.
+#
+# NICHT GEPRUEFT wird hier absichtlich der Gegenstands-Topf: die
+# Mega-Steine des Formats (Golisopite, Baxcalibrite, ...) sind
+# Erfindungen des Spiels und haben keinen deutschen Namen, den man
+# nachschlagen koennte. Ein Melder, der 73 unloesbare Zeilen wirft,
+# wird weggeklickt und nimmt die loesbaren mit.
+NAMENSTOEPFE = [
+    ("ability", "abilities", "F\u00e4higkeit", "F\u00e4higkeiten", "ability", "abilities"),
+    ("move", "moves", "Attacke", "Attacken", "move", "moves"),
+]
+
+
+def benutzte_namen_ohne_deutsch():
+    try:
+        usage = _lies("champions_usage.json")
+        namen = _lies("champions_names_de.json")
+    except FileNotFoundError:
+        return []
+    benutzt = {}
+    for _slug, rec in (usage.get("pokemon") or {}).items():
+        for _fmt, blk in (rec or {}).items():
+            if not isinstance(blk, dict):
+                continue
+            for feld, eintraege in blk.items():
+                if not isinstance(eintraege, list):
+                    continue
+                for e in eintraege:
+                    n = (e.get("name") or "").strip() if isinstance(e, dict) else ""
+                    if n:
+                        benutzt.setdefault(feld, set()).add(n)
+    luecken = []
+    for feld, topf, einzahl, mehrzahl, einzahl_en, mehrzahl_en in NAMENSTOEPFE:
+        tabelle = namen.get(topf) or {}
+        fehlt = sorted(n for n in benutzt.get(feld, set()) if not (tabelle.get(n) or "").strip())
+        if not fehlt:
+            continue
+        liste = ", ".join(fehlt[:8])
+        mehr = " \u2026" if len(fehlt) > 8 else ""
+        wort = einzahl if len(fehlt) == 1 else mehrzahl
+        wort_en = einzahl_en if len(fehlt) == 1 else mehrzahl_en
+        hat = "hat" if len(fehlt) == 1 else "haben"
+        has = "has" if len(fehlt) == 1 else "have"
+        luecken.append({
+            "id": "deutscher-name/" + topf,
+            "klasse": "deutscher-name",
+            "titel": f"{len(fehlt)} {wort} aus den Nutzungsdaten {hat} keinen "
+                     f"deutschen Namen: {liste}{mehr}",
+            "titelEn": f"{len(fehlt)} {wort_en} used in the usage data {has} no "
+                       f"German name: {liste}{mehr}",
+            "wo": f"data/champions_usage.json \u2192 pokemon[*][*].{feld}[].name  "
+                  f"fehlt in  data/champions_names_de.json \u2192 {topf}",
+            "ansicht": "side-quest",
+            "vorschlag": None,
+        })
+    return luecken
+
+
 PRUEFUNGEN = [mega_faehigkeiten, nutzungsdaten, namenskonflikte,
-              fehlende_bereiche, gegenstandsnamen]
+              fehlende_bereiche, gegenstandsnamen,
+              benutzte_namen_ohne_deutsch]
 
 KLASSEN = {
     "mega-faehigkeit": {
@@ -328,6 +410,10 @@ KLASSEN = {
     "gegenstandsname": {
         "de": "Gegenstand ohne Namen",
         "en": "Held item without a name",
+    },
+    "deutscher-name": {
+        "de": "Kein deutscher Name",
+        "en": "No German name",
     },
 }
 

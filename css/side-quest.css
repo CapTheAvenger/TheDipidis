@@ -3823,6 +3823,114 @@
 }
 .sq-console .sq-calc-ohne { color: var(--sq-dim2); font-style: italic; }
 
+/* ── DIE KADERLEISTE IM RECHNER (16.09.2026) ──────────────────────────
+   ANLASS (Betreiber): „können wir hier noch irgendwie mein Team 1:1 wie
+   ich es spiele reinladen und beim Gegner per pick 6 schnell auswahl …
+   und dann kann ich über das Pokemon Sprite Icon dann schnell die Daten
+   wählen welche Pokemon gegeneinander kämpfen".
+
+   Zwei Bänke übereinander, je bis zu sechs Sprites. Der gewählte Kämpfer
+   trägt den Akzentrahmen — das ist die einzige Zustandsanzeige, die es
+   hier braucht.
+
+   WARUM `grid-template-columns: repeat(auto-fill, …)` UND NICHT `flex`
+   Sechs Sprites in einer Reihe sind bei 1280 px bequem, bei 390 px nicht.
+   Ein Raster mit fester Mindestbreite bricht von selbst auf zwei Reihen,
+   ohne dass eine Breite geraten werden muss — die Bedingung ist „das
+   Sprite braucht 84 px", und genau die steht hier.
+   (Regel: eine Regel gehört an ihre Bedingung, nicht an einen Takt.) */
+/* ZWEI SPALTEN, WEIL ES ZWEI SEITEN SIND.
+   Im Entwurf (16.09.2026) standen beide Baenke untereinander ueber die
+   volle Breite: fuenf Sprites links, 900 px Leere rechts, und die
+   Knoepfe ganz aussen am Rand — der Zusammenhang zwischen „mein Kader"
+   und „Team laden" war nicht mehr zu sehen. Nebeneinander fuellt jede
+   Seite ihre Spalte, und die beiden Kader stehen sich gegenueber wie
+   im Kampf.
+   Die Grenze haengt an der Bedingung, die wirklich gemeint ist: zwei
+   Baenke zu je sechs Sprites (84 px) plus Abstand brauchen rund 1100 px.
+   Darunter untereinander. */
+.sq-console .sq-kader {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 18px;
+}
+.sq-console .sq-kader-seite { min-width: 0; }
+/* Ueberschrift auf ihrer Zeile, Werkzeug auf seiner.
+   In einer gemeinsamen Flex-Zeile (Entwurf 16.09.2026) schrumpfte das
+   Auswahlfeld auf die Breite seines Pfeils, waehrend der Knopf die
+   halbe Spalte nahm: `flex: 1 1 100px` mit `min-width: 0` laesst ein
+   Feld unter seinen Inhalt schrumpfen, ein Knopf mit Innenabstand
+   schrumpft nicht mit. Ein Raster mit `auto` fuer den Knopf und
+   `minmax(0,1fr)` fuer das Feld sagt genau das, was gemeint ist. */
+.sq-console .sq-kader-kopf { margin-bottom: 8px; }
+.sq-console .sq-kader-kopf .sq-lbl { margin: 0 0 6px; }
+.sq-console .sq-kader-laden {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: center;
+}
+.sq-console .sq-kader-laden .sq-btn { white-space: nowrap; }
+.sq-console .sq-kader-teamwahl,
+.sq-console .sq-kader-suche { min-width: 0; width: 100%; font-size: var(--fs-xs); }
+
+/* auto-fill mit fester Mindestbreite statt einer geratenen Spaltenzahl:
+   die Bedingung ist „ein Sprite braucht 84 px", und genau die steht hier. */
+.sq-console .sq-kader-bank {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 7px;
+}
+.sq-console .sq-kader-chip { position: relative; min-width: 0; }
+.sq-console .sq-kader-sprite {
+    width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: var(--sq-deep); border: 1.4px solid var(--sq-line); border-radius: 12px;
+    padding: 6px 4px 5px; cursor: pointer; color: var(--sq-dim);
+    font-size: var(--fs-xs); line-height: 1.25; text-align: center;
+    transition: border-color .12s ease, color .12s ease;
+}
+.sq-console .sq-kader-sprite:hover { border-color: var(--sq-accent); color: var(--sq-txt); }
+.sq-console .sq-kader-sprite:focus-visible { outline: 2px solid var(--sq-accent); outline-offset: 2px; }
+.sq-console .sq-kader-chip.is-an .sq-kader-sprite {
+    border-color: var(--sq-accent2); color: var(--sq-txt);
+    background: linear-gradient(180deg, #1b2750, var(--sq-deep));
+}
+.sq-console .sq-kader-img {
+    width: 46px; height: 46px; image-rendering: pixelated; object-fit: contain;
+}
+.sq-console .sq-kader-name {
+    display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-weight: 700;
+}
+.sq-console .sq-kader-marke, .sq-console .sq-kader-warn {
+    display: block; font-style: normal; font-size: 10px; letter-spacing: .04em;
+    text-transform: uppercase;
+}
+.sq-console .sq-kader-marke { color: var(--sq-accent2); }
+.sq-console .sq-kader-warn { color: var(--sq-schlecht); }
+
+/* Ein Kader-Eintrag ohne Nutzungsdaten bleibt SICHTBAR und sagt warum.
+   Ihn wegzulassen hieße, dem Betreiber fünf statt sechs Pokémon zu
+   zeigen, ohne dass er je erfährt, welches fehlt. */
+.sq-console .sq-kader-chip.is-tot .sq-kader-sprite { cursor: not-allowed; opacity: .62; }
+.sq-console .sq-kader-chip.is-tot .sq-kader-sprite:hover { border-color: var(--sq-line); }
+
+.sq-console .sq-kader-weg {
+    position: absolute; top: -5px; right: -5px; width: 19px; height: 19px;
+    aspect-ratio: 1 / 1; border-radius: 50%;
+    background: var(--sq-panel); border: .8px solid var(--sq-line);
+    color: var(--sq-dim2); font-size: 12px; line-height: 1; cursor: pointer; padding: 0;
+}
+.sq-console .sq-kader-weg:hover { color: var(--sq-schlecht); border-color: var(--sq-schlecht); }
+.sq-console .sq-kader-weg:focus-visible { outline: 2px solid var(--sq-accent); outline-offset: 1px; }
+
+.sq-console .sq-kader-vorschlag {
+    display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px;
+}
+.sq-console .sq-kader-vorschlag button {
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 999px;
+    color: var(--sq-dim); font-size: var(--fs-xs); padding: 3px 10px; cursor: pointer;
+}
+.sq-console .sq-kader-vorschlag button:hover { color: var(--sq-txt); border-color: var(--sq-accent); }
+.sq-console .sq-kader-fuss { margin: 0; grid-column: 1 / -1; }
+
+@media (max-width: 1100px) {
+    .sq-console .sq-kader { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* ── DER RECHNER-REITER (16.09.2026) ─────────────────────────────────
    ANLASS (Betreiber): „der Damage Culc ist ja immer noch kein eigenes
    Feature … ich erwarte schon etwas in richtung von NCP — nur optisch
@@ -4015,4 +4123,10 @@
     .sq-console .sq-rech-satz { font-size: 15px; }
     .sq-console .sq-verl-zeile { grid-template-columns: minmax(0, 1fr) 26px; }
     .sq-console .sq-verl-lage { grid-column: 1 / -1; }
+    /* Bei 390 px teilen sich Auswahlfeld und Knopf die volle Breite —
+       nebeneinander gedrueckt waere das Teamfeld 60 px breit und die
+       Namen darin unlesbar. */
+    /* Bei 390 px teilen sich Auswahlfeld und Knopf die volle Breite —
+       der Knopftext ist dort laenger als das halbe Fenster. */
+    .sq-console .sq-kader-laden { grid-template-columns: minmax(0, 1fr); }
 }

@@ -2874,6 +2874,43 @@ const BASE_PATH = './data/';
             }
         }
 
+        /**
+         * DAS FORMATFENSTER VOLLSTAENDIG IN DEN GLOBALEN ZUSTAND.
+         *
+         * BEFUND 16.09.2026, live gefunden — nicht von einem Test:
+         * `window._formatWindow` trug auf der fertigen Seite genau DREI
+         * Felder (current_set, oldest_legal_set, current_set_jp),
+         * waehrend data/format_window.json zwoelf fuehrt. Der Grund ist
+         * der Schnappschuss in index.html: er wird von bump-version.sh
+         * und vom Deploy-Schritt „Cache-bust" mit DREI einzelnen
+         * sed-Zeilen fortgeschrieben, eine je Feldname.
+         *
+         * Folge am selben Tag: die neuen Felder `neuestes_set` und
+         * `neues_set_filter_ab` kamen in der Datei an, aber nie in der
+         * Oberflaeche — der Filter „Neues Set" fiel still auf
+         * current_set zurueck.
+         *
+         * Der Schnappschuss bleibt: er ist SYNCHRON da, bevor irgendein
+         * Modul laeuft, und getCurrentMetaFormat() braucht ihn so.
+         * Neu ist, dass die Datei selbst darueber gelegt wird, sobald
+         * sie da ist. Damit kostet ein neues Feld im Formatfenster
+         * keinen Eintrag an drei Stellen mehr.
+         *
+         * Zusammengefuehrt wird, nicht ersetzt: faellt der Abruf aus,
+         * bleibt der Schnappschuss stehen.
+         */
+        async function loadFormatWindow() {
+            try {
+                const resp = await fetch(`./data/format_window.json?t=${Date.now()}`);
+                if (!resp.ok) return;
+                const json = await resp.json();
+                if (!json || typeof json !== 'object') return;
+                window._formatWindow = Object.assign({}, window._formatWindow || {}, json);
+            } catch (e) {
+                console.warn('[init] Formatfenster nicht ladbar, Schnappschuss bleibt:', e);
+            }
+        }
+
         async function loadSetOrderMap() {
             try {
                 const resp = await fetch(`./data/sets.json?t=${Date.now()}`);

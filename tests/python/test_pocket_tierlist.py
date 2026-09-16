@@ -2341,3 +2341,88 @@ def test_ein_set_eintrag_bringt_den_abschnitt_an_ein_tier_deck(mod):
     assert d["quelle_liste"] == "beide"
     assert d["set_abschnitt"] == "New Alpha Decks", (
         "der Set-Eintrag hat den Abschnitt nicht an das Tier-Deck weitergegeben")
+
+
+def test_die_reihenfolge_der_abschnitte_steht_in_meta(mod, monkeypatch, tmp_path):
+    """Gefunden bei der Live-Abnahme am 16.09.2026, nicht von einem Test.
+
+    Der Reiter zeigte „Old Decks Updated …" ueber „New … Decks", Game8
+    zeigt es andersherum. Die Oberflaeche ordnete nach erstem Auftreten
+    in der nach Stufe sortierten Deckliste — und weil das staerkste Deck
+    zufaellig ein aktualisiertes war, stand der zweite Abschnitt oben.
+
+    Die Reihenfolge kennt nur die Quellseite. Sie gehoert deshalb in die
+    Daten und nicht in eine Regel im Browser: die Ueberschriften wechseln
+    mit jedem Set, eine feste Liste im Code waere beim naechsten Set
+    falsch.
+    """
+    # `main` bricht bei leerer Tier-Liste ab (Aufbau der Seite geaendert) —
+    # deshalb steht hier ein Eintrag, der mit der Frage nichts zu tun hat.
+    tier = [("T", "S", "9", "hm_1", "")]
+    set_decks = [
+        ("Neu", "S", "1", None, "New Alpha Decks"),
+        ("Alt", "A", "2", None, "Old Decks Updated with Alpha"),
+        ("Neu2", "B", "3", None, "New Alpha Decks"),
+    ]
+    ziel = tmp_path / "x.json"
+    monkeypatch.setattr(mod, "AUSGABE", str(ziel))
+    monkeypatch.setattr(mod, "hole", lambda *a, **k: "<html></html>")
+    monkeypatch.setattr(mod, "lies_seite", lambda h: (tier, set_decks))
+    monkeypatch.setattr(mod, "sammle",
+                        lambda *a, **k: ([{"name": "Neu", "code": "C"}], [], 1, []))
+    monkeypatch.setattr(sys, "argv", ["x"])
+    assert mod.main() == 0
+    meta = json.loads(ziel.read_text(encoding="utf-8"))["_meta"]
+    assert meta["set_abschnitte"] == [
+        "New Alpha Decks", "Old Decks Updated with Alpha"], (
+        f"die Reihenfolge der Quelle kam nicht durch: {meta.get('set_abschnitte')!r}")
+
+
+def test_die_abschnittsliste_ist_ohne_wiederholung_und_ohne_leere(mod, monkeypatch, tmp_path):
+    """Zwei Fallen auf einmal.
+
+    Ein `set` waere hier falsch (es hat keine Reihenfolge), eine blosse
+    Liste waere es auch (dieselbe Ueberschrift steht an jedem Deck
+    darunter). Und ein Eintrag ohne Abschnitt — der Normalfall bei der
+    Tier-Tabelle — darf keinen leeren Abschnitt in die Liste schreiben:
+    die Oberflaeche zeigt Decks ohne Abschnitt bewusst am ENDE, mit einer
+    eigenen Auskunft.
+    """
+    tier = [("T", "S", "9", "hm_1", "")]
+    set_decks = [
+        ("A", "S", "1", None, "Zwei"),
+        ("B", "A", "2", None, ""),
+        ("C", "B", "3", None, "Eins"),
+        ("D", "B", "4", None, "Zwei"),
+    ]
+    ziel = tmp_path / "x.json"
+    monkeypatch.setattr(mod, "AUSGABE", str(ziel))
+    monkeypatch.setattr(mod, "hole", lambda *a, **k: "<html></html>")
+    monkeypatch.setattr(mod, "lies_seite", lambda h: (tier, set_decks))
+    monkeypatch.setattr(mod, "sammle",
+                        lambda *a, **k: ([{"name": "A", "code": "C"}], [], 1, []))
+    monkeypatch.setattr(sys, "argv", ["x"])
+    assert mod.main() == 0
+    liste = json.loads(ziel.read_text(encoding="utf-8"))["_meta"]["set_abschnitte"]
+    assert liste == ["Zwei", "Eins"], f"weder Reihenfolge noch Eindeutigkeit: {liste!r}"
+    assert "" not in liste, "ein leerer Abschnitt steht in der Liste"
+
+
+def test_die_ausgelieferte_datei_fuehrt_jede_benutzte_ueberschrift(mod):
+    """Die Gegenprobe an den echten Daten, in BEIDE Richtungen.
+
+    Steht an einem Deck ein Abschnitt, den `_meta.set_abschnitte` nicht
+    kennt, landet er in der Oberflaeche am Ende — und niemand merkt es.
+    Steht in der Liste eine Ueberschrift, die an keinem Deck haengt,
+    hat sich die Quelle geaendert, ohne dass die Decks nachgezogen sind.
+    """
+    datei = os.path.join(WURZEL, "data", "pocket_tierlist.json")
+    with io.open(datei, encoding="utf-8") as f:
+        daten = json.load(f)
+    ordnung = daten["_meta"].get("set_abschnitte")
+    assert ordnung, "die ausgelieferte Datei fuehrt keine Abschnittsreihenfolge"
+    benutzt = {d.get("set_abschnitt") for d in daten["decks"] if d.get("set_abschnitt")}
+    assert benutzt <= set(ordnung), (
+        f"Abschnitte an Decks, die _meta nicht kennt: {benutzt - set(ordnung)}")
+    assert set(ordnung) <= benutzt, (
+        f"Abschnitte in _meta, die an keinem Deck haengen: {set(ordnung) - benutzt}")

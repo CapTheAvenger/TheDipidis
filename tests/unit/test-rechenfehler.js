@@ -264,7 +264,22 @@ describe('Doppelmodus: der 0,75-Abzug fuer Flaechenattacken', () => {
             'Make It Rain muss als nachgetragen markiert bleiben');
     });
 
-    it('damageRange zieht bei spread genau ein Viertel ab', () => {
+    it('der Flaechenabzug liegt auf dem GRUNDSCHADEN, nicht auf jedem Wurf', () => {
+        /* UMGESCHRIEBEN 16.09.2026. Vorher stand hier
+         *
+         *     flaeche.rolls[i] === floor(einzel.rolls[i] * 0.75)
+         *
+         * — und das pinnte die falsche Reihenfolge fest. Im Spiel (und
+         * im NCP-Rechner, script_res/damage_MASTER.js, calcGeneralMods
+         * Punkt a) wird der Abzug auf den Grundschaden angewendet, BEVOR
+         * die 16 Wuerfe daraus entstehen. Die Zusicherung haette den
+         * Umbau abgelehnt, obwohl er die Korrektur ist: genau die
+         * Bauart, an der dieses Projekt schon zweimal haengengeblieben
+         * ist ("eine Zusicherung, die eine Zahl pinnt statt einer
+         * Eigenschaft").
+         *
+         * Geprueft wird jetzt die Eigenschaft, und zwar so, dass sie die
+         * beiden Reihenfolgen UNTERSCHEIDET. */
         const CD = ladeChampions();
         const gemein = {
             move: { power: 100, damage_class: 'Physical', type: 'Ground' },
@@ -276,13 +291,22 @@ describe('Doppelmodus: der 0,75-Abzug fuer Flaechenattacken', () => {
         const einzel = CD.damageRange(Object.assign({}, gemein, { spread: false }));
         const flaeche = CD.damageRange(Object.assign({}, gemein, { spread: true }));
         assert.ok(einzel && flaeche);
-        // Bodenweise abgerundet, deshalb kein exaktes Verhaeltnis — aber
-        // jeder Wurf muss der abgerundeten Dreiviertel-Zahl entsprechen.
-        for (let i = 0; i < einzel.rolls.length; i++) {
-            assert.equal(flaeche.rolls[i], Math.max(1, Math.floor(einzel.rolls[i] * 0.75)),
-                `Wurf ${i}: ${flaeche.rolls[i]} statt ${Math.floor(einzel.rolls[i] * 0.75)}`);
-        }
-        assert.ok(flaeche.max < einzel.max);
+        assert.ok(flaeche.max < einzel.max, 'der Abzug muss wirken');
+
+        // Die Spanne schrumpft mit. Laege der Abzug hinter dem Wurf,
+        // waere jeder Wurf einzeln gekuerzt und die Spanne bliebe breit.
+        assert.ok((flaeche.max - flaeche.min) < (einzel.max - einzel.min),
+            `Spanne ohne ${einzel.max - einzel.min}, mit ${flaeche.max - flaeche.min} — `
+            + 'der Abzug liegt hinter dem Wurf statt davor');
+
+        // Und die Gegenprobe zur Gegenprobe: mindestens ein Wurf weicht
+        // von der alten Rechenweise ab. Ohne diese Zeile waere die
+        // Zusicherung auch mit der alten Reihenfolge gruen.
+        const alteWeise = einzel.rolls.map(v => Math.max(1, Math.floor(v * 0.75)));
+        assert.ok(flaeche.rolls.some((v, i) => v !== alteWeise[i]),
+            'kein Wurf unterscheidet sich — dann prueft diese Zeile die Reihenfolge nicht');
+        assert.ok(flaeche.angewendet.indexOf('Flächenabzug') !== -1,
+            'der Abzug muss namentlich im Ergebnis stehen');
     });
 
     it('die Matchup-Ansicht gibt den Modus weiter, statt fest false zu senden', () => {

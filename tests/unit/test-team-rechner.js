@@ -998,3 +998,45 @@ describe('Team-Rechner — Oberflaeche', () => {
             'der Knopf in den Team-Rechner steht auch dort, wo er nichts tut');
     });
 });
+
+// ── Der Name stand doppelt da (16.09.2026) ──────────────────────────
+//
+// Gemeldet mit Bild: in der Matrix und in den Teamchips stand
+// „GolisopodGolisopod – Tectass".
+//
+// Ursache: localName() gibt seit dem 05.09.2026 die ZUSAMMENGESETZTE
+// Form zurueck („Golisopod – Tectass"), nameHtml() setzte aber weiter
+// `englisch + <small>localName()</small>` davor. Beide Aenderungen waren
+// fuer sich richtig; zusammen ergaben sie den englischen Namen zweimal.
+//
+// VERFAELSCHUNGSPROBE (16.09.2026): nurDeutsch() wieder auf localName()
+// umgestellt -> beide Zusicherungen unten fallen um.
+describe('Der zusammengesetzte Name steht nur einmal da', () => {
+    it('nameHtml zeigt den englischen Namen gross und den deutschen klein', () => {
+        const { api, sandbox } = load('de');
+        // Die echte Namenstabelle liegt in champions-namen.js; hier
+        // genuegt die Schnittstelle, die nurDeutsch() benutzt.
+        sandbox.ChampionsNamen = {
+            de: (en) => (en === 'Golisopod' ? 'Tectass' : null),
+            istUnbenannt: () => false,
+            beide: (en, d) => (d && d !== en) ? en + ' – ' + d : en,
+        };
+        const html = api.nameHtml('Golisopod', 'pokemon');
+        assert.equal(html, 'Golisopod<small>Tectass</small>');
+        assert.equal((html.match(/Golisopod/g) || []).length, 1,
+            'Der englische Name darf genau einmal vorkommen — der Befund vom 16.09.2026 '
+            + 'war „GolisopodGolisopod – Tectass".');
+    });
+
+    it('ohne deutschen Namen bleibt der englische allein stehen', () => {
+        const { api, sandbox } = load('de');
+        sandbox.ChampionsNamen = { de: () => null, istUnbenannt: () => false, beide: (en) => en };
+        assert.equal(api.nameHtml('Gholdengo', 'pokemon'), 'Gholdengo');
+    });
+
+    it('in der englischen Oberfläche steht nie ein deutscher Zusatz', () => {
+        const { api, sandbox } = load('en');
+        sandbox.ChampionsNamen = { de: () => 'Tectass', istUnbenannt: () => false, beide: (en) => en };
+        assert.equal(api.nameHtml('Golisopod', 'pokemon'), 'Golisopod');
+    });
+});

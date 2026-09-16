@@ -2216,16 +2216,70 @@
         return treffer ? treffer.name : null;
     }
 
+    /* WENN DER SLUG FEHLT UND DIE WORTFOLGE UMGEDREHT IST (16.09.2026)
+
+       ANLASS: bei der Live-Abnahme des Paste-Imports kam aus dem Team
+       des Betreibers
+
+           Arcanine-Hisui @ Focus Sash
+
+       als „keine Nutzungsdaten“ zurueck. Die Nutzungsdatei fuehrt die
+       Art als `hisuian-arcanine` — Showdown haengt die Form HINTEN an,
+       diese Datei setzt sie als Adjektiv DAVOR.
+
+       Aus dem Team-Builder faellt das nicht auf: der uebergibt den Slug
+       mit. Ein PASTE kann das nie — dort steht nur der Showdown-Name.
+
+       KEINE ADJEKTIVTABELLE. Eine Liste hisui->hisuian, alola->alolan,
+       galar->galarian, paldea->paldean waere beim naechsten Zusatz
+       falsch und muesste gepflegt werden. Verglichen werden stattdessen
+       die BESTANDTEILE, jeder gegen den anderen als Praefix: aus
+       {arcanine, hisui} wird `hisuian-arcanine`, weil `hisuian` mit
+       `hisui` beginnt. Der Slug darf zusaetzliche Teile tragen
+       (`paldean-tauros-aqua-breed` gegen `Tauros-Paldea-Aqua`), aber
+       jeder Teil des Namens muss vorkommen.
+
+       EINDEUTIG ODER GAR NICHT. Treffen mehrere Slugs, wird NICHTS
+       zurueckgegeben — der Eintrag bleibt dann sichtbar im Kader stehen
+       und sagt „keine Nutzungsdaten“. Einen von mehreren zu nehmen
+       hiesse raten, und geraten wird hier nicht.
+
+       Gemessen am 16.09.2026 gegen die echte Nutzungsdatei: 31 von 31
+       Formen mit Bindestrich getroffen, keine mehrdeutig, erfundene
+       Namen („Pikachu-Hoenn“) bleiben offen. */
+    function slugAusTeilen(name) {
+        if (!_usage) return null;
+        const basis = String(name || '').toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        const teile = basis.split('-').filter(Boolean);
+        if (teile.length < 2) return null;   // ein Wort deckt usageSlug schon ab
+        const passt = (slug) => {
+            const rest = slug.split('-').filter(Boolean);
+            if (rest.length < teile.length) return false;
+            for (const a of teile) {
+                const i = rest.findIndex(b => b === a || b.indexOf(a) === 0 || a.indexOf(b) === 0);
+                if (i < 0) return false;
+                rest.splice(i, 1);
+            }
+            return true;
+        };
+        const treffer = Object.keys(_usage).filter(passt);
+        return treffer.length === 1 ? treffer[0] : null;
+    }
+
     function loeseNamen(m) {
         const ausSlug = nameAusSlug(m.slug);
         if (ausSlug) return ausSlug;
         // `_dex` ist null, solange load() nicht durch ist. Der Zugriff
         // darauf war der Absturz vom 15.09.2026 (siehe oeffneTeamRechner).
         if (m.name && _dex && _dex[m.name]) return m.name;
-        // Der Showdown-Name als Slug gelesen ist der letzte Versuch:
+        // Der Showdown-Name als Slug gelesen ist der naechste Versuch:
         // "Zoroark-Hisui" -> "zoroark-hisui" findet den Nutzungseintrag.
         const alsSlug = nameAusSlug(String(m.name || '').toLowerCase());
-        return alsSlug || m.name;
+        if (alsSlug) return alsSlug;
+        // Und zuletzt ueber die Bestandteile (siehe Kopf).
+        const ueberTeile = nameAusSlug(slugAusTeilen(m.name));
+        return ueberTeile || m.name;
     }
 
     function uebernimmTeam(team) {
@@ -3362,7 +3416,7 @@
         TEAM_MAX, TEAM_KAMPF,
         teamUrteil, teamZelle, teamSet, spreadAusText, uebernimmTeam, hatAngriff,
         realistischeTreffer, teamCalcHtml, teamMatrix, teamBank, wireTeam,
-        klammereSpread, loeseNamen, nameAusSlug, teamSuche,
+        klammereSpread, loeseNamen, nameAusSlug, teamSuche, slugAusTeilen,
         /* Die Kampflage (16.09.2026): rangeFor rechnet sie, feldHtml und
            lageHtml zeichnen sie, feldState setzt sie. Alle drei muessen
            greifbar sein, sonst laesst sich nur pruefen, DASS es die

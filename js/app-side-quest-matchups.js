@@ -27,6 +27,11 @@
     const RES_URL = 'champions_resources.json';
     const CHART_URL = 'champions_type_chart.json';
     const NAMES_DE_URL = 'champions_names_de.json';
+    /* Die Merkmale der Attacken (Kontakt, Faust, Biss, Klinge, Schall,
+       Puls, Ball, Rueckstoss, Zusatzeffekt). Getrennte Datei, weil sie
+       aus einer anderen Quelle kommt als champions_resources.json —
+       siehe scripts/build_champions_move_flags.py. */
+    const FLAGS_URL = 'champions_move_flags.json';
 
     // Champions verteilt 66 Statuswertpunkte, höchstens 32 auf einen Wert.
     // Beides aus den echten Spreads in champions_usage.json abgelesen, nicht
@@ -323,9 +328,9 @@
         if (_loading) return _loading;
         _loading = Promise.all([
             jget(USAGE_URL), jget(DEX_URL), jget(TEAMS_URL),
-            jget(RES_URL), jget(CHART_URL), jget(NAMES_DE_URL),
-        ]).then(([usage, dex, teams, res, chart, names]) => {
-            setData({ usage, dex, teams, res, chart, names });
+            jget(RES_URL), jget(CHART_URL), jget(NAMES_DE_URL), jget(FLAGS_URL),
+        ]).then(([usage, dex, teams, res, chart, names, flags]) => {
+            setData({ usage, dex, teams, res, chart, names, flags });
             return true;
         });
         return _loading;
@@ -338,8 +343,20 @@
         ((d.dex && d.dex.entries) || []).forEach(e => { _dex[e.en] = e; });
         _usage = (d.usage && d.usage.pokemon) || {};
         _moves = {};
+        /* Merkmale dazu, ohne den Grundeintrag anzufassen: der Rechner
+           bekommt EIN Objekt je Attacke, nicht zwei Quellen, die er
+           selbst zusammenlegen muesste. Fehlt die Datei, bleiben die
+           Merkmale leer — der Rechner meldet die betroffenen
+           Faehigkeiten dann wieder als unbelegt, statt zu raten. */
+        const merkmale = (d.flags && d.flags.attacken) || {};
         ((d.res && d.res.entries) || []).forEach(e => {
-            if (e.cat === 'move') _moves[e.en] = e;
+            if (e.cat !== 'move') return;
+            const m = merkmale[e.en];
+            _moves[e.en] = m ? Object.assign({}, e, {
+                flags: m.flags || [],
+                recoil: !!m.recoil,
+                zusatzeffekt: !!m.zusatzeffekt,
+            }) : e;
         });
         _namesDe = d.names || {};
         _eff = (window.ChampionsDamage && window.ChampionsDamage.makeChart)

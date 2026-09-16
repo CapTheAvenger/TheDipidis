@@ -308,6 +308,23 @@ jobs:
       # Editionen und die GO-Liste (09.09.2026). Beide fail-soft: schlaegt
       # einer fehl, bleibt die eingecheckte Datei stehen und die Kachel
       # zeigt weiter den letzten guten Stand.
+      # Attacken-Merkmale (16.09.2026). Sie kommen aus der Attackendatei
+      # des Kampfsimulators von Pokemon Showdown und speisen elf
+      # Faehigkeiten im Schadensrechner. Muss NACH
+      # build_champions_resources.py laufen: die Liste der Champions-
+      # Attacken kommt von dort. Fail-soft wie die uebrigen.
+      - name: Attacken-Merkmale nachziehen
+        run: |
+          set -uo pipefail
+          python -u scripts/build_champions_move_flags.py
+          rc=$?
+          if [ $rc -ne 0 ]; then
+            echo "::warning::build_champions_move_flags exited with $rc — Datei bleibt wie sie ist"
+            echo "FAIL scripts/build_champions_move_flags.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+            echo "OK   scripts/build_champions_move_flags.py" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+
       - name: Editionen und Pokemon-GO-Liste
         run: |
           set -uo pipefail

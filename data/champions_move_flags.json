@@ -1,0 +1,3079 @@
+{
+ "_meta": {
+  "quelle": "https://raw.githubusercontent.com/smogon/pokemon-showdown/master/data/moves.ts",
+  "lizenz": "Pokemon Showdown, MIT",
+  "erzeugt_am": "2026-09-16T11:29:20+00:00",
+  "erzeuger": "scripts/build_champions_move_flags.py",
+  "attacken_im_bestand": 513,
+  "davon_belegt": 513,
+  "zaehlung": {
+   "contact": 170,
+   "punch": 15,
+   "bite": 8,
+   "slicing": 18,
+   "sound": 24,
+   "pulse": 6,
+   "bullet": 18,
+   "recoil": 12,
+   "zusatzeffekt": 124
+  },
+  "uebernommene_merkmale": [
+   "contact",
+   "punch",
+   "bite",
+   "slicing",
+   "sound",
+   "pulse",
+   "bullet"
+  ],
+  "hinweis": "Nur Attacken, die data/champions_resources.json schon fuehrt. Diese Datei ergaenzt keine Attacke und korrigiert keine Staerke.",
+  "ohne_eintrag": [],
+  "ohne_eintrag_stand": "2026-09-16"
+ },
+ "attacken": {
+  "Accelerock": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Acid Armor": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Acid Spray": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Acrobatics": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Acupressure": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Aerial Ace": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "After You": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Agility": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Air Cutter": {
+   "flags": [
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Air Slash": {
+   "flags": [
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Alluring Voice": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Ally Switch": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Amnesia": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Ancient Power": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Apple Acid": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Aqua Cutter": {
+   "flags": [
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Aqua Jet": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Aqua Ring": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Aqua Step": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Aqua Tail": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Armor Cannon": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Aromatic Mist": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Assurance": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Attract": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Aura Sphere": {
+   "flags": [
+    "bullet",
+    "pulse"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Aura Wheel": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Aurora Veil": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Avalanche": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Axe Kick": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": true
+  },
+  "Baby-Doll Eyes": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Baneful Bunker": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Barb Barrage": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Baton Pass": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Beak Blast": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Beat Up": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Belch": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Belly Drum": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Bind": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Bite": {
+   "flags": [
+    "bite",
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Bitter Blade": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Bitter Malice": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Blast Burn": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Blaze Kick": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Blizzard": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Block": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Body Press": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Body Slam": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Bone Rush": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Boomburst": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Bounce": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Brave Bird": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": false
+  },
+  "Breaking Swipe": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Brick Break": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Brutal Swing": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Bug Bite": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Bug Buzz": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Bulk Up": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Bulldoze": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Bullet Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Bullet Seed": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Burn Up": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Burning Jealousy": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Calm Mind": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Ceaseless Edge": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Charge": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Charge Beam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Charm": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Chilling Water": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Chilly Reception": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Circle Throw": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Clanging Scales": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Clangorous Soul": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Clear Smog": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Close Combat": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Coaching": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Coil": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Comeuppance": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Confuse Ray": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Copycat": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Corrosive Gas": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Cosmic Power": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Cotton Guard": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Cotton Spore": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Counter": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Court Change": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Covet": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Crabhammer": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Cross Chop": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Cross Poison": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Crunch": {
+   "flags": [
+    "bite",
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Crush Claw": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Curse": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dark Pulse": {
+   "flags": [
+    "pulse"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Darkest Lariat": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dazzling Gleam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Decorate": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Defog": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Destiny Bond": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Detect": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dig": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dire Claw": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Disable": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Discharge": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Dive": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Double Hit": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Double Shock": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Double Team": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Double-Edge": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": false
+  },
+  "Draco Meteor": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dragon Cheer": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dragon Claw": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dragon Dance": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dragon Darts": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dragon Pulse": {
+   "flags": [
+    "pulse"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dragon Rush": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Dragon Tail": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Drain Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Draining Kiss": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Drill Peck": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Drill Run": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Drum Beating": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Dual Wingbeat": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Dynamic Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Earth Power": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Earthquake": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Eerie Impulse": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Eerie Spell": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Electric Terrain": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Electrify": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Electro Ball": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Electro Shot": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Electroweb": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Encore": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Endeavor": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Endure": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Energy Ball": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Entrainment": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Eruption": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Expanding Force": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Explosion": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Extrasensory": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Extreme Speed": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Facade": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Fairy Lock": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Fake Out": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Fake Tears": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Feather Dance": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Feint": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Fell Stinger": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Fickle Beam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Fiery Dance": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Final Gambit": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Fire Blast": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Fire Fang": {
+   "flags": [
+    "bite",
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Fire Lash": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Fire Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Fire Spin": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "First Impression": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Fissure": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Flail": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Flame Charge": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Flamethrower": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Flare Blitz": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": true
+  },
+  "Flash Cannon": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Flatter": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Fling": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Flip Turn": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Flower Trick": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Fly": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Flying Press": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Focus Blast": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Focus Energy": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Focus Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Follow Me": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Forest's Curse": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Foul Play": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Freeze-Dry": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Frenzy Plant": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Frost Breath": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Future Sight": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Gastro Acid": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Giga Drain": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Giga Impact": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Gigaton Hammer": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Glaive Rush": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Glare": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Grass Knot": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Grassy Glide": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Grassy Terrain": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Grav Apple": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Gravity": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Growth": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Guard Split": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Guard Swap": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Guillotine": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Gunk Shot": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Gyro Ball": {
+   "flags": [
+    "bullet",
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Hammer Arm": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Hard Press": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Haze": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Head Smash": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": false
+  },
+  "Headlong Rush": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Heal Bell": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Heal Pulse": {
+   "flags": [
+    "pulse"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Healing Wish": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Heat Crash": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Heat Wave": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Heavy Slam": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Helping Hand": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Hex": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "High Horsepower": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "High Jump Kick": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": false
+  },
+  "Horn Drill": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Horn Leech": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Howl": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Hurricane": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Hydro Cannon": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Hydro Pump": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Hyper Beam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Hyper Voice": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Hypnosis": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Ice Beam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Ice Fang": {
+   "flags": [
+    "bite",
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Ice Hammer": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Ice Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Ice Shard": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Ice Spinner": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Icicle Crash": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Icicle Spear": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Icy Wind": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Imprison": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Infernal Parade": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Inferno": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Infestation": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Ingrain": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Instruct": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Iron Defense": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Iron Head": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Iron Tail": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Jaw Lock": {
+   "flags": [
+    "bite",
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Jet Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "King's Shield": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Knock Off": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Kowtow Cleave": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Lash Out": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Last Resort": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Last Respects": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Lava Plume": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Leaf Blade": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Leaf Storm": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Leech Life": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Leech Seed": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Life Dew": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Light Screen": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Light of Ruin": {
+   "flags": [],
+   "recoil": true,
+   "zusatzeffekt": false
+  },
+  "Liquidation": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Lock-On": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Low Kick": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Low Sweep": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Lumina Crash": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Lunge": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Mach Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Magic Powder": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Magic Room": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Magnet Rise": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Magnetic Flux": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Make It Rain": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Matcha Gotcha": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Mean Look": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Mega Kick": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Megahorn": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Memento": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Metal Burst": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Metal Sound": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Meteor Assault": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Meteor Beam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Meteor Mash": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Milk Drink": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Minimize": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Mirror Coat": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Misty Explosion": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Misty Terrain": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Moonblast": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Moonlight": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Morning Sun": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Mortal Spin": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Mountain Gale": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Mud Shot": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Mud-Slap": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Muddy Water": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Mystical Fire": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Nasty Plot": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Night Daze": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Night Shade": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Night Slash": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "No Retreat": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Noble Roar": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Nuzzle": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Octolock": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Outrage": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Overdrive": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Overheat": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Pain Split": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Parabolic Charge": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Parting Shot": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Payback": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Perish Song": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Petal Blizzard": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Petal Dance": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Phantom Force": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Pin Missile": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Play Rough": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Pluck": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Poison Fang": {
+   "flags": [
+    "bite",
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Poison Jab": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Poison Powder": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Pollen Puff": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Poltergeist": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Population Bomb": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Pounce": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Power Gem": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Power Shift": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Power Split": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Power Swap": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Power Trick": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Power Trip": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Power Whip": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Protect": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Psych Up": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Psychic": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Psychic Fangs": {
+   "flags": [
+    "bite",
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Psychic Noise": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Psychic Terrain": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Psycho Cut": {
+   "flags": [
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Psyshield Bash": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Psyshock": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Pyro Ball": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Quash": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Quick Attack": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Quick Guard": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Quiver Dance": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Rage Fist": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Rage Powder": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Raging Bull": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Raging Fury": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Rain Dance": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Rapid Spin": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Razor Shell": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Recover": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Recycle": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Reflect": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Reflect Type": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Rest": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Reversal": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Revival Blessing": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Rising Voltage": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Roar": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Rock Blast": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Rock Polish": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Rock Slide": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Rock Tomb": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Rock Wrecker": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Role Play": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Roost": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Round": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sacred Sword": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Safeguard": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Salt Cure": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Sand Tomb": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sandstorm": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Scald": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Scale Shot": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Scary Face": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Scorching Sands": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Screech": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Seed Bomb": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Seismic Toss": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Self-Destruct": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Shadow Ball": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Shadow Claw": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Shadow Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Shadow Sneak": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Shed Tail": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sheer Cold": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Shell Side Arm": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Shell Smash": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Shelter": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Simple Beam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sing": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Skill Swap": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Skitter Smack": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Sky Attack": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Slack Off": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Slash": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sleep Powder": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sleep Talk": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sludge Bomb": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Sludge Wave": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Smack Down": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Smart Strike": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Snap Trap": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Snarl": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Snipe Shot": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Snore": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Snowscape": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Soak": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Soft-Boiled": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Solar Beam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Solar Blade": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sparkling Aria": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Speed Swap": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Spicy Extract": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Spikes": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Spiky Shield": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Spirit Break": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Spirit Shackle": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Spit Up": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Spite": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Spore": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Stealth Rock": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Steel Beam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Steel Roller": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Steel Wing": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Sticky Web": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Stockpile": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Stomping Tantrum": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Stone Axe": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Stone Edge": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Stored Power": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Storm Throw": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Strength Sap": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "String Shot": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Struggle": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Struggle Bug": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Stuff Cheeks": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Stun Spore": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Substitute": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sucker Punch": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sunny Day": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Super Fang": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Supercell Slam": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": false
+  },
+  "Superpower": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Surf": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Swagger": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Swallow": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sweet Kiss": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Sweet Scent": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Switcheroo": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Swords Dance": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Synthesis": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Syrup Bomb": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Tail Slap": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Tailwind": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Taunt": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Tearful Look": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Teatime": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Teeter Dance": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Temper Flare": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Terrain Pulse": {
+   "flags": [
+    "pulse"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Thief": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Thrash": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Throat Chop": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Thunder": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Thunder Fang": {
+   "flags": [
+    "bite",
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Thunder Punch": {
+   "flags": [
+    "contact",
+    "punch"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Thunder Wave": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Thunderbolt": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Tickle": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Tidy Up": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Topsy-Turvy": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Torch Song": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Torment": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Toxic": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Toxic Spikes": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Toxic Thread": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Trailblaze": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Transform": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Tri Attack": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Trick": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Trick Room": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Trick-or-Treat": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Triple Arrows": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Triple Axel": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Trop Kick": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Twin Beam": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "U-turn": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Upper Hand": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Uproar": {
+   "flags": [
+    "sound"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Vacuum Wave": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Venoshock": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Volt Switch": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Volt Tackle": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": true
+  },
+  "Water Pulse": {
+   "flags": [
+    "pulse"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Water Shuriken": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Water Spout": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Waterfall": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Wave Crash": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": false
+  },
+  "Weather Ball": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Whirlpool": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Whirlwind": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Wide Guard": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Wild Charge": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": false
+  },
+  "Will-O-Wisp": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Wish": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Wonder Room": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Wood Hammer": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": true,
+   "zusatzeffekt": false
+  },
+  "Worry Seed": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Wrap": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "X-Scissor": {
+   "flags": [
+    "contact",
+    "slicing"
+   ],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Yawn": {
+   "flags": [],
+   "recoil": false,
+   "zusatzeffekt": false
+  },
+  "Zap Cannon": {
+   "flags": [
+    "bullet"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Zen Headbutt": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  },
+  "Zing Zap": {
+   "flags": [
+    "contact"
+   ],
+   "recoil": false,
+   "zusatzeffekt": true
+  }
+ }
+}

@@ -188,8 +188,21 @@ describe('Pocket-Reiter: die Liste entsteht wirklich', () => {
 
     it('jede Stufe bekommt ihren eigenen Abschnitt mit der richtigen Zahl', () => {
         // Faengt TIER_ORDNUNG ohne 'D' (ueberlebende Mutation 07.09.2026).
+        //
+        // DECKS OHNE STUFE zaehlen hier nicht mit: Game8 fuehrt seit dem
+        // 16.09.2026 „Team Rocket's Wobbuffet" als Untiered, der Scraper
+        // schreibt dafuer `tier: null`. Die bekommen KEINEN Stufen-
+        // Abschnitt, sondern den eigenen Kasten „Ohne bekannte Stufe"
+        // darunter — geprueft im Fall gleich danach.
         const zaehlung = {};
-        DATEN.decks.forEach(d => { zaehlung[d.tier] = (zaehlung[d.tier] || 0) + 1; });
+        const ohneStufe = [];
+        DATEN.decks.forEach(d => {
+            if (d.tier === null || d.tier === undefined || d.tier === '') {
+                ohneStufe.push(d);
+                return;
+            }
+            zaehlung[d.tier] = (zaehlung[d.tier] || 0) + 1;
+        });
         const html = u.knoten.pocketListe.innerHTML;
         Object.keys(zaehlung).forEach(stufe => {
             const re = new RegExp('Stufe ' + stufe.replace('+', '\\+') +
@@ -198,8 +211,13 @@ describe('Pocket-Reiter: die Liste entsteht wirklich', () => {
                 `der Abschnitt "Stufe ${stufe}" mit ${zaehlung[stufe]} Decks fehlt`);
         });
         const abschnitte = (html.match(/class="pk-stufe"/g) || []).length;
-        assert.equal(abschnitte, Object.keys(zaehlung).length,
+        assert.equal(abschnitte, Object.keys(zaehlung).length + (ohneStufe.length ? 1 : 0),
             'die Zahl der Abschnitte passt nicht zu den Stufen in der Datei');
+        if (ohneStufe.length) {
+            assert.match(html, /Ohne bekannte Stufe|Tier not recognised/,
+                'die Decks ohne Stufe haben keinen eigenen Kasten — dann fallen '
+                + 'sie entweder weg oder stehen unter einer Stufe, die sie nicht haben');
+        }
     });
 
     it('holt die Daten ohne Zwischenspeicher', () => {
@@ -697,5 +715,55 @@ describe('Pocket: die Kartenliste nennt das Set beim Namen', () => {
             'der bekannte Name steht nicht als Name da');
         assert.equal((html.match(/<b>/g) || []).length, 1,
             'fuer die unbekannte Kennung wurde ein Name erfunden');
+    });
+});
+
+/* ── EIN DECK OHNE STUFE (16.09.2026) ─────────────────────────────────
+   Game8 fuehrt seit heute „Team Rocket's Wobbuffet" als Untiered; der
+   Scraper schreibt dafuer `tier: null`. Der Zweig fuer unbekannte
+   Stufen gab es seit dem 07.09. — betreten hat ihn nie ein Deck, und
+   deshalb ist drei Wochen nicht aufgefallen, dass er als einziger
+   Zweig KEINE Sprites zeichnet. Ein Sonderweg, den nichts betritt, ist
+   kein Sonderweg, sondern eine Falle mit Zeitzuender. */
+describe('Pocket: ein Deck ohne Stufe', () => {
+    const OHNE_STUFE = {
+        _meta: { anzahl: 2 },
+        decks: [
+            { name: 'Pikachu ex', tier: 'S', archiv: '1', quelle_liste: 'tier',
+              set_abschnitt: '', pokemon: [{ name: 'Pikachu ex', anzahl: 2, set: 'A1', nummer: '001' }] },
+            { name: 'Wobbuffet', tier: null, archiv: '2', quelle_liste: 'set',
+              set_abschnitt: 'New Alpha Decks',
+              pokemon: [{ name: 'Wobbuffet', anzahl: 2, set: 'A1', nummer: '002' }] },
+        ],
+    };
+
+    it('faellt nicht aus der Liste und bekommt trotzdem sein Bild', async () => {
+        const u = await gezeichnet(OHNE_STUFE);
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.ok(html.indexOf('Wobbuffet') !== -1,
+            'das Deck ohne Stufe fehlt ganz');
+        assert.match(html, /Ohne bekannte Stufe|Tier not recognised/,
+            'es fehlt der eigene Kasten samt Begruendung');
+        // Der Kern: auch diese Zeile traegt ein Bild.
+        const nachWobbuffet = html.slice(html.indexOf('Ohne bekannte Stufe'));
+        assert.ok(nachWobbuffet.indexOf('pk-sprite') !== -1,
+            'die Zeile ohne Stufe bekommt kein Bild — sie stuende als einzige '
+            + 'der Liste nackt da');
+    });
+
+    it('steht unter „Neues Set" am Ende, nicht vor der Stufe S', async () => {
+        const u = await gezeichnet({
+            _meta: {}, decks: [
+                { name: 'Ohne Stufe', tier: null, archiv: '1', quelle_liste: 'set',
+                  set_abschnitt: 'New Alpha Decks' },
+                { name: 'Mit Stufe S', tier: 'S', archiv: '2', quelle_liste: 'set',
+                  set_abschnitt: 'New Alpha Decks' },
+            ],
+        });
+        klick(u.knoten, 'data-pk-filter', 'set');
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.ok(html.indexOf('Mit Stufe S') < html.indexOf('Ohne Stufe'),
+            'das Deck ohne Stufe steht vor der Stufe S — indexOf() gibt fuer eine '
+            + 'unbekannte Stufe -1, und -1 sortiert ganz nach oben');
     });
 });

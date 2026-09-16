@@ -81,6 +81,21 @@
             suggestTitle: 'Passt dazu',
             suggestHintFirst: 'Meistgespielte Pokémon — tippen zum Starten, oder oben suchen.',
             suggestHint: 'Sortiert nach Überschneidung — % = auf wie vielen Partner-Listen deiner Gewählten das Pokémon steht. Tippen zum Hinzufügen.',
+            gleichTitle: 'Gleicht Schwächen aus',
+            gleichHint: 'Gerechnet, nicht gezählt: wogegen deine Auswahl verliert — und wer genau '
+                + 'das schlägt. Grundlage ist je Pokémon der meistgespielte Satz aus der '
+                + 'In-Game-Nutzungsanalyse (Attacken, Item, Fähigkeit, Wesen, Verteilung), dazu '
+                + 'Basiswerte, Attackenwerte und Typentabelle. Das Ergebnis kommt aus unserem '
+                + 'Schadensmodell — Siegquoten Pokémon gegen Pokémon stehen in keiner Quelle.',
+            gleichRechnet: 'rechne …',
+            gleichVerliert: 'Verliert gegen:',
+            gleichKeine: 'Deine Auswahl verliert gegen keines der verbreitetsten Pokémon — '
+                + 'rechnerisch gibt es hier nichts auszugleichen.',
+            gleichNiemand: 'Kein Pokémon der Analyse schlägt eines davon.',
+            gleichWen: (n, von) => `schlägt ${n} von ${von}`,
+            gleichLuecke: (fehlt, ganz) => `${fehlt} der ${ganz} Arten aus der Nutzungsanalyse `
+                + 'stehen nicht im Pokédex (keine Basiswerte) und bleiben in dieser Rechnung außen vor.',
+            gleichAus: 'Rechner nicht geladen — dieser Block bleibt leer.',
             freeTitle: 'Weitere Treffer',
             freeHint: 'Diese stehen auf keiner Partner-Liste deiner Auswahl — dort ist je Pokémon nur Platz für acht. Wählbar sind sie trotzdem.',
             freeNone: 'Kein Pokémon dieses Namens gefunden.',
@@ -142,6 +157,21 @@
             suggestTitle: 'Plays with',
             suggestHintFirst: 'Most-played Pokémon — tap to start, or search above.',
             suggestHint: 'Sorted by overlap — % is how many of your picks list it as a partner. Tap to add.',
+            gleichTitle: 'Covers your weaknesses',
+            gleichHint: 'Calculated, not counted: what your picks lose to — and who beats exactly '
+                + 'that. Based on each Pokémon\'s most-played set from the in-game usage analysis '
+                + '(moves, item, ability, nature, spread), plus base stats, move data and the type '
+                + 'chart. The result comes from our damage model — no source carries head-to-head '
+                + 'win rates.',
+            gleichRechnet: 'calculating …',
+            gleichVerliert: 'Loses to:',
+            gleichKeine: 'Your picks lose to none of the most-played Pokémon — by this calculation '
+                + 'there is nothing to cover.',
+            gleichNiemand: 'No Pokémon in the analysis beats any of them.',
+            gleichWen: (n, von) => `beats ${n} of ${von}`,
+            gleichLuecke: (fehlt, ganz) => `${fehlt} of the ${ganz} species in the usage analysis `
+                + 'are missing from the Pokédex (no base stats) and are left out of this calculation.',
+            gleichAus: 'Calculator not loaded — this block stays empty.',
             freeTitle: 'Other matches',
             freeHint: 'These are on none of your picks\' partner lists — each Pokémon only has eight slots there. You can still pick them.',
             freeNone: 'No Pokémon of that name found.',
@@ -258,6 +288,147 @@
             }
         } catch (err) { /* fail-soft: der Editor zeigt dann keine Werte */ }
         _mvLoaded = true;
+    }
+
+    /* ── „Gleicht Schwächen aus" (16.09.2026) ────────────────────────────
+       ANLASS (Betreiber): „bei passt dazu haben wir weiterhin nur die
+       Pokemon die damit gespielt werden, sollte nicht noch dazu kommen
+       vorschlag nach Pokemon die die Schwächen ausgleichen".
+
+       „Passt dazu" liest eine GEWOHNHEIT aus den Teamkameraden-Listen.
+       Dieser Block rechnet eine WIRKUNG: wogegen die Auswahl verliert und
+       wer das schlägt. Die Rechnung selbst steht in
+       js/champions-schwaechen.js — hier hängt nur die Oberfläche dran.
+
+       Drei zusätzliche Dateien, alle klein gegen die schon geladene
+       Nutzungsdatei (1,0 MB): Pokédex 326 KB, Merkmale 48 KB,
+       Typentabelle 2,7 KB. Fällt eine aus, bleibt der Block leer und
+       sagt das — der Rest des Builders läuft weiter.
+
+       Kosten gemessen am 16.09.2026 in dieser Sandkiste: Kader bauen 6 ms,
+       eine Auswertung 536 ms (ein Pokémon) bis 622 ms (sechs). Das ist zu
+       viel für den Renderpfad, deshalb läuft sie NACH dem Zeichnen in
+       einem eigenen Takt und schreibt nur in ihren eigenen Kasten. */
+    const POKEDEX_URL = 'data/champions_pokedex.json';
+    const CHART_URL = 'data/champions_type_chart.json';
+    const FLAGS_URL = 'data/champions_move_flags.json';
+
+    let _kader = null;          // Ergebnis von ChampionsSchwaechen.baueKader
+    let _kaderLoaded = false;   // Ladeversuch gestartet
+    /* Getrennt vom Ladeversuch: „laedt noch" und „geht nicht" sind zwei
+       verschiedene Auskuenfte, und die falsche davon waere eine
+       Behauptung ueber die Datenlage. */
+    let _kaderFertig = false;
+    let _gleich = null;         // { key, drohungen, ausgleicher }
+    let _gleichLaeuft = '';     // Schlüssel der laufenden Rechnung
+    const GLEICH_MAX = 12;      // so viele Ausgleicher werden gezeigt
+
+    function gleichKey() { return _team.slice().sort().join('|'); }
+
+    async function loadKader() {
+        if (_kaderLoaded) return;
+        _kaderLoaded = true;
+        if (!window.ChampionsDamage || !window.ChampionsSchwaechen) { _kaderFertig = true; return; }
+        try {
+            const [rd, rc, rf] = await Promise.all([
+                fetch(`${POKEDEX_URL}?t=${Date.now()}`),
+                fetch(`${CHART_URL}?t=${Date.now()}`),
+                fetch(`${FLAGS_URL}?t=${Date.now()}`),
+            ]);
+            if (!rd.ok || !rc.ok || !rf.ok) return;
+            const [jd, jc, jf] = await Promise.all([rd.json(), rc.json(), rf.json()]);
+            const dexEntries = (jd && jd.entries) || [];
+            const flags = (jf && jf.attacken) || {};
+            /* Die Attackenwerte liegen schon in _mv (loadRes). Die
+               Merkmale kommen aus der zweiten Datei dazu — ohne sie
+               rechnet der Kern Eisenfaust, Klingentänzer & Co. nicht,
+               und das stünde dann in „unbelegt". */
+            const moves = {};
+            Object.keys(_mv || {}).forEach(en => {
+                const m = flags[en];
+                moves[en] = m
+                    ? Object.assign({}, _mv[en], {
+                        flags: m.flags || [], recoil: !!m.recoil, zusatzeffekt: !!m.zusatzeffekt,
+                    })
+                    : _mv[en];
+            });
+            const chart = window.ChampionsDamage.makeChart(jc);
+            _kader = window.ChampionsSchwaechen.baueKader(_raw, dexEntries, moves, chart);
+        } catch (err) {
+            console.warn('[SideQuest/builder] Schwächen-Analyse nicht ladbar', err);
+            _kader = null;
+        } finally {
+            _kaderFertig = true;
+        }
+    }
+
+    /** Rechnet die Auswertung NACH dem Zeichnen und schreibt sie in ihren
+     *  Kasten. Läuft je Auswahl genau einmal: das Ergebnis liegt unter
+     *  seinem Schlüssel, und derselbe Schlüssel rechnet nicht noch mal. */
+    function gleichRechnen(host) {
+        if (!_kader || !_team.length) return;
+        const key = gleichKey();
+        if ((_gleich && _gleich.key === key) || _gleichLaeuft === key) return;
+        _gleichLaeuft = key;
+        setTimeout(() => {
+            let erg = null;
+            try {
+                erg = window.ChampionsSchwaechen.analyse(_kader, _team);
+            } catch (err) {
+                console.warn('[SideQuest/builder] Schwächen-Rechnung fehlgeschlagen', err);
+            }
+            _gleichLaeuft = '';
+            if (!erg) return;
+            _gleich = { key: key, drohungen: erg.drohungen, ausgleicher: erg.ausgleicher };
+            if (gleichKey() !== key) return;   // Auswahl hat sich inzwischen geändert
+            const box = (host || document).querySelector('.sqb-gleich');
+            if (!box) return;
+            box.innerHTML = gleichInnenHtml(t());
+            wireSuggs(box);
+        }, 0);
+    }
+
+    /** Der Inhalt des Kastens — ohne die Hülle, damit ihn die Rechnung
+     *  nachträglich allein ersetzen kann. */
+    function gleichInnenHtml(l) {
+        if (!_kader) {
+            return `<p class="sqb-none">${escapeHtml(
+                _kaderFertig ? l.gleichAus : l.gleichRechnet)}</p>`;
+        }
+        const key = gleichKey();
+        if (!_gleich || _gleich.key !== key) {
+            return `<p class="sqb-none">${escapeHtml(l.gleichRechnet)}</p>`;
+        }
+        if (!_gleich.drohungen.length) {
+            return `<p class="sqb-none">${escapeHtml(l.gleichKeine)}</p>`;
+        }
+        const namen = _gleich.drohungen.map(d => escapeHtml(displayName(d.slug))).join(' · ');
+        const kopf = `<p class="sqb-gleich-gegen"><b>${escapeHtml(l.gleichVerliert)}</b> ${namen}</p>`;
+        if (!_gleich.ausgleicher.length) {
+            return kopf + `<p class="sqb-none">${escapeHtml(l.gleichNiemand)}</p>`;
+        }
+        const frei = MAX - _team.length;
+        const liste = _gleich.ausgleicher.slice(0, GLEICH_MAX).map(a =>
+            `<button type="button" class="sqb-sugg sqb-sugg--gleich"${frei <= 0 ? ' disabled' : ''}
+                    data-add="${escapeHtml(a.slug)}"
+                    title="${escapeHtml(l.gleichWen(a.n, a.von))} — ${escapeHtml(
+                        a.gegen.map(g => displayName(g)).join(', '))}">
+                ${icon(a.slug)}
+                <span class="sqb-sugg-name">${escapeHtml(displayName(a.slug))}</span>
+                <span class="sqb-sugg-count">${a.n}/${a.von}</span>
+            </button>`).join('');
+        const luecke = (_kader.ohneDex && _kader.ohneDex.length)
+            ? `<p class="sqb-hint sqb-gleich-luecke">${escapeHtml(l.gleichLuecke(
+                _kader.ohneDex.length, _kader.ohneDex.length + _kader.liste.length))}</p>`
+            : '';
+        return kopf + `<div class="sqb-suggs">${liste}</div>` + luecke;
+    }
+
+    function gleichHtml(l) {
+        if (!_team.length) return '';
+        return `<h4 class="sqb-sec sqb-sec--gleich">${escapeHtml(l.gleichTitle)}</h4>
+            <p class="sqb-hint">${escapeHtml(l.gleichHint)}</p>
+            <div class="sqb-gleich">${gleichInnenHtml(l)}</div>`;
     }
 
     async function loadDe() {
@@ -960,6 +1131,7 @@
                 <h4 class="sqb-sec">${escapeHtml(l.suggestTitle)}</h4>
                 <p class="sqb-hint">${escapeHtml(_team.length ? l.suggestHint : l.suggestHintFirst)}</p>
                 <div class="sqb-suggs">${suggestionsHtml(l)}</div>
+                ${gleichHtml(l)}
                 ${_team.length ? `<div class="sqb-setzen-wrap">
                     <button type="button" class="sqb-setzen">${escapeHtml(l.setzen)}</button>
                     <p class="sqb-hint">${escapeHtml(l.setzenHint)}</p>
@@ -967,6 +1139,7 @@
                 <p class="sqb-attr">${escapeHtml(l.attribution)}</p>
             </div>`;
         wire(host);
+        gleichRechnen(host);
     }
 
     function wire(host) {
@@ -1063,6 +1236,11 @@
         ]);
         _activated = true;
         render();
+        /* Der Schwaechen-Kader kommt NACH dem ersten Zeichnen: er braucht
+           die Attackenwerte aus loadRes() und drei weitere Dateien, und
+           der Builder ist ohne ihn voll bedienbar. Ist er da, wird nur
+           nachgezeichnet, wenn ueberhaupt etwas gewaehlt ist. */
+        loadKader().then(() => { if (_team.length) render(); });
     }
 
     document.addEventListener('languageChanged', () => {
@@ -1080,6 +1258,13 @@
         setState: function (team, raw, dex, sets) {
             _team = team || []; _raw = raw || {}; _dex = dex || {};
             _dexLoaded = true; _sets = sets || {};
-        }
+        },
+        // Fuer die Zusicherungen zum Schwaechen-Block: Kader und Ergebnis
+        // von aussen setzen, damit gleichInnenHtml() ohne Netz laeuft.
+        setGleich: function (kader, gleich, fertig) {
+            _kader = kader; _gleich = gleich; _kaderFertig = fertig !== false;
+        },
+        gleichInnenHtml: function (l) { return gleichInnenHtml(l); },
+        gleichKey: function () { return gleichKey(); }
     };
 })();

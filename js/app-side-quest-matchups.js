@@ -495,13 +495,28 @@
         const a = _dex[attName], d = _dex[defName];
         if (!a || !d) return null;
         const flaeche = istFlaeche(mv);
+        /* SEIT DEM 16.09.2026 GEHEN FAEHIGKEIT UND GEGENSTAND BEIDER
+           SEITEN MIT.
+           ------------------------------------------------------------
+           Vorher wanderte nur `attSet.item` hinueber — und auch das nur
+           fuer Life Orb und Expert Belt. Die Sets tragen die Faehigkeit
+           laengst (topSet() liest sie aus den Nutzungsdaten), sie kam
+           nur nie an der Rechnung an. Folge: Bedroher senkte den Angriff
+           nicht, Schwebe fing Boden-Attacken nicht ab, eine
+           Widerstandsbeere halbierte nichts.
+
+           Gemessen an den Nutzungsdaten (16.09.2026): Bedroher steht bei
+           42 Arteneintraegen, Schwebe bei 18, Widerstandsbeeren
+           zusammen bei ueber 250. */
         const r = window.ChampionsDamage.damageRange({
             move: mv,
             attackerStats: attStats,
             defenderStats: defStats,
             attackerTypes: [a.t1, a.t2].filter(Boolean),
             effectiveness: _eff(mv.type, [d.t1, d.t2].filter(Boolean)),
-            item: attSet.item,
+            attacker: { ability: attSet.ability, item: attSet.item },
+            defender: { ability: defSet && defSet.ability, item: defSet && defSet.item },
+            field: { doubles: _format === 'doubles' },
             spread: _format === 'doubles' && flaeche === true,
         });
         if (r) {
@@ -620,11 +635,34 @@
                 esc(tName(t))}</span>`).join('');
     }
 
+    /* DER NAME STAND DOPPELT DA (gemeldet 16.09.2026, mit Bild:
+       „GolisopodGolisopod – Tectass").
+       ------------------------------------------------------------
+       localName() gab bis zum 05.09.2026 den DEUTSCHEN Namen allein
+       zurueck; seitdem gibt es die zusammengesetzte Form
+       „Golisopod – Tectass" aus champions-namen.js. Diese Funktion hier
+       wurde nicht mitgezogen und setzte weiter `englisch + <small>was
+       localName liefert</small>` — also den englischen Namen zweimal.
+
+       Gebraucht wird hier der deutsche Name ALLEIN. Den gibt
+       ChampionsNamen.de(); localName() bleibt fuer alle Stellen, die
+       die zusammengesetzte Form wollen. */
+    function nurDeutsch(en, kind) {
+        if (!en || !de()) return '';
+        if (window.ChampionsNamen && window.ChampionsNamen.istUnbenannt
+            && window.ChampionsNamen.istUnbenannt(en)) return '';
+        if (window.ChampionsNamen && typeof window.ChampionsNamen.de === 'function') {
+            const d = window.ChampionsNamen.de(en, kind);
+            return (d && d !== en) ? d : '';
+        }
+        const map = kind === 'nature' ? NATURE_DE : (_namesDe && _namesDe[kind]);
+        const d = map && map[en];
+        return (d && d !== en) ? d : '';
+    }
+
     function nameHtml(en, kind) {
-        const d = localName(en, kind);
-        return (d && d !== en)
-            ? `${esc(en)}<small>${esc(d)}</small>`
-            : esc(en);
+        const d = nurDeutsch(en, kind);
+        return d ? `${esc(en)}<small>${esc(d)}</small>` : esc(en);
     }
 
     // ── Set-Editor (die eine Komponente) ────────────────────────────
@@ -1644,6 +1682,9 @@
         teamUrteil, teamZelle, teamSet, spreadAusText, uebernimmTeam, hatAngriff,
         realistischeTreffer, teamCalcHtml, teamMatrix, teamBank, wireTeam,
         klammereSpread, loeseNamen, nameAusSlug, teamSuche,
+        // Der Namensbau: der doppelte Name vom 16.09.2026 war hier
+        // nicht pruefbar, weil niemand herankam.
+        nameHtml, nurDeutsch, localName,
         teamQ: (v) => { _teamQ = v; },
         aktiveNamen, istAktiv, ausSet,
         teamState: (patch) => {

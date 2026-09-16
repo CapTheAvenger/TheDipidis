@@ -213,6 +213,130 @@ describe('Der Paste — derselbe Leser wie der Teams-Import', () => {
 
 // ══════════════════════════════════════════════════════════════════════
 
+describe('Regionalformen aus einem Paste', () => {
+    /* LIVE GEFUNDEN (16.09.2026), mit dem echten Team des Betreibers:
+
+           Arcanine-Hisui @ Focus Sash
+
+       kam als „keine Nutzungsdaten" zurueck. Die Nutzungsdatei fuehrt
+       die Art als `hisuian-arcanine` — Showdown haengt die Form HINTEN
+       an, die Datei setzt sie als Adjektiv DAVOR.
+
+       Aus dem Team-Builder faellt das nicht auf: der uebergibt den Slug
+       mit. Ein Paste kann das nie. */
+    it('jede Form mit Bindestrich aus der echten Datei wird aufgeloest', () => {
+        const { api } = load();
+        const slugs = Object.keys(DATA.usage.pokemon).filter(s => s.indexOf('-') !== -1);
+        assert.ok(slugs.length > 20,
+            `nur ${slugs.length} Slugs mit Bindestrich — die Probe waere fast leer`);
+
+        /* Aus dem Slug den Showdown-Namen ZURUECKBAUEN, statt eine Liste
+           in den Testcode zu schreiben: `hisuian-arcanine` -> das
+           Adjektiv nach hinten, also „Arcanine-Hisuian". Das ist noch
+           nicht ganz Showdowns Schreibweise („Arcanine-Hisui"), und
+           genau deshalb taugt es als Probe — es prueft den
+           Praefix-Vergleich und nicht eine auswendig gelernte Tabelle. */
+        const ADJEKTIVE = ['hisuian', 'alolan', 'galarian', 'paldean'];
+        let geprueft = 0;
+        slugs.forEach(slug => {
+            const teile = slug.split('-');
+            const i = teile.findIndex(t => ADJEKTIVE.indexOf(t) !== -1);
+            if (i < 0) return;                       // keine umgedrehte Form
+            const gedreht = teile.filter((_, k) => k !== i)
+                .map(t => t.charAt(0).toUpperCase() + t.slice(1))
+                .join('-') + '-' + teile[i].slice(0, 5);
+            const erwartet = api.nameAusSlug(slug);
+            assert.ok(erwartet, `${slug} hat keinen Namen im Kader`);
+            assert.equal(api.loeseNamen({ name: gedreht }), erwartet,
+                `„${gedreht}" wird nicht auf ${slug} aufgeloest`);
+            geprueft++;
+        });
+        assert.ok(geprueft >= 10,
+            `nur ${geprueft} umgedrehte Formen geprueft — die Probe bestuende fast leer`);
+    });
+
+    it('der gemeldete Fall selbst', () => {
+        const { api } = load();
+        const soll = api.nameAusSlug('hisuian-arcanine');
+        if (!soll) return;   // die Art faellt eines Tages aus dem Kader
+        assert.equal(api.loeseNamen({ name: 'Arcanine-Hisui' }), soll,
+            'der gemeldete Fall aus dem Team des Betreibers geht weiter nicht');
+    });
+
+    it('was es nicht gibt, bekommt keinen Slug', () => {
+        const { api } = load();
+        assert.equal(api.slugAusTeilen('Pikachu-Hoenn'), null,
+            'eine erfundene Form bekommt einen Slug zugewiesen');
+        assert.equal(api.slugAusTeilen('Erfundenmon'), null,
+            'ein erfundener Name bekommt einen Slug zugewiesen');
+        // Ein einzelnes Wort geht diesen Weg gar nicht erst — dafuer ist
+        // usageSlug zustaendig, und zwei Wege fuer dieselbe Frage waeren
+        // der Anfang vom Auseinanderlaufen.
+        assert.equal(api.slugAusTeilen('Rillaboom'), null,
+            'ein Name aus EINEM Wort geht durch die Teilesuche');
+    });
+
+    it('EINDEUTIG ODER GAR NICHT — an GESETZTEN Daten geprueft', () => {
+        /* DIE REGEL WAR MIT DEN ECHTEN DATEN NICHT AUSLOESBAR.
+
+           Gemessen am 16.09.2026: ueber die ganze Nutzungsdatei gibt es
+           KEINEN mehrdeutigen Fall. Die Verfaelschungsprobe
+           (`treffer[0]` statt `treffer.length === 1`) blieb deshalb
+           gruen — die Regel stand da, ohne dass irgendetwas sie
+           beruehrte.
+
+           Eine Regel, die nur bei Daten greift, die es heute nicht
+           gibt, wird an gesetzten Daten geprueft oder gar nicht. Hier
+           steht eine Nutzungsdatei mit ZWEI Slugs, auf die derselbe
+           Showdown-Name passt. */
+        const { api } = load();
+        const roster = api.setData({
+            usage: { pokemon: {
+                'hisuian-arcanine': DATA.usage.pokemon['hisuian-arcanine']
+                    || DATA.usage.pokemon[Object.keys(DATA.usage.pokemon)[0]],
+                'hisuian-arcanine-alt': DATA.usage.pokemon['hisuian-arcanine']
+                    || DATA.usage.pokemon[Object.keys(DATA.usage.pokemon)[0]],
+            } },
+            dex: DATA.dex, teams: DATA.teams, res: DATA.res,
+            chart: DATA.chart, names: DATA.names, flags: DATA.flags,
+        });
+        assert.ok(Array.isArray(roster), 'die gesetzten Daten wurden nicht angenommen');
+        assert.equal(api.slugAusTeilen('Arcanine-Hisui'), null,
+            'bei zwei passenden Slugs wird einer davon geraten');
+        // Gegenprobe: mit nur EINEM der beiden trifft es wieder.
+        api.setData({
+            usage: { pokemon: {
+                'hisuian-arcanine': DATA.usage.pokemon['hisuian-arcanine']
+                    || DATA.usage.pokemon[Object.keys(DATA.usage.pokemon)[0]],
+            } },
+            dex: DATA.dex, teams: DATA.teams, res: DATA.res,
+            chart: DATA.chart, names: DATA.names, flags: DATA.flags,
+        });
+        assert.equal(api.slugAusTeilen('Arcanine-Hisui'), 'hisuian-arcanine',
+            'die Probe selbst taugt nicht — auch mit einem Slug trifft es nicht');
+        api.setData(DATA);
+    });
+
+    it('ein Paste mit Regionalform rechnet danach wirklich', () => {
+        const { api } = load();
+        const soll = api.nameAusSlug('hisuian-arcanine');
+        if (!soll) return;
+        api.kaderState({ mein: [] });
+        assert.equal(api.ladePaste(
+            'Arcanine-Hisui @ Focus Sash\nAbility: Rock Head\n'
+            + 'EVs: 32 Atk / 32 Spe\nJolly Nature\n- Head Smash\n- Flare Blitz'), true,
+            'der Paste wurde nicht gelesen');
+        const e = api.kaderState().mein[0];
+        assert.equal(e.name, soll, 'der Name wurde nicht aufgeloest');
+        assert.equal(api.kaderRechenbar(e), true,
+            'die Form steht weiter als „keine Nutzungsdaten" im Kader');
+        assert.equal(api.setFor(soll, 'me').item, 'Focus Sash',
+            'der Satz der Form kam nicht an');
+    });
+});
+
+// ══════════════════════════════════════════════════════════════════════
+
 describe('Die Attacken stehen in der Reihenfolge des Satzes', () => {
     it('moveTable traegt die Satzstelle mit — und bleibt selbst nach Schaden sortiert', () => {
         const { api } = load();

@@ -3822,3 +3822,197 @@
     text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
 }
 .sq-console .sq-calc-ohne { color: var(--sq-dim2); font-style: italic; }
+
+/* ── DER RECHNER-REITER (16.09.2026) ─────────────────────────────────
+   ANLASS (Betreiber): „der Damage Culc ist ja immer noch kein eigenes
+   Feature … ich erwarte schon etwas in richtung von NCP — nur optisch
+   schöner, besser zu bedienen und klarer in der Darstellung."
+
+   Ordnung (Entwurf C, vom Betreiber gewählt): Kopfband mit der Antwort
+   → Feldleiste → beide Richtungen nebeneinander → Vergleich → Sätze
+   hinter dem Aufklapper. Die Antwort steht ganz oben, nicht unter
+   dreißig Formularfeldern. */
+.sq-console .sq-rech { display: flex; flex-direction: column; gap: 12px; }
+.sq-console .sq-rech-intro {
+    font-size: var(--fs-xs); color: var(--sq-dim); line-height: 1.55; margin: 0 0 11px;
+}
+.sq-console .sq-rech-hint {
+    font-size: var(--fs-xs); color: var(--sq-dim2); line-height: 1.55; margin: 0 0 8px;
+}
+
+/* Das Kopfband: beide Namen, dazwischen der Tausch, darunter die
+   Antwort über die volle Breite. */
+.sq-console .sq-rech-kopf {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 10px 12px; align-items: end;
+    background: linear-gradient(180deg, #16203f, var(--sq-panel));
+    border: .8px solid #35427a; border-radius: 14px; padding: 12px;
+    box-shadow: var(--sq-shadow);
+}
+.sq-console .sq-rech-wer { min-width: 0; }
+.sq-console .sq-rech-wer.is-opp { text-align: right; }
+.sq-console .sq-rech-pick { width: 100%; font-size: 13px; font-weight: 700; }
+.sq-console .sq-rech-typen {
+    display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap;
+}
+.sq-console .sq-rech-wer.is-opp .sq-rech-typen { justify-content: flex-end; }
+.sq-console .sq-rech-vs {
+    display: flex; flex-direction: column; align-items: center; gap: 5px; padding-bottom: 3px;
+}
+.sq-console .sq-rech-vs > span {
+    font-size: var(--fs-xs); color: var(--sq-dim2); text-transform: uppercase; letter-spacing: .12em;
+}
+.sq-console .sq-rech-tausch {
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
+    color: var(--sq-dim); font-size: 14px; line-height: 1; padding: 5px 9px; cursor: pointer;
+}
+.sq-console .sq-rech-tausch:hover { color: var(--sq-txt); border-color: var(--sq-accent); }
+
+/* Die Antwort. Der Satz ist das Größte auf der Seite — er ist der
+   Grund, warum jemand den Reiter aufgemacht hat. */
+.sq-console .sq-rech-erg {
+    grid-column: 1 / -1; border-top: .8px solid var(--sq-line); padding-top: 10px;
+}
+.sq-console .sq-rech-satz { font-size: 17px; line-height: 1.4; }
+.sq-console .sq-rech-satz b { color: var(--sq-accent2); }
+.sq-console .sq-rech-satz small {
+    display: inline; font-size: .78em; color: var(--sq-dim); margin-left: 3px; font-weight: 400;
+}
+.sq-console .sq-rech-zahl { font-family: var(--sq-num); font-variant-numeric: tabular-nums; }
+.sq-console .sq-rech-wuerfe {
+    margin-top: 6px; font-family: var(--sq-num); font-size: 10.5px; color: var(--sq-dim2);
+    overflow-x: auto; white-space: nowrap; scrollbar-width: thin;
+}
+.sq-console .sq-rech-wuerfe u { text-decoration: none; color: var(--sq-dim); font-weight: 700; }
+.sq-console .sq-rech-erg-fuss {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 9px;
+}
+.sq-console .sq-rech-ini { font-size: var(--fs-xs); color: var(--sq-dim); }
+.sq-console .sq-rech-ini.is-fast { color: var(--tint-ok-ink); }
+.sq-console .sq-rech-ini.is-slow { color: var(--tint-bad-ink); }
+/* Der Merk-Knopf rechts, nicht ueber die ganze Breite: .sq-btn ist
+   sonst ein Blockknopf, und ein Band mit einem einzigen breiten Knopf
+   sieht aus, als waere es der Hauptzweck des Kastens. Der Hauptzweck
+   ist der Satz darueber. */
+.sq-console .sq-rech-merk { margin-left: auto; width: auto; flex: 0 0 auto; }
+
+/* Beide Richtungen nebeneinander — das ist der Teil, den der
+   NCP-Rechner nicht hat. Im Doppelkampf ist die Frage nie „was mache
+   ich", sondern „wer legt wen zuerst um". */
+.sq-console .sq-rech-zwei {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px;
+    align-items: start;
+}
+.sq-console .sq-rech-richtung.is-deal .sq-lbl { color: var(--tint-ok-ink); }
+.sq-console .sq-rech-richtung.is-deal .sq-lbl::before { background: var(--tint-ok-ink); }
+.sq-console .sq-rech-richtung.is-take .sq-lbl { color: var(--tint-bad-ink); }
+.sq-console .sq-rech-richtung.is-take .sq-lbl::before { background: var(--tint-bad-ink); }
+
+/* Eine Attackenzeile. Anklickbar, weil ein Klick sie ins Kopfband
+   hebt — dort stehen dann ihre 16 Würfe. */
+.sq-console .sq-rech-mv {
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(54px, 1fr) 96px 84px;
+    gap: 10px; align-items: center; width: 100%; text-align: left;
+    background: transparent; border: 0; border-top: .8px solid var(--sq-line);
+    padding: 8px 6px; color: var(--sq-txt); font: inherit; cursor: pointer; border-radius: 8px;
+}
+.sq-console .sq-rech-mv:first-of-type { border-top: 0; }
+.sq-console .sq-rech-mv:hover { background: rgba(85,102,224,.10); }
+.sq-console .sq-rech-mv.is-on {
+    background: rgba(85,102,224,.18); box-shadow: inset 0 0 0 .8px var(--sq-accent);
+}
+.sq-console .sq-rech-mv:focus-visible { outline: 2px solid var(--sq-accent); outline-offset: 1px; }
+.sq-console .sq-rech-mv-n {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    font-weight: 700; font-size: 13px; min-width: 0;
+}
+.sq-console .sq-rech-mv-n small {
+    display: inline; font-size: .8em; color: var(--sq-dim); font-weight: 400;
+}
+.sq-console .sq-rech-bp,
+.sq-console .sq-rech-flag, .sq-console .sq-rech-eff {
+    font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: .03em;
+}
+.sq-console .sq-rech-bp { font-family: var(--sq-num); font-weight: 500; color: var(--sq-dim); }
+.sq-console .sq-rech-flag {
+    color: var(--tint-warn-ink); background: var(--tint-warn); padding: 1px 6px; border-radius: 999px;
+}
+.sq-console .sq-rech-eff.is-super { color: var(--tint-bad-ink); }
+.sq-console .sq-rech-eff.is-resist { color: var(--tint-ok-ink); }
+.sq-console .sq-rech-eff.is-immune { color: var(--sq-dim2); }
+.sq-console .sq-rech-bar { height: 7px; border-radius: 99px; background: var(--sq-deep); overflow: hidden; }
+.sq-console .sq-rech-bar i { display: block; height: 100%; border-radius: 99px; }
+.sq-console .sq-rech-bar.is-deal i { background: var(--tint-ok-ink); }
+.sq-console .sq-rech-bar.is-take i { background: var(--tint-bad-ink); }
+.sq-console .sq-rech-pct {
+    font-family: var(--sq-num); font-variant-numeric: tabular-nums;
+    font-size: 12px; font-weight: 700; text-align: right;
+}
+.sq-console .sq-rech-ko { font-size: var(--fs-xs); color: var(--sq-dim); text-align: right; }
+
+/* Der Vergleich: gemerkte Stände untereinander, jeder mit SEINER Lage.
+   Nur die Zahl zu merken wäre wertlos — zwei Stände unterscheiden sich
+   ja gerade durch die Lage, aus der sie kommen. */
+.sq-console .sq-verl-liste { list-style: none; margin: 0 0 9px; padding: 0; }
+.sq-console .sq-verl-zeile {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) 26px;
+    gap: 10px; align-items: baseline;
+    border-top: .8px solid var(--sq-line); padding: 7px 2px;
+}
+.sq-console .sq-verl-zeile:first-child { border-top: 0; }
+.sq-console .sq-verl-satz { font-size: 12.5px; line-height: 1.45; min-width: 0; }
+.sq-console .sq-verl-satz b { color: var(--sq-txt); }
+.sq-console .sq-verl-satz small { display: none; }
+.sq-console .sq-verl-lage { font-size: var(--fs-xs); color: var(--sq-dim); line-height: 1.45; }
+.sq-console .sq-verl-weg {
+    background: none; border: 0; color: var(--sq-dim2); font-size: 15px; line-height: 1;
+    cursor: pointer; padding: 2px 5px; border-radius: 6px;
+}
+.sq-console .sq-verl-weg:hover { color: var(--tint-bad-ink); background: var(--tint-bad); }
+
+/* Die Sätze hinter dem Aufklapper. */
+.sq-console .sq-rech-saetze > summary {
+    cursor: pointer; list-style: none;
+    background: var(--sq-panel); border: .8px solid var(--sq-line); border-radius: 12px;
+    padding: 10px 13px; font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+}
+.sq-console .sq-rech-saetze > summary::-webkit-details-marker { display: none; }
+.sq-console .sq-rech-saetze > summary::before { content: "▸"; color: var(--sq-accent2); font-size: 12px; }
+.sq-console .sq-rech-saetze[open] > summary::before { content: "▾"; }
+.sq-console .sq-rech-saetze > summary em {
+    font-style: normal; font-weight: 400; color: var(--sq-dim2);
+    font-size: var(--fs-xs); margin-left: auto;
+}
+.sq-console .sq-rech-editoren {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px;
+    margin-top: 12px; align-items: start;
+}
+
+/* Hilfreiche Hand und Helfer stehen bei der SEITE, nicht beim Feld —
+   genau wie der Schirm darüber. */
+.sq-console .sq-partner {
+    display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px;
+}
+
+/* Auf schmalen Schirmen kippt die Attackenzeile in drei Bänder, statt
+   vier Spalten auf 340 px zu quetschen. Die Grenze hängt an der
+   Bedingung, die wirklich gemeint ist: unter dieser Breite passen
+   Name, Balken, Prozent und K.O. nicht mehr nebeneinander. */
+@media (max-width: 560px) {
+    .sq-console .sq-rech-mv {
+        grid-template-columns: minmax(0, 1fr) 84px;
+        grid-template-areas: "n p" "b b" "k k"; gap: 3px 8px;
+    }
+    .sq-console .sq-rech-mv-n { grid-area: n; }
+    .sq-console .sq-rech-pct { grid-area: p; }
+    .sq-console .sq-rech-bar { grid-area: b; }
+    .sq-console .sq-rech-ko { grid-area: k; text-align: left; }
+    .sq-console .sq-rech-kopf { grid-template-columns: 1fr; }
+    .sq-console .sq-rech-wer.is-opp { text-align: left; }
+    .sq-console .sq-rech-wer.is-opp .sq-rech-typen { justify-content: flex-start; }
+    .sq-console .sq-rech-vs { flex-direction: row; justify-content: space-between; }
+    .sq-console .sq-rech-satz { font-size: 15px; }
+    .sq-console .sq-verl-zeile { grid-template-columns: minmax(0, 1fr) 26px; }
+    .sq-console .sq-verl-lage { grid-column: 1 / -1; }
+}

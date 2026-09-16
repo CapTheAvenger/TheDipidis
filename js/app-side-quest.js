@@ -1609,6 +1609,37 @@
         });
     }
 
+    /* ── Die eigenen Teams LESEN (16.09.2026) ────────────────────────────
+       ANLASS (Betreiber): „können wir hier noch irgendwie mein Team 1:1
+       wie ich es spiele reinladen".
+
+       Bis heute ging in diesen Speicher nur etwas HINEIN
+       (addImportedTeam, copyAsOwn) — heraus kam er nur ueber render(),
+       also als fertiges HTML. Der Rechner braucht die Aufstellung als
+       Daten.
+
+       ZWEIMAL KOPIERT, UND DAS IST ABSICHT.
+       Ein Aufrufer, der die zurueckgegebene Liste veraendert, wuerde
+       sonst durch `loadImported()` hindurch in den Speicher des
+       Betreibers greifen — und dessen Regel lautet: gespeicherte Teams
+       werden nie veraendert. Eine tiefe Kopie kostet bei sechs Pokemon
+       nichts und macht den Missbrauch unmoeglich statt unwahrscheinlich. */
+    function getOwnTeams() {
+        return loadImported().map(t => {
+            try { return JSON.parse(JSON.stringify(t)); } catch (_) { return null; }
+        }).filter(Boolean);
+    }
+
+    /* Das aktive Team als Objekt — oder null. Null heisst hier zweierlei
+       und das ist in Ordnung: keins markiert, oder das markierte ist aus
+       der Liste gefallen. Beide Male ist die richtige Antwort „nimm
+       nichts an", nicht „nimm das erste". */
+    function getActiveTeam() {
+        const code = getActiveCode();
+        if (!code) return null;
+        return getOwnTeams().find(t => t.replica_code === code) || null;
+    }
+
     // Expose for the tab-switch hook
     window.sideQuest = {
         render,
@@ -1620,6 +1651,8 @@
         copyAsOwn,
         getActiveCode,
         setActiveTeam,
+        getOwnTeams,
+        getActiveTeam,
     };
 
     // Auto-render when the side-quest tab becomes active. The site uses

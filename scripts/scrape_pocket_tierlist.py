@@ -1502,6 +1502,24 @@ def main():
                               "Game8 zwei Drucke derselben Karte in einer Zeile "
                               "zusammenfasst und ein Deck von 33 deshalb zu Recht "
                               "herausfällt.",
+            # DIE REIHENFOLGE DER ABSCHNITTE IST EINE ANGABE DER QUELLE
+            # ----------------------------------------------------------
+            # Gefunden am 16.09.2026 bei der Live-Abnahme: der Reiter
+            # zeigte „Old Decks Updated …" ueber „New … Decks", Game8
+            # zeigt es andersherum. Der Grund war, dass die Oberflaeche
+            # die Abschnitte nach ERSTEM AUFTRETEN in der (nach Stufe
+            # sortierten) Deckliste ordnete und der Kommentar daneben
+            # „in der Reihenfolge der Quelle" behauptete.
+            #
+            # Die Reihenfolge kennt nur diese Seite. Sie gehoert deshalb
+            # in die Daten, nicht in eine Regel im Browser: die
+            # Ueberschriften wechseln mit jedem Set, eine feste Liste im
+            # Code waere beim naechsten Set falsch.
+            #
+            # `dict.fromkeys` statt `set`: es geht um die REIHENFOLGE,
+            # und ein Set hat keine.
+            "set_abschnitte": [a for a in dict.fromkeys(
+                d[4] for d in set_decks) if a],
             "uebersicht": {
                 "tier_tabelle": len(tier),
                 "set_tabelle": len(set_decks),

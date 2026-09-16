@@ -681,6 +681,80 @@ describe('Pocket: „Neues Set" zeigt die Abschnitte der Quelle', () => {
         assert.ok(/pk-alt/.test(html) && /Überschrift zuordnen|assign their heading/.test(html),
             'es fehlt die Auskunft, WARUM das Deck keine Ueberschrift hat');
     });
+
+    /* ══════════════════════════════════════════════════════════════
+       DIE REIHENFOLGE DER ABSCHNITTE (Live-Abnahme 16.09.2026)
+       ══════════════════════════════════════════════════════════════
+       Gefunden nicht von einem Test, sondern beim Hinsehen nach dem
+       Deploy: der Reiter zeigte „Old Decks Updated …" ueber „New …
+       Decks", Game8 zeigt es andersherum. Alle Zusicherungen waren
+       gruen — geprueft war, DASS beide Abschnitte da sind.
+
+       Der Grund war eine Sortierung nach erstem Auftreten in der nach
+       Stufe sortierten Deckliste, ueber der ein Kommentar „in der
+       Reihenfolge der Quelle" behauptete. Genau der Fall aus CLAUDE.md:
+       ein Satz, der eine Tatsache behauptet, ist Code.
+
+       Die Reihenfolge steht jetzt in `_meta.set_abschnitte`. Geprueft
+       wird gegen DIESE Angabe, nicht gegen eine Liste im Testcode — die
+       Ueberschriften wechseln mit jedem Set.
+       ══════════════════════════════════════════════════════════════ */
+    const ZWEI_ABSCHNITTE = {
+        _meta: { set_abschnitte: ['Neu zuerst', 'Alt danach'] },
+        decks: [
+            // Absicht: das STAERKSTE Deck steht im ZWEITEN Abschnitt.
+            // Genau diese Lage hat den Fehler live erzeugt.
+            { name: 'Stark alt', tier: 'S', archiv: '1', quelle_liste: 'set',
+              set_abschnitt: 'Alt danach' },
+            { name: 'Schwach neu', tier: 'C', archiv: '2', quelle_liste: 'set',
+              set_abschnitt: 'Neu zuerst' },
+        ],
+    };
+
+    it('folgt der Reihenfolge aus _meta — nicht der Stufe des ersten Decks', async () => {
+        const u = await gezeichnet(ZWEI_ABSCHNITTE);
+        klick(u.knoten, 'data-pk-filter', 'set');
+        const html = u.knoten.pocketListe.innerHTML;
+        const a = html.indexOf('Neu zuerst'), b = html.indexOf('Alt danach');
+        assert.ok(a !== -1, 'der erste Abschnitt fehlt');
+        assert.ok(b !== -1, 'der zweite Abschnitt fehlt');
+        assert.ok(a < b,
+            '„Alt danach" steht vor „Neu zuerst" — geordnet wird nach der Stufe des '
+            + 'ersten Decks statt nach der Quelle');
+    });
+
+    it('umgedrehte Angabe dreht die Anzeige mit (Verfaelschungsprobe)', async () => {
+        const gedreht = JSON.parse(JSON.stringify(ZWEI_ABSCHNITTE));
+        gedreht._meta.set_abschnitte = ['Alt danach', 'Neu zuerst'];
+        const u = await gezeichnet(gedreht);
+        klick(u.knoten, 'data-pk-filter', 'set');
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.ok(html.indexOf('Alt danach') < html.indexOf('Neu zuerst'),
+            'die Angabe in _meta wird gar nicht gelesen — die Anzeige aendert sich nicht');
+    });
+
+    it('ohne die Angabe faellt es auf das erste Auftreten zurueck, nicht auf einen Absturz',
+        async () => {
+            const ohne = JSON.parse(JSON.stringify(ZWEI_ABSCHNITTE));
+            delete ohne._meta.set_abschnitte;
+            const u = await gezeichnet(ohne);
+            klick(u.knoten, 'data-pk-filter', 'set');
+            const html = u.knoten.pocketListe.innerHTML;
+            assert.ok(/Neu zuerst/.test(html) && /Alt danach/.test(html),
+                'ohne _meta.set_abschnitte fehlt ein Abschnitt');
+        });
+
+    it('die echte Datei fuehrt die Reihenfolge und deckt jeden vorkommenden Abschnitt', () => {
+        const ordnung = (DATEN._meta || {}).set_abschnitte;
+        assert.ok(Array.isArray(ordnung) && ordnung.length,
+            'data/pocket_tierlist.json fuehrt keine Abschnittsreihenfolge');
+        const benutzt = new Set(DATEN.decks.map(d => d.set_abschnitt).filter(Boolean));
+        benutzt.forEach(a => {
+            assert.ok(ordnung.indexOf(a) !== -1,
+                `"${a}" steht an Decks, aber nicht in _meta.set_abschnitte — dann `
+                + 'landet der Abschnitt am Ende, ohne dass jemand es merkt');
+        });
+    });
 });
 
 describe('Pocket: die Kartenliste nennt das Set beim Namen', () => {

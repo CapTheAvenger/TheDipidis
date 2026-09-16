@@ -170,6 +170,27 @@
             keineAttacke: 'Dieser Satz hat keine Attacke, die Schaden macht.',
             tausch: '⇄ Seiten tauschen',
             weg: 'Entfernen',
+            kaderMein: 'Mein Kader', kaderOpp: 'Gegner',
+            kaderKlick: 'Klick ein Sprite an — es kämpft dann oben.',
+            kaderTeamLaden: 'Team laden',
+            kaderKeinTeam: 'Noch kein eigenes Team gespeichert. Bau eins im '
+                        + 'Team-Builder und speichere es — danach steht es hier.',
+            kaderAktiv: '(aktiv)',
+            kaderPick6: 'Top 6 des Metas',
+            kaderPick6Titel: 'Füllt die sechs meistgespielten Pokémon des Formats '
+                        + 'ein, je mit ihrem meistgespielten Satz.',
+            kaderSuche: 'Gegner suchen …',
+            kaderOppLeer: 'Noch kein Gegner gewählt. Such oben eins oder nimm die Top 6.',
+            kaderMeinLeer: 'Noch kein Team geladen.',
+            kaderWeg: 'Aus dem Kader nehmen',
+            kaderVoll: (n) => `${n}/6`,
+            kaderOhneDaten: 'keine Nutzungsdaten',
+            kaderOhneDatenTitel: 'Für dieses Pokémon führt die Nutzungsanalyse '
+                        + 'keinen Satz. Gerechnet wird es deshalb nicht — geraten wird '
+                        + 'hier nichts.',
+            kaderEigenerSatz: 'dein Satz',
+            kaderEigenerSatzTitel: 'Dieses Pokémon rechnet mit dem Satz aus deinem Team, '
+                        + 'nicht mit dem meistgespielten.',
             nature: 'Wesen', noItem: '— kein Item —', moves: 'Attacken',
             empty: '— leer —', points: 'Statuswertpunkte', reset: 'Standard-Set',
             budget: (used) => `${used}/${SP_BUDGET} Punkte`,
@@ -292,6 +313,26 @@
             keineAttacke: 'This set has no damaging move.',
             tausch: '⇄ Swap sides',
             weg: 'Remove',
+            kaderMein: 'My squad', kaderOpp: 'Opponent',
+            kaderKlick: 'Click a sprite — it then fights up top.',
+            kaderTeamLaden: 'Load team',
+            kaderKeinTeam: 'No team of your own saved yet. Build one in the team '
+                        + 'builder and save it — it will show up here.',
+            kaderAktiv: '(active)',
+            kaderPick6: 'Top 6 of the meta',
+            kaderPick6Titel: 'Fills in the six most-played Pokémon of the format, '
+                        + 'each with its most-played set.',
+            kaderSuche: 'Search opponent …',
+            kaderOppLeer: 'No opponent picked yet. Search above or take the top 6.',
+            kaderMeinLeer: 'No team loaded yet.',
+            kaderWeg: 'Take out of the squad',
+            kaderVoll: (n) => `${n}/6`,
+            kaderOhneDaten: 'no usage data',
+            kaderOhneDatenTitel: 'The usage analysis carries no set for this Pokémon. '
+                        + 'It is therefore not calculated — nothing is guessed here.',
+            kaderEigenerSatz: 'your set',
+            kaderEigenerSatzTitel: 'This Pokémon calculates with the set from your '
+                        + 'team, not with the most-played one.',
             nature: 'Nature', noItem: '— no item —', moves: 'Moves',
             empty: '— empty —', points: 'Stat points', reset: 'Default set',
             budget: (used) => `${used}/${SP_BUDGET} points`,
@@ -1956,6 +1997,17 @@
         _teamQ = '';
         _teamAn = true;
         _calc = null;
+        /* DERSELBE KADER IN BEIDEN ANSICHTEN (16.09.2026).
+           Wer aus dem Builder kommt, landet im Team-Rechner. Wechselt er
+           danach auf den Rechner-Reiter, stand dort bis heute wieder das
+           Meta-Team — sein eigenes war zwei Klicks entfernt, obwohl es
+           gerade uebergeben worden war. */
+        _kaderMein = _teamMine.map(m => ({
+            name: m.name,
+            eigen: m.set ? satzUebernehmen(m.name, m.set) : false,
+        }));
+        const ersteRechenbar = _kaderMein.find(kaderRechenbar);
+        if (ersteRechenbar) _rMe = ersteRechenbar.name;
     }
 
     /* Von aussen aufgerufen (Team-Builder). Die Ansicht muss dabei erst
@@ -2171,17 +2223,329 @@
             </div>`;
     }
 
+
+    /* ════════════════════════════════════════════════════════════════
+       DER KADER IM RECHNER (16.09.2026)
+       ════════════════════════════════════════════════════════════════
+       ANLASS (Betreiber): „können wir hier noch irgendwie mein Team 1:1
+       wie ich es spiele reinladen und beim Gegner per pick 6 schnell
+       auswahl die 6 möglichen Pokemon mit dem Set wie es am meisten
+       gespielt wird und dann kann ich über das Pokemon Sprite Icon dann
+       schnell die Daten wählen welche Pokemon gegeneinander kämpfen".
+
+       Drei Dinge, eine Leiste:
+
+         1. Mein Kader   — aus einem GESPEICHERTEN eigenen Team, mit den
+                           Sätzen, die darin stehen.
+         2. Gegner       — bis zu sechs, je mit dem meistgespielten Satz.
+                           „Top 6 des Metas" füllt sie in einem Klick.
+         3. Sprite-Klick — bestimmt, wer oben gegeneinander rechnet.
+
+       WARUM DIE SÄTZE IN `_sets` LANDEN UND NICHT DANEBEN
+       ---------------------------------------------------
+       Der Team-Rechner führt seine Sätze in `_teamMine[i].set` und holt
+       sie über teamSet(). Der Rechner-Reiter fragt setFor(). Zwei Quellen
+       für dieselbe Sache heißt: man dreht im Satz-Aufklapper an einem
+       Regler, und die Zahl oben ändert sich nicht — der Fehler vom
+       15.09.2026 in klein.
+
+       Ein geladenes Team schreibt seinen Satz deshalb unter demselben
+       Schlüssel in `_sets`, den setFor() liest. Danach gibt es genau eine
+       Quelle, der Satz-Aufklapper bearbeitet sie, und die Matchup-Liste
+       sieht dasselbe.
+
+       WAS DABEI ÜBERSCHRIEBEN WIRD
+       ----------------------------
+       Nur Wesen, Fähigkeit, Item, Attacken und Punkte — also das, was im
+       Builder gebaut wurde. Die KAMPFLAGE (Stufen, Status, KP, Schirm,
+       Hand, Helfer) bleibt stehen, wie topSet() sie anlegt: neutral. Ein
+       Team sagt nichts darüber aus, wie weit ein Kampf schon ist.
+       ════════════════════════════════════════════════════════════════ */
+
+    let _kaderMein = [];      // [{ name, set|null, eigen }] — bis zu sechs
+    let _kaderOpp = [];       // [{ name, set:null, eigen:false }]
+    let _kaderQ = '';         // Suchfeld der Gegnerbank
+    let _kaderTeam = '';      // replica_code des gewaehlten eigenen Teams
+
+    const KADER_MAX = TEAM_MAX;
+
+    /* Die eigenen Teams, fehlertolerant. `window.sideQuest` kann fehlen
+       (der Rechner laeuft auch in den Zusicherungen ohne den Reiter),
+       und dann ist die richtige Antwort eine leere Liste — nicht ein
+       Absturz, der die ganze Leiste verschluckt. */
+    function eigeneTeams() {
+        const api = window.sideQuest;
+        if (!api || typeof api.getOwnTeams !== 'function') return [];
+        try { return api.getOwnTeams() || []; } catch (_) { return []; }
+    }
+
+    function aktiverTeamCode() {
+        const api = window.sideQuest;
+        if (!api || typeof api.getActiveCode !== 'function') return '';
+        try { return api.getActiveCode() || ''; } catch (_) { return ''; }
+    }
+
+    /* Ein Pokemon ist rechenbar, wenn der Pokedex seine Werte fuehrt UND
+       die Nutzungsanalyse einen Satz hergibt. Fehlt eins von beidem,
+       steht es trotzdem im Kader — sichtbar und benannt, mit einem
+       Grund. Es still wegzulassen waere derselbe Fehler wie eine
+       geratene Zahl: der Betreiber sieht fuenf statt sechs Pokemon und
+       erfaehrt nie, welches fehlt. */
+    function kaderRechenbar(e) {
+        if (!e || !e.name) return false;
+        if (!_dex || !_dex[e.name]) return false;
+        return !!(e.set || setFor(e.name, 'me') || setFor(e.name, 'opp'));
+    }
+
+    /* Den Satz eines geladenen Teams in `_sets` schreiben — unter dem
+       Schluessel, den setFor() liest. Die Kampflage kommt aus topSet()
+       und bleibt neutral (siehe Kopf). */
+    function satzUebernehmen(name, satz) {
+        if (!name || !satz) return false;
+        const grund = setFor(name, 'me');
+        if (!grund) return false;
+        _sets[setKey(name, 'me')] = Object.assign({}, grund, {
+            nature: satz.nature || grund.nature,
+            ability: satz.ability || grund.ability,
+            item: satz.item || '',
+            moves: (satz.moves || []).filter(Boolean).slice(0, 4),
+            spread: Object.assign(emptySpread(), satz.spread || {}),
+        });
+        return true;
+    }
+
+    /* Ein gespeichertes Team in den Kader holen. `team.pokemon` hat
+       dieselbe Form wie das, was der Builder an oeffneTeamRechner()
+       uebergibt — deshalb wird hier dieselbe Namensaufloesung benutzt
+       (loeseNamen ueber den Slug), statt eine zweite zu bauen. */
+    function ladeKaderTeam(code) {
+        const team = eigeneTeams().find(t => t.replica_code === code);
+        if (!team || !Array.isArray(team.pokemon)) return false;
+        _kaderTeam = code;
+        _kaderMein = team.pokemon.filter(m => m && m.name).slice(0, KADER_MAX).map(m => {
+            const name = loeseNamen(m);
+            const moves = (m.moves || []).filter(Boolean).slice(0, 4);
+            const hatBau = !!(m.nature || moves.length);
+            const satz = hatBau ? {
+                nature: m.nature || 'Hardy',
+                ability: m.ability || '',
+                item: m.item || '',
+                moves,
+                spread: klammereSpread(spreadAusText(m.evs)),
+            } : null;
+            const eigen = satz ? satzUebernehmen(name, satz) : false;
+            return { name, eigen };
+        });
+        const ersteRechenbar = _kaderMein.find(kaderRechenbar);
+        if (ersteRechenbar) _rMe = ersteRechenbar.name;
+        _rMove = null;
+        return true;
+    }
+
+    /* Die sechs meistgespielten Pokemon des Formats. `_roster` ist schon
+       nach Nutzung absteigend sortiert (buildRoster); gefiltert wird auf
+       die, zu denen es ueberhaupt einen Satz gibt — sonst stuende dort
+       ein Name, den der Rechner nicht rechnen kann. */
+    function metaTop(n) {
+        if (!_roster) return [];
+        return _roster.filter(r => setFor(r.name, 'opp')).slice(0, n).map(r => r.name);
+    }
+
+    function kaderPick6() {
+        _kaderOpp = metaTop(KADER_MAX).map(name => ({ name, eigen: false }));
+        /* NICHT DAS SPIEGELMATCH ALS EROEFFNUNG.
+           Gemessen im Entwurf (16.09.2026): der Reiter oeffnete mit
+           „Gortrom U-Turn gegen Gortrom". Das eigene Team beginnt mit
+           dem meistgespielten Pokemon, die Top 6 auch — und das erste
+           Bild ist dann eine Rechnung gegen sich selbst. Rechenbar ist
+           sie, aber sie beantwortet keine Frage.
+           Gibt es NUR den Spiegel (Kader mit einem Namen), bleibt er
+           stehen: nichts zu zeigen waere schlechter. */
+        if (_kaderOpp.length) {
+            const anders = _kaderOpp.find(e => e.name !== _rMe);
+            _rOpp = (anders || _kaderOpp[0]).name;
+        }
+        _rMove = null;
+    }
+
+    /* Ein Sprite-Knopf. Der Klick setzt die Paarung oben — das ist die
+       ganze Bedienung, um die es in der Anfrage ging. */
+    function kaderChip(e, seite) {
+        const gewaehlt = seite === 'opp' ? _rOpp : _rMe;
+        const an = e.name === gewaehlt;
+        const geht = kaderRechenbar(e);
+        const zeig = nurDeutsch(e.name, 'pokemon') || e.name;
+        const marke = e.eigen
+            ? `<i class="sq-kader-marke" title="${esc(L().kaderEigenerSatzTitel)}">${
+                  esc(L().kaderEigenerSatz)}</i>`
+            : '';
+        const warn = geht ? '' : `<i class="sq-kader-warn" title="${
+            esc(L().kaderOhneDatenTitel)}">${esc(L().kaderOhneDaten)}</i>`;
+        return `<div class="sq-kader-chip${an ? ' is-an' : ''}${geht ? '' : ' is-tot'}">
+                <button type="button" class="sq-kader-sprite"
+                        data-sq-kader="${esc(seite)}" data-sq-kader-name="${esc(e.name)}"
+                        ${geht ? '' : 'disabled'}
+                        aria-pressed="${an ? 'true' : 'false'}"
+                        title="${esc(zeig)}">
+                    ${sprite(e.name, 'sq-kader-img')}
+                    <span class="sq-kader-name">${esc(zeig)}</span>
+                    ${marke}${warn}
+                </button>
+                <button type="button" class="sq-kader-weg"
+                        data-sq-kader-weg="${esc(seite)}" data-sq-kader-wegname="${esc(e.name)}"
+                        title="${esc(L().kaderWeg)}" aria-label="${esc(L().kaderWeg)}">×</button>
+            </div>`;
+    }
+
+    /* Die Auswahl der eigenen Teams. Das aktive Team steht mit „(aktiv)"
+       dran und ist vorgewaehlt — es ist das, was der Betreiber gerade
+       spielt, und damit die wahrscheinlichste Antwort. */
+    function kaderTeamWahl() {
+        const teams = eigeneTeams();
+        if (!teams.length) {
+            return `<p class="sq-rech-hint">${esc(L().kaderKeinTeam)}</p>`;
+        }
+        const aktiv = aktiverTeamCode();
+        const gewaehlt = _kaderTeam || aktiv || teams[0].replica_code;
+        const opt = teams.map(t => {
+            const n = (t.pokemon || []).length;
+            const txt = `${t.team_name || 'Team'} · ${n}${
+                t.replica_code === aktiv ? ' ' + L().kaderAktiv : ''}`;
+            return `<option value="${esc(t.replica_code)}"${
+                t.replica_code === gewaehlt ? ' selected' : ''}>${esc(txt)}</option>`;
+        }).join('');
+        return `<span class="sq-kader-laden">
+                <select class="sq-in sq-kader-teamwahl" data-sq-kader-teamwahl
+                        aria-label="${esc(L().kaderTeamLaden)}">${opt}</select>
+                <button type="button" class="sq-btn" data-sq-kader-laden>${
+                    esc(L().kaderTeamLaden)}</button>
+            </span>`;
+    }
+
+    function kaderSuche() {
+        const q = _kaderQ.trim().toLowerCase();
+        if (!q || !_roster) return '';
+        const drin = new Set(_kaderOpp.map(e => e.name));
+        const treffer = _roster.filter(r => {
+            if (drin.has(r.name)) return false;
+            if (!setFor(r.name, 'opp')) return false;
+            const de = String(nurDeutsch(r.name, 'pokemon') || '').toLowerCase();
+            return r.name.toLowerCase().indexOf(q) !== -1 || de.indexOf(q) !== -1;
+        }).slice(0, 8);
+        if (!treffer.length) return '';
+        return `<div class="sq-kader-vorschlag">${treffer.map(r =>
+            `<button type="button" data-sq-kader-add="${esc(r.name)}">${
+                esc(nurDeutsch(r.name, 'pokemon') || r.name)}</button>`).join('')}</div>`;
+    }
+
+    function kaderSeiteHtml(seite) {
+        const liste = seite === 'opp' ? _kaderOpp : _kaderMein;
+        const chips = liste.map(e => kaderChip(e, seite)).join('');
+        const leer = seite === 'opp' ? L().kaderOppLeer : L().kaderMeinLeer;
+        const werkzeug = seite === 'opp'
+            ? `<span class="sq-kader-laden">
+                   <input type="search" class="sq-in sq-kader-suche" data-sq-kader-suche
+                          placeholder="${esc(L().kaderSuche)}" value="${esc(_kaderQ)}"
+                          aria-label="${esc(L().kaderSuche)}"
+                          ${_kaderOpp.length >= KADER_MAX ? 'disabled' : ''}>
+                   <button type="button" class="sq-btn" data-sq-kader-pick6
+                           title="${esc(L().kaderPick6Titel)}">${esc(L().kaderPick6)}</button>
+               </span>`
+            : kaderTeamWahl();
+        return `<div class="sq-kader-seite is-${esc(seite)}">
+                <div class="sq-kader-kopf">
+                    <h4 class="sq-lbl">${esc(seite === 'opp' ? L().kaderOpp : L().kaderMein)}<em>${
+                        esc(L().kaderVoll(liste.length))}</em></h4>
+                    ${werkzeug}
+                </div>
+                ${chips ? `<div class="sq-kader-bank">${chips}</div>`
+                        : `<p class="sq-empty">${esc(leer)}</p>`}
+                ${seite === 'opp' ? kaderSuche() : ''}
+            </div>`;
+    }
+
+    function kaderHtml() {
+        return `<div class="sq-panel sq-kader">
+                ${kaderSeiteHtml('me')}
+                ${kaderSeiteHtml('opp')}
+                <p class="sq-rech-hint sq-kader-fuss">${esc(L().kaderKlick)}</p>
+            </div>`;
+    }
+
+    function wireKader(host) {
+        host.querySelectorAll('[data-sq-kader]').forEach(b => {
+            b.addEventListener('click', () => {
+                const seite = b.getAttribute('data-sq-kader');
+                const name = b.getAttribute('data-sq-kader-name');
+                if (seite === 'opp') _rOpp = name; else _rMe = name;
+                _rMove = null;
+                renderRechner();
+            });
+        });
+        host.querySelectorAll('[data-sq-kader-weg]').forEach(b => {
+            b.addEventListener('click', () => {
+                const seite = b.getAttribute('data-sq-kader-weg');
+                const name = b.getAttribute('data-sq-kader-wegname');
+                if (seite === 'opp') _kaderOpp = _kaderOpp.filter(e => e.name !== name);
+                else _kaderMein = _kaderMein.filter(e => e.name !== name);
+                renderRechner();
+            });
+        });
+        const laden = host.querySelector('[data-sq-kader-laden]');
+        if (laden) {
+            laden.addEventListener('click', () => {
+                const sel = host.querySelector('[data-sq-kader-teamwahl]');
+                if (sel && ladeKaderTeam(sel.value)) renderRechner();
+            });
+        }
+        const p6 = host.querySelector('[data-sq-kader-pick6]');
+        if (p6) p6.addEventListener('click', () => { kaderPick6(); renderRechner(); });
+        host.querySelectorAll('[data-sq-kader-add]').forEach(b => {
+            b.addEventListener('click', () => {
+                const name = b.getAttribute('data-sq-kader-add');
+                if (_kaderOpp.length >= KADER_MAX) return;
+                if (_kaderOpp.some(e => e.name === name)) return;
+                _kaderOpp.push({ name, eigen: false });
+                _rOpp = name;
+                _rMove = null;
+                _kaderQ = '';
+                renderRechner();
+            });
+        });
+        /* Das Suchfeld zeichnet die ganze Leiste neu — und mit ihr sich
+           selbst. Ohne das Zuruecksetzen von Wert und Cursor steht nach
+           jedem Zeichen der Cursor am Anfang. Dieselbe Loesung wie im
+           Team-Rechner. */
+        const suche = host.querySelector('[data-sq-kader-suche]');
+        if (suche) {
+            suche.addEventListener('input', () => {
+                _kaderQ = suche.value;
+                const pos = suche.selectionStart;
+                renderRechner();
+                const neu = document.querySelector('[data-sq-kader-suche]');
+                if (neu) { neu.focus(); try { neu.setSelectionRange(pos, pos); } catch (_) {} }
+            });
+        }
+    }
+
     function rechnerHtml() {
         const meSet = _rMe && setFor(_rMe, 'me');
         const oppSet = _rOpp && setFor(_rOpp, 'opp');
+        /* DIE KADERLEISTE STEHT AUCH DANN, WENN NICHTS GERECHNET WERDEN
+           KANN. Vorher kam hier ein blankes „keine Nutzungsdaten" und
+           die Leiste verschwand mit — also genau das Werkzeug, mit dem
+           man den Zustand haette aufloesen koennen. */
         if (!meSet || !oppSet) {
-            return `<div class="sq-panel"><p class="sq-empty">${esc(L().noUsage)}</p></div>`;
+            return `<div class="sq-rech">${kaderHtml()}
+                <div class="sq-panel"><p class="sq-empty">${esc(L().noUsage)}</p></div>
+            </div>`;
         }
         const f = rechFall();
         const meStats = statsOf(_rMe, meSet), oppStats = statsOf(_rOpp, oppSet);
         const spd = window.ChampionsDamage.speedComparison(meStats.spe, oppStats.spe);
         const verb = spd.tie ? L().tie : (spd.faster ? L().faster : L().slower);
         return `<div class="sq-rech">
+            ${kaderHtml()}
             <div class="sq-rech-kopf">
                 ${rechWer('me', _rMe)}
                 <div class="sq-rech-vs">
@@ -2259,6 +2623,7 @@
             </div>`;
         wire(host);
         wireRechner(host);
+        wireKader(host);
     }
 
     /* Alles, was nur der Rechner-Reiter hat. Die Set-Editoren, die
@@ -2321,6 +2686,23 @@
 
     function activateRechner() {
         const starte = () => {
+            /* DER REITER OEFFNET ARBEITSFAEHIG, NICHT LEER.
+               Ein leerer Kader mit zwei Knoepfen daneben verlangt zwei
+               Klicks, bevor ueberhaupt etwas dasteht. Vorbelegt wird mit
+               dem, was der Betreiber gerade spielt (das aktive Team) und
+               mit dem, wogegen er es am ehesten spielt (die sechs
+               meistgespielten Pokemon). Beides ist mit einem Klick
+               wieder weg.
+
+               Nur wenn NOCH NICHTS dasteht: wer ueber den Team-Builder
+               hereinkommt, hat seinen Kader schon dabei. */
+            if (!_kaderMein.length) {
+                const teams = eigeneTeams();
+                const aktiv = aktiverTeamCode();
+                const nimm = teams.find(t => t.replica_code === aktiv) || teams[0];
+                if (nimm) ladeKaderTeam(nimm.replica_code);
+            }
+            if (!_kaderOpp.length) kaderPick6();
             if (!_rMe && _roster && _roster.length) _rMe = _roster[0].name;
             if (!_rOpp && _roster && _roster.length) {
                 _rOpp = (_roster.find(r => r.name !== _rMe) || _roster[0]).name;
@@ -2407,5 +2789,22 @@
         },
         state: (patch) => { if (patch && patch.format) _format = patch.format;
                             if (patch && patch.me) _me = patch.me; },
+        /* Die Kaderleiste (16.09.2026). Greifbar sind die Teile, die
+           etwas ENTSCHEIDEN: welcher Satz in `_sets` landet
+           (satzUebernehmen), wer ueberhaupt gerechnet werden kann
+           (kaderRechenbar), welche sechs das Meta stellt (metaTop) und
+           was die Leiste daraus zeichnet (kaderHtml). Ohne sie liesse
+           sich nur pruefen, DASS eine Leiste da ist. */
+        KADER_MAX, kaderHtml, kaderChip, kaderRechenbar, satzUebernehmen,
+        metaTop, kaderPick6, ladeKaderTeam, wireKader, setFor, setKey,
+        kaderState: (patch) => {
+            if (patch) {
+                if (patch.mein != null) _kaderMein = patch.mein;
+                if (patch.opp != null) _kaderOpp = patch.opp;
+                if (patch.q != null) _kaderQ = patch.q;
+                if (patch.team != null) _kaderTeam = patch.team;
+            }
+            return { mein: _kaderMein, opp: _kaderOpp, q: _kaderQ, team: _kaderTeam };
+        },
     };
 })();

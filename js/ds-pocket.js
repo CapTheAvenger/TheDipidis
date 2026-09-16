@@ -324,17 +324,34 @@
        etwas, das die Stufe nicht sagt: ob ein Deck mit dem Set NEU ist
        oder ein bestehendes, das durch das Set besser wurde. Genau danach
        wird hier gruppiert; die Stufe steht weiter an jeder Zeile. */
-    function nachAbschnitten(decks, streit) {
+    function nachAbschnitten(decks, streit, ordnung) {
         var gruppen = [], zuordnung = {};
         decks.forEach(function (d) {
             var a = d.set_abschnitt || '';
             if (!zuordnung[a]) { zuordnung[a] = []; gruppen.push(a); }
             zuordnung[a].push(d);
         });
-        // Die Abschnitte in der Reihenfolge der Quelle lassen; nur die
-        // Decks ohne Abschnitt ganz nach hinten, weil sie eine Auskunft
-        // brauchen statt einer Ueberschrift.
-        gruppen.sort(function (a, b) { return (a ? 0 : 1) - (b ? 0 : 1); });
+        /* DIE REIHENFOLGE KOMMT AUS DER QUELLE — NICHT AUS DEM ZUFALL.
+
+           Hier stand „die Abschnitte in der Reihenfolge der Quelle
+           lassen". Das war FALSCH und bei der Live-Abnahme am 16.09.2026
+           auch zu sehen: geordnet wurde nach erstem Auftreten in der
+           nach Stufe sortierten Deckliste, und weil das staerkste Deck
+           zufaellig ein aktualisiertes war, stand „Old Decks Updated …"
+           ueber „New … Decks". Game8 zeigt es andersherum.
+
+           Die Reihenfolge kennt nur die Quellseite; sie steht deshalb
+           seit dem 16.09.2026 in `_meta.set_abschnitte`. Fehlt sie
+           (aeltere Datei), bleibt es beim ersten Auftreten — schlechter
+           als die Quelle, aber besser als eine erfundene Regel im Code.
+           Ohne Abschnitt geht ans Ende: diese Decks brauchen eine
+           Auskunft, keine Ueberschrift. */
+        var rangA = function (a) {
+            if (!a) return 1e6;
+            var i = (ordnung || []).indexOf(a);
+            return i < 0 ? 1e5 + gruppen.indexOf(a) : i;
+        };
+        gruppen.sort(function (a, b) { return rangA(a) - rangA(b); });
         var s = '';
         gruppen.forEach(function (a) {
             var teil = zuordnung[a];
@@ -371,7 +388,10 @@
                              'No deck in the list matches this filter.'));
         }
         var streit = abweichendeStufen(daten._meta || {}, daten.decks || []);
-        if (filter === 'set') return nachAbschnitten(decks, streit);
+        if (filter === 'set') {
+            return nachAbschnitten(decks, streit,
+                (daten._meta || {}).set_abschnitte || []);
+        }
         var s = '';
         TIER_ORDNUNG.forEach(function (stufe) {
             var teil = decks.filter(function (d) { return d.tier === stufe; });

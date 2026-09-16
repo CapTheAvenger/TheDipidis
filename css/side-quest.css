@@ -2387,6 +2387,34 @@
     background: rgba(3,105,161,0.1); border-radius: 999px; padding: 0 6px; min-width: 18px; text-align: center;
 }
 .sqb-none, .sqb-loading { font-size: 0.9rem; color: var(--ink-3); padding: 6px 2px; }
+
+/* Dritter Vorschlagsblock: „Gleicht Schwächen aus" (16.09.2026).
+   ---------------------------------------------------------------
+   Er steht bewusst UNTER „Passt dazu" und trägt ein eigenes Signal,
+   weil er etwas anderes behauptet: „Passt dazu" zählt aus, was
+   zusammen gespielt wird (Beleg), dieser hier rechnet, wer schlägt,
+   was die Auswahl schlägt (Modell). Zwei Herkünfte, zwei Farben —
+   dieselbe Trennlinie wie bei „Weitere Treffer" sagt „andere
+   Herkunft".
+
+   Farben über die Marken, nicht über feste Werte: side-quest.css hat
+   keinen eigenen Dunkelmodus-Block, der ganze Umschwung hängt an
+   css/tokens.css. Ein fester Grünton stünde nachts auf dunklem Grund
+   — dasselbe Muster wie .sqb-sugg.is-partial weiter unten. */
+.sqb-sec--gleich { color: var(--tint-bad-ink); margin-top: 18px; padding-top: 14px;
+    border-top: 1px solid var(--line); }
+.sqb-gleich { display: flex; flex-direction: column; gap: 8px; }
+.sqb-gleich-gegen { margin: 0; font-size: 0.82rem; color: var(--ink-2); line-height: 1.5; }
+.sqb-gleich-gegen b { color: var(--tint-bad-ink); font-weight: 900; }
+.sqb-sugg--gleich { background: var(--tint-ok); border-color: var(--line-strong); }
+.sqb-sugg--gleich:hover { background: var(--tint-ok); border-color: var(--tint-ok-ink); }
+.sqb-sugg--gleich .sqb-sugg-count { color: var(--tint-ok-ink); background: rgba(19,115,55,0.12); }
+/* Voll ist voll: bei sechs Gewählten bleibt der Vorschlag lesbar,
+   aber er tut nichts mehr. Ohne das sähe er klickbar aus und
+   schluckte den Klick still. */
+.sqb-sugg--gleich[disabled] { opacity: 0.55; cursor: default; }
+.sqb-sugg--gleich[disabled]:hover { border-color: var(--line-strong); }
+.sqb-gleich-luecke { margin: 2px 0 0; font-style: italic; }
 .sqb-teams { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .sqb-team {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -3739,3 +3767,58 @@
     .sq-console .sq-team { padding: 10px; }
     .sq-console .sq-team-zelle { min-width: 104px; font-size: 10.5px; }
 }
+
+/* ── DIE KAMPFLAGE IM SCHADENSRECHNER (16.09.2026) ───────────────────
+   Gemeldet: „der Damage Culc ist ja immer noch nicht fertig und als
+   Feature verfuegbar". Der Rechenkern konnte Wetter, Gelaende, Schirme,
+   Statusstufen, Verbrennung und Volltreffer — die Oberflaeche hatte
+   fuer nichts davon ein Feld.
+
+   Die Feldleiste liegt quer ueber dem Rechner (beide Seiten teilen sie),
+   die Lage steht in jedem Set-Editor (sie gehoert einer Seite). Die
+   Stufenregler nehmen bewusst DASSELBE Raster wie .sq-sp-row darueber:
+   zwei Reglerblöcke im selben Kasten, die unterschiedlich ausgerichtet
+   sind, liest niemand als zusammengehoerig. */
+.sq-console .sq-feld {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px;
+}
+.sq-console .sq-feld .sq-fld { margin-bottom: 0; flex: 1 1 150px; min-width: 0; }
+.sq-console .sq-fld-check {
+    display: flex; align-items: center; gap: 7px; flex: 0 0 auto;
+    min-height: 32px; cursor: pointer;
+}
+.sq-console .sq-fld-check input { accent-color: var(--sq-accent); width: 16px; height: 16px; }
+.sq-console .sq-fld-check > span {
+    display: inline; margin-bottom: 0; font-size: var(--fs-xs);
+    text-transform: uppercase; letter-spacing: .08em; color: var(--sq-dim2);
+}
+.sq-console .sq-lage {
+    margin-top: 10px; padding-top: 10px; border-top: .8px solid var(--sq-line);
+}
+.sq-console .sq-lage-kopf {
+    font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em;
+    color: var(--sq-dim2); margin-bottom: 5px;
+}
+.sq-console .sq-boosts { display: grid; gap: 2px; margin-bottom: 9px; }
+.sq-console .sq-boost {
+    display: grid; grid-template-columns: 34px minmax(0, 1fr) 30px;
+    align-items: center; gap: 8px; min-height: 30px;
+}
+.sq-console .sq-boost-lbl {
+    font-size: var(--fs-xs); color: var(--sq-dim2); text-transform: uppercase;
+}
+.sq-console .sq-boost-val { font-family: var(--sq-num); font-size: 11px; text-align: right; }
+.sq-console .sq-boost-range { width: 100%; accent-color: var(--sq-accent); height: 22px; }
+
+/* Was gerechnet wurde, steht unter der Tabelle — und was nicht
+   gerechnet werden konnte, daneben. „Nicht gerechnet" ist eine
+   Auskunft, kein Makel, deshalb dieselbe ruhige Farbe. */
+.sq-console .sq-calc-fuss {
+    display: flex; flex-wrap: wrap; gap: 4px 16px;
+    margin-top: 8px; padding-top: 8px; border-top: .8px solid var(--sq-line);
+    font-size: var(--fs-xs); line-height: 1.5; color: var(--sq-dim2);
+}
+.sq-console .sq-calc-mit b, .sq-console .sq-calc-ohne b {
+    text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+}
+.sq-console .sq-calc-ohne { color: var(--sq-dim2); font-style: italic; }

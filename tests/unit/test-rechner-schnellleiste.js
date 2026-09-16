@@ -686,6 +686,170 @@ describe('Das Auswahlfenster', () => {
 
 // ══════════════════════════════════════════════════════════════════════
 
+describe('Die Pokémon-Auswahl ist ein Suchfilter', () => {
+    /* ANLASS (Betreiber, 16.09.2026): „das Feld sollte ein Suchfilter
+       sein, damit ich nach raichu suchen kann und dann werden mir halt
+       alle Möglichkeiten die Raichu enthalten angezeigt".
+
+       Vorher stand dort ein <select> mit der Begruendung, jeder Browser
+       bringe seine Tippsuche mit. Die springt aber zum ANFANG eines
+       Eintrags: wer „raichu" tippt, landet bei „Raichu" und findet
+       „Mega Raichu X" nie. */
+    it('findet in der MITTE des Namens, nicht nur am Anfang', () => {
+        const { api } = load();
+        const alle = api.rechListe('me').map(r => r.name);
+        /* Ein Wortteil aus den echten Daten, der bei mehreren Eintraegen
+           NICHT am Anfang steht — sonst prueft die Zusicherung nur, was
+           ein <select> auch koennte. */
+        const zaehler = {};
+        alle.forEach(n => n.split(/[\s-]+/).forEach(w => {
+            const k = w.toLowerCase();
+            if (k.length < 5) return;
+            (zaehler[k] = zaehler[k] || []).push(n);
+        }));
+        const kandidat = Object.keys(zaehler).find(k =>
+            zaehler[k].length >= 2
+            && zaehler[k].some(n => n.toLowerCase().indexOf(k) > 0));
+        assert.ok(kandidat,
+            'kein Wortteil in den echten Daten, der mitten im Namen steht — '
+            + 'die Probe waere leer');
+
+        api.sucheState({ me: kandidat });
+        const treffer = api.rechTreffer('me').map(r => r.name);
+        zaehler[kandidat].forEach(n => assert.ok(treffer.indexOf(n) !== -1,
+            `„${kandidat}" findet ${n} nicht`));
+        assert.ok(treffer.some(n => n.toLowerCase().indexOf(kandidat) > 0),
+            'gefunden wird weiter nur am Wortanfang — das kann ein Auswahlfeld auch');
+        api.sucheState({ me: '' });
+    });
+
+    it('der gemeldete Fall: eine Suche nach „raichu"', () => {
+        const { api } = load();
+        const alle = api.rechListe('me').map(r => r.name);
+        const raichus = alle.filter(n => /raichu/i.test(n));
+        if (raichus.length < 2) return;   // faellt die Art aus dem Kader
+        api.sucheState({ me: 'raichu' });
+        const treffer = api.rechTreffer('me').map(r => r.name);
+        raichus.forEach(n => assert.ok(treffer.indexOf(n) !== -1,
+            `„raichu" findet ${n} nicht`));
+        assert.equal(treffer.length, raichus.length,
+            'die Suche liefert mehr als die Raichus');
+        api.sucheState({ me: '' });
+    });
+
+    it('findet auch ueber den deutschen Namen und den Typ', () => {
+        const de = load('de').api;
+        const eintrag = de.rechListe('me').find(r => r.zeig !== r.name && r.typen.length);
+        assert.ok(eintrag, 'kein Eintrag mit eigenem deutschen Namen');
+        de.sucheState({ me: eintrag.zeig.slice(1, 5) });   // MITTEN im deutschen Namen
+        assert.ok(de.rechTreffer('me').some(r => r.name === eintrag.name),
+            'der deutsche Name findet nicht');
+        de.sucheState({ me: eintrag.typen[0] });
+        const nachTyp = de.rechTreffer('me');
+        assert.ok(nachTyp.length > 1, `nur ${nachTyp.length} Treffer fuer einen ganzen Typ`);
+        assert.ok(nachTyp.every(r => r.typen.some(t =>
+            t.toLowerCase().indexOf(eintrag.typen[0].toLowerCase()) === 0)),
+            'die Typsuche liefert Pokemon ohne diesen Typ');
+        de.sucheState({ me: '' });
+    });
+
+    it('ein leeres Feld zeigt alles', () => {
+        const { api } = load();
+        api.sucheState({ me: '' });
+        assert.equal(api.rechTreffer('me').length, api.rechListe('me').length,
+            'ohne Eingabe fehlt etwas');
+        assert.ok(api.rechListe('me').length > 100,
+            'die Liste ist zu kurz — die Probe waere fast leer');
+    });
+
+    it('Unsinn trifft nichts und sagt es', () => {
+        const { api } = load();
+        api.sucheState({ me: 'xyzxyzxyz' });
+        assert.equal(api.rechTreffer('me').length, 0, 'Unsinn trifft etwas');
+        const html = api.rechTrefferHtml('me', null);
+        assert.ok(/sq-rech-leer/.test(html), 'ohne Treffer steht dort eine leere Liste');
+        api.sucheState({ me: '' });
+    });
+
+    it('die Liste ist gedeckelt UND sagt, dass mehr da ist', () => {
+        const { api } = load();
+        api.sucheState({ me: '' });
+        const html = api.rechTrefferHtml('me', null);
+        const zeilen = (html.match(/data-sq-rechname=/g) || []).length;
+        assert.ok(zeilen > 0 && zeilen <= 40,
+            `${zeilen} Zeilen gezeichnet — ohne Deckel kostet jeder Tastendruck Zeit`);
+        assert.ok(/sq-rech-mehr/.test(html),
+            'der Deckel greift still — der Leser haelt die Liste fuer vollstaendig');
+    });
+
+    it('das Feld traegt die Seite und ist ein Suchfeld', () => {
+        const { api } = load();
+        const name = ersterMitSatz(api);
+        api.sucheState({ offen: '' });
+        const html = api.rechWer('opp', name, api.setFor(name, 'opp'));
+        assert.ok(/data-sq-rech="opp"/.test(html), 'die Auswahl fehlt');
+        assert.ok(/type="search"/.test(html), 'es ist kein Eingabefeld');
+        assert.ok(!/<select[^>]*data-sq-rech/.test(html),
+            'es ist weiter ein Auswahlfeld — dann bleibt die Suche am Wortanfang haengen');
+        assert.ok(/role="combobox"/.test(html), 'das Feld sagt nicht, was es ist');
+        assert.ok(/data-sq-treffer="opp"/.test(html), 'die Trefferliste fehlt');
+    });
+
+    it('zugeklappt steht der GEWAEHLTE Name im Feld, nicht der Suchtext', () => {
+        const de = load('de').api;
+        const name = ersterMitSatz(de);
+        de.sucheState({ offen: '', me: 'halb getippt' });
+        const html = de.rechWer('me', name, de.setFor(name, 'me'));
+        const wert = (html.match(/data-sq-rech="me"[\s\S]*?value="([^"]*)"/) || [])[1];
+        assert.equal(wert, de.nurDeutsch(name, 'pokemon') || name,
+            'im zugeklappten Feld steht nicht das, was gerechnet wird');
+        de.sucheState({ me: '' });
+    });
+
+    it('der Suchtext ueberlebt das Zeichnen, solange die Liste offen ist', () => {
+        const { api } = load();
+        const name = ersterMitSatz(api);
+        api.sucheState({ offen: 'me', me: 'raich' });
+        const html = api.rechWer('me', name, api.setFor(name, 'me'));
+        const wert = (html.match(/data-sq-rech="me"[\s\S]*?value="([^"]*)"/) || [])[1];
+        assert.equal(wert, 'raich', 'der getippte Text geht beim Zeichnen verloren');
+        assert.ok(/data-sq-treffer="me" role="listbox">/.test(html.replace(/\s+/g, ' '))
+            || !/data-sq-treffer="me"[^>]*hidden/.test(html),
+            'die Liste ist zu, obwohl gerade gesucht wird');
+        api.sucheState({ offen: '', me: '' });
+    });
+
+    it('das Suchfeld zeichnet beim Tippen NICHT neu', () => {
+        /* Ein renderRechner() bei jedem Tastendruck wirft den Fokus aus
+           dem Feld — nach einem Buchstaben tippt man ins Leere.
+           Dieselbe Falle wie am 05.09.2026 im Suchfeld der
+           Matchup-Liste. */
+        const i = SRC_C.indexOf('function wireRechner');
+        assert.ok(i !== -1, 'wireRechner nicht gefunden');
+        const a = SRC_C.indexOf("feld.addEventListener('input'", i);
+        assert.ok(a !== -1, 'das Suchfeld hat keinen input-Zuhoerer');
+        const block = SRC_C.slice(a, SRC_C.indexOf('\n', a) + 1);
+        assert.ok(!/renderRechner\(\)/.test(block),
+            'der input-Zuhoerer zeichnet neu — damit verliert das Feld den Fokus');
+        assert.ok(/frisch\(\)/.test(block), 'die Trefferliste wird beim Tippen nicht erneuert');
+    });
+
+    it('jedes Merkmal der Trefferliste hat eine CSS-Regel', () => {
+        ['.sq-rech-combo', '.sq-rech-treffer', '.sq-rech-treff', '.sq-rech-treff-img',
+         '.sq-rech-leer', '.sq-rech-mehr'].forEach(k => {
+            assert.ok(CSS_C.indexOf(k) !== -1, `keine Regel fuer ${k}`);
+        });
+        // Die Liste muss ueber dem Kopfband LIEGEN, nicht darin stehen —
+        // sonst springt die halbe Seite bei jedem Tastendruck.
+        const i = CSS_C.indexOf('.sq-console .sq-rech-treffer {');
+        const block = CSS_C.slice(i, CSS_C.indexOf('}', i));
+        assert.ok(/position:\s*absolute/.test(block),
+            'die Trefferliste steht im Fluss — die Seite springt beim Tippen');
+    });
+});
+
+// ══════════════════════════════════════════════════════════════════════
+
 describe('Der Weg aus dem Team-Builder', () => {
     it('oeffneTeamRechner zeigt den RECHNER, nicht die Matchup-Liste', () => {
         const i = SRC_C.indexOf('function oeffneTeamRechner');

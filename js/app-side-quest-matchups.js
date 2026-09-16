@@ -210,6 +210,9 @@
             kaderModalFort: (a, b) => `Wahl ${a} / ${b}`,
             kaderModalZu: 'Schließen',
             schnellStufen: 'Stufen',
+            rechSuchePh: 'Pokémon suchen — Name oder Typ …',
+            rechKeinTreffer: 'Kein Pokémon passt dazu.',
+            rechMehr: (n) => `+ ${n} weitere — tipp weiter, um einzugrenzen.`,
             schnellSchirm: 'Schirm',
             schirmKurz: { reflect: 'REFLEKTOR', light: 'LICHTSCHILD', aurora: 'AURORA' },
             rueckenwind: 'Rückenwind',
@@ -384,6 +387,9 @@
             kaderModalFort: (a, b) => `Pick ${a} / ${b}`,
             kaderModalZu: 'Close',
             schnellStufen: 'Stages',
+            rechSuchePh: 'Search a Pokémon — name or type …',
+            rechKeinTreffer: 'No Pokémon matches that.',
+            rechMehr: (n) => `+ ${n} more — keep typing to narrow it down.`,
             schnellSchirm: 'Screen',
             schirmKurz: { reflect: 'REFLECT', light: 'LIGHT SCREEN', aurora: 'AURORA VEIL' },
             rueckenwind: 'Tailwind',
@@ -2413,29 +2419,102 @@
     let _rSeite = 'me';           // aus welcher Richtung stammt sie?
     let _verlauf = [];            // gemerkte Staende
 
-    /* Die Auswahl je Seite. Ein einfaches Auswahlfeld statt einer
-       eigenen Suche: 264 Eintraege, nach deutschem Namen sortiert, und
-       jeder Browser bringt seine Tippsuche schon mit — auf dem Handy
-       sogar eine bessere, als wir bauen wuerden. */
-    function rechOptionen(gewaehlt) {
-        if (!_roster) return '';
-        const liste = _roster
-            .filter(r => setFor(r.name, 'me'))
-            .map(r => ({ name: r.name, zeig: nurDeutsch(r.name, 'pokemon') || r.name }))
+    /* ════════════════════════════════════════════════════════════════
+       DIE AUSWAHL IST EIN SUCHFELD, KEIN AUSWAHLFELD (16.09.2026)
+       ════════════════════════════════════════════════════════════════
+       ANLASS (Betreiber): „das Feld sollte ein Suchfilter sein, damit
+       ich nach raichu suchen kann und dann werden mir halt alle
+       Möglichkeiten die Raichu enthalten angezeigt".
+
+       Hier stand ein <select> mit der Begründung, jeder Browser bringe
+       seine Tippsuche schon mit. Das war falsch gedacht: die Tippsuche
+       eines Auswahlfelds springt zum ANFANG eines Eintrags. Wer
+       „raichu" tippt, landet bei „Raichu" — und findet „Mega Raichu X"
+       und „Mega Raichu Y" nie, weil die mit „Mega" beginnen. Genau
+       diese drei wollte der Betreiber nebeneinander sehen.
+
+       Gesucht wird deshalb im GANZEN Namen, deutsch wie englisch, und
+       zusätzlich über den Typ — dieselbe Suche wie im Auswahlfenster,
+       damit nicht zwei Suchen mit verschiedenen Regeln nebeneinander
+       stehen.
+
+       WARUM KEIN <datalist>: dessen Filterregel gehört dem Browser,
+       ist je nach Browser Präfix oder Teilkette, und auf dem Handy
+       sieht sie überall anders aus. Bei einer Frage, deren Antwort
+       gerade der Unterschied zwischen Präfix und Teilkette ist, kann
+       die Regel nicht beim Browser liegen.
+       ════════════════════════════════════════════════════════════════ */
+
+    let _rSuche = { me: '', opp: '' };   // was gerade im Feld getippt steht
+    let _rOffen = '';                    // welche Seite ihre Liste offen hat
+
+    /** Alle waehlbaren Pokemon einer Seite, nach deutschem Namen. */
+    function rechListe(side) {
+        if (!_roster) return [];
+        return _roster
+            .filter(r => setFor(r.name, side === 'opp' ? 'opp' : 'me'))
+            .map(r => ({
+                name: r.name,
+                zeig: nurDeutsch(r.name, 'pokemon') || r.name,
+                typen: (r.types || []).map(t => String(tName(t))),
+            }))
             .sort((a, b) => a.zeig.localeCompare(b.zeig, 'de'));
-        return liste.map(r =>
-            `<option value="${esc(r.name)}"${r.name === gewaehlt ? ' selected' : ''}>${
-                esc(r.zeig)}${r.zeig === r.name ? '' : ' · ' + esc(r.name)}</option>`).join('');
+    }
+
+    /* Die Treffer zu einer Eingabe. TEILKETTE, nicht Praefix — das ist
+       der ganze Punkt (siehe Kopf). Gesucht wird in beiden Namen und in
+       den Typen; ein leeres Feld zeigt alles. */
+    function rechTreffer(side) {
+        const q = String(_rSuche[side] || '').trim().toLowerCase();
+        const liste = rechListe(side);
+        if (!q) return liste;
+        return liste.filter(r =>
+            r.zeig.toLowerCase().indexOf(q) !== -1
+            || r.name.toLowerCase().indexOf(q) !== -1
+            || r.typen.some(t => t.toLowerCase().indexOf(q) === 0));
+    }
+
+    function rechTrefferHtml(side, gewaehlt) {
+        const treffer = rechTreffer(side);
+        if (!treffer.length) {
+            return `<p class="sq-rech-leer">${esc(L().rechKeinTreffer)}</p>`;
+        }
+        /* GEDECKELT, UND DER DECKEL SAGT ES.
+           Ohne Eingabe sind es ueber 260 Zeilen; die alle zu zeichnen
+           kostet bei jedem Tastendruck Zeit, und gelesen wird ohnehin
+           nur der Anfang. Wer mehr sucht, tippt weiter — und erfaehrt
+           in der letzten Zeile, dass es mehr gibt. */
+        const DECKEL = 40;
+        const gezeigt = treffer.slice(0, DECKEL);
+        const rest = treffer.length - gezeigt.length;
+        return gezeigt.map(r =>
+            `<button type="button" role="option" class="sq-rech-treff${
+                r.name === gewaehlt ? ' is-an' : ''}"
+                    aria-selected="${r.name === gewaehlt ? 'true' : 'false'}"
+                    data-sq-rechwahl="${esc(side)}" data-sq-rechname="${esc(r.name)}">
+                ${sprite(r.name, 'sq-rech-treff-img')}
+                <span class="sq-rech-treff-n">${esc(r.zeig)}${
+                    r.zeig === r.name ? '' : `<em>${esc(r.name)}</em>`}</span>
+            </button>`).join('')
+            + (rest > 0 ? `<p class="sq-rech-mehr">${esc(L().rechMehr(rest))}</p>` : '');
     }
 
     function rechWer(side, name, set) {
         const e = name && _dex[name];
         const typen = e ? [e.t1, e.t2].filter(Boolean) : [];
+        const offen = _rOffen === side;
+        const zeig = name ? (nurDeutsch(name, 'pokemon') || name) : '';
         return `<div class="sq-rech-wer is-${side}">
-                <select class="sq-in sq-rech-pick" data-sq-rech="${side}"
-                        aria-label="${esc(side === 'me' ? L().mine : L().opponent)}">
-                    ${rechOptionen(name)}
-                </select>
+                <div class="sq-rech-combo">
+                    <input type="search" class="sq-in sq-rech-pick" data-sq-rech="${side}"
+                           value="${esc(offen ? (_rSuche[side] || '') : zeig)}"
+                           placeholder="${esc(L().rechSuchePh)}"
+                           autocomplete="off" spellcheck="false" role="combobox"
+                           aria-expanded="${offen ? 'true' : 'false'}" aria-autocomplete="list"
+                           aria-label="${esc(side === 'me' ? L().mine : L().opponent)}">
+                    <div class="sq-rech-treffer" data-sq-treffer="${side}" role="listbox"${
+                        offen ? '' : ' hidden'}>${offen ? rechTrefferHtml(side, name) : ''}</div>
+                </div>
                 <div class="sq-rech-typen">${typeChips(typen)}</div>
                 ${schnellHtml(side, set)}
             </div>`;
@@ -3286,12 +3365,97 @@
     /* Alles, was nur der Rechner-Reiter hat. Die Set-Editoren, die
        Feldleiste und die Stufenregler haengen schon an wire(). */
     function wireRechner(host) {
-        host.querySelectorAll('[data-sq-rech]').forEach(sel => {
-            sel.addEventListener('change', () => {
-                const seite = sel.getAttribute('data-sq-rech');
-                if (seite === 'opp') _rOpp = sel.value; else _rMe = sel.value;
-                _rMove = null;              // die alte Attacke gehoert zum alten Paar
-                renderRechner();
+        /* DAS SUCHFELD DARF NICHT NEU ZEICHNEN (16.09.2026).
+
+           Ein renderRechner() bei jedem Tastendruck wirft den Fokus aus
+           dem Feld — nach einem Buchstaben tippt man ins Leere. Ersetzt
+           wird deshalb NUR die Trefferliste. Dieselbe Falle wie beim
+           Suchfeld der Matchup-Liste (05.09.2026) und beim Suchfeld der
+           Gegnerbank. */
+        const waehle = (side, name) => {
+            if (!name) return;
+            if (side === 'opp') _rOpp = name; else _rMe = name;
+            _rMove = null;              // die alte Attacke gehoert zum alten Paar
+            _rOffen = '';
+            _rSuche[side] = '';
+            renderRechner();
+        };
+
+        host.querySelectorAll('[data-sq-rech]').forEach(feld => {
+            const side = feld.getAttribute('data-sq-rech');
+            const liste = host.querySelector(`[data-sq-treffer="${side}"]`);
+            if (!liste) return;
+            const jetzt = () => (side === 'opp' ? _rOpp : _rMe);
+
+            const frisch = () => {
+                liste.innerHTML = rechTrefferHtml(side, jetzt());
+                liste.hidden = false;
+                feld.setAttribute('aria-expanded', 'true');
+                _rOffen = side;
+            };
+            const zu = () => {
+                liste.hidden = true;
+                feld.setAttribute('aria-expanded', 'false');
+                if (_rOffen === side) _rOffen = '';
+                _rSuche[side] = '';
+                // Das Feld traegt wieder den GEWAEHLTEN Namen, nicht den
+                // halb getippten Suchtext — sonst stuende dort „raich"
+                // und darueber rechnete Raichu.
+                const n = jetzt();
+                feld.value = n ? (nurDeutsch(n, 'pokemon') || n) : '';
+            };
+
+            feld.addEventListener('focus', () => {
+                _rSuche[side] = '';
+                feld.value = '';
+                frisch();
+            });
+            feld.addEventListener('input', () => { _rSuche[side] = feld.value; frisch(); });
+            feld.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape') { zu(); feld.blur(); return; }
+                if (ev.key === 'Enter') {
+                    ev.preventDefault();
+                    const erster = liste.querySelector('[data-sq-rechname]');
+                    if (erster) waehle(side, erster.getAttribute('data-sq-rechname'));
+                    return;
+                }
+                if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+                    const alle = [...liste.querySelectorAll('[data-sq-rechname]')];
+                    if (!alle.length) return;
+                    ev.preventDefault();
+                    const i = alle.indexOf(document.activeElement);
+                    const n = ev.key === 'ArrowDown'
+                        ? (i < 0 ? 0 : Math.min(i + 1, alle.length - 1))
+                        : Math.max(i - 1, 0);
+                    alle[n].focus();
+                }
+            });
+            /* Ein Klick in der Liste nimmt dem Feld den Fokus, BEVOR er
+               ankommt. Deshalb nicht beim blur schliessen, sondern einen
+               Wimpernschlag spaeter — und nur, wenn der Fokus die Liste
+               wirklich verlassen hat. */
+            const vielleichtZu = () => setTimeout(() => {
+                const a = document.activeElement;
+                if (a === feld || (a && liste.contains(a))) return;
+                zu();
+            }, 120);
+            feld.addEventListener('blur', vielleichtZu);
+            liste.addEventListener('focusout', vielleichtZu);
+            liste.addEventListener('click', (ev) => {
+                const b = ev.target.closest('[data-sq-rechname]');
+                if (b) waehle(side, b.getAttribute('data-sq-rechname'));
+            });
+            liste.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape') { zu(); feld.focus(); return; }
+                if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+                    const alle = [...liste.querySelectorAll('[data-sq-rechname]')];
+                    const i = alle.indexOf(document.activeElement);
+                    ev.preventDefault();
+                    if (ev.key === 'ArrowUp' && i === 0) { feld.focus(); return; }
+                    const n = ev.key === 'ArrowDown'
+                        ? Math.min(i + 1, alle.length - 1) : Math.max(i - 1, 0);
+                    if (alle[n]) alle[n].focus();
+                }
             });
         });
         const t = host.querySelector('[data-sq-rtausch]');
@@ -3299,6 +3463,7 @@
             t.addEventListener('click', () => {
                 const x = _rMe; _rMe = _rOpp; _rOpp = x;
                 _rSeite = _rSeite === 'me' ? 'opp' : 'me';
+                _rOffen = ''; _rSuche = { me: '', opp: '' };
                 renderRechner();
             });
         }
@@ -3471,6 +3636,15 @@
         metaTop, kaderPick6, ladeKaderTeam, wireKader, setFor, setKey, kaderEroeffnung,
         ladePaste, pasteHtml, waehleImKader, waehlerKandidaten, waehlerRasterHtml,
         schnellHtml, wireSchnell, initiative, rechZeilen, moveTable,
+        rechListe, rechTreffer, rechTrefferHtml, rechWer,
+        sucheState: (patch) => {
+            if (patch) {
+                if (patch.offen != null) _rOffen = patch.offen;
+                if (patch.me != null) _rSuche.me = patch.me;
+                if (patch.opp != null) _rSuche.opp = patch.opp;
+            }
+            return { offen: _rOffen, me: _rSuche.me, opp: _rSuche.opp };
+        },
         pasteState: (patch) => {
             if (patch) {
                 if (patch.offen != null) _kaderPasteOffen = patch.offen;

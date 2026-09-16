@@ -443,6 +443,92 @@ def _pick_current_set(release_dates: dict) -> str:
     return candidates[0][0]
 
 
+def neuestes_set_felder(release_dates: dict) -> dict:
+    """Die zwei Felder, die sagen, was zuletzt ERSCHIENEN ist.
+
+    Nicht zu verwechseln mit `current_set`. Der Unterschied ist der
+    Ankerriegel (`anker_belegt`): `current_set` wechselt erst, wenn
+    echte Turnierlisten das neue Set belegen — ein Sammelset wie 30C
+    dreht es womoeglich nie. Das ist fuer das FORMAT genau richtig und
+    fuer die Frage "was ist neu im Laden" genau falsch.
+
+    Die Oberflaeche braucht beides: der Filter „Neues Set" in den
+    meistgespielten Karten (js/app-tier-meta.js) zeigt das zuletzt
+    erschienene Set, jede formatabhaengige Ansicht das laufende.
+
+    `neues_set_filter_ab` ist das Erscheinungsdatum plus EIN Tag —
+    Anweisung des Betreibers vom 16.09.2026: am Erscheinungstag selbst
+    steht noch das vorherige Set da. Das Feld wird hier ABGELEITET
+    statt in der Oberflaeche gerechnet, damit die Karenz an einer
+    Stelle steht und nachgeprueft werden kann.
+
+    Leeres dict, wenn sich nichts aufloesen laesst — der Aufrufer
+    schreibt dann nichts, statt eine Luecke zu behaupten.
+    """
+    code = _pick_current_set(release_dates or {})
+    if not code:
+        return {}
+    datum = (release_dates or {}).get(code, '')
+    if not datum:
+        return {}
+    return {
+        'neuestes_set':              code,
+        'neuestes_set_release_date': datum,
+        'neues_set_filter_ab':       _add_days(datum, 1),
+    }
+
+
+def aktualisiere_neuestes_set(format_window_path: str,
+                              release_dates: dict = None) -> bool:
+    """Die drei Felder aus `neuestes_set_felder()` nachtragen — AUCH
+    wenn `write_format_window()` abgebrochen hat.
+
+    WARUM EIGENS: write_format_window() schreibt bei einem nicht
+    belegten Formatwechsel GAR NICHTS und gibt '' zurueck. Das ist
+    richtig fuer das Formatfenster — und genau der Fall, in dem das
+    neu erschienene Set bekannt werden muss: ein Sammelset kommt durch
+    den Ankerriegel nicht durch, steht aber trotzdem im Laden. Ohne
+    diesen Nachtrag bliebe `neuestes_set` bei jedem geblockten Wechsel
+    auf dem alten Stand stehen.
+
+    Schreibt NUR diese drei Felder und laesst alles andere in Ruhe.
+    Ein Ruecksprung auf ein aelteres Erscheinungsdatum wird abgelehnt
+    (derselbe Monotonieriegel wie beim Formatfenster).
+    """
+    felder = neuestes_set_felder(dict(FALLBACK_RELEASE_DATES, **(release_dates or {})))
+    if not felder:
+        print("[Update Sets] ! neuestes Set nicht aufloesbar — Felder bleiben, wie sie sind")
+        return False
+    try:
+        with open(format_window_path, encoding='utf-8') as f:
+            vorhanden = json.load(f)
+    except (OSError, ValueError) as e:
+        print(f"[Update Sets] ! {format_window_path} nicht lesbar ({e}) — "
+              f"neuestes_set nicht nachgetragen")
+        return False
+    alt = str(vorhanden.get('neuestes_set_release_date') or '')
+    neu = str(felder.get('neuestes_set_release_date') or '')
+    if alt and neu < alt:
+        print(f"::error::update_sets: neuestes_set wuerde von "
+              f"{vorhanden.get('neuestes_set')} ({alt}) auf "
+              f"{felder.get('neuestes_set')} ({neu}) zurueckfallen — nicht geschrieben.")
+        return False
+    if all(str(vorhanden.get(k) or '') == str(v) for k, v in felder.items()):
+        return False
+    vorhanden.update(felder)
+    try:
+        with open(format_window_path, 'w', encoding='utf-8') as f:
+            json.dump(vorhanden, f, indent=2, ensure_ascii=False)
+            f.write('\n')
+    except OSError as e:
+        print(f"[Update Sets] ! {format_window_path} nicht schreibbar ({e})")
+        return False
+    print(f"[Update Sets] neuestes_set -> {felder['neuestes_set']} "
+          f"({felder['neuestes_set_release_date']}, Filter ab "
+          f"{felder['neues_set_filter_ab']})")
+    return True
+
+
 # Wie viele VERSCHIEDENE Karten eines Sets im echten Standardfeld
 # gespielt werden muessen, damit es als Rotationsanker durchgeht.
 #
@@ -986,6 +1072,10 @@ def write_format_window(sets_metadata_path: str,
         'lag_days':             lag_days,
         'current_set_jp':       jp_current,
         'jp_release_date':      jp_release,
+        # Was zuletzt ERSCHIENEN ist — ohne Ankerriegel, siehe
+        # neuestes_set_felder(). Getrennt von current_set, weil die
+        # Oberflaeche beide Fragen stellt.
+        **neuestes_set_felder(en_dates),
         '_note': (
             'Auto-derived twice per weekly run from limitlesstcg.com/cards '
             '(EN) and /cards/jp (JP). EN and JP run on independent rotation '
@@ -1808,6 +1898,13 @@ def main():
     #    release dates automatically — no more manual edits when a set
     #    rotates. Reads the format_window we just wrote and patches only
     #    the date / set fields, leaving everything else untouched.
+    # 3b) Das zuletzt erschienene Set nachtragen — auch wenn 3) den
+    #     Formatwechsel abgelehnt hat. Genau dann zaehlt es: ein
+    #     Sammelset kommt durch den Ankerriegel nicht, erscheint aber.
+    aktualisiere_neuestes_set(
+        fw_path or os.path.join(data_dir, 'format_window.json'),
+        release_dates)
+
     if fw_path:
         # project_root = update_sets.py is at backend/core/update_sets.py
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

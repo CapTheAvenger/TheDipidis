@@ -116,6 +116,18 @@ def test_keine_datei_bleibt_ohne_stand():
         + "holt sie nach, sofern der Klon den vollen Verlauf hat.")
 
 
+def _in_utc(iso: str) -> str:
+    """Einen ISO-Zeitstempel auf UTC drehen; Unlesbares bleibt, wie es ist."""
+    from datetime import datetime, timezone
+    roh = (iso or "").strip()
+    if not roh:
+        return ""
+    try:
+        return datetime.fromisoformat(roh).astimezone(timezone.utc).isoformat()
+    except ValueError:
+        return roh
+
+
 def test_der_stand_stimmt_mit_dem_git_verlauf_ueberein():
     """Die eigentliche Zusicherung: das Datum ist nicht nur da, es stimmt.
 
@@ -138,7 +150,16 @@ def test_der_stand_stimmt_mit_dem_git_verlauf_ueberein():
         aus_git = subprocess.run(
             ["git", "log", "-1", "--format=%cI", "--", "data/" + name],
             cwd=WURZEL, capture_output=True, text=True).stdout.strip()
-        if aus_git and aus_git[:10] != str(wert)[:10]:
+        # BEIDE Seiten in UTC, bevor der Tag abgeschnitten wird.
+        # BEFUND 16.09.2026: git gibt die ORTSZEIT des Commits aus
+        # (2026-09-16T00:02:19+02:00), data_stand.json schreibt UTC
+        # (2026-09-15T21:52:32+00:00). Dasselbe Ereignis, zwei
+        # Tagesdaten — die Zusicherung fiel um, sobald ein Commit
+        # zwischen 22:00 und 24:00 UTC landete, und meldete einen
+        # Datenfehler, wo keiner war. Die Zeitzone ist keine
+        # Eigenschaft des Standes, sondern der Ausgabe.
+        aus_git = _in_utc(aus_git)
+        if aus_git and aus_git[:10] != _in_utc(str(wert))[:10]:
             schief.append(f"{name}: Datei sagt {str(wert)[:10]}, "
                           f"git sagt {aus_git[:10]}")
     assert not schief, (

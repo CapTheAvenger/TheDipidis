@@ -41,6 +41,15 @@ function schneide(kopf, bis) {
     return SRC.slice(a, b);
 }
 
+/* staplesNachArt() ruft seit dem 16.09.2026 zwei Helfer: neuesSetCode()
+   loest das Set des Filters „Neues Set" auf, kartenSets() liest alle
+   Drucke eines Namens. Beide werden hier WOERTLICH mitgeschnitten und
+   nicht nachgebaut — eine Nachbildung bliebe gruen, waehrend die Seite
+   etwas anderes tut. */
+const SET_HILFEN = schneide('function neuesSetCode(heute)',
+                            '\n        /* Art setzen UND merken');
+const MIN_ARCH = Number(/const STAPLES_NEUES_SET_MIN_ARCHETYPEN\s*=\s*(\d+)/.exec(SRC)[1]);
+
 const NACH_ART = schneide('function staplesNachArt(daten, artId)', '\n        /**');
 const ZAEHLUNG = schneide('function staplesArtZaehlung(daten)',
                           '\n        function staplesAnzahl()');
@@ -56,9 +65,11 @@ const ART_MAX = Number(/const STAPLES_ART_MAX\s*=\s*(\d+)/.exec(SRC)[1]);
 
 function bau() {
     const attrappen = { STAPLES_ARTEN: ARTEN, STAPLES_ART_SCHWELLE: SCHWELLE,
-                        STAPLES_ART_MAX: ART_MAX };
+                        STAPLES_ART_MAX: ART_MAX,
+                        STAPLES_NEUES_SET_MIN_ARCHETYPEN: MIN_ARCH,
+                        window: { _formatWindow: { current_set: 'PBL' } } };
     return new Function(...Object.keys(attrappen),
-        NACH_ART + ZAEHLUNG +
+        SET_HILFEN + NACH_ART + ZAEHLUNG +
         '\nreturn { waehle: staplesNachArt, zaehl: staplesArtZaehlung };'
     )(...Object.values(attrappen));
 }

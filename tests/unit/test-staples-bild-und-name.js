@@ -46,6 +46,15 @@ function schneide(kopf, bis) {
 }
 
 const AUSWAHL = schneide('function staplesAuswahl(daten)', '\n        /** Wie viele Karten');
+/* staplesNachArt() ruft seit dem 16.09.2026 zwei Helfer: neuesSetCode()
+   loest das Set des Filters „Neues Set" auf, kartenSets() liest alle
+   Drucke eines Namens. Beide werden hier WOERTLICH mitgeschnitten und
+   nicht nachgebaut — eine Nachbildung bliebe gruen, waehrend die Seite
+   etwas anderes tut. */
+const SET_HILFEN = schneide('function neuesSetCode(heute)',
+                            '\n        /* Art setzen UND merken');
+const MIN_ARCH = Number(/const STAPLES_NEUES_SET_MIN_ARCHETYPEN\s*=\s*(\d+)/.exec(SRC)[1]);
+
 const NACH_ART = schneide('function staplesNachArt(daten, artId)', '\n        /** Wie viele Karten');
 const WIDGET = schneide('function renderTopCardsWidget(topCards)',
                         '/**\n         * Render and inject Top Cards Widget');
@@ -107,6 +116,8 @@ function bau(art, anzahl) {
         STAPLES_ARTEN: ARTEN,
         STAPLES_ART_SCHWELLE: SCHWELLE,
         STAPLES_ART_MAX: ART_MAX,
+        STAPLES_NEUES_SET_MIN_ARCHETYPEN: MIN_ARCH,
+        window: { _formatWindow: { current_set: 'PBL' } },
         ladeStaplesAnzahl: () => anzahl,
         staplesAnzahl: () => anzahl,
         ladeStaplesArt: () => _staplesArt,
@@ -141,7 +152,7 @@ function bau(art, anzahl) {
         _staplesDaten: null,
     };
     const fabrik = new Function(...Object.keys(attrappen),
-        NACH_ART + AUSWAHL + WIDGET + LISTE +
+        SET_HILFEN + NACH_ART + AUSWAHL + WIDGET + LISTE +
         '\nreturn { render: renderTopCardsWidget, liste: staplesListe,' +
         '  setzeDaten: (d) => { _staplesDaten = d; } };');
     const g = fabrik(...Object.values(attrappen));

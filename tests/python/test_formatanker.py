@@ -277,9 +277,23 @@ def test_die_setauswahl_allein_wuerde_das_sonderset_nehmen(monkeypatch):
 
 
 def test_kuenftige_sets_werden_noch_nicht_gezogen():
-    """Heute (vor dem 16.09.) ist der Fall noch nicht eingetreten — der
-    Riegel wird gebraucht, BEVOR er greifen muss."""
-    assert _pick_current_set({"PBL": "2026-07-17", "30C": "2026-09-16"}) == "PBL"
+    """Ein Set, das noch nicht ERSCHIENEN ist, wird nicht gezogen.
+
+    Bis zum 16.09.2026 stand hier "30C": "2026-09-16" — und die
+    Zusicherung fiel an genau diesem Tag um, weil 30C damit erschienen
+    WAR. Sie pruefte ein Kalenderdatum statt der Bedingung, die sie
+    meint. Dasselbe Muster, das dieses Projekt schon zweimal die
+    Deploy-Kette gekostet hat ("eine Karenz gehoert an einen Beleg,
+    nicht an die Zeit").
+
+    Jetzt liegt das Datum immer in der Zukunft, egal wann der Test
+    laeuft.
+    """
+    import datetime as _dt
+    morgen = (_dt.date.today() + _dt.timedelta(days=1)).isoformat()
+    naechstes_jahr = (_dt.date.today() + _dt.timedelta(days=365)).isoformat()
+    assert _pick_current_set({"PBL": "2026-07-17", "30C": morgen}) == "PBL"
+    assert _pick_current_set({"PBL": "2026-07-17", "30C": naechstes_jahr}) == "PBL"
 
 
 # ── Die andere Richtung: ein Hauptset fehlt in ROTATIONEN ────────────

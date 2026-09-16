@@ -2079,14 +2079,34 @@
         return { attName, defName, name: r.name, range: r.range, seite: _rSeite };
     }
 
+    /* EIN NAME JE SACHE, NICHT ZWEI.
+       Live gesehen am 16.09.2026, gleich nach dem Ausliefern: die
+       Kopfzeile las sich
+
+         „Rillaboom Gortrom Wood Hammer Holzhammer gegen Sneasler
+          Snieboss: 98-116 (62,4-73,9 %) - 2HKO"
+
+       — vier Namen, wo zwei genuegen. nameHtml() setzt bewusst beide
+       Sprachen nebeneinander, und ueberall sonst ist das richtig: in
+       einer Liste sucht man mit dem Namen, den man gerade im Kopf hat.
+       In DIESEM Satz nicht. Er ist die Antwort des ganzen Reiters, er
+       steht in 17px, und die Auswahlfelder direkt darueber fuehren
+       ohnehin schon „Gortrom · Rillaboom".
+
+       Der andere Name geht nicht verloren: er steht im title. */
+    function einName(en, kind) {
+        const d = nurDeutsch(en, kind);
+        return d ? `<span title="${esc(en)}">${esc(d)}</span>` : esc(en);
+    }
+
     function rechSatzHtml(f) {
         const g = f.range;
+        const a = einName(f.attName, 'pokemon'), d = einName(f.defName, 'pokemon');
+        const mv = einName(f.name, 'moves');
         if (g.effectiveness === 0) {
-            return `<b>${nameHtml(f.attName, 'pokemon')}</b> ${nameHtml(f.name, 'moves')} ${
-                esc(L().gegen)} <b>${nameHtml(f.defName, 'pokemon')}</b>: <b>${esc(L().immune)}</b>`;
+            return `<b>${a}</b> ${mv} ${esc(L().gegen)} <b>${d}</b>: <b>${esc(L().immune)}</b>`;
         }
-        return `<b>${nameHtml(f.attName, 'pokemon')}</b> ${nameHtml(f.name, 'moves')} ${
-            esc(L().gegen)} <b>${nameHtml(f.defName, 'pokemon')}</b>: <span class="sq-rech-zahl">${
+        return `<b>${a}</b> ${mv} ${esc(L().gegen)} <b>${d}</b>: <span class="sq-rech-zahl">${
             g.min}–${g.max}</span> <span class="sq-rech-zahl">(${esc(num(g.minPct))}–${
             esc(num(g.maxPct))} %)</span> — <b>${esc(koLabel(g.ko))}</b>`;
     }

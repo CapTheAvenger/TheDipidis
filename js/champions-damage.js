@@ -191,20 +191,33 @@
     // (Kontakt, Faust, Biss, Klinge, Schall, Puls, Ball). Ohne sie
     // laesst sich nicht entscheiden, welche Attacke Eisenfaust
     // verstaerkt. Geraten wird nicht.
+    /* AM 16.09.2026 STAND HIER EINE LISTE VON ZWOELF.
+       ------------------------------------------------------------------
+       Elf davon hatten denselben Grund: die Attackendaten fuehrten keine
+       Merkmale. Der Betreiber am selben Tag: „genau geraten wird nicht,
+       aber dann muessen wir die Daten dringend belegen."
+
+       Belegt sind sie jetzt — data/champions_move_flags.json, erzeugt
+       von scripts/build_champions_move_flags.py aus der Attackendatei
+       des Kampfsimulators von Pokemon Showdown (MIT). Gemessen:
+       513 von 513 Champions-Attacken gefunden, KEINE ohne Eintrag.
+
+       Uebrig bleibt eine einzige Faehigkeit, und ihr Grund ist ein
+       anderer: Stahlgeist wirkt vom PARTNER aus. Der Rechner kennt zwei
+       Seiten, nicht vier Plaetze. Das ist keine Datenluecke, sondern
+       eine Grenze dieses Rechners — und sie steht hier, damit sie nicht
+       fuer eine gehalten wird. */
     const NICHT_BELEGT = {
-        'Iron Fist': 'Faustattacken sind in den Attackendaten nicht gekennzeichnet',
-        'Strong Jaw': 'Bissattacken sind nicht gekennzeichnet',
-        'Sharpness': 'Klingenattacken sind nicht gekennzeichnet',
-        'Tough Claws': 'Kontaktattacken sind nicht gekennzeichnet',
-        'Punk Rock': 'Schallattacken sind nicht gekennzeichnet',
-        'Mega Launcher': 'Pulsattacken sind nicht gekennzeichnet',
-        'Bulletproof': 'Ball- und Bombenattacken sind nicht gekennzeichnet',
-        'Soundproof': 'Schallattacken sind nicht gekennzeichnet',
-        'Fluffy': 'Kontaktattacken sind nicht gekennzeichnet',
-        'Sheer Force': 'ob eine Attacke einen Zusatzeffekt hat, steht nicht in den Daten',
-        'Reckless': 'Rueckstossattacken sind nicht gekennzeichnet',
-        'Steely Spirit': 'wirkt vom Partner aus; der Rechner kennt nur zwei Seiten',
+        'Steely Spirit': 'wirkt vom Partner aus; der Rechner kennt zwei Seiten, nicht vier Plaetze',
     };
+
+    /* Merkmale einer Attacke. Fehlt die Merkmalsdatei, ist die Liste
+       leer — dann greift keine der Regeln unten, und das ist richtig:
+       lieber keine Verstaerkung als eine geratene. */
+    function hatMerkmal(move, name) {
+        const f = move && move.flags;
+        return !!(f && f.indexOf && f.indexOf(name) !== -1);
+    }
 
     // Statusstufen: +1 ist ×1,5, −1 ist ×2/3 — und beide mit floor,
     // nicht mit Rundung.
@@ -273,6 +286,18 @@
                      immunGrund: d.ability, angewendet, unbelegt };
         }
         if (durchbricht && IMMUN_FAEHIGKEIT[d.ability] === move.type) merke('Mold Breaker');
+        /* Kugelsicher und Schallmauer fangen nicht einen TYP ab, sondern
+           eine BAUART — sie brauchen deshalb die Merkmale und standen bis
+           zum 16.09.2026 in NICHT_BELEGT. */
+        const merkmalImmun = (!durchbricht && (
+            (d.ability === 'Bulletproof' && hatMerkmal(move, 'bullet') && 'Bulletproof')
+            || (d.ability === 'Soundproof' && hatMerkmal(move, 'sound') && 'Soundproof')));
+        if (merkmalImmun) {
+            merke(merkmalImmun);
+            return { rolls: new Array(16).fill(0), min: 0, max: 0, minPct: 0, maxPct: 0,
+                     effectiveness: 0, stab: 1, ko: null, immune: true,
+                     immunGrund: merkmalImmun, angewendet, unbelegt };
+        }
         if (eff === 0) {
             return { rolls: new Array(16).fill(0), min: 0, max: 0, minPct: 0, maxPct: 0,
                      effectiveness: 0, stab: 1, ko: null, immune: true,
@@ -282,6 +307,16 @@
         // ── 1. Grundstaerke ─────────────────────────────────────────
         const bpMods = [];
         if (a.ability === 'Technician' && power <= 60) { bpMods.push(0x1800); merke('Technician'); }
+        /* ×1,2 */
+        if (a.ability === 'Iron Fist' && hatMerkmal(move, 'punch')) { bpMods.push(0x1333); merke('Iron Fist'); }
+        if (a.ability === 'Reckless' && move.recoil) { bpMods.push(0x1333); merke('Reckless'); }
+        /* ×1,3 */
+        if (a.ability === 'Sheer Force' && move.zusatzeffekt) { bpMods.push(0x14CD); merke('Sheer Force'); }
+        if (a.ability === 'Tough Claws' && hatMerkmal(move, 'contact')) { bpMods.push(0x14CD); merke('Tough Claws'); }
+        if (a.ability === 'Punk Rock' && hatMerkmal(move, 'sound')) { bpMods.push(0x14CD); merke('Punk Rock'); }
+        /* ×1,5 */
+        if (a.ability === 'Mega Launcher' && hatMerkmal(move, 'pulse')) { bpMods.push(0x1800); merke('Mega Launcher'); }
+        if (a.ability === 'Strong Jaw' && hatMerkmal(move, 'bite')) { bpMods.push(0x1800); merke('Strong Jaw'); }
         if (a.ability === 'Analytic' && opts.langsamer) { bpMods.push(0x14CD); merke('Analytic'); }
         if (TYP_ITEM[a.item] === move.type) { bpMods.push(0x1333); merke(a.item); }
         if (a.item === 'Muscle Band' && physical) { bpMods.push(0x1199); merke('Muscle Band'); }
@@ -303,6 +338,9 @@
         if (a.ability === 'Guts' && physical && a.status) { atMods.push(0x1800); merke('Guts'); }
         if (a.ability === 'Solar Power' && !physical && String(f.weather || '') === 'Sun') { atMods.push(0x1800); merke('Solar Power'); }
         if (a.ability === 'Water Bubble' && move.type === 'Water') { atMods.push(0x2000); merke('Water Bubble'); }
+        /* Scharfkantig liegt auf dem ANGRIFF, nicht auf der Staerke —
+           NCP damage_MASTER.js Zeile 1960, atMods. */
+        if (a.ability === 'Sharpness' && hatMerkmal(move, 'slicing')) { atMods.push(0x1800); merke('Sharpness'); }
         if (NOTLAGE[a.ability] === move.type && a.hpAnteil <= 1 / 3) { atMods.push(0x1800); merke(a.ability); }
         if (!durchbricht && d.ability === 'Thick Fat' && (move.type === 'Fire' || move.type === 'Ice')) { atMods.push(0x800); merke('Thick Fat'); }
         if (!durchbricht && d.ability === 'Heatproof' && move.type === 'Fire') { atMods.push(0x800); merke('Heatproof'); }
@@ -366,6 +404,9 @@
             finalMods.push(0xC00); merke(d.ability);
         }
         if (!durchbricht && d.ability === 'Purifying Salt' && move.type === 'Ghost') { finalMods.push(0x800); merke('Purifying Salt'); }
+        if (!durchbricht && d.ability === 'Fluffy' && hatMerkmal(move, 'contact')) { finalMods.push(0x800); merke('Fluffy'); }
+        if (!durchbricht && d.ability === 'Fluffy' && move.type === 'Fire') { finalMods.push(0x2000); merke('Fluffy'); }
+        if (!durchbricht && d.ability === 'Punk Rock' && hatMerkmal(move, 'sound')) { finalMods.push(0x800); merke('Punk Rock'); }
         if (a.item === 'Expert Belt' && eff > 1) { finalMods.push(0x1333); merke('Expert Belt'); }
         else if (a.item === 'Life Orb') { finalMods.push(0x14CC); merke('Life Orb'); }
         const beere = RESIST_BEERE[d.item];
@@ -509,7 +550,7 @@
         /* Die Bausteine der Rechnung nach aussen, damit eine Zusicherung
            sie EINZELN pruefen kann. Eine Kette, die nur im Ganzen
            pruefbar ist, wird beim ersten Fehler zur Suche im Heuhaufen. */
-        pokeRound, chainMods, stufe,
+        pokeRound, chainMods, stufe, hatMerkmal,
         TYP_ITEM, RESIST_BEERE, IMMUN_FAEHIGKEIT, NOTLAGE, NICHT_BELEGT,
     };
 })(typeof window !== 'undefined' ? window : globalThis);

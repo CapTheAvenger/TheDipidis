@@ -151,6 +151,29 @@ describe('Der Fall, den das Kopfband zeigt', () => {
         assert.ok(html.indexOf(api.koLabel(f.range.ko)) !== -1, 'das K.O.-Urteil fehlt im Satz');
     });
 
+    it('jede Sache steht mit EINEM Namen im Satz, nicht mit zweien', () => {
+        /* Live gesehen am 16.09.2026: die Kopfzeile las sich „Rillaboom
+           Gortrom Wood Hammer Holzhammer gegen Sneasler Snieboss: …" —
+           vier Namen, wo zwei genuegen. Ueberall sonst ist die doppelte
+           Form richtig; in DIESEM Satz, der die Antwort des ganzen
+           Reiters traegt, nicht. */
+        const api = load('de');
+        const p = paar(api);
+        api.rechState({ me: p.me, opp: p.opp, move: null, seite: 'me' });
+        const f = api.rechFall();
+        const html = api.rechSatzHtml(f);
+        // Kein <small> — das ist die doppelte Form aus nameHtml().
+        assert.ok(html.indexOf('<small>') === -1,
+            `der Satz traegt die doppelte Namensform: ${html.replace(/<[^>]+>/g, '')}`);
+        // Und der andere Name ist nicht verloren, sondern steht im title.
+        const deName = api.nurDeutsch(f.attName, 'pokemon');
+        if (deName) {
+            assert.ok(html.indexOf(`title="${f.attName}"`) !== -1,
+                'der englische Name ist ganz verschwunden statt in den Titel zu wandern');
+            assert.ok(html.indexOf(deName) !== -1, 'der deutsche Name fehlt');
+        }
+    });
+
     it('beide Richtungen stehen gleichzeitig im Kasten', () => {
         /* Das ist der Unterschied zum NCP-Rechner: dort steht immer nur
            eine Richtung. Im Doppelkampf ist die Frage aber nie „was mache

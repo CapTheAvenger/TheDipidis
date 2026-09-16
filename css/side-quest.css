@@ -4074,7 +4074,57 @@
 }
 .sq-console .sq-rech-wer { min-width: 0; }
 .sq-console .sq-rech-wer.is-opp { text-align: right; }
+/* ── DAS SUCHFELD DER POKEMON-AUSWAHL (16.09.2026) ───────────────────
+   ANLASS (Betreiber): „das Feld sollte ein Suchfilter sein, damit ich
+   nach raichu suchen kann und dann werden mir halt alle Möglichkeiten
+   die Raichu enthalten angezeigt".
+
+   Die Trefferliste liegt ABSOLUT über dem Kopfband, nicht im Fluss:
+   im Fluss würde sie die Schnellleiste und die halbe Seite nach unten
+   schieben, sobald man tippt — und beim Löschen wieder zurück. Ein
+   Feld, unter dem die Seite springt, ist kein Suchfeld. */
 .sq-console .sq-rech-pick { width: 100%; font-size: 13px; font-weight: 700; }
+.sq-console .sq-rech-combo { position: relative; }
+.sq-console .sq-rech-treffer {
+    position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px);
+    max-height: 320px; overflow-y: auto; overscroll-behavior: contain;
+    background: var(--sq-panel); border: 1px solid var(--sq-accent);
+    border-radius: 10px; box-shadow: 0 10px 28px rgba(0, 0, 0, .45);
+    padding: 4px;
+}
+.sq-console .sq-rech-treffer[hidden] { display: none; }
+.sq-console .sq-rech-treff {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    background: none; border: none; border-radius: 8px; cursor: pointer;
+    color: var(--sq-dim); font-family: inherit; font-size: var(--fs-xs);
+    padding: 5px 7px; text-align: left;
+}
+.sq-console .sq-rech-treff:hover,
+.sq-console .sq-rech-treff:focus-visible {
+    background: var(--sq-deep); color: var(--sq-txt); outline: none;
+}
+.sq-console .sq-rech-treff:focus-visible { box-shadow: inset 0 0 0 1.4px var(--sq-accent); }
+.sq-console .sq-rech-treff.is-an { color: var(--sq-txt); background: var(--sq-deep); }
+.sq-console .sq-rech-treff.is-an .sq-rech-treff-n { font-weight: 700; }
+.sq-console .sq-rech-treff-img {
+    width: 30px; height: 30px; flex: 0 0 30px;
+    image-rendering: pixelated; object-fit: contain;
+}
+.sq-console .sq-rech-treff-n {
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* Der englische Name als Beiwerk: er steht da, damit ein Paste-Name
+   wiedererkannt wird, soll aber den deutschen nicht überstimmen. */
+.sq-console .sq-rech-treff-n em {
+    font-style: normal; color: var(--sq-dim2); margin-left: 6px; font-weight: 400;
+}
+.sq-console .sq-rech-leer,
+.sq-console .sq-rech-mehr {
+    margin: 0; padding: 8px 7px; font-size: var(--fs-xs); color: var(--sq-dim2);
+}
+/* Die Gegnerseite ist rechtsbündig gesetzt — die Liste darin nicht,
+   sonst stünden Sprite und Name auf getrennten Seiten der Zeile. */
+.sq-console .sq-rech-wer.is-opp .sq-rech-treffer { text-align: left; }
 .sq-console .sq-rech-typen {
     display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap;
 }

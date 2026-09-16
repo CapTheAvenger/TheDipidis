@@ -95,9 +95,30 @@ describe('Side Quest: der Teams-Reiter wird tatsächlich gezeichnet', () => {
     });
 
     it('der Renderer ist öffentlich, sonst kann ihn niemand aufrufen', () => {
-        const exp = SQ.match(/window\.sideQuest\s*=\s*\{([\s\S]{0,300}?)\}/);
-        assert.ok(exp, 'window.sideQuest wird gar nicht gesetzt');
-        assert.match(exp[1], /(^|[\s,{])render\s*[,}]/,
+        /* OHNE KOMMENTARE UND OHNE ENGE OBERGRENZE (16.09.2026).
+
+           Das Muster suchte in den ersten 300 Zeichen hinter
+           `window.sideQuest = {`. Am 16.09.2026 kam ein Eintrag mit
+           erklaerendem Kommentar dazu, der Block wurde laenger als 300
+           Zeichen, und die Zusicherung meldete „window.sideQuest wird
+           gar nicht gesetzt" — eine Aussage, die schlicht falsch war.
+
+           Eine Obergrenze, die an der LAENGE eines Blocks haengt,
+           beschreibt nicht die Bedingung, die gemeint ist („steht
+           `render` im Ausgang?"). Kommentare heraus, Grenze auf die
+           erste schliessende Klammer der Ebene. */
+        const ohneKommentare = SQ
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/(^|[^:"'`])\/\/.*$/gm, '$1');
+        assert.ok(ohneKommentare.length > SQ.length * 0.3,
+            'das Ausschneiden der Kommentare hat zu viel entfernt');
+        const i = ohneKommentare.indexOf('window.sideQuest = {');
+        assert.ok(i !== -1, 'window.sideQuest wird gar nicht gesetzt');
+        const block = ohneKommentare.slice(i, ohneKommentare.indexOf('};', i));
+        assert.match(block, /(^|[\s,{])render\s*[,}]/,
             'window.sideQuest.render fehlt — die beiden Aufrufer oben liefen ins Leere');
+        // Gegenprobe: der Ausschnitt endet wirklich am Ausgang und laeuft
+        // nicht ueber den Rest der Datei weiter.
+        assert.ok(block.length < 2000, `der Ausschnitt ist ${block.length} Zeichen lang`);
     });
 });

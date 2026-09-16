@@ -1653,6 +1653,18 @@
         setActiveTeam,
         getOwnTeams,
         getActiveTeam,
+        /* DER PASTE-LESER GEHOERT NACH AUSSEN (16.09.2026)
+
+           ANLASS (Betreiber): „bei mein Kader sollten wir die Option
+           geben Pokepaste bzw unseren Showdown/Limitless export zu
+           nutzen".
+
+           Er steht seit jeher hier, weil das Import-Fenster der
+           Teams-Ansicht ihn braucht. Der Rechner braucht GENAU
+           DENSELBEN Leser — ein zweiter waere die klassische Quelle
+           dafuer, dass ein Paste an der einen Stelle geht und an der
+           anderen nicht. */
+        parsePokepaste: parsePokepasteText,
     };
 
     // Auto-render when the side-quest tab becomes active. The site uses

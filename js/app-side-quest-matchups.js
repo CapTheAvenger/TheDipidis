@@ -2684,29 +2684,46 @@
         if (_verlauf.length > 12) _verlauf.length = 12;
     }
 
+    /* DER REITER OEFFNET ARBEITSFAEHIG, NICHT LEER.
+       Ein leerer Kader mit zwei Knoepfen daneben verlangt zwei Klicks,
+       bevor ueberhaupt etwas dasteht. Vorbelegt wird mit dem, was der
+       Betreiber gerade spielt (das aktive Team) und mit dem, wogegen er
+       es am ehesten spielt (die sechs meistgespielten Pokemon). Beides
+       ist mit einem Klick wieder weg.
+
+       Nur wenn NOCH NICHTS dasteht: wer ueber den Team-Builder
+       hereinkommt, hat seinen Kader schon dabei.
+
+       DIE REIHENFOLGE DIESER VIER SCHRITTE IST DER GANZE WITZ.
+       ------------------------------------------------------
+       Live gemessen am 16.09.2026, nach dem Deploy: der Reiter oeffnete
+       mit „Gortrom Kehrtwende gegen Gortrom". Der eigene Vorgabewert
+       stand damals HINTER kaderPick6() — wer kein eigenes Team
+       gespeichert hat (der Normalfall beim ersten Besuch), hatte beim
+       Pick 6 noch gar kein `_rMe`, also griff die Spiegelsperre ins
+       Leere und danach wurde `_rMe` auf genau dasselbe oberste Pokemon
+       gesetzt.
+
+       Erst wissen, WER kaempft, dann den Gegner waehlen. Deshalb steht
+       das hier als eigene, aufrufbare Funktion: was man nicht aufrufen
+       kann, kann man nicht pruefen. */
+    function kaderEroeffnung() {
+        if (!_kaderMein.length) {
+            const teams = eigeneTeams();
+            const aktiv = aktiverTeamCode();
+            const nimm = teams.find(t => t.replica_code === aktiv) || teams[0];
+            if (nimm) ladeKaderTeam(nimm.replica_code);
+        }
+        if (!_rMe && _roster && _roster.length) _rMe = _roster[0].name;
+        if (!_kaderOpp.length) kaderPick6();
+        if (!_rOpp && _roster && _roster.length) {
+            _rOpp = (_roster.find(r => r.name !== _rMe) || _roster[0]).name;
+        }
+    }
+
     function activateRechner() {
         const starte = () => {
-            /* DER REITER OEFFNET ARBEITSFAEHIG, NICHT LEER.
-               Ein leerer Kader mit zwei Knoepfen daneben verlangt zwei
-               Klicks, bevor ueberhaupt etwas dasteht. Vorbelegt wird mit
-               dem, was der Betreiber gerade spielt (das aktive Team) und
-               mit dem, wogegen er es am ehesten spielt (die sechs
-               meistgespielten Pokemon). Beides ist mit einem Klick
-               wieder weg.
-
-               Nur wenn NOCH NICHTS dasteht: wer ueber den Team-Builder
-               hereinkommt, hat seinen Kader schon dabei. */
-            if (!_kaderMein.length) {
-                const teams = eigeneTeams();
-                const aktiv = aktiverTeamCode();
-                const nimm = teams.find(t => t.replica_code === aktiv) || teams[0];
-                if (nimm) ladeKaderTeam(nimm.replica_code);
-            }
-            if (!_kaderOpp.length) kaderPick6();
-            if (!_rMe && _roster && _roster.length) _rMe = _roster[0].name;
-            if (!_rOpp && _roster && _roster.length) {
-                _rOpp = (_roster.find(r => r.name !== _rMe) || _roster[0]).name;
-            }
+            kaderEroeffnung();
             renderRechner();
         };
         if (_activated && _roster) { starte(); return; }
@@ -2796,7 +2813,7 @@
            was die Leiste daraus zeichnet (kaderHtml). Ohne sie liesse
            sich nur pruefen, DASS eine Leiste da ist. */
         KADER_MAX, kaderHtml, kaderChip, kaderRechenbar, satzUebernehmen,
-        metaTop, kaderPick6, ladeKaderTeam, wireKader, setFor, setKey,
+        metaTop, kaderPick6, ladeKaderTeam, wireKader, setFor, setKey, kaderEroeffnung,
         kaderState: (patch) => {
             if (patch) {
                 if (patch.mein != null) _kaderMein = patch.mein;

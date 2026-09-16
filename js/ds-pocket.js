@@ -50,6 +50,23 @@
     'use strict';
 
     var QUELLE = 'data/pocket_tierlist.json';
+    /* DIE SET-NAMEN (16.09.2026).
+       ANLASS (Betreiber): „können wir bei den Details von den Karten
+       auch den Set Namen schreiben weil mit B3 und A2 und so kann ich
+       nichts anfangen. Aber wenn ich weiß wie das set heißt kann ich
+       noch schnell fehlende Karten besorgen."
+
+       Die Kennung ist der Sortierschluessel des Spiels, kein Name, den
+       man in einem Laden nennen kann. Die Tabelle steht in einer
+       EIGENEN Datei: sie aendert sich mit den Erweiterungen, nicht mit
+       den Decks, und der naechtliche Decklauf soll sie nicht
+       ueberschreiben.
+
+       Faellt sie aus, bleibt die blanke Kennung stehen — der Reiter
+       laeuft weiter. Ein erfundener Set-Name schickt den Betreiber in
+       den Laden nach etwas, das es nicht gibt. */
+    var SET_QUELLE = 'data/pocket_sets.json';
+    var setNamen = null;
     var HOST = 'pocket';
     var TIER_ORDNUNG = ['S', 'A+', 'A', 'B', 'C', 'D'];
     // Ein neues Pocket-Set erscheint etwa im Monatsabstand; danach ist
@@ -270,6 +287,77 @@
         return d.quelle_liste === 'set' || d.quelle_liste === 'beide';
     }
 
+    /* EINE DECKZEILE — in beiden Gruppierungen dieselbe. */
+    function zeile(d, streit) {
+        var i = (daten.decks || []).indexOf(d);
+        var s = '<button type="button" class="pk-zeile" data-pk-deck="' + i + '">';
+        s += '<span class="pk-marke">' + esc(d.tier || '?') + '</span>';
+        s += spriteHtml(d);
+        s += '<span class="pk-name">' + esc(d.name);
+        var fuss = [];
+        if (d.quelle_liste === 'set') {
+            fuss.push(t('Stufe aus der Set-Tabelle', 'tier from the set table'));
+        }
+        if (streit && streit[d.name]) {
+            fuss.push(t('Game8 nennt auch ' + streit[d.name].join('/'),
+                        'Game8 also lists ' + streit[d.name].join('/')));
+        }
+        if (fuss.length) {
+            s += '<span class="pk-fussnote">' + esc(fuss.join(' · ')) + '</span>';
+        }
+        s += '</span><span class="pk-pfeil" aria-hidden="true">›</span></button>';
+        return s;
+    }
+
+    /* „NEUES SET" IST KEINE STUFENLISTE (16.09.2026).
+       ANLASS (Betreiber): „bei neues Set sollten ja nur die New Team
+       Rocket's Ambition Decks und Old Decks Updated with Team Rocket's
+       Ambition inklusive der Tiers".
+
+       Und: „bei Pocket ändert der Filter Alle, Tier-List, Neues Set
+       quasi nichts." Gemessen am 16.09.2026 gegen die echte Seite
+       stimmte das fast — der Filter greift (23 gegen 21 von 33 Decks),
+       aber er SIEHT nicht danach aus, weil elf Decks in beiden Listen
+       stehen und die Gruppierung in beiden Faellen dieselbe war.
+
+       Game8 teilt die Set-Tabelle in ZWEI Abschnitte, und die sagen
+       etwas, das die Stufe nicht sagt: ob ein Deck mit dem Set NEU ist
+       oder ein bestehendes, das durch das Set besser wurde. Genau danach
+       wird hier gruppiert; die Stufe steht weiter an jeder Zeile. */
+    function nachAbschnitten(decks, streit) {
+        var gruppen = [], zuordnung = {};
+        decks.forEach(function (d) {
+            var a = d.set_abschnitt || '';
+            if (!zuordnung[a]) { zuordnung[a] = []; gruppen.push(a); }
+            zuordnung[a].push(d);
+        });
+        // Die Abschnitte in der Reihenfolge der Quelle lassen; nur die
+        // Decks ohne Abschnitt ganz nach hinten, weil sie eine Auskunft
+        // brauchen statt einer Ueberschrift.
+        gruppen.sort(function (a, b) { return (a ? 0 : 1) - (b ? 0 : 1); });
+        var s = '';
+        gruppen.forEach(function (a) {
+            var teil = zuordnung[a];
+            teil.sort(function (x, y) {
+                var r = TIER_ORDNUNG.indexOf(x.tier) - TIER_ORDNUNG.indexOf(y.tier);
+                return r || x.name.localeCompare(y.name, 'de');
+            });
+            s += '<section class="pk-stufe">';
+            s += '<h3>' + esc(a || t('Ohne Abschnitt', 'No section')) +
+                 ' <span class="pk-stufe-zahl">' + teil.length + '</span></h3>';
+            if (!a) {
+                s += '<p class="pk-alt">' + esc(t(
+                    'Diese Decks stehen in der Set-Tabelle, ohne dass der Lauf '
+                    + 'ihre Überschrift zuordnen konnte. Sie stehen trotzdem da.',
+                    'These decks are in the set table, but the run could not '
+                    + 'assign their heading. They are shown anyway.')) + '</p>';
+            }
+            teil.forEach(function (d) { s += zeile(d, streit); });
+            s += '</section>';
+        });
+        return s;
+    }
+
     function liste() {
         var decks = (daten.decks || []).filter(passt);
         if (!decks.length) {
@@ -277,6 +365,7 @@
                              'No deck in the list matches this filter.'));
         }
         var streit = abweichendeStufen(daten._meta || {}, daten.decks || []);
+        if (filter === 'set') return nachAbschnitten(decks, streit);
         var s = '';
         TIER_ORDNUNG.forEach(function (stufe) {
             var teil = decks.filter(function (d) { return d.tier === stufe; });
@@ -287,27 +376,7 @@
             s += '<section class="pk-stufe">';
             s += '<h3>' + esc(t('Stufe ', 'Tier ')) + esc(stufe) +
                  ' <span class="pk-stufe-zahl">' + teil.length + '</span></h3>';
-            teil.forEach(function (d) {
-                var i = (daten.decks || []).indexOf(d);
-                s += '<button type="button" class="pk-zeile" data-pk-deck="' + i + '">';
-                s += '<span class="pk-marke">' + esc(d.tier) + '</span>';
-                s += spriteHtml(d);
-                s += '<span class="pk-name">' + esc(d.name);
-                var fuss = [];
-                if (d.quelle_liste === 'set') {
-                    fuss.push(t('Stufe aus der Set-Tabelle', 'tier from the set table'));
-                }
-                if (streit[d.name]) {
-                    fuss.push(t('Game8 nennt auch ' + streit[d.name].join('/'),
-                                'Game8 also lists ' + streit[d.name].join('/')));
-                }
-                if (fuss.length) {
-                    s += '<span class="pk-fussnote">' + esc(fuss.join(' · ')) + '</span>';
-                }
-                s += '</span>';
-                s += '<span class="pk-pfeil" aria-hidden="true">›</span>';
-                s += '</button>';
-            });
+            teil.forEach(function (d) { s += zeile(d, streit); });
             s += '</section>';
         });
 
@@ -429,8 +498,16 @@
             return '<h4>' + esc(titel) + ' <span>(' + stueck + ')</span></h4><ul>' +
                 karten.map(function (k) {
                     var nr = k.set && k.nummer ? k.set + '-' + k.nummer : '';
+                    var name = k.set && setNamen ? setNamen[k.set] : '';
+                    /* Der Name steht VOR der Kennung und traegt sie im
+                       Titel: der Name ist das, wonach man sucht, die
+                       Kennung das, was auf der Karte steht. Fehlt der
+                       Name, bleibt die Kennung allein — sichtbar
+                       unvollstaendig statt still erfunden. */
                     return '<li><span>' + k.anzahl + '× ' + esc(k.name) + '</span>' +
-                           '<span>' + esc(nr) + '</span></li>';
+                           '<span class="pk-karte-set" title="' + esc(nr) + '">' +
+                           (name ? '<b>' + esc(name) + '</b> ' : '') +
+                           esc(nr) + '</span></li>';
                 }).join('') + '</ul>';
         }
         return '<div class="pk-karten">' +
@@ -731,6 +808,15 @@
                 daten = j;
                 geladen = true;
                 zeichne();
+                // NACH dem Zeichnen und ohne Wartezeit davor: die
+                // Deckliste ist ohne Set-Namen vollstaendig bedienbar,
+                // und eine zweite Datei darf den Reiter nicht aufhalten.
+                fetch(SET_QUELLE, { cache: 'no-store' })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (sj) {
+                        if (sj && sj.sets) { setNamen = sj.sets; zeichne(); }
+                    })
+                    .catch(function () { /* blanke Kennung bleibt */ });
             })
             .catch(function (e) {
                 laeuft = null;

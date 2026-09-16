@@ -1110,10 +1110,11 @@
        Wer !important mit !important beantwortet, gewinnt einmal und
        verliert beim naechsten Mal; wer die Marke umsetzt, bleibt im
        System. */
-    --ui-btn-pad-y: 5px;
-    --ui-btn-pad-x: 10px;
-    --ui-btn-font-size: 12.5px;
-    --ui-btn-radius: 8px;
+    /* Der Maßstab steht seit dem 16.09.2026 an EINER Stelle, fuer
+       diese Reihe und die Werkzeugleiste darueber gemeinsam:
+       css/pokeball-menu.css, `.deck-builder-toolbar, .current-meta-
+       mydeck-btns, …`. Hier standen eigene, kleinere Werte — und genau
+       dieser Unterschied war der Befund vom 16.09.2026. */
 }
 .current-meta-mydeck-btns .btn-modern {
     box-shadow: none;
@@ -1128,18 +1129,16 @@
     transform: none;
     box-shadow: none;
 }
-/* Die eine Hauptaktion behaelt ihr Gewicht. Ohne diese Zeile wuerde die
-   Regel darueber auch sie einebnen — dann saehe die Leiste ruhig aus
-   und niemand faende den Knopf, um den es geht. */
+/* Die eine Hauptaktion behaelt ihr Gewicht — ueber die FARBE. Ohne
+   diese Zeile wuerde die Regel darueber auch sie einebnen; dann saehe
+   die Leiste ruhig aus und niemand faende den Knopf, um den es geht.
+   Die eigenen, GROESSEREN Marken, die hier bis zum 16.09.2026 standen,
+   sind weg: eine Reihe, in der ein Knopf aus dem Maßstab faellt, liest
+   sich als Fehler und nicht als Hinweis. Gruen genuegt. */
 .current-meta-mydeck-btns .btn-modern.success {
     background: var(--color-success);
     border-color: #219653;
     color: #fff;
-    /* Eigene Marken, damit die Hauptaktion etwas groesser bleibt als die
-       Werkzeuge daneben — dieselbe Mechanik wie oben. */
-    --ui-btn-pad-y: 7px;
-    --ui-btn-pad-x: 15px;
-    --ui-btn-font-size: 13.5px;
 }
 .current-meta-mydeck-btns .btn-modern.success:hover {
     background: #1c7f47;
@@ -1937,8 +1936,16 @@
     background: var(--surface-2);
     border: 1px solid var(--line);
     border-radius: 8px;
+    /* Auf denselben Maßstab wie die Knoepfe der Leiste gebracht
+       (16.09.2026). Gemessen vorher: Chips 26–28 px neben Knoepfen von
+       38,1 px in derselben Zeile; nachher 31 px neben 30,9 px. */
     padding: 5px 12px;
-    font-size: 0.88em;
+    font-size: 13px;
+    /* Die Hoehe kam aus dem Inhalt: der mittlere Chip fuehrt kein
+       .toolbar-metric-sep und war damit 2 px niedriger als seine
+       Nachbarn. Sie kommt jetzt aus der Regel. */
+    min-height: 31px;
+    box-sizing: border-box;
     font-weight: 700;
     color: var(--ink);
     white-space: nowrap;

@@ -1307,9 +1307,15 @@
         }
 
         /* Deck Builder Styles */
+        /* Die Flaeche des Deckbaus folgt dem Thema (16.09.2026).
+           Gemessen im Dunkelmodus: hier stand ein fester heller
+           Verlauf (#fafbff -> #f0f4ff) — die weisse Platte im Bild des
+           Betreibers. --surface-0 liegt im Hellmodus bei #f7f8fa und
+           damit fast genau auf dem alten Wert; die Kachel darin
+           (.section-panel, --surface-1) hebt sich in BEIDEN Themen ab. */
         .deck-builder {
             padding: 16px 20px;
-            background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%);
+            background: var(--surface-0);
             border-top: 3px solid var(--pokemon-blue, #3B4CCA);
             border-radius: 0 0 12px 12px;
         }

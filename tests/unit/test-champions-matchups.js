@@ -335,11 +335,24 @@ describe('die Aussagen über K.O. und Effektivität', () => {
 });
 
 describe('die Oberfläche sagt, was sie nicht rechnet', () => {
-    it('Fähigkeiten, Wetter und Volltreffer stehen in der Fußnote', () => {
-        assert.match(SRC, /noteOut:[^\n]*Fähigkeiten/);
-        assert.match(SRC, /noteOut:[^\n]*Wetter/);
-        assert.match(SRC, /noteOut:[^\n]*Volltreffer/);
-        assert.match(SRC, /noteOut:[^\n]*abilities/);
+    /* GEAENDERT AM 16.09.2026 — und zwar weil diese Zusicherung das
+       FALSCHE festgenagelt hat.
+
+       Hier stand: „noteOut muss Fähigkeiten, Wetter und Volltreffer
+       nennen". Am 15.09. war das richtig; am 16.09. konnte der Rechner
+       alle drei, und die Zusicherung verlangte weiterhin, dass die
+       Oberfläche das Gegenteil behauptet. Sie war grün, während der
+       Satz unter dem Rechner nachweislich falsch war.
+
+       Eine Zusicherung darf einen Vorbehalt nicht FESTSCHREIBEN. Sie
+       darf nur verlangen, dass es überhaupt einen gibt und dass er
+       nicht leer ist. Ob sein INHALT stimmt, prüft
+       tests/unit/test-rechner-kampflage.js gegen die gemessene Wirkung
+       jedes einzelnen Feldes — dort, wo der Bezug zur Wirklichkeit
+       herzustellen ist. */
+    it('es gibt überhaupt einen Vorbehalt, in beiden Sprachen', () => {
+        assert.match(SRC, /noteOut:[^\n]*Nicht gerechnet/);
+        assert.match(SRC, /noteOut:[^\n]*Not calculated/);
     });
 
     it('das Gegner-Set ist als „meistgenutzt" ausgewiesen', () => {
@@ -435,9 +448,22 @@ describe('beide Sprachen', () => {
         assert.ok(de && en);
         const keys = (lang) => {
             const m = SRC.match(new RegExp(`\\n        ${lang}: \\{([\\s\\S]*?)\\n        \\},`));
-            // Zeichenketten vorher entfernen — „Nicht gerechnet: …" sähe
-            // sonst aus wie ein Label namens „gerechnet".
-            const body = m[1].replace(/'(?:[^'\\]|\\.)*'/g, "''").replace(/`(?:[^`\\]|\\.)*`/g, '``');
+            /* Zeichenketten UND Kommentare vorher entfernen — „Nicht
+               gerechnet: …" sähe sonst aus wie ein Label namens
+               „gerechnet". Die Zeichenketten waren schon draußen; die
+               Kommentare kamen am 16.09.2026 dazu, als ein erklärender
+               Block innerhalb von `de: {` genau diesen Satz zitierte und
+               die Zusicherung darüber stolperte. Das ist dieselbe Regel
+               wie in CLAUDE.md: was Quelltext nach Zeichenketten
+               durchsucht, schneidet vorher die Kommentare heraus. */
+            const roh = m[1];
+            const ohneKommentare = roh
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+            assert.ok(ohneKommentare.length > roh.length * 0.3,
+                'das Ausschneiden der Kommentare hat zu viel entfernt');
+            const body = ohneKommentare
+                .replace(/'(?:[^'\\]|\\.)*'/g, "''").replace(/`(?:[^`\\]|\\.)*`/g, '``');
             return (body.match(/(?:^|[\s,{])([a-zA-Z]+):/gm) || [])
                 .map(s => s.replace(/[^a-zA-Z]/g, ''));
         };

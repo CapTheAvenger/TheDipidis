@@ -185,6 +185,77 @@ describe('Pick 6: die sechs meistgespielten — aus den Daten, nicht aus einer L
 
 // ══════════════════════════════════════════════════════════════════════
 
+describe('Die Eroeffnung des Reiters', () => {
+    /* LIVE GEFUNDEN, NICHT VON EINEM TEST (16.09.2026, nach dem Deploy).
+       Der Reiter oeffnete mit „Gortrom Kehrtwende gegen Gortrom".
+       Alle Zusicherungen waren gruen — geprueft war die Spiegelsperre in
+       kaderPick6(), und die greift nur, wenn `_rMe` schon steht. Wer kein
+       eigenes Team gespeichert hat (der Normalfall beim ersten Besuch),
+       hatte beim Pick 6 noch gar keins. */
+    it('ohne eigenes Team: kein Spiegelmatch', () => {
+        const { api, sandbox } = load();
+        sandbox.sideQuest = { getActiveCode: () => '', getOwnTeams: () => [] };
+        api.rechState({ me: null, opp: null });
+        api.kaderState({ mein: [], opp: [] });
+        api.kaderEroeffnung();
+        const st = api.rechState();
+        assert.ok(st.me, 'niemand kaempft auf der eigenen Seite');
+        assert.ok(st.opp, 'niemand kaempft auf der Gegnerseite');
+        assert.notEqual(st.me, st.opp,
+            'der Reiter oeffnet ohne eigenes Team mit einer Rechnung gegen sich selbst');
+    });
+
+    it('ohne eigenes Team steht der Gegnerkader trotzdem', () => {
+        const { api, sandbox } = load();
+        sandbox.sideQuest = { getActiveCode: () => '', getOwnTeams: () => [] };
+        api.rechState({ me: null, opp: null });
+        api.kaderState({ mein: [], opp: [] });
+        api.kaderEroeffnung();
+        const st = api.kaderState();
+        assert.equal(st.opp.length, 6, 'der Gegnerkader bleibt leer');
+        assert.equal(st.mein.length, 0, 'ohne gespeichertes Team steht etwas im eigenen Kader');
+    });
+
+    it('mit eigenem Team kaempft das eigene Team — und nicht gegen sich selbst', () => {
+        const { api, sandbox } = load();
+        const roster = api.setData(DATA);
+        // Bewusst das OBERSTE Pokemon des Metas ins Team: genau die Lage,
+        // die live den Spiegel erzeugt hat.
+        const oben = api.metaTop(6)[0];
+        const slug = roster.find(r => r.name === oben).slug;
+        sandbox.sideQuest = {
+            getActiveCode: () => 'imp-e',
+            getOwnTeams: () => ([{
+                replica_code: 'imp-e', team_name: 'E',
+                pokemon: [{ name: oben, slug, nature: 'Adamant', ability: '', item: '',
+                            evs: '32 Atk', moves: api.setFor(oben, 'me').moves.slice(0, 2) }],
+            }]),
+        };
+        api.rechState({ me: null, opp: null });
+        api.kaderState({ mein: [], opp: [] });
+        api.kaderEroeffnung();
+        const st = api.rechState();
+        assert.equal(st.me, oben, 'das geladene Team kaempft nicht');
+        assert.notEqual(st.opp, oben, 'das geladene Team rechnet gegen sich selbst');
+    });
+
+    it('ruehrt einen schon stehenden Kader nicht an (Weg ueber den Team-Builder)', () => {
+        const { api, sandbox } = load();
+        sandbox.sideQuest = { getActiveCode: () => '', getOwnTeams: () => [] };
+        const a = ersterMitSatz(api);
+        const b = ersterMitSatz(api, [a]);
+        api.rechState({ me: a, opp: b });
+        api.kaderState({ mein: [{ name: a, eigen: true }], opp: [{ name: b, eigen: false }] });
+        api.kaderEroeffnung();
+        const st = api.kaderState();
+        assert.equal(st.mein.length, 1, 'der uebergebene Kader wurde ueberschrieben');
+        assert.equal(st.opp.length, 1, 'der Gegnerkader wurde mit dem Meta ueberschrieben');
+        assert.equal(api.rechState().me, a, 'die Paarung wurde umgeworfen');
+    });
+});
+
+// ══════════════════════════════════════════════════════════════════════
+
 describe('„1:1 wie ich es spiele": der eigene Satz landet dort, wo gerechnet wird', () => {
     it('satzUebernehmen schreibt unter DEN Schluessel, den setFor liest', () => {
         const { api } = load();

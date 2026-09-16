@@ -250,7 +250,8 @@
      * Freiwillig: attackerTypes, effectiveness, spread, crit,
      *   attacker {ability,item,status,boosts,hpAnteil},
      *   defender {ability,item,boosts,hpAnteil},
-     *   field {weather,terrain,reflect,lightScreen,auroraVeil,doubles},
+     *   field {weather,terrain,reflect,lightScreen,auroraVeil,doubles,
+     *          helpingHand,friendGuard},
      *   item (alte Form: Gegenstand des Angreifers).
      *
      * `angewendet` fuehrt jeden wirksam gewordenen Modifikator mit
@@ -322,6 +323,17 @@
         if (a.item === 'Muscle Band' && physical) { bpMods.push(0x1199); merke('Muscle Band'); }
         if (a.item === 'Wise Glasses' && !physical) { bpMods.push(0x1199); merke('Wise Glasses'); }
         if (a.item === 'Normal Gem' && move.type === 'Normal') { bpMods.push(0x14CD); merke('Normal Gem'); }
+        /* HILFREICHE HAND — der Partner schlaegt mit.
+           16.09.2026, auf Ansage: „Hilfreiche Hand + Helfer (Doubles)".
+           Sie ist ein GRUNDSTAERKE-Modifikator (×1,5, 0x1800), kein
+           Angriffs-Modifikator; die Reihenfolge entscheidet ueber die
+           letzte Stelle, weil jede Kette fuer sich mit pokeRound
+           schliesst. Belegt: Showdowns Rechenkern fuehrt sie in
+           calculateBPMods mit 6144 = 0x1800.
+
+           Sie gehoert der ANGREIFERSEITE: ein Partner hilft dem, der
+           schlaegt, nicht dem, der getroffen wird. */
+        if (f.helpingHand) { bpMods.push(0x1800); merke('Helping Hand'); }
         const gelaende = String(f.terrain || '');
         if (gelaende === 'Grassy' && move.type === 'Grass') { bpMods.push(0x14CD); merke('Grassy Terrain'); }
         if (gelaende === 'Electric' && move.type === 'Electric') { bpMods.push(0x14CD); merke('Electric Terrain'); }
@@ -407,6 +419,16 @@
         if (!durchbricht && d.ability === 'Fluffy' && hatMerkmal(move, 'contact')) { finalMods.push(0x800); merke('Fluffy'); }
         if (!durchbricht && d.ability === 'Fluffy' && move.type === 'Fire') { finalMods.push(0x2000); merke('Fluffy'); }
         if (!durchbricht && d.ability === 'Punk Rock' && hatMerkmal(move, 'sound')) { finalMods.push(0x800); merke('Punk Rock'); }
+        /* HELFER (Friend Guard) — der Partner deckt mit.
+           ×0,75 (0xC00) auf alles, was auf DIESE Seite einschlaegt,
+           also ein Modifikator der VERTEIDIGERSEITE. Belegt: Showdowns
+           calculateFinalMods fuehrt sie mit 3072 = 0xC00. Wie beim
+           Schirm zaehlt die Seite, auf der sie steht — nicht die, von
+           der sie ausgeht.
+
+           Anders als der Schirm wirkt sie AUCH bei einem Volltreffer:
+           der Volltreffer hebt Schirme auf, nicht Faehigkeiten. */
+        if (f.friendGuard) { finalMods.push(0xC00); merke('Friend Guard'); }
         if (a.item === 'Expert Belt' && eff > 1) { finalMods.push(0x1333); merke('Expert Belt'); }
         else if (a.item === 'Life Orb') { finalMods.push(0x14CC); merke('Life Orb'); }
         const beere = RESIST_BEERE[d.item];

@@ -646,6 +646,11 @@
         matchups: 'sideQuestMatchupsHost',
         pokedex: 'sideQuestPokedexHost',
         builder: 'sideQuestBuilderHost',
+        /* Der Schadensrechner als EIGENER Reiter (16.09.2026).
+           Bis dahin war er ein Unterzustand der Matchup-Liste: erst ein
+           Pokémon wählen, dann eine Zeile anklicken. Gemeldet: „der
+           Damage Culc ist ja immer noch kein eigenes Feature". */
+        rechner: 'sideQuestRechnerHost',
         resources: 'sideQuestResourcesHost',
         // Statuszustaende, seit dem 31.08.2026. Der Host heisst
         // bewusst NICHT sideQuestStatusHost: #sideQuestStatus ist
@@ -694,6 +699,8 @@
             }
         } else if (view === 'pokedex' && window.sideQuestPokedex) {
             window.sideQuestPokedex.activate();
+        } else if (view === 'rechner' && window.sideQuestRechner) {
+            window.sideQuestRechner.activate();
         } else if (view === 'builder' && window.sideQuestBuilder) {
             window.sideQuestBuilder.activate();
         } else if (view === 'usage' && window.sideQuestUsage) {
@@ -716,6 +723,7 @@
             b.textContent = v === 'usage' ? (uiLang() === 'de' ? 'Nutzung' : 'Usage')
                           : v === 'items' ? (uiLang() === 'de' ? 'Items' : 'Items')
                           : v === 'matchups' ? 'Matchups'
+                          : v === 'rechner' ? (uiLang() === 'de' ? 'Rechner' : 'Calculator')
                           : v === 'status' ? 'Status'
                           : v === 'resources' ? l.tabResources
                           : v === 'pokedex' ? pokedexLabel

@@ -72,7 +72,15 @@ const translations = {
     'menu.profile':           'My Profile',
     'menu.howToUse':          'How to Use',
     'menu.quellen':           'Sources & Method',
-    'menu.sideQuest':         'Side Quest: Pokémon Champions Replica',
+    /* „Replica" ist am 16.09.2026 aus dem Titel gefallen, auf Ansage:
+       „das replika kann aus dem Titel raus, da wir ja mittlerweile
+       deutlich mehr können". Der Reiter fing als reine Sammlung von
+       Replica-Codes an; inzwischen haengen Nutzungsanalyse, Pokedex,
+       Items, Matchups, Schadensrechner, Team-Builder und
+       Statuszustaende darunter. Der Name beschrieb also die Herkunft,
+       nicht mehr den Inhalt. Die Codes selbst heissen weiter Replica —
+       das ist ihr Name im Spiel, kein Titel. */
+    'menu.sideQuest':         'Side Quest: Pokémon Champions',
     'menu.pocket':            'Side Quest: Pokémon TCG Pocket',
 
     // ── Tab labels ───────────────────────────────────────────
@@ -2734,7 +2742,7 @@ const translations = {
     'menu.profile':           'Mein Profil',
     'menu.howToUse':          'Anleitung',
     'menu.quellen':           'Quellen & Methodik',
-    'menu.sideQuest':         'Side Quest: Pokémon Champions Replica',
+    'menu.sideQuest':         'Side Quest: Pokémon Champions',
     'menu.pocket':            'Side Quest: Pokémon TCG Pocket',
 
     // ── Tab labels ───────────────────────────────────────────

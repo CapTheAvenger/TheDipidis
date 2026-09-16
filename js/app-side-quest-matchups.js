@@ -153,6 +153,23 @@
                         + 'Schirm gelten für diese Seite, Wetter und Gelände für beide.',
             angewendet: 'Gerechnet mit:',
             unbelegt: 'Nicht gerechnet:',
+            hilfe: 'Hilfreiche Hand',
+            hilfeTitel: 'Der Partner schlägt mit: ×1,5 auf die Stärke dieser Seite.',
+            helfer: 'Helfer',
+            helferTitel: 'Der Partner deckt mit: ×0,75 auf alles, was auf DIESE Seite einschlägt.',
+            rechnerTitel: 'Schadensrechner',
+            rechnerHint: 'Zwei Pokémon, ein Feld, beide Richtungen. Vorbelegt ist je der '
+                        + 'meistgespielte Satz aus der In-Game-Nutzungsanalyse — alles änderbar.',
+            gegen: 'gegen', duTriffst: 'Du triffst', duWirstGetroffen: 'Du wirst getroffen',
+            wuerfe: '16 Würfe',
+            merken: '+ Stand merken', vergleich: 'Vergleich', leeren: 'Liste leeren',
+            vergleichHint: 'Gemerkte Stände bleiben stehen, bis du sie leerst — so siehst du '
+                        + '„mit Schirm" und „ohne Schirm" nebeneinander statt nacheinander.',
+            saetze: 'Sätze bearbeiten',
+            saetzeHint: 'Fähigkeit · Item · Wesen · Attacken · Punkte · Stufen · Status · KP',
+            keineAttacke: 'Dieser Satz hat keine Attacke, die Schaden macht.',
+            tausch: '⇄ Seiten tauschen',
+            weg: 'Entfernen',
             nature: 'Wesen', noItem: '— kein Item —', moves: 'Attacken',
             empty: '— leer —', points: 'Statuswertpunkte', reset: 'Standard-Set',
             budget: (used) => `${used}/${SP_BUDGET} Punkte`,
@@ -258,6 +275,23 @@
                         + 'screen apply to this side, weather and terrain to both.',
             angewendet: 'Calculated with:',
             unbelegt: 'Not calculated:',
+            hilfe: 'Helping Hand',
+            hilfeTitel: 'The partner joins in: ×1.5 on this side\'s base power.',
+            helfer: 'Friend Guard',
+            helferTitel: 'The partner covers: ×0.75 on everything hitting THIS side.',
+            rechnerTitel: 'Damage calculator',
+            rechnerHint: 'Two Pokémon, one field, both directions. Pre-filled with each '
+                        + 'Pokémon\'s most-played set from the in-game usage analysis — all editable.',
+            gegen: 'vs', duTriffst: 'You hit', duWirstGetroffen: 'You are hit',
+            wuerfe: '16 rolls',
+            merken: '+ Keep this case', vergleich: 'Comparison', leeren: 'Clear list',
+            vergleichHint: 'Kept cases stay until you clear them — so you see “with screen” and '
+                        + '“without screen” side by side instead of one after the other.',
+            saetze: 'Edit sets',
+            saetzeHint: 'Ability · item · nature · moves · points · stages · status · HP',
+            keineAttacke: 'This set has no damaging move.',
+            tausch: '⇄ Swap sides',
+            weg: 'Remove',
             nature: 'Nature', noItem: '— no item —', moves: 'Moves',
             empty: '— empty —', points: 'Stat points', reset: 'Default set',
             budget: (used) => `${used}/${SP_BUDGET} points`,
@@ -507,6 +541,12 @@
                Behauptung ueber den Kampf. */
             boosts: { atk: 0, def: 0, spa: 0, spd: 0 },
             status: '', hp: '1', schirm: '',
+            /* Hilfreiche Hand und Helfer gehoeren an die SEITE, nicht
+               ans Feld — genau wie der Schirm. Damit komponieren sie
+               von selbst richtig, auch wenn beide Richtungen
+               gleichzeitig gerechnet werden: die Hand zaehlt bei dem,
+               der schlaegt, der Helfer bei dem, der getroffen wird. */
+            hilfe: false, helfer: false,
         };
     }
 
@@ -624,6 +664,8 @@
                 reflect: dSet.schirm === 'reflect',
                 lightScreen: dSet.schirm === 'light',
                 auroraVeil: dSet.schirm === 'aurora',
+                helpingHand: !!attSet.hilfe,
+                friendGuard: !!dSet.helfer,
             },
             crit: !!_feld.crit,
             spread: _format === 'doubles' && flaeche === true,
@@ -894,6 +936,16 @@
                         ${opt('', set.schirm, L().keinSchirm)}${opt('reflect', set.schirm, L().reflektor)}
                         ${opt('light', set.schirm, L().lichtschild)}${opt('aurora', set.schirm, L().auroraschleier)}
                     </select></label>
+                <div class="sq-partner">
+                    <label class="sq-fld-check" title="${esc(L().hilfeTitel)}">
+                        <input type="checkbox" data-sq-side="${side}" data-sq-flag="hilfe"${
+                            set.hilfe ? ' checked' : ''}>
+                        <span>${esc(L().hilfe)}</span></label>
+                    <label class="sq-fld-check" title="${esc(L().helferTitel)}">
+                        <input type="checkbox" data-sq-side="${side}" data-sq-flag="helfer"${
+                            set.helfer ? ' checked' : ''}>
+                        <span>${esc(L().helfer)}</span></label>
+                </div>
             </div>`;
     }
 
@@ -1455,6 +1507,7 @@
     function render() {
         const host = document.getElementById('sideQuestMatchupsHost');
         if (!host) return;
+        _rechAn = false;
         if (!_roster) {
             host.innerHTML = `<div class="sq-console"><div class="sq-grid"><div class="sq-panel">${
                 esc(L().loading)}</div></div></div>`;
@@ -1491,8 +1544,34 @@
         wire(host);
     }
 
+    /* WELCHER KASTEN WIRD NEU GEZEICHNET?
+       -----------------------------------
+       Gemessen am 16.09.2026, gleich nach dem Einbau: den Volltreffer
+       im Rechner-Reiter anhaken aenderte die Zahl NICHT — der gemerkte
+       Stand daneben trug sie aber. Ursache: die gemeinsamen Zuhoerer in
+       wire() riefen render(), und render() zeichnet den
+       MATCHUP-Kasten. Der Rechner blieb auf dem alten Stand stehen,
+       waehrend der Zustand darunter laengst der neue war. Nichts sah
+       kaputt aus; die Zahl war nur falsch.
+
+       Zwei Ansichten, ein Satz Zuhoerer — dann muss der Zeichenbefehl
+       die Ansicht kennen, nicht der Zuhoerer. */
+    function zeichne() {
+        const rHost = document.getElementById('sideQuestRechnerHost');
+        if (rHost && !rHost.hidden) { renderRechner(); return; }
+        render();
+    }
+
     function editorTarget(side) {
-        const name = side === 'opp' ? _calc : _me;
+        /* Der Rechner-Reiter fuehrt seine EIGENE Paarung. Teilte er sich
+           _me/_calc mit der Matchup-Liste, wuerde ein Wechsel dort die
+           Auswahl hier umwerfen — und umgekehrt. Die SAETZE teilen sich
+           beide (setFor schluesselt ueber Name, Format und Seite): wer
+           ein Set einmal baut, findet es in beiden Ansichten wieder.
+           Das ist gewollt, die Auswahl ist es nicht. */
+        const name = _rechAn
+            ? (side === 'opp' ? _rOpp : _rMe)
+            : (side === 'opp' ? _calc : _me);
         return { name, set: name ? setFor(name, side) : null };
     }
 
@@ -1528,14 +1607,14 @@
             binde(b, 'click', () => {
                 _format = b.getAttribute('data-sq-format');
                 _limit = ROSTER_STEP;
-                render();
+                zeichne();
             });
         });
         host.querySelectorAll('[data-sq-mine]').forEach(r => {
             const pick = () => {
                 _me = r.getAttribute('data-sq-mine');
                 _limit = ROSTER_STEP;
-                render();
+                zeichne();
             };
             binde(r, 'click', pick);
             binde(r, 'keydown', (e) => {
@@ -1543,7 +1622,7 @@
             });
         });
         host.querySelectorAll('[data-sq-opp]').forEach(r => {
-            const open = () => { _calc = r.getAttribute('data-sq-opp'); render(); };
+            const open = () => { _calc = r.getAttribute('data-sq-opp'); zeichne(); };
             binde(r, 'click', open);
             binde(r, 'keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
@@ -1552,21 +1631,21 @@
         const backBtn = host.querySelector('[data-sq-back]');
         if (backBtn) backBtn.addEventListener('click', () => {
             if (_teamAn) { _teamAn = false; _teamQ = ''; } else { _calc = null; }
-            render();
+            zeichne();
         });
         wireTeam(host);
 
         const more = host.querySelector('[data-sq-more]');
-        binde(more, 'click', () => { _limit += ROSTER_STEP; render(); });
+        binde(more, 'click', () => { _limit += ROSTER_STEP; zeichne(); });
 
         const typeSel = host.querySelector('[data-sq-opptype]');
         binde(typeSel, 'change', () => {
-            _oppType = typeSel.value; _limit = ROSTER_STEP; render();
+            _oppType = typeSel.value; _limit = ROSTER_STEP; zeichne();
         });
 
         host.querySelectorAll('[data-sq-sort]').forEach(b => {
             binde(b, 'click', () => {
-                _sort = b.getAttribute('data-sq-sort'); _limit = ROSTER_STEP; render();
+                _sort = b.getAttribute('data-sq-sort'); _limit = ROSTER_STEP; zeichne();
             });
         });
 
@@ -1595,7 +1674,19 @@
             const was = el.getAttribute('data-sq-feld');
             el.addEventListener('change', () => {
                 _feld[was] = (el.type === 'checkbox') ? el.checked : el.value;
-                render();
+                zeichne();
+            });
+        });
+
+        // Hilfreiche Hand und Helfer — Haken, kein Auswahlfeld.
+        host.querySelectorAll('[data-sq-flag]').forEach(el => {
+            const side = el.getAttribute('data-sq-side');
+            const flag = el.getAttribute('data-sq-flag');
+            el.addEventListener('change', () => {
+                const t = editorTarget(side);
+                if (!t.set) return;
+                t.set[flag] = el.checked;
+                zeichne();
             });
         });
 
@@ -1616,7 +1707,7 @@
                     if (!t.set) return;
                     if (!t.set.boosts) t.set.boosts = { atk: 0, def: 0, spa: 0, spd: 0 };
                     t.set.boosts[key] = Math.max(-6, Math.min(6, Number(el.value) || 0));
-                    render();
+                    zeichne();
                 });
                 return;
             }
@@ -1631,7 +1722,7 @@
                     const t = editorTarget(side);
                     if (!t.set) return;
                     t.set.spread = clampSpread(t.set.spread, el.getAttribute('data-sq-key'), el.value);
-                    render();
+                    zeichne();
                 });
                 return;
             }
@@ -1640,7 +1731,7 @@
                 if (!t.set) return;
                 if (field === 'move') t.set.moves[Number(el.getAttribute('data-sq-i'))] = el.value;
                 else t.set[field] = el.value;
-                render();
+                zeichne();
             });
         });
 
@@ -1650,7 +1741,7 @@
                 const name = side === 'opp' ? _calc : _me;
                 if (!name) return;
                 delete _sets[setKey(name, side)];
-                render();
+                zeichne();
             });
         });
     }
@@ -1887,6 +1978,324 @@
         });
     }
 
+    /* ════════════════════════════════════════════════════════════════
+       DER RECHNER ALS EIGENES FEATURE (16.09.2026)
+       ════════════════════════════════════════════════════════════════
+       ANLASS (Betreiber): „aber der Damage Culc ist ja immer noch kein
+       eigenes Feature … ich erwarte schon etwas in richtung von
+       nerd-of-now.github.io/NCP-VGC-Damage-Calculator/ — nur optisch
+       schoener, besser zu bedienen und klarer in der Darstellung."
+
+       Zu Recht. Bis heute war der Rechner ein UNTERZUSTAND der
+       Matchup-Liste: erst ein Pokemon waehlen, dann eine Zeile
+       anklicken — einen Reiter gab es nicht. Wer ihn suchte, fand ihn
+       nicht.
+
+       DIE ORDNUNG (Entwurf C, vom Betreiber gewaehlt):
+         1. Kopfband   — beide Pokemon, der Ergebnissatz, die 16 Wuerfe
+         2. Feldleiste — Wetter, Gelaende, Volltreffer
+         3. Zwei Tafeln nebeneinander: „Du triffst" / „Du wirst getroffen"
+         4. Vergleich  — gemerkte Staende untereinander
+         5. Saetze     — hinter einem Aufklapper, damit die Antwort oben
+                         nicht unter dreissig Formularfeldern verschwindet
+
+       Punkt 3 ist das, was der NCP-Rechner NICHT kann: dort steht immer
+       nur eine Richtung. Im Doppelkampf ist die Frage aber nie „was
+       mache ich", sondern „wer legt wen zuerst um".
+       ════════════════════════════════════════════════════════════════ */
+
+    let _rechAn = false;          // zeichnet gerade der Rechner-Reiter?
+    let _rMe = null, _rOpp = null;
+    let _rMove = null;            // welche Attacke traegt das Kopfband?
+    let _rSeite = 'me';           // aus welcher Richtung stammt sie?
+    let _verlauf = [];            // gemerkte Staende
+
+    /* Die Auswahl je Seite. Ein einfaches Auswahlfeld statt einer
+       eigenen Suche: 264 Eintraege, nach deutschem Namen sortiert, und
+       jeder Browser bringt seine Tippsuche schon mit — auf dem Handy
+       sogar eine bessere, als wir bauen wuerden. */
+    function rechOptionen(gewaehlt) {
+        if (!_roster) return '';
+        const liste = _roster
+            .filter(r => setFor(r.name, 'me'))
+            .map(r => ({ name: r.name, zeig: nurDeutsch(r.name, 'pokemon') || r.name }))
+            .sort((a, b) => a.zeig.localeCompare(b.zeig, 'de'));
+        return liste.map(r =>
+            `<option value="${esc(r.name)}"${r.name === gewaehlt ? ' selected' : ''}>${
+                esc(r.zeig)}${r.zeig === r.name ? '' : ' · ' + esc(r.name)}</option>`).join('');
+    }
+
+    function rechWer(side, name) {
+        const e = name && _dex[name];
+        const typen = e ? [e.t1, e.t2].filter(Boolean) : [];
+        return `<div class="sq-rech-wer is-${side}">
+                <select class="sq-in sq-rech-pick" data-sq-rech="${side}"
+                        aria-label="${esc(side === 'me' ? L().mine : L().opponent)}">
+                    ${rechOptionen(name)}
+                </select>
+                <div class="sq-rech-typen">${typeChips(typen)}</div>
+            </div>`;
+    }
+
+    /* Die Zeilen einer Richtung. Anklickbar: ein Klick hebt die Attacke
+       ins Kopfband, damit dort die Wuerfe dazu stehen. */
+    function rechZeilen(seite, attName, attSet, defName, defSet) {
+        const rows = moveTable(attName, attSet, defName, defSet);
+        if (!rows.length) return `<p class="sq-empty">${esc(L().keineAttacke)}</p>`;
+        return rows.map(r => {
+            const g = r.range;
+            const w = Math.max(3, Math.min(100, g.maxPct));
+            const aktiv = (_rSeite === seite && _rMove === r.name);
+            const eff = effLabel(g.effectiveness);
+            const flaeche = g.spreadAngewendet
+                ? `<em class="sq-rech-flag" title="${esc(L().flaecheTitel)}">${esc(L().flaeche)}</em>` : '';
+            return `<button type="button" class="sq-rech-mv${aktiv ? ' is-on' : ''}"
+                        data-sq-rmove="${esc(r.name)}" data-sq-rseite="${esc(seite)}">
+                    <span class="sq-rech-mv-n">${nameHtml(r.name, 'moves')}
+                        <span class="sq-mu-type sq-play-type-${esc(String(r.move.type).toLowerCase())}">${
+                            esc(tName(r.move.type))}</span>
+                        <em class="sq-rech-bp">${esc(r.move.power)}</em>${flaeche}${
+                        eff ? `<em class="sq-rech-eff${effClass(g.effectiveness)}">${esc(eff)}</em>` : ''}
+                    </span>
+                    <span class="sq-rech-bar ${seite === 'me' ? 'is-deal' : 'is-take'}">
+                        <i style="width:${w}%"></i></span>
+                    <span class="sq-rech-pct">${esc(num(g.minPct))}–${esc(num(g.maxPct))} %</span>
+                    <span class="sq-rech-ko">${esc(koLabel(g.ko))}</span>
+                </button>`;
+        }).join('');
+    }
+
+    /** Der Satz im Kopfband — dieselbe Form, die auch der Vergleich fuehrt. */
+    function rechFall() {
+        if (!_rMe || !_rOpp) return null;
+        const meSet = setFor(_rMe, 'me'), oppSet = setFor(_rOpp, 'opp');
+        if (!meSet || !oppSet) return null;
+        const hin = _rSeite === 'me';
+        const attName = hin ? _rMe : _rOpp, defName = hin ? _rOpp : _rMe;
+        const attSet = hin ? meSet : oppSet, defSet = hin ? oppSet : meSet;
+        const rows = moveTable(attName, attSet, defName, defSet);
+        if (!rows.length) return null;
+        const r = rows.find(x => x.name === _rMove) || rows[0];
+        return { attName, defName, name: r.name, range: r.range, seite: _rSeite };
+    }
+
+    function rechSatzHtml(f) {
+        const g = f.range;
+        if (g.effectiveness === 0) {
+            return `<b>${nameHtml(f.attName, 'pokemon')}</b> ${nameHtml(f.name, 'moves')} ${
+                esc(L().gegen)} <b>${nameHtml(f.defName, 'pokemon')}</b>: <b>${esc(L().immune)}</b>`;
+        }
+        return `<b>${nameHtml(f.attName, 'pokemon')}</b> ${nameHtml(f.name, 'moves')} ${
+            esc(L().gegen)} <b>${nameHtml(f.defName, 'pokemon')}</b>: <span class="sq-rech-zahl">${
+            g.min}–${g.max}</span> <span class="sq-rech-zahl">(${esc(num(g.minPct))}–${
+            esc(num(g.maxPct))} %)</span> — <b>${esc(koLabel(g.ko))}</b>`;
+    }
+
+    /* Die Lage in einem Satz — sie gehoert in den Vergleich, sonst
+       stehen dort zwei Zeilen mit derselben Zahl und niemand weiss
+       mehr, worin sie sich unterschieden. */
+    function lageKurz(attSet, defSet) {
+        const teile = [];
+        if (_feld.wetter) teile.push(_feld.wetter === 'Sun' ? L().sonne : L().regen);
+        if (_feld.gelaende) {
+            teile.push(_feld.gelaende === 'Grassy' ? L().grasfeld
+                : _feld.gelaende === 'Electric' ? L().elektrofeld : L().psychofeld);
+        }
+        if (_feld.crit) teile.push(L().volltreffer);
+        if (defSet.schirm) {
+            teile.push(defSet.schirm === 'reflect' ? L().reflektor
+                : defSet.schirm === 'light' ? L().lichtschild : L().auroraschleier);
+        }
+        if (attSet.hilfe) teile.push(L().hilfe);
+        if (defSet.helfer) teile.push(L().helfer);
+        const st = (set, wo) => BOOST_KEYS.forEach((k, i) => {
+            const v = Number((set.boosts || {})[k]) || 0;
+            if (v) teile.push(`${wo} ${L().evs[i + 1]} ${v > 0 ? '+' : ''}${v}`);
+        });
+        st(attSet, '▲'); st(defSet, '▼');
+        if (attSet.status) teile.push(L().verbrannt);
+        if (String(defSet.hp) !== '1') teile.push(`${L().kp} ${Math.round(Number(defSet.hp) * 100)} %`);
+        return teile.join(' · ');
+    }
+
+    function verlaufHtml() {
+        if (!_verlauf.length) return '';
+        const zeilen = _verlauf.map((v, i) => `<li class="sq-verl-zeile">
+                <span class="sq-verl-satz">${v.satz}</span>
+                <span class="sq-verl-lage">${esc(v.lage) || '—'}</span>
+                <button type="button" class="sq-verl-weg" data-sq-verl-weg="${i}"
+                        title="${esc(L().weg)}" aria-label="${esc(L().weg)}">×</button>
+            </li>`).join('');
+        return `<div class="sq-panel sq-verl">
+                ${sectionLabel(L().vergleich, `${_verlauf.length}`)}
+                <p class="sq-rech-hint">${esc(L().vergleichHint)}</p>
+                <ul class="sq-verl-liste">${zeilen}</ul>
+                <button type="button" class="sq-btn" data-sq-verl-leer>${esc(L().leeren)}</button>
+            </div>`;
+    }
+
+    function rechnerHtml() {
+        const meSet = _rMe && setFor(_rMe, 'me');
+        const oppSet = _rOpp && setFor(_rOpp, 'opp');
+        if (!meSet || !oppSet) {
+            return `<div class="sq-panel"><p class="sq-empty">${esc(L().noUsage)}</p></div>`;
+        }
+        const f = rechFall();
+        const meStats = statsOf(_rMe, meSet), oppStats = statsOf(_rOpp, oppSet);
+        const spd = window.ChampionsDamage.speedComparison(meStats.spe, oppStats.spe);
+        const verb = spd.tie ? L().tie : (spd.faster ? L().faster : L().slower);
+        return `<div class="sq-rech">
+            <div class="sq-rech-kopf">
+                ${rechWer('me', _rMe)}
+                <div class="sq-rech-vs">
+                    <span>${esc(L().gegen)}</span>
+                    <button type="button" class="sq-rech-tausch" data-sq-rtausch
+                            title="${esc(L().tausch)}" aria-label="${esc(L().tausch)}">⇄</button>
+                </div>
+                ${rechWer('opp', _rOpp)}
+                <div class="sq-rech-erg">
+                    ${f ? `<div class="sq-rech-satz">${rechSatzHtml(f)}</div>
+                        <div class="sq-rech-wuerfe"><u>${esc(L().wuerfe)}</u> ${
+                            esc(f.range.rolls.join(' '))}</div>`
+                        : `<p class="sq-empty">${esc(L().keineAttacke)}</p>`}
+                    <div class="sq-rech-erg-fuss">
+                        <span class="sq-rech-ini ${spd.tie ? 'is-tie' : (spd.faster ? 'is-fast' : 'is-slow')}">${
+                            esc(L().speedLine(spd.mine, spd.theirs, verb))}</span>
+                        ${f ? `<button type="button" class="sq-btn sq-rech-merk" data-sq-merk>${
+                            esc(L().merken)}</button>` : ''}
+                    </div>
+                </div>
+            </div>
+            ${feldHtml()}
+            <div class="sq-rech-zwei">
+                <div class="sq-panel sq-rech-richtung is-deal">
+                    ${sectionLabel(L().duTriffst, `${nurDeutsch(_rMe, 'pokemon') || _rMe} → ${
+                        nurDeutsch(_rOpp, 'pokemon') || _rOpp}`)}
+                    ${rechZeilen('me', _rMe, meSet, _rOpp, oppSet)}
+                </div>
+                <div class="sq-panel sq-rech-richtung is-take">
+                    ${sectionLabel(L().duWirstGetroffen, `${nurDeutsch(_rOpp, 'pokemon') || _rOpp} → ${
+                        nurDeutsch(_rMe, 'pokemon') || _rMe}`)}
+                    ${rechZeilen('opp', _rOpp, oppSet, _rMe, meSet)}
+                </div>
+            </div>
+            ${verlaufHtml()}
+            <details class="sq-rech-saetze"${_rechOffen ? ' open' : ''}>
+                <summary>${esc(L().saetze)}<em>${esc(L().saetzeHint)}</em></summary>
+                <div class="sq-rech-editoren">
+                    <div>${setEditor('me', _rMe, meSet, L().set)}</div>
+                    <div>${setEditor('opp', _rOpp, oppSet, L().oppSet)}</div>
+                </div>
+            </details>
+            ${noteHtml()}
+        </div>`;
+    }
+
+    let _rechOffen = false;   // steht der Satz-Aufklapper offen?
+
+    function renderRechner() {
+        const host = document.getElementById('sideQuestRechnerHost');
+        if (!host) return;
+        /* _rechAn traegt die ANSICHT, nicht den Zeichenvorgang.
+           Zuerst stand hier ein Setzen am Anfang und ein Zuruecksetzen
+           am Ende — damit war die Fahne genau so lange wahr, wie
+           gezeichnet wurde, und in jedem spaeteren Klick wieder falsch.
+           editorTarget() haette dann im Rechner-Reiter das Set des
+           MATCHUP-Paares bearbeitet: man dreht an Fuegros Reglern und
+           aendert Gortroms Satz. */
+        _rechAn = true;
+        if (!_roster) {
+            host.innerHTML = `<div class="sq-console"><div class="sq-panel">${esc(L().loading)}</div></div>`;
+            return;
+        }
+        const seg = (val, label) =>
+            `<button type="button" data-sq-format="${val}" class="${_format === val ? 'on' : ''}">${esc(label)}</button>`;
+        host.innerHTML = `
+            <div class="sq-console">
+                <div class="sq-top">
+                    <span class="sq-brand">Champions <span>${esc(L().rechnerTitel)}</span></span>
+                    <span class="sq-spacer"></span>
+                    <span class="sq-seg">${seg('doubles', L().doubles)}${seg('singles', L().singles)}</span>
+                </div>
+                <p class="sq-rech-intro">${esc(L().rechnerHint)}</p>
+                ${rechnerHtml()}
+            </div>`;
+        wire(host);
+        wireRechner(host);
+    }
+
+    /* Alles, was nur der Rechner-Reiter hat. Die Set-Editoren, die
+       Feldleiste und die Stufenregler haengen schon an wire(). */
+    function wireRechner(host) {
+        host.querySelectorAll('[data-sq-rech]').forEach(sel => {
+            sel.addEventListener('change', () => {
+                const seite = sel.getAttribute('data-sq-rech');
+                if (seite === 'opp') _rOpp = sel.value; else _rMe = sel.value;
+                _rMove = null;              // die alte Attacke gehoert zum alten Paar
+                renderRechner();
+            });
+        });
+        const t = host.querySelector('[data-sq-rtausch]');
+        if (t) {
+            t.addEventListener('click', () => {
+                const x = _rMe; _rMe = _rOpp; _rOpp = x;
+                _rSeite = _rSeite === 'me' ? 'opp' : 'me';
+                renderRechner();
+            });
+        }
+        host.querySelectorAll('[data-sq-rmove]').forEach(b => {
+            b.addEventListener('click', () => {
+                _rMove = b.getAttribute('data-sq-rmove');
+                _rSeite = b.getAttribute('data-sq-rseite');
+                renderRechner();
+            });
+        });
+        const m = host.querySelector('[data-sq-merk]');
+        if (m) m.addEventListener('click', () => { merkeStand(); renderRechner(); });
+        host.querySelectorAll('[data-sq-verl-weg]').forEach(b => {
+            b.addEventListener('click', () => {
+                _verlauf.splice(Number(b.getAttribute('data-sq-verl-weg')), 1);
+                renderRechner();
+            });
+        });
+        const leer = host.querySelector('[data-sq-verl-leer]');
+        if (leer) leer.addEventListener('click', () => { _verlauf = []; renderRechner(); });
+        const det = host.querySelector('.sq-rech-saetze');
+        if (det) det.addEventListener('toggle', () => { _rechOffen = det.open; });
+    }
+
+    /* Merken heisst: den Satz UND die Lage festhalten. Nur die Zahl zu
+       merken waere wertlos — zwei Staende unterscheiden sich ja gerade
+       durch die Lage, aus der sie kommen. */
+    function merkeStand() {
+        const f = rechFall();
+        if (!f) return;
+        const meSet = setFor(_rMe, 'me'), oppSet = setFor(_rOpp, 'opp');
+        const hin = f.seite === 'me';
+        const eintrag = {
+            satz: rechSatzHtml(f),
+            lage: lageKurz(hin ? meSet : oppSet, hin ? oppSet : meSet),
+        };
+        // Zweimal derselbe Stand ist kein Vergleich.
+        const gleich = _verlauf.some(v => v.satz === eintrag.satz && v.lage === eintrag.lage);
+        if (!gleich) _verlauf.unshift(eintrag);
+        if (_verlauf.length > 12) _verlauf.length = 12;
+    }
+
+    function activateRechner() {
+        const starte = () => {
+            if (!_rMe && _roster && _roster.length) _rMe = _roster[0].name;
+            if (!_rOpp && _roster && _roster.length) {
+                _rOpp = (_roster.find(r => r.name !== _rMe) || _roster[0]).name;
+            }
+            renderRechner();
+        };
+        if (_activated && _roster) { starte(); return; }
+        _activated = true;
+        renderRechner();
+        load().then(starte);
+    }
+
     function activate() {
         if (_activated) { render(); return; }
         _activated = true;
@@ -1900,9 +2309,12 @@
     document.addEventListener('languageChanged', () => {
         const host = document.getElementById('sideQuestMatchupsHost');
         if (host && !host.hidden && _activated) render();
+        const rHost = document.getElementById('sideQuestRechnerHost');
+        if (rHost && !rHost.hidden && _activated) renderRechner();
     });
 
     window.sideQuestMatchups = { activate, oeffneTeamRechner };
+    window.sideQuestRechner = { activate: activateRechner };
     window._sqMatchupInternals = {
         setData, topSet, clampSpread, spreadTotal, buildRoster, usageSlug,
         moveTable, bestMove, koLabel, effLabel, statsOf, matchup, staerkeVariabel,
@@ -1921,6 +2333,24 @@
            veraendert. Genau das ist der Unterschied zwischen einer
            Textzusicherung und einer Verhaltenszusicherung. */
         rangeFor, feldHtml, lageHtml, setEditor, noteHtml, BOOST_KEYS,
+        /* Der Rechner-Reiter (16.09.2026). Greifbar sind die reinen
+           Teile: die Paarung setzen, den Fall lesen, die Lage in einen
+           Satz fassen, merken. Ohne sie liesse sich nur pruefen, DASS
+           es einen Reiter gibt — nicht, dass er das Richtige rechnet
+           und der Vergleich die Lage mitfuehrt. */
+        rechnerHtml, rechFall, rechSatzHtml, lageKurz, merkeStand, verlaufHtml,
+        editorTarget, zeichne,
+        rechState: (patch) => {
+            if (patch) {
+                if (patch.me != null) _rMe = patch.me;
+                if (patch.opp != null) _rOpp = patch.opp;
+                if (patch.move !== undefined) _rMove = patch.move;
+                if (patch.seite != null) _rSeite = patch.seite;
+                if (patch.verlauf != null) _verlauf = patch.verlauf;
+                if (patch.an != null) _rechAn = patch.an;
+            }
+            return { me: _rMe, opp: _rOpp, move: _rMove, seite: _rSeite, verlauf: _verlauf };
+        },
         feldState: (patch) => {
             if (patch) Object.assign(_feld, patch);
             return _feld;

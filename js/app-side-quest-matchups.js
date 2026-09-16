@@ -45,6 +45,21 @@
     let _dex = null;             // en -> Pokédex-Eintrag
     let _usage = null;           // slug -> Nutzungsdatensatz
     let _moves = null;           // en -> Attacken-Eintrag
+
+    /* DIE KAMPFLAGE — der Teil des Rechners, der bis zum 16.09.2026
+       fehlte.
+       ------------------------------------------------------------------
+       Gemeldet: „der Damage Culc ist ja immer noch nicht fertig und als
+       Feature verfuegbar". Zu Recht: der Rechenkern konnte seit dem
+       Umbau Wetter, Gelaende, Schirme, Statusstufen, Verbrennung und
+       Volltreffer — die Oberflaeche hatte fuer nichts davon ein Feld.
+       Gerechnet wurde also immer die nackte Grundlage, und niemand kam
+       an den Rest heran.
+
+       Was BEIDE Seiten teilen, steht hier; was zu einer Seite gehoert
+       (Stufen, Status, KP, Schirm), steht im Set — sonst waere der
+       Schirm des Gegners auch der eigene. */
+    let _feld = { wetter: '', gelaende: '', crit: false };
     let _namesDe = null;         // { moves, items, abilities, pokemon }
     let _rank = null;            // en -> Team-Auftritte
     let _roster = null;          // [{ name, slug, types, count }]
@@ -119,6 +134,25 @@
             brand: 'Matchups', doubles: 'Doppel', singles: 'Einzel',
             mine: 'Dein Pokémon', search: 'Suchen …', noHit: 'Kein Treffer.',
             set: 'Set', oppSet: 'Gegner-Set', ability: 'Fähigkeit', item: 'Item',
+            lage: 'Kampflage', wetter: 'Wetter', gelaende: 'Gelände',
+            keinWetter: '— kein Wetter —', keinGelaende: '— kein Gelände —',
+            sonne: 'Sonne', regen: 'Regen',
+            grasfeld: 'Grasfeld', elektrofeld: 'Elektrofeld', psychofeld: 'Psychofeld',
+            volltreffer: 'Volltreffer',
+            volltrefferTitel: 'Rechnet jeden Treffer als Volltreffer: ×1,5, und Schirme '
+                        + 'wirken dann nicht.',
+            stufen: 'Statusstufen', status: 'Status', kein: '—',
+            verbrannt: 'Verbrannt', paralysiert: 'Paralysiert', vergiftet: 'Vergiftet',
+            kp: 'KP-Stand', kpVoll: 'volle KP', kpHalb: 'halbe KP',
+            kpDrittel: 'ein Drittel oder weniger',
+            schirm: 'Schirm', keinSchirm: '— kein Schirm —',
+            reflektor: 'Reflektor', lichtschild: 'Lichtschild', auroraschleier: 'Auroraschleier',
+            schirmTitel: 'Der Schirm steht auf DIESER Seite und senkt, was auf sie einschlägt. '
+                        + 'Im Doppelkampf auf zwei Drittel, im Einzelkampf auf die Hälfte.',
+            lageTitel: 'Alles hier geht in die Rechnung ein — Stufen, Status, KP-Stand und '
+                        + 'Schirm gelten für diese Seite, Wetter und Gelände für beide.',
+            angewendet: 'Gerechnet mit:',
+            unbelegt: 'Nicht gerechnet:',
             nature: 'Wesen', noItem: '— kein Item —', moves: 'Attacken',
             empty: '— leer —', points: 'Statuswertpunkte', reset: 'Standard-Set',
             budget: (used) => `${used}/${SP_BUDGET} Punkte`,
@@ -155,8 +189,19 @@
             move: 'Attacke', dmg: 'Schaden', share: 'Anteil KP', ko: 'K.O.',
             speedLine: (a, b, verb) => `Initiative ${a} gegen ${b} — du bist ${verb}.`,
             noteHead: 'Gerechnet wird',
-            noteIn: 'Level 50, DV 31, Wesen, Statuswertpunkte, Typen-Effektivität, STAB, Leben-Orb und Expertengurt.',
-            noteOut: 'Nicht gerechnet: Fähigkeiten, Wetter, Felder, Statusveränderungen, Volltreffer, Mehrfachtreffer.',
+            /* DIESER SATZ IST CODE (Regel aus CLAUDE.md, 13.09.2026).
+               Bis zum 16.09.2026 stand hier „Nicht gerechnet:
+               Fähigkeiten, Wetter, Felder, Statusveränderungen,
+               Volltreffer" — sechs Dinge, die der Rechner inzwischen
+               alle kann. Gegen dieses Auseinanderlaufen steht eine
+               Zusicherung in tests/unit/test-rechner-kampflage.js: was
+               die Verhaltensproben dort als WIRKSAM nachweisen, darf
+               hier nicht als „nicht gerechnet" stehen. */
+            noteIn: 'Level 50, DV 31, Wesen, Statuswertpunkte, Typen-Effektivität, STAB, '
+                    + 'Fähigkeiten und Items beider Seiten, dazu Wetter, Gelände, Schirme, '
+                    + 'Statusstufen, Status, KP-Stand und Volltreffer aus der Kampflage.',
+            noteOut: 'Nicht gerechnet: Mehrfachtreffer. Was im Einzelfall fehlt, steht unter '
+                    + 'der jeweiligen Tabelle.',
             noteSet: 'Das Gegner-Set ist jeweils das meistgenutzte Set dieses Formats — im Rechner änderbar.',
             evs: ['KP', 'ANG', 'VER', 'SPA', 'SPV', 'INI'],
             statNames: ['KP', 'Angriff', 'Verteidigung', 'Sp.-Angriff', 'Sp.-Verteidigung', 'Initiative'],
@@ -196,6 +241,23 @@
             brand: 'Matchups', doubles: 'Doubles', singles: 'Singles',
             mine: 'Your Pokémon', search: 'Search …', noHit: 'No match.',
             set: 'Set', oppSet: 'Opponent set', ability: 'Ability', item: 'Held item',
+            lage: 'Battle state', wetter: 'Weather', gelaende: 'Terrain',
+            keinWetter: '— no weather —', keinGelaende: '— no terrain —',
+            sonne: 'Sun', regen: 'Rain',
+            grasfeld: 'Grassy', elektrofeld: 'Electric', psychofeld: 'Psychic',
+            volltreffer: 'Critical hit',
+            volltrefferTitel: 'Treats every hit as a critical hit: ×1.5, and screens do not apply.',
+            stufen: 'Stat stages', status: 'Status', kein: '—',
+            verbrannt: 'Burned', paralysiert: 'Paralysed', vergiftet: 'Poisoned',
+            kp: 'HP left', kpVoll: 'full HP', kpHalb: 'half HP', kpDrittel: 'a third or less',
+            schirm: 'Screen', keinSchirm: '— no screen —',
+            reflektor: 'Reflect', lichtschild: 'Light Screen', auroraschleier: 'Aurora Veil',
+            schirmTitel: 'The screen is on THIS side and reduces what hits it. Two thirds in '
+                        + 'doubles, half in singles.',
+            lageTitel: 'Everything here goes into the calculation — stages, status, HP and '
+                        + 'screen apply to this side, weather and terrain to both.',
+            angewendet: 'Calculated with:',
+            unbelegt: 'Not calculated:',
             nature: 'Nature', noItem: '— no item —', moves: 'Moves',
             empty: '— empty —', points: 'Stat points', reset: 'Default set',
             budget: (used) => `${used}/${SP_BUDGET} points`,
@@ -232,8 +294,11 @@
             move: 'Move', dmg: 'Damage', share: 'Share of HP', ko: 'KO',
             speedLine: (a, b, verb) => `Speed ${a} against ${b} — you are ${verb}.`,
             noteHead: 'What is calculated',
-            noteIn: 'Level 50, IV 31, nature, stat points, type effectiveness, STAB, Life Orb and Expert Belt.',
-            noteOut: 'Not calculated: abilities, weather, terrain, status, critical hits, multi-hit moves.',
+            noteIn: 'Level 50, IV 31, nature, stat points, type effectiveness, STAB, both '
+                    + 'sides\' abilities and items, plus weather, terrain, screens, stat stages, '
+                    + 'status, HP left and critical hits from the battle state.',
+            noteOut: 'Not calculated: multi-hit moves. Anything missing in a given case is '
+                    + 'listed under that table.',
             noteSet: 'The opponent set is that format’s most-used set — editable in the calculator.',
             evs: ['HP', 'ATK', 'DEF', 'SPA', 'SPD', 'SPE'],
             statNames: ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'],
@@ -436,6 +501,12 @@
             item: first(block && block.held_item),
             moves: ((block && block.move) || []).slice(0, 4).map(m => m.name),
             spread: Object.assign(emptySpread(), spread || {}),
+            /* Die Kampflage startet neutral: volle KP, keine Stufen,
+               kein Status, kein Schirm. Das ist der Zustand, den man vor
+               dem ersten Zug hat — jede andere Vorbelegung waere eine
+               Behauptung ueber den Kampf. */
+            boosts: { atk: 0, def: 0, spa: 0, spd: 0 },
+            status: '', hp: '1', schirm: '',
         };
     }
 
@@ -525,15 +596,36 @@
            Gemessen an den Nutzungsdaten (16.09.2026): Bedroher steht bei
            42 Arteneintraegen, Schwebe bei 18, Widerstandsbeeren
            zusammen bei ueber 250. */
+        /* Die Kampflage geht mit: Stufen und Status des Angreifers,
+           Stufen, KP und Schirm des Verteidigers, dazu Wetter, Gelaende
+           und Volltreffer aus der Feldleiste. Der Schirm gehoert zur
+           VERTEIDIGENDEN Seite — er wirkt gegen das, was auf ihn
+           einschlaegt, nicht gegen das, was von ihm ausgeht. */
+        const dSet = defSet || {};
         const r = window.ChampionsDamage.damageRange({
             move: mv,
             attackerStats: attStats,
             defenderStats: defStats,
             attackerTypes: [a.t1, a.t2].filter(Boolean),
             effectiveness: _eff(mv.type, [d.t1, d.t2].filter(Boolean)),
-            attacker: { ability: attSet.ability, item: attSet.item },
-            defender: { ability: defSet && defSet.ability, item: defSet && defSet.item },
-            field: { doubles: _format === 'doubles' },
+            attacker: {
+                ability: attSet.ability, item: attSet.item,
+                boosts: attSet.boosts, status: attSet.status,
+                hpAnteil: Number(attSet.hp == null ? 1 : attSet.hp),
+            },
+            defender: {
+                ability: dSet.ability, item: dSet.item,
+                boosts: dSet.boosts,
+                hpAnteil: Number(dSet.hp == null ? 1 : dSet.hp),
+            },
+            field: {
+                doubles: _format === 'doubles',
+                weather: _feld.wetter, terrain: _feld.gelaende,
+                reflect: dSet.schirm === 'reflect',
+                lightScreen: dSet.schirm === 'light',
+                auroraVeil: dSet.schirm === 'aurora',
+            },
+            crit: !!_feld.crit,
             spread: _format === 'doubles' && flaeche === true,
         });
         if (r) {
@@ -740,6 +832,71 @@
             `<span class="sq-mu-stat"><b>${stats[k]}</b><span>${esc(L().evs[i])}</span></span>`).join('')}</div>`;
     }
 
+    /* DIE FELDLEISTE — was BEIDE Seiten teilen.
+       Wetter und Gelaende gelten fuer das ganze Feld, der Volltreffer
+       ist eine Frage an die Rechnung („was, wenn er trifft"), keine
+       Eigenschaft einer Seite. */
+    function feldHtml() {
+        const w = (v, t) => `<option value="${v}"${_feld.wetter === v ? ' selected' : ''}>${esc(t)}</option>`;
+        const g = (v, t) => `<option value="${v}"${_feld.gelaende === v ? ' selected' : ''}>${esc(t)}</option>`;
+        return `<div class="sq-panel sq-feld">
+                <label class="sq-fld"><span>${esc(L().wetter)}</span>
+                    <select class="sq-in" data-sq-feld="wetter">
+                        ${w('', L().keinWetter)}${w('Sun', L().sonne)}${w('Rain', L().regen)}
+                    </select></label>
+                <label class="sq-fld"><span>${esc(L().gelaende)}</span>
+                    <select class="sq-in" data-sq-feld="gelaende">
+                        ${g('', L().keinGelaende)}${g('Grassy', L().grasfeld)}
+                        ${g('Electric', L().elektrofeld)}${g('Psychic', L().psychofeld)}
+                    </select></label>
+                <label class="sq-fld sq-fld-check" title="${esc(L().volltrefferTitel)}">
+                    <input type="checkbox" data-sq-feld="crit"${_feld.crit ? ' checked' : ''}>
+                    <span>${esc(L().volltreffer)}</span></label>
+            </div>`;
+    }
+
+    /* DIE KAMPFLAGE EINER SEITE.
+       Vier Stufen statt sechs: Initiative entscheidet ueber die
+       Reihenfolge, nicht ueber den Schaden, und dafuer gibt es die
+       Initiativzeile darueber. Wer sie hier haette, wuerde sie fuer
+       einen Schadensregler halten. */
+    const BOOST_KEYS = ['atk', 'def', 'spa', 'spd'];
+
+    function lageHtml(side, set) {
+        const b = (set && set.boosts) || {};
+        const stufe = (k, i) => {
+            const v = Number(b[k]) || 0;
+            return `<div class="sq-boost">
+                <span class="sq-boost-lbl">${esc(L().evs[i + 1])}</span>
+                <input class="sq-boost-range" type="range" min="-6" max="6" step="1"
+                       value="${v}" data-sq-side="${side}" data-sq-field="boost" data-sq-key="${k}"
+                       aria-label="${esc(L().statNames[i + 1])}">
+                <span class="sq-boost-val" data-sq-boostval="${side}-${k}">${v > 0 ? '+' : ''}${v}</span>
+            </div>`;
+        };
+        const opt = (wert, jetzt, text) =>
+            `<option value="${wert}"${String(jetzt) === String(wert) ? ' selected' : ''}>${esc(text)}</option>`;
+        return `<div class="sq-lage" title="${esc(L().lageTitel)}">
+                <div class="sq-lage-kopf">${esc(L().stufen)}</div>
+                <div class="sq-boosts">${BOOST_KEYS.map(stufe).join('')}</div>
+                <label class="sq-fld"><span>${esc(L().status)}</span>
+                    <select class="sq-in" data-sq-side="${side}" data-sq-field="status">
+                        ${opt('', set.status, L().kein)}${opt('burn', set.status, L().verbrannt)}
+                        ${opt('par', set.status, L().paralysiert)}${opt('psn', set.status, L().vergiftet)}
+                    </select></label>
+                <label class="sq-fld"><span>${esc(L().kp)}</span>
+                    <select class="sq-in" data-sq-side="${side}" data-sq-field="hp">
+                        ${opt('1', set.hp, L().kpVoll)}${opt('0.5', set.hp, L().kpHalb)}
+                        ${opt('0.33', set.hp, L().kpDrittel)}
+                    </select></label>
+                <label class="sq-fld" title="${esc(L().schirmTitel)}"><span>${esc(L().schirm)}</span>
+                    <select class="sq-in" data-sq-side="${side}" data-sq-field="schirm">
+                        ${opt('', set.schirm, L().keinSchirm)}${opt('reflect', set.schirm, L().reflektor)}
+                        ${opt('light', set.schirm, L().lichtschild)}${opt('aurora', set.schirm, L().auroraschleier)}
+                    </select></label>
+            </div>`;
+    }
+
     function setEditor(side, name, set, title) {
         const block = usageBlock(name);
         const e = _dex[name];
@@ -783,6 +940,7 @@
                     </div>
                     ${SP_KEYS.map((k, i) => spRow(side, k, i, set.spread)).join('')}
                 </div>
+                ${lageHtml(side, set)}
                 <button type="button" class="sq-btn" data-sq-reset="${side}">${esc(L().reset)}</button>
                 ${statsRow(statsOf(name, set))}
             </div>`;
@@ -961,13 +1119,40 @@
                     <span class="sq-mu-ko">${esc(koLabel(g.ko))}</span>
                 </div>`;
         }).join('');
+        /* WAS GERECHNET WURDE, STEHT DARUNTER.
+           Der Rechenkern fuehrt seit dem 16.09.2026 jeden wirksamen
+           Modifikator namentlich mit (`angewendet`) und jede Faehigkeit,
+           die er nicht belegen kann (`unbelegt`). Beides gehoert vor die
+           Augen des Nutzers: eine Zahl, die um ein Drittel abweicht,
+           weil irgendwo ein Schirm steht, ist ohne diese Zeile nicht
+           nachvollziehbar — und „nicht gerechnet" ist eine Auskunft,
+           kein Makel.
+
+           Zusammengefasst ueber alle Attacken der Tabelle, weil die
+           Modifikatoren fast immer dieselben sind. */
+        const sammle = (feld) => {
+            const out = [];
+            rows.forEach(r => ((r.range && r.range[feld]) || []).forEach(x => {
+                if (out.indexOf(x) === -1) out.push(x);
+            }));
+            return out;
+        };
+        const angewendet = sammle('angewendet');
+        const unbelegt = sammle('unbelegt');
+        const fuss = (angewendet.length || unbelegt.length)
+            ? `<div class="sq-calc-fuss">${
+                angewendet.length ? `<span class="sq-calc-mit"><b>${esc(L().angewendet)}</b> ${
+                    esc(angewendet.map(x => localName(x, 'abilities') || x).join(' · '))}</span>` : ''}${
+                unbelegt.length ? `<span class="sq-calc-ohne"><b>${esc(L().unbelegt)}</b> ${
+                    esc(unbelegt.join(' · '))}</span>` : ''}</div>`
+            : '';
         return `<div class="sq-panel">
                 ${sectionLabel(title, defStats ? `${defStats.hp} ${L().evs[0]}` : '')}
                 <div class="sq-calc-head">
                     <span>${esc(L().move)}</span><span>${esc(L().dmg)}</span>
                     <span></span><span>${esc(L().share)}</span><span>${esc(L().ko)}</span>
                 </div>
-                ${body}
+                ${body}${fuss}
             </div>`;
     }
 
@@ -981,6 +1166,7 @@
                 <div>${setEditor('me', _me, meSet, L().set)}</div>
                 <div>${setEditor('opp', _calc, oppSet, L().oppSet)}</div>
                 <div class="sq-stack">
+                    ${feldHtml()}
                     <div class="sq-panel sq-speed ${spd.tie ? 'is-tie' : (spd.faster ? 'is-fast' : 'is-slow')}">
                         ${esc(L().speedLine(spd.mine, spd.theirs, verb))}
                     </div>
@@ -1258,6 +1444,7 @@
                     ${teamSuche()}
                     ${teamBank('opp')}
                 </div>
+                ${feldHtml()}
                 ${teamMatrix()}
                 ${noteHtml(true)}
             </div>`;
@@ -1402,9 +1589,37 @@
             });
         }
 
+        // Die Feldleiste — Wetter, Gelaende, Volltreffer. Sie gehoert
+        // keiner Seite, deshalb ein eigener Merkmalsname.
+        host.querySelectorAll('[data-sq-feld]').forEach(el => {
+            const was = el.getAttribute('data-sq-feld');
+            el.addEventListener('change', () => {
+                _feld[was] = (el.type === 'checkbox') ? el.checked : el.value;
+                render();
+            });
+        });
+
         host.querySelectorAll('[data-sq-field]').forEach(el => {
             const side = el.getAttribute('data-sq-side');
             const field = el.getAttribute('data-sq-field');
+            if (field === 'boost') {
+                // Wie beim Punkteregler: beim Ziehen nur die Zahl,
+                // gerechnet wird beim Loslassen.
+                const key = el.getAttribute('data-sq-key');
+                el.addEventListener('input', () => {
+                    const out = host.querySelector(`[data-sq-boostval="${side}-${key}"]`);
+                    const v = Number(el.value) || 0;
+                    if (out) out.textContent = (v > 0 ? '+' : '') + v;
+                });
+                el.addEventListener('change', () => {
+                    const t = editorTarget(side);
+                    if (!t.set) return;
+                    if (!t.set.boosts) t.set.boosts = { atk: 0, def: 0, spa: 0, spd: 0 };
+                    t.set.boosts[key] = Math.max(-6, Math.min(6, Number(el.value) || 0));
+                    render();
+                });
+                return;
+            }
             if (field === 'sp') {
                 // Beim Ziehen nur die Zahl mitführen, erst beim Loslassen
                 // neu rechnen — sonst ruckelt der Regler.
@@ -1699,6 +1914,17 @@
         teamUrteil, teamZelle, teamSet, spreadAusText, uebernimmTeam, hatAngriff,
         realistischeTreffer, teamCalcHtml, teamMatrix, teamBank, wireTeam,
         klammereSpread, loeseNamen, nameAusSlug, teamSuche,
+        /* Die Kampflage (16.09.2026): rangeFor rechnet sie, feldHtml und
+           lageHtml zeichnen sie, feldState setzt sie. Alle drei muessen
+           greifbar sein, sonst laesst sich nur pruefen, DASS es die
+           Felder gibt — nicht, dass ein gesetztes Feld die Zahl
+           veraendert. Genau das ist der Unterschied zwischen einer
+           Textzusicherung und einer Verhaltenszusicherung. */
+        rangeFor, feldHtml, lageHtml, setEditor, noteHtml, BOOST_KEYS,
+        feldState: (patch) => {
+            if (patch) Object.assign(_feld, patch);
+            return _feld;
+        },
         // Der Namensbau: der doppelte Name vom 16.09.2026 war hier
         // nicht pruefbar, weil niemand herankam.
         nameHtml, nurDeutsch, localName,

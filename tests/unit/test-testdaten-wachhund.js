@@ -71,6 +71,7 @@ const REGISTER = {
     'test-b1-listen-vorwert.js':         'Einheit des Bayes-Vorwerts (B1): liest limitless_online_decks.csv und limitless_online_decks_comparison.csv, aber NUR als Schema (welche Spalten es gibt) und als GLEICHUNG zwischen beiden Exporten (new_count == count). Welche Zahlen dort diese Woche stehen, ist der Pruefung egal. Die eine Ungleichung (Summe Partien > Summe Listen) ist eine Eigenschaft der beiden Einheiten, kein Wochenwert: sie faellt erst, wenn jedes Deck hoechstens eine Partie je Liste spielt.',
     'test-champions-base-stats.js':      'Schema der Statuswerte, keine Zahlenbaender',
     'test-champions-damage.js':          'Rechenwege am Schadensmodell; Baender sind physikalisch (Chance zwischen 0 und 1)',
+    'test-champions-schaden-ketten.js':  'Die vier Modifikatorketten des Schadensrechners (Umbau 16.09.2026 nach dem NCP-Rechner). Aus data/ kommt NUR champions_type_chart.json — die Typentafel ist Regelwissen und aendert sich nicht mit einem Scraperlauf. Alle Bauten sind GESETZT (feste Werte im Kopf der Datei), damit die Zusicherungen die Rechnung pruefen und nicht den naechtlichen Lauf. Kein Wochenwert wird behauptet.',
     'test-champions-matchups.js':        'Struktur der Matchup-Datei, Rechnung an gesetzten Werten',
     'test-hub-gezaehlte-antritte.js':    'Gezaehlte Antritte: ruft answerModel() und answerHtml() mit den echten Zeilen auf und rechnet jede angezeigte Zahl gegen die CSV nach — Anteil, Quote, Feldschnitt und Nenner muessen aus denselben zwei Zahlen folgen, die daneben stehen. Das sind GLEICHUNGEN gegen die Datei, keine Behauptungen ueber Wochenwerte: welche Zahlen dort stehen, ist der Pruefung egal, sie muessen nur zueinander passen. Dazu Eigenschaften der Spalten (ganze Zahlen, keine Top 8 ueber den Antritten), das Alles-oder-nichts-Tor gegen kaputte Werte und seit dem 02.09.2026 die Probe, dass das Vielfache im Satz und auf jeder Kachel aus den beiden Zahlen folgt, die daneben stehen.',
     'test-stufen-im-text.js':            'Stufen im Attackentext: liest alle Attacken aus champions_resources.json und die Stufentabelle aus champions_statuszustaende.json. Geprueft werden EIGENSCHAFTEN, keine Wochenwerte: dass keine Marke auf Genauigkeit, Fluchtwert oder Volltreffer sitzt (die folgen laut den Daten selbst einer anderen Tabelle), dass jede Stufe eine der sechs bekannten ist, dass benannte Attacken ihre Marke tragen, und dass Tabelle und Formel uebereinstimmen. Attackenbeschreibungen sind gepflegter Text, keine Wochenzahlen.',
@@ -361,7 +362,7 @@ const REGISTER = {
    haengen an Smogon-Basiswerten und eigenen Nutzungszeilen, nicht an der
    Rangliste dieser Woche. Faellt eine davon weg, SOLL der Test
    umfallen. */
-const OBERGRENZE = 113;
+const OBERGRENZE = 114;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

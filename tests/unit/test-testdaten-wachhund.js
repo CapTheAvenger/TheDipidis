@@ -71,6 +71,7 @@ const REGISTER = {
     'test-b1-listen-vorwert.js':         'Einheit des Bayes-Vorwerts (B1): liest limitless_online_decks.csv und limitless_online_decks_comparison.csv, aber NUR als Schema (welche Spalten es gibt) und als GLEICHUNG zwischen beiden Exporten (new_count == count). Welche Zahlen dort diese Woche stehen, ist der Pruefung egal. Die eine Ungleichung (Summe Partien > Summe Listen) ist eine Eigenschaft der beiden Einheiten, kein Wochenwert: sie faellt erst, wenn jedes Deck hoechstens eine Partie je Liste spielt.',
     'test-champions-base-stats.js':      'Schema der Statuswerte, keine Zahlenbaender',
     'test-champions-damage.js':          'Rechenwege am Schadensmodell; Baender sind physikalisch (Chance zwischen 0 und 1)',
+    'test-attacken-merkmale.js':         'Die Attacken-Merkmale aus data/champions_move_flags.json und die elf Faehigkeiten, die daran haengen (16.09.2026). Sie liest ZWEI Dateien aus data/ und behauptet an keiner Stelle einen Wochenwert: geprueft wird die GLEICHUNG zwischen Datei und Wirklichkeit (wer keinen Eintrag hat, steht in _meta.ohne_eintrag — und umgekehrt), und dass die Merkmalsdatei keine Attacke ergaenzt, die der Bestand nicht fuehrt. Wie viele Faustattacken es diese Woche gibt, ist jeder Zusicherung egal. Das VERHALTEN der elf Faehigkeiten wird an der echten Rechnung ausgefuehrt, nicht im Quelltext gesucht. ZWEI Ungleichungen sieht der Zaehler unten, und dafuer wurde die OBERGRENZE von 114 auf 116 gesetzt: es sind VORPRUEFUNGEN GEGEN EIN LEERES BESTEHEN. Sie fragen, ob ueberhaupt eine Attacke ein Rueckstoss- bzw. Zusatzeffekt-Merkmal traegt. Liefe der Parser eines Tages leer, waeren Achtlos und Rabauke stillschweigend wirkungslos und JEDE andere Zusicherung dieser Datei bliebe trotzdem gruen. Es sind keine festen Zahlen — nur \'groesser als null\'.',
     'test-champions-schaden-ketten.js':  'Die vier Modifikatorketten des Schadensrechners (Umbau 16.09.2026 nach dem NCP-Rechner). Aus data/ kommt NUR champions_type_chart.json — die Typentafel ist Regelwissen und aendert sich nicht mit einem Scraperlauf. Alle Bauten sind GESETZT (feste Werte im Kopf der Datei), damit die Zusicherungen die Rechnung pruefen und nicht den naechtlichen Lauf. Kein Wochenwert wird behauptet.',
     'test-champions-matchups.js':        'Struktur der Matchup-Datei, Rechnung an gesetzten Werten',
     'test-hub-gezaehlte-antritte.js':    'Gezaehlte Antritte: ruft answerModel() und answerHtml() mit den echten Zeilen auf und rechnet jede angezeigte Zahl gegen die CSV nach — Anteil, Quote, Feldschnitt und Nenner muessen aus denselben zwei Zahlen folgen, die daneben stehen. Das sind GLEICHUNGEN gegen die Datei, keine Behauptungen ueber Wochenwerte: welche Zahlen dort stehen, ist der Pruefung egal, sie muessen nur zueinander passen. Dazu Eigenschaften der Spalten (ganze Zahlen, keine Top 8 ueber den Antritten), das Alles-oder-nichts-Tor gegen kaputte Werte und seit dem 02.09.2026 die Probe, dass das Vielfache im Satz und auf jeder Kachel aus den beiden Zahlen folgt, die daneben stehen.',
@@ -362,7 +363,12 @@ const REGISTER = {
    haengen an Smogon-Basiswerten und eigenen Nutzungszeilen, nicht an der
    Rangliste dieser Woche. Faellt eine davon weg, SOLL der Test
    umfallen. */
-const OBERGRENZE = 114;
+/* 16.09.2026: 114 -> 116. Die zwei neuen sind die Vorpruefungen in
+   test-attacken-merkmale.js ("traegt ueberhaupt eine Attacke ein
+   Rueckstoss-Merkmal?"). Sie stehen gegen ein LEERES BESTEHEN, nicht
+   gegen eine feste Zahl: ohne sie koennte der Parser leer laufen und
+   alle anderen Zusicherungen derselben Datei blieben gruen. */
+const OBERGRENZE = 116;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

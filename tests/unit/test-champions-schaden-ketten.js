@@ -225,15 +225,29 @@ describe('Fähigkeiten und Gegenstände beider Seiten', () => {
 });
 
 describe('Was der Rechner NICHT kann, sagt er selbst', () => {
-    it('eine Fähigkeit ohne Datengrundlage wird gemeldet, nicht geraten', () => {
-        /* Eisenfaust braucht die Kennzeichnung „Faustattacke". Die
-           Attackendaten führen sie nicht — also wird nichts verstärkt
-           UND der Aufrufer erfährt warum. Stillschweigend nichts zu tun
-           wäre dasselbe Ergebnis mit einer Lüge davor. */
-        const r = schlag({ attacker: { ability: 'Iron Fist' } });
-        assert.ok(r.unbelegt.indexOf('Iron Fist') !== -1,
-            'Eisenfaust muss in `unbelegt` stehen');
-        assert.equal(r.max, schlag({}).max, 'und darf nichts verändern');
+    it('eine Fähigkeit ohne Grundlage wird gemeldet, nicht geraten', () => {
+        /* UMGESCHRIEBEN 16.09.2026, am selben Tag. Vorher stand hier
+         * Eisenfaust — und die Zeile wurde falsch, sobald die Merkmale
+         * belegt waren (data/champions_move_flags.json). Eine
+         * Zusicherung, die einen NAMEN aus der Lückenliste pinnt, wehrt
+         * sich gegen das Schließen der Lücke; sie muss die EIGENSCHAFT
+         * prüfen.
+         *
+         * Geprüft wird jetzt: was auch immer der Rechner nicht belegen
+         * kann, steht namentlich im Ergebnis UND verändert keine Zahl.
+         * Der Name kommt aus NICHT_BELEGT selbst, nicht aus dieser
+         * Datei. */
+        const offen = Object.keys(CD.NICHT_BELEGT);
+        assert.ok(offen.length > 0,
+            'Vorbedingung: es muss etwas Unbelegtes geben, sonst prüft die Zeile nichts');
+        offen.forEach(ab => {
+            const r = schlag({ attacker: { ability: ab }, defender: { ability: ab } });
+            assert.ok(r.unbelegt.indexOf(ab) !== -1,
+                `${ab} steht in NICHT_BELEGT, wird aber nicht gemeldet`);
+            assert.equal(r.max, schlag({}).max, `${ab} verändert eine Zahl, obwohl unbelegt`);
+            assert.ok(String(CD.NICHT_BELEGT[ab]).length > 20,
+                `${ab} hat keinen lesbaren Grund — „unbelegt" ohne Warum ist ein Achselzucken`);
+        });
     });
 
     it('jeder wirksame Modifikator steht namentlich im Ergebnis', () => {

@@ -13,7 +13,7 @@
     "all_cards_database.csv": "2026-09-15T06:50:07+00:00",
     "price_data.csv": "2026-09-15T08:11:55+00:00",
     "labs_tournament_decks.csv": "2026-09-15T06:50:07+00:00",
-    "champions_usage.json": "2026-09-15T05:12:52+00:00",
+    "champions_usage.json": "2026-09-16T05:11:22+00:00",
     "city_league_archetypes_comparison.csv": "2026-07-31T07:10:57+00:00",
     "city_league_archetypes_deck_stats.csv": "2026-07-31T07:10:57+00:00",
     "tournament_cards_data_overview.csv": "2026-09-05T19:07:57+02:00",
@@ -25,7 +25,7 @@
     "online_api_tournaments.csv": "2026-09-15T03:48:41+00:00",
     "online_api_matchups_TEF-PBL.csv": "2026-09-15T03:48:41+00:00",
     "online_api_cards_TEF-PBL.csv": "2026-09-15T03:48:41+00:00",
-    "meta_prognose.json": "2026-09-15T03:48:41+00:00",
+    "meta_prognose.json": "2026-09-16T03:48:30+00:00",
     "labs_tournament_decks_BRS-PRE.csv": "2026-09-10T09:09:22+00:00",
     "labs_tournament_decks_SVI-ASC.csv": "2026-09-10T09:09:22+00:00",
     "labs_tournament_decks_SVI-PFL.csv": "2026-09-10T09:09:22+00:00",
@@ -45,8 +45,8 @@
     "player_continuity.csv": "2026-09-06T16:39:10+00:00",
     "champions_editionen.json": "2026-09-15T21:52:32+00:00",
     "pokemon_go_liste.json": "2026-09-09T16:16:18+02:00",
-    "pokemon_go_shiny.json": "2026-09-15T04:10:36+00:00",
-    "opgg_champions_moves.json": "2026-09-10T04:06:46+00:00"
+    "pokemon_go_shiny.json": "2026-09-16T04:08:06+00:00",
+    "opgg_champions_moves.json": "2026-09-16T04:08:06+00:00"
   },
   "inhalt_bis": {
     "meta_prognose.json": "2026-09-14",

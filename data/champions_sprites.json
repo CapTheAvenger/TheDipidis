@@ -4,8 +4,8 @@
   "quelle": "https://www.pokewiki.de/Liste_der_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions",
   "rechte": "Die Icons sind Spiel-Screenshots. Rechteinhaber: The Pokémon Company / Nintendo / GAME FREAK. PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG; die dortige CC-BY-SA-Lizenz gilt nur fuer den Wiki-Text, nicht fuer diese Bilder.",
   "erzeuger": "scripts/build_champions_sprites.py",
-  "anzahl": 316,
-  "bytes": 4635476
+  "anzahl": 318,
+  "bytes": 4660350
  },
  "sprites": {
   "Garchomp (Mega-Z)": {
@@ -1408,6 +1408,14 @@
    "hoehe": 128,
    "bytes": 15315
   },
+  "Overqwil": {
+   "datei": "images/champions/overqwil.png",
+   "formschluessel": "904",
+   "quelle": "https://www.pokewiki.de/images/4/4f/Pok%C3%A9mon-Icon_904_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12654
+  },
   "Sandaconda": {
    "datei": "images/champions/sandaconda.png",
    "formschluessel": "844",
@@ -1543,6 +1551,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 18088
+  },
+  "Toxtricity": {
+   "datei": "images/champions/toxtricity.png",
+   "formschluessel": "849",
+   "quelle": "https://www.pokewiki.de/images/4/48/Pok%C3%A9mon-Icon_849_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12220
   },
   "Aegislash": {
    "datei": "images/champions/aegislash.png",

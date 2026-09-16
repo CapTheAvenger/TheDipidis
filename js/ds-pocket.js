@@ -338,9 +338,15 @@
         var s = '';
         gruppen.forEach(function (a) {
             var teil = zuordnung[a];
+            /* `indexOf` gibt fuer eine unbekannte Stufe -1 — damit
+               stuende ein Deck OHNE Stufe ganz oben, noch vor S. Es
+               gehoert ans Ende. */
+            var rang = function (t) {
+                var i = TIER_ORDNUNG.indexOf(t);
+                return i < 0 ? TIER_ORDNUNG.length : i;
+            };
             teil.sort(function (x, y) {
-                var r = TIER_ORDNUNG.indexOf(x.tier) - TIER_ORDNUNG.indexOf(y.tier);
-                return r || x.name.localeCompare(y.name, 'de');
+                return rang(x.tier) - rang(y.tier) || x.name.localeCompare(y.name, 'de');
             });
             s += '<section class="pk-stufe">';
             s += '<h3>' + esc(a || t('Ohne Abschnitt', 'No section')) +
@@ -417,15 +423,17 @@
                 'Game8 uses a tier we do not know (' + stufen.join(', ') +
                 '). The decks are shown anyway — dropping them would be the ' +
                 'quieter but worse option.')) + '</p>';
+            /* DIESELBE ZEILE WIE UEBERALL (16.09.2026).
+               Hier stand eine eigene, magere Fassung ohne Sprites. Das
+               fiel drei Wochen nicht auf, weil nie ein Deck in diesem
+               Zweig landete — bis Game8 am 16.09.2026 „Team Rocket's
+               Wobbuffet" als Untiered fuehrte. Dann stand es als
+               einziges Deck der Liste ohne Bild da.
+
+               Ein Sonderweg, den nichts je betritt, ist kein Sonderweg,
+               sondern eine Falle mit Zeitzuender. */
             fremd.sort(function (a, b) { return a.name.localeCompare(b.name, 'de'); });
-            fremd.forEach(function (d) {
-                var i = (daten.decks || []).indexOf(d);
-                s += '<button type="button" class="pk-zeile" data-pk-deck="' + i + '">';
-                s += '<span class="pk-marke">?</span>';
-                s += '<span class="pk-name">' + esc(d.name) + '</span>';
-                s += '<span class="pk-pfeil" aria-hidden="true">›</span>';
-                s += '</button>';
-            });
+            fremd.forEach(function (d) { s += zeile(d, streit); });
             s += '</section>';
         }
         return s;

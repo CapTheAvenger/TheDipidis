@@ -88,6 +88,7 @@
                     { key: 'set_mapping', run: () => loadSetMapping() },
                     { key: 'rarity_preferences', run: () => loadRarityPreferences() },
                     { key: 'set_order', run: () => loadSetOrderMap() },
+                    { key: 'format_window', run: () => loadFormatWindow() },
                     { key: 'pokemonproxies', run: () => loadPokemonProxiesIndex() },
                     { key: 'prizepack_images', run: () => loadPrizePackImagesIndex() }
                 ];

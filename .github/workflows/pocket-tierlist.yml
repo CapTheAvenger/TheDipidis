@@ -132,6 +132,28 @@ jobs:
             exit $rc
           fi
 
+      # DIE SET-NAMEN GEHOEREN IN DENSELBEN LAUF (16.09.2026)
+      #
+      # ANLASS (Betreiber): „mit B3 und A2 und so kann ich nichts
+      # anfangen. Aber wenn ich weiß wie das set heißt kann ich noch
+      # schnell fehlende Karten besorgen."
+      #
+      # data/pocket_sets.json steht in einer eigenen Datei, weil es sich
+      # mit den Erweiterungen aendert und nicht mit den Decks. Es gehoert
+      # trotzdem in DIESEN Lauf: ein neues Set bringt neue Decks UND eine
+      # neue Kennung mit. Liefen die beiden getrennt, stuenden nach jedem
+      # Set-Wechsel fuer ein paar Tage Karten in der Liste, deren Set die
+      # Namenstabelle noch nicht kennt.
+      #
+      # `continue-on-error`: die Deckliste ist das Ergebnis dieses Laufs,
+      # die Namen sind die Zugabe. Faellt die Namensseite aus, bleibt in
+      # der Oberflaeche die blanke Kennung stehen — das ist schlechter
+      # als ein Name, aber weit besser als ein abgebrochener Lauf ohne
+      # frische Decks.
+      - name: Set-Namen fortschreiben
+        continue-on-error: true
+        run: python3 scripts/build_pocket_sets.py
+
       # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN (12.09.2026)
       #
       # `build_data_stand.py` schreibt den Stand einer Datei nur fort,
@@ -163,7 +185,7 @@ jobs:
             echo "keine Ausgabe — nichts zu committen"
             exit 0
           fi
-          git add data/pocket_tierlist.json data/data_stand.json
+          git add data/pocket_tierlist.json data/pocket_sets.json data/data_stand.json
           if git diff --cached --quiet; then
             echo "unverändert — kein Push."
             exit 0

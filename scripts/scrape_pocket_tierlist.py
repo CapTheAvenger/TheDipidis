@@ -260,15 +260,38 @@ def _anker(href):
 
 
 def lies_tabelle(tab):
-    """[(name, stufe, archiv_id, anker)] aus einer Game8-Deck-Tabelle.
+    """[(name, stufe, archiv_id, anker, abschnitt)] aus einer Game8-Tabelle.
+
+    ABSCHNITT, seit dem 16.09.2026
+    ------------------------------
+    ANLASS (Betreiber): „bei neues Set sollten ja nur die New Team
+    Rocket's Ambition Decks und Old Decks Updated with Team Rocket's
+    Ambition inklusive der Tiers".
+
+    Die Set-Tabelle ist keine flache Liste: sie hat ZWEI Ueberschriften,
+    und die sagen etwas, das die Stufe nicht sagt — ob ein Deck mit dem
+    Set NEU ist oder ein bestehendes, das durch das Set besser wurde.
+    Bis hierher hat der Lauf die Ueberschrift gelesen und weggeworfen;
+    der Reiter konnte die Aufteilung deshalb gar nicht zeigen.
+
+    Bei der Tier-Tabelle ist der Abschnitt leer — dort steht in der
+    Ueberschrift die Stufe, und die steht schon im zweiten Feld.
 
     Der Name aus dem alt-Text ist NUR ein Behelf — er ist bei jedem Deck
     mit Apostroph abgeschnitten (siehe deck_abschnitte). Der richtige
     Name kommt später von der Deck-Seite. Hier steht er, damit ein
     Ausfall einen Namen tragen kann, den man wiedererkennt.
     """
-    raus, stufe = [], None
+    raus, stufe, abschnitt = [], None, ""
     for tr in tab.find_all("tr"):
+        # Die Ueberschrift einer Set-Zeile benennt den Abschnitt. Eine
+        # Stufen-Ueberschrift der Tier-Tabelle traegt ein Abzeichen und
+        # keinen Text — sie faellt unten durch die Abzeichen-Regel und
+        # kommt hier gar nicht an.
+        for th in tr.find_all("th"):
+            text = th.get_text(" ", strip=True)
+            if text and not th.find("img", alt=re.compile(r"\bTier$")):
+                abschnitt = text
         abzeichen = tr.find("img", alt=re.compile(r"\bTier$"))
         # NUR ein Abzeichen, das IM th HAENGT, ist eine Stufenzeile.
         #
@@ -304,7 +327,8 @@ def lies_tabelle(tab):
                          re.sub(r"\s*Tier$", "", eigen_abz["alt"]).strip()
                          if eigen_abz else stufe,
                          aid,
-                         _anker(a["href"])))
+                         _anker(a["href"]),
+                         abschnitt))
     return raus
 
 
@@ -1021,6 +1045,59 @@ def waehle_abschnitt(seite, anker, behelfsname):
                         f"{len(abschnitte)} Abschnitte eindeutig")
 
 
+def baue_eintraege(tier, set_decks):
+    """Aus beiden Tabellen die Deck-Einträge — ohne Netz.
+
+    STAND FRUEHER IN sammle() ALS SCHLIESSUNG (16.09.2026 herausgeloest).
+    Grund: die Regel „nur die Set-Tabelle setzt einen Abschnitt" war von
+    aussen nicht erreichbar. Eine Verfaelschungsprobe blieb gruen —
+    nicht weil die Regel haelt, sondern weil sie niemand fahren konnte.
+    Was man nicht aufrufen kann, kann man nicht pruefen.
+    """
+    alle = {}
+
+    def eintrag(name, stufe, aid, anker, woher, abschnitt=""):
+        schluessel = (aid, anker)
+        d = alle.get(schluessel)
+        if d is None:
+            alle[schluessel] = {"name": name, "tier": stufe, "archiv": aid,
+                                "anker": anker, "quelle_liste": woher,
+                                # Nur die Set-Tabelle hat Abschnitte; bei
+                                # der Tier-Tabelle bleibt das Feld leer,
+                                # statt die Stufe hineinzuschreiben. Ein
+                                # leeres Feld ist eine Auskunft, ein
+                                # erfundener Abschnitt waere eine
+                                # Behauptung — und der Reiter gruppierte
+                                # unter „Neues Set" dann nach Stufen,
+                                # also nach genau dem, was er dort NICHT
+                                # zeigen soll.
+                                "set_abschnitt": abschnitt if woher == "set" else ""}
+            return
+        if d["quelle_liste"] != woher:
+            d["quelle_liste"] = "beide"
+        if not d.get("tier"):
+            d["tier"] = stufe
+        # Trifft ein Set-Eintrag auf ein schon vorhandenes Tier-Deck,
+        # bringt er den Abschnitt mit. Andersherum darf er ihn nicht
+        # ueberschreiben.
+        if woher == "set" and abschnitt and not d.get("set_abschnitt"):
+            d["set_abschnitt"] = abschnitt
+
+    for name, stufe, aid, anker, abschnitt in tier:
+        # Der Abschnitt wird WEITERGEREICHT, nicht hier schon
+        # weggeworfen: sonst entscheiden zwei Stellen dasselbe, und die
+        # Regel in eintrag() ist von aussen nicht mehr pruefbar — eine
+        # Verfaelschungsprobe darauf blieb am 16.09.2026 gruen, weil die
+        # Schleife sie vorweggenommen hat.
+        eintrag(name, stufe, aid, anker, "tier", abschnitt)
+    for name, stufe, aid, anker, abschnitt in set_decks:
+        # Ein Set-Deck ohne Anker und ein Tier-Deck mit Anker zeigen auf
+        # dieselbe Seite. Zusammengeführt wird später über den Namen, den
+        # beide erst von der Deck-Seite bekommen.
+        eintrag(name, stufe, aid, anker, "set", abschnitt)
+    return alle
+
+
 def sammle(tier, set_decks, nur=None, still=False):
     """Je Deck den Scan-Code holen. Gibt (decks, ausfaelle) zurück.
 
@@ -1036,27 +1113,7 @@ def sammle(tier, set_decks, nur=None, still=False):
     ohne Anker — dort ist die Seite als Ganzes gemeint, und es zählt ihr
     erstes Muster.
     """
-    alle = {}
-
-    def eintrag(name, stufe, aid, anker, woher):
-        schluessel = (aid, anker)
-        d = alle.get(schluessel)
-        if d is None:
-            alle[schluessel] = {"name": name, "tier": stufe, "archiv": aid,
-                                "anker": anker, "quelle_liste": woher}
-            return
-        if d["quelle_liste"] != woher:
-            d["quelle_liste"] = "beide"
-        if not d.get("tier"):
-            d["tier"] = stufe
-
-    for name, stufe, aid, anker in tier:
-        eintrag(name, stufe, aid, anker, "tier")
-    for name, stufe, aid, anker in set_decks:
-        # Ein Set-Deck ohne Anker und ein Tier-Deck mit Anker zeigen auf
-        # dieselbe Seite. Zusammengeführt wird später über den Namen, den
-        # beide erst von der Deck-Seite bekommen.
-        eintrag(name, stufe, aid, anker, "set")
+    alle = baue_eintraege(tier, set_decks)
 
     reihe = list(alle.values())
     if nur is not None:
@@ -1211,6 +1268,14 @@ def _zusammenfuehren(decks):
 
         if vorhanden.get("quelle_liste") != d.get("quelle_liste"):
             vorhanden["quelle_liste"] = "beide"
+        # DER ABSCHNITT DARF BEIM ZUSAMMENLEGEN NICHT VERLOREN GEHEN.
+        # Gemessen am 16.09.2026 gegen die echte Seite: sieben der 28
+        # Zeilen der Set-Tabelle zeigen auf eine Seite, deren Deck unter
+        # einer ANDEREN Archivnummer gefuehrt wird. Faellt hier der
+        # Abschnitt weg, verliert der Reiter fuer diese sieben die
+        # Aufteilung „neu" gegen „aktualisiert" — und zwar still.
+        if d.get("set_abschnitt") and not vorhanden.get("set_abschnitt"):
+            vorhanden["set_abschnitt"] = d["set_abschnitt"]
         # Nur der Tier-Eintrag darf Stufe UND Anker setzen, und dann
         # beide zusammen mit seiner Archivnummer — sonst zeigt der
         # Verweis ins Leere.

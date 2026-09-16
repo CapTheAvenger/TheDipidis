@@ -117,7 +117,7 @@ def test_die_stufe_gehoert_zum_richtigen_deck(gelesen):
     plausibel aussieht und in der jedes Deck falsch einsortiert ist.
     """
     tier, _ = gelesen
-    nach_namen = {n: s for n, s, _a, _k in tier}
+    nach_namen = {n: s for n, s, _a, _k, _ab in tier}
     assert nach_namen.get("Chien-Pao ex and Baxcalibur") == "S"
     assert nach_namen.get("Mega Altaria ex and PD Espeon") == "S"
     assert nach_namen.get("Hoopa ex and Darkrai ex") == "A+", (
@@ -129,7 +129,7 @@ def test_die_stufe_gehoert_zum_richtigen_deck(gelesen):
 def test_die_stufen_stehen_in_der_reihenfolge_der_seite(gelesen):
     tier, _ = gelesen
     reihe = []
-    for _n, st, _a, _k in tier:
+    for _n, st, _a, _k, _ab in tier:
         if not reihe or reihe[-1] != st:
             reihe.append(st)
     assert reihe == ["S", "A+", "A", "B", "C"], (
@@ -140,7 +140,7 @@ def test_die_stufen_stehen_in_der_reihenfolge_der_seite(gelesen):
 
 def test_das_wort_deck_faellt_aus_dem_namen(gelesen):
     tier, _ = gelesen
-    mit = [n for n, _s, _a, _k in tier if n.endswith(" Deck")]
+    mit = [n for n, _s, _a, _k, _ab in tier if n.endswith(" Deck")]
     assert not mit, (f"diese Namen tragen noch das angehaengte 'Deck': {mit}. "
                      f"Auf einer Kachel unter einem Deck-Symbol ist das Wort "
                      f"'Deck' Fuellung, keine Information")
@@ -154,7 +154,7 @@ def test_in_der_set_tabelle_traegt_jede_zelle_ihre_eigene_stufe(gelesen):
     kennt, gibt allen Set-Decks die Stufe der letzten Kopfzeile.
     """
     _, set_decks = gelesen
-    stufen = [s for _n, s, _a, _k in set_decks]
+    stufen = [s for _n, s, _a, _k, _ab in set_decks]
     assert stufen and all(stufen), "einem Set-Deck fehlt die Stufe"
     assert len(set(stufen)) > 1, (
         "alle Set-Decks haben dieselbe Stufe — dann ist die Zuordnung je "
@@ -163,7 +163,7 @@ def test_in_der_set_tabelle_traegt_jede_zelle_ihre_eigene_stufe(gelesen):
 
 def test_die_archiv_nummer_wird_mitgelesen(gelesen):
     tier, _ = gelesen
-    ohne = [n for n, _s, a, _k in tier if not (a or "").isdigit()]
+    ohne = [n for n, _s, a, _k, _ab in tier if not (a or "").isdigit()]
     assert not ohne, (f"ohne Archivnummer laesst sich die Deck-Seite nicht "
                       f"aufrufen und der Scan-Code nicht holen: {ohne}")
 
@@ -177,11 +177,11 @@ def test_die_tier_liste_verlinkt_den_abschnitt_nicht_nur_die_seite(gelesen):
     sie im Woerterbuch uebereinander.
     """
     tier, set_decks = gelesen
-    ohne = [n for n, _s, _a, k in tier if not k]
+    ohne = [n for n, _s, _a, k, _ab in tier if not k]
     assert not ohne, (f"diese Tier-Eintraege kamen ohne Anker an: {ohne[:5]}")
 
     mehrfach = {}
-    for _n, _s, a, _k in tier:
+    for _n, _s, a, _k, _ab in tier:
         mehrfach[a] = mehrfach.get(a, 0) + 1
     doppelt = {a: n for a, n in mehrfach.items() if n > 1}
     assert doppelt, (
@@ -190,7 +190,7 @@ def test_die_tier_liste_verlinkt_den_abschnitt_nicht_nur_die_seite(gelesen):
         "zwei Varianten (z. B. 597145, 562097, 613775)")
 
     # Und die Set-Tabelle verlinkt ohne Anker: dort ist die Seite gemeint.
-    assert all(k is None for _n, _s, _a, k in set_decks), (
+    assert all(k is None for _n, _s, _a, k, _ab in set_decks), (
         "ein Set-Eintrag traegt einen Anker — dann stimmt die Annahme nicht "
         "mehr, dass dort die Seite als Ganzes gemeint ist")
 
@@ -398,7 +398,7 @@ def test_der_lauf_haengt_die_kartenliste_ans_deck(mod, monkeypatch, deckseite):
     name = "Team Rocket's Articuno ex and 18 Trainers"
     netz = _Netz({f"{mod.BASIS}/games/Pokemon-TCG-Pocket/archives/9": deckseite})
     _verkabelt(mod, monkeypatch, netz, code=decks[name]["code"])
-    fertig, ausfaelle, _v, _z = mod.sammle([(name, "B", "9", None)], [], still=True)
+    fertig, ausfaelle, _v, _z = mod.sammle([(name, "B", "9", None, "")], [], still=True)
     assert fertig, f"kein Deck durchgekommen: {ausfaelle}"
     d = fertig[0]
     assert d.get("pokemon") and d.get("trainer"), (
@@ -1324,7 +1324,7 @@ def test_varianten_derselben_seite_fallen_nicht_zusammen(mod, monkeypatch):
     netz = _Netz({f"{mod.BASIS}/games/Pokemon-TCG-Pocket/archives/9": _seite("Alpha", "Beta")})
     _verkabelt(mod, monkeypatch, netz)
     fertig, ausfaelle, _versucht, _zus = mod.sammle(
-        [("Alpha", "S", "9", "hm_101"), ("Beta", "A", "9", "hm_102")], [], still=True)
+        [("Alpha", "S", "9", "hm_101", ""), ("Beta", "A", "9", "hm_102", "")], [], still=True)
     assert len(fertig) == 2, (
         f"aus zwei Varianten derselben Seite wurden {len(fertig)} — dann "
         f"faellt eine still unter den Tisch. Ausfaelle: {ausfaelle}")
@@ -1336,7 +1336,7 @@ def test_die_seite_wird_nur_einmal_geholt(mod, monkeypatch):
     """Sonst holt jede Variante dieselbe Seite noch einmal."""
     netz = _Netz({f"{mod.BASIS}/games/Pokemon-TCG-Pocket/archives/9": _seite("Alpha", "Beta")})
     _verkabelt(mod, monkeypatch, netz)
-    mod.sammle([("Alpha", "S", "9", "hm_101"), ("Beta", "A", "9", "hm_102")], [], still=True)
+    mod.sammle([("Alpha", "S", "9", "hm_101", ""), ("Beta", "A", "9", "hm_102", "")], [], still=True)
     seitenabrufe = [u for u in netz.abrufe if "/archives/" in u]
     assert len(seitenabrufe) == 1, (
         f"die Seite wurde {len(seitenabrufe)}-mal geholt — Game8 schuldet uns "
@@ -1352,7 +1352,7 @@ def test_ein_deck_ohne_bestandene_darstellungsprobe_kommt_nicht_in_die_datei(mod
     """
     netz = _Netz({f"{mod.BASIS}/games/Pokemon-TCG-Pocket/archives/9": _seite("Alpha")})
     _verkabelt(mod, monkeypatch, netz, probe_ok=False)
-    fertig, ausfaelle, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101")], [], still=True)
+    fertig, ausfaelle, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101", "")], [], still=True)
     assert fertig == [], (
         "ein Deck, dessen Inhalt unsere eigene Darstellung nicht uebersteht, "
         "steht trotzdem in der Datei")
@@ -1363,7 +1363,7 @@ def test_ein_deck_ohne_bestandene_darstellungsprobe_kommt_nicht_in_die_datei(mod
 def test_ein_unlesbares_muster_kommt_nicht_in_die_datei(mod, monkeypatch):
     netz = _Netz({f"{mod.BASIS}/games/Pokemon-TCG-Pocket/archives/9": _seite("Alpha")})
     _verkabelt(mod, monkeypatch, netz, unlesbar=True)
-    fertig, ausfaelle, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101")], [], still=True)
+    fertig, ausfaelle, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101", "")], [], still=True)
     assert fertig == [] and ausfaelle, "ein unlesbares Muster liefert einen Code"
 
 
@@ -1372,7 +1372,7 @@ def test_der_name_kommt_von_der_deck_seite_nicht_aus_der_uebersicht(mod, monkeyp
     netz = _Netz({f"{mod.BASIS}/games/Pokemon-TCG-Pocket/archives/9":
                   _seite("Team Rocket's Articuno ex and 18 Trainers")})
     _verkabelt(mod, monkeypatch, netz)
-    fertig, _aus, _versucht, _zus = mod.sammle([("Team Rocket", "B", "9", "hm_101")], [], still=True)
+    fertig, _aus, _versucht, _zus = mod.sammle([("Team Rocket", "B", "9", "hm_101", "")], [], still=True)
     assert fertig[0]["name"] == "Team Rocket's Articuno ex and 18 Trainers", (
         f"der abgeschnittene Behelfsname hat ueberlebt: {fertig[0]['name']!r}")
 
@@ -1409,7 +1409,7 @@ def _lauf(mod, monkeypatch, tier, set_decks, fertig, ausfaelle, argv, ziel=None)
 def test_ein_leeres_ergebnis_gibt_eins_zurueck(mod, monkeypatch):
     """Frueher nur ein Quelltext-Grep — die Bedingung liess sich abschalten."""
     rc, geschrieben = _lauf(mod, monkeypatch,
-                            [("A", "S", "1", "hm_101")], [], [], [("A", "kaputt")], [])
+                            [("A", "S", "1", "hm_101", "")], [], [], [("A", "kaputt")], [])
     assert rc == 1, "ein Lauf ohne einen einzigen Code meldet Erfolg"
     assert not geschrieben, "und schreibt die vorhandene Datei tot"
 
@@ -1608,8 +1608,8 @@ def test_die_tier_stufe_gewinnt_gegen_die_set_stufe(mod, monkeypatch):
     """
     netz = _Netz({f"{mod.BASIS}/games/Pokemon-TCG-Pocket/archives/9": _seite("Alpha")})
     _verkabelt(mod, monkeypatch, netz)
-    fertig, _aus, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101")],
-                           [("Alpha", "C", "9", None)], still=True)
+    fertig, _aus, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101", "")],
+                           [("Alpha", "C", "9", None, "")], still=True)
     stufen = {d["name"]: d["tier"] for d in fertig}
     assert stufen.get("Alpha") == "S", (
         f"die Set-Stufe hat die Tier-Stufe ueberschrieben: {stufen}")
@@ -1629,7 +1629,7 @@ def test_zwischen_zwei_abrufen_wird_gewartet(mod, monkeypatch):
     pausen = []
     monkeypatch.setattr(mod.time, "sleep", lambda s: pausen.append(s))
 
-    mod.sammle([("Alpha", "S", "9", "hm_101")], [], still=True)
+    mod.sammle([("Alpha", "S", "9", "hm_101", "")], [], still=True)
     abrufe = len(netz.abrufe)
     assert len(pausen) >= abrufe, (
         f"{abrufe} Abrufe, aber nur {len(pausen)} Pausen — jeder Abruf braucht "
@@ -1711,8 +1711,8 @@ def test_ein_deck_aus_beiden_tabellen_steht_nur_einmal_in_der_datei(mod, monkeyp
     """
     netz = _Netz({f"{mod.BASIS}/games/Pokemon-TCG-Pocket/archives/9": _seite("Alpha")})
     _verkabelt(mod, monkeypatch, netz)
-    fertig, _aus, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101")],
-                           [("Alpha", "C", "9", None)], still=True)
+    fertig, _aus, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101", "")],
+                           [("Alpha", "C", "9", None, "")], still=True)
     assert len(fertig) == 1, (
         f"dasselbe Deck steht {len(fertig)}-mal in der Ausgabe: "
         f"{[(d['name'], d['tier']) for d in fertig]}")
@@ -1733,8 +1733,8 @@ def test_kein_code_steht_unter_zwei_namen_in_derselben_ausgabe(mod, monkeypatch)
     monkeypatch.setattr(mod.time, "sleep", lambda *_: None)
     netz.bilder = {"https://img.game8.co/101/x.png/show": b"CODE-ALPHA",
                    "https://img.game8.co/102/x.png/show": b"CODE-BETA"}
-    fertig, _aus, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101"),
-                            ("Beta", "A", "9", "hm_102")], [], still=True)
+    fertig, _aus, _versucht, _zus = mod.sammle([("Alpha", "S", "9", "hm_101", ""),
+                            ("Beta", "A", "9", "hm_102", "")], [], still=True)
     codes = {d["name"]: d["code"] for d in fertig}
     assert codes == {"Alpha": "CODE-ALPHA", "Beta": "CODE-BETA"}, (
         f"Name und Code passen nicht zusammen: {codes}")
@@ -1956,7 +1956,7 @@ def test_eine_aufgefuellte_zeile_verliert_ihre_decks_nicht(gelesen):
     die Schwelle nichts davon sehen.
     """
     _tier, set_decks = gelesen
-    ids = [aid for _n, _st, aid, _a in set_decks]
+    ids = [aid for _n, _st, aid, _a, _ab in set_decks]
     for verloren in ("562129", "532008", "571731"):
         assert verloren in ids, (
             f"Archiv {verloren} steht in der letzten Set-Zeile der echten "
@@ -1975,7 +1975,7 @@ def test_die_stufenweiche_haengt_am_th_nicht_an_der_zeile(mod):
         "    <th colspan='4'></th></tr>"
         "</table>")
     tab = BeautifulSoup(zeile, "lxml").find("table")
-    namen = [n for n, _s, _i, _a in mod.lies_tabelle(tab)]
+    namen = [n for n, _s, _i, _a, _ab in mod.lies_tabelle(tab)]
     assert namen == ["Alpha", "Beta"], (
         f"eine mit <th> aufgefuellte Zeile wurde uebersprungen: {namen}")
 
@@ -2110,14 +2110,14 @@ def test_die_rechnung_muss_aufgehen(mod, monkeypatch, tmp_path):
 
 def test_die_ausgabe_nennt_die_herkunft_der_zahl(mod, monkeypatch, tmp_path):
     """`anzahl` allein laesst sich nicht nachpruefen."""
-    tier = [("A", "S", "1", "hm_101")]
+    tier = [("A", "S", "1", "hm_101", "")]
     fertig = [{"name": "A", "code": "C1"}]
     zus = [{"art": "erwartet", "behalten": "A", "aufgegangen_in": "1",
             "verloren": "A2", "verlorene_stelle": "2", "verlorene_stufe": "B"}]
     ziel = tmp_path / "x.json"
     monkeypatch.setattr(mod, "AUSGABE", str(ziel))
     monkeypatch.setattr(mod, "hole", lambda *a, **k: "<html></html>")
-    monkeypatch.setattr(mod, "lies_seite", lambda h: (tier, [("A2", "B", "2", None)]))
+    monkeypatch.setattr(mod, "lies_seite", lambda h: (tier, [("A2", "B", "2", None, "")]))
     monkeypatch.setattr(mod, "sammle", lambda *a, **k: (fertig, [], 2, zus))
     monkeypatch.setattr(sys, "argv", ["x"])
     assert mod.main() == 0
@@ -2154,7 +2154,7 @@ def test_nur_null_geht_null_decks_an(mod, monkeypatch):
     netz = _Netz({f"{mod.BASIS}/games/Pokemon-TCG-Pocket/archives/9": _seite("Alpha")})
     _verkabelt(mod, monkeypatch, netz)
     fertig, _aus, versucht, _zus = mod.sammle(
-        [("Alpha", "S", "9", "hm_101")], [], nur=0, still=True)
+        [("Alpha", "S", "9", "hm_101", "")], [], nur=0, still=True)
     assert versucht == 0 and fertig == [], (
         f"--nur 0 ging {versucht} Decks an statt keines")
 
@@ -2231,3 +2231,113 @@ def test_die_eingabe_aus_dem_actions_dialog_laeuft_nicht_als_shell_text():
         f"{[z for z in befehl.splitlines() if '${{' in z]}")
     assert "NUR" in schritt.get("env", {}), (
         "die Eingabe kommt nicht ueber die Umgebung herein")
+
+
+# ── Der Abschnitt der Set-Tabelle (16.09.2026) ────────────────────────
+#
+# ANLASS (Betreiber): „bei neues Set sollten ja nur die New Team
+# Rocket's Ambition Decks und Old Decks Updated with Team Rocket's
+# Ambition inklusive der Tiers".
+#
+# Die Set-Tabelle ist keine flache Liste. Ihre zwei Ueberschriften sagen
+# etwas, das die Stufe nicht sagt: ob ein Deck MIT dem Set neu ist oder
+# ein bestehendes, das durch das Set besser wurde. Bis hierher hat der
+# Lauf die Ueberschrift gelesen und weggeworfen.
+
+SET_TABELLE = """
+<table>
+  <tr><th>New Alpha Decks</th></tr>
+  <tr><td><a href="/games/x/archives/11"><img alt="Neu Eins Deck"></a>
+          <img alt="B Tier"></td></tr>
+  <tr><th>Old Decks Updated with Alpha</th></tr>
+  <tr><td><a href="/games/x/archives/22"><img alt="Alt Eins Deck"></a>
+          <img alt="S Tier"></td>
+      <td><a href="/games/x/archives/33"><img alt="Alt Zwei Deck"></a>
+          <img alt="A Tier"></td></tr>
+</table>
+"""
+
+
+def _tab(html):
+    from bs4 import BeautifulSoup
+    return BeautifulSoup(html, "lxml").find("table")
+
+
+def test_die_set_tabelle_traegt_ihre_abschnitte_mit(mod):
+    zeilen = mod.lies_tabelle(_tab(SET_TABELLE))
+    nach_id = {aid: abschnitt for _n, _s, aid, _k, abschnitt in zeilen}
+    assert nach_id["11"] == "New Alpha Decks", (
+        "das erste Deck traegt nicht die Ueberschrift, unter der es steht")
+    assert nach_id["22"] == "Old Decks Updated with Alpha"
+    assert nach_id["33"] == "Old Decks Updated with Alpha", (
+        "die zweite Zelle derselben Zeile hat den Abschnitt verloren")
+
+
+def test_die_stufen_ueberschrift_ist_kein_abschnitt(mod):
+    """Die Tier-Tabelle hat Ueberschriften, aber keine Abschnitte.
+
+    Dort steht in der Ueberschrift die STUFE, und die steht schon im
+    zweiten Feld. Landete sie zusaetzlich im Abschnitt, gruppierte der
+    Reiter unter „Neues Set" nach Stufennamen — also genau nach dem, was
+    er gerade NICHT zeigen soll.
+    """
+    tier = """
+    <table>
+      <tr><th><img alt="S Tier"></th></tr>
+      <tr><td><a href="/games/x/archives/44"><img alt="Nur Tier Deck"></a></td></tr>
+    </table>
+    """
+    zeilen = mod.lies_tabelle(_tab(tier))
+    assert [a for *_r, a in zeilen] == [""], (
+        f"die Tier-Tabelle liefert Abschnitte: {[a for *_r, a in zeilen]}")
+
+
+def test_der_abschnitt_ueberlebt_das_zusammenlegen(mod, monkeypatch):
+    """Sieben von 28 Set-Zeilen zeigen auf ein Deck unter anderer Nummer.
+
+    Gemessen am 16.09.2026 gegen die echte Seite. Faellt der Abschnitt
+    beim Zusammenlegen weg, verliert der Reiter fuer diese sieben die
+    Aufteilung — und zwar still.
+    """
+    behalten = {"name": "A", "tier": "S", "archiv": "1", "anker": "hm_1",
+                "quelle_liste": "tier", "set_abschnitt": "", "code": "X"}
+    verloren = {"name": "A", "tier": "S", "archiv": "2", "anker": None,
+                "quelle_liste": "set", "set_abschnitt": "New Alpha Decks", "code": "X"}
+    reihe, zusammen = mod._zusammenfuehren([behalten, verloren])
+    assert len(reihe) == 1, "die beiden haetten zusammenfallen muessen"
+    assert reihe[0]["set_abschnitt"] == "New Alpha Decks", (
+        "der Abschnitt ging beim Zusammenlegen verloren")
+    assert zusammen, "das Zusammenlegen wurde nicht festgehalten"
+
+
+def test_nur_die_set_tabelle_setzt_einen_abschnitt(mod):
+    """Ein Tier-Eintrag darf keinen Abschnitt tragen.
+
+    Sonst stuende in der Datei ein Abschnitt an einem Deck, das in der
+    Set-Tabelle gar nicht vorkommt — eine Behauptung ueber die Quelle,
+    die die Quelle nicht deckt. Der Reiter gruppierte unter „Neues Set"
+    dann nach Stufennamen, also nach genau dem, was er dort NICHT zeigen
+    soll.
+    """
+    alle = mod.baue_eintraege(
+        [("Nur Tier", "S", "9", "hm_1", "Ueberschrift der Tier-Tabelle")],
+        [])
+    d = list(alle.values())[0]
+    assert d["set_abschnitt"] == "", (
+        f"ein Tier-Eintrag traegt den Abschnitt {d['set_abschnitt']!r}")
+
+
+def test_ein_set_eintrag_bringt_den_abschnitt_an_ein_tier_deck(mod):
+    """Der haeufigste Fall: dasselbe Deck steht in beiden Tabellen.
+
+    Elf der 33 Decks sind das (gemessen 16.09.2026). Kaeme der Abschnitt
+    dabei nicht mit, stuenden sie unter „Neues Set" ohne Ueberschrift —
+    und das sind gerade die bekanntesten.
+    """
+    alle = mod.baue_eintraege(
+        [("A", "S", "9", None, "")],
+        [("A", "S", "9", None, "New Alpha Decks")])
+    d = list(alle.values())[0]
+    assert d["quelle_liste"] == "beide"
+    assert d["set_abschnitt"] == "New Alpha Decks", (
+        "der Set-Eintrag hat den Abschnitt nicht an das Tier-Deck weitergegeben")

@@ -94,7 +94,15 @@ function umgebung(daten) {
         addEventListener(art, f) { (this._hoerer[art] = this._hoerer[art] || []).push(f); },
         fetch(pfad, wahl) {
             fenster._geholt = { pfad: pfad, wahl: wahl };
-            return Promise.resolve({ ok: true, json: () => Promise.resolve(daten) });
+            // Seit dem 16.09.2026 holt der Reiter zwei Dateien; nur den
+            // letzten Abruf zu merken hiesse, die Reihenfolge nicht
+            // pruefen zu koennen.
+            (fenster._alleGeholt = fenster._alleGeholt || []).push({ pfad: pfad, wahl: wahl });
+            return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve(
+                    /pocket_sets/.test(pfad) ? { sets: { B3b: 'Everyday Wonders' } } : daten),
+            });
         },
         getLang: () => 'de',
         console: { warn() {} },
@@ -180,8 +188,21 @@ describe('Pocket-Reiter: die Liste entsteht wirklich', () => {
 
     it('jede Stufe bekommt ihren eigenen Abschnitt mit der richtigen Zahl', () => {
         // Faengt TIER_ORDNUNG ohne 'D' (ueberlebende Mutation 07.09.2026).
+        //
+        // DECKS OHNE STUFE zaehlen hier nicht mit: Game8 fuehrt seit dem
+        // 16.09.2026 „Team Rocket's Wobbuffet" als Untiered, der Scraper
+        // schreibt dafuer `tier: null`. Die bekommen KEINEN Stufen-
+        // Abschnitt, sondern den eigenen Kasten „Ohne bekannte Stufe"
+        // darunter — geprueft im Fall gleich danach.
         const zaehlung = {};
-        DATEN.decks.forEach(d => { zaehlung[d.tier] = (zaehlung[d.tier] || 0) + 1; });
+        const ohneStufe = [];
+        DATEN.decks.forEach(d => {
+            if (d.tier === null || d.tier === undefined || d.tier === '') {
+                ohneStufe.push(d);
+                return;
+            }
+            zaehlung[d.tier] = (zaehlung[d.tier] || 0) + 1;
+        });
         const html = u.knoten.pocketListe.innerHTML;
         Object.keys(zaehlung).forEach(stufe => {
             const re = new RegExp('Stufe ' + stufe.replace('+', '\\+') +
@@ -190,13 +211,28 @@ describe('Pocket-Reiter: die Liste entsteht wirklich', () => {
                 `der Abschnitt "Stufe ${stufe}" mit ${zaehlung[stufe]} Decks fehlt`);
         });
         const abschnitte = (html.match(/class="pk-stufe"/g) || []).length;
-        assert.equal(abschnitte, Object.keys(zaehlung).length,
+        assert.equal(abschnitte, Object.keys(zaehlung).length + (ohneStufe.length ? 1 : 0),
             'die Zahl der Abschnitte passt nicht zu den Stufen in der Datei');
+        if (ohneStufe.length) {
+            assert.match(html, /Ohne bekannte Stufe|Tier not recognised/,
+                'die Decks ohne Stufe haben keinen eigenen Kasten — dann fallen '
+                + 'sie entweder weg oder stehen unter einer Stufe, die sie nicht haben');
+        }
     });
 
     it('holt die Daten ohne Zwischenspeicher', () => {
-        assert.equal(u.fenster._geholt.pfad, 'data/pocket_tierlist.json');
-        assert.equal(u.fenster._geholt.wahl.cache, 'no-store');
+        /* Seit dem 16.09.2026 holt der Reiter ZWEI Dateien: die
+           Deckliste und die Set-Namen. Geprueft wird deshalb nicht mehr
+           „genau dieser eine Abruf", sondern die Eigenschaft, auf die es
+           ankommt — die Deckliste kommt ZUERST (der Reiter ist ohne die
+           Namen voll bedienbar, umgekehrt nicht), und KEIN Abruf nimmt
+           den Zwischenspeicher. */
+        const alle = u.fenster._alleGeholt || [u.fenster._geholt];
+        assert.equal(alle[0].pfad, 'data/pocket_tierlist.json',
+            'die Deckliste muss der erste Abruf sein — sonst wartet der '
+            + 'Reiter auf eine Datei, die er zum Zeichnen nicht braucht');
+        alle.forEach(g => assert.equal(g.wahl.cache, 'no-store',
+            `${g.pfad} wurde mit Zwischenspeicher geholt`));
     });
 });
 
@@ -560,5 +596,174 @@ describe('Pocket-Reiter: was schiefgehen kann', () => {
         const h = u.knoten.pocketOverlay.innerHTML;
         assert.match(h, /nicht zeichnen/, 'es bleibt ein leeres weisses Feld stehen');
         assert.ok(h.includes(DATEN.decks[0].code), 'der Code steht nirgends zum Abschreiben');
+    });
+});
+
+/* ════════════════════════════════════════════════════════════════════
+   SET-NAMEN UND DIE ABSCHNITTE DES NEUEN SETS (16.09.2026)
+   ════════════════════════════════════════════════════════════════════
+   ZWEI ANLAESSE (Betreiber):
+
+     „bei Pocket ändert der Filter Alle, Tier-List, Neues Set quasi
+      nichts … bei neues Set sollten ja nur die New Team Rocket's
+      Ambition Decks und Old Decks Updated with Team Rocket's Ambition
+      inklusive der Tiers"
+
+     „können wir bei den Details von den Karten auch den Set Namen
+      schreiben weil mit B3 und A2 und so kann ich nichts anfangen"
+
+   Nachgemessen am 16.09.2026 gegen die echte Game8-Seite: der Filter
+   GREIFT (23 gegen 21 von 33 Decks), aber er sah nicht danach aus, weil
+   elf Decks in beiden Listen stehen und beide Ansichten nach Stufe
+   gruppierten. Die Set-Tabelle hat zwei Ueberschriften, und die sagen
+   etwas, das die Stufe nicht sagt: ob ein Deck mit dem Set NEU ist oder
+   ein bestehendes, das durch das Set besser wurde.
+   ════════════════════════════════════════════════════════════════════ */
+
+const MIT_ABSCHNITT = {
+    _meta: { anzahl: 3 },
+    decks: [
+        { name: 'Neu Eins', tier: 'B', archiv: '1', quelle_liste: 'set',
+          set_abschnitt: "New Team Rocket's Ambition Decks" },
+        { name: 'Alt Eins', tier: 'S', archiv: '2', quelle_liste: 'beide',
+          set_abschnitt: "Old Decks Updated with Team Rocket's Ambition" },
+        { name: 'Nur Tier', tier: 'A', archiv: '3', quelle_liste: 'tier',
+          set_abschnitt: '' },
+    ],
+};
+
+describe('Pocket: „Neues Set" zeigt die Abschnitte der Quelle', () => {
+    it('gruppiert nach Abschnitt statt nach Stufe', async () => {
+        const u = await gezeichnet(MIT_ABSCHNITT);
+        klick(u.knoten, 'data-pk-filter', 'set');
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.ok(html.indexOf("New Team Rocket&#39;s Ambition Decks") !== -1
+               || html.indexOf("New Team Rocket's Ambition Decks") !== -1,
+            'der Abschnitt der neuen Decks fehlt');
+        assert.ok(/Old Decks Updated with Team Rocket/.test(html),
+            'der Abschnitt der aktualisierten Decks fehlt');
+        // Die Stufe steht weiter an der Zeile — ausdruecklich verlangt
+        // („inklusive der Tiers").
+        assert.ok(/class="pk-marke">S</.test(html), 'die Stufe fehlt an der Zeile');
+        assert.ok(html.indexOf('Nur Tier') === -1,
+            'ein Deck, das nur in der Tier-Liste steht, taucht unter „Neues Set" auf');
+        assert.ok(!/Stufe S/.test(html),
+            'unter „Neues Set" stehen weiter Stufenueberschriften — dann ist die '
+            + 'Aufteilung der Quelle wieder unsichtbar');
+    });
+
+    it('die anderen Filter bleiben nach Stufe gruppiert', async () => {
+        const u = await gezeichnet(MIT_ABSCHNITT);
+        klick(u.knoten, 'data-pk-filter', 'alle');
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.ok(/Stufe S/.test(html), 'die Stufenueberschrift fehlt bei „Alle"');
+        assert.ok(!/Old Decks Updated/.test(html),
+            '„Alle" gruppiert nach Abschnitt — dann sagt der Filter nichts mehr aus');
+    });
+
+    it('ein Deck ohne Abschnitt verschwindet nicht, sondern wird angeschrieben', async () => {
+        const u = await gezeichnet({
+            _meta: {}, decks: [
+                { name: 'Ohne', tier: 'B', archiv: '9', quelle_liste: 'set', set_abschnitt: '' },
+            ],
+        });
+        klick(u.knoten, 'data-pk-filter', 'set');
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.ok(html.indexOf('Ohne') !== -1,
+            'ein Deck ohne Abschnitt faellt aus der Liste — das ist die stille '
+            + 'Reparatur, die dieses Projekt ueberall verbietet');
+        assert.ok(/Ohne Abschnitt|No section/.test(html),
+            'die Ueberschrift fuer Decks ohne Abschnitt fehlt');
+        /* Und die ERKLAERUNG darunter, nicht nur die Ueberschrift: die
+           Ueberschrift steht auch dann da, wenn der erklaerende Satz
+           fehlt — dann liest der Nutzer „Ohne Abschnitt" und weiss
+           nicht, ob das ein Fehler ist oder Absicht. */
+        assert.ok(/pk-alt/.test(html) && /Überschrift zuordnen|assign their heading/.test(html),
+            'es fehlt die Auskunft, WARUM das Deck keine Ueberschrift hat');
+    });
+});
+
+describe('Pocket: die Kartenliste nennt das Set beim Namen', () => {
+    const MIT_KARTEN = {
+        _meta: {}, decks: [{
+            name: 'Testdeck', tier: 'B', archiv: '1', quelle_liste: 'tier',
+            code: 'x', pokemon: [{ name: 'Bonsly', anzahl: 1, set: 'B3b', nummer: '078' }],
+            trainer: [{ name: 'Cyrus', anzahl: 1, set: 'ZZ9', nummer: '001' }],
+        }],
+    };
+
+    it('schreibt den Klarnamen vor die Kennung — und erfindet keinen', async () => {
+        const u = await gezeichnet(MIT_KARTEN);
+        // Die Namenstabelle kommt als ZWEITER Abruf, nach dem Zeichnen.
+        await new Promise(r => setTimeout(r, 0));
+        await new Promise(r => setTimeout(r, 0));
+        klick(u.knoten, 'data-pk-deck', '0');
+        const html = u.knoten.pocketOverlay.innerHTML;
+        assert.ok(html.indexOf('Everyday Wonders') !== -1,
+            'der Set-Name fehlt — mit „B3b" allein kann niemand einkaufen gehen');
+        /* NUR der sichtbare Text zaehlt. Die Kennung steht ausserdem im
+           title-Attribut — wer gegen das ganze HTML prueft, haelt eine
+           Zeile fuer heil, in der sichtbar gar keine Kennung mehr
+           steht. */
+        const sichtbar = html.replace(/<[^>]+>/g, '|');
+        assert.ok(sichtbar.indexOf('B3b-078') !== -1,
+            'die Kennung fehlt sichtbar — sie steht auf der Karte und ist das, '
+            + 'was man im Laden abgleicht');
+        assert.ok(sichtbar.indexOf('ZZ9-001') !== -1,
+            'eine unbekannte Kennung muss sichtbar stehen bleiben');
+        assert.ok(html.indexOf('<b>Everyday Wonders</b>') !== -1,
+            'der bekannte Name steht nicht als Name da');
+        assert.equal((html.match(/<b>/g) || []).length, 1,
+            'fuer die unbekannte Kennung wurde ein Name erfunden');
+    });
+});
+
+/* ── EIN DECK OHNE STUFE (16.09.2026) ─────────────────────────────────
+   Game8 fuehrt seit heute „Team Rocket's Wobbuffet" als Untiered; der
+   Scraper schreibt dafuer `tier: null`. Der Zweig fuer unbekannte
+   Stufen gab es seit dem 07.09. — betreten hat ihn nie ein Deck, und
+   deshalb ist drei Wochen nicht aufgefallen, dass er als einziger
+   Zweig KEINE Sprites zeichnet. Ein Sonderweg, den nichts betritt, ist
+   kein Sonderweg, sondern eine Falle mit Zeitzuender. */
+describe('Pocket: ein Deck ohne Stufe', () => {
+    const OHNE_STUFE = {
+        _meta: { anzahl: 2 },
+        decks: [
+            { name: 'Pikachu ex', tier: 'S', archiv: '1', quelle_liste: 'tier',
+              set_abschnitt: '', pokemon: [{ name: 'Pikachu ex', anzahl: 2, set: 'A1', nummer: '001' }] },
+            { name: 'Wobbuffet', tier: null, archiv: '2', quelle_liste: 'set',
+              set_abschnitt: 'New Alpha Decks',
+              pokemon: [{ name: 'Wobbuffet', anzahl: 2, set: 'A1', nummer: '002' }] },
+        ],
+    };
+
+    it('faellt nicht aus der Liste und bekommt trotzdem sein Bild', async () => {
+        const u = await gezeichnet(OHNE_STUFE);
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.ok(html.indexOf('Wobbuffet') !== -1,
+            'das Deck ohne Stufe fehlt ganz');
+        assert.match(html, /Ohne bekannte Stufe|Tier not recognised/,
+            'es fehlt der eigene Kasten samt Begruendung');
+        // Der Kern: auch diese Zeile traegt ein Bild.
+        const nachWobbuffet = html.slice(html.indexOf('Ohne bekannte Stufe'));
+        assert.ok(nachWobbuffet.indexOf('pk-sprite') !== -1,
+            'die Zeile ohne Stufe bekommt kein Bild — sie stuende als einzige '
+            + 'der Liste nackt da');
+    });
+
+    it('steht unter „Neues Set" am Ende, nicht vor der Stufe S', async () => {
+        const u = await gezeichnet({
+            _meta: {}, decks: [
+                { name: 'Ohne Stufe', tier: null, archiv: '1', quelle_liste: 'set',
+                  set_abschnitt: 'New Alpha Decks' },
+                { name: 'Mit Stufe S', tier: 'S', archiv: '2', quelle_liste: 'set',
+                  set_abschnitt: 'New Alpha Decks' },
+            ],
+        });
+        klick(u.knoten, 'data-pk-filter', 'set');
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.ok(html.indexOf('Mit Stufe S') < html.indexOf('Ohne Stufe'),
+            'das Deck ohne Stufe steht vor der Stufe S — indexOf() gibt fuer eine '
+            + 'unbekannte Stufe -1, und -1 sortiert ganz nach oben');
     });
 });

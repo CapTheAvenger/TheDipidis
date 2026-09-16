@@ -440,7 +440,7 @@ describe('Team-Rechner — was wirklich gezeichnet wird', () => {
         const html = api.teamMatrix();
         const striche = (html.match(/class="sq-team-zelle is-leer"/g) || []).length;
         assert.equal(striche, 0, 'die Matrix ist leer, obwohl beide Seiten Sets haben');
-        assert.match(html, /\d+(?:,\d)?–\d+(?:,\d)? %/,
+        assert.match(html, /\d+(?:,\d)?\s*–\s*\d+(?:,\d)? %/,
             'in keiner Zelle steht eine Spanne — es wird nur der Hoechstwurf gezeigt');
     });
 

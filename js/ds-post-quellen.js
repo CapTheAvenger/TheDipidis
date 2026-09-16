@@ -1219,6 +1219,29 @@ REZEPTE['pocket'] = {
              * S", waehrend die hoechste Stufe fehlte — und der Test blieb
              * gruen, weil er nur zaehlt, ob die GEZEIGTEN Stufen ganz
              * sind (Abnahme 04.09.2026). */
+            /* ZWEI VERSCHIEDENE DINGE, EINE FRUEHERE REGEL (16.09.2026).
+               Bis heute war jede Stufe ausserhalb von TIER_ORDNUNG ein
+               harter Abbruch. Gedacht war das gegen eine NEUE Stufe
+               („SS"), die sonst stumm aus der Liste faellt — und dafuer
+               ist es weiter richtig.
+
+               Am 16.09.2026 fuehrte Game8 aber ein Deck GANZ OHNE Stufe
+               („Team Rocket's Wobbuffet", auf der Seite als „Untiered"
+               bezeichnet). Der Scraper schreibt dafuer `tier: null`, und
+               das ist keine unbekannte Stufe, sondern gar keine — ein
+               Zustand, den die Quelle ausdruecklich kennt.
+
+               Ein Post ohne Stufe zu erzeugen waere falsch; einen
+               ganzen Post-Entwurf daran scheitern zu lassen aber auch.
+               Die Decks ohne Stufe fallen deshalb aus der Auswahl (die
+               Achterliste ordnet NACH Stufe, dort ist fuer sie kein
+               Platz), und der Abbruch bleibt dem vorbehalten, wofuer er
+               gebaut wurde: einer Stufe, die es gibt und die wir nicht
+               kennen. */
+            var ohneStufe = decks.filter(function (dk) {
+                return dk.tier === null || dk.tier === undefined || dk.tier === '';
+            });
+            decks = decks.filter(function (dk) { return ohneStufe.indexOf(dk) < 0; });
             var fremd = decks.map(function (dk) { return dk.tier; })
                 .filter(function (t) { return TIER_ORDNUNG.indexOf(t) < 0; });
             if (fremd.length) throw new Error(
@@ -1226,6 +1249,9 @@ REZEPTE['pocket'] = {
                 fremd.slice(0, 3).join(', ') + '. Die Reihenfolge in ' +
                 'TIER_ORDNUNG muss ergaenzt werden, sonst faellt die Stufe ' +
                 'stumm aus der Liste');
+            if (!decks.length) throw new Error(
+                'pocket_tierlist.json hat nur Decks ohne Stufe — daraus laesst ' +
+                'sich keine nach Stufen geordnete Liste bauen');
             decks.sort(function (x, y) {
                 var a = TIER_ORDNUNG.indexOf(x.tier), b = TIER_ORDNUNG.indexOf(y.tier);
                 return (a < 0 ? 99 : a) - (b < 0 ? 99 : b)

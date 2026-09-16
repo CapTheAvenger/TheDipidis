@@ -145,8 +145,15 @@ describe('Der Fall, den das Kopfband zeigt', () => {
         api.rechState({ me: p.me, opp: p.opp, move: null, seite: 'me' });
         const f = api.rechFall();
         const html = api.rechSatzHtml(f);
-        assert.ok(html.indexOf(`${f.range.min}–${f.range.max}`) !== -1,
+        /* Die Spanne traegt seit dem 16.09.2026 ein schmales
+           Leerzeichen um den Strich (Betreiber: „die Werte so nah am
+           Bindestrick […] wirkt irgendwie komisch"). Geprueft wird
+           deshalb ueber denselben Helfer, den die Oberflaeche benutzt —
+           nicht ueber eine zweite, von Hand nachgebaute Schreibweise,
+           die beim naechsten Feinschliff wieder auseinanderlaeuft. */
+        assert.ok(html.indexOf(api.spanne(f.range.min, f.range.max)) !== -1,
             'die Schadensspanne fehlt im Satz');
+        assert.ok(/\d\s*–\s*\d/.test(html), 'der Satz zeigt gar keine Spanne');
         assert.ok(html.indexOf('%') !== -1, 'der Anteil fehlt im Satz');
         assert.ok(html.indexOf(api.koLabel(f.range.ko)) !== -1, 'das K.O.-Urteil fehlt im Satz');
     });

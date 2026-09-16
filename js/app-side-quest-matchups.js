@@ -391,6 +391,23 @@
 
     function tName(t) { return (de() && TYPE_DE[t]) ? TYPE_DE[t] : t; }
 
+    /* DIE SPANNE BRAUCHT LUFT UM DEN STRICH (16.09.2026).
+       ANLASS (Betreiber, mit Kringel um die Prozentspalte): „vll
+       bekommen wir die Werte noch etwas schöner Formatiert da die Werte
+       so nah am Bindestrick stehen wirkt das irgendwie komisch."
+
+       Typografisch ist „62,4–73,9" als Bis-Strich ohne Leerraum
+       richtig. In einer Ziffernschrift mit fester Laufweite ist es
+       trotzdem schlecht lesbar: alle drei Zeichen sind gleich breit,
+       der Strich verschmilzt mit den Ziffern, und man liest eine
+       einzige lange Zahl.
+
+       Das schmale Leerzeichen (U+2009) loest das, ohne aus dem
+       Bis-Strich einen Gedankenstrich zu machen: es bricht nicht um
+       und bleibt deutlich schmaler als ein Wortzwischenraum. */
+    const SCHMAL = '\u2009';
+    function spanne(a, b) { return `${a}${SCHMAL}–${SCHMAL}${b}`; }
+
     // Englischer Name bleibt führend (die Daten sind englisch), der deutsche
     // steht daneben — genauso wie im Pokédex-Subtab.
     function localName(en, kind) {
@@ -1045,7 +1062,7 @@
                 <span class="sq-mu-mv">${esc(localName(best.name, 'moves'))}${
                     eff ? `<i class="sq-mu-eff${effClass(r.effectiveness)}">${esc(eff)}</i>` : ''}</span>
                 <span class="sq-mu-bar ${cls}"><i style="width:${w}%"></i></span>
-                <span class="sq-mu-pct">${esc(num(r.minPct))}–${esc(num(r.maxPct))} %</span>
+                <span class="sq-mu-pct">${esc(spanne(num(r.minPct), num(r.maxPct)))} %</span>
                 <span class="sq-mu-ko">${esc(koLabel(r.ko))}</span>
             </span>`;
     }
@@ -1165,9 +1182,9 @@
                             eff ? ` · <span class="sq-mu-eff${effClass(g.effectiveness)}">${eff}</span>` : ''}${
                             flaecheHtml}</i>
                     </span>
-                    <span class="sq-calc-num">${g.min}–${g.max}</span>
+                    <span class="sq-calc-num">${esc(spanne(g.min, g.max))}</span>
                     <span class="sq-mu-bar ${tone || 'is-deal'}"><i style="width:${w}%"></i></span>
-                    <span class="sq-calc-pct">${esc(num(g.minPct))}–${esc(num(g.maxPct))} %</span>
+                    <span class="sq-calc-pct">${esc(spanne(num(g.minPct), num(g.maxPct)))} %</span>
                     <span class="sq-mu-ko">${esc(koLabel(g.ko))}</span>
                 </div>`;
         }).join('');
@@ -1442,7 +1459,7 @@
                                 <b>${esc(L().immune)}</b><u></u></span>`;
                     }
                     return `<span class="${klasse}"><i>${esc(label)}</i>
-                            <b>${esc(num(g.minPct))}–${esc(num(g.maxPct))} %</b>
+                            <b>${esc(spanne(num(g.minPct), num(g.maxPct)))} %</b>
                             <u>${esc(koLabel(g.ko))}</u>
                             <em title="${esc(localName(m2.name, 'moves'))}">${
                                 esc(localName(m2.name, 'moves'))}</em></span>`;
@@ -2059,7 +2076,7 @@
                     </span>
                     <span class="sq-rech-bar ${seite === 'me' ? 'is-deal' : 'is-take'}">
                         <i style="width:${w}%"></i></span>
-                    <span class="sq-rech-pct">${esc(num(g.minPct))}–${esc(num(g.maxPct))} %</span>
+                    <span class="sq-rech-pct">${esc(spanne(num(g.minPct), num(g.maxPct)))} %</span>
                     <span class="sq-rech-ko">${esc(koLabel(g.ko))}</span>
                 </button>`;
         }).join('');
@@ -2107,8 +2124,8 @@
             return `<b>${a}</b> ${mv} ${esc(L().gegen)} <b>${d}</b>: <b>${esc(L().immune)}</b>`;
         }
         return `<b>${a}</b> ${mv} ${esc(L().gegen)} <b>${d}</b>: <span class="sq-rech-zahl">${
-            g.min}–${g.max}</span> <span class="sq-rech-zahl">(${esc(num(g.minPct))}–${
-            esc(num(g.maxPct))} %)</span> — <b>${esc(koLabel(g.ko))}</b>`;
+            esc(spanne(g.min, g.max))}</span> <span class="sq-rech-zahl">(${
+            esc(spanne(num(g.minPct), num(g.maxPct)))} %)</span> — <b>${esc(koLabel(g.ko))}</b>`;
     }
 
     /* Die Lage in einem Satz — sie gehoert in den Vergleich, sonst
@@ -2358,7 +2375,7 @@
            Satz fassen, merken. Ohne sie liesse sich nur pruefen, DASS
            es einen Reiter gibt — nicht, dass er das Richtige rechnet
            und der Vergleich die Lage mitfuehrt. */
-        rechnerHtml, rechFall, rechSatzHtml, lageKurz, merkeStand, verlaufHtml,
+        rechnerHtml, rechFall, rechSatzHtml, lageKurz, merkeStand, verlaufHtml, spanne,
         editorTarget, zeichne,
         rechState: (patch) => {
             if (patch) {

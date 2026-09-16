@@ -7,11 +7,11 @@
 "letztes_wort": "data/champions_namen_entschieden.json"
 },
 "counts": {
-"moves": 927,
+"moves": 929,
 "items": 581
 },
 "aus_entscheidungsdatei": {
-"moves": 1,
+"moves": 3,
 "items": 48
 }
 },
@@ -130,6 +130,7 @@
 "Chatter": "Geschwätz",
 "Chilling Reception": "Eisige Stimmung",
 "Chilling Water": "Kalte Dusche",
+"Chilly Reception": "Eisige Stimmung",
 "Chip Away": "Zermürben",
 "Chloroblast": "Chlorostrahl",
 "Circle Throw": "Überkopfwurf",
@@ -298,6 +299,7 @@
 "Follow Me": "Spotlight",
 "Force Palm": "Kraftwelle",
 "Foresight": "Scharfblick",
+"Forest's Curse": "Waldesfluch",
 "Foul Play": "Schmarotzer",
 "Freeze Shock": "Frostvolt",
 "Freeze-Dry": "Gefriertrockner",

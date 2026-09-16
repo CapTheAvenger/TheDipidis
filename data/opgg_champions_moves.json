@@ -2,8 +2,8 @@
  "_meta": {
   "quelle": "https://op.gg/de/pokemon-champions/moves",
   "beschreibung": "Champions-Attackenliste von op.gg — zweite Quelle neben otterlyclueless/pokemon-champions-data. Liefert die deutschen Beschreibungstexte, die PokéAPI fuer neuere Attacken nicht fuehrt, und belegt unabhaengig, welche Attacken zum Champions-Pool gehoeren.",
-  "attacken": 581,
-  "mit_deutschem_text": 581,
+  "attacken": 580,
+  "mit_deutschem_text": 580,
   "mit_kampfwerten": 0,
   "warnung_kampfwerte": "Staerke, Genauigkeit und AP stehen NICHT im server-gerenderten HTML — op.gg rendert sie erst im Browser nach. Sie fehlen deshalb in den Eintraegen (kein null, sondern kein Feld). Wer sie braucht, braucht einen Scraper, der die Seite ausfuehrt.",
   "hinweis": "Der Schluessel ist der englische Slug aus der URL (make-it-rain). Er laesst sich ueber norm() gegen den englischen Attackennamen halten."
@@ -540,10 +540,6 @@
   "drum-beating": {
    "de": "Trommelschläge",
    "text": "Senkt die Initiative des Zieles um eine Stufe."
-  },
-  "dual-chop": {
-   "de": "Doppelhieb",
-   "text": "Versetzt dem Ziel mit massiven Extremitäten Hiebe. Angriff erfolgt zweimal hintereinander."
   },
   "dual-wingbeat": {
    "de": "Doppelflügel",

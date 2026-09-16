@@ -191,6 +191,38 @@
             kaderEigenerSatz: 'dein Satz',
             kaderEigenerSatzTitel: 'Dieses Pokémon rechnet mit dem Satz aus deinem Team, '
                         + 'nicht mit dem meistgespielten.',
+            kaderPaste: 'Paste einfügen',
+            kaderPasteTitel: 'Showdown- oder Limitless-Export (Pokepaste) hier einfügen — '
+                        + 'derselbe Text, den auch der Import der Teams-Ansicht liest.',
+            kaderPastePh: 'Rillaboom @ Miracle Seed\nAbility: Grassy Surge\nEVs: 21 HP / 25 Atk …',
+            kaderPasteLaden: 'Paste laden',
+            kaderPasteFehler: 'Daraus liest sich kein Team. Erwartet wird ein Showdown-Export: '
+                        + 'Name @ Item, darunter Ability/EVs/Wesen und die Attacken mit "- ".',
+            kaderPasteLeer: 'Das Feld ist leer.',
+            kaderPasteOk: (n) => `${n} Pokémon aus dem Paste geladen.`,
+            kaderWaehlen: 'Aus der Liste wählen',
+            kaderWaehlenTitel: 'Dasselbe Auswahlfenster wie bei den Replika-Teams — '
+                        + 'alle Pokémon des Formats mit ihrer Nutzung.',
+            kaderModalMein: 'Eigenes Pokémon wählen',
+            kaderModalOpp: 'Gegner wählen',
+            kaderModalPh: 'Pokémon, deutsche Namen oder Typ …',
+            kaderModalLeer: 'Kein Treffer.',
+            kaderModalFort: (a, b) => `Wahl ${a} / ${b}`,
+            kaderModalZu: 'Schließen',
+            schnellStufen: 'Stufen',
+            schnellSchirm: 'Schirm',
+            schirmKurz: { reflect: 'REFLEKTOR', light: 'LICHTSCHILD', aurora: 'AURORA' },
+            rueckenwind: 'Rückenwind',
+            rueckenwindTitel: 'Verdoppelt die Initiative dieser Seite. Ändert keinen Schaden — '
+                        + 'nur, wer zuerst zieht.',
+            statusKein: 'kein Status',
+            wuerfeTitel: (r) => `16 Würfe: ${r}`,
+            saetzeOffen: 'Sets bearbeiten',
+            /* Der alte Hinweis zaehlte „Stufen · Status · KP" mit auf.
+               Die stehen seit dem 16.09.2026 oben in der Schnellleiste;
+               ein Etikett, das sie hier verspricht, schickt den Leser
+               nach unten, wo sie nicht mehr sind. */
+            saetzeHintOffen: 'Fähigkeit · Item · Wesen · Attacken · Punkte',
             nature: 'Wesen', noItem: '— kein Item —', moves: 'Attacken',
             empty: '— leer —', points: 'Statuswertpunkte', reset: 'Standard-Set',
             budget: (used) => `${used}/${SP_BUDGET} Punkte`,
@@ -333,6 +365,34 @@
             kaderEigenerSatz: 'your set',
             kaderEigenerSatzTitel: 'This Pokémon calculates with the set from your '
                         + 'team, not with the most-played one.',
+            kaderPaste: 'Paste a team',
+            kaderPasteTitel: 'Paste a Showdown or Limitless export (pokepaste) here — '
+                        + 'the same text the teams view\u2019s import reads.',
+            kaderPastePh: 'Rillaboom @ Miracle Seed\nAbility: Grassy Surge\nEVs: 21 HP / 25 Atk …',
+            kaderPasteLaden: 'Load paste',
+            kaderPasteFehler: 'No team can be read from that. A Showdown export is expected: '
+                        + 'name @ item, then ability/EVs/nature and the moves with "- ".',
+            kaderPasteLeer: 'The field is empty.',
+            kaderPasteOk: (n) => `${n} Pokémon loaded from the paste.`,
+            kaderWaehlen: 'Pick from the list',
+            kaderWaehlenTitel: 'The same picker as the replica teams — every Pokémon of '
+                        + 'the format with its usage.',
+            kaderModalMein: 'Pick your Pokémon',
+            kaderModalOpp: 'Pick an opponent',
+            kaderModalPh: 'Pokémon, local names or type …',
+            kaderModalLeer: 'No match.',
+            kaderModalFort: (a, b) => `Pick ${a} / ${b}`,
+            kaderModalZu: 'Close',
+            schnellStufen: 'Stages',
+            schnellSchirm: 'Screen',
+            schirmKurz: { reflect: 'REFLECT', light: 'LIGHT SCREEN', aurora: 'AURORA VEIL' },
+            rueckenwind: 'Tailwind',
+            rueckenwindTitel: 'Doubles this side\u2019s speed. Changes no damage — only who '
+                        + 'moves first.',
+            statusKein: 'no status',
+            wuerfeTitel: (r) => `16 rolls: ${r}`,
+            saetzeOffen: 'Edit sets',
+            saetzeHintOffen: 'Ability · item · nature · moves · points',
             nature: 'Nature', noItem: '— no item —', moves: 'Moves',
             empty: '— empty —', points: 'Stat points', reset: 'Default set',
             budget: (used) => `${used}/${SP_BUDGET} points`,
@@ -605,7 +665,32 @@
                gleichzeitig gerechnet werden: die Hand zaehlt bei dem,
                der schlaegt, der Helfer bei dem, der getroffen wird. */
             hilfe: false, helfer: false,
+            /* RUECKENWIND (16.09.2026, Anlass: „genauso ob Rückenwind
+               aktiv ist oder nicht").
+
+               Er steht an der SEITE, nicht am Feld — zwei Seiten koennen
+               gleichzeitig Rueckenwind haben, und dann heben sie sich
+               auf. Ein Feldwert koennte das nicht abbilden.
+
+               Er aendert KEINEN Schaden, nur die Reihenfolge; deshalb
+               fasst ihn rangeFor() nicht an, sondern allein
+               initiative(). */
+            rueckenwind: false,
         };
+    }
+
+    /* Die Initiative EINER SEITE, mit Rueckenwind.
+
+       Rueckenwind verdoppelt die Initiative fuer vier Zuege. Gerundet
+       wird nicht: Showdown rechnet spe * 2 glatt.
+
+       Warum eine eigene Funktion und kein Feld in statsOf(): statsOf()
+       liefert die Werte des Pokemon, und die aendert Rueckenwind nicht.
+       Er aendert, wer zuerst zieht. Das ist derselbe Unterschied wie
+       zwischen einem Schirm und einem Verteidigungswert. */
+    function initiative(set, stats) {
+        const roh = (stats && stats.spe) || 0;
+        return (set && set.rueckenwind) ? roh * 2 : roh;
     }
 
     // Die Seite gehört mit in den Schlüssel: im Spiegelmatch ist das eigene
@@ -766,9 +851,22 @@
         const defStats = statsOf(defName, defSet);
         if (!attStats || !defStats) return [];
         const rows = [];
-        (attSet.moves || []).forEach(mn => {
+        (attSet.moves || []).forEach((mn, i) => {
             const range = rangeFor(attName, attSet, attStats, defName, defSet, defStats, mn);
-            if (range) rows.push({ name: mn, move: moveEntry(mn), range });
+            /* `stelle` ist die Position IM SATZ — dieselbe Reihenfolge,
+               die im Spiel im Attackenmenue steht.
+
+               ANLASS (Betreiber, 16.09.2026): „die Attacken bei du
+               triffst sollten der korrekten Reihenfolge entsprechen und
+               nicht nach schaden sortiert werden, das verwirrt sonst."
+
+               Die SORTIERUNG hier bleibt trotzdem nach Schaden: an ihr
+               haengt bestMove(), und daran wiederum die Matchup-Liste,
+               die Team-Matrix und schlaegt() in champions-schwaechen.js.
+               Wer die Satzreihenfolge anzeigen will, sortiert nach
+               `stelle` zurueck — die Zeile weiss selbst, wo sie
+               hingehoert. */
+            if (range) rows.push({ name: mn, move: moveEntry(mn), range, stelle: i });
         });
         return rows.sort((x, y) => y.range.max - x.range.max || y.range.min - x.range.min);
     }
@@ -1007,7 +1105,168 @@
             </div>`;
     }
 
-    function setEditor(side, name, set, title) {
+
+    /* ════════════════════════════════════════════════════════════════
+       DIE SCHNELLLEISTE (16.09.2026)
+       ════════════════════════════════════════════════════════════════
+       ANLASS (Betreiber): „macht es außerdem sinn unter den ausgewählten
+       pokemon die gerade geprüft werden anzuklicken ob und welcher
+       schirm aktiv ist, dann muss man nicht extra runter scrollen …
+       genauso ob Rückenwind aktiv ist oder nicht. die Statusstufen
+       könnten wir da vll auch direkt zeigen … alles andere was nicht
+       schnell gehen muss kann mit scrollen unten bleiben aber manche
+       Dinge muss man schnell tippen / aktivieren / verändern. Status wie
+       verbrannt und co könnt man ja auch als logo zeigen".
+
+       DIE TRENNLINIE, die dahinter steckt: was sich WÄHREND eines
+       Kampfes ändert, gehört nach oben — Stufen, Status, KP, Schirm,
+       Rückenwind, Hilfreiche Hand, Helfer. Was den BAU beschreibt —
+       Fähigkeit, Item, Wesen, Attacken, Punkte — bleibt unten. Ein
+       Kampf ändert keine Punkteverteilung.
+
+       EIN REGLER JE WERT, NICHT ZWEI.
+       Die Kampflage stand bisher unten im Satz-Editor (lageHtml). Sie
+       steht jetzt oben — und unten NICHT mehr, sonst gäbe es zwei
+       Bedienelemente für denselben Wert. Die Matchup-Ansicht behält
+       ihre alte Form; dort gibt es keine Schnellleiste, und `ohneLage`
+       entscheidet das an genau einer Stelle.
+
+       WARUM STUFEN HIER ALS SCHRITTKNÖPFE UND NICHT ALS SCHIEBEREGLER
+       Ein Schieberegler von −6 bis +6 braucht eine Zielgenauigkeit, die
+       auf dem Handy niemand hat, und „schnell tippen" war die Vorgabe.
+       −/+ trifft immer.
+       ════════════════════════════════════════════════════════════════ */
+
+    /* Status als Zeichen. Der Name steht im `title`, damit niemand raten
+       muss — ein Symbol ohne Beschriftung ist eine Abkürzung für den,
+       der es kennt, und eine Sackgasse für alle anderen. */
+    const STATUS_ZEICHEN = [
+        { wert: '', zeichen: '∅', label: () => L().statusKein },
+        { wert: 'burn', zeichen: '\u{1F525}', label: () => L().verbrannt },
+        { wert: 'par', zeichen: '⚡', label: () => L().paralysiert },
+        /* NICHT U+2620 (Totenkopf). Im Entwurf am 16.09.2026 gerendert
+           kam dort ein SCHLOSS heraus — die Schriftart der Seite fuehrt
+           das Zeichen nicht und der Ersatz sass daneben. Ein violetter
+           Punkt ist die Farbe, die das Spiel selbst fuer Gift benutzt,
+           und jede Schrift kennt ihn. */
+        { wert: 'psn', zeichen: '🟣', label: () => L().vergiftet },
+    ];
+
+    const KP_STUFEN = [
+        { wert: '1', text: '1/1', label: () => L().kpVoll },
+        { wert: '0.5', text: '1/2', label: () => L().kpHalb },
+        { wert: '0.33', text: '1/3', label: () => L().kpDrittel },
+    ];
+
+    /* Die Kuerzel stehen im Labelblock, nicht als Abschnitt des vollen
+       Namens. Zwei Anlaeufe waren falsch: fest deutsch im Code
+       („LICHT" auf der englischen Seite), und dann die ersten drei
+       Buchstaben — das ergab „LIG" und „AUR", und was drei Buchstaben
+       eines Wortes bedeuten, weiss nur, wer das Wort schon kennt.
+       Der volle Name steht im `title`. */
+    const SCHIRM_STUFEN = [
+        { wert: '', zeichen: '∅', label: () => L().keinSchirm },
+        { wert: 'reflect', zeichen: () => L().schirmKurz.reflect, label: () => L().reflektor },
+        { wert: 'light', zeichen: () => L().schirmKurz.light, label: () => L().lichtschild },
+        { wert: 'aurora', zeichen: () => L().schirmKurz.aurora, label: () => L().auroraschleier },
+    ];
+
+    /** Eine Reihe gleichwertiger Knöpfe, von denen genau einer an ist. */
+    function wahlReihe(side, field, jetzt, stufen, extra) {
+        return stufen.map(o => {
+            const an = String(jetzt || (field === 'hp' ? '1' : '')) === String(o.wert);
+            const t = o.label();
+            const z = typeof o.zeichen === 'function' ? o.zeichen() : (o.zeichen || o.text);
+            return `<button type="button" class="sq-schnell-w${an ? ' is-an' : ''}"
+                        data-sq-side="${esc(side)}" data-sq-wahl="${esc(field)}"
+                        data-sq-wert="${esc(o.wert)}" aria-pressed="${an ? 'true' : 'false'}"
+                        title="${esc(t)}" aria-label="${esc(t)}">${esc(z)}</button>`;
+        }).join('') + (extra || '');
+    }
+
+    /** Ein Ein-/Aus-Knopf, der an demselben Satzfeld hängt wie die Haken. */
+    function flaggeKnopf(side, flag, text, titel, an) {
+        return `<button type="button" class="sq-schnell-f${an ? ' is-an' : ''}"
+                    data-sq-side="${esc(side)}" data-sq-flagbtn="${esc(flag)}"
+                    aria-pressed="${an ? 'true' : 'false'}" title="${esc(titel)}">${esc(text)}</button>`;
+    }
+
+    function schnellHtml(side, set) {
+        if (!set) return '';
+        const b = set.boosts || {};
+        const stufe = (k, i) => {
+            const v = Number(b[k]) || 0;
+            return `<span class="sq-schnell-stufe${v ? (v > 0 ? ' is-plus' : ' is-minus') : ''}"
+                          title="${esc(L().statNames[i + 1])}">
+                    <b>${esc(L().evs[i + 1])}</b>
+                    <button type="button" data-sq-side="${esc(side)}" data-sq-boostschritt="${k}"
+                            data-sq-delta="-1" aria-label="${esc(L().statNames[i + 1])} −"
+                            ${v <= -6 ? 'disabled' : ''}>−</button>
+                    <i data-sq-boostval="${esc(side)}-${k}">${v > 0 ? '+' : ''}${v}</i>
+                    <button type="button" data-sq-side="${esc(side)}" data-sq-boostschritt="${k}"
+                            data-sq-delta="1" aria-label="${esc(L().statNames[i + 1])} +"
+                            ${v >= 6 ? 'disabled' : ''}>+</button>
+                </span>`;
+        };
+        return `<div class="sq-schnell is-${esc(side)}">
+                <div class="sq-schnell-zeile">${BOOST_KEYS.map(stufe).join('')}</div>
+                <div class="sq-schnell-zeile">
+                    <span class="sq-schnell-gruppe" role="group"
+                          aria-label="${esc(L().status)}">${
+                        wahlReihe(side, 'status', set.status, STATUS_ZEICHEN)}</span>
+                    <span class="sq-schnell-gruppe" role="group"
+                          aria-label="${esc(L().kp)}">${
+                        wahlReihe(side, 'hp', set.hp, KP_STUFEN)}</span>
+                </div>
+                <div class="sq-schnell-zeile">
+                    <span class="sq-schnell-gruppe" role="group"
+                          aria-label="${esc(L().schirm)}" title="${esc(L().schirmTitel)}">${
+                        wahlReihe(side, 'schirm', set.schirm, SCHIRM_STUFEN)}</span>
+                </div>
+                <div class="sq-schnell-zeile">
+                    ${flaggeKnopf(side, 'rueckenwind', L().rueckenwind, L().rueckenwindTitel,
+                                  !!set.rueckenwind)}
+                    ${flaggeKnopf(side, 'hilfe', L().hilfe, L().hilfeTitel, !!set.hilfe)}
+                    ${flaggeKnopf(side, 'helfer', L().helfer, L().helferTitel, !!set.helfer)}
+                </div>
+            </div>`;
+    }
+
+    /* Die Zuhörer der Schnellleiste. Sie schreiben in DASSELBE Satzobjekt
+       wie die Regler unten (editorTarget), damit es keine zweite Wahrheit
+       gibt. */
+    function wireSchnell(host) {
+        host.querySelectorAll('[data-sq-wahl]').forEach(b => {
+            b.addEventListener('click', () => {
+                const t = editorTarget(b.getAttribute('data-sq-side'));
+                if (!t.set) return;
+                t.set[b.getAttribute('data-sq-wahl')] = b.getAttribute('data-sq-wert');
+                zeichne();
+            });
+        });
+        host.querySelectorAll('[data-sq-flagbtn]').forEach(b => {
+            b.addEventListener('click', () => {
+                const t = editorTarget(b.getAttribute('data-sq-side'));
+                if (!t.set) return;
+                const flag = b.getAttribute('data-sq-flagbtn');
+                t.set[flag] = !t.set[flag];
+                zeichne();
+            });
+        });
+        host.querySelectorAll('[data-sq-boostschritt]').forEach(b => {
+            b.addEventListener('click', () => {
+                const t = editorTarget(b.getAttribute('data-sq-side'));
+                if (!t.set) return;
+                if (!t.set.boosts) t.set.boosts = { atk: 0, def: 0, spa: 0, spd: 0 };
+                const k = b.getAttribute('data-sq-boostschritt');
+                const d = Number(b.getAttribute('data-sq-delta')) || 0;
+                t.set.boosts[k] = Math.max(-6, Math.min(6, (Number(t.set.boosts[k]) || 0) + d));
+                zeichne();
+            });
+        });
+    }
+
+    function setEditor(side, name, set, title, ohneLage) {
         const block = usageBlock(name);
         const e = _dex[name];
         if (!e || !set) {
@@ -1050,7 +1309,7 @@
                     </div>
                     ${SP_KEYS.map((k, i) => spRow(side, k, i, set.spread)).join('')}
                 </div>
-                ${lageHtml(side, set)}
+                ${ohneLage ? '' : lageHtml(side, set)}
                 <button type="button" class="sq-btn" data-sq-reset="${side}">${esc(L().reset)}</button>
                 ${statsRow(statsOf(name, set))}
             </div>`;
@@ -2034,15 +2293,36 @@
        Gibt ein Promise zurueck, damit der Aufrufer einen Fehlschlag
        melden kann statt ihn zu verschlucken. */
     function oeffneTeamRechner(team) {
+        /* SEIT DEM 16.09.2026 FUEHRT DER KNOPF IN DEN RECHNER-REITER.
+
+           ANLASS (Betreiber): „wenn ich im Team Builder ein Team gebaut
+           habe und dann auf Damage Calc gehe dann muss zu unserem
+           Rechner weitergeleitet werden und Team direkt importiert."
+
+           Vorher landete er im Team-Rechner INNERHALB der Matchup-Liste.
+           Das war richtig, solange es keinen eigenen Reiter gab — seit
+           dem gibt es zwei Orte, an denen dasselbe Team gerechnet wird,
+           und der Knopf zeigte auf den aelteren. Die Matrix bleibt ueber
+           „Matchups → Team" erreichbar; sie beantwortet eine andere Frage
+           (sechs gegen sechs auf einen Blick) als der Rechner (zwei
+           gegeneinander, in beide Richtungen, mit Kampflage).
+
+           `uebernimmTeam` fuellt BEIDE Kader — den der Matrix und den
+           der Leiste (seit dem 16.09.2026) —, deshalb steht danach in
+           beiden Ansichten dasselbe Team. */
         if (window.sideQuestResources && typeof window.sideQuestResources.showView === 'function') {
-            window.sideQuestResources.showView('matchups');
+            window.sideQuestResources.showView('rechner');
         }
         _activated = true;
-        render();
+        renderRechner();
         return load().then(() => {
             uebernimmTeam(team);
             if (!_me && _roster && _roster.length) _me = _roster[0].name;
-            render();
+            /* Die Eroeffnung setzt den Gegner, falls noch keiner steht —
+               und sie tut es NACH uebernimmTeam, damit sie den eigenen
+               Kaempfer schon kennt und nicht den Spiegel waehlt. */
+            kaderEroeffnung();
+            renderRechner();
             return true;
         });
     }
@@ -2094,7 +2374,7 @@
                 esc(r.zeig)}${r.zeig === r.name ? '' : ' · ' + esc(r.name)}</option>`).join('');
     }
 
-    function rechWer(side, name) {
+    function rechWer(side, name, set) {
         const e = name && _dex[name];
         const typen = e ? [e.t1, e.t2].filter(Boolean) : [];
         return `<div class="sq-rech-wer is-${side}">
@@ -2103,13 +2383,30 @@
                     ${rechOptionen(name)}
                 </select>
                 <div class="sq-rech-typen">${typeChips(typen)}</div>
+                ${schnellHtml(side, set)}
             </div>`;
     }
 
     /* Die Zeilen einer Richtung. Anklickbar: ein Klick hebt die Attacke
        ins Kopfband, damit dort die Wuerfe dazu stehen. */
     function rechZeilen(seite, attName, attSet, defName, defSet) {
-        const rows = moveTable(attName, attSet, defName, defSet);
+        /* IN DER REIHENFOLGE DES SATZES, NICHT NACH SCHADEN.
+
+           ANLASS (Betreiber, 16.09.2026): „die Attacken bei du triffst
+           sollten der korrekten Reihenfolge entsprechen und nicht nach
+           schaden sortiert werden, das verwirrt sonst."
+
+           Er hat recht, und der Grund ist nicht Geschmack: im Spiel
+           steht das Attackenmenue in der Satzreihenfolge. Wer hier eine
+           andere Reihenfolge liest, muss beim Umschalten jedes Mal neu
+           suchen — und im Zweifel greift er die falsche.
+
+           moveTable() bleibt nach Schaden sortiert (daran haengt
+           bestMove und damit die halbe Matchup-Ansicht); zurueckgedreht
+           wird ueber `stelle`, die Position im Satz. */
+        const rows = moveTable(attName, attSet, defName, defSet)
+            .slice()
+            .sort((x, y) => x.stelle - y.stelle);
         if (!rows.length) return `<p class="sq-empty">${esc(L().keineAttacke)}</p>`;
         return rows.map(r => {
             const g = r.range;
@@ -2118,7 +2415,19 @@
             const eff = effLabel(g.effectiveness);
             const flaeche = g.spreadAngewendet
                 ? `<em class="sq-rech-flag" title="${esc(L().flaecheTitel)}">${esc(L().flaeche)}</em>` : '';
+            /* DIE 16 WUERFE GEHEN NICHT VERLOREN, SIE ZIEHEN UM.
+
+               Der Betreiber: „was soll mir … 16 Würfe 98 99 100 … sagen?
+               das steht ja auch in der Attacken du triffst Tabelle und
+               das reicht, den Platz können wir also frei machen."
+
+               Die Spanne steht wirklich schon in der Zeile; die einzelne
+               Wurfverteilung nicht. Sie einfach zu loeschen waere eine
+               stille Reparatur — sie steht deshalb im `title` der Zeile,
+               einen Zeiger entfernt statt einer Zeile ueber der halben
+               Breite. */
             return `<button type="button" class="sq-rech-mv${aktiv ? ' is-on' : ''}"
+                        title="${esc(L().wuerfeTitel(g.rolls.join(' ')))}"
                         data-sq-rmove="${esc(r.name)}" data-sq-rseite="${esc(seite)}">
                     <span class="sq-rech-mv-n">${nameHtml(r.name, 'moves')}
                         <span class="sq-mu-type sq-play-type-${esc(String(r.move.type).toLowerCase())}">${
@@ -2414,12 +2723,10 @@
             return `<option value="${esc(t.replica_code)}"${
                 t.replica_code === gewaehlt ? ' selected' : ''}>${esc(txt)}</option>`;
         }).join('');
-        return `<span class="sq-kader-laden">
-                <select class="sq-in sq-kader-teamwahl" data-sq-kader-teamwahl
+        return `<select class="sq-in sq-kader-teamwahl" data-sq-kader-teamwahl
                         aria-label="${esc(L().kaderTeamLaden)}">${opt}</select>
-                <button type="button" class="sq-btn" data-sq-kader-laden>${
-                    esc(L().kaderTeamLaden)}</button>
-            </span>`;
+            <button type="button" class="sq-btn" data-sq-kader-laden>${
+                esc(L().kaderTeamLaden)}</button>`;
     }
 
     function kaderSuche() {
@@ -2442,6 +2749,15 @@
         const liste = seite === 'opp' ? _kaderOpp : _kaderMein;
         const chips = liste.map(e => kaderChip(e, seite)).join('');
         const leer = seite === 'opp' ? L().kaderOppLeer : L().kaderMeinLeer;
+        /* EIN WEG REICHT NICHT — es sind drei verschiedene Fragen.
+             „Ich habe ein Team gespeichert"  -> Auswahlfeld + Laden
+             „Ich habe einen Paste"           -> Textfeld
+             „Ich weiss nur, wen ich sehen will" -> Auswahlfenster
+           Der Waehler steht auf BEIDEN Seiten, weil der Betreiber ihn
+           fuer beide angefragt hat: „das gleiche Modal ruhig auch für
+           meine Pokemon". */
+        const waehler = `<button type="button" class="sq-btn" data-sq-kader-waehler="${esc(seite)}"
+                    title="${esc(L().kaderWaehlenTitel)}">${esc(L().kaderWaehlen)}</button>`;
         const werkzeug = seite === 'opp'
             ? `<span class="sq-kader-laden">
                    <input type="search" class="sq-in sq-kader-suche" data-sq-kader-suche
@@ -2450,14 +2766,23 @@
                           ${_kaderOpp.length >= KADER_MAX ? 'disabled' : ''}>
                    <button type="button" class="sq-btn" data-sq-kader-pick6
                            title="${esc(L().kaderPick6Titel)}">${esc(L().kaderPick6)}</button>
+                   ${waehler}
                </span>`
-            : kaderTeamWahl();
+            : `<span class="sq-kader-laden">
+                   ${kaderTeamWahl()}
+                   <button type="button" class="sq-btn${_kaderPasteOffen ? ' is-an' : ''}"
+                           data-sq-kader-paste title="${esc(L().kaderPasteTitel)}"
+                           aria-expanded="${_kaderPasteOffen ? 'true' : 'false'}">${
+                       esc(L().kaderPaste)}</button>
+                   ${waehler}
+               </span>`;
         return `<div class="sq-kader-seite is-${esc(seite)}">
                 <div class="sq-kader-kopf">
                     <h4 class="sq-lbl">${esc(seite === 'opp' ? L().kaderOpp : L().kaderMein)}<em>${
                         esc(L().kaderVoll(liste.length))}</em></h4>
                     ${werkzeug}
                 </div>
+                ${seite === 'me' ? pasteHtml() + meldungHtml() : ''}
                 ${chips ? `<div class="sq-kader-bank">${chips}</div>`
                         : `<p class="sq-empty">${esc(leer)}</p>`}
                 ${seite === 'opp' ? kaderSuche() : ''}
@@ -2495,11 +2820,37 @@
         if (laden) {
             laden.addEventListener('click', () => {
                 const sel = host.querySelector('[data-sq-kader-teamwahl]');
+                _kaderMeldung = null;
                 if (sel && ladeKaderTeam(sel.value)) renderRechner();
             });
         }
         const p6 = host.querySelector('[data-sq-kader-pick6]');
         if (p6) p6.addEventListener('click', () => { kaderPick6(); renderRechner(); });
+        host.querySelectorAll('[data-sq-kader-waehler]').forEach(b => {
+            b.addEventListener('click', () => oeffneWaehler(b.getAttribute('data-sq-kader-waehler')));
+        });
+        const pb = host.querySelector('[data-sq-kader-paste]');
+        if (pb) {
+            pb.addEventListener('click', () => {
+                _kaderPasteOffen = !_kaderPasteOffen;
+                _kaderMeldung = null;
+                renderRechner();
+                const feld = document.querySelector('[data-sq-kader-pastefeld]');
+                if (feld) feld.focus();
+            });
+        }
+        const feld = host.querySelector('[data-sq-kader-pastefeld]');
+        // Nur mitschreiben, NICHT neu zeichnen: ein Neuzeichnen bei jedem
+        // Zeichen wuerfe den Cursor in ein sechszeiliges Textfeld zurueck.
+        if (feld) feld.addEventListener('input', () => { _kaderPasteText = feld.value; });
+        const pl = host.querySelector('[data-sq-kader-pasteladen]');
+        if (pl) {
+            pl.addEventListener('click', () => {
+                const t = host.querySelector('[data-sq-kader-pastefeld]');
+                ladePaste(t ? t.value : _kaderPasteText);
+                renderRechner();
+            });
+        }
         host.querySelectorAll('[data-sq-kader-add]').forEach(b => {
             b.addEventListener('click', () => {
                 const name = b.getAttribute('data-sq-kader-add');
@@ -2528,6 +2879,252 @@
         }
     }
 
+
+    /* ════════════════════════════════════════════════════════════════
+       EIN PASTE STATT EINES GESPEICHERTEN TEAMS (16.09.2026)
+       ════════════════════════════════════════════════════════════════
+       ANLASS (Betreiber): „bei mein Kader sollten wir die Option geben
+       Pokepaste bzw unseren Showdown/Limitless export zu nutzen".
+
+       Der Weg über ein gespeichertes Team setzt voraus, dass man es
+       vorher im Builder gebaut UND gespeichert hat. Wer seinen Bau in
+       Showdown oder auf Limitless liegen hat, will ihn hier hineinwerfen
+       und rechnen — nicht erst einen Umweg über zwei andere Reiter
+       gehen.
+
+       DERSELBE LESER WIE DER TEAMS-IMPORT.
+       `window.sideQuest.parsePokepaste` ist genau die Funktion, die auch
+       das Import-Fenster der Teams-Ansicht benutzt. Einen zweiten Leser
+       zu schreiben, wäre die klassische Quelle dafür, dass ein Paste an
+       der einen Stelle geht und an der anderen nicht — und der hier
+       kann schon mehr, als man beim Nachbauen bedenken würde: Spitznamen
+       in Klammern, Geschlechtsangaben, und sogar den eigenen
+       „Champions-Bauplan" dieser Seite.
+
+       EIN FEHLSCHLAG WIRD BENANNT, NICHT VERSCHLUCKT.
+       Ein Paste, aus dem sich nichts lesen lässt, hinterlässt sonst
+       einen unveränderten Kader und keinen Grund — und der Leser denkt,
+       der Knopf sei kaputt.
+       ════════════════════════════════════════════════════════════════ */
+
+    let _kaderPasteOffen = false;
+    let _kaderPasteText = '';
+    let _kaderMeldung = null;      // { art: 'ok'|'fehler', text }
+
+    function pasteLeser() {
+        const api = window.sideQuest;
+        return (api && typeof api.parsePokepaste === 'function') ? api.parsePokepaste : null;
+    }
+
+    function ladePaste(text) {
+        const lies = pasteLeser();
+        if (!lies) { _kaderMeldung = { art: 'fehler', text: L().kaderPasteFehler }; return false; }
+        if (!String(text || '').trim()) {
+            _kaderMeldung = { art: 'fehler', text: L().kaderPasteLeer };
+            return false;
+        }
+        let mons = null;
+        try { mons = lies(text); } catch (_) { mons = null; }
+        if (!mons || !mons.length) {
+            _kaderMeldung = { art: 'fehler', text: L().kaderPasteFehler };
+            return false;
+        }
+        /* BEFUND BEIM SCHREIBEN DER ZUSICHERUNGEN (16.09.2026):
+           „völliger unsinn ohne struktur" kam als Team mit EINEM Pokemon
+           dieses Namens zurueck. Der Leser ist bewusst nachsichtig — er
+           bedient auch das Import-Fenster, wo eine Zeile ohne „@" ein
+           gueltiges Pokemon ist.
+
+           Fuer den Kader reicht das nicht: der Kader waere danach mit
+           einem Namen gefuellt gewesen, den es nicht gibt, ordentlich
+           beschriftet mit „keine Nutzungsdaten" — und der Betreiber
+           haette gesucht, was an SEINEM Paste falsch ist.
+
+           Die Grenze ist deshalb: kennt der Pokedex KEINEN der gelesenen
+           Namen, war es kein Team. Kennt er einen Teil, bleibt es dabei
+           und die unbekannten stehen benannt im Kader — das ist derselbe
+           Fall wie ein Pokemon, das Champions nicht fuehrt. */
+        const bekannt = mons.filter(m => {
+            const n = loeseNamen(m);
+            return !!(n && _dex && _dex[n]);
+        });
+        if (!bekannt.length) {
+            _kaderMeldung = { art: 'fehler', text: L().kaderPasteFehler };
+            return false;
+        }
+        /* Genau derselbe Weg wie beim gespeicherten Team — ueber
+           uebernimmTeam(), damit Namensaufloesung, Klammerung der Punkte
+           und die Uebernahme in `_sets` an EINER Stelle stehen. */
+        uebernimmTeam({ mons: mons.slice(0, KADER_MAX) });
+        _kaderTeam = '';
+        _kaderPasteText = '';
+        _kaderPasteOffen = false;
+        _kaderMeldung = { art: 'ok', text: L().kaderPasteOk(_kaderMein.length) };
+        _rMove = null;
+        return true;
+    }
+
+    function pasteHtml() {
+        if (!_kaderPasteOffen) return '';
+        return `<div class="sq-kader-paste">
+                <textarea class="sq-in sq-kader-pastefeld" data-sq-kader-pastefeld rows="6"
+                          spellcheck="false" placeholder="${esc(L().kaderPastePh)}"
+                          aria-label="${esc(L().kaderPasteTitel)}">${esc(_kaderPasteText)}</textarea>
+                <button type="button" class="sq-btn" data-sq-kader-pasteladen>${
+                    esc(L().kaderPasteLaden)}</button>
+            </div>`;
+    }
+
+    function meldungHtml() {
+        if (!_kaderMeldung) return '';
+        return `<p class="sq-kader-meldung is-${esc(_kaderMeldung.art)}" role="status">${
+            esc(_kaderMeldung.text)}</p>`;
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       DAS AUSWAHLFENSTER — FUER BEIDE SEITEN (16.09.2026)
+       ════════════════════════════════════════════════════════════════
+       ANLASS (Betreiber): „und beim Gegner nicht nur die Top 6 als Wahl
+       geben sondern da auch das gleiche Modal wie alle 6 schnell
+       auswählen von dem Play bereich der Replika Teams und das gleiche
+       Modal ruhig auch für meine Pokemon zur verfügung stellen".
+
+       Dieselbe Gestalt wie der Arten-Wähler der Teams-Ansicht: ein
+       Vollbild mit Suchfeld und einem Raster, jede Kachel mit Sprite,
+       Name und Nutzungszahl, nach Nutzung absteigend. Die CSS-Klassen
+       `sq-play-picker-*` werden BEWUSST wiederverwendet und nicht
+       nachgebaut — zwei Paletten für dasselbe Fenster driften.
+
+       Was hier anders ist als dort: es füllt einen Kader, keinen Filter.
+       Deshalb schließt es nicht bei sechs, sondern erst auf Wunsch —
+       wer den fünften wieder herausnimmt, will den sechsten setzen, und
+       ein Fenster, das sich dabei zuklappt, ist ärgerlich.
+       ════════════════════════════════════════════════════════════════ */
+
+    let _waehlerSeite = null;      // 'me' | 'opp' | null
+    let _waehlerQ = '';
+    let _waehlerTaste = null;
+
+    function waehlerKandidaten() {
+        if (!_roster) return [];
+        const q = _waehlerQ.trim().toLowerCase();
+        return _roster.filter(r => {
+            if (!setFor(r.name, _waehlerSeite === 'opp' ? 'opp' : 'me')) return false;
+            if (!q) return true;
+            const de = String(nurDeutsch(r.name, 'pokemon') || '').toLowerCase();
+            const typen = (r.types || []).map(t => String(tName(t)).toLowerCase()).join(' ');
+            return r.name.toLowerCase().indexOf(q) !== -1
+                || de.indexOf(q) !== -1
+                || typen.indexOf(q) !== -1;
+        });
+    }
+
+    function waehlerRasterHtml() {
+        const liste = _waehlerSeite === 'opp' ? _kaderOpp : _kaderMein;
+        const drin = new Set(liste.map(e => e.name));
+        const treffer = waehlerKandidaten();
+        if (!treffer.length) {
+            return `<p class="sq-play-picker-empty">${esc(L().kaderModalLeer)}</p>`;
+        }
+        return treffer.map(r => {
+            const an = drin.has(r.name);
+            const zeig = nurDeutsch(r.name, 'pokemon') || r.name;
+            return `<button type="button" class="sq-play-picker-cell sq-play-picker-cell-played${
+                        an ? ' is-selected' : ''}"
+                        data-sq-waehl="${esc(r.name)}" aria-pressed="${an ? 'true' : 'false'}"
+                        title="${esc(zeig)}">
+                    ${sprite(r.name, 'sq-play-picker-cell-img')}
+                    <span class="sq-play-picker-cell-name">${esc(zeig)}</span>
+                    ${r.count ? `<span class="sq-play-picker-cell-usage">${esc(r.count)}</span>` : ''}
+                </button>`;
+        }).join('');
+    }
+
+    function schliesseWaehler() {
+        const el = document.getElementById('sqRechnerWaehler');
+        if (el) el.remove();
+        if (_waehlerTaste) { document.removeEventListener('keydown', _waehlerTaste); _waehlerTaste = null; }
+        if (window.HintergrundSperre) window.HintergrundSperre.freigeben('rechner-waehler');
+        _waehlerSeite = null;
+        _waehlerQ = '';
+    }
+
+    function waehlerAuffrischen() {
+        const el = document.getElementById('sqRechnerWaehler');
+        if (!el) return;
+        const raster = el.querySelector('.sq-play-picker-grid');
+        const fort = el.querySelector('.sq-play-picker-progress');
+        const liste = _waehlerSeite === 'opp' ? _kaderOpp : _kaderMein;
+        if (raster) raster.innerHTML = waehlerRasterHtml();
+        if (fort) fort.textContent = L().kaderModalFort(liste.length, KADER_MAX);
+    }
+
+    function oeffneWaehler(seite) {
+        schliesseWaehler();
+        _waehlerSeite = seite === 'opp' ? 'opp' : 'me';
+        _waehlerQ = '';
+        const titel = _waehlerSeite === 'opp' ? L().kaderModalOpp : L().kaderModalMein;
+        const liste = _waehlerSeite === 'opp' ? _kaderOpp : _kaderMein;
+        const el = document.createElement('div');
+        el.id = 'sqRechnerWaehler';
+        el.className = 'sq-play-picker-overlay';
+        el.innerHTML = `
+            <div class="sq-play-picker-panel" role="dialog" aria-modal="true"
+                 aria-label="${esc(titel)}">
+                <header class="sq-play-picker-head">
+                    <span class="sq-play-picker-progress" aria-live="polite">${
+                        esc(L().kaderModalFort(liste.length, KADER_MAX))}</span>
+                    <input type="search" class="sq-play-picker-search" autocomplete="off"
+                           inputmode="search" placeholder="${esc(L().kaderModalPh)}">
+                    <button type="button" class="sq-play-picker-close"
+                            aria-label="${esc(L().kaderModalZu)}">×</button>
+                </header>
+                <div class="sq-play-picker-grid">${waehlerRasterHtml()}</div>
+            </div>`;
+        document.body.appendChild(el);
+        // Dieselbe Sperre wie bei den anderen Vollbildern dieser Seite:
+        // `body { overflow: hidden }` allein reicht nicht, `html` traegt
+        // ein eigenes overflow (js/hintergrund-sperre.js).
+        if (window.HintergrundSperre) window.HintergrundSperre.sperren('rechner-waehler');
+
+        const suche = el.querySelector('.sq-play-picker-search');
+        suche.addEventListener('input', () => {
+            _waehlerQ = suche.value;
+            const raster = el.querySelector('.sq-play-picker-grid');
+            if (raster) raster.innerHTML = waehlerRasterHtml();
+        });
+        el.querySelector('.sq-play-picker-close')
+          .addEventListener('click', () => { schliesseWaehler(); renderRechner(); });
+        el.addEventListener('click', (e) => {
+            if (e.target === el) { schliesseWaehler(); renderRechner(); return; }
+            const zelle = e.target.closest('[data-sq-waehl]');
+            if (!zelle) return;
+            waehleImKader(_waehlerSeite, zelle.getAttribute('data-sq-waehl'));
+            waehlerAuffrischen();
+        });
+        _waehlerTaste = (e) => { if (e.key === 'Escape') { schliesseWaehler(); renderRechner(); } };
+        document.addEventListener('keydown', _waehlerTaste);
+        setTimeout(() => suche && suche.focus(), 30);
+    }
+
+    /* Ein Klick im Fenster: drin heisst raus, draussen heisst rein.
+       Der Kaempfer wandert mit, damit die Wahl sofort etwas rechnet. */
+    function waehleImKader(seite, name) {
+        if (!name) return;
+        const opp = seite === 'opp';
+        const liste = opp ? _kaderOpp : _kaderMein;
+        const drin = liste.some(e => e.name === name);
+        if (drin) {
+            if (opp) _kaderOpp = _kaderOpp.filter(e => e.name !== name);
+            else _kaderMein = _kaderMein.filter(e => e.name !== name);
+            return;
+        }
+        if (liste.length >= KADER_MAX) return;
+        liste.push({ name, eigen: false });
+        if (opp) _rOpp = name; else _rMe = name;
+        _rMove = null;
+    }
+
     function rechnerHtml() {
         const meSet = _rMe && setFor(_rMe, 'me');
         const oppSet = _rOpp && setFor(_rOpp, 'opp');
@@ -2542,23 +3139,22 @@
         }
         const f = rechFall();
         const meStats = statsOf(_rMe, meSet), oppStats = statsOf(_rOpp, oppSet);
-        const spd = window.ChampionsDamage.speedComparison(meStats.spe, oppStats.spe);
+        /* Mit Rueckenwind gerechnet — sonst stuende ueber der Leiste ein
+           Knopf, der nichts bewirkt. */
+        const spd = window.ChampionsDamage.speedComparison(
+            initiative(meSet, meStats), initiative(oppSet, oppStats));
         const verb = spd.tie ? L().tie : (spd.faster ? L().faster : L().slower);
         return `<div class="sq-rech">
             ${kaderHtml()}
             <div class="sq-rech-kopf">
-                ${rechWer('me', _rMe)}
+                ${rechWer('me', _rMe, meSet)}
                 <div class="sq-rech-vs">
                     <span>${esc(L().gegen)}</span>
                     <button type="button" class="sq-rech-tausch" data-sq-rtausch
                             title="${esc(L().tausch)}" aria-label="${esc(L().tausch)}">⇄</button>
                 </div>
-                ${rechWer('opp', _rOpp)}
+                ${rechWer('opp', _rOpp, oppSet)}
                 <div class="sq-rech-erg">
-                    ${f ? `<div class="sq-rech-satz">${rechSatzHtml(f)}</div>
-                        <div class="sq-rech-wuerfe"><u>${esc(L().wuerfe)}</u> ${
-                            esc(f.range.rolls.join(' '))}</div>`
-                        : `<p class="sq-empty">${esc(L().keineAttacke)}</p>`}
                     <div class="sq-rech-erg-fuss">
                         <span class="sq-rech-ini ${spd.tie ? 'is-tie' : (spd.faster ? 'is-fast' : 'is-slow')}">${
                             esc(L().speedLine(spd.mine, spd.theirs, verb))}</span>
@@ -2581,18 +3177,24 @@
                 </div>
             </div>
             ${verlaufHtml()}
-            <details class="sq-rech-saetze"${_rechOffen ? ' open' : ''}>
-                <summary>${esc(L().saetze)}<em>${esc(L().saetzeHint)}</em></summary>
+            <div class="sq-rech-saetze">
+                ${sectionLabel(L().saetzeOffen, L().saetzeHintOffen)}
                 <div class="sq-rech-editoren">
-                    <div>${setEditor('me', _rMe, meSet, L().set)}</div>
-                    <div>${setEditor('opp', _rOpp, oppSet, L().oppSet)}</div>
+                    <div>${setEditor('me', _rMe, meSet, L().set, true)}</div>
+                    <div>${setEditor('opp', _rOpp, oppSet, L().oppSet, true)}</div>
                 </div>
-            </details>
+            </div>
             ${noteHtml()}
         </div>`;
     }
 
-    let _rechOffen = false;   // steht der Satz-Aufklapper offen?
+    /* `_rechOffen` ist weg (16.09.2026). Der Aufklapper auch.
+
+       ANLASS (Betreiber): „sätze bearbeiten immer ausgeklappt lassen".
+       Zugeklappt war er eine Vorgabe, die bei jedem Zeichnen neu
+       durchgesetzt wurde — wer den Reiter oeffnete, klappte ihn als
+       Erstes auf. Ein Zustand, den JEDER sofort aendert, ist keine
+       Voreinstellung, sondern ein Klick zu viel. */
 
     function renderRechner() {
         const host = document.getElementById('sideQuestRechnerHost');
@@ -2624,6 +3226,7 @@
         wire(host);
         wireRechner(host);
         wireKader(host);
+        wireSchnell(host);
     }
 
     /* Alles, was nur der Rechner-Reiter hat. Die Set-Editoren, die
@@ -2662,8 +3265,6 @@
         });
         const leer = host.querySelector('[data-sq-verl-leer]');
         if (leer) leer.addEventListener('click', () => { _verlauf = []; renderRechner(); });
-        const det = host.querySelector('.sq-rech-saetze');
-        if (det) det.addEventListener('toggle', () => { _rechOffen = det.open; });
     }
 
     /* Merken heisst: den Satz UND die Lage festhalten. Nur die Zahl zu
@@ -2814,6 +3415,23 @@
            sich nur pruefen, DASS eine Leiste da ist. */
         KADER_MAX, kaderHtml, kaderChip, kaderRechenbar, satzUebernehmen,
         metaTop, kaderPick6, ladeKaderTeam, wireKader, setFor, setKey, kaderEroeffnung,
+        ladePaste, pasteHtml, waehleImKader, waehlerKandidaten, waehlerRasterHtml,
+        schnellHtml, wireSchnell, initiative, rechZeilen, moveTable,
+        pasteState: (patch) => {
+            if (patch) {
+                if (patch.offen != null) _kaderPasteOffen = patch.offen;
+                if (patch.text != null) _kaderPasteText = patch.text;
+                if (patch.meldung !== undefined) _kaderMeldung = patch.meldung;
+            }
+            return { offen: _kaderPasteOffen, text: _kaderPasteText, meldung: _kaderMeldung };
+        },
+        waehlerState: (patch) => {
+            if (patch) {
+                if (patch.seite !== undefined) _waehlerSeite = patch.seite;
+                if (patch.q != null) _waehlerQ = patch.q;
+            }
+            return { seite: _waehlerSeite, q: _waehlerQ };
+        },
         kaderState: (patch) => {
             if (patch) {
                 if (patch.mein != null) _kaderMein = patch.mein;

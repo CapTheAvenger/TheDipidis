@@ -3823,6 +3823,121 @@
 }
 .sq-console .sq-calc-ohne { color: var(--sq-dim2); font-style: italic; }
 
+/* ── DIE SCHNELLLEISTE IM KOPFBAND (16.09.2026) ──────────────────────
+   ANLASS (Betreiber): „manche Dinge muss man schnell tippen /
+   aktivieren / verändern … dann muss man nicht extra runter scrollen".
+
+   Alles hier ist ein KNOPF, kein Regler und kein Auswahlfeld: ein
+   Schieberegler von −6 bis +6 verlangt eine Zielgenauigkeit, die auf
+   dem Handy niemand hat, und ein Auswahlfeld kostet zwei Tipper plus
+   ein aufklappendes Betriebssystem-Menü. −/+ und eine Reihe gleich
+   großer Kacheln treffen immer. */
+.sq-console .sq-schnell {
+    display: flex; flex-direction: column; gap: 5px; margin-top: 7px;
+}
+.sq-console .sq-schnell-zeile {
+    display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center;
+}
+.sq-console .sq-rech-wer.is-opp .sq-schnell-zeile { justify-content: flex-end; }
+.sq-console .sq-schnell-gruppe { display: inline-flex; gap: 3px; }
+
+/* Eine Stufe: Kürzel, −, Wert, +. Der Wert bekommt tabular-nums, sonst
+   springt die Zeile bei jedem Klick um die Breite einer Ziffer. */
+.sq-console .sq-schnell-stufe {
+    display: inline-flex; align-items: center; gap: 2px;
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
+    padding: 1px 3px;
+}
+.sq-console .sq-schnell-stufe b {
+    font-size: 10px; letter-spacing: .04em; color: var(--sq-dim2);
+    font-weight: 700; padding: 0 2px;
+}
+.sq-console .sq-schnell-stufe i {
+    font-style: normal; font-size: var(--fs-xs); font-weight: 700; min-width: 17px;
+    text-align: center; color: var(--sq-dim); font-variant-numeric: tabular-nums;
+}
+.sq-console .sq-schnell-stufe button {
+    background: none; border: none; color: var(--sq-dim2); cursor: pointer;
+    font-size: 13px; line-height: 1; padding: 3px 5px; border-radius: 6px;
+}
+.sq-console .sq-schnell-stufe button:hover:not(:disabled) {
+    color: var(--sq-txt); background: var(--sq-panel);
+}
+.sq-console .sq-schnell-stufe button:disabled { opacity: .3; cursor: default; }
+.sq-console .sq-schnell-stufe.is-plus { border-color: var(--sq-gut); }
+.sq-console .sq-schnell-stufe.is-plus i { color: var(--sq-gut); }
+.sq-console .sq-schnell-stufe.is-minus { border-color: var(--sq-schlecht); }
+.sq-console .sq-schnell-stufe.is-minus i { color: var(--sq-schlecht); }
+
+/* Eine Wahlreihe (Status, KP, Schirm): genau einer ist an. */
+.sq-console .sq-schnell-w,
+.sq-console .sq-schnell-f {
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
+    color: var(--sq-dim2); cursor: pointer; font-family: inherit;
+    font-size: var(--fs-xs); font-weight: 700; line-height: 1;
+    padding: 5px 8px; min-height: 26px;
+}
+.sq-console .sq-schnell-w:hover,
+.sq-console .sq-schnell-f:hover { color: var(--sq-txt); border-color: var(--sq-accent); }
+.sq-console .sq-schnell-w:focus-visible,
+.sq-console .sq-schnell-f:focus-visible,
+.sq-console .sq-schnell-stufe button:focus-visible {
+    outline: 2px solid var(--sq-accent); outline-offset: 1px;
+}
+.sq-console .sq-schnell-w.is-an,
+.sq-console .sq-schnell-f.is-an {
+    background: linear-gradient(180deg, #1b2750, var(--sq-deep));
+    border-color: var(--sq-accent2); color: var(--sq-txt);
+}
+
+/* ── Paste-Feld und Meldung im Kader ─────────────────────────────── */
+.sq-console .sq-kader-paste {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px;
+    align-items: start; margin-bottom: 8px;
+}
+.sq-console .sq-kader-pastefeld {
+    width: 100%; min-height: 96px; resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: var(--fs-xs); line-height: 1.45; white-space: pre;
+}
+.sq-console .sq-kader-meldung {
+    margin: 0 0 8px; font-size: var(--fs-xs); line-height: 1.5;
+}
+.sq-console .sq-kader-meldung.is-ok { color: var(--sq-gut); }
+.sq-console .sq-kader-meldung.is-fehler { color: var(--sq-schlecht); }
+.sq-console .sq-kader-laden .sq-btn.is-an {
+    border-color: var(--sq-accent2); color: var(--sq-txt);
+}
+
+/* Das Auswahlfenster des Rechners nutzt die Klassen des Play-Wählers.
+   Nur die Kachelbreite wird angehoben: hier stehen deutsche Namen
+   („Gladimperio", „Brutalanda"), die in der schmalen Gegner-Kachel
+   abgeschnitten würden. */
+#sqRechnerWaehler .sq-play-picker-grid {
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+}
+#sqRechnerWaehler .sq-play-picker-cell {
+    padding: 0.4rem 0.3rem 0.45rem; min-height: 80px; justify-content: flex-start; gap: 3px;
+}
+#sqRechnerWaehler .sq-play-picker-cell-name {
+    white-space: normal; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+}
+#sqRechnerWaehler .sq-play-picker-cell-img {
+    width: 40px; height: 40px; image-rendering: pixelated; object-fit: contain;
+}
+
+/* Die Sätze stehen offen — kein Aufklapper mehr (16.09.2026).
+   Die Überschrift trägt rechts den Untertitel („Fähigkeit · Item · …");
+   ohne min-width:0 schob er sich im Entwurf über den rechten Rand
+   hinaus, weil .sq-lbl den <em> nicht schrumpfen ließ. */
+.sq-console .sq-rech-saetze { display: block; }
+.sq-console .sq-rech-saetze > .sq-lbl { display: flex; gap: 10px; align-items: baseline; }
+.sq-console .sq-rech-saetze > .sq-lbl em {
+    margin-left: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* ── DIE KADERLEISTE IM RECHNER (16.09.2026) ──────────────────────────
    ANLASS (Betreiber): „können wir hier noch irgendwie mein Team 1:1 wie
    ich es spiele reinladen und beim Gegner per pick 6 schnell auswahl …
@@ -4119,6 +4234,10 @@
     .sq-console .sq-rech-kopf { grid-template-columns: 1fr; }
     .sq-console .sq-rech-wer.is-opp { text-align: left; }
     .sq-console .sq-rech-wer.is-opp .sq-rech-typen { justify-content: flex-start; }
+    .sq-console .sq-rech-wer.is-opp .sq-schnell-zeile { justify-content: flex-start; }
+    /* Das Paste-Feld und sein Knopf untereinander: nebeneinander bliebe
+       vom Textfeld nichts uebrig. */
+    .sq-console .sq-kader-paste { grid-template-columns: minmax(0, 1fr); }
     .sq-console .sq-rech-vs { flex-direction: row; justify-content: space-between; }
     .sq-console .sq-rech-satz { font-size: 15px; }
     .sq-console .sq-verl-zeile { grid-template-columns: minmax(0, 1fr) 26px; }

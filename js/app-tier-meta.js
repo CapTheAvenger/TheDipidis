@@ -2992,6 +2992,20 @@
                         rarity: card.rarity || '',
                         set_code: card.set_code || '',
                         set_number: card.set_number || '',
+                        /* ALLE Sets, in denen dieser Name im Bestand
+                           liegt — nicht nur das der ersten Zeile.
+                           BEFUND 16.09.2026: `set_code` oben nimmt den
+                           Druck der ZUERST gelesenen Zeile. Fuer die
+                           Anzeige reicht das; fuer die Frage "steht
+                           diese Karte im neuen Set?" ist es eine
+                           Zufallsantwort. Gemessen an
+                           data/current_meta_card_data.csv: 37 Namen
+                           tragen PBL in der ersten Zeile, 39 tragen es
+                           in irgendeiner — Chi-Yu (MEG/PBL/TWM) und
+                           Slowpoke fielen allein wegen der Zeilenfolge
+                           heraus. Die Zeilenfolge ist keine
+                           Entscheidung. */
+                        set_codes: new Set(),
                         /* ACE SPEC ist eine Eigenschaft der KARTE, nicht
                            eines Drucks — jeder Druck von "Unfair Stamp"
                            ist eine. Diese Aufstellung fasst ohnehin nach
@@ -3007,6 +3021,10 @@
                 // Add archetype to set (for unique deck count)
                 globalCardStats[cardName].archetypes.add(card.archetype);
                 globalCardStats[cardName].total_appearances++;
+                if (card.set_code) {
+                    globalCardStats[cardName].set_codes.add(
+                        String(card.set_code).trim().toUpperCase());
+                }
                 /* Ein einziges "Yes" genuegt; ein leeres Feld
                    ueberschreibt ein gesetztes nie. Die Regel dahinter
                    steht in backend/core/ace_spec_regel.py und laesst das
@@ -3043,6 +3061,7 @@
                     type: card.type,
                     rarity: card.rarity,
                     set_code: card.set_code,
+                    set_codes: Array.from(card.set_codes),
                     set_number: card.set_number,
                     is_ace_spec: card.is_ace_spec
                 };
@@ -3141,6 +3160,33 @@
         const STAPLES_ART_SCHWELLE = 25;   // Prozent der Archetypen
         const STAPLES_ART_MAX = 10;
         const STAPLES_ART_KEY = 'staples_art_v1';
+        /* DAS NEUE SET KOMMT NICHT UEBER 25 % — UND KANN ES NICHT.
+           ------------------------------------------------------
+           GEMESSEN am 16.09.2026 an data/current_meta_card_data.csv
+           (61 Archetypen, 518 Namen): von den 39 Namen, die einen
+           PBL-Druck tragen, liegt der STAERKSTE bei 24,6 % — Gwynn in
+           15 von 61 Archetypen. Fuer 25 % braeuchte er 16. Es fehlt
+           genau EIN Archetyp, und deshalb war die Liste „Neues Set"
+           leer, seit sie am 11.09.2026 gebaut wurde. Nicht wegen einer
+           Rotation: current_set steht seit dem 17.07.2026 auf PBL.
+
+           Der Fehler war nicht die Zahl 25, sondern sie hier
+           anzuwenden. 25 % beantwortet die Frage "welche Karte teilen
+           viele Archetypen" — das ist die Frage der sechs Kartenarten.
+           „Neues Set" fragt etwas anderes: "was aus diesem Set wird
+           ueberhaupt gespielt". Ein Set, das seit Wochen draussen ist,
+           erreicht formatweite 25 % nur mit seinen ein, zwei besten
+           Karten; ein Set, das seit einem Tag draussen ist, nie.
+
+           Die Bedingung, die hier wirklich gemeint ist: die Karte wird
+           nicht nur von EINEM Deck gespielt. Ein einzelner Archetyp ist
+           die Techkarte eines Decks, zwei sind ein Anfang. Die Zahl
+           haengt damit an der Bedingung und nicht am Formatumfang —
+           sie bleibt richtig, wenn das Feld von 61 auf 20 Archetypen
+           schrumpft, was direkt nach einer Rotation der Normalfall ist.
+           Gemessen: 30 der 39 PBL-Namen liegen in >= 2 Archetypen,
+           9 in genau einem. */
+        const STAPLES_NEUES_SET_MIN_ARCHETYPEN = 2;
         /* Reihenfolge = Reihenfolge der Knoepfe. `typen` sind die Werte
            der Spalte `type` in data/current_meta_card_data.csv — gemessen
            am 10.09.2026, nicht geraten: Basic / Stage 1 / Stage 2 sind
@@ -3203,6 +3249,57 @@
 
         function staplesArt() { return _staplesArt; }
 
+        /**
+         * AUF WELCHES SET DER FILTER „NEUES SET" ZEIGT.
+         *
+         * Zwei Felder aus data/format_window.json, und sie beantworten
+         * zwei VERSCHIEDENE Fragen:
+         *
+         *   current_set    welches FORMAT gerade gespielt wird. Es
+         *                  wechselt erst, wenn echte Turnierlisten das
+         *                  neue Set belegen (Ankerriegel,
+         *                  backend/core/update_sets.py). Ein Sammelset
+         *                  wie 30C dreht es womoeglich nie.
+         *   neuestes_set   welches Set zuletzt ERSCHIENEN ist. Reines
+         *                  Erscheinungsdatum, ohne Riegel.
+         *
+         * Dieser Filter heisst „Neues Set", also zaehlt das zweite.
+         *
+         * DIE KARENZ VON EINEM TAG ist eine Anweisung des Betreibers
+         * (16.09.2026): "Nur die meiste genutzten Karten aus dem neuen
+         * Set muessen halt sofort in dem Fall von PBL auf 30C
+         * umspringen aber halt auch erst ab 1 Tag nach Release."
+         * Am Erscheinungstag selbst steht also noch das vorherige Set
+         * da — `tag > erschienen`, nicht `>=`.
+         *
+         * Fehlt eines der Felder oder das Datum, faellt die Regel auf
+         * current_set zurueck: dann verhaelt sich der Filter wie vor
+         * dem 16.09.2026, statt gar nichts zu zeigen.
+         */
+        function neuesSetCode(heute) {
+            const fw = (typeof window !== 'undefined' && window._formatWindow)
+                ? window._formatWindow : {};
+            const laufend = String(fw.current_set || '').trim().toUpperCase();
+            const neuestes = String(fw.neuestes_set || '').trim().toUpperCase();
+            const erschienen = String(fw.neuestes_set_release_date || '').trim();
+            /* `typeof Date` aus demselben Grund wie `typeof window`:
+               die Regel laeuft in tests/unit/ in einem vm-Kontext, der
+               nur mitbekommt, was er ausdruecklich hereinreicht. */
+            const tag = String(heute || '').trim()
+                || ((typeof Date !== 'undefined')
+                    ? new Date().toISOString().slice(0, 10) : '');
+            if (neuestes && erschienen && tag && tag > erschienen) return neuestes;
+            return laufend;
+        }
+
+        /** Alle Sets, in denen ein Kartenname im Bestand gedruckt ist. */
+        function kartenSets(c) {
+            const viele = (c && Array.isArray(c.set_codes) && c.set_codes.length)
+                ? c.set_codes : [(c && c.set_code) || ''];
+            return viele.map(x => String(x || '').trim().toUpperCase())
+                        .filter(x => x !== '');
+        }
+
         /* Art setzen UND merken — eine Stelle fuer beides.
            `null` raeumt den Speichereintrag weg, statt "null" als Text
            hineinzuschreiben; sonst laege beim naechsten Laden eine
@@ -3248,31 +3345,36 @@
                 ? (c => String(c.is_ace_spec || '').trim().toLowerCase() === 'yes')
                 : art.kennzeichen === 'neues_set'
                 ? (() => {
-                    /* `typeof window` statt `window`: die Auswahlregel
-                       laeuft in tests/unit/test-staples-kartenarten.js in
-                       einem vm-Kontext ohne Fenster. Ein ReferenceError
-                       dort ist kein Testproblem, sondern der Beweis,
-                       dass die Funktion mehr voraussetzt als sie
-                       braucht. */
-                    const fw = (typeof window !== 'undefined' && window._formatWindow)
-                        ? window._formatWindow : {};
-                    const neu = String(fw.current_set || '').trim().toUpperCase();
+                    /* Welches Set gemeint ist, steht in neuesSetCode() —
+                       mit der Karenz von einem Tag nach dem Erscheinen. */
+                    const neu = neuesSetCode();
                     /* Ohne bekanntes Set trifft NICHTS zu — der Knopf
                        erscheint dann gar nicht erst (er wird nur
                        gezeichnet, wenn die Zaehlung ueber null liegt).
                        Alles durchzulassen waere schlimmer: der Filter
                        hiesse „Neues Set" und zeigte das ganze Format. */
                     if (!neu) return () => false;
-                    return c => String(c.set_code || '').trim().toUpperCase() === neu;
+                    /* Ueber ALLE Drucke des Namens, nicht ueber den
+                       zuerst gelesenen — siehe set_codes oben. */
+                    return c => kartenSets(c).indexOf(neu) !== -1;
                 })()
                 : (() => {
                     const menge = {};
                     (art.typen || []).forEach(t => { menge[t] = true; });
                     return c => menge[String(c.type || '').trim()] === true;
                 })();
+            /* ZWEI SCHWELLEN, WEIL ES ZWEI FRAGEN SIND.
+               Die sechs Kartenarten fragen "wer wird breit geteilt" —
+               dafuer ist der Anteil der Archetypen das Mass. „Neues
+               Set" fragt "was daraus wird ueberhaupt gespielt"; dort
+               schneidet dasselbe Mass die ganze Liste weg (die
+               Rechnung steht bei STAPLES_NEUES_SET_MIN_ARCHETYPEN). */
+            const ueberSchwelle = art.kennzeichen === 'neues_set'
+                ? (c => Number(c.deck_inclusion_count) >= STAPLES_NEUES_SET_MIN_ARCHETYPEN)
+                : (c => Number(c.global_share) >= STAPLES_ART_SCHWELLE);
             return (daten || [])
                 .filter(passt)
-                .filter(c => Number(c.global_share) >= STAPLES_ART_SCHWELLE)
+                .filter(ueberSchwelle)
                 .slice(0, STAPLES_ART_MAX);
         }
 
@@ -3482,6 +3584,8 @@
         window.staplesArten = {
             liste: () => STAPLES_ARTEN.map(a => Object.assign({}, a)),
             schwelle: () => STAPLES_ART_SCHWELLE,
+            mindestArchetypen: () => STAPLES_NEUES_SET_MIN_ARCHETYPEN,
+            neuesSet: (heute) => neuesSetCode(heute),
             hoechstens: () => STAPLES_ART_MAX,
             waehle: (daten, id) => staplesNachArt(daten, id),
             zaehlung: (daten) => staplesArtZaehlung(daten),
@@ -3621,6 +3725,16 @@
                            + 'wird nur, was ausdrücklich als ACE SPEC belegt ist; wo die Regel '
                            + 'nichts belegen kann, bleibt die Karte draußen statt geraten '
                            + 'dazuzukommen.</p>'
+                           + '<p><strong>Neues Set</strong> folgt einer eigenen Regel. '
+                           + 'Die ' + STAPLES_ART_SCHWELLE + '-%-Schwelle fragt, welche Karte '
+                           + 'viele Archetypen <em>teilen</em> — ein frisch erschienenes Set '
+                           + 'kann das gar nicht erreichen. Hier zählt deshalb, ob eine Karte '
+                           + 'überhaupt in mehr als einem Deck liegt: ab '
+                           + STAPLES_NEUES_SET_MIN_ARCHETYPEN + ' Archetypen, die '
+                           + STAPLES_ART_MAX + ' meistgespielten. Gezeigt wird das zuletzt '
+                           + '<em>erschienene</em> Set, und zwar ab dem Tag nach dem Erscheinen '
+                           + '— nicht das Format: ein Sammelset wechselt das Format nicht, '
+                           + 'steht aber trotzdem im Laden.</p>'
                            + '<p>Gerade über der Schwelle: ' + escapeHtml(artZeilen) + '.</p>')
                         : ('<p>The percentage under each card is the share of '
                            + '<strong>archetypes</strong> that play it — not the share of all '
@@ -3638,6 +3752,15 @@
                            + 'in the ACE SPEC list. Only cards explicitly marked as ACE SPEC are '
                            + 'counted; where the rule cannot establish it, the card stays out '
                            + 'rather than being guessed in.</p>'
+                           + '<p><strong>Newest set</strong> follows its own rule. The '
+                           + STAPLES_ART_SCHWELLE + ' % threshold asks which card many '
+                           + 'archetypes <em>share</em> — a freshly released set cannot reach '
+                           + 'that at all. What counts here is whether a card sits in more than '
+                           + 'one deck: from ' + STAPLES_NEUES_SET_MIN_ARCHETYPEN
+                           + ' archetypes, the ' + STAPLES_ART_MAX + ' most played. It shows the '
+                           + 'most recently <em>released</em> set, from the day after release — '
+                           + 'not the format: a collector set does not move the format but is '
+                           + 'on the shelves all the same.</p>'
                            + '<p>Currently above the threshold: ' + escapeHtml(artZeilen) + '.</p>')
                 });
             }
@@ -3650,8 +3773,7 @@
                        steht deshalb dabei — und kommt aus dem
                        Formatfenster, nicht aus dieser Datei. */
                     const setKurz = a.kennzeichen === 'neues_set'
-                        ? String(((typeof window !== 'undefined' && window._formatWindow)
-                            || {}).current_set || '').trim().toUpperCase()
+                        ? neuesSetCode()
                         : '';
                     const lbl = (deLbl ? a.de : a.en) + (setKurz ? ' ' + setKurz : '');
                     return `<button type="button" class="btn-toggle-item${aktiv ? ' active' : ''}"

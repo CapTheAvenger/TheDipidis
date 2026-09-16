@@ -1,5 +1,5 @@
 {
-  "erzeugt_am": "2026-09-15T22:19:45+00:00",
+  "erzeugt_am": "2026-09-16T03:48:30+00:00",
   "quelle": "Zeitpunkt des Laufs fuer geaenderte Dateien, sonst fortgeschrieben",
   "dateien": {
     "limitless_online_decks.csv": "2026-09-15T06:50:07+00:00",
@@ -25,7 +25,7 @@
     "online_api_tournaments.csv": "2026-09-15T03:48:41+00:00",
     "online_api_matchups_TEF-PBL.csv": "2026-09-15T03:48:41+00:00",
     "online_api_cards_TEF-PBL.csv": "2026-09-15T03:48:41+00:00",
-    "meta_prognose.json": "2026-09-15T03:48:41+00:00",
+    "meta_prognose.json": "2026-09-16T03:48:30+00:00",
     "labs_tournament_decks_BRS-PRE.csv": "2026-09-10T09:09:22+00:00",
     "labs_tournament_decks_SVI-ASC.csv": "2026-09-10T09:09:22+00:00",
     "labs_tournament_decks_SVI-PFL.csv": "2026-09-10T09:09:22+00:00",

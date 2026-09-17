@@ -79,6 +79,44 @@ jobs:
           fi
           exit 0
 
+      # DER KADER GEHOERT IN DENSELBEN LAUF WIE DIE NUTZUNGSDATEN
+      # (16.09.2026)
+      #
+      # ANLASS (Betreiber): „es sind nicht alle Rotoms waehlbar beim
+      # Gegner gerade gesehen". Vier Rotom-Formen hatten eine eigene
+      # Nutzungszeile und keinen Pokedex-Eintrag — zusammen mit 21
+      # weiteren Arten.
+      #
+      # scrape_champions_roster.py entscheidet seitdem unter anderem
+      # danach, WER EINE EIGENE NUTZUNGSZEILE HAT. Damit haengt er an
+      # data/champions_usage.json, und genau die schreibt der Schritt
+      # darueber. Liefe er weiter nur im naechtlichen Replica-Lauf,
+      # stuende eine neu gespielte Form zwischen den beiden Laeufen in
+      # den Nutzungsdaten und nicht im Kader — dieselbe Falle wie bei
+      # datenluecken.json am 14.09.2026 (CLAUDE.md, „Eine Regel gehoert
+      # an ihre Bedingung, nicht an ein Band oder einen Takt").
+      #
+      # Er laeuft AUCH weiter im Replica-Lauf; doppelt ist hier richtig,
+      # weil dort der pokebase-Kader selbst neu gelesen wird.
+      #
+      # Fail-soft wie die Nachbarn: ohne pokebase bleibt die committete
+      # Datei stehen. Ein alter Kader ist schlechter als ein neuer und
+      # weit besser als ein halber.
+      - name: Scrape Champions roster additions
+        id: roster
+        run: |
+          set +e
+          python -u scripts/scrape_champions_roster.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::scrape_champions_roster exited with $rc — roster JSON kept as-is"
+              git checkout -- data/champions_roster_extra.json 2>/dev/null
+              echo "failed=$rc" >> "$GITHUB_OUTPUT"
+          else
+              echo "failed=0" >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
+
       # Rebuild the Pokédex (also writes data/champions_names_de.json from the
       # committed German name sources). Fail-soft: keeps committed JSON.
       # BEFUND 05.09.2026: der Schritt darueber wurde am 21.08. scharf
@@ -197,6 +235,7 @@ jobs:
           git config --local user.name  "github-actions[bot]"
           git add data/champions_usage.json data/data_stand.json \
                   data/datenluecken.json \
+                  data/champions_roster_extra.json \
                   data/champions_pokedex.json \
                   data/champions_names_de.json \
                   data/champions_resources.json

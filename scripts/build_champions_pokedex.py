@@ -412,6 +412,31 @@ def load_usage():
         key = _norm(rec.get("name", ""))
         if key:
             index.setdefault(key, rec)
+    # ── DIE QUELLE SCHREIBT REGIONALFORMEN IN ZWEI STILEN ────────────
+    #
+    # BEFUND (16.09.2026): 15 der 16 Regionalform-Schluessel stehen im
+    # Adjektivstil ("alolan-raichu", "hisuian-arcanine",
+    # "galarian-slowking"). EINER steht im Showdown-Stil:
+    # "persian-alola". Der Pokedex nennt den Eintrag "Alolan Persian"
+    # und suchte damit einen Schluessel, den es nicht gibt — Snobilikat
+    # (Alola) waere ohne Nutzungsdaten in den Kader gekommen und im
+    # Rechner gar nicht waehlbar gewesen (buildRoster verlangt einen
+    # Nutzungsschluessel).
+    #
+    # Hier wird nichts umbenannt, nur ein ZWEITER Schluessel auf
+    # denselben Datensatz gelegt: `setdefault` laesst jeden echten
+    # Eintrag stehen. Faellt der Quelle der Stilbruch eines Tages auf,
+    # greift diese Schleife ins Leere und kostet nichts.
+    for slug, rec in (data.get("pokemon") or {}).items():
+        teile = str(slug).split("-")
+        if len(teile) < 2:
+            continue
+        pre = REGION_SUFFIX.get(teile[-1].capitalize())
+        if not pre:
+            continue
+        key = _norm(pre[0] + " " + "-".join(teile[:-1]))
+        if key:
+            index.setdefault(key, rec)
     return index, season
 
 
@@ -518,6 +543,33 @@ def write_names_de(pokemon_names_de):
                 if de_fx or en_fx:
                     out["abilityFx"][e["en"]] = {"de": de_fx or en_fx,
                                                  "en": en_fx or de_fx}
+            # ── GEGENSTAENDE AUS DERSELBEN QUELLE (16.09.2026) ───────
+            #
+            # BEFUND, gemeldet vom Betreiber: „bei Psychic Seed fehlt der
+            # deutsche Name". Er fehlte nicht in den Daten — er stand in
+            # champions_resources.json als „Psycho-Samen", von PokeAPI
+            # geliefert, und kam hier nie an: `out["items"]` wurde
+            # AUSSCHLIESSLICH aus de_name_overrides.json (pokemonexperte)
+            # befuellt, waehrend `out["abilities"]` drei Zeilen darueber
+            # schon immer aus den Ressourcen las. Was pokemonexperte nicht
+            # fuehrt, stand auf der deutschen Seite englisch da.
+            #
+            # GEMESSEN am Stand vom 16.09.2026 ueber die 160 Gegenstaende,
+            # die data/champions_usage.json wirklich fuehrt: 55 ohne
+            # deutschen Namen, davon 32 in den Ressourcen vorhanden
+            # (Psycho-Samen, Elektro-Samen, Gras-Samen, Absolnit,
+            # Blendpuder, Lauchstange, Krummloeffel …). Die restlichen 23
+            # sind Mega-Steine, die es nur in Champions gibt — fuer die
+            # gibt es keinen deutschen Namen, und es wird auch keiner
+            # erfunden.
+            #
+            # LUECKENFUELLER, kein Ueberschreiber: `if not …get(en)` laesst
+            # jeden Namen stehen, den die Uebersteuerungsdatei schon
+            # gesetzt hat. Die Entscheidungsdatei ganz unten gewinnt
+            # weiterhin gegen beide.
+            if e.get("cat") == "item" and e.get("en") and e.get("de"):
+                if not out["items"].get(e["en"]):
+                    out["items"][e["en"]] = e["de"]
     except Exception as e:  # noqa: BLE001
         print(f"WARN: names_de — ability names unavailable ({e})")
     # Curated overrides for abilities the standard datasets miss (e.g. a real

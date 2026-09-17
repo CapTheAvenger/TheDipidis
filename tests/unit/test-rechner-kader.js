@@ -92,94 +92,49 @@ function ersterMitSatz(api, ausser) {
 
 // ══════════════════════════════════════════════════════════════════════
 
-describe('Pick 6: die sechs meistgespielten — aus den Daten, nicht aus einer Liste', () => {
-    it('metaTop(6) liefert genau die sechs obersten der Nutzungsanalyse', () => {
-        const { api } = load();
-        const roster = api.setData(DATA);
-        const erwartet = roster.filter(r => api.setFor(r.name, 'opp')).slice(0, 6).map(r => r.name);
-        const gemessen = api.metaTop(6);
-        assert.equal(gemessen.length, 6, 'Pick 6 liefert keine sechs');
-        assert.equal(JSON.stringify(gemessen), JSON.stringify(erwartet),
-            'die Reihenfolge folgt nicht der Nutzung');
-    });
+describe('Die Gegnerseite wird NICHT vorbelegt (16.09.2026)', () => {
+    /* ANLASS (Betreiber): „und beim Gegner bitte nicht automatisch
+       Pokemon vorgeben und das Top 6 Meta kann auch weg".
 
-    it('die Reihenfolge ist wirklich absteigend nach Nutzung', () => {
-        const { api } = load();
-        const roster = api.setData(DATA);
-        const zahl = {};
-        roster.forEach(r => { zahl[r.name] = r.count; });
-        const top = api.metaTop(6);
-        for (let i = 1; i < top.length; i++) {
-            assert.ok(zahl[top[i - 1]] >= zahl[top[i]],
-                `${top[i]} wird oefter gespielt als ${top[i - 1]}, steht aber dahinter`);
-        }
-        assert.ok(zahl[top[0]] > 0, 'das oberste Pokemon hat keine gemessene Nutzung');
-    });
+       Hier standen bis heute sechs Zusicherungen fuer genau das
+       Gegenteil (Pick 6, Reihenfolge nach Nutzung, keine Spiegelpaarung).
+       Sie sind nicht „kaputt" geworden — die ABSICHT hat sich geaendert,
+       und eine Zusicherung, die eine abgeschaffte Absicht bewacht, ist
+       schlimmer als keine. Ersetzt statt gelockert. */
 
-    it('jedes der sechs bringt einen rechenbaren Satz mit', () => {
-        const { api } = load();
-        api.metaTop(6).forEach(n => {
-            const s = api.setFor(n, 'opp');
-            assert.ok(s, `${n} hat keinen Satz — Pick 6 duerfte es nicht vorschlagen`);
-            assert.ok(s.moves && s.moves.length, `${n} hat keine Attacken im Satz`);
-        });
-    });
-
-    it('kaderPick6() setzt den Kader UND den ersten Kaempfer', () => {
-        const { api } = load();
+    it('kaderEroeffnung() laesst den Gegnerkader leer', () => {
+        const { api, sandbox } = load();
+        sandbox.sideQuest = { getActiveCode: () => '', getOwnTeams: () => [] };
         api.rechState({ me: null, opp: null });
-        api.kaderState({ opp: [] });
-        api.kaderPick6();
-        const st = api.kaderState();
-        assert.equal(st.opp.length, 6, 'der Gegnerkader ist nicht voll');
-        assert.equal(api.rechState().opp, st.opp[0].name,
-            'nach Pick 6 kaempft nicht das erste Pokemon des Kaders');
+        api.kaderState({ mein: [], opp: [] });
+        api.kaderEroeffnung();
+        assert.equal(api.kaderState().opp.length, 0,
+            'die Gegnerseite wurde wieder vorbelegt');
+        assert.equal(api.rechState().opp, null,
+            'es kaempft ein Gegner, den niemand gewaehlt hat');
     });
 
-    it('eroeffnet NICHT mit dem Spiegelmatch', () => {
-        /* Im Entwurf gemessen: „Gortrom U-Turn gegen Gortrom". Das
-           eigene Team beginnt mit dem meistgespielten Pokemon, die Top 6
-           auch — und das erste Bild war eine Rechnung gegen sich
-           selbst. */
-        const { api } = load();
-        const oben = api.metaTop(6)[0];
-        api.rechState({ me: oben, opp: null });
-        api.kaderState({ opp: [] });
-        api.kaderPick6();
-        assert.notEqual(api.rechState().opp, oben,
-            'der Reiter oeffnet mit einer Rechnung gegen sich selbst');
-        assert.equal(api.rechState().opp, api.metaTop(6)[1],
-            'statt des Spiegels muss das naechste Pokemon des Kaders antreten');
+    it('die eigene Seite bekommt trotzdem einen Kaempfer', () => {
+        /* Die Gegenrichtung derselben Aenderung: „nicht vorgeben" galt
+           dem GEGNER. Faellt dabei die eigene Vorbelegung mit weg, oeffnet
+           der Reiter vollstaendig leer — das war nie bestellt. */
+        const { api, sandbox } = load();
+        sandbox.sideQuest = { getActiveCode: () => '', getOwnTeams: () => [] };
+        api.rechState({ me: null, opp: null });
+        api.kaderState({ mein: [], opp: [] });
+        api.kaderEroeffnung();
+        assert.ok(api.rechState().me, 'auf der eigenen Seite kaempft niemand');
     });
 
-    it('bleibt beim Spiegel, wenn es nur EINEN Gegner gibt', () => {
-        /* Die Rueckfallseite von „nicht das Spiegelmatch": gibt das Meta
-           nur ein einziges Pokemon her, ist der Spiegel die einzige
-           Rechnung — und nichts zu zeigen waere schlechter.
-
-           Geprueft wird das mit einer auf EINEN Eintrag gekuerzten
-           Nutzungsdatei, nicht mit einem gesetzten Zustand: sonst
-           behauptete die Zusicherung nur ihren eigenen Aufbau. */
+    it('es gibt keinen Pick-6-Knopf mehr — und keine Funktion dahinter', () => {
         const { api } = load();
-        const name = ersterMitSatz(api);
-        const roster = api.setData(DATA);
-        const slug = roster.find(r => r.name === name).slug;
-        const schmal = Object.assign({}, DATA, {
-            usage: Object.assign({}, DATA.usage,
-                { pokemon: { [slug]: DATA.usage.pokemon[slug] } }),
-        });
-        api.setData(schmal);
-        // ueber JSON: das Feld entsteht im vm-Kontext (siehe oben).
-        assert.equal(JSON.stringify(api.metaTop(6)), JSON.stringify([name]),
-            'die gekuerzte Probe stimmt nicht');
-
-        api.rechState({ me: name, opp: null });
-        api.kaderState({ opp: [] });
-        api.kaderPick6();
-        assert.equal(api.rechState().opp, name,
-            'bei nur einem moeglichen Gegner bleibt der Reiter leer, statt den '
-            + 'Spiegel zu zeigen');
-        api.setData(DATA);
+        assert.equal(typeof api.kaderPick6, 'undefined',
+            'kaderPick6 ist noch greifbar');
+        assert.equal(typeof api.metaTop, 'undefined',
+            'metaTop ist noch greifbar');
+        const html = api.kaderHtml();
+        assert.ok(html.indexOf('data-sq-kader-pick6') === -1,
+            'der Pick-6-Knopf steht noch in der Leiste');
     });
 });
 
@@ -187,12 +142,11 @@ describe('Pick 6: die sechs meistgespielten — aus den Daten, nicht aus einer L
 
 describe('Die Eroeffnung des Reiters', () => {
     /* LIVE GEFUNDEN, NICHT VON EINEM TEST (16.09.2026, nach dem Deploy).
-       Der Reiter oeffnete mit „Gortrom Kehrtwende gegen Gortrom".
-       Alle Zusicherungen waren gruen — geprueft war die Spiegelsperre in
-       kaderPick6(), und die greift nur, wenn `_rMe` schon steht. Wer kein
-       eigenes Team gespeichert hat (der Normalfall beim ersten Besuch),
-       hatte beim Pick 6 noch gar keins. */
-    it('ohne eigenes Team: kein Spiegelmatch', () => {
+       Der Reiter oeffnete mit „Gortrom Kehrtwende gegen Gortrom". Der
+       Spiegel ist seit dem zweiten Auftrag desselben Tages gar nicht
+       mehr moeglich: die Gegnerseite wird nicht mehr vorbelegt. Was
+       bleibt, ist die eigene Seite — und die soll stehen. */
+    it('ohne eigenes Team steht die eigene Seite, die Gegnerseite nicht', () => {
         const { api, sandbox } = load();
         sandbox.sideQuest = { getActiveCode: () => '', getOwnTeams: () => [] };
         api.rechState({ me: null, opp: null });
@@ -200,28 +154,16 @@ describe('Die Eroeffnung des Reiters', () => {
         api.kaderEroeffnung();
         const st = api.rechState();
         assert.ok(st.me, 'niemand kaempft auf der eigenen Seite');
-        assert.ok(st.opp, 'niemand kaempft auf der Gegnerseite');
-        assert.notEqual(st.me, st.opp,
-            'der Reiter oeffnet ohne eigenes Team mit einer Rechnung gegen sich selbst');
+        assert.equal(st.opp, null, 'es steht ein Gegner da, den niemand gewaehlt hat');
+        const k = api.kaderState();
+        assert.equal(k.opp.length, 0, 'der Gegnerkader wurde vorbelegt');
+        assert.equal(k.mein.length, 0, 'ohne gespeichertes Team steht etwas im eigenen Kader');
     });
 
-    it('ohne eigenes Team steht der Gegnerkader trotzdem', () => {
-        const { api, sandbox } = load();
-        sandbox.sideQuest = { getActiveCode: () => '', getOwnTeams: () => [] };
-        api.rechState({ me: null, opp: null });
-        api.kaderState({ mein: [], opp: [] });
-        api.kaderEroeffnung();
-        const st = api.kaderState();
-        assert.equal(st.opp.length, 6, 'der Gegnerkader bleibt leer');
-        assert.equal(st.mein.length, 0, 'ohne gespeichertes Team steht etwas im eigenen Kader');
-    });
-
-    it('mit eigenem Team kaempft das eigene Team — und nicht gegen sich selbst', () => {
+    it('mit eigenem Team kaempft das eigene Team', () => {
         const { api, sandbox } = load();
         const roster = api.setData(DATA);
-        // Bewusst das OBERSTE Pokemon des Metas ins Team: genau die Lage,
-        // die live den Spiegel erzeugt hat.
-        const oben = api.metaTop(6)[0];
+        const oben = roster.filter(r => api.setFor(r.name, 'me'))[0].name;
         const slug = roster.find(r => r.name === oben).slug;
         sandbox.sideQuest = {
             getActiveCode: () => 'imp-e',
@@ -236,7 +178,7 @@ describe('Die Eroeffnung des Reiters', () => {
         api.kaderEroeffnung();
         const st = api.rechState();
         assert.equal(st.me, oben, 'das geladene Team kaempft nicht');
-        assert.notEqual(st.opp, oben, 'das geladene Team rechnet gegen sich selbst');
+        assert.equal(st.opp, null, 'der Gegner wurde trotzdem vorbelegt');
     });
 
     it('ruehrt einen schon stehenden Kader nicht an (Weg ueber den Team-Builder)', () => {
@@ -400,27 +342,33 @@ describe('Wer gerechnet werden kann — und wer sichtbar NICHT', () => {
 describe('Die Leiste selbst', () => {
     it('zeichnet beide Seiten mit Ueberschrift und Zaehler', () => {
         const { api } = load();
-        api.kaderState({ mein: [], opp: [] });
-        api.kaderPick6();
+        const sechs = api.setData(DATA).filter(r => api.setFor(r.name, 'opp')).slice(0, 6)
+            .map(r => ({ name: r.name, eigen: false }));
+        api.kaderState({ mein: [], opp: sechs });
         const html = api.kaderHtml();
         assert.ok(/sq-kader-seite is-me/.test(html), 'die eigene Seite fehlt');
         assert.ok(/sq-kader-seite is-opp/.test(html), 'die Gegnerseite fehlt');
-        assert.ok(/Mein Kader/.test(html), 'die eigene Ueberschrift fehlt');
+        /* „Mein Kader" heisst seit dem 16.09.2026 „Mein Team" — auf
+           Ansage: „bei mein Kader (sollte Mein Team heißen)". */
+        assert.ok(/Mein Team/.test(html), 'die eigene Ueberschrift fehlt');
+        assert.ok(!/Mein Kader/.test(html), 'die alte Ueberschrift steht noch da');
         assert.ok(/6\/6/.test(html), 'der Zaehler steht nicht auf 6/6');
     });
 
-    it('bietet Pick 6 und die Gegnersuche an', () => {
+    it('bietet die Gegnersuche und den Waehler an — und keinen Pick 6', () => {
         const { api } = load();
         api.kaderState({ mein: [], opp: [] });
         const html = api.kaderHtml();
-        assert.ok(/data-sq-kader-pick6/.test(html), 'der Pick-6-Knopf fehlt');
         assert.ok(/data-sq-kader-suche/.test(html), 'das Suchfeld fehlt');
+        assert.ok(/data-sq-kader-waehler="opp"/.test(html), 'der Waehler fehlt');
+        assert.ok(!/data-sq-kader-pick6/.test(html), 'der Pick-6-Knopf steht noch da');
     });
 
     it('ein voller Gegnerkader sperrt das Suchfeld statt still zu verschlucken', () => {
         const { api } = load();
-        api.kaderState({ mein: [], opp: [] });
-        api.kaderPick6();
+        const sechs = api.setData(DATA).filter(r => api.setFor(r.name, 'opp')).slice(0, 6)
+            .map(r => ({ name: r.name, eigen: false }));
+        api.kaderState({ mein: [], opp: sechs });
         assert.ok(/data-sq-kader-suche[^>]*disabled|disabled[^>]*data-sq-kader-suche/
             .test(api.kaderHtml().replace(/\s+/g, ' ')),
             'bei sechs Gegnern bleibt das Suchfeld offen und tut nichts');
@@ -438,7 +386,6 @@ describe('Die Leiste selbst', () => {
         const { api } = load();
         api.rechState({ me: null, opp: null });
         api.kaderState({ mein: [], opp: [] });
-        api.kaderPick6();
         const html = api.rechnerHtml();
         assert.ok(/sq-kader/.test(html),
             'ohne rechenbares Paar verschwindet die Leiste — also genau das Werkzeug, '
@@ -542,9 +489,9 @@ describe('Verdrahtung und Oberflaeche', () => {
         // Uebersetzung.
         const deHtml = load('de').api.kaderHtml();
         const enHtml = load('en').api.kaderHtml();
-        assert.ok(/Mein Kader/.test(deHtml), 'die deutsche Ueberschrift fehlt');
-        assert.ok(/My squad/.test(enHtml), 'die englische Ueberschrift fehlt');
-        assert.ok(!/Mein Kader/.test(enHtml), 'die englische Leiste traegt deutschen Text');
+        assert.ok(/Mein Team/.test(deHtml), 'die deutsche Ueberschrift fehlt');
+        assert.ok(/My team/.test(enHtml), 'die englische Ueberschrift fehlt');
+        assert.ok(!/Mein Team/.test(enHtml), 'die englische Leiste traegt deutschen Text');
     });
 });
 

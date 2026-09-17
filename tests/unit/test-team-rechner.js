@@ -1029,9 +1029,21 @@ describe('Der zusammengesetzte Name steht nur einmal da', () => {
     });
 
     it('ohne deutschen Namen bleibt der englische allein stehen', () => {
+        /* HIER STAND EIN FESTER NAME („Gholdengo") UND EINE ATTRAPPE,
+           die `de` auf null setzte. Seit dem 16.09.2026 kommt der
+           deutsche Artname zuerst aus data/champions_pokedex.json
+           (artDeutsch) — und der Pokedex fuehrt fuer Gholdengo sehr wohl
+           „Monetigo". Die Attrappe stellte also nicht mehr dar, was sie
+           darstellen sollte: einen Namen OHNE deutsche Entsprechung.
+
+           Der Fall wird deshalb aus den echten Daten geholt: ein
+           Eintrag, dessen deutscher Name mit dem englischen
+           uebereinstimmt (davon fuehrt der Pokedex mehrere Dutzend). */
         const { api, sandbox } = load('de');
         sandbox.ChampionsNamen = { de: () => null, istUnbenannt: () => false, beide: (en) => en };
-        assert.equal(api.nameHtml('Gholdengo', 'pokemon'), 'Gholdengo');
+        const gleich = DATA.dex.entries.find(e => e.de && e.de === e.en);
+        assert.ok(gleich, 'kein Eintrag ohne eigenen deutschen Namen — die Probe greift nicht');
+        assert.equal(api.nameHtml(gleich.en, 'pokemon'), gleich.en);
     });
 
     it('in der englischen Oberfläche steht nie ein deutscher Zusatz', () => {

@@ -4299,3 +4299,76 @@
        der Knopftext ist dort laenger als das halbe Fenster. */
     .sq-console .sq-kader-laden { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DIE INITIATIVE UNTER DEM SPRITE (16.09.2026)
+
+   Bestellt: „Vll zeigen wir einfach den Initiative Wert unter dem
+   Pokemon Bild bei mein Kader und beim Gegner". Sie steht unter dem
+   Namen und über der Satz-Marke — als Zahl, nicht als Balken: es sind
+   bis zu zwölf Kacheln nebeneinander, und zwölf Balken wären ein
+   Diagramm, das niemand bestellt hat.
+
+   `tabular-nums`, damit die Zahlen in der Rasterzeile untereinander
+   stehen und man zwei Kacheln ohne Lesen vergleichen kann. */
+.sq-console .sq-kader-ini {
+    display: block; font-size: 10px; letter-spacing: .04em;
+    color: var(--sq-accent); font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.sq-console .sq-kader-chip.is-an .sq-kader-ini { color: var(--sq-accent2); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DIE ITEM-AUSWAHL MIT BILD (16.09.2026)
+
+   „mir sagt nicht automatisch jeder Name was aber die Optik schon".
+   Ein <select> kann kein Bild — deshalb Knopf plus eigene Liste, im
+   selben Aufbau wie die Artensuche darüber (absolut überlagernd, damit
+   beim Öffnen nichts nach unten rutscht).
+
+   Die Bilder sind 24×24 und werden auf 26 px gezeichnet: `pixelated`
+   hält sie scharf statt sie weichzuzeichnen. */
+.sq-console .sq-item-fld { position: relative; }
+.sq-console .sq-item-combo { position: relative; }
+.sq-console .sq-item-knopf {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    cursor: pointer; text-align: left; font-family: inherit;
+}
+.sq-console .sq-item-pfeil { margin-left: auto; font-style: normal; color: var(--sq-dim2); }
+.sq-console .sq-item-liste {
+    position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px);
+    max-height: 300px; overflow-y: auto; overscroll-behavior: contain;
+    background: var(--sq-panel); border: 1px solid var(--sq-accent);
+    border-radius: 10px; box-shadow: 0 10px 28px rgba(0, 0, 0, .45);
+    padding: 4px;
+}
+.sq-console .sq-item-liste[hidden] { display: none; }
+.sq-console .sq-item-zeile {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    background: none; border: none; border-radius: 8px; cursor: pointer;
+    color: var(--sq-dim); font-family: inherit; font-size: var(--fs-xs);
+    padding: 5px 7px; text-align: left;
+}
+.sq-console .sq-item-zeile:hover,
+.sq-console .sq-item-zeile:focus-visible {
+    background: var(--sq-deep); color: var(--sq-txt); outline: none;
+}
+.sq-console .sq-item-zeile:focus-visible { box-shadow: inset 0 0 0 1.4px var(--sq-accent); }
+.sq-console .sq-item-zeile.is-an { color: var(--sq-txt); background: var(--sq-deep); font-weight: 700; }
+.sq-console .sq-item-img {
+    width: 26px; height: 26px; flex: 0 0 26px;
+    image-rendering: pixelated; object-fit: contain;
+}
+/* Wo es kein Bild gibt (Champions-eigene Mega-Steine), bleibt der
+   Platz frei — und zwar GENAU so breit wie ein Bild, sonst stünden die
+   Namen der Liste auf zwei verschiedenen Kanten. */
+.sq-console .sq-item-leerbild {
+    display: block; width: 26px; height: 26px; flex: 0 0 26px;
+}
+.sq-console .sq-item-n {
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sq-console .sq-item-pct {
+    margin-left: auto; font-style: normal; color: var(--sq-dim2);
+    font-variant-numeric: tabular-nums; font-weight: 400;
+}

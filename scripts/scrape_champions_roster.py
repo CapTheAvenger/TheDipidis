@@ -61,6 +61,7 @@ EXTRA_FORMEN = [
 
 TEAMS_PATH = os.path.join(ROOT, "data", "champions_replica_teams.json")
 USAGE_PATH = os.path.join(ROOT, "data", "champions_usage.json")
+POKEDEX_PATH = os.path.join(ROOT, "data", "champions_pokedex.json")
 
 # Teamnamen, die eine Form meinen, die der Pokedex unter der Grundform
 # fuehrt. Ohne diese Zeilen wuerden sie als "fehlt" gelesen und ein
@@ -169,10 +170,110 @@ def geschlechtsformen(vorhanden, smogon, usage):
     return neu
 
 
+# Nutzungsschluessel, die sich NICHT durch Grossschreiben der Teile in
+# einen Smogon-Namen verwandeln lassen. Beide tragen ein Zeichen, das
+# der Schluessel nicht hergibt (typografischer Apostroph, Punkt).
+# Nachgeschlagen in data/pokemon_battle_data.json am 16.09.2026, nicht
+# geraten — dort stehen sie woertlich als "Farfetch’d" und "Mr. Mime".
+SLUG_SONDERFALL = {
+    "farfetch-d": "Farfetch’d",
+    "mr-mime": "Mr. Mime",
+    "mr-mime-galar": "Mr. Mime-Galar",
+    "mime-jr": "Mime Jr.",
+    "sirfetch-d": "Sirfetch’d",
+}
+
+
+def pokedex_schluessel(pokedex):
+    """Alles, woran der Pokedex einen Eintrag wiedererkennt.
+
+    Zwei Schreibweisen, weil beide vorkommen: `meta.slug` ist der
+    Nutzungsschluessel ("rotom-wash"), `en` der Anzeigename
+    ("Rotom (Wash)"). Der Anzeigename wird auf dieselbe Form gebracht
+    wie ein Nutzungsschluessel, damit ein Vergleich ueberhaupt moeglich
+    ist.
+    """
+    raus = set()
+    for e in (pokedex or {}).get("entries", []):
+        slug = ((e or {}).get("meta") or {}).get("slug")
+        if slug:
+            raus.add(str(slug).lower())
+        en = (e or {}).get("en")
+        if en:
+            raus.add(re.sub(r"[^a-z0-9]+", "-", str(en).lower()).strip("-"))
+    return raus
+
+
+def nutzungsformen(vorhanden, smogon, usage, pokedex):
+    """FORMEN, DIE GESPIELT WERDEN UND IM POKEDEX FEHLEN.
+
+    ANLASS (Betreiber, 16.09.2026): "es sind nicht alle Rotoms waehlbar
+    beim Gegner gerade gesehen".
+
+    Er hat recht, und es betraf nicht nur Rotom. GEMESSEN am Stand vom
+    16.09.2026 gegen data/champions_pokedex.json: 27 Schluessel aus
+    data/champions_usage.json haben dort keinen Eintrag. Die Oberflaeche
+    kann sie deshalb gar nicht anbieten — der Rechner baut seine Liste
+    aus dem Pokedex (buildRoster in js/app-side-quest-matchups.js).
+
+        rotom-heat, rotom-frost, rotom-fan, rotom-mow   (rotom-wash war da)
+        arboliva, inteleon, persian, persian-alola, grapploct, qwilfish,
+        vileplume, squawkabilly(+yellow), swalot, musharna, wigglytuff,
+        perrserker, mabosstiff, lycanroc-midnight, toxtricity-low-key,
+        gourgeist-small/large/super, farfetch-d, mr-mime
+
+    Das ist dieselbe Luecke, die seit dem 08.09.2026 als "17 Arten ohne
+    Pokedex-Eintrag" in den Projektberichten steht — nur vollstaendig
+    gemessen statt geschaetzt.
+
+    AUFGENOMMEN WIRD, WER ZWEI BELEGE HAT — genau wie bei den
+    Geschlechtsformen eine Funktion darueber:
+
+      1. Eine EIGENE Nutzungszeile in data/champions_usage.json.
+         championsbattledata.com fuehrt die Form getrennt, sie wird also
+         getrennt gespielt. Das ist der Beleg dafuer, dass es sie in
+         Champions ueberhaupt gibt.
+      2. Basiswerte in data/pokemon_battle_data.json (Smogon). Ohne die
+         waere der Eintrag eine Zeile ohne Zahlen, und der Rechner
+         koennte mit ihm nichts anfangen.
+
+    Fehlt der zweite, bleibt die Form draussen und wird GEMELDET, nicht
+    ergaenzt. Geraten wird nichts.
+
+    WARUM GEGEN DEN POKEDEX UND NICHT GEGEN roster.json: die Frage ist
+    woertlich "was kann die Oberflaeche anbieten", und das entscheidet
+    der Pokedex. roster.json fuehrt Anzeigenamen ("Mega Venusaur"), die
+    erst uebersetzt werden muessten — eine Uebersetzung, die hier
+    danebenliegen und die Art dann doppelt anlegen koennte. Der Pokedex
+    fuehrt beide Schreibweisen selbst mit.
+
+    Der Vergleich gegen den ZULETZT GEBAUTEN Pokedex heilt sich selbst:
+    faellt eine Art dort heraus, fehlt sie beim naechsten Lauf in dieser
+    Menge und wird wieder ergaenzt.
+    """
+    da = pokedex_schluessel(pokedex)
+    neu, ohne_werte = [], []
+    for schluessel in sorted((usage or {}).get("pokemon", {}).keys()):
+        if schluessel in da:
+            continue
+        nm = slug_to_smogon(schluessel)
+        if nm in vorhanden or nm in neu:
+            continue
+        if TEAM_UNTER_GRUNDFORM.get(nm):
+            continue
+        if nm not in smogon or "baseStats" not in smogon[nm]:
+            ohne_werte.append(schluessel)
+            continue
+        neu.append(nm)
+    return neu, ohne_werte
+
+
 def slug_to_smogon(slug):
     """pokebase slug → Smogon species name. 'ninetales-alola' →
     'Ninetales-Alola'; 'kommo-o' → 'Kommo-o' (the trailing 'o' stays
     lowercase as it's part of the name, not a form)."""
+    if slug in SLUG_SONDERFALL:
+        return SLUG_SONDERFALL[slug]
     parts = slug.split("-")
     out = [parts[0].capitalize()]
     for p in parts[1:]:
@@ -278,9 +379,23 @@ def main():
         print("Geschlechtsformen mit eigener Nutzungszeile (%d): %s"
               % (len(geschlecht), ", ".join(sorted(geschlecht))))
 
+    # Formen mit eigener Nutzungszeile, die der Pokedex nicht fuehrt.
+    vorhanden = vorhanden | set(geschlecht)
+    nutzung_neu, nutzung_ohne = nutzungsformen(
+        vorhanden, smogon, _lade(USAGE_PATH), _lade(POKEDEX_PATH))
+    if nutzung_neu:
+        print("Formen mit eigener Nutzungszeile, im Pokedex bisher ohne Eintrag (%d): %s"
+              % (len(nutzung_neu), ", ".join(sorted(nutzung_neu))))
+    if nutzung_ohne:
+        # Benannt, nicht verschwiegen: hier wird etwas gespielt, wofuer
+        # keine Basiswerte vorliegen. Ein Eintrag ohne Zahlen waere im
+        # Rechner eine Zeile, die nichts rechnen kann.
+        print("WARN: eigene Nutzungszeile, aber keine Smogon-Werte: %s"
+              % ", ".join(sorted(nutzung_ohne)), file=sys.stderr)
+
     # Stable, de-duplicated key list (base first, then megas, then forms).
     seen, keys = set(), []
-    for k in base + aus_mega + teams_neu + geschlecht + megas + formen:
+    for k in base + aus_mega + teams_neu + geschlecht + nutzung_neu + megas + formen:
         if k not in seen:
             seen.add(k)
             keys.append(k)
@@ -305,6 +420,9 @@ def main():
             "aus_teams_ohne_werte": sorted(teams_ohne),
             "geschlechtsformen": sorted(geschlecht),
             "geschlechtsformen_count": len(geschlecht),
+            "aus_nutzung": sorted(nutzung_neu),
+            "aus_nutzung_count": len(nutzung_neu),
+            "aus_nutzung_ohne_werte": sorted(nutzung_ohne),
         },
         "smogonKeys": keys,
     }

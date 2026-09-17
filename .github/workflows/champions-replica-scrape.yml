@@ -198,6 +198,32 @@ jobs:
           fi
           exit 0
 
+      # DIE ITEM-ICONS GEHOEREN IN DENSELBEN LAUF (16.09.2026)
+      #
+      # Welche Gegenstands-Icons gebraucht werden, entscheiden zwei
+      # Dateien: die Serebii-Verfuegbarkeitsliste (Schritt darueber) und
+      # data/champions_usage.json. Beide werden in DIESEM Lauf
+      # fortgeschrieben. Liefe der Spiegel getrennt, stuende nach jeder
+      # Erweiterung fuer ein paar Tage ein Gegenstand ohne Bild in der
+      # Liste — die Regel gehoert an ihre Bedingung, nicht an einen
+      # eigenen Takt.
+      #
+      # Fail-soft: ohne Bilder bleibt die Liste einsprachig-textlich. Das
+      # ist schlechter als mit Bildern und weit besser als ein roter Lauf.
+      - name: Gegenstands-Icons spiegeln
+        run: |
+          set +e
+          python -u scripts/build_champions_item_sprites.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::build_champions_item_sprites failed — Bilder und Manifest bleiben wie committet"
+              git checkout -- data/champions_item_sprites.json 2>/dev/null
+              echo "FAIL scripts/build_champions_item_sprites.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/build_champions_item_sprites.py" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+          exit 0
+
       # Refresh the Champions roster additions (M-B+ Pokémon/megas not in
       # the M-A dataset) from pokebase + Smogon. Fail-soft: keeps committed.
       - name: Scrape Champions roster additions
@@ -509,6 +535,8 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           git add data/datenluecken.json \
+                  data/champions_item_sprites.json \
+                  images/champions-items \
                   data/champions_replica_teams.json \
                   data/champions_resources.json \
                   data/champions_pokedex.json \

@@ -32,6 +32,10 @@
        aus einer anderen Quelle kommt als champions_resources.json —
        siehe scripts/build_champions_move_flags.py. */
     const FLAGS_URL = 'champions_move_flags.json';
+    /* Die Gegenstands-Icons. Eigene Datei, weil sie an den Bildern unter
+       images/champions-items/ haengt und nicht an den Namen — siehe
+       scripts/build_champions_item_sprites.py. */
+    const ITEMBILD_URL = 'champions_item_sprites.json';
 
     // Champions verteilt 66 Statuswertpunkte, höchstens 32 auf einen Wert.
     // Beides aus den echten Spreads in champions_usage.json abgelesen, nicht
@@ -61,6 +65,7 @@
        Schirm des Gegners auch der eigene. */
     let _feld = { wetter: '', gelaende: '', crit: false };
     let _namesDe = null;         // { moves, items, abilities, pokemon }
+    let _itemBild = {};          // englischer Gegenstandsname -> Dateiname
     let _rank = null;            // en -> Team-Auftritte
     let _roster = null;          // [{ name, slug, types, count }]
     let _eff = null;             // (moveType, defTypes) -> Multiplikator
@@ -170,17 +175,22 @@
             keineAttacke: 'Dieser Satz hat keine Attacke, die Schaden macht.',
             tausch: '⇄ Seiten tauschen',
             weg: 'Entfernen',
-            kaderMein: 'Mein Kader', kaderOpp: 'Gegner',
+            kaderMein: 'Mein Team', kaderOpp: 'Gegner',
+            kaderIniKurz: 'INI',
+            kaderIniTitel: 'Effektive Initiative dieses Satzes — mit Rückenwind '
+                        + 'verdoppelt, genau wie die Zeile über der Feldleiste.',
             kaderKlick: 'Klick ein Sprite an — es kämpft dann oben.',
             kaderTeamLaden: 'Team laden',
             kaderKeinTeam: 'Noch kein eigenes Team gespeichert. Bau eins im '
                         + 'Team-Builder und speichere es — danach steht es hier.',
             kaderAktiv: '(aktiv)',
-            kaderPick6: 'Top 6 des Metas',
-            kaderPick6Titel: 'Füllt die sechs meistgespielten Pokémon des Formats '
-                        + 'ein, je mit ihrem meistgespielten Satz.',
             kaderSuche: 'Gegner suchen …',
-            kaderOppLeer: 'Noch kein Gegner gewählt. Such oben eins oder nimm die Top 6.',
+            kaderOppLeer: 'Noch kein Gegner gewählt. Such oben einen oder nimm „Aus der '
+                        + 'Liste wählen“.',
+            rechKeinGegner: 'Noch kein Gegner gewählt. Nimm rechts „Gegner suchen …“ oder '
+                        + '„Aus der Liste wählen“ — dann steht hier die Rechnung.',
+            rechKeinEigenes: 'Noch kein eigenes Pokémon gewählt. Lade links dein Team oder '
+                        + 'nimm „Aus der Liste wählen“.',
             kaderMeinLeer: 'Noch kein Team geladen.',
             kaderWeg: 'Aus dem Kader nehmen',
             kaderVoll: (n) => `${n}/6`,
@@ -348,17 +358,21 @@
             keineAttacke: 'This set has no damaging move.',
             tausch: '⇄ Swap sides',
             weg: 'Remove',
-            kaderMein: 'My squad', kaderOpp: 'Opponent',
+            kaderMein: 'My team', kaderOpp: 'Opponent',
+            kaderIniKurz: 'SPE',
+            kaderIniTitel: 'Effective Speed of this set — doubled under Tailwind, '
+                        + 'exactly like the line above the field bar.',
             kaderKlick: 'Click a sprite — it then fights up top.',
             kaderTeamLaden: 'Load team',
             kaderKeinTeam: 'No team of your own saved yet. Build one in the team '
                         + 'builder and save it — it will show up here.',
             kaderAktiv: '(active)',
-            kaderPick6: 'Top 6 of the meta',
-            kaderPick6Titel: 'Fills in the six most-played Pokémon of the format, '
-                        + 'each with its most-played set.',
             kaderSuche: 'Search opponent …',
-            kaderOppLeer: 'No opponent picked yet. Search above or take the top 6.',
+            kaderOppLeer: 'No opponent picked yet. Search above or use “Pick from list”.',
+            rechKeinGegner: 'No opponent picked yet. Use “Search opponent …” or “Pick from '
+                        + 'list” on the right — the numbers show up here.',
+            rechKeinEigenes: 'No Pokémon of your own picked yet. Load your team on the left '
+                        + 'or use “Pick from list”.',
             kaderMeinLeer: 'No team loaded yet.',
             kaderWeg: 'Take out of the squad',
             kaderVoll: (n) => `${n}/6`,
@@ -517,6 +531,30 @@
 
     // Englischer Name bleibt führend (die Daten sind englisch), der deutsche
     // steht daneben — genauso wie im Pokédex-Subtab.
+    /* DER POKEDEX IST FUER ARTEN DIE VOLLSTAENDIGERE QUELLE (16.09.2026).
+
+       ANLASS (Betreiber): „bitte wie immer deutschen und englischen
+       Namen suchen lassen, weil so ist doof" — im Suchfeld stand
+       „Mega Golisopod" ohne deutschen Namen, eine Zeile darunter
+       „Tectass Golisopod" mit.
+
+       Der Grund war nicht, dass der Name fehlt: data/champions_names_de.json
+       fuehrt nur die GRUNDARTEN (Golisopod -> Tectass), waehrend
+       data/champions_pokedex.json jede Form fuehrt (Mega Golisopod ->
+       „Tectass (Mega)", Hisuian Arcanine -> „Arkani (Hisui)").
+
+       GEMESSEN am Stand vom 16.09.2026 ueber alle 318 Pokedex-Eintraege:
+       318 tragen einen deutschen Namen, 217 davon stehen auch in der
+       Namenstabelle und stimmen dort in 217 von 217 Faellen ueberein —
+       NULL Widersprueche. 101 stehen nur im Pokedex. Der Pokedex ist
+       damit eine echte Obermenge, keine zweite Meinung; er kommt
+       deshalb zuerst dran und die Tabelle bleibt als Rueckfall. */
+    function artDeutsch(en) {
+        const e = en && _dex && _dex[en];
+        const d = e && e.de;
+        return (d && d !== en) ? d : '';
+    }
+
     function localName(en, kind) {
         if (!en) return '';
         // Kein Pseudoname fuer einen Gegenstand, den die Quelle nicht
@@ -527,7 +565,7 @@
         }
         if (!de()) return en;
         const map = kind === 'nature' ? NATURE_DE : (_namesDe && _namesDe[kind]);
-        const d = map && map[en];
+        const d = (kind === 'pokemon' && artDeutsch(en)) || (map && map[en]);
         // Der Kommentar darueber stand hier schon, seit dem 05.09.2026 —
         // der Code hat ihn nur nie eingeloest: zurueck kam der deutsche
         // Name ALLEIN. Zusammengesetzt wird jetzt in champions-namen.js,
@@ -552,8 +590,9 @@
         _loading = Promise.all([
             jget(USAGE_URL), jget(DEX_URL), jget(TEAMS_URL),
             jget(RES_URL), jget(CHART_URL), jget(NAMES_DE_URL), jget(FLAGS_URL),
-        ]).then(([usage, dex, teams, res, chart, names, flags]) => {
-            setData({ usage, dex, teams, res, chart, names, flags });
+            jget(ITEMBILD_URL),
+        ]).then(([usage, dex, teams, res, chart, names, flags, itembild]) => {
+            setData({ usage, dex, teams, res, chart, names, flags, itembild });
             return true;
         });
         return _loading;
@@ -582,6 +621,9 @@
             }) : e;
         });
         _namesDe = d.names || {};
+        /* Fehlt die Datei, bleibt die Liste ohne Bilder — sie ist dann
+           genau das, was sie vor dem 16.09.2026 war, und nicht kaputt. */
+        _itemBild = (d.itembild && d.itembild.sprites) || {};
         _eff = (window.ChampionsDamage && window.ChampionsDamage.makeChart)
             ? window.ChampionsDamage.makeChart(d.chart) : (() => 1);
         _rank = countAppearances(d.teams);
@@ -964,6 +1006,11 @@
         if (!en || !de()) return '';
         if (window.ChampionsNamen && window.ChampionsNamen.istUnbenannt
             && window.ChampionsNamen.istUnbenannt(en)) return '';
+        // Arten zuerst aus dem Pokedex — siehe artDeutsch().
+        if (kind === 'pokemon') {
+            const a = artDeutsch(en);
+            if (a) return a;
+        }
         if (window.ChampionsNamen && typeof window.ChampionsNamen.de === 'function') {
             const d = window.ChampionsNamen.de(en, kind);
             return (d && d !== en) ? d : '';
@@ -997,6 +1044,96 @@
                 esc(label)}</option>`);
         });
         return opts.join('');
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       DIE ITEM-AUSWAHL ZEIGT BILDER (16.09.2026)
+
+       ANLASS (Betreiber): „koennen wir bei den items auch noch den
+       Champions sprite anzeigen. WEil mir sagt nicht automatisch jeder
+       Name was aber die Optik schon".
+
+       Ein <select> kann keine Bilder — der Browser zeichnet die Liste,
+       nicht wir. Deshalb steht hier eine eigene Liste: ein Knopf mit dem
+       aktuellen Gegenstand, darunter die Auswahl. Der Rest des
+       Set-Editors bleibt bei <select>, weil dort kein Bild dazugehoert.
+
+       GEDECKELT WIRD NICHT: die Liste eines Pokemon sind die
+       Gegenstaende aus seinen Nutzungsdaten — im ganzen Bestand vom
+       16.09.2026 hoechstens 19 Zeilen. Ein Suchfeld wie bei den Arten
+       (ueber 300 Zeilen) waere hier ein Klick zu viel.
+
+       WO KEIN BILD IST, STEHT KEINS. 40 der 166 Gegenstaende haben
+       keines, fast alle Champions-eigene Mega-Steine. Ein fremdes
+       Mega-Stein-Bild als Platzhalter waere ein Bild, das etwas anderes
+       behauptet, als es zeigt; stattdessen bleibt der Platz leer und
+       der Name traegt die Zeile allein.
+       ════════════════════════════════════════════════════════════════ */
+
+    const ITEM_BASIS = 'images/champions-items/';
+    let _itemOffen = '';        // '' | 'me' | 'opp' — welche Liste offen ist
+
+    function itemBildHtml(en) {
+        const datei = en && _itemBild && _itemBild[en];
+        if (!datei) return '<span class="sq-item-leerbild" aria-hidden="true"></span>';
+        return `<img class="sq-item-img" loading="lazy" alt=""
+                     src="${esc(ITEM_BASIS + datei)}">`;
+    }
+
+    function itemZeileHtml(side, en, pct, gewaehlt) {
+        const an = en === gewaehlt;
+        return `<button type="button" role="option" class="sq-item-zeile${an ? ' is-an' : ''}"
+                    aria-selected="${an ? 'true' : 'false'}"
+                    data-sq-itemwahl="${esc(side)}" data-sq-itemname="${esc(en)}">
+                ${itemBildHtml(en)}
+                <span class="sq-item-n">${esc(en ? localName(en, 'items') : L().noItem)}</span>
+                ${pct != null ? `<em class="sq-item-pct">${esc(num(pct))} %</em>` : ''}
+            </button>`;
+    }
+
+    function itemWahl(side, set, block) {
+        const liste = (block && block.held_item) || [];
+        const offen = _itemOffen === side;
+        const jetzt = set.item || '';
+        const zeilen = itemZeileHtml(side, '', null, jetzt)
+            + liste.map(v => itemZeileHtml(side, v.name, v.pct, jetzt)).join('');
+        return `<div class="sq-fld sq-item-fld"><span>${esc(L().item)}</span>
+                <div class="sq-item-combo">
+                    <button type="button" class="sq-in sq-item-knopf" data-sq-itemauf="${esc(side)}"
+                            aria-expanded="${offen ? 'true' : 'false'}" aria-haspopup="listbox">
+                        ${itemBildHtml(jetzt)}
+                        <span class="sq-item-n">${esc(jetzt ? localName(jetzt, 'items') : L().noItem)}</span>
+                        <em class="sq-item-pfeil" aria-hidden="true">▾</em>
+                    </button>
+                    <div class="sq-item-liste" role="listbox"${offen ? '' : ' hidden'}>${
+                        offen ? zeilen : ''}</div>
+                </div>
+            </div>`;
+    }
+
+    /* Die Klickpfade der Item-Auswahl. Eigene Funktion, weil sie —
+       anders als ein <select> — bei jedem Zeichnen neu gebunden werden
+       muss. */
+    function wireItem(host) {
+        host.querySelectorAll('[data-sq-itemauf]').forEach(b => {
+            b.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                const side = b.getAttribute('data-sq-itemauf');
+                _itemOffen = (_itemOffen === side) ? '' : side;
+                zeichne();
+            });
+        });
+        host.querySelectorAll('[data-sq-itemwahl]').forEach(b => {
+            b.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                const side = b.getAttribute('data-sq-itemwahl');
+                const t = editorTarget(side);
+                if (!t.set) return;
+                t.set.item = b.getAttribute('data-sq-itemname') || '';
+                _itemOffen = '';
+                zeichne();
+            });
+        });
     }
 
     // Attacken-Auswahl: erst die meistgenutzten dieses Pokémon mit Anteil,
@@ -1295,10 +1432,7 @@
                     <select class="sq-in" data-sq-side="${side}" data-sq-field="ability">
                         ${optionList((block && block.ability) || [], set.ability, 'abilities', '—')}
                     </select></label>
-                <label class="sq-fld"><span>${esc(L().item)}</span>
-                    <select class="sq-in" data-sq-side="${side}" data-sq-field="item">
-                        ${optionList((block && block.held_item) || [], set.item, 'items', L().noItem)}
-                    </select></label>
+                ${itemWahl(side, set, block)}
                 <label class="sq-fld"><span>${esc(L().nature)}</span>
                     <select class="sq-in" data-sq-side="${side}" data-sq-field="nature">
                         ${optionList(natures, set.nature, 'nature')}
@@ -2067,6 +2201,10 @@
                 zeichne();
             });
         });
+        // Die Item-Auswahl ist kein <select> mehr — sie braucht eigene
+        // Klickpfade, und zwar in BEIDEN Ansichten, weil der Set-Editor
+        // in beiden steht. Deshalb hier und nicht in wireRechner().
+        wireItem(host);
     }
 
     /* Die Klickpfade des Team-Rechners.
@@ -2784,39 +2922,48 @@
         return true;
     }
 
-    /* Die sechs meistgespielten Pokemon des Formats. `_roster` ist schon
-       nach Nutzung absteigend sortiert (buildRoster); gefiltert wird auf
-       die, zu denen es ueberhaupt einen Satz gibt — sonst stuende dort
-       ein Name, den der Rechner nicht rechnen kann. */
-    function metaTop(n) {
-        if (!_roster) return [];
-        return _roster.filter(r => setFor(r.name, 'opp')).slice(0, n).map(r => r.name);
-    }
-
-    function kaderPick6() {
-        _kaderOpp = metaTop(KADER_MAX).map(name => ({ name, eigen: false }));
-        /* NICHT DAS SPIEGELMATCH ALS EROEFFNUNG.
-           Gemessen im Entwurf (16.09.2026): der Reiter oeffnete mit
-           „Gortrom U-Turn gegen Gortrom". Das eigene Team beginnt mit
-           dem meistgespielten Pokemon, die Top 6 auch — und das erste
-           Bild ist dann eine Rechnung gegen sich selbst. Rechenbar ist
-           sie, aber sie beantwortet keine Frage.
-           Gibt es NUR den Spiegel (Kader mit einem Namen), bleibt er
-           stehen: nichts zu zeigen waere schlechter. */
-        if (_kaderOpp.length) {
-            const anders = _kaderOpp.find(e => e.name !== _rMe);
-            _rOpp = (anders || _kaderOpp[0]).name;
-        }
-        _rMove = null;
-    }
+    /* metaTop() und kaderPick6() sind am 16.09.2026 ERSATZLOS entfernt
+       worden, auf Ansage: „das Top 6 Meta kann auch weg". Sie standen
+       hier, solange die Gegnerseite vorbelegt wurde; ohne Vorbelegung
+       hatten sie nur noch einen Knopf, und den gibt es auch nicht mehr.
+       Wer die sechs meistgespielten sucht, findet sie im Reiter Nutzung
+       — dort sind sie die eigentliche Antwort und nicht eine Vorgabe,
+       die man wegklickt. */
 
     /* Ein Sprite-Knopf. Der Klick setzt die Paarung oben — das ist die
        ganze Bedienung, um die es in der Anfrage ging. */
+    /* DIE INITIATIVE STEHT UNTER JEDEM BILD (16.09.2026).
+
+       ANLASS (Betreiber): „wir haben ja über den Replika Play Button die
+       möglichkeit einfach nur eine Initiative Vergleich der Teams
+       anzuzeigen, aber jetzt nutze ich ja mein Damage Calc und da wäre
+       das jetzt gut zu sehen. Vll zeigen wir einfach den Initiative Wert
+       unter dem Pokemon Bild".
+
+       Gerechnet wird mit DERSELBEN Funktion wie die Zeile im Kopfband
+       (initiative(): Grundwert, mit Rueckenwind verdoppelt) — sonst
+       stuenden im selben Bild zwei Zahlen fuer dieselbe Sache.
+
+       Ohne Satz keine Zahl: wo kaderRechenbar() falsch ist, gibt es
+       keinen Wert, und eine 0 waere eine Behauptung statt einer Luecke. */
+    function kaderIni(e, seite) {
+        if (!kaderRechenbar(e)) return null;
+        const satz = setFor(e.name, seite === 'opp' ? 'opp' : 'me');
+        if (!satz) return null;
+        const stats = statsOf(e.name, satz);
+        if (!stats) return null;
+        return initiative(satz, stats);
+    }
+
     function kaderChip(e, seite) {
         const gewaehlt = seite === 'opp' ? _rOpp : _rMe;
         const an = e.name === gewaehlt;
         const geht = kaderRechenbar(e);
         const zeig = nurDeutsch(e.name, 'pokemon') || e.name;
+        const ini = kaderIni(e, seite);
+        const iniHtml = ini == null ? '' :
+            `<span class="sq-kader-ini" title="${esc(L().kaderIniTitel)}">${
+                esc(L().kaderIniKurz)} ${esc(String(ini))}</span>`;
         const marke = e.eigen
             ? `<i class="sq-kader-marke" title="${esc(L().kaderEigenerSatzTitel)}">${
                   esc(L().kaderEigenerSatz)}</i>`
@@ -2831,6 +2978,7 @@
                         title="${esc(zeig)}">
                     ${sprite(e.name, 'sq-kader-img')}
                     <span class="sq-kader-name">${esc(zeig)}</span>
+                    ${iniHtml}
                     ${marke}${warn}
                 </button>
                 <button type="button" class="sq-kader-weg"
@@ -2897,8 +3045,6 @@
                           placeholder="${esc(L().kaderSuche)}" value="${esc(_kaderQ)}"
                           aria-label="${esc(L().kaderSuche)}"
                           ${_kaderOpp.length >= KADER_MAX ? 'disabled' : ''}>
-                   <button type="button" class="sq-btn" data-sq-kader-pick6
-                           title="${esc(L().kaderPick6Titel)}">${esc(L().kaderPick6)}</button>
                    ${waehler}
                </span>`
             : `<span class="sq-kader-laden">
@@ -2957,8 +3103,6 @@
                 if (sel && ladeKaderTeam(sel.value)) renderRechner();
             });
         }
-        const p6 = host.querySelector('[data-sq-kader-pick6]');
-        if (p6) p6.addEventListener('click', () => { kaderPick6(); renderRechner(); });
         host.querySelectorAll('[data-sq-kader-waehler]').forEach(b => {
             b.addEventListener('click', () => oeffneWaehler(b.getAttribute('data-sq-kader-waehler')));
         });
@@ -3266,8 +3410,22 @@
            die Leiste verschwand mit — also genau das Werkzeug, mit dem
            man den Zustand haette aufloesen koennen. */
         if (!meSet || !oppSet) {
+            /* ZWEI VERSCHIEDENE ZUSTAENDE, ZWEI VERSCHIEDENE SAETZE.
+
+               Bis zum 16.09.2026 stand hier in beiden Faellen „keine
+               Nutzungsdaten". Solange die Gegnerseite vorbelegt war, kam
+               der Fall „niemand gewaehlt" nie vor; seit sie leer
+               oeffnet, waere derselbe Satz eine Falschaussage ueber die
+               Datenlage — die Daten sind da, es ist nur niemand
+               ausgewaehlt. Dieselbe Regel wie beim Platzhalter im
+               Pokedex-Modal (13.09.2026): ein Satz, der eine Tatsache
+               ueber die Datenlage behauptet, darf sie nur behaupten,
+               wenn sie zutrifft. */
+            const text = !_rOpp ? L().rechKeinGegner
+                : !_rMe ? L().rechKeinEigenes
+                : L().noUsage;
             return `<div class="sq-rech">${kaderHtml()}
-                <div class="sq-panel"><p class="sq-empty">${esc(L().noUsage)}</p></div>
+                <div class="sq-panel"><p class="sq-empty">${esc(text)}</p></div>
             </div>`;
         }
         const f = rechFall();
@@ -3504,29 +3662,21 @@
         if (_verlauf.length > 12) _verlauf.length = 12;
     }
 
-    /* DER REITER OEFFNET ARBEITSFAEHIG, NICHT LEER.
-       Ein leerer Kader mit zwei Knoepfen daneben verlangt zwei Klicks,
-       bevor ueberhaupt etwas dasteht. Vorbelegt wird mit dem, was der
-       Betreiber gerade spielt (das aktive Team) und mit dem, wogegen er
-       es am ehesten spielt (die sechs meistgespielten Pokemon). Beides
-       ist mit einem Klick wieder weg.
+    /* VORBELEGT WIRD NUR DIE EIGENE SEITE.
+
+       Der eigene Kader kommt aus dem aktiven Team — das ist keine
+       Vermutung, sondern das Team, das der Betreiber gerade spielt, und
+       ohne es waere der Reiter beim Oeffnen vollstaendig leer.
+
+       Die GEGNERSEITE bleibt leer, seit dem 16.09.2026 und auf Ansage
+       (siehe unten). Was frueher hier stand — die sechs meistgespielten
+       Pokemon plus ein erster Gegner — ist ersatzlos weg.
 
        Nur wenn NOCH NICHTS dasteht: wer ueber den Team-Builder
        hereinkommt, hat seinen Kader schon dabei.
 
-       DIE REIHENFOLGE DIESER VIER SCHRITTE IST DER GANZE WITZ.
-       ------------------------------------------------------
-       Live gemessen am 16.09.2026, nach dem Deploy: der Reiter oeffnete
-       mit „Gortrom Kehrtwende gegen Gortrom". Der eigene Vorgabewert
-       stand damals HINTER kaderPick6() — wer kein eigenes Team
-       gespeichert hat (der Normalfall beim ersten Besuch), hatte beim
-       Pick 6 noch gar kein `_rMe`, also griff die Spiegelsperre ins
-       Leere und danach wurde `_rMe` auf genau dasselbe oberste Pokemon
-       gesetzt.
-
-       Erst wissen, WER kaempft, dann den Gegner waehlen. Deshalb steht
-       das hier als eigene, aufrufbare Funktion: was man nicht aufrufen
-       kann, kann man nicht pruefen. */
+       Eigene, aufrufbare Funktion, weil sich nur pruefen laesst, was
+       man aufrufen kann. */
     function kaderEroeffnung() {
         if (!_kaderMein.length) {
             const teams = eigeneTeams();
@@ -3535,10 +3685,22 @@
             if (nimm) ladeKaderTeam(nimm.replica_code);
         }
         if (!_rMe && _roster && _roster.length) _rMe = _roster[0].name;
-        if (!_kaderOpp.length) kaderPick6();
-        if (!_rOpp && _roster && _roster.length) {
-            _rOpp = (_roster.find(r => r.name !== _rMe) || _roster[0]).name;
-        }
+        /* DIE GEGNERSEITE BLEIBT LEER (16.09.2026).
+
+           ANLASS (Betreiber): „und beim Gegner bitte nicht automatisch
+           Pokemon vorgeben und das Top 6 Meta kann auch weg".
+
+           Bis hierher stand hinter dieser Zeile ein kaderPick6(), das
+           die sechs meistgespielten Pokemon des Formats einsetzte, plus
+           ein Rueckfall, der den ersten Gegner waehlte. Beides war eine
+           Antwort auf eine Frage, die niemand gestellt hat: wer den
+           Rechner oeffnet, will ein BESTIMMTES Matchup rechnen und muss
+           die sechs fremden Namen erst wieder wegklicken.
+
+           Was dadurch moeglich wird, muss die Anzeige aushalten: ohne
+           `_rOpp` gibt es keine Rechnung. rechnerHtml() unterscheidet
+           deshalb jetzt „noch keiner gewaehlt" von „keine Nutzungsdaten"
+           — der zweite Satz waere hier schlicht falsch. */
     }
 
     function activateRechner() {
@@ -3589,6 +3751,11 @@
            veraendert. Genau das ist der Unterschied zwischen einer
            Textzusicherung und einer Verhaltenszusicherung. */
         rangeFor, feldHtml, lageHtml, setEditor, noteHtml, BOOST_KEYS,
+        /* Die Item-Auswahl mit Bild (16.09.2026). Greifbar sind die
+           Zeichner UND der Zustand: ohne itemState() liesse sich nur
+           pruefen, dass eine zugeklappte Liste zugeklappt ist. */
+        itemWahl, itemBildHtml, kaderIni, artDeutsch,
+        itemState: (v) => { if (v !== undefined) _itemOffen = v; return _itemOffen; },
         /* Der Rechner-Reiter (16.09.2026). Greifbar sind die reinen
            Teile: die Paarung setzen, den Fall lesen, die Lage in einen
            Satz fassen, merken. Ohne sie liesse sich nur pruefen, DASS
@@ -3629,11 +3796,11 @@
         /* Die Kaderleiste (16.09.2026). Greifbar sind die Teile, die
            etwas ENTSCHEIDEN: welcher Satz in `_sets` landet
            (satzUebernehmen), wer ueberhaupt gerechnet werden kann
-           (kaderRechenbar), welche sechs das Meta stellt (metaTop) und
-           was die Leiste daraus zeichnet (kaderHtml). Ohne sie liesse
-           sich nur pruefen, DASS eine Leiste da ist. */
+           (kaderRechenbar) und was die Leiste daraus zeichnet
+           (kaderHtml). Ohne sie liesse sich nur pruefen, DASS eine
+           Leiste da ist. */
         KADER_MAX, kaderHtml, kaderChip, kaderRechenbar, satzUebernehmen,
-        metaTop, kaderPick6, ladeKaderTeam, wireKader, setFor, setKey, kaderEroeffnung,
+        ladeKaderTeam, wireKader, setFor, setKey, kaderEroeffnung,
         ladePaste, pasteHtml, waehleImKader, waehlerKandidaten, waehlerRasterHtml,
         schnellHtml, wireSchnell, initiative, rechZeilen, moveTable,
         rechListe, rechTreffer, rechTrefferHtml, rechWer,

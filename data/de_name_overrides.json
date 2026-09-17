@@ -7,11 +7,11 @@
 "letztes_wort": "data/champions_namen_entschieden.json"
 },
 "counts": {
-"moves": 929,
+"moves": 928,
 "items": 581
 },
 "aus_entscheidungsdatei": {
-"moves": 3,
+"moves": 2,
 "items": 48
 }
 },
@@ -128,7 +128,6 @@
 "Charge Beam": "Ladestrahl",
 "Charm": "Charme",
 "Chatter": "Geschwätz",
-"Chilling Reception": "Eisige Stimmung",
 "Chilling Water": "Kalte Dusche",
 "Chilly Reception": "Eisige Stimmung",
 "Chip Away": "Zermürben",

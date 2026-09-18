@@ -1,5 +1,5 @@
 {
-    "format_filter": "PBL",
+    "format_filter": "30C",
     "min_players": 100,
     "max_tournaments": 200,
     "delay_between_requests": 1.5,

@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-09-18 06:40:24+00:00",
+ "erzeugt": "2026-09-19 10:36:32+00:00",
  "format": "TEF-30C",
  "betriebsart": "B",
  "betriebsart_klartext": "Kaltstart — TEF-30C hat noch kein Praesenzturnier, Anker ist die Vorepoche TEF-CRI",
@@ -27,16 +27,16 @@
  ],
  "ankerspieler_gesamt": 6572,
  "online_abdeckung": {
-  "schnappschuss": "2026-09-18",
-  "anteil_unbekannt": 2.25,
+  "schnappschuss": "2026-09-19",
+  "anteil_unbekannt": 2.26,
   "groesste_unbekannte": [
    {
     "deck": "Mega Darkrai",
-    "anteil": 0.47
+    "anteil": 0.46
    },
    {
     "deck": "Cinccino",
-    "anteil": 0.39
+    "anteil": 0.38
    },
    {
     "deck": "Wailord",

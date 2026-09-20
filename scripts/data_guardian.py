@@ -80,6 +80,17 @@ CONSUMERS = {
     #   online_api_cards_TEF-PBL.csv      13 Spalten, 274.897 Zeilen
     #   online_api_matchups_TEF-PBL.csv   11 Spalten,  84.463 Zeilen
     #
+    # ROTATION 16.09.2026 (Set 30C): die beiden <FORMAT>-Eintraege
+    # stehen seit dem 20.09.2026 unter TEF-30C. Der Auszug ist wirklich
+    # entstanden und traegt denselben Kopf — am 20.09. abgelesen:
+    #
+    #   online_api_cards_TEF-30C.csv      13 Spalten,  5.657 Zeilen
+    #   online_api_matchups_TEF-30C.csv   11 Spalten,  1.497 Zeilen
+    #
+    # Genau dieses Hinsehen sollte der harte Schluessel erzwingen (siehe
+    # den Absatz darunter). Die alten TEF-PBL-Dateien bleiben liegen;
+    # bewacht wird das laufende Format.
+    #
     # Eingetragen ist jeweils der SCHLUESSEL- und Nutzkern, nicht jede
     # Spalte: ein Vertrag, der auch die letzte Randspalte einschliesst,
     # wird beim ersten harmlosen Umbau abgeschaltet statt gelesen.
@@ -143,7 +154,7 @@ CONSUMERS = {
     # Rotiert das Format, zeigt der Waechter auf eine Datei, die es
     # nicht mehr gibt — und das ist Absicht: dann muss jemand hinsehen,
     # ob der neue Auszug wirklich entstanden ist.
-    "online_api_cards_TEF-PBL.csv": {
+    "online_api_cards_TEF-30C.csv": {
         "sep": ";",
         # `set` und `number` sind der Riegel: backend/core/update_sets.py
         # liest sie, um zu pruefen, ob es fuer ein neues Set ueberhaupt
@@ -156,7 +167,7 @@ CONSUMERS = {
                     "backend/core/update_sets.py den Riegel fuer "
                     "data/format_window.json. Semikolon-getrennt."),
     },
-    "online_api_matchups_TEF-PBL.csv": {
+    "online_api_matchups_TEF-30C.csv": {
         "sep": ";",
         "required": ["tournament_id", "date", "meta", "archetype_id",
                      "opponent_id", "wins", "losses", "matches",

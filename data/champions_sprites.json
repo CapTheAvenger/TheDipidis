@@ -4,8 +4,8 @@
   "quelle": "https://www.pokewiki.de/Liste_der_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions",
   "rechte": "Die Icons sind Spiel-Screenshots. Rechteinhaber: The Pokémon Company / Nintendo / GAME FREAK. PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG; die dortige CC-BY-SA-Lizenz gilt nur fuer den Wiki-Text, nicht fuer diese Bilder.",
   "erzeuger": "scripts/build_champions_sprites.py",
-  "anzahl": 318,
-  "bytes": 4660350
+  "anzahl": 343,
+  "bytes": 4969078
  },
  "sprites": {
   "Garchomp (Mega-Z)": {
@@ -1008,6 +1008,14 @@
    "hoehe": 128,
    "bytes": 14504
   },
+  "Inteleon": {
+   "datei": "images/champions/inteleon.png",
+   "formschluessel": "818",
+   "quelle": "https://www.pokewiki.de/images/d/d6/Pok%C3%A9mon-Icon_818_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9462
+  },
   "Mamoswine": {
    "datei": "images/champions/mamoswine.png",
    "formschluessel": "473",
@@ -1280,6 +1288,38 @@
    "hoehe": 128,
    "bytes": 16927
   },
+  "Rotom (Fan)": {
+   "datei": "images/champions/rotom-fan.png",
+   "formschluessel": "479d",
+   "quelle": "https://www.pokewiki.de/images/7/7b/Pok%C3%A9mon-Icon_479d_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11022
+  },
+  "Rotom (Frost)": {
+   "datei": "images/champions/rotom-frost.png",
+   "formschluessel": "479c",
+   "quelle": "https://www.pokewiki.de/images/4/44/Pok%C3%A9mon-Icon_479c_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10041
+  },
+  "Rotom (Heat)": {
+   "datei": "images/champions/rotom-heat.png",
+   "formschluessel": "479a",
+   "quelle": "https://www.pokewiki.de/images/c/ca/Pok%C3%A9mon-Icon_479a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9846
+  },
+  "Rotom (Mow)": {
+   "datei": "images/champions/rotom-mow.png",
+   "formschluessel": "479e",
+   "quelle": "https://www.pokewiki.de/images/6/61/Pok%C3%A9mon-Icon_479e_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10729
+  },
   "Rotom (Wash)": {
    "datei": "images/champions/rotom-wash.png",
    "formschluessel": "479b",
@@ -1367,6 +1407,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 12631
+  },
+  "Arboliva": {
+   "datei": "images/champions/arboliva.png",
+   "formschluessel": "930",
+   "quelle": "https://www.pokewiki.de/images/c/c7/Pok%C3%A9mon-Icon_930_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14665
   },
   "Gliscor": {
    "datei": "images/champions/gliscor.png",
@@ -1536,6 +1584,14 @@
    "hoehe": 128,
    "bytes": 15750
   },
+  "Mabosstiff": {
+   "datei": "images/champions/mabosstiff.png",
+   "formschluessel": "943",
+   "quelle": "https://www.pokewiki.de/images/5/54/Pok%C3%A9mon-Icon_943_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13255
+  },
   "Machamp": {
    "datei": "images/champions/machamp.png",
    "formschluessel": "068",
@@ -1559,6 +1615,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 12220
+  },
+  "Toxtricity (Low-Key)": {
+   "datei": "images/champions/toxtricity-low-key.png",
+   "formschluessel": "849a",
+   "quelle": "https://www.pokewiki.de/images/4/47/Pok%C3%A9mon-Icon_849a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11843
   },
   "Aegislash": {
    "datei": "images/champions/aegislash.png",
@@ -1792,6 +1856,30 @@
    "hoehe": 128,
    "bytes": 11726
   },
+  "Gourgeist (Large)": {
+   "datei": "images/champions/gourgeist-large.png",
+   "formschluessel": "711b",
+   "quelle": "https://www.pokewiki.de/images/4/45/Pok%C3%A9mon-Icon_711b_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12562
+  },
+  "Gourgeist (Small)": {
+   "datei": "images/champions/gourgeist-small.png",
+   "formschluessel": "711a",
+   "quelle": "https://www.pokewiki.de/images/0/03/Pok%C3%A9mon-Icon_711a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 10632
+  },
+  "Gourgeist (Super)": {
+   "datei": "images/champions/gourgeist-super.png",
+   "formschluessel": "711c",
+   "quelle": "https://www.pokewiki.de/images/1/18/Pok%C3%A9mon-Icon_711c_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13140
+  },
   "Altaria": {
    "datei": "images/champions/altaria.png",
    "formschluessel": "334",
@@ -1920,6 +2008,14 @@
    "hoehe": 128,
    "bytes": 12900
   },
+  "Vileplume": {
+   "datei": "images/champions/vileplume.png",
+   "formschluessel": "045",
+   "quelle": "https://www.pokewiki.de/images/f/f8/Pok%C3%A9mon-Icon_045_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11304
+  },
   "Houndstone": {
    "datei": "images/champions/houndstone.png",
    "formschluessel": "972",
@@ -1951,6 +2047,22 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 12394
+  },
+  "Lycanroc (Midnight)": {
+   "datei": "images/champions/lycanroc-midnight.png",
+   "formschluessel": "745a",
+   "quelle": "https://www.pokewiki.de/images/4/4f/Pok%C3%A9mon-Icon_745a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 12423
+  },
+  "Musharna": {
+   "datei": "images/champions/musharna.png",
+   "formschluessel": "518",
+   "quelle": "https://www.pokewiki.de/images/0/0e/Pok%C3%A9mon-Icon_518_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13549
   },
   "Scovillain": {
    "datei": "images/champions/scovillain.png",
@@ -2103,6 +2215,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 16324
+  },
+  "Grapploct": {
+   "datei": "images/champions/grapploct.png",
+   "formschluessel": "853",
+   "quelle": "https://www.pokewiki.de/images/1/13/Pok%C3%A9mon-Icon_853_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14375
   },
   "Lopunny": {
    "datei": "images/champions/lopunny.png",
@@ -2280,6 +2400,14 @@
    "hoehe": 128,
    "bytes": 12601
   },
+  "Swalot": {
+   "datei": "images/champions/swalot.png",
+   "formschluessel": "317",
+   "quelle": "https://www.pokewiki.de/images/9/97/Pok%C3%A9mon-Icon_317_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11871
+  },
   "Meowstic": {
    "datei": "images/champions/meowstic.png",
    "formschluessel": "678",
@@ -2335,6 +2463,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 18154
+  },
+  "Mr. Mime": {
+   "datei": "images/champions/mr-mime.png",
+   "formschluessel": "122",
+   "quelle": "https://www.pokewiki.de/images/3/35/Pok%C3%A9mon-Icon_122_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16995
   },
   "Sharpedo": {
    "datei": "images/champions/sharpedo.png",
@@ -2408,6 +2544,14 @@
    "hoehe": 128,
    "bytes": 12069
   },
+  "Alolan Persian": {
+   "datei": "images/champions/alolan-persian.png",
+   "formschluessel": "053a",
+   "quelle": "https://www.pokewiki.de/images/3/39/Pok%C3%A9mon-Icon_053a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 16279
+  },
   "Pelipper": {
    "datei": "images/champions/pelipper.png",
    "formschluessel": "279",
@@ -2415,6 +2559,30 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 11348
+  },
+  "Perrserker": {
+   "datei": "images/champions/perrserker.png",
+   "formschluessel": "863",
+   "quelle": "https://www.pokewiki.de/images/f/f2/Pok%C3%A9mon-Icon_863_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13461
+  },
+  "Persian": {
+   "datei": "images/champions/persian.png",
+   "formschluessel": "053",
+   "quelle": "https://www.pokewiki.de/images/3/30/Pok%C3%A9mon-Icon_053_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 15250
+  },
+  "Qwilfish": {
+   "datei": "images/champions/qwilfish.png",
+   "formschluessel": "211",
+   "quelle": "https://www.pokewiki.de/images/a/ac/Pok%C3%A9mon-Icon_211_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11200
   },
   "Rotom": {
    "datei": "images/champions/rotom.png",
@@ -2439,6 +2607,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 8372
+  },
+  "Wigglytuff": {
+   "datei": "images/champions/wigglytuff.png",
+   "formschluessel": "040",
+   "quelle": "https://www.pokewiki.de/images/5/58/Pok%C3%A9mon-Icon_040_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 14082
   },
   "Dedenne": {
    "datei": "images/champions/dedenne.png",
@@ -2488,6 +2664,22 @@
    "hoehe": 128,
    "bytes": 9721
   },
+  "Squawkabilly": {
+   "datei": "images/champions/squawkabilly.png",
+   "formschluessel": "931",
+   "quelle": "https://www.pokewiki.de/images/6/69/Pok%C3%A9mon-Icon_931_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9453
+  },
+  "Squawkabilly (Yellow)": {
+   "datei": "images/champions/squawkabilly-yellow.png",
+   "formschluessel": "931b",
+   "quelle": "https://www.pokewiki.de/images/6/69/Pok%C3%A9mon-Icon_931b_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 9563
+  },
   "Vivillon": {
    "datei": "images/champions/vivillon.png",
    "formschluessel": "666",
@@ -2535,6 +2727,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 10098
+  },
+  "Farfetch’d": {
+   "datei": "images/champions/farfetch-d.png",
+   "formschluessel": "083",
+   "quelle": "https://www.pokewiki.de/images/2/2c/Pok%C3%A9mon-Icon_083_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 11726
   },
   "Pikachu": {
    "datei": "images/champions/pikachu.png",

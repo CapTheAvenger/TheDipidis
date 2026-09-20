@@ -117,12 +117,40 @@ def test_der_ausgelieferte_bestand_traegt_das_richtige_datum():
 
 
 def test_das_datum_bleibt_im_tef_cri_fenster():
-    """Die Korrektur darf das Turnier nicht aus seinem Format schieben."""
-    with open(os.path.join(DATEN, "format_window.json"), encoding="utf-8") as f:
-        fw = json.load(f)
-    # TEF-CRI lief bis zum Beginn des aktuellen Fensters.
-    assert "12th June 2026" and fw["in_person_legal_date"] == "2026-07-31"
+    """Die Korrektur darf das Turnier nicht aus seinem Format schieben.
+
+    ZWEI FEHLER IN EINER ZEILE, BEIDE AM 20.09.2026 BEHOBEN:
+
+    1. Hier stand `assert "12th June 2026" and fw["in_person_legal_date"]
+       == "2026-07-31"`. Der erste Teil ist eine nichtleere Zeichenkette
+       und damit immer wahr — geprueft wurde allein der zweite. Das
+       Datum stand also nur scheinbar in der Zusicherung.
+    2. Genau dieser zweite Teil nagelte den Beginn des DAMALS laufenden
+       Fensters fest. Am 16.09.2026 ist Set 30C erschienen,
+       `in_person_legal_date` sprang auf den 25.09., und die Zusicherung
+       fiel um — obwohl weder an der Korrektur noch am Turnier etwas
+       falsch geworden ist.
+
+    Gemeint war und ist: das korrigierte Datum muss im
+    TEF-CRI-PRAESENZFENSTER liegen. Dessen Grenzen sind historisch
+    (05.06.2026 bis zum Start des Folgeformats am 31.07.2026) und
+    gehoeren deshalb als feste Daten hierher — nicht als Griff in eine
+    Datei, die mit jeder Rotation weiterzieht. Das Turnierdatum wird
+    aus der Uebersteuerungsdatei gelesen statt abgeschrieben, damit
+    Korrektur und Probe nicht auseinanderlaufen koennen.
+    """
     import datetime
-    d = datetime.date(2026, 6, 12)
-    assert datetime.date(2026, 6, 5) <= d < datetime.date(2026, 7, 31), (
-        "das korrigierte Datum liegt nicht mehr im TEF-CRI-Praesenzfenster")
+    with open(os.path.join(DATEN, "labs_tournament_id_overrides.json"),
+              encoding="utf-8") as f:
+        e = json.load(f)["overrides"]["518"]
+    monate = {"January": 1, "February": 2, "March": 3, "April": 4,
+              "May": 5, "June": 6, "July": 7, "August": 8,
+              "September": 9, "October": 10, "November": 11, "December": 12}
+    teile = e["tournament_date"].split()
+    tag = int("".join(c for c in teile[0] if c.isdigit()))
+    d = datetime.date(int(teile[2]), monate[teile[1]], tag)
+    TEF_CRI_VON = datetime.date(2026, 6, 5)     # Praesenzstart TEF-CRI
+    TEF_CRI_BIS = datetime.date(2026, 7, 31)    # Praesenzstart TEF-PBL
+    assert TEF_CRI_VON <= d < TEF_CRI_BIS, (
+        f"das korrigierte Datum {d} liegt nicht mehr im "
+        f"TEF-CRI-Praesenzfenster ({TEF_CRI_VON} bis {TEF_CRI_BIS})")

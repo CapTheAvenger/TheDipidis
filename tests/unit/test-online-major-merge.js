@@ -192,12 +192,41 @@ describe('mergeOnlineMajorAdditive am echten Datenbestand', () => {
     // alphabetisch letzte Datei. Mit dem falschen Format faende der Merge
     // keine Turnierzeilen, gaebe die Eingabe unveraendert zurueck, und der
     // Test unten wuerde nur noch die Rohdaten summieren statt die Funktion.
+    /* WELCHES FORMAT — UND WAS IM NACHLAUF GILT (20.09.2026).
+
+       Gewaehlt wird das laufende Format, so wie die Seite es bestimmt,
+       NICHT die alphabetisch letzte Datei: mit dem falschen Format
+       faende der Merge keine Turnierzeilen, gaebe die Eingabe
+       unveraendert zurueck, und der Test unten wuerde nur noch die
+       Rohdaten summieren statt die Funktion.
+
+       ABER: zwischen Set-Erscheinen und Praesenzlegalitaet gibt es zum
+       laufenden Format noch gar keine Turnierdatei. Am 16.09.2026 ist
+       30C erschienen, die Praesenzturniere beginnen am 25.09. — neun
+       Tage lang fehlt tournament_cards_data_cards_TEF-30C.csv, und
+       diese Zusicherung im describe-Rumpf riss die ganze Datei mit
+       („1 Fehlschlag gemeldet, aber nur 0 gezaehlt").
+
+       Im Nachlauf wird deshalb das zuletzt abgeschlossene Format
+       genommen — `previous_format_key` aus derselben Datei, nicht
+       geraten. Gepruefte Eigenschaft bleibt dieselbe; sie laeuft nur
+       auf dem Bestand, den es wirklich gibt. Fehlt auch der, ist das
+       ein echter Befund und die Zusicherung faellt. */
     const fenster = JSON.parse(lies('data/format_window.json'));
-    const formatKey = `${fenster.oldest_legal_set}-${fenster.current_set}`;
+    const kandidaten = [
+        `${fenster.oldest_legal_set}-${fenster.current_set}`,
+        String(fenster.previous_format_key || ''),
+    ].filter(Boolean);
+    const formatKey = kandidaten.find(k => fs.existsSync(
+        path.join(wurzel, 'data', `tournament_cards_data_cards_${k}.csv`)));
+    assert.ok(formatKey,
+        `weder fuer ${kandidaten.join(' noch ')} gibt es `
+        + 'tournament_cards_data_cards_<Format>.csv — dann hat auch das '
+        + 'zuletzt abgeschlossene Format keine Turnierdaten');
     const turnierDatei = `tournament_cards_data_cards_${formatKey}.csv`;
-    assert.ok(fs.existsSync(path.join(wurzel, 'data', turnierDatei)),
-        `${turnierDatei} fehlt — das laufende Format hat keine Turnierdaten`);
     const turnier = liesCsv('data/' + turnierDatei);
+    assert.notEqual(turnier.length, 0,
+        `${turnierDatei} ist leer — dann prueft der Rest dieser Datei nichts`);
 
     it('der Bestand traegt beide Quellen — sonst prueft der Rest nichts', () => {
         const live = alle.filter(r => String(r.meta || '').startsWith('Meta Live')).length;

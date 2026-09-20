@@ -110,21 +110,46 @@ describe('Die Evidenzhuerde — was sie wirklich tut', () => {
     });
 
     it('die Beispiele im Kommentar stimmen mit der Rechnung ueberein', () => {
-        // Genau hier lag der Fehler: der Kommentar nannte Lillie's
-        // Clefairy und Metagross als Faelle, die die Huerde faengt.
-        // Beide bestehen sie. Diese Zusage haelt fest, dass die
-        // Richtigstellung im Code steht und nicht zurueckgedreht wird.
+        /* Genau hier lag der Fehler: der Kommentar nannte Lillie's
+           Clefairy und Metagross als Faelle, die die Huerde faengt.
+           Beide bestehen sie. Diese Zusage haelt fest, dass die
+           Richtigstellung im Code steht und nicht zurueckgedreht wird.
+
+           GEGEN WELCHES FORMAT GERECHNET WIRD (20.09.2026):
+
+           Hier stand `kand` — die Kandidaten des jeweils VORIGEN
+           Formats. Am 16.09.2026 ist das Fenster auf TEF-30C gerueckt,
+           `previous_format_key` damit auf TEF-PBL, und dort hat
+           Lillie's Clefairy 4 Spieler in 1 Turnier: sie faellt durch.
+           Die Zusicherung meldete daraufhin, die Richtigstellung sei
+           falsch geworden — dabei war nur das Format gewechselt.
+
+           Die Richtigstellung ist eine Aussage ueber EINE Messung:
+           44 bzw. 50 Spieler in je 2 Turnieren, nachgezaehlt auf
+           TEF-CRI (89 Archetypen, steht zwei Zeilen weiter im selben
+           Kommentar). Genau dagegen wird sie jetzt gehalten — und das
+           Format wird NICHT im Testcode wiederholt, sondern aus dem
+           Kommentar gelesen: so koennen Behauptung und Probe nicht
+           auseinanderlaufen. Nachgemessen am 20.09.2026 auf TEF-CRI:
+           Clefairy 44/2, Metagross 50/2, 89 Kandidaten — unveraendert. */
         const i = MC.indexOf('RICHTIGSTELLUNG 29.08.2026');
         assert.notEqual(i, -1,
             'die Richtigstellung zur Evidenzhuerde ist verschwunden');
         const block = MC.slice(i, i + 1500);
         assert.match(block, /beide BESTEHEN die Huerde/);
+        const m = block.match(/nachgezaehlt auf ([A-Z0-9]+-[A-Z0-9]+)/);
+        assert.ok(m, 'der Kommentar nennt das Format nicht mehr, auf dem er '
+            + 'gemessen wurde — dann ist er nicht mehr nachpruefbar');
+        const gemessen = bodenKandidaten(m[1]);
+        assert.notEqual(gemessen.length, 0,
+            `das Format ${m[1]} steht nicht mehr in labs_tournament_decks.csv — `
+            + 'dann laesst sich die Richtigstellung nicht mehr belegen');
         for (const name of ["Lillie's Clefairy", 'Metagross']) {
-            const x = kand.find(y => y.name === name);
+            const x = gemessen.find(y => y.name === name);
             if (!x) continue;   // Deck aus den Daten verschwunden — dann ist nichts zu belegen
             assert.ok(nimmt(x),
-                `${name} faellt jetzt doch durch die Huerde — dann ist die `
-                + 'Richtigstellung im Kommentar ihrerseits falsch geworden');
+                `${name} faellt auf ${m[1]} jetzt doch durch die Huerde — dann ist `
+                + 'die Richtigstellung im Kommentar ihrerseits falsch geworden');
         }
     });
 });

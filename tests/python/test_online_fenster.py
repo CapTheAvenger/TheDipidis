@@ -52,13 +52,42 @@ def _stand(ordner, datum, paare):
     return pfad
 
 
+# Der Formatstart, gegen den diese Suite rechnet. Er gehoert zur
+# gesetzten Welt wie die Tagesstaende selbst — siehe Fussnote an der
+# Vorrichtung.
+FORMATSTART_PROBE = "2026-07-01"
+
+
 @pytest.fixture()
 def welt(tmp_path):
+    """Eine vollstaendig GESETZTE Welt — auch der Formatstart.
+
+    BEFUND 20.09.2026: achtzehn Zusicherungen dieser Datei fielen an
+    EINEM Tag um, ohne dass jemand etwas geaendert haette. Die
+    Vorrichtung setzte Tagesstaende auf feste Daten im August 2026,
+    liess `baue()` aber weiter das ECHTE data/format_window.json lesen.
+    Am 16.09.2026 ist Set 30C erschienen; `set_release_date` sprang auf
+    den 16.09., und damit lagen alle gesetzten Staende vor dem
+    Formatstart. Der Rotationsschutz verwarf folgerichtig jeden davon,
+    `baue()` gab `None` zurueck, und jedes `(zeilen, meta), fehler = ...`
+    scheiterte an einem TypeError.
+
+    Kein Defekt: die Vorrichtung war zur Haelfte gesetzt und zur
+    Haelfte echt. Wer eine Welt baut, muss sie ganz bauen — sonst
+    haengen die Zusicherungen am Kalender.
+    """
     m = _modul()
     verlauf = tmp_path / "verlauf"
     verlauf.mkdir()
     m.VERLAUF = str(verlauf)
     m.ZIEL = str(tmp_path / "fenster.csv")
+    fenster = tmp_path / "format_window.json"
+    with io.open(str(fenster), "w", encoding="utf-8") as f:
+        json.dump({"set_release_date": FORMATSTART_PROBE}, f)
+    m.FORMATFENSTER = str(fenster)
+    assert m._formatstart() == FORMATSTART_PROBE, (
+        "die gesetzte Welt greift nicht — _formatstart() liest weiter "
+        "das echte data/format_window.json")
     return m, str(verlauf)
 
 
@@ -598,6 +627,23 @@ def test_die_echte_datei_traegt_einen_messbaren_trend():
 
     Der ganze Punkt der Aenderung: der Trend muss GROESSER sein als der
     Wochentrend des Kumulativstands, sonst hat sich nichts geaendert.
+
+    WANN ES KEINEN TREND GEBEN KANN (20.09.2026):
+
+    Ein Trend vergleicht dieses Fenster mit dem davor. Nach einer
+    Formatrotation gibt es das Fenster davor nicht — der Zaehler der
+    Quelle faengt bei null an, und `baue()` zieht die Basis auf den
+    ersten Stand des neuen Formats. Am 20.09.2026 stand deshalb in der
+    ausgelieferten Datei ein Fenster ueber EINEN Tag (18.09. bis 19.09.,
+    Set 30C ist am 16.09. erschienen) und in keiner einzigen Zeile ein
+    Trend. Diese Zusicherung meldete daraufhin „fast keine Zeile traegt
+    einen Trend" — und hatte damit recht, nur war es kein Defekt.
+
+    Die Datei sagt selbst, ob es ein Vorfenster gibt: `vorfenster_von`
+    in der Meta-Datei daneben. Genau daran haengt die Forderung jetzt —
+    und im Fall ohne Vorfenster wird die Gegenrichtung geprueft, dass
+    naemlich wirklich KEINE Zeile einen Trend behauptet. Geschwiegen
+    wird also nicht; es wird nur das Richtige geprueft.
     """
     import os
     pfad = os.path.join(WURZEL, "data", "limitless_online_fenster.csv")
@@ -606,8 +652,18 @@ def test_die_echte_datei_traegt_einen_messbaren_trend():
     with io.open(pfad, encoding="utf-8-sig") as f:
         f.readline()
         rows = list(csv.DictReader(f, delimiter=";"))
+    meta_pfad = os.path.join(WURZEL, "data", "limitless_online_fenster_meta.json")
+    with io.open(meta_pfad, encoding="utf-8") as f:
+        meta = json.load(f)
     werte = [abs(float(r["trend_fenster"].replace(",", ".")))
              for r in rows if r.get("trend_fenster")]
+    if not meta.get("vorfenster_von"):
+        assert not werte, (
+            "die Meta-Datei fuehrt kein Vorfenster, die CSV traegt aber "
+            f"{len(werte)} Trendwerte — einer davon ist erfunden")
+        assert not [r for r in rows if r.get("share_vorfenster")], (
+            "ohne Vorfenster steht trotzdem ein Vorfensteranteil in der Datei")
+        return
     assert len(werte) > 20, "fast keine Zeile traegt einen Trend"
     schnitt = sum(werte) / len(werte)
     assert schnitt > 0.05, (

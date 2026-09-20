@@ -212,7 +212,7 @@ the delivered name 61 (the 62nd is the `other` bucket).
 ### `online_api_cards_<FORMAT>.csv`
 `tournament_id, date, meta, archetype_id, group, set, number, card, copies_total, lists_with_card, lists_total, avg_count, inclusion_rate`
 
-One file **per format window** (`online_api_cards_TEF-PBL.csv`). Card counts
+One file **per format window** (`online_api_cards_TEF-30C.csv`). Card counts
 across the whole field of an archetype, joinable on `(set, number)`.
 
 > **`avg_count` and `inclusion_rate` mean different things and both are needed.**

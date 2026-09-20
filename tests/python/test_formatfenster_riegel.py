@@ -45,6 +45,22 @@ FENSTER = {
 }
 
 
+# Die Fallback-Tabellen, die zu DIESER gesetzten Welt gehoeren.
+#
+# BEFUND 20.09.2026: die Vorrichtung setzte das Fenster (PBL), liess
+# `_pick_current_set()` aber die ECHTEN Fallback-Tabellen aus
+# update_sets.py lesen. Solange deren neuester Eintrag PBL war, fiel das
+# nicht auf. Mit der Rotation auf Set 30C (16.09.2026) gewann 30C gegen
+# das gesetzte "XYZ" vom 07.08., und zwei Zusicherungen fielen um —
+# ohne dass an ihnen oder am Riegel etwas kaputt gewesen waere.
+#
+# Dieselbe Klasse wie in tests/python/test_online_fenster.py am selben
+# Tag: eine Welt, die zur Haelfte gesetzt und zur Haelfte echt ist,
+# haengt am Kalender. Also wird sie ganz gesetzt.
+WELT_EN = {"PBL": "2026-07-17", "CRI": "2026-05-22", "POR": "2026-03-27"}
+WELT_JP = {"M6": "2026-07-31", "M5": "2026-05-22"}
+
+
 @pytest.fixture()
 def fenster_ordner(tmp_path, monkeypatch):
     ordner = tmp_path / "data"
@@ -52,6 +68,11 @@ def fenster_ordner(tmp_path, monkeypatch):
     (ordner / "format_window.json").write_text(
         json.dumps(FENSTER), encoding="utf-8")
     monkeypatch.setattr(update_sets, "data_dir", str(ordner))
+    monkeypatch.setattr(update_sets, "FALLBACK_RELEASE_DATES", dict(WELT_EN))
+    monkeypatch.setattr(update_sets, "FALLBACK_JP_RELEASE_DATES", dict(WELT_JP))
+    assert update_sets._pick_current_set(dict(WELT_EN)) == FENSTER["current_set"], (
+        "die gesetzte Welt passt nicht zum gesetzten Fenster — dann prueft "
+        "keine Zusicherung darunter das, was sie zu pruefen glaubt")
     return ordner
 
 
@@ -61,8 +82,10 @@ def _gelesen(ordner):
 
 def test_ruecksprung_wird_nicht_geschrieben(fenster_ordner, monkeypatch, capsys):
     # Fallbacks kuenstlich auf den alten Stand: simuliert "Quelle weg".
-    alt_en = dict(update_sets.FALLBACK_RELEASE_DATES)
-    alt_jp = dict(update_sets.FALLBACK_JP_RELEASE_DATES)
+    # Ausgangspunkt ist die gesetzte Welt der Vorrichtung, nicht die
+    # echte Tabelle — sonst haengt der Fall wieder am Kalender.
+    alt_en = dict(WELT_EN)
+    alt_jp = dict(WELT_JP)
     alt_en.pop("PBL", None)
     alt_jp.pop("M6", None)
     monkeypatch.setattr(update_sets, "FALLBACK_RELEASE_DATES", alt_en)
@@ -137,16 +160,34 @@ def test_gleichstand_wird_geschrieben(fenster_ordner):
 
 def test_fallbacks_kennen_den_aktuellen_stand():
     """Der Riegel ist die zweite Verteidigungslinie. Die erste ist, dass
-    die Fallback-Tabellen nicht auf einem alten Format stehen."""
-    assert update_sets.FALLBACK_RELEASE_DATES.get("PBL") == "2026-07-17"
-    assert update_sets.FALLBACK_JP_RELEASE_DATES.get("M6") == "2026-07-31"
-    for code in ("PBL", "M6"):
-        assert code in update_sets.FALLBACK_SET_ORDER, (
-            f"{code} hat keine Ordnungszahl — der Chunker wuerde seine "
-            f"Karten in den Legacy-Chunk werfen.")
+    die Fallback-Tabellen nicht auf einem alten Format stehen.
+
+    KEIN SET-KUERZEL MEHR IM TESTCODE (20.09.2026).
+
+    Hier standen "PBL" und "M6" woertlich — die Anker vom 21.08.2026.
+    Am 16.09.2026 ist Set 30C erschienen, und diese Zusicherung meldete
+    einen Fehler, den es nicht gab: nicht die Tabelle war falsch, der
+    Test war alt. Ein Kuerzel im Testcode ist genau der abgelesene
+    Wochenwert, den der Wachhund sonst verbietet.
+
+    Gefragt wird jetzt, was wirklich gemeint ist: kennen die Tabellen
+    den Stand, den data/format_window.json fuehrt? Das gilt nach JEDER
+    Rotation — und schlaegt genau dann an, wenn jemand sie zu bumpen
+    vergisst.
+    """
     with open(os.path.join(WURZEL, "data", "format_window.json"), encoding="utf-8") as f:
         echt = json.load(f)
+    en, jp = echt["current_set"], echt["current_set_jp"]
+    assert update_sets.FALLBACK_RELEASE_DATES.get(en) == echt["set_release_date"], (
+        f"der EN-Anker {en} fehlt in FALLBACK_RELEASE_DATES oder traegt ein "
+        f"anderes Datum als data/format_window.json")
+    assert update_sets.FALLBACK_JP_RELEASE_DATES.get(jp) == echt["jp_release_date"], (
+        f"der JP-Anker {jp} fehlt in FALLBACK_JP_RELEASE_DATES oder traegt ein "
+        f"anderes Datum als data/format_window.json")
+    assert en in update_sets.FALLBACK_SET_ORDER, (
+        f"{en} hat keine Ordnungszahl — der Chunker wuerde seine "
+        f"Karten in den Legacy-Chunk werfen.")
     assert update_sets._pick_current_set(
-        dict(update_sets.FALLBACK_RELEASE_DATES)) == echt["current_set"]
+        dict(update_sets.FALLBACK_RELEASE_DATES)) == en
     assert update_sets._pick_current_set(
-        dict(update_sets.FALLBACK_JP_RELEASE_DATES)) == echt["current_set_jp"]
+        dict(update_sets.FALLBACK_JP_RELEASE_DATES)) == jp

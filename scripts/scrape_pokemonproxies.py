@@ -41,7 +41,14 @@ def _baue_set_map(rueckwaerts: int = 3) -> dict:
             jp = str(json.load(f).get("current_set_jp") or "").strip().upper()
     except (OSError, ValueError):
         return karte
-    m = re.fullmatch(r"M(\d{1,2})", jp)
+    # Auch die Unterset-Schreibweise: seit dem 16.09.2026 heisst das
+    # laufende JP-Set M6A. Ohne den optionalen Buchstaben fiel diese
+    # Karte auf {5a} zurueck und verlor M6 — dieselbe Luecke wie in
+    # backend/scrapers/scrape_pokemonproxies_urls.py, dort ausfuehrlich
+    # belegt. Die Praefix-Regel haengt an der NUMMER, nicht am
+    # Buchstaben; ein eigenes Praefix fuer das Unterset wird NICHT
+    # erfunden.
+    m = re.fullmatch(r"M(\d{1,2})[A-Z]?", jp)
     if not m:
         return karte
     nummer = int(m.group(1))

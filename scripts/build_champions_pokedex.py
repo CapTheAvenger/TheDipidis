@@ -783,6 +783,16 @@ def main():
         dex = dexnums.get(base.lower())
         if dex is None:
             dex = dexnums.get(re.sub(r"[^a-z0-9]", "", base.lower()))
+        # BEFUND 17.09.2026, derselbe Fehler eine Schreibweise weiter:
+        # "Mr. Mime" kam mit dex=None herein. data/pokemon_dex_numbers.json
+        # fuehrt die Art als "mr-mime" und "mr mime" — der Punkt in
+        # "mr. mime" traf keins von beiden, und die Fassung ohne
+        # Sonderzeichen ("mrmime") auch nicht. Dritte Stufe: jede Folge
+        # von Sonderzeichen wird EIN Bindestrich. Eine fehlende Nummer
+        # ist kein Schoenheitsfehler — die Oberflaeche sortiert und sucht
+        # darueber, und der Sprite-Spiegel baut seinen Dateinamen daraus.
+        if dex is None:
+            dex = dexnums.get(re.sub(r"[^a-z0-9]+", "-", base.lower()).strip("-"))
         entries.append(make_entry(en, name_de, dex, kind, t1, t2, sm["baseStats"]))
         have.add(norm_en(en))
         added += 1

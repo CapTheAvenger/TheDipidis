@@ -87,7 +87,8 @@ IN_PERSON_LEGAL_LAG_DAYS = 14
 # because the sets aren't the same physical product. City League JP
 # data tracks the JP rotation; the EN scrapers track the EN rotation.
 FALLBACK_JP_RELEASE_DATES = {
-    'M6':  '2026-07-31',  # aktueller JP-Anker (Stand 21.08.2026)
+    'M6A': '2026-09-16',  # aktueller JP-Anker (Stand 20.09.2026)
+    'M6':  '2026-07-31',  # Mega Brave/Symphonia-Nachfolger
     'M5':  '2026-05-22',  # Mega Symphonia
     'M4':  '2026-03-13',  # Ninja Spinner
     'M3':  '2025-12-26',  # Nihil Zero (POR-EN counterpart)
@@ -99,7 +100,14 @@ FALLBACK_JP_RELEASE_DATES = {
 # back to this dict. Keep the most recent ~6 sets here so a fresh
 # install still has a working format_window.json.
 FALLBACK_RELEASE_DATES = {
-    'PBL': '2026-07-17',  # Phantasmal Blaze — aktueller EN-Anker (21.08.2026)
+    # ROTATION 16.09.2026: Set 30C ist erschienen. Datum und Kuerzel
+    # stehen in data/format_window.json (`current_set`,
+    # `set_release_date`), das der Wochenlauf aus limitlesstcg.com
+    # ableitet — nicht von Hand gesetzt, nur hier nachgezogen, damit der
+    # Rueckfall nicht auf dem alten Format steht, wenn das Scrapen
+    # ausfaellt.
+    '30C': '2026-09-16',  # aktueller EN-Anker (20.09.2026)
+    'PBL': '2026-07-17',  # Phantasmal Blaze
     'CRI': '2026-05-22',  # Chaos Rising
     'POR': '2026-03-27',  # Perfect Order
     'BLK': '2026-01-17',
@@ -129,6 +137,10 @@ INTENTIONALLY_UNORDERED_SETS = {'M3'}
 # happens.
 FALLBACK_SET_ORDER = {
     # Mega (2026)
+    # 30C: Ordnungszahl aus data/sets.json uebernommen (158), nicht
+    # geschaetzt — die Datei ist die Quelle, mit der dieser Rueckfall
+    # laut Kommentar oben synchron bleiben soll.
+    '30C': 158,
     'MEZ': 158, 'MEM': 157, 'M6': 156, 'PBL': 155,
     'CRI': 154, 'M5': 153,
     'M4': 152, 'POR': 151, 'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,
@@ -1911,12 +1923,31 @@ def main():
         settings_path = os.path.join(project_root, 'config', 'scraper_settings.json')
         apply_format_window_to_scraper_settings(fw_path, settings_path)
 
-        # 5) The card-database tab filters through the hand-maintained
-        #    pokemon_sets_mapping.csv; a new EN set missing there has ALL
-        #    its cards silently dropped before any search runs (how the
-        #    120 PBL cards vanished 2026-07-17..08-01). Append-only:
-        #    existing rows are never touched.
-        ensure_set_in_pokemon_sets_mapping(fw_path)
+    # 5) Die Set-Liste des Kartenreiters nachziehen.
+    #
+    #    js/app-cards-db.js filtert englische Karten durch
+    #    data/pokemon_sets_mapping.csv. Fehlt dort ein Set, werden ALLE
+    #    seine Karten verworfen, bevor irgendeine Suche laeuft — so sind
+    #    am 17.07.2026 die 120 PBL-Karten zwei Wochen lang unsichtbar
+    #    gewesen. Angehaengt wird nur, nie geaendert.
+    #
+    #    BEFUND 20.09.2026, DIESELBE LUECKE EIN SET SPAETER: Set 30C ist
+    #    am 16.09. erschienen, hatte Karten in der Datenbank und keine
+    #    Zeile in der Liste. Der Schritt stand bis hierher INNERHALB von
+    #    `if fw_path:` — und `fw_path` ist leer, sobald
+    #    write_format_window() nichts schreibt (unveraenderter Stand,
+    #    abgelehnter Ruecksprung, unlesbare Datei). Verpasst ein Lauf das
+    #    Nachtragen, hat es danach nie wieder eine Gelegenheit: der
+    #    naechste Lauf schreibt das Fenster nicht mehr.
+    #
+    #    Die Bedingung, die wirklich gemeint ist, lautet „das laufende
+    #    Set hat keine Zeile" — und die steht in der Funktion selbst.
+    #    Also haengt der Aufruf nicht mehr am Schreibpfad, sondern nur
+    #    noch an der Datei. Ein verpasster Lauf heilt sich damit beim
+    #    naechsten. Denselben Rueckfall benutzt aktualisiere_neuestes_set()
+    #    eine Zeile weiter oben, aus genau demselben Grund.
+    ensure_set_in_pokemon_sets_mapping(
+        fw_path or os.path.join(data_dir, 'format_window.json'))
 
     print("[Update Sets] Done!")
 

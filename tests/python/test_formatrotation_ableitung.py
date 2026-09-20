@@ -59,20 +59,41 @@ def _ableiten(alt_aeltest, alt_set, neu_aeltest, neu_set):
 # ── 1 · DIE ABLEITUNG SELBST ────────────────────────────────────────
 
 def test_ableitung_trifft_die_letzte_echte_rotation(daten):
-    """CRI -> PBL am 17.07.2026 muss genau das ergeben, was dasteht.
+    """Die Regel muss den gepflegten Wert nachrechnen, nicht behaupten.
 
-    Das ist der Beleg, nicht die Behauptung: der Wert in der Datei wurde
-    damals von Hand gesetzt. Rechnet die Regel ihn nach, beschreibt sie
-    die Wirklichkeit.
+    DIE ROTATION KOMMT AUS DER DATEI, NICHT AUS DEM TESTCODE
+    (20.09.2026).
+
+    Hier stand `_ableiten('TEF', 'CRI', 'TEF', 'PBL')` — die Rotation
+    vom 17.07.2026. Sie traf `previous_format_key` genau so lange, wie
+    PBL das laufende Set war. Am 16.09.2026 ist 30C erschienen, der
+    gepflegte Wert wurde folgerichtig TEF-PBL, und diese Zusicherung
+    meldete, die Ableitung sei kaputt. Sie war es nicht: der Test stand
+    auf der vorletzten Rotation.
+
+    Geprueft wird jetzt die LETZTE, und die steht in der Datei selbst:
+    `previous_format_key` nennt das gerade abgeloeste Format, also
+    dessen aeltestes und dessen laufendes Set. Die Ableitung muss daraus
+    wieder genau diesen Schluessel bauen — eine Aussage ueber die
+    Schreibweise der Regel, die jede Rotation ueberlebt.
     """
     fw = json.load(open(os.path.join(daten, 'format_window.json'),
                         encoding='utf-8'))
-    schluessel, nur_ergaenzt = _ableiten('TEF', 'CRI', 'TEF', 'PBL')
-    assert schluessel == fw.get('previous_format_key'), (
+    voriger = str(fw.get('previous_format_key') or '')
+    assert '-' in voriger, ('data/format_window.json fuehrt kein '
+                            'previous_format_key in der Form ALT-NEU')
+    alt_aeltestes, alt_laufendes = voriger.split('-', 1)
+    schluessel, nur_ergaenzt = _ableiten(
+        alt_aeltestes, alt_laufendes,
+        fw.get('oldest_legal_set'), fw.get('current_set'))
+    assert schluessel == voriger, (
         'die Ableitung trifft den handgepflegten Wert nicht mehr — '
         'entweder hat sich die Schreibweise des Schluessels geaendert '
         'oder die Datei wurde von Hand verstellt')
     assert nur_ergaenzt == fw.get('set_addition_only')
+    # Die historische Rotation CRI -> PBL als festes Beispiel: sie haengt
+    # an keiner Datei und kann deshalb nicht veralten.
+    assert _ableiten('TEF', 'CRI', 'TEF', 'PBL')[0] == 'TEF-CRI'
 
 
 def test_set_dazu_und_echte_rotation_sind_verschieden():

@@ -17,6 +17,7 @@ measured 464->334 oscillation).
 import csv
 import importlib.util
 import json
+import re
 import os
 import sys
 
@@ -133,3 +134,34 @@ def test_scraper_carries_jp_prints_through_the_whitelist():
                encoding='utf-8').read()
     assert '"jp_prints": (row.get("jp_prints") or "").strip(),' in src, \
         'jp_prints dropped from the load whitelist again — the oscillation returns'
+
+
+def test_das_nachtragen_haengt_nicht_am_schreibpfad():
+    """Der Aufruf muss AUSSERHALB von `if fw_path:` stehen.
+
+    BEFUND 20.09.2026: Set 30C ist am 16.09. erschienen, hatte Karten in
+    der Datenbank und keine Zeile in der Set-Liste — die 191 Karten des
+    Sets waren im Kartenreiter unsichtbar, dieselbe Luecke wie bei PBL
+    am 17.07.2026. Die Funktion oben war nicht kaputt; sie wurde nur
+    nicht gerufen. Sie stand innerhalb von `if fw_path:`, und `fw_path`
+    ist leer, sobald write_format_window() nichts schreibt. Verpasst EIN
+    Lauf das Nachtragen, bekommt er nie wieder eine Gelegenheit.
+
+    Warum eine Textzusicherung und keine Ausfuehrung: main() liest ein
+    Dutzend Dateien und geht ins Netz. Gemessen wird deshalb die
+    EINRUECKUNG des Aufrufs im Quelltext — vier Leerzeichen heisst „im
+    Funktionsrumpf", acht heisst „in einem Block darin". Kommentare
+    werden vorher geschnitten, sonst faengt das Muster die Erklaerung
+    ueber dem Aufruf mit (CLAUDE.md, 13./14.09.2026).
+    """
+    quelle = open(os.path.join(ROOT, 'backend', 'core', 'update_sets.py'),
+                  encoding='utf-8').read()
+    ohne = re.sub(r'^\s*#.*$', '', quelle, flags=re.M)
+    assert len(ohne) > len(quelle) * 0.3, 'das Ausschneiden hat zu viel entfernt'
+    treffer = re.findall(r'^( *)ensure_set_in_pokemon_sets_mapping\(',
+                         ohne, flags=re.M)
+    aufrufe = [t for t in treffer if t != '']      # die Definition hat 0
+    assert aufrufe, 'ensure_set_in_pokemon_sets_mapping wird nirgends gerufen'
+    assert all(len(t) == 4 for t in aufrufe), (
+        'der Aufruf steht eingerueckt in einem Block — vermutlich wieder in '
+        f'`if fw_path:`. Gefundene Einrueckungen: {[len(t) for t in aufrufe]}')

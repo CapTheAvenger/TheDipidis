@@ -50,26 +50,61 @@ BACKEND = _lade(os.path.join(ROOT, "backend", "scrapers",
 SKRIPT = _lade(os.path.join(ROOT, "scripts", "scrape_pokemonproxies.py"), "pp_skript")
 
 
+# DIE JP-SETS HEISSEN NICHT IMMER "M<n>" (20.09.2026).
+#
+# Hier stand `re.fullmatch(r"M\d{1,2}", s)`. Am 16.09.2026 ist das
+# JP-Set **M6A** erschienen; `current_set_jp` traegt seitdem einen
+# Buchstaben am Ende, die Vorrichtung brach mit "current_set_jp
+# unbrauchbar" ab und riss drei Pruefungen mit — ein Abbruch in der
+# Vorrichtung, nicht einmal ein Fehlschlag.
+#
+# Das Muster kennt jetzt die Unterset-Schreibweise. Die Stammnummer ist
+# das, woran die Praefix-Regel haengt (M6 -> "6a"), und sie wird hier
+# einmal herausgeschnitten, damit jede Pruefung darunter dasselbe
+# meint.
+JP_MUSTER = re.compile(r"M(\d{1,2})([A-Z]?)")
+
+
 @pytest.fixture(scope="module")
 def jp_set():
     with open(os.path.join(ROOT, "data", "format_window.json"), encoding="utf-8") as f:
         s = str(json.load(f).get("current_set_jp") or "").strip().upper()
-    assert re.fullmatch(r"M\d{1,2}", s), f"current_set_jp unbrauchbar: {s!r}"
+    assert JP_MUSTER.fullmatch(s), f"current_set_jp unbrauchbar: {s!r}"
     return s
+
+
+def _stammset(jp_set):
+    """'M6A' -> 'M6'; 'M6' -> 'M6'."""
+    return "M" + JP_MUSTER.fullmatch(jp_set).group(1)
 
 
 class TestAbleitung:
     def test_das_laufende_jp_set_steht_in_der_karte(self, jp_set):
-        assert jp_set in BACKEND.PREFIX_TO_SET.values(), (
-            f"{jp_set} fehlt in PREFIX_TO_SET {BACKEND.PREFIX_TO_SET} — "
-            "dann findet der Scraper dessen Karten nicht"
+        """Die Karte muss der JP-Rotation folgen — mindestens bis zum Stamm.
+
+        GEMESSEN AM 20.09.2026: data/pokemonproxies_index.json fuehrt 42
+        Bilder, alle unter dem Praefix "6a" und dem Set M6. Fuer das
+        Unterset M6A liefert der Vite-Bundle der Quelle keine eigenen
+        Dateien — es gibt also nichts zu finden und nichts zu erfinden.
+        Ein geratenes Praefix waere hier der teuerste Fehler: es laedt
+        ein Bild, das ein anderes Set zeigt.
+
+        Geprueft wird deshalb der Stamm. Bekommt M6A eines Tages eigene
+        Dateien, faellt das an genau dieser Stelle auf — dann steht das
+        Unterset in der Quelle und gehoert in die Karte.
+        """
+        stamm = _stammset(jp_set)
+        assert stamm in BACKEND.PREFIX_TO_SET.values(), (
+            f"{stamm} (Stamm von {jp_set}) fehlt in PREFIX_TO_SET "
+            f"{BACKEND.PREFIX_TO_SET} — dann findet der Scraper dessen "
+            "Karten nicht"
         )
-        assert jp_set in SKRIPT.SET_MAP.values(), (
-            f"{jp_set} fehlt in scripts/scrape_pokemonproxies.py SET_MAP"
+        assert stamm in SKRIPT.SET_MAP.values(), (
+            f"{stamm} fehlt in scripts/scrape_pokemonproxies.py SET_MAP"
         )
 
     def test_der_ausdruck_trifft_eine_datei_des_laufenden_sets(self, jp_set):
-        praefix = BACKEND._prefix_fuer(jp_set)
+        praefix = BACKEND._prefix_fuer(_stammset(jp_set))
         assert praefix, f"kein Praefix ableitbar aus {jp_set}"
         treffer = BACKEND._ASSET_RE.search(
             f"/assets/{praefix}-001-Tropius-5SkyH5ve.png")
@@ -102,6 +137,7 @@ class TestAbleitung:
 
 class TestFallbackRouten:
     def test_die_set_routen_folgen_derselben_karte(self, jp_set):
+        jp_set = _stammset(jp_set)
         assert f"/{jp_set.lower()}" in BACKEND.FALLBACK_PATHS, (
             f"Route /{jp_set.lower()} fehlt in FALLBACK_PATHS "
             f"{BACKEND.FALLBACK_PATHS}"

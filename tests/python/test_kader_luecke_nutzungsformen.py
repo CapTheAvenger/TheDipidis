@@ -147,26 +147,56 @@ def test_was_der_pokedex_schon_fuehrt_wird_nicht_erneut_angelegt(roster_modul, d
     assert len(bekannt) > 200, "die Pokedex-Menge ist verdaechtig klein"
 
 
-def test_eine_form_ohne_basiswerte_wird_gemeldet_statt_verschluckt(roster_modul, daten):
-    """Die Meldeseite der Regel — mit gekuerzten Daten geprueft.
+def test_beide_zweige_an_einem_gebauten_fall(roster_modul, daten):
+    """Die Regel in BEIDE Richtungen — an einem gebauten Fall.
 
-    Im echten Bestand hat am 16.09.2026 JEDE der 25 vorgeschlagenen
-    Formen Smogon-Werte; `ohne_werte` ist leer, und eine Verfaelschung
-    des Melde-Zweigs blieb deshalb gruen (gemessen). Ein Fall, den es in
-    den Daten nicht gibt, muss gebaut werden — sonst bewacht die Regel
-    ihre wichtigere Haelfte nicht.
+    Hier stand zuerst eine Probe, die sich auf die echte Luecke stuetzte
+    ("nimm den ersten Vorschlag"). Sie war grün, solange die 27 Arten im
+    Pokedex fehlten — und fiel in dem Moment um, in dem die Regel ihre
+    Arbeit getan hatte und nichts mehr vorzuschlagen war. Eine
+    Zusicherung, die nur vor ihrer eigenen Behebung haelt, bewacht
+    nichts.
+
+    Der Fall wird deshalb GEBAUT: eine Art, die der Pokedex fuehrt, wird
+    aus einer Kopie entfernt. Danach muss die Regel sie
+      * ERGAENZEN, solange Smogon Werte fuehrt, und
+      * MELDEN, sobald die Werte fehlen.
+    Beides unabhaengig davon, wie vollstaendig der echte Bestand gerade
+    ist.
     """
     vorhanden = set(daten["extra"]["smogonKeys"])
-    neu, _ohne = roster_modul.nutzungsformen(
-        vorhanden, daten["smogon"], daten["usage"], daten["dex"])
-    assert neu, "die Regel schlaegt gar nichts vor — die Probe greift nicht"
+    # Eine Art suchen, die der Pokedex fuehrt UND die eine Nutzungszeile hat.
+    zeilen = sorted((daten["usage"].get("pokemon") or {}))
+    opfer_slug = None
+    for schluessel in zeilen:
+        nm = roster_modul.slug_to_smogon(schluessel)
+        if nm in daten["smogon"] and "baseStats" in daten["smogon"][nm] \
+                and nm not in vorhanden \
+                and schluessel in roster_modul.pokedex_schluessel(daten["dex"]):
+            opfer_slug, opfer_name = schluessel, nm
+            break
+    assert opfer_slug, "keine passende Art fuer den gebauten Fall gefunden"
 
-    # Genau EINEM Vorschlag die Basiswerte nehmen.
-    opfer = sorted(neu)[0]
-    schmal = {k: v for k, v in daten["smogon"].items() if k != opfer}
+    ohne_eintrag = {"entries": [e for e in daten["dex"]["entries"]
+                                if (e.get("meta") or {}).get("slug") != opfer_slug
+                                and _norm_en(e.get("en")) != opfer_slug]}
+
+    neu, ohne = roster_modul.nutzungsformen(
+        vorhanden, daten["smogon"], daten["usage"], ohne_eintrag)
+    assert opfer_name in neu, (
+        f"{opfer_name} fehlt im Pokedex, hat Nutzungszeile und Werte — "
+        "und wird trotzdem nicht ergaenzt")
+    assert opfer_slug not in ohne, f"{opfer_name} wird zugleich gemeldet und ergaenzt"
+
+    schmal = {k: v for k, v in daten["smogon"].items() if k != opfer_name}
     neu2, ohne2 = roster_modul.nutzungsformen(
-        vorhanden, schmal, daten["usage"], daten["dex"])
-    assert opfer not in neu2, f"{opfer} wird ohne Basiswerte trotzdem ergaenzt"
-    passend = [z for z in ohne2 if roster_modul.slug_to_smogon(z) == opfer]
-    assert passend, (f"{opfer} verschwindet still, statt gemeldet zu werden — "
-                     "genau der Zustand, der den Rotom-Fall verursacht hat")
+        vorhanden, schmal, daten["usage"], ohne_eintrag)
+    assert opfer_name not in neu2, f"{opfer_name} wird ohne Basiswerte trotzdem ergaenzt"
+    assert opfer_slug in ohne2, (
+        f"{opfer_name} verschwindet still, statt gemeldet zu werden — genau der "
+        "Zustand, der den Rotom-Fall verursacht hat")
+
+
+def _norm_en(en):
+    import re
+    return re.sub(r"[^a-z0-9]+", "-", str(en or "").lower()).strip("-")

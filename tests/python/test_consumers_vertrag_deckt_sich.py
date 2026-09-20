@@ -58,6 +58,7 @@ filtert jemand danach. Genau das haelt
 """
 
 import importlib.util
+import json
 import os
 import re
 import sys
@@ -101,13 +102,30 @@ def _dokumentierte_dateien():
 
 
 def _format_schluessel():
-    """Der heutige Formatschluessel, aus den vorhandenen Dateien gelesen —
-    nicht abgeschrieben."""
-    for name in os.listdir(os.path.join(WURZEL, "data")):
-        m = re.match(r"^online_api_cards_(.+)\.csv$", name)
-        if m:
-            return m.group(1)
-    return None
+    """Der heutige Formatschluessel — aus data/format_window.json.
+
+    BEFUND 20.09.2026: hier stand „der erste Treffer aus os.listdir".
+    Solange es genau EINE online_api_cards_*.csv gab, war das dasselbe.
+    Nach der Rotation auf Set 30C liegen zwei da (TEF-PBL und TEF-30C),
+    und os.listdir gibt keine Reihenfolge zu — die Zusicherung haette je
+    nach Dateisystem das laufende ODER das abgelaufene Format geprueft
+    und waere damit ein Muenzwurf gewesen.
+
+    Das Fenster sagt es eindeutig. Die Datei wird trotzdem geprueft:
+    steht der Schluessel nur in der Konfiguration und nicht im Ordner,
+    ist der Auszug gar nicht entstanden — und genau darauf soll der
+    harte Waechterschluessel aufmerksam machen.
+    """
+    with open(os.path.join(WURZEL, "data", "format_window.json"),
+              encoding="utf-8") as f:
+        fw = json.load(f)
+    schluessel = f"{fw.get('oldest_legal_set')}-{fw.get('current_set')}"
+    pfad = os.path.join(WURZEL, "data", f"online_api_cards_{schluessel}.csv")
+    assert os.path.exists(pfad), (
+        f"data/format_window.json fuehrt {schluessel}, aber "
+        f"online_api_cards_{schluessel}.csv gibt es nicht — der Auszug des "
+        "laufenden Formats ist nicht entstanden")
+    return schluessel
 
 
 def _entfalte(namen):

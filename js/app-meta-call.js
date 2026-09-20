@@ -7003,7 +7003,9 @@ window.MetaCall = (function () {
               // RICHTIGSTELLUNG 29.08.2026 (Nachpruefung): hier standen
               // Lillie's Clefairy und Metagross als Beispielfaelle. Das
               // war falsch — beide BESTEHEN die Huerde (je 2 Turniere,
-              // 44 bzw. 50 Spieler). Was ihre Anhebung heute verhindert,
+              // 44 bzw. 50 Spieler, gemessen auf TEF-CRI wie die
+              // Zaehlung weiter unten; am 20.09.2026 unveraendert
+              // nachgerechnet). Was ihre Anhebung damals verhindert hat,
               // ist die Alterssperre, nicht diese Huerde. Eine Begruendung
               // mit Beispielen, die sie nicht trifft, ist schlimmer als
               // gar keine: sie laesst den naechsten Leser glauben, die

@@ -654,13 +654,40 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {
            erklaert und dabei der falsche alte Name genannt. Vorlagen mit
            ${...} werden gegen das laufende Format aufgeloest, denn genau
            dieser Pfad entsteht zur Laufzeit. */
-        const schluessel = `${FENSTER.oldest_legal_set}-${FENSTER.current_set}`;
+        /* WELCHE SCHLUESSEL EINGESETZT WERDEN (20.09.2026).
+
+           Hier stand der Schluessel des LAUFENDEN Formats, fest
+           eingesetzt. Am 16.09.2026 ist Set 30C erschienen, das Fenster
+           heisst seitdem TEF-30C — und die Praesenzturniere dieses
+           Formats beginnen erst am 25.09. (`in_person_legal_date`, neun
+           Tage Nachlauf). In diesen neun Tagen gibt es
+           data/labs_tournament_decks_TEF-30C.csv nicht, und diese
+           Zusicherung meldete einen Oberflaechentext, der ins Leere
+           zeigt.
+
+           Er zeigt aber nicht ins Leere. js/app-archetype-card.js setzt
+           `_majorZeitraum` NUR, wenn das Verzeichnis den Schluessel
+           fuehrt (`kennt`), und schreibt sonst „Fuer dieses Format liegt
+           kein Praesenzturnier-Auszug vor". Die Vorlage wird also nie
+           mit einem Schluessel gefuellt, den es nicht gibt — die
+           Zusicherung hat dem Code etwas vorgeworfen, das er nicht tut.
+
+           Eingesetzt werden deshalb die Schluessel, die das Verzeichnis
+           WIRKLICH fuehrt. Das ist strenger als vorher (dreizehn Pfade
+           statt einem) und behauptet nichts ueber den Nachlauf. */
+        const verz = JSON.parse(fs.readFileSync(
+            path.join(WURZEL, 'data/labs_tournament_decks_verzeichnis.json'), 'utf8'));
+        const schluesselListe = [...new Set(verz.meta_keys || [])];
+        assert.notEqual(schluesselListe.length, 0,
+            'das Verzeichnis fuehrt keinen einzigen Meta-Schluessel — dann setzt '
+            + 'diese Zusicherung nichts ein und prueft nichts');
         const pfade = [];
         for (const quelle of [CM, KARTE]) {
             const ohne = quelle.replace(/\/\*[\s\S]*?\*\//g, ' ')
                 .replace(/^[ \t]*\/\/.*$/gm, '');
             for (const p of (ohne.match(/data\/[A-Za-z0-9_\-.${}]+\.(?:json|csv|md)\b/g) || [])) {
-                pfade.push(p.replace(/\$\{[^}]*\}/g, schluessel));
+                if (p.indexOf('${') === -1) { pfade.push(p); continue; }
+                for (const k of schluesselListe) pfade.push(p.replace(/\$\{[^}]*\}/g, k));
             }
         }
         const einmalig = [...new Set(pfade)].sort();

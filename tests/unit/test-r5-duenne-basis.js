@@ -255,8 +255,36 @@ describe('B2 — die Aufteilung wird gezaehlt, nicht abgeschrieben', () => {
         assert.equal(M.bestandsLageAus(null, null), null);
     });
 
+    /* DIE FENSTERGRENZE DARF NICHT DIE DES LAUFENDEN FORMATS SEIN
+       (20.09.2026).
+
+       Hier stand `FW.in_person_legal_date`. Am 16.09.2026 ist Set 30C
+       erschienen; die Praesenzturniere des neuen Fensters beginnen erst
+       am 25.09. Neun Tage lang liegen damit NULL Listen im Fenster, und
+       diese Zusicherung fiel um — ohne dass irgendetwas kaputt war: der
+       Text faellt dann bewusst weg (`_bestandsLageSatz` gibt '' zurueck,
+       wenn `archetypen` 0 ist), statt eine alte Zahl zu behaupten.
+
+       Geprueft wird deshalb mit einer Grenze, die aus den DATEN kommt
+       und garantiert Listen stehen laesst — und der leere Fall bekommt
+       eine eigene Zusicherung darunter. Beide Seiten sind damit
+       bewacht, und keine haengt mehr am Kalender. */
+    const grenzeMitListen = (() => {
+        const tage = listen
+            .map(l => String(l.tournament_date || '').trim())
+            .filter(t => /^\d{4}-\d{2}-\d{2}$/.test(t))
+            .sort();
+        assert.notEqual(tage.length, 0,
+            'keine einzige Liste traegt ein ISO-Datum — dann laesst sich keine '
+            + 'Fenstergrenze aus den Daten bilden');
+        return tage[0];          // der aelteste Tag: alles liegt im Fenster
+    })();
+
     it('der Warum?-Kasten schreibt die gezaehlten Zahlen samt Datei hin', () => {
-        const lage = M.bestandsLageAus(listen, FW.in_person_legal_date);
+        const lage = M.bestandsLageAus(listen, grenzeMitListen);
+        assert.notEqual(lage.archetypen, 0,
+            'die gewaehlte Grenze laesst kein einziges Deck stehen — dann '
+            + 'prueft diese Zusicherung den leeren Fall statt des vollen');
         const b = befund('de')._duenneBasisBefund(
             { archetyp: 'Mega Chandelure', n_lists: 1, schwelle: 3, lage });
         assert.ok(b.hint.includes(String(lage.listen_im_fenster) + ' von '
@@ -275,6 +303,21 @@ describe('B2 — die Aufteilung wird gezaehlt, nicht abgeschrieben', () => {
             assert.ok(b.hint.includes(stueck),
                 `die Aufteilung "${stueck}" fehlt im Text: ` + b.hint);
         }
+    });
+
+    it('ein leeres Fenster behauptet keine Zahl, sondern schweigt', () => {
+        /* Der Zustand vom 16.-25.09.2026: das Format ist gewechselt, die
+           Praesenzturniere haben noch nicht angefangen. Frueher war
+           dieser Fall ungeprueft — er kam in den Daten nie vor, und als
+           er kam, fiel die Zusicherung darueber um. */
+        const leer = M.bestandsLageAus(listen, '2099-01-01');
+        assert.equal(leer.listen_im_fenster, 0, 'die Probe ist nicht leer');
+        const b = befund('de')._duenneBasisBefund(
+            { archetyp: 'Mega Chandelure', n_lists: 1, schwelle: 3, lage: leer });
+        assert.ok(!/Tag-2-Listen/.test(b.hint),
+            'bei leerem Fenster steht trotzdem ein Bestandssatz da: ' + b.hint);
+        assert.ok(b.hint.length > 0,
+            'bei leerem Fenster faellt der ganze Befund weg statt nur des Satzes');
     });
 
     it('die Aufteilung steht NICHT mehr fest im angezeigten Text', () => {

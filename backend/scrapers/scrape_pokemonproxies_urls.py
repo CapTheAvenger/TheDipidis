@@ -145,9 +145,29 @@ def _jp_set_aus_formatfenster() -> str:
     return ""
 
 
+# JP-Sets heissen "M<n>" und seit dem 16.09.2026 auch "M<n>A" — M6A ist
+# ein Unterset von M6. Die Praefix-Regel der Quelle haengt an der
+# NUMMER ("6a"), nicht am Buchstaben.
+_JP_MUSTER = re.compile(r"M(\d{1,2})[A-Z]?")
+
+
 def _prefix_fuer(set_code: str) -> str:
-    """'M6' -> '6a'. Leer, wenn das Kuerzel nicht dem Muster folgt."""
-    m = re.fullmatch(r"M(\d{1,2})", (set_code or "").strip().upper())
+    """'M6' -> '6a', 'M6A' -> '6a'. Leer, wenn das Kuerzel nicht passt.
+
+    BEFUND 20.09.2026: hier stand `re.fullmatch(r"M(\d{1,2})", ...)`.
+    Am 16.09.2026 ist M6A erschienen; `current_set_jp` traegt seitdem
+    den Buchstaben, das Muster traf nicht mehr — und `baue_prefix_karte`
+    fiel auf den statischen Bestand {3a, 4a, 5a} zurueck. Damit war M6
+    aus der Karte VERSCHWUNDEN, obwohl die Quelle 42 M6-Bilder fuehrt
+    (data/pokemonproxies_index.json, gemessen am 20.09.). Ein Lauf haette
+    sie nicht mehr gefunden.
+
+    Das Unterset bekommt KEIN eigenes Praefix: der Vite-Bundle der
+    Quelle liefert am 20.09.2026 ausschliesslich "6a"-Dateien. Ein
+    geratenes "6b" wuerde im besten Fall nichts treffen und im
+    schlechtesten ein Bild eines anderen Sets.
+    """
+    m = _JP_MUSTER.fullmatch((set_code or "").strip().upper())
     return f"{m.group(1)}a" if m else ""
 
 
@@ -159,7 +179,7 @@ def baue_prefix_karte(jp_set: str = "", rueckwaerts: int = 3) -> dict:
     dass ein uebersprungener Lauf eine Luecke hinterlaesst.
     """
     karte = dict(_PREFIX_STATISCH)
-    m = re.fullmatch(r"M(\d{1,2})", (jp_set or "").strip().upper())
+    m = _JP_MUSTER.fullmatch((jp_set or "").strip().upper())
     if not m:
         return karte
     nummer = int(m.group(1))

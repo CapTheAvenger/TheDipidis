@@ -381,7 +381,12 @@
             if (f && f.toLowerCase().indexOf(t) !== -1) return true;
         }
         // Card text last — fairly expensive on a 20k corpus.
+        //
+        // BEIDE Sprachen (21.09.2026): seit `card_text_de` existiert,
+        // wuerde eine Suche nach "Ablagestapel" sonst nichts finden,
+        // obwohl der Nutzer den Satz auf der Karte vor sich sieht.
         if (card.card_text && card.card_text.toLowerCase().indexOf(t) !== -1) return true;
+        if (card.card_text_de && card.card_text_de.toLowerCase().indexOf(t) !== -1) return true;
         return false;
     }
 
@@ -468,6 +473,8 @@
                 rarity:       iRarity >= 0 ? parts[iRarity] : '',
                 image_url:    iImg >= 0 ? parts[iImg] : '',
                 card_text:    '',
+                // Die japanische Quelle fuehrt keinen deutschen Text.
+                card_text_de: '',
                 is_japanese:  true,
             };
             // Replace the raw Japanese scan with the English pokemonproxies
@@ -555,6 +562,7 @@
                            : /pokemonproxies\.com/.test(cur.image_url) ? cur.image_url
                            : preferNonEmpty(cur.image_url, sec.image_url),
                 card_text:   preferNonEmpty(cur.card_text, sec.card_text),
+                card_text_de: preferNonEmpty(cur.card_text_de, sec.card_text_de),
                 is_japanese: cur.is_japanese || sec.is_japanese || false,
             };
         }
@@ -650,6 +658,7 @@
                 rarity:      c.rarity || '',
                 image_url:   url,
                 card_text:   c.card_text || '',
+                card_text_de: c.card_text_de || '',
                 is_japanese: isJp,
             };
             if (isJp) normalised.image_url = applyJpProxyUrl(normalised);
@@ -916,26 +925,34 @@
             ? `<span class="pdb-jp-badge">${escapeHtml(labels.jpBadge)}</span>` : '';
         // Card text — preserve newlines + the Limitless ' || ' separator.
         //
-        // KENNZEICHNUNG (10.09.2026): `card_text` gibt es in der Quelle
-        // NUR auf Englisch — anders als beim Namen (name_en/name_de)
-        // fuehrt weder data/all_cards_database.csv noch ein
-        // data/cards_chunk_*.json ein deutsches Gegenstueck. Der
-        // Betreiber hat entschieden: "Englisch zeigen, sichtbar
-        // gekennzeichnet". Das Abzeichen kommt aus
-        // js/kartentext-hinweis.js — EINE Quelle fuer alle
-        // Anzeigestellen; tests/unit/test-kartentext-kennzeichnung.js
-        // verlangt den Aufruf von jeder von ihnen.
+        // KENNZEICHNUNG (10.09.2026, ERWEITERT 21.09.2026): der
+        // Kartentext lag urspruenglich nur auf Englisch vor. Der
+        // Betreiber hatte entschieden: "Englisch zeigen, sichtbar
+        // gekennzeichnet". Seit dem 21.09.2026 fuehrt die
+        // Kartendatenbank `card_text_de` fuer Standard und Extended
+        // (Abdeckung 96,5 % bzw. 99,9 %; Legacy bleibt leer, weil die
+        // Quelle dort nur 60,4 % uebersetzt fuehrt).
+        //
+        // Welcher Text gezeigt und ob gekennzeichnet wird, entscheidet
+        // deshalb nicht mehr diese Stelle, sondern
+        // `KartentextHinweis.waehlen` anhand DIESER Karte — sonst
+        // behauptet das Abzeichen eine Datenlage, die es so nicht mehr
+        // gibt. Das Abzeichen kommt weiter aus js/kartentext-hinweis.js
+        // — EINE Quelle fuer alle Anzeigestellen;
+        // tests/unit/test-kartentext-kennzeichnung.js verlangt den
+        // Aufruf von jeder von ihnen.
         //
         // Kein `window.KartentextHinweis &&`-Rueckfall: ein stiller
         // Rueckfall wuerde genau das weglassen, was hier zugesichert
         // wird. index.html laedt kartentext-hinweis.js vor dieser
         // Datei (beide `defer`, Reihenfolge damit garantiert), und der
         // Unit-Test prueft diese Reihenfolge mit.
-        const textBlocks = (card.card_text || '').trim();
+        const textWahl = window.KartentextHinweis.waehlen(card, lang);
+        const textBlocks = textWahl.text;
         const textHtml = textBlocks
             ? window.KartentextHinweis.umhuellen(
                   textBlocks.split(/\s*\|\|\s*/).map(t => `<p>${escapeHtml(t)}</p>`).join(''),
-                  lang)
+                  lang, textWahl.textsprache)
             : `<p class="pdb-zoom-empty">${escapeHtml(labels.zoomNoText)}</p>`;
 
         const overlay = document.createElement('div');

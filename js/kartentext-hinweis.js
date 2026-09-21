@@ -82,8 +82,45 @@
         return 'en';
     }
 
-    /** Nur das Abzeichen, ohne den Text. HTML-Zeichenkette. */
-    function abzeichen(vorgabe) {
+    /**
+     * Welcher Text wird gezeigt — und in welcher Sprache?
+     *
+     * SEIT DEM 21.09.2026 IST DAS EINE FRAGE AN DIE DATEN.
+     * -----------------------------------------------------
+     * Bis dahin war die Antwort immer „Englisch", weil es nichts
+     * anderes gab. `backend/scrapers/scrape_kartentexte.py` fuellt
+     * jetzt `card_text_de` fuer Standard und Extended (gemessene
+     * Abdeckung 96,5 % bzw. 99,9 %) — fuer Legacy bleibt die Spalte
+     * leer, weil Limitless dort nur 60,4 % uebersetzt fuehrt.
+     *
+     * Das Abzeichen darf deshalb nicht mehr behaupten, die Quelle
+     * liefere nur Englisch. Es haengt jetzt an DIESER Karte: liegt ein
+     * deutscher Text vor und will der Nutzer Deutsch, faellt es weg;
+     * sonst steht es dran und sagt, warum.
+     *
+     * Das ist dieselbe Regel wie im Pokedex-Modal am 13.09.2026: ein
+     * Satz, der eine Tatsache ueber die Datenlage behauptet, gehoert
+     * gegen die Daten gehalten — nicht gegen sich selbst.
+     */
+    function waehlen(karte, vorgabe) {
+        var spr = sprache(vorgabe);
+        var k = karte || {};
+        var de = String(k.card_text_de == null ? '' : k.card_text_de).trim();
+        var en = String(k.card_text == null ? '' : k.card_text).trim();
+        if (spr === 'de' && de) {
+            return { text: de, textsprache: 'de', gekennzeichnet: false };
+        }
+        return { text: en, textsprache: 'en', gekennzeichnet: !!en };
+    }
+
+    /**
+     * Nur das Abzeichen, ohne den Text. HTML-Zeichenkette.
+     *
+     * Leere Zeichenkette, wenn nichts zu kennzeichnen ist — der
+     * deutsche Text braucht kein Abzeichen.
+     */
+    function abzeichen(vorgabe, gekennzeichnet) {
+        if (gekennzeichnet === false) return '';
         var l = TEXTE[sprache(vorgabe)];
         return '<p class="kartentext-hinweis" data-kartentext-quelle="en" title="' +
                esc(l.titel) + '">' +
@@ -94,16 +131,21 @@
     }
 
     /**
-     * Abzeichen + der englische Kartentext, fertig zum Einsetzen.
+     * Abzeichen + Kartentext, fertig zum Einsetzen.
      *
      * `innenHtml` ist BEREITS fertiges HTML (die Anzeigestelle hat den
      * Rohtext selbst maskiert und in Absaetze zerlegt) — hier wird
      * deshalb nicht noch einmal maskiert, das wuerde die Absaetze
      * zerstoeren.
+     *
+     * `textsprache` steuert das `lang`-Attribut. Es auf 'en' stehen zu
+     * lassen, waere kein Schoenheitsfehler: eine Vorlesesoftware
+     * spraeche den deutschen Text dann mit englischer Aussprache.
      */
-    function umhuellen(innenHtml, vorgabe) {
-        return abzeichen(vorgabe) +
-               '<div class="kartentext-original" lang="en">' +
+    function umhuellen(innenHtml, vorgabe, textsprache) {
+        var spr = (textsprache === 'de') ? 'de' : 'en';
+        return abzeichen(vorgabe, spr !== 'de') +
+               '<div class="kartentext-original" lang="' + spr + '">' +
                String(innenHtml == null ? '' : innenHtml) +
                '</div>';
     }
@@ -111,6 +153,7 @@
     var API = {
         TEXTE: TEXTE,
         sprache: sprache,
+        waehlen: waehlen,
         abzeichen: abzeichen,
         umhuellen: umhuellen
     };

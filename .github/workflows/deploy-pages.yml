@@ -241,6 +241,15 @@ jobs:
           # Seite im Repo da und live 404, und das faellt niemandem auf,
           # weil sie in keinem Menue steht.
           cp -r posts _site/posts
+          # Die Masterclass-Aufbereitungen (21.09.2026). js/ds-masterclass.js
+          # laedt sie aus masterclass/ nach, genau wie ds-tutorial.js die
+          # Anleitung. Und genau dieselbe Falle ist eingetreten: PR #792 war
+          # gruen, gemerged und ausgerollt — und der Abruf gab live 404,
+          # weil diese Zeile fehlte. Gemessen am 21.09.2026 um 18:20 an
+          # thedipidis.app: fetch('masterclass/mega-stalobor.de.html') -> 404,
+          # der Reiter zeigte "Die Masterclass liess sich nicht laden".
+          # tests/unit/test-masterclass.js liest diese Datei jetzt mit.
+          cp -r masterclass _site/masterclass
           cp pokemon_sets_mapping.csv _site/ 2>/dev/null || true
           mkdir -p _site/config
           cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true

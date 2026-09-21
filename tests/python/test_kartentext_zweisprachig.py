@@ -499,3 +499,120 @@ def test_ein_deutscher_text_traegt_nie_die_englische_wrr_zeile():
     assert treffer == [], (
         f"{len(treffer)} deutsche Kartentexte tragen die englische "
         f"WRR-Zeile: {treffer[:10]}")
+
+
+# ── Die Aera-Auswahl muss wirklich auswaehlen ────────────────────────
+#
+# BEFUND AUS LAUF #1 (21.09.2026): der Lauf hat **alle 154 Sets** geholt
+# statt der 47 aus Standard und Extended — 308 Abrufe statt 94.
+#
+# Ursache: `load_set_order()` aus card_scraper_shared sucht sets.json
+# relativ zum Aufrufort und kam im Scraper leer zurueck. Eine leere
+# Ordnung heisst fuer `aera_fuer_set`, dass jedes Set eine frische
+# Rotation ist — und frische Rotationen gehen in den Standard.
+#
+# Das Tueckische: es sah nach Erfolg aus. Mehr Daten als bestellt faellt
+# nicht auf, nur die Laufzeit war doppelt so lang. Genau deshalb steht
+# die Pruefung hier und nicht im Kopf des Betreibers.
+
+def test_der_scraper_liest_die_ordnungszahlen_selbst():
+    """Ausgefuehrt: die Datei muss wirklich Zahlen hergeben."""
+    sk = _lade("sk_test", os.path.join(WURZEL, "backend", "scrapers",
+                                       "scrape_kartentexte.py"))
+    ordnung = sk.set_ordnung()
+    assert len(ordnung) > 100, f"nur {len(ordnung)} Ordnungszahlen"
+    assert ordnung.get("TEF"), "TEF fehlt — dann ist die Datei unbrauchbar"
+
+
+def test_eine_eingeschraenkte_auswahl_ist_kleiner_als_alles():
+    """Der Fehler aus Lauf #1, gegen die echten Daten.
+
+    Geprueft wird die AUSWAHL, nicht ihre Schreibweise: wie viele Sets
+    bleiben uebrig, wenn nur Standard und Extended gewuenscht sind?
+    """
+    import csv as _csv
+    sk = _lade("sk_test2", os.path.join(WURZEL, "backend", "scrapers",
+                                        "scrape_kartentexte.py"))
+    ordnung = sk.set_ordnung()
+    aera = pcd.aera_fuer_set
+
+    alle = set()
+    with open(os.path.join(DATEN, "all_cards_database.csv"),
+              encoding="utf-8-sig", newline="") as f:
+        for r in _csv.DictReader(f):
+            s = (r.get("set") or "").strip()
+            if s:
+                alle.add(s)
+
+    gewaehlt = {s for s in alle if aera(s, ordnung) in {"standard", "extended"}}
+    assert gewaehlt, "keine Sets ausgewaehlt"
+    assert len(gewaehlt) < len(alle), (
+        f"Standard+Extended waehlt alle {len(alle)} Sets aus. Die "
+        "Einordnung greift nicht — genau der Fehler aus Lauf #1.")
+    # Und die Groessenordnung stimmt: gemessen am 21.09.2026 sind es 47
+    # von 154. Die Form ist bewusst eine Spanne, keine Gleichheit — ein
+    # neues Set darf dazukommen, ohne dass diese Datei rot wird.
+    assert 30 <= len(gewaehlt) <= 80, (
+        f"{len(gewaehlt)} von {len(alle)} Sets gewaehlt — am 21.09.2026 "
+        "waren es 47. Eine Abweichung dieser Groesse heisst, dass sich "
+        "die Einordnung verschoben hat.")
+    # Gegenprobe: ein bekanntes Legacy-Set darf NICHT dabei sein.
+    assert "BS" not in gewaehlt, "Base Set gilt als Standard oder Extended"
+
+
+def test_der_ausgelieferte_legacy_chunk_traegt_keinen_deutschen_text():
+    """Gegen die ECHTE Datei, nicht gegen einen gebauten Fall.
+
+    NACHTRAG 21.09.2026: Lauf #1 hat wegen des Auswahlfehlers oben auch
+    Legacy-Karten mit deutschem Text gefuellt. Die Texte sind richtig
+    und bleiben in der CSV stehen — ein Verlust wird in diesem Repo
+    nicht stillschweigend weggeworfen (CLAUDE.md, 13.09.2026).
+
+    Entscheidend ist, was AUSGELIEFERT wird: der Legacy-Chunk waere
+    sonst um rund 1,6 MB groesser, fuer einen Text, den 46 % der Karten
+    dort nicht haben. Genau das prueft diese Zusicherung — an der Datei,
+    die der Browser laedt.
+    """
+    pfad = os.path.join(DATEN, "cards_chunk_legacy.json")
+    if not os.path.isfile(pfad):
+        pytest.skip("Chunk noch nicht gebaut.")
+    with open(pfad, encoding="utf-8") as f:
+        karten = json.load(f)
+    mit = [f"{c.get('set')}-{c.get('number')}" for c in karten
+           if (c.get("card_text_de") or "").strip()]
+    assert mit == [], (
+        f"{len(mit)} Karten im Legacy-Chunk tragen deutschen Text: "
+        f"{mit[:10]}")
+    # Gegenprobe: im Standard-Chunk MUSS welcher stehen, sonst prueft
+    # die Zeile oben nur, dass die Spalte ueberall fehlt.
+    std = os.path.join(DATEN, "cards_chunk_standard.json")
+    with open(std, encoding="utf-8") as f:
+        s_karten = json.load(f)
+    s_mit = sum(1 for c in s_karten if (c.get("card_text_de") or "").strip())
+    assert s_mit > 1000, (
+        f"nur {s_mit} Karten im Standard-Chunk mit deutschem Text — dann "
+        "ist die Spalte ueberall verlorengegangen, nicht nur in Legacy")
+
+
+def test_eine_leere_ordnung_bricht_ab_statt_alles_zu_holen(tmp_path):
+    """Der gebaute Fall zum Fehler aus Lauf #1.
+
+    Die Zusicherung darueber prueft, dass die echte sets.json Zahlen
+    hergibt — sie kann aber nicht zeigen, was bei einer LEEREN Datei
+    passiert. Genau das war der Fehler: ein leeres Ergebnis wurde
+    geduldet und fuehrte dazu, dass jedes Set als frische Rotation galt.
+    Ohne diesen Fall bliebe die Verfaelschungsprobe blind (gemessen).
+    """
+    sk = _lade("sk_test3", os.path.join(WURZEL, "backend", "scrapers",
+                                        "scrape_kartentexte.py"))
+    with open(tmp_path / "sets.json", "w", encoding="utf-8") as f:
+        json.dump({}, f)
+    sk.DATEN = str(tmp_path)
+    with pytest.raises(RuntimeError) as fehler:
+        sk.set_ordnung()
+    assert "Ordnungszahlen" in str(fehler.value)
+
+    # Und die Gegenrichtung: mit Zahlen geht es durch.
+    with open(tmp_path / "sets.json", "w", encoding="utf-8") as f:
+        json.dump({"TEF": 138}, f)
+    assert sk.set_ordnung() == {"TEF": 138}

@@ -383,9 +383,45 @@ def main() -> int:
                 'geschrieben nach: %s', veraendert, geleert,
                 ', '.join(os.path.relpath(z, WURZEL) for z in ziele))
 
+    # ── Der Bericht muss die Frage „ist alles da?" beantworten ────
+    #
+    # BEFUND 21.09.2026: nach einem gezielten Lauf (`--sets`) stand in
+    # der Standdatei nur noch, was DIESER Lauf angefasst hat — sieben
+    # Sets, 799 Karten. Wie vollstaendig Standard und Extended sind, war
+    # daraus nicht mehr zu lesen, obwohl genau das die Frage ist, fuer
+    # die es die Datei gibt.
+    #
+    # `gesamtstand` zaehlt deshalb ueber die AKTUELLE Datenbank, nicht
+    # ueber den Lauf: alle Karten der beiden vorderen Aeren, unabhaengig
+    # davon, welche Sets gerade geholt wurden.
+    alle_aeren = {}
+    for k in karten:
+        a = aera_fuer_set((k.get('set') or '').strip(), ordnung)
+        e = alle_aeren.setdefault(a, {'karten': 0, 'mit_text_de': 0,
+                                      'mit_text_en': 0})
+        e['karten'] += 1
+        if (k.get('card_text_de') or '').strip():
+            e['mit_text_de'] += 1
+        if (k.get('card_text') or '').strip():
+            e['mit_text_en'] += 1
+    for a, e in alle_aeren.items():
+        e['anteil_de'] = round(100.0 * e['mit_text_de'] / max(1, e['karten']), 1)
+
+    logger.info('Gesamtstand der Datenbank:')
+    for a in ('standard', 'extended', 'legacy'):
+        if a in alle_aeren:
+            e = alle_aeren[a]
+            logger.info('  %-9s %6d Karten, %6d mit deutschem Text (%.1f %%)',
+                        a, e['karten'], e['mit_text_de'], e['anteil_de'])
+
     stand = os.path.join(DATEN, 'kartentext_stand.json')
     with open(stand, 'w', encoding='utf-8') as f:
         json.dump({
+            '_gesamtstand_zweck':
+                'Zaehlt ueber die ganze Datenbank, nicht ueber diesen Lauf '
+                '— sonst beantwortet ein gezielter --sets-Lauf die Frage '
+                '„ist alles da?" nicht mehr.',
+            'gesamtstand': alle_aeren,
             '_zweck': 'Belegt, welche Sets deutschen Kartentext tragen und '
                       'welche Karten die Quelle nicht uebersetzt fuehrt.',
             'gelaufen_am': time.strftime('%Y-%m-%d %H:%M:%S UTC',

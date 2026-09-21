@@ -741,6 +741,14 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'deck-compare':          'profile',
         'settings':              'profile',
         'einstellungen':         'profile',
+        /* 21.09.2026: zwoelfter Untertab "Meine Masterclasses". Ohne
+           diesen Eintrag steigt applyHash() an `if (!tabId) return` aus
+           und #masterclass laesst den zuletzt offenen Untertab stehen —
+           genau der Befund von B3 in
+           tests/unit/test-tieflink-nachabnahme-07-09.js, der die REGEL
+           prueft und nicht die einzelnen Nachzuegler. */
+        'masterclass':           'profile',
+        'meisterklasse':         'profile',
     };
 
     // For hash aliases that target Profile, we also want to auto-switch
@@ -769,6 +777,9 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'deck-compare':   'deckcompare',
         'settings':       'settings',
         'einstellungen':  'settings',
+        // 21.09.2026 zusammen mit HASH_ALIASES nachgezogen.
+        'masterclass':    'masterclass',
+        'meisterklasse':  'masterclass',
         // HIER STANDEN 'hub', 'uebersicht' UND 'overview'.
         //
         // Die Kachelseite hatte bis zum 26.08.2026 den Menuepunkt

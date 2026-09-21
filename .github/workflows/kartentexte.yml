@@ -1,0 +1,156 @@
+name: Kartentexte DE+EN
+
+# WARUM ES DIESEN ABLAUF GIBT
+# ===========================
+# backend/scrapers/scrape_kartentexte.py laeuft im Wochenlauf mit. Er
+# braucht aber auch einen EIGENEN Startknopf, und zwar aus zwei Gruenden:
+#
+# 1. Der erste Lauf. Die Spalte `card_text_de` ist am 21.09.2026 leer
+#    angelegt worden; gefuellt wird sie von diesem Ablauf. Auf den
+#    naechsten Dienstag zu warten hiesse, eine leere Spalte auszuliefern.
+# 2. Die Sandkiste erreicht limitlesstcg.com nicht (der Proxy lehnt
+#    CONNECT ab, gemessen 21.09.2026). Kartentexte kann deshalb NUR CI
+#    holen — dieselbe Lage wie bei den Champions-Sprites, und dieselbe
+#    Lehre aus CLAUDE.md: ein Ablauf, der Dateien holt, gehoert auf den
+#    ZWEIG, nicht auf `main`.
+#
+# Kein `schedule`: der Wochenlauf deckt den laufenden Betrieb ab. Ein
+# zweiter Zeitplan auf dieselben Daten waere doppelte Last bei Limitless
+# ohne zusaetzlichen Nutzen.
+
+on:
+  workflow_dispatch:
+    inputs:
+      aeren:
+        description: 'Welche Aeren (standard,extended,legacy)'
+        required: false
+        default: 'standard,extended'
+      sets:
+        description: 'Nur diese Sets, mit Komma getrennt (leer = alle der Aeren)'
+        required: false
+        default: ''
+      trockenlauf:
+        description: 'Nur messen, nichts schreiben'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+  # Ohne `actions: write` scheitert der `gh workflow run` unten zur
+  # Laufzeit mit 403 — und zwar erst im letzten Schritt, wenn die Daten
+  # schon committet sind.
+  actions: write
+
+concurrency:
+  group: kartentexte-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  holen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Abhaengigkeiten
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml cloudscraper
+
+      - name: Kartentexte holen
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        run: |
+          args=""
+          if [ -n "${{ inputs.sets }}" ]; then
+            args="$args --sets ${{ inputs.sets }}"
+          fi
+          if [ "${{ inputs.trockenlauf }}" = "true" ]; then
+            args="$args --trockenlauf"
+          fi
+          python backend/scrapers/scrape_kartentexte.py \
+            --aeren "${{ inputs.aeren }}" $args
+
+      # Die Chunks im selben Lauf neu bauen. Sonst laege der deutsche
+      # Text in der CSV, ohne je im Browser anzukommen — genau die
+      # Luecke, an der sich dieses Repo am 17.07. und am 16.09.2026
+      # schon zweimal verschluckt hat (ein Set in den Daten, aber nicht
+      # in der Auslieferung).
+      - name: Chunks neu bauen
+        if: ${{ inputs.trockenlauf != true }}
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        run: python backend/core/prepare_card_data.py
+
+      - name: Bilanz
+        run: |
+          echo "### Kartentexte" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f data/kartentext_stand.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          d = json.load(open('data/kartentext_stand.json', encoding='utf-8'))
+          print(f"- Sets: {len(d['sets'])}")
+          print(f"- Karten betrachtet: {d['karten_betrachtet']}")
+          print(f"- mit englischem Text: {d['mit_text_en']}")
+          print(f"- mit deutschem Text: {d['mit_text_de']}")
+          fehlt = d.get('ohne_deutsche_fassung') or []
+          print(f"- ohne deutsche Fassung: {len(fehlt)}")
+          if fehlt:
+              print("  - " + ", ".join(fehlt[:40]))
+          PY
+          else
+            echo "- keine Standdatei geschrieben (Trockenlauf oder Abbruch)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN
+      #
+      # `build_data_stand.py` schreibt den Stand einer Datei nur fort,
+      # wenn der LAUFENDE Job sie angefasst hat. Faellt der Schritt weg,
+      # commitet der Job neue Daten und laesst data/data_stand.json auf
+      # dem alten Datum stehen — die Seite schreibt dann ein Datum an
+      # Daten, die juenger sind. tests/python/
+      # test_ablaeufe_schreiben_den_datenstand.py haelt das fest.
+      - name: Datenstaende fortschreiben
+        if: ${{ inputs.trockenlauf != true }}
+        run: python3 scripts/build_data_stand.py
+
+      - name: Committen
+        id: commit
+        if: ${{ inputs.trockenlauf != true }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/all_cards_database.csv data/kartentext_stand.json \
+                  data/cards_chunk_standard.json data/cards_chunk_extended.json \
+                  data/cards_chunk_legacy.json data/cards_manifest.json \
+                  data/all_cards_merged.json data/data_stand.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Nichts geaendert."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Auto: Kartentexte DE+EN aktualisiert"
+            git push origin HEAD:${{ github.ref_name }}
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # DER PUSH ALLEIN LOEST KEINEN DEPLOY AUS (Befund 21.08.2026).
+      #
+      # GitHub unterdrueckt `on: push`-Ablaeufe fuer Pushes, die mit
+      # GITHUB_TOKEN authentifiziert sind. Ohne diesen Schritt laegen die
+      # deutschen Kartentexte in `main` und kaemen nie im Browser an —
+      # genau der Fall, den tests/python/test_deploy_dispatch.py seit dem
+      # 21.08.2026 verhindert.
+      #
+      # Nur von `main` aus: laeuft der Ablauf auf einem Zweig (so ist er
+      # gedacht, siehe Kopf), gehoert der Deploy zum PR und nicht hierher.
+      - name: Deploy anstossen (GITHUB_TOKEN-Push triggert ihn nicht)
+        if: ${{ steps.commit.outputs.pushed == 'true' && github.ref_name == 'main' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-pages.yml --ref main

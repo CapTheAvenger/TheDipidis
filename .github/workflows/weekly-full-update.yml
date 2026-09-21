@@ -252,6 +252,18 @@ jobs:
       # new-set cards have no Cardmarket-ID mapping and no merged
       # price entry. update_sets.py first so format_window / sets.json
       # reflect the latest rotation before any consumer reads them.
+      #
+      # scrape_kartentexte.py (NEU 21.09.2026) steht bewusst direkt VOR
+      # prepare_card_data.py: es schreibt `card_text` und `card_text_de`
+      # in all_cards_database.csv, und der Chunker verteilt sie
+      # anschliessend auf die drei cards_chunk_*.json. Umgekehrt laege
+      # der deutsche Text eine Woche lang in der CSV, ohne je im Browser
+      # anzukommen.
+      #
+      # Der Schritt faerbt den Lauf NICHT rot (er steht nicht in der
+      # blockierenden Liste unten). Liefert Limitless zu wenig, bricht
+      # er von selbst mit rc=2 ab und laesst den vorhandenen Bestand
+      # stehen — gemeldet statt still ueberschrieben.
       - name: Run scrapers
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
@@ -279,6 +291,7 @@ jobs:
               "scrapers/cardmarket_price_merger.py" \
               "scrapers/japanese_cards_scraper.py" \
               "scrapers/scrape_pokemonproxies_urls.py" \
+              "scrapers/scrape_kartentexte.py" \
               "core/prepare_card_data.py" \
               "scrapers/archetype_icons_scraper.py" \
               "scrapers/pokemon_card_text_scraper.py" \

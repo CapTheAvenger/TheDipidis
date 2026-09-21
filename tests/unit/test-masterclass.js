@@ -230,3 +230,28 @@ test('die CSS kommt ohne !important aus und faerbt ueber Tokens', () => {
         assert.ok(cssNackt.includes(`var(${t})`), `Token ${t} wird nicht benutzt`);
     });
 });
+
+/* ── Ausgeliefert wird nur, was die Positivliste kennt ── */
+
+test('der Deploy kopiert masterclass/ nach _site — sonst ist es live 404', () => {
+    /* BEFUND (21.09.2026, live gemessen): PR #792 war gruen, gemerged und
+     * ausgerollt. Der Reiter zeigte trotzdem "Die Masterclass liess sich
+     * nicht laden", weil `fetch('masterclass/mega-stalobor.de.html')` auf
+     * thedipidis.app 404 gab: _site wird aus einer Positivliste gebaut,
+     * nicht aus dem Repo-Inhalt. Dieselbe Falle wie bei tutorial/ (18.08.)
+     * und posts/ (04.09.) — beide stehen als Kommentar in derselben Datei.
+     * Eine gruene Suite hat davon nichts gemerkt, weil kein Test die
+     * Ausliefer-Liste gelesen hat. Jetzt tut es einer. */
+    const yml = fs.readFileSync(
+        path.join(WURZEL, '.github', 'workflows', 'deploy-pages.yml'), 'utf8');
+    const ohneRaute = yml.split('\n').filter((z) => !/^\s*#/.test(z)).join('\n');
+    assert.ok(ohneRaute.length > yml.length * 0.3,
+        `das Ausschneiden hat zu viel entfernt: ${ohneRaute.length} von ${yml.length}`);
+    assert.match(ohneRaute, /cp -r masterclass _site\/masterclass/,
+        'masterclass/ fehlt in der Positivliste von deploy-pages.yml — '
+        + 'das Inhaltsstueck waere live 404, obwohl es im Repo liegt');
+    /* Die Gegenprobe: das Verzeichnis, aus dem geladen wird, ist auch das,
+     * das kopiert wird. Ein Umbenennen faellt hier auf. */
+    assert.match(JS_NACKT, /datei:\s*'masterclass\//,
+        'der Guide zeigt nicht mehr auf masterclass/');
+});

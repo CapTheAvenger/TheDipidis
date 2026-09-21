@@ -283,17 +283,25 @@ Drei Dinge, die ein fremder Leser wissen muss:
 
 **Der Beleg dazu heisst `data/kartentext_stand.json`**
 (`{_zweck, gelaufen_am, quelle, aeren, sets, karten_betrachtet, mit_text_en,
-mit_text_de, ohne_deutsche_fassung}`): welche Sets geholt wurden und welche
-Karten die Quelle nicht auf Deutsch fuehrt, mit dem Schluessel `SET|NUMMER`.
+mit_text_de, ohne_deutsche_fassung}`) — bewusst ohne eigene
+`###`-Ueberschrift: `check_schema` im Waechter liest **CSV-Spalten**, nicht
+JSON-Schluessel, und traegt man die Datei dort ein, meldet er jeden ihrer acht
+Schluessel als verlorene Spalte (gemessen 21.09.2026). Bewacht wird sie
+stattdessen von `tests/python/test_kartentext_zweisprachig.py`.
+
+Welche Sets geholt wurden und welche Karten die Quelle nicht auf Deutsch
+fuehrt, mit dem Schluessel `SET|NUMMER`.
 `tests/python/test_kartentext_zweisprachig.py` haelt diesen Bericht gegen die
 Datenbank — in beide Richtungen, damit die Liste weder waechst, ohne dass
 jemand nachgesehen hat, noch Eintraege behaelt, die laengst uebersetzt sind.
 
-Die Datei steht bewusst **ohne eigene `###`-Ueberschrift** hier: sie entsteht
-erst mit dem ersten Lauf, und der Waechtervertrag verlangt von jeder
-ueberschriebenen Datei, dass es sie gibt. Ein Vertragseintrag fuer eine Datei,
-die noch nicht existiert, waere eine Zusicherung auf Vorrat. Sobald der erste
-Lauf durch ist, gehoert sie nachgetragen — dann ist sie belegt.
+**Der erste Lauf am 21.09.2026 hat mehr geholt als bestellt.** Er meldet
+`aeren: [extended, standard]`, aber `sets: 154` — also alle. Ursache war eine
+leere Set-Ordnung, die jedes Set als frische Rotation gelten liess. Die
+gefundenen Legacy-Texte sind richtig und bleiben in der CSV stehen; in den
+`cards_chunk_legacy.json` kommen sie nicht, und die naechsten Laeufe holen
+wieder nur die beiden vorderen Aeren. Die Standdatei dokumentiert damit einen
+Zustand, den sie selbst erklaert.
 
 ### `japanese_cards_database.csv`
 `name_jp,name_en,set,number,type,energy_type,hp,rarity,image_url,…`

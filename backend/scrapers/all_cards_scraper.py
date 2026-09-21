@@ -228,6 +228,18 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
                 # oscillation that periodically resurfaced JP duplicates
                 # ("EN beats JP" lost half its suppression links).
                 "jp_prints": (row.get("jp_prints") or "").strip(),
+                # card_text_de GENAUSO, und aus genau demselben Grund
+                # (21.09.2026). Der deutsche Kartentext wird von
+                # backend/scrapers/scrape_kartentexte.py geholt, nicht
+                # hier — dieser Scraper darf ihn nur DURCHREICHEN.
+                #
+                # Ohne diese Zeile blankt jeder Wochenlauf die Spalte
+                # fuer alle 20.580 Karten, denn die Schreibfunktionen
+                # fuehren card_text_de in ihren fieldnames und fuellen
+                # fehlende Schluessel mit ''. Ausgefuehrt gemessen, mit
+                # genau einer Zeile: card_text ueberlebt, card_text_de
+                # kam als None zurueck.
+                "card_text_de": (row.get("card_text_de") or "").strip(),
                 "card_url": "",
             }
 

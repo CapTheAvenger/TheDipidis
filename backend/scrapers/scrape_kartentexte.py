@@ -320,16 +320,41 @@ def main() -> int:
                 k['card_text_de'] = neu_de
                 veraendert += 1
 
-    with open(KARTEN_CSV, 'w', encoding='utf-8', newline='') as f:
-        schreiber = csv.DictWriter(f, fieldnames=SPALTEN,
-                                   extrasaction='ignore')
-        schreiber.writeheader()
-        for k in karten:
-            k.setdefault('card_text_de', '')
-            schreiber.writerow(k)
+    for k in karten:
+        k.setdefault('card_text_de', '')
 
-    logger.info('%d Feld(er) geaendert, %s geschrieben.', veraendert,
-                os.path.basename(KARTEN_CSV))
+    # ── Geschrieben wird an BEIDE Orte (21.09.2026) ────────────────
+    #
+    # Dieses Repo fuehrt die Kartendatenbank doppelt: `data/` ist die
+    # ausgelieferte Fassung, `backend/core/data/` die Arbeitsfassung der
+    # Scraper. Der Wochenlauf saet am Anfang von `data/` nach
+    # `core/data/`, und `prepare_card_data` liest `core/data/`, baut
+    # daraus die Chunks und spiegelt am Ende ueber SYNC_PATTERNS wieder
+    # zurueck nach `data/`.
+    #
+    # Wer also nur nach `data/` schreibt, verliert dreifach:
+    #   1. prepare_card_data liest die alte Fassung -> Chunks ohne
+    #      deutschen Text,
+    #   2. der Rueckspiegel ueberschreibt `data/` mit ebendieser alten
+    #      Fassung -> der frisch geholte Text ist weg,
+    #   3. und beides faellt nicht auf, weil jede Datei gueltig bleibt.
+    #
+    # Deshalb beide. `core/data/` nur, wenn es den Ordner schon gibt —
+    # ihn anzulegen, wo keiner ist, wuerde einen Arbeitsstand vortaeuschen.
+    ziele = [KARTEN_CSV]
+    kern_csv = os.path.join(KERN, 'data', 'all_cards_database.csv')
+    if os.path.isdir(os.path.dirname(kern_csv)):
+        ziele.append(kern_csv)
+
+    for ziel in ziele:
+        with open(ziel, 'w', encoding='utf-8', newline='') as f:
+            schreiber = csv.DictWriter(f, fieldnames=SPALTEN,
+                                       extrasaction='ignore')
+            schreiber.writeheader()
+            schreiber.writerows(karten)
+
+    logger.info('%d Feld(er) geaendert, geschrieben nach: %s', veraendert,
+                ', '.join(os.path.relpath(z, WURZEL) for z in ziele))
 
     stand = os.path.join(DATEN, 'kartentext_stand.json')
     with open(stand, 'w', encoding='utf-8') as f:

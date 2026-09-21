@@ -1620,6 +1620,79 @@ def check_kartentext_bericht(findings):
         f"Bericht, aendert keine Zuordnung)."))
 
 
+def kartentext_de_gefuellt():
+    """Wie viele Zeilen in all_cards_database.csv deutschen Kartentext tragen.
+
+    WARUM DIESE PRUEFUNG EXISTIERT
+    ------------------------------
+    Am 21.09.2026 wurde die Spalte `card_text_de` angelegt. Beim Audit der
+    Wochenlauf-Kette kamen noch am selben Tag zwei Loecher ans Licht, die
+    sie beim naechsten Dienstagslauf fuer ALLE 20.580 Zeilen geleert
+    haetten: eine Feld-Weissliste in all_cards_scraper.load_existing_cards,
+    die den neuen Namen nicht kannte, und ein Scraper, der nur an einen der
+    beiden Datenorte schrieb. Beide sind behoben.
+
+    Gegen einen VOLLSTAENDIGEN Verlust haette `tote_spalten()` angeschlagen
+    — eine Spalte, die in jeder Zeile leer ist, ist dort ein CRITICAL.
+    Gegen einen TEILVERLUST schlaegt nichts an: faellt kuenftig ein Set,
+    eine Aera oder ein Abrufblock aus, sinkt die Zahl, und jede einzelne
+    Datei bleibt formal gueltig. Genau so sahen auch die beiden Loecher von
+    heute aus — kein Schritt meldete einen Fehler.
+
+    `data/kartentext_stand.json` beantwortet die Frage nicht: der Lauf, der
+    die Spalte leert, schreibt im selben Zug auch den Bericht neu. Ein
+    Beleg, der sich mit dem Schaden mitbewegt, ist keiner.
+
+    Die Richtung ist die Aussage: **verloren ist ein Fehler, Zuwachs
+    nicht** (CLAUDE.md, 12.09.2026). Limitless uebersetzt laufend nach, die
+    Zahl soll also steigen duerfen, ohne jemanden zu wecken.
+
+    `None` heisst „keine Aussage moeglich" — Datei fehlt, Spalte fehlt oder
+    unlesbar. Die fehlende Spalte meldet `check_schema` ueber den
+    Consumer-Vertrag, der sie seit dem 21.09.2026 fuehrt.
+    """
+    pfad = os.path.join(DATA, "all_cards_database.csv")
+    if not os.path.isfile(pfad):
+        return None
+    try:
+        with open(pfad, encoding="utf-8-sig") as f:
+            leser = csv.DictReader(f)
+            if "card_text_de" not in (leser.fieldnames or []):
+                return None
+            return sum(1 for r in leser
+                       if (r.get("card_text_de") or "").strip())
+    except (OSError, csv.Error, ValueError):
+        return None
+
+
+def check_kartentext_de_verlust(findings, cur, base):
+    """Grundlinienvergleich, kein absoluter Schwellwert.
+
+    Eine feste Untergrenze waere hier dieselbe falsche Form wie `== 299`
+    bei den Kaderlisten: sie muesste bei jedem Nachuebersetzen von Hand
+    hochgezogen werden und stuende nach der dritten Woche auf einer Zahl,
+    die niemand mehr begruendet.
+    """
+    if cur is None or base is None:
+        return
+    if cur < base:
+        findings.append((
+            "CRITICAL",
+            f"all_cards_database.csv: deutscher Kartentext von {base} auf "
+            f"{cur} Zeilen gefallen ({cur - base:+d}). Ein Verlust ist hier "
+            f"immer ein Fehler — die Quelle uebersetzt nach, sie nimmt "
+            f"nichts zurueck. Erster Verdacht: eine Feld-Weissliste oder "
+            f"eine fieldnames-Liste, die 'card_text_de' nicht fuehrt "
+            f"(backend/scrapers/all_cards_scraper.py), oder ein Lauf, der "
+            f"nur an einen der beiden Datenorte geschrieben hat."))
+    elif cur > base:
+        findings.append((
+            "INFO",
+            f"all_cards_database.csv: deutscher Kartentext von {base} auf "
+            f"{cur} Zeilen gewachsen ({cur - base:+d}) — kein Befund, "
+            f"Zuwachs ist der Zielzustand."))
+
+
 def check_champions_usage(findings, vorher=None):
     """Anteilslisten, die sich nicht auf 100 % addieren koennen.
 
@@ -2828,6 +2901,7 @@ def main():
     inhalt_alter = inhalt_gegen_datei()
     price = price_integrity()
     empties = empty_data_files()
+    kartentext_de = kartentext_de_gefuellt()
     jp_sets = None
 
     findings = []
@@ -2851,6 +2925,8 @@ def main():
         check_price_integrity(findings, price, baseline.get("price_integrity"))
         check_emptiness(findings, empties, baseline.get("empty_files"))
         check_tote_spalten(findings, tot, baseline.get("tote_spalten"))
+        check_kartentext_de_verlust(
+            findings, kartentext_de, baseline.get("kartentext_de_gefuellt"))
     # Der Paar-Widerspruch braucht keine Grundlinie: er ist auch beim ersten
     # Lauf eine Aussage ueber den Zustand, nicht ueber eine Veraenderung.
     check_paired_emptiness(findings, empties)
@@ -2902,6 +2978,7 @@ def main():
                 "price_integrity": price,
                 "empty_files": empties,
                 "tote_spalten": tot,
+                "kartentext_de_gefuellt": kartentext_de,
                 "jp_set_rows": jp_sets or {},
                 "champions_teams": champions_teams,
                 "champions_ueber_grenze": champions_ueber_grenze,

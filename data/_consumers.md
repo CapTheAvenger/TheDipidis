@@ -248,6 +248,53 @@ shrinks, a set stops mapping, or an input goes stale.
 **If you need a new column or a new file, open an issue here** rather than
 parsing around the gap — that keeps the contract explicit and checkable.
 
+### `all_cards_database.csv`
+`name_en,name_de,set,number,type,energy_type,hp,rarity,image_url,international_prints,jp_prints,cardmarket_url,card_text,card_text_de`
+
+**NACHGETRAGEN 21.09.2026.** Die meistgelesene Datei dieses Verzeichnisses
+stand hier bis heute nicht — sie wurde nur nebenbei erwaehnt. Wer sie liest:
+`cardmarket_id_mapper`, `cardmarket_price_merger`, `pokemon_card_text_scraper`,
+`pokemon_card_effects_scraper`, `prepare_card_data` (baut daraus
+`all_cards_merged.json` und die drei `cards_chunk_*.json`) und vier
+Arbeitsablaeufe.
+
+**Die Spalte `card_text_de` ist am 21.09.2026 ANGEHAENGT worden** — hinten,
+ohne eine bestehende zu verschieben, wie es die Regel in CLAUDE.md verlangt
+(„Adding a column is safe; renaming/removing one breaks them"). Gefuellt wird
+sie von `backend/scrapers/scrape_kartentexte.py` aus
+`limitlesstcg.com/cards/de/<SET>?display=full`.
+
+Drei Dinge, die ein fremder Leser wissen muss:
+
+* **Sie ist nicht ueberall gefuellt, und das ist Absicht.** Gemessen am
+  21.09.2026 fuehrt Limitless im Standardformat 96,5 %, in Extended 99,9 %,
+  in Legacy aber nur 60,4 % der Karten auf Deutsch. Der Scraper holt deshalb
+  nur die beiden vorderen Aeren. Leer heisst „nicht uebersetzt", nie „noch
+  nicht geholt" — was tatsaechlich geholt wurde, steht in
+  `data/kartentext_stand.json`.
+* **Sie traegt KEINE Weakness/Resistance/Retreat-Zeile.** Die ist auch auf
+  der deutschen Seite englisch; `card_text` (EN) fuehrt sie weiter am Ende.
+* **`card_text` selbst ist am 21.09.2026 vollstaendiger geworden.** Zwei
+  Parserfehler sind behoben: Faehigkeitsnamen fehlten bis dahin in **allen**
+  20.580 Zeilen, und **3.208 von 3.210** Trainer-, Item-, Stadion- und
+  Energiekarten hatten ueberhaupt keinen Text. Wer auf der alten Luecke
+  aufgebaut hat — etwa „leerer card_text = Trainerkarte" —, muss das
+  anpassen.
+
+**Der Beleg dazu heisst `data/kartentext_stand.json`**
+(`{_zweck, gelaufen_am, quelle, aeren, sets, karten_betrachtet, mit_text_en,
+mit_text_de, ohne_deutsche_fassung}`): welche Sets geholt wurden und welche
+Karten die Quelle nicht auf Deutsch fuehrt, mit dem Schluessel `SET|NUMMER`.
+`tests/python/test_kartentext_zweisprachig.py` haelt diesen Bericht gegen die
+Datenbank — in beide Richtungen, damit die Liste weder waechst, ohne dass
+jemand nachgesehen hat, noch Eintraege behaelt, die laengst uebersetzt sind.
+
+Die Datei steht bewusst **ohne eigene `###`-Ueberschrift** hier: sie entsteht
+erst mit dem ersten Lauf, und der Waechtervertrag verlangt von jeder
+ueberschriebenen Datei, dass es sie gibt. Ein Vertragseintrag fuer eine Datei,
+die noch nicht existiert, waere eine Zusicherung auf Vorrat. Sobald der erste
+Lauf durch ist, gehoert sie nachgetragen — dann ist sie belegt.
+
 ### `japanese_cards_database.csv`
 `name_jp,name_en,set,number,type,energy_type,hp,rarity,image_url,…`
 

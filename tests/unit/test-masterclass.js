@@ -255,3 +255,75 @@ test('der Deploy kopiert masterclass/ nach _site — sonst ist es live 404', () 
     assert.match(JS_NACKT, /datei:\s*'masterclass\//,
         'der Guide zeigt nicht mehr auf masterclass/');
 });
+
+/* ── Fachbegriffe, die man nicht uebersetzt ── */
+
+test('going first/second steht so da und ist nicht in "vorne/hinten" uebersetzt', () => {
+    /* BEFUND (21.09.2026, vom Betreiber gemeldet): Die Aufbereitung hatte
+     * "Vorne wählen" und "Zug 1 hinten" geschrieben. Im Deutschen sagen
+     * Spieler aber "Going First" und "Going Second" — und schlimmer: im
+     * selben Stueck heisst "vorne/hinten liegen" das Preisrennen. Derselbe
+     * Satz meinte damit zwei verschiedene Dinge. Woertlich: "Going first
+     * oder Going second ist auch im deutschen so übernommen und musst du
+     * nicht übersetzen. Vorne ist hier auch falsch."
+     *
+     * Die Zusicherung prueft beide Richtungen: der Fachbegriff muss
+     * vorkommen, und die uebersetzten Wendungen duerfen es nicht. */
+    assert.ok(/Going First/.test(FRAGMENT), 'Going First kommt nicht vor');
+    assert.ok(/Going Second/.test(FRAGMENT), 'Going Second kommt nicht vor');
+
+    const verboten = [
+        /vorne wählen/i, /hinten wählen/i, /Zug 1 hinten/i, /Zug 1 vorne/i,
+        /wenn du vorne bist/i, /wenn du hinten bist/i,
+        /wenn man vorne ist/i, /wenn man hinten ist/i,
+        /blind vorne/i,
+    ];
+    const treffer = verboten
+        .map((r) => (FRAGMENT.match(r) || [])[0])
+        .filter(Boolean);
+    assert.deepStrictEqual(treffer, [],
+        'uebersetztes going first/second im Stueck: ' + treffer.join(', '));
+
+    /* Gegenprobe, damit die Verbotsliste nicht ins Leere prueft: "vorne"
+     * und "hinten" duerfen weiter vorkommen — aber nur dort, wo sie das
+     * Preisrennen oder das Spielfeld meinen. */
+    const rest = (FRAGMENT.match(/\b(vorne|hinten)\b/g) || []).length;
+    assert.ok(rest <= 3,
+        `${rest} offene "vorne/hinten" im Stueck — jedes davon von Hand pruefen`);
+});
+
+test('Phase 1 und Phase 2 heissen wie auf der Karte, nicht "Stufe"', () => {
+    /* Die deutschen Karten sagen "Phase-2-Pokémon" (siehe card_text_de von
+     * POR-84 Rosys Ermutigung). "Stufe 2" ist die englische Denkweise. */
+    const stufe = (FRAGMENT.match(/Stufe[- ][12]/g) || []);
+    assert.deepStrictEqual(stufe, [],
+        'auf den deutschen Karten heisst das Phase 1 / Phase 2: ' + stufe.join(', '));
+});
+
+test('der Lavados-Treffer steht mit 220 da, und der Bankzugriff beim Boss', () => {
+    /* BEFUND (21.09.2026, vom Betreiber gemeldet): Im Stueck stand
+     * "Lavados (Moltres) gibt Bankzugriff ohne Matt" und "für 120".
+     * Beides war falsch. Nachgerechnet am Kartentext:
+     *   Kampfschwingen 20, gegen ein Pokémon-ex +90  = 110
+     *   Mega-Stalobor-ex hat Feuerschwäche, also x2  = 220
+     * Bankzugriff gibt Lavados gar keinen — die Attacke trifft nur das
+     * Aktive Pokémon. Er kommt von Befehl vom Boss; neu ist nur, dass
+     * Katapuldra die Feuer-Energie von Hand anlegen kann und Matt
+     * (Crispin) dafuer nicht mehr braucht. Die 120 stammen aus einem
+     * verstolperten Untertitel ("dealing 200 … 120 damage"). */
+    const stellen = FRAGMENT.split(/Lavados/).slice(1)
+        .map((s) => s.slice(0, 420));
+    assert.ok(stellen.length >= 2, `nur ${stellen.length} Lavados-Stellen`);
+
+    const mit220 = stellen.filter((s) => /\b220\b/.test(s));
+    assert.ok(mit220.length >= 1,
+        'keine Lavados-Stelle nennt die nachgerechneten 220');
+
+    const falsch = stellen.filter((s) => /Bankzugriff/.test(s) && !/Boss/.test(s));
+    assert.deepStrictEqual(falsch, [],
+        'eine Lavados-Stelle behauptet Bankzugriff, ohne den Boss zu nennen');
+
+    const alteZahl = stellen.filter((s) => /Lavados[^.]{0,80}\b120\b/.test('Lavados' + s));
+    assert.deepStrictEqual(alteZahl, [],
+        'die widerlegten 120 stehen wieder im Stueck');
+});

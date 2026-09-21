@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202609211314
+// v202609211745
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
 //   Data files        → Network-first  (fresh scraper output; fall back to cache offline)
 
-const CACHE_NAME = 'tcg-analysis-v202609211314';
+const CACHE_NAME = 'tcg-analysis-v202609211745';
 
 // Static shell — cached on install.
 //
@@ -39,6 +39,10 @@ const CACHE_NAME = 'tcg-analysis-v202609211314';
 // jeden Nutzer teuer machen, um einen Tab offline zu haben, den kaum
 // jemand offline sucht. Der Abruf laeuft ueber den Netzwerk-zuerst-Zweig
 // im fetch-Handler und landet nach dem ersten Oeffnen im Cache.
+// Aus demselben Grund nicht in der Liste: masterclass/*.de.html.
+// Die Mega-Stalobor-Aufbereitung allein sind 188 KB, und der
+// Unterreiter wird gezielt geoeffnet — js/ds-masterclass.js holt das
+// Fragment erst beim ersten Oeffnen nach.
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -86,6 +90,7 @@ const SHELL_ASSETS = [
   './css/app-meta-prognose.css',
   './css/testing-groups.css',
   './css/archetype-icons.css',
+  './css/masterclass.css',
   './js/inline-init.js',
   './js/app-utils.js',
   './js/i18n.js',
@@ -181,6 +186,7 @@ const SHELL_ASSETS = [
   './js/ds-filter.js',
   './js/ds-share.js',
   './js/ds-tutorial.js',
+  './js/ds-masterclass.js',
   './images/pokeball-icon.png',
   './images/escape-rope.png'
 ];

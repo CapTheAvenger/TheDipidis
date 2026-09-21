@@ -84,7 +84,7 @@ KERN = os.path.join(WURZEL, 'backend', 'core')
 sys.path.insert(0, KERN)
 
 from card_scraper_shared import (  # noqa: E402
-    setup_console_encoding, setup_logging, safe_fetch_html, load_set_order,
+    setup_console_encoding, setup_logging, safe_fetch_html,
 )
 from kartentext import (  # noqa: E402
     kartentext, ist_uebersetzt, kartenschluessel,
@@ -110,6 +110,33 @@ SPALTEN = ['name_en', 'name_de', 'set', 'number', 'type', 'energy_type',
 
 SEITE_EN = 'https://limitlesstcg.com/cards/{set}?display=full'
 SEITE_DE = 'https://limitlesstcg.com/cards/de/{set}?display=full'
+
+
+def set_ordnung() -> Dict[str, int]:
+    """Die Ordnungszahlen aus data/sets.json — direkt, nicht ueber
+    `load_set_order()`.
+
+    BEFUND AUS LAUF #1 (21.09.2026): `load_set_order()` sucht sets.json
+    relativ zum Aufrufort und kam hier LEER zurueck. Eine leere Ordnung
+    heisst fuer `aera_fuer_set`, dass jedes Set eine frische Rotation
+    ist — also „standard". Der Lauf hat deshalb **alle 154 Sets** geholt
+    statt der rund 90 aus Standard und Extended, 308 Abrufe statt 180.
+
+    Das Tueckische daran: es sah nach Erfolg aus. Mehr Daten als
+    bestellt faellt nicht auf; nur die Laufzeit war doppelt so lang.
+
+    Ein leeres Ergebnis wird deshalb nicht geduldet. Ohne Ordnungszahlen
+    ist JEDE Aera-Auswahl falsch, und lieber bricht der Lauf ab, als
+    dass er das Vierfache holt und niemand es merkt.
+    """
+    pfad = os.path.join(DATEN, 'sets.json')
+    with open(pfad, encoding='utf-8') as f:
+        ordnung = json.load(f)
+    if not isinstance(ordnung, dict) or not ordnung:
+        raise RuntimeError(
+            f'{pfad} traegt keine Ordnungszahlen. Ohne sie gilt jedes Set '
+            'als frische Rotation, und der Lauf wuerde alle Aeren holen.')
+    return ordnung
 
 
 def _aera_funktion():
@@ -172,7 +199,7 @@ def main() -> int:
 
     karten = lies_karten()
     aera_fuer_set = _aera_funktion()
-    ordnung = load_set_order()
+    ordnung = set_ordnung()
     gewuenscht = {a.strip() for a in args.aeren.split(',') if a.strip()}
 
     # Welche Sets? Immer aus dem BESTAND, nie aus einer Liste im Code —
@@ -193,6 +220,21 @@ def main() -> int:
     if not sets:
         logger.error('Kein Set ausgewaehlt (Aeren: %s).', sorted(gewuenscht))
         return 1
+
+    # SELBSTKONTROLLE (nach Lauf #1 am 21.09.2026): waehlt eine
+    # EINGESCHRAENKTE Aera-Liste am Ende doch jedes Set aus, dann hat die
+    # Einordnung nicht funktioniert — und der Lauf wuerde das Vierfache
+    # holen, ohne dass es auffiele. Bei `--sets` gilt das nicht, dort ist
+    # die Auswahl ausdruecklich von Hand gesetzt.
+    if (not args.sets
+            and gewuenscht != {'standard', 'extended', 'legacy'}
+            and len(sets) == len(je_set)):
+        logger.error(
+            '::error::Die Aera-Auswahl %s umfasst ALLE %d Sets. Die '
+            'Einordnung greift nicht — vermutlich fehlen die '
+            'Ordnungszahlen. Es wird nichts geholt.',
+            sorted(gewuenscht), len(je_set))
+        return 3
 
     erwartet = sum(je_set[s] for s in sets)
     logger.info('%d Set(s), %d Karten, %d Abrufe.',

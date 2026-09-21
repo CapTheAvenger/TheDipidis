@@ -655,3 +655,191 @@ def test_die_chunks_sind_wirklich_drei():
         f"der Standard-Chunk traegt {groessen['standard']} von {gesamt} "
         f"Karten ({groessen}). Er wird bei JEDEM Seitenaufruf geladen; "
         "am 21.09.2026 waren es dadurch 19,87 MB statt 3,79 MB.")
+
+
+# ═════════════════════════════════════════════════════════════════════
+#
+# DER WOCHENLAUF HAETTE DEN DEUTSCHEN TEXT VERNICHTET (21.09.2026)
+# ================================================================
+# Nach dem Ausliefern gefragt: „ist alles im Weekly Full drin?" Beim
+# Nachrechnen der Kette kamen ZWEI Loecher heraus, beide unsichtbar,
+# beide mit demselben Ergebnis — `card_text_de` waere beim naechsten
+# Dienstag leer gewesen.
+#
+# Die Kette im Wochenlauf:
+#
+#   1. Seed          data/  ->  backend/core/data/
+#   2. all_cards_scraper   liest core/data/, schreibt core/data/
+#   3. scrape_kartentexte  liest data/,      schreibt data/
+#   4. prepare_card_data   liest core/data/, baut die Chunks
+#   5. SYNC_PATTERNS       core/data/  ->  data/   (schreibt zurueck!)
+#
+# LOCH A, Schritt 2: `load_existing_cards` baut ein Kartenobjekt aus
+# einer FELD-WEISSEN LISTE, und die Schreibfunktionen fuellen fehlende
+# Schluessel mit ''. `card_text_de` stand nicht darin. Ausgefuehrt
+# gemessen mit genau einer Zeile: card_text kam zurueck, card_text_de
+# als None. Derselbe Fehler, den der Kommentar an `jp_prints` seit der
+# gemessenen 464->334-Schwingung beschreibt.
+#
+# LOCH B, Schritte 3 bis 5: der Kartentext-Scraper schrieb nur nach
+# `data/`. Schritt 4 liest aber `core/data/` — die Chunks haetten
+# keinen deutschen Text bekommen — und Schritt 5 spiegelt `core/data/`
+# zurueck nach `data/` und haette den frisch geholten Text ueberschrieben.
+#
+# Keines der beiden faellt im Betrieb auf: jede Datei bleibt gueltig,
+# kein Schritt meldet etwas, und alle Suiten waren gruen.
+
+def test_der_kartenscraper_reicht_den_deutschen_text_durch(tmp_path):
+    """LOCH A, ausgefuehrt.
+
+    Eine Textzusicherung reicht hier nicht: geprueft werden muss, was
+    aus `load_existing_cards` HERAUSKOMMT, nicht welche Zeile im
+    Quelltext steht.
+    """
+    acs = _lade("acs_test", os.path.join(WURZEL, "backend", "scrapers",
+                                         "all_cards_scraper.py"))
+    spalten = ["name_en", "name_de", "set", "number", "type", "energy_type",
+               "hp", "rarity", "image_url", "international_prints",
+               "jp_prints", "cardmarket_url", "card_text", "card_text_de"]
+    zeile = {k: "" for k in spalten}
+    zeile.update({
+        "name_en": "Mega Excadrill ex", "name_de": "Mega-Stalobor-ex",
+        "set": "PBL", "number": "65", "type": "Stage 1",
+        "energy_type": "Metal", "hp": "340", "rarity": "Double Rare",
+        "image_url": "http://beispiel/x.png",
+        "international_prints": "PBL-65", "cardmarket_url": "http://cm/x",
+        "card_text": "MM Undermine 90",
+        "card_text_de": "MM Untergraben 90",
+    })
+    pfad = tmp_path / "all_cards_database.csv"
+    with open(pfad, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=spalten)
+        w.writeheader()
+        w.writerow(zeile)
+
+    erg = acs.load_existing_cards(str(pfad))
+    karten = erg[0] if isinstance(erg, tuple) else erg
+    assert karten, "keine Karte eingelesen"
+    k = karten[0]
+    assert k.get("card_text") == "MM Undermine 90", "schon der englische fehlt"
+    assert k.get("card_text_de") == "MM Untergraben 90", (
+        "card_text_de faellt aus der Feld-Weissen-Liste von "
+        "load_existing_cards. Die Schreibfunktionen fuellen fehlende "
+        "Schluessel mit '' — jeder Wochenlauf wuerde die Spalte fuer alle "
+        "20.580 Karten leeren, genau wie es jp_prints einmal passiert ist.")
+
+
+def test_der_kartentext_scraper_bedient_beide_datenordner():
+    """LOCH B, an der Schreibstelle.
+
+    Geprueft wird der Quelltext, weil ein echter Lauf ins Netz geht —
+    aber gezielt: die Schreibschleife MUSS mehr als einen Zielpfad
+    kennen, und `backend/core/data` muss einer davon sein. Kommentare
+    werden vorher geschnitten, sonst faengt das Muster die Erklaerung
+    darueber mit (CLAUDE.md, 13./14.09.2026).
+    """
+    quelle = open(os.path.join(WURZEL, "backend", "scrapers",
+                               "scrape_kartentexte.py"), encoding="utf-8").read()
+    ohne = re.sub(r"^\s*#.*$", "", quelle, flags=re.M)
+    assert len(ohne) > len(quelle) * 0.3, "das Ausschneiden hat zu viel entfernt"
+    assert "for ziel in ziele:" in ohne, (
+        "es wird nur an EINEN Ort geschrieben — dann liest prepare_card_data "
+        "die alte Fassung und der Rueckspiegel loescht den neuen Text")
+    assert re.search(r"os\.path\.join\(KERN,\s*'data'", ohne), (
+        "backend/core/data ist kein Ziel der Schreibschleife")
+
+
+def test_die_beiden_spiegellisten_kennen_die_kartendatenbank():
+    """Schritt 1 und Schritt 5 muessen dieselbe Datei fuehren.
+
+    Der Wochenlauf sagt es selbst: „prepare_card_data.SYNC_PATTERNS is
+    the matching write-back list — keep the two in lockstep." Steht die
+    Kartendatenbank nur in einer der beiden, laeuft der deutsche Text in
+    genau eine Richtung verloren.
+    """
+    lauf = open(os.path.join(WURZEL, ".github", "workflows",
+                             "weekly-full-update.yml"), encoding="utf-8").read()
+    pcd_quelle = open(os.path.join(KERN, "prepare_card_data.py"),
+                      encoding="utf-8").read()
+    ohne = re.sub(r"^\s*#.*$", "", pcd_quelle, flags=re.M)
+    assert len(ohne) > len(pcd_quelle) * 0.3, "das Ausschneiden hat zu viel entfernt"
+
+    saat = re.search(r"Seed backend/core/data/ from data/(.{0,2200})", lauf, re.S)
+    assert saat, "der Seed-Schritt heisst nicht mehr so"
+    assert "all_cards_database.csv" in saat.group(1), (
+        "die Kartendatenbank wird nicht mehr geseedet — dann liest "
+        "all_cards_scraper einen leeren Bestand")
+
+    muster = re.search(r"SYNC_PATTERNS\s*=\s*\[(.*?)\n\]", ohne, re.S)
+    assert muster, "SYNC_PATTERNS nicht gefunden"
+    assert '"all_cards_database.csv"' in muster.group(1), (
+        "die Kartendatenbank steht nicht mehr in SYNC_PATTERNS")
+
+
+# ── Kein Platzhalter darf als deutscher Text durchgehen ──────────────
+#
+# BEFUND 21.09.2026, beim Nachmessen des Datenstands: 29 Karten trugen
+# „Attack 1" als deutschen Attackennamen — CRE-154, SMP-3, SMP-29,
+# SMP-194 und fuenfzehn SP-Promos.
+#
+# Die Erkennung lief auf dem Text NACH dem Abschneiden des Schadens.
+# Bei „0 Attack 1 30×" fiel dabei nur die 30× weg und „Attack 1" traf.
+# Bei „C Attack 1" — Platzhalter ohne Schaden — frass dieselbe Regel die
+# 1 als Schaden, uebrig blieb „Attack", und das Muster verlangte eine
+# Ziffer. Die Karte galt als uebersetzt.
+#
+# Die Zahl gehoert zum Platzhalter, nicht zum Schaden.
+
+_PLATZHALTER_PRUEFUNG = re.compile(
+    r'^(?:Attack|Ability)\s+\d+(?:\s+\d+\s*[+×x*]?)?$', re.I)
+_SYMBOLE = re.compile(r'^[A-Z0-9]+\s+')
+
+
+def _traegt_platzhalter(text):
+    for teil in (text or "").split(" || "):
+        if _PLATZHALTER_PRUEFUNG.match(_SYMBOLE.sub("", teil).strip()):
+            return True
+    return False
+
+
+def test_beide_platzhalterformen_werden_erkannt():
+    """Mit Schaden und ohne — die zweite Form war das Loch."""
+    def block(attacke):
+        roh = ('<div class="card-text"><div class="card-text-section">'
+               '<p class="card-text-title"><span class="card-text-name">'
+               '<a href="/cards/de/X/1">Bauz</a></span></p></div>'
+               '<div class="card-text-section"><div class="card-text-attack">'
+               f'<p class="card-text-attack-info">{attacke}</p>'
+               '</div></div></div>')
+        return BeautifulSoup(roh, "lxml").select_one(".card-text")
+
+    for a in ("C Attack 1", "0 Attack 1 30×", "RCC Attack 1", "C Attack 2"):
+        assert kt.ist_uebersetzt(block(a)) is False, a
+    # Gegenrichtung: echte Attacken bleiben drin, mit und ohne Schaden.
+    for a in ("G Lockendes Glühen", "FF Krawallhammer 150",
+              "MMM Maximalbohrer 200+"):
+        assert kt.ist_uebersetzt(block(a)) is True, a
+
+
+def test_kein_ausgelieferter_deutscher_text_traegt_einen_platzhalter():
+    """Gegen die echte Datei — dort sind die 29 aufgefallen."""
+    with open(os.path.join(DATEN, "all_cards_database.csv"),
+              encoding="utf-8-sig", newline="") as f:
+        treffer = [f"{r['set']}-{r['number']}" for r in csv.DictReader(f)
+                   if _traegt_platzhalter(r.get("card_text_de"))]
+    assert treffer == [], (
+        f"{len(treffer)} deutsche Kartentexte tragen einen Platzhalter "
+        f"statt eines Attackennamens: {treffer[:10]}")
+
+
+def test_und_auch_nicht_in_den_ausgelieferten_chunks():
+    """Was im Browser landet, zaehlt."""
+    for name in ("standard", "extended"):
+        pfad = os.path.join(DATEN, f"cards_chunk_{name}.json")
+        if not os.path.isfile(pfad):
+            pytest.skip("Chunks noch nicht gebaut.")
+        with open(pfad, encoding="utf-8") as f:
+            karten = json.load(f)
+        treffer = [f"{c.get('set')}-{c.get('number')}" for c in karten
+                   if _traegt_platzhalter(c.get("card_text_de"))]
+        assert treffer == [], f"{name}: {treffer[:8]}"

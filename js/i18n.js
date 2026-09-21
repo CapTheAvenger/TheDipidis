@@ -1332,6 +1332,9 @@ const translations = {
     'mc.share':                 'Share',
     'mc.shareField':            'Share Meta Share image',
     'mc.shareDay2':             'Share Day 2 prognosis image',
+    // ── Masterclasses ────────────────────────────────────────
+    'mcl.tab':                  'Masterclasses',
+    'mcl.title':                'My Masterclasses',
     // ── Testing Groups ───────────────────────────────────────
     'tg.title':                 'Testing Groups',
     'tg.subtitle':              'Collaborative matchup tables for your playtest crew. Edits sync across members with an activity log.',
@@ -4009,6 +4012,9 @@ const translations = {
     'mc.share':                 'Teilen',
     'mc.shareField':            'Meta-Share-Bild teilen',
     'mc.shareDay2':             'Day-2-Prognose-Bild teilen',
+    // ── Masterclasses ────────────────────────────────────────
+    'mcl.tab':                  'Masterclasses',
+    'mcl.title':                'Meine Masterclasses',
     // ── Testing Groups ───────────────────────────────────────
     'tg.title':                 'Testing Groups',
     'tg.subtitle':              'Gemeinsame Matchup-Tabellen für deine Playtest-Crew. Änderungen synchronisieren zwischen allen Mitgliedern, mit Aktivitätslog.',

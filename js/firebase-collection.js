@@ -3755,6 +3755,12 @@ function switchProfileTab(tabName) {
     TestingGroups.init();
   }
 
+  // Masterclasses: das Regal zeichnen. Der Inhalt einer Masterclass wird
+  // erst geholt, wenn jemand sie oeffnet — siehe js/ds-masterclass.js.
+  if (tabName === 'masterclass' && window.DsMasterclass) {
+    window.DsMasterclass.oeffnen();
+  }
+
   // Scroll the tab nav into view so the user sees both the activated
   // pill and the new content immediately. Without this, clicking a
   // sub-tab while scrolled past the nav looks like nothing happened.

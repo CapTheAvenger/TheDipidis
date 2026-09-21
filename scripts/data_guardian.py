@@ -220,6 +220,23 @@ CONSUMERS = {
                      "name_de", "name_en", "image_url_de", "image_url_en"],
         "purpose": "Prize Pack card -> official play.pokemon.com image + its original print.",
     },
+    "all_cards_database.csv": {
+        "required": ["name_en", "name_de", "set", "number", "type",
+                     "energy_type", "hp", "rarity", "image_url",
+                     "international_prints", "jp_prints", "cardmarket_url",
+                     "card_text", "card_text_de"],
+        "purpose": "Die internationale Haelfte der Kartendatenbank — Grundlage "
+                   "fuer all_cards_merged.json und die drei cards_chunk_*.json, "
+                   "also fuer alles, was der Browser an Karten kennt. "
+                   "NACHGETRAGEN 21.09.2026: sie stand in keinem Vertrag, "
+                   "obwohl sechs Skripte und vier Ablaeufe sie lesen. Anlass "
+                   "war die neue Spalte card_text_de; dabei fiel auf, dass "
+                   "auch die dreizehn alten ungesichert waren. "
+                   "card_text_de ist NICHT ueberall gefuellt und soll es nicht "
+                   "sein: Limitless fuehrt Legacy nur zu 60,4 Prozent auf "
+                   "Deutsch (gemessen 21.09.2026). Was geholt wurde, belegt "
+                   "data/kartentext_stand.json.",
+    },
     "japanese_cards_database.csv": {
         "required": ["name", "set", "number", "type", "rarity", "image_url"],
         "purpose": "Japanische Karten -> Deck Builder (ueber prepare_card_data). "

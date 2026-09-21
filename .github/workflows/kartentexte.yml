@@ -95,7 +95,19 @@ jobs:
         if: ${{ inputs.trockenlauf != true }}
         run: |
           mkdir -p backend/core/data
-          for f in all_cards_database.csv japanese_cards_database.csv; do
+          # sets.json MUSS mit. Ohne sie kommt `load_set_order()` leer
+          # zurueck, und dann haelt `aera_fuer_set` JEDES Set fuer eine
+          # frische Rotation und legt es in den Standard-Chunk.
+          #
+          # GEMESSEN am 21.09.2026 nach Lauf #2: cards_chunk_standard.json
+          # trug danach ALLE 21.076 Karten und 19,87 MB statt 5.101 und
+          # 3,79 MB, extended und legacy waren LEER. Jeder Seitenaufruf
+          # haette das Fuenffache geladen. Der Wochenlauf hat das nie
+          # gezeigt, weil dort update_sets.py als erster Schritt die
+          # Datei nach core/data/ schreibt.
+          for f in all_cards_database.csv japanese_cards_database.csv \
+                   price_data.csv sets.json pokemonproxies_url_map.json \
+                   energy_type_map.json; do
             if [ -f "data/$f" ]; then
               cp "data/$f" "backend/core/data/$f"
               echo "  ↳ $f nach backend/core/data/ gespiegelt"
@@ -114,6 +126,38 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
         run: python backend/core/prepare_card_data.py
+
+      # DER CHUNKER HAT EINE ENTARTUNGSFORM (21.09.2026).
+      #
+      # Faellt die Set-Ordnung weg, landet alles im Standard-Chunk und
+      # die beiden anderen bleiben leer — ohne Fehlermeldung, denn
+      # formal ist jede Datei gueltig. Gemessen wird deshalb die
+      # Aufteilung selbst, bevor irgendetwas committet wird.
+      - name: Aufteilung der Chunks pruefen
+        if: ${{ inputs.trockenlauf != true }}
+        run: |
+          python - <<'PY'
+          import json, sys
+          groessen = {}
+          for name in ('standard', 'extended', 'legacy'):
+              with open(f'data/cards_chunk_{name}.json', encoding='utf-8') as f:
+                  groessen[name] = len(json.load(f))
+          print('Chunks:', groessen)
+          gesamt = sum(groessen.values())
+          fehler = []
+          if groessen['standard'] > 0.5 * gesamt:
+              fehler.append(
+                  f"der Standard-Chunk traegt {groessen['standard']} von "
+                  f"{gesamt} Karten — die Set-Ordnung hat nicht gegriffen")
+          for name in ('extended', 'legacy'):
+              if groessen[name] == 0:
+                  fehler.append(f'der {name}-Chunk ist leer')
+          if fehler:
+              for f_ in fehler:
+                  print(f'::error::{f_}')
+              sys.exit(1)
+          print('Aufteilung plausibel.')
+          PY
 
       - name: Bilanz
         run: |

@@ -77,6 +77,33 @@ jobs:
           python backend/scrapers/scrape_kartentexte.py \
             --aeren "${{ inputs.aeren }}" $args
 
+      # DIE EINGABE LIEGT WOANDERS ALS DIE AUSGABE (gemessen 21.09.2026).
+      #
+      # `prepare_card_data.py` LIEST aus `backend/core/data/`
+      # (get_data_dir() leitet den Pfad von der Lage des Moduls ab) und
+      # SCHREIBT nach `data/` im Projektstamm. Der Wochenlauf kommt damit
+      # klar, weil `all_cards_scraper.py` ohnehin nach core/data/ schreibt
+      # und danach in die Wurzel gespiegelt wird.
+      #
+      # scrape_kartentexte.py schreibt direkt nach `data/` — das ist die
+      # ausgelieferte Datei und der richtige Ort. Ohne diese Spiegelung
+      # in die Gegenrichtung findet prepare_card_data seine Eingabe nicht
+      # und bricht ab: „all_cards_database.csv existiert nicht". Genau so
+      # ist Lauf #1 am 21.09.2026 nach 7:58 gescheitert — der Kartentext
+      # war da, aber der Commit-Schritt kam nie.
+      - name: Eingabe fuer den Chunker spiegeln
+        if: ${{ inputs.trockenlauf != true }}
+        run: |
+          mkdir -p backend/core/data
+          for f in all_cards_database.csv japanese_cards_database.csv; do
+            if [ -f "data/$f" ]; then
+              cp "data/$f" "backend/core/data/$f"
+              echo "  ↳ $f nach backend/core/data/ gespiegelt"
+            else
+              echo "::warning::data/$f fehlt — der Chunker wird abbrechen"
+            fi
+          done
+
       # Die Chunks im selben Lauf neu bauen. Sonst laege der deutsche
       # Text in der CSV, ohne je im Browser anzukommen — genau die
       # Luecke, an der sich dieses Repo am 17.07. und am 16.09.2026

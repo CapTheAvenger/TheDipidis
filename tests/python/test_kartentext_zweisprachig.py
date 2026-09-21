@@ -843,3 +843,78 @@ def test_und_auch_nicht_in_den_ausgelieferten_chunks():
         treffer = [f"{c.get('set')}-{c.get('number')}" for c in karten
                    if _traegt_platzhalter(c.get("card_text_de"))]
         assert treffer == [], f"{name}: {treffer[:8]}"
+
+
+# ── Der Bericht muss die Frage beantworten, fuer die es ihn gibt ─────
+#
+# BEFUND 21.09.2026: nach einem gezielten Lauf (`--sets BWP,DCR,…`)
+# stand in der Standdatei nur noch, was DIESER Lauf angefasst hat —
+# sieben Sets, 799 Karten. Wie vollstaendig Standard und Extended sind,
+# war daraus nicht mehr zu lesen. Genau das ist aber die Frage, fuer die
+# es die Datei gibt.
+#
+# `gesamtstand` zaehlt deshalb ueber die Datenbank, nicht ueber den Lauf.
+
+def test_der_bericht_fuehrt_einen_gesamtstand():
+    stand = _stand()
+    if stand is None:
+        pytest.skip("Noch kein Lauf.")
+    g = stand.get("gesamtstand")
+    assert g, (
+        "der Bericht fuehrt keinen Gesamtstand — nach einem gezielten "
+        "Lauf ist dann nicht mehr zu erkennen, wie vollstaendig die "
+        "Kartentexte sind")
+    for a in ("standard", "extended"):
+        assert a in g, f"{a} fehlt im Gesamtstand"
+        assert g[a]["karten"] > 1000, f"{a}: {g[a]}"
+        assert 0 <= g[a]["anteil_de"] <= 100
+
+
+def test_der_gesamtstand_deckt_sich_mit_der_datenbank():
+    """Ein Bericht, den niemand gegen die Daten haelt, ist eine
+    Behauptung — dieselbe Regel wie beim Lauf-Bericht darueber."""
+    stand = _stand()
+    if stand is None or not stand.get("gesamtstand"):
+        pytest.skip("Noch kein Gesamtstand.")
+    with open(os.path.join(DATEN, "sets.json"), encoding="utf-8") as f:
+        ordnung = json.load(f)
+    gezaehlt = {}
+    with open(os.path.join(DATEN, "all_cards_database.csv"),
+              encoding="utf-8-sig", newline="") as f:
+        for r in csv.DictReader(f):
+            a = pcd.aera_fuer_set((r.get("set") or "").strip(), ordnung)
+            e = gezaehlt.setdefault(a, {"karten": 0, "mit_text_de": 0})
+            e["karten"] += 1
+            if (r.get("card_text_de") or "").strip():
+                e["mit_text_de"] += 1
+
+    for a, e in stand["gesamtstand"].items():
+        assert a in gezaehlt, f"{a} steht im Bericht, nicht in den Daten"
+        assert e["karten"] == gezaehlt[a]["karten"], (
+            f"{a}: Bericht {e['karten']} Karten, gezaehlt "
+            f"{gezaehlt[a]['karten']}")
+        assert e["mit_text_de"] == gezaehlt[a]["mit_text_de"], (
+            f"{a}: Bericht {e['mit_text_de']} mit deutschem Text, gezaehlt "
+            f"{gezaehlt[a]['mit_text_de']}")
+
+
+def test_der_scraper_schreibt_den_gesamtstand_auch_kuenftig():
+    """Die beiden Pruefungen darueber lesen die DATEI.
+
+    Nimmt jemand den Gesamtstand aus dem Scraper heraus, bleiben sie
+    gruen, bis der naechste Lauf die Datei ohne ihn neu schreibt — und
+    dann ist er weg, ohne dass es jemand gemerkt hat. Gemessen: beide
+    Verfaelschungsproben am Scraper blieben blind.
+
+    Deshalb hier zusaetzlich der Quelltext, mit Kommentarschnitt und
+    Gegenprobe (CLAUDE.md, 13./14.09.2026).
+    """
+    quelle = open(os.path.join(WURZEL, "backend", "scrapers",
+                               "scrape_kartentexte.py"), encoding="utf-8").read()
+    ohne = re.sub(r"^\s*#.*$", "", quelle, flags=re.M)
+    assert len(ohne) > len(quelle) * 0.3, "das Ausschneiden hat zu viel entfernt"
+    assert "'gesamtstand': alle_aeren," in ohne, (
+        "der Scraper schreibt keinen Gesamtstand mehr in die Standdatei")
+    # Und er muss ueber ALLE Karten zaehlen, nicht ueber die des Laufs.
+    assert re.search(r"for k in karten:\s*\n\s*a = aera_fuer_set", ohne), (
+        "der Gesamtstand zaehlt nicht mehr ueber die ganze Datenbank")

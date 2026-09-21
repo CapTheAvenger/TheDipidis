@@ -1,0 +1,23 @@
+{
+  "_meta": {
+    "zweck": "Echte Kartenbloecke von limitlesstcg.com als Pruefvorrat fuer backend/core/kartentext.py.",
+    "gemessen_am": "2026-09-21",
+    "quelle": [
+      "https://limitlesstcg.com/cards/de/PBL/100",
+      "https://limitlesstcg.com/cards/de/SVI/196",
+      "https://limitlesstcg.com/cards/de/30C/120",
+      "https://limitlesstcg.com/cards/de/SVE/1"
+    ],
+    "gekuerzt": "Lange Effekttexte enden nach 40 Zeichen mit einem Auslassungszeichen. Geprueft wird die STRUKTUR; der volle Wortlaut gehoert der Quelle und nicht in dieses Repo.",
+    "warum_diese_vier": [
+      "PBL/100  Faehigkeit — ihr NAME steht nur in .card-text-ability-info hinter 'Ability:', ein .card-text-ability-name gibt es auf der Seite nicht",
+      "SVI/196  Item — der Effekttext steht in einem KLASSENLOSEN .card-text-section, den der alte Parser nie gelesen hat",
+      "30C/120  ohne deutsche Fassung — leerer Linktext, href auf /cards/en/, Platzhalter-Attacke 'Attack 1'",
+      "SVE/1    Basisenergie — hat ueberhaupt keinen Text, der leere Abschnitt darf nichts erzeugen"
+    ]
+  },
+  "de|PBL|100": "<div class=\"card-text\"><div class=\"card-text-section\"><p class=\"card-text-title\"><span class=\"card-text-name\"><a href=\"/cards/de/PBL/100\">Rameidon-ex</a></span>\n- Fighting - 330 HP </p><p class=\"card-text-type\">\nPokémon\n- Stage 2\n- Evolves from\n<a href=\"/cards/de?q=name:koknodon\">Koknodon</a></p></div><div class=\"card-text-section\"><div class=\"card-text-ability\"><p class=\"card-text-ability-info\">\nAbility: Kollateraler Kopfstoß </p><p class=\"card-text-ability-effect\">Einmal während deines Zuges, wenn dieses…</p></div><div class=\"card-text-attack\"><p class=\"card-text-attack-info\"><span class=\"ptcg-symbol\">FF</span>\nKrawallhammer 150\n</p><p class=\"card-text-attack-effect\">\nWährend deines nächsten Zuges fügen die von diesem Pokémon eingesetzten Attacken dem Aktiven Pokémon deines Gegners 150 Schadenspunkte mehr zu <span class=\"reminder-text\">(bevor Schwäche und Resistenz verrechnet werden)</span>. </p></div></div><div class=\"card-text-section\"><p class=\"card-text-wrr\">\nWeakness: Grass <br>\nResistance: none <br>\nRetreat: 2 <br></p></div><div class=\"card-text-section card-text-artist\">\nIllustrated by <a href=\"/cards/de?q=!artist:5ban_graphics\">\n5ban Graphics\n</a></div></div>",
+  "de|SVI|196": "<div class=\"card-text\"><div class=\"card-text-section\"><p class=\"card-text-title\"><span class=\"card-text-name\"><a href=\"/cards/de/SVI/196\">Hyperball</a></span></p><p class=\"card-text-type\">\nTrainer\n- Item\n</p></div><div class=\"card-text-section\">\nDu kannst diese Karte nur einsetzen, wenn du 2 andere Karten aus deiner Hand auf deinen Ablagestapel legst.<br><br>Durchsuche dein Deck nach 1 Pokémon, zeige es deinem Gegner und nimm es auf deine Hand. Mische anschließend dein Deck.\n</div><div class=\"card-text-section card-text-artist\">\nIllustrated by <a href=\"/cards/de?q=!artist:ayaka_yoshida\">\nAyaka Yoshida\n</a></div></div>",
+  "de|30C|120": "<div class=\"card-text\"><div class=\"card-text-section\"><p class=\"card-text-title\"><span class=\"card-text-name\"><a href=\"/cards/en/30C/120\"></a></span>\n- Colorless - 30 HP </p><p class=\"card-text-type\">\nPokémon\n- Basic\n</p></div><div class=\"card-text-section\"><div class=\"card-text-attack\"><p class=\"card-text-attack-info\"><span class=\"ptcg-symbol\">0</span>\nAttack 1 30×\n</p><p class=\"card-text-attack-effect\"></p></div></div><div class=\"card-text-section\"><p class=\"card-text-wrr\">\nWeakness: Fighting <br>\nResistance: none <br>\nRetreat: 0 <br></p></div><div class=\"card-text-section card-text-artist\">\nIllustrated by <a href=\"/cards?q=!artist:kanami_ogata\">\nKanami Ogata\n</a></div></div>",
+  "de|SVE|1": "<div class=\"card-text\"><div class=\"card-text-section\"><p class=\"card-text-title\"><span class=\"card-text-name\"><a href=\"/cards/de/SVE/1\">Pflanzen-Energie</a></span></p><p class=\"card-text-type\">\nEnergy\n- Basic Energy\n</p></div><div class=\"card-text-section\"></div></div>"
+}

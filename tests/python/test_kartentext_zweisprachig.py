@@ -918,3 +918,95 @@ def test_der_scraper_schreibt_den_gesamtstand_auch_kuenftig():
     # Und er muss ueber ALLE Karten zaehlen, nicht ueber die des Laufs.
     assert re.search(r"for k in karten:\s*\n\s*a = aera_fuer_set", ohne), (
         "der Gesamtstand zaehlt nicht mehr ueber die ganze Datenbank")
+
+
+# ---------------------------------------------------------------------------
+# DER TEILVERLUST — was `tote_spalten()` NICHT sieht
+#
+# Gegen einen VOLLSTAENDIGEN Verlust der Spalte schlaegt der Waechter an:
+# eine Pflichtspalte, die in JEDER Zeile leer ist, ist dort ein CRITICAL.
+#
+# Gegen einen TEILVERLUST schlug bis zum 21.09.2026 nichts an. Faellt ein
+# Set, eine Aera oder ein Abrufblock aus, sinkt die Zahl — und jede
+# einzelne Datei bleibt formal gueltig. Genau so sahen die beiden Loecher
+# aus, die an diesem Tag gefunden wurden: kein Schritt meldete einen
+# Fehler, alle Suiten waren gruen.
+#
+# data/kartentext_stand.json beantwortet die Frage nicht, denn der Lauf,
+# der die Spalte leert, schreibt im selben Zug auch den Bericht neu. Ein
+# Beleg, der sich mit dem Schaden mitbewegt, ist keiner.
+# ---------------------------------------------------------------------------
+
+def _waechter():
+    return _lade("dg_kartentext",
+                 os.path.join(WURZEL, "scripts", "data_guardian.py"))
+
+
+def test_der_waechter_zaehlt_den_deutschen_kartentext():
+    dg = _waechter()
+    gezaehlt = dg.kartentext_de_gefuellt()
+    assert gezaehlt is not None, (
+        "der Waechter kann den Fuellstand von card_text_de nicht messen — "
+        "fehlt die Datei oder die Spalte?")
+
+    with open(os.path.join(DATEN, "all_cards_database.csv"),
+              encoding="utf-8-sig") as f:
+        eigen = sum(1 for r in csv.DictReader(f)
+                    if (r.get("card_text_de") or "").strip())
+    assert gezaehlt == eigen, (
+        f"der Waechter zaehlt {gezaehlt}, die Datei traegt {eigen}")
+
+
+def test_ein_verlust_ist_ein_fehler_ein_zuwachs_nicht():
+    """Die Richtung IST die Aussage (CLAUDE.md, 12.09.2026).
+
+    `== n` und `<= n` waeren beide falsch: Limitless uebersetzt laufend
+    nach, und eine Form, die bei Zuwachs bricht, wird nach der dritten
+    Woche von Hand hochgesetzt und ist dann keine Sicherung mehr.
+    """
+    dg = _waechter()
+
+    verlust = []
+    dg.check_kartentext_de_verlust(verlust, 14_000, 14_617)
+    assert [s for s, _ in verlust] == ["CRITICAL"], (
+        "ein Verlust von 617 Zeilen deutschem Kartentext ist kein CRITICAL")
+    assert "card_text_de" in verlust[0][1], (
+        "die Meldung nennt die Spalte nicht, die verloren ging")
+
+    zuwachs = []
+    dg.check_kartentext_de_verlust(zuwachs, 14_900, 14_617)
+    assert [s for s, _ in zuwachs] == ["INFO"], (
+        "Zuwachs darf niemanden wecken — die Quelle uebersetzt nach")
+
+    gleich = []
+    dg.check_kartentext_de_verlust(gleich, 14_617, 14_617)
+    assert gleich == [], "unveraendert ist kein Befund"
+
+    # Ohne Grundlinie (erster Lauf nach dem Ausliefern) keine Aussage —
+    # und vor allem kein falscher Alarm.
+    ohne = []
+    dg.check_kartentext_de_verlust(ohne, 14_617, None)
+    dg.check_kartentext_de_verlust(ohne, None, 14_617)
+    assert ohne == [], "ohne Grundlinie darf nichts gemeldet werden"
+
+
+def test_der_waechter_schreibt_den_fuellstand_in_die_grundlinie():
+    """Sonst wird die Pruefung nie scharf.
+
+    Sie vergleicht gegen `baseline['kartentext_de_gefuellt']`. Steht der
+    Schluessel nicht in der Datei, die `--update-baseline` schreibt, ist
+    `base` bei JEDEM Lauf None — die Pruefung waere dauerhaft stumm und
+    niemand wuerde es merken. Das ist dieselbe Falle wie eine
+    abgeschaltete Zusicherung, nur unsichtbar.
+    """
+    quelle = open(os.path.join(WURZEL, "scripts", "data_guardian.py"),
+                  encoding="utf-8").read()
+    ohne = re.sub(r"^\s*#.*$", "", quelle, flags=re.M)
+    assert len(ohne) > len(quelle) * 0.3, "das Ausschneiden hat zu viel entfernt"
+    assert '"kartentext_de_gefuellt": kartentext_de,' in ohne, (
+        "der Fuellstand wird nicht in die Grundlinie geschrieben — "
+        "die Pruefung bliebe fuer immer stumm")
+    assert 'baseline.get("kartentext_de_gefuellt")' in ohne, (
+        "die Pruefung liest den Schluessel nicht aus der Grundlinie")
+    assert "check_kartentext_de_verlust(" in ohne, (
+        "die Pruefung wird in main() gar nicht aufgerufen")

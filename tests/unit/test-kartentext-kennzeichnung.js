@@ -161,7 +161,8 @@ function jsDateien() {
 }
 
 function erhebung() {
-    const gruppen = { zeichenkette: [], uebernahme: [], suche: [], anzeige: [] };
+    const gruppen = { zeichenkette: [], uebernahme: [], suche: [],
+                      auswahl: [], anzeige: [] };
     for (const datei of jsDateien()) {
         const roh    = lies(path.join('js', datei));
         const code   = blanke(roh, false);
@@ -169,7 +170,17 @@ function erhebung() {
         let i = code.indexOf('card_text');
         while (i !== -1) {
             const vor  = i > 0 ? roh[i - 1] : '';
-            const nach = roh[i + 'card_text'.length] || '';
+            // BEIDE FELDER (21.09.2026). Seit es `card_text_de` gibt,
+            // darf die Erhebung nicht mehr nur `card_text` kennen:
+            // sonst waere eine neue Anzeigestelle, die den DEUTSCHEN
+            // Text zeigt, fuer diesen Test unsichtbar — und genau die
+            // Sorte Luecke soll er ja finden. Die Kennzeichnungspflicht
+            // gilt fuer beide: bei deutschem Text heisst sie „kein
+            // Abzeichen und lang=de", und auch das entscheidet
+            // js/kartentext-hinweis.js und nicht die Anzeigestelle.
+            const istDe = roh.startsWith('card_text_de', i);
+            const feld  = istDe ? 'card_text_de' : 'card_text';
+            const nach  = roh[i + feld.length] || '';
             // Wortgrenze: `pokemon_card_text` und `card_text_scraper`
             // sind Dateinamen, kein Feld.
             if (/[A-Za-z0-9_$]/.test(vor) || /[A-Za-z0-9_$]/.test(nach)) {
@@ -183,9 +194,36 @@ function erhebung() {
             else if (nach === ':')                                 gruppen.uebernahme.push(e);
             else if (/toLowerCase/.test(zeile) &&
                      /(indexOf|includes|match)/.test(zeile))       gruppen.suche.push(e);
-            else if (/card_text\s*:/.test(zeile))                  gruppen.uebernahme.push(e);
+            else if (/card_text(_de)?\s*:/.test(zeile))            gruppen.uebernahme.push(e);
+            // Auswahl: die Kennzeichnungsdatei SELBST. Seit dem
+            // 21.09.2026 entscheidet `waehlen()` dort, ob ein deutscher
+            // oder ein englischer Text gezeigt wird — sie liest dafuer
+            // beide Felder. Von ihr zu verlangen, sie moege
+            // `KartentextHinweis` aufrufen, waere ein Zirkel: sie IST
+            // die Kennzeichnung. Die Gruppe steht hier trotzdem und
+            // wird gezaehlt, damit eine zweite Fundstelle in dieser
+            // Datei nicht unbemerkt durchrutscht.
+            else if (datei === 'kartentext-hinweis.js')            gruppen.auswahl.push(e);
             else                                                   gruppen.anzeige.push(e);
             i = code.indexOf('card_text', i + 1);
+        }
+
+        // ── Der Umweg zaehlt auch als Anzeigestelle (21.09.2026) ──
+        //
+        // Seit `waehlen()` entscheidet, welcher der beiden Texte
+        // gezeigt wird, fasst die Anzeigestelle im Deckbauer das Feld
+        // `card_text` nicht mehr selbst an — sie nimmt, was `waehlen`
+        // zurueckgibt. Ohne diese Schleife faende die Erhebung darueber
+        // KEINE Anzeigestelle mehr und der Test liefe gruen ins Leere,
+        // obwohl unveraendert ein Kartentext auf dem Schirm steht.
+        if (datei !== 'kartentext-hinweis.js') {
+            let w = code.indexOf('KartentextHinweis.waehlen');
+            while (w !== -1) {
+                const nr = roh.slice(0, w).split('\n').length;
+                gruppen.anzeige.push({ datei, nr, zeile: zeilen[nr - 1].trim(),
+                                       index: w, quelle: roh });
+                w = code.indexOf('KartentextHinweis.waehlen', w + 1);
+            }
         }
     }
     return gruppen;
@@ -309,10 +347,23 @@ describe('Erhebung: jede Anzeigestelle von card_text traegt die Kennzeichnung', 
             zeichenkette: ERHEBUNG.zeichenkette.length,
             uebernahme:   ERHEBUNG.uebernahme.length,
             suche:        ERHEBUNG.suche.length,
+            auswahl:      ERHEBUNG.auswahl.length,
             anzeige:      ERHEBUNG.anzeige.length,
         };
-        const soll = { zeichenkette: 1, uebernahme: 6, suche: 2, anzeige: 1 };
-        const liste = ['zeichenkette', 'uebernahme', 'suche', 'anzeige']
+        // 21.09.2026, nachgezaehlt nach dem Umbau auf zwei Sprachen.
+        // Die Erhebung kennt jetzt BEIDE Feldnamen, deshalb steigen
+        // die Zahlen ueberall dort, wo der Deckbauer das deutsche
+        // Gegenstueck mitfuehrt:
+        //   uebernahme  6 -> 12  (vier Stellen, je doppelt gezaehlt,
+        //                         weil `blanke` Zuweisung und Lesen
+        //                         auf derselben Zeile getrennt findet)
+        //   suche       2 ->  4  (die zweite Zeile sucht im DE-Text)
+        //   auswahl     -  ->  4  (die beiden Lesezugriffe in waehlen)
+        //   anzeige     1 ->  1  (unveraendert eine Stelle, jetzt ueber
+        //                         KartentextHinweis.waehlen gefunden)
+        const soll = { zeichenkette: 1, uebernahme: 12, suche: 4,
+                       auswahl: 4, anzeige: 1 };
+        const liste = ['zeichenkette', 'uebernahme', 'suche', 'auswahl', 'anzeige']
             .map(k => `  ${k}: ${ist[k]} (erwartet ${soll[k]})\n` +
                       ERHEBUNG[k].map(e => '      ' + ort(e)).join('\n'))
             .join('\n');
@@ -474,5 +525,100 @@ describe('Ausgeliefert wird die Kennzeichnung auch', () => {
                          'kartentext-hinweis-text', 'kartentext-original']) {
             assert.ok(CSS.indexOf('.' + k) !== -1, `.${k} fehlt in css/kartentext-hinweis.css`);
         }
+    });
+});
+
+// ═════════════════════════════════════════════════════════════════════
+//
+// ZWEI SPRACHEN (21.09.2026)
+// ==========================
+// Bis zum 20.09.2026 fuehrte die Kartendatenbank den Kartentext nur auf
+// Englisch, und das Abzeichen hat das zu Recht behauptet.
+// backend/scrapers/scrape_kartentexte.py fuellt seitdem `card_text_de`
+// fuer Standard und Extended — gemessene Abdeckung 96,5 % bzw. 99,9 %;
+// Legacy bleibt leer, weil limitlesstcg.com dort nur 60,4 % uebersetzt
+// fuehrt.
+//
+// Damit wird aus einer festen Aussage eine Frage an die Daten. Genau
+// dafuer gibt es in CLAUDE.md die Regel „EIN SATZ, DER EINE TATSACHE
+// BEHAUPTET, IST CODE": der Hinweis darf nicht mehr behaupten, es gebe
+// nur Englisch, sobald fuer DIESE Karte ein deutscher Text vorliegt.
+//
+// ═════════════════════════════════════════════════════════════════════
+
+const KARTE_DE = Object.assign({}, KARTE, {
+    card_text_de: '[Ability] Kollateraler Kopfstoss || Wirf 1 Muenze. || FF Krawallhammer 150',
+});
+
+describe('Der Kartentext folgt der Datenlage, nicht einer Annahme', () => {
+
+    it('deutscher Text vorhanden + deutsche Oberflaeche: er wird gezeigt', () => {
+        const w = H.waehlen(KARTE_DE, 'de');
+        assert.equal(w.textsprache, 'de');
+        assert.equal(w.gekennzeichnet, false);
+        assert.ok(w.text.indexOf('Krawallhammer') !== -1,
+            'der deutsche Text ist nicht durchgereicht worden');
+    });
+
+    it('deutscher Text vorhanden, aber Oberflaeche auf Englisch: englischer Text', () => {
+        const w = H.waehlen(KARTE_DE, 'en');
+        assert.equal(w.textsprache, 'en');
+        assert.equal(w.gekennzeichnet, true,
+            'auf englischer Oberflaeche ist der englische Text der richtige — ' +
+            'gekennzeichnet wird trotzdem, denn er IST die englische Quelle');
+        assert.ok(w.text.indexOf('Stampede') !== -1);
+    });
+
+    it('kein deutscher Text (Legacy): Rueckfall auf Englisch MIT Abzeichen', () => {
+        const w = H.waehlen(KARTE, 'de');
+        assert.equal(w.textsprache, 'en');
+        assert.equal(w.gekennzeichnet, true);
+    });
+
+    it('gar kein Text: nichts zu kennzeichnen', () => {
+        const w = H.waehlen(KARTE_OHNE_TEXT, 'de');
+        assert.equal(w.text, '');
+        assert.equal(w.gekennzeichnet, false,
+            'ein Abzeichen ueber einer leeren Flaeche behauptet einen Text, ' +
+            'den es nicht gibt');
+    });
+
+    it('eine Karte ohne jedes Feld bringt waehlen nicht um', () => {
+        const w = H.waehlen(undefined, 'de');
+        assert.equal(w.text, '');
+        assert.equal(w.gekennzeichnet, false);
+    });
+
+    it('das Zoom-Fenster zeigt den deutschen Text OHNE Abzeichen', () => {
+        const html = zoomHtml(KARTE_DE, 'de');
+        assert.ok(html.indexOf('Krawallhammer') !== -1,
+            'der deutsche Kartentext steht nicht im erzeugten HTML');
+        assert.ok(html.indexOf('Stampede') === -1,
+            'der englische Text steht daneben — dann waeren es zwei Kartentexte');
+        assert.ok(html.indexOf('kartentext-hinweis') === -1,
+            'Das Abzeichen „Kartentext auf Englisch" steht ueber einem DEUTSCHEN ' +
+            'Text. Genau diese Sorte Satz meint CLAUDE.md mit „ein Satz, der eine ' +
+            'Tatsache behauptet, ist Code".');
+    });
+
+    it('und setzt lang="de" — sonst liest die Vorlesesoftware Deutsch englisch', () => {
+        const html = zoomHtml(KARTE_DE, 'de');
+        assert.match(html, /class="kartentext-original" lang="de"/);
+    });
+
+    it('ohne deutschen Text bleibt alles wie bisher: Abzeichen und lang="en"', () => {
+        const html = zoomHtml(KARTE, 'de');
+        assert.match(html, /class="kartentext-hinweis"/);
+        assert.match(html, /class="kartentext-original" lang="en"/);
+    });
+
+    it('die Suche findet auch den deutschen Text', () => {
+        // Sonst sucht ein deutscher Nutzer nach einem Wort, das er auf
+        // der Karte vor sich sieht, und bekommt nichts.
+        const quelle = lies('js/app-profile-deck-builder.js');
+        const fn = quelle.slice(quelle.indexOf('function matchesSearch'));
+        const rumpf = fn.slice(0, fn.indexOf('\n    }') + 6);
+        assert.match(rumpf, /card_text_de/,
+            'matchesSearch durchsucht card_text, aber nicht card_text_de');
     });
 });

@@ -672,7 +672,11 @@ def create_merged_database():
 STANDARD_MIN_ORDER = 136   # TEF and newer
 
 # Extended boundary — sets >= this and < STANDARD_MIN_ORDER
-EXTENDED_MIN_ORDER = 113   # SSH and newer
+EXTENDED_MIN_ORDER = 113   # RCL (Rebel Clash) and newer.
+#
+# Hier stand „SSH and newer". Das stimmt nicht: sets.json fuehrt SSH
+# auf 112, also EINEN unter der Schwelle — Sword & Shield selbst ist
+# Legacy, das erste Extended-Set ist RCL. Nachgesehen am 21.09.2026.
 
 # Promo sets span multiple eras; assign them to standard for fast first-load.
 PROMO_ERA_SETS = {"SVP", "MEP", "SP", "HSP", "SMP", "SV", "SWSHP"}
@@ -700,6 +704,33 @@ def _is_new_set_unknown_to_set_order(set_code: str, set_order: dict) -> bool:
 # Fighting Energy" in M3 → "Rocky Fighting Energy" in POR) leave stale
 # autocomplete suggestions if kept around, so we drop them here.
 SUPERSEDED_SETS = {"M3"}  # POR fully supersedes M3 (115 of 116 cards duplicated)
+
+
+def aera_fuer_set(set_code: str, set_order: dict) -> str:
+    """'standard' | 'extended' | 'legacy' | 'ueberholt' fuer ein Set.
+
+    HERAUSGEZOGEN AM 21.09.2026. Diese Einordnung stand nur im Rumpf von
+    `split_card_database_chunks` und wurde damit von aussen unerreichbar.
+    `backend/scrapers/scrape_kartentexte.py` muss dieselbe Frage
+    beantworten — welche Sets bekommen einen deutschen Kartentext? —,
+    und eine zweite Kopie der Schwellen waere genau die Sorte
+    Doppelpflege, an der dieses Repo schon mehrfach auseinandergelaufen
+    ist. Das Verhalten ist unveraendert; der Aufrufer unten benutzt jetzt
+    diese Funktion.
+    """
+    code = (set_code or '').strip()
+    if code.upper() in SUPERSEDED_SETS:
+        return 'ueberholt'
+    order = set_order.get(code, set_order.get(code.upper(), 0))
+    if order == 0 and _is_new_set_unknown_to_set_order(code, set_order):
+        # Frisches Rotationsset, dessen Ordnungszahl noch fehlt — in den
+        # Standard, sonst verschwindet es aus dem Deck Builder.
+        return 'standard'
+    if code.upper() in PROMO_ERA_SETS or order >= STANDARD_MIN_ORDER:
+        return 'standard'
+    if order >= EXTENDED_MIN_ORDER:
+        return 'extended'
+    return 'legacy'
 
 
 def split_card_database_chunks(all_cards: list, frontend_data: str):
@@ -752,29 +783,38 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
 
     for card in all_cards:
         set_code = (card.get("set") or "").strip()
+        aera = aera_fuer_set(set_code, set_order)
 
         # Drop superseded preview sets (e.g. M3 → POR rename)
-        if set_code.upper() in SUPERSEDED_SETS:
+        if aera == "ueberholt":
             dropped_superseded += 1
             continue
-
-        order = set_order.get(set_code, set_order.get(set_code.upper(), 0))
 
         # New-set safety net: a set with order==0 + not in sets.json is
         # almost always a fresh rotation set whose order entry hasn't
         # been written yet (update_sets.py is supposed to populate it
-        # but can silently skip on Cloudflare blocks). Route it to
-        # Standard rather than letting order=0 default it into Legacy,
-        # where the deck builder would never load it. We log every
-        # unknown set we promote so the operator can confirm.
-        if order == 0 and _is_new_set_unknown_to_set_order(set_code, set_order):
+        # but can silently skip on Cloudflare blocks). aera_fuer_set
+        # routes it to Standard rather than letting order=0 default it
+        # into Legacy, where the deck builder would never load it. We
+        # log every unknown set we promote so the operator can confirm.
+        if _is_new_set_unknown_to_set_order(set_code, set_order):
             unknown_sets_promoted.add(set_code.upper())
-            standard.append(card)
-            continue
 
-        if set_code.upper() in PROMO_ERA_SETS or order >= STANDARD_MIN_ORDER:
+        # DEUTSCHER KARTENTEXT NUR DORT, WO ES IHN GIBT (21.09.2026).
+        #
+        # Gemessen an limitlesstcg.com: Standard 96,5 %, Extended
+        # 99,9 %, Legacy nur 60,4 % der Karten auf Deutsch. Die Spalte
+        # `card_text_de` traegt deshalb bewusst nur die beiden vorderen
+        # Aeren. Ohne diese Zeile wuerde sie ungefiltert in JEDEN Chunk
+        # durchgereicht — die Chunks uebernehmen sonst jedes Feld — und
+        # cards_chunk_legacy.json waere um rund 1,6 MB groesser, fuer
+        # einen Text, den 40 % der Karten dort gar nicht haben.
+        if aera == "legacy":
+            card.pop("card_text_de", None)
+
+        if aera == "standard":
             standard.append(card)
-        elif order >= EXTENDED_MIN_ORDER:
+        elif aera == "extended":
             extended.append(card)
         else:
             legacy.append(card)

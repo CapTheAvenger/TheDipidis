@@ -26,6 +26,8 @@ from card_scraper_shared import (
     setup_console_encoding, get_app_path, get_data_dir, safe_fetch_html,
     setup_logging, load_settings, load_set_order, card_sort_key
 )
+# Eine Extraktion, zwei Scraper — siehe Kopf von backend/core/kartentext.py.
+from kartentext import kartentext
 
 setup_console_encoding()
 
@@ -655,37 +657,27 @@ def _fetch_single_card(card: dict) -> dict:
             # Trainer/Energy: Name - Trainer or Name - Energy
             pass
 
-    # Card text: attacks + abilities
-    card_text_parts = []
-    for ability_el in soup.select(".card-text-ability"):
-        ab_name = ability_el.select_one(".card-text-ability-name")
-        ab_effect = ability_el.select_one(".card-text-ability-effect")
-        if ab_name:
-            card_text_parts.append(f"[Ability] {ab_name.get_text(strip=True)}")
-        if ab_effect:
-            card_text_parts.append(ab_effect.get_text(" ", strip=True))
-
-    for attack_el in soup.select(".card-text-attack"):
-        info_el = attack_el.select_one(".card-text-attack-info")
-        effect_el = attack_el.select_one(".card-text-attack-effect")
-        if info_el:
-            # get_text() folds the .ptcg-symbol nodes inline already,
-            # so we don't need a separate symbol extraction pass.
-            full_text = info_el.get_text(" ", strip=True)
-            card_text_parts.append(full_text)
-        if effect_el:
-            effect_text = effect_el.get_text(" ", strip=True)
-            if effect_text:
-                card_text_parts.append(effect_text)
-
-    # Weakness / Resistance / Retreat
-    wr_section = soup.select_one(".card-text-wrr")
-    if wr_section:
-        wr_text = wr_section.get_text(" ", strip=True)
-        card_text_parts.append(wr_text)
-
-    if card_text_parts:
-        card["card_text"] = " || ".join(card_text_parts)
+    # ── Kartentext ─────────────────────────────────────────────────
+    #
+    # ZWEI FEHLER, BEIDE AM 21.09.2026 GEMESSEN UND HIER BEHOBEN:
+    #
+    # 1. Der Faehigkeitsname wurde in `.card-text-ability-name` gesucht.
+    #    Dieses Element gibt es auf der Seite nicht — Limitless schreibt
+    #    den Namen in `.card-text-ability-info` hinter „Ability:".
+    #    Ergebnis: in KEINER der 20.580 Karten stand je ein
+    #    Faehigkeitsname. Der Effekt war da, der Name nie.
+    # 2. Trainer, Items, Stadien, Werkzeuge und Spezialenergien fuehren
+    #    ihren Text in einem KLASSENLOSEN `.card-text-section`. Der
+    #    wurde nie gelesen — 3.208 von 3.210 Nicht-Pokemon hatten
+    #    ueberhaupt keinen Kartentext.
+    #
+    # Die Extraktion liegt jetzt in backend/core/kartentext.py, weil
+    # scrape_kartentexte.py dieselbe Arbeit fuer beide Sprachen macht.
+    # Zwei Kopien waeren zwei Gelegenheiten, denselben Fehler noch
+    # einmal zu machen.
+    text = kartentext(soup.select_one(".card-text") or soup, mit_wrr=True)
+    if text:
+        card["card_text"] = text
 
     return card
 
@@ -705,7 +697,13 @@ def scrape_card_details(
 
     fieldnames = ["name_en", "name_de", "set", "number", "type", "energy_type",
                   "hp", "rarity", "image_url", "international_prints",
-                  "jp_prints", "cardmarket_url", "card_text"]
+                  "jp_prints", "cardmarket_url", "card_text",
+                  # NEU 21.09.2026 — gefuellt von
+                  # backend/scrapers/scrape_kartentexte.py, nicht hier. Die Spalte
+                  # MUSS trotzdem in dieser Kopfzeile stehen: DictWriter schreibt
+                  # die Datei komplett neu, und was in fieldnames fehlt, ist nach
+                  # dem naechsten Lauf weg.
+                  "card_text_de"]
 
     def write_csv_batch(current_cards: list):
         all_data = (existing_cards + current_cards) if append_mode else current_cards
@@ -919,7 +917,9 @@ def main():
 
         fieldnames = ["name_en", "name_de", "set", "number", "type", "energy_type",
                       "hp", "rarity", "image_url", "international_prints",
-                      "jp_prints", "cardmarket_url", "card_text"]
+                      "jp_prints", "cardmarket_url", "card_text",
+                      # siehe Kommentar bei der ersten Kopfzeile
+                      "card_text_de"]
 
         with open(csv_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")

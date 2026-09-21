@@ -327,3 +327,34 @@ test('der Lavados-Treffer steht mit 220 da, und der Bankzugriff beim Boss', () =
     assert.deepStrictEqual(alteZahl, [],
         'die widerlegten 120 stehen wieder im Stueck');
 });
+
+test('das Kartendetail zeigt den deutschen Kartentext, nicht nur den englischen', () => {
+    /* BEFUND (21.09.2026, live gesehen): Das Kartendetail war mit
+     * "Kartentext (englisch)" ueberschrieben und zeigte nur den
+     * englischen Text — in einer Aufbereitung, die es ausdruecklich auf
+     * Deutsch geben sollte. Die Datenbank fuehrt card_text_de; genutzt
+     * hat es niemand. Jetzt steht der deutsche Text oben und der
+     * englische klein darunter. */
+    assert.ok(/data-text-en=/.test(FRAGMENT),
+        'das Stueck liefert keinen zweiten Kartentext mit');
+
+    const kacheln = FRAGMENT.match(/data-text="[^"]{20,}"/g) || [];
+    assert.ok(kacheln.length >= 20, `nur ${kacheln.length} Kartentexte im Stueck`);
+
+    /* Nicht eine Stichprobe, sondern JEDES Hauptfeld: Wendungen, die nur
+     * im englischen Kartentext vorkommen, duerfen dort nicht stehen.
+     * Eine Stichprobe auf ein einzelnes Wort haette eine einzelne Karte
+     * durchrutschen lassen — gemessen in der Verfaelschungsprobe. */
+    const englisch = /Search your deck|Discard the top|Prevent all effects|This attack does|Once during your turn|Put \d+ damage/;
+    const falsch = kacheln.filter((k) => englisch.test(k));
+    assert.deepStrictEqual(falsch.map((k) => k.slice(11, 60)), [],
+        'diese Kartentexte stehen englisch im Hauptfeld');
+    assert.ok(/data-text="[^"]*Untergraben/.test(FRAGMENT),
+        'im Hauptfeld steht nicht der deutsche Kartentext');
+
+    assert.ok(JS_NACKT.includes('kartentextEn'),
+        'das Skript kennt den zweiten Kartentext nicht');
+    const de = JS_NACKT.slice(JS_NACKT.indexOf('de:'), JS_NACKT.indexOf('function lang'));
+    assert.ok(/kartentext:\s*'Kartentext'/.test(de),
+        'die deutsche Beschriftung heisst weiter "Kartentext (englisch)"');
+});

@@ -62,7 +62,8 @@
             geoeffnet: 'Geöffnet',
             inDieser: '× in dieser Liste',
             warum: 'Warum diese Anzahl',
-            kartentext: 'Kartentext (englisch)',
+            kartentext: 'Kartentext',
+            kartentextEn: 'Card text (English)',
             keinTreffer: 'Kein Treffer.'
         },
         en: {
@@ -80,7 +81,8 @@
             geoeffnet: 'Open',
             inDieser: '× in this list',
             warum: 'Why this count',
-            kartentext: 'Card text (English)',
+            kartentext: 'Card text',
+            kartentextEn: 'Kartentext (Deutsch)',
             keinTreffer: 'No match.'
         }
     };
@@ -226,8 +228,15 @@
             '</div></div>' +
             (knopf.dataset.warum ? '<div class="mcl-lupe-block"><strong>' + esc(T('warum')) + '</strong>' +
                 markiere(knopf.dataset.warum) + '</div>' : '') +
+            /* Der deutsche Kartentext steht oben, der englische darunter:
+              * Hausi hat die Karten auf Deutsch in der Hand und liest die
+              * Listen auf Englisch. Bis zum 21.09.2026 gab es hier nur den
+              * englischen — in einer Aufbereitung, die es auf Deutsch geben
+              * sollte. */
             (knopf.dataset.text ? '<div class="mcl-lupe-block"><strong>' + esc(T('kartentext')) + '</strong>' +
                 esc(knopf.dataset.text) + '</div>' : '') +
+            (knopf.dataset.textEn ? '<div class="mcl-lupe-block mcl-fein"><strong>' + esc(T('kartentextEn')) + '</strong>' +
+                esc(knopf.dataset.textEn) + '</div>' : '') +
             '<button type="button" class="mcl-lupe-zu">' + esc(T('schliessen')) + '</button></div>';
         document.body.appendChild(d);
         d.addEventListener('click', function (e) {

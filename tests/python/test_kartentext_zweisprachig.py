@@ -616,3 +616,42 @@ def test_eine_leere_ordnung_bricht_ab_statt_alles_zu_holen(tmp_path):
     with open(tmp_path / "sets.json", "w", encoding="utf-8") as f:
         json.dump({"TEF": 138}, f)
     assert sk.set_ordnung() == {"TEF": 138}
+
+
+# ── Die Chunks muessen drei Chunks bleiben ───────────────────────────
+#
+# BEFUND (21.09.2026, nach Lauf #2): cards_chunk_standard.json trug
+# **alle 21.076 Karten und 19,87 MB** statt 5.101 und 3,79 MB; extended
+# und legacy waren LEER. Jeder Seitenaufruf haette das Fuenffache
+# geladen.
+#
+# Ursache war wieder die leere Set-Ordnung: `prepare_card_data` liest
+# sets.json aus backend/core/data/, mein Ablauf hat sie dorthin nicht
+# gespiegelt, und ohne Ordnungszahlen gilt jedes Set als frische
+# Rotation — frische Rotationen gehen in den Standard.
+#
+# Das Tueckische ist dasselbe wie bei der Aera-Auswahl: formal war jede
+# Datei gueltig, kein Schritt meldete einen Fehler, und die Zahlen sieht
+# nur, wer sie misst. Deshalb steht die Messung jetzt hier UND im
+# Ablauf — im Ablauf, damit gar nicht erst committet wird; hier, damit
+# ein entarteter Stand nicht durch die Suiten rutscht.
+
+def test_die_chunks_sind_wirklich_drei():
+    pfade = {n: os.path.join(DATEN, f"cards_chunk_{n}.json")
+             for n in ("standard", "extended", "legacy")}
+    if not all(os.path.isfile(p) for p in pfade.values()):
+        pytest.skip("Chunks noch nicht gebaut.")
+    groessen = {}
+    for n, p in pfade.items():
+        with open(p, encoding="utf-8") as f:
+            groessen[n] = len(json.load(f))
+    gesamt = sum(groessen.values())
+    assert gesamt > 15000, f"nur {gesamt} Karten in den Chunks — {groessen}"
+    for n in ("extended", "legacy"):
+        assert groessen[n] > 0, (
+            f"der {n}-Chunk ist leer, {groessen} — die Set-Ordnung hat "
+            "nicht gegriffen")
+    assert groessen["standard"] < 0.5 * gesamt, (
+        f"der Standard-Chunk traegt {groessen['standard']} von {gesamt} "
+        f"Karten ({groessen}). Er wird bei JEDEM Seitenaufruf geladen; "
+        "am 21.09.2026 waren es dadurch 19,87 MB statt 3,79 MB.")

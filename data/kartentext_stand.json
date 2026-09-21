@@ -1,5 +1,26 @@
 {
   "_zweck": "Belegt, welche Sets deutschen Kartentext tragen und welche Karten die Quelle nicht uebersetzt fuehrt.",
+  "_gesamtstand_zweck": "Zaehlt ueber die ganze Datenbank, nicht ueber diesen Lauf — sonst beantwortet ein gezielter --sets-Lauf die Frage „ist alles da?\" nicht mehr.",
+  "gesamtstand": {
+    "standard": {
+      "karten": 4605,
+      "mit_text_de": 4186,
+      "mit_text_en": 4595,
+      "anteil_de": 90.9
+    },
+    "extended": {
+      "karten": 4153,
+      "mit_text_de": 4083,
+      "mit_text_en": 4099,
+      "anteil_de": 98.3
+    },
+    "legacy": {
+      "karten": 11822,
+      "mit_text_de": 6348,
+      "mit_text_en": 11667,
+      "anteil_de": 53.7
+    }
+  },
   "gelaufen_am": "2026-09-21 15:52:55 UTC",
   "quelle": "https://limitlesstcg.com/cards/de/<SET>?display=full",
   "aeren": [

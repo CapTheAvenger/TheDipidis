@@ -298,7 +298,27 @@ def main() -> int:
         logger.info('Trockenlauf — nichts geschrieben.')
         return 0
 
+    # WANN DARF EIN VORHANDENER TEXT GELEERT WERDEN? (21.09.2026)
+    #
+    # Ein leeres Ergebnis heisst zweierlei, und die beiden sind nicht
+    # dasselbe:
+    #
+    #   „die Seite war da, die Karte steht nicht drauf"  -> echte Luecke
+    #   „die Seite war nicht da"                         -> Abrufpanne
+    #
+    # Unterscheiden laesst sich das am SET: hat die englische Setseite
+    # Karten geliefert, war die Quelle erreichbar, und ein fehlender
+    # deutscher Eintrag ist ein Befund. Blieb sie leer, wird nichts
+    # angetastet.
+    #
+    # Ohne diese Unterscheidung bleibt ein einmal falsch geschriebener
+    # Text fuer immer stehen — gemessen an den 29 Karten, die „Attack 1"
+    # als deutschen Attackennamen trugen: der naechste Lauf haette sie
+    # nicht korrigiert, weil er nur nichtleere Werte schreiben durfte.
+    gesehene_sets = {k.split('|')[0] for k in en_alle}
+
     veraendert = 0
+    geleert = 0
     for k in karten:
         s = (k.get('set') or '').strip().upper()
         n = (k.get('number') or '').strip()
@@ -308,17 +328,22 @@ def main() -> int:
             continue
         neu_en = en_alle.get(schluessel, '')
         neu_de = de_alle.get(schluessel, '')
-        # Ein leeres Ergebnis darf einen vorhandenen Text NICHT
-        # ueberschreiben: Basisenergien haben legitim keinen, aber ein
-        # einzelner verpatzter Abruf hat auch keinen — und der zweite
-        # Fall ist nicht vom ersten zu unterscheiden.
+        alt_de = (k.get('card_text_de') or '')
+
+        # Der englische Text wird nie durch Leere ersetzt: dort gibt es
+        # keine „echte Luecke", jede Karte hat einen — ausser den
+        # Basisenergien, und die hatten nie einen.
         if neu_en and neu_en != (k.get('card_text') or ''):
             k['card_text'] = neu_en
             veraendert += 1
-        if neu_de != (k.get('card_text_de') or ''):
-            if neu_de or not (k.get('card_text_de') or ''):
+
+        if neu_de != alt_de:
+            if neu_de:
                 k['card_text_de'] = neu_de
                 veraendert += 1
+            elif s in gesehene_sets:
+                k['card_text_de'] = ''
+                geleert += 1
 
     for k in karten:
         k.setdefault('card_text_de', '')
@@ -353,7 +378,9 @@ def main() -> int:
             schreiber.writeheader()
             schreiber.writerows(karten)
 
-    logger.info('%d Feld(er) geaendert, geschrieben nach: %s', veraendert,
+    logger.info('%d Feld(er) geaendert, %d deutscher Text geleert '
+                '(Set war erreichbar, Karte nicht uebersetzt), '
+                'geschrieben nach: %s', veraendert, geleert,
                 ', '.join(os.path.relpath(z, WURZEL) for z in ziele))
 
     stand = os.path.join(DATEN, 'kartentext_stand.json')

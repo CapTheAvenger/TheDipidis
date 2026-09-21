@@ -76,9 +76,24 @@ _FAEHIGKEIT_PRAEFIX = re.compile(
     re.IGNORECASE | re.DOTALL)
 
 # Platzhalter einer nicht uebersetzten Karte: "Attack 1", "Attack 2", …
-# Die Energiesymbole stehen davor, der Schaden dahinter — beide werden
-# vorher abgeschnitten.
-_PLATZHALTER = re.compile(r'^(?:Attack|Ability)\s+\d+$', re.IGNORECASE)
+#
+# GEPRUEFT WIRD DER TEXT OHNE ENERGIESYMBOLE, ABER MIT SCHADEN.
+#
+# BEFUND 21.09.2026: hier stand `^(?:Attack|Ability)\s+\d+$`, geprueft
+# auf dem Ergebnis von `attacke_ohne_beiwerk()` — also NACH dem
+# Abschneiden des Schadens. Bei "0 Attack 1 30×" fiel dabei nur die 30×
+# weg und "Attack 1" traf. Bei "C Attack 1" (Platzhalter OHNE Schaden)
+# frass dieselbe Regel die 1 als Schaden, uebrig blieb "Attack", und das
+# Muster verlangte eine Ziffer — die Karte galt als uebersetzt.
+#
+# Gemessen: 29 Karten trugen danach "Attack 1" als deutschen
+# Attackennamen, darunter CRE-154, SMP-3 und fuenfzehn SP-Promos.
+#
+# Die Zahl gehoert zum Platzhalter, nicht zum Schaden. Das Muster deckt
+# deshalb beide Formen ab und laeuft auf dem Text, bevor der Schaden
+# abgeschnitten wird.
+_PLATZHALTER = re.compile(
+    r'^(?:Attack|Ability)\s+\d+(?:\s+\d+\s*[+\u00d7x*]?)?$', re.IGNORECASE)
 
 # Energiesymbole am Anfang einer Attackenzeile ("FF", "0", "MMM").
 _SYMBOLE_VORN = re.compile(r'^[A-Z0-9]+\s+')
@@ -129,7 +144,11 @@ def ist_uebersetzt(block: Any) -> bool:
     if '/cards/en/' in (link.get('href') or ''):
         return False
     for el in block.select('.card-text-attack-info'):
-        if _PLATZHALTER.match(attacke_ohne_beiwerk(_text(el))):
+        # Nur die Energiesymbole weg — der Schaden bleibt stehen, sonst
+        # verschwindet die Nummer des Platzhalters mit ihm (siehe der
+        # Kommentar an _PLATZHALTER).
+        ohne_symbole = _SYMBOLE_VORN.sub('', _text(el)).strip()
+        if _PLATZHALTER.match(ohne_symbole):
             return False
     return True
 

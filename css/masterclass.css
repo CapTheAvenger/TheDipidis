@@ -287,6 +287,32 @@
     border-top: 1px dashed var(--line);
 }
 
+/* Der Kopierknopf steht in der Quellenzeile unter jeder Liste. 44 px
+   Hoehe, weil die Seite genau dort ihre Untergrenze fuer Tippziele hat
+   (css/tippziele.css) — er wird auf dem Handy gedrueckt, nicht geklickt. */
+.mcl-kopieren {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    min-height: 44px;
+    margin-left: var(--s-2);
+    padding: 6px 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface-1);
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+}
+.mcl-kopieren:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+}
+.mcl-kopieren[disabled] {
+    opacity: .6;
+    cursor: progress;
+}
+
 /* ── Listen ────────────────────────────────────────────────────── */
 
 .mcl-listmeta { font-size: var(--fs-md); color: var(--ink-2); margin: 0 0 var(--s-3); }

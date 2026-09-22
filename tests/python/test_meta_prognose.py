@@ -240,9 +240,19 @@ def test_der_gemessene_fall_von_mega_excadrill_bleibt_stehen():
     assert vor["mega-excadrill-ex"] == pytest.approx(7.59, abs=0.05), (
         f"Vorwert {vor['mega-excadrill-ex']:.2f} % statt 7,59 % — steht ein "
         f"fremdes Formatfenster im Nenner? (Nenner: {gv}, erwartet 26.130)")
-    assert gv == 26130, (
-        f"der Nenner des abgeschlossenen Fensters ist {gv} statt 26.130. "
-        f"Er kann nicht wachsen — entweder wurden alte Zeilen entfernt "
+    # GEAENDERT 22.09.2026: hier stand `gv == 26130` mit der Begruendung
+    # "er kann nicht wachsen". Er kann es doch: der Labs-Scraper probiert
+    # aeltere Turnier-IDs nach (siehe tests/python/test_labs_gap_fill.py).
+    # Ein erfolgreich nachgetragenes Juli-Turnier fuegt Zeilen MITTEN in
+    # das geschlossene Fenster ein — legitimer Zuwachs, der die Deploy-
+    # Kette angehalten haette. Verlust bleibt ein Fehler: dann wurden
+    # alte Zeilen entfernt oder das Fenster ist nicht mehr auf TEF-PBL
+    # begrenzt. Was das Fenster sauber haelt, steht ohnehin eine Zeile
+    # darueber (7,59 %) und in der Gleichung darunter.
+    assert gv >= 26130, (
+        f"der Nenner des abgeschlossenen Fensters ist auf {gv} gefallen "
+        f"(gemessen am 10.09.2026: 26.130). Ein abgeschlossenes Fenster "
+        f"verliert keine Listen — entweder wurden alte Zeilen entfernt "
         f"oder das Fenster ist nicht mehr sauber auf TEF-PBL begrenzt")
 
     # 2. Die Gleichung gegen die Datei: nichts faellt heraus, nichts

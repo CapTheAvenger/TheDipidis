@@ -550,12 +550,23 @@ def test_eine_eingeschraenkte_auswahl_ist_kleiner_als_alles():
         f"Standard+Extended waehlt alle {len(alle)} Sets aus. Die "
         "Einordnung greift nicht — genau der Fehler aus Lauf #1.")
     # Und die Groessenordnung stimmt: gemessen am 21.09.2026 sind es 47
-    # von 154. Die Form ist bewusst eine Spanne, keine Gleichheit — ein
-    # neues Set darf dazukommen, ohne dass diese Datei rot wird.
-    assert 30 <= len(gewaehlt) <= 80, (
-        f"{len(gewaehlt)} von {len(alle)} Sets gewaehlt — am 21.09.2026 "
-        "waren es 47. Eine Abweichung dieser Groesse heisst, dass sich "
-        "die Einordnung verschoben hat.")
+    # von 154.
+    #
+    # GEAENDERT 22.09.2026: die Obergrenze war 80 und damit eine absolute
+    # Zahl auf einer Datei, die der Wochenlauf mit jedem neuen Set
+    # verlaengert. Extended waechst mit — die 80 waere irgendwann
+    # gefallen, ohne dass sich an der Einordnung etwas geaendert haette.
+    # Die Aussage ist ein ANTEIL: Standard+Extended ist ein Ausschnitt,
+    # nicht die halbe Geschichte. Der faellt auch bei 300 Sets noch
+    # richtig aus.
+    assert len(gewaehlt) >= 30, (
+        f"nur {len(gewaehlt)} von {len(alle)} Sets gewaehlt — am 21.09.2026 "
+        "waren es 47. So wenige heisst, dass die Einordnung Sets verliert.")
+    assert len(gewaehlt) < len(alle) * 0.6, (
+        f"{len(gewaehlt)} von {len(alle)} Sets gewaehlt "
+        f"({len(gewaehlt) / len(alle) * 100:.0f} %) — Standard+Extended ist "
+        "ein Ausschnitt der Kartengeschichte, kein Mehrheitsanteil. Die "
+        "Einordnung hat sich verschoben.")
     # Gegenprobe: ein bekanntes Legacy-Set darf NICHT dabei sein.
     assert "BS" not in gewaehlt, "Base Set gilt als Standard oder Extended"
 

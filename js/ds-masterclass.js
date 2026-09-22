@@ -64,6 +64,8 @@
             warum: 'Warum diese Anzahl',
             kartentext: 'Kartentext',
             kartentextEn: 'Card text (English)',
+            sammlerdruck: 'Sammlerdruck',
+            kopiert: 'Liste als Bild — kopieren oder sichern',
             keinTreffer: 'Kein Treffer.'
         },
         en: {
@@ -83,6 +85,8 @@
             warum: 'Why this count',
             kartentext: 'Card text',
             kartentextEn: 'Kartentext (Deutsch)',
+            sammlerdruck: 'Collector print',
+            kopiert: 'List as an image — copy or save',
             keinTreffer: 'No match.'
         }
     };
@@ -209,6 +213,206 @@
         });
     }
 
+    /* Dieselbe Adresse wie im Bestand (js/app-anti-tech.js) und wie im
+     * erzeugten Stueck — aus "SET-NUM" wird die Limitless-Bildadresse. */
+    function bildAdresse(druck) {
+        var t = String(druck || '').split('-');
+        if (t.length !== 2 || !t[0] || !t[1]) return '';
+        var n = t[1];
+        while (n.length < 3) n = '0' + n;
+        return 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/' + t[0] + '/' + t[0] + '_' + n + '_R_EN_LG.png';
+    }
+
+    function detailBild(knopf) {
+        var hoch = knopf.dataset.druckHoch;
+        return hoch && hoch !== knopf.dataset.druck ? bildAdresse(hoch) : '';
+    }
+
+    /* Bilder vom Limitless-CDN vergiften das Canvas: die Adresse schickt
+     * kein Access-Control-Allow-Origin, und toBlob() wirft danach. Der
+     * Bestand loest das seit dem Deckbauer ueber den weserv-Proxy
+     * (js/app-deck-builder.js, js/ds-share.js) — dieselbe Loesung hier,
+     * ueber DsShare, wenn es geladen ist. */
+    function corsAdresse(url) {
+        try {
+            if (window.DsShare && window.DsShare._internals
+                && typeof window.DsShare._internals.corsUrl === 'function') {
+                return window.DsShare._internals.corsUrl(url);
+            }
+        } catch (e) { /* egal */ }
+        if (!url || url.indexOf('data:') === 0 || url.indexOf('blob:') === 0) return url;
+        try {
+            if (new URL(url).origin === location.origin) return url;
+        } catch (e) { return url; }
+        return 'https://images.weserv.nl/?url=' + encodeURIComponent(url);
+    }
+
+    function ladeBild(url) {
+        return new Promise(function (fertig) {
+            var fertigGemeldet = false;
+            var bild = new Image();
+            bild.crossOrigin = 'anonymous';
+            var uhr = setTimeout(function () {
+                if (fertigGemeldet) return;
+                fertigGemeldet = true;
+                fertig(null);
+            }, 10000);
+            bild.onload = function () {
+                if (fertigGemeldet) return;
+                fertigGemeldet = true;
+                clearTimeout(uhr);
+                fertig(bild);
+            };
+            bild.onerror = function () {
+                if (fertigGemeldet) return;
+                fertigGemeldet = true;
+                clearTimeout(uhr);
+                fertig(null);
+            };
+            bild.src = url;
+        });
+    }
+
+    /* Wie viele Spalten? Feste Breite 1200 px — ein Bild mit
+     * vorhersagbarer Groesse liest sich auf Discord besser als eine
+     * Bildschirmaufnahme. Die Spaltenzahl richtet sich nach der Zahl der
+     * verschiedenen Karten, damit die letzte Zeile nicht als Rest
+     * dasteht. */
+    function gitter(anzahl) {
+        var beste = null;
+        for (var spalten = 5; spalten <= 8; spalten++) {
+            var zeilen = Math.ceil(anzahl / spalten);
+            var rest = anzahl % spalten || spalten;
+            var kb = Math.floor((1200 - 2 * 28 - 10 * (spalten - 1)) / spalten);
+            /* Die VOLLE letzte Zeile schlaegt die groessere Kachel: 21
+             * Karten auf 5 Spalten enden mit EINER Kachel, und die liest
+             * sich wie ein Rest, obwohl sie zur Liste gehoert. Auf 7
+             * Spalten sind es drei volle Zeilen. Dieselbe Abwaegung wie
+             * in js/ds-share.js gitterMasse(). */
+            var wert = (rest / spalten) * 1000 + kb;
+            if (!beste || wert > beste.wert) {
+                beste = { spalten: spalten, zeilen: zeilen, kb: kb,
+                          kh: Math.round(kb * 342 / 245), wert: wert };
+            }
+        }
+        return beste;
+    }
+
+    async function listeKopieren(wurzel, knopf) {
+        var i = knopf.getAttribute('data-mcl-kopieren');
+        var block = wurzel.querySelector('[data-mcl-listenblock="' + i + '"]');
+        if (!block) return;
+        var kacheln = [].slice.call(block.querySelectorAll('.mcl-kk'));
+        if (!kacheln.length) return;
+
+        var vorher = knopf.textContent;
+        knopf.disabled = true;
+        knopf.textContent = T('laden');
+
+        var g = gitter(kacheln.length);
+        var PAD = 28, GAP = 10, KOPF = 104, FUSS = 46;
+        var breite = 1200;
+        var hoehe = PAD + KOPF + g.zeilen * g.kh + (g.zeilen - 1) * GAP + FUSS + PAD;
+        var c = document.createElement('canvas');
+        c.width = breite;
+        c.height = hoehe;
+        var ctx = c.getContext('2d');
+        var sans = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+
+        ctx.fillStyle = '#12101B';
+        ctx.fillRect(0, 0, breite, hoehe);
+
+        var name = block.getAttribute('data-mcl-listenname') || '';
+        var summe = kacheln.reduce(function (s, k) { return s + (Number(k.dataset.n) || 0); }, 0);
+        ctx.fillStyle = '#F4F1FF';
+        ctx.font = '700 34px ' + sans;
+        ctx.textBaseline = 'top';
+        ctx.fillText(name, PAD, PAD);
+        ctx.fillStyle = '#A79FC4';
+        ctx.font = '500 20px ' + sans;
+        ctx.fillText('Mega-Stalobor-ex · ' + summe + ' Karten · ' + kacheln.length + ' verschiedene',
+            PAD, PAD + 44);
+
+        /* Alle Bilder GLEICHZEITIG. Nacheinander waeren es bei 26
+         * Karten 26 Umlaeufe — auf dem Handy im Zug ist das der
+         * Unterschied zwischen zwei Sekunden und einer halben Minute,
+         * und eine haengende Adresse haelt bei 10 s Zeitgrenze alles
+         * dahinter auf. */
+        var bilder = await Promise.all(kacheln.map(function (kachel) {
+            var im = kachel.querySelector('img');
+            var quelle = im ? (im.currentSrc || im.getAttribute('src')) : '';
+            return quelle ? ladeBild(corsAdresse(quelle)) : Promise.resolve(null);
+        }));
+
+        for (var k = 0; k < kacheln.length; k++) {
+            var sp = k % g.spalten, ze = Math.floor(k / g.spalten);
+            var x = PAD + sp * (g.kb + GAP);
+            var y = PAD + KOPF + ze * (g.kh + GAP);
+            ctx.save();
+            ctx.beginPath();
+            var r = 10;
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + g.kb, y, x + g.kb, y + g.kh, r);
+            ctx.arcTo(x + g.kb, y + g.kh, x, y + g.kh, r);
+            ctx.arcTo(x, y + g.kh, x, y, r);
+            ctx.arcTo(x, y, x + g.kb, y, r);
+            ctx.closePath();
+            ctx.clip();
+            if (bilder[k]) {
+                ctx.drawImage(bilder[k], x, y, g.kb, g.kh);
+            } else {
+                ctx.fillStyle = '#241E33';
+                ctx.fillRect(x, y, g.kb, g.kh);
+                ctx.fillStyle = '#A79FC4';
+                ctx.font = '600 15px ' + sans;
+                ctx.textAlign = 'center';
+                ctx.fillText(kacheln[k].dataset.de || '', x + g.kb / 2, y + g.kh / 2);
+                ctx.textAlign = 'left';
+            }
+            ctx.restore();
+            /* Die Anzahl als Muenze unten auf der Kachel — dieselbe Stelle
+             * wie in der Seite, damit das Bild und die Liste gleich
+             * gelesen werden. */
+            var rr = Math.max(15, Math.round(g.kb * 0.13));
+            var mx = x + g.kb / 2, my = y + g.kh - rr - 6;
+            ctx.beginPath();
+            ctx.arc(mx, my, rr, 0, Math.PI * 2);
+            ctx.fillStyle = '#E8833A';
+            ctx.fill();
+            ctx.fillStyle = '#1A1020';
+            ctx.font = '700 ' + Math.round(rr * 1.15) + 'px ' + sans;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(String(kacheln[k].dataset.n || ''), mx, my + 1);
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+        }
+
+        ctx.fillStyle = '#6F6890';
+        ctx.font = '500 18px ' + sans;
+        ctx.fillText('thedipidis.app · Masterclass Mega-Stalobor-ex', PAD, hoehe - PAD - 18);
+
+        knopf.disabled = false;
+        knopf.textContent = vorher;
+
+        var datei = (name.replace(/[^\wÄÖÜäöüß]+/g, '-').replace(/^-+|-+$/g, '') || 'Liste') + '.png';
+        if (window.DsBildvorschau && typeof window.DsBildvorschau.zeige === 'function') {
+            return window.DsBildvorschau.zeige(c, {
+                dateiname: datei, titel: T('kopiert'), alt: name
+            });
+        }
+        /* Ohne das Vorschaumodul bleibt der Download — lieber eine Datei
+         * als ein Knopf, der nichts tut. */
+        c.toBlob(function (blob) {
+            if (!blob) return;
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = datei;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        }, 'image/png');
+    }
+
     function kartenDetail(knopf) {
         var alt = document.getElementById('mclLupe');
         if (alt) alt.remove();
@@ -220,10 +424,18 @@
         d.setAttribute('aria-modal', 'true');
         d.innerHTML = '<div class="mcl-lupe-inhalt">' +
             '<div class="mcl-lupe-kopf">' +
-            (bild ? '<img src="' + esc(bild.getAttribute('src')) + '" alt="">' : '') +
+            /* Im Detail haengt der hochwertigste Druck derselben Karte,
+              * in der Liste der neueste guenstige: die Liste wird
+              * verschickt und nachgebaut, das Detail angesehen
+              * (Hausi, 22.09.2026). Faellt data-druck-hoch weg, bleibt
+              * das Bild der Kachel. */
+            (bild ? '<img src="' + esc(detailBild(knopf) || bild.getAttribute('src')) + '" alt="">' : '') +
             '<div><h5>' + esc(knopf.dataset.de) + '</h5>' +
             '<p class="mcl-lupe-en">' + esc(knopf.dataset.en) + '</p>' +
             (knopf.dataset.druck ? '<p class="mcl-lupe-druck">' + esc(knopf.dataset.druck) + '</p>' : '') +
+            (knopf.dataset.druckHoch && knopf.dataset.druckHoch !== knopf.dataset.druck
+                ? '<p class="mcl-lupe-druck mcl-fein">' + esc(T('sammlerdruck')) + ': '
+                  + esc(knopf.dataset.druckHoch) + '</p>' : '') +
             '<p class="mcl-lupe-druck mcl-fein">' + esc(knopf.dataset.n) + ' ' + esc(T('inDieser')) + '</p>' +
             '</div></div>' +
             (knopf.dataset.warum ? '<div class="mcl-lupe-block"><strong>' + esc(T('warum')) + '</strong>' +
@@ -294,6 +506,7 @@
             if ((b = e.target.closest('[data-mcl-ziel]'))) { bereichWechseln(wurzel, b.getAttribute('data-mcl-ziel')); return; }
             if ((b = e.target.closest('[data-mcl-filter]'))) { matchupFilter(wurzel, b.getAttribute('data-mcl-filter')); return; }
             if ((b = e.target.closest('[data-mcl-liste]'))) { listeWechseln(wurzel, b.getAttribute('data-mcl-liste')); return; }
+            if ((b = e.target.closest('[data-mcl-kopieren]'))) { listeKopieren(wurzel, b); return; }
             if ((b = e.target.closest('.mcl-kk'))) { kartenDetail(b); return; }
             if (e.target.closest('.mcl-schliessen')) {
                 var buehne = document.getElementById('mclBuehne');
@@ -341,6 +554,8 @@
         _bereichWechseln: bereichWechseln,
         _matchupFilter: matchupFilter,
         _listeWechseln: listeWechseln,
-        _markiere: markiere
+        _markiere: markiere,
+        _gitter: gitter,
+        _bildAdresse: bildAdresse
     };
 })();

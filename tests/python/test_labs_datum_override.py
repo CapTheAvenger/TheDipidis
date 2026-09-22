@@ -163,3 +163,44 @@ def test_die_korrektur_wirkt_vor_dem_datumsfilter():
     assert ruf < filt, (
         "die Korrektur steht NACH dem Datumsfilter. Dann filtert der Lauf "
         "nach einem Datum, das er hinterher nicht schreibt")
+
+
+def test_die_korrektur_greift_auch_am_zwischenspeicher_vorbei():
+    """Der Uebersichts-Zweig allein reicht NICHT.
+
+    BEFUND (22.09.2026, zweiter Anlauf). Die erste Fassung wandte den
+    Override nur dort an, wo der Datumstext der Uebersichtsseite gelesen
+    wird. Das Datum kommt aber aus drei Quellen:
+
+      1. die frisch gelesene Uebersichtsseite,
+      2. `labs_tournaments.json` — der zwischengespeicherte Index,
+      3. `cached_tournament_meta` — die Metadaten des letzten Laufs.
+
+    Fuer ein Turnier, das der Lauf nicht neu einliest, kam das Datum aus
+    (2) oder (3), und die Korrektur lief ins Leere. Das Tor im
+    Wochenlauf schlug daraufhin ein zweites Mal mit derselben Meldung
+    an: labs 2026-09-19 gegen per_player 2026-09-18.
+
+    Geprueft wird deshalb die Stelle HINTER allen drei Quellen.
+    """
+    with io.open(LABS_QUELLE, encoding="utf-8") as f:
+        quelle = f.read()
+    ohne = "\n".join(z for z in quelle.split("\n")
+                      if not z.lstrip().startswith("#"))
+    assert len(ohne) > len(quelle) * 0.3, "das Ausschneiden hat zu viel entfernt"
+
+    sammel = ohne.find(
+        "effective_date = t.get('tournament_date') or "
+        "cached_for_skip.get('tournament_date') or ''")
+    assert sammel > 0, (
+        "die Stelle, an der das Datum aus allen drei Quellen zusammenlaeuft, "
+        "heisst anders — diese Pruefung greift ins Leere")
+    korr = ohne.find("effective_date = _datum_mit_override(tid, effective_date)")
+    assert korr > sammel, (
+        "die Korrektur steht nicht HINTER der Stelle, an der das Datum aus "
+        "Uebersicht, Zwischenspeicher und Vorlauf zusammenlaeuft. Dann "
+        "erreicht sie genau die Turniere nicht, die der Lauf nicht neu "
+        "einliest — und das sind die meisten")
+    verwendung = ohne.find("_derive_meta_for_labs_tournament(", korr)
+    assert verwendung > korr, (
+        "die Korrektur steht nach der ersten Verwendung des Datums")

@@ -276,12 +276,27 @@ describe('Datenstand', () => {
     const BUILD = lies('scripts/build_data_stand.py');
     const HTML = lies('index.html');
 
-    it('alle vier leeren City-League-Dateien sind als leer gemeldet', () => {
-        for (const f of ['city_league_analysis.csv', 'city_league_archetypes.csv',
-                         'city_league_archetypes_comparison.csv',
-                         'city_league_archetypes_deck_stats.csv']) {
-            assert.ok(stand.leer.includes(f), f + ' fehlt in der leer-Liste');
+    it('die leer-Liste deckt sich mit dem Bestand', () => {
+        /* UMGESCHRIEBEN 22.09.2026. Hier standen VIER City-League-Namen
+           abgeschrieben, die in stand.leer stehen MUSSTEN — also leer
+           SEIN. Die vier Scraper laufen aber weiter im Wochenlauf, und
+           zwar im Anhaengemodus: EINE Datenzeile nimmt die Datei aus der
+           leer-Liste und macht diese Zusicherung rot. Der Deploy stuende
+           dann an einer guten Nachricht — die japanische Saison laeuft
+           wieder.
+
+           Geprueft wird jetzt die Deckungsgleichheit: was der Bauer als
+           leer meldet, ist leer, und was leer ist, meldet er. */
+        for (const f of stand.leer) {
+            let inhalt;
+            try { inhalt = lies('data/' + f); } catch (e) { continue; }
+            const zeilen = inhalt.trim().split('\n').filter(z => z.trim());
+            assert.ok(zeilen.length <= 1,
+                `${f} steht in stand.leer, traegt aber ${zeilen.length - 1} `
+                + 'Datenzeilen — die Meldung ist veraltet');
         }
+        assert.ok(Array.isArray(stand.leer),
+            'data_stand.json fuehrt keine leer-Liste mehr');
     });
 
     it('die beiden nachgetragenen Quellen werden geführt', () => {

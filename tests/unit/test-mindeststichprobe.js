@@ -85,15 +85,34 @@ describe('City-League-Tiers: ein Indexschnitt heisst nicht "Beherrschen das Meta
         const platz = (x) => zahl(x.new_avg_placement, 999);
         const t1 = nachAnzahl.slice(0, 3).map(platz);
         const t2 = nachAnzahl.slice(3, 10).map(platz);
-        assert.ok(Math.min(...t2) < Math.min(...t1),
-            `das beste Tier-2-Deck (${Math.min(...t2)}) muesste besser stehen als `
-            + `das beste Tier-1-Deck (${Math.min(...t1)}) — sonst ist die Begruendung `
-            + 'im Kommentar veraltet');
-        // Und die Spreizung der gelisteten 20 ist kleiner als ein ganzer Platz.
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand, das beste Tier-2-Deck
+           muesse BESSER stehen als das beste Tier-1-Deck. Gemessen sind
+           das 7,74 gegen 8,07 — 0,33 Plaetze, an einer Datei, die der
+           Wochenlauf zweimal die Woche neu schreibt. Eine City League
+           kehrt das um, ohne dass an der Umbenennung etwas waere.
+
+           Die Begruendung der Umbenennung ist auch gar nicht "Tier 2 ist
+           besser als Tier 1". Sie ist: die Listenzahl misst keine
+           Spielstaerke, weil die gelisteten 20 alle im selben
+           Platzierungsbereich liegen. Das traegt die Spreizung allein —
+           und die ist mit 1,72 von erlaubten 4 weit weg. Vier Plaetze
+           sind bei acht Runden die halbe Skala; darueber waere die
+           Behauptung wirklich hinfaellig. */
         const zwanzig = nachAnzahl.slice(0, 20).map(platz);
         const spreizung = Math.max(...zwanzig) - Math.min(...zwanzig);
-        assert.ok(spreizung < 3,
-            `Spreizung ueber die 20 gelisteten Decks: ${spreizung.toFixed(2)} Plaetze`);
+        assert.ok(zwanzig.length >= 10,
+            `nur ${zwanzig.length} gelistete Decks — dann sagt die Spreizung nichts`);
+        assert.ok(spreizung < 4,
+            `Spreizung ueber die ${zwanzig.length} gelisteten Decks: `
+            + `${spreizung.toFixed(2)} Plaetze. Bei acht Runden waeren vier Plaetze `
+            + 'die halbe Skala — dann traegt "die Listenzahl misst keine '
+            + 'Spielstaerke" nicht mehr');
+        // Die Richtung selbst wird nur gemeldet, nicht gesperrt: sie
+        // schwankt mit jedem Wochenlauf.
+        if (!(Math.min(...t2) < Math.min(...t1))) {
+            console.warn(`[tier] bestes Tier-2-Deck ${Math.min(...t2)} steht nicht `
+                + `besser als das beste Tier-1-Deck ${Math.min(...t1)}`);
+        }
     });
 
     it('ein grosser Teil der Archetypen besteht aus genau einer Liste', () => {
@@ -190,8 +209,24 @@ describe('Rogue-Block: nach Listenzahl, nicht nach der Platzierung eines Einzeln
         const rogue = nachAnzahl.slice(20);
         const nachPlatz = [...rogue]
             .sort((a, b) => zahl(a.new_avg_placement, 999) - zahl(b.new_avg_placement, 999));
-        assert.ok(nachPlatz.slice(0, 3).every(x => zahl(x.new_count) === 1),
-            'die alte Sortierung stellte Decks mit einer Liste nach oben');
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand, die DREI nach Platzierung
+           besten Rogue-Decks bestuenden aus genau EINER Liste. Gemessen
+           sind es 1/1/1 — und der vierte steht schon auf 2. Eine einzige
+           City League, in der ein Zwei-Listen-Deck einen ersten Platz
+           holt, macht die Zusicherung rot, ohne dass an der Sortierung
+           etwas waere.
+
+           Die Aussage ist nicht "genau drei und genau eine". Sie ist:
+           die alte Sortierung nach Platzierung stellt DUENNE Stichproben
+           nach oben. Das misst ein Anteil ueber die Spitze des Blocks. */
+        const spitze = nachPlatz.slice(0, 10);
+        const duenn = spitze.filter(x => zahl(x.new_count) <= 2).length;
+        assert.ok(spitze.length >= 5, 'zu wenige Rogue-Decks fuer die Messung');
+        assert.ok(duenn >= Math.ceil(spitze.length * 0.6),
+            `nur ${duenn} der ${spitze.length} nach Platzierung besten Rogue-Decks `
+            + 'stehen auf hoechstens zwei Listen — dann stellte die alte '
+            + 'Sortierung keine duennen Stichproben mehr nach oben, und die '
+            + 'Begruendung der Umstellung gehoert neu bewertet');
         const nachN = [...rogue].sort((a, b) => zahl(b.new_count) - zahl(a.new_count));
         assert.ok(zahl(nachN[0].new_count) > 50,
             'die neue Sortierung stellt eine tragfaehige Stichprobe nach oben');

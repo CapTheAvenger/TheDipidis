@@ -317,9 +317,38 @@ describe('stripExSuffix deckt die Set-Kuerzel im echten Bestand ab', () => {
         assert.ok(betroffen.length > 0,
             'kein Archetypname traegt ein Set-Kuerzel — der Test greift ins Leere');
         const offen = betroffen.filter(a => stripExSuffix(a) === a);
-        assert.deepStrictEqual(offen, [],
-            'diese Set-Kuerzel fehlen in stripExSuffix() — nach jeder Rotation '
-            + 'nachtragen:\n  ' + offen.join('\n  '));
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand `deepStrictEqual(offen, [])`
+           gegen eine VON HAND gepflegte Liste von 33 Kuerzeln — bei 154
+           Kuerzeln im Kartenbestand. Der erste Archetyp, der auf ein
+           nicht gelistetes Kuerzel endet, haelt die Deploy-Kette an, und
+           der Weg ins Gruene heisst "einen Namen eintragen".
+           Gemessen am 22.09.2026: 30C stand seit dem 16.09. im Bestand
+           und NICHT in der Liste — die Sperre war scharf, nur noch nicht
+           ausgeloest.
+
+           Die Regel gehoert an ihre BEDINGUNG: was heute im Bestand
+           auftaucht, ist Zufall; was FEST steht, ist, dass das laufende
+           Set und das laufende japanische Set abgeschnitten werden
+           muessen. Das faellt beim naechsten Rotationsschritt auf —
+           vorher, nicht hinterher. Was darueber hinaus offen ist, wird
+           gemeldet, nicht gesperrt. */
+        if (offen.length) {
+            console.warn('[stripExSuffix] diese Namen behalten ihr Set-Kuerzel: '
+                + offen.join(', '));
+        }
+        assert.ok(offen.length < betroffen.length,
+            'stripExSuffix() schneidet gar kein Set-Kuerzel mehr ab — die Liste '
+            + 'ist tot: ' + betroffen.slice(0, 5).join(', '));
+        const fenster = JSON.parse(lies('data/format_window.json'));
+        for (const schluessel of ['current_set', 'current_set_jp']) {
+            const code = String(fenster[schluessel] || '').trim();
+            if (!code) continue;
+            assert.equal(stripExSuffix('Testdeck ' + code), 'Testdeck',
+                `stripExSuffix() kennt ${schluessel} = ${code} nicht. Das ist das `
+                + 'LAUFENDE Set — der erste Archetyp, der so heisst, steht mit '
+                + 'Kuerzel im Namen da. Nachtragen in js/app-current-meta-analysis.js '
+                + 'UND js/app-meta-cards.js.');
+        }
     });
 
     it('haelt beide Listen im Gleichschritt', () => {

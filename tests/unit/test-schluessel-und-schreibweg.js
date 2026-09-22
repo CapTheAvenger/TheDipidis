@@ -272,11 +272,28 @@ describe('Deck-Builder: die Turniergroesse wird auch unter der Limitless-ID gefu
         assert.equal(erfunden.length, 0,
             `${erfunden.length} ONLINE-Zeile(n) tragen eine Labs-Kennung. `
             + `Online-Turniere haben keine — die waere geraten.`);
-        // Und die Zuordnung stimmt inhaltlich, nicht nur formal:
-        const naic = zeilen.slice(1).find(z => z && z.split(',')[iLim] === '518');
-        assert.ok(naic, 'NAIC (518) ist nicht mehr in der Datei');
-        assert.equal(naic.split(',')[iTid], '0070',
-            'NAIC traegt eine andere Labs-Kennung als 0070');
+        /* Und die Zuordnung stimmt inhaltlich, nicht nur formal.
+
+           UMGESCHRIEBEN 22.09.2026: hier stand EIN Turnier namentlich
+           (NAIC 2026, Limitless 518). Die Datei ist ein rollendes
+           Fenster; rollt das Turnier heraus, faellt die Zusicherung,
+           ohne dass etwas kaputt ist. Geprueft wird jetzt JEDE
+           hinterlegte Uebersetzung — aber nur fuer die Turniere, die
+           heute wirklich in der Datei stehen. */
+        const ov = JSON.parse(lies('data/labs_tournament_id_overrides.json'));
+        let geprueft = 0;
+        for (const [lim, o] of Object.entries(ov.overrides || {})) {
+            if (!o || !o.labs_tournament_id) continue;
+            const z = zeilen.slice(1).find(x => x && x.split(',')[iLim] === String(lim));
+            if (!z) continue;   // aus dem Fenster gerollt — kein Fehler
+            geprueft++;
+            assert.equal(z.split(',')[iTid], String(o.labs_tournament_id),
+                `Limitless ${lim} traegt eine andere Labs-Kennung als `
+                + `${o.labs_tournament_id} — die hinterlegte Uebersetzung greift nicht`);
+        }
+        assert.ok(geprueft > 0,
+            'kein einziges Turnier mit hinterlegter Uebersetzung steht noch in '
+            + 'der Datei — dann prueft diese Zusicherung nichts mehr');
     });
 
     it('und die Uebersetzung 518 -> 0070 ist dokumentiert', () => {

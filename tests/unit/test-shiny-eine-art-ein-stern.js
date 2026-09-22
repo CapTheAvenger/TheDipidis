@@ -176,11 +176,17 @@ describe('Eine Art, ein Stern', () => {
     it('die drei Paldea-Tauros bekommen drei verschiedene Schluessel', () => {
         const { CS } = lade();
         const tauros = DEX.entries.filter(e => e.dex === 128 && (e.form || 'Base') === 'Regional');
-        assert.strictEqual(tauros.length, 3,
-            'die Datenlage hat sich geaendert: 128 traegt nicht mehr drei Regionalformen');
+        /* UMGESCHRIEBEN 22.09.2026: hier stand `tauros.length === 3`.
+           Wie viele Paldea-Tauros der Kader fuehrt, ist eine Beobachtung
+           ueber die Datei; die AUSSAGE ist, dass gleiche Nummer und
+           gleiche Form-Kennung nicht zu einem gemeinsamen Stern
+           zusammenfallen. Das gilt bei zwei Formen genauso wie bei drei. */
+        assert.ok(tauros.length > 1,
+            `128 traegt nur ${tauros.length} Regionalform(en) — dann prueft diese `
+            + 'Zusicherung nichts mehr');
         const schluessel = new Set(tauros.map(e => CS.schluessel(e)));
-        assert.strictEqual(schluessel.size, 3,
-            'Nummer UND Form-Kennung sind bei den drei Tauros gleich — ohne den '
+        assert.strictEqual(schluessel.size, tauros.length,
+            'Nummer UND Form-Kennung sind bei den Paldea-Tauros gleich — ohne den '
             + 'Namen im Schluessel waeren sie ein einziger Stern');
     });
 

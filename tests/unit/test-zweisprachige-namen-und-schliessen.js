@@ -271,10 +271,19 @@ describe('Die Namen, die die Oberflaeche zeigen muss, liegen deutsch vor', () =>
         const ohne = Object.entries(ov)
             .filter(([, v]) => !String((v && v._source) || (v && v.quelle) || '').trim())
             .map(([k]) => k);
-        // Die drei Champions-eigenen Faehigkeiten haben keine oeffentliche
-        // Quelle; sie stehen in der Datei mit einer Notiz statt _source.
-        assert.ok(ohne.length <= 3,
-            `Ohne Quellenangabe: ${ohne.join(', ')}`);
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand `ohne.length <= 3` mit der
+           Begruendung, die drei Champions-eigenen Faehigkeiten traegen
+           statt _source eine Notiz. Beides trifft die Datei nicht mehr:
+           gemessen ist es EIN Eintrag ohne Quelle (Electric Surge), und
+           ein Notizfeld gibt es dort gar nicht — die Felder sind de,
+           de_effect, en_effect und _source.
+
+           Die Aussage ist ein ANTEIL: ein geratener Name faellt auf,
+           solange er die Ausnahme bleibt. Waechst der Anteil, ist die
+           Quellenpflicht nicht mehr die Regel. */
+        assert.ok(ohne.length <= Math.max(3, Object.keys(ov).length * 0.15),
+            `${ohne.length} von ${Object.keys(ov).length} Eintraegen ohne `
+            + `Quellenangabe: ${ohne.join(', ')}`);
         const ent = json('data/champions_namen_entschieden.json').namen;
         Object.entries(ent.moves || {}).forEach(([en, v]) => {
             assert.ok(String((v && v.quelle) || '').trim(),

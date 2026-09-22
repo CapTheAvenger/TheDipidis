@@ -68,16 +68,33 @@ describe('Ohne Grundform keine Mega-Form', () => {
             + 'es gaebe die Grundform im Spiel nicht.');
     });
 
-    it('Tandrak selbst — der gemeldete Fall', () => {
+    it('Tandrak selbst — der gemeldete Fall, solange er im Kader steht', () => {
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand `assert.ok(mega, 'steht
+           nicht mehr im Pokedex')` — zwei Namen als Pflicht, in einer
+           Datei, deren Kader sich laut dem Kommentar weiter unten
+           WOECHENTLICH dreht. Faellt Tandrak aus der Rangliste, faellt
+           diese Datei mit, ohne dass an der Regel etwas waere.
+
+           Die Regel ist "ohne Grundform keine Mega-Form" und wird oben
+           ueber ALLE Eintraege geprueft. Der gemeldete Fall bleibt als
+           Beispiel — aber nur, solange es ihn gibt. */
         const dex = json('data/champions_pokedex.json');
         const basis = dex.entries.find(e => e.en === 'Dragalge');
         const mega = dex.entries.find(e => e.en === 'Mega Dragalge');
-        assert.ok(mega, 'Mega Dragalge steht nicht mehr im Pokedex');
-        assert.ok(basis, 'Dragalge fehlt — genau der gemeldete Fall');
+        if (!mega && !basis) return;   // aus dem Kader gefallen, kein Defekt
+        assert.ok(basis, 'Mega Dragalge steht ohne Dragalge im Pokedex — genau '
+            + 'der gemeldete Fall vom 15.09.2026');
         assert.equal(basis.de, 'Tandrak');
         assert.ok(basis.hp && basis.hp.base > 0,
             'Die Grundform steht ohne Basiswerte da — dann ist die Zeile leer '
             + 'und behauptet trotzdem etwas.');
+        // Und die Regel greift ueberhaupt noch irgendwo: mindestens eine
+        // Mega-Form steht mit ihrer Grundform da.
+        const namen = new Set(dex.entries.map(e => e.en));
+        const paare = dex.entries.filter(e => /^Mega /.test(e.en)
+            && namen.has(e.en.replace(/^Mega /, '')));
+        assert.ok(paare.length > 0,
+            'keine einzige Mega-Form steht mit ihrer Grundform im Pokedex');
     });
 
     it('die ergaenzten Grundformen sind BELEGT, nicht abgeleitet', () => {
@@ -138,13 +155,26 @@ describe('Ohne Grundform keine Mega-Form', () => {
         const usage = json('data/champions_usage.json');
         const zeilen = Object.keys(usage.pokemon || {});
         const formen = extra._meta.geschlechtsformen || [];
-        assert.ok(formen.length >= 1, 'keine Geschlechtsform abgeleitet');
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand `formen.length >= 1` bei
+           gemessenen genau EINER Form (Basculegion-F) — eine Untergrenze
+           ohne Luft nach unten. Verliert Basculegion-F seine eigene
+           Nutzungszeile, streicht der Scraper die Form regelkonform, und
+           der Test faellt an seiner eigenen Regel.
+
+           Und statt Oinkologne-F namentlich auszuschliessen, wird die
+           REGEL geprueft: keine Geschlechtsform ohne eigene Nutzungszeile
+           im Kader. Das deckt Oinkologne-F ab und jede weitere. */
         formen.forEach(n => {
             assert.ok(zeilen.indexOf(n.toLowerCase()) !== -1,
                 `${n} hat keine eigene Nutzungszeile`);
         });
-        assert.ok(extra.smogonKeys.indexOf('Oinkologne-F') === -1,
-            'Oinkologne-F hat keine Nutzungszeile und darf nicht im Kader stehen');
+        const ohneZeile = (extra.smogonKeys || []).filter(k => /-F$/.test(k)
+            && zeilen.indexOf(String(k).toLowerCase()) === -1);
+        assert.deepEqual(ohneZeile, [],
+            'diese Geschlechtsformen stehen im Kader, ohne dass '
+            + 'championsbattledata.com eine eigene Zeile fuehrt: '
+            + ohneZeile.join(', ') + '. Dann wird eine Form getrennt gezeigt, '
+            + 'die das Spiel nicht getrennt spielt (der Fall Oinkologne-F)');
         assert.match(SCRAPER, /if form\.lower\(\) not in zeilen:/,
             'die Bedingung fehlt im Scraper — dann kommt sie beim naechsten Lauf weg');
     });

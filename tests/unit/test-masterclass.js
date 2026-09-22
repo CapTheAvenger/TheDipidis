@@ -148,7 +148,7 @@ test('jede Liste fuehrt genau 60 Karten und genau ein ACE SPEC', () => {
      * abgeschrieben, und jede kommt auf 60 — ein Lesefehler waere hier
      * aufgefallen. */
     const bloecke = FRAGMENT.match(/data-mcl-listenblock="\d+"[\s\S]*?<\/div>\s*<p class="mcl-quelle">/g) || [];
-    assert.ok(bloecke.length >= 20, `${bloecke.length} Listenbloecke gefunden, erwartet mindestens 20`);
+    assert.ok(bloecke.length >= 25, `${bloecke.length} Listenbloecke gefunden, erwartet mindestens 25`);
     const ACE = ['Heldenumhang', 'Edler Rollwagen', 'Geheime Box', 'Unfairer Stempel'];
     bloecke.forEach((b, i) => {
         const anzahlen = [...b.matchAll(/data-n="(\d+)"/g)].map((m) => Number(m[1]));
@@ -353,10 +353,25 @@ test('das Kartendetail zeigt den deutschen Kartentext, nicht nur den englischen'
      * im englischen Kartentext vorkommen, duerfen dort nicht stehen.
      * Eine Stichprobe auf ein einzelnes Wort haette eine einzelne Karte
      * durchrutschen lassen — gemessen in der Verfaelschungsprobe. */
-    const englisch = /Search your deck|Discard the top|Prevent all effects|This attack does|Once during your turn|Put \d+ damage/;
+    /* 22.09.2026: die Liste fester englischer Wendungen hat eine
+     * Verfaelschung durchgelassen — Briduradon-ex' englischer Text
+     * enthaelt keine davon. Jetzt entscheiden allgemeine englische
+     * Funktionswoerter, die in einem deutschen Kartentext nirgends
+     * vorkommen (gemessen: 0 von 501 deutschen Texten treffen sie). */
+    const englisch = /\b(your|the|you may|from your|during your|opponent|attached to|damage|discard|search)\b/i;
     const falsch = kacheln.filter((k) => englisch.test(k));
     assert.deepStrictEqual(falsch.map((k) => k.slice(11, 60)), [],
         'diese Kartentexte stehen englisch im Hauptfeld');
+
+    /* Und der Gegencheck ohne Wortliste: Haupt- und Zweitfeld duerfen
+     * nie denselben Text fuehren. Wer den deutschen Text durch den
+     * englischen ersetzt, faellt hier auf, egal welche Woerter darin
+     * stehen. */
+    const paare = [...FRAGMENT.matchAll(/data-text="([^"]*)" data-text-en="([^"]*)"/g)];
+    assert.ok(paare.length >= 20, `nur ${paare.length} Kartentext-Paare im Stueck`);
+    const doppelt = paare.filter((m) => m[1] && m[2] && m[1] === m[2]);
+    assert.deepStrictEqual(doppelt.map((m) => m[1].slice(0, 40)), [],
+        'bei diesen Karten steht im Hauptfeld derselbe Text wie im Zweitfeld');
     assert.ok(/data-text="[^"]*Untergraben/.test(FRAGMENT),
         'im Hauptfeld steht nicht der deutsche Kartentext');
 
@@ -365,6 +380,48 @@ test('das Kartendetail zeigt den deutschen Kartentext, nicht nur den englischen'
     const de = JS_NACKT.slice(JS_NACKT.indexOf('de:'), JS_NACKT.indexOf('function lang'));
     assert.ok(/kartentext:\s*'Kartentext'/.test(de),
         'die deutsche Beschriftung heisst weiter "Kartentext (englisch)"');
+});
+
+test('die fuenf Online-Listen der letzten sieben Tage sind eigene Listen', () => {
+    /* BESTELLUNG (22.09.2026): "kannst du noch die erfolgreichsten Listen
+     * der letzten 7 Tage online Limitless Turniere dazu packen". Quelle:
+     * play.limitlesstcg.com, gelesen am 22.09.2026 — Best-Finishes-Tabelle
+     * des Archetyps plus die Standings aller dort gelisteten
+     * Online-Turniere ab 100 Spielern im Fenster 15.-22.09.2026.
+     *
+     * Die Zusicherung haengt an data-mcl-liste und data-de, nicht an
+     * Fliesstext: am 22.09. ist eine Verfaelschung durch eine
+     * Freitextpruefung geschluepft, weil derselbe Name auch in der
+     * Ausarbeitung steht. */
+    const chips = FRAGMENT.match(/data-mcl-liste="\d+"[^>]*>([^<]+)</g) || [];
+    const online = chips.filter((c) => /·\s*\d+\.\s*von\s*\d+/.test(c));
+    assert.strictEqual(online.length, 5,
+        `${online.length} Online-Chips, erwartet 5 (Platz und Feldgroesse im Namen)`);
+    ['Kingssofgamer02', 'Kapony', 'Ducsjr', 'CALLMEDANDI', 'Lordeyebrow'].forEach((s) => {
+        assert.ok(online.some((c) => c.includes(s)), `kein Online-Chip fuer ${s}`);
+    });
+    assert.ok(/class="mcl-listgruppe-titel">Online · letzte 7 Tage</.test(FRAGMENT),
+        'die Gruppe "Online · letzte 7 Tage" fehlt in der Listenwahl');
+
+    /* Briduradon-ex steckt nur in der Online-Liste von Ducsjr. Faellt die
+     * Kachel weg, ist die Liste keine echte Liste mehr, sondern eine
+     * Variante von Tims Liste. */
+    assert.ok(/data-de="Briduradon-ex"/.test(FRAGMENT),
+        'Briduradon-ex steht in keiner Liste als Karte');
+
+    /* Woher die Zahlen kommen, steht unter den Listen — sonst ist eine
+     * Platzierung eine Behauptung. */
+    assert.ok(/play\.limitlesstcg\.com/.test(FRAGMENT), 'die Quelle der Online-Listen fehlt');
+    assert.ok(/ab 100 Spielern/.test(FRAGMENT), 'die Grundgesamtheit der Online-Listen fehlt');
+});
+
+test('Tims Paketliste heisst Kangama Arktos Build', () => {
+    /* BESTELLUNG (22.09.2026): "kannst du die Tim Liste welche aktuell
+     * Update mit Paket heisst umbenennen in Kangama Arktos Build". */
+    assert.ok(/data-mcl-liste="\d+"[^>]*>Kangama Arktos Build</.test(FRAGMENT),
+        'kein Listenchip heisst "Kangama Arktos Build"');
+    assert.ok(!/Update · mit Paket/.test(FRAGMENT),
+        'der alte Name "Update · mit Paket" steht noch im Stueck');
 });
 
 test('die Kangama/Arktos-Liste und die Worlds-Gruppe sind da', () => {
@@ -380,13 +437,13 @@ test('die Kangama/Arktos-Liste und die Worlds-Gruppe sind da', () => {
         'Team Rockets Arktos steht in keiner Liste als Karte');
 
     const gruppen = FRAGMENT.match(/class="mcl-listgruppe-titel">([^<]+)</g) || [];
-    assert.strictEqual(gruppen.length, 2,
-        `${gruppen.length} Listengruppen, erwartet 2 (Tims Listen, Worlds Tag 2)`);
+    assert.strictEqual(gruppen.length, 3,
+        `${gruppen.length} Listengruppen, erwartet 3 (Tims Listen, Worlds Tag 2, Online)`);
 
     /* Die dreizehn fremden Listen tragen Name und Platzierung, sonst
      * weiss der Leser nicht, wessen Liste er sieht. */
     const chips = FRAGMENT.match(/data-mcl-liste="\d+"[^>]*>([^<]+)</g) || [];
-    assert.ok(chips.length >= 20, `nur ${chips.length} Listenchips`);
+    assert.ok(chips.length >= 25, `nur ${chips.length} Listenchips`);
     const mitPlatz = chips.filter((c) => /·\s*\d+\./.test(c));
     assert.ok(mitPlatz.length >= 11,
         `nur ${mitPlatz.length} Chips nennen eine Platzierung`);

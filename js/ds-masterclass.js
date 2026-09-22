@@ -37,8 +37,17 @@
         autor: 'Tim Danklin',
         datum: '17.08.2026',
         zusatz: 'Update 10.09. · Liste 19.09.',
-        bild: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_065_R_EN_LG.png',
-        kennzahlen: '22 Matchups · 6 Listen · 10.250 Wörter',
+        /* Die Regalkachel zeigt den SAMMLERDRUCK der Leitkarte — denselben,
+         * den das Kartendetail zeigt (PBL-103 statt PBL-65). Hausi,
+         * 22.09.2026: "Ist immer noch der low rarity Print, obwohl da max
+         * rarity Print hin soll." Der guenstige Druck gehoert in die
+         * Listen, die verschickt werden; auf der Kachel steht das Bild,
+         * das man ansieht. */
+        bild: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_103_R_EN_LG.png',
+        /* Gezaehlt am Stueck, nicht geschaetzt: 22 Matchups, 25 Listen,
+         * 10.164 Woerter in der Ausarbeitung (22.09.2026). Die Zahl "6
+         * Listen" stand hier noch, als es laengst 25 waren. */
+        kennzahlen: '22 Matchups · 25 Listen · 10.164 Wörter',
         sprachen: ['de'],
         datei: 'masterclass/mega-stalobor.de.html'
     }];

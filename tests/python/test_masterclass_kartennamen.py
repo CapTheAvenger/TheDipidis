@@ -296,3 +296,123 @@ def test_listendruck_ist_der_neueste_guenstige_sammlerdruck_der_hochwertigste():
     # oben leer erfuellbar.
     assert verschieden >= 20, ("nur %d Kacheln unterscheiden Listen- und Sammlerdruck — "
                                "die Trennung ist nicht angekommen" % verschieden)
+
+
+# ---------------------------------------------------------------------------
+# Die Matchup-Zahlen stehen so im Stueck, wie die Rohdaten sie hergeben
+# ---------------------------------------------------------------------------
+
+ONLINE_JETZT = os.path.join(WURZEL, "data", "online_api_matchups_TEF-30C.csv")
+ONLINE_DAVOR = os.path.join(WURZEL, "data", "online_api_matchups_TEF-PBL.csv")
+LABS_MU = os.path.join(WURZEL, "data", "labs_tournament_matchups.csv")
+ARCHETYPEN = os.path.join(WURZEL, "data", "online_api_archetypes.csv")
+MINDEST_PARTIEN = 30
+EIGEN = "mega-excadrill-ex"
+
+
+def _matchpunkte(w, l, t):
+    """(3S + U) / (3 · Partien) — die Konvention, unter der die Labs-Dateien
+    ihre Quoten fuehren (js/win-rate-konvention.js). Eine zweite Formel
+    waere die vierte Konvention, die das Haus verbietet."""
+    n = w + l + t
+    return (3 * w + t) / (3 * n) * 100 if n else None
+
+
+def _online(pfad):
+    csv.field_size_limit(10 ** 7)
+    z = {}
+    with open(pfad, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f, delimiter=";"):
+            if r["archetype_id"] != EIGEN:
+                continue
+            e = z.setdefault(r["opponent_id"], [0, 0, 0])
+            e[0] += int(r["wins"]); e[1] += int(r["losses"]); e[2] += int(r["ties"])
+    return z
+
+
+def _majors():
+    csv.field_size_limit(10 ** 7)
+    z = {}
+    with open(LABS_MU, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            if r["my_deck_slug"] != EIGEN or r["day_filter"] != "overall":
+                continue
+            if not (r["vs_wins"] or "").strip():
+                continue
+            z[r["opponent_deck_slug"]] = [int(r["vs_wins"]), int(r["vs_losses"]), int(r["vs_ties"] or 0)]
+    return z
+
+
+def _slugs():
+    csv.field_size_limit(10 ** 7)
+    k = {}
+    with open(ARCHETYPEN, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f, delimiter=";"):
+            k.setdefault(r["archetype_name"].strip().lower(), r["archetype_id"])
+    with open(LABS_MU, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            k.setdefault((r["opponent_deck_name"] or "").strip().lower(), r["opponent_deck_slug"])
+    return k
+
+
+@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
+def test_die_drei_matchup_quoten_stehen_so_da_wie_die_rohdaten():
+    """BESTELLUNG (22.09.2026): aktuelles Online-Meta, das Meta davor und
+    die letzten Majors nebeneinander, "damit ich mich mit aktuellen Daten
+    bestmoeglich vorbereiten kann".
+
+    Drei Zahlen je Matchup sind drei Gelegenheiten, sich zu vertun. Dieser
+    Test rechnet alle drei aus den Rohbilanzen nach und vergleicht sie mit
+    dem, was im Stueck steht — Zeichen fuer Zeichen, inklusive der Regel,
+    dass unter 30 Partien die Bilanz steht statt einer Quote.
+    """
+    with open(STUECK, encoding="utf-8") as f:
+        roh = f.read()
+
+    slugs = _slugs()
+    quellen = {
+        "Jetzt": _online(ONLINE_JETZT),
+        "Davor": _online(ONLINE_DAVOR),
+        "Majors": _majors(),
+    }
+
+    # Je Matchup: englischer Name aus der Kachel, dann die vier Zellen.
+    bloecke = re.findall(
+        r'<span class="mcl-nm">[^<]*<em>([^<]*)</em></span>[\s\S]*?<span class="mcl-wr3">([\s\S]*?)</span></span>',
+        roh)
+    assert len(bloecke) >= 20, "nur %d Matchup-Bloecke gefunden" % len(bloecke)
+
+    falsch, ohne_slug = [], []
+    geprueft = 0
+    for en, block in bloecke:
+        name = html.unescape(en).strip().lower()
+        slug = slugs.get(name)
+        if not slug:
+            ohne_slug.append(en)
+            continue
+        zellen = dict(
+            (m[0], (m[1], m[2]))
+            for m in re.findall(r'<em>(Jetzt|Davor|Majors)</em><b>([^<]+)</b>(?:<i>\(([\d.]+)\)</i>)?', block)
+        )
+        for feld, daten in quellen.items():
+            w, l, t = daten.get(slug, [0, 0, 0])
+            n = w + l + t
+            steht = zellen.get(feld)
+            assert steht is not None, "%s: Zelle %s fehlt" % (en, feld)
+            wert, nenner = steht
+            if n == 0:
+                soll, soll_n = "—", None
+            elif n < MINDEST_PARTIEN:
+                soll, soll_n = "%d–%d–%d" % (w, l, t), n
+            else:
+                soll = ("%.1f" % _matchpunkte(w, l, t)).replace(".", ",") + " %"
+                soll_n = n
+            ist_n = int(nenner.replace(".", "")) if nenner else None
+            if wert.replace("&nbsp;", " ") != soll or ist_n != soll_n:
+                falsch.append("%s / %s: Stueck sagt %r (%s), gerechnet %r (%s)"
+                              % (en, feld, wert, nenner, soll, soll_n))
+            geprueft += 1
+
+    assert ohne_slug == [], "fuer diese Decks gibt es keinen Archetyp-Schluessel: " + ", ".join(ohne_slug)
+    assert falsch == [], "diese Zahlen stehen anders im Stueck als in den Rohdaten:\n  " + "\n  ".join(falsch)
+    assert geprueft >= 60, "nur %d Zellen geprueft — der Test wuerde ins Leere pruefen" % geprueft

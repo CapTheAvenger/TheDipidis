@@ -1026,15 +1026,29 @@ jobs:
           fi
           bash scripts/run-js-unit-tests.sh > /tmp/js.log 2>&1
           js=$?
-          python3 -m pip install --quiet pytest beautifulsoup4 >/dev/null 2>&1
+
+          # DIESELBE LISTE WIE IM TESTSCHRITT VON deploy-pages.yml.
+          #
+          # BEFUND 22.09.2026, erster Lauf mit diesem Tor: hier standen
+          # nur `pytest beautifulsoup4`. pytest brach beim Einsammeln
+          # mit Rueckgabewert 2 ab — ein Importfehler, kein einziger
+          # Fehlschlag. Das Tor haette damit JEDEN Wochenlauf blockiert,
+          # unabhaengig von den Daten: ein Tor, das immer zu ist, ist
+          # kein Tor, sondern ein Riegel.
+          #
+          # tests/python/test_tor_und_testschritt_ziehen_gleich.py haelt
+          # die beiden Zeilen aneinander.
+          python3 -m pip install --quiet \
+              pytest beautifulsoup4 requests lxml \
+              zxing-cpp segno Pillow PyYAML >/dev/null 2>&1
           python3 -m pytest tests/python -q > /tmp/py.log 2>&1
           py=$?
           {
             echo ""
-            echo "| Suite | Ergebnis |"
-            echo "| --- | --- |"
-            echo "| JS   | $(tail -n 20 /tmp/js.log | grep -E 'JS unit tests:' || echo "Rueckgabewert $js") |"
-            echo "| Python | $(tail -n 5 /tmp/py.log | grep -E 'passed|failed' || echo "Rueckgabewert $py") |"
+            echo "| Suite | Rueckgabewert | Ergebnis |"
+            echo "| --- | ---: | --- |"
+            echo "| JS   | $js | $(grep -E 'JS unit tests:' /tmp/js.log | tail -n 1) |"
+            echo "| Python | $py | $(grep -E '[0-9]+ (passed|failed|error)' /tmp/py.log | tail -n 1) |"
           } >> "$GITHUB_STEP_SUMMARY"
           if [ $js -ne 0 ] || [ $py -ne 0 ]; then
             {
@@ -1043,11 +1057,38 @@ jobs:
               echo "guten Stand, die Seite laeuft mit den Daten der Vorwoche"
               echo "weiter. Die frischen Daten liegen als Artefakt bei."
               echo ""
-              echo "### Rot"
+              # DIE MELDUNG, NICHT NUR DER DATEINAME (22.09.2026).
+              #
+              # Der erste Lauf meldete "✗ test-tag2-grundgesamtheit.js —
+              # 1 failure(s)" und sonst nichts. Welche Zahl gegen welche
+              # Grenze gelaufen war, stand nur in einem Log, das niemand
+              # ohne Anmeldung herunterladen kann — und die frischen
+              # Daten liegen als 41-MB-Artefakt daneben. Die Diagnose
+              # kostete einen zweiten Lauf.
+              #
+              # Wer dieses Tor zuschlagen sieht, muss OHNE zweiten Lauf
+              # wissen, was es gefangen hat.
+              echo "### Rot — die Meldungen"
               echo '```'
-              grep -E '^✗|^FAILED' /tmp/js.log /tmp/py.log | head -40
+              grep -E '^✗|^FAILED|^ *error:|^ *[A-Za-z]*Error|^E ' /tmp/js.log /tmp/py.log \
+                | head -60
               echo '```'
+              echo ""
+              echo "<details><summary>JS-Log, letzte 120 Zeilen</summary>"
+              echo ""
+              echo '```'
+              tail -n 120 /tmp/js.log
+              echo '```'
+              echo "</details>"
+              echo ""
+              echo "<details><summary>Python-Log, letzte 120 Zeilen</summary>"
+              echo ""
+              echo '```'
+              tail -n 120 /tmp/py.log
+              echo '```'
+              echo "</details>"
             } >> "$GITHUB_STEP_SUMMARY"
+            cp /tmp/js.log /tmp/py.log data/ 2>/dev/null || true
             echo "gruen=false" >> "$GITHUB_OUTPUT"
             echo "::error::Die frischen Daten machen Zusicherungen rot — nicht gepusht. Siehe Zusammenfassung."
             exit 1

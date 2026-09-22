@@ -43,7 +43,7 @@
     "unfair stamp",
     "victory piece"
   ],
-  "_hinweis": "29.08.2026: total_count stand auf 53 und zaehlte die EINTRAEGE, nicht die eindeutigen Namen — sieben standen doppelt drin (computer search, master ball, maximum belt, prime catcher, scoop up cyclone, scramble switch, sparkling crystal). Fuer die Anwendung war das folgenlos (die Liste wird als Menge benutzt), aber die Zahl im eigenen Metafeld war falsch und haette bei einer Vollstaendigkeitspruefung in die Irre gefuehrt. Dubletten entfernt, Zahl korrigiert. NICHT behoben und weiterhin offen: die Liste wird von Hand gepflegt und traegt den Stand vom 18.02.2026. Ob seit Februar Ace Specs dazugekommen sind, laesst sich im Repo NICHT feststellen — all_cards_merged.csv kennt keine Raritaet 'ACE SPEC' (geprueft: 0 Treffer), es gibt also keine unabhaengige Referenz. Die Spalte is_ace_spec in den Turnier-CSVs taugt dafuer nicht: sie ist in beide Richtungen falsch (16 Namen als Ace Spec markiert, die nachweislich mehrfach gespielt werden). Wer die Liste erweitert, muss die Quelle von Hand pruefen.",
+  "_hinweis": "29.08.2026: total_count stand auf 53 und zaehlte die EINTRAEGE, nicht die eindeutigen Namen — sieben standen doppelt drin (computer search, master ball, maximum belt, prime catcher, scoop up cyclone, scramble switch, sparkling crystal). Fuer die Anwendung war das folgenlos (die Liste wird als Menge benutzt), aber die Zahl im eigenen Metafeld war falsch und haette bei einer Vollstaendigkeitspruefung in die Irre gefuehrt. Dubletten entfernt, Zahl korrigiert. Die Liste wird weiterhin von Hand gepflegt. NACHTRAG 22.09.2026 — DIE VOLLSTAENDIGKEIT IST DOCH PRUEFBAR. Der Satz \"ob seit Februar Ace Specs dazugekommen sind, laesst sich im Repo NICHT feststellen\" stimmte nur fuer das Repo, nicht fuer die Quelle: limitlesstcg.com/cards?q=is:ace&display=list gibt die Namen als Text aus (die Bildansicht tut es nicht, daher der alte Befund). Abgerufen am 22.09.2026: 46 Drucke, 39 verschiedene Namen — genau die 39, die hier stehen. Die Liste ist also NICHT hinter der Rotation zurueck. Wer sie nachzieht, nimmt dieselbe Adresse mit display=list.",
   "_geprueft": {
     "am": "2026-09-10",
     "gegen": "https://limitlesstcg.com/cards?q=is%3Aace",
@@ -53,6 +53,7 @@
     "ueberzaehlig": 0,
     "warum_die_zahlen_verschieden_sind": "Die Quelle zaehlt DRUCKE, diese Liste fuehrt NAMEN. 46 Drucke verteilen sich auf 39 Namen, weil mehrere ACE SPECs nachgedruckt wurden (z. B. Prime Catcher in TEF und PRE).",
     "warum_das_geprueft_wurde": "timestamp steht auf 2026-02-18, also VOR POR, CRI und PBL. Der Verdacht war, dass ACE SPECs dieser drei Sets fehlen. Gemessen: die Quelle fuehrt aus POR, CRI und PBL KEINE einzige ACE SPEC — die Liste ist inhaltlich aktuell, nur ihr Zeitstempel sieht alt aus. Neu gezogen wurde nichts, deshalb bleibt timestamp stehen.",
-    "was_das_NICHT_heisst": "Dass die Liste morgen noch vollstaendig ist. Ein neues Set mit einer ACE SPEC macht sie unvollstaendig, und diese Datei merkt das nicht von selbst — sie wird nicht von einem Zeitplan gezogen."
+    "was_das_NICHT_heisst": "Dass die Liste morgen noch vollstaendig ist. Ein neues Set mit einer ACE SPEC macht sie unvollstaendig, und diese Datei merkt das nicht von selbst — sie wird nicht von einem Zeitplan gezogen.",
+    "2026-09-22": "39 Namen / 46 Drucke gegen limitlesstcg.com/cards?q=is:ace&display=list — deckungsgleich, keine Ergaenzung noetig."
   }
 }

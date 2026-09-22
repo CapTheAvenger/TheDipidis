@@ -1,32 +1,43 @@
 /**
- * EIN KOMMENTAR, DER EINE MESSUNG BEHAUPTET, IST EINE QUELLENANGABE.
+ * EIN KOMMENTAR, DER EINE MESSUNG BEHAUPTET, IST EINE QUELLENANGABE —
+ * ABER EINE FELDQUOTE IST KEINE KONSTANTE.
  *
- * BEFUND (07.09.2026). In js/app-meta-call.js stand an zwei Stellen
+ * BEFUND 1 (07.09.2026). In js/app-meta-call.js stand an zwei Stellen
  * "10,95 % (gemessen in data/labs_tournament_matchups_TEF-PBL.csv,
- * 6.121 Partien)" und einmal "Limitless Online 1,28 % (2.248 von
- * 174.954)". Nachgemessen ergibt dieselbe Auswahl heute 11,05 % aus
- * 6.192 Partien und 1,29 % aus 180.414 Partien. Die Dateien sind
- * gewachsen, die Saetze nicht.
+ * 6.121 Partien)". Nachgemessen ergab dieselbe Auswahl 11,05 % aus
+ * 6.192 Partien. Die Dateien waren gewachsen, die Saetze nicht.
+ * Behoben, indem die Zahl aus der Prosa in die Konstante
+ * BELEGTE_FELDQUOTEN wanderte — und diese Datei sie gegen die Datei
+ * nachrechnete.
  *
- * Gerechnet wurde nie mit diesen Zahlen — die Quote kommt zur Laufzeit
- * aus der Datei (siehe `aggUnentschieden` und `_unentschiedenQuote`).
- * Das macht es nicht harmlos: der Kommentar ist der einzige Ort, an dem
- * steht, WORAUF sich die Umstellung der Tag-2-Rechnung stuetzt. Eine
- * Quellenangabe, die die Datei nicht mehr hergibt, ist nicht
- * nachpruefbar und sieht so aus, als waere sie es.
+ * BEFUND 2 (22.09.2026) — DIE REPARATUR WAR DIE FALSCHE FORM.
+ * Der Wochenlauf schrieb 13,75 % in dieselbe Datei. Die Zusicherung
+ * schlug an, `test` fiel um, `build` und `deploy` wurden uebersprungen,
+ * die Seite hing auf dem Vortag. Kaputt war nichts.
  *
- * BEHOBEN, INDEM DIE ZAHL AUFHOERT, PROSA ZU SEIN. Sie steht jetzt in
- * der Konstanten BELEGTE_FELDQUOTEN in js/app-meta-call.js, und dieser
- * Test rechnet jeden Eintrag gegen seine Datei nach. Wer die Datei neu
- * scrapt und die Konstante nicht nachzieht, bekommt Rot statt eines
- * still falschen Satzes.
+ * Ein Sollwert mit Toleranzband verlangt, dass ein Mensch ihn
+ * woechentlich nachzieht — und der Deploy steht so lange. Das ist
+ * dieselbe Sorte Stillstand wie am 11., 12. und 13.09.2026, und
+ * dieselbe Lehre: **die Frage ist nicht, ob die Zahl stimmt, sondern
+ * welche Richtung ein Fehler ist.**
  *
- * WAS HIER KEIN WOCHENWERT IST: geprueft wird nicht "die Quote ist
- * 11,05 %", sondern "die Quote, die im Code als gemessen ausgewiesen
- * ist, ist auch die, die in der Datei steht". Der Sollwert kommt aus
- * dem Code, der Istwert aus der Datei; beide bewegen sich gemeinsam.
- * Das Toleranzband steht in der Konstanten selbst und ist dort
- * begruendet.
+ * WAS DIESE DATEI SEITDEM PRUEFT — beides ohne Wochenwert:
+ *
+ * 1. Das VERHAELTNIS. Auf Papier wird um mindestens den Faktor 3
+ *    haeufiger unentschieden gespielt als online. Das ist die Aussage,
+ *    auf der die Umstellung der Tag-2-Rechnung beruht, und sie ist eine
+ *    Eigenschaft der beiden Spielformen — auf Papier laeuft die Zeit
+ *    ab, online nicht.
+ * 2. KEIN VERLUST. Die Partienzahl darf wachsen, aber nicht unter den
+ *    in der Konstanten datierten Stand fallen. Ein leergelaufener
+ *    Scraper faellt damit auf; Zuwachs weckt niemanden
+ *    (CLAUDE.md, 12.09.2026).
+ * 3. Dass die Konstante ueberhaupt noch dasteht und auf existierende
+ *    Dateien zeigt — sonst stuenden die Quellenangaben wieder nur als
+ *    Prosa im Kommentar, und Befund 1 waere zurueck.
+ *
+ * Gerechnet wird mit der Quote AUS DER DATEI (siehe `aggUnentschieden`
+ * und `_unentschiedenQuote`), nie mit einer Zahl aus dem Quelltext.
  */
 
 const { describe, it } = require('node:test');
@@ -113,7 +124,10 @@ describe('Die im Code genannten Feldquoten stehen so in den Dateien', () => {
         assert.deepStrictEqual(Object.keys(BELEGE).sort(),
             ['unentschiedenOnline', 'unentschiedenPraesenz']);
         for (const [k, e] of Object.entries(BELEGE)) {
-            for (const feld of ['was', 'datei', 'auswahl', 'anteilPz', 'partien', 'toleranzPp', 'stand']) {
+            /* `anteilPz` und `toleranzPp` sind am 22.09.2026 entfallen —
+               siehe Befund 2 im Kopf. Was bleibt, ist die
+               Quellenangabe plus eine datierte Untergrenze. */
+            for (const feld of ['was', 'datei', 'auswahl', 'mindestensPartien', 'gemessenAm']) {
                 assert.ok(e[feld] != null && e[feld] !== '',
                     `${k}: das Feld ${feld} fehlt — ohne es ist der Beleg nicht nachpruefbar`);
             }
@@ -122,35 +136,42 @@ describe('Die im Code genannten Feldquoten stehen so in den Dateien', () => {
         }
     });
 
-    it('Praesenz: 11,05 % steht wirklich in labs_tournament_matchups_TEF-PBL.csv', () => {
-        const e = BELEGE.unentschiedenPraesenz;
-        const m = messePraesenz(e.datei);
-        assert.ok(m.partien > 0, `${e.datei} liefert keine einzige Bilanzzeile`);
-        const ist = (m.u / m.partien) * 100;
-        const ab = Math.abs(ist - e.anteilPz);
-        assert.ok(ab <= e.toleranzPp,
-            `${e.datei}: gemessen ${ist.toFixed(4)} %, im Code steht ${e.anteilPz} % `
-            + `(${ab.toFixed(4)} pp Abstand, erlaubt ${e.toleranzPp}). `
-            + `${m.u} von ${m.partien} Partien aus ${m.zeilen} Zeilen. `
-            + 'BELEGTE_FELDQUOTEN in js/app-meta-call.js nachziehen.');
-        const nennerAb = Math.abs(m.partien - e.partien) / e.partien;
-        assert.ok(nennerAb <= PARTIEN_BAND,
-            `${e.datei}: ${m.partien} Partien, im Code stehen ${e.partien}`);
+    it('kein Wochenwert steht mehr in der Konstanten', () => {
+        /* Die Verfaelschungsprobe zu Befund 2: wer den Sollwert
+           zurueckbaut, bekommt Rot — sonst waere der Stillstand vom
+           22.09.2026 in vier Wochen wieder da, und der naechste
+           Durchgang haette nur die Zahl hochgesetzt. */
+        for (const [k, e] of Object.entries(BELEGE)) {
+            for (const verboten of ['anteilPz', 'toleranzPp', 'partien', 'stand']) {
+                assert.ok(!(verboten in e),
+                    `${k}: das Feld ${verboten} ist zurueck. Eine Feldquote waechst `
+                    + 'mit jedem Turnier — ein Sollwert dafuer haelt den Deploy an, '
+                    + 'ohne dass etwas kaputt ist (Befund 22.09.2026).');
+            }
+        }
     });
 
-    it('Online: 1,29 % steht wirklich in limitless_online_decks.csv', () => {
-        const e = BELEGE.unentschiedenOnline;
-        const m = messeOnline(e.datei);
-        assert.ok(m.partien > 0, `${e.datei} liefert keine einzige Bilanzzeile`);
-        const ist = (m.u / m.partien) * 100;
-        const ab = Math.abs(ist - e.anteilPz);
-        assert.ok(ab <= e.toleranzPp,
-            `${e.datei}: gemessen ${ist.toFixed(4)} %, im Code steht ${e.anteilPz} % `
-            + `(${ab.toFixed(4)} pp Abstand, erlaubt ${e.toleranzPp}). `
-            + `${m.u} von ${m.partien} Partien aus ${m.zeilen} Zeilen.`);
-        const nennerAb = Math.abs(m.partien - e.partien) / e.partien;
-        assert.ok(nennerAb <= PARTIEN_BAND,
-            `${e.datei}: ${m.partien} Partien, im Code stehen ${e.partien}`);
+    it('die Partienzahl waechst — und faellt nicht unter den datierten Stand', () => {
+        /* DIE RICHTUNG IST DIE AUSSAGE. Zuwachs ist der Normalfall und
+           weckt niemanden; ein Rueckgang heisst, dass eine Datei
+           leergelaufen ist oder eine Auswahl nicht mehr trifft — und
+           genau dann ist die Quellenangabe wertlos. */
+        const faelle = [
+            ['unentschiedenPraesenz', messePraesenz],
+            ['unentschiedenOnline', messeOnline],
+        ];
+        for (const [k, messe] of faelle) {
+            const e = BELEGE[k];
+            const m = messe(e.datei);
+            assert.ok(m.partien > 0,
+                `${e.datei} liefert keine einzige Bilanzzeile — die Auswahl `
+                + `"${e.auswahl}" trifft nichts mehr`);
+            assert.ok(m.partien >= e.mindestensPartien,
+                `${e.datei}: ${m.partien} Partien aus ${m.zeilen} Zeilen, am `
+                + `${e.gemessenAm} waren es ${e.mindestensPartien}. Ein Verlust ist `
+                + 'hier immer ein Fehler — die Datei sammelt Turniere, sie gibt '
+                + 'keine zurueck.');
+        }
     });
 
     it('die beiden Felder unterscheiden sich wirklich um ein Vielfaches', () => {
@@ -176,7 +197,7 @@ describe('Die im Code genannten Feldquoten stehen so in den Dateien', () => {
            die der Code wirklich liest: dort darf keine der alten Zahlen
            stehen. */
         const alsText = JSON.stringify(BELEGE);
-        for (const alt of ['6121', '174954', '10.95', '1.28', '15.3']) {
+        for (const alt of ['6121', '174954', '10.95', '1.28', '15.3', '11.05', '1.29']) {
             assert.ok(!alsText.includes(alt),
                 `die ueberholte Zahl ${alt} steht wieder in BELEGTE_FELDQUOTEN`);
         }

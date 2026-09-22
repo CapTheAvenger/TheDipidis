@@ -521,12 +521,27 @@ def save_to_csv(data: List[Dict[str, Any]], output_file: str):
                     output_file, existing_header, fieldnames, missing, added,
                 )
             # Row-count guard
+            #
+            # GEAENDERT 22.09.2026: hier stand "overwriting anyway".
+            # Der Waechter erkannte einen halben Scrape, protokollierte
+            # ihn als Fehler — und schrieb ihn trotzdem aus. Damit ist er
+            # keine Sicherung, sondern eine Notiz: die kaputte Datei geht
+            # in denselben Commit wie alles andere, und aufgefangen wird
+            # sie erst stromabwaerts von scripts/sanity_check_data.py,
+            # wenn sie unter dessen Schwelle faellt.
+            #
+            # Eine Datei der Vorwoche ist besser als eine halbe von heute.
+            # Genau dieselbe Regel traegt das Tor im Wochenlauf.
             if existing_row_count > 0 and len(data) < max(1, existing_row_count // 2):
                 logger.error(
                     "[save_to_csv] %s: new snapshot has %d rows but existing file had %d. "
-                    "This looks like a partial scrape — overwriting anyway, but check the source!",
+                    "This looks like a partial scrape — NOT overwriting. "
+                    "Check the source; the previous file stays in place.",
                     output_file, len(data), existing_row_count,
                 )
+                print(f"::error::{output_file}: {len(data)} Zeilen gegen bisher "
+                      f"{existing_row_count} — halber Abruf, es wird NICHT geschrieben.")
+                return False
         except Exception as e:
             logger.warning("[save_to_csv] Could not pre-check existing %s: %s", output_file, e)
 

@@ -59,6 +59,39 @@ DEFAULT_SETTINGS = {
     "max_workers": 8,
 }
 
+def _schreibe_csv_atomar(pfad: str, kopf: list, zeilen: list) -> None:
+    """Erst daneben schreiben, dann umbenennen.
+
+    NACHGETRAGEN 22.09.2026. `data/all_cards_database.csv` ist mit 13,7 MB
+    und ueber 20.000 Zeilen die groesste Datei des Projekts, sie traegt
+    die Spalte card_text_de (14.617 gefuellte Zeilen), und sie wurde bei
+    JEDEM Batch-Zwischenstand komplett neu geschrieben — mit einem
+    schlichten open(..., "w"), das die vorhandene Datei kuerzt, BEVOR die
+    erste Zeile drinsteht.
+
+    Ein Abbruch mittendrin — der Wochenlauf hat ein Zeitlimit — hinterlaesst
+    damit eine abgeschnittene Kartendatenbank, und der Commit-Schritt
+    committet sie. Der Waechter check_kartentext_de_verlust faengt davon
+    nur die eine Spalte, und erst beim naechsten Waechterlauf.
+    """
+    os.makedirs(os.path.dirname(pfad) or ".", exist_ok=True)
+    vorlaeufig = pfad + ".tmp"
+    with open(vorlaeufig, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=kopf, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(zeilen)
+    os.replace(vorlaeufig, pfad)
+
+
+def _schreibe_json_atomar(pfad: str, inhalt) -> None:
+    """Dasselbe fuer JSON — siehe _schreibe_csv_atomar."""
+    os.makedirs(os.path.dirname(pfad) or ".", exist_ok=True)
+    vorlaeufig = pfad + ".tmp"
+    with open(vorlaeufig, "w", encoding="utf-8") as f:
+        json.dump(inhalt, f, indent=2, ensure_ascii=False)
+    os.replace(vorlaeufig, pfad)
+
+
 def _load_settings() -> dict:
     return load_settings("all_cards_scraper_settings.json", DEFAULT_SETTINGS)
 
@@ -720,10 +753,7 @@ def scrape_card_details(
     def write_csv_batch(current_cards: list):
         all_data = (existing_cards + current_cards) if append_mode else current_cards
         deduped  = list({f"{c.get('set','')}::{c.get('number','')}": c for c in all_data}.values())
-        with open(csv_path, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
-            writer.writeheader()
-            writer.writerows(deduped)
+        _schreibe_csv_atomar(csv_path, fieldnames, deduped)
 
     completed     = 0
     updated_cards = []
@@ -933,10 +963,7 @@ def main():
                       # siehe Kommentar bei der ersten Kopfzeile
                       "card_text_de"]
 
-        with open(csv_path, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
-            writer.writeheader()
-            writer.writerows(deduplicated)
+        _schreibe_csv_atomar(csv_path, fieldnames, deduplicated)
 
         json_data = {
             "timestamp": datetime.now().isoformat(),
@@ -944,8 +971,7 @@ def main():
             "total_count": len(deduplicated),
             "cards": deduplicated,
         }
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(json_data, f, indent=2, ensure_ascii=False)
+        _schreibe_json_atomar(json_path, json_data)
 
         logger.info("+ CSV gespeichert:  %s", csv_path)
         logger.info("+ JSON gespeichert: %s", json_path)

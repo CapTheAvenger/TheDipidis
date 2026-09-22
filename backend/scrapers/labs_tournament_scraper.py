@@ -706,6 +706,124 @@ def discover_tournament_ids_by_walk(from_id: int, to_id: int, delay: float = 0.5
 
 # ── Date helpers ──────────────────────────────────────────────────────────────
 
+_DATUM_OVERRIDES_CACHE = None
+
+
+def _labs_datum_overrides() -> dict:
+    """{labs_tournament_id: 'YYYY-MM-DD'} aus
+    data/labs_tournament_id_overrides.json.
+
+    WARUM DER LABS-SCRAPER DIE DATEI AUCH LIEST (22.09.2026)
+    --------------------------------------------------------
+    Die Datei traegt seit dem 22.08.2026 optional ein korrigiertes
+    `tournament_date`. Gelesen hat es bis heute nur die JH-Seite
+    (`tournament_scraper_JH._datum_mit_override`) und ueber sie der
+    Decklisten-Scraper. Der Labs-Scraper schrieb weiter, was er auf der
+    Seite fand.
+
+    Das kann nicht gutgehen, und es ist nicht gutgegangen:
+    `tests/python/test_per_decklist_datum_override.py` verlangt, dass
+    beide Dateien dasselbe Datum fuehren. Eine Korrektur, die nur eine
+    der beiden erreicht, macht den Widerspruch, den sie beheben soll.
+
+    GEMESSEN am 22.09.2026 fuer das Regional Baltimore (labs 0072):
+
+        Quelle labs.limitlesstcg.com/0072/decks   "September 18-20, 2026"
+        labs_tournament_decks.csv, Stand morgens   2026-09-18
+        labs_tournament_decks.csv, frischer Lauf   2026-09-19
+
+    Dieselbe Seite, dasselbe Turnier, zwei Laeufe, zwei Daten. Der
+    Wert aus der Uebersichtsseite ist also nicht stabil — und genau
+    dafuer gibt es die Override-Datei. Eine hinterlegte, begruendete
+    Korrektur gewinnt jetzt an BEIDEN Schreibstellen.
+
+    Der Schluessel der Datei ist die limitless-Kennung; hier wird nach
+    der labs-Kennung gefragt. Umgeschluesselt wird ueber
+    `labs_tournament_id` desselben Eintrags.
+    """
+    global _DATUM_OVERRIDES_CACHE
+    if _DATUM_OVERRIDES_CACHE is not None:
+        return _DATUM_OVERRIDES_CACHE
+    heraus = {}
+    pfad = os.path.join(_get_data_dir(), 'labs_tournament_id_overrides.json')
+    if not os.path.isfile(pfad):
+        pfad = os.path.join(_PROJECT_ROOT, "data", "labs_tournament_id_overrides.json")
+    try:
+        with open(pfad, encoding='utf-8') as f:
+            roh = json.load(f).get('overrides') or {}
+        for eintrag in roh.values():
+            if not isinstance(eintrag, dict):
+                continue
+            labs_id = str(eintrag.get('labs_tournament_id') or '').strip()
+            datum = str(eintrag.get('tournament_date') or '').strip()
+            if not labs_id or not datum:
+                continue
+            # DIESELBE UMWANDLUNG WIE AUF DER JH-SEITE, nicht eine
+            # zweite. Die Datei schreibt das Datum in Limitless-Form
+            # ("18th September 2026"); `_parse_date` hier kennt nur
+            # "September 18, 2026" und haette still None geliefert —
+            # die Korrektur waere wirkungslos geblieben, ohne dass
+            # irgendwo etwas gemeldet wird.
+            iso = _iso_aus_limitless_datum(datum)
+            if iso:
+                heraus[labs_id] = iso
+            else:
+                logger.warning(
+                    "[date-overrides] labs %s: %r ist kein lesbares Datum — "
+                    "die Korrektur bleibt wirkungslos", labs_id, datum)
+    except (OSError, ValueError) as e:
+        logger.warning("[date-overrides] %s nicht lesbar: %s", pfad, e)
+    if heraus:
+        logger.info("[date-overrides] %d Datumskorrektur(en) fuer labs-Turniere",
+                    len(heraus))
+    _DATUM_OVERRIDES_CACHE = heraus
+    return heraus
+
+
+def _parse_iso(raw: str) -> Optional[datetime]:
+    """'2026-09-18' -> datetime. None, wenn es keine ISO-Form ist."""
+    m = re.match(r'^(20\d{2})-(\d{2})-(\d{2})$', str(raw).strip())
+    if not m:
+        return None
+    try:
+        return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    except ValueError:
+        return None
+
+
+def _iso_aus_limitless_datum(raw: str) -> str:
+    """'18th September 2026' oder '2026-09-18' -> '2026-09-18'.
+
+    Wortgleich mit `tournament_scraper_JH._parse_iso_date` — dieselbe
+    Datei wird von beiden Seiten gelesen, also muss sie auf beiden
+    Seiten gleich verstanden werden. Leerer String, wenn die Form
+    unbekannt ist; der Aufrufer meldet das, statt still nichts zu tun.
+    """
+    roh = (raw or '').strip()
+    if not roh:
+        return ''
+    if re.match(r'^\d{4}-\d{2}-\d{2}', roh):
+        return roh[:10]
+    sauber = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', roh, flags=re.IGNORECASE)
+    for fmt in ('%d %B %Y', '%d %b %Y', '%B %d %Y', '%b %d %Y',
+                '%B %d, %Y', '%b %d, %Y'):
+        try:
+            return datetime.strptime(sauber, fmt).strftime('%Y-%m-%d')
+        except ValueError:
+            continue
+    return ''
+
+
+def _datum_mit_override(labs_tid: str, datum_aus_quelle: str) -> str:
+    """Das hinterlegte Datum, falls eines da ist — sonst die Quelle."""
+    korr = _labs_datum_overrides().get(str(labs_tid).strip())
+    if not korr or korr == datum_aus_quelle:
+        return datum_aus_quelle
+    logger.info("[date-overrides] labs %s: %r aus der Seite wird zu %r",
+                labs_tid, datum_aus_quelle, korr)
+    return korr
+
+
 def _parse_date(raw: str) -> Optional[datetime]:
     """Parse date strings like 'April 4–5, 2026', 'April 4, 2026', 'Apr 4 2026'."""
     if not raw:
@@ -891,6 +1009,14 @@ def scrape_tournament_list(
 
         date_obj = _parse_date(date_text)
         date_str = date_obj.strftime('%Y-%m-%d') if date_obj else ''
+        # Eine hinterlegte Korrektur gewinnt ueber die Uebersichtsseite —
+        # siehe `_labs_datum_overrides`. Sie wirkt VOR dem Datumsfilter,
+        # sonst filtert der Lauf nach einem Datum, das er hinterher
+        # nicht schreibt.
+        korrigiert = _datum_mit_override(tournament_id, date_str)
+        if korrigiert != date_str:
+            date_str = korrigiert
+            date_obj = _parse_iso(date_str) or date_obj
 
         # ── Filters ───────────────────────────────────────────────────────────
         # Strict mode when from_date is set: a tournament with no parseable

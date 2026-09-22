@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """Data guardian — checks the data pipeline's health and REPORTS. Never repairs.
 
 Why report-only: this data drives prices and card identity. A silently "fixed"
@@ -2314,9 +2314,15 @@ def check_pocket_frische(findings):
         stand = stand.replace(tzinfo=dt.timezone.utc)
     alter = (dt.datetime.now(dt.timezone.utc) - stand).days
 
-    # Dieselbe Schwelle, die js/ds-pocket.js dem Besucher anzeigt.
+    # Dieselbe Schwelle UND derselbe Vergleich, die js/ds-pocket.js dem
+    # Besucher anzeigt: dort steht `tage >= PLAUSIBEL_TAGE`.
+    #
+    # ABNAHMEBEFUND 22.09.2026: hier stand `>`. Genau einen Tag lang —
+    # bei exakt 28 — sah der Besucher die Warnung und der Waechter
+    # schwieg. Das ist das Gegenteil dessen, was die Meldung darunter
+    # verspricht.
     PLAUSIBEL_TAGE = 28
-    if alter > PLAUSIBEL_TAGE:
+    if alter >= PLAUSIBEL_TAGE:
         findings.append((
             "WARN",
             f"pocket_tierlist.json ist {alter} Tage alt (Schwelle "

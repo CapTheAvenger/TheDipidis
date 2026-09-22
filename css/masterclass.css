@@ -171,6 +171,20 @@
 
 .mcl-filter { display: flex; gap: var(--s-1); flex-wrap: wrap; margin-bottom: var(--s-3); }
 
+/* Listenwahl in zwei beschrifteten Gruppen. Mit zwanzig Listen ist eine
+   einzige Chip-Reihe auf dem Handy nicht mehr zu lesen; die Beschriftung
+   sagt, ob es Tims eigene Liste ist oder eine fremde vom Turnier. */
+.mcl-listgruppe { margin-bottom: var(--s-3); }
+.mcl-listgruppe-titel {
+    display: block;
+    font-size: var(--fs-sm);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-3, var(--ink-2));
+    margin-bottom: var(--s-1);
+}
+.mcl-listwahl-reihe { display: flex; gap: var(--s-1); flex-wrap: wrap; }
+
 /* ── Spickzettel ───────────────────────────────────────────────── */
 
 .mcl-regeln { list-style: none; counter-reset: mclr; margin: 0; padding: 0; }

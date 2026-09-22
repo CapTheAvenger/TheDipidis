@@ -99,12 +99,30 @@ def test_geschrieben_wird_von_hand_und_mit_schalter():
     assert "repariere_ace_spec" in r
 
 
-def test_die_ace_spec_liste_deckt_das_aktuelle_format_vollstaendig_ab():
-    """Der eigentliche Grund, warum der alte Zeitstempel kein Problem ist.
+def test_im_aktuellen_format_ist_jede_zeile_entschieden():
+    """Im laufenden Format darf keine Zeile unentschieden bleiben.
 
-    Faellt dieser Test um, ist die Liste hinter der Rotation zurueck —
-    dann ist `ace_specs.json` nachzuziehen, und erst DANN stellt sich die
-    Schalterfrage neu.
+    WAS DIESER TEST NICHT MEHR BEHAUPTET (22.09.2026). Er hiess
+    `..._liste_deckt_das_aktuelle_format_vollstaendig_ab` und meldete
+    beim Umfallen "die Ace-Spec-Liste hinkt der Rotation hinterher". Am
+    22.09.2026 fiel er mit 294 unentschiedenen Zeilen um — und die
+    Diagnose war falsch:
+
+      * `data/ace_specs.json` fuehrt 39 Namen.
+      * limitlesstcg.com/cards?q=is:ace&display=list, abgerufen am
+        22.09.2026: 46 Drucke, 39 verschiedene Namen — dieselben.
+
+    Die Liste war also vollstaendig. Unentschieden waren die Zeilen aus
+    einem anderen Grund: der Wochenlauf hatte 1.589 neue Zeilen
+    geschrieben, und `scripts/repariere_ace_spec.py --melden` wies 2.618
+    Felder im Gesamtbestand aus, die anders belegt sind als die Regel es
+    vorgibt. Der Bestand hinkte, nicht die Liste.
+
+    Repariert wird das mit dem Ablauf „Daten reparieren"
+    (ace-spec-reparatur.yml, `schreiben=true`) — bewusst von Hand und
+    bewusst nicht im Wochenlauf, weil ein unbeaufsichtigter Lauf ueber
+    660.000 Zeilen die falsche Antwort auf einen Befund ist (siehe
+    Kopf dieser Datei).
     """
     pfad = os.path.join(DATEN, "tournament_cards_data_cards_TEF-PBL.csv")
     c = collections.Counter()
@@ -112,8 +130,16 @@ def test_die_ace_spec_liste_deckt_das_aktuelle_format_vollstaendig_ab():
         for r in csv.DictReader(f, delimiter=";"):
             c[(r.get("is_ace_spec") or "").strip()] += 1
     assert c[""] == 0, (
-        f"{c['']} Zeile(n) im aktuellen Format sind unentschieden — die "
-        "Ace-Spec-Liste hinkt der Rotation hinterher")
+        f"{c['']} von {sum(c.values())} Zeile(n) im aktuellen Format sind "
+        "unentschieden. ERST PRUEFEN, WORAN ES LIEGT:\n"
+        "  1. `python3 scripts/repariere_ace_spec.py --melden` — weist er "
+        "Abweichungen aus, hinkt der BESTAND. Dann den Ablauf "
+        "„Daten reparieren\" (ace-spec-reparatur.yml) mit schreiben=true "
+        "ausloesen.\n"
+        "  2. Meldet er nichts, hinkt die LISTE. Dann "
+        "limitlesstcg.com/cards?q=is:ace&display=list abrufen (die "
+        "Bildansicht gibt keine Namen her) und data/ace_specs.json "
+        "nachziehen.")
     assert c["Yes"] > 0 and c["No"] > 0, dict(c)
 
 

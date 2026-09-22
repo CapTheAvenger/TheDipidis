@@ -233,19 +233,58 @@ def test_die_widerlegung_von_cardprovs_haelt(produkte):
         f"dieselbe Konsequenz")
 
 
-def test_der_zweite_slowbro_traegt_weiterhin_keinen_preis(produkte, preise):
+def _hat_handelsgeschichte(eintrag):
+    """Traegt dieser Preiseintrag einen MARKT oder ein einzelnes Angebot?
+
+    Ein Produkt, das nie gehandelt wurde, aber gelistet ist, bekommt bei
+    Cardmarket den Listenpreis in jedes Durchschnittsfeld geschrieben:
+    avg = avg1 = avg7 = avg30 = trend, und `low` bleibt leer. Ein
+    Produkt mit echten Verkaeufen hat ein `low` und Durchschnitte, die
+    sich ueber die Zeitraeume unterscheiden.
+
+    Der Unterschied ist genau der, auf den es beim Pin ankommt — nicht
+    "hat einen Preis", sondern "hat eine Preisgrundlage".
+    """
+    if not eintrag:
+        return False
+    if eintrag.get("low") in (None, ""):
+        return False
+    reihe = [eintrag.get(f) for f in ("avg", "avg1", "avg7", "avg30")]
+    if any(w in (None, "") for w in reihe):
+        return False
+    return len({round(float(w), 2) for w in reihe}) > 1
+
+
+def test_der_pin_zeigt_auf_das_produkt_mit_der_belastbaren_preisgrundlage(produkte, preise):
     """Warum 894262 und nicht 903006.
 
-    Beide heissen "Slowbro" und liegen in 6232. 903006 fuehrt im
-    Preisfuehrer keinen einzigen Wert — kein Verkauf, keine Grundlage.
-    Bekommt es je einen, ist die Wahl wieder offen.
+    HIER STAND BIS ZUM 22.09.2026 `_preis(preise.get(903006)) is None`
+    — "903006 fuehrt keinen einzigen Wert". Das war am 03.09.2026 wahr.
+    Am 22.09.2026 stand dort avg 125,00 EUR, die Zusicherung fiel um,
+    und die Deploy-Kette stand.
+
+    Die Entscheidung war trotzdem unveraendert richtig. Falsch war ihre
+    BEGRUENDUNG: "das einzige mit Preis" ist eine Aussage ueber einen
+    Tagesstand des Preisfuehrers, nicht ueber die Produkte. Gemessen am
+    22.09.2026:
+
+        894262  low 5,99 · avg1 18,00 · avg7 17,52 · avg30 16,52
+        903006  low —    · avg1 = avg7 = avg30 = trend = 125,00
+
+    Das eine hat einen Markt, das andere ein einzelnes Angebot. Genau
+    das wird jetzt geprueft — und die Tripwire bleibt scharf: bekommt
+    903006 je eine echte Handelsgeschichte, gibt es zwei belastbare
+    Kandidaten und die Wahl gehoert neu entschieden.
     """
     assert produkte.get(903006), "Produkt 903006 ist aus dem Abzug verschwunden"
-    assert _preis(preise.get(903006)) is None, (
-        "903006 fuehrt inzwischen einen Preis. Damit gibt es zwei "
-        "bepreiste Slowbro-Produkte in Erweiterung 6232, und die "
-        "Begruendung des Pins auf 894262 ('das einzige mit Preis') "
-        "traegt nicht mehr")
+    assert _hat_handelsgeschichte(preise.get(894262)), (
+        "894262 traegt keine belastbare Preisgrundlage mehr — dann traegt der "
+        "Pin seine Begruendung nicht mehr und gehoert neu geprueft")
+    assert not _hat_handelsgeschichte(preise.get(903006)), (
+        "903006 traegt inzwischen eine echte Handelsgeschichte (low gesetzt und "
+        "unterschiedliche Durchschnitte). Damit gibt es zwei belastbare "
+        "Slowbro-Produkte in Erweiterung 6232, und die Wahl zwischen ihnen "
+        "gehoert neu entschieden — nicht weitergeschrieben")
 
 
 # ── MEP 4: die Regel greift NICHT, und das ist der Punkt ───────────────

@@ -259,7 +259,23 @@ describe('Die Listen-CSV fuehrt genau das Tag-2-Feld', () => {
        sie darf nur geringfuegig darunter liegen. Ein Gleichheitszeichen
        haette beim naechsten unzuordenbaren Deck wieder den Deploy
        angehalten, ohne dass etwas kaputt ist. */
+    /* EIN EINZELNES UNZUORDENBARES DECK IST IMMER ERLAUBT.
+       ---------------------------------------------------------------
+       NACHTRAG 22.09.2026, erster Lauf des Tors im Wochenlauf: die
+       reine Prozentgrenze war die falsche FORM, und zwar unabhaengig
+       davon, welche Zahl dort steht.
+
+       Die Luecke entsteht, weil die beiden Dateien die Archetypen
+       verschieden schneiden und labs einen Sammeleintrag `Other`
+       fuehrt. Sie ist damit eine Eigenschaft der ZUORDNUNG und faellt
+       in ganzen Decks an, nicht in Prozent. Dasselbe eine Deck wiegt
+       bei 559 Listen 0,18 % und bei 50 Listen 2 % — die Grenze haette
+       also nicht die Datenlage bestraft, sondern die Turniergroesse.
+
+       Deshalb: ein Deck geht immer durch, darueber hinaus ein Prozent.
+       Ein systematischer Ausfall der Zuordnung faellt weiterhin auf. */
     const ZUORDNUNGS_LUECKE_MAX = 0.01;   // 1 % der Listen, gemessen: 1 von 559
+    const ZUORDNUNGS_LUECKE_FREI = 1;     // ein Deck, immer
 
     it('Gegenprobe: die Summe der Spalte day2_players traegt die Listen', () => {
         for (const e of ERHEBUNG) {
@@ -268,14 +284,17 @@ describe('Die Listen-CSV fuehrt genau das Tag-2-Feld', () => {
                 `Turnier ${e.tid}: labs day2_players summiert ${e.summeDay2Spalte}, `
                 + `es gibt aber nur ${e.listen} Listen — mehr Spieler als Listen `
                 + `heisst, dass jemand doppelt gezaehlt wird`);
-            const luecke = (e.listen - e.summeDay2Spalte) / e.listen;
+            const fehlend = e.listen - e.summeDay2Spalte;
+            const luecke = Math.max(0, fehlend - ZUORDNUNGS_LUECKE_FREI) / e.listen;
             assert.ok(luecke <= ZUORDNUNGS_LUECKE_MAX,
                 `Turnier ${e.tid}: labs day2_players summiert ${e.summeDay2Spalte}, `
                 + `die Listen-CSV fuehrt ${e.listen} — `
-                + `${(luecke * 100).toFixed(1)} % der Listen finden keinen `
-                + `Archetypen-Eintrag (erlaubt ${ZUORDNUNGS_LUECKE_MAX * 100} %). `
-                + `Eine einzelne unzuordenbare Liste ist normal, ein Prozent `
-                + `nicht mehr`);
+                + `${fehlend} Liste(n) finden keinen Archetypen-Eintrag — `
+                + `nach Abzug der einen freien sind das `
+                + `${(luecke * 100).toFixed(2)} % (erlaubt `
+                + `${ZUORDNUNGS_LUECKE_MAX * 100} %). Eine einzelne `
+                + `unzuordenbare Liste ist normal, ein systematischer Ausfall `
+                + `der Zuordnung nicht`);
         }
     });
 
@@ -295,10 +314,12 @@ describe('Die Listen-CSV fuehrt genau das Tag-2-Feld', () => {
             assert.ok(proTurnier.get(e.tid) <= e.listen,
                 `Turnier ${e.tid} in TEF-PBL: ${proTurnier.get(e.tid)} Spieler `
                 + `bei ${e.listen} Listen — mehr Spieler als Listen`);
-            const luecke2 = (e.listen - proTurnier.get(e.tid)) / e.listen;
+            const fehlend2 = e.listen - proTurnier.get(e.tid);
+            const luecke2 = Math.max(0, fehlend2 - ZUORDNUNGS_LUECKE_FREI) / e.listen;
             assert.ok(luecke2 <= ZUORDNUNGS_LUECKE_MAX,
                 `Turnier ${e.tid} in TEF-PBL: ${proTurnier.get(e.tid)} statt ${e.listen} `
-                + `(${(luecke2 * 100).toFixed(1)} % ohne Archetypen-Eintrag)`);
+                + `(${fehlend2} ohne Archetypen-Eintrag, nach Abzug der einen `
+                + `freien ${(luecke2 * 100).toFixed(2)} %)`);
             geprueft++;
         }
         assert.ok(geprueft > 0,

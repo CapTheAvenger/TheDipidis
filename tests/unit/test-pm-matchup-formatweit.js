@@ -61,11 +61,24 @@ describe('Die Labs-Matchups kennen keine einzelnen Turniere', () => {
         const datei = 'data/labs_tournament_matchups_TEF-CRI.csv';
         const zeilen = csv(datei);
         assert.ok(zeilen.length > 100, `zu wenig Zeilen: ${zeilen.length}`);
-        const listen = new Set(zeilen.map(z => (z.tournaments_used || '').trim()));
-        assert.equal(listen.size, 1, `mehrere Listen gefunden: ${[...listen].slice(0, 5)}`);
-        const einzige = [...listen][0];
-        assert.ok(einzige.includes(','),
-            'wenn Labs eines Tages je Turnier liefert, darf der Vorbehalt weg — dann faellt dieser Test');
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand `listen.size === 1` —
+           ALLE Zeilen eines Chunks muessten dieselbe Turnierliste nennen.
+           Die Form, die das ausschliesst, gibt es im Bestand bereits: der
+           Nachbarchunk TEF-POR fuehrt ZWEI Listen (73 Zeilen mit vier
+           Kennungen, 7.972 mit sieben), weil er waehrend des Formats
+           mehrfach gewachsen ist. Sobald TEF-CRI dasselbe passiert — oder
+           dieser Test auf einen anderen Chunk gestellt wird —, faellt er
+           an einer Normalitaet.
+
+           Die Aussage ist: Labs liefert AGGREGIERT ueber mehrere
+           Turniere, nicht je Einzelturnier. Das steht in jeder Zeile
+           selbst. */
+        const mehrfach = zeilen.filter(z => (z.tournaments_used || '').includes(','));
+        assert.ok(mehrfach.length > zeilen.length * 0.9,
+            `nur ${mehrfach.length} von ${zeilen.length} Zeilen nennen mehrere `
+            + 'Turniere. Wenn Labs eines Tages je Turnier liefert, darf der '
+            + 'Vorbehalt ueber der Tabelle weg — dann faellt dieser Test, und '
+            + 'das ist gewollt');
     });
 });
 

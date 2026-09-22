@@ -44,9 +44,29 @@ describe('Der Befund, der die Änderung trägt', () => {
                 if (b && Array.isArray(b.teammate) && b.teammate.length) laengen.add(b.teammate.length);
             });
         });
-        assert.deepEqual([...laengen], [8],
-            `Partner-Listen haben Längen ${[...laengen].join('/')} — die Begründung `
-            + `der freien Auswahl beruht auf der Acht`);
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand `deepEqual([...laengen], [8])`
+           — JEDE Partner-Liste muesse exakt acht Eintraege haben.
+
+           Die Acht ist kein Versprechen der Quelle, sondern UNSER Deckel:
+           KEEP = { ... 'teammate': 8 } in scripts/scrape_champions_usage.py.
+           Ein Deckel garantiert eine Obergrenze, keine Gleichheit. Der
+           Beleg steht in derselben Datei: held_item traegt denselben
+           Deckel und fuehrt heute schon eine Liste mit SECHS Eintraegen.
+           Sobald die Quelle fuer ein Pokemon weniger als acht Mitstreiter
+           listet, liegt eine 7 in der Menge und der Deploy steht — an
+           einer Beobachtung ueber das Feld dieser Woche.
+
+           Die Begruendung der freien Auswahl haengt nicht daran, dass
+           jede Liste VOLL ist, sondern daran, dass keine ueber acht
+           hinausgeht: acht Plaetze von 264 sind so oder so ein Bruchteil. */
+        const groesste = Math.max(...laengen);
+        assert.ok(groesste <= 8,
+            `eine Partner-Liste hat ${groesste} Plaetze — mehr als der Deckel `
+            + 'KEEP.teammate in scripts/scrape_champions_usage.py zulaesst. '
+            + 'Entweder ist der Deckel gestiegen (dann hier und in der '
+            + 'Begruendung der freien Auswahl nachziehen) oder der Scraper '
+            + 'schneidet nicht mehr ab');
+        assert.ok(laengen.size > 0, 'keine einzige Partner-Liste in den Daten');
     });
 
     it('ohne freie Auswahl wären die meisten Pokémon unerreichbar', () => {
@@ -78,7 +98,8 @@ describe('Der Befund, der die Änderung trägt', () => {
         assert.ok(unerreichbar.length >= 50,
             `nur ${unerreichbar.length} Pokémon ausserhalb der Partner-Liste`);
         assert.ok(mates.size <= 8,
-            `die Partner-Liste hat ${mates.size} Eintraege — mehr als acht Plaetze`);
+            `die Partner-Liste hat ${mates.size} Eintraege — mehr als der Deckel `
+            + 'KEEP.teammate in scripts/scrape_champions_usage.py zulaesst');
     });
 });
 

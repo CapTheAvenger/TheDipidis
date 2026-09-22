@@ -317,20 +317,73 @@ describe('stripExSuffix deckt die Set-Kuerzel im echten Bestand ab', () => {
         assert.ok(betroffen.length > 0,
             'kein Archetypname traegt ein Set-Kuerzel — der Test greift ins Leere');
         const offen = betroffen.filter(a => stripExSuffix(a) === a);
-        assert.deepStrictEqual(offen, [],
-            'diese Set-Kuerzel fehlen in stripExSuffix() — nach jeder Rotation '
-            + 'nachtragen:\n  ' + offen.join('\n  '));
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand `deepStrictEqual(offen, [])`
+           gegen eine VON HAND gepflegte Liste von 30 Kuerzeln — bei 154
+           Kuerzeln im Kartenbestand. Der erste Archetyp, der auf ein
+           nicht gelistetes Kuerzel endet, haelt die Deploy-Kette an, und
+           der Weg ins Gruene heisst "einen Namen eintragen".
+
+           Nachgemessen am Verlauf: 30C ist am 18.09.2026 um 06:40 UTC
+           in data/all_cards_database.csv gekommen (Commit 938956a, 161
+           Zeilen; im Stand vom 16.09. waren es null) und stand seither
+           NICHT in der Liste. Vier Tage, in denen die Sperre scharf war
+           und nur noch nicht ausgeloest.
+
+           Die Regel gehoert an ihre BEDINGUNG: was heute im Bestand
+           auftaucht, ist Zufall; was FEST steht, ist, dass das laufende
+           Set und das laufende japanische Set abgeschnitten werden
+           muessen. Das faellt beim naechsten Rotationsschritt auf —
+           vorher, nicht hinterher. Was darueber hinaus offen ist, wird
+           gemeldet, nicht gesperrt. */
+        if (offen.length) {
+            console.warn('[stripExSuffix] diese Namen behalten ihr Set-Kuerzel: '
+                + offen.join(', '));
+        }
+        assert.ok(offen.length < betroffen.length,
+            'stripExSuffix() schneidet gar kein Set-Kuerzel mehr ab — die Liste '
+            + 'ist tot: ' + betroffen.slice(0, 5).join(', '));
+        const fenster = JSON.parse(lies('data/format_window.json'));
+        for (const schluessel of ['current_set', 'current_set_jp']) {
+            const code = String(fenster[schluessel] || '').trim();
+            if (!code) continue;
+            assert.equal(stripExSuffix('Testdeck ' + code), 'Testdeck',
+                `stripExSuffix() kennt ${schluessel} = ${code} nicht. Das ist das `
+                + 'LAUFENDE Set — der erste Archetyp, der so heisst, steht mit '
+                + 'Kuerzel im Namen da. Nachtragen in js/app-current-meta-analysis.js '
+                + 'UND js/app-meta-cards.js.');
+        }
     });
 
     it('haelt beide Listen im Gleichschritt', () => {
         // Dieselbe Aufzaehlung steht ein zweites Mal in app-meta-cards.js.
         // Laufen sie auseinander, schneidet die eine Ansicht ab, was die
         // andere stehen laesst — und die Namen passen nicht mehr zusammen.
+        /* ABNAHMEBEFUND 22.09.2026. Hier stand `/asc\|[a-z0-9|]+/` —
+           die Liste wurde ab dem Wort "asc" gelesen. Alles, was
+           ALPHABETISCH DAVOR steht, fiel heraus, und genau dort steht
+           das Kuerzel, das dieser Durchgang nachgetragen hat: 30c.
+           Verglichen wurden damit 31 von 32 Kuerzeln, und ausgerechnet
+           das neue war ungedeckt — eine Probe hat es gefunden (30c nur
+           in einer der beiden Dateien geloescht: Suite blieb gruen).
+
+           Jetzt wird die ganze Klammer gegriffen. */
         const holen = (datei) => {
-            const m = lies(datei).match(/\(\?:|\((asc\|[a-z0-9|]+)\)/);
-            const roh = lies(datei).match(/asc\|[a-z0-9|]+/);
-            assert.ok(roh, `keine Set-Kuerzel-Liste in ${datei}`);
-            return roh[0].split('|').sort().join('|');
+            const text = lies(datei);
+            // Die ganze Klammer, und zwar DIE mit den Set-Kuerzeln:
+            // beide Dateien fuehren noch andere Alternativlisten.
+            // Erkannt wird sie daran, dass sie asc UND tef enthaelt —
+            // nicht daran, wo sie anfaengt.
+            const kandidaten = [...text.matchAll(/\((?:\?:)?([a-z0-9|]+)\)/g)]
+                .map(m => m[1].split('|').filter(Boolean))
+                .filter(t => t.includes('asc') && t.includes('tef'));
+            assert.equal(kandidaten.length, 1,
+                `in ${datei} gibt es ${kandidaten.length} Set-Kuerzel-Listen `
+                + '(erwartet genau eine)');
+            const teile = kandidaten[0];
+            assert.ok(teile.length > 20,
+                `die Set-Kuerzel-Liste in ${datei} hat nur ${teile.length} `
+                + 'Eintraege — der Ausdruck greift nicht mehr die ganze Liste');
+            return teile.sort().join('|');
         };
         assert.strictEqual(
             holen('js/app-current-meta-analysis.js'),

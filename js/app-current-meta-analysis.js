@@ -296,7 +296,7 @@
         // set suffix into the UI (the CRI miss is what triggered this).
         function stripExSuffix(name) {
             return String(name || '')
-                .replace(/\s+(?:asc|blk|cri|dri|jtg|m3|m4|m5|m6|meg|mee|mep|mew|obf|paf|pal|par|pbl|pfl|por|pre|scr|sfa|ssp|svi|sve|svp|tef|twm|wht)$/i, '')
+                .replace(/\s+(?:30c|asc|blk|cri|dri|jtg|m3|m4|m5|m6|m6a|meg|mee|mep|mew|obf|paf|pal|par|pbl|pfl|por|pre|scr|sfa|ssp|svi|sve|svp|tef|twm|wht)$/i, '')
                 .replace(/\s+ex$/i, '')
                 .trim();
         }

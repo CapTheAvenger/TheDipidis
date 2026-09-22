@@ -586,6 +586,23 @@ def _list_labs_chunk_paths(prefix: str) -> List[str]:
     return paths
 
 
+def _schreibe_json_atomar(pfad: str, inhalt) -> None:
+    """Dasselbe fuer JSON — erst daneben, dann umbenennen.
+
+    NACHGETRAGEN 22.09.2026. `labs_tournaments.json` ist der
+    zwischengespeicherte Index: faellt er aus, verliert der naechste Lauf
+    nicht seine eigene Ausgabe, sondern die Kenntnis JEDES frueher
+    gesehenen Turniers — und schreibt sie als leer zurueck. Ein Abbruch
+    mitten im Schreiben ist im Wochenlauf kein Gedankenspiel, er hat ein
+    Zeitlimit.
+    """
+    os.makedirs(os.path.dirname(pfad) or '.', exist_ok=True)
+    vorlaeufig = pfad + '.tmp'
+    with open(vorlaeufig, 'w', encoding='utf-8') as f:
+        json.dump(inhalt, f, indent=2, ensure_ascii=False)
+    os.replace(vorlaeufig, pfad)
+
+
 def _schreibe_csv_atomar(pfad: str, kopf: List[str], zeilen: List[Dict]) -> None:
     """Erst daneben schreiben, dann umbenennen.
 
@@ -2019,7 +2036,18 @@ def parse_matchup_table(soup, summary=None):
                 try:
                     win_pct_val = round(float(txt.replace('%', '').replace(',', '.').strip()), 4)
                 except ValueError:
-                    pass
+                    # NACHGETRAGEN 22.09.2026: hier stand `pass`. Eine
+                    # unlesbare Siegquote blieb damit auf 0.0 stehen und
+                    # wurde als "0 %" ausgeliefert — nicht zu
+                    # unterscheiden von einem Deck, das wirklich keine
+                    # Partie gewonnen hat. Aendert die Quelle ihr Format,
+                    # stuenden alle Quoten auf null und niemand saehe es.
+                    logger.warning(
+                        "[matchup] Siegquote %r ist nicht lesbar (Gegner %s) — "
+                        "die Zeile behaelt 0 %%, und das ist von einem echten "
+                        "0 %% nicht zu unterscheiden. Format der Quelle pruefen.",
+                        txt, opp_slug,
+                    )
             elif txt and count_val == 0 and not '%' in txt:
                 count_val = _parse_int_count(txt)
         if count_val <= 0 and win_pct_val == 0.0:
@@ -2265,8 +2293,7 @@ def save_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> None:
 
     # Tournament index JSON
     json_path = os.path.join(data_dir, 'labs_tournaments.json')
-    with open(json_path, 'w', encoding='utf-8') as f:
-        json.dump(tournaments_meta, f, indent=2, ensure_ascii=False)
+    _schreibe_json_atomar(json_path, tournaments_meta)
     logger.info("Saved tournament index → %s", json_path)
 
     csv_path = os.path.join(data_dir, 'labs_tournament_decks.csv')
@@ -2289,10 +2316,7 @@ def save_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> None:
         # across the combined set so re-scraped tournaments don't
         # produce two rows per (tid, slug).
         combined = _dedupe_deck_rows(existing_rows + list(deck_rows))
-        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction='ignore')
-            writer.writeheader()
-            writer.writerows(combined)
+        _schreibe_csv_atomar(csv_path, CSV_FIELDS, combined)
         logger.info("Saved deck data → %s  (rewrote %d rows; %d after dedupe)",
                     csv_path, len(existing_rows) + len(deck_rows), len(combined))
     else:
@@ -2305,12 +2329,11 @@ def save_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> None:
             with open(csv_path, 'r', newline='', encoding='utf-8') as f:
                 on_disk = list(csv.DictReader(f))
         combined = _dedupe_deck_rows(on_disk + list(deck_rows))
-        write_header = True  # always include header in the full rewrite
-        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction='ignore')
-            if write_header:
-                writer.writeheader()
-            writer.writerows(combined)
+        # ATOMAR, seit 22.09.2026. Die Datei ist KUMULATIV: hier steht der
+        # gesamte Altbestand im Speicher und wird neu geschrieben. Ein
+        # Abbruch mitten im Schreiben verliert nicht den Lauf, sondern die
+        # Historie — und der Commit-Schritt committet die halbe Datei.
+        _schreibe_csv_atomar(csv_path, CSV_FIELDS, combined)
         logger.info("Saved deck data → %s  (%d total after dedupe; %d new)",
                     csv_path, len(combined), len(deck_rows))
 
@@ -2320,16 +2343,12 @@ def overwrite_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> No
     os.makedirs(data_dir, exist_ok=True)
 
     json_path = os.path.join(data_dir, 'labs_tournaments.json')
-    with open(json_path, 'w', encoding='utf-8') as f:
-        json.dump(tournaments_meta, f, indent=2, ensure_ascii=False)
+    _schreibe_json_atomar(json_path, tournaments_meta)
     logger.info("Overwrote tournament index → %s", json_path)
 
     csv_path = os.path.join(data_dir, 'labs_tournament_decks.csv')
     deduped = _dedupe_deck_rows(deck_rows)
-    with open(csv_path, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction='ignore')
-        writer.writeheader()
-        writer.writerows(deduped)
+    _schreibe_csv_atomar(csv_path, CSV_FIELDS, deduped)
     logger.info("Overwrote deck data → %s  (%d rows; %d after dedupe)",
                 csv_path, len(deck_rows), len(deduped))
 

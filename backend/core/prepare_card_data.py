@@ -1284,8 +1284,15 @@ def split_tournament_cards(frontend_data):
                                 if mn is None or d < mn: mn = d
                                 if mx is None or d > mx: mx = d
                             total_rows_manifest += 1
-                except OSError:
-                    pass
+                except OSError as e:
+                    # GEAENDERT 22.09.2026: hier stand `pass`. Ist ein
+                    # Chunk unlesbar, landet {"min_date": None,
+                    # "max_date": None} im Manifest — und der Lader waehlt
+                    # "latest" NACH max_date. Ein Lesefehler verschiebt
+                    # damit still, welches Meta als das aktuelle gilt.
+                    print(f"::warning::{chunk_name} ist nicht lesbar ({e}) — "
+                          f"der Chunk bekommt kein Datum ins Manifest, und die "
+                          f"Auswahl des laufenden Metas laeuft an ihm vorbei.")
         else:
             total_rows_manifest += len(meta_rows.get(meta_key, []))
         chunk_dates[chunk_name] = {

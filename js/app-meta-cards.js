@@ -97,7 +97,7 @@ function _mcKartenQuotenHinweis(id) {
                 .replace(/['\u2018\u2019\u201B\u0060\u00B4\u02BC]/g, '')       // uebrige Apostrophe streichen
                 .replace(/^(rocket|hop|steven|cynthia|marnie|lillie|ethan|hau|n|iono|arven|nemona|kieran|kabu|raihan|jacq|geeta|ns)s\b/i, '$1')  // possessive without apostrophe (Rockets → Rocket)
                 .replace(/\bex\b/g, '')          // strip standalone "ex"
-                .replace(/\b(asc|blk|cri|dri|jtg|m3|m4|m5|m6|meg|mee|mep|mew|obf|paf|pal|par|pbl|pfl|por|pre|scr|sfa|ssp|svi|sve|svp|tef|twm|wht)\b/g, '') // strip set-code suffixes (full EN+JP rotation; sorted alphabetically)
+                .replace(/\b(30c|asc|blk|cri|dri|jtg|m3|m4|m5|m6|m6a|meg|mee|mep|mew|obf|paf|pal|par|pbl|pfl|por|pre|scr|sfa|ssp|svi|sve|svp|tef|twm|wht)\b/g, '') // strip set-code suffixes (full EN+JP rotation; sorted alphabetically)
                 .replace(/\s+/g, ' ').trim();
         }
         // Expose globally so other modules can use the same matching key.

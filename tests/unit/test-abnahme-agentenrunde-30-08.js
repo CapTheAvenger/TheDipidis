@@ -276,12 +276,46 @@ describe('Datenstand', () => {
     const BUILD = lies('scripts/build_data_stand.py');
     const HTML = lies('index.html');
 
-    it('alle vier leeren City-League-Dateien sind als leer gemeldet', () => {
-        for (const f of ['city_league_analysis.csv', 'city_league_archetypes.csv',
-                         'city_league_archetypes_comparison.csv',
-                         'city_league_archetypes_deck_stats.csv']) {
-            assert.ok(stand.leer.includes(f), f + ' fehlt in der leer-Liste');
+    it('die leer-Liste deckt sich mit dem Bestand', () => {
+        /* UMGESCHRIEBEN 22.09.2026. Hier standen VIER City-League-Namen
+           abgeschrieben, die in stand.leer stehen MUSSTEN — also leer
+           SEIN. Die vier Scraper laufen aber weiter im Wochenlauf, und
+           zwar im Anhaengemodus: EINE Datenzeile nimmt die Datei aus der
+           leer-Liste und macht diese Zusicherung rot. Der Deploy stuende
+           dann an einer guten Nachricht — die japanische Saison laeuft
+           wieder.
+
+           Geprueft wird jetzt die Deckungsgleichheit: was der Bauer als
+           leer meldet, ist leer, und was leer ist, meldet er. */
+        for (const f of stand.leer) {
+            let inhalt;
+            try { inhalt = lies('data/' + f); } catch (e) { continue; }
+            const zeilen = inhalt.trim().split('\n').filter(z => z.trim());
+            assert.ok(zeilen.length <= 1,
+                `${f} steht in stand.leer, traegt aber ${zeilen.length - 1} `
+                + 'Datenzeilen — die Meldung ist veraltet');
         }
+        /* UND DIE ZWEITE RICHTUNG. Ohne sie bestand die Pruefung auch
+           dann, wenn der Bauer eine leere Datei gar nicht mehr meldet
+           — die Schleife oben laeuft dann einfach nicht (abgenommen
+           und gefunden am 22.09.2026: einen Namen aus stand.leer
+           streichen liess die Suite gruen). Der Defekt, den die alte
+           Fassung fing, waere damit ersatzlos verschwunden. */
+        assert.ok(Array.isArray(stand.leer),
+            'data_stand.json fuehrt keine leer-Liste mehr');
+        const gemeldet = new Set(stand.leer);
+        const verschwiegen = [];
+        for (const f of Object.keys(stand.dateien || {})) {
+            if (gemeldet.has(f)) continue;
+            let inhalt;
+            try { inhalt = lies('data/' + f); } catch (e) { continue; }
+            const zeilen = inhalt.trim().split('\n').filter(z => z.trim());
+            if (zeilen.length <= 1 && /\.csv$/i.test(f)) verschwiegen.push(f);
+        }
+        assert.deepEqual(verschwiegen, [],
+            'diese Dateien tragen keine einzige Datenzeile, stehen aber nicht '
+            + 'in stand.leer — dann verschweigt der Frischechip eine leere '
+            + 'Quelle, und der Reiter sieht aus, als haette er Daten');
     });
 
     it('die beiden nachgetragenen Quellen werden geführt', () => {

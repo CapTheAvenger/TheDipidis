@@ -312,8 +312,15 @@ def fehlendes_fenster(datenverzeichnis: str = "data") -> Optional[Tuple[str, str
                   encoding="utf-8") as datei:
             bekannt.add(str((json.load(datei)).get("current_set")
                             or "").strip().upper())
-    except (OSError, ValueError):
-        pass
+    except (OSError, ValueError) as fehler:
+        # GEAENDERT 22.09.2026: hier stand `pass`. Faellt das
+        # Formatfenster aus, verliert `bekannt` das laufende Set — und
+        # die Neues-Set-Erkennung darunter schlaegt auf genau das Set an,
+        # das gerade richtig eingeordnet wird. Eine Falschmeldung, deren
+        # Ursache nirgends steht.
+        print(f"::warning::format_window.json ist nicht lesbar ({fehler}) — "
+              f"das laufende Set fehlt in der Liste der bekannten, und die "
+              f"Neues-Set-Meldung darunter kann es faelschlich melden.")
     bekannt.discard("")
     for code, eintrag in meta.items():
         datum = (eintrag or {}).get("release_date")

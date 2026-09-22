@@ -133,8 +133,14 @@ describe('Effektiv gegen Typ', () => {
             ((p[f] || {}).move || []).forEach(m => genutzt.add(m.name));
         }));
         const ohne = [...genutzt].filter(m => !mitTyp.has(m));
-        assert.ok(ohne.length < 20,
-            `${ohne.length} genutzte Attacken ohne Typ — das ist zu viel fuer eine Randnotiz`);
+        /* UMGESCHRIEBEN 22.09.2026: hier stand die feste Zahl 20 auf einer
+           Menge, die mit dem Kader waechst. Heute 0 von 423 — viel Luft,
+           aber dieselbe Bauart: ein Set, das Attacken zuerst in die
+           Nutzungsdatei bekommt, laesst sie steigen. Ein Anteil waechst
+           mit. */
+        assert.ok(ohne.length < Math.max(20, genutzt.size * 0.05),
+            `${ohne.length} von ${genutzt.size} genutzten Attacken ohne Typ — `
+            + 'das ist zu viel fuer eine Randnotiz');
     });
 
     it('ist verdrahtet: Waehler, Neuzeichnen, beide Sprachen', () => {

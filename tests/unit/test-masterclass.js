@@ -138,10 +138,18 @@ test('markiere maskiert HTML und laesst nur Fett und Kursiv durch', () => {
 
 /* ── Was das Inhaltsstueck behauptet, muss darin auch stehen ── */
 
-test('jede der sechs Listen fuehrt genau 60 Karten und genau ein ACE SPEC', () => {
+test('jede Liste fuehrt genau 60 Karten und genau ein ACE SPEC', () => {
+    /* 21.09.2026: sechs Listen. 22.09.2026 auf 20 erweitert — Tims
+     * Empfehlung mit dem Kangama/Arktos-Paket plus die dreizehn
+     * Mega-Stalobor-Listen aus Tag 2 der Worlds. Der Betreiber hatte
+     * gemeldet, dass die Kangama/Arktos-Liste fehlt; sie stand nur als
+     * Fliesstext da. Die 60 und die eine ACE SPEC sind die Gegenprobe
+     * fuers Ablesen: 14 Listen unabhaengig aus Videobildern
+     * abgeschrieben, und jede kommt auf 60 — ein Lesefehler waere hier
+     * aufgefallen. */
     const bloecke = FRAGMENT.match(/data-mcl-listenblock="\d+"[\s\S]*?<\/div>\s*<p class="mcl-quelle">/g) || [];
-    assert.strictEqual(bloecke.length, 6, `${bloecke.length} Listenbloecke gefunden, erwartet 6`);
-    const ACE = ['Heldenumhang', 'Edler Rollwagen', 'Geheime Box'];
+    assert.ok(bloecke.length >= 20, `${bloecke.length} Listenbloecke gefunden, erwartet mindestens 20`);
+    const ACE = ['Heldenumhang', 'Edler Rollwagen', 'Geheime Box', 'Unfairer Stempel'];
     bloecke.forEach((b, i) => {
         const anzahlen = [...b.matchAll(/data-n="(\d+)"/g)].map((m) => Number(m[1]));
         const summe = anzahlen.reduce((a, n) => a + n, 0);
@@ -357,4 +365,29 @@ test('das Kartendetail zeigt den deutschen Kartentext, nicht nur den englischen'
     const de = JS_NACKT.slice(JS_NACKT.indexOf('de:'), JS_NACKT.indexOf('function lang'));
     assert.ok(/kartentext:\s*'Kartentext'/.test(de),
         'die deutsche Beschriftung heisst weiter "Kartentext (englisch)"');
+});
+
+test('die Kangama/Arktos-Liste und die Worlds-Gruppe sind da', () => {
+    /* BEFUND (22.09.2026, vom Betreiber gemeldet): "es gibt ja wohl eine
+     * Liste mit Kangama und Arctos, aber die ist gar nicht drin." Stimmte:
+     * das Paket stand nur als Fliesstext in Teil B4. Tim zeigt die
+     * fertigen 60 Karten bei Minute 11:50 des Updates. */
+    /* Als Kartenkachel, nicht irgendwo im Fliesstext — genau das war
+     * der Befund: der Name stand da, die Liste nicht. */
+    assert.ok(/data-de="Team Rockets Kangama-ex"/.test(FRAGMENT),
+        'Team Rockets Kangama-ex steht in keiner Liste als Karte');
+    assert.ok(/data-de="Team Rockets Arktos"/.test(FRAGMENT),
+        'Team Rockets Arktos steht in keiner Liste als Karte');
+
+    const gruppen = FRAGMENT.match(/class="mcl-listgruppe-titel">([^<]+)</g) || [];
+    assert.strictEqual(gruppen.length, 2,
+        `${gruppen.length} Listengruppen, erwartet 2 (Tims Listen, Worlds Tag 2)`);
+
+    /* Die dreizehn fremden Listen tragen Name und Platzierung, sonst
+     * weiss der Leser nicht, wessen Liste er sieht. */
+    const chips = FRAGMENT.match(/data-mcl-liste="\d+"[^>]*>([^<]+)</g) || [];
+    assert.ok(chips.length >= 20, `nur ${chips.length} Listenchips`);
+    const mitPlatz = chips.filter((c) => /·\s*\d+\./.test(c));
+    assert.ok(mitPlatz.length >= 11,
+        `nur ${mitPlatz.length} Chips nennen eine Platzierung`);
 });

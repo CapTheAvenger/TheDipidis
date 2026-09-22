@@ -2267,6 +2267,66 @@ def check_proxy_frische(findings):
             f"{', '.join(sorted((meta.get('set_breakdown') or {}).keys())) or '—'}."))
 
 
+def check_pocket_frische(findings):
+    """S-POCKET — der Pocket-Bereich altert, und niemand sagt es vorher.
+
+    BEFUND 22.09.2026. data/pocket_tierlist.json steht in KEINER
+    automatischen Frischepruefung: nicht in data_stand.json, nicht in
+    den Schwellen von scripts/sanity_check_data.py, und dieser Waechter
+    kannte sie bis heute gar nicht. Der einzige Alterungsalarm ist ein
+    Banner im Browser, das ab 28 Tagen erscheint (js/ds-pocket.js,
+    PLAUSIBEL_TAGE) — der Einzige, dem das auffaellt, ist also ein
+    Besucher, und erst nach vier Wochen.
+
+    Der Bereich geht nicht falsch, er geht ALT: scrape_pocket_tierlist.py
+    hat bewusst keinen Zeitplan, weil Game8 dem GitHub-Laeufer auf jedem
+    Weg mit HTTP 202 antwortet (Cloudflare, dreimal gemessen am
+    04.09.2026). Geerntet wird von Hand aus einer Sitzung heraus, in der
+    die Domain erreichbar ist. Genau deshalb braucht es hier eine
+    Meldung: ein Lauf, der nie faellig ist, faellt auch nie aus.
+
+    Gemeldet wird, nicht gesperrt — dieselbe Schwelle wie im Browser.
+    """
+    path = os.path.join(DATA, "pocket_tierlist.json")
+    if not os.path.exists(path):
+        return
+    try:
+        with open(path, encoding="utf-8") as f:
+            daten = json.load(f) or {}
+    except Exception as e:                                  # noqa: BLE001
+        findings.append(("CRITICAL", f"pocket_tierlist.json ist nicht lesbar: {e}"))
+        return
+    roh = (daten.get("_meta") or {}).get("abgerufen")
+    if not roh:
+        findings.append(("WARN",
+                         "pocket_tierlist.json traegt kein _meta.abgerufen — "
+                         "dann laesst sich ihr Alter nirgends pruefen, auch "
+                         "nicht im Browser."))
+        return
+    try:
+        stand = dt.datetime.fromisoformat(str(roh).replace("Z", "+00:00"))
+    except ValueError:
+        findings.append(("WARN",
+                         f"pocket_tierlist.json: _meta.abgerufen ist kein "
+                         f"lesbares Datum ({roh!r})"))
+        return
+    if stand.tzinfo is None:
+        stand = stand.replace(tzinfo=dt.timezone.utc)
+    alter = (dt.datetime.now(dt.timezone.utc) - stand).days
+
+    # Dieselbe Schwelle, die js/ds-pocket.js dem Besucher anzeigt.
+    PLAUSIBEL_TAGE = 28
+    if alter > PLAUSIBEL_TAGE:
+        findings.append((
+            "WARN",
+            f"pocket_tierlist.json ist {alter} Tage alt (Schwelle "
+            f"{PLAUSIBEL_TAGE}, dieselbe wie das Banner im Browser). Der "
+            f"Lauf hat bewusst keinen Zeitplan, weil Game8 dem GitHub-"
+            f"Laeufer mit Cloudflare 202 antwortet — geerntet wird von "
+            f"Hand. Ab hier sieht der Besucher die Warnung; besser ist, "
+            f"sie vorher hier zu lesen."))
+
+
 def check_proxy_karte_gegen_bestand(findings):
     """S17b — zeigen die Kartendateien auf Proxy-URLs, die die Karte
     gar nicht mehr kennt?
@@ -2943,6 +3003,7 @@ def main():
     champions_teams = check_champions_teams(findings, baseline.get("champions_teams"))
     check_uebersicht_gegen_chunks(findings)
     check_proxy_frische(findings)
+    check_pocket_frische(findings)
     check_proxy_karte_gegen_bestand(findings)
     jp_sets = check_jp_setbestand(findings)
     if not first_run:

@@ -106,6 +106,16 @@ RHYTHMUS = {
     "scripts/build_champions_resources.py": "taeglich",
     "scripts/build_champions_pokedex.py": "taeglich",
     "scripts/build_champions_editionen.py": "taeglich",
+    # NACHGETRAGEN 22.09.2026. Diese drei fuehrten einen Herzschlag in
+    # data/_job_heartbeats.json, standen aber in KEINER der beiden Listen
+    # und konnten damit nie einen Befund ausloesen — weder "stumm" noch
+    # "bewusst ohne Zeitplan". Der Satz "Alle Erzeuger mit Zeitplan haben
+    # in ihrer Frist gelaufen" war wahr und deckte weniger ab, als er
+    # klang. Gegen genau diese Luecke steht jetzt
+    # tests/python/test_frischepruefung_deckt_alle_erzeuger.py.
+    "scrapers/scrape_kartentexte.py": "zweimal_woechentlich",
+    "scripts/build_champions_item_sprites.py": "taeglich",
+    "scripts/build_champions_move_flags.py": "taeglich",
 }
 
 # Erzeuger, die BEWUSST keinen Zeitplan haben — mit der Begruendung.

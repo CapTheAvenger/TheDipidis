@@ -204,3 +204,91 @@ def test_die_korrektur_greift_auch_am_zwischenspeicher_vorbei():
     verwendung = ohne.find("_derive_meta_for_labs_tournament(", korr)
     assert verwendung > korr, (
         "die Korrektur steht nach der ersten Verwendung des Datums")
+
+
+def test_die_korrektur_hat_das_letzte_wort_vor_dem_schreiben():
+    """Der Zwischenspeicher war nicht die letzte Schreibstelle.
+
+    BEFUND (22.09.2026, DRITTER Anlauf). Die Korrektur stand bereits
+    hinter allen drei Datumsquellen. Der Wochenlauf schrieb trotzdem
+    weiter:
+
+        0072: per_player=2026-09-18  labs=2026-09-19
+
+    Der Grund stand ein paar hundert Zeilen weiter unten. Nach dem
+    Zusammenfuehren laeuft ein Nachlauf gegen den Namensabgleich
+    (`name_meta_lookup`, gebaut aus den
+    tournament_cards_data_cards_<META>.csv). Der setzt das Datum
+    ZWEIMAL neu — beim Rescue einer unsortierten Zeile und beim
+    Auffrischen einer Zeile mit abweichendem Datum. Die Kartendaten
+    kommen von limitless, und limitless datiert dieses Regional auf den
+    19.09. Die Korrektur wurde also richtig gesetzt und danach wieder
+    ueberschrieben.
+
+    Zweimal ist die Korrektur nach hinten geschoben worden, zweimal
+    fand sich die naechste Schreibstelle. Deshalb haelt diese
+    Zusicherung nicht fest, dass sie an einer bestimmten Stelle steht,
+    sondern dass zwischen ihr und dem Speichern KEINE Schreibstelle
+    mehr liegt. Das ist die Eigenschaft, auf die es ankommt — und sie
+    gilt auch fuer eine Schreibstelle, die es heute noch nicht gibt.
+    """
+    with io.open(LABS_QUELLE, encoding="utf-8") as f:
+        quelle = f.read()
+    ohne = "\n".join(z for z in quelle.split("\n")
+                      if not z.lstrip().startswith("#"))
+    assert len(ohne) > len(quelle) * 0.3, "das Ausschneiden hat zu viel entfernt"
+
+    schluss = ohne.find("_neu = _datum_mit_override(_tid, _alt)")
+    assert schluss > 0, (
+        "die Schluss-Korrektur vor dem Speichern gibt es nicht mehr. Dann "
+        "gewinnt wieder, was zuletzt geschrieben hat — zuletzt war das der "
+        "Namensabgleich gegen die Kartendaten, und der datiert dieses "
+        "Regional einen Tag spaeter")
+
+    # Ab der Korrektur nach vorn suchen: `save_results` steht auch als
+    # Definition weiter oben in der Datei.
+    kandidaten = [i for i in (ohne.find("overwrite_results(tournaments_meta", schluss),
+                              ohne.find("save_results(tournaments_meta", schluss))
+                  if i > 0]
+    speichern = min(kandidaten) if kandidaten else -1
+    assert speichern > 0, "die Speicherstelle heisst anders; diese Pruefung greift ins Leere"
+    assert schluss < speichern, (
+        "die Schluss-Korrektur steht NACH dem Speichern — dann landet sie "
+        "nicht mehr in der Datei")
+
+    # Und das eigentliche Versprechen: dazwischen wird nichts mehr
+    # geschrieben. Eine neue Schreibstelle faellt hier um.
+    dazwischen = ohne[schluss:speichern]
+    verboten = [z.strip() for z in dazwischen.split("\n")
+                if "tournament_date'] =" in z or 'tournament_date"] =' in z]
+    erlaubt = {"_zeile['tournament_date'] = _neu", "_t['tournament_date'] = _neu"}
+    uebrig = [z for z in verboten if z not in erlaubt]
+    assert uebrig == [], (
+        "zwischen der Schluss-Korrektur und dem Speichern wird das Datum "
+        "noch einmal geschrieben: " + " | ".join(uebrig) + ". Dann ist die "
+        "Korrektur wieder nicht das letzte Wort — genau der Fehler, der am "
+        "22.09.2026 dreimal hintereinander denselben Lauf rot gemacht hat.")
+
+
+def test_der_namensabgleich_kommt_vor_der_schluss_korrektur():
+    """Sonst prueft die Zusicherung darueber eine leere Strecke.
+
+    Wuerde der Nachlauf gegen den Namensabgleich eines Tages HINTER die
+    Schluss-Korrektur wandern, waere die Reihenfolge wieder falsch —
+    und `test_die_korrektur_hat_das_letzte_wort_vor_dem_schreiben`
+    bliebe trotzdem gruen, weil zwischen Korrektur und Speichern dann
+    zwar geschrieben wird, aber die Zeile anders aussieht.
+    """
+    with io.open(LABS_QUELLE, encoding="utf-8") as f:
+        quelle = f.read()
+    ohne = "\n".join(z for z in quelle.split("\n")
+                      if not z.lstrip().startswith("#"))
+    assert len(ohne) > len(quelle) * 0.3, "das Ausschneiden hat zu viel entfernt"
+    namensabgleich = ohne.rfind("row['tournament_date'] = new_date")
+    schluss = ohne.find("_neu = _datum_mit_override(_tid, _alt)")
+    assert namensabgleich > 0, (
+        "der Nachlauf gegen den Namensabgleich schreibt das Datum nicht mehr "
+        "— dann ist diese Pruefung gegenstandslos und kann weg")
+    assert schluss > namensabgleich, (
+        "der Namensabgleich steht HINTER der Schluss-Korrektur und "
+        "ueberschreibt sie wieder. Das ist der Befund vom 22.09.2026.")

@@ -126,7 +126,8 @@ def _melde_leeren_datenordner(data_dir: str) -> None:
 
     BEFUND 22.09.2026. `get_data_dir()` loest auf <Modulverzeichnis>/data
     auf — im Arbeitsbaum ist das `backend/core/data`, und das steht in
-    .gitignore und ist LEER. Zwanzig Module lesen darueber. Lokal liest
+    .gitignore und ist LEER. 22 Module unter backend/ lesen darueber
+    (gezaehlt am 22.09.2026, 86 Aufrufstellen). Lokal liest
     damit jede Nachschlagetabelle ins Leere und kann nichts ueberschreiben;
     in CI wird der Ordner aus data/ befuellt und greift.
 
@@ -140,10 +141,14 @@ def _melde_leeren_datenordner(data_dir: str) -> None:
     der Scraper eine leere Tabelle statt eines Fehlers.
 
     Geheilt ist das damit nicht — aber es ist nicht mehr still:
-      * in CI (GITHUB_ACTIONS) ist ein leerer Ordner ein ::error::,
-        denn dort MUSS die Saat gelaufen sein;
+      * in CI (GITHUB_ACTIONS) eine Anmerkung am Lauf (::warning::),
+        mit dem Hinweis auf die Dateiliste des Ablaufs;
       * lokal eine einmalige Warnung, damit niemand einem Ergebnis
         traut, das aus einem leeren Ordner stammt.
+
+    Bewusst WARNUNG und nicht FEHLER: nicht jeder Ablauf saet diesen
+    Ordner. Ein Waechter, der viermal falschen Alarm schlaegt, wird
+    beim fuenften Mal nicht gelesen.
     """
     global _DATENORDNER_GEMELDET
     if _DATENORDNER_GEMELDET:

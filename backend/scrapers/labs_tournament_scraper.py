@@ -3068,6 +3068,59 @@ def main() -> None:
     if corrected:
         logger.info("Corrected %d stale row assignments via name lookup", corrected)
 
+    # ── Das letzte Wort hat die hinterlegte Korrektur ──────────────────
+    #
+    # BEFUND 22.09.2026, DRITTER ANLAUF. Die Korrektur stand bereits an
+    # der Stelle, an der das Datum aus allen drei Quellen zusammenlaeuft
+    # (Uebersichtsseite, labs_tournaments.json, cached_tournament_meta).
+    # Der Wochenlauf schrieb trotzdem weiter 2026-09-19 fuer labs 0072,
+    # waehrend die Decklisten-Datei 2026-09-18 trug, und das Tor schlug
+    # zum dritten Mal mit derselben Meldung an:
+    #
+    #     0072: per_player=2026-09-18  labs=2026-09-19
+    #
+    # DIE URSACHE STEHT DIREKT DARUEBER. Der Nachlauf gegen den
+    # Namensabgleich (`name_meta_lookup`, gebaut aus den
+    # tournament_cards_data_cards_<META>.csv) setzt das Datum ZWEIMAL
+    # neu — in (A) beim Rescue und beim Auffrischen, in (B) beim
+    # Zuruecksetzen. Und die Kartendaten stammen von limitless, das
+    # dieses Regional auf den 19.09. datiert. Die Korrektur wurde also
+    # in der Schleife richtig gesetzt und ein paar hundert Zeilen
+    # spaeter wieder ueberschrieben.
+    #
+    # Zwei Anlaeufe lang ist die Korrektur weiter nach hinten geschoben
+    # worden, und jedes Mal fand sich die naechste Schreibstelle.
+    # Deshalb steht sie jetzt nicht an einer Schreibstelle, sondern
+    # HINTER ALLEN: unmittelbar vor dem Speichern, wo es keine weitere
+    # geben kann. Wer kuenftig eine dazubaut, kommt hier nicht vorbei.
+    #
+    # Festgehalten in tests/python/test_labs_datum_override.py.
+    _ueberschrieben = 0
+    for _zeile in merged_deck_rows:
+        _tid = str(_zeile.get('tournament_id') or '').strip()
+        if not _tid:
+            continue
+        _alt = (_zeile.get('tournament_date') or '').strip()
+        _neu = _datum_mit_override(_tid, _alt)
+        if _neu != _alt:
+            _zeile['tournament_date'] = _neu
+            _ueberschrieben += 1
+    for _t in tournaments_meta:
+        _tid = str(_t.get('tournament_id') or '').strip()
+        if not _tid:
+            continue
+        _alt = (_t.get('tournament_date') or '').strip()
+        _neu = _datum_mit_override(_tid, _alt)
+        if _neu != _alt:
+            _t['tournament_date'] = _neu
+    if _ueberschrieben:
+        logger.info(
+            "[date-overrides] %d Deckzeile(n) kurz vor dem Schreiben auf das "
+            "hinterlegte Datum zurueckgesetzt — etwas dazwischen hatte sie "
+            "wieder auf den Quellwert gezogen (zuletzt der Namensabgleich "
+            "gegen die Kartendaten).", _ueberschrieben,
+        )
+
     # ── Save ───────────────────────────────────────────────────────────────
     if overwrite:
         overwrite_results(tournaments_meta, merged_deck_rows)

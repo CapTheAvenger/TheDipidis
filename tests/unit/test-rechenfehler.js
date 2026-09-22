@@ -209,24 +209,47 @@ describe('Doppelmodus: der 0,75-Abzug fuer Flaechenattacken', () => {
         }
     });
 
-    it('spread folgt dem Zielfeld — ausser wo die geprüfte Quelle widerspricht', () => {
-        // Ableitung: target in {9, 11, 14}. Genau eine Ausnahme, und die
-        // steht mit Begruendung im Builder: Matcha Gotcha traegt in der
-        // Mainline-Quelle target 10, ist in Champions aber eine
-        // Flaechenattacke — unsere hand-geprüfte deutsche Beschreibung
-        // sagt das ausdruecklich.
+    it('spread folgt dem Zielfeld — und jede Ausnahme traegt ihre Begruendung', () => {
+        /* UMGESCHRIEBEN 22.09.2026. Vorher stand hier
+         *
+         *     assert.deepEqual(abweichend, ['Matcha Gotcha']);
+         *
+         * — eine Ausnahmeliste mit genau einem Namen, gemessen an einer
+         * Datei, die der naechtliche Lauf zweimal am Tag neu schreibt.
+         * Die naechste Attacke, die Champions anders zielt als die
+         * Mainline-Quelle, haette die Deploy-Kette angehalten, ohne dass
+         * irgendetwas kaputt gewesen waere — und der Weg zurueck ins
+         * Gruene waere gewesen, einen Namen in die Liste zu schreiben.
+         * Das ist keine Pruefung, das ist Buchhaltung.
+         *
+         * Die Regel gehoert an ihre BEDINGUNG: eine Abweichung ist
+         * zulaessig, WENN die hand-geprüfte deutsche Beschreibung sie
+         * ausspricht. Matcha Gotcha traegt target 10 und ist trotzdem
+         * Flaeche — ihr Text sagt "Trifft beide Gegner". Eine still
+         * umgekippte Zuordnung sagt gar nichts und faellt hier um,
+         * heute wie in einem halben Jahr.
+         */
         const FLAECHE = new Set([9, 11, 14]);
+        const SAGT_FLAECHE = /trifft (beide|alle|zwei)|allen? Gegner|Fl(ä|ae)che/i;
         const abweichend = attacken.filter(m =>
             typeof m.spread === 'boolean' && Number.isInteger(m.target)
-            && m.spread !== FLAECHE.has(m.target)).map(m => m.en);
-        assert.deepEqual(abweichend, ['Matcha Gotcha'],
-            'unerwartete Abweichung zwischen target und spread');
+            && m.spread !== FLAECHE.has(m.target));
+        const stumm = abweichend.filter(m =>
+            !SAGT_FLAECHE.test(String(m.de_effect || '')));
+        assert.deepEqual(stumm.map(m => `${m.en} (target ${m.target}, spread ${m.spread})`), [],
+            'diese Attacken weichen vom Zielfeld ab, ohne dass ihre deutsche '
+            + 'Beschreibung es ausspricht — entweder ist die Zuordnung still '
+            + 'umgekippt, oder die Beschreibung wurde nicht mitgezogen');
+        // Und die Gegenprobe: die Ausnahme ist keine leere Regel.
         const mg = attacken.find(m => m.en === 'Matcha Gotcha');
-        assert.match(mg.de_effect, /Trifft beide Gegner/,
-            'die Begruendung der Ausnahme steht nicht mehr in den Daten');
+        if (mg) {
+            assert.equal(mg.spread, true, 'Matcha Gotcha ist keine Flaechenattacke mehr');
+            assert.match(mg.de_effect, SAGT_FLAECHE,
+                'die Begruendung der Ausnahme steht nicht mehr in den Daten');
+        }
     });
 
-    it('34 Schadensattacken sind Flaechenattacken', () => {
+    it('die Flaechenattacken sind gezaehlt wie sie gelistet sind', () => {
         // 13.09.2026: von 33 auf 34. Dazugekommen ist Overdrive
         // (Toxtricity-Signaturattacke, target 11 = alle Gegner). Grund
         // ist derselbe Kaderwechsel, der an diesem Tag die Deploy-Kette
@@ -246,9 +269,34 @@ describe('Doppelmodus: der 0,75-Abzug fuer Flaechenattacken', () => {
         // Die feste Zahl ist Absicht: sie faellt um, wenn sich die
         // Ziel-Zuordnung still aendert. Wer sie anpasst, muss vorher
         // wissen, welche Attacke dazugekommen oder weggefallen ist.
+        /* UMGESCHRIEBEN 22.09.2026. Vorher stand hier zweimal die feste
+         * Zahl 34. Der Kommentar darueber ist die Anklageschrift: am
+         * 09.09. von 32 auf 33, am 13.09. von 33 auf 34, und beide Male
+         * hat die Deploy-Kette gestanden, bis jemand die Zahl von Hand
+         * hochgesetzt hat. Die Datei wird ZWEIMAL TAEGLICH neu gebaut;
+         * die Zahl steht damit dauerhaft auf dem Anschlag.
+         *
+         * Was die Zahl belegen sollte, war nie ihr Betrag, sondern
+         * zweierlei — und beides haelt ohne sie:
+         *
+         *   1. Die Datei stimmt mit sich selbst ueberein. _meta.counts
+         *      zaehlt (siehe scripts/build_champions_resources.py:597)
+         *      genau die Zuege mit power UND spread. Geht die Zaehlung
+         *      an den Eintraegen vorbei, ist der Bauer defekt — und das
+         *      faellt hier um, egal wie viele es sind.
+         *   2. Der Bestand geht nicht verloren. Flaechenattacken
+         *      verschwinden nicht; wenn doch, hat der Kader oder die
+         *      Quelle etwas eingebuesst. Dafuer die Untergrenze.
+         */
         const n = attacken.filter(m => m.power && m.spread).length;
-        assert.equal(n, 34);
-        assert.equal(RES._meta.counts.spread, 34, 'die Zaehlung im _meta passt nicht dazu');
+        assert.equal(RES._meta.counts.spread, n,
+            `_meta.counts.spread sagt ${RES._meta.counts.spread}, gezaehlt `
+            + `sind ${n} Zuege mit power und spread — der Bauer zaehlt an `
+            + 'seinen eigenen Eintraegen vorbei');
+        assert.ok(n >= 34,
+            `nur noch ${n} Schadens-Flaechenattacken (am 13.09.2026 gemessen: `
+            + '34). Zuwachs ist kein Fehler, Verlust schon — hier ist etwas '
+            + 'aus dem Pool gefallen');
         const ov = attacken.find(m => m.en === 'Overdrive');
         assert.ok(ov, 'Overdrive fehlt in den Attackendaten');
         assert.equal(ov.spread, true);

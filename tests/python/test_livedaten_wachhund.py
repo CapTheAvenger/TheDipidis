@@ -78,12 +78,6 @@ AUSNAHMEN = {
     'test_pocket_tierlist.py::test_eine_trennstelle_zwischen_zwei_karten_wird_abgelehnt':
         'dieselbe Deckregel',
 
-    # Ein ABGESCHLOSSENES Formatfenster. Der Test sagt es selbst: "Er
-    # kann nicht wachsen — entweder wurden alte Zeilen entfernt oder das
-    # Fenster ist nicht mehr sauber begrenzt." Genau das soll er fangen.
-    'test_meta_prognose.py::test_der_gemessene_fall_von_mega_excadrill_bleibt_stehen':
-        'abgeschlossenes Formatfenster, der Nenner KANN nicht wachsen',
-
     # Die 29 sind die Summe des HTML, das der Test SELBST baut
     # (suppe(html) ein paar Zeilen darueber). Die Live-Daten kommen nur
     # ueber Db() herein und aendern daran nichts.

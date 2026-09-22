@@ -39,12 +39,59 @@ const path = require('path');
 
 const UNIT = path.join(__dirname);
 
-const liestLiveDaten = (t) =>
+/* Der ENGE Blick: der Lesevorgang steht ausgeschrieben im Test.
+   Bis zum 22.09.2026 war das der einzige. */
+const liestLiveDatenDirekt = (t) =>
     /readFileSync\([^)]*(path\.join\([^)]*['"]data['"]|['"]data\/|ROOT[^)]*data)/.test(t) ||
     /join\(ROOT,\s*['"]data['"]/.test(t);
 
+/* DER BLINDE FLECK, gemessen am 22.09.2026.
+
+   Der enge Blick findet 43 Dateien. Wirklich aus data/ lesen 90. Die
+   uebrigen 47 tun es ueber einen Helfer —
+
+       const lies = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
+       ...
+       const RES = JSON.parse(lies('data/champions_resources.json'));
+
+   — und `path.join(ROOT, p)` enthaelt das Wort 'data' nicht. Deshalb
+   war tests/unit/test-rechenfehler.js fuer diesen Wachhund unsichtbar,
+   und deshalb konnte dort `assert.equal(n, 34)` stehen und am 09. und
+   am 13.09.2026 zweimal von Hand hochgesetzt werden, nachdem die
+   Deploy-Kette gestanden hatte. Der Wachhund war die ganze Zeit gruen.
+
+   Ein Wachhund, der die Haelfte des Hofes nicht sieht, meldet Ruhe.
+
+   Der WEITE Blick nimmt jede Zeichenkette, die auf eine Datei unter
+   data/ zeigt. Er traegt die beiden Sperrklinken unten. Die
+   Registerpflicht haengt vorerst weiter am engen Blick — 37 der neu
+   gesehenen Dateien haben noch keinen Eintrag, und ein Register
+   voller ungelesener Begruendungen waere schlimmer als keins. */
+const liestLiveDaten = (t) =>
+    liestLiveDatenDirekt(t)
+    || /['"`]data\/[A-Za-z0-9_.\/-]+['"`]/.test(t);
+
 // assert.ok(... irgendwas < 5 ...) — eine Ungleichung gegen eine feste Zahl.
 const UNGLEICHUNG = /assert\.ok\([^;]*[<>]=?\s*-?\d/;
+
+/* GLEICHHEIT gegen eine feste Zahl — die zweite Haelfte derselben
+   Bauart, und bis zum 22.09.2026 sah dieser Wachhund sie gar nicht.
+   Er zaehlte nur Ungleichungen.
+
+   Was er dadurch durchgelassen hat, steht in
+   tests/unit/test-rechenfehler.js:
+
+       assert.equal(n, 34);   // Flaechenattacken
+
+   Diese Zeile ist am 09.09.2026 von 32 auf 33 und am 13.09.2026 von 33
+   auf 34 gesetzt worden, beide Male von Hand, beide Male NACHDEM die
+   Deploy-Kette stand. Zweimal derselbe Vorgang, und der Wachhund, der
+   genau dafuer gebaut wurde, hat geschwiegen — weil `==` kein `<` ist.
+
+   Zweistellig und groesser: unter zehn ist fast immer eine Sorte
+   (zwei Spalten, drei Reiter), kein abgelesener Bestand. Dieselbe
+   Schwelle benutzt die Python-Seite (AB_HIER_BESTAND). */
+const GLEICHHEIT = /assert\.(equal|strictEqual|deepEqual|deepStrictEqual)\([^;]*,\s*-?\d{2,}\s*[,)]/;
 
 function dateienMitDatenzugriff() {
     return fs.readdirSync(UNIT)
@@ -52,14 +99,25 @@ function dateienMitDatenzugriff() {
         .filter(f => liestLiveDaten(fs.readFileSync(path.join(UNIT, f), 'utf8')));
 }
 
-function ungleichungen(datei) {
+/* Nur die Dateien, die der enge Blick sieht. Sie und nur sie muessen
+   im Register stehen — siehe die Notiz am weiten Blick. */
+function dateienMitDirektemDatenzugriff() {
+    return fs.readdirSync(UNIT)
+        .filter(f => f.startsWith('test-') && f.endsWith('.js'))
+        .filter(f => liestLiveDatenDirekt(fs.readFileSync(path.join(UNIT, f), 'utf8')));
+}
+
+function zeilenMit(datei, muster) {
     return fs.readFileSync(path.join(UNIT, datei), 'utf8').split('\n')
         .filter(z => {
             const s = z.trim();
             if (s.startsWith('//') || s.startsWith('*')) return false;
-            return UNGLEICHUNG.test(z);
+            return muster.test(z);
         }).length;
 }
+
+function ungleichungen(datei) { return zeilenMit(datei, UNGLEICHUNG); }
+function gleichheiten(datei) { return zeilenMit(datei, GLEICHHEIT); }
 
 /**
  * Das Register. Jede Testdatei, die eine Datei aus data/ liest, steht hier
@@ -415,12 +473,34 @@ const REGISTER = {
    uebersteigen (das waeren Geisterspieler), und sie darf hoechstens
    ein Prozent darunter liegen. Beides ist eine Eigenschaft der
    Zuordnung, kein abgelesener Stand. */
-const OBERGRENZE = 141;
+/* 22.09.2026: von 141 auf 379 — und das ist KEINE Lockerung.
+
+   Bis heute zaehlte diese Sperrklinke nur die 43 Dateien, die der enge
+   Blick sah. Seit heute sind es alle 90, die wirklich aus data/ lesen
+   (siehe die Notiz am weiten Blick oben). Dieselbe Regel, dreifacher
+   Hof. Die 141 waren nie die Zahl der Ungleichungen im Projekt — sie
+   waren die Zahl in der Haelfte, die man sah.
+
+   Nach unten darf sie jederzeit, nach oben nur mit Begruendung. */
+const OBERGRENZE = 379;
+
+/* Die zweite Sperrklinke, eingezogen am 22.09.2026: so viele
+   Gleichheiten gegen eine zweistellige Zahl stehen heute in Dateien,
+   die aus data/ lesen. Die Zahl ist KEIN Gutachten — die meisten davon
+   stehen an Werten, die der Test selbst setzt (Schadenswuerfe,
+   QR-Kantenlaengen), und die sind voellig in Ordnung. Sie zaehlt ueber
+   alle 90 Dateien, die aus data/ lesen, nicht nur ueber die 43 des
+   engen Blicks. Sie ist eine
+   Sperrklinke: sie darf nur fallen. Wer eine neue Gleichheit gegen
+   eine feste Zahl in eine Datei mit Datenzugriff schreibt, faellt hier
+   um und muss begruenden, warum die Zahl auch in vier Wochen noch
+   stimmt. Genau das hat bei `assert.equal(n, 34)` zweimal gefehlt. */
+const OBERGRENZE_GLEICHHEIT = 162;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 
     it('jede Datei mit Datenzugriff steht im Register', () => {
-        const unbekannt = dateienMitDatenzugriff().filter(f => !(f in REGISTER));
+        const unbekannt = dateienMitDirektemDatenzugriff().filter(f => !(f in REGISTER));
         assert.deepEqual(unbekannt, [],
             'Diese Testdateien lesen aus data/, stehen aber nicht im Register:\n' +
             unbekannt.map(f => '  ' + f).join('\n') +
@@ -446,6 +526,21 @@ describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
             'Bauart, die den Deploy schon zweimal angehalten hat. Wenn sie wirklich ' +
             'noetig ist: Obergrenze hier hochsetzen und dazuschreiben, warum die ' +
             'Zahl auch in vier Wochen noch stimmt.');
+    });
+
+    it('die Zahl der Gleichheiten an Live-Daten steigt nicht', () => {
+        const dateien = dateienMitDatenzugriff();
+        const proDatei = dateien.map(f => [f, gleichheiten(f)]).filter(([, n]) => n > 0);
+        const jetzt = proDatei.reduce((s, [, n]) => s + n, 0);
+        assert.ok(jetzt <= OBERGRENZE_GLEICHHEIT,
+            `Gleichheiten gegen feste Zahlen in Dateien mit Datenzugriff: ${jetzt} `
+            + `(erlaubt: ${OBERGRENZE_GLEICHHEIT})\n`
+            + proDatei.sort((a, b) => b[1] - a[1]).map(([f, n]) => `  ${String(n).padStart(3)}  ${f}`).join('\n')
+            + '\n\nEine Gleichheit gegen eine abgelesene Zahl ist die Bauart, die am '
+            + '09. und am 13.09.2026 die Deploy-Kette angehalten hat (assert.equal(n, 34) '
+            + 'auf champions_resources.json, zweimal von Hand hochgesetzt). Wenn die '
+            + 'Zahl aus dem Test selbst kommt und nicht aus data/, ist sie in Ordnung — '
+            + 'dann die Obergrenze hier hochsetzen und dazuschreiben, woher sie kommt.');
     });
 
     /* Die frueher hier beobachtete Vorbedingung in

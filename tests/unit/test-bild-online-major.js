@@ -196,9 +196,19 @@ describe('Der Nenner in der Seitenspalte ist richtig benannt', () => {
             const v = parseFloat((z.split(';')[iB] || '0').replace(',', '.'));
             if (Number.isFinite(v)) summe += v;
         }
-        assert.ok(summe > 1000 && summe < 30000,
-            `die Summe liegt bei ${Math.round(summe)} — ausserhalb des `
-            + 'Bereichs, in dem sie als "Antritte auf Turnieren mit Schnitt" '
-            + 'plausibel ist');
+        /* GEAENDERT 22.09.2026: hier stand `summe < 30000` — eine
+           absolute Obergrenze auf einer Summe, die mit jedem
+           Online-Turnier waechst, das der Wochenlauf dazuschreibt. Heute
+           6.313. Die Aussage ist die untere Richtung (die Spalte traegt
+           ueberhaupt Antritte) und die Groessenordnung im Verhaeltnis zur
+           Datei — nicht ein Deckel, den der naechste Dienstag reisst. */
+        assert.ok(summe > 1000,
+            `die Summe liegt bei ${Math.round(summe)} — zu wenig, um als `
+            + '"Antritte auf Turnieren mit Top-8-Schnitt" eine Aussage zu sein');
+        const zeilen = L.length - 1;
+        assert.ok(summe < zeilen * 2000,
+            `${Math.round(summe)} gewichtete Antritte auf ${zeilen} Zeilen — `
+            + 'im Schnitt ueber 2.000 je Deck. Dann zaehlt die Spalte etwas '
+            + 'anderes, als die Beschriftung behauptet');
     });
 });

@@ -170,12 +170,30 @@ describe('Die Zahlen stimmen mit den Rohdaten überein', () => {
             set: f[iSet], number: f[iNum], id: f[iId], method: f[iM] }; });
     }
 
-    it('100 Produktnummern bedienen mehr als eine Karte', () => {
+    it('Produktnummern bedienen weiterhin mehr als eine Karte', () => {
+        /* UMGESCHRIEBEN 22.09.2026. Vorher: `>= 50 && <= 200`, gemessen
+           an einer Datei, die der taegliche Lauf um 08:00 UTC neu
+           schreibt und die mit dem Kartenbestand waechst. Heute sind es
+           94 — die Obergrenze war ein Zeitzuender.
+
+           Die Aussage ist die untere Richtung: gibt es KEINE
+           Kollisionen mehr, ist die Sonderbehandlung unten unnoetig
+           geworden und gehoert geprueft. Dass es mehr werden, ist der
+           Lauf der Dinge. Die obere Schranke bleibt als ANTEIL — ein
+           Drittel kollidierender Nummern waere kein Randfall mehr,
+           sondern ein kaputter Abgleich. */
         const zaehler = new Map();
-        for (const r of mapping()) zaehler.set(r.id, (zaehler.get(r.id) || 0) + 1);
+        const zeilen = mapping();
+        for (const r of zeilen) zaehler.set(r.id, (zaehler.get(r.id) || 0) + 1);
         const doppelt = [...zaehler.values()].filter(n => n > 1);
-        assert.ok(doppelt.length >= 50 && doppelt.length <= 200,
-            'kollidierende IDs: ' + doppelt.length);
+        assert.ok(doppelt.length >= 50,
+            `nur noch ${doppelt.length} kollidierende Produktnummern (am `
+            + '22.09.2026: 94). Loesen sie sich auf, ist die Sonderbehandlung '
+            + 'unten zu pruefen — nicht diese Zahl zu senken.');
+        assert.ok(doppelt.length < zaehler.size * 0.2,
+            `${doppelt.length} von ${zaehler.size} Produktnummern bedienen `
+            + 'mehr als eine Karte. Das ist kein Randfall mehr — der Abgleich '
+            + 'trifft nicht mehr.');
     });
 
     it('kein Paar ist auf BEIDEN Seiten live-verified', () => {

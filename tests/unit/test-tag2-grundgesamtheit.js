@@ -441,10 +441,23 @@ describe('dataQuality traegt Piloten und Feldgroesse aus den Labs-Dateien', () =
                 const onl = ONLINE_FELD_AUS_ZEILE.get(tid) || ONLINE_FELD.get(tid);
                 if (onl > 0) sollFeld += onl; else fOk = false;
             }
+            /* DIE MELDUNG NENNT DIE ZAHLEN (22.09.2026).
+               Hier stand nur "weicht ab". Als das Tor im Wochenlauf
+               anschlug, war das alles, was davon ankam — und die
+               frischen Daten lagen als 41-MB-Artefakt daneben, an das
+               ohne Anmeldung niemand herankommt. Eine Abweichung ohne
+               ihre beiden Zahlen ist nicht nachpruefbar; genau das
+               haelt dieses Repo sonst ueberall fest. */
+            const woher = `Turniere ${tids.join(',') || '—'}`;
             assert.equal(dq.n_piloten, pOk ? sollPiloten : null,
-                `${arch}: n_piloten weicht von labs player_count ab`);
+                `${arch}: n_piloten ist ${dq.n_piloten}, aus labs player_count `
+                + `gerechnet ${pOk ? sollPiloten : 'null (eine Zeile fehlt)'} `
+                + `(${woher})`);
             assert.equal(dq.feldgroesse, fOk ? sollFeld : null,
-                `${arch}: feldgroesse weicht von labs total_players ab`);
+                `${arch}: feldgroesse ist ${dq.feldgroesse}, aus labs `
+                + `total_players bzw. der Online-Turnierdatei gerechnet `
+                + `${fOk ? sollFeld : 'null (fuer ein Turnier gibt keine '
+                    + 'Quelle eine Feldgroesse her)'} (${woher})`);
             geprueft++;
         }
         assert.ok(geprueft > 2,

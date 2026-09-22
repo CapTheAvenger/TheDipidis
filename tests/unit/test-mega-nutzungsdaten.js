@@ -127,10 +127,13 @@ describe('Mega-Formen erben die Zahlen der Grundform — mit Beleg', () => {
            kein neues Set mehr, sondern ein Fehler im Bau.
 
            UMGESCHRIEBEN 22.09.2026: die Schranke war die feste Zahl 5.
-           Ein Set bringt Mega-Formen im Dutzend — 30C hat den Bestand
-           von 75 auf 78 gehoben —, und genau diese Bauart hat am 12. und
-           13.09.2026 zusammen einen Vormittag und vier Stunden Deploy
-           gekostet. Ein Anteil am Bestand waechst mit. */
+           Der Mega-Bestand kommt aus dem KADER von Pokemon Champions
+           (data/champions_pokedex.json), nicht aus dem TCG-Kartensatz —
+           eine Regelrunde bringt neue Formen im Dutzend. Gemessen am
+           22.09.2026: 78 Mega-Formen. Genau diese Bauart, eine feste
+           Obergrenze auf einer Menge, die mit dem Kader waechst, hat am
+           12. und 13.09.2026 zusammen einen Vormittag und vier Stunden
+           Deploy gekostet. Ein Anteil am Bestand waechst mit. */
         assert.ok(nurNeu.length <= Math.max(5, Math.round(MEGAS.length * 0.1)),
             `${nurNeu.length} von ${MEGAS.length} Mega-Formen ohne Nutzungsdaten (${
                 nurNeu.map(e => e.en).slice(0, 10).join(', ')}) — das sind zu viele fuer `
@@ -261,7 +264,8 @@ describe('Die fehlenden Mega-Faehigkeiten werden benannt', () => {
            Betreiber hat am 13.09. die Bildschirmfotos der pokebase-Seiten
            von Mega Golisopod und Mega Salamence geliefert; beide Werte
            sind eindeutig belegt und damit uebernommen — die Liste ist auf
-           18 gewachsen. Ein Beleg, der DAZUkommt, ist kein Fehler; einer,
+           18 und am 22.09.2026 auf 19 gewachsen. Ein Beleg, der
+           DAZUkommt, ist kein Fehler; einer,
            der verschwindet, schon. Die Python-Seite prueft dasselbe
            (tests/python/test_datenluecken.py, `>= 16`). */
         assert.ok((POKEDEX._meta.megaAbilityBelegt || []).length >= 16,

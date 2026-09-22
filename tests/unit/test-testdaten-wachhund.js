@@ -47,8 +47,8 @@ const liestLiveDatenDirekt = (t) =>
 
 /* DER BLINDE FLECK, gemessen am 22.09.2026.
 
-   Der enge Blick findet 43 Dateien. Wirklich aus data/ lesen 90. Die
-   uebrigen 47 tun es ueber einen Helfer —
+   Der enge Blick findet 43 Dateien. Wirklich aus data/ lesen 91. Die
+   uebrigen 48 tun es ueber einen Helfer —
 
        const lies = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
        ...
@@ -192,7 +192,7 @@ const REGISTER = {
 
 // ── NACHGETRAGEN AM 22.09.2026: die 37 Dateien des weiten Blicks ────
 //
-// Bis heute sah der Wachhund 43 von 90 Dateien, die wirklich aus data/
+// Bis heute sah der Wachhund 43 von 91 Dateien, die wirklich aus data/
 // lesen (siehe die Notiz am weiten Blick oben). Diese 37 waren nie im
 // Register, weil sie ueber einen Helfer lesen. Jede ist gelesen, jede
 // Zusicherung gegen Live-Daten eingeordnet und am echten Bestand
@@ -531,7 +531,7 @@ const REGISTER = {
 /* 22.09.2026: von 141 auf 379 — und das ist KEINE Lockerung.
 
    Bis heute zaehlte diese Sperrklinke nur die 43 Dateien, die der enge
-   Blick sah. Seit heute sind es alle 90, die wirklich aus data/ lesen
+   Blick sah. Seit heute sind es alle 91, die wirklich aus data/ lesen
    (siehe die Notiz am weiten Blick oben). Dieselbe Regel, dreifacher
    Hof. Die 141 waren nie die Zahl der Ungleichungen im Projekt — sie
    waren die Zahl in der Haelfte, die man sah.
@@ -545,6 +545,12 @@ const REGISTER = {
    "genau 34" wird "mindestens 25", "genau drei Namen" wird "hoechstens
    ein Anteil". Neun davon zaehlen hier neu mit.
 
+   Nachtrag desselben Tages, nach der Abnahme: von 388 auf 390. Ein
+   Pruefagent hat sieben Auflagen erhoben, und zwei der Reparaturen
+   dafuer sind wieder Ungleichungen — eine Laengenprobe auf die
+   Kuerzelliste und eine Obergrenze auf verwaiste Teamnamen. Auch das
+   ist die Richtung, in die die Sperrklinke zeigen soll.
+
    Der Zaehler der GLEICHHEITEN steht dabei unveraendert bei 162 —
    nachgemessen, nicht geschaetzt. Das ueberrascht nur auf den ersten
    Blick: die meisten umgeformten Gleichheiten standen als
@@ -552,14 +558,14 @@ const REGISTER = {
    Zahl, die der Gleichheitszaehler sehen koennte. Die Sperrklinke misst
    Bauart, nicht Wirkung — dass die Gleichheit weg ist, steht in den
    Zusicherungen selbst und in den Eintraegen des Registers. */
-const OBERGRENZE = 388;
+const OBERGRENZE = 390;
 
 /* Die zweite Sperrklinke, eingezogen am 22.09.2026: so viele
    Gleichheiten gegen eine zweistellige Zahl stehen heute in Dateien,
    die aus data/ lesen. Die Zahl ist KEIN Gutachten — die meisten davon
    stehen an Werten, die der Test selbst setzt (Schadenswuerfe,
    QR-Kantenlaengen), und die sind voellig in Ordnung. Sie zaehlt ueber
-   alle 90 Dateien, die aus data/ lesen, nicht nur ueber die 43 des
+   alle 91 Dateien, die aus data/ lesen, nicht nur ueber die 43 des
    engen Blicks. Sie ist eine
    Sperrklinke: sie darf nur fallen. Wer eine neue Gleichheit gegen
    eine feste Zahl in eine Datei mit Datenzugriff schreibt, faellt hier

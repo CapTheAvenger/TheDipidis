@@ -295,8 +295,27 @@ describe('Datenstand', () => {
                 `${f} steht in stand.leer, traegt aber ${zeilen.length - 1} `
                 + 'Datenzeilen — die Meldung ist veraltet');
         }
+        /* UND DIE ZWEITE RICHTUNG. Ohne sie bestand die Pruefung auch
+           dann, wenn der Bauer eine leere Datei gar nicht mehr meldet
+           — die Schleife oben laeuft dann einfach nicht (abgenommen
+           und gefunden am 22.09.2026: einen Namen aus stand.leer
+           streichen liess die Suite gruen). Der Defekt, den die alte
+           Fassung fing, waere damit ersatzlos verschwunden. */
         assert.ok(Array.isArray(stand.leer),
             'data_stand.json fuehrt keine leer-Liste mehr');
+        const gemeldet = new Set(stand.leer);
+        const verschwiegen = [];
+        for (const f of Object.keys(stand.dateien || {})) {
+            if (gemeldet.has(f)) continue;
+            let inhalt;
+            try { inhalt = lies('data/' + f); } catch (e) { continue; }
+            const zeilen = inhalt.trim().split('\n').filter(z => z.trim());
+            if (zeilen.length <= 1 && /\.csv$/i.test(f)) verschwiegen.push(f);
+        }
+        assert.deepEqual(verschwiegen, [],
+            'diese Dateien tragen keine einzige Datenzeile, stehen aber nicht '
+            + 'in stand.leer — dann verschweigt der Frischechip eine leere '
+            + 'Quelle, und der Reiter sieht aus, als haette er Daten');
     });
 
     it('die beiden nachgetragenen Quellen werden geführt', () => {

@@ -279,8 +279,29 @@ describe('Sortierung nach Champions-Nutzung', () => {
            und das loest sich beim naechsten Lauf von selbst. Geprueft
            wird deshalb der ANTEIL, und die Namen stehen weiter in der
            Meldung. */
-        assert.ok(verwaist.length <= Math.max(2, namen.size * 0.15),
-            `${verwaist.length} von ${namen.size} Teamnamen ohne Pokedex-Eintrag: `
+        /* ABNAHMEBEFUND 22.09.2026, zweiter Durchgang.
+
+           Der erste Versuch rechnete einen ANTEIL gegen `namen` — die
+           Menge der Teamnamen. Jeder verwaiste Name steckt selbst
+           darin, der Defekt vergroesserte also seine eigene Schranke:
+           16 eingeschleuste Phantomnamen blieben gruen, rot wurde es
+           erst bei 18. Und 16 ist genau die Zahl, die der Kommentar
+           oben als den Vorfall vom 11.09.2026 anfuehrt. Der zweite
+           Versuch rechnete gegen die bekannten Pokedex-Namen (ueber
+           500) — mit 5 % waeren 25 durchgegangen, noch schlechter.
+
+           Hier ist ein Anteil die falsche Form. Ein verwaister
+           Teamname ist kein Bestandswert, sondern ein MANGEL, und
+           Maengel zaehlt man absolut. Fuenf sind die Handvoll, die ein
+           nachhinkender Spiegel-Lauf erklaert; die neun vom 11.09.2026
+           waren es schon nicht mehr.
+
+           Der Unterschied zur alten Fassung ist nicht die Zahl,
+           sondern dass keine NAMENSLISTE mehr gepflegt werden muss:
+           der Weg ins Gruene heisst nicht mehr "einen Namen
+           eintragen", sondern "nachsehen, warum es so viele sind". */
+        assert.ok(verwaist.length <= 5,
+            `${verwaist.length} Teamnamen ohne Pokedex-Eintrag: `
             + JSON.stringify(verwaist) + '\n'
             + 'Bei einer Schreibweise eines vorhandenen Eintrags gehoert eine '
             + 'Zeile in TEAM_AUSNAHMEN; bei einem wirklich neuen Pokemon zieht '

@@ -415,6 +415,109 @@ test('die fuenf Online-Listen der letzten sieben Tage sind eigene Listen', () =>
     assert.ok(/ab 100 Spielern/.test(FRAGMENT), 'die Grundgesamtheit der Online-Listen fehlt');
 });
 
+test('das Kopierbild teilt die Karten auf volle Zeilen auf und bleibt in der Breite', () => {
+    /* BESTELLUNG (22.09.2026): ein Knopf, der die Liste als Bild in die
+     * Zwischenablage legt — zum Verschicken auf Tims Discord. Das Bild
+     * ist 1200 px breit, damit es dort vorhersagbar aussieht.
+     *
+     * Die Funktion wird AUSGEFUEHRT, nicht im Quelltext gesucht. */
+    const { gitter } = lade('gitter');
+
+    [19, 20, 21, 23, 24, 26, 29].forEach((n) => {
+        const g = gitter(n);
+        assert.ok(g, `keine Aufteilung fuer ${n} Karten`);
+        const breite = g.spalten * g.kb + (g.spalten - 1) * 10 + 2 * 28;
+        assert.ok(breite <= 1200,
+            `${n} Karten: ${breite} px breit, mehr als die 1200 des Bildes`);
+        assert.strictEqual(g.zeilen, Math.ceil(n / g.spalten),
+            `${n} Karten: ${g.zeilen} Zeilen passen nicht zu ${g.spalten} Spalten`);
+        assert.ok(g.kh > g.kb, `${n} Karten: Kachel ${g.kb}x${g.kh} ist nicht hochkant`);
+    });
+
+    /* 21 Karten auf 5 Spalten enden mit EINER Kachel in der letzten
+     * Zeile — das liest sich wie ein Rest. Auf 7 Spalten sind es drei
+     * volle Zeilen. Dieselbe Abwaegung wie in ds-share.js. */
+    const g21 = gitter(21);
+    assert.strictEqual(21 % g21.spalten, 0,
+        `21 Karten enden mit ${21 % g21.spalten} Kacheln in der letzten Zeile`);
+});
+
+test('die Bildadresse wird aus dem Druck gebaut, nicht geraten', () => {
+    const { bildAdresse } = lade('bildAdresse');
+    assert.strictEqual(bildAdresse('PBL-103'),
+        'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_103_R_EN_LG.png');
+    /* Einstellige Nummern werden dreistellig — MEE-8 liegt unter
+     * MEE_008, nicht unter MEE_8. */
+    assert.ok(bildAdresse('MEE-8').endsWith('/MEE/MEE_008_R_EN_LG.png'), bildAdresse('MEE-8'));
+    ['', 'PBL', 'PBL-', '-103'].forEach((mist) => {
+        assert.strictEqual(bildAdresse(mist), '', `aus "${mist}" wurde eine Adresse`);
+    });
+});
+
+test('jede Liste traegt einen Kopierknopf, jede Kachel beide Drucke', () => {
+    /* BESTELLUNG (22.09.2026): "In den Listen selbst bitte den
+     * aktuellsten Low-Rarity-Print" plus "einen Button, der die Liste
+     * als Screenshot in die Zwischenablage packt". Also zwei Drucke je
+     * Kachel — der guenstige in der Liste, der hochwertige im Detail —
+     * und je Liste ein Knopf. */
+    const bloecke = FRAGMENT.match(/data-mcl-listenblock="\d+"/g) || [];
+    const knoepfe = FRAGMENT.match(/data-mcl-kopieren="\d+"/g) || [];
+    assert.strictEqual(knoepfe.length, bloecke.length,
+        `${knoepfe.length} Kopierknoepfe auf ${bloecke.length} Listen`);
+    assert.ok(bloecke.length >= 25, `nur ${bloecke.length} Listen`);
+
+    /* Das Bild braucht einen Namen, sonst heisst jede Datei gleich. */
+    const namen = FRAGMENT.match(/data-mcl-listenname="[^"]+"/g) || [];
+    assert.strictEqual(namen.length, bloecke.length,
+        `${namen.length} Listen tragen einen Namen, erwartet ${bloecke.length}`);
+
+    const druck = FRAGMENT.match(/data-druck="[^"]*"/g) || [];
+    const hoch = FRAGMENT.match(/data-druck-hoch="[^"]*"/g) || [];
+    assert.strictEqual(hoch.length, druck.length,
+        `${hoch.length} Kacheln tragen den Sammlerdruck, ${druck.length} den Listendruck`);
+
+    const paare = [...FRAGMENT.matchAll(/data-druck="([^"]*)" data-druck-hoch="([^"]*)"/g)];
+    const anders = new Set(paare.filter((m) => m[1] !== m[2]).map((m) => m[1] + '>' + m[2]));
+    assert.ok(anders.size >= 20,
+        `nur ${anders.size} Karten unterscheiden Listen- und Sammlerdruck — die Trennung fehlt`);
+
+    /* Und das Detail zeigt ihn auch an, sonst waere das Attribut tot. */
+    assert.ok(JS_NACKT.includes('druckHoch'), 'das Skript liest data-druck-hoch nicht');
+});
+
+test('der Klick auf den Kopierknopf landet beim Kopieren, der auf eine Karte beim Detail', () => {
+    /* Die Verdrahtung wird AUSGEFUEHRT. Eine Textsuche nach
+     * "data-mcl-kopieren" im Skript haette hier nichts gesehen: der
+     * Name steht ohnehin in listeKopieren() selbst — gemessen in der
+     * Verfaelschungsprobe, die Zeile liess sich entfernen, ohne dass
+     * eine Zusicherung rot wurde. */
+    const quelle = schneideFunktion(JS, 'verdrahte');
+    const ktx = { assert, gerufen: [], handler: null };
+    ktx.wurzel = { addEventListener: (typ, fn) => { if (typ === 'click') ktx.handler = fn; } };
+    vm.createContext(ktx);
+    vm.runInContext(
+        'function bereichWechseln() { gerufen.push("bereich"); }\n'
+        + 'function matchupFilter() { gerufen.push("filter"); }\n'
+        + 'function listeWechseln() { gerufen.push("liste"); }\n'
+        + 'function listeKopieren() { gerufen.push("kopieren"); }\n'
+        + 'function kartenDetail() { gerufen.push("detail"); }\n'
+        + 'function sucheVerdrahten() {}\n'
+        + quelle + '\nverdrahte(wurzel);', ktx);
+
+    assert.ok(ktx.handler, 'verdrahte() haengt keinen Klick-Horcher an');
+
+    const klick = (treffer) => ({
+        target: { closest: (sel) => (sel === treffer ? { getAttribute: () => '3' } : null) }
+    });
+    ktx.handler(klick('[data-mcl-kopieren]'));
+    assert.deepStrictEqual(ktx.gerufen, ['kopieren'],
+        'ein Klick auf den Kopierknopf ruft nicht listeKopieren');
+    ktx.gerufen.length = 0;
+    ktx.handler(klick('.mcl-kk'));
+    assert.deepStrictEqual(ktx.gerufen, ['detail'],
+        'ein Klick auf eine Karte ruft nicht mehr das Detail');
+});
+
 test('Tims Paketliste heisst Kangama Arktos Build', () => {
     /* BESTELLUNG (22.09.2026): "kannst du die Tim Liste welche aktuell
      * Update mit Paket heisst umbenennen in Kangama Arktos Build". */

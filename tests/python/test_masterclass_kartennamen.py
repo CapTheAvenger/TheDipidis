@@ -195,20 +195,24 @@ def _zeilen_nach_druck():
 
 
 @pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
-def test_kacheln_zeigen_den_hochwertigsten_druck():
-    """BESTELLUNG (22.09.2026): "Koennen wir fuer die angezeigte Karte im
-    Regal die high rarity Karte Anzeige — aktuell wird die low rarity
-    Print der Karte angezeigt."
+def test_listendruck_ist_der_neueste_guenstige_sammlerdruck_der_hochwertigste():
+    """Zwei Drucke je Karte, zwei Regeln.
 
-    Geprueft wird die REGEL, nicht eine Liste von 29 Karten: zu keiner
-    gezeigten Kachel darf es einen hoeherwertigen Druck DERSELBEN Karte
-    im Formatfenster geben.
+    BESTELLUNG 1 (22.09.2026, frueh): "Koennen wir fuer die angezeigte
+    Karte im Regal die high rarity Karte Anzeige."
+    BESTELLUNG 2 (22.09.2026, abends): "In den Listen selbst, aber bitte
+    den aktuellsten Low-Rarity-Print benutzen. Das macht es beim Teilen
+    einfacher."
 
-    Damit ein spaeteres Set den Test nicht rot faerbt, ohne dass jemand
-    etwas kaputtgemacht hat, traegt das Stueck sein eigenes Fenster und
-    seinen Stand (data-mcl-drucke-fenster / -stand). Geprueft wird gegen
-    die Sets, die es zu diesem Stand schon gab. Ein neues Set macht das
-    Stueck veraltet, nicht falsch — das faellt beim naechsten Bau auf.
+    Daraus: in der LISTE (`data-druck`) der neueste guenstige Druck — die
+    Liste wird verschickt und nachgebaut. Im DETAIL (`data-druck-hoch`)
+    der hochwertigste Druck derselben Karte.
+
+    Geprueft wird die REGEL, nicht eine Kartenliste. Damit ein spaeteres
+    Set den Test nicht rot faerbt, ohne dass jemand etwas kaputtgemacht
+    hat, traegt das Stueck sein eigenes Fenster und seinen Stand
+    (data-mcl-drucke-fenster / -stand); geprueft wird gegen die Sets, die
+    es zu diesem Stand schon gab.
     """
     with open(STUECK, encoding="utf-8") as f:
         roh = f.read()
@@ -228,45 +232,67 @@ def test_kacheln_zeigen_den_hochwertigsten_druck():
         return bool(m) and von <= m["order"] <= bis and (m.get("release_date") or "") <= stand.group(1)
 
     idx = _zeilen_nach_druck()
-    kacheln = {
-        (html.unescape(de), druck)
-        for de, druck in re.findall(r'data-de="([^"]+)" data-en="[^"]*" data-druck="([^"]+)"', roh)
-    }
-    assert len(kacheln) >= 25, "nur %d verschiedene Kacheln — der Test wuerde ins Leere pruefen" % len(kacheln)
 
-    zu_billig, falscher_name, unbekannt = [], [], []
-    hoch = 0
-    for de, druck in sorted(kacheln):
+    def pool(druck):
+        """Alle Drucke derselben Karte im Fenster, mit Bild."""
         z = idx.get(tuple(druck.split("-")))
-        if not z or not (z.get("image_url") or "").strip() or not im_fenster(z["set"]):
-            unbekannt.append("%s (%s)" % (de, druck))
-            continue
-        # Der gezeigte Druck muss dieselbe Karte sein wie die Beschriftung.
-        if (z.get("name_de") or "").strip() != de:
-            falscher_name.append("%s zeigt %s, das ist %s" % (de, druck, z.get("name_de")))
-            continue
-        pool = [p.strip() for p in (z.get("international_prints") or "").split(",") if p.strip()]
-        if druck not in pool:
-            pool.append(druck)
-        beste = 0
-        bester_druck = druck
-        for p in pool:
+        if not z:
+            return []
+        namen = [p.strip() for p in (z.get("international_prints") or "").split(",") if p.strip()]
+        if druck not in namen:
+            namen.append(druck)
+        aus = []
+        for p in namen:
             if "-" not in p:
                 continue
             s, n = p.rsplit("-", 1)
             k = idx.get((s, n))
             if not k or not (k.get("image_url") or "").strip() or not im_fenster(s):
                 continue
-            if _rang(k["rarity"], s) > beste:
-                beste, bester_druck = _rang(k["rarity"], s), p
-        if _rang(z["rarity"], z["set"]) < beste:
-            zu_billig.append("%s zeigt %s (%s), besser waere %s" % (de, druck, z["rarity"], bester_druck))
-        if _rang(z["rarity"], z["set"]) >= 10:
-            hoch += 1
+            aus.append((p, k, _rang(k["rarity"], s), meta[s]["order"], int(re.sub(r"\D", "", n) or 0)))
+        return aus
+
+    kacheln = {
+        (html.unescape(de), druck, hoch)
+        for de, druck, hoch in re.findall(
+            r'data-de="([^"]+)" data-en="[^"]*" data-druck="([^"]+)" data-druck-hoch="([^"]*)"', roh)
+    }
+    assert len(kacheln) >= 25, "nur %d verschiedene Kacheln — der Test wuerde ins Leere pruefen" % len(kacheln)
+
+    zu_teuer, zu_billig, falscher_name, unbekannt = [], [], [], []
+    verschieden = 0
+    for de, druck, hoch in sorted(kacheln):
+        z = idx.get(tuple(druck.split("-")))
+        if not z or not (z.get("image_url") or "").strip() or not im_fenster(z["set"]):
+            unbekannt.append("%s (%s)" % (de, druck))
+            continue
+        if (z.get("name_de") or "").strip() != de:
+            falscher_name.append("%s zeigt %s, das ist %s" % (de, druck, z.get("name_de")))
+            continue
+        kandidaten = pool(druck)
+        if not kandidaten:
+            continue
+
+        # 1) In der Liste: der guenstigste Druck, und davon der aus dem
+        #    neuesten Set.
+        billigster = min(k[2] for k in kandidaten)
+        eng = sorted([k for k in kandidaten if k[2] == billigster], key=lambda k: (-k[3], k[4]))
+        if druck != eng[0][0]:
+            zu_teuer.append("%s zeigt in der Liste %s (%s), erwartet %s"
+                            % (de, druck, z["rarity"], eng[0][0]))
+
+        # 2) Im Detail: der hochwertigste.
+        teuerster = max(kandidaten, key=lambda k: (k[2], k[3], k[4]))
+        if hoch != teuerster[0]:
+            zu_billig.append("%s zeigt im Detail %s, erwartet %s" % (de, hoch or "nichts", teuerster[0]))
+        if hoch and hoch != druck:
+            verschieden += 1
 
     assert unbekannt == [], "diese Kacheln zeigen einen Druck, den die Datenbank im Fenster nicht kennt:\n  " + "\n  ".join(unbekannt)
     assert falscher_name == [], "diese Kacheln zeigen den Druck einer ANDEREN Karte:\n  " + "\n  ".join(falscher_name)
-    assert zu_billig == [], "diese Kacheln zeigen nicht den hochwertigsten Druck:\n  " + "\n  ".join(zu_billig)
-    # Gegenprobe: waere die Regel oben leer erfuellbar, wuerde sie auch
-    # bei lauter Commons gruen melden.
-    assert hoch >= 20, "nur %d Kacheln zeigen ueberhaupt einen hochwertigen Druck — die Umstellung ist nicht angekommen" % hoch
+    assert zu_teuer == [], "in der Liste steht nicht der neueste guenstige Druck:\n  " + "\n  ".join(zu_teuer)
+    assert zu_billig == [], "im Detail steht nicht der hochwertigste Druck:\n  " + "\n  ".join(zu_billig)
+    # Gegenprobe: waeren beide Felder gleich befuellt, waere die Regel
+    # oben leer erfuellbar.
+    assert verschieden >= 20, ("nur %d Kacheln unterscheiden Listen- und Sammlerdruck — "
+                               "die Trennung ist nicht angekommen" % verschieden)

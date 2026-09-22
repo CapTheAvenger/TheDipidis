@@ -118,6 +118,77 @@ def get_app_path() -> str:
         return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.abspath(__file__))
 
+_DATENORDNER_GEMELDET = False
+
+
+def _melde_leeren_datenordner(data_dir: str) -> None:
+    """Ein leerer Datenordner ist der Ermoeglicher stiller Fehler.
+
+    BEFUND 22.09.2026. `get_data_dir()` loest auf <Modulverzeichnis>/data
+    auf — im Arbeitsbaum ist das `backend/core/data`, und das steht in
+    .gitignore und ist LEER. Zwanzig Module lesen darueber. Lokal liest
+    damit jede Nachschlagetabelle ins Leere und kann nichts ueberschreiben;
+    in CI wird der Ordner aus data/ befuellt und greift.
+
+    Genau daran ist der Datumsfehler vom 22.09.2026 dreimal
+    vorbeigelaufen: der Namensabgleich, der die Korrektur ueberschrieb,
+    hatte lokal null Eintraege. Ein Fehler, der nur im Lauf existiert,
+    und niemand sieht ihn, bevor er im Lauf zuschlaegt.
+
+    Befuellt wird der Ordner von sieben der 28 Ablaeufe, jeder mit einer
+    VON HAND gepflegten Dateiliste. Fehlt einer Liste ein Eintrag, sieht
+    der Scraper eine leere Tabelle statt eines Fehlers.
+
+    Geheilt ist das damit nicht — aber es ist nicht mehr still:
+      * in CI (GITHUB_ACTIONS) ist ein leerer Ordner ein ::error::,
+        denn dort MUSS die Saat gelaufen sein;
+      * lokal eine einmalige Warnung, damit niemand einem Ergebnis
+        traut, das aus einem leeren Ordner stammt.
+    """
+    global _DATENORDNER_GEMELDET
+    if _DATENORDNER_GEMELDET:
+        return
+    def _hat_daten(ordner: str) -> bool:
+        # Nicht "irgendein Eintrag": der Ordner sammelt auch Protokolle,
+        # und eine .log-Datei macht eine leere Nachschlagetabelle nicht
+        # voll. Gezaehlt wird, was gelesen wird.
+        try:
+            for eintrag in os.scandir(ordner):
+                if eintrag.is_file() and eintrag.name.lower().endswith(
+                        ('.csv', '.json')):
+                    return True
+        except OSError:
+            return True   # nicht lesbar ist eine andere Geschichte
+        return False
+
+    if _hat_daten(data_dir):
+        return
+    _DATENORDNER_GEMELDET = True
+    projekt = os.path.normpath(os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), '..', '..', 'data'))
+    hat_projektdaten = os.path.isdir(projekt) and _hat_daten(projekt)
+    satz = (f"{data_dir} fuehrt keine einzige CSV- oder JSON-Datei. Jede "
+            f"Nachschlagetabelle, die von hier "
+            f"gelesen wird, ist damit leer — ohne dass irgendwo ein Fehler "
+            f"entsteht.")
+    if os.environ.get('GITHUB_ACTIONS'):
+        # WARNUNG, nicht FEHLER: nicht jeder Ablauf saet diesen Ordner,
+        # und ein Waechter, der viermal falschen Alarm schlaegt, wird beim
+        # fuenften Mal nicht gelesen. Sichtbar ist die Meldung trotzdem —
+        # als Anmerkung am Lauf, genau dort, wo man sie sucht, wenn ein
+        # Ergebnis nicht stimmt.
+        print(f"::warning::{satz} Saet dieser Ablauf backend/core/data, "
+              f"dann hat der Saat-Schritt diese Dateien nicht kopiert — "
+              f"die Dateiliste im Ablauf pruefen.")
+        logger.warning(satz)
+    else:
+        logger.warning(
+            "%s %s", satz,
+            ("Im Projektstamm liegen Daten (%s) — lokal ist das normal, aber "
+             "ein Ergebnis aus diesem Lauf ist nicht mit CI vergleichbar."
+             % projekt) if hat_projektdaten else "")
+
+
 def get_data_dir() -> str:
     app_path = get_app_path()
     parts = app_path.replace('\\', '/').split('/')
@@ -127,6 +198,7 @@ def get_data_dir() -> str:
         workspace_root = app_path
     data_dir = os.path.join(workspace_root, 'data')
     os.makedirs(data_dir, exist_ok=True)
+    _melde_leeren_datenordner(data_dir)
     return data_dir
 
 def fix_mojibake(s: str) -> str:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Limitless Online Deck Scraper - Fast Edition
 Uses cloudscraper + BeautifulSoup4 + ThreadPoolExecutor for parallel matchup scraping.
@@ -489,9 +489,17 @@ def save_to_csv(data: List[Dict[str, Any]], output_file: str):
          schema changes (added/renamed columns that the frontend
          loader still expects in the old shape).
       2. Row-count guard: if the new snapshot has fewer than 50% of
-         the rows the existing file has, log an ERROR but still
-         write — the user gets a loud signal but the run isn't
-         silently rolled back. Tune the threshold via env if needed.
+         the rows the existing file has, log an ERROR and REFUSE to
+         write. Returns False in that case; the previous file stays
+         in place. (Changed 22.09.2026 — this used to say "log an
+         ERROR but still write", and that is exactly what it did: a
+         guard that detects a partial scrape and ships it anyway is
+         a note, not a safeguard. Callers MUST check the return
+         value with `is False` and skip every derived report, or
+         they will rebuild those reports from half the data.)
+
+    Returns False when the row-count guard refused the write.
+    Every other path returns None.
     """
     if not data:
         print("No data to save.")
@@ -1350,7 +1358,42 @@ def main():
         return
 
     logger.info("Scraping complete! Total decks found: %s", len(deck_data))
-    save_to_csv(deck_data, settings["output_file"])
+    geschrieben = save_to_csv(deck_data, settings["output_file"]) is not False
+
+    # ABNAHMEBEFUND 22.09.2026. Bis zu diesem Punkt hiess es, der
+    # Zeilenzahl-Waechter lasse "die Datei der Vorwoche stehen". Das
+    # stimmte fuer limitless_online_decks.csv — und war fuer alles
+    # DAHINTER falsch. Der Rueckgabewert wurde nicht ausgewertet, der
+    # Lauf lief weiter, und dann passierte Folgendes:
+    #
+    #     old_stats = load_previous_stats(datei)   # vor dem Schreiben
+    #     save_to_csv(...)                         # schreibt NICHT
+    #     new_stats = load_previous_stats(datei)   # liest DIESELBE Datei
+    #     create_comparison_report(old_stats, new_stats, ...)
+    #
+    # Beide Staende sind identisch, also schreibt der Vergleich fuer
+    # JEDES der 139 Decks "BESTEHEND, Aenderung 0, Trend STABIL" — ein
+    # falsch-stabiles Bild, und zwar ueber den vorherigen Vergleich
+    # drueber. Vorher spiegelte die Datei wenigstens den kaputten
+    # Istzustand; jetzt haette sie behauptet, alles sei ruhig.
+    #
+    # Ein Waechter, der die Hauptdatei rettet und die abgeleiteten
+    # faelscht, ist schlimmer als keiner.
+    if not geschrieben:
+        logger.error(
+            "Der Zeilenzahl-Waechter hat den Schreibvorgang abgelehnt. Die "
+            "abgeleiteten Berichte werden UEBERSPRUNGEN — sie wuerden sonst "
+            "aus dem halben Abruf gebaut oder den Vergleich auf 'alles "
+            "stabil' setzen.")
+        print("::error::halber Abruf: limitless_online_decks.csv und die "
+              "davon abgeleiteten Berichte bleiben auf dem letzten guten "
+              "Stand.")
+        # SystemExit statt return: main() wird von __main__ ohne
+        # sys.exit aufgerufen, ein Rueckgabewert kaeme nirgends an.
+        # Der Wochenlauf sammelt die Rueckgabewerte mit `set +e` und
+        # meldet sie in der Bilanz der nicht blockierenden Schritte —
+        # dort soll das auftauchen.
+        raise SystemExit(1)
 
     new_stats   = load_previous_stats(output_file)
     deck_lookup = {deck["deck_name"]: deck for deck in deck_data}

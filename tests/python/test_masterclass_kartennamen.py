@@ -18,6 +18,7 @@ sonst prueft der Test ins Leere (etwa wenn die Datenbank umzieht).
 
 import csv
 import html
+import json
 import os
 import re
 
@@ -150,3 +151,122 @@ def test_jeder_kursive_attackenname_steht_auch_auf_einer_karte():
         "Diese kursiven Namen stehen auf keiner Karte der Datenbank:\n  "
         + "\n  ".join(unbekannt)
     )
+
+
+# ---------------------------------------------------------------------------
+# Die Kacheln zeigen den hochwertigsten Druck derselben Karte
+# ---------------------------------------------------------------------------
+
+SETS_META = os.path.join(WURZEL, "data", "sets_metadata.json")
+
+# Rangfolge 1:1 aus js/app-utils.js getRarityPriority — dieselbe
+# Reihenfolge, nach der die uebrige Seite ihre Drucke waehlt. Eine zweite
+# Rangfolge im Projekt waere ein zweiter Massstab.
+def _rang(rarity, setcode=""):
+    if not rarity:
+        promo = ("MEP", "SVP", "SP", "SMP", "XYP", "BWP", "HSP", "DPP", "NP", "WP")
+        return 8 if setcode in promo else 0
+    r = rarity.lower()
+    if "uncommon" in r: return 2
+    if "common" in r: return 1
+    if "secret rare" in r: return 16
+    if "rainbow rare" in r: return 15
+    if "special art rare" in r or "special illustration rare" in r: return 14
+    if "ultra rare" in r: return 13
+    if "shiny rare" in r: return 12
+    if "character super rare" in r: return 11
+    if "character holo rare" in r or "art rare" in r or "illustration rare" in r: return 10
+    if "amazing rare" in r: return 9
+    if "radiant rare" in r: return 8
+    if "triple rare" in r: return 7
+    if "double rare" in r: return 6
+    if "holo rare" in r: return 5
+    if "rare" in r: return 3
+    return 0
+
+
+def _zeilen_nach_druck():
+    csv.field_size_limit(10 ** 7)
+    idx = {}
+    with open(DATENBANK, encoding="utf-8-sig") as f:
+        for z in csv.DictReader(f):
+            idx.setdefault((z["set"], z["number"]), z)
+    return idx
+
+
+@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
+def test_kacheln_zeigen_den_hochwertigsten_druck():
+    """BESTELLUNG (22.09.2026): "Koennen wir fuer die angezeigte Karte im
+    Regal die high rarity Karte Anzeige — aktuell wird die low rarity
+    Print der Karte angezeigt."
+
+    Geprueft wird die REGEL, nicht eine Liste von 29 Karten: zu keiner
+    gezeigten Kachel darf es einen hoeherwertigen Druck DERSELBEN Karte
+    im Formatfenster geben.
+
+    Damit ein spaeteres Set den Test nicht rot faerbt, ohne dass jemand
+    etwas kaputtgemacht hat, traegt das Stueck sein eigenes Fenster und
+    seinen Stand (data-mcl-drucke-fenster / -stand). Geprueft wird gegen
+    die Sets, die es zu diesem Stand schon gab. Ein neues Set macht das
+    Stueck veraltet, nicht falsch — das faellt beim naechsten Bau auf.
+    """
+    with open(STUECK, encoding="utf-8") as f:
+        roh = f.read()
+
+    fenster = re.search(r'data-mcl-drucke-fenster="([A-Z0-9]+)-([A-Z0-9]+)"', roh)
+    stand = re.search(r'data-mcl-drucke-stand="(\d{4}-\d{2}-\d{2})"', roh)
+    assert fenster and stand, "das Stueck sagt nicht, fuer welches Fenster und welchen Stand seine Drucke gelten"
+
+    with open(SETS_META, encoding="utf-8") as f:
+        meta = json.load(f)
+    aeltestes, neuestes = fenster.group(1), fenster.group(2)
+    assert aeltestes in meta and neuestes in meta, "unbekannte Sets im Fenster: %s" % fenster.group(0)
+    von, bis = meta[aeltestes]["order"], meta[neuestes]["order"]
+
+    def im_fenster(setcode):
+        m = meta.get(setcode)
+        return bool(m) and von <= m["order"] <= bis and (m.get("release_date") or "") <= stand.group(1)
+
+    idx = _zeilen_nach_druck()
+    kacheln = {
+        (html.unescape(de), druck)
+        for de, druck in re.findall(r'data-de="([^"]+)" data-en="[^"]*" data-druck="([^"]+)"', roh)
+    }
+    assert len(kacheln) >= 25, "nur %d verschiedene Kacheln — der Test wuerde ins Leere pruefen" % len(kacheln)
+
+    zu_billig, falscher_name, unbekannt = [], [], []
+    hoch = 0
+    for de, druck in sorted(kacheln):
+        z = idx.get(tuple(druck.split("-")))
+        if not z or not (z.get("image_url") or "").strip() or not im_fenster(z["set"]):
+            unbekannt.append("%s (%s)" % (de, druck))
+            continue
+        # Der gezeigte Druck muss dieselbe Karte sein wie die Beschriftung.
+        if (z.get("name_de") or "").strip() != de:
+            falscher_name.append("%s zeigt %s, das ist %s" % (de, druck, z.get("name_de")))
+            continue
+        pool = [p.strip() for p in (z.get("international_prints") or "").split(",") if p.strip()]
+        if druck not in pool:
+            pool.append(druck)
+        beste = 0
+        bester_druck = druck
+        for p in pool:
+            if "-" not in p:
+                continue
+            s, n = p.rsplit("-", 1)
+            k = idx.get((s, n))
+            if not k or not (k.get("image_url") or "").strip() or not im_fenster(s):
+                continue
+            if _rang(k["rarity"], s) > beste:
+                beste, bester_druck = _rang(k["rarity"], s), p
+        if _rang(z["rarity"], z["set"]) < beste:
+            zu_billig.append("%s zeigt %s (%s), besser waere %s" % (de, druck, z["rarity"], bester_druck))
+        if _rang(z["rarity"], z["set"]) >= 10:
+            hoch += 1
+
+    assert unbekannt == [], "diese Kacheln zeigen einen Druck, den die Datenbank im Fenster nicht kennt:\n  " + "\n  ".join(unbekannt)
+    assert falscher_name == [], "diese Kacheln zeigen den Druck einer ANDEREN Karte:\n  " + "\n  ".join(falscher_name)
+    assert zu_billig == [], "diese Kacheln zeigen nicht den hochwertigsten Druck:\n  " + "\n  ".join(zu_billig)
+    # Gegenprobe: waere die Regel oben leer erfuellbar, wuerde sie auch
+    # bei lauter Commons gruen melden.
+    assert hoch >= 20, "nur %d Kacheln zeigen ueberhaupt einen hochwertigen Druck — die Umstellung ist nicht angekommen" % hoch

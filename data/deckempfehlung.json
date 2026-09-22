@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-09-22 07:01:44+00:00",
+ "erzeugt": "2026-09-22 15:10:09+00:00",
  "format": "TEF-30C",
  "betriebsart": "B",
  "betriebsart_klartext": "Kaltstart — TEF-30C hat noch kein Praesenzturnier, Anker ist die Vorepoche TEF-CRI",
@@ -34,7 +34,7 @@
  "ankerspieler_gesamt": 9690,
  "online_abdeckung": {
   "schnappschuss": "2026-09-22",
-  "anteil_unbekannt": 1.01,
+  "anteil_unbekannt": 1.02,
   "groesste_unbekannte": [
    {
     "deck": "Wailord",
@@ -50,7 +50,7 @@
    },
    {
     "deck": "Gengar",
-    "anteil": 0.09
+    "anteil": 0.1
    },
    {
     "deck": "Rocket's Nidoking",

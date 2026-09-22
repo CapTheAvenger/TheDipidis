@@ -163,23 +163,97 @@ test('jede Liste fuehrt genau 60 Karten und genau ein ACE SPEC', () => {
     });
 });
 
-test('jede Siegquote im Stueck nennt ihren Nenner, oder sie nennt gar keine Zahl', () => {
-    const zeilen = FRAGMENT.match(/<span class="mcl-wr">[\s\S]*?<\/span>/g) || [];
-    assert.ok(zeilen.length >= 20, `nur ${zeilen.length} Matchup-Zeilen`);
-    zeilen.forEach((z) => {
-        const hatQuote = /\d+,\d+\s*%/.test(z);
-        const hatNenner = /aus\s[\d.]+\sMatches/.test(z);
-        const sagtOhne = z.includes('keine Ladder-Daten');
-        assert.ok(hatQuote ? hatNenner : sagtOhne,
-            `Zeile ohne Nenner und ohne Hinweis: ${z.slice(0, 120)}`);
+test('jede Siegquote nennt ihren Nenner, und unter 30 Partien steht keine Quote', () => {
+    /* BESTELLUNG (22.09.2026): "Koennen wir bei Matchups die aktuellen
+     * Werte vom current Online Meta anzeigen ... und von den letzten
+     * Majors auch noch die Matchup-Daten dazu ... damit ich mich mit
+     * aktuellen Daten bestmoeglich vorbereiten kann."
+     *
+     * Drei gemessene Zahlen je Matchup, und damit drei Gelegenheiten,
+     * eine Quote ohne Grundlage zu zeigen. Die Mindeststichprobe ist
+     * dieselbe wie in der Archetypkarte (js/app-archetype-card.js,
+     * MIN_PRAESENZ_PARTIEN = 30): darunter steht die Bilanz. */
+    const zellen = [...FRAGMENT.matchAll(
+        /<span class="mcl-wrz([^"]*)"[^>]*>(?:<em>([^<]*)<\/em>)?<b>([^<]*)<\/b>(?:<i>\((\d[\d.]*)\)<\/i>)?<\/span>/g)];
+    assert.ok(zellen.length >= 80,
+        `nur ${zellen.length} Zahlenzellen gefunden — erwartet vier je Matchup`);
+
+    const ohneNenner = [];
+    const zuDuenn = [];
+    const verschenkt = [];
+    zellen.forEach(([, klasse, label, wert, n]) => {
+        if (/mcl-wrz-tim/.test(klasse)) return;          /* Tims Spalte ist keine Messung */
+        if (wert === '—') return;                         /* keine Partien: sagt es auch */
+        const partien = n ? Number(String(n).replace(/\./g, '')) : null;
+        if (partien === null) { ohneNenner.push(label + ' ' + wert); return; }
+        const istQuote = /%/.test(wert);
+        if (istQuote && partien < 30) zuDuenn.push(`${label} ${wert} aus ${partien}`);
+        if (!istQuote && partien >= 30) verschenkt.push(`${label} ${wert} aus ${partien}`);
     });
+
+    assert.deepStrictEqual(ohneNenner, [], 'diese Zahlen stehen ohne Nenner da');
+    assert.deepStrictEqual(zuDuenn, [],
+        'diese Quoten stehen unter der Mindeststichprobe von 30 Partien');
+    assert.deepStrictEqual(verschenkt, [],
+        'hier steht eine Bilanz, obwohl die Stichprobe fuer eine Quote reicht');
+
+    /* Gegenprobe: es muessen ueberhaupt Quoten UND Bilanzen vorkommen,
+     * sonst prueft die Regel oben nur eine Seite. */
+    const quoten = zellen.filter((m) => /%/.test(m[3])).length;
+    const bilanzen = zellen.filter((m) => /\d+–\d+–\d+/.test(m[3])).length;
+    assert.ok(quoten >= 20, `nur ${quoten} Quoten im Stueck`);
+    assert.ok(bilanzen >= 5, `nur ${bilanzen} Bilanzen — die Mindeststichprobe greift nirgends`);
+});
+
+test('jedes Matchup zeigt drei Metas und Tims Einschaetzung', () => {
+    /* "Vielleicht zeigen wir auch aktuelles Meta WR und daneben last
+     * Meta Online und Last Meta Major ... und falls Tim eine eigene
+     * Schaetzung gegeben hat, dann noch Tim WR." — Tim hat keine Zahl
+     * genannt, deshalb steht dort sein Wort, klar als Einschaetzung
+     * beschriftet. */
+    const reihen = FRAGMENT.match(/<span class="mcl-wr3">[\s\S]*?<\/span><\/span>/g) || [];
+    const mus = (FRAGMENT.match(/<details class="mcl-mu"/g) || []).length;
+    assert.ok(mus >= 20, `nur ${mus} Matchups`);
+    assert.strictEqual(reihen.length, mus,
+        `${reihen.length} Zahlenreihen auf ${mus} Matchups`);
+    ['Jetzt', 'Davor', 'Majors', 'Tim'].forEach((k) => {
+        const n = (FRAGMENT.match(new RegExp('<em>' + k + '</em>', 'g')) || []).length;
+        assert.strictEqual(n, mus, `${k} steht ${n}-mal, erwartet ${mus}`);
+    });
+
+    /* Tims Wort muss zur Ampel des Matchups passen — sonst widerspraeche
+     * die Zeile dem Balken daneben. */
+    const paare = [...FRAGMENT.matchAll(/data-s="(gut|even|schlecht)"[\s\S]*?mcl-tim-(gut|even|schlecht)"[^>]*><em>Tim<\/em><b>([^<]+)<\/b>/g)];
+    assert.strictEqual(paare.length, mus, `nur ${paare.length} Tim-Zellen zugeordnet`);
+    const wort = { gut: 'gut', even: 'ausgeglichen', schlecht: 'schlecht' };
+    const falsch = paare.filter((m) => m[1] !== m[2] || m[3] !== wort[m[1]]).map((m) => m.slice(1, 4).join('/'));
+    assert.deepStrictEqual(falsch, [], 'Tims Spalte widerspricht der Ampel');
+
+    /* Und die Zahlen muessen als das beschriftet sein, was sie sind. */
+    assert.ok(/Win % nach Matchpunkten/.test(FRAGMENT), 'die Konvention der Quoten steht nirgends');
+    assert.ok(/online_api_matchups_TEF-30C\.csv/.test(FRAGMENT), 'die Quelle des aktuellen Metas fehlt');
+    assert.ok(/labs_tournament_matchups\.csv/.test(FRAGMENT), 'die Quelle der Majors fehlt');
 });
 
 test('das Stueck nennt seine Quellen und behauptet keine eigenen Zahlen', () => {
-    assert.ok(FRAGMENT.includes('limitless_online_decks_matchups.csv'),
-        'die Matchup-Quelle fehlt');
-    assert.ok(FRAGMENT.includes('limitless_online_decks.csv'),
-        'die Feldanteil-Quelle fehlt');
+    /* 22.09.2026: die Matchup-Quelle hat gewechselt. Vorher stand dort
+     * EINE Ladder-Aggregation (limitless_online_decks_matchups.csv,
+     * Konvention ohne Unentschieden); jetzt sind es drei Quellen, aus
+     * denen die Quoten selbst gerechnet werden — die alte Zeile waere
+     * eine vierte Zahl fuer dieselbe Frage gewesen. */
+    [
+        'online_api_matchups_TEF-30C.csv',
+        'online_api_matchups_TEF-PBL.csv',
+        'labs_tournament_matchups.csv',
+        'limitless_online_decks.csv',
+    ].forEach((quelle) => {
+        assert.ok(FRAGMENT.includes(quelle), `die Quelle ${quelle} wird nicht genannt`);
+    });
+    /* Und der Stand, zu dem die Zahlen gelesen wurden: das Stueck zieht
+     * nicht nach. */
+    assert.ok(/Stand \d{4}-\d{2}-\d{2}/.test(FRAGMENT), 'der Datenstand fehlt');
+    assert.ok(/zieht nicht selbst nach/.test(FRAGMENT),
+        'das Stueck sagt nicht, dass seine Zahlen eingefroren sind');
 });
 
 /* ── Einbindung und Sprache ── */

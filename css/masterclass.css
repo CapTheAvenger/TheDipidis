@@ -263,9 +263,11 @@
     font-variant-numeric: tabular-nums;
 }
 .mcl-wr small { display: block; font-size: var(--fs-xs); font-weight: 500; color: var(--ink-3); }
-.mcl-mu[data-s="gut"] .mcl-wr { color: var(--mcl-gut); }
-.mcl-mu[data-s="even"] .mcl-wr { color: var(--mcl-even); }
-.mcl-mu[data-s="schlecht"] .mcl-wr { color: var(--mcl-schlecht); }
+/* Die Ampelfarbe faerbt NICHT mehr die gemessenen Quoten: sie ist Tims
+   Einschaetzung, und eine gemessene Zahl in der Farbe einer Meinung
+   liest sich wie deren Beleg. Farbig ist nur noch Tims eigene Zelle
+   (.mcl-tim-*) und der Balken links. */
+.mcl-wr { color: var(--ink-2); }
 
 .mcl-mu-body { padding: 2px 13px 14px; border-top: 1px solid var(--line); }
 .mcl-mu-body h5 {
@@ -285,6 +287,62 @@
     margin-top: var(--s-3);
     padding-top: var(--s-2);
     border-top: 1px dashed var(--line);
+}
+
+/* Drei gemessene Quoten plus Tims Einschaetzung in einer Zeile, jede
+   Zahl mit ihrem Nenner in Klammern. Gestapelt (Beschriftung ueber
+   Zahl ueber Nenner) war die Zeile bei 390 px 196 px hoch — mal 22
+   Matchups sind das 4.300 px Bildlauf fuer eine Liste, die am
+   Turniertag ueberflogen wird. Inline sind es rund 60 px. */
+.mcl-wr3 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 2px var(--s-2);
+    font-size: var(--fs-sm);
+}
+.mcl-wrz {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    white-space: nowrap;
+}
+.mcl-wrz em {
+    font-style: normal;
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+}
+.mcl-wrz b {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+}
+.mcl-wrz i {
+    font-style: normal;
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+}
+.mcl-wrz-duenn b,
+.mcl-wrz-leer b {
+    color: var(--ink-2);
+    font-weight: 500;
+}
+/* Dieselben drei Farben wie die Ampel links — eine zweite Farbskala fuer
+   dieselbe Aussage waere eine zweite Aussage. */
+.mcl-tim-gut b      { color: var(--mcl-gut); }
+.mcl-tim-even b     { color: var(--mcl-even); }
+.mcl-tim-schlecht b { color: var(--mcl-schlecht); }
+
+/* Unter 560 px stehen die vier Angaben unter dem Namen statt daneben:
+   nebeneinander braeuchten sie 334 px, fuer den Namen blieben 20. */
+@media (max-width: 560px) {
+    .mcl-mu > summary {
+        grid-template-columns: 7px 1fr;
+        row-gap: var(--s-2);
+    }
+    .mcl-mu > summary > .mcl-wr { grid-column: 2; }
+    .mcl-wr3 { justify-content: flex-start; }
 }
 
 /* Der Kopierknopf steht in der Quellenzeile unter jeder Liste. 44 px

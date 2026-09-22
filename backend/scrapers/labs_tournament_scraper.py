@@ -2840,6 +2840,24 @@ def main() -> None:
         # JS-rendered pages, but the chunks still know the real value.
         cached_for_skip = cached_tournament_meta.get(tid) or {}
         effective_date = t.get('tournament_date') or cached_for_skip.get('tournament_date') or ''
+        # DIE KORREKTUR GEHOERT HIERHER, NICHT NUR AN DEN UEBERSICHTS-ZWEIG.
+        #
+        # BEFUND 22.09.2026, zweiter Anlauf: die erste Fassung wandte den
+        # Override nur dort an, wo der Datumstext der Uebersichtsseite
+        # gelesen wird. Das Datum kommt aber aus DREI Quellen — der
+        # frisch gelesenen Uebersicht, `labs_tournaments.json` (der
+        # zwischengespeicherte Index) und `cached_tournament_meta`. Fuer
+        # ein Turnier, das der Lauf nicht neu einliest, kam es aus dem
+        # Zwischenspeicher, und die Korrektur lief ins Leere: labs
+        # schrieb weiter 2026-09-19, waehrend die andere Datei 2026-09-18
+        # trug.
+        #
+        # Diese Stelle liegt hinter allen drei Quellen und vor jeder
+        # Verwendung — `_derive_meta_for_labs_tournament`, `row_date` und
+        # `t['tournament_date']` lesen ab hier den korrigierten Wert.
+        effective_date = _datum_mit_override(tid, effective_date)
+        if effective_date:
+            t['tournament_date'] = effective_date
         # Combined derivation: date first, then name-based cards lookup.
         t_meta, effective_date = _derive_meta_for_labs_tournament(
             tid, t.get('tournament_name', ''), effective_date,

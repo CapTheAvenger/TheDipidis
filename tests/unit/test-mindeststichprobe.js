@@ -96,12 +96,29 @@ describe('City-League-Tiers: ein Indexschnitt heisst nicht "Beherrschen das Meta
             `Spreizung ueber die 20 gelisteten Decks: ${spreizung.toFixed(2)} Plaetze`);
     });
 
-    it('128 von 304 Archetypen bestehen aus genau einer Liste', () => {
+    it('ein grosser Teil der Archetypen besteht aus genau einer Liste', () => {
+        /* UMGESCHRIEBEN 22.09.2026. Vorher: assert.equal(r.length, 304)
+         * und assert.equal(einzel, 128) — zwei Zahlen aus dem Datenstand
+         * vom 20.08.2026, gemessen an einer Datei, die der Wochenlauf
+         * zweimal die Woche neu schreibt.
+         *
+         * Was der Kommentar in js/app-tier-meta.js belegt haben will, ist
+         * nicht die 128: es ist der Satz "eine Platzierung aus EINER
+         * Liste ist keine Ø-Platzierung". Der traegt, solange ein
+         * erheblicher Teil der Archetypen genau eine Liste hat — und er
+         * faellt, wenn das aufhoert. Genau das steht jetzt hier.
+         */
         const r = csvSemikolon('data/city_league_archetypes_comparison_M3.csv');
         const einzel = r.filter(x => zahl(x.new_count) === 1).length;
-        assert.equal(r.length, 304);
-        assert.equal(einzel, 128,
-            'die Zahl in Kommentar und Grundlagen-Zeile ist an dieser Datei gemessen');
+        assert.ok(r.length >= 200,
+            `nur noch ${r.length} Archetypen in der Datei — dann ist die `
+            + 'Messung dahinter keine Aussage mehr');
+        const anteil = einzel / r.length;
+        assert.ok(anteil >= 0.2,
+            `nur ${einzel} von ${r.length} Archetypen (${(anteil * 100).toFixed(1)} %) `
+            + 'bestehen aus genau einer Liste. Der Hinweis auf der Karte und der '
+            + 'Kommentar in js/app-tier-meta.js begruenden sich mit dieser Lage — '
+            + 'wenn sie sich aufloest, gehoeren beide neu bewertet');
     });
 });
 

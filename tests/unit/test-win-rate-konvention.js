@@ -115,8 +115,11 @@ describe('Die drei Konventionen sind die ihrer Quellen', () => {
      * Die Toleranz weiter aufzumachen waere die falsche Antwort: sie
      * wuerde mit jedem weiteren Unentschieden wieder reissen und dabei
      * nebenbei jede ECHTE Abweichung durchlassen. Deshalb steht die
-     * Ausnahme jetzt mit Namen da. Kommt eine zweite dazu, faellt der
-     * Test; verschwindet diese, faellt er auch — beides will man wissen.
+     * Ausnahme jetzt mit Namen da.
+     *
+     * NACHTRAG 22.09.2026: "kommt eine zweite dazu, faellt der Test"
+     * stand hier und war die falsche Form — siehe die Begruendung an
+     * der Zusicherung selbst.
      */
     const BEKANNTE_AUSREISSER = new Set(['Wailord']);
 
@@ -137,12 +140,39 @@ describe('Die drei Konventionen sind die ihrer Quellen', () => {
         assert.ok(n > 100, 'zu wenige Zeilen: ' + n);
         assert.ok(maxNormal < 0.02,
             'auch ausserhalb der benannten Ausnahme weicht eine Zeile ab: ' + maxNormal);
+        /* UMGESCHRIEBEN 22.09.2026. Hier stand Gleichheit gegen
+           BEKANNTE_AUSREISSER: genau ein Name, gemessen an einer Datei,
+           die der Wochenlauf zweimal die Woche neu schreibt. Ein
+           zweiter Zahlendreher in der Quelle haette die Deploy-Kette
+           angehalten — und der Weg zurueck ins Gruene waere gewesen,
+           einen Namen einzutragen.
+
+           Was hier wirklich zaehlt, steht zwei Zeilen darueber und ist
+           unveraendert scharf: AUSSERHALB der Ausreisser weicht keine
+           Zeile ab (maxNormal < 0,02). Dazu kommt die Richtung, die ein
+           echter Konventionswechsel der Quelle auslöst — dann folgt
+           nicht EINE Zeile einer anderen Formel, sondern fast jede.
+           Deshalb hier ein Anteil statt einer Namensliste.
+
+           Und die Gegenrichtung bleibt eine Gleichheit: ein Name, der
+           als bekannter Ausreisser eingetragen ist, in der Datei steht
+           und dort inzwischen brav der Konvention folgt, ist eine
+           veraltete Notiz. Die deckt eines Tages einen echten Fehler
+           zu und gehoert weg. */
         const namen = ausreisser.map(a => a.replace(/ \(.*$/, '')).sort();
-        assert.deepEqual(namen, [...BEKANNTE_AUSREISSER].sort(),
-            'die Menge der Zeilen, die der Quelle nach einer ANDEREN Konvention '
-            + 'folgen, hat sich geaendert.\n  jetzt: ' + JSON.stringify(ausreisser)
-            + '\n  Dazugekommen: nachrechnen, welche Formel die Quelle dort benutzt, '
-            + 'und erst dann eintragen. Weggefallen: aus BEKANNTE_AUSREISSER loeschen.');
+        const anteil = namen.length / n;
+        assert.ok(anteil <= 0.03,
+            `${namen.length} von ${n} Zeilen (${(anteil * 100).toFixed(1)} %) folgen `
+            + 'einer ANDEREN Konvention als die Datei behauptet. Bei einzelnen '
+            + 'Zeilen ist das ein Zahlendreher der Quelle, bei diesem Anteil hat '
+            + 'die Quelle ihre Konvention gewechselt.\n  ' + JSON.stringify(ausreisser));
+        const inDerDatei = new Set(rows.map(r => String(r.deck_name || '').trim()));
+        const brav = [...BEKANNTE_AUSREISSER].filter(
+            a => inDerDatei.has(a) && !namen.includes(a));
+        assert.deepEqual(brav, [],
+            brav.join(', ') + ' steht als bekannter Ausreisser in dieser Datei, '
+            + 'folgt der Konvention inzwischen aber. Die Notiz ist veraltet und '
+            + 'gehoert aus BEKANNTE_AUSREISSER geloescht.');
     });
 
     it('und die drei liefern für dieselbe Bilanz drei Zahlen', () => {

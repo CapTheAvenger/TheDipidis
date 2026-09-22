@@ -402,17 +402,48 @@ describe('City League: derselbe Archetyp in wechselnder Wortreihenfolge', () => 
         assert.equal(key(null), '');
     });
 
-    it('am echten Datenstand legt er 38 Schreibweisen zusammen', () => {
+    it('am echten Datenstand legt er wirklich Schreibweisen zusammen', () => {
+        /* UMGESCHRIEBEN 22.09.2026. Vorher standen hier drei feste Zahlen
+         * (304 Zeilen, 266 Gruppen, 38 Zusammenlegungen), gemessen am
+         * Datenstand vom 20.08.2026 und festgenagelt an einer Datei, die
+         * der Wochenlauf jeden Dienstag und Freitag neu schreibt. Jede
+         * neue City League haette alle drei gleichzeitig umgeworfen —
+         * ohne dass an der Bruecke etwas gewesen waere.
+         *
+         * Die Aussage dahinter ist nicht "38", sondern: es GIBT doppelte
+         * Schreibwege, der Schluessel findet sie, und er faellt dabei
+         * nicht ins andere Extrem und wirft halbwegs alles zusammen.
+         * Das haelt bei jeder Groesse.
+         */
         const rows = csv('data/city_league_archetypes_comparison_M3.csv');
         const gruppen = new Map();
         rows.forEach(r => {
             const k = key(r.archetype);
-            gruppen.set(k, (gruppen.get(k) || 0) + 1);
+            if (!gruppen.has(k)) gruppen.set(k, []);
+            gruppen.get(k).push(r.archetype);
         });
-        const doppelt = [...gruppen.values()].filter(n => n > 1);
-        assert.equal(rows.length, 304);
-        assert.equal(gruppen.size, 266, 'erwartet werden 266 Gruppen aus 304 Namen');
-        assert.equal(doppelt.reduce((s, n) => s + n - 1, 0), 38);
+        const zusammengelegt = rows.length - gruppen.size;
+        assert.ok(rows.length >= 200,
+            `die Datei traegt nur noch ${rows.length} Archetypen — bei diesem `
+            + 'Umfang ist die Messung dahinter keine Aussage mehr');
+        assert.ok(zusammengelegt >= 1,
+            'der Schluessel legt keine einzige Schreibweise mehr zusammen. '
+            + 'Entweder schreibt die Quelle die Namen jetzt einheitlich '
+            + '(dann kann die Bruecke weg) oder der Schluessel greift nicht '
+            + 'mehr (dann steht ein Deck wieder in zwei Stufen)');
+        assert.ok(zusammengelegt < rows.length * 0.25,
+            `${zusammengelegt} von ${rows.length} Namen werden zusammengelegt. `
+            + 'Das ist zu viel fuer blosse Wortreihenfolge — der Schluessel '
+            + 'entfernt offenbar etwas, statt nur zu sortieren');
+        // Und die belegten Paare landen wirklich beieinander, solange die
+        // Quelle sie noch fuehrt.
+        const da = new Set(rows.map(r => r.archetype));
+        for (const [a, b] of [['Ogerpon Raging-Bolt', 'Raging-Bolt Ogerpon'],
+            ['Mega Venusaur Ogerpon', 'Ogerpon Mega Venusaur']]) {
+            if (da.has(a) && da.has(b)) {
+                assert.equal(key(a), key(b), `${a} und ${b} liegen nicht mehr in einer Gruppe`);
+            }
+        }
     });
 
     it('und keine dieser Gruppen mischt Mega mit Nicht-Mega', () => {

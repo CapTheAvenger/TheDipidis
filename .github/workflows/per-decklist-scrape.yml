@@ -42,6 +42,32 @@ on:
         description: 'Stop after N tournaments (0 = unlimited)'
         type: string
         default: '0'
+      # ── ZWEI REPARATUREN OHNE NETZ (22.09.2026) ────────────────────
+      #
+      # Beide arbeiten nur auf der vorhandenen Datei. Sie muessen hier
+      # ausloesbar sein, weil data/tournament_decklists_per_player.csv
+      # 35 MB gross ist — ueber die GitHub-Weboberflaeche laesst sie
+      # sich nicht ausliefern. Ohne diesen Eingang war die Reparatur am
+      # 22.09.2026 nicht erreichbar, obwohl der Schalter im Scraper
+      # seit dem 07.09.2026 existiert.
+      #
+      # Ist einer der beiden gesetzt, wird NICHT gescrapt.
+      turnier_id_nachtragen:
+        description: 'Nur reparieren: leere tournament_id aufloesen (kein Netz, kein Scrape)'
+        type: boolean
+        default: false
+      datum_nachtragen:
+        description: 'Nur reparieren: tournament_date aus den Overrides nachziehen (kein Netz, kein Scrape)'
+        type: boolean
+        default: false
+      bilanzen_nachtragen:
+        description: 'Nur reparieren: 0-0-0-Bilanzen aus player_continuity.csv fuellen (kein Netz, kein Scrape)'
+        type: boolean
+        default: false
+      trocken:
+        description: 'Reparatur nur melden, nichts schreiben'
+        type: boolean
+        default: false
   schedule:
     # 12:00 UTC Tuesday — runs ~6 h after the weekly full update so the
     # JH scraper has already discovered the week's new tournaments.
@@ -135,6 +161,62 @@ jobs:
         run: |
           set +e
           echo "::group::scrapers/per_decklist_scraper.py"
+
+          # ── REPARATURLAEUFE ZUERST (22.09.2026) ──────────────────
+          # Beide brauchen kein Netz und arbeiten nur auf der
+          # vorhandenen Datei. Ist einer gesetzt, wird NICHT gescrapt:
+          # ein Reparaturlauf, der nebenbei neue Turniere holt, waere
+          # nicht mehr nachvollziehbar, und der Abdruckvergleich im
+          # Scraper wuerde auf einem anderen Bestand laufen als dem,
+          # den er gelesen hat.
+          #
+          # Reihenfolge, falls mehrere gesetzt sind: erst die Kennung,
+          # dann das Datum, dann die Bilanz. Andersherum findet die
+          # Bilanz nichts — Kontinuitaetsbilanzen.finde verlangt Turnier
+          # UND Platz.
+          REP=""
+          if [ "${{ github.event.inputs.turnier_id_nachtragen }}" = "true" ]; then
+              REP="$REP --turnier-id-nachtragen"
+          fi
+          if [ "${{ github.event.inputs.datum_nachtragen }}" = "true" ]; then
+              REP="$REP --datum-nachtragen"
+          fi
+          if [ "${{ github.event.inputs.bilanzen_nachtragen }}" = "true" ]; then
+              REP="$REP --bilanzen-nachtragen"
+          fi
+          if [ -n "$REP" ]; then
+              TROCKEN=""
+              if [ "${{ github.event.inputs.trocken }}" = "true" ]; then
+                  TROCKEN="--trocken"
+              fi
+              # AUSDRUECKLICH NACH backend/core/data/ SCHREIBEN.
+              # Ohne --output nimmt der Schalter data/ im Repo — und der
+              # Schritt "Copy output back to data/" weiter unten wuerde
+              # die Reparatur danach mit der ungeaenderten Saatkopie aus
+              # backend/core/data/ ueberschreiben. Dieselbe Falle wie am
+              # 21.09.2026 bei den Kartentexten: zwei Datenordner, und
+              # der falsche gewinnt am Ende.
+              # ABSOLUT, nicht relativ: --output wird mit
+              # os.path.join(data_dir, ...) verbunden. Ein relativer
+              # Pfad landete damit unter backend/core/data/backend/...
+              ZIEL="$GITHUB_WORKSPACE/backend/core/data/tournament_decklists_per_player.csv"
+              rc=0
+              for schalter in $REP; do
+                  echo "--- $schalter $TROCKEN"
+                  python backend/scrapers/per_decklist_scraper.py \
+                      $schalter $TROCKEN --output "$ZIEL"
+                  einzel=$?
+                  if [ $einzel -ne 0 ]; then rc=$einzel; fi
+              done
+              echo "::endgroup::"
+              echo "### Reparaturlauf" >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "Schalter: \`$REP $TROCKEN\` · Rueckgabewert: \`$rc\`" >> "$GITHUB_STEP_SUMMARY"
+              # Ende des Schritts — der Reparaturlauf scrapt NICHT.
+              # Die folgenden Schritte (Copy back, Commit) laufen weiter.
+              exit $rc
+          fi
+
           ARGS=""
           if [ -n "${{ github.event.inputs.tournament_id }}" ]; then
               ARGS="$ARGS --tournament-id ${{ github.event.inputs.tournament_id }}"

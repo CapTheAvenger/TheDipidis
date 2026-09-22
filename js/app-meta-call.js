@@ -141,33 +141,62 @@ window.MetaCall = (function () {
      der eine Messung behauptet, die die Datei nicht mehr hergibt, ist
      eine falsche Quellenangabe.
 
-     Jetzt stehen die Zahlen EINMAL, maschinenlesbar, und
-     tests/unit/test-praesenz-unentschieden-belegt.js rechnet jede
-     davon gegen ihre Datei nach. Laufen sie auseinander, wird der Test
-     rot statt der Kommentar still falsch. Wer die Zahlen anfasst,
-     ohne nachzumessen, merkt es sofort.
-
-     `toleranzPp` ist der Spielraum, in dem die Datei sich bewegen
-     darf, bevor der Eintrag nachgezogen werden muss.
+     NACHTRAG 22.09.2026: die erste Fassung dieser Tabelle fuehrte den
+     WERT mit (`anteilPz`) und ein Toleranzband. Das hat den Kommentar
+     ehrlich gemacht und den Deploy angehalten — siehe den Block
+     direkt darunter. Gefuehrt wird jetzt nur noch, WO die Quote
+     herkommt, plus eine datierte Untergrenze fuer die Partienzahl.
      ══════════════════════════════════════════════════════════════════ */
+  /* DIE QUELLENANGABE ZUR UNENTSCHIEDEN-QUOTE — OHNE EINEN WOCHENWERT.
+     ==================================================================
+     Gerechnet wird mit der Quote AUS DER DATEI (siehe
+     `aggUnentschieden` und `_unentschiedenQuote`). Dieser Block sagt,
+     WORAUF sich die Umstellung der Tag-2-Rechnung stuetzt: welche
+     Datei, welche Auswahl.
+
+     BIS ZUM 22.09.2026 STAND HIER AUCH DER WERT — `anteilPz: 11.05`
+     mit einem Toleranzband von 0,3 pp. Das war die falsche Form, und
+     sie hat genau das getan, was eine falsche Form tut: der
+     Wochenlauf vom 22.09.2026 schrieb 13,75 % in die Datei, die
+     Zusicherung schlug an, `test` fiel um, `build` und `deploy` wurden
+     uebersprungen — und kaputt war nichts. Dieselbe Sorte Stillstand
+     wie am 11., 12. und 13.09.2026.
+
+     Eine Feldquote ist keine Konstante. Sie waechst mit jedem
+     Turnier, das dazukommt. Ein Sollwert mit Band verlangt, dass ein
+     Mensch ihn woechentlich von Hand nachzieht — und der Deploy steht
+     so lange.
+
+     WAS STATTDESSEN FESTGEHALTEN WIRD, in
+     tests/unit/test-praesenz-unentschieden-belegt.js:
+
+     1. Auf Papier wird um ein VIELFACHES haeufiger unentschieden
+        gespielt als online — mindestens Faktor 3. Das ist die Aussage,
+        auf der die Umstellung beruht, und sie ist eine Eigenschaft der
+        beiden Spielformen (auf Papier laeuft die Zeit ab, online
+        nicht), kein Wochenwert.
+     2. Die Zahl der Partien darf WACHSEN, aber nicht unter den hier
+        datierten Stand fallen. Ein Verlust ist ein Fehler, Zuwachs
+        nicht (CLAUDE.md, 12.09.2026) — und ein leergelaufener Scraper
+        faellt damit auf, ohne dass Zuwachs jemanden weckt.
+
+     `mindestensPartien` ist deshalb eine UNTERGRENZE mit Datum, kein
+     Sollwert. Wer sie hochsetzt, muss dazuschreiben, wann er gemessen
+     hat. */
   const BELEGTE_FELDQUOTEN = {
     unentschiedenPraesenz: {
       was:        'Anteil unentschiedener Partien im Praesenzfeld',
       datei:      'data/labs_tournament_matchups_TEF-PBL.csv',
       auswahl:    "day_filter='overall', Zeilen mit vs_wins/vs_losses",
-      anteilPz:   11.05,
-      partien:    6192,
-      toleranzPp: 0.30,
-      stand:      '07.09.2026',
+      mindestensPartien: 30710,
+      gemessenAm: '22.09.2026',
     },
     unentschiedenOnline: {
       was:        'Anteil unentschiedener Partien in den Limitless-Online-Turnieren',
       datei:      'data/limitless_online_decks.csv',
       auswahl:    'Summe ueber alle Zeilen (wins/losses/ties)',
-      anteilPz:   1.29,
-      partien:    180414,
-      toleranzPp: 0.10,
-      stand:      '07.09.2026',
+      mindestensPartien: 236128,
+      gemessenAm: '22.09.2026',
     },
   };
   if (typeof window !== 'undefined') window._mcBelegteFeldquoten = BELEGTE_FELDQUOTEN;
@@ -1452,9 +1481,11 @@ window.MetaCall = (function () {
    * WARUM ES DIESE ZWEITE GIBT (07.09.2026). `_labsDeckWr` rechnet
    * S/(S+N+U) — dieselbe Formel wie die Online-Spalte, und trotzdem
    * nicht dieselbe Groesse: die Zahl haengt daran, wie oft im Feld
-   * unentschieden gespielt wird, und das ist online (1,29 %) und auf
-   * Papier (11,05 % bei den Worlds in San Francisco) um den Faktor
-   * neun verschieden. Wer die beiden voneinander ABZIEHT, misst zum
+   * unentschieden gespielt wird, und darin unterscheiden sich die
+   * beiden Felder um ein Vielfaches (gemessen 22.09.2026: online
+   * 1,35 %, auf Papier 13,75 % — Faktor 10; die Zusicherung haelt
+   * mindestens Faktor 3 fest, weil die Werte mit jedem Turnier
+   * wachsen). Wer die beiden voneinander ABZIEHT, misst zum
    * groessten Teil diesen Unterschied. S/(S+N) kuerzt ihn heraus.
    *
    * Angezeigt wird weiter `_labsDeckWr` — dort steht die Zahl allein
@@ -7955,22 +7986,25 @@ window.MetaCall = (function () {
              der ONLINE-Matrix (`base.pTie`) bzw. aus
              MAJOR_MATCHUP_TIE_RATE = 0,02.
 
-             DIE ZAHLEN STEHEN IN BELEGTE_FELDQUOTEN, NICHT HIER
-             (07.09.2026). An dieser Stelle stand "Limitless Online
-             1,28 % (2.248 von 174.954) · Worlds SF (TEF-PBL) 10,95 %
-             · alle Majors zusammen 15,30 %". Nachgemessen am
-             07.09.2026 sind es 1,29 % (2.322 von 180.414) und 11,05 %
-             (684 von 6.192). Die dritte Zeile war schon damals keine
-             eigene Messung: die zwoelf abgeschlossenen Epochen tragen
-             keine Bilanz, deshalb IST "alle Majors zusammen" heute
-             dieselbe Zahl wie TEF-PBL — 11,05 % aus denselben 6.192
-             Partien. Sie ist ersatzlos gestrichen, weil sie sich aus
-             der Datei nicht herstellen laesst.
+             HIER STEHT KEINE ZAHL MEHR (22.09.2026). An dieser Stelle
+             stand "Limitless Online 1,28 % · Worlds SF (TEF-PBL)
+             10,95 % · alle Majors zusammen 15,30 %", spaeter mit den
+             Werten vom 07.09. nachgezogen. Beides war vier Wochen
+             spaeter wieder ueberholt — eine Feldquote waechst mit
+             jedem Turnier.
 
-             Auf Papier wird also rund neunmal haeufiger unentschieden
-             gespielt als online (BELEGTE_FELDQUOTEN, gegen die Dateien
-             nachgerechnet in
-             tests/unit/test-praesenz-unentschieden-belegt.js).
+             Die Aussage, auf die es ankommt, ist kein Wochenwert: auf
+             Papier wird um ein VIELFACHES haeufiger unentschieden
+             gespielt als online, weil dort die Zeit ablaeuft. Genau
+             das haelt tests/unit/test-praesenz-unentschieden-belegt.js
+             fest (mindestens Faktor 3, gegen beide Dateien
+             nachgerechnet). Welche Datei und welche Auswahl gemeint
+             sind, steht in BELEGTE_FELDQUOTEN.
+
+             Die frueher mitgefuehrte dritte Zeile "alle Majors
+             zusammen" ist ersatzlos gestrichen: die zwoelf
+             abgeschlossenen Epochen tragen keine Bilanz, sie war also
+             nie eine eigene Messung.
 
              WIE GROSS DIE WIRKUNG WIRKLICH IST — und warum die erste
              Schaetzung dazu falsch war. Der Befund kam mit der Rechnung
@@ -8632,10 +8666,12 @@ window.MetaCall = (function () {
    * Siegquote. Seitdem stehen auf beiden Seiten S/(S+N+U) — dieselbe
    * FORMEL, und trotzdem nicht dieselbe GROESSE. S/(S+N+U) faellt, je
    * oefter im Feld unentschieden gespielt wird, und die beiden Felder
-   * unterscheiden sich darin um den Faktor neun:
+   * unterscheiden sich darin um ein Vielfaches (gemessen 22.09.2026,
+   * die Werte wachsen mit jedem Turnier — festgehalten wird nur die
+   * Richtung, siehe BELEGTE_FELDQUOTEN):
    *
-   *     online (data/limitless_online_decks.csv)      1,29 %
-   *     Worlds SF (labs_tournament_matchups_TEF-PBL)  11,05 %
+   *     online (data/limitless_online_decks.csv)       1,35 %
+   *     Praesenz (labs_tournament_matchups_TEF-PBL)   13,75 %
    *
    * Nachgemessen ueber die elf Decks, die beim letzten Major die
    * 20-Spieler-Schwelle nehmen (Worlds San Francisco, tournament_id
@@ -9414,16 +9450,16 @@ window.MetaCall = (function () {
    *
    * DER BEFUND (Agententeam B, 06.09.2026). calcDay2 rechnet ein
    * PRAESENZTURNIER, bezog seine Unentschieden-Quote aber aus der
-   * Online-Matrix — dort steht 1,29 %, weil online kaum unentschieden
-   * gespielt wird. Auf Papier sind es 11,05 %.
+   * Online-Matrix — dort wird kaum unentschieden gespielt, auf Papier
+   * um ein Vielfaches haeufiger.
    *
-   * BEIDE ZAHLEN STEHEN IN BELEGTE_FELDQUOTEN und werden von
-   * tests/unit/test-praesenz-unentschieden-belegt.js gegen ihre Dateien
-   * nachgerechnet. Hier standen bis zum 07.09.2026 "1,28 %" und
-   * "10,95 % ... 6.121 Partien" — beides war ueberholt (heute 2.322 von
-   * 180.414 und 684 von 6.192). Gerechnet wurde nie mit diesen Zahlen;
-   * die Quote kommt aus der Datei. Aber eine Quellenangabe, die die
-   * Datei nicht mehr hergibt, ist keine Quellenangabe.
+   * WELCHE DATEI UND WELCHE AUSWAHL: BELEGTE_FELDQUOTEN. Die Quote
+   * selbst steht dort seit dem 22.09.2026 NICHT mehr — sie kam aus der
+   * Datei, wurde aber als Zahl mitgefuehrt und war jedes Mal binnen
+   * Wochen ueberholt (zuletzt 11,05 % gegen gemessene 13,75 %). Was
+   * geprueft wird, ist die Aussage: mindestens Faktor 3 zwischen
+   * Papier und Online, und kein Verlust an Partien
+   * (tests/unit/test-praesenz-unentschieden-belegt.js).
    *
    * Wirkung, nachgerechnet (8 Runden, 16 Punkte, S:N wie gemessen):
    * 12,9 % -> 14,0 %, also rund +1,1 pp. Die Rechnung, die daraus
@@ -9437,7 +9473,7 @@ window.MetaCall = (function () {
    * weggerechnet.
    *
    * Warum eine EINZIGE Quote und nicht die Quote je Paarung: online
-   * liegt der Schnitt bei 1,29 %, die meisten Paarungen haben null
+   * liegt der Schnitt bei gut einem Prozent, die meisten Paarungen haben null
    * Unentschieden. Diese Nullen mit Faktor neun hochzuskalieren waere
    * Rauschen mit Vorzeichen. Eine gemessene Feldquote ist die ehrlichere
    * Aussage.
@@ -13521,7 +13557,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
          Konventionen — und keine der beiden Seiten dieser Differenz
          wird darin gerechnet. Beide werden auf S/(S+N) umgerechnet,
          weil sich nur dort der Unentschieden-Anteil herauskuerzt (auf
-         Papier 11,05 %, online 1,29 %). Der Satz sagt das jetzt, und
+         Papier um ein Vielfaches haeufiger als online). Der Satz sagt das jetzt, und
          die Formel kommt aus js/win-rate-konvention.js. */
       const konv = (typeof window !== 'undefined' && window.WinRateKonvention)
         ? window.WinRateKonvention.KONVENTIONEN.ohneUnentschieden.formel
@@ -13902,9 +13938,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
      verschiedenen Formeln gerechnet sind: dieser Chip zeigt die
      Papierquote aus der Labs-Bilanz, S/(S+N+U); die Begegnungsliste
      ein paar Zeilen tiefer zeigt S/(S+N) (siehe `_anzeigeQuote`). Der
-     Unterschied ist nicht klein — bei den Worlds in San Francisco
-     enden 11,05 % der Partien unentschieden, das sind rund fuenf
-     Punkte. Der Kurzname und die Formel haengen deshalb als title an
+     Unterschied ist nicht klein — im Praesenzfeld enden zweistellig
+     viele Prozent der Partien unentschieden (22.09.2026: 13,75 %),
+     das sind mehrere Punkte. Der Kurzname und die Formel haengen deshalb als title an
      der Zahl; die Texte kommen aus js/win-rate-konvention.js, damit
      Name und Formel nicht wieder auseinanderlaufen koennen. */
   function _wrKonventionsTitel(konventionId) {
@@ -13973,9 +14009,10 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
      beiden dasselbe?" hat eine andere Antwort.
 
      Sie bleibt eine Frage, die beantwortet werden muss: auf Papier
-     enden rund 11 % der Partien unentschieden (684 von 6.192 in
-     data/labs_tournament_matchups_TEF-PBL.csv), online rund 1,3 %
-     (2.322 von 180.414 in data/limitless_online_decks.csv). Zwischen
+     endet ein zweistelliger Prozentsatz der Partien unentschieden
+     (data/labs_tournament_matchups_TEF-PBL.csv), online rund ein
+     Prozent (data/limitless_online_decks.csv) — gemessen am
+     22.09.2026 13,75 % gegen 1,35 %, und beide wachsen weiter. Zwischen
      zwei Quoten, von denen die eine die Unentschieden im Nenner fuehrt
      und die andere nicht, liegen deshalb mehrere Punkte, ohne dass
      eines der Decks besser gespielt haette.

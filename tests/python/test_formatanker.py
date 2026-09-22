@@ -338,15 +338,53 @@ def test_beide_schwellen_sind_dieselbe_zahl():
 
 # ── Der Bestand von heute ────────────────────────────────────────────
 
-def test_der_heutige_bestand_belegt_pbl_und_lehnt_die_minisets_ab():
+def test_der_heutige_bestand_belegt_was_die_seite_fuehrt():
     """An den echten Daten, nicht an gebauten. Strukturpruefung an
     Live-Daten ist zulaessig (tests/unit/test-testdaten-wachhund.js);
-    eine enge Zahl waere es nicht — deshalb nur belegt/nicht belegt."""
+    eine enge Zahl waere es nicht — deshalb nur belegt/nicht belegt.
+
+    HIER STAND BIS ZUM 22.09.2026 `assert not anker_belegt("data", "30C")`.
+    Das war am 16.09.2026 richtig: 30C war frisch erschienen, niemand
+    spielte seine Karten, und der Riegel hielt es aus dem Formatschluessel
+    heraus — genau wofuer er gebaut wurde.
+
+    Sechs Tage spaeter spielt das Feld 27 verschiedene 30C-Karten, die
+    Schwelle liegt bei 25, und `format_window.json` fuehrt 30C als
+    laufendes Set. Der Riegel hat also GEOEFFNET, wie vorgesehen — und
+    die Zusicherung fiel um, weil sie ein Set-Kuerzel festgenagelt
+    hatte statt der Eigenschaft.
+
+    Das hat am 22.09.2026 die Deploy-Kette angehalten, ohne dass etwas
+    kaputt war. Geprueft wird deshalb jetzt, was dauerhaft gelten muss:
+
+    * das Set, das die Seite als laufendes Format fuehrt, ist belegt —
+      sonst zeigt sie ein Format, das die Turnierdaten nicht tragen;
+    * ein Sammlerset ohne Feldspuren kommt durch keines der beiden Tore;
+    * ein Kuerzel, das es gar nicht gibt, ebenso — sonst koennte die
+      Funktion schlicht immer True sagen und alles darueber bliebe gruen.
+    """
     if not os.path.exists(os.path.join("data", "online_api_cards_TEF-PBL.csv")):
         pytest.skip("online_api_cards_TEF-PBL.csv nicht vorhanden")
-    assert anker_belegt("data", "PBL")[0]
-    assert not anker_belegt("data", "MEE")[0]
-    assert not anker_belegt("data", "30C")[0]
+    import json as _json
+    with open(os.path.join("data", "format_window.json"), encoding="utf-8") as f:
+        laufend = (_json.load(f).get("current_set") or "").strip()
+    assert laufend, "format_window.json fuehrt kein laufendes Set"
+
+    belegt, zahl, grund = anker_belegt("data", laufend)
+    assert belegt, (
+        f"die Seite fuehrt {laufend} als laufendes Format, der Anker ist aber "
+        f"nicht belegt ({grund}). Entweder ist der Riegel umgangen worden oder "
+        f"die Turnierdaten zu diesem Format fehlen.")
+
+    assert anker_belegt("data", "PBL")[0], (
+        "PBL ist seit Juli im Feld — ist es nicht mehr belegt, ist eine "
+        "Kartendatei leergelaufen")
+    assert not anker_belegt("data", "MEE")[0], (
+        "MEE ist ein Sammlerset ohne eigenen Formatschluessel und darf durch "
+        "keines der beiden Tore kommen")
+    assert not anker_belegt("data", "ZZKEINSET")[0], (
+        "ein Kuerzel ohne jede Feldspur gilt als belegt — dann sagt die "
+        "Funktion immer ja und jede Pruefung darueber ist wertlos")
 
 
 # ── Der Riegel im Schreibweg, nicht nur die Prueffunktion ────────────

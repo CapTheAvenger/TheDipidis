@@ -640,7 +640,25 @@ test('kein Kicker nennt ein anderes Turnier als die Fusszeile', async () => {
     const roh = Q.liesCsv(
         fs.readFileSync(D('data/labs_tournament_decks_TEF-PBL.csv'), 'utf8'), ',');
     const name = roh[0].tournament_name;
-    const kern = name.replace(/^World Championship\s+/i, '').trim();
+    /* DIESELBE KUERZUNG WIE DIE QUELLE, NICHT EINE ZWEITE.
+     *
+     * Hier stand bis zum 22.09.2026 `name.replace(/^World Championship
+     * \s+/i, '')` — eine eigene, zweite Kuerzungsregel neben
+     * `kurzTurnier` in js/ds-post-quellen.js. Solange der Anker ein
+     * Worlds war, kamen beide auf dasselbe Ergebnis.
+     *
+     * Nach dem Wochenlauf am 22.09.2026 war der juengste Anker ein
+     * Regional: die Datei sagt "Regional Championship Baltimore", die
+     * Quelle kuerzt das zu "Regional Baltimore", diese Zeile liess den
+     * Namen unveraendert — und der Deploy stand.
+     *
+     * Der Fehler war nicht die Zahl der Woche, sondern die zweite
+     * Kopie einer Regel. Geprueft wird, was diese Zusicherung immer
+     * gemeint hat: Kicker und Fusszeile nennen DAS Turnier aus der
+     * Datei. Ein fest verdrahteter Name — der urspruengliche Befund —
+     * faellt weiterhin durch, weil er `kurzTurnier(name)` nicht
+     * enthaelt. */
+    const kern = Q.kurzTurnier(name);
     for (const id of ['worlds-tag1', 'tag2']) {
         const erg = await Q.lade(id);
         assert.ok(erg.kicker.includes(kern),

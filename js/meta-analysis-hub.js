@@ -87,6 +87,41 @@
         return typeof window.getLang === 'function' ? window.getLang() === 'de' : true;
     }
 
+    /* DAS VIELFACHE FOLGT AUS DEN ANGEZEIGTEN ZAHLEN, NICHT AUS DEN ROHEN.
+       ================================================================
+       BEFUND (22.09.2026, nach dem Wochenlauf): auf der Startseite stand
+       „12,7 % Top-8-Quote gegen 6,9 % im Schnitt — rund 1,9-mal so oft".
+       12,7 durch 6,9 sind 1,8. Der Deploy stand, weil
+       tests/unit/test-hub-gezaehlte-antritte.js genau das prueft.
+
+       Die Zusicherung hatte recht. Gerechnet wurde mit den ROHEN Werten
+       (12,72 / 6,86 = 1,854 -> 1,9), angezeigt wurden die auf eine
+       Nachkommastelle gerundeten. Solange das Verhaeltnis nicht nahe an
+       einer Rundungsgrenze liegt, faellt das nicht auf — und genau
+       deshalb ist es am 02.09.2026 schon einmal eingebaut worden,
+       obwohl der Kommentar daneben „er zeigt das Vielfache SEINER
+       EIGENEN beiden Zahlen" verspricht.
+
+       Das ist keine Zahl aus dieser Woche, die man hochsetzt. Es ist
+       eine Regel, die an der falschen Bedingung hing: der Leser
+       rechnet mit dem, was er SIEHT.
+
+       `formatPercent` schneidet mit `toFixed(digits)` — hier wird
+       dieselbe Rundung angewandt, damit Anzeige und Rechnung nicht
+       auseinanderlaufen koennen. */
+    function angezeigteZahl(v, digits) {
+        return Number(Number(v).toFixed(digits == null ? 1 : digits));
+    }
+    /** Vielfaches aus zwei Werten, beide zuerst auf die Anzeige gerundet.
+     *  `null`, wenn der Nenner nichts hergibt — eine 1 waere dort eine
+     *  Behauptung. */
+    function vielfaches(zaehler, nenner) {
+        const z = angezeigteZahl(zaehler);
+        const n = angezeigteZahl(nenner);
+        if (!(n > 0) || !Number.isFinite(z)) return null;
+        return Math.round((z / n) * 10) / 10;
+    }
+
     async function loadAnswerRows() {
         if (_answerRows) return _answerRows;
         if (typeof fetchAndParseCSV !== 'function') return null;
@@ -334,7 +369,10 @@
         // Startseite folgt ihr jetzt auch: er zeigt das Vielfache
         // SEINER EIGENEN beiden Zahlen.
         const schnittRoh = model.conv.expected * 100;
-        const faktor = schnittRoh > 0 ? (model.headlineConvPct / schnittRoh) : 1;
+        /* Beide Zahlen stehen im selben Satz — also wird auch mit beiden
+           gerundeten gerechnet (siehe `vielfaches`). */
+        const faktorRoh = vielfaches(model.headlineConvPct, schnittRoh);
+        const faktor = faktorRoh == null ? 1 : faktorRoh;
         const fak = faktor.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
         /* Hier standen bis zum 02.09.2026 `cuts`, `antritte`, `gewichtet`
@@ -507,8 +545,15 @@
                bleibt in der Rangliste, wo es als geglaettet
                beschriftet ist und seine eigene Spalte hat. */
             const schnittFuerKachel = model.conv.expected * 100;
-            const fak = (d.convPct == null || !(schnittFuerKachel > 0)) ? '' :
-                (d.convPct / schnittFuerKachel).toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            /* Die Kachel zeigt die QUOTE, den Schnitt nicht. Gerundet
+               wird deshalb der Zaehler — die Zahl, die der Leser vor
+               sich hat —, der Nenner bleibt roh. Derselbe Befund wie
+               oben im Satz (22.09.2026). */
+            const fakZahl = (d.convPct == null) ? null
+                : (!(schnittFuerKachel > 0) ? null
+                    : Math.round((angezeigteZahl(d.convPct) / schnittFuerKachel) * 10) / 10);
+            const fak = fakZahl == null ? '' :
+                fakZahl.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
             const verglichen = !fak ? '' : (de
                 ? `${fak}-mal so oft wie der Schnitt`
                 : `${fak}× as often as average`);

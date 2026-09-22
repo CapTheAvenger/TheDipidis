@@ -196,17 +196,36 @@ def test_jede_hinterlegte_labs_zuordnung_greift(jh_echt, cards_tid, labs_tid):
         f"die Zuordnung {cards_tid} -> {labs_tid} greift nicht")
 
 
-def test_es_sind_zehn_zuordnungen(jh_echt):
+# Stand, gegen den verglichen wird. Es ist eine UNTERGRENZE, kein
+# Sollwert: die Datei waechst, wenn ein Turniername wieder einmal
+# auseinanderlaeuft. Ein Verlust dagegen heisst, dass jemand eine
+# nachgeschlagene Entscheidung weggeworfen hat — und dieses Repo wirft
+# Belege nicht stillschweigend weg (CLAUDE.md, 13.09.2026).
+MINDESTENS_ZUORDNUNGEN = 10      # gemessen 22.09.2026 (mit 577 sind es 11)
+
+
+def test_die_zuordnungen_gehen_nicht_verloren(jh_echt):
     """Ein Waechter fuer den Waechter: faellt die Datei weg oder wird sie
     leer gelesen, steht der Parametersatz oben ploetzlich auf null
-    Faellen und die zehn Tests darueber verschwinden lautlos."""
+    Faellen und die Tests darueber verschwinden lautlos.
+
+    HIER STAND BIS ZUM 22.09.2026 `== 10`. Das war die falsche Form.
+    An diesem Tag kam mit 577 (Regional Baltimore) eine elfte Zuordnung
+    dazu — eine REPARATUR, die 559 Decklisten ihre Bilanz zurueckgab —
+    und die Zusicherung machte daraus einen roten Deploy. Genau die
+    Sorte Stillstand, die CLAUDE.md seit dem 12.09.2026 beschreibt:
+    `== n` und `<= n` brechen durch Zuwachs, `>= n` nicht.
+    """
     geladen = jh_echt._load_labs_id_overrides()
-    assert len(MIT_LABS_ID) == 10, (
+    assert len(MIT_LABS_ID) >= MINDESTENS_ZUORDNUNGEN, (
         f"data/labs_tournament_id_overrides.json fuehrt {len(MIT_LABS_ID)} "
-        "Labs-Zuordnungen statt zehn")
-    assert len(geladen) == 10, (
-        f"das JH-Modul laedt {len(geladen)} Zuordnungen statt zehn — "
-        "es sucht die Datei am falschen Ort")
+        f"Labs-Zuordnungen, am 22.09.2026 waren es {MINDESTENS_ZUORDNUNGEN}. "
+        "Ein Verlust ist hier immer ein Fehler — jede Zeile ist eine von "
+        "Hand nachgeschlagene Entscheidung")
+    assert len(geladen) == len(MIT_LABS_ID), (
+        f"das JH-Modul laedt {len(geladen)} Zuordnungen, die Datei fuehrt "
+        f"{len(MIT_LABS_ID)} — es sucht die Datei am falschen Ort oder liest "
+        "sie unvollstaendig")
 
 
 # ── 3. Der Nachtrag: welcher Wert, aus welchem Verzeichnis ───────────────────

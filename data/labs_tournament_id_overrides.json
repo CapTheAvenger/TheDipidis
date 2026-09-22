@@ -1,6 +1,12 @@
 {
   "comment": "Manual cards-tid → labs-tid overrides for tournaments where automatic name-matching fails. Used by backend/scrapers/tournament_scraper_JH.py (_resolve_labs_tournament_id) for new scrapes and by backend/scrapers/backfill_labs_tournament_id.py for historical overview rows. Cause of mismatch is in 'reason' for each entry. Add new entries when the limitlesstcg.com name diverges from the labs.limitlesstcg.com name in a way the normalize step can't bridge. | 22.08.2026: Die Eintraege koennen zusaetzlich 'tournament_date' + 'date_reason' tragen. Damit wird ein nachweislich falsches Datum der Quelle korrigiert, ohne dass der naechste Lauf die Korrektur ueberschreibt (tournament_scraper_JH._datum_mit_override).",
   "overrides": {
+    "577": {
+      "labs_tournament_id": "0072",
+      "reason": "limitless \"Regional Baltimore, MD – Limitless\" (19.09.2026) gegen labs \"Regional Championship Baltimore\" (18.09.2026) — Name UND Datum weichen ab, der Namensabgleich kann das nicht ueberbruecken. Belegt am 22.09.2026: alle 559 Decklisten aus 577 finden unter (0072, Platz) genau einen Eintrag in data/player_continuity.csv, 558 der 559 Namen sind zeichengleich, der eine uebrige ist eine Teilmenge. Ohne diesen Eintrag blieb tournament_id leer, die Bilanzen liessen sich nicht verbinden, und alle 559 Listen standen mit 0-0-0 in data/tournament_decklists_per_player.csv — eine Bilanz, die es so nicht gab. Das hat am 22.09.2026 tests/python/test_bilanz_je_zeile.py ausgeloest und die Deploy-Kette angehalten.",
+      "tournament_date": "18th September 2026",
+      "date_reason": "Limitless fuehrt das Regional auf dem 19.09.2026 (Samstag), labs auf dem 18.09.2026 (Freitag). Ein Regional laeuft Freitag bis Sonntag; eingetragen ist der ERSTE Turniertag, wie bei allen mehrtaegigen Turnieren in dieser Datei (siehe 518). Ohne diese Korrektur nennen die beiden Dateien dasselbe Ereignis an zwei Tagen, und die Seite zeigt je nach Reiter ein anderes Datum — festgehalten in tests/python/test_per_decklist_datum_override.py."
+    },
     "518": {
       "labs_tournament_id": "0070",
       "reason": "NAIC 2026 abbreviation vs labs 'International Championship New Orleans' — same event (same city, 3752 players). Limitless dates it 2026-06-10; the event actually ran 12.-14.06.2026, see tournament_date below.",

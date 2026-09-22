@@ -295,9 +295,49 @@ describe('ace_specs.json ist in sich stimmig', () => {
             `total_count ${LISTE.total_count} gegen ${eindeutig} eindeutige Namen`);
     });
 
-    it('die offene Frage steht in der Datei', () => {
-        assert.match(LISTE._hinweis || '', /NICHT behoben/,
-            'die Liste ist von Hand gepflegt und veraltet — das muss dranstehen, '
-            + 'sonst haelt sie der naechste Leser fuer geprueft');
+    /* BIS ZUM 22.09.2026 VERLANGTE DIESE ZUSICHERUNG DEN SATZ
+       „NICHT behoben".
+       ================================================================
+       Er stand seit dem 29.08.2026 in der Datei und war richtig: die
+       Liste wird von Hand gepflegt, und ob seit Februar Ace Specs
+       dazugekommen sind, liess sich — so der Befund von damals — im
+       Repo nicht feststellen.
+
+       Der Befund stimmte nur fuer das Repo, nicht fuer die Quelle.
+       limitlesstcg.com/cards?q=is:ace liefert in der BILDansicht keine
+       Namen, mit `&display=list` sehr wohl. Abgerufen am 22.09.2026:
+       46 Drucke, 39 verschiedene Namen — genau die 39, die in der
+       Datei stehen. Die Liste war also nie hinter der Rotation
+       zurueck.
+
+       Was der naechste Leser wissen muss, ist damit nicht mehr „das
+       ist offen", sondern **wann zuletzt nachgesehen wurde und wo**.
+       Genau das wird jetzt verlangt — und zwar so, dass es nicht
+       einfach behauptet werden kann: `_geprueft` traegt datierte
+       Eintraege, und der Hinweis muss die Adresse nennen, unter der
+       sich die Pruefung wiederholen laesst. */
+    it('die Datei sagt, WANN zuletzt gegen die Quelle geprueft wurde', () => {
+        const g = LISTE._geprueft;
+        assert.ok(g && typeof g === 'object' && Object.keys(g).length > 0,
+            'ace_specs.json fuehrt kein Feld _geprueft — dann weiss niemand, '
+            + 'ob die Liste je gegen die Quelle gehalten wurde');
+        const daten = Object.keys(g).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k));
+        assert.ok(daten.length > 0,
+            '_geprueft traegt keinen datierten Eintrag (YYYY-MM-DD) — ein '
+            + 'Pruefvermerk ohne Datum ist keiner');
+    });
+
+    it('und WO — die Adresse muss die Namen wirklich hergeben', () => {
+        /* Die Bildansicht (?q=is:ace) gibt nur Bilddateien aus. Wer sie
+           als Quelle notiert, schickt den naechsten Leser auf genau den
+           Irrweg, der am 29.08.2026 zu „laesst sich nicht feststellen"
+           gefuehrt hat. */
+        const text = String(LISTE._hinweis || '') + String(LISTE.source || '');
+        assert.match(text, /display=list/,
+            'weder Hinweis noch Quelle nennen die Listenansicht '
+            + '(?q=is:ace&display=list) — die Bildansicht gibt keine Namen her');
+        assert.match(String(LISTE._hinweis || ''), /von Hand gepflegt/,
+            'dass die Liste von Hand gepflegt wird, muss dranstehen — daran '
+            + 'aendert eine bestandene Pruefung nichts');
     });
 });

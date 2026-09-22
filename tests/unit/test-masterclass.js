@@ -485,6 +485,46 @@ test('jede Liste traegt einen Kopierknopf, jede Kachel beide Drucke', () => {
     assert.ok(JS_NACKT.includes('druckHoch'), 'das Skript liest data-druck-hoch nicht');
 });
 
+test('die Regalkachel zeigt den Sammlerdruck und nennt die Zahlen des Stuecks', () => {
+    /* BEFUND (22.09.2026, vom Betreiber gemeldet, mit Bildschirmfoto):
+     * "Ist immer noch der low rarity Print, obwohl da max rarity Print
+     * hin soll." Gemeint war die KACHEL im Regal — sie hing noch an
+     * PBL-65, waehrend Listen und Detail laengst getrennt waren.
+     *
+     * Die Zusicherung haengt die Kachel an die REGEL, nicht an eine
+     * Nummer: sie liest den Sammlerdruck derselben Karte aus dem Stueck
+     * und verlangt genau dessen Bild. Wer die Druckwahl aendert, aendert
+     * damit auch die Kachel — oder faellt hier um. */
+    const hoch = /data-mcl-karte="mega-excadrill-ex"[^>]*data-druck-hoch="([A-Z0-9]+)-(\d+)"/.exec(FRAGMENT);
+    assert.ok(hoch, 'im Stueck steht kein Sammlerdruck fuer Mega-Stalobor-ex');
+    const datei = `${hoch[1]}_${hoch[2].padStart(3, '0')}_R_EN_LG.png`;
+    const kachel = /bild:\s*'([^']+)'/.exec(JS_NACKT);
+    assert.ok(kachel, 'die Regalkachel fuehrt kein Bild');
+    assert.ok(kachel[1].endsWith(datei),
+        `die Kachel zeigt ${kachel[1].split('/').pop()}, der Sammlerdruck ist ${datei}`);
+
+    /* Und die Kennzahlen auf der Kachel muessen stimmen: "6 Listen" stand
+     * dort noch, als es 25 waren. */
+    const kenn = /kennzahlen:\s*'([^']+)'/.exec(JS_NACKT);
+    assert.ok(kenn, 'die Regalkachel fuehrt keine Kennzahlen');
+    const zahl = (muster) => { const m = muster.exec(kenn[1]); return m ? Number(m[1].replace(/\./g, '')) : null; };
+    const mus = (FRAGMENT.match(/class="mcl-mu"/g) || []).length;
+    const listen = (FRAGMENT.match(/data-mcl-listenblock="\d+"/g) || []).length;
+    assert.strictEqual(zahl(/(\d+)\s*Matchups/), mus, `Kachel nennt andere Matchups als das Stueck (${mus})`);
+    assert.strictEqual(zahl(/(\d+)\s*Listen/), listen, `Kachel nennt andere Listen als das Stueck (${listen})`);
+
+    /* Die Wortzahl gegen den tatsaechlichen Text, mit 10 % Luft: sie ist
+     * eine Angabe fuer den Leser, keine Messgroesse — aber "10.250", wenn
+     * es 6.000 sind, waere eine Behauptung. */
+    const doku = /<div class="mcl-doku" id="mclDoku">([\s\S]*?)<\/div>\s*<p class="mcl-keintreffer"/.exec(FRAGMENT);
+    assert.ok(doku, 'die Ausarbeitung steckt nicht mehr im Stueck');
+    const woerter = (doku[1].replace(/<[^>]+>/g, ' ').match(/[A-Za-zÄÖÜäöüß0-9][A-Za-zÄÖÜäöüß0-9'\u2019\-.]*/g) || []).length;
+    const genannt = zahl(/([\d.]+)\s*Wörter/);
+    assert.ok(genannt !== null, 'die Kachel nennt keine Wortzahl');
+    assert.ok(Math.abs(genannt - woerter) / woerter <= 0.1,
+        `Kachel nennt ${genannt} Wörter, gezaehlt sind ${woerter}`);
+});
+
 test('der Klick auf den Kopierknopf landet beim Kopieren, der auf eine Karte beim Detail', () => {
     /* Die Verdrahtung wird AUSGEFUEHRT. Eine Textsuche nach
      * "data-mcl-kopieren" im Skript haette hier nichts gesehen: der

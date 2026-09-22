@@ -975,6 +975,96 @@ jobs:
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
 
+      # ══════════════════════════════════════════════════════════════
+      # DAS TOR VOR DEM PUSH (22.09.2026)
+      # ══════════════════════════════════════════════════════════════
+      #
+      # WARUM ES DAS GIBT. Am 22.09.2026 lief dieser Ablauf um 06:19
+      # gruen durch und schob seine Daten nach `main`. Danach fiel der
+      # `test`-Job von deploy-pages.yml um, `build` und `deploy` wurden
+      # uebersprungen, und die Seite hing den ganzen Tag auf dem Stand
+      # vom Vortag. Kaputt war nichts: drei Zusicherungen hatten Zahlen
+      # aus den Daten der VORWOCHE festgenagelt, und die Daten waren
+      # gewachsen.
+      #
+      # Der Wochenlauf hat seine eigene Ausgabe nie geprueft. Er konnte
+      # `main` also rot machen, ohne es zu merken — und gemerkt hat es
+      # der Betreiber, an einer Mail und an einer Seite, die nicht mehr
+      # aktuell wurde.
+      #
+      # DIE REGEL, die dieses Tor durchsetzt: **ein Lauf veroeffentlicht
+      # nur, was seine eigenen Zusicherungen aushalten.** Sind sie rot,
+      # bleibt `main` auf dem letzten guten Stand — die Seite
+      # funktioniert weiter, sie ist nur eine Woche alt. Das ist immer
+      # besser als eine Deploy-Kette, die steht.
+      #
+      # WARUM DAS TOR NICHT DIE LOESUNG IST, SONDERN DIE ABSICHERUNG.
+      # Die eigentliche Arbeit war, die Zusicherungen in die richtige
+      # Form zu bringen (CLAUDE.md: „verloren ist ein Fehler, Zuwachs
+      # nicht"). Schlaegt dieses Tor an, ist das ein echter Befund und
+      # kein Rauschen — dann gehoert hingesehen.
+      #
+      # Der Job wird rot. Das ist beabsichtigt: eine Mail ueber den
+      # Wochenlauf ist die richtige Meldung, eine stehende Deploy-Kette
+      # nicht.
+      - name: Node fuer die JS-Suite
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '20'
+
+      - name: Zusicherungen gegen die frischen Daten
+        id: pruefen
+        run: |
+          set +e
+          echo "## Tor vor dem Push" >> "$GITHUB_STEP_SUMMARY"
+          # Genau wie in deploy-pages.yml — die Suite braucht nur papaparse.
+          npm install --no-save papaparse >/dev/null 2>&1
+          if ! command -v node >/dev/null 2>&1; then
+            echo "::error::node fehlt — das Tor kann nicht pruefen und laesst deshalb NICHTS durch."
+            echo "gruen=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          bash scripts/run-js-unit-tests.sh > /tmp/js.log 2>&1
+          js=$?
+          python3 -m pip install --quiet pytest beautifulsoup4 >/dev/null 2>&1
+          python3 -m pytest tests/python -q > /tmp/py.log 2>&1
+          py=$?
+          {
+            echo ""
+            echo "| Suite | Ergebnis |"
+            echo "| --- | --- |"
+            echo "| JS   | $(tail -n 20 /tmp/js.log | grep -E 'JS unit tests:' || echo "Rueckgabewert $js") |"
+            echo "| Python | $(tail -n 5 /tmp/py.log | grep -E 'passed|failed' || echo "Rueckgabewert $py") |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ $js -ne 0 ] || [ $py -ne 0 ]; then
+            {
+              echo ""
+              echo "**Es wird NICHTS gepusht.** \`main\` bleibt auf dem letzten"
+              echo "guten Stand, die Seite laeuft mit den Daten der Vorwoche"
+              echo "weiter. Die frischen Daten liegen als Artefakt bei."
+              echo ""
+              echo "### Rot"
+              echo '```'
+              grep -E '^✗|^FAILED' /tmp/js.log /tmp/py.log | head -40
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "gruen=false" >> "$GITHUB_OUTPUT"
+            echo "::error::Die frischen Daten machen Zusicherungen rot — nicht gepusht. Siehe Zusammenfassung."
+            exit 1
+          fi
+          echo "gruen=true" >> "$GITHUB_OUTPUT"
+
+      # Die frischen Daten bleiben erreichbar, auch wenn das Tor
+      # zugeschlagen hat — sonst waere eine Stunde Scrapen verloren und
+      # der naechste Lauf muesste alles noch einmal holen.
+      - name: Frische Daten sichern, falls das Tor zuschlaegt
+        if: failure() && steps.pruefen.outcome == 'failure'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: daten-wochenlauf-${{ github.run_id }}
+          path: data/
+          retention-days: 14
+
       - name: Commit + push
         id: commit
         run: |

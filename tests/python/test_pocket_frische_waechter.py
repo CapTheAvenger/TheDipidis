@@ -77,3 +77,16 @@ def test_waechter_und_browser_benutzen_dieselbe_schwelle():
     assert waechter == int(o.group(1)), (
         f"der Waechter meldet ab {waechter} Tagen, der Browser ab "
         f"{o.group(1)} — dieselbe Frage, zwei Antworten")
+
+    # UND DERSELBE VERGLEICH.
+    #
+    # ABNAHMEBEFUND 22.09.2026: die Zahlen stimmten ueberein, die
+    # Operatoren nicht — der Waechter hatte `>`, der Browser `>=`. Bei
+    # exakt 28 Tagen sah der Besucher die Warnung und der Waechter
+    # schwieg. Genau einen Tag lang, und genau falsch herum.
+    assert re.search(r"alter\s*>=\s*PLAUSIBEL_TAGE", block), (
+        "der Waechter vergleicht nicht mit >= — dann faellt der Tag, an dem "
+        "das Banner im Browser erscheint, in seine Luecke")
+    assert re.search(r">=\s*PLAUSIBEL_TAGE", _lies(OBERFLAECHE)), (
+        "js/ds-pocket.js vergleicht nicht mehr mit >= — dann gehen Waechter "
+        "und Banner wieder auseinander")

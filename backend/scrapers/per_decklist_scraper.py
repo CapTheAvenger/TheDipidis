@@ -1214,6 +1214,130 @@ def _datum_nachtragen_kern(ziel: str, trocken: bool = False) -> Dict:
     return bericht
 
 
+def turnier_id_nachtragen(ziel: str, datenverzeichnis=None,
+                          trocken: bool = False) -> Dict:
+    """`--turnier-id-nachtragen`: leere `tournament_id` nachziehen — ohne Netz.
+
+    WARUM ES DAS GIBT (22.09.2026)
+
+    `scrape_one_tournament` loest die labs-Turnierkennung zur SCHREIBZEIT
+    auf (`_resolve_labs_tournament_id`). Findet der Namensabgleich das
+    Turnier nicht, bleibt die Zelle leer — und wird nie wieder
+    angeschaut, auch wenn spaeter ein Override dazukommt. Dieselbe
+    Luecke, die `backend/scrapers/backfill_labs_tournament_id.py` fuer
+    die Uebersichtsdatei schliesst; fuer den Decklisten-Bestand gab es
+    sie bis heute nicht.
+
+    Gekostet hat das den Deploy vom 22.09.2026. Das Regional Baltimore
+    heisst bei limitless "Regional Baltimore, MD – Limitless"
+    (19.09.2026), bei labs "Regional Championship Baltimore"
+    (18.09.2026) — Name UND Datum weichen ab. Die 559 Decklisten
+    standen damit ohne `tournament_id` im Bestand, `bilanzen_nachtragen`
+    konnte sie nicht verbinden (`finde` verlangt Turnier UND Platz),
+    und alle 559 trugen 0-0-0. Die Bilanzen lagen die ganze Zeit in
+    data/player_continuity.csv.
+
+    WAS ANGEFASST WIRD
+
+    Ausschliesslich `tournament_id`, und ausschliesslich in Zeilen, in
+    denen sie LEER ist. Ein vorhandener Wert wird nie ueberschrieben —
+    eine falsche Kennung waere schlimmer als eine fehlende, weil sie
+    eine fremde Bilanz anziehen koennte. Alle uebrigen Spalten werden
+    vor und nach dem Nachtrag Zelle fuer Zelle verglichen; weichen sie
+    ab, wird NICHTS geschrieben.
+
+    Geraten wird nichts: aufgeloest wird mit genau derselben Funktion,
+    die auch der Scrape-Weg benutzt, samt ihrer Override-Datei.
+
+    Rueckgabe: Bericht als dict (auch im Probelauf).
+    """
+    with _overrides_aus(datenverzeichnis):
+        return _turnier_id_nachtragen_kern(ziel, trocken)
+
+
+def _turnier_id_nachtragen_kern(ziel: str, trocken: bool = False) -> Dict:
+    kopf, zeilen = _bestand_lesen(ziel)
+    bericht: Dict = {
+        'zeilen_vorher': len(zeilen),
+        'zeilen_nachher': len(zeilen),
+        'geaendert': 0,
+        'je_turnier': {},
+        'ohne_treffer': {},
+        'geschrieben': False,
+    }
+    if not zeilen:
+        return bericht
+    if 'tournament_id' not in kopf:
+        bericht['fehler'] = f'{ziel} fuehrt keine Spalte tournament_id'
+        return bericht
+
+    andere = [k for k in kopf if k != 'tournament_id']
+    abdruck_vorher = [tuple(z.get(k, '') for k in andere) for z in zeilen]
+
+    # Je (limitless-Kennung, Name, Datum) EINMAL aufloesen, nicht je
+    # Zeile: der Bestand hat fuer ein einzelnes Regional ueber 14.000
+    # Zeilen, und die Aufloesung schreibt bei jedem Treffer ins Log.
+    aufgeloest: Dict[tuple, str] = {}
+    for z in zeilen:
+        if str(z.get('tournament_id') or '').strip():
+            continue
+        schl = (str(z.get('limitless_tournament_id') or '').strip(),
+                str(z.get('tournament_name') or '').strip(),
+                str(z.get('tournament_date') or '').strip())
+        if schl not in aufgeloest:
+            aufgeloest[schl] = _resolve_labs_tournament_id(schl[1], schl[2], schl[0])
+        neu = aufgeloest[schl]
+        if not neu:
+            e = bericht['ohne_treffer'].setdefault(
+                schl[0] or schl[1], {'name': schl[1], 'datum': schl[2], 'zeilen': 0})
+            e['zeilen'] += 1
+            continue
+        z['tournament_id'] = neu
+        bericht['geaendert'] += 1
+        e = bericht['je_turnier'].setdefault(
+            schl[0] or schl[1],
+            {'name': schl[1], 'datum': schl[2], 'auf': neu, 'zeilen': 0})
+        e['zeilen'] += 1
+
+    abdruck_nachher = [tuple(z.get(k, '') for k in andere) for z in zeilen]
+    if len(zeilen) != bericht['zeilen_vorher'] or abdruck_nachher != abdruck_vorher:
+        bericht['fehler'] = ('der Nachtrag haette ausserhalb von tournament_id '
+                             'etwas veraendert')
+        return bericht
+
+    bericht['zeilen_nachher'] = len(zeilen)
+    if bericht['geaendert'] and not trocken:
+        _schreibe_atomar(ziel, kopf, zeilen)
+        bericht['geschrieben'] = True
+    return bericht
+
+
+def _lauf_turnier_id(ziel: str, trocken: bool = False) -> int:
+    """CLI-Huelle um `turnier_id_nachtragen` — misst, meldet, schreibt."""
+    b = turnier_id_nachtragen(ziel, trocken=trocken)
+    if not b['zeilen_vorher']:
+        print(f"::error::{ziel} hat keine Zeilen — nichts nachzutragen.")
+        return 1
+    if b.get('fehler'):
+        print(f"::error::{b['fehler']} — es wird nichts geschrieben.")
+        return 1
+    print(f"{b['zeilen_vorher']} Zeile(n) im Bestand.")
+    for lid, e in sorted(b['je_turnier'].items()):
+        print(f"  {lid} {e['name']!r} ({e['datum']}) -> {e['auf']} "
+              f"({e['zeilen']} Zeilen)")
+    for lid, e in sorted(b['ohne_treffer'].items()):
+        print(f"  ohne Treffer: {lid} {e['name']!r} ({e['datum']}, "
+              f"{e['zeilen']} Zeilen) — bleibt leer")
+    print(f"  geaenderte Zellen: {b['geaendert']} — ausschliesslich in "
+          f"tournament_id (alle uebrigen Spalten Zelle fuer Zelle geprueft)")
+    if trocken:
+        print("Probelauf — es wird nichts geschrieben.")
+        return 0
+    if b['geschrieben']:
+        print(f"geschrieben: {ziel}")
+    return 0
+
+
 def _lauf_datum(ziel: str, trocken: bool = False) -> int:
     """CLI-Huelle um `datum_nachtragen` — misst, meldet, schreibt."""
     b = datum_nachtragen(ziel, trocken=trocken)
@@ -1327,6 +1451,15 @@ def main():
                          'mit 0-0-0 aus data/player_continuity.csv fuellen. '
                          'Was dort nicht steht, bekommt LEERE Felder statt '
                          'einer 0. Nur wins/losses/ties werden angefasst.')
+    ap.add_argument('--turnier-id-nachtragen', action='store_true',
+                    dest='turnier_id_nachtragen',
+                    help='Ohne Netz: im vorhandenen Bestand die LEEREN Zellen '
+                         'der Spalte tournament_id aufloesen — mit derselben '
+                         'Funktion wie der Scrape-Weg, samt '
+                         'labs_tournament_id_overrides.json. Ein vorhandener '
+                         'Wert wird nie ueberschrieben; alle uebrigen Spalten '
+                         'werden vor und nach dem Lauf Zelle fuer Zelle '
+                         'verglichen.')
     ap.add_argument('--datum-nachtragen', action='store_true',
                     dest='datum_nachtragen',
                     help='Ohne Netz: im vorhandenen Bestand die Spalte '
@@ -1352,6 +1485,15 @@ def main():
             if os.path.exists(im_repo):
                 ziel = im_repo
         return _lauf_datum(ziel, args.trocken)
+
+    if args.turnier_id_nachtragen:
+        # Reiner Dateilauf wie --datum-nachtragen: kein Netz.
+        ziel = out_path
+        if args.output == OUTPUT_FILE:
+            im_repo = os.path.join(_PROJECT_ROOT, 'data', OUTPUT_FILE)
+            if os.path.exists(im_repo):
+                ziel = im_repo
+        return _lauf_turnier_id(ziel, args.trocken)
 
     if args.bilanzen_nachtragen:
         # Reiner Dateilauf: kein Netz, keine Kartendatenbank, kein

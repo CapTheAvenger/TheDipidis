@@ -51,8 +51,37 @@ EIGEN = "mega-excadrill-ex"
 BLOCK = re.compile(
     r'<span class="mcl-nm">[^<]*<em>([^<]*)</em></span>'
     r'([\s\S]*?<span class="mcl-wr3">[\s\S]*?</span></span>)')
+
+
+def _fenster_aus_dateiname(pfad):
+    """online_api_matchups_TEF-30C.csv -> TEF–30C (Gedankenstrich wie im
+    Stueck). Die Spaltenkoepfe heissen seit dem 23.09.2026 nach ihrem
+    Meta statt "Jetzt"/"Davor" (Hausi: "mit den Metabezeichnungen kann
+    doch jeder viel mehr anfangen"). Der Erzeuger haengt deshalb am
+    Meta seiner Quelle, nicht an einem Wort im Stueck — rollt das
+    Format, rollen Kopf und Muster mit."""
+    m = re.search(r"matchups_([A-Za-z0-9]+-[A-Za-z0-9]+)\.csv$", os.path.basename(pfad))
+    return (m.group(1) if m else "").replace("-", "\u2013")
+
+
+KOPF_JETZT = _fenster_aus_dateiname(ONLINE_JETZT)
+KOPF_DAVOR = _fenster_aus_dateiname(ONLINE_DAVOR)
+# Die Majors tragen ihr Format in Klammern; welches, sagt die Spalte
+# meta der Rohdaten — hier genuegt das Muster.
+KOPF_MAJORS = r"Majors \([^<]*\)"
+
 ZELLE = re.compile(
-    r'(<em>(Jetzt|Davor|Majors)</em><b>)([^<]+)(</b>)(<i>\((?:[\d.]+)\)</i>)?')
+    r'(<em>(' + re.escape(KOPF_JETZT) + r'|' + re.escape(KOPF_DAVOR)
+    + r'|' + KOPF_MAJORS + r')</em><b>)([^<]+)(</b>)(<i>\((?:[\d.]+)\)</i>)?')
+
+
+def _feld(kopf):
+    """Spaltenkopf -> Quelle."""
+    if kopf == KOPF_JETZT:
+        return "jetzt"
+    if kopf == KOPF_DAVOR:
+        return "davor"
+    return "major"
 
 
 def _matchpunkte(w, l, t):
@@ -137,12 +166,13 @@ def nachziehen(roh, quellen, slugs):
             return m.group(0)
 
         def zelle_ersetzen(z):
-            vorn, feld, wert, hinten, nenner = z.groups()
+            vorn, kopf, wert, hinten, nenner = z.groups()
+            feld = _feld(kopf)
             soll, soll_n = soll_zelle(quellen[feld].get(slug, [0, 0, 0]))
             ist = wert
             if ist != soll or (nenner or "") != soll_n:
                 aenderungen.append(
-                    f"{html.unescape(en)} / {feld}: {ist!r}{nenner or ''} "
+                    f"{html.unescape(en)} / {kopf}: {ist!r}{nenner or ''} "
                     f"-> {soll!r}{soll_n}")
             return vorn + soll + hinten + soll_n
 
@@ -196,9 +226,9 @@ def main():
         roh = f.read()
 
     quellen = {
-        "Jetzt": _online(ONLINE_JETZT),
-        "Davor": _online(ONLINE_DAVOR),
-        "Majors": _majors(),
+        "jetzt": _online(ONLINE_JETZT),
+        "davor": _online(ONLINE_DAVOR),
+        "major": _majors(),
     }
     neu, aenderungen, ohne_slug = nachziehen(roh, quellen, _slugs())
     neu, stand_aend = stand_nachziehen(neu)

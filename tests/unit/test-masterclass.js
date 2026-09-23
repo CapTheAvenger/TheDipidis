@@ -216,10 +216,37 @@ test('jedes Matchup zeigt drei Metas und Tims Einschaetzung', () => {
     assert.ok(mus >= 20, `nur ${mus} Matchups`);
     assert.strictEqual(reihen.length, mus,
         `${reihen.length} Zahlenreihen auf ${mus} Matchups`);
-    ['Jetzt', 'Davor', 'Majors', 'Tim'].forEach((k) => {
-        const n = (FRAGMENT.match(new RegExp('<em>' + k + '</em>', 'g')) || []).length;
-        assert.strictEqual(n, mus, `${k} steht ${n}-mal, erwartet ${mus}`);
-    });
+    /* BESTELLUNG (23.09.2026): "Bei jetzt schreibst du TEF bis 30C,
+     * statt davor TEF bis PBL, und bei Majors da auch in Klammern
+     * TEF bis PBL — mit den Metabezeichnungen kann doch jeder viel mehr
+     * anfangen als mit jetzt und davor." Jeder Spaltenkopf muss also
+     * sein Meta nennen. Der laufende kommt aus data/format_window.json,
+     * genau wie im Rest der Seite; die Majors-Spalte traegt ihr Format
+     * in Klammern, weil sie aus einem anderen stammt. */
+    /* Das laufende Fenster kommt aus dem Stempel des Stuecks selbst
+     * (data-mcl-drucke-fenster) — der wird beim Bau aus
+     * data/format_window.json gesetzt und in der Python-Zusicherung
+     * dagegen geprueft. So haengt dieser Test nicht an den Daten dieser
+     * Woche (tests/unit/test-testdaten-wachhund.js). */
+    const stempel = (FRAGMENT.match(/data-mcl-drucke-fenster="([^"]+)"/) || [])[1];
+    assert.ok(stempel, 'der Formatfenster-Stempel des Stuecks fehlt');
+    const laufend = stempel.replace('-', '\u2013');
+    const koepfe = [...FRAGMENT.matchAll(/<span class="mcl-wr3">([\s\S]*?)<\/span><\/span>/g)]
+        .map((m) => [...m[1].matchAll(/<em>([^<]+)<\/em>/g)].map((e) => e[1]).join('|'));
+    assert.strictEqual(koepfe.length, mus, `${koepfe.length} Zahlenreihen auf ${mus} Matchups`);
+    const gleich = new Set(koepfe);
+    assert.strictEqual(gleich.size, 1,
+        'die Matchups tragen verschiedene Spaltenkoepfe: ' + [...gleich].join(' / '));
+    const [k1, k2, k3, k4] = [...gleich][0].split('|');
+    assert.strictEqual(k1, laufend,
+        `die erste Spalte heisst "${k1}", das laufende Formatfenster ist "${laufend}"`);
+    assert.ok(/^[A-Z0-9]+\u2013[A-Z0-9]+$/.test(k2) && k2 !== k1,
+        `die zweite Spalte nennt kein eigenes Meta: "${k2}"`);
+    assert.ok(/^Majors \([A-Z0-9]+\u2013[A-Z0-9]+\)$/.test(k3),
+        `die Majors-Spalte nennt ihr Format nicht in Klammern: "${k3}"`);
+    assert.strictEqual(k4, 'Tim', `die vierte Spalte heisst "${k4}"`);
+    assert.ok(!/<em>(Jetzt|Davor)<\/em>/.test(FRAGMENT),
+        'die Spalten heissen wieder Jetzt/Davor statt nach ihrem Meta');
 
     /* Tims Wort muss zur Ampel des Matchups passen — sonst widerspraeche
      * die Zeile dem Balken daneben. */
@@ -235,6 +262,21 @@ test('jedes Matchup zeigt drei Metas und Tims Einschaetzung', () => {
     assert.ok(/labs_tournament_matchups\.csv/.test(FRAGMENT), 'die Quelle der Majors fehlt');
 });
 
+
+test('die Zahlenspalten stapeln, solange sie nicht nebeneinander passen', () => {
+    /* Mit den Metakoepfen braucht der Zahlenblock 527 statt 434 px
+     * (Playwright, tokens.css inline — ohne die fallen alle var()-Regeln
+     * aus und jede Messung ist wertlos). Der Umbruchpunkt lag bei 560 px
+     * und war schon vorher zu tief: bei 640 px Breite stand die Zeile
+     * auf 152 px, weil die Deck-Namen neben den Zahlen auf fuenf Zeilen
+     * brachen; mit den laengeren Koepfen waeren es 274 px und 14
+     * abgeschnittene Stellen geworden. Ab 1000 px gestapelt: 95-112 px,
+     * kein Umbruch, nichts abgeschnitten. */
+    const m = CSS.match(/@media \(max-width:\s*(\d+)px\)\s*\{\s*\.mcl-mu > summary\s*\{\s*grid-template-columns:\s*7px 1fr;/);
+    assert.ok(m, 'die Regel, die die Zahlenspalten unter den Deck-Namen stapelt, fehlt');
+    assert.ok(Number(m[1]) >= 900,
+        `gestapelt wird erst unter ${m[1]} px — der Zahlenblock braucht 527 px neben dem Namen`);
+});
 test('das Stueck nennt seine Quellen und behauptet keine eigenen Zahlen', () => {
     /* 22.09.2026: die Matchup-Quelle hat gewechselt. Vorher stand dort
      * EINE Ladder-Aggregation (limitless_online_decks_matchups.csv,

@@ -171,6 +171,11 @@
             quelle: 'data/limitless_online_decks.csv (Spalte win_rate_numeric)',
             beleg: {
                 datei: 'data/limitless_online_decks.csv',
+                /* Diese Datei traegt ihr Format NICHT im Namen: sie wird bei
+                   jeder Rotation neu gefuellt. Die Zeilenzahlen unten gelten
+                   deshalb fuer dieses eine Fenster. Am 16.09.2026 ist auf
+                   TEF-30C rotiert (siehe tests/formatfenster.js). */
+                fenster: 'TEF-PBL',
                 trenner: ';',
                 spalte: 'win_rate_numeric',
                 bilanz: ['wins', 'losses', 'ties'],
@@ -205,6 +210,11 @@
             quelle: 'data/limitless_online_decks_matchups.csv (Spalte win_rate)',
             beleg: {
                 datei: 'data/limitless_online_decks_matchups.csv',
+                /* Diese Datei traegt ihr Format NICHT im Namen: sie wird bei
+                   jeder Rotation neu gefuellt. Die Zeilenzahlen unten gelten
+                   deshalb fuer dieses eine Fenster. Am 16.09.2026 ist auf
+                   TEF-30C rotiert (siehe tests/formatfenster.js). */
+                fenster: 'TEF-PBL',
                 trenner: ';',
                 spalte: 'win_rate',
                 bilanz: 'record',

@@ -437,6 +437,42 @@ def load_usage():
         key = _norm(pre[0] + " " + "-".join(teile[:-1]))
         if key:
             index.setdefault(key, rec)
+
+    # ── UND DANN HAT DIE QUELLE GANZ UMGESTELLT (23.09.2026) ─────────
+    #
+    # Am 23.09.2026 um 05:10 UTC standen nicht mehr 15 von 16
+    # Regionalformen im Adjektivstil, sondern NULL. Die Quelle fuehrt sie
+    # seither durchgaengig im Showdown-Stil: `ninetales-alola` statt
+    # `alolan-ninetales`, `tauros-paldea-aqua` statt
+    # `paldean-tauros-aqua-breed`, `maushold-four` statt
+    # `maushold-family-of-four`.
+    #
+    # Die Schleife darueber hat die zweiteiligen Faelle mitgenommen —
+    # Hisuian Goodra, Alolan Ninetales und die uebrigen zwoelf fanden ihre
+    # Daten. Die DREITEILIGEN nicht: bei `tauros-paldea-aqua` steht das
+    # Regionswort in der MITTE, `teile[-1]` ist "aqua". Gemessen am
+    # Stand vom 23.09.2026: die drei Paldea-Tauros-Varianten kamen ohne
+    # `meta` in den Kader — "Tauros (Paldea, Flutenvariante)" ohne eine
+    # einzige Nutzungszahl, und tests/python/test_paldea_tauros.py hat
+    # genau das gesehen.
+    #
+    # Zusammengesetzt wird der Name mit denselben zwei Tabellen, aus
+    # denen er auch entsteht (REGION_SUFFIX + VARIANTE_SUFFIX) — keine
+    # zweite Namensliste, die auseinanderlaufen koennte. `setdefault`
+    # laesst jeden echten Eintrag stehen; kommt der Adjektivstil zurueck,
+    # greift diese Schleife ins Leere und kostet nichts.
+    for slug, rec in (data.get("pokemon") or {}).items():
+        teile = str(slug).split("-")
+        if len(teile) != 3:
+            continue
+        grund, region, var = teile
+        pre = REGION_SUFFIX.get(region.capitalize())
+        en_var = VARIANTE_SUFFIX.get(var.capitalize())
+        if not pre or not en_var:
+            continue
+        key = _norm(f"{pre[0]} {grund} ({en_var[0]})")
+        if key:
+            index.setdefault(key, rec)
     return index, season
 
 

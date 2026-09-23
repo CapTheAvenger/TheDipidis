@@ -336,7 +336,16 @@
 
 /* Unter 560 px stehen die vier Angaben unter dem Namen statt daneben:
    nebeneinander braeuchten sie 334 px, fuer den Namen blieben 20. */
-@media (max-width: 560px) {
+/* Die Zahlenspalten heissen seit dem 23.09.2026 nach ihrem Meta
+   (TEF–30C, TEF–PBL, Majors (TEF–PBL)) statt Jetzt/Davor/Majors — und
+   brauchen damit 527 statt 434 px. Der Umbruchpunkt lag bei 560 px und
+   war schon vorher zu tief: gemessen (Playwright, tokens.css inline) lag
+   die Zeile bei 640 px Breite bei 152 px Hoehe, weil die Deck-Namen
+   neben den Zahlen auf fuenf Zeilen brachen. Mit den laengeren Koepfen
+   waeren es 274 px und 14 abgeschnittene Stellen geworden. Ab 1000 px
+   gestapelt: 95-112 px, nichts bricht um, nichts ist abgeschnitten;
+   darueber steht die Zeile einzeilig bei 73 px. */
+@media (max-width: 1000px) {
     .mcl-mu > summary {
         grid-template-columns: 7px 1fr;
         row-gap: var(--s-2);

@@ -343,6 +343,30 @@ def _majors():
     return z
 
 
+def _majors_meta():
+    """Das Format, in dem die Majors gespielt wurden — aus der Spalte
+    meta derselben Zeilen, aus denen die Zahlen kommen. Steht im Stueck
+    ein anderes Fenster im Spaltenkopf, ist die Beschriftung falsch."""
+    csv.field_size_limit(10 ** 7)
+    metas = set()
+    with open(LABS_MU, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            if r["my_deck_slug"] != EIGEN or r["day_filter"] != "overall":
+                continue
+            if not (r["vs_wins"] or "").strip():
+                continue
+            metas.add(r["meta"])
+    assert len(metas) == 1, "die Majors-Zeilen mischen Formate: %s" % sorted(metas)
+    return metas.pop()
+
+
+def _fenster_aus_dateiname(pfad):
+    """online_api_matchups_TEF-30C.csv -> TEF-30C."""
+    m = re.search(r"matchups_([A-Za-z0-9]+-[A-Za-z0-9]+)\.csv$", os.path.basename(pfad))
+    assert m, "kein Formatfenster im Dateinamen %s" % pfad
+    return m.group(1)
+
+
 def _slugs():
     csv.field_size_limit(10 ** 7)
     k = {}
@@ -370,10 +394,21 @@ def test_die_drei_matchup_quoten_stehen_so_da_wie_die_rohdaten():
         roh = f.read()
 
     slugs = _slugs()
+    # BESTELLUNG (23.09.2026): "Bei jetzt schreibst du TEF bis 30C, statt
+    # davor TEF bis PBL, und bei Majors in Klammern auch TEF bis PBL —
+    # mit den Metabezeichnungen kann doch jeder viel mehr anfangen."
+    # Der Kopf jeder Spalte muss deshalb das Fenster nennen, aus dem die
+    # Zahl der Spalte stammt: die beiden Online-Spalten das Fenster aus
+    # dem Dateinamen des Scrapers, die Majors-Spalte das Format aus der
+    # Spalte meta derselben Zeilen.
+    kopf_jetzt = _fenster_aus_dateiname(ONLINE_JETZT).replace("-", "\u2013")
+    kopf_davor = _fenster_aus_dateiname(ONLINE_DAVOR).replace("-", "\u2013")
+    kopf_major = "Majors (%s)" % _majors_meta().replace("-", "\u2013")
+    assert kopf_jetzt != kopf_davor, "beide Online-Spalten traegen denselben Kopf"
     quellen = {
-        "Jetzt": _online(ONLINE_JETZT),
-        "Davor": _online(ONLINE_DAVOR),
-        "Majors": _majors(),
+        kopf_jetzt: _online(ONLINE_JETZT),
+        kopf_davor: _online(ONLINE_DAVOR),
+        kopf_major: _majors(),
     }
 
     # Je Matchup: englischer Name aus der Kachel, dann die vier Zellen.
@@ -392,8 +427,10 @@ def test_die_drei_matchup_quoten_stehen_so_da_wie_die_rohdaten():
             continue
         zellen = dict(
             (m[0], (m[1], m[2]))
-            for m in re.findall(r'<em>(Jetzt|Davor|Majors)</em><b>([^<]+)</b>(?:<i>\(([\d.]+)\)</i>)?', block)
+            for m in re.findall(r'<em>([^<]+)</em><b>([^<]+)</b>(?:<i>\(([\d.]+)\)</i>)?', block)
         )
+        assert "Jetzt" not in zellen and "Davor" not in zellen, (
+            "%s: die Spalten heissen wieder Jetzt/Davor statt nach ihrem Meta" % en)
         for feld, daten in quellen.items():
             w, l, t = daten.get(slug, [0, 0, 0])
             n = w + l + t

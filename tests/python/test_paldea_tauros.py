@@ -51,14 +51,50 @@ def _norm(s):
     return re.sub(r"[^a-z0-9]", "", str(s).lower())
 
 
+# DIE QUELLE HAT DIE SCHREIBWEISE GEDREHT (23.09.2026).
+#
+# Bis dahin stand hier je Variante der Ladder-Slug ausgeschrieben:
+# "paldean-tauros-combat-breed". Am 23.09.2026 um 05:10 UTC hat
+# championsbattledata alle sechzehn Regionalform-Schluessel umbenannt —
+# aus "paldean-tauros-aqua-breed" wurde "tauros-paldea-aqua". Damit stand
+# keiner der drei Slugs mehr in der Datei, und diese Pruefung hielt den
+# Deploy an, obwohl nichts kaputt war.
+#
+# Kaputt war etwas anderes, und DAS hat sie mitgefunden: der Index in
+# scripts/build_champions_pokedex.py nahm nur zweiteilige Slugs mit
+# (Regionswort hinten). Bei "tauros-paldea-aqua" steht es in der Mitte —
+# die drei Varianten kamen ohne Nutzungsdaten in den Kader.
+#
+# JETZT STEHT KEIN SLUG MEHR IM TESTCODE. Die VARIANTE bleibt (sie ist
+# unsere Entscheidung, nicht die der Quelle), der Slug wird gegen die
+# Datei gesucht — in beiden Schreibweisen.
 VARIANTEN = {
     "Paldean Tauros (Combat Breed)": ("Tauros (Paldea, Gefechtvariante)",
-                                      "Fighting", "", "paldean-tauros-combat-breed"),
+                                      "Fighting", "", "combat"),
     "Paldean Tauros (Blaze Breed)": ("Tauros (Paldea, Flammenvariante)",
-                                     "Fighting", "Fire", "paldean-tauros-blaze-breed"),
+                                     "Fighting", "Fire", "blaze"),
     "Paldean Tauros (Aqua Breed)": ("Tauros (Paldea, Flutenvariante)",
-                                    "Fighting", "Water", "paldean-tauros-aqua-breed"),
+                                    "Fighting", "Water", "aqua"),
 }
+
+
+def _ladder_slug(usage, variante):
+    """Der Slug dieser Variante, wie die Datei ihn HEUTE schreibt.
+
+    Beide bekannten Stile werden akzeptiert: Adjektiv vorn
+    ("paldean-tauros-aqua-breed", bis 22.09.2026) und Form hinten
+    ("tauros-paldea-aqua", seit 23.09.2026). Gefunden wird genau EINER —
+    treffen mehrere, ist die Datei uneindeutig und das gehoert gemeldet.
+    """
+    treffer = sorted(
+        s for s in (usage.get("pokemon") or {})
+        if "tauros" in s and "paldea" in s and variante in s
+    )
+    assert len(treffer) == 1, (
+        f"champions_usage.json fuehrt fuer die {variante}-Variante "
+        f"{len(treffer)} Schluessel statt einen: {treffer}"
+    )
+    return treffer[0]
 
 
 def test_alle_drei_varianten_stehen_im_pokedex(dex):
@@ -77,7 +113,7 @@ def test_der_sammelname_ist_verschwunden(dex):
 
 @pytest.mark.parametrize("en", sorted(VARIANTEN))
 def test_deutscher_name_und_typen(dex, en):
-    de, t1, t2, _slug = VARIANTEN[en]
+    de, t1, t2, _variante = VARIANTEN[en]
     e = next(x for x in dex["entries"] if x["en"] == en)
     assert e["de"] == de
     assert e["t1"] == t1
@@ -87,8 +123,8 @@ def test_deutscher_name_und_typen(dex, en):
 
 @pytest.mark.parametrize("en", sorted(VARIANTEN))
 def test_jede_variante_haengt_an_ihrem_eigenen_ladder_satz(dex, usage, en):
-    _de, _t1, _t2, slug = VARIANTEN[en]
-    assert slug in usage["pokemon"], f"Ladder-Slug {slug} fehlt in champions_usage.json"
+    _de, _t1, _t2, variante = VARIANTEN[en]
+    slug = _ladder_slug(usage, variante)
     e = next(x for x in dex["entries"] if x["en"] == en)
     meta = e.get("meta") or {}
     assert meta, f"{en} hat keinen Nutzungsdatensatz — genau die Luecke von damals"
@@ -98,11 +134,28 @@ def test_jede_variante_haengt_an_ihrem_eigenen_ladder_satz(dex, usage, en):
 
 
 @pytest.mark.parametrize("en", sorted(VARIANTEN))
-def test_der_name_normalisiert_auf_den_slug(en):
-    """Die Verknuepfung haengt am Namen. Ohne diese Gleichheit findet der
-    Bauer den Datensatz nicht mehr, ohne dass irgendetwas rot wird."""
-    _de, _t1, _t2, slug = VARIANTEN[en]
-    assert _norm(en) == _norm(slug)
+def test_jede_variante_findet_ihren_eigenen_slug(usage, en):
+    """DIE VERKNUEPFUNG HAENGT NICHT MEHR AM NAMEN (23.09.2026).
+
+    Bis dahin stand hier `_norm(en) == _norm(slug)`: normalisiert war
+    "Paldean Tauros (Combat Breed)" genau "paldean-tauros-combat-breed".
+    Diese Gleichheit war die Verknuepfung — und sie ist mit der
+    Umbenennung der Quelle weggefallen ("taurospaldeacombat").
+
+    Geprueft wird deshalb, was jetzt wirklich traegt: jede der drei
+    Varianten findet EINEN eigenen Schluessel in der Datei, und die drei
+    sind verschieden. Faellt das, traegt eine Variante die Werte einer
+    anderen — genau der Fehler vom 31.08.2026.
+    """
+    _de, _t1, _t2, variante = VARIANTEN[en]
+    slug = _ladder_slug(usage, variante)
+    andere = {
+        v: _ladder_slug(usage, v)
+        for _en, (_d, _a, _b, v) in VARIANTEN.items() if v != variante
+    }
+    assert slug not in andere.values(), (
+        f"{en} und {[k for k, v in andere.items() if v == slug]} zeigen auf "
+        f"denselben Schluessel {slug!r}")
 
 
 def test_basiswerte_stimmen_mit_smogon_ueberein(dex):

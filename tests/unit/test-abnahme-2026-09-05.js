@@ -670,34 +670,156 @@ describe('Champions-Nutzung: Regionalformen finden ihre Daten', () => {
     });
 
     it('wo der Nutzungsstand den Schluessel fuehrt, wird er auch genommen', () => {
-        /* Hier darf die Woche mitreden — aber nur so: ein Fall, den die
-           Datei diese Woche gar nicht kennt, ist kein Fehler der
-           Umrechnung, sondern eine Luecke im Scrape. Vorher stand hier
-           ein hartes assert.ok(usage[s]), und genau das hat main am
-           08.09.2026 rot gemacht, als maushold-family-of-four aus dem
-           Nutzungsstand verschwand. */
+        /* DIESE ZUSICHERUNG HAT DEN 23.09.2026 NICHT UEBERLEBT — UND DER
+           GRUND WAR SIE SELBST.
+
+           Bis dahin stand hier: nimm die sieben Faelle aus FAELLE, und
+           fuer jeden, dessen SCHLUESSEL diese Woche in der Datei steht,
+           pruefe, dass die Umrechnung ihn findet. Dazu eine Untergrenze
+           („mindestens einer"), damit die Zusicherung nicht leerlaeuft.
+
+           Am 23.09.2026, 05:10 UTC hat championsbattledata die
+           Schreibweise GEDREHT: `ninetales-alola` statt
+           `alolan-ninetales`, `tauros-paldea-aqua` statt
+           `paldean-tauros-aqua-breed`, `maushold-four` statt
+           `maushold-family-of-four`. Damit stand KEINER der sieben
+           Schluessel mehr in der Datei, die Untergrenze schlug an, und
+           Deploy 3025/3026/3027 waren rot.
+
+           Sie hatte recht, aber aus dem falschen Grund: sie meldete
+           „kaputter Aufbau", wo die Quelle nur anders schrieb. Der
+           Fehler war, dass die SCHREIBWEISE der Quelle im Testcode
+           auswendig stand.
+
+           JETZT KOMMT DIE ERWARTUNG AUS DER DATEI SELBST. Fuer jeden
+           Schluessel mit Bindestrich wird der Anzeigename
+           zurueckgebaut — in BEIDEN Schreibweisen, weil der Rueckbau
+           sonst wieder eine auswendig gelernte Richtung waere — und
+           dann verlangt, dass die Umrechnung genau diesen Schluessel
+           wiederfindet. Dreht die Quelle noch einmal, aendert sich hier
+           keine Zeile. */
         const usageSlug = new Function('_usage', quelle[0] + '; return usageSlug;')(usage);
-        const gefunden = [];
-        const fehlend  = [];
-        for (const [name, erwartet] of FAELLE) {
-            if (usage[erwartet]) {
-                assert.equal(usageSlug(name), erwartet,
-                    `${name} findet ${erwartet} nicht, obwohl der Schluessel in der Datei steht`);
-                gefunden.push(erwartet);
-            } else {
-                fehlend.push(erwartet);
+
+        const gross = (w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w);
+        const ADJ_ZU_REGION = {
+            alolan: 'Alola', galarian: 'Galar', hisuian: 'Hisui', paldean: 'Paldea',
+        };
+        const FORMWORT = { breed: 1, form: 1, forme: 1 };
+
+        /* Aus einem Schluessel den Anzeigenamen bauen, wie Showdown und
+           der Kader ihn schreiben. Beide Richtungen der Quelle werden
+           bedient — Adjektiv vorn (`alolan-ninetales`) und Form hinten
+           (`ninetales-alola`). */
+        function anzeigename(key) {
+            const w = key.split('-').filter(Boolean);
+            if (w[0] === 'mega') {
+                const r = w.slice(1).map(gross);
+                if (r.length > 1 && (r[r.length - 1] === 'X' || r[r.length - 1] === 'Y')) {
+                    return r.slice(0, -1).join('-') + '-Mega-' + r[r.length - 1];
+                }
+                return r.join('-') + '-Mega';
             }
+            if (ADJ_ZU_REGION[w[0]] && w.length >= 2) {
+                const r = w.slice(1).filter((x) => !FORMWORT[x]).map(gross);
+                return [r[0], ADJ_ZU_REGION[w[0]]].concat(r.slice(1)).join('-');
+            }
+            return w.filter((x) => !FORMWORT[x]).map(gross).join('-');
         }
-        /* Untergrenze, damit die Zusicherung nicht lautlos leerlaeuft,
-           wenn die Datei einmal gar nichts mehr hergibt. Eine feste
-           Zahl waere wieder ein Wochenwert — deshalb „mindestens einer". */
-        assert.ok(gefunden.length >= 1,
-            'kein einziger der erwarteten Schluessel steht in data/champions_usage.json '
-            + `(${Object.keys(usage).length} Schluessel) — das ist kein Wochenwert mehr, `
-            + `sondern ein kaputter Aufbau. Erwartet wurden: ${FAELLE.map(f => f[1]).join(', ')}`);
-        if (fehlend.length) {
-            console.log(`    # diese Woche nicht im Nutzungsstand: ${fehlend.join(', ')}`);
-        }
+
+        const mitBindestrich = Object.keys(usage).filter((k) => k.indexOf('-') !== -1);
+        const daneben = [];
+        mitBindestrich.forEach((k) => {
+            const name = anzeigename(k);
+            const ist = usageSlug(name);
+            if (ist !== k) daneben.push(`${k} -> "${name}" -> ${ist}`);
+        });
+        assert.deepEqual(daneben, [],
+            'Diese Schluessel der Nutzungsdatei findet die Umrechnung nicht '
+            + `wieder (${mitBindestrich.length} mit Bindestrich geprueft): `
+            + daneben.join(' ; '));
+
+        /* Untergrenze GEGEN LEERLAUF, nicht gegen die Woche: bricht die
+           Datei zusammen, steht hier nichts mehr zu pruefen und die
+           Zusicherung waere lautlos gruen. 39 waren es am 23.09.2026;
+           die Grenze liegt bewusst weit darunter, weil Zuwachs und
+           Abgang einzelner Formen normal sind. */
+        assert.ok(mitBindestrich.length >= 15,
+            `nur ${mitBindestrich.length} Schluessel mit Bindestrich in `
+            + `data/champions_usage.json (${Object.keys(usage).length} Schluessel) — `
+            + 'das ist kein Wochenwert mehr, sondern ein kaputter Aufbau');
+
+        /* UND DIE GEGENRICHTUNG: kein Kadereintrag darf auf die
+           Grundform durchfallen. Das ist der teurere Fehler — eine Zahl,
+           die echt aussieht, aber einem anderen Pokemon gehoert. Genau
+           das passierte am 23.09.2026 mit "Maushold Family of Four"
+           (-> `maushold`) und den drei Mega-Z-Eintraegen. */
+        const kader = JSON.parse(lies('data/champions_pokedex.json')).entries
+            .map((e) => e.en).filter((n) => /[\s(]/.test(String(n)));
+        assert.ok(kader.length >= 50,
+            `nur ${kader.length} mehrteilige Kadernamen — die Probe waere fast leer`);
+        const erbt = [];
+        kader.forEach((n) => {
+            const s = usageSlug(n);
+            if (usage[s] && s.indexOf('-') === -1) erbt.push(`${n} -> ${s}`);
+        });
+        assert.deepEqual(erbt, [],
+            'Diese Formen bekommen die Nutzungszahlen ihrer GRUNDFORM: ' + erbt.join(' ; '));
+    });
+
+    it('beide Schreibweisen der Quelle werden erreicht', () => {
+        /* DIE WOCHENUNABHAENGIGE FASSUNG DESSELBEN. Die Zusicherung
+           darueber haengt an der Datei — steht darin eines Tages nur
+           noch eine Schreibweise, kann sie die andere nicht mehr
+           pruefen, und die Zeile, die sie erzeugt, koennte ersatzlos
+           entfallen. Diese hier haengt an nichts: sie fragt die
+           Kandidatenliste, und die kommt allein aus dem Namen.
+
+           Beide Richtungen wurden gebraucht — die erste seit dem
+           05.09.2026, die zweite seit dem 23.09.2026, als die Quelle
+           drehte. */
+        const kand = new Function('_usage', quelle[0] + '; return usageKandidaten;')({});
+
+        // Form HINTEN im Namen -> Adjektiv VORN im Schluessel.
+        assert.ok(kand('Ninetales-Alola').includes('alolan-ninetales'),
+            'Richtung 1 fehlt: ' + kand('Ninetales-Alola').join(', '));
+        assert.ok(kand('Tauros-Paldea-Aqua').includes('paldean-tauros-aqua-breed'),
+            'Richtung 1 fehlt bei drei Teilen: ' + kand('Tauros-Paldea-Aqua').join(', '));
+
+        // Adjektiv VORN im Namen -> Form HINTEN im Schluessel.
+        assert.ok(kand('Hisuian Goodra').includes('goodra-hisui'),
+            'Richtung 2 fehlt: ' + kand('Hisuian Goodra').join(', '));
+        assert.ok(kand('Paldean Tauros (Aqua Breed)').includes('tauros-paldea-aqua'),
+            'Richtung 2 fehlt bei drei Teilen: '
+            + kand('Paldean Tauros (Aqua Breed)').join(', '));
+        assert.ok(kand('Maushold Family of Four').includes('maushold-four'),
+            'die kurze Schreibweise fehlt: ' + kand('Maushold Family of Four').join(', '));
+
+        /* Und die Grundform bleibt hinten — in BEIDEN Richtungen. Stuende
+           sie vorn, bekaeme die Form die Zahlen der Art. */
+        [['Ninetales-Alola', 'alolan-ninetales', 'ninetales'],
+            ['Hisuian Goodra', 'goodra-hisui', 'goodra']].forEach(([name, form, art]) => {
+            const l = kand(name);
+            const iForm = l.indexOf(form);
+            const iArt = l.indexOf(art);
+            assert.ok(iForm >= 0, `${name} bietet ${form} nicht an`);
+            if (iArt >= 0) {
+                assert.ok(iForm < iArt,
+                    `${name} bietet die Grundform (${art}) VOR ${form} an`);
+            }
+        });
+
+        /* EINE MEGA-FORM BEKOMMT NIE DIE ZAHLEN DER GRUNDFORM. Am
+           23.09.2026 trugen "Garchomp (Mega-Z)", "Lucario (Mega-Z)" und
+           "Absol (Mega-Z)" die Nutzungszahlen von Garchomp, Lucario und
+           Absol. Die Quelle fuehrt derzeit keinen Mega-Schluessel;
+           faellt der Kandidat wieder durch, wird geraten. */
+        ['Garchomp (Mega-Z)', 'Mega Gallade', 'Charizard-Mega-Y'].forEach((n) => {
+            const l = kand(n);
+            const art = n.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '').split('-').filter((x) => x !== 'mega')[0];
+            assert.ok(l.indexOf(art) === -1,
+                `${n} bietet die blosse Art "${art}" an: ${l.join(', ')}`);
+        });
     });
 });
 

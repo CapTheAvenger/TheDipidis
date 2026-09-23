@@ -195,8 +195,42 @@
        REGION + AUSNAHMEN) — dieser Reiter hat sie nur nicht benutzt.
        Statt sie zu verdrahten, werden hier mehrere Schreibweisen
        nacheinander probiert und die erste genommen, die es wirklich
-       gibt. Findet sich keine, bleibt die ehrliche Meldung stehen. */
+       gibt. Findet sich keine, bleibt die ehrliche Meldung stehen.
+
+       DIE QUELLE HAT DIE SCHREIBWEISE GEDREHT (23.09.2026).
+
+       Nachgemessen am Stand vom 23.09.2026, 05:10 UTC: championsbattledata
+       fuehrt die Regionalformen seit diesem Lauf ANDERSHERUM —
+       `ninetales-alola` statt `alolan-ninetales`, `tauros-paldea-aqua`
+       statt `paldean-tauros-aqua-breed`, `maushold-four` statt
+       `maushold-family-of-four`. 16 Schluessel umbenannt, kein einziger
+       Hinweis in der Datei.
+
+       Folge, gemessen gegen data/champions_pokedex.json: 15 Kadereintraege
+       verloren ihre Nutzungsdaten — Hisuian Goodra, Hisuian Arcanine,
+       Hisuian Typhlosion, Hisuian Decidueye, Hisuian Samurott, Hisuian
+       Avalugg, Hisuian Zoroark, Alolan Ninetales, Alolan Raichu, Galarian
+       Slowbro, Galarian Slowking, Galarian Stunfisk und die drei
+       Paldean-Tauros-Zuchten. Auf dem Bildschirm stand wieder „keine
+       Nutzungsdaten", obwohl die Daten da sind.
+
+       DESHALB WERDEN BEIDE RICHTUNGEN ANGEBOTEN. Die Schleife unten baut
+       aus einem Namen mit Form HINTEN den Schluessel mit Adjektiv VORN;
+       der Block darunter baut aus einem Namen mit Adjektiv VORN den
+       Schluessel mit Form HINTEN. Dreht die Quelle noch einmal, trifft
+       weiter eine der beiden. Welche, entscheidet allein die Datei —
+       usageSlug() nimmt den ersten Kandidaten, den sie kennt.
+
+       Die Gegenprobe dazu steht in
+       tests/unit/test-abnahme-2026-09-05.js („beide Schreibweisen der
+       Quelle werden erreicht") und faellt um, sobald eine Richtung
+       wegfaellt. */
     var USAGE_REGION = { alola: 'alolan', galar: 'galarian', hisui: 'hisuian', paldea: 'paldean' };
+    // Die Gegenrichtung: Adjektiv vorn -> Formwort hinten.
+    var USAGE_ADJEKTIV = { alolan: 'alola', galarian: 'galar', hisuian: 'hisui', paldean: 'paldea' };
+    // Woerter, die nur die Form benennen und in der kurzen Schreibweise
+    // der Quelle entfallen ("paldean-tauros-aqua-breed" -> "tauros-paldea-aqua").
+    var USAGE_FORMWORT = { breed: 1, form: 1, forme: 1 };
 
     function usageKandidaten(name) {
         const roh = String(name || '').toLowerCase().trim();
@@ -253,15 +287,43 @@
                 aus.push('mega-' + kopf);
                 aus.push(['mega', kopf].concat(rest.filter(x => x !== 'mega')).join('-'));
             }
+            /* Gegenrichtung: "Hisuian Goodra" -> "goodra-hisui",
+               "Paldean Tauros (Aqua Breed)" -> "tauros-paldea-aqua".
+               Seit dem 23.09.2026 die Schreibweise der Quelle. */
+            const suffix = USAGE_ADJEKTIV[kopf];
+            if (suffix) {
+                const ohneFormwort = rest.filter(x => !USAGE_FORMWORT[x]);
+                if (ohneFormwort.length) {
+                    aus.push([ohneFormwort[0], suffix].concat(ohneFormwort.slice(1)).join('-'));
+                    aus.push(ohneFormwort[0] + '-' + suffix);
+                }
+            }
             // "lycanroc-dusk" -> "lycanroc-dusk-form"
             aus.push(base + '-form');
             aus.push(base + '-forme');
             // "maushold-four" -> "maushold-family-of-four"
             aus.push(kopf + '-family-of-' + letzte);
-            // Letzter Ausweg: die Art allein. Nur wenn es die Form
-            // nicht gibt — sonst stuende die Zahl der Grundform unter
-            // dem Namen einer anderen.
-            aus.push(kopf);
+            /* Und zurueck: "Maushold Family of Four" -> "maushold-four".
+               Ohne diese Zeile faellt der Eintrag seit dem 23.09.2026 auf
+               den blossen Artnamen durch und traegt dann die Zahlen der
+               Grundform — schlimmer als gar keine Zahl, weil sie echt
+               aussieht. Sie steht bewusst VOR der Ausweichzeile. */
+            if (rest.length >= 2) aus.push(kopf + '-' + letzte);
+            /* Letzter Ausweg: die Art allein. Nur wenn es die Form
+               nicht gibt — sonst stuende die Zahl der Grundform unter
+               dem Namen einer anderen.
+
+               AUSSER BEI MEGA (gemessen 23.09.2026). Genau das ist
+               diesen drei Eintraegen passiert: "Garchomp (Mega-Z)",
+               "Lucario (Mega-Z)" und "Absol (Mega-Z)" fielen auf
+               `garchomp`, `lucario`, `absol` durch und trugen die
+               Nutzungszahlen der GRUNDFORM unter dem Namen der
+               Mega-Form. Eine falsche Zahl, die echt aussieht, ist
+               schlimmer als gar keine — deshalb bleibt hier die
+               ehrliche Meldung stehen. Die Quelle fuehrt derzeit
+               (23.09.2026) ueberhaupt keinen Mega-Schluessel; taucht
+               einer auf, greifen die beiden Mega-Zeilen oben. */
+            if (rest.indexOf('mega') === -1 && !/^mega/.test(kopf)) aus.push(kopf);
         }
         /* Doppelfrei zurueckgeben, Reihenfolge erhalten. usageSlug()
            nimmt ohnehin den ersten Treffer, aber eine Liste, in der

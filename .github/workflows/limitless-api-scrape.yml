@@ -242,6 +242,33 @@ jobs:
             exit $rc
           fi
 
+      # ── Die Masterclass-Aufbereitung nachziehen (23.09.2026) ─────
+      #
+      # BEFUND: masterclass/mega-stalobor.de.html traegt je Matchup drei
+      # Zahlen aus genau den CSVs, die dieser Lauf schreibt. Sie sind am
+      # 21.09.2026 von Hand hineingerechnet worden, und niemand hat sie
+      # nachgezogen. Am 23.09.2026 standen im Stueck 52 Partien gegen
+      # Dragapult, in der Datei 66 — sechzehn Zellen auseinander, und
+      # tests/python/test_masterclass_kartennamen.py hat den Deploy
+      # angehalten. Zu Recht: eine Zahl im Stueck, die nicht in den Daten
+      # steht, ist eine Behauptung.
+      #
+      # Der Schritt gehoert HIERHIN, weil hier die Eingabe entsteht. Er
+      # laeuft NACH dem Scrape und VOR dem Commit, sonst schreibt er in
+      # den Vortagesstand. Fail-soft: faellt er um, bleibt das Stueck
+      # stehen — dann ist es dateiert, nicht falsch, und die Zusicherung
+      # meldet es beim naechsten Deploy.
+      - name: Masterclass-Zahlen nachziehen
+        if: ${{ success() && inputs.gegenprobe != true && inputs.trocken != true }}
+        run: |
+          set +e
+          python3 -u scripts/masterclass_zahlen_nachziehen.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "::warning::masterclass_zahlen_nachziehen exited with $rc — Stueck bleibt wie es ist"
+          fi
+          exit 0
+
       - name: Datenstaende fortschreiben
         if: ${{ success() && inputs.gegenprobe != true && inputs.trocken != true }}
         run: python3 scripts/build_data_stand.py
@@ -264,6 +291,11 @@ jobs:
                   data/data_stand.json \
                   data/meta_prognose.json
           git add data/online_api_cards_*.csv data/online_api_matchups_*.csv 2>/dev/null || true
+          # Das Stueck aus dem Schritt "Masterclass-Zahlen nachziehen".
+          # Ohne diese Zeile waere der Schritt wirkungslos — dieselbe
+          # Falle, die data/champions_move_flags.json sieben Tage lang
+          # weggeworfen hat (23.09.2026).
+          git add masterclass/mega-stalobor.de.html 2>/dev/null || true
           # Die alten flachen Dateien sind in die Chunks uebergegangen.
           # 09.09.2026: die beiden ungeteilten Dateien gibt es nicht mehr —
           # der Lauf schreibt seit dem Umbau nur noch Auszuege je

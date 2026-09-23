@@ -550,7 +550,27 @@ jobs:
                   data/pokemon_go_liste.json \
                   data/pokemon_go_shiny.json \
                   data/opgg_champions_moves.json \
+                  data/champions_move_flags.json \
+                  data/champions_namen_entschieden.json \
                   data/data_stand.json
+          # BEFUND 23.09.2026 — DIESELBE KLASSE, ZWEITER FALL.
+          # data/champions_move_flags.json (Schritt "Attacken-Merkmale
+          # nachziehen") und data/champions_namen_entschieden.json
+          # (geschrieben von build_champions_resources.py) fehlten in dieser
+          # Liste. Beide wurden seit dem 16.09.2026 in JEDEM naechtlichen Lauf
+          # gebaut und danach weggeworfen — `erzeugt_am` stand sieben Tage
+          # unveraendert auf dem 16.09., obwohl der Erzeuger jede Nacht lief
+          # und den Stempel jedes Mal neu setzt.
+          # Sichtbar wurde es erst, als der Bestand sich aenderte: der
+          # Replica-Lauf vom 23.09.2026 nahm "Zing Zap" aus
+          # champions_resources.json (513 -> 512 Attacken), die Merkmalsdatei
+          # blieb auf 513 stehen, und tests/unit/test-attacken-merkmale.js
+          # hat das Paar auseinanderlaufen sehen — Deploy 3025, 3026 und 3027
+          # rot, `build` und `deploy` uebersprungen.
+          # tests/python/test_commitliste_deckt_die_erzeugten_dateien.py haelt
+          # diese Liste jetzt gegen die Dateien, die die Schritte oben wirklich
+          # schreiben. Wer hier kuerzt, faellt dort um.
+          #
           # BEFUND 05.09.2026: champions_speed_corpus.json wurde in jedem
           # naechtlichen Lauf gebaut, nach data/ kopiert (Schritt "Copy
           # output back to data/") — und dann weggeworfen, weil sie in

@@ -158,6 +158,79 @@ def _alter_tage(zeitpunkt, jetzt):
     return (jetzt - t).total_seconds() / 86400.0
 
 
+# ── Laeuft er, oder LIEFERT er auch? ──────────────────────────────────
+#
+# BEFUND 23.09.2026. Die Pruefung oben fragt den Herzschlag: IST DER
+# ERZEUGER GELAUFEN. Sie hat sieben Tage lang "FRISCH, lief vor 0.1 Tagen"
+# fuer scripts/build_champions_move_flags.py gemeldet — und das stimmte.
+# Das Ergebnis kam trotzdem nie an: data/champions_move_flags.json fehlte
+# in der `git add`-Liste von champions-replica-scrape.yml und wurde nach
+# jedem Lauf mit dem Runner weggeworfen. Der Stempel `erzeugt_am` stand
+# unveraendert auf dem 16.09., waehrend der Erzeuger ihn jede Nacht neu
+# setzte.
+#
+# Aufgefallen ist es erst, als der Bestand sich aenderte ("Zing Zap" fiel
+# aus champions_resources.json) und die Merkmalsdatei nicht mitkam —
+# Deploy 3025, 3026 und 3027 rot.
+#
+# DESHALB WIRD JETZT DER STEMPFEL DES ERGEBNISSES GEGEN DEN LAUF
+# GEHALTEN. Die Regel gilt nur fuer Dateien, deren Erzeuger den Stempel
+# bei JEDEM Lauf neu setzt — dort ist ein alter Stempel ein Beweis, kein
+# Verdacht. Eine Datei, die sich inhaltlich nicht aendert, faellt hier
+# nicht auf; sie steht weiter unter "inhaltlich still".
+STEMPEL_FELDER = ("erzeugt_am", "scraped_at", "erstellt_am", "generated_at")
+
+# Erzeuger -> Datei, deren Stempel er bei jedem Lauf neu setzt.
+# Bewusst von Hand: eine geratene Zuordnung waere eine Behauptung, und
+# eine falsche Behauptung ist schlimmer als keine.
+ERGEBNIS_MIT_STEMPEL = {
+    "scripts/build_champions_move_flags.py": "champions_move_flags.json",
+    "scripts/scrape_champions_usage.py": "champions_usage.json",
+}
+
+# Wieviel Tage darf der Stempel hinter dem Lauf herhinken, bevor es ein
+# Befund ist? Ein Tag Luft fuer Laufzeit und Zeitzone, plus die Frist des
+# Rhythmus — sonst meldete ein Erzeuger, der zweimal die Woche laeuft,
+# an jedem dritten Tag.
+STEMPEL_LUFT_TAGE = 1.0
+
+
+def nicht_ausgeliefert(jetzt=None):
+    """Erzeuger, die LIEFEN, deren Ergebnis aber nicht angekommen ist."""
+    jetzt = jetzt or dt.datetime.now(dt.timezone.utc)
+    herz = _lies(os.path.join(DATEN, "_job_heartbeats.json"))
+    heraus = []
+    for job, datei in sorted(ERGEBNIS_MIT_STEMPEL.items()):
+        rhythmus = RHYTHMUS.get(job)
+        if not rhythmus:
+            continue
+        eintrag = herz.get(job)
+        eintrag = eintrag if isinstance(eintrag, dict) else {}
+        lauf = _alter_tage(eintrag.get("zuletzt_erfolgreich"), jetzt)
+        if lauf is None:
+            continue          # kein Herzschlag — das meldet die Pruefung oben
+        inhalt = _lies(os.path.join(DATEN, datei))
+        meta = inhalt.get("_meta") if isinstance(inhalt, dict) else None
+        if not isinstance(meta, dict):
+            continue
+        stempel = None
+        for feld in STEMPEL_FELDER:
+            if meta.get(feld):
+                stempel = _alter_tage(meta[feld], jetzt)
+                break
+        if stempel is None:
+            continue
+        erlaubt = ERWARTET_TAGE[rhythmus] + STEMPEL_LUFT_TAGE
+        if stempel - lauf > erlaubt:
+            heraus.append((
+                job, datei,
+                f"lief vor {lauf:.1f} Tagen, aber der Stempel in "
+                f"data/{datei} ist {stempel:.1f} Tage alt — das Ergebnis "
+                "kommt nicht an (fehlt die Datei in der `git add`-Liste "
+                "ihres Ablaufs?)"))
+    return heraus
+
+
 def pruefe(jetzt=None):
     """Gibt (zeilen, stille) zurueck. `stille` sind die echten Befunde."""
     jetzt = jetzt or dt.datetime.now(dt.timezone.utc)
@@ -246,6 +319,14 @@ def main():
               f"lief(en) nicht in der erwarteten Frist: {namen}")
     else:
         print("Alle Erzeuger mit Zeitplan haben in ihrer Frist erfolgreich gelaufen.")
+
+    # Der zweite Satz, der frueher fehlte: gelaufen ist nicht geliefert.
+    verworfen = nicht_ausgeliefert()
+    for job, datei, hinweis in verworfen:
+        print(f"::warning title=Ergebnis kommt nicht an::{job}: {hinweis}")
+    if not verworfen:
+        print(f"Alle {len(ERGEBNIS_MIT_STEMPEL)} gestempelten Ergebnisse sind "
+              "so frisch wie ihr Lauf.")
 
     zusammenfassung = os.environ.get("GITHUB_STEP_SUMMARY")
     if args.markdown and zusammenfassung:

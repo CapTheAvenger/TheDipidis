@@ -116,6 +116,14 @@ def test_das_muster_findet_die_bloecke_wirklich():
     assert len(m.BLOCK.findall(roh)) >= 20
     assert len(m.ZELLE.findall(roh)) >= 60, (
         "weniger als drei Zellen je Matchup gefunden — das Zellmuster passt nicht")
+    # Und die Koepfe muessen die sein, die das Stueck traegt: seit dem
+    # 23.09.2026 heissen sie nach ihrem Meta. Ein Muster, das auf
+    # "Jetzt"/"Davor" wartet, faende hier nichts mehr.
+    koepfe = {t[1] for t in m.ZELLE.findall(roh)}
+    assert m.KOPF_JETZT in koepfe, (
+        "der Kopf des laufenden Metas (%s) kommt im Stueck nicht vor" % m.KOPF_JETZT)
+    assert any(k.startswith("Majors (") for k in koepfe), (
+        "die Majors-Spalte nennt ihr Format nicht in Klammern: %s" % sorted(koepfe))
 
 
 @pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
@@ -126,9 +134,9 @@ def test_am_heutigen_stand_ist_nichts_nachzuziehen():
     with open(STUECK, encoding="utf-8") as f:
         roh = f.read()
     quellen = {
-        "Jetzt": m._online(m.ONLINE_JETZT),
-        "Davor": m._online(m.ONLINE_DAVOR),
-        "Majors": m._majors(),
+        "jetzt": m._online(m.ONLINE_JETZT),
+        "davor": m._online(m.ONLINE_DAVOR),
+        "major": m._majors(),
     }
     _neu, aenderungen, _ohne = m.nachziehen(roh, quellen, m._slugs())
     assert aenderungen == [], (
@@ -146,9 +154,9 @@ def test_zweimal_nachziehen_aendert_nichts_mehr():
     with open(STUECK, encoding="utf-8") as f:
         roh = f.read()
     quellen = {
-        "Jetzt": m._online(m.ONLINE_JETZT),
-        "Davor": m._online(m.ONLINE_DAVOR),
-        "Majors": m._majors(),
+        "jetzt": m._online(m.ONLINE_JETZT),
+        "davor": m._online(m.ONLINE_DAVOR),
+        "major": m._majors(),
     }
     slugs = m._slugs()
     einmal, _a, _o = m.nachziehen(roh, quellen, slugs)

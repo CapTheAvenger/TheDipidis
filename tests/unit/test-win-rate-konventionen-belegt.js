@@ -28,6 +28,7 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const FENSTER = require('../formatfenster.js');
 
 const WURZEL = path.join(__dirname, '..', '..');
 const lies = (...p) => fs.readFileSync(path.join(WURZEL, ...p), 'utf8');
@@ -128,14 +129,37 @@ describe('Datei → Formel → nachgerechnet', () => {
             const b = k.beleg;
             const rows = zeilen(b.datei, b.trenner);
 
-            // (a) Die Datei ist nicht unter den Stand gefallen, an dem
-            //     gemessen wurde. Nach oben darf sie wachsen.
-            const untergrenze = b.zeilen * (1 - ZEILEN_BAND);
-            assert.ok(rows.length >= untergrenze,
-                `${b.datei} hat nur noch ${rows.length} Zeilen, der Beleg nennt `
-                + `${b.zeilen} (Untergrenze ${Math.round(untergrenze)}). Eine `
-                + 'geschrumpfte Quelle macht die Nachrechnung unten wertlos: '
-                + 'nachmessen, nicht die Zahl senken.');
+            /* (a) Die Datei ist nicht unter den Stand gefallen, an dem
+                   gemessen wurde. Nach oben darf sie wachsen.
+
+                   ABER NUR IM SELBEN FENSTER (23.09.2026). Der
+                   Online-Scraber haengt `?set=<current_set>` an jede
+                   Anfrage; rotiert das Format, faengt die Zaehlung von
+                   vorn an. Im Wochenlauf #147 fielen die Matchupzeilen
+                   von 1.716 auf 847, ohne dass etwas kaputt war — diese
+                   Zeile hat den Lauf angehalten. */
+            const lage = FENSTER.rotationsLage(b);
+            if (lage === 'ueberfaellig') {
+                assert.fail(`${b.datei}: ` + FENSTER.ueberfaelligText(b, `${rows.length} Zeilen`));
+            }
+            if (lage === 'jung') {
+                console.log(`    # ${b.datei}: Fenster ${b.fenster} -> `
+                    + `${FENSTER.fenster().schluessel}, Untergrenze ausgesetzt — `
+                    + `gemessen ${rows.length} Zeilen`);
+                /* Leergelaufen bleibt auch nach einer Rotation ein
+                   Fehler. Zwanzig Zeilen sind keine Quelle mehr, aus der
+                   sich eine Konvention ablesen liesse. */
+                assert.ok(rows.length >= 20,
+                    `${b.datei}: nach der Rotation stehen nur noch ${rows.length} `
+                    + 'Zeilen — das ist kein neues Fenster, sondern eine leere Datei');
+            } else {
+                const untergrenze = b.zeilen * (1 - ZEILEN_BAND);
+                assert.ok(rows.length >= untergrenze,
+                    `${b.datei} hat nur noch ${rows.length} Zeilen, der Beleg nennt `
+                    + `${b.zeilen} (Untergrenze ${Math.round(untergrenze)}). Eine `
+                    + 'geschrumpfte Quelle macht die Nachrechnung unten wertlos: '
+                    + 'nachmessen, nicht die Zahl senken.');
+            }
 
             // (b) Die Formel trifft die Spalte — Zeile fuer Zeile.
             let geprueft = 0, treffer = 0, groesste = 0, wo = '';
@@ -165,10 +189,14 @@ describe('Datei → Formel → nachgerechnet', () => {
 
             // (c) Es treffen nicht weniger Zeilen als beim Messen. Dass es
             //     mehr werden, ist der erwuenschte Fall.
-            const trefferGrenze = b.treffer * (1 - ZEILEN_BAND);
-            assert.ok(treffer >= trefferGrenze,
-                `${b.datei}: nur noch ${treffer} Zeilen treffen ${k.formel}, der `
-                + `Beleg nennt ${b.treffer} (Untergrenze ${Math.round(trefferGrenze)})`);
+            if (lage === 'jung') {
+                console.log(`    # ${b.datei}: Trefferzahl im neuen Fenster: ${treffer}`);
+            } else {
+                const trefferGrenze = b.treffer * (1 - ZEILEN_BAND);
+                assert.ok(treffer >= trefferGrenze,
+                    `${b.datei}: nur noch ${treffer} Zeilen treffen ${k.formel}, der `
+                    + `Beleg nennt ${b.treffer} (Untergrenze ${Math.round(trefferGrenze)})`);
+            }
 
             /* (d) Die belegten Ausnahmen.
 

@@ -79,9 +79,34 @@ describe('Die Quelle rechnet Siege durch alle Partien', () => {
 
     it('unsere gespeicherte Quote ist S/(S+N+U), nicht die halbe-Punkte-Formel', () => {
         // Der Beleg des Betreibers, an unseren eigenen Zahlen nachgerechnet.
-        const zeilen = csv(path.join('data', 'limitless_online_decks.csv'), ';')
-            .filter(r => zahl(r.wins) + zahl(r.losses) + zahl(r.ties) >= 500);
-        assert.ok(zeilen.length >= 20, 'zu wenige Zeilen fuer die Pruefung');
+        /* DIE AUSWAHL IST DIE OBERSTEN ZWANZIG, NICHT "ab 500 Partien".
+
+           Bis zum 23.09.2026 filterte diese Zeile auf Decks mit
+           mindestens 500 Partien. Das war ein Bestandswert des Fensters
+           TEF-PBL, das acht Wochen gesammelt hatte. Nach der Rotation auf
+           30C am 16.09.2026 zaehlt der Online-Scraper von vorn — im
+           Wochenlauf #147 standen 22.671 Partien auf 107 Decks, und kein
+           einziges kam auf 500. Die Auswahl lief leer, die Vorpruefung
+           schlug an, kaputt war nichts.
+
+           Gebraucht werden die Zeilen mit der GROESSTEN Bilanz, weil dort
+           die Rundung am wenigsten stoert — und das sind immer die
+           obersten zwanzig, in jedem Fenster. */
+        const alle = csv(path.join('data', 'limitless_online_decks.csv'), ';')
+            .filter(r => zahl(r.wins) + zahl(r.losses) + zahl(r.ties) > 0);
+        const zeilen = alle
+            .sort((a, b) => (zahl(b.wins) + zahl(b.losses) + zahl(b.ties))
+                          - (zahl(a.wins) + zahl(a.losses) + zahl(a.ties)))
+            .slice(0, 20);
+        assert.ok(zeilen.length >= 20,
+            `zu wenige Zeilen fuer die Pruefung: ${zeilen.length} von ${alle.length}`);
+        /* Und sie muessen Unentschieden fuehren, sonst fallen die beiden
+           verglichenen Formeln rechnerisch zusammen und die Probe bestuende
+           leer. */
+        const mitU = zeilen.filter(r => zahl(r.ties) > 0).length;
+        assert.ok(mitU >= 3,
+            `nur ${mitU} der zwanzig groessten Bilanzen fuehren Unentschieden — `
+            + 'dann ist S/(S+N+U) von der halbe-Punkte-Formel nicht zu unterscheiden');
 
         let sMit = 0, sHalb = 0;
         for (const r of zeilen) {

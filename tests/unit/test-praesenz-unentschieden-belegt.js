@@ -60,6 +60,7 @@ function ladeBelege() {
     const stueck = MC.slice(anfang, ende + 5);
     return new Function(stueck + ' return BELEGTE_FELDQUOTEN;')();
 }
+const FENSTER = require('../formatfenster.js');
 const BELEGE = ladeBelege();
 
 function csv(datei, trenner) {
@@ -127,7 +128,7 @@ describe('Die im Code genannten Feldquoten stehen so in den Dateien', () => {
             /* `anteilPz` und `toleranzPp` sind am 22.09.2026 entfallen —
                siehe Befund 2 im Kopf. Was bleibt, ist die
                Quellenangabe plus eine datierte Untergrenze. */
-            for (const feld of ['was', 'datei', 'auswahl', 'mindestensPartien', 'gemessenAm']) {
+            for (const feld of ['was', 'datei', 'auswahl', 'fenster', 'mindestensPartien', 'gemessenAm']) {
                 assert.ok(e[feld] != null && e[feld] !== '',
                     `${k}: das Feld ${feld} fehlt — ohne es ist der Beleg nicht nachpruefbar`);
             }
@@ -166,6 +167,30 @@ describe('Die im Code genannten Feldquoten stehen so in den Dateien', () => {
             assert.ok(m.partien > 0,
                 `${e.datei} liefert keine einzige Bilanzzeile — die Auswahl `
                 + `"${e.auswahl}" trifft nichts mehr`);
+            /* ABER NUR IM SELBEN FENSTER (23.09.2026). Rotiert das
+               Format, faengt die Zaehlung von vorn an — das ist kein
+               Verlust. Am 16.09.2026 ist auf 30C rotiert, und der
+               Online-Bestand fiel im Wochenlauf #147 von 236.128 auf
+               22.671 Partien, ohne dass irgendetwas kaputt war.
+
+               Welcher Fall vorliegt, steht im Dateinamen: wer sein
+               Format selbst nennt, rotiert nicht. */
+            if (!FENSTER.belegGiltNoch(e)) {
+                const f = FENSTER.fenster();
+                console.log(`    # ${k}: Beleg aus dem Fenster ${e.fenster}, `
+                    + `es laeuft ${f.schluessel} — Untergrenze ausgesetzt, `
+                    + `gemessen sind jetzt ${m.partien} Partien aus ${m.zeilen} Zeilen`);
+                /* NICHT lautlos durchwinken: leergelaufen ist auch nach
+                   einer Rotation ein Fehler. Die Zeile oben hat bereits
+                   `partien > 0` verlangt; hier kommt die Zeilenzahl dazu,
+                   weil eine Datei mit einer Handvoll Zeilen keine
+                   Quellenangabe mehr traegt. */
+                assert.ok(m.zeilen >= 20,
+                    `${e.datei}: nach der Rotation auf ${f.schluessel} stehen nur `
+                    + `noch ${m.zeilen} Zeilen — das ist kein neues Fenster mehr, `
+                    + 'sondern eine leergelaufene Datei');
+                continue;
+            }
             assert.ok(m.partien >= e.mindestensPartien,
                 `${e.datei}: ${m.partien} Partien aus ${m.zeilen} Zeilen, am `
                 + `${e.gemessenAm} waren es ${e.mindestensPartien}. Ein Verlust ist `

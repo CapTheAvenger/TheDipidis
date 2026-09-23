@@ -183,11 +183,33 @@ window.MetaCall = (function () {
      `mindestensPartien` ist deshalb eine UNTERGRENZE mit Datum, kein
      Sollwert. Wer sie hochsetzt, muss dazuschreiben, wann er gemessen
      hat. */
+  /* NACHTRAG 23.09.2026 — EINE UNTERGRENZE GILT FUER EIN FORMATFENSTER.
+
+     Am 16.09.2026 ist das Standardformat auf 30C rotiert. Der
+     Online-Scraper haengt `?set=<current_set>` an jede Anfrage und holt
+     seither nur noch Partien SEIT dem neuen Set. Gemessen im Wochenlauf
+     #147 (23.09.2026): 22.671 Partien aus 107 Zeilen, vorher 236.128 aus
+     139. Die Archetypen sind fast dieselben — nur der Zeitraum ist eine
+     Woche statt acht.
+
+     Die Untergrenze von 236.128 musste damit umfallen, und sie hatte
+     unrecht: das ist kein Verlust, sondern ein Neustart der Zaehlung. Der
+     Wochenlauf hat nichts gepusht, richtig so, aber er blieb rot.
+
+     Deshalb traegt jeder Beleg jetzt sein FENSTER. Zwei Faelle, und der
+     Unterschied steht im Dateinamen: `labs_tournament_matchups_TEF-PBL.csv`
+     nennt ihr Format selbst, rotiert also nie — bei der naechsten Rotation
+     entsteht eine neue Datei daneben. `limitless_online_decks.csv` nennt
+     es nicht und wird bei jeder Rotation neu gefuellt.
+
+     Innerhalb eines Fensters gilt unveraendert: verloren ist ein Fehler,
+     Zuwachs nicht. */
   const BELEGTE_FELDQUOTEN = {
     unentschiedenPraesenz: {
       was:        'Anteil unentschiedener Partien im Praesenzfeld',
       datei:      'data/labs_tournament_matchups_TEF-PBL.csv',
       auswahl:    "day_filter='overall', Zeilen mit vs_wins/vs_losses",
+      fenster:    'TEF-PBL',
       mindestensPartien: 30710,
       gemessenAm: '22.09.2026',
     },
@@ -195,8 +217,9 @@ window.MetaCall = (function () {
       was:        'Anteil unentschiedener Partien in den Limitless-Online-Turnieren',
       datei:      'data/limitless_online_decks.csv',
       auswahl:    'Summe ueber alle Zeilen (wins/losses/ties)',
-      mindestensPartien: 236128,
-      gemessenAm: '22.09.2026',
+      fenster:    'TEF-30C',
+      mindestensPartien: 22671,
+      gemessenAm: '23.09.2026 (Wochenlauf #147)',
     },
   };
   if (typeof window !== 'undefined') window._mcBelegteFeldquoten = BELEGTE_FELDQUOTEN;

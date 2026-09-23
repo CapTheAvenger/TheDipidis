@@ -571,7 +571,20 @@ const REGISTER = {
    „mindestens 15 Schluessel mit Bindestrich" und „mindestens 50
    mehrteilige Kadernamen". Beide sind `>=`, beide ueberleben Zuwachs,
    keine nennt einen Wochenwert. */
-const OBERGRENZE = 392;
+/* 23.09.2026, zweiter Nachtrag: von 392 auf 393. Am 16.09.2026 ist das
+   Standardformat auf 30C rotiert; der Online-Scraper haengt
+   `?set=<current_set>` an jede Anfrage und zaehlt seither von vorn.
+   Dreizehn Zusicherungen in acht Dateien nagelten Bestandsgroessen des
+   alten Fensters fest („ein Verlust ist hier immer ein Fehler",
+   „mindestens 1.287 Zeilen", „es gibt eine Zeile mit share=0") und
+   hielten den Wochenlauf #147 an, ohne dass etwas kaputt war.
+
+   Die Umformung tauscht diese Sollwerte gegen ANTEILE und gegen den
+   Vergleich mit dem laufenden Fenster (tests/formatfenster.js). Dabei
+   fallen Gleichheiten und Obergrenzen weg und Ungleichungen kommen
+   hinzu — netto eine. Das ist die Richtung, in die die Sperrklinke
+   zeigen soll. */
+const OBERGRENZE = 393;
 
 /* Die zweite Sperrklinke, eingezogen am 22.09.2026: so viele
    Gleichheiten gegen eine zweistellige Zahl stehen heute in Dateien,

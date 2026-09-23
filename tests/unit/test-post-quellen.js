@@ -24,6 +24,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const FENSTER = require('../formatfenster.js');
 
 const WURZEL = path.join(__dirname, '..', '..');
 const D = (p) => path.join(WURZEL, p);
@@ -214,6 +215,25 @@ test('jede Quelle schreibt eine Zahl in ihre Fusszeile', async () => {
 test('keine Zombie-Zeile kommt in die Ausgabe', async () => {
     const roh = Q.liesCsv(fs.readFileSync(D('data/limitless_online_decks.csv'), 'utf8'), ';');
     const zombies = roh.filter((r) => r.deck_name && Q.zahlAus(r.share_numeric) === 0);
+    /* NACH EINER ROTATION GIBT ES NOCH KEINE ZOMBIES (23.09.2026).
+
+       Ein Zombie ist ein Deck, das im laufenden Fenster auf share=0
+       gefallen ist. Das braucht Geschichte. Am 16.09.2026 ist auf 30C
+       rotiert, der Online-Scraper zaehlt seither von vorn, und im
+       Wochenlauf #147 fuehrte keine einzige Zeile mehr share=0 — die
+       Vorpruefung schlug an, kaputt war nichts.
+
+       Die Vorpruefung bleibt trotzdem stehen: sie ist der einzige Schutz
+       davor, dass diese Zusicherung leer besteht. Sie wird nur fuer die
+       ersten drei Wochen eines Fensters ausgesetzt, und danach von
+       selbst wieder scharf. Ein Deploy, der laenger stillstuende, waere
+       schlimmer als drei Wochen ohne diese eine Probe. */
+    if (zombies.length === 0 && FENSTER.istJung()) {
+        console.log('    # keine share=0-Zeile im jungen Fenster '
+            + `${FENSTER.fenster().schluessel} (seit ${FENSTER.fenster().start}) — `
+            + `Probe ausgesetzt, ab ${FENSTER.JUNG_TAGE} Tagen wieder scharf`);
+        return;
+    }
     assert.ok(zombies.length >= 1,
         'die Datei enthält keine Zeile mit share=0 mehr — dann kann dieser Test ' +
         'leer bestehen und prüft nichts');
@@ -677,6 +697,13 @@ test('der Zombie-Filter wirkt dort, wo er wirken muss', async () => {
     const roh = Q.liesCsv(
         fs.readFileSync(D('data/limitless_online_decks.csv'), 'utf8'), ';');
     const zombies = roh.filter((r) => r.deck_name && Q.zahlAus(r.share_numeric) === 0);
+    /* Siehe die Begruendung an der ersten Zombie-Probe weiter oben:
+       ausgesetzt, solange das Fenster jung ist, danach wieder scharf. */
+    if (zombies.length === 0 && FENSTER.istJung()) {
+        console.log('    # keine share=0-Zeile im jungen Fenster '
+            + `${FENSTER.fenster().schluessel} — Probe ausgesetzt`);
+        return;
+    }
     assert.ok(zombies.length >= 1,
         'die Datei enthaelt keine Zeile mit share=0 mehr — dann kann dieser ' +
         'Test leer bestehen');

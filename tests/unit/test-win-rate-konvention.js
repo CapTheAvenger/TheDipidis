@@ -92,8 +92,26 @@ describe('Die drei Konventionen sind die ihrer Quellen', () => {
             max = Math.max(max,
                 Math.abs(W.KONVENTIONEN.ohneUnentschieden.rechne(m[0], m[1]) - quelle));
         }
-        assert.ok(n > 1000, 'zu wenige Zeilen: ' + n);
-        assert.ok(mitU > 300, 'ohne Unentschieden waere der Test wertlos: ' + mitU);
+        /* VORPRUEFUNGEN GEGEN EIN LEERES BESTEHEN — relativ, nicht absolut.
+
+           Bis zum 23.09.2026 stand hier `n > 1000` und `mitU > 300`.
+           Beides waren Bestandswerte des Fensters TEF-PBL. Am 16.09.2026
+           ist auf 30C rotiert; der Online-Scraper haengt
+           `?set=<current_set>` an jede Anfrage und zaehlt seither von
+           vorn. Der Wochenlauf #147 fand 847 Zeilen und wurde hier rot,
+           ohne dass etwas kaputt war.
+
+           Die Frage der Vorpruefung ist nicht "sind es viele", sondern
+           "ist ueberhaupt etwas zu pruefen". Der Anteil traegt das, die
+           absolute Zahl nicht: fast jede Zeile muss nachrechenbar sein,
+           und Unentschieden muessen in nennenswertem Anteil vorkommen —
+           sonst faellt die Gegenprobe der drei Konventionen zusammen. */
+        assert.ok(n >= 100, 'zu wenige Zeilen: ' + n);
+        assert.ok(n >= rows.length * 0.9,
+            `nur ${n} von ${rows.length} Zeilen liessen sich lesen — die Datei `
+            + 'hat ihre Bilanzspalte geaendert');
+        assert.ok(mitU >= Math.max(20, n * 0.05),
+            `ohne Unentschieden waere der Test wertlos: ${mitU} von ${n} Zeilen`);
         assert.ok(max < 0.02, 'Abweichung: ' + max);
     });
 

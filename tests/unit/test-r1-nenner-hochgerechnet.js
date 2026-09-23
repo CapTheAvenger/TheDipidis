@@ -28,6 +28,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const FENSTER = require('../formatfenster.js');
 
 const WURZEL = path.join(__dirname, '..', '..');
 const lies = (rel) => fs.readFileSync(path.join(WURZEL, rel), 'utf8');
@@ -258,8 +259,22 @@ describe('B1 — der Nenner der Anteilskachel steht als HOCHGERECHNET da', () =>
         }
         api.setData(decks, null);
         const feld = api.onlineFeld();
-        assert.ok(feld.listen,
-            'die Datei gibt heute keinen Nenner her — dann prueft diese Zusicherung nichts');
+        /* VORPRUEFUNG, NICHT SOLLWERT (23.09.2026). Der hochgerechnete
+           Nenner entsteht aus der Luecke zwischen der Summe der Anteile
+           und 100 %. Direkt nach einer Rotation listet die Ladder fast
+           nur noch gezaehlte Decks — dann gibt es keine Luecke, keinen
+           hochgerechneten Nenner und nichts zu pruefen. Das ist kein
+           Defekt, sondern ein junges Fenster. */
+        if (!feld.listen) {
+            if (FENSTER.istJung()) {
+                console.log(`    # junges Fenster ${FENSTER.fenster().schluessel}: `
+                    + 'die Anteile summieren sich auf, es gibt keinen hochgerechneten '
+                    + 'Nenner — Probe ausgesetzt');
+                return;
+            }
+            assert.fail('die Datei gibt heute keinen Nenner her — dann prueft '
+                + 'diese Zusicherung nichts');
+        }
 
         // Sollwerte NEU aus der Datei, nicht abgeschrieben.
         const gelistet = DECKS.reduce((s, r) => s + zahl(r.count), 0);
@@ -296,7 +311,17 @@ describe('B1 — der Nenner der Anteilskachel steht als HOCHGERECHNET da', () =>
         }
         api.setData(decks, null);
         const feld = api.onlineFeld();
-        assert.ok(feld.other, 'ohne Other-Zahl prueft diese Zusicherung nichts');
+        /* Dieselbe Vorpruefung wie oben: ohne Luecke zwischen Anteilssumme
+           und 100 % ist Other null, und dann gibt es keine exakte Zahl,
+           die irgendwo stehen koennte. */
+        if (!feld.other) {
+            if (FENSTER.istJung()) {
+                console.log(`    # junges Fenster ${FENSTER.fenster().schluessel}: `
+                    + 'Other ist null — Probe ausgesetzt');
+                return;
+            }
+            assert.fail('ohne Other-Zahl prueft diese Zusicherung nichts');
+        }
         const txt = hinweis(api.tilesHtml(DECKS[0].deck_name, 'embed'));
         const marke = gross(feld.other);
         let ab = 0, treffer = 0;

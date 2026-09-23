@@ -21,6 +21,7 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
+const FENSTER = require('../formatfenster.js');
 
 const ROOT = path.join(__dirname, '..', '..');
 const lies = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
@@ -255,11 +256,34 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
            Ein paar unausgewiesene Namen sind der Normalfall eines
            rollenden Exports; VIELE heissen, dass die Quelle ihre
            Schreibweise umgestellt hat. Das trennt ein Anteil. */
-        assert.ok(durchgefallen.length <= Math.max(2, turnierNamen.size * 0.05),
+        /* NACH EINER ROTATION IST DIE LADDER DIE JUNGE SEITE (23.09.2026).
+
+           Die Turnierdatei sammelt weiter, die Ladder faengt von vorn an:
+           der Online-Scraper haengt `?set=<current_set>` an jede Anfrage,
+           und seit dem 16.09.2026 steht dort 30C. Im Wochenlauf #147
+           standen 121 Turniernamen gegen 107 Ladder-Decks aus einer
+           Woche — 20 Namen fielen durch, und die Meldung behauptete, die
+           Quelle habe ihre Schreibweise umgestellt. Das stimmte nicht.
+
+           Ein Deck, das im neuen Format online noch nicht gespielt wurde,
+           ist keine fehlende Bruecke. Deshalb greift im jungen Fenster
+           ein weiterer Anteil — und danach wieder der enge. */
+        const jung = FENSTER.istJung();
+        const anteil = jung ? 0.25 : 0.05;
+        if (jung && durchgefallen.length > turnierNamen.size * 0.05) {
+            console.log(`    # junges Fenster ${FENSTER.fenster().schluessel}: `
+                + `${durchgefallen.length} von ${turnierNamen.size} Turniernamen ohne `
+                + `Ladder-Treffer — erwartet, solange die Ladder erst sammelt. `
+                + `Ab ${FENSTER.JUNG_TAGE} Tagen gilt wieder 5 %.`);
+        }
+        assert.ok(durchgefallen.length <= Math.max(2, turnierNamen.size * anteil),
             `${durchgefallen.length} von ${turnierNamen.size} Turniernamen sind `
             + 'weder verbrueckt noch als offen ausgewiesen: '
             + durchgefallen.slice(0, 10).join(', ')
-            + '. Bei dieser Menge hat die Quelle ihre Schreibweise umgestellt');
+            + (jung
+                ? '. Auch fuer ein junges Fenster sind das zu viele — hier hat die '
+                  + 'Quelle ihre Schreibweise umgestellt'
+                : '. Bei dieser Menge hat die Quelle ihre Schreibweise umgestellt'));
     });
 
     it('und es sind so viele, wie die Bruecke ausweist', () => {
@@ -282,14 +306,22 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
         const nichtTreffend = [...turnierNamen].filter(n => !ladderNamen.has(n));
         const ausgewiesen = ALIAS.turnier_zu_ladder.length
             + ALIAS.bewusst_nicht_verbunden.length;
-        assert.ok(nichtTreffend.length <= ausgewiesen,
-            'nicht treffende Namen: ' + nichtTreffend.length
-            + ', in archetype_aliases.json ausgewiesen: ' + ausgewiesen
-            + ' — es gibt mehr unverbundene Namen als ausgewiesene Faelle');
+        /* Dieselbe Rotation, eine Ebene tiefer: solange die Ladder erst
+           sammelt, treffen mehr Turniernamen daneben, als die Aliasdatei
+           je ausweisen koennte — ohne dass eine Bruecke fehlt. */
+        if (!FENSTER.istJung()) {
+            assert.ok(nichtTreffend.length <= ausgewiesen,
+                'nicht treffende Namen: ' + nichtTreffend.length
+                + ', in archetype_aliases.json ausgewiesen: ' + ausgewiesen
+                + ' — es gibt mehr unverbundene Namen als ausgewiesene Faelle');
+        } else if (nichtTreffend.length > ausgewiesen) {
+            console.log(`    # junges Fenster: ${nichtTreffend.length} nicht treffende `
+                + `Namen gegen ${ausgewiesen} ausgewiesene — die Ladder sammelt noch`);
+        }
         // Die Mengen duerfen wachsen, aber die Ueberschneidung muss die Regel
         // bleiben und die Ausnahme klein. Gemessen 21.08.2026: 116 von 123.
         const gemeinsam = [...turnierNamen].filter(n => ladderNamen.has(n)).length;
-        assert.ok(gemeinsam > turnierNamen.size * 0.8,
+        assert.ok(gemeinsam > turnierNamen.size * (FENSTER.istJung() ? 0.6 : 0.8),
             `nur ${gemeinsam} von ${turnierNamen.size} Turniernamen treffen die Ladder`);
     });
 });

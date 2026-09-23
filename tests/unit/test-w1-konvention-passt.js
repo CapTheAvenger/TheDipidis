@@ -106,10 +106,35 @@ function gemesseneKonvention(proben) {
     }
     const rang = Object.keys(treffer).sort((a, b) => treffer[b] - treffer[a]);
     const erster = rang[0], zweiter = rang[1];
-    const vorsprung = (treffer[erster] - treffer[zweiter]) / proben.length;
+
+    /* DER VORSPRUNG GEHOERT AUF DIE ZEILEN, DIE IHN ZEIGEN KOENNEN.
+
+       BEFUND 23.09.2026 (Wochenlauf #147). Hier stand der Vorsprung
+       gegen ALLE Zeilen. Eine Zeile ohne Unentschieden erfuellt aber
+       alle drei Konventionen gleichzeitig — sie kann gar nichts
+       unterscheiden und verwaessert den Nenner nur.
+
+       Solange das Fenster acht Wochen gesammelt hatte, fiel das nicht
+       auf. Nach der Rotation auf 30C am 16.09.2026 zaehlt der
+       Online-Scraper von vorn: 847 statt 1.794 Matchupzeilen, Treffer
+       {matchpunkte: 687, mitUnentschieden: 682, ohneUnentschieden: 847}.
+       Vorsprung gegen alle Zeilen 0,19 — unter der Schwelle, obwohl der
+       Sieger JEDE Zeile trifft und die beiden anderen 160 verfehlen.
+
+       Gerechnet wird der Vorsprung deshalb gegen die Zeilen MIT
+       Unentschieden. Das ist dieselbe Aussage, nur ohne die Zeilen, die
+       zu ihr nichts beitragen — und sie haengt nicht mehr daran, wie
+       lange ein Fenster schon sammelt. */
+    const unterscheidbar = proben.filter((p) => (p.u || 0) > 0).length;
+    const nenner = unterscheidbar > 0 ? unterscheidbar : proben.length;
+    const vorsprung = (treffer[erster] - treffer[zweiter]) / nenner;
+    assert.ok(unterscheidbar >= 10 || proben.length < 50,
+        `nur ${unterscheidbar} von ${proben.length} Zeilen fuehren Unentschieden — `
+        + 'ohne sie fallen zwei Konventionen zusammen und die Probe bestuende leer');
     assert.ok(vorsprung >= MINDESTVORSPRUNG,
         'die Datei laesst sich keiner Konvention eindeutig zuordnen: '
-        + JSON.stringify(treffer) + ' bei ' + proben.length + ' Zeilen');
+        + JSON.stringify(treffer) + ' bei ' + proben.length + ' Zeilen, davon '
+        + unterscheidbar + ' mit Unentschieden');
     return { id: erster, treffer, proben: proben.length };
 }
 

@@ -386,9 +386,77 @@ def benutzte_namen_ohne_deutsch():
     return luecken
 
 
+def drucke_ohne_kartentyp():
+    """Drucke in den ausgelieferten Zeilen, zu denen die Kartendatenbank
+    keinen Typ kennt.
+
+    BEFUND 23.09.2026 (Wochenlauf #147). 455 von 178.221 Zeilen standen
+    ohne Kartentyp da, alle aus den JP-Drucken MEE-9 bis MEE-16 (Energien
+    und Items). tests/python/test_kartentyp_aus_druck.py verglich gegen
+    einen Grundstand von 3 und hielt den Lauf an.
+
+    Der Grundstand war richtig gemeint und falsch gebaut: er ist eine
+    ZAHL, und eine Zahl sagt nicht, WELCHE Luecke dazugekommen ist. Die
+    Kartendatenbank fuehrt MEE-13 als "Poke Pad", die Turnierliste nennt
+    es "Psychic Energy" — die JP-Nummerierung der Decklisten ist eine
+    andere als die der jp_prints. Wer sie hier aufloesen wollte, schriebe
+    den falschen Typ hinein; der Scraper laesst das Feld deshalb
+    ABSICHTLICH leer, damit der Rueckfall im Frontend greift.
+
+    Eine geduldete Luecke ist in Ordnung, eine UNBENANNTE nicht. Ab hier
+    steht jeder unaufloesbare Druck namentlich im Inventar, mit Anzahl —
+    sichtbar im Admin-Bereich, und die Zusicherung verlangt nur noch,
+    dass keine unbenannte dazukommt.
+    """
+    import csv as _csv
+
+    pfad = os.path.join(DATA, "tournament_decklists_per_player.csv")
+    if not os.path.exists(pfad):
+        return []
+    try:
+        import sys
+        sys.path.insert(0, os.path.join(os.path.dirname(DATA), "backend", "core"))
+        import card_scraper_shared as css
+        db = css.CardDatabaseLookup()
+    except Exception:
+        return []
+    if not getattr(db, "nach_druck", None):
+        return []
+
+    zaehler = {}
+    namen = {}
+    with open(pfad, encoding="utf-8-sig") as f:
+        for r in _csv.DictReader(f):
+            satz = (r.get("set_code") or "").strip()
+            nummer = (r.get("set_number") or "").strip()
+            if not satz or not nummer:
+                continue
+            if db.typ_von_druck(satz, nummer):
+                continue
+            schluessel = f"{satz} {nummer}"
+            zaehler[schluessel] = zaehler.get(schluessel, 0) + 1
+            namen.setdefault(schluessel, (r.get("card_name") or "").strip())
+
+    heraus = []
+    for schluessel, anzahl in sorted(zaehler.items()):
+        name = namen.get(schluessel) or "?"
+        heraus.append({
+            "id": "kartentyp/" + schluessel.lower().replace(" ", "-"),
+            "klasse": "kartentyp",
+            "titel": f"{name} ({schluessel}) — kein Kartentyp in der Datenbank "
+                     f"({anzahl}x)",
+            "titelEn": f"{name} ({schluessel}) — no card type in the database "
+                       f"({anzahl}x)",
+            "wo": "data/tournament_decklists_per_player.csv → Spalte type",
+            "ansicht": "deck-builder",
+            "vorschlag": None,
+        })
+    return heraus
+
+
 PRUEFUNGEN = [mega_faehigkeiten, nutzungsdaten, namenskonflikte,
               fehlende_bereiche, gegenstandsnamen,
-              benutzte_namen_ohne_deutsch]
+              benutzte_namen_ohne_deutsch, drucke_ohne_kartentyp]
 
 KLASSEN = {
     "mega-faehigkeit": {
@@ -414,6 +482,10 @@ KLASSEN = {
     "deutscher-name": {
         "de": "Kein deutscher Name",
         "en": "No German name",
+    },
+    "kartentyp": {
+        "de": "Druck ohne Kartentyp",
+        "en": "Print without a card type",
     },
 }
 

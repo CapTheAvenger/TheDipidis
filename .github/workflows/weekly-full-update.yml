@@ -972,6 +972,33 @@ jobs:
       - name: Deckempfehlung neu rechnen
         run: python3 scripts/build_deckempfehlung.py
 
+      # ── Die Masterclass an den Wochenlauf haengen (23.09.2026) ────
+      #
+      # BESTELLUNG: "Die Masterclass unbedingt auf den Wochenlauf
+      # haengen, damit ich immer die aktuellsten Daten habe."
+      #
+      # masterclass/mega-stalobor.de.html traegt drei Sorten Zahlen aus
+      # genau den Dateien, die dieser Lauf schreibt: die Matchup-Quoten,
+      # die Feldanteile und die fuenf Listen unter "Online - letzte 7
+      # Tage". Bis heute standen die Listen seit dem 22.09. still.
+      #
+      # Der Schritt gehoert HINTER die Scraper und VOR das Tor: er
+      # rechnet mit dem frischen Stand, und die Zusicherungen im
+      # naechsten Schritt sehen sein Ergebnis. Fail-soft: faellt ein
+      # Erzeuger um, bleibt das Stueck stehen — dann ist es dateiert,
+      # nicht falsch, und die Zusicherung meldet es beim Deploy.
+      - name: Masterclass nachziehen (Zahlen, Feldanteile, Online-Listen)
+        run: |
+          set +e
+          python3 -u scripts/masterclass_zahlen_nachziehen.py
+          rc1=$?
+          python3 -u scripts/masterclass_listen_nachziehen.py
+          rc2=$?
+          if [ "$rc1" -ne 0 ] || [ "$rc2" -ne 0 ]; then
+            echo "::warning::Masterclass nicht vollstaendig nachgezogen (Zahlen $rc1, Listen $rc2) — das Stueck bleibt, wie es ist"
+          fi
+          exit 0
+
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
 

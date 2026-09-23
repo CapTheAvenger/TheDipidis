@@ -827,6 +827,105 @@ def build_best_online_decklists(limitless_decks: list, recent_days: int = 7) -> 
     return best
 
 
+MASTERCLASS_ARCHETYP = "Mega Excadrill"
+MASTERCLASS_LISTEN = 5
+
+
+def build_masterclass_listen(limitless_decks: list, archetyp: str = MASTERCLASS_ARCHETYP,
+                             anzahl: int = MASTERCLASS_LISTEN, recent_days: int = 7) -> list:
+    """Die `anzahl` bestplatzierten ECHTEN Listen EINES Archetyps aus den
+    letzten `recent_days` Tagen — dieselbe Auswahl wie
+    build_best_online_decklists, nur nicht eine je Archetyp, sondern
+    mehrere fuer einen.
+
+    BESTELLUNG (23.09.2026): "Die Masterclass unbedingt auf den
+    Wochenlauf haengen, damit ich immer die aktuellsten Daten habe."
+    Die Gruppe "Online - letzte 7 Tage" in
+    masterclass/mega-stalobor.de.html stand seit dem 22.09. still; sie
+    haelt genau diese Listen. Der Lauf hat sie ohnehin im Speicher —
+    hier faellt kein zusaetzlicher Abruf an.
+
+    Sortiert wie dort: niedrigster Platz zuerst, bei Gleichstand hoehere
+    Matchpunktquote, dann juengeres Turnier. Erfindet nichts: ohne
+    Platz, ohne Karten oder ausserhalb des Fensters faellt eine Liste
+    raus.
+    """
+    cutoff = datetime.now() - timedelta(days=recent_days)
+    ziel = (archetyp or "").strip().lower()
+
+    def _rang(place_str):
+        m = re.match(r'^\s*(\d+)(?:st|nd|rd|th)\b', str(place_str or ''), re.IGNORECASE)
+        return int(m.group(1)) if m else None
+
+    def _punkte(score_str):
+        """Matchpunkte (3S+U)/(3n) — dieselbe Konvention wie oben."""
+        m = re.match(r'^\s*(\d+)\s*-\s*(\d+)\s*-\s*(\d+)\s*$', str(score_str or ''))
+        if not m:
+            return 0.0
+        w, l, t = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        g = w + l + t
+        return ((3 * w + t) / (3 * g) * 100.0) if g else 0.0
+
+    def _datum(date_iso):
+        try:
+            return int((date_iso or '').strip().replace('-', ''))
+        except ValueError:
+            return 0
+
+    def _im_fenster(date_iso):
+        try:
+            return datetime.strptime((date_iso or '').strip(), '%Y-%m-%d') >= cutoff
+        except ValueError:
+            return False
+
+    kandidaten = []
+    for d in limitless_decks:
+        if (d.get('archetype') or '').strip().lower() != ziel:
+            continue
+        karten = d.get('cards') or []
+        datum = (d.get('tournament_date') or '').strip()
+        rang = _rang(d.get('place'))
+        if not karten or rang is None or not _im_fenster(datum):
+            continue
+        wp = _punkte(d.get('score'))
+        kandidaten.append(((rang, -wp, -_datum(datum)), {
+            'tournament_id':   d.get('tournament_id') or '',
+            'tournament_name': d.get('tournament_name') or '',
+            'tournament_date': datum,
+            'player':          d.get('player') or '',
+            'place':           d.get('place') or '',
+            'place_rank':      rang,
+            'total_players':   int(d.get('total_players') or 0),
+            'score':           d.get('score') or '',
+            'win_pct':         round(wp, 1),
+            'cards': [
+                {
+                    'name':        c.get('name') or c.get('card_name') or '',
+                    'count':       int(c.get('count') or 0),
+                    'set_code':    c.get('set_code') or '',
+                    'set_number':  c.get('set_number') or '',
+                    'type':        c.get('type') or '',
+                    'is_ace_spec': bool(c.get('is_ace_spec')),
+                }
+                for c in karten
+            ],
+        }))
+
+    # EINE Liste je Spieler und Turnier: derselbe Spieler taucht sonst
+    # mit demselben Lauf mehrfach auf und verdraengt fremde Listen.
+    gesehen = set()
+    aus = []
+    for _s, e in sorted(kandidaten, key=lambda k: k[0]):
+        schluessel = (e['tournament_id'], e['player'])
+        if schluessel in gesehen:
+            continue
+        gesehen.add(schluessel)
+        aus.append(e)
+        if len(aus) >= anzahl:
+            break
+    return aus
+
+
 # ============================================================
 # AGGREGATION + OUTPUT
 # ============================================================
@@ -947,6 +1046,20 @@ def main():
                     len(best_online), best_path)
     except OSError as e:
         logger.warning("Konnte online_best_decklists.json nicht schreiben: %s", e)
+
+    # Die Listen der Masterclass — derselbe Datensatz, ein Archetyp,
+    # mehrere Listen. scripts/masterclass_listen_nachziehen.py schreibt
+    # sie ins Stueck.
+    mcl = build_masterclass_listen(limitless_decks)
+    mcl_path = os.path.join(get_data_dir(), "masterclass_online_listen.json")
+    try:
+        with open(mcl_path, "w", encoding="utf-8") as f:
+            json.dump({"archetyp": MASTERCLASS_ARCHETYP, "fenster_tage": 7,
+                       "listen": mcl}, f, ensure_ascii=False)
+        logger.info("Masterclass-Listen: %d Listen fuer %s (letzte 7 Tage) → %s",
+                    len(mcl), MASTERCLASS_ARCHETYP, mcl_path)
+    except OSError as e:
+        logger.warning("Konnte masterclass_online_listen.json nicht schreiben: %s", e)
 
     logger.info("=" * 60)
     logger.info("SCRAPING KOMPLETT!")

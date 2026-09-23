@@ -67,16 +67,77 @@ def test_das_stueck_steht_in_der_commitliste_dieses_ablaufs():
 
 def test_er_erfindet_nichts():
     m = _modul()
+    kopf = "Online-Meta TEF\u201330C (laufendes Format): 53,8 % Win % nach Matchpunkten"
     # Keine Bilanz -> Gedankenstrich, KEIN geschaetzter Wert.
-    assert m.soll_zelle([0, 0, 0]) == ("—", "")
+    klasse, titel, wert, nenner = m.soll_zelle([0, 0, 0], "mcl-wrz", kopf)
+    assert wert == "\u2014" and nenner == ""
+    assert klasse.endswith("mcl-wrz-leer")
+    assert titel.endswith("keine Partien in den Daten")
     # Unter 30 Partien bleibt es eine Bilanz — die Regel, die das Stueck
     # selbst ausspricht.
-    assert m.soll_zelle([5, 6, 0])[0] == "5–6–0"
-    assert m.soll_zelle([14, 14, 0])[0] == "14–14–0"
+    assert m.soll_zelle([5, 6, 0], "mcl-wrz", kopf)[2] == "5\u20136\u20130"
+    assert m.soll_zelle([14, 14, 0], "mcl-wrz", kopf)[2] == "14\u201314\u20130"
     # Ab 30 eine Quote, und zwar (3S+U)/(3n).
-    wert, nenner = m.soll_zelle([17, 17, 0])
+    klasse, titel, wert, nenner = m.soll_zelle([17, 17, 0], "mcl-wrz", kopf)
     assert wert == "50,0 %", wert
     assert nenner == "<i>(34)</i>", nenner
+    assert klasse == "mcl-wrz", klasse
+
+
+def test_die_sprechblase_wird_mitgezogen():
+    """BEFUND 23.09.2026: die Zelle traegt die Zahl ZWEIMAL — sichtbar und
+    in der Sprechblase. Wer nur die sichtbare nachzieht, hinterlaesst eine
+    Sprechblase, die etwas anderes behauptet als der Wert daneben."""
+    m = _modul()
+    kopf = "Online-Meta TEF\u201330C (laufendes Format): irgendwas Altes"
+    _k, titel, wert, _n = m.soll_zelle([17, 17, 0], "mcl-wrz", kopf)
+    assert titel.startswith("Online-Meta TEF\u201330C (laufendes Format): ")
+    assert wert in titel, "die Sprechblase nennt einen anderen Wert als die Zelle"
+    assert "34 Partien" in titel and "17\u201317\u20130" in titel
+    # Und der ANFANG bleibt stehen: er benennt die Spalte und stammt nicht
+    # aus diesem Skript.
+    _k2, titel2, _w2, _n2 = m.soll_zelle(
+        [1, 1, 0], "mcl-wrz", "Letzte Pr\u00e4senzturniere, Format X: alt")
+    assert titel2.startswith("Letzte Pr\u00e4senzturniere, Format X: ")
+
+
+def test_die_verschiebung_wird_gerechnet_nicht_gesetzt():
+    """Unter 30 Partien nennt die Sprechblase, wie stark eine einzelne
+    Partie die Quote verschiebt: 100/n Prozentpunkte, eine Nachkommastelle."""
+    m = _modul()
+    _k, titel, _w, _n = m.soll_zelle([14, 14, 0], "mcl-wrz", "X: alt")
+    assert "3.6 Punkte" in titel, titel
+    _k, titel, _w, _n = m.soll_zelle([12, 4, 5], "mcl-wrz", "X: alt")
+    assert "4.8 Punkte" in titel, titel
+
+
+def test_die_spaltenkoepfe_kommen_aus_den_daten():
+    """Kein Spaltenname steht im Skript. Er wird abgeleitet — aus dem
+    Dateinamen des Scrapers und aus der Spalte `meta` der Majors-Zeilen,
+    genau wie in tests/python/test_masterclass_kartennamen.py."""
+    m = _modul()
+    k = m.koepfe()
+    assert k["jetzt"] != k["davor"], "beide Online-Spalten traegen denselben Kopf"
+    assert k["majors"].startswith("Majors (")
+    assert "\u2013" in k["jetzt"], "der Kopf nutzt den Halbgeviertstrich"
+    assert "Jetzt" not in k.values() and "Davor" not in k.values()
+
+
+@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
+def test_die_abgeleiteten_koepfe_stehen_auch_wirklich_im_stueck():
+    """Die eigentliche Verknuepfung. Laufen Ableitung und Stueck
+    auseinander, zieht der Erzeuger keine einzige Zelle nach und meldet
+    trotzdem 'nichts zu tun' — genau das ist am 23.09.2026 passiert, als
+    die Spalten von Jetzt/Davor/Majors auf die Metanamen umgestellt
+    wurden."""
+    m = _modul()
+    with open(STUECK, encoding="utf-8") as f:
+        roh = f.read()
+    im_stueck = {z[2] for z in m.ZELLE.findall(roh)}
+    for name in m.koepfe().values():
+        assert name in im_stueck, (
+            f"der abgeleitete Spaltenkopf {name!r} steht nicht im Stueck \u2014 "
+            f"dort stehen: {sorted(im_stueck)}")
 
 
 def test_die_grenze_liegt_bei_dreissig_und_zwar_beidseitig():
@@ -84,8 +145,8 @@ def test_die_grenze_liegt_bei_dreissig_und_zwar_beidseitig():
     einer Seite geprueft ist, ist nicht geprueft."""
     m = _modul()
     assert m.MINDEST_PARTIEN == 30
-    assert "–" in m.soll_zelle([15, 14, 0])[0]     # 29 Partien
-    assert "%" in m.soll_zelle([15, 15, 0])[0]     # 30 Partien
+    assert "\u2013" in m.soll_zelle([15, 14, 0], "mcl-wrz", "X: alt")[2]   # 29 Partien
+    assert "%" in m.soll_zelle([15, 15, 0], "mcl-wrz", "X: alt")[2]        # 30 Partien
 
 
 def test_die_konvention_ist_die_des_hauses():
@@ -114,16 +175,11 @@ def test_das_muster_findet_die_bloecke_wirklich():
     with open(STUECK, encoding="utf-8") as f:
         roh = f.read()
     assert len(m.BLOCK.findall(roh)) >= 20
-    assert len(m.ZELLE.findall(roh)) >= 60, (
-        "weniger als drei Zellen je Matchup gefunden — das Zellmuster passt nicht")
-    # Und die Koepfe muessen die sein, die das Stueck traegt: seit dem
-    # 23.09.2026 heissen sie nach ihrem Meta. Ein Muster, das auf
-    # "Jetzt"/"Davor" wartet, faende hier nichts mehr.
-    koepfe = {t[1] for t in m.ZELLE.findall(roh)}
-    assert m.KOPF_JETZT in koepfe, (
-        "der Kopf des laufenden Metas (%s) kommt im Stueck nicht vor" % m.KOPF_JETZT)
-    assert any(k.startswith("Majors (") for k in koepfe), (
-        "die Majors-Spalte nennt ihr Format nicht in Klammern: %s" % sorted(koepfe))
+    koepfe = set(m.koepfe().values())
+    daten = [z for z in m.ZELLE.findall(roh) if z[2] in koepfe]
+    assert len(daten) >= 60, (
+        "weniger als drei Datenzellen je Matchup gefunden \u2014 das Zellmuster "
+        f"passt nicht (gefunden: {len(daten)} von {len(m.ZELLE.findall(roh))} Zellen)")
 
 
 @pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
@@ -133,10 +189,11 @@ def test_am_heutigen_stand_ist_nichts_nachzuziehen():
     m = _modul()
     with open(STUECK, encoding="utf-8") as f:
         roh = f.read()
+    k = m.koepfe()
     quellen = {
-        "jetzt": m._online(m.ONLINE_JETZT),
-        "davor": m._online(m.ONLINE_DAVOR),
-        "major": m._majors(),
+        k["jetzt"]: m._online(m.ONLINE_JETZT),
+        k["davor"]: m._online(m.ONLINE_DAVOR),
+        k["majors"]: m._majors(),
     }
     _neu, aenderungen, _ohne = m.nachziehen(roh, quellen, m._slugs())
     assert aenderungen == [], (
@@ -153,10 +210,11 @@ def test_zweimal_nachziehen_aendert_nichts_mehr():
     m = _modul()
     with open(STUECK, encoding="utf-8") as f:
         roh = f.read()
+    k = m.koepfe()
     quellen = {
-        "jetzt": m._online(m.ONLINE_JETZT),
-        "davor": m._online(m.ONLINE_DAVOR),
-        "major": m._majors(),
+        k["jetzt"]: m._online(m.ONLINE_JETZT),
+        k["davor"]: m._online(m.ONLINE_DAVOR),
+        k["majors"]: m._majors(),
     }
     slugs = m._slugs()
     einmal, _a, _o = m.nachziehen(roh, quellen, slugs)

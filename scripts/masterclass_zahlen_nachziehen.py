@@ -51,37 +51,53 @@ EIGEN = "mega-excadrill-ex"
 BLOCK = re.compile(
     r'<span class="mcl-nm">[^<]*<em>([^<]*)</em></span>'
     r'([\s\S]*?<span class="mcl-wr3">[\s\S]*?</span></span>)')
+# Eine Datenzelle samt Klasse und Sprechblase. Die Beschriftung wird NICHT
+# aufgezaehlt: sie kommt seit dem 23.09.2026 aus den Daten (Formatfenster
+# aus dem Dateinamen, Majors-Format aus der Spalte `meta`) und hiess davor
+# Jetzt/Davor/Majors. Eine Liste hier waere die naechste auswendig gelernte
+# Schreibweise.
+ZELLE = re.compile(
+    r'<span class="(mcl-wrz[^"]*)" title="([^"]*)">'
+    r'<em>([^<]+)</em><b>([^<]+)</b>(<i>\([\d.]+\)</i>)?</span>')
+
+# Woerter, die nur die Form benennen: aus "TEF-30C" im Dateinamen wird
+# "TEF\u201330C" im Kopf (Halbgeviertstrich), genau wie in der Zusicherung.
+def _kopf(text):
+    return str(text).replace("-", "\u2013")
 
 
 def _fenster_aus_dateiname(pfad):
-    """online_api_matchups_TEF-30C.csv -> TEF–30C (Gedankenstrich wie im
-    Stueck). Die Spaltenkoepfe heissen seit dem 23.09.2026 nach ihrem
-    Meta statt "Jetzt"/"Davor" (Hausi: "mit den Metabezeichnungen kann
-    doch jeder viel mehr anfangen"). Der Erzeuger haengt deshalb am
-    Meta seiner Quelle, nicht an einem Wort im Stueck — rollt das
-    Format, rollen Kopf und Muster mit."""
+    """online_api_matchups_TEF-30C.csv -> TEF-30C."""
     m = re.search(r"matchups_([A-Za-z0-9]+-[A-Za-z0-9]+)\.csv$", os.path.basename(pfad))
-    return (m.group(1) if m else "").replace("-", "\u2013")
+    if not m:
+        raise SystemExit(f"::error::kein Formatfenster im Dateinamen {pfad}")
+    return m.group(1)
 
 
-KOPF_JETZT = _fenster_aus_dateiname(ONLINE_JETZT)
-KOPF_DAVOR = _fenster_aus_dateiname(ONLINE_DAVOR)
-# Die Majors tragen ihr Format in Klammern; welches, sagt die Spalte
-# meta der Rohdaten — hier genuegt das Muster.
-KOPF_MAJORS = r"Majors \([^<]*\)"
+def _majors_meta():
+    """Das Format der Majors-Zeilen \u2014 aus derselben Spalte `meta`, aus der
+    auch die Zahlen kommen."""
+    csv.field_size_limit(10 ** 7)
+    metas = set()
+    with open(LABS_MU, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            if r["my_deck_slug"] != EIGEN or r["day_filter"] != "overall":
+                continue
+            if not (r["vs_wins"] or "").strip():
+                continue
+            metas.add(r["meta"])
+    if len(metas) != 1:
+        raise SystemExit(f"::error::die Majors-Zeilen mischen Formate: {sorted(metas)}")
+    return metas.pop()
 
-ZELLE = re.compile(
-    r'(<em>(' + re.escape(KOPF_JETZT) + r'|' + re.escape(KOPF_DAVOR)
-    + r'|' + KOPF_MAJORS + r')</em><b>)([^<]+)(</b>)(<i>\((?:[\d.]+)\)</i>)?')
 
-
-def _feld(kopf):
-    """Spaltenkopf -> Quelle."""
-    if kopf == KOPF_JETZT:
-        return "jetzt"
-    if kopf == KOPF_DAVOR:
-        return "davor"
-    return "major"
+def koepfe():
+    """Die drei Spaltenkoepfe, so wie sie im Stueck stehen muessen."""
+    return {
+        "jetzt": _kopf(_fenster_aus_dateiname(ONLINE_JETZT)),
+        "davor": _kopf(_fenster_aus_dateiname(ONLINE_DAVOR)),
+        "majors": "Majors (%s)" % _kopf(_majors_meta()),
+    }
 
 
 def _matchpunkte(w, l, t):
@@ -135,25 +151,45 @@ def _tausender(n):
     return f"{n:,}".replace(",", ".")
 
 
-def soll_zelle(bilanz):
-    """(Text, Nenner-HTML) fuer eine Bilanz. Erfindet nichts."""
+def soll_zelle(bilanz, klasse_alt, titel_alt):
+    """(Klasse, Titel, Wert, Nenner-HTML) fuer eine Bilanz. Erfindet nichts.
+
+    Der ANFANG der Sprechblase bleibt stehen \u2014 er benennt die Spalte
+    ("Online-Meta TEF\u201330C (laufendes Format): ") und ist Text, den
+    dieses Skript nicht geschrieben hat. Neu gerechnet wird nur, was hinter
+    dem Doppelpunkt steht. So \u00fcberlebt eine Umformulierung der Spalten\u00fcber-
+    schrift diesen Erzeuger, ohne dass hier eine Zeile nachgezogen wird.
+    """
+    kopf = titel_alt.partition(": ")[0] + ": "
+    grund = klasse_alt.split()[0]          # "mcl-wrz", Zusaetze kommen aus dem Fall
     w, l, t = bilanz
     n = w + l + t
     if n == 0:
-        return "—", ""
+        return (grund + " mcl-wrz-leer", kopf + "keine Partien in den Daten", "\u2014", "")
+    bilanztext = f"{w}\u2013{l}\u2013{t}"
     if n < MINDEST_PARTIEN:
-        return f"{w}–{l}–{t}", f"<i>({_tausender(n)})</i>"
-    # Das Leerzeichen vor dem Prozentzeichen ist ein GEWOEHNLICHES —
-    # so steht es seit dem 21.09.2026 im Stueck. Ein geschuetztes waere
-    # typografisch besser und wuerde bei jedem Lauf 50 Zellen anfassen
-    # statt der wenigen, die sich wirklich geaendert haben. Wer es
-    # umstellt, stellt es im ganzen Stueck um, nicht hier nebenbei.
+        # Wie stark eine einzelne Partie die Quote verschiebt: ein Sieg statt
+        # einer Niederlage sind drei der 3n Punkte, also 100/n Prozentpunkte.
+        verschiebung = f"{100.0 / n:.1f}"
+        titel = (f"{kopf}Bilanz {bilanztext} (S\u2013N\u2013U) aus {_tausender(n)} Partien. "
+                 f"Unter {MINDEST_PARTIEN} Partien steht hier keine Quote \u2014 eine "
+                 f"einzelne Partie verschiebt sie um {verschiebung} Punkte.")
+        return (grund + " mcl-wrz-duenn", titel, bilanztext, f"<i>({_tausender(n)})</i>")
+    # Das Leerzeichen vor dem Prozentzeichen ist ein GEWOEHNLICHES \u2014
+    # so steht es im Stueck.
     quote = ("%.1f" % _matchpunkte(w, l, t)).replace(".", ",") + " %"
-    return quote, f"<i>({_tausender(n)})</i>"
+    titel = (f"{kopf}{quote} Win % nach Matchpunkten, aus {_tausender(n)} Partien, "
+             f"Bilanz {bilanztext} (S\u2013N\u2013U)")
+    return (grund, titel, quote, f"<i>({_tausender(n)})</i>")
 
 
 def nachziehen(roh, quellen, slugs):
-    """Gibt (neuer Text, Liste der Aenderungen, Namen ohne Schluessel)."""
+    """Gibt (neuer Text, Liste der Aenderungen, Namen ohne Schluessel).
+
+    `quellen` ist {Spaltenkopf: {slug: [w, l, t]}}. Eine Zelle, deren Kopf
+    dort nicht steht (die Tim-Spalte), bleibt unberuehrt \u2014 sie traegt keine
+    gerechnete Zahl, sondern eine Einschaetzung.
+    """
     aenderungen = []
     ohne_slug = []
 
@@ -166,15 +202,18 @@ def nachziehen(roh, quellen, slugs):
             return m.group(0)
 
         def zelle_ersetzen(z):
-            vorn, kopf, wert, hinten, nenner = z.groups()
-            feld = _feld(kopf)
-            soll, soll_n = soll_zelle(quellen[feld].get(slug, [0, 0, 0]))
-            ist = wert
-            if ist != soll or (nenner or "") != soll_n:
+            klasse_alt, titel_alt, kopf, wert_alt, nenner_alt = z.groups()
+            if kopf not in quellen:
+                return z.group(0)          # Tim oder eine neue Spalte
+            klasse, titel, wert, nenner = soll_zelle(
+                quellen[kopf].get(slug, [0, 0, 0]), klasse_alt, titel_alt)
+            neu = (f'<span class="{klasse}" title="{titel}">'
+                   f'<em>{kopf}</em><b>{wert}</b>{nenner}</span>')
+            if neu != z.group(0):
                 aenderungen.append(
-                    f"{html.unescape(en)} / {kopf}: {ist!r}{nenner or ''} "
-                    f"-> {soll!r}{soll_n}")
-            return vorn + soll + hinten + soll_n
+                    f"{html.unescape(en)} / {kopf}: {wert_alt!r}{nenner_alt or ''} "
+                    f"-> {wert!r}{nenner}")
+            return neu
 
         return m.group(0).replace(block, ZELLE.sub(zelle_ersetzen, block))
 
@@ -225,10 +264,15 @@ def main():
     with open(STUECK, encoding="utf-8") as f:
         roh = f.read()
 
+    k = koepfe()
+    if k["jetzt"] == k["davor"]:
+        print("::error::beide Online-Spalten traegen denselben Kopf "
+              f"({k['jetzt']}) \u2014 es wird NICHTS geschrieben")
+        return 1
     quellen = {
-        "jetzt": _online(ONLINE_JETZT),
-        "davor": _online(ONLINE_DAVOR),
-        "major": _majors(),
+        k["jetzt"]: _online(ONLINE_JETZT),
+        k["davor"]: _online(ONLINE_DAVOR),
+        k["majors"]: _majors(),
     }
     neu, aenderungen, ohne_slug = nachziehen(roh, quellen, _slugs())
     neu, stand_aend = stand_nachziehen(neu)
@@ -238,9 +282,21 @@ def main():
     # Ohne diese Zeile koennte das Skript "0 Aenderungen" melden, weil es
     # nichts gefunden hat — und genau so bliebe der Fehler unsichtbar.
     gefunden = len(BLOCK.findall(roh))
-    if gefunden < 20:
-        print(f"::error::nur {gefunden} Matchup-Bloecke im Stueck gefunden — "
-              "das Muster passt nicht mehr, es wird NICHTS geschrieben")
+    # JE SPALTE zaehlen, nicht in Summe. Wechselte nur EINE der drei
+    # Beschriftungen, bliebe die Summe ueber jeder Grenze und das Skript
+    # meldete "alle Zahlen stehen wie die Rohdaten" — ohne eine einzige
+    # Zelle dieser Spalte angesehen zu haben. Gemessen am 23.09.2026 in
+    # der Verfaelschungsprobe, nachdem die Spalten von Jetzt/Davor/Majors
+    # auf die Metanamen umgestellt worden waren.
+    alle = ZELLE.findall(roh)
+    je_kopf = {kopf: sum(1 for z in alle if z[2] == kopf) for kopf in quellen}
+    duenn = sorted(k for k, n in je_kopf.items() if n < 20)
+    if gefunden < 20 or duenn:
+        vorhanden = sorted({z[2] for z in alle})
+        print(f"::error::{gefunden} Matchup-Bloecke, Zellen je Spalte "
+              f"{je_kopf}. Zu wenige fuer: {duenn or 'die Bloecke selbst'}. "
+              f"Im Stueck stehen die Koepfe {vorhanden}. "
+              "Es wird NICHTS geschrieben.")
         return 1
 
     if ohne_slug:

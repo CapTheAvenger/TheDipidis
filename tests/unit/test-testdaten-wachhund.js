@@ -162,7 +162,7 @@ const REGISTER = {
     'test-metacall-boden-verhalten.js': 'rechnet Boden- und Klebrigkeits-Aggregation gegen data/, behauptet aber KEINE Wochenwerte: geprueft werden Eigenschaften der Rechnung (bei einem Turnier ist jede Klebrigkeit null), Richtungen (die Huerde kappt keine Spitze) und Konsistenz zwischen Kommentar und Zahl. Genau diese Datei existiert, weil eine reine Quelltext-Zusage eine falsche Begruendung nicht bemerken konnte',
     'test-metacall-namensbruecke.js': 'liest data/archetype_aliases.json — eine gepflegte Namensliste, keine Wochenzahlen; sie aendert sich nur, wenn jemand ein Paar von Hand eintraegt',
     'test-nenner-und-rundung.js':        'Rundungsvertrag; Abweichungen sind Toleranzen der Rechnung, keine Feldwerte. Seit dem 04.09.2026 ausserdem eine Probe an einem GESETZTEN Feld: aus einem bekannten N und dessen eigenen gerundeten Anteilen muss wieder N herauskommen. Die fing eine Mutation, an der alle Livedaten-Proben vorbeiliefen.',
-    'test-abnahme-2026-09-05.js':        'Abnahme vom 05.09.2026 (neun Pruefagenten auf der Live-Seite). STEHT HIER FREIWILLIG: liestLiveDaten() findet die Datei nicht, weil sie den Pfad ueber einen Parameter reicht — dieselbe Luecke wie bei test-labs-trennzeichen.js. Gelesen wird genau EINE Datei aus data/, champions_usage.json, und zwar fuer EIGENSCHAFTEN der Namensumrechnung: fuer einen Namen aus der Rangliste muss ein Schluessel herauskommen, den die Datei wirklich fuehrt (Ninetales-Alola -> alolan-ninetales und sechs weitere). Welche Pokemon diese Woche in der Datei stehen, ist der Pruefung egal — sie prueft die Zuordnung, nicht den Bestand. Alles andere in der Datei sind Zusicherungen an den QUELLTEXT (js/, css/, backend/), keine Zahlen aus data/.',
+    'test-abnahme-2026-09-05.js':        'Abnahme vom 05.09.2026 (neun Pruefagenten auf der Live-Seite). STEHT HIER FREIWILLIG: liestLiveDaten() findet die Datei nicht, weil sie den Pfad ueber einen Parameter reicht — dieselbe Luecke wie bei test-labs-trennzeichen.js. Gelesen werden ZWEI Dateien aus data/: champions_usage.json und champions_pokedex.json. BERICHTIGT AM 23.09.2026 — DER EINTRAG HIER WAR FALSCH, UND DAS HAT MAIN ROT GEMACHT. Er behauptete: \"Welche Pokemon diese Woche in der Datei stehen, ist der Pruefung egal — sie prueft die Zuordnung, nicht den Bestand.\" Das stimmte nicht. Im Testcode standen sieben SCHLUESSEL der Quelle ausgeschrieben (alolan-ninetales und sechs weitere), und als championsbattledata am 23.09.2026 um 05:10 UTC die Schreibweise drehte (ninetales-alola, tauros-paldea-aqua, maushold-four), stand keiner davon mehr in der Datei — Deploy 3025, 3026 und 3027 rot, ohne dass jemand etwas geaendert hatte. Es war schon das zweite Mal: am 08.09.2026 hatte dieselbe Zusicherung aus demselben Grund angehalten, und die damalige Reparatur hat die auswendig gelernten Namen stehen gelassen. SO STEHT ES JETZT, und das ist nachpruefbar statt behauptet: die Erwartung kommt aus der DATEI SELBST. Fuer jeden Schluessel mit Bindestrich wird der Anzeigename in BEIDEN Schreibweisen zurueckgebaut, und die Umrechnung muss genau diesen Schluessel wiederfinden; dazu die Gegenrichtung, dass kein mehrteiliger Kadername auf die Grundform durchfaellt. Kein Pokemonname steht mehr als Erwartung im Code. Die zweite Zusicherung (\"beide Schreibweisen der Quelle werden erreicht\") liest gar keine Daten — sie fragt die Kandidatenliste, und die kommt allein aus dem Namen. Die BEIDEN Untergrenzen (mindestens 15 Schluessel mit Bindestrich, mindestens 50 mehrteilige Kadernamen) sind Vorpruefungen gegen ein leeres Bestehen und der Grund, warum die OBERGRENZE am 23.09.2026 von 390 auf 392 ging. Alles andere in der Datei sind Zusicherungen an den QUELLTEXT (js/, css/, backend/), keine Zahlen aus data/.',
     'test-labs-trennzeichen.js':         'Trennzeichen und Wirkung des Labs-Gewichts. STEHT HIER FREIWILLIG: liestLiveDaten() findet die Datei nicht, weil sie den Pfad erst in eine Konstante legt und danach liest — dieselbe Luecke, die weiter unten als "ein Viertel dessen, was er zu bewachen behauptet" beschrieben ist. Ihre Zusicherungen sind Eigenschaften des Motors, keine Wochenwerte: dass die Labs-Daten viele Bewertungen bewegen und mindestens eine um einen ganzen Punkt. Die frueher hier stehende Behauptung "ein Deck kommt NEU in Tier 1" war ein Wochenwert und hat am 04.09.2026 den Deploy angehalten; an ihrer Stelle steht jetzt eine Probe an gesetzten Werten, die das Gewicht exakt nachrechnet.',
     'test-side-quest-play.js':           'Rechenwege am Nutzungsmodell, Toleranzen auf selbst gesetzten Anteilen',
     'test-side-quest-usage.js':          'Struktur der Nutzungsdatei plus weite Untergrenzen (mindestens 10 Teams)',
@@ -557,8 +557,21 @@ const REGISTER = {
    `deepEqual(x, [])` da, und eine leere Liste traegt keine zweistellige
    Zahl, die der Gleichheitszaehler sehen koennte. Die Sperrklinke misst
    Bauart, nicht Wirkung — dass die Gleichheit weg ist, steht in den
-   Zusicherungen selbst und in den Eintraegen des Registers. */
-const OBERGRENZE = 390;
+   Zusicherungen selbst und in den Eintraegen des Registers.
+
+   23.09.2026: von 390 auf 392. Zwei Vorpruefungen GEGEN EIN LEERES
+   BESTEHEN in test-abnahme-2026-09-05.js. Die dortige Zusicherung
+   „wo der Nutzungsstand den Schluessel fuehrt, wird er auch genommen"
+   hat an diesem Morgen den Deploy angehalten, weil sie die
+   SCHREIBWEISE der Quelle auswendig kannte (`alolan-ninetales`) und
+   championsbattledata sie um 05:10 UTC gedreht hat
+   (`ninetales-alola`). Die Erwartung kommt jetzt aus der Datei selbst
+   — und eine Erwartung aus der Datei braucht zwei Untergrenzen, sonst
+   prueft sie eines Tages eine leere Menge und meldet gruen:
+   „mindestens 15 Schluessel mit Bindestrich" und „mindestens 50
+   mehrteilige Kadernamen". Beide sind `>=`, beide ueberleben Zuwachs,
+   keine nennt einen Wochenwert. */
+const OBERGRENZE = 392;
 
 /* Die zweite Sperrklinke, eingezogen am 22.09.2026: so viele
    Gleichheiten gegen eine zweistellige Zahl stehen heute in Dateien,

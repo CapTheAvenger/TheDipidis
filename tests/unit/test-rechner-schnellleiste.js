@@ -225,40 +225,97 @@ describe('Regionalformen aus einem Paste', () => {
        Aus dem Team-Builder faellt das nicht auf: der uebergibt den Slug
        mit. Ein Paste kann das nie. */
     it('jede Form mit Bindestrich aus der echten Datei wird aufgeloest', () => {
+        /* AM 23.09.2026 STAND HIER EINE AUSWENDIG GELERNTE SCHREIBWEISE.
+
+           Die Probe suchte in den Slugs nach den Adjektiven `hisuian`,
+           `alolan`, `galarian`, `paldean` und drehte sie nach hinten. Als
+           die Quelle um 05:10 UTC die Richtung wechselte
+           (`arcanine-hisui` statt `hisuian-arcanine`), fand sie kein
+           einziges Adjektiv mehr — `geprueft` blieb 0, die Untergrenze
+           schlug an, Deploy 3025/3026/3027 rot.
+
+           Der Fehler war nicht die Untergrenze, sondern die Liste: eine
+           Probe, die die Schreibweise der Quelle kennt, faellt um, wenn
+           die Quelle sie aendert. JETZT WIRD DER NAME IN BEIDEN
+           RICHTUNGEN ZURUECKGEBAUT und nur verlangt, dass wenigstens
+           eine davon zum Slug zurueckfuehrt. */
         const { api } = load();
         const slugs = Object.keys(DATA.usage.pokemon).filter(s => s.indexOf('-') !== -1);
         assert.ok(slugs.length > 20,
             `nur ${slugs.length} Slugs mit Bindestrich — die Probe waere fast leer`);
 
-        /* Aus dem Slug den Showdown-Namen ZURUECKBAUEN, statt eine Liste
-           in den Testcode zu schreiben: `hisuian-arcanine` -> das
-           Adjektiv nach hinten, also „Arcanine-Hisuian". Das ist noch
-           nicht ganz Showdowns Schreibweise („Arcanine-Hisui"), und
-           genau deshalb taugt es als Probe — es prueft den
-           Praefix-Vergleich und nicht eine auswendig gelernte Tabelle. */
-        const ADJEKTIVE = ['hisuian', 'alolan', 'galarian', 'paldean'];
+        const gross = t => t.charAt(0).toUpperCase() + t.slice(1);
+        // Adjektiv <-> Regionswort. Nicht als Wissen ueber die Quelle,
+        // sondern als die Umschrift, die Showdown und der Kader teilen.
+        const ADJ = { hisuian: 'Hisui', alolan: 'Alola', galarian: 'Galar', paldean: 'Paldea' };
+        const REG = { hisui: 'Hisuian', alola: 'Alolan', galar: 'Galarian', paldea: 'Paldean' };
+        const FORMWORT = { breed: 1, form: 1, forme: 1 };
+
+        /* Alle plausiblen Anzeigenamen zu einem Slug — BEIDE Richtungen,
+           damit kein Wechsel der Quelle diese Probe leerlaufen laesst. */
+        function namen(slug) {
+            const w = slug.split('-').filter(Boolean);
+            const rein = w.filter(t => !FORMWORT[t]);
+            const aus = [rein.map(gross).join('-')];
+            // Adjektiv vorn -> Form hinten: hisuian-arcanine -> Arcanine-Hisui
+            if (ADJ[w[0]] && rein.length >= 2) {
+                const r = rein.slice(1).map(gross);
+                aus.push([r[0], ADJ[w[0]]].concat(r.slice(1)).join('-'));
+            }
+            // Form hinten -> Adjektiv vorn: arcanine-hisui -> Hisuian-Arcanine
+            const i = rein.findIndex(t => REG[t]);
+            if (i > 0) {
+                aus.push([REG[rein[i]]].concat(
+                    rein.filter((_, k) => k !== i).map(gross)).join('-'));
+            }
+            return aus.filter((x, k) => x && aus.indexOf(x) === k);
+        }
+
         let geprueft = 0;
+        const daneben = [];
         slugs.forEach(slug => {
-            const teile = slug.split('-');
-            const i = teile.findIndex(t => ADJEKTIVE.indexOf(t) !== -1);
-            if (i < 0) return;                       // keine umgedrehte Form
-            const gedreht = teile.filter((_, k) => k !== i)
-                .map(t => t.charAt(0).toUpperCase() + t.slice(1))
-                .join('-') + '-' + teile[i].slice(0, 5);
-            const erwartet = api.nameAusSlug(slug);
-            assert.ok(erwartet, `${slug} hat keinen Namen im Kader`);
-            assert.equal(api.loeseNamen({ name: gedreht }), erwartet,
-                `„${gedreht}" wird nicht auf ${slug} aufgeloest`);
-            geprueft++;
+            const soll = api.nameAusSlug(slug);
+            if (!soll) return;                 // nicht im Kader — nichts zu loesen
+            const versuche = namen(slug);
+            /* Nur die Faelle, bei denen der Rueckbau ueberhaupt eine
+               ANDERE Schreibweise ergibt als der reine Slug — sonst
+               prueft die Zeile nur, dass eine Zeichenkette sich selbst
+               gleicht. */
+            const gedreht = versuche.slice(1);
+            if (!gedreht.length) return;
+            const treffer = gedreht.filter(n => api.loeseNamen({ name: n }) === soll);
+            if (!treffer.length) daneben.push(`${slug}: ${gedreht.join(' / ')} -> nichts`);
+            else geprueft++;
         });
+        assert.deepEqual(daneben, [],
+            'Diese umgedrehten Schreibweisen werden nicht aufgeloest: ' + daneben.join(' ; '));
         assert.ok(geprueft >= 10,
             `nur ${geprueft} umgedrehte Formen geprueft — die Probe bestuende fast leer`);
     });
 
     it('der gemeldete Fall selbst', () => {
+        /* AM 23.09.2026 HAT SICH DIESE ZUSICHERUNG SELBST ABGESCHALTET.
+
+           `nameAusSlug('hisuian-arcanine')` gab null zurueck, sobald die
+           Quelle den Schluessel in `arcanine-hisui` umbenannte — und die
+           Zeile darunter, der ganze Zweck der Pruefung, wurde nie
+           erreicht. Gruen, ohne etwas geprueft zu haben: genau die Sorte
+           Zeile, die CLAUDE.md verbietet.
+
+           Der Fall haengt am NAMEN aus dem Paste, nicht an der
+           Schreibweise des Schluessels. Also wird der Kader gefragt und
+           NICHT uebersprungen: fuehrt er die Art, muss der Name aus dem
+           Team des Betreibers sie finden. */
         const { api } = load();
-        const soll = api.nameAusSlug('hisuian-arcanine');
-        if (!soll) return;   // die Art faellt eines Tages aus dem Kader
+        const slugs = Object.keys(DATA.usage.pokemon);
+        const arcanine = slugs.filter(s => /^(hisuian-arcanine|arcanine-hisui)$/.test(s));
+        assert.equal(arcanine.length, 1,
+            'die Nutzungsdatei fuehrt Hisui-Arcanine unter keiner der beiden '
+            + `Schreibweisen — gefunden: ${arcanine.join(', ')}`);
+        const soll = api.nameAusSlug(arcanine[0]);
+        assert.ok(soll,
+            `${arcanine[0]} steht in der Nutzungsdatei, aber der Kader findet `
+            + 'keinen Namen dazu — dann zeigt der Reiter "keine Nutzungsdaten"');
         assert.equal(api.loeseNamen({ name: 'Arcanine-Hisui' }), soll,
             'der gemeldete Fall aus dem Team des Betreibers geht weiter nicht');
     });

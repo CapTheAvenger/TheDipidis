@@ -183,6 +183,85 @@ def soll_zelle(bilanz, klasse_alt, titel_alt):
     return (grund, titel, quote, f"<i>({_tausender(n)})</i>")
 
 
+ONLINE_FELD = os.path.join(DATEN, "limitless_online_decks.csv")
+
+SUB = re.compile(r'(<span class="mcl-nm">[^<]*<em>([^<]*)</em></span>\s*'
+                 r'<span class="mcl-sub">)([^<]*)(</span>)')
+MU_DETAILS = re.compile(r'<details class="mcl-mu"[\s\S]*?</details>')
+
+
+def _feldanteile():
+    """deck_name -> Feldanteil als Text ("8,54"). Quelle ist die Datei,
+    aus der auch die Meta-Seite ihre Anteile nimmt."""
+    csv.field_size_limit(10 ** 7)
+    aus = {}
+    if not os.path.exists(ONLINE_FELD):
+        return aus
+    with open(ONLINE_FELD, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f, delimiter=";"):
+            name = (r.get("deck_name") or "").strip()
+            anteil = (r.get("share") or "").replace("%", "").strip()
+            if name and anteil:
+                aus[name.lower()] = anteil.replace(".", ",")
+    return aus
+
+
+def feld_nachziehen(roh, anteile):
+    """Der Feldanteil je Matchup-Zeile. Die zweite Angabe in derselben
+    Zeile (die Spielzeit) stammt aus Tims Ausarbeitung, nicht aus den
+    Daten — sie wird NICHT angefasst."""
+    aenderungen = []
+
+    def ersetzen(m):
+        vorn, en, text, hinten = m.groups()
+        neu_anteil = anteile.get(html.unescape(en).strip().lower())
+        if not neu_anteil:
+            return m.group(0)
+        t = re.sub(r"^\s*[\d.,]+\s*%\s*Feldanteil", "%s %% Feldanteil" % neu_anteil, text)
+        if t == text:
+            return m.group(0)
+        aenderungen.append("%s / Feldanteil: %s -> %s %%"
+                           % (html.unescape(en), text.split(" Feldanteil")[0], neu_anteil))
+        return vorn + t + hinten
+
+    return SUB.sub(ersetzen, roh), aenderungen
+
+
+def sortieren(roh, anteile):
+    """"Sortiert nach Feldanteil" steht als Versprechen ueber der Liste.
+    Aendern sich die Anteile, muss die Reihenfolge mit — sonst ist der
+    Satz falsch. Decks ohne Anteil behalten ihre Stelle am Ende."""
+    bloecke = MU_DETAILS.findall(roh)
+    if len(bloecke) < 20:
+        return roh, []
+
+    def schluessel(i_block):
+        i, b = i_block
+        m = re.search(r'<span class="mcl-nm">[^<]*<em>([^<]*)</em></span>', b)
+        name = html.unescape(m.group(1)).strip().lower() if m else ""
+        wert = anteile.get(name)
+        try:
+            zahl = float((wert or "").replace(",", "."))
+        except ValueError:
+            zahl = None
+        return (0 if zahl is not None else 1, -(zahl or 0.0), i)
+
+    sortiert = [b for _k, b in sorted(((schluessel((i, b)), b)
+                                       for i, b in enumerate(bloecke)), key=lambda x: x[0])]
+    if sortiert == bloecke:
+        return roh, []
+
+    def namen(liste):
+        return [html.unescape(re.search(r'<em>([^<]*)</em>', b).group(1)) for b in liste]
+
+    vorher, nachher = namen(bloecke), namen(sortiert)
+    verschoben = [f"{a} -> {n}" for a, n in zip(vorher, nachher) if a != n]
+    kette = iter(sortiert)
+    return MU_DETAILS.sub(lambda _m: next(kette), roh), [
+        "Reihenfolge nach Feldanteil: " + "; ".join(verschoben[:4])
+        + (" …" if len(verschoben) > 4 else "")]
+
+
 def nachziehen(roh, quellen, slugs):
     """Gibt (neuer Text, Liste der Aenderungen, Namen ohne Schluessel).
 
@@ -277,6 +356,11 @@ def main():
     neu, aenderungen, ohne_slug = nachziehen(roh, quellen, _slugs())
     neu, stand_aend = stand_nachziehen(neu)
     aenderungen += stand_aend
+    anteile = _feldanteile()
+    neu, feld_aend = feld_nachziehen(neu, anteile)
+    aenderungen += feld_aend
+    neu, sort_aend = sortieren(neu, anteile)
+    aenderungen += sort_aend
 
     # GEGEN EIN LEERES BESTEHEN: findet das Muster die Bloecke ueberhaupt?
     # Ohne diese Zeile koennte das Skript "0 Aenderungen" melden, weil es

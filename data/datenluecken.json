@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt": "2026-09-23T06:00:36Z",
+  "erzeugt": "2026-09-23T11:03:17Z",
   "erzeuger": "scripts/datenluecken.py",
   "anzahl": 0,
   "jeKlasse": {},
@@ -28,6 +28,10 @@
    "deutscher-name": {
     "de": "Kein deutscher Name",
     "en": "No German name"
+   },
+   "kartentyp": {
+    "de": "Druck ohne Kartentyp",
+    "en": "Print without a card type"
    }
   },
   "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten."

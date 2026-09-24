@@ -92,6 +92,38 @@ jobs:
           pip install pytest beautifulsoup4 requests lxml
           pip install zxing-cpp segno Pillow PyYAML
 
+      # ── Die Nachschlagetabellen saeen ────────────────────────────
+      #
+      # BEFUND 24.09.2026, nachdem dieser Job zweimal hintereinander rot
+      # war (Deploy 3040 und 3041) — und beide Male war NICHTS kaputt.
+      #
+      # get_data_dir() loest auf backend/core/data auf. Der Ordner steht
+      # in .gitignore und ist im Checkout LEER. Der Wochenlauf befuellt
+      # ihn mit ueber zwanzig Dateien, dieser Job bisher mit KEINER.
+      # Dieselbe Suite lief damit in zwei verschiedenen Welten: was dort
+      # eine gefuellte Kartendatenbank sah, sah hier eine leere — ohne
+      # dass irgendwo ein Fehler entstand.
+      #
+      # Aufgeflogen ist es an data/datenluecken.json: der Wochenlauf
+      # schrieb acht benannte Luecken hinein (er hatte die Datenbank),
+      # dieser Job rechnete sie neu, fand keine einzige Karte und
+      # meldete die Datei als veraltet. Sie war es nicht.
+      #
+      # KEINE von Hand gepflegte Dateiliste. Genau die ist in sieben
+      # anderen Ablaeufen die naechste Fehlerquelle: fehlt ihr ein
+      # Eintrag, sieht der Test eine leere Tabelle statt eines Fehlers.
+      # Hier wird alles genommen, was data/ an Tabellen fuehrt.
+      #
+      # Hardlinks, kein Kopieren: derselbe Datentraeger, also kostet es
+      # weder Platz noch nennenswerte Zeit. Faellt das aus (anderes
+      # Dateisystem), wird kopiert.
+      - name: Nachschlagetabellen fuer die Tests saeen
+        run: |
+          mkdir -p backend/core/data
+          cp -al data/*.csv data/*.json backend/core/data/ 2>/dev/null \
+            || cp data/*.csv data/*.json backend/core/data/
+          echo "gesaet: $(ls backend/core/data | wc -l) Dateien"
+
       - name: Run Python unit tests
         run: |
           set +e

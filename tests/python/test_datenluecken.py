@@ -643,3 +643,101 @@ def test_die_entscheidung_kommt_nach_allen_anderen_quellen():
         "danach ueberschrieben")
     assert quelle.index("open(NAMEN_ENTSCHIEDEN_PATH") < quelle.index(
         "with open(NAMES_DE_OUT"), "die Entscheidungen kommen zu spaet zum Schreiben"
+
+
+# ══════════════════════════════════════════════════════════════════════
+# NICHT GEMESSEN IST NICHT DASSELBE WIE NICHTS GEFUNDEN (24.09.2026)
+#
+# Der Deploy 3041 fiel, und die Datei war NICHT veraltet. Die Pruefung
+# drucke_ohne_kartentyp() braucht als einzige die Kartendatenbank aus
+# backend/core/data. Der Wochenlauf saet diesen Ordner, der Deploy nicht.
+# Dort fand sie also keine Karte, gab eine LEERE LISTE zurueck und
+# behauptete damit "keine Luecke" — waehrend die Datei acht fuehrte, vom
+# Wochenlauf geschrieben, der die Datenbank sehr wohl hatte.
+#
+# Aufgefallen ist es erst jetzt, weil die Klasse "kartentyp" am
+# 23.09.2026 dazukam und der Wochenlauf 149 die ersten Eintraege schrieb.
+# Vorher war die Liste beidseitig leer — der Fehler war die ganze Zeit da
+# und unsichtbar.
+# ══════════════════════════════════════════════════════════════════════
+
+def _mit_ersatzpruefung(monkeypatch, rueckgabe):
+    """Die Kartentyp-Pruefung durch eine ersetzen, die `rueckgabe` liefert.
+
+    Ausgetauscht wird der Eintrag in PRUEFUNGEN, nicht das Modulattribut:
+    die Liste haelt eine REFERENZ auf die Funktion, ein Patch am Modul
+    ginge an ihr vorbei. Und der Ersatz braucht denselben __name__, weil
+    baue() darueber die Klasse zuordnet — eine Lambda hiesse
+    "<lambda>" und faende keine.
+    """
+    import datenluecken  # noqa: PLC0415
+
+    def drucke_ohne_kartentyp():
+        return rueckgabe
+
+    monkeypatch.setattr(datenluecken, "PRUEFUNGEN",
+                        [drucke_ohne_kartentyp if f.__name__ == "drucke_ohne_kartentyp"
+                         else f
+                         for f in datenluecken.PRUEFUNGEN])
+    return datenluecken
+
+
+def test_ohne_grundlage_wird_keine_luecke_fuer_verschwunden_erklaert(monkeypatch):
+    """Kann eine Pruefung nicht messen, bleiben ihre Eintraege stehen.
+
+    Ohne diese Regel loescht jeder Lauf ohne Kartendatenbank acht
+    benannte Luecken aus dem Inventar — und der naechste Lauf MIT
+    Datenbank schreibt sie wieder hinein. Das Inventar haette dann
+    gewackelt, je nachdem wer es zuletzt angefasst hat.
+    """
+    sys.path.insert(0, SCRIPTS)
+    try:
+        dl = _mit_ersatzpruefung(monkeypatch, None)   # None = NICHT_MESSBAR
+        vorher = {"luecken": [
+            {"id": "kartentyp/mee-10", "klasse": "kartentyp", "titel": "A"},
+            {"id": "mega-faehigkeit/x", "klasse": "mega-faehigkeit", "titel": "B"},
+        ]}
+        frisch = dl.baue(vorher=vorher)
+    finally:
+        sys.path.remove(SCRIPTS)
+
+    kartentyp = [l for l in frisch["luecken"] if l["klasse"] == "kartentyp"]
+    assert kartentyp, ("die nicht messbare Klasse ist aus dem Inventar "
+                       "verschwunden, statt uebernommen zu werden")
+    assert kartentyp[0]["id"] == "kartentyp/mee-10"
+
+
+def test_eine_nicht_gemessene_klasse_steht_auch_so_da(monkeypatch):
+    """Sie wird BENANNT, nicht verschwiegen.
+
+    Der Admin-Bereich liest diese Datei. Ein uebernommener Stand, der
+    aussieht wie ein frisch gemessener, waere genau die Sorte Zahl, die
+    niemand mehr nachrechnet.
+    """
+    sys.path.insert(0, SCRIPTS)
+    try:
+        dl = _mit_ersatzpruefung(monkeypatch, None)
+        frisch = dl.baue(vorher={"luecken": []})
+    finally:
+        sys.path.remove(SCRIPTS)
+    assert frisch["_meta"]["nichtGemessen"] == ["kartentyp"]
+
+
+def test_wo_gemessen_werden_kann_zaehlt_die_messung_und_nicht_der_altstand(monkeypatch):
+    """Die Gegenprobe — sonst koennte die Uebernahme ALLES konservieren.
+
+    Eine Klasse, die gemessen WIRD, muss ihren alten Stand ersetzen.
+    Ohne diese Zusicherung waere ein Inventar denkbar, das nie wieder
+    kleiner wird.
+    """
+    sys.path.insert(0, SCRIPTS)
+    try:
+        dl = _mit_ersatzpruefung(monkeypatch, [])     # [] = gemessen, nichts gefunden
+        frisch = dl.baue(vorher={"luecken": [
+            {"id": "kartentyp/alt", "klasse": "kartentyp", "titel": "veraltet"},
+        ]})
+    finally:
+        sys.path.remove(SCRIPTS)
+    assert not [l for l in frisch["luecken"] if l["klasse"] == "kartentyp"], (
+        "eine gemessene Klasse hat ihren alten Stand behalten")
+    assert frisch["_meta"]["nichtGemessen"] == []

@@ -443,6 +443,42 @@ jobs:
           echo "::endgroup::"
           exit 0
 
+      # ── Victory Road: das letzte Major und die Replika-Sammlung ──
+      #
+      # NICHT BLOCKIEREND, aus demselben Grund wie die Schritte darueber:
+      # faellt eine fremde Seite aus, soll der Wochenlauf weiterlaufen und
+      # der Ausfall in der Bilanz stehen — nicht der ganze Lauf kippen.
+      #
+      # ZEITBUDGET: die Tiefe von 32 je Turnier kostet einen Aufruf der
+      # Paste-Schnittstelle je Platzierung. Bei zwei Majors an einem
+      # Wochenende (der Normalfall — am 19./20.09.2026 Baltimore und
+      # Tangerang, am 26./27.09.2026 Frankfurt und Brisbane) sind das rund
+      # 64 Aufrufe mit 0,35 s Pause, also gut zwei Minuten.
+      - name: Victory Road — letztes Major und Replika-Sammlung
+        run: |
+          set +e
+          echo "::group::scrapers/victory_road_major_scraper.py"
+          python3 backend/scrapers/victory_road_major_scraper.py --tiefe 32
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::victory_road_major_scraper exited with $rc"
+              echo "FAIL scrapers/victory_road_major_scraper.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scrapers/victory_road_major_scraper.py" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+          echo "::endgroup::"
+          echo "::group::scrapers/victory_road_replika_scraper.py"
+          python3 backend/scrapers/victory_road_replika_scraper.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::victory_road_replika_scraper exited with $rc"
+              echo "FAIL scrapers/victory_road_replika_scraper.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scrapers/victory_road_replika_scraper.py" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+          echo "::endgroup::"
+          exit 0
+
       - name: Run labs tournament scraper (deck list + matchups)
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core

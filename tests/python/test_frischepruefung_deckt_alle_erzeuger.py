@@ -29,6 +29,7 @@ import importlib.util
 import io
 import json
 import os
+import pytest
 import sys
 
 HIER = os.path.dirname(os.path.abspath(__file__))
@@ -98,6 +99,51 @@ def test_die_beiden_listen_ueberschneiden_sich_nicht():
 # ueberhaupt etwas zu pruefen hat.
 
 
+def _quelldatei(job):
+    """Der Pfad zur Erzeugerdatei hinter einem Herzschlag-Schluessel.
+
+    BEFUND 24.09.2026: die Schluessel sind NICHT durchgaengig
+    repo-relativ. "scripts/x.py" liegt unter <repo>/scripts/, aber
+    "scrapers/x.py" und "core/x.py" liegen unter <repo>/backend/. Das
+    fiel nie auf, weil in ERGEBNIS_MIT_STEMPEL bisher nur scripts/-
+    Eintraege standen — der erste scrapers/-Eintrag lief sofort in einen
+    FileNotFoundError, und zwar in der Zusicherung, nicht im Erzeuger.
+    """
+    direkt = os.path.join(WURZEL, job)
+    if os.path.isfile(direkt):
+        return direkt
+    unter_backend = os.path.join(WURZEL, "backend", job)
+    assert os.path.isfile(unter_backend), (
+        "zu %s gibt es weder %s noch %s — der Herzschlag-Schluessel zeigt "
+        "auf keine Datei" % (job, direkt, unter_backend))
+    return unter_backend
+
+
+def test_der_pfadhelfer_findet_beide_bauarten_von_schluessel():
+    """An gesetzten Schluesseln — der Helfer darf kein ungeprueftes Stueck sein.
+
+    Die Herzschlag-Schluessel sind zweierlei Bauart, und das faellt erst
+    auf, wenn der erste scrapers/-Eintrag in ERGEBNIS_MIT_STEMPEL landet:
+    "scripts/x.py" liegt unter <repo>/, "scrapers/x.py" unter
+    <repo>/backend/. Gesucht werden hier zwei Dateien, die es WIRKLICH
+    gibt — welche, ist der Zusicherung egal, sie kommen aus RHYTHMUS.
+    """
+    m = _pruefe_frische()
+    unter_scripts = [j for j in m.RHYTHMUS if j.startswith("scripts/")]
+    unter_backend = [j for j in m.RHYTHMUS if j.startswith(("scrapers/", "core/"))]
+    assert unter_scripts and unter_backend, (
+        "RHYTHMUS fuehrt nicht mehr beide Bauarten — dann prueft das hier nichts")
+
+    for job in (unter_scripts[0], unter_backend[0]):
+        pfad = _quelldatei(job)
+        assert os.path.isfile(pfad), job
+
+    # Gegenprobe: ein Schluessel, hinter dem keine Datei liegt, muss
+    # auffallen — sonst liefe die Regel auf einem Tippfehler leer.
+    with pytest.raises(AssertionError):
+        _quelldatei("scrapers/gibt_es_nicht_12345.py")
+
+
 def test_jedes_gestempelte_ergebnis_gehoert_zu_einem_erzeuger_mit_zeitplan():
     m = _pruefe_frische()
     for job in m.ERGEBNIS_MIT_STEMPEL:
@@ -128,7 +174,7 @@ def test_der_erzeuger_setzt_den_stempel_bei_jedem_lauf_neu():
     """
     m = _pruefe_frische()
     for job in m.ERGEBNIS_MIT_STEMPEL:
-        with open(os.path.join(WURZEL, job), encoding="utf-8") as fh:
+        with open(_quelldatei(job), encoding="utf-8") as fh:
             quelle = fh.read()
         assert "datetime.now" in quelle or "utcnow" in quelle, (
             f"{job} holt sich keine aktuelle Zeit — dann ist der Stempel "

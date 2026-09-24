@@ -116,6 +116,16 @@ RHYTHMUS = {
     "scrapers/scrape_kartentexte.py": "zweimal_woechentlich",
     "scripts/build_champions_item_sprites.py": "taeglich",
     "scripts/build_champions_move_flags.py": "taeglich",
+    # NACHGETRAGEN 24.09.2026 — UND ES IST DERSELBE FEHLER WIE OBEN.
+    # Die beiden Victory-Road-Scraper kamen mit dem Umbau des
+    # Champions-Reiters dazu (PR #812), haengen im Wochenlauf und
+    # schreiben dort einen Herzschlag. In keiner der beiden Listen zu
+    # stehen war beim Bauen als Nebenbefund GEMELDET und nicht behoben —
+    # und hat dann den Wochenlauf 150 nach 51 Minuten Scrapen
+    # abgebrochen. Ein gemeldeter Befund, der einen Lauf anhaelt, war
+    # kein Nebenbefund.
+    "scrapers/victory_road_major_scraper.py": "woechentlich",
+    "scrapers/victory_road_replika_scraper.py": "woechentlich",
 }
 
 # Erzeuger, die BEWUSST keinen Zeitplan haben — mit der Begruendung.
@@ -186,6 +196,13 @@ STEMPEL_FELDER = ("erzeugt_am", "scraped_at", "erstellt_am", "generated_at")
 ERGEBNIS_MIT_STEMPEL = {
     "scripts/build_champions_move_flags.py": "champions_move_flags.json",
     "scripts/scrape_champions_usage.py": "champions_usage.json",
+    # NOCH NICHT die beiden Victory-Road-Scraper (24.09.2026): ihre
+    # Ergebnisdateien gibt es im Repo noch gar nicht — der erste
+    # Wochenlauf, der sie erzeugt hat, brach vorher ab. Einen Stempel zu
+    # bewachen, den es nicht gibt, ist keine Pruefung, sondern ein
+    # dauerhaft roter Test. Der Eintrag gehoert hierher, sobald
+    # data/victory_road_major_teams.json und
+    # data/victory_road_replika_teams.json im Repo liegen.
 }
 
 # Wieviel Tage darf der Stempel hinter dem Lauf herhinken, bevor es ein

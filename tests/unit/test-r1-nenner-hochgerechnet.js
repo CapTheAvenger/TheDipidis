@@ -144,6 +144,64 @@ function alsDecks(zeilen) {
 
 /* ══════════════════════════════════════════════════════════════════ */
 
+/** Die exakte Other-Zahl darf im Hinweis nicht NACKT stehen (Befund B1).
+ *
+ *  Erlaubt sind drei Umgebungen, und jede sagt dem Leser, was er vor sich
+ *  hat:
+ *    "= 1.700"           der Rechenweg, also die exakte Zahl mit ihrer Herkunft
+ *    "rund 1.700"        ausdruecklich als gerundet gekennzeichnet
+ *    "Nenner 33 bis 33"  als GRENZE der Spanne — nur, wenn die Zahl
+ *                        wirklich eine Grenze ist (kleines Feld)
+ *
+ *  Gesucht wird die Zahl als GANZE Zahl, nicht als Zeichenkette: "1.700"
+ *  innerhalb von "11.700" oder "1.7005" ist kein Treffer. Sonst haengt die
+ *  Zusicherung daran, wie gross die Zahlen dieser Woche gerade sind.
+ *
+ *  Nach der Zahl darf ein Satzzeichen stehen: im Hinweis folgt auf den
+ *  Rechenweg ein Komma ("= 1.700, je nach Nenner"). Ausgeschlossen ist
+ *  deshalb nur ein Trennzeichen, auf das WIEDER eine Ziffer folgt.
+ */
+function pruefeOtherImText(txt, feld) {
+    const marke = gross(feld.other);
+    const muster = new RegExp(
+        '(?<![\\d.,])' + marke.replace(/[.]/g, '\\.') + '(?![\\d])(?![.,]\\d)', 'g');
+
+    /* Die beiden Grenzen der Spanne — aus dem Feld, nicht ausgeschrieben.
+       Faellt die exakte Other-Zahl mit einer Grenze zusammen (die Spanne
+       ist dann so scharf, dass gerundet dasselbe herauskommt), steht sie
+       im Satz "je nach Nenner X bis Y" — dort ist sie als GRENZE
+       bezeichnet und damit erlaubt. Ohne diese Umgebung wuerde die
+       Zusicherung rot, sobald die Spanne eng wird. */
+    const grenzen = new Set();
+    if (feld.otherSpanne) {
+        grenzen.add(gross(feld.otherSpanne.von));
+        grenzen.add(gross(feld.otherSpanne.bis));
+    }
+
+    let treffer = 0, mitRechenweg = 0;
+    for (const m of txt.matchAll(muster)) {
+        treffer++;
+        const davor = txt.slice(0, m.index);
+        if (davor.endsWith('= ')) { mitRechenweg++; continue; }
+        if (davor.endsWith('rund ')) continue;
+        /* "Nenner 1.969" / "bis 1.976" gilt nur, wenn die Zahl wirklich
+           eine Grenze IST — sonst waere jede nackte Zahl nach diesen
+           Woertern durchgerutscht. */
+        if (grenzen.has(marke)
+            && (davor.endsWith('Nenner ') || davor.endsWith(' bis '))) continue;
+        assert.fail(`"${marke}" steht ohne Rechenweg, ohne "rund" und nicht als `
+            + `Grenze im Text — genau die Scheingenauigkeit aus Befund B1 `
+            + `(Umgebung: `
+            + `${JSON.stringify(txt.slice(Math.max(0, m.index - 12), m.index + marke.length + 4))}):\n`
+            + txt);
+    }
+    assert.ok(treffer >= 1,
+        `die Other-Zahl ${marke} steht gar nicht im Hinweis:\n` + txt);
+    assert.equal(mitRechenweg, 1,
+        `die exakte Other-Zahl steht ${mitRechenweg}-mal mit ihrem Rechenweg da, `
+        + 'erwartet genau einmal:\n' + txt);
+}
+
 describe('B1 — der Nenner der Anteilskachel steht als HOCHGERECHNET da', () => {
 
     /* Ein Feld, das niemand scrapt: 10.000 Listen, zehn benannte Decks
@@ -323,17 +381,86 @@ describe('B1 — der Nenner der Anteilskachel steht als HOCHGERECHNET da', () =>
             assert.fail('ohne Other-Zahl prueft diese Zusicherung nichts');
         }
         const txt = hinweis(api.tilesHtml(DECKS[0].deck_name, 'embed'));
-        const marke = gross(feld.other);
-        let ab = 0, treffer = 0;
-        for (;;) {
-            const i = txt.indexOf(marke, ab);
-            if (i < 0) break;
-            treffer++;
-            assert.equal(txt.slice(Math.max(0, i - 2), i), '= ',
-                `"${marke}" steht ohne seinen Rechenweg im Text — genau die `
-                + `Scheingenauigkeit aus Befund B1:\n` + txt);
-            ab = i + marke.length;
+        pruefeOtherImText(txt, feld);
+    });
+
+    it('an gesetzten Zahlen: eine RUNDE Other-Zahl steht zweimal da — und das ist richtig', () => {
+        /* BEFUND 23.09.2026 (Wochenlauf #148). Die Zusicherung darueber
+           verlangte, dass die Other-Zahl GENAU EINMAL im Hinweis steht,
+           und dass ihr unmittelbar ein "= " vorausgeht.
+
+           Das gilt nur, solange die exakte Zahl und ihre auf Hunderter
+           gerundete Fassung verschiedene Zeichenketten sind. Ist Other
+           ein Vielfaches von 100, sind sie dieselbe:
+
+               ... rund 1.700 Listen (10.000 - 8.300 = 1.700, ...)
+                        ^^^^^                         ^^^^^
+
+           Dann zaehlt die Suche zwei Treffer, und der erste steht hinter
+           "rund " statt hinter "= ". Mit den grossen Zahlen des alten
+           Formatfensters kam das nie vor; nach der Rotation auf TEF-30C
+           am 16.09.2026 sind die Zahlen klein, und der Wochenlauf #148
+           lief genau hier auf.
+
+           Der Sinn der Regel bleibt unveraendert (Befund B1): eine exakte
+           Zahl darf nicht NACKT dastehen. Benannt darf sie stehen — als
+           Rechenweg "= ", als "rund " gekennzeichnet oder als Grenze der
+           Spanne. Alles andere faellt weiterhin um.
+
+           Diese Probe haelt den Fall an GESETZTEN Zahlen fest, damit er
+           nicht wieder von der Woche abhaengt: 20 Decks zu 4,15 % und 415
+           Listen ergeben 8.300 gelistete, einen Nenner von 10.000 und
+           Other = 1.700 — ein glattes Vielfaches von 100. */
+        const sb = ladeKarte('de');
+        const api = sb._archetypeCardInternals;
+        const decks = {};
+        for (let k = 0; k < 20; k++) {
+            decks['Deck' + k] = { share: 4.15, count: 415, winRate: 50, partien: 0 };
         }
-        assert.equal(treffer, 1, 'die Other-Zahl steht nicht genau einmal da');
+        api.setData(decks, null);
+        const feld = api.onlineFeld();
+        assert.equal(feld.other, 1700, 'die gesetzte Lage ergibt nicht mehr Other = 1.700');
+        assert.equal(feld.other % 100, 0, 'die Probe braucht ein Vielfaches von 100');
+        const txt = hinweis(api.tilesHtml('Deck0', 'embed'));
+        assert.ok(txt.includes('rund 1.700') && txt.includes('= 1.700'),
+            'die gesetzte Lage zeigt nicht beide Umgebungen:\n' + txt);
+        pruefeOtherImText(txt, feld);
+    });
+
+    it('an gesetzten Zahlen: in einem KLEINEN Feld ist die Other-Zahl ihre eigene Grenze', () => {
+        /* DIE ZWEITE FALLE DESSELBEN BEFUNDS (gemessen 24.09.2026)
+           ---------------------------------------------------------
+           Die Spanne des Nenners ist rund n * 0,005 / Anteil breit. Sie
+           schrumpft also MIT dem Feld — und unter etwa 600 Listen ist sie
+           so eng, dass gerundet dieselbe Zahl herauskommt wie die exakte:
+
+               ... = 33, je nach Nenner 33 bis 33) ...
+
+           Dann steht die exakte Zahl dreimal da, zweimal davon als
+           GRENZE. Das ist keine Scheingenauigkeit, sondern die ehrliche
+           Auskunft, dass die Spanne nichts mehr hergibt — und es muss
+           bestehen, sonst laeuft der erste Wochenlauf nach einer Rotation
+           hier auf, wenn das neue Feld noch klein ist.
+
+           Gesetzte Lage: 20 Decks zu 4,15 % und je 8 Listen ergeben 160
+           gelistete, einen Nenner von 193 und Other = 33, Grenzen 33
+           bis 33. */
+        const sb = ladeKarte('de');
+        const api = sb._archetypeCardInternals;
+        const decks = {};
+        for (let k = 0; k < 20; k++) {
+            decks['Deck' + k] = { share: 4.15, count: 8, winRate: 50, partien: 0 };
+        }
+        api.setData(decks, null);
+        const feld = api.onlineFeld();
+        assert.equal(feld.other, 33, 'die kleine Lage ergibt nicht mehr Other = 33');
+        assert.ok(feld.otherSpanne, 'die kleine Lage hat keine Spanne');
+        assert.equal(gross(feld.otherSpanne.von), gross(feld.other),
+            'die untere Grenze faellt nicht mit der exakten Zahl zusammen — '
+            + 'dann prueft dieser Fall nicht mehr, was er pruefen soll');
+        const txt = hinweis(api.tilesHtml('Deck0', 'embed'));
+        assert.ok(txt.includes('= 33') && txt.includes('Nenner 33 bis 33'),
+            'die kleine Lage zeigt die Zahl nicht als Rechenweg UND als Grenze:\n' + txt);
+        pruefeOtherImText(txt, feld);
     });
 });

@@ -407,21 +407,38 @@ def drucke_ohne_kartentyp():
     steht jeder unaufloesbare Druck namentlich im Inventar, mit Anzahl —
     sichtbar im Admin-Bereich, und die Zusicherung verlangt nur noch,
     dass keine unbenannte dazukommt.
+
+    NACHTRAG 24.09.2026 — DIESE PRUEFUNG HAT DEN DEPLOY ANGEHALTEN.
+    ---------------------------------------------------------------
+    Sie braucht als einzige die KARTENDATENBANK, und die liegt in
+    backend/core/data. Der Wochenlauf saet diesen Ordner, der Deploy
+    NICHT. Dort fand sie also keine Karte, gab eine leere Liste zurueck
+    und behauptete damit: "keine Luecke". Die Datei im Repo fuehrte acht
+    — geschrieben vom Wochenlauf, der die Datenbank sehr wohl hatte.
+
+    test_datenluecken.py verglich beide und meldete die Datei als
+    veraltet. Sie war es nicht. Nicht gemessen ist nicht dasselbe wie
+    nichts gefunden, und genau diesen Unterschied hat die Pruefung
+    verschluckt — drei Mal, an drei verschiedenen Ausgaengen.
+
+    Sie gibt jetzt NICHT_MESSBAR zurueck, wenn ihr die Grundlage fehlt.
+    baue() laesst die vorhandenen Eintraege dieser Klasse dann stehen,
+    statt sie wortlos zu loeschen.
     """
     import csv as _csv
 
     pfad = os.path.join(DATA, "tournament_decklists_per_player.csv")
     if not os.path.exists(pfad):
-        return []
+        return NICHT_MESSBAR
     try:
         import sys
         sys.path.insert(0, os.path.join(os.path.dirname(DATA), "backend", "core"))
         import card_scraper_shared as css
         db = css.CardDatabaseLookup()
     except Exception:
-        return []
+        return NICHT_MESSBAR
     if not getattr(db, "nach_druck", None):
-        return []
+        return NICHT_MESSBAR
 
     zaehler = {}
     namen = {}
@@ -458,6 +475,22 @@ PRUEFUNGEN = [mega_faehigkeiten, nutzungsdaten, namenskonflikte,
               fehlende_bereiche, gegenstandsnamen,
               benutzte_namen_ohne_deutsch, drucke_ohne_kartentyp]
 
+# Welche Klasse eine Pruefung fuellt. Nur noetig fuer die, die
+# NICHT_MESSBAR zurueckgeben koennen — sonst waere nicht zu sagen,
+# WELCHE Eintraege uebernommen werden muessen.
+KLASSE_JE_PRUEFUNG = {
+    "drucke_ohne_kartentyp": "kartentyp",
+}
+
+
+def _vorheriger_stand():
+    """Der zuletzt geschriebene Stand, oder ein leerer."""
+    try:
+        with open(OUT_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"luecken": []}
+
 KLASSEN = {
     "mega-faehigkeit": {
         "de": "Mega-Fähigkeit ohne Beleg",
@@ -490,10 +523,36 @@ KLASSEN = {
 }
 
 
-def baue():
+# Eine Pruefung, die ihre Grundlage nicht hat, gibt DIES zurueck — nicht
+# eine leere Liste. "Nicht gemessen" und "nichts gefunden" sehen im
+# Ergebnis gleich aus und bedeuten das Gegenteil voneinander; am
+# 24.09.2026 hat genau diese Verwechslung den Deploy angehalten.
+NICHT_MESSBAR = None
+
+
+def baue(vorher=None):
+    """Das Inventar neu bestimmen.
+
+    `vorher` ist der bereits geschriebene Stand. Kann eine Pruefung nicht
+    messen, bleiben SEINE Eintraege dieser Klasse stehen — ohne Grundlage
+    darf niemand behaupten, eine Luecke sei verschwunden. Fehlt `vorher`,
+    wird die Datei selbst gelesen.
+    """
+    if vorher is None:
+        vorher = _vorheriger_stand()
+
     luecken = []
+    nicht_gemessen = []
     for pruefung in PRUEFUNGEN:
-        luecken.extend(pruefung())
+        ergebnis = pruefung()
+        if ergebnis is NICHT_MESSBAR:
+            klasse = KLASSE_JE_PRUEFUNG.get(pruefung.__name__)
+            if klasse:
+                nicht_gemessen.append(klasse)
+                luecken.extend([l for l in (vorher.get("luecken") or [])
+                                if l.get("klasse") == klasse])
+            continue
+        luecken.extend(ergebnis)
     luecken.sort(key=lambda x: (x["klasse"], x["id"]))
     zaehler = {}
     for l in luecken:
@@ -507,6 +566,9 @@ def baue():
             "klassen": KLASSEN,
             "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — "
                      "dieses Skript aendert keine Daten.",
+            # Welche Klassen in DIESEM Lauf nicht gemessen werden konnten.
+            # Ihre Eintraege sind uebernommen, nicht neu bestimmt.
+            "nichtGemessen": sorted(nicht_gemessen),
         },
         "luecken": luecken,
     }

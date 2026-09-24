@@ -102,5 +102,21 @@
     "tournament_type": "regional",
     "country": "US",
     "total_players": 2734
+  },
+  {
+    "tournament_id": "0073",
+    "tournament_name": "Regional Championship Brisbane",
+    "tournament_date": "",
+    "tournament_type": "special",
+    "country": "",
+    "total_players": 0
+  },
+  {
+    "tournament_id": "0074",
+    "tournament_name": "Regional Championship Frankfurt",
+    "tournament_date": "",
+    "tournament_type": "special",
+    "country": "",
+    "total_players": 0
   }
 ]

@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt": "2026-09-24T12:05:43Z",
+  "erzeugt": "2026-09-24T15:15:41Z",
   "erzeuger": "scripts/datenluecken.py",
   "anzahl": 8,
   "jeKlasse": {
@@ -36,7 +36,8 @@
     "en": "Print without a card type"
    }
   },
-  "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten."
+  "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten.",
+  "nichtGemessen": []
  },
  "luecken": [
   {

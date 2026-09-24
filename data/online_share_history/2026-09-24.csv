@@ -1,28 +1,28 @@
 ﻿deck_name;rank;count;share;winrate
-Dragapult;1;627;9,99;53,0
-N's Zoroark;2;394;6,28;48,59
-Slowking;3;391;6,23;51,51
-Alakazam Dudunsparce;4;385;6,13;49,49
-Dragapult Dusknoir;5;374;5,96;51,29
-Basic Box;6;287;4,57;53,07
-Mega Excadrill;7;283;4,51;51,3
-Dhelmise;8;238;3,79;49,75
-Crustle;9;199;3,17;51,45
+Dragapult;1;628;9,99;53,01
+N's Zoroark;2;394;6,26;48,59
+Slowking;3;391;6,22;51,51
+Alakazam Dudunsparce;4;385;6,12;49,49
+Dragapult Dusknoir;5;376;5,98;51,31
+Basic Box;6;287;4,56;53,07
+Mega Excadrill;7;284;4,52;51,26
+Dhelmise;8;240;3,82;49,6
+Crustle;9;199;3,16;51,45
 Lopunny Dudunsparce;10;186;2,96;53,37
 Dragapult Blaziken;11;164;2,61;51,78
-Festival Lead;12;143;2,28;51,4
-Lucario Hariyama;13;138;2,2;46,85
+Festival Lead;12;144;2,29;51,63
+Lucario Hariyama;13;138;2,19;46,85
 Sharpedo Toxtricity;14;137;2,18;48,87
 Ogerpon Meganium Hydrapple;15;127;2,02;52,37
-Rocket's Honchkrow;16;107;1,7;50,77
+Rocket's Honchkrow;16;108;1,72;50,76
 Mega Greninja;17;100;1,59;41,96
-Mega Lucario;18;99;1,58;46,95
+Mega Lucario;18;99;1,57;46,95
 Cynthia's Garchomp;19;98;1,56;51,5
-Grimmsnarl Froslass;20;93;1,48;50,87
+Grimmsnarl Froslass;20;94;1,49;50,74
 Alakazam Dusknoir;21;83;1,32;48,41
-Rocket's Mewtwo;22;70;1,12;50,93
+Rocket's Mewtwo;22;71;1,13;50,76
 Greninja;23;63;1,0;50,39
-Lopunny Dusknoir;24;55;0,88;48,9
+Lopunny Dusknoir;24;55;0,87;48,9
 Steven's Metagross;25;52;0,83;42,58
 Beedrill;26;51;0,81;57,63
 Raging Bolt Ogerpon;27;51;0,81;51,23
@@ -33,9 +33,9 @@ Toxtricity Box;31;41;0,65;52,69
 Starmie Froslass;32;39;0,62;51,59
 Seaking Festival Lead;33;34;0,54;48,48
 Ethan's Typhlosion;34;34;0,54;43,44
-Dragapult Dudunsparce;35;33;0,53;51,88
-Mega Starmie;36;33;0,53;46,83
-Mega Chandelure;37;32;0,51;42,15
+Dragapult Dudunsparce;35;33;0,52;51,88
+Mega Starmie;36;33;0,52;46,83
+Mega Chandelure;37;33;0,52;42,62
 Toucannon;38;28;0,45;42,62
 Manectric Eelektrik;39;28;0,45;30,11
 Ogerpon Meganium;40;27;0,43;39,29
@@ -54,7 +54,7 @@ Toxtricity;52;14;0,22;40,32
 Eelektrik;53;14;0,22;31,82
 Mega Camerupt;54;13;0,21;50,85
 Ceruledge;55;12;0,19;47,17
-Hydreigon;56;11;0,18;46,15
+Hydreigon;56;11;0,17;46,15
 Mega Charizard X;57;10;0,16;28,89
 Iono's Bellibolt;58;10;0,16;30,77
 Dragapult Froslass;59;10;0,16;36,36

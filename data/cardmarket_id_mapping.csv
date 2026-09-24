@@ -8993,6 +8993,15 @@ MEP,51,886620,unique,Oshawott
 MEP,52,886621,unique,Grookey
 MEP,53,886622,unique,Scorbunny
 MEP,54,886623,unique,Sobble
+MEP,55,891870,unique,Treecko
+MEP,56,891880,unique,Torchic
+MEP,57,891888,unique,Mudkip
+MEP,58,891889,unique,Chespin
+MEP,59,888506,priced-by-all(2↔3),Fennekin
+MEP,60,891891,unique,Froakie
+MEP,61,891892,unique,Sprigatito
+MEP,62,891893,unique,Fuecoco
+MEP,63,891894,unique,Quaxly
 MEP,64,877543,live-verified,Serperior
 MEP,65,877544,manual-pin,Barbaracle
 MEP,66,877545,live-verified,Tyrantrum
@@ -9018,6 +9027,18 @@ MEP,85,894264,manual-pin,Bastiodon
 MEP,86,898176,unique,Slowpoke
 MEP,87,898177,unique,Binacle
 MEP,88,895779,live-verified,Zarude
+MEP,89,903672,unique,Mega Zeraora ex
+MEP,90,903676,unique,Mega Darkrai ex
+MEP,91,903681,unique,Mega Dragonite ex
+MEP,92,903686,priced-by-date(1↔2),Paradise Resort
+MEP,94,895609,unique,Alolan Exeggutor
+MEP,95,895610,unique,Lucario
+MEP,96,895606,unique,Moltres
+MEP,97,895607,unique,Articuno
+MEP,98,895608,unique,Zapdos
+MEP,99,895611,priced-by-date(1↔2),Greninja ex
+MEP,100,895612,priced-by-date(1↔2),Sylveon ex
+MEP,101,895605,priced-by-date(1↔2),Nidorina
 MEW,1,733596,live-verified,Bulbasaur
 MEW,2,733597,live-verified,Ivysaur
 MEW,3,733598,live-verified,Venusaur ex

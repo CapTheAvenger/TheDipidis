@@ -2,9 +2,9 @@
   "_gesamtstand_zweck": "Zaehlt ueber die ganze Datenbank, nicht ueber diesen Lauf — sonst beantwortet ein gezielter --sets-Lauf die Frage „ist alles da?\" nicht mehr.",
   "gesamtstand": {
     "standard": {
-      "karten": 4605,
-      "mit_text_de": 4186,
-      "mit_text_en": 4595,
+      "karten": 4626,
+      "mit_text_de": 4207,
+      "mit_text_en": 4616,
       "anteil_de": 90.9
     },
     "extended": {
@@ -21,7 +21,7 @@
     }
   },
   "_zweck": "Belegt, welche Sets deutschen Kartentext tragen und welche Karten die Quelle nicht uebersetzt fuehrt.",
-  "gelaufen_am": "2026-09-22 14:41:19 UTC",
+  "gelaufen_am": "2026-09-24 11:31:57 UTC",
   "quelle": "https://limitlesstcg.com/cards/de/<SET>?display=full",
   "aeren": [
     "extended",
@@ -76,9 +76,9 @@
     "VIV",
     "WHT"
   ],
-  "karten_betrachtet": 8758,
-  "mit_text_en": 8694,
-  "mit_text_de": 8269,
+  "karten_betrachtet": 8779,
+  "mit_text_en": 8715,
+  "mit_text_de": 8290,
   "ohne_deutsche_fassung": [
     "30C|120",
     "ASR|164",

@@ -257560,6 +257560,54 @@
       "Illustrated by GOSSAN"
     ]
   },
+  "MEP|100": {
+    "name": "Sylveon ex",
+    "card_type": "Evolves from Eevee",
+    "energy_type": "Psychic",
+    "hp": "270",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Colorful Harmony",
+        "cost": [
+          "P",
+          "C",
+          "C"
+        ],
+        "damage": "50×",
+        "text": "This attack does 50 damage for each type of Basic Energy attached to all of your Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "MEP|101": {
+    "name": "Nidorina",
+    "card_type": "Evolves from Nidoran♀",
+    "energy_type": "Darkness",
+    "hp": "90",
+    "abilities": [
+      {
+        "name": "Share Happiness",
+        "text": "Once during your turn, you may use this Ability. Heal 30 damage from 1 of your Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Bite",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Taiga Kasai"
+    ]
+  },
   "MEP|11": {
     "name": "Mega Latias ex",
     "card_type": "Basic",
@@ -258677,6 +258725,109 @@
       "Illustrated by Saboteri"
     ]
   },
+  "MEP|55": {
+    "name": "Treecko",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Pound",
+        "cost": [
+          "G"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|56": {
+    "name": "Torchic",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Peck",
+        "cost": [
+          "C"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|57": {
+    "name": "Mudkip",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Mud-Slap",
+        "cost": [
+          "W",
+          "W"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|58": {
+    "name": "Chespin",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Pin Missile",
+        "cost": [
+          "G",
+          "C"
+        ],
+        "damage": "10×",
+        "text": "Flip 4 coins. This attack does 10 damage for each heads."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|59": {
+    "name": "Fennekin",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Scratch",
+        "cost": [
+          "R",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
   "MEP|6": {
     "name": "Drifblim",
     "card_type": "Evolves from Drifloon",
@@ -258704,6 +258855,92 @@
     ],
     "rules": [
       "Illustrated by Shimaris Yukichi"
+    ]
+  },
+  "MEP|60": {
+    "name": "Froakie",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Pound",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|61": {
+    "name": "Sprigatito",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Leafage",
+        "cost": [
+          "G",
+          "C",
+          "C"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|62": {
+    "name": "Fuecoco",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Flamethrower",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "70",
+        "text": "Discard an Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|63": {
+    "name": "Quaxly",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Wing Attack",
+        "cost": [
+          "W",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
     ]
   },
   "MEP|64": {
@@ -259414,6 +259651,36 @@
       "Illustrated by IKEDA Saki"
     ]
   },
+  "MEP|89": {
+    "name": "Mega Zeraora ex",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "270",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Thunderous Fist",
+        "cost": [
+          "L"
+        ],
+        "damage": "60×",
+        "text": "This attack does 60 damage for each [ L ] Energy attached to this Pokémon."
+      },
+      {
+        "name": "Zepto Turn",
+        "cost": [
+          "L",
+          "L",
+          "L"
+        ],
+        "damage": "150",
+        "text": "Switch this Pokémon with 1 of your Benched Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
   "MEP|9": {
     "name": "Alakazam",
     "card_type": "Evolves from Kadabra",
@@ -259435,6 +259702,237 @@
     ],
     "rules": [
       "Illustrated by Aya Kusube"
+    ]
+  },
+  "MEP|90": {
+    "name": "Mega Darkrai ex",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "280",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Dusk Raid",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "110+",
+        "text": "If your Benched Pokémon have any damage counters on them, this attack does 110 more damage."
+      },
+      {
+        "name": "Abyss Eye",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "",
+        "text": "If your opponent's Active Pokémon is affected by a Special Condition, it is Knocked Out."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "MEP|91": {
+    "name": "Mega Dragonite ex",
+    "card_type": "Evolves from Dragonair",
+    "energy_type": "Dragon",
+    "hp": "370",
+    "abilities": [
+      {
+        "name": "Sky Transport",
+        "text": "Once during your turn, you may use this Ability. Switch your Active Pokémon with 1 of your Benched Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Ryuno Glide",
+        "cost": [
+          "W",
+          "L",
+          "L"
+        ],
+        "damage": "330",
+        "text": "Discard 2 Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "MEP|92": {
+    "name": "Paradise Resort",
+    "card_type": "Stadium",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "The Retreat Cost of each Psyduck in play (both yours and your opponent's) is [ C ] less.",
+      "Illustrated by Naoki Saito"
+    ]
+  },
+  "MEP|94": {
+    "name": "Alolan Exeggutor",
+    "card_type": "Evolves from Exeggcute",
+    "energy_type": "Grass",
+    "hp": "150",
+    "abilities": [
+      {
+        "name": "Scale Up",
+        "text": "If this Pokémon has 6 or more [ G ] Energy attached, it gets +250 HP."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Mega Drain",
+        "cost": [
+          "G",
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "150",
+        "text": "Heal 50 damage from this Pokémon"
+      }
+    ],
+    "rules": [
+      "Illustrated by yuu"
+    ]
+  },
+  "MEP|95": {
+    "name": "Lucario",
+    "card_type": "Evolves from Riolu",
+    "energy_type": "Fighting",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Aura Sphere",
+        "cost": [
+          "F",
+          "F",
+          "C"
+        ],
+        "damage": "100",
+        "text": "This attack also does 60 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": [
+      "Illustrated by Taiga Kasai"
+    ]
+  },
+  "MEP|96": {
+    "name": "Moltres",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Fiery Flapping",
+        "text": "Once during your turn, if you have Articuno and Zapdos in play, you may use this Ability. Attach a Basic [ R ] Energy card from your hand to this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Fire Spin",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "130",
+        "text": "Discard 2 Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Krgc"
+    ]
+  },
+  "MEP|97": {
+    "name": "Articuno",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Frosty Flapping",
+        "text": "Once during your turn, if you have Moltres and Zapdos in play, you may use this Ability. Attach a Basic [ W ] Energy card from your hand to this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hail",
+        "cost": [
+          "W",
+          "W",
+          "C"
+        ],
+        "damage": "",
+        "text": "This attack does 30 damage to each of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": [
+      "Illustrated by Taira Akitsu"
+    ]
+  },
+  "MEP|98": {
+    "name": "Zapdos",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Flash-Pop Flapping",
+        "text": "Once during your turn, if you have Moltres and Articuno in play, you may use this Ability. Attach a Basic [ L ] Energy card from your hand to this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Thundering Lightning",
+        "cost": [
+          "L",
+          "L",
+          "L",
+          "C"
+        ],
+        "damage": "210",
+        "text": "This Pokémon also does 60 damage to itself."
+      }
+    ],
+    "rules": [
+      "Illustrated by SIE NANAHARA"
+    ]
+  },
+  "MEP|99": {
+    "name": "Greninja ex",
+    "card_type": "Evolves from Frogadier",
+    "energy_type": "Water",
+    "hp": "300",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Stealthy Slash",
+        "cost": [
+          "W"
+        ],
+        "damage": "",
+        "text": "This attack does 30 damage to 1 of your opponent's Pokémon for each damage counter on that Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "name": "Aqua Edge",
+        "cost": [
+          "W",
+          "W"
+        ],
+        "damage": "160",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
     ]
   },
   "MEW|1": {

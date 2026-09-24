@@ -3127,6 +3127,156 @@
 }
 .sqp-go.is-nein { color: var(--ink-soft, #6b7280); }
 
+/* ══════════════════════════════════════════════════════════════════
+   QUELLEN-HAUPTAUSWAHL (24.09.2026)
+
+   Der Teams-Reiter zeigt seit heute drei Quellen: VGCPastes, die
+   Replika-Sammlung von Victory Road und die Teams des letzten Majors.
+   Die Leiste steht in JEDEM Pfad, auch im Leerzustand — sonst waere
+   eine Quelle ohne Datei eine Sackgasse ohne Weg zurueck.
+
+   FARBEN: --surface-2 / --line / --brand / --gold aus tokens.css, NICHT
+   die --sq-*-Reihe. Die ist auf .sq-console beschraenkt (den dunklen
+   Bereich), der Teams-Reiter liegt hell und ausserhalb — dort waren die
+   Variablen undefiniert und jede Flaeche blieb durchsichtig. Gemessen am
+   24.09.2026 im Bild: die Auswahlleiste sah aus wie eine Reihe Links.
+   ══════════════════════════════════════════════════════════════════ */
+.side-quest-quellen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 1rem 0;
+}
+.side-quest-quellen-label {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: 0.3rem;
+}
+.side-quest-quelle-btn {
+    /* 44 px Tippflaeche — die Entscheidung von der Mobil-Optimierung
+       steht, hier wird sie nicht unterlaufen. */
+    min-height: 44px;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.side-quest-quelle-btn:hover { border-color: var(--brand); color: var(--ink); }
+.side-quest-quelle-btn.is-active {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+}
+.side-quest-quelle-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+/* ── Kopf des letzten Majors ───────────────────────────────────────
+   Mehrere Turniere an EINEM Wochenende sind der Normalfall: am
+   19./20.09.2026 liefen Baltimore und Tangerang, am 26./27.09.2026
+   Frankfurt und Brisbane. Deshalb eine Liste, kein einzelner Name. */
+.side-quest-major-kopf {
+    list-style: none;
+    margin: 0 0 1rem 0;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-2);
+}
+.side-quest-major-turnier {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+.side-quest-major-turnier + .side-quest-major-turnier {
+    border-top: 1px solid var(--line);
+}
+.side-quest-major-turnier a { color: var(--brand); text-decoration: none; }
+.side-quest-major-turnier a:hover { text-decoration: underline; }
+.side-quest-major-datum,
+.side-quest-major-bilanz {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Schalter „nur mit Replika-Code" ───────────────────────────────
+   Er steht UEBER der vollstaendigen Liste und nicht als eigener
+   Bereich daneben: ein Replika-Code ist die Ausnahme (16 von 155 bei
+   Baltimore), eine Teamliste die Regel. */
+.side-quest-nurcode {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    margin: 0 0 1rem 0;
+    padding: 0.35rem 0.8rem 0.35rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-2);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink-2);
+    cursor: pointer;
+}
+.side-quest-nurcode input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--brand); }
+.side-quest-nurcode-zahl {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Der Hinweis auf die fehlenden Statuswertpunkte ────────────────
+   Eine Open Team List blendet EVs und IVs aus. Das steht hin, statt
+   geschaetzte Werte zu erfinden. */
+.side-quest-ohne-ev {
+    margin: 0.5rem 0 0 0;
+    padding: 0.6rem 0.8rem;
+    border-left: 3px solid var(--gold, #d8a22b);
+    border-radius: 0 8px 8px 0;
+    background: rgba(216, 162, 43, 0.08);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    color: var(--ink-2);
+}
+.side-quest-quelle-link { margin: 0 0 0.3rem 0; font-size: var(--fs-xs); }
+.side-quest-quelle-link a { color: var(--ink-3); }
+
+/* Eine Karte ohne Replika-Code traegt KEINEN leeren Kopierknopf: der
+   sah aus wie ein Code, der gleich kommt, und kopierte nichts. */
+.side-quest-copy-btn.is-ohne-code {
+    cursor: default;
+    opacity: 0.6;
+}
+.side-quest-copy-btn.is-ohne-code .side-quest-copy-label {
+    font-style: italic;
+}
+
+@media (max-width: 560px) {
+    .side-quest-quellen-label { width: 100%; margin-bottom: 0.2rem; }
+    .side-quest-quelle-btn { flex: 1 1 auto; text-align: center; }
+    .side-quest-major-turnier { font-size: 0.82rem; }
+}
+
+
 /* ── Champions "console" ───────────────────────────────────────────
    Ported from champions-layout-prototyp.html. Scoped to .sq-console,
    NOT #side-quest: the four existing subtabs still assume a light

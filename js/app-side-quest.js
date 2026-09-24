@@ -12,6 +12,99 @@
     'use strict';
 
     const DATA_URL = 'data/champions_replica_teams.json';
+
+    /* ══════════════════════════════════════════════════════════════
+       DREI QUELLEN STATT EINER (24.09.2026)
+
+       ANLASS (Betreiber): „ich wuerde mir jetzt zum Beispiel gerade
+       genau das Champions-Team nachbauen und muesste jetzt halt
+       irgendwo im Internet das suchen und das will ich nicht, weil
+       ich habe ja eine eigene Seite".
+
+       GEMESSEN an Baltimore (24.09.2026), und dieser Befund bestimmt
+       den Aufbau: von 155 Masters-Platzierungen trugen **16 einen
+       Replika-Code**, aber **155 eine Teamliste**. Ein Reiter, der nur
+       Teams MIT Code zeigt, zeigt fast nichts. Deshalb ist „nur mit
+       Replika-Code" ein SCHALTER ueber einer vollstaendigen Liste und
+       kein eigener Bereich.
+
+       Die Quellen stehen getrennt und namentlich da. Sie werden NICHT
+       verschmolzen: wer wissen will, woher ein Team kommt, soll es
+       sehen koennen — und die Quellen unterscheiden sich in dem, was
+       sie liefern (siehe hatEv).
+       ══════════════════════════════════════════════════════════════ */
+    const QUELLEN = [
+        {
+            id: 'vgcpastes',
+            url: DATA_URL,
+            de: 'VGCPastes', en: 'VGCPastes',
+            anbieter: 'VGCPastes',
+            link: 'https://twitter.com/VGCPastes',
+            // Diese Quelle fuehrt Statuswertpunkte.
+            hatEv: true,
+            gruppierung: 'regulation',
+        },
+        {
+            id: 'victoryroad',
+            url: 'data/victory_road_replika_teams.json',
+            de: 'Victory Road', en: 'Victory Road',
+            anbieter: 'Victory Road — Replika-Sammlung',
+            link: 'https://victoryroad.pro/champions-replica/',
+            hatEv: false,
+            gruppierung: 'keine',
+        },
+        {
+            id: 'major',
+            url: 'data/victory_road_major_teams.json',
+            de: 'Letztes Major', en: 'Last major',
+            // Der Linktext nennt den ANBIETER, nicht den Reiternamen —
+            // sonst stand "Letztes Major" zweimal untereinander da,
+            // einmal als aktiver Knopf und einmal als Link.
+            anbieter: 'Victory Road — Turnierkalender',
+            link: 'https://victoryroad.pro/2027-season-calendar/',
+            hatEv: false,
+            gruppierung: 'turnier',
+        },
+    ];
+
+    let _aktiveQuelle = 'vgcpastes';
+    let _nurMitCode = false;
+    const _quellenDaten = {};      // id -> geladene Datei
+
+    function quelleVon(id) {
+        return QUELLEN.filter(function (q) { return q.id === id; })[0] || QUELLEN[0];
+    }
+
+    /** Eine Quelldatei holen. Fehlt sie, gibt es einen LEERZUSTAND —
+     *  keinen Fehler und vor allem keine erfundenen Teams. Die beiden
+     *  neuen Dateien entstehen erst im Wochenlauf; bis dahin sagt die
+     *  Oberflaeche genau das. */
+    async function ladeQuelle(id) {
+        if (_quellenDaten[id]) return _quellenDaten[id];
+        const q = quelleVon(id);
+        try {
+            const resp = await fetch(q.url + '?t=' + Date.now());
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            _quellenDaten[id] = await resp.json();
+        } catch (err) {
+            console.warn('[SideQuest] Quelle nicht ladbar:', q.url, err);
+            _quellenDaten[id] = { _meta: {}, teams: [], _fehlt: true };
+        }
+        return _quellenDaten[id];
+    }
+
+    /** Die Teams einer Fremdquelle auf das Schema bringen, das
+     *  renderTeam() ohnehin liest. Die Pokemon-Felder passen bereits
+     *  (name, item, ability, nature, moves, evs); es fehlt allein der
+     *  Turniername unter dem alten Schluessel. */
+    function vereinheitliche(team) {
+        const k = Object.assign({}, team);
+        if (!k.tournament) {
+            k.tournament = k.turnier || k.ergebnis || '';
+        }
+        return k;
+    }
+
     const STRATEGY_URL = 'data/champions_team_strategies.json';
     const DE_NAMES_URL = 'data/pokemon_names_de.json';
     const HOST_ID  = 'sideQuestTeamsHost';
@@ -90,6 +183,18 @@
 
     const LABELS = {
         de: {
+            ohneCode: 'Ohne Replika-Code',
+            quelleLabel: 'Quelle',
+            quelleAria: 'Quelle der Teams wählen',
+            nurMitCode: 'Nur mit Replika-Code',
+            nurMitCodeAria: 'Nur Teams mit Replika-Code anzeigen',
+            majorKopf: 'Letztes Major',
+            majorLeer: 'Für das letzte Major liegen noch keine Teams vor. Die Daten entstehen im Wochenlauf.',
+            quelleLeer: 'Für diese Quelle liegen noch keine Teams vor. Die Daten entstehen im Wochenlauf.',
+            ohneEvHinweis: 'Open Team Lists führen keine Statuswertpunkte. Art, Item, Fähigkeit, Attacken und Wesen stehen so da, wie sie gespielt wurden — die Verteilung der Punkte nicht.',
+            platzKurz: 'Platz',
+            keinCodeGefunden: 'Kein Team dieser Auswahl trägt einen Replika-Code.',
+            teamsGezaehlt: 'Teams',
             playBtn: 'Play',
             playAria: 'Live-Hilfe (Speed-Werte + Schwächen + Gegner-Erfassung) öffnen für',
             infoBtn: 'So spielst du das Team',
@@ -157,6 +262,18 @@
             uebernommenFehler: 'Kopieren nicht möglich — der Browser lässt keinen lokalen Speicher zu (privates Fenster?).',
         },
         en: {
+            ohneCode: 'No replica code',
+            quelleLabel: 'Source',
+            quelleAria: 'Choose the source of the teams',
+            nurMitCode: 'Replica code only',
+            nurMitCodeAria: 'Show only teams that carry a replica code',
+            majorKopf: 'Last major',
+            majorLeer: 'No teams for the last major yet. The data is produced by the weekly run.',
+            quelleLeer: 'No teams for this source yet. The data is produced by the weekly run.',
+            ohneEvHinweis: 'Open team lists carry no stat points. Species, item, ability, moves and nature are exactly as played — the point spread is not.',
+            platzKurz: 'Place',
+            keinCodeGefunden: 'No team in this selection carries a replica code.',
+            teamsGezaehlt: 'teams',
             playBtn: 'Play',
             playAria: 'Open live helper (speed values + weaknesses + opponent capture) for',
             infoBtn: 'How to play this team',
@@ -408,6 +525,29 @@
             : (en || '');
     }
 
+    /** Der Artname, zweisprachig wo die Quelle es hergibt.
+
+        BEFUND (24.09.2026): Faehigkeit, Item, Attacke und Wesen stehen auf
+        den Teamkarten laengst als „Intimidate – Bedroher" da, die ART aber
+        blieb englisch — „Salamence" statt „Salamence – Brutalanda". Das
+        faellt auf einer deutschen Seite auf.
+
+        Die Paste-Schnittstelle von VR Pastes liefert den deutschen Namen
+        gratis mit (`speciesTranslation`), der Scraper legt ihn als
+        `name_de` ab. Wo er dasteht, steht er jetzt auch auf der Karte.
+
+        FUER DIE VGCPASTES-QUELLE AENDERT SICH NICHTS: dort gibt es kein
+        `name_de`, und es hier aus einer Namenstabelle nachzuschlagen waere
+        ein anderer Auftrag. Der Befund ist gemeldet, nicht still
+        mitrepariert. */
+    function artName(p) {
+        const en = (p && p.name) || '';
+        const de = (p && p.name_de) || '';
+        if (!en) return de || '\u2014';
+        if (!de || de === en) return en;
+        return en + ' \u2013 ' + de;
+    }
+
     function renderPokemon(p) {
         const moves = (p.moves || []).slice(0, 4);
         const movesHtml = moves.map(m =>
@@ -436,7 +576,7 @@
                 <div class="side-quest-mon-head">
                     <span class="side-quest-mon-title">
                         ${icon}
-                        <span class="side-quest-mon-name">${escapeHtml(p.name || '—')}</span>
+                        <span class="side-quest-mon-name">${escapeHtml(artName(p))}</span>
                     </span>
                     ${tera}
                 </div>
@@ -451,24 +591,54 @@
         `;
     }
 
+    /** Die Kennung, unter der eine Teamkarte ihre Knoepfe fuehrt.
+
+        Zeichnen und Verdrahten MUESSEN dieselbe benutzen — stuenden die
+        beiden Regeln an zwei Stellen, liefen sie irgendwann
+        auseinander, und der Fehler waere ein Knopf, der das falsche
+        Team oeffnet. Genau das ist nicht zu sehen, solange ueberhaupt
+        ein Team erscheint. */
+    function kartenKennung(team) {
+        if (!team) return '';
+        return team.replica_code || team.paste_id || teamIdentityHash(team);
+    }
+
     function renderTeam(team) {
         const monsHtml = (team.pokemon || []).map(renderPokemon).join('');
         const stratHtml = (team.strategy || [])
             .map(line => `<li>${escapeHtml(line)}</li>`)
             .join('');
-        const code = team.replica_code || '';
+        const replikaCode = team.replica_code || '';
+        /* DIE KARTENKENNUNG IST NICHT DER REPLIKA-CODE (24.09.2026)
+           -----------------------------------------------------------
+           Bis heute war beides dasselbe, weil jedes Team aus dem
+           VGCPastes-Sheet einen Code trug. Die Teams vom letzten Major
+           tragen ihn NICHT: gemessen an Baltimore hatten 16 von 155
+           Platzierungen einen Code, alle 155 aber eine Teamliste.
+
+           Bliebe die Kennung der Code, haetten 139 Karten dieselbe
+           LEERE Kennung — jeder Knopf auf jeder dieser Karten haette
+           dann dasselbe erste Team gefunden, und niemand haette es
+           gesehen, weil ein Team ja erschienen waere. Nur eben immer
+           dasselbe.
+
+           Die Kennung faellt deshalb auf die Paste-Kennung zurueck und
+           zuletzt auf den Inhaltsschluessel der Karte. Der Replika-Code
+           bleibt dem vorbehalten, was WIRKLICH der Code ist: dem
+           Kopierknopf und den Strategie-Erklaerungen. */
+        const code = kartenKennung(team);
         const trainer = team.trainer ? ` · ${escapeHtml(team.trainer)}` : '';
         const tourney = team.tournament ? `<span class="side-quest-team-tourney">${escapeHtml(team.tournament)}${trainer}</span>` : '';
         const labels = LABELS[uiLang()];
         const hash = teamIdentityHash(team);
         const status = getMark(hash);
         const stateClass = status ? ` side-quest-mark-state-${status}` : '';
-        const hasGuide = !!(_strategies && _strategies[code] &&
-                            _strategies[code][uiLang()]);
+        const hasGuide = !!(replikaCode && _strategies && _strategies[replikaCode] &&
+                            _strategies[replikaCode][uiLang()]);
         const infoBtn = hasGuide ? `
                     <button class="side-quest-info-btn"
                             type="button"
-                            data-strategy-code="${escapeHtml(code)}"
+                            data-strategy-code="${escapeHtml(replikaCode)}"
                             aria-label="${escapeHtml(labels.infoAria)} ${escapeHtml(team.team_name || code)}">
                         <span class="side-quest-info-icon" aria-hidden="true">ℹ</span>
                         <span class="side-quest-info-label">${escapeHtml(labels.infoBtn)}</span>
@@ -531,14 +701,22 @@
         const cornerBtn = team._imported
             ? `<button class="side-quest-remove-btn" type="button" data-remove-import="${escapeHtml(code)}"
                        aria-label="${escapeHtml(labels.importRemove)} ${escapeHtml(team.team_name || '')}">🗑</button>`
-            : `<button class="side-quest-copy-btn"
+            : (replikaCode
+                ? `<button class="side-quest-copy-btn"
                             type="button"
-                            data-code="${escapeHtml(code)}"
-                            aria-label="Copy replica code ${escapeHtml(code)}">
+                            data-code="${escapeHtml(replikaCode)}"
+                            aria-label="Copy replica code ${escapeHtml(replikaCode)}">
                         <span class="side-quest-copy-label">Replica</span>
-                        <span class="side-quest-copy-code">${escapeHtml(code) || '—'}</span>
+                        <span class="side-quest-copy-code">${escapeHtml(replikaCode)}</span>
                         <span class="side-quest-copy-icon" aria-hidden="true">📋</span>
-                    </button>`;
+                    </button>`
+                /* Ohne Code KEIN leerer Kopierknopf mit einem
+                   Gedankenstrich darin: er sah aus wie ein Code, der
+                   gleich kommt, und kopierte nichts. Statt dessen steht
+                   da, WAS es zu diesem Team gibt — die Teamliste. */
+                : `<span class="side-quest-copy-btn is-ohne-code">
+                        <span class="side-quest-copy-label">${escapeHtml(LABELS[uiLang()].ohneCode)}</span>
+                    </span>`);
         // No "#N" — it read like a placement/rank, which it isn't (teams are
         // sorted newest-first, not ranked). Show the share date instead so the
         // freshness is clear.
@@ -1408,6 +1586,243 @@
         overlay.querySelector('#sqImportText').focus();
     }
 
+    /* ── Die Hauptauswahl ueber dem Reiter ─────────────────────────
+       Sie steht in JEDEM Pfad, auch im Leerzustand — sonst waere die
+       einzige Quelle, die gerade keine Datei hat, eine Sackgasse ohne
+       Weg zurueck. */
+    function renderQuellenLeiste() {
+        const labels = LABELS[uiLang()];
+        const sprache = uiLang() === 'de' ? 'de' : 'en';
+        const knoepfe = QUELLEN.map(function (q) {
+            const aktiv = q.id === _aktiveQuelle;
+            return '<button class="side-quest-quelle-btn' + (aktiv ? ' is-active' : '') + '"'
+                + ' type="button" data-quelle="' + escapeHtml(q.id) + '"'
+                + ' aria-pressed="' + (aktiv ? 'true' : 'false') + '">'
+                + escapeHtml(q[sprache]) + '</button>';
+        }).join('');
+        return '<div class="side-quest-quellen" role="group" aria-label="'
+            + escapeHtml(labels.quelleAria) + '">'
+            + '<span class="side-quest-quellen-label">' + escapeHtml(labels.quelleLabel) + '</span>'
+            + knoepfe + '</div>';
+    }
+
+    function wireQuellenLeiste(host) {
+        host.querySelectorAll('[data-quelle]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const id = btn.getAttribute('data-quelle');
+                if (id === _aktiveQuelle) return;
+                _aktiveQuelle = id;
+                render();
+            });
+        });
+        const schalter = host.querySelector('[data-nur-mit-code]');
+        if (schalter) {
+            schalter.addEventListener('change', function () {
+                _nurMitCode = !!schalter.checked;
+                render();
+            });
+        }
+    }
+
+    /* Welche Turniere das „letzte Major" gerade sind — und ZWEI sind der
+       Normalfall, nicht die Ausnahme: am 19./20.09.2026 liefen Baltimore
+       und Tangerang, am 26./27.09.2026 Frankfurt und Brisbane. Deshalb
+       steht hier eine Liste und kein einzelner Name. */
+    function renderMajorKopf(meta) {
+        const turniere = Array.isArray(meta.turniere) ? meta.turniere : [];
+        if (!turniere.length) return '';
+        const zeilen = turniere.map(function (t) {
+            const name = escapeHtml(t.name || '');
+            const kopf = t.url
+                ? '<a href="' + escapeHtml(t.url) + '" target="_blank" rel="noopener">' + name + '</a>'
+                : name;
+            const wann = t.ende ? '<span class="side-quest-major-datum">' + escapeHtml(t.ende) + '</span>' : '';
+            // Die Bilanz steht mit da: wie viele Platzierungen es gab, wie
+            // viele davon einen Code tragen und wie viele Teams gezogen
+            // wurden. Ohne sie liesse sich nicht sagen, ob ein Lauf
+            // vollstaendig war.
+            const bilanz = '<span class="side-quest-major-bilanz">'
+                + escapeHtml(String(t.gezogen || 0)) + ' / '
+                + escapeHtml(String(t.platzierungen_gesamt || 0)) + ' · '
+                + escapeHtml(String(t.mit_replica_code || 0)) + ' × Code'
+                + '</span>';
+            return '<li class="side-quest-major-turnier">' + kopf + ' ' + wann + ' ' + bilanz + '</li>';
+        }).join('');
+        return '<ul class="side-quest-major-kopf">' + zeilen + '</ul>';
+    }
+
+    /* Der Renderpfad fuer die beiden neuen Quellen. Der alte Pfad fuer
+       VGCPastes bleibt unberuehrt — er traegt „Meine Teams", den
+       Artenfilter und die Regulationsbloecke, und nichts davon soll an
+       einem Umbau haengen, der ihn gar nicht betrifft. */
+    async function renderFremdquelle(host, status) {
+        const labels = LABELS[uiLang()];
+        const q = quelleVon(_aktiveQuelle);
+        const daten = await ladeQuelle(_aktiveQuelle);
+        if (status) status.textContent = '';
+
+        const meta = daten._meta || {};
+        const alle = (Array.isArray(daten.teams) ? daten.teams : []).map(vereinheitliche);
+        const kopf = _aktiveQuelle === 'major' ? renderMajorKopf(meta) : '';
+
+        if (!alle.length) {
+            host.innerHTML = renderQuellenLeiste()
+                + '<div class="side-quest-empty"><p>'
+                + escapeHtml(_aktiveQuelle === 'major' ? labels.majorLeer : labels.quelleLeer)
+                + '</p></div>';
+            wireQuellenLeiste(host);
+            return;
+        }
+
+        const gefiltert = _nurMitCode
+            ? alle.filter(function (t) { return !!t.replica_code; })
+            : alle;
+
+        // Der Schalter steht ueber der vollstaendigen Liste, weil ein
+        // Replika-Code die Ausnahme ist (16 von 155 bei Baltimore).
+        const schalter = '<label class="side-quest-nurcode">'
+            + '<input type="checkbox" data-nur-mit-code' + (_nurMitCode ? ' checked' : '') + '>'
+            + '<span>' + escapeHtml(labels.nurMitCode) + '</span>'
+            + '<span class="side-quest-nurcode-zahl">' + escapeHtml(String(gefiltert.length))
+            + ' / ' + escapeHtml(String(alle.length)) + '</span></label>';
+
+        // Die ehrliche Kennzeichnung: diese Quellen fuehren keine
+        // Statuswertpunkte. Sie wird NICHT durch geschaetzte Werte
+        // ersetzt — lieber eine Luecke, die dasteht, als eine Zahl, die
+        // niemand nachrechnen kann.
+        const evHinweis = (meta.hat_ev === false || q.hatEv === false)
+            ? '<p class="side-quest-ohne-ev">' + escapeHtml(labels.ohneEvHinweis) + '</p>'
+            : '';
+
+        let koerper;
+        if (!gefiltert.length) {
+            koerper = '<p class="side-quest-filter-none">'
+                + escapeHtml(labels.keinCodeGefunden) + '</p>';
+        } else if (q.gruppierung === 'turnier') {
+            const nachTurnier = new Map();
+            gefiltert.forEach(function (t) {
+                const k = t.turnier || t.tournament || '';
+                if (!nachTurnier.has(k)) nachTurnier.set(k, []);
+                nachTurnier.get(k).push(t);
+            });
+            const bloecke = [];
+            nachTurnier.forEach(function (liste, name) {
+                bloecke.push('<section class="side-quest-reg-block">'
+                    + '<h3 class="side-quest-reg-head is-current">' + escapeHtml(name)
+                    + '<span class="side-quest-reg-count">' + liste.length + '</span></h3>'
+                    + '<div class="side-quest-teams">'
+                    + liste.slice().sort(function (a, b) { return (a.platz || 999) - (b.platz || 999); })
+                        .map(renderTeam).join('')
+                    + '</div></section>');
+            });
+            koerper = bloecke.join('');
+        } else {
+            koerper = '<div class="side-quest-teams">'
+                + gefiltert.map(renderTeam).join('') + '</div>';
+        }
+
+        const stand = meta.erzeugt_am
+            ? '<p class="side-quest-updated">' + escapeHtml(labels.lastUpdated) + ' '
+              + escapeHtml(meta.erzeugt_am) + '</p>'
+            : '';
+        const quellLink = q.link
+            ? '<p class="side-quest-quelle-link"><a href="' + escapeHtml(q.link)
+              + '" target="_blank" rel="noopener">'
+              + escapeHtml(q.anbieter || q[uiLang() === 'de' ? 'de' : 'en'])
+              + '</a></p>'
+            : '';
+
+        host.innerHTML = renderQuellenLeiste() + '<div class="side-quest-intro">'
+            + quellLink + stand + evHinweis + '</div>'
+            + kopf + schalter + koerper;
+
+        wireQuellenLeiste(host);
+        wireTeamKarten(host, alle);
+    }
+
+    /* Die Knoepfe der Teamkarten verdrahten. Bis zum 24.09.2026 stand
+       das inline in render() — seit es einen ZWEITEN Renderpfad fuer die
+       Victory-Road-Quellen gibt, braucht es beide Male dasselbe, und
+       zweimal dasselbe abgeschrieben waere zweimal zu pflegen. */
+    function wireTeamKarten(host, allTeams) {
+        const labels = LABELS[uiLang()];
+        allTeams = Array.isArray(allTeams) ? allTeams : [];
+        host.querySelectorAll('.side-quest-copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => copyCode(btn));
+        });
+
+        host.querySelectorAll('[data-active-code]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-active-code') || '';
+                const schonAktiv = getActiveCode() === code;
+                // Zweiter Klick nimmt die Marke wieder weg. setActiveTeam
+                // zeichnet selbst neu.
+                setActiveTeam(schonAktiv ? '' : code);
+                if (typeof window.showToast === 'function') {
+                    window.showToast(schonAktiv ? labels.aktivAus : labels.aktivIst, 'success');
+                }
+            });
+        });
+
+        host.querySelectorAll('[data-copyown-code]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-copyown-code') || '';
+                const team = allTeams.find(t => kartenKennung(t) === code);
+                if (!team) return;
+                const res = copyAsOwn(team);
+                if (typeof window.showToast === 'function') {
+                    window.showToast(res && res.ok ? labels.uebernommen : labels.uebernommenFehler,
+                                     res && res.ok ? 'success' : 'warning');
+                }
+            });
+        });
+
+        host.querySelectorAll('.side-quest-info-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-strategy-code') || '';
+                const entry = _strategies && _strategies[code];
+                const team = allTeams.find(t => kartenKennung(t) === code);
+                if (entry && team) openStrategyModal(team, entry);
+            });
+        });
+
+        host.querySelectorAll('.side-quest-claude-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-team-code') || '';
+                const team = allTeams.find(t => kartenKennung(t) === code);
+                if (team) openClaudeForTeam(team, btn);
+            });
+        });
+
+        host.querySelectorAll('.side-quest-play-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-team-code') || '';
+                const team = allTeams.find(t => kartenKennung(t) === code);
+                if (team && window.sideQuestPlay && typeof window.sideQuestPlay.openPlayModal === 'function') {
+                    window.sideQuestPlay.openPlayModal(team);
+                }
+            });
+        });
+
+        host.querySelectorAll('.side-quest-export-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-export-code') || '';
+                const team = allTeams.find(t => kartenKennung(t) === code);
+                if (team) openExportModal(team);
+            });
+        });
+
+        host.querySelectorAll('.side-quest-mark-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const hash = btn.getAttribute('data-team-hash') || '';
+                const mark = btn.getAttribute('data-mark') || '';
+                if (!hash) return;
+                setMark(hash, mark);
+                render();  // cheap: data is cached, just re-sorts + repaints
+            });
+        });
+    }
+
     async function render() {
         const host = document.getElementById(HOST_ID);
         if (!host) return;
@@ -1420,22 +1835,35 @@
         // ChampionsNamen.laden() kommt mit in denselben Wurf: die
         // Teamkarten rendern direkt danach, und ein nachgereichter
         // Namensspeicher haette die erste Zeichnung schon verpasst.
+        //
+        // Die Namensdatei und die Strategien werden AUCH fuer die
+        // Victory-Road-Quellen gebraucht (renderPokemon uebersetzt
+        // darueber), deshalb laufen sie vor der Verzweigung.
         const [data] = await Promise.all([
             loadData(), loadStrategies(), loadDeNames(),
             (window.ChampionsNamen && window.ChampionsNamen.laden)
                 ? window.ChampionsNamen.laden() : Promise.resolve(null),
         ]);
+        // Eine andere Quelle als VGCPastes hat ihren eigenen Pfad: sie
+        // kennt weder Regulationsbloecke noch „Meine Teams" noch den
+        // Artenfilter, und der alte Pfad soll an diesem Umbau nicht
+        // haengen.
+        if (_aktiveQuelle !== 'vgcpastes') {
+            await renderFremdquelle(host, status);
+            return;
+        }
+
         const meta  = data._meta || {};
         const teams = Array.isArray(data.teams) ? data.teams : [];
         if (status) status.textContent = '';
 
         if (teams.length === 0) {
-            host.innerHTML = `
+            host.innerHTML = renderQuellenLeiste() + `
                 <div class="side-quest-empty">
-                    <p>No teams loaded.</p>
-                    <p>Run <code>backend/scrapers/champions_replica_scraper.py</code> or populate <code>data/champions_replica_teams.json</code>.</p>
+                    <p>${escapeHtml(LABELS[uiLang()].quelleLeer)}</p>
                 </div>
             `;
+            wireQuellenLeiste(host);
             return;
         }
 
@@ -1514,6 +1942,7 @@
             : `<p class="side-quest-filter-none">${escapeHtml(labels.filterNone)}</p>`;
 
         host.innerHTML = `
+            ${renderQuellenLeiste()}
             ${headerHtml}
             ${importBarHtml}
             ${filterHtml}
@@ -1522,6 +1951,7 @@
         `;
 
         wireSpeciesFilter(host);
+        wireQuellenLeiste(host);
 
         const importOpen = host.querySelector('.side-quest-import-open');
         if (importOpen) importOpen.addEventListener('click', openImportModal);
@@ -1533,80 +1963,7 @@
             });
         });
 
-        host.querySelectorAll('.side-quest-copy-btn').forEach(btn => {
-            btn.addEventListener('click', () => copyCode(btn));
-        });
-
-        host.querySelectorAll('[data-active-code]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const code = btn.getAttribute('data-active-code') || '';
-                const schonAktiv = getActiveCode() === code;
-                // Zweiter Klick nimmt die Marke wieder weg. setActiveTeam
-                // zeichnet selbst neu.
-                setActiveTeam(schonAktiv ? '' : code);
-                if (typeof window.showToast === 'function') {
-                    window.showToast(schonAktiv ? labels.aktivAus : labels.aktivIst, 'success');
-                }
-            });
-        });
-
-        host.querySelectorAll('[data-copyown-code]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const code = btn.getAttribute('data-copyown-code') || '';
-                const team = allTeams.find(t => (t.replica_code || '') === code);
-                if (!team) return;
-                const res = copyAsOwn(team);
-                if (typeof window.showToast === 'function') {
-                    window.showToast(res && res.ok ? labels.uebernommen : labels.uebernommenFehler,
-                                     res && res.ok ? 'success' : 'warning');
-                }
-            });
-        });
-
-        host.querySelectorAll('.side-quest-info-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const code = btn.getAttribute('data-strategy-code') || '';
-                const entry = _strategies && _strategies[code];
-                const team = allTeams.find(t => (t.replica_code || '') === code);
-                if (entry && team) openStrategyModal(team, entry);
-            });
-        });
-
-        host.querySelectorAll('.side-quest-claude-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const code = btn.getAttribute('data-team-code') || '';
-                const team = allTeams.find(t => (t.replica_code || '') === code);
-                if (team) openClaudeForTeam(team, btn);
-            });
-        });
-
-        host.querySelectorAll('.side-quest-play-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const code = btn.getAttribute('data-team-code') || '';
-                const team = allTeams.find(t => (t.replica_code || '') === code);
-                if (team && window.sideQuestPlay && typeof window.sideQuestPlay.openPlayModal === 'function') {
-                    window.sideQuestPlay.openPlayModal(team);
-                }
-            });
-        });
-
-        host.querySelectorAll('.side-quest-export-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const code = btn.getAttribute('data-export-code') || '';
-                const team = allTeams.find(t => (t.replica_code || '') === code);
-                if (team) openExportModal(team);
-            });
-        });
-
-        host.querySelectorAll('.side-quest-mark-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const hash = btn.getAttribute('data-team-hash') || '';
-                const mark = btn.getAttribute('data-mark') || '';
-                if (!hash) return;
-                setMark(hash, mark);
-                render();  // cheap: data is cached, just re-sorts + repaints
-            });
-        });
+        wireTeamKarten(host, allTeams);
     }
 
     /* ── Die eigenen Teams LESEN (16.09.2026) ────────────────────────────

@@ -1,0 +1,24 @@
+<!--
+  PROBE der Struktur von https://victoryroad.pro/2027-season-calendar/,
+  gemessen 24.09.2026. ECHTE Zeilen, gemessene Tag-Struktur.
+
+  Die Seite fuehrt 68 Zeilen in 14 Tabellen, davon 24 mit "Regional" im Namen
+  und 19 mit einem Link auf die Turnierseite. Hier stehen 7 Zeilen, die alle
+  Faelle abdecken, die der Parser unterscheiden muss:
+
+    * GELAUFEN und ausgewertet  -> Sieger ist ein Personenname, Link vorhanden
+    * ZWEI am selben Wochenende -> Baltimore und Indonesia am 19./20. Sep;
+                                   Frankfurt und Brisbane am 26./27. Sep
+    * NOCH NICHT gelaufen       -> Sieger ist ein Aufruf ("Sign-ups are open!")
+    * NOCH KEINE Seite          -> gar kein Link, Format "TBD"
+
+  Der Gedankenstrich im Datum ist ein echter EN DASH (U+2013), kein Bindestrich.
+-->
+<html><head><title>Calendar of Pok&eacute;mon VGC events for the 2027 Season</title></head>
+<body><div id="content">
+<h2>Regional Championships</h2>
+<table class="infobox2 sortable">
+<tr><th>Date</th><th>Event</th><th>Winner</th><th>Format</th></tr>
+<tr><td>19–20 Sep 2026</td><td><a href="https://victoryroad.pro/2027-baltimore/">Baltimore Regional</a></td><td>Joseph Ugarte</td><td>M-C<br>OTS</td></tr><tr><td>19–20 Sep 2026</td><td><a href="https://victoryroad.pro/2027-indonesia-tangerang/">Indonesia Premier Ball League Tangerang Regency Regional</a></td><td>Daffa Prasetyo</td><td>M-C<br>OTS</td></tr><tr><td>26–27 Sep 2026</td><td><a href="https://victoryroad.pro/2027-frankfurt/">Frankfurt Regional</a></td><td>Sign-ups are open!</td><td>M-C<br>OTS</td></tr><tr><td>26–27 Sep 2026</td><td><a href="https://victoryroad.pro/2027-brisbane/">Brisbane Regional</a></td><td>Sign-ups are open!</td><td>M-C<br>OTS</td></tr><tr><td>3–4 Oct 2026</td><td><a href="https://victoryroad.pro/2027-recife/">Recife Regional</a></td><td>Sign-ups are open!</td><td>M-C<br>OTS</td></tr><tr><td>10–11 Oct 2026</td><td><a href="https://victoryroad.pro/2027-louisville/">Louisville Regional</a></td><td>Sign-ups are open!</td><td>M-C<br>OTS</td></tr><tr><td>5–6 Dec 2026</td><td>Las Vegas Regional</td><td>All info here!</td><td>TBD</td></tr>
+</table>
+</div></body></html>

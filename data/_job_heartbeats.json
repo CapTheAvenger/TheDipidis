@@ -2,33 +2,33 @@
   "_hinweis": "Wann lief welcher nicht blockierende Schritt zuletzt, und mit welchem Ergebnis. Getrennt von der Frage, ob sich die zugehoerige Datei geaendert hat.",
   "core/prepare_card_data.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "core/update_sets.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/all_cards_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/archetype_icons_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/cardmarket_id_mapper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/cardmarket_price_merger.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/champions_replica_scraper.py": {
     "status": "OK",
@@ -37,98 +37,98 @@
   },
   "scrapers/city_league_analysis_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/city_league_archetype_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/city_league_past_analysis_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/city_league_past_archetype_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/current_meta_analysis_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/japanese_cards_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/labs_tournament_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/limitless_online_decklist_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/limitless_online_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/online_tournament_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/per_decklist_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/player_continuity_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/pokemon_card_effects_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/pokemon_card_text_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/scrape_kartentexte.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/scrape_pokemonproxies_urls.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/tournament_scraper_JH.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/victory_road_major_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scrapers/victory_road_replika_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scripts/build_champions_editionen.py": {
     "status": "OK",
@@ -157,8 +157,8 @@
   },
   "scripts/build_online_fenster.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   },
   "scripts/scrape_champions_items.py": {
     "status": "OK",
@@ -202,7 +202,7 @@
   },
   "tools/build_threat_intel.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-09-24T15:14:57Z",
-    "zuletzt_gelaufen": "2026-09-24T15:14:57Z"
+    "zuletzt_erfolgreich": "2026-09-24T16:25:43Z",
+    "zuletzt_gelaufen": "2026-09-24T16:25:43Z"
   }
 }

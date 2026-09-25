@@ -321,3 +321,81 @@ def test_der_preislauf_wirft_die_bildurteile_nicht_weg(tmp_path, monkeypatch):
     neu2 = bau.write_json_index(zeilen, str(ziel))
     assert "geprueft" not in neu2["TEF-114"], (
         "ein Urteil wurde auf eine andere Bildadresse uebertragen")
+
+
+# ── Die beiden Leser muessen dasselbe sagen ──────────────────────────
+
+def _weich(versatz):
+    """Ein weiches Motiv ohne harte Kanten — einem Kartenbild naeher als
+    ein Streifenmuster, und im Gegensatz zu ihm ohne Sprungstellen, an
+    denen sich zwei Skalierungen streiten koennen."""
+    return lambda x, y, k: min(255, max(0,
+        (x * 140) // 240 + (y * 90) // 330 + versatz + k * 4))
+
+
+def test_beide_leser_faellen_dasselbe_urteil():
+    """BEFUND (25.09.2026, erster Lauf im Ablauf): der Lauf war nach 7
+    Minuten gruen und hatte KEIN einziges Urteil geschrieben. Das
+    Entfiltern eines PNG kostet in reinem Python Millionen von
+    Schleifendurchlaeufen; 266 Bilder passen in keine Frist.
+
+    Seitdem holt sich das Skript Pillow, wenn es kann, und behaelt den
+    eigenen Leser als Rueckfall. Zwei Leser sind nur dann unbedenklich,
+    wenn sie dasselbe URTEIL faellen. Geprueft wird deshalb die
+    Entscheidung, die das Skript wirklich trifft: welches der drei
+    Galeriebilder gehoert zu diesem Basisdruck?
+
+    Der „Basisdruck" ist hier dasselbe Motiv, nur heller und leicht
+    verschoben — so wie sich ein gestempelter Druck vom Basisdruck
+    unterscheidet."""
+    pytest.importorskip("PIL", reason="ohne Pillow gibt es nur einen Leser")
+    breit, hoch = 240, 330
+    vorlagen = {'a': _weich(0), 'b': _weich(70), 'c': _weich(150)}
+    for leser in (PP.png_grau_raster, PP.bild_raster):
+        galerie = {n: leser(png(breit, hoch, f, 4)) for n, f in vorlagen.items()}
+        assert all(galerie.values()), "ein Bild wurde nicht gelesen"
+        for name, f in vorlagen.items():
+            gestoert = leser(png(breit, hoch,
+                                 lambda x, y, k: min(255, f(x, y, k) + 12), 1))
+            naechster = min(galerie, key=lambda n: PP.abstand(galerie[n], gestoert))
+            assert naechster == name, (
+                "%s haelt %s fuer %s" % (leser.__name__, name, naechster))
+
+
+def test_auf_einem_weichen_motiv_sind_sich_die_leser_auch_im_wert_einig():
+    """Auf die Zahl genau muessen sie sich nicht ueberall einigen: ein
+    hartkantiges Streifenmuster trennt die Kastenraender anders und
+    weicht dann um bis zu 0,5 ab. Auf einem weichen Motiv — und auf
+    echten Kartenbildern, dort gemessen 0,011 — stimmen sie ueberein."""
+    pytest.importorskip("PIL", reason="ohne Pillow gibt es nur einen Leser")
+    roh = png(240, 330, _weich(0), 1)
+    a = PP.png_grau_raster(roh)
+    b = PP.bild_raster(roh)
+    weit = max(abs(x - y) for x, y in zip(a, b))
+    assert weit < 0.05, "die beiden Leser sind sich um %.3f uneinig" % weit
+
+
+def test_mit_pillow_wird_der_langsame_leser_nicht_mehr_angefasst(monkeypatch):
+    """Der Rueckfall darf ein Rueckfall bleiben. Laeuft er trotz Pillow
+    mit, ist die Frist wieder das Problem, das den ersten Lauf leer
+    zurueckgab — und nichts davon waere zu sehen: das Ergebnis stimmt ja,
+    es dauert nur zwanzigmal so lange (gemessen an einem echten
+    Kartenbild: 1,47 s gegen 0,05 s)."""
+    pytest.importorskip("PIL", reason="ohne Pillow gibt es nur einen Leser")
+    def nicht_anfassen(*a, **k):
+        raise AssertionError("der eigene PNG-Leser lief, obwohl Pillow da ist")
+    monkeypatch.setattr(PP, "png_grau_raster", nicht_anfassen)
+    PP._PIL = None                      # die Erkennung frisch laufen lassen
+    raster = PP.bild_raster(png(64, 64, MUSTER["flecken"], 1))
+    assert raster and len(raster) == PP.RASTER * PP.RASTER
+
+
+def test_der_schnelle_weg_wird_auch_genommen():
+    """Ohne diese Zeile waere die Bibliothek installiert und ungenutzt —
+    und der Lauf liefe wieder in seine Frist."""
+    with open(os.path.join(SKRIPTE, "pruefe_prizepack_galerie.py"), encoding="utf-8") as f:
+        text = f.read()
+    assert "bild_raster(http_get(url))" in text, "die Galeriebilder gehen nicht ueber bild_raster"
+    assert "bild_raster(http_get(basisurl))" in text, "die Basisbilder gehen nicht ueber bild_raster"
+    assert "getattr(Image, \"BOX\"" in text, (
+        "Pillow skaliert nicht mit derselben Kastenmittelung wie der eigene Leser")

@@ -368,7 +368,7 @@ def bildpruefung(index, args):
         return f"Bildpruefung: nicht moeglich ({type(e).__name__}: {e})"
     urteile = pp.pruefe(index, frist=time.time() + args.pruefsekunden, ausgabe=log)
     if not urteile:
-        return "Bildpruefung: nichts offen — %s" % pp.bilanz(index)
+        return "Bildpruefung: nichts geurteilt — %s" % pp.bilanz(index)
     pp.eintragen(index, urteile)
     tmp = args.json_out + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
@@ -393,7 +393,7 @@ def main():
     ap.add_argument("--ohne-bildpruefung", action="store_true",
                     help="die Bildpruefung ueberspringen (sie laedt je offenem "
                          "Eintrag zwei Bilder)")
-    ap.add_argument("--pruefsekunden", type=float, default=420.0,
+    ap.add_argument("--pruefsekunden", type=float, default=660.0,
                     help="Frist fuer die Bildpruefung; was sie nicht schafft, "
                          "bleibt offen und wird beim naechsten Lauf gemessen")
     ap.add_argument("--refresh-prices", action="store_true",

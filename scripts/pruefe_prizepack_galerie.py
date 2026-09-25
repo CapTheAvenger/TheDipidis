@@ -51,6 +51,7 @@ die eine Bibliothek braucht, die dort fehlt, laeuft nie.
 import argparse
 import json
 import os
+import io
 import struct
 import sys
 import time
@@ -95,7 +96,73 @@ def http_get(url, versuche=3, pause=8):
     return None
 
 
-# ── PNG lesen, ohne Pillow ───────────────────────────────────────────
+# ── Bilder lesen ─────────────────────────────────────────────────────
+#
+# WARUM HIER EINE BIBLIOTHEK INSTALLIERT WIRD (gemessen 25.09.2026)
+# -----------------------------------------------------------------
+# Der erste Lauf im Ablauf brach nach 7 Minuten ab, ohne ein einziges
+# Urteil: das Entfiltern eines PNG kostet in reinem Python rund vier
+# Millionen Schleifendurchlaeufe je Bild — bei 266 Bildern sind das
+# Minuten, nicht Sekunden. Der Lauf war gruen, die Datei unveraendert,
+# und auf der Seite blieb jedes Stempelbild verborgen. Genau die Sorte
+# Fehler, die nicht auffaellt.
+#
+# Pillow macht dieselbe Arbeit in Millisekunden. Die Datei des Ablaufs
+# ist aus dieser Sitzung nicht aenderbar (die GitHub-App darf
+# .github/workflows/ nicht schreiben), also holt das Skript sie sich
+# selbst — einmal, leise, und mit dem eigenen Leser als Rueckfall. Ohne
+# Netz oder ohne pip bleibt alles wie vorher, nur langsamer.
+
+_PIL = None
+
+
+def _pillow():
+    """Pillow, wenn es da ist oder sich holen laesst. Sonst None."""
+    global _PIL
+    if _PIL is not None:
+        return _PIL or None
+    try:
+        from PIL import Image  # noqa: PLC0415
+        _PIL = Image
+        return _PIL
+    except ImportError:
+        pass
+    try:
+        import subprocess  # noqa: PLC0415
+        subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "pillow"],
+                       check=True, timeout=180)
+        from PIL import Image  # noqa: PLC0415
+        _PIL = Image
+        log("  Pillow nachinstalliert — das Lesen der Bilder geht damit "
+            "etwa hundertmal schneller")
+        return _PIL
+    except Exception as e:  # noqa: BLE001
+        log("  Pillow nicht verfuegbar (%s) — es wird mit dem eigenen "
+            "PNG-Leser gearbeitet" % type(e).__name__)
+        _PIL = False
+        return None
+
+
+def bild_raster(rohbytes, raster=RASTER):
+    """Graues raster*raster-Gitter eines Bildes, auf die mittlere
+    Helligkeit normiert. Erst Pillow, dann der eigene Leser."""
+    Image = _pillow()
+    if Image is not None:
+        # BOX, nicht BILINEAR: das ist dieselbe Kastenmittelung, die der
+        # eigene Leser unten macht. Sonst beurteilten zwei Laeufe
+        # dasselbe Bild mit zwei verschiedenen Beschreibungen (gemessen
+        # 25.09.2026: bis zu 0,11 Abweichung je Feld), und ein
+        # Grenzfall koennte je nach Umgebung anders ausgehen.
+        try:
+            b = Image.open(io.BytesIO(rohbytes)).convert("L").resize(
+                (raster, raster), getattr(Image, "BOX", Image.BILINEAR))
+            p = list(b.getdata())
+            mw = sum(p) / float(len(p)) or 1.0
+            return [x / mw for x in p]
+        except Exception:  # noqa: BLE001
+            return None
+    return png_grau_raster(rohbytes, raster)
+
 
 def png_grau_raster(rohbytes, raster=RASTER):
     """PNG -> graues raster*raster-Gitter, auf die mittlere Helligkeit
@@ -258,7 +325,7 @@ def pruefe(index, frist=None, pause=0.35, nur_offene=True, serien=None,
             if frist and time.time() > frist:
                 ausgabe("  Frist erreicht — die restlichen Eintraege bleiben offen")
                 break
-            g = png_grau_raster(http_get(url))
+            g = bild_raster(http_get(url))
             time.sleep(pause)
             if g:
                 galerie[nummer] = g
@@ -282,7 +349,7 @@ def pruefe(index, frist=None, pause=0.35, nur_offene=True, serien=None,
                 urteile[k] = {"urteil": OFFEN, "grund": "kein Basisdruck in der Kartendatenbank",
                               "adresse": adresse}
                 continue
-            b = png_grau_raster(http_get(basisurl))
+            b = bild_raster(http_get(basisurl))
             time.sleep(pause)
             if not b:
                 urteile[k] = {"urteil": OFFEN, "grund": "Basisbild nicht lesbar",

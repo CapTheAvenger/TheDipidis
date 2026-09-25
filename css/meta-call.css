@@ -2903,8 +2903,20 @@
     background: var(--surface-1);
     box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.18);
 }
+/* BEFUND (Betreiber, 25.09.2026, Bildschirmfoto): „hab gefunden, wo ich
+   Meta Call Daten ändern kann, aber das Feld wird weiß."
+
+   Genau dieses Feld. Die Fläche stand fest auf #f3eafa, die Schrift auf
+   var(--ink) — und --ink dreht im Dunkelmodus auf Hell. Ergebnis: helle
+   Schrift auf fast weißem Grund, also eine Zahl, die man eingibt und
+   nicht mehr liest. Die Regel zwei Blöcke tiefer sagt es wörtlich:
+   „Fester Grauwert traegt nur in einem Modus — --ink-3 dreht mit."
+
+   Die Fläche dreht jetzt mit; unterschieden bleibt das gefüllte Feld
+   ohnehin am Akzentrahmen. */
 .mc-cell-est .mc-personal-input.has-value {
-    background: #f3eafa;
+    background: var(--mc-tint-personal);
+    color: var(--ink);
     border-color: var(--mc-personal-accent);
 }
 .mc-cell-final .mc-share-final {
@@ -2950,11 +2962,15 @@
     gap: 8px;
     padding: 7px 12px;
     margin: -4px 0 14px;
-    background: #f3eafa;
-    border: 1px solid #d9c5ed;
+    /* Dieselbe Sorte wie oben: feste helle Flaeche. Sie steht hier mit
+       einer festen dunklen Schrift zusammen und war deshalb lesbar —
+       aber ein heller Kasten mitten im dunklen Meta Call sieht aus wie
+       ein Fehler. Beide Werte drehen jetzt mit. */
+    background: var(--mc-tint-personal);
+    border: 1px solid var(--mc-personal-accent);
     border-radius: 8px;
     font-size: 0.84rem;
-    color: #5a3678;
+    color: var(--ink);
     line-height: 1.35;
     max-width: 100%;
 }

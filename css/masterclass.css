@@ -355,10 +355,11 @@
 }
 
 /* ── Vorlesen ───────────────────────────────────────────────────
-   Die Leiste steht in der Suchzeile und bleibt beim Scrollen oben
-   kleben: wer 10.000 Woerter vorlesen laesst, will Pause erreichen,
-   ohne erst nach oben zu wischen. 44 px Tippziel wie ueberall
-   (css/tippziele.css). */
+   Die Leiste steht fest ueber der Seite und bleibt damit beim
+   Scrollen erreichbar: wer 10.000 Woerter vorlesen laesst, will Pause
+   erreichen, ohne erst nach oben zu wischen. Warum fest und nicht
+   klebend, steht als Messung an .mcl-vorleser. 44 px Tippziel wie
+   ueberall (css/tippziele.css). */
 .mcl-suchzeile {
     z-index: 3;
     background: var(--surface-0, var(--surface-1));

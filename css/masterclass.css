@@ -632,3 +632,134 @@
     .mcl-kachel-bild { width: 54px; }
     .mcl-gitter { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
 }
+
+/* ── Cardbinder ─────────────────────────────────────────────────────
+ *
+ * Der fuenfte Bereich einer Masterclass: jede Karte, die je in einer
+ * erfassten Liste dieses Archetyps stand, mit Metafilter, Nutzung,
+ * Preis, Matchups und Turnierergebnissen. Angehaengt von
+ * js/ds-masterclass.js, nicht im gekauften Inhaltsstueck — damit jede
+ * kuenftige Masterclass ihn von selbst bekommt.
+ *
+ * Die Kachel ist bewusst breiter als die der Listen (.mcl-gitter,
+ * 84 px): dort zaehlt nur die Anzahl im Deck, hier stehen vier Zahlen
+ * und ein Preis unter dem Bild. Bei 84 px braeche die Zeile
+ * „2631 / 2641 Listen" um.
+ */
+
+.mcl-bd-gitter {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--s-3);
+}
+
+.mcl-bd-karte {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-1);
+    min-width: 0;
+}
+
+.mcl-bd-bild { line-height: 0; }
+.mcl-bd-bild img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--r-sm);
+}
+
+.mcl-bd-txt {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    font-size: var(--fs-xs);
+}
+.mcl-bd-txt b {
+    font-size: var(--fs-sm);
+    line-height: 1.2;
+    /* Kartennamen werden lang ("Team Rockets Lambda"). Sie duerfen
+     * umbrechen — abgeschnittener Text ist hier ein Fehler, denn der
+     * Name ist das, wonach im Laden gefragt wird. */
+    overflow-wrap: anywhere;
+}
+.mcl-bd-druck,
+.mcl-bd-zahlen {
+    color: var(--ink-3);
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+}
+.mcl-bd-zahlen b { font-size: var(--fs-xs); color: var(--ink); }
+
+.mcl-bd-preis {
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    align-self: flex-start;
+}
+.mcl-bd-preis:hover { text-decoration: underline; }
+.mcl-bd-kein { color: var(--ink-3); font-weight: 500; cursor: help; }
+
+.mcl-bd-h {
+    margin: var(--s-6) 0 var(--s-2);
+    font-size: var(--fs-lg);
+}
+
+.mcl-bd-mus,
+.mcl-bd-tns { list-style: none; margin: 0; padding: 0; }
+
+.mcl-bd-mus {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: var(--s-2);
+}
+.mcl-bd-mu {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface-1);
+    padding: var(--s-2);
+    min-width: 0;
+}
+.mcl-bd-mu[data-s="gut"] .mcl-ampel { background: var(--mcl-gut); }
+.mcl-bd-mu[data-s="schlecht"] .mcl-ampel { background: var(--mcl-schlecht); }
+.mcl-bd-mu-n { flex: 1; min-width: 0; font-size: var(--fs-sm); overflow-wrap: anywhere; }
+.mcl-bd-mu-z { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.mcl-bd-mu-z small { display: block; font-size: var(--fs-xs); color: var(--ink-3); }
+
+.mcl-bd-tn {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-bottom: 1px solid var(--line);
+    padding: var(--s-2) 0;
+}
+.mcl-bd-tn span {
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+}
+
+.mcl-bd-herkunft {
+    margin-top: var(--s-6);
+    border-top: 1px solid var(--line);
+    padding-top: var(--s-3);
+    font-size: var(--fs-sm);
+    color: var(--ink-2);
+}
+.mcl-bd-herkunft summary { cursor: pointer; color: var(--ink-2); }
+.mcl-bd-herkunft p { margin: var(--s-2) 0 0; }
+.mcl-bd-herkunft .mcl-sub { overflow-wrap: anywhere; }
+
+@media (max-width: 480px) {
+    .mcl-bd-gitter { grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); }
+    .mcl-bd-mus { grid-template-columns: 1fr; }
+}

@@ -45,6 +45,50 @@ DATEN = os.path.join(WURZEL, "data")
 STUECK = os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
 LISTEN_JSON = os.path.join(DATEN, "masterclass_online_listen.json")
 
+# ── WORAN EINE ACE SPEC ERKANNT WIRD ──────────────────────────────────
+#
+# BEFUND (Wochenlauf 159, 25.09.2026): eine frisch gezogene Liste fuehrte
+# „Prime Catcher" — eine ACE SPEC — und die Kachel trug keine Markierung.
+# Der Grund steht seit je im Bestand, in js/app-city-league.js:
+#
+#     "CSV is_ace_spec is buggy"
+#
+# Derselbe Lauf meldete es sogar mit: „is_ace_spec driftet wieder: 5
+# Felder in den ausgelieferten CSVs sind anders belegt als die Regel es
+# vorgibt."
+#
+# Deshalb entscheidet nicht EIN Signal, sondern beide: das Feld
+# is_ace_spec ODER der Name im Register data/ace_specs.json (39 Karten,
+# Quelle limitlesstcg.com/cards?q=is:ace). Das Register ist dieselbe
+# Quelle, gegen die tests/python/test_ace_spec_an_der_kachel.py prueft —
+# und dieselbe, aus der window.isAceSpec im Frontend liest.
+ACE_REGISTER_DATEI = "ace_specs.json"
+
+
+def _ace_register():
+    pfad = os.path.join(DATEN, ACE_REGISTER_DATEI)
+    try:
+        with open(pfad, encoding="utf-8") as f:
+            namen = (json.load(f) or {}).get("ace_specs") or []
+    except Exception as e:  # noqa: BLE001
+        print("::warning::%s nicht lesbar (%s) — die ACE-SPEC-Markierung "
+              "haengt dann allein am Feld is_ace_spec" % (ACE_REGISTER_DATEI, e))
+        return set()
+    return {str(n).strip().lower().replace("\u2019", "'") for n in namen if str(n).strip()}
+
+
+ACE_NAMEN = _ace_register()
+
+
+def ist_ace_spec(name_en, feld=False):
+    """Eins von beiden genuegt. Geraten wird nichts: beide Quellen sind
+    gefuehrte Angaben, keine Heuristik ueber Seltenheit oder Kartentext."""
+    if feld:
+        return True
+    n = html.unescape(str(name_en or "")).strip().lower().replace("\u2019", "'")
+    return bool(n) and n in ACE_NAMEN
+
+
 GRUPPE = "Online · letzte 7 Tage"
 TIMS_BLOCK = "0"          # Tims aktuelle Liste — Bezug fuer den Unterschied
 CDN = "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci"
@@ -102,6 +146,10 @@ def kachel_vorlagen(roh):
 def kachel_mit_anzahl(vorlage, n):
     de = _attr(vorlage, "de")
     k = re.sub(r'\sdata-n="\d+"', ' data-n="%d"' % n, vorlage, count=1)
+    # Eine uebernommene Vorlage kann aus einer Zeit stammen, in der es die
+    # Markierung noch nicht gab. Sie wird ergaenzt, nie entfernt.
+    if 'data-ace=' not in k and ist_ace_spec(_attr(vorlage, "en")):
+        k = k.replace(' data-n=', ' data-ace="1" data-n=', 1)
     k = re.sub(r'aria-label="[^"]*"', 'aria-label="%s, %d mal"' % (html.escape(de), n), k, count=1)
     k = re.sub(r'<span class="mcl-anz">\d+</span>', '<span class="mcl-anz">%d</span>' % n, k, count=1)
     return k
@@ -224,7 +272,7 @@ def block(nummer, liste, vorlagen, tims):
             de = _attr(vorlage, "de") or name
         else:
             k = kachel_neu(name, karte.get("set_code"), karte.get("set_number"), n,
-                           bool(karte.get("is_ace_spec")))
+                           ist_ace_spec(name, bool(karte.get("is_ace_spec"))))
             if not k:
                 fehlende.append(name)
                 continue

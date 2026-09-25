@@ -593,7 +593,13 @@ test('die Beschriftungen des Regals gibt es in beiden Sprachen', () => {
     const txt = JS_NACKT.slice(JS_NACKT.indexOf('var TXT'), JS_NACKT.indexOf('function lang'));
     const de = (txt.match(/de:\s*\{[\s\S]*?\}/) || [''])[0];
     const en = (txt.match(/en:\s*\{[\s\S]*?\}/) || [''])[0];
-    const schluessel = (b) => (b.match(/(\w+):\s*'/g) || []).map((x) => x.replace(/:\s*'$/, ''));
+    /* Beide Anfuehrungsformen zaehlen. Seit dem 25.09.2026 steht in der
+     * englischen Fassung "Tim's picks only" — mit Apostroph im Text, also
+     * in doppelten Anfuehrungszeichen. Der alte Ausdruck sah nur die
+     * einfachen und meldete den Schluessel als in en fehlend, obwohl er
+     * dasteht. */
+    const schluessel = (b) => (b.match(/(\w+):\s*["']/g) || [])
+        .map((x) => x.replace(/:\s*["']$/, ''));
     assert.deepStrictEqual(schluessel(de).sort(), schluessel(en).sort(),
         'die Beschriftungen unterscheiden sich zwischen de und en');
     assert.ok(schluessel(de).length >= 12, `nur ${schluessel(de).length} Beschriftungen`);

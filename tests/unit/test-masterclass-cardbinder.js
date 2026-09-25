@@ -69,6 +69,31 @@ function lade(...namen) {
     return vm.runInContext('({' + namen.join(',') + '})', ktx);
 }
 
+/* binderKarteHtml traegt seit dem Deckbau (25.09.2026) drei weitere
+ * Auskuenfte an der Karte: wie oft das + sie hineinlegt, wie oft sie
+ * schon drin ist, und was Tim spielt. Die ersten beiden kommen aus
+ * Nachbarfunktionen — die muessen also mitgeladen werden. `window` wird
+ * hier LEER gestellt: dann greift in binderMenge der Rueckfall, und der
+ * Deckbauer ist nicht da, also ist die Karte nie im Deck. Genau der
+ * Zustand, in dem eine Kachel weiterhin richtig aussehen muss. */
+function ladeKachel(zusatz) {
+    const namen = ['binderKarteHtml', 'binderZahl', 'binderDruck', 'binderMenge',
+        'binderImDeck', 'binderDeckKarte', 'deckBauer'];
+    const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
+    const ktx = Object.assign({
+        assert,
+        esc: (s) => String(s === null || s === undefined ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;'),
+        T: (k) => k,
+        bildAdresse: () => '',
+        window: {}
+    }, zusatz || {});
+    vm.createContext(ktx);
+    vm.runInContext(quelle + '\n;({' + namen.join(',') + '})', ktx);
+    return vm.runInContext('({' + namen.join(',') + '})', ktx);
+}
+
 /* Eine Mappe, wie build_masterclass_cardbinder.py sie schreibt. */
 const karte = (o) => Object.assign({
     name: 'Drilbur', name_de: 'Rotomurf', set: 'PBL', nummer: '46',
@@ -77,7 +102,7 @@ const karte = (o) => Object.assign({
     je_meta: {
         'TEF-PBL': { listen_mit_karte: 2631, listen_gesamt: 2641, anteil: 99.6, schnitt: 3.9, hoechstzahl: 4, turniere: 220 }
     },
-    gesamt: { listen_mit_karte: 2631, listen_gesamt: 2641, anteil: 99.6 },
+    gesamt: { listen_mit_karte: 2631, listen_gesamt: 2641, anteil: 99.6, schnitt: 3.9, hoechstzahl: 4 },
     quellen: ['online_api']
 }, o);
 
@@ -139,7 +164,7 @@ test('binderEinhaengen setzt Knopf und Abschnitt — das Inhaltsstueck bleibt un
 /* ── 2 · Metafilter und Sortierung ───────────────────────────────── */
 
 test('der Metafilter zeigt nur Karten, die es in diesem Meta gab', () => {
-    const { binderSortiert } = lade('binderSortiert');
+    const { binderSortiert } = lade('binderSortiert', 'binderDruck', 'binderGruppenRang');
     const nurPbl = karte({ name: 'Nur PBL' });
     const nur30c = karte({
         name: 'Nur 30C',
@@ -157,7 +182,7 @@ test('der Metafilter zeigt nur Karten, die es in diesem Meta gab', () => {
 });
 
 test('die Sortierung nach Nutzung gilt IM gewaehlten Meta, nicht insgesamt', () => {
-    const { binderSortiert } = lade('binderSortiert');
+    const { binderSortiert } = lade('binderSortiert', 'binderDruck', 'binderGruppenRang');
     /* A ist insgesamt haeufiger, B ist im neuen Meta haeufiger. Wer im
      * neuen Meta sortiert und A zuerst bekommt, sortiert nach der
      * falschen Zahl. */
@@ -179,7 +204,7 @@ test('die Sortierung nach Nutzung gilt IM gewaehlten Meta, nicht insgesamt', () 
 });
 
 test('nach Preis sortiert steht die teuerste Karte oben, Karten ohne Preis unten', () => {
-    const { binderSortiert } = lade('binderSortiert');
+    const { binderSortiert } = lade('binderSortiert', 'binderDruck', 'binderGruppenRang');
     const billig = karte({ name: 'billig', preis: { eur: 0.04 } });
     const teuer = karte({ name: 'teuer', preis: { eur: 31.5 } });
     const ohne = karte({ name: 'ohne', preis: null });
@@ -188,7 +213,7 @@ test('nach Preis sortiert steht die teuerste Karte oben, Karten ohne Preis unten
 });
 
 test('nach Name sortiert wird der DEUTSCHE Name genommen', () => {
-    const { binderSortiert } = lade('binderSortiert');
+    const { binderSortiert } = lade('binderSortiert', 'binderDruck', 'binderGruppenRang');
     /* Englisch waere Drilbur < Zubat; deutsch ist Rotomurf > Zubat
      * nicht — also entscheidet, welcher Name benutzt wird. */
     const a = karte({ name: 'Drilbur', name_de: 'Rotomurf' });
@@ -212,7 +237,7 @@ test('eine fehlende Zahl wird zum Strich, nicht zur Null', () => {
 });
 
 test('ohne Preis steht ein Strich und kein Euro-Betrag', () => {
-    const { binderKarteHtml } = lade('binderKarteHtml', 'binderZahl');
+    const { binderKarteHtml } = ladeKachel();
     const html = binderKarteHtml(karte({ preis: null }), 'alle');
     assert.ok(!/\d[,.]\d\d\s*€|\\u20ac/.test(html.replace(/–/g, '')),
         'im HTML steht ein Betrag, obwohl kein Preis in den Daten ist:\n' + html);
@@ -220,7 +245,7 @@ test('ohne Preis steht ein Strich und kein Euro-Betrag', () => {
 });
 
 test('die Kachel zeigt den deutschen Namen und den Druck', () => {
-    const { binderKarteHtml } = lade('binderKarteHtml', 'binderZahl');
+    const { binderKarteHtml } = ladeKachel();
     const html = binderKarteHtml(karte({}), 'alle');
     assert.ok(html.includes('Rotomurf'), 'der deutsche Name fehlt:\n' + html);
     assert.ok(html.includes('PBL-46'), 'der Druck fehlt:\n' + html);
@@ -228,7 +253,7 @@ test('die Kachel zeigt den deutschen Namen und den Druck', () => {
 });
 
 test('eine Karte ohne deutschen Namen behaelt den englischen', () => {
-    const { binderKarteHtml } = lade('binderKarteHtml', 'binderZahl');
+    const { binderKarteHtml } = ladeKachel();
     const html = binderKarteHtml(karte({ name_de: null, name: 'Jumbo Ice Cream' }), 'alle');
     assert.ok(html.includes('Jumbo Ice Cream'),
         'ohne deutschen Namen steht gar kein Name da:\n' + html);
@@ -272,4 +297,409 @@ test('die Beschriftungen gibt es in beiden Sprachen', () => {
         assert.ok(new RegExp('\\b' + k + ':').test(de), `deutsch fehlt: ${k}`);
         assert.ok(new RegExp('\\b' + k + ':').test(en), `englisch fehlt: ${k}`);
     });
+});
+
+/* ── 5 · Standardsortierung ───────────────────────────────────────────
+ *
+ * BEFUND (Betreiber, 25.09.2026): „bitte auch noch unsere
+ * Standardsortierung anbieten --> Pokemon, supporter, Item, Tool,
+ * Stadion, Spezial Energie, Basis Energie"
+ *
+ * Geprueft wird die AUSGEFUEHRTE Sortierung, nicht die Liste im
+ * Quelltext: eine Reihenfolge, die nur als Konstante richtig dasteht,
+ * aber nicht angewendet wird, waere gruen und falsch.
+ */
+
+function ladeSortierung() {
+    const namen = ['binderSortiert', 'binderDruck', 'binderGruppenRang'];
+    const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
+    /* BINDER_GRUPPEN steht im Modul und wird hier AUS DEM QUELLTEXT
+     * geholt, nicht im Test wiederholt — sonst pruefte der Test seine
+     * eigene Kopie. */
+    const roh = /var BINDER_GRUPPEN = (\[[^\]]*\]);/.exec(JS);
+    assert.ok(roh, 'BINDER_GRUPPEN nicht im Quelltext gefunden');
+    const ktx = { assert, BINDER_GRUPPEN: JSON.parse(roh[1].replace(/'/g, '"')) };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    return { fn: vm.runInContext('binderSortiert', ktx), gruppen: ktx.BINDER_GRUPPEN };
+}
+
+test('die Standardsortierung ist Pokemon, Supporter, Item, Tool, Stadion, Spezial-, Basis-Energie', () => {
+    const { fn, gruppen } = ladeSortierung();
+    assert.deepStrictEqual(gruppen,
+        ['pokemon', 'supporter', 'item', 'tool', 'stadium', 'special-energy', 'basic-energy'],
+        'die Reihenfolge im Modul ist nicht die, um die der Betreiber gebeten hat');
+
+    /* Absichtlich verkehrt herum hineingegeben. */
+    const ein = gruppen.slice().reverse().map((g, i) => karte({
+        name: 'K' + i, name_de: 'K' + i, gruppe: g, set: 'PBL', nummer: String(10 + i)
+    }));
+    const raus = fn(ein, 'alle', 'standard').map((k) => k.gruppe);
+    assert.deepStrictEqual(raus, gruppen);
+});
+
+test('innerhalb einer Gruppe steht das Meistgespielte oben', () => {
+    const { fn } = ladeSortierung();
+    const viel = karte({ name: 'viel', nummer: '1' });
+    const wenig = karte({
+        name: 'wenig', nummer: '2',
+        je_meta: { 'TEF-PBL': { listen_mit_karte: 12, listen_gesamt: 2641, anteil: 0.5 } },
+        gesamt: { listen_mit_karte: 12, listen_gesamt: 2641, anteil: 0.5 }
+    });
+    assert.deepStrictEqual(fn([wenig, viel], 'alle', 'standard').map((k) => k.name),
+        ['viel', 'wenig']);
+});
+
+test('eine Karte ohne Gruppe steht hinten und faellt nicht heraus', () => {
+    const { fn } = ladeSortierung();
+    const ohne = karte({ name: 'ohne', gruppe: null, nummer: '9' });
+    const pokemon = karte({ name: 'poke', gruppe: 'pokemon', nummer: '8' });
+    const raus = fn([ohne, pokemon], 'alle', 'standard').map((k) => k.name);
+    assert.deepStrictEqual(raus, ['poke', 'ohne'],
+        'eine Karte ohne Gruppenangabe darf nicht verschwinden — sie steht hinten');
+});
+
+/* ── 6 · Tims Empfehlungen ───────────────────────────────────────────
+ *
+ * BEFUND (Betreiber, 25.09.2026): „ich möchte bitte noch eine Option das
+ * ich nur nach Tims empfehlungen filtern kann wenn ich innerhalb meiner
+ * Masterclass Daten mein Deck bauen will."
+ */
+
+/* Ein DOM-Ersatz, der so viel kann, wie timGruppenBloecke/timZaehlung
+ * brauchen: querySelectorAll ueber zwei Auswahlausdruecke. */
+function stueckErsatz(gruppen, bloecke) {
+    const kk = (druck, n) => ({
+        getAttribute: (k) => (k === 'data-druck' ? druck : k === 'data-n' ? String(n) : null)
+    });
+    const blockObj = {};
+    Object.entries(bloecke).forEach(([nr, karten]) => {
+        blockObj[nr] = { querySelectorAll: () => karten.map(([d, n]) => kk(d, n)) };
+    });
+    const grpObj = gruppen.map((g) => ({
+        querySelector: (sel) => (sel === '.mcl-listgruppe-titel' ? { textContent: g.titel } : null),
+        querySelectorAll: () => g.nummern.map((n) => ({ getAttribute: () => String(n) }))
+    }));
+    return {
+        querySelectorAll(sel) {
+            if (sel === '.mcl-listgruppe') return grpObj;
+            return [];
+        },
+        querySelector(sel) {
+            const m = /\[data-mcl-listenblock="([^"]+)"\]/.exec(sel);
+            if (m) return blockObj[m[1]] || null;
+            return null;
+        }
+    };
+}
+
+function ladeTim() {
+    const namen = ['timGruppenBloecke', 'timZaehlung'];
+    const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
+    const ktx = { assert };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    return {
+        bloecke: vm.runInContext('timGruppenBloecke', ktx),
+        zaehlung: vm.runInContext('timZaehlung', ktx)
+    };
+}
+
+test('die Gruppe mit Tims Listen wird am Autorennamen erkannt', () => {
+    const { bloecke } = ladeTim();
+    const w = stueckErsatz([
+        { titel: 'Tims Listen', nummern: [0, 1, 2] },
+        { titel: 'Worlds · Tag 2', nummern: [3, 4] },
+        { titel: 'Online · letzte 7 Tage', nummern: [5] }
+    ], {});
+    assert.deepStrictEqual([...bloecke(w)], ['0', '1', '2']);
+});
+
+test('ohne Gruppentitel gilt Block 0 — dieselbe Bezugsliste wie im Erzeuger', () => {
+    const { bloecke } = ladeTim();
+    /* scripts/masterclass_listen_nachziehen.py nennt sie TIMS_BLOCK = "0". */
+    const w = stueckErsatz([], { '0': [['TEF-113', 4]] });
+    assert.deepStrictEqual([...bloecke(w)], ['0']);
+});
+
+test('ohne Tim-Gruppe und ohne Block 0 gibt es keine Empfehlungen — und nichts wird erfunden', () => {
+    const { bloecke } = ladeTim();
+    const w = stueckErsatz([{ titel: 'Worlds · Tag 2', nummern: [3] }], {});
+    assert.deepStrictEqual([...bloecke(w)], []);
+});
+
+test('ueber mehrere Listen zaehlt die HOECHSTE Zahl, nicht die Summe', () => {
+    const { zaehlung } = ladeTim();
+    const w = stueckErsatz([], {
+        '0': [['TEF-113', 4], ['PBL-65', 2]],
+        '1': [['TEF-113', 3], ['CRI-61', 1]]
+    });
+    const z = zaehlung(w, ['0', '1']);
+    assert.strictEqual(z['TEF-113'], 4, 'vier plus drei ist keine Kopienzahl');
+    assert.strictEqual(z['PBL-65'], 2);
+    assert.strictEqual(z['CRI-61'], 1);
+});
+
+test('der Tim-Filter laesst nur Karten aus seinen Listen stehen', () => {
+    const { fn } = ladeSortierung();
+    const seine = karte({ name: 'seine', set: 'TEF', nummer: '113' });
+    const fremde = karte({ name: 'fremde', set: 'SSP', nummer: '100' });
+    const tim = { 'TEF-113': 4 };
+    assert.deepStrictEqual(fn([seine, fremde], 'alle', 'standard', false, tim).map((k) => k.name),
+        ['seine', 'fremde'], 'ohne Filter fehlt eine Karte');
+    assert.deepStrictEqual(fn([seine, fremde], 'alle', 'standard', true, tim).map((k) => k.name),
+        ['seine']);
+    assert.deepStrictEqual(fn([seine, fremde], 'alle', 'standard', true, {}).map((k) => k.name),
+        [], 'ohne Tim-Zaehlung darf der Filter nicht alles durchlassen');
+});
+
+/* ── 7 · Deckbau an der Karte ────────────────────────────────────────
+ *
+ * BEFUND (Betreiber, 25.09.2026): „So das ich direkt auf der gespielten
+ * Karte mit + dann die Karte ins Deck packen kann und am besten wird
+ * dann die Karte so oft ins Deck gepackt wird wie sie im Durschnitt
+ * gespielt wurde, dazu haben wir ja eine Regel."
+ *
+ * Die Regel ist _markeZahl() in js/app-city-league.js. Geprueft wird,
+ * dass der Cardbinder SIE nimmt — und nicht eine eigene Rechnung.
+ */
+
+test('die Menge am + kommt aus _markeZahl und nicht aus einer eigenen Rechnung', () => {
+    const namen = ['binderMenge'];
+    const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
+    const gerufen = [];
+    const ktx = {
+        assert,
+        window: {
+            _markeZahl: function (...args) { gerufen.push(args); return 3; }
+        }
+    };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    const binderMenge = vm.runInContext('binderMenge', ktx);
+    const k = karte({});
+    assert.strictEqual(binderMenge(k, 'alle'), 3, 'die Hausregel wurde nicht genommen');
+    assert.strictEqual(gerufen.length, 1, '_markeZahl wurde nicht gerufen');
+    /* Die Reihenfolge der Argumente ist dieselbe wie an den anderen
+     * Aufrufstellen: (Gesamtschnitt, Schnitt-wenn-enthalten, Maximum,
+     * in-Listen, Listen). Der Cardbinder fuehrt keinen Gesamtschnitt —
+     * deshalb 0 an erster Stelle, und der Schnitt an zweiter. */
+    assert.deepStrictEqual([...gerufen[0]], [0, 3.9, 4, 2631, 2641]);
+});
+
+test('ohne die Hausregel bleibt die Menge mindestens 1 — geklickt ist geklickt', () => {
+    const quelle = schneideFunktion(JS, 'binderMenge');
+    const ktx = { assert, window: {} };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    const binderMenge = vm.runInContext('binderMenge', ktx);
+    /* Keine Zahl in den Daten: dann eine Karte, nie null. */
+    const leer = karte({
+        je_meta: { 'TEF-PBL': { listen_mit_karte: 0, listen_gesamt: 0, anteil: null, schnitt: null, hoechstzahl: null } },
+        gesamt: { listen_mit_karte: 0, listen_gesamt: 0, anteil: null }
+    });
+    assert.strictEqual(binderMenge(leer, 'alle'), 1);
+    assert.strictEqual(binderMenge(karte({}), 'alle'), 4, 'der Rueckfall ist die Hoechstzahl');
+});
+
+test('die Kachel traegt Zaehler und + mit der Menge; ohne Karte im Deck ist der Zaehler verborgen', () => {
+    const { binderKarteHtml } = ladeKachel();
+    const html = binderKarteHtml(karte({}), 'alle');
+    assert.ok(/data-mcl-bdzahl="PBL-46"/.test(html), 'kein Zaehler an der Karte:\n' + html);
+    assert.ok(/data-mcl-bdzahl="PBL-46"[^>]*hidden/.test(html),
+        'der Zaehler steht sichtbar da, obwohl keine Karte im Deck ist');
+    assert.ok(/data-mcl-bdplus="PBL-46"/.test(html), 'kein + an der Karte');
+    assert.ok(/data-mcl-bdminus="PBL-46"[^>]*hidden/.test(html),
+        'das − steht sichtbar da, obwohl nichts herauszunehmen ist');
+    assert.ok(/\+ 4×|\+ 4×/.test(html),
+        'am + steht nicht, wie viele Kopien es hineinlegt:\n' + html);
+});
+
+test('liegt die Karte im Deck, zeigt die Kachel die Zahl', () => {
+    /* Der Deckbauer wird gestellt: er sagt, zwei liegen drin. */
+    const { binderKarteHtml } = ladeKachel({
+        window: {
+            ProfileDeckBuilder: {
+                addCopies: () => ({ hinzugefuegt: 0 }),
+                countOf: () => 2
+            }
+        }
+    });
+    const html = binderKarteHtml(karte({}), 'alle');
+    assert.ok(/data-mcl-bdzahl="PBL-46"[^>]*>2×|data-mcl-bdzahl="PBL-46"[^>]*>2×/.test(html),
+        'die Zahl im Deck steht nicht an der Karte:\n' + html);
+    assert.ok(!/data-mcl-bdzahl="PBL-46"[^>]*hidden/.test(html),
+        'der Zaehler ist verborgen, obwohl zwei Karten im Deck liegen');
+});
+
+test('eine ACE SPEC ist an der Kachel erkennbar', () => {
+    const { binderKarteHtml } = ladeKachel();
+    assert.ok(binderKarteHtml(karte({ ace: true }), 'alle').includes('mcl-bd-ace'));
+    assert.ok(!binderKarteHtml(karte({}), 'alle').includes('mcl-bd-ace'));
+});
+
+test('Tims Kopienzahl steht an der Karte, und eine alte Liste sieht anders aus', () => {
+    const { binderKarteHtml } = ladeKachel();
+    const k = karte({ set: 'TEF', nummer: '113' });
+    const jetzt = binderKarteHtml(k, 'alle', { 'TEF-113': 4 }, { 'TEF-113': 4 });
+    assert.ok(jetzt.includes('mcl-bd-tim'), 'Tims Zahl fehlt an der Karte');
+    assert.ok(!/mcl-bd-tim[^>]*data-alt="1"/.test(jetzt),
+        'eine Karte aus Tims AKTUELLER Liste ist als alt gekennzeichnet');
+    const alt = binderKarteHtml(k, 'alle', { 'TEF-113': 4 }, {});
+    assert.ok(/mcl-bd-tim[^>]*data-alt="1"/.test(alt),
+        'eine Karte aus einer aelteren Liste ist nicht unterschieden');
+    assert.ok(!binderKarteHtml(k, 'alle', {}, {}).includes('mcl-bd-tim'),
+        'Tims Marke steht da, obwohl er die Karte nicht spielt');
+});
+
+test('der Deckblock und der Deckbau haben Regeln im Stilblatt', () => {
+    ['.mcl-bd-zaehler', '.mcl-bd-plus', '.mcl-bd-minus', '.mcl-bd-deck',
+     '.mcl-bd-dwarn', '.mcl-bd-tim', '.mcl-bd-ace', '.mcl-bd-grp']
+        .forEach((k) => assert.ok(CSS.includes(k), `Regel fehlt: ${k}`));
+});
+
+test('die neuen Beschriftungen gibt es in beiden Sprachen', () => {
+    const schluessel = ['binderSortStandard', 'binderNurTim', 'binderDeck', 'binderPlus',
+        'binderMinus', 'binderDeckSpeichern', 'binderDeckKopieren', 'binderDeckLeeren',
+        'binderWarn60', 'binderWarnAce', 'binderWarnBasis', 'binderGrpStadium',
+        'binderGrpSpecialEnergy', 'binderGrpBasicEnergy', 'binderGespeichert'];
+    const de = JS.slice(JS.indexOf('de: {'), JS.indexOf('en: {'));
+    const en = JS.slice(JS.indexOf('en: {'));
+    schluessel.forEach((k) => {
+        assert.ok(new RegExp('\\b' + k + ':').test(de), `deutsch fehlt: ${k}`);
+        assert.ok(new RegExp('\\b' + k + ':').test(en), `englisch fehlt: ${k}`);
+    });
+});
+
+test('die Standardsortierung ist die Voreinstellung', () => {
+    /* Der Betreiber baut hier sein Deck; eine Deckliste liest man in
+     * dieser Reihenfolge. */
+    const quelle = schneideFunktion(JS, 'binderStandNeu');
+    const ktx = { assert };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    const stand = vm.runInContext('binderStandNeu()', ktx);
+    assert.strictEqual(stand.sort, 'standard');
+    assert.strictEqual(stand.meta, 'alle');
+    assert.strictEqual(stand.nurTim, false);
+});
+
+/* ── 8 · Der Deckblock ────────────────────────────────────────────────
+ *
+ * „Ich möchte insgesamt einfach einfach und Komfortable mein finales Deck
+ * bauen mit allem was dazu gehört, vor allem mit allen Informationen die
+ * ich brauche." (Betreiber, 25.09.2026)
+ *
+ * Also: die Zahl gegen 60, die Regelverstoesse benannt, der Kartenwert —
+ * und kein erfundener Preis.
+ */
+
+function ladeDeckblock(deckKarten, mappe) {
+    const namen = ['binderDeckHtml', 'binderDeckText', 'binderDeckKarten',
+        'binderMappeIndex', 'binderZahl', 'binderDruck', 'deckBauer'];
+    const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
+    const roh = /var BINDER_GRUPPEN = (\[[^\]]*\]);/.exec(JS);
+    const txt = /var BINDER_GRUPPE_TXT = (\{[^}]*\});/.exec(JS);
+    assert.ok(roh && txt, 'Gruppenlisten nicht im Quelltext gefunden');
+    const ktx = {
+        assert,
+        esc: (s) => String(s === null || s === undefined ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;'),
+        T: (k) => k,
+        BINDER_GRUPPEN: JSON.parse(roh[1].replace(/'/g, '"')),
+        BINDER_GRUPPE_TXT: JSON.parse(txt[1].replace(/'/g, '"').replace(/([,{]\s*)([a-zA-Z-]+)(\s*:)/g, '$1"$2"$3')),
+        binderDaten: { probe: { karten: mappe } },
+        window: {
+            ProfileDeckBuilder: {
+                addCopies: () => ({ hinzugefuegt: 0 }),
+                countOf: () => 0,
+                getDeck: () => ({ name: '', cards: deckKarten })
+            }
+        }
+    };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    return {
+        html: vm.runInContext('binderDeckHtml', ktx),
+        text: vm.runInContext('binderDeckText', ktx)
+    };
+}
+
+const G = { id: 'probe', titel: 'Mega-Stalobor-ex' };
+
+test('ein leeres Deck sagt, was das + tut — und rechnet nichts', () => {
+    const { html } = ladeDeckblock([], []);
+    const s = html(G);
+    assert.ok(s.includes('binderDeckLeer'), 'kein Hinweis am leeren Deck:\n' + s);
+    assert.ok(!/\d+\s*binderDeckZahl/.test(s), 'am leeren Deck steht eine Kartenzahl');
+});
+
+test('der Deckblock zaehlt gegen 60 und benennt die Regelverstoesse', () => {
+    const mappe = [
+        karte({ name: 'Drilbur', set: 'PBL', nummer: '46', gruppe: 'pokemon' }),
+        karte({ name: 'Secret Box', set: 'TWM', nummer: '163', gruppe: 'item', ace: true }),
+        karte({ name: 'Prime Catcher', set: 'TEF', nummer: '157', gruppe: 'item', ace: true })
+    ];
+    const deck = [
+        { set: 'PBL', number: '46', name_en: 'Drilbur', type: 'Basic', count: 4 },
+        { set: 'TWM', number: '163', name_en: 'Secret Box', type: 'Item', count: 1 },
+        { set: 'TEF', number: '157', name_en: 'Prime Catcher', type: 'Item', count: 1 }
+    ];
+    const s = ladeDeckblock(deck, mappe).html(G);
+    assert.ok(/>6 binderDeckZahl</.test(s), 'die Kartenzahl fehlt oder ist falsch:\n' + s);
+    assert.ok(s.includes('binderWarn60'), 'sechs Karten sind kein Deck — das muss dastehen');
+    assert.ok(s.includes('binderWarnAce'), 'zwei ACE SPEC werden nicht beanstandet');
+    assert.ok(!s.includes('binderWarnBasis'),
+        'Basis-Pokemon sind da, trotzdem wird sie beanstandet');
+});
+
+test('ohne Basis-Pokemon steht der dritte Verstoss da', () => {
+    const mappe = [karte({ name: 'Iono', set: 'PAL', nummer: '185', gruppe: 'supporter' })];
+    const deck = [{ set: 'PAL', number: '185', name_en: 'Iono', type: 'Supporter', count: 4 }];
+    const s = ladeDeckblock(deck, mappe).html(G);
+    assert.ok(s.includes('binderWarnBasis'));
+});
+
+test('der Kartenwert summiert nur, was einen Preis hat — und sagt, wie viele keinen haben', () => {
+    const mappe = [
+        karte({ name: 'A', set: 'PBL', nummer: '1', gruppe: 'pokemon', preis: { eur: 2.5 } }),
+        karte({ name: 'B', set: 'PBL', nummer: '2', gruppe: 'pokemon', preis: null })
+    ];
+    const deck = [
+        { set: 'PBL', number: '1', name_en: 'A', type: 'Basic', count: 2 },
+        { set: 'PBL', number: '2', name_en: 'B', type: 'Basic', count: 3 }
+    ];
+    const s = ladeDeckblock(deck, mappe).html(G);
+    assert.ok(s.includes('5,00'), 'zweimal 2,50 € sind 5,00 € — die Summe fehlt:\n' + s);
+    assert.ok(/3 binderDeckOhnePreis/.test(s),
+        'die drei Karten ohne Preis werden nicht benannt — dann sieht die Summe '
+        + 'vollstaendig aus, ist es aber nicht');
+});
+
+test('die Deckliste als Text steht in der Standardreihenfolge', () => {
+    const mappe = [
+        karte({ name: 'Metal Energy', set: 'SVI', nummer: '134', gruppe: 'basic-energy' }),
+        karte({ name: 'Iono', set: 'PAL', nummer: '185', gruppe: 'supporter' }),
+        karte({ name: 'Drilbur', set: 'PBL', nummer: '46', gruppe: 'pokemon' })
+    ];
+    const deck = [
+        { set: 'SVI', number: '134', name_en: 'Metal Energy', count: 8 },
+        { set: 'PAL', number: '185', name_en: 'Iono', count: 3 },
+        { set: 'PBL', number: '46', name_en: 'Drilbur', count: 4 }
+    ];
+    const zeilen = ladeDeckblock(deck, mappe).text(G).split('\n');
+    assert.deepStrictEqual(zeilen, [
+        '4 Drilbur PBL 46',
+        '3 Iono PAL 185',
+        '8 Metal Energy SVI 134'
+    ]);
+});
+
+test('der Deckblock traegt die Knoepfe zum Speichern, Kopieren und Leeren', () => {
+    const mappe = [karte({ name: 'A', set: 'PBL', nummer: '1', gruppe: 'pokemon' })];
+    const deck = [{ set: 'PBL', number: '1', name_en: 'A', type: 'Basic', count: 1 }];
+    const s = ladeDeckblock(deck, mappe).html(G);
+    ['data-mcl-bdspeichern', 'data-mcl-bdkopieren', 'data-mcl-bdleeren', 'data-mcl-bddeckname']
+        .forEach((a) => assert.ok(s.includes(a), `${a} fehlt im Deckblock:\n` + s));
 });

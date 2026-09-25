@@ -253,21 +253,57 @@ def test_listendruck_ist_der_neueste_guenstige_sammlerdruck_der_hochwertigste():
         return aus
 
     kacheln = {
-        (html.unescape(de), druck, hoch)
-        for de, druck, hoch in re.findall(
-            r'data-de="([^"]+)" data-en="[^"]*" data-druck="([^"]+)" data-druck-hoch="([^"]*)"', roh)
+        (html.unescape(de), html.unescape(en), druck, hoch)
+        for de, en, druck, hoch in re.findall(
+            r'data-de="([^"]+)" data-en="([^"]*)" data-druck="([^"]+)" data-druck-hoch="([^"]*)"', roh)
     }
     assert len(kacheln) >= 25, "nur %d verschiedene Kacheln — der Test wuerde ins Leere pruefen" % len(kacheln)
 
     zu_teuer, zu_billig, falscher_name, unbekannt = [], [], [], []
+    ohne_deutschen_namen = []
     verschieden = 0
-    for de, druck, hoch in sorted(kacheln):
+    for de, en, druck, hoch in sorted(kacheln):
         z = idx.get(tuple(druck.split("-")))
         if not z or not (z.get("image_url") or "").strip() or not im_fenster(z["set"]):
             unbekannt.append("%s (%s)" % (de, druck))
             continue
-        if (z.get("name_de") or "").strip() != de:
-            falscher_name.append("%s zeigt %s, das ist %s" % (de, druck, z.get("name_de")))
+        # WELCHER NAME GEPRUEFT WIRD — UND WARUM DAS EINEN UNTERSCHIED MACHT
+        #
+        # BEFUND (Wochenlauf 154, 25.09.2026): der Lauf wurde rot mit
+        # "Mew ex zeigt 30C-66, das ist " — mit leerem Ende. Der Druck
+        # war RICHTIG: 30C-66 ist Mew ex. Leer war der DEUTSCHE Name in
+        # der Kartendatenbank, weil das Set 30C erst am 16.09.2026
+        # erschienen ist und 128 seiner 161 Karten noch keinen
+        # deutschen Namen fuehren.
+        #
+        # Die Zusicherung hat damit zwei verschiedene Dinge in einen
+        # Topf geworfen: "die Kachel zeigt den Druck einer anderen
+        # Karte" (ein Fehler) und "fuer diesen Druck steht noch kein
+        # deutscher Name im Bestand" (eine Luecke). Nur das Erste darf
+        # einen Lauf anhalten.
+        #
+        # Geprueft wird deshalb gegen den Namen, den der Bestand
+        # WIRKLICH fuehrt: den deutschen, wenn es ihn gibt, sonst den
+        # englischen — den traegt die Kachel in data-en ohnehin mit.
+        # Die Pruefung wird dadurch nicht schwaecher: ein falscher Druck
+        # faellt in beiden Faellen auf.
+        name_de = (z.get("name_de") or "").strip()
+        name_en = (z.get("name_en") or "").strip()
+        if name_de:
+            if name_de != de:
+                falscher_name.append("%s zeigt %s, das ist %s" % (de, druck, name_de))
+                continue
+        elif name_en:
+            ohne_deutschen_namen.append("%s (%s)" % (de, druck))
+            if name_en != en:
+                falscher_name.append(
+                    "%s/%s zeigt %s, das ist %s (englisch geprueft — fuer "
+                    "diesen Druck fuehrt der Bestand keinen deutschen Namen)"
+                    % (de, en, druck, name_en))
+                continue
+        else:
+            unbekannt.append("%s (%s) — der Bestand fuehrt weder deutschen "
+                             "noch englischen Namen" % (de, druck))
             continue
         kandidaten = pool(druck)
         if not kandidaten:
@@ -290,6 +326,14 @@ def test_listendruck_ist_der_neueste_guenstige_sammlerdruck_der_hochwertigste():
 
     assert unbekannt == [], "diese Kacheln zeigen einen Druck, den die Datenbank im Fenster nicht kennt:\n  " + "\n  ".join(unbekannt)
     assert falscher_name == [], "diese Kacheln zeigen den Druck einer ANDEREN Karte:\n  " + "\n  ".join(falscher_name)
+
+    # Die Luecke wird BENANNT, nicht verschwiegen — und sie haelt den
+    # Lauf nicht an. Sie schliesst sich von selbst, sobald der
+    # Kartentext-Lauf die deutschen Namen des neuen Sets geholt hat.
+    if ohne_deutschen_namen:
+        print("HINWEIS: fuer diese Drucke fuehrt der Bestand noch keinen "
+              "deutschen Namen, geprueft wurde gegen den englischen:\n  "
+              + "\n  ".join(sorted(ohne_deutschen_namen)))
     assert zu_teuer == [], "in der Liste steht nicht der neueste guenstige Druck:\n  " + "\n  ".join(zu_teuer)
     assert zu_billig == [], "im Detail steht nicht der hochwertigste Druck:\n  " + "\n  ".join(zu_billig)
     # Gegenprobe: waeren beide Felder gleich befuellt, waere die Regel

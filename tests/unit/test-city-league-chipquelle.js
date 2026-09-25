@@ -94,14 +94,55 @@ describe('City League: Frischechip und angezeigte Datei', () => {
         }
     });
 
-    it('die leeren Dateien sind als leer gefuehrt', () => {
-        // Damit "keine Daten" dort weiterhin richtig ist, wenn jemand
-        // wieder auf "Aktuelles Meta" umschaltet.
-        const leer = STAND.leer || [];
-        assert.ok(leer.includes('city_league_archetypes.csv'),
-            'city_league_archetypes.csv ist nicht mehr als leer gefuehrt — '
-            + 'entweder hat sie Daten bekommen (dann gehoert diese '
-            + 'Zusicherung ueberdacht) oder der Leerbefund ist ausgefallen');
+    it('der Leerzustand kommt aus der Datei, nicht aus einem Namen im Test', () => {
+        /* UMGESCHRIEBEN 25.09.2026 — SIE HAT DEN WOCHENLAUF 153 ANGEHALTEN.
+           ------------------------------------------------------------------
+           Hier stand: city_league_archetypes.csv MUSS in stand.leer stehen,
+           also LEER SEIN. Die City-League-Scraper laufen aber weiter, und
+           zwar im Anhaengemodus — EINE Datenzeile nimmt die Datei aus der
+           Liste und macht diese Zusicherung rot. Der Deploy stand damit an
+           einer GUTEN Nachricht: die japanische Saison laeuft wieder.
+
+           Es ist derselbe Fehler, der am 22.09.2026 in
+           tests/unit/test-abnahme-agentenrunde-30-08.js schon einmal
+           repariert wurde — dort standen VIER solcher Namen. Diese fuenfte
+           Stelle wurde damals uebersehen.
+
+           Gemessen am 25.09.2026: mit einer Datenzeile in allen vier
+           City-League-Dateien faellt von der ganzen JS-Suite GENAU diese
+           eine Datei um. Nach der Umschreibung keine mehr.
+
+           Die Deckungsgleichheit (was leer gemeldet ist, ist leer — und was
+           leer ist, wird gemeldet) prueft test-abnahme-agentenrunde-30-08.js
+           in BEIDE Richtungen. Hier gehoert sie nicht noch einmal hin.
+
+           Was hier bleibt, ist die Eigenschaft, die dieser Reiter wirklich
+           braucht: der Chip darf den Leerzustand nicht erfinden und nicht
+           verschweigen — er muss ihn aus stand.leer LESEN. Das gilt
+           unabhaengig davon, ob diese Woche Daten da sind. */
+        /* OHNE `|| []` — sonst prueft die Zusicherung sich selbst gesund.
+           Gemessen in der Verfaelschungsprobe vom 25.09.2026: mit dem
+           Rueckfall blieb sie gruen, als die leer-Liste aus dem
+           Datenstand verschwand. Genau den Fall soll sie fangen. */
+        assert.ok(Array.isArray(STAND.leer),
+            'data_stand.json fuehrt keine leer-Liste mehr — dann kann der '
+            + 'Chip einen Leerzustand gar nicht erkennen');
+
+        // Der Chip muss die Liste WIRKLICH lesen. Ein Grep auf den Namen
+        // reicht nicht: er stuende auch in einem Kommentar.
+        assert.match(CODE, /\bleer\b/,
+            'app-city-league.js liest die leer-Liste aus data_stand.json '
+            + 'nicht mehr — dann zeigt der Reiter einen Stand an, den seine '
+            + 'Quelle nicht hergibt');
+
+        // Und die City-League-Dateien des Reiters muessen ueberhaupt im
+        // Datenstand gefuehrt sein — sonst kann ueber sie nichts gesagt
+        // werden, weder voll noch leer.
+        const gefuehrt = Object.keys(STAND.dateien || {});
+        const fehlen = ['city_league_archetypes.csv', 'city_league_analysis.csv']
+            .filter(f => !gefuehrt.includes(f));
+        assert.deepEqual(fehlen, [],
+            'diese Dateien des Reiters stehen in keinem Datenstand: ' + fehlen);
     });
 
     it('die Saison-Meldung nennt ihre Quelle', () => {

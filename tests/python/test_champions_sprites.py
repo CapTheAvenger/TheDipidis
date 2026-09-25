@@ -151,16 +151,79 @@ def test_eine_unbelegte_klammerform_bricht_ab(mod):
     assert mod.schluessel({"en": "Ledian", "dex": 166}) == "166"
 
 
-def test_jede_uebersteuerung_gehoert_zu_einem_echten_eintrag(mod, dex):
-    """Eine verwaiste Zeile in der Tabelle ist eine Zeile, die niemand
-    mehr prueft — und die beim naechsten Umbau falsch angewandt wird."""
+def test_eine_ungenutzte_uebersteuerung_haelt_keinen_lauf_an(mod, dex, capsys):
+    """DIESE ZUSICHERUNG HAT ZWEIMAL AN EINEM TAG DIE KETTE ANGEHALTEN.
+
+    Sie verlangte frueher, dass JEDE Zeile in FORM_UEBERSTEUERUNG gerade
+    einen Eintrag im Pokedex hat. Gemessen am 25.09.2026:
+
+        04:11 UTC  champions_pokedex.json  319 Eintraege
+        05:14 UTC  champions_pokedex.json  343 Eintraege
+
+    Dieselben acht Alternativformen (Gourgeist Large/Small/Super,
+    Lycanroc Midnight, Rotom Fan/Frost, Squawkabilly Yellow, Toxtricity
+    Low-Key) waren erst weg und Stunden spaeter wieder da. Die Datei
+    wird aus Nutzungsdaten neu gebaut — sie atmet.
+
+    Folge: Deploy 3048 rot, weil acht Schluessel ins Leere zeigten. Dann
+    die Reparatur (Schluessel nach AUSGESCHIEDEN). Dann der PR rot, weil
+    dieselben acht wieder im Pokedex standen. Zweimal Stillstand, ohne
+    dass irgendjemand etwas kaputtgemacht hat.
+
+    Die Tabelle IST ein Nachschlagewerk. Ein Eintrag, auf den der Kader
+    gerade nicht zeigt, richtet keinen Schaden an — er wartet. Gefaehrlich
+    sind die drei anderen Richtungen, und die bleiben hart:
+
+        test_jeder_eintrag_bekommt_einen_schluessel   (kein Eintrag ohne Bild)
+        test_keine_zwei_eintraege_teilen_sich_ein_bild
+        test_keine_form_verschwindet_aus_BEIDEN_listen (kein Verlust)
+
+    Hier wird der ungenutzte Rest nur noch BENANNT.
+    """
     da = {e["en"] for e in dex}
-    verwaist = sorted(set(mod.FORM_UEBERSTEUERUNG) - da)
-    assert verwaist == [], (
-        f"{verwaist} zeigt ins Leere. Wenn die Quelle die Form wirklich "
-        "nicht mehr fuehrt, gehoert der Schluessel MIT Datum und Beleg "
-        "nach AUSGESCHIEDEN — nicht in den Papierkorb."
-    )
+    ungenutzt = sorted(set(mod.FORM_UEBERSTEUERUNG) - da)
+    if ungenutzt:
+        print("HINWEIS: %d nachgeschlagene Formen fuehrt der Kader gerade "
+              "nicht: %s. Das ist kein Fehler — die Schluessel warten."
+              % (len(ungenutzt), ungenutzt))
+    # Was hart bleibt: die Tabelle darf nicht zur Haelfte ins Leere
+    # zeigen. Dann stimmt nicht der Kader nicht mehr, sondern die Datei.
+    assert len(ungenutzt) <= len(mod.FORM_UEBERSTEUERUNG) // 2, (
+        "%d von %d Uebersteuerungen zeigen ins Leere — das ist kein "
+        "Kaderatmen mehr, da stimmt die Pokedex-Datei nicht."
+        % (len(ungenutzt), len(mod.FORM_UEBERSTEUERUNG)))
+
+
+def test_keine_form_verschwindet_aus_BEIDEN_listen(mod):
+    """Der Papierkorb-Schutz hatte selbst ein Loch (gemessen 25.09.2026).
+
+    Die Zusicherung darunter faengt: Schluessel aus FORM_UEBERSTEUERUNG
+    geloescht statt nach AUSGESCHIEDEN verschoben. Sie faengt NICHT:
+    Schluessel aus AUSGESCHIEDEN geloescht. In der Verfaelschungsprobe
+    liess sich "Rotom (Fan)" spurlos entfernen — die Suite blieb gruen,
+    und die nachgeschlagene Quelle waere weg gewesen. Genau das, was der
+    Kommentar an AUSGESCHIEDEN ausschliessen will: "Ein Verlust ist ein
+    Befund, kein Aufraeumen."
+
+    Deshalb eine UNTERGRENZE ueber beide Listen zusammen. Sie ist `>=`:
+    neue Formen und neue Ausscheider sind kein Fehler, nur das
+    Verschwinden ist einer. Eine Form, die aus AUSGESCHIEDEN zurueck nach
+    FORM_UEBERSTEUERUNG wandert, laesst die Summe unveraendert.
+    """
+    MINDESTENS = 19     # Stand 25.09.2026: 19 gefuehrt + 0 ausgeschieden
+    gesamt = len(mod.FORM_UEBERSTEUERUNG) + len(mod.AUSGESCHIEDEN)
+    assert gesamt >= MINDESTENS, (
+        "zusammen nur noch %d nachgeschlagene Formen (vorher mindestens %d) — "
+        "es wurde eine geloescht statt verschoben. Der Schluessel gehoert "
+        "MIT Datum und Beleg nach AUSGESCHIEDEN." % (gesamt, MINDESTENS))
+
+
+def test_keine_form_steht_in_beiden_listen(mod):
+    """Sonst gilt sie gleichzeitig als gefuehrt und als ausgeschieden,
+    und welche der beiden Zeilen angewandt wird, entscheidet die
+    Reihenfolge im Quelltext."""
+    doppelt = sorted(set(mod.FORM_UEBERSTEUERUNG) & set(mod.AUSGESCHIEDEN))
+    assert doppelt == [], "%s steht in beiden Listen" % doppelt
 
 
 def test_ausgeschiedene_formen_bleiben_ausgeschieden(mod, dex):
@@ -173,6 +236,11 @@ def test_ausgeschiedene_formen_bleiben_ausgeschieden(mod, dex):
     """
     da = {e["en"] for e in dex}
     zurueck = sorted(set(mod.AUSGESCHIEDEN) & da)
+    # Seit dem 25.09.2026 ist die Liste leer und soll es bleiben: das
+    # Kaderatmen fuehrt nicht mehr hierher (siehe
+    # test_eine_ungenutzte_uebersteuerung_haelt_keinen_lauf_an). Was hier
+    # einmal landet, kam aus einem ANDEREN Grund — und dann gilt die
+    # Gegenrichtung unveraendert.
     assert zurueck == [], (
         f"{zurueck} steht wieder im Pokedex — Schluessel aus AUSGESCHIEDEN "
         "zurueck nach FORM_UEBERSTEUERUNG holen."

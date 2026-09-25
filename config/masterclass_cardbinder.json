@@ -1,0 +1,10 @@
+{
+  "_comment": "Je gekaufter Masterclass eine Zeile. Der Schluessel ist die id aus GUIDES in js/ds-masterclass.js; tests/python/test_masterclass_cardbinder.py haelt beide Listen deckungsgleich, damit eine neue Masterclass ihren Cardbinder nicht vergisst. kopf_pokemon ist der Limitless-Slug der Leitkarte — nach ihm werden die Archetypen zusammengesucht (Entscheidung Hausi, 24.09.2026: 'Nach Kopf-Pokemon').",
+  "masterclasses": {
+    "mega-stalobor": {
+      "titel_en": "Mega Excadrill ex",
+      "kopf_pokemon": "excadrill-mega",
+      "_beleg": "data/archetype_icons.json fuehrt 'Mega Excadrill' -> ['excadrill-mega']; data/labs_tournament_decks_TEF-PBL.csv fuehrt deck_slug 'mega-excadrill-ex' mit pokemon 'excadrill-mega'."
+    }
+  }
+}

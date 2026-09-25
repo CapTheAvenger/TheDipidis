@@ -228,6 +228,13 @@ jobs:
               fi
           done
 
+          # ZEITMARKE FUER DEN RUECKWEG (25.09.2026). Alles, was NACH
+          # diesem Punkt in backend/core/data landet, hat DIESER Lauf
+          # geschrieben — und genau das kommt am Ende zurueck nach
+          # data/. Die geseedeten Dateien sind aelter und bleiben liegen.
+          touch "$RUNNER_TEMP/saat.marke"
+          echo "Saat-Marke gesetzt: $(date -u +'%H:%M:%S UTC')"
+
       # Cardmarket publishes daily JSON dumps on a public S3 bucket.
       # The cardmarket_id_mapper / cardmarket_price_merger scrapers
       # expect them at data/{products_singles_6,products_nonsingles_6,price_guide_6}.json.
@@ -954,6 +961,48 @@ jobs:
           fi
           exit 0
 
+      # ── ALLES ZURUECK, WAS DIESER LAUF ERZEUGT HAT ───────────────
+      #
+      # BEFUND 25.09.2026. Die Wochenlaeufe 151 und 152 liefen GRUEN
+      # durch, beide Victory-Road-Scraper meldeten `status: OK` im
+      # Herzschlag — und keine ihrer Dateien lag danach im Repo.
+      #
+      # URSACHE: get_data_dir() loest auf backend/core/data auf. Von dort
+      # kam bisher nur eine VON HAND GEPFLEGTE Liste zurueck (Schritt
+      # "Sync labs output to data/"). Wer nicht darin stand, fiel mit dem
+      # Runner weg. Dieselbe Bauart hat im September schon zweimal
+      # Dateien verloren: champions_speed_corpus.json (05.09.) und
+      # champions_move_flags.json (sieben Tage lang, bis 23.09.).
+      #
+      # Eine Liste, die jemand pflegen muss, wird irgendwann nicht
+      # gepflegt. Deshalb KEINE Liste mehr: zurueck kommt, was nach der
+      # Saat-Marke geschrieben wurde — also genau das, was dieser Lauf
+      # erzeugt hat. Geseedete Dateien sind aelter und bleiben unberuehrt;
+      # ein Scraper, der diese Woche nicht lief, schreibt nichts und kann
+      # folglich auch nichts ueberschreiben. Damit ist der alte Vorbehalt
+      # gegen champions_replica_teams.json von selbst erfuellt.
+      #
+      # Der Schritt laeuft NACH allen Scrapern und VOR den Zusicherungen,
+      # damit die Suite den Stand prueft, der auch committet wird.
+      - name: Erzeugte Dateien zurueck nach data/
+        run: |
+          set +e
+          marke="$RUNNER_TEMP/saat.marke"
+          if [ ! -f "$marke" ]; then
+              echo "::warning::keine Saat-Marke gefunden — der Rueckweg wird uebersprungen"
+              exit 0
+          fi
+          zurueck=0
+          for q in backend/core/data/*.json backend/core/data/*.csv; do
+              [ -f "$q" ] || continue
+              [ "$q" -nt "$marke" ] || continue
+              cp "$q" "data/$(basename "$q")"
+              zurueck=$((zurueck+1))
+              echo "  <- $(basename "$q") ($(stat -c%s "data/$(basename "$q")") B)"
+          done
+          echo "$zurueck Datei(en) aus diesem Lauf zurueckgeschrieben."
+          exit 0
+
       - name: Datenluecken neu bestimmen (Admin-Bereich)
         # BEFUND 07.09.2026: `grep -rn datenluecken .github/` fand nichts.
         # scripts/datenluecken.py schrieb data/datenluecken.json, der
@@ -1032,6 +1081,34 @@ jobs:
           rc2=$?
           if [ "$rc1" -ne 0 ] || [ "$rc2" -ne 0 ]; then
             echo "::warning::Masterclass nicht vollstaendig nachgezogen (Zahlen $rc1, Listen $rc2) — das Stueck bleibt, wie es ist"
+          fi
+          exit 0
+
+      # DIE KARTENMAPPE GEHOERT IN DENSELBEN LAUF WIE DIE KARTENDATEN
+      #
+      # scripts/build_masterclass_cardbinder.py liest data/*.csv — die
+      # Dateien, die dieser Lauf gerade geschrieben hat. Liefe der
+      # Erzeuger getrennt, stuende im Cardbinder-Reiter nach jedem
+      # Turnierwochenende ein paar Tage lang ein aelterer Kartenbestand
+      # als im Rest der Seite. Dieselbe Regel wie bei den Set-Namen der
+      # Pocket-Liste (CLAUDE.md: eine Regel gehoert an ihre Bedingung).
+      #
+      # Er laeuft NACH dem Rueckweg (Schritt „Erzeugte Dateien zurueck
+      # nach data/"), weil er aus data/ liest und nicht aus dem
+      # gitignoreten Saatordner.
+      #
+      # `set +e` und `exit 0`: eine fehlende Kartenmappe ist schlechter
+      # als eine alte, aber weit besser als ein abgebrochener Lauf ohne
+      # die frischen Turnierdaten. Der Reiter zeigt dann die Mappe des
+      # letzten Laufs; dass sie aelter ist, steht in ihrem eigenen Kopf
+      # (_meta.gebaut).
+      - name: Kartenmappen der Masterclasses neu bauen
+        run: |
+          set +e
+          python3 -u scripts/build_masterclass_cardbinder.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "::warning::Kartenmappen nicht vollstaendig gebaut (Code $rc) — der Cardbinder-Reiter zeigt den letzten Stand"
           fi
           exit 0
 

@@ -66,11 +66,14 @@ function lade(...namen) {
     vm.createContext(ktx);
     /* Die ausgeschnittenen Funktionen rufen Nachbarn, die hier nicht
      * geprueft werden — seit dem 23.09.2026 haelt bereichWechseln das
-     * Vorlesen an. Ein leerer Platzhalter genuegt; wuerde er fehlen,
-     * bliebe der Test an einer fremden Funktion haengen statt an dem,
-     * was er misst. */
+     * Vorlesen an, seit dem 25.09.2026 haengt verdrahte() den
+     * Cardbinder an (eigene Datei: test-masterclass-cardbinder.js).
+     * Ein leerer Platzhalter genuegt; wuerde er fehlen, bliebe der Test
+     * an einer fremden Funktion haengen statt an dem, was er misst. */
     vm.runInContext('function vlStopp() {}\nfunction vorleserBauen() {}\n'
-        + 'function vlUmschalten() {}\n' + quelle
+        + 'function vlUmschalten() {}\nfunction binderEinhaengen() {}\n'
+        + 'function binderOeffnen() {}\nfunction binderZeichnen() {}\n'
+        + 'var binderStand = {};\n' + quelle
         + '\n;({' + namen.join(',') + '})', ktx);
     return vm.runInContext('({' + namen.join(',') + '})', ktx);
 }
@@ -443,6 +446,11 @@ test('die Vorleseknoepfe sind verdrahtet und der Bereichswechsel schaltet die St
         'function bereichWechseln() {}\nfunction matchupFilter() {}\n'
         + 'function listeWechseln() {}\nfunction listeKopieren() {}\n'
         + 'function kartenDetail() {}\nfunction sucheVerdrahten() {}\n'
+        /* Seit dem 25.09.2026 haengt verdrahte() den Cardbinder an.
+         * Der hat seine eigene Datei (test-masterclass-cardbinder.js);
+         * hier ist er nur ein Nachbar. */
+        + 'function binderEinhaengen() {}\nfunction binderOeffnen() {}\n'
+        + 'function binderZeichnen() {}\nvar binderStand = {};\n'
         + 'function vorleserBauen() { gerufen.push("leiste"); }\n'
         + 'function vlUmschalten() { gerufen.push("umschalten"); }\n'
         + 'function vlStopp() { gerufen.push("stopp"); }\n'
@@ -738,21 +746,65 @@ test('die fuenf Online-Listen der letzten sieben Tage sind eigene Listen', () =>
      * Fliesstext: am 22.09. ist eine Verfaelschung durch eine
      * Freitextpruefung geschluepft, weil derselbe Name auch in der
      * Ausarbeitung steht. */
+    /* KEINE SPIELERNAMEN MEHR IN DIESER ZUSICHERUNG (25.09.2026)
+     *
+     * Hier standen fuenf Namen: Kingssofgamer02, Kapony, Ducsjr,
+     * CALLMEDANDI, Lordeyebrow. Der Wochenlauf 154 wurde damit rot —
+     * mit "kein Online-Chip fuer Ducsjr". Kaputt war nichts: der
+     * Schritt "Masterclass nachziehen" baut diesen Block jede Woche neu
+     * aus den Online-Turnieren der LETZTEN SIEBEN TAGE. Nach sieben
+     * Tagen spielen dort andere Leute.
+     *
+     * Ein Name aus rotierenden Daten gehoert nicht in eine Zusicherung
+     * (CLAUDE.md: "eine Zusicherung, die eine Zahl aus den Daten dieser
+     * Woche festnagelt"). Geprueft wird jetzt die FORM, die der
+     * Erzeuger einhalten muss — die aendert sich nicht mit dem
+     * Wochenende. */
     const chips = FRAGMENT.match(/data-mcl-liste="\d+"[^>]*>([^<]+)</g) || [];
     const online = chips.filter((c) => /·\s*\d+\.\s*von\s*\d+/.test(c));
     assert.strictEqual(online.length, 5,
         `${online.length} Online-Chips, erwartet 5 (Platz und Feldgroesse im Namen)`);
-    ['Kingssofgamer02', 'Kapony', 'Ducsjr', 'CALLMEDANDI', 'Lordeyebrow'].forEach((s) => {
-        assert.ok(online.some((c) => c.includes(s)), `kein Online-Chip fuer ${s}`);
+
+    online.forEach((c) => {
+        const m = />([^<]+?)\s*·\s*(\d+)\.\s*von\s*(\d+)\s*<?/.exec(c);
+        assert.ok(m, `Online-Chip ohne "Name · Platz. von Feldgroesse": ${c}`);
+        const [, name, platz, feld] = m;
+        assert.ok(name.trim().length >= 2, `Online-Chip ohne Spielernamen: ${c}`);
+        assert.ok(Number(platz) >= 1, `Platz 0 oder kleiner: ${c}`);
+        /* Die Grundgesamtheit steht als "ab 100 Spielern" unter den
+         * Listen. Ein Chip mit kleinerem Feld widerspricht dem Satz,
+         * den der Leser darunter liest. */
+        assert.ok(Number(feld) >= 100,
+            `Feldgroesse ${feld} widerspricht dem Hinweis "ab 100 Spielern": ${c}`);
+        assert.ok(Number(platz) <= Number(feld),
+            `Platz ${platz} bei nur ${feld} Spielern: ${c}`);
     });
+
     assert.ok(/class="mcl-listgruppe-titel">Online · letzte 7 Tage</.test(FRAGMENT),
         'die Gruppe "Online · letzte 7 Tage" fehlt in der Listenwahl');
 
-    /* Briduradon-ex steckt nur in der Online-Liste von Ducsjr. Faellt die
-     * Kachel weg, ist die Liste keine echte Liste mehr, sondern eine
-     * Variante von Tims Liste. */
-    assert.ok(/data-de="Briduradon-ex"/.test(FRAGMENT),
-        'Briduradon-ex steht in keiner Liste als Karte');
+    /* Die Online-Listen muessen ECHTE Listen sein und nicht Varianten
+     * von Tims Liste. Frueher hing das an einer einzelnen Karte
+     * ("Briduradon-ex steckt nur in der Liste von Ducsjr") — auch die
+     * rotiert. Gemessen wird stattdessen die Eigenschaft selbst: die
+     * Online-Listen zusammen fuehren mindestens eine Karte, die in
+     * keiner der uebrigen Listen steht. */
+    const bloecke = [...FRAGMENT.matchAll(
+        /data-mcl-listenblock="(\d+)"([\s\S]*?)(?=data-mcl-listenblock="|$)/g)];
+    assert.ok(bloecke.length >= 10, `nur ${bloecke.length} Listenbloecke gefunden`);
+    const onlineNummern = new Set();
+    chips.forEach((c, i) => { if (/·\s*\d+\.\s*von\s*\d+/.test(c)) onlineNummern.add(String(i)); });
+    const karten = (txt) => new Set([...txt.matchAll(/data-de="([^"]+)"/g)].map((m) => m[1]));
+    const inOnline = new Set();
+    const inRest = new Set();
+    bloecke.forEach(([, nr, txt]) => {
+        const topf = onlineNummern.has(nr) ? inOnline : inRest;
+        karten(txt).forEach((k) => topf.add(k));
+    });
+    const nurOnline = [...inOnline].filter((k) => !inRest.has(k));
+    assert.ok(nurOnline.length >= 1,
+        'keine einzige Karte steht nur in den Online-Listen — dann sind '
+        + 'das keine eigenen Listen, sondern Varianten von Tims Liste');
 
     /* Woher die Zahlen kommen, steht unter den Listen — sonst ist eine
      * Platzierung eine Behauptung. */
@@ -888,7 +940,11 @@ test('der Klick auf den Kopierknopf landet beim Kopieren, der auf eine Karte bei
         + 'function listeKopieren() { gerufen.push("kopieren"); }\n'
         + 'function kartenDetail() { gerufen.push("detail"); }\n'
         + 'function sucheVerdrahten() {}\n'
-        + quelle + '\nverdrahte(wurzel);', ktx);
+        /* Nachbar seit dem 25.09.2026 — der Cardbinder hat seine
+         * eigene Datei (test-masterclass-cardbinder.js). */
+        + 'function binderEinhaengen() {}\nfunction binderOeffnen() {}\n'
+        + 'function binderZeichnen() {}\nvar binderStand = {};\n'
+        + quelle + '\nverdrahte(wurzel, { id: "probe" });', ktx);
 
     assert.ok(ktx.handler, 'verdrahte() haengt keinen Klick-Horcher an');
 

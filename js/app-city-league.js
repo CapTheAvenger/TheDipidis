@@ -1173,14 +1173,17 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 const id = String((r && r.tournament_id) || '').trim();
                 if (!id) return;
                 if (!nachId.has(id)) {
-                    nachId.set(id, { id, bezeichnung: '', ort: '', listen: 0,
+                    nachId.set(id, { id, bezeichnung: '', ort: '', klasse: '',
+                                     listen: 0,
                                      bester: null, schlechtester: null });
                 }
                 const e = nachId.get(id);
                 const bez = String(r.shop || '').trim();
                 const ort = String(r.prefecture || '').trim();
+                const kls = String(r.format || '').trim();
                 if (!e.bezeichnung && bez) e.bezeichnung = bez;
                 if (!e.ort && ort) e.ort = ort;
+                if (!e.klasse && kls) e.klasse = kls;
                 e.listen += 1;
                 const platz = parseInt(r.placement || '', 10);
                 if (Number.isFinite(platz) && platz > 0) {
@@ -1234,6 +1237,18 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
          */
         function cityLeagueHerkunftSatz(herkunft, de) {
             const CL_ORT_PLATZHALTER = ['Special Event'];
+            /* Die Spalte `format` der Archetyp-Datei fuehrt die
+               Turnierklasse. Solange dort "City League (JP)" steht, sagt
+               der Reitername schon alles. Steht etwas ANDERES drin, muss
+               es dastehen: seit dem 25.09.2026 zieht der Scraper auch die
+               japanischen Majors mit (Champions League, Regional League,
+               Japan Championships, koreanische und suedostasiatische
+               Ligen im japanischen Format). Die Champions League Yokohama
+               vom 20.09.2026 fuehrt 10.000 Spieler; eine City League
+               typisch 4 bis 16. Ein Platz 8 heisst in beiden Faellen
+               etwas voellig anderes, und wer die Ansicht liest, muss
+               erkennen koennen, welcher Fall vorliegt. */
+            const CL_KLASSE_REITERNAME = 'City League (JP)';
             const t = Array.isArray(herkunft) ? herkunft : [];
             // Ab vier Turnieren traegt die Ansicht ihren Namen selbst; eine
             // Aufzaehlung waere dann nur noch Laerm.
@@ -1251,6 +1266,10 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                             : ''));
                 }
                 if (!e.nameFehlt) teile.push((de ? 'Bezeichnung „' : 'name “') + e.bezeichnung + (de ? '“' : '”'));
+                if (e.klasse && e.klasse !== CL_KLASSE_REITERNAME) {
+                    teile.push((de ? 'Turnierklasse „' : 'tournament class “')
+                        + e.klasse + (de ? '“ (keine City League)' : '” (not a City League)'));
+                }
                 const spanne = (e.bester !== null && e.schlechtester !== null
                                 && e.bester !== e.schlechtester)
                     ? (de ? ' (Plätze ' + e.bester + ' bis ' + e.schlechtester + ')'

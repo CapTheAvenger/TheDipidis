@@ -57,7 +57,6 @@ if _CORE_DIR not in sys.path:
 from card_scraper_shared import (            # noqa: E402
     setup_console_encoding,
     setup_logging,
-    get_data_dir,
     safe_fetch_html,
 )
 
@@ -65,6 +64,26 @@ setup_console_encoding()
 logger = setup_logging("victory_road_major_scraper")
 
 ROOT = os.path.abspath(os.path.join(_SCRIPT_DIR, '..', '..'))
+
+# ── WOHIN DAS ERGEBNIS GEHOERT ───────────────────────────────────────
+#
+# NICHT get_data_dir(). Das loest auf backend/core/data auf — den
+# gitignoreten Saatordner. Dorthin geschrieben landet die Datei NIE im
+# Repo: der Wochenlauf kopiert von dort nur eine VON HAND GEPFLEGTE
+# Liste zurueck nach data/, und wer nicht darin steht, faellt mit dem
+# Runner weg.
+#
+# GEMESSEN 25.09.2026, nachdem genau das passiert ist: die Wochenlaeufe
+# 151 und 152 liefen gruen durch, beide Scraper meldeten
+# `status: OK` im Herzschlag — und keine der beiden Dateien war im
+# Repo. Ein Lauf, der gruen ist und nichts liefert, ist schlimmer als
+# einer, der rot wird.
+#
+# Diese beiden Scraper LESEN nichts aus dem Saatordner (sie holen alles
+# aus dem Netz), also gibt es keinen Grund, dorthin zu schreiben. Das
+# Ergebnis gehoert in den Projektstamm, wo `git add` es findet.
+AUSGABE_DIR = os.path.join(ROOT, "data")
+
 
 KALENDER_URL = "https://victoryroad.pro/2027-season-calendar/"
 PASTE_API = "https://vrpaste-backend.vercel.app/api/paste/{id}?lang=german"
@@ -490,7 +509,8 @@ def main() -> int:
         logger.info("dry-run: %d Teams, nichts geschrieben.", len(daten["teams"]))
         return 0
 
-    ziel = os.path.join(get_data_dir(), "victory_road_major_teams.json")
+    os.makedirs(AUSGABE_DIR, exist_ok=True)
+    ziel = os.path.join(AUSGABE_DIR, "victory_road_major_teams.json")
     with open(ziel, "w", encoding="utf-8") as f:
         json.dump(daten, f, ensure_ascii=False, indent=1)
     logger.info("%d Teams -> %s", len(daten["teams"]), ziel)

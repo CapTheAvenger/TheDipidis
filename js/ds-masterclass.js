@@ -76,6 +76,27 @@
             sammlerdruck: 'Sammlerdruck',
             kopiert: 'Liste als Bild — kopieren oder sichern',
             keinTreffer: 'Kein Treffer.',
+            binder: 'Cardbinder',
+            binderLead: 'Jede Karte, die für diesen Archetyp je in einer erfassten Liste stand.',
+            binderLaden: 'Kartenmappe wird geladen …',
+            binderFehlt: 'Für diese Masterclass ist noch keine Kartenmappe gebaut.',
+            binderAlle: 'Alle Metas',
+            binderListen: 'Listen',
+            binderAnteil: 'Anteil',
+            binderSchnitt: 'Ø',
+            binderMax: 'max',
+            binderPreis: 'Preis',
+            binderOhnePreis: 'kein Preis im Bestand',
+            binderSortNutzung: 'Meistgenutzt',
+            binderSortName: 'Name',
+            binderSortPreis: 'Preis',
+            binderMatchups: 'Matchups aus echten Turnieren',
+            binderTurniere: 'Turnierergebnisse des Decks',
+            binderPartien: 'Partien',
+            binderQuote: 'Siegquote',
+            binderSpieler: 'Spieler',
+            binderKeine: 'Keine Karte in diesem Meta.',
+            binderHerkunft: 'Woher die Zahlen kommen',
             vorlesen: 'Vorlesen',
             pause: 'Pause',
             weiter: 'Weiter',
@@ -103,6 +124,27 @@
             sammlerdruck: 'Collector print',
             kopiert: 'List as an image — copy or save',
             keinTreffer: 'No match.',
+            binder: 'Cardbinder',
+            binderLead: 'Every card that has ever appeared in a recorded list for this archetype.',
+            binderLaden: 'Loading card binder …',
+            binderFehlt: 'No card binder has been built for this masterclass yet.',
+            binderAlle: 'All metas',
+            binderListen: 'lists',
+            binderAnteil: 'share',
+            binderSchnitt: 'avg',
+            binderMax: 'max',
+            binderPreis: 'Price',
+            binderOhnePreis: 'no price on file',
+            binderSortNutzung: 'Most used',
+            binderSortName: 'Name',
+            binderSortPreis: 'Price',
+            binderMatchups: 'Matchups from real tournaments',
+            binderTurniere: 'Tournament results for this deck',
+            binderPartien: 'games',
+            binderQuote: 'win rate',
+            binderSpieler: 'players',
+            binderKeine: 'No card in this meta.',
+            binderHerkunft: 'Where the numbers come from',
             vorlesen: 'Read aloud',
             pause: 'Pause',
             weiter: 'Continue',
@@ -197,12 +239,235 @@
             buehne.innerHTML = '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' +
                 esc(g.titel) + '</h4>' +
                 '<button type="button" class="mcl-schliessen">' + esc(T('schliessen')) + '</button></div>' + txt;
-            verdrahte(buehne);
+            verdrahte(buehne, g);
             try { buehne.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }
         }).catch(function (err) {
             console.warn('[DsMasterclass] ' + g.id + ' nicht geladen:', err && err.message);
             zeigeFehler(buehne, g);
         });
+    }
+
+    /* ---------- Cardbinder ----------------------------------------
+     *
+     * ANLASS (Betreiber, 24.09.2026): „Dann nehme ich noch einen Reiter,
+     * Cardbinder, wo ich sehe, aus allen, seitdem es den Archetype gibt,
+     * alle Karten, die jemals fuer diesen Archetype benutzt worden sind
+     * … dass ich den Masterclass-Bereich einfach nicht verlassen
+     * moechte." Dazu: Metafilter, meistgenutzte Karten, Preise,
+     * Matchups und Turnierergebnisse.
+     *
+     * WARUM DER REITER HIER ENTSTEHT UND NICHT IM INHALTSSTUECK
+     * --------------------------------------------------------
+     * masterclass/<id>.de.html ist eine gekaufte Aufbereitung, von Hand
+     * gesetzt, 640 KB gross. Stuende der Cardbinder darin, muesste jede
+     * kuenftige Masterclass ihn mitbringen — und die erste, die es
+     * vergisst, haette ihn nicht. Er wird deshalb beim Oeffnen
+     * ANGEHAENGT: eine neue Masterclass bekommt ihn, ohne dass jemand
+     * daran denkt. Genau das war die Auflage: „wenn ich mir zukuenftig
+     * neue Masterclasses kaufe, dann soll von Anfang an klar sein, dass
+     * das so gemacht werden soll".
+     *
+     * Die Daten kommen aus data/masterclass_cardbinder/<id>.json,
+     * vorberechnet von scripts/build_masterclass_cardbinder.py. Roh
+     * waeren es 32 MB Kartenzeilen je Meta — das laedt niemand im
+     * Browser.
+     */
+
+    var binderDaten = {};    /* guide-id -> Mappe */
+    var binderLaeuft = {};   /* guide-id -> Promise */
+    var binderStand = {};    /* guide-id -> {meta, sortierung} */
+
+    function binderUrl(id) {
+        return 'data/masterclass_cardbinder/' + encodeURIComponent(id) + '.json';
+    }
+
+    function binderHolen(id) {
+        if (binderDaten[id]) return Promise.resolve(binderDaten[id]);
+        if (binderLaeuft[id]) return binderLaeuft[id];
+        binderLaeuft[id] = fetch(binderUrl(id), { credentials: 'same-origin' })
+            .then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function (j) {
+                binderDaten[id] = j;
+                delete binderLaeuft[id];
+                return j;
+            })
+            .catch(function (err) { delete binderLaeuft[id]; throw err; });
+        return binderLaeuft[id];
+    }
+
+    /* Eine Zahl, die aus den Daten kommt — oder ein Strich. Nie eine 0,
+     * die wie eine Messung aussieht. */
+    function binderZahl(w, nach) {
+        if (w === null || w === undefined || w === '') return '–';
+        var n = Number(w);
+        if (!isFinite(n)) return '–';
+        return n.toFixed(nach === undefined ? 0 : nach).replace('.', ',');
+    }
+
+    function binderKarteHtml(k, meta) {
+        var w = (meta === 'alle') ? k.gesamt : (k.je_meta && k.je_meta[meta]);
+        if (!w) return '';
+        var name = k.name_de || k.name;
+        var druck = (k.set || '') + (k.nummer ? '-' + k.nummer : '');
+        var bild = k.bild || bildAdresse(druck);
+        var kopf = bild
+            ? '<img loading="lazy" alt="' + esc(name) + '" src="' + esc(bild) + '">'
+            : '<div class="mcl-kk-text">' + esc(name) + '</div>';
+        var teile = [];
+        if (w.anteil !== null && w.anteil !== undefined) {
+            teile.push('<b>' + binderZahl(w.anteil, 1) + '\u00a0%</b>');
+        }
+        if (w.listen_mit_karte) {
+            teile.push(binderZahl(w.listen_mit_karte) + '\u202f/\u202f' +
+                binderZahl(w.listen_gesamt) + ' ' + esc(T('binderListen')));
+        }
+        if (w.schnitt) teile.push(esc(T('binderSchnitt')) + '\u00a0' + binderZahl(w.schnitt, 2));
+        if (w.hoechstzahl) teile.push(esc(T('binderMax')) + '\u00a0' + binderZahl(w.hoechstzahl));
+        var preis = k.preis && k.preis.eur !== null && k.preis.eur !== undefined
+            ? (k.preis.url
+                ? '<a class="mcl-bd-preis" href="' + esc(k.preis.url) + '" target="_blank" rel="noopener">'
+                    + binderZahl(k.preis.eur, 2) + '\u00a0\u20ac</a>'
+                : '<span class="mcl-bd-preis">' + binderZahl(k.preis.eur, 2) + '\u00a0\u20ac</span>')
+            : '<span class="mcl-bd-preis mcl-bd-kein" title="' + esc(T('binderOhnePreis')) + '">–</span>';
+        return '<li class="mcl-bd-karte">' +
+            '<div class="mcl-bd-bild">' + kopf + '</div>' +
+            '<div class="mcl-bd-txt"><b>' + esc(name) + '</b>' +
+            '<span class="mcl-bd-druck">' + esc(druck) + '</span>' +
+            '<span class="mcl-bd-zahlen">' + teile.join(' · ') + '</span>' +
+            preis + '</div></li>';
+    }
+
+    function binderSortiert(karten, meta, wie) {
+        var liste = karten.filter(function (k) {
+            return meta === 'alle' || (k.je_meta && k.je_meta[meta]);
+        });
+        var wert = function (k) {
+            var w = (meta === 'alle') ? k.gesamt : k.je_meta[meta];
+            return w ? (w.listen_mit_karte || 0) : 0;
+        };
+        if (wie === 'name') {
+            liste.sort(function (a, b) {
+                return String(a.name_de || a.name).localeCompare(String(b.name_de || b.name), 'de');
+            });
+        } else if (wie === 'preis') {
+            liste.sort(function (a, b) {
+                var pa = a.preis && a.preis.eur !== null ? a.preis.eur : -1;
+                var pb = b.preis && b.preis.eur !== null ? b.preis.eur : -1;
+                return pb - pa;
+            });
+        } else {
+            liste.sort(function (a, b) { return wert(b) - wert(a); });
+        }
+        return liste;
+    }
+
+    function binderZeichnen(wurzel, g) {
+        var ziel = wurzel.querySelector('[data-mcl-abschnitt="binder"]');
+        if (!ziel) return;
+        var d = binderDaten[g.id];
+        if (!d) return;
+        var stand = binderStand[g.id] || (binderStand[g.id] = { meta: 'alle', sort: 'nutzung' });
+
+        var metas = (d.metas || []);
+        var chips = ['<button type="button" class="mcl-chip" data-mcl-bdmeta="alle" aria-pressed="' +
+            (stand.meta === 'alle') + '">' + esc(T('binderAlle')) + '</button>'];
+        metas.forEach(function (m) {
+            chips.push('<button type="button" class="mcl-chip" data-mcl-bdmeta="' + esc(m.id) +
+                '" aria-pressed="' + (stand.meta === m.id) + '"' +
+                (m.hinweis ? ' title="' + esc(m.hinweis) + '"' : '') + '>' +
+                esc(m.name || m.id) + ' <small>' + binderZahl(m.listen) + '</small></button>');
+        });
+
+        var sorten = [['nutzung', 'binderSortNutzung'], ['name', 'binderSortName'], ['preis', 'binderSortPreis']];
+        var sortChips = sorten.map(function (p) {
+            return '<button type="button" class="mcl-chip" data-mcl-bdsort="' + p[0] +
+                '" aria-pressed="' + (stand.sort === p[0]) + '">' + esc(T(p[1])) + '</button>';
+        }).join('');
+
+        var liste = binderSortiert(d.karten || [], stand.meta, stand.sort);
+        var karten = liste.length
+            ? '<ul class="mcl-bd-gitter">' + liste.map(function (k) {
+                return binderKarteHtml(k, stand.meta);
+            }).join('') + '</ul>'
+            : '<p class="mcl-status">' + esc(T('binderKeine')) + '</p>';
+
+        var mus = (d.matchups || []).slice(0, 24).map(function (m) {
+            var s = m.siegquote;
+            var klasse = s >= 55 ? 'gut' : (s <= 45 ? 'schlecht' : 'even');
+            return '<li class="mcl-bd-mu" data-s="' + klasse + '"><span class="mcl-ampel"></span>' +
+                '<span class="mcl-bd-mu-n">' + esc(m.gegner) + '</span>' +
+                '<span class="mcl-bd-mu-z"><b>' + binderZahl(s, 1) + '\u00a0%</b>' +
+                '<small>' + binderZahl(m.partien) + ' ' + esc(T('binderPartien')) + '</small></span></li>';
+        }).join('');
+
+        var turniere = (d.turniere || []).map(function (t) {
+            return '<li class="mcl-bd-tn"><b>' + esc(t.turnier) + '</b>' +
+                '<span>' + esc(t.datum) + ' · ' + binderZahl(t.spieler_deck) + '\u202f/\u202f' +
+                binderZahl(t.spieler_gesamt) + ' ' + esc(T('binderSpieler')) +
+                ' · ' + binderZahl(t.anteil, 2) + '\u00a0% · ' +
+                esc(T('binderQuote')) + ' ' + binderZahl(t.siegquote, 1) + '\u00a0%</span></li>';
+        }).join('');
+
+        var quellen = [];
+        (d.karten || []).forEach(function (k) {
+            (k.quellen || []).forEach(function (q) {
+                if (quellen.indexOf(q) < 0) quellen.push(q);
+            });
+        });
+
+        ziel.innerHTML =
+            '<p class="mcl-lead">' + esc(T('binderLead')) + '</p>' +
+            '<div class="mcl-filter" data-mcl-bdleiste="meta">' + chips.join('') + '</div>' +
+            '<div class="mcl-filter" data-mcl-bdleiste="sort">' + sortChips + '</div>' +
+            karten +
+            (mus ? '<h4 class="mcl-bd-h">' + esc(T('binderMatchups')) + '</h4>' +
+                '<ul class="mcl-bd-mus">' + mus + '</ul>' : '') +
+            (turniere ? '<h4 class="mcl-bd-h">' + esc(T('binderTurniere')) + '</h4>' +
+                '<ul class="mcl-bd-tns">' + turniere + '</ul>' : '') +
+            '<details class="mcl-bd-herkunft"><summary>' + esc(T('binderHerkunft')) + '</summary>' +
+            '<p>' + esc(String((d._meta && d._meta.hinweis) || '')) + '</p>' +
+            '<p class="mcl-sub">' + esc(quellen.join(' · ')) +
+            (d._meta && d._meta.gebaut ? ' · ' + esc(d._meta.gebaut) : '') + '</p></details>';
+    }
+
+    function binderOeffnen(wurzel, g) {
+        var ziel = wurzel.querySelector('[data-mcl-abschnitt="binder"]');
+        if (!ziel) return;
+        if (binderDaten[g.id]) { binderZeichnen(wurzel, g); return; }
+        ziel.innerHTML = '<p class="mcl-status">' + esc(T('binderLaden')) + '</p>';
+        binderHolen(g.id).then(function () {
+            binderZeichnen(wurzel, g);
+        }).catch(function (err) {
+            console.warn('[DsMasterclass] Cardbinder ' + g.id + ' nicht geladen:', err && err.message);
+            /* Kein erfundener Inhalt: was fehlt, wird benannt. */
+            ziel.innerHTML = '<p class="mcl-status">' + esc(T('binderFehlt')) + '</p>';
+        });
+    }
+
+    /* Haengt Knopf und Abschnitt an das geladene Stueck. Laeuft genau
+     * einmal je geoeffneter Masterclass. */
+    function binderEinhaengen(wurzel, g) {
+        var nav = wurzel.querySelector('.mcl-bereiche');
+        if (!nav || nav.querySelector('[data-mcl-ziel="binder"]')) return;
+        var knopf = document.createElement('button');
+        knopf.type = 'button';
+        knopf.className = 'mcl-bereich';
+        knopf.setAttribute('data-mcl-ziel', 'binder');
+        knopf.setAttribute('aria-pressed', 'false');
+        knopf.textContent = T('binder');
+        nav.appendChild(knopf);
+
+        var abschnitte = wurzel.querySelectorAll('[data-mcl-abschnitt]');
+        var letzter = abschnitte[abschnitte.length - 1];
+        if (!letzter) return;
+        var block = document.createElement('div');
+        block.className = 'mcl-abschnitt mcl-bd';
+        block.setAttribute('data-mcl-abschnitt', 'binder');
+        block.hidden = true;
+        letzter.parentNode.insertBefore(block, letzter.nextSibling);
     }
 
     /* ---------- Verdrahtung im geladenen Stueck ---------- */
@@ -856,10 +1121,28 @@
         });
     }
 
-    function verdrahte(wurzel) {
+    function verdrahte(wurzel, g) {
+        binderEinhaengen(wurzel, g);
         wurzel.addEventListener('click', function (e) {
             var b;
-            if ((b = e.target.closest('[data-mcl-ziel]'))) { bereichWechseln(wurzel, b.getAttribute('data-mcl-ziel')); return; }
+            if ((b = e.target.closest('[data-mcl-bdmeta]'))) {
+                var st = binderStand[g.id] || (binderStand[g.id] = { meta: 'alle', sort: 'nutzung' });
+                st.meta = b.getAttribute('data-mcl-bdmeta');
+                binderZeichnen(wurzel, g);
+                return;
+            }
+            if ((b = e.target.closest('[data-mcl-bdsort]'))) {
+                var st2 = binderStand[g.id] || (binderStand[g.id] = { meta: 'alle', sort: 'nutzung' });
+                st2.sort = b.getAttribute('data-mcl-bdsort');
+                binderZeichnen(wurzel, g);
+                return;
+            }
+            if ((b = e.target.closest('[data-mcl-ziel]'))) {
+                var ziel = b.getAttribute('data-mcl-ziel');
+                bereichWechseln(wurzel, ziel);
+                if (ziel === 'binder') binderOeffnen(wurzel, g);
+                return;
+            }
             if ((b = e.target.closest('[data-mcl-filter]'))) { matchupFilter(wurzel, b.getAttribute('data-mcl-filter')); return; }
             if ((b = e.target.closest('[data-mcl-liste]'))) { listeWechseln(wurzel, b.getAttribute('data-mcl-liste')); return; }
             if ((b = e.target.closest('[data-mcl-vl="start"]'))) { vlUmschalten(wurzel); return; }
@@ -922,6 +1205,15 @@
         _englischeNamen: englischeNamen,
         _sprechStuecke: sprechStuecke,
         _vorleseBloecke: vorleseBloecke,
-        _ersterSichtbarer: ersterSichtbarer
+        _ersterSichtbarer: ersterSichtbarer,
+        /* Fuer die Zusicherungen: der Cardbinder wird am Verhalten
+         * geprueft, nicht am Wortlaut im Quelltext. */
+        _binderEinhaengen: binderEinhaengen,
+        _binderZeichnen: binderZeichnen,
+        _binderSortiert: binderSortiert,
+        _binderKarteHtml: binderKarteHtml,
+        _binderZahl: binderZahl,
+        _binderDaten: binderDaten,
+        _binderStand: binderStand
     };
 })();

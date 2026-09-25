@@ -1,0 +1,226 @@
+name: City League nachziehen
+
+# Nur die zwei City-League-Scraper, per Hand ausgeloest.
+#
+# ANLASS (25.09.2026): Turnier 569 (Champions League Yokohama, 10.000
+# Spieler) kam ueber ZWEI Wege in die Turnierliste — ueber
+# get_jp_major_tournaments() aus der Hauptliste und ueber
+# `additional_tournament_ids`, wohin update_sets es per
+# auto_discover_js geschrieben hatte. Es wurde deshalb zweimal
+# abgerufen, und in data/city_league_analysis.csv stand danach JEDE
+# Zahl doppelt: 48 Decks statt 24, alle 14 Archetypen mit gerader
+# Deckzahl.
+#
+# Der Riegel steht seit demselben Tag an zwei Stellen im Scraper. Die
+# doppelten Zeilen sind aus den Dateien genommen und das Turnier aus
+# data/city_league_analysis_scraped.json gestrichen — halbiert wurde
+# nichts, denn Rechnen an Daten ist keine Messung. Was fehlt, ist EIN
+# sauberer Abruf.
+#
+# WARUM EIN EIGENER ABLAUF UND NICHT DER WOCHENLAUF
+# -------------------------------------------------
+# weekly-full-update.yml ruft 20 Scraper auf und braucht mehr als zwei
+# Stunden. Fuer ein einzelnes nachzuziehendes Turnier ist das der
+# falsche Hebel — und bis zum naechsten Termin (Di/Fr 06:00 UTC) stuende
+# der japanische Reiter ohne Kartenauswertung da.
+#
+# Der Lauf ist wiederholbar: `city_league_analysis_scraped.json` merkt
+# sich, was schon abgerufen ist. Ein zweiter Lauf aendert nichts und
+# commitet nichts.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # die nachgezogenen CSVs committen
+  actions: write    # deploy-pages anstossen (GITHUB_TOKEN-Push tut es nicht)
+
+concurrency:
+  # Nicht gegen den Wochenlauf antreten: beide schreiben dieselben CSVs.
+  group: weekly-full-update
+  cancel-in-progress: false
+
+jobs:
+  nachziehen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Abhaengigkeiten
+        run: |
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet requests beautifulsoup4 lxml pandas cloudscraper pytest
+
+      - name: Stand vorher festhalten
+        run: |
+          # Fuer die Gegenprobe unten: wie viele Decks stehen je
+          # Archetyp drin, BEVOR der Lauf etwas anfasst.
+          python3 - <<'PY' | tee /tmp/vorher.txt
+          import csv, os
+          csv.field_size_limit(2**31 - 1)
+          p = "data/city_league_analysis.csv"
+          n = 0
+          if os.path.exists(p):
+              with open(p, newline="", encoding="utf-8-sig") as fh:
+                  n = sum(1 for _ in csv.DictReader(fh, delimiter=";"))
+          print("zeilen=%d" % n)
+          PY
+
+      - name: Scraper
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        working-directory: backend
+        run: |
+          # `set +e` laesst BEIDE Scraper laufen, auch wenn der erste
+          # umfaellt — sonst faehrt ein Fehler in der Kartenauswertung
+          # die Archetypdatei gar nicht mehr an, und die beiden Dateien
+          # beschrieben danach verschiedene Turnierbestaende.
+          #
+          # Verschluckt wird deshalb nichts: jeder Rueckgabewert steht in
+          # der Zusammenfassung des Laufs, und ein Fehlschlag faerbt den
+          # Lauf am Ende rot ($fehler).
+          set +e
+          fehler=0
+          {
+            echo "### City League nachziehen"
+            echo ""
+            echo "| Scraper | rc |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for step in \
+              "scrapers/city_league_analysis_scraper.py" \
+              "scrapers/city_league_archetype_scraper.py" \
+          ; do
+              echo "::group::$step"
+              python "$step"
+              rc=$?
+              echo "::endgroup::"
+              echo "| \`$step\` | $rc |" >> "$GITHUB_STEP_SUMMARY"
+              if [ "$rc" -ne 0 ]; then
+                  echo "::error::$step endete mit $rc"
+                  fehler=1
+              fi
+          done
+          exit $fehler
+
+      - name: Gegenprobe — keine Zahl steht doppelt
+        run: |
+          # Der Befund, der diesen Ablauf ausgeloest hat, in Zahlen: wenn
+          # ein Turnier zweimal abgerufen wurde, ist JEDE Deckzahl gerade.
+          # Bei 14 Archetypen ist das kein Zufall (1 zu 16.384).
+          #
+          # Geprueft wird eine EIGENSCHAFT, nicht eine festgenagelte Zahl:
+          # dieselbe Platzierung darf nicht zweimal in der Archetypdatei
+          # stehen, und die Kartenauswertung darf kein Turnier in zwei
+          # Turnierklassen fuehren.
+          python3 - <<'PY'
+          import csv, os, sys
+          csv.field_size_limit(2**31 - 1)
+
+          fehler = []
+
+          p = "data/city_league_archetypes.csv"
+          if os.path.exists(p):
+              with open(p, newline="", encoding="utf-8-sig") as fh:
+                  zeilen = list(csv.DictReader(fh, delimiter=";"))
+              gesehen = {}
+              for z in zeilen:
+                  s = (str(z.get("tournament_id") or "").strip(),
+                       str(z.get("placement") or "").strip(),
+                       str(z.get("player") or "").strip())
+                  gesehen[s] = gesehen.get(s, 0) + 1
+              doppelt = [s for s, n in gesehen.items() if n > 1]
+              if doppelt:
+                  fehler.append("%d Platzierungen stehen doppelt in %s: %s"
+                                % (len(doppelt), p, doppelt[:5]))
+              # Ein Turnier, zwei Klassen = derselbe Befund von der anderen Seite.
+              klassen = {}
+              for z in zeilen:
+                  klassen.setdefault(str(z.get("tournament_id") or "").strip(),
+                                     set()).add((z.get("format") or "").strip())
+              mehrfach = {t: sorted(k) for t, k in klassen.items() if len(k) > 1}
+              if mehrfach:
+                  fehler.append("diese Turniere stehen unter zwei Turnierklassen: %s"
+                                % mehrfach)
+
+          p2 = "data/city_league_analysis.csv"
+          if os.path.exists(p2):
+              with open(p2, newline="", encoding="utf-8-sig") as fh:
+                  zeilen2 = list(csv.DictReader(fh, delimiter=";"))
+              gesehen2 = {}
+              for z in zeilen2:
+                  s = (str(z.get("tournament_id") or "").strip(),
+                       str(z.get("archetype") or "").strip(),
+                       str(z.get("card_identifier") or "").strip(),
+                       str(z.get("period") or "").strip())
+                  gesehen2[s] = gesehen2.get(s, 0) + 1
+              doppelt2 = [s for s, n in gesehen2.items() if n > 1]
+              if doppelt2:
+                  fehler.append("%d Kartenzeilen stehen doppelt in %s: %s"
+                                % (len(doppelt2), p2, doppelt2[:5]))
+
+          for f in fehler:
+              print("::error::%s" % f)
+          sys.exit(1 if fehler else 0)
+          PY
+
+      # Dieser Schritt DARF den Lauf rot faerben — anders als im
+      # Wochenlauf, wo er einer von zwanzig ist. Hier ist die frische
+      # City-League-Auswertung in der Kartenmappe der Zweck des Laufs:
+      # scheitert sie, ist das Ergebnis nicht das, was drauf steht.
+      # (Ein `set +e` mit `exit 0` waere genau die Stelle, die
+      # tests/unit/test-gruen-ohne-pruefung.js zu Recht beanstandet.)
+      - name: Kartenmappen der Masterclasses neu bauen
+        run: python3 scripts/build_masterclass_cardbinder.py
+
+      - name: Tests
+        run: |
+          python -m pytest tests/python/test_cardbinder_meta_und_gruppen.py \
+                           tests/python/test_masterclass_cardbinder.py -q
+
+      - name: Datenstaende fortschreiben
+        run: python3 scripts/build_data_stand.py
+
+      # `git add data` unten nimmt jede Datei unter data/ mit, auch die
+      # Quellen des Luecken-Inventars. Wer sie commitet und das Inventar
+      # stehen laesst, laesst es ueber einen alten Stand urteilen —
+      # tests/python/test_ablaeufe_ziehen_das_inventar_mit.py faengt das.
+      # Fail-soft wie in den anderen Ablaeufen: faellt es um, bleibt das
+      # alte Inventar stehen.
+      - name: Luecken-Inventar fortschreiben
+        run: python3 scripts/datenluecken.py || true
+
+      - name: Committen
+        id: commit
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add data
+          if git diff --cached --quiet; then
+            echo "Nichts geaendert — der Bestand war schon vollstaendig."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "Daten: City League nachgezogen — $(date -u +'%Y-%m-%d %H:%M UTC')"
+          for versuch in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "pushed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            git pull --rebase=true --autostash -X ours origin main || exit 1
+          done
+          echo "::error::Push nach 3 Versuchen fehlgeschlagen"; exit 1
+
+      # Ein Push mit GITHUB_TOKEN loest `on: push` nicht aus.
+      - name: Deploy anstossen
+        if: ${{ steps.commit.outputs.pushed == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main

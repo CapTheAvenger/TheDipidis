@@ -1,0 +1,2564 @@
+{
+  "30C::23": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::24": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::25": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::26": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::27": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::28": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::29": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::30": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::31": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::32": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::33": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::34": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::35": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::36": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::37": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::38": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::39": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::40": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::41": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::42": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::43": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::44": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::45": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::46": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::47": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::48": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::49": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::50": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::51": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::52": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "30C::B": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "AOR::52": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "AOR::53": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "AOR::54": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "AOR::55": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "AOR::56": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "AOR::75a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BG::1": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BG::2": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BG::3": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BG::4": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BG::5": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BG::6": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BG::7": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BG::8": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BG::9": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BKP::107a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BKP::81": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKP::82": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKP::83": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKP::84": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKP::85": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKP::98a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BKP::98b": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BKT::100": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKT::101": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKT::102": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKT::103": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKT::105": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKT::106": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKT::107": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKT::146a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BKT::97": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKT::98": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BKT::99": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BRS::D": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "BRS::F": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "BRS::G": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "BRS::L": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "BRS::M": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "BRS::P": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "BRS::R": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "BRS::W": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "BUS::105a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BUS::112a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BUS::115a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BUS::116a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BUS::140": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BUS::159": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BUS::18a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BUS::39a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BUS::88a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BUS::91": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BUS::92": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BUS::92a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "BUS::93": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BUS::94": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BUS::95": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BUS::96": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BUS::97": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BUS::98": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "BWP::77": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "BWP::78": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "CEC::143a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEC::144": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::145": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::146": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::147": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::148": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::149": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::150": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::151": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::152": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::153": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::154": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEC::155": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CEL::CC1": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC10": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC11": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC12": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC13": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC14": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC15": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC16": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC17": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC18": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC19": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC2": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC20": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC21": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC22": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC23": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC24": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC25": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC3": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC4": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC5": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC6": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC7": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC8": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CEL::CC9": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CES::10a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CES::123a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CES::148a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CES::177a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CIN::63a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "CIN::71": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CIN::72": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CIN::73": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "CIN::84a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "DET::14": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "DET::15": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "DRM::40a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "DRM::60a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "EVO::63": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FCO::105a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FCO::111a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FCO::43a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FCO::54a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FCO::65": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FCO::66": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FCO::67": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FCO::68": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FCO::70": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FCO::71": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FCO::72": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FFI::55a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FFI::69": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FFI::70": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FFI::71": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FFI::72": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FFI::73": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLF::62": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLF::63": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLF::64": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLF::65": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLF::66": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLF::67": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLF::68": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLF::88a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FLI::102a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FLI::112a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FLI::113a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FLI::126": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLI::139": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLI::2a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "FLI::83": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLI::84": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLI::85": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLI::86": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLI::87": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLI::88": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLI::89": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "FLI::90": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::28a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GEN::50": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::51": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::52": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::73a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GEN::RC17": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::RC18": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::RC19": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::RC20": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::RC21": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::RC22": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::RC30": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GEN::RC32": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GRI::121a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::124a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::125a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::128a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::130a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::140": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GRI::157a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::158": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GRI::19a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::21a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::51a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::60a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::88": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GRI::89": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GRI::90": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GRI::91": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GRI::92": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "GRI::92a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "GRI::93": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::38": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::39": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::40": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::41": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::42": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::43": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::SV34": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::SV35": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::SV36": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::SV75": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "HIF::SV76": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "KSS::1": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::10": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::11": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::12": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::13": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::14": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::15": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::16": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::17": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::18": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::19": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::2": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::20": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::21": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::22": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::23": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::24": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::25": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::26": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::27": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::28": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::29": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::3": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::30": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::31": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::32": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::33": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::34": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::35": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::36": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::37": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::38": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::39": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::4": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::5": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::6": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::7": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::8": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "KSS::9": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "LOT::132": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::133": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::134": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::135": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::136": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::137": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::138": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::139": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::140": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::141": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::142": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::143": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::144": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::145": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::146": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::147": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::148": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::149": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::150": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::151": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::172a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "LOT::187a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "LOT::188a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "LOT::189a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "LOT::205": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::206": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::225": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "LOT::226": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PHF::116": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PHF::24a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "PHF::65a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "PHF::67": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PHF::68": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PHF::69": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PHF::70": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PHF::71": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PRC::101": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PRC::102": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PRC::103": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PRC::104": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PRC::105": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "PRC::155": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "RM::1": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::10": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::11": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::12": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::13": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::14": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::15": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::16": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::2": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::3": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::4": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::5": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::6": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::7": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::8": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "RM::9": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "ROS::43": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "ROS::44": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "ROS::45": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "ROS::46": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "ROS::47": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "ROS::48": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "ROS::77a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "ROS::92a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SFA::64": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "SI::1": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::10": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::11": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::12": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::13": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::14": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::15": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::16": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::17": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::18": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::2": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::3": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::4": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::5": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::6": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::7": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::8": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SI::9": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SLG::10a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SLG::68a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SLG::77a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SMP::128": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "SMP::152": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "SMP::163": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "SMP::200": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "STS::111": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "STS::116": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "STS::76": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "STS::78": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "STS::80": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "STS::81": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "SUM::101a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "SUM::90": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "SUM::91": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "SUM::92": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "SUM::93": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "TEU::111": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "TEU::112": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "TEU::152a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "TEU::152b": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UF::?": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_cardmarket_url",
+    "tries": 1
+  },
+  "UNB::131": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::132": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::133": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::134": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::135": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::136": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::137": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::138": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::139": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::140": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::141": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::142": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::182a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UNB::182b": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UNB::189a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UNB::195a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UNB::206": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNB::226": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNM::143": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNM::144": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNM::145": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UNM::191a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UNM::206a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UNM::79a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UPR::119a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UPR::122a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UPR::125a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UPR::135a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UPR::153a": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_basic",
+    "tries": 1
+  },
+  "UPR::92": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UPR::93": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "UPR::94": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::146": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::87": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::88": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::89": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::90": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::91": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::92": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::93": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::94": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::95": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::96": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XY::97": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XYP::103": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XYP::139": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XYP::149": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XYP::15": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XYP::31": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XYP::4": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XYP::43": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XYP::5": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  },
+  "XYP::7": {
+    "first_seen": "2026-09-25T12:07:04.602558",
+    "last_attempted": "2026-09-25T12:07:04.602558",
+    "reason": "missing_energy_type",
+    "tries": 1
+  }
+}

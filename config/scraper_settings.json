@@ -67,7 +67,9 @@
                 "end_date": "auto",
                 "include_jp_majors": true,
                 "max_decklists_per_league": 50,
-                "additional_tournament_ids": []
+                "additional_tournament_ids": [
+                    569
+                ]
             }
         },
         "auto_discover_js": true,
@@ -84,9 +86,11 @@
         "region": "jp",
         "min_tournament_size": 1,
         "_min_size_comment": "JP City League events typically post 4-16 placements (NOT 32+). The earlier value 32 (added 2026-04-21) silently rejected every new tournament for two weeks — see backend/scrapers/city_league_archetype_scraper.py DEFAULT_SETTINGS comment for the full incident.",
-        "additional_tournament_ids": [],
+        "additional_tournament_ids": [
+            569
+        ],
         "include_jp_majors": true,
-        "_jp_majors_comment": "Japanische Majors (Champions League, Regional League, Japan Championships, Korean/SEA-Ligen) laufen im japanischen Standard-Format, stehen aber NICHT in /tournaments/jp \u2014 nur in der Hauptliste /tournaments, erkennbar an data-format=\"standard-jp\". Gemessen 25.09.2026: die Champions League Yokohama (Turnier 569, 20.09.2026, 10.000 Spieler, Sieger Keiyo Watanabe mit Mega-Stalobor) fehlte deshalb im laufenden Fenster, das seit der M6A-Rotation am 16.09.2026 sonst leer ist."
+        "_jp_majors_comment": "Japanische Majors (Champions League, Regional League, Japan Championships, Korean/SEA-Ligen) laufen im japanischen Standard-Format, stehen aber NICHT in /tournaments/jp — nur in der Hauptliste /tournaments, erkennbar an data-format=\"standard-jp\". Gemessen 25.09.2026: die Champions League Yokohama (Turnier 569, 20.09.2026, 10.000 Spieler, Sieger Keiyo Watanabe mit Mega-Stalobor) fehlte deshalb im laufenden Fenster, das seit der M6A-Rotation am 16.09.2026 sonst leer ist."
     },
     "city_league_analysis_past": {
         "sources": {

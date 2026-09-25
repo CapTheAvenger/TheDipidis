@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-09-24 16:26:26+00:00",
+ "erzeugt": "2026-09-25 12:35:59+00:00",
  "format": "TEF-30C",
  "betriebsart": "B",
  "betriebsart_klartext": "Kaltstart — TEF-30C hat noch kein Praesenzturnier, Anker ist die Vorepoche TEF-CRI",
@@ -33,27 +33,27 @@
  ],
  "ankerspieler_gesamt": 9691,
  "online_abdeckung": {
-  "schnappschuss": "2026-09-24",
-  "anteil_unbekannt": 1.19,
+  "schnappschuss": "2026-09-25",
+  "anteil_unbekannt": 1.14,
   "groesste_unbekannte": [
    {
     "deck": "Gengar",
-    "anteil": 0.68
+    "anteil": 0.65
    },
    {
     "deck": "Mega Gengar",
-    "anteil": 0.14
+    "anteil": 0.13
    },
    {
     "deck": "Heatran Metang",
     "anteil": 0.03
    },
    {
-    "deck": "Erika's Victreebel",
+    "deck": "Slaking",
     "anteil": 0.03
    },
    {
-    "deck": "Mega Lopunny",
+    "deck": "Erika's Victreebel",
     "anteil": 0.03
    }
   ]

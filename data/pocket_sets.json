@@ -4,7 +4,7 @@
   "quelle": "game8.co",
   "quelle_url": "https://game8.co/games/Pokemon-TCG-Pocket/archives/482685",
   "hinweis": "Nichts hier ist geraten. Wofür die Seite keinen Namen führt, steht in ohne_namen und bleibt in der Oberfläche die blanke Kennung.",
-  "anzahl": 23,
+  "anzahl": 24,
   "in_kartenlisten": [
    "A1",
    "A1a",
@@ -29,7 +29,16 @@
    "P-A",
    "P-B"
   ],
-  "ohne_namen": []
+  "ohne_namen": [],
+  "nachgetragen": [
+   {
+    "kennung": "B4b",
+    "name": "Deluxe Pack Mega",
+    "am": "2026-09-25",
+    "beleg": "game8.co/games/Pokemon-TCG-Pocket/archives/482685 — „Deluxe Pack Mega (B4b) has been announced for release on September 29th, 2026, 6pm PDT. It is the 22nd overall expansion following Team Rocket's Ambition (B4a)“",
+    "warum_von_hand": "build_pocket_sets.py kann nicht in CI laufen: game8.co antwortet Rechenzentrums-Adressen mit HTTP 202 (Cloudflare-Pruefung). Am 25.09.2026 nachgemessen, auch aus der Bausandkiste: 202. Gelesen wurde die Seite im Browser der Arbeitssitzung."
+   }
+  ]
  },
  "sets": {
   "A1": "Genetic Apex",
@@ -53,6 +62,7 @@
   "B3b": "Everyday Wonders",
   "B4": "Ruler of the Skies",
   "B4a": "Team Rocket's Ambition",
+  "B4b": "Deluxe Pack Mega",
   "P-A": "Promo-A",
   "P-B": "Promo-B"
  }

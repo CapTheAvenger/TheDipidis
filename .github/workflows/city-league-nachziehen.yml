@@ -58,6 +58,63 @@ jobs:
           python -m pip install --quiet --upgrade pip
           python -m pip install --quiet requests beautifulsoup4 lxml pandas cloudscraper pytest
 
+      # OHNE SAAT LAEUFT DER SCRAPER INS LEERE (25.09.2026 gemessen)
+      #
+      # Der erste Lauf dieses Ablaufs war nach 2 Sekunden gruen und hatte
+      # nichts getan. Die Anmerkung sagte, warum: „backend/core/data
+      # fuehrt keine einzige CSV- oder JSON-Datei." Die Scraper lesen
+      # ihre Nachschlagetabellen von dort, nicht aus data/ — ohne
+      # Kartendatenbank bricht city_league_analysis_scraper.py sofort ab
+      # („Karten-Datenbank ist leer!"), und der Archetyp-Scraper schreibt
+      # in ein Verzeichnis, das niemand liest.
+      #
+      # Dieselbe Saat wie in weekly-full-update.yml, auf die Dateien
+      # gekuerzt, die diese beiden Scraper brauchen:
+      #   (a) Nachschlagetabellen  — sonst schlagen alle Zuordnungen fehl
+      #   (b) Gedaechtnisdateien   — sonst wird jedes Turnier neu geholt
+      #   (c) bisherige Ausgaben   — die Scraper arbeiten im append-Modus
+      #       und wuerden den Bestand sonst auf die Zeilen DIESES Laufs
+      #       zusammenstreichen (passiert am 02.05.2026, 152.588 Zeilen)
+      #
+      # (b) und (c) gehoeren zusammen. Wer eine Liste aendert, aendert
+      # die andere mit.
+      - name: Saat — backend/core/data/ aus data/
+        run: |
+          mkdir -p backend/core/data
+          for f in \
+              all_cards_database.csv \
+              all_cards_database.json \
+              japanese_cards_database.csv \
+              cardmarket_id_mapping.csv \
+              price_data.csv \
+              sets.json \
+              sets_metadata.json \
+              format_window.json \
+              archetype_icons.json \
+              formats_catalog.json \
+              ace_specs.json \
+              city_league_analysis_scraped.json \
+              city_league_analysis_past_scraped.json \
+              city_league_analysis.csv \
+              city_league_analysis_past.csv \
+              city_league_archetypes.csv \
+              city_league_archetypes_past.csv \
+              city_league_archetypes_comparison.csv \
+              city_league_archetypes_comparison_M3.csv \
+              city_league_archetypes_deck_stats.csv \
+              city_league_archetypes_past_comparison.csv \
+              city_league_archetypes_past_deck_stats.csv \
+          ; do
+              if [ -f "data/$f" ]; then
+                  cp "data/$f" "backend/core/data/$f"
+                  echo "  gesaet: $f"
+              fi
+          done
+          # ZEITMARKE FUER DEN RUECKWEG: alles, was NACH diesem Punkt in
+          # backend/core/data landet, hat DIESER Lauf geschrieben.
+          touch "$RUNNER_TEMP/saat.marke"
+          echo "Saat-Marke gesetzt: $(date -u +'%H:%M:%S UTC')"
+
       - name: Stand vorher festhalten
         run: |
           # Fuer die Gegenprobe unten: wie viele Decks stehen je
@@ -109,6 +166,31 @@ jobs:
               fi
           done
           exit $fehler
+
+      # Der Rueckweg, gegen die Saat-Marke. Ohne ihn stuenden die neuen
+      # Zeilen in backend/core/data und `git add data` fasste sie nie an.
+      - name: Erzeugte Dateien zurueck nach data/
+        run: |
+          set +e
+          marke="$RUNNER_TEMP/saat.marke"
+          if [ ! -f "$marke" ]; then
+              echo "::warning::keine Saat-Marke gefunden — der Rueckweg wird uebersprungen"
+              exit 0
+          fi
+          zurueck=0
+          for q in backend/core/data/*.json backend/core/data/*.csv backend/core/data/*.html; do
+              [ -f "$q" ] || continue
+              [ "$q" -nt "$marke" ] || continue
+              cp "$q" "data/$(basename "$q")"
+              zurueck=$((zurueck+1))
+              echo "  <- $(basename "$q") ($(stat -c%s "data/$(basename "$q")") B)"
+          done
+          echo "$zurueck Datei(en) aus diesem Lauf zurueckgeschrieben."
+          # Nichts zurueckzuschreiben ist kein Fehler: dann war der
+          # Bestand schon vollstaendig. Sichtbar ist es in der Zeile
+          # darueber und in der Zusammenfassung des Laufs.
+          echo "| zurueckgeschrieben | $zurueck |" >> "$GITHUB_STEP_SUMMARY"
+          exit 0
 
       - name: Gegenprobe — keine Zahl steht doppelt
         run: |

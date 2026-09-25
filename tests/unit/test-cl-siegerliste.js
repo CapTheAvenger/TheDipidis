@@ -212,3 +212,32 @@ test('zwei Sieger in einem Turnier werden gezaehlt, nicht doppelt gezeigt', () =
     assert.strictEqual(raus[0].zeilen, 2,
         'die zweite Platz-1-Zeile wird verschluckt, statt gezaehlt zu werden');
 });
+
+test('die Zeilen liegen VOR dem Zeichnen bereit', () => {
+    /* BEFUND (25.09.2026, live geprueft): die Siegerliste zeigte „kein
+     * japanisches Major im Datensatz", waehrend die Champions League
+     * Yokohama mit Sieger Keiyo Watanabe in der Datei stand und
+     * window.cityLeagueArchetypesData 29 Zeilen fuehrte.
+     *
+     * Grund: das Ablegen stand VIER ZEILEN NACH dem Zeichnen. Beim
+     * ersten Aufbau war der Speicher leer; erst ein zweites Zeichnen
+     * haette die Liste gefuellt.
+     *
+     * Geprueft wird die Reihenfolge im Quelltext, weil genau dort der
+     * Fehler sass — und weil renderCityLeagueTable() die Zeilen an zwei
+     * Stellen von dort liest. */
+    const ablegen = QUELLE.indexOf('window.cityLeagueArchetypesData = archetypesData');
+    const zeichnen = QUELLE.indexOf('renderCityLeagueTable(tournamentCount, dateRange');
+    assert.ok(ablegen > 0, 'window.cityLeagueArchetypesData wird nirgends gesetzt');
+    assert.ok(zeichnen > 0, 'renderCityLeagueTable wird nirgends aus dem Laden gerufen');
+    assert.ok(ablegen < zeichnen,
+        'die Zeilen werden ERST NACH dem Zeichnen abgelegt — die Siegerliste '
+        + 'und der Herkunftssatz lesen dann ins Leere');
+});
+
+test('die Siegerliste liest dieselben Zeilen, die abgelegt werden', () => {
+    /* Ein zweiter Speicher waere derselbe Fehler mit einem anderen
+     * Namen. */
+    assert.ok(/cityLeagueSiegerListe\(window\.cityLeagueArchetypesData \|\| \[\]\)/.test(QUELLE),
+        'die Siegerliste liest nicht window.cityLeagueArchetypesData');
+});

@@ -9,14 +9,15 @@
   "archetyp_kennungen": [
    "mega-excadrill-ex"
   ],
-  "gebaut": "2026-09-25T14:49:24+00:00",
+  "gebaut": "2026-09-25T15:13:36+00:00",
   "karten": 228,
   "metas": [
    "TEF-30C",
+   "Champions League (JP)",
    "TEF-PBL"
   ],
   "doppelte_turniere_uebersprungen": 13,
-  "turniere_gesamt": 245,
+  "turniere_gesamt": 246,
   "hinweis": "Jede Zeile kommt aus einer Quelle unter data/. Nichts ist hochgerechnet. Fehlt ein Preis oder ein Bild, steht dort nichts — geraten wird nicht.",
   "rangfolge_bei_doppelten_turnieren": [
    "online_api",
@@ -37,6 +38,19 @@
    "bis": "2026-09-24",
    "meta_quellen": [
     "format_window.json + sets_metadata.json"
+   ]
+  },
+  {
+   "id": "Champions League (JP)",
+   "name": "Champions League (Japan)",
+   "hinweis": null,
+   "turniere": 1,
+   "turniere_abgeleitet": 0,
+   "listen": 1,
+   "von": "2026-09-20",
+   "bis": "2026-09-20",
+   "meta_quellen": [
+    "city_league_archetypes.csv"
    ]
   },
   {
@@ -85,16 +99,25 @@
      "schnitt": 2.04,
      "hoechstzahl": 2,
      "turniere": 220
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 2.0,
+     "hoechstzahl": 2,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2641,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2642,
+    "listen_gesamt": 2642,
     "anteil": 100.0,
     "schnitt": 2.04,
     "hoechstzahl": 2
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -133,16 +156,25 @@
      "schnitt": 3.3,
      "hoechstzahl": 4,
      "turniere": 220
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 3.0,
+     "hoechstzahl": 3,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2631,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2632,
+    "listen_gesamt": 2642,
     "anteil": 99.6,
     "schnitt": 3.3,
     "hoechstzahl": 4
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -181,16 +213,25 @@
      "schnitt": 1.98,
      "hoechstzahl": 2,
      "turniere": 220
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 2.0,
+     "hoechstzahl": 2,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2621,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2622,
+    "listen_gesamt": 2642,
     "anteil": 99.2,
     "schnitt": 1.98,
     "hoechstzahl": 2
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -229,16 +270,25 @@
      "schnitt": 3.9,
      "hoechstzahl": 4,
      "turniere": 220
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 4.0,
+     "hoechstzahl": 4,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2606,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2607,
+    "listen_gesamt": 2642,
     "anteil": 98.7,
     "schnitt": 3.9,
     "hoechstzahl": 4
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -277,16 +327,25 @@
      "schnitt": 3.73,
      "hoechstzahl": 4,
      "turniere": 219
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 4.0,
+     "hoechstzahl": 4,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2593,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2594,
+    "listen_gesamt": 2642,
     "anteil": 98.2,
     "schnitt": 3.74,
     "hoechstzahl": 4
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -373,16 +432,25 @@
      "schnitt": 1.58,
      "hoechstzahl": 2,
      "turniere": 220
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 2.0,
+     "hoechstzahl": 2,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2576,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2577,
+    "listen_gesamt": 2642,
     "anteil": 97.5,
-    "schnitt": 1.56,
+    "schnitt": 1.57,
     "hoechstzahl": 2
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -421,16 +489,25 @@
      "schnitt": 2.53,
      "hoechstzahl": 4,
      "turniere": 219
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 4.0,
+     "hoechstzahl": 4,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2574,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2575,
+    "listen_gesamt": 2642,
     "anteil": 97.5,
     "schnitt": 2.56,
     "hoechstzahl": 4
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -469,16 +546,25 @@
      "schnitt": 2.26,
      "hoechstzahl": 4,
      "turniere": 220
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 1.0,
+     "hoechstzahl": 1,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2491,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2492,
+    "listen_gesamt": 2642,
     "anteil": 94.3,
     "schnitt": 2.27,
     "hoechstzahl": 4
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -517,16 +603,25 @@
      "schnitt": 2.19,
      "hoechstzahl": 3,
      "turniere": 218
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 3.0,
+     "hoechstzahl": 3,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2338,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2339,
+    "listen_gesamt": 2642,
     "anteil": 88.5,
     "schnitt": 2.14,
     "hoechstzahl": 3
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -565,16 +660,25 @@
      "schnitt": 1.08,
      "hoechstzahl": 1,
      "turniere": 219
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 1.0,
+     "hoechstzahl": 1,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2272,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2273,
+    "listen_gesamt": 2642,
     "anteil": 86.0,
     "schnitt": 1.07,
     "hoechstzahl": 1
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -613,16 +717,25 @@
      "schnitt": 1.15,
      "hoechstzahl": 3,
      "turniere": 213
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 1.0,
+     "hoechstzahl": 1,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2169,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 2170,
+    "listen_gesamt": 2642,
     "anteil": 82.1,
     "schnitt": 1.13,
     "hoechstzahl": 3
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -709,16 +822,25 @@
      "schnitt": 3.11,
      "hoechstzahl": 4,
      "turniere": 219
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 4.0,
+     "hoechstzahl": 4,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2040,
-    "listen_gesamt": 2641,
-    "anteil": 77.2,
+    "listen_mit_karte": 2041,
+    "listen_gesamt": 2642,
+    "anteil": 77.3,
     "schnitt": 3.11,
     "hoechstzahl": 4
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -757,16 +879,25 @@
      "schnitt": 2.29,
      "hoechstzahl": 4,
      "turniere": 215
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 3.0,
+     "hoechstzahl": 3,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1917,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 1918,
+    "listen_gesamt": 2642,
     "anteil": 72.6,
     "schnitt": 2.27,
     "hoechstzahl": 4
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -805,16 +936,25 @@
      "schnitt": 0.68,
      "hoechstzahl": 1,
      "turniere": 219
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 1.0,
+     "hoechstzahl": 1,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1674,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 1675,
+    "listen_gesamt": 2642,
     "anteil": 63.4,
     "schnitt": 0.68,
     "hoechstzahl": 1
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -853,16 +993,25 @@
      "schnitt": 0.7,
      "hoechstzahl": 1,
      "turniere": 218
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 2.0,
+     "hoechstzahl": 2,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1658,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 1659,
+    "listen_gesamt": 2642,
     "anteil": 62.8,
     "schnitt": 0.7,
-    "hoechstzahl": 1
+    "hoechstzahl": 2
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -948,16 +1097,25 @@
      "schnitt": 1.33,
      "hoechstzahl": 4,
      "turniere": 216
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 3.0,
+     "hoechstzahl": 3,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1529,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 1530,
+    "listen_gesamt": 2642,
     "anteil": 57.9,
     "schnitt": 1.34,
     "hoechstzahl": 4
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api",
     "online_datiert"
@@ -996,16 +1154,25 @@
      "schnitt": 0.65,
      "hoechstzahl": 1,
      "turniere": 214
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 1.0,
+     "hoechstzahl": 1,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1420,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 1421,
+    "listen_gesamt": 2642,
     "anteil": 53.8,
     "schnitt": 0.64,
     "hoechstzahl": 1
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api"
    ]
@@ -1089,16 +1256,25 @@
      "schnitt": 0.59,
      "hoechstzahl": 1,
      "turniere": 209
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 1.0,
+     "hoechstzahl": 1,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1307,
-    "listen_gesamt": 2641,
+    "listen_mit_karte": 1308,
+    "listen_gesamt": 2642,
     "anteil": 49.5,
     "schnitt": 0.59,
     "hoechstzahl": 1
    },
    "quellen": [
+    "city_league",
     "majors",
     "online_api"
    ]
@@ -1343,6 +1519,63 @@
    ]
   },
   {
+   "name": "Brock's Scouting",
+   "name_de": "Rockos Erkundung",
+   "set": "JTG",
+   "nummer": "146",
+   "typ": "Supporter",
+   "gruppe": "supporter",
+   "gruppe_name": "Supporter",
+   "gruppe_rang": 2,
+   "ace": null,
+   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_146_R_EN_LG.png",
+   "preis": {
+    "eur": 0.08,
+    "eur_niedrig": 0.02,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Brocks-Scouting-V1-JTG146?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
+    "stand": "2026-09-25T12:11:13.031167"
+   },
+   "je_meta": {
+    "TEF-30C": {
+     "listen_mit_karte": 90,
+     "listen_gesamt": 173,
+     "anteil": 52.0,
+     "schnitt": 1.92,
+     "hoechstzahl": 3,
+     "turniere": 23
+    },
+    "TEF-PBL": {
+     "listen_mit_karte": 543,
+     "listen_gesamt": 2468,
+     "anteil": 22.0,
+     "schnitt": 1.12,
+     "hoechstzahl": 4,
+     "turniere": 157
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 1.0,
+     "hoechstzahl": 1,
+     "turniere": 1
+    }
+   },
+   "gesamt": {
+    "listen_mit_karte": 634,
+    "listen_gesamt": 2642,
+    "anteil": 24.0,
+    "schnitt": 1.24,
+    "hoechstzahl": 4
+   },
+   "quellen": [
+    "city_league",
+    "majors",
+    "online_api",
+    "online_datiert"
+   ]
+  },
+  {
    "name": "Beldum",
    "name_de": "Tanhel",
    "set": "CRI",
@@ -1387,54 +1620,6 @@
    "quellen": [
     "majors",
     "online_api"
-   ]
-  },
-  {
-   "name": "Brock's Scouting",
-   "name_de": "Rockos Erkundung",
-   "set": "JTG",
-   "nummer": "146",
-   "typ": "Supporter",
-   "gruppe": "supporter",
-   "gruppe_name": "Supporter",
-   "gruppe_rang": 2,
-   "ace": null,
-   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_146_R_EN_LG.png",
-   "preis": {
-    "eur": 0.08,
-    "eur_niedrig": 0.02,
-    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Brocks-Scouting-V1-JTG146?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-09-25T12:11:13.031167"
-   },
-   "je_meta": {
-    "TEF-30C": {
-     "listen_mit_karte": 90,
-     "listen_gesamt": 173,
-     "anteil": 52.0,
-     "schnitt": 1.92,
-     "hoechstzahl": 3,
-     "turniere": 23
-    },
-    "TEF-PBL": {
-     "listen_mit_karte": 543,
-     "listen_gesamt": 2468,
-     "anteil": 22.0,
-     "schnitt": 1.12,
-     "hoechstzahl": 4,
-     "turniere": 157
-    }
-   },
-   "gesamt": {
-    "listen_mit_karte": 633,
-    "listen_gesamt": 2641,
-    "anteil": 24.0,
-    "schnitt": 1.24,
-    "hoechstzahl": 4
-   },
-   "quellen": [
-    "majors",
-    "online_api",
-    "online_datiert"
    ]
   },
   {
@@ -2499,6 +2684,62 @@
    ]
   },
   {
+   "name": "Iron Defender",
+   "name_de": "Eisendefensive",
+   "set": "MEG",
+   "nummer": "118",
+   "typ": "Item",
+   "gruppe": "item",
+   "gruppe_name": "Item",
+   "gruppe_rang": 3,
+   "ace": null,
+   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_118_R_EN_LG.png",
+   "preis": {
+    "eur": 0.04,
+    "eur_niedrig": 0.02,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Iron-Defender-MEG118?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
+    "stand": "2026-09-25T12:11:13.031167"
+   },
+   "je_meta": {
+    "TEF-30C": {
+     "listen_mit_karte": 3,
+     "listen_gesamt": 173,
+     "anteil": 1.7,
+     "schnitt": 0.2,
+     "hoechstzahl": null,
+     "turniere": 2
+    },
+    "TEF-PBL": {
+     "listen_mit_karte": 56,
+     "listen_gesamt": 2468,
+     "anteil": 2.3,
+     "schnitt": 0.2,
+     "hoechstzahl": 1,
+     "turniere": 43
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 1.0,
+     "hoechstzahl": 1,
+     "turniere": 1
+    }
+   },
+   "gesamt": {
+    "listen_mit_karte": 60,
+    "listen_gesamt": 2642,
+    "anteil": 2.3,
+    "schnitt": 0.21,
+    "hoechstzahl": 1
+   },
+   "quellen": [
+    "city_league",
+    "majors",
+    "online_api"
+   ]
+  },
+  {
    "name": "Team Rocket's Articuno",
    "name_de": "Team Rockets Arktos",
    "set": "DRI",
@@ -2538,53 +2779,6 @@
     "listen_gesamt": 2641,
     "anteil": 2.3,
     "schnitt": 0.37,
-    "hoechstzahl": 1
-   },
-   "quellen": [
-    "majors",
-    "online_api"
-   ]
-  },
-  {
-   "name": "Iron Defender",
-   "name_de": "Eisendefensive",
-   "set": "MEG",
-   "nummer": "118",
-   "typ": "Item",
-   "gruppe": "item",
-   "gruppe_name": "Item",
-   "gruppe_rang": 3,
-   "ace": null,
-   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_118_R_EN_LG.png",
-   "preis": {
-    "eur": 0.04,
-    "eur_niedrig": 0.02,
-    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Iron-Defender-MEG118?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-09-25T12:11:13.031167"
-   },
-   "je_meta": {
-    "TEF-30C": {
-     "listen_mit_karte": 3,
-     "listen_gesamt": 173,
-     "anteil": 1.7,
-     "schnitt": 0.2,
-     "hoechstzahl": null,
-     "turniere": 2
-    },
-    "TEF-PBL": {
-     "listen_mit_karte": 56,
-     "listen_gesamt": 2468,
-     "anteil": 2.3,
-     "schnitt": 0.2,
-     "hoechstzahl": 1,
-     "turniere": 43
-    }
-   },
-   "gesamt": {
-    "listen_mit_karte": 59,
-    "listen_gesamt": 2641,
-    "anteil": 2.2,
-    "schnitt": 0.2,
     "hoechstzahl": 1
    },
    "quellen": [
@@ -2644,7 +2838,7 @@
    "name_de": null,
    "set": "MEE",
    "nummer": "16",
-   "typ": null,
+   "typ": "Basic Energy",
    "gruppe": "basic-energy",
    "gruppe_name": "Basis-Energie",
    "gruppe_rang": 7,
@@ -2659,16 +2853,25 @@
      "schnitt": 15.94,
      "hoechstzahl": null,
      "turniere": 6
+    },
+    "Champions League (JP)": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 1,
+     "anteil": 100.0,
+     "schnitt": 16.0,
+     "hoechstzahl": 16,
+     "turniere": 1
     }
    },
    "gesamt": {
-    "listen_mit_karte": 41,
-    "listen_gesamt": 173,
-    "anteil": 23.7,
+    "listen_mit_karte": 42,
+    "listen_gesamt": 174,
+    "anteil": 24.1,
     "schnitt": 15.94,
-    "hoechstzahl": null
+    "hoechstzahl": 16
    },
    "quellen": [
+    "city_league",
     "online_api"
    ]
   },

@@ -857,9 +857,9 @@
     "4827",
     "4828",
     "548",
-    "568"
+    "568",
+    "569"
   ],
-  "last_updated": "2026-09-25 12:07:58",
-  "total_count": 859,
-  "_hinweis_2026_09_25": "Turnier 569 (Champions League Yokohama) ist am 25.09.2026 aus dieser Liste genommen worden, damit der naechste Lauf es EINMAL neu abruft. Grund: es kam ueber zwei Wege in die Turnierliste (Hauptliste und additional_tournament_ids) und wurde deshalb zweimal abgerufen — in city_league_analysis.csv stand danach jede Zahl doppelt (alle 14 Archetypen mit gerader Deckzahl, Summe 48 statt 24). Die Zeilen des Turniers sind aus der CSV entfernt; halbiert wurde nichts. Der Riegel steht seit demselben Tag im Scraper (zwei Stellen)."
+  "last_updated": "2026-09-25 15:13:21",
+  "total_count": 859
 }

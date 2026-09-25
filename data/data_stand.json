@@ -1,5 +1,5 @@
 {
-  "erzeugt_am": "2026-09-25T14:49:25+00:00",
+  "erzeugt_am": "2026-09-25T15:13:38+00:00",
   "quelle": "Zeitpunkt des Laufs fuer geaenderte Dateien, sonst fortgeschrieben",
   "dateien": {
     "limitless_online_decks.csv": "2026-09-25T12:36:08+00:00",
@@ -7,7 +7,7 @@
     "online_tournament_top8_decks.csv": "2026-09-25T12:36:08+00:00",
     "limitless_meta_stats.json": "2026-09-25T12:36:08+00:00",
     "city_league_archetypes.csv": "2026-09-25T14:03:49+00:00",
-    "city_league_analysis.csv": "2026-09-25T14:03:49+00:00",
+    "city_league_analysis.csv": "2026-09-25T15:13:38+00:00",
     "city_league_analysis_past.csv": "2026-08-30T11:22:17+00:00",
     "city_league_archetypes_past.csv": "2026-08-22T03:31:34+00:00",
     "all_cards_database.csv": "2026-09-25T12:36:08+00:00",
@@ -60,6 +60,7 @@
     "online_api_archetypes.csv": "2026-09-24",
     "tournament_decklists_per_player.csv": "2026-09-25",
     "player_continuity.csv": "2026-09-18",
+    "city_league_analysis.csv": "2026-09-20",
     "city_league_analysis_past.csv": "2026-06-06",
     "online_api_cards_TEF-30C.csv": "2026-09-24",
     "online_api_cards_TEF-PBL.csv": "2026-09-17",
@@ -80,9 +81,7 @@
     "labs_tournament_decks_TEF-POR.csv": "2026-05-30",
     "limitless_online_fenster.csv": "2026-09-25"
   },
-  "leer": [
-    "city_league_analysis.csv"
-  ],
+  "leer": [],
   "ohne_stand": [],
   "inhaltsspalte_unlesbar": []
 }

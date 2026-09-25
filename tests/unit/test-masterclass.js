@@ -796,27 +796,42 @@ test('die fuenf Online-Listen der letzten sieben Tage sind eigene Listen', () =>
         'die Gruppe "Online · letzte 7 Tage" fehlt in der Listenwahl');
 
     /* Die Online-Listen muessen ECHTE Listen sein und nicht Varianten
-     * von Tims Liste. Frueher hing das an einer einzelnen Karte
-     * ("Briduradon-ex steckt nur in der Liste von Ducsjr") — auch die
-     * rotiert. Gemessen wird stattdessen die Eigenschaft selbst: die
-     * Online-Listen zusammen fuehren mindestens eine Karte, die in
-     * keiner der uebrigen Listen steht. */
+     * von Tims Liste.
+     *
+     * ZWEIMAL FALSCH ANGESETZT, BEIDE MALE AN ROTIERENDEN DATEN:
+     *   1. bis 25.09.2026: an einer einzelnen Karte ("Briduradon-ex
+     *      steckt nur in der Liste von Ducsjr").
+     *   2. am 25.09.2026: "mindestens eine Karte steht nur in den
+     *      Online-Listen". Ob das in einer Woche zutrifft, haengt
+     *      davon ab, wer online gespielt hat — nicht davon, ob der
+     *      Erzeuger richtig arbeitet.
+     *
+     * Was WIRKLICH gemeint ist und sich nicht mit der Woche aendert:
+     * zu jedem Online-Chip gehoert ein eigener Listenblock mit eigenen
+     * Karten. Genau das wird geprueft. */
     const bloecke = [...FRAGMENT.matchAll(
         /data-mcl-listenblock="(\d+)"([\s\S]*?)(?=data-mcl-listenblock="|$)/g)];
     assert.ok(bloecke.length >= 10, `nur ${bloecke.length} Listenbloecke gefunden`);
-    const onlineNummern = new Set();
-    chips.forEach((c, i) => { if (/·\s*\d+\.\s*von\s*\d+/.test(c)) onlineNummern.add(String(i)); });
+
+    /* Die Nummer kommt aus dem Attribut, nicht aus der Position im
+     * Feld — sonst haengt der Test an der Reihenfolge im Dokument. */
+    const onlineNummern = new Set(
+        [...FRAGMENT.matchAll(/data-mcl-liste="(\d+)"[^>]*>([^<]+)</g)]
+            .filter((m) => /·\s*\d+\.\s*von\s*\d+/.test(m[2]))
+            .map((m) => m[1]));
+    assert.strictEqual(onlineNummern.size, online.length,
+        'Chips und Listennummern der Online-Gruppe passen nicht zusammen');
+
     const karten = (txt) => new Set([...txt.matchAll(/data-de="([^"]+)"/g)].map((m) => m[1]));
-    const inOnline = new Set();
-    const inRest = new Set();
-    bloecke.forEach(([, nr, txt]) => {
-        const topf = onlineNummern.has(nr) ? inOnline : inRest;
-        karten(txt).forEach((k) => topf.add(k));
+    const onlineBloecke = bloecke.filter(([, nr]) => onlineNummern.has(nr));
+    assert.strictEqual(onlineBloecke.length, online.length,
+        `${onlineBloecke.length} Listenbloecke fuer ${online.length} Online-Chips`);
+    onlineBloecke.forEach(([, nr, txt]) => {
+        const k = karten(txt);
+        assert.ok(k.size >= 10,
+            `Listenblock ${nr} fuehrt nur ${k.size} verschiedene Karten — `
+            + 'das ist keine Deckliste');
     });
-    const nurOnline = [...inOnline].filter((k) => !inRest.has(k));
-    assert.ok(nurOnline.length >= 1,
-        'keine einzige Karte steht nur in den Online-Listen — dann sind '
-        + 'das keine eigenen Listen, sondern Varianten von Tims Liste');
 
     /* Woher die Zahlen kommen, steht unter den Listen — sonst ist eine
      * Platzierung eine Behauptung. */

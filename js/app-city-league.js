@@ -942,13 +942,32 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 // BEFUND B4: woraus die Ansicht besteht, einmal lesen und
                 // merken — der Sprachwechsel baut die Tabelle neu auf.
                 window._cityLeagueTurnierHerkunft = cityLeagueTurnierHerkunft(archetypesData);
+
+                /* DIE ZEILEN VOR DEM ZEICHNEN ABLEGEN (25.09.2026).
+                 *
+                 * BEFUND, live geprueft: die Siegerliste der japanischen
+                 * Majors zeigte „Im geladenen Zeitraum steht kein
+                 * japanisches Major im Datensatz", waehrend die Champions
+                 * League Yokohama mit Sieger Keiyo Watanabe in
+                 * data/city_league_archetypes.csv stand und
+                 * window.cityLeagueArchetypesData 29 Zeilen fuehrte.
+                 *
+                 * Grund: `window.cityLeagueArchetypesData` wurde VIER
+                 * ZEILEN NACH renderCityLeagueTable() gesetzt. Beim
+                 * ersten Zeichnen war es undefined; erst ein zweites
+                 * Zeichnen (Sprachwechsel, Filter) haette die Liste
+                 * gefuellt. renderCityLeagueTable liest die Zeilen an
+                 * zwei Stellen von dort (Herkunftssatz als Rueckfall,
+                 * Siegerliste) — das Ablegen gehoert also davor.
+                 */
+                window.cityLeagueArchetypesData = archetypesData;
+                window.cityLeagueComparisonData = cityLeagueData;
+                window.cityLeagueImageMap = imageMap;
+
                 renderCityLeagueTable(tournamentCount, dateRange, window._cityLeagueTurnierHerkunft);
 
                 // Keep the analysis dropdown in sync with the freshly loaded format data
                 // analysisData wird im Hintergrund geladen (window._cityLeagueAnalysisPromise)
-                window.cityLeagueArchetypesData = archetypesData;
-                window.cityLeagueComparisonData = cityLeagueData;
-                window.cityLeagueImageMap = imageMap;
                 const previousDeckValue = document.getElementById('cityLeagueDeckSelect')?.value || '';
                 populateCityLeagueDeckSelect([], cityLeagueData);
 

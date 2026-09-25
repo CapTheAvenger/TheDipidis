@@ -96,47 +96,61 @@ ERWARTETE_KANTE = 128   # alle CMP-Icons sind 128x128
 # verwaister Name in FORM_UEBERSTEUERUNG muss hier stehen.
 AUSGESCHIEDEN = {
     # 13.09.2026 stand hier Rotom (Heat): pokebase.app hatte die Form aus
-    # dem Kader genommen. Am 17.09.2026 ist sie zurueck — nicht ueber
-    # pokebase, sondern ueber die neue Regel in
-    # scrape_champions_roster.py (eigene Nutzungszeile + Smogon-Werte).
-    # Der Schluessel wandert damit zurueck nach FORM_UEBERSTEUERUNG,
-    # genau wie der Kommentar dort oben es vorgesehen hat. Die Liste ist
-    # derzeit leer — das ist ein Befund, kein Versehen: der Kader hat
-    # seit dem 13.09. keine Form mehr verloren.
+    # dem Kader genommen. Am 17.09.2026 war sie zurueck.
     #
-    # 25.09.2026 — ACHT ALTERNATIVFORMEN AUSGESCHIEDEN (Deploy 3048).
-    # Gemessen an data/champions_pokedex.json (319 Eintraege): der Kader
-    # fuehrt die GRUNDFORM jeweils weiter, nur die Alternativform nicht
-    # mehr. Also ein Kaderwechsel, kein Ausfall der Quelle — sonst waere
-    # auch die Grundform verschwunden:
+    # 25.09.2026, frueh: acht Alternativformen kamen hierher, weil der
+    # Pokedex sie nicht mehr fuehrte (319 Eintraege, Deploy 3048).
+    # 25.09.2026, spaeter am selben Tag: der naechtliche
+    # `champions-usage refresh` um 05:14 UTC schrieb einen Pokedex mit
+    # 343 Eintraegen — alle acht wieder da. Innerhalb von Stunden hin
+    # und zurueck.
     #
-    #   Gourgeist     Grundform da, (Large/Small/Super) weg
-    #   Lycanroc      Grundform + (Dusk) da, (Midnight) weg
-    #   Rotom         Grundform + (Heat/Mow/Wash) da, (Fan/Frost) weg
-    #   Squawkabilly  Grundform da, (Yellow) weg
-    #   Toxtricity    Grundform da, (Low-Key) weg
-    #
-    # Die nachgeschlagenen Schluessel bleiben stehen, damit sie niemand
-    # erneut nachschlagen muss, wenn die Formen zurueckkommen.
-    "Gourgeist (Large)": ("711b",
-                         "25.09.2026 aus dem Kader; Grundform Gourgeist laeuft weiter"),
-    "Gourgeist (Small)": ("711a",
-                         "25.09.2026 aus dem Kader; Grundform Gourgeist laeuft weiter"),
-    "Gourgeist (Super)": ("711c",
-                         "25.09.2026 aus dem Kader; Grundform Gourgeist laeuft weiter"),
-    "Lycanroc (Midnight)": ("745a",
-                           "25.09.2026 aus dem Kader; Lycanroc und (Dusk) laufen weiter"),
-    "Rotom (Fan)":   ("479d",
-                     "25.09.2026 aus dem Kader; Rotom, (Heat), (Mow), (Wash) laufen weiter"), # Wirbel-Rotom
-    "Rotom (Frost)": ("479c",
-                     "25.09.2026 aus dem Kader; Rotom, (Heat), (Mow), (Wash) laufen weiter"), # Frost-Rotom
-    "Squawkabilly (Yellow)": ("931b",
-                             "25.09.2026 aus dem Kader; Grundform Squawkabilly laeuft weiter"),
-    "Toxtricity (Low-Key)": ("849a",
-                            "25.09.2026 aus dem Kader; Grundform Toxtricity laeuft weiter"),
+    # DARAUS DIE LEHRE, DIE JETZT IM CODE STEHT (siehe den Block ueber
+    # FORM_UEBERSTEUERUNG): ein nachgeschlagener Schluessel, auf den der
+    # Kader gerade nicht zeigt, ist KEIN Fehler. Er wird nicht mehr
+    # umgeraeumt. Diese Liste bleibt deshalb leer und existiert nur noch
+    # fuer den Fall, dass eine Form aus einem ANDEREN Grund als dem
+    # Kaderatmen verschwindet — dann gehoert sie mit Datum und Beleg
+    # hierher.
 }
 
+# DER KADER ATMET — EINE UEBERSTEUERUNG, DIE INS LEERE ZEIGT, IST KEIN
+# FEHLER (25.09.2026)
+#
+# data/champions_pokedex.json wird aus Nutzungsdaten neu gebaut. Am
+# 25.09.2026 fuehrte er um 04:11 UTC 319 Eintraege und um 05:14 UTC 343 —
+# dieselben acht Alternativformen waren erst weg und dann wieder da.
+#
+# Eine Tabelle, die jede Abweichung davon verbietet, faellt bei JEDEM
+# dieser Atemzuege um: erst rot, weil ein Schluessel ins Leere zeigt
+# (Deploy 3048), dann rot, weil er zurueck muss. Zweimal Stillstand,
+# ohne dass irgendjemand etwas kaputtgemacht hat. Genau der Fall aus
+# CLAUDE.md: „eine Regel gehoert an ihre Bedingung".
+#
+# Die Bedingung, die wir wirklich meinen, ist nicht „jeder Schluessel
+# hat gerade einen Eintrag", sondern:
+#
+#   1. Jeder Eintrag im Pokedex bekommt EINEN Schluessel   -> harter Fehler
+#   2. Keine zwei Eintraege teilen sich ein Bild            -> harter Fehler
+#   3. Kein nachgeschlagener Schluessel geht verloren       -> harter Fehler
+#   4. Ein Schluessel ohne aktuellen Eintrag                -> Nachschlagewerk
+#
+# Punkt 4 ist das, was diese Tabelle IST: ein Nachschlagewerk. Ein
+# ungenutzter Eintrag darin richtet keinen Schaden an — er wartet. Wer
+# ihn loeschte, muesste ihn beim naechsten Atemzug erneut nachschlagen.
 FORM_UEBERSTEUERUNG = {
+    # Kaderatmen 25.09.2026 (siehe oben): erst weg, Stunden spaeter
+    # zurueck. Die Schluessel bleiben hier stehen, egal welchen Stand
+    # der Pokedex gerade hat.
+    "Gourgeist (Large)":     "711b",   # Riesen-Irrbis
+    "Gourgeist (Small)":     "711a",   # Klein-Irrbis
+    "Gourgeist (Super)":     "711c",   # Super-Irrbis
+    "Lycanroc (Midnight)":   "745a",   # Wolwerock Nachtform
+    "Rotom (Fan)":           "479d",   # Wirbel-Rotom
+    "Rotom (Frost)":         "479c",   # Frost-Rotom
+    "Squawkabilly (Yellow)": "931b",   # Krawalloro gelb
+    "Toxtricity (Low-Key)":  "849a",   # Riffex Tiefton-Form
+
     # pokewiki.de/Liste_der_Pokémon_in_Pokémon_Champions nennt die drei
     # Varianten namentlich; die Farben der Icons bestaetigen es
     # (a schlicht, b rote Hoerner, c blaue Hoerner).

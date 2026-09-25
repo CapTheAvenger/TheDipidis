@@ -336,12 +336,43 @@ eine Ursache ableitet, ohne sie zu messen, produziert genau die
 Diskussion, die dieses Projekt am 13.09.2026 zum zehnten Mal gefuehrt
 hat.
 
-#### Was bleibt
+#### NACHGEMESSEN 25.09.2026: DIE MCP-WEGE GEHEN WIEDER
 
-Ein `create_branch` gegen einen Wegwerf-Namen am Anfang einer Sitzung
-kostet einen Aufruf und sagt, ob sich etwas geaendert hat. Geht es
-nicht — und das ist der Normalfall —, dann **ohne weitere Diskussion**
-ueber die Weboberflaeche ausliefern. Kein dritter Weg, keine Tokens.
+Der Absatz darueber stammt vom 21.08.2026 und war an diesem Tag richtig.
+Am 25.09.2026 nachgemessen, in dieser Reihenfolge und mit diesem
+Ergebnis:
+
+| Weg | gemessen 21.08.2026 | gemessen 25.09.2026 |
+| --- | --- | --- |
+| `git push` | 403 | **403** (unveraendert) |
+| `curl api.github.com` | 403 | **403** (unveraendert) |
+| `git fetch` | — | **geht** |
+| `mcp__Github__create_branch` | 403 | **geht** |
+| `mcp__Github__push_files` | 403 | **geht** |
+| `mcp__Github__create_pull_request` | 403 | **geht** |
+| `mcp__Github__merge_pull_request` | 403 | **geht** |
+
+Die Fehlermeldung von `curl` nennt inzwischen auch den Grund und den
+Ausweg: *„GitHub access to this repository is not enabled for this
+session. Use add_repo to request access."* Ein `add_repo`-Werkzeug stand
+in dieser Sitzung nicht in der Werkzeugliste — deshalb bleibt es bei dem,
+was gemessen geht.
+
+**Was daraus folgt — die Reihenfolge, nicht die Religion:**
+
+1. `mcp__Github__create_branch` gegen einen Wegwerf-Namen. Ein Aufruf.
+2. Geht das, dann Zweig + PR + Merge ueber MCP. `push_files` traegt den
+   Inhalt aber **im Aufruf selbst** — bei grossen Dateien
+   (`index.html` 363 KB, `js/app-city-league.js` 327 KB) kostet das ein
+   Vielfaches einer Browser-Runde. Faustregel, gemessen: **bis ~30 KB
+   je Datei `push_files`, darueber der Browser.**
+3. Geht `create_branch` nicht, **ohne weitere Diskussion** ueber die
+   Weboberflaeche ausliefern. Kein dritter Weg, keine Tokens.
+
+Der Browser-Weg ist damit nicht abgeschafft, sondern der **zuverlaessige
+Weg fuer grosse Dateien**. Am 25.09.2026 sind so 17 Dateien in acht
+Runden gelandet, alle byte-gleich nachgeprueft
+(`git hash-object` gegen `git rev-parse <zweig>:<datei>`).
 
 Billiger wird der Weg nur ueber **weniger PRs**, nicht ueber ein anderes
 Werkzeug: die Kosten haengen an der Zahl der beruehrten Verzeichnisse

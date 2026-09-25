@@ -64,7 +64,14 @@ function lade(...namen) {
     const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
     const ktx = { assert };
     vm.createContext(ktx);
-    vm.runInContext(quelle + '\n;({' + namen.join(',') + '})', ktx);
+    /* Die ausgeschnittenen Funktionen rufen Nachbarn, die hier nicht
+     * geprueft werden — seit dem 23.09.2026 haelt bereichWechseln das
+     * Vorlesen an. Ein leerer Platzhalter genuegt; wuerde er fehlen,
+     * bliebe der Test an einer fremden Funktion haengen statt an dem,
+     * was er misst. */
+    vm.runInContext('function vlStopp() {}\nfunction vorleserBauen() {}\n'
+        + 'function vlUmschalten() {}\n' + quelle
+        + '\n;({' + namen.join(',') + '})', ktx);
     return vm.runInContext('({' + namen.join(',') + '})', ktx);
 }
 
@@ -277,6 +284,216 @@ test('die Zahlenspalten stapeln, solange sie nicht nebeneinander passen', () => 
     assert.ok(Number(m[1]) >= 900,
         `gestapelt wird erst unter ${m[1]} px — der Zahlenblock braucht 527 px neben dem Namen`);
 });
+test('der Vorleser spricht, was dasteht — aber nicht, wie es dasteht', () => {
+    /* BESTELLUNG (23.09.2026): "Ein Knopf im Ausarbeitungs-Bereich, der
+     * vorliest, wo du gerade bist, mit Pause und Tempo."
+     *
+     * Vorher hatte Hausi eine erzeugte Tonfassung gehoert und nach zehn
+     * Minuten abgebrochen: "Mega-Stalobor-ex" wurde als "Mega Stalobor,
+     * Ex" mit Pause gelesen, die englischen Namen in Klammern zerhacken
+     * jeden Satz. Der Bildschirmtext bleibt, wie er ist — geglaettet
+     * wird nur, was die Stimme bekommt. AUSGEFUEHRT, nicht gelesen. */
+    const ktx = { assert };
+    vm.createContext(ktx);
+    vm.runInContext("var KURSIV_AUF='\\u0001', KURSIV_ZU='\\u0002';\n"
+        + schneideFunktion(JS, 'englischeKlammer') + '\n'
+        + schneideFunktion(JS, 'sprechText'), ktx);
+    /* Welche Klammer ein englischer Kartenname ist, entscheidet nicht
+     * eine Heuristik, sondern die Kartenkachel: data-en desselben
+     * Stuecks. */
+    const namen = { drilbur: true, beldum: true, moltres: true };
+    const sprich = (t) => ktx.sprechText(t, namen);
+
+    assert.strictEqual(sprich('Mega-Stalobor-ex baut auf'), 'Mega Staloborex baut auf',
+        'der Bindestrich vor "ex" macht in der Stimme eine Pause');
+    assert.strictEqual(sprich('Genesect-ex und Beatori-ex'), 'Genesectex und Beatoriex');
+    assert.strictEqual(sprich('Rotomurf (Drilbur) zieht'), 'Rotomurf zieht',
+        'der englische Name in Klammern gehoert nicht in den Ton');
+    assert.strictEqual(sprich('Lavados (Moltres, PFL-14) ist neu'), 'Lavados ist neu',
+        'Druckcodes sind im Ton Buchstabensalat');
+    assert.strictEqual(sprich('Ein Zug [38:26] spaeter'), 'Ein Zug spaeter',
+        'Videozeitmarken helfen beim Hoeren nicht');
+    /* Zahlen bleiben: eine Klammer mit Datum oder Menge traegt Inhalt. */
+    assert.ok(/\(17\.08\.2026, 76 Min\.\)/.test(sprich('Quelle (17.08.2026, 76 Min.) dazu')),
+        'Klammern mit Zahlen tragen Inhalt und muessen bleiben');
+    /* Ein englischer Name, den keine Kachel kennt — Gegnerkarten kommen
+     * in den Listen nicht vor. Die Form entscheidet. */
+    assert.strictEqual(sprich('Grolldra (Dreepy) und Phandra (Drakloak).'),
+        'Grolldra und Phandra.', 'unbekannte englische Namen bleiben stehen');
+    assert.strictEqual(sprich('Mauzi (Team Rocket\u2019s Meowth) legt an'),
+        'Mauzi legt an', 'mehrwortige englische Namen bleiben stehen');
+
+    /* GEGENPROBE, und der eigentliche Grund fuer die Kursiv-Marke: die
+     * deutsche Erklaerung hinter einem englischen Attackennamen steht in
+     * derselben Klammerform. Im Markup steht sie hinter <em>. */
+    const kursiv = (en, de) => '\u0001' + en + '\u0002 (' + de + ')';
+    assert.ok(/\(Metallmacher\)/.test(sprich(kursiv('Metal Maker', 'Metallmacher') + ' beschleunigt')),
+        'die deutsche Erklaerung wurde mit weggeworfen');
+    assert.ok(!/[\u0001\u0002]/.test(sprich(kursiv('Metal Maker', 'Metallmacher'))),
+        'die Marke landet in der Stimme');
+    assert.ok(/\(und zwar zwei Stueck\)/.test(sprich('Metang (und zwar zwei Stueck) legt an')),
+        'deutsche Einschuebe duerfen nicht verschwinden');
+
+    /* Die Marke kommt aus dem Markup, nicht aus dem Text. */
+    const rtx = { assert };
+    vm.createContext(rtx);
+    vm.runInContext("var KURSIV_AUF='\\u0001', KURSIV_ZU='\\u0002';\n"
+        + schneideFunktion(JS, 'sprechRoh'), rtx);
+    const txt = (v) => ({ nodeType: 3, nodeValue: v });
+    const em = (v) => ({ nodeType: 1, tagName: 'EM', childNodes: [txt(v)] });
+    const roh = rtx.sprechRoh({ childNodes: [em('Metal Maker'), txt(' (Metallmacher) treibt an')] });
+    assert.strictEqual(roh, '\u0001Metal Maker\u0002 (Metallmacher) treibt an',
+        'kursive Stellen werden nicht markiert');
+
+    /* Und die Namen kommen wirklich aus dem Stueck. */
+    const ntx = { assert };
+    vm.createContext(ntx);
+    vm.runInContext(schneideFunktion(JS, 'englischeNamen'), ntx);
+    const gefunden = ntx.englischeNamen({
+        querySelectorAll: () => [{ getAttribute: () => 'Drilbur' }, { getAttribute: () => 'Beldum' }]
+    });
+    assert.ok(gefunden.drilbur && gefunden.beldum, 'die Kartennamen werden nicht eingelesen');
+    /* Arrays und Objekte aus dem vm-Kontext tragen fremde Prototypen —
+     * deepStrictEqual scheitert daran, obwohl der Inhalt stimmt. */
+    assert.strictEqual(Object.keys(ntx.englischeNamen(null)).length, 0,
+        'ohne Stueck faellt es um');
+});
+
+test('der Vorleser zerteilt in Stuecke, ohne ein Wort zu verlieren', () => {
+    /* Eine einzelne lange Aeusserung bricht in Chrome nach gut 15
+     * Sekunden ab — deshalb Stuecke. Ein Zerteiler, der dabei Text
+     * verschluckt, faellt beim Hoeren nicht auf und ist das Schlimmste,
+     * was hier passieren kann. */
+    const ktx = { assert };
+    vm.createContext(ktx);
+    vm.runInContext(schneideFunktion(JS, 'sprechStuecke'), ktx);
+
+    const text = 'Erster Satz mit etwas Laenge. Zweiter Satz, auch nicht kurz! '
+        + 'Dritter Satz? Und ein vierter, der noch etwas weiterlaeuft und dabei '
+        + 'genug Zeichen mitbringt, um die Grenze zu reissen.';
+    const stuecke = ktx.sprechStuecke(text, 80);
+    assert.ok(stuecke.length >= 3, `nur ${stuecke.length} Stuecke`);
+    stuecke.forEach((s) => assert.ok(s.length <= 80 + 40, `Stueck zu lang: ${s.length}`));
+    const wieder = stuecke.join(' ').replace(/\s+/g, ' ').trim();
+    assert.strictEqual(wieder, text.replace(/\s+/g, ' ').trim(),
+        'beim Zerteilen ist Text verlorengegangen oder dazugekommen');
+
+    /* Ein Satz ohne Punkt darf nicht mitten im Wort zerschnitten werden. */
+    const lang = 'wort '.repeat(60).trim();
+    ktx.sprechStuecke(lang, 100).forEach((s) => {
+        assert.ok(/^wort( wort)*$/.test(s.trim()), `mitten im Wort geschnitten: ${s.slice(0, 30)}`);
+    });
+    assert.strictEqual(ktx.sprechStuecke('   ', 80).length, 0, 'Leerraum wird zu Stuecken');
+
+    /* OHNE Vorgabe: die eingebaute Obergrenze ist der eigentliche Zweck.
+     * Ein Test, der immer eine eigene Grenze mitgibt, prueft sie nie —
+     * in der Verfaelschungsprobe liess sich die Voreinstellung auf
+     * 100.000 setzen, ohne dass etwas rot wurde (23.09.2026). */
+    const langerText = 'Ein Satz mit ordentlich Laenge und mehreren Angaben. '.repeat(40);
+    const standard = ktx.sprechStuecke(langerText);
+    assert.ok(standard.length >= 8, `nur ${standard.length} Stuecke ohne Vorgabe`);
+    const laengstes = Math.max(...standard.map((x) => x.length));
+    assert.ok(laengstes <= 300,
+        `laengstes Stueck ${laengstes} Zeichen — Chrome bricht lange Aeusserungen ab`);
+});
+
+test('der Vorleser ueberspringt, was nicht auf dem Bildschirm steht, und faengt dort an, wo man ist', () => {
+    /* Die Volltextsuche blendet Bloecke aus (hidden). Liest die Stimme
+     * sie trotzdem, erzaehlt sie etwas, das nicht dasteht. Und
+     * angefangen wird beim ersten Block im Bild, nicht von vorn —
+     * "der vorliest, wo du gerade bist". */
+    const ktx = { assert };
+    vm.createContext(ktx);
+    vm.runInContext(schneideFunktion(JS, 'vorleseBloecke') + '\n'
+        + schneideFunktion(JS, 'ersterSichtbarer'), ktx);
+
+    const block = (text, hidden, oben) => ({
+        hidden: !!hidden, textContent: text,
+        getBoundingClientRect: () => ({ top: oben, bottom: oben + 50 })
+    });
+    const doku = { children: [
+        block('Erster Absatz', false, -400),
+        block('Versteckt durch die Suche', true, -300),
+        block(' ', false, -200),
+        block('Zweiter Absatz', false, 120),
+        block('Dritter Absatz', false, 400)
+    ] };
+    const sichtbar = ktx.vorleseBloecke(doku);
+    assert.strictEqual(sichtbar.map((b) => b.textContent).join(' | '),
+        'Erster Absatz | Zweiter Absatz | Dritter Absatz',
+        'ausgeblendete oder leere Bloecke landen in der Stimme');
+
+    assert.strictEqual(ktx.ersterSichtbarer(sichtbar, 70), 1,
+        'vorgelesen wird nicht ab dem Block, der im Bild steht');
+    assert.strictEqual(ktx.ersterSichtbarer([], 70), 0, 'leere Liste wirft');
+});
+
+test('die Vorleseknoepfe sind verdrahtet und der Bereichswechsel schaltet die Stimme ab', () => {
+    /* AUSGEFUEHRT. Am 22.09.2026 ist eine Textzusicherung fuer den
+     * Kopierknopf durchgerutscht, weil der gesuchte Name auch im
+     * eigenen Quelltext stand. */
+    const quelle = schneideFunktion(JS, 'verdrahte');
+    const ktx = { assert, gerufen: [], handler: null };
+    ktx.wurzel = {
+        addEventListener: (typ, fn) => { if (typ === 'click') ktx.handler = fn; },
+        querySelectorAll: () => []
+    };
+    vm.createContext(ktx);
+    vm.runInContext(
+        'function bereichWechseln() {}\nfunction matchupFilter() {}\n'
+        + 'function listeWechseln() {}\nfunction listeKopieren() {}\n'
+        + 'function kartenDetail() {}\nfunction sucheVerdrahten() {}\n'
+        + 'function vorleserBauen() { gerufen.push("leiste"); }\n'
+        + 'function vlUmschalten() { gerufen.push("umschalten"); }\n'
+        + 'function vlStopp() { gerufen.push("stopp"); }\n'
+        + quelle + '\nverdrahte(wurzel);', ktx);
+
+    assert.ok(ktx.gerufen.includes('leiste'),
+        'verdrahte() baut die Vorleseleiste nicht');
+    const klick = (treffer) => ({ target: { closest: (sel) => (sel === treffer ? {} : null) } });
+    ktx.gerufen.length = 0;
+    ktx.handler(klick('[data-mcl-vl="start"]'));
+    assert.deepStrictEqual(ktx.gerufen, ['umschalten'], 'der Startknopf ist nicht verdrahtet');
+    ktx.gerufen.length = 0;
+    ktx.handler(klick('[data-mcl-vl="stopp"]'));
+    assert.deepStrictEqual(ktx.gerufen, ['stopp'], 'der Stoppknopf ist nicht verdrahtet');
+
+    /* Wer den Bereich wechselt, hoert sonst weiter, was er nicht sieht. */
+    const wtx = { assert, gerufen: [] };
+    wtx.wurzel = { querySelectorAll: () => ({ forEach: () => {} }) };
+    vm.createContext(wtx);
+    vm.runInContext('function vlStopp() { gerufen.push("stopp"); }\n'
+        + schneideFunktion(JS, 'bereichWechseln')
+        + '\nbereichWechseln(wurzel, "listen");', wtx);
+    assert.deepStrictEqual(wtx.gerufen, ['stopp'],
+        'beim Wechsel aus der Ausarbeitung laeuft die Stimme weiter');
+
+    /* Und in der Ausarbeitung selbst darf sie NICHT abbrechen. */
+    wtx.gerufen.length = 0;
+    vm.runInContext('bereichWechseln(wurzel, "doku");', wtx);
+    assert.deepStrictEqual(wtx.gerufen, [],
+        'der Wechsel in die Ausarbeitung bricht das Vorlesen ab');
+});
+
+test('die Vorleseleiste ist auf dem Handy bedienbar', () => {
+    /* 44 px ist die Untergrenze des Hauses fuer Tippziele
+     * (css/tippziele.css) — der Knopf wird auf dem Rad gedrueckt, nicht
+     * geklickt. Und die Leiste klebt oben, sonst muss man fuer Pause
+     * durch 10.000 Woerter zurueckwischen. */
+    const knopf = /\.mcl-vl-knopf\s*\{[^}]*\}/.exec(CSS);
+    assert.ok(knopf, 'die Vorleseknoepfe haben keine eigene Regel');
+    assert.ok(/min-height:\s*44px/.test(knopf[0]),
+        'der Vorleseknopf ist kleiner als 44 px');
+    const tempo = /\.mcl-vl-tempo select\s*\{[^}]*\}/.exec(CSS);
+    assert.ok(tempo && /min-height:\s*44px/.test(tempo[0]),
+        'die Tempowahl ist kleiner als 44 px');
+    const zeile = /\.mcl-suchzeile\s*\{[^}]*\}/.exec(CSS);
+    assert.ok(zeile && /position:\s*sticky/.test(zeile[0]),
+        'die Leiste klebt nicht oben — Pause waere beim Hoeren nicht erreichbar');
+    assert.ok(/\.mcl-vl-jetzt/.test(CSS),
+        'der gerade gelesene Block wird nicht markiert');
+});
+
 test('das Stueck nennt seine Quellen und behauptet keine eigenen Zahlen', () => {
     /* 22.09.2026: die Matchup-Quelle hat gewechselt. Vorher stand dort
      * EINE Ladder-Aggregation (limitless_online_decks_matchups.csv,
@@ -652,7 +869,8 @@ test('der Klick auf den Kopierknopf landet beim Kopieren, der auf eine Karte bei
     ktx.wurzel = { addEventListener: (typ, fn) => { if (typ === 'click') ktx.handler = fn; } };
     vm.createContext(ktx);
     vm.runInContext(
-        'function bereichWechseln() { gerufen.push("bereich"); }\n'
+        'function vorleserBauen() {}\nfunction vlUmschalten() {}\nfunction vlStopp() {}\n'
+        + 'function bereichWechseln() { gerufen.push("bereich"); }\n'
         + 'function matchupFilter() { gerufen.push("filter"); }\n'
         + 'function listeWechseln() { gerufen.push("liste"); }\n'
         + 'function listeKopieren() { gerufen.push("kopieren"); }\n'

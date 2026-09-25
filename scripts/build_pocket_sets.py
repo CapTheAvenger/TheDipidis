@@ -60,6 +60,27 @@ MUSTER = re.compile(r"^([A-Za-z0-9][A-Za-z0-9 '’&:.-]{2,44}?)\s*\(([AB]\d[a-z]
 
 MINDESTENS = 18     # so viele Sets fuehrt die Seite seit dem 16.09.2026
 
+# ── ETIKETTEN, DIE KEINE NAMEN SIND ───────────────────────────────────
+#
+# BEFUND 25.09.2026: die Quellseite fuehrt B4a an zwei Stellen —
+#
+#     "Team Rocket's Ambition (B4a)   Release: August 26, 2026"
+#     "New Set (B4a)"                 (Banner in der Seitennavigation)
+#
+# Beide treffen das Muster "Name (Kennung)". Welche zuerst kommt,
+# entscheidet die Reihenfolge im Baum, nicht die Wahrheit — und beim
+# Durchlauf an diesem Tag gewann das Banner. Dann stuende in der
+# Oberflaeche "New Set" als Set-Name, und der Betreiber ginge damit in
+# den Laden.
+#
+# Ein Etikett wie "New Set" ist keine Angabe, die spaeter richtig wird:
+# es wandert mit jeder Erweiterung weiter. Es wird deshalb nicht
+# uebernommen — weder als Name noch als Platzhalter.
+PLATZHALTER = {
+    "new set", "newest set", "latest set", "new expansion",
+    "coming soon", "tba", "tbd", "upcoming", "next set",
+}
+
 
 def lies(html):
     from bs4 import BeautifulSoup
@@ -70,6 +91,8 @@ def lies(html):
         if not treffer:
             continue
         kennung, name = treffer.group(2), treffer.group(1).strip()
+        if name.lower() in PLATZHALTER:
+            continue
         # Der erste Fund gewinnt: die Uebersichtstabelle steht oben,
         # weiter unten wiederholen Fliesstexte dieselben Namen
         # gelegentlich verkuerzt.
@@ -93,6 +116,17 @@ def gebrauchte_kennungen():
     return raus
 
 
+def bestand():
+    """Was schon benannt ist. Ein Name geht nie verloren, nur weil die
+    Quellseite ihn heute nicht fuehrt (Umbau, Banner, Seitenwechsel)."""
+    if not os.path.exists(ZIEL):
+        return {}
+    try:
+        return dict(json.load(open(ZIEL, encoding="utf-8")).get("sets") or {})
+    except Exception:
+        return {}
+
+
 def main():
     html = hole(QUELLE)
     namen = lies(html)
@@ -103,6 +137,23 @@ def main():
               f"Es wird NICHTS geschrieben — eine halbe Tabelle "
               f"sieht auf der Seite aus wie eine ganze.")
         return 1
+
+    # Bestand einmischen. Neu gelesene Namen gewinnen; verschwundene
+    # bleiben stehen und werden BENANNT (CLAUDE.md: ein Verlust wird nie
+    # stillschweigend geloescht — wer eine Zeile wegwirft, vernichtet die
+    # nachgeschlagene Quelle).
+    alt = bestand()
+    nur_aus_bestand = sorted(k for k in alt if k not in namen)
+    geaendert = sorted(k for k in namen if k in alt and alt[k] != namen[k])
+    zusammen = dict(alt)
+    zusammen.update(namen)
+    for k in nur_aus_bestand:
+        print(f"::warning::Kennung {k} ({alt[k]!r}) steht nicht mehr auf der "
+              f"Quellseite — der Name bleibt erhalten, geprueft wurde er "
+              f"heute nicht.")
+    for k in geaendert:
+        print(f"::warning::Kennung {k}: {alt[k]!r} -> {namen[k]!r}")
+    namen = zusammen
 
     gebraucht = gebrauchte_kennungen()
     ohne = sorted(k for k in gebraucht if k not in namen)
@@ -123,6 +174,8 @@ def main():
             "anzahl": len(namen),
             "in_kartenlisten": sorted(gebraucht),
             "ohne_namen": ohne,
+            "nicht_mehr_auf_der_quellseite": nur_aus_bestand,
+            "geaendert_in_diesem_lauf": geaendert,
         },
         "sets": dict(sorted(namen.items())),
     }

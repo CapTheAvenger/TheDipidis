@@ -719,8 +719,11 @@
             ? '<div class="city-league-card-stats-mobile">' + binderZahl(w.anteil, 1) + '\u00a0%</div>' : '';
         var schnitt = (w && w.schnitt)
             ? '<div class="city-league-card-avg-mobile">\u00d8 ' + binderZahl(w.schnitt, 2) + 'x</div>' : '';
+        /* Ohne Leerzeichen vor dem Euro — genau wie im Deckbauer. Mit
+         * Leerzeichen schnitt der Preis bei schmalen Kacheln auf „,03"
+         * ab (live gesehen am 25.09.2026). */
         var preis = (k && k.preis && k.preis.eur !== null && k.preis.eur !== undefined)
-            ? binderZahl(k.preis.eur, 2) + '\u00a0\u20ac' : '\u2013';
+            ? binderZahl(k.preis.eur, 2) + '\u20ac' : '\u2013';
 
         var herz = '';
         try {
@@ -814,7 +817,10 @@
             var summe = eintraege.reduce(function (s, e) { return s + (e.c.count || 0); }, 0);
             var titel = grp ? T(BINDER_GRUPPE_TXT[grp]) : T('binderGrpOhne');
             return '<h5 class="mcl-bd-grp">' + esc(titel) + ' <span>' + summe + '</span></h5>' +
-                '<div class="card-grid mcl-bd-dgitter" data-size="sm">' +
+                /* md statt sm: bei 90 px blieben dem Preis neben L und P
+                 * nur rund 32 px, und „1,03€" wurde zu „,03". Das Deck
+                 * ist die Arbeitsflaeche, nicht die Uebersicht. */
+                '<div class="card-grid mcl-bd-dgitter" data-size="md">' +
                 eintraege.map(binderDeckKachelHtml).join('') + '</div>';
         }).join('');
 

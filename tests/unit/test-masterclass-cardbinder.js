@@ -595,8 +595,8 @@ test('die Standardsortierung ist die Voreinstellung', () => {
  */
 
 function ladeDeckblock(deckKarten, mappe) {
-    const namen = ['binderDeckHtml', 'binderDeckText', 'binderDeckKarten',
-        'binderMappeIndex', 'binderZahl', 'binderDruck', 'deckBauer'];
+    const namen = ['binderDeckHtml', 'binderDeckKachelHtml', 'binderDeckText',
+        'binderDeckKarten', 'binderMappeIndex', 'binderZahl', 'binderDruck', 'deckBauer'];
     const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
     const roh = /var BINDER_GRUPPEN = (\[[^\]]*\]);/.exec(JS);
     const txt = /var BINDER_GRUPPE_TXT = (\{[^}]*\});/.exec(JS);
@@ -607,6 +607,7 @@ function ladeDeckblock(deckKarten, mappe) {
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;'),
         T: (k) => k,
+        bildAdresse: (druck) => 'https://example.invalid/' + String(druck || '') + '.png',
         BINDER_GRUPPEN: JSON.parse(roh[1].replace(/'/g, '"')),
         BINDER_GRUPPE_TXT: JSON.parse(txt[1].replace(/'/g, '"').replace(/([,{]\s*)([a-zA-Z-]+)(\s*:)/g, '$1"$2"$3')),
         binderDaten: { probe: { karten: mappe } },
@@ -737,7 +738,7 @@ test('die weiteren Drucke einer Basis-Energie stehen an der Kachel, nicht als ei
         'eine Energie ohne weitere Drucke traegt trotzdem die Marke');
 });
 
-test('eine Deckzeile zeigt ein Bild und laesst eine Kopie mehr zu', () => {
+test('eine Deckkachel zeigt das Kartenbild und laesst eine Kopie mehr zu', () => {
     const mappe = [karte({
         name: 'Drilbur', set: 'PBL', nummer: '46', gruppe: 'pokemon',
         bild: 'https://example.invalid/pbl046.png'
@@ -745,12 +746,22 @@ test('eine Deckzeile zeigt ein Bild und laesst eine Kopie mehr zu', () => {
     const deck = [{ set: 'PBL', number: '46', name_en: 'Drilbur', name_de: 'Rotomurf',
         type: 'Basic', count: 3 }];
     const s = ladeDeckblock(deck, mappe).html(G);
-    assert.ok(s.includes('mcl-bd-dbild'), 'kein Bild in der Deckzeile:\n' + s);
+    assert.ok(s.includes('city-league-card-image'), 'kein Kartenbild an der Deckkachel:\n' + s);
     assert.ok(s.includes('https://example.invalid/pbl046.png'),
         'das Bild der Mappe wird nicht genommen');
     assert.ok(/data-mcl-bdplus1="PBL-46"/.test(s),
         'aus dem Deck heraus laesst sich keine Kopie mehr hinzufuegen');
     assert.ok(/data-mcl-bdminus="PBL-46"/.test(s), 'das − fehlt');
+    assert.ok(/data-mcl-bddruck="PBL-46"/.test(s), 'das Artwork laesst sich nicht tauschen');
+    /* Die Kachel traegt die Klassen des Deckbauers — nichts davon ist
+     * hier neu gebaut, und das Stilblatt dafuer steht in
+     * css/ui-components.css. */
+    ['card-item', 'city-league-card-item', 'city-league-card-image-container',
+     'city-league-card-badge-deck', 'city-league-card-info-bottom',
+     'city-league-card-action-row', 'city-league-card-action-btn']
+        .forEach((k) => assert.ok(s.includes(k), `Klasse des Deckbauers fehlt: ${k}`));
+    assert.ok(/card-grid[^>]*data-size=/.test(s),
+        'die Kacheln stehen nicht im Kartenraster, sondern wieder untereinander');
 });
 
 test('das Plus in der Deckzeile legt GENAU eine Karte hinein', () => {
@@ -779,9 +790,14 @@ test('das Plus in der Deckzeile legt GENAU eine Karte hinein', () => {
     assert.deepStrictEqual([...gerufen], [4, 1]);
 });
 
-test('das Bild und der Knopf haben Regeln im Stilblatt', () => {
-    ['.mcl-bd-dbild', '.mcl-bd-plus1', '.mcl-bd-weitere']
+test('die Deckkacheln haben ihre eigenen Regeln, der Rest kommt vom Deckbauer', () => {
+    ['.mcl-bd-dgitter', '.mcl-bd-dkachel', '.mcl-bd-weitere']
         .forEach((k) => assert.ok(CSS.includes(k), `Regel fehlt: ${k}`));
+    /* Die Regeln der alten Zeilendarstellung duerfen nicht liegen
+     * bleiben — tote Regeln sind die naechste Fehlersuche. */
+    ['.mcl-bd-dbild', '.mcl-bd-plus1', '.mcl-bd-dgrps']
+        .forEach((k) => assert.ok(!CSS.includes(k + ' ') && !CSS.includes(k + ','),
+            `Regel der alten Deckzeile steht noch im Stilblatt: ${k}`));
 });
 
 test('Basis-Pokemon werden gezaehlt, auch mit Elementbuchstabe davor', () => {
@@ -818,4 +834,128 @@ test('Basis-Pokemon werden gezaehlt, auch mit Elementbuchstabe davor', () => {
         [deck[1], deck[3]], [mappe[1], mappe[3]]).html(G);
     assert.ok(ohne.includes('binderWarnBasis'),
         'ohne Basis-Pokemon bleibt der Hinweis aus — dann prueft er nichts');
+});
+
+/* ── 10 · Das Artwork tauschen ────────────────────────────────────────
+ *
+ * BEFUND (Betreiber, 25.09.2026, Bildschirmaufnahme): „Wir haben hier
+ * schon den Deck-Builder-Bereich. Da haben wir auch den Deckbau gebaut,
+ * um dann die Artworks austauschen zu können und die Mengen verändern zu
+ * können mit Plus und Minus … den sollst du einfach in dem Bereich ‚Mein
+ * Deck' in der Masterclass beim Cardbinder nachbauen."
+ *
+ * Der Druckschalter ist gebaut (js/app-cards-db.js). Geprueft wird, dass
+ * der Cardbinder IHN nimmt und den Tausch danach im Deck vollzieht — und
+ * dass er dabei nicht in die drei fremden Decks greift.
+ */
+
+function ladeTausch(deckKarten, mappe) {
+    const namen = ['binderDruckTauschen', 'binderDeckKarten', 'binderMappeIndex', 'binderDruck', 'deckBauer'];
+    const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
+    const rufe = [];
+    let deck = deckKarten.slice();
+    const ktx = {
+        assert, T: (k) => k,
+        binderDaten: { probe: { karten: mappe } },
+        binderZaehlerNachziehen: () => rufe.push(['nachziehen']),
+        binderMeldung: (w, t) => rufe.push(['meldung', t]),
+        window: {
+            ProfileDeckBuilder: {
+                addCopies: (k, n) => { rufe.push(['add', k.set + '-' + k.number, n]); return { hinzugefuegt: n }; },
+                removeOne: (s) => rufe.push(['remove', s]),
+                countOf: () => 0,
+                getDeck: () => ({ cards: deck })
+            }
+        }
+    };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    return { fn: vm.runInContext('binderDruckTauschen', ktx), rufe };
+}
+
+test('der Tausch zieht ALLE Kopien des alten Drucks auf den neuen um', () => {
+    const mappe = [karte({ name: 'Drilbur', set: 'PBL', nummer: '46', gruppe: 'pokemon', typ: 'Basic' })];
+    const deck = [{ set: 'PBL', number: '46', name_en: 'Drilbur', name_de: 'Rotomurf',
+        type: 'Basic', count: 3 }];
+    const { fn, rufe } = ladeTausch(deck, mappe);
+    fn({}, { id: 'probe' }, 'PBL-46', 'PBL', '103');
+
+    const raus = rufe.filter((r) => r[0] === 'remove');
+    assert.strictEqual(raus.length, 3, 'es wurden nicht alle drei Kopien herausgenommen');
+    raus.forEach((r) => assert.strictEqual(r[1], 'PBL-46'));
+    const rein = rufe.filter((r) => r[0] === 'add');
+    assert.strictEqual(rein.length, 1, 'der neue Druck wird nicht in EINEM Zug gelegt');
+    assert.deepStrictEqual([...rein[0]], ['add', 'PBL-103', 3]);
+    assert.ok(rufe.some((r) => r[0] === 'nachziehen'), 'die Kacheln werden nicht nachgezogen');
+    assert.ok(rufe.some((r) => r[0] === 'meldung' && /PBL-46/.test(r[1]) && /PBL-103/.test(r[1])),
+        'der Tausch wird nicht gemeldet:\n' + JSON.stringify(rufe));
+});
+
+test('derselbe Druck ist kein Tausch', () => {
+    const mappe = [karte({ set: 'PBL', nummer: '46' })];
+    const deck = [{ set: 'PBL', number: '46', name_en: 'Drilbur', count: 3 }];
+    const { fn, rufe } = ladeTausch(deck, mappe);
+    fn({}, { id: 'probe' }, 'PBL-46', 'PBL', '46');
+    assert.deepStrictEqual(rufe, [], 'es wurde etwas getan, obwohl sich nichts aendert');
+});
+
+test('eine Karte, die nicht im Deck liegt, wird nicht getauscht', () => {
+    const mappe = [karte({ set: 'PBL', nummer: '46' })];
+    const { fn, rufe } = ladeTausch([], mappe);
+    fn({}, { id: 'probe' }, 'PBL-46', 'PBL', '103');
+    assert.deepStrictEqual(rufe, []);
+});
+
+test('passt nicht alles, wird das gesagt statt verschluckt', () => {
+    /* Zwei Drucke derselben Karte koennen zusammen mehr als vier
+     * Kopien halten. Beim Zusammenlegen greift die Spielregel — und
+     * was nicht passt, muss dastehen. */
+    const mappe = [karte({ set: 'PBL', nummer: '46' })];
+    const deck = [{ set: 'PBL', number: '46', name_en: 'Drilbur', count: 6 }];
+    const namen = ['binderDruckTauschen', 'binderDeckKarten', 'binderMappeIndex', 'binderDruck', 'deckBauer'];
+    const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
+    const rufe = [];
+    const ktx = {
+        assert, T: (k) => k,
+        binderDaten: { probe: { karten: mappe } },
+        binderZaehlerNachziehen: () => {},
+        binderMeldung: (w, t) => rufe.push(t),
+        window: {
+            ProfileDeckBuilder: {
+                addCopies: () => ({ hinzugefuegt: 4, grenze: true }),
+                removeOne: () => {}, countOf: () => 0,
+                getDeck: () => ({ cards: deck })
+            }
+        }
+    };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    vm.runInContext('binderDruckTauschen', ktx)({}, { id: 'probe' }, 'PBL-46', 'PBL', '103');
+    assert.ok(rufe.length === 1 && /binderDruckRest/.test(rufe[0]),
+        'dass zwei Kopien nicht mitgekommen sind, steht nirgends:\n' + JSON.stringify(rufe));
+});
+
+test('der Cardbinder nimmt den vorhandenen Druckschalter — und faellt nicht in fremde Decks', () => {
+    const quelle = schneideFunktion(JS, 'binderDruckSchalter');
+    const gerufen = [];
+    const ktx = {
+        assert, T: (k) => k,
+        binderMappeIndex: () => ({ 'PBL-46': karte({ name: 'Drilbur', set: 'PBL', nummer: '46' }) }),
+        binderDeckKarten: () => [],
+        binderDruckWartet: {},
+        window: { openRaritySwitcher: (...a) => gerufen.push(a) }
+    };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    vm.runInContext('binderDruckSchalter', ktx)({}, { id: 'probe' }, 'PBL-46');
+    assert.strictEqual(gerufen.length, 1, 'der vorhandene Schalter wird nicht gerufen');
+    const [name, deckKey, quelleHinweis, ziel] = gerufen[0];
+    assert.strictEqual(name, 'Drilbur');
+    assert.strictEqual(deckKey, 'Drilbur (PBL 46)');
+    assert.strictEqual(quelleHinweis, '',
+        'ein Quellenhinweis wuerde den Schalter in cityLeague/currentMeta/pastMeta suchen lassen');
+    assert.strictEqual(ziel, 'staples',
+        'ohne den Nur-Anzeige-Weg tauscht der Schalter in einem FREMDEN Deck');
+    /* Und er merkt sich, worauf die Antwort gehoert. */
+    assert.strictEqual(vm.runInContext('binderDruckWartet.probe', ktx), 'PBL-46');
 });

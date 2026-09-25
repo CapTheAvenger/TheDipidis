@@ -925,68 +925,49 @@
     color: var(--mcl-schlecht, #b4232a);
 }
 
-.mcl-bd-dgrps {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: var(--s-3);
-}
-.mcl-bd-dgrp h5 {
-    margin: 0 0 var(--s-1);
-    font-size: var(--fs-sm);
-    display: flex;
-    gap: var(--s-2);
-    align-items: baseline;
-}
 .mcl-bd-dgrp h5 span {
     font-family: var(--font-num);
     font-variant-numeric: tabular-nums;
     color: var(--ink-3);
     font-size: var(--fs-xs);
 }
-.mcl-bd-dgrp ul { list-style: none; margin: 0; padding: 0; }
-.mcl-bd-dgrp li {
-    display: flex;
-    align-items: center;
-    gap: var(--s-1);
-    font-size: var(--fs-sm);
-    padding: 1px 0;
-}
-.mcl-bd-dn {
-    font-family: var(--font-num);
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
-    min-width: 24px;
-}
-.mcl-bd-dname { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.mcl-bd-dset {
-    font-family: var(--font-num);
-    font-size: var(--fs-xs);
-    color: var(--ink-3);
-}
+/* ── Der Deckblock als Kachelraster (25.09.2026) ────────────────────
+ *
+ * ANLASS (Betreiber, Bildschirmaufnahme): „wenn ich jetzt so eine zweite
+ * Karte reinsetze, dann wird die da unten drunter gepackt, und damit
+ * zieht sich die Liste irgendwann total in die Laenge. … den [Deck-
+ * Builder-Bereich] sollst du einfach in dem Bereich ‚Mein Deck' in der
+ * Masterclass beim Cardbinder nachbauen."
+ *
+ * Die Kacheln tragen deshalb die Klassen des Deckbauers
+ * (.card-item .city-league-card-item, .card-grid) und werden von
+ * css/ui-components.css gestaltet — hier stehen nur die paar Regeln,
+ * die es dort nicht gibt.
+ *
+ * WARUM DIE FRUEHERE ZEILE NICHT ZU RETTEN WAR: ui-components.css:18
+ * gibt JEDEM Limitless-Kartenbild `width: 100%` ueber einen
+ * Attributselektor. Der schlaegt eine einzelne Klasse — das 28-px-Bild
+ * wurde 159 px breit und der Name brach auf ein Zeichen je Zeile um.
+ * Die Deckbauer-Klassen leben seit Monaten neben genau dieser Regel.
+ */
 
-/* Kleines Kartenbild in der Deckzeile. Der Betreiber baut sein Deck
-   nach Bildern: „natürlich auch kleine Bilder anzeigen. Wie im Deck
-   Builder feature halt" (25.09.2026). Feste Breite, damit Zahl, Name
-   und Druck darunter in einer Spalte bleiben. */
-.mcl-bd-dbild {
-    width: 28px;
-    min-width: 28px;
-    height: 39px;
-    object-fit: cover;
-    border-radius: 3px;
-    display: block;
-}
-.mcl-bd-plus1 {
-    border: 1px solid var(--line-strong);
-    background: var(--surface-1);
-    color: var(--ink);
+.mcl-bd-dgitter { margin: 0 0 var(--s-3); }
+
+/* Die ACE-SPEC-Marke gibt es an der Deckbauer-Kachel nicht — hier
+   schon, weil das Deck hoechstens eine fuehren darf. */
+.mcl-bd-dkachel .mcl-bd-dace {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    z-index: 2;
+    padding: 1px 5px;
     border-radius: var(--r-sm);
-    padding: 1px 7px;
-    font-size: var(--fs-xs);
-    line-height: 1.5;
-    cursor: pointer;
+    background: var(--mcl-schlecht, #b4232a);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
 }
-.mcl-bd-plus1:hover, .mcl-bd-deck .mcl-bd-minus:hover { border-color: var(--ink); }
 
 /* Weitere Drucke derselben Basis-Energie — benannt, nicht als eigene
    Kachel. */
@@ -1049,6 +1030,5 @@
 }
 
 @media (max-width: 480px) {
-    .mcl-bd-dgrps { grid-template-columns: 1fr; }
     .mcl-bd-dknopf .mcl-btn { flex: 1 1 auto; }
 }

@@ -124,6 +124,11 @@
             binderWeitereDrucke: 'weiterer Druck',
             binderWeitereDruckeMz: 'weitere Drucke',
             binderEnergieHinweis: 'Basis-Energien sind austauschbar — gezeigt wird der meistgespielte Druck.',
+            binderDruck: 'Anderes Artwork',
+            binderLimitless: 'Karte auf Limitless öffnen',
+            binderProxy: 'In die Proxy-Liste',
+            binderDruckGetauscht: 'Artwork getauscht',
+            binderDruckRest: 'Nicht alle Kopien passten — mehr als 4× ist nicht erlaubt.',
             binderMatchups: 'Matchups aus echten Turnieren',
             binderTurniere: 'Turnierergebnisse des Decks',
             binderPartien: 'Partien',
@@ -206,6 +211,11 @@
             binderWeitereDrucke: 'other print',
             binderWeitereDruckeMz: 'other prints',
             binderEnergieHinweis: 'Basic energies are interchangeable \u2014 the most played print is shown.',
+            binderDruck: 'Different artwork',
+            binderLimitless: 'Open card on Limitless',
+            binderProxy: 'Add to proxy list',
+            binderDruckGetauscht: 'Artwork swapped',
+            binderDruckRest: 'Not all copies fit \u2014 more than 4\u00d7 is not allowed.',
             binderMatchups: 'Matchups from real tournaments',
             binderTurniere: 'Tournament results for this deck',
             binderPartien: 'games',
@@ -668,6 +678,99 @@
         return idx;
     }
 
+    /* Eine Deckkachel — dieselbe Form wie im Deckbauer der
+     * Deck-Analyse (js/app-current-meta-analysis.js) und mit DENSELBEN
+     * Klassen. Nichts davon ist hier neu gebaut; das Stilblatt dafuer
+     * steht seit Langem in css/ui-components.css.
+     *
+     * ANLASS (Betreiber, 25.09.2026, Bildschirmaufnahme): „wenn ich jetzt
+     * so eine zweite Karte reinsetze, dann wird die da unten drunter
+     * gepackt, und damit zieht sich die Liste irgendwann total in die
+     * Laenge. … Wir haben hier schon den Deck-Builder-Bereich, da haben
+     * wir auch den Deckbau gebaut, um dann die Artworks austauschen zu
+     * koennen und die Mengen veraendern zu koennen mit Plus und Minus —
+     * den sollst du einfach in dem Bereich ‚Mein Deck' in der Masterclass
+     * beim Cardbinder nachbauen."
+     *
+     * WARUM DIE FRUEHERE ZEILE NICHT ZU RETTEN WAR (gemessen 25.09.2026)
+     * css/ui-components.css:18 setzt fuer JEDES Limitless-Kartenbild
+     *     img[src*="digitaloceanspaces.com/tpci/"] { width: 100% }
+     * Ein Attributselektor schlaegt eine einzelne Klasse. Das 28-px-Bild
+     * der Deckzeile wurde deshalb 159 px breit, der Name bekam 10 px und
+     * brach auf ein Zeichen je Zeile um. Die Klassen der Deckbauer-Kachel
+     * haben dieses Problem nicht — sie leben seit Monaten neben genau
+     * dieser Regel.
+     */
+    function binderDeckKachelHtml(e) {
+        var c = e.c, k = e.k;
+        var schluessel = String((c.set || '') + '-' + (c.number || '')).toUpperCase();
+        var setCode = String(c.set || '').toUpperCase();
+        var nummer = String(c.number || '');
+        var name = c.name_de || c.name_en || schluessel;
+        var nameEn = c.name_en || c.name_de || '';
+        var bild = (k && k.bild) || bildAdresse(schluessel);
+        var druckText = (setCode + ' ' + nummer).trim();
+
+        /* Die Zahlen der Mappe, wenn die Karte darin steht. Ein Druck,
+         * den nie jemand gespielt hat, steht nicht drin — dann bleiben
+         * die Felder leer statt bei null. */
+        var w = k && k.gesamt;
+        var anteil = (w && w.anteil !== null && w.anteil !== undefined)
+            ? '<div class="city-league-card-stats-mobile">' + binderZahl(w.anteil, 1) + '\u00a0%</div>' : '';
+        var schnitt = (w && w.schnitt)
+            ? '<div class="city-league-card-avg-mobile">\u00d8 ' + binderZahl(w.schnitt, 2) + 'x</div>' : '';
+        var preis = (k && k.preis && k.preis.eur !== null && k.preis.eur !== undefined)
+            ? binderZahl(k.preis.eur, 2) + '\u00a0\u20ac' : '\u2013';
+
+        var herz = '';
+        try {
+            if (typeof window.getWishlistBadgeHtml === 'function') {
+                herz = window.getWishlistBadgeHtml(nameEn, setCode, nummer) || '';
+            }
+        } catch (err) { herz = ''; }
+
+        var ace = k && k.ace
+            ? '<div class="mcl-bd-dace" title="ACE SPEC — h\u00f6chstens eine je Deck">ACE</div>' : '';
+
+        return '<div class="card-item city-league-card-item mcl-bd-dkachel"' +
+            ' data-mcl-bddeckkarte="' + esc(schluessel) + '">' +
+            '<div class="card-image-container city-league-card-image-container">' +
+            (bild
+                ? '<img class="city-league-card-image" loading="lazy" alt="' + esc(name) +
+                  '" src="' + esc(bild) + '" data-mcl-bdzeigen="' + esc(schluessel) + '">'
+                : '') +
+            '<div class="city-league-card-badge city-league-card-badge-deck">' + (c.count || 0) + '</div>' +
+            herz + ace +
+            '<div class="card-info-bottom city-league-card-info-bottom">' +
+            '<div class="card-info-text city-league-card-info-text">' +
+            '<div class="city-league-card-title-mobile" title="' + esc(name) + '">' + esc(name) + '</div>' +
+            '<div class="city-league-card-set-stats-row">' +
+            '<div class="city-league-card-set-mobile">' + esc(druckText) + '</div>' + anteil + '</div>' +
+            schnitt +
+            '</div>' +
+            '<div class="card-action-buttons city-league-card-action-buttons">' +
+            '<div class="city-league-card-action-row">' +
+            '<button type="button" class="city-league-card-action-btn city-league-card-remove-btn"' +
+                ' data-mcl-bdminus="' + esc(schluessel) + '" title="' + esc(T('binderMinus')) +
+                '" aria-label="' + esc(T('binderMinus') + ': ' + name) + '">\u2212</button>' +
+            '<button type="button" class="city-league-card-action-btn city-league-card-rarity-btn"' +
+                ' data-mcl-bddruck="' + esc(schluessel) + '" title="' + esc(T('binderDruck')) +
+                '" aria-label="' + esc(T('binderDruck') + ': ' + name) + '">\u2605</button>' +
+            '<button type="button" class="city-league-card-action-btn city-league-card-add-btn"' +
+                ' data-mcl-bdplus1="' + esc(schluessel) + '" title="' + esc(T('binderPlusEine')) +
+                '" aria-label="' + esc(T('binderPlusEine') + ': ' + name) + '">+</button>' +
+            '</div>' +
+            '<div class="city-league-card-action-row">' +
+            (setCode && nummer
+                ? '<button type="button" class="city-league-card-action-btn city-league-card-limitless-btn"' +
+                  ' data-mcl-bdlimitless="' + esc(schluessel) + '" title="' + esc(T('binderLimitless')) + '">L</button>'
+                : '<span></span>') +
+            '<button type="button" class="city-league-card-action-btn city-league-card-proxy-btn"' +
+                ' data-mcl-bdproxy="' + esc(schluessel) + '" title="' + esc(T('binderProxy')) + '">P</button>' +
+            '<span class="city-league-card-action-btn city-league-card-market-btn">' + preis + '</span>' +
+            '</div></div></div></div></div>';
+    }
+
     function binderDeckHtml(g) {
         var karten = binderDeckKarten(g);
         var idx = binderMappeIndex(g);
@@ -710,29 +813,9 @@
             });
             var summe = eintraege.reduce(function (s, e) { return s + (e.c.count || 0); }, 0);
             var titel = grp ? T(BINDER_GRUPPE_TXT[grp]) : T('binderGrpOhne');
-            return '<div class="mcl-bd-dgrp"><h5>' + esc(titel) +
-                ' <span>' + summe + '</span></h5><ul>' +
-                eintraege.map(function (e) {
-                    var schluessel = String((e.c.set || '') + '-' + (e.c.number || '')).toUpperCase();
-                    var name = e.c.name_de || e.c.name_en || schluessel;
-                    /* Dasselbe Bild wie an der Kachel — der Betreiber
-                     * baut sein Deck nach Bildern, nicht nach Namen:
-                     * „natürlich auch kleine Bilder anzeigen. Wie im
-                     * Deck Builder feature halt" (25.09.2026). */
-                    var bild = (e.k && e.k.bild) || bildAdresse(schluessel);
-                    return '<li>' +
-                        (bild ? '<img class="mcl-bd-dbild" loading="lazy" alt="' + esc(name) +
-                            '" src="' + esc(bild) + '">' : '<span class="mcl-bd-dbild"></span>') +
-                        '<span class="mcl-bd-dn">' + (e.c.count || 0) + '\u00d7</span>' +
-                        '<span class="mcl-bd-dname">' + esc(name) + '</span>' +
-                        '<span class="mcl-bd-dset">' + esc(schluessel) + '</span>' +
-                        '<button type="button" class="mcl-bd-minus" data-mcl-bdminus="' + esc(schluessel) + '"' +
-                        ' aria-label="' + esc(T('binderMinus') + ': ' + name) + '" title="' +
-                        esc(T('binderMinus')) + '">\u2212</button>' +
-                        '<button type="button" class="mcl-bd-plus1" data-mcl-bdplus1="' + esc(schluessel) + '"' +
-                        ' aria-label="' + esc(T('binderPlusEine') + ': ' + name) + '" title="' +
-                        esc(T('binderPlusEine')) + '">+</button></li>';
-                }).join('') + '</ul></div>';
+            return '<h5 class="mcl-bd-grp">' + esc(titel) + ' <span>' + summe + '</span></h5>' +
+                '<div class="card-grid mcl-bd-dgitter" data-size="sm">' +
+                eintraege.map(binderDeckKachelHtml).join('') + '</div>';
         }).join('');
 
         var warnungen = [];
@@ -753,7 +836,7 @@
                 ? '<ul class="mcl-bd-dwarn">' + warnungen.map(function (x) {
                     return '<li>' + esc(x) + '</li>';
                 }).join('') + '</ul>' : '') +
-            '<div class="mcl-bd-dgrps">' + reihen + '</div>' +
+            reihen +
             summe +
             '<div class="mcl-bd-dknopf">' +
             '<input type="text" class="mcl-bd-dname-eingabe" data-mcl-bddeckname="1" ' +
@@ -960,6 +1043,93 @@
         binderZaehlerNachziehen(wurzel, g);
     }
 
+    /* ---------- Das Artwork tauschen -------------------------------
+     *
+     * ANLASS (Betreiber, 25.09.2026): „um dann die Artworks austauschen
+     * zu koennen".
+     *
+     * Der Druckschalter ist gebaut und geprueft — js/app-cards-db.js,
+     * openRaritySwitcher(). Er hat zwei Wege durch dasselbe Fenster:
+     * mit Deck tauscht er die Stueckzahlen um, ohne Deck waehlt er nur
+     * den ANZEIGE-Druck und meldet die Wahl als Ereignis
+     * `ds:anzeigedruck`.
+     *
+     * Der Cardbinder nimmt den zweiten Weg (`anzeigeZiel = 'staples'`)
+     * und macht den Tausch selbst. Das ist der kleine Eingriff: der
+     * Schalter kennt drei Deckarten (cityLeague, currentMeta, pastMeta)
+     * plus gespeicherte Profildecks, und eine vierte haette an fuenf
+     * Stellen in zwei fremden Dateien eingetragen werden muessen — jede
+     * davon eine Stelle, an der die drei vorhandenen Decks kaputtgehen
+     * koennen. Das Ereignis gibt es schon; es wird hier nur gehoert.
+     */
+    function binderDruckSchalter(wurzel, g, schluessel) {
+        var k = binderMappeIndex(g)[schluessel];
+        var name = k && k.name;
+        var teile = String(schluessel || '').split('-');
+        if (!name) {
+            /* Ein Druck, den die Mappe nicht fuehrt (frisch getauscht):
+             * dann steht der Name im Deck. */
+            var d = binderDeckKarten(g).filter(function (c) {
+                return String((c.set || '') + '-' + (c.number || '')).toUpperCase() === schluessel;
+            })[0];
+            name = d && (d.name_en || d.name_de);
+        }
+        if (!name || typeof window.openRaritySwitcher !== 'function') return;
+        binderDruckWartet[g.id] = schluessel;
+        window.openRaritySwitcher(name, name + ' (' + teile[0] + ' ' + teile.slice(1).join('-') + ')',
+            '', 'staples');
+    }
+
+    var binderDruckWartet = {};   /* guide-id -> Druck, dessen Schalter offen ist */
+    var binderHoertDruck = false;
+
+    function binderDruckZuhoeren() {
+        if (binderHoertDruck) return;
+        binderHoertDruck = true;
+        document.addEventListener('ds:anzeigedruck', function (e) {
+            var d = e && e.detail;
+            if (!d || !d.set || !d.number) return;
+            var buehne = document.getElementById('mclBuehne');
+            if (!buehne || buehne.hidden) return;
+            GUIDES.forEach(function (g) {
+                if (!binderDruckWartet[g.id]) return;
+                var alt = binderDruckWartet[g.id];
+                delete binderDruckWartet[g.id];
+                binderDruckTauschen(buehne, g, alt, String(d.set).toUpperCase(), String(d.number));
+            });
+        });
+    }
+
+    /* Alle Kopien des alten Drucks auf den neuen umziehen. Der Bestand
+     * nennt das „Alle tauschen"; hier ist es dasselbe, nur fuer das eine
+     * Deck des Cardbinders. */
+    function binderDruckTauschen(wurzel, g, altSchluessel, neuSet, neuNummer) {
+        var p = deckBauer();
+        if (!p) return;
+        var neuSchluessel = (neuSet + '-' + neuNummer).toUpperCase();
+        if (neuSchluessel === altSchluessel) return;
+        var deck = binderDeckKarten(g);
+        var alt = deck.filter(function (c) {
+            return String((c.set || '') + '-' + (c.number || '')).toUpperCase() === altSchluessel;
+        })[0];
+        if (!alt || !(alt.count > 0)) return;
+
+        var wieViele = alt.count;
+        for (var i = 0; i < wieViele; i++) p.removeOne(altSchluessel);
+        var erg = p.addCopies({
+            set: neuSet, number: String(neuNummer),
+            name_en: alt.name_en, name_de: alt.name_de,
+            type: alt.type, energy_type: alt.energy_type,
+            image_url: '', is_japanese: false
+        }, wieViele);
+
+        binderZaehlerNachziehen(wurzel, g);
+        var gelegt = (erg && erg.hinzugefuegt) || 0;
+        binderMeldung(wurzel, T('binderDruckGetauscht') + ': ' + altSchluessel + ' \u2192 ' +
+            neuSchluessel + ', ' + gelegt + '\u00d7' +
+            (gelegt < wieViele ? ' \u2014 ' + T('binderDruckRest') : ''));
+    }
+
     function binderSpeichern(wurzel, g) {
         var p = deckBauer();
         if (!p || typeof p.saveToAccount !== 'function') return;
@@ -1017,6 +1187,7 @@
         var ziel = wurzel.querySelector('[data-mcl-abschnitt="binder"]');
         if (!ziel) return;
         binderZuhoeren();
+        binderDruckZuhoeren();
         if (binderDaten[g.id]) { binderZeichnen(wurzel, g); return; }
         ziel.innerHTML = '<p class="mcl-status">' + esc(T('binderLaden')) + '</p>';
         binderHolen(g.id).then(function () {
@@ -1710,6 +1881,36 @@
                 binderPlus(wurzel, g, b.getAttribute('data-mcl-bdplus1'), 1);
                 return;
             }
+            if ((b = e.target.closest('[data-mcl-bddruck]'))) {
+                binderDruckSchalter(wurzel, g, b.getAttribute('data-mcl-bddruck'));
+                return;
+            }
+            if ((b = e.target.closest('[data-mcl-bdlimitless]'))) {
+                var lt = String(b.getAttribute('data-mcl-bdlimitless') || '').split('-');
+                if (typeof window.openLimitlessCard === 'function') {
+                    window.openLimitlessCard(lt[0], lt.slice(1).join('-'));
+                }
+                return;
+            }
+            if ((b = e.target.closest('[data-mcl-bdproxy]'))) {
+                var ps = b.getAttribute('data-mcl-bdproxy');
+                var pk = binderMappeIndex(g)[ps];
+                var pt = String(ps || '').split('-');
+                if (typeof window.addCardToProxy === 'function') {
+                    window.addCardToProxy((pk && pk.name) || ps, pt[0], pt.slice(1).join('-'), 1);
+                }
+                return;
+            }
+            if ((b = e.target.closest('[data-mcl-bdzeigen]'))) {
+                /* Dasselbe grosse Bild wie im Deckbauer. */
+                if (typeof window.showSingleCard === 'function' && b.src) {
+                    var zs = b.getAttribute('data-mcl-bdzeigen');
+                    var zk = binderMappeIndex(g)[zs];
+                    window.showSingleCard(b.src, ((zk && (zk.name_de || zk.name)) || zs) +
+                        ' (' + String(zs).replace('-', ' ') + ')');
+                }
+                return;
+            }
             if ((b = e.target.closest('[data-mcl-bdplus]'))) {
                 binderPlus(wurzel, g, b.getAttribute('data-mcl-bdplus'));
                 return;
@@ -1824,6 +2025,8 @@
         _timGruppenBloecke: timGruppenBloecke,
         _timZaehlung: timZaehlung,
         _binderStandNeu: binderStandNeu,
-        _binderTim: binderTim
+        _binderTim: binderTim,
+        _binderDeckKachelHtml: binderDeckKachelHtml,
+        _binderDruckTauschen: binderDruckTauschen
     };
 })();

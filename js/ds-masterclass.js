@@ -120,6 +120,10 @@
             binderGespeichert: 'Deck in „Meine Decks" gespeichert.',
             binderNichtAngemeldet: 'Zum Speichern in „Meine Decks" bitte anmelden.',
             binderDeckName: 'Name des Decks',
+            binderPlusEine: 'Eine mehr',
+            binderWeitereDrucke: 'weiterer Druck',
+            binderWeitereDruckeMz: 'weitere Drucke',
+            binderEnergieHinweis: 'Basis-Energien sind austauschbar — gezeigt wird der meistgespielte Druck.',
             binderMatchups: 'Matchups aus echten Turnieren',
             binderTurniere: 'Turnierergebnisse des Decks',
             binderPartien: 'Partien',
@@ -198,6 +202,10 @@
             binderGespeichert: 'Deck saved to My Decks.',
             binderNichtAngemeldet: 'Please sign in to save to My Decks.',
             binderDeckName: 'Deck name',
+            binderPlusEine: 'One more',
+            binderWeitereDrucke: 'other print',
+            binderWeitereDruckeMz: 'other prints',
+            binderEnergieHinweis: 'Basic energies are interchangeable \u2014 the most played print is shown.',
             binderMatchups: 'Matchups from real tournaments',
             binderTurniere: 'Tournament results for this deck',
             binderPartien: 'games',
@@ -555,6 +563,17 @@
                 (timJ ? '' : ' data-alt="1"') + '>' + esc(T('binderTimN')) + '\u00a0' + timN + '\u00d7</span>'
             : '';
         var aceMarke = k.ace ? '<span class="mcl-bd-ace" title="ACE SPEC — h\u00f6chstens eine je Deck">ACE</span>' : '';
+        /* Basis-Energien stehen nur noch einmal je Energieart da. Was
+         * sonst noch gefuehrt wird, wird benannt statt verschwiegen. */
+        var weitere = (k.weitere_drucke || []);
+        var weitereMarke = weitere.length
+            ? '<span class="mcl-bd-weitere" title="' + esc(T('binderEnergieHinweis') + ' ' +
+                weitere.map(function (w) {
+                    return (w.set || '') + '-' + (w.nummer || '') + ': ' +
+                        binderZahl(w.listen_mit_karte) + ' ' + T('binderListen');
+                }).join(' · ')) + '">+' + weitere.length + '\u00a0' +
+                esc(T(weitere.length === 1 ? 'binderWeitereDrucke' : 'binderWeitereDruckeMz')) + '</span>'
+            : '';
         var zaehler = '<span class="mcl-bd-zaehler" data-mcl-bdzahl="' + esc(schluessel) + '"' +
             (drin ? '' : ' hidden') + '>' + drin + '\u00d7</span>';
         var knoepfe =
@@ -571,6 +590,7 @@
             '<div class="mcl-bd-txt"><b>' + esc(name) + '</b>' +
             '<span class="mcl-bd-druck">' + esc(druck) + '</span>' +
             '<span class="mcl-bd-zahlen">' + teile.join(' · ') + '</span>' +
+            weitereMarke +
             timMarke +
             preis +
             '<span class="mcl-bd-knoepfe">' + knoepfe + '</span>' +
@@ -690,12 +710,23 @@
                 eintraege.map(function (e) {
                     var schluessel = String((e.c.set || '') + '-' + (e.c.number || '')).toUpperCase();
                     var name = e.c.name_de || e.c.name_en || schluessel;
-                    return '<li><span class="mcl-bd-dn">' + (e.c.count || 0) + '\u00d7</span>' +
+                    /* Dasselbe Bild wie an der Kachel — der Betreiber
+                     * baut sein Deck nach Bildern, nicht nach Namen:
+                     * „natürlich auch kleine Bilder anzeigen. Wie im
+                     * Deck Builder feature halt" (25.09.2026). */
+                    var bild = (e.k && e.k.bild) || bildAdresse(schluessel);
+                    return '<li>' +
+                        (bild ? '<img class="mcl-bd-dbild" loading="lazy" alt="' + esc(name) +
+                            '" src="' + esc(bild) + '">' : '<span class="mcl-bd-dbild"></span>') +
+                        '<span class="mcl-bd-dn">' + (e.c.count || 0) + '\u00d7</span>' +
                         '<span class="mcl-bd-dname">' + esc(name) + '</span>' +
                         '<span class="mcl-bd-dset">' + esc(schluessel) + '</span>' +
                         '<button type="button" class="mcl-bd-minus" data-mcl-bdminus="' + esc(schluessel) + '"' +
                         ' aria-label="' + esc(T('binderMinus') + ': ' + name) + '" title="' +
-                        esc(T('binderMinus')) + '">\u2212</button></li>';
+                        esc(T('binderMinus')) + '">\u2212</button>' +
+                        '<button type="button" class="mcl-bd-plus1" data-mcl-bdplus1="' + esc(schluessel) + '"' +
+                        ' aria-label="' + esc(T('binderPlusEine') + ': ' + name) + '" title="' +
+                        esc(T('binderPlusEine')) + '">+</button></li>';
                 }).join('') + '</ul></div>';
         }).join('');
 
@@ -906,12 +937,12 @@
         setTimeout(function () { if (p.parentNode) p.remove(); }, 6000);
     }
 
-    function binderPlus(wurzel, g, schluessel) {
+    function binderPlus(wurzel, g, schluessel, wieViele) {
         var p = deckBauer();
         var k = binderMappeIndex(g)[schluessel];
         if (!p || !k) return;
         var stand = binderStand[g.id] || (binderStand[g.id] = binderStandNeu());
-        var menge = binderMenge(k, stand.meta);
+        var menge = wieViele || binderMenge(k, stand.meta);
         var erg = p.addCopies(binderDeckKarte(k), menge);
         if (erg && erg.grenze && !erg.hinzugefuegt) binderMeldung(wurzel, T('binderGrenze'));
         binderZaehlerNachziehen(wurzel, g);
@@ -1670,6 +1701,10 @@
         binderEinhaengen(wurzel, g);
         wurzel.addEventListener('click', function (e) {
             var b;
+            if ((b = e.target.closest('[data-mcl-bdplus1]'))) {
+                binderPlus(wurzel, g, b.getAttribute('data-mcl-bdplus1'), 1);
+                return;
+            }
             if ((b = e.target.closest('[data-mcl-bdplus]'))) {
                 binderPlus(wurzel, g, b.getAttribute('data-mcl-bdplus'));
                 return;

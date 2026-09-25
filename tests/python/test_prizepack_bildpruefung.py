@@ -399,3 +399,69 @@ def test_der_schnelle_weg_wird_auch_genommen():
     assert "bild_raster(http_get(basisurl))" in text, "die Basisbilder gehen nicht ueber bild_raster"
     assert "getattr(Image, \"BOX\"" in text, (
         "Pillow skaliert nicht mit derselben Kastenmittelung wie der eigene Leser")
+
+
+# ── Zeigt der Eintrag auf die Karte, die er behauptet? ───────────────
+
+def test_die_schluesselpruefung_benennt_den_falschen_druck():
+    """BEFUND (25.09.2026): neun von 225 Eintraegen zeigen auf einen
+    anderen Druck, als ihr Name sagt (SHF statt SFA, dazu zwei PLF).
+    „Night Stretcher" haengt damit an „Rusted Shield" — Bild, Preis und
+    Kaufadresse auf der falschen Karte.
+
+    Das laesst sich OHNE NETZ messen: die Kartendatenbank liegt im Baum.
+    Berichtigt wird nichts — welcher Druck gemeint war, sagt nur die
+    Quelle."""
+    bau = _lade("build_prizepack_official_images")
+    index = {
+        "SFA-61": {"name_en": "Night Stretcher"},
+        "SHF-61": {"name_en": "Night Stretcher"},
+        "SVE-16": {"name_en": "Basic Metal Energy"},
+        "XYZ-1": {"name_en": "Gibt Es Nicht"},
+    }
+    db = {("SFA", "61"): "Night Stretcher", ("SHF", "61"): "Rusted Shield",
+          ("SVE", "16"): "Metal Energy"}
+    import unittest.mock as mock
+    with mock.patch.object(bau, "_kartendatenbank", lambda: db):
+        zahl = bau.schluesselpruefung(index)
+    assert index["SFA-61"]["schluessel"] == "OK"
+    assert index["SHF-61"]["schluessel"].startswith("FALSCH")
+    assert "Rusted Shield" in index["SHF-61"]["schluessel"]
+    # „Basic Metal Energy" und „Metal Energy" sind dieselbe Karte.
+    assert index["SVE-16"]["schluessel"] == "OK", "die Energie gilt als falscher Druck"
+    assert index["XYZ-1"]["schluessel"].startswith("UNBEKANNT"), (
+        "ein Druck, den die Datenbank nicht kennt, ist kein FALSCH — "
+        "sonst verschwaende er aus der Oberflaeche, obwohl nichts gegen ihn spricht")
+    assert zahl == {"ok": 2, "falsch": 1, "unbekannt": 1}
+
+
+def test_ohne_kartendatenbank_wird_nicht_geurteilt():
+    """Eine leere Datenbank wuerde JEDEN Eintrag zum Unbekannten machen.
+    Dann lieber gar kein Urteil als 225 falsche."""
+    bau = _lade("build_prizepack_official_images")
+    index = {"SFA-61": {"name_en": "Night Stretcher"}}
+    import unittest.mock as mock
+    with mock.patch.object(bau, "_kartendatenbank", dict):
+        zahl = bau.schluesselpruefung(index)
+    assert "schluessel" not in index["SFA-61"]
+    assert zahl == {"ohne_datenbank": 1}
+
+
+def test_an_den_echten_daten_sind_es_genau_diese_neun():
+    """Der Anlass selbst, an der echten Datei — und zwar als OBERGRENZE:
+    werden es mehr, ist etwas Neues kaputt; werden es weniger, hat jemand
+    die Quelle berichtigt und diese Zeile gehoert nachgezogen."""
+    pfad = os.path.join(ROOT, "data", "prizepack_official_images.json")
+    if not os.path.exists(pfad):
+        pytest.skip("keine Prize-Pack-Daten im Baum")
+    bau = _lade("build_prizepack_official_images")
+    with open(pfad, encoding="utf-8") as f:
+        index = json.load(f)
+    if not bau._kartendatenbank():
+        pytest.skip("keine Karten-Chunks im Baum")
+    zahl = bau.schluesselpruefung(index)
+    assert zahl["falsch"] <= 9, (
+        "mehr Eintraege als bisher zeigen auf eine fremde Karte: %s" % zahl)
+    assert zahl["ok"] >= 200, (
+        "kaum noch Eintraege gelten als richtig — dann prueft die Regel "
+        "nicht mehr das, was sie soll: %s" % zahl)

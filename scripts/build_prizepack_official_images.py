@@ -346,6 +346,87 @@ def write_json_index(rows, path):
     return index
 
 
+def _kartendatenbank():
+    """(SET, NUMMER) -> name_en aus den Karten-Chunks. Ohne Netz."""
+    import glob  # noqa: PLC0415
+    aus = {}
+    for pfad in sorted(glob.glob(os.path.join(DATA, "cards_chunk_*.json"))):
+        try:
+            with open(pfad, encoding="utf-8") as f:
+                karten = json.load(f)
+        except Exception:  # noqa: BLE001
+            continue
+        for c in karten:
+            s = str(c.get("set") or "").upper()
+            n = str(c.get("number") or "").lstrip("0") or "0"
+            if s and n:
+                aus.setdefault((s, n), c.get("name_en") or "")
+    return aus
+
+
+def _schluesselname(s):
+    """Namen vergleichbar machen: Akzente, Apostrophe und das fuehrende
+    „Basic" der Energien weg. „Basic Metal Energy" und „Metal Energy"
+    sind dieselbe Karte — das ist kein Befund."""
+    import unicodedata  # noqa: PLC0415
+    t = unicodedata.normalize("NFKD", (s or "").lower()).encode("ascii", "ignore").decode()
+    t = re.sub(r"[^a-z0-9 ]", "", t).strip()
+    if t.startswith("basic "):
+        t = t[6:]
+    return t.replace(" ", "")
+
+
+def schluesselpruefung(index):
+    """Zeigt der Eintrag auf die Karte, die er behauptet?
+
+    BEFUND (25.09.2026, an den echten Daten gemessen): NEUN von 225
+    Eintraegen zeigen auf einen anderen Druck, als ihr Name sagt —
+    sieben mit dem Setcode SHF statt SFA (Shrouded Fable), zwei mit PLF:
+
+        SHF-61  heisst hier „Night Stretcher", die Datenbank fuehrt
+                dort „Rusted Shield"
+        SHF-19  „Dusclops"  -> „Cinderace VMAX"
+        PLF-85  „Battle Cage" -> „Latias-EX"
+
+    Die Folge steht auf der Seite: das gestempelte Bild, der Preis und
+    die Kaufadresse haengen an der FALSCHEN Karte. Das ist derselbe
+    Schaden wie ein falsches Artwork im Druckschalter, nur an einer
+    anderen Stelle — und im Gegensatz zur Galerienummer laesst es sich
+    OHNE NETZ messen: die Kartendatenbank liegt im Baum.
+
+    Geraten wird nichts: der Eintrag wird BENANNT, nicht berichtigt.
+    Welcher Druck gemeint war, sagt nur die Quelle.
+    """
+    db = _kartendatenbank()
+    if not db:
+        log("::warning::keine Karten-Chunks im Baum — die Schluessel bleiben ungeprueft")
+        return {"ohne_datenbank": len(index)}
+    zahl = {"ok": 0, "falsch": 0, "unbekannt": 0}
+    for k, e in index.items():
+        teile = k.split("-", 1)
+        if len(teile) != 2:
+            continue
+        name = db.get((teile[0].upper(), teile[1].lstrip("0") or "0"))
+        if name is None:
+            e["schluessel"] = "UNBEKANNT: dieser Druck steht nicht in der Kartendatenbank"
+            zahl["unbekannt"] += 1
+        elif _schluesselname(name) == _schluesselname(e.get("name_en")):
+            e["schluessel"] = "OK"
+            zahl["ok"] += 1
+        else:
+            e["schluessel"] = ("FALSCH: die Datenbank fuehrt hier \u201e%s\u201c" % name)
+            zahl["falsch"] += 1
+    if zahl["falsch"]:
+        log("::warning::%d Prize-Pack-Eintraege zeigen auf eine andere Karte, als ihr "
+            "Name sagt — die Oberflaeche fuehrt sie nicht; der Setcode muss an der "
+            "Quelle nachgesehen werden" % zahl["falsch"])
+        for k, e in sorted(index.items()):
+            if str(e.get("schluessel", "")).startswith("FALSCH"):
+                log("   %-10s %-28s %s" % (k, (e.get("name_en") or "")[:28],
+                                           e["schluessel"]))
+    return zahl
+
+
 def bildpruefung(index, args):
     """Jedes gestempelte Bild gegen den Basisdruck derselben Karte halten.
 
@@ -413,7 +494,15 @@ def main():
         if not rows:
             log("::error::CSV empty — nothing to refresh")
             return 1
-        write_json_index(rows, args.json_out)
+        index = write_json_index(rows, args.json_out)
+        # Die Schluesselpruefung braucht kein Netz und gehoert deshalb
+        # auch in den taeglichen Weg — sonst stuende das Urteil erst nach
+        # dem naechsten Wochenlauf in den Daten.
+        zahl = schluesselpruefung(index)
+        with open(args.json_out + ".tmp", "w", encoding="utf-8") as f:
+            json.dump(index, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        os.replace(args.json_out + ".tmp", args.json_out)
+        log("Schluessel: %s" % zahl)
         return 0
 
     log("Discovering per-series PDF card lists…")
@@ -482,12 +571,13 @@ def main():
     # the SPA can offer the official Play!-stamped Prize Pack image as an
     # international print. Later series win on the rare set+number collision.
     index = write_json_index(rows, args.json_out)
+    schluessel = schluesselpruefung(index)
     bild = bildpruefung(index, args)
     from collections import Counter
     per = Counter(int(r["series"]) for r in rows)
     log("Per-series counts: " + ", ".join(f"SE{s}={n}" for s, n in sorted(per.items())))
     log(f"Wrote {args.out} — {len(rows)} rows ({fetched_new} new series fetched). "
-        f"{verified}. {bild}")
+        f"{verified}. {bild}. Schluessel: {schluessel}")
     return 0
 
 

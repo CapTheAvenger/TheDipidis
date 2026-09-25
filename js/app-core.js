@@ -2973,14 +2973,31 @@ const BASE_PATH = './data/';
          * Ein falsches Kartenbild ist schlimmer als kein Kartenbild.
          */
         function nurNachgemesseneStempelbilder(json) {
-            let ohneMessung = 0;
-            for (const e of Object.values(json || {})) {
+            let ohneMessung = 0, falscheKarte = 0;
+            for (const [k, e] of Object.entries(json || {})) {
                 if (!e || typeof e !== 'object') continue;
+                /* ZEIGT DER EINTRAG UEBERHAUPT AUF DIE RICHTIGE KARTE?
+                 *
+                 * BEFUND (25.09.2026, ohne Netz an den Daten gemessen):
+                 * neun von 225 Eintraegen zeigen auf einen anderen Druck,
+                 * als ihr Name sagt — sieben mit dem Setcode SHF statt
+                 * SFA, zwei mit PLF. „Night Stretcher" haengt damit an
+                 * „Rusted Shield": Bild, Preis und Kaufadresse landen auf
+                 * der falschen Karte. Ein solcher Eintrag wird nicht
+                 * verbogen, sondern gar nicht erst gefuehrt —
+                 * scripts/build_prizepack_official_images.py benennt ihn
+                 * in den Daten. */
+                if (String(e.schluessel || '').indexOf('FALSCH') === 0) {
+                    delete json[k];
+                    falscheKarte++;
+                    continue;
+                }
                 if (e.geprueft === true) continue;
                 if (e.en || e.de) { e.en = ''; e.de = ''; ohneMessung++; }
             }
-            if (ohneMessung) {
-                devLog(`[init] prize-pack: ${ohneMessung} Stempelbilder ohne Messung — nicht gezeigt`);
+            if (ohneMessung || falscheKarte) {
+                devLog(`[init] prize-pack: ${ohneMessung} Stempelbilder ohne Messung — nicht gezeigt; `
+                    + `${falscheKarte} Eintraege zeigen auf eine andere Karte — nicht gefuehrt`);
             }
             return json;
         }

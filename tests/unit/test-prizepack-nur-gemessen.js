@@ -148,3 +148,39 @@ test('ein Druck ohne Bild wird trotzdem eingetragen (Sammlung, Preis)', () => {
     assert.ok(/rows\.push\(\{ ppsSet, num, img: img \|\| '', entry: e, baseSet \}\)/.test(text),
         'die Zeile fuer das Kartenregister fehlt oder hat eine andere Form');
 });
+
+/* ── Ein Eintrag, der auf die falsche Karte zeigt ────────────────── */
+/*
+ * BEFUND (25.09.2026, ohne Netz an den echten Daten gemessen): neun von
+ * 225 Eintraegen zeigen auf einen anderen Druck, als ihr Name sagt —
+ * sieben mit dem Setcode SHF statt SFA (Shrouded Fable), zwei mit PLF.
+ * „Night Stretcher" haengt damit an „Rusted Shield". Bild, Preis und
+ * Kaufadresse landen auf der falschen Karte, und das hat mit der
+ * Galerienummer gar nichts zu tun.
+ */
+test('ein Eintrag mit falschem Druck wird gar nicht erst gefuehrt', () => {
+    const sperre = ladeSperre();
+    const idx = sperre({
+        'SHF-61': eintrag({ name_en: 'Night Stretcher', geprueft: true,
+                            schluessel: 'FALSCH: die Datenbank fuehrt hier „Rusted Shield“' }),
+        'TEF-114': eintrag({ geprueft: true, schluessel: 'OK' })
+    });
+    assert.ok(!('SHF-61' in idx), 'der falsche Eintrag ist noch da — Preis und Bild '
+        + 'haengen dann an einer fremden Karte');
+    assert.ok(idx['TEF-114'], 'der richtige Eintrag ist mit verschwunden');
+});
+
+test('ein Eintrag ohne Schluesselurteil bleibt — geurteilt wird nur, was gemessen ist', () => {
+    const sperre = ladeSperre();
+    const idx = sperre({ 'TEF-114': eintrag({ geprueft: true }) });
+    assert.ok(idx['TEF-114'], 'ein Eintrag ohne Urteil wurde weggeworfen');
+    assert.strictEqual(idx['TEF-114'].en, 'https://cdn.invalid/EN_41-2x.png');
+});
+
+test('„UNBEKANNT" ist kein „FALSCH"', () => {
+    const sperre = ladeSperre();
+    const idx = sperre({
+        'XYZ-1': eintrag({ geprueft: true, schluessel: 'UNBEKANNT: dieser Druck steht nicht in der Kartendatenbank' })
+    });
+    assert.ok(idx['XYZ-1'], 'ein ungeklaerter Eintrag wurde wie ein falscher behandelt');
+});

@@ -1084,6 +1084,34 @@ jobs:
           fi
           exit 0
 
+      # DIE KARTENMAPPE GEHOERT IN DENSELBEN LAUF WIE DIE KARTENDATEN
+      #
+      # scripts/build_masterclass_cardbinder.py liest data/*.csv — die
+      # Dateien, die dieser Lauf gerade geschrieben hat. Liefe der
+      # Erzeuger getrennt, stuende im Cardbinder-Reiter nach jedem
+      # Turnierwochenende ein paar Tage lang ein aelterer Kartenbestand
+      # als im Rest der Seite. Dieselbe Regel wie bei den Set-Namen der
+      # Pocket-Liste (CLAUDE.md: eine Regel gehoert an ihre Bedingung).
+      #
+      # Er laeuft NACH dem Rueckweg (Schritt „Erzeugte Dateien zurueck
+      # nach data/"), weil er aus data/ liest und nicht aus dem
+      # gitignoreten Saatordner.
+      #
+      # `set +e` und `exit 0`: eine fehlende Kartenmappe ist schlechter
+      # als eine alte, aber weit besser als ein abgebrochener Lauf ohne
+      # die frischen Turnierdaten. Der Reiter zeigt dann die Mappe des
+      # letzten Laufs; dass sie aelter ist, steht in ihrem eigenen Kopf
+      # (_meta.gebaut).
+      - name: Kartenmappen der Masterclasses neu bauen
+        run: |
+          set +e
+          python3 -u scripts/build_masterclass_cardbinder.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "::warning::Kartenmappen nicht vollstaendig gebaut (Code $rc) — der Cardbinder-Reiter zeigt den letzten Stand"
+          fi
+          exit 0
+
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
 

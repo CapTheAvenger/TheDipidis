@@ -762,8 +762,20 @@ test('die fuenf Online-Listen der letzten sieben Tage sind eigene Listen', () =>
      * Wochenende. */
     const chips = FRAGMENT.match(/data-mcl-liste="\d+"[^>]*>([^<]+)</g) || [];
     const online = chips.filter((c) => /·\s*\d+\.\s*von\s*\d+/.test(c));
-    assert.strictEqual(online.length, 5,
-        `${online.length} Online-Chips, erwartet 5 (Platz und Feldgroesse im Namen)`);
+    /* HOECHSTENS fuenf, MINDESTENS eine (25.09.2026).
+     *
+     * Vorher stand hier `=== 5`. Seit demselben Tag laesst
+     * build_masterclass_listen nur noch Turniere ab 100 Spielern durch
+     * (MASTERCLASS_MIN_SPIELER) — der Satz unter der Gruppe verspricht
+     * das, und bis dahin hat es niemand eingehalten. In einer ruhigen
+     * Woche erreichen womoeglich keine fuenf Turniere diese Groesse.
+     * Dann zeigt die Gruppe weniger, und das ist RICHTIG, nicht kaputt.
+     *
+     * Was ein Fehler bleibt: gar keine Liste (dann steht die Gruppe
+     * leer da) und mehr als fuenf (dann greift die Auswahl nicht). */
+    assert.ok(online.length >= 1 && online.length <= 5,
+        `${online.length} Online-Chips — erwartet 1 bis 5 (Platz und `
+        + `Feldgroesse im Namen)`);
 
     online.forEach((c) => {
         const m = />([^<]+?)\s*·\s*(\d+)\.\s*von\s*(\d+)\s*<?/.exec(c);

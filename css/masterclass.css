@@ -355,23 +355,61 @@
 }
 
 /* ── Vorlesen ───────────────────────────────────────────────────
-   Die Leiste steht in der Suchzeile und bleibt beim Scrollen oben
-   kleben: wer 10.000 Woerter vorlesen laesst, will Pause erreichen,
-   ohne erst nach oben zu wischen. 44 px Tippziel wie ueberall
-   (css/tippziele.css). */
+   Die Leiste steht fest ueber der Seite und bleibt damit beim
+   Scrollen erreichbar: wer 10.000 Woerter vorlesen laesst, will Pause
+   erreichen, ohne erst nach oben zu wischen. Warum fest und nicht
+   klebend, steht als Messung an .mcl-vorleser. 44 px Tippziel wie
+   ueberall (css/tippziele.css). */
 .mcl-suchzeile {
-    position: sticky;
-    top: 0;
     z-index: 3;
     background: var(--surface-0, var(--surface-1));
     padding-bottom: var(--s-2);
 }
+
+/* GEMESSEN 25.09.2026, live auf thedipidis.app — und zwar gegen die
+   erste Fassung dieser Leiste, die hier bis heute `position: sticky`
+   trug:
+
+       scrollTop 5.000  ->  .mcl-suchzeile rect.top = -3.550
+
+   Sie klebte nicht. Der Grund steht in der Seite, nicht in dieser
+   Datei: `body` traegt `overflow: hidden auto`. Damit ist der
+   Scroll-Kasten fuer das Kleben der BODY-Kasten — und der scrollt
+   nie; gescrollt wird das HTML-Element. `sticky` hat dann nichts,
+   woran es kleben koennte.
+
+   `fixed` haelt (gemessen in derselben Ansicht): rect.top blieb bei
+   1.154, nachdem scrollTop auf 7.000 sprang. Und die Leiste
+   verschwindet mit ihrem Bereich — der Abschnitt steht auf
+   `display: none`, sobald man auf Spickzettel wechselt; gemessen
+   0x0 dort, 313x44 zurueck in der Ausarbeitung.
+
+   Warum ueberhaupt: 10.164 Woerter. Wer Pause druecken will, soll
+   nicht erst nach oben wischen muessen. */
 .mcl-vorleser {
+    position: fixed;
+    right: var(--s-3);
+    bottom: var(--s-3);
+    z-index: 60;
     display: flex;
     align-items: center;
     gap: var(--s-2);
     flex-wrap: wrap;
-    margin-top: var(--s-2);
+    padding: var(--s-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface-0, var(--surface-1));
+    box-shadow: 0 4px 16px rgb(0 0 0 / 28%);
+}
+/* Die letzten Zeilen duerfen nicht unter der Leiste liegen. */
+#mclDoku { padding-bottom: 88px; }
+@media (max-width: 560px) {
+    .mcl-vorleser {
+        left: var(--s-3);
+        right: var(--s-3);
+        justify-content: center;
+        border-radius: var(--r-sm);
+    }
 }
 .mcl-vl-knopf {
     display: inline-flex;

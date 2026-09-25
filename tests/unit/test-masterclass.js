@@ -478,8 +478,8 @@ test('die Vorleseknoepfe sind verdrahtet und der Bereichswechsel schaltet die St
 test('die Vorleseleiste ist auf dem Handy bedienbar', () => {
     /* 44 px ist die Untergrenze des Hauses fuer Tippziele
      * (css/tippziele.css) — der Knopf wird auf dem Rad gedrueckt, nicht
-     * geklickt. Und die Leiste klebt oben, sonst muss man fuer Pause
-     * durch 10.000 Woerter zurueckwischen. */
+     * geklickt. Und die Leiste muss beim Scrollen erreichbar BLEIBEN,
+     * sonst muss man fuer Pause durch 10.000 Woerter zurueckwischen. */
     const knopf = /\.mcl-vl-knopf\s*\{[^}]*\}/.exec(CSS);
     assert.ok(knopf, 'die Vorleseknoepfe haben keine eigene Regel');
     assert.ok(/min-height:\s*44px/.test(knopf[0]),
@@ -487,9 +487,21 @@ test('die Vorleseleiste ist auf dem Handy bedienbar', () => {
     const tempo = /\.mcl-vl-tempo select\s*\{[^}]*\}/.exec(CSS);
     assert.ok(tempo && /min-height:\s*44px/.test(tempo[0]),
         'die Tempowahl ist kleiner als 44 px');
-    const zeile = /\.mcl-suchzeile\s*\{[^}]*\}/.exec(CSS);
-    assert.ok(zeile && /position:\s*sticky/.test(zeile[0]),
-        'die Leiste klebt nicht oben — Pause waere beim Hoeren nicht erreichbar');
+    /* GEMESSEN 25.09.2026 live: `position: sticky` greift auf dieser
+     * Seite NICHT. `body` traegt `overflow: hidden auto`, damit ist der
+     * BODY-Kasten der Scroll-Kasten fuers Kleben — und der scrollt nie.
+     * Bei scrollTop 5.000 stand die Zeile bei rect.top = -3.550, also
+     * weg. `fixed` haelt (rect.top blieb 1.154 bei scrollTop 7.000).
+     * Wer das zurueckdreht, liefert eine Leiste aus, die beim Hoeren
+     * verschwindet. */
+    const leiste = /\.mcl-vorleser\s*\{[^}]*\}/.exec(CSS);
+    assert.ok(leiste, 'die Vorleseleiste hat keine eigene Regel');
+    assert.ok(/position:\s*fixed/.test(leiste[0]),
+        'die Leiste scrollt weg — Pause waere beim Hoeren nicht erreichbar');
+    assert.ok(!/position:\s*sticky/.test(/\.mcl-suchzeile\s*\{[^}]*\}/.exec(CSS)[0]),
+        'sticky steht wieder da, und es wirkt auf dieser Seite nicht');
+    assert.ok(/#mclDoku\s*\{[^}]*padding-bottom/.test(CSS),
+        'ohne Platz unten liegen die letzten Zeilen unter der Leiste');
     assert.ok(/\.mcl-vl-jetzt/.test(CSS),
         'der gerade gelesene Block wird nicht markiert');
 });
@@ -924,4 +936,76 @@ test('die Kangama/Arktos-Liste und die Worlds-Gruppe sind da', () => {
     const mitPlatz = chips.filter((c) => /·\s*\d+\./.test(c));
     assert.ok(mitPlatz.length >= 11,
         `nur ${mitPlatz.length} Chips nennen eine Platzierung`);
+});
+
+
+test('Decklisten-Tabellen werden nicht doppelt vorgelesen', () => {
+    /* GEHOERT am 25.09.2026 auf der Seite: der Vorleser fing bei einer
+     * Deckliste an und las "ANZAHL DEUTSCH ENGLISH 4 Tanhel Beldum 4
+     * Metang Metang ..." — jede Zeile zweimal, dazu die Spaltenkoepfe
+     * und die Setnummern der Spalte "Druck".
+     *
+     * Gemessen in derselben Ansicht: fuenf Tabellen in der
+     * Ausarbeitung, vier als Anzahl|Deutsch|English[|Druck], eine als
+     * Karte|Wofuer. Deshalb die ersten ZWEI Zellen — die erste allein
+     * wuerde die zweispaltige Tabelle halbieren. */
+    const ttx = { assert };
+    vm.createContext(ttx);
+    vm.runInContext("var KURSIV_AUF='\u0001', KURSIV_ZU='\u0002';\n"
+        + schneideFunktion(JS, 'sprechZellen') + '\n'
+        + schneideFunktion(JS, 'sprechRoh'), ttx);
+
+    const txt = (v) => ({ nodeType: 3, nodeValue: v });
+    const zelle = (tag, v) => ({ nodeType: 1, tagName: tag, children: [], childNodes: [txt(v)] });
+    const reihe = (tag, werte) => {
+        const kinder = werte.map((w) => zelle(tag, w));
+        return { nodeType: 1, tagName: 'TR', children: kinder, childNodes: kinder };
+    };
+    const tabelle = (reihen) => ({
+        nodeType: 1, tagName: 'TABLE', children: reihen, childNodes: reihen
+    });
+
+    const deckliste = tabelle([
+        reihe('TH', ['Anzahl', 'Deutsch', 'English', 'Druck']),
+        reihe('TD', ['4', 'Tanhel', 'Beldum', 'PBL 46']),
+        reihe('TD', ['2', 'Mega-Stalobor-ex', 'Mega Excadrill ex', 'PBL 65'])
+    ]);
+    const gesprochen = ttx.sprechRoh({ childNodes: [deckliste] });
+
+    assert.ok(!/Beldum/.test(gesprochen),
+        'die englische Spalte wird mitgelesen — jede Zeile doppelt');
+    assert.ok(!/PBL/.test(gesprochen), 'die Setnummern werden mitgelesen');
+    assert.ok(!/Anzahl/.test(gesprochen) && !/English/.test(gesprochen),
+        'die Spaltenkoepfe werden vorgelesen');
+    assert.ok(/4\s*Tanhel/.test(gesprochen), 'die Anzahl fehlt');
+    assert.ok(/Mega-Stalobor-ex/.test(gesprochen), 'der deutsche Name fehlt');
+
+    /* Und der zweite Weg, auf dem ein Spaltenkopf hereinkommt: in
+     * einem THEAD, mit TD-Zellen. Die nurKopf-Regel greift da nicht —
+     * diese Zusicherung fehlte zuerst, und die Verfaelschungsprobe vom
+     * 25.09.2026 ("THEAD wird nicht uebersprungen") blieb gruen. */
+    const mitKopfbereich = tabelle([
+        { nodeType: 1, tagName: 'THEAD', children: [], childNodes: [reihe('TD', ['Anzahl', 'Deutsch'])] },
+        reihe('TD', ['4', 'Tanhel'])
+    ]);
+    const ohneKopf = ttx.sprechRoh({ childNodes: [mitKopfbereich] });
+    assert.ok(!/Anzahl/.test(ohneKopf) && !/Deutsch/.test(ohneKopf),
+        'der THEAD wird vorgelesen');
+    assert.ok(/4\s*Tanhel/.test(ohneKopf), 'mit dem THEAD ist auch die Zeile weg');
+
+    /* Die zweispaltige Tabelle behaelt BEIDE Spalten. */
+    const wofuer = tabelle([
+        reihe('TH', ['Karte', 'Wofuer']),
+        reihe('TD', ['Heldenumhang', 'plus 100 KP'])
+    ]);
+    const zwei = ttx.sprechRoh({ childNodes: [wofuer] });
+    assert.ok(/Heldenumhang/.test(zwei) && /plus 100 KP/.test(zwei),
+        'die zweispaltige Tabelle wurde halbiert');
+
+    /* Und ausserhalb von Tabellen bleibt alles, wie es war. */
+    const em = (v) => ({ nodeType: 1, tagName: 'EM', children: [], childNodes: [txt(v)] });
+    assert.strictEqual(
+        ttx.sprechRoh({ childNodes: [em('Metal Maker'), txt(' (Metallmacher)')] }),
+        '\u0001Metal Maker\u0002 (Metallmacher)',
+        'die Tabellenregel hat den normalen Fliesstext veraendert');
 });

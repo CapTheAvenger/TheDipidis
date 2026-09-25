@@ -219,3 +219,60 @@ def test_der_rueckweg_nennt_keine_einzelnen_dateinamen():
     assert echte_namen == [], (
         "im Rueckweg stehen wieder einzelne Dateinamen: %s — damit ist er "
         "erneut eine Liste, die jemand pflegen muss" % echte_namen)
+
+
+# ── DIE SUITEN GEHOEREN VOR DEN MERGE ─────────────────────────────────
+#
+# BEFUND (25.09.2026): deploy-pages.yml lief ausschliesslich auf
+# `push: main`. Der `test`-Job — beide grossen Suiten — sah einen PR
+# damit nie; auf einem PR liefen nur Sprachreinheit, Visual Non-Meta und
+# Data Consistency. Ein Fehler in den Suiten wurde deshalb erst NACH dem
+# Merge sichtbar, auf main, wo `build` und `deploy` uebersprungen werden
+# und die Seite auf dem alten Stand haengt, ohne dass etwas kaputt
+# aussieht. Die Deploys 3040, 3041, 3048 und 3049 sind genau so
+# entstanden.
+
+def _deploy_yaml():
+    import os
+    hier = os.path.dirname(os.path.abspath(__file__))
+    wurzel = os.path.normpath(os.path.join(hier, "..", ".."))
+    pfad = os.path.join(wurzel, ".github", "workflows", "deploy-pages.yml")
+    import pytest as _p
+    yaml = _p.importorskip("yaml")
+    with open(pfad, encoding="utf-8") as f:
+        d = yaml.safe_load(f)
+    # PyYAML liest das nackte `on:` als Wahrheitswert True.
+    d["_on"] = d.get("on", d.get(True))
+    return d
+
+
+def test_die_suiten_laufen_auch_auf_einem_pr():
+    d = _deploy_yaml()
+    ausloeser = d["_on"]
+    assert "pull_request" in ausloeser, (
+        "deploy-pages.yml laeuft nicht auf Pull Requests — die beiden "
+        "grossen Suiten sehen einen PR dann nie, und ein Fehler faellt "
+        "erst nach dem Merge auf main auf")
+    assert d["jobs"]["test"].get("if") in (None, ""), (
+        "der test-Job traegt eine Bedingung — er muss auf JEDEM Ausloeser "
+        "laufen, sonst ist die PR-Pruefung wieder weg")
+
+
+def test_ein_pr_liefert_nicht_aus():
+    d = _deploy_yaml()
+    for job in ("build", "deploy"):
+        bed = str(d["jobs"][job].get("if") or "")
+        assert "pull_request" in bed, (
+            f"Job {job} hat keine Bedingung gegen pull_request — ein PR "
+            f"wuerde die Seite ausliefern")
+
+
+def test_ein_pr_schiesst_den_deploy_von_main_nicht_ab():
+    d = _deploy_yaml()
+    gruppe = str(d.get("concurrency", {}).get("group") or "")
+    abbrechen = d.get("concurrency", {}).get("cancel-in-progress")
+    if abbrechen:
+        assert "github.ref" in gruppe or "github.event" in gruppe, (
+            f"concurrency.group ist fest ({gruppe!r}) und "
+            f"cancel-in-progress ist an — ein PR-Lauf bricht damit den "
+            f"laufenden Deploy von main ab")

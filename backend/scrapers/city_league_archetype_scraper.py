@@ -462,7 +462,31 @@ def _scrape_single_tournament(tournament: dict) -> list:
         archetype = ''
         slug_candidates: list[str] = []
         if _matcher is not None and cleaned_names:
-            slug_candidates = [n.strip().lower().replace(' ', '-') for n in cleaned_names]
+            # DER SLUG KOMMT AUS DER QUELLE, NICHT AUS DEM ANZEIGENAMEN
+            #
+            # BEFUND (Wochenlauf 157, 25.09.2026): hier stand
+            # `cleaned_names`. Das sind die ANZEIGENAMEN — durch
+            # fix_mega_pokemon_name() gelaufen, das aus der
+            # Limitless-Schreibweise `starmie-mega` den Namen
+            # `mega starmie` macht. Kleingeschrieben und mit Bindestrich
+            # wurde daraus der Slug `mega-starmie`.
+            #
+            # Zwei Schaeden auf einmal:
+            #   1. canonicalize_by_slugs() schlaegt in
+            #      archetype_icons.json nach, und dort heisst die Form
+            #      ueberall `starmie-mega`. Die Signatur traf nie.
+            #   2. _record_observed_icons() schrieb `mega-starmie` als
+            #      neuen Eintrag in die Datei — gegen die Regel, dass
+            #      der Formzusatz ans ENDE des Slugs gehoert
+            #      (tests/python/test_archetyp_icons.py).
+            #
+            # Aufgefallen ist es erst, als die Champions League Yokohama
+            # in den japanischen Bestand kam und mit ihr die ersten
+            # Mega-Formen. Die `alt`-Werte der Deck-Symbole SIND die
+            # Limitless-Slugs (gemessen 25.09.2026 an Turnier 569:
+            # excadrill-mega, clefairy, ogerpon, slowking). Sie werden
+            # deshalb unveraendert genommen.
+            slug_candidates = [n.strip().lower() for n in raw_names if n and n.strip()]
             canonical = _matcher.canonicalize_by_slugs(slug_candidates)
             if canonical:
                 archetype = canonical

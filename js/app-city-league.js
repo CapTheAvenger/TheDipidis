@@ -1321,6 +1321,132 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
          *
          * @param {boolean} de
          */
+        /* ── Die Siegerliste der japanischen Majors ──────────────────
+         *
+         * ANLASS (Betreiber, 25.09.2026): „es fehlt noch die City
+         * Champions League Sieger Liste".
+         *
+         * Seit dem 25.09.2026 zieht backend/scrapers/
+         * city_league_archetype_scraper.py auch die japanischen Majors
+         * mit — Champions League, Regional League, Japan Championships,
+         * die koreanische und die Premier Ball League. Sie stehen in
+         * derselben Datei wie die City Leagues
+         * (data/city_league_archetypes.csv), unterscheidbar an der
+         * Spalte `format`.
+         *
+         * Ein Sieger ist die Zeile mit placement = 1. Mehr steht dort
+         * nicht: die Datei fuehrt Datum, Turnierkennung, Praefektur,
+         * Laden, Klasse, Platz, Spieler und Archetyp — keine
+         * Teilnehmerzahl und keine Deckliste. Genau so viel wird
+         * gezeigt, und der Weg zur Quelle ist die Turnierseite
+         * https://limitlesstcg.com/tournaments/<id>, dieselbe Adresse,
+         * die der Scraper abruft (Zeile 389 dort).
+         *
+         * Die Liste steht IM Funktionskoerper, damit
+         * tests/unit/lib-cityleague-sandkasten.js sie mit der Funktion
+         * herausschneiden kann.
+         */
+        function cityLeagueSiegerListe(archetypesData) {
+            const CL_KLASSE_REITERNAME = 'City League (JP)';
+            const zeilen = Array.isArray(archetypesData) ? archetypesData : [];
+            const siegerJeTurnier = new Map();
+            zeilen.forEach(r => {
+                if (String(r.placement || '').trim() !== '1') return;
+                const id = String(r.tournament_id || '').trim();
+                if (!id) return;
+                const klasse = String(r.format || '').trim();
+                /* Ein Turnier, zwei Sieger waere ein Datenfehler — der
+                   erste Treffer gilt, und die Zahl der Zeilen steht
+                   daneben, damit es auffaellt. */
+                const vorher = siegerJeTurnier.get(id);
+                if (vorher) { vorher.zeilen += 1; return; }
+                siegerJeTurnier.set(id, {
+                    id: id,
+                    datum: String(r.date || '').trim(),
+                    klasse: klasse,
+                    istMajor: !!klasse && klasse !== CL_KLASSE_REITERNAME,
+                    ort: String(r.prefecture || '').trim(),
+                    laden: String(r.shop || '').trim(),
+                    spieler: String(r.player || '').trim(),
+                    archetyp: String(r.archetype || '').trim(),
+                    url: 'https://limitlesstcg.com/tournaments/' + id,
+                    zeilen: 1
+                });
+            });
+            const alle = [...siegerJeTurnier.values()];
+            /* Majors zuerst, dann nach Datum absteigend. Das Datum steht
+               in der Quelle als "20th September 2026" ODER als
+               "2026-09-20" — sortiert wird deshalb ueber die geparste
+               Form, nicht ueber die Zeichenkette. */
+            const zeit = (e) => {
+                const d = Date.parse(e.datum.replace(/(\d+)(st|nd|rd|th)/, '$1'));
+                return isNaN(d) ? 0 : d;
+            };
+            alle.sort((a, b) => (Number(b.istMajor) - Number(a.istMajor)) || (zeit(b) - zeit(a)));
+            return alle;
+        }
+
+        function cityLeagueSiegerHtml(liste, de) {
+            const majors = (liste || []).filter(e => e.istMajor);
+            const titel = de ? 'Sieger der japanischen Majors' : 'Winners of the Japanese majors';
+            if (!majors.length) {
+                /* Kein Major im Fenster: das wird gesagt, nicht verschwiegen
+                   und nicht mit City-League-Siegern aufgefuellt. Eine City
+                   League hat 4 bis 16 Spieler, die Champions League
+                   Yokohama vom 20.09.2026 hatte 10.000 — ein Sieg heisst
+                   in beiden Faellen etwas voellig anderes. */
+                const cl = (liste || []).length;
+                return `
+                <div class="city-league-sieger" data-cl-sieger="leer">
+                    <h3 class="city-league-info-card-title">${escapeHtml(titel)}</h3>
+                    <p class="city-league-sieger-leer">${escapeHtml(de
+                        ? 'Im geladenen Zeitraum steht kein japanisches Major im Datensatz'
+                          + (cl ? ' — nur ' + cl + ' City-League-Turnier(e).' : '.')
+                          + ' Der Scraper zieht Champions League, Regional League, '
+                          + 'Japan Championships, Korean League und Premier Ball League '
+                          + 'seit dem 25.09.2026 mit; sobald eines im Fenster liegt, '
+                          + 'steht sein Sieger hier.'
+                        : 'No Japanese major is in the loaded window'
+                          + (cl ? ` — only ${cl} City League tournament(s).` : '.')
+                          + ' The scraper has been pulling Champions League, Regional '
+                          + 'League, Japan Championships, Korean League and Premier Ball '
+                          + 'League since 25 Sep 2026; as soon as one falls in the window '
+                          + 'its winner appears here.')}</p>
+                </div>`;
+            }
+            const kopf = de
+                ? ['Datum', 'Turnierklasse', 'Ort', 'Sieger', 'Deck', 'Quelle']
+                : ['Date', 'Tournament class', 'Location', 'Winner', 'Deck', 'Source'];
+            const zeilen = majors.map(e => `
+                <tr>
+                    <td>${escapeHtml(e.datum || '–')}</td>
+                    <td>${escapeHtml(e.klasse)}</td>
+                    <td>${escapeHtml(e.ort || e.laden || '–')}</td>
+                    <td>${escapeHtml(e.spieler || (de ? 'nicht im Datensatz' : 'not in the data'))}</td>
+                    <td>${escapeHtml(e.archetyp || '–')}</td>
+                    <td><a href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${escapeHtml(e.id)}</a></td>
+                </tr>`).join('');
+            return `
+                <div class="city-league-sieger" data-cl-sieger="voll">
+                    <h3 class="city-league-info-card-title">${escapeHtml(titel)}</h3>
+                    <div class="city-league-table-wrap">
+                        <table class="city-league-sieger-tabelle">
+                            <thead><tr>${kopf.map(k => `<th>${escapeHtml(k)}</th>`).join('')}</tr></thead>
+                            <tbody>${zeilen}</tbody>
+                        </table>
+                    </div>
+                    <p class="city-league-sieger-fuss">${escapeHtml(de
+                        ? 'Ein Sieger ist die Zeile mit Platz 1 aus '
+                          + 'data/city_league_archetypes.csv. Teilnehmerzahl und '
+                          + 'Deckliste fuehrt der Datensatz nicht — sie stehen auf der '
+                          + 'verlinkten Turnierseite.'
+                        : 'A winner is the placement-1 row from '
+                          + 'data/city_league_archetypes.csv. The data set carries neither '
+                          + 'the field size nor the decklist — both are on the linked '
+                          + 'tournament page.')}</p>
+                </div>`;
+        }
+
         function cityLeagueRubrikNamen(de) {
             const roh = de
                 ? { seltener: 'Seltener gespielt', haeufiger: 'Häufiger gespielt',
@@ -1594,7 +1720,13 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                         </div>
                     </div>
                 </div>`;
-            
+
+            /* Die Siegerliste der japanischen Majors, gleich unter den
+               Karten: wer den Reiter oeffnet, will zuerst wissen, wer
+               gewonnen hat. */
+            html += cityLeagueSiegerHtml(
+                cityLeagueSiegerListe(window.cityLeagueArchetypesData || []), _herkunftDe);
+
             /* BEFUND A-F2.11 bis F2.13 / H1: bis zum 07.09.2026 folgte hier
                direkt die erste bedingte Tabelle — und wenn keine davon
                gerendert wurde, stand zwischen den Karten oben und der

@@ -41,6 +41,12 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Iterable
 
+# Die Gruppenregel liegt neben diesem Skript. Der Pfad muss von Hand
+# gesetzt werden, weil das Skript aus beliebigem Arbeitsverzeichnis
+# laeuft und scripts/ kein Paket ist.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import kartengruppe  # noqa: E402
+
 
 MIN_INCLUSION_PCT       = 30.0  # below this a card stays off the stock 60-card list
 HARD_DECK_SIZE          = 60    # PTCG hard cap
@@ -253,29 +259,20 @@ def _is_basic_energy(card_name: str, card_type: str) -> bool:
 def _classify_card_type(card_type: str, card_name: str) -> str:
     """Map the CSV's free-form `type` value into one of our 7 buckets.
 
-    The CSV uses Pokémon TCG canonical labels — "Basic" / "Stage 1" /
-    "Stage 2" for Pokémon evolution stages, "Item" / "Supporter" /
-    "Tool" / "Stadium" for trainers, "Basic Energy" / "Special Energy"
-    for energies — so straight string-matching gets us there.
+    Die Regel selbst steht in scripts/kartengruppe.py und wird von dort
+    geholt — nicht hier ein zweites Mal ausgeschrieben.
+
+    BEFUND (25.09.2026): die frueher hier stehende Kopie prueft
+    `t == 'Item'` auf Gleichheit. Der Bestand fuehrt 25 Karten mit dem
+    Typ „Item/Technical Machine" (data/cards_chunk_*.json) — die
+    landeten damit unter „pokemon". Die gemeinsame Regel trennt auf dem
+    ersten Abschnitt vor „/" und antwortet „item".
+
+    Der Rueckfall bleibt „pokemon": was hier nicht erkannt wird, ist im
+    Bestand erfahrungsgemaess eine Pokemon-Form, die ein Scraper neu
+    dazugeschrieben hat (BREAK, V-UNION, ...).
     """
-    t = (card_type or '').strip()
-    if 'Basic Energy' in t:
-        return 'basic-energy'
-    if 'Special Energy' in t:
-        return 'special-energy'
-    if t == 'Supporter':
-        return 'supporter'
-    if t == 'Tool' or 'Pokémon Tool' in t or 'Pokemon Tool' in t:
-        return 'tool'
-    if t == 'Stadium':
-        return 'stadium'
-    if t == 'Item':
-        return 'item'
-    # Pokémon stages (Basic / Stage 1 / Stage 2 / etc.) plus the empty
-    # string default — Pokémon is the safe fallback because anything
-    # we don't recognise tends to be a Pokémon variant the scraper
-    # added (BREAK, V-UNION, etc.).
-    return 'pokemon'
+    return kartengruppe.gruppe(card_type, card_name) or 'pokemon'
 
 
 def _card_from_row(r: dict, count: int, ace_spec_names: set[str] | None) -> dict:

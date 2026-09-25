@@ -3155,6 +3155,45 @@ img[src*="limitlesstcg"] {
 .city-league-info-card-exit {
     color: #ff6b6b;
 }
+/* ── Siegerliste der japanischen Majors ─────────────────────────────
+ *
+ * ANLASS (Betreiber, 25.09.2026): „es fehlt noch die City Champions
+ * League Sieger Liste".
+ *
+ * Bewusst KEINE Karte aus dem Verlaufsgitter darueber: eine Tabelle mit
+ * sechs Spalten auf dem Farbverlauf waere auf dem Handy nicht zu lesen.
+ * Sie steht auf der Flaeche des Reiters und nutzt dessen Tabellenfarben.
+ */
+.city-league-sieger {
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--cl-table-border, rgba(127,127,127,.35));
+    border-radius: 12px;
+    background: var(--surface-1, transparent);
+}
+.city-league-sieger .city-league-info-card-title {
+    color: var(--cl-table-title-ink, inherit);
+}
+.city-league-sieger-tabelle {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9em;
+}
+.city-league-sieger-tabelle th,
+.city-league-sieger-tabelle td {
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--cl-table-border, rgba(127,127,127,.25));
+}
+.city-league-sieger-tabelle th { font-weight: 600; white-space: nowrap; }
+.city-league-sieger-tabelle tbody tr:hover { background: var(--cl-table-row-hover, transparent); }
+.city-league-sieger-leer,
+.city-league-sieger-fuss {
+    margin: 8px 0 0;
+    font-size: .85em;
+    opacity: .85;
+}
+
 /* WORAUS DIESE ANSICHT BESTEHT (07.09.2026).
  *
  * js/app-city-league.js:1428 haengt den Herkunftssatz als <span> hinter

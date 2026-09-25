@@ -801,3 +801,220 @@
     .mcl-bd-gitter { grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); }
     .mcl-bd-mus { grid-template-columns: 1fr; }
 }
+
+/* ── Deckbau im Cardbinder ──────────────────────────────────────────
+ *
+ * ANLASS (Betreiber, 25.09.2026): „da wie gesagt möchte ich von das aus
+ * mein Deck final bauen, sprich ich brauche alles was zum Deck Builder
+ * Feature dazu gehört. So das ich direkt auf der gespielten Karte mit +
+ * dann die Karte ins Deck packen kann … wichtig ist dann auch da ich auf
+ * der Karte sehe in der Masterclass wie oft ich die dann schon in mein
+ * Deck gepackt habe".
+ *
+ * Also drei Dinge am Bild: der Zaehler (wie oft schon drin), die
+ * ACE-SPEC-Marke (hoechstens eine je Deck) und darunter +/−. Der Zaehler
+ * sitzt IM Bild, weil er zur Karte gehoert und nicht zur Zeile darunter;
+ * das + traegt seine Menge im Text, damit man vor dem Klick weiss, was
+ * passiert.
+ */
+
+.mcl-bd-bild { position: relative; }
+
+.mcl-bd-zaehler {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    min-width: 22px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--surface-1);
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.5;
+}
+.mcl-bd-zaehler[hidden] { display: none; }
+
+.mcl-bd-ace {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 1px 5px;
+    border-radius: var(--r-sm);
+    background: var(--mcl-schlecht, #b4232a);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+.mcl-bd-tim {
+    align-self: flex-start;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    font-size: var(--fs-xs);
+    color: var(--ink-2);
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+}
+/* Steht in einer aelteren Liste von Tim, nicht in seiner aktuellen —
+   das ist eine andere Auskunft und sieht deshalb anders aus. */
+.mcl-bd-tim[data-alt="1"] { border-style: dashed; color: var(--ink-3); }
+
+.mcl-bd-knoepfe { display: flex; gap: 4px; margin-top: 2px; }
+.mcl-bd-plus, .mcl-bd-minus {
+    border: 1px solid var(--line-strong);
+    background: var(--surface-1);
+    color: var(--ink);
+    border-radius: var(--r-sm);
+    padding: 3px 8px;
+    font-size: var(--fs-xs);
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    line-height: 1.4;
+}
+.mcl-bd-plus { flex: 1; font-weight: 700; }
+.mcl-bd-plus:hover, .mcl-bd-minus:hover { border-color: var(--ink); }
+.mcl-bd-minus[hidden] { display: none; }
+
+/* Gruppenueberschrift in der Standardsortierung. */
+.mcl-bd-grp {
+    margin: var(--s-4) 0 var(--s-2);
+    font-size: var(--fs-md);
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-2);
+}
+.mcl-bd-grp span {
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+}
+.mcl-bd-grp + .mcl-bd-gitter { margin-bottom: var(--s-2); }
+
+/* ── Der Deckblock ─────────────────────────────────────────────────── */
+
+.mcl-bd-deck {
+    margin: var(--s-4) 0;
+    padding: var(--s-3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface-2, var(--surface-1));
+}
+.mcl-bd-deck .mcl-bd-h { margin-top: 0; display: flex; align-items: baseline; gap: var(--s-2); flex-wrap: wrap; }
+.mcl-bd-dzahl {
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink-3);
+}
+.mcl-bd-dzahl[data-voll="true"] { color: var(--mcl-gut, #1d7a43); }
+
+.mcl-bd-dwarn {
+    list-style: none;
+    margin: 0 0 var(--s-2);
+    padding: 0;
+    font-size: var(--fs-sm);
+    color: var(--mcl-schlecht, #b4232a);
+}
+
+.mcl-bd-dgrps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: var(--s-3);
+}
+.mcl-bd-dgrp h5 {
+    margin: 0 0 var(--s-1);
+    font-size: var(--fs-sm);
+    display: flex;
+    gap: var(--s-2);
+    align-items: baseline;
+}
+.mcl-bd-dgrp h5 span {
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+    font-size: var(--fs-xs);
+}
+.mcl-bd-dgrp ul { list-style: none; margin: 0; padding: 0; }
+.mcl-bd-dgrp li {
+    display: flex;
+    align-items: center;
+    gap: var(--s-1);
+    font-size: var(--fs-sm);
+    padding: 1px 0;
+}
+.mcl-bd-dn {
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    min-width: 24px;
+}
+.mcl-bd-dname { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.mcl-bd-dset {
+    font-family: var(--font-num);
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+}
+
+.mcl-bd-dsumme {
+    display: block;
+    margin-top: var(--s-3);
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+.mcl-bd-dsumme small { font-weight: 400; color: var(--ink-3); }
+
+.mcl-bd-dknopf {
+    display: flex;
+    gap: var(--s-2);
+    flex-wrap: wrap;
+    margin-top: var(--s-3);
+}
+.mcl-bd-dname-eingabe {
+    flex: 1 1 180px;
+    min-width: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    padding: 5px 9px;
+    font: inherit;
+    font-size: var(--fs-sm);
+    background: var(--surface-1);
+    color: var(--ink);
+}
+.mcl-bd-deck .mcl-btn {
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--surface-1);
+    border-radius: var(--r-sm);
+    padding: 5px 12px;
+    font-size: var(--fs-sm);
+    cursor: pointer;
+}
+.mcl-bd-deck .mcl-btn-leise {
+    background: var(--surface-1);
+    color: var(--ink-2);
+    border-color: var(--line-strong);
+}
+
+.mcl-bd-meldung {
+    margin: 0 0 var(--s-3);
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-sm);
+    border: 1px solid var(--line-strong);
+    background: var(--surface-2, var(--surface-1));
+    font-size: var(--fs-sm);
+}
+
+@media (max-width: 480px) {
+    .mcl-bd-dgrps { grid-template-columns: 1fr; }
+    .mcl-bd-dknopf .mcl-btn { flex: 1 1 auto; }
+}

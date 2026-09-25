@@ -87,9 +87,39 @@
             binderMax: 'max',
             binderPreis: 'Preis',
             binderOhnePreis: 'kein Preis im Bestand',
+            binderSortStandard: 'Standardsortierung',
             binderSortNutzung: 'Meistgenutzt',
             binderSortName: 'Name',
             binderSortPreis: 'Preis',
+            binderNurTim: 'Nur Tims Empfehlungen',
+            binderNurTimTitel: 'Zeigt nur Karten, die in einer von Tims Listen stehen — die Gruppe „Tims Listen" in diesem Stück.',
+            binderTimN: 'Tim spielt',
+            binderGrpPokemon: 'Pokémon',
+            binderGrpSupporter: 'Supporter',
+            binderGrpItem: 'Item',
+            binderGrpTool: 'Tool',
+            binderGrpStadium: 'Stadion',
+            binderGrpSpecialEnergy: 'Spezial-Energie',
+            binderGrpBasicEnergy: 'Basis-Energie',
+            binderGrpOhne: 'Ohne Angabe',
+            binderDeck: 'Mein Deck',
+            binderDeckLeer: 'Noch keine Karte im Deck. Das + auf einer Karte legt sie so oft hinein, wie sie im Schnitt gespielt wurde.',
+            binderDeckZahl: 'von 60',
+            binderPlus: 'Ins Deck',
+            binderMinus: 'Eine heraus',
+            binderPlusTitel: 'Legt die Karte so oft ins Deck, wie sie im Schnitt gespielt wurde — dieselbe Regel wie die rote Marke auf den anderen Reitern.',
+            binderGrenze: 'Mehr als 4× ist nicht erlaubt (außer Basis-Energie).',
+            binderDeckSpeichern: 'In „Meine Decks" speichern',
+            binderDeckLeeren: 'Deck leeren',
+            binderDeckKopieren: 'Als Liste kopieren',
+            binderDeckSumme: 'Kartenwert',
+            binderDeckOhnePreis: 'ohne Preis',
+            binderWarn60: 'Ein Deck hat genau 60 Karten.',
+            binderWarnAce: 'Mehr als eine ACE SPEC ist nicht erlaubt.',
+            binderWarnBasis: 'Ohne Basis-Pokémon ist das Deck nicht spielbar.',
+            binderGespeichert: 'Deck in „Meine Decks" gespeichert.',
+            binderNichtAngemeldet: 'Zum Speichern in „Meine Decks" bitte anmelden.',
+            binderDeckName: 'Name des Decks',
             binderMatchups: 'Matchups aus echten Turnieren',
             binderTurniere: 'Turnierergebnisse des Decks',
             binderPartien: 'Partien',
@@ -135,9 +165,39 @@
             binderMax: 'max',
             binderPreis: 'Price',
             binderOhnePreis: 'no price on file',
+            binderSortStandard: 'Standard order',
             binderSortNutzung: 'Most used',
             binderSortName: 'Name',
             binderSortPreis: 'Price',
+            binderNurTim: "Tim's picks only",
+            binderNurTimTitel: "Shows only cards that appear in one of Tim's lists — the \u201cTims Listen\u201d group in this piece.",
+            binderTimN: 'Tim plays',
+            binderGrpPokemon: 'Pok\u00e9mon',
+            binderGrpSupporter: 'Supporter',
+            binderGrpItem: 'Item',
+            binderGrpTool: 'Tool',
+            binderGrpStadium: 'Stadium',
+            binderGrpSpecialEnergy: 'Special Energy',
+            binderGrpBasicEnergy: 'Basic Energy',
+            binderGrpOhne: 'Unspecified',
+            binderDeck: 'My deck',
+            binderDeckLeer: 'No card in the deck yet. The + on a card adds as many copies as it was played on average.',
+            binderDeckZahl: 'of 60',
+            binderPlus: 'Add to deck',
+            binderMinus: 'Remove one',
+            binderPlusTitel: 'Adds as many copies as the card was played on average \u2014 the same rule as the red badge on the other tabs.',
+            binderGrenze: 'More than 4\u00d7 is not allowed (except basic energy).',
+            binderDeckSpeichern: 'Save to My Decks',
+            binderDeckLeeren: 'Clear deck',
+            binderDeckKopieren: 'Copy as list',
+            binderDeckSumme: 'Card value',
+            binderDeckOhnePreis: 'without price',
+            binderWarn60: 'A deck has exactly 60 cards.',
+            binderWarnAce: 'More than one ACE SPEC is not allowed.',
+            binderWarnBasis: 'Without a Basic Pok\u00e9mon the deck cannot be played.',
+            binderGespeichert: 'Deck saved to My Decks.',
+            binderNichtAngemeldet: 'Please sign in to save to My Decks.',
+            binderDeckName: 'Deck name',
             binderMatchups: 'Matchups from real tournaments',
             binderTurniere: 'Tournament results for this deck',
             binderPartien: 'games',
@@ -275,7 +335,35 @@
 
     var binderDaten = {};    /* guide-id -> Mappe */
     var binderLaeuft = {};   /* guide-id -> Promise */
-    var binderStand = {};    /* guide-id -> {meta, sortierung} */
+    var binderStand = {};    /* guide-id -> {meta, sort, nurTim} */
+    var binderTim = {};      /* guide-id -> {SET-NUM: Anzahl in Tims Listen} */
+    var binderTimJetzt = {}; /* guide-id -> {SET-NUM: Anzahl in Tims AKTUELLER Liste} */
+
+    /* Die Standardsortierung, um die der Betreiber am 25.09.2026 gebeten
+     * hat: „Pokemon, supporter, Item, Tool, Stadion, Spezial Energie,
+     * Basis Energie". Dieselbe Reihenfolge fuehrt js/app-deck-builder.js
+     * seit Langem als `typeOrder`; die Gruppe je Karte steht in der
+     * Mappe (scripts/kartengruppe.py hat sie gesetzt). */
+    var BINDER_GRUPPEN = ['pokemon', 'supporter', 'item', 'tool', 'stadium',
+        'special-energy', 'basic-energy'];
+    var BINDER_GRUPPE_TXT = {
+        'pokemon': 'binderGrpPokemon',
+        'supporter': 'binderGrpSupporter',
+        'item': 'binderGrpItem',
+        'tool': 'binderGrpTool',
+        'stadium': 'binderGrpStadium',
+        'special-energy': 'binderGrpSpecialEnergy',
+        'basic-energy': 'binderGrpBasicEnergy'
+    };
+
+    function binderGruppenRang(k) {
+        var i = BINDER_GRUPPEN.indexOf(k && k.gruppe);
+        return i < 0 ? BINDER_GRUPPEN.length : i;
+    }
+
+    function binderDruck(k) {
+        return String((k.set || '') + '-' + (k.nummer || '')).toUpperCase();
+    }
 
     function binderUrl(id) {
         return 'data/masterclass_cardbinder/' + encodeURIComponent(id) + '.json';
@@ -307,11 +395,134 @@
         return n.toFixed(nach === undefined ? 0 : nach).replace('.', ',');
     }
 
-    function binderKarteHtml(k, meta) {
+    /* ---------- Tims Empfehlungen ----------------------------------
+     *
+     * ANLASS (Betreiber, 25.09.2026): „ich möchte bitte noch eine Option
+     * das ich nur nach Tims empfehlungen filtern kann wenn ich innerhalb
+     * meiner Masterclass Daten mein Deck bauen will."
+     *
+     * Woher die Auskunft kommt: aus dem geladenen Stueck selbst. Die
+     * Schalterleiste dort ist in Gruppen geteilt, und die erste heisst
+     * „Tims Listen" (Bloecke 0–6 bei Mega-Stalobor). Dieselbe Gruppierung
+     * liest scripts/masterclass_listen_nachziehen.py schon aus
+     * (gruppen_nummern(), GRUPPE) und dieselbe Bezugsliste nennt es
+     * TIMS_BLOCK = "0" — Tims aktuelle Liste.
+     *
+     * NICHT aus der Kartenmappe: die kennt nur, was in ERFASSTEN Listen
+     * stand. Ob Tim eine Karte empfiehlt, steht in seiner Ausarbeitung —
+     * und nirgends sonst.
+     */
+    function timGruppenBloecke(wurzel) {
+        var nummern = [];
+        wurzel.querySelectorAll('.mcl-listgruppe').forEach(function (grp) {
+            var titel = grp.querySelector('.mcl-listgruppe-titel');
+            var text = (titel && titel.textContent) || '';
+            /* Die Gruppe heisst im Stueck „Tims Listen". Geprueft wird auf
+             * den Namen des Autors, nicht auf den vollen Wortlaut — eine
+             * kuenftige Masterclass hat einen anderen Autor. */
+            if (!/^\s*tim/i.test(text)) return;
+            grp.querySelectorAll('[data-mcl-liste]').forEach(function (c) {
+                var n = c.getAttribute('data-mcl-liste');
+                if (n !== null && nummern.indexOf(n) < 0) nummern.push(n);
+            });
+        });
+        /* Kein Gruppentitel im Stueck: dann gilt der Bezug, den der
+         * Erzeuger ohnehin kennt — Block 0 ist Tims aktuelle Liste. */
+        if (!nummern.length && wurzel.querySelector('[data-mcl-listenblock="0"]')) {
+            nummern.push('0');
+        }
+        return nummern;
+    }
+
+    function timZaehlung(wurzel, bloecke) {
+        var aus = {};
+        bloecke.forEach(function (nr) {
+            var block = wurzel.querySelector('[data-mcl-listenblock="' + nr + '"]');
+            if (!block) return;
+            block.querySelectorAll('.mcl-kk').forEach(function (kk) {
+                var druck = String(kk.getAttribute('data-druck') || '').toUpperCase();
+                var n = parseInt(kk.getAttribute('data-n'), 10) || 0;
+                if (!druck || !n) return;
+                /* Mehrere Listen: die HOECHSTE Zahl, die Tim je gespielt
+                 * hat. Eine Summe ueber sieben Listen waere sinnlos. */
+                aus[druck] = Math.max(aus[druck] || 0, n);
+            });
+        });
+        return aus;
+    }
+
+    function timLesen(wurzel, g) {
+        if (binderTim[g.id]) return;
+        var bloecke = timGruppenBloecke(wurzel);
+        binderTim[g.id] = timZaehlung(wurzel, bloecke);
+        binderTimJetzt[g.id] = timZaehlung(wurzel, bloecke.slice(0, 1));
+    }
+
+    /* ---------- Die Bruecke zum Deck ------------------------------
+     *
+     * Es gibt EIN Deck: das des Deckbauers im Profil
+     * (js/app-profile-deck-builder.js, localStorage
+     * dipidis.profileDeckBuilder.v1). Der Cardbinder legt dort hinein
+     * und liest von dort — kein zweites Deck, das auseinanderlaeuft.
+     */
+    function deckBauer() {
+        var p = window.ProfileDeckBuilder;
+        return (p && typeof p.addCopies === 'function') ? p : null;
+    }
+
+    /* Aus einer Mappenkarte die Form, die der Deckbauer fuehrt. */
+    function binderDeckKarte(k) {
+        return {
+            set: k.set || '',
+            number: k.nummer || '',
+            name_en: k.name || '',
+            name_de: k.name_de || '',
+            type: k.typ || '',
+            rarity: null,
+            image_url: k.bild || '',
+            is_japanese: false
+        };
+    }
+
+    function binderImDeck(k) {
+        var p = deckBauer();
+        if (!p || typeof p.countOf !== 'function') return 0;
+        try { return p.countOf(binderDeckKarte(k)) || 0; } catch (e) { return 0; }
+    }
+
+    /* Wie oft die Karte ins Deck soll: die REGEL, die das Haus schon hat.
+     *
+     * _markeZahl() in js/app-city-league.js beantwortet genau diese Frage
+     * („wie viele spiele ich davon, wenn ich sie spiele") und ist dort
+     * ausfuehrlich begruendet — Schnitt ueber die Listen, die die Karte
+     * WIRKLICH enthalten, Boden bei 1, bei einer einzigen Liste das
+     * Maximum. Sie ist global und wird vor dieser Datei geladen
+     * (index.html). Fehlt sie wider Erwarten, gilt die Hoechstzahl —
+     * derselbe Rueckfall wie in js/app-current-meta-analysis.js:5207.
+     */
+    function binderMenge(k, meta) {
+        var w = (meta === 'alle') ? k.gesamt : (k.je_meta && k.je_meta[meta]);
+        if (!w) return 1;
+        var schnitt = (w.schnitt === null || w.schnitt === undefined) ? 0 : w.schnitt;
+        var hoechst = w.hoechstzahl || 0;
+        var listen = w.listen_gesamt || 0;
+        var mit = w.listen_mit_karte || 0;
+        var n = (typeof window._markeZahl === 'function')
+            ? window._markeZahl(0, schnitt, hoechst, mit, listen)
+            : (hoechst || Math.max(1, Math.round(schnitt)));
+        n = Number(n) || 0;
+        /* Die Marke darf 0 sein, wenn keine Quelle eine Zahl fuehrt —
+         * ins Deck gelegt wird dann trotzdem eine Karte, denn der Klick
+         * war eindeutig. */
+        return Math.max(1, n);
+    }
+
+    function binderKarteHtml(k, meta, tim, timJetzt) {
         var w = (meta === 'alle') ? k.gesamt : (k.je_meta && k.je_meta[meta]);
         if (!w) return '';
         var name = k.name_de || k.name;
         var druck = (k.set || '') + (k.nummer ? '-' + k.nummer : '');
+        var schluessel = binderDruck(k);
         var bild = k.bild || bildAdresse(druck);
         var kopf = bild
             ? '<img loading="lazy" alt="' + esc(name) + '" src="' + esc(bild) + '">'
@@ -332,17 +543,45 @@
                     + binderZahl(k.preis.eur, 2) + '\u00a0\u20ac</a>'
                 : '<span class="mcl-bd-preis">' + binderZahl(k.preis.eur, 2) + '\u00a0\u20ac</span>')
             : '<span class="mcl-bd-preis mcl-bd-kein" title="' + esc(T('binderOhnePreis')) + '">–</span>';
-        return '<li class="mcl-bd-karte">' +
-            '<div class="mcl-bd-bild">' + kopf + '</div>' +
+        /* Was der Deckbau braucht, steht AN der Karte: wie viele das +
+         * hineinlegt, wie viele schon drin sind, und was Tim spielt. */
+        var menge = binderMenge(k, meta);
+        var drin = binderImDeck(k);
+        var timN = (tim && tim[schluessel]) || 0;
+        var timJ = (timJetzt && timJetzt[schluessel]) || 0;
+        var timMarke = timN
+            ? '<span class="mcl-bd-tim" title="' + esc(T('binderTimN') + ' ' + timN + '\u00d7' +
+                (timJ ? '' : ' (nicht in seiner aktuellen Liste)')) + '"' +
+                (timJ ? '' : ' data-alt="1"') + '>' + esc(T('binderTimN')) + '\u00a0' + timN + '\u00d7</span>'
+            : '';
+        var aceMarke = k.ace ? '<span class="mcl-bd-ace" title="ACE SPEC — h\u00f6chstens eine je Deck">ACE</span>' : '';
+        var zaehler = '<span class="mcl-bd-zaehler" data-mcl-bdzahl="' + esc(schluessel) + '"' +
+            (drin ? '' : ' hidden') + '>' + drin + '\u00d7</span>';
+        var knoepfe =
+            '<button type="button" class="mcl-bd-minus" data-mcl-bdminus="' + esc(schluessel) + '"' +
+                ' aria-label="' + esc(T('binderMinus') + ': ' + name) + '" title="' + esc(T('binderMinus')) + '"' +
+                (drin ? '' : ' hidden') + '>\u2212</button>' +
+            '<button type="button" class="mcl-bd-plus" data-mcl-bdplus="' + esc(schluessel) + '"' +
+                ' aria-label="' + esc(T('binderPlus') + ': ' + name + ', ' + menge + '\u00d7') + '"' +
+                ' title="' + esc(T('binderPlusTitel')) + '">+\u202f' + menge + '\u00d7</button>';
+
+        return '<li class="mcl-bd-karte" data-mcl-bdkarte="' + esc(schluessel) + '"' +
+            ' data-gruppe="' + esc(k.gruppe || '') + '">' +
+            '<div class="mcl-bd-bild">' + kopf + zaehler + aceMarke + '</div>' +
             '<div class="mcl-bd-txt"><b>' + esc(name) + '</b>' +
             '<span class="mcl-bd-druck">' + esc(druck) + '</span>' +
             '<span class="mcl-bd-zahlen">' + teile.join(' · ') + '</span>' +
-            preis + '</div></li>';
+            timMarke +
+            preis +
+            '<span class="mcl-bd-knoepfe">' + knoepfe + '</span>' +
+            '</div></li>';
     }
 
-    function binderSortiert(karten, meta, wie) {
+    function binderSortiert(karten, meta, wie, nurTim, tim) {
         var liste = karten.filter(function (k) {
-            return meta === 'alle' || (k.je_meta && k.je_meta[meta]);
+            if (!(meta === 'alle' || (k.je_meta && k.je_meta[meta]))) return false;
+            if (nurTim) return !!(tim && tim[binderDruck(k)]);
+            return true;
         });
         var wert = function (k) {
             var w = (meta === 'alle') ? k.gesamt : k.je_meta[meta];
@@ -358,10 +597,157 @@
                 var pb = b.preis && b.preis.eur !== null ? b.preis.eur : -1;
                 return pb - pa;
             });
+        } else if (wie === 'standard') {
+            /* Pokemon, Supporter, Item, Tool, Stadion, Spezial-Energie,
+             * Basis-Energie — innerhalb einer Gruppe das Meistgespielte
+             * zuerst, damit die Reihenfolge einer Deckliste entspricht. */
+            liste.sort(function (a, b) {
+                var d = binderGruppenRang(a) - binderGruppenRang(b);
+                if (d) return d;
+                d = wert(b) - wert(a);
+                if (d) return d;
+                return String(a.name_de || a.name).localeCompare(String(b.name_de || b.name), 'de');
+            });
         } else {
             liste.sort(function (a, b) { return wert(b) - wert(a); });
         }
         return liste;
+    }
+
+    /* ---------- Mein Deck ------------------------------------------
+     *
+     * ANLASS (Betreiber, 25.09.2026): „Ich möchte insgesamt einfach
+     * einfach und Komfortable mein finales Deck bauen mit allem was dazu
+     * gehört, vor allem mit allen Informationen die ich brauche."
+     *
+     * Also: die Zahl gegen 60, die Gruppen wie in einer Deckliste, die
+     * Regelverstoesse benannt (60 Karten, hoechstens eine ACE SPEC,
+     * mindestens ein Basis-Pokemon), der Kartenwert — und der Weg
+     * heraus: als Liste in die Ablage oder in „Meine Decks".
+     */
+
+    function binderDeckKarten(g) {
+        var p = deckBauer();
+        if (!p || typeof p.getDeck !== 'function') return [];
+        var d = null;
+        try { d = p.getDeck(); } catch (e) { d = null; }
+        if (!d) {
+            /* Der Profil-Reiter war noch nie offen — countOf() liest
+             * dann aus dem Speicher und fuellt ihn. */
+            try { p.countOf({ set: '', number: '' }); d = p.getDeck(); } catch (e) { d = null; }
+        }
+        return (d && Array.isArray(d.cards)) ? d.cards.filter(function (c) { return (c.count || 0) > 0; }) : [];
+    }
+
+    /* Die Mappe kennt Gruppe, Preis und ACE SPEC — der Deckbauer nicht.
+     * Deshalb wird je Deckkarte in der Mappe nachgesehen. */
+    function binderMappeIndex(g) {
+        var d = binderDaten[g.id];
+        var idx = {};
+        ((d && d.karten) || []).forEach(function (k) { idx[binderDruck(k)] = k; });
+        return idx;
+    }
+
+    function binderDeckHtml(g) {
+        var karten = binderDeckKarten(g);
+        var idx = binderMappeIndex(g);
+        var gesamt = karten.reduce(function (s, c) { return s + (c.count || 0); }, 0);
+        if (!gesamt) {
+            return '<div class="mcl-bd-deck" data-mcl-bddeck="1">' +
+                '<h4 class="mcl-bd-h">' + esc(T('binderDeck')) + '</h4>' +
+                '<p class="mcl-status">' + esc(T('binderDeckLeer')) + '</p></div>';
+        }
+
+        var nachGruppe = {};
+        var ace = 0, basis = 0, preis = 0, ohnePreis = 0;
+        karten.forEach(function (c) {
+            var schluessel = String((c.set || '') + '-' + (c.number || '')).toUpperCase();
+            var k = idx[schluessel];
+            var grp = (k && k.gruppe) || '';
+            (nachGruppe[grp] || (nachGruppe[grp] = [])).push({ c: c, k: k });
+            if (k && k.ace) ace += (c.count || 0);
+            var typ = String((k && k.typ) || c.type || '').toLowerCase();
+            if (typ === 'basic') basis += (c.count || 0);
+            if (k && k.preis && k.preis.eur !== null && k.preis.eur !== undefined) {
+                preis += k.preis.eur * (c.count || 0);
+            } else {
+                ohnePreis += (c.count || 0);
+            }
+        });
+
+        var reihen = BINDER_GRUPPEN.concat(['']).map(function (grp) {
+            var eintraege = nachGruppe[grp];
+            if (!eintraege || !eintraege.length) return '';
+            eintraege.sort(function (a, b) {
+                return (b.c.count || 0) - (a.c.count || 0) ||
+                    String(a.c.name_de || a.c.name_en || '').localeCompare(
+                        String(b.c.name_de || b.c.name_en || ''), 'de');
+            });
+            var summe = eintraege.reduce(function (s, e) { return s + (e.c.count || 0); }, 0);
+            var titel = grp ? T(BINDER_GRUPPE_TXT[grp]) : T('binderGrpOhne');
+            return '<div class="mcl-bd-dgrp"><h5>' + esc(titel) +
+                ' <span>' + summe + '</span></h5><ul>' +
+                eintraege.map(function (e) {
+                    var schluessel = String((e.c.set || '') + '-' + (e.c.number || '')).toUpperCase();
+                    var name = e.c.name_de || e.c.name_en || schluessel;
+                    return '<li><span class="mcl-bd-dn">' + (e.c.count || 0) + '\u00d7</span>' +
+                        '<span class="mcl-bd-dname">' + esc(name) + '</span>' +
+                        '<span class="mcl-bd-dset">' + esc(schluessel) + '</span>' +
+                        '<button type="button" class="mcl-bd-minus" data-mcl-bdminus="' + esc(schluessel) + '"' +
+                        ' aria-label="' + esc(T('binderMinus') + ': ' + name) + '" title="' +
+                        esc(T('binderMinus')) + '">\u2212</button></li>';
+                }).join('') + '</ul></div>';
+        }).join('');
+
+        var warnungen = [];
+        if (gesamt !== 60) warnungen.push(T('binderWarn60'));
+        if (ace > 1) warnungen.push(T('binderWarnAce'));
+        if (!basis) warnungen.push(T('binderWarnBasis'));
+
+        var summe = '<span class="mcl-bd-dsumme">' + esc(T('binderDeckSumme')) + ' ' +
+            binderZahl(preis, 2) + '\u00a0\u20ac' +
+            (ohnePreis ? ' <small>(' + ohnePreis + ' ' + esc(T('binderDeckOhnePreis')) + ')</small>' : '') +
+            '</span>';
+
+        return '<div class="mcl-bd-deck" data-mcl-bddeck="1">' +
+            '<h4 class="mcl-bd-h">' + esc(T('binderDeck')) +
+            ' <span class="mcl-bd-dzahl" data-voll="' + (gesamt === 60) + '">' + gesamt +
+            ' ' + esc(T('binderDeckZahl')) + '</span></h4>' +
+            (warnungen.length
+                ? '<ul class="mcl-bd-dwarn">' + warnungen.map(function (x) {
+                    return '<li>' + esc(x) + '</li>';
+                }).join('') + '</ul>' : '') +
+            '<div class="mcl-bd-dgrps">' + reihen + '</div>' +
+            summe +
+            '<div class="mcl-bd-dknopf">' +
+            '<input type="text" class="mcl-bd-dname-eingabe" data-mcl-bddeckname="1" ' +
+            'placeholder="' + esc(T('binderDeckName')) + '" aria-label="' + esc(T('binderDeckName')) + '" ' +
+            'value="' + esc(g.titel || '') + '">' +
+            '<button type="button" class="mcl-btn" data-mcl-bdspeichern="1">' +
+            esc(T('binderDeckSpeichern')) + '</button>' +
+            '<button type="button" class="mcl-btn mcl-btn-leise" data-mcl-bdkopieren="1">' +
+            esc(T('binderDeckKopieren')) + '</button>' +
+            '<button type="button" class="mcl-btn mcl-btn-leise" data-mcl-bdleeren="1">' +
+            esc(T('binderDeckLeeren')) + '</button>' +
+            '</div></div>';
+    }
+
+    /* Die Deckliste im ueblichen Textformat — dieselbe Form, die der
+     * Deckbauer beim Einfuegen wieder liest (parseDeckList). */
+    function binderDeckText(g) {
+        var karten = binderDeckKarten(g);
+        var idx = binderMappeIndex(g);
+        var zeilen = [];
+        BINDER_GRUPPEN.concat(['']).forEach(function (grp) {
+            karten.forEach(function (c) {
+                var schluessel = String((c.set || '') + '-' + (c.number || '')).toUpperCase();
+                var k = idx[schluessel];
+                if (((k && k.gruppe) || '') !== grp) return;
+                zeilen.push((c.count || 0) + ' ' + (c.name_en || c.name_de || '') +
+                    ' ' + (c.set || '') + ' ' + (c.number || ''));
+            });
+        });
+        return zeilen.join('\n');
     }
 
     function binderZeichnen(wurzel, g) {
@@ -369,7 +755,10 @@
         if (!ziel) return;
         var d = binderDaten[g.id];
         if (!d) return;
-        var stand = binderStand[g.id] || (binderStand[g.id] = { meta: 'alle', sort: 'nutzung' });
+        var stand = binderStand[g.id] || (binderStand[g.id] = binderStandNeu());
+        timLesen(wurzel, g);
+        var tim = binderTim[g.id] || {};
+        var timJetzt = binderTimJetzt[g.id] || {};
 
         var metas = (d.metas || []);
         var chips = ['<button type="button" class="mcl-chip" data-mcl-bdmeta="alle" aria-pressed="' +
@@ -381,18 +770,53 @@
                 esc(m.name || m.id) + ' <small>' + binderZahl(m.listen) + '</small></button>');
         });
 
-        var sorten = [['nutzung', 'binderSortNutzung'], ['name', 'binderSortName'], ['preis', 'binderSortPreis']];
+        var sorten = [['standard', 'binderSortStandard'], ['nutzung', 'binderSortNutzung'],
+            ['name', 'binderSortName'], ['preis', 'binderSortPreis']];
         var sortChips = sorten.map(function (p) {
             return '<button type="button" class="mcl-chip" data-mcl-bdsort="' + p[0] +
                 '" aria-pressed="' + (stand.sort === p[0]) + '">' + esc(T(p[1])) + '</button>';
         }).join('');
+        /* Der Tim-Schalter steht nur da, wenn es im Stueck ueberhaupt
+         * Tim-Listen gibt — ein Filter, der nichts filtern kann, ist
+         * eine Falle. */
+        var timAnzahl = Object.keys(tim).length;
+        if (timAnzahl) {
+            sortChips += '<button type="button" class="mcl-chip mcl-chip-tim" data-mcl-bdtim="1"' +
+                ' aria-pressed="' + (!!stand.nurTim) + '" title="' + esc(T('binderNurTimTitel')) + '">' +
+                esc(T('binderNurTim')) + ' <small>' + timAnzahl + '</small></button>';
+        }
 
-        var liste = binderSortiert(d.karten || [], stand.meta, stand.sort);
-        var karten = liste.length
-            ? '<ul class="mcl-bd-gitter">' + liste.map(function (k) {
-                return binderKarteHtml(k, stand.meta);
-            }).join('') + '</ul>'
-            : '<p class="mcl-status">' + esc(T('binderKeine')) + '</p>';
+        var liste = binderSortiert(d.karten || [], stand.meta, stand.sort, stand.nurTim, tim);
+        var mitGruppen = (stand.sort === 'standard');
+        var karten;
+        if (!liste.length) {
+            karten = '<p class="mcl-status">' + esc(T('binderKeine')) + '</p>';
+        } else if (mitGruppen) {
+            /* In der Standardsortierung bekommt jede Gruppe ihre
+             * Ueberschrift mit Kartenzahl — so liest man eine Deckliste. */
+            var stuecke = [];
+            var letzte = null;
+            var offen = false;
+            liste.forEach(function (k) {
+                var grp = k.gruppe || '';
+                if (grp !== letzte) {
+                    if (offen) stuecke.push('</ul>');
+                    var anzahl = liste.filter(function (x) { return (x.gruppe || '') === grp; }).length;
+                    var titel = grp ? T(BINDER_GRUPPE_TXT[grp]) : T('binderGrpOhne');
+                    stuecke.push('<h5 class="mcl-bd-grp">' + esc(titel) +
+                        ' <span>' + anzahl + '</span></h5><ul class="mcl-bd-gitter">');
+                    offen = true;
+                    letzte = grp;
+                }
+                stuecke.push(binderKarteHtml(k, stand.meta, tim, timJetzt));
+            });
+            if (offen) stuecke.push('</ul>');
+            karten = stuecke.join('');
+        } else {
+            karten = '<ul class="mcl-bd-gitter">' + liste.map(function (k) {
+                return binderKarteHtml(k, stand.meta, tim, timJetzt);
+            }).join('') + '</ul>';
+        }
 
         var mus = (d.matchups || []).slice(0, 24).map(function (m) {
             var s = m.siegquote;
@@ -422,6 +846,7 @@
             '<p class="mcl-lead">' + esc(T('binderLead')) + '</p>' +
             '<div class="mcl-filter" data-mcl-bdleiste="meta">' + chips.join('') + '</div>' +
             '<div class="mcl-filter" data-mcl-bdleiste="sort">' + sortChips + '</div>' +
+            binderDeckHtml(g) +
             karten +
             (mus ? '<h4 class="mcl-bd-h">' + esc(T('binderMatchups')) + '</h4>' +
                 '<ul class="mcl-bd-mus">' + mus + '</ul>' : '') +
@@ -433,9 +858,129 @@
             (d._meta && d._meta.gebaut ? ' · ' + esc(d._meta.gebaut) : '') + '</p></details>';
     }
 
+    function binderStandNeu() {
+        /* Die Standardsortierung ist die Voreinstellung: der Betreiber
+         * baut hier sein Deck, und eine Deckliste liest man in dieser
+         * Reihenfolge. */
+        return { meta: 'alle', sort: 'standard', nurTim: false };
+    }
+
+    /* Nach einer Deckaenderung nur das Noetige neu zeichnen: die Zaehler
+     * an den Karten und der Deckblock. Das ganze Gitter neu zu setzen
+     * (228 Karten) verliert die Bildlaufhoehe und laedt Bilder neu. */
+    function binderZaehlerNachziehen(wurzel, g) {
+        var ziel = wurzel.querySelector('[data-mcl-abschnitt="binder"]');
+        if (!ziel) return;
+        var idx = binderMappeIndex(g);
+        ziel.querySelectorAll('[data-mcl-bdkarte]').forEach(function (li) {
+            var schluessel = li.getAttribute('data-mcl-bdkarte');
+            var k = idx[schluessel];
+            var n = k ? binderImDeck(k) : 0;
+            var zahl = li.querySelector('[data-mcl-bdzahl]');
+            if (zahl) {
+                zahl.textContent = n + '\u00d7';
+                zahl.hidden = !n;
+            }
+            var minus = li.querySelector('[data-mcl-bdminus]');
+            if (minus) minus.hidden = !n;
+        });
+        var alt = ziel.querySelector('[data-mcl-bddeck]');
+        if (alt) {
+            var huelle = document.createElement('div');
+            huelle.innerHTML = binderDeckHtml(g);
+            var neu = huelle.firstElementChild;
+            if (neu) alt.parentNode.replaceChild(neu, alt);
+        }
+    }
+
+    function binderMeldung(wurzel, text) {
+        var ziel = wurzel.querySelector('[data-mcl-abschnitt="binder"]');
+        if (!ziel) return;
+        var alt = ziel.querySelector('.mcl-bd-meldung');
+        if (alt) alt.remove();
+        var p = document.createElement('p');
+        p.className = 'mcl-bd-meldung';
+        p.setAttribute('role', 'status');
+        p.textContent = text;
+        ziel.insertBefore(p, ziel.firstChild);
+        setTimeout(function () { if (p.parentNode) p.remove(); }, 6000);
+    }
+
+    function binderPlus(wurzel, g, schluessel) {
+        var p = deckBauer();
+        var k = binderMappeIndex(g)[schluessel];
+        if (!p || !k) return;
+        var stand = binderStand[g.id] || (binderStand[g.id] = binderStandNeu());
+        var menge = binderMenge(k, stand.meta);
+        var erg = p.addCopies(binderDeckKarte(k), menge);
+        if (erg && erg.grenze && !erg.hinzugefuegt) binderMeldung(wurzel, T('binderGrenze'));
+        binderZaehlerNachziehen(wurzel, g);
+    }
+
+    function binderMinus(wurzel, g, schluessel) {
+        var p = deckBauer();
+        if (!p || typeof p.removeOne !== 'function') return;
+        p.removeOne(schluessel);
+        binderZaehlerNachziehen(wurzel, g);
+    }
+
+    function binderSpeichern(wurzel, g) {
+        var p = deckBauer();
+        if (!p || typeof p.saveToAccount !== 'function') return;
+        var feld = wurzel.querySelector('[data-mcl-bddeckname]');
+        var name = (feld && feld.value) || g.titel || '';
+        var erg = p.saveToAccount(name);
+        if (erg && erg.ok) {
+            binderMeldung(wurzel, T('binderGespeichert'));
+        } else if (erg && erg.grund === 'kein-konto') {
+            binderMeldung(wurzel, T('binderNichtAngemeldet'));
+        } else {
+            binderMeldung(wurzel, T('binderDeckLeer'));
+        }
+    }
+
+    function binderKopieren(wurzel, g) {
+        var text = binderDeckText(g);
+        if (!text) { binderMeldung(wurzel, T('binderDeckLeer')); return; }
+        var fertig = function () { binderMeldung(wurzel, T('binderDeckKopieren') + ' \u2713'); };
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(fertig, function () { fertig(); });
+                return;
+            }
+        } catch (e) { /* Rueckfall unten */ }
+        fertig();
+    }
+
+    function binderLeeren(wurzel, g) {
+        var p = deckBauer();
+        if (!p || typeof p.clearDeck !== 'function') return;
+        p.clearDeck();
+        binderZaehlerNachziehen(wurzel, g);
+    }
+
+    /* Wer das Deck anderswo aendert (Deckbauer im Profil), findet hier
+     * dieselben Zahlen vor. Ein einziger Zuhoerer fuer die ganze Seite:
+     * je geoeffneter Masterclass einen anzuhaengen wuerde sie stapeln. */
+    var binderHoertZu = false;
+    function binderZuhoeren() {
+        if (binderHoertZu) return;
+        binderHoertZu = true;
+        document.addEventListener('profileDeckChanged', function () {
+            var buehne = document.getElementById('mclBuehne');
+            if (!buehne || buehne.hidden) return;
+            var wurzel = buehne.querySelector('[data-mcl-abschnitt="binder"]');
+            if (!wurzel) return;
+            GUIDES.forEach(function (g) {
+                if (binderDaten[g.id]) binderZaehlerNachziehen(buehne, g);
+            });
+        });
+    }
+
     function binderOeffnen(wurzel, g) {
         var ziel = wurzel.querySelector('[data-mcl-abschnitt="binder"]');
         if (!ziel) return;
+        binderZuhoeren();
         if (binderDaten[g.id]) { binderZeichnen(wurzel, g); return; }
         ziel.innerHTML = '<p class="mcl-status">' + esc(T('binderLaden')) + '</p>';
         binderHolen(g.id).then(function () {
@@ -1125,15 +1670,32 @@
         binderEinhaengen(wurzel, g);
         wurzel.addEventListener('click', function (e) {
             var b;
+            if ((b = e.target.closest('[data-mcl-bdplus]'))) {
+                binderPlus(wurzel, g, b.getAttribute('data-mcl-bdplus'));
+                return;
+            }
+            if ((b = e.target.closest('[data-mcl-bdminus]'))) {
+                binderMinus(wurzel, g, b.getAttribute('data-mcl-bdminus'));
+                return;
+            }
+            if (e.target.closest('[data-mcl-bdspeichern]')) { binderSpeichern(wurzel, g); return; }
+            if (e.target.closest('[data-mcl-bdkopieren]')) { binderKopieren(wurzel, g); return; }
+            if (e.target.closest('[data-mcl-bdleeren]')) { binderLeeren(wurzel, g); return; }
             if ((b = e.target.closest('[data-mcl-bdmeta]'))) {
-                var st = binderStand[g.id] || (binderStand[g.id] = { meta: 'alle', sort: 'nutzung' });
+                var st = binderStand[g.id] || (binderStand[g.id] = binderStandNeu());
                 st.meta = b.getAttribute('data-mcl-bdmeta');
                 binderZeichnen(wurzel, g);
                 return;
             }
             if ((b = e.target.closest('[data-mcl-bdsort]'))) {
-                var st2 = binderStand[g.id] || (binderStand[g.id] = { meta: 'alle', sort: 'nutzung' });
+                var st2 = binderStand[g.id] || (binderStand[g.id] = binderStandNeu());
                 st2.sort = b.getAttribute('data-mcl-bdsort');
+                binderZeichnen(wurzel, g);
+                return;
+            }
+            if (e.target.closest('[data-mcl-bdtim]')) {
+                var st3 = binderStand[g.id] || (binderStand[g.id] = binderStandNeu());
+                st3.nurTim = !st3.nurTim;
                 binderZeichnen(wurzel, g);
                 return;
             }
@@ -1214,6 +1776,14 @@
         _binderKarteHtml: binderKarteHtml,
         _binderZahl: binderZahl,
         _binderDaten: binderDaten,
-        _binderStand: binderStand
+        _binderStand: binderStand,
+        _binderMenge: binderMenge,
+        _binderDeckHtml: binderDeckHtml,
+        _binderDeckText: binderDeckText,
+        _binderGruppen: BINDER_GRUPPEN,
+        _timGruppenBloecke: timGruppenBloecke,
+        _timZaehlung: timZaehlung,
+        _binderStandNeu: binderStandNeu,
+        _binderTim: binderTim
     };
 })();

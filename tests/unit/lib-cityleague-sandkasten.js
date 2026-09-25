@@ -53,6 +53,10 @@ const FUNKTIONEN = [
     '_komma', '_kommaText', '_rang',
     'cityLeagueTurnierHerkunft', 'cityLeagueHerkunftSatz',
     'cityLeagueRubrikNamen', 'cityLeagueVergleichLeerHinweis',
+    /* Die Siegerliste der japanischen Majors (25.09.2026) haengt
+       renderCityLeagueTable() in dieselbe Ausgabe — ohne sie hier
+       laeuft der Sandkasten in ein ReferenceError. */
+    'cityLeagueSiegerListe', 'cityLeagueSiegerHtml',
     'getCityLeagueSortedSections', 'renderCityLeagueTable'
 ];
 

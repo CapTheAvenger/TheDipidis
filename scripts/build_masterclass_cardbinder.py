@@ -54,6 +54,17 @@ csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
 HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.dirname(HIER)
+
+# Die Gruppenregel (Pokemon/Supporter/Item/Tool/Stadion/Spezial-/
+# Basis-Energie) liegt neben diesem Skript; das Formatfenster und die
+# ACE-SPEC-Liste liegen im Bestand. Alle drei werden GEHOLT und nicht
+# hier ein zweites Mal ausgeschrieben.
+sys.path.insert(0, HIER)
+sys.path.insert(0, os.path.join(WURZEL, "backend", "scrapers"))
+sys.path.insert(0, os.path.join(WURZEL, "backend", "core"))
+import kartengruppe  # noqa: E402
+from limitless_api_scraper import formatschluessel  # noqa: E402
+from ace_spec_regel import lade_ace_liste  # noqa: E402
 DATA = os.path.join(WURZEL, "data")
 REGISTER = os.path.join(WURZEL, "config", "masterclass_cardbinder.json")
 AUSGABE_DIR = os.path.join(DATA, "masterclass_cardbinder")
@@ -238,6 +249,163 @@ QUELLEN = {
 }
 
 
+# ── WELCHES FORMAT WURDE GESPIELT ─────────────────────────────────────
+#
+# BEFUND (Betreiber, 25.09.2026, mit Bildschirmfoto): „was genau ist
+# denn Online ohne Meta, das kann ja nicht sein."
+#
+# Er hat recht. data/online_tournament_dated_cards.csv traegt in ALLEN
+# 24.555 Zeilen die Meta-Angabe „Online Dated" (backend/core/
+# limitless_dated.py, DATED_META_LABEL) — das ist kein Format, sondern
+# der Name der Datei. Ein Chip „Online, ohne Meta-Angabe 2" sagt dem
+# Leser nichts, und die zwei Turniere dahinter haben selbstverstaendlich
+# ein Format gespielt.
+#
+# ZWEI WEGE, IN DIESER REIHENFOLGE
+# --------------------------------
+# 1. DER INDEX. Mehrere Quellen fuehren je Turnier die Meta selbst:
+#    data/online_api_tournaments.csv (452 Turniere, gemessen
+#    25.09.2026), die Kartendateien der Online-API und die der Majors.
+#    Steht ein Turnier dort, wird seine Meta uebernommen — gemessen,
+#    nicht gerechnet.
+#
+# 2. DAS FORMATFENSTER. Online wechselt das Format am SET-RELEASE;
+#    genau das rechnet formatschluessel() in backend/scrapers/
+#    limitless_api_scraper.py aus data/format_window.json und
+#    data/sets_metadata.json — dieselbe Funktion, die jedem
+#    API-Turnier seine Meta gibt.
+#
+# WIE GUT DER ZWEITE WEG IST, NACHGEMESSEN
+# ----------------------------------------
+# Gegenprobe am 25.09.2026 ueber alle 452 Turniere, die ihre Meta
+# selbst fuehren: 445 Mal sagt formatschluessel(Datum) dasselbe, 7 Mal
+# nicht. Alle sieben liegen am 16./17.09.2026 — dem Release von 30C.
+# Am Umschalttag laufen beide Formate nebeneinander.
+#
+# Deshalb: der Index gewinnt, wo es ihn gibt; das Fenster fuellt die
+# Luecke und wird ALS ABGELEITET AUSGEWIESEN (`abgeleitet` je Turnier,
+# `turniere_abgeleitet` je Meta, plus ein Hinweis am Chip). Eine
+# abgeleitete Zahl, die sich als gemessen ausgibt, waere schlimmer als
+# der namenlose Topf von vorher.
+
+META_UNBEKANNT = "Online Dated"     # = limitless_dated.DATED_META_LABEL
+
+# Die Kartenauswertung der City League stempelt JEDER Zeile
+# `meta = "City League"` auf (backend/scrapers/city_league_analysis_
+# scraper.py). Welche Turnierklasse wirklich gespielt wurde, steht dort
+# nicht — wohl aber in der Archetypdatei desselben Fensters, Spalte
+# `format`.
+#
+# BEFUND (Betreiber, 25.09.2026): der Chip hiess „City League (Japan) 2",
+# dahinter stand die Champions League Yokohama mit 10.000 Spielern. Eine
+# City League hat 4 bis 16. Genau davor warnt js/app-city-league.js im
+# Herkunftssatz schon: „Ein Platz 8 heisst in beiden Faellen etwas
+# voellig anderes."
+META_CITY_LEAGUE = "City League"
+
+
+def meta_index():
+    """Turnier -> (Meta, Quelldatei) aus allen Quellen, die sie fuehren."""
+    index = {}
+
+    def nimm(pfad, spalte_id, spalte_meta, trenner=";"):
+        name = os.path.basename(pfad)
+        for z in lies_csv(pfad, trenner):
+            t = (z.get(spalte_id) or "").strip()
+            m = (z.get(spalte_meta) or "").strip()
+            if t and m and m != META_UNBEKANNT and t not in index:
+                index[t] = (m, name)
+
+    nimm(os.path.join(DATA, "online_api_tournaments.csv"), "tournament_id", "meta")
+    for pfad in sorted(glob.glob(os.path.join(DATA, "online_api_cards_*.csv"))):
+        nimm(pfad, "tournament_id", "meta")
+    for pfad in sorted(glob.glob(os.path.join(DATA, "tournament_cards_data_cards_*.csv"))):
+        nimm(pfad, "tournament_id", "meta")
+    return index
+
+
+def turnierklassen():
+    """Turnier -> Turnierklasse aus der Archetypdatei desselben Fensters."""
+    tab = {}
+    for name in ("city_league_archetypes.csv", "city_league_archetypes_past.csv"):
+        for z in lies_csv(os.path.join(DATA, name)):
+            t = (z.get("tournament_id") or "").strip()
+            k = (z.get("format") or "").strip()
+            if t and k:
+                tab.setdefault(t, k)
+    return tab
+
+
+def loese_meta(meta, turnier, datum, index, klassen=None):
+    """(Meta, abgeleitet?, Quelle). Nur Platzhalter werden angefasst."""
+    roh = (meta or "").strip()
+    if roh == META_CITY_LEAGUE and klassen:
+        klasse = klassen.get((turnier or "").strip())
+        if klasse:
+            # Gemessen, nicht abgeleitet: die Klasse steht so in der
+            # Archetypdatei, geschrieben aus der Turnierliste.
+            return klasse, False, "city_league_archetypes.csv"
+    if roh != META_UNBEKANNT:
+        return (meta or "ohne Meta-Angabe"), False, None
+    treffer = index.get((turnier or "").strip())
+    if treffer:
+        return treffer[0], False, treffer[1]
+    iso = _datum(datum)
+    if iso:
+        schluessel = formatschluessel(iso, DATA)
+        if schluessel and schluessel != "vor-bekanntem-fenster":
+            return schluessel, True, "format_window.json + sets_metadata.json"
+    # Kein Datum, kein Index: dann bleibt die Angabe aus, und sie wird
+    # auch nicht erfunden.
+    return META_UNBEKANNT, False, None
+
+
+ABGELEITET_HINWEIS = (
+    "Fuer %d der %d Turniere in diesem Meta fuehrt keine Quelle das Format "
+    "selbst. Es ist aus dem Turnierdatum abgeleitet: online wechselt das "
+    "Format am Set-Release, und genau dieses Fenster steht in "
+    "data/format_window.json und data/sets_metadata.json. Gegenprobe am "
+    "25.09.2026 an 452 Turnieren, die ihr Format selbst fuehren: 445 Mal "
+    "stimmt die Ableitung, 7 Mal nicht — alle sieben am Release-Tag von 30C, "
+    "an dem beide Formate nebeneinander laufen."
+)
+
+
+# ── WELCHE KARTENART ──────────────────────────────────────────────────
+#
+# Die Standardsortierung, um die der Betreiber am 25.09.2026 gebeten hat
+# („Pokemon, supporter, Item, Tool, Stadion, Spezial Energie, Basis
+# Energie"), braucht die FEINE Kartenart. Die Online-API fuehrt nur eine
+# grobe Spalte `group` (pokemon/trainer/energy) — und weil sie in der
+# Rangfolge vorne steht, stand bisher bei 105 von 228 Karten „trainer".
+#
+# Die feine Art steht in den `type`-Spalten der anderen Quellen und,
+# vollstaendig, in data/cards_chunk_*.json (21.092 Karten). Die
+# Zuordnung selbst macht scripts/kartengruppe.py.
+
+def typtabelle():
+    """(set, nummer) -> feine Kartenart, aus dem Bestand."""
+    tab = {}
+    for pfad in sorted(glob.glob(os.path.join(DATA, "cards_chunk_*.json"))):
+        try:
+            with open(pfad, encoding="utf-8") as fh:
+                karten = json.load(fh)
+        except Exception as e:  # noqa: BLE001
+            print(f"::warning::{os.path.basename(pfad)} nicht lesbar: {e}")
+            continue
+        if not isinstance(karten, list):
+            continue
+        for k in karten:
+            typ = (k.get("type") or "").strip()
+            if not typ:
+                continue
+            satz = (k.get("set") or "").strip().upper()
+            nr = (k.get("number") or "").strip().lstrip("0") or (k.get("number") or "").strip()
+            if satz:
+                tab.setdefault((satz, nr), typ)
+    return tab
+
+
 # ── PREISE UND BILDER ─────────────────────────────────────────────────
 
 def preistabelle():
@@ -291,6 +459,13 @@ def deutsche_namen():
 META_KLARNAME = {
     "Online Dated": "Online, ohne Meta-Angabe",
     "City League": "City League (Japan)",
+    "City League (JP)": "City League (Japan)",
+    "Champions League (JP)": "Champions League (Japan)",
+    "Regional League (JP)": "Regional League (Japan)",
+    "Japan Championships (JP)": "Japan Championships",
+    "Korean League (JP)": "Korean League (japanisches Format)",
+    "Premier Ball League (JP)": "Premier Ball League (Japan)",
+    "Sonstiges (JP)": "Sonstiges Turnier (japanisches Format)",
 }
 META_HINWEIS = {
     "Online Dated": ("Die Quelldatei online_tournament_dated_cards.csv fuehrt fuer "
@@ -404,6 +579,8 @@ def baue_einen(mc_id, eintrag):
             if t:
                 besitzer.setdefault(t, quellenname)
 
+    index = meta_index()
+    klassen = turnierklassen()
     karten = {}
     metas = {}
     uebersprungen = {}
@@ -414,16 +591,21 @@ def baue_einen(mc_id, eintrag):
             continue
         if not name:
             continue
-        meta = meta or "ohne Meta-Angabe"
+        meta, abgeleitet, meta_quelle = loese_meta(meta, turnier, datum, index, klassen)
         satz = (satz or "").strip().upper()
         nr = (nr or "").strip().lstrip("0") or (nr or "").strip()
         schluessel = (satz, nr, name)
 
         m = metas.setdefault(meta, {"id": meta, "turniere": set(), "listen": 0,
-                                    "von": None, "bis": None})
+                                    "von": None, "bis": None,
+                                    "abgeleitet": set(), "meta_quellen": set()})
         if turnier and turnier not in m["turniere"]:
             m["turniere"].add(turnier)
             m["listen"] += gesamt
+            if abgeleitet:
+                m["abgeleitet"].add(turnier)
+        if meta_quelle:
+            m["meta_quellen"].add(meta_quelle)
         iso = _datum(datum)
         if iso:
             m["von"] = min(m["von"] or iso, iso)
@@ -431,11 +613,19 @@ def baue_einen(mc_id, eintrag):
 
         k = karten.setdefault(schluessel, {
             "name": name, "set": satz, "nummer": nr, "gruppe": gruppe or "",
-            "je_meta": {}, "quellen": set(),
+            "typen": set(), "je_meta": {}, "quellen": set(),
         })
         k["quellen"].add(quelle)
-        if gruppe and not k["gruppe"]:
-            k["gruppe"] = gruppe
+        if gruppe:
+            k["typen"].add(gruppe)
+            # Die FEINE Angabe gewinnt. Die Online-API steht in der
+            # Rangfolge vorn, fuehrt aber nur pokemon/trainer/energy —
+            # ohne diesen Vorrang stuende bei 105 von 228 Karten
+            # „trainer", und die Standardsortierung koennte Supporter,
+            # Item, Tool und Stadion nicht trennen.
+            if not k["gruppe"] or (kartengruppe.gruppe(k["gruppe"]) is None
+                                   and kartengruppe.gruppe(gruppe) is not None):
+                k["gruppe"] = gruppe
         jm = k["je_meta"].setdefault(meta, {"listen_mit_karte": 0, "schnitt_summe": 0.0,
                                             "hoechstzahl": 0, "turniere": set()})
         jm["listen_mit_karte"] += mit
@@ -447,15 +637,21 @@ def baue_einen(mc_id, eintrag):
     preise = preistabelle()
     bilder = bildtabelle()
     de_namen = deutsche_namen()
+    typen = typtabelle()
+    ace_namen = lade_ace_liste()
 
     karten_raus = []
     for (satz, nr, name), k in karten.items():
         gesamt_mit = 0
+        gesamt_schnittsumme = 0.0
+        gesamt_hoechst = 0
         je_meta = {}
         for meta, jm in k["je_meta"].items():
             listen_gesamt = metas[meta]["listen"]
             mit = jm["listen_mit_karte"]
             gesamt_mit += mit
+            gesamt_schnittsumme += jm["schnitt_summe"]
+            gesamt_hoechst = max(gesamt_hoechst, jm["hoechstzahl"])
             je_meta[meta] = {
                 "listen_mit_karte": mit,
                 "listen_gesamt": listen_gesamt,
@@ -465,28 +661,65 @@ def baue_einen(mc_id, eintrag):
                 "turniere": len(jm["turniere"]),
             }
         listen_gesamt_alle = sum(m["listen"] for m in metas.values() if m["id"] in k["je_meta"])
+        # Die feine Kartenart: was eine Quelle geschrieben hat, sonst der
+        # Bestand. Die Gruppe daraus nach der gemeinsamen Regel.
+        typ = k["gruppe"] or ""
+        grp = kartengruppe.gruppe(typ, name)
+        if grp is None:
+            typ_bestand = typen.get((satz, nr)) or ""
+            grp = kartengruppe.gruppe(typ_bestand, name)
+            if grp is not None:
+                typ = typ_bestand
         karten_raus.append({
             "name": name, "name_de": de_namen.get((satz, nr)),
             "set": satz, "nummer": nr,
-            "gruppe": k["gruppe"] or None,
+            "typ": typ or None,
+            "gruppe": grp,
+            "gruppe_name": kartengruppe.LABEL_DE.get(grp) if grp else None,
+            "gruppe_rang": kartengruppe.rang(grp),
+            # ACE SPEC: hoechstens eine je Deck. Dieselben zwei Beine wie
+            # in scripts/masterclass_listen_nachziehen.py — das Register
+            # data/ace_specs.json ODER das Feld der Quelle.
+            "ace": (str(name).strip().lower().replace("\u2019", "'") in ace_namen) or None,
             "bild": bilder.get((satz, nr)),
             "preis": preise.get((satz, nr)),
             "je_meta": je_meta,
+            # ueber ALLE Metas dieselben vier Angaben wie je Meta. Ohne
+            # Schnitt und Hoechstzahl kann die Ansicht „Alle Metas"
+            # nicht sagen, wie viele Kopien ins Deck gehoeren — das +
+            # legte dort immer genau eine hinein (gemessen 25.09.2026).
+            # Der Schnitt ist mit der Zahl der Listen gewichtet, die die
+            # Karte WIRKLICH enthalten; das ist dieselbe Frage wie je
+            # Meta, nur ueber einen groesseren Bestand.
             "gesamt": {
                 "listen_mit_karte": gesamt_mit,
                 "listen_gesamt": listen_gesamt_alle,
                 "anteil": round(100.0 * gesamt_mit / listen_gesamt_alle, 1) if listen_gesamt_alle else None,
+                "schnitt": round(gesamt_schnittsumme / gesamt_mit, 2) if gesamt_mit else None,
+                "hoechstzahl": gesamt_hoechst or None,
             },
             "quellen": sorted(k["quellen"]),
         })
     karten_raus.sort(key=lambda c: (-(c["gesamt"]["listen_mit_karte"]), c["name"]))
 
-    metas_raus = [{
-        "id": m["id"], "name": META_KLARNAME.get(m["id"], m["id"]),
-        "hinweis": META_HINWEIS.get(m["id"]),
-        "turniere": len(m["turniere"]), "listen": m["listen"],
-        "von": m["von"], "bis": m["bis"],
-    } for m in sorted(metas.values(), key=lambda x: (x["bis"] or ""), reverse=True)]
+    def _meta_zeile(m):
+        abgeleitet = len(m.get("abgeleitet") or ())
+        hinweis = META_HINWEIS.get(m["id"])
+        if abgeleitet:
+            zusatz = ABGELEITET_HINWEIS % (abgeleitet, len(m["turniere"]))
+            hinweis = (hinweis + " " + zusatz) if hinweis else zusatz
+        return {
+            "id": m["id"], "name": META_KLARNAME.get(m["id"], m["id"]),
+            "hinweis": hinweis,
+            "turniere": len(m["turniere"]),
+            "turniere_abgeleitet": abgeleitet,
+            "listen": m["listen"],
+            "von": m["von"], "bis": m["bis"],
+            "meta_quellen": sorted(m.get("meta_quellen") or ()),
+        }
+
+    metas_raus = [_meta_zeile(m) for m in
+                  sorted(metas.values(), key=lambda x: (x["bis"] or ""), reverse=True)]
 
     return {
         "_meta": {

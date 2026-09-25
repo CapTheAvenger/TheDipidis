@@ -94,6 +94,9 @@ DEFAULT_SETTINGS = {
             # tournaments that are out-of-format for the Current view).
             "start_date": "13.03.2026",
             "end_date": "auto",
+            # Japanische Majors aus der Hauptliste /tournaments
+            # mitziehen — siehe city_league_archetype_scraper.
+            "include_jp_majors": True,
             "max_decklists_per_league": 16,
             "max_tournaments": 0,
             "additional_tournament_ids": [],
@@ -298,7 +301,26 @@ def scrape_city_league(settings: dict, card_db: CardDatabaseLookup) -> list:
         
     logger.info("Lade Turnier-Liste...")
     tournaments = city_league_module.get_tournaments_in_date_range("jp", start_dt, end_dt)
-    
+    vor_majors = len(tournaments)
+
+    # Derselbe Griff wie im Archetyp-Scraper, aus demselben Grund:
+    # /tournaments/jp fuehrt nur City Leagues. Die Kartenauswertung darf
+    # nicht auf einem anderen Turnierbestand stehen als die
+    # Archetyp-Auswertung — sonst widersprechen sich zwei Dateien, die
+    # dasselbe Fenster beschreiben (genau der Fall, der am 21.08.2026
+    # wochenlang unbemerkt blieb).
+    if config.get('include_jp_majors', True):
+        bekannte = {str(t.get('tournament_id') or t.get('id', '')) for t in tournaments}
+        try:
+            for t in city_league_module.get_jp_major_tournaments(start_dt, end_dt):
+                if str(t['tournament_id']) not in bekannte:
+                    tournaments.append(t)
+                    bekannte.add(str(t['tournament_id']))
+        except Exception as e:
+            logger.warning("Japanische Majors nicht ladbar: %s", e)
+        logger.info("Turnierliste: %s aus /tournaments/jp + %s japanische Majors.",
+                    vor_majors, len(tournaments) - vor_majors)
+
     additional_ids = config.get('additional_tournament_ids', [])
     if additional_ids:
         logger.info("Lade %s zusaetzliche Turniere via ID...", len(additional_ids))

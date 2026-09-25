@@ -108,7 +108,14 @@ DEFAULT_SETTINGS = {
     # event for two weeks — symptom: archetypes CSV frozen at
     # April 18, current-meta UI showing data 17 days old.
     "min_tournament_size": 1,
-    "additional_tournament_ids": []
+    "additional_tournament_ids": [],
+    # Japanische Majors (Champions League, Regional League, Japan
+    # Championships) aus der Hauptliste /tournaments mitziehen. Sie
+    # tragen dasselbe japanische Standard-Meta wie die City League und
+    # sind der einzige Bestand, der in der Saisonpause ueberhaupt
+    # vorliegt. Abschaltbar, damit ein Wiederholungslauf sie ueberspringen
+    # kann — standardmaessig AN.
+    "include_jp_majors": True
 }
 
 def _load_settings() -> dict:
@@ -205,6 +212,178 @@ def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: d
     logger.info("%s Turniere im Zeitraum gefunden (über %s Seiten).",
                 len(tournaments), page)
     return tournaments
+
+# ── JAPANISCHE MAJORS FINDEN SICH SELBST ──────────────────────────────
+#
+# Die Liste /tournaments/jp fuehrt AUSSCHLIESSLICH City Leagues. Gemessen
+# am 25.09.2026: neuester Eintrag dort 06 May 26, Spaltenkopf
+# "Date | Prefecture | Shop | Winner". Die Champions League Yokohama vom
+# 20.09.2026 (Turnier 569, 10.000 Spieler, Sieger Keiyo Watanabe mit
+# Mega-Stalobor) steht dort NICHT — sie steht nur in der Hauptliste
+# /tournaments, deren Kopf "Date | Country | Name | | Players | Winner"
+# lautet.
+#
+# Folge bis zu diesem Tag: der laufende japanische Meta-Reiter war leer
+# (city_league_archetypes.csv hatte nur seine Kopfzeile), obwohl das
+# groesste japanische Turnier der Saison seit fuenf Tagen ausgewertet
+# vorlag. Kein Scraper war defekt — es hat nur keiner hingesehen.
+#
+# Der Unterscheider ist NICHT der Turniername. "Champions League",
+# "Regional League", "Japan Championships" ist eine Liste, die mit jedem
+# neuen Format-Namen veraltet. Die Hauptliste fuehrt je Zeile ein
+# Formatbild, und dessen alt-Text ist die Bedingung, die wir wirklich
+# meinen:
+#
+#     20 Sep 26 | IMG[flags/JP] | Champions League Yokohama
+#               | IMG[formats/standard-jp.png alt="standard-jp"] | 10000
+#
+# alt="standard-jp" heisst "japanisches Standard-Meta". Genau das ist der
+# Datenbestand, den dieser Ablauf fuehrt. Ein Name muss dafuer nicht
+# geraten werden.
+JP_FORMAT_ALT = "standard-jp"
+
+# Turnierklassen, die in der Spalte `format` erscheinen duerfen. Der
+# Schluessel ist ein Stueck des Namens in Kleinschreibung, der Wert die
+# Klasse, die in die CSV geht. Wer hier nichts trifft, bekommt die
+# neutrale Klasse — geraten wird nicht.
+#
+# Der Zusatz "(JP)" meint in diesem Bestand seit je das japanische
+# Standard-FORMAT, nicht das Austragungsland — die vorhandene Klasse
+# "City League (JP)" traegt ihn genauso. Das ist wichtig, weil das
+# Formatbild standard-jp am 25.09.2026 gemessen auch ueber Turnieren
+# ausserhalb Japans steht: "Korean League Final Season" (24.05.2026),
+# "Singapore Premier Ball League", "Indonesia Master Ball League". Die
+# spielen dasselbe Format und gehoeren damit in denselben Bestand — aber
+# sie werden BENANNT, nicht zu Champions Leagues gemacht.
+JP_MAJOR_KLASSEN = (
+    ("champions league",   "Champions League (JP)"),
+    ("regional league",    "Regional League (JP)"),
+    ("championships",      "Japan Championships (JP)"),
+    ("korean league",      "Korean League (JP)"),
+    ("ball league",        "Premier Ball League (JP)"),
+    ("city league",        "City League (JP)"),
+)
+# Trifft nichts, wird das sichtbar unbestimmt gelassen. "Major (JP)"
+# waere eine Behauptung ueber die Groesse des Turniers, die wir nicht
+# gemessen haben.
+JP_MAJOR_KLASSE_UNBEKANNT = "Sonstiges (JP)"
+
+
+def klassifiziere_jp_turnier(name: str) -> str:
+    """Ordnet einen Turniernamen im JP-Format einer benannten Klasse zu.
+
+    Trifft nichts, kommt `Sonstiges (JP)` zurueck — sichtbar unbestimmt
+    statt stillschweigend als City League verbucht.
+    """
+    klein = (name or "").lower()
+    for stueck, klasse in JP_MAJOR_KLASSEN:
+        if stueck in klein:
+            return klasse
+    return JP_MAJOR_KLASSE_UNBEKANNT
+
+
+def get_jp_major_tournaments(start_date: datetime, end_date: datetime,
+                            max_pages: int = 5) -> list:
+    """Japanische Standard-Turniere aus der HAUPTLISTE /tournaments.
+
+    Erkennt sie am Formatbild (alt="standard-jp"), nicht am Namen. Gibt
+    dieselbe Form zurueck wie get_tournaments_in_date_range, damit
+    _scrape_single_tournament nichts davon wissen muss.
+    """
+    gefunden = []
+    gesehen = set()
+    for page in range(1, max_pages + 1):
+        url = f"https://limitlesstcg.com/tournaments?show=100&page={page}"
+        logger.info("Lade Hauptturnierliste Seite %s (japanische Majors): %s",
+                    page, url)
+        soup = fetch_page_bs4(url)
+        if not soup:
+            logger.warning("Hauptturnierliste Seite %s nicht ladbar.", page)
+            break
+
+        rows = [tr for tr in soup.select('table.striped tr') if tr.find('td')]
+        if not rows:
+            logger.info("Hauptliste Seite %s leer — Ende.", page)
+            break
+
+        seite_aeltestes = None
+        seite_neu = 0
+        for row in rows:
+            cells = row.find_all('td')
+            if len(cells) < 5:
+                continue
+
+            t_date = parse_tournament_date(cells[0].get_text(strip=True))
+            if t_date and (seite_aeltestes is None or t_date < seite_aeltestes):
+                seite_aeltestes = t_date
+
+            # Zwei Wege zum selben Merkmal, beide gemessen am 25.09.2026:
+            #   <tr data-format="standard-jp" ...>
+            #   <td><img class="format" alt="standard-jp" ...></td>
+            # Der Spaltenindex hat sich bei Limitless schon zweimal
+            # verschoben, diese beiden Merkmale nie. Verlangt wird nur
+            # EINES von beiden — verschwindet eines, laeuft es weiter.
+            ist_jp = (row.get('data-format') or '').strip().lower() == JP_FORMAT_ALT
+            if not ist_jp:
+                ist_jp = any(
+                    JP_FORMAT_ALT == (img.get('alt') or '').strip().lower()
+                    for img in row.select('img')
+                )
+            if not ist_jp:
+                continue
+
+            link = row.select_one('a[href^="/tournaments/"]')
+            if not link:
+                continue
+            t_id = (link.get('href') or '').rstrip('/').split('/')[-1]
+            if not t_id.isdigit() or t_id in gesehen:
+                continue
+
+            if not t_date:
+                logger.warning(
+                    "Japanisches Turnier %s ohne lesbares Datum (%r) — "
+                    "uebersprungen statt geraten.",
+                    t_id, cells[0].get_text(strip=True))
+                continue
+            if not (start_date <= t_date <= end_date):
+                continue
+
+            gesehen.add(t_id)
+            name = link.get_text(strip=True)
+            klasse = klassifiziere_jp_turnier(name)
+            # Die Praefektur-Spalte fuehrt bei einem Major keine Praefektur —
+            # die Hauptliste hat diese Spalte nicht. Was sie fuehrt, ist das
+            # Land, und das ist ein Quellwert: <td><img class="flag"
+            # alt="JP"></td> bzw. data-country am <tr>. Es wird ausgelesen,
+            # nicht gesetzt — eine gesetzte Ortsangabe muesste die Seite als
+            # Platzhalter ausweisen (siehe ORT_PLATZHALTER_OHNE_QUELLE), und
+            # ein geratener Wert kommt hier gar nicht erst hinein.
+            land = (row.get('data-country') or '').strip()
+            if not land:
+                flagge = row.select_one('img.flag')
+                land = (flagge.get('alt') or '').strip() if flagge else ''
+            gefunden.append({
+                'tournament_id': t_id,
+                'url': f"https://limitlesstcg.com/tournaments/{t_id}",
+                'date_str': cells[0].get_text(strip=True),
+                'prefecture': land,
+                'shop': name,
+                'format': klasse,
+            })
+            seite_neu += 1
+
+        logger.info("  Hauptliste Seite %s: +%s japanische Turniere im Fenster, "
+                    "aeltestes Datum: %s", page, seite_neu,
+                    seite_aeltestes.strftime('%d.%m.%Y') if seite_aeltestes else '?')
+
+        if seite_aeltestes is not None and seite_aeltestes < start_date:
+            logger.info("Hauptliste beendet: Seite %s liegt vor %s.",
+                        page, start_date.strftime('%d.%m.%Y'))
+            break
+
+    logger.info("%s japanische Majors in der Hauptliste gefunden.", len(gefunden))
+    return gefunden
+
 
 def get_tournament_by_id(tournament_id: str) -> dict:
     url = f"https://limitlesstcg.com/tournaments/{tournament_id}"
@@ -307,7 +486,16 @@ def _scrape_single_tournament(tournament: dict) -> list:
                 'tournament_id': tournament['tournament_id'],
                 'prefecture': tournament.get('prefecture', ''),
                 'shop': tournament.get('shop', ''),
-                'format': 'City League (JP)',
+                # Die Turnierklasse kommt AUS dem Turnier, nicht aus einer
+                # festen Zeichenkette. Bis 25.09.2026 stand hier
+                # 'City League (JP)' fest — damit haette ein japanisches
+                # Major (Champions League, Regional League) in derselben
+                # Spalte gestanden wie ein Laden-Turnier mit acht
+                # Spielern, und niemand haette die beiden im Nachhinein
+                # trennen koennen. Gemessen am 25.09.2026: die Champions
+                # League Yokohama (Turnier 569) fuehrt 10.000 Spieler,
+                # eine City League typisch 4 bis 16.
+                'format': tournament.get('format') or 'City League (JP)',
                 'placement': placement,
                 'player': player,
                 'archetype': archetype
@@ -423,18 +611,24 @@ def save_deck_statistics(data: list, output_file: str):
         t_info = f"{entry.get('date', '')} - {entry.get('prefecture', '')} - {entry.get('shop', '')}"
 
         if arch not in deck_data:
-            deck_data[arch] = {'count': 0, 'placements': [], 'tournaments': set()}
+            deck_data[arch] = {'count': 0, 'placements': [], 'tournaments': set(),
+                               'formate': set()}
 
         deck_data[arch]['count'] += 1
         deck_data[arch]['placements'].append(place)
         deck_data[arch]['tournaments'].add(t_info)
+        deck_data[arch]['formate'].add(entry.get('format') or 'City League (JP)')
 
     stats_rows = []
     for arch, info in deck_data.items():
         avg_place = sum(info['placements']) / len(info['placements']) if info['placements'] else 0
         stats_rows.append({
             'archetype': arch,
-            'format': 'City League (JP)',
+            # Mehrere Klassen sind moeglich, sobald ein Major mit im
+            # Fenster liegt. Sie werden BENANNT, nicht auf eine
+            # zusammengezogen — sonst liest sich ein Top-8-Platz beim
+            # 10.000-Spieler-Major wie ein Ladensieg.
+            'format': ' + '.join(sorted(info['formate'])) or 'City League (JP)',
             'total_appearances': info['count'],
             'average_placement': str(round(avg_place, 2)).replace('.', ','),
             'best_placement': min(info['placements']) if info['placements'] else 0,
@@ -654,6 +848,20 @@ def main():
     logger.info("Zeitraum: %s bis %s", start_date_str, end_date_str)
 
     tournaments = get_tournaments_in_date_range(settings['region'], start_date, end_date)
+    vor_majors = len(tournaments)
+
+    # Japanische Majors stehen nicht in /tournaments/jp, nur in der
+    # Hauptliste. Ohne diesen Schritt bleibt der laufende japanische
+    # Reiter in der Saisonpause der City League leer, obwohl es Daten
+    # gibt (gemessen 25.09.2026, Champions League Yokohama).
+    if settings.get('include_jp_majors', True):
+        bekannte = {str(t['tournament_id']) for t in tournaments}
+        for t in get_jp_major_tournaments(start_date, end_date):
+            if str(t['tournament_id']) not in bekannte:
+                tournaments.append(t)
+                bekannte.add(str(t['tournament_id']))
+        logger.info("Turnierliste: %s aus /tournaments/jp + %s japanische Majors.",
+                    vor_majors, len(tournaments) - vor_majors)
 
     for t_id in settings.get('additional_tournament_ids', []):
         t_info = get_tournament_by_id(str(t_id))

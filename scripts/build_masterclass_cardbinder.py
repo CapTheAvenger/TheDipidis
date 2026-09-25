@@ -725,15 +725,28 @@ def baue_einen(mc_id, eintrag):
                 "turniere": len(jm["turniere"]),
             }
         listen_gesamt_alle = sum(m["listen"] for m in metas.values() if m["id"] in k["je_meta"])
-        # Die feine Kartenart: was eine Quelle geschrieben hat, sonst der
-        # Bestand. Die Gruppe daraus nach der gemeinsamen Regel.
-        typ = k["gruppe"] or ""
+        # Die feine Kartenart. DER BESTAND GEWINNT.
+        #
+        # BEFUND (25.09.2026, live geprueft): hier stand zuerst die
+        # Angabe der Quelle vorn. Fuer Rotomurf (PBL-46) liefert die
+        # Online-API aber nur die grobe Spalte „pokemon" — und die
+        # landete als `typ` in der Mappe. Der Deckblock zaehlt damit
+        # kein einziges Basis-Pokemon und meldete „Ohne Basis-Pokemon
+        # ist das Deck nicht spielbar", waehrend drei Rotomurf drin
+        # lagen. Dieselbe Angabe geht an den Deckbauer im Profil, dessen
+        # Mulligan-Rechnung an genau diesem Feld haengt.
+        #
+        # data/cards_chunk_*.json fuehrt fuer jede der 21.092 Karten die
+        # feine Art (Basic, Stage 1, Item, Supporter, ...). Sie ist
+        # deshalb die erste Wahl; die Quelle bleibt der Rueckfall.
+        typ_quelle = k["gruppe"] or ""
+        typ_bestand = typen.get((satz, nr)) or ""
+        typ = typ_bestand or typ_quelle
         grp = kartengruppe.gruppe(typ, name)
         if grp is None:
-            typ_bestand = typen.get((satz, nr)) or ""
-            grp = kartengruppe.gruppe(typ_bestand, name)
-            if grp is not None:
-                typ = typ_bestand
+            grp = kartengruppe.gruppe(typ_quelle, name)
+            if grp is not None and not typ_bestand:
+                typ = typ_quelle
         karten_raus.append({
             "name": name, "name_de": de_namen.get((satz, nr)),
             "set": satz, "nummer": nr,

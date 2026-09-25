@@ -503,3 +503,31 @@ def test_nur_basis_energien_werden_zusammengefasst():
          "gesamt": {"listen_mit_karte": 20}},
     ]
     assert len(mod.energien_zusammenfassen(karten)) == 2
+
+
+def test_die_kartenart_ist_fein_und_nicht_die_grobe_spalte():
+    """BEFUND (25.09.2026, live geprueft): fuer Rotomurf (PBL-46) stand
+    in der Mappe `typ = "pokemon"` — die grobe Spalte der Online-API.
+
+    Der Deckblock zaehlte damit kein einziges Basis-Pokemon und meldete
+    „Ohne Basis-Pokémon ist das Deck nicht spielbar“, waehrend drei
+    Rotomurf drin lagen. Dieselbe Angabe geht an den Deckbauer im
+    Profil, dessen Mulligan-Rechnung an genau diesem Feld haengt.
+    """
+    grob = {"pokemon", "trainer", "energy"}
+    for name, d in _mappen():
+        karten = d.get("karten") or []
+        assert karten, "%s fuehrt keine Karte" % name
+        ohne = [k["name"] for k in karten if not k.get("typ")]
+        assert ohne == [], "%s: diese Karten haben keine Kartenart: %s" % (name, ohne[:8])
+        grobe = [(k["name"], k["typ"]) for k in karten
+                 if str(k["typ"]).strip().lower() in grob]
+        assert grobe == [], (
+            "%s: diese Karten tragen die GROBE Spalte als Kartenart — damit "
+            "laesst sich kein Basis-Pokemon erkennen: %s" % (name, grobe[:8]))
+        # Und mindestens ein Basis-Pokemon muss erkennbar sein: ohne eines
+        # waere kein Deck spielbar.
+        basis = [k for k in karten
+                 if str(k["typ"]).strip().lower().endswith("basic")]
+        assert basis, (
+            "%s: keine einzige Karte ist als Basis-Pokemon erkennbar" % name)

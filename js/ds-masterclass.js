@@ -686,8 +686,13 @@
             var grp = (k && k.gruppe) || '';
             (nachGruppe[grp] || (nachGruppe[grp] = [])).push({ c: c, k: k });
             if (k && k.ace) ace += (c.count || 0);
-            var typ = String((k && k.typ) || c.type || '').toLowerCase();
-            if (typ === 'basic') basis += (c.count || 0);
+            /* Basis-Pokemon zaehlen — fuer die Regel „ohne Basis-Pokemon
+             * ist das Deck nicht spielbar". Der Bestand schreibt die Art
+             * teils mit Elementbuchstabe davor (MBasic, DBasic, WBasic),
+             * deshalb das Wortende statt der Gleichheit. „Basic Energy"
+             * endet auf „energy" und faellt damit nicht hinein. */
+            var typ = String((k && k.typ) || c.type || '').toLowerCase().trim();
+            if (/(^|[a-z])basic$/.test(typ)) basis += (c.count || 0);
             if (k && k.preis && k.preis.eur !== null && k.preis.eur !== undefined) {
                 preis += k.preis.eur * (c.count || 0);
             } else {

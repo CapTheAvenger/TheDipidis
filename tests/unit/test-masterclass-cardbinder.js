@@ -783,3 +783,39 @@ test('das Bild und der Knopf haben Regeln im Stilblatt', () => {
     ['.mcl-bd-dbild', '.mcl-bd-plus1', '.mcl-bd-weitere']
         .forEach((k) => assert.ok(CSS.includes(k), `Regel fehlt: ${k}`));
 });
+
+test('Basis-Pokemon werden gezaehlt, auch mit Elementbuchstabe davor', () => {
+    /* BEFUND (25.09.2026, live): der Deckblock meldete „Ohne
+     * Basis-Pokémon ist das Deck nicht spielbar", waehrend drei
+     * Rotomurf drin lagen — die Mappe fuehrte als Kartenart die grobe
+     * Spalte „pokemon". Seitdem steht dort die feine Art; der Bestand
+     * schreibt sie teils mit Elementbuchstabe (MBasic, DBasic). */
+    const mappe = [
+        karte({ name: 'Drilbur', set: 'PBL', nummer: '46', gruppe: 'pokemon', typ: 'Basic' }),
+        karte({ name: 'Metang', set: 'TEF', nummer: '114', gruppe: 'pokemon', typ: 'Stage 1' }),
+        karte({ name: 'Beldum', set: 'TEF', nummer: '113', gruppe: 'pokemon', typ: 'MBasic' }),
+        karte({ name: 'Metal Energy', set: 'MEE', nummer: '8', gruppe: 'basic-energy', typ: 'Basic Energy' })
+    ];
+    const deck = [
+        { set: 'PBL', number: '46', name_en: 'Drilbur', count: 3 },
+        { set: 'TEF', number: '114', name_en: 'Metang', count: 4 },
+        { set: 'TEF', number: '113', name_en: 'Beldum', count: 4 },
+        { set: 'MEE', number: '8', name_en: 'Metal Energy', count: 8 }
+    ];
+    const s = ladeDeckblock(deck, mappe).html(G);
+    assert.ok(!s.includes('binderWarnBasis'),
+        'Basis-Pokemon sind da (Drilbur, Beldum), werden aber nicht gezaehlt:\n' + s);
+
+    /* Der Elementbuchstabe allein: Beldum traegt „MBasic", sonst ist
+     * kein Basis-Pokemon im Deck. Eine Pruefung auf Gleichheit
+     * (`typ === 'basic'`) sieht es nicht. */
+    const nurM = ladeDeckblock([deck[2], deck[3]], [mappe[2], mappe[3]]).html(G);
+    assert.ok(!nurM.includes('binderWarnBasis'),
+        '„MBasic" wird nicht als Basis-Pokemon erkannt:\n' + nurM);
+
+    /* Gegenprobe: nur Stage 1 und Energie — dann fehlt es wirklich. */
+    const ohne = ladeDeckblock(
+        [deck[1], deck[3]], [mappe[1], mappe[3]]).html(G);
+    assert.ok(ohne.includes('binderWarnBasis'),
+        'ohne Basis-Pokemon bleibt der Hinweis aus — dann prueft er nichts');
+});

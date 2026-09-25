@@ -103,6 +103,37 @@ AUSGESCHIEDEN = {
     # genau wie der Kommentar dort oben es vorgesehen hat. Die Liste ist
     # derzeit leer — das ist ein Befund, kein Versehen: der Kader hat
     # seit dem 13.09. keine Form mehr verloren.
+    #
+    # 25.09.2026 — ACHT ALTERNATIVFORMEN AUSGESCHIEDEN (Deploy 3048).
+    # Gemessen an data/champions_pokedex.json (319 Eintraege): der Kader
+    # fuehrt die GRUNDFORM jeweils weiter, nur die Alternativform nicht
+    # mehr. Also ein Kaderwechsel, kein Ausfall der Quelle — sonst waere
+    # auch die Grundform verschwunden:
+    #
+    #   Gourgeist     Grundform da, (Large/Small/Super) weg
+    #   Lycanroc      Grundform + (Dusk) da, (Midnight) weg
+    #   Rotom         Grundform + (Heat/Mow/Wash) da, (Fan/Frost) weg
+    #   Squawkabilly  Grundform da, (Yellow) weg
+    #   Toxtricity    Grundform da, (Low-Key) weg
+    #
+    # Die nachgeschlagenen Schluessel bleiben stehen, damit sie niemand
+    # erneut nachschlagen muss, wenn die Formen zurueckkommen.
+    "Gourgeist (Large)": ("711b",
+                         "25.09.2026 aus dem Kader; Grundform Gourgeist laeuft weiter"),
+    "Gourgeist (Small)": ("711a",
+                         "25.09.2026 aus dem Kader; Grundform Gourgeist laeuft weiter"),
+    "Gourgeist (Super)": ("711c",
+                         "25.09.2026 aus dem Kader; Grundform Gourgeist laeuft weiter"),
+    "Lycanroc (Midnight)": ("745a",
+                           "25.09.2026 aus dem Kader; Lycanroc und (Dusk) laufen weiter"),
+    "Rotom (Fan)":   ("479d",
+                     "25.09.2026 aus dem Kader; Rotom, (Heat), (Mow), (Wash) laufen weiter"), # Wirbel-Rotom
+    "Rotom (Frost)": ("479c",
+                     "25.09.2026 aus dem Kader; Rotom, (Heat), (Mow), (Wash) laufen weiter"), # Frost-Rotom
+    "Squawkabilly (Yellow)": ("931b",
+                             "25.09.2026 aus dem Kader; Grundform Squawkabilly laeuft weiter"),
+    "Toxtricity (Low-Key)": ("849a",
+                            "25.09.2026 aus dem Kader; Grundform Toxtricity laeuft weiter"),
 }
 
 FORM_UEBERSTEUERUNG = {
@@ -127,28 +158,20 @@ FORM_UEBERSTEUERUNG = {
     # der Spiegel haette abgebrochen.
     "Rotom (Heat)":  "479a",                   # Hitze-Rotom
     "Rotom (Wash)":  "479b",                   # Wasch-Rotom
-    "Rotom (Frost)": "479c",                   # Frost-Rotom
-    "Rotom (Fan)":   "479d",                   # Wirbel-Rotom
     "Rotom (Mow)":   "479e",                   # Schneid-Rotom
     # ── PUMPDJINN, drei Groessen (pokewiki.de/Pumpdjinn/Sprites…) ─────
     # 711 Mittelgrosse Sorte (unsere Grundform), 711a Kleine,
     # 711b Grosse, 711c Extragrosse Sorte — ebenfalls aus dem alt-Text.
-    "Gourgeist (Small)": "711a",
-    "Gourgeist (Large)": "711b",
-    "Gourgeist (Super)": "711c",
     # ── RIFFEX (pokewiki.de/Riffex/Sprites_und_3D-Modelle) ───────────
     # 849 Hoch-Form (unsere Grundform), 849a Tief-Form.
-    "Toxtricity (Low-Key)": "849a",
     # ── KRAWALLORO (pokewiki.de/Krawalloro/Sprites_und_3D-Modelle) ───
     # 931 Gruengefiedert (unsere Grundform), 931a Blaugefiedert,
     # 931b Gelbgefiedert, 931c Weissgefiedert. Champions fuehrt neben
     # der Grundform nur die gelbe.
-    "Squawkabilly (Yellow)": "931b",
     # pokewiki.de/Wolwerock/Sprites_und_3D-Modelle:
     # 745 Tagform, 745a Nachtform, 745b Zwielichtform.
     # Die Nachtform kam am 17.09.2026 in den Kader; ihr Schluessel stand
     # seit dem 31.08. in diesem Kommentar, nur nicht in der Tabelle.
-    "Lycanroc (Midnight)": "745a",
     "Lycanroc (Dusk)": "745b",
     # pokewiki.de/Floette: 670e = Ewigbluetler. Fuer Champions gibt es
     # dort NUR 670e und 670m1 — keine gewoehnliche Floette. Das deckt

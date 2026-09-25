@@ -561,12 +561,44 @@
      * was bleiben soll. */
     var KURSIV_AUF = '\u0001', KURSIV_ZU = '\u0002';
 
+    /* Tabellen sind der Sonderfall. GEMESSEN 25.09.2026 in der
+     * ausgelieferten Ausarbeitung: fuenf Tabellen, vier davon
+     * Decklisten in der Form
+     *
+     *     Anzahl | Deutsch | English [| Druck]
+     *
+     * und eine zweispaltige (Karte | Wofuer). Wer die ungefiltert
+     * vorliest, hoert jede Zeile doppelt — "4 Tanhel Beldum, 4 Metang
+     * Metang" — und dazu Setnummern. Gehoert wurde genau das am
+     * 25.09.2026 auf der Seite; es war der Grund fuer diese Regel.
+     *
+     * Also: die ersten ZWEI Zellen. Nicht die erste, weil die
+     * zweispaltige Tabelle in beiden Spalten Inhalt hat. Reine
+     * Kopfzeilen (nur TH) fallen weg, THEAD ebenso. */
+    function sprechZellen(tr) {
+        var zellen = Array.prototype.filter.call(tr.children || [], function (c) {
+            return c.tagName === 'TD' || c.tagName === 'TH';
+        });
+        if (!zellen.length) return null;
+        var nurKopf = zellen.every(function (c) { return c.tagName === 'TH'; });
+        return nurKopf ? null : zellen.slice(0, 2);
+    }
+
     function sprechRoh(el) {
         var aus = '';
         (function gehe(knoten) {
             Array.prototype.forEach.call(knoten.childNodes || [], function (n) {
                 if (n.nodeType === 3) { aus += n.nodeValue; return; }
                 if (n.nodeType !== 1) return;
+                if (n.tagName === 'THEAD') return;
+                if (n.tagName === 'TABLE') { gehe(n); aus += '. '; return; }
+                if (n.tagName === 'TR') {
+                    var zellen = sprechZellen(n);
+                    if (!zellen) return;
+                    zellen.forEach(function (c) { gehe(c); aus += ' '; });
+                    aus += ', ';
+                    return;
+                }
                 var kursiv = n.tagName === 'EM' || n.tagName === 'I';
                 if (kursiv) aus += KURSIV_AUF;
                 gehe(n);

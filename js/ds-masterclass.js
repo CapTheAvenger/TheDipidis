@@ -75,7 +75,13 @@
             kartentextEn: 'Card text (English)',
             sammlerdruck: 'Sammlerdruck',
             kopiert: 'Liste als Bild — kopieren oder sichern',
-            keinTreffer: 'Kein Treffer.'
+            keinTreffer: 'Kein Treffer.',
+            vorlesen: 'Vorlesen',
+            pause: 'Pause',
+            weiter: 'Weiter',
+            stopp: 'Stopp',
+            tempo: 'Tempo',
+            keineStimme: 'Dieser Browser kann nicht vorlesen.'
         },
         en: {
             regalTitel: 'My Masterclasses',
@@ -96,7 +102,13 @@
             kartentextEn: 'Kartentext (Deutsch)',
             sammlerdruck: 'Collector print',
             kopiert: 'List as an image — copy or save',
-            keinTreffer: 'No match.'
+            keinTreffer: 'No match.',
+            vorlesen: 'Read aloud',
+            pause: 'Pause',
+            weiter: 'Continue',
+            stopp: 'Stop',
+            tempo: 'Speed',
+            keineStimme: 'This browser cannot read aloud.'
         }
     };
 
@@ -196,6 +208,9 @@
     /* ---------- Verdrahtung im geladenen Stueck ---------- */
 
     function bereichWechseln(wurzel, ziel) {
+        /* Wer den Bereich wechselt, will nicht weiter vorgelesen bekommen,
+         * was er nicht mehr sieht. */
+        if (ziel !== 'doku') vlStopp(wurzel);
         wurzel.querySelectorAll('[data-mcl-abschnitt]').forEach(function (a) {
             a.hidden = a.getAttribute('data-mcl-abschnitt') !== ziel;
         });
@@ -474,6 +489,306 @@
             .replace(/\*(.+?)\*/g, '<i>$1</i>');
     }
 
+    /* ── Vorlesen ─────────────────────────────────────────────────
+     *
+     * BESTELLUNG (23.09.2026): "Ein Knopf im Ausarbeitungs-Bereich, der
+     * vorliest, wo du gerade bist, mit Pause und Tempo." Hausi hoert die
+     * Masterclass beim Radfahren.
+     *
+     * Die Sprachausgabe steckt im Browser (Web Speech API) — kein
+     * fremder Dienst, keine Datei, und auf dem Handy nimmt sie die
+     * Stimme, die dort eingestellt ist. Vier Dinge, die dabei
+     * erfahrungsgemaess schieflaufen und hier geloest sind:
+     *
+     *   1. LANGE TEXTE brechen ab. Chrome hoert nach gut 15 Sekunden auf
+     *      zu sprechen, wenn eine einzelne Aeusserung zu lang ist.
+     *      Deshalb wird Block fuer Block gesprochen, jeder Block in
+     *      Stuecken an Satzgrenzen, und waehrend des Sprechens haelt ein
+     *      Taktgeber die Warteschlange mit resume() wach.
+     *   2. WO BIN ICH? Vorgelesen wird ab dem ersten Block, der im Bild
+     *      steht — nicht von vorn. Der laufende Block wird markiert und
+     *      nachgezogen, sonst sucht man beim Weiterlesen die Stelle.
+     *   3. DIE SUCHE blendet Bloecke aus. Ausgeblendete werden
+     *      uebersprungen; sonst liest die Stimme, was nicht dasteht.
+     *   4. GESPROCHEN IST NICHT GESCHRIEBEN. "Mega-Stalobor-ex" wurde
+     *      als "Mega Stalobor, Ex" mit Pause gelesen, die englischen
+     *      Namen in Klammern zerhacken jeden Satz, Druckcodes wie
+     *      "PBL-46" sind im Ton Buchstabensalat (Hausi, 23.09.2026,
+     *      nach zehn Minuten Hoeren). Der Text auf dem Bildschirm bleibt
+     *      wie er ist; nur was gesprochen wird, wird geglaettet.
+     */
+
+    var vl = { bloecke: [], stuecke: [], i: 0, laeuft: false, tempo: 1, takt: null };
+
+    function sprache() {
+        return window.speechSynthesis || null;
+    }
+
+    /* Nur, was auf dem Bildschirm steht: ausgeblendete Bloecke und leere
+     * Huellen faellt die Stimme nicht an. */
+    function vorleseBloecke(doku) {
+        return Array.prototype.slice.call(doku.children).filter(function (b) {
+            return !b.hidden && String(b.textContent || '').trim().length > 1;
+        });
+    }
+
+    /* Welche Klammer ist ein englischer Kartenname? Nicht geraten,
+     * sondern nachgesehen: die Kartenkacheln desselben Stuecks tragen
+     * ihren englischen Namen in data-en. Eine Heuristik ueber Gross- und
+     * Kleinschreibung wuerde "(Metallmacher)" genauso wegwerfen wie
+     * "(Beldum)" — und die deutsche Erklaerung ist genau das, was
+     * bleiben soll. */
+    function englischeNamen(wurzel) {
+        var aus = {};
+        if (!wurzel || !wurzel.querySelectorAll) return aus;
+        Array.prototype.forEach.call(wurzel.querySelectorAll('[data-en]'), function (k) {
+            var n = String(k.getAttribute('data-en') || '').trim().toLowerCase();
+            if (n) aus[n] = true;
+        });
+        return aus;
+    }
+
+    /* Der Text eines Blocks, mit MARKE um kursive Stellen. Die
+     * Ausarbeitung haelt eine Konvention durch, und die entscheidet
+     * ueber die Klammern:
+     *
+     *     Grolldra (Dreepy)                 deutsch, dahinter englisch
+     *     <em>Metal Maker</em> (Metallmacher)  englisch, dahinter deutsch
+     *
+     * Beide sehen als reiner Text gleich aus. Im Markup nicht: die
+     * englischen Attackennamen stehen kursiv. Ohne diese Marke wuerde
+     * die Glaettung die deutsche Erklaerung wegwerfen — also genau das,
+     * was bleiben soll. */
+    var KURSIV_AUF = '\u0001', KURSIV_ZU = '\u0002';
+
+    function sprechRoh(el) {
+        var aus = '';
+        (function gehe(knoten) {
+            Array.prototype.forEach.call(knoten.childNodes || [], function (n) {
+                if (n.nodeType === 3) { aus += n.nodeValue; return; }
+                if (n.nodeType !== 1) return;
+                var kursiv = n.tagName === 'EM' || n.tagName === 'I';
+                if (kursiv) aus += KURSIV_AUF;
+                gehe(n);
+                if (kursiv) aus += KURSIV_ZU;
+            });
+        })(el);
+        return aus;
+    }
+
+    /* Ist der Klammerinhalt ein englischer Name? Erst die Kartenliste
+     * des Stuecks (belegt), dann die Form: ein bis drei Woerter, jedes
+     * gross geschrieben, keine Ziffern. "Grolldra (Dreepy)" faellt so
+     * weg, "(und zwar zwei Stueck)" bleibt. */
+    function englischeKlammer(inhalt, bekannt) {
+        var kern = inhalt.replace(/,.*$/, '').trim();
+        if (!kern) return false;
+        if (bekannt[kern.toLowerCase()]) return true;
+        if (/\d/.test(kern)) return false;
+        var woerter = kern.split(/\s+/);
+        if (woerter.length > 3) return false;
+        return woerter.every(function (w) { return /^[A-ZÄÖÜ][\wÄÖÜäöüß'\u2019-]*$/.test(w); });
+    }
+
+    /* Aus geschriebenem Text gesprochenen machen. */
+    function sprechText(roh, namen) {
+        var bekannt = namen || {};
+        var t = String(roh || '');
+        t = t.replace(/\[\d{1,2}:\d{2}(?::\d{2})?\]/g, ' ');       /* Zeitmarken */
+        t = t.replace(/([A-Za-zÄÖÜäöüß])-(ex|EX)\b/g, '$1ex');     /* Stalobor-ex */
+        t = t.replace(/\bMega-(?=[A-ZÄÖÜ])/g, 'Mega ');
+        t = t.replace(/(\u0002\s*)?\(([^()]*)\)/g, function (ganz, nachKursiv, inhalt) {
+            if (/\b[A-Z0-9]{2,4}-\d+\b/.test(inhalt)) return nachKursiv || ' ';  /* Druckcode */
+            if (nachKursiv) return ganz;          /* deutsche Erklaerung: bleibt */
+            return englischeKlammer(inhalt, bekannt) ? ' ' : ganz;
+        });
+        t = t.split(KURSIV_AUF).join('').split(KURSIV_ZU).join('');
+        /* Wo eine Klammer herausfaellt, bleibt sonst ein Leerzeichen vor
+         * dem Satzzeichen stehen — die Stimme macht daraus eine Pause
+         * mitten im Satzende. */
+        t = t.replace(/\s+([,.;:!?])/g, '$1');
+        return t.replace(/\s{2,}/g, ' ').trim();
+    }
+
+    /* In Stuecke an Satzgrenzen: eine einzelne lange Aeusserung bricht
+     * in Chrome mitten im Satz ab. */
+    function sprechStuecke(text, hoechstens) {
+        var max = hoechstens || 220;
+        var saetze = String(text || '').match(/[^.!?…]+[.!?…]*\s*/g) || [];
+        var aus = [], jetzt = '';
+        saetze.forEach(function (satz) {
+            if ((jetzt + satz).length > max && jetzt.trim()) { aus.push(jetzt.trim()); jetzt = ''; }
+            while (satz.length > max) {                  /* Satz ohne Punkt */
+                var schnitt = satz.lastIndexOf(' ', max);
+                if (schnitt < 40) schnitt = max;
+                aus.push(satz.slice(0, schnitt).trim());
+                satz = satz.slice(schnitt);
+            }
+            jetzt += satz;
+        });
+        if (jetzt.trim()) aus.push(jetzt.trim());
+        return aus.filter(function (s) { return s.length; });
+    }
+
+    /* Ab wo? Der erste Block, dessen Ende noch im Bild ist. */
+    function ersterSichtbarer(bloecke, oben) {
+        for (var i = 0; i < bloecke.length; i++) {
+            var r = bloecke[i].getBoundingClientRect();
+            if (r.bottom > (oben || 0)) return i;
+        }
+        return 0;
+    }
+
+    function deutscheStimme() {
+        var s = sprache();
+        var alle = (s && s.getVoices) ? s.getVoices() : [];
+        var de = alle.filter(function (v) { return /^de/i.test(v.lang || ''); });
+        return de.length ? de[0] : null;
+    }
+
+    function vlMarkiere(el) {
+        var wurzel = document.getElementById('mclDoku');
+        if (!wurzel) return;
+        Array.prototype.forEach.call(wurzel.querySelectorAll('.mcl-vl-jetzt'), function (b) {
+            b.classList.remove('mcl-vl-jetzt');
+        });
+        if (!el) return;
+        el.classList.add('mcl-vl-jetzt');
+        var r = el.getBoundingClientRect();
+        if (r.top < 60 || r.bottom > (window.innerHeight || 800) - 40) {
+            try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { }
+        }
+    }
+
+    function vlKnoepfe(wurzel, zustand) {
+        var start = wurzel.querySelector('[data-mcl-vl="start"]');
+        var stopp = wurzel.querySelector('[data-mcl-vl="stopp"]');
+        if (start) {
+            start.textContent = zustand === 'laeuft' ? '⏸ ' + T('pause')
+                : zustand === 'pause' ? '▶ ' + T('weiter')
+                : '▶ ' + T('vorlesen');
+            start.setAttribute('aria-pressed', String(zustand === 'laeuft'));
+        }
+        if (stopp) stopp.hidden = zustand === 'aus';
+    }
+
+    function vlWeiterSprechen(wurzel) {
+        var s = sprache();
+        if (!s || !vl.laeuft) return;
+        if (vl.i >= vl.stuecke.length) { vlStopp(wurzel); return; }
+        var stueck = vl.stuecke[vl.i];
+        vlMarkiere(stueck.el);
+        var u = new window.SpeechSynthesisUtterance(stueck.text);
+        u.lang = 'de-DE';
+        u.rate = vl.tempo;
+        var stimme = deutscheStimme();
+        if (stimme) u.voice = stimme;
+        u.onend = function () { vl.i++; vlWeiterSprechen(wurzel); };
+        u.onerror = function () { vl.i++; vlWeiterSprechen(wurzel); };
+        s.speak(u);
+    }
+
+    function vlStart(wurzel) {
+        var s = sprache();
+        var doku = wurzel.querySelector('#mclDoku');
+        if (!s || !doku) return;
+        s.cancel();
+        var bloecke = vorleseBloecke(doku);
+        var ab = ersterSichtbarer(bloecke, 70);
+        var namen = englischeNamen(wurzel);
+        vl.stuecke = [];
+        bloecke.slice(ab).forEach(function (el) {
+            sprechStuecke(sprechText(sprechRoh(el), namen)).forEach(function (text) {
+                vl.stuecke.push({ el: el, text: text });
+            });
+        });
+        vl.i = 0;
+        vl.laeuft = true;
+        vlKnoepfe(wurzel, 'laeuft');
+        vlTaktAn(wurzel);
+        vlWeiterSprechen(wurzel);
+    }
+
+    /* Chrome haelt die Warteschlange nur an, wenn niemand hinsieht:
+     * ohne diesen Taktgeber verstummt sie nach gut 15 Sekunden. */
+    function vlTaktAn(wurzel) {
+        vlTaktAus();
+        vl.takt = window.setInterval(function () {
+            var s = sprache();
+            if (!s || !vl.laeuft) return;
+            if (s.speaking && !s.paused) { s.pause(); s.resume(); }
+        }, 9000);
+    }
+
+    function vlTaktAus() {
+        if (vl.takt) { window.clearInterval(vl.takt); vl.takt = null; }
+    }
+
+    function vlStopp(wurzel) {
+        var s = sprache();
+        if (s) s.cancel();
+        vl.laeuft = false;
+        vl.stuecke = [];
+        vl.i = 0;
+        vlTaktAus();
+        vlMarkiere(null);
+        if (wurzel) vlKnoepfe(wurzel, 'aus');
+    }
+
+    function vlUmschalten(wurzel) {
+        var s = sprache();
+        if (!s) return;
+        if (!vl.laeuft) { vlStart(wurzel); return; }
+        if (s.paused) { s.resume(); vlKnoepfe(wurzel, 'laeuft'); return; }
+        s.pause();
+        vlKnoepfe(wurzel, 'pause');
+    }
+
+    /* Tempo waehrend des Lesens: die laufende Aeusserung traegt ihre Rate
+     * schon in sich, also wird ab dem naechsten Stueck neu angesetzt. */
+    function vlTempo(wurzel, wert) {
+        var zahl = Number(wert);
+        vl.tempo = (zahl > 0.4 && zahl < 3) ? zahl : 1;
+        try { window.localStorage.setItem('mclVorleseTempo', String(vl.tempo)); } catch (e) { }
+        if (!vl.laeuft) return;
+        var s = sprache();
+        if (s) s.cancel();
+        vlWeiterSprechen(wurzel);
+    }
+
+    function vorleserBauen(wurzel) {
+        var zeile = wurzel.querySelector('.mcl-suchzeile');
+        if (!zeile || zeile.querySelector('[data-mcl-vl]')) return;
+        var gespeichert = 1;
+        try { gespeichert = Number(window.localStorage.getItem('mclVorleseTempo')) || 1; } catch (e) { }
+        vl.tempo = (gespeichert > 0.4 && gespeichert < 3) ? gespeichert : 1;
+        var leiste = document.createElement('div');
+        leiste.className = 'mcl-vorleser';
+        if (!sprache()) {
+            leiste.innerHTML = '<span class="mcl-fein">' + esc(T('keineStimme')) + '</span>';
+            zeile.appendChild(leiste);
+            return;
+        }
+        var tempi = [0.8, 1, 1.2, 1.5, 1.8];
+        leiste.innerHTML =
+            '<button type="button" class="mcl-vl-knopf" data-mcl-vl="start" aria-pressed="false">▶ '
+            + esc(T('vorlesen')) + '</button>'
+            + '<button type="button" class="mcl-vl-knopf mcl-vl-stopp" data-mcl-vl="stopp" hidden>■ '
+            + esc(T('stopp')) + '</button>'
+            + '<label class="mcl-vl-tempo">' + esc(T('tempo'))
+            + ' <select data-mcl-vl="tempo">'
+            + tempi.map(function (t) {
+                return '<option value="' + t + '"' + (t === vl.tempo ? ' selected' : '') + '>'
+                    + String(t).replace('.', ',') + '×</option>';
+            }).join('')
+            + '</select></label>';
+        zeile.appendChild(leiste);
+        leiste.addEventListener('change', function (e) {
+            var w = e.target.closest('[data-mcl-vl="tempo"]');
+            if (w) vlTempo(wurzel, w.value);
+        });
+    }
+
     /* Volltextsuche im Ausarbeitungs-Abschnitt. Ohne Treffer wird ALLES
      * ausgeblendet — sonst bleibt eine Wand aus Ueberschriften stehen und
      * die Seite sieht kaputt aus. */
@@ -515,14 +830,18 @@
             if ((b = e.target.closest('[data-mcl-ziel]'))) { bereichWechseln(wurzel, b.getAttribute('data-mcl-ziel')); return; }
             if ((b = e.target.closest('[data-mcl-filter]'))) { matchupFilter(wurzel, b.getAttribute('data-mcl-filter')); return; }
             if ((b = e.target.closest('[data-mcl-liste]'))) { listeWechseln(wurzel, b.getAttribute('data-mcl-liste')); return; }
+            if ((b = e.target.closest('[data-mcl-vl="start"]'))) { vlUmschalten(wurzel); return; }
+            if ((b = e.target.closest('[data-mcl-vl="stopp"]'))) { vlStopp(wurzel); return; }
             if ((b = e.target.closest('[data-mcl-kopieren]'))) { listeKopieren(wurzel, b); return; }
             if ((b = e.target.closest('.mcl-kk'))) { kartenDetail(b); return; }
             if (e.target.closest('.mcl-schliessen')) {
+                vlStopp(wurzel);
                 var buehne = document.getElementById('mclBuehne');
                 if (buehne) { buehne.hidden = true; buehne.innerHTML = ''; }
             }
         });
         sucheVerdrahten(wurzel);
+        vorleserBauen(wurzel);
     }
 
     /* ---------- Einstieg ---------- */
@@ -565,6 +884,12 @@
         _listeWechseln: listeWechseln,
         _markiere: markiere,
         _gitter: gitter,
-        _bildAdresse: bildAdresse
+        _bildAdresse: bildAdresse,
+        _sprechText: sprechText,
+        _sprechRoh: sprechRoh,
+        _englischeNamen: englischeNamen,
+        _sprechStuecke: sprechStuecke,
+        _vorleseBloecke: vorleseBloecke,
+        _ersterSichtbarer: ersterSichtbarer
     };
 })();

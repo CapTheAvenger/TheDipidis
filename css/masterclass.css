@@ -354,6 +354,71 @@
     .mcl-wr3 { justify-content: flex-start; }
 }
 
+/* ── Vorlesen ───────────────────────────────────────────────────
+   Die Leiste steht in der Suchzeile und bleibt beim Scrollen oben
+   kleben: wer 10.000 Woerter vorlesen laesst, will Pause erreichen,
+   ohne erst nach oben zu wischen. 44 px Tippziel wie ueberall
+   (css/tippziele.css). */
+.mcl-suchzeile {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--surface-0, var(--surface-1));
+    padding-bottom: var(--s-2);
+}
+.mcl-vorleser {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    flex-wrap: wrap;
+    margin-top: var(--s-2);
+}
+.mcl-vl-knopf {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    min-height: 44px;
+    padding: 6px 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface-1);
+    color: var(--ink);
+    font-size: var(--fs-md);
+    font-weight: 600;
+    cursor: pointer;
+}
+.mcl-vl-knopf[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--surface-1);
+}
+.mcl-vl-stopp { font-weight: 500; color: var(--ink-2); }
+.mcl-vl-tempo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    font-size: var(--fs-sm);
+    color: var(--ink-2);
+}
+.mcl-vl-tempo select {
+    min-height: 44px;
+    padding: 4px 8px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface-1);
+    color: var(--ink);
+    font-family: var(--font-num);
+    font-size: var(--fs-sm);
+}
+/* Der Block, der gerade gelesen wird. Kein Rahmen, der die Zeilen
+   verschiebt — ein Balken links und ein ruhiger Grund. */
+.mcl-doku .mcl-vl-jetzt {
+    background: var(--surface-2);
+    box-shadow: -3px 0 0 0 var(--mcl-akzent);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    padding-left: var(--s-2);
+}
+
 /* Der Kopierknopf steht in der Quellenzeile unter jeder Liste. 44 px
    Hoehe, weil die Seite genau dort ihre Untergrenze fuer Tippziele hat
    (css/tippziele.css) — er wird auf dem Handy gedrueckt, nicht geklickt. */

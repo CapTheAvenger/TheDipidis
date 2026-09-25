@@ -959,3 +959,18 @@ test('der Cardbinder nimmt den vorhandenen Druckschalter — und faellt nicht in
     /* Und er merkt sich, worauf die Antwort gehoert. */
     assert.strictEqual(vm.runInContext('binderDruckWartet.probe', ktx), 'PBL-46');
 });
+
+test('der Preis passt in die Kachel und die Deckkacheln sind die groesseren', () => {
+    /* BEFUND (25.09.2026, live): bei data-size="sm" (90 px) blieben dem
+     * Preis neben L und P rund 32 px — „1,03€" wurde zu „,03". */
+    const mappe = [karte({ set: 'PBL', nummer: '65', gruppe: 'pokemon', typ: 'Basic',
+        preis: { eur: 1.03 } })];
+    const deck = [{ set: 'PBL', number: '65', name_en: 'Mega Excadrill ex', count: 2 }];
+    const s = ladeDeckblock(deck, mappe).html(G);
+    assert.ok(/data-size="md"/.test(s),
+        'die Deckkacheln stehen wieder im schmalen Raster — dort schneidet der Preis ab');
+    assert.ok(s.includes('1,03€'),
+        'der Preis steht nicht ohne Leerzeichen vor dem Euro:\n' + s);
+    assert.ok(!s.includes('1,03 €'),
+        'das schmale Leerzeichen ist wieder da — genau das hat den Preis abgeschnitten');
+});

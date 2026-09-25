@@ -855,6 +855,50 @@ def create_html_comparison(comparison_data: list, output_file: str):
 # ============================================================================
 # MAIN EXECUTION
 # ============================================================================
+# Der Platzhalter, den get_tournament_by_id() setzt, wenn die
+# Turnierseite eines EINZELNEN Turniers keine Praefektur fuehrt. Dieselbe
+# Zeichenkette prueft js/app-city-league.js (CL_ORT_PLATZHALTER).
+ORT_PLATZHALTER = "Special Event"
+
+
+def entdoppeln(zeilen):
+    """Eine Platzierung je (Turnier, Platz, Spieler) — die bessere Zeile.
+
+    Selbstheilung fuer die Dateien, in denen der Fehler schon steht: der
+    Riegel oben verhindert neue Doppel, raeumt aber nicht auf, was der
+    Lauf 160 geschrieben hat (58 Zeilen, 29 doppelt).
+
+    Welche Zeile besser ist, ist keine Geschmacksfrage: die eine traegt
+    die Turnierklasse und den Namen AUS DER QUELLE, die andere die
+    Platzhalter des Einzelabrufs. Vorrang hat die mit den echten
+    Angaben — die Platzhalterzeile enthaelt keine Auskunft, die der
+    anderen fehlt.
+    """
+    aus = {}
+    def guete(z):
+        punkte = 0
+        if (z.get("prefecture") or "").strip() != ORT_PLATZHALTER:
+            punkte += 2
+        if not str(z.get("shop") or "").strip().startswith("Tournament "):
+            punkte += 1
+        # Eine Turnierklasse, die nicht der Reitername ist, ist die
+        # genauere Angabe (Champions League statt City League).
+        if (z.get("format") or "").strip() not in ("", "City League (JP)"):
+            punkte += 1
+        return punkte
+
+    for z in zeilen:
+        schluessel = (str(z.get("tournament_id") or "").strip(),
+                      str(z.get("placement") or "").strip(),
+                      str(z.get("player") or "").strip())
+        vorher = aus.get(schluessel)
+        if vorher is None or guete(z) > guete(vorher):
+            aus[schluessel] = z
+    if len(aus) != len(zeilen):
+        logger.info("Entdoppelt: %d von %d Zeilen bleiben.", len(aus), len(zeilen))
+    return list(aus.values())
+
+
 def main():
     logger.info("=" * 60)
     logger.info("CITY LEAGUE ARCHETYPE SCRAPER - FAST EDITION")
@@ -878,8 +922,29 @@ def main():
     # Hauptliste. Ohne diesen Schritt bleibt der laufende japanische
     # Reiter in der Saisonpause der City League leer, obwohl es Daten
     # gibt (gemessen 25.09.2026, Champions League Yokohama).
+    # EINE Turnierkennung, EIN Eintrag — egal ueber welchen der drei
+    # Wege sie hereinkommt.
+    #
+    # BEFUND (25.09.2026, an data/city_league_archetypes.csv des
+    # Wochenlaufs 160 gemessen): die Datei fuehrte 58 Zeilen, 29 davon
+    # doppelt. Turnier 569 (Champions League Yokohama) stand zweimal
+    # drin — einmal als „Champions League (JP)" mit Praefektur „JP" und
+    # dem echten Turniernamen, einmal als „City League (JP)" mit den
+    # Platzhaltern des Einzelabrufs („Special Event", „Tournament 569").
+    #
+    # Grund: es kommt ueber ZWEI Wege herein. get_jp_major_tournaments()
+    # findet es in der Hauptliste (neu seit dem 25.09.2026), und
+    # update_sets.apply_format_window_to_scraper_settings hat es
+    # gleichzeitig in `additional_tournament_ids` geschrieben
+    # (auto_discover_js). Der Dedup-Riegel stand nur im Major-Zweig; die
+    # Handliste haengte blind an.
+    #
+    # Folge waere nicht bloss eine doppelte Zeile: jede Archetypzahl
+    # dieses Turniers zaehlt doppelt, und die Ansicht haette 10.000
+    # Spieler als 20.000 Platzierungen gelesen.
+    bekannte = {str(t['tournament_id']) for t in tournaments}
+
     if settings.get('include_jp_majors', True):
-        bekannte = {str(t['tournament_id']) for t in tournaments}
         for t in get_jp_major_tournaments(start_date, end_date):
             if str(t['tournament_id']) not in bekannte:
                 tournaments.append(t)
@@ -888,9 +953,16 @@ def main():
                     vor_majors, len(tournaments) - vor_majors)
 
     for t_id in settings.get('additional_tournament_ids', []):
+        if str(t_id) in bekannte:
+            # Kein Fehler: auto_discover_js schreibt genau die Turniere
+            # hierher, die der Major-Zweig ohnehin findet.
+            logger.info("Zusaetzliches Turnier %s steht schon in der Liste "
+                        "(ueber die Turnierliste gefunden) — nicht doppelt.", t_id)
+            continue
         t_info = get_tournament_by_id(str(t_id))
         if t_info:
             tournaments.append(t_info)
+            bekannte.add(str(t_id))
             logger.info("Zusaetzliches Turnier %s geladen.", t_id)
 
     if not tournaments:
@@ -938,7 +1010,7 @@ def main():
         with open(output_path, 'r', encoding='utf-8-sig') as f:
             old_data = list(csv.DictReader(f, delimiter=';'))
 
-    new_data = old_data + all_data
+    new_data = entdoppeln(old_data + all_data)
 
     if all_data:
         save_to_csv(new_data, settings['output_file'])

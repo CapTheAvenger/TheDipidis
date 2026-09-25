@@ -309,8 +309,24 @@ def scrape_city_league(settings: dict, card_db: CardDatabaseLookup) -> list:
     # Archetyp-Auswertung — sonst widersprechen sich zwei Dateien, die
     # dasselbe Fenster beschreiben (genau der Fall, der am 21.08.2026
     # wochenlang unbemerkt blieb).
+    # EINE Turnierkennung, EIN Eintrag — der Riegel gilt fuer ALLE drei
+    # Wege, nicht nur fuer die Majors.
+    #
+    # BEFUND (25.09.2026, am Wochenlauf 160 gemessen): Turnier 569
+    # (Champions League Yokohama) kam ueber zwei Wege herein — ueber
+    # get_jp_major_tournaments() aus der Hauptliste und ueber
+    # `additional_tournament_ids`, wohin
+    # update_sets.apply_format_window_to_scraper_settings es per
+    # auto_discover_js geschrieben hatte. Die Schleife unten hat es
+    # daraufhin ZWEIMAL abgerufen und `all_decks` jede Deckliste doppelt
+    # hinzugefuegt. In data/city_league_analysis.csv stand danach jede
+    # Zahl doppelt: 48 Decks statt 24, 24 Kopien Lahmus statt 12.
+    #
+    # Der Riegel `scraped_ids` weiter unten greift dagegen nicht: er
+    # kennt nur Turniere FRUEHERER Laeufe.
+    bekannte = {str(t.get('tournament_id') or t.get('id', '')) for t in tournaments}
+
     if config.get('include_jp_majors', True):
-        bekannte = {str(t.get('tournament_id') or t.get('id', '')) for t in tournaments}
         try:
             for t in city_league_module.get_jp_major_tournaments(start_dt, end_dt):
                 if str(t['tournament_id']) not in bekannte:
@@ -325,10 +341,15 @@ def scrape_city_league(settings: dict, card_db: CardDatabaseLookup) -> list:
     if additional_ids:
         logger.info("Lade %s zusaetzliche Turniere via ID...", len(additional_ids))
         for tid in additional_ids:
+            if str(tid) in bekannte:
+                logger.info("Zusaetzliches Turnier %s steht schon in der Liste "
+                            "(ueber die Turnierliste gefunden) — nicht doppelt.", tid)
+                continue
             try:
                 t_info = city_league_module.get_tournament_by_id(str(tid))
                 if t_info:
                     tournaments.append(t_info)
+                    bekannte.add(str(tid))
             except Exception as e:
                 logger.warning("Fehler bei zusaetzlichem Turnier %s: %s", tid, e)
 
@@ -365,6 +386,15 @@ def scrape_city_league(settings: dict, card_db: CardDatabaseLookup) -> list:
 
     for i, tournament in enumerate(tournaments, 1):
         t_id = str(tournament.get('tournament_id') or tournament.get('id', 'unknown'))
+        # Zweiter Riegel, am Abruf selbst. Der erste (oben, beim
+        # Zusammenstellen) genuegt fuer die bekannten Wege; dieser hier
+        # haelt auch, wenn ein kuenftiger dritter Weg dazukommt. Eine
+        # doppelt gezaehlte Deckliste sieht in der Ausgabe nicht falsch
+        # aus — sie verdoppelt nur jede Zahl.
+        if t_id in newly_scraped_ids:
+            logger.info("[%d/%d] Turnier %s stand mehrfach in der Liste — "
+                        "einmal genuegt.", i, total, t_id)
+            continue
         t_name = tournament.get('shop') or tournament.get('name') or 'Tournament'
         t_date = tournament.get('date') or tournament.get('date_str') or ''
         tournament['date'] = t_date

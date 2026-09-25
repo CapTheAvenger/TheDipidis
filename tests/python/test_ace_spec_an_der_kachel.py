@@ -16,9 +16,10 @@ BEFUND (Wochenlauf 158, 25.09.2026): „Liste 23 hat 0 ACE SPEC".
 
 DIE LOESUNG UND WARUM SIE HIER GEPRUEFT WIRD
 
-  Die Kachel traegt data-ace="1", gesetzt aus is_ace_spec. Damit liest
-  der JS-Test nichts aus data/ — und tests/unit/test-testdaten-wachhund.js
-  muss die Datei nicht in seine Zaehlung aufnehmen.
+  Die Kachel traegt data-ace="1", gesetzt aus is_ace_spec UND dem
+  Register. Damit liest der JS-Test nichts aus data/ — und
+  tests/unit/test-testdaten-wachhund.js muss die Datei nicht in seine
+  Zaehlung aufnehmen.
 
   Der Abgleich gegen das Register gehoert dafuer hierher: Python hat
   keinen solchen Wachhund, und die Frage „stimmen die Markierungen mit
@@ -88,10 +89,50 @@ def test_der_erzeuger_setzt_die_markierung():
                for k in ast.walk(ast.Module(body=koerper, type_ignores=[]))), (
         "ist_ace steht in der Signatur, wird im Koerper aber nicht benutzt")
 
-    # Und der Aufrufer reicht is_ace_spec durch.
+    # Und die Erkennung steht auf ZWEI Beinen.
+    #
+    # BEFUND (Wochenlauf 159, 25.09.2026): eine frisch gezogene Liste
+    # fuehrte „Prime Catcher" ohne Markierung. Das Feld is_ace_spec ist
+    # nachweislich unzuverlaessig — js/app-city-league.js sagt es
+    # woertlich ("CSV is_ace_spec is buggy"), und derselbe Lauf meldete
+    # „is_ace_spec driftet wieder: 5 Felder". Ein Signal allein genuegt
+    # also nicht.
     ganz = _lies(ERZEUGER)
     assert re.search(r"is_ace_spec", ganz), (
-        "die Markierung kommt nicht aus is_ace_spec — dann ist sie geraten")
+        "die Markierung kommt nicht aus is_ace_spec — dann fehlt das erste Bein")
+    assert "ace_specs.json" in ganz, (
+        "der Erzeuger schlaegt nicht im Register data/ace_specs.json nach — "
+        "dann haengt die Markierung allein am fehleranfaelligen Feld")
+
+    fn2 = next((k for k in ast.walk(baum)
+                if isinstance(k, ast.FunctionDef) and k.name == "ist_ace_spec"), None)
+    assert fn2 is not None, "ist_ace_spec() nicht gefunden"
+
+
+def test_die_erkennung_steht_auf_zwei_beinen():
+    """Verhalten, ausgefuehrt: Register ODER Feld genuegt, und eine
+    gewoehnliche Karte wird nicht markiert."""
+    import importlib.util
+    import sys as _sys
+
+    _sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+    spec = importlib.util.spec_from_file_location("mln_unter_test", ERZEUGER)
+    mod = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(mod)
+    except Exception as e:  # noqa: BLE001
+        pytest.skip(f"Erzeuger nicht ladbar: {e}")
+
+    assert len(mod.ACE_NAMEN) >= 20, (
+        f"das Register kam nur mit {len(mod.ACE_NAMEN)} Namen an")
+    # Genau der Fall aus Lauf 159: im Register, Feld leer.
+    assert mod.ist_ace_spec("Prime Catcher", False) is True
+    # HTML-Entitaeten duerfen den Abgleich nicht brechen.
+    assert mod.ist_ace_spec("Hero&#x27;s Cape", False) is True
+    # Feld allein genuegt, falls das Register die Karte noch nicht kennt.
+    assert mod.ist_ace_spec("Irgendeine Neue", True) is True
+    # Und eine gewoehnliche Karte bleibt unmarkiert.
+    assert mod.ist_ace_spec("Beldum", False) is False
 
 
 def test_die_markierungen_stimmen_mit_dem_register_ueberein():

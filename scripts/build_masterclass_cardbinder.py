@@ -557,6 +557,70 @@ def matchups(slugs):
     return liste
 
 
+# ── BASIS-ENERGIEN: EIN DRUCK JE ENERGIEART ───────────────────────────
+#
+# BEFUND (Betreiber, 25.09.2026, am Bildschirmfoto): „für Basis Metal
+# brauchen wir nicht verschiede Prints zeigen, eins reicht".
+#
+# Er hat recht: die Mappe zeigte acht Basis-Energie-Kacheln, drei davon
+# Metall (MEE-8 mit 2592 Listen, MEE-16 mit 42, EVO-98 mit 8). Fuer den
+# Deckbau sind Basis-Energien austauschbar — welcher Druck im Karton
+# liegt, entscheidet niemand nach der Quote.
+#
+# WAS NICHT GEMACHT WIRD: die Listenzahlen addieren. 2592 + 42 + 8 sind
+# 2642 — bei 2641 Listen insgesamt. Der Ueberschuss beweist, dass
+# Listen mehrere Drucke fuehren; eine Summe zaehlte sie doppelt.
+#
+# Gezeigt wird deshalb der meistgespielte Druck mit SEINEN gemessenen
+# Zahlen, und die anderen stehen als `weitere_drucke` daneben — nicht
+# verschwiegen, nur nicht mehr als eigene Kachel.
+
+def _energieart(name):
+    """„Basic Metal Energy" und „Metal Energy" sind dieselbe Energieart."""
+    n = " ".join(str(name or "").strip().lower().split())
+    if n.startswith("basic "):
+        n = n[6:]
+    return n
+
+
+def energien_zusammenfassen(karten):
+    fuehrend = {}
+    aus = []
+    for k in karten:
+        if k.get("gruppe") != "basic-energy":
+            aus.append(k)
+            continue
+        art = _energieart(k.get("name"))
+        vorher = fuehrend.get(art)
+        if vorher is None:
+            fuehrend[art] = k
+            k["weitere_drucke"] = []
+            aus.append(k)
+            continue
+        # Der meistgespielte Druck fuehrt; der andere wandert an ihn.
+        a = (vorher.get("gesamt") or {}).get("listen_mit_karte") or 0
+        b = (k.get("gesamt") or {}).get("listen_mit_karte") or 0
+        if b > a:
+            # Rollentausch: der neue fuehrt, der alte wird Nebendruck.
+            k["weitere_drucke"] = vorher.pop("weitere_drucke", [])
+            aus[aus.index(vorher)] = k
+            fuehrend[art] = k
+            vorher, k = k, vorher
+        vorher.setdefault("weitere_drucke", []).append({
+            "name": k.get("name"), "name_de": k.get("name_de"),
+            "set": k.get("set"), "nummer": k.get("nummer"),
+            "listen_mit_karte": (k.get("gesamt") or {}).get("listen_mit_karte"),
+            "schnitt": (k.get("gesamt") or {}).get("schnitt"),
+            "preis": (k.get("preis") or {}).get("eur"),
+        })
+    for k in aus:
+        if k.get("gruppe") == "basic-energy":
+            k["weitere_drucke"] = sorted(
+                k.get("weitere_drucke") or [],
+                key=lambda d: -(d.get("listen_mit_karte") or 0))
+    return aus
+
+
 # ── ZUSAMMENBAUEN ─────────────────────────────────────────────────────
 
 def baue_einen(mc_id, eintrag):
@@ -700,6 +764,7 @@ def baue_einen(mc_id, eintrag):
             },
             "quellen": sorted(k["quellen"]),
         })
+    karten_raus = energien_zusammenfassen(karten_raus)
     karten_raus.sort(key=lambda c: (-(c["gesamt"]["listen_mit_karte"]), c["name"]))
 
     def _meta_zeile(m):

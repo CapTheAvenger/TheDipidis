@@ -9,8 +9,8 @@
   "archetyp_kennungen": [
    "mega-excadrill-ex"
   ],
-  "gebaut": "2026-09-25T15:13:36+00:00",
-  "karten": 228,
+  "gebaut": "2026-09-25T15:21:53+00:00",
+  "karten": 226,
   "metas": [
    "TEF-30C",
    "Champions League (JP)",
@@ -397,6 +397,26 @@
     "majors",
     "online_api",
     "online_datiert"
+   ],
+   "weitere_drucke": [
+    {
+     "name": "Metal Energy",
+     "name_de": null,
+     "set": "MEE",
+     "nummer": "16",
+     "listen_mit_karte": 42,
+     "schnitt": 15.94,
+     "preis": null
+    },
+    {
+     "name": "Metal Energy",
+     "name_de": "Metall-Energie",
+     "set": "EVO",
+     "nummer": "98",
+     "listen_mit_karte": 8,
+     "schnitt": 17.25,
+     "preis": 0.51
+    }
    ]
   },
   {
@@ -2834,48 +2854,6 @@
    ]
   },
   {
-   "name": "Metal Energy",
-   "name_de": null,
-   "set": "MEE",
-   "nummer": "16",
-   "typ": "Basic Energy",
-   "gruppe": "basic-energy",
-   "gruppe_name": "Basis-Energie",
-   "gruppe_rang": 7,
-   "ace": null,
-   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEE/MEE_008_R_EN_LG.png",
-   "preis": null,
-   "je_meta": {
-    "TEF-30C": {
-     "listen_mit_karte": 41,
-     "listen_gesamt": 173,
-     "anteil": 23.7,
-     "schnitt": 15.94,
-     "hoechstzahl": null,
-     "turniere": 6
-    },
-    "Champions League (JP)": {
-     "listen_mit_karte": 1,
-     "listen_gesamt": 1,
-     "anteil": 100.0,
-     "schnitt": 16.0,
-     "hoechstzahl": 16,
-     "turniere": 1
-    }
-   },
-   "gesamt": {
-    "listen_mit_karte": 42,
-    "listen_gesamt": 174,
-    "anteil": 24.1,
-    "schnitt": 15.94,
-    "hoechstzahl": 16
-   },
-   "quellen": [
-    "city_league",
-    "online_api"
-   ]
-  },
-  {
    "name": "Heavy Baton",
    "name_de": "Schweres Staffelholz",
    "set": "TEF",
@@ -3718,7 +3696,8 @@
    },
    "quellen": [
     "online_api"
-   ]
+   ],
+   "weitere_drucke": []
   },
   {
    "name": "Steven's Metang",
@@ -4558,7 +4537,8 @@
    },
    "quellen": [
     "online_api"
-   ]
+   ],
+   "weitere_drucke": []
   },
   {
    "name": "Wellspring Mask Ogerpon ex",
@@ -4803,44 +4783,6 @@
    },
    "quellen": [
     "online_api"
-   ]
-  },
-  {
-   "name": "Metal Energy",
-   "name_de": "Metall-Energie",
-   "set": "EVO",
-   "nummer": "98",
-   "typ": "Basic Energy",
-   "gruppe": "basic-energy",
-   "gruppe_name": "Basis-Energie",
-   "gruppe_rang": 7,
-   "ace": null,
-   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/EVO/EVO_098_R_EN_LG.png",
-   "preis": {
-    "eur": 0.51,
-    "eur_niedrig": 0.05,
-    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Evolutions/Metal-Energy-EVO98?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-09-25T12:11:13.031167"
-   },
-   "je_meta": {
-    "TEF-PBL": {
-     "listen_mit_karte": 8,
-     "listen_gesamt": 2468,
-     "anteil": 0.3,
-     "schnitt": 17.25,
-     "hoechstzahl": 19,
-     "turniere": 1
-    }
-   },
-   "gesamt": {
-    "listen_mit_karte": 8,
-    "listen_gesamt": 2468,
-    "anteil": 0.3,
-    "schnitt": 17.25,
-    "hoechstzahl": 19
-   },
-   "quellen": [
-    "majors"
    ]
   },
   {
@@ -5899,7 +5841,8 @@
    },
    "quellen": [
     "online_api"
-   ]
+   ],
+   "weitere_drucke": []
   },
   {
    "name": "Genesect",
@@ -7018,7 +6961,8 @@
    },
    "quellen": [
     "online_api"
-   ]
+   ],
+   "weitere_drucke": []
   },
   {
    "name": "Kofu",
@@ -8090,7 +8034,8 @@
    },
    "quellen": [
     "online_api"
-   ]
+   ],
+   "weitere_drucke": []
   },
   {
    "name": "Deluxe Bomb",

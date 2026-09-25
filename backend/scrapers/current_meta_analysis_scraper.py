@@ -830,6 +830,24 @@ def build_best_online_decklists(limitless_decks: list, recent_days: int = 7) -> 
 MASTERCLASS_ARCHETYP = "Mega Excadrill"
 MASTERCLASS_LISTEN = 5
 
+# ── DIE ZAHL, DIE UNTER DEN LISTEN STEHT ──────────────────────────────
+#
+# In masterclass/mega-stalobor.de.html steht seit dem 22.09.2026 unter
+# der Gruppe „Online · letzte 7 Tage" der Satz: die Listen kaemen aus
+# Online-Turnieren **ab 100 Spielern**.
+#
+# BEFUND (Wochenlauf 156, 25.09.2026): dieser Erzeuger hat die Grenze
+# nie angewandt. Am 22.09. stimmte der Satz zufaellig — die fuenf
+# besten Listen kamen aus Feldern von 124 bis 386 Spielern. Drei Tage
+# spaeter schrieb der Lauf „Nicollas Tavares · 1. von 26" in die Liste,
+# und der Satz darunter war falsch.
+#
+# Das ist der Fall aus CLAUDE.md: „EIN SATZ, DER EINE TATSACHE
+# BEHAUPTET, IST CODE." Die Grenze steht deshalb jetzt HIER, und
+# tests/python/test_masterclass_feldgroesse.py haelt sie gegen den Satz
+# im Stueck. Wer eine aendert, muss die andere mitaendern.
+MASTERCLASS_MIN_SPIELER = 100
+
 
 def build_masterclass_listen(limitless_decks: list, archetyp: str = MASTERCLASS_ARCHETYP,
                              anzahl: int = MASTERCLASS_LISTEN, recent_days: int = 7) -> list:
@@ -879,6 +897,7 @@ def build_masterclass_listen(limitless_decks: list, archetyp: str = MASTERCLASS_
             return False
 
     kandidaten = []
+    zu_klein = []
     for d in limitless_decks:
         if (d.get('archetype') or '').strip().lower() != ziel:
             continue
@@ -886,6 +905,14 @@ def build_masterclass_listen(limitless_decks: list, archetyp: str = MASTERCLASS_
         datum = (d.get('tournament_date') or '').strip()
         rang = _rang(d.get('place'))
         if not karten or rang is None or not _im_fenster(datum):
+            continue
+        feld = int(d.get('total_players') or 0)
+        if feld < MASTERCLASS_MIN_SPIELER:
+            # Nicht stillschweigend: ein 1. Platz unter 26 Spielern ist
+            # eine andere Aussage als ein 1. Platz unter 386, und der
+            # Satz unter der Liste nennt die Grundgesamtheit.
+            zu_klein.append("%s (%s, %d Spieler)" % (
+                d.get('player') or '?', d.get('tournament_name') or '?', feld))
             continue
         wp = _punkte(d.get('score'))
         kandidaten.append(((rang, -wp, -_datum(datum)), {
@@ -923,6 +950,15 @@ def build_masterclass_listen(limitless_decks: list, archetyp: str = MASTERCLASS_
         aus.append(e)
         if len(aus) >= anzahl:
             break
+    if zu_klein:
+        logger.info("Masterclass-Listen: %d Liste(n) unter %d Spielern "
+                    "ausgelassen: %s", len(zu_klein), MASTERCLASS_MIN_SPIELER,
+                    "; ".join(zu_klein[:5]))
+    if len(aus) < anzahl:
+        print("::warning::Masterclass-Listen: nur %d von %d Listen im Fenster "
+              "erreichen %d Spieler. Die Gruppe zeigt entsprechend weniger — "
+              "das ist richtig, nicht kaputt." % (len(aus), anzahl,
+                                                  MASTERCLASS_MIN_SPIELER))
     return aus
 
 

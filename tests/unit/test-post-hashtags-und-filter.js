@@ -38,6 +38,7 @@ const vm = require('vm');
 
 const WURZEL = path.join(__dirname, '..', '..');
 const D = (p) => path.join(WURZEL, p);
+const MUSTER = require('../post-uebergabe-muster.js');
 
 function fenster() {
     const ctx = { console };
@@ -55,6 +56,11 @@ function fenster() {
     vm.createContext(ctx);
     vm.runInContext(fs.readFileSync(D('js/matchup-glaettung.js'), 'utf8'), ctx,
                     { filename: 'matchup-glaettung.js' });
+    /* Die Quelle „From the app" liest den lokalen Speicher statt einer
+     * Datei — Muster und Speicher stehen in
+     * tests/post-uebergabe-muster.js, damit beide Testdateien dieselbe
+     * Uebergabe pruefen. */
+    MUSTER.uebergabeEinrichten(ctx);
     vm.runInContext(fs.readFileSync(D('js/ds-post-quellen.js'), 'utf8'), ctx,
                     { filename: 'ds-post-quellen.js' });
     return ctx;

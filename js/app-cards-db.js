@@ -4198,6 +4198,37 @@
          * versions ist leer, wenn nichts Vollstaendiges gefunden wurde;
          * der Aufrufer entscheidet, was er dann sagt.
          */
+        /* WANN IST EIN DRUCK WAEHLBAR?
+         *
+         * BEFUND (Betreiber, 25.09.2026, Bildschirmfoto „Meine Decks"):
+         * „bei den Metal Energien sind SVE 24 nicht zur Auswahl dabei".
+         * Angeboten wurden SFA 99, CRZ 159, EVS 237, SUM 163, EVO 98,
+         * GEN 82, XY 139, BLW 112, CL 87, CL 95 — keine einzige
+         * SVE-Energie. Dabei ist SVE der Druck, den heute jedes Deck
+         * spielt.
+         *
+         * URSACHE: der Filter verlangte neben dem Bild auch eine
+         * RARITY. Die Kartendatenbank fuehrt fuer 167 englische
+         * Trainer- und Energiekarten keine — darunter ALLE 24
+         * SVE-Basis-Energien (gemessen 25.09.2026 ueber
+         * data/cards_chunk_*.json). Die Karten sind vollstaendig
+         * vorhanden, nur eine Spalte ist leer.
+         *
+         * Die Rarity wird an der Kachel ohnehin schon als fehlend
+         * behandelt („Rarity: N/A", Abzeichen „Unknown"). Eine leere
+         * Anzeigespalte darf einen echten Druck nicht aus der Auswahl
+         * werfen; was der Druck wirklich braucht, ist ein Bild — sonst
+         * waere die Kachel leer und der Proxy-Druck weiss.
+         */
+        function druckIstWaehlbar(version) {
+            if (!version) return false;
+            const direkt = version.image_url && String(version.image_url).trim() !== '';
+            if (direkt) return true;
+            return !!(typeof getUnifiedCardImage === 'function'
+                && getUnifiedCardImage(version.set, version.number));
+        }
+        window.druckIstWaehlbar = druckIstWaehlbar;
+
         function collectCardPrints(cardName, set, number) {
             const actualCardName = String(cardName || '');
             const normalizedActualCardName = normalizeCardName(actualCardName);
@@ -4361,13 +4392,9 @@
             // For Trainer/Energy (name-based matching), apply lighter filter - we only need rarity + image_url
             const beforeCompleteFilter = versions.length;
             if (!isPokemonCard) {
-                // TRAINER/ENERGY: Basic filter - must have rarity and image_url
+                // TRAINER/ENERGY: der Druck braucht ein BILD — sonst nichts.
                 // Note: international_prints not required for Trainer/Energy (all same name = functionally identical)
-                versions = versions.filter(version => {
-                    const hasRarity = version.rarity && version.rarity.trim() !== '';
-                    const hasImageUrl = (version.image_url && version.image_url.trim() !== '') || !!getUnifiedCardImage(version.set, version.number);
-                    return hasRarity && hasImageUrl;
-                });
+                versions = versions.filter(druckIstWaehlbar);
                 if (beforeCompleteFilter > versions.length) {
                     devLog(`[Trainer/Energy Filter] Filtered out ${beforeCompleteFilter - versions.length} incomplete cards`);
                     devLog(`[openRaritySwitcher] After complete data filter: ${versions.length} versions`);
@@ -4728,8 +4755,16 @@
                     throw new Error('saveDeck function is not available');
                 }
 
+                /* Das bearbeitete Deck bleibt offen.
+                 *
+                 * BEFUND (Betreiber, 25.09.2026): „wenn ich in my decks
+                 * eine Karte den Rarity Switcher nutze, klappt sich das
+                 * Deck wieder ein … ich will, dass ich mein Deck
+                 * bearbeiten kann und es aufgeklappt bleibt." Plus und
+                 * Minus in „Meine Decks" machen das laengst; nur dieser
+                 * Weg zeichnete die Liste neu und liess sie zugeklappt. */
                 if (typeof updateDecksUI === 'function') {
-                    updateDecksUI();
+                    updateDecksUI(profileDeckId);
                 }
 
                 closeRaritySwitcher();

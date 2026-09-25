@@ -3543,6 +3543,75 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         // ── Deck Grid Preview Modal ──────────────────────────────────
         let _currentPreviewDeckIndex = -1;
 
+        /* ── DER POST ZUM DECK (25.09.2026) ─────────────────────────
+         *
+         * BESTELLT: „ich haette in My Decks gerne direkt eine Posts
+         * Option, damit ich es bei Instagram posten kann in meinem
+         * festgelegten Design … weil aktuell kann ich nur ein Bild
+         * generieren."
+         *
+         * Das Bild daneben (exportSavedDeckAsImage) bleibt, was es ist:
+         * ein Abzug der Vorschau zum Nachschlagen. Der Post ist das
+         * Instagram-Format der Seite — 1080x1350, Marke, Kopf, Fuss —
+         * und wird von js/ds-share.js gemalt, derselben Datei, die schon
+         * den Staples- und den Turnierpost macht.
+         *
+         * VEROEFFENTLICHT WIRD NICHTS. Eine Seite ohne Server und ohne
+         * Instagram-Business-Konto kann das nicht; der Weg ist Bild ->
+         * Teilen-Dialog des Geraets -> Instagram. Genau deshalb zeigt
+         * ds-bildvorschau.js das Bild erst an. */
+        function postSavedDeck(deckIndex) {
+            const decks = window.userDecks || [];
+            const deck = decks[deckIndex];
+            if (!deck) return;
+            if (!window.DsShare || typeof window.DsShare.shareDeckPost !== 'function') {
+                showToast(getLang() === 'de'
+                    ? 'Das Bildmodul ist nicht geladen. Seite neu laden.'
+                    : 'Image module not loaded — reload the page.', 'warning');
+                return;
+            }
+            window.DsShare.shareDeckPost(deck);
+        }
+        window.postSavedDeck = postSavedDeck;
+
+        /* Derselbe Inhalt, der andere Weg: auf der Post-Seite lassen
+         * sich Ueberschrift, Text und Hashtags noch aendern. Uebergeben
+         * wird ueber den lokalen Speicher, nicht ueber die Adresse —
+         * eine Deckliste in der URL stuende in jedem Verlauf (siehe
+         * js/ds-post-uebergabe.js). */
+        function postSavedDeckAufPostSeite(deckIndex) {
+            const decks = window.userDecks || [];
+            const deck = decks[deckIndex];
+            if (!deck) return;
+            const U = window.DsPostUebergabe;
+            if (!U || typeof U.oeffnen !== 'function') {
+                showToast(getLang() === 'de'
+                    ? 'Die Uebergabe ist nicht geladen. Seite neu laden.'
+                    : 'Handover module not loaded — reload the page.', 'warning');
+                return;
+            }
+            const daten = U.ausDeck(deck);
+            if (!daten) {
+                showToast(getLang() === 'de' ? 'Keine Karten im Deck' : 'No cards in deck', 'warning');
+                return;
+            }
+            const erg = U.oeffnen('deck', daten.titel, daten);
+            if (!erg.ok) {
+                showToast(getLang() === 'de'
+                    ? 'Die Uebergabe hat nicht geklappt (' + erg.grund + ').'
+                    : 'Handover failed (' + erg.grund + ').', 'error');
+                return;
+            }
+            if (!erg.fenster) {
+                /* Pop-up geblockt: die Uebergabe liegt trotzdem. */
+                showToast(getLang() === 'de'
+                    ? 'Deck uebergeben. Post-Seite von Hand oeffnen: ' + erg.adresse
+                    : 'Deck handed over. Open the posts page manually: ' + erg.adresse,
+                    'info', 8000);
+            }
+        }
+        window.postSavedDeckAufPostSeite = postSavedDeckAufPostSeite;
+
         /** Export a saved deck (My Decks): opens grid preview modal first. */
         function exportSavedDeckAsImage(deckIndex) {
             const decks = window.userDecks || [];

@@ -129,6 +129,7 @@ function gleichheiten(datei) { return zeilenMit(datei, GLEICHHEIT); }
  * Eintrag laesst diesen Test fallen — genau das ist der Zweck.
  */
 const REGISTER = {
+    'test-druckauswahl-und-deck-offen.js': 'Welcher Druck im Rarity Switcher zur Auswahl steht, und dass das bearbeitete Deck in „Meine Decks" aufgeklappt bleibt (25.09.2026, zwei Befunde des Betreibers). Aus data/ liest sie NUR die Karten-Chunks, und nur um zu belegen, dass es die Drucke gibt, um die es geht: jede SVE-Metall-Energie der Datenbank muss waehlbar sein — WELCHE Nummern das sind und was in ihrer Rarity-Spalte steht, ist jeder Zusicherung egal. Kein Wochenwert wird behauptet; die Auswahlregel selbst wird AUSGEFUEHRT (druckIstWaehlbar in einem vm-Kontext), nicht im Quelltext gesucht. ZWEI Ungleichungen, beide Vorpruefungen gegen ein leeres Bestehen und beide gegen EINS: dass ueberhaupt eine SVE-Metall-Energie in der Datenbank steht, und dass das Kommentar-Ausschneiden nicht zu viel entfernt hat. Dafuer wurde die OBERGRENZE von 394 auf 396 gesetzt.',
     'test-city-league-chipquelle.js':    'Frischechip und angezeigte Datei der City League: liest data/data_stand.json und das Verzeichnis data/, aber keine einzige Zahl aus einer Datendatei. Vier Sorten Zusicherung, alle strukturell. (1) BESTAND: jeder Dateiname in CHIP_PAARE muss als Datei existieren — die Zuordnung steht ausgeschrieben statt als Namensregel, und das ist genau die Zusicherung, die das rechtfertigt. (2) DECKUNG: die Ausgangsangabe data-quelle in index.html muss in CHIP_PAARE vorkommen, sonst greift die Umschaltung ins Leere. (3) VORHANDENSEIN eines Inhaltsdatums fuer die beiden _past-Dateien in data_stand.json — WELCHES Datum dort steht, ist der Pruefung egal, es muss nur eins geben; ohne das zeigte der Chip das Schreibdatum einer Datei, deren Inhalt Wochen aelter ist. (4) Dass die vier leeren Dateien weiterhin als leer gefuehrt sind, mit ausdruecklicher Ansage im Fehlertext, dass ein Wegfall auch heissen kann: sie haben Daten bekommen, dann gehoert die Zusicherung ueberdacht statt repariert. KEINE Ungleichung an Live-Daten: die einzige Mengenzusicherung ist eine GLEICHHEIT (CHIP_PAARE fuehrt genau vier Namen) und laeuft gegen den Quelltext, nicht gegen data/. Anlass war ein Live-Befund vom 10.09.2026: der Reiter zeigte 26 Listen, der Chip daneben "keine Daten".',
     'test-b1-listen-vorwert.js':         'Einheit des Bayes-Vorwerts (B1): liest limitless_online_decks.csv und limitless_online_decks_comparison.csv, aber NUR als Schema (welche Spalten es gibt) und als GLEICHUNG zwischen beiden Exporten (new_count == count). Welche Zahlen dort diese Woche stehen, ist der Pruefung egal. Die eine Ungleichung (Summe Partien > Summe Listen) ist eine Eigenschaft der beiden Einheiten, kein Wochenwert: sie faellt erst, wenn jedes Deck hoechstens eine Partie je Liste spielt.',
     'test-champions-base-stats.js':      'Schema der Statuswerte, keine Zahlenbaender',
@@ -590,8 +591,18 @@ const REGISTER = {
    die Vorpruefung, dass die geprueite Zahl ueberhaupt im Hinweis steht.
    Ohne sie bestuende die Zusicherung darunter leer, sobald der Hinweis
    die Zahl gar nicht mehr nennt. Sie vergleicht mit EINS, nicht mit
-   einem Wochenwert, und stimmt deshalb auch in vier Wochen noch. */
-const OBERGRENZE = 393 + 1;
+   einem Wochenwert, und stimmt deshalb auch in vier Wochen noch.
+
+   394 auf 396 am 25.09.2026, Anlass: der Betreiber fand im Druckschalter
+   von „Meine Decks" keine einzige SVE-Metall-Energie. Die beiden neuen
+   Ungleichungen stehen in test-druckauswahl-und-deck-offen.js und
+   vergleichen mit EINS, nicht mit einem Wochenwert: dass die
+   Kartendatenbank ueberhaupt eine SVE-Metall-Energie fuehrt (sonst
+   pruefte die Schleife darunter ueber eine leere Liste) und dass das
+   Kommentar-Ausschneiden nicht zu viel entfernt hat. Verschwaende die
+   Datenbank die SVE-Energien eines Tages, ist das ein Datenbefund und
+   soll rot sein. */
+const OBERGRENZE = 393 + 1 + 2;
 
 /* Die zweite Sperrklinke, eingezogen am 22.09.2026: so viele
    Gleichheiten gegen eine zweistellige Zahl stehen heute in Dateien,

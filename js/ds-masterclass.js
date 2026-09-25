@@ -678,6 +678,77 @@
         return idx;
     }
 
+    /* Der Schluessel einer KARTE, nicht eines Drucks.
+     *
+     * „Basic Metal Energy" und „Metal Energy" sind dieselbe Energieart —
+     * dieselbe Zusammenfassung, die scripts/build_masterclass_cardbinder.py
+     * in _energieart() macht, damit im Regal nicht sechs Metall-Energien
+     * nebeneinander stehen. Dasselbe gilt deutsch fuer „Basis-".
+     */
+    function binderKartenSchluessel(name) {
+        var n = String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        if (n.indexOf('basic ') === 0) n = n.slice(6);
+        else if (n.indexOf('basis-') === 0) n = n.slice(6);
+        else if (n.indexOf('basis ') === 0) n = n.slice(6);
+        return n;
+    }
+
+    function binderMappeNamen(g) {
+        var d = binderDaten[g.id];
+        var idx = {};
+        ((d && d.karten) || []).forEach(function (k) {
+            [k.name, k.name_de].forEach(function (n) {
+                var s = binderKartenSchluessel(n);
+                if (s && !idx[s]) idx[s] = k;
+            });
+        });
+        return idx;
+    }
+
+    /* ---------- Was der Cardbinder ueber einen Druck im Deck weiss ----
+     *
+     * BEFUND (Betreiber, 25.09.2026): „ich verstehe nicht warum die Karte
+     * eine Zeile nach unten rutscht wenn ich die Raritaet wechsle." Nach
+     * einem Artwork-Tausch stand Metang (SVP 90) unter „Ohne Angabe",
+     * ohne Preis und ohne Zahlen.
+     *
+     * URSACHE: die Mappe fuehrt nur Drucke, die in den ausgewerteten
+     * Listen WIRKLICH gespielt wurden. Ein frisch getauschter Druck ist
+     * darin nicht enthalten; die Gruppe wurde aber allein am Druck
+     * nachgesehen (`idx[schluessel].gruppe`) und fiel deshalb auf ''.
+     *
+     * Zwei Quellen, getrennt gehalten — das ist der Kern:
+     *   k  = die Mappe unter DIESEM Druck. Nur daraus kommen Preis und
+     *        Nutzungszahlen, denn die gehoeren dem Druck.
+     *   a  = irgendein Druck DERSELBEN Karte. Daraus kommen Gruppe, Art,
+     *        ACE SPEC und der Name — die gehoeren der Karte.
+     * Fehlt k, bleiben Preis und Zahlen leer. Geraten wird nichts.
+     */
+    function binderDeckWissen(c, idx, nam) {
+        var schluessel = String((c.set || '') + '-' + (c.number || '')).toUpperCase();
+        var k = idx[schluessel] || null;
+        var a = k;
+        if (!a) {
+            a = nam[binderKartenSchluessel(c.name_en)] ||
+                nam[binderKartenSchluessel(c.name_de)] || null;
+        }
+        return { c: c, k: k, a: a, schluessel: schluessel };
+    }
+
+    /* Dasselbe fuer die Klick-Behandler, die nur den Druck in der Hand
+     * haben. Gibt die Kartenkenntnis (a) zurueck, nicht den Preis. */
+    function binderWissenZuDruck(g, schluessel) {
+        var idx = binderMappeIndex(g);
+        if (idx[schluessel]) return { k: idx[schluessel], a: idx[schluessel] };
+        var nam = binderMappeNamen(g);
+        var c = binderDeckKarten(g).filter(function (x) {
+            return String((x.set || '') + '-' + (x.number || '')).toUpperCase() === schluessel;
+        })[0];
+        if (!c) return { k: null, a: null, c: null };
+        var w = binderDeckWissen(c, idx, nam);
+        return w;
+    }
+
     /* Eine Deckkachel — dieselbe Form wie im Deckbauer der
      * Deck-Analyse (js/app-current-meta-analysis.js) und mit DENSELBEN
      * Klassen. Nichts davon ist hier neu gebaut; das Stilblatt dafuer
@@ -702,12 +773,13 @@
      * dieser Regel.
      */
     function binderDeckKachelHtml(e) {
-        var c = e.c, k = e.k;
-        var schluessel = String((c.set || '') + '-' + (c.number || '')).toUpperCase();
+        var c = e.c, k = e.k, a = e.a || e.k;
+        var schluessel = e.schluessel ||
+            String((c.set || '') + '-' + (c.number || '')).toUpperCase();
         var setCode = String(c.set || '').toUpperCase();
         var nummer = String(c.number || '');
-        var name = c.name_de || c.name_en || schluessel;
-        var nameEn = c.name_en || c.name_de || '';
+        var name = c.name_de || c.name_en || (a && (a.name_de || a.name)) || schluessel;
+        var nameEn = c.name_en || (a && a.name) || c.name_de || '';
         var bild = (k && k.bild) || bildAdresse(schluessel);
         var druckText = (setCode + ' ' + nummer).trim();
 
@@ -732,7 +804,7 @@
             }
         } catch (err) { herz = ''; }
 
-        var ace = k && k.ace
+        var ace = a && a.ace
             ? '<div class="mcl-bd-dace" title="ACE SPEC — h\u00f6chstens eine je Deck">ACE</div>' : '';
 
         return '<div class="card-item city-league-card-item mcl-bd-dkachel"' +
@@ -777,6 +849,7 @@
     function binderDeckHtml(g) {
         var karten = binderDeckKarten(g);
         var idx = binderMappeIndex(g);
+        var nam = binderMappeNamen(g);
         var gesamt = karten.reduce(function (s, c) { return s + (c.count || 0); }, 0);
         if (!gesamt) {
             return '<div class="mcl-bd-deck" data-mcl-bddeck="1">' +
@@ -787,17 +860,17 @@
         var nachGruppe = {};
         var ace = 0, basis = 0, preis = 0, ohnePreis = 0;
         karten.forEach(function (c) {
-            var schluessel = String((c.set || '') + '-' + (c.number || '')).toUpperCase();
-            var k = idx[schluessel];
-            var grp = (k && k.gruppe) || '';
-            (nachGruppe[grp] || (nachGruppe[grp] = [])).push({ c: c, k: k });
-            if (k && k.ace) ace += (c.count || 0);
+            var w = binderDeckWissen(c, idx, nam);
+            var k = w.k, a = w.a;
+            var grp = (a && a.gruppe) || '';
+            (nachGruppe[grp] || (nachGruppe[grp] = [])).push(w);
+            if (a && a.ace) ace += (c.count || 0);
             /* Basis-Pokemon zaehlen — fuer die Regel „ohne Basis-Pokemon
              * ist das Deck nicht spielbar". Der Bestand schreibt die Art
              * teils mit Elementbuchstabe davor (MBasic, DBasic, WBasic),
              * deshalb das Wortende statt der Gleichheit. „Basic Energy"
              * endet auf „energy" und faellt damit nicht hinein. */
-            var typ = String((k && k.typ) || c.type || '').toLowerCase().trim();
+            var typ = String((a && a.typ) || c.type || '').toLowerCase().trim();
             if (/(^|[a-z])basic$/.test(typ)) basis += (c.count || 0);
             if (k && k.preis && k.preis.eur !== null && k.preis.eur !== undefined) {
                 preis += k.preis.eur * (c.count || 0);
@@ -1033,11 +1106,16 @@
 
     function binderPlus(wurzel, g, schluessel, wieViele) {
         var p = deckBauer();
-        var k = binderMappeIndex(g)[schluessel];
-        if (!p || !k) return;
+        if (!p) return;
+        /* Auch ein Druck, den die Mappe nicht fuehrt (frisch getauscht),
+         * muss sich vermehren lassen — sonst tut das Plus nach einem
+         * Artwork-Tausch stillschweigend nichts (Befund 25.09.2026). */
+        var w = binderWissenZuDruck(g, schluessel);
+        var karte = w.k ? binderDeckKarte(w.k) : w.c;
+        if (!karte) return;
         var stand = binderStand[g.id] || (binderStand[g.id] = binderStandNeu());
-        var menge = wieViele || binderMenge(k, stand.meta);
-        var erg = p.addCopies(binderDeckKarte(k), menge);
+        var menge = wieViele || (w.k ? binderMenge(w.k, stand.meta) : 1);
+        var erg = p.addCopies(karte, menge);
         if (erg && erg.grenze && !erg.hinzugefuegt) binderMeldung(wurzel, T('binderGrenze'));
         binderZaehlerNachziehen(wurzel, g);
     }
@@ -1069,17 +1147,14 @@
      * koennen. Das Ereignis gibt es schon; es wird hier nur gehoert.
      */
     function binderDruckSchalter(wurzel, g, schluessel) {
-        var k = binderMappeIndex(g)[schluessel];
-        var name = k && k.name;
+        /* Ein Druck, den die Mappe nicht fuehrt (frisch getauscht), holt
+         * seinen Namen aus dem Deck oder aus einem anderen Druck
+         * derselben Karte. */
+        var w = binderWissenZuDruck(g, schluessel);
+        var name = (w.k && w.k.name) ||
+            (w.c && (w.c.name_en || w.c.name_de)) ||
+            (w.a && (w.a.name || w.a.name_de)) || '';
         var teile = String(schluessel || '').split('-');
-        if (!name) {
-            /* Ein Druck, den die Mappe nicht fuehrt (frisch getauscht):
-             * dann steht der Name im Deck. */
-            var d = binderDeckKarten(g).filter(function (c) {
-                return String((c.set || '') + '-' + (c.number || '')).toUpperCase() === schluessel;
-            })[0];
-            name = d && (d.name_en || d.name_de);
-        }
         if (!name || typeof window.openRaritySwitcher !== 'function') return;
         binderDruckWartet[g.id] = schluessel;
         window.openRaritySwitcher(name, name + ' (' + teile[0] + ' ' + teile.slice(1).join('-') + ')',
@@ -1900,10 +1975,11 @@
             }
             if ((b = e.target.closest('[data-mcl-bdproxy]'))) {
                 var ps = b.getAttribute('data-mcl-bdproxy');
-                var pk = binderMappeIndex(g)[ps];
+                var pw = binderWissenZuDruck(g, ps);
+                var pn = (pw.a && pw.a.name) || (pw.c && (pw.c.name_en || pw.c.name_de)) || ps;
                 var pt = String(ps || '').split('-');
                 if (typeof window.addCardToProxy === 'function') {
-                    window.addCardToProxy((pk && pk.name) || ps, pt[0], pt.slice(1).join('-'), 1);
+                    window.addCardToProxy(pn, pt[0], pt.slice(1).join('-'), 1);
                 }
                 return;
             }
@@ -1911,8 +1987,10 @@
                 /* Dasselbe grosse Bild wie im Deckbauer. */
                 if (typeof window.showSingleCard === 'function' && b.src) {
                     var zs = b.getAttribute('data-mcl-bdzeigen');
-                    var zk = binderMappeIndex(g)[zs];
-                    window.showSingleCard(b.src, ((zk && (zk.name_de || zk.name)) || zs) +
+                    var zw = binderWissenZuDruck(g, zs);
+                    var zn = (zw.a && (zw.a.name_de || zw.a.name)) ||
+                        (zw.c && (zw.c.name_de || zw.c.name_en)) || zs;
+                    window.showSingleCard(b.src, zn +
                         ' (' + String(zs).replace('-', ' ') + ')');
                 }
                 return;

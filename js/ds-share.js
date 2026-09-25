@@ -2395,9 +2395,17 @@
 
         /* Nur diese Zeile laeuft auf die Muenze zu — "100,0 %" braucht
          * rund ein Drittel der Kachelbreite, der Platz reicht immer. */
+        /* `wert` und `marke` sind die Fassung fuer andere Inhalte als
+         * die Staples-Liste: der Deck-Post (25.09.2026) traegt in der
+         * Muenze die STUECKZAHL und in der Zeile den Druck („TEF 114“)
+         * statt Rang und Anteil. Ohne die beiden Felder bleibt alles
+         * genau wie vorher — das ist wichtig, weil dieselbe Kachel den
+         * Staples-Post malt, der seit dem 22.09.2026 live ist. */
         ctx.fillStyle = MC_FARBEN.holz;
         ctx.font = fMono(Math.max(11, Math.round(kb * 0.095)), 700);
-        ctx.fillText(clip(ctx, num(k.share, 1) + ' %', kb - 14 - (2 * r + 8)), x + 7, y + kh - 9);
+        var wertText = (k.wert === undefined || k.wert === null)
+            ? (num(k.share, 1) + ' %') : String(k.wert);
+        ctx.fillText(clip(ctx, wertText, kb - 14 - (2 * r + 8)), x + 7, y + kh - 9);
 
         ctx.beginPath();
         ctx.arc(rangX, rangY, r, 0, Math.PI * 2);
@@ -2406,7 +2414,8 @@
         ctx.fillStyle = MC_FARBEN.holz;
         ctx.font = fMono(Math.round(r * 1.05), 700);
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(String(k.rang), rangX, rangY + 1);
+        ctx.fillText(String(k.marke === undefined || k.marke === null ? k.rang : k.marke),
+            rangX, rangY + 1);
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
         ctx.restore();
 
@@ -2526,7 +2535,97 @@
         });
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+     * DER DECK-POST — eine gespeicherte Deckliste im Post-Design
+     *
+     * BESTELLT (Betreiber, 25.09.2026): „ich haette in My Decks gerne
+     * direkt eine Posts Option, damit ich es bei Instagram posten kann
+     * in meinem festgelegten Design … weil aktuell kann ich nur ein Bild
+     * generieren."
+     *
+     * Das vorhandene Bild (exportSavedDeckAsImage) ist ein Abzug der
+     * Vorschau: dunkles Fenster, Kachelgitter, sonst nichts. Der Post
+     * dagegen ist das Format, das die Seite fuer Instagram schon hat —
+     * 1080x1350, Marke, Bluetenlage, Kopf mit Kicker und Titel, Fuss.
+     *
+     * NICHTS DAVON IST HIER NEU GEBAUT. Gemalt wird mit
+     * staplesPostCanvas(), derselben Funktion, die den Staples-Post
+     * macht; die Kachel unterscheidet nur, was in der Muenze und in der
+     * Zeile darunter steht (Stueckzahl und Druck statt Rang und Anteil).
+     * Ein zweiter Nachbau haette zwei Bilder ergeben, die sich mit der
+     * Zeit auseinanderentwickeln.
+     * ═══════════════════════════════════════════════════════════════ */
+    function deckPostKarten(deck) {
+        /* Dieselbe Leseweise wie beim Turnierposter: Schluessel
+         * zerlegen, Bild suchen, nach Kartenart sortieren. */
+        return schnappschussKarten({ cards: (deck && deck.cards) || {} })
+            .filter(function (k) { return k.anzahl > 0; });
+    }
+
+    function shareDeckPost(deck, opt) {
+        opt = opt || {};
+        var karten = deckPostKarten(deck);
+        if (!karten.length) {
+            toast(L('Keine Karten im Deck', 'No cards in this deck'), 'warning');
+            return Promise.resolve(false);
+        }
+        var gesamt = karten.reduce(function (s, k) { return s + k.anzahl; }, 0);
+        var facts = spaceFacts(activeSpace()) || {};
+        toast(L('Bild wird erstellt …', 'Creating image …'), 'info');
+        return Promise.all([
+            markenBild('logo'),
+            Promise.all(MC_BLUETEN.map(function (b) { return markenBild(b[0]); })),
+            Promise.all(karten.map(function (k) { return loadImage(k.url); }))
+        ]).then(function (teile) {
+            var bilder = teile[2];
+            var fehlend = bilder.filter(function (b) { return !b; }).length;
+            /* Dieselbe Schwelle wie beim Staples-Post: ein paar fehlende
+             * Bilder tragen ihren Namen, zu viele ergeben ein halb leeres
+             * Bild — das wird gesagt statt angeboten. */
+            if (fehlend > Math.max(2, Math.floor(karten.length / 3))) {
+                toast(L('Zu viele Kartenbilder liessen sich nicht laden (' + fehlend + ' von '
+                        + karten.length + '). Bitte noch einmal versuchen.',
+                        'Too many card images failed to load (' + fehlend + ' of '
+                        + karten.length + '). Please try again.'), 'error', 6000);
+                return false;
+            }
+            var kacheln = karten.map(function (k, i) {
+                return {
+                    name: k.name,
+                    /* Die Muenze traegt die Stueckzahl — die eine Zahl,
+                     * nach der unter einem Deck-Post gefragt wird. */
+                    marke: k.anzahl,
+                    /* Und darunter der Druck, damit der Post dieselbe
+                     * Auskunft gibt wie die Liste zum Abtippen. */
+                    wert: (k.set ? (k.set + ' ' + k.number) : ''),
+                    bild: bilder[i]
+                };
+            });
+            var titel = opt.titel || deck.name || deck.archetype
+                || L('Mein Deck', 'My deck');
+            var kicker = opt.kicker || deck.archetype || facts.format || '';
+            var cv = staplesPostCanvas({
+                kicker: kicker,
+                titel: titel,
+                karten: kacheln,
+                fuss: karten.length + L(' Karten \u00b7 ', ' cards \u00b7 ') + gesamt
+                    + L(' gesamt \u00b7 ', ' total \u00b7 ') + today()
+            }, { logo: teile[0], blueten: teile[1] });
+            if (fehlend > 0) {
+                toast(L(fehlend + ' Kartenbild(er) fehlen im Post.',
+                        fehlend + ' card image(s) missing from the post.'), 'warning', 5000);
+            }
+            return deliver(cv, safeName(titel) + '_post_'
+                + new Date().toISOString().slice(0, 10) + '.png');
+        }).catch(function (e) {
+            console.error('[DsShare] Deck-Post fehlgeschlagen', e);
+            toast(L('Bild-Export fehlgeschlagen', 'Image export failed'), 'error');
+            return false;
+        });
+    }
+
     window.DsShare = {
+        shareDeckPost: shareDeckPost,
         shareDeckCard: shareDeckCard,
         shareMetaCallPost: shareMetaCallPost,
         shareStaplesPost: shareStaplesPost,
@@ -2544,7 +2643,8 @@
             matchPunkte: matchPunkte, hatDay2: hatDay2,
             PUNKTE: PUNKTE, DAY2_PUNKTE: DAY2_PUNKTE,
             parseKartenSchluessel: parseKartenSchluessel, gitterMasse: gitterMasse,
-            safeName: safeName, initials: initials
+            safeName: safeName, initials: initials,
+            deckPostKarten: deckPostKarten, malStapleKachel: malStapleKachel
         }
     };
 })();

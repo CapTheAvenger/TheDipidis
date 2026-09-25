@@ -270,6 +270,32 @@ def product_url(series, name_en, orig_set, orig_num):
                 + quote_plus((name_en or "").split("[")[0].strip()))
 
 
+def _alte_urteile(path):
+    """Die Bildurteile der bestehenden JSON, je Schluessel.
+
+    Sie entstehen in scripts/pruefe_prizepack_galerie.py und kosten je
+    Eintrag zwei Bilddownloads — sie duerfen deshalb NICHT verlorengehen,
+    wenn der taegliche Preislauf die Datei neu schreibt. Die Datei ist
+    ihr eigener Speicher: der Ablauf, der sie commitet, fasst nur die
+    beiden prizepack-Dateien an, und seine Datei ist aus dieser Sitzung
+    nicht aenderbar.
+    """
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            alt = json.load(f)
+    except Exception as e:  # noqa: BLE001
+        log(f"::warning::{path} nicht lesbar ({e}) — die Bildurteile fangen neu an")
+        return {}
+    aus = {}
+    for k, e in (alt or {}).items():
+        if isinstance(e, dict) and "pruefung" in e:
+            aus[k] = {f: e.get(f) for f in
+                      ("geprueft", "pruefung", "pruefadresse", "pruefstand")}
+    return aus
+
+
 def write_json_index(rows, path):
     """Emit { "SET-NUMBER": {series, num, de, en, names, idProduct, price, market_url} }.
 
@@ -279,6 +305,7 @@ def write_json_index(rows, path):
     """
     products = load_pps_cardmarket_products()
     prices = load_price_guide()
+    urteile = _alte_urteile(path)
     matched = priced = 0
 
     index = {}
@@ -302,14 +329,57 @@ def write_json_index(rows, path):
                 entry["price"] = price
             entry["market_url"] = product_url(
                 r["series"], r["name_en"], r["set_code"], r["set_number"])
+        # Das Bildurteil gehoert dem Druck, nicht dem Preislauf.
+        frueher = urteile.get(key)
+        if frueher and frueher.get("pruefadresse") == entry["en"]:
+            entry.update({k: v for k, v in frueher.items() if v is not None})
         index[key] = entry
 
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(index, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     os.replace(tmp, path)
+    mit = sum(1 for e in index.values() if e.get("geprueft") is True)
     log(f"Wrote {path} — {len(index)} keyed prints "
-        f"({matched} matched to Cardmarket, {priced} with a price)")
+        f"({matched} matched to Cardmarket, {priced} with a price, "
+        f"{mit} mit nachgemessenem Bild)")
+    return index
+
+
+def bildpruefung(index, args):
+    """Jedes gestempelte Bild gegen den Basisdruck derselben Karte halten.
+
+    ANLASS (Betreiber, 25.09.2026): im Rarity Switcher von Metang stand
+    unter „Prize-Pack-Serie 7 · TEF 114“ das Artwork von Munkidori. Die
+    Galerienummer stammt aus der Zeilennummer der PDF-Liste; das war an
+    einer einzigen Karte geprueft. Seitdem entscheidet eine MESSUNG, ob
+    die Oberflaeche das Bild zeigt (js/app-core.js zeigt nur
+    `geprueft: true`).
+
+    Kostet nur beim ersten Mal etwas: ein Eintrag mit Urteil und
+    unveraenderter Bildadresse wird nicht erneut geladen.
+    """
+    if args.ohne_bildpruefung:
+        return "Bildpruefung: uebersprungen (--ohne-bildpruefung)"
+    try:
+        sys.path.insert(0, HERE)
+        import pruefe_prizepack_galerie as pp  # noqa: PLC0415
+    except Exception as e:  # noqa: BLE001
+        return f"Bildpruefung: nicht moeglich ({type(e).__name__}: {e})"
+    urteile = pp.pruefe(index, frist=time.time() + args.pruefsekunden, ausgabe=log)
+    if not urteile:
+        return "Bildpruefung: nichts offen — %s" % pp.bilanz(index)
+    pp.eintragen(index, urteile)
+    tmp = args.json_out + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(index, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    os.replace(tmp, args.json_out)
+    b = pp.bilanz(index)
+    if b["falsch"]:
+        log("::warning::%d Prize-Pack-Bilder zeigen nachweislich eine andere Karte — "
+            "die Oberflaeche zeigt sie nicht; die Galerienummer muss von Hand "
+            "nachgesehen werden" % b["falsch"])
+    return "Bildpruefung: %s" % b
 
 
 def _rows_from_csv(path):
@@ -320,6 +390,12 @@ def _rows_from_csv(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-verify", action="store_true")
+    ap.add_argument("--ohne-bildpruefung", action="store_true",
+                    help="die Bildpruefung ueberspringen (sie laedt je offenem "
+                         "Eintrag zwei Bilder)")
+    ap.add_argument("--pruefsekunden", type=float, default=420.0,
+                    help="Frist fuer die Bildpruefung; was sie nicht schafft, "
+                         "bleibt offen und wird beim naechsten Lauf gemessen")
     ap.add_argument("--refresh-prices", action="store_true",
                     help="rebuild the JSON (prices) from the existing CSV only — no "
                          "gallery/CDN fetch. For the daily price job.")
@@ -405,11 +481,13 @@ def main():
     # Frontend index: keyed by "SET-NUMBER" (matching the site's card index) so
     # the SPA can offer the official Play!-stamped Prize Pack image as an
     # international print. Later series win on the rare set+number collision.
-    write_json_index(rows, args.json_out)
+    index = write_json_index(rows, args.json_out)
+    bild = bildpruefung(index, args)
     from collections import Counter
     per = Counter(int(r["series"]) for r in rows)
     log("Per-series counts: " + ", ".join(f"SE{s}={n}" for s, n in sorted(per.items())))
-    log(f"Wrote {args.out} — {len(rows)} rows ({fetched_new} new series fetched). {verified}")
+    log(f"Wrote {args.out} — {len(rows)} rows ({fetched_new} new series fetched). "
+        f"{verified}. {bild}")
     return 0
 
 

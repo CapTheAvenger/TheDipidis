@@ -163,6 +163,38 @@ def test_jede_uebersteuerung_gehoert_zu_einem_echten_eintrag(mod, dex):
     )
 
 
+def test_keine_form_verschwindet_aus_BEIDEN_listen(mod):
+    """Der Papierkorb-Schutz hatte selbst ein Loch (gemessen 25.09.2026).
+
+    Die Zusicherung darunter faengt: Schluessel aus FORM_UEBERSTEUERUNG
+    geloescht statt nach AUSGESCHIEDEN verschoben. Sie faengt NICHT:
+    Schluessel aus AUSGESCHIEDEN geloescht. In der Verfaelschungsprobe
+    liess sich "Rotom (Fan)" spurlos entfernen — die Suite blieb gruen,
+    und die nachgeschlagene Quelle waere weg gewesen. Genau das, was der
+    Kommentar an AUSGESCHIEDEN ausschliessen will: "Ein Verlust ist ein
+    Befund, kein Aufraeumen."
+
+    Deshalb eine UNTERGRENZE ueber beide Listen zusammen. Sie ist `>=`:
+    neue Formen und neue Ausscheider sind kein Fehler, nur das
+    Verschwinden ist einer. Eine Form, die aus AUSGESCHIEDEN zurueck nach
+    FORM_UEBERSTEUERUNG wandert, laesst die Summe unveraendert.
+    """
+    MINDESTENS = 19     # Stand 25.09.2026: 11 gefuehrt + 8 ausgeschieden
+    gesamt = len(mod.FORM_UEBERSTEUERUNG) + len(mod.AUSGESCHIEDEN)
+    assert gesamt >= MINDESTENS, (
+        "zusammen nur noch %d nachgeschlagene Formen (vorher mindestens %d) — "
+        "es wurde eine geloescht statt verschoben. Der Schluessel gehoert "
+        "MIT Datum und Beleg nach AUSGESCHIEDEN." % (gesamt, MINDESTENS))
+
+
+def test_keine_form_steht_in_beiden_listen(mod):
+    """Sonst gilt sie gleichzeitig als gefuehrt und als ausgeschieden,
+    und welche der beiden Zeilen angewandt wird, entscheidet die
+    Reihenfolge im Quelltext."""
+    doppelt = sorted(set(mod.FORM_UEBERSTEUERUNG) & set(mod.AUSGESCHIEDEN))
+    assert doppelt == [], "%s steht in beiden Listen" % doppelt
+
+
 def test_ausgeschiedene_formen_bleiben_ausgeschieden(mod, dex):
     """Die Gegenrichtung: taucht eine ausgeschiedene Form wieder im
     Pokedex auf, muss ihr Schluessel zurueck in die Uebersteuerung.

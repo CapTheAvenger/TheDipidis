@@ -200,6 +200,15 @@
         } catch (e) {
             console.warn('[ProfileDeckBuilder] save failed', e);
         }
+        // Wer sonst auf dieses Deck schaut, zieht seine Zaehler nach.
+        // Der Cardbinder der Masterclass zeigt an jeder Karte, wie oft
+        // sie schon im Deck liegt — ohne dieses Signal muesste er
+        // pollen oder falsch anzeigen.
+        try {
+            document.dispatchEvent(new CustomEvent('profileDeckChanged', {
+                detail: { total: countCards(_deck) },
+            }));
+        } catch (_) { /* aeltere Browser: dann eben kein Signal */ }
     }
 
     // ── Pure helpers (unit-tested) ───────────────────────────────────
@@ -794,8 +803,20 @@
 
     // ── Deck mutations ──────────────────────────────────────────────
 
+    // BEFUND (25.09.2026): addCard() legte bei `_deck === null` ein LEERES
+    // Deck an und rief danach saveDeck() — localStorage war damit
+    // ueberschrieben. `_deck` ist aber nur nach activate() gefuellt, und
+    // der Cardbinder der Masterclass legt Karten ins Deck, ohne dass der
+    // Profil-Reiter je offen war. Das hat dort das gespeicherte Deck des
+    // Nutzers stillschweigend geleert. Deshalb: aus dem Speicher lesen,
+    // nie ein leeres Deck erfinden.
+    function ensureDeck() {
+        if (!_deck) _deck = loadDeck();
+        return _deck;
+    }
+
     function addCard(card) {
-        if (!_deck) _deck = emptyDeck();
+        ensureDeck();
         const key = cardKey(card);
         const existing = _deck.cards.find(c => cardKey(c) === key);
         if (existing) {
@@ -825,6 +846,98 @@
         saveDeck();
         renderDeckPanel();
         renderMulligan();
+    }
+
+    /* ── Was der Cardbinder der Masterclass braucht ────────────────────
+     *
+     * ANLASS (Betreiber, 25.09.2026): „So das ich direkt auf der
+     * gespielten Karte mit + dann die Karte ins Deck packen kann und am
+     * besten wird dann die Karte so oft ins Deck gepackt wird wie sie im
+     * Durschnitt gespielt wurde … wichtig ist dann auch da ich auf der
+     * Karte sehe in der Masterclass wie oft ich die dann schon in mein
+     * Deck gepackt habe und von Da aus das Deck natürlich in meine Decks
+     * Speichern können".
+     *
+     * Drei Dinge, die addCard() nicht kann: mehrere Kopien in EINEM Zug
+     * (sonst blinkt bei jeder Kopie ein Hinweis und es wird dreimal
+     * gezeichnet), die aktuelle Anzahl LESEN, und das Deck ins Konto
+     * schreiben. Sie stehen hier und nicht im Cardbinder, damit es
+     * genau EIN Deck gibt — dasselbe, das der Profil-Reiter zeigt.
+     */
+
+    /* Anzahl dieser Karte im Deck. Liest den Speicher, wenn der
+     * Profil-Reiter noch nie offen war. */
+    function countOf(card) {
+        const deck = ensureDeck();
+        const key = cardKey(card);
+        const hit = (deck.cards || []).find(c => cardKey(c) === key);
+        return hit ? (hit.count || 0) : 0;
+    }
+
+    /* Legt bis zu `n` Kopien ins Deck und sagt, wie viele es wurden.
+     * Die Obergrenze (4, ausser Basis-Energie) wird eingehalten, ohne
+     * je Kopie einen Hinweis einzublenden. */
+    function addCopies(card, n) {
+        const deck = ensureDeck();
+        const wunsch = Math.max(0, Math.floor(Number(n) || 0));
+        if (!card || !wunsch) return { hinzugefuegt: 0, grenze: false };
+        const key = cardKey(card);
+        let existing = deck.cards.find(c => cardKey(c) === key);
+        const unlimited = isBasicEnergy(existing || card);
+        const platz = unlimited ? wunsch
+            : Math.max(0, MAX_PER_CARD - (existing ? existing.count || 0 : 0));
+        const wirklich = Math.min(wunsch, platz);
+        if (!wirklich) return { hinzugefuegt: 0, grenze: true };
+        if (existing) {
+            existing.count += wirklich;
+        } else {
+            deck.cards.push({
+                set:         card.set,
+                number:      card.number,
+                name_en:     card.name_en,
+                name_de:     card.name_de,
+                type:        card.type,
+                energy_type: card.energy_type,
+                rarity:      card.rarity,
+                image_url:   card.image_url,
+                is_japanese: !!card.is_japanese,
+                count:       wirklich,
+            });
+        }
+        saveDeck();
+        renderDeckPanel();
+        renderMulligan();
+        return { hinzugefuegt: wirklich, grenze: wirklich < wunsch };
+    }
+
+    /* Die Schluesselform von „Meine Decks": `Name (SET NUMMER)`. Dieselbe,
+     * die js/app-cards-db.js:3996 baut und die firebase-collection.js
+     * beim Lesen wieder auseinandernimmt. Englischer Name, weil der
+     * Bestand dort englisch gefuehrt wird. */
+    function meineDecksSchluessel(card) {
+        const name = card.name_en || card.name_de || '';
+        return `${name} (${(card.set || '').toUpperCase()} ${card.number || ''})`;
+    }
+
+    /* Schreibt das Deck als NEUES Deck ins Konto. Kein bestehendes Deck
+     * wird angefasst: ohne `id` legt saveDeck() eines an. */
+    function saveToAccount(name) {
+        const deck = ensureDeck();
+        const karten = (deck.cards || []).filter(c => (c.count || 0) > 0);
+        if (!karten.length) return { ok: false, grund: 'leer' };
+        if (typeof window.saveDeck !== 'function') return { ok: false, grund: 'kein-konto' };
+        const cards = {};
+        for (const c of karten) {
+            const k = meineDecksSchluessel(c);
+            cards[k] = (cards[k] || 0) + (c.count || 0);
+        }
+        const nutzlast = {
+            name: String(name || deck.name || '').trim() || 'Deck',
+            cards,
+            totalCards: Object.values(cards).reduce((s, n) => s + n, 0),
+        };
+        window.saveDeck(nutzlast);
+        return { ok: true, karten: nutzlast.totalCards, name: nutzlast.name };
     }
 
     function removeOne(key) {
@@ -1484,9 +1597,15 @@
         mergeCardSources,
         openZoomModal,
         closeZoomModal,
+        meineDecksSchluessel,
         // Action surface
         activate,
         getDeck: () => _deck,
         clearDeck,
+        // Fuer den Cardbinder der Masterclass — ein Deck, eine Ablage.
+        countOf,
+        addCopies,
+        removeOne,
+        saveToAccount,
     };
 })();

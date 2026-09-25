@@ -703,3 +703,83 @@ test('der Deckblock traegt die Knoepfe zum Speichern, Kopieren und Leeren', () =
     ['data-mcl-bdspeichern', 'data-mcl-bdkopieren', 'data-mcl-bdleeren', 'data-mcl-bddeckname']
         .forEach((a) => assert.ok(s.includes(a), `${a} fehlt im Deckblock:\n` + s));
 });
+
+/* ── 9 · Basis-Energien und Deckzeilen ────────────────────────────────
+ *
+ * BEFUNDE (Betreiber, 25.09.2026, am Bildschirmfoto der offenen Mappe):
+ *
+ *   „für Basis Metal brauchen wir nicht verschiede Prints zeigen, eins
+ *    reicht"
+ *   „beim Deckbau auch noch die möglichkeit mehr kopien einer Karte
+ *    zulassen und natürlich auch kleine Bilder anzeigen. Wie im Deck
+ *    Builder feature halt"
+ */
+
+test('die weiteren Drucke einer Basis-Energie stehen an der Kachel, nicht als eigene', () => {
+    const { binderKarteHtml } = ladeKachel();
+    const energie = karte({
+        name: 'Metal Energy', name_de: 'Metall-Energie', set: 'MEE', nummer: '8',
+        gruppe: 'basic-energy',
+        weitere_drucke: [
+            { set: 'MEE', nummer: '16', listen_mit_karte: 42, schnitt: 15.94 },
+            { set: 'EVO', nummer: '98', listen_mit_karte: 8, schnitt: 17.25 }
+        ]
+    });
+    const html = binderKarteHtml(energie, 'alle');
+    assert.ok(html.includes('mcl-bd-weitere'), 'die weiteren Drucke werden verschwiegen:\n' + html);
+    assert.ok(/\+2 binderWeitereDruckeMz/.test(html), 'die ZAHL der weiteren Drucke fehlt');
+    assert.ok(/MEE-16: 42/.test(html), 'der Hinweis nennt den weiteren Druck nicht mit seiner Zahl');
+    /* Und keine Summe: 2592 + 42 + 8 waeren 2642 bei 2641 Listen. */
+    assert.ok(!html.includes('2642'), 'die Listenzahlen wurden addiert — das zaehlt Listen doppelt');
+
+    const ohne = binderKarteHtml(karte({ gruppe: 'basic-energy' }), 'alle');
+    assert.ok(!ohne.includes('mcl-bd-weitere'),
+        'eine Energie ohne weitere Drucke traegt trotzdem die Marke');
+});
+
+test('eine Deckzeile zeigt ein Bild und laesst eine Kopie mehr zu', () => {
+    const mappe = [karte({
+        name: 'Drilbur', set: 'PBL', nummer: '46', gruppe: 'pokemon',
+        bild: 'https://example.invalid/pbl046.png'
+    })];
+    const deck = [{ set: 'PBL', number: '46', name_en: 'Drilbur', name_de: 'Rotomurf',
+        type: 'Basic', count: 3 }];
+    const s = ladeDeckblock(deck, mappe).html(G);
+    assert.ok(s.includes('mcl-bd-dbild'), 'kein Bild in der Deckzeile:\n' + s);
+    assert.ok(s.includes('https://example.invalid/pbl046.png'),
+        'das Bild der Mappe wird nicht genommen');
+    assert.ok(/data-mcl-bdplus1="PBL-46"/.test(s),
+        'aus dem Deck heraus laesst sich keine Kopie mehr hinzufuegen');
+    assert.ok(/data-mcl-bdminus="PBL-46"/.test(s), 'das − fehlt');
+});
+
+test('das Plus in der Deckzeile legt GENAU eine Karte hinein', () => {
+    /* Das + an der Kachel legt die Durchschnittsmenge hinein; das + in
+     * der Zeile ist die Feinjustierung. Wuerden beide dasselbe tun,
+     * waere die Zeile unbrauchbar. */
+    const quelle = schneideFunktion(JS, 'binderPlus');
+    const gerufen = [];
+    const ktx = {
+        assert,
+        deckBauer: () => ({ addCopies: (k, n) => { gerufen.push(n); return { hinzugefuegt: n }; } }),
+        binderMappeIndex: () => ({ 'PBL-46': karte({}) }),
+        binderMenge: () => 4,
+        binderDeckKarte: (k) => k,
+        binderStand: {},
+        binderStandNeu: () => ({ meta: 'alle', sort: 'standard', nurTim: false }),
+        binderZaehlerNachziehen: () => {},
+        binderMeldung: () => {},
+        T: (k) => k
+    };
+    vm.createContext(ktx);
+    vm.runInContext(quelle, ktx);
+    const binderPlus = vm.runInContext('binderPlus', ktx);
+    binderPlus({}, { id: 'probe' }, 'PBL-46');       // Kachel
+    binderPlus({}, { id: 'probe' }, 'PBL-46', 1);    // Deckzeile
+    assert.deepStrictEqual([...gerufen], [4, 1]);
+});
+
+test('das Bild und der Knopf haben Regeln im Stilblatt', () => {
+    ['.mcl-bd-dbild', '.mcl-bd-plus1', '.mcl-bd-weitere']
+        .forEach((k) => assert.ok(CSS.includes(k), `Regel fehlt: ${k}`));
+});

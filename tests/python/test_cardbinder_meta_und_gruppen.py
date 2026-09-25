@@ -420,3 +420,86 @@ def test_die_turnierklassen_kommen_aus_der_archetypdatei():
             assert tab.get(t) == k, (
                 "Turnier %s fuehrt in der Datei %r, die Tabelle sagt %r"
                 % (t, k, tab.get(t)))
+
+
+# ── 4 · Basis-Energien ────────────────────────────────────────────────
+
+def test_jede_basis_energieart_steht_genau_einmal():
+    """BEFUND (Betreiber, 25.09.2026): „für Basis Metal brauchen wir
+    nicht verschiede Prints zeigen, eins reicht“.
+
+    Die Mappe fuehrte drei Metall-Kacheln (MEE-8 mit 2592 Listen, MEE-16
+    mit 42, EVO-98 mit 8). Fuer den Deckbau sind Basis-Energien
+    austauschbar.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "cb_energie", os.path.join(WURZEL, "scripts", "build_masterclass_cardbinder.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    for name, d in _mappen():
+        arten = {}
+        for k in d.get("karten") or []:
+            if k.get("gruppe") != "basic-energy":
+                continue
+            art = mod._energieart(k.get("name"))
+            arten.setdefault(art, []).append(k["set"] + "-" + k["nummer"])
+        doppelt = {a: v for a, v in arten.items() if len(v) > 1}
+        assert doppelt == {}, (
+            "%s zeigt mehrere Kacheln derselben Energieart: %s" % (name, doppelt))
+
+
+def test_der_gezeigte_druck_ist_der_meistgespielte_und_die_anderen_stehen_daneben():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "cb_energie2", os.path.join(WURZEL, "scripts", "build_masterclass_cardbinder.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    def e(nummer, listen):
+        return {"name": "Metal Energy", "set": "MEE", "nummer": nummer,
+                "gruppe": "basic-energy",
+                "gesamt": {"listen_mit_karte": listen, "schnitt": 15.0},
+                "preis": {"eur": 0.02}}
+
+    # Absichtlich in falscher Reihenfolge: der kleinste zuerst.
+    raus = mod.energien_zusammenfassen([e("16", 42), e("8", 2592), e("98", 8)])
+    assert len(raus) == 1, "die Drucke wurden nicht zusammengefasst"
+    assert raus[0]["nummer"] == "8", (
+        "gezeigt wird nicht der meistgespielte Druck, sondern %s" % raus[0]["nummer"])
+    weitere = [w["nummer"] for w in raus[0]["weitere_drucke"]]
+    assert weitere == ["16", "98"], (
+        "die anderen Drucke fehlen oder stehen in falscher Reihenfolge: %s" % weitere)
+    # Und keine Summe.
+    assert raus[0]["gesamt"]["listen_mit_karte"] == 2592, (
+        "die Listenzahlen wurden addiert — 2592+42+8 sind 2642 bei 2641 Listen, "
+        "also zaehlte das Listen doppelt")
+
+
+def test_basic_und_ohne_basic_sind_dieselbe_energieart():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "cb_energie3", os.path.join(WURZEL, "scripts", "build_masterclass_cardbinder.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert mod._energieart("Basic Metal Energy") == mod._energieart("Metal Energy")
+    assert mod._energieart("Metal Energy") != mod._energieart("Psychic Energy")
+
+
+def test_nur_basis_energien_werden_zusammengefasst():
+    """Zwei Drucke desselben Supporters sind NICHT austauschbar — der
+    Kartentext kann sich unterscheiden, und die Deckliste nennt den
+    Druck."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "cb_energie4", os.path.join(WURZEL, "scripts", "build_masterclass_cardbinder.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    karten = [
+        {"name": "Iono", "set": "PAL", "nummer": "185", "gruppe": "supporter",
+         "gesamt": {"listen_mit_karte": 100}},
+        {"name": "Iono", "set": "PAF", "nummer": "80", "gruppe": "supporter",
+         "gesamt": {"listen_mit_karte": 20}},
+    ]
+    assert len(mod.energien_zusammenfassen(karten)) == 2

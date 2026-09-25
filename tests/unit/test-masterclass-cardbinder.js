@@ -595,8 +595,13 @@ test('die Standardsortierung ist die Voreinstellung', () => {
  */
 
 function ladeDeckblock(deckKarten, mappe) {
+    /* binderDeckWissen und das Namensregister gehoeren seit dem
+     * 25.09.2026 dazu: ein getauschter Druck steht nicht in der Mappe und
+     * findet Gruppe, Art und ACE SPEC ueber die KARTE. */
     const namen = ['binderDeckHtml', 'binderDeckKachelHtml', 'binderDeckText',
-        'binderDeckKarten', 'binderMappeIndex', 'binderZahl', 'binderDruck', 'deckBauer'];
+        'binderDeckKarten', 'binderMappeIndex', 'binderMappeNamen',
+        'binderKartenSchluessel', 'binderDeckWissen', 'binderZahl',
+        'binderDruck', 'deckBauer'];
     const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
     const roh = /var BINDER_GRUPPEN = (\[[^\]]*\]);/.exec(JS);
     const txt = /var BINDER_GRUPPE_TXT = (\{[^}]*\});/.exec(JS);
@@ -773,6 +778,10 @@ test('das Plus in der Deckzeile legt GENAU eine Karte hinein', () => {
     const ktx = {
         assert,
         deckBauer: () => ({ addCopies: (k, n) => { gerufen.push(n); return { hinzugefuegt: n }; } }),
+        /* Seit dem 25.09.2026 fragt binderPlus die Kartenkenntnis, nicht
+         * mehr nur das Druckregister — ein getauschter Druck steht dort
+         * nicht, und das + tat sonst nichts. */
+        binderWissenZuDruck: () => ({ k: karte({}), a: karte({}) }),
         binderMappeIndex: () => ({ 'PBL-46': karte({}) }),
         binderMenge: () => 4,
         binderDeckKarte: (k) => k,
@@ -850,7 +859,9 @@ test('Basis-Pokemon werden gezaehlt, auch mit Elementbuchstabe davor', () => {
  */
 
 function ladeTausch(deckKarten, mappe) {
-    const namen = ['binderDruckTauschen', 'binderDeckKarten', 'binderMappeIndex', 'binderDruck', 'deckBauer'];
+    const namen = ['binderDruckTauschen', 'binderDeckKarten', 'binderMappeIndex',
+        'binderMappeNamen', 'binderKartenSchluessel', 'binderDeckWissen',
+        'binderWissenZuDruck', 'binderDruck', 'deckBauer'];
     const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
     const rufe = [];
     let deck = deckKarten.slice();
@@ -912,7 +923,9 @@ test('passt nicht alles, wird das gesagt statt verschluckt', () => {
      * was nicht passt, muss dastehen. */
     const mappe = [karte({ set: 'PBL', nummer: '46' })];
     const deck = [{ set: 'PBL', number: '46', name_en: 'Drilbur', count: 6 }];
-    const namen = ['binderDruckTauschen', 'binderDeckKarten', 'binderMappeIndex', 'binderDruck', 'deckBauer'];
+    const namen = ['binderDruckTauschen', 'binderDeckKarten', 'binderMappeIndex',
+        'binderMappeNamen', 'binderKartenSchluessel', 'binderDeckWissen',
+        'binderWissenZuDruck', 'binderDruck', 'deckBauer'];
     const quelle = namen.map((n) => schneideFunktion(JS, n)).join('\n');
     const rufe = [];
     const ktx = {
@@ -940,6 +953,10 @@ test('der Cardbinder nimmt den vorhandenen Druckschalter — und faellt nicht in
     const gerufen = [];
     const ktx = {
         assert, T: (k) => k,
+        binderWissenZuDruck: () => ({
+            k: karte({ name: 'Drilbur', set: 'PBL', nummer: '46' }),
+            a: karte({ name: 'Drilbur', set: 'PBL', nummer: '46' })
+        }),
         binderMappeIndex: () => ({ 'PBL-46': karte({ name: 'Drilbur', set: 'PBL', nummer: '46' }) }),
         binderDeckKarten: () => [],
         binderDruckWartet: {},

@@ -25,6 +25,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const FENSTER = require('../formatfenster.js');
+const MUSTER = require('../post-uebergabe-muster.js');
 
 const WURZEL = path.join(__dirname, '..', '..');
 const D = (p) => path.join(WURZEL, p);
@@ -48,10 +49,15 @@ function fenster() {
     vm.createContext(ctx);
     vm.runInContext(fs.readFileSync(D('js/matchup-glaettung.js'), 'utf8'), ctx,
                     { filename: 'matchup-glaettung.js' });
+    /* Die Uebergabe aus der App — Muster und Speicher stehen in
+     * tests/post-uebergabe-muster.js, weil zwei Testdateien sie
+     * brauchen. */
+    MUSTER.uebergabeEinrichten(ctx);
     vm.runInContext(fs.readFileSync(D('js/ds-post-quellen.js'), 'utf8'), ctx,
                     { filename: 'ds-post-quellen.js' });
     return ctx;
 }
+
 
 const Q = fenster().window.DsPostQuellen;
 

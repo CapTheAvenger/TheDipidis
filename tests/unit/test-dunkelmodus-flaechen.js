@@ -245,6 +245,45 @@ describe('Feste helle Flaechen wachsen nicht weiter', () => {
         assert.ok(festeHelleFlaechen().length > 100,
             'der Sucher findet fast nichts mehr — dann ist er kaputt, nicht das CSS sauber');
     });
+
+    /* BEFUND (Betreiber, 25.09.2026, Bildschirmfoto): „hab gefunden, wo
+       ich Meta Call Daten ändern kann, aber das Feld wird weiß."
+
+       Das Eingabefeld der Spalte „Meine Schätzung" bekam mit dem ersten
+       Zeichen die Klasse `has-value` — und die setzte die Flaeche fest
+       auf #f3eafa, waehrend die Schrift an var(--ink) haengt. Im
+       Dunkelmodus ist --ink hell: helle Schrift auf fast weissem Grund.
+       Man tippt eine Zahl ein und sieht sie nicht mehr.
+
+       Das ist nicht irgendeine helle Flaeche aus dem Deckel oben,
+       sondern die gefaehrliche Paarung: FESTE Flaeche unter einer Farbe,
+       die mitdreht. Deshalb steht sie hier einzeln — und zwar an der
+       Stelle, an der ein Nutzer wirklich schreibt. */
+    const EINGABEN = [
+        ['css/meta-call.css', '.mc-personal-input'],
+    ];
+
+    it('kein Eingabefeld traegt eine feste Flaeche unter mitdrehender Schrift', () => {
+        const schlecht = [];
+        EINGABEN.forEach(([datei, wahl]) => {
+            const text = ohneKomm(lies(datei));
+            const regeln = text.split('}');
+            regeln.forEach((r) => {
+                if (r.indexOf(wahl) < 0) return;
+                const koerper = r.slice(r.indexOf('{') + 1);
+                const grund = /background(?:-color)?\s*:\s*([^;]+)/.exec(koerper);
+                if (!grund) return;
+                const wert = grund[1].trim().toLowerCase();
+                if (wert.indexOf('var(') >= 0 || wert === 'none'
+                    || wert === 'transparent' || wert === 'inherit') return;
+                schlecht.push(`${datei}: ${wahl} -> background: ${wert}`);
+            });
+        });
+        assert.deepEqual(schlecht, [],
+            'Feste Flaeche an einem Eingabefeld. Die Schrift dieser Felder haengt an '
+            + '--ink und dreht im Dunkelmodus mit — die Flaeche muss das auch:\n  '
+            + schlecht.join('\n  '));
+    });
 });
 
 /*

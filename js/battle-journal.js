@@ -1505,6 +1505,13 @@
                                 <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentCard('${safeTournKey}','${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.imageSquare', 'Bild im Quadrat (1:1)'))}</button>
                                 <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentSummary('${safeTournKey}', false, '${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.shareTournament', 'Textbild für den Chat'))}</button>
                                 <button type="button" role="menuitem" onclick="bjMenuAction(this, () => shareTournamentSummary('${safeTournKey}', true, '${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Textbild mit Bricks und Notizen'))}</button>
+                                <!-- Derselbe Inhalt auf der Post-Seite: dort
+                                     lassen sich Ueberschrift, Text und Hashtags
+                                     noch aendern (Betreiber, 25.09.2026:
+                                     „gleiches gilt fuer den Battle Journal,
+                                     moechte ich auch ueber Posts in meinem
+                                     Design haben"). -->
+                                <button type="button" role="menuitem" onclick="bjMenuAction(this, () => postTournamentAufPostSeite('${safeTournKey}','${safeMetaKey}'))">${escapeHtml(battleJournalText('bj.postSeite', 'Auf der Post-Seite \u00f6ffnen'))}</button>
                             </div>
                         </div>
                     </div>`;
@@ -2874,6 +2881,63 @@
     };
 
     window.shareTournamentSummary = shareTournamentSummary;
+
+    /* ── DAS TURNIER AUF DER POST-SEITE (25.09.2026) ────────────────
+     *
+     * BESTELLT: „und gleiches gilt fuer den Battle Journal, moechte ich
+     * auch ueber Posts in meinem Design haben."
+     *
+     * Das Hochformat-Poster bleibt, wie es ist. Hier geht derselbe
+     * Inhalt an posts/index.html, wo Ueberschrift, Text und Hashtags
+     * noch zu aendern sind. Eingesammelt wird er von der Funktion, die
+     * auch das Poster fuellt — collectTournamentSpec() in js/ds-share.js:
+     * zwei Sammler haetten zwei Bilanzen ergeben, und genau das war am
+     * 11.09.2026 schon einmal ein Befund (2-1-1 gegen 2-3-1). */
+    window.postTournamentAufPostSeite = function (tournamentName, metaKey) {
+        var U = window.DsPostUebergabe;
+        var teile = window.DsShare && window.DsShare._internals;
+        if (!U || typeof U.oeffnen !== 'function'
+            || !teile || typeof teile.collectTournamentSpec !== 'function') {
+            showToast(battleJournalText('bj.shareCardMissing',
+                'Das Bildmodul ist nicht geladen. Seite neu laden.'), 'warning');
+            return;
+        }
+        var spec = null;
+        try { spec = teile.collectTournamentSpec(tournamentName, { metaKey: metaKey }); }
+        catch (e) { spec = null; }
+        if (!spec) {
+            showToast(battleJournalText('bj.postSeiteLeer',
+                'Fuer dieses Turnier fehlen die Daten.'), 'warning');
+            return;
+        }
+        var erg = U.oeffnen('turnier', spec.tournament, {
+            titel: spec.tournament,
+            format: spec.format || '',
+            art: spec.type || '',
+            datum: spec.date || '',
+            platz: spec.place || null,
+            bilanz: spec.record || null,
+            quote: (typeof spec.winRate === 'number' && isFinite(spec.winRate))
+                ? spec.winRate : null,
+            deck: spec.deck || '',
+            /* Die eingefrorene Liste des Turniers — dieselbe, die das
+             * Poster zeichnet. Ohne sie waere der Post auf der anderen
+             * Seite ein anderes Deck. */
+            karten: (spec.deckSnapshot && spec.deckSnapshot.cards) || null,
+            bilder: U.bildAdressen((spec.deckSnapshot && spec.deckSnapshot.cards) || {}),
+            runden: spec.rounds || []
+        });
+        if (!erg.ok) {
+            showToast(battleJournalText('bj.postSeiteFehler',
+                'Die Uebergabe hat nicht geklappt.') + ' (' + erg.grund + ')', 'error');
+            return;
+        }
+        if (!erg.fenster) {
+            showToast(battleJournalText('bj.postSeiteHand',
+                'Turnier uebergeben. Post-Seite von Hand oeffnen:') + ' ' + erg.adresse,
+                'info', 8000);
+        }
+    };
 
     // Das quadratische Ergebnisbild lebt in js/ds-share.js — hier steht
     // nur die Bruecke, damit der Knopf im Turnierkopf einen Namen zum

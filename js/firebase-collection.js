@@ -2303,15 +2303,36 @@ function updateProfileUI(profile) {
 }
 
 // Update decks UI
-function updateDecksUI() {
+/* Ein Deck nach dem Neuzeichnen wieder aufklappen.
+ *
+ * BEFUND (Betreiber, 25.09.2026): „wenn ich in my decks eine Karte den
+ * Rarity Switcher nutze, klappt sich das Deck wieder ein … ich will,
+ * dass ich mein Deck bearbeiten kann und es aufgeklappt bleibt."
+ *
+ * Plus und Minus machen das laengst (zwei Stellen weiter unten); der
+ * Druckwechsel rief updateDecksUI() ohne diesen Schritt. Damit ist es
+ * EINE Sache statt dreier Abschriften. */
+function deckAufklappen(deckId) {
+  const inhalt = document.getElementById(deckId);
+  if (!inhalt) return false;
+  inhalt.style.display = 'block';
+  const pfeil = document.getElementById(`${deckId}-arrow`);
+  if (pfeil) pfeil.style.transform = 'rotate(180deg)';
+  return true;
+}
+window.deckAufklappen = deckAufklappen;
+
+/* Das bearbeitete Deck bleibt offen — und nur dieses.
+ *
+ * Die Regel von 2026-05-05 („jedes Neuzeichnen beginnt zugeklappt")
+ * bleibt: sie verhindert, dass die Liste ueber die Sitzung hinweg
+ * aufgeht. Wer aber gerade IN einem Deck arbeitet, hat es nicht
+ * zugeklappt haben wollen. Deshalb bekommt updateDecksUI die Kennung
+ * des Decks, dessen Bearbeitung das Neuzeichnen ausgeloest hat — alles
+ * andere bleibt zu. */
+function updateDecksUI(offenHalten) {
   const decksGrid = document.getElementById('decks-grid');
   if (!decksGrid) return;
-
-  // Per user preference (2026-05-05): every render starts with all
-  // decks collapsed. The previous "remember + restore expanded state"
-  // pass made the My Decks list creep open over time as the user
-  // opened decks during a session, then never collapsed again on
-  // re-render — visually noisier than just starting fresh.
 
   // Update deck count
   const decksCount = document.getElementById('profile-decks-count');
@@ -2844,6 +2865,12 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" class="deck-action-btn deck-btn-export" title="${getLang()==='de' ? 'Als Bild speichern' : 'Save as image'}">
               ${getLang()==='de' ? 'Bild' : 'Image'}
             </button>
+            <button onclick="event.stopPropagation(); postSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-post" title="${getLang()==='de' ? 'Post im Instagram-Format (1080\u00d71350) erzeugen und teilen' : 'Create the Instagram post (1080\u00d71350) and share it'}">
+              ${getLang()==='de' ? 'Post' : 'Post'}
+            </button>
+            <button onclick="event.stopPropagation(); postSavedDeckAufPostSeite(${deckIndex})" class="deck-action-btn deck-btn-postseite" title="${getLang()==='de' ? 'Dieses Deck auf der Post-Seite \u00f6ffnen (\u00dcberschrift, Text und Hashtags dort)' : 'Open this deck on the posts page (headline, caption and hashtags there)'}">
+              ${getLang()==='de' ? 'Post-Seite' : 'Posts page'}
+            </button>
             <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" class="deck-action-btn deck-btn-rename" title="${getLang()==='de' ? 'Umbenennen' : 'Rename'}">
               ${getLang()==='de' ? 'Umbenennen' : 'Rename'}
             </button>
@@ -2880,8 +2907,16 @@ function updateDecksUI() {
     `;
   }).join('');
   
-  // No restore-expanded pass — see the comment at the top of
-  // updateDecksUI for why every render starts collapsed.
+  /* Kein Wiederherstellen aller vorher offenen Decks — nur das eine,
+   * das gerade bearbeitet wurde (siehe den Absatz ueber der Funktion).
+   * `offenHalten` ist die Deck-Kennung aus dem Konto, nicht die
+   * laufende Nummer: die Reihenfolge der Liste kann sich beim
+   * Neuzeichnen aendern. */
+  if (offenHalten) {
+    const i = (window.userDecks || []).findIndex(
+      d => d && String(d.id) === String(offenHalten));
+    if (i >= 0) deckAufklappen(`saved-deck-${i}`);
+  }
 
   // Render folder navigation if any folders exist
   renderFolderNav();
@@ -2961,10 +2996,7 @@ async function myDeckChangeCardCount(deckIndex, deckKey, delta) {
   });
   updateDecksUI();
   // Re-open the deck after UI rebuild
-  setTimeout(() => {
-    const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
-    if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
-  }, 50);
+  setTimeout(() => deckAufklappen(`saved-deck-${deckIndex}`), 50);
 }
 
 // ============================================================
@@ -2986,10 +3018,7 @@ async function myDeckRemoveCard(deckIndex, deckKey) {
   });
   showNotification(getLang() === 'de' ? 'Karte entfernt' : 'Card removed', 'success');
   updateDecksUI();
-  setTimeout(() => {
-    const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
-    if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
-  }, 50);
+  setTimeout(() => deckAufklappen(`saved-deck-${deckIndex}`), 50);
 }
 
 // ============================================================
@@ -3024,12 +3053,7 @@ async function myDeckAddCard(deckIndex, cardName, setCode, setNumber) {
     showNotification(`${cardName} ${getLang() === 'de' ? 'hinzugefügt' : 'added'}`, 'success');
     updateDecksUI();
     // Re-open the deck after UI rebuild
-    setTimeout(() => {
-      const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
-      if (deckEl && deckEl.style.display === 'none') {
-        toggleDeckCollapse(`saved-deck-${deckIndex}`);
-      }
-    }, 100);
+    setTimeout(() => deckAufklappen(`saved-deck-${deckIndex}`), 100);
   } catch (error) {
     console.error('Error adding card:', error);
     showNotification(fcText('notif.deckError', 'Error updating deck'), 'error');
@@ -3143,8 +3167,7 @@ function _persistTechOptions(deck) {
 function _refreshDeckUiKeepOpen(deckIndex, keepTechOpen) {
   updateDecksUI();
   setTimeout(() => {
-    const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
-    if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
+    deckAufklappen(`saved-deck-${deckIndex}`);
     if (keepTechOpen) toggleTechOptions(`saved-deck-${deckIndex}`);
   }, 60);
 }

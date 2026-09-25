@@ -10645,6 +10645,10 @@ window.MetaCall = (function () {
     <button type="button" class="mc-bild-btn" onclick="MetaCall.generateTournamentImage()">
       ${esc(t('mc.generateImage'))}
     </button>
+    <button type="button" class="mc-bild-btn mc-bild-btn-leise" onclick="MetaCall.postSeiteOeffnen()"
+            title="${esc(t('mc.postSeiteHint'))}">
+      ${esc(t('mc.postSeite'))}
+    </button>
     <span class="mc-bild-hinweis">${esc(t('mc.generateImageHint'))}</span>
   </div>
 </div>`;
@@ -15463,6 +15467,170 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     return aus.sort((a, b) => b.finalShare - a.finalShare);
   }
 
+  /* ── DER META CALL AUF DER POST-SEITE (25.09.2026) ──────────────
+   *
+   * BESTELLT (Betreiber): „diese ganzen Meta Share Daten fuer ein
+   * Turnier will ich gerne als Post haben, sowohl einzeln als auch als
+   * Karussell und das koennen wir ja ueber thedipidis.app/posts/ machen,
+   * es muss nur sichergestellt werden, dass ich meine Meta Share
+   * gespeicherten Daten in Posts laden kann und dann welches Deck ich
+   * spiele und dann geht es los."
+   *
+   * Der eine Knopf daneben macht EIN Bild (die Top 10 des Feldes). Hier
+   * geht der ganze Stand hinueber: Feld, das eigene Deck mit seinem
+   * Ergebnis, die erwarteten Begegnungen und die Empfehlungen. Auf der
+   * Post-Seite wird daraus je ein Bild — oder alle vier als Karussell.
+   *
+   * GERECHNET WIRD HIER, NICHT DRUEBEN. Die Post-Seite hat weder die
+   * Kette noch die Paarungsmatrix; sie bekommt fertige Zahlen aus
+   * denselben Funktionen, die auch die Tabelle fuellen
+   * (_prognostiziertesFeld, calcDay2, getMatchup). Ein zweiter
+   * Rechenweg waere die sichere Art, zwei verschiedene Day-2-Chancen zu
+   * bekommen.
+   *
+   * WAS NICHT MITGEHT: nichts aus dem Konto, kein Name, keine Kennung.
+   * Nur Zahlen, die auch auf dem Bild stehen. */
+  /* Ein Stand des Meta Calls, so wie ihn die Post-Seite braucht: das
+   * Feld, je waehlbarem Deck das Ergebnis und die Paarungen, und die
+   * Empfehlungen. Zweimal gerufen — einmal mit den eigenen
+   * Schaetzungen, einmal ohne. */
+  function _postStand(feldRoh, deckNamen) {
+    const feld = feldRoh.filter(d => d && d.name && d.name !== '_junk');
+    const summe = feld.reduce((s, d) => s + (d.finalShare || 0), 0) || 1;
+    const anteile = feld.slice(0, 20).map(d => ({
+      name: d.name,
+      anteil: (d.finalShare || 0),
+      /* Wie oft man ihm in den Runden begegnet — dieselbe Rechnung wie
+         in der Spalte „Ø Begegnungen" des Reiters. */
+      schnitt: (_settings.rounds || 0) * (d.finalShare || 0) / 100
+    }));
+    const decks = {};
+    deckNamen.forEach(name => {
+      if (!name) return;
+      let r = null;
+      try { r = calcDay2(feldRoh, name); } catch (e) { r = null; }
+      if (!r) return;
+      const quoten = {};
+      anteile.forEach(g => {
+        try {
+          const m = getBaseMatchup(name, g.name);
+          const nenner = (m.pWin || 0) + (m.pLoss || 0);
+          /* „Matchup" rechnet ohne Unentschieden — S/(S+N), wie im
+             Reiter und in der Fusszeile des Bildes. */
+          if (nenner > 0) quoten[g.name] = (m.pWin / nenner) * 100;
+        } catch (e) { /* ohne Messung keine Zahl */ }
+      });
+      decks[name] = {
+        ergebnis: {
+          day2: (r.day2Prob || 0) * 100,
+          wins: r.expWin, ties: r.expTie, losses: r.expLoss,
+          quote: _settings.rounds ? (r.expWin / _settings.rounds) * 100 : null
+        },
+        quoten: quoten
+      };
+    });
+    let empfehlungen = [];
+    try {
+      empfehlungen = (typeof calcRecommendations === 'function'
+        ? calcRecommendations(feldRoh, 10) : []).map(r => ({
+          name: r.name, day2: (r.day2Prob || 0) * 100, quote: r.avgWR || null
+        }));
+    } catch (e) { empfehlungen = []; }
+    return { feld: anteile, decks: decks, empfehlungen: empfehlungen, summe: summe };
+  }
+
+  /* ── DER META CALL AUF DER POST-SEITE (25.09.2026) ──────────────
+   *
+   * BESTELLT (Betreiber): „diese ganzen Meta Share Daten fuer ein
+   * Turnier will ich gerne als Post haben, sowohl einzeln als auch als
+   * Karussell … es muss nur sichergestellt werden, dass ich meine Meta
+   * Share gespeicherten Daten in Posts laden kann und dann welches Deck
+   * ich spiele und dann geht es los." Und: „ich brauche als Post 1x
+   * Standard Meta Call und meine gespeicherte Prognose."
+   *
+   * Also gehen ZWEI STAENDE hinueber:
+   *
+   *   eigen     das Feld, wie es mit seinen Schaetzungen dasteht
+   *   standard  dasselbe Feld ohne sie — die reine Modellprognose
+   *
+   * Und zwar VOLLSTAENDIG je Stand: Day-2-Chance und Paarungen sind
+   * gegen das jeweilige Feld gerechnet. Wer die Standard-Prognose zeigt
+   * und darunter eine Day-2-Chance, die gegen ein anderes Feld
+   * gerechnet wurde, postet zwei Zahlen, die nicht zusammengehoeren.
+   *
+   * WELCHE DECKS: das eigene plus die zehn Empfehlungen. Die Post-Seite
+   * kann keine Paarung rechnen — sie hat weder Matrix noch Kette —,
+   * deshalb geht die Auswahl fertig mit. Zehn sind genug, um „welches
+   * Deck spiele ich" zu beantworten, und klein genug fuer den
+   * Speicher.
+   *
+   * WAS NICHT MITGEHT: nichts aus dem Konto, kein Name, keine Kennung.
+   * Nur Zahlen, die auch auf dem Bild stehen.
+   */
+  function postSeiteOeffnen() {
+    const U = window.DsPostUebergabe;
+    if (!U || typeof U.oeffnen !== 'function') {
+      if (typeof showToast === 'function') showToast(t('mc.generateImageMissing'), 'error');
+      return;
+    }
+    const eigenFeld = buildField();
+    if (!eigenFeld || !eigenFeld.length) {
+      if (typeof showToast === 'function') showToast(t('mc.generateImageEmpty'), 'error');
+      return;
+    }
+    /* Das Feld ohne die eigenen Schaetzungen — dieselbe Funktion, nur
+       mit leerer Schaetzungsliste. Ein zweiter Rechenweg waere die
+       sichere Art, zwei verschiedene Standardprognosen zu bekommen. */
+    const merkeEigene = _personalShares;
+    let standardFeld;
+    try {
+      _personalShares = {};
+      standardFeld = buildField();
+    } finally {
+      _personalShares = merkeEigene;
+    }
+
+    const meinDeck = (_settings.myDeck || '').trim();
+    const kandidaten = [];
+    if (meinDeck) kandidaten.push(meinDeck);
+    try {
+      (calcRecommendations(eigenFeld, 10) || []).forEach(r => {
+        if (r && r.name && kandidaten.indexOf(r.name) < 0) kandidaten.push(r.name);
+      });
+    } catch (e) { /* dann eben nur das eigene Deck */ }
+
+    const hatEigene = Object.keys(merkeEigene || {}).length > 0;
+    const erg = U.oeffnen('metacall', (_settings.tournamentName || '').trim(), {
+      titel: (_settings.tournamentName || '').trim(),
+      art: t(_typeLabelI18nKey(_settings.tournamentType)),
+      /* Dieselbe Angabe, die im Kopf des Reiters steht. */
+      format: (_metaSource === 'past'
+        ? ('Past Meta: ' + (_pastMetaFormatKey || '?'))
+        : ('Current Meta' + ((() => { const c = _displayInPersonSetCode(); return c ? ' (' + c + ')' : ''; })()))),
+      spieler: _settings.totalPlayers || null,
+      runden: _settings.rounds || null,
+      day2Punkte: _settings.day2Points || null,
+      meinDeck: meinDeck,
+      /* Ob ueberhaupt eigene Schaetzungen drinstecken — sonst bietet die
+         Post-Seite zwei Quellen an, hinter denen dasselbe steht. */
+      eigeneSchaetzungen: hatEigene,
+      szenario: _currentScenarioName || '',
+      staende: {
+        eigen: _postStand(eigenFeld, kandidaten),
+        standard: _postStand(standardFeld, kandidaten)
+      }
+    });
+    if (!erg.ok) {
+      if (typeof showToast === 'function') {
+        showToast(t('mc.postSeiteFehler') + ' (' + erg.grund + ')', 'error');
+      }
+      return;
+    }
+    if (!erg.fenster && typeof showToast === 'function') {
+      showToast(t('mc.postSeiteHand') + ' ' + erg.adresse, 'info', 8000);
+    }
+  }
+
   function generateTournamentImage() {
     if (!window.DsShare || typeof window.DsShare.shareMetaCallPost !== 'function') {
       if (typeof showToast === 'function') {
@@ -16650,6 +16818,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _onSettingCommit,
     _onTournamentName,
     generateTournamentImage,
+    postSeiteOeffnen,
     _setTournamentType,
     _setMetaCallMode,
     _onToggleSource,

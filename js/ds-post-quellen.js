@@ -1650,6 +1650,393 @@ REZEPTE['deck-bilanz'] = {
     }
 };
 
+/* ── 14 · Was die App herübergereicht hat ──────────────────────────
+ *
+ * BESTELLT (Betreiber, 25.09.2026): „ich hätte in My Decks gerne direkt
+ * eine Posts Option … oder zumindest auf der Posts Seite, dass ich das
+ * Deck dort aufrufen kann und es posten kann … und gleiches gilt für den
+ * Battle Journal."
+ *
+ * WARUM DIESE QUELLE ANDERS IST ALS DIE DREIZEHN DARÜBER
+ * ------------------------------------------------------
+ * Alle anderen lesen eine Datei aus data/ — Zahlen, die für jeden
+ * gelten. Diese hier liest den lokalen Speicher: ein Deck aus „Meine
+ * Decks" oder ein Turnier aus dem Battle Journal, beides persönlich und
+ * beides im Konto, an das diese Seite nie käme. Die App legt es ab
+ * (js/ds-post-uebergabe.js), hier wird es aufgenommen.
+ *
+ * DIE BILDADRESSEN KOMMEN MIT, SIE WERDEN NICHT GERATEN. Set und
+ * Nummer ergäben für japanische Sets, Prize-Pack-Drucke und
+ * Proxy-Ersatz die falsche Adresse; die App weiß es und schickt es
+ * deshalb mit.
+ *
+ * OHNE ÜBERGABE STEHT HIER KEIN PLATZHALTER, sondern der Satz, was zu
+ * tun ist. Eine Quelle, die leer lädt und so tut, als sei das ein
+ * Ergebnis, ist die unangenehmste Sorte Fehler.
+ */
+function uebergabeKarten(paket) {
+    var d = (paket && paket.daten) || {};
+    var karten = d.karten || {};
+    var bilder = d.bilder || {};
+    var liste = Object.keys(karten).map(function (key) {
+        var m = String(key).match(/^(.*?)\s*\(([^()\s]+)\s+([^()\s]+)\)\s*$/);
+        return {
+            name: m ? m[1].trim() : String(key),
+            set: m ? m[2].trim() : '',
+            nummer: m ? m[3].trim() : '',
+            anzahl: parseInt(karten[key], 10) || 0,
+            url: bilder[key] || ''
+        };
+    }).filter(function (k) { return k.anzahl > 0; });
+    /* Dieselbe Lesereihenfolge wie auf jeder Deckliste: viele zuerst,
+       dann der Name. Eine Sortierung nach Kartenart bräuchte die
+       Kartendatenbank, und die hat diese Seite nicht — das wäre geraten. */
+    liste.sort(function (a, b) {
+        return b.anzahl - a.anzahl || a.name.localeCompare(b.name, 'en');
+    });
+    return liste;
+}
+
+/* DIE SCHEIBEN EINES META CALLS.
+ *
+ * BESTELLT (Betreiber, 25.09.2026): „diese ganzen Meta Share Daten für
+ * ein Turnier will ich gerne als Post haben, sowohl einzeln als auch als
+ * Karussell … dann wähle ich noch mein Deck aus, was ich spielen will,
+ * und dann kann ich die verschiedenen Posts generieren lassen." Und:
+ * „ich brauche als Post 1x Standard Meta Call und meine gespeicherte
+ * Prognose."
+ *
+ * Daraus werden drei Stellschrauben, jede an ihrem eigenen Bedienelement
+ * der Seite:
+ *
+ *     Quelle   welcher Stand — die Modellprognose oder die eigene
+ *     Deck     welches Deck ich spiele
+ *     Scheibe  welches der fünf Bilder
+ *
+ * DIE FÜNF SCHEIBEN ergeben zusammen eine Geschichte und stehen einzeln
+ * jede für sich:
+ *
+ *     1 Das Feld            wen erwarte ich, mit welchem Anteil
+ *     2 Mein Deck           was heißt das für meine Day-2-Chance
+ *     3 Begegnungen         wie oft treffe ich wen in acht Runden
+ *     4 Meine Paarungen     wie stehe ich gegen jeden davon
+ *     5 Empfehlungen        was stünde in diesem Meta besser
+ *
+ * JEDE QUOTE TRÄGT IHREN NENNER (Hausregel). Er ist für alle Scheiben
+ * derselbe und steht deshalb in der Fußzeile: Spielerzahl, Rundenzahl
+ * und die Punkte für Day 2.
+ *
+ * GERECHNET WIRD HIER NICHTS. Alle Zahlen kommen fertig aus dem Meta
+ * Call — und zwar je Stand vollständig: eine Day-2-Chance gehört zu dem
+ * Feld, gegen das sie gerechnet wurde. Was nicht übergeben wurde, wird
+ * nicht ersetzt: fehlt ein Deck, fehlen die Scheiben 2 bis 4, und das
+ * steht dann da, statt dass eine Zahl erscheint, die niemand gerechnet
+ * hat.
+ */
+function metaCallFuss(d) {
+    var teile = [];
+    if (d.spieler) teile.push(tausend(d.spieler) + ' players');
+    if (d.runden) teile.push(d.runden + ' rounds');
+    if (d.day2Punkte) teile.push('Day 2: ' + d.day2Punkte + ' pts');
+    return teile.join(' \u00b7 ');
+}
+
+function metaCallScheiben(d, titel, standName) {
+    var stand = ((d.staende || {})[standName]) || null;
+    if (!stand) throw new Error('The handover carries no "' + standName + '" state. '
+        + 'Open the Meta Call and hand it over again.');
+    var feld = stand.feld || [];
+    if (!feld.length) throw new Error('The handover carries no field.');
+    var fuss = metaCallFuss(d);
+    var kicker = [d.art, d.format].filter(Boolean).join(' \u00b7 ');
+    var eigen = standName === 'eigen';
+    var deckNamen = Object.keys(stand.decks || {});
+    var vorgabe = (d.meinDeck && stand.decks && stand.decks[d.meinDeck])
+        ? d.meinDeck : (deckNamen[0] || '');
+
+    function schnitt(x) { return (Math.round(x * 100) / 100).toFixed(2); }
+
+    function scheibeFeld() {
+        return {
+            zeilen: zeilenText(feld.slice(0, MAX).map(function (r) {
+                return [r.name, prozent(r.anteil, 1)];
+            })),
+            listeKopf: eigen ? 'my call %' : 'predicted %',
+            listeKopfLinks: 'Deck',
+            kicker: kicker,
+            titel: titel || 'Meta Call',
+            fuss: fuss,
+            caption: (eigen
+                ? 'The field I expect at ' + (titel || 'this tournament')
+                : 'What the model predicts for ' + (titel || 'this tournament'))
+                + (d.spieler ? ' (' + tausend(d.spieler) + ' players)' : '') + '.',
+            tags: hashtags(['metacall', 'meta']
+                .concat(feld.slice(0, 4).map(function (r) { return r.name; }))),
+            vorlagen: ['liste']
+        };
+    }
+
+    function deckStand(deck) {
+        var e = (stand.decks || {})[deck];
+        if (!e) throw new Error('No numbers for "' + (deck || '—')
+            + '". Pick your deck in the Meta Call and hand it over again.');
+        return e;
+    }
+
+    function scheibeMeinDeck(deck) {
+        var e = deckStand(deck);
+        var r = e.ergebnis || {};
+        return {
+            zahl: prozent(r.day2, 1),
+            zahlLabel: 'Day 2 chance',
+            zahlNenner: deck + ' \u00b7 ' + (d.runden || '?') + ' rounds \u00b7 '
+                + (d.day2Punkte || '?') + ' pts \u00b7 ' + prozent(r.quote, 1) + ' win rate',
+            /* NUR PARTIEN IN DIESER LISTE — die Balken hängen an der
+               Zahl, und drei Werte in Partien sind vergleichbar. Die
+               Tagesquote stand hier zuerst mit drin: 44,5 % bekam einen
+               langen Balken neben 3,60 Siegen, und der Balken behauptete
+               damit einen Vergleich, den es nicht gibt (gerendert
+               25.09.2026). Sie steht jetzt im Nenner der großen Zahl. */
+            zeilen: zeilenText([
+                ['\u00d8 wins', schnitt(r.wins)],
+                ['\u00d8 ties', schnitt(r.ties)],
+                ['\u00d8 losses', schnitt(r.losses)]
+            ]),
+            ohneRang: true,
+            listeKopf: 'per ' + (d.runden || '?') + ' rounds',
+            listeKopfLinks: deck,
+            kicker: kicker,
+            titel: deck,
+            fuss: fuss,
+            caption: deck + ' at ' + (titel || 'this tournament') + ': '
+                + prozent(r.day2, 1) + ' to make day 2, '
+                + prozent(r.quote, 1) + ' win rate over ' + (d.runden || '?') + ' rounds'
+                + (eigen ? ', against the field I expect' : ', against the predicted field') + '.',
+            tags: hashtags(['metacall', deck]),
+            vorlagen: ['zahl', 'liste']
+        };
+    }
+
+    function scheibeBegegnungen(deck) {
+        var b = feld.filter(function (r) { return r.schnitt > 0; });
+        if (!b.length) throw new Error('The handover carries no expected encounters.');
+        return {
+            zeilen: zeilenText(b.slice(0, MAX).map(function (r) {
+                return [r.name, '\u00d8 ' + schnitt(r.schnitt)];
+            })),
+            ohneRang: true,
+            listeKopf: 'times in ' + (d.runden || '?') + ' rounds',
+            listeKopfLinks: 'Deck',
+            kicker: kicker,
+            titel: 'Who I expect to face',
+            fuss: fuss,
+            caption: 'Expected encounters over ' + (d.runden || '?') + ' rounds'
+                + (deck ? ' with ' + deck : '') + '.',
+            tags: hashtags(['metacall', 'matchups']
+                .concat(b.slice(0, 4).map(function (r) { return r.name; }))),
+            vorlagen: ['liste']
+        };
+    }
+
+    function scheibeMatchups(deck) {
+        var e = deckStand(deck);
+        var quoten = e.quoten || {};
+        var b = feld.filter(function (r) {
+            /* Der Spiegel bleibt draußen: gegen das eigene Deck sind es
+               per Definition 50 %, und eine Zeile ohne Auskunft nimmt
+               einer mit Auskunft den Platz weg. */
+            return typeof quoten[r.name] === 'number' && isFinite(quoten[r.name])
+                && String(r.name).toLowerCase() !== String(deck).toLowerCase();
+        });
+        if (!b.length) throw new Error('No matchup numbers for "' + deck + '".');
+        return {
+            zeilen: zeilenText(b.slice(0, MAX).map(function (r) {
+                return [r.name, prozent(quoten[r.name], 0)];
+            })),
+            /* KEINE RANGZIFFERN. Die Reihenfolge ist die des Feldes —
+               wen ich am häufigsten treffe —, nicht die der Quoten. Eine
+               01 vor Dragapult behauptete sonst, das sei die beste
+               Paarung (gerendert 25.09.2026: 01 stand vor 58 %, während
+               66 % auf Platz 05 lag). */
+            ohneRang: true,
+            listeKopf: 'win % (no ties)',
+            listeKopfLinks: 'Opponent \u00b7 by share',
+            kicker: kicker,
+            titel: deck + ' vs the field',
+            fuss: fuss,
+            caption: deck + ' against the field at ' + (titel || 'this tournament')
+                + '. Win % excludes ties (W / (W + L)).',
+            tags: hashtags(['metacall', 'matchups', deck]),
+            vorlagen: ['liste']
+        };
+    }
+
+    function scheibeEmpfehlungen() {
+        var e = stand.empfehlungen || [];
+        if (!e.length) throw new Error('The handover carries no recommendations.');
+        return {
+            zeilen: zeilenText(e.slice(0, MAX).map(function (r) {
+                return [r.name, prozent(r.day2, 1)];
+            })),
+            listeKopf: 'Day 2 chance',
+            listeKopfLinks: 'Deck',
+            kicker: kicker,
+            titel: 'What would do well here',
+            fuss: fuss,
+            caption: 'The decks with the best day-2 chance against '
+                + (eigen ? 'the field I expect at ' : 'the predicted field at ')
+                + (titel || 'this tournament') + '.',
+            tags: hashtags(['metacall', 'deckchoice']
+                .concat(e.slice(0, 4).map(function (r) { return r.name; }))),
+            vorlagen: ['liste']
+        };
+    }
+
+    var scheiben = [
+        { id: 'feld', name: '1 \u00b7 The field', bau: scheibeFeld },
+        { id: 'meindeck', name: '2 \u00b7 My deck', bau: scheibeMeinDeck },
+        { id: 'begegnungen', name: '3 \u00b7 Expected encounters', bau: scheibeBegegnungen },
+        { id: 'matchups', name: '4 \u00b7 My matchups', bau: scheibeMatchups },
+        { id: 'empfehlungen', name: '5 \u00b7 What would do well', bau: scheibeEmpfehlungen }
+    ];
+
+    function bauen(id, deck) {
+        var s = scheiben.filter(function (x) { return x.id === id; })[0];
+        if (!s) throw new Error('unknown slide: ' + id);
+        var e = s.bau(deck || vorgabe);
+        e.filter = verfuegbar;
+        e.proFilter = proFilter;
+        e.decks = deckNamen;
+        e.proDeck = function (name) { return proFilter(id, name); };
+        e.karussell = reihe;
+        e.gewaehltesDeck = deck || vorgabe;
+        return e;
+    }
+    function proFilter(id, deck) { return bauen(id, deck); }
+
+    /* Nur anbieten, was wirklich dahintersteht — ein Eintrag in der
+       Auswahl ist ein Versprechen, das beim Klick bricht. */
+    var verfuegbar = scheiben.filter(function (s) {
+        try { s.bau(vorgabe); return true; } catch (e) { return false; }
+    }).map(function (s) { return { id: s.id, name: s.name }; });
+    /* Für den Karussell-Knopf: die Reihenfolge, in der die Bilder
+       gehören. Ohne sie wäre „alle" eine Menge ohne Reihenfolge, und die
+       Galerie des Telefons sortiert alphabetisch. */
+    var reihe = verfuegbar.map(function (s) { return s.id; });
+    if (!verfuegbar.length) throw new Error('Nothing in this Meta Call can be drawn.');
+    return bauen(verfuegbar[0].id, vorgabe);
+}
+
+REZEPTE['uebergabe'] = {
+    name: 'From the app (deck / tournament)',
+    gruppe: 'Mine',
+    groesse: 'local',
+    lade: function () {
+        return new Promise(function (aufloesen) {
+            var U = window.DsPostUebergabe;
+            var paket = (U && typeof U.holen === 'function') ? U.holen() : null;
+            if (!paket) {
+                throw new Error('Nothing handed over yet. Open a deck in "My decks" '
+                    + 'or a tournament in the Battle Journal and choose "Posts page" there.');
+            }
+            var d = paket.daten || {};
+            var karten = uebergabeKarten(paket);
+            var gesamt = karten.reduce(function (s, k) { return s + k.anzahl; }, 0);
+            var titel = String(paket.titel || d.titel || '').trim();
+
+            if (paket.art === 'deck') {
+                aufloesen({
+                    /* Die Liste trägt hier die Stückzahl, nicht einen Rang:
+                       vier Karten mit „4" sind kein Gleichstand, sondern
+                       eine Deckliste. Deshalb ohne Rangnummern. */
+                    zeilen: zeilenText(karten.slice(0, MAX).map(function (k) {
+                        return [k.name, k.anzahl + '\u00d7'];
+                    })),
+                    ohneRang: true,
+                    listeKopf: 'Copies',
+                    listeKopfLinks: 'Card',
+                    kicker: String(d.archetyp || 'My deck'),
+                    titel: titel || 'My deck',
+                    fuss: karten.length + ' different \u00b7 ' + gesamt + ' cards',
+                    caption: (titel || 'My deck') + ' \u2014 '
+                        + karten.length + ' different cards, ' + gesamt + ' in total.',
+                    tags: hashtags(['deck', 'decklist']
+                        .concat(d.archetyp ? [d.archetyp] : [])
+                        .concat(karten.slice(0, 4).map(function (k) { return k.name; }))),
+                    kartenGitter: karten,
+                    vorlagen: ['deckliste', 'liste']
+                });
+                return;
+            }
+
+            if (paket.art === 'metacall') {
+                aufloesen(metaCallScheiben(d, titel, 'eigen'));
+                return;
+            }
+
+            /* Turnier: die Runden sind die Liste, die eingefrorene
+               Deckliste das Gitter. Beides aus derselben Übergabe. */
+            var b = d.bilanz || {};
+            var bilanz = [b.w, b.l, b.t].map(function (x) { return Number(x) || 0; }).join('-');
+            var runden = (d.runden || []).map(function (r) {
+                var z = r.result === 'win' ? 'W' : r.result === 'loss' ? 'L'
+                      : r.result === 'tie' ? 'T' : '\u2013';
+                return ['R' + r.n + ' \u00b7 ' + (r.opponent || '\u2013'),
+                        z + (r.games ? ' ' + r.games : '')];
+            });
+            aufloesen({
+                zeilen: zeilenText(runden.slice(0, MAX)),
+                ohneRang: true,
+                listeKopf: 'Result',
+                listeKopfLinks: 'Round \u00b7 opponent',
+                kicker: [d.art, d.format].filter(Boolean).join(' \u00b7 '),
+                titel: titel || 'Tournament',
+                fuss: [bilanz, d.deck, d.datum].filter(Boolean).join(' \u00b7 '),
+                caption: (titel || 'Tournament') + ' \u2014 ' + bilanz
+                    + (d.deck ? ' with ' + d.deck : '')
+                    + (d.platz ? ', place ' + d.platz : '') + '.',
+                tags: hashtags(['tournament', 'battlejournal']
+                    .concat(d.deck ? [d.deck] : [])
+                    .concat(d.format ? [d.format] : [])),
+                kartenGitter: karten,
+                vorlagen: karten.length ? ['liste', 'deckliste'] : ['liste']
+            });
+        });
+    }
+};
+
+/* DIE MODELLPROGNOSE ALS EIGENE QUELLE.
+ *
+ * BESTELLT (Betreiber, 25.09.2026): „dann brauche ich als Post 1x
+ * Standard Meta Call und meine gespeicherte Prognose."
+ *
+ * Beide stehen in derselben Übergabe; getrennt sind sie hier, weil die
+ * Seite genau drei Bedienelemente hat und alle drei schon belegt sind:
+ * Quelle, Deck und Scheibe. Der Stand gehört an die Quelle — er ist die
+ * Frage „wessen Zahlen zeige ich", und die stellt man einmal, nicht bei
+ * jedem Bild neu.
+ *
+ * Ohne eigene Schätzungen im Meta Call wäre diese Quelle eine Kopie der
+ * anderen. Dann sagt sie das, statt zweimal dasselbe anzubieten.
+ */
+REZEPTE['uebergabe-standard'] = {
+    name: 'Meta Call \u2014 model forecast (from the app)',
+    gruppe: 'Mine',
+    groesse: 'local',
+    lade: function () {
+        return new Promise(function (aufloesen) {
+            var U = window.DsPostUebergabe;
+            var paket = (U && typeof U.holen === 'function') ? U.holen() : null;
+            if (!paket || paket.art !== 'metacall') {
+                throw new Error('No Meta Call handed over yet. Open the Meta Call in the '
+                    + 'app and choose "Posts page" there.');
+            }
+            aufloesen(metaCallScheiben(paket.daten || {},
+                String(paket.titel || (paket.daten || {}).titel || ''), 'standard'));
+        });
+    }
+};
+
 window.DsPostQuellen = {
     REZEPTE: REZEPTE,
     /* Fuer die Tests und fuer die Oberflaeche. */

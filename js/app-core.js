@@ -2950,13 +2950,49 @@ const BASE_PATH = './data/';
         // image URLs (German + English) from play.pokemon.com, keyed by the card's
         // ORIGINAL international print. Lets us offer the stamped Prize Pack variant
         // as an international print. Loaded inert; consumed by the image resolver.
+        /* EIN GESTEMPELTES BILD WIRD GEZEIGT, WENN ES NACHGEMESSEN IST
+         *
+         * BEFUND (Betreiber, 25.09.2026, Bildschirmfoto): im Rarity
+         * Switcher von Metang stand unter „Prize-Pack-Serie 7 · TEF 114"
+         * das Artwork von Munkidori.
+         *
+         * URSACHE: die Bildnummer kommt aus der ZEILENNUMMER der
+         * offiziellen PDF-Kartenliste (scripts/build_prizepack_official_images.py).
+         * Geprueft war diese Annahme an einer einzigen Karte. Eine um eins
+         * verschobene Liste hat keine Luecke und sieht bis zum Schluss
+         * richtig aus — sichtbar wird der Fehler erst am Bild, und zwar
+         * dem Nutzer.
+         *
+         * Seit dem 25.09.2026 misst scripts/pruefe_prizepack_galerie.py
+         * jedes Galeriebild gegen den Basisdruck derselben Karte und
+         * schreibt das Urteil in die Daten (`geprueft`). Hier wird nur
+         * noch die Folge gezogen: ohne Messung kein Bild. Alles andere am
+         * Eintrag — Name, Preis, Kaufadresse — bleibt, denn das haengt
+         * nicht an der Galerienummer.
+         *
+         * Ein falsches Kartenbild ist schlimmer als kein Kartenbild.
+         */
+        function nurNachgemesseneStempelbilder(json) {
+            let ohneMessung = 0;
+            for (const e of Object.values(json || {})) {
+                if (!e || typeof e !== 'object') continue;
+                if (e.geprueft === true) continue;
+                if (e.en || e.de) { e.en = ''; e.de = ''; ohneMessung++; }
+            }
+            if (ohneMessung) {
+                devLog(`[init] prize-pack: ${ohneMessung} Stempelbilder ohne Messung — nicht gezeigt`);
+            }
+            return json;
+        }
+        window.nurNachgemesseneStempelbilder = nurNachgemesseneStempelbilder;
+
         async function loadPrizePackImagesIndex() {
             try {
                 const resp = await fetch(`./data/prizepack_official_images.json?t=${Date.now()}`);
                 if (resp.ok) {
                     const json = await resp.json();
                     if (json && typeof json === 'object') {
-                        window.prizePackImagesIndex = json;
+                        window.prizePackImagesIndex = nurNachgemesseneStempelbilder(json);
                         // Synthetic identity for a stamped Prize Pack print.
                         // MUST include the base set: a Prize Pack series spans
                         // several sets, so "PPS9-150" alone collided for 26
@@ -2971,10 +3007,16 @@ const BASE_PATH = './data/';
                             const baseSet = k.slice(0, dash);
                             const num = k.slice(dash + 1);
                             const img = e.en || e.de;
-                            if (!num || !img) continue;
+                            /* Ohne Bild wird der Druck trotzdem eingetragen:
+                             * Name, Preis und Kaufadresse haengen nicht an der
+                             * Galerienummer. Sonst waere eine Prize-Pack-Karte
+                             * in der Sammlung wieder unauffindbar und mit 0 €
+                             * bewertet — der Fehler, den der Absatz oben
+                             * ausdruecklich verhindern soll. */
+                            if (!num) continue;
                             const ppsSet = `PPS${e.series}${baseSet}`;
-                            synth[`${ppsSet}-${num}`] = img;
-                            rows.push({ ppsSet, num, img, entry: e, baseSet });
+                            if (img) synth[`${ppsSet}-${num}`] = img;
+                            rows.push({ ppsSet, num, img: img || '', entry: e, baseSet });
                         }
                         window.prizePackSynthImages = synth;
                         window.__prizePackIndexRows = rows;

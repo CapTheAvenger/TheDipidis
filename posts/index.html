@@ -189,6 +189,7 @@ legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transfor
            Textfeldern — siehe KOERPER weiter unten. -->
       <button type="button" data-vorlage="gitter"    aria-pressed="false">Heatmap</button>
       <button type="button" data-vorlage="deckkarte" aria-pressed="false">Deck card</button>
+      <button type="button" data-vorlage="deckliste" aria-pressed="false">Decklist</button>
     </div>
 
     <!-- DER WÄHLER STEHT UNTER DEN REITERN, NICHT DARÜBER.
@@ -315,6 +316,20 @@ And the number of games beside it, so you can see what it rests on.</textarea></
       same files the site reads.</p>
     </fieldset>
 
+    <!-- DIE DECKLISTE ALS KARTENGITTER (25.09.2026).
+         Bestellt: „ich haette in My Decks gerne direkt eine Posts Option …
+         oder zumindest auf der Posts Seite, dass ich das Deck dort aufrufen
+         kann und es posten kann." Das Gitter kommt aus der Uebergabe, nicht
+         aus einem Textfeld: 22 Karten mit Set, Nummer und Stueckzahl tippt
+         niemand ab. -->
+    <fieldset id="gDeckliste" hidden>
+      <legend>Decklist</legend>
+      <p class="herkunft">Pick the source „From the app": open a deck in
+      „My decks" or a tournament in the Battle Journal and choose
+      „Posts page" there. The grid shows every card with its copies; the
+      headline, caption and hashtags stay editable here.</p>
+    </fieldset>
+
     <label class="feld"><span>Footer, left</span>
       <input type="text" id="fuss" value="Source: Limitless"></label>
 
@@ -328,6 +343,13 @@ And the number of games beside it, so you can see what it rests on.</textarea></
            auf der Hauptseite längst richtig; hier fehlte es. -->
       <button type="button" class="tun leise" id="btnTeilen" hidden>Share</button>
       <button type="button" class="tun leise" id="btnAlle">All four as PNG</button>
+      <!-- DAS KARUSSELL (25.09.2026).
+           Bestellt: „diese ganzen Meta Share Daten fuer ein Turnier will
+           ich gerne als Post haben, sowohl einzeln als auch als
+           Karussell." Es erscheint nur, wenn die Quelle wirklich eine
+           Reihenfolge mitbringt — sonst waere es ein Knopf, der dasselbe
+           Bild fuenfmal speichert. -->
+      <button type="button" class="tun leise" id="btnKarussell" hidden>Carousel (all slides)</button>
     </div>
     <p class="warnung" id="warnung" hidden></p>
 
@@ -368,7 +390,14 @@ And the number of games beside it, so you can see what it rests on.</textarea></
      immer aus dem Cache bedienen. Der Service Worker holt `/js/` ohnehin
      netzwerk-zuerst-strikt, also ist das hier sicher. -->
 <script src="../js/matchup-glaettung.js"></script>
+<script src="../js/ds-post-uebergabe.js"></script>
 <script src="../js/ds-post-quellen.js"></script>
+<!-- GELIEHEN, NICHT NACHGEBAUT (25.09.2026): die Kartenkachel und die
+     Aufteilung des Gitters stehen in js/ds-share.js, seit der
+     Staples-Post sie braucht. Die Deckliste hier benutzt dieselben
+     Funktionen ueber DsShare._internals — sonst haette der Betreiber
+     zwei „festgelegte Designs", die sich langsam auseinanderleben. -->
+<script src="../js/ds-share.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════════════
  * Die Marke. Eins zu eins aus js/ds-share.js — siehe Kommentar oben.
@@ -536,7 +565,16 @@ function malKopf(ctx, spec, logo) {
     while (ctx.measureText(String(spec.titel || '')).width > 560 && gr > 40) {
         gr -= 3; ctx.font = fSans(gr, 800);
     }
-    ctx.fillText(String(spec.titel || ''), 56, 322 + 14 + gr);
+    /* UND WENN ER DANN IMMER NOCH NICHT PASST, WIRD ER GEKUERZT.
+     *
+     * BEFUND (25.09.2026, gerendert): „Mega Excadrill - Frankfurt Sep 26"
+     * misst auch bei 40 px noch rund 810 px. Die Schleife hoert bei 40
+     * auf, und gezeichnet wurde bisher trotzdem der ganze Text — er lief
+     * unter das Logo, das bei x = 750 beginnt. Ein Titel, der halb hinter
+     * dem Logo steht, sieht aus wie ein kaputtes Bild und nicht wie ein
+     * zu langer Name. Gekuerzt sieht man dagegen sofort, dass man ihn
+     * kuerzer schreiben muss — und das Feld daneben ist editierbar. */
+    ctx.fillText(clip(ctx, String(spec.titel || ''), 660), 56, 322 + 14 + gr);
     malLogo(ctx, logo, MP.W - 44 - 286, 300, 286);
 }
 function malFuss(ctx, links) {
@@ -842,6 +880,122 @@ function malGitter(ctx, spec) {
  * die steht in js/ds-post-quellen.js und spiegelt vorschauAuswahl()
  * aus js/app-archetype-card.js.
  */
+/* ── DIE DECKLISTE ALS KARTENGITTER ────────────────────────────────
+ *
+ * BESTELLT (Betreiber, 25.09.2026): „ich hätte in My Decks gerne direkt
+ * eine Posts Option, damit ich es bei Instagram posten kann in meinem
+ * festgelegten Design oder zumindest auf der Posts Seite, dass ich das
+ * Deck dort aufrufen kann und es posten kann."
+ *
+ * HIER WIRD NICHTS NEU GEMALT. Die Kachel (`malStapleKachel`) und die
+ * Aufteilung (`staplesGitter`) stehen seit dem Staples-Post in
+ * js/ds-share.js und sind von dort geliehen. Ein zweiter Nachbau hätte
+ * zwei Bilder ergeben, die sich mit der nächsten Änderung
+ * auseinanderleben — und der Betreiber hätte zwei „festgelegte Designs".
+ *
+ * IN DER MÜNZE STEHT DIE STÜCKZAHL, in der Zeile darunter der Druck.
+ * Beides ist das, wonach unter einem Decklisten-Post gefragt wird.
+ *
+ * FEHLT DAS MODUL, steht das da. Ein leerer Kasten sähe aus wie ein Deck
+ * ohne Karten.
+ */
+function malDeckliste(ctx, spec) {
+    var teileDs = window.DsShare && window.DsShare._internals;
+    var karten = spec.karten || [];
+    var links = 56, rechts = MP.W - 56;
+    if (!teileDs || typeof teileDs.staplesGitter !== 'function'
+        || typeof teileDs.malStapleKachel !== 'function') {
+        malHinweis(ctx, 'js/ds-share.js is not loaded — no card grid.');
+        return;
+    }
+    if (!karten.length) {
+        malHinweis(ctx, 'No decklist handed over. Open a deck in "My decks" '
+            + 'or a tournament in the Battle Journal and choose "Posts page".');
+        return;
+    }
+    var oben = 470;
+    var feldH = FUSS_OBEN - 34 - oben;
+    var breite = rechts - links;
+    var mass = teileDs.staplesGitter(karten.length, breite, feldH);
+    if (!mass) { malHinweis(ctx, 'Too many cards for one grid.'); return; }
+    var gitterB = mass.spalten * mass.kb + (mass.spalten - 1) * mass.gap;
+    var gitterH = mass.zeilen * mass.kh + (mass.zeilen - 1) * mass.gap;
+    var startX = links + Math.round((breite - gitterB) / 2);
+    var startY = oben + Math.max(0, Math.round((feldH - gitterH) / 2));
+    for (var i = 0; i < karten.length; i++) {
+        var k = karten[i];
+        var zeile = Math.floor(i / mass.spalten);
+        var inZeile = Math.min(mass.spalten, karten.length - zeile * mass.spalten);
+        /* Eine angebrochene letzte Zeile mittig — links geklebt liest sie
+           sich wie ein Rest, nicht wie das Ende. Dieselbe Regel wie im
+           Staples-Post. */
+        var zx = startX + Math.round(((mass.spalten - inZeile) * (mass.kb + mass.gap)) / 2);
+        teileDs.malStapleKachel(ctx, {
+            name: k.name,
+            marke: k.anzahl,
+            wert: (k.set ? (k.set + ' ' + k.nummer) : ''),
+            bild: kartenBilder[k.set + '-' + k.nummer] || null
+        }, zx + (i % mass.spalten) * (mass.kb + mass.gap),
+           startY + zeile * (mass.kh + mass.gap), mass.kb, mass.kh);
+    }
+    if (kartenLaedt > 0) {
+        /* Solange Bilder unterwegs sind, steht das im Bild — sonst
+           speichert jemand ein halb geladenes Gitter und merkt es erst
+           auf Instagram. */
+        malHinweis(ctx, kartenLaedt + ' card image(s) still loading …', true);
+    }
+}
+
+/* Ein Satz mitten ins Feld, wenn das Gitter nichts zeigen kann. */
+function malHinweis(ctx, text, unten) {
+    ctx.save();
+    ctx.fillStyle = F.matt;
+    ctx.font = fSans(26, 600);
+    ctx.textAlign = 'center';
+    var y = unten ? FUSS_OBEN - 44 : 700;
+    var woerter = String(text).split(/\s+/), zeile = '', zeilen = [];
+    woerter.forEach(function (w) {
+        var probe = zeile ? zeile + ' ' + w : w;
+        if (ctx.measureText(probe).width > MP.W - 160 && zeile) { zeilen.push(zeile); zeile = w; }
+        else zeile = probe;
+    });
+    if (zeile) zeilen.push(zeile);
+    zeilen.forEach(function (z, i) { ctx.fillText(z, MP.W / 2, y + i * 34); });
+    ctx.restore();
+    ctx.textAlign = 'start';
+}
+
+/* Die Bilder der Uebergabe nachladen und danach EINMAL neu zeichnen.
+ *
+ * Ueber denselben Proxy wie in der App: das Limitless-CDN schickt kein
+ * Access-Control-Allow-Origin, und ein direkt geladenes Bild vergiftet
+ * die Leinwand — toBlob() wuerfe danach, und der Post liesse sich nicht
+ * speichern. corsUrl() steht in js/ds-share.js. */
+function kartenUebernehmen(gitter) {
+    kartenGitter = gitter;
+    kartenBilder = {};
+    kartenLaedt = 0;
+    if (!gitter || !gitter.length) return;
+    var teileDs = window.DsShare && window.DsShare._internals;
+    var proxy = (teileDs && typeof teileDs.corsUrl === 'function')
+        ? teileDs.corsUrl : function (u) { return u; };
+    gitter.forEach(function (k) {
+        if (!k.url) return;
+        kartenLaedt++;
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function () {
+            kartenBilder[k.set + '-' + k.nummer] = img;
+            if (--kartenLaedt <= 0) zeichne();
+        };
+        img.onerror = function () {
+            /* Ohne Bild traegt die Kachel den Namen — das kann sie. */
+            if (--kartenLaedt <= 0) zeichne();
+        };
+        img.src = proxy(k.url);
+    });
+}
+
 function malDeckkarte(ctx, spec) {
     var links = 56, rechts = MP.W - 56, breite = rechts - links;
     var kacheln = spec.kacheln || [], mus = spec.matchups || [];
@@ -1145,7 +1299,12 @@ var KOERPER = {
        verschlimmbessern. Sie zeichnen, was die Quelle geliefert hat,
        und alles drumherum (Kicker, Titel, Fuss, Bildunterschrift)
        bleibt wie bei den anderen vier editierbar. */
-    gitter: malGitter, deckkarte: malDeckkarte
+    gitter: malGitter, deckkarte: malDeckkarte,
+    /* Die Deckliste als Kartengitter (25.09.2026). Sie malt NICHT selbst:
+       die Kachel und die Aufteilung kommen aus js/ds-share.js, wo sie seit
+       dem Staples-Post stehen. Zwei Nachbauten haetten zwei Bilder
+       ergeben, die sich mit der Zeit auseinanderleben. */
+    deckliste: malDeckliste
 };
 
 /* ── Zusammenbau ──────────────────────────────────────────────────── */
@@ -1166,6 +1325,10 @@ var listeTitel = null;
    Formular — ein 8 × 8-Gitter hat kein Textfeld. */
 var gitterDaten = null, gitterKoepfe = null;
 var deckKacheln = null, deckMatchups = null;
+/* Das Kartengitter der Uebergabe: die Liste steht sofort, die Bilder
+   kommen nach. Gezeichnet wird synchron — deshalb liegen die geladenen
+   Bilder hier und nicht in einem Versprechen. */
+var kartenGitter = null, kartenBilder = {}, kartenLaedt = 0;
 
 function spec() {
     return {
@@ -1188,7 +1351,8 @@ function spec() {
         gitter:       gitterDaten,
         gitterKoepfe: gitterKoepfe,
         kacheln:      deckKacheln,
-        matchups:     deckMatchups
+        matchups:     deckMatchups,
+        karten:       kartenGitter
     };
 }
 
@@ -1210,7 +1374,8 @@ function zeichne() {
  * sortiert die Galerie sie danach als feature, liste, text, zahl. Wer
  * sie am Telefon in dieser Reihenfolge ins Karussell laedt, merkt den
  * Dreher erst, wenn der Post draussen ist. */
-var REIHE = { feature: 1, zahl: 2, liste: 3, text: 4, gitter: 5, deckkarte: 6 };
+var REIHE = { feature: 1, zahl: 2, liste: 3, text: 4, gitter: 5, deckkarte: 6,
+              deckliste: 7 };
 function dateiname(s, mitNummer) {
     var kern = ('dipidis-' + s.vorlage + '-' + (s.titel || 'post'))
         .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 56);
@@ -1281,6 +1446,80 @@ document.getElementById('btnAlle').addEventListener('click', function () {
         }, i * 350);   /* nacheinander — Browser blocken vier Downloads auf einmal */
     });
 });
+/* ── DAS KARUSSELL ────────────────────────────────────────────────
+ *
+ * BESTELLT (Betreiber, 25.09.2026): „sowohl einzeln als auch als
+ * Karussell, damit man es optisch schoen darstellen kann."
+ *
+ * Ein Karussell ist kein neues Bild, sondern eine REIHENFOLGE: die
+ * Scheiben der Quelle, nacheinander, jede in ihrer eigenen Vorlage. Die
+ * Quelle sagt, welche es sind (`erg.karussell`) — hier wird nur
+ * abgearbeitet.
+ *
+ * DIE NUMMER GEHOERT IN DEN DATEINAMEN. Die Galerie des Telefons
+ * sortiert alphabetisch; ohne 01-, 02- … laedt man die Scheiben in einer
+ * Reihenfolge hoch, die niemand gewaehlt hat. Genau dafuer gibt es REIHE
+ * weiter oben — hier zaehlt aber die Reihenfolge der Scheiben, nicht die
+ * der Vorlagen.
+ *
+ * NACHEINANDER, nicht auf einmal: Browser blocken mehrere Downloads
+ * gleichzeitig (gemessen am Knopf „All four as PNG", 350 ms Abstand).
+ * Ein Wechsel der Scheibe rechnet dazu neu, deshalb hier mehr Luft.
+ */
+function karussellNamen(nr, s) {
+    var kern = ('dipidis-' + (s.titel || 'post'))
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return ('0' + nr) + '-' + kern + '.png';
+}
+
+document.getElementById('btnKarussell').addEventListener('click', function () {
+    var erg = aktErgebnis;
+    var reihe = (erg && erg.karussell) || [];
+    if (!reihe.length || !erg.proFilter) return;
+    var knopf = this;
+    knopf.disabled = true;
+    var i = 0;
+    (function naechste() {
+        if (i >= reihe.length) {
+            knopf.disabled = false;
+            filterAnwenden(document.getElementById('filter').value || reihe[0]);
+            return;
+        }
+        var id = reihe[i];
+        i++;
+        try {
+            var deckWahl = (erg.decks && erg.decks.length)
+                ? document.getElementById('deck').value : null;
+            var scheibe = erg.proFilter(id, deckWahl);
+            var felder = felderBauen(scheibe, null);
+            var s = spec();
+            Object.keys(felder).forEach(function (k) {
+                if (k.charAt(0) !== '_') s[k] = felder[k];
+            });
+            /* Die Scheibe bringt ihre Vorlage mit — sonst stuenden fuenf
+               Ranglisten im Karussell, auch dort, wo eine grosse Zahl
+               gemeint war. */
+            s.vorlage = (scheibe.vorlagen && scheibe.vorlagen[0]) || aktuelle;
+            s.ohneRang = !!scheibe.ohneRang;
+            s.karten = scheibe.kartenGitter || null;
+            var cv = document.createElement('canvas');
+            cv.width = MP.W; cv.height = MP.H;
+            male(cv.getContext('2d'), s);
+            liefere(cv, karussellNamen(i, s));
+        } catch (e) {
+            /* Eine Scheibe, die nicht kann, haelt das Karussell nicht
+               auf — sie wird benannt. */
+            var w = document.getElementById('warnung');
+            if (w) {
+                w.hidden = false;
+                w.textContent = 'Slide "' + id + '" was skipped: '
+                    + ((e && e.message) ? e.message : String(e));
+            }
+        }
+        setTimeout(naechste, 500);
+    })();
+});
+
 /* EIN KOPIERWEG FUER DREI KNOEPFE.
  *
  * Die erste Fassung hatte ihn nur fuer die Bildunterschrift. Mit
@@ -1520,6 +1759,22 @@ function felderBauen(erg, deckName) {
             f.zahl = z.zahl; f.zahlLabel = z.zahlLabel; f.zahlNenner = z.zahlNenner;
             f._zahlTitel = z.titel || null;
         }
+    } else if (erg.zahl !== undefined && erg.zahl !== null) {
+        /* EINE QUELLE DARF IHRE ZAHL AUCH DIREKT MITBRINGEN (25.09.2026).
+         *
+         * `zahlFuer(deck)` gehoert zu den Quellen, bei denen man ein Deck
+         * waehlt. Die Meta-Call-Uebergabe hat kein Deck zu waehlen — sie
+         * BRINGT eines mit, und mit ihm genau eine Zahl: die
+         * Day-2-Chance.
+         *
+         * BEFUND beim Rendern: ohne diesen Zweig blieben Zahl, Label und
+         * Nenner der VORIGEN Quelle stehen. Auf der Scheibe „Mein Deck"
+         * stand dann „7,5 % — Dragapult's share — from 2,983 lists in the
+         * online meta" ueber der Ueberschrift „Mega Excadrill". Drei
+         * fremde Angaben auf einem Bild, das nach Instagram geht. */
+        f.zahl = erg.zahl;
+        f.zahlLabel = erg.zahlLabel || '';
+        f.zahlNenner = erg.zahlNenner || '';
     }
     return f;
 }
@@ -1533,6 +1788,7 @@ function uebernimm(erg, quelleName, felder) {
     gitterKoepfe  = erg.gitterKoepfe || null;
     deckKacheln   = erg.kacheln || null;
     deckMatchups  = erg.matchups || null;
+    kartenUebernehmen(erg.kartenGitter || null);
     Object.keys(felder).forEach(function (k) {
         if (k.charAt(0) !== '_') setzeFeld(k, felder[k]);
     });
@@ -1551,6 +1807,13 @@ function uebernimm(erg, quelleName, felder) {
      * Zeile beantworten soll, hat sie damit falsch beantwortet. */
     textHerkunft('Aus: <b>' + quelleName + '</b> · ' + mengeAus(erg) + ' · ' +
                  erg.fuss);
+    /* Der Karussell-Knopf erscheint nur, wo es wirklich eine Reihe gibt. */
+    var kk = document.getElementById('btnKarussell');
+    if (kk) {
+        var reihe = erg.karussell || [];
+        kk.hidden = !(reihe.length > 1 && erg.proFilter);
+        kk.textContent = 'Carousel (' + reihe.length + ' slides)';
+    }
     pruefeGeaendert();
 
     /* EINMAL AUF DIE PASSENDE VORLAGE SPRINGEN — und es dazusagen.
@@ -1694,12 +1957,18 @@ function filterAnwenden(id) {
     var erg = aktErgebnis, rez = window.DsPostQuellen.REZEPTE[aktQuelle];
     if (!erg || !rez || !erg.proFilter) return;
     try {
-        var quelle = erg.proFilter(id);
+        /* Das gewaehlte Deck geht mit: bei den Meta-Call-Scheiben
+           entscheidet es ueber Day-2-Chance und Paarungen. Quellen ohne
+           Deckwahl ignorieren den zweiten Wert. */
+        var deckWahl = (erg.decks && erg.decks.length)
+            ? document.getElementById('deck').value : null;
+        var quelle = erg.proFilter(id, deckWahl);
         /* filter/proFilter mitnehmen: die naechste Wahl braucht beides,
            und `uebernimm` arbeitet auf dem uebergebenen Objekt. */
         quelle.filter = erg.filter;
         quelle.proFilter = erg.proFilter;
         quelle.decks = erg.decks;
+        if (!quelle.karussell) quelle.karussell = erg.karussell;
         aktErgebnis = quelle;
         var eintrag = (erg.filter || []).filter(function (e) { return e.id === id; })[0];
         uebernimm(quelle, rez.name + (eintrag && eintrag.id ? ' · ' + eintrag.name : ''),
@@ -1714,6 +1983,20 @@ function nachLaden(rez) {
     /* Der Filter zuerst: hat die Quelle einen, entscheidet er, welche
        Zeilen ueberhaupt entstehen. */
     if (erg.filter && erg.filter.length && erg.proFilter) {
+        /* BEIDES ZUGLEICH (25.09.2026). Bis heute schlossen sich Filter
+           und Deckwahl aus: der Filter kam zuerst und kehrte um, der
+           Deckwaehler blieb verborgen. Der Meta Call braucht beide —
+           „dann waehle ich noch mein Deck aus, was ich spielen will, und
+           dann kann ich die verschiedenen Posts generieren lassen."
+           Quellen ohne `decks` merken davon nichts. */
+        if (erg.decks && erg.decks.length) {
+            deckListeFuellen(erg.decks);
+            var df = document.getElementById('deck');
+            if (erg.decks.indexOf(df.value) < 0) {
+                df.value = erg.gewaehltesDeck || erg.decks[0];
+            }
+            document.getElementById('deckFeld').hidden = false;
+        }
         filterFuellen(erg.filter);
         var fs = document.getElementById('filter');
         var wahl = erg.filter.some(function (e) { return e.id === fs.value; })
@@ -1760,7 +2043,7 @@ function schalteVorlage(v) {
         o.setAttribute('aria-pressed', String(o.dataset.vorlage === v));
     });
 
-    ['feature', 'zahl', 'liste', 'text', 'gitter', 'deckkarte'].forEach(function (n) {
+    ['feature', 'zahl', 'liste', 'text', 'gitter', 'deckkarte', 'deckliste'].forEach(function (n) {
         document.getElementById('g' + n[0].toUpperCase() + n.slice(1)).hidden = (n !== v);
     });
 
@@ -1837,7 +2120,16 @@ function schalteVorlage(v) {
     });
     q.addEventListener('change', function () { quelleWaehlen(q.value); });
     document.getElementById('deck').addEventListener('change', function () {
-        if (aktQuelle) quelleAnwenden(this.value);
+        if (!aktQuelle) return;
+        /* Hat die Quelle einen Filter, gehoert die Deckwahl DORT hinein
+           — sonst verlöre der Wechsel die gewaehlte Scheibe (25.09.2026,
+           Meta Call). Quellen ohne Filter gehen den alten Weg. */
+        var erg = aktErgebnis;
+        if (erg && erg.filter && erg.filter.length && erg.proFilter) {
+            filterAnwenden(document.getElementById('filter').value || erg.filter[0].id);
+            return;
+        }
+        quelleAnwenden(this.value);
     });
     /* Der Teilen-Knopf erscheint nur, wenn das Geraet Dateien teilen
      * kann — am Schreibtisch bleibt er weg. */

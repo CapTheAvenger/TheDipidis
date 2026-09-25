@@ -107,11 +107,26 @@ def kachel_mit_anzahl(vorlage, n):
     return k
 
 
-def kachel_neu(name_en, set_code, set_number, n):
+def kachel_neu(name_en, set_code, set_number, n, ist_ace=False):
     """Eine Karte, die im Stueck noch nicht vorkommt. Namen und Text aus
     der Kartendatenbank, Druck nach derselben Regel wie der Rest der
     Listen (neuester guenstiger Druck). Ohne Begruendung — die hat Tim
-    fuer diese Karte nie geschrieben, und erfunden wird keine."""
+    fuer diese Karte nie geschrieben, und erfunden wird keine.
+
+    `ist_ace` schreibt data-ace="1" an die Kachel. Warum das hier
+    entsteht und nicht im Test:
+
+    BEFUND (Wochenlauf 158, 25.09.2026): tests/unit/test-masterclass.js
+    zaehlte ACE SPEC gegen vier deutsche Namen im Test. Das Format kennt
+    39. Eine frisch gezogene Liste mit einer fuenften zaehlte als null,
+    und der Lauf wurde rot, ohne dass etwas kaputt war.
+
+    Die Namensliste im Test nachzupflegen waere derselbe Fehler, den
+    js/app-city-league.js schon einmal gemacht hat: eine handgefuehrte
+    Kopie von data/ace_specs.json, die um 12 fehlende und 3 erfundene
+    Namen abgedriftet ist. Deshalb sagt die KACHEL selbst, was sie ist —
+    aus derselben Quelle, aus der die Liste kommt.
+    """
     roh = "%s-%s" % (str(set_code or "").strip(), str(set_number or "").strip())
     kandidaten, basis = DRUCKE.kandidaten(roh)
     if not basis:
@@ -124,12 +139,13 @@ def kachel_neu(name_en, set_code, set_number, n):
     bild = _bild(druck)
     if not bild:
         return None
+    ace = ' data-ace="1"' if ist_ace else ''
     return ('<button type="button" class="mcl-kk" data-mcl-karte="%s" data-de="%s" data-en="%s" '
-            'data-druck="%s" data-druck-hoch="%s" data-n="%d" aria-label="%s, %d mal">'
+            'data-druck="%s" data-druck-hoch="%s" data-n="%d"%s aria-label="%s, %d mal">'
             '<img src="%s" alt="" loading="lazy" width="245" height="342">'
             '<span class="mcl-anz">%d</span></button>'
             % (html.escape(_slug(en)), html.escape(de), html.escape(en),
-               html.escape(druck), html.escape(hoch), n, html.escape(de), n, bild, n))
+               html.escape(druck), html.escape(hoch), n, ace, html.escape(de), n, bild, n))
 
 
 # ------------------------------------------------------- Einleitungstext
@@ -207,7 +223,8 @@ def block(nummer, liste, vorlagen, tims):
             k = kachel_mit_anzahl(vorlage, n)
             de = _attr(vorlage, "de") or name
         else:
-            k = kachel_neu(name, karte.get("set_code"), karte.get("set_number"), n)
+            k = kachel_neu(name, karte.get("set_code"), karte.get("set_number"), n,
+                           bool(karte.get("is_ace_spec")))
             if not k:
                 fehlende.append(name)
                 continue

@@ -148,7 +148,7 @@ test('markiere maskiert HTML und laesst nur Fett und Kursiv durch', () => {
 
 /* ── Was das Inhaltsstueck behauptet, muss darin auch stehen ── */
 
-test('jede Liste fuehrt genau 60 Karten und genau ein ACE SPEC', () => {
+test('jede Liste fuehrt 60 Karten und hoechstens eine ACE SPEC', () => {
     /* 21.09.2026: sechs Listen. 22.09.2026 auf 20 erweitert — Tims
      * Empfehlung mit dem Kangama/Arktos-Paket plus die dreizehn
      * Mega-Stalobor-Listen aus Tag 2 der Worlds. Der Betreiber hatte
@@ -159,18 +159,50 @@ test('jede Liste fuehrt genau 60 Karten und genau ein ACE SPEC', () => {
      * aufgefallen. */
     const bloecke = FRAGMENT.match(/data-mcl-listenblock="\d+"[\s\S]*?<\/div>\s*<p class="mcl-quelle">/g) || [];
     assert.ok(bloecke.length >= 25, `${bloecke.length} Listenbloecke gefunden, erwartet mindestens 25`);
-    const ACE = ['Heldenumhang', 'Edler Rollwagen', 'Geheime Box', 'Unfairer Stempel'];
+    /* ACE SPEC STEHT AN DER KACHEL, NICHT IN EINER NAMENSLISTE
+     *
+     * BEFUND (Wochenlauf 158, 25.09.2026): „Liste 23 hat 0 ACE SPEC".
+     * Hier stand eine Liste mit genau vier deutschen Namen —
+     * Heldenumhang, Edler Rollwagen, Geheime Box, Unfairer Stempel.
+     * Das Format kennt 39. Eine frisch gezogene Online-Liste mit einer
+     * FUENFTEN ACE SPEC zaehlte als null, und der Lauf wurde rot, ohne
+     * dass etwas kaputt war.
+     *
+     * Die Liste im Test nachzupflegen waere derselbe Fehler, den
+     * js/app-city-league.js schon gemacht hat: eine handgefuehrte Kopie
+     * von data/ace_specs.json, um 12 fehlende und 3 erfundene Namen
+     * abgedriftet.
+     *
+     * Die Kachel sagt es jetzt selbst (data-ace="1"), gesetzt von
+     * scripts/masterclass_listen_nachziehen.py aus is_ace_spec. Damit
+     * liest dieser Test WEITER NICHTS aus data/ — der Wachhund in
+     * test-testdaten-wachhund.js zaehlt diese Datei nicht mit, und das
+     * soll so bleiben.
+     *
+     * Und: `=== 1` war strenger als die Spielregel. Erlaubt ist
+     * HOECHSTENS eine; eine Liste ganz ohne ist legal. */
+    let mitGenauEiner = 0;
     bloecke.forEach((b, i) => {
         const anzahlen = [...b.matchAll(/data-n="(\d+)"/g)].map((m) => Number(m[1]));
         const summe = anzahlen.reduce((a, n) => a + n, 0);
         assert.strictEqual(summe, 60, `Liste ${i} hat ${summe} Karten`);
-        const aces = ACE.filter((a) => b.includes(`data-de="${a}"`)).length;
-        assert.strictEqual(aces, 1, `Liste ${i} hat ${aces} ACE SPEC`);
+        const aces = (b.match(/data-ace="1"/g) || []).length;
+        assert.ok(aces <= 1,
+            `Liste ${i} fuehrt ${aces} ACE SPEC — erlaubt ist hoechstens eine`);
+        if (aces === 1) mitGenauEiner++;
         const zuViel = [...b.matchAll(/data-de="([^"]+)" data-en="[^"]*" data-druck="[^"]*" data-n="(\d+)"/g)]
             .filter((m) => Number(m[2]) > 4 && !/Energie|Energy/.test(m[1]));
         assert.strictEqual(zuViel.length, 0,
             `Liste ${i}: mehr als 4 Kopien von ${zuViel.map((m) => m[1]).join(', ')}`);
     });
+    /* Die Gegenprobe zum Abgleich selbst: Tims Listen fuehren alle eine
+     * ACE SPEC. Findet der Abgleich ploetzlich fast keine mehr, ist
+     * nicht das Meta anders — dann passen Namen und Register nicht mehr
+     * zusammen. `>=` ist die richtige Richtung: mehr Listen sind kein
+     * Fehler, weniger Treffer schon. */
+    assert.ok(mitGenauEiner >= 10,
+        `nur ${mitGenauEiner} von ${bloecke.length} Listen fuehren eine ACE `
+        + 'SPEC aus dem Register — der Abgleich greift nicht mehr');
 });
 
 test('jede Siegquote nennt ihren Nenner, und unter 30 Partien steht keine Quote', () => {

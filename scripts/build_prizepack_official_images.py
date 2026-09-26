@@ -129,6 +129,66 @@ def image_url(series, lang_loc, lang_code, gallery_number):
     return f"{CF}/expansions/series{series}/{lang_loc}/OP_Prize_SE{series}_{lang_code}_{gallery_number}-2x.png"
 
 
+# ── Galerienummern, die NICHT der PDF-Zeile folgen (DA-1, 27.09.2026) ──
+#
+# Die Bildnummer stammt aus der Zeilennummer der offiziellen PDF-Liste.
+# Fuer Serie 7 stimmt das nicht: die PDF fuehrt Leafeon ex (PRE 6) als
+# Zeile 36, die Galerie zeigt es als Bild 58; die Zeilen 37–58 sind
+# dort die Bilder 36–57. Gemessen per Sichtpruefung (Galeriebild neben
+# Basisdruck, alle 96 Bilder der Serie). Kein Parserfehler — die PDF ist
+# vollstaendig und richtig gelesen, nur die Reihenfolge der Galerie weicht
+# ab. Deshalb steht die Abweichung BENANNT UND DATIERT in den Daten
+# (data/prizepack_galerie_korrekturen.json), nicht im Code.
+KORREKTUREN = os.path.join(DATA, "prizepack_galerie_korrekturen.json")
+
+
+def lade_korrekturen(path=KORREKTUREN):
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def galerie_korrigieren(rows, korrekturen=None):
+    """Setzt benannte Karten an ihre gemessene Galerieposition und
+    nummeriert die Serie danach fortlaufend neu. Idempotent: steht die
+    Karte schon dort, aendert sich nichts. Bildadressen folgen der Nummer."""
+    k = lade_korrekturen() if korrekturen is None else korrekturen
+    rows = list(rows)
+    for v in (k or {}).get("verschiebungen", []):
+        serie = str(v["serie"])
+        teil = [r for r in rows if str(r["series"]) == serie]
+        if not teil:
+            continue
+        teil.sort(key=lambda r: int(r["gallery_number"]))
+        wer = [r for r in teil if "%s-%s" % (str(r["set_code"]).upper(), r["set_number"]) == v["karte"]]
+        if len(wer) != 1:
+            log("::warning::Korrektur SE%s %s: Karte %d-mal gefunden — nicht angewandt"
+                % (serie, v["karte"], len(wer)))
+            continue
+        teil.remove(wer[0])
+        teil.insert(int(v["galerie"]) - 1, wer[0])
+        for i, r in enumerate(teil, 1):
+            neu = str(i) if isinstance(r["gallery_number"], str) else i
+            r["gallery_number"] = neu
+            r["image_url_de"] = image_url(serie, "de-de", "DE", i)
+            r["image_url_en"] = image_url(serie, "en-us", "EN", i)
+        rows = [r for r in rows if str(r["series"]) != serie] + teil
+    rows.sort(key=lambda r: (int(r["series"]), int(r["gallery_number"])))
+    return rows
+
+
+def sichtpruefung(korrekturen=None):
+    """{(serie, schluessel): galerienummer} — per Sichtpruefung bestaetigte
+    Galeriebilder. Das Urteil gehoert zur NUMMER: traegt der Eintrag eine
+    andere, gilt es nicht."""
+    k = lade_korrekturen() if korrekturen is None else korrekturen
+    s = (k or {}).get("sichtpruefung") or {}
+    return ({(str(serie), key): int(nr) for serie, keys in (s.get("bestaetigt") or {}).items()
+             for key, nr in keys.items()}, s.get("datum"))
+
+
 def build_series(series, pdf_de_url, pdf_en_url):
     """Fetch + parse DE and EN PDFs, join by (set,num), emit rows."""
     log(f"  SE{series}: DE {pdf_de_url}")
@@ -306,6 +366,7 @@ def write_json_index(rows, path):
     products = load_pps_cardmarket_products()
     prices = load_price_guide()
     urteile = _alte_urteile(path)
+    sicht, sicht_datum = sichtpruefung()
     matched = priced = 0
 
     index = {}
@@ -329,6 +390,10 @@ def write_json_index(rows, path):
                 entry["price"] = price
             entry["market_url"] = product_url(
                 r["series"], r["name_en"], r["set_code"], r["set_number"])
+        # Sichtpruefung (DA-1/UI-2, 27.09.2026): benannt in den Daten.
+        if sicht.get((str(r["series"]), key)) == int(r["gallery_number"]):
+            entry.update({"geprueft": True, "pruefung": "sichtpruefung",
+                          "pruefadresse": entry["en"], "pruefstand": sicht_datum})
         # Das Bildurteil gehoert dem Druck, nicht dem Preislauf.
         frueher = urteile.get(key)
         if frueher and frueher.get("pruefadresse") == entry["en"]:
@@ -494,6 +559,7 @@ def main():
         if not rows:
             log("::error::CSV empty — nothing to refresh")
             return 1
+        rows = galerie_korrigieren(rows)
         index = write_json_index(rows, args.json_out)
         # Die Schluesselpruefung braucht kein Netz und gehoert deshalb
         # auch in den taeglichen Weg — sonst stuende das Urteil erst nach
@@ -545,7 +611,7 @@ def main():
         log("::error::no rows and no existing data to fall back to")
         return 1
 
-    rows.sort(key=lambda r: (int(r["series"]), int(r["gallery_number"])))
+    rows = galerie_korrigieren(rows)
 
     # sanity: SE9 #19 should be a Mega Dragonite/Dragoran
     for r in rows:

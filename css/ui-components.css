@@ -4223,7 +4223,7 @@ img[src*="limitlesstcg"] {
     border-radius: 8px;
     border: 1px solid var(--border-color);
     font-weight: bold;
-    background: var(--primary-blue);
+    background: var(--brand);
     color: var(--text-main);
     cursor: pointer;
 }
@@ -4258,7 +4258,7 @@ img[src*="limitlesstcg"] {
     font-size: 1em;
 }
 .skeleton-error-message .retry-link {
-    color: var(--primary-blue, #3B4CCA);
+    color: var(--brand);
     cursor: pointer;
     text-decoration: underline;
     font-weight: 600;
@@ -4807,7 +4807,7 @@ img[src*="limitlesstcg"] {
     right: 0;
     max-height: 340px;
     overflow-y: auto;
-    background: var(--bg-primary, #fff);
+    background: var(--surface-1);
     border: 2px solid var(--border-color, #ddd);
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
@@ -4853,11 +4853,11 @@ img[src*="limitlesstcg"] {
 }
 
 .custom-binder-dropdown-item:hover:not(:disabled) {
-    background: var(--accent-soft, rgba(59,76,202,0.08));
+    background: color-mix(in srgb, var(--brand) 8%, transparent);
 }
 
 .custom-binder-dropdown-item.is-selected {
-    background: var(--accent-soft, rgba(59,76,202,0.12));
+    background: color-mix(in srgb, var(--brand) 12%, transparent);
     border-left: 3px solid var(--accent, #3b4cca);
     opacity: 1;
     cursor: pointer;
@@ -4906,7 +4906,7 @@ img[src*="limitlesstcg"] {
     align-items: center;
     gap: 2px;
     padding: 8px 6px;
-    background: var(--bg-secondary, #f8f9fa);
+    background: var(--surface-2);
     border: 2px solid var(--border-color, #ddd);
     border-radius: 10px;
     cursor: pointer;
@@ -4916,12 +4916,12 @@ img[src*="limitlesstcg"] {
 
 .cb-main-pokemon-btn:hover {
     border-color: var(--accent, #3b4cca);
-    background: var(--accent-soft, rgba(59,76,202,0.08));
+    background: color-mix(in srgb, var(--brand) 8%, transparent);
 }
 
 .cb-main-pokemon-btn.is-selected {
     border-color: var(--accent, #3b4cca);
-    background: var(--accent-soft, rgba(59,76,202,0.15));
+    background: color-mix(in srgb, var(--brand) 15%, transparent);
 }
 
 .cb-mpg-rank {
@@ -5020,7 +5020,7 @@ img[src*="limitlesstcg"] {
 .cb-preset-chip {
     display: inline-flex;
     align-items: center;
-    background: var(--card-bg, #fff);
+    background: var(--surface-1);
     border: 1px solid var(--border-color, #ddd);
     border-radius: 20px;
     overflow: hidden;
@@ -5034,12 +5034,12 @@ img[src*="limitlesstcg"] {
     padding: 5px 10px;
     cursor: pointer;
     font: inherit;
-    color: var(--text, #333);
+    color: var(--ink);
     white-space: nowrap;
 }
 
 .cb-preset-load:hover {
-    background: var(--accent-soft, rgba(59,76,202,0.08));
+    background: color-mix(in srgb, var(--brand) 8%, transparent);
     color: var(--accent, #3b4cca);
 }
 

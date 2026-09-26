@@ -327,6 +327,13 @@
        3,48:1, "Decks" (#8e44ad) dunkel bei 3,01:1. */
     --profil-decks-ink: #7d3c98;
     --profil-misc-ink: #566566;
+    /* Meta-Call-Akzent (UI-1, 26.09.2026). Stand 13-mal als
+       var(--mc-accent, #6b21a8) in meta-call.css, ohne dass ihn eine Datei
+       definierte — im dunklen Modus also 2,03:1 auf --surface-1. Zwei Werte,
+       weil derselbe Ton einmal als Schrift/Rand auf der Flaeche und einmal
+       als Grund unter weisser Schrift steht. */
+    --mc-accent: #6b21a8;        /* auf weiss 8,72:1 */
+    --mc-accent-solid: #6b21a8;  /* weiss darauf 8,72:1 */
 
     /* ── Der Signaturstrich ──────────────────────────────────────────
      * Zwei Pixel Marke-nach-Gold unter der Kopfzeile ersetzen den alten
@@ -467,6 +474,8 @@
 
     --profil-decks-ink: #c79cf0;
     --profil-misc-ink: #9aa8aa;
+    --mc-accent: #b07ce6;        /* auf --surface-1 5,78:1 */
+    --mc-accent-solid: #7d3c98;  /* weiss darauf 7,07:1 */
 
     /* Auf dunklem Grund braucht ein Schatten mehr Tiefe, sonst ist er
      * unsichtbar; die Innenkante übernimmt die Kantenzeichnung. */

@@ -255,7 +255,7 @@
    sie liest sich das Ganze wie zwei getrennte Listen. */
 .sz-stufen {
     margin-top: var(--s-6, 28px);
-    padding-top: var(--s-5, 22px);
+    padding-top: var(--s-6);
     border-top: 1px solid var(--line);
 }
 .sz-stufen-titel {

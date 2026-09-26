@@ -49,7 +49,7 @@
     color: var(--ink-2);
     border: 1px dashed #e0e0e0;
     border-radius: 12px;
-    background: var(--surface-alt, #f8f9fa);
+    background: var(--surface-2);
 }
 
 .side-quest-empty code {
@@ -2531,7 +2531,7 @@
 .sqb-setzen {
     font-size: 0.92rem; font-weight: 800;
     padding: 10px 20px; border-radius: 10px;
-    border: 1px solid var(--gruen, #16a34a); background: var(--gruen, var(--solid-ok)); color: #fff;
+    border: 1px solid var(--solid-ok); background: var(--solid-ok); color: #fff;
     cursor: pointer;
 }
 .sqb-setzen:hover { filter: brightness(0.92); }
@@ -2597,7 +2597,7 @@
     border-radius: 10px; cursor: pointer; border: 1px solid var(--line-strong);
     background: var(--surface-1); color: var(--ink-2);
 }
-.sqb-do-save { border-color: var(--gruen, #16a34a); background: var(--gruen, var(--solid-ok)); color: #fff; }
+.sqb-do-save { border-color: var(--solid-ok); background: var(--solid-ok); color: #fff; }
 .sqb-do-save:hover { filter: brightness(0.92); }
 .sqb-do-active { border-color: var(--gold); color: var(--vorbehalt); }
 .sqb-do-active:hover { background: var(--vorbehalt-bg); }
@@ -2750,7 +2750,7 @@
 }
 .sqb-budget {
     font-style: normal; font-weight: 800; font-variant-numeric: tabular-nums;
-    color: var(--gruen, var(--tint-ok-ink)); font-size: 0.8rem;
+    color: var(--tint-ok-ink); font-size: 0.8rem;
 }
 .sqb-budget.is-full { color: var(--vorbehalt); }
 .sqb-field--sp .sqb-hint { margin: 0; }
@@ -2923,7 +2923,7 @@
 .sqp-kachel-nr {
     font-size: 0.68rem;
     font-variant-numeric: tabular-nums;
-    color: var(--ink-soft, #6b7280);
+    color: var(--ink-3);
     letter-spacing: 0.02em;
 }
 .sqp-kachel-name {
@@ -2976,7 +2976,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: var(--ink-soft, #6b7280);
+    color: var(--ink-3);
 }
 .sqp-herkunft-block { margin-bottom: 0.6rem; }
 .sqp-herkunft-block:last-child { margin-bottom: 0; }
@@ -2986,7 +2986,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: var(--ink-soft, #6b7280);
+    color: var(--ink-3);
     margin-bottom: 0.3rem;
     cursor: help;
 }
@@ -2999,13 +2999,13 @@
     border: 1px solid #e4e7ec;
     color: var(--ink);
 }
-.sqp-herkunft-leer { font-size: 0.78rem; color: var(--ink-soft, #6b7280); }
+.sqp-herkunft-leer { font-size: 0.78rem; color: var(--ink-3); }
 .sqp-go-zeile { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: baseline; }
 .sqp-go { font-size: 0.8rem; font-weight: 600; }
 .sqp-go.is-ja { color: #1f7a4d; }
 .sqp-go.is-unklar { color: #8a6d1f; cursor: help; }
-.sqp-go.is-mega { color: var(--ink-soft, #6b7280); cursor: help; }
-.sqp-go-basis { font-size: 0.78rem; color: var(--ink-soft, #6b7280); }
+.sqp-go.is-mega { color: var(--ink-3); cursor: help; }
+.sqp-go-basis { font-size: 0.78rem; color: var(--ink-3); }
 .sqp-herkunft-warnung {
     margin: 0.4rem 0 0;
     font-size: 0.72rem;
@@ -3017,7 +3017,7 @@
 .sqp-herkunft-quelle {
     margin: 0.3rem 0 0;
     font-size: 0.68rem;
-    color: var(--ink-soft, #6b7280);
+    color: var(--ink-3);
     word-break: break-all;
 }
 
@@ -3029,7 +3029,7 @@
 
 /* ── Item-Nutzung und Attacken-Wirksamkeit (09.09.2026) ────────────── */
 .sqi { display: flex; flex-direction: column; }
-.sqi-intro { font-size: 0.9rem; color: var(--ink-soft, #6b7280); margin: 0 0 0.6rem; }
+.sqi-intro { font-size: 0.9rem; color: var(--ink-3); margin: 0 0 0.6rem; }
 .sqi-suche {
     width: 100%; padding: 0.55rem 0.8rem; font: inherit; font-size: 0.92rem;
     border: 1px solid #e0e0e0; border-radius: 10px; background: var(--surface-1, #fff);
@@ -3039,7 +3039,7 @@
 .sqi-spacer { flex: 1 1 auto; }
 .sqi-leiste-label {
     font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.03em; color: var(--ink-soft, #6b7280);
+    letter-spacing: 0.03em; color: var(--ink-3);
 }
 .sqi-sort, .sqi-fmt {
     appearance: none; border: 1px solid #e0e0e0; background: var(--surface-2);
@@ -3049,7 +3049,7 @@
 .sqi-sort.is-active, .sqi-fmt.is-active {
     background: #2e70c0; border-color: #5b9cef; color: #fff;
 }
-.sqi-zaehler { font-size: 0.8rem; color: var(--ink-soft, #6b7280); margin: 0 0 0.4rem; }
+.sqi-zaehler { font-size: 0.8rem; color: var(--ink-3); margin: 0 0 0.4rem; }
 .sqi-liste { display: flex; flex-direction: column; gap: 1px; background: #e4e7ec;
     border: 1px solid #e4e7ec; border-radius: 10px; overflow: hidden; }
 .sqi-item { background: var(--surface-1, #fff); }
@@ -3062,8 +3062,8 @@
 .sqi-kopf:hover { background: var(--surface-2); }
 .sqi-kopf:focus-visible { outline: 2px solid #2e70c0; outline-offset: -2px; }
 .sqi-name { font-weight: 600; font-size: 0.94rem; }
-.sqi-en { font-size: 0.78rem; color: var(--ink-soft, #6b7280); }
-.sqi-zahl { font-size: 0.78rem; color: var(--ink-soft, #6b7280); margin-left: auto; }
+.sqi-en { font-size: 0.78rem; color: var(--ink-3); }
+.sqi-zahl { font-size: 0.78rem; color: var(--ink-3); margin-left: auto; }
 .sqi-spitze {
     font-size: 0.86rem; font-weight: 700; color: #2e70c0;
     font-variant-numeric: tabular-nums; min-width: 3.6rem; text-align: right;
@@ -3075,7 +3075,7 @@
 }
 .sqi-wirkung {
     margin: 0; padding: 0 0.85rem 0.55rem; font-size: 0.8rem; line-height: 1.45;
-    color: var(--ink-soft, #6b7280);
+    color: var(--ink-3);
 }
 .sqi-traeger { padding: 0 0.85rem 0.8rem; }
 .sqi-nenner {
@@ -3090,7 +3090,7 @@
 .sqi-tab th {
     text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: var(--ink-soft, #6b7280) !important;
+    color: var(--ink-3) !important;
     background: transparent !important;
     padding: 0.3rem 0.4rem; border-bottom: 1px solid #e4e7ec;
 }
@@ -3104,14 +3104,14 @@
     border-radius: 2px; margin-right: 0.45rem; vertical-align: middle; position: relative;
 }
 .sqi-bar i { position: absolute; inset: 0 auto 0 0; background: #2e70c0; border-radius: 2px; }
-.sqi-status { font-size: 0.9rem; color: var(--ink-soft, #6b7280); padding: 0.8rem; }
-.sqi-quelle { font-size: 0.72rem; color: var(--ink-soft, #6b7280); margin: 0.7rem 0 0; }
+.sqi-status { font-size: 0.9rem; color: var(--ink-3); padding: 0.8rem; }
+.sqi-quelle { font-size: 0.72rem; color: var(--ink-3); margin: 0.7rem 0 0; }
 
 /* Typwaehler und Wirksamkeitsmarken im Detail */
 .sqp-gegentyp { display: flex; align-items: center; gap: 0.5rem; margin: 0.7rem 0 0.3rem; }
 .sqp-gegentyp-lbl {
     font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.03em; color: var(--ink-soft, #6b7280);
+    letter-spacing: 0.03em; color: var(--ink-3);
 }
 .sqp-fx {
     display: inline-block; margin-left: 0.4rem; font-size: 0.74rem; font-weight: 700;
@@ -3122,10 +3122,10 @@
 .sqp-fx.is-null { background: #3a3a3a; color: #fff; border: 1px solid #3a3a3a; }
 .sqp-fx.is-neutral { background: #f0f2f5; color: #6b7280; border: 1px solid #e0e3e8; }
 .sqp-fx.is-status, .sqp-fx.is-unklar {
-    background: transparent; color: var(--ink-soft, #6b7280);
+    background: transparent; color: var(--ink-3);
     border: 1px dashed #cbd2da; font-weight: 600; cursor: help;
 }
-.sqp-go.is-nein { color: var(--ink-soft, #6b7280); }
+.sqp-go.is-nein { color: var(--ink-3); }
 
 /* ══════════════════════════════════════════════════════════════════
    QUELLEN-HAUPTAUSWAHL (24.09.2026)

@@ -140,6 +140,7 @@ jobs:
             cardmarket-card-images.yml
             prizepack-official-images.yml
             limitless-api-scrape.yml
+            firestore-regelprobe.yml
           "
           rot=0
           for wf in $WORKFLOWS; do

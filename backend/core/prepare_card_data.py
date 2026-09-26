@@ -673,6 +673,24 @@ STANDARD_MIN_ORDER = 136   # TEF and newer
 
 # Extended boundary — sets >= this and < STANDARD_MIN_ORDER
 EXTENDED_MIN_ORDER = 113   # RCL (Rebel Clash) and newer.
+
+# DIE GRENZEN HAENGEN AN EINEM SET, NICHT AN EINER ZAHL (27.09.2026).
+#
+# Wochenlauf #164 (26.09.2026) ist daran rot geworden: sets.json wird aus
+# der Setliste von limitlesstcg.com neu nummeriert, und sobald dort unter
+# SSH ein Set dazukommt, rutscht alles darueber um eins nach oben. Mit
+# festen Zahlen wurde SSH dann "extended" und MEW "standard" — ohne dass
+# sich an der Rotation irgendetwas geaendert hatte. Die Zahlen oben sind
+# deshalb nur noch der Rueckfall, wenn das Anker-Set in der Ordnung fehlt.
+# Die Anker sind die Sets, die heute an den Grenzen stehen: PAR hatte am
+# 27.09.2026 die Ordnung 136, RCL die 113.
+STANDARD_ANKER = 'PAR'
+EXTENDED_ANKER = 'RCL'
+
+
+def _schwelle(set_order: dict, anker: str, rueckfall: int) -> int:
+    wert = set_order.get(anker) if set_order else None
+    return int(wert) if isinstance(wert, (int, float)) and wert > 0 else rueckfall
 #
 # Hier stand „SSH and newer". Das stimmt nicht: sets.json fuehrt SSH
 # auf 112, also EINEN unter der Schwelle — Sword & Shield selbst ist
@@ -726,9 +744,9 @@ def aera_fuer_set(set_code: str, set_order: dict) -> str:
         # Frisches Rotationsset, dessen Ordnungszahl noch fehlt — in den
         # Standard, sonst verschwindet es aus dem Deck Builder.
         return 'standard'
-    if code.upper() in PROMO_ERA_SETS or order >= STANDARD_MIN_ORDER:
+    if code.upper() in PROMO_ERA_SETS or order >= _schwelle(set_order, STANDARD_ANKER, STANDARD_MIN_ORDER):
         return 'standard'
-    if order >= EXTENDED_MIN_ORDER:
+    if order >= _schwelle(set_order, EXTENDED_ANKER, EXTENDED_MIN_ORDER):
         return 'extended'
     return 'legacy'
 

@@ -111,6 +111,85 @@
     var SANS = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
     var MONO = 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace';
 
+    /* ── No-Show ──────────────────────────────────────────────
+     *
+     * BEFUND 26.09.2026, vom Betreiber im fertigen Bild gefunden, nicht
+     * von einem Test: die Bildkarte zeigte für ein Turnier mit einem
+     * No-Show ERGEBNIS 1–5–1 und PUNKTE 4. Die Turnierleitung hatte
+     * 2–5–1 und 7 gewertet.
+     *
+     * Die Ursache war nicht die Rechnung, sondern die ZAHL der Rechner.
+     * Der neue Wert `noshow` war am 26.09.2026 dem Journal beigebracht
+     * worden — und das Journal hat einen eigenen Bildzeichner
+     * (shareTournamentSummary in js/battle-journal.js). Diese Datei
+     * enthält drei weitere, und in allen drei fiel `noshow` durch das
+     * abschliessende `else` in die Unentschieden.
+     *
+     * Deshalb steht die Behandlung ab jetzt EINMAL hier, und jeder
+     * Zeichner fragt diese Funktionen statt sie nachzubauen:
+     *
+     *   Bilanz    — ein No-Show zählt als Sieg, so wie die Turnier-
+     *               leitung gewertet hat, und wird daneben ausgewiesen.
+     *   Punkte    — drei, wie ein Sieg (rundenPunkte).
+     *   Quote     — zählt in KEINEM der beiden Brüche. Am grünen Tisch
+     *               wurde nicht gespielt; eine Quote, die davon besser
+     *               wird, sagt nichts über das Deck. Genauso rechnet
+     *               js/battle-journal.js (nurGespielte).
+     *   Farbe     — der neutrale Ton, nicht das Siegblau: es wurde
+     *               nichts gespielt. Rot war der erste Gedanke des
+     *               Betreibers, ist auf diesem Bild aber die Farbe der
+     *               Niederlage — ein roter Sieg wäre eine falsche
+     *               Auskunft. Das Zeichen im Eck sagt N, damit die
+     *               Unterscheidung auch ohne Farbe ankommt.
+     *
+     * Das Zeichen ist N und der Text sagt "No-Show" AUSGESCHRIEBEN:
+     * auf demselben Bild steht die Quotenformel S / (S + N + U), in der
+     * N die Niederlage ist. Ein blankes N in einem Satz wäre dort
+     * zweideutig.
+     */
+    var NO_SHOW = 'noshow';
+
+    function istNoShow(m) {
+        if (!m) return false;
+        return (typeof m === 'string' ? m : m.result) === NO_SHOW;
+    }
+
+    function rundenZeichen(result) {
+        return result === NO_SHOW ? 'N'
+             : result === 'win' ? 'W'
+             : result === 'loss' ? 'L' : 'T';
+    }
+
+    function rundenFarbe(result) {
+        return result === NO_SHOW ? C.dvZero
+             : result === 'win' ? C.dvPos
+             : result === 'loss' ? C.dvNeg : C.dvZero;
+    }
+
+    /** Der Rahmen einer Rundenzeile. Wie rundenFarbe, nur für das
+     *  Neutrale leiser: eine Umrandung in dvZero stach die Zeile heraus,
+     *  ohne etwas zu sagen. Unentschieden und No-Show sind hier derselbe
+     *  Ton — unterschieden werden sie durch das Zeichen. */
+    function rundenRahmen(result) {
+        return result === 'win' ? C.dvPos
+             : result === 'loss' ? C.dvNeg : C.lineStrong;
+    }
+
+    /** Ein Satz unter dem Bild, der die Wertung benennt — aber nur, wenn
+     *  es überhaupt einen No-Show gab. Ohne ihn stehen auf dem Bild eine
+     *  Bilanz und eine Quote, die sich widersprechen (2–5–1 neben
+     *  14,3 %), und der Leser hat keine Sprechblase zum Nachfragen. */
+    function noShowHinweis(anzahl) {
+        if (!anzahl) return '';
+        /* Der Name der Quote kommt aus js/win-rate-konvention.js, nicht
+         * aus diesem Satz. Ein Quotenname ohne seinen Zusatz legt nicht
+         * fest, ob die Unentschieden im Nenner stehen — und auf einem
+         * Bild gibt es keine Sprechblase, in der man das nachliest. */
+        return anzahl + '× No-Show: ' + L(
+            'zählt als Sieg (3 Punkte), nicht in die ' + quotenName() + '.',
+            'counts as a win (3 points), not towards the ' + quotenName() + '.');
+    }
+
     function fSans(size, weight) { return (weight || 400) + ' ' + size + 'px ' + SANS; }
     function fMono(size, weight) { return (weight || 400) + ' ' + size + 'px ' + MONO; }
 
@@ -1006,7 +1085,12 @@
          * ein Drittel des Bildes leer, weil der Block oben festgenagelt war
          * und die Liste unten mittig sass. */
         var contentTop = ruleY + 28;
-        var footY = RC.S - 84;
+        /* Gab es einen No-Show, braucht der erklärende Satz eine Zeile
+         * über der Fusszeile. Sie geht vom Platz der RUNDENLISTE ab, nicht
+         * von der Fusszeile: die Liste rechnet Höhe und Zeilenzahl selbst
+         * aus `band` und passt sich an, die Fusszeile steht fest. */
+        var nsText = noShowHinweis(rec.n);
+        var footY = RC.S - 84 - (nsText ? 26 : 0);
         var rounds = spec.rounds || [];
         var band = footY - contentTop - heroH - 28;
 
@@ -1052,8 +1136,7 @@
 
             ctx.fillStyle = 'rgba(17,23,48,.80)';
             rr(ctx, RC.PAD, y, RC.S - RC.PAD * 2, rowH, 12); ctx.fill();
-            ctx.strokeStyle = m.result === 'win' ? C.dvPos
-                            : m.result === 'loss' ? C.dvNeg : C.lineStrong;
+            ctx.strokeStyle = rundenRahmen(m.result);
             ctx.lineWidth = 1;
             rr(ctx, RC.PAD, y, RC.S - RC.PAD * 2, rowH, 12); ctx.stroke();
 
@@ -1065,9 +1148,8 @@
             /* W/L/T in beiden Sprachen. Die Kuerzel stehen so auf jeder
              * Turniertabelle, und der Betreiber hat sie ausdruecklich so
              * gewollt — S/N/U las sich fuer ihn nicht als Ergebnis. */
-            var mark = m.result === 'win' ? 'W' : m.result === 'loss' ? 'L' : 'T';
-            var markColor = m.result === 'win' ? C.dvPos
-                          : m.result === 'loss' ? C.dvNeg : C.dvZero;
+            var mark = rundenZeichen(m.result);
+            var markColor = rundenFarbe(m.result);
             ctx.fillStyle = markColor;
             ctx.beginPath(); ctx.arc(RC.PAD + 74, cy, 15, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = C.bg0;
@@ -1105,6 +1187,17 @@
             ctx.textBaseline = 'middle';
             ctx.fillText('+ ' + (rounds.length - shown.length) + ' '
                 + L('weitere Runden', 'more rounds'), RC.PAD + 18, my);
+        }
+
+        /* Der No-Show-Satz über der Fusszeile. Ohne ihn stehen auf dem
+         * Bild eine Bilanz und eine Quote, die sich widersprechen
+         * (2–5–1 neben 14,3 %) — und ein Bild hat keine Sprechblase. */
+        if (nsText) {
+            ctx.font = fSans(14, 400);
+            ctx.fillStyle = C.ink3;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+            ctx.fillText(clip(ctx, nsText, RC.S - RC.PAD * 2), RC.S / 2, footY + 22);
+            ctx.textAlign = 'start';
         }
 
         /* ── Fuss ───────────────────────────────────────────────── */
@@ -1306,13 +1399,18 @@
         var asc = entries.slice().sort(function (a, b) {
             return (a.createdAtMs || 0) - (b.createdAtMs || 0);
         });
-        var w = 0, l = 0, t = 0;
+        /* Ein No-Show zählt in die Bilanz als Sieg UND wird getrennt
+         * mitgezählt — `n` trägt ihn bis ins Bild, damit dort niemand
+         * die Siegzahl für gespielte Siege hält. Siehe No-Show-Block. */
+        var w = 0, l = 0, t = 0, n = 0;
         asc.forEach(function (e) {
-            if (e.result === 'win') w++;
+            if (istNoShow(e)) { w++; n++; }
+            else if (e.result === 'win') w++;
             else if (e.result === 'loss') l++;
             else if (e.result === 'tie') t++;
         });
         var scored = w + l + t;
+        var gespielt = scored - n;
         var last = asc[asc.length - 1];
         var o = o0;
 
@@ -1322,14 +1420,18 @@
             // jedem Eintrag. Ein spaeter nachgetragener Match hat das Feld
             // nicht — also nicht asc[0] fragen, sondern die Gruppe.
             place: o.place || (asc.find(function (e) { return e.placement; }) || {}).placement || null,
-            record: { w: w, l: l, t: t },
+            record: { w: w, l: l, t: t, n: n },
             // S/(S+N+U) — dieselbe Konvention, die das Journal selbst
             // rechnet und die auf der Tier-Karte steht. Hier stand
             // (S + U/2)/Partien: eine vierte Konvention, die keine Quelle
             // dieses Hauses benutzt, und die Fussnote darunter behauptete
             // sie auch noch. Bei 2-1-1 waren das 62,5 % im Bild gegen
             // 50 % in der Zeile daneben.
-            winRate: scored ? (w / scored) * 100 : NaN,
+            // Der No-Show steht in KEINEM der beiden Brüche: nicht im
+            // Zähler (w - n) und nicht im Nenner (gespielt). Er ist ein
+            // Sieg der Turnierleitung, keine gespielte Partie — dieselbe
+            // Regel wie nurGespielte() in js/battle-journal.js.
+            winRate: gespielt ? ((w - n) / gespielt) * 100 : NaN,
             deck: asc[0].ownDeck || '',
             // Die eingefrorene Liste. Sie haengt am Turnier, gespeichert ist
             // sie an jedem Eintrag — also die Gruppe fragen, nicht asc[0]:
@@ -1469,10 +1571,18 @@
      * — dieselbe Rechnung, mit der die Turnierleitung die Tabelle fuehrt. */
     var PUNKTE = { win: 3, tie: 1, loss: 0 };
 
+    /* Ein No-Show gibt dasselbe wie ein Sieg — der Gegner ist nicht
+     * erschienen, die Runde ist gewonnen. Siehe den No-Show-Block oben.
+     * Diese Funktion ist die EINZIGE Stelle, die Ergebnis in Punkte
+     * übersetzt; die Rundenzeile auf dem Poster fragt sie ebenfalls. */
+    function rundenPunkte(result) {
+        return (result === 'win' || result === NO_SHOW) ? PUNKTE.win
+             : result === 'tie' ? PUNKTE.tie : PUNKTE.loss;
+    }
+
     function matchPunkte(runden) {
         return (runden || []).reduce(function (summe, m) {
-            return summe + (m.result === 'win' ? PUNKTE.win
-                          : m.result === 'tie' ? PUNKTE.tie : PUNKTE.loss);
+            return summe + rundenPunkte(m.result);
         }, 0);
     }
 
@@ -1645,11 +1755,24 @@
          * stehen genauso auf jeder Turniertabelle — der Betreiber hat sie
          * ausdruecklich so gewollt, und ein Bild fuer Instagram wird nicht
          * nur in Deutschland gelesen. */
+        /* Die Siegzahl ENTHÄLT den No-Show — so hat die Turnierleitung
+         * gewertet — und die Fusszeile sagt, wie viele davon am grünen
+         * Tisch entschieden wurden. Der Betreiber wollte die Zahl selbst
+         * rot; rot ist auf diesem Bild die Niederlage, ein roter Sieg
+         * wäre also eine falsche Auskunft. Stattdessen benennt die
+         * Fusszeile es, und ganz unten steht der Satz dazu. */
         spalten.push({ lab: L('ERGEBNIS', 'RESULT'),
                        val: rec.w + '-' + rec.l + '-' + rec.t,
-                       fuss: 'W · L · T', farbe: C.ink, mono: true });
+                       fuss: 'W · L · T' + (rec.n ? ' · ' + rec.n + '× No-Show' : ''),
+                       farbe: C.ink, mono: true });
+        /* Die Legende muss die Punkte erklären, die wirklich in der Summe
+         * stehen. "Sieg 3 · Unentschieden 1" neben einer 7, die einen
+         * No-Show enthält, ist ein Satz, der eine falsche Tatsache
+         * behauptet — siehe CLAUDE.md. */
         spalten.push({ lab: L('PUNKTE', 'POINTS'), val: String(punkte),
-                       fuss: L('Sieg 3 · Unentschieden 1', 'win 3 · tie 1'),
+                       fuss: rec.n
+                           ? L('Sieg & No-Show 3 · Unentschieden 1', 'win & no-show 3 · tie 1')
+                           : L('Sieg 3 · Unentschieden 1', 'win 3 · tie 1'),
                        farbe: day2 ? C.gold : C.brandInk, mono: true,
                        marke: day2 ? 'DAY 2' : '' });
         spalten.push({ lab: L('RUNDEN', 'ROUNDS'), val: String((spec.rounds || []).length),
@@ -1709,7 +1832,17 @@
             ctx.fillStyle = sp.farbe;
             ctx.fillText(clip(ctx, sp.val, sw - 28), cx, bandY + 112);
             if (sp.fuss) {
-                ctx.font = fSans(15, 400);
+                /* Die Fusszeile schrumpft wie der Wert darüber.
+                 * BEFUND 26.09.2026: bei vier Spalten bleiben je 238 px,
+                 * und "14,3 % Siegquote inkl. Unentschieden" braucht bei
+                 * 15 px rund 240 — abgeschnitten wurde also schon vor dem
+                 * No-Show ausgerechnet der Teil, der den Nenner nennt. */
+                var fg = 15;
+                do {
+                    ctx.font = fSans(fg, 400);
+                    if (ctx.measureText(sp.fuss).width <= sw - 28) break;
+                    fg -= 1;
+                } while (fg > 10);
                 ctx.fillStyle = C.ink3;
                 ctx.fillText(clip(ctx, sp.fuss, sw - 28), cx, bandY + 142);
             }
@@ -1793,7 +1926,7 @@
             var reiheB = inDieser * d + (inDieser - 1) * gap;
             var gx = PC.PAD + Math.round((innen - reiheB) / 2) + spInReihe * (d + gap);
             var gy = gegnerY + reihe * (d + 28);
-            var farbe = m.result === 'win' ? C.dvPos : m.result === 'loss' ? C.dvNeg : C.dvZero;
+            var farbe = rundenFarbe(m.result);
 
             ctx.save();
             ctx.beginPath();
@@ -1828,16 +1961,13 @@
             ctx.fillStyle = C.bg0;
             ctx.font = fSans(Math.round(pz * 1.35), 700);
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(m.result === 'win' ? 'W'
-                       : m.result === 'loss' ? 'L' : 'T',
-                       gx + d - pz, gy + d - pz + 1);
+            ctx.fillText(rundenZeichen(m.result), gx + d - pz, gy + d - pz + 1);
             ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
 
             /* Die Punkte der Runde. Drei fuer den Sieg, einer fuers
              * Unentschieden, keiner fuer die Niederlage — damit man auf dem
              * Bild nachrechnen kann, wie die Summe oben zustande kommt. */
-            var rp = m.result === 'win' ? PUNKTE.win
-                   : m.result === 'tie' ? PUNKTE.tie : PUNKTE.loss;
+            var rp = rundenPunkte(m.result);
             ctx.font = fMono(15, 700);
             ctx.fillStyle = rp > 0 ? farbe : C.ink3;
             ctx.textAlign = 'center';
@@ -1932,6 +2062,19 @@
             ctx.font = fSans(46, 700);
             ctx.fillStyle = C.ink;
             ctx.fillText(clip(ctx, spec.deck || '–', innen), PC.W / 2, by + bs2 + 52);
+            ctx.textAlign = 'start';
+        }
+
+        /* Der No-Show-Satz, zwischen Gegnerreihe und Fusszeile. Die
+         * Gegnernamen enden bei fussY - 24, die Fusszeile beginnt bei
+         * fussY + 17 — diese Zeile liegt dazwischen und verschiebt
+         * nichts. Sie erscheint nur, wenn es einen No-Show gab. */
+        var nsHinweis = noShowHinweis(rec.n);
+        if (nsHinweis) {
+            ctx.font = fSans(15, 400);
+            ctx.fillStyle = C.ink3;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+            ctx.fillText(clip(ctx, nsHinweis, innen), PC.W / 2, fussY + 2);
             ctx.textAlign = 'start';
         }
 
@@ -2642,6 +2785,10 @@
             MC_BLUETEN: MC_BLUETEN, MP: MP,
             matchPunkte: matchPunkte, hatDay2: hatDay2,
             PUNKTE: PUNKTE, DAY2_PUNKTE: DAY2_PUNKTE,
+            NO_SHOW: NO_SHOW, istNoShow: istNoShow, rundenPunkte: rundenPunkte,
+            rundenZeichen: rundenZeichen, rundenFarbe: rundenFarbe,
+            rundenRahmen: rundenRahmen,
+            noShowHinweis: noShowHinweis,
             parseKartenSchluessel: parseKartenSchluessel, gitterMasse: gitterMasse,
             safeName: safeName, initials: initials,
             deckPostKarten: deckPostKarten, malStapleKachel: malStapleKachel

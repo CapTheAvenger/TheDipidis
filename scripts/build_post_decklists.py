@@ -66,6 +66,9 @@ import sys
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 QUELLE = os.path.join(WURZEL, 'data', 'tournament_decklists_per_player.csv')
+# Die Feldgroesse der Papier-Turniere steht NICHT in der Quelle oben —
+# siehe feldgroessen() weiter unten.
+LABS = os.path.join(WURZEL, 'data')
 KARTEN_DB = os.path.join(WURZEL, 'data', 'all_cards_database.json')
 ZIEL = os.path.join(WURZEL, 'data', 'post_decklists.json')
 
@@ -118,6 +121,49 @@ def bilderkarte():
         if not s or not n:
             continue
         aus.setdefault(s + '-' + n, url)
+    return aus
+
+
+def feldgroessen():
+    """tournament_id -> Teilnehmerzahl, aus data/labs_tournament_decks*.csv.
+
+    DER BEFUND, DER DIESE FUNKTION AUSGELOEST HAT (Pruefagent, 26.09.2026)
+    ---------------------------------------------------------------------
+    Der erste Bau nahm als Nenner einer Platzierung die Zahl der Spieler
+    MIT Deckliste und schrieb sie als „1st of 559" ins Bild. Nachgezaehlt:
+    das Regional Baltimore hatte **3.119** Teilnehmer; 559 davon haben
+    eine Liste eingereicht. Der geposteten Zahl fehlte damit der Faktor
+    5,6 — und dieselbe Seite nannte zwei Zeilen weiter, in der
+    Events-Kette, korrekt „3,119 players" fuer dasselbe Turnier.
+
+    Ein falscher Nenner auf einem Bild, das durch Instagram wandert, ist
+    keine Ungenauigkeit, sondern eine Behauptung. Die richtige Zahl steht
+    in denselben Dateien, die die Seite fuer ihre Events-Posts ohnehin
+    liest, und laesst sich ueber `tournament_id` treffen — geprueft an
+    allen vier Majors der Quelle (Baltimore 3.119, Worlds 797, NAIC
+    3.743, Turin 2.032).
+
+    Wird ein Turnier dort nicht gefunden, kommt KEINE Zahl zurueck. Dann
+    steht auf dem Bild „4th" ohne Nenner — das ist weniger, aber nicht
+    falsch.
+    """
+    aus = {}
+    try:
+        namen = sorted(os.listdir(LABS))
+    except OSError:
+        return aus
+    for name in namen:
+        if not name.startswith('labs_tournament_decks') or not name.endswith('.csv'):
+            continue
+        try:
+            with open(os.path.join(LABS, name), newline='', encoding='utf-8') as f:
+                for r in csv.DictReader(f):
+                    tid = (r.get('tournament_id') or '').strip()
+                    n = _zahl(r.get('total_players'), 0)
+                    if tid and n > 0:
+                        aus[tid] = max(aus.get(tid, 0), n)
+        except (OSError, ValueError):
+            continue
     return aus
 
 
@@ -219,6 +265,10 @@ def bauen():
     nach_archetyp = {}
     for e in vollstaendig.values():
         t = turniere[e['tid']]
+        # NUR ONLINE. Der Kicker des Bildes sagt „online", und die
+        # Feldgroesse kommt aus `spielerzahl` — die fuellt nur der
+        # Online-Scraper. Ein Papier-Turnier im Fenster traege also einen
+        # falschen Kicker und gar keinen Nenner.
         if t['quelle'] != 'online':
             continue
         if not t['datum'] or not (von.isoformat() <= t['datum'] <= bis.isoformat()):
@@ -265,7 +315,14 @@ def bauen():
         major = {
             'name': t['name'], 'datum': t['datum'], 'meta': t['meta'],
             'plaetze': MAJOR_PLAETZE,
+            # Die Zahl der Spieler MIT Liste. Sie ist NICHT der Nenner
+            # einer Platzierung (siehe feldgroessen) — sie steht hier,
+            # damit der Waechter sehen kann, wie viel vom Feld ueberhaupt
+            # erfasst ist.
             'gefuehrt': gefuehrt,
+            # Der Nenner: die Teilnehmerzahl. 0 heisst „nicht gefunden",
+            # und dann steht auf dem Bild kein „of N".
+            'feld': feldgroessen().get(tid, 0),
             'listen': [{
                 'platz': e['platz'],
                 'archetyp': e['archetyp'] or 'Other',

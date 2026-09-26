@@ -1927,6 +1927,86 @@ function metaCallScheiben(d, titel, standName) {
     return bauen(verfuegbar[0].id, vorgabe);
 }
 
+/* ── EIN STUECK DER UEBERGABE ALS BILD ────────────────────────────────
+ *
+ * Herausgezogen aus REZEPTE['uebergabe'] am 26.09.2026. Anlass: die
+ * Kaskade (siehe BAUM weiter unten) zeigt nicht mehr „das zuletzt
+ * uebergebene Stueck", sondern laesst aus ALLEN uebergebenen waehlen.
+ * Damit braucht dieselbe Rechnung zwei Aufrufer — und zwei Kopien waeren
+ * zwei Bilder, die sich mit der Zeit auseinanderentwickeln. */
+function deckScheibe(paket) {
+    var d = paket.daten || {};
+    var karten = uebergabeKarten(paket);
+    var gesamt = karten.reduce(function (s, k) { return s + k.anzahl; }, 0);
+    var titel = String(paket.titel || d.titel || '').trim();
+    return {
+        /* Die Liste trägt hier die Stückzahl, nicht einen Rang:
+           vier Karten mit „4" sind kein Gleichstand, sondern
+           eine Deckliste. Deshalb ohne Rangnummern. */
+        zeilen: zeilenText(karten.slice(0, MAX).map(function (k) {
+            return [k.name, k.anzahl + '\u00d7'];
+        })),
+        ohneRang: true,
+        listeKopf: 'Copies',
+        listeKopfLinks: 'Card',
+        kicker: String(d.archetyp || 'My deck'),
+        titel: titel || 'My deck',
+        fuss: karten.length + ' different \u00b7 ' + gesamt + ' cards',
+        caption: (titel || 'My deck') + ' \u2014 '
+            + karten.length + ' different cards, ' + gesamt + ' in total.',
+        tags: hashtags(['deck', 'decklist']
+            .concat(d.archetyp ? [d.archetyp] : [])
+            .concat(karten.slice(0, 4).map(function (k) { return k.name; }))),
+        kartenGitter: karten,
+        vorlagen: ['deckliste', 'liste']
+    };
+}
+
+function turnierScheibe(paket) {
+    var d = paket.daten || {};
+    var karten = uebergabeKarten(paket);
+    var titel = String(paket.titel || d.titel || '').trim();
+    /* Turnier: die Runden sind die Liste, die eingefrorene
+       Deckliste das Gitter. Beides aus derselben Übergabe. */
+    var b = d.bilanz || {};
+    var bilanz = [b.w, b.l, b.t].map(function (x) { return Number(x) || 0; }).join('-');
+    var runden = (d.runden || []).map(function (r) {
+        var z = r.result === 'win' ? 'W' : r.result === 'loss' ? 'L'
+              : r.result === 'tie' ? 'T' : '\u2013';
+        return ['R' + r.n + ' \u00b7 ' + (r.opponent || '\u2013'),
+                z + (r.games ? ' ' + r.games : '')];
+    });
+    return {
+        zeilen: zeilenText(runden.slice(0, MAX)),
+        ohneRang: true,
+        listeKopf: 'Result',
+        listeKopfLinks: 'Round \u00b7 opponent',
+        kicker: [d.art, d.format].filter(Boolean).join(' \u00b7 '),
+        titel: titel || 'Tournament',
+        fuss: [bilanz, d.deck, d.datum].filter(Boolean).join(' \u00b7 '),
+        caption: (titel || 'Tournament') + ' \u2014 ' + bilanz
+            + (d.deck ? ' with ' + d.deck : '')
+            + (d.platz ? ', place ' + d.platz : '') + '.',
+        tags: hashtags(['tournament', 'battlejournal']
+            .concat(d.deck ? [d.deck] : [])
+            .concat(d.format ? [d.format] : [])),
+        kartenGitter: karten,
+        vorlagen: karten.length ? ['liste', 'deckliste'] : ['liste']
+    };
+}
+
+/* Ein Stueck, gleich welcher Art. */
+function uebergabeScheibe(paket, standName) {
+    if (!paket) throw new Error('Nothing handed over.');
+    if (paket.art === 'deck') return deckScheibe(paket);
+    if (paket.art === 'metacall') {
+        return metaCallScheiben(paket.daten || {},
+            String(paket.titel || (paket.daten || {}).titel || ''),
+            standName || 'eigen');
+    }
+    return turnierScheibe(paket);
+}
+
 REZEPTE['uebergabe'] = {
     name: 'From the app (deck / tournament)',
     gruppe: 'Mine',
@@ -1939,68 +2019,7 @@ REZEPTE['uebergabe'] = {
                 throw new Error('Nothing handed over yet. Open a deck in "My decks" '
                     + 'or a tournament in the Battle Journal and choose "Posts page" there.');
             }
-            var d = paket.daten || {};
-            var karten = uebergabeKarten(paket);
-            var gesamt = karten.reduce(function (s, k) { return s + k.anzahl; }, 0);
-            var titel = String(paket.titel || d.titel || '').trim();
-
-            if (paket.art === 'deck') {
-                aufloesen({
-                    /* Die Liste trägt hier die Stückzahl, nicht einen Rang:
-                       vier Karten mit „4" sind kein Gleichstand, sondern
-                       eine Deckliste. Deshalb ohne Rangnummern. */
-                    zeilen: zeilenText(karten.slice(0, MAX).map(function (k) {
-                        return [k.name, k.anzahl + '\u00d7'];
-                    })),
-                    ohneRang: true,
-                    listeKopf: 'Copies',
-                    listeKopfLinks: 'Card',
-                    kicker: String(d.archetyp || 'My deck'),
-                    titel: titel || 'My deck',
-                    fuss: karten.length + ' different \u00b7 ' + gesamt + ' cards',
-                    caption: (titel || 'My deck') + ' \u2014 '
-                        + karten.length + ' different cards, ' + gesamt + ' in total.',
-                    tags: hashtags(['deck', 'decklist']
-                        .concat(d.archetyp ? [d.archetyp] : [])
-                        .concat(karten.slice(0, 4).map(function (k) { return k.name; }))),
-                    kartenGitter: karten,
-                    vorlagen: ['deckliste', 'liste']
-                });
-                return;
-            }
-
-            if (paket.art === 'metacall') {
-                aufloesen(metaCallScheiben(d, titel, 'eigen'));
-                return;
-            }
-
-            /* Turnier: die Runden sind die Liste, die eingefrorene
-               Deckliste das Gitter. Beides aus derselben Übergabe. */
-            var b = d.bilanz || {};
-            var bilanz = [b.w, b.l, b.t].map(function (x) { return Number(x) || 0; }).join('-');
-            var runden = (d.runden || []).map(function (r) {
-                var z = r.result === 'win' ? 'W' : r.result === 'loss' ? 'L'
-                      : r.result === 'tie' ? 'T' : '\u2013';
-                return ['R' + r.n + ' \u00b7 ' + (r.opponent || '\u2013'),
-                        z + (r.games ? ' ' + r.games : '')];
-            });
-            aufloesen({
-                zeilen: zeilenText(runden.slice(0, MAX)),
-                ohneRang: true,
-                listeKopf: 'Result',
-                listeKopfLinks: 'Round \u00b7 opponent',
-                kicker: [d.art, d.format].filter(Boolean).join(' \u00b7 '),
-                titel: titel || 'Tournament',
-                fuss: [bilanz, d.deck, d.datum].filter(Boolean).join(' \u00b7 '),
-                caption: (titel || 'Tournament') + ' \u2014 ' + bilanz
-                    + (d.deck ? ' with ' + d.deck : '')
-                    + (d.platz ? ', place ' + d.platz : '') + '.',
-                tags: hashtags(['tournament', 'battlejournal']
-                    .concat(d.deck ? [d.deck] : [])
-                    .concat(d.format ? [d.format] : [])),
-                kartenGitter: karten,
-                vorlagen: karten.length ? ['liste', 'deckliste'] : ['liste']
-            });
+            aufloesen(uebergabeScheibe(paket, 'eigen'));
         });
     }
 };
@@ -2037,8 +2056,570 @@ REZEPTE['uebergabe-standard'] = {
     }
 };
 
+
+/* ══════════════════════════════════════════════════════════════════════
+ * DER BAUM: HAUPTFILTER → UNTERFILTER → ERGEBNIS
+ * ══════════════════════════════════════════════════════════════════════
+ *
+ * BESTELLT (Betreiber, 26.09.2026, nach einem Blick auf die Seite am
+ * Telefon): „Wenn ich bei Posts auf Decklist bin, zeigt er mir bei Fill
+ * from die gleichen Optionen an wie überall auch. Das ergibt ja keinen
+ * Sinn. Also der Main-Filter oder die Richtung des Posts sollte schon
+ * bestimmen, was ich danach für Optionen habe. […] Und grundsätzlich
+ * arbeite einfach durch, dass wir immer einen Hauptfilter haben, und der
+ * Hauptfilter führt dann zu Unterfiltern und die Unterfilter dann zum
+ * entsprechenden Ergebnis. Aber so wie es jetzt ist, ist es einfach
+ * nicht sinnvoll."
+ *
+ * WAS VORHER FALSCH WAR
+ * ---------------------
+ * Es gab EINEN Wähler mit dreizehn Einträgen, nach Themen gruppiert, und
+ * danach höchstens einen Kartenfilter. „Erfolgreichste Listen der letzten
+ * 7 Tage" gab es überhaupt nicht, „meine Decks" hieß „From the app" und
+ * zeigte genau das eine Deck, das er zuletzt angeklickt hatte.
+ *
+ * DER VERTRAG EINES KNOTENS
+ * -------------------------
+ *     { id, name, frage, optionen, lade }
+ *
+ *   frage     Beschriftung des Wählers, der zwischen `optionen` wählt.
+ *   optionen  Array von Knoten — ODER eine Funktion(pfad), die eines
+ *             liefert, auch als Promise. Dynamisch ist der Normalfall:
+ *             die Decks stehen im lokalen Speicher, die Archetypen in
+ *             einer Datei, die Scheiben im übergebenen Stand.
+ *   lade      Funktion(pfad) -> Promise<Bild>. Nur Blätter haben es.
+ *
+ * Ein Knoten mit `optionen` ist ein Filter, ein Knoten mit `lade` ist ein
+ * Ergebnis. Beides zugleich gibt es nicht — das wäre ein Wähler, dessen
+ * erste Wahl schon ein Bild ist, und die Oberfläche müsste raten, was
+ * gemeint ist.
+ *
+ * WARUM EINE FUNKTION UND KEINE FESTE LISTE
+ * -----------------------------------------
+ * Ein Eintrag in einer Auswahl ist ein Versprechen. „Dragapult" darf nur
+ * dastehen, wenn dahinter wirklich eine Liste liegt; „Regional
+ * Frankfurt" nur, wenn der Meta Call dazu übergeben wurde. Feste Listen
+ * hätten beides behauptet, und der Bruch käme erst beim Klick.
+ *
+ * DIE ERSTE OPTION IST IMMER SCHON GEWÄHLT
+ * ----------------------------------------
+ * `kaskade()` füllt jede unbeantwortete Stufe mit ihrer ersten Option.
+ * Wer „Decks" wählt, sieht sofort ein Bild — nicht drei leere Wähler.
+ * Genau das meint „der Hauptfilter führt dann zu Unterfiltern und die
+ * Unterfilter dann zum entsprechenden Ergebnis".
+ * ══════════════════════════════════════════════════════════════════ */
+
+/* ── Die abgeleiteten Listen ──────────────────────────────────────────
+ *
+ * data/post_decklists.json entsteht beim Deploy aus
+ * data/tournament_decklists_per_player.csv (45 MB, 202.685 Zeilen) —
+ * siehe scripts/build_post_decklists.py. Die Quelle selbst hierher zu
+ * laden wäre kein Ladebalken, sondern ein Abbruch. */
+var _listenVersprechen = null;
+function postListen() {
+    if (!_listenVersprechen) {
+        _listenVersprechen = hole('data/post_decklists.json', true).then(function (j) {
+            if (!j || j.v !== 1) throw new Error('post_decklists.json: unbekannte Fassung');
+            return j;
+        });
+    }
+    return _listenVersprechen;
+}
+
+/* Die Bildadresse einer Karte aus der abgeleiteten Datei. Der gemeinsame
+ * Anfang steht einmal im Kopf — bei 615 Karten sind das 50 KB weniger. */
+function listenBild(j, set, nummer) {
+    var rest = (j.bilder || {})[String(set).toUpperCase() + '-' + String(nummer).toUpperCase()];
+    if (!rest) return '';
+    return /^https?:/i.test(rest) ? rest : (j.bild_praefix || '') + rest;
+}
+
+function listenKarten(j, karten) {
+    return (karten || []).map(function (k) {
+        return {
+            name: k[0], set: k[1], nummer: k[2], anzahl: k[3],
+            url: listenBild(j, k[1], k[2])
+        };
+    });
+}
+
+/* Eine Platzierung, wie sie ein englischer Leser erwartet. */
+function platzWort(n) {
+    var i = parseInt(n, 10) || 0;
+    var rest = i % 100;
+    if (rest >= 11 && rest <= 13) return i + 'th';
+    return i + (['th', 'st', 'nd', 'rd'][i % 10] || 'th');
+}
+
+function bilanzWort(L) {
+    return [L.w, L.l, L.t].map(function (x) { return Number(x) || 0; }).join('-');
+}
+
+/* EINE FREMDE LISTE ALS BILD.
+ *
+ * DIE PLATZIERUNG TRÄGT IHR FELD. „1." allein ist keine Aussage — ein
+ * erster Platz unter 386 Spielern und einer unter 56 sind zwei
+ * verschiedene Nachrichten, und beide Zahlen stehen in den Daten. Die
+ * Hausregel „jede Quote trägt ihren Nenner" gilt auch hier. */
+function fremdeListeScheibe(j, L, opt) {
+    var karten = listenKarten(j, L.karten);
+    var gesamt = karten.reduce(function (s, k) { return s + k.anzahl; }, 0);
+    var archetyp = String(opt.archetyp || L.archetyp || '');
+    var fussTeile = [platzWort(L.platz) + (opt.von ? ' of ' + tausend(opt.von) : '')];
+    if (L.feld) fussTeile.push(tausend(L.feld) + ' players');
+    fussTeile.push(bilanzWort(L));
+    if (L.datum) fussTeile.push(L.datum);
+    return {
+        zeilen: zeilenText(karten.slice(0, MAX).map(function (k) {
+            return [k.name, k.anzahl + '×'];
+        })),
+        ohneRang: true,
+        listeKopf: 'Copies',
+        listeKopfLinks: 'Card',
+        kicker: [archetyp, opt.kicker].filter(Boolean).join(' · '),
+        titel: opt.titel || archetyp || 'Decklist',
+        fuss: fussTeile.join(' · '),
+        caption: (archetyp || 'This deck') + ' — ' + platzWort(L.platz)
+            + (L.feld ? ' of ' + tausend(L.feld) : '')
+            + ' at ' + (L.turnier || opt.turnier || 'the event')
+            + ' (' + bilanzWort(L) + '), ' + karten.length + ' different cards.',
+        tags: hashtags(['decklist', 'pokemontcg']
+            .concat(archetyp ? [archetyp] : [])
+            .concat(karten.slice(0, 4).map(function (k) { return k.name; }))),
+        kartenGitter: karten,
+        vorlagen: ['deckliste', 'liste'],
+        _gesamt: gesamt
+    };
+}
+
+/* ── Was die Übergabe hergibt ────────────────────────────────────── */
+
+function bestandListe(art) {
+    var U = window.DsPostUebergabe;
+    if (!U || typeof U.bestand !== 'function') return { liste: [], gekuerzt: 0 };
+    var b = null;
+    try { b = U.bestand(); } catch (e) { b = null; }
+    return (b && b[art]) || { liste: [], gekuerzt: 0 };
+}
+
+/* Aus einem Bestandseintrag wird ein Knoten. Der Index ist die Kennung:
+ * zwei Decks dürfen denselben Namen tragen, und dann wäre der Name ein
+ * Schlüssel, der zwei Dinge öffnet. */
+/* WAS NICHT PASSTE, WIRD GENANNT.
+ *
+ * Der Bestand ist gedeckelt (700 KB je Art, siehe ds-post-uebergabe.js).
+ * Kuerzt er, darf die Auswahl nicht so tun, als waere sie vollstaendig —
+ * der Betreiber suchte sonst ein Deck, das es „nicht gibt". Der Eintrag
+ * ist waehlbar und sagt beim Laden, was zu tun ist; ein grauer Hinweis
+ * ohne Erklaerung waere eine Sackgasse. */
+function mitGekuerzt(knoten, b, was) {
+    if (!b.gekuerzt) return knoten;
+    return knoten.concat([{
+        id: 'gekuerzt',
+        name: '— ' + b.gekuerzt + ' more ' + was + ' did not fit —',
+        lade: function () {
+            return Promise.reject(new Error(b.gekuerzt + ' more ' + was
+                + ' were left out: the handover is capped so it cannot fill up the '
+                + 'browser storage. Open the one you want in the app and choose '
+                + '„Posts page" there — it always goes first.'));
+        }
+    }]);
+}
+
+function bestandKnoten(art, bauen) {
+    return function () {
+        var b = bestandListe(art);
+        return b.liste.map(function (e, i) {
+            return {
+                id: String(i),
+                name: e.titel || ('#' + (i + 1)),
+                lade: function () {
+                    return Promise.resolve(bauen({
+                        art: art, titel: e.titel, daten: e.daten
+                    }));
+                }
+            };
+        });
+    };
+}
+
+function nichtsUebergeben(was, wo) {
+    return [{
+        id: 'leer', name: '— nothing handed over —',
+        lade: function () {
+            return Promise.reject(new Error('No ' + was + ' handed over yet. Open '
+                + wo + ' in the app and choose „Posts page" there.'));
+        }
+    }];
+}
+
+/* ── Die fünf Ketten ─────────────────────────────────────────────── */
+
+/* 1 · MEINE DECKS */
+function meineDecks() {
+    var k = bestandKnoten('deck', deckScheibe)();
+    if (!k.length) return nichtsUebergeben('deck', 'a deck in „My decks"');
+    return mitGekuerzt(k, bestandListe('deck'), 'decks');
+}
+
+/* 2 · DIE ERFOLGREICHSTEN LISTEN DER LETZTEN SIEBEN TAGE */
+function siebenArchetypen() {
+    return postListen().then(function (j) {
+        var namen = Object.keys(j.sieben_tage || {});
+        if (!namen.length) {
+            return [{ id: 'leer', name: '— no lists in the window —',
+                lade: function () {
+                    return Promise.reject(new Error('The derived file carries no lists for '
+                        + 'the last ' + (j.fenster ? j.fenster.tage : 7) + ' days'
+                        + (j.ohne_daten ? ' (' + j.ohne_daten + ')' : '') + '.'));
+                } }];
+        }
+        /* ALPHABETISCH — UND ZWAR GEMESSEN, NICHT GERATEN.
+         *
+         * Der erste Bau sortierte nach Zahl der Listen. Im Browser stand
+         * dann: „Alakazam Dudunsparce (8) · Alakazam Dusknoir (8) ·
+         * Basic Box (8)" — 97 Einträge, fast alle am Deckel von acht.
+         * Die Zahl war damit keine Auskunft, sondern Rauschen, und die
+         * Reihenfolge war in Wahrheit alphabetisch, nur unerklärt.
+         *
+         * Jetzt ist sie es ausdrücklich: in einem Auswahlfeld mit 97
+         * Einträgen springt ein Tastendruck zum Buchstaben, und der
+         * Betreiber sucht SEIN Deck. Statt der Zahl steht im Namen, was
+         * dahinter wirklich interessant ist — das beste Ergebnis. */
+        namen.sort(function (a, b) { return a.localeCompare(b, 'en'); });
+        var sw = ((j.fenster || {}).erfolg_platz) || 0;
+        return namen.map(function (a) {
+            var b = j.sieben_tage[a][0];
+            return {
+                id: a,
+                name: a + ' — best ' + platzWort(b.platz)
+                    + (b.feld ? ' of ' + tausend(b.feld) : ''),
+                /* Die Schwelle steht in der Frage, wie beim Major die
+                   Top 32 — sonst wirkt sie stumm, und niemand weiss,
+                   warum ein Archetyp fehlt. Sie kommt aus der Datei
+                   (scripts/build_post_decklists.py, ERFOLG_PLATZ), nicht
+                   aus dieser Zeile. */
+                frage: 'List' + (sw ? ' (top ' + sw + ')' : ''),
+                optionen: j.sieben_tage[a].map(function (L, i) {
+                    return {
+                        id: String(i),
+                        name: platzWort(L.platz) + ' · '
+                            + (L.feld ? tausend(L.feld) + ' players · ' : '')
+                            + bilanzWort(L) + ' · ' + L.datum,
+                        lade: function () {
+                            return Promise.resolve(fremdeListeScheibe(j, L, {
+                                archetyp: a,
+                                kicker: (sw ? 'Top ' + sw + ' · ' : '')
+                                    + 'last 7 days · online',
+                                titel: a,
+                                turnier: L.turnier
+                            }));
+                        }
+                    };
+                })
+            };
+        });
+    });
+}
+
+/* 3 · DAS LETZTE MAJOR, TOP 32 */
+function majorArchetypen() {
+    return postListen().then(function (j) {
+        var m = j.major;
+        if (!m || !(m.listen || []).length) {
+            return [{ id: 'leer', name: '— no major on file —',
+                lade: function () {
+                    return Promise.reject(new Error('The derived file carries no major.'));
+                } }];
+        }
+        var nach = {};
+        m.listen.forEach(function (L) {
+            var a = L.archetyp || 'Other';
+            if (!nach[a]) nach[a] = [];
+            nach[a].push(L);
+        });
+        var namen = Object.keys(nach);
+        /* Nach dem besten Platz: wer das Turnier gewonnen hat, steht oben. */
+        namen.sort(function (a, b) {
+            return (nach[a][0].platz - nach[b][0].platz) || a.localeCompare(b, 'en');
+        });
+        return namen.map(function (a) {
+            return {
+                id: a,
+                name: a + ' (' + nach[a].length + ')',
+                /* „Da brauchen wir aber nicht mehr anbieten als die Top
+                   32." Die Grenze steckt in der Datei (MAJOR_PLAETZE) —
+                   hier steht sie in der Frage, damit sie im Bild sichtbar
+                   wird und nicht stumm wirkt. */
+                frage: 'Placement (top ' + (m.plaetze || 32) + ')',
+                optionen: nach[a].map(function (L) {
+                    return {
+                        id: String(L.platz),
+                        name: platzWort(L.platz) + ' place · ' + bilanzWort(L),
+                        lade: function () {
+                            return Promise.resolve(fremdeListeScheibe(j,
+                                {
+                                    platz: L.platz, w: L.w, l: L.l, t: L.t,
+                                    karten: L.karten, datum: m.datum,
+                                    turnier: m.name, feld: 0
+                                },
+                                {
+                                    archetyp: a,
+                                    kicker: kurzTurnier(m.name) + ' · ' + m.datum,
+                                    titel: a, turnier: m.name,
+                                    /* „4th" allein ist keine Aussage. Beim
+                                       Major nennt die Datei die Zahl der
+                                       GEFUEHRTEN Platzierungen, nicht eine
+                                       Teilnehmerzahl — deshalb „of 559"
+                                       und nicht „559 players". */
+                                    von: m.gefuehrt || 0
+                                }));
+                        }
+                    };
+                })
+            };
+        });
+    });
+}
+
+/* 4 · DER META CALL */
+function metaScheibenKnoten(paket, standName) {
+    /* Welche Scheiben es gibt, weiß nur der gebaute Stand — und ob er
+       sich überhaupt bauen lässt. Wirft er, steht ein Knoten da, der beim
+       Klick denselben Satz sagt; eine leere Auswahl wäre stiller. */
+    var erg = null, fehler = null;
+    try { erg = metaCallScheiben(paket.daten || {}, String(paket.titel || ''), standName); }
+    catch (e) { fehler = e; }
+    if (!erg) {
+        return [{ id: 'leer', name: '— not available —',
+            lade: function () { return Promise.reject(fehler); } }];
+    }
+    var alle = (erg.karussell || []).slice();
+    var aus = [];
+    /* „ob jetzt alle angezeigt werden sollen im Karussell oder nur ein
+       Feature davon" — das Karussell steht zuerst, weil es der Fall ist,
+       den er beschrieben hat. Gemalt wird dabei die erste Scheibe; der
+       Karussell-Knopf unter der Vorschau erzeugt alle. */
+    /* DIE SCHEIBENLISTE WIRD ABGENOMMEN, NICHT WEITERGEGEBEN.
+     *
+     * `bauen()` haengt an jede Scheibe `filter` — die fuenf Scheiben —,
+     * weil die Oberflaeche sie bis zum 25.09.2026 als Kartenfilter
+     * anzeigte. Genau dieser Waehler ist jetzt eine Stufe der Kaskade.
+     * Bliebe `filter` stehen, stuenden die fuenf Scheiben ZWEIMAL da:
+     * einmal als Unterfilter und einmal als „Card filter" darunter.
+     *
+     * `proFilter`, `decks` und `karussell` bleiben — der Karussell-Knopf
+     * und die Deckwahl arbeiten damit. */
+    function ohneScheibenfilter(e) {
+        if (e) delete e.filter;
+        return e;
+    }
+    if (alle.length > 1) {
+        aus.push({
+            id: 'alle', name: 'All slides — carousel (' + alle.length + ')',
+            lade: function () {
+                return Promise.resolve(ohneScheibenfilter(
+                    metaCallScheiben(paket.daten || {},
+                        String(paket.titel || ''), standName)));
+            }
+        });
+    }
+    (erg.filter || []).forEach(function (f) {
+        aus.push({
+            id: f.id, name: f.name,
+            lade: function () {
+                var e = metaCallScheiben(paket.daten || {},
+                    String(paket.titel || ''), standName);
+                return Promise.resolve(ohneScheibenfilter(
+                    e.proFilter(f.id, e.gewaehltesDeck)));
+            }
+        });
+    });
+    return aus;
+}
+
+/* Die Standardprognose: „dann wird halt die angezeigt, die jetzt gerade
+ * live auf der Seite ist." Das ist der offene Meta Call der App — also
+ * das EINE übergebene Stück, nicht ein gespeichertes Szenario. */
+function metaStandard() {
+    var U = window.DsPostUebergabe;
+    var paket = (U && typeof U.holen === 'function') ? U.holen() : null;
+    if (!paket || paket.art !== 'metacall') {
+        var b = bestandListe('metacall');
+        if (b.liste.length) {
+            paket = { art: 'metacall', titel: b.liste[0].titel, daten: b.liste[0].daten };
+        }
+    }
+    if (!paket || paket.art !== 'metacall') {
+        return nichtsUebergeben('Meta Call', 'the Meta Call');
+    }
+    return metaScheibenKnoten(paket, 'standard');
+}
+
+/* Die bearbeitete Prognose: „dann bei der bearbeiteten Prognose werden
+ * dann meine gespeicherten Metacalls angezeigt." */
+function metaEigene() {
+    var b = bestandListe('metacall');
+    if (!b.liste.length) return nichtsUebergeben('Meta Call', 'the Meta Call');
+    return mitGekuerzt(b.liste.map(function (e, i) {
+        var paket = { art: 'metacall', titel: e.titel, daten: e.daten };
+        return {
+            id: String(i),
+            name: (e.titel || ('#' + (i + 1)))
+                + ((e.daten && e.daten.eigeneSchaetzungen) ? '' : ' — no own estimates'),
+            frage: 'Slide',
+            optionen: metaScheibenKnoten(paket, 'eigen')
+        };
+    }), b, 'Meta Calls');
+}
+
+/* 5 · DAS BATTLE JOURNAL */
+function journalTurniere() {
+    var k = bestandKnoten('turnier', turnierScheibe)();
+    if (!k.length) return nichtsUebergeben('tournament', 'a tournament in the Battle Journal');
+    return mitGekuerzt(k, bestandListe('turnier'), 'tournaments');
+}
+
+/* ── Die bestehenden dreizehn Quellen, unter ihre Gruppe einsortiert ──
+ *
+ * Sie verschwinden nicht: „Weitere Posts Feature mit entsprechender
+ * Vorfilterung." Ihre Gruppe IST der Hauptfilter — sie stand bisher schon
+ * als `gruppe` in jedem Rezept und war nur eine Zwischenüberschrift im
+ * Wähler. Jetzt ist sie die erste Frage.
+ *
+ * Ihr eigener Filter (`erg.filter`) bleibt, was er ist, und erscheint als
+ * LETZTE Stufe — die Oberfläche hängt ihn an, sobald das geladene
+ * Ergebnis einen mitbringt. */
+var GRUPPEN_ALS_HAUPT = [
+    ['meta', 'Online meta'],
+    ['events', 'Events'],
+    ['karten', 'Cards'],
+    ['champions', 'Champions'],
+    ['pocket', 'Pocket']
+];
+
+function gruppenKnoten(gruppe) {
+    return Object.keys(REZEPTE).filter(function (id) {
+        return REZEPTE[id].gruppe === gruppe;
+    }).map(function (id) {
+        var r = REZEPTE[id];
+        return {
+            id: id,
+            name: r.name + (r.groesse ? ' (' + r.groesse + ')' : ''),
+            lade: function () { return window.DsPostQuellen.lade(id); }
+        };
+    });
+}
+
+var BAUM = [
+    /* Der Meta Call steht oben: „Ja, also Hauptfeature Metacall." */
+    {
+        id: 'metacall', name: 'Meta Call', frage: 'Forecast',
+        optionen: [
+            { id: 'standard', name: 'Model forecast — as it stands on the site',
+              frage: 'Slide', optionen: metaStandard },
+            { id: 'eigen', name: 'My edited forecast — saved Meta Calls',
+              frage: 'Saved forecast', optionen: metaEigene }
+        ]
+    },
+    {
+        id: 'decks', name: 'Decks', frage: 'Source',
+        optionen: [
+            { id: 'meine', name: 'My decks', frage: 'Deck', optionen: meineDecks },
+            { id: 'sieben', name: 'Most successful lists — last 7 days',
+              frage: 'Archetype', optionen: siebenArchetypen },
+            { id: 'major', name: 'Last major', frage: 'Archetype', optionen: majorArchetypen }
+        ]
+    },
+    {
+        id: 'journal', name: 'Battle Journal', frage: 'Tournament',
+        optionen: journalTurniere
+    }
+].concat(GRUPPEN_ALS_HAUPT.map(function (g) {
+    return {
+        id: g[0], name: g[1], frage: 'Source',
+        optionen: function () { return gruppenKnoten(g[1]); }
+    };
+}));
+
+/* ── Der Gang durch den Baum ──────────────────────────────────────────
+ *
+ * `kaskade(pfad)` beantwortet der Oberfläche genau eine Frage: welche
+ * Wähler stehen da, was ist darin gewählt, und welches Blatt ist
+ * erreicht. Die Oberfläche malt und rechnet nichts.
+ *
+ * Eine unbeantwortete Stufe wird mit ihrer ersten Option beantwortet —
+ * siehe Kopf. Ein Pfad, der ins Leere zeigt (ein gelöschtes Deck, ein
+ * Archetyp, der aus dem Fenster gefallen ist), wird ebenso behandelt:
+ * die Alternative wäre ein leerer Wähler mit einem Fehler dahinter. */
+function optionenVon(knoten, pfad) {
+    var o = knoten.optionen;
+    var erg;
+    if (typeof o === 'function') {
+        try { erg = Promise.resolve(o(pfad)); } catch (e) { erg = Promise.reject(e); }
+    } else {
+        erg = Promise.resolve(o || []);
+    }
+    /* EIN AUSFALL BLEIBT IM WAEHLER STEHEN, ER FRISST NICHT DIE KETTE.
+     *
+     * Scheitert das Nachladen einer Stufe — die abgeleitete Datei fehlt,
+     * das Netz ist weg —, dann waren vorher der Hauptfilter UND alle
+     * Unterfilter weg, und die Meldung stand ueber einer leeren Seite.
+     * Der Ausfall gehoert dorthin, wo er passiert ist: ein Eintrag, der
+     * beim Laden denselben Satz sagt. Dann sieht man, WELCHE Stufe nicht
+     * kann, und die Stufen darueber bleiben bedienbar. */
+    return erg.then(function (liste) {
+        return (liste && liste.length) ? liste : [{
+            id: 'leer', name: '— nothing here —',
+            lade: function () {
+                return Promise.reject(new Error('This filter has nothing behind it.'));
+            }
+        }];
+    }, function (e) {
+        return [{
+            id: 'leer', name: '— not available —',
+            lade: function () { return Promise.reject(e); }
+        }];
+    });
+}
+
+function kaskade(pfad) {
+    pfad = (pfad || []).map(String);
+    var stufen = [];
+    var tiefe = 0;
+
+    function weiter(knoten, optionen) {
+        var wahl = pfad[tiefe];
+        var treffer = optionen.filter(function (o) { return String(o.id) === wahl; })[0];
+        if (!treffer) treffer = optionen[0] || null;
+        stufen.push({
+            frage: knoten ? (knoten.frage || 'Source') : 'Post',
+            optionen: optionen.map(function (o) { return { id: String(o.id), name: o.name }; }),
+            wahl: treffer ? String(treffer.id) : ''
+        });
+        tiefe++;
+        if (!treffer) return Promise.resolve({ stufen: stufen, blatt: null });
+        if (treffer.optionen) {
+            return optionenVon(treffer, pfad.slice(0, tiefe)).then(function (u) {
+                return weiter(treffer, u || []);
+            });
+        }
+        return Promise.resolve({ stufen: stufen, blatt: treffer });
+    }
+
+    return weiter(null, BAUM);
+}
+
 window.DsPostQuellen = {
     REZEPTE: REZEPTE,
+    BAUM: BAUM,
+    kaskade: kaskade,
+    postListen: postListen,
+    platzWort: platzWort,
+    deckScheibe: deckScheibe,
+    turnierScheibe: turnierScheibe,
+    uebergabeScheibe: uebergabeScheibe,
+    fremdeListeScheibe: fremdeListeScheibe,
     /* Fuer die Tests und fuer die Oberflaeche. */
     liesCsv: liesCsv,
     zerlege: zerlege,

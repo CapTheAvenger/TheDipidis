@@ -46,7 +46,7 @@ describe('Pocket-Reiter: im Dokument', () => {
     it('der Reiter existiert und startet NICHT aktiv', () => {
         const m = HTML.match(/<div id="pocket"([^>]*)>/);
         assert.ok(m, '<div id="pocket"> fehlt in index.html');
-        assert.match(m[1], /class="tab-content"/,
+        assert.match(m[1], /class="tab-content(?: fs-scale)?"/,
             'der Reiter traegt nicht die Klasse tab-content');
         assert.doesNotMatch(m[1], /\bactive\b/,
             'der neue Reiter startet aktiv — test-startseite-meta.js zaehlt, ' +

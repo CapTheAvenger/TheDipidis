@@ -97,7 +97,7 @@ describe('Admin — der Weg hinein', () => {
     });
 
     it('der Reiter existiert im HTML und hat seinen Behälter', () => {
-        assert.match(HTML, /<div id="admin" class="tab-content">/);
+        assert.match(HTML, /<div id="admin" class="tab-content(?: fs-scale)?">/);
         assert.match(HTML, /id="adminHost"/);
         assert.match(HTML, /id="adminTitel"/);
         assert.match(HTML, /id="adminZurueck"/);

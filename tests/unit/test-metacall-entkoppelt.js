@@ -42,7 +42,7 @@ const TG = R('js/app-testing-groups.js');
 
 describe('Meta Call: eigener Tab statt Profil-Untertab', () => {
     it('es gibt einen Tab-Container #meta-call', () => {
-        assert.match(HTML, /<div id="meta-call" class="tab-content">/);
+        assert.match(HTML, /<div id="meta-call" class="tab-content(?: fs-scale)?">/);
         assert.match(HTML, /id="metaCallHost"/);
     });
 

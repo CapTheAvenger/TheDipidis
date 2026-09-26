@@ -261,7 +261,15 @@ describe('ds-share: ein Turnier ist die Gruppe seiner Partien', () => {
         // stimmte nicht. Das Journal rechnet durchgaengig S/(S+N+U), und die
         // Tier-Karte, aus der die Deck-Bildkarte ihre Zahl zieht, ebenfalls.
         // Bei 2-1-1 waren das 62,5 % im Bild gegen 50 % in der Zeile daneben.
-        assert.match(SHARE, /winRate: scored \? \(w \/ scored\) \* 100 : NaN/);
+        // 26.09.2026: der Nenner heisst jetzt `gespielt` statt `scored`.
+        // Nicht weil die Konvention gewechselt haette — S/(S+N+U) steht
+        // unveraendert —, sondern weil ein No-Show keine gespielte Partie
+        // ist und in KEINEM der beiden Brueche vorkommen darf. `w`
+        // ENTHAELT ihn (das ist die Bilanz, so hat die Turnierleitung
+        // gewertet), also muss er im Zaehler abgezogen werden.
+        assert.match(SHARE, /winRate: gespielt \? \(\(w - n\) \/ gespielt\) \* 100 : NaN/);
+        assert.match(SHARE, /var gespielt = scored - n;/,
+            'der Nenner trennt gespielte Partien nicht mehr ab');
         assert.doesNotMatch(SHARE, /\(w \+ t \/ 2\) \/ scored/);
         /* DIE FUSSNOTE MIT DER FORMEL IST SEIT DEM 11.09.2026 WEG.
            Gemeldet: „bei den Bildern die Bezeichnung mit dem S durch S

@@ -135,3 +135,11 @@ data/bot-deck-index.json
 
 # Backend scraper data (synced to data/ via prepare_card_data.py)
 backend/core/data/
+
+# Die Listen der Post-Seite entstehen beim Deploy, nicht im Repo
+# (26.09.2026). .github/workflows/deploy-pages.yml baut sie aus
+# data/tournament_decklists_per_player.csv nach _site/data/. Sie hier zu
+# fuehren hiesse: bei jedem Scrape eine halbe Megabyte neu in die
+# Geschichte, und ein „letzte 7 Tage", das bis zum naechsten Commit
+# altert. Lokal darf sie liegen — fuer die Abnahme im Browser.
+data/post_decklists.json

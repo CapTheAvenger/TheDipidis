@@ -152,6 +152,9 @@
             opponentValue: document.getElementById('battleJournalOpponentValue'),
             opponentList: document.getElementById('battleJournalOpponentList'),
             bestOfInput: document.getElementById('battleJournalBestOf'),
+            noShowInput: document.getElementById('battleJournalNoShow'),
+            noShowBtn: document.getElementById('battleJournalNoShowBtn'),
+            bestOfRow: document.getElementById('battleJournalBestOfRow'),
             turnOrderInput: document.getElementById('battleJournalTurnOrder'),
             resultInput: document.getElementById('battleJournalResult'),
             gameDetails: document.getElementById('battleJournalGameDetails'),
@@ -536,8 +539,6 @@
         const goingLabel = battleJournalText('bj.turnOrder', 'Going');
         const resultLabel = battleJournalText('bj.result', 'Result');
         const headerLabel = battleJournalText('bj.gameDetails', 'Game Details');
-        const noShowShort = battleJournalText('bj.noshowShort', 'N');
-        const noShowTitle = battleJournalText('bj.noshowToggleTitle', 'No-Show — Gegner nicht erschienen');
         const brickTitle = battleJournalText('bj.brickToggleTitle', 'Brick (Pech-Spiel)');
         const mulliganTitle = battleJournalText('bj.mulliganToggleTitle', 'Mulligan in diesem Game');
         const notesPlaceholder = battleJournalText('bj.gameNotesPlaceholder', 'Notiz zu diesem Game...');
@@ -567,11 +568,10 @@
                             <button type="button" class="battle-journal-choice" data-field="game${i}Turn" data-value="first" onclick="setGameChoice(${i},'turn','first')">${escapeHtml(firstLabel)}</button>
                             <button type="button" class="battle-journal-choice" data-field="game${i}Turn" data-value="second" onclick="setGameChoice(${i},'turn','second')">${escapeHtml(secondLabel)}</button>
                         </div>
-                        <div class="battle-journal-choice-group battle-journal-choice-group-result battle-journal-choice-group-vier">
+                        <div class="battle-journal-choice-group battle-journal-choice-group-result">
                             <button type="button" class="battle-journal-choice battle-journal-choice-win" data-field="game${i}Result" data-value="win" onclick="setGameChoice(${i},'result','win')">W</button>
                             <button type="button" class="battle-journal-choice battle-journal-choice-loss" data-field="game${i}Result" data-value="loss" onclick="setGameChoice(${i},'result','loss')">L</button>
                             <button type="button" class="battle-journal-choice battle-journal-choice-tie" data-field="game${i}Result" data-value="tie" onclick="setGameChoice(${i},'result','tie')">T</button>
-                            <button type="button" class="battle-journal-choice battle-journal-choice-noshow" data-field="game${i}Result" data-value="noshow" onclick="setGameChoice(${i},'result','noshow')" title="${escapeHtml(noShowTitle)}" aria-label="${escapeHtml(noShowTitle)}">${escapeHtml(noShowShort)}</button>
                         </div>
                     </div>${extrasHtml}
                 </div>`;
@@ -768,8 +768,9 @@
                         : entry.result === 'loss'
                             ? battleJournalText('bj.loss', 'Loss')
                             : battleJournalText('bj.tie', 'Tie');
-                const turnText = entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : battleJournalText('bj.secondShort', '2nd');
-                const bestOfText = entry.bestOf === 'bo3' ? 'BO3' : 'BO1';
+                const turnText = istNoShow(entry) ? '\u2013'
+                    : (entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : battleJournalText('bj.secondShort', '2nd'));
+                const bestOfText = istNoShow(entry) ? '\u2013' : (entry.bestOf === 'bo3' ? 'BO3' : 'BO1');
                 const tournamentPart = entry.tournamentName ? `${escapeHtml(entry.tournamentName)} · ` : '';
                 const title = `${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}`;
                 const bo3Text = entry.bestOf === 'bo3' && Array.isArray(entry.bo3Games) && entry.bo3Games.length === 3
@@ -846,15 +847,63 @@
         persistBattleJournalDraftFromForm();
     }
 
+    /* Der No-Show-Schalter.
+     *
+     * BEFUND 26.09.2026, von Hausi am Turniertisch gefunden: der erste
+     * Anlauf haengte den No-Show an eine GAME-Zeile. Das Formular
+     * verlangt aber weiter einen Gegner-Archetyp — und wenn niemand
+     * erschienen ist, gibt es keinen. Der Eintrag liess sich nicht
+     * speichern.
+     *
+     * Ein No-Show ist eine Eigenschaft des MATCHES, nicht einer Partie.
+     * Der Schalter blendet deshalb alles aus, was man ohne Gegner nicht
+     * ausfuellen kann (Gegnerfeld, Best of, Game-Details), und die
+     * Pruefung verlangt es dann auch nicht mehr. */
+    function noShowAn() {
+        const els = battleJournalElements();
+        return (els.noShowInput?.value || '') === '1';
+    }
+
+    function noShowAnsichtSetzen() {
+        const els = battleJournalElements();
+        const an = noShowAn();
+        if (els.noShowBtn) {
+            els.noShowBtn.classList.toggle('is-active', an);
+            els.noShowBtn.setAttribute('aria-pressed', String(an));
+        }
+        if (els.opponentValue) {
+            els.opponentValue.disabled = an;
+            if (an) els.opponentValue.value = '';
+            els.opponentValue.closest('div')?.classList.toggle('is-ausgegraut', an);
+        }
+        if (els.bestOfRow) els.bestOfRow.classList.toggle('d-none', an);
+        if (els.gameDetails && an) els.gameDetails.classList.add('d-none');
+        if (!an) setBattleJournalChoice('bestOf', els.bestOfInput?.value || '');
+    }
+
+    function toggleNoShow() {
+        const els = battleJournalElements();
+        if (!els.noShowInput) return;
+        els.noShowInput.value = noShowAn() ? '' : '1';
+        noShowAnsichtSetzen();
+        persistBattleJournalDraftFromForm();
+    }
+
     function getBattleJournalFormValues() {
         const els = battleJournalElements();
-        const games = getGameDetails();
-        const derived = deriveOverallResult(games);
+        const nichtErschienen = noShowAn();
+        const games = nichtErschienen ? [] : getGameDetails();
+        const derived = nichtErschienen
+            ? { turnOrder: '', result: NO_SHOW }
+            : deriveOverallResult(games);
         return {
             tournamentName: String(els.tournamentName?.value || '').trim(),
             ownDeck: String(els.ownDeckValue?.value || '').trim(),
-            opponentArchetype: String(els.opponentValue?.value || '').trim(),
-            bestOf: String(els.bestOfInput?.value || '').trim(),
+            // Kein Gegner, kein Best of, keine Partie — nichts davon ist
+            // beobachtet worden, also wird auch nichts davon gespeichert.
+            opponentArchetype: nichtErschienen ? '' : String(els.opponentValue?.value || '').trim(),
+            noShow: nichtErschienen,
+            bestOf: nichtErschienen ? '' : String(els.bestOfInput?.value || '').trim(),
             meta: String(els.metaInput?.value || '').trim(),
             tournamentType: String(els.typeInput?.value || '').trim(),
             brick: els.brickInput?.checked || false,
@@ -876,6 +925,7 @@
         if (els.tournamentName) els.tournamentName.value = draft.tournamentName || '';
         if (els.ownDeckValue) els.ownDeckValue.value = draft.ownDeck || '';
         if (els.opponentValue) els.opponentValue.value = draft.opponentArchetype || '';
+        if (els.noShowInput) els.noShowInput.value = draft.noShow ? '1' : '';
         if (els.bestOfInput) els.bestOfInput.value = draft.bestOf || '';
         if (els.metaInput) els.metaInput.value = draft.meta || '';
         if (els.typeInput) els.typeInput.value = draft.tournamentType || '';
@@ -885,6 +935,7 @@
         document.querySelectorAll('.bj-type-chip').forEach(c => c.classList.toggle('is-selected', c.dataset.value === (draft.tournamentType || '')));
 
         renderDeckChoices();
+        noShowAnsichtSetzen();
         setBattleJournalChoice('bestOf', draft.bestOf || '');
         // Game details are applied inside setBattleJournalChoice after renderGameRows
     }
@@ -894,14 +945,15 @@
         if (els.form) els.form.reset();
         if (els.tournamentName) els.tournamentName.value = '';
         if (els.ownDeckValue) els.ownDeckValue.value = '';
-        if (els.opponentValue) els.opponentValue.value = '';
-        if (els.bestOfInput) els.bestOfInput.value = '';
+        if (els.opponentValue) { els.opponentValue.value = ''; els.opponentValue.disabled = false; }
+        if (els.noShowInput) els.noShowInput.value = '';
         if (els.turnOrderInput) els.turnOrderInput.value = '';
         if (els.resultInput) els.resultInput.value = '';
         if (els.metaInput) els.metaInput.value = '';
         if (els.typeInput) els.typeInput.value = '';
         document.querySelectorAll('.battle-journal-choice').forEach(button => button.classList.remove('is-selected'));
         document.querySelectorAll('.bj-type-chip').forEach(c => c.classList.remove('is-selected'));
+        noShowAnsichtSetzen();
         const brickEl = document.getElementById('battleJournalBrick');
         if (brickEl) brickEl.checked = false;
         const mulliganEl = document.getElementById('battleJournalMulligan');
@@ -923,6 +975,9 @@
             showToast(battleJournalText('bj.validationOwnDeck', 'Please select your deck.'), 'warning');
             return false;
         }
+        // Bei einem No-Show gibt es keinen Gegner, kein Best of und keine
+        // Partie — danach zu fragen waere der Fehler, nicht die Luecke.
+        if (values.result === NO_SHOW) return true;
         if (!values.opponentArchetype) {
             showToast(battleJournalText('bj.validationOpponent', 'Please select the opponent archetype.'), 'warning');
             return false;
@@ -946,8 +1001,14 @@
         const activeTab = getBattleJournalActiveTab();
         const sourceArchetype = getBattleJournalCurrentOwnDeck();
         const games = values.games || [];
-        const derived = deriveOverallResult(games);
-        const isBo3 = (values.bestOf || 'bo1') === 'bo3';
+        // Bei einem No-Show gibt es keine Spiele, aus denen sich etwas
+        // ableiten liesse — das Ergebnis steht schon fest und kommt aus
+        // dem Schalter, nicht aus der Ableitung.
+        const nichtErschienen = values.result === NO_SHOW || !!values.noShow;
+        const derived = nichtErschienen
+            ? { turnOrder: '', result: NO_SHOW }
+            : deriveOverallResult(games);
+        const isBo3 = !nichtErschienen && (values.bestOf || 'bo1') === 'bo3';
         // For BO3 the brick + mulligan + notes live per-game (inside
         // bo3Games[i]). The match-level fields still get stored — for BO3
         // they roll up to "any game flagged" and "concatenated notes" so
@@ -968,7 +1029,9 @@
             tournamentType: values.tournamentType || '',
             ownDeck: values.ownDeck,
             opponentArchetype: values.opponentArchetype,
-            bestOf: values.bestOf || 'bo1',
+            // Ohne Partie gibt es kein Best of. Ein 'bo1' hier waere eine
+            // Behauptung ueber etwas, das nie stattgefunden hat.
+            bestOf: nichtErschienen ? '' : (values.bestOf || 'bo1'),
             turnOrder: derived.turnOrder,
             result: derived.result,
             bo3Games: games,
@@ -1598,7 +1661,7 @@
             : entry.result === 'loss' ? battleJournalText('bj.loss', 'Loss')
             : battleJournalText('bj.tie', 'Tie');
         const turnText = entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : (entry.turnOrder === 'second' ? battleJournalText('bj.secondShort', '2nd') : '');
-        const bestOfText = entry.bestOf === 'bo3' ? 'BO3' : 'BO1';
+        const bestOfText = istNoShow(entry) ? '\u2013' : (entry.bestOf === 'bo3' ? 'BO3' : 'BO1');
         const dateStr = new Date(entry.createdAtMs || Date.now()).toLocaleString(locale, { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
         const pendingBadge = entry._pending ? `<span class="bj-history-pending">${escapeHtml(battleJournalText('bj.histPending', 'pending'))}</span>` : '';
 
@@ -2620,8 +2683,6 @@
         const games = Array.isArray(savedGames) ? savedGames : [];
         const firstLabel  = battleJournalText('bj.first', 'First');
         const secondLabel = battleJournalText('bj.second', 'Second');
-        const noShowShort   = battleJournalText('bj.noshowShort', 'N');
-        const noShowTitle   = battleJournalText('bj.noshowToggleTitle', 'No-Show — Gegner nicht erschienen');
         const brickTitle    = battleJournalText('bj.brickToggleTitle', 'Brick (Pech-Spiel)');
         const mulliganTitle = battleJournalText('bj.mulliganToggleTitle', 'Mulligan in diesem Game');
         const notesPh       = battleJournalText('bj.gameNotesPlaceholder', 'Notiz zu diesem Game...');
@@ -2647,11 +2708,10 @@
                             <button type="button" class="battle-journal-choice${sel(turn,'first')}"  data-edit-game="${i}" data-edit-field="Turn"   data-edit-value="first"  onclick="setEditGameChoice(${i},'turn','first')">${escapeHtml(firstLabel)}</button>
                             <button type="button" class="battle-journal-choice${sel(turn,'second')}" data-edit-game="${i}" data-edit-field="Turn"   data-edit-value="second" onclick="setEditGameChoice(${i},'turn','second')">${escapeHtml(secondLabel)}</button>
                         </div>
-                        <div class="battle-journal-choice-group battle-journal-choice-group-result battle-journal-choice-group-vier">
+                        <div class="battle-journal-choice-group battle-journal-choice-group-result">
                             <button type="button" class="battle-journal-choice battle-journal-choice-win${sel(res,'win')}"   data-edit-game="${i}" data-edit-field="Result" data-edit-value="win"  onclick="setEditGameChoice(${i},'result','win')">W</button>
                             <button type="button" class="battle-journal-choice battle-journal-choice-loss${sel(res,'loss')}" data-edit-game="${i}" data-edit-field="Result" data-edit-value="loss" onclick="setEditGameChoice(${i},'result','loss')">L</button>
                             <button type="button" class="battle-journal-choice battle-journal-choice-tie${sel(res,'tie')}"   data-edit-game="${i}" data-edit-field="Result" data-edit-value="tie"  onclick="setEditGameChoice(${i},'result','tie')">T</button>
-                            <button type="button" class="battle-journal-choice battle-journal-choice-noshow${sel(res,'noshow')}" data-edit-game="${i}" data-edit-field="Result" data-edit-value="noshow" onclick="setEditGameChoice(${i},'result','noshow')" title="${escapeHtml(noShowTitle)}" aria-label="${escapeHtml(noShowTitle)}">${escapeHtml(noShowShort)}</button>
                         </div>
                     </div>
                     <div class="battle-journal-game-extras">
@@ -2711,7 +2771,9 @@
         const newOwnDeck  = String(document.getElementById('bjEditEntryOwnDeck')?.value || '').trim();
         const newOpponent = String(document.getElementById('bjEditEntryOpponent')?.value || '').trim();
 
-        if (!newOwnDeck || !newOpponent) {
+        const bearbeitetesErgebnis = String(document.getElementById('bjEditEntryResult')?.value || '').trim();
+        const bleibtNoShow = !isBo3 && bearbeitetesErgebnis === NO_SHOW;
+        if (!newOwnDeck || (!newOpponent && !bleibtNoShow)) {
             showToast(battleJournalText('bj.editDeckRequired', 'Deck and opponent are required.'), 'warning');
             return;
         }
@@ -2851,6 +2913,7 @@
     window.closeBattleJournalSheet = closeBattleJournalSheet;
     window.submitBattleJournalEntry = submitBattleJournalEntry;
     window.setBattleJournalChoice = setBattleJournalChoice;
+    window.toggleNoShow = toggleNoShow;
     window.setGameChoice = setGameChoice;
     window.onGameNotesInput = onGameNotesInput;
     window.setEditGameChoice = setEditGameChoice;
@@ -2901,7 +2964,8 @@
         return liste;
     }
     window._bjGetGroup = journalGruppe;
-    window._bjNoShow = { NO_SHOW, istNoShow, alsSiegGewertet, nurGespielte, deriveOverallResult };
+    window._bjNoShow = { NO_SHOW, istNoShow, alsSiegGewertet, nurGespielte, deriveOverallResult,
+        noShowAn, toggleNoShow, getBattleJournalFormValues, validateBattleJournalEntry };
     window.copyJournalEntry = copyJournalEntry;
     window.copyAllJournalEntries = copyAllJournalEntries;
     window.clearAllJournalEntries = clearAllJournalEntries;

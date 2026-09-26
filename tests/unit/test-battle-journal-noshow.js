@@ -164,21 +164,67 @@ describe('No-Show: die Oberfläche kennt ihn', () => {
     const html = ohneKommentare(lies('index.html'));
     const i18n = lies('js/i18n.js');
 
-    it('es gibt einen vierten Knopf, in der Eingabe und im Bearbeiten-Fenster', () => {
-        // Die Klasse allein genügt nicht — ein Knopf, der anders aussieht
-        // aber `tie` setzt, ist der schlimmere Fehler. Geprüft wird
-        // deshalb, was er SETZT: Datenwert und Aufruf.
+    it('der Schalter steht VOR dem Gegnerfeld-Zwang, nicht in einer Game-Zeile', () => {
+        // Der erste Anlauf haengte den No-Show an eine Game-Zeile. Das
+        // Formular verlangt aber einen Gegner-Archetyp, und den gibt es
+        // nicht, wenn niemand erschienen ist — der Eintrag liess sich
+        // nicht speichern. Der Schalter gehoert an den Match.
+        assert.match(html, /id="battleJournalNoShowBtn"[\s\S]{0,200}onclick="toggleNoShow\(\)"/,
+            'der No-Show-Schalter fehlt im Formular');
+        assert.match(html, /id="battleJournalNoShow"[^>]*type="hidden"/,
+            'ohne das versteckte Feld überlebt der Zustand keinen Entwurf');
+        const vorGegner = html.indexOf('id="battleJournalNoShowBtn"');
+        const bestOf = html.indexOf('id="battleJournalBestOfRow"');
+        assert.ok(vorGegner > -1 && bestOf > vorGegner,
+            'der Schalter muss über „Best of" stehen — er blendet es aus');
+    });
+
+    it('es gibt nur EINEN Weg: kein No-Show mehr in den Game-Zeilen', () => {
+        // Zwei Wege, dasselbe zu sagen, sind ein Fehler in Wartestellung:
+        // der Weg über die Game-Zeile liesse sich nicht speichern.
+        assert.ok(!/battle-journal-choice-noshow/.test(rein),
+            'in den Game-Zeilen steht wieder ein No-Show-Knopf');
         const eingabe = schneideFunktion(rein, 'renderGameRows');
-        assert.match(eingabe, /data-value="noshow"[^>]*setGameChoice\(\$\{i\},'result','noshow'\)/,
-            'der vierte Knopf in der Eingabe setzt kein noshow');
-        const fenster = schneideFunktion(rein, '_renderEditBo3Games');
-        assert.match(fenster, /data-edit-value="noshow"[^>]*setEditGameChoice\(\$\{i\},'result','noshow'\)/,
-            'der vierte Knopf im Bearbeiten-Fenster setzt kein noshow');
-        for (const koerper of [eingabe, fenster]) {
-            assert.match(koerper, /battle-journal-choice-noshow/);
-            assert.match(koerper, /battle-journal-choice-group-vier/,
-                'ohne die Vierer-Klasse bricht die Knopfreihe um');
-        }
+        assert.ok(!/noshow/.test(eingabe),
+            'renderGameRows kennt den No-Show wieder');
+    });
+
+    it('die Prüfung verlangt keinen Gegner, wenn niemand erschienen ist', () => {
+        const pruef = schneideFunktion(rein, 'validateBattleJournalEntry');
+        assert.match(pruef, /values\.result === NO_SHOW\)\s*return true/,
+            'ohne diesen Ausstieg kann Hausi den Eintrag nicht speichern — '
+            + 'genau der Befund vom 26.09.');
+        const ausstieg = pruef.indexOf('NO_SHOW');
+        const gegnerZwang = pruef.indexOf('validationOpponent');
+        assert.ok(ausstieg > -1 && ausstieg < gegnerZwang,
+            'der Ausstieg muss VOR der Gegnerprüfung stehen');
+    });
+
+    it('ein No-Show speichert nichts, was niemand beobachtet hat', () => {
+        const werte = schneideFunktion(rein, 'getBattleJournalFormValues');
+        assert.match(werte, /opponentArchetype: nichtErschienen \? ''/,
+            'ein Gegnerdeck, das niemand gesehen hat, darf nicht gespeichert werden');
+        assert.match(werte, /bestOf: nichtErschienen \? ''/,
+            'ohne Partie gibt es kein Best of');
+        assert.match(werte, /games = nichtErschienen \? \[\]/,
+            'ohne Partie gibt es keine Spiele');
+        assert.match(werte, /result: NO_SHOW/);
+    });
+
+    it('das Bearbeiten-Fenster lässt den Gegner ebenfalls leer', () => {
+        const speichern = schneideFunktion(rein, 'saveEditEntry');
+        // Die Variable allein genuegt nicht — sie muss die Bedingung auch
+        // entschaerfen. Sonst steht sie da und wirkt nicht.
+        assert.match(speichern, /\(!newOpponent && !bleibtNoShow\)/,
+            'im Bearbeiten-Fenster greift sonst wieder der Gegnerzwang');
+        assert.match(html, /value="noshow"/,
+            'das Auswahlfeld im Bearbeiten-Fenster kennt den Wert nicht');
+    });
+
+    it('ohne Partie zeigt die Zeile weder BO noch Zugreihenfolge', () => {
+        const treffer = rein.match(/istNoShow\(entry\) \? '\\u2013'/g) || [];
+        assert.ok(treffer.length >= 2,
+            'BO1/1st würde eine Partie behaupten, die es nicht gab');
     });
 
     it('die Ergebnisfilter kennen ihn in beiden Menüs', () => {
@@ -187,18 +233,19 @@ describe('No-Show: die Oberfläche kennt ihn', () => {
             'Verlaufsfilter und Auswahlfeld im Bearbeiten-Fenster');
     });
 
-    it('beide Sprachen haben die Beschriftung', () => {
-        for (const key of ['bj.noshow', 'bj.noshowShort', 'bj.noshowToggleTitle',
-                           'bj.noshowHint']) {
+    it('beide Sprachen haben alle Beschriftungen', () => {
+        for (const key of ['bj.noshow', 'bj.noshowShort', 'bj.noshowHint',
+                           'bj.noshowButton', 'bj.noshowButtonHint']) {
             const treffer = i18n.match(new RegExp(`'${key.replace('.', '\\.')}'`, 'g')) || [];
             assert.equal(treffer.length, 2, `${key} fehlt in einer der beiden Sprachen`);
         }
     });
 
-    it('die vier Knöpfe bekommen vier Spalten', () => {
+    it('der Schalter hat eine eigene Fläche, die den Zustand zeigt', () => {
         const css = ohneKommentare(lies('css/styles.css'));
-        assert.match(css,
-            /\.battle-journal-choice-group-result\.battle-journal-choice-group-vier\s*\{[^}]*repeat\(4,\s*1fr\)/,
-            'sonst stehen W/L/T/N in drei Spalten und die vierte fällt in die nächste Zeile');
+        assert.match(css, /\.bj-noshow-btn\s*\{[^}]*var\(--surface-1\)/,
+            'der Schalter faerbt nicht über Tokens — im Dunkelmodus wäre er weiss');
+        assert.match(css, /\.bj-noshow-btn\.is-active\s*\{/,
+            'ohne eingeschalteten Zustand sieht man nicht, dass er an ist');
     });
 });

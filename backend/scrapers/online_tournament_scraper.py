@@ -314,6 +314,35 @@ def _archetype_for_slugs(slugs: List[str]) -> str:
     return " ".join(parts)
 
 
+def _archetype_from_row(row) -> str:
+    """Den Decknamen nehmen, den die Seite selbst vergibt.
+
+    SC-3, gemessen 26.09.2026: jede Standings-Zeile traegt den Link
+    `/tournament/<id>/metagame/<deck-id>` mit `data-tooltip="<Deckname>"`
+    — dieselben Namen wie die Ladder ("Basic Box", "Dhelmise",
+    "Ogerpon Meganium Hydrapple"). Frueher wurde der Name aus den zwei
+    Sprites zurueckgerechnet. Mehrere Decks teilen sich aber dasselbe
+    Sprite-Paar (ogerpon+clefairy: "Clefairy Ogerpon" UND "Basic Box";
+    ogerpon+hydrapple: "Hydrapple Ogerpon", "Ogerpon Hydrapple",
+    "Ogerpon Meganium Hydrapple"), und der Abgleich ueber das Paar nahm
+    irgendeinen davon. Folge: Basic Box (4,84 % der Ladder) fehlte in
+    online_tournament_top8_decks.csv ganz, seine 554 Antritte standen
+    unter "Clefairy Ogerpon" (33 Ladder-Listen).
+
+    Leerer Rueckgabewert = die Zeile traegt keinen Decknamen; dann
+    rechnet der Aufrufer wie bisher aus den Sprites.
+    """
+    for a in row.find_all("a", href=True):
+        if "/metagame/" not in a["href"]:
+            continue
+        spitze = a.find(attrs={"data-tooltip": True})
+        name = (spitze.get("data-tooltip") if spitze else "") or ""
+        name = name.strip()
+        if name:
+            return name
+    return ""
+
+
 def _fetch_standings(tid: str) -> List[Dict[str, Any]]:
     """Return one row per player: { placement, archetype, winrate }."""
     url = f"{BASE_URL}{STANDINGS_PATH_TPL.format(tid=tid)}"
@@ -338,7 +367,7 @@ def _fetch_standings(tid: str) -> List[Dict[str, Any]]:
         slugs = _slugs_from_row(row)
         if not slugs:
             continue
-        archetype = _archetype_for_slugs(slugs)
+        archetype = _archetype_from_row(row) or _archetype_for_slugs(slugs)
         # Standings rows show two percentages: the player's actual
         # win-rate first, then resistance / opponent-win-rate. Take the
         # FIRST percent-shaped cell so we capture the player's WR, not

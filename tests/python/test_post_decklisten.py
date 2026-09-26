@@ -230,6 +230,8 @@ def test_die_groesse_haengt_an_den_deckeln_und_nicht_am_zufall(gebaut):
     ist die Frage, ob die Deckel ueberhaupt greifen — und die ist eine
     Richtung, kein Punkt.
 
+    Gemessen am 26.09.2026: 197 KB roh, 19 KB gzip.
+
     Die gemessene Groesse selbst beobachtet scripts/data_guardian.py: der
     meldet und haelt nichts an.
     """
@@ -435,3 +437,142 @@ def test_nur_top_acht_gilt_als_erfolgreich(gebaut):
     # Und die Auswahl ist danach nicht leer — sonst waere die Schwelle zu hart.
     assert len(gebaut['sieben_tage']) >= 10, (
         f"nach der Schwelle bleiben nur {len(gebaut['sieben_tage'])} Archetypen")
+
+
+def test_der_nenner_einer_platzierung_ist_das_feld_nicht_die_zahl_der_listen(gebaut):
+    """DER BEFUND DES PRUEFAGENTEN (26.09.2026).
+
+    Der erste Bau nahm als Nenner die Zahl der Spieler MIT Deckliste und
+    schrieb sie als „1st of 559" ins Bild. Nachgezaehlt: das Regional
+    Baltimore hatte 3.119 Teilnehmer, 559 davon haben eine Liste
+    eingereicht — dem geposteten Bild fehlte der Faktor 5,6. Dieselbe
+    Seite nannte in der Events-Kette korrekt „3,119 players" fuer
+    dasselbe Turnier.
+
+    Geprueft wird die GLEICHUNG gegen die Datei, aus der die Events-Posts
+    ihre Zahl nehmen — kein Wochenwert steht hier im Code.
+    """
+    import glob
+    m = gebaut['major']
+    assert m['feld'] > 0, 'das Major nennt keine Feldgroesse'
+    assert m['gefuehrt'] > 0
+    assert m['feld'] >= m['gefuehrt'], (
+        f"das Feld ({m['feld']}) ist kleiner als die Zahl der eingereichten "
+        f"Listen ({m['gefuehrt']}) — dann ist eine der beiden Zahlen falsch")
+
+    # Der Sollwert kommt aus den labs-Dateien, ueber die Turnierkennung.
+    tid = None
+    with open(QUELLE, newline='', encoding='utf-8') as f:
+        for r in csv.DictReader(f):
+            if ((r.get('quelle') or '').strip() == 'papier'
+                    and (r.get('tournament_date') or '').strip() == m['datum']
+                    and (r.get('tournament_name') or '').strip() == m['name']):
+                tid = (r.get('tournament_id') or '').strip()
+                break
+    assert tid, 'das Major hat in der Quelle keine Turnierkennung'
+    soll = 0
+    for pfad in glob.glob(os.path.join(WURZEL, 'data', 'labs_tournament_decks*.csv')):
+        with open(pfad, newline='', encoding='utf-8') as f:
+            for r in csv.DictReader(f):
+                if (r.get('tournament_id') or '').strip() != tid:
+                    continue
+                try:
+                    soll = max(soll, int((r.get('total_players') or '0').strip()))
+                except ValueError:
+                    pass
+    assert soll > 0, f'fuer {tid} steht in keiner labs-Datei eine Teilnehmerzahl'
+    assert m['feld'] == soll, (
+        f"die Datei nennt {m['feld']} Teilnehmer, die labs-Datei {soll}")
+
+
+def test_ohne_teilnehmerzahl_wird_keine_erfunden(tmp_path):
+    """Kein Nenner ist weniger, aber nicht falsch."""
+    kopf = ('tournament_id,limitless_tournament_id,tournament_name,'
+            'tournament_date,meta,place,player_name,deck_archetype,deck_slug,'
+            'wins,losses,ties,card_name,card_identifier,set_code,set_number,'
+            'count,type,is_ace_spec,quelle,spielerzahl,druck_quelle,scraped_at')
+    zeilen = [kopf,
+              ('9999,,Regional Nirgendwo,2026-09-18,TEF-PBL,1,Sieger,Slowking,'
+               'slowking,12,2,1,Slowking,,BLK,58,60,Pokemon,false,papier,,,')]
+    p = tmp_path / 'per_player.csv'
+    p.write_text('\n'.join(zeilen), encoding='utf-8')
+    m = _modul()
+    m.QUELLE = str(p)
+    m.KARTEN_DB = str(tmp_path / 'keine.json')
+    m.LABS = str(tmp_path)          # keine labs-Datei -> keine Teilnehmerzahl
+    daten, fehler = m.bauen()
+    assert fehler is None, fehler
+    assert daten['major']['feld'] == 0, (
+        f"fuer ein Turnier ohne Eintrag steht {daten['major']['feld']} da")
+    assert daten['major']['gefuehrt'] == 1
+
+
+def test_ein_papier_turnier_im_fenster_faellt_nicht_unter_online(tmp_path):
+    """VERFAELSCHUNGSPROBE, DIE NICHT BISS (Pruefagent, 26.09.2026).
+
+    `if t['quelle'] != 'online': continue` liess sich entfernen, ohne dass
+    etwas rot wurde — in dieser Woche faellt kein Papier-Turnier ins
+    Fenster. Kaeme eines hinein, truegen seine Listen den Kicker
+    „last 7 days · online", und `feld` waere 0, weil `spielerzahl` bei
+    Papier leer ist. Also mit eigenen Zeilen.
+    """
+    kopf = ('tournament_id,limitless_tournament_id,tournament_name,'
+            'tournament_date,meta,place,player_name,deck_archetype,deck_slug,'
+            'wins,losses,ties,card_name,card_identifier,set_code,set_number,'
+            'count,type,is_ace_spec,quelle,spielerzahl,druck_quelle,scraped_at')
+    zeilen = [kopf,
+              (',aaa,Online Weekly,2026-09-20,TEF-PBL,1,Aya,Dragapult,dragapult,'
+               '7,1,1,Dreepy,,TWM,128,60,Pokemon,false,online,120,,'),
+              ('0099,,Regional Papier,2026-09-20,TEF-PBL,1,Bo,Slowking,slowking,'
+               '12,2,1,Slowking,,BLK,58,60,Pokemon,false,papier,,,')]
+    p = tmp_path / 'per_player.csv'
+    p.write_text('\n'.join(zeilen), encoding='utf-8')
+    m = _modul()
+    m.QUELLE = str(p)
+    m.KARTEN_DB = str(tmp_path / 'keine.json')
+    m.LABS = str(tmp_path)
+    daten, fehler = m.bauen()
+    assert fehler is None, fehler
+    assert 'Slowking' not in daten['sieben_tage'], (
+        'ein Papier-Turnier steht unter „erfolgreichste Listen der letzten 7 '
+        'Tage · online" — mit einem Kicker, der nicht stimmt, und ohne Nenner')
+    assert 'Dragapult' in daten['sieben_tage']
+    # Und es ist trotzdem als Major zu haben.
+    assert daten['major'] and daten['major']['name'] == 'Regional Papier'
+
+
+def test_die_karten_stehen_nach_stueckzahl(tmp_path):
+    """VERFAELSCHUNGSPROBE, DIE NICHT BISS (Pruefagent, 26.09.2026).
+
+    Die Sortierung liess sich entfernen, ohne dass etwas rot wurde. Das
+    Bild zeigt acht von rund 28 Zeilen unter der Spalte „Copies" und ohne
+    Rangziffern — in CSV-Reihenfolge waere das ein willkuerlicher
+    Ausschnitt, der aussieht wie die wichtigsten Karten.
+    """
+    kopf = ('tournament_id,limitless_tournament_id,tournament_name,'
+            'tournament_date,meta,place,player_name,deck_archetype,deck_slug,'
+            'wins,losses,ties,card_name,card_identifier,set_code,set_number,'
+            'count,type,is_ace_spec,quelle,spielerzahl,druck_quelle,scraped_at')
+    # Absichtlich AUFSTEIGEND in die Datei geschrieben.
+    karten = [('Zzz Energy', 'SVE', '13', 40), ('Mittel', 'TWM', '2', 4),
+              ('Anfang', 'TWM', '1', 16)]
+    zeilen = [kopf]
+    for name, st, nr, anzahl in karten:
+        zeilen.append(f',aaa,Online Weekly,2026-09-20,TEF-PBL,1,Aya,Dragapult,'
+                      f'dragapult,7,1,1,{name},,{st},{nr},{anzahl},Pokemon,false,'
+                      f'online,120,,')
+    p = tmp_path / 'per_player.csv'
+    p.write_text('\n'.join(zeilen), encoding='utf-8')
+    m = _modul()
+    m.QUELLE = str(p)
+    m.KARTEN_DB = str(tmp_path / 'keine.json')
+    m.LABS = str(tmp_path)
+    daten, fehler = m.bauen()
+    assert fehler is None, fehler
+    reihe = daten['sieben_tage']['Dragapult'][0]['karten']
+    assert [k[3] for k in reihe] == [40, 16, 4], (
+        f'die Karten stehen nicht nach Stueckzahl: {reihe}')
+    # Und bei gleicher Stueckzahl nach Namen — sonst entscheidet die
+    # Reihenfolge in der Quelle, welche acht das Bild zeigt.
+    umsortiert = m.karten_ordnen([['B', 'X', '1', 3], ['A', 'X', '2', 3]])
+    assert [k[0] for k in umsortiert] == ['A', 'B'], umsortiert

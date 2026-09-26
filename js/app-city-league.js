@@ -1928,8 +1928,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                             <thead>
                                 <tr class="city-league-info-table-header-row">
                                     <th class="city-league-info-table-header city-league-info-table-header-archetype">${t('cl.thArchetype')}</th>
-                                    <th class="city-league-info-table-header">${t('cl.thCount')}</th>
-                                    <th class="city-league-info-table-header">${t('cl.thAvgPlacementShort')}</th>
+                                    <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipCount'))}">${t('cl.thCount')}</th>
+                                    <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipAvgPlacement'))}">${t('cl.thAvgPlacementShort')}</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -1957,8 +1957,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                             <thead>
                                 <tr class="city-league-info-table-header-row">
                                     <th class="city-league-info-table-header city-league-info-table-header-archetype">${t('cl.thArchetype')}</th>
-                                    <th class="city-league-info-table-header">${t('cl.thCount')}</th>
-                                    <th class="city-league-info-table-header">${t('cl.thAvgPlacementShort')}</th>
+                                    <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipCount'))}">${t('cl.thCount')}</th>
+                                    <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipAvgPlacement'))}">${t('cl.thAvgPlacementShort')}</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -2152,9 +2152,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     <thead>
                         <tr class="city-league-info-table-header-row">
                             <th class="city-league-info-table-header city-league-info-table-header-archetype">${t('cl.thMainPokemon')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thVariants')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thCount')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thAvgPlacementShort')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipVariants'))}">${t('cl.thVariants')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipCount'))}">${t('cl.thCount')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipAvgPlacement'))}">${t('cl.thAvgPlacementShort')}</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -2210,9 +2210,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     <thead>
                         <tr class="city-league-info-table-header-row">
                             <th class="city-league-info-table-header city-league-info-table-header-archetype">${t('cl.thMainPokemon')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thVariants')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thCount')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thAvgPlacementShort')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipVariants'))}">${t('cl.thVariants')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipCount'))}">${t('cl.thCount')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipAvgPlacement'))}">${t('cl.thAvgPlacementShort')}</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -2286,8 +2286,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     <thead>
                         <tr class="city-league-info-table-header-row">
                             <th class="city-league-info-table-header city-league-info-table-header-archetype">${t('cl.thDeck')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thCount')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thAvgPlacementShort')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipCount'))}">${t('cl.thCount')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipAvgPlacement'))}">${t('cl.thAvgPlacementShort')}</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -2318,8 +2318,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     <thead>
                         <tr class="city-league-info-table-header-row">
                             <th class="city-league-info-table-header city-league-info-table-header-archetype">${t('cl.thArchetype')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thCount')}</th>
-                            <th class="city-league-info-table-header">${t('cl.thAvgPlacementShort')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipCount'))}">${t('cl.thCount')}</th>
+                            <th class="city-league-info-table-header" title="${escapeHtml(t('cl.tipAvgPlacement'))}">${t('cl.thAvgPlacementShort')}</th>
                         </tr>
                     </thead>
                     <tbody>`;

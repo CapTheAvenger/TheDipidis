@@ -56,6 +56,10 @@
             online: 'Online',
             erwartet: 'erwartet',
             bewegung: 'Bewegung',
+            // UI-8 (5), 26.09.2026: Kopfzeilen mit Erklaerung
+            tipOnline: 'Anteil des Decks an den Online-Listen im Fenster (gemessen).',
+            tipErwartet: 'Erwarteter Anteil im Turnierlokal nach dem Modell — eine Erwartung, keine Messung.',
+            tipBewegung: 'Unterschied zwischen erwartet und online, in Prozentpunkten.',
             listen: 'Listen',
             keine: 'Für dieses Format liegt keine Prognose vor.',
             fehler: 'Die Prognosedaten konnten nicht geladen werden.',
@@ -80,6 +84,9 @@
             online: 'online',
             erwartet: 'expected',
             bewegung: 'shift',
+            tipOnline: "The deck's share of the online lists in this window (measured).",
+            tipErwartet: 'Expected share on site according to the model — an expectation, not a measurement.',
+            tipBewegung: 'Difference between expected and online, in percentage points.',
             listen: 'lists',
             keine: 'No forecast available for this format.',
             fehler: 'Could not load the forecast data.',
@@ -230,9 +237,9 @@
               <table class="mp-tabelle">
                 <thead><tr>
                   <th>${esc(l.deck)}</th>
-                  <th class="mp-zahl">${esc(l.online)}</th>
-                  <th>${esc(l.erwartet)}</th>
-                  <th>${esc(l.bewegung)}</th>
+                  <th class="mp-zahl" title="${esc(l.tipOnline)}">${esc(l.online)}</th>
+                  <th title="${esc(l.tipErwartet)}">${esc(l.erwartet)}</th>
+                  <th title="${esc(l.tipBewegung)}">${esc(l.bewegung)}</th>
                 </tr></thead>
                 <tbody>${sichtbar.map(z => zeileHtml(z, groesster, l)).join('')}</tbody>
               </table>

@@ -3586,7 +3586,7 @@
                     : `${deckCount} / ${_nenner} Decks`;
                 coverageDisplay = `<div class="card-database-coverage" style="background: ${coverageColor};" title="${escapeHtml(herkunftSatz)} · ${archetypeCount} Archetypes${maxCount > 0 ? ' · Max: ' + maxCount + 'x copies per deck' : ''}${escapeHtml(obergrenzeSatz)}${escapeHtml(_weitereSatz)}">
                     ${coverageIcon} ${obergrenzeMarke}${coveragePctLabel}% Coverage
-                    <span class="card-database-coverage-quelle" style="display:block; font-weight:400; font-size:0.85em; opacity:0.92;">${escapeHtml(herkunftZeile)}</span>
+                    <span class="card-database-coverage-quelle">${escapeHtml(herkunftZeile)}</span>
                 </div>`;
             }
             const limitlessButton = (card.set && card.number)

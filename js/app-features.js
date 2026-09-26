@@ -1322,7 +1322,16 @@
          * Parses and populates the deck builder
          */
         async function importFromPTCGL(source) {
-            const ptcglText = await showInputModal({ title: 'Import PTCGL Deck', message: 'Paste your PTCGL deck list:\n\n(Format: "4 Charizard ex PAL 234")', textarea: true, placeholder: '4 Charizard ex PAL 234\n3 Rare Candy SVI 191\n...' });
+            // UI-7 (26.09.2026): der Import ERSETZT das Deck. Das stand bis
+            // hierher nur im title-Attribut des Knopfes — auf dem Telefon gibt
+            // es keinen Tooltip. Jetzt sagt es der Dialog selbst, mit der Zahl
+            // der Karten, die verloren gingen.
+            const bisher = (source === 'cityLeague' ? window.cityLeagueDeck
+                : source === 'currentMeta' ? window.currentMetaDeck
+                : source === 'pastMeta' ? window.pastMetaDeck : null) || {};
+            const bisherKarten = Object.values(bisher).reduce((s, c) => s + (Number(c) || 0), 0);
+            const hinweis = bisherKarten > 0 ? '\n\n' + t('deck.importPTCGLReplaces', { n: bisherKarten }) : '';
+            const ptcglText = await showInputModal({ title: t('deck.importPTCGLModalTitle'), message: t('deck.importPTCGLModalMsg') + hinweis, textarea: true, placeholder: '4 Charizard ex PAL 234\n3 Rare Candy SVI 191\n...' });
             if (!ptcglText) return;
 
             const allCardsDb = window.allCardsDatabase || [];
@@ -1372,7 +1381,7 @@
             }
 
             if (importCount === 0) {
-                showDeckShareToast('No valid cards found in PTCGL text!');
+                showDeckShareToast(t('deck.importPTCGLNone'));
                 return;
             }
 
@@ -1390,7 +1399,8 @@
 
             updateDeckDisplay(source);
             const totalCards = Object.values(newDeck).reduce((s, c) => s + c, 0);
-            showDeckShareToast(`PTCGL import: ${importCount} cards (${totalCards} total)${errorCount > 0 ? ` | ${errorCount} errors` : ''}`);
+            showDeckShareToast(t('deck.importPTCGLDone', { n: importCount, total: totalCards })
+                + (errorCount > 0 ? ' | ' + t('deck.importPTCGLErrors', { n: errorCount }) : ''));
         }
 
         // ================================================================

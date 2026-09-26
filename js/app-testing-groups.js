@@ -1621,7 +1621,7 @@ window.TestingGroups = (function () {
     const rows = snap.docs.map(d => {
       const a = d.data() || {};
       const when = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : new Date();
-      const whenStr = when.toLocaleString();
+      const whenStr = when.toLocaleString(window.seitenLocale ? window.seitenLocale() : 'de-DE');
       const actionLabel = t('tg.action.' + (a.action || 'update')) || a.action;
       const fieldStr = a.field ? `<strong>${_esc(a.field)}</strong>` : '';
       const change = (a.oldValue != null && a.newValue != null)

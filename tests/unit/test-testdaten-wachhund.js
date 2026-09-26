@@ -129,7 +129,7 @@ function gleichheiten(datei) { return zeilenMit(datei, GLEICHHEIT); }
  * Eintrag laesst diesen Test fallen — genau das ist der Zweck.
  */
 const REGISTER = {
-    'test-post-kaskade.js':              'Der Gang durch die Post-Filter (26.09.2026, Befund des Betreibers: „Wenn ich bei Posts auf Decklist bin, zeigt er mir bei Fill from die gleichen Optionen an wie ueberall auch. Das ergibt ja keinen Sinn."). Sie liest aus data/, weil der Gang durch den Baum auch die dreizehn alten Quellen erreicht und jede davon ihre echte Datei laedt — geprueft wird an ihnen aber NICHTS aus den Daten: dass ein Blatt entweder ein Bild mit Titel und Fusszeile liefert oder einen verstaendlichen Befund, dass keine Fusszeile 48 Zeichen und kein Wert 12 Zeichen ueberschreitet (beides Klippen von malListe, keine Wochenwerte), und dass kein Waehler leer angeboten wird. Welche Turniere und welche Zahlen diese Woche in den Dateien stehen, ist jeder Zusicherung egal. Die ZAHLEN der abgeleiteten Listendatei prueft tests/python/test_post_decklisten.py gegen die echten 45 MB; hier steht dafuer bewusst ein kleiner Ausschnitt im Testcode, weil eine Zusicherung ueber die MECHANIK nicht davon abhaengen darf, welches Turnier zuletzt lief. SIEBEN UNGLEICHUNGEN sieht der Zaehler, alle Vorpruefungen gegen ein leeres Bestehen: dass der Gang ueberhaupt mehr als zwanzig Blaetter findet (sonst bestuende die Schleife darueber leer), dass „decks" ueber mindestens drei Stufen fuehrt, dass jede Stufe Optionen hat, und die zwei Klippen von malListe. Dafuer wurde die OBERGRENZE von 396 auf 403 gesetzt.',
+    'test-post-kaskade.js':              'Der Gang durch die Post-Filter (26.09.2026, Befund des Betreibers: „Wenn ich bei Posts auf Decklist bin, zeigt er mir bei Fill from die gleichen Optionen an wie ueberall auch. Das ergibt ja keinen Sinn."). Sie liest aus data/, weil der Gang durch den Baum auch die dreizehn alten Quellen erreicht und jede davon ihre echte Datei laedt — geprueft wird an ihnen aber NICHTS aus den Daten: dass ein Blatt entweder ein Bild mit Titel und Fusszeile liefert oder einen verstaendlichen Befund, dass keine Fusszeile 48 Zeichen und kein Wert 12 Zeichen ueberschreitet (beides Klippen von malListe, keine Wochenwerte), und dass kein Waehler leer angeboten wird. Welche Turniere und welche Zahlen diese Woche in den Dateien stehen, ist jeder Zusicherung egal. Die ZAHLEN der abgeleiteten Listendatei prueft tests/python/test_post_decklisten.py gegen die echten 45 MB; hier steht dafuer bewusst ein kleiner Ausschnitt im Testcode, weil eine Zusicherung ueber die MECHANIK nicht davon abhaengen darf, welches Turnier zuletzt lief. SIEBEN UNGLEICHUNGEN sieht der Zaehler, alle Vorpruefungen gegen ein leeres Bestehen: dass der Gang ueberhaupt mehr als zwanzig Blaetter findet (sonst bestuende die Schleife darueber leer), dass „decks" ueber mindestens drei Stufen fuehrt, dass jede Stufe Optionen hat, und die zwei Klippen von malListe. Dafuer wurde die OBERGRENZE von 396 auf 403 gesetzt, am selben Tag auf 406: die Live-Abnahme brachte drei weitere Ungleichungen, weil der Kicker gemessene 40 Zeichen fasst (gesperrt 652 px bei 15 px; 42 Zeichen messen 685, und malKopf schneidet bei 660). Gefunden wurde das im Bild - dort stand die Zeile abgeschnitten, und beim Major fiel das Datum weg. Die eine Gleichheit gegen eine feste Zahl (KICKER_MAX === 40) ist dieselbe Messung und keine Zahl aus den Daten.',
     'test-druckauswahl-und-deck-offen.js': 'Welcher Druck im Rarity Switcher zur Auswahl steht, und dass das bearbeitete Deck in „Meine Decks" aufgeklappt bleibt (25.09.2026, zwei Befunde des Betreibers). Aus data/ liest sie NUR die Karten-Chunks, und nur um zu belegen, dass es die Drucke gibt, um die es geht: jede SVE-Metall-Energie der Datenbank muss waehlbar sein — WELCHE Nummern das sind und was in ihrer Rarity-Spalte steht, ist jeder Zusicherung egal. Kein Wochenwert wird behauptet; die Auswahlregel selbst wird AUSGEFUEHRT (druckIstWaehlbar in einem vm-Kontext), nicht im Quelltext gesucht. ZWEI Ungleichungen, beide Vorpruefungen gegen ein leeres Bestehen und beide gegen EINS: dass ueberhaupt eine SVE-Metall-Energie in der Datenbank steht, und dass das Kommentar-Ausschneiden nicht zu viel entfernt hat. Dafuer wurde die OBERGRENZE von 394 auf 396 gesetzt.',
     'test-city-league-chipquelle.js':    'Frischechip und angezeigte Datei der City League: liest data/data_stand.json und das Verzeichnis data/, aber keine einzige Zahl aus einer Datendatei. Vier Sorten Zusicherung, alle strukturell. (1) BESTAND: jeder Dateiname in CHIP_PAARE muss als Datei existieren — die Zuordnung steht ausgeschrieben statt als Namensregel, und das ist genau die Zusicherung, die das rechtfertigt. (2) DECKUNG: die Ausgangsangabe data-quelle in index.html muss in CHIP_PAARE vorkommen, sonst greift die Umschaltung ins Leere. (3) VORHANDENSEIN eines Inhaltsdatums fuer die beiden _past-Dateien in data_stand.json — WELCHES Datum dort steht, ist der Pruefung egal, es muss nur eins geben; ohne das zeigte der Chip das Schreibdatum einer Datei, deren Inhalt Wochen aelter ist. (4) Dass die vier leeren Dateien weiterhin als leer gefuehrt sind, mit ausdruecklicher Ansage im Fehlertext, dass ein Wegfall auch heissen kann: sie haben Daten bekommen, dann gehoert die Zusicherung ueberdacht statt repariert. KEINE Ungleichung an Live-Daten: die einzige Mengenzusicherung ist eine GLEICHHEIT (CHIP_PAARE fuehrt genau vier Namen) und laeuft gegen den Quelltext, nicht gegen data/. Anlass war ein Live-Befund vom 10.09.2026: der Reiter zeigte 26 Listen, der Chip daneben "keine Daten".',
     'test-b1-listen-vorwert.js':         'Einheit des Bayes-Vorwerts (B1): liest limitless_online_decks.csv und limitless_online_decks_comparison.csv, aber NUR als Schema (welche Spalten es gibt) und als GLEICHUNG zwischen beiden Exporten (new_count == count). Welche Zahlen dort diese Woche stehen, ist der Pruefung egal. Die eine Ungleichung (Summe Partien > Summe Listen) ist eine Eigenschaft der beiden Einheiten, kein Wochenwert: sie faellt erst, wenn jedes Deck hoechstens eine Partie je Liste spielt.',
@@ -603,9 +603,11 @@ const REGISTER = {
    Kommentar-Ausschneiden nicht zu viel entfernt hat. Verschwaende die
    Datenbank die SVE-Energien eines Tages, ist das ein Datenbefund und
    soll rot sein. */
-/* 393 + 1 + 2 wie gehabt, + 7 fuer test-post-kaskade.js (26.09.2026,
- * die Post-Kaskade — siehe ihren Eintrag im REGISTER). */
-const OBERGRENZE = 393 + 1 + 2 + 7;
+/* 393 + 1 + 2 wie gehabt, + 10 fuer test-post-kaskade.js (26.09.2026,
+ * die Post-Kaskade — siehe ihren Eintrag im REGISTER). Die letzten drei
+ * kamen aus der Live-Abnahme desselben Tages dazu: der Kicker fasst
+ * gemessene 40 Zeichen, und im Bild stand "... LAST 7 DAYS - O.". */
+const OBERGRENZE = 393 + 1 + 2 + 10;
 
 /* Die zweite Sperrklinke, eingezogen am 22.09.2026: so viele
    Gleichheiten gegen eine zweistellige Zahl stehen heute in Dateien,
@@ -627,7 +629,13 @@ const OBERGRENZE = 393 + 1 + 2 + 7;
    kommt dabei keine Zahl; die Werte sind von Hand nachrechenbar und
    aendern sich nie. Genau deshalb stehen sie gesetzt da und nicht an
    den Daten der Woche. */
-const OBERGRENZE_GLEICHHEIT = 162 + 2;
+/* +1 am 26.09.2026: test-post-kaskade.js vergleicht KICKER_MAX mit 40.
+ * Das ist keine Zahl aus den Daten, sondern eine GEMESSENE Eigenschaft
+ * der Zeichenflaeche — 40 Zeichen messen gesperrt 652 px, 42 messen 685,
+ * und `malKopf` schneidet bei 660. Sie kann durch keinen Datenlauf
+ * brechen, wohl aber durch eine Aenderung an malKopf — und genau dann
+ * SOLL sie rot werden. */
+const OBERGRENZE_GLEICHHEIT = 162 + 2 + 1;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

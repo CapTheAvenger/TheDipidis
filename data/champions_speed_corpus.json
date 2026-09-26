@@ -1,13 +1,13 @@
 {
   "_meta": {
-    "last_updated": "2026-09-25",
+    "last_updated": "2026-09-26",
     "window_days": 14,
-    "window_start": "2026-09-11",
-    "window_end": "2026-09-25",
+    "window_start": "2026-09-12",
+    "window_end": "2026-09-26",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
     "content_to": "2026-09-22",
-    "samples_outside_window": 6,
+    "samples_outside_window": 12,
     "team_count": 120,
     "teams_with_samples": 120,
     "sample_count": 716,

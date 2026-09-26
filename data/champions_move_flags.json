@@ -2,7 +2,7 @@
  "_meta": {
   "quelle": "https://raw.githubusercontent.com/smogon/pokemon-showdown/master/data/moves.ts",
   "lizenz": "Pokemon Showdown, MIT",
-  "erzeugt_am": "2026-09-25T04:07:55+00:00",
+  "erzeugt_am": "2026-09-26T04:06:47+00:00",
   "erzeuger": "scripts/build_champions_move_flags.py",
   "attacken_im_bestand": 512,
   "davon_belegt": 512,
@@ -28,7 +28,7 @@
   ],
   "hinweis": "Nur Attacken, die data/champions_resources.json schon fuehrt. Diese Datei ergaenzt keine Attacke und korrigiert keine Staerke.",
   "ohne_eintrag": [],
-  "ohne_eintrag_stand": "2026-09-25"
+  "ohne_eintrag_stand": "2026-09-26"
  },
  "attacken": {
   "Accelerock": {

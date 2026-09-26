@@ -411,14 +411,17 @@ test('die Fusszeile der fremden Listen laeuft nicht ueber', async () => {
 });
 
 test('der Spaltenkopf sagt, wie viele Karten nicht im Bild stehen', async () => {
-    /* Die Hausregel ueber MAX: „Wer acht von 131 zeigt, ohne die 131 zu
+    /* Die Hausregel ueber MAX: „Wer zehn von 131 zeigt, ohne die 131 zu
        nennen, laesst den Leser glauben, das sei das ganze Feld."
-       `malListe` schneidet bei acht ab, ohne es zu sagen. */
+       `malListe` schneidet bei MAX ab, ohne es zu sagen.
+
+       DER DECKEL KOMMT AUS DEM MODUL (26.09.2026). Hier stand `Math.min(8, n)`
+       — nur richtig, solange MAX acht war. */
     const Q = fenster();
     const erg = await (await Q.kaskade(['decks', 'major', 'Slowking', '1'])).blatt.lade();
     const n = erg.kartenGitter.length;
     assert.ok(n > 0);
-    assert.equal(erg.listeKopf, `Copies (${Math.min(8, n)} of ${n})`,
+    assert.equal(erg.listeKopf, `Copies (${Math.min(Q.MAX, n)} of ${n})`,
         `der Spaltenkopf nennt die Zahl nicht: ${erg.listeKopf}`);
 });
 

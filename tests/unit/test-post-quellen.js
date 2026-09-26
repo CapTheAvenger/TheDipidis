@@ -995,11 +995,28 @@ test('mehrere Turniere in einer Datei ergeben trotzdem ein Bild', async () => {
     assert.equal(z.zahl, '60.0 %', `120 von 200 sind 60 %, nicht ${z.zahl}`);
 });
 
-test('ein Gleichstand an der achten Stelle wird nicht angeschnitten', async () => {
-    /* Neun Pokemon, die letzten drei gleichauf: gezeigt werden sechs,
-     * nicht acht. */
+/* Ein Muster, dessen letzte DREI Eintraege gleichauf liegen — die Gruppe
+   beginnt eine Stelle VOR dem Deckel und reicht darueber hinaus. Gezeigt
+   werden deshalb `MAX - 2` Zeilen.
+
+   DIE ZAHLEN KOMMEN AUS DEM MODUL (26.09.2026). Vorher standen hier neun
+   Namen und die Erwartung „sechs" fest im Test — beides nur richtig,
+   solange MAX gleich acht war. Mit der Umstellung auf zehn erreichte das
+   Muster den Deckel gar nicht mehr, und zwei Zusicherungen wurden rot,
+   ohne dass am Schnitt etwas falsch war. Eine abgeschriebene Zahl im
+   Test prueft dann etwas anderes, als das Modul tut. */
+function gleichstandMuster(max) {
+    const namen = [];
+    for (let i = 0; i < max + 1; i++) namen.push(String.fromCharCode(65 + i));
+    const wie = {};
+    namen.forEach((n, i) => { wie[n] = i <= max - 3 ? (max + 4 - i) : 3; });
+    return { namen: namen, wie: wie, erwartet: namen.slice(0, max - 2) };
+}
+
+test('ein Gleichstand am Deckel wird nicht angeschnitten', async () => {
+    const muster = gleichstandMuster(Q.MAX);
     const teams = [];
-    const wie = { A: 9, B: 8, C: 7, D: 6, E: 5, F: 4, G: 3, H: 3, I: 3 };
+    const wie = muster.wie;
     let nr = 0;
     Object.keys(wie).forEach((name) => {
         for (let i = 0; i < wie[name]; i++) {
@@ -1013,8 +1030,12 @@ test('ein Gleichstand an der achten Stelle wird nicht angeschnitten', async () =
     }));
     const erg = await Q2.lade('champions');
     const namen = zeilenVon(erg).map((z) => z.name);
-    assert.deepEqual(namen, ['A', 'B', 'C', 'D', 'E', 'F'],
+    assert.deepEqual(namen, muster.erwartet,
         `der Gleichstand bei drei Teams ist angeschnitten: ${namen.join(', ')}`);
+    /* Vorpruefung gegen ein leeres Bestehen: das Muster MUSS den Deckel
+       ueberhaupt erreichen, sonst schneidet niemand etwas ab. */
+    assert.ok(muster.namen.length > Q.MAX,
+        `das Muster hat ${muster.namen.length} Eintraege bei MAX ${Q.MAX}`);
 });
 
 test('eine Karte mit zwei Drucken wird einmal gezaehlt', async () => {
@@ -1047,10 +1068,12 @@ test('auch Staples schneidet keinen Gleichstand an', async () => {
      * die Livedaten-Probe den Mechanismus nicht ausloesen. Ein
      * Mutationslauf am 04.09.2026 hat den Schnitt ausgebaut, ohne dass
      * eine Zusicherung fiel. */
-    /* G, H und I liegen alle bei vier Archetypen. Die Gruppe beginnt an
-     * Stelle sieben und reichte damit ueber die achte hinaus — gezeigt
-     * werden deshalb sechs Zeilen, nicht acht. */
-    const wie = { A: 10, B: 9, C: 8, D: 7, E: 6, F: 5, G: 4, H: 4, I: 4 };
+    /* Die letzten DREI liegen gleichauf. Die Gruppe beginnt eine Stelle
+     * vor dem Deckel und reicht darueber hinaus — gezeigt werden deshalb
+     * `MAX - 2` Zeilen. Das Muster kommt aus dem Modul, nicht aus einer
+     * festen Neun (siehe gleichstandMuster weiter oben). */
+    const muster = gleichstandMuster(Q.MAX);
+    const wie = muster.wie;
     const zeilen = ['archetype;card_name;card_identifier;meta'];
     Object.keys(wie).forEach((karte) => {
         for (let i = 0; i < wie[karte]; i++) {
@@ -1060,7 +1083,7 @@ test('auch Staples schneidet keinen Gleichstand an', async () => {
     const Q2 = mitDatei('current_meta_card_data.csv', zeilen.join('\n'));
     const erg = await Q2.lade('staples');
     const namen = zeilenVon(erg).map((z) => z.name);
-    assert.deepEqual(namen, ['A', 'B', 'C', 'D', 'E', 'F'],
+    assert.deepEqual(namen, muster.erwartet,
         `der Gleichstand bei vier Archetypen ist angeschnitten: ${namen.join(', ')}`);
     /* KEIN "x von y" IM KOPF — und das ist hier richtig.
      * Der Spaltenkopf traegt bei Staples den Nenner der WERTE
@@ -1145,8 +1168,10 @@ test('alle Werte gleich ergibt keine leere Tafel', async () => {
      * zurueck — `malListe` bricht dann ab, waehrend Titel, Spaltenkopf
      * und Nenner weiter gemalt werden. Genau der Zustand, gegen den die
      * Leere-Datei-Wuerfe geschrieben sind. */
+    /* Mehr Karten als der Deckel traegt, alle mit demselben Wert — die
+       Zahl kommt aus dem Modul, nicht aus einer festen Zehn. */
     const zeilen = ['archetype;card_name;card_identifier;meta'];
-    for (let k = 0; k < 10; k++) {
+    for (let k = 0; k < Q.MAX + 2; k++) {
         for (let a = 0; a < 10; a++) zeilen.push(`Arch${a};K${k};SET 1;Meta Live`);
     }
     const Q2 = mitDatei('current_meta_card_data.csv', zeilen.join('\n'));
@@ -1156,7 +1181,8 @@ test('alle Werte gleich ergibt keine leere Tafel', async () => {
         assert.ok(String(erg.zeilen || '').trim(),
             'die Quelle liefert eine leere Zeilenliste unter Titel und Nenner');
     }
-    assert.ok(geworfen, 'zehn gleichauf liegende Karten ergeben keinen Befund');
+    assert.ok(geworfen,
+        `${Q.MAX + 2} gleichauf liegende Karten ergeben keinen Befund`);
 });
 
 test('eine zu lange Fusszeile verliert ihren Nenner nicht', async () => {
@@ -1259,4 +1285,173 @@ test('der Teilen-Weg ist da, nicht nur der Download', () => {
     assert.ok(/navigator\.share/.test(html) && /navigator\.canShare/.test(html),
         'die Post-Seite kennt navigator.share nicht — am iPhone landet das Bild ' +
         'dann nicht zuverlässig in den Fotos');
+});
+
+/* ══ DER DECKEL: ZEHN, IN BEIDEN ANSICHTEN ════════════════════════════
+ *
+ * BESTELLT (Betreiber, 26.09.2026): „Können wir bei den Most played
+ * Decks nicht die Top 10 zeigen? Top 10 ist irgendwie runder als Top 8."
+ *
+ * VERFAELSCHUNGSPROBEN, DIE ZUERST NICHT BISSEN: `MAX` zurueck auf acht
+ * zu setzen liess alles gruen, weil jede Zusicherung den Deckel brav aus
+ * dem Modul las — richtig fuer die Nachrechnung, blind fuer die
+ * Bestellung. Und die Tafel-Ansicht auf acht zu belassen ebenso: dann
+ * zeigte DIESELBE Quelle je nach Ansicht acht oder zehn Zeilen, und
+ * niemand wuesste, welche der beiden Zahlen gilt.
+ *
+ * Geprueft wird deshalb AUSGEFUEHRT: beide Zeichner bekommen zwoelf
+ * Zeilen und muessen genau MAX davon malen. */
+
+function seitenFunktion(name) {
+    const html = fs.readFileSync(D('posts/index.html'), 'utf8');
+    const treffer = new RegExp(`function\\s+${name}\\s*\\(`).exec(html);
+    assert.ok(treffer, `Funktion nicht gefunden: ${name}`);
+    const auf = html.indexOf('{', treffer.index);
+    let tiefe = 0;
+    for (let i = auf; i < html.length; i++) {
+        if (html[i] === '{') tiefe++;
+        else if (html[i] === '}') {
+            tiefe--;
+            if (tiefe === 0) return html.slice(treffer.index, i + 1);
+        }
+    }
+    throw new Error(`Klammer nicht geschlossen: ${name}`);
+}
+
+/* Eine Zeichenflaeche, die nur mitschreibt. Sie muss genug koennen, dass
+   die beiden Zeichner durchlaufen — mehr nicht. */
+function zaehlFlaeche() {
+    const texte = [];
+    const schrift = [];
+    /* DIE SCHRIFT WIRD BEIM ZEICHNEN GEMESSEN, NICHT IRGENDWANN.
+     *
+     * Erste Fassung nahm die groesste je gesetzte Schriftgroesse. Das
+     * ging schief: `malRangliste` setzt dieselbe Groesse zweimal —
+     * einmal zum AUSMESSEN der Namensbreite, einmal beim Zeichnen. Eine
+     * Verfaelschung nur an der zweiten Stelle blieb damit unsichtbar
+     * (beim Verfaelschen gemessen, 26.09.2026). Aufgeschrieben wird
+     * deshalb die Schrift, die zum Zeitpunkt DES TEXTES gilt. */
+    let jetzt = '';
+    const beiText = [];
+    const flaechen = [];
+    return {
+        texte, schrift, beiText, flaechen,
+        ctx: {
+            save() {}, restore() {}, beginPath() {}, closePath() {},
+            moveTo() {}, lineTo() {}, arcTo() {}, arc() {}, rect() {},
+            fill() {}, stroke() {}, clip() {},
+            /* Die Zeilenhoehe der Tafel steht in keiner Variablen, die
+               von aussen sichtbar waere — wohl aber in der Flaeche, die
+               sie je Zeile einfaerbt. */
+            fillRect: (x, y, w, h) => { flaechen.push({ x, y, w, h }); },
+            measureText: (t) => ({ width: String(t).length * 11 }),
+            fillText: (t) => { texte.push(String(t)); beiText.push(jetzt); },
+            set font(v) { jetzt = v; schrift.push(v); },
+            get font() { return jetzt; },
+            set fillStyle(v) {}, get fillStyle() { return ''; },
+            set strokeStyle(v) {}, get strokeStyle() { return ''; },
+            set lineWidth(v) {}, get lineWidth() { return 0; },
+            set textAlign(v) {}, get textAlign() { return 'left'; },
+            set textBaseline(v) {}, get textBaseline() { return 'middle'; },
+        },
+    };
+}
+
+function maleZeilen(welcher, anzahl) {
+    const zeilen = [];
+    for (let i = 0; i < anzahl; i++) {
+        zeilen.push(`Deck ${String(i + 1).padStart(2, '0')} | ${(20 - i).toFixed(2)} %`);
+    }
+    const ctx = { console };
+    ctx.MP = { W: 1080, H: 1350 };
+    ctx.F = { creme: '#f7efe4', holz: '#e3b276', matt: '#a38fa8', kopf: '#1a1030' };
+    ctx.fSans = (g) => `${g}px sans`;
+    ctx.fMono = (g) => `${g}px mono`;
+    ctx.clip = (c, t) => String(t);
+    ctx.rundesRechteck = () => {};
+    ctx.wertZahl = (t) => {
+        const m = String(t || '').replace(/\s/g, '').match(/-?\d+(?:[.,]\d+)?/);
+        return m ? parseFloat(m[0].replace(',', '.')) : NaN;
+    };
+    vm.createContext(ctx);
+    vm.runInContext(seitenFunktion('listeZeilen'), ctx);
+    vm.runInContext(seitenFunktion(welcher), ctx);
+    const f = zaehlFlaeche();
+    ctx.__ctx = f.ctx;
+    ctx.__spec = { zeilen: zeilen.join('\n'), listeKopf: 'Share', listeKopfLinks: 'Deck' };
+    vm.runInContext(`${welcher}(__ctx, __spec)`, ctx);
+    /* Jede Zeile malt ihren Namen. Gezaehlt werden die „Deck NN". */
+    const namen = [];
+    const namenSchrift = [];
+    f.texte.forEach((t, i) => {
+        if (!/^Deck \d\d$/.test(t)) return;
+        namen.push(t);
+        namenSchrift.push(parseInt(f.beiText[i], 10) || 0);
+    });
+    /* Die Zeilenhoehe: die haeufigste Hoehe unter den eingefaerbten
+       Flaechen. Der Kopfbalken und die Trennlinien fallen damit heraus. */
+    const haeufig = {};
+    f.flaechen.forEach((r) => { haeufig[r.h] = (haeufig[r.h] || 0) + 1; });
+    const zeilenHoehe = Object.keys(haeufig)
+        .sort((a, b) => haeufig[b] - haeufig[a])
+        .map(Number)[0] || 0;
+    return { namen, namenSchrift, zeilenHoehe,
+             kleinsterName: namenSchrift.length ? Math.min(...namenSchrift) : 0 };
+}
+
+test('beide Ansichten zeigen genau MAX Zeilen — nicht acht hier und zehn dort', () => {
+    const zuViel = Q.MAX + 2;
+    const rang = maleZeilen('malRangliste', zuViel);
+    const tafel = maleZeilen('malTafel', zuViel);
+    assert.equal(rang.namen.length, Q.MAX,
+        `die Rangliste malt ${rang.namen.length} Zeilen, der Deckel ist ${Q.MAX}`);
+    assert.equal(tafel.namen.length, Q.MAX,
+        `die Tafel malt ${tafel.namen.length} Zeilen, die Rangliste ${rang.namen.length} — ` +
+        'dieselbe Quelle zeigt je nach Ansicht verschieden viele Decks');
+});
+
+test('auch die Tafel hat Luft fuer zehn Zeilen', () => {
+    /* Die Tafel zeichnet ihren Text in FESTEN 34 px — sie schrumpft
+       nicht, sie wird eng. Bei der alten Flaeche waeren zehn Zeilen
+       54 px hoch gewesen: zehn Punkte Luft ueber und unter einer
+       34-px-Zeile, mit Unterlaengen fast an der Trennlinie. Die neue
+       Flaeche gibt 65.
+
+       VERFAELSCHUNGSPROBE, DIE ZUERST NICHT BISS: die Tafel-Flaeche auf
+       das alte Mass zurueckzusetzen liess alles gruen — gezaehlt wurden
+       nur die ZEILEN, nicht ihre Hoehe. */
+    const tafel = maleZeilen('malTafel', Q.MAX);
+    assert.equal(tafel.namen.length, Q.MAX);
+    assert.ok(tafel.zeilenHoehe >= 58,
+        `bei ${Q.MAX} Zeilen ist die Tafelzeile nur ${tafel.zeilenHoehe} px hoch. `
+        + 'Der Text steht dort in festen 34 px — unter 58 bleibt weniger als ein '
+        + 'Drittel Zeilenhoehe Luft, und die Unterlaengen stossen an die Trennlinie.');
+});
+
+test('der Deckel steht auf zehn — so bestellt', () => {
+    /* Diese Zusicherung liest die Zahl NICHT aus dem Modul. Genau das
+       ist ihr Zweck: alle anderen tun es und merken deshalb nicht, wenn
+       der Deckel zurueckfaellt. „Top 10 ist irgendwie runder als Top 8."
+       Wer das begruendet aendert, aendert auch diese Zeile — und sieht
+       dabei, dass es eine Bestellung war und kein Zufall. */
+    assert.equal(Q.MAX, 10,
+        `der Deckel steht auf ${Q.MAX}. Bestellt waren zehn Zeilen — und die `
+        + 'Flaeche der beiden Zeichner ist darauf ausgelegt.');
+});
+
+test('zehn Zeilen stehen in voller Groesse, nicht geschrumpft', () => {
+    /* DER GRUND, WARUM DIE ACHT UEBERHAUPT DASTAND. Zehn Zeilen in die
+       alte Flaeche zu quetschen haette die Decknamen von 38 px auf 22 px
+       gedrueckt — auf einem Telefon nicht mehr lesbar. Gemessen und
+       angesehen am 26.09.2026; die Flaeche ist dafuer gewachsen.
+
+       Geprueft wird die groesste gesetzte Schriftgroesse der Rangliste
+       bei vollem Deckel: faellt sie unter 38, ist die Flaeche wieder zu
+       klein, und der Post ist unleserlich, ohne dass etwas „kaputt" ist. */
+    const rang = maleZeilen('malRangliste', Q.MAX);
+    assert.equal(rang.namen.length, Q.MAX);
+    assert.ok(rang.kleinsterName >= 38,
+        `bei ${Q.MAX} Zeilen wird der kleinste Deckname mit ${rang.kleinsterName} px `
+        + 'gezeichnet. Unter 38 ist er auf dem Telefon nicht mehr zu lesen — dann '
+        + 'braucht die Liste mehr Flaeche, nicht eine kleinere Schrift.');
 });

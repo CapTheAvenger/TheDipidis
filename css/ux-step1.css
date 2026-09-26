@@ -1,7 +1,8 @@
 /* Step 1: Unified Buttons + Inputs (non-breaking layer)
    Loaded last to normalize legacy button/input classes. */
 
-:root {
+:root,
+.battle-journal-sheet:not(.is-dark) {
     --ui-btn-radius: 10px;
     --ui-btn-font-size: 14px;
     --ui-btn-font-weight: 700;

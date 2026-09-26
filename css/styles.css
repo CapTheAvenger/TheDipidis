@@ -24,7 +24,8 @@
    - --color-info kept at #3498db (codebase mostly uses it that way);
      the bootstrap-style #17a2b8 is gone.
    ==================================================================== */
-:root {
+:root,
+.battle-journal-sheet:not(.is-dark) {
     /* ── Brand: Pokémon ─────────────────────────────────────────── */
     /* 29.08.2026 minimal nachgezogen: #E3350D traegt weisse Schrift an
        mehreren Stellen (Proxy-Kopf, Knoepfe) und lag bei 4,39 — knapp
@@ -6518,8 +6519,8 @@ details[open] > .tier-trending-summary::after {
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    border: 1px solid rgba(31, 45, 61, 0.12);
-    background: #fff;
+    border: 1px solid var(--line-strong);
+    background: var(--surface-1);
     color: var(--text-dark);
     font-size: 24px;
     cursor: pointer;
@@ -6527,8 +6528,8 @@ details[open] > .tier-trending-summary::after {
 }
 
 .battle-journal-theme-toggle {
-    border: 1px solid rgba(31, 45, 61, 0.16);
-    background: #fff;
+    border: 1px solid var(--line-strong);
+    background: var(--surface-1);
     color: var(--text-dark);
     border-radius: 999px;
     padding: 7px 12px;
@@ -6552,24 +6553,24 @@ details[open] > .tier-trending-summary::after {
     gap: 6px;
     border-radius: 999px;
     padding: 8px 12px;
-    background: rgba(59, 76, 202, 0.1);
-    color: var(--pokemon-blue-dark);
+    background: var(--tint-info);
+    color: var(--tint-info-ink);
     font-size: 13px;
     font-weight: 800;
 }
 
 .battle-journal-status-badge.is-offline {
-    background: rgba(231, 76, 60, 0.12);
+    background: var(--tint-bad);
     color: var(--tint-bad-ink);
 }
 
 .battle-journal-status-badge.is-syncing {
-    background: rgba(243, 156, 18, 0.16);
+    background: var(--tint-warn);
     color: var(--tint-warn-ink);
 }
 
 .battle-journal-status-badge.is-success {
-    background: rgba(39, 174, 96, 0.14);
+    background: var(--tint-ok);
     color: var(--tint-ok-ink);
 }
 
@@ -6597,10 +6598,18 @@ details[open] > .tier-trending-summary::after {
     width: 100%;
     min-height: 48px;
     border-radius: 12px;
-    border: 2px solid rgba(59, 76, 202, 0.16);
-    background: #fff;
+    border: 2px solid var(--line-strong);
+    background: var(--surface-1);
+    color: var(--ink);
     padding: 12px 14px;
     font-size: 15px;
+}
+
+/* Der Platzhalter kam vom Browser (#757575) und stand damit auf dunklem
+ * Grund bei 3,83:1. --ink-3 dreht mit und haelt in beiden Welten. */
+.battle-journal-input::placeholder {
+    color: var(--ink-3);
+    opacity: 1;
 }
 
 .battle-journal-input:focus {
@@ -6622,8 +6631,8 @@ details[open] > .tier-trending-summary::after {
     left: 0;
     right: 0;
     z-index: 200;
-    background: #fff;
-    border: 1px solid #d0d7e2;
+    background: var(--surface-1);
+    border: 1px solid var(--line-strong);
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     max-height: 240px;
@@ -6633,17 +6642,17 @@ details[open] > .tier-trending-summary::after {
 .bj-autocomplete-item {
     padding: 11px 14px;
     cursor: pointer;
-    border-bottom: 1px solid #f0f2f5;
+    border-bottom: 1px solid var(--line);
     font-size: 0.92rem;
-    color: #2c3e50;
+    color: var(--ink);
     line-height: 1.3;
     -webkit-tap-highlight-color: rgba(59, 76, 202, 0.18);
 }
 .bj-autocomplete-item:last-child { border-bottom: none; }
 .bj-autocomplete-item:hover,
 .bj-autocomplete-item:active {
-    background: #eef2ff;
-    color: #1e3a8a;
+    background: var(--tint-info);
+    color: var(--tint-info-ink);
 }
 .battle-journal-sheet.is-dark .bj-autocomplete {
     background: #1f2937;
@@ -6663,8 +6672,9 @@ details[open] > .tier-trending-summary::after {
     width: 100%;
     min-height: 40px;
     border-radius: 10px;
-    border: 2px solid rgba(59, 76, 202, 0.14);
-    background: #fff;
+    border: 2px solid var(--line-strong);
+    background: var(--surface-1);
+    color: var(--ink);
     padding: 8px 12px;
     font-size: 14px;
     margin-bottom: 8px;
@@ -6690,10 +6700,10 @@ details[open] > .tier-trending-summary::after {
 }
 
 .battle-journal-bo3-details {
-    border: 1px solid rgba(31, 45, 61, 0.12);
+    border: 1px solid var(--line);
     border-radius: 12px;
     padding: 10px;
-    background: rgba(255, 255, 255, 0.72);
+    background: var(--surface-1);
 }
 
 .battle-journal-bo3-row {
@@ -6747,9 +6757,9 @@ details[open] > .tier-trending-summary::after {
 .battle-journal-tap-card {
     min-height: 56px;
     border-radius: 14px;
-    border: 2px solid rgba(59, 76, 202, 0.16);
-    background: linear-gradient(180deg, #ffffff 0%, #f5f8ff 100%);
-    color: var(--text-dark);
+    border: 2px solid var(--line-strong);
+    background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-0) 100%);
+    color: var(--ink);
     font-size: 13px;
     font-weight: 800;
     padding: 8px;
@@ -6762,8 +6772,9 @@ details[open] > .tier-trending-summary::after {
 }
 
 .battle-journal-tap-card.is-selected {
-    border-color: #1f8b4d;
-    background: linear-gradient(180deg, #ecfff4 0%, #d8f8e8 100%);
+    border-color: var(--solid-ok);
+    background: var(--tint-ok);
+    color: var(--tint-ok-ink);
     box-shadow: 0 8px 18px rgba(31, 139, 77, 0.18);
 }
 
@@ -6777,38 +6788,47 @@ details[open] > .tier-trending-summary::after {
     grid-template-columns: repeat(3, 1fr);
 }
 
+/* BEFUND 26.09.2026: `background: #fff` war fest, `color` kam aus der
+ * Tokenschicht. Im Dunkelmodus hiess das helle Tinte auf weissem Grund —
+ * gemessen 1,21:1 fuer „Going First", „Going Second" und W/L/T, also
+ * unsichtbar. Beides muss aus derselben Welt kommen. */
 .battle-journal-choice {
     min-height: 48px;
     border-radius: 12px;
-    border: 2px solid rgba(31, 45, 61, 0.1);
-    background: #fff;
-    color: var(--text-dark);
+    border: 2px solid var(--line-strong);
+    background: var(--surface-1);
+    color: var(--ink);
     font-size: 14px;
     font-weight: 800;
     cursor: pointer;
 }
 
+/* Die vier gewaehlten Zustaende nehmen je ein ganzes Tokenpaar —
+ * Flaeche UND Tinte. Vorher war die Flaeche ein durchscheinendes
+ * rgba() (also hell, egal welcher Modus) und die Tinte teils ein
+ * fester Hex-Wert, teils ein Token. Gemessen: W gewaehlt 3,60:1 in
+ * BEIDEN Modi, T gewaehlt 1,91:1 im Dunkeln. */
 .battle-journal-choice.is-selected {
-    border-color: var(--pokemon-blue);
-    background: rgba(59, 76, 202, 0.1);
-    color: var(--pokemon-blue-dark);
+    border-color: var(--brand);
+    background: var(--tint-info);
+    color: var(--tint-info-ink);
 }
 
 .battle-journal-choice-win.is-selected {
-    border-color: #27ae60;
-    background: rgba(39, 174, 96, 0.12);
-    color: #1f8b4d;
+    border-color: var(--solid-ok);
+    background: var(--tint-ok);
+    color: var(--tint-ok-ink);
 }
 
 .battle-journal-choice-loss.is-selected {
-    border-color: #e74c3c;
-    background: rgba(231, 76, 60, 0.12);
+    border-color: var(--solid-bad);
+    background: var(--tint-bad);
     color: var(--tint-bad-ink);
 }
 
 .battle-journal-choice-tie.is-selected {
-    border-color: #f39c12;
-    background: rgba(243, 156, 18, 0.16);
+    border-color: var(--tint-warn-ink);
+    background: var(--tint-warn);
     color: var(--tint-warn-ink);
 }
 
@@ -6837,7 +6857,7 @@ details[open] > .tier-trending-summary::after {
 .battle-journal-secondary-btn {
     min-width: 110px;
     min-height: 50px;
-    background: rgba(31, 45, 61, 0.08);
+    background: var(--surface-2);
     color: var(--text-dark);
 }
 
@@ -6868,16 +6888,16 @@ details[open] > .tier-trending-summary::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: var(--card-bg, #f7f8fa);
+    background: var(--surface-2);
     border-radius: 10px;
     padding: 10px 18px;
     min-width: 70px;
 }
 .bj-history-stat strong { font-size: 1.3rem; }
 .bj-history-stat span { font-size: 0.78rem; color: var(--text-muted, #888); }
-.bj-history-stat.is-win strong { color: #1f8b4d; }
-.bj-history-stat.is-loss strong { color: #c0392b; }
-.bj-history-stat.is-tie strong { color: #e67e22; }
+.bj-history-stat.is-win strong { color: var(--tint-ok-ink); }
+.bj-history-stat.is-loss strong { color: var(--tint-bad-ink); }
+.bj-history-stat.is-tie strong { color: var(--tint-warn-ink); }
 
 .battle-journal-history-list {
     display: flex;
@@ -6891,7 +6911,7 @@ details[open] > .tier-trending-summary::after {
     gap: 6px 10px;
     padding: 10px 14px;
     border-radius: 12px;
-    background: var(--card-bg, #f7f8fa);
+    background: var(--surface-2);
     border-left: 4px solid #999;
 }
 .bj-history-item.is-win { border-left-color: #1f8b4d; }
@@ -6942,7 +6962,7 @@ details[open] > .tier-trending-summary::after {
 .bj-history-clip {
     display: none;
     font-size: 0.78rem;
-    color: var(--accent, #2563eb);
+    color: var(--brand-ink);
     font-weight: 600;
     margin-top: 3px;
     letter-spacing: 0.3px;
@@ -6956,7 +6976,8 @@ details[open] > .tier-trending-summary::after {
 }
 .bj-history-copy-btn {
     background: none;
-    border: 1px solid rgba(0,0,0,.12);
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.85rem;
@@ -6986,12 +7007,12 @@ details[open] > .tier-trending-summary::after {
     padding: 6px 12px;
     border-radius: 999px;
     border: 1.5px solid rgba(0,0,0,.12);
-    background: var(--card-bg, #f7f8fa);
+    background: var(--surface-2);
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
     transition: all .15s;
-    color: var(--text-color, #333);
+    color: var(--ink);
 }
 .bj-type-chip:hover {
     border-color: var(--accent, #2563eb);
@@ -7092,7 +7113,8 @@ details[open] > .tier-trending-summary::after {
 }
 .bj-tournament-share-btn {
     background: none;
-    border: 1px solid rgba(0,0,0,.1);
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.78rem;
@@ -7108,8 +7130,8 @@ details[open] > .tier-trending-summary::after {
 /* Der Bild-Knopf ist das Ziel dieser Zeile, also sieht er auch danach
  * aus. Die uebrigen Aktionen liegen unter den drei Punkten. */
 .bj-tournament-image-btn {
-    border-color: var(--accent, #2563eb);
-    color: var(--accent, #2563eb);
+    border-color: var(--brand-ink);
+    color: var(--brand-ink);
     font-weight: 700;
 }
 
@@ -7212,14 +7234,14 @@ details[open] > .tier-trending-summary::after {
     text-align: right;
 }
 .bj-matchup-rate {
-    color: var(--accent, #2563eb);
+    color: var(--brand-ink);
     font-weight: 700;
 }
 
 /* ── Matchup Analysis Modal ─── */
 .ma-modal-shell {
     width: min(96vw, 900px);
-    background: var(--card-bg, #fff);
+    background: var(--surface-1);
     border-radius: 20px;
     box-shadow: 0 24px 80px rgba(0,0,0,.35);
     overflow: hidden;
@@ -7295,8 +7317,8 @@ details[open] > .tier-trending-summary::after {
     padding: 5px 12px;
     border-radius: 999px;
     border: 1.5px solid rgba(0,0,0,.12);
-    background: var(--card-bg, #f7f8fa);
-    color: var(--text-color, #333);
+    background: var(--surface-2);
+    color: var(--ink);
     font-size: .8rem;
     font-weight: 600;
     cursor: pointer;
@@ -7322,8 +7344,8 @@ details[open] > .tier-trending-summary::after {
     border: 1.5px solid rgba(0,0,0,.1);
     border-radius: 10px;
     font-size: .88rem;
-    background: var(--card-bg, #fff);
-    color: var(--text-color, #333);
+    background: var(--surface-1);
+    color: var(--ink);
 }
 .ma-filter-select:focus {
     outline: none;
@@ -7358,9 +7380,11 @@ details[open] > .tier-trending-summary::after {
     text-transform: uppercase;
     letter-spacing: .3px;
 }
-.ma-stat.is-win strong { color: #1f8b4d; }
-.ma-stat.is-loss strong { color: #c0392b; }
-.ma-stat.is-tie strong { color: #e67e22; }
+/* Feste Hex-Werte als SCHRIFT: gemessen 4,13 / 3,28 / 2,66:1. Die
+ * -ink-Familie ist genau dafuer da und dreht mit dem Modus. */
+.ma-stat.is-win strong { color: var(--tint-ok-ink); }
+.ma-stat.is-loss strong { color: var(--tint-bad-ink); }
+.ma-stat.is-tie strong { color: var(--tint-warn-ink); }
 
 /* Sections */
 .ma-section {
@@ -7433,7 +7457,7 @@ details[open] > .tier-trending-summary::after {
     position: sticky;
     left: 0;
     z-index: 2;
-    background: var(--card-bg, #fff);
+    background: var(--surface-1);
     max-width: 160px;
     border-right: 1px solid rgba(0,0,0,.08);
     box-shadow: 2px 0 4px rgba(0,0,0,.06);
@@ -7463,16 +7487,20 @@ details[open] > .tier-trending-summary::after {
     color: rgba(0,0,0,.15);
     font-weight: 400;
 }
+/* Die drei Felder der Matchup-Tafel: Flaeche und Tinte aus demselben
+ * Tokenpaar. Vorher war die Flaeche ein durchscheinendes rgba() (immer
+ * hell) unter einer Tinte, die mit dem Modus dreht — dieselbe Ursache
+ * wie im Bearbeiten-Fenster. */
 .ma-heatmap-good {
-    background: rgba(31,139,77,.15);
+    background: var(--tint-ok);
     color: var(--tint-ok-ink);
 }
 .ma-heatmap-mid {
-    background: rgba(230,126,34,.12);
-    color: #b35c10;
+    background: var(--tint-warn);
+    color: var(--tint-warn-ink);
 }
 .ma-heatmap-bad {
-    background: rgba(192,57,43,.12);
+    background: var(--tint-bad);
     color: var(--tint-bad-ink);
 }
 
@@ -7539,13 +7567,23 @@ details[open] > .tier-trending-summary::after {
     }
 }
 
-/* ── Edit Modal ─── */
+/* ── Edit Modal ───
+ *
+ * BEFUND 26.09.2026: dieses Fenster malte seine Flaechen ueber
+ * `--card-bg`, `--text-color` und `--input-bg` — drei Namen, die es in
+ * KEINER Datei des Projekts gibt. Jedes var() fiel also auf seinen
+ * hellen Ersatzwert zurueck, waehrend die Schrift daneben aus der
+ * echten Tokenschicht kam und im Dunkelmodus mitdrehte. Gemessen: die
+ * eingegebene Notiz 1,03:1, „Your Deck" 1,78:1, „Going First" 1,21:1.
+ * Jetzt nimmt beides dieselben Tokens; das Fenster folgt dem Modus der
+ * Seite, aus der es geoeffnet wird. */
 .bj-edit-modal {
     max-width: 480px;
     width: 95%;
     border-radius: 16px;
     overflow: hidden;
-    background: var(--card-bg, #fff);
+    background: var(--surface-1);
+    color: var(--ink);
 }
 .bj-edit-modal-header {
     display: flex;
@@ -7579,37 +7617,45 @@ details[open] > .tier-trending-summary::after {
 .bj-edit-label {
     font-size: 0.82rem;
     font-weight: 700;
-    color: var(--text-muted, #555);
+    color: var(--ink-2);
     margin-bottom: -4px;
 }
 .bj-edit-input {
     width: 100%;
     padding: 10px 12px;
-    border: 1.5px solid rgba(0,0,0,.12);
+    border: 1.5px solid var(--line-strong);
     border-radius: 10px;
     font-size: 0.95rem;
-    background: var(--card-bg, #f7f8fa);
-    color: var(--text-color, #333);
+    background: var(--surface-0);
+    color: var(--ink);
     box-sizing: border-box;
     transition: border-color .15s;
 }
+.bj-edit-input::placeholder {
+    color: var(--ink-3);
+    opacity: 1;
+}
 .bj-edit-input:focus {
     outline: none;
-    border-color: var(--accent, #2563eb);
+    border-color: var(--brand);
 }
 .bj-edit-modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
     padding: 12px 20px;
-    border-top: 1px solid rgba(0,0,0,.08);
+    border-top: 1px solid var(--line);
 }
 
 /* ── Edit/Delete Buttons on history items ─── */
+/* Ohne `color` nimmt ein <button> die Systemfarbe `buttontext`
+ * (schwarz) und nicht --ink. Im Dunkelmodus stand „Edit"/„Del"/„Copy"
+ * damit schwarz auf dunkler Flaeche: gemessen 1,20 bis 1,24:1. */
 .bj-history-edit-btn,
 .bj-history-delete-btn {
     background: none;
-    border: 1px solid rgba(0,0,0,.1);
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.78rem;
@@ -7627,7 +7673,8 @@ details[open] > .tier-trending-summary::after {
 
 .bj-history-brick-btn {
     background: none;
-    border: 1px solid rgba(0,0,0,.1);
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
     border-radius: 8px;
     cursor: pointer;
     font-size: .78rem;
@@ -7643,7 +7690,8 @@ details[open] > .tier-trending-summary::after {
 .bj-tournament-add-btn,
 .bj-tournament-edit-btn {
     background: none;
-    border: 1px solid rgba(0,0,0,.1);
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.78rem;
@@ -7657,7 +7705,7 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-footer {
     margin-top: 16px;
-    border-top: 1px solid rgba(31, 45, 61, 0.1);
+    border-top: 1px solid var(--line);
     padding-top: 14px;
 }
 
@@ -7820,8 +7868,8 @@ details[open] > .tier-trending-summary::after {
 .battle-journal-pending-item,
 .battle-journal-empty-state {
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(31, 45, 61, 0.08);
+    background: var(--surface-1);
+    border: 1px solid var(--line);
     padding: 10px 12px;
 }
 
@@ -7862,17 +7910,17 @@ details[open] > .tier-trending-summary::after {
 }
 
 .battle-journal-result-pill.is-win {
-    background: rgba(39, 174, 96, 0.14);
-    color: #1f8b4d;
+    background: var(--tint-ok);
+    color: var(--tint-ok-ink);
 }
 
 .battle-journal-result-pill.is-loss {
-    background: rgba(231, 76, 60, 0.12);
+    background: var(--tint-bad);
     color: var(--tint-bad-ink);
 }
 
 .battle-journal-result-pill.is-tie {
-    background: rgba(243, 156, 18, 0.16);
+    background: var(--tint-warn);
     color: var(--tint-warn-ink);
 }
 
@@ -9355,7 +9403,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     flex-direction: column;
     gap: 10px;
     padding: 10px 0 4px;
-    border-top: 1px solid rgba(0,0,0,.07);
+    border-top: 1px solid var(--line);
 }
 
 /* Brick checkbox label */
@@ -9375,7 +9423,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     flex-shrink: 0;
 }
 .bj-brick-icon { font-size: 1rem; }
-.bj-brick-text { font-weight: 700; color: #c0392b; }
+.bj-brick-text { font-weight: 700; color: var(--tint-bad-ink); }
 .bj-brick-hint {
     font-size: 0.76rem;
     color: var(--ink-3);
@@ -9386,28 +9434,26 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 .bj-notes-textarea {
     width: 100%;
     padding: 8px 10px;
-    border: 1px solid rgba(0,0,0,.14);
+    border: 1px solid var(--line-strong);
     border-radius: 8px;
     font-size: 0.88rem;
     line-height: 1.4;
     resize: vertical;
     font-family: inherit;
-    color: inherit;
-    background: var(--input-bg, rgba(0,0,0,.03));
+    color: var(--ink);
+    background: var(--surface-2);
     transition: border-color 0.15s;
     box-sizing: border-box;
 }
+.bj-notes-textarea::placeholder {
+    color: var(--ink-3);
+    opacity: 1;
+}
 .bj-notes-textarea:focus {
     outline: none;
-    border-color: #3498db;
-    background: #fff;
+    border-color: var(--brand);
+    background: var(--surface-1);
 }
-.battle-journal-sheet.is-dark .bj-notes-textarea {
-    background: rgba(255,255,255,.07);
-    border-color: rgba(255,255,255,.15);
-    color: #fff;
-}
-.battle-journal-sheet.is-dark .bj-notes-textarea::placeholder { color: rgba(255,255,255,.4); }
 
 /* Brick / Mulligan badges in history items — same shape, tinted
    differently so they're easy to tell apart at a glance. */
@@ -9423,15 +9469,19 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     margin-left: 6px;
     vertical-align: middle;
 }
+/* Die Flaechen waren durchscheinende rgba() — also immer hell, egal
+ * welcher Modus — unter einer Tinte aus der Tokenschicht. Gemessen im
+ * Hellen 3,67 bzw. 3,59:1, weil die Toenung auf farbigem Grund liegt.
+ * Flaeche und Tinte kommen jetzt aus demselben Paar. */
 .bj-brick-badge {
-    background: rgba(230,126,34,.15);
+    background: var(--tint-warn);
     color: var(--tint-warn-ink);
-    border: 1px solid rgba(192,57,43,.25);
+    border: 1px solid var(--tint-warn-ink);
 }
 .bj-mulligan-badge {
-    background: rgba(52, 152, 219, .15);
-    color: var(--dv-pos-ink);
-    border: 1px solid rgba(41, 128, 185, .35);
+    background: var(--tint-info);
+    color: var(--tint-info-ink);
+    border: 1px solid var(--tint-info-ink);
 }
 .bj-history-item.is-brick {
     border-left-color: #e67e22 !important;
@@ -9439,7 +9489,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 }
 .bj-history-notes {
     font-size: 0.78rem;
-    color: var(--ink-3);
+    color: var(--ink-2);
     margin-top: 3px;
     font-style: italic;
     line-height: 1.4;
@@ -9448,7 +9498,6 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     margin-left: 12px;
     margin-top: 1px;
 }
-.battle-journal-sheet.is-dark .bj-history-notes { color: rgba(255,255,255,.5); }
 
 /* Per-game brick + notes (BO3 form rows) */
 .battle-journal-game-extras {
@@ -9457,60 +9506,75 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     gap: 6px;
     margin-top: 4px;
 }
+/* Der AUS-Zustand stand auf `opacity: .45`. Das Zeichen darin ist ein
+ * Emoji, also ein Bild: bei 45 % blieben vom Ziegel 2,10:1 und vom
+ * Mulligan-Pfeil 1,87:1 gegen den Grund uebrig — man sah nicht, dass da
+ * ein Knopf ist.
+ *
+ * Den Unterschied tragen jetzt Flaeche und Rahmen, nicht die
+ * Durchsichtigkeit: aus = neutrale Flaeche, ein = getoente Flaeche mit
+ * farbigem Rahmen, so wie die Abzeichen daneben. Das Emoji bleibt in
+ * beiden Zustaenden voll deckend. (Ein `filter: grayscale()` waere der
+ * naechstliegende Weg gewesen und war der erste Versuch — er greift
+ * aber auch Flaeche und Rahmen und macht die Tokens damit wieder
+ * kaputt: gemessen 1,17:1 im Dunkeln.) */
 .bj-game-brick-btn,
 .bj-game-mulligan-btn {
     flex-shrink: 0;
     width: 36px;
     height: 36px;
-    border: 1px solid rgba(0,0,0,.14);
-    background: transparent;
+    border: 1px solid var(--line-strong);
+    background: var(--surface-1);
     border-radius: 8px;
     cursor: pointer;
     font-size: 1rem;
     line-height: 1;
-    opacity: 0.45;
-    transition: opacity .12s, background .12s, border-color .12s;
+    /* Ohne das nimmt der Knopf die Systemfarbe `buttontext` (schwarz)
+     * und nicht --ink. Das faellt nur auf, wenn ein Schirm das Emoji
+     * nicht hat und einen Textersatz zeichnet — dann stand es schwarz
+     * auf dunkler Flaeche. */
+    color: var(--ink);
+    transition: background .12s, border-color .12s;
 }
 .bj-game-brick-btn:hover,
-.bj-game-mulligan-btn:hover { opacity: 0.8; }
+.bj-game-mulligan-btn:hover { background: var(--surface-2); }
 .bj-game-brick-btn.is-active {
-    opacity: 1;
-    background: rgba(230,126,34,.18);
-    border-color: rgba(192,57,43,.45);
+    background: var(--tint-warn);
+    border-color: var(--tint-warn-ink);
 }
 .bj-game-mulligan-btn.is-active {
-    opacity: 1;
-    background: rgba(52, 152, 219, .18);
-    border-color: rgba(41, 128, 185, .45);
+    background: var(--tint-info);
+    border-color: var(--tint-info-ink);
 }
 
 /* Match-level mulligan label tinted blue (vs brick's red) so the
    two checkboxes are visually distinguishable when stacked. */
 .bj-mulligan-text { color: var(--dv-pos-ink) !important; }
+/* `color: inherit` war hier der teuerste Wert der Datei: im
+ * Bearbeiten-Fenster erbte das Feld die Tinte der SEITE (--ink, im
+ * Dunkeln fast weiss) und stand auf einem festen hellen Grund.
+ * Gemessen 1,03:1 — die eingetippte Notiz war unsichtbar. */
 .bj-game-notes-input {
     flex: 1;
     min-width: 0;
     padding: 7px 10px;
-    border: 1px solid rgba(0,0,0,.14);
+    border: 1px solid var(--line-strong);
     border-radius: 8px;
     font-size: 0.85rem;
     font-family: inherit;
-    color: inherit;
-    background: var(--input-bg, rgba(0,0,0,.03));
+    color: var(--ink);
+    background: var(--surface-2);
     box-sizing: border-box;
+}
+.bj-game-notes-input::placeholder {
+    color: var(--ink-3);
+    opacity: 1;
 }
 .bj-game-notes-input:focus {
     outline: none;
-    border-color: #3498db;
-    background: #fff;
+    border-color: var(--brand);
+    background: var(--surface-1);
 }
-.battle-journal-sheet.is-dark .bj-game-notes-input {
-    background: rgba(255,255,255,.07);
-    border-color: rgba(255,255,255,.15);
-    color: #fff;
-}
-.battle-journal-sheet.is-dark .bj-game-notes-input::placeholder { color: rgba(255,255,255,.4); }
-.battle-journal-sheet.is-dark .bj-game-brick-btn { border-color: rgba(255,255,255,.15); }
 
 /* BO3 per-game editor inside the edit-entry modal */
 .bj-edit-games-container {
@@ -9519,10 +9583,10 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     gap: 8px;
 }
 .bj-edit-game-row {
-    background: rgba(0,0,0,.03);
+    background: var(--surface-2);
     padding: 8px 10px;
     border-radius: 10px;
-    border: 1px solid rgba(0,0,0,.06);
+    border: 1px solid var(--line);
 }
 
 /* "Share with details" button — visually distinct sibling of Share */
@@ -9533,7 +9597,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 /* Brick count in bar list */
 .bj-brick-count {
     font-size: 0.72rem;
-    color: #e67e22;
+    color: var(--tint-warn-ink);
     margin-left: 6px;
     cursor: help;
 }
@@ -9604,9 +9668,9 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     font-variant-numeric: tabular-nums;
     min-width: 62px;
 }
-.ma-wr-good { background: rgba(31,139,77,.18);  color: var(--tint-ok-ink); }
-.ma-wr-mid  { background: rgba(230,126,34,.18); color: #b35c10; }
-.ma-wr-bad  { background: rgba(192,57,43,.18);  color: var(--tint-bad-ink); }
+.ma-wr-good { background: var(--tint-ok);   color: var(--tint-ok-ink); }
+.ma-wr-mid  { background: var(--tint-warn); color: var(--tint-warn-ink); }
+.ma-wr-bad  { background: var(--tint-bad);  color: var(--tint-bad-ink); }
 
 @media (max-width: 600px) {
     .ma-matchup-row {

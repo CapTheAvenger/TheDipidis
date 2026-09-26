@@ -184,7 +184,16 @@ SLUG_SONDERFALL = {
 }
 
 
-def pokedex_schluessel(pokedex):
+def als_schluessel(name):
+    """Smogon-Name oder Anzeigename -> Form eines Nutzungsschluessels.
+
+    "Rotom-Fan" und "Rotom (Fan)" werden beide "rotom-fan",
+    "Farfetch’d" wird "farfetch-d", "Mr. Mime" wird "mr-mime".
+    """
+    return re.sub(r"[^a-z0-9]+", "-", str(name or "").lower()).strip("-")
+
+
+def pokedex_schluessel(pokedex, ohne=()):
     """Alles, woran der Pokedex einen Eintrag wiedererkennt.
 
     Zwei Schreibweisen, weil beide vorkommen: `meta.slug` ist der
@@ -192,19 +201,26 @@ def pokedex_schluessel(pokedex):
     ("Rotom (Wash)"). Der Anzeigename wird auf dieselbe Form gebracht
     wie ein Nutzungsschluessel, damit ein Vergleich ueberhaupt moeglich
     ist.
+
+    `ohne`: Smogon-Namen, deren Eintraege NICHT mitzaehlen — die Formen,
+    die diese Datei beim letzten Lauf selbst ergaenzt hat (siehe
+    nutzungsformen, "Das Pendel").
     """
+    ausnehmen = {als_schluessel(n) for n in (ohne or ())}
     raus = set()
     for e in (pokedex or {}).get("entries", []):
-        slug = ((e or {}).get("meta") or {}).get("slug")
+        slug = str(((e or {}).get("meta") or {}).get("slug") or "").lower()
+        en = als_schluessel((e or {}).get("en"))
+        if ausnehmen and (slug in ausnehmen or en in ausnehmen):
+            continue
         if slug:
-            raus.add(str(slug).lower())
-        en = (e or {}).get("en")
+            raus.add(slug)
         if en:
-            raus.add(re.sub(r"[^a-z0-9]+", "-", str(en).lower()).strip("-"))
+            raus.add(en)
     return raus
 
 
-def nutzungsformen(vorhanden, smogon, usage, pokedex):
+def nutzungsformen(vorhanden, smogon, usage, pokedex, eigene=()):
     """FORMEN, DIE GESPIELT WERDEN UND IM POKEDEX FEHLEN.
 
     ANLASS (Betreiber, 16.09.2026): "es sind nicht alle Rotoms waehlbar
@@ -247,11 +263,26 @@ def nutzungsformen(vorhanden, smogon, usage, pokedex):
     danebenliegen und die Art dann doppelt anlegen koennte. Der Pokedex
     fuehrt beide Schreibweisen selbst mit.
 
-    Der Vergleich gegen den ZULETZT GEBAUTEN Pokedex heilt sich selbst:
-    faellt eine Art dort heraus, fehlt sie beim naechsten Lauf in dieser
-    Menge und wird wieder ergaenzt.
+    DAS PENDEL (SC-1, gemessen 26.09.2026). Hier stand bis dahin: „Der
+    Vergleich gegen den ZULETZT GEBAUTEN Pokedex heilt sich selbst." Er
+    heilte nicht, er PENDELTE. Der Pokedex enthaelt die Formen, die diese
+    Funktion beim letzten Lauf ergaenzt hat. Beim naechsten Lauf standen
+    sie deshalb in `da`, wurden NICHT mehr ergaenzt, fielen beim
+    Pokedex-Bau heraus — und der uebernaechste Lauf ergaenzte sie wieder.
+    Zwei Laeufe am Tag (champions-replica-scrape 04:00 UTC,
+    champions-usage-refresh 05:00 UTC) machten daraus jeden Morgen
+    142 -> 166 Kaderschluessel und 319 -> 343 Pokedex-Eintraege; eine
+    Stunde lang fehlten 24 Formen und test_champions_sprites.py hielt den
+    Deploy an.
+
+    Deshalb zaehlen die Eintraege, die aus `eigene` (dem letzten
+    `_meta.aus_nutzung` dieser Datei) stammen, beim Abgleich NICHT mit.
+    Die Antwort haengt damit nur noch an den anderen Quellen des Kaders,
+    nicht an ihrem eigenen Echo — sie ist bei jedem Lauf dieselbe.
+    Faellt die Nutzungszeile einer Form weg, faellt sie auch hier
+    heraus: `eigene` nimmt nur aus dem Abgleich, es haelt nichts fest.
     """
-    da = pokedex_schluessel(pokedex)
+    da = pokedex_schluessel(pokedex, ohne=eigene)
     neu, ohne_werte = [], []
     for schluessel in sorted((usage or {}).get("pokemon", {}).keys()):
         if schluessel in da:
@@ -381,8 +412,11 @@ def main():
 
     # Formen mit eigener Nutzungszeile, die der Pokedex nicht fuehrt.
     vorhanden = vorhanden | set(geschlecht)
+    # Was diese Datei beim letzten Lauf selbst ergaenzt hat — gegen das
+    # Pendel, siehe nutzungsformen().
+    frueher = ((_lade(OUT) or {}).get("_meta") or {}).get("aus_nutzung") or []
     nutzung_neu, nutzung_ohne = nutzungsformen(
-        vorhanden, smogon, _lade(USAGE_PATH), _lade(POKEDEX_PATH))
+        vorhanden, smogon, _lade(USAGE_PATH), _lade(POKEDEX_PATH), eigene=frueher)
     if nutzung_neu:
         print("Formen mit eigener Nutzungszeile, im Pokedex bisher ohne Eintrag (%d): %s"
               % (len(nutzung_neu), ", ".join(sorted(nutzung_neu))))

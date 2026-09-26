@@ -128,7 +128,15 @@ describe('der zweite Tokensatz', () => {
         .slice(stripComments(TOKENS).indexOf(':root[data-theme="dark"]'));
 
     it('existiert und hängt an data-theme', () => {
-        assert.match(TOKENS, /:root\[data-theme="dark"\]\s*\{/);
+        // 26.09.2026: der Block traegt einen ZWEITEN Selektor. Das
+        // Battle-Journal-Blatt hat mit „Dark/Light" eine eigene
+        // Helligkeit, die nichts vom Dunkelmodus der Seite weiss; seine
+        // Regeln faerben aber ueber dieselben Tokens. Ohne den zweiten
+        // Selektor stand ein helles Blatt auf dunkler Seite mit dunklen
+        // Werten da — gemessen 1,10:1. Das ist KEIN zweites Stylesheet:
+        // es bleibt derselbe eine Block, nur fuer zwei Wurzeln.
+        assert.match(TOKENS,
+            /:root\[data-theme="dark"\],\s*\.battle-journal-sheet\.is-dark\s*\{/);
     });
 
     it('definiert jede Fläche und jede Textfarbe neu', () => {
@@ -160,8 +168,14 @@ describe('der zweite Tokensatz', () => {
         // Der ganze Dunkelmodus ist ein :root-Block. Alles, was
         // Selektoren dupliziert, wäre der Anfang des zweiten
         // Stylesheets, das hier vermieden werden soll.
+        //
+        // Ausgenommen ist genau ein Name: `.battle-journal-sheet.is-dark`
+        // steht als zweiter Selektor AM SELBEN Block (siehe oben), nicht
+        // als eigene Regel. Jeder andere Selektor faellt weiterhin auf.
         const rules = darkBlock.match(/^\s*[.#\[a-zA-Z][^\n{]*\{/gm) || [];
-        assert.deepEqual(rules.filter(r => !r.includes(':root')), []);
+        assert.deepEqual(rules
+            .filter(r => !r.includes(':root'))
+            .filter(r => r.trim() !== '.battle-journal-sheet.is-dark {'), []);
     });
 
     it('components.css braucht dafür keine Zeile Änderung', () => {

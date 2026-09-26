@@ -24,7 +24,8 @@
  * Absichtlich NICHT hier: Komponenten. Die stehen ab Phase 1 in
  * css/components.css und bestehen ausschließlich aus diesen Tokens.
  */
-:root {
+:root,
+.battle-journal-sheet:not(.is-dark) {
     /* ── Typografie: sechs Stufen, mehr gibt es nicht ─────────────── */
     --fs-xs: 11px;      /* Tabellenzusatz, n=, Fußnoten */
     --fs-sm: 12px;      /* Grundgröße aller Datenansichten */
@@ -383,12 +384,33 @@
  * erhalten, die Rangordnung also auch — sie wird nur eine Stufe
  * flacher, so wie auf einem kleinen Schirm ueblich. */
 @media (max-width: 768px) {
-    :root {
+    :root,
+    .battle-journal-sheet:not(.is-dark) {
         --lbl: 11px;
     }
 }
 
-:root[data-theme="dark"] {
+/* ── Die zweite Helligkeit: das Battle-Journal-Blatt ──────────────────
+ *
+ * BEFUND 26.09.2026, live gemessen: das Blatt hat mit „Dark/Light" einen
+ * eigenen Schalter, der nichts mit dem Dunkelmodus der Seite zu tun hat.
+ * Seine Regeln faerbten aber ueber die Tokens der Seite. Helles Blatt
+ * auf dunkler Seite: „Tournament Name" 1,10:1, die Knoepfe BO1/W/L/T
+ * 1,21:1 — unlesbar. Dunkles Blatt auf heller Seite: „BO3" 2,30:1.
+ *
+ * Deshalb steht `.battle-journal-sheet` jetzt als zweiter Selektor an
+ * den Tokenbloecken selbst: `:not(.is-dark)` an den hellen, `.is-dark`
+ * am dunklen. var() loest erst an der Fundstelle auf, also nimmt jede
+ * Regel im Blatt ab hier die Werte SEINER Welt — auch die !important-
+ * Regeln aus ux-step1.css. Eine Zeile pro Block statt dreissig
+ * Ausnahmen, und die beiden Welten koennen nicht mehr auseinanderlaufen.
+ *
+ * Wer im Blatt einen rohen Hex-Wert als GRUND einsetzt, bricht das
+ * wieder: der Grund bliebe hell, waehrend die Tinte mitdreht. Genau so
+ * ist dieser Befund entstanden.
+ * ─────────────────────────────────────────────────────────────────── */
+:root[data-theme="dark"],
+.battle-journal-sheet.is-dark {
     --surface-0: #0b0f1e;
     --surface-1: #111730;
     --surface-2: #161d3a;

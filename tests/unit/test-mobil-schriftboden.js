@@ -117,7 +117,11 @@ describe('Was der Boden bisher verdeckt hat', () => {
         // 10 px Grossbuchstaben sind auf dem Schreibtisch ruhig und auf
         // dem Telefon zu klein. Sichtbar wurde es erst, als der Boden sie
         // nicht mehr stillschweigend auf 12 px hob.
-        assert.match(TOKENS, /@media \(max-width: 768px\)\s*\{\s*:root \{\s*--lbl: 11px;/);
+        // Der :root im @media traegt seit dem 26.09.2026 einen zweiten
+        // Selektor fuer das Battle-Journal-Blatt (eigene Helligkeit,
+        // gleiche Werte). Der Wert selbst ist unveraendert.
+        assert.match(TOKENS,
+            /@media \(max-width: 768px\)\s*\{\s*:root,\s*\.battle-journal-sheet:not\(\.is-dark\) \{\s*--lbl: 11px;/);
         assert.match(TOKENS, /--lbl: 10px/, 'der Wert fuer grosse Schirme bleibt');
     });
 

@@ -84,8 +84,11 @@ function token(block, name) {
     const m = block.match(new RegExp('--' + name + ':\\s*([^;]+);'));
     return m ? m[1].trim() : null;
 }
-const HELL = tokenBlock(':root {');
-const DUNKEL = tokenBlock(':root[data-theme="dark"] {');
+// 26.09.2026: beide Bloecke tragen einen zweiten Selektor fuer das
+// Battle-Journal-Blatt, das eine eigene Helligkeit fuehrt und dieselben
+// Werte braucht. Es bleiben dieselben zwei Bloecke.
+const HELL = tokenBlock(':root,\n.battle-journal-sheet:not(.is-dark) {');
+const DUNKEL = tokenBlock(':root[data-theme="dark"],\n.battle-journal-sheet.is-dark {');
 
 describe('Die Marken-Farbe ist ein Token, kein Rueckfallwert', () => {
     it('--pokemon-blue ist in beiden Modi definiert', () => {
@@ -94,10 +97,16 @@ describe('Die Marken-Farbe ist ein Token, kein Rueckfallwert', () => {
     });
 
     it('keine Datenseite faerbt Text mehr mit dem festen #1e3a8a', () => {
-        // Ausnahme mit Grund: das Kampftagebuch bringt seinen eigenen
-        // Dunkelmodus ueber .battle-journal-sheet.is-dark mit, statt den
-        // Tokens zu folgen. Die feste Farbe dort ist eine Hellmodus-Regel,
-        // die im Dunkeln ueberschrieben wird — der Test unten belegt das.
+        // Bis zum 26.09.2026 stand hier eine Ausnahme: das Kampftagebuch
+        // durfte die feste Farbe behalten, weil es mit
+        // `.battle-journal-sheet.is-dark` seinen eigenen Dunkelmodus
+        // mitbrachte und die Regel dort ueberschrieb.
+        //
+        // Die Ausnahme ist weg, und mit ihr der Grund dafuer: das Blatt
+        // fuehrt jetzt die Tokenschicht selbst (tokens.css, zweiter
+        // Selektor am :root-Block), also faerbt auch die
+        // Autovervollstaendigung darin ueber `--tint-info-ink`. Es gibt
+        // keine Datei mehr, die eine Ausnahme braucht.
         const treffer = [];
         for (const datei of fs.readdirSync(path.join(wurzel, 'css'))) {
             if (!datei.endsWith('.css')) continue;
@@ -105,18 +114,17 @@ describe('Die Marken-Farbe ist ein Token, kein Rueckfallwert', () => {
                 if (/^\s*color\s*:\s*#1e3a8a\s*;/i.test(z)) treffer.push(datei + ':' + (i + 1));
             });
         }
-        const ohneTagebuch = treffer.filter(t => !t.startsWith('styles.css'));
-        assert.deepStrictEqual(ohneTagebuch, [],
-            'feste Textfarbe #1e3a8a wieder da: ' + ohneTagebuch.join(', '));
+        assert.deepStrictEqual(treffer, [],
+            'feste Textfarbe #1e3a8a wieder da: ' + treffer.join(', '));
     });
 
-    it('die Ausnahme im Kampftagebuch hat wirklich eine Dunkel-Entsprechung', () => {
+    it('die Autovervollstaendigung des Tagebuchs faerbt ueber Tokens', () => {
+        // Die Stelle, an der die Ausnahme sass. Flaeche UND Schrift
+        // kommen aus demselben Paar, damit sie gemeinsam drehen.
         const q = ohneKomm(lies('css/styles.css'));
-        assert.ok(/\.bj-autocomplete-item:hover,\s*\n\.bj-autocomplete-item:active \{[^}]*#1e3a8a/.test(q),
-            'die Ausnahme steht nicht mehr da, wo dieser Test sie vermutet');
-        assert.ok(/\.battle-journal-sheet\.is-dark \.bj-autocomplete-item:hover/.test(q),
-            'die feste Farbe im Kampftagebuch hat keine Dunkel-Entsprechung mehr — ' +
-            'dann ist sie keine Ausnahme, sondern ein Fehler');
+        assert.ok(/\.bj-autocomplete-item:hover,\s*\n\.bj-autocomplete-item:active \{[^}]*background: var\(--tint-info\)[^}]*color: var\(--tint-info-ink\)/.test(q),
+            'die Autovervollstaendigung nimmt Flaeche und Schrift nicht mehr '
+            + 'aus dem Paar --tint-info / --tint-info-ink');
     });
 });
 

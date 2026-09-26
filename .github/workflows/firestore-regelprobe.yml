@@ -1,0 +1,29 @@
+name: Firestore-Regelprobe
+
+# WZ-3 (26.09.2026): fragt die Produktivdatenbank unangemeldet, ob die
+# veroeffentlichten Regeln das Aufzaehlen der Sammlungen mit ID-Zugang
+# verweigern — die Pruefung von firestore.rules im Repo sagt nicht, ob
+# DIESE Datei live ist. Liest nur, schreibt nichts, committet nichts.
+# Einzelheiten und Messwerte: scripts/firestore_regelprobe.py
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Regeln von aussen pruefen
+        env:
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+        run: python3 scripts/firestore_regelprobe.py

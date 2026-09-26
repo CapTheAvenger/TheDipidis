@@ -133,12 +133,25 @@ describe('Die Namensbrücke ist gepflegt, nicht geraten', () => {
                 + 'keinen bezifferten Beleg — dann ist nicht mehr nachvollziehbar, '
                 + 'ob es den Namen je gab');
         }
-        // Rollen ALLE heraus, ist nicht ein Deck ausgeschieden, sondern
-        // die Quelle kaputt oder umbenannt. Das ist ein Befund.
-        assert.notEqual(ausgerollt.length, ALIAS.turnier_zu_ladder.length,
-            'kein einziger Brückeneintrag trifft noch einen Turniernamen — '
-            + 'das ist kein Meta-Wandel mehr, sondern ein Quellenproblem: '
-            + `${ausgerollt.join(', ')}`);
+        /* Hier stand bis 26.09.2026: rollen ALLE Brueckeneintraege heraus,
+           sei die Quelle kaputt oder umbenannt.
+
+           SC-3 hat das umgedreht. Der Turnier-Scraper nimmt seit dem
+           26.09.2026 den Decknamen, den play.limitlesstcg.com in jeder
+           Standings-Zeile selbst vergibt (data-tooltip am Metagame-Link),
+           statt ihn aus zwei Sprites zurueckzurechnen. Das SIND die
+           Ladder-Namen. Die vier Brueckenquellen ("Dhelmise Banette",
+           "Bolt", ...) waren Kunstnamen der Sprite-Rechnung und
+           verschwinden mit dem naechsten Lauf alle auf einmal — gewollt.
+
+           Eine umgestellte Quelle faellt trotzdem auf: dann treffen VIELE
+           Turniernamen die Ladder nicht mehr, und genau das misst
+           "Brücken plus offene decken alle nicht treffenden Turniernamen
+           ab" weiter unten, mit Anteil statt fester Menge. */
+        if (ausgerollt.length === ALIAS.turnier_zu_ladder.length) {
+            console.log('    # alle Brückenquellen ausgerollt — erwartet seit SC-3 '
+                + '(Deckname aus der Standings-Zeile)');
+        }
     });
 
     it('und die Turnierseite hat vorher wirklich nicht getroffen', () => {

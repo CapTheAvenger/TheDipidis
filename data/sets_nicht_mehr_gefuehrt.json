@@ -1,0 +1,13 @@
+{
+  "_hinweis": "Sets, die nicht mehr gefuehrt werden: kein Abruf, keine Pflege. Ihre Datensaetze bleiben stehen, damit gespeicherte Decks, Binder und Ansichten, die eine Karte ueber (set, number) aufloesen, weiter aufloesen. Gelesen von backend/scrapers/japanese_cards_scraper.py. Geprueft von tests/python/test_sets_nicht_mehr_gefuehrt.py.",
+  "sets": {
+    "M4": {
+      "seit": "2026-09-26",
+      "grund": "Entscheidung Hausi (DA-6): das laufende JP-Meta ist M6; fuer M4 (Ninja Spinner) gibt es das internationale Gegenstueck. Nachgemessen 26.09.2026: 83 Karten, alle jp_only, in keiner Kartendatenbank-Ansicht (nicht in pokemon_sets_mapping.csv) und nie formatlegal (getJapaneseOnlySetCodes). In keiner ausgelieferten CSV steht ein M4-Druck. Ob gespeicherte Decks oder Binder in Firestore M4-Drucke tragen, ist NICHT GEPRUEFT (kein Zugriff) — deshalb bleiben die Datensaetze."
+    },
+    "M5": {
+      "seit": "2026-09-26",
+      "grund": "Entscheidung Hausi (DA-6): das laufende JP-Meta ist M6; fuer M5 (Abyss Eye) gibt es das internationale Gegenstueck. Nachgemessen 26.09.2026: 79 Karten, alle jp_only, in keiner Kartendatenbank-Ansicht und nie formatlegal. In keiner ausgelieferten CSV steht ein M5-Druck. Gespeicherte Decks und Binder: NICHT GEPRUEFT — deshalb bleiben die Datensaetze."
+    }
+  }
+}

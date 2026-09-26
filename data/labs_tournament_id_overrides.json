@@ -48,6 +48,18 @@
     "515": {
       "labs_tournament_id": "0071",
       "reason": "Worlds 2026 — limitless 'World Championships 2026' vs labs 'World Championship San Francisco'. Die Normalisierung bricht hier doppelt: aus dem Limitless-Namen bleibt '2026', aus dem Labs-Namen 'san francisco' — es gibt kein gemeinsames Wort mehr. Derselbe Bruch wie bei Worlds 2025 (500 -> 0035), nur mit einer anderen Stadt. Belegt am 05.09.2026: player_continuity.csv fuehrt tid=0071 mit tournament_date 2026-08-28, und labs_tournament_decks_TEF-PBL.csv nennt fuer dieses Turnier 774 Spieler. WAS DER FEHLENDE EINTRAG GEKOSTET HAT: _loadTournamentSizes findet ueber die leere labs_tournament_id keine Groesse, _sizeWeight(0) vergibt den Notwert 0,5 statt log(774)/log(2000)=0,875. Alle acht Worlds-Listen liegen ausserdem auf Platz 37-122, also im selben 0,1-Platzband — dadurch war das Listengewicht fuer JEDE der acht identisch und die gesamte Gewichtung des Deckbaus wirkungslos (weightedShare = n/8). Zusaetzlich lief in per_decklist_scraper.py der Bilanz-Rueckfall nicht (er verlangt einen labs_tid), weshalb alle 143 Worlds-Listen wins/losses/ties=0 tragen."
+    },
+    "labs-0019": {
+      "labs_tournament_id": "0019",
+      "tournament_date": "2025-02-15",
+      "reason": "Nur ein Labs-Turnier, kein Gegenstueck auf limitlesstcg.com/cards (tests/python/test_labs_name_meta_lookup.py: 0019 bleibt ohne Namenstreffer). Der Schluessel ist deshalb die Labs-Kennung.",
+      "date_reason": "DA-3, 26.09.2026: labs.limitlesstcg.com/0019/decks nennt 'February 15–16, 2025' (Special Event, 299 Spieler) — eingetragen ist der erste Turniertag. Die Labs-Uebersicht lieferte kein Datum, das Turnier lag seit dem 25.05.2026 in labs_tournament_decks__unsorted.csv. Regel Hausi: ein Praesenzturnier muss ein Datum haben."
+    },
+    "labs-0042": {
+      "labs_tournament_id": "0042",
+      "tournament_date": "2025-11-01",
+      "reason": "Nur ein Labs-Turnier ohne Namenstreffer in der Kartenuebersicht (Brisbane kommt dort in mehreren Formaten vor). Der Schluessel ist deshalb die Labs-Kennung.",
+      "date_reason": "DA-3, 26.09.2026: labs.limitlesstcg.com/0042/decks nennt 'November 1–2, 2025' (Regional Championship, 617 Spieler) — eingetragen ist der erste Turniertag. Die Labs-Uebersicht lieferte kein Datum, das Turnier lag seit dem 25.05.2026 in labs_tournament_decks__unsorted.csv. Regel Hausi: ein Praesenzturnier muss ein Datum haben."
     }
   },
   "intentionally_unmapped": {

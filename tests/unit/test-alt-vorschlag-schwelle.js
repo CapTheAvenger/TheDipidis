@@ -82,12 +82,16 @@ const ZAEHLER_ANKER = [
    '    if (pluralityShare < ALT_SUGGESTION_MIN_SHARE) { __z.anteil++; return null; }'],
   ['    if (pluralityMedian == null || naiveMedian == null) return null;',
    '    if (pluralityMedian == null || naiveMedian == null) { __z.medianFehlt++; return null; }'],
-  ['    const gap = naiveMedian - pluralityMedian;\n'
-   + '    if (gap < ALT_SUGGESTION_MIN_GAP) return null;',
+  /* DER ANKER FOLGT DEM MODUL (26.09.2026): dort heisst der Vergleich
+     seit dem Gleichstands-Befund "<=" statt "<". Ein Anker, der die
+     alte Schreibweise sucht, findet nichts mehr — und AUFBAU_FEHLER
+     macht daraus einen benannten roten Test statt einer stillen Null. */
+  ['    const gap = naiveMedian - pluralityMedian;',
    '    const gap = naiveMedian - pluralityMedian;\n'
-   + '    __z.abstaende.push(gap);\n'
-   + '    if (gap < ALT_SUGGESTION_MIN_GAP) { __z.unterdrueckt++; return null; }\n'
-   + '    __z.durch++;'],
+   + '    __z.abstaende.push(gap);'],
+  ['    if (gap <= ALT_SUGGESTION_MIN_GAP) return null;',
+   '    if (gap <= ALT_SUGGESTION_MIN_GAP) { __z.unterdrueckt++; return null; }\n'
+   + '    __z.durch++; __z.durchAbstaende.push(gap);'],
 ];
 
 function sandkasten(quelle, zaehler) {
@@ -146,7 +150,8 @@ async function aufbauen() {
     quelle = quelle.replace(a, b);
   }
   const z = { aufrufe: 0, stichprobe: 0, randzone: 0, deckungsgleich: 0,
-              anteil: 0, medianFehlt: 0, unterdrueckt: 0, durch: 0, abstaende: [] };
+              anteil: 0, medianFehlt: 0, unterdrueckt: 0, durch: 0,
+              abstaende: [], durchAbstaende: [] };
   const sb = sandkasten(quelle, z);
   const M = sb.MostConsistencyBuilder;
   await M.loadData();
@@ -207,38 +212,59 @@ describe('ALT_SUGGESTION_MIN_GAP — die Rolle der Zahl an den echten Daten', ()
       + 'dann ist die Zahl wirkungslos und die Begruendung im Quelltext hinfaellig.');
   });
 
-  it('die Zahl sitzt nicht auf einer Kante', () => {
+  it('kein GEZEIGTER Vorschlag haengt an einem Gleichstand mit der Schwelle', () => {
     if (!MESSUNG) return;
-    /* Laege ein gemessener Abstand unmittelbar neben der Schwelle,
-       entschiede eine GEGRIFFENE Zahl ueber einen einzelnen Vorschlag.
-       Gemessen 11.09.2026: naechster Abstand darunter 26, darueber
-       113,5 — jede Schwelle zwischen 27 und 113 ergibt dasselbe
-       Ergebnis. */
+    /* WAS HIER FRUEHER STAND, UND WARUM ES ERSETZT IST (26.09.2026).
+     *
+     * Bis heute verlangte diese Zusicherung, dass die Schwelle nicht
+     * EXAKT auf einem gemessenen Abstand sitzt — sonst entschiede eine
+     * GEGRIFFENE Zahl einen einzelnen Vorschlag per Gleichstand. Genau
+     * das trat im Wochenlauf #162 ein: ein Abstand von exakt 50. Der
+     * Lauf lief rot, und die frischen Daten der ganzen Woche blieben
+     * liegen.
+     *
+     * Behoben wurde nicht die Zusicherung, sondern die LAGE. Der
+     * Vergleich im Modul heisst jetzt "echt groesser" statt
+     * "groesser-gleich" — ein Gleichstand kann einen Vorschlag nur
+     * noch verhindern, nie ausloesen. Die unbelegte Zahl darf bremsen,
+     * nicht treiben.
+     *
+     * Die Zusicherung sagt deshalb jetzt genau das, was die Gefahr war,
+     * statt sie ueber einen Naeherungsabstand zu umschreiben — und ist
+     * damit schaerfer: sie gilt fuer JEDE Datenlage, nicht nur fuer
+     * die, in der die Mediane gerade weit genug wegliegen. Sie kann
+     * auch nicht mehr rot werden, weil ein Scraperlauf die Mediane
+     * verschiebt; sie wird rot, wenn das Modul wieder ">=" benutzt.
+     *
+     * Der Naeherungsabstand bleibt als BEOBACHTUNG erhalten — gemeldet,
+     * nicht anhaltend. Er ist die Auskunft, wie viel Luft die Zahl noch
+     * hat, und die soll nicht verlorengehen. */
     const g = SCHWELLEN.MIN_GAP;
-    const darunter = MESSUNG.abstaende.filter(x => x < g);
-    const darueber = MESSUNG.abstaende.filter(x => x >= g);
-    const naechsteDarunter = darunter.length ? Math.max(...darunter) : null;
-    const naechsteDarueber = darueber.length ? Math.min(...darueber) : null;
-    const abstandZurKante = Math.min(
-      naechsteDarunter == null ? Infinity : g - naechsteDarunter,
-      naechsteDarueber == null ? Infinity : naechsteDarueber - g);
-    /* BEWUSST NUR "> 0", NICHT "> 2".
-       Ein enges Band waere hier ein abgelesener Wochenwert und wuerde
-       den Deploy anhalten, sobald der naechste Scraperlauf die Mediane
-       verschiebt — die Bauart, an der dieses Projekt schon zweimal
-       haengengeblieben ist (siehe tests/unit/test-testdaten-wachhund.js).
-       Verlangt wird deshalb nur, dass die Schwelle nicht EXAKT auf einem
-       gemessenen Abstand sitzt. Tritt das ein, entscheidet eine Zahl
-       ohne Beleg einen einzelnen Fall per Gleichstand — dann MUSS der
-       Test rot werden, denn dann ist die fehlende Begruendung nicht mehr
-       folgenlos. Gemessener Sicherheitsabstand am 11.09.2026: 24
-       Plaetze nach unten (26), 63,5 nach oben (113,5). */
-    assert.ok(abstandZurKante > 0,
-      `ALT_SUGGESTION_MIN_GAP = ${g} liegt jetzt GENAU auf einem gemessenen `
-      + 'Abstand. Damit entscheidet eine Zahl ohne Beleg einen einzelnen Vorschlag '
-      + 'per Gleichstand — das ist die Lage, in der die Zahl begruendet werden '
-      + 'muss statt weiterbenutzt.\n'
-      + `  naechster Abstand darunter: ${naechsteDarunter}, darueber: ${naechsteDarueber}`);
+    /* VORPRUEFUNG GEGEN EIN LEERES BESTEHEN. Fuellt der Zaehler die
+       Liste der GEZEIGTEN Abstaende nicht, prueft die Zusicherung
+       darunter eine leere Menge und besteht immer — beim Verfaelschen
+       gemessen: den Push wegzulassen liess alles gruen. */
+    assert.equal(MESSUNG.durchAbstaende.length, MESSUNG.durch,
+      `der Zaehler hat ${MESSUNG.durch} gezeigte Vorschlaege gezaehlt, aber `
+      + `${MESSUNG.durchAbstaende.length} Abstaende dazu aufgeschrieben — die `
+      + 'Zusicherung darunter liefe ueber eine leere Menge');
+    const aufDerKante = MESSUNG.abstaende.filter((x) => x === g);
+    const gezeigtAufDerKante = MESSUNG.durchAbstaende.filter((x) => x === g);
+    assert.equal(gezeigtAufDerKante.length, 0,
+      `${gezeigtAufDerKante.length} Vorschlag/Vorschlaege werden GEZEIGT, obwohl `
+      + `ihr Abstand exakt der Schwelle ${g} entspricht. Damit ist eine `
+      + 'ausdruecklich als GEGRIFFEN gekennzeichnete Zahl die alleinige Ursache '
+      + 'eines Bildes, das dem Betreiber eine Kartenzahl empfiehlt. Der Vergleich '
+      + 'im Modul muss "echt groesser" sein, nicht "groesser-gleich".');
+
+    /* Die Beobachtung, nicht die Sperre. */
+    const darunter = MESSUNG.abstaende.filter((x) => x < g);
+    const darueber = MESSUNG.abstaende.filter((x) => x > g);
+    const nd = darunter.length ? Math.max(...darunter) : null;
+    const no = darueber.length ? Math.min(...darueber) : null;
+    console.error(`    [Beobachtung] ALT_SUGGESTION_MIN_GAP = ${g}; naechster `
+      + `gemessener Abstand darunter: ${nd}, darueber: ${no}; `
+      + `${aufDerKante.length} exakt auf der Schwelle (werden unterdrueckt).`);
   });
 
   it('die Datenlage steht — sonst ist die ganze Messung oben ein Nichts', () => {
@@ -288,14 +314,28 @@ describe('das Tor wirkt in der richtigen Richtung — von Hand gerechnet', () =>
       + `Vorschlag: ${JSON.stringify(r)}`);
   });
 
-  it('genau AUF der Schwelle wird es laut', () => {
+  it('genau AUF der Schwelle bleibt es still — eine unbelegte Zahl treibt nicht', () => {
+    /* GEAENDERT AM 26.09.2026, und zwar bewusst: vorher wurde es hier
+       laut. Der Wochenlauf #162 brachte einen gemessenen Abstand von
+       exakt 50, und damit waere die als GEGRIFFEN gekennzeichnete Zahl
+       die alleinige Ursache eines gezeigten Vorschlags gewesen. */
     const sb = sandkasten(KONS, {});
     const f = fall(SCHWELLEN.MIN_GAP);
     const r = sb.MostConsistencyBuilder._internals.alternativVorschlag(f.karte, 2);
-    assert.ok(r, `Abstand ${f.g} erreicht die Schwelle ${f.g}, es kam kein Vorschlag`);
+    assert.equal(r, null,
+      `Abstand ${f.g} ist ein Gleichstand mit der Schwelle ${f.g} und hat trotzdem `
+      + `einen Vorschlag erzeugt: ${JSON.stringify(r)}`);
+  });
+
+  it('knapp DARUEBER wird es laut', () => {
+    const sb = sandkasten(KONS, {});
+    const f = fall(SCHWELLEN.MIN_GAP + 1);
+    const r = sb.MostConsistencyBuilder._internals.alternativVorschlag(f.karte, 2);
+    assert.ok(r, `Abstand ${f.g + 1} liegt ueber der Schwelle ${f.g}, `
+      + 'es kam kein Vorschlag');
     assert.equal(r.naive_count, 2);
     assert.equal(r.suggested_count, 3);
-    assert.equal(r.placement_gap, f.g);
+    assert.equal(r.placement_gap, f.g + 1);
     assert.equal(r.direction, 'up');
   });
 

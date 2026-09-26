@@ -238,6 +238,18 @@ var TURNIER_KURZ = [
 ];
 function kurzTurnier(name) {
     var t = String(name || 'ein Turnier').trim();
+    /* DER ANHANG DER QUELLE GEHOERT NICHT ZUM NAMEN (26.09.2026).
+     *
+     * Limitless haengt an jeden Turniernamen seinen eigenen: „Regional
+     * Baltimore, MD – Limitless". Live gemessen ergab das im Kicker
+     * „BASIC BOX · REGIONAL BALTIMORE, MD – LIM…" — 59 Zeichen in einer
+     * Zeile, die 40 fasst, und das Datum fiel vom Bild.
+     *
+     * Weg kommt zweierlei: der Anhang „– Limitless" und die
+     * Bundesstaats-Abkuerzung hinter dem Komma. Beides sagt dem Leser
+     * eines Posts nichts, was der Ortsname nicht schon sagt. */
+    t = t.replace(/\s*[\u2013\u2014-]\s*Limitless\s*$/i, '').trim();
+    t = t.replace(/,\s*[A-Z]{2}$/, '').trim();
     for (var i = 0; i < TURNIER_KURZ.length; i++) {
         if (TURNIER_KURZ[i][0].test(t)) {
             return t.replace(TURNIER_KURZ[i][0], TURNIER_KURZ[i][1]).trim();
@@ -257,6 +269,28 @@ function fussZeile(vorn, hinten) {
     /* `hinten` traegt den Nenner und wird nie gekuerzt. */
     var platz = FUSS_MAX - String(hinten).length - 3;
     return passtIn(vorn, Math.max(6, platz)) + ' · ' + hinten;
+}
+
+/* DER KICKER FASST VIERZIG ZEICHEN — GEMESSEN, NICHT GESCHAETZT.
+ *
+ * `malKopf` in posts/index.html sperrt den Kicker (jedes Zeichen mit
+ * einem Leerzeichen dahinter), verkleinert ihn von 24 px bis 15 px und
+ * schneidet dann bei 660 px ab. Am 26.09.2026 live an
+ * thedipidis.app/posts/ mit der echten Schrift nachgemessen:
+ *
+ *     40 Zeichen -> 652 px bei 15 px   passt
+ *     42 Zeichen -> 685 px bei 15 px   abgeschnitten
+ *
+ * Gefunden wurde die Grenze, weil sie gerissen war: „MEGA EXCADRILL ·
+ * TOP 8 · LAST 7 DAYS · O." stand im Bild, und beim Major fiel das
+ * Datum ganz weg. Sie steht jetzt neben FUSS_MAX, damit die naechste
+ * Quelle sie nicht wieder selbst herausfinden muss. */
+var KICKER_MAX = 40;
+function kickerZeile(vorn, hinten) {
+    if (!hinten) return passtIn(String(vorn || ''), KICKER_MAX);
+    if (!vorn) return passtIn(String(hinten), KICKER_MAX);
+    var platz = KICKER_MAX - String(hinten).length - 3;
+    return passtIn(String(vorn), Math.max(6, platz)) + ' · ' + hinten;
 }
 function kurzDatum(iso) {
     var m = String(iso || '').match(/(\d{4})-(\d{2})-(\d{2})/);
@@ -2007,8 +2041,22 @@ function uebergabeScheibe(paket, standName) {
     return turnierScheibe(paket);
 }
 
+/* NICHT MEHR IM WAEHLER (26.09.2026) — ABER NICHT TOT.
+ *
+ * Seit der Kaskade waehlt niemand mehr „From the app": der Weg heisst
+ * jetzt Decks → My decks bzw. Battle Journal → Turnier, und beide rufen
+ * dieselben Bauer (deckScheibe/turnierScheibe) auf. Die zwei Rezepte
+ * bleiben trotzdem stehen, weil sie in der Gruppe „Mine" von
+ * tests/unit/test-post-quellen.js und
+ * tests/unit/test-post-hashtags-und-filter.js mitlaufen: die beiden
+ * Dateien gehen ALLE Rezepte durch und halten sie gegen die Hausregeln
+ * (Nenner in der Fusszeile, Breite der Wertspalte, Hashtags). Ohne sie
+ * liefe keine dieser Pruefungen mehr ueber ein Deck oder ein Turnier.
+ * `gruppe: 'Mine'` steht in keinem Hauptfilter — sie sind also
+ * erreichbar fuer die Zusicherungen und unerreichbar im Waehler, und
+ * genau das ist gewollt. */
 REZEPTE['uebergabe'] = {
-    name: 'From the app (deck / tournament)',
+    name: 'A handed-over deck or tournament (tests only)',
     gruppe: 'Mine',
     groesse: 'local',
     lade: function () {
@@ -2176,7 +2224,10 @@ function fremdeListeScheibe(j, L, opt) {
         ohneRang: true,
         listeKopf: 'Copies',
         listeKopfLinks: 'Card',
-        kicker: [archetyp, opt.kicker].filter(Boolean).join(' · '),
+        /* OHNE DEN ARCHETYP. Er steht gross als Titel direkt darunter —
+           zweimal derselbe Name kostete die Zeichen, an denen dann das
+           Datum fehlte (live gemessen 26.09.2026). */
+        kicker: passtIn(String(opt.kicker || archetyp), KICKER_MAX),
         titel: opt.titel || archetyp || 'Decklist',
         fuss: fussTeile.join(' · '),
         caption: (archetyp || 'This deck') + ' — ' + platzWort(L.platz)
@@ -2365,7 +2416,7 @@ function majorArchetypen() {
                                 },
                                 {
                                     archetyp: a,
-                                    kicker: kurzTurnier(m.name) + ' · ' + m.datum,
+                                    kicker: kickerZeile(kurzTurnier(m.name), m.datum),
                                     titel: a, turnier: m.name,
                                     /* „4th" allein ist keine Aussage. Beim
                                        Major nennt die Datei die Zahl der
@@ -2628,6 +2679,9 @@ window.DsPostQuellen = {
     tausend: tausend,
     kurzTurnier: kurzTurnier,
     MAX: MAX,
+    FUSS_MAX: FUSS_MAX,
+    KICKER_MAX: KICKER_MAX,
+    kickerZeile: kickerZeile,
     liste: function () {
         return Object.keys(REZEPTE).map(function (id) {
             var r = REZEPTE[id];

@@ -536,6 +536,8 @@
         const goingLabel = battleJournalText('bj.turnOrder', 'Going');
         const resultLabel = battleJournalText('bj.result', 'Result');
         const headerLabel = battleJournalText('bj.gameDetails', 'Game Details');
+        const noShowShort = battleJournalText('bj.noshowShort', 'N');
+        const noShowTitle = battleJournalText('bj.noshowToggleTitle', 'No-Show — Gegner nicht erschienen');
         const brickTitle = battleJournalText('bj.brickToggleTitle', 'Brick (Pech-Spiel)');
         const mulliganTitle = battleJournalText('bj.mulliganToggleTitle', 'Mulligan in diesem Game');
         const notesPlaceholder = battleJournalText('bj.gameNotesPlaceholder', 'Notiz zu diesem Game...');
@@ -565,10 +567,11 @@
                             <button type="button" class="battle-journal-choice" data-field="game${i}Turn" data-value="first" onclick="setGameChoice(${i},'turn','first')">${escapeHtml(firstLabel)}</button>
                             <button type="button" class="battle-journal-choice" data-field="game${i}Turn" data-value="second" onclick="setGameChoice(${i},'turn','second')">${escapeHtml(secondLabel)}</button>
                         </div>
-                        <div class="battle-journal-choice-group battle-journal-choice-group-result">
+                        <div class="battle-journal-choice-group battle-journal-choice-group-result battle-journal-choice-group-vier">
                             <button type="button" class="battle-journal-choice battle-journal-choice-win" data-field="game${i}Result" data-value="win" onclick="setGameChoice(${i},'result','win')">W</button>
                             <button type="button" class="battle-journal-choice battle-journal-choice-loss" data-field="game${i}Result" data-value="loss" onclick="setGameChoice(${i},'result','loss')">L</button>
                             <button type="button" class="battle-journal-choice battle-journal-choice-tie" data-field="game${i}Result" data-value="tie" onclick="setGameChoice(${i},'result','tie')">T</button>
+                            <button type="button" class="battle-journal-choice battle-journal-choice-noshow" data-field="game${i}Result" data-value="noshow" onclick="setGameChoice(${i},'result','noshow')" title="${escapeHtml(noShowTitle)}" aria-label="${escapeHtml(noShowTitle)}">${escapeHtml(noShowShort)}</button>
                         </div>
                     </div>${extrasHtml}
                 </div>`;
@@ -637,11 +640,46 @@
         }
     }
 
+    /* ── No-Show ──────────────────────────────────────────────────
+     *
+     * Ein Sieg, weil der Gegner nicht erschienen ist, zaehlt fuers
+     * TURNIERERGEBNIS wie jeder andere Sieg — drei Punkte. Ueber das
+     * MATCHUP sagt er nichts: es wurde keine Partie gespielt. Wer ihn
+     * in die Siegquote gegen ein Deck einrechnet, macht dieses Deck
+     * besser, als es ist.
+     *
+     * Deshalb gibt es genau zwei Fragen, und sie werden hier einmal
+     * beantwortet statt an neun Fundstellen einzeln:
+     *
+     *   alsSiegGewertet(r)  — zaehlt das fuer die Bilanz als Sieg?
+     *   nurGespielte(liste) — was darf ueber ein Matchup aussagen?
+     *
+     * Die Gefahr sitzt in der Form `if (win) … else if (loss) … else
+     * tie` — die steht an neun Stellen, und ein neuer Wert landet dort
+     * still im Unentschieden. Jede dieser Stellen filtert jetzt vorher
+     * oder fragt ausdruecklich. */
+    var NO_SHOW = 'noshow';
+    function istNoShow(e) {
+        if (!e) return false;
+        return (typeof e === 'string' ? e : e.result) === NO_SHOW;
+    }
+    function alsSiegGewertet(result) {
+        return result === 'win' || result === NO_SHOW;
+    }
+    function nurGespielte(entries) {
+        return (Array.isArray(entries) ? entries : []).filter(function (e) {
+            return !istNoShow(e);
+        });
+    }
+
     function deriveOverallResult(games) {
         if (!games || games.length === 0) return { turnOrder: '', result: '' };
         // Only consider games that have a result filled in
         const filled = games.filter(g => g.result);
         if (filled.length === 0) return { turnOrder: games[0]?.turnOrder || '', result: '' };
+        // Ein No-Show heisst: es wurde nicht gespielt. Dann ist das ganze
+        // Match ein No-Show, egal was in den anderen Zeilen steht.
+        if (filled.some(istNoShow)) return { turnOrder: games[0]?.turnOrder || '', result: NO_SHOW };
         if (filled.length === 1) return { turnOrder: games[0]?.turnOrder || '', result: filled[0].result };
         // BO3: 2 wins/losses = decisive, otherwise derive from what's filled
         let wins = 0, losses = 0;
@@ -721,12 +759,15 @@
             .slice(-BATTLE_JOURNAL_MAX_PREVIEW)
             .reverse()
             .map(entry => {
-                const resultClass = entry.result === 'win' ? 'is-win' : (entry.result === 'loss' ? 'is-loss' : 'is-tie');
-                const resultText = entry.result === 'win'
-                    ? battleJournalText('bj.win', 'Win')
-                    : entry.result === 'loss'
-                        ? battleJournalText('bj.loss', 'Loss')
-                        : battleJournalText('bj.tie', 'Tie');
+                const resultClass = istNoShow(entry) ? 'is-noshow'
+                    : (entry.result === 'win' ? 'is-win' : (entry.result === 'loss' ? 'is-loss' : 'is-tie'));
+                const resultText = istNoShow(entry)
+                    ? battleJournalText('bj.noshow', 'No-Show')
+                    : entry.result === 'win'
+                        ? battleJournalText('bj.win', 'Win')
+                        : entry.result === 'loss'
+                            ? battleJournalText('bj.loss', 'Loss')
+                            : battleJournalText('bj.tie', 'Tie');
                 const turnText = entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : battleJournalText('bj.secondShort', '2nd');
                 const bestOfText = entry.bestOf === 'bo3' ? 'BO3' : 'BO1';
                 const tournamentPart = entry.tournamentName ? `${escapeHtml(entry.tournamentName)} · ` : '';
@@ -1282,12 +1323,14 @@
                 if (g.result === 'win') return 'W';
                 if (g.result === 'loss') return 'L';
                 if (g.result === 'tie') return 'T';
+                if (istNoShow(g)) return 'N';
                 return '?';
             }).join('');
         } else {
             if (entry.result === 'win') resultStr = 'W';
             else if (entry.result === 'loss') resultStr = 'L';
             else if (entry.result === 'tie') resultStr = 'T';
+            else if (istNoShow(entry)) resultStr = 'N';
             else resultStr = '?';
         }
         const opponent = entry.opponentArchetype || 'Unknown';
@@ -1389,14 +1432,24 @@
         if (filterType) filtered = filtered.filter(e => (e.tournamentType || '') === filterType);
 
         // Stats
-        const totalW = filtered.filter(e => e.result === 'win').length;
-        const totalL = filtered.filter(e => e.result === 'loss').length;
-        const totalT = filtered.filter(e => e.result === 'tie').length;
+        //
+        // W/L/T sind die GESPIELTEN Ergebnisse, No-Show steht daneben
+        // und die Quote rechnet nur ueber gespielte Partien. Ein Sieg
+        // am gruenen Tisch gehoert in die Turnierbilanz (die steht
+        // weiter unten je Turnier), nicht in eine Siegquote.
+        const gespielt = nurGespielte(filtered);
+        const totalW = gespielt.filter(e => e.result === 'win').length;
+        const totalL = gespielt.filter(e => e.result === 'loss').length;
+        const totalT = gespielt.filter(e => e.result === 'tie').length;
+        const totalN = filtered.length - gespielt.length;
         const total = filtered.length;
         // 0 von 0 Spielen ist nicht 0 %, sondern undefiniert. Der leere Journal
         // zeigte "0 % Win Rate" — ein neuer Nutzer liest das als "du verlierst
         // alles", bevor er das erste Match eingetragen hat.
-        const winRateLabel = total > 0 ? `${Math.round((totalW / total) * 100)}%` : '—';
+        const winRateLabel = gespielt.length > 0 ? `${Math.round((totalW / gespielt.length) * 100)}%` : '—';
+        const noShowKachel = totalN > 0
+            ? `<div class="bj-history-stat is-noshow" title="${escapeHtml(battleJournalText('bj.noshowHint', 'Gewonnen, weil der Gegner nicht erschienen ist — zaehlt nicht in die Quote.'))}"><strong>${totalN}</strong><span>${escapeHtml(battleJournalText('bj.noshow', 'No-Show'))}</span></div>`
+            : '';
 
         if (statsEl) {
             statsEl.innerHTML = `
@@ -1404,6 +1457,7 @@
                 <div class="bj-history-stat is-win"><strong>${totalW}</strong><span>${battleJournalText('bj.win', 'Win')}</span></div>
                 <div class="bj-history-stat is-loss"><strong>${totalL}</strong><span>${battleJournalText('bj.loss', 'Loss')}</span></div>
                 <div class="bj-history-stat is-tie"><strong>${totalT}</strong><span>${battleJournalText('bj.tie', 'Tie')}</span></div>
+                ${noShowKachel}
                 <div class="bj-history-stat" title="${escapeHtml(bjQuotenHinweis(BJ_KONVENTION))}" data-quote-konvention="${BJ_KONVENTION}"><strong>${winRateLabel}</strong><span>${escapeHtml(bjMitQuote(battleJournalText('bj.histWinRate', '{quote}'), BJ_KONVENTION))}</span></div>
             `;
         }
@@ -1446,15 +1500,19 @@
             });
 
             const metaEntries = Object.values(tournaments).flat();
-            const mW = metaEntries.filter(e => e.result === 'win').length;
+            // Bilanz, nicht Matchup: ein No-Show ist hier ein Sieg (drei
+            // Punkte), wird aber daneben ausgewiesen, damit niemand die
+            // Zahl fuer gespielte Siege haelt.
+            const mW = metaEntries.filter(e => alsSiegGewertet(e.result)).length;
             const mL = metaEntries.filter(e => e.result === 'loss').length;
             const mT = metaEntries.filter(e => e.result === 'tie').length;
+            const mN = metaEntries.filter(istNoShow).length;
 
             html += `<div class="bj-meta-folder">
                 <div class="bj-meta-folder-header" onclick="this.parentElement.classList.toggle('is-collapsed')">
                     <span class="bj-meta-folder-icon"></span>
                     <span class="bj-meta-folder-label">${escapeHtml(metaLabel)}</span>
-                    <span class="bj-meta-folder-stats">${mW}W ${mL}L ${mT}T</span>
+                    <span class="bj-meta-folder-stats">${mW}W ${mL}L ${mT}T${mN > 0 ? ` ${mN}N` : ''}</span>
                     <span class="bj-meta-folder-chevron">▾</span>
                 </div>
                 <div class="bj-meta-folder-content">`;
@@ -1462,9 +1520,10 @@
             tournNames.forEach(tournKey => {
                 const entries = tournaments[tournKey];
                 const tournLabel = tournKey || battleJournalText('bj.noTournament', 'No Tournament');
-                const tW = entries.filter(e => e.result === 'win').length;
+                const tW = entries.filter(e => alsSiegGewertet(e.result)).length;
                 const tL = entries.filter(e => e.result === 'loss').length;
                 const tT = entries.filter(e => e.result === 'tie').length;
+                const tN = entries.filter(istNoShow).length;
                 const tTotal = entries.length;
                 const tWinRate = tTotal > 0 ? Math.round((tW / tTotal) * 100) : 0;
                 const safeTournKey = escapeHtml(tournKey).replace(/'/g, "\\'");
@@ -1530,9 +1589,12 @@
     }
 
     function _buildHistoryItemHtml(entry, locale) {
-        const resultClass = entry.result === 'win' ? 'is-win' : (entry.result === 'loss' ? 'is-loss' : 'is-tie');
-        const resultEmoji = entry.result === 'win' ? 'W' : (entry.result === 'loss' ? 'L' : 'T');
-        const resultText = entry.result === 'win' ? battleJournalText('bj.win', 'Win')
+        const resultClass = istNoShow(entry) ? 'is-noshow'
+            : (entry.result === 'win' ? 'is-win' : (entry.result === 'loss' ? 'is-loss' : 'is-tie'));
+        const resultEmoji = istNoShow(entry) ? battleJournalText('bj.noshowShort', 'N')
+            : (entry.result === 'win' ? 'W' : (entry.result === 'loss' ? 'L' : 'T'));
+        const resultText = istNoShow(entry) ? battleJournalText('bj.noshow', 'No-Show')
+            : entry.result === 'win' ? battleJournalText('bj.win', 'Win')
             : entry.result === 'loss' ? battleJournalText('bj.loss', 'Loss')
             : battleJournalText('bj.tie', 'Tie');
         const turnText = entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : (entry.turnOrder === 'second' ? battleJournalText('bj.secondShort', '2nd') : '');
@@ -1622,7 +1684,7 @@
                 if (!g) return;
                 const tag = `G${i + 1}`;
                 const turn = g.turnOrder === 'first' ? '1st' : (g.turnOrder === 'second' ? '2nd' : '\u2013');
-                const res  = g.result === 'win' ? 'W' : (g.result === 'loss' ? 'L' : (g.result === 'tie' ? 'T' : '\u2013'));
+                const res  = g.result === 'win' ? 'W' : (g.result === 'loss' ? 'L' : (g.result === 'tie' ? 'T' : (istNoShow(g) ? 'N' : '\u2013')));
                 const brickMark = g.brick    ? ' \ud83e\uddf1' : '';
                 const mullMark  = g.mulligan ? ' \ud83d\udd04' : '';
                 const head = `${tag}: ${turn}/${res}${brickMark}${mullMark}`;
@@ -1661,9 +1723,12 @@
         const entries = journalGruppe(tournamentName, metaKey);
         if (entries.length === 0) return;
 
-        const wins = entries.filter(e => e.result === 'win').length;
+        // Das Turnierbild zeigt die BILANZ — dort zaehlt ein No-Show als
+        // Sieg, so wie ihn der Veranstalter gewertet hat.
+        const wins = entries.filter(e => alsSiegGewertet(e.result)).length;
         const losses = entries.filter(e => e.result === 'loss').length;
         const ties = entries.filter(e => e.result === 'tie').length;
+        const noShows = entries.filter(istNoShow).length;
         const total = entries.length;
         const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
 
@@ -1731,14 +1796,16 @@
         let y = HEADER_H + 4;
         entries.forEach((entry, idx) => {
             const size = rowSizes[idx];
-            const resultEmoji = entry.result === 'win' ? '\u2705' : (entry.result === 'loss' ? '\u274c' : '\ud83d\udfe1');
-            ctx.fillStyle = entry.result === 'win' ? 'rgba(39,174,96,0.15)' : (entry.result === 'loss' ? 'rgba(231,76,60,0.12)' : 'rgba(243,156,18,0.12)');
+            const resultEmoji = alsSiegGewertet(entry.result) ? '\u2705' : (entry.result === 'loss' ? '\u274c' : '\ud83d\udfe1');
+            ctx.fillStyle = istNoShow(entry) ? 'rgba(148,163,184,0.16)'
+                : (entry.result === 'win' ? 'rgba(39,174,96,0.15)' : (entry.result === 'loss' ? 'rgba(231,76,60,0.12)' : 'rgba(243,156,18,0.12)'));
             ctx.fillRect(12, y - 16, W - 24, size.h - 8);
             ctx.fillStyle = '#e2e8f0';
             ctx.font = ROW_FONT;
             const brickMark = entry.brick    ? '  \ud83e\uddf1' : '';
             const mullMark  = entry.mulligan ? '  \ud83d\udd04' : '';
-            ctx.fillText(`${resultEmoji}  ${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}${brickMark}${mullMark}`, 20, y + 4);
+            const noShowMark = istNoShow(entry) ? '  \u00b7 No-Show' : '';
+            ctx.fillText(`${resultEmoji}  ${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}${brickMark}${mullMark}${noShowMark}`, 20, y + 4);
 
             if (withDetails && size.detailLines.length) {
                 ctx.fillStyle = '#cbd5e0';
@@ -1890,6 +1957,7 @@
     function _renderMASummary(entries) {
         const el = document.getElementById('maSummaryStats');
         if (!el) return;
+        entries = nurGespielte(entries);
         const w = entries.filter(e => e.result === 'win').length;
         const l = entries.filter(e => e.result === 'loss').length;
         const t = entries.filter(e => e.result === 'tie').length;
@@ -1909,6 +1977,7 @@
     }
 
     function _renderMAHeatmap(entries) {
+        entries = nurGespielte(entries);
         const wrap = document.getElementById('maHeatmapWrap');
         if (!wrap) return;
 
@@ -2028,6 +2097,7 @@
     }
 
     function _renderMARankings(entries) {
+        entries = nurGespielte(entries);
         const bestEl = document.getElementById('maRankBest');
         const worstEl = document.getElementById('maRankWorst');
         if (!bestEl || !worstEl) return;
@@ -2073,6 +2143,7 @@
     }
 
     function _renderMABarList(entries) {
+        entries = nurGespielte(entries);
         const container = document.getElementById('maBarList');
         if (!container) return;
 
@@ -2549,6 +2620,8 @@
         const games = Array.isArray(savedGames) ? savedGames : [];
         const firstLabel  = battleJournalText('bj.first', 'First');
         const secondLabel = battleJournalText('bj.second', 'Second');
+        const noShowShort   = battleJournalText('bj.noshowShort', 'N');
+        const noShowTitle   = battleJournalText('bj.noshowToggleTitle', 'No-Show — Gegner nicht erschienen');
         const brickTitle    = battleJournalText('bj.brickToggleTitle', 'Brick (Pech-Spiel)');
         const mulliganTitle = battleJournalText('bj.mulliganToggleTitle', 'Mulligan in diesem Game');
         const notesPh       = battleJournalText('bj.gameNotesPlaceholder', 'Notiz zu diesem Game...');
@@ -2574,10 +2647,11 @@
                             <button type="button" class="battle-journal-choice${sel(turn,'first')}"  data-edit-game="${i}" data-edit-field="Turn"   data-edit-value="first"  onclick="setEditGameChoice(${i},'turn','first')">${escapeHtml(firstLabel)}</button>
                             <button type="button" class="battle-journal-choice${sel(turn,'second')}" data-edit-game="${i}" data-edit-field="Turn"   data-edit-value="second" onclick="setEditGameChoice(${i},'turn','second')">${escapeHtml(secondLabel)}</button>
                         </div>
-                        <div class="battle-journal-choice-group battle-journal-choice-group-result">
+                        <div class="battle-journal-choice-group battle-journal-choice-group-result battle-journal-choice-group-vier">
                             <button type="button" class="battle-journal-choice battle-journal-choice-win${sel(res,'win')}"   data-edit-game="${i}" data-edit-field="Result" data-edit-value="win"  onclick="setEditGameChoice(${i},'result','win')">W</button>
                             <button type="button" class="battle-journal-choice battle-journal-choice-loss${sel(res,'loss')}" data-edit-game="${i}" data-edit-field="Result" data-edit-value="loss" onclick="setEditGameChoice(${i},'result','loss')">L</button>
                             <button type="button" class="battle-journal-choice battle-journal-choice-tie${sel(res,'tie')}"   data-edit-game="${i}" data-edit-field="Result" data-edit-value="tie"  onclick="setEditGameChoice(${i},'result','tie')">T</button>
+                            <button type="button" class="battle-journal-choice battle-journal-choice-noshow${sel(res,'noshow')}" data-edit-game="${i}" data-edit-field="Result" data-edit-value="noshow" onclick="setEditGameChoice(${i},'result','noshow')" title="${escapeHtml(noShowTitle)}" aria-label="${escapeHtml(noShowTitle)}">${escapeHtml(noShowShort)}</button>
                         </div>
                     </div>
                     <div class="battle-journal-game-extras">
@@ -2827,6 +2901,7 @@
         return liste;
     }
     window._bjGetGroup = journalGruppe;
+    window._bjNoShow = { NO_SHOW, istNoShow, alsSiegGewertet, nurGespielte, deriveOverallResult };
     window.copyJournalEntry = copyJournalEntry;
     window.copyAllJournalEntries = copyAllJournalEntries;
     window.clearAllJournalEntries = clearAllJournalEntries;
@@ -3070,6 +3145,10 @@
         all.forEach(function(e) {
             if (!e || !e.opponentArchetype) return;
             if (excludeBricks && e.brick) return;
+            // Ein No-Show sagt nichts ueber das Matchup — er wurde nicht
+            // gespielt. Ohne diese Zeile landet er unten im `else` und
+            // zaehlt als Unentschieden.
+            if (istNoShow(e)) return;
             if (_normDeck(e.ownDeck) !== normOwn) return;
             const opp = e.opponentArchetype;
             if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0 };

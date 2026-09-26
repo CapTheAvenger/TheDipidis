@@ -239,8 +239,12 @@ pruefe('PTCGL: Import- und Export-Knopf tragen verschiedene Beschriftungen', () 
 // 6. Battle Journal: keine Quote ohne Spiele.
 // ---------------------------------------------------------------------------
 pruefe('Journal: zeigt bei 0 Spielen "—" statt "0 %"', () => {
+    // 26.09.2026: der Nenner heisst nicht mehr `total`, sondern
+    // `gespielt.length` — seit dem No-Show sind eingetragene Matches und
+    // gespielte Partien nicht mehr dasselbe. Die Zusage bleibt dieselbe:
+    // ohne gespielte Partie gibt es keine Quote, sondern einen Strich.
     const bj = read('js/battle-journal.js');
-    assert.ok(/const winRateLabel = total > 0 \?[^:]*: '—'/.test(bj),
+    assert.ok(/const winRateLabel = gespielt\.length > 0 \?[^:]*: '—'/.test(bj),
         '0/0 wird weiterhin als 0 % dargestellt');
 });
 

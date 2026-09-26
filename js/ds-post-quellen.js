@@ -1783,7 +1783,19 @@ function metaCallScheiben(d, titel, standName) {
     if (!feld.length) throw new Error('The handover carries no field.');
     var fuss = metaCallFuss(d);
     var kicker = [d.art, d.format].filter(Boolean).join(' \u00b7 ');
-    var eigen = standName === 'eigen';
+    /* „MY CALL" NUR, WENN ES EINEN GIBT (Pruefagent, 26.09.2026).
+     *
+     * `staende.eigen` wird auch dann gerechnet, wenn im Szenario keine
+     * einzige eigene Schaetzung steckt — dann stehen dort die Zahlen des
+     * Modells. Die Spalte hiess trotzdem „my call %", und der Satz
+     * darunter „The field I expect". Das Kennzeichen liegt seit dem
+     * 25.09.2026 im Paket (`eigeneSchaetzungen`) und wurde nur fuer die
+     * Quellenauswahl benutzt; hier entscheidet es jetzt mit.
+     *
+     * Fehlt das Kennzeichen ganz (aeltere Uebergabe), gilt der Stand als
+     * eigen — so, wie es vorher war. */
+    var eigen = standName === 'eigen'
+        && (d.eigeneSchaetzungen === undefined || !!d.eigeneSchaetzungen);
     var deckNamen = Object.keys(stand.decks || {});
     var vorgabe = (d.meinDeck && stand.decks && stand.decks[d.meinDeck])
         ? d.meinDeck : (deckNamen[0] || '');
@@ -2169,6 +2181,18 @@ function postListen() {
         _listenVersprechen = hole('data/post_decklists.json', true).then(function (j) {
             if (!j || j.v !== 1) throw new Error('post_decklists.json: unbekannte Fassung');
             return j;
+        }, function (e) {
+            /* EIN FEHLSCHLAG WIRD NICHT GEMERKT (Pruefagent, 26.09.2026).
+             *
+             * Vorher blieb das abgewiesene Versprechen stehen: ein
+             * Funkloch beim ersten Antippen von „Most successful lists",
+             * und BEIDE Listen-Ketten waren bis zum Neuladen tot — mit
+             * einer Meldung, die auf die Datei zeigte und nicht auf das
+             * Netz. Am Telefon, dem bestellten Fall, ist das der
+             * Normalfall und nicht die Ausnahme. `hole()` cachet aus
+             * demselben Grund gar nichts. */
+            _listenVersprechen = null;
+            throw e;
         });
     }
     return _listenVersprechen;
@@ -2213,27 +2237,51 @@ function fremdeListeScheibe(j, L, opt) {
     var karten = listenKarten(j, L.karten);
     var gesamt = karten.reduce(function (s, k) { return s + k.anzahl; }, 0);
     var archetyp = String(opt.archetyp || L.archetyp || '');
-    var fussTeile = [platzWort(L.platz) + (opt.von ? ' of ' + tausend(opt.von) : '')];
-    if (L.feld) fussTeile.push(tausend(L.feld) + ' players');
-    fussTeile.push(bilanzWort(L));
-    if (L.datum) fussTeile.push(L.datum);
+
+    /* EINE FELDGROESSE, NICHT ZWEI (Pruefagent, 26.09.2026).
+     *
+     * Bis heute rechnete die Fusszeile mit `opt.von` und die
+     * Bildunterschrift mit `L.feld`. Beim Major ist `L.feld` null — die
+     * Fusszeile trug also „1st of 559", die Unterschrift „1st at
+     * Regional Baltimore" OHNE Zahl. Und genau die Unterschrift ist der
+     * Text, der mit nach Instagram geht.
+     *
+     * Der Nenner ist jetzt EIN Wert, und er steht in beiden. */
+    var feld = Number(opt.von || L.feld || 0) || 0;
+    var platz = platzWort(L.platz) + (feld ? ' of ' + tausend(feld) : '');
+
+    /* DIE FUSSZEILE GEHT DURCH DEN RIEGEL.
+     *
+     * `fussZeile` kuerzt vorne und laesst hinten stehen, was zaehlt —
+     * `join(' · ')` tat das nicht. Gemessen: „1st of 1,024 · 1,024
+     * players · 10-1-1 · 2026-09-19" sind 50 Zeichen bei 48 Platz, und
+     * malFuss schneidet das Datum ab. Heute fehlten zwei Zeichen. */
+    var vorn = [platz];
+    /* Beim Major ist `opt.von` schon die Feldgroesse; eine zweite
+       Spielerzahl daneben waere dieselbe Zahl zweimal. */
+    if (L.feld && !opt.von) vorn.push(tausend(L.feld) + ' players');
+    vorn.push(bilanzWort(L));
+
     return {
         zeilen: zeilenText(karten.slice(0, MAX).map(function (k) {
             return [k.name, k.anzahl + '×'];
         })),
         ohneRang: true,
-        listeKopf: 'Copies',
+        /* WIE VIELE FEHLEN, GEHOERT IN DEN SPALTENKOPF — die Hausregel
+           ueber MAX. Das Bild zeigt acht von 28 Zeilen; ohne die 28
+           liest sich das wie die ganze Liste. */
+        listeKopf: 'Copies (' + Math.min(MAX, karten.length) + ' of ' + karten.length + ')',
         listeKopfLinks: 'Card',
         /* OHNE DEN ARCHETYP. Er steht gross als Titel direkt darunter —
            zweimal derselbe Name kostete die Zeichen, an denen dann das
            Datum fehlte (live gemessen 26.09.2026). */
         kicker: passtIn(String(opt.kicker || archetyp), KICKER_MAX),
         titel: opt.titel || archetyp || 'Decklist',
-        fuss: fussTeile.join(' · '),
-        caption: (archetyp || 'This deck') + ' — ' + platzWort(L.platz)
-            + (L.feld ? ' of ' + tausend(L.feld) : '')
+        fuss: fussZeile(vorn.join(' · '), L.datum || ''),
+        caption: (archetyp || 'This deck') + ' — ' + platz
             + ' at ' + (L.turnier || opt.turnier || 'the event')
-            + ' (' + bilanzWort(L) + '), ' + karten.length + ' different cards.',
+            + ' (' + bilanzWort(L) + '), ' + karten.length + ' different cards, '
+            + gesamt + ' in total.',
         tags: hashtags(['decklist', 'pokemontcg']
             .concat(archetyp ? [archetyp] : [])
             .concat(karten.slice(0, 4).map(function (k) { return k.name; }))),
@@ -2339,6 +2387,14 @@ function siebenArchetypen() {
          * dahinter wirklich interessant ist — das beste Ergebnis. */
         namen.sort(function (a, b) { return a.localeCompare(b, 'en'); });
         var sw = ((j.fenster || {}).erfolg_platz) || 0;
+        /* DAS FENSTER IST DATIERT, NICHT BENANNT. Der Kopf von
+           scripts/build_post_decklists.py verlangt genau das: die Datei
+           entsteht beim Deploy, „letzte 7 Tage" altert mit jedem Tag
+           danach. Ein fuenf Tage alter Deploy schriebe sonst „last 7
+           days" ueber ein Fenster, das vor zwoelf Tagen endete. */
+        var f = j.fenster || {};
+        var spanne = (f.von && f.bis) ? (kurzDatum(f.von) + '–' + kurzDatum(f.bis))
+            : 'last 7 days';
         return namen.map(function (a) {
             var b = j.sieben_tage[a][0];
             return {
@@ -2360,8 +2416,9 @@ function siebenArchetypen() {
                         lade: function () {
                             return Promise.resolve(fremdeListeScheibe(j, L, {
                                 archetyp: a,
-                                kicker: (sw ? 'Top ' + sw + ' · ' : '')
-                                    + 'last 7 days · online',
+                                kicker: kickerZeile(
+                                    (sw ? 'Top ' + sw + ' · ' : '') + 'online',
+                                    spanne),
                                 titel: a,
                                 turnier: L.turnier
                             }));
@@ -2402,7 +2459,7 @@ function majorArchetypen() {
                    32." Die Grenze steckt in der Datei (MAJOR_PLAETZE) —
                    hier steht sie in der Frage, damit sie im Bild sichtbar
                    wird und nicht stumm wirkt. */
-                frage: 'Placement (top ' + (m.plaetze || 32) + ')',
+                frage: 'Placement' + (m.plaetze ? ' (top ' + m.plaetze + ')' : ''),
                 optionen: nach[a].map(function (L) {
                     return {
                         id: String(L.platz),
@@ -2418,12 +2475,15 @@ function majorArchetypen() {
                                     archetyp: a,
                                     kicker: kickerZeile(kurzTurnier(m.name), m.datum),
                                     titel: a, turnier: m.name,
-                                    /* „4th" allein ist keine Aussage. Beim
-                                       Major nennt die Datei die Zahl der
-                                       GEFUEHRTEN Platzierungen, nicht eine
-                                       Teilnehmerzahl — deshalb „of 559"
-                                       und nicht „559 players". */
-                                    von: m.gefuehrt || 0
+                                    /* „4th" allein ist keine Aussage — und
+                                       „4th of 559" war die FALSCHE Aussage:
+                                       559 ist die Zahl der eingereichten
+                                       Listen, das Feld hatte 3.119 Spieler
+                                       (Pruefagent, 26.09.2026). Der Nenner
+                                       kommt jetzt aus derselben Datei, aus
+                                       der die Events-Posts ihn nehmen. Ist
+                                       er nicht zu treffen, steht keiner da. */
+                                    von: m.feld || 0
                                 }));
                         }
                     };
@@ -2655,7 +2715,27 @@ function kaskade(pfad) {
                 return weiter(treffer, u || []);
             });
         }
-        return Promise.resolve({ stufen: stufen, blatt: treffer });
+        /* DER RANGWAECHTER GEHOERT AUF JEDEN WEG (Pruefagent, 26.09.2026).
+         *
+         * `rangPruefen` sass nur in `DsPostQuellen.lade` — dem Weg, den
+         * die Seite bis zur Kaskade ging. Ein Blatt, das sein `lade`
+         * selbst mitbringt, kam daran vorbei. Live nachgestellt: Meta
+         * Call → bearbeitete Prognose → „1 · The field" zeigte „Crustle
+         * 4.0 %" und „Mega Excadrill 4.0 %" mit den Rangziffern 06 und
+         * 07 darueber — das Bild behauptete eine Ordnung, die die Zahlen
+         * nicht hergeben. Genau der Fall, den
+         * tests/unit/test-post-quellen.js seit dem 04.09.2026 verbietet.
+         *
+         * Heute faengt jedes neue Blatt das mit `ohneRang: true` selbst
+         * ab. Das naechste ohne diese Zeile fiele still durch — deshalb
+         * steht der Waechter jetzt an der Stelle, durch die ALLE muessen. */
+        var blatt = {
+            id: treffer.id, name: treffer.name,
+            lade: function (p) {
+                return Promise.resolve(treffer.lade(p)).then(rangPruefen);
+            }
+        };
+        return Promise.resolve({ stufen: stufen, blatt: blatt });
     }
 
     return weiter(null, BAUM);

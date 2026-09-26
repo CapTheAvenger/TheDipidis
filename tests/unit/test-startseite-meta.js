@@ -52,7 +52,7 @@ describe('Startseite — die Meta-Ansicht empfaengt', () => {
         const klassen = cm[1].trim().split(/\s+/);
         assert.ok(klassen.includes('tab-content'), 'tab-content fehlt: ' + cm[1]);
         assert.ok(klassen.includes('active'), 'active fehlt: ' + cm[1]);
-        assert.match(HTML, /<div id="meta-analysis-hub" class="tab-content">/);
+        assert.match(HTML, /<div id="meta-analysis-hub" class="tab-content(?: fs-scale)?">/);
     });
 
     it('genau ein Reiter ist beim Laden aktiv', () => {

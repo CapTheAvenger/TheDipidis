@@ -1352,6 +1352,17 @@ function zahlLokal(wert, stellen) {
 }
 window.zahlLokal = zahlLokal;
 
+/* Die Sprachkennung der SEITE, nicht des Browsers (UI-6, 26.09.2026).
+ * Zwei Datumsangaben standen ohne Kennung: das Datum auf dem geteilten
+ * Meta-Call-Bild und die Zeitstempel im Aktivitaetsprotokoll der
+ * Testgruppen. Ohne Argument nimmt toLocaleDateString() die Sprache des
+ * Browsers — bei deutscher Seite und englischem Browser stand dann
+ * "9/26/2026" neben deutschem Text. */
+function seitenLocale() {
+    return (typeof getLang === 'function' && getLang() === 'en') ? 'en-US' : 'de-DE';
+}
+window.seitenLocale = seitenLocale;
+
 /* Die ZWEITE, engere Schreibweise: feste Nachkommastellen, deutsches
  * Dezimalkomma, KEIN Tausenderpunkt. Bis 10.09.2026 stand sie 29-mal
  * woertlich als `.toFixed(1)` gefolgt von `.replace('.', ',')` in js/

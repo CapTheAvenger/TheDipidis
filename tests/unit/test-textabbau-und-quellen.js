@@ -165,7 +165,7 @@ describe('Der Weg zur Erklaerung ist ein Klick', () => {
     });
 
     it('die Seite existiert wirklich und ist erreichbar', () => {
-        assert.match(HTML, /id="quellen" class="tab-content"/, 'der Reiter fehlt');
+        assert.match(HTML, /id="quellen" class="tab-content(?: fs-scale)?"/, 'der Reiter fehlt');
         assert.match(HTML, /id="quellenHost"/, 'der Platz fuer den Inhalt fehlt');
         assert.match(HTML, /id="menu-btn-quellen"/, 'kein Eintrag im Pokeball-Menue');
         assert.match(HTML, /js\/app-quellen\.js\?/, 'das Modul wird nicht geladen');

@@ -17,7 +17,7 @@
 .quellen-main {
     max-width: 62ch;
     margin: 0;
-    padding-bottom: var(--s-5, 32px);
+    padding-bottom: var(--s-8);
 }
 
 .qu-lead {

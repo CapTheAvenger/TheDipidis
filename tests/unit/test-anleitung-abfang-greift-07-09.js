@@ -118,11 +118,12 @@ function seite() {
 
 describe('B5/F8.5b — der Abfang greift wirklich, nicht nur im Stub', () => {
     it('die Anleitung haengt in #tutorial — sonst faende die Auswahl nichts', () => {
-        const reiter = HTML.indexOf('<div id="tutorial" class="tab-content">');
+        // seit UI-4 (26.09.2026) traegt jeder Reiter zusaetzlich fs-scale
+        const reiter = HTML.search(/<div id="tutorial" class="tab-content(?: fs-scale)?">/);
         assert.ok(reiter > -1, '#tutorial gibt es nicht mehr');
         const wirt = HTML.indexOf('id="tutorialHost"', reiter);
         assert.ok(wirt > reiter, '#tutorialHost steht nicht mehr hinter #tutorial');
-        const naechsterReiter = HTML.indexOf('class="tab-content"', reiter + 40);
+        const naechsterReiter = HTML.indexOf('class="tab-content', reiter + 40);
         assert.ok(naechsterReiter > wirt,
             'Der Wirt der Anleitung liegt nicht mehr INNERHALB von #tutorial. '
             + 'closest(\'#tutorial a[href="#"]\') findet dann nichts, der Klick setzt den '

@@ -2209,6 +2209,18 @@ function _anteilHinweis(card) {
             ? ('Dort im Schnitt ' + _kommaZahl(dort, 2) + ' Kopien.')
             : ('Averaging ' + _kommaZahl(dort, 2) + ' copies there.'));
     }
+    /* UI-8 (4), 26.09.2026: "bei durchschnittlich 3,2 Kopien fehlt die
+       Verteilung". Eine Verteilung je Kopienzahl fuehren die Kartendateien
+       NICHT — sie haben Summe, Listenzahl, Schnitt und das Maximum
+       (max_count). Gezeigt wird deshalb, was belegt ist: die Spanne von
+       einer bis zur hoechsten gespielten Kopienzahl. Mehr zu behaupten,
+       hiesse eine Verteilung zu erfinden. */
+    var hoechst = Number(card && (card.max_count != null ? card.max_count : card.maxCount)) || 0;
+    if (hoechst > 0 && dort > 0) {
+        teile.push(de
+            ? (hoechst === 1 ? 'Immer genau 1 Kopie.' : ('Gespielt werden 1 bis ' + hoechst + ' Kopien.'))
+            : (hoechst === 1 ? 'Always exactly 1 copy.' : ('Played at 1 to ' + hoechst + ' copies.')));
+    }
     teile.push(de
         ? ('Über alle Listen ' + _kommaZahl(gesamt, 2) + ' — das ist die Zahl auf der Kachel.')
         : ('Across all lists ' + _kommaZahl(gesamt, 2) + ' — the number on the tile.'));

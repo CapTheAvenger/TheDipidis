@@ -2439,7 +2439,7 @@
 }
 
 .tier-hero-card .archetype-rank-badge {
-    background-color: var(--dark-bg, #1a1a2e);
+    background-color: #1a1a2e;
     color: white;
     border-radius: 50%;
     width: 24px;

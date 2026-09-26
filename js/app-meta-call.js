@@ -11192,7 +11192,7 @@ window.MetaCall = (function () {
           <th class="mc-th-online" title="${esc(t('mc.headerOnlineTooltip'))}">${t('mc.headerOnline')}</th>
           <th class="mc-th-est" title="${esc(t('mc.headerPersonalTooltip'))}">${t('mc.headerPersonal')}</th>
           <th class="mc-th-final" title="${esc(t('mc.headerFinalTooltip'))}">${t('mc.headerFinal')}</th>
-          <th class="mc-th-players">${t('mc.headerPlayers')}</th>
+          <th class="mc-th-players" title="${esc(t('mc.tipPlayers'))}">${t('mc.headerPlayers')}</th>
           <th class="mc-th-enc" id="mc-th-enc" title="${esc(t('mc.headerAvgEncTooltip').replace('{n}', _settings.rounds))}">${t('mc.headerAvgEnc')} (${_settings.rounds} R.)</th>
         </tr>
       </thead>
@@ -12977,9 +12977,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         <thead><tr>
           <th>#</th>
           <th>${t('mc.recDeck')}</th>
-          <th>${esc(_zielKurz())}</th>
+          <th title="${esc(t('mc.tipRecZiel'))}">${esc(_zielKurz())}</th>
           <th title="${esc(_wrKonventionsTitel('mitUnentschieden'))}" data-hinweis="${esc(_wrKonventionsTitel('mitUnentschieden'))}">${esc(_wrKurzform(t('mc.recAvgWr')))}</th>
-          <th>${t('mc.recExpWins')}</th>
+          <th title="${esc(t('mc.tipRecExpWins'))}">${t('mc.recExpWins')}</th>
           <th class="mc-rec-toggle-th" aria-label="Why?"></th>
         </tr></thead>
         <tbody>${day2Rows}</tbody>
@@ -13412,7 +13412,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         && _activeInPersonSetCode
         && _currentSetUpper
         && _activeInPersonSetCode !== _currentSetUpper)
-      ? ` <span class="mc-predictor-banner-lagwindow" style="opacity:0.85;color:var(--tint-warn-ink);" title="${esc(t('mc.bannerLagWindowHelp').replace(/\{new\}/g, _currentSetUpper).replace(/\{old\}/g, _activeInPersonSetCode))}">${esc(t('mc.bannerLagWindow').replace('{new}', _currentSetUpper))}</span>`
+      ? ` <span class="mc-predictor-banner-lagwindow" style="color:var(--tint-warn-ink);" title="${esc(t('mc.bannerLagWindowHelp').replace(/\{new\}/g, _currentSetUpper).replace(/\{old\}/g, _activeInPersonSetCode))}">${esc(t('mc.bannerLagWindow').replace('{new}', _currentSetUpper))}</span>`
       : '';
     // Stale-cache canary (2026-06). Surfaces the newest scraped_at
     // timestamp we saw across the loaded labs CSV. If this displays
@@ -14466,7 +14466,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     ctx.fillText(BRAND_FOOTER + ' · Meta Call', 28, h - 16);
 
     ctx.textAlign = 'right';
-    ctx.fillText(new Date().toLocaleDateString(), w - 28, h - 16);
+    ctx.fillText(new Date().toLocaleDateString(window.seitenLocale ? window.seitenLocale() : 'de-DE'), w - 28, h - 16);
     ctx.textAlign = 'left';
   }
 

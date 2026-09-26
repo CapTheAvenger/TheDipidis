@@ -895,7 +895,7 @@
 .uv-tag2-block {
     margin-top: 14px;
     padding: 12px 14px;
-    border-top: 1px solid var(--line-2, rgba(0, 0, 0, 0.12));
+    border-top: 1px solid var(--line);
 }
 .uv-tag2-titel {
     font-size: 0.82em;

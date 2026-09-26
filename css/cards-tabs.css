@@ -769,3 +769,13 @@
         min-height: 24px !important;
     }
 }
+
+/* Herkunftszeile unter der Abdeckungsangabe der Kartendatenbank. Stand bis
+   26.09.2026 als style-Attribut im Skript (font-size: 0.85em) — dort kam
+   keine Regel der Schriftskala an ihr vorbei (UI-4: 9,3 px bei 390 px). */
+.card-database-coverage-quelle {
+    display: block;
+    font-weight: 400;
+    font-size: 0.85em;
+    opacity: 0.92;
+}

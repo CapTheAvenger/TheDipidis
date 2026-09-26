@@ -25,9 +25,9 @@
     margin-top: 8px;
     padding: 6px 10px;
     border-radius: 6px;
-    background: var(--warning-bg, #fff7ed);
-    color: var(--warning-text, #9a3412);
-    border: 1px solid var(--warning-border, #fed7aa);
+    background: var(--tint-warn);
+    color: var(--tint-warn-ink);
+    border: 1px solid color-mix(in srgb, var(--tint-warn-ink) 35%, transparent);
     font-size: .82rem;
     font-weight: 600;
 }
@@ -202,9 +202,9 @@
     color: var(--text-primary, #111827);
 }
 .pk-meldung.is-fehler {
-    background: var(--danger-bg, #fef2f2);
-    color: var(--danger-text, #991b1b);
-    border: 1px solid var(--danger-border, #fecaca);
+    background: var(--tint-bad);
+    color: var(--tint-bad-ink);
+    border: 1px solid color-mix(in srgb, var(--tint-bad-ink) 35%, transparent);
 }
 
 /* ── Vollbild mit dem Muster ──────────────────────────────────────── */
@@ -347,9 +347,9 @@
 }
 .pk-kopieren:focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
 .pk-kopieren.is-fehler {
-    border-color: var(--danger-border, #fecaca);
-    background: var(--danger-bg, #fef2f2);
-    color: var(--danger-text, #991b1b);
+    border-color: color-mix(in srgb, var(--tint-bad-ink) 35%, transparent);
+    background: var(--tint-bad);
+    color: var(--tint-bad-ink);
 }
 .pk-kopier-hinweis {
     font-size: .78rem;

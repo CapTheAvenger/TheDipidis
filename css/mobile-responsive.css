@@ -1225,6 +1225,65 @@
         font-size: var(--fs-xs);
     }
 
+    /* Siegertabelle der japanischen Majors (gefunden mit
+     * scripts/messe_schrift_kontrast.py, 26.09.2026, 390 px):
+     *  - die Kopfzeile "Date" stand WEISS auf #f8f9fa (1,05:1): die
+     *    allgemeine Regel `.tab-content table th:first-child` gibt der
+     *    ersten Spalte einen hellen Grund fuers Kleben, die Kopfzeile ist
+     *    aber dunkel mit weisser Schrift;
+     *  - die Kopfzellen ueberlagerten sich ("Tournament class" ueber
+     *    "Location"), weil thead mit table-layout: fixed feste Spalten
+     *    bekommt und `white-space: nowrap` den Text hinausschob;
+     *  - Kopf und Zellen lagen bei 9,35 px.
+     */
+    #city-league .city-league-sieger-tabelle thead th:first-child {
+        background-color: #1a1a2e;
+    }
+    #city-league .city-league-sieger-tabelle th {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+    #city-league.fs-scale .city-league-sieger-tabelle th,
+    #city-league.fs-scale .city-league-sieger-tabelle td {
+        font-size: var(--fs-xs);
+    }
+
+    /* Etappe 3 (UI-4, 26.09.2026): die uebrigen 13 Ansichten.
+     *
+     * Gemessen bei 390 px mit scripts/messe_schrift_kontrast.py, einmal
+     * ohne und einmal mit --mit-klasse fs-scale. Ohne Boden fielen genau
+     * diese Klassen unter 11 px (kleinster Wert in Klammern):
+     *   meta-call   .mp-name/.mp-bewegung/.mp-zahl/.mc-rec-name-text/th (9,3)
+     *               .mc-predictor-banner-trend (9,7)
+     *   cards       .price-unverified-badge (8,2), .card-database-coverage-quelle (9,3)
+     *   tutorial    .mockup-pill (10,4), .mockup-wt-card-set (10,6),
+     *               .mockup-wt-card-user-label (10,9)
+     *   side-quest  .side-quest-reg-badge (10,6), 120 Stueck
+     * Sie bekommen den Tokenwert --fs-xs (11 px) — dieselbe Regel wie in
+     * Etappe 1 und 2, kein neuer Sonderwert und kein !important. */
+    #meta-call.fs-scale .mp-name,
+    #meta-call.fs-scale .mp-bewegung,
+    #meta-call.fs-scale .mp-zahl,
+    #meta-call.fs-scale .mc-rec-name-text,
+    #meta-call.fs-scale .mc-predictor-banner-trend,
+    #meta-call.fs-scale th,
+    #cards.fs-scale .price-unverified-badge,
+    #tutorial.fs-scale .mockup-pill,
+    #tutorial.fs-scale .mockup-wt-card-set,
+    #tutorial.fs-scale .mockup-wt-card-user-label,
+    #side-quest.fs-scale .side-quest-reg-badge,
+    #cards.fs-scale .card-database-coverage-quelle {
+        font-size: var(--fs-xs);
+    }
+
+    /* Der Datenstands-Chip steht in jeder Ansicht in der Ueberschrift und
+     * rechnet mit 0.55em von ihr — 10,1 bis 10,8 px ohne Boden. Einmal fuer
+     * alle umgestellten Ansichten, nicht dreizehnmal. */
+    .tab-content.fs-scale .data-freshness-chip,
+    .tab-content.fs-scale .data-freshness-chip * {
+        font-size: var(--fs-xs);
+    }
+
     /* Der Kartentitel bleibt die Grundgroesse — er ist die Zeile, an der
      * man die Karte erkennt, und stand vorher (durch den Boden) ebenfalls
      * auf 12 px. */

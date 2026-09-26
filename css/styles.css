@@ -184,7 +184,7 @@
     max-width: 1200px;
     margin: 0 auto 20px auto;
     padding: 16px 20px;
-    background: var(--bg-main, #ffffff);
+    background: var(--surface-1);
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
@@ -202,7 +202,7 @@
     color: var(--text-muted);
 }
 .info-panel {
-    background: var(--bg-panel, #ecf0f1);
+    background: var(--surface-2);
     padding: 1rem 1.5rem;
     border-radius: 8px;
     line-height: 1.6;
@@ -9095,7 +9095,6 @@ details[open] > .tier-trending-summary::after {
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  font-family: var(--font-fancy);
   font-size: 14px;
   z-index: 1000;
   pointer-events: none;
@@ -11018,6 +11017,13 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .data-freshness-chip .js-data-freshness {
     font-variant-numeric: tabular-nums;
     margin-left: 3px;
+}
+/* UI-8 (6): Verweis vom Datenstand zur Quelldatei. */
+.data-freshness-chip .data-rohdaten {
+    margin-left: 6px;
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 /* Ein alter oder unbekannter Stand darf nicht aussehen wie ein frischer.
    Bis zum 20.08.2026 stand in jedem Chip das heutige Datum — es gab also

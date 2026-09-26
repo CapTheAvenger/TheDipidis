@@ -38,7 +38,7 @@ from card_scraper_shared import (
 )
 # Dieselbe Regel wie in der Bestandsreparatur — card_scraper_shared liegt
 # neben ace_spec_regel, der Pfad ist zu diesem Zeitpunkt also schon gesetzt.
-from ace_spec_regel import entscheide_zeile, lade_ace_liste
+from ace_spec_regel import entscheide, belege_aus_bestand, lade_ace_liste
 
 setup_console_encoding()
 
@@ -537,8 +537,10 @@ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[lis
                 # c['count'] ist die Zahl der Kopien in DIESEM Deck; mehr als
                 # eine schliesst eine ACE SPEC aus.
                 "is_ace_spec": ("Yes" if card_db.is_ace_spec_by_name(name)
-                                else entscheide_zeile(name, lade_ace_liste(),
-                                                      c['count'], c.get('type', '')))
+                                else entscheide(name, lade_ace_liste(),
+                                                *belege_aus_bestand(),
+                                                typ=c.get('type', ''),
+                                                max_count=c['count']))
             })
 
     return cards, deck_name
@@ -638,10 +640,11 @@ def aggregate_tournament_cards(all_decks: list, t_info: dict, card_db: CardDatab
                 # bleibt der Rueckfall — sie kann ein "Yes" tragen, das aus
                 # der Namensliste kam und den db_c-Weg nicht braucht.
                 "is_ace_spec": (samp["is_ace_spec"] if samp["is_ace_spec"] == "Yes"
-                                else (entscheide_zeile(
+                                else (entscheide(
                                           samp["name"], lade_ace_liste(),
-                                          stat["max_count"],
-                                          (db_c.get("type", "") if db_c else ""))
+                                          *belege_aus_bestand(),
+                                          typ=(db_c.get("type", "") if db_c else ""),
+                                          max_count=stat["max_count"])
                                       or samp["is_ace_spec"]))
             })
 

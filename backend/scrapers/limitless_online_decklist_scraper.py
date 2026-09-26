@@ -538,7 +538,8 @@ def baue_zeilen(turnier: dict, standing: dict, karten: list, gestempelt: str) ->
             # am 10.09.2026 umgestellt; diese Datei war uebersehen und
             # schrieb weiter nach der schwachen Regel in DIESELBE CSV.
             "is_ace_spec":             entscheide(k["name"], ace, *_belege(),
-                                                  typ=k["type"]),
+                                                  typ=k["type"],
+                                                  max_count=k["count"]),
             "quelle":                  QUELLE_ONLINE,
             # Gemessen an `data-players` der Turnierliste, nicht
             # geschaetzt. 0 heisst: das Attribut fehlte — dann

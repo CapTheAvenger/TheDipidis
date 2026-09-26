@@ -2252,6 +2252,57 @@ def build_matchup_rows(
     return rows
 
 
+# ── Matchups je Turnier (DA-8, 26.09.2026) ──────────────────────────────────
+#
+# BEFUND F14: labs_tournament_matchups_<META>.csv fuehrt KEINE Zeile je
+# Turnier — jede Zeile ist der Schnitt ueber alle Turniere des Formats
+# (tournaments_used='69,70'). Das Vergangene Meta zeigte deshalb bei einem
+# gewaehlten Turnier den Formatschnitt, mit einem Vorbehaltssatz darueber.
+#
+# Entscheidung Hausi (26.09.2026): pro Turnier ist richtig.
+#
+# Die Quelle kann das: die kombinierte Ansicht nimmt eine BELIEBIGE
+# Turnierliste (?tournaments=69,70) — mit genau einer Kennung ist sie die
+# Matrix dieses einen Turniers. Geschrieben wird in EIGENE Dateien:
+#
+#   data/labs_matchups_je_turnier_<META>.csv
+#
+# Bewusst NICHT unter labs_tournament_matchups_*: diese Vorsilbe lesen
+# Meta Call, Current Meta, der Cardbinder und der Wochenlauf als
+# Formatschnitt (glob / startswith). Zeilen je Turnier darin wuerden dort
+# jede Partie ein zweites Mal zaehlen.
+#
+# Nur 'overall' (das Flag &d1 wirkt nicht, siehe oben; &d2 je Turnier
+# braucht niemand). Ein Turnier ist nach dem letzten Tag abgeschlossen —
+# einmal geholt, wird es nicht wieder geholt. Je Lauf hoechstens
+# JE_TURNIER_LIMIT Abrufe; der Rest kommt im naechsten Lauf.
+JE_TURNIER_PREFIX = 'labs_matchups_je_turnier'
+JE_TURNIER_LIMIT = 300
+
+
+def je_turnier_ziele(deck_rows: List[Dict], vorhanden: List[Dict]) -> List[Tuple[str, str, str, str]]:
+    """(meta, tid, slug, deck_name) fuer jedes Deck in jedem Turnier, das noch
+    keine Matrix je Turnier hat. Neueste Turniere zuerst (hoechste Kennung)."""
+    fertig = {((r.get('meta') or '').strip(), str(r.get('tournaments_used') or '').strip(),
+               (r.get('my_deck_slug') or '').strip()) for r in vorhanden}
+    ziele = {}
+    for z in deck_rows:
+        meta = (z.get('meta') or '').strip()
+        slug = (z.get('deck_slug') or '').strip()
+        tid_roh = str(z.get('tournament_id') or '').strip()
+        if not meta or meta == '_unsorted' or not slug or not tid_roh:
+            continue
+        try:
+            tid = str(int(tid_roh))
+        except ValueError:
+            continue
+        if (meta, tid, slug) in fertig:
+            continue
+        ziele.setdefault((meta, tid, slug), z.get('deck_name') or slug)
+    return sorted(((m, t, s, n) for (m, t, s), n in ziele.items()),
+                  key=lambda x: (-int(x[1]), x[0], x[2]))
+
+
 def save_matchup_rows(matchup_rows: List[Dict], data_dir: Optional[str] = None) -> str:
     """Write matchup rows to data/labs_tournament_matchups.csv (append-or-replace
     semantics — caller decides). Returns the output path."""
@@ -2482,6 +2533,11 @@ def main() -> None:
              'Overall WR as the Major-side input before the 65/35 online '
              'blend in getBaseMatchup. Recommended invocation for a fresh '
              'meta is `--matchup-days overall day2`.',
+    )
+    parser.add_argument(
+        '--je-turnier-limit', type=int, default=JE_TURNIER_LIMIT,
+        help='Hoechstzahl der Abrufe fuer die Matchups JE TURNIER (DA-8) in '
+             'diesem Lauf. Was darueber liegt, holt der naechste Lauf nach.',
     )
     parser.add_argument(
         '--matchup-meta', metavar='META', default='',
@@ -3289,6 +3345,31 @@ def main() -> None:
             "Matchup pass done. %d new rows + %d carried-over from chunks = %d total.",
             len(matchup_rows), len(merged_matchup_rows) - len(matchup_rows), len(merged_matchup_rows),
         )
+
+    if args.matchups:
+        # DA-8: die Matrix je Turnier (siehe JE_TURNIER_PREFIX).
+        vorhanden_je = _reassemble_labs_monolith(JE_TURNIER_PREFIX, MATCHUP_CSV_HEADER)
+        ziele = je_turnier_ziele(merged_deck_rows, vorhanden_je)
+        grenze = max(0, int(getattr(args, 'je_turnier_limit', JE_TURNIER_LIMIT) or 0))
+        logger.info("Matchups je Turnier: %d offen, %d in diesem Lauf (Grenze %d).",
+                    len(ziele), min(len(ziele), grenze), grenze)
+        neu_je: List[Dict] = []
+        for i, (meta, tid, slug, name) in enumerate(ziele[:grenze], 1):
+            logger.info("  [je Turnier %d/%d] %s · %s · %s", i, min(len(ziele), grenze), meta, tid, slug)
+            try:
+                ergebnis = scrape_archetype_matchups(slug, [tid], day_filter=MATCHUP_DAY_OVERALL)
+                neu_je.extend(build_matchup_rows(meta, slug, name, ergebnis))
+            except Exception as e:  # noqa: BLE001 — je Deck protokollieren und weiter
+                logger.warning("    Matchups je Turnier fehlgeschlagen %s/%s/%s: %s", meta, tid, slug, e)
+            time.sleep(delay)
+        if neu_je or vorhanden_je:
+            ersetzt = {(r['meta'], r['tournaments_used'], r['my_deck_slug']) for r in neu_je}
+            alle_je = [r for r in vorhanden_je
+                       if (r.get('meta', ''), r.get('tournaments_used', ''), r.get('my_deck_slug', ''))
+                       not in ersetzt] + neu_je
+            markiere_matchup_zeilen(alle_je)
+            logger.info("Per-meta split — Matchups je Turnier:")
+            _split_labs_by_meta(alle_je, JE_TURNIER_PREFIX, MATCHUP_CSV_HEADER)
 
     # ── Per-meta split (2026-05-24) ────────────────────────────────────────
     # Write the monolithic CSVs out to data/labs_tournament_decks_<META>.csv

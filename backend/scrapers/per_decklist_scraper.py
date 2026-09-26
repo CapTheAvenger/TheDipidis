@@ -85,7 +85,7 @@ from card_scraper_shared import (
     extract_cards_from_decklist_soup,
 )
 # Dieselbe Regel wie in der Bestandsreparatur.
-from ace_spec_regel import entscheide_zeile, lade_ace_liste
+from ace_spec_regel import entscheide, belege_aus_bestand, lade_ace_liste
 from turnier_legalitaet import zweiter_freitag_nach
 
 # Reuse the JH scraper's name → labs-tid resolver + format/meta derivation
@@ -901,11 +901,17 @@ def scrape_one_tournament(
                     'quelle':                    'papier',
                     'druck_quelle':              c.get('druck_quelle', ''),
                     # Belegt statt geraten — siehe backend/core/ace_spec_regel.py.
+                    # DA-2 (26.09.2026): die STARKE Regel mit den Belegen
+                    # des ganzen Bestands, wie seit 10.09. in
+                    # card_scraper_shared.py und limitless_dated.py. Die
+                    # zeilenweise Form schrieb hier weiter in dieselbe
+                    # Datei, die der Abgleich mit dem Bestand prueft.
                     'is_ace_spec':               ('Yes' if c.get('is_ace_spec')
-                                                  else entscheide_zeile(
+                                                  else entscheide(
                                                       card_name, lade_ace_liste(),
-                                                      c.get('count', 0),
-                                                      c.get('type', '') or c.get('card_type', ''))),
+                                                      *belege_aus_bestand(),
+                                                      typ=c.get('type', '') or c.get('card_type', ''),
+                                                      max_count=c.get('count', 0))),
                     'scraped_at':                scraped_at,
                 })
 

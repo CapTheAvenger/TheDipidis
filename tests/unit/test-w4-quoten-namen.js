@@ -271,7 +271,13 @@ describe('W4 — die gerechnete Konvention, an den echten Dateien gemessen', () 
         }
         // Der Beweis, dass Ties in `filtered`/`entries` DRIN sind: sie werden
         // aus derselben Menge gezaehlt.
-        assert.match(bj, /const totalT = filtered\.filter\(e => e\.result === 'tie'\)\.length;/);
+        // 26.09.2026: gezaehlt wird aus `gespielt` statt aus `filtered`.
+        // Der No-Show ist kein gespieltes Match und faellt vorher heraus —
+        // die Unentschieden bleiben drin, und genau das ist hier die
+        // Zusage: Zaehler und Nenner kommen aus DERSELBEN Menge.
+        assert.match(bj, /const totalT = gespielt\.filter\(e => e\.result === 'tie'\)\.length;/);
+        assert.match(bj, /const winRateLabel = gespielt\.length > 0/,
+            'Nenner und Unentschieden muessen aus derselben Menge kommen');
         assert.match(bj, /const ties = entries\.filter\(e => e\.result === 'tie'\)\.length;/);
         // Und nirgends wird der Nenner um die Unentschieden gekuerzt.
         assert.ok(!/\.length\s*-\s*(totalT|ties|t)\b/.test(bj),

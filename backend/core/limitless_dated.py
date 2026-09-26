@@ -369,7 +369,8 @@ def aggregate_tournament_archetype(
             # anderen Turnier zweimal lag — 4506 von 29153 Zeilen wichen
             # deshalb am 10.09.2026 vom Bestandsabgleich ab.
             "is_ace_spec": entscheide(
-                name, lade_ace_liste(), *belege_aus_bestand(), typ=type_),
+                name, lade_ace_liste(), *belege_aus_bestand(), typ=type_,
+                max_count=agg["max_count"]),
             "total_players": int(total_players or 0),
         })
     return out

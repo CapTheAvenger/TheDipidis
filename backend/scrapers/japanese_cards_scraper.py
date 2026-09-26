@@ -228,6 +228,22 @@ def scrape_japanese_cards_list(target_sets: Set[str]) -> List[Dict[str, str]]:
     logger.info("Insgesamt %s japanische Karten in der Liste gefunden.", len(all_cards))
     return all_cards
 
+def nicht_mehr_gefuehrt() -> Set[str]:
+    """Set-Codes aus data/sets_nicht_mehr_gefuehrt.json (DA-6, 26.09.2026).
+
+    Sie werden nicht mehr abgerufen. Ihre Zeilen in der Datenbank bleiben:
+    merge_rows() behaelt jedes Set, das ein Lauf nicht anfasst, und genau
+    das sollen gespeicherte Decks und Binder weiter aufloesen koennen.
+    """
+    pfad = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
+                        "data", "sets_nicht_mehr_gefuehrt.json")
+    try:
+        with open(os.path.normpath(pfad), encoding="utf-8") as f:
+            return {str(k).upper() for k in (json.load(f).get("sets") or {})}
+    except (OSError, ValueError):
+        return set()
+
+
 def filter_latest_sets(cards: List[Dict[str, str]]) -> Tuple[List[Dict[str, str]], Set[str]]:
     PROMO_SETS = {
         "MEP", "SVP", "SP", "SMP", "XYP", "BWP", "HSP", "DPP", "NP", "WP",
@@ -253,6 +269,10 @@ def filter_latest_sets(cards: List[Dict[str, str]]) -> Tuple[List[Dict[str, str]
     for s in promo_sets_found:
         logger.info(" - %s (Promo)", s)
 
+    raus = nicht_mehr_gefuehrt() & target_sets
+    if raus:
+        logger.info("Nicht mehr gefuehrt, wird nicht abgerufen: %s", ", ".join(sorted(raus)))
+        target_sets = target_sets - raus
     filtered = [c for c in cards if c["set"] in target_sets]
     logger.info("Liste auf %s Karten reduziert.", len(filtered))
     return filtered, target_sets
@@ -340,6 +360,8 @@ def main():
         return
 
     logger.info(f"Neueste Sets online: {', '.join(sorted(latest_online))}")
+    # DA-6: was nicht mehr gefuehrt wird, wird gar nicht erst abgerufen.
+    latest_online = latest_online - nicht_mehr_gefuehrt()
 
     # Hier stand ein Abbruch, sobald die neuesten Set-CODES schon in der
     # Datenbank vorkamen. Ein Set ist aber kein Ereignis, sondern ein

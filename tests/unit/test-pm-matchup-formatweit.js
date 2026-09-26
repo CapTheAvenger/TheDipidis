@@ -87,7 +87,7 @@ describe('Der Vorbehalt steht ueber der Tabelle', () => {
     const I18N = lies('js/i18n.js');
 
     it('wird nur bei Einzelauswahl UND mehreren Turnieren gesetzt', () => {
-        assert.match(PM, /const _muFormatweit = !!tournamentFilter && _muTurniere\.size > 1;/);
+        assert.match(PM, /const _muFormatweit = !!tournamentFilter && !_muJeTurnier && _muTurniere\.size > 1;/);
     });
 
     it('zaehlt die Turniere aus den tatsaechlich getroffenen Zeilen', () => {

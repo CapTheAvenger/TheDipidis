@@ -1825,6 +1825,36 @@
         const _pastMetaLabsDecksCache = new Map(); // metaKey -> parsed rows | null
         const _pastMetaLabsMatchupsCache = new Map(); // metaKey -> parsed rows | null
 
+        /* DA-8 (26.09.2026): die Matrix JE TURNIER. Eigene Dateien
+           (data/labs_matchups_je_turnier_<META>.csv, geschrieben von
+           backend/scrapers/labs_tournament_scraper.py) — nicht unter der
+           Vorsilbe labs_tournament_matchups_, die andere Ansichten als
+           Formatschnitt lesen. Welche Formate es gibt, sagt das
+           Verzeichnis; eine Datei, die es nicht gibt, wird nicht
+           angefragt (keine 404 in der Konsole). */
+        let _pmJeTurnierVerzeichnis = null;
+        async function _pmLadeJeTurnier(formatKey) {
+            if (_pmJeTurnierVerzeichnis === null) {
+                try {
+                    const r = await fetch('data/labs_matchups_je_turnier_verzeichnis.json?t=' + Date.now());
+                    const j = r.ok ? await r.json() : null;
+                    _pmJeTurnierVerzeichnis = new Set((j && j.meta_keys) || []);
+                } catch (_e) {
+                    _pmJeTurnierVerzeichnis = new Set();
+                }
+            }
+            if (!_pmJeTurnierVerzeichnis.has(formatKey)) return null;
+            return _pmLoadLabsCsv(`labs_matchups_je_turnier_${formatKey}.csv`, _pastMetaLabsMatchupsCache);
+        }
+
+        function _pmZeilenDiesesTurniers(zeilen, archetype, tid) {
+            return (zeilen || []).filter(r =>
+                (r.my_deck_name || '').trim() === archetype
+                && (r.day_filter || '').trim() === 'overall'
+                && String(r.tournament_count || '').trim() === '1'
+                && pastMetaTidPasst(String(r.tournaments_used || '').trim(), tid));
+        }
+
         function _pmParseCSVQuoted(text, sep) {
             const splitLine = (line) => {
                 const out = [];
@@ -2139,7 +2169,7 @@
             // day1 / day2 splits — start with 'overall' to avoid duplicate
             // rows in the matrix. (Day-1/Day-2 split could be a future
             // toggle.)
-            const myRows = rows.filter(r => {
+            let myRows = rows.filter(r => {
                 if ((r.my_deck_name || '').trim() !== archetype) return false;
                 if ((r.day_filter || '').trim() !== 'overall') return false;
                 if (tournamentFilter) {
@@ -2162,14 +2192,20 @@
             // trifft also, sobald das gewaehlte Turnier in der Liste steht —
             // und zeigt danach den Schnitt ueber ALLE Turniere des Formats.
             //
-            // Die Daten je Turnier gibt es nicht; erfinden laesst sich das
+            // DA-8: liegt die Matrix dieses einen Turniers vor, gilt sie.
+            let _muJeTurnier = false;
+            if (tournamentFilter) {
+                const je = _pmZeilenDiesesTurniers(await _pmLadeJeTurnier(formatKey), archetype, tournamentFilter);
+                if (je.length) { myRows = je; _muJeTurnier = true; }
+            }
+            // Ohne Matrix je Turnier (DA-8) gilt die formatweite; erfinden laesst sich das
             // nicht. Was fehlt, ist der Satz darueber. Ohne ihn liest sich
             // "Spezial Turin, Dragapult vs Gardevoir 54,2 %" als Ergebnis
             // dieses einen Turniers, und das ist es nicht.
             const _muTurniere = new Set();
             myRows.forEach(r => String(r.tournaments_used || '').split(',')
                 .forEach(x => { const v = x.trim(); if (v) _muTurniere.add(v); }));
-            const _muFormatweit = !!tournamentFilter && _muTurniere.size > 1;
+            const _muFormatweit = !!tournamentFilter && !_muJeTurnier && _muTurniere.size > 1;
 
             if (myRows.length === 0) {
                 const noPairsLabel = (typeof t === 'function' ? t('pm.matchupNoPairs') : 'No matchup pairs recorded for this archetype.');
@@ -2192,7 +2228,9 @@
             const headerOpp = (typeof t === 'function' ? t('pm.matchupColOpponent') : 'Opponent');
             const headerGames = (typeof t === 'function' ? t('pm.matchupColGames') : 'Games');
             const headerWr = (typeof t === 'function' ? t('pm.matchupColWinPct') : 'Win %');
-            const tournHint = (typeof t === 'function' ? t('pm.matchupTournHint') : 'Aggregated across labs tournaments where this archetype appeared.');
+            const tournHint = _muJeTurnier
+                ? (typeof t === 'function' ? t('pm.matchupTournSingle') : 'Matchups of this tournament only.')
+                : (typeof t === 'function' ? t('pm.matchupTournHint') : 'Aggregated across labs tournaments where this archetype appeared.');
 
             // Mindeststichprobe. Diese Tabelle hatte als einzige Matchup-Ansicht
             // gar keine: "Mega Camerupt, 1 Game, 100,0 %" stand gleichrangig

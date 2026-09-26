@@ -73,14 +73,27 @@ def entscheide_zeile(name, ace, max_count=None, typ=None) -> str:
     return ""
 
 
-def entscheide(name, ace, mehrfach=None, typen=None, typ=None) -> str:
+def entscheide(name, ace, mehrfach=None, typen=None, typ=None, max_count=None) -> str:
     """Entscheidung mit Belegen aus dem gesamten Bestand: `mehrfach` ist die
     Menge der Namen, die IRGENDWO mehrfach gespielt wurden, `typen` bildet
     Name -> alle je beobachteten type-Werte ab. Das ist strenger als die
     zeilenweise Form: eine Karte, die in dieser einen Zeile einmal liegt,
     anderswo aber zweimal, wird auch hier zu "No".
 
-    `typ` ist der Typ AUS DER ZEILE, die gerade geschrieben wird.
+    `typ` ist der Typ AUS DER ZEILE, die gerade geschrieben wird,
+    `max_count` die Kopienzahl AUS DER ZEILE (DA-2, 26.09.2026).
+
+    WARUM AUCH DIE KOPIENZAHL DER ZEILE (gemessen 26.09.2026)
+    ---------------------------------------------------------
+    Derselbe Fehler wie am 11.09. beim Typ, eine Spalte weiter: der
+    Bestand wird VOR dem Schreiben gelesen, eine Karte, die zum ersten
+    Mal mehrfach liegt, steht in `mehrfach` also noch nicht. Gefunden
+    an "Adventuring Lantern" (M6 64) in city_league_analysis.csv:
+    max_count 2 in derselben Zeile, trotzdem ein leeres Feld — und im
+    naechsten Abgleich eine von 7 "Drift"-Stellen. `entscheide_zeile`
+    haette "No" geschrieben. Mit `max_count` ist `entscheide` jetzt in
+    jedem Fall mindestens so stark wie `entscheide_zeile`
+    (tests/python/test_ace_spec_eine_regel.py).
 
     WARUM ER GEBRAUCHT WIRD (gemessen 11.09.2026)
     ---------------------------------------------
@@ -103,6 +116,9 @@ def entscheide(name, ace, mehrfach=None, typen=None, typ=None) -> str:
     if n in ace:
         return "Yes"
     if mehrfach and n in mehrfach:
+        return "No"
+    m = _zahl(max_count)
+    if m is not None and m > 1:
         return "No"
     ts = set((typen or {}).get(n) or ())
     t = (typ or "").strip()

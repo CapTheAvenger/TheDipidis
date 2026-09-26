@@ -1178,7 +1178,8 @@ def aggregate_card_data(all_decks: List[DeckEntry], card_db: CardDatabaseLookup,
                 'is_ace_spec': ('Yes' if card_db.is_ace_spec_by_name(name)
                                 else entscheide(name, lade_ace_liste(),
                                                 *belege_aus_bestand(),
-                                                typ=c_info.get('type', '')))
+                                                typ=c_info.get('type', ''),
+                                                max_count=stats['max_count']))
             }
 
             if group_by_tournament_date:

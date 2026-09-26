@@ -220,8 +220,11 @@ jobs:
           # Labs per-meta chunks (2026-05-24 split refactor). Without these
           # the labs scraper's _reassemble_labs_monolith() sees an empty
           # cache and re-scrapes every historical tournament on every run.
+          # labs_matchups_je_turnier_*: Matrix je Turnier (DA-8). Ohne den
+          # Samen holte jeder Lauf alle Turniere neu statt nur die offenen.
           for chunk in data/labs_tournament_decks_*.csv \
-                       data/labs_tournament_matchups_*.csv; do
+                       data/labs_tournament_matchups_*.csv \
+                       data/labs_matchups_je_turnier_*.csv; do
               if [ -f "$chunk" ]; then
                   cp "$chunk" "backend/core/data/$(basename "$chunk")"
                   echo "  seeded labs chunk: $(basename "$chunk")"
@@ -768,7 +771,9 @@ jobs:
           # rotation cycle.
           shopt -s nullglob
           for f in backend/core/data/labs_tournament_decks_*.csv \
-                   backend/core/data/labs_tournament_matchups_*.csv; do
+                   backend/core/data/labs_tournament_matchups_*.csv \
+                   backend/core/data/labs_matchups_je_turnier_*.csv \
+                   backend/core/data/labs_matchups_je_turnier_verzeichnis.json; do
               base=$(basename "$f")
               cp "$f" "data/$base"
               sz=$(stat -c%s "data/$base")

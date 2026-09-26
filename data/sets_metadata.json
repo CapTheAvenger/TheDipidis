@@ -303,6 +303,10 @@
     "order": 156,
     "release_date": "2026-07-31"
   },
+  "M6A": {
+    "order": 159,
+    "release_date": "2026-09-16"
+  },
   "MA": {
     "order": 23,
     "release_date": "2004-03-15"
@@ -334,6 +338,10 @@
   "MEZ": {
     "order": 158,
     "release_date": "2026-07-31"
+  },
+  "MF": {
+    "order": 160,
+    "release_date": "2026-09-16"
   },
   "MT": {
     "order": 43,

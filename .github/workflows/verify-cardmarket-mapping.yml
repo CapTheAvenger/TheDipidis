@@ -28,7 +28,7 @@ on:
       only_conflicts:
         description: 'Only the proven SAR-vs-Secret-Rare conflict groups (true/false)'
         required: false
-        default: 'true'
+        default: 'false'
       recon:
         description: 'Recon mode: dump Limitless price HTML to the log, verify nothing (true/false)'
         required: false
@@ -58,7 +58,14 @@ jobs:
       - name: Verify mappings against live product pages
         run: |
           ARGS="--limit ${{ github.event.inputs.limit || '150' }}"
-          if [ "${{ github.event.inputs.only_conflicts || 'true' }}" = "true" ]; then
+          # DA-7 (26.09.2026): der Zeitplan lief mit --only-conflicts, und
+          # davon gibt es seit dem 01.08. keine mehr — gemessen 26.09.:
+          # 0 Konfliktgruppen, 1.388 positionell zugeordnete Zeilen mit
+          # Cardmarket-URL, 149 davon nie geprueft (u. a. ganz 30C). Der
+          # Lauf tat jede Woche nichts und blieb gruen. Die URL ist die
+          # einzige Identitaetsaussage; sie soll ALLE positionellen
+          # Zeilen erreichen, nicht nur die Konfliktgruppen.
+          if [ "${{ github.event.inputs.only_conflicts || 'false' }}" = "true" ]; then
             ARGS="$ARGS --only-conflicts"
           fi
           if [ "${{ github.event.inputs.recon || 'false' }}" = "true" ]; then

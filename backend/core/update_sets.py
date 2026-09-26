@@ -141,6 +141,15 @@ FALLBACK_SET_ORDER = {
     # geschaetzt — die Datei ist die Quelle, mit der dieser Rueckfall
     # laut Kommentar oben synchron bleiben soll.
     '30C': 158,
+    # DA-4 (26.09.2026): M6A (30th Celebration) und MF (Premium Deck Set
+    # Espeon & Umbreon) — JP-Sets, beide 16.09.2026 laut
+    # limitlesstcg.com/cards/jp (gemessen 26.09.2026). Sie hatten ein
+    # Datum, aber keine Ordnungszahl: backfill_order_from_release_dates()
+    # stapelt nur, was NEUER als das neueste bekannte Set ist, und 30C
+    # erschien am selben Tag — also blieben beide liegen und wurden jede
+    # Woche gemeldet. Die Zahlen sind die, die derselbe Nachtrag vergeben
+    # haette (Reihenfolge Datum, dann Kuerzel, oben aufgesetzt).
+    'M6A': 159, 'MF': 160,
     'MEZ': 158, 'MEM': 157, 'M6': 156, 'PBL': 155,
     'CRI': 154, 'M5': 153,
     'M4': 152, 'POR': 151, 'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,

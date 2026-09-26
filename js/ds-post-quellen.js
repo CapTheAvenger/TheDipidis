@@ -2256,11 +2256,17 @@ function fremdeListeScheibe(j, L, opt) {
      * `join(' · ')` tat das nicht. Gemessen: „1st of 1,024 · 1,024
      * players · 10-1-1 · 2026-09-19" sind 50 Zeichen bei 48 Platz, und
      * malFuss schneidet das Datum ab. Heute fehlten zwei Zeichen. */
-    var vorn = [platz];
-    /* Beim Major ist `opt.von` schon die Feldgroesse; eine zweite
-       Spielerzahl daneben waere dieselbe Zahl zweimal. */
-    if (L.feld && !opt.von) vorn.push(tausend(L.feld) + ' players');
-    vorn.push(bilanzWort(L));
+    /* DIE FELDGROESSE STEHT EINMAL, NICHT ZWEIMAL.
+     *
+     * LIVE GEMESSEN (26.09.2026, nach dem Deploy): im Bild stand
+     * „1st of 386 · 386 players · 10-1-1 · 2026-09-19". Die Bedingung
+     * hier hiess `if (L.feld && !opt.von)` und traf bei der
+     * Sieben-Tage-Kette zu, weil dort `opt.von` leer ist und dieselbe
+     * Zahl schon ueber `L.feld` in die Platzierung gewandert war.
+     * Der Nenner steht in „1st of 386"; eine zweite Spielerzahl daneben
+     * ist dieselbe Zahl und kostet zwoelf Zeichen in einer Zeile, die
+     * 48 fasst. */
+    var vorn = [platz, bilanzWort(L)];
 
     return {
         zeilen: zeilenText(karten.slice(0, MAX).map(function (k) {

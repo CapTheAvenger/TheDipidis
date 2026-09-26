@@ -262,10 +262,16 @@ test('die 7-Tage-Kette fuehrt ueber den Archetyp auf dessen Listen', async () =>
         'in der Dragapult-Liste stehen Karten eines anderen Decks');
     /* DIE PLATZIERUNG TRÄGT IHR FELD — Hausregel „jede Quote trägt ihren
        Nenner", angewandt auf einen Platz. */
-    assert.match(bild.fuss, /2nd/, `die Platzierung fehlt in der Fußzeile: ${bild.fuss}`);
-    assert.match(bild.fuss, /203 players/,
+    assert.match(bild.fuss, /2nd of 203/,
         `die Feldgröße fehlt in der Fußzeile — „2nd" allein ist keine Aussage: ${bild.fuss}`);
     assert.match(bild.fuss, /7-1-1/, `die Bilanz fehlt in der Fußzeile: ${bild.fuss}`);
+    /* UND SIE STEHT EINMAL. Live gemessen am 26.09.2026 nach dem Deploy:
+       „1st of 386 · 386 players · 10-1-1 · 2026-09-19" — dieselbe Zahl
+       zweimal, zwölf Zeichen in einer Zeile, die 48 fasst. */
+    assert.equal((bild.fuss.match(/203/g) || []).length, 1,
+        `die Feldgröße steht zweimal in der Fußzeile: ${bild.fuss}`);
+    assert.ok(!/players/.test(bild.fuss),
+        `neben „of 203" steht noch eine Spielerzahl: ${bild.fuss}`);
 });
 
 test('die Archetypen der 7-Tage-Kette stehen alphabetisch, mit dem besten Ergebnis', async () => {

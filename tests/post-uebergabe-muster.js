@@ -151,4 +151,87 @@ function uebergabeEinrichten(ctx, art) {
     return ctx;
 }
 
-module.exports = { BEISPIEL_DECK, BEISPIEL_TURNIER, BEISPIEL_METACALL, uebergabeEinrichten };
+/* ── DER BESTAND (26.09.2026) ─────────────────────────────────────────
+ *
+ * Die Kaskade auf der Post-Seite laesst nicht mehr „das zuletzt
+ * uebergebene Stueck" waehlen, sondern ALLE. Dafuer braucht der Test
+ * mehr als eines je Art — mit einem einzigen Deck waere die Zusicherung
+ * „alle Decks stehen zur Wahl" von der Zusicherung „eines steht zur
+ * Wahl" nicht zu unterscheiden.
+ *
+ * Das zweite Deck ist eine ECHTE zweite Liste: dieselben Karten, aber
+ * eine andere Verteilung waere ein Zwilling gewesen. Hier ist es ein
+ * anderer Archetyp mit anderer Kartenzahl. */
+const ZWEITES_DECK = {
+    'Dreepy (TWM 128)': 4, 'Drakloak (TWM 129)': 4, 'Dragapult ex (TWM 130)': 3,
+    'Duskull (SFA 40)': 2, 'Dusclops (SFA 41)': 2, 'Dusknoir (SFA 42)': 2,
+    'Fezandipiti ex (SFA 38)': 1, 'Munkidori (TWM 95)': 1,
+    'Iono (PAL 185)': 3, "Boss's Orders (PAL 172)": 2, 'Arven (SVI 186)': 2,
+    'Buddy-Buddy Poffin (TEF 144)': 4, 'Nest Ball (SVI 181)': 3,
+    'Ultra Ball (SVI 196)': 3, 'Rare Candy (SVI 191)': 3,
+    'Counter Catcher (PAR 160)': 2, 'Super Rod (PAL 188)': 1,
+    'Technical Machine: Devolution (PAR 177)': 1, 'Artazon (PAL 171)': 2,
+    'Basic Psychic Energy (SVE 13)': 5, 'Basic Fire Energy (SVE 10)': 5,
+    'Jet Energy (PAL 190)': 1
+};
+
+/* Ein zweites Turnier — anderes Ergebnis, anderes Deck, mehr Runden. */
+const ZWEITES_TURNIER = {
+    titel: 'League Cup Mainz Sep 2026',
+    format: 'TEF-PBL',
+    art: 'League Cup',
+    datum: '14.9.2026',
+    platz: 3,
+    bilanz: { w: 4, l: 1, t: 1 },
+    quote: 75,
+    deck: 'Dragapult Dusknoir',
+    karten: ZWEITES_DECK,
+    bilder: {},
+    runden: [
+        { n: 1, result: 'win', opponent: 'Slowking', games: 'WW' },
+        { n: 2, result: 'loss', opponent: 'Crustle', games: 'LL' },
+        { n: 3, result: 'tie', opponent: 'Basic Box', games: 'WL' }
+    ]
+};
+
+/* Ein zweiter Meta Call: derselbe Bau, andere Zahlen — und OHNE eigene
+ * Schaetzungen, damit die Zusicherung „ohne eigene Schaetzungen wird es
+ * gesagt" etwas zu pruefen hat. */
+const ZWEITER_METACALL = JSON.parse(JSON.stringify(BEISPIEL_METACALL));
+ZWEITER_METACALL.titel = 'League Cup Mainz September 2026';
+ZWEITER_METACALL.szenario = 'League Cup Mainz September 2026';
+ZWEITER_METACALL.spieler = 64;
+ZWEITER_METACALL.runden = 5;
+ZWEITER_METACALL.eigeneSchaetzungen = false;
+ZWEITER_METACALL.meinDeck = 'Crustle';
+
+/* Legt zusaetzlich zum EINEN Stueck den vollen Bestand hin — so, wie es
+ * die drei Aufrufer in der App seit dem 26.09.2026 tun. */
+function bestandEinrichten(ctx) {
+    const U = ctx.window.DsPostUebergabe;
+    U.bestandLegen('deck', [
+        { titel: 'Mega Excadrill - Frankfurt Sep 26', daten: {
+            titel: 'Mega Excadrill - Frankfurt Sep 26', archetyp: 'Mega Excadrill',
+            karten: BEISPIEL_DECK, bilder: {},
+            gesamt: Object.keys(BEISPIEL_DECK).reduce((s, k) => s + BEISPIEL_DECK[k], 0) } },
+        { titel: 'Dragapult Dusknoir - Standard', daten: {
+            titel: 'Dragapult Dusknoir - Standard', archetyp: 'Dragapult Dusknoir',
+            karten: ZWEITES_DECK, bilder: {},
+            gesamt: Object.keys(ZWEITES_DECK).reduce((s, k) => s + ZWEITES_DECK[k], 0) } }
+    ]);
+    U.bestandLegen('turnier', [
+        { titel: BEISPIEL_TURNIER.titel, daten: BEISPIEL_TURNIER },
+        { titel: ZWEITES_TURNIER.titel, daten: ZWEITES_TURNIER }
+    ]);
+    U.bestandLegen('metacall', [
+        { titel: BEISPIEL_METACALL.titel, daten: BEISPIEL_METACALL },
+        { titel: ZWEITER_METACALL.titel, daten: ZWEITER_METACALL }
+    ]);
+    return ctx;
+}
+
+module.exports = {
+    BEISPIEL_DECK, BEISPIEL_TURNIER, BEISPIEL_METACALL,
+    ZWEITES_DECK, ZWEITES_TURNIER, ZWEITER_METACALL,
+    uebergabeEinrichten, bestandEinrichten
+};

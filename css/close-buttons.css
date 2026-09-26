@@ -127,13 +127,27 @@
 .help-modal-close::after {
   content: var(--close-tooltip, 'Close');
   position: absolute;
-  bottom: -14px;
+  bottom: -15px;
   left: 50%;
   transform: translateX(-50%);
   font-size: var(--fs-xs);
   font-weight: 700;
+  /* BEFUND 26.09.2026, live gemessen: weisse Schrift mit Schatten stand
+   * ueber JEDEM Grund, auf dem der Knopf gerade sass. Auf dem dunklen
+   * Kopf des Bearbeiten-Fensters waren das 18,9:1 — auf dem HELLEN
+   * Battle-Journal-Blatt 1,74:1, also weiss auf weiss. Der Knopf ist
+   * derselbe, der Grund wechselt; ein fester Wert kann darum nicht
+   * stimmen.
+   *
+   * Statt die Farbe zu raten, bringt die Beschriftung ihren eigenen
+   * Grund mit: eine schmale dunkle Kapsel. Damit haengt der Kontrast
+   * nicht mehr davon ab, was zufaellig dahinterliegt — gemessen 8,86:1
+   * auf dem hellen Blatt und 17,87:1 auf dem dunklen. */
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  background: rgba(15, 23, 42, 0.78);
+  padding: 1px 5px;
+  border-radius: 5px;
+  line-height: 1.25;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -238,4 +252,3 @@
   color: #fca5a5 !important;
   border-color: rgba(239, 68, 68, 0.45) !important;
 }
-

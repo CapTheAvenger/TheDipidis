@@ -44,6 +44,15 @@ name: Pocket Tier List
 # Der Ablauf bleibt hier stehen, weil er dann sofort wieder greift, wenn
 # Game8 den Läufer eines Tages durchlässt. Ein Probelauf über
 # `workflow_dispatch` sagt das in fünfzig Sekunden.
+#
+# NACHGEMESSEN 26.09.2026 (SC-4)
+# ------------------------------
+#   Läufer, Lauf #5:   cloudscraper 202 | curl_cffi 202 | requests 202
+#   Cowork-Umgebung:   game8.co 200, voller Lauf 34 Decks mit Scan-Code
+# Die Ernte läuft deshalb wöchentlich als Aufgabe in der Cowork-Umgebung
+# über scripts/pocket_ernte.sh. Der Datenwächter bewacht nicht mehr den
+# letzten Lauf dieses Ablaufs (der sagt nichts über die Daten), sondern
+# das Alter der Datei — check_pocket_frische().
 
 on:
   workflow_dispatch:

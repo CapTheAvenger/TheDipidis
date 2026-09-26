@@ -133,8 +133,10 @@ RHYTHMUS = {
 OHNE_ZEITPLAN = {
     "scripts/scrape_pocket_tierlist.py":
         "Game8 antwortet dem GitHub-Laeufer auf jedem Weg mit HTTP 202 "
-        "(Cloudflare). Drei Laeufe am 04.09.2026 gemessen. Ein Zeitplan "
-        "erzeugte jede Nacht eine Warnung und nie eine Zeile Daten.",
+        "(Cloudflare). Drei Laeufe am 04.09.2026 gemessen, Lauf #5 am "
+        "26.09.2026 ebenso. Geerntet wird woechentlich aus der "
+        "Cowork-Umgebung ueber scripts/pocket_ernte.sh; das Alter der "
+        "Datei prueft check_pocket_frische() im Datenwaechter.",
     "scripts/build_champions_sprites.py":
         "Der Kader aendert sich mit einer Regelrunde, nicht taeglich. "
         "292 Abrufe bei einem ehrenamtlichen Wiki gehoeren nicht in einen "

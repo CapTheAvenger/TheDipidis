@@ -127,9 +127,47 @@ def bestand():
         return {}
 
 
+def alte_nachtraege():
+    """Die von Hand nachgetragenen Namen samt Beleg aus dem Bestand."""
+    if not os.path.exists(ZIEL):
+        return []
+    try:
+        meta = json.load(open(ZIEL, encoding="utf-8")).get("_meta") or {}
+    except Exception:
+        return []
+    return [e for e in (meta.get("nachgetragen") or []) if isinstance(e, dict)]
+
+
+def nachtraege_fortschreiben(nachtraege, von_der_quelle):
+    """Ein Nachtrag bleibt, bis die Quelle den Namen selbst fuehrt.
+
+    BEFUND SC-4 (26.09.2026): der erste Lauf aus der Cowork-Umgebung
+    schrieb `_meta` neu und warf `nachgetragen` weg — auch den Beleg,
+    WARUM B4b von Hand kam. Der Name selbst blieb (bestand()), sein
+    Nachweis nicht. Jetzt:
+      * fuehrt die Quelle die Kennung selbst  -> der Nachtrag ist
+        bestaetigt und wandert nach `nachtrag_bestaetigt` (Kennung,
+        Name, Datum des Nachtrags) — benannt, nicht verschwiegen;
+      * fuehrt sie sie nicht                 -> der Nachtrag bleibt
+        stehen, mit Beleg.
+    """
+    bleibt, bestaetigt = [], []
+    for e in nachtraege:
+        k = e.get("kennung")
+        if k and k in von_der_quelle:
+            bestaetigt.append({"kennung": k, "name": von_der_quelle[k],
+                               "nachgetragen_am": e.get("am")})
+        else:
+            bleibt.append(e)
+    return bleibt, bestaetigt
+
+
 def main():
     html = hole(QUELLE)
     namen = lies(html)
+    nachtraege, bestaetigt = nachtraege_fortschreiben(alte_nachtraege(), namen)
+    for e in bestaetigt:
+        print(f"Nachtrag {e['kennung']} ({e['name']!r}) fuehrt die Quelle jetzt selbst")
     print(f"{len(namen)} Sets benannt")
     if len(namen) < MINDESTENS:
         print(f"::error::nur {len(namen)} Sets gefunden (erwartet >= {MINDESTENS}). "
@@ -176,6 +214,8 @@ def main():
             "ohne_namen": ohne,
             "nicht_mehr_auf_der_quellseite": nur_aus_bestand,
             "geaendert_in_diesem_lauf": geaendert,
+            "nachgetragen": nachtraege,
+            "nachtrag_bestaetigt": bestaetigt,
         },
         "sets": dict(sorted(namen.items())),
     }

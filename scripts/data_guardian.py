@@ -2384,9 +2384,11 @@ def check_pocket_frische(findings):
             f"pocket_tierlist.json ist {alter} Tage alt (Schwelle "
             f"{PLAUSIBEL_TAGE}, dieselbe wie das Banner im Browser). Der "
             f"Lauf hat bewusst keinen Zeitplan, weil Game8 dem GitHub-"
-            f"Laeufer mit Cloudflare 202 antwortet — geerntet wird von "
-            f"Hand. Ab hier sieht der Besucher die Warnung; besser ist, "
-            f"sie vorher hier zu lesen."))
+            f"Laeufer mit Cloudflare 202 antwortet — geerntet wird "
+            f"woechentlich aus der Cowork-Umgebung (scripts/pocket_ernte.sh). "
+            f"Ist die Datei trotzdem so alt, ist die Ernte ausgefallen. Ab "
+            f"hier sieht der Besucher die Warnung; besser ist, sie vorher "
+            f"hier zu lesen."))
 
 
 def check_proxy_karte_gegen_bestand(findings):

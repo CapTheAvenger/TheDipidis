@@ -200,3 +200,88 @@ def test_beide_zweige_an_einem_gebauten_fall(roster_modul, daten):
 def _norm_en(en):
     import re
     return re.sub(r"[^a-z0-9]+", "-", str(en or "").lower()).strip("-")
+
+
+# ── SC-1: das Pendel ──────────────────────────────────────────────────
+#
+# Gemessen 26.09.2026 ueber zehn Commits: champions-replica-scrape (04:00
+# UTC) schrieb 142 Kaderschluessel und 319 Pokedex-Eintraege,
+# champions-usage-refresh (05:00 UTC) 166 und 343. Ursache war die Regel
+# selbst: sie verglich gegen den zuletzt gebauten Pokedex, der ihre eigene
+# Ergaenzung vom letzten Lauf schon enthielt — und liess sie deshalb weg.
+# Jeder Lauf kippte das Ergebnis des vorigen.
+
+
+def _vor_der_ergaenzung(daten):
+    eigene = list((daten["extra"].get("_meta") or {}).get("aus_nutzung") or [])
+    vorhanden = set(daten["extra"]["smogonKeys"]) - set(eigene)
+    return vorhanden, eigene
+
+
+def test_die_ergaenzung_pendelt_nicht(roster_modul, daten):
+    """Zwei Laeufe hintereinander muessen dasselbe ergaenzen.
+
+    Lauf 1 sieht einen Pokedex MIT seiner letzten Ergaenzung, Lauf 2 einen
+    OHNE sie (so wie nach einem Lauf, der sie weggelassen hat). Beide
+    muessen dieselbe Menge liefern — sonst ist die Antwort ein Echo des
+    vorigen Laufs und nicht der Quellen.
+    """
+    vorhanden, eigene = _vor_der_ergaenzung(daten)
+    assert eigene, ("_meta.aus_nutzung ist leer — ohne eigene Ergaenzung laesst "
+                    "sich das Pendel nicht nachstellen")
+
+    neu_voll, _ = roster_modul.nutzungsformen(
+        vorhanden, daten["smogon"], daten["usage"], daten["dex"], eigene=eigene)
+    assert neu_voll, ("mit vollem Pokedex wird nichts ergaenzt — die eigene "
+                      "Ergaenzung vom letzten Lauf zaehlt als 'schon da'")
+
+    weg = {_norm_en(n) for n in neu_voll}
+    schmal = {"entries": [e for e in daten["dex"]["entries"]
+                          if str((e.get("meta") or {}).get("slug") or "").lower() not in weg
+                          and _norm_en(e.get("en")) not in weg]}
+    assert len(schmal["entries"]) < len(daten["dex"]["entries"])
+
+    neu_schmal, _ = roster_modul.nutzungsformen(
+        vorhanden, daten["smogon"], daten["usage"], schmal, eigene=[])
+    neu_wieder, _ = roster_modul.nutzungsformen(
+        vorhanden, daten["smogon"], daten["usage"], daten["dex"], eigene=neu_schmal)
+
+    assert sorted(neu_voll) == sorted(neu_schmal) == sorted(neu_wieder), (
+        "die Ergaenzung haengt am vorigen Pokedex: voll=%d, schmal=%d, wieder=%d"
+        % (len(neu_voll), len(neu_schmal), len(neu_wieder)))
+
+
+def test_eigene_nimmt_nur_aus_dem_abgleich_und_haelt_nichts_fest(roster_modul, daten):
+    """Die Gegenrichtung: faellt eine Nutzungszeile weg, faellt die Form raus.
+
+    `eigene` darf keine Liste werden, die Formen festhaelt, die niemand
+    mehr spielt — sonst waere aus dem Pendel ein Friedhof geworden.
+    """
+    vorhanden, eigene = _vor_der_ergaenzung(daten)
+    opfer = eigene[0]
+    zeile = _norm_en(opfer)
+    usage = {"pokemon": {k: v for k, v in (daten["usage"].get("pokemon") or {}).items()
+                         if k != zeile}}
+    assert len(usage["pokemon"]) < len(daten["usage"]["pokemon"]), (
+        f"{opfer} hat keine Nutzungszeile {zeile!r} — der Fall ist nicht gebaut")
+    neu, _ = roster_modul.nutzungsformen(
+        vorhanden, daten["smogon"], usage, daten["dex"], eigene=eigene)
+    assert opfer not in neu, f"{opfer} bleibt ergaenzt, obwohl die Nutzungszeile fehlt"
+
+
+def test_der_lauf_reicht_seine_letzte_ergaenzung_weiter(roster_modul):
+    """main() muss `eigene` aus der zuletzt geschriebenen Datei fuellen.
+
+    Textpruefung, weil main() pokebase.app abruft und hier nicht laufen
+    kann. Kommentare werden vorher herausgeschnitten, sonst macht die
+    Erklaerung darueber die Probe blind.
+    """
+    import inspect
+    import re
+    quelle = inspect.getsource(roster_modul.main)
+    ohne = re.sub(r"#[^\n]*", "", quelle)
+    assert len(ohne) > len(quelle) * 0.3, "das Ausschneiden hat zu viel entfernt"
+    assert re.search(r"_lade\(OUT\)", ohne) and '"aus_nutzung"' in ohne, (
+        "main() liest die letzte Ergaenzung nicht aus der eigenen Ausgabedatei")
+    assert re.search(r"nutzungsformen\((?:[^()]|\([^()]*\))*eigene=frueher", ohne), (
+        "main() reicht `eigene` nicht an nutzungsformen weiter — das Pendel ist zurueck")

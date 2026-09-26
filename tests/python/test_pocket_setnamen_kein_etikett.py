@@ -106,9 +106,48 @@ def test_nachtrag_nennt_seinen_beleg():
     """Was von Hand hereinkam, sagt woher und warum."""
     with open(DATEN, encoding="utf-8") as f:
         d = json.load(f)
+    # Hier stand bis 26.09.2026 zusaetzlich `assert nach` ("B4b kam von
+    # Hand"). Das war eine Aussage ueber den Stand eines Tages: sobald die
+    # Quelle B4b selbst fuehrt, ist der Nachtrag bestaetigt und wandert
+    # nach `nachtrag_bestaetigt` (SC-4). Die Zusicherung haette den
+    # ersten Erntelauf rot gemacht. Geprueft wird jetzt die Regel: jeder
+    # Nachtrag — offen oder bestaetigt — nennt Herkunft und Datum.
     nach = d["_meta"].get("nachgetragen") or []
-    assert nach, "kein Nachtrag vermerkt, obwohl B4b von Hand kam"
+    for e in d["_meta"].get("nachtrag_bestaetigt") or []:
+        assert e.get("kennung") and e.get("name"), f"bestaetigter Nachtrag ohne Namen: {e}"
     for e in nach:
         assert e.get("beleg"), f"{e.get('kennung')} ohne Beleg"
         assert e.get("warum_von_hand"), f"{e.get('kennung')} ohne Begruendung"
         assert e.get("am"), f"{e.get('kennung')} ohne Datum"
+
+
+def test_ein_nachtrag_bleibt_bis_die_quelle_ihn_selbst_fuehrt(mod):
+    """SC-4: der Nachweis eines Nachtrags geht nicht mit dem naechsten Lauf verloren."""
+    nachtrag = {"kennung": "B4b", "name": "Deluxe Pack Mega", "am": "2026-09-25",
+                "beleg": "Quellseite", "warum_von_hand": "Laeufer bekam 202"}
+    bleibt, bestaetigt = mod.nachtraege_fortschreiben([nachtrag], {"B4a": "x"})
+    assert bleibt == [nachtrag] and bestaetigt == [], "Nachtrag verschwand, obwohl die Quelle B4b nicht fuehrt"
+    bleibt, bestaetigt = mod.nachtraege_fortschreiben([nachtrag], {"B4b": "Deluxe Pack Mega"})
+    assert bleibt == [], "bestaetigter Nachtrag steht weiter als offen da"
+    assert bestaetigt == [{"kennung": "B4b", "name": "Deluxe Pack Mega",
+                           "nachgetragen_am": "2026-09-25"}]
+
+
+def test_main_schreibt_die_nachtraege_mit(mod, tmp_path, monkeypatch):
+    """Verhalten, nicht Schreibweise: main() laeuft gegen eine gebaute Seite."""
+    ziel = tmp_path / "pocket_sets.json"
+    ziel.write_text(json.dumps({"_meta": {"nachgetragen": [
+        {"kennung": "B9x", "name": "Kommt noch", "am": "2026-09-25",
+         "beleg": "Quellseite", "warum_von_hand": "202"},
+        {"kennung": "B4b", "name": "Deluxe Pack Mega", "am": "2026-09-25",
+         "beleg": "Quellseite", "warum_von_hand": "202"}]},
+        "sets": {"B9x": "Kommt noch"}}), encoding="utf-8")
+    monkeypatch.setattr(mod, "ZIEL", str(ziel))
+    monkeypatch.setattr(mod, "hole", lambda url: SEITE)
+    monkeypatch.setattr(mod, "MINDESTENS", 1)
+    monkeypatch.setattr(mod, "gebrauchte_kennungen", lambda: set())
+    assert mod.main() == 0
+    d = json.loads(ziel.read_text(encoding="utf-8"))
+    assert [e["kennung"] for e in d["_meta"]["nachgetragen"]] == ["B9x"]
+    assert [e["kennung"] for e in d["_meta"]["nachtrag_bestaetigt"]] == ["B4b"]
+    assert d["sets"]["B9x"] == "Kommt noch"

@@ -100,6 +100,15 @@ jobs:
       #
       # Nicht ueberwacht: bot-keepalive (alle 5 Minuten, waere nur Rauschen),
       # visual-fullpage (Bildvergleich, keine Daten) und dieser Lauf selbst.
+      #
+      # Ebenfalls nicht: pocket-tierlist.yml (SC-4, 26.09.2026). Der Lauf
+      # hat keinen Zeitplan und kann auf dem GitHub-Laeufer nichts liefern
+      # (Lauf #5 am 26.09.2026: cloudscraper, curl_cffi und requests je
+      # HTTP 202). Geerntet wird woechentlich aus der Cowork-Umgebung ueber
+      # scripts/pocket_ernte.sh. Sein letzter Lauf sagt deshalb nichts ueber
+      # die Daten — jeder Probelauf von Hand haette die Ampel dauerhaft rot
+      # gestellt. Die Bedingung, um die es geht, ist das ALTER der Datei,
+      # und die prueft check_pocket_frische() im Guardian-Skript.
       - name: Datenlaeufe auf Rot pruefen
         id: laeufe
         env:
@@ -130,7 +139,6 @@ jobs:
             verify-cardmarket-mapping.yml
             cardmarket-card-images.yml
             prizepack-official-images.yml
-            pocket-tierlist.yml
             limitless-api-scrape.yml
           "
           rot=0

@@ -6788,6 +6788,14 @@ details[open] > .tier-trending-summary::after {
     grid-template-columns: repeat(3, 1fr);
 }
 
+/* Seit dem No-Show sind es vier: W · L · T · N. Auf 390 px teilen sie
+ * sich die halbe Zeilenbreite, also rund 45 px je Knopf — genug fuer
+ * einen Buchstaben und einen Daumen, wenn der Abstand kleiner wird. */
+.battle-journal-choice-group-result.battle-journal-choice-group-vier {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
+
 /* BEFUND 26.09.2026: `background: #fff` war fest, `color` kam aus der
  * Tokenschicht. Im Dunkelmodus hiess das helle Tinte auf weissem Grund —
  * gemessen 1,21:1 fuer „Going First", „Going Second" und W/L/T, also
@@ -6830,6 +6838,14 @@ details[open] > .tier-trending-summary::after {
     border-color: var(--tint-warn-ink);
     background: var(--tint-warn);
     color: var(--tint-warn-ink);
+}
+
+/* Der No-Show bekommt bewusst KEIN Gruen: er zaehlt in der Bilanz als
+ * Sieg, war aber keiner am Tisch. Neutral getoent sagt genau das. */
+.battle-journal-choice-noshow.is-selected {
+    border-color: var(--ink-3);
+    background: var(--surface-2);
+    color: var(--ink);
 }
 
 .battle-journal-actions {
@@ -6898,6 +6914,7 @@ details[open] > .tier-trending-summary::after {
 .bj-history-stat.is-win strong { color: var(--tint-ok-ink); }
 .bj-history-stat.is-loss strong { color: var(--tint-bad-ink); }
 .bj-history-stat.is-tie strong { color: var(--tint-warn-ink); }
+.bj-history-stat.is-noshow strong { color: var(--ink-2); }
 
 .battle-journal-history-list {
     display: flex;
@@ -6914,9 +6931,10 @@ details[open] > .tier-trending-summary::after {
     background: var(--surface-2);
     border-left: 4px solid #999;
 }
-.bj-history-item.is-win { border-left-color: #1f8b4d; }
-.bj-history-item.is-loss { border-left-color: #c0392b; }
-.bj-history-item.is-tie { border-left-color: #e67e22; }
+.bj-history-item.is-win { border-left-color: var(--tint-ok-ink); }
+.bj-history-item.is-loss { border-left-color: var(--tint-bad-ink); }
+.bj-history-item.is-tie { border-left-color: var(--tint-warn-ink); }
+.bj-history-item.is-noshow { border-left-color: var(--ink-3); }
 
 .bj-history-item-main { flex: 1; min-width: 0; grid-column: 1; grid-row: 1 / span 2; }
 .bj-history-tournament {
@@ -7191,6 +7209,9 @@ details[open] > .tier-trending-summary::after {
 }
 .bj-history-item.is-tie {
     background: linear-gradient(135deg, rgba(243,156,18,.08), rgba(243,156,18,.02));
+}
+.bj-history-item.is-noshow {
+    background: linear-gradient(135deg, rgba(135,145,184,.10), rgba(135,145,184,.03));
 }
 
 /* ── Matchup Heatmap ─── */
@@ -7917,6 +7938,11 @@ details[open] > .tier-trending-summary::after {
 .battle-journal-result-pill.is-loss {
     background: var(--tint-bad);
     color: var(--tint-bad-ink);
+}
+
+.battle-journal-result-pill.is-noshow {
+    background: var(--surface-2);
+    color: var(--ink-2);
 }
 
 .battle-journal-result-pill.is-tie {

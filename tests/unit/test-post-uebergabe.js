@@ -384,3 +384,102 @@ test('eine Stueckzahl 0 wird gezeigt, nicht verschluckt', () => {
     assert.ok(t.indexOf('0') >= 0 && t.indexOf('7') < 0,
         'statt der 0 steht der Rang in der Muenze');
 });
+
+/* ══ DER BESTAND (26.09.2026) ═══════════════════════════════════════
+ *
+ * Neben dem EINEN uebergebenen Stueck liegt seit dem 26.09.2026 je Art
+ * eine Liste — die Kaskade der Post-Seite laesst daraus waehlen. Diese
+ * Zusicherungen halten die beiden Riegel fest, die dabei zaehlen: der
+ * Deckel und die Fassungspruefung. Beide waren beim Bau der Kaskade
+ * unbelegt (Verfaelschungsprobe: „Bestand wird nicht gekuerzt" und
+ * „Bestand ohne Fassungspruefung" blieben gruen).
+ */
+function speicherFenster() {
+    const inhalt = {};
+    const ctx = { console };
+    ctx.window = ctx;
+    ctx.localStorage = {
+        getItem: (k) => (k in inhalt ? inhalt[k] : null),
+        setItem: (k, v) => { inhalt[k] = String(v); },
+        removeItem: (k) => { delete inhalt[k]; }
+    };
+    vm.createContext(ctx);
+    vm.runInContext(fs.readFileSync(D('js/ds-post-uebergabe.js'), 'utf8'), ctx,
+                    { filename: 'ds-post-uebergabe.js' });
+    return { U: ctx.window.DsPostUebergabe, inhalt: inhalt };
+}
+
+test('der Bestand traegt alle Stuecke einer Art', () => {
+    const { U } = speicherFenster();
+    const erg = U.bestandLegen('deck', [
+        { titel: 'A', daten: { karten: { 'X (SVI 1)': 1 } } },
+        { titel: 'B', daten: { karten: { 'Y (SVI 2)': 2 } } }
+    ]);
+    assert.ok(erg.ok, `der Bestand liess sich nicht legen: ${erg.grund}`);
+    assert.equal(erg.gekuerzt, 0, 'ein Bestand aus zwei Decks wurde gekuerzt');
+    const b = U.bestand();
+    assert.deepEqual(b.deck.liste.map((e) => e.titel), ['A', 'B']);
+    /* Die drei Arten liegen unter EIGENEN Schluesseln: ein Meta Call ist
+     * hundertmal so gross wie ein Deck, und sprengt er den Platz, sollen
+     * die Decks trotzdem dastehen. */
+    assert.equal(b.turnier.liste.length, 0, 'die Arten teilen sich einen Schluessel');
+});
+
+test('was nicht mehr passt, wird gekuerzt und gezaehlt', () => {
+    const { U } = speicherFenster();
+    /* Ein Eintrag von rund 120 KB — sechs passen in die 700 KB, mehr
+     * nicht. Gekuerzt wird VON HINTEN: der Aufrufer uebergibt das
+     * angeklickte Stueck als erstes. */
+    const gross = (n) => {
+        const karten = {};
+        for (let i = 0; i < 2600; i++) karten[`Karte ${n}-${i} (SVI ${i})`] = 1;
+        return { titel: 'D' + n, daten: { karten } };
+    };
+    const rein = [];
+    for (let n = 0; n < 12; n++) rein.push(gross(n));
+    const erg = U.bestandLegen('deck', rein);
+    assert.ok(erg.ok, `der Bestand liess sich nicht legen: ${erg.grund}`);
+    assert.ok(erg.gekuerzt > 0,
+        'zwoelf Eintraege von je 120 KB passen angeblich in 700 KB — dann ist ' +
+        'der Deckel wirkungslos und der lokale Speicher laeuft voll');
+    assert.equal(erg.anzahl + erg.gekuerzt, 12,
+        `${erg.anzahl} behalten + ${erg.gekuerzt} gekuerzt sind nicht 12`);
+    assert.ok(erg.groesse <= U.BESTAND_HOECHSTENS,
+        `${erg.groesse} Zeichen liegen ueber dem Deckel ${U.BESTAND_HOECHSTENS}`);
+    const b = U.bestand();
+    assert.equal(b.deck.liste.length, erg.anzahl);
+    assert.equal(b.deck.gekuerzt, erg.gekuerzt,
+        'die Zahl der weggelassenen Eintraege kommt nicht beim Leser an — ' +
+        'die Auswahl behauptet dann, vollstaendig zu sein');
+    assert.equal(b.deck.liste[0].titel, 'D0', 'gekuerzt wurde von vorne');
+});
+
+test('ein Bestand aus einer fremden Fassung wird nicht gedeutet', () => {
+    /* Dieselbe Strenge wie bei `holen`. Ein halb verstandener Bestand
+     * ergibt eine Auswahlliste mit Loechern, und die faellt erst beim
+     * Klick auf. */
+    const { U, inhalt } = speicherFenster();
+    inhalt[U.BESTAND + 'deck'] = JSON.stringify({
+        v: U.FASSUNG + 1, stand: '', gekuerzt: 0,
+        liste: [{ titel: 'Aus der Zukunft', daten: { karten: { 'X (SVI 1)': 1 } } }]
+    });
+    assert.equal(U.bestand().deck.liste.length, 0,
+        'ein Bestand mit fremder Fassungsnummer wird trotzdem gelesen');
+    /* Und Unsinn im Speicher auch nicht. */
+    inhalt[U.BESTAND + 'turnier'] = '{kein json';
+    assert.equal(U.bestand().turnier.liste.length, 0);
+});
+
+test('die Auswahl sagt, wenn Stuecke weggelassen wurden', () => {
+    /* Sonst sucht der Betreiber drueben ein Deck, das es „nicht gibt". */
+    const quelle = fs.readFileSync(D('js/ds-post-quellen.js'), 'utf8');
+    assert.match(quelle, /function mitGekuerzt/,
+        'die Quellen nennen die weggelassenen Stuecke nicht');
+    ['meineDecks', 'journalTurniere', 'metaEigene'].forEach((f) => {
+        const i = quelle.indexOf('function ' + f);
+        assert.ok(i > 0, `${f} gibt es nicht mehr`);
+        const block = quelle.slice(i, i + 700);
+        assert.match(block, /mitGekuerzt/,
+            `${f} verschweigt, dass der Bestand gekuerzt wurde`);
+    });
+});

@@ -245,10 +245,17 @@ test('die 7-Tage-Kette fuehrt ueber den Archetyp auf dessen Listen', async () =>
         'Dragapult hat im Ausschnitt eine Liste, angeboten werden ' +
         dp.stufen[3].optionen.length);
     const bild = await dp.blatt.lade();
-    assert.match(bild.kicker, /Dragapult/,
-        `das Bild nennt den gewählten Archetyp nicht: ${bild.kicker}`);
+    /* Der Archetyp steht als TITEL, nicht im Kicker: zweimal derselbe
+       Name kostete die Zeichen, an denen dann das Datum fehlte (live
+       gemessen 26.09.2026). */
+    assert.equal(bild.titel, 'Dragapult',
+        `das Bild nennt den gewählten Archetyp nicht als Titel: ${bild.titel}`);
+    assert.ok(!/Dragapult/.test(bild.kicker),
+        `der Archetyp steht zweimal im Kopf: ${bild.kicker} / ${bild.titel}`);
     assert.match(bild.kicker, /Top 8/,
         `das Bild nennt die Schwelle nicht: ${bild.kicker}`);
+    assert.match(bild.caption, /Dragapult/,
+        `die Bildunterschrift nennt den Archetyp nicht: ${bild.caption}`);
     assert.ok(!/Excadrill/.test(bild.zeilen),
         'in der Dragapult-Liste stehen Karten eines anderen Decks');
     /* DIE PLATZIERUNG TRÄGT IHR FELD — Hausregel „jede Quote trägt ihren
@@ -311,6 +318,39 @@ test('das letzte Major bietet keinen Platz jenseits der Top 32', async () => {
     const sk = await Q.kaskade(['decks', 'major', 'Slowking']);
     assert.deepEqual(sk.stufen[3].optionen.map((o) => o.id), ['1', '29'],
         'die Plätze des Archetyps stimmen nicht');
+});
+
+test('beim Major ueberlebt das Datum im Kicker, nicht der Anhang der Quelle', async () => {
+    /* GEFUNDEN IM BILD (26.09.2026, live): im Kopf stand
+       „BASIC BOX · REGIONAL BALTIMORE, MD – LIM…" — das Datum war weg.
+       Der Kicker fasst vierzig Zeichen; wer sie mit dem Archetyp (steht
+       schon als Titel), der Bundesstaats-Abkuerzung und dem Wort
+       „Limitless" fuellt, verliert die Angabe, die wirklich etwas sagt.
+
+       Die aeussere Grenze in `fremdeListeScheibe` kuerzt IMMER auf 40 —
+       deshalb haelt eine Laengenzusicherung allein gar nichts (probiert:
+       beide Verfaelschungen blieben gruen). Geprueft wird, WAS uebrig
+       bleibt. */
+    const Q = fenster();
+    const k = await Q.kaskade(['decks', 'major', 'Slowking']);
+    const erg = await k.blatt.lade();
+    assert.ok(erg.kicker.length <= Q.KICKER_MAX);
+    assert.match(erg.kicker, /2026-09-18/,
+        `das Datum ist aus dem Kicker gefallen: ${erg.kicker}`);
+    assert.match(erg.kicker, /Baltimore/,
+        `der Ort ist aus dem Kicker gefallen: ${erg.kicker}`);
+    assert.ok(!/Limitless/.test(erg.kicker),
+        `der Anhang der Quelle steht im Kicker: ${erg.kicker}`);
+    /* Und die Kuerzung selbst, direkt: sie nimmt den Anhang und die
+       Bundesstaats-Abkuerzung, nicht den Namen. */
+    assert.equal(Q.kurzTurnier('Regional Baltimore, MD \u2013 Limitless'),
+        'Regional Baltimore');
+    assert.equal(Q.kurzTurnier('NAIC 2026, New Orleans \u2013 Limitless'),
+        'NAIC 2026, New Orleans');
+    /* Ohne Anhang bleibt alles, wie es war — die Kuerzung darf nicht an
+       Namen greifen, die sie nichts angeht. */
+    assert.equal(Q.kurzTurnier('Rare Candy Club Showdown #45'),
+        'Rare Candy Club Showdown #45');
 });
 
 test('der Meta Call trennt Modellprognose und bearbeitete Prognose', async () => {
@@ -407,6 +447,8 @@ test('das Battle Journal fuehrt direkt auf die Turniere', async () => {
 
 test('jedes Blatt liefert ein vollstaendiges Bild oder einen Befund', async () => {
     const Q = fenster();
+    const K = Q.KICKER_MAX;
+    assert.equal(K, 40, 'die gemessene Kickergrenze ist nicht mehr 40');
     const blaetter = await alleBlaetter(Q);
     assert.ok(blaetter.length > 20,
         `nur ${blaetter.length} Blätter — der Gang durch den Baum greift nicht`);
@@ -426,6 +468,16 @@ test('jedes Blatt liefert ein vollstaendiges Bild oder einen Befund', async () =
            clippt den Wert bei zwölf Zeichen, die Fußzeile bei 48. */
         assert.ok(erg.fuss.length <= 48,
             `${weg}: die Fußzeile hat ${erg.fuss.length} Zeichen (Grenze 48): ${erg.fuss}`);
+        /* DER KICKER FASST VIERZIG (26.09.2026, live nachgemessen).
+         *
+         * Gefunden, weil es im Bild stand: „MEGA EXCADRILL · TOP 8 ·
+         * LAST 7 DAYS · O." — und beim Major fiel das Datum ganz weg.
+         * `malKopf` sperrt den Kicker, verkleinert ihn bis 15 px und
+         * schneidet dann bei 660 px; 40 Zeichen messen dort 652 px, 42
+         * messen 685. Die Grenze steht als KICKER_MAX neben FUSS_MAX. */
+        assert.ok(String(erg.kicker || '').length <= K,
+            `${weg}: der Kicker hat ${erg.kicker.length} Zeichen (Grenze ${K}) ` +
+            `und wird stumm abgeschnitten: ${erg.kicker}`);
         zeilenVon(erg).forEach((z) => {
             assert.ok(z.wert.length <= 12,
                 `${weg}: „${z.wert}" hat ${z.wert.length} Zeichen, die Spalte fasst 12`);
@@ -492,6 +544,34 @@ test('die Uebergabe wird beim Oeffnen erkannt', () => {
         assert.match(SEITE, new RegExp(art + ':\\s*\\['),
             `für die Art ${art} kennt die Seite keinen Zweig`);
     });
+});
+
+test('kein Hinweis auf der Seite nennt einen Eintrag, den es nicht mehr gibt', () => {
+    /* Der Deckliste-Reiter erklaerte bis zum 26.09.2026: „Pick the source
+       ‚From the app'". Diesen Eintrag gibt es im Waehler nicht mehr — er
+       ist in zwei Ketten aufgegangen. Eine Anleitung, die auf einen
+       Eintrag zeigt, den man nicht findet, ist schlimmer als keine. */
+    /* Kommentare zaehlen nicht — weder die des HTML noch die des
+       Skripts darin. Der erste Anlauf fiel ueber einen Absatz, der die
+       alte Bezeichnung nur ERKLAERTE. */
+    const text = SEITE.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '')
+        /* Und der Zeilenumbruch im Absatz zaehlt auch nicht: der Weg
+           steht im Quelltext ueber zwei Zeilen, im Browser in einer. */
+        .replace(/<\/?b>/g, '').replace(/\s+/g, ' ');
+    assert.ok(!/From the app/.test(text),
+        'die Seite erklaert noch den Eintrag „From the app", den es nicht mehr gibt');
+    /* Und die zwei anderen Hinweise nennen den WEG, nicht nur den Namen:
+       „Matchup heatmap" allein findet man in einem Waehler nicht mehr,
+       der nur acht Richtungen zeigt. */
+    ['Online meta → Matchup heatmap', 'Online meta → A deck vs. the'].forEach((w) => {
+        assert.ok(text.indexOf(w) >= 0, `der Hinweis nennt den Weg nicht: ${w}`);
+    });
+    const i = text.indexOf('<legend>Decklist</legend>');
+    assert.ok(i > 0, 'den Deckliste-Reiter gibt es nicht mehr');
+    const block = text.slice(i, i + 900);
+    ['My decks', 'Most successful lists', 'Last major', 'Battle Journal']
+        .forEach((k) => assert.ok(block.indexOf(k) >= 0,
+            `der Hinweis nennt die Kette „${k}" nicht`));
 });
 
 test('der Karussell-Knopf kehrt ueber den Pfad zurueck, nicht ueber den Kartenfilter', () => {

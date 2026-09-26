@@ -866,7 +866,7 @@ def check_post_decklisten(findings):
 
     Sie liegt nicht im Repo: .github/workflows/deploy-pages.yml baut sie
     bei jedem Deploy nach _site/data/post_decklists.json (26.09.2026).
-    Gemessen an diesem Tag: 545 KB roh, 51 KB gzip.
+    Gemessen an diesem Tag nach der Top-8-Schwelle: 197 KB roh, 19 KB gzip.
 
     WARUM HIER UND NICHT ALS ZUSICHERUNG: die Groesse waechst mit der Zahl
     der Turniere im Fenster. Eine Obergrenze im Test haette den Deploy

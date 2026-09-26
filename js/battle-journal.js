@@ -2946,8 +2946,11 @@
             var ms = e.createdAtMs || 0;
             if (!paare[k] || paare[k].ms < ms) paare[k] = { name: n, meta: m, ms: ms };
         });
-        return Object.keys(paare).map(function (k) { return paare[k]; })
-            .sort(function (a, b) { return b.ms - a.ms; })
+        var reihe = Object.keys(paare).map(function (k) { return paare[k]; })
+            .sort(function (a, b) { return b.ms - a.ms; });
+        var namen = {};
+        reihe.forEach(function (p) { namen[p.name] = (namen[p.name] || 0) + 1; });
+        return reihe
             .map(function (p) {
                 if (!journalGruppe(p.name, p.meta).length) return null;
                 var sp = null;
@@ -2955,7 +2958,18 @@
                 catch (e) { sp = null; }
                 if (!sp) return null;
                 var d = bjUebergabeDaten(sp);
-                return { titel: sp.tournament, daten: d };
+                /* ZWEI TURNIERE KOENNEN GLEICH HEISSEN (Pruefagent,
+                 * 26.09.2026). „League Cup Mainz" gibt es in jedem
+                 * Format. Im Waehler drueben stuenden dann zwei
+                 * ununterscheidbare Eintraege — oder einer fiele weg,
+                 * weil die Entdopplung ueber den Titel geht. Das Meta
+                 * haengt deshalb dran, aber nur wo es gebraucht wird. */
+                var mehrfach = namen[p.name] > 1;
+                return {
+                    titel: sp.tournament + ((mehrfach && p.meta)
+                        ? ' (' + p.meta + ')' : ''),
+                    daten: d
+                };
             })
             .filter(Boolean);
     }

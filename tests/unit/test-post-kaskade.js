@@ -87,6 +87,7 @@ function fenster(opt) {
     ctx.fetch = function (u) {
         const rel = String(u).replace(/^\.\.\//, '');
         if (rel === 'data/post_decklists.json') {
+            if (opt.fetchListen) return opt.fetchListen();
             if (!listen) return Promise.resolve({ ok: false, status: 404 });
             return Promise.resolve({
                 ok: true, status: 200,
@@ -106,7 +107,8 @@ function fenster(opt) {
     vm.runInContext(fs.readFileSync(D('js/matchup-glaettung.js'), 'utf8'), ctx,
                     { filename: 'matchup-glaettung.js' });
     MUSTER.uebergabeEinrichten(ctx, opt.art || 'metacall');
-    if (!opt.ohneBestand) MUSTER.bestandEinrichten(ctx);
+    if (opt.bestandBauen) opt.bestandBauen(ctx);
+    else if (!opt.ohneBestand) MUSTER.bestandEinrichten(ctx);
     vm.runInContext(fs.readFileSync(D('js/ds-post-quellen.js'), 'utf8'), ctx,
                     { filename: 'ds-post-quellen.js' });
     return ctx.window.DsPostQuellen;
@@ -289,17 +291,33 @@ test('die Platzierung des Majors traegt ihren Nenner', async () => {
        Teilnehmerzahl fuehrt die Quelle fuer Papier-Turniere nicht, und
        eine geschaetzte waere erfunden. */
     const listen = LISTEN();
+    listen.major.feld = 3119;
     listen.major.gefuehrt = 559;
     const Q = fenster({ listen: listen });
     const erg = await (await Q.kaskade(['decks', 'major', 'Slowking', '29'])).blatt.lade();
-    assert.match(erg.fuss, /29th of 559/,
+    /* DER NENNER IST DAS FELD, NICHT DIE ZAHL DER EINGEREICHTEN LISTEN
+       (Pruefagent, 26.09.2026). Das Regional Baltimore hatte 3.119
+       Teilnehmer; 559 davon haben eine Liste eingereicht. Die Fusszeile
+       trug „of 559" — dem geposteten Bild fehlte damit der Faktor 5,6,
+       waehrend dieselbe Seite in der Events-Kette korrekt „3,119
+       players" fuer dasselbe Turnier nannte. */
+    assert.match(erg.fuss, /29th of 3,119/,
         `die Fußzeile nennt den Nenner nicht: ${erg.fuss}`);
+    assert.ok(!/559/.test(erg.fuss),
+        `die Zahl der eingereichten Listen steht als Nenner da: ${erg.fuss}`);
+    /* UND DIE BILDUNTERSCHRIFT AUCH — sie ist der Text, der mit nach
+       Instagram geht. Sie rechnete mit einem anderen Feld als die
+       Fusszeile und verlor die Zahl beim Major ganz. */
+    assert.match(erg.caption, /29th of 3,119/,
+        `die Bildunterschrift nennt den Nenner nicht: ${erg.caption}`);
     /* Und ohne die Zahl steht KEINE erfundene da. */
     const ohne = LISTEN();
     const Q2 = fenster({ listen: ohne });
     const e2 = await (await Q2.kaskade(['decks', 'major', 'Slowking', '29'])).blatt.lade();
     assert.ok(!/ of \d/.test(e2.fuss),
-        `ohne gefuehrte Zahl steht trotzdem ein Nenner da: ${e2.fuss}`);
+        `ohne Feldgroesse steht trotzdem ein Nenner da: ${e2.fuss}`);
+    assert.ok(!/ of \d/.test(e2.caption),
+        `ohne Feldgroesse steht in der Unterschrift ein Nenner: ${e2.caption}`);
 });
 
 test('das letzte Major bietet keinen Platz jenseits der Top 32', async () => {
@@ -351,6 +369,107 @@ test('beim Major ueberlebt das Datum im Kicker, nicht der Anhang der Quelle', as
        Namen greifen, die sie nichts angeht. */
     assert.equal(Q.kurzTurnier('Rare Candy Club Showdown #45'),
         'Rare Candy Club Showdown #45');
+});
+
+test('das Fenster steht datiert im Bild, nicht als Beschreibung', async () => {
+    /* Der Kopf von scripts/build_post_decklists.py verlangt es: die
+       Datei entsteht beim Deploy, „letzte 7 Tage" altert mit jedem Tag
+       danach. Ein fuenf Tage alter Deploy schriebe „last 7 days" ueber
+       ein Fenster, das vor zwoelf Tagen endete. (Pruefagent 26.09.2026) */
+    const Q = fenster();
+    const erg = await (await Q.kaskade(['decks', 'sieben', 'Dragapult', '0'])).blatt.lade();
+    assert.match(erg.kicker, /19\.09\.[–-]25\.09\./,
+        `das Fenster steht nicht im Kicker: ${erg.kicker}`);
+    assert.ok(!/last 7 days/i.test(erg.kicker),
+        `im Kicker steht die Beschreibung statt der Daten: ${erg.kicker}`);
+    assert.ok(erg.kicker.length <= Q.KICKER_MAX);
+});
+
+test('die Fusszeile der fremden Listen laeuft nicht ueber', async () => {
+    /* GEMESSEN (Pruefagent, 26.09.2026): „1st of 1,024 · 1,024 players ·
+       10-1-1 · 2026-09-19" sind 50 Zeichen bei 48 Platz — malFuss
+       schneidet dann das Datum ab. Heute fehlten zwei Zeichen. Die
+       Zeile geht deshalb durch `fussZeile`, das vorne kuerzt und den
+       Nenner hinten stehen laesst. */
+    const listen = LISTEN();
+    listen.sieben_tage.Dragapult[0].feld = 1024;
+    listen.sieben_tage.Dragapult[0].w = 10;
+    const Q = fenster({ listen: listen });
+    const erg = await (await Q.kaskade(['decks', 'sieben', 'Dragapult', '0'])).blatt.lade();
+    assert.ok(erg.fuss.length <= 48,
+        `die Fußzeile hat ${erg.fuss.length} Zeichen: ${erg.fuss}`);
+    assert.match(erg.fuss, /2026-09-23/,
+        `das Datum ist aus der Fußzeile gefallen: ${erg.fuss}`);
+    assert.match(erg.fuss, /1,024/,
+        `die Feldgröße ist aus der Fußzeile gefallen: ${erg.fuss}`);
+});
+
+test('der Spaltenkopf sagt, wie viele Karten nicht im Bild stehen', async () => {
+    /* Die Hausregel ueber MAX: „Wer acht von 131 zeigt, ohne die 131 zu
+       nennen, laesst den Leser glauben, das sei das ganze Feld."
+       `malListe` schneidet bei acht ab, ohne es zu sagen. */
+    const Q = fenster();
+    const erg = await (await Q.kaskade(['decks', 'major', 'Slowking', '1'])).blatt.lade();
+    const n = erg.kartenGitter.length;
+    assert.ok(n > 0);
+    assert.equal(erg.listeKopf, `Copies (${Math.min(8, n)} of ${n})`,
+        `der Spaltenkopf nennt die Zahl nicht: ${erg.listeKopf}`);
+});
+
+test('der Rangwaechter greift auch auf dem Kaskadenweg', async () => {
+    /* GEFUNDEN LIVE (Pruefagent, 26.09.2026): Meta Call → bearbeitete
+       Prognose → „1 · The field" zeigte „Crustle 4.0 %" und „Mega
+       Excadrill 4.0 %" mit den Rangziffern 06 und 07 darueber. Das Bild
+       behauptete eine Ordnung, die die Zahlen nicht hergeben.
+       `rangPruefen` sass nur in `DsPostQuellen.lade` — dem Weg, den die
+       Seite bis zur Kaskade ging. */
+    const Q = fenster();
+    const erg = await (await Q.kaskade(['metacall', 'eigen', '0', 'feld'])).blatt.lade();
+    const werte = String(erg.zeilen).split('\n').filter(Boolean)
+        .map((z) => (z.split('|')[1] || '').trim());
+    const doppelt = werte.length !== new Set(werte).size;
+    assert.ok(doppelt,
+        'im Muster liegen keine zwei Werte gleichauf — dann prüft diese ' +
+        'Zusicherung den Fall nicht, den sie halten soll');
+    assert.equal(erg.ohneRang, true,
+        `zwei gleiche Werte (${werte.join(', ')}) bekommen trotzdem Rangziffern`);
+});
+
+test('ein abgewiesener Abruf wird nicht gemerkt', async () => {
+    /* Am Telefon — dem bestellten Fall — ist ein Funkloch der Normalfall.
+       Vorher blieb das abgewiesene Versprechen stehen und BEIDE
+       Listen-Ketten waren bis zum Neuladen tot (Pruefagent 26.09.2026). */
+    let anlauf = 0;
+    const gut = LISTEN();
+    const Q = fenster({ fetchListen: () => {
+        anlauf++;
+        return anlauf === 1
+            ? Promise.resolve({ ok: false, status: 503 })
+            : Promise.resolve({ ok: true, status: 200,
+                                json: () => Promise.resolve(gut),
+                                text: () => Promise.resolve(JSON.stringify(gut)) });
+    } });
+    await assert.rejects(() => Q.postListen(), /503/);
+    const j = await Q.postListen();
+    assert.equal(Object.keys(j.sieben_tage).length, 2,
+        'nach dem zweiten Anlauf kommt immer noch der alte Fehlschlag');
+    assert.equal(anlauf, 2, `es gab ${anlauf} Abrufe`);
+});
+
+test('„my call" steht nur ueber eigenen Schaetzungen', async () => {
+    /* `staende.eigen` wird auch gerechnet, wenn im Szenario keine eigene
+       Schaetzung steckt — dann stehen dort die Zahlen des Modells. Der
+       Waehler sagte es ehrlich („— no own estimates"), das BILD sagte
+       weiter „my call %". (Pruefagent, 26.09.2026) */
+    const Q = fenster();
+    const mit = await (await Q.kaskade(['metacall', 'eigen', '0', 'feld'])).blatt.lade();
+    const ohne = await (await Q.kaskade(['metacall', 'eigen', '1', 'feld'])).blatt.lade();
+    assert.equal(mit.listeKopf, 'my call %',
+        `mit eigenen Schätzungen steht: ${mit.listeKopf}`);
+    assert.equal(ohne.listeKopf, 'predicted %',
+        `ohne eigene Schätzungen steht trotzdem: ${ohne.listeKopf}`);
+    assert.ok(!/I expect/.test(ohne.caption),
+        `die Unterschrift behauptet eine eigene Erwartung: ${ohne.caption}`);
 });
 
 test('der Meta Call trennt Modellprognose und bearbeitete Prognose', async () => {
@@ -483,6 +602,39 @@ test('jedes Blatt liefert ein vollstaendiges Bild oder einen Befund', async () =
                 `${weg}: „${z.wert}" hat ${z.wert.length} Zeichen, die Spalte fasst 12`);
         });
     }
+});
+
+test('die Auswahl nennt die Stuecke, die nicht mehr in den Speicher passten', async () => {
+    /* VERFAELSCHUNGSPROBE, DIE NICHT BISS (Pruefagent, 26.09.2026):
+       `mitGekuerzt` liess sich neutralisieren, ohne dass etwas rot wurde
+       — die einzige Sicherung war ein Textgriff nach dem Wort
+       „mitGekuerzt" im Quelltext. Genau das Muster, das CLAUDE.md
+       verbietet. Hier wird der Fall stattdessen HERGESTELLT: ein
+       Bestand, der nicht ganz passt. */
+    const Q = fenster({ bestandBauen: (ctx) => {
+        const U = ctx.window.DsPostUebergabe;
+        const gross = (n) => {
+            const karten = {};
+            for (let i = 0; i < 2600; i++) karten[`Karte ${n}-${i} (SVI ${i})`] = 1;
+            return { titel: 'Deck ' + n, daten: { titel: 'Deck ' + n, karten, bilder: {} } };
+        };
+        const rein = [];
+        for (let n = 0; n < 12; n++) rein.push(gross(n));
+        const erg = U.bestandLegen('deck', rein);
+        assert.ok(erg.gekuerzt > 0, 'der Bestand wurde gar nicht gekürzt');
+    } });
+    const k = await Q.kaskade(['decks', 'meine']);
+    const letzte = k.stufen[2].optionen[k.stufen[2].optionen.length - 1];
+    assert.match(letzte.name, /more decks did not fit/,
+        `die Auswahl verschweigt die weggelassenen Decks: ${letzte.name}`);
+    assert.match(letzte.name, /\d/, `die Zahl fehlt: ${letzte.name}`);
+    /* Und der Eintrag ist keine Sackgasse: er sagt beim Laden, was zu
+       tun ist. Erreicht wird er ueber den Pfad, nicht ueber die
+       Stufenliste — die traegt nur Kennung und Namen. */
+    const b = await Q.kaskade(['decks', 'meine', 'gekuerzt']);
+    assert.equal(b.stufen[2].wahl, 'gekuerzt');
+    await assert.rejects(() => b.blatt.lade(), /left out|Posts page/,
+        'der Hinweis erklärt nicht, wie man an das fehlende Deck kommt');
 });
 
 test('ohne Uebergabe sagt jede eigene Kette, was zu tun ist', async () => {

@@ -15651,7 +15651,11 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     try { namen = Object.keys(_loadScenarios() || {}); } catch (e) { namen = []; }
     if (!namen.length) return aus;
     let original = null;
-    try { original = _snapshotState(); } catch (e) { return aus; }
+    let settingsVorher = null;
+    try {
+      original = _snapshotState();
+      settingsVorher = { ..._settings };
+    } catch (e) { return aus; }
     try {
       const alle = _loadScenarios() || {};
       namen.forEach(name => {
@@ -15666,7 +15670,16 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         } catch (e) { /* ein unlesbares Szenario laesst die anderen stehen */ }
       });
     } finally {
-      try { _applyState(original); } catch (e) { /* nichts zu retten */ }
+      try {
+        _applyState(original);
+        /* ERSETZEN, NICHT MISCHEN (Pruefagent, 26.09.2026). `_applyState`
+         * spreizt `settings` IN die vorhandenen — ein Schluessel, den nur
+         * ein altes Szenario fuehrt, ueberlebt das Zuruecksetzen sonst.
+         * Kein Datenverlust, aber der Stand nach dem Klick waere nicht
+         * exakt der davor, und das faellt erst in der naechsten Rechnung
+         * auf. */
+        if (settingsVorher) _settings = { ...settingsVorher };
+      } catch (e) { /* nichts zu retten */ }
     }
     return aus;
   }

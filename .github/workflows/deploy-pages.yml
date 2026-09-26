@@ -325,7 +325,8 @@ jobs:
       # data/tournament_decklists_per_player.csv ist 45 MB gross und
       # 202.685 Zeilen lang. posts/index.html laeuft im Browser, oft am
       # Telefon — sie kann die Quelle nicht laden. Die abgeleitete Datei
-      # ist gemessen 545 KB (51 KB gzip) und steht in ZWEI Sekunden.
+      # ist gemessen 197 KB (19 KB gzip) und steht in zwei Sekunden.
+      # (545 KB stand hier bis zum 26.09.2026 — vor der Top-8-Schwelle.)
       #
       # Sie im Repo zu fuehren haette geheissen: bei jedem Scrape eine
       # neue Fassung von einer halben Megabyte in die Geschichte, und ein

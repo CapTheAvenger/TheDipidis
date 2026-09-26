@@ -6788,13 +6788,6 @@ details[open] > .tier-trending-summary::after {
     grid-template-columns: repeat(3, 1fr);
 }
 
-/* Seit dem No-Show sind es vier: W · L · T · N. Auf 390 px teilen sie
- * sich die halbe Zeilenbreite, also rund 45 px je Knopf — genug fuer
- * einen Buchstaben und einen Daumen, wenn der Abstand kleiner wird. */
-.battle-journal-choice-group-result.battle-journal-choice-group-vier {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-}
 
 /* BEFUND 26.09.2026: `background: #fff` war fest, `color` kam aus der
  * Tokenschicht. Im Dunkelmodus hiess das helle Tinte auf weissem Grund —
@@ -6840,13 +6833,55 @@ details[open] > .tier-trending-summary::after {
     color: var(--tint-warn-ink);
 }
 
-/* Der No-Show bekommt bewusst KEIN Gruen: er zaehlt in der Bilanz als
- * Sieg, war aber keiner am Tisch. Neutral getoent sagt genau das. */
-.battle-journal-choice-noshow.is-selected {
+/* ── No-Show ──────────────────────────────────────────────────────
+ *
+ * Eigene Zeile statt eines vierten Knopfes in der Ergebnisreihe: wenn
+ * niemand erschienen ist, gibt es kein Gegnerdeck, kein Best of und
+ * keine Partie. Der Schalter muss deshalb VOR diesen Feldern stehen
+ * und sie ausblenden — sonst sucht jemand einen Gegner-Archetyp, den
+ * es nicht gibt (genau so ist der erste Anlauf gescheitert).
+ *
+ * Bewusst kein Gruen: er zaehlt in der Bilanz als Sieg, war aber
+ * keiner am Tisch. */
+.bj-noshow-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+    min-height: 52px;
+    padding: 9px 14px;
+    border: 2px dashed var(--line-strong);
+    border-radius: 12px;
+    background: var(--surface-1);
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+    transition: background .12s, border-color .12s;
+}
+.bj-noshow-btn:hover { background: var(--surface-2); }
+.bj-noshow-btn.is-active {
+    border-style: solid;
     border-color: var(--ink-3);
     background: var(--surface-2);
-    color: var(--ink);
 }
+.bj-noshow-titel {
+    font-size: 14px;
+    font-weight: 800;
+}
+.bj-noshow-hinweis {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-2);
+}
+.bj-noshow-btn.is-active .bj-noshow-titel::before {
+    content: '\2713\00a0';
+}
+
+/* Das Gegnerfeld bleibt sichtbar, aber sichtbar AUSSER Betrieb —
+ * verstecken waere schlechter: dann fragt sich jemand, wo es hin ist. */
+.is-ausgegraut { opacity: .45; }
+.is-ausgegraut .battle-journal-input { cursor: not-allowed; }
 
 .battle-journal-actions {
     display: flex;

@@ -123,7 +123,11 @@ describe('tokens.css ist der Vorrat', () => {
         const medien = [...rein.matchAll(/@media[^{]*\{([\s\S]*?\})\s*\}/g)];
         for (const m of medien) {
             const innen = m[1].trim();
-            assert.match(innen, /^:root\s*\{[\s\S]*\}$/,
+            // Der Block darf seit dem 26.09.2026 einen zweiten Selektor
+            // tragen: das Battle-Journal-Blatt fuehrt eine eigene
+            // Helligkeit und braucht dieselben Werte. Es bleibt ein Block.
+            assert.match(innen,
+                /^:root\s*(,\s*\.battle-journal-sheet:not\(\.is-dark\)\s*)?\{[\s\S]*\}$/,
                 `@media in tokens.css enthält mehr als ein :root: ${innen.slice(0, 60)}`);
             const deklarationen = innen.slice(innen.indexOf('{') + 1, innen.lastIndexOf('}'))
                 .split(';').map(x => x.trim()).filter(Boolean);
@@ -134,7 +138,7 @@ describe('tokens.css ist der Vorrat', () => {
         }
         const outside = rein
             .replace(/@media[^{]*\{[\s\S]*?\}\s*\}/g, '')
-            .replace(/:root(\[data-theme="dark"\])?\s*\{[\s\S]*?\n\}/g, '').trim();
+            .replace(/:root(\[data-theme="dark"\])?\s*(,\s*\.battle-journal-sheet(:not\(\.is-dark\)|\.is-dark)\s*)?\{[\s\S]*?\n\}/g, '').trim();
         assert.equal(outside, '', `tokens.css enthält Regeln außerhalb von :root: ${outside.slice(0, 80)}`);
     });
 });

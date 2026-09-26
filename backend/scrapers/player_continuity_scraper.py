@@ -33,6 +33,7 @@ Usage:
 
 import argparse
 import csv
+import datetime as _dt
 import json
 import logging
 import os
@@ -128,6 +129,112 @@ def load_meta_map(data_dir: str) -> Dict[str, str]:
             logger.warning("tid=%s traegt mehrere metas %s — nehme %s",
                            tid, sorted(werte), out[tid])
     return out
+
+
+def meta_fuer_turnier(t: Dict, tid: str, datum: str,
+                      meta_map: Dict[str, str]) -> str:
+    """Das Format EINES Turniers, aus drei Quellen in dieser Reihenfolge.
+
+    Eine eigene Funktion, weil die Reihenfolge der Kern der Reparatur vom
+    26.09.2026 ist und in der Schleife darueber nicht pruefbar waere: die
+    Schleife holt Seiten. `tests/python/test_klebrigkeit_formatfilter.py`
+    fuehrt diese Funktion aus, statt den Quelltext nach einem Aufruf zu
+    durchsuchen — eine Textzusicherung haette nicht bemerkt, dass die
+    dritte Quelle gar nicht aufgerufen wird (beim Verfaelschen gemessen).
+
+      1. der Index selbst — falls er die Spalte je bekommt,
+      2. die Karte aus labs_tournament_decks.csv,
+      3. das DATUM (siehe meta_aus_datum).
+    """
+    aus_index = (t.get('meta') or '').strip() if t else ''
+    aus_karte = (meta_map or {}).get(tid, '')
+    meta = aus_index or aus_karte or meta_aus_datum(datum)
+    if not meta:
+        logger.warning("    tid=%s ohne meta — die Klebrigkeit kann "
+                       "dieses Turnier nicht nach Format filtern.", tid)
+    elif not aus_index and not aus_karte:
+        logger.info("    tid=%s steht noch nicht in der Deck-Uebersicht "
+                    "— Format aus dem Datum %s abgeleitet: %s",
+                    tid, datum, meta)
+    return meta
+
+
+def meta_aus_datum(datum: str) -> str:
+    """Das Format eines Turniers aus SEINEM DATUM — dieselbe Regel wie im
+    Labs-Scraper, nicht eine zweite.
+
+    BEFUND (Wochenlauf #161, 26.09.2026, 05:03 UTC). Das Tor vor dem Push
+    schlug zu:
+
+        817 von 25238 Zeilen ohne meta
+        tournament_id 0073, tournament_date 2026-09-26, meta ''
+
+    Kein Defekt im Parser, sondern eine LUECKE IN DER REIHENFOLGE: ein
+    Turnier steht in der Standings-Liste (und damit in dieser Datei),
+    bevor es in der Deck-Uebersicht steht. `load_meta_map` liest aber
+    genau die Deck-Uebersicht — fuer ein Turnier vom Vortag hat sie
+    schlicht noch keinen Eintrag. Das Datum ist da, das Format waere
+    daraus ableitbar, und trotzdem blieb die Spalte leer.
+
+    Teuer war das, weil die Zusicherung richtig ist: ohne diese Spalte
+    mischt das Klebrigkeits-Fenster mehrere Formate und daempft Decks
+    fuer eine Rotation statt fuer fehlende Spielertreue (Befund
+    29.08.2026). Sie darf also NICHT gelockert werden — die Luecke
+    gehoert geschlossen.
+
+    WARUM GELIEHEN UND NICHT NACHGEBAUT: die Regel ist nicht
+    "Datum -> Format", sondern "Datum -> Format, ausser im
+    In-Person-Lag-Fenster, dann das Vorformat". Genau daran ist am
+    23.05.2026 schon einmal ein Turnier falsch einsortiert worden
+    (Melbourne unter TEF-CRI, obwohl CRI erst am 05.06. legal war). Eine
+    zweite Abschrift dieser Regel waere die Stelle, an der die beiden
+    Dateien auseinanderlaufen.
+
+    Findet auch der Labs-Scraper nichts, bleibt es leer — und dann ist es
+    ein Befund und kein Anlass zum Raten.
+    """
+    datum = (datum or '').strip()
+    if not datum:
+        return ''
+    # EIN UNLESBARES DATUM IST KEIN NEUES TURNIER.
+    # Ohne diese Pruefung faellt jeder Unsinn in der Spalte durch bis zum
+    # Zweig „brandneu, also laufendes Format" — und bekaeme ein Format
+    # zugesprochen, fuer das es keinen Beleg gibt. Beim Schreiben der
+    # Zusicherung gemessen: meta_aus_datum('kein datum') gab 'TEF-30C'.
+    try:
+        _dt.datetime.strptime(datum, '%Y-%m-%d')
+    except ValueError:
+        logger.warning("Datum %r ist kein ISO-Datum — kein Format abgeleitet.",
+                       datum)
+        return ''
+    try:
+        from scrapers import labs_tournament_scraper as _labs
+    except ImportError:
+        try:
+            import labs_tournament_scraper as _labs       # Direktaufruf im Ordner
+        except ImportError:
+            logger.warning("labs_tournament_scraper nicht importierbar — "
+                           "meta kann nicht aus dem Datum abgeleitet werden.")
+            return ''
+    try:
+        # 1. Ein Chunk, dessen Datumsfenster das Turnier enthaelt.
+        m = _labs._derive_meta_from_date(datum)
+        if m:
+            return m
+        # 2. Brandneu: noch kein Chunk. Dann das laufende Format — ausser
+        #    das Turnier liegt VOR dem Tag, an dem das neue Set in Person
+        #    legal wird; dann spielt es noch das Vorformat.
+        laufend = _labs._current_meta_key()
+        if not laufend:
+            return ''
+        legal = _labs._load_in_person_legal_date()
+        if legal and datum < legal:
+            return _labs._previous_meta_for_date(datum) or ''
+        return laufend
+    except Exception as e:                                   # noqa: BLE001
+        logger.warning("meta aus dem Datum %s nicht ableitbar: %s: %s",
+                       datum, type(e).__name__, e)
+        return 
 
 
 # Der Nutzlast-Block, den die Seite selbst schon mitliefert.
@@ -565,10 +672,7 @@ def main():
         date = (t.get('tournament_date') or '').strip()
         # Index zuerst (falls er die Spalte je bekommt), sonst die
         # Karte aus labs_tournament_decks.csv.
-        meta = (t.get('meta') or '').strip() or meta_map.get(tid, '')
-        if not meta:
-            logger.warning("    tid=%s ohne meta — die Klebrigkeit kann "
-                           "dieses Turnier nicht nach Format filtern.", tid)
+        meta = meta_fuer_turnier(t, tid, date, meta_map)
         logger.info("[%d/%d] tid=%s  %s  %s",
                     i, len(target), tid, date, meta or '(no meta)')
         rows = scrape_standings_full(tid)

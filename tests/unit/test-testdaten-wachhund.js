@@ -612,7 +612,15 @@ const REGISTER = {
  * Teilnehmerzahl (Baltimore 559 statt 3.119), die Fusszeile lief bei
  * vierstelligen Feldern ueber, und der Spaltenkopf verschwieg, wie
  * viele Karten nicht im Bild stehen. */
-const OBERGRENZE = 393 + 1 + 2 + 13;
+/* +2 am 26.09.2026 fuer test-post-quellen.js: der Deckel der Ranglisten
+ * ging von acht auf zehn („Top 10 ist irgendwie runder als Top 8"), und
+ * die zwei neuen Ungleichungen sind LESBARKEITSSCHWELLEN der
+ * Zeichenflaeche, keine Wochenwerte — der kleinste gezeichnete Deckname
+ * muss 38 px messen, die Tafelzeile mindestens 58 px hoch sein. Beide
+ * koennen durch keinen Datenlauf brechen, wohl aber durch eine
+ * Aenderung an malRangliste/malTafel — und genau dann SOLLEN sie rot
+ * werden. */
+const OBERGRENZE = 393 + 1 + 2 + 13 + 2;
 
 /* Die zweite Sperrklinke, eingezogen am 22.09.2026: so viele
    Gleichheiten gegen eine zweistellige Zahl stehen heute in Dateien,
@@ -640,7 +648,12 @@ const OBERGRENZE = 393 + 1 + 2 + 13;
  * und `malKopf` schneidet bei 660. Sie kann durch keinen Datenlauf
  * brechen, wohl aber durch eine Aenderung an malKopf — und genau dann
  * SOLL sie rot werden. */
-const OBERGRENZE_GLEICHHEIT = 162 + 2 + 1;
+/* +1 am 26.09.2026: test-post-quellen.js vergleicht MAX mit 10. Die
+ * Zahl ist eine BESTELLUNG des Betreibers, kein Datenwert — und genau
+ * deshalb muss sie festgenagelt sein: alle anderen Zusicherungen lesen
+ * den Deckel aus dem Modul und merken nicht, wenn er zurueckfaellt
+ * (beim Verfaelschen gemessen). */
+const OBERGRENZE_GLEICHHEIT = 162 + 2 + 1 + 1;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

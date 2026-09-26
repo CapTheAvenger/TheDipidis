@@ -300,13 +300,33 @@ function zeilenText(paare) {
     return paare.map(function (p) { return p[0] + ' | ' + p[1]; }).join('\n');
 }
 
-/* HÖCHSTENS ACHT — UND DAS MUSS DASTEHEN.
+/* HÖCHSTENS ZEHN — UND DAS MUSS DASTEHEN.
  *
- * `malListe` schneidet bei acht ab, ohne es zu sagen, und malt dabei
- * 01–08 davor. Das Bild BEHAUPTET damit eine Rangfolge unter den ersten
- * acht von wie vielen auch immer. Wer acht von 131 zeigt, ohne die 131
- * zu nennen, laesst den Leser glauben, das sei das ganze Feld. */
-var MAX = 8;
+ * `malListe` schneidet bei zehn ab, ohne es zu sagen, und malt dabei
+ * 01–10 davor. Das Bild BEHAUPTET damit eine Rangfolge unter den ersten
+ * zehn von wie vielen auch immer. Wer zehn von 131 zeigt, ohne die 131
+ * zu nennen, laesst den Leser glauben, das sei das ganze Feld.
+ *
+ * VON ACHT AUF ZEHN (26.09.2026). Bestellt: „Können wir bei den Most
+ * played Decks nicht die Top 10 zeigen? Top 10 ist irgendwie runder als
+ * Top 8."
+ *
+ * Die Acht war nie eine Zahl der Gestaltung, sondern eine Behauptung
+ * über die Zeichenfläche — und sie stimmte schon länger nicht mehr:
+ * `listeZeilen` in posts/index.html schneidet seit jeher bei ZEHN, der
+ * Deckel sass allein hier. Gemessen wurde deshalb, was zehn Zeilen
+ * wirklich kosten (gerendert in Chromium, 1080 × 1350):
+ *
+ *     acht Zeilen, alte Flaeche   82 px hoch, Name 38 px
+ *     zehn Zeilen, alte Flaeche   66 px hoch, Name 22 px   <- zu klein
+ *     zehn Zeilen, neue Flaeche   78 px hoch, Name 38 px
+ *
+ * Die neue Fläche beginnt bei 470 statt 540 und endet 50 px tiefer —
+ * das Band zwischen Titel und Liste war ohnehin tot. Zehn Zeilen stehen
+ * damit in derselben Schriftgröße wie vorher acht; die Tafel-Ansicht
+ * bekam dieselbe Behandlung. Nichts wird kleiner, nur die leere Stelle
+ * verschwindet. */
+var MAX = 10;
 
 /* NICHT MITTEN IN EINEN GLEICHSTAND SCHNEIDEN.
  *

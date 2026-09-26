@@ -1100,11 +1100,25 @@ function malRangliste(ctx, spec, mitBalken) {
     if (!zeilen.length) return;
 
     var links = 56, rechts = MP.W - 56, breite = rechts - links;
-    var oben = 540;
-    /* Die Liste fuellt ihre Flaeche. Bei sechs Zeilen stuende sie
-       sonst oben und liesse ein Drittel des Bildes leer — genau die
-       "halbleere Kachel" vom 02.09.2026. */
-    var platz = MP.H - 150 - oben;
+    /* DIE FLAECHE WURDE GROESSER, NICHT DIE SCHRIFT KLEINER (26.09.2026).
+     *
+     * Bestellt: „Top 10 ist irgendwie runder als Top 8." Zehn Zeilen in
+     * die alte Flaeche zu quetschen haette die Decknamen von 38 px auf
+     * 22 px gedrueckt — auf einem Telefon nicht mehr lesbar (gerendert
+     * und angesehen, nicht gerechnet).
+     *
+     * Also faengt die Liste 70 px hoeher an und endet 50 px tiefer. Der
+     * Platz war da: zwischen der Titelgrundlinie (hoechstens 408) und
+     * der alten Oberkante lag ein totes Band von 132 px, und bis zur
+     * Fusszeile (Grundlinie 1300) waren es 100 px Luft. Gemessen bleibt
+     * zehn Zeilen damit dieselbe Schriftgroesse wie vorher acht:
+     * 78 px Zeilenhoehe, Name 38 px, Wert 34 px.
+     *
+     * Kuerzere Listen fuellen ihre Flaeche weiter aus — bei sechs
+     * Zeilen stuende sie sonst oben und liesse ein Drittel des Bildes
+     * leer, genau die „halbleere Kachel" vom 02.09.2026. */
+    var oben = 470;
+    var platz = MP.H - 100 - oben;
     var zeilenH = Math.min(126, Math.floor(platz / zeilen.length));
 
     /* Der groesste Wert setzt die Balkenlaenge. Nicht 100 %: bei einem
@@ -1138,7 +1152,7 @@ function malRangliste(ctx, spec, mitBalken) {
      * er ganz weggelassen — ein 60 Punkte langer Stummel behauptet
      * Verhaeltnisse, die er nicht zeigen kann. */
     var lueckeName = 28, lueckeBalken = 28;
-    ctx.font = fSans(Math.min(38, zeilenH - 44), 700);
+    ctx.font = fSans(Math.min(38, zeilenH - 40), 700);
     var nameBedarf = 0;
     zeilen.forEach(function (z) {
         nameBedarf = Math.max(nameBedarf, ctx.measureText(z[0]).width);
@@ -1166,7 +1180,11 @@ function malRangliste(ctx, spec, mitBalken) {
         }
 
         ctx.fillStyle = F.creme;
-        ctx.font = fSans(Math.min(38, zeilenH - 44), 700);
+        /* 40 statt 44 Punkte Luft: bei 78 px Zeilenhoehe — dem Mass
+           fuer zehn Zeilen — reicht das fuer die vollen 38 px, und
+           zwischen zwei Zeilen bleiben immer noch 40 px. Gerendert
+           nachgesehen, nicht gerechnet. */
+        ctx.font = fSans(Math.min(38, zeilenH - 40), 700);
         ctx.textAlign = 'left';
         ctx.fillText(clip(ctx, z[0], nameBreite + 2), x, mitte);
 
@@ -1184,7 +1202,7 @@ function malRangliste(ctx, spec, mitBalken) {
         }
 
         ctx.fillStyle = F.holz;
-        ctx.font = fMono(Math.min(34, zeilenH - 48), 700);
+        ctx.font = fMono(Math.min(34, zeilenH - 44), 700);
         ctx.textAlign = 'right';
         ctx.fillText(clip(ctx, z[1], wertBreite + 8), rechts, mitte);
 
@@ -1204,11 +1222,14 @@ function malRangliste(ctx, spec, mitBalken) {
 /* ── 3c · Tafel: der Zuschnitt der Feldtabelle ─────────────────────── */
 function malTafel(ctx, spec) {
     var zeilen = String(spec.zeilen || '').split('\n')
-        .map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 8)
+        /* ZEHN, WIE DIE RANGLISTE (26.09.2026). Stuende hier weiter
+           acht, zeigte dieselbe Quelle je nach Ansicht acht oder zehn
+           Zeilen — und niemand wuesste, welche der beiden Zahlen gilt. */
+        .map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 10)
         .map(function (s) { var t = s.split('|'); return [ (t[0]||'').trim(), (t[1]||'').trim() ]; });
     if (!zeilen.length) return;
 
-    var x = 26, breite = MP.W - 52, oben = 560;
+    var x = 26, breite = MP.W - 52, oben = 500;
     var kopfH = 62;
     /* KURZE LISTEN FÜLLEN IHRE FLÄCHE.
      *
@@ -1219,7 +1240,10 @@ function malTafel(ctx, spec) {
      * 02.09.2026 ausdrücklich beanstandet hat. Jetzt wächst die Zeile,
      * bis die Fläche voll ist, und wird bei 104 gedeckelt, damit vier
      * Zeilen nicht wie Plakatschrift wirken. */
-    var platzListe = MP.H - 180 - oben - kopfH;
+    /* Dieselbe Rechnung wie bei der Rangliste: 60 px hoeher anfangen,
+       50 px tiefer enden. Zehn Zeilen bekommen damit 65 px statt 54 —
+       gerendert nachgesehen. */
+    var platzListe = MP.H - 130 - oben - kopfH;
     var zeilenH = Math.min(136, Math.floor(platzListe / zeilen.length));
     var hoehe = kopfH + zeilen.length * zeilenH;
 

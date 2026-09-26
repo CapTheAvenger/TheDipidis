@@ -118,7 +118,9 @@ def _pusht_nach_main(text):
         nackt = zeile.strip()
         if not nackt or nackt.startswith("#"):
             continue
-        if "git push" in nackt:
+        # Seit dem 27.09.2026 schreiben drei Ablaeufe ueber
+        # scripts/daten_pushen.sh — das ist ebenfalls ein Push nach main.
+        if "git push" in nackt or "scripts/daten_pushen.sh" in nackt:
             return True
     return False
 

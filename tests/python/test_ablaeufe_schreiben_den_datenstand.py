@@ -88,6 +88,10 @@ def test_der_fortgeschriebene_stand_landet_auch_im_commit():
     for name, text in _ablaeufe():
         if not RUFT_AUF.search(text):
             continue
+        # scripts/daten_pushen.sh nimmt data_stand.json selbst mit
+        # (ausgefuehrt geprueft in test_daten_pushen.py, 27.09.2026).
+        if re.search(r'^\s*bash scripts/daten_pushen\.sh', text, re.M):
+            continue
         adds = re.findall(r'^\s*git add\s+(.+?)(?:\s*\\)?$', text, re.M)
         if not adds:
             fehlt.append(f'{name} (kein git add gefunden)')

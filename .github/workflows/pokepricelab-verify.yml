@@ -65,17 +65,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/pokepricelab_verification.csv data/data_stand.json
-          if git diff --cached --quiet; then
-            echo "No report changes."
-            exit 0
-          fi
-          git commit -m "Auto: pokepricelab identity cross-check — $(date -u '+%Y-%m-%d %H:%M UTC')
+          # Schreibweg mit Neuaufsetzen statt Rebase (27.09.2026, Verify #15
+          # endete mit Code 128 an einem Konflikt auf data_stand.json):
+          # scripts/daten_pushen.sh baut die Datenstaende auf dem neuen Stand neu.
+          bash scripts/daten_pushen.sh "Auto: pokepricelab identity cross-check — $(date -u '+%Y-%m-%d %H:%M UTC')
 
           Report only — no mapping was changed.
           Triggered by .github/workflows/pokepricelab-verify.yml
-          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          for i in 1 2 3 4; do
-            git push && break
-            git pull --rebase && sleep $((2 ** i))
-          done
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" data/pokepricelab_verification.csv

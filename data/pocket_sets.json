@@ -30,13 +30,14 @@
    "P-B"
   ],
   "ohne_namen": [],
-  "nachgetragen": [
+  "nicht_mehr_auf_der_quellseite": [],
+  "geaendert_in_diesem_lauf": [],
+  "nachgetragen": [],
+  "nachtrag_bestaetigt": [
    {
     "kennung": "B4b",
     "name": "Deluxe Pack Mega",
-    "am": "2026-09-25",
-    "beleg": "game8.co/games/Pokemon-TCG-Pocket/archives/482685 — „Deluxe Pack Mega (B4b) has been announced for release on September 29th, 2026, 6pm PDT. It is the 22nd overall expansion following Team Rocket's Ambition (B4a)“",
-    "warum_von_hand": "build_pocket_sets.py kann nicht in CI laufen: game8.co antwortet Rechenzentrums-Adressen mit HTTP 202 (Cloudflare-Pruefung). Am 25.09.2026 nachgemessen, auch aus der Bausandkiste: 202. Gelesen wurde die Seite im Browser der Arbeitssitzung."
+    "nachgetragen_am": "2026-09-25"
    }
   ]
  },

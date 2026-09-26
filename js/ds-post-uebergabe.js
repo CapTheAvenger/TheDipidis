@@ -36,6 +36,39 @@
  * behauptet, hat es nicht versucht. Der Weg ist: Bild erzeugen →
  * Teilen-Dialog des Geräts → Instagram. Genau dafür zeigt
  * js/ds-bildvorschau.js das Bild erst an, statt es wortlos zu speichern.
+ *
+ * ══════════════════════════════════════════════════════════════════
+ * DER BESTAND (26.09.2026) — EIN STÜCK GENÜGT NICHT MEHR
+ * ══════════════════════════════════════════════════════════════════
+ *
+ * BESTELLT (Betreiber): „Wenn ich also auf Decks, dann sollte danach die
+ * nächste Option My Decks sein. Dann zeigt er mir im nächsten Filter
+ * genau meine Decks an, aus denen ich wählen kann. […] Hauptfeature
+ * Metacall, und da habe ich dann die Möglichkeit zu wählen zwischen
+ * Standardprognose oder bearbeiteter Prognose, und dann bei der
+ * bearbeiteten Prognose werden dann meine gespeicherten Metacalls
+ * angezeigt. […] Battle Journal, und da kann ich dann einfach das
+ * entsprechende Turnier auswählen."
+ *
+ * Bis heute übergab die App EIN Stück: das angeklickte Deck, das
+ * angeklickte Turnier, den offenen Meta Call. Eine Auswahlliste auf der
+ * Post-Seite kann daraus nicht entstehen — sie hätte genau einen
+ * Eintrag, und der Betreiber müsste für jedes zweite Deck in die App
+ * zurück und wieder auf „Post-Seite" drücken.
+ *
+ * Deshalb liegt neben dem EINEN Stück jetzt der BESTAND: je Art eine
+ * Liste. Drei getrennte Schlüssel, nicht einer — ein Meta Call ist
+ * hundertmal so groß wie ein Deck, und wenn die Meta Calls den Platz
+ * sprengen, sollen die Decks trotzdem dastehen.
+ *
+ * Der alte Schlüssel bleibt unverändert und behält seine Bedeutung
+ * („das hier wollte er gerade"). Er entscheidet weiter, was die
+ * Post-Seite beim Öffnen vorschlägt.
+ *
+ * WAS PASSIERT, WENN ES NICHT PASST: die Liste wird gekürzt, und die
+ * Zahl der weggelassenen Einträge steht als `gekuerzt` daneben. Die
+ * Post-Seite sagt es dann — ein stilles Fehlen wäre eine Auswahl, die
+ * behauptet, vollständig zu sein.
  * ══════════════════════════════════════════════════════════════════ */
 (function () {
     'use strict';
@@ -49,6 +82,16 @@
      * nicht auffressen. */
     var HOECHSTENS = 200 * 1024;
     var ARTEN = { deck: true, turnier: true, metacall: true };
+
+    /* Der Bestand je Art unter eigenem Schluessel — siehe Kopf. */
+    var BESTAND = 'dipidis.post.bestand.v1.';
+    /* Gemessen am 26.09.2026: ein Deck rund 3,5 KB (25 Schluessel plus
+     * Bildadressen), ein Turnier rund 3 KB, ein gerechneter Meta-Call-
+     * Stand rund 10 KB. 700 KB je Art tragen damit ~200 Decks, ~230
+     * Turniere oder ~35 Meta Calls — mehr, als der Betreiber hat, und
+     * zusammen unter der Haelfte der ueblichen 5-MB-Grenze des
+     * Ursprungs, in dem auch die Szenarien und die Anmeldung liegen. */
+    var BESTAND_HOECHSTENS = 700 * 1024;
 
     function jetzt() {
         try { return new Date().toISOString(); } catch (e) { return ''; }
@@ -173,8 +216,90 @@
         };
     }
 
+    /* ── DER BESTAND ──────────────────────────────────────────────────
+     *
+     * `legen` bleibt, was es war: EIN Stueck, der Vorschlag beim
+     * Oeffnen. `bestandLegen` ist die Liste, aus der die Post-Seite
+     * waehlen laesst. Beides zugleich ist der Normalfall — die App weiss
+     * in dem Moment ohnehin alles.
+     *
+     * GEKUERZT WIRD VON HINTEN. Der Aufrufer uebergibt in der Reihenfolge,
+     * in der die App die Stuecke zeigt (zuletzt geaendert zuerst). Wer
+     * kuerzen muss, laesst also das weg, was am weitesten unten stand. */
+    function bestandLegen(art, liste) {
+        if (!ARTEN[art]) return { ok: false, grund: 'art' };
+        var s = speicher();
+        if (!s) return { ok: false, grund: 'kein-speicher' };
+        var rein = (liste || []).filter(function (e) {
+            return e && e.daten && typeof e.daten === 'object';
+        }).map(function (e) {
+            return { titel: String(e.titel || ''), daten: e.daten };
+        });
+
+        var gekuerzt = 0;
+        var paket = null;
+        while (true) {
+            try {
+                paket = JSON.stringify({
+                    v: FASSUNG, stand: jetzt(), gekuerzt: gekuerzt, liste: rein
+                });
+            } catch (e) { return { ok: false, grund: 'nicht-darstellbar' }; }
+            if (paket.length <= BESTAND_HOECHSTENS || !rein.length) break;
+            rein = rein.slice(0, rein.length - 1);
+            gekuerzt++;
+        }
+        try { s.setItem(BESTAND + art, paket); } catch (e) {
+            return { ok: false, grund: 'speicher-voll' };
+        }
+        return { ok: true, groesse: paket.length, anzahl: rein.length, gekuerzt: gekuerzt };
+    }
+
+    function bestandEiner(art) {
+        var s = speicher();
+        if (!s || !ARTEN[art]) return { liste: [], gekuerzt: 0, stand: '' };
+        var roh = null;
+        try { roh = s.getItem(BESTAND + art); } catch (e) { return { liste: [], gekuerzt: 0, stand: '' }; }
+        if (!roh) return { liste: [], gekuerzt: 0, stand: '' };
+        var p = null;
+        try { p = JSON.parse(roh); } catch (e) { p = null; }
+        /* Dieselbe Strenge wie bei `holen`: eine fremde Fassung wird
+         * nicht gedeutet. Ein halb verstandener Bestand ergibt eine
+         * Auswahlliste mit Loechern, und die faellt erst beim Klick auf. */
+        if (!p || p.v !== FASSUNG || !Array.isArray(p.liste)) {
+            return { liste: [], gekuerzt: 0, stand: '' };
+        }
+        return {
+            liste: p.liste.filter(function (e) { return e && e.daten; }),
+            gekuerzt: parseInt(p.gekuerzt, 10) || 0,
+            stand: String(p.stand || '')
+        };
+    }
+
+    function bestand() {
+        return {
+            deck: bestandEiner('deck'),
+            turnier: bestandEiner('turnier'),
+            metacall: bestandEiner('metacall')
+        };
+    }
+
+    /* Ein Zug: Bestand hinlegen, das gewaehlte Stueck als Vorschlag
+     * daneben, Fenster auf. Die drei Aufrufer in der App taten das
+     * vorher in drei Zeilen, und die dritte davon fehlte zweimal. */
+    function oeffnenMitBestand(art, titel, daten, liste) {
+        var b = bestandLegen(art, liste);
+        var erg = oeffnen(art, titel, daten);
+        erg.bestand = b;
+        return erg;
+    }
+
     window.DsPostUebergabe = {
         SCHLUESSEL: SCHLUESSEL,
+        BESTAND: BESTAND,
+        BESTAND_HOECHSTENS: BESTAND_HOECHSTENS,
+        bestandLegen: bestandLegen,
+        bestand: bestand,
+        oeffnenMitBestand: oeffnenMitBestand,
         FASSUNG: FASSUNG,
         HOECHSTENS: HOECHSTENS,
         legen: legen,

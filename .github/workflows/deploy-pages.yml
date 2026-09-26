@@ -313,6 +313,35 @@ jobs:
           cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true
           cp _config.yml _site/ 2>/dev/null || true
 
+      # ── DIE LISTEN FUER DIE POST-SEITE (26.09.2026) ────────────────
+      #
+      # BESTELLT: „Dann die erfolgreichsten Listen der letzten 7 Tage —
+      # dann kann ich im naechsten Filter den Archetype waehlen und in
+      # einem weiteren Filter sehe ich dann nur von dem Deck die
+      # erfolgreichsten Listen der letzten 7 Tage. Das gleiche fuer Last
+      # Major."
+      #
+      # WARUM HIER UND NICHT ALS COMMIT: die Quelle
+      # data/tournament_decklists_per_player.csv ist 45 MB gross und
+      # 202.685 Zeilen lang. posts/index.html laeuft im Browser, oft am
+      # Telefon — sie kann die Quelle nicht laden. Die abgeleitete Datei
+      # ist gemessen 545 KB (51 KB gzip) und steht in ZWEI Sekunden.
+      #
+      # Sie im Repo zu fuehren haette geheissen: bei jedem Scrape eine
+      # neue Fassung von einer halben Megabyte in die Geschichte, und ein
+      # „letzte 7 Tage", das bis zum naechsten Commit altert. Hier
+      # entsteht sie bei JEDEM Deploy aus dem Stand, der gerade
+      # ausgeliefert wird — sie kann also nie neuer oder aelter sein als
+      # die Quelle daneben.
+      #
+      # Das Skript endet auch ohne Quelle mit 0 und schreibt eine
+      # gueltige leere Datei: eine Post-Seite, die „keine Listen
+      # vorhanden" sagt, ist besser als ein Deploy, der daran haengt.
+      - name: Post-Decklisten ableiten
+        run: |
+          python3 scripts/build_post_decklists.py --aus _site/data/post_decklists.json
+          ls -l _site/data/post_decklists.json
+
       # Restore previously-optimized images. The key tracks the source
       # image content (hashFiles over images/**), so it only misses when
       # an image is added/changed/removed — in which case the Optimize

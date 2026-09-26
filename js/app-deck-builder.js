@@ -3595,7 +3595,32 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 showToast(getLang() === 'de' ? 'Keine Karten im Deck' : 'No cards in deck', 'warning');
                 return;
             }
-            const erg = U.oeffnen('deck', daten.titel, daten);
+            /* ALLE DECKS GEHEN MIT (26.09.2026).
+             *
+             * BESTELLT: „Wenn ich also auf Decks, dann sollte danach die
+             * naechste Option My Decks sein. Dann zeigt er mir im
+             * naechsten Filter genau meine Decks an, aus denen ich
+             * waehlen kann."
+             *
+             * Ohne diese Zeile haette die Auswahlliste drueben genau
+             * einen Eintrag — das angeklickte Deck —, und fuer das
+             * zweite Deck muesste er hierher zurueck. Das angeklickte
+             * bleibt der Vorschlag; die anderen stehen daneben.
+             *
+             * Decks ohne Karten fallen weg: `ausDeck` gibt dafuer null,
+             * und ein leerer Eintrag in der Liste waere ein Angebot, das
+             * beim Klick bricht. Das gewaehlte zuerst — gekuerzt wird
+             * von hinten (siehe ds-post-uebergabe.js). */
+            const bestandListe = [{ titel: daten.titel, daten: daten }];
+            decks.forEach((d, i) => {
+                if (i === deckIndex) return;
+                let x = null;
+                try { x = U.ausDeck(d); } catch (e) { x = null; }
+                if (x) bestandListe.push({ titel: x.titel, daten: x });
+            });
+            const erg = (typeof U.oeffnenMitBestand === 'function')
+                ? U.oeffnenMitBestand('deck', daten.titel, daten, bestandListe)
+                : U.oeffnen('deck', daten.titel, daten);
             if (!erg.ok) {
                 showToast(getLang() === 'de'
                     ? 'Die Uebergabe hat nicht geklappt (' + erg.grund + ').'

@@ -29,6 +29,8 @@ import collections
 import csv
 import datetime as dt
 import glob
+import gzip
+import importlib.util
 import json
 import os
 import re
@@ -857,6 +859,60 @@ def check_datenstand(findings):
                              f"data/data_stand.json — sie wird nur bei Aenderung "
                              f"fortgeschrieben und hat sich seit Aufnahme in die "
                              f"Liste nicht geaendert"))
+
+
+def check_post_decklisten(findings):
+    """Wie gross die abgeleitete Listendatei der Post-Seite WAERE.
+
+    Sie liegt nicht im Repo: .github/workflows/deploy-pages.yml baut sie
+    bei jedem Deploy nach _site/data/post_decklists.json (26.09.2026).
+    Gemessen an diesem Tag: 545 KB roh, 51 KB gzip.
+
+    WARUM HIER UND NICHT ALS ZUSICHERUNG: die Groesse waechst mit der Zahl
+    der Turniere im Fenster. Eine Obergrenze im Test haette den Deploy
+    angehalten, sobald eine Woche mehr Turniere hat — ohne Defekt, genau
+    die Sorte Stillstand vom 11. und 12.09.2026. Hier wird beobachtet und
+    nichts angehalten; tests/python/test_post_decklisten.py sichert
+    stattdessen die DECKEL zu, aus denen die Groesse folgt.
+    """
+    skript = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "build_post_decklists.py")
+    if not os.path.exists(skript):
+        findings.append(("WARN",
+                         "scripts/build_post_decklists.py fehlt — die Post-Seite "
+                         "bietet dann die zwei Listen-Filter "
+                         "als leere Auswahl an"))
+        return
+    try:
+        spec = importlib.util.spec_from_file_location("_bpd", skript)
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        daten, fehler = m.bauen()
+    except Exception as e:                                        # noqa: BLE001
+        findings.append(("WARN",
+                         f"scripts/build_post_decklists.py laeuft nicht durch: "
+                         f"{type(e).__name__}: {e}"))
+        return
+    if daten is None:
+        findings.append(("WARN",
+                         f"post_decklists laesst sich nicht bauen: {fehler} — "
+                         f"die zwei Listen-Filter der Post-Seite bleiben leer"))
+        return
+    roh = json.dumps(daten, ensure_ascii=False, separators=(",", ":"))
+    kb = len(roh.encode("utf-8")) / 1024.0
+    klein = len(gzip.compress(roh.encode("utf-8"), 9)) / 1024.0
+    listen = sum(len(v) for v in daten["sieben_tage"].values())
+    major = len((daten.get("major") or {}).get("listen") or [])
+    stufe = "WARN" if kb > 4096 else "INFO"
+    findings.append((stufe,
+                     f"post_decklists (Post-Seite, wird beim Deploy gebaut): "
+                     f"{kb:.0f} KB roh, {klein:.0f} KB gzip \u2014 "
+                     f"{len(daten['sieben_tage'])} Archetypen mit {listen} Listen "
+                     f"im Fenster {daten['fenster']['von']}\u2013"
+                     f"{daten['fenster']['bis']}, {major} Listen aus "
+                     f"{(daten.get('major') or {}).get('name', '?')}, "
+                     f"{daten['verworfen_unvollstaendig']} Listen ohne 60 Karten "
+                     f"verworfen"))
 
 
 # How long a CSV may sit header-only before we say the refill never happened.
@@ -2977,6 +3033,7 @@ def main():
     check_stillstand(findings)
     check_formatfenster_alter(findings)
     check_datenstand(findings)
+    check_post_decklisten(findings)
     check_matchup_bilanzen(findings)
     check_kontinuitaet_vollstaendig(findings)
     check_druck_herkunft(findings)

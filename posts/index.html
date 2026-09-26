@@ -201,8 +201,20 @@ legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transfor
          einen Reiter zu viel, kostet es einen Klick. Und Kicker, Titel
          und Fußzeile stehen ohnehin hier und gelten für alle vier
          Vorlagen. (Abnahme 04.09.2026) -->
-    <label class="feld"><span>Fill from</span>
+    <!-- DER HAUPTFILTER (26.09.2026).
+         Bestellt: „Also der Main-Filter oder die Richtung des Posts
+         sollte schon bestimmen, was ich danach für Optionen habe. […]
+         Grundsätzlich arbeite einfach durch, dass wir immer einen
+         Hauptfilter haben, und der Hauptfilter führt dann zu Unterfiltern
+         und die Unterfilter dann zum entsprechenden Ergebnis."
+         Der Baum steht in js/ds-post-quellen.js (BAUM/kaskade) — hier
+         wird nur gemalt. -->
+    <label class="feld"><span>Post</span>
       <select id="quelle" class="quelle"></select></label>
+    <!-- Die Unterfilter entstehen zur Laufzeit: wie viele es sind, sagt
+         der gewählte Zweig, nicht das Formular. Drei feste Wähler hätten
+         bei „Battle Journal" zwei leere ergeben. -->
+    <div id="unterfilter"></div>
     <p class="herkunft" id="herkunft">Numbers come from the site, not from typing.
       Everything stays editable.</p>
 
@@ -1317,7 +1329,7 @@ var ohneRang = false;
    schreibt. Turnier- und Champions-Quellen koennen zwischen zwei
    Events leer sein, und eine leere Rangliste waere schlimmer als eine
    abgetippte. */
-var LISTE_VORGABE = 'meta-online';
+var LISTE_VORGABE = ['meta', 'meta-online'];
 var listeQuelleGesetzt = false;
 var zahlTitel = null;   /* der Titel, den die Quelle fuer die Zahl-Vorlage vorschlaegt */
 var listeTitel = null;
@@ -1482,7 +1494,11 @@ document.getElementById('btnKarussell').addEventListener('click', function () {
     (function naechste() {
         if (i >= reihe.length) {
             knopf.disabled = false;
-            filterAnwenden(document.getElementById('filter').value || reihe[0]);
+            /* Zurueck auf das Bild, das vor dem Karussell dastand. Ueber
+               den Pfad, nicht ueber den Kartenfilter: die Scheiben sind
+               seit dem 26.09.2026 eine Stufe der Kaskade, und
+               `#filter` traegt bei einem Meta Call gar nichts mehr. */
+            kaskadeAnwenden(aktPfad);
             return;
         }
         var id = reihe[i];
@@ -1630,6 +1646,15 @@ var FELDER = ['kicker', 'titel', 'punkte', 'zahl', 'zahlLabel', 'zahlNenner',
 var geladenStand = null;   /* was die Quelle geschrieben hat */
 var vorQuelle = null;      /* was VOR der Quelle dastand — der Rückweg */
 var aktQuelle = '';
+/* Der Pfad durch den Baum — die Kennung einer Auswahl ist jetzt eine
+   Kette, nicht ein Wort. `aktQuelle` bleibt daneben stehen: an einem
+   Dutzend Stellen heisst `if (aktQuelle)` nichts anderes als „es ist
+   eine Quelle aktiv", und das gilt weiter. */
+var aktPfad = [];
+/* Was vorher REZEPTE[aktQuelle] war. Ein Blatt des Baums ist nicht
+   immer ein Rezept — „1st · 203 players · 7-1-1" ist eine Zeile einer
+   abgeleiteten Datei und hat keinen Eintrag in REZEPTE. */
+var aktRezept = null;
 var aktErgebnis = null;
 var imCache = {};
 
@@ -1837,7 +1862,7 @@ function deckListeFuellen(namen) {
 }
 
 function quelleAnwenden(deckName) {
-    var erg = aktErgebnis, rez = window.DsPostQuellen.REZEPTE[aktQuelle];
+    var erg = aktErgebnis, rez = aktRezept;
     if (!erg || !rez) return;
     var name = deckName || (erg.decks && erg.decks[0]) || null;
 
@@ -1870,7 +1895,10 @@ function meldeFehler(rez, e) {
     knoepfe(true);
     aktQuelle = ''; aktErgebnis = null; geladenStand = null; ohneRang = false;
     markiereReiter(null);
-    document.getElementById('quelle').value = '';
+    /* Der Hauptfilter bleibt stehen, die Unterfilter auch: sie zeigen,
+       WO es nicht weitergeht. Vorher sprang der Wähler auf „Nothing"
+       zurück, und die Meldung stand über einer Auswahl, die es nicht
+       mehr gab. Nur das Ergebnis ist weg. */
     document.getElementById('deckFeld').hidden = true;
     document.getElementById('filterFeld').hidden = true;
     document.getElementById('geaendert').hidden = true;
@@ -1880,61 +1908,120 @@ function meldeFehler(rez, e) {
         ' — die Felder sind unverändert.', 'fehler');
 }
 
-function quelleWaehlen(id) {
-    var w = document.getElementById('warnung');
-    if (!id) {
-        /* ZURÜCK HEISST WIEDERHERSTELLEN, NICHT LEEREN.
-         * Frisst ein Griff an den Wähler das Getippte unwiederbringlich,
-         * fasst er ihn nach dem ersten Mal nie wieder an. */
-        if (vorQuelle) {
-            FELDER.forEach(function (f) {
-                var e = document.getElementById(f);
-                if (e && vorQuelle[f] != null) e.value = vorQuelle[f];
-            });
-            vorQuelle = null;
-        }
-        aktQuelle = ''; aktErgebnis = null; geladenStand = null; ohneRang = false;
-        markiereReiter(null);
-        document.getElementById('deckFeld').hidden = true;
-        document.getElementById('filterFeld').hidden = true;
-        document.getElementById('geaendert').hidden = true;
-        w.hidden = true;
-        textHerkunft('Numbers come from the site, not from typing. ' +
-                     'Alles bleibt überschreibbar.');
-        zeichne();
-        return;
-    }
+/* ── DIE KASKADE ──────────────────────────────────────────────────────
+ *
+ * Eine Funktion, ein Pfad, ein Bild. `DsPostQuellen.kaskade(pfad)` sagt,
+ * welche Wähler dastehen und welches Blatt erreicht ist; hier wird
+ * gemalt und geladen.
+ *
+ * DER PFAD WIRD ZURUECKGEMELDET, NICHT UEBERNOMMEN. Wer „Decks" wählt,
+ * schickt `['decks']` — zurueck kommt `['decks','meine','0']`, weil
+ * jede offene Stufe mit ihrer ersten Option beantwortet wird. Genau
+ * deshalb steht nach einem Klick auf den Hauptfilter sofort ein Bild da
+ * und nicht eine Reihe leerer Wähler. */
+function unterfilterMalen(stufen) {
+    var wo = document.getElementById('unterfilter');
+    wo.innerHTML = '';
+    /* Stufe 0 ist der Hauptfilter — der hat sein eigenes Feld. */
+    stufen.slice(1).forEach(function (st, i) {
+        var tiefe = i + 1;
+        var lab = document.createElement('label');
+        lab.className = 'feld';
+        var sp = document.createElement('span');
+        sp.textContent = st.frage;
+        var sel = document.createElement('select');
+        sel.className = 'quelle';
+        sel.id = 'unterfilter' + tiefe;
+        st.optionen.forEach(function (o) {
+            var op = document.createElement('option');
+            op.value = o.id; op.textContent = o.name;
+            sel.appendChild(op);
+        });
+        sel.value = st.wahl;
+        sel.addEventListener('change', function () {
+            /* Eine Stufe weiter unten wird verworfen: sie gehoerte zu
+               der alten Wahl. Was danach kommt, beantwortet die Kaskade
+               selbst mit der ersten Option. */
+            kaskadeAnwenden(aktPfad.slice(0, tiefe).concat([sel.value]));
+        });
+        lab.appendChild(sp); lab.appendChild(sel);
+        wo.appendChild(lab);
+    });
+}
 
-    var rez = window.DsPostQuellen.REZEPTE[id];
-    if (!rez) return;
+function kaskadeZuruecksetzen() {
+    /* ZURÜCK HEISST WIEDERHERSTELLEN, NICHT LEEREN.
+     * Frisst ein Griff an den Wähler das Getippte unwiederbringlich,
+     * fasst er ihn nach dem ersten Mal nie wieder an. */
+    if (vorQuelle) {
+        FELDER.forEach(function (f) {
+            var e = document.getElementById(f);
+            if (e && vorQuelle[f] != null) e.value = vorQuelle[f];
+        });
+        vorQuelle = null;
+    }
+    aktQuelle = ''; aktPfad = []; aktRezept = null;
+    aktErgebnis = null; geladenStand = null; ohneRang = false;
+    markiereReiter(null);
+    document.getElementById('unterfilter').innerHTML = '';
+    document.getElementById('deckFeld').hidden = true;
+    document.getElementById('filterFeld').hidden = true;
+    document.getElementById('geaendert').hidden = true;
+    document.getElementById('warnung').hidden = true;
+    textHerkunft('Numbers come from the site, not from typing. ' +
+                 'Alles bleibt überschreibbar.');
+    zeichne();
+}
+
+function kaskadeAnwenden(pfad) {
+    if (!pfad || !pfad.length || !pfad[0]) { kaskadeZuruecksetzen(); return; }
+    var w = document.getElementById('warnung');
     if (!vorQuelle) vorQuelle = standNehmen();
-    aktQuelle = id;
     w.hidden = true;
 
-    if (imCache[id]) {
-        aktErgebnis = imCache[id];
-        try { nachLaden(rez); } catch (e) { meldeFehler(rez, e); }
-        return;
-    }
+    window.DsPostQuellen.kaskade(pfad).then(function (k) {
+        var stufen = k.stufen || [];
+        aktPfad = stufen.map(function (st) { return st.wahl; });
+        document.getElementById('quelle').value = aktPfad[0] || '';
+        unterfilterMalen(stufen);
 
-    /* Der Wähler IST die Fortschrittsanzeige. Die Größe steht nur bei
-     * den großen Dateien dabei — sonst lässt sie schnelle Ladungen
-     * langsam wirken. */
-    textHerkunft('Lädt: ' + rez.name + ' …' +
-        (rez.groesse ? ' ' + rez.groesse + ', das dauert einen Moment.' : ''),
-        'laedt');
-    knoepfe(false);
+        /* Der Name des Bildes ist der ganze Weg dorthin. „Decks ·
+           Most successful lists — last 7 days · Dragapult · 1st · 203
+           players" beantwortet die Frage „woher kommen diese Zahlen"
+           ohne Nachschlagen; „From the app" tat das nicht. */
+        var namen = stufen.map(function (st) {
+            var o = st.optionen.filter(function (x) { return x.id === st.wahl; })[0];
+            return o ? o.name : '';
+        }).filter(Boolean);
+        var name = namen.join(' \u00b7 ');
+        aktRezept = { name: name };
+        aktQuelle = aktPfad.join('\u0000');
 
-    window.DsPostQuellen.lade(id).then(function (erg) {
-        imCache[id] = erg;
-        aktErgebnis = erg;
-        knoepfe(true);
-        nachLaden(rez);
+        if (!k.blatt) {
+            meldeFehler(aktRezept, new Error('this branch offers nothing'));
+            return;
+        }
+
+        if (imCache[aktQuelle]) {
+            aktErgebnis = imCache[aktQuelle];
+            try { nachLaden(aktRezept); } catch (e) { meldeFehler(aktRezept, e); }
+            return;
+        }
+
+        /* Der Wähler IST die Fortschrittsanzeige. */
+        textHerkunft('Lädt: ' + name + ' …', 'laedt');
+        knoepfe(false);
+        return k.blatt.lade(aktPfad).then(function (erg) {
+            imCache[aktQuelle] = erg;
+            aktErgebnis = erg;
+            knoepfe(true);
+            nachLaden(aktRezept);
+        });
     }).catch(function (e) {   /* faengt auch, was nachLaden wirft */
         /* BEI EINEM FEHLER BLEIBT JEDES FELD UNANGETASTET.
          * Halb gefüllte Felder mit altem Nenner neben frischen Zahlen
          * sind schlimmer als gar nichts. */
-        meldeFehler(rez, e);
+        meldeFehler(aktRezept, e);
     });
 }
 
@@ -1954,7 +2041,7 @@ function filterFuellen(eintraege) {
 }
 
 function filterAnwenden(id) {
-    var erg = aktErgebnis, rez = window.DsPostQuellen.REZEPTE[aktQuelle];
+    var erg = aktErgebnis, rez = aktRezept;
     if (!erg || !rez || !erg.proFilter) return;
     try {
         /* Das gewaehlte Deck geht mit: bei den Meta-Call-Scheiben
@@ -2072,9 +2159,8 @@ function schalteVorlage(v) {
     if (v === 'liste' && !aktQuelle && !listeQuelleGesetzt) {
         listeQuelleGesetzt = true;
         var qw = document.getElementById('quelle');
-        if (qw && [].some.call(qw.options, function (o) { return o.value === LISTE_VORGABE; })) {
-            qw.value = LISTE_VORGABE;
-            quelleWaehlen(LISTE_VORGABE);   /* zeichnet selbst */
+        if (qw && [].some.call(qw.options, function (o) { return o.value === LISTE_VORGABE[0]; })) {
+            kaskadeAnwenden(LISTE_VORGABE);   /* zeichnet selbst */
             return;
         }
     }
@@ -2101,24 +2187,40 @@ function schalteVorlage(v) {
         zeichne();
     });
 
-    /* Der Quellen-Wähler, nach Themen gruppiert. */
+    /* Der Hauptfilter: die erste Stufe des Baums. Keine optgroups mehr —
+       die Gruppen SIND jetzt die Einträge, und was darunter liegt,
+       entscheidet der nächste Wähler. */
     var q = document.getElementById('quelle');
     var leer = document.createElement('option');
     leer.value = ''; leer.textContent = 'Nothing — I will type it';
     q.appendChild(leer);
-    var gruppen = {};
-    window.DsPostQuellen.liste().forEach(function (e) {
-        if (!gruppen[e.gruppe]) {
-            gruppen[e.gruppe] = document.createElement('optgroup');
-            gruppen[e.gruppe].label = e.gruppe;
-            q.appendChild(gruppen[e.gruppe]);
-        }
+    window.DsPostQuellen.BAUM.forEach(function (h) {
         var o = document.createElement('option');
-        o.value = e.id;
-        o.textContent = e.name + (e.groesse ? ' (' + e.groesse + ')' : '');
-        gruppen[e.gruppe].appendChild(o);
+        o.value = h.id; o.textContent = h.name;
+        q.appendChild(o);
     });
-    q.addEventListener('change', function () { quelleWaehlen(q.value); });
+    q.addEventListener('change', function () { kaskadeAnwenden([q.value]); });
+
+    /* ── DIE ÜBERGABE WIRD BEGRÜSST (26.09.2026) ──────────────────
+     *
+     * Die App öffnet posts/index.html#uebergabe. Bisher las die Seite
+     * das Kreuz nicht: das Deck lag im Speicher, und der Betreiber
+     * musste den Wähler selbst finden. Jetzt springt der Hauptfilter auf
+     * den Zweig, aus dem er gerade gekommen ist.
+     *
+     * Was für eine Art übergeben wurde, sagt die Übergabe selbst — nicht
+     * ein zweiter Parameter in der Adresse, der mit ihr auseinanderlaufen
+     * könnte. */
+    if (String(location.hash || '').indexOf('uebergabe') >= 0) {
+        var U = window.DsPostUebergabe;
+        var paket = (U && typeof U.holen === 'function') ? U.holen() : null;
+        var weg = paket && ({
+            deck: ['decks', 'meine'],
+            turnier: ['journal'],
+            metacall: ['metacall', 'eigen']
+        })[paket.art];
+        if (weg) kaskadeAnwenden(weg);
+    }
     document.getElementById('deck').addEventListener('change', function () {
         if (!aktQuelle) return;
         /* Hat die Quelle einen Filter, gehoert die Deckwahl DORT hinein

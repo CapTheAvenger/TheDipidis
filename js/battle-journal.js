@@ -2893,6 +2893,73 @@
      * auch das Poster fuellt — collectTournamentSpec() in js/ds-share.js:
      * zwei Sammler haetten zwei Bilanzen ergeben, und genau das war am
      * 11.09.2026 schon einmal ein Befund (2-1-1 gegen 2-3-1). */
+    /* Aus einem Turnierspiegel wird, was das Bild braucht — an EINER
+     * Stelle, damit das uebergebene Stueck und die Auswahlliste nicht
+     * auseinanderlaufen koennen. */
+    function bjUebergabeDaten(spec) {
+        var U = window.DsPostUebergabe;
+        var karten = (spec.deckSnapshot && spec.deckSnapshot.cards) || null;
+        return {
+            titel: spec.tournament,
+            format: spec.format || '',
+            art: spec.type || '',
+            datum: spec.date || '',
+            platz: spec.place || null,
+            bilanz: spec.record || null,
+            quote: (typeof spec.winRate === 'number' && isFinite(spec.winRate))
+                ? spec.winRate : null,
+            deck: spec.deck || '',
+            /* Die eingefrorene Liste des Turniers — dieselbe, die das
+             * Poster zeichnet. Ohne sie waere der Post auf der anderen
+             * Seite ein anderes Deck. */
+            karten: karten,
+            bilder: (U && typeof U.bildAdressen === 'function')
+                ? U.bildAdressen(karten || {}) : {},
+            runden: spec.rounds || []
+        };
+    }
+
+    /* ALLE TURNIERE DES JOURNALS (26.09.2026).
+     *
+     * BESTELLT: „dann brauchen wir als naechstes einen Main-Filter
+     * Battle Journal, und da kann ich dann einfach das entsprechende
+     * Turnier auswaehlen, was ich nutzen will."
+     *
+     * DIE FILTER DES JOURNALS GELTEN MIT. journalGruppe() liest die vier
+     * Auswahlfelder ueber der Liste; wer sie umgeht, uebergibt zu einem
+     * Turniernamen eine andere Bilanz als die Zeile, neben der der Knopf
+     * steht — genau der Befund vom 11.09.2026 (2-1-1 gegen 2-3-1).
+     * Deshalb wird JEDES Paar (Name, Meta) vorher durch dieselbe
+     * Gruppierung geschickt, und ein leeres Paar wird uebersprungen.
+     * Sonst faellt collectTournamentSpec auf den ungefilterten Bestand
+     * zurueck und liefert dieselbe falsche Bilanz durch die Hintertuer.
+     *
+     * Reihenfolge: das jüngste zuerst — gekuerzt wird von hinten. */
+    function bjAlleTurniere(teile) {
+        var cache = journalHistoryCache || [];
+        var paare = {};
+        cache.forEach(function (e) {
+            var n = String(e.tournamentName || '');
+            if (!n) return;
+            var m = String(e.meta || '');
+            var k = n + '\u0000' + m;
+            var ms = e.createdAtMs || 0;
+            if (!paare[k] || paare[k].ms < ms) paare[k] = { name: n, meta: m, ms: ms };
+        });
+        return Object.keys(paare).map(function (k) { return paare[k]; })
+            .sort(function (a, b) { return b.ms - a.ms; })
+            .map(function (p) {
+                if (!journalGruppe(p.name, p.meta).length) return null;
+                var sp = null;
+                try { sp = teile.collectTournamentSpec(p.name, { metaKey: p.meta }); }
+                catch (e) { sp = null; }
+                if (!sp) return null;
+                var d = bjUebergabeDaten(sp);
+                return { titel: sp.tournament, daten: d };
+            })
+            .filter(Boolean);
+    }
+
     window.postTournamentAufPostSeite = function (tournamentName, metaKey) {
         var U = window.DsPostUebergabe;
         var teile = window.DsShare && window.DsShare._internals;
@@ -2910,23 +2977,18 @@
                 'Fuer dieses Turnier fehlen die Daten.'), 'warning');
             return;
         }
-        var erg = U.oeffnen('turnier', spec.tournament, {
-            titel: spec.tournament,
-            format: spec.format || '',
-            art: spec.type || '',
-            datum: spec.date || '',
-            platz: spec.place || null,
-            bilanz: spec.record || null,
-            quote: (typeof spec.winRate === 'number' && isFinite(spec.winRate))
-                ? spec.winRate : null,
-            deck: spec.deck || '',
-            /* Die eingefrorene Liste des Turniers — dieselbe, die das
-             * Poster zeichnet. Ohne sie waere der Post auf der anderen
-             * Seite ein anderes Deck. */
-            karten: (spec.deckSnapshot && spec.deckSnapshot.cards) || null,
-            bilder: U.bildAdressen((spec.deckSnapshot && spec.deckSnapshot.cards) || {}),
-            runden: spec.rounds || []
-        });
+        /* Das angeklickte Turnier zuerst, die anderen dahinter — und
+         * keines zweimal. */
+        var liste = [{ titel: spec.tournament, daten: bjUebergabeDaten(spec) }];
+        try {
+            bjAlleTurniere(teile).forEach(function (e) {
+                if (e.titel !== spec.tournament) liste.push(e);
+            });
+        } catch (e) { /* dann eben nur das angeklickte */ }
+        var erg = (typeof U.oeffnenMitBestand === 'function')
+            ? U.oeffnenMitBestand('turnier', spec.tournament,
+                                  bjUebergabeDaten(spec), liste)
+            : U.oeffnen('turnier', spec.tournament, bjUebergabeDaten(spec));
         if (!erg.ok) {
             showToast(battleJournalText('bj.postSeiteFehler',
                 'Die Uebergabe hat nicht geklappt.') + ' (' + erg.grund + ')', 'error');

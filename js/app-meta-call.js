@@ -15567,17 +15567,14 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
    * WAS NICHT MITGEHT: nichts aus dem Konto, kein Name, keine Kennung.
    * Nur Zahlen, die auch auf dem Bild stehen.
    */
-  function postSeiteOeffnen() {
-    const U = window.DsPostUebergabe;
-    if (!U || typeof U.oeffnen !== 'function') {
-      if (typeof showToast === 'function') showToast(t('mc.generateImageMissing'), 'error');
-      return;
-    }
+  /* Ein vollstaendiges Uebergabepaket aus DEM STAND, DER GERADE GILT.
+   * Herausgezogen aus postSeiteOeffnen, weil es jetzt mehrfach gebraucht
+   * wird: einmal fuer den offenen Meta Call und einmal je gespeichertem
+   * Szenario. Zwei Kopien dieser Rechnung waeren zwei Gelegenheiten,
+   * verschiedene Zahlen fuer dasselbe Feld zu erzeugen. */
+  function _postPaket(szenarioName) {
     const eigenFeld = buildField();
-    if (!eigenFeld || !eigenFeld.length) {
-      if (typeof showToast === 'function') showToast(t('mc.generateImageEmpty'), 'error');
-      return;
-    }
+    if (!eigenFeld || !eigenFeld.length) return null;
     /* Das Feld ohne die eigenen Schaetzungen — dieselbe Funktion, nur
        mit leerer Schaetzungsliste. Ein zweiter Rechenweg waere die
        sichere Art, zwei verschiedene Standardprognosen zu bekommen. */
@@ -15599,8 +15596,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       });
     } catch (e) { /* dann eben nur das eigene Deck */ }
 
-    const hatEigene = Object.keys(merkeEigene || {}).length > 0;
-    const erg = U.oeffnen('metacall', (_settings.tournamentName || '').trim(), {
+    return {
       titel: (_settings.tournamentName || '').trim(),
       art: t(_typeLabelI18nKey(_settings.tournamentType)),
       /* Dieselbe Angabe, die im Kopf des Reiters steht. */
@@ -15613,13 +15609,92 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       meinDeck: meinDeck,
       /* Ob ueberhaupt eigene Schaetzungen drinstecken — sonst bietet die
          Post-Seite zwei Quellen an, hinter denen dasselbe steht. */
-      eigeneSchaetzungen: hatEigene,
-      szenario: _currentScenarioName || '',
+      eigeneSchaetzungen: Object.keys(merkeEigene || {}).length > 0,
+      szenario: szenarioName != null ? String(szenarioName) : (_currentScenarioName || ''),
       staende: {
         eigen: _postStand(eigenFeld, kandidaten),
         standard: _postStand(standardFeld, kandidaten)
       }
-    });
+    };
+  }
+
+  /* ── ALLE GESPEICHERTEN PROGNOSEN (26.09.2026) ───────────────────
+   *
+   * BESTELLT (Betreiber): „da habe ich dann die Moeglichkeit zu waehlen
+   * zwischen Standardprognose oder bearbeiteter Prognose, und dann bei
+   * der bearbeiteten Prognose werden dann meine gespeicherten Metacalls
+   * angezeigt."
+   *
+   * WARUM GERECHNET UND NICHT NUR DIE SCHAETZUNGEN UEBERGEBEN
+   * ---------------------------------------------------------
+   * Ein Szenario speichert nur die Eingaben (Schaetzungen, Einstellungen,
+   * Feldauswahl) — nicht das Feld, nicht die Day-2-Chance, nicht die
+   * Paarungen. Die Post-Seite hat weder Matrix noch Kette; sie koennte
+   * daraus kein Feld rechnen. Also rechnet die App es hier, je Szenario,
+   * mit demselben Weg wie fuer den offenen Stand.
+   *
+   * WAS DAS KOSTET: je Szenario zwei buildField() und elf calcDay2().
+   * Gemessen wird das an einem Klick, nicht an einem Ladevorgang.
+   *
+   * DIE METAQUELLE GEHT NICHT MIT INS SZENARIO (_snapshotState speichert
+   * sie nicht). Ein gespeichertes Szenario wird deshalb gegen die
+   * Metaquelle gerechnet, die JETZT eingestellt ist — genauso, wie es
+   * sich verhaelt, wenn man das Szenario in der App laedt. Die Angabe
+   * `format` im Paket sagt, welche das war.
+   *
+   * ZURUECKGESETZT WIRD IMMER. `_applyState` schreibt die Feldauswahl in
+   * den Speicher (_feldAuswahlMerken) — ohne das finally stuende nach
+   * einem Klick auf „Post-Seite" das letzte Szenario in der App. */
+  function _postPaketeAllerSzenarien() {
+    const aus = [];
+    let namen = [];
+    try { namen = Object.keys(_loadScenarios() || {}); } catch (e) { namen = []; }
+    if (!namen.length) return aus;
+    let original = null;
+    try { original = _snapshotState(); } catch (e) { return aus; }
+    try {
+      const alle = _loadScenarios() || {};
+      namen.forEach(name => {
+        try {
+          /* Vor JEDEM Szenario zurueck auf den Ausgangsstand: _applyState
+             mischt `settings` in die vorhandenen, sonst traegt Szenario B
+             die Einstellungen von A weiter. */
+          _applyState(original);
+          _applyState(alle[name]);
+          const paket = _postPaket(name);
+          if (paket) aus.push({ titel: name, daten: paket });
+        } catch (e) { /* ein unlesbares Szenario laesst die anderen stehen */ }
+      });
+    } finally {
+      try { _applyState(original); } catch (e) { /* nichts zu retten */ }
+    }
+    return aus;
+  }
+
+  function postSeiteOeffnen() {
+    const U = window.DsPostUebergabe;
+    if (!U || typeof U.oeffnen !== 'function') {
+      if (typeof showToast === 'function') showToast(t('mc.generateImageMissing'), 'error');
+      return;
+    }
+    const paket = _postPaket(null);
+    if (!paket) {
+      if (typeof showToast === 'function') showToast(t('mc.generateImageEmpty'), 'error');
+      return;
+    }
+    /* Der offene Stand zuerst, die gespeicherten dahinter — und keines
+       zweimal: ist gerade ein Szenario geladen, ist es schon der erste
+       Eintrag. */
+    const liste = [{ titel: paket.szenario || paket.titel || 'Meta Call', daten: paket }];
+    try {
+      _postPaketeAllerSzenarien().forEach(e => {
+        if (e.titel !== liste[0].titel) liste.push(e);
+      });
+    } catch (e) { /* dann eben nur der offene Stand */ }
+
+    const erg = (typeof U.oeffnenMitBestand === 'function')
+      ? U.oeffnenMitBestand('metacall', paket.titel, paket, liste)
+      : U.oeffnen('metacall', paket.titel, paket);
     if (!erg.ok) {
       if (typeof showToast === 'function') {
         showToast(t('mc.postSeiteFehler') + ' (' + erg.grund + ')', 'error');

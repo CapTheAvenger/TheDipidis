@@ -297,6 +297,14 @@
   //   11 der 21 Vorschlaege, die die anderen Regeln durchlassen
   //   (bei MIN_GAP = 0 waeren es 21 in 14 Archetypen).
   //
+  //   NACHTRAG 26.09.2026: sie sass dann doch auf einer Kante. Der
+  //   Wochenlauf #162 brachte einen Abstand von exakt 50, und die
+  //   Zusicherung wurde rot — richtigerweise. Behoben ist nicht die
+  //   Zusicherung, sondern die Lage: der Vergleich heisst jetzt "echt
+  //   groesser" statt "groesser-gleich". Damit kann ein Gleichstand
+  //   einen Vorschlag nur noch VERHINDERN, nie ausloesen. Die Zahl ist
+  //   weiterhin GEGRIFFEN — sie ist nur nicht mehr gefaehrlich.
+  //
   //   Sie sass am 10.09.2026 auch nicht auf einer Kante: der naechste
   //   gemessene Abstand darunter war 42, der naechste darueber 64.
   //
@@ -1149,7 +1157,25 @@
     // Direction matches the user's intuition: higher copies should
     // correlate with lower median place (smaller place = better).
     const gap = naiveMedian - pluralityMedian;
-    if (gap < ALT_SUGGESTION_MIN_GAP) return null;
+    // ECHT GROESSER, NICHT GROESSER-GLEICH (26.09.2026).
+    //
+    // BEFUND: Wochenlauf #162 lief rot, weil in den frischen Daten ein
+    // gemessener Abstand GENAU 50 betrug. Mit ">=" haette damit eine
+    // ausdruecklich als GEGRIFFEN gekennzeichnete Zahl einen einzelnen
+    // Vorschlag per Gleichstand ERZEUGT — das Bild haette dem Betreiber
+    // eine Kartenzahl empfohlen, und der einzige Grund dafuer waere
+    // gewesen, dass zwei Mediane zufaellig exakt 50 Plaetze
+    // auseinanderlagen.
+    //
+    // Die Zahl bleibt unbelegt. Sie darf aber nie die alleinige
+    // Ursache eines GEZEIGTEN Vorschlags sein. Beim Gleichstand gilt
+    // deshalb, was fuer jedes andere nicht erfuellte Tor in dieser
+    // Datei gilt: kein Vorschlag. Eine unbelegte Zahl darf bremsen,
+    // nicht treiben.
+    //
+    // Wirkung, gemessen: genau die Kandidaten mit Abstand exakt
+    // ALT_SUGGESTION_MIN_GAP fallen weg — diese Woche einer.
+    if (gap <= ALT_SUGGESTION_MIN_GAP) return null;
 
     return {
       naive_count:        naiveCount,

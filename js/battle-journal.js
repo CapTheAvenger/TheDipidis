@@ -1588,7 +1588,15 @@
                 const tT = entries.filter(e => e.result === 'tie').length;
                 const tN = entries.filter(istNoShow).length;
                 const tTotal = entries.length;
-                const tWinRate = tTotal > 0 ? Math.round((tW / tTotal) * 100) : 0;
+                // BEFUND 26.09.2026: tW ENTHAELT den No-Show (Bilanz), also
+                // durfte er nicht auch noch in die Quote. 1 Sieg + 1 No-Show
+                // aus 8 Runden stand hier als 25 % — ein Wert, den kein
+                // gespieltes Match hergibt. Quote: nur Gespieltes, in
+                // Zaehler UND Nenner. Ohne gespielte Partie ist sie nicht 0,
+                // sondern undefiniert.
+                const tGespielt = tTotal - tN;
+                const tWinRate = tGespielt > 0
+                    ? `${Math.round(((tW - tN) / tGespielt) * 100)}%` : '\u2014';
                 const safeTournKey = escapeHtml(tournKey).replace(/'/g, "\\'");
                 const groupType = (entries[0]?.tournamentType || '').replace(/'/g, "\\'");
                 // Die Platzierung haengt am Turnier, gespeichert ist sie an
@@ -1601,7 +1609,7 @@
                     <div class="bj-tournament-header">
                         <div class="bj-tournament-info">
                             <strong class="bj-tournament-name">${escapeHtml(tournLabel)}</strong>
-                            <span class="bj-tournament-record">${tW}-${tL}-${tT} (${tWinRate}%)</span>${
+                            <span class="bj-tournament-record">${tW}-${tL}-${tT}${tN > 0 ? ` \u00b7 ${tN}N` : ''} (${tWinRate})</span>${
                                 tPlacement ? `<span class="bj-tournament-placement">${escapeHtml(tPlacement)}</span>` : ''}
                         </div>
                         <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">+ Match</button>
@@ -1793,7 +1801,12 @@
         const ties = entries.filter(e => e.result === 'tie').length;
         const noShows = entries.filter(istNoShow).length;
         const total = entries.length;
-        const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+        // `wins` enthaelt den No-Show (so hat die Turnierleitung gewertet),
+        // die Quote darf ihn nicht enthalten — in keinem der beiden
+        // Brueche. Dieselbe Regel wie nurGespielte() und wie js/ds-share.js.
+        const gespieltN = total - noShows;
+        const winRate = gespieltN > 0
+            ? Math.round(((wins - noShows) / gespieltN) * 100) : 0;
 
         const W = 600;
         /* 96 -> 116: unter der Bilanzzeile steht jetzt die Konvention.
@@ -1848,7 +1861,11 @@
         // Record line
         ctx.fillStyle = '#a0aec0';
         ctx.font = '14px system-ui, sans-serif';
-        ctx.fillText(`${wins}W-${losses}L-${ties}T  \u00b7  ${winRate} % ${bjQuotenName(BJ_KONVENTION)}`, 16, 78);
+        // Der No-Show wird benannt, sonst widersprechen sich auf demselben
+        // Bild die Bilanz (2W) und die Quote (14 %) ohne Erklaerung. Und er
+        // wird AUSGESCHRIEBEN: in der Formel darunter, S / (S + N + U), ist
+        // N die Niederlage.
+        ctx.fillText(`${wins}W-${losses}L-${ties}T${noShows > 0 ? `  \u00b7  ${noShows}\u00d7 No-Show` : ''}  \u00b7  ${winRate} % ${bjQuotenName(BJ_KONVENTION)}`, 16, 78);
         // Die Formel darunter, kleiner: sie ist der Nenner, ohne den
         // der Name auf dem geteilten Bild nichts festlegt.
         ctx.fillStyle = '#8794a8';

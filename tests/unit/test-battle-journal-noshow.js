@@ -249,3 +249,66 @@ describe('No-Show: die Oberfläche kennt ihn', () => {
             'ohne eingeschalteten Zustand sieht man nicht, dass er an ist');
     });
 });
+
+/**
+ * BEFUND 26.09.2026 — gefunden hat es der Betreiber, nicht ein Test.
+ *
+ * Nach PR #841/#842 war der No-Show im Formular, in der Bilanz und in
+ * den Matchups richtig. Er war es nicht in den BILDERN, und von denen
+ * gibt es vier: shareTournamentSummary() hier und drei in js/ds-share.js.
+ * Dazu kam die Turnierzeile im Ordner, deren Quote den No-Show im Zähler
+ * führte.
+ *
+ * Die Lehre steht in claude/no-show-battle-journal-2026-09-26.md: ein
+ * neuer Ergebniswert ist nicht fertig, wenn die Eingabe geht — er ist
+ * fertig, wenn jede Stelle, die Ergebnisse ZÄHLT oder ZEICHNET, ihn
+ * kennt. Und davon gibt es mehr als eine.
+ */
+describe('No-Show: die Quote bleibt gespielten Partien vorbehalten', () => {
+    const rein = ohneKommentare(lies('js/battle-journal.js'));
+
+    it('die Turnierzeile rechnet die Quote ohne den No-Show', () => {
+        // tW ENTHAELT den No-Show (Bilanz). Stand er auch im Nenner,
+        // stieg die Quote durch ein nicht gespieltes Match.
+        assert.match(rein, /const tGespielt = tTotal - tN;/,
+            'die Turnierzeile trennt gespielte Partien nicht ab');
+        assert.match(rein, /\(\(tW - tN\) \/ tGespielt\)/,
+            'der No-Show steht wieder in einem der beiden Brueche');
+    });
+
+    it('die Turnierzeile weist den No-Show neben der Bilanz aus', () => {
+        assert.match(rein, /\$\{tN > 0 \? ` \\u00b7 \$\{tN\}N` : ''\}/,
+            'ohne Ausweis haelt der Leser die Siegzahl fuer gespielte Siege');
+    });
+
+    it('das Journal-Turnierbild rechnet die Quote ohne den No-Show', () => {
+        assert.match(rein, /const gespieltN = total - noShows;/,
+            'das Bild trennt gespielte Partien nicht ab');
+        assert.match(rein, /\(\(wins - noShows\) \/ gespieltN\)/,
+            'der No-Show steht wieder in einem der beiden Brueche');
+    });
+
+    it('das Journal-Turnierbild schreibt No-Show aus, nicht als N', () => {
+        // Unter der Bilanzzeile steht die Formel S / (S + N + U). Dort
+        // ist N die Niederlage — ein blankes N waere zweideutig.
+        assert.match(rein, /\$\{noShows\}\\u00d7 No-Show/,
+            'die Bilanzzeile des Bildes benennt den No-Show nicht');
+    });
+
+    it('kein Zeichner in js/ds-share.js deutet ein Matchergebnis selbst', () => {
+        // Genau das war der Fehler: drei Zeichner, jeder mit eigener
+        // Kette, und `noshow` fiel in allen drei durchs `else`. Ab jetzt
+        // gibt es vier Funktionen (rundenZeichen, rundenFarbe,
+        // rundenRahmen, rundenPunkte) und niemand sonst fragt m.result
+        // nach einem Wert. Der Riegel gilt gegen die VIERTE Kopie.
+        const share = ohneKommentare(lies('js/ds-share.js'));
+        // (?<![\w$]): `gm.result` in der BO3-Spieleliste ist etwas
+        // anderes — das sind EINZELSPIELE, und ein einzelnes Spiel kann
+        // kein No-Show sein (der Schalter sitzt am Match, PR #842).
+        const ketten = share.match(/(?<![\w$])m\.result === '[a-z]+'/g) || [];
+        assert.equal(ketten.length, 0,
+            `${ketten.length} eigene Ergebnisdeutung(en) in js/ds-share.js: `
+            + `${(ketten || []).join(', ')} — dort faellt der naechste `
+            + 'neue Wert wieder durchs else');
+    });
+});

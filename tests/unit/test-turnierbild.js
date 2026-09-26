@@ -365,17 +365,35 @@ describe('Turnierbild: die Entscheidungen gegen die Vorlage', () => {
                               code.indexOf('function sharePostCard'));
 
     it('der Ausgang steht in der divergierenden Skala, nicht in Grün/Rot', () => {
-        assert.match(poster, /C\.dvPos/);
-        assert.match(poster, /C\.dvNeg/);
+        // Seit dem 26.09.2026 wählt rundenFarbe() die Farbe — EINMAL, für
+        // alle drei Zeichner. Deshalb steht C.dvPos nicht mehr im Poster;
+        // geprüft wird jetzt die Funktion, die das Poster fragt.
+        assert.match(poster, /rundenFarbe\(m\.result\)/,
+            'das Poster wählt die Farbe wieder selbst');
+        const J = ladeShare();
+        assert.equal(J.rundenFarbe('win'), J.PALETTE.dvPos);
+        assert.equal(J.rundenFarbe('loss'), J.PALETTE.dvNeg);
         assert.ok(!/#2ecc71|#27ae60|'green'|'red'/.test(poster),
             'irgendwo ist Grün oder Rot zurückgekommen');
     });
 
     it('Farbe allein entscheidet nicht — es gibt ein Zeichen dazu', () => {
         // Seit dem 24.08. W/L/T statt S/N/U — der Betreiber hat die
-        // internationalen Kuerzel ausdruecklich gewollt.
-        assert.match(poster, /m\.result === 'win' \? 'W'/, 'das Siegzeichen fehlt');
-        assert.match(poster, /m\.result === 'loss' \? 'L' : 'T'/, 'das Niederlagenzeichen fehlt');
+        // internationalen Kuerzel ausdruecklich gewollt. Seit dem
+        // 26.09.2026 kommt N für No-Show dazu, und weil die Kette in
+        // DREI Zeichnern stand (und `noshow` in zweien davon durch das
+        // `else` in die Unentschieden fiel), steht sie nur noch EINMAL:
+        // rundenZeichen(). Der Zeichner fragt sie, statt sie nachzubauen.
+        assert.match(poster, /rundenZeichen\(m\.result\)/,
+            'das Poster baut die Zeichenkette wieder selbst');
+        assert.ok(!/\? 'W'|\? 'L'|: 'T'/.test(poster),
+            'im Poster steht wieder eine eigene Zeichenkette — dort fällt No-Show durchs else');
+        // und die Funktion selbst, ausgeführt:
+        const J = ladeShare();
+        assert.equal(J.rundenZeichen('win'), 'W');
+        assert.equal(J.rundenZeichen('loss'), 'L');
+        assert.equal(J.rundenZeichen('tie'), 'T');
+        assert.equal(J.rundenZeichen(J.NO_SHOW), 'N');
     });
 
     it('das Anzahl-Zeichen ist nicht rot', () => {
@@ -614,5 +632,168 @@ describe('Turnierbild: keine einzelne Kachel in der letzten Zeile', () => {
         }));
         assert.ok(m.kb >= bestMoeglich * 0.88,
             `${m.kb} px statt bis zu ${bestMoeglich} px — zu viel Verlust für eine glatte Zeile`);
+    });
+});
+
+// ── 12. Der No-Show auf dem Bild ───────────────────────────────
+
+/**
+ * BEFUND 26.09.2026, vom Betreiber im fertigen Bild gefunden, nicht von
+ * einem Test: nach einem Turnier mit einem No-Show zeigte die Bildkarte
+ * ERGEBNIS 1–5–1 und PUNKTE 4. Gewertet hatte die Turnierleitung 2–5–1
+ * und 7 — "ich habe heute zwei Siege, ein Unentschieden, dementsprechend
+ * habe ich sieben Punkte."
+ *
+ * Am selben Tag war der No-Show im Journal gebaut worden (PR #841/#842),
+ * und dreizehn Zusicherungen waren grün. Sie deckten den Weg vom
+ * Formular bis in die Statistik ab — aber nicht die BILDER, und von denen
+ * gibt es vier: eines in js/battle-journal.js und drei hier. In allen
+ * drei hier fiel der neue Wert durch das abschliessende `else` in die
+ * Unentschieden.
+ *
+ * Diese Zusicherungen führen deshalb die Rechenteile AUS, mit genau der
+ * Runde von Hausis Turnier, statt Zeichenketten zu begutachten.
+ */
+
+describe('Turnierbild: ein No-Show zählt als Sieg, aber nicht in die Quote', () => {
+    /* Hausis Turnier vom 26.09.2026, in der Reihenfolge, in der es
+     * gespielt wurde: acht Runden, davon eine am grünen Tisch. */
+    const HAUSI = [
+        { result: 'loss',   opponentArchetype: 'A', createdAtMs: 1, ownDeck: 'Deck', bestOf: 'bo1' },
+        { result: 'win',    opponentArchetype: 'B', createdAtMs: 2, ownDeck: 'Deck', bestOf: 'bo1' },
+        { result: 'loss',   opponentArchetype: 'C', createdAtMs: 3, ownDeck: 'Deck', bestOf: 'bo1' },
+        { result: 'tie',    opponentArchetype: 'D', createdAtMs: 4, ownDeck: 'Deck', bestOf: 'bo1' },
+        { result: 'noshow', opponentArchetype: '',  createdAtMs: 5, ownDeck: 'Deck', bestOf: '' },
+        { result: 'loss',   opponentArchetype: 'E', createdAtMs: 6, ownDeck: 'Deck', bestOf: 'bo1' },
+        { result: 'loss',   opponentArchetype: 'F', createdAtMs: 7, ownDeck: 'Deck', bestOf: 'bo1' },
+        { result: 'loss',   opponentArchetype: 'G', createdAtMs: 8, ownDeck: 'Deck', bestOf: 'bo1' }
+    ];
+    const mitGruppe = gruppe => ladeShare({ _bjGetGroup: () => gruppe });
+
+    it('die Bilanz ist 2-5-1, nicht 1-5-1', () => {
+        const I = mitGruppe(HAUSI);
+        const spec = I.collectTournamentSpec('Regional', {});
+        assert.deepEqual(alsEinfach(spec.record), { w: 2, l: 5, t: 1, n: 1 });
+    });
+
+    it('die Punkte sind 7, nicht 4', () => {
+        const I = mitGruppe(HAUSI);
+        const spec = I.collectTournamentSpec('Regional', {});
+        assert.equal(I.matchPunkte(spec.rounds), 7);
+    });
+
+    it('ein No-Show gibt drei Punkte, wie ein Sieg', () => {
+        const I = ladeShare();
+        assert.equal(I.rundenPunkte('win'), 3);
+        assert.equal(I.rundenPunkte(I.NO_SHOW), 3);
+        assert.equal(I.rundenPunkte('tie'), 1);
+        assert.equal(I.rundenPunkte('loss'), 0);
+    });
+
+    it('die Siegquote rechnet OHNE den No-Show — in beiden Brüchen', () => {
+        const I = mitGruppe(HAUSI);
+        const spec = I.collectTournamentSpec('Regional', {});
+        // Ein gespielter Sieg aus sieben gespielten Partien. Nicht 2/8
+        // (25 %, der No-Show im Zaehler) und nicht 2/7 (28,6 %).
+        assert.ok(Math.abs(spec.winRate - (1 / 7) * 100) < 0.01,
+            `Quote ${spec.winRate} statt ${(1 / 7) * 100}`);
+    });
+
+    it('ohne No-Show bleibt alles, wie es war', () => {
+        const ohne = HAUSI.filter(e => e.result !== 'noshow');
+        const I = mitGruppe(ohne);
+        const spec = I.collectTournamentSpec('Regional', {});
+        assert.deepEqual(alsEinfach(spec.record), { w: 1, l: 5, t: 1, n: 0 });
+        assert.equal(I.matchPunkte(spec.rounds), 4);
+        assert.ok(Math.abs(spec.winRate - (1 / 7) * 100) < 0.01);
+    });
+
+    it('der Ring ist neutral, nicht rot — rot heißt hier Niederlage', () => {
+        const I = ladeShare();
+        // Der Betreiber hatte rot vorgeschlagen ("vielleicht macht man die
+        // Siegerzahl irgendwie rot"). Auf diesem Bild ist rot die
+        // Niederlage; ein roter Sieg waere eine falsche Auskunft. Also
+        // der neutrale Ton plus das Zeichen N.
+        assert.equal(I.rundenFarbe(I.NO_SHOW), I.PALETTE.dvZero);
+        assert.notEqual(I.rundenFarbe(I.NO_SHOW), I.PALETTE.dvNeg);
+        assert.equal(I.rundenFarbe('win'), I.PALETTE.dvPos);
+        assert.equal(I.rundenFarbe('loss'), I.PALETTE.dvNeg);
+    });
+
+    it('der erklärende Satz steht nur da, wenn es einen No-Show gab', () => {
+        const I = ladeShare();
+        assert.equal(I.noShowHinweis(0), '');
+        assert.equal(I.noShowHinweis(undefined), '');
+        const satz = I.noShowHinweis(2);
+        assert.match(satz, /2× No-Show/);
+        assert.match(satz, /3 Punkte/, 'der Satz nennt die Punkte nicht');
+    });
+
+    it('der Satz nennt die Quote mit ihrem Namen aus der Quelle', () => {
+        // Nicht "nicht in die Siegquote" — das legt nicht fest, ob die
+        // Unentschieden im Nenner stehen. Der Name kommt aus
+        // js/win-rate-konvention.js; die Probe steckt einen erfundenen
+        // Namen hinein und sieht, ob er im Satz ankommt.
+        const stub = name => ({
+            WinRateKonvention: {
+                kurz: () => name,
+                kuerzel: () => 'WR*',
+                hol: () => ({ formel: 'S / (S + N + U)' })
+            }
+        });
+        assert.match(ladeShare(stub('Siegquote inkl. Unentschieden')).noShowHinweis(1),
+            /Siegquote inkl\. Unentschieden/);
+        assert.match(ladeShare(stub('ZWERGENQUOTE')).noShowHinweis(1), /ZWERGENQUOTE/,
+            'der Satz schreibt den Quotennamen selbst hin statt ihn zu fragen');
+    });
+
+    it('No-Show steht ausgeschrieben, weil N in der Formel die Niederlage ist', () => {
+        // Auf demselben Bild steht S / (S + N + U) — dort ist N die
+        // Niederlage. Ein blankes "1 N" im Satz waere zweideutig. Der
+        // Quotenname wird hier auf einen N-freien Platzhalter gesetzt,
+        // damit die Probe den SATZ prueft und nicht die Formel.
+        const I = ladeShare({ WinRateKonvention: {
+            kurz: () => 'QUOTE', kuerzel: () => 'Q', hol: () => ({ formel: 'Q' })
+        } });
+        const satz = I.noShowHinweis(1).replace(/No-Show/g, '');
+        assert.ok(!/(^|[^\w-])N([^\w-]|$)/.test(satz),
+            `im Hinweis steht ein blankes N: ${satz}`);
+        assert.match(I.noShowHinweis(1), /No-Show/, 'der Satz nennt den Fall nicht');
+    });
+
+    it('beide Karten zeichnen den Satz, nicht nur die vom Betreiber gemeldete', () => {
+        const code = ohneKommentar(SHARE);
+        const post = code.slice(code.indexOf('function postCardCanvas'),
+                                code.indexOf('function sharePostCard'));
+        const ergebnis = code.slice(code.indexOf('function resultCardCanvas'),
+                                    code.indexOf('function toast'));
+        assert.match(post, /noShowHinweis\(/, 'dem Turnierposter fehlt der Satz');
+        assert.match(ergebnis, /noShowHinweis\(/, 'der Ergebniskarte fehlt der Satz');
+        assert.match(ergebnis, /rundenZeichen\(m\.result\)/,
+            'die Ergebniskarte baut die Zeichenkette selbst — dort fällt No-Show durchs else');
+    });
+
+    it('die Fusszeile des Ergebnisbandes nennt den No-Show', () => {
+        const code = ohneKommentar(SHARE);
+        const post = code.slice(code.indexOf('function postCardCanvas'),
+                                code.indexOf('function sharePostCard'));
+        // Die Siegzahl enthaelt ihn; ohne diese Zeile haelt der Leser sie
+        // fuer gespielte Siege.
+        assert.match(post, /rec\.n \? ' · ' \+ rec\.n \+ '× No-Show' : ''/,
+            'unter ERGEBNIS steht nicht, wie viele Siege am grünen Tisch fielen');
+        // Und die Punktelegende darf keine Regel behaupten, die die Summe
+        // nicht hergibt — "Sieg 3 · Unentschieden 1" neben einer 7 mit
+        // No-Show ist ein falscher Satz.
+        assert.match(post, /No-Show 3/,
+            'die Punktelegende erklaert die Summe nicht');
+    });
+
+    it('matchPunkte fragt rundenPunkte, statt die Kette nachzubauen', () => {
+        const code = ohneKommentar(SHARE);
+        const mp = code.slice(code.indexOf('function matchPunkte'),
+                              code.indexOf('function matchPunkte') + 260);
+        assert.match(mp, /rundenPunkte\(m\.result\)/);
+        assert.ok(!/PUNKTE\.tie/.test(mp),
+            'matchPunkte rechnet wieder selbst — dann geht der naechste Wert dort verloren');
     });
 });

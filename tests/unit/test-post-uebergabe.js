@@ -451,7 +451,8 @@ test('was nicht mehr passt, wird gekuerzt und gezaehlt', () => {
     assert.equal(b.deck.gekuerzt, erg.gekuerzt,
         'die Zahl der weggelassenen Eintraege kommt nicht beim Leser an — ' +
         'die Auswahl behauptet dann, vollstaendig zu sein');
-    assert.equal(b.deck.liste[0].titel, 'D0', 'gekuerzt wurde von vorne');
+    assert.equal(b.deck.liste[0].titel, 'D0',
+        'der erste Eintrag fehlt — gekuerzt wurde von VORNE statt von hinten');
 });
 
 test('ein Bestand aus einer fremden Fassung wird nicht gedeutet', () => {

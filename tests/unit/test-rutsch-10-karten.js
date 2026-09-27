@@ -48,7 +48,7 @@ function sortiere(karten) {
         },
         console,
         // Die Kartendaten tragen den Typ als Element + Stufe („PBasic", „WStage 1").
-        getCardTypeCategory: (t) => (/^[A-Z](Basic|Stage)/.test(t) ? 'Pokemon' : 'Trainer'),
+        getCardTypeCategory: (t) => (/^([A-Z])?(Basic|Stage)/.test(t) ? 'Pokemon' : 'Trainer'),
         parseLocaleNumber: (v, d) => { const n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? d : n; }
     };
     vm.createContext(sb);
@@ -62,6 +62,15 @@ test('FE-9: die Familie mit dem hoechsten Anteil steht vorn, auch gegen die Elem
     // Psyduck zuerst — die Alakazam-Linie traegt das Deck aber mit 95 %.
     const r = sortiere([poke('Psyduck', 40, 'W'), poke('Golduck', 30, 'W', 'Stage 1'),
         poke('Abra', 95, 'P'), poke('Kadabra', 90, 'P', 'Stage 1'), poke('Alakazam', 90, 'P', 'Stage 2')]);
+    assert.deepEqual(r, ['Abra', 'Kadabra', 'Alakazam', 'Psyduck', 'Golduck']);
+});
+
+test('FE-9: auch mit Typ ohne Elementbuchstaben („Stage 2") bleibt die Linie in Entwicklungsreihenfolge', () => {
+    // So kommen die Karten des gebauten Decks live an (gemessen 28.09.2026):
+    // type „Basic"/„Stage 1"/„Stage 2", das Element steht in energy_type.
+    const karte = (n, p, e, st) => ({ card_name: n, type: st, energy_type: e, percentage_in_archetype: String(p) });
+    const r = sortiere([karte('Golduck', 30, 'Water', 'Stage 1'), karte('Alakazam', 100, 'Psychic', 'Stage 2'),
+        karte('Kadabra', 100, 'Psychic', 'Stage 1'), karte('Psyduck', 30, 'Water', 'Basic'), karte('Abra', 100, 'Psychic', 'Basic')]);
     assert.deepEqual(r, ['Abra', 'Kadabra', 'Alakazam', 'Psyduck', 'Golduck']);
 });
 

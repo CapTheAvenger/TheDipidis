@@ -2394,6 +2394,28 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                Alakazam vor Psyduck (38 %), ohne dass die Linie zerreisst — der
                Fehler aus 410cebd („share% zuerst“ zerriss die Linien) kommt
                nicht zurueck. */
+            /* Rutsch-10-Abnahme (28.09.2026, live gemessen): die Karten des
+               gebauten Decks tragen den Typ OHNE Elementbuchstaben — „Basic",
+               „Stage 1", „Stage 2", nicht „PBasic". Der alte Zugriff
+               `charAt(0)` / `substring(1)` fand dort weder Element noch Stufe
+               (alles 99), und innerhalb der Linie entschied das Alphabet:
+               Abra, Alakazam, Kadabra. Beide Formen werden jetzt gelesen;
+               das Element kommt sonst aus energy_type. */
+            const _elementNamen = { grass: 'G', fire: 'R', water: 'W', lightning: 'L', psychic: 'P',
+                fighting: 'F', darkness: 'D', metal: 'M', dragon: 'N', colorless: 'C' };
+            function _element(card, typ) {
+                if (/^[GRWLPFDMNC](Basic|Stage)/.test(typ)) return typ.charAt(0);
+                const e = String(card.energy_type || card.element || '').trim().toLowerCase();
+                return _elementNamen[e] || (/^[GRWLPFDMNC]$/i.test(e) ? e.toUpperCase() : '');
+            }
+            function _stufe(typ) {
+                const t = String(typ || '').replace(/\s+/g, '').toLowerCase();
+                if (/stage2$/.test(t)) return evolutionOrder.Stage2;
+                if (/stage1$/.test(t)) return evolutionOrder.Stage1;
+                if (/basic$/.test(t)) return evolutionOrder.Basic;
+                return 99;
+            }
+
             const _famAnteil = new Map();
             const _famKey = new Map();
             cards.forEach(c => {
@@ -2448,8 +2470,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         return famB - famA;
                     }
 
-                    const elementA = cardTypeA.charAt(0);
-                    const elementB = cardTypeB.charAt(0);
+                    const elementA = _element(a, cardTypeA);
+                    const elementB = _element(b, cardTypeB);
 
                     const elemOrderA = elementOrder[elementA] || 99;
                     const elemOrderB = elementOrder[elementB] || 99;
@@ -2468,10 +2490,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     }
 
                     // Same Pokedex: evolution stage (Basic → Stage1 → Stage2).
-                    const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');
-                    const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');
-                    const evolOrderA = evolutionOrder[evolutionA] || 99;
-                    const evolOrderB = evolutionOrder[evolutionB] || 99;
+                    const evolOrderA = _stufe(cardTypeA);
+                    const evolOrderB = _stufe(cardTypeB);
                     if (evolOrderA !== evolOrderB) {
                         return evolOrderA - evolOrderB;
                     }

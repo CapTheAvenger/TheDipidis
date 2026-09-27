@@ -1,0 +1,405 @@
++    'matchup.totalGames':       'Matches gesamt:',|
+     'matchup.vsTitle':          'Matchup gegen {n}',|
+@@ -4768,7 +4766,7 @@ const translations = {|
+     'antiTech.belegNein':             'unbelegt',|
+-    'antiTech.belegHeuristik':        'aus dem Kartentext abgeleitet, nicht an Partien gemessen',|
++    'antiTech.belegHeuristik':        'aus dem Kartentext abgeleitet, nicht an Matches gemessen',|
+     'antiTech.belegStand':            'Stand',|
+     'antiTech.belegDatumUnbekannt':   'Datum unbekannt',|
+-    'antiTech.belegPartien':          'Matchup aus {n} Partien',|
+-    'antiTech.belegOhnePartien':      'Partienzahl des Matchups nicht bekannt',|
++    'antiTech.belegPartien':          'Matchup aus {n} Matches',|
++    'antiTech.belegOhnePartien':      'Matchzahl des Matchups nicht bekannt',|
+     'antiTech.belegKopf':             'Regelbasis: {datei}{version} · Stand {datum} · {n} Paarungen. Alles darüber hinaus ist aus Kartentexten abgeleitet und als unbelegt gekennzeichnet.',|
+@@ -4821,8 +4819,8 @@ const translations = {|
+     'techLab.belegNein':              'unbelegt',|
+-    'techLab.belegHeuristik':         'aus dem Kartentext abgeleitet, nicht an Partien gemessen',|
++    'techLab.belegHeuristik':         'aus dem Kartentext abgeleitet, nicht an Matches gemessen',|
+     'techLab.belegNutzer':            'vom Nutzer eingetragen',|
+-    'techLab.belegNutzerSatz':        'nicht an Partien gemessen',|
++    'techLab.belegNutzerSatz':        'nicht an Matches gemessen',|
+     'techLab.belegStand':             'Stand',|
+     'techLab.belegDatumUnbekannt':    'Datum unbekannt',|
+-    'techLab.belegOhnePartien':       'keine Partien dahinter — hier stehen Kartentexte gegeneinander, keine Deckpaarungen',|
++    'techLab.belegOhnePartien':       'keine Matches dahinter — hier stehen Kartentexte gegeneinander, keine Deckpaarungen',|
+     'techLab.belegKopf':              'Regelbasis: {datei}{version} · Stand {datum} · {n} Paarungen. Alles darüber hinaus ist aus Kartentexten abgeleitet und als unbelegt gekennzeichnet.',|
+@@ -4987,3 +4985,3 @@ const translations = {|
+     'aria.droppedCards':           'Entfernte Karten',|
+-    'aria.editMatch':              'Partie bearbeiten',|
++    'aria.editMatch':              'Match bearbeiten',|
+     'aria.editTournament':         'Turnier bearbeiten',|
+diff --git a/js/win-rate-konvention.js b/js/win-rate-konvention.js|
+index 5a54c0d..20439df 100644|
+--- a/js/win-rate-konvention.js|
++++ b/js/win-rate-konvention.js|
+@@ -166,3 +166,3 @@|
+                   + 'nicht vergleichbar.',|
+-            langEn: 'Share of games won out of all games played — ties count in the '|
++            langEn: 'Share of matches won out of all matches played — ties count in the '|
+                   + 'denominator, but not as half a win. The figure drops as ties get '|
+@@ -206,3 +206,3 @@|
+                   + 'werden.',|
+-            langEn: 'Share of decided games won — ties are left out entirely. Alone '|
++            langEn: 'Share of decided matches won — ties are left out entirely. Alone '|
+                   + 'among the three it does not depend on how often the field draws, '|
+diff --git a/scripts/messe_begriffe.py b/scripts/messe_begriffe.py|
+new file mode 100644|
+index 0000000..f290ffc|
+--- /dev/null|
++++ b/scripts/messe_begriffe.py|
+@@ -0,0 +1,94 @@|
++#!/usr/bin/env python3|
++"""Welche Woerter stehen wirklich auf den Meta-Ansichten? — gemessen am gezeichneten Schirm.|
++|
++UI-18 (Rutsch 6, 27.09.2026, Hausi): „Wording ueberall konsequent ‚Matches'|
++statt ‚Partien'/‚Games'". Ein Grep im Quelltext sieht Kommentare,|
++Bezeichner und Regex-Muster und uebersieht zusammengesetzte Texte. Dieses|
++Werkzeug laedt die Seite, oeffnet jede Meta-Ansicht, klappt alle|
++<details> auf und zaehlt die Treffer im SICHTBAREN Text und in den|
++Hinweisen (title, aria-label, data-hinweis) — also genau das, was ein|
++Leser zu sehen bekommt.|
++|
++AUFRUF|
++------|
++    python3 -m http.server 8765 --bind 127.0.0.1 &      # aus der Repo-Wurzel|
++    python3 scripts/messe_begriffe.py                    # Standard: Partie|Games|
++    python3 scripts/messe_begriffe.py --muster "Siegquote" --sprache de|
++    python3 scripts/messe_begriffe.py --url https://thedipidis.app/|
++|
++Ausgabe: je Ansicht und Sprache eine Zeile mit der Trefferzahl, darunter|
++bis zu fuenf Fundstellen. Rueckgabe 0 — das Werkzeug misst, es urteilt nicht.|
++|
++Das Battle Journal ist absichtlich NICHT dabei: dort ist ein Game eine|
++Einzelpartie innerhalb eines Bo3-Matches (Entscheidung Hausi, 27.09.2026).|
++"""|
++import argparse|
++import asyncio|
++import re|
++|
++ANSICHTEN = ["current-meta", "current-analysis", "past-meta", "meta-call",|
++             "city-league", "city-league-analysis"]|
++|
++SAMMLER = r"""|
++(args) => {|
++  const [ansicht, muster] = args;|
++  const wurzel = document.getElementById(ansicht);|
++  if (!wurzel) return {fehlt: true};|
++  wurzel.querySelectorAll('details').forEach(d => { d.open = true; });|
++  const re = new RegExp(muster, 'g');|
++  const funde = [];|
++  const txt = wurzel.innerText || '';|
++  let m;|
++  while ((m = re.exec(txt))) funde.push('text: …' + txt.slice(Math.max(0, m.index - 40), m.index + 40).replace(/\s+/g, ' ') + '…');|
++  wurzel.querySelectorAll('[title],[aria-label],[data-hinweis]').forEach(e => {|
++    ['title', 'aria-label', 'data-hinweis'].forEach(a => {|
++      const v = e.getAttribute(a);|
++      if (!v) return;|
++      const r2 = new RegExp(muster, 'g');|
++      let mm;|
++      while ((mm = r2.exec(v))) funde.push(a + ': …' + v.slice(Math.max(0, mm.index - 40), mm.index + 40) + '…');|
++    });|
++  });|
++  return {funde};|
++}|
++"""|
++|
++|
++async def miss(url, muster, sprachen):|
++    from playwright.async_api import async_playwright|
++    async with async_playwright() as p:|
++        b = await p.chromium.launch()|
++        for sprache in sprachen:|
++            pg = await b.new_page(viewport={'width': 1280, 'height': 900},|
++                                  locale='de-DE' if sprache == 'de' else 'en-US')|
++            await pg.goto(url, wait_until='load', timeout=90000)|
++            await pg.wait_for_function('typeof window.switchTab === "function"', timeout=90000)|
++            for ans in ANSICHTEN:|
++                await pg.evaluate(f"switchTab('{ans}')")|
++                await pg.wait_for_timeout(7000)|
++                erg = await pg.evaluate(SAMMLER, [ans, muster])|
++                if erg.get('fehlt'):|
++                    print(f"{sprache} {ans:22s} Ansicht fehlt")|
++                    continue|
++                funde = erg['funde']|
++                print(f"{sprache} {ans:22s} {len(funde)} Treffer")|
++                for f in funde[:5]:|
++                    print('      ' + f)|
++            await pg.close()|
++        await b.close()|
++|
++|
++def main():|
++    ap = argparse.ArgumentParser()|
++    ap.add_argument('--url', default='http://127.0.0.1:8765/index.html')|
++    ap.add_argument('--muster', default=r'Partie|\b[Gg]ames?\b')|
++    ap.add_argument('--sprache', choices=['de', 'en', 'beide'], default='beide')|
++    a = ap.parse_args()|
++    re.compile(a.muster)|
++    sprachen = ['de', 'en'] if a.sprache == 'beide' else [a.sprache]|
++    asyncio.run(miss(a.url, a.muster, sprachen))|
++    return 0|
++|
++|
++if __name__ == '__main__':|
++    raise SystemExit(main())|
+diff --git a/scripts/messe_schrift_kontrast.py b/scripts/messe_schrift_kontrast.py|
+index f1440fd..a899a9b 100644|
+--- a/scripts/messe_schrift_kontrast.py|
++++ b/scripts/messe_schrift_kontrast.py|
+@@ -61,2 +61,8 @@ SAMMLER = r"""|
+   const deckkraft = (el) => { let o = 1; for (let e = el; e && e.nodeType === 1; e = e.parentElement) o *= parseFloat(getComputedStyle(e).opacity || '1'); return o; };|
++  // filter: brightness() eines Vorfahren dimmt die Schrift GENAUSO wie den|
++  // Grund. Der Grund kommt aus dem Bildschirmfoto (schon gedimmt), die|
++  // Schriftfarbe aus dem CSS (ungedimmt) — ohne diesen Faktor misst das|
++  // Werkzeug im Dunkelmodus der Anleitung zu schwache Kontraste|
++  // (Rutsch 6, 27.09.2026: 3 von 4 Befunden waren nur dieser Fehler).|
++  const helligkeit = (el) => { let h = 1; for (let e = el; e && e.nodeType === 1; e = e.parentElement) { const f = getComputedStyle(e).filter || ''; const m = f.match(/brightness\(([\d.]+)\)/); if (m) h *= parseFloat(m[1]); } return h; };|
+   const walker = document.createTreeWalker(wurzel, NodeFilter.SHOW_TEXT);|
+@@ -82,3 +88,3 @@ SAMMLER = r"""|
+       text: text.slice(0, 50), klasse: (el.className && el.className.baseVal === undefined ? el.className : '') || el.tagName.toLowerCase(),|
+-      fs, gewicht: parseInt(cs.fontWeight, 10) || 400, farbe: cs.color, deckkraft: op,|
++      fs, gewicht: parseInt(cs.fontWeight, 10) || 400, farbe: cs.color, deckkraft: op, helligkeit: helligkeit(el),|
+       x: rect.left + scrollX, y: rect.top + scrollY, b: rect.width, h: rect.height,|
+@@ -199,3 +205,4 @@ def messe(seite, ansicht, breite, dunkel, klasse):|
+             continue|
+-        vg = tuple(a * c + (1 - a) * h for c, h in zip((r, g, b), bg))|
++        hf = k.get("helligkeit", 1.0)|
++        vg = tuple(a * min(255.0, c * hf) + (1 - a) * h for c, h in zip((r, g, b), bg))|
+         k["hintergrund"] = "#%02x%02x%02x" % bg|
+diff --git a/tests/unit/test-archetype-card.js b/tests/unit/test-archetype-card.js|
+index 7ca13eb..d336efd 100644|
+--- a/tests/unit/test-archetype-card.js|
++++ b/tests/unit/test-archetype-card.js|
+@@ -113,5 +113,9 @@ describe('the card and the panel cannot disagree', () => {|
+            und es geht auf — das ist der ganze Punkt. */|
+-        const ctx = html.match(/arc-tile--conv[\s\S]*?arc-tile-ctx">([^<]+)</)[1];|
++        // UI-26 (27.09.2026, Hausi): der Schnitt steht im Namen der Kachel —|
++        // „Online Top 8-Quote (Ø 6,3 %)" —, nicht mehr als eigene Zeile.|
++        const ctx = html.match(/arc-tile--conv[\s\S]*?arc-tile-label">([^<]+)</)[1];|
+         const schnitt = (conv.expected * 100).toFixed(1).replace('.', ',');|
+-        assert.equal(ctx.trim(), `Schnitt aller Decks ${schnitt} %`);|
++        assert.equal(ctx.trim(), `Online Top 8-Quote (Ø ${schnitt} %)`);|
++        assert.ok(!/arc-tile--conv[^]*?arc-tile-ctx">[^<]*Schnitt/.test(html.split('arc-tile--day2')[0]),|
++            'der Schnitt steht wieder als eigene Zeile darunter');|
+         // Und die Probe: die grosse Zahl geteilt durch diese ergibt|
+diff --git a/tests/unit/test-audit-p0-fixes.js b/tests/unit/test-audit-p0-fixes.js|
+index 91b7ebd..b2fb4af 100644|
+--- a/tests/unit/test-audit-p0-fixes.js|
++++ b/tests/unit/test-audit-p0-fixes.js|
+@@ -110,5 +110,8 @@ pruefe('Meta-Performance: sortierbar nach jeder angezeigten Spalte', () => {|
+     assert.ok(m, 'SPALTEN-Definition nicht gefunden');|
+-    for (const k of ['listen', 'anteil', 'wr', 'antritte', 'cuts', 'quote', 'faktor']) {|
++    for (const k of ['listen', 'anteil', 'wr', 'antritte', 'cuts', 'quote']) {|
+         assert.ok(m[0].includes(`k: '${k}'`), `Spalte ${k} fehlt`);|
+     }|
++    // UI-26 (27.09.2026, Hausi): die Spalte „ggü. Schnitt" ist weg — der|
++    // Schnitt steht im Kopf der Top-8-Quote.|
++    assert.ok(!m[0].includes("k: 'faktor'"), 'die Faktor-Spalte ist zurück');|
+     assert.ok(/data-rang-spalte="\$\{c\.k\}"/.test(tier),|
+@@ -117,3 +120,3 @@ pruefe('Meta-Performance: sortierbar nach jeder angezeigten Spalte', () => {|
+ |
+-pruefe('Meta-Performance: keine Faktor-Zahl unter der Mindeststichprobe', () => {|
++pruefe('Meta-Performance: keine Faktor-Zahl mehr, die Rohspalten zeigen ihren Wert', () => {|
+     // Diese Pruefung las bis zum 20.08.2026 den QUELLTEXT: sie suchte die|
+@@ -145,20 +148,8 @@ pruefe('Meta-Performance: keine Faktor-Zahl unter der Mindeststichprobe', () =>|
+ |
+-    // Genau an der Grenze: 20 gewichtete Antritte reichen, 19,9 nicht.|
+-    const drueber = f({ faktor: 1.4, faktorRoh: 1.9, antritteGew: 20 }, 'faktor');|
+-    assert.ok(/1,4-mal/.test(drueber),|
+-        'ab CONV_MIN_N muss der Faktor dastehen, war: ' + drueber);|
+-|
+-    for (const n of [0, 1, 8, 19, 19.9, null, undefined, NaN]) {|
+-        const aus = f({ faktor: 1.0, faktorRoh: 1.0, antritteGew: n }, 'faktor');|
+-        assert.ok(!/-mal/.test(aus),|
+-            'bei ' + n + ' Antritten steht wieder eine Faktor-Zahl da: ' + aus);|
+-        assert.ok(aus.includes('–'),|
+-            'bei ' + n + ' Antritten fehlt der Strich: ' + aus);|
+-    }|
+-|
+-    // Der gemeldete Fall: 23 Decks ohne einen einzigen Cut standen mit|
+-    // "1,0-mal" und einem Balken auf der Nulllinie da.|
+-    const ohneCut = f({ faktor: 1.0, faktorRoh: 1.0, antritteGew: 3, cuts: 0 }, 'faktor');|
+-    assert.ok(!/ds-bar-fill/.test(ohneCut),|
+-        'ohne Stichprobe darf auch kein Balken gezeichnet werden');|
++    // UI-26 (27.09.2026): die Faktor-Spalte gibt es nicht mehr. Ein|
++    // Schluessel, den die Tabelle nicht kennt, zeigt einen Strich —|
++    // weder eine Zahl noch einen Balken.|
++    const faktor = f({ faktor: 1.4, faktorRoh: 1.9, antritteGew: 20 }, 'faktor');|
++    assert.equal(faktor, '–', 'die Zelle zeichnet wieder einen Faktor: ' + faktor);|
++    assert.ok(!/ds-bar-fill|-mal/.test(faktor));|
+ |
+diff --git a/tests/unit/test-b1-listen-vorwert.js b/tests/unit/test-b1-listen-vorwert.js|
+index 1404e9e..787086e 100644|
+--- a/tests/unit/test-b1-listen-vorwert.js|
++++ b/tests/unit/test-b1-listen-vorwert.js|
+@@ -5,3 +5,3 @@|
+  *   `PRIOR_GAMES: 50` und liess den Satz ueber der Liste sagen|
+- *   "geglaettet gegen einen Vorwert von 50 Partien bei 50 %".|
++ *   "geglaettet gegen einen Vorwert von 50 Matches bei 50 %".|
+  *   Hineingereicht wird aber `new_count` aus|
+@@ -11,3 +11,3 @@|
+  *   3.138 Listen; dieselbe Woche hat in data/limitless_online_decks.csv|
+- *   7943 + 6642 + 276 = 14.861 Partien. Der Vorwert wog also rund|
++ *   7943 + 6642 + 276 = 14.861 Matches. Der Vorwert wog also rund|
+  *   4,7-mal schwerer, als sein Name behauptete.|
+@@ -195,4 +195,4 @@ describe('B1 — der Vorwert der Tier-Glaettung zaehlt Listen, nicht Partien', (|
+         // darf sie nicht mitgerissen haben.|
+-        assert.ok(de.includes('ab ' + RECHNUNG.TIER_SCORE.LABS_MIN_PARTIEN + ' Partien je Deck'),|
+-            'die Labs-Schwelle zaehlt Partien und muss so heissen:\n' + de);|
++        assert.ok(de.includes('ab ' + RECHNUNG.TIER_SCORE.LABS_MIN_PARTIEN + ' Matches je Deck'),|
++            'die Labs-Schwelle zaehlt Matches (UI-18: Matches statt Partien) und muss so heissen:\n' + de);|
+     });|
+diff --git a/tests/unit/test-cm-tier-grundlage.js b/tests/unit/test-cm-tier-grundlage.js|
+index 015501d..ffb9ed9 100644|
+--- a/tests/unit/test-cm-tier-grundlage.js|
++++ b/tests/unit/test-cm-tier-grundlage.js|
+@@ -250,3 +250,3 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B|
+             ['Gewicht 125,0;', 'TIER_SCORE.WR_GEWICHT'],|
+-            ['ab 126 Partien je Deck', 'TIER_SCORE.LABS_MIN_PARTIEN'],|
++            ['ab 126 Matches je Deck', 'TIER_SCORE.LABS_MIN_PARTIEN'],|
+             ['bis +127 pp', 'TIER_SCORE.LABS_WR_DECKEL'],|
+@@ -299,3 +299,3 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B|
+         const s = satz('de');|
+-        assert.ok(s.includes('ab ' + GEMESSEN.labsMinPartien + ' Partien je Deck'),|
++        assert.ok(s.includes('ab ' + GEMESSEN.labsMinPartien + ' Matches je Deck'),|
+             'gemessene Schwelle: ' + GEMESSEN.labsMinPartien + '\n' + s);|
+diff --git a/tests/unit/test-conversion-performance.js b/tests/unit/test-conversion-performance.js|
+index f834b67..8a0e49d 100644|
+--- a/tests/unit/test-conversion-performance.js|
++++ b/tests/unit/test-conversion-performance.js|
+@@ -406,7 +406,8 @@ describe('the diverging bar keeps its colours', () => {|
+ |
+-    it('and it is still used somewhere', () => {|
+-        // Ein Balken, den niemand mehr rendert, ist toter Stil.|
++    it('the meta-performance table no longer draws it (UI-26, 27.09.2026)', () => {|
++        // Hausi: der Vergleich mit dem Schnitt stand dreifach da. Die Spalte|
++        // „ggü. Schnitt" samt Balken ist weg; die Komponente bleibt in|
++        // components.css fuer kuenftige Nutzer.|
+         const tier = fs.readFileSync(path.join(ROOT, 'js', 'app-tier-meta.js'), 'utf8');|
+-        assert.match(tier, /ds-bar-track is-diverging/,|
+-            'der divergierende Balken wird nirgends mehr erzeugt');|
++        assert.doesNotMatch(tier, /ds-bar-track is-diverging/);|
+     });|
+@@ -444,30 +445,9 @@ describe('the listing floor', () => {|
+     // Form von Nachweis. Dieser hier RUFT die Zellenfunktion auf.|
+-    it('the floor is applied where the number is printed, not in the maths', () => {|
++    it('the table prints no factor any more (UI-26, 27.09.2026)', () => {|
++        // Bis zum 27.09.2026 stand hier die Mindeststichprobe des Faktors.|
++        // Die Spalte ist weg; die Zelle zeigt fuer den alten Schluessel|
++        // einen Strich, nie eine Zahl.|
+         const zelle = ladeZelle();|
+-        const MIN = compute.CONV_MIN_N;|
+-        // antritteGew, nicht antritte: die Schwelle liest seit dem|
+-        // 02.09.2026 den gewichteten Wert, die Anzeige die gezaehlte Zahl.|
+-        const unterGrenze = zelle({ name: 'X', faktor: 1.0, faktorRoh: 0.96,|
+-                                    antritteGew: MIN - 0.5 }, 'faktor');|
+-        assert.ok(!/\d/.test(unterGrenze.replace(/[^>]*>/g, '').trim()),|
+-            'unter der Mindeststichprobe darf keine Faktor-Zahl gedruckt werden: ' + unterGrenze);|
+-        assert.match(unterGrenze, /–/);|
+-|
+-        const drueber = zelle({ name: 'X', faktor: 1.6, faktorRoh: 1.2,|
+-                                antritteGew: MIN }, 'faktor');|
+-        assert.match(drueber, /1,6-mal/);|
+-|
+-        /* Der gemeldete Fall vom 02.09.2026: keine gezaehlte Zahl da,|
+-           aber 640,5 gewichtete Antritte. Die Spalte "ggue. Schnitt"|
+-           stand trotzdem auf Strich, in jeder einzelnen Zeile. */|
+-        const ohneZaehlung = zelle({ name: 'X', faktor: 1.6, faktorRoh: 1.2,|
+-                                     antritte: null, antritteGew: 640.5 }, 'faktor');|
+-        assert.match(ohneZaehlung, /1,6-mal/,|
+-            'ohne gezaehlte Startzahl schweigt der Faktor wieder, obwohl '|
+-            + 'die Stichprobe traegt');|
+-        assert.match(drueber, /roh 1,2-mal/, 'der rohe Wert gehoert in den Titel');|
+-|
+-        const compFn = utilsChunk(/function computeConversionPerformance\(rows\) \{[\s\S]*?\n\}\n/, 'compute');|
+-        assert.doesNotMatch(compFn, /CONV_MIN_N/,|
+-            'the floor must not touch the field average');|
++        const aus = zelle({ name: 'X', faktor: 1.6, faktorRoh: 1.2, antritteGew: 640.5 }, 'faktor');|
++        assert.equal(aus, '–');|
+     });|
+diff --git a/tests/unit/test-design-components.js b/tests/unit/test-design-components.js|
+index 213c4c9..9dc3449 100644|
+--- a/tests/unit/test-design-components.js|
++++ b/tests/unit/test-design-components.js|
+@@ -131,9 +131,8 @@ describe('Current Meta benutzt die Komponenten wirklich', () => {|
+ |
+-    it('die Balkenzeile lebt jetzt in der Rangliste', () => {|
+-        // Sie stand im eigenen Block "Top 8 vs. Erwartung". Der Block ist am|
+-        // 19.08.2026 in die sortierbare Rangliste aufgegangen, der Balken ist|
+-        // mitgewandert — er zeigt auf einen Blick, wer ueber dem Schnitt liegt.|
+-        assert.match(TIER, /ds-bar-track is-diverging/);|
+-        assert.match(TIER, /ds-bar-fill \$\{posi \? 'is-pos' : 'is-neg'\}/);|
+-        assert.match(TIER, /cm-rangliste/, 'der Balken haengt nicht an der Rangliste');|
++    it('die Balkenzeile ist mit der Spalte „ggü. Schnitt" gegangen (UI-26)', () => {|
++        // Sie stand seit dem 19.08.2026 in der Rangliste. Am 27.09.2026 hat|
++        // Hausi den dreifachen Vergleich mit dem Schnitt auf einen Kopf|
++        // „Online Top 8-Quote (Ø …)" zusammengelegt.|
++        assert.doesNotMatch(TIER, /ds-bar-track is-diverging/);|
++        assert.match(TIER, /cm-rangliste/);|
+     });|
+diff --git a/tests/unit/test-design-depth.js b/tests/unit/test-design-depth.js|
+index 38436c7..635440b 100644|
+--- a/tests/unit/test-design-depth.js|
++++ b/tests/unit/test-design-depth.js|
+@@ -313,3 +313,5 @@ describe('Fachbegriffe erklären sich dort, wo die Zahl steht', () => {|
+         const hilfen = [...block.matchAll(/hilf:\s*'([a-zA-Z]+)'/g)].map(m => m[1]);|
+-        assert.ok(hilfen.length >= 2, `nur ${hilfen.length} Spalten mit Hilfstext`);|
++        // Seit UI-26 (27.09.2026) ist die Spalte „ggü. Schnitt" (vsField)|
++        // weg; es bleiben die Top-8-Quote und die Win-Rate-Spalte.|
++        assert.ok(hilfen.length >= 1, `nur ${hilfen.length} Spalten mit Hilfstext`);|
+         hilfen.forEach(k => assert.match(TIER, new RegExp('\\n\\s+' + k + ':'),|
+diff --git a/tests/unit/test-ds-share.js b/tests/unit/test-ds-share.js|
+index ec6f0c3..e2bb23e 100644|
+--- a/tests/unit/test-ds-share.js|
++++ b/tests/unit/test-ds-share.js|
+@@ -15,3 +15,3 @@|
+  *    Deck sieht darauf gut aus.|
+- *  - Jede Zeile trägt ihre Partienzahl. Eine 68-%-Zeile über 9 Partien|
++ *  - Jede Zeile trägt ihre Partienzahl. Eine 68-%-Zeile über 9 Matches|
+  *    ist nicht dasselbe Argument wie eine über 238.|
+@@ -136,3 +136,3 @@ describe('ds-share: die Entscheidungen gegen die Vorlage', () => {|
+     it('malt keine Zeile ohne ihre Partienzahl', () => {|
+-        assert.match(SHARE, /L\('Matches', 'Games'\)/,|
++        assert.match(SHARE, /L\('Matches', 'Matches'\)/,|
+             'Die Spalte mit der Matchzahl ist aus der Matchup-Tabelle verschwunden.');|
+diff --git a/tests/unit/test-karten-und-kacheln.js b/tests/unit/test-karten-und-kacheln.js|
+index cb3cef4..b8826e7 100644|
+--- a/tests/unit/test-karten-und-kacheln.js|
++++ b/tests/unit/test-karten-und-kacheln.js|
+@@ -195,3 +195,3 @@ describe('Der Datenumfang — von der Startseite nach Quellen & Methodik', () =>|
+         assert.match(z, /14\.026 Spieler/);|
+-        assert.match(z, /59\.910 Partien/);|
++        assert.match(z, /59\.910 Matches/);|
+         assert.match(z, /60 Archetypen, zu denen vollständige/);|
+diff --git a/tests/unit/test-leere-spalten-und-schwellen.js b/tests/unit/test-leere-spalten-und-schwellen.js|
+index f4a8314..ff21fed 100644|
+--- a/tests/unit/test-leere-spalten-und-schwellen.js|
++++ b/tests/unit/test-leere-spalten-und-schwellen.js|
+@@ -60,9 +60,2 @@ function filterAusQuelle() {|
+ /** Schneidet die Faktor-Schwelle aus der Datei und macht sie ausfuehrbar. */|
+-function faktorSchwelleAusQuelle() {|
+-    const m = OHNE_KOMMENTAR.match(/if \(!\((r\.[A-Za-z]+) >= CONV_MIN_N\)\)/);|
+-    assert.ok(m, 'die Faktor-Schwelle steht nicht mehr in js/app-tier-meta.js');|
+-    return new Function('r', 'CONV_MIN_N',|
+-        'return !(' + m[1] + ' >= CONV_MIN_N);');|
+-}|
+-|
+ /** Schneidet die duenn-Schwelle aus der Datei und macht sie ausfuehrbar. */|
+@@ -121,13 +114,5 @@ describe('Leere Spalten fallen weg, Schwellen rechnen weiter', () => {|
+ |
+-    it('der Faktor haengt am gewichteten Wert, nicht an der Anzeige', () => {|
+-        const schweigt = faktorSchwelleAusQuelle();|
+-        // Genau der ausgelieferte Zustand: keine gezaehlte Zahl da,|
+-        // aber 640,5 gewichtete Antritte — weit ueber der Schwelle.|
+-        assert.equal(schweigt({ antritte: null, antritteGew: 640.5 }, 20), false,|
+-            'der Faktor schweigt wieder, obwohl die Stichprobe traegt');|
+-        // Und er schweigt weiterhin, wo die Stichprobe wirklich zu klein ist.|
+-        assert.equal(schweigt({ antritte: null, antritteGew: 4 }, 20), true,|
+-            'der Faktor redet jetzt auch bei vier Antritten');|
+-        assert.equal(schweigt({ antritte: null, antritteGew: null }, 20), true,|
+-            'ohne jeden Wert muss der Faktor schweigen');|
++    it('eine Faktor-Schwelle gibt es nicht mehr — die Spalte ist weg (UI-26)', () => {|
++        assert.doesNotMatch(OHNE_KOMMENTAR, /r\.antritteGew >= CONV_MIN_N/);|
++        assert.doesNotMatch(OHNE_KOMMENTAR, /k: 'faktor'/);|
+     });|
+diff --git a/tests/unit/test-matches-und-lesbarkeit.js b/tests/unit/test-matches-und-lesbarkeit.js|

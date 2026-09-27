@@ -1,0 +1,71 @@
++    assert.doesNotMatch(max[1], /clip-path|border-radius/, 'die Feld-Anzahl bekommt wieder eine eigene Form');|
++    const deck = /\.city-league-card-badge-deck\s*\{([^}]*)\}/.exec(share);|
++    assert.ok(deck);|
++    assert.doesNotMatch(deck[1], /border-radius/, 'die Deck-Anzahl bekommt wieder eine eigene Form');|
++});|
++|
++test('UI-37: keine aeltere Regel schlaegt die Familie bei Groesse oder Lage', () => {|
++    // Zwei Wege, auf denen eine alte Regel die Familie trotz spaeterer|
++    // Ladereihenfolge schlaegt: eine ID im Selektor, oder !important.|
++    // So blieb card-max-count in Mein-Deck bei 16 px, und das Herz lag|
++    // per Inline-Regel in index.html (top: 22px !important) auf der|
++    // Deck-Anzahl.|
++    const html = R('index.html');|
++    const quellen = [|
++        ['index.html', [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n')],|
++        ...fs.readdirSync(path.join(__dirname, '..', '..', 'css')).filter((f) => f.endsWith('.css'))|
++            .map((f) => ['css/' + f, R('css/' + f)])|
++    ];|
++    // `:not(.plakette)` nimmt die Plakette gerade AUS — das zaehlt nicht als Treffer.|
++    const trifft = (sel) => ((sel) => FAMILIE.some((k) => new RegExp(k.replace(/\./g, '\\.') + '(?![\\w-])(?!::)').test(sel)))(sel.replace(/:not\([^)]*\)/g, ''));|
++    const funde = [];|
++    for (const [name, text] of quellen) {|
++        for (const m of ohneKommentare(text).matchAll(/([^{}]+)\{([^{}]*)\}/g)) {|
++            const sel = m[1].trim();|
++            if (!trifft(sel)) continue;|
++            for (const d of m[2].split(';')) {|
++                const [eig, ...wert] = d.split(':');|
++                const e = (eig || '').trim();|
++                if (!/^(width|height|top|right|min-height|min-width)$/.test(e)) continue;|
++                if (/!important/.test(wert.join(':')) || /#/.test(sel)) funde.push(`${name}: ${sel.slice(0, 70)} { ${d.trim()} }`);|
++            }|
++        }|
++    }|
++    assert.deepEqual(funde, [], 'aeltere Regeln setzen Plakettengroesse oder -lage an der Familie vorbei');|
++});|
++|
++test('UI-37: die 44-px-Regel fuer Deck-Knoepfe nimmt das Herz aus', () => {|
++    // Sonst ist das Herz auf dem Handy ein 22 x 44 px grosses Oval — die|
++    // Regel nennt das Herz nicht, darum faengt die Probe darueber sie nicht.|
++    const css = ohneKommentare(R('css/styles.css'));|
++    const regeln = [...css.matchAll(/([^{}]+)\{([^{}]*min-height:\s*44px[^{}]*)\}/g)]|
++        .map((m) => m[1].trim()).filter((sel) => /(^|,)\s*\.deck-card button/.test(sel));|
++    assert.ok(regeln.length, 'die Regel fuer die Deck-Knoepfe ist verschwunden');|
++    for (const sel of regeln) assert.match(sel, /\.deck-card button:not\(\.wishlist-heart-badge\)/, sel);|
++});|
++|
++// ── UI-36 ───────────────────────────────────────────────────────────|
++test('UI-36: das Preisschild waechst nicht in die Zeile', () => {|
++    for (const datei of ['css/ui-components.css', 'css/mobile-responsive.css']) {|
++        const css = ohneKommentare(R(datei));|
++        const regeln = [...css.matchAll(/\.city-league-card-action-row\s*>\s*\.city-league-card-market-btn\s*\{([^}]*)\}/g)];|
++        assert.ok(regeln.length, `${datei}: Regel fuer das Preisschild fehlt`);|
++        for (const r of regeln) {|
++            assert.match(r[1], /flex:\s*0\s+0\s+auto/, `${datei}: das Preisschild fuellt wieder die Zeile`);|
++            assert.doesNotMatch(r[1], /overflow:\s*hidden/, `${datei}: das Preisschild darf den Betrag wieder abschneiden`);|
++        }|
++    }|
++});|
+diff --git a/version.json b/version.json|
+index 883a6b0..4403efb 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202609272004"}|
+\ No newline at end of file|
++{"version":"202609272155"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

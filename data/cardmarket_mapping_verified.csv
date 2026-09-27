@@ -669,7 +669,7 @@ BLW,47,279785,verified,"limitless-fingerprint 2.09EUR~2.09EUR (ratio 1.00, pool 
 BLW,5,279743,verified,"limitless-fingerprint 8.56EUR~8.56EUR (ratio 1.00, pool 2) [metric trend, agreeing: trend]",279744,no,2026-09-26T23:55:34+00:00,https://limitlesstcg.com/cards/BLW/5
 BLW,53,279791,verified,"limitless-fingerprint 0.33EUR~0.33EUR (ratio 1.00, pool 2)",279791,yes,2026-08-01T18:58:00+00:00,https://limitlesstcg.com/cards/BLW/53
 BLW,58,279796,verified,"limitless-fingerprint 0.09EUR~0.09EUR (ratio 1.00, pool 2)",279796,yes,2026-08-09T10:48:47+00:00,https://limitlesstcg.com/cards/BLW/58
-BLW,59,279796,verified,"limitless-fingerprint 0.12EUR~0.11EUR (ratio 1.09, pool 2) [metric avg30, agreeing: avg30]",279797,no,2026-09-26T23:55:38+00:00,https://limitlesstcg.com/cards/BLW/59
+BLW,59,,kollision,"limitless-fingerprint 0.12EUR~0.11EUR (ratio 1.09, pool 2) [metric avg30, agreeing: avg30] — Nummer 279796 ist schon fuer BLW-58 bestaetigt (2026-08-09); nachgetragen 2026-09-27, Lauf #16",279797,,2026-09-26T23:55:38+00:00,https://limitlesstcg.com/cards/BLW/59
 BLW,6,,no_price_on_page,,279743,,2026-09-26T23:55:34+00:00,https://limitlesstcg.com/cards/BLW/5
 BLW,64,279802,verified,"limitless-fingerprint 0.66EUR~0.66EUR (ratio 1.00, pool 2)",279802,yes,2026-08-01T18:57:29+00:00,https://limitlesstcg.com/cards/BLW/64
 BLW,77,,fingerprint_ambiguous,fingerprint_ambiguous(0 in band),279815,,2026-09-26T23:55:32+00:00,https://limitlesstcg.com/cards/BLW/77

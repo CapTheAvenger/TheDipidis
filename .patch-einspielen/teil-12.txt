@@ -1,0 +1,119 @@
+             'der Aufruf von ladeMajorMatchups() hat kein eigenes Fangnetz mehr — '|
+@@ -271,4 +275,5 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {|
+         const meta = ohneKomm(lies(path.join('js', 'app-current-meta.js')));|
+-        const a = meta.indexOf('async function ladeMajorMatchups');|
+-        const rumpf = meta.slice(a, meta.indexOf('window._majorMatchupRegistry = reg;', a));|
++        // Die Zuweisung steht seit dem 27.09.2026 im gemeinsamen Parser.|
++        const a = meta.indexOf('function majorMatchupsParsen(');|
++        const rumpf = meta.slice(a, meta.indexOf('return reg;', a));|
+         assert.ok(/bilanzDa\s*:/.test(rumpf),|
+@@ -333,6 +338,7 @@ describe('Die Zahl kommt aus der Bilanz, nicht aus vs_win_pct', () => {|
+         const meta = ohneKomm(lies(path.join('js', 'app-current-meta.js')));|
+-        const a = meta.indexOf('async function ladeMajorMatchups');|
+-        assert.ok(a > 0, 'ladeMajorMatchups ist weg');|
+-        const rumpf = meta.slice(a, meta.indexOf('window._majorMatchupRegistry = reg;', a));|
+-        assert.ok(rumpf.length > 200, 'der Rumpf von ladeMajorMatchups ist leer');|
++        // Seit dem 27.09.2026 im gemeinsamen Parser majorMatchupsParsen().|
++        const a = meta.indexOf('function majorMatchupsParsen(');|
++        assert.ok(a > 0, 'majorMatchupsParsen ist weg');|
++        const rumpf = meta.slice(a, meta.indexOf('return reg;', a));|
++        assert.ok(rumpf.length > 200, 'der Rumpf des Parsers ist leer');|
+         assert.ok(/DsGlaettung/.test(rumpf),|
+@@ -882,2 +888,3 @@ describe('Die Schwelle steht sichtbar unter der Tabelle', () => {|
+             'const matchupsFor = () => ZEILEN;',|
++            'const majorMuFremd = () => "";',|
+             // dieselben vier Helfer wie oben, aus DERSELBEN Datei|
+-- |
+2.43.0|
+|
+|
+From 3296550fe4a966189b30ce74c6a62e4816a8654a Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sun, 27 Sep 2026 11:36:02 +0200|
+Subject: [PATCH 4/4] UI-16: Kurzname Win-Rate statt Siegquote inkl.|
+ Unentschieden; Top-8-Schnitt im Kopf aus gezaehlten Zeilen|
+|
+---|
+ js/app-tier-meta.js                             | 13 +++++++++++--|
+ js/win-rate-konvention.js                       | 10 ++++++++--|
+ tests/unit/test-nenner-und-rundung.js           |  4 +++-|
+ tests/unit/test-r5-win-prozent-namen.js         |  5 +++--|
+ tests/unit/test-win-rate-konventionen-belegt.js |  5 ++++-|
+ 5 files changed, 29 insertions(+), 8 deletions(-)|
+|
+diff --git a/js/app-tier-meta.js b/js/app-tier-meta.js|
+index c5ce43d..c6cc44a 100644|
+--- a/js/app-tier-meta.js|
++++ b/js/app-tier-meta.js|
+@@ -2263,4 +2263,13 @@|
+ |
+-                    const schnittKopf = (conv && Number.isFinite(conv.expected))|
+-                        ? ' (Ø ' + fmtPct(conv.expected * 100, 1) + ')' : '';|
++                    /* Der Schnitt im Kopf rechnet mit DENSELBEN Zahlen wie die|
++                       Spalte darunter: gezaehlt, wo die Datei Zaehlungen fuehrt|
++                       (window.gezaehlteZeilen, dasselbe Tor wie die Karte).|
++                       Gemessen 27.09.2026: vorher 6,7 % im Kopf, 6,6 % auf der|
++                       Kachel — derselbe Schnitt, zwei Zahlen. */|
++                    const _convSchnitt = (typeof window !== 'undefined'|
++                        && typeof window.gezaehlteZeilen === 'function' && t8rows && t8rows.length)|
++                        ? computeConversionPerformance(window.gezaehlteZeilen(t8rows).zeilen)|
++                        : conv;|
++                    const schnittKopf = (_convSchnitt && Number.isFinite(_convSchnitt.expected))|
++                        ? ' (Ø ' + fmtPct(_convSchnitt.expected * 100, 1) + ')' : '';|
+                     const SPALTEN = [|
+diff --git a/js/win-rate-konvention.js b/js/win-rate-konvention.js|
+index 20439df..09215a6 100644|
+--- a/js/win-rate-konvention.js|
++++ b/js/win-rate-konvention.js|
+@@ -159,4 +159,10 @@|
+                nicht tragen, sonst hiessen wieder drei Groessen gleich. */|
+-            kurzDe: 'Siegquote inkl. Unentschieden',|
+-            kurzEn: 'Win share incl. ties',|
++            /* UI-16 (27.09.2026, Hausi): „der lange Text muss da weg …|
++               von mir aus WR fuer Win-Rate, und dann ist es halt einfach|
++               Win-Rate." Kurz UND unterscheidbar: „Win %" bleibt den|
++               Matchpunkten, „Win-Rate" ist diese hier (S/(S+N+U)). Die|
++               Formel steht weiter im Hinweis (langDe). Bis zum 27.09.2026:|
++               „Siegquote inkl. Unentschieden". */|
++            kurzDe: 'Win-Rate',|
++            kurzEn: 'Win rate',|
+             langDe: 'Anteil gewonnener Matches an allen gespielten — Unentschieden '|
+diff --git a/tests/unit/test-nenner-und-rundung.js b/tests/unit/test-nenner-und-rundung.js|
+index f91b170..1724329 100644|
+--- a/tests/unit/test-nenner-und-rundung.js|
++++ b/tests/unit/test-nenner-und-rundung.js|
+@@ -600,3 +600,5 @@ describe('Glaettung wird benannt', () => {|
+         // Er darf umziehen, aber nicht gehen.|
+-        assert.match(TIER, /' \(Ø ' \+ fmtPct\(conv\.expected \* 100, 1\) \+ '\)'/);|
++        assert.match(TIER, /' \(Ø ' \+ fmtPct\(_convSchnitt\.expected \* 100, 1\) \+ '\)'/);|
++        // Derselbe Schnitt wie auf der Kachel: gezaehlte Zeilen (27.09.2026).|
++        assert.match(TIER, /computeConversionPerformance\(window\.gezaehlteZeilen\(t8rows\)\.zeilen\)/);|
+         assert.match(TIER, /de: 'Online Top 8-Quote' \+ schnittKopf/);|
+diff --git a/tests/unit/test-r5-win-prozent-namen.js b/tests/unit/test-r5-win-prozent-namen.js|
+index ea266e0..bf69df6 100644|
+--- a/tests/unit/test-r5-win-prozent-namen.js|
++++ b/tests/unit/test-r5-win-prozent-namen.js|
+@@ -133,4 +133,5 @@ describe('B1 — die Saetze neben der Spalte tragen denselben Namen wie die Spal|
+         assert.ok(!/win\s?%/i.test(html), 'englischer Text nennt weiter win %:\n' + html);|
+-        assert.equal(K.kurz('mitUnentschieden'), 'Win share incl. ties');|
+-        assert.ok(html.includes('Win share incl. ties'),|
++        // UI-16 (27.09.2026): Kurzname „Win rate" statt „Win share incl. ties".|
++        assert.equal(K.kurz('mitUnentschieden'), 'Win rate');|
++        assert.ok(html.includes('Win rate'),|
+             'der englische Kurzname fehlt:\n' + html);|
+diff --git a/tests/unit/test-win-rate-konventionen-belegt.js b/tests/unit/test-win-rate-konventionen-belegt.js|
+index 1f917a4..55eca02 100644|
+--- a/tests/unit/test-win-rate-konventionen-belegt.js|
++++ b/tests/unit/test-win-rate-konventionen-belegt.js|
+@@ -449,3 +449,6 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {|
+             assert.match(M.kurz('ohneUnentschieden'), /ohne Unentschieden|excluding ties/);|
+-            assert.match(M.kurz('mitUnentschieden'), /inkl\. Unentschieden|incl\. ties/);|
++            // UI-16 (27.09.2026, Hausi): die Kacheln-Konvention heisst kurz|
++            // „Win-Rate" — der lange Name war auf der Kachel zu viel. Den|
++            // Unterschied nennt der Hinweis (lang), nicht mehr der Name.|
++            assert.match(M.kurz('mitUnentschieden'), /^(Win-Rate|Win rate)$/);|
+         }|
+-- |
+2.43.0|
+|
+|

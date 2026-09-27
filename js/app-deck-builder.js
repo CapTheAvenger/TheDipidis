@@ -3908,10 +3908,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (skala.id === 'y2_anteil') {
                 return de
                     ? 'Skala „score“: 0–100. Der Wert IST der erfolgsgewichtete Anteil '
-                    + 'der ausgewerteten Tag-2-Listen in Prozent — dieselbe Zahl wie '
+                    + 'der ausgewerteten Day-2-Listen in Prozent — dieselbe Zahl wie '
                     + 'das „% share“ daneben, nur gerundet.'
                     : 'Scale of "score": 0–100. The value IS the success-weighted share '
-                    + 'of the analysed day-2 lists, in percent — the same figure as the '
+                    + 'of the analysed Day 2 lists, in percent — the same figure as the '
                     + '"% share" badge next to it, only rounded.';
             }
             return de
@@ -4169,7 +4169,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     // korrigiert, dieser Ersatztext blieb stehen — er greift nur,
                     // wenn der Schluessel fehlt, traegt dann aber die alte
                     // Falschaussage weiter.
-                    : 'Bei diesen Karten spielt die Mehrheit der ausgewerteten Tag-2-Listen eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich deutlich besser. Das ist eine Aussage über die veröffentlichten Listen, nicht über das Feld. Der Builder hat NICHT automatisch angepasst, du kannst manuell überlegen ob du den Vorschlag übernimmst.';
+                    : 'Bei diesen Karten spielt die Mehrheit der ausgewerteten Day-2-Listen eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich deutlich besser. Das ist eine Aussage über die veröffentlichten Listen, nicht über das Feld. Der Builder hat NICHT automatisch angepasst, du kannst manuell überlegen ob du den Vorschlag übernimmst.';
                 altWrap.appendChild(altIntro);
 
                 altSuggestions
@@ -7105,12 +7105,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     : '';
                 return de
                     ? `Das betrifft nicht nur diesen Archetyp: ${fenster} liegen `
-                      + `${lage.listen_im_fenster} von ${lage.listen_gesamt} Tag-2-Listen `
+                      + `${lage.listen_im_fenster} von ${lage.listen_gesamt} Day-2-Listen `
                       + `auf ${lage.archetypen} Archetypen, ${lage.unter_schwelle} davon `
                       + `unter der Schwelle${aufteilung}. Zur Laufzeit gezählt aus `
                       + `${lage.quelle} (Felder ${felder})${grenze}.`
                     : `This is not limited to this archetype: ${fenster} there are `
-                      + `${lage.listen_im_fenster} of ${lage.listen_gesamt} day-2 lists `
+                      + `${lage.listen_im_fenster} of ${lage.listen_gesamt} Day 2 lists `
                       + `across ${lage.archetypen} archetypes, ${lage.unter_schwelle} of them `
                       + `below the threshold${aufteilung}. Counted at runtime from `
                       + `${lage.quelle} (fields ${felder})${grenze}.`;
@@ -7143,8 +7143,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const de = (typeof getLang === 'function' && getLang() === 'de');
             const arch = String(mv.archetyp || '').trim();
             const listen = de
-                ? (n === 1 ? '1 Tag-2-Liste' : `${n} Tag-2-Listen`)
-                : (n === 1 ? '1 day-2 list' : `${n} day-2 lists`);
+                ? (n === 1 ? '1 Day-2-Liste' : `${n} Day-2-Listen`)
+                : (n === 1 ? '1 Day 2 list' : `${n} Day 2 lists`);
             const wer = arch ? (de ? ` für „${arch}“` : ` for "${arch}"`) : '';
             const lageSatz = _bestandsLageSatz(mv.lage, de);
             return {
@@ -8660,7 +8660,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                             const _mcbQ = window.MostConsistencyBuilder;
                             const _basisQ = (_mcbQ && typeof _mcbQ.datenbasisSatz === 'function')
                                 ? _mcbQ.datenbasisSatz(Object.assign({}, _dqA, { n_lists: _n }))
-                                : `${_n} Tag-2-Listen`;
+                                : `${_n} Day-2-Listen`;
                             const _wo = _t === 1
                                 ? `aus ${_basisQ} eines einzigen Turniers${_nm ? ` (${_nm}` : ''}${_ankerDatum ? `${_nm ? ', ' : ' ('}${_ankerDatum}` : ''}${_nm || _ankerDatum ? ')' : ''}`
                                 : `aus ${_basisQ} von ${_t} Turnieren${_ankerDatum ? `, zuletzt ${_ankerDatum}` : ''}`;
@@ -8670,7 +8670,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                                 : '';
                             return `${_aceTraceEntry.chosen || ''} steht in `
                                  + `${zahlKomma(Number(((cands[0] && cands[0].weightedShare || 0) * 100)))} % `
-                                 + `der ausgewerteten Präsenz-Tag-2-Listen — ${_wo}.`
+                                 + `der ausgewerteten Präsenz-Day-2-Listen — ${_wo}.`
                                  + (_ankerAlter != null ? ` Das ist ${_ankerAlter} Tage her.` : '')
                                  + _alt;
                         })(),
@@ -8716,7 +8716,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const _mcbA = window.MostConsistencyBuilder;
                     const _basisSatz = (_mcbA && typeof _mcbA.datenbasisSatz === 'function')
                         ? _mcbA.datenbasisSatz(Object.assign({}, _dqq, { n_lists: _nL }))
-                        : `${_nL} Tag-2-Listen`;
+                        : `${_nL} Day-2-Listen`;
                     const _basisHinweis = (_mcbA && typeof _mcbA.datenbasisHinweis === 'function')
                         ? _mcbA.datenbasisHinweis(Object.assign({}, _dqq, { n_lists: _nL }))
                         : '';
@@ -8864,7 +8864,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     algo_desc:    `MostConsistencyBuilder (Phase Y.2) — 6-phase per-decklist success-weighted build · Core @ ${(result.coreThreshold * 100).toFixed(0)}% · `
                                 + ((window.MostConsistencyBuilder && typeof window.MostConsistencyBuilder.datenbasisSatz === 'function')
                                     ? window.MostConsistencyBuilder.datenbasisSatz(result.dataQuality, 'en')
-                                    : `${result.dataQuality.n_lists || 0} day-2 lists`)
+                                    : `${result.dataQuality.n_lists || 0} Day 2 lists`)
                                 + ' analyzed.',
                     layers: {
                         meta_boost:       false,
@@ -8951,7 +8951,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const _mcb = window.MostConsistencyBuilder;
                 const _basis = (_mcb && typeof _mcb.datenbasisSatz === 'function')
                     ? _mcb.datenbasisSatz(result.dataQuality)
-                    : `${result.dataQuality.n_lists} Tag-2-Listen`;
+                    : `${result.dataQuality.n_lists} Day-2-Listen`;
                 showToast(
                     `✓ ${archetype}: ${liveTotal}/60 Karten · `
                     + `Core @ ${(result.coreThreshold * 100).toFixed(0)} % · `

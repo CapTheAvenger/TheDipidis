@@ -651,11 +651,11 @@
                     ? L('Day 2 (Major): zu wenige Antritte ('
                             + spec.majorDay2Antritte + ' von '
                             + (spec.majorDay2MinAntritte || 5) + ')',
-                        'day 2 (major): too few entries ('
+                        'Day 2 (major): too few entries ('
                             + spec.majorDay2Antritte + ' of '
                             + (spec.majorDay2MinAntritte || 5) + ')')
                     : (majorGarNicht ? ''
-                        : L('Day 2 (Major): keine Daten', 'day 2 (major): no data'))));
+                        : L('Day 2 (Major): keine Daten', 'Day 2 (major): no data'))));
 
         /* ── Körper links: Sprites groß + Herkunft ─────────────────── */
         ctx.fillStyle = C.line; ctx.fillRect(0, bodyY, DC.W, bodyH);

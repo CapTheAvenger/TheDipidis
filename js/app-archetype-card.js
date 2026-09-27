@@ -1339,7 +1339,7 @@
                         .replace('{s}', fmt(feld.day2Quote))
                     : ''),
                 L('arc.day2Tip', de
-                    ? '{d2} von {d1} Antritten haben Tag 2 erreicht. Nur Präsenzturniere — online gibt es keinen zweiten Tag.'
+                    ? '{d2} von {d1} Antritten haben Day 2 erreicht. Nur Präsenzturniere — online gibt es kein Day 2.'
                     : '{d2} of {d1} entries made day 2. In-person events only — online has no second day.')
                     .replace('{d2}', fmtGanz(m.day2))
                     .replace('{d1}', fmtGanz(m.day1)),
@@ -2199,7 +2199,7 @@
                 : 'The in-person figures come from a different format: ' + fremd + '.')
                 + '</strong> ' + esc(de
                 ? 'Online läuft bereits das aktuelle Format. Major-Anteil, Major-WR und Day-2-Quote vergleichen deshalb zwei verschiedene Kartenpools — dort steht der Formatschlüssel jeweils daneben.'
-                : 'Online already runs the current format. Major share, major WR and the day-2 rate therefore compare two different card pools — the format key is shown next to each of them.')
+                : 'Online already runs the current format. Major share, major WR and the Day 2 rate therefore compare two different card pools — the format key is shown next to each of them.')
                 + '</p>';
         }
         html += '<p>' + esc(zeitraumText()) + '</p>';

@@ -750,8 +750,11 @@ img[src*="limitlesstcg"] {
 }
 /* Modular utility classes for heatmap UI and price button states */
 .heatmap-container {
-    margin: 16px 0 !important;
-    padding: 16px !important;
+    /* UI-29 (27.09.2026): Rand und Polster ohne !important, damit die
+       Heatmap im Abschnitt (css/components.css, .ds-sec-body) keinen
+       zweiten Rand um den ersten legt. */
+    margin: 16px 0;
+    padding: 16px;
     background: var(--surface-1) !important;
     border-radius: 12px !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;

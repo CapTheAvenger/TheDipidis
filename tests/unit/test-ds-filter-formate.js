@@ -43,24 +43,30 @@ const L = require('./lib-dom-sandkasten.js');
 const MARKUP = L.lies('index.html');
 const FORMATE = ['SVI-PRE', 'TWM-PRE', 'SFA-PRE', 'SCR-PRE', 'SSP-PRE', 'PRE-PRE'];
 
-/** Der Past-Meta-Reiter, so wie er in index.html steht. */
+/** Der Traeger der Kopier-Mechanik.
+ *
+ * Bis zum 27.09.2026 war das der Past-Meta-Reiter. Seit UI-33 steht das
+ * Format dort in der Steuerung und wird NICHT mehr kopiert (eigene
+ * Zusicherung unten). Die Mechanik — Huelle, Abgleich, Sperre ab fuenf
+ * Optionen — gilt weiter fuer jeden Raum mit Kopie; geprueft wird sie
+ * jetzt am Japan-Reiter mit sieben Optionen in einer Steuerungsgruppe. */
 function umgebung(wahl) {
     wahl = wahl || {};
     const dok = L.dokument();
-    const reiter = dok.neu('div', 'past-meta');
+    const reiter = dok.neu('div', 'city-league');
     reiter.className = 'tab-content active fs-scale';
     const behaelter = dok.neu('div', null, reiter);
     behaelter.className = 'container';
     const kopf = dok.neu('div', null, behaelter);
-    kopf.className = 'header';
+    kopf.className = 'city-league-header';
     const steuer = dok.neu('div', null, behaelter);
     steuer.className = 'controls';
     const gruppe = dok.neu('div', null, steuer);
     gruppe.className = 'control-group';
     const etikett = dok.neu('label', null, gruppe);
-    etikett.setAttribute('for', 'pastMetaFormatFilter');
+    etikett.setAttribute('for', 'cityLeagueFormatSelect');
     etikett.textContent = 'Meta/Format Filter:';
-    const quelle = dok.neu('select', 'pastMetaFormatFilter', gruppe);
+    const quelle = dok.neu('select', 'cityLeagueFormatSelect', gruppe);
     quelle.className = 'control-input modern-select';
 
     const platzhalter = dok.createElement('option');
@@ -203,7 +209,7 @@ describe('C2 — nachgefuellte Formate erreichen die Zeile auch ohne change-Erei
 
     it('der Abdruck unterscheidet Optionsliste, aktive Wahl und Sperren', () => {
         const u = umgebung({});
-        const raum = { key: 'past', quelle: 'pastMetaFormatFilter' };
+        const raum = { key: 'jp', quelle: 'cityLeagueFormatSelect' };
         const a = u.ctx.window.DsFilter.abdruck(raum);
         u.quelle.value = 'SFA-PRE';
         const b = u.ctx.window.DsFilter.abdruck(raum);
@@ -474,7 +480,7 @@ describe('M27 — abgleichen() meldet sich selbst bei neuen Quellen an', () => {
     it('ein Auswahlfeld, das erst nach dem Start entsteht, wird von abgleichen() erfasst', () => {
         const u = umgebungOhneReiter();
         // Beim Start gab es das Feld noch nicht — niemand kann es kennen.
-        const quelle = u.dok.neu('select', 'pastMetaFormatFilter');
+        const quelle = u.dok.neu('select', 'cityLeagueFormatSelect');
         const o = u.dok.createElement('option');
         o.value = 'all'; o.textContent = '-- Alle Formate --';
         quelle.appendChild(o);
@@ -490,7 +496,7 @@ describe('M27 — abgleichen() meldet sich selbst bei neuen Quellen an', () => {
 
     it('das nachtraeglich erfasste Feld stellt danach wirklich eine Uhr', () => {
         const u = umgebungOhneReiter();
-        const quelle = u.dok.neu('select', 'pastMetaFormatFilter');
+        const quelle = u.dok.neu('select', 'cityLeagueFormatSelect');
         assert.equal(u.offen(), 0, 'Vorbedingung: es darf keine Uhr laufen');
         u.ctx.window.DsFilter.abgleichen();          // meldet sich an
         quelle.dispatchEvent({ type: 'change' });
@@ -503,17 +509,17 @@ describe('M27 — abgleichen() meldet sich selbst bei neuen Quellen an', () => {
 describe('M28 — ein Auswahlfeld ohne Elternknoten bringt die Zeile nicht um', () => {
     function umgebungOhneEltern() {
         const dok = L.dokument();
-        const reiter = dok.neu('div', 'past-meta');
+        const reiter = dok.neu('div', 'city-league');
         reiter.className = 'tab-content active';
         const behaelter = dok.neu('div', null, reiter);
         behaelter.className = 'container';
         const kopf = dok.neu('div', null, behaelter);
-        kopf.className = 'header';
+        kopf.className = 'city-league-header';
 
         // Das Auswahlfeld haengt an NICHTS — es ist nur ueber die Kennung
         // erreichbar. Genau der Zustand, den der Waechter abfaengt.
         const quelle = dok.createElement('select');
-        quelle.id = 'pastMetaFormatFilter';
+        quelle.id = 'cityLeagueFormatSelect';
         FORMATE.forEach(w => {
             const o = dok.createElement('option');
             o.value = w; o.textContent = w;
@@ -552,7 +558,7 @@ describe('M28 — ein Auswahlfeld ohne Elternknoten bringt die Zeile nicht um', 
     it('der Grund steht im Protokoll, nicht nur im Nichts', () => {
         const u = umgebungOhneEltern();
         const alle = u.warnungen.join(' | ');
-        assert.match(alle, /pastMetaFormatFilter/,
+        assert.match(alle, /cityLeagueFormatSelect/,
             'der stille Ausfall wird nicht gemeldet: "' + alle + '"');
         assert.match(alle, /Elternknoten/);
     });
@@ -561,5 +567,64 @@ describe('M28 — ein Auswahlfeld ohne Elternknoten bringt die Zeile nicht um', 
         const u = umgebungOhneEltern();
         assert.equal(u.quelle.parentElement, null,
             'das Feld wurde in eine Huelle gehaengt, die an nichts haengt');
+    });
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   UI-32 / UI-33 (27.09.2026) — in Rotationen steht das Format unten
+   ════════════════════════════════════════════════════════════════════ */
+describe('UI-33 — Rotationen zeigt das Format bei Turnier, Archetyp und Karten-Share', () => {
+    function rotationen() {
+        const dok = L.dokument();
+        const reiter = dok.neu('div', 'past-meta');
+        reiter.className = 'tab-content active fs-scale';
+        const behaelter = dok.neu('div', null, reiter);
+        behaelter.className = 'container';
+        const kopf = dok.neu('div', null, behaelter);
+        kopf.className = 'header';
+        const steuer = dok.neu('div', null, behaelter);
+        steuer.className = 'controls';
+        const gruppe = dok.neu('div', null, steuer);
+        gruppe.className = 'control-group';
+        const etikett = dok.neu('label', null, gruppe);
+        etikett.setAttribute('for', 'pastMetaFormatFilter');
+        const quelle = dok.neu('select', 'pastMetaFormatFilter', gruppe);
+        fuellen(dok, quelle);
+        const uhren = [];
+        const fenster = { document: dok, getLang: () => 'de', addEventListener() {}, switchTab() {}, switchTabAndUpdateMenu() {} };
+        fenster.window = fenster;
+        const ctx = { window: fenster, document: dok, console: { warn() {}, log() {} },
+            setTimeout: (f) => { uhren.push(f); return uhren.length; }, clearTimeout() {},
+            Event: function (art) { return { type: art }; } };
+        vm.createContext(ctx);
+        vm.runInContext(L.lies('js', 'ds-filter.js'), ctx, { filename: 'ds-filter.js' });
+        return { dok, kopf, quelle, etikett,
+                 zeile() { return kopf.parentElement.querySelector(':scope > .ds-filter'); } };
+    }
+
+    it('die Zeile oben traegt nur die Raumwahl, keine Formatkopie', () => {
+        const u = rotationen();
+        assert.ok(u.zeile(), 'die Zeile fehlt ganz');
+        assert.ok(u.zeile().querySelectorAll('.ds-filter-btn').filter(b => b.getAttribute('data-space')).length === 3,
+            'die Raumwahl Japan/Global/Rotationen fehlt');
+        assert.ok(!u.zeile().querySelector('.ds-filter-select'), 'oben steht wieder eine Formatkopie');
+        assert.equal(u.zeile().querySelectorAll('.ds-filter-lab').length, 0);
+    });
+
+    it('das Original in der Steuerung bleibt sichtbar und bedienbar', () => {
+        const u = rotationen();
+        const h = u.quelle.parentElement;
+        assert.ok(!(h.classList && h.classList.contains('ds-filter-verdeckt')), 'das Format ist verdeckt');
+        assert.ok(!u.etikett.classList.contains('ds-filter-verdeckt'), 'das Etikett ist verdeckt');
+        assert.notEqual(u.quelle.getAttribute('tabindex'), '-1');
+        assert.notEqual(u.quelle.getAttribute('aria-hidden'), 'true');
+    });
+
+    it('index.html fuehrt das Format in derselben Steuerung wie Turnier und Archetyp', () => {
+        const i = MARKUP.indexOf('id="past-meta"');
+        const steuer = MARKUP.slice(MARKUP.indexOf('<div class="controls">', i), MARKUP.indexOf('id="pastMetaStatsSection"', i));
+        for (const id of ['pastMetaFormatFilter', 'pastMetaTournamentFilter', 'pastMetaDeckSelect', 'pastMetaFilterSelect']) {
+            assert.ok(steuer.includes('id="' + id + '"'), id + ' steht nicht in der Steuerung');
+        }
     });
 });

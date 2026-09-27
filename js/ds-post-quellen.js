@@ -777,7 +777,7 @@ REZEPTE['worlds-tag1'] = {
                  * Datei kam — beim Nachstellen mit TEF-POR standen zwei
                  * verschiedene Turniere auf einem Bild. */
                 kicker: d.kurz,
-                titel: d.datum ? d.kurz + ', Tag 1' : d.kurz,
+                titel: d.datum ? d.kurz + ', Day 1' : d.kurz,
                 fuss: fussZeile(d.kurz + ', ' + d.datum, tausend(d.gesamt) + ' players'),
                 tags: hashtags(['tournament', 'majors', d.turnier]
                     .concat(acht.slice(0, 4).map(function (x) { return x.name; }))),
@@ -1949,7 +1949,7 @@ function metaCallScheiben(d, titel, standName) {
             kicker: kicker,
             titel: 'What would do well here',
             fuss: fuss,
-            caption: 'The decks with the best day-2 chance against '
+            caption: 'The decks with the best Day 2 chance against '
                 + (eigen ? 'the field I expect at ' : 'the predicted field at ')
                 + (titel || 'this tournament') + '.',
             tags: hashtags(['metacall', 'deckchoice']

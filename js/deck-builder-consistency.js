@@ -1730,10 +1730,10 @@
          aendert, ist die Beschriftung: "3 decklists" waren immer schon
          3 TAG-2-Listen. Ob 3 der richtige Wert ist, ist NICHT GEPRUEFT
          — hier wurde nur die Beschreibung richtiggestellt. */
-      dq.warning = `Only ${lists.length} day-2 decklist(s) for this archetype — `
+      dq.warning = `Only ${lists.length} Day 2 decklist(s) for this archetype — `
                  + `below ${MIN_WEIGHTED_LISTS} the algorithm can't produce a `
                  + `representative build. Note that limitless publishes lists `
-                 + `from day 2 onward, so this is the top cut, not the field. `
+                 + `from Day 2 onward, so this is the top cut, not the field. `
                  + `Try widening the tournament filter.`;
       trace.push({
         phase: 6, decision: 'data_too_thin',
@@ -2034,8 +2034,8 @@
         : `${zahl(n)} ${n === 1 ? 'list' : 'lists'}`
           + (online > 0 ? ` (${zahl(online)} online)` : ''))
       : (de
-        ? `${zahl(n)} Tag-2-${n === 1 ? 'Liste' : 'Listen'}`
-        : `${zahl(n)} day-2 ${n === 1 ? 'list' : 'lists'}`);
+        ? `${zahl(n)} Day-2-${n === 1 ? 'Liste' : 'Listen'}`
+        : `${zahl(n)} Day 2 ${n === 1 ? 'list' : 'lists'}`);
     const piloten = Number.isFinite(d.n_piloten) && d.n_piloten > 0 ? d.n_piloten : null;
     const feld    = Number.isFinite(d.feldgroesse) && d.feldgroesse > 0 ? d.feldgroesse : null;
     let satz = kopf;
@@ -2064,8 +2064,8 @@
         ? `Gemischte Grundlage: ${zahl(online)} der ${nL} Listen kommen aus `
           + 'Online-Turnieren, wo JEDE Liste des Feldes veroeffentlicht wird. '
           + 'Der Rest kommt von limitlesstcg.com, das Decklisten erst ab '
-          + 'Tag 2 zeigt'
-        : 'Limitless veroeffentlicht Decklisten erst ab Tag 2. Der Bau steht '
+          + 'Day 2 zeigt'
+        : 'Limitless veroeffentlicht Decklisten erst ab Day 2. Der Bau steht '
           + 'deshalb auf dem Top Cut, nicht auf dem ganzen Feld';
       if (piloten !== null) {
         t += ` — ${zahl(piloten)} Spieler haben diesen Archetyp gespielt, `
@@ -2077,8 +2077,8 @@
     let t = online > 0
       ? `Mixed basis: ${online} of ${nL} lists come from online tournaments, `
         + 'where every list in the field is published. The rest come from '
-        + 'limitlesstcg.com, which shows decklists from day 2 onward'
-      : 'Limitless publishes decklists from day 2 onward, so this build rests '
+        + 'limitlesstcg.com, which shows decklists from Day 2 onward'
+      : 'Limitless publishes decklists from Day 2 onward, so this build rests '
         + 'on the top cut, not the whole field';
     if (piloten !== null) {
       t += ` — ${piloten} players ran this archetype, `

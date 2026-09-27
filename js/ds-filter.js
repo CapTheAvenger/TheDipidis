@@ -62,7 +62,12 @@
            ZEITRAUM innerhalb Japans. Der Raum heisst jetzt nach dem,
            was ihn unterscheidet. */
         { key: 'past', tab: 'past-meta',   de: '📦 Rotationen', en: '📦 Rotations',
-          quelle: 'pastMetaFormatFilter', zweiteDe: 'Format', zweiteEn: 'Format' },
+          quelle: 'pastMetaFormatFilter', zweiteDe: 'Format', zweiteEn: 'Format',
+          /* UI-33 (27.09.2026, Hausi): in Rotationen gehoert das Format
+             zu Turnier-Filter, Archetyp und Karten-Share — dort steht
+             das Original ohnehin. Die Zeile oben traegt nur noch die
+             Raumwahl; das Original bleibt sichtbar. */
+          formatInSteuerung: true },
     ];
 
     // Wo die Zeile in den jeweiligen Reiter kommt. Sie sitzt direkt
@@ -195,7 +200,7 @@
            TEF–30C"). Gemessen: kein Klick, keine Optionen. Es faellt
            deshalb ganz weg, samt Beschriftung. Japan und Rotationen
            behalten ihre echte Auswahl. */
-        if (!f) return wrap;
+        if (!f || raum.formatInSteuerung) return wrap;
 
         var g2 = document.createElement('div');
         g2.className = 'ds-filter-group';
@@ -339,7 +344,7 @@
                     behaelter.appendChild(q);
                 }
             }
-            var zeigen = (r.key !== raum.key);
+            var zeigen = (r.key !== raum.key) || !!r.formatInSteuerung;
             behaelter.classList.toggle('ds-filter-verdeckt', !zeigen);
             /* Das Etikett gehoert zum Feld. BEFUND DER ABNAHME
                (03.09.2026): auf past-meta hat das Auswahlfeld keinen

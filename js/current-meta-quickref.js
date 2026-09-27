@@ -661,7 +661,7 @@
         : { feldgroesse: null, n_piloten: null };
       const deM = (typeof getLang === 'function') ? getLang() === 'de' : true;
       const _zahlM = (x) => deM ? String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : String(x);
-      let _tag2M = deM ? 'Tag-2-Liste' : 'day-2 list';
+      let _tag2M = deM ? 'Day-2-Liste' : 'Day 2 list';
       if (_feldM.n_piloten !== null) {
         _tag2M += deM
           ? ` — ${_zahlM(_feldM.n_piloten)} Piloten`
@@ -673,10 +673,10 @@
           : `, field ${_zahlM(_feldM.feldgroesse)}`;
       }
       const _titelM = deM
-        ? 'Limitless veroeffentlicht Decklisten erst ab Tag 2. Diese Liste stammt '
+        ? 'Limitless veroeffentlicht Decklisten erst ab Day 2. Diese Liste stammt '
           + 'aus dem Top Cut, nicht aus dem ganzen Feld — die Platzierung ist die '
           + 'im Gesamtfeld, die veroeffentlichten Listen sind nur die des Cuts.'
-        : 'Limitless publishes decklists from day 2 onward. This list comes from the '
+        : 'Limitless publishes decklists from Day 2 onward. This list comes from the '
           + 'top cut, not the whole field — the placement is field-wide, the published '
           + 'lists are the cut only.';
       return `
@@ -787,13 +787,13 @@
           : `${_trenn}of ${_zahlO(_tp)} players in the field`);
     const _titelO = deO
       ? 'Online-Turniere veroeffentlichen nur einen kleinen Teil ihrer Listen — '
-        + 'nicht das Feld und auch keinen Tag-2-Cut. Nachgezaehlt in '
+        + 'nicht das Feld und auch keinen Day-2-Cut. Nachgezaehlt in '
         + 'data/online_tournament_dated_cards.csv: bei keinem der 321 erfassten '
         + 'Turniere decken die veroeffentlichten Listen das Feld ab (groesstes '
         + 'Beispiel: 909 Spieler, 17 Listen). Der typische Build steht also auf '
         + 'dieser Stichprobe, nicht auf dem Online-Meta.'
       : 'Online tournaments publish only a small share of their lists — neither the '
-        + 'field nor a day-2 cut. Counted in data/online_tournament_dated_cards.csv: '
+        + 'field nor a Day 2 cut. Counted in data/online_tournament_dated_cards.csv: '
         + 'in none of the 321 recorded tournaments do the published lists cover the '
         + 'field (largest example: 909 players, 17 lists). The typical build rests on '
         + 'that sample, not on the online meta.';

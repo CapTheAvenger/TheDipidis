@@ -3475,3 +3475,27 @@
 /* Der Satz ueber dem Kartenraster, wenn die roten Marken sich nicht auf
    die Deckgroesse summieren — siehe die Notiz in js/app-city-league.js. */
 .cl-marken-summe { margin: 0 0 10px; }
+
+/* UI-35 (27.09.2026, Hausi): Record und Win % in einer Zeile. Eine Kachel
+   mit zwei Haelften statt zweier Kacheln — so bleibt es bei jeder Breite
+   eine Zeile, auch wo das Raster auf eine Spalte faellt (mobile-
+   responsive.css, .past-meta-stats-grid 1fr !important). */
+#past-meta .past-meta-stat-paar {
+    display: flex;
+    flex-wrap: wrap;   /* unter ~340 px lieber zwei Zeilen als seitlich raus */
+    gap: 12px;
+    align-items: flex-start;
+}
+#past-meta .past-meta-stat-paar > .past-meta-stat-teil {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+/* Der Record bricht sonst am Bindestrich um (gemessen 390 px:
+   „740-811-" / „307"). */
+#past-meta .past-meta-stat-paar .past-meta-stat-value {
+    white-space: nowrap;
+}
+#past-meta .past-meta-stat-paar > .past-meta-stat-teil + .past-meta-stat-teil {
+    padding-left: 12px;
+    border-left: 1px solid var(--line);
+}

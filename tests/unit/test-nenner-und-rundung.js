@@ -612,12 +612,12 @@ describe('Glaettung wird benannt', () => {
 });
 
 describe('Vergangenes Meta: die Grundgesamtheit ist benannt', () => {
-    it('"total decklists" heisst jetzt "Tag-2-Decklisten"', () => {
+    it('"total decklists" heisst jetzt "Day-2-Decklisten"', () => {
         assert.doesNotMatch(PAST, /\$\{totalDecklists\} total decklists\)`;/);
-        assert.match(PAST, /Tag-2-Decklisten/);
-        assert.match(PAST, /day-2 decklists/);
+        assert.match(PAST, /Day-2-Decklisten/);
+        assert.match(PAST, /Day 2 decklists/);
     });
     it('und die Verzerrung steht im Titel der Kachel', () => {
-        assert.match(PAST, /Limitless veroeffentlicht Decklisten erst ab Tag 2/);
+        assert.match(PAST, /Limitless veroeffentlicht Decklisten erst ab Day 2/);
     });
 });

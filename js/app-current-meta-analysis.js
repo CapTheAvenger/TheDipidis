@@ -5510,7 +5510,7 @@
             const renderTier = (tierCards, tierTitle, tierEmoji) => {
                 if (tierCards.length === 0) return '';
                 
-                let html = `<div style="margin-bottom: 30px;">`;
+                let html = `<div class="tier-listen-huelle">`;
                 html += `<h3 style="margin: 20px 0 15px 0; color: #2c3e50; font-size: 1.3em; display: flex; align-items: center; gap: 10px;"><span>${tierEmoji}</span> ${tierTitle}</h3>`;
                 html += '<div style="display: flex; flex-direction: column; gap: 15px;">';
                 

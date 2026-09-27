@@ -87,7 +87,7 @@ describe('B3 — eine fehlende Schwelle ist keine Schwelle von 0', () => {
                 'ein Nichtwert steht als Zahl im Text: ' + b.message);
             assert.ok(b.message.includes('keine Schwelle hinterlegt'),
                 'der Ersatztext fehlt: ' + b.message);
-            assert.ok(b.message.includes('nur 1 Tag-2-Liste'),
+            assert.ok(b.message.includes('nur 1 Day-2-Liste'),
                 'die gemessene Listenzahl fehlt: ' + b.message);
         });
     }
@@ -314,7 +314,7 @@ describe('B2 — die Aufteilung wird gezaehlt, nicht abgeschrieben', () => {
         assert.equal(leer.listen_im_fenster, 0, 'die Probe ist nicht leer');
         const b = befund('de')._duenneBasisBefund(
             { archetyp: 'Mega Chandelure', n_lists: 1, schwelle: 3, lage: leer });
-        assert.ok(!/Tag-2-Listen/.test(b.hint),
+        assert.ok(!/Day-2-Listen/.test(b.hint),
             'bei leerem Fenster steht trotzdem ein Bestandssatz da: ' + b.hint);
         assert.ok(b.hint.length > 0,
             'bei leerem Fenster faellt der ganze Befund weg statt nur des Satzes');
@@ -331,7 +331,7 @@ describe('B2 — die Aufteilung wird gezaehlt, nicht abgeschrieben', () => {
                 unter_schwelle: 2, erreichen: 1, verteilung: { 1: 2 },
             },
         });
-        assert.ok(b.hint.includes('7 von 9 Tag-2-Listen'),
+        assert.ok(b.hint.includes('7 von 9 Day-2-Listen'),
             'der Satz zeigt nicht die uebergebene Messung: ' + b.hint);
         assert.ok(b.hint.includes('2 auf einer Liste'), b.hint);
         assert.ok(!/elf mit|vier mit|11 auf|15 davon/.test(b.hint),

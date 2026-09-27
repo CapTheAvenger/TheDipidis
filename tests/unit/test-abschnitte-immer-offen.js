@@ -135,10 +135,14 @@ describe('UI-12 / UI-13 — die Filterzeile ohne doppelte Beschriftung', () => {
         assert.equal(zeile.querySelectorAll('.ds-filter-lab').length, 0);
     });
 
-    it('Rotationen behaelt seine echte Formatwahl samt Beschriftung', () => {
+    it('Rotationen fuehrt seine Formatwahl in der Steuerung, nicht in der Zeile (UI-33)', () => {
+        /* Bis 27.09.2026 stand hier: „behaelt seine echte Formatwahl samt
+           Beschriftung" in der Zeile. Seit UI-33 steht das Format bei
+           Turnier-Filter und Archetyp — die Zeile traegt nur die Raumwahl.
+           Die Sichtbarkeit des Originals prueft test-ds-filter-formate.js. */
         const zeile = filterZeile('past', 'pastMetaFormatFilter');
-        assert.equal(zeile.querySelectorAll('.ds-filter-group').length, 2);
-        assert.deepEqual(zeile.querySelectorAll('.ds-filter-lab').map(l => l.textContent), ['Format']);
+        assert.equal(zeile.querySelectorAll('.ds-filter-group').length, 1);
+        assert.equal(zeile.querySelectorAll('.ds-filter-lab').length, 0);
     });
 });
 

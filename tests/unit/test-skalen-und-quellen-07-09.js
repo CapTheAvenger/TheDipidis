@@ -330,12 +330,12 @@ describe('B5 — der Rueckfall unter die Mindestzahl ist nicht mehr stumm', () =
         assert.equal(b.level, 'warn', 'ein Rueckfall auf einer Liste ist keine Info');
         const text = b.message + ' ' + b.hint;
         assert.ok(text.includes('Mega Chandelure'), 'der Archetyp fehlt: ' + text);
-        assert.ok(/\b1 Tag-2-Liste\b/.test(text),
+        assert.ok(/\b1 Day-2-Liste\b/.test(text),
             'die tatsaechliche Listenzahl fehlt oder steht im Plural: ' + text);
         assert.ok(text.includes('3'), 'die Schwelle fehlt: ' + text);
 
         const zwei = f({ archetyp: 'Dhelmise', n_lists: 2, schwelle: 3 });
-        assert.ok(/\b2 Tag-2-Listen\b/.test(zwei.message),
+        assert.ok(/\b2 Day-2-Listen\b/.test(zwei.message),
             'zwei Listen stehen im Singular: ' + zwei.message);
 
         /* Die Zahl wird WIRKLICH durchgereicht und nicht gerundet oder
@@ -352,7 +352,7 @@ describe('B5 — der Rueckfall unter die Mindestzahl ist nicht mehr stumm', () =
             'der Hinweis sagt nicht, woher der Bau stattdessen kommt: ' + b.hint);
         const e = befundApi('en')({ archetyp: 'X', n_lists: 1, schwelle: 3 });
         assert.notEqual(e.message, b.message, 'der Befund ist einsprachig');
-        assert.ok(/day-2 list\b/.test(e.message), e.message);
+        assert.ok(/Day 2 list\b/.test(e.message), e.message);
     });
 
     it('die Messung kommt vom Y.2-Pfad bis in den Bericht', () => {
@@ -401,7 +401,7 @@ describe('B5 — der Rueckfall unter die Mindestzahl ist nicht mehr stumm', () =
         assert.equal(gesehen.length, 1, 'der Rueckfall bleibt im Toast stumm');
         assert.equal(gesehen[0].art, 'warning', 'der Hinweis kommt als Erfolg daher');
         assert.ok(gesehen[0].text.includes('Dhelmise')
-               && /\b2 Tag-2-Listen\b/.test(gesehen[0].text)
+               && /\b2 Day-2-Listen\b/.test(gesehen[0].text)
                && gesehen[0].text.includes('3'),
             'der Toast nennt Archetyp, Listenzahl oder Schwelle nicht: '
             + gesehen[0].text);
@@ -810,17 +810,23 @@ describe('B4 — die Win-%-Kachel nennt die Konvention des Nachbarreiters', () =
             'beide Konventionen heissen wieder gleich');
     });
 
-    it('der Satz steht sichtbar an der Kachel, nicht nur im Titel', () => {
-        /* Der title-Text bleibt (er traegt den langen Hinweis), aber der
-           Verweis muss auch ohne Mauszeiger lesbar sein — auf dem Telefon
-           gibt es keinen. */
+    it('UI-35: der Satz steht im title der Win-%-Zahl, nicht mehr darunter', () => {
+        /* Bis 27.09.2026 stand der Satz sichtbar unter der Zahl (Befund
+           07.09.: auf dem Telefon gibt es keinen Mauszeiger). Hausi hat es
+           am 27.09.2026 anders entschieden (UI-35): „Text unter Win
+           Percentage kann weg" — Record und Win % stehen in einer Zeile.
+           Der Satz bleibt im title, verloren geht er nicht. */
         const kachel = stueck(PM,
-            '<div class="past-meta-stat-card" title="${(winPctTitle',
+            '<div class="past-meta-stat-teil past-meta-stat-winpct"',
             '<div class="past-meta-stat-card${day2Duenn');
-        assert.ok(kachel.includes('${winPctKonvSatz}'),
-            'der Verweis erscheint nur im title-Attribut');
-        assert.ok(kachel.includes('past-meta-stat-nenner'),
-            'der Verweis benutzt keine vorhandene Klasse — dann fehlt ihm die Form');
+        assert.ok(kachel.includes('title="${(winPctTitle'), 'der Satz fehlt auch im title');
+        assert.ok(!kachel.includes('${winPctKonvSatz}'), 'der Satz steht wieder sichtbar unter der Zahl');
+        const titel = stueck(PM, 'const winPctTitle =', ';');
+        assert.ok(titel.includes('winPctKonvSatz'), 'der title traegt den Konventionssatz nicht mehr');
+        const paar = stueck(PM, '<div class="past-meta-stat-card past-meta-stat-paar">',
+            '<div class="past-meta-stat-card${day2Duenn');
+        assert.ok(paar.includes('${recordLabel}') && paar.includes('${winPctLabel}'),
+            'Record und Win % stehen nicht mehr in einer Kachel (UI-35)');
     });
 
     it('ohne das Konventionsmodul faellt die Kachel nicht um', () => {

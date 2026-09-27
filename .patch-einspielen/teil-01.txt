@@ -1,0 +1,450 @@
+From ee2fda0659f9eebf25da5a5eb70ebaffeae24c6d Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sun, 27 Sep 2026 11:14:42 +0200|
+Subject: [PATCH 1/2] Rutsch 8: Standard beginnt beim Formatfenster (TEF),|
+ daten_pushen verliert nichts, Wochenlauf ohne cp-Fehler, Messwerkzeug (DA-9,|
+ DA-10, DA-11, WZ-7, WZ-8)|
+|
+---|
+ backend/core/prepare_card_data.py        | 30 ++++++++-|
+ data/kartentext_stand.json               | 16 ++---|
+ scripts/data_guardian.py                 | 10 +--|
+ scripts/daten_pushen.sh                  | 12 ++++|
+ scripts/messe_datenluecken_rutsch8.py    | 80 ++++++++++++++++++++++++|
+ scripts/verfaelschungsprobe.py           | 76 ++++++++++++++++++++++|
+ tests/python/test_aera_haengt_am_set.py  | 17 ++++-|
+ tests/python/test_daten_pushen.py        | 31 +++++++++|
+ tests/python/test_wochenlauf_nullglob.py | 57 +++++++++++++++++|
+ 9 files changed, 314 insertions(+), 15 deletions(-)|
+ create mode 100644 scripts/messe_datenluecken_rutsch8.py|
+ create mode 100644 scripts/verfaelschungsprobe.py|
+ create mode 100644 tests/python/test_wochenlauf_nullglob.py|
+|
+diff --git a/backend/core/prepare_card_data.py b/backend/core/prepare_card_data.py|
+index de1d275..6909bca 100644|
+--- a/backend/core/prepare_card_data.py|
++++ b/backend/core/prepare_card_data.py|
+@@ -686,3 +686,12 @@ EXTENDED_MIN_ORDER = 113   # RCL (Rebel Clash) and newer.|
+ # 27.09.2026 die Ordnung 136, RCL die 113.|
+-STANDARD_ANKER = 'PAR'|
++#|
++# DA-10 (27.09.2026): der Standard-Anker war PAR — abgelesen an der Zahl|
++# 136, die am 27.09. in sets.json auf PAR stand. Gemeint war aber TEF: der|
++# Kommentar an STANDARD_MIN_ORDER sagt es, und das laufende Format beginnt|
++# laut data/format_window.json (oldest_legal_set) bei TEF. Gemessen: der|
++# Standard-Chunk trug PAR und PAF mit, zwei Sets, die in TEF-30C nicht|
++# legal sind. Der Anker kommt deshalb jetzt aus format_window.json — das|
++# wird bei jeder Rotation automatisch fortgeschrieben —, TEF nur als|
++# Rueckfall, falls die Datei fehlt.|
++STANDARD_ANKER_RUECKFALL = 'TEF'|
+ EXTENDED_ANKER = 'RCL'|
+@@ -690,2 +699,21 @@ EXTENDED_ANKER = 'RCL'|
+ |
++def standard_anker(fenster: dict = None) -> str:|
++    """Das aelteste legale Set des laufenden Formats."""|
++    if fenster is None:|
++        fenster = {}|
++        wurzel_data = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'data'))|
++        for ort in (get_data_dir(), wurzel_data):|
++            try:|
++                with open(os.path.join(ort, 'format_window.json'), encoding='utf-8') as f:|
++                    fenster = json.load(f)|
++                break|
++            except Exception:  # noqa: BLE001 — naechster Ort, dann Rueckfall|
++                continue|
++    wert = str((fenster or {}).get('oldest_legal_set') or '').strip().upper()|
++    return wert or STANDARD_ANKER_RUECKFALL|
++|
++|
++STANDARD_ANKER = standard_anker()|
++|
++|
+ def _schwelle(set_order: dict, anker: str, rueckfall: int) -> int:|
+diff --git a/data/kartentext_stand.json b/data/kartentext_stand.json|
+index 20cde69..45006e1 100644|
+--- a/data/kartentext_stand.json|
++++ b/data/kartentext_stand.json|
+@@ -4,12 +4,12 @@|
+     "standard": {|
+-      "karten": 4626,|
+-      "mit_text_de": 4207,|
+-      "mit_text_en": 4616,|
+-      "anteil_de": 90.9|
++      "karten": 4115,|
++      "mit_text_de": 3696,|
++      "mit_text_en": 4105,|
++      "anteil_de": 89.8|
+     },|
+     "extended": {|
+-      "karten": 4153,|
+-      "mit_text_de": 4083,|
+-      "mit_text_en": 4099,|
+-      "anteil_de": 98.3|
++      "karten": 4664,|
++      "mit_text_de": 4594,|
++      "mit_text_en": 4610,|
++      "anteil_de": 98.5|
+     },|
+diff --git a/scripts/data_guardian.py b/scripts/data_guardian.py|
+index a70f24b..bdc536b 100644|
+--- a/scripts/data_guardian.py|
++++ b/scripts/data_guardian.py|
+@@ -1125,6 +1125,8 @@ def check_set_order(findings):|
+     # boundary prepare_card_data bins it out of the standard chunk.|
+-    # Mirrors STANDARD_ANKER / STANDARD_MIN_ORDER in|
+-    # backend/core/prepare_card_data.py: die Grenze haengt am Set PAR, nicht|
+-    # an der Zahl (sets.json wird neu nummeriert, 27.09.2026).|
+-    standard_min = order.get("PAR") or 136|
++    # Mirrors standard_anker() / STANDARD_MIN_ORDER in|
++    # backend/core/prepare_card_data.py: die Grenze haengt am aeltesten|
++    # legalen Set des Formatfensters (DA-10, 27.09.2026 — vorher PAR, das|
++    # war eine abgelesene Zahl, kein Formatbeginn), nicht an einer Zahl.|
++    anker = str(fw.get("oldest_legal_set") or "TEF").strip().upper()|
++    standard_min = order.get(anker) or 136|
+     # The card-database tab filters EVERYTHING through the hand-maintained|
+diff --git a/scripts/daten_pushen.sh b/scripts/daten_pushen.sh|
+index c9c6367..a3f1394 100644|
+--- a/scripts/daten_pushen.sh|
++++ b/scripts/daten_pushen.sh|
+@@ -36,2 +36,3 @@ if ! festhalten; then echo "Nichts zu schreiben."; exit 0; fi|
+ |
++|
+ for versuch in 1 2 3 4 5; do|
+@@ -44,2 +45,13 @@ for versuch in 1 2 3 4 5; do|
+     git fetch -q origin main || { sleep $((2 ** versuch)); continue; }|
++    # WZ-7 (27.09.2026): Beim Neuaufsetzen unten wird hart auf origin/main|
++    # zurueckgesetzt. Was der Lauf geaendert, aber NICHT uebergeben hat, waere|
++    # danach weg — still. Also vorher nachsehen und in dem Fall abbrechen,|
++    # mit Namen. data_stand.json ist abgeleitet und wird neu gebaut.|
++    uebrig="$(git status --porcelain --untracked-files=no | grep -v ' data/data_stand.json$' || true)"|
++    if [ -n "$uebrig" ]; then|
++        echo "::error::daten_pushen: nicht uebergebene Aenderungen wuerden beim Neuaufsetzen verloren gehen:"|
++        echo "$uebrig"|
++        echo "Diese Dateien an daten_pushen.sh uebergeben oder vorher verwerfen."|
++        exit 1|
++    fi|
+     git reset -q --hard origin/main|
+diff --git a/scripts/messe_datenluecken_rutsch8.py b/scripts/messe_datenluecken_rutsch8.py|
+new file mode 100644|
+index 0000000..0a130b2|
+--- /dev/null|
++++ b/scripts/messe_datenluecken_rutsch8.py|
+@@ -0,0 +1,80 @@|
++#!/usr/bin/env python3|
++"""Zwei Messungen aus Rutsch 8 (27.09.2026) — ein Befehl statt Handarbeit.|
++|
++1. DA-11  Matchups je Turnier: wie viele (Format, Turnier, Deck)-Ziele gibt es,|
++          wie viele sind geholt, wie viele offen — und bei JE_TURNIER_LIMIT|
++          Abrufen je Wochenlauf: wie viele Wochen noch?|
++2. DA-9   Cardmarket: wo weicht die geprueft-bestaetigte Nummer|
++          (cardmarket_mapping_verified.csv, status=verified) von der|
++          ausgelieferten Zuordnung (cardmarket_id_mapping.csv) ab — und ist|
++          die Abweichung eine Handentscheidung (cardmarket_mapping_manual.csv)?|
++|
++AUFRUF|
++    python3 scripts/messe_datenluecken_rutsch8.py|
++|
++Das Werkzeug misst, es urteilt nicht; Rueckgabe immer 0.|
++"""|
++import csv|
++import glob|
++import math|
++import os|
++import re|
++|
++WURZEL = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))|
++DATA = os.path.join(WURZEL, 'data')|
++|
++|
++def lies(name):|
++    with open(os.path.join(DATA, name), encoding='utf-8-sig') as f:|
++        return list(csv.DictReader(f))|
++|
++|
++def je_turnier():|
++    ziele = set()|
++    for z in lies('labs_tournament_decks.csv'):|
++        meta = (z.get('meta') or '').strip()|
++        slug = (z.get('deck_slug') or '').strip()|
++        tid = (z.get('tournament_id') or '').strip()|
++        if not meta or meta == '_unsorted' or not slug or not tid:|
++            continue|
++        try:|
++            ziele.add((meta, str(int(tid)), slug))|
++        except ValueError:|
++            continue|
++    fertig, turniere = set(), set()|
++    for pfad in glob.glob(os.path.join(DATA, 'labs_matchups_je_turnier_*.csv')):|
++        with open(pfad, encoding='utf-8-sig') as f:|
++            for r in csv.DictReader(f):|
++                k = ((r.get('meta') or '').strip(), str(r.get('tournaments_used') or '').strip(),|
++                     (r.get('my_deck_slug') or '').strip())|
++                fertig.add(k)|
++                turniere.add(k[:2])|
++    quelle = open(os.path.join(WURZEL, 'backend', 'scrapers', 'labs_tournament_scraper.py'),|
++                  encoding='utf-8').read()|
++    m = re.search(r'^JE_TURNIER_LIMIT\s*=\s*(\d+)', quelle, re.M)|
++    grenze = int(m.group(1)) if m else 0|
++    offen = len(ziele - fertig)|
++    print(f"DA-11  Ziele {len(ziele)} · geholt {len(fertig & ziele)} · offen {offen} · "|
++          f"Turniere mit Daten {len(turniere)} von {len({z[:2] for z in ziele})} · "|
++          f"Grenze je Lauf {grenze} → noch {math.ceil(offen / grenze) if grenze else '∞'} Wochenlaeufe")|
++|
++|
++def cardmarket():|
++    karte = {(r['set'], r['number']): r for r in lies('cardmarket_id_mapping.csv')}|
++    hand = {(r['set'], r['number']): r for r in lies('cardmarket_mapping_manual.csv')}|
++    abw = []|
++    for r in lies('cardmarket_mapping_verified.csv'):|
++        k = (r['set'], r['number'])|
++        if r.get('status') != 'verified' or k not in karte:|
++            continue|
++        if karte[k]['cardmarket_product_id'] != r['verified_product_id']:|
++            abw.append((k, karte[k]['cardmarket_product_id'], r['verified_product_id'], k in hand))|
++    print(f"DA-9   geprueft ≠ ausgeliefert: {len(abw)} · davon Handentscheidung: "|
++          f"{sum(1 for a in abw if a[3])} · ohne: {sum(1 for a in abw if not a[3])}")|
++    for (s, n), ist, soll, h in abw:|
++        print(f"       {s} {n}: ausgeliefert {ist}, Fingerabdruck {soll}{'  (von Hand gepinnt)' if h else ''}")|
++|
++|
++if __name__ == '__main__':|
++    je_turnier()|
++    cardmarket()|
+diff --git a/scripts/verfaelschungsprobe.py b/scripts/verfaelschungsprobe.py|
+new file mode 100644|
+index 0000000..16c58d6|
+--- /dev/null|
++++ b/scripts/verfaelschungsprobe.py|
+@@ -0,0 +1,76 @@|
++#!/usr/bin/env python3|
++"""Verfaelschungsprobe: beisst eine Zusicherung wirklich?|
++|
++Projektregel 3: jede neue Zusicherung bekommt eine Verfaelschungsprobe.|
++Bisher war das ein Handgriff je Sitzung (sed, Test fahren, zuruecksetzen) —|
++und ein zeilenbasiertes sed auf einen mehrzeiligen Block aendert still|
++NICHTS und „beweist" dann alles. Dieses Werkzeug macht daraus einen Befehl|
++und bricht ab, wenn die Mutation den Text gar nicht trifft.|
++|
++AUFRUF|
++------|
++    python3 scripts/verfaelschungsprobe.py PROBEN.json|
++|
++PROBEN.json ist eine Liste von Proben:|
++|
++    [{"name":  "Abschnitt bleibt zu",|
++      "datei": "js/ds-sections.js",|
++      "alt":   "sec.classList.add('is-open');",|
++      "neu":   "sec.classList.toggle('is-open', false);",|
++      "test":  "tests/unit/test-abschnitte-immer-offen.js"}]|
++|
++Je Probe: `alt` muss GENAU EINMAL in der Datei stehen (sonst Abbruch —|
++eine Mutation, die nichts aendert, beweist nichts), dann wird ersetzt, der|
++Test mit `node --test` (bzw. pytest fuer .py) gefahren und die Datei|
++byte-gleich zurueckgeschrieben — auch bei Abbruch.|
++|
++Ergebnis je Probe: ROT (gut: der Test faellt) oder GRUEN (schlecht: die|
++Zusicherung beisst nicht). Rueckgabe 1, sobald eine Probe gruen bleibt.|
++"""|
++import json|
++import subprocess|
++import sys|
++from pathlib import Path|
++|
++WURZEL = Path(__file__).resolve().parent.parent|
++|
++|
++def fahre(test):|
++    if test.endswith('.py'):|
++        befehl = [sys.executable, '-m', 'pytest', '-q', '-x', test]|
++    else:|
++        befehl = ['node', '--test', test]|
++    r = subprocess.run(befehl, cwd=WURZEL, capture_output=True, text=True)|
++    return r.returncode|
++|
++|
++def main():|
++    if len(sys.argv) != 2:|
++        print(__doc__)|
++        return 2|
++    proben = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))|
++    gruen = 0|
++    for p in proben:|
++        pfad = WURZEL / p['datei']|
++        vorher = pfad.read_bytes()|
++        text = vorher.decode('utf-8')|
++        n = text.count(p['alt'])|
++        if n != 1:|
++            print(f"ABBRUCH  {p['name']}: `alt` steht {n}-mal in {p['datei']} (verlangt: genau einmal)")|
++            return 2|
++        try:|
++            pfad.write_text(text.replace(p['alt'], p['neu']), encoding='utf-8')|
++            rc = fahre(p['test'])|
++        finally:|
++            pfad.write_bytes(vorher)|
++        if rc == 0:|
++            gruen += 1|
++            print(f"GRUEN    {p['name']}  — die Zusicherung beisst NICHT ({p['test']})")|
++        else:|
++            print(f"ROT      {p['name']}")|
++    print(f"{len(proben)} Proben, {len(proben) - gruen} rot, {gruen} gruen")|
++    return 1 if gruen else 0|
++|
++|
++if __name__ == '__main__':|
++    sys.exit(main())|
+diff --git a/tests/python/test_aera_haengt_am_set.py b/tests/python/test_aera_haengt_am_set.py|
+index 0ed6ea2..8b95803 100644|
+--- a/tests/python/test_aera_haengt_am_set.py|
++++ b/tests/python/test_aera_haengt_am_set.py|
+@@ -35,3 +35,3 @@ def test_eine_neunummerierung_aendert_keine_aera():|
+     neu["NEU-ALT"] = ORDNUNG["SSH"]|
+-    for code in ("SSH", "RCL", "MEW", "PAR", "TEF", "BS", "30C", "OBF", "PAF"):|
++    for code in ("SSH", "RCL", "MEW", "PAR", "TEF", "BS", "30C", "OBF", "PAF", "TWM"):|
+         assert pcd.aera_fuer_set(code, neu) == pcd.aera_fuer_set(code, ORDNUNG), code|
+@@ -62,2 +62,15 @@ def test_der_waechter_spiegelt_den_anker():|
+     ohne = "\n".join(z.split("#")[0] for z in src.splitlines())|
+-    assert 'order.get("PAR")' in ohne and "standard_min = 136" not in ohne|
++    assert 'fw.get("oldest_legal_set")' in ohne and 'order.get("PAR")' not in ohne|
++    assert "standard_min = 136" not in ohne|
++|
++|
++def test_der_standard_beginnt_beim_aeltesten_legalen_set():|
++    """DA-10 (27.09.2026): der Anker war PAR — abgelesen an einer Zahl. Das|
++    Formatfenster sagt TEF; PAR und PAF sind in TEF-30C nicht legal."""|
++    fenster = json.load(open(os.path.join(WURZEL, "data", "format_window.json"), encoding="utf-8"))|
++    assert pcd.STANDARD_ANKER == fenster["oldest_legal_set"].upper()|
++    assert pcd.aera_fuer_set(pcd.STANDARD_ANKER, ORDNUNG) == "standard"|
++    for code in ("PAR", "PAF", "MEW"):|
++        assert pcd.aera_fuer_set(code, ORDNUNG) == "extended", code|
++    assert pcd.standard_anker({"oldest_legal_set": "svi"}) == "SVI"|
++    assert pcd.standard_anker({}) == pcd.STANDARD_ANKER_RUECKFALL|
+diff --git a/tests/python/test_daten_pushen.py b/tests/python/test_daten_pushen.py|
+index 853128c..08bd159 100644|
+--- a/tests/python/test_daten_pushen.py|
++++ b/tests/python/test_daten_pushen.py|
+@@ -99 +99,32 @@ def test_die_drei_ablaeufe_nutzen_den_weg():|
+         assert "git pull --rebase" not in ohne, f|
++|
++|
++def test_eine_nicht_uebergebene_aenderung_geht_nicht_verloren(tmp_path):|
++    """WZ-7 (Befund Abnahmeagent, 26.09.2026): bei abgelehntem Push setzt das|
++    Skript hart auf origin/main zurueck. Eine Datei, die der Lauf geschrieben,|
++    aber nicht an das Skript uebergeben hat, waere danach weg. Jetzt bricht es|
++    VOR dem Zuruecksetzen ab und nennt die Datei."""|
++    tmp = str(tmp_path)|
++    origin = _aufbau(tmp)|
++    a = _klon(tmp, "a", origin)|
++    b = _klon(tmp, "b", origin)|
++    assert _lauf(b, "data/b.csv", "y\n2\n", "B").returncode == 0|
++    # A schreibt zwei Dateien, uebergibt aber nur eine|
++    open(os.path.join(a, "data", "b.csv"), "w").write("y\nvon A, nicht uebergeben\n")|
++    ra = _lauf(a, "data/a.csv", "x\n2\n", "A")|
++    assert ra.returncode == 1, ra.stdout + ra.stderr|
++    assert "data/b.csv" in ra.stdout + ra.stderr|
++    assert open(os.path.join(a, "data", "b.csv")).read() == "y\nvon A, nicht uebergeben\n", \|
++        "die nicht uebergebene Aenderung wurde beim Zuruecksetzen vernichtet"|
++|
++|
++def test_geht_der_erste_push_durch_stoert_eine_fremde_aenderung_nicht(tmp_path):|
++    """Die Sperre gilt nur dort, wo zurueckgesetzt wird — ein Lauf, der ohne|
++    Konkurrenz schreibt, wird durch sie nicht rot."""|
++    tmp = str(tmp_path)|
++    origin = _aufbau(tmp)|
++    a = _klon(tmp, "a", origin)|
++    open(os.path.join(a, "data", "b.csv"), "w").write("y\nlokal\n")|
++    ra = _lauf(a, "data/a.csv", "x\n3\n", "A")|
++    assert ra.returncode == 0, ra.stdout + ra.stderr|
++    assert open(os.path.join(a, "data", "b.csv")).read() == "y\nlokal\n"|
+diff --git a/tests/python/test_wochenlauf_nullglob.py b/tests/python/test_wochenlauf_nullglob.py|
+new file mode 100644|
+index 0000000..92ea74e|
+--- /dev/null|
++++ b/tests/python/test_wochenlauf_nullglob.py|
+@@ -0,0 +1,57 @@|
++"""WZ-8 (27.09.2026): der Kopierblock des Wochenlaufs meldet keinen Fehler,|
++wenn eine seiner Dateien fehlt.|
++|
++In .github/workflows/weekly-full-update.yml stand im nullglob-Block|
++``labs_matchups_je_turnier_verzeichnis.json`` als FESTER Name. nullglob laesst|
++nur Muster verschwinden, die nichts treffen — ein fester Name bleibt stehen,|
++und ``cp`` schrieb einen Fehler ins Log (kein roter Lauf, ``set +e``, aber|
++eine Meldung, die jeden Leser des Protokolls in die Irre schickt).|
++|
++Der Block wird hier AUSGEFUEHRT: in einem leeren Verzeichnis mit einer|
++einzigen Labs-Datei und OHNE Verzeichnisdatei.|
++"""|
++import os|
++import re|
++import subprocess|
++|
++HIER = os.path.dirname(os.path.abspath(__file__))|
++WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
++ABLAUF = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")|
++|
++|
++def _block():|
++    text = open(ABLAUF, encoding="utf-8").read()|
++    i = text.index("shopt -s nullglob\n          for f in backend/core/data/labs_tournament_decks_*.csv")|
++    j = text.index("shopt -u nullglob", i)|
++    zeilen = text[i:j].splitlines()|
++    return "\n".join(z[10:] if z.startswith(" " * 10) else z for z in zeilen)|
++|
++|
++def test_jeder_eintrag_der_liste_ist_ein_muster():|
++    liste = _block().split("; do")[0]|
++    eintraege = re.findall(r"backend/core/data/\S+", liste)|
++    assert len(eintraege) >= 4, eintraege|
++    feste = [e for e in eintraege if not re.search(r"[*?\[]", e)]|
++    assert feste == [], "feste Namen im nullglob-Block: " + ", ".join(feste)|
++|
++|
++def test_fehlt_die_verzeichnisdatei_schweigt_der_block(tmp_path):|
++    os.makedirs(tmp_path / "backend" / "core" / "data")|
++    os.makedirs(tmp_path / "data")|
++    (tmp_path / "backend" / "core" / "data" / "labs_tournament_decks_TEF-PBL.csv").write_text("a\n1\n")|
++    r = subprocess.run(["bash", "-c", _block() + "\nshopt -u nullglob\n"],|
++                       cwd=tmp_path, capture_output=True, text=True)|
++    assert r.returncode == 0, r.stderr|
++    assert "cp:" not in r.stderr and "No such file" not in r.stderr, r.stderr|
++    assert (tmp_path / "data" / "labs_tournament_decks_TEF-PBL.csv").exists()|
++    assert not (tmp_path / "data" / "labs_matchups_je_turnier_verzeichnis.json").exists()|
++|
++|
++def test_ist_sie_da_wird_sie_kopiert(tmp_path):|
++    os.makedirs(tmp_path / "backend" / "core" / "data")|
++    os.makedirs(tmp_path / "data")|
++    (tmp_path / "backend" / "core" / "data" / "labs_matchups_je_turnier_verzeichnis.json").write_text("{}")|
++    r = subprocess.run(["bash", "-c", _block() + "\nshopt -u nullglob\n"],|
++                       cwd=tmp_path, capture_output=True, text=True)|
++    assert r.returncode == 0, r.stderr|
++    assert (tmp_path / "data" / "labs_matchups_je_turnier_verzeichnis.json").read_text() == "{}"|
+-- |
+2.43.0|
+|
+|
+From 5731efd0c19290c372d9d1c58d0ad00ff850a7f9 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sun, 27 Sep 2026 14:02:18 +0200|
+Subject: [PATCH 2/2] Patch-Weg: Aenderungen als zerlegter format-patch ueber|
+ MCP anliefern, ein Ablauf spielt sie auf dem Zweig ein|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_013hzUMDCVEkjqp53EeEsxxw|
+---|
+ tests/python/test_deploy_dispatch.py | 3 +++|
+ 1 file changed, 3 insertions(+)|
+|
+diff --git a/tests/python/test_deploy_dispatch.py b/tests/python/test_deploy_dispatch.py|
+index 182f5fb..6acaf3f 100644|
+--- a/tests/python/test_deploy_dispatch.py|
++++ b/tests/python/test_deploy_dispatch.py|
+@@ -46,2 +46,5 @@ AUSNAHMEN = {|
+         "erreicht den Browser nie.",|
++    "patch-einspielen.yml":|
++        "laeuft nur auf Zweigen patch/** und pusht dorthin zurueck, nie nach main; "|
++        "der Deploy kommt mit dem Merge des PR.",|
+     "pokepricelab-index.yml":|
+-- |
+2.43.0|
+|
+|

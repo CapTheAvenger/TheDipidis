@@ -97,3 +97,34 @@ def test_die_drei_ablaeufe_nutzen_den_weg():
         ohne = "\n".join(z.split("#")[0] for z in y.splitlines())
         assert "bash scripts/daten_pushen.sh" in ohne, f
         assert "git pull --rebase" not in ohne, f
+
+
+def test_eine_nicht_uebergebene_aenderung_geht_nicht_verloren(tmp_path):
+    """WZ-7 (Befund Abnahmeagent, 26.09.2026): bei abgelehntem Push setzt das
+    Skript hart auf origin/main zurueck. Eine Datei, die der Lauf geschrieben,
+    aber nicht an das Skript uebergeben hat, waere danach weg. Jetzt bricht es
+    VOR dem Zuruecksetzen ab und nennt die Datei."""
+    tmp = str(tmp_path)
+    origin = _aufbau(tmp)
+    a = _klon(tmp, "a", origin)
+    b = _klon(tmp, "b", origin)
+    assert _lauf(b, "data/b.csv", "y\n2\n", "B").returncode == 0
+    # A schreibt zwei Dateien, uebergibt aber nur eine
+    open(os.path.join(a, "data", "b.csv"), "w").write("y\nvon A, nicht uebergeben\n")
+    ra = _lauf(a, "data/a.csv", "x\n2\n", "A")
+    assert ra.returncode == 1, ra.stdout + ra.stderr
+    assert "data/b.csv" in ra.stdout + ra.stderr
+    assert open(os.path.join(a, "data", "b.csv")).read() == "y\nvon A, nicht uebergeben\n", \
+        "die nicht uebergebene Aenderung wurde beim Zuruecksetzen vernichtet"
+
+
+def test_geht_der_erste_push_durch_stoert_eine_fremde_aenderung_nicht(tmp_path):
+    """Die Sperre gilt nur dort, wo zurueckgesetzt wird — ein Lauf, der ohne
+    Konkurrenz schreibt, wird durch sie nicht rot."""
+    tmp = str(tmp_path)
+    origin = _aufbau(tmp)
+    a = _klon(tmp, "a", origin)
+    open(os.path.join(a, "data", "b.csv"), "w").write("y\nlokal\n")
+    ra = _lauf(a, "data/a.csv", "x\n3\n", "A")
+    assert ra.returncode == 0, ra.stdout + ra.stderr
+    assert open(os.path.join(a, "data", "b.csv")).read() == "y\nlokal\n"

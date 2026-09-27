@@ -44,6 +44,9 @@ AUSNAHMEN = {
     "data-guardian.yml":
         "schreibt nur data/_guardian_baseline.json — reiner Pruefzustand, "
         "erreicht den Browser nie.",
+    "patch-einspielen.yml":
+        "laeuft nur auf Zweigen patch/** und pusht dorthin zurueck, nie nach main; "
+        "der Deploy kommt mit dem Merge des PR.",
     "pokepricelab-index.yml":
         "Katalog-Index als Eingabe fuer spaetere Laeufe; kein js/-Modul holt ihn.",
     "pokepricelab-verify.yml":

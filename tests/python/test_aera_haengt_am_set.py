@@ -33,7 +33,7 @@ def test_eine_neunummerierung_aendert_keine_aera():
     # wie im Lauf #164: unter SSH kommt ein Set dazu, alles darueber +1
     neu = _verschoben(ORDNUNG, ab=ORDNUNG["SSH"])
     neu["NEU-ALT"] = ORDNUNG["SSH"]
-    for code in ("SSH", "RCL", "MEW", "PAR", "TEF", "BS", "30C", "OBF", "PAF"):
+    for code in ("SSH", "RCL", "MEW", "PAR", "TEF", "BS", "30C", "OBF", "PAF", "TWM"):
         assert pcd.aera_fuer_set(code, neu) == pcd.aera_fuer_set(code, ORDNUNG), code
 
 
@@ -60,4 +60,17 @@ def test_ohne_anker_greift_der_rueckfall():
 def test_der_waechter_spiegelt_den_anker():
     src = open(os.path.join(WURZEL, "scripts", "data_guardian.py"), encoding="utf-8").read()
     ohne = "\n".join(z.split("#")[0] for z in src.splitlines())
-    assert 'order.get("PAR")' in ohne and "standard_min = 136" not in ohne
+    assert 'fw.get("oldest_legal_set")' in ohne and 'order.get("PAR")' not in ohne
+    assert "standard_min = 136" not in ohne
+
+
+def test_der_standard_beginnt_beim_aeltesten_legalen_set():
+    """DA-10 (27.09.2026): der Anker war PAR — abgelesen an einer Zahl. Das
+    Formatfenster sagt TEF; PAR und PAF sind in TEF-30C nicht legal."""
+    fenster = json.load(open(os.path.join(WURZEL, "data", "format_window.json"), encoding="utf-8"))
+    assert pcd.STANDARD_ANKER == fenster["oldest_legal_set"].upper()
+    assert pcd.aera_fuer_set(pcd.STANDARD_ANKER, ORDNUNG) == "standard"
+    for code in ("PAR", "PAF", "MEW"):
+        assert pcd.aera_fuer_set(code, ORDNUNG) == "extended", code
+    assert pcd.standard_anker({"oldest_legal_set": "svi"}) == "SVI"
+    assert pcd.standard_anker({}) == pcd.STANDARD_ANKER_RUECKFALL

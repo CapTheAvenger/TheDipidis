@@ -378,6 +378,44 @@ Billiger wird der Weg nur ueber **weniger PRs**, nicht ueber ein anderes
 Werkzeug: die Kosten haengen an der Zahl der beruehrten Verzeichnisse
 je PR.
 
+#### DER PATCH-WEG (seit 27.09.2026 der Standard fuer grosse Aenderungen)
+
+`push_files` traegt den ganzen Dateiinhalt im Aufruf — bei `index.html`
+(363 KB) nicht machbar. Der Patch-Weg schickt stattdessen nur den DIFF:
+
+1. Lokal committen. Je Commit einzeln
+   `git -c core.attributesFile=<datei> format-patch -1 -U1 --binary --stdout <commit>`
+   (die Datei enthaelt `masterclass/*.html -diff`: eine Aenderung in der
+   506-KB-Zeile reist dann als Binaerdelta von 60 Bytes statt 1 MB).
+   Mehrere Patches mit `cat` aneinanderhaengen — ein Nachtrag laesst die
+   schon gelieferten Teile byte-gleich.
+2. `python3 scripts/patch_weg.py verpacken x.patch ordner --teil 24000`
+   zerlegt in Teile mit `|` am Zeilenende (schuetzt Leerzeichen am
+   Zeilenende) und maskiert ein woertliches Schraegstrich-u.
+3. `mcp__Github__create_branch` → `patch/<name>`, dann JEDEN Teil einzeln
+   mit `push_files` nach `.patch-einspielen/teil-NN.txt` und **nach jedem
+   Teil** `git fetch` + `sha256sum` gegen `FERTIG.json`. Gemessen: ein
+   Teil, der auf eine Leerzeile endet, kam einmal eine Zeile kurz an.
+   `FERTIG.json` kommt zuletzt.
+4. `.github/workflows/patch-einspielen.yml` setzt zusammen, prueft jede
+   Pruefsumme, entfernt die Anlieferung und macht `git am` auf DEMSELBEN
+   Zweig. Danach den Baum des Zweigs (`git rev-parse <zweig>^{tree}`)
+   gegen den lokalen Baum halten, erst dann PR, CI, Merge.
+
+**Grenzen, gemessen 27.09.2026:** MCP schreibt keine Datei unter
+`.github/workflows/` (403 „Resource not accessible by integration"), und
+`GITHUB_TOKEN` darf Ablaeufe auch nicht aendern. Ablaufaenderungen gehoeren
+deshalb nie in den Patch — sie macht der Betreiber ueber einen
+Bearbeiten-Link auf GitHub.com. `merge_pull_request` braucht die volle
+40-stellige SHA in `expectedHeadSha`.
+
+**Live-Abnahme:** die Sandkiste erreicht `thedipidis.app` nicht (403 am
+Proxy). Gemessen geht Chrome auf dem Rechner des Betreibers (Claude in
+Chrome), solange er verbunden ist — Zahlen per `javascript_tool` als Zeile
+zurueckgeben. Dort liess sich die Fensterbreite nicht auf Handygroesse
+stellen, ein iframe sperrt die Seite; Handybreiten deshalb lokal auf
+demselben Baum messen (`python3 -m http.server` + Playwright).
+
 #### Zwei Fallen im Upload-Formular (gemessen 13.09.2026)
 
 **Die versteckten Felder NIE setzen.** Beide Versuche haben je einen

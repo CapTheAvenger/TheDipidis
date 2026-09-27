@@ -447,7 +447,10 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
             assert.ok(!/Win %/.test(M.kurz('ohneUnentschieden')), sprache);
             // Und die beiden nennen ihren Unterschied im Namen.
             assert.match(M.kurz('ohneUnentschieden'), /ohne Unentschieden|excluding ties/);
-            assert.match(M.kurz('mitUnentschieden'), /inkl\. Unentschieden|incl\. ties/);
+            // UI-16 (27.09.2026, Hausi): die Kacheln-Konvention heisst kurz
+            // „Win-Rate" — der lange Name war auf der Kachel zu viel. Den
+            // Unterschied nennt der Hinweis (lang), nicht mehr der Name.
+            assert.match(M.kurz('mitUnentschieden'), /^(Win-Rate|Win rate)$/);
         }
     });
 });

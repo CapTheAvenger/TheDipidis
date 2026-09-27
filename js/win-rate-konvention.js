@@ -157,8 +157,14 @@
                Konvention MATCHPUNKTE vorbehalten (Anordnung des
                Betreibers vom 05.09.2026); die anderen beiden duerfen es
                nicht tragen, sonst hiessen wieder drei Groessen gleich. */
-            kurzDe: 'Siegquote inkl. Unentschieden',
-            kurzEn: 'Win share incl. ties',
+            /* UI-16 (27.09.2026, Hausi): „der lange Text muss da weg …
+               von mir aus WR fuer Win-Rate, und dann ist es halt einfach
+               Win-Rate." Kurz UND unterscheidbar: „Win %" bleibt den
+               Matchpunkten, „Win-Rate" ist diese hier (S/(S+N+U)). Die
+               Formel steht weiter im Hinweis (langDe). Bis zum 27.09.2026:
+               „Siegquote inkl. Unentschieden". */
+            kurzDe: 'Win-Rate',
+            kurzEn: 'Win rate',
             langDe: 'Anteil gewonnener Matches an allen gespielten — Unentschieden '
                   + 'zaehlen im Nenner mit, aber nicht als halber Sieg. Die Zahl '
                   + 'sinkt, je haeufiger unentschieden gespielt wird; zwischen zwei '

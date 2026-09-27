@@ -2261,8 +2261,17 @@
                         };
                     });
 
-                    const schnittKopf = (conv && Number.isFinite(conv.expected))
-                        ? ' (Ø ' + fmtPct(conv.expected * 100, 1) + ')' : '';
+                    /* Der Schnitt im Kopf rechnet mit DENSELBEN Zahlen wie die
+                       Spalte darunter: gezaehlt, wo die Datei Zaehlungen fuehrt
+                       (window.gezaehlteZeilen, dasselbe Tor wie die Karte).
+                       Gemessen 27.09.2026: vorher 6,7 % im Kopf, 6,6 % auf der
+                       Kachel — derselbe Schnitt, zwei Zahlen. */
+                    const _convSchnitt = (typeof window !== 'undefined'
+                        && typeof window.gezaehlteZeilen === 'function' && t8rows && t8rows.length)
+                        ? computeConversionPerformance(window.gezaehlteZeilen(t8rows).zeilen)
+                        : conv;
+                    const schnittKopf = (_convSchnitt && Number.isFinite(_convSchnitt.expected))
+                        ? ' (Ø ' + fmtPct(_convSchnitt.expected * 100, 1) + ')' : '';
                     const SPALTEN = [
                         { k: 'name',     de: 'Deck',          en: 'Deck',        num: false },
                         { k: 'listen',   de: 'Listen',        en: 'Lists',       num: true,

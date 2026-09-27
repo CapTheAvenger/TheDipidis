@@ -598,7 +598,9 @@ describe('Glaettung wird benannt', () => {
         // Bis zum 27.09.2026 stand er an der Spalte „ggü. Schnitt". Hausi:
         // „Online Top 8-Quote (Ø 6,6 %)" statt eines separaten Vergleichswerts.
         // Er darf umziehen, aber nicht gehen.
-        assert.match(TIER, /' \(Ø ' \+ fmtPct\(conv\.expected \* 100, 1\) \+ '\)'/);
+        assert.match(TIER, /' \(Ø ' \+ fmtPct\(_convSchnitt\.expected \* 100, 1\) \+ '\)'/);
+        // Derselbe Schnitt wie auf der Kachel: gezaehlte Zeilen (27.09.2026).
+        assert.match(TIER, /computeConversionPerformance\(window\.gezaehlteZeilen\(t8rows\)\.zeilen\)/);
         assert.match(TIER, /de: 'Online Top 8-Quote' \+ schnittKopf/);
         assert.match(TIER, /en: 'Online top-8 rate' \+ schnittKopf/);
         assert.doesNotMatch(TIER, /k: 'faktor'/);

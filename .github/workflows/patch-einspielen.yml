@@ -1,0 +1,59 @@
+name: Patch einspielen
+
+# Der Patch-Weg (27.09.2026): Aenderungen kommen als zerlegter
+# `git format-patch` unter .patch-einspielen/ auf einen Zweig patch/…,
+# weil aus der Cowork-Sandkiste `git push` 403 ist und die MCP-Werkzeuge
+# sonst den ganzen Dateiinhalt tragen muessten. Dieser Ablauf setzt die
+# Teile zusammen (scripts/patch_weg.py prueft jede Pruefsumme), entfernt
+# die Anlieferung und spielt die Commits mit `git am` auf DEMSELBEN Zweig
+# ein. Danach PR und Merge wie immer.
+#
+# Solange FERTIG.json fehlt, ist die Anlieferung unterwegs: der Lauf
+# endet gruen und tut nichts.
+#
+# Grenze: GITHUB_TOKEN darf keine Dateien unter .github/workflows/
+# schreiben. Aenderungen an Ablaeufen gehoeren deshalb NICHT in den Patch,
+# sondern werden direkt auf den Zweig gelegt.
+
+on:
+  push:
+    branches: ['patch/**']
+    paths: ['.patch-einspielen/**']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: patch-einspielen-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  einspielen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Teile zusammensetzen
+        id: teile
+        run: |
+          set +e
+          python3 scripts/patch_weg.py auspacken .patch-einspielen /tmp/ganz.patch
+          rc=$?
+          set -e
+          if [ "$rc" = "3" ]; then echo "bereit=nein" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ "$rc" != "0" ]; then exit "$rc"; fi
+          echo "bereit=ja" >> "$GITHUB_OUTPUT"
+
+      - name: Anlieferung entfernen und Commits einspielen
+        if: steps.teile.outputs.bereit == 'ja'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -r -q .patch-einspielen
+          git commit -q -m "Patch-Weg: Anlieferung entfernt"
+          git am --3way --committer-date-is-author-date /tmp/ganz.patch
+          git log --oneline -n 20
+          git push origin "HEAD:${GITHUB_REF_NAME}"

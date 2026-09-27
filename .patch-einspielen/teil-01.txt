@@ -1,0 +1,90 @@
+From 92e9ea6c172415767ca9f30e51b654ddfe1a740f Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Mon, 28 Sep 2026 01:00:50 +0200|
+Subject: [PATCH] Rutsch 11, Nachtrag FE-9: Element und Stufe auch ohne|
+ Elementbuchstaben|
+|
+Live-Abnahme von Rutsch 10 (1920 px, Stempel 202609272237-e8a2d79): im|
+gebauten Deck stand Abra, Alakazam, Kadabra. Die Karten tragen dort den Typ|
+"Basic"/"Stage 1"/"Stage 2" ohne Elementbuchstaben; charAt(0)/substring(1)|
+fanden weder Element noch Stufe, das Alphabet entschied. _element() liest|
+jetzt auch energy_type, _stufe() beide Schreibweisen. Zusicherung mit den|
+live gemessenen Feldern, Verfaelschungsprobe (alter Stufenzugriff) rot.|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01U9cddKKu6gh42UZVUcp4S5|
+---|
+ js/app-deck-builder.js              | 32 +++++++++++++++++++++++------|
+ tests/unit/test-rutsch-10-karten.js | 11 +++++++++-|
+ 2 files changed, 36 insertions(+), 7 deletions(-)|
+|
+diff --git a/js/app-deck-builder.js b/js/app-deck-builder.js|
+index 46790be..7460038 100644|
+--- a/js/app-deck-builder.js|
++++ b/js/app-deck-builder.js|
+@@ -2396,2 +2396,24 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+                nicht zurueck. */|
++            /* Rutsch-10-Abnahme (28.09.2026, live gemessen): die Karten des|
++               gebauten Decks tragen den Typ OHNE Elementbuchstaben — „Basic",|
++               „Stage 1", „Stage 2", nicht „PBasic". Der alte Zugriff|
++               `charAt(0)` / `substring(1)` fand dort weder Element noch Stufe|
++               (alles 99), und innerhalb der Linie entschied das Alphabet:|
++               Abra, Alakazam, Kadabra. Beide Formen werden jetzt gelesen;|
++               das Element kommt sonst aus energy_type. */|
++            const _elementNamen = { grass: 'G', fire: 'R', water: 'W', lightning: 'L', psychic: 'P',|
++                fighting: 'F', darkness: 'D', metal: 'M', dragon: 'N', colorless: 'C' };|
++            function _element(card, typ) {|
++                if (/^[GRWLPFDMNC](Basic|Stage)/.test(typ)) return typ.charAt(0);|
++                const e = String(card.energy_type || card.element || '').trim().toLowerCase();|
++                return _elementNamen[e] || (/^[GRWLPFDMNC]$/i.test(e) ? e.toUpperCase() : '');|
++            }|
++            function _stufe(typ) {|
++                const t = String(typ || '').replace(/\s+/g, '').toLowerCase();|
++                if (/stage2$/.test(t)) return evolutionOrder.Stage2;|
++                if (/stage1$/.test(t)) return evolutionOrder.Stage1;|
++                if (/basic$/.test(t)) return evolutionOrder.Basic;|
++                return 99;|
++            }|
++|
+             const _famAnteil = new Map();|
+@@ -2450,4 +2472,4 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+ |
+-                    const elementA = cardTypeA.charAt(0);|
+-                    const elementB = cardTypeB.charAt(0);|
++                    const elementA = _element(a, cardTypeA);|
++                    const elementB = _element(b, cardTypeB);|
+ |
+@@ -2470,6 +2492,4 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+                     // Same Pokedex: evolution stage (Basic → Stage1 → Stage2).|
+-                    const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');|
+-                    const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');|
+-                    const evolOrderA = evolutionOrder[evolutionA] || 99;|
+-                    const evolOrderB = evolutionOrder[evolutionB] || 99;|
++                    const evolOrderA = _stufe(cardTypeA);|
++                    const evolOrderB = _stufe(cardTypeB);|
+                     if (evolOrderA !== evolOrderB) {|
+diff --git a/tests/unit/test-rutsch-10-karten.js b/tests/unit/test-rutsch-10-karten.js|
+index abc38c7..78224b4 100644|
+--- a/tests/unit/test-rutsch-10-karten.js|
++++ b/tests/unit/test-rutsch-10-karten.js|
+@@ -50,3 +50,3 @@ function sortiere(karten) {|
+         // Die Kartendaten tragen den Typ als Element + Stufe („PBasic", „WStage 1").|
+-        getCardTypeCategory: (t) => (/^[A-Z](Basic|Stage)/.test(t) ? 'Pokemon' : 'Trainer'),|
++        getCardTypeCategory: (t) => (/^([A-Z])?(Basic|Stage)/.test(t) ? 'Pokemon' : 'Trainer'),|
+         parseLocaleNumber: (v, d) => { const n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? d : n; }|
+@@ -67,2 +67,11 @@ test('FE-9: die Familie mit dem hoechsten Anteil steht vorn, auch gegen die Elem|
+ |
++test('FE-9: auch mit Typ ohne Elementbuchstaben („Stage 2") bleibt die Linie in Entwicklungsreihenfolge', () => {|
++    // So kommen die Karten des gebauten Decks live an (gemessen 28.09.2026):|
++    // type „Basic"/„Stage 1"/„Stage 2", das Element steht in energy_type.|
++    const karte = (n, p, e, st) => ({ card_name: n, type: st, energy_type: e, percentage_in_archetype: String(p) });|
++    const r = sortiere([karte('Golduck', 30, 'Water', 'Stage 1'), karte('Alakazam', 100, 'Psychic', 'Stage 2'),|
++        karte('Kadabra', 100, 'Psychic', 'Stage 1'), karte('Psyduck', 30, 'Water', 'Basic'), karte('Abra', 100, 'Psychic', 'Basic')]);|
++    assert.deepEqual(r, ['Abra', 'Kadabra', 'Alakazam', 'Psyduck', 'Golduck']);|
++});|
++|
+ test('FE-9: innerhalb der Familie bleibt die Entwicklungsreihenfolge, auch wenn die Stufe 2 mehr Anteil hat', () => {|
+-- |
+2.43.0|
+|
+|

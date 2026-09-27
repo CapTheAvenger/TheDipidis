@@ -1208,7 +1208,7 @@
                 const kacheln = document.getElementById('pastMetaPerformanceCards');
                 const matrix = document.getElementById('pastMetaMatchupBlock');
                 if (abschnitt && kacheln && matrix) {
-                    abschnitt.classList.remove('d-none');
+                    abschnitt.classList.toggle('d-none', !pastMetaEinFormat(formatFilter));
                     kacheln.innerHTML = '';
                     matrix.innerHTML = '<p class="past-meta-section-hint past-meta-empty-state">'
                         + escapeHtml(t('pm.familieKeineBilanz').replace('{name}', familienName))
@@ -1940,21 +1940,28 @@
             return !isNaN(n) && String(n) === tids.roh;
         }
 
+        // FE-7 (27.09.2026): ist genau EIN Format gewaehlt? „all" ist
+        // Multi-Format, leer heisst noch nichts gewaehlt. Eigene Funktion,
+        // damit die Zusicherung sie ausfuehren kann.
+        function pastMetaEinFormat(formatKey) {
+            return !!formatKey && formatKey !== 'all';
+        }
+
         async function renderPastMetaPerformance(archetype, formatKey, tournamentFilter) {
             const section = document.getElementById('pastMetaPerformanceSection');
             const cards   = document.getElementById('pastMetaPerformanceCards');
             const matchup = document.getElementById('pastMetaMatchupBlock');
             if (!section || !cards || !matchup) return;
 
-            // Multi-format aggregate isn't supported — labs CSVs are
-            // per-meta and combining different rotations would mix decks
-            // that wouldn't even share a card pool. Surface the section
-            // anyway so the user understands why it's blank instead of
-            // silently hiding the entire panel.
-            if (!archetype || formatKey === 'all' || !formatKey) {
-                section.classList.remove('d-none');
+            // Multi-Format: der Abschnitt ist aus (FE-7, Entscheidung Hausi
+            // 27.09.2026). Die Labs-Dateien gelten je Format; eine Bilanz
+            // ueber mehrere Rotationen mischte Decks, die nicht einmal
+            // denselben Kartenpool haben. Vorher stand hier ein leerer
+            // Abschnitt mit dem Hinweis, ein Format zu waehlen.
+            if (!pastMetaEinFormat(formatKey) || !archetype) {
+                section.classList.add('d-none');
                 cards.innerHTML = '';
-                matchup.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${(typeof t === 'function' ? t('pm.performanceFormatAllHint') : 'Pick a specific format to see this archetype\'s cumulative tournament performance.')}</p>`;
+                matchup.innerHTML = '';
                 return;
             }
 
@@ -2395,8 +2402,11 @@
             const body    = document.getElementById('pastMetaMostSuccessfulBody');
             if (!section || !body) return;
 
-            if (!archetype) {
+            // FE-7: auch die beste Liste gilt nur innerhalb EINES Formats —
+            // bei Multi-Format waere sie die beste ueber Rotationen hinweg.
+            if (!archetype || !pastMetaEinFormat(formatKey)) {
                 section.classList.add('d-none');
+                body.innerHTML = '';
                 window.pastMetaMostSuccessfulList = null;
                 return;
             }

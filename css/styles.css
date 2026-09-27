@@ -1661,6 +1661,16 @@
             z-index: 3;
         }
 
+        /* UI-38 (27.09.2026): das Kennzahl-Band sitzt IN der Knopfsaeule,
+           nicht mehr frei ueber der Karte. Vorher stand es auf
+           `bottom: 52px`, die Knopfsaeule wuchs aber mit ihren Knoepfen —
+           gemessen ab 1024 px 3 px Ueberlappung auf JEDER Kachel (27/27).
+           Im selben Fluss kann nichts mehr ueberlappen, egal wie hoch
+           die Knoepfe werden. */
+        .deck-card-actions > .deck-card-overlay {
+            position: static;
+        }
+
         .deck-card-action-row {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -3267,7 +3277,9 @@
                 font-size: 10px;
             }
 
-            .grid-view-active #cityLeagueDeckOverview .card-max-count,
+            /* .card-max-count stand hier mit 20 px — seit UI-37 (27.09.2026)
+               kommt die Groesse aus der Plaketten-Familie am Ende von
+               css/mobile-responsive.css; die ID haette sie geschlagen. */
             .grid-view-active #cityLeagueDeckOverview .card-in-deck-count {
                 font-size: 10px !important;
                 width: 20px !important;
@@ -4211,15 +4223,9 @@
                 padding: 0 !important;
             }
 
-            /* Mobile Deck Builder - count badge */
-            #cityLeagueMyDeckGrid .card-max-count,
-            #currentMetaMyDeckGrid .card-max-count,
-            #pastMetaMyDeckGrid .card-max-count {
-                font-size: var(--fs-xs) !important;
-                width: 16px !important;
-                height: 16px !important;
-                line-height: 16px !important;
-            }
+            /* Mobile Deck Builder - count badge: Groesse seit UI-37
+               (27.09.2026) in der Plaketten-Familie am Ende von
+               css/mobile-responsive.css, eine Groesse fuer alle. */
         }
         
         /* Extra Mobile-Optimierung für sehr kleine Screens */
@@ -8542,8 +8548,11 @@ details[open] > .tier-trending-summary::after {
         font-size: 1.3em;
     }
 
-    /* --- Fix 5: Deck-card action buttons → bigger touch targets --- */
-    .deck-card button {
+    /* --- Fix 5: Deck-card action buttons → bigger touch targets ---
+       Das Herz ist eine Plakette, kein Aktionsknopf: mit 44 px Hoehe war
+       es auf dem Handy ein 22 x 44 px grosses Oval (gemessen UI-37,
+       27.09.2026). Seine Trefferflaeche kommt aus css/tippziele.css. */
+    .deck-card button:not(.wishlist-heart-badge) {
         min-height: 44px !important;
         height: auto !important;
         font-size: 13px !important;

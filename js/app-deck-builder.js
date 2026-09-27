@@ -2075,8 +2075,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         ${ownedBadge}
                         ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(safeCardName, setCode, setNumber) : ''}
                         <div class="card-max-count">${count}</div>
-                        <div class="deck-card-overlay">${overlayText}</div>
                         <div class="deck-card-actions">
+                            <div class="deck-card-overlay">${overlayText}</div>
                             <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 1fr;">
                                 <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-remove-btn" title="${escapeHtml(t('cl.removeFromDeck'))}">-</button>
                                 <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-rarity-btn" title="${escapeHtml(t('cl.switchPrint'))}">★</button>
@@ -2276,6 +2276,135 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 'Energy': 7
             };
             
+            // Helper: resolve Pokedex number from card data or global map.
+            //
+            // Card-name shapes we need to handle:
+            //   "Garchomp ex"                 → garchomp
+            //   "Cynthia's Garchomp ex"       → garchomp (trainer-possessive)
+            //   "Hop's Trevenant"             → trevenant
+            //   "Bloodmoon Ursaluna ex"       → ursaluna (form prefix)
+            //   "Hisuian Zoroark"             → zoroark (regional)
+            //   "Hisui Goomy"                 → goomy
+            //   "Paldean Tauros"              → tauros
+            //   "Galarian Slowking"           → slowking
+            //   "Alolan Vulpix"               → vulpix
+            //   "Origin Forme Dialga"         → dialga
+            //   "Dusk Mane Necrozma"          → necrozma
+            //   "Dawn Wings Necrozma"         → necrozma
+            //   "Iron Hands ex"               → iron hands  (no prefix to strip)
+            //
+            // pokemon_dex_numbers.json keys cards by bare base name only,
+            // so the regional/form prefixes MUST come off before the
+            // lookup or the card falls to 99999 and lands in the wrong
+            // pokedex position.
+            function _getDexNum(card) {
+                const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);
+                if (!isNaN(direct) && direct > 0) return direct;
+                const dexMap = window.pokedexNumbers || {};
+                const rawName = String(card.card_name || card.name || '').trim().toLowerCase();
+                return _getDexNumFromName(rawName, dexMap);
+            }
+
+            // Lookup-only variant — same multi-stage fallback as
+            // _getDexNum (direct → trainer-prefix-strip → form-prefix-
+            // strip → ex/vmax/... suffix-strip → first-word-strip)
+            // but takes a name string instead of a card object.
+            // Used by _getFamilyBaseDex when walking up the
+            // evolution chain.
+            function _getDexNumFromName(rawName, dexMap) {
+                dexMap = dexMap || window.pokedexNumbers || {};
+                const direct = parseInt(dexMap[rawName], 10);
+                if (!isNaN(direct) && direct > 0) return direct;
+                // Strip trainer-possessive prefixes ("Cynthia's Gible" →
+                // "gible", "Hop's Trevenant" → "trevenant", "Team Rocket's
+                // Mewtwo" → "mewtwo") via the shared helper.
+                const trainerStripped = (typeof window !== 'undefined' && window.stripTrainerOwnerPrefix)
+                    ? window.stripTrainerOwnerPrefix(rawName).base.trim()
+                    : rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();
+                if (trainerStripped !== rawName) {
+                    const stripMap = parseInt(dexMap[trainerStripped], 10);
+                    if (!isNaN(stripMap) && stripMap > 0) return stripMap;
+                }
+                // Strip form / regional prefixes that the dex map doesn't
+                // index ("Bloodmoon Ursaluna ex" → "ursaluna ex"). The
+                // ex / vmax / etc. suffix strip below then drops the
+                // tail and leaves the bare base name.
+                const formStripped = trainerStripped
+                    .replace(/^(?:bloodmoon|origin\s+forme|origin|dusk\s+mane|dawn\s+wings|crowned\s+sword|crowned\s+shield|crowned|hisuian|hisui|paldean|paldea|galarian|galar|alolan|alola)\s+/, '')
+                    .trim();
+                if (formStripped !== trainerStripped) {
+                    const formMap = parseInt(dexMap[formStripped], 10);
+                    if (!isNaN(formMap) && formMap > 0) return formMap;
+                }
+                const baseName = formStripped
+                    .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
+                    .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+                const baseMap = parseInt(dexMap[baseName], 10);
+                if (!isNaN(baseMap) && baseMap > 0) return baseMap;
+                // Final fallback for unknown form prefixes not in the
+                // explicit list — drop the first word and try again.
+                // Compound species (Iron Thorns, Raging Bolt) resolve
+                // directly via baseMap above and never reach this branch.
+                const words = baseName.split(/\s+/).filter(Boolean);
+                if (words.length >= 2) {
+                    const stripped = words.slice(1).join(' ');
+                    const formMap = parseInt(dexMap[stripped], 10);
+                    if (!isNaN(formMap) && formMap > 0) return formMap;
+                }
+                return 99999;
+            }
+
+            // Family-line grouping — walks up the evolution chain via
+            // pokemon_card_effects.json's "Evolves from X" card_type
+            // text and returns the dex of the BASE species. With this,
+            // Dusknoir (#477) sorts alongside Dusclops (#356) and
+            // Duskull (#355) under the family base dex 355 instead of
+            // landing 122 numbers later in strict pokédex order. User
+            // flagged: "duskull, dusclops und Dusknoir stehen immer
+            // noch nicht nebeneinander" — TCG convention is to group
+            // evolution lines together, not split them by Gen.
+            //
+            // Falls back to plain _getDexNum when card-effects isn't
+            // loaded yet (e.g. the index is lazy-loaded during
+            // autoCompleteConsistency; on a fresh page load before any
+            // build, sort runs without it). Walk depth capped at 4 to
+            // protect against malformed cycles.
+            function _getFamilyBaseDex(card) {
+                const idx = (typeof window !== 'undefined') && window._cardEffectsIndex;
+                if (!idx || !idx.byName || idx.byName.size === 0) return _getDexNum(card);
+                let currentName = String(card.card_name || card.name || '').toLowerCase().trim();
+                const dexMap = window.pokedexNumbers || {};
+                for (let depth = 0; depth < 4; depth++) {
+                    const eff = idx.byName.get(currentName);
+                    if (!eff) break;
+                    const cardType = String(eff.card_type || '').toLowerCase().trim();
+                    const m = /^evolves from\s+(.+)$/.exec(cardType);
+                    if (!m) break;
+                    currentName = m[1].trim();
+                }
+                return _getDexNumFromName(currentName, dexMap);
+            }
+
+
+            /* FE-9 (27.09.2026, Hausi): innerhalb der Kategorien nach Karten-Share,
+               „damit die meistgenutzten Karten des Decks zuerst stehen". Bei den
+               Pokémon zaehlt dafuer die FAMILIE: ihr hoechster Anteil stellt die
+               ganze Entwicklungslinie nach vorn, innerhalb der Linie bleibt
+               Basic → Phase 1 → Phase 2. So steht Abra (100 %) mit Kadabra und
+               Alakazam vor Psyduck (38 %), ohne dass die Linie zerreisst — der
+               Fehler aus 410cebd („share% zuerst“ zerriss die Linien) kommt
+               nicht zurueck. */
+            const _famAnteil = new Map();
+            const _famKey = new Map();
+            cards.forEach(c => {
+                const typ = c.type || c.card_type || '';
+                if (getCardTypeCategory(typ) !== 'Pokemon') return;
+                const key = _getFamilyBaseDex(c);
+                _famKey.set(c, key);
+                const p = parseLocaleNumber(c.percentage_in_archetype || '0', 0) || 0;
+                if (!_famAnteil.has(key) || p > _famAnteil.get(key)) _famAnteil.set(key, p);
+            });
+
             const sorted = cards.sort((a, b) => {
                 const cardTypeA = a.type || a.card_type || '';
                 const cardTypeB = b.type || b.card_type || '';
@@ -2295,115 +2424,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const percA = parseLocaleNumber(a.percentage_in_archetype || '0', 0) || 0;
                 const percB = parseLocaleNumber(b.percentage_in_archetype || '0', 0) || 0;
                 
-                // Helper: resolve Pokedex number from card data or global map.
-                //
-                // Card-name shapes we need to handle:
-                //   "Garchomp ex"                 → garchomp
-                //   "Cynthia's Garchomp ex"       → garchomp (trainer-possessive)
-                //   "Hop's Trevenant"             → trevenant
-                //   "Bloodmoon Ursaluna ex"       → ursaluna (form prefix)
-                //   "Hisuian Zoroark"             → zoroark (regional)
-                //   "Hisui Goomy"                 → goomy
-                //   "Paldean Tauros"              → tauros
-                //   "Galarian Slowking"           → slowking
-                //   "Alolan Vulpix"               → vulpix
-                //   "Origin Forme Dialga"         → dialga
-                //   "Dusk Mane Necrozma"          → necrozma
-                //   "Dawn Wings Necrozma"         → necrozma
-                //   "Iron Hands ex"               → iron hands  (no prefix to strip)
-                //
-                // pokemon_dex_numbers.json keys cards by bare base name only,
-                // so the regional/form prefixes MUST come off before the
-                // lookup or the card falls to 99999 and lands in the wrong
-                // pokedex position.
-                function _getDexNum(card) {
-                    const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);
-                    if (!isNaN(direct) && direct > 0) return direct;
-                    const dexMap = window.pokedexNumbers || {};
-                    const rawName = String(card.card_name || card.name || '').trim().toLowerCase();
-                    return _getDexNumFromName(rawName, dexMap);
-                }
-
-                // Lookup-only variant — same multi-stage fallback as
-                // _getDexNum (direct → trainer-prefix-strip → form-prefix-
-                // strip → ex/vmax/... suffix-strip → first-word-strip)
-                // but takes a name string instead of a card object.
-                // Used by _getFamilyBaseDex when walking up the
-                // evolution chain.
-                function _getDexNumFromName(rawName, dexMap) {
-                    dexMap = dexMap || window.pokedexNumbers || {};
-                    const direct = parseInt(dexMap[rawName], 10);
-                    if (!isNaN(direct) && direct > 0) return direct;
-                    // Strip trainer-possessive prefixes ("Cynthia's Gible" →
-                    // "gible", "Hop's Trevenant" → "trevenant", "Team Rocket's
-                    // Mewtwo" → "mewtwo") via the shared helper.
-                    const trainerStripped = (typeof window !== 'undefined' && window.stripTrainerOwnerPrefix)
-                        ? window.stripTrainerOwnerPrefix(rawName).base.trim()
-                        : rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();
-                    if (trainerStripped !== rawName) {
-                        const stripMap = parseInt(dexMap[trainerStripped], 10);
-                        if (!isNaN(stripMap) && stripMap > 0) return stripMap;
-                    }
-                    // Strip form / regional prefixes that the dex map doesn't
-                    // index ("Bloodmoon Ursaluna ex" → "ursaluna ex"). The
-                    // ex / vmax / etc. suffix strip below then drops the
-                    // tail and leaves the bare base name.
-                    const formStripped = trainerStripped
-                        .replace(/^(?:bloodmoon|origin\s+forme|origin|dusk\s+mane|dawn\s+wings|crowned\s+sword|crowned\s+shield|crowned|hisuian|hisui|paldean|paldea|galarian|galar|alolan|alola)\s+/, '')
-                        .trim();
-                    if (formStripped !== trainerStripped) {
-                        const formMap = parseInt(dexMap[formStripped], 10);
-                        if (!isNaN(formMap) && formMap > 0) return formMap;
-                    }
-                    const baseName = formStripped
-                        .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
-                        .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
-                    const baseMap = parseInt(dexMap[baseName], 10);
-                    if (!isNaN(baseMap) && baseMap > 0) return baseMap;
-                    // Final fallback for unknown form prefixes not in the
-                    // explicit list — drop the first word and try again.
-                    // Compound species (Iron Thorns, Raging Bolt) resolve
-                    // directly via baseMap above and never reach this branch.
-                    const words = baseName.split(/\s+/).filter(Boolean);
-                    if (words.length >= 2) {
-                        const stripped = words.slice(1).join(' ');
-                        const formMap = parseInt(dexMap[stripped], 10);
-                        if (!isNaN(formMap) && formMap > 0) return formMap;
-                    }
-                    return 99999;
-                }
-
-                // Family-line grouping — walks up the evolution chain via
-                // pokemon_card_effects.json's "Evolves from X" card_type
-                // text and returns the dex of the BASE species. With this,
-                // Dusknoir (#477) sorts alongside Dusclops (#356) and
-                // Duskull (#355) under the family base dex 355 instead of
-                // landing 122 numbers later in strict pokédex order. User
-                // flagged: "duskull, dusclops und Dusknoir stehen immer
-                // noch nicht nebeneinander" — TCG convention is to group
-                // evolution lines together, not split them by Gen.
-                //
-                // Falls back to plain _getDexNum when card-effects isn't
-                // loaded yet (e.g. the index is lazy-loaded during
-                // autoCompleteConsistency; on a fresh page load before any
-                // build, sort runs without it). Walk depth capped at 4 to
-                // protect against malformed cycles.
-                function _getFamilyBaseDex(card) {
-                    const idx = (typeof window !== 'undefined') && window._cardEffectsIndex;
-                    if (!idx || !idx.byName || idx.byName.size === 0) return _getDexNum(card);
-                    let currentName = String(card.card_name || card.name || '').toLowerCase().trim();
-                    const dexMap = window.pokedexNumbers || {};
-                    for (let depth = 0; depth < 4; depth++) {
-                        const eff = idx.byName.get(currentName);
-                        if (!eff) break;
-                        const cardType = String(eff.card_type || '').toLowerCase().trim();
-                        const m = /^evolves from\s+(.+)$/.exec(cardType);
-                        if (!m) break;
-                        currentName = m[1].trim();
-                    }
-                    return _getDexNumFromName(currentName, dexMap);
-                }
-
                 // For Pokemon: sort by element type → family-base Pokedex →
                 // evolution stage → share%.
                 //
@@ -2421,6 +2441,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // Duskull (#355) so the whole Duskull → Dusclops → Dusknoir
                 // line stays adjacent instead of split by Gen.
                 if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
+                    // FE-9: die meistgespielte Familie zuerst (s. oben).
+                    const famA = _famAnteil.get(_famKey.get(a)) || 0;
+                    const famB = _famAnteil.get(_famKey.get(b)) || 0;
+                    if (famA !== famB) {
+                        return famB - famA;
+                    }
+
                     const elementA = cardTypeA.charAt(0);
                     const elementB = cardTypeB.charAt(0);
 
@@ -2434,8 +2461,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     // SAME ELEMENT: family-base Pokedex FIRST so evolution
                     // lines stay grouped (and late-Gen evolutions like
                     // Dusknoir #477 sort with Duskull #355).
-                    const dexA = _getFamilyBaseDex(a);
-                    const dexB = _getFamilyBaseDex(b);
+                    const dexA = _famKey.get(a);
+                    const dexB = _famKey.get(b);
                     if (dexA !== dexB) {
                         return dexA - dexB;
                     }

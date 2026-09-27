@@ -1761,12 +1761,6 @@ img[src*="limitlesstcg"] {
 .bg-light { background: var(--surface-2) !important; }
 .bg-blue-light { background: var(--tint-info) !important; }
 .border-left-blue { border-left: 4px solid #3498db !important; }
-.city-league-other-print-sparkle {
-    top: 52px;
-}
-.city-league-other-print-sparkle-hasdeck {
-    top: 52px;
-}
 
 /* Cardmarket button uses data-market-cursor for state styling (available vs unavailable). */
 /* City League Card Item Modular Styles */
@@ -1855,15 +1849,9 @@ img[src*="limitlesstcg"] {
  * and the heart to top:22px, so we drop the sparkle's top in the
  * mobile media-query below as well to keep the same stacking order. */
 .city-league-other-print-sparkle {
+    /* Lage, Groesse und Form: Plaketten-Familie (UI-37, 27.09.2026)
+     * am Ende von css/mobile-responsive.css. */
     position: absolute !important;
-    top: 52px !important;
-    right: 4px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 20px !important;
-    height: 20px !important;
-    border-radius: 50% !important;
     z-index: 4 !important;
     cursor: help;
     background: #f59e0b !important;
@@ -1895,10 +1883,6 @@ img[src*="limitlesstcg"] {
  * 16px wishlist heart (top: 22px). */
 @media (max-width: 768px) {
     .city-league-other-print-sparkle {
-        top: 40px !important;
-        right: 3px !important;
-        width: 16px !important;
-        height: 16px !important;
         font-size: 0.55em !important;
         border-width: 1px !important;
     }
@@ -1991,8 +1975,13 @@ img[src*="limitlesstcg"] {
 .city-league-card-action-row > .city-league-card-proxy-btn {
     flex: 0 0 26px;
 }
+/* UI-36 (27.09.2026): das Preisschild ist so breit wie sein Betrag und
+ * steht rechts, statt den Rest der Zeile zu fuellen. Gemessen vorher
+ * (scripts/messe_kartenleiste.py, Rotationen 1280 px): 72 x 24 px,
+ * 56 % der Zeile — ein Block, der groesser wirkte als die Zahl darin. */
 .city-league-card-action-row > .city-league-card-market-btn {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
+    margin-left: auto;
 }
 /* ── Die Aktionsknoepfe auf der Karte ──────────────────────────────
  *

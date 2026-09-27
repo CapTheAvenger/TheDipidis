@@ -1,0 +1,370 @@
+-    <link rel="stylesheet" href="css/mobile-responsive.css?v=202609272004" type="text/css">|
++    <link rel="stylesheet" href="css/mobile-responsive.css?v=202609272155" type="text/css">|
+     <!-- Escape Rope Close Buttons -->|
+-    <link rel="stylesheet" href="css/close-buttons.css?v=202609272004" type="text/css">|
+-    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202609272004" type="text/css">|
++    <link rel="stylesheet" href="css/close-buttons.css?v=202609272155" type="text/css">|
++    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202609272155" type="text/css">|
+     <!-- Mobile Drag & Drop polyfill for touch devices -->|
+@@ -359,29 +359,7 @@|
+ |
+-      /* Count badges: 22px (was 16px — 2026-06-10 audit fix) */|
+-      body .city-league-card-badge {|
+-        width: 22px !important;|
+-        height: 22px !important;|
+-        min-height: 22px !important;|
+-        min-width: 22px !important;|
+-        max-width: 22px !important;|
+-        max-height: 22px !important;|
+-        font-size: 0.78em;|
+-        padding: 0 !important;|
+-      }|
+-|
+-      /* Wishlist heart: same size as count badge */|
+-      body .wishlist-heart-badge {|
+-        width: 22px !important;|
+-        height: 22px !important;|
+-        min-height: 22px !important;|
+-        max-height: 22px !important;|
+-        min-width: 22px !important;|
+-        max-width: 22px !important;|
+-        font-size: 12px !important;|
+-        padding: 0 !important;|
+-        top: 22px !important;|
+-        right: 3px !important;|
+-        line-height: 1 !important;|
+-        box-sizing: border-box !important;|
+-      }|
++      /* Plaketten und Herz: Groesse, Form und Lage stehen seit UI-37|
++         (27.09.2026) in der Plaketten-Familie am Ende von|
++         css/mobile-responsive.css. Hier stand das Herz mit top: 22px —|
++         bei 22 px grossen Plaketten ab 4 px lag es 4 px auf der|
++         Deck-Anzahl. Die 22 px aus dem Audit vom 10.06.2026 gelten weiter. */|
+ |
+@@ -482,4 +460,4 @@|
+          ?v=NNNN in dieser Datei, also zieht der Stempel jetzt mit. -->|
+-    <script src="js/pokemon-loading-screen.js?v=202609272004"></script>|
+-    <script src="js/csv-cache-interceptor.js?v=202609272004"></script>|
++    <script src="js/pokemon-loading-screen.js?v=202609272155"></script>|
++    <script src="js/csv-cache-interceptor.js?v=202609272155"></script>|
+     <a href="#main-content" class="skip-to-content">Skip to content</a>|
+@@ -3934,8 +3912,8 @@|
+     <!-- Error tracking (must load before all other JS) -->|
+-    <script src="js/error-tracking.js?v=202609272004"></script>|
++    <script src="js/error-tracking.js?v=202609272155"></script>|
+ |
+-    <script src="js/inline-init.js?v=202609272004" defer></script>|
++    <script src="js/inline-init.js?v=202609272155" defer></script>|
+     <!-- Haelt die Seite hinter einem Vollbild an. Muss vor allen Modulen|
+          stehen, die ein Overlay oeffnen. -->|
+-    <script src="js/hintergrund-sperre.js?v=202609272004" defer></script>|
++    <script src="js/hintergrund-sperre.js?v=202609272155" defer></script>|
+ |
+@@ -4118,10 +4096,10 @@|
+     <!-- Utilities first (provides escapeHtml globally) -->|
+-    <script src="js/app-utils.js?v=202609272004" defer></script>|
+-    <script src="js/i18n.js?v=202609272004" defer></script>|
++    <script src="js/app-utils.js?v=202609272155" defer></script>|
++    <script src="js/i18n.js?v=202609272155" defer></script>|
+     <!-- Firebase: credentials ? config ? globals ? auth ? collection -->|
+-    <script src="js/firebase-credentials.js?v=202609272004" defer></script>|
+-    <script src="js/firebase-config.js?v=202609272004" defer></script>|
+-    <script src="js/firebase-globals.js?v=202609272004" defer></script>|
+-    <script src="js/firebase-auth.js?v=202609272004" defer></script>|
+-    <script src="js/auth-ui-helpers.js?v=202609272004" defer></script>|
++    <script src="js/firebase-credentials.js?v=202609272155" defer></script>|
++    <script src="js/firebase-config.js?v=202609272155" defer></script>|
++    <script src="js/firebase-globals.js?v=202609272155" defer></script>|
++    <script src="js/firebase-auth.js?v=202609272155" defer></script>|
++    <script src="js/auth-ui-helpers.js?v=202609272155" defer></script>|
+     <!-- Zwei Decklisten nebeneinander. Muss VOR firebase-collection.js|
+@@ -4129,9 +4107,9 @@|
+          auf, sobald die Ansicht "Nebeneinander" gewaehlt wird. -->|
+-    <script src="js/deck-vergleich-nebeneinander.js?v=202609272004" defer></script>|
+-    <script src="js/firebase-collection.js?v=202609272004" defer></script>|
++    <script src="js/deck-vergleich-nebeneinander.js?v=202609272155" defer></script>|
++    <script src="js/firebase-collection.js?v=202609272155" defer></script>|
+     <!-- Wishlist import for the Telegram bot's card lists (paste, not upload). -->|
+-    <script src="js/wishlist-bot-import.js?v=202609272004" defer></script>|
++    <script src="js/wishlist-bot-import.js?v=202609272155" defer></script>|
+     <!-- TCG Showdown handoff — replaces the in-app Playtester.|
+          Standalone helper, no deps; only uses globals from other scripts. -->|
+-    <script src="js/tcg-showdown-link.js?v=202609272004" defer></script>|
++    <script src="js/tcg-showdown-link.js?v=202609272155" defer></script>|
+     <!-- Chart.js, PapaParse and localForage (IndexedDB wrapper) — self-hosted -->|
+@@ -4141,3 +4119,3 @@|
+     <!-- Card data cache layer (IndexedDB) -->|
+-    <script src="js/card-data-cache.js?v=202609272004" defer></script>|
++    <script src="js/card-data-cache.js?v=202609272155" defer></script>|
+     <!-- Offline prefetcher — warms the SW cache with every data file|
+@@ -4145,7 +4123,7 @@|
+          has the full dataset locally without per-tab warm-up. -->|
+-    <script src="js/offline-prefetch.js?v=202609272004" defer></script>|
++    <script src="js/offline-prefetch.js?v=202609272155" defer></script>|
+     <!-- App modules -->|
+-    <script src="js/deck-analysis-shared.js?v=202609272004" defer></script>|
+-    <script src="js/app-core.js?v=202609272004" defer></script>|
+-    <script src="js/app-price.js?v=202609272004" defer></script>|
++    <script src="js/deck-analysis-shared.js?v=202609272155" defer></script>|
++    <script src="js/app-core.js?v=202609272155" defer></script>|
++    <script src="js/app-price.js?v=202609272155" defer></script>|
+     <!-- Die Glaettung muss vor jedem Leser der Matchup-Zahlen stehen:|
+@@ -4156,17 +4134,17 @@|
+          Quote anzeigt — app-tier-meta, app-past-meta, ds-share. -->|
+-    <script src="js/win-rate-konvention.js?v=202609272004" defer></script>|
+-    <script src="js/matchup-glaettung.js?v=202609272004" defer></script>|
+-    <script src="js/rangliste-sortieren.js?v=202609272004" defer></script>|
+-    <script src="js/ds-bildvorschau.js?v=202609272004" defer></script>|
+-    <script src="js/app-tier-meta.js?v=202609272004" defer></script>|
+-    <script src="js/app-city-league.js?v=202609272004" defer></script>|
+-    <script src="js/app-deck-builder.js?v=202609272004" defer></script>|
+-    <script src="js/card-capability-engine.js?v=202609272004" defer></script>|
+-    <script src="js/tech-ideen.js?v=202609272004" defer></script>|
+-    <script src="js/app-tech-lab.js?v=202609272004" defer></script>|
+-    <script src="js/app-anti-tech.js?v=202609272004" defer></script>|
+-    <script src="js/app-meta-cards.js?v=202609272004" defer></script>|
+-    <script src="js/app-current-meta.js?v=202609272004" defer></script>|
+-    <script src="js/app-past-meta.js?v=202609272004" defer></script>|
+-    <script src="js/app-cards-db.js?v=202609272004" defer></script>|
++    <script src="js/win-rate-konvention.js?v=202609272155" defer></script>|
++    <script src="js/matchup-glaettung.js?v=202609272155" defer></script>|
++    <script src="js/rangliste-sortieren.js?v=202609272155" defer></script>|
++    <script src="js/ds-bildvorschau.js?v=202609272155" defer></script>|
++    <script src="js/app-tier-meta.js?v=202609272155" defer></script>|
++    <script src="js/app-city-league.js?v=202609272155" defer></script>|
++    <script src="js/app-deck-builder.js?v=202609272155" defer></script>|
++    <script src="js/card-capability-engine.js?v=202609272155" defer></script>|
++    <script src="js/tech-ideen.js?v=202609272155" defer></script>|
++    <script src="js/app-tech-lab.js?v=202609272155" defer></script>|
++    <script src="js/app-anti-tech.js?v=202609272155" defer></script>|
++    <script src="js/app-meta-cards.js?v=202609272155" defer></script>|
++    <script src="js/app-current-meta.js?v=202609272155" defer></script>|
++    <script src="js/app-past-meta.js?v=202609272155" defer></script>|
++    <script src="js/app-cards-db.js?v=202609272155" defer></script>|
+     <!-- Fuellt die Frische-Chips aus data/data_stand.json, dem im Wochenlauf|
+@@ -4174,43 +4152,43 @@|
+          das die Fusszeile setzt. -->|
+-    <script src="js/ds-datenstand.js?v=202609272004" defer></script>|
+-    <script src="js/ds-csv.js?v=202609272004" defer></script>|
+-    <script src="js/app-init.js?v=202609272004" defer></script>|
+-    <script src="js/app-current-meta-analysis.js?v=202609272004" defer></script>|
+-    <script src="js/app-features.js?v=202609272004" defer></script>|
+-    <script src="js/archetype-icons.js?v=202609272004" defer></script>|
+-    <script src="js/app-archetype-card.js?v=202609272004" defer></script>|
+-    <script src="js/app-meta-call.js?v=202609272004" defer></script>|
+-    <script src="js/app-meta-prognose.js?v=202609272004" defer></script>|
+-    <script src="js/app-deckempfehlung.js?v=202609272004" defer></script>|
+-    <script src="js/meta-analysis-hub.js?v=202609272004" defer></script>|
+-    <script src="js/app-testing-groups.js?v=202609272004" defer></script>|
+-    <script src="js/battle-journal.js?v=202609272004" defer></script>|
+-    <script src="js/meta-binder.js?v=202609272004" defer></script>|
+-    <script src="js/custom-binder.js?v=202609272004" defer></script>|
+-    <script src="js/draw-simulator.js?v=202609272004" defer></script>|
+-    <script src="js/app-calculator.js?v=202609272004" defer></script>|
+-    <script src="js/champions-namen.js?v=202609272004" defer></script>|
+-    <script src="js/qr-svg.js?v=202609272004" defer></script>|
+-    <script src="js/ds-pocket.js?v=202609272004" defer></script>|
+-    <script src="js/app-side-quest.js?v=202609272004" defer></script>|
+-    <script src="js/app-side-quest-play.js?v=202609272004" defer></script>|
+-    <script src="js/champions-shiny.js?v=202609272004" defer></script>|
+-    <script src="js/app-side-quest-pokedex.js?v=202609272004" defer></script>|
+-    <script src="js/app-side-quest-items.js?v=202609272004" defer></script>|
++    <script src="js/ds-datenstand.js?v=202609272155" defer></script>|
++    <script src="js/ds-csv.js?v=202609272155" defer></script>|
++    <script src="js/app-init.js?v=202609272155" defer></script>|
++    <script src="js/app-current-meta-analysis.js?v=202609272155" defer></script>|
++    <script src="js/app-features.js?v=202609272155" defer></script>|
++    <script src="js/archetype-icons.js?v=202609272155" defer></script>|
++    <script src="js/app-archetype-card.js?v=202609272155" defer></script>|
++    <script src="js/app-meta-call.js?v=202609272155" defer></script>|
++    <script src="js/app-meta-prognose.js?v=202609272155" defer></script>|
++    <script src="js/app-deckempfehlung.js?v=202609272155" defer></script>|
++    <script src="js/meta-analysis-hub.js?v=202609272155" defer></script>|
++    <script src="js/app-testing-groups.js?v=202609272155" defer></script>|
++    <script src="js/battle-journal.js?v=202609272155" defer></script>|
++    <script src="js/meta-binder.js?v=202609272155" defer></script>|
++    <script src="js/custom-binder.js?v=202609272155" defer></script>|
++    <script src="js/draw-simulator.js?v=202609272155" defer></script>|
++    <script src="js/app-calculator.js?v=202609272155" defer></script>|
++    <script src="js/champions-namen.js?v=202609272155" defer></script>|
++    <script src="js/qr-svg.js?v=202609272155" defer></script>|
++    <script src="js/ds-pocket.js?v=202609272155" defer></script>|
++    <script src="js/app-side-quest.js?v=202609272155" defer></script>|
++    <script src="js/app-side-quest-play.js?v=202609272155" defer></script>|
++    <script src="js/champions-shiny.js?v=202609272155" defer></script>|
++    <script src="js/app-side-quest-pokedex.js?v=202609272155" defer></script>|
++    <script src="js/app-side-quest-items.js?v=202609272155" defer></script>|
+     <!-- Der Datenumfang wird in app-tier-meta.js gerechnet und in|
+          app-quellen.js angezeigt. Muss vor beiden stehen. -->|
+-    <script src="js/ds-datenumfang.js?v=202609272004" defer></script>|
+-    <script src="js/app-quellen.js?v=202609272004" defer></script>|
+-    <script src="js/app-admin.js?v=202609272004" defer></script>|
++    <script src="js/ds-datenumfang.js?v=202609272155" defer></script>|
++    <script src="js/app-quellen.js?v=202609272155" defer></script>|
++    <script src="js/app-admin.js?v=202609272155" defer></script>|
+     <!-- Die Bruecke zwischen Nutzungs-Slug, Anzeigename und Showdown-Name.|
+          Muss VOR allem stehen, was ein gebautes Team weiterverarbeitet. -->|
+-    <script src="js/champions-set.js?v=202609272004" defer></script>|
+-    <script src="js/champions-names.js?v=202609272004" defer></script>|
+-    <script src="js/app-side-quest-builder.js?v=202609272004" defer></script>|
+-    <script src="js/app-side-quest-status.js?v=202609272004" defer></script>|
+-    <script src="js/app-side-quest-resources.js?v=202609272004" defer></script>|
+-    <script src="js/champions-damage.js?v=202609272004" defer></script>|
+-    <script src="js/champions-schwaechen.js?v=202609272004" defer></script>|
+-    <script src="js/app-side-quest-usage.js?v=202609272004" defer></script>|
+-    <script src="js/app-side-quest-matchups.js?v=202609272004" defer></script>|
++    <script src="js/champions-set.js?v=202609272155" defer></script>|
++    <script src="js/champions-names.js?v=202609272155" defer></script>|
++    <script src="js/app-side-quest-builder.js?v=202609272155" defer></script>|
++    <script src="js/app-side-quest-status.js?v=202609272155" defer></script>|
++    <script src="js/app-side-quest-resources.js?v=202609272155" defer></script>|
++    <script src="js/champions-damage.js?v=202609272155" defer></script>|
++    <script src="js/champions-schwaechen.js?v=202609272155" defer></script>|
++    <script src="js/app-side-quest-usage.js?v=202609272155" defer></script>|
++    <script src="js/app-side-quest-matchups.js?v=202609272155" defer></script>|
+     <!-- Kennzeichnung "Kartentext auf Englisch". MUSS vor jeder Datei stehen,|
+@@ -4218,7 +4196,7 @@|
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202609272004" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202609272004" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202609272004" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202609272004" defer></script>|
+-    <script src="js/ds-nav.js?v=202609272004" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202609272155" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202609272155" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202609272155" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202609272155" defer></script>|
++    <script src="js/ds-nav.js?v=202609272155" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4228,6 +4206,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202609272004" defer></script>|
+-    <script src="js/ds-sections.js?v=202609272004" defer></script>|
+-    <script src="js/ds-filter.js?v=202609272004" defer></script>|
+-    <script src="js/ds-share.js?v=202609272004" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202609272155" defer></script>|
++    <script src="js/ds-sections.js?v=202609272155" defer></script>|
++    <script src="js/ds-filter.js?v=202609272155" defer></script>|
++    <script src="js/ds-share.js?v=202609272155" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4236,5 +4214,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202609272004" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202609272004" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202609272004" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202609272155" defer></script>|
++    <script src="js/ds-tutorial.js?v=202609272155" defer></script>|
++    <script src="js/ds-masterclass.js?v=202609272155" defer></script>|
+ |
+diff --git a/js/app-deck-builder.js b/js/app-deck-builder.js|
+index 4bd9f4c..46790be 100644|
+--- a/js/app-deck-builder.js|
++++ b/js/app-deck-builder.js|
+@@ -2077,4 +2077,4 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+                         <div class="card-max-count">${count}</div>|
+-                        <div class="deck-card-overlay">${overlayText}</div>|
+                         <div class="deck-card-actions">|
++                            <div class="deck-card-overlay">${overlayText}</div>|
+                             <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 1fr;">|
+@@ -2278,2 +2278,131 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+             |
++            // Helper: resolve Pokedex number from card data or global map.|
++            //|
++            // Card-name shapes we need to handle:|
++            //   "Garchomp ex"                 → garchomp|
++            //   "Cynthia's Garchomp ex"       → garchomp (trainer-possessive)|
++            //   "Hop's Trevenant"             → trevenant|
++            //   "Bloodmoon Ursaluna ex"       → ursaluna (form prefix)|
++            //   "Hisuian Zoroark"             → zoroark (regional)|
++            //   "Hisui Goomy"                 → goomy|
++            //   "Paldean Tauros"              → tauros|
++            //   "Galarian Slowking"           → slowking|
++            //   "Alolan Vulpix"               → vulpix|
++            //   "Origin Forme Dialga"         → dialga|
++            //   "Dusk Mane Necrozma"          → necrozma|
++            //   "Dawn Wings Necrozma"         → necrozma|
++            //   "Iron Hands ex"               → iron hands  (no prefix to strip)|
++            //|
++            // pokemon_dex_numbers.json keys cards by bare base name only,|
++            // so the regional/form prefixes MUST come off before the|
++            // lookup or the card falls to 99999 and lands in the wrong|
++            // pokedex position.|
++            function _getDexNum(card) {|
++                const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);|
++                if (!isNaN(direct) && direct > 0) return direct;|
++                const dexMap = window.pokedexNumbers || {};|
++                const rawName = String(card.card_name || card.name || '').trim().toLowerCase();|
++                return _getDexNumFromName(rawName, dexMap);|
++            }|
++|
++            // Lookup-only variant — same multi-stage fallback as|
++            // _getDexNum (direct → trainer-prefix-strip → form-prefix-|
++            // strip → ex/vmax/... suffix-strip → first-word-strip)|
++            // but takes a name string instead of a card object.|
++            // Used by _getFamilyBaseDex when walking up the|
++            // evolution chain.|
++            function _getDexNumFromName(rawName, dexMap) {|
++                dexMap = dexMap || window.pokedexNumbers || {};|
++                const direct = parseInt(dexMap[rawName], 10);|
++                if (!isNaN(direct) && direct > 0) return direct;|
++                // Strip trainer-possessive prefixes ("Cynthia's Gible" →|
++                // "gible", "Hop's Trevenant" → "trevenant", "Team Rocket's|
++                // Mewtwo" → "mewtwo") via the shared helper.|
++                const trainerStripped = (typeof window !== 'undefined' && window.stripTrainerOwnerPrefix)|
++                    ? window.stripTrainerOwnerPrefix(rawName).base.trim()|
++                    : rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();|
++                if (trainerStripped !== rawName) {|
++                    const stripMap = parseInt(dexMap[trainerStripped], 10);|
++                    if (!isNaN(stripMap) && stripMap > 0) return stripMap;|
++                }|
++                // Strip form / regional prefixes that the dex map doesn't|
++                // index ("Bloodmoon Ursaluna ex" → "ursaluna ex"). The|
++                // ex / vmax / etc. suffix strip below then drops the|
++                // tail and leaves the bare base name.|
++                const formStripped = trainerStripped|
++                    .replace(/^(?:bloodmoon|origin\s+forme|origin|dusk\s+mane|dawn\s+wings|crowned\s+sword|crowned\s+shield|crowned|hisuian|hisui|paldean|paldea|galarian|galar|alolan|alola)\s+/, '')|
++                    .trim();|
++                if (formStripped !== trainerStripped) {|
++                    const formMap = parseInt(dexMap[formStripped], 10);|
++                    if (!isNaN(formMap) && formMap > 0) return formMap;|
++                }|
++                const baseName = formStripped|
++                    .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')|
++                    .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();|
++                const baseMap = parseInt(dexMap[baseName], 10);|
++                if (!isNaN(baseMap) && baseMap > 0) return baseMap;|
++                // Final fallback for unknown form prefixes not in the|
++                // explicit list — drop the first word and try again.|
++                // Compound species (Iron Thorns, Raging Bolt) resolve|
++                // directly via baseMap above and never reach this branch.|
++                const words = baseName.split(/\s+/).filter(Boolean);|
++                if (words.length >= 2) {|
++                    const stripped = words.slice(1).join(' ');|
++                    const formMap = parseInt(dexMap[stripped], 10);|
++                    if (!isNaN(formMap) && formMap > 0) return formMap;|
++                }|
++                return 99999;|
++            }|
++|
++            // Family-line grouping — walks up the evolution chain via|
++            // pokemon_card_effects.json's "Evolves from X" card_type|
++            // text and returns the dex of the BASE species. With this,|
++            // Dusknoir (#477) sorts alongside Dusclops (#356) and|
++            // Duskull (#355) under the family base dex 355 instead of|
++            // landing 122 numbers later in strict pokédex order. User|
++            // flagged: "duskull, dusclops und Dusknoir stehen immer|
++            // noch nicht nebeneinander" — TCG convention is to group|
++            // evolution lines together, not split them by Gen.|
++            //|
++            // Falls back to plain _getDexNum when card-effects isn't|
++            // loaded yet (e.g. the index is lazy-loaded during|
++            // autoCompleteConsistency; on a fresh page load before any|
++            // build, sort runs without it). Walk depth capped at 4 to|
++            // protect against malformed cycles.|
++            function _getFamilyBaseDex(card) {|
++                const idx = (typeof window !== 'undefined') && window._cardEffectsIndex;|
++                if (!idx || !idx.byName || idx.byName.size === 0) return _getDexNum(card);|
++                let currentName = String(card.card_name || card.name || '').toLowerCase().trim();|
++                const dexMap = window.pokedexNumbers || {};|
++                for (let depth = 0; depth < 4; depth++) {|
++                    const eff = idx.byName.get(currentName);|

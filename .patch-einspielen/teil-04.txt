@@ -1,0 +1,414 @@
++.mockup-movers-block.is-up   .mockup-movers-head { background: linear-gradient(90deg, var(--solid-ok), #15803d); }|
+ .mockup-movers-block.is-down .mockup-movers-head { background: linear-gradient(90deg, #dc2626, #f87171); }|
+@@ -1303,3 +1303,3 @@|
+     padding: 4px 8px;|
+-    font-size: 0.64rem;|
++    font-size: var(--fs-xs);|
+     border-top: 1px solid rgba(15, 23, 42, 0.05);|
+@@ -1325,3 +1325,3 @@|
+     text-align: right;|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+ }|
+@@ -1342,3 +1342,3 @@|
+     padding: 6px 10px;|
+-    font-size: 0.65rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -1393,3 +1393,3 @@|
+     .mockup-hub-tile .mockup-tile-title { font-size: 0.74rem; }|
+-    .mockup-hub-tile .mockup-tile-desc  { font-size: 0.63rem; }|
++    .mockup-hub-tile .mockup-tile-desc  { font-size: var(--fs-xs); }|
+ }|
+@@ -1490,3 +1490,3 @@|
+ .mockup-wt-card-set {|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     color: var(--ink-3);|
+@@ -1501,3 +1501,3 @@|
+     align-self: flex-start;|
+-    background: linear-gradient(135deg, var(--solid-ok), #219a52);|
++    background: linear-gradient(135deg, var(--solid-ok), #15803d);|
+     color: #fff;|
+@@ -1517,3 +1517,3 @@|
+ .mockup-wt-card-user-label {|
+-    font-size: 0.68rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 700;|
+@@ -1534,3 +1534,3 @@|
+ .mockup-wt-card-user-suffix {|
+-    font-size: 0.68rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 700;|
+@@ -1619,3 +1619,3 @@|
+     justify-content: center;|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -1694,3 +1694,3 @@|
+     border-radius: 3px;|
+-    font-size: 0.95em;|
++    font-size: 1em;|
+ }|
+@@ -1801,3 +1801,3 @@|
+ .mockup-deck-section-count {|
+-    font-size: 0.65rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -1865,3 +1865,3 @@|
+     padding: 6px 10px;|
+-    font-size: 0.68rem;|
++    font-size: var(--fs-xs);|
+     color: var(--ink-3);|
+@@ -1935,3 +1935,3 @@|
+     color: #fff;|
+-    font-size: 0.65rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -1986,3 +1986,3 @@|
+     justify-content: space-between;|
+-    font-size: 0.68rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -2058,3 +2058,3 @@|
+ .mockup-deckgrid-section-head .hint {|
+-    font-size: 0.68rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 500;|
+@@ -2064,3 +2064,3 @@|
+     margin-left: auto;|
+-    font-size: 0.68rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -2111,3 +2111,3 @@|
+     left: 4px;|
+-    background: rgba(34, 197, 94, 0.92);|
++    background: rgba(21, 128, 61, 0.94);|
+ }|
+@@ -2116,5 +2116,5 @@|
+     right: 4px;|
+-    background: rgba(245, 158, 11, 0.96);|
++    background: rgba(180, 83, 9, 0.96);|
+     padding: 2px 5px;|
+-    font-size: 0.68rem;|
++    font-size: var(--fs-xs);|
+ }|
+@@ -2267,7 +2267,7 @@|
+     padding: 2px 0;|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+ }|
+-.mockup-bs-rank.is-t1 { background: linear-gradient(135deg, #d32f2f, #ef4444); }|
+-.mockup-bs-rank.is-t2 { background: linear-gradient(135deg, #a55300, #fb923c); }|
+-.mockup-bs-rank.is-t3 { background: linear-gradient(135deg, #2d7530, #4ade80); }|
++.mockup-bs-rank.is-t1 { background: linear-gradient(135deg, #b91c1c, #dc2626); }|
++.mockup-bs-rank.is-t2 { background: linear-gradient(135deg, #a55300, #c2410c); }|
++.mockup-bs-rank.is-t3 { background: linear-gradient(135deg, #2d7530, #15803d); }|
+ .mockup-bs-deck {|
+@@ -2312,3 +2312,3 @@|
+     text-align: right;|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     min-width: 36px;|
+@@ -2371,3 +2371,3 @@|
+     font-weight: 800;|
+-    font-size: 0.64rem;|
++    font-size: var(--fs-xs);|
+     color: var(--ink-3);|
+@@ -2412,3 +2412,3 @@|
+     height: 100%;|
+-    background: linear-gradient(90deg, var(--pokemon-blue, #3B4CCA), #6366f1);|
++    background: linear-gradient(90deg, var(--pokemon-blue, #3B4CCA), #4f46e5);|
+     border-radius: inherit;|
+@@ -2433,3 +2433,3 @@|
+     padding: 4px 12px;|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -2474,3 +2474,3 @@|
+ .mockup-cooking-active {|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -2502,4 +2502,4 @@|
+ }|
+-.mockup-matchup-section.is-best  .mockup-matchup-head { background: linear-gradient(90deg, var(--solid-ok), #22c55e); }|
+-.mockup-matchup-section.is-worst .mockup-matchup-head { background: linear-gradient(90deg, #dc2626, #ef4444); }|
++.mockup-matchup-section.is-best  .mockup-matchup-head { background: linear-gradient(90deg, var(--solid-ok), #15803d); }|
++.mockup-matchup-section.is-worst .mockup-matchup-head { background: linear-gradient(90deg, #b91c1c, #dc2626); }|
+ .mockup-matchup-section.is-neutral .mockup-matchup-head { background: linear-gradient(90deg, #475569, #64748b); }|
+@@ -2615,2 +2615,3 @@|
+ }|
++.mockup-tech-slots-label small { font-size: var(--fs-xs); }  /* UI-10: stand bei 9,3 px */|
+ .mockup-tech-slots-label {|
+@@ -2637,3 +2638,3 @@|
+     margin-left: auto;|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -2786,3 +2787,3 @@|
+ .mockup-techlab-target-sub {|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 700;|
+@@ -2992,3 +2993,3 @@|
+     left: 4px;|
+-    background: rgba(245, 158, 11, 0.95);|
++    background: rgba(180, 83, 9, 0.95);|
+     color: #fff;|
+@@ -3051,5 +3052,5 @@|
+     justify-content: center;|
+-    background: linear-gradient(135deg, var(--pokemon-blue, #3B4CCA), #6366f1);|
++    background: linear-gradient(135deg, var(--pokemon-blue, #3B4CCA), #4f46e5);|
+     color: #fff;|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -3167,3 +3168,3 @@|
+     padding: 0 4px;|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -3199,3 +3200,3 @@|
+ .mockup-tg-dash-avatar:first-child { margin-left: 0; }|
+-.mockup-tg-dash-avatar.v2 { background: linear-gradient(135deg, var(--solid-ok), #facc15); }|
++.mockup-tg-dash-avatar.v2 { background: linear-gradient(135deg, var(--solid-ok), #a16207); }|
+ .mockup-tg-dash-avatar.v3 { background: linear-gradient(135deg, #b45309, #a3231b); }  /* 2,80:1 -> 5,02:1 */|
+@@ -3204,3 +3205,3 @@|
+     margin-left: auto;|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -3389,2 +3390,5 @@|
+     --brand-ink: #2a3899;|
++    /* UI-9 (27.09.2026): --brand lief im Mockup noch mit seinem|
++       Dunkelmodus-Wert #5566e0 — gemessen 3,7:1 auf dem hellen Grund. */|
++    --brand: #3B4CCA;|
+     --tint-warn-ink: #a74d08;|
+diff --git a/css/styles.css b/css/styles.css|
+index bf826dd..23d5ef3 100644|
+--- a/css/styles.css|
++++ b/css/styles.css|
+@@ -5971,21 +5971,4 @@ details[open] > .tier-trending-summary::after {|
+  * variant rows. */|
+-/* Der NENNER hinter einer Quote — nicht zu verwechseln mit|
+- * `.stat-badge-suffix` darunter, der einmal die Variantenzahl|
+- * wiederholte und deshalb am 01.09.2026 von der Kachel geflogen ist|
+- * ("einmal das in Groß reicht auf jeden Fall aus").|
+- *|
+- * Das hier ist keine Wiederholung, sondern die fehlende Hälfte: die|
+- * Menge, aus der die Win Rate gebildet ist. Hausregel dieses Projekts —|
+- * jede Quote trägt ihren Nenner. Deshalb eigene Klasse, damit die|
+- * Zusicherung zur alten Anordnung weiter greifen kann.|
+- *|
+- * Bewusst blasser und kleiner als die Quote selbst: er soll sie|
+- * einordnen, nicht mit ihr konkurrieren. */|
+-.stat-badge .stat-badge-nenner {|
+-    margin-left: 3px;|
+-    opacity: 0.6;|
+-    font-weight: 500;|
+-    font-size: var(--fs-xs);|
+-    font-variant-numeric: tabular-nums;|
+-}|
++/* .stat-badge-nenner (die Antrittszahl neben der WR der Startkacheln) ist|
++   seit UI-17 (27.09.2026) weg — die Zahl steht im Hinweis der Plakette. */|
+ |
+@@ -10398,3 +10381,3 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }|
+ .heatmap-zelle-quelle {|
+-    font-size: 0.65rem;|
++    font-size: var(--fs-xs);  /* UI-11 (27.09.2026): war 0,65/0,66 rem = 10,4 px */|
+     font-weight: 600;|
+@@ -10403,3 +10386,3 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }|
+ .heatmap-zelle-kennzahl {|
+-    font-size: 0.65rem;|
++    font-size: var(--fs-xs);  /* UI-11 (27.09.2026): war 0,65/0,66 rem = 10,4 px */|
+     font-weight: 600;|
+@@ -10412,3 +10395,3 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }|
+ .heatmap-zelle-n {|
+-    font-size: 0.65rem;|
++    font-size: var(--fs-xs);  /* UI-11 (27.09.2026): war 0,65/0,66 rem = 10,4 px */|
+     font-weight: 500;|
+@@ -11417,3 +11400,3 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }|
+ .arc-halb-anzahl {|
+-    font-size: 0.66rem;|
++    font-size: var(--fs-xs);  /* UI-11 (27.09.2026): war 0,65/0,66 rem = 10,4 px */|
+     font-weight: 500;|
+diff --git a/css/ui-components.css b/css/ui-components.css|
+index bdfd5db..80dd2b1 100644|
+--- a/css/ui-components.css|
++++ b/css/ui-components.css|
+@@ -2443,3 +2443,3 @@ img[src*="limitlesstcg"] {|
+         padding: 6px 5px !important;|
+-        font-size: 0.68rem !important;|
++        font-size: var(--fs-xs) !important;  /* UI-11: war 0,68 rem = 10,9 px */|
+     }|
+@@ -2461,3 +2461,3 @@ img[src*="limitlesstcg"] {|
+         min-width: 80px !important;|
+-        font-size: 0.64rem !important;|
++        font-size: var(--fs-xs) !important;|
+     }|
+diff --git a/js/app-anti-tech.js b/js/app-anti-tech.js|
+index 950b018..42338b2 100644|
+--- a/js/app-anti-tech.js|
++++ b/js/app-anti-tech.js|
+@@ -263,6 +263,6 @@|
+             if (partien > 0) {|
+-                teile.push(_tf('antiTech.belegPartien', 'Matchup aus {n} Partien')|
++                teile.push(_tf('antiTech.belegPartien', 'Matchup aus {n} Matches')|
+                     .replace('{n}', String(partien)));|
+             } else {|
+-                teile.push(_tf('antiTech.belegOhnePartien', 'Partienzahl des Matchups nicht bekannt'));|
++                teile.push(_tf('antiTech.belegOhnePartien', 'Matchzahl des Matchups nicht bekannt'));|
+             }|
+@@ -273,3 +273,3 @@|
+             + _tf('antiTech.belegHeuristik',|
+-                 'aus dem Kartentext abgeleitet, nicht an Partien gemessen');|
++                 'aus dem Kartentext abgeleitet, nicht an Matches gemessen');|
+     }|
+diff --git a/js/app-archetype-card.js b/js/app-archetype-card.js|
+index f95ed1c..e2f5d70 100644|
+--- a/js/app-archetype-card.js|
++++ b/js/app-archetype-card.js|
+@@ -1137,10 +1137,10 @@|
+                 `${esc(fmt(d.winRate))} %`,|
+-                /* Die Matchzahl steht MIT auf der Zeile, nicht nur im|
+-                   Hinweis: sie ist die Zahl, an der man entscheidet, ob man|
+-                   der Quote glaubt, und ein Hinweis erscheint erst beim|
+-                   Verweilen — auf dem Telefon also nie. Seit dem 02.09.2026|
+-                   auch fuer online, vorher stand sie nur beim Major. */|
+-                fmtGanz(d.partien),|
++                /* UI-17 (27.09.2026, Hausi): die Matchzahl steht NICHT mehr|
++                   auf der Kachel — „fuer Enduser ohne Erklaerung|
++                   verwirrend". Sie bleibt im Hinweis der Kachel („Online aus|
++                   n Matches") und im erzeugten Bild. Vom 02.09. bis|
++                   27.09.2026 stand sie rechts neben der Quote. */|
++                '',|
+                 wrMajor,|
+-                (m && m.partien > 0) ? fmtGanz(m.partien) : '',|
++                '',|
+                 majorLeer,|
+@@ -1158,3 +1158,3 @@|
+                     ? 'Siege geteilt durch alle Matches, auf beiden Seiten gleich gerechnet. Online aus {n} Matches. {mj}'|
+-                    : 'Wins divided by all games, same on both sides. Online from {n} games. {mj}')|
++                    : 'Wins divided by all matches, same on both sides. Online from {n} matches. {mj}')|
+                     .replace('{n}', fmtGanz(d.partien))|
+@@ -1163,3 +1163,3 @@|
+                             ? 'Major aus {p} Matches, davon {u} % unentschieden — online sind es 1,3 %. Unentschieden zählen auf beiden Seiten nicht als Sieg, drücken die Major-Spalte also spürbar. Bei dieser Matchzahl liegt der Wert auf ±{k} Punkte genau.'|
+-                            : 'Major from {p} games, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down. At this sample the value is accurate to ±{k} points.')|
++                            : 'Major from {p} matches, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down. At this sample the value is accurate to ±{k} points.')|
+                             .replace('{p}', fmtGanz(m.partien))|
+@@ -1169,3 +1169,3 @@|
+                             ? 'Noch keine Major-Matches für dieses Deck in diesem Format.'|
+-                            : 'No in-person games for this deck in this format yet.'))|
++                            : 'No in-person matches for this deck in this format yet.'))|
+                     + _wrKonventionsSatz(de),|
+@@ -1214,10 +1214,10 @@|
+         const conv = (c && quote != null)|
++            /* UI-26 (27.09.2026, Hausi): der Schnitt steht im Namen —|
++               „Online Top 8-Quote (Ø 6,6 %)" —, nicht mehr als eigene|
++               Zeile darunter. */|
+             ? tile('conv', toneFor(c.perfPct),|
+-                L('arc.convLabel3', de ? 'Top-8-Quote (online)' : 'Top-8 rate (online)'),|
++                L('arc.convLabel4', de ? 'Online Top 8-Quote' : 'Online top-8 rate')|
++                    + (schnitt != null ? ' (Ø ' + fmt(schnitt) + ' %)' : ''),|
+                 `${esc(fmt(quote))} %`,|
+-                esc(schnitt != null|
+-                    ? L('arc.convCtx2', de ? 'Schnitt aller Decks {s} %'|
+-                                           : 'field average {s} %')|
+-                        .replace('{s}', fmt(schnitt))|
+-                    : ''),|
++                '',|
+                 // WICHTIG: c.brought zaehlt NICHT dieselbe Grundgesamtheit wie|
+@@ -1244,3 +1244,3 @@|
+                 arrow(c.perfPct))|
+-            : tile('conv', 'tie', L('arc.convLabel3', de ? 'Top-8-Quote (online)' : 'Top-8 rate (online)'),|
++            : tile('conv', 'tie', L('arc.convLabel4', de ? 'Online Top 8-Quote' : 'Online top-8 rate'),|
+                 '–',|
+@@ -1524,4 +1524,4 @@|
+                 titel: L('arc.muMajorFehlt', de|
+-                    ? 'Keine Präsenzpartien für diese Paarung.'|
+-                    : 'No in-person games for this pairing.'),|
++                    ? 'Keine Präsenz-Matches für diese Paarung.'|
++                    : 'No in-person matches for this pairing.'),|
+             };|
+@@ -1542,4 +1542,4 @@|
+             ? (de|
+-                ? ` Die Quelle zählt hier ${summe} Einzelergebnisse auf ${n} Partien — jede Spiegelpartie ist für beide Seiten verbucht.`|
+-                : ` The source books ${summe} results on ${n} games — each mirror game is counted for both sides.`)|
++                ? ` Die Quelle zählt hier ${summe} Einzelergebnisse auf ${n} Matches — jedes Spiegel-Match ist für beide Seiten verbucht.`|
++                : ` The source books ${summe} results on ${n} matches — each mirror match is counted for both sides.`)|
+             : '';|
+@@ -1551,4 +1551,4 @@|
+                 titel: mitQuote(L('arc.muMajorOhneBilanz', de|
+-                    ? '{n} Präsenzpartien, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine {quote} ({formel}) bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'|
+-                    : '{n} in-person games, but the source row carries no record — without wins and losses there is no {quote} ({formel}) to show. Hence the dash instead of an estimate.'), 'ohneUnentschieden')|
++                    ? '{n} Präsenz-Matches, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine {quote} ({formel}) bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'|
++                    : '{n} in-person matches, but the source row carries no record — without wins and losses there is no {quote} ({formel}) to show. Hence the dash instead of an estimate.'), 'ohneUnentschieden')|
+                     .replace('{n}', String(n)) + spiegelSatz,|
+@@ -1564,7 +1564,7 @@|
+                 titel: (de|
+-                    ? `Bilanz ${bilanz} (S–N–U) aus ${n} Präsenzpartien. Unter ${MIN_PRAESENZ_PARTIEN} Partien steht hier kein Prozentwert: `|
+-                      + `bei ${n} Partien verschiebt eine einzige Partie die Quote um ${fmt(100 / n)} Punkte. `|
++                    ? `Bilanz ${bilanz} (S–N–U) aus ${n} Präsenz-Matches. Unter ${MIN_PRAESENZ_PARTIEN} Matches steht hier kein Prozentwert: `|
++                      + `bei ${n} Matches verschiebt ein einziges Match die Quote um ${fmt(100 / n)} Punkte. `|
+                       + `Die Bilanz sagt dasselbe, ohne eine Genauigkeit zu behaupten, die die Stichprobe nicht trägt.`|
+-                    : `Record ${bilanz} (W–L–T) from ${n} in-person games. Below ${MIN_PRAESENZ_PARTIEN} games no percentage is shown: `|
+-                      + `at ${n} games a single game moves the rate by ${fmt(100 / n)} points. `|
++                    : `Record ${bilanz} (W–L–T) from ${n} in-person matches. Below ${MIN_PRAESENZ_PARTIEN} matches no percentage is shown: `|
++                      + `at ${n} matches a single match moves the rate by ${fmt(100 / n)} points. `|
+                       + `The record says the same without claiming a precision the sample cannot carry.`)|
+@@ -1581,4 +1581,4 @@|
+                 titel: mitQuote(L('arc.muMajorNurRemis', de|
+-                    ? '{n} Präsenzpartien, alle unentschieden ({b}). Die {quote} ({formel}) zählt Siege gegen entschiedene Partien — entschieden ist hier keine. Ein Wert stünde für nichts.'|
+-                    : '{n} in-person games, all drawn ({b}). The {quote} ({formel}) counts wins against decided games — none here were decided. A number would stand for nothing.'), 'ohneUnentschieden')|
++                    ? '{n} Präsenz-Matches, alle unentschieden ({b}). Die {quote} ({formel}) zählt Siege gegen entschiedene Matches — entschieden ist hier keine. Ein Wert stünde für nichts.'|
++                    : '{n} in-person matches, all drawn ({b}). The {quote} ({formel}) counts wins against decided matches — none here were decided. A number would stand for nothing.'), 'ohneUnentschieden')|
+                     .replace('{n}', String(n)).replace('{b}', bilanz) + spiegelSatz,|
+@@ -1591,4 +1591,4 @@|
+             titel: L('arc.muMajorTip', de|
+-                ? '{w} aus {n} Präsenzpartien (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Siege ÷ entschiedene Partien, mit demselben Ausgleich für dünne Paarungen. Roh {r} %.'|
+-                : '{w} from {n} in-person games (record {b}). Same calculation as the column on the left: wins ÷ decided games, with the same allowance for thin pairings. Raw {r} %.')|
++                ? '{w} aus {n} Präsenz-Matches (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Siege ÷ entschiedene Matches, mit demselben Ausgleich für dünne Paarungen. Roh {r} %.'|
++                : '{w} from {n} in-person matches (record {b}). Same calculation as the column on the left: wins ÷ decided matches, with the same allowance for thin pairings. Raw {r} %.')|
+                 .replace('{w}', fmt(m.majorWr) + ' %')|
+@@ -1633,4 +1633,4 @@|
+             ? mitQuote(L('arc.muLegende', de|
+-                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Partien dahinter'|
+-                : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the games behind it'), 'ohneUnentschieden')|
++                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Matches dahinter'|
++                : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the matches behind it'), 'ohneUnentschieden')|
+             /* Ohne Praesenzdaten sagt EIN Satz, was zwei leere|
+@@ -1735,7 +1735,7 @@|
+             ? `<p class="arc-mu-note arc-mu-note-praesenz">${esc((de|
+-                ? 'Major-WR: erst ab {n} Präsenzpartien als Prozentwert. Darunter steht die Bilanz (S–N–U) '|
+-                  + 'und daneben die Partienzahl — bei {n} Partien verschiebt eine einzige Partie die Quote '|
++                ? 'Major-WR: erst ab {n} Präsenz-Matches als Prozentwert. Darunter steht die Bilanz (S–N–U) '|
++                  + 'und daneben die Matchzahl — bei {n} Matches verschiebt ein einziges Match die Quote '|
+                   + 'schon um {p} Punkte, darunter entsprechend mehr. Betroffen hier: {k} von {g} Zeilen.'|
+-                : 'Major WR: shown as a percentage only from {n} in-person games. Below that you get the record (W–L–T) '|
+-                  + 'next to the game count — at {n} games a single game already moves the rate by {p} points, '|
++                : 'Major WR: shown as a percentage only from {n} in-person matches. Below that you get the record (W–L–T) '|
++                  + 'next to the match count — at {n} matches a single match already moves the rate by {p} points, '|
+                   + 'and more below. Affected here: {k} of {g} rows.')|
+@@ -1758,6 +1758,6 @@|
+                             data-quote-konvention="ohneUnentschieden">${esc(L('arc.colWinRate', 'WR'))}</th>|
+-                        <th title="${esc(L('arc.colGames', de ? 'gespielte Matches' : 'games played'))}">${|
++                        <th title="${esc(L('arc.colGames', de ? 'gespielte Matches' : 'matches played'))}">${|
+                             esc(L('arc.colGamesKurz', 'M'))}</th>|
+-                        <th title="${esc(de ? 'gewonnene Matches' : 'games won')}">W</th>|
+-                        <th title="${esc(de ? 'verlorene Matches' : 'games lost')}">L</th>|
++                        <th title="${esc(de ? 'gewonnene Matches' : 'matches won')}">W</th>|
++                        <th title="${esc(de ? 'verlorene Matches' : 'matches lost')}">L</th>|
+                         <!-- T, nicht U. Gemeldet am 01.09.2026: "wenn man bei|
+@@ -1795,4 +1795,4 @@|
+                         ${!hatMajor ? '' : `                        <th title="${esc(quotenHinweis('ohneUnentschieden') + '  ' + L('arc.colMajorTip', de|
+-                            ? 'Präsenzturniere: Siege ÷ entschiedene Partien (Unentschieden bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Präsenzturnieren statt online.'|
+-                            : 'In-person events: wins ÷ decided games (ties left out) — the same calculation and the same smoothing as the WR column on the left, just measured at in-person events instead of online.'))}"|
++                            ? 'Präsenzturniere: Siege ÷ entschiedene Matches (Unentschieden bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Präsenzturnieren statt online.'|
++                            : 'In-person events: wins ÷ decided matches (ties left out) — the same calculation and the same smoothing as the WR column on the left, just measured at in-person events instead of online.'))}"|
+                             data-quote-konvention="ohneUnentschieden">${|
+@@ -1800,4 +1800,4 @@|
+                         <th title="${esc(L('arc.colMajorN', de|
+-                            ? 'Präsenzpartien dieser Paarung'|
+-                            : 'in-person games for this pairing'))}">${|
++                            ? 'Präsenz-Matches dieser Paarung'|

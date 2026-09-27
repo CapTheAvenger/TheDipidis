@@ -1,0 +1,384 @@
++                // Nur die Gesamtsicht, nicht Tag 1 / Tag 2 getrennt —|
++                // sonst zaehlt dieselbe Partie mehrfach.|
++                if (String(r.day_filter || '').trim() !== 'overall') continue;|
++                const a = String(r.my_deck_name || '').trim();|
++                const b = String(r.opponent_deck_name || '').trim();|
++                if (!a || !b) continue;|
++                const anzahl = parseInt(r.vs_count || '0', 10) || 0;|
++                const punkte = parseLocaleNumber(r.vs_win_pct || '0', 0);|
++                if (!anzahl) continue;|
++                /* DIE BILANZ JE PAARUNG (03.09.2026).|
++                   Bis hierher stand in der Major-Spalte `punkte` — die|
++                   Spalte vs_win_pct der Labs-Datei. Die heisst dort|
++                   "Win %", ist aber nachweislich die Matchpunktquote|
++                   (3S+U)/(3M): drei Paarungen aus dem Worlds-Lauf|
++                   treffen sie auf 0,01 Punkte genau, die Win Rate|
++                   S/(S+N) verfehlt sie um 1,5 bis 12 Punkte. Deshalb|
++                   hiess die Spalte anders als die daneben.|
++|
++                   Jetzt scrapen wir die Bilanz mit (vs_wins /|
++                   vs_losses / vs_ties, backend/scrapers/|
++                   labs_tournament_scraper.py). Damit laesst sich die|
++                   Major-Quote MIT DERSELBEN RECHNUNG bilden wie die|
++                   Online-Spalte links: S/(S+N), geglaettet mit|
++                   demselben 20-Partien-Prior (js/matchup-glaettung.js).|
++                   Erst dadurch darf die Spalte "Major-WR" heissen.|
++|
++                   LEER IST LEER: fehlt die Bilanz (Zeile aus einem|
++                   Lauf vor dieser Aenderung), bleibt `wr` null und die|
++                   Oberflaeche zeigt einen Strich. Aus `punkte` eine|
++                   Win Rate zu schaetzen waere eine Behauptung. */|
++                const ganz = (v) => {|
++                    const n = parseInt(String(v == null ? '' : v).trim(), 10);|
++                    return Number.isFinite(n) && n >= 0 ? n : null;|
++                };|
++                const siege = ganz(r.vs_wins);|
++                const niederlagen = ganz(r.vs_losses);|
++                const unentschieden = ganz(r.vs_ties);|
++                const hatBilanz = siege != null && niederlagen != null;|
++                const entschieden = hatBilanz ? siege + niederlagen : 0;|
++                const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;|
++                const wr = (hatBilanz && entschieden > 0 && G && typeof G.quote === 'function')|
++                    ? G.quote(siege, niederlagen)|
++                    : (hatBilanz && entschieden > 0 ? (siege / entschieden) * 100 : null);|
++                const wrRoh = (hatBilanz && entschieden > 0)|
++                    ? (siege / entschieden) * 100 : null;|
++                if (!reg[a]) reg[a] = {};|
++                /* DREI ZUSTAENDE, NICHT ZWEI (03.09.2026, live gefunden).|
++                   25 der 769 Paarungen stehen auf 0-0-1: eine einzige|
++                   Partie, und die endete unentschieden. Die Bilanz IST|
++                   da, sie hat nur keinen Nenner — S/(S+N) ist auf null|
++                   entschiedenen Partien nicht definiert. Der erste|
++                   Wurf zeigte dafuer den Hinweis "ohne Bilanz in der|
++                   Quelle", was schlicht falsch war. `bilanzDa`|
++                   unterscheidet die beiden Faelle, damit die|
++                   Oberflaeche sagen kann, welcher vorliegt. */|
++                reg[a][b] = { anzahl, punkte, siege, niederlagen, unentschieden,|
++                              wr, wrRoh, bilanzDa: hatBilanz };|
++            }|
++            return reg;|
++        }|
++|
++        /* DA-13 / FE-5 (27.09.2026): solange es im laufenden Format noch|
++           kein Major gibt, das LETZTE Major-Format (data/format_window.json|
++           → previous_format_key). Das Register der Heatmap bleibt davon|
++           unberuehrt — sie zeigt weiter nur das laufende Format. Wer den|
++           Rueckfall nutzt, bekommt den Schluessel mit und muss ihn|
++           anschreiben. */|
++        async function ladeMajorMatchupsMitRueckfall() {|
++            const fw = window._formatWindow;|
++            const alt = fw && fw.oldest_legal_set ? String(fw.oldest_legal_set).toUpperCase() : '';|
++            const neu = fw && fw.current_set ? String(fw.current_set).toUpperCase() : '';|
++            const laufend = (alt && neu) ? `${alt}-${neu}` : '';|
++            const reg = await ladeMajorMatchups();|
++            if (reg && Object.keys(reg).length) return { reg, key: laufend };|
++            if (window._majorMatchupRueckfall) return window._majorMatchupRueckfall;|
++            const leer = { reg: {}, key: '' };|
++            try {|
++                const vorher = fw && fw.previous_format_key ? String(fw.previous_format_key).toUpperCase() : '';|
++                if (!vorher || vorher === laufend) { window._majorMatchupRueckfall = leer; return leer; }|
++                const stamp = `?t=${Date.now()}`;|
++                const v = await fetch(`${BASE_PATH}labs_tournament_matchups_verzeichnis.json${stamp}`)|
++                    .then(r => r.ok ? r.json() : null).catch(() => null);|
++                if (!v || !Array.isArray(v.meta_keys) || v.meta_keys.indexOf(vorher) === -1) {|
++                    window._majorMatchupRueckfall = leer; return leer;|
++                }|
++                const txt = await fetch(`${BASE_PATH}labs_tournament_matchups_${vorher}.csv${stamp}`)|
++                    .then(r => r.ok ? r.text() : '').catch(() => '');|
++                window._majorMatchupRueckfall = txt ? { reg: majorMatchupsParsen(txt), key: vorher } : leer;|
++                return window._majorMatchupRueckfall;|
++            } catch (_e) {|
++                window._majorMatchupRueckfall = leer;|
++                return leer;|
++            }|
++        }|
++        window.ladeMajorMatchupsMitRueckfall = ladeMajorMatchupsMitRueckfall;|
++|
+         async function ladeMajorMatchups() {|
+@@ -127,65 +233,3 @@|
+                 // mit einem Feld und alles faellt still auf leer zurueck.|
+-                const parsed = (typeof Papa !== 'undefined' && Papa.parse)|
+-                    ? Papa.parse(txt, { header: true, delimiter: ',', skipEmptyLines: true })|
+-                    : { data: [] };|
+-                const reg = {};|
+-                for (const r of (parsed.data || [])) {|
+-                    // Nur die Gesamtsicht, nicht Tag 1 / Tag 2 getrennt —|
+-                    // sonst zaehlt dieselbe Partie mehrfach.|
+-                    if (String(r.day_filter || '').trim() !== 'overall') continue;|
+-                    const a = String(r.my_deck_name || '').trim();|
+-                    const b = String(r.opponent_deck_name || '').trim();|
+-                    if (!a || !b) continue;|
+-                    const anzahl = parseInt(r.vs_count || '0', 10) || 0;|
+-                    const punkte = parseLocaleNumber(r.vs_win_pct || '0', 0);|
+-                    if (!anzahl) continue;|
+-                    /* DIE BILANZ JE PAARUNG (03.09.2026).|
+-                       Bis hierher stand in der Major-Spalte `punkte` — die|
+-                       Spalte vs_win_pct der Labs-Datei. Die heisst dort|
+-                       "Win %", ist aber nachweislich die Matchpunktquote|
+-                       (3S+U)/(3M): drei Paarungen aus dem Worlds-Lauf|
+-                       treffen sie auf 0,01 Punkte genau, die Win Rate|
+-                       S/(S+N) verfehlt sie um 1,5 bis 12 Punkte. Deshalb|
+-                       hiess die Spalte anders als die daneben.|
+-|
+-                       Jetzt scrapen wir die Bilanz mit (vs_wins /|
+-                       vs_losses / vs_ties, backend/scrapers/|
+-                       labs_tournament_scraper.py). Damit laesst sich die|
+-                       Major-Quote MIT DERSELBEN RECHNUNG bilden wie die|
+-                       Online-Spalte links: S/(S+N), geglaettet mit|
+-                       demselben 20-Partien-Prior (js/matchup-glaettung.js).|
+-                       Erst dadurch darf die Spalte "Major-WR" heissen.|
+-|
+-                       LEER IST LEER: fehlt die Bilanz (Zeile aus einem|
+-                       Lauf vor dieser Aenderung), bleibt `wr` null und die|
+-                       Oberflaeche zeigt einen Strich. Aus `punkte` eine|
+-                       Win Rate zu schaetzen waere eine Behauptung. */|
+-                    const ganz = (v) => {|
+-                        const n = parseInt(String(v == null ? '' : v).trim(), 10);|
+-                        return Number.isFinite(n) && n >= 0 ? n : null;|
+-                    };|
+-                    const siege = ganz(r.vs_wins);|
+-                    const niederlagen = ganz(r.vs_losses);|
+-                    const unentschieden = ganz(r.vs_ties);|
+-                    const hatBilanz = siege != null && niederlagen != null;|
+-                    const entschieden = hatBilanz ? siege + niederlagen : 0;|
+-                    const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;|
+-                    const wr = (hatBilanz && entschieden > 0 && G && typeof G.quote === 'function')|
+-                        ? G.quote(siege, niederlagen)|
+-                        : (hatBilanz && entschieden > 0 ? (siege / entschieden) * 100 : null);|
+-                    const wrRoh = (hatBilanz && entschieden > 0)|
+-                        ? (siege / entschieden) * 100 : null;|
+-                    if (!reg[a]) reg[a] = {};|
+-                    /* DREI ZUSTAENDE, NICHT ZWEI (03.09.2026, live gefunden).|
+-                       25 der 769 Paarungen stehen auf 0-0-1: eine einzige|
+-                       Partie, und die endete unentschieden. Die Bilanz IST|
+-                       da, sie hat nur keinen Nenner — S/(S+N) ist auf null|
+-                       entschiedenen Partien nicht definiert. Der erste|
+-                       Wurf zeigte dafuer den Hinweis "ohne Bilanz in der|
+-                       Quelle", was schlicht falsch war. `bilanzDa`|
+-                       unterscheidet die beiden Faelle, damit die|
+-                       Oberflaeche sagen kann, welcher vorliegt. */|
+-                    reg[a][b] = { anzahl, punkte, siege, niederlagen, unentschieden,|
+-                                  wr, wrRoh, bilanzDa: hatBilanz };|
+-                }|
++                const reg = majorMatchupsParsen(txt);|
+                 window._majorMatchupRegistry = reg;|
+@@ -527,3 +571,13 @@|
+                  * ohne Daten. */|
+-                let tableHtml = `<table class="heatmap-table" style="--heatmap-cols: ${xDecks.length};">`;|
++                /* FE-4 (27.09.2026, Hausi): „CSV-Button durch ‚Bild generieren'|
++                   ersetzen — nur wenn gut lesbar umsetzbar, sonst CSV-Button|
++                   ersatzlos raus." Gemessen: 20 × 20 Zellen auf einem|
++                   1080 px breiten Bild lassen je Zelle rund 45 px; auf einem|
++                   390 px breiten Telefon angezeigt (Faktor 0,36) wird selbst|
++                   eine zweistellige Quote in 22 px zu 8 px Schrift — unter|
++                   der Grenze von 11 px, die diese Seite sonst einhaelt. Also|
++                   kein Bild und kein CSV-Knopf mehr an der Heatmap|
++                   (data-csv="nein" ist der vorgesehene Ausstieg aus|
++                   js/ds-csv.js). */|
++                let tableHtml = `<table class="heatmap-table" data-csv="nein" style="--heatmap-cols: ${xDecks.length};">`;|
+                 tableHtml += `<colgroup><col class="heatmap-col-first">${xDecks.map(() => '<col class="heatmap-col-data">').join('')}</colgroup>`;|
+diff --git a/js/app-tier-meta.js b/js/app-tier-meta.js|
+index 2322f59..c5ce43d 100644|
+--- a/js/app-tier-meta.js|
++++ b/js/app-tier-meta.js|
+@@ -867,2 +867,13 @@|
+             if (!archetypeCardsData || archetypeCardsData.length === 0) {|
++                /* DA-14 (27.09.2026, Hausi): „Bild fehlt beim Deck Okidogi|
++                   Barbaracle". Gemessen: es ist das einzige der 20|
++                   Rogue-Decks ohne Zeilen in der Kartenauswertung des|
++                   laufenden Metas (8 Listen) — deshalb die graue Flaeche.|
++                   Statt ihrer das Pokémon-Bild aus data/archetype_icons.json,|
++                   dasselbe, das Heatmap und Kacheln zeigen. Erst wenn auch|
++                   das fehlt, bleibt die Flaeche grau. */|
++                const sprites = (typeof window !== 'undefined' && window.ArchetypeIcons|
++                    && typeof window.ArchetypeIcons.getIconUrls === 'function')|
++                    ? (window.ArchetypeIcons.getIconUrls(archetypeName) || []) : [];|
++                if (sprites.length) return sprites[0];|
+                 return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="280"%3E%3Crect fill="%23ddd" width="200" height="280"/%3E%3C/svg%3E';|
+@@ -2188,2 +2199,20 @@|
+ |
++                    /* FE-6 (27.09.2026, Hausi): „sobald Major-Daten fuers|
++                       aktuelle Format vorliegen, zusaetzlich zu den Online-|
++                       Werten auch Major-Werte zeigen". Quelle ist derselbe|
++                       Auszug, den der Tier-Score liest (labsByName, NUR das|
++                       laufende Format — kein Rueckfall auf ein altes). Gibt|
++                       es ihn nicht, bleibt jede Zelle leer und die Spalten|
++                       verschwinden ueber hatWert() unten von selbst.|
++                       Anteil = Antritte des Decks / Antritte aller Decks im|
++                       Auszug; Win % = Siege / alle Matches, dieselbe|
++                       Konvention wie die Online-Spalte. */|
++                    const _majorSumme = labsByName|
++                        ? Object.values(labsByName).reduce((a, e) => a + (e.players || 0), 0) : 0;|
++                    const majorVon = (name) => {|
++                        if (!labsByName || !(_majorSumme > 0)) return null;|
++                        const e = labsByName[name] || labsByName[kanon(name)] || null;|
++                        if (!e || !(e.games > 0)) return null;|
++                        return { anteil: (e.players / _majorSumme) * 100, wr: e.winPct };|
++                    };|
+                     const reihen = [...alleNamen].map(name => {|
+@@ -2229,2 +2258,4 @@|
+                             rang: l ? (l.new_count || 0) : 0,|
++                            majorAnteil: majorVon(name) ? majorVon(name).anteil : null,|
++                            majorWr:     majorVon(name) ? majorVon(name).wr : null,|
+                         };|
+@@ -2248,2 +2279,11 @@|
+                                  en: tierQuotenHinweis('mitUnentschieden') } },|
++                        /* FE-6: die Major-Werte daneben — nur sichtbar, wenn der|
++                           Auszug des laufenden Formats Zeilen traegt. */|
++                        { k: 'majorAnteil', de: 'Major-Anteil', en: 'Major share', num: true,|
++                          tip: { de: 'Anteil an den Antritten der Präsenzturniere (Majors) im laufenden Format.',|
++                                 en: 'Share of entries at in-person events (majors) in the current format.' } },|
++                        { k: 'majorWr', de: 'Major ' + tierQuotenName('mitUnentschieden'),|
++                                        en: 'Major ' + tierQuotenName('mitUnentschieden'), num: true,|
++                          tip: { de: tierQuotenHinweis('mitUnentschieden') + ' Gemessen auf den Präsenzturnieren des laufenden Formats.',|
++                                 en: tierQuotenHinweis('mitUnentschieden') + ' Measured at the in-person events of the current format.' } },|
+                         /* DREI UEBERSCHRIFTEN NEU BENANNT AM 01.09.2026.|
+@@ -2319,3 +2359,4 @@|
+                     const SPALTEN_SICHTBAR = SPALTEN.filter(c =>|
+-                        (c.k !== 'antritte' && c.k !== 'cuts') || hatWert(c.k));|
++                        (c.k !== 'antritte' && c.k !== 'cuts' && c.k !== 'majorAnteil' && c.k !== 'majorWr')|
++                        || hatWert(c.k));|
+ |
+@@ -2353,2 +2394,4 @@|
+                         if (k === 'wr')       return r.wr       == null ? '–' : fmtPct(r.wr);|
++                        if (k === 'majorAnteil') return r.majorAnteil == null ? '–' : fmtPct(r.majorAnteil);|
++                        if (k === 'majorWr')     return r.majorWr     == null ? '–' : fmtPct(r.majorWr);|
+                         if (k === 'antritte') return r.antritte == null ? '–' : fmtHalb(r.antritte);|
+diff --git a/js/ds-bildvorschau.js b/js/ds-bildvorschau.js|
+index 4540887..95ab256 100644|
+--- a/js/ds-bildvorschau.js|
++++ b/js/ds-bildvorschau.js|
+@@ -149,2 +149,16 @@|
+               '</div>' +|
++              /* FE-5 (27.09.2026): mehrere Fassungen desselben Bildes|
++                 (Online / Major / Kombiniert). Nur da, wenn der Aufrufer|
++                 sie anbietet — sonst sieht das Fenster aus wie bisher. */|
++              (Array.isArray(o.varianten) && o.varianten.length > 1|
++                ? '<div class="ds-bildvorschau-varianten" role="group" aria-label="' +|
++                    esc(L('Fassung', 'Version')) + '">' +|
++                    o.varianten.map(function (v) {|
++                        var an = v.id === (o.aktiv || o.varianten[0].id);|
++                        return '<button type="button" class="ds-bildvorschau-variante' + (an ? ' is-on' : '') +|
++                            '" data-variante="' + esc(v.id) + '" aria-pressed="' + an + '">' +|
++                            esc(v.label) + '</button>';|
++                    }).join('') +|
++                  '</div>'|
++                : '') +|
+               '<div class="ds-bildvorschau-body">' +|
+@@ -177,2 +191,24 @@|
+ |
++        /* Fassung wechseln: neues Bild bauen lassen, zeigen, und das PNG|
++           fuer Kopieren/Speichern neu vorbereiten. */|
++        var knoepfe = modal.querySelectorAll('.ds-bildvorschau-variante');|
++        for (var vi = 0; vi < knoepfe.length; vi++) {|
++            knoepfe[vi].addEventListener('click', function (ev) {|
++                var id = ev.currentTarget.getAttribute('data-variante');|
++                if (typeof o.wechsle !== 'function') return;|
++                for (var k = 0; k < knoepfe.length; k++) {|
++                    var an = knoepfe[k].getAttribute('data-variante') === id;|
++                    knoepfe[k].classList.toggle('is-on', an);|
++                    knoepfe[k].setAttribute('aria-pressed', String(an));|
++                }|
++                Promise.resolve(o.wechsle(id)).then(function (erg) {|
++                    if (!erg || !erg.canvas) return;|
++                    canvas = erg.canvas;|
++                    if (erg.dateiname) dateiname = erg.dateiname;|
++                    modal.querySelector('.ds-bildvorschau-img').src = canvas.toDataURL('image/png');|
++                    fertigerBlob = null;|
++                    try { canvas.toBlob(function (b) { fertigerBlob = b; }, 'image/png'); } catch (e) { /* beim Klick */ }|
++                });|
++            });|
++        }|
+         function mitBlob(weiter) {|
+diff --git a/js/ds-share.js b/js/ds-share.js|
+index 8e1b939..bf28dc7 100644|
+--- a/js/ds-share.js|
++++ b/js/ds-share.js|
+@@ -758,3 +758,11 @@|
+         var rowH = MU_ZEILE_H;|
+-        var budget = muBudget((spec.matchups || []).length);|
++        /* FE-5 (27.09.2026, Hausi): drei Fassungen desselben Bildes —|
++           „Online" (bisher), „Major" (die Paarungen der Praesenzturniere)|
++           und „Kombiniert" (je Gegner beide Quoten nebeneinander; statt|
++           des Decknamens zwei Pokémon-Bilder, weil sonst der Platz fehlt).|
++           Umgeschaltet wird in der Bildvorschau. */|
++        var variante = spec.variante === 'major' || spec.variante === 'kombiniert'|
++            ? spec.variante : 'online';|
++        var muQuelle = variante === 'major' ? (spec.majorMatchups || []) : (spec.matchups || []);|
++        var budget = muBudget(muQuelle.length);|
+         var zeilenProSpalte = budget.proSpalte;|
+@@ -792,3 +800,29 @@|
+            22 Symbol + 8 Abstand + Name + 52 Matches + 66 Record + 96 Quote. */|
++        /* Getoente Quotenzelle, eine fuer alle Fassungen. Ohne Quote (kein|
++           Match entschieden, oder keine Major-Paarung) ein Strich — nie|
++           eine erfundene Zahl. */|
++        function quoteZelle(x, w, wert, duenn, cy) {|
++            var da = wert != null && isFinite(wert);|
++            var d = da ? wert - 50 : 0;|
++            ctx.fillStyle = (duenn || !da) ? 'rgba(135,145,184,.10)'|
++                          : (d >= 0 ? C.dvPosBg : C.dvNegBg);|
++            rr(ctx, x, cy - 13, w, 26, 6); ctx.fill();|
++            ctx.font = fMono(14, 700);|
++            ctx.fillStyle = (duenn || !da) ? C.ink3 : C.ink;|
++            ctx.textAlign = 'right';|
++            ctx.textBaseline = 'middle';|
++            ctx.fillText(da ? num(wert, 1) + ' %' : '–', x + w - 10, cy);|
++            ctx.textAlign = 'start';|
++        }|
+         function kanten(x0) {|
++            if (variante === 'kombiniert') {|
++                /* Rechts nach links: Major-Quote, Major-Matches, Luecke,|
++                   Online-Quote, Online-Matches. Links die zwei Bilder. */|
++                var zb = spalten > 1 ? 84 : 104;|
++                var majorWrX = x0 + spaltenB - zb;|
++                var majorGames = majorWrX - 8;|
++                var onlineWrX = majorGames - 44 - 14 - zb;|
++                return { x: x0, zb: zb, majorWrX: majorWrX, majorGames: majorGames,|
++                         onlineWrX: onlineWrX, onlineGames: onlineWrX - 8 };|
++            }|
+             var quoteB = spalten > 1 ? 96 : 116;|
+@@ -804,2 +838,14 @@|
+         function kopf(k) {|
++            if (variante === 'kombiniert') {|
++                label(ctx, L('Gegner', 'Opponent'), k.x, ty);|
++                ctx.textAlign = 'right';|
++                label(ctx, 'M', k.onlineGames, ty);|
++                label(ctx, L('Online', 'Online'), k.onlineWrX + k.zb - 10, ty);|
++                label(ctx, 'M', k.majorGames, ty);|
++                label(ctx, L('Major', 'Major'), k.majorWrX + k.zb - 10, ty);|
++                ctx.textAlign = 'start';|
++                ctx.fillStyle = C.line;|
++                ctx.fillRect(k.x, ty + 8, spaltenB, 1);|
++                return;|
++            }|
+             label(ctx, L('Gegner', 'Opponent'), k.x, ty);|
+@@ -808,3 +854,4 @@|
+             label(ctx, L('Record', 'Record'), k.record, ty);|
+-            label(ctx, quotenKuerzel('ohneUnentschieden'), k.wrX + k.wrW - 10, ty);|
++            label(ctx, (variante === 'major' ? 'Major-' : '') + quotenKuerzel('ohneUnentschieden'),|
++                  k.wrX + k.wrW - 10, ty);|
+             ctx.textAlign = 'start';|
+@@ -820,3 +867,3 @@|
+          * Frage vor einem Turnier ist die andere: woran stirbt es? */|
+-        var all = (spec.matchups || []);|
++        var all = muQuelle;|
+         var mus = all;|
+@@ -886,2 +933,25 @@|
+ |
++            if (variante === 'kombiniert') {|
++                var paar = (art.mIcons2 && art.mIcons2[r]) || [];|
++                if (paar.length) {|
++                    for (var pi = 0; pi < Math.min(2, paar.length); pi++) {|
++                        sprite(ctx, paar[pi], k.x + pi * 26, cy - 12, 24, initials(m.opponent));|
++                    }|
++                } else {|
++                    sprite(ctx, null, k.x, cy - 12, 24, initials(m.opponent));|
++                }|
++                quoteZelle(k.onlineWrX, k.zb, m.winRate, m.thin, cy);|
++                ctx.textAlign = 'right';|
++                ctx.font = fMono(12, 400);|
++                ctx.fillStyle = C.ink3;|
++                ctx.textBaseline = 'middle';|
++                ctx.fillText(num(m.games, 0), k.onlineGames, cy);|
++                ctx.fillText(m.majorAnzahl ? num(m.majorAnzahl, 0) : '–', k.majorGames, cy);|
++                ctx.textAlign = 'start';|

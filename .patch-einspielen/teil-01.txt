@@ -1,0 +1,439 @@
+From 8ca0f6474358246950be0f62ae838b3e3f153904 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Mon, 28 Sep 2026 00:06:11 +0200|
+Subject: [PATCH] Rutsch 10: Kartenuebersicht und gebautes Deck (UI-36, UI-37,|
+ UI-38, FE-7, FE-8, FE-9)|
+|
+- FE-9: Pokemon-Familien stehen nach ihrem hoechsten Anteil, die Linie bleibt zusammen|
+- FE-7: Rotationen bei Multi-Format ohne Turnier-Performance und beste Liste|
+- FE-8: gemessen schon erfuellt (scripts/messe_druckwahl.py), kein Code|
+- UI-38: Prozentzeile der Deck-Kachel im Aktionsblock, 0 Ueberlappungen 360-1920 px|
+- UI-37: eine Plaketten-Familie (rund, 22 px) am Ende von mobile-responsive.css;|
+  alte Groessen- und Lageregeln geleert, Herz lag per Inline-Regel auf der Deck-Anzahl|
+- UI-36: Preisschild so breit wie sein Betrag, Leiste bei 390 px 164 -> 133 px|
+- Messwerkzeuge: messe_plaketten, messe_kartenleiste, messe_multiformat_abschnitte,|
+  messe_deckkachel_ueberlappung, messe_druckwahl|
+- Zusicherungen: tests/unit/test-rutsch-10-karten.js (11, alle mit Verfaelschungsprobe)|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01U9cddKKu6gh42UZVUcp4S5|
+---|
+ css/ds-share.css                         |  40 +---|
+ css/mobile-responsive.css                | 116 ++++++---|
+ css/styles.css                           |  33 ++-|
+ css/ui-components.css                    |  27 +--|
+ index.html                               | 286 +++++++++++------------|
+ js/app-deck-builder.js                   | 251 +++++++++++---------|
+ js/app-past-meta.js                      |  30 ++-|
+ js/i18n.js                               |   2 -|
+ scripts/messe_deckkachel_ueberlappung.py |  86 +++++++|
+ scripts/messe_druckwahl.py               | 121 ++++++++++|
+ scripts/messe_kartenleiste.py            | 100 ++++++++|
+ scripts/messe_multiformat_abschnitte.py  |  60 +++++|
+ scripts/messe_plaketten.py               | 101 ++++++++|
+ service-worker.js                        |   4 +-|
+ tests/unit/test-rutsch-10-karten.js      | 212 +++++++++++++++++|
+ version.json                             |   2 +-|
+ 16 files changed, 1091 insertions(+), 380 deletions(-)|
+ create mode 100644 scripts/messe_deckkachel_ueberlappung.py|
+ create mode 100644 scripts/messe_druckwahl.py|
+ create mode 100644 scripts/messe_kartenleiste.py|
+ create mode 100644 scripts/messe_multiformat_abschnitte.py|
+ create mode 100644 scripts/messe_plaketten.py|
+ create mode 100644 tests/unit/test-rutsch-10-karten.js|
+|
+diff --git a/css/ds-share.css b/css/ds-share.css|
+index 5e9d04c..64d6793 100644|
+--- a/css/ds-share.css|
++++ b/css/ds-share.css|
+@@ -163,5 +163,7 @@|
+ |
+-/* Die Anzahl, die das Feld spielt: Sechseck unten links, wie bei|
+- * poke_hive. Ein Sechseck bleibt auch auf einem 92-px-Daumenbild als|
+- * Plakette erkennbar, ein 18-px-Kreis wird zum Punkt. */|
++/* Die Anzahl, die das Feld spielt: oben links, rot.|
++ * UI-37 (27.09.2026, Entscheidung Hausi): kein Sechseck mehr — alle|
++ * Plaketten auf dem Kartenbild sind rund und gleich gross, wie im Deck|
++ * Builder. Form und Groesse stehen in der Plaketten-Familie am Ende von|
++ * css/mobile-responsive.css; hier bleiben nur Ecke und Farbe. */|
+ .city-league-card-image-container .city-league-card-badge-max {|
+@@ -170,25 +172,14 @@|
+      * dort liegt auf dem Minus-Knopf und faengt seinen Klick ab. */|
+-    top: 5px;|
+-    left: 5px;|
++    left: 4px;|
+     right: auto;|
+     bottom: auto;|
+-    width: 28px;|
+-    height: 32px;|
+-    border: 0;|
+-    border-radius: 0;|
+     background: #e3350d;|
+-    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);|
+     font-family: var(--font-num);|
+-    font-size: var(--fs-md);|
+-    box-shadow: 0 2px 6px rgba(0, 0, 0, .55);|
+ }|
+ |
+-/* Die Anzahl im eigenen Deck: eckige Marke oben rechts, in der|
+- * Markenfarbe. Andere Ecke, andere Form, andere Farbfamilie — drei|
+- * Unterschiede, damit einer ausfallen darf. */|
++/* Die Anzahl im eigenen Deck: oben rechts, in der Markenfarbe. Andere|
++ * Ecke und andere Farbe unterscheiden sie von der Feld-Anzahl. */|
+ .city-league-card-image-container .city-league-card-badge-deck {|
+-    top: 5px;|
+     left: auto;|
+-    right: 5px;|
+-    border-radius: var(--r-sm);|
++    right: 4px;|
+     background: var(--brand);|
+@@ -197,15 +188,2 @@|
+ |
+-/* Auf schmalen Geraeten schrumpft css/mobile-responsive.css alle|
+- * Plaketten auf 18 px. Die Plakette darf mitschrumpfen, aber sie bleibt|
+- * ein Sechseck — der Formunterschied ist genau das, was auf einem|
+- * 92-px-Daumenbild noch traegt. Zwei Klassen im Selektor, damit die|
+- * Regel ohne !important gewinnt, obwohl sie frueher geladen wird. */|
+-@media (max-width: 480px) {|
+-    .city-league-card-image-container .city-league-card-badge-max {|
+-        width: 22px;|
+-        height: 25px;|
+-        font-size: var(--fs-sm);|
+-    }|
+-}|
+-|
+ /* Der Punkt vor der Abschnittsüberschrift im Kartengitter. Vorher|
+diff --git a/css/mobile-responsive.css b/css/mobile-responsive.css|
+index 607f111..1266f3f 100644|
+--- a/css/mobile-responsive.css|
++++ b/css/mobile-responsive.css|
+@@ -1619,7 +1619,3 @@|
+   .wishlist-heart-badge {|
+-    width: 16px !important;|
+-    height: 16px !important;|
+     font-size: var(--fs-xs) !important;|
+-    top: 20px !important;|
+-    right: 3px !important;|
+   }|
+@@ -1762,8 +1758,15 @@|
+      * bequem danebenpasst. */|
+-    flex: 1 1 60px;|
++    flex: 0 0 auto;|
++    margin-left: auto;|
+     min-width: 0;|
+     padding: 0 var(--s-1);|
+-    overflow: hidden;|
+     white-space: nowrap;|
+   }|
++  /* UI-36 (27.09.2026): Basis ist jetzt die Breite des Betrags selbst|
++   * (`flex: 0 0 auto`), nicht pauschal 60 px. Das ist die Bedingung, die|
++   * gemeint war: umbrechen genau dann, wenn der Betrag nicht neben L|
++   * und P passt — und weil das Schild nicht schrumpft, wird die Zahl|
++   * dabei nie abgeschnitten. Gemessen vorher bei 390 px in Rotationen:|
++   * „0,14€" brach auf eine eigene Zeile und wurde 94 px breit (92 % der|
++   * Zeile), die Leiste unter dem Bild war 164 px hoch. */|
+ }|
+@@ -2213,6 +2216,5 @@|
+   }|
+-  /* Wishlist badge on card thumbnails */|
++  /* Wishlist badge on card thumbnails: Groesse seit UI-37 in der|
++   * Plaketten-Familie am Ende dieser Datei. */|
+   .wishlist-heart-badge {|
+-    width: 20px !important;|
+-    height: 20px !important;|
+     font-size: 11px !important;|
+@@ -2260,7 +2262,3 @@|
+   .wishlist-heart-badge {|
+-    width: 18px !important;|
+-    height: 18px !important;|
+     font-size: 10px !important;|
+-    top: 24px !important;|
+-    right: 3px !important;|
+     border-width: 1px !important;|
+@@ -2270,7 +2268,3 @@|
+   .wishlist-heart-badge {|
+-    width: 16px !important;|
+-    height: 16px !important;|
+     font-size: var(--fs-xs) !important;|
+-    top: 22px !important;|
+-    right: 2px !important;|
+     border-width: 1px !important;|
+@@ -2282,4 +2276,2 @@|
+   .city-league-card-badge {|
+-    width: 18px;|
+-    height: 18px;|
+     font-size: 0.6em;|
+@@ -2521,20 +2513,5 @@|
+   /* ── Deck-count badge & wishlist badge: smaller ── */|
+-  .meta-card-grid .card-badge,|
+-  .meta-card-analysis-grid .card-badge,|
+-  #cityLeagueMetaGrid .card-badge,|
+-  #currentMetaMetaGrid .card-badge {|
+-    width: 16px !important;|
+-    height: 16px !important;|
+-    font-size: 0.6em !important;|
+-  }|
+-|
+-  .meta-card-grid .wishlist-heart-badge,|
+-  .meta-card-analysis-grid .wishlist-heart-badge,|
+-  #cityLeagueMetaGrid .wishlist-heart-badge,|
+-  #currentMetaMetaGrid .wishlist-heart-badge {|
+-    width: 16px !important;|
+-    height: 16px !important;|
+-    font-size: 10px !important;|
+-    top: 20px !important;|
+-  }|
++  /* Plaketten und Herz: Groesse steht seit UI-37 (27.09.2026) in der|
++   * Plaketten-Familie am Ende dieser Datei. Die 16-px-Regel hier trug|
++   * eine ID und schlug die Familie deshalb trotz gleichem !important. */|
+ }|
+@@ -2998 +2975,66 @@|
+ }|
++|
++/* ===========================================================|
++   UI-37 — Plaketten-Familie (27.09.2026, Entscheidung Hausi:|
++   „rund wie im Deck Builder", einheitlich in Form und Groesse).|
++|
++   Gemessen vorher (scripts/messe_plaketten.py, Rotationen):|
++   bei 390 px fuenf Formen — Sechseck 22x22, eckig 22x22, rund 22,|
++   rund 16, rund 16; bei 1280 px Sechseck 28x32, eckig 20x20, rund|
++   22, 20, 20. Die Groessen kamen aus einem Dutzend Regeln in vier|
++   Dateien, viele mit !important, jede fuer einen anderen Bereich.|
++|
++   Deshalb steht die Familie hier, in der zuletzt geladenen Datei,|
++   an EINER Stelle: eine Groesse --plakette, eine Form, ein Abstand.|
++   Die rechte Spalte stapelt sich aus derselben Variable, damit Herz|
++   und „andere Drucke" nie auf der Plakette darueber liegen.|
++   Ohne !important: die aelteren Groessen- und Lageregeln, die es|
++   trugen, sind dafuer an ihrer Stelle geleert (index.html,|
++   ui-components.css, styles.css und weiter oben in dieser Datei).|
++   =========================================================== */|
++:root {|
++    --plakette: 22px;|
++    --plakette-abstand: 3px;|
++    --plakette-rand: 4px;|
++}|
++/* Keine kleinere Stufe fuers Handy: der Audit vom 10.06.2026 hat die|
++ * Plaketten dort von 16 auf 22 px gehoben (Inline-Regel in index.html),|
++ * weil 16 px auf dem Daumenbild zum Punkt wurden. */|
++|
++.city-league-card-badge,|
++.wishlist-heart-badge,|
++.city-league-other-print-sparkle,|
++.card-max-count,|
++.my-deck-card-count,|
++.card-item .card-badge.pos-abs {|
++    width: var(--plakette);|
++    height: var(--plakette);|
++    min-width: 0;|
++    min-height: 0;|
++    padding: 0;|
++    border-radius: 50%;|
++    clip-path: none;|
++    box-sizing: border-box;|
++    display: flex;|
++    align-items: center;|
++    justify-content: center;|
++    line-height: 1;|
++}|
++|
++/* Rechte Spalte: erste Zeile oben, darunter Herz, darunter|
++ * „andere Drucke". Die obere Zeile traegt links wie rechts|
++ * dieselbe Hoehe. */|
++.city-league-card-badge,|
++.card-max-count,|
++.my-deck-card-count,|
++.card-item .card-badge.pos-abs {|
++    top: var(--plakette-rand);|
++}|
++.wishlist-heart-badge {|
++    top: calc(var(--plakette-rand) + var(--plakette) + var(--plakette-abstand));|
++    right: var(--plakette-rand);|
++}|
++.city-league-other-print-sparkle {|
++    top: calc(var(--plakette-rand) + 2 * (var(--plakette) + var(--plakette-abstand)));|
++    right: var(--plakette-rand);|
++}|
+diff --git a/css/styles.css b/css/styles.css|
+index c54310f..904fd30 100644|
+--- a/css/styles.css|
++++ b/css/styles.css|
+@@ -1663,2 +1663,12 @@|
+ |
++        /* UI-38 (27.09.2026): das Kennzahl-Band sitzt IN der Knopfsaeule,|
++           nicht mehr frei ueber der Karte. Vorher stand es auf|
++           `bottom: 52px`, die Knopfsaeule wuchs aber mit ihren Knoepfen —|
++           gemessen ab 1024 px 3 px Ueberlappung auf JEDER Kachel (27/27).|
++           Im selben Fluss kann nichts mehr ueberlappen, egal wie hoch|
++           die Knoepfe werden. */|
++        .deck-card-actions > .deck-card-overlay {|
++            position: static;|
++        }|
++|
+         .deck-card-action-row {|
+@@ -3269,3 +3279,5 @@|
+ |
+-            .grid-view-active #cityLeagueDeckOverview .card-max-count,|
++            /* .card-max-count stand hier mit 20 px — seit UI-37 (27.09.2026)|
++               kommt die Groesse aus der Plaketten-Familie am Ende von|
++               css/mobile-responsive.css; die ID haette sie geschlagen. */|
+             .grid-view-active #cityLeagueDeckOverview .card-in-deck-count {|
+@@ -4213,11 +4225,5 @@|
+ |
+-            /* Mobile Deck Builder - count badge */|
+-            #cityLeagueMyDeckGrid .card-max-count,|
+-            #currentMetaMyDeckGrid .card-max-count,|
+-            #pastMetaMyDeckGrid .card-max-count {|
+-                font-size: var(--fs-xs) !important;|
+-                width: 16px !important;|
+-                height: 16px !important;|
+-                line-height: 16px !important;|
+-            }|
++            /* Mobile Deck Builder - count badge: Groesse seit UI-37|
++               (27.09.2026) in der Plaketten-Familie am Ende von|
++               css/mobile-responsive.css, eine Groesse fuer alle. */|
+         }|
+@@ -8544,4 +8550,7 @@ details[open] > .tier-trending-summary::after {|
+ |
+-    /* --- Fix 5: Deck-card action buttons → bigger touch targets --- */|
+-    .deck-card button {|
++    /* --- Fix 5: Deck-card action buttons → bigger touch targets ---|
++       Das Herz ist eine Plakette, kein Aktionsknopf: mit 44 px Hoehe war|
++       es auf dem Handy ein 22 x 44 px grosses Oval (gemessen UI-37,|
++       27.09.2026). Seine Trefferflaeche kommt aus css/tippziele.css. */|
++    .deck-card button:not(.wishlist-heart-badge) {|
+         min-height: 44px !important;|
+diff --git a/css/ui-components.css b/css/ui-components.css|
+index bb1a758..b1cfd77 100644|
+--- a/css/ui-components.css|
++++ b/css/ui-components.css|
+@@ -1763,8 +1763,2 @@ img[src*="limitlesstcg"] {|
+ .border-left-blue { border-left: 4px solid #3498db !important; }|
+-.city-league-other-print-sparkle {|
+-    top: 52px;|
+-}|
+-.city-league-other-print-sparkle-hasdeck {|
+-    top: 52px;|
+-}|
+ |
+@@ -1857,11 +1851,5 @@ img[src*="limitlesstcg"] {|
+ .city-league-other-print-sparkle {|
++    /* Lage, Groesse und Form: Plaketten-Familie (UI-37, 27.09.2026)|
++     * am Ende von css/mobile-responsive.css. */|
+     position: absolute !important;|
+-    top: 52px !important;|
+-    right: 4px !important;|
+-    display: flex !important;|
+-    align-items: center !important;|
+-    justify-content: center !important;|
+-    width: 20px !important;|
+-    height: 20px !important;|
+-    border-radius: 50% !important;|
+     z-index: 4 !important;|
+@@ -1897,6 +1885,2 @@ img[src*="limitlesstcg"] {|
+     .city-league-other-print-sparkle {|
+-        top: 40px !important;|
+-        right: 3px !important;|
+-        width: 16px !important;|
+-        height: 16px !important;|
+         font-size: 0.55em !important;|
+@@ -1993,4 +1977,9 @@ img[src*="limitlesstcg"] {|
+ }|
++/* UI-36 (27.09.2026): das Preisschild ist so breit wie sein Betrag und|
++ * steht rechts, statt den Rest der Zeile zu fuellen. Gemessen vorher|
++ * (scripts/messe_kartenleiste.py, Rotationen 1280 px): 72 x 24 px,|
++ * 56 % der Zeile — ein Block, der groesser wirkte als die Zahl darin. */|
+ .city-league-card-action-row > .city-league-card-market-btn {|
+-    flex: 1 1 auto;|
++    flex: 0 0 auto;|
++    margin-left: auto;|
+ }|
+diff --git a/index.html b/index.html|
+index 5d51c55..cecd757 100644|
+--- a/index.html|
++++ b/index.html|
+@@ -105,3 +105,3 @@|
+     // If the server has a newer version, we purge caches + SW and hard-reload.|
+-    window.APP_VERSION = '202609272004';|
++    window.APP_VERSION = '202609272155';|
+     (function() {|
+@@ -175,46 +175,46 @@|
+          darf sich auf die Variablen verlassen. -->|
+-    <link rel="stylesheet" href="css/tokens.css?v=202609272004" type="text/css">|
+-    <link rel="stylesheet" href="css/components.css?v=202609272004" type="text/css">|
+-    <link rel="stylesheet" href="css/ds-nav.css?v=202609272004">|
+-    <link rel="stylesheet" href="css/styles.css?v=202609272004" type="text/css">|
+-    <link rel="stylesheet" href="css/ui-components.css?v=202609272004" type="text/css">|
+-    <link rel="stylesheet" href="css/ds-share.css?v=202609272004">|
+-    <link rel="stylesheet" href="css/pokeball-menu.css?v=202609272004" type="text/css">|
+-    <link rel="stylesheet" href="css/dashboard-theme.css?v=202609272004" type="text/css">|
++    <link rel="stylesheet" href="css/tokens.css?v=202609272155" type="text/css">|
++    <link rel="stylesheet" href="css/components.css?v=202609272155" type="text/css">|
++    <link rel="stylesheet" href="css/ds-nav.css?v=202609272155">|
++    <link rel="stylesheet" href="css/styles.css?v=202609272155" type="text/css">|
++    <link rel="stylesheet" href="css/ui-components.css?v=202609272155" type="text/css">|
++    <link rel="stylesheet" href="css/ds-share.css?v=202609272155">|
++    <link rel="stylesheet" href="css/pokeball-menu.css?v=202609272155" type="text/css">|
++    <link rel="stylesheet" href="css/dashboard-theme.css?v=202609272155" type="text/css">|
+     <!-- Non-critical CSS: async load (tab-specific styles) -->|
+-    <link rel="stylesheet" href="css/auth-styles.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-header.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-filter-section.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-tabs.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/city-league.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/anti-tech.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/tech-lab.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/tech-slots.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/profile-howto-info.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/masterclass.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/meta-call.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/app-meta-prognose.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/side-quest.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ds-pocket.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/quellen.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/admin.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/statuszustaende.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/tippziele.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/testing-groups.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/archetype-icons.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step1.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step2.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step3.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step4.css?v=202609272004" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/auth-styles.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/cards-header.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/cards-filter-section.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/cards-tabs.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/city-league.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/anti-tech.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/tech-lab.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/tech-slots.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/profile-howto-info.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/masterclass.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/meta-call.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/app-meta-prognose.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/side-quest.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ds-pocket.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/quellen.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/admin.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/statuszustaende.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/tippziele.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/testing-groups.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/archetype-icons.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step1.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step2.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step3.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step4.css?v=202609272155" type="text/css" media="print" onload="this.media='all'">|
+     <!-- Mobile Responsive Optimization — SCHRITT 1 (Layout Umbrüche) -->|

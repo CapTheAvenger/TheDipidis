@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-09-26 10:04:27+00:00",
+ "erzeugt": "2026-09-27 02:12:09+00:00",
  "format": "TEF-30C",
  "betriebsart": "B",
  "betriebsart_klartext": "Kaltstart — TEF-30C hat noch kein Praesenzturnier, Anker ist die Vorepoche TEF-CRI",
@@ -33,23 +33,23 @@
  ],
  "ankerspieler_gesamt": 9691,
  "online_abdeckung": {
-  "schnappschuss": "2026-09-26",
-  "anteil_unbekannt": 1.17,
+  "schnappschuss": "2026-09-27",
+  "anteil_unbekannt": 1.07,
   "groesste_unbekannte": [
    {
     "deck": "Gengar",
-    "anteil": 0.65
+    "anteil": 0.6
    },
    {
     "deck": "Mega Gengar",
-    "anteil": 0.12
-   },
-   {
-    "deck": "Mamoswine",
-    "anteil": 0.04
+    "anteil": 0.11
    },
    {
     "deck": "Mega Lopunny",
+    "anteil": 0.05
+   },
+   {
+    "deck": "Mamoswine",
     "anteil": 0.04
    },
    {
@@ -317,58 +317,58 @@
  ],
  "vertrauen": {
   "turniere": 24,
-  "empfehlung_mittel": 21.34,
-  "feld_mittel": 14.77,
-  "bestmoeglich_mittel": 39.85,
-  "vorsprung": 6.57,
-  "vorsprung_standardfehler": 2.29,
-  "anteil_am_erreichbaren": 26.2,
-  "median": 18.91,
+  "empfehlung_mittel": 20.25,
+  "feld_mittel": 15.27,
+  "bestmoeglich_mittel": 39.59,
+  "vorsprung": 4.99,
+  "vorsprung_standardfehler": 2.24,
+  "anteil_am_erreichbaren": 20.5,
+  "median": 17.94,
   "quartil_unten": 13.52,
-  "quartil_oben": 30.59,
+  "quartil_oben": 28.71,
   "day2_ueberhaupt_erreicht": 23,
-  "ueber_feldschnitt": 16,
-  "bestes_deck_getroffen": 2,
-  "unter_den_besten_drei": 10,
+  "ueber_feldschnitt": 15,
+  "bestes_deck_getroffen": 1,
+  "unter_den_besten_drei": 8,
   "schlechtester_fall": 0.0,
-  "deckabdeckung": 85.9
+  "deckabdeckung": 86.0
  },
  "vertrauen_je_betriebsart": {
   "A": {
-   "turniere": 44,
-   "empfehlung_mittel": 24.73,
-   "feld_mittel": 14.88,
-   "bestmoeglich_mittel": 35.83,
-   "vorsprung": 9.85,
-   "vorsprung_standardfehler": 1.37,
-   "anteil_am_erreichbaren": 47.0,
-   "median": 23.85,
-   "quartil_unten": 20.13,
-   "quartil_oben": 27.53,
-   "day2_ueberhaupt_erreicht": 43,
-   "ueber_feldschnitt": 41,
-   "bestes_deck_getroffen": 7,
-   "unter_den_besten_drei": 18,
+   "turniere": 46,
+   "empfehlung_mittel": 24.91,
+   "feld_mittel": 14.83,
+   "bestmoeglich_mittel": 36.01,
+   "vorsprung": 10.09,
+   "vorsprung_standardfehler": 1.36,
+   "anteil_am_erreichbaren": 47.6,
+   "median": 23.91,
+   "quartil_unten": 19.84,
+   "quartil_oben": 28.11,
+   "day2_ueberhaupt_erreicht": 45,
+   "ueber_feldschnitt": 42,
+   "bestes_deck_getroffen": 8,
+   "unter_den_besten_drei": 19,
    "schlechtester_fall": 0.0,
-   "deckabdeckung": 99.4
+   "deckabdeckung": 99.3
   },
   "B": {
    "turniere": 24,
-   "empfehlung_mittel": 21.34,
-   "feld_mittel": 14.77,
-   "bestmoeglich_mittel": 39.85,
-   "vorsprung": 6.57,
-   "vorsprung_standardfehler": 2.29,
-   "anteil_am_erreichbaren": 26.2,
-   "median": 18.91,
+   "empfehlung_mittel": 20.25,
+   "feld_mittel": 15.27,
+   "bestmoeglich_mittel": 39.59,
+   "vorsprung": 4.99,
+   "vorsprung_standardfehler": 2.24,
+   "anteil_am_erreichbaren": 20.5,
+   "median": 17.94,
    "quartil_unten": 13.52,
-   "quartil_oben": 30.59,
+   "quartil_oben": 28.71,
    "day2_ueberhaupt_erreicht": 23,
-   "ueber_feldschnitt": 16,
-   "bestes_deck_getroffen": 2,
-   "unter_den_besten_drei": 10,
+   "ueber_feldschnitt": 15,
+   "bestes_deck_getroffen": 1,
+   "unter_den_besten_drei": 8,
    "schlechtester_fall": 0.0,
-   "deckabdeckung": 85.9
+   "deckabdeckung": 86.0
   }
  }
 }

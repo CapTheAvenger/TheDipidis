@@ -15,7 +15,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const ALT = /\b(Tag[ -]?[12]\b|TAG[ -][12]\b|Tag[ -]zwei|zweite[nr]? Tag\b|Day[ -]?two\b|DAY TWO|day[ -][12] (?!-))/;
+const ALT = /\b(Tag[ -]?[12]\b|TAG[ -][12]\b|Tag[ -]zwei|zweite[nr]? Tag\b|Day[ -]?two\b|DAY TWO|day[ -][12](?![-\w])|second day\b)/;
 
 const leer = (m) => m.replace(/[^\n]/g, ' ');
 function ohneKommentareJs(s) {

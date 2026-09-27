@@ -1097,7 +1097,7 @@ const translations = {
     'arc.wrTipOhne':            'No in-person matches for this deck in this format yet.',
     'arc.day2Label':            'Day 2 rate (major)',
     'arc.day2Ctx':              'field average {s} %',
-    'arc.day2Tip':              '{d2} of {d1} entries made day 2. In-person events only \u2014 online has no second day.',
+    'arc.day2Tip':              '{d2} of {d1} entries made Day 2. In-person events only \u2014 online has no Day 2.',
     'arc.day2Duenn':            'too few entries',
     'arc.day2DuennTip':         'This deck had {d1} entries \u2014 too few for a rate.',
     'arc.day2OhneTip':          'No in-person event with this deck in this format yet. Day 2 is in-person only.',

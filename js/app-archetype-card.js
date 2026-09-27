@@ -1340,7 +1340,7 @@
                     : ''),
                 L('arc.day2Tip', de
                     ? '{d2} von {d1} Antritten haben Day 2 erreicht. Nur Präsenzturniere — online gibt es kein Day 2.'
-                    : '{d2} of {d1} entries made day 2. In-person events only — online has no second day.')
+                    : '{d2} of {d1} entries made Day 2. In-person events only — online has no Day 2.')
                     .replace('{d2}', fmtGanz(m.day2))
                     .replace('{d1}', fmtGanz(m.day1)),
                 arrow(feld.day2Quote != null ? m.day2Quote - feld.day2Quote : 0))
@@ -1499,7 +1499,7 @@
             major = de
                 ? `Major-Zahlen und Day 2: data/labs_tournament_decks_${z.key}.csv — `
                   + `${z.turniere} ${z.turniere === 1 ? 'Turnier' : 'Turniere'} ${spanne}.`
-                : `Major figures and day 2: data/labs_tournament_decks_${z.key}.csv — `
+                : `Major figures and Day 2: data/labs_tournament_decks_${z.key}.csv — `
                   + `${z.turniere} ${z.turniere === 1 ? 'event' : 'events'} ${spanne}.`;
         } else {
             major = de

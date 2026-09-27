@@ -18,10 +18,10 @@ test('keine sichtbare Zeichenkette sagt „Tag 2" oder „Day two"', () => {
 });
 
 test('das Werkzeug erkennt die alten Schreibweisen (Gegenprobe)', () => {
-    for (const alt of ["'Tag 2'", "'Tag-2-Listen'", "'day-2 list'", "'Day two'", "'Tag-1-Antritte'"]) {
+    for (const alt of ["'Tag 2'", "'Tag-2-Listen'", "'day-2 list'", "'Day two'", "'Tag-1-Antritte'", "'made day 2.'", "'no second day'"]) {
         assert.equal(W.messe('var x = ' + alt + ';', true).treffer.length, 1, alt);
     }
-    for (const neu of ["'Day 2'", "'Day-2-Listen'", "'Day 2 list'", "'Tagebuch 2'"]) {
+    for (const neu of ["'Day 2'", "'Day-2-Listen'", "'Day 2 list'", "'Tagebuch 2'", "'day-2-quote'"]) {
         assert.equal(W.messe('var x = ' + neu + ';', true).treffer.length, 0, neu);
     }
 });

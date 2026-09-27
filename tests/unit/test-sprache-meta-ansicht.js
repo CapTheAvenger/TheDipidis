@@ -96,11 +96,18 @@ describe('js/app-tier-meta.js — nichts mehr fest verdrahtet', () => {
         });
     }
 
-    it('beide tierTitles-Tabellen holen jeden Untertitel aus t()', () => {
+    it('jede tierTitles-Tabelle holt jeden Untertitel aus t() — oder hat keinen', () => {
+        // Seit UI-15/20/21/22 (27.09.2026, Hausi) traegt die Tabelle des
+        // aktuellen Metas KEINE Untertitel mehr („Tier 1" reicht, der
+        // Rogue-Block heisst „Rogue"). Die City-League-Tabelle behaelt
+        // ihre vier, denn die nennen die Raenge.
         const tabellen = TIER.match(/const tierTitles = \{[\s\S]*?\};/g) || [];
         assert.equal(tabellen.length, 2,
             'erwartet werden genau die zwei bekannten Tabellen, gefunden: ' + tabellen.length);
-        for (const [i, tb] of tabellen.entries()) {
+        const ohne = tabellen.filter(tb => !/subtitle:/.test(tb));
+        assert.equal(ohne.length, 1, 'genau eine Tabelle (aktuelles Meta) ist ohne Untertitel');
+        assert.match(ohne[0], /'tier-trending':\s*\{\s*title:\s*'Rogue'\s*\}/);
+        for (const [i, tb] of tabellen.filter(tb => /subtitle:/.test(tb)).entries()) {
             // Vier Eintraege, vier t()-Aufrufe, kein Literal dazwischen.
             const rufe = tb.match(/t\('([^']+)'\)/g) || [];
             assert.equal(rufe.length, 4,
@@ -134,8 +141,8 @@ describe('js/app-tier-meta.js — nichts mehr fest verdrahtet', () => {
         for (const tb of tabellen) {
             for (const m of tb.matchAll(/t\('([^']+)'\)/g)) schluessel.add(m[1]);
         }
-        assert.ok(schluessel.size >= 5,
-            'die beiden Tabellen benutzen dieselben Schluessel — dann sagen sie wieder dasselbe');
+        assert.ok(schluessel.size >= 4,
+            'die City-League-Tabelle hat ihre vier Untertitel verloren');
         const I18N = fs.readFileSync(path.join(ROOT, 'js/i18n.js'), 'utf8');
         for (const k of schluessel) {
             const treffer = I18N.match(new RegExp("'" + k.replace('.', '\\.') + "':", 'g')) || [];

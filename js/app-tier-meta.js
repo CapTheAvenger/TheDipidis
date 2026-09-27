@@ -1841,15 +1841,15 @@
                 }
             });
             
+            // UI-15/20/21/22 (27.09.2026, Hausi): keine Zusatztexte mehr.
+            // „Tier 1" sagt schon, was „Beherrschen das Meta" sagen
+            // wollte; der Rogue-Block heisst nur noch „Rogue". Die
+            // Einteilung selbst (Schwellen oben) bleibt unveraendert.
             const tierTitles = {
-                'tier-1':        { title: 'Tier 1',           subtitle: t('tier.sub1')     },
-                'tier-2':        { title: 'Tier 2',           subtitle: t('tier.sub2')     },
-                'tier-3':        { title: 'Tier 3',           subtitle: t('tier.sub3')     },
-                // "Aufkommende Archetypen" war eine Aussage ueber die Zukunft
-                // dieser Decks. Was den Block wirklich zusammenhaelt, ist,
-                // dass sie unter den Tier-Schwellen liegen — und dass ihre
-                // Zahlen auf den duennsten Stichproben der Seite stehen.
-                'tier-trending': { title: 'Rogue / Trending',  subtitle: t('tier.cmSubRogue') }
+                'tier-1':        { title: 'Tier 1' },
+                'tier-2':        { title: 'Tier 2' },
+                'tier-3':        { title: 'Tier 3' },
+                'tier-trending': { title: 'Rogue' }
             };
             
             // Limit trending decks to top 20
@@ -2441,7 +2441,11 @@
 
                     overallTop8Html = `
                         <div class="ds-panel cm-rangliste-block">
-                            <h3 class="ds-label">🏆 ${deR ? 'Meta-Performance' : 'Meta performance'}</h3>
+                            <!-- UI-23 (27.09.2026, Hausi): die zweite Ueberschrift
+                                 „🏆 Meta-Performance" und der Verweis „Nenner und
+                                 Rechenweg →" sind weg — der Abschnitt heisst schon
+                                 so, und der Rechenweg steht hinter dem Info-Knopf
+                                 und unter „Quellen und Methodik". -->
                             <!-- DER ERKLAERTEXT WANDERT HINTER DEN KNOPF
                                  (10.09.2026). Er stand als sieben Zeilen ueber
                                  einer Tabelle mit neun Spalten. Gemeldet mit
@@ -2516,8 +2520,7 @@
                                 /* Ohne Register bleibt der Text, wo er war —
                                    sonst waere die Erklaerung ersatzlos weg. */
                                 return langText;
-                            })()}<a class="qu-verweis" href="#quellen">${
-                                    deR ? 'Nenner und Rechenweg →' : 'Denominators and method →'}</a></p>
+                            })()}</p>
                             <div class="mobile-table-scroll">
                                 <table class="ds-table cm-rangliste" data-rang-sortiert="listen" data-rang-richtung="ab">
                                     <thead><tr><th class="ds-rank">#</th>${kopfZellen}</tr></thead>
@@ -2726,7 +2729,6 @@
                 const decks = tierGroups[tierKey];
                 if (decks.length === 0) return;
                 const tierMeta = tierTitles[tierKey];
-                const isTrending = tierKey === 'tier-trending';
 
                 // Tier 1 bis 3 bekommen die volle Archetyp-Karte, eine je
                 // Zeile: das sind die Decks, die man wirklich gegeneinander
@@ -2753,21 +2755,12 @@
                 const isStacked = (tierKey === 'tier-1' || tierKey === 'tier-2' || tierKey === 'tier-3');
                 const gridCls = isStacked ? 'arc-inline-list' : 'deck-grid tier-deck-grid';
 
-                if (isTrending) {
-                    html += `
+                // UI-13: auch der Rogue-Block ist offen — kein <details>
+                // mehr. Eine Unterzeile steht nur, wenn es eine gibt.
+                html += `
                     <div class="tier-section ${tierKey}" id="cm-${tierKey}">
-                        <details>
-                            <summary class="tier-trending-summary">
-                                <h3 style="display:inline;">${tierMeta.title} <small>${tierMeta.subtitle}</small></h3>
-                                <span class="tier-trending-count">${decks.length} Decks</span>
-                            </summary>
-                            <div class="${gridCls}">`;
-                } else {
-                    html += `
-                    <div class="tier-section ${tierKey}" id="cm-${tierKey}">
-                        <h3>${tierMeta.title} <small>${tierMeta.subtitle}</small></h3>
+                        <h3>${tierMeta.title}${tierMeta.subtitle ? ` <small>${tierMeta.subtitle}</small>` : ''}</h3>
                         <div class="${gridCls}">`;
-                }
                 
                 decks.forEach(deck => {
                     const archetypeName = deck.archetype;
@@ -2909,16 +2902,9 @@
                         </div>`;
                 });
                 
-                if (isTrending) {
-                    html += `
-                            </div>
-                        </details>
-                    </div>`;
-                } else {
-                    html += `
+                html += `
                         </div>
                     </div>`;
-                }
             });
             
             html += '</div>';

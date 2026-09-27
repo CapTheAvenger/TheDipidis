@@ -1642,7 +1642,16 @@
        ZUSAETZLICH zu den 12 px, die jede .ds-sec-Karte darin schon hat.
        Gemessen auf 390 px: die Heatmap kam damit auf 314 statt 362 px. */
     padding: var(--s-6) var(--page-gutter);
+    /* UI-13 (27.09.2026, Hausi): „Zwischenraum nach dem Datenraum weg,
+       direkt weiter mit den meistgespielten Archetypen." Die Filterzeile
+       darueber bringt ihren eigenen Abstand mit. */
+    padding-top: 0;
     background: var(--surface-1);
+}
+/* Ohne Kopf (seit 11.09.2026 in der Meta-Ansicht) ist das Raster das erste
+   Kind — sein Abstand nach oben war dann ein leerer Streifen (UI-13). */
+.tier-hero-section > .tier-hero-grid:first-child {
+    margin-top: 0;
 }
 .city-league-add-card-panel {
     margin-bottom: 18px;

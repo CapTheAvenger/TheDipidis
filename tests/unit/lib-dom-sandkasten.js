@@ -313,6 +313,10 @@ function Knoten(tag, dok) {
         while (k) { if (passt(k, s)) return k; k = k.parentElement; }
         return null;
     };
+    /* Nur einfache Verbundbedingungen, auch durch Komma getrennt —
+       js/ds-sections.js (sammle) braucht nicht mehr (UI-13, 27.09.2026). */
+    self.matches = (s) => String(s).split(',').some(z => passt(self, z));
+    self.contains = (k) => { while (k) { if (k === self) return true; k = k.parentElement; } return false; };
 
     self.addEventListener = (art, f) => { (self._hoerer[art] = self._hoerer[art] || []).push(f); };
     self.removeEventListener = (art, f) => {

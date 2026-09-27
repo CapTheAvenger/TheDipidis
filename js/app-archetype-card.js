@@ -170,8 +170,14 @@
      * „vielleicht koennen wir den freigewordenen Platz irgendwie ja
      * dafuer nutzen". Eine Zeile misst 34 px, die beiden Absaetze
      * zusammen rund 130 — das sind knapp vier Zeilen, und zwoelf statt
-     * acht kostet vier. */
-    const MU_VORSCHAU = 12;
+     * acht kostet vier.
+     *
+     * Sind zwanzig (27.09.2026, UI-19, Hausi): „Top 12" und „Alle 20"
+     * waren zwei Knoepfe fuer fast dieselbe Tabelle. Jetzt EIN Knopf
+     * „Top 20 Matchups anzeigen", der beim Aufklappen gleich die zwanzig
+     * zeigt. Den Knopf „Alle {n}" gibt es nur noch, wenn ein Deck mehr
+     * als zwanzig Gegner hat. */
+    const MU_VORSCHAU = 20;
 
     /* ── WELCHE PAARUNGEN DIE VORSCHAU ZEIGT ─────────────────────────
      *
@@ -1821,7 +1827,7 @@
            `all.length`. Zwei Knoepfe, zwei Zahlen, beide wahr. */
         return `<details class="arc-mu-details">
                 <summary class="arc-mu-summary">${esc(
-                    L('arc.matchupsToggle', de ? 'Matchups anzeigen ({n})' : 'Show matchups ({n})')
+                    L('arc.matchupsToggle', de ? 'Top {n} Matchups anzeigen' : 'Show top {n} matchups')
                         .replace('{n}', String(rows.length)))}</summary>
                 ${table}
             </details>`;
@@ -2142,8 +2148,8 @@
         html += '<p>' + esc(zeitraumText()) + '</p>';
         html += '<p>' + esc(legendeText(hatMajor)) + '</p>';
         html += '<p>' + esc(de
-            ? 'Die zugeklappte Karte zeigt ' + MU_VORSCHAU + ' Paarungen: je zur Hälfte die mit den meisten Begegnungen über und unter 50 %, danach nach Quote sortiert. Nicht die besten und schlechtesten — eine Paarung, die man zweimal trifft, zählt für die Vorbereitung weniger als eine, die ständig kommt. „Alle" zeigt die vollständige Liste.'
-            : 'The collapsed card shows ' + MU_VORSCHAU + ' pairings: half of them the most-played above 50 %, half the most-played below, then sorted by rate. Not the best and worst — a pairing you meet twice matters less for preparation than one you meet constantly. “All” shows the full list.')
+            ? 'Der Knopf „Top ' + MU_VORSCHAU + ' Matchups anzeigen“ zeigt bis zu ' + MU_VORSCHAU + ' Paarungen: hat ein Deck mehr Gegner, je zur Hälfte die mit den meisten Begegnungen über und unter 50 %, danach nach Quote sortiert. Nicht die besten und schlechtesten — eine Paarung, die man zweimal trifft, zählt für die Vorbereitung weniger als eine, die ständig kommt. „Alle" zeigt dann die vollständige Liste.'
+            : 'The button “Show top ' + MU_VORSCHAU + ' matchups” shows up to ' + MU_VORSCHAU + ' pairings: if a deck has more opponents, half of them the most-played above 50 %, half the most-played below, then sorted by rate. Not the best and worst — a pairing you meet twice matters less for preparation than one you meet constantly. “All” then shows the full list.')
             + '</p>';
         return html;
     };

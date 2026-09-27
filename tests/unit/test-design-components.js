@@ -113,7 +113,10 @@ describe('Current Meta benutzt die Komponenten wirklich', () => {
         // 🏆 "Wie oft Top-8 erreicht") plus eine dritte darunter. Alle drei
         // zeigten dieselben Decks mit denselben Spalten in anderer
         // Reihenfolge; seit dem 19.08.2026 ist es eine sortierbare Tabelle.
-        assert.match(TIER, /<div class="ds-panel cm-rangliste-block">\s*\n\s*<h3 class="ds-label">🏆/);
+        // UI-23 (27.09.2026): die zweite Ueberschrift „🏆 Meta-Performance"
+        // im Panel ist weg — der Abschnitt heisst schon so.
+        assert.match(TIER, /<div class="ds-panel cm-rangliste-block">/);
+        assert.ok(!/<h3 class="ds-label">🏆/.test(TIER), 'die doppelte Ueberschrift ist zurueck');
         assert.ok(!/<h3 class="ds-label">🌐/.test(TIER),
             'die zweite Rangliste ist wieder da');
         // Bis zum 01.09.2026 waren es zwei: die Rangliste und die

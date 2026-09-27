@@ -1617,11 +1617,7 @@
    Fix: Reduce badge size proportionally on mobile */
 @media (max-width: 480px) {
   .wishlist-heart-badge {
-    width: 16px !important;
-    height: 16px !important;
     font-size: var(--fs-xs) !important;
-    top: 20px !important;
-    right: 3px !important;
   }
 }
 
@@ -1760,12 +1756,19 @@
      * er nicht, bricht flex-wrap ihn auf eine eigene. Mit `100 %` brach
      * er immer um, auch auf einer 143 px breiten Kachel, auf der er
      * bequem danebenpasst. */
-    flex: 1 1 60px;
+    flex: 0 0 auto;
+    margin-left: auto;
     min-width: 0;
     padding: 0 var(--s-1);
-    overflow: hidden;
     white-space: nowrap;
   }
+  /* UI-36 (27.09.2026): Basis ist jetzt die Breite des Betrags selbst
+   * (`flex: 0 0 auto`), nicht pauschal 60 px. Das ist die Bedingung, die
+   * gemeint war: umbrechen genau dann, wenn der Betrag nicht neben L
+   * und P passt — und weil das Schild nicht schrumpft, wird die Zahl
+   * dabei nie abgeschnitten. Gemessen vorher bei 390 px in Rotationen:
+   * „0,14€" brach auf eine eigene Zeile und wurde 94 px breit (92 % der
+   * Zeile), die Leiste unter dem Bild war 164 px hoch. */
 }
 
 /* 4. CITY LEAGUE STATS GRID: Fix cut-off "AVERAGE PLACEMENT" label
@@ -2211,10 +2214,9 @@
     font-size: var(--fs-xs);
     padding: 1px 4px;
   }
-  /* Wishlist badge on card thumbnails */
+  /* Wishlist badge on card thumbnails: Groesse seit UI-37 in der
+   * Plaketten-Familie am Ende dieser Datei. */
   .wishlist-heart-badge {
-    width: 20px !important;
-    height: 20px !important;
     font-size: 11px !important;
   }
 }
@@ -2258,21 +2260,13 @@
    the count badge (.city-league-card-badge) which is 20px on desktop, ~16-18px on mobile */
 @media (max-width: 768px) {
   .wishlist-heart-badge {
-    width: 18px !important;
-    height: 18px !important;
     font-size: 10px !important;
-    top: 24px !important;
-    right: 3px !important;
     border-width: 1px !important;
   }
 }
 @media (max-width: 480px) {
   .wishlist-heart-badge {
-    width: 16px !important;
-    height: 16px !important;
     font-size: var(--fs-xs) !important;
-    top: 22px !important;
-    right: 2px !important;
     border-width: 1px !important;
   }
   /* Ohne !important: ui-components.css wird frueher geladen, diese
@@ -2280,8 +2274,6 @@
    * hier nie etwas geschlagen — sie haben nur css/ds-share.css daran
    * gehindert, der Anzahl-Plakette eine eigene Form zu geben. */
   .city-league-card-badge {
-    width: 18px;
-    height: 18px;
     font-size: 0.6em;
   }
 }
@@ -2519,24 +2511,9 @@
   }
 
   /* ── Deck-count badge & wishlist badge: smaller ── */
-  .meta-card-grid .card-badge,
-  .meta-card-analysis-grid .card-badge,
-  #cityLeagueMetaGrid .card-badge,
-  #currentMetaMetaGrid .card-badge {
-    width: 16px !important;
-    height: 16px !important;
-    font-size: 0.6em !important;
-  }
-
-  .meta-card-grid .wishlist-heart-badge,
-  .meta-card-analysis-grid .wishlist-heart-badge,
-  #cityLeagueMetaGrid .wishlist-heart-badge,
-  #currentMetaMetaGrid .wishlist-heart-badge {
-    width: 16px !important;
-    height: 16px !important;
-    font-size: 10px !important;
-    top: 20px !important;
-  }
+  /* Plaketten und Herz: Groesse steht seit UI-37 (27.09.2026) in der
+   * Plaketten-Familie am Ende dieser Datei. Die 16-px-Regel hier trug
+   * eine ID und schlug die Familie deshalb trotz gleichem !important. */
 }
 
 @media (max-width: 480px) {
@@ -2995,4 +2972,69 @@
     .ds-table th.ds-num {
         white-space: normal;
     }
+}
+
+/* ===========================================================
+   UI-37 — Plaketten-Familie (27.09.2026, Entscheidung Hausi:
+   „rund wie im Deck Builder", einheitlich in Form und Groesse).
+
+   Gemessen vorher (scripts/messe_plaketten.py, Rotationen):
+   bei 390 px fuenf Formen — Sechseck 22x22, eckig 22x22, rund 22,
+   rund 16, rund 16; bei 1280 px Sechseck 28x32, eckig 20x20, rund
+   22, 20, 20. Die Groessen kamen aus einem Dutzend Regeln in vier
+   Dateien, viele mit !important, jede fuer einen anderen Bereich.
+
+   Deshalb steht die Familie hier, in der zuletzt geladenen Datei,
+   an EINER Stelle: eine Groesse --plakette, eine Form, ein Abstand.
+   Die rechte Spalte stapelt sich aus derselben Variable, damit Herz
+   und „andere Drucke" nie auf der Plakette darueber liegen.
+   Ohne !important: die aelteren Groessen- und Lageregeln, die es
+   trugen, sind dafuer an ihrer Stelle geleert (index.html,
+   ui-components.css, styles.css und weiter oben in dieser Datei).
+   =========================================================== */
+:root {
+    --plakette: 22px;
+    --plakette-abstand: 3px;
+    --plakette-rand: 4px;
+}
+/* Keine kleinere Stufe fuers Handy: der Audit vom 10.06.2026 hat die
+ * Plaketten dort von 16 auf 22 px gehoben (Inline-Regel in index.html),
+ * weil 16 px auf dem Daumenbild zum Punkt wurden. */
+
+.city-league-card-badge,
+.wishlist-heart-badge,
+.city-league-other-print-sparkle,
+.card-max-count,
+.my-deck-card-count,
+.card-item .card-badge.pos-abs {
+    width: var(--plakette);
+    height: var(--plakette);
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border-radius: 50%;
+    clip-path: none;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* Rechte Spalte: erste Zeile oben, darunter Herz, darunter
+ * „andere Drucke". Die obere Zeile traegt links wie rechts
+ * dieselbe Hoehe. */
+.city-league-card-badge,
+.card-max-count,
+.my-deck-card-count,
+.card-item .card-badge.pos-abs {
+    top: var(--plakette-rand);
+}
+.wishlist-heart-badge {
+    top: calc(var(--plakette-rand) + var(--plakette) + var(--plakette-abstand));
+    right: var(--plakette-rand);
+}
+.city-league-other-print-sparkle {
+    top: calc(var(--plakette-rand) + 2 * (var(--plakette) + var(--plakette-abstand)));
+    right: var(--plakette-rand);
 }

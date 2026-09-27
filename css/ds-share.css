@@ -161,51 +161,29 @@
 .card-usage-bar[data-usage="option"] .card-usage-fill { background: var(--brand); }
 .card-usage-bar[data-usage="main"]   .card-usage-fill { background: var(--gold); }
 
-/* Die Anzahl, die das Feld spielt: Sechseck unten links, wie bei
- * poke_hive. Ein Sechseck bleibt auch auf einem 92-px-Daumenbild als
- * Plakette erkennbar, ein 18-px-Kreis wird zum Punkt. */
+/* Die Anzahl, die das Feld spielt: oben links, rot.
+ * UI-37 (27.09.2026, Entscheidung Hausi): kein Sechseck mehr — alle
+ * Plaketten auf dem Kartenbild sind rund und gleich gross, wie im Deck
+ * Builder. Form und Groesse stehen in der Plaketten-Familie am Ende von
+ * css/mobile-responsive.css; hier bleiben nur Ecke und Farbe. */
 .city-league-card-image-container .city-league-card-badge-max {
     /* Oben links, nicht unten links: die untere Kante des Bildcontainers
      * gehoert der Infoleiste mit den Aktionsknoepfen — eine Plakette
      * dort liegt auf dem Minus-Knopf und faengt seinen Klick ab. */
-    top: 5px;
-    left: 5px;
+    left: 4px;
     right: auto;
     bottom: auto;
-    width: 28px;
-    height: 32px;
-    border: 0;
-    border-radius: 0;
     background: #e3350d;
-    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
     font-family: var(--font-num);
-    font-size: var(--fs-md);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
 }
 
-/* Die Anzahl im eigenen Deck: eckige Marke oben rechts, in der
- * Markenfarbe. Andere Ecke, andere Form, andere Farbfamilie — drei
- * Unterschiede, damit einer ausfallen darf. */
+/* Die Anzahl im eigenen Deck: oben rechts, in der Markenfarbe. Andere
+ * Ecke und andere Farbe unterscheiden sie von der Feld-Anzahl. */
 .city-league-card-image-container .city-league-card-badge-deck {
-    top: 5px;
     left: auto;
-    right: 5px;
-    border-radius: var(--r-sm);
+    right: 4px;
     background: var(--brand);
     font-family: var(--font-num);
-}
-
-/* Auf schmalen Geraeten schrumpft css/mobile-responsive.css alle
- * Plaketten auf 18 px. Die Plakette darf mitschrumpfen, aber sie bleibt
- * ein Sechseck — der Formunterschied ist genau das, was auf einem
- * 92-px-Daumenbild noch traegt. Zwei Klassen im Selektor, damit die
- * Regel ohne !important gewinnt, obwohl sie frueher geladen wird. */
-@media (max-width: 480px) {
-    .city-league-card-image-container .city-league-card-badge-max {
-        width: 22px;
-        height: 25px;
-        font-size: var(--fs-sm);
-    }
 }
 
 /* Der Punkt vor der Abschnittsüberschrift im Kartengitter. Vorher

@@ -1155,9 +1155,10 @@
                     if (Array.isArray(parsed.excluded) && typeof window.excludedCardsFromArray === 'function') {
                         window.excludedCardsFromArray('pastMeta', parsed.excluded);
                     }
-                    if (Array.isArray(parsed.techSlots) && typeof window.techSlotsFromArray === 'function') {
-                        window.techSlotsFromArray('pastMeta', parsed.techSlots);
-                    }
+                    /* FE-10 (27.09.2026): Rotationen hat keinen Tech-Karten-Block
+                       mehr. Gespeicherte Tech-Karten NICHT wieder einlesen —
+                       sonst zwaenge der naechste Generate Karten ins Deck, die
+                       niemand sieht und niemand entfernen kann. */
                     devLog('Loaded Past Meta deck from localStorage:', Object.keys(window.pastMetaDeck).length, 'cards');
                     return true;
                 }

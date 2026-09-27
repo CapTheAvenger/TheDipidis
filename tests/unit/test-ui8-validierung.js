@@ -7,7 +7,7 @@
  *   (3) JP-Signalfarbe                            schon da (--space-jp Bernstein, nicht Rot)
  *   (4) Oe-Kopien-Verteilung                      HIER — Spanne aus max_count, mehr fuehren die Daten nicht
  *   (5) Tooltips fuer Fachbegriffe                HIER — 8 Kopfzeilen ohne Erklaerung (gemessen)
- *   (6) Rohdaten-Link                             HIER — am Datenstands-Chip
+ *   (6) Rohdaten-Link                             gebaut 26.09., auf Wunsch wieder entfernt 27.09. (UI-30/31)
  *   (7) CSV-Export                                HIER — js/ds-csv.js
  *   (8) Past-Meta-Vorauswahl                      schon da (defaultFormat = neuestes Fenster)
  *   (9) Deep-Links                                schon da (#current-analysis?deck=…, js/inline-init.js)
@@ -89,25 +89,43 @@ function fakeEl(tag) {
     return el;
 }
 
-describe('UI-8 (6): vom Datenstand zur Quelldatei', () => {
-    const src = R('js/ds-datenstand.js');
-    const code = src.slice(src.indexOf('var ROHDATEN_BASIS'), src.indexOf('/**\n     * Fuellt alle Chips.'));
-    it('der Chip bekommt genau einen Verweis auf die eigene Datei', () => {
+/* UI-30/UI-31 (27.09.2026): der Rohdaten-Verweis aus UI-8 (6) ist auf
+ * Hausis Wunsch wieder weg. Die Probe fuehrt das Modul aus und zeichnet
+ * einen echten Chip — sie liest keinen Quelltext. */
+describe('UI-30/UI-31: der Datenstands-Chip zeigt keinen Rohdaten-Verweis', () => {
+    function lauf() {
         const chip = fakeEl('span'); chip.className = 'data-freshness-chip';
-        const wert = fakeEl('span'); wert.className = 'js-data-freshness'; chip.appendChild(wert);
-        const ctx = { document: { createElement: fakeEl }, de: () => true };
-        vm.runInNewContext(code + '\nrohdatenVerweis(w, "limitless_online_decks.csv"); rohdatenVerweis(w, "limitless_online_decks.csv");', Object.assign(ctx, { w: wert }));
-        const links = chip.kinder.filter(k => k.className === 'data-rohdaten');
-        assert.equal(links.length, 1, 'zweimal gezeichnet, zwei Verweise');
-        assert.equal(links[0].href, 'https://github.com/CapTheAvenger/TheDipidis/blob/main/data/limitless_online_decks.csv');
-        assert.equal(links[0].textContent, 'Rohdaten');
+        chip.classList = { add() {}, remove() {}, toggle() {} };
+        const wert = fakeEl('span'); wert.className = 'js-data-freshness';
+        wert.setAttribute('data-quelle', 'limitless_online_decks.csv');
+        chip.appendChild(wert);
+        const erzeugt = [];
+        const ctx = {
+            window: { getLang: () => 'de' },
+            document: {
+                readyState: 'complete',
+                createElement: (t) => { const e = fakeEl(t); erzeugt.push(e); return e; },
+                querySelectorAll: () => [wert],
+                addEventListener() {},
+            },
+            fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve({
+                dateien: { 'limitless_online_decks.csv': '2026-09-27T02:00:00Z' }, inhalt_bis: {}, leer: [] }) }),
+            Date, Promise, Math, isNaN,
+        };
+        ctx.window.document = ctx.document;
+        vm.runInNewContext(R('js/ds-datenstand.js'), ctx);
+        return new Promise(r => setTimeout(r, 20)).then(() => ({ chip, wert, erzeugt, ctx }));
+    }
+    it('der Chip wird gezeichnet, aber ohne Verweis', async () => {
+        const { chip, wert, erzeugt } = await lauf();
+        assert.match(String(wert.textContent), /2026/, 'der Chip wurde gar nicht gezeichnet — die Probe waere blind');
+        assert.equal(erzeugt.filter(e => e.tagName === 'a').length, 0, 'es wurde ein Verweis erzeugt');
+        assert.equal(chip.kinder.length, 1, 'am Chip haengt mehr als der Datumswert');
     });
-    it('ein Dateiname mit Pfadzeichen bekommt keinen Verweis', () => {
-        const chip = fakeEl('span'); chip.className = 'data-freshness-chip';
-        const wert = fakeEl('span'); chip.appendChild(wert);
-        const ctx = { document: { createElement: fakeEl }, de: () => true };
-        vm.runInNewContext(code + '\nrohdatenVerweis(w, "../x.csv");', Object.assign(ctx, { w: wert }));
-        assert.equal(chip.kinder.length, 1);
+    it('das Modul bietet keinen Verweis-Helfer mehr an', async () => {
+        const { ctx } = await lauf();
+        assert.ok(ctx.window.DsDatenstand, 'Modul nicht geladen');
+        assert.equal(ctx.window.DsDatenstand.rohdatenVerweis, undefined);
     });
 });
 

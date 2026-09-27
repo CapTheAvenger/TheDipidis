@@ -251,7 +251,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
             ['ab 126 Matches je Deck', 'TIER_SCORE.LABS_MIN_PARTIEN'],
             ['bis +127 pp', 'TIER_SCORE.LABS_WR_DECKEL'],
             ['Gewicht 128,0)', 'TIER_SCORE.LABS_WR_GEWICHT'],
-            ['Tag-2-Quote (bis 129,00', 'TIER_SCORE.TAG2_DECKEL'],
+            ['Day-2-Quote (bis 129,00', 'TIER_SCORE.TAG2_DECKEL'],
             ['Gewicht 131)', 'TIER_SCORE.TAG2_GEWICHT'],
             ['hier 132 von 133 Listen', 'minCountThreshold / _maxCount']
         ];
@@ -305,7 +305,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
 
     it('B2: Tag-2-Deckel und -Gewicht im Satz sind die gemessenen', () => {
         const s = satz('de');
-        assert.ok(s.includes('Tag-2-Quote (bis ' + de(GEMESSEN.tag2Deckel, 2)
+        assert.ok(s.includes('Day-2-Quote (bis ' + de(GEMESSEN.tag2Deckel, 2)
             + ', Gewicht ' + de(GEMESSEN.tag2Gewicht, 0) + ')'),
             'gemessen: Deckel ' + GEMESSEN.tag2Deckel + ', Gewicht '
             + GEMESSEN.tag2Gewicht + '\n' + s);
@@ -369,7 +369,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
     it('fehlt die Turnierdatei, sagt der Satz das — statt einen Anteil zu erklaeren, den es nicht gab', () => {
         const s = satz('de', 313.8, 3138, null);
         assert.match(s, /KEINE Turnierdatei/);
-        assert.ok(!s.includes('Tag-2-Quote (bis'), 'der fehlende Anteil wird nicht beschrieben');
+        assert.ok(!s.includes('Day-2-Quote (bis'), 'der fehlende Anteil wird nicht beschrieben');
         assert.match(satz('en', 313.8, 3138, null), /No tournament file/);
     });
 

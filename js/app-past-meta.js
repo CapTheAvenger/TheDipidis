@@ -1166,7 +1166,7 @@
             // Cut, nicht das Feld. Das gehoert an die Zahl geschrieben.
             const deckKachel = document.getElementById('pastMetaStatTournament');
             const dePM = (typeof getLang === 'function' && getLang() === 'de');
-            const listenWort = dePM ? 'Tag-2-Decklisten' : 'day-2 decklists';
+            const listenWort = dePM ? 'Day-2-Decklisten' : 'Day 2 decklists';
             // "74 Tournaments" stand bis zum 03.09.2026 auch in der
             // deutschen Oberflaeche — ein englisches Wort mitten in einer
             // deutschen Kachel, direkt neben dem uebersetzten
@@ -1178,10 +1178,10 @@
                 ? `${tournamentNames[0]} (${totalDecklists} ${listenWort})`
                 : `${uniqueTournamentCount} ${turnierWort} (${totalDecklists} ${listenWort})`;
             deckKachel.title = dePM
-                ? 'Limitless veroeffentlicht Decklisten erst ab Tag 2. Alle Kartenzahlen dieses '
+                ? 'Limitless veroeffentlicht Decklisten erst ab Day 2. Alle Kartenzahlen dieses '
                   + 'Reiters stammen aus dem Top Cut, nicht aus dem ganzen Meta — Anteile sind '
                   + 'dadurch nach oben verzerrt.'
-                : 'Limitless publishes decklists from day 2 onward. Every card figure on this tab '
+                : 'Limitless publishes decklists from Day 2 onward. Every card figure on this tab '
                   + 'comes from the top cut, not the whole field — inclusion rates are biased upward.';
             
             document.getElementById('pastMetaStatFormat').textContent = pastMetaCurrentDeck.format;
@@ -2104,6 +2104,9 @@
             const winPctTitle = [winPctHinweis, winPctKonvSatz].filter(Boolean).join('  ');
             const day2Label = (typeof t === 'function' ? t('pm.perfStatDay2Conv') : 'Day-2 Conversion');
 
+            /* UI-35 (27.09.2026, Hausi): Record und Win % stehen in EINER
+               Kachel nebeneinander, der Konventionssatz unter der Win-%-Zahl
+               ist weg — er steht weiter im title der Zahl. */
             cards.innerHTML = `
                 <div class="past-meta-stat-card">
                     <div class="past-meta-stat-label">${tournLabel}</div>
@@ -2113,19 +2116,20 @@
                     <div class="past-meta-stat-label">${playersLabel}</div>
                     <div class="past-meta-stat-value">${fmtInt(players)}</div>
                 </div>
-                <div class="past-meta-stat-card">
-                    <div class="past-meta-stat-label">${recordLabel}</div>
-                    <div class="past-meta-stat-value past-meta-stat-mono">${fmtInt(wins)}-${fmtInt(losses)}-${fmtInt(ties)}</div>
-                </div>
-                <div class="past-meta-stat-card" title="${(winPctTitle || '').replace(/"/g, '&quot;')}">
-                    <div class="past-meta-stat-label">${winPctLabel}</div>
-                    <div class="past-meta-stat-value">${isFinite(winPct) ? fmtPct(winPct) : '–'}</div>
-                    <div class="past-meta-stat-nenner">${winPctKonvSatz}</div>
+                <div class="past-meta-stat-card past-meta-stat-paar">
+                    <div class="past-meta-stat-teil">
+                        <div class="past-meta-stat-label">${recordLabel}</div>
+                        <div class="past-meta-stat-value past-meta-stat-mono">${fmtInt(wins)}-${fmtInt(losses)}-${fmtInt(ties)}</div>
+                    </div>
+                    <div class="past-meta-stat-teil past-meta-stat-winpct" title="${(winPctTitle || '').replace(/"/g, '&quot;')}">
+                        <div class="past-meta-stat-label">${winPctLabel}</div>
+                        <div class="past-meta-stat-value">${isFinite(winPct) ? fmtPct(winPct) : '–'}</div>
+                    </div>
                 </div>
                 <div class="past-meta-stat-card${day2Duenn ? ' past-meta-stat-duenn' : ''}"${
                     day2Duenn ? ` title="${((typeof t === 'function'
                         ? t('pm.day2ThinTip')
-                        : 'Fewer than {n} day-1 players — this is a single result, not a rate.')
+                        : 'Fewer than {n} Day 1 players — this is a single result, not a rate.')
                         .replace('{n}', String(DAY2_MIN_SPIELER))).replace(/"/g, '&quot;')}"` : ''}>
                     <div class="past-meta-stat-label">${day2Label}</div>
                     <div class="past-meta-stat-value">${day1 > 0 ? fmtPct(day2Conv) : '–'}</div>
@@ -2133,7 +2137,7 @@
                         day1 > 0
                             ? `${fmtInt(day2)} / ${fmtInt(day1)}` + (day2Duenn
                                 ? ` · ${(typeof t === 'function' ? t('pm.day2Thin') : 'thin')}` : '')
-                            : (typeof t === 'function' ? t('pm.day2NoBasis') : 'no day-1 figures')
+                            : (typeof t === 'function' ? t('pm.day2NoBasis') : 'no Day 1 figures')
                     }</div>
                 </div>
             `;

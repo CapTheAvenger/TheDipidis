@@ -544,7 +544,9 @@ describe('was nichts zu sagen hat, steht nicht da', () => {
            aktiven — und laesst die Doppelbedienung genau dort stehen,
            wo sie stoert. Ein Zeichen, und die alte Testfassung blieb
            gruen. */
-        assert.match(F, /var zeigen = \(r\.key !== raum\.key\);/);
+        /* Seit UI-33 (27.09.2026) mit dem Zusatz fuer Raeume, deren Format
+           in der Steuerung steht (Rotationen) — die Richtung bleibt. */
+        assert.match(F, /var zeigen = \(r\.key !== raum\.key\) \|\| !!r\.formatInSteuerung;/);
         /* BEIDE Aufrufe — fuer das Feld und fuer sein Etikett. Nur den
            ersten zu pruefen liess eine umgedrehte Bedingung durch, weil
            der zweite die Regex noch erfuellte. */

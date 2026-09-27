@@ -565,6 +565,11 @@ html.is-signed-out [onclick*="radelist"]:hover {
     flex: 1 1 auto;
     min-width: 0;
     padding-right: var(--s-2);
+    /* UI-29 (27.09.2026): die Kopfzeile sitzt in der Karte des Abschnitts
+       und bringt ihr Polster selbst mit. `.tab-content h2` (Handy:
+       20 px oben, 15 px unten) gilt fuer freie Ueberschriften, nicht
+       fuer diese — gemessen stand die Kopfzeile 75 statt 44 px hoch. */
+    margin: 0;
 }
 /* Der Platz fuer den Info-Knopf steht leer, solange fuer den Abschnitt
    nichts gemeldet wurde. Ohne :empty bliebe sein Polster als Luecke
@@ -609,6 +614,30 @@ html.is-signed-out [onclick*="radelist"]:hover {
     display: block;
     padding: 0 var(--s-4) var(--s-4);
 }
+
+/* UI-29 (27.09.2026): kein Rand doppelt. Der Abschnitt ist die Karte, sein
+   Rumpf hat unten schon Polster — was darin als ERSTES oder LETZTES steht,
+   bringt keinen eigenen Aussenrand mehr mit. Gemessen am Aktuellen Meta
+   (390 px): 28 px unter den Top-Archetypen, 16 + 16 px um die Heatmap,
+   30 px unter der Tier-Liste, 30 px unter den Top-Karten — alles leer.
+
+   Zwischen den Tier-Stufen standen 56 px; eine Stufe hat einen farbigen
+   Kopfbalken und ist damit schon getrennt. */
+.ds-sec-body > :first-child { margin-top: 0; }
+.ds-sec-body > :last-child,
+.ds-sec-body > :last-child > :last-child { margin-bottom: 0; }
+/* Die Huelle um die Tier-Stufen trug ihren Abstand inline
+   (style="margin-bottom: 30px") und war damit fuer die Regel oben
+   unerreichbar. Ausserhalb eines Abschnitts bleibt er. */
+.tier-listen-huelle { margin-bottom: 30px; }
+.ds-sec-body .tier-section { margin-bottom: var(--s-4); padding-bottom: var(--s-3); }
+.ds-sec-body .tier-section:last-child { margin-bottom: 0; }
+/* Oben und unten sitzt das Polster des Abschnitts schon — die Heatmap und
+   die Top-Archetypen legen keins mehr dazu. Die Tabelle traegt aus der
+   Grundregel fuer <table> 20 px Rand; im Rollkasten ist das nur Luecke. */
+.ds-sec-body > .heatmap-container { padding-top: 0; padding-bottom: 0; }
+.ds-sec-body > .tier-hero-section { padding-bottom: 0; }
+#matchupHeatmapContainer .heatmap-table-scroll > .heatmap-table { margin: 0; }
 /* Ein Knopf, der aussieht wie der Rest der Seite.
 
    `class="action-btn"` kam im ganzen Projekt genau einmal vor: am Knopf

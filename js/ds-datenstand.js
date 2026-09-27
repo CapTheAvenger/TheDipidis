@@ -151,27 +151,9 @@
         return (Date.now() - d.getTime()) / 86400000;
     }
 
-    /* UI-8 (6), 26.09.2026: von der Zahl zur Quelldatei. Jeder Chip
-     * nennt seine Datei schon (data-quelle); daneben steht jetzt ein
-     * Verweis auf genau diese Datei im oeffentlichen Repo. Die Dateien in
-     * data/ sind eine veroeffentlichte Schnittstelle (data/_consumers.md),
-     * der Verweis zeigt also nichts, was nicht ohnehin offen liegt. */
-    var ROHDATEN_BASIS = 'https://github.com/CapTheAvenger/TheDipidis/blob/main/data/';
-    function rohdatenVerweis(el, datei) {
-        var chip = el.closest ? el.closest('.data-freshness-chip') : null;
-        if (!chip || !datei || !/^[A-Za-z0-9_.\-]+$/.test(datei)) return;
-        var a = chip.querySelector('.data-rohdaten');
-        if (!a) {
-            a = document.createElement('a');
-            a.className = 'data-rohdaten';
-            a.target = '_blank';
-            a.rel = 'noopener';
-            chip.appendChild(a);
-        }
-        a.href = ROHDATEN_BASIS + datei;
-        a.textContent = de() ? 'Rohdaten' : 'raw data';
-        a.title = (de() ? 'Quelldatei ansehen: ' : 'View source file: ') + datei;
-    }
+    /* UI-30/UI-31, 27.09.2026: der Verweis „Rohdaten" (UI-8 (6)) neben dem
+     * Datum ist wieder weg. Hausi will die Leser nicht auf das Repo
+     * schicken. Der Chip nennt Datum und Quelldatei (Tooltip) weiter. */
 
     /**
      * Fuellt alle Chips. Jeder Chip nennt seine Quelle selbst ueber
@@ -216,7 +198,6 @@
                 var d = zeigeInhalt ? dInhalt : dDatei;
 
                 el.textContent = alsText(d);
-                rohdatenVerweis(el, datei);
                 var tage = alterTage(d);
                 var eltern = el.closest ? el.closest('.data-freshness-chip') : null;
                 if (eltern) {
@@ -262,6 +243,5 @@
         alsText: alsText,
         alterTage: alterTage,
         zeichne: zeichne,
-        rohdatenVerweis: rohdatenVerweis,
     };
 }());

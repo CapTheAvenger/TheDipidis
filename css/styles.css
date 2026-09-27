@@ -11001,13 +11001,6 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-variant-numeric: tabular-nums;
     margin-left: 3px;
 }
-/* UI-8 (6): Verweis vom Datenstand zur Quelldatei. */
-.data-freshness-chip .data-rohdaten {
-    margin-left: 6px;
-    color: var(--link);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-}
 /* Ein alter oder unbekannter Stand darf nicht aussehen wie ein frischer.
    Bis zum 20.08.2026 stand in jedem Chip das heutige Datum — es gab also
    nie einen Anlass, zwei Zustaende zu unterscheiden. Jetzt gibt es drei:

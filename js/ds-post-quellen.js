@@ -777,7 +777,7 @@ REZEPTE['worlds-tag1'] = {
                  * Datei kam — beim Nachstellen mit TEF-POR standen zwei
                  * verschiedene Turniere auf einem Bild. */
                 kicker: d.kurz,
-                titel: d.datum ? d.kurz + ', Tag 1' : d.kurz,
+                titel: d.datum ? d.kurz + ', Day 1' : d.kurz,
                 fuss: fussZeile(d.kurz + ', ' + d.datum, tausend(d.gesamt) + ' players'),
                 tags: hashtags(['tournament', 'majors', d.turnier]
                     .concat(acht.slice(0, 4).map(function (x) { return x.name; }))),
@@ -859,7 +859,7 @@ REZEPTE['tag2'] = {
                  * der Bruch — der Spaltenkopf sagt jetzt, wie viele
                  * Decks die Schwelle ueberhaupt genommen haben. */
                 tags: hashtags(['day2', 'tournament', d.turnier]),
-                caption: 'Who reached the second day at ' + d.turnier + ' — ' +
+                caption: 'Who reached Day 2 at ' + d.turnier + ' — ' +
                     'gezählt ab ' + TAG2_MIN + ' Spielern am Deck, sonst entscheidet ' +
                     'ein einzelner Spieler die Quote.',
                 vorlagen: ['liste']
@@ -1875,7 +1875,7 @@ function metaCallScheiben(d, titel, standName) {
             titel: deck,
             fuss: fuss,
             caption: deck + ' at ' + (titel || 'this tournament') + ': '
-                + prozent(r.day2, 1) + ' to make day 2, '
+                + prozent(r.day2, 1) + ' to make Day 2, '
                 + prozent(r.quote, 1) + ' win rate over ' + (d.runden || '?') + ' rounds'
                 + (eigen ? ', against the field I expect' : ', against the predicted field') + '.',
             tags: hashtags(['metacall', deck]),
@@ -1949,7 +1949,7 @@ function metaCallScheiben(d, titel, standName) {
             kicker: kicker,
             titel: 'What would do well here',
             fuss: fuss,
-            caption: 'The decks with the best day-2 chance against '
+            caption: 'The decks with the best Day 2 chance against '
                 + (eigen ? 'the field I expect at ' : 'the predicted field at ')
                 + (titel || 'this tournament') + '.',
             tags: hashtags(['metacall', 'deckchoice']

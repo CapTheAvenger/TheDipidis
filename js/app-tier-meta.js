@@ -282,15 +282,15 @@
             const labsDe = g.labsAktiv
                 ? ('und, wo eine Turnierdatei vorliegt (ab ' + ganz(g.labsMinPartien)
                    + ' Matches je Deck), dem Turnier-Win % über 50 (bis +' + z(g.labsWrDeckel, 0)
-                   + ' pp, Gewicht ' + z(g.labsWrGewicht, 1) + ') samt Tag-2-Quote (bis '
+                   + ' pp, Gewicht ' + z(g.labsWrGewicht, 1) + ') samt Day-2-Quote (bis '
                    + z(g.tag2Deckel, 2) + ', Gewicht ' + z(g.tag2Gewicht, 0) + ')')
-                : 'Für dieses Meta liegt KEINE Turnierdatei vor — der dritte Anteil (Turnier-Win % und Tag-2-Quote) fehlt, gerechnet wurde nur aus Anteil und Win %';
+                : 'Für dieses Meta liegt KEINE Turnierdatei vor — der dritte Anteil (Turnier-Win % und Day-2-Quote) fehlt, gerechnet wurde nur aus Anteil und Win %';
             const labsEn = g.labsAktiv
                 ? ('and, where a tournament file exists (from ' + ganz(g.labsMinPartien)
                    + ' matches per deck), tournament Win % above 50 (up to +' + z(g.labsWrDeckel, 0)
-                   + ' pp, weight ' + z(g.labsWrGewicht, 1) + ') plus day-2 conversion (up to '
+                   + ' pp, weight ' + z(g.labsWrGewicht, 1) + ') plus Day 2 conversion (up to '
                    + z(g.tag2Deckel, 2) + ', weight ' + z(g.tag2Gewicht, 0) + ')')
-                : 'No tournament file exists for this meta — the third component (tournament Win % and day-2 conversion) is missing; the score used share and Win % only';
+                : 'No tournament file exists for this meta — the third component (tournament Win % and Day 2 conversion) is missing; the score used share and Win % only';
 
             /* BEFUND B6 (07.09.2026): hier stand "der Listenzahl des
                Rang-1-Decks". Gerechnet wird aber mit dem Maximum ueber alle
@@ -1266,7 +1266,7 @@
                         .replace('{archetypen}', String(clArchetypen))
                         .replace('{einzel}', String(clEinzelstueck)))}</p>`;
 
-            let html = heroHtml + clGrundlage + '<div style="margin-bottom: 30px;">';
+            let html = heroHtml + clGrundlage + '<div class="tier-listen-huelle">';
             
             // Render each tier
             ['tier-1', 'tier-2', 'tier-3', 'tier-trending'].forEach(tierKey => {
@@ -2743,7 +2743,7 @@
                 tag2Deckel: TIER_SCORE.TAG2_DECKEL, tag2Gewicht: TIER_SCORE.TAG2_GEWICHT
             });
 
-            let html = heroHtml + overallTop8Html + cmGrundlage + '<div style="margin-bottom: 30px;">';
+            let html = heroHtml + overallTop8Html + cmGrundlage + '<div class="tier-listen-huelle">';
 
             // Render each tier
             ['tier-1', 'tier-2', 'tier-3', 'tier-trending'].forEach(tierKey => {

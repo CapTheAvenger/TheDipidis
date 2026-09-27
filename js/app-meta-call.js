@@ -3750,7 +3750,7 @@ window.MetaCall = (function () {
       + `fuellt die Spalte aus den Platzierungen (812 der 4.713 Zeilen, `
       + `davon 74 groesser 0; der Rest ist leer statt 0). Der Term `
       + `oben ist aber auf eine Groesse in der Naehe der `
-      + `Tag1-zu-Tag2-Konversion kalibriert, die Top-Cut-Quote hat `
+      + `Day-1-zu-Day-2-Konversion kalibriert, die Top-Cut-Quote hat `
       + `Median 0 und Maximum 0,5 — er wuerde ein Deck MIT Top-8-Platz `
       + `schlechter stellen als eines ohne. Deshalb steht `
       + `T8_SPALTE_KALIBRIERT auf false. Faellt diese Meldung weg, hat `
@@ -8304,7 +8304,7 @@ window.MetaCall = (function () {
             console.warn(
               '[MetaCall] Day-1-Matchupkarte verworfen fuer ' + _kopieVonOverall.join(', ')
               + ' — sie ist Paar fuer Paar identisch mit Overall, also keine '
-              + 'Tag-1-Auswahl. Ohne das Verwerfen wuerden die Tag-2-Spiele '
+              + 'Day-1-Auswahl. Ohne das Verwerfen wuerden die Day-2-Spiele '
               + 'doppelt gewichtet (0,45 als Day 2 + ihr Anteil in 0,35 als '
               + '"Day 1"). Ursache: das geratene Flag &d1 im Labs-Scraper.'
             );
@@ -10234,11 +10234,11 @@ window.MetaCall = (function () {
   function _d2ConvHerkunft() {
     return _mcIstDeutsch()
       ? `Gelesen aus der Spalte ${D2CONV_SPALTE} der Major-Datei `
-        + `(nicht selbst aus Tag-2- durch Tag-1-Antritten gerechnet), `
+        + `(nicht selbst aus Day-2- durch Day-1-Antritten gerechnet), `
         + `rangewichtet über die Turniere; gezählt werden nur Turniere mit `
         + `mindestens ${D2CONV_MIN_ANTRITTE} Antritten dieses Decks.`
       : `Read from the ${D2CONV_SPALTE} column of the major file (not `
-        + `recomputed from day-2 over day-1 entries), rank-weighted across `
+        + `recomputed from Day 2 over Day 1 entries), rank-weighted across `
         + `tournaments; only tournaments with at least `
         + `${D2CONV_MIN_ANTRITTE} entries of this deck are counted.`;
   }
@@ -13274,13 +13274,13 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
    * welches Turnier in die Quote eingeht. */
   function _frozenD2Hinweis() {
     return _mcIstDeutsch()
-      ? 'Summe der Tag-2-Antritte geteilt durch die Summe der Tag-1-Antritte '
+      ? 'Summe der Day-2-Antritte geteilt durch die Summe der Day-1-Antritte '
         + 'über alle Turniere dieser Epoche — selbst gerechnet, ohne '
         + 'Mindeststichprobe je Turnier. Der Empfehlungsblock oben liest '
         + 'stattdessen die Spalte ' + D2CONV_SPALTE + ' und zählt nur Turniere '
         + 'mit mindestens ' + D2CONV_MIN_ANTRITTE + ' Antritten; für dasselbe '
         + 'Deck stehen deshalb zwei verschiedene Zahlen.'
-      : 'Sum of day-2 entries divided by the sum of day-1 entries across all '
+      : 'Sum of Day 2 entries divided by the sum of Day 1 entries across all '
         + 'tournaments of this era — computed here, with no per-tournament '
         + 'minimum. The recommendation block above reads the '
         + D2CONV_SPALTE + ' column instead and counts only tournaments with at '

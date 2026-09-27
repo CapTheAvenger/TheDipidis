@@ -208,7 +208,7 @@ before(async () => {
 });
 
 // ════════════════════════════════════════════════════════════════════
-describe('Die Listen-CSV fuehrt genau das Tag-2-Feld', () => {
+describe('Die Listen-CSV fuehrt genau das Day-2-Feld', () => {
 
     it('jedes Turnier: Zahl der Listen = Zahl der day2-Zeilen mit Platz', () => {
         assert.ok(ERHEBUNG.length > 0, 'Vorpruefung: die Listen-CSV fuehrt Turniere');
@@ -216,7 +216,7 @@ describe('Die Listen-CSV fuehrt genau das Tag-2-Feld', () => {
             assert.equal(e.listen, e.day2MitPlatz,
                 `Turnier ${e.tid}: ${e.listen} Listen, aber ${e.day2MitPlatz} `
                 + `day2-Spieler mit Platz. Weichen die ab, ist die Datei NICHT `
-                + `mehr genau der Tag-2-Cut — dann ist jede "Tag-2"-Beschriftung `
+                + `mehr genau der Day-2-Cut — dann ist jede "Tag-2"-Beschriftung `
                 + `im Deckbauer falsch und muss mit.`);
         }
     });
@@ -550,44 +550,44 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {
 
     it('nennt Listen, Piloten und Feld — und das Wort Tag 2', () => {
         const s = MCB.datenbasisSatz(VOLL, 'de');
-        assert.equal(s, '8 Tag-2-Listen von 32 Piloten (Feld 797)');
+        assert.equal(s, '8 Day-2-Listen von 32 Piloten (Feld 797)');
     });
 
     it('englisch dieselbe Aussage', () => {
         assert.equal(MCB.datenbasisSatz(VOLL, 'en'),
-            '8 day-2 lists from 32 pilots (field 797)');
+            '8 Day 2 lists from 32 pilots (field 797)');
     });
 
     it('ohne Pilotenzahl faellt nur dieser Halbsatz weg', () => {
         const s = MCB.datenbasisSatz(OHNE_P, 'de');
-        assert.equal(s, '8 Tag-2-Listen (Feld 797)');
+        assert.equal(s, '8 Day-2-Listen (Feld 797)');
         assert.ok(!/Piloten/.test(s), 'erfundene Pilotenzahl im Satz');
     });
 
     it('ohne beide Zahlen bleibt die Listenzahl mit dem Wort Tag 2 — und NICHTS sonst', () => {
         const s = MCB.datenbasisSatz(NACKT, 'de');
-        assert.equal(s, '8 Tag-2-Listen');
+        assert.equal(s, '8 Day-2-Listen');
         assert.ok(!/Feld|\(/.test(s),
             'geratene Feldgroesse im Satz — genau das darf nicht passieren');
     });
 
     it('eine einzige Liste steht in der Einzahl', () => {
-        assert.equal(MCB.datenbasisSatz({ n_lists: 1 }, 'de'), '1 Tag-2-Liste');
-        assert.equal(MCB.datenbasisSatz({ n_lists: 1 }, 'en'), '1 day-2 list');
+        assert.equal(MCB.datenbasisSatz({ n_lists: 1 }, 'de'), '1 Day-2-Liste');
+        assert.equal(MCB.datenbasisSatz({ n_lists: 1 }, 'en'), '1 Day 2 list');
     });
 
     it('grosse Zahlen bekommen im Deutschen den Punkt', () => {
         assert.equal(MCB.datenbasisSatz({ n_lists: 675, feldgroesse: 3743 }, 'de'),
-            '675 Tag-2-Listen (Feld 3.743)');
+            '675 Day-2-Listen (Feld 3.743)');
     });
 
     it('der Hinweistext erklaert die Quelle und erfindet nichts', () => {
         const h = MCB.datenbasisHinweis(VOLL, 'de');
-        assert.ok(/Tag 2/.test(h), 'Hinweis nennt Tag 2 nicht');
+        assert.ok(/Day 2/.test(h), 'Hinweis nennt Tag 2 nicht');
         assert.ok(h.includes('32') && h.includes('797') && h.includes('8'),
             'Hinweis nennt die drei Zahlen nicht');
         const leer = MCB.datenbasisHinweis(NACKT, 'de');
-        assert.ok(/Tag 2/.test(leer), 'auch ohne Zahlen muss Tag 2 dastehen');
+        assert.ok(/Day 2/.test(leer), 'auch ohne Zahlen muss Tag 2 dastehen');
         assert.ok(!/\d{3}/.test(leer), 'Hinweis erfindet eine Feldgroesse');
     });
 
@@ -648,7 +648,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
         f({ MostConsistencyBuilder: MCB }, { dataQuality: DQ, coreThreshold: 0.9 },
           'Mega Excadrill', 60, (t) => { gezeigt = t; });
         assert.equal(gezeigt,
-            '✓ Mega Excadrill: 60/60 Karten · Core @ 90 % · 8 Tag-2-Listen von 32 Piloten (Feld 797)');
+            '✓ Mega Excadrill: 60/60 Karten · Core @ 90 % · 8 Day-2-Listen von 32 Piloten (Feld 797)');
         assert.ok(!/\b8 Listen ausgewertet\b/.test(gezeigt),
             'die alte, nackte Formulierung steht wieder da');
     });
@@ -658,7 +658,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
             'const _mcb = window.MostConsistencyBuilder;',
             "                showToast(");
         const f = new Function('window', 'result', stueck + '\nreturn _basis;');
-        assert.equal(f({}, { dataQuality: DQ }), '8 Tag-2-Listen');
+        assert.equal(f({}, { dataQuality: DQ }), '8 Day-2-Listen');
     });
 
     it('die Qualitaetszeile traegt den Satz statt "8 Listen"', () => {
@@ -675,13 +675,13 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
                     { n_lists: 8, decision: 'data_ok' }, null,
                     { dataQuality: DQ, coreThreshold: 0.9 });
         assert.ok(r, 'die Qualitaetszeile entsteht gar nicht');
-        assert.ok(r.message.startsWith('Datenbasis: 8 Tag-2-Listen von 32 Piloten (Feld 797)'),
+        assert.ok(r.message.startsWith('Datenbasis: 8 Day-2-Listen von 32 Piloten (Feld 797)'),
             'die Zeile nennt den Nenner nicht: ' + r.message);
-        assert.ok(/Tag 2/.test(r.hint) && /797/.test(r.hint),
+        assert.ok(/Day 2/.test(r.hint) && /797/.test(r.hint),
             'der Hinweis erklaert die Quelle nicht: ' + r.hint);
     });
 
-    it('der Berichtstext (englisch) nennt day-2 lists', () => {
+    it('der Berichtstext (englisch) nennt Day 2 lists', () => {
         const roh = schneide('algo_desc:    `MostConsistencyBuilder (Phase Y.2)',
                              'layers: {');
         const ausdruck = roh.replace(/^algo_desc:\s*/, '').replace(/,\s*$/, '');
@@ -689,7 +689,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
             'return ' + ausdruck.replace(/,\s*$/, '') + ';');
         const txt = f({ MostConsistencyBuilder: MCB },
                       { dataQuality: DQ, coreThreshold: 0.9 });
-        assert.ok(/8 day-2 lists from 32 pilots \(field 797\) analyzed\./.test(txt), txt);
+        assert.ok(/8 Day 2 lists from 32 pilots \(field 797\) analyzed\./.test(txt), txt);
         assert.ok(!/\b8 lists analyzed\b/.test(txt), 'die alte Formulierung steht wieder da');
     });
 });
@@ -764,11 +764,11 @@ describe('Die Schnellreferenz ordnet ihre Zahlen ein', () => {
             wins: 0, losses: 0, ties: 0,
             cards: [{ name: 'Test', count: 4 }],
         }, 'major');
-        assert.ok(/Tag-2-Liste/.test(html), 'Major-Kachel nennt Tag 2 nicht:\n' + html);
+        assert.ok(/Day-2-Liste/.test(html), 'Major-Kachel nennt Tag 2 nicht:\n' + html);
         assert.ok(html.includes(String(soll.n_piloten)),
             `Major-Kachel nennt die Pilotenzahl ${soll.n_piloten} nicht`);
         assert.ok(/Feld /.test(html), 'Major-Kachel nennt das Feld nicht');
-        assert.ok(/title="[^"]*Tag 2[^"]*"/.test(html),
+        assert.ok(/title="[^"]*Day 2[^"]*"/.test(html),
             'Major-Kachel erklaert Tag 2 nicht im title');
     });
 
@@ -780,7 +780,7 @@ describe('Die Schnellreferenz ordnet ihre Zahlen ein', () => {
             place: 3, player_name: 'X', wins: 0, losses: 0, ties: 0,
             cards: [{ name: 'Test', count: 4 }],
         }, 'major');
-        assert.ok(/Tag-2-Liste/.test(html), 'Tag 2 fehlt');
+        assert.ok(/Day-2-Liste/.test(html), 'Tag 2 fehlt');
         const sub = html.match(/past-meta-best-sub[^>]*>([^<]*)</)[1];
         assert.ok(!/Feld|Piloten/.test(sub),
             'geratene Feldgroesse oder Pilotenzahl in der Kopfzeile: ' + sub);
@@ -852,7 +852,7 @@ describe('Die Gewichtung gewichtet INNERHALB des Cuts', () => {
            haette mindestens ein Turnier mehr Listen als day2-Spieler.
            Das ist oben schon geprueft; hier die Folgerung fuer das
            Gewicht. Platz 122 bei Worlds bekommt das Band 0,1 (absolut)
-           bzw. 0,2 (Perzentil) — beides sind Tag-2-Gewichte. */
+           bzw. 0,2 (Perzentil) — beides sind Day-2-Gewichte. */
         const w = MCB._internals.placementWeight;
         const e = ERHEBUNG.find(x => x.feld > 0 && x.listen > 32);
         assert.ok(e, 'Vorpruefung: ein Turnier mit Listen jenseits von Platz 32');
@@ -861,7 +861,7 @@ describe('Die Gewichtung gewichtet INNERHALB des Cuts', () => {
             'der letzte Platz mit Liste liegt hinter dem Cut — dann waere '
             + '"Day-1-only" doch richtig und die Beschriftung muesste zurueck');
         assert.ok(w(letzter, e.feld) > 0,
-            'die letzte Tag-2-Liste bekaeme gar kein Gewicht');
+            'die letzte Day-2-Liste bekaeme gar kein Gewicht');
     });
 
     it('das Perzentil misst am Feld, die Gewichtung laeuft ueber den Cut', () => {
@@ -900,7 +900,7 @@ describe('Die Gewichtung gewichtet INNERHALB des Cuts', () => {
 
     it('die Schwelle von 3 haengt an der Stichprobe, nicht am Feld', async () => {
         /* Die Zusage: ein Archetyp mit weniger als drei Listen wird
-           abgelehnt, und die Ablehnung sagt dazu, dass es Tag-2-Listen
+           abgelehnt, und die Ablehnung sagt dazu, dass es Day-2-Listen
            sind. Welcher Archetyp das diese Woche ist, ist egal. */
         const zaehler = new Map();
         for (const r of PER) {
@@ -915,8 +915,8 @@ describe('Die Gewichtung gewichtet INNERHALB des Cuts', () => {
         const res = await MCB.build(duenn[0]);
         assert.equal(res.dataQuality.sufficient, false,
             `${duenn[0]} hat unter drei Listen, wird aber gebaut`);
-        assert.ok(/day-2/.test(res.dataQuality.warning),
-            'die Ablehnung sagt nicht, dass es Tag-2-Listen sind: '
+        assert.ok(/Day 2/.test(res.dataQuality.warning),
+            'die Ablehnung sagt nicht, dass es Day-2-Listen sind: '
             + res.dataQuality.warning);
     });
 });
@@ -967,10 +967,10 @@ describe('Fehlt eine Zahl, wird sie NICHT geraten — gesetzter Fall', () => {
     });
 
     it('der Satz nennt dann nur die Listenzahl und das Wort Tag 2', () => {
-        assert.equal(MCB.datenbasisSatz(dq, 'de'), '4 Tag-2-Listen');
+        assert.equal(MCB.datenbasisSatz(dq, 'de'), '4 Day-2-Listen');
         const h = MCB.datenbasisHinweis(dq, 'de');
-        assert.ok(/Tag 2/.test(h), 'Tag 2 fehlt im Hinweis');
-        assert.ok(!/\d/.test(h.replace(/Tag 2/g, '')),
+        assert.ok(/Day 2/.test(h), 'Tag 2 fehlt im Hinweis');
+        assert.ok(!/\d/.test(h.replace(/Day 2/g, '')),
             'im Hinweis steht eine Zahl, die es nicht gibt: ' + h);
     });
 
@@ -996,7 +996,7 @@ describe('Fehlt eine Zahl, wird sie NICHT geraten — gesetzter Fall', () => {
             cards: [{ name: 'Test', count: 4 }],
         }, 'major');
         const sub = html.match(/past-meta-best-sub[^>]*>([^<]*)</)[1];
-        assert.ok(/Tag-2-Liste/.test(sub), 'Tag 2 fehlt: ' + sub);
+        assert.ok(/Day-2-Liste/.test(sub), 'Tag 2 fehlt: ' + sub);
         assert.ok(!/Feld|Piloten/.test(sub),
             'ohne Motor steht dort eine erfundene Zahl: ' + sub);
     });
@@ -1018,7 +1018,7 @@ describe('Die Mehrheitsdiagnose nennt Listen, nicht das Feld', () => {
         placement_gap: 60, plurality_median: 40, naive_median: 100,
     };
 
-    it('beide Textvorlagen sprechen von Tag-2-Listen', () => {
+    it('beide Textvorlagen sprechen von Day-2-Listen', () => {
         const vorlagen = [];
         const marke = 'detail: `';
         let i = QUELLE.indexOf(marke);
@@ -1042,16 +1042,16 @@ describe('Die Mehrheitsdiagnose nennt Listen, nicht das Feld', () => {
             assert.ok(!/[Ff]ield plurality/.test(txt),
                 'der Text behauptet eine MEHRHEIT DES FELDES. Gerechnet wird sie '
                 + 'ueber _perListCounts, also ueber die veroeffentlichten '
-                + 'Tag-2-Listen — bei Mega Excadrill 8 Listen von 32 Piloten. '
+                + 'Day-2-Listen — bei Mega Excadrill 8 Listen von 32 Piloten. '
                 + 'Text: ' + txt);
             assert.ok(/[Dd]ay-2/.test(txt),
-                'der Text sagt nicht, dass es Tag-2-Listen sind: ' + txt);
+                'der Text sagt nicht, dass es Day-2-Listen sind: ' + txt);
         }
     });
 
     it('der Quelltext behauptet nirgends mehr eine Feldmehrheit', () => {
         assert.equal((QUELLE.match(/[Ff]ield plurality/g) || []).length, 0,
             'irgendwo steht wieder "field plurality" — die Mehrheit ist die '
-            + 'der ausgewerteten Listen, und die sind der Tag-2-Cut');
+            + 'der ausgewerteten Listen, und die sind der Day-2-Cut');
     });
 });

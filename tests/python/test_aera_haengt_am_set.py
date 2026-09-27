@@ -47,8 +47,13 @@ def test_die_anker_stehen_an_der_grenze():
 
 
 def test_ohne_anker_greift_der_rueckfall():
-    ohne = {k: v for k, v in ORDNUNG.items() if k not in (pcd.STANDARD_ANKER, pcd.EXTENDED_ANKER)}
+    # Eine feste, kleine Ordnung — NICHT data/sets.json: die wird neu
+    # nummeriert, und genau daran ist die erste Fassung dieser Probe im
+    # Wochenlauf #165 rot geworden (SSH stand dort auf 113 = Rueckfallgrenze).
+    ohne = {"SSH": pcd.EXTENDED_MIN_ORDER - 1, "DAA": pcd.EXTENDED_MIN_ORDER + 1,
+            "TEF": pcd.STANDARD_MIN_ORDER + 2}
     assert pcd.aera_fuer_set("TEF", ohne) == "standard"
+    assert pcd.aera_fuer_set("DAA", ohne) == "extended"
     assert pcd.aera_fuer_set("SSH", ohne) == "legacy"
 
 

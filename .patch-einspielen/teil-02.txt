@@ -113,12 +113,12 @@ index 8562fa3..a6a38ae 100644|
 --- a/js/i18n.js|
 +++ b/js/i18n.js|
 @@ -1134,3 +1134,3 @@ const translations = {|
-     'arc.loading':              'Loading …',|
+     'arc.loading':              'Loading ¤u2026',|
 -    'arc.matchupsToggle':       'Show matchups ({n})',|
 +    'arc.matchupsToggle':       'Show top {n} matchups',|
      'arc.showAll':              'All {n}',|
 @@ -3827,3 +3827,3 @@ const translations = {|
-     'arc.loading':              'Lade …',|
+     'arc.loading':              'Lade ¤u2026',|
 -    'arc.matchupsToggle':       'Matchups anzeigen ({n})',|
 +    'arc.matchupsToggle':       'Top {n} Matchups anzeigen',|
      'arc.showAll':              'Alle {n}',|

@@ -39,6 +39,7 @@ die Liste `FERTIG.json`, ist die Anlieferung noch unterwegs: Rueckgabe 3.
 """
 import hashlib
 import json
+import re
 import os
 import sys
 
@@ -86,6 +87,13 @@ def verpacken(patch, ziel, teil=24000):
     return liste
 
 
+def _teilnummer(name):
+    m = re.fullmatch(r'teil-(\d+)\.txt', name)
+    if not m:
+        raise SystemExit(f'unbekannter Teilname: {name}')
+    return int(m.group(1))
+
+
 def auspacken(ordner, ausgabe):
     pfad = os.path.join(ordner, 'FERTIG.json')
     if not os.path.isfile(pfad):
@@ -93,7 +101,10 @@ def auspacken(ordner, ausgabe):
         return 3
     liste = json.load(open(pfad, encoding='utf-8'))
     zeilen = []
-    for name in sorted(liste['teile']):
+    # Nach der NUMMER sortieren, nicht nach dem Namen (WZ-10, 28.09.2026):
+    # ab 100 Teilen stuende `teil-100` sonst hinter `teil-10`, und der Lauf
+    # braeche mit einer irrefuehrenden Gesamtpruefsumme ab.
+    for name in sorted(liste['teile'], key=_teilnummer):
         p = os.path.join(ordner, name)
         if not os.path.isfile(p):
             print(f'::error::Teil fehlt: {name}')

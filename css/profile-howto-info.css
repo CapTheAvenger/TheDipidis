@@ -2844,6 +2844,12 @@
     opacity: 0.7;
     margin-top: 2px;
 }
+/* UI-39 (28.09.2026): auf dem blauen aktiven Chip druckte die Deckkraft
+   0,7 die weisse Schrift auf 4,23:1 (WZ-1, 390 px, hell und dunkel).
+   Hier traegt die Farbe den Unterschied, nicht die Deckkraft. */
+.mockup-format-chip.is-active small {
+    opacity: 1;
+}
 
 /* Tournament picker — dropdown-list mockup */
 .mockup-picker-list {

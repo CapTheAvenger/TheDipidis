@@ -7,11 +7,16 @@ import importlib.util
 import json
 import os
 import re
+import shutil
+import subprocess
+
+import yaml
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _spec = importlib.util.spec_from_file_location('patch_weg', os.path.join(WURZEL, 'scripts', 'patch_weg.py'))
 pw = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(pw)
+ABLAUF = os.path.join(WURZEL, '.github', 'workflows', 'patch-einspielen.yml')
 
 # Was ein echter Patch mitbringt: Leerzeichen am Zeilenende (Kontextzeile
 # einer leeren Codezeile, Signatur "-- "), Umlaute, kein Zeilenende am Schluss.
@@ -96,16 +101,132 @@ def test_ein_schraegstrich_u_reist_maskiert_und_kommt_woertlich_an(tmp_path):
     assert (tmp_path / 'aus').read_bytes() == roh.encode('utf-8')
 
 
+def test_ab_hundert_teilen_stimmt_die_reihenfolge(tmp_path):
+    """WZ-10: nach Namen sortiert stand teil-100 hinter teil-10."""
+    quelle = tmp_path / 'c.patch'
+    roh = ''.join(f'+Zeile {i:05d}\n' for i in range(1200))
+    quelle.write_bytes(roh.encode('utf-8'))
+    liste = pw.verpacken(str(quelle), str(tmp_path / 'l'), 100)
+    assert len(liste['teile']) >= 100, len(liste['teile'])
+    assert pw.auspacken(str(tmp_path / 'l'), str(tmp_path / 'aus')) == 0
+    assert (tmp_path / 'aus').read_bytes() == roh.encode('utf-8')
+
+
 def test_ohne_schraegstrich_u_bleibt_alles_wie_es_ist(tmp_path):
     ordner, liste = _verpackt(tmp_path)
     assert 'flucht' not in liste
 
 
-def test_der_ablauf_wartet_auf_fertig_und_raeumt_vor_dem_einspielen_auf():
-    yml = open(os.path.join(WURZEL, '.github', 'workflows', 'patch-einspielen.yml'), encoding='utf-8').read()
-    ohne = re.sub(r'(?m)^\s*#.*$', '', yml)
-    assert "branches: ['patch/**']" in ohne, 'der Ablauf darf nur auf patch/-Zweigen laufen'
-    assert 'if [ "$rc" = "3" ]; then echo "bereit=nein"' in ohne
-    rm, am = ohne.find('git rm -r -q .patch-einspielen'), ohne.find('git am --3way')
-    assert 0 < rm < am, 'die Anlieferung muss vor dem Einspielen weg'
-    assert 'git push origin "HEAD:${GITHUB_REF_NAME}"' in ohne
+def test_der_ablauf_laeuft_nur_auf_patch_zweigen():
+    """Das ist wirklich Text: die Ausloeseregel wird nicht ausgefuehrt."""
+    wf = yaml.safe_load(open(ABLAUF, encoding='utf-8'))
+    ausloeser = wf.get('on', wf.get(True))
+    assert ausloeser['push']['branches'] == ['patch/**'], 'der Ablauf darf nur auf patch/-Zweigen laufen'
+
+
+# ── WZ-11 (28.09.2026): den Ablauf AUSFUEHREN statt lesen ──────────────
+#
+# Die fruehere Zusicherung suchte vier Textstellen. Der Abnahmeagent hat am
+# 27.09.2026 fuenf Verfaelschungen probiert, vier blieben gruen, darunter
+# ein zusaetzliches `git push origin HEAD:main` und `git am --skip`.
+# Jetzt laufen die `run:`-Schritte der Datei in einem Wegwerf-Repo gegen
+# einen lokalen Wegwerf-Ursprung, und geprueft wird, was danach DORT steht.
+
+def _git(cwd, *args):
+    return subprocess.run(['git', *args], cwd=cwd, check=True, capture_output=True, text=True).stdout.strip()
+
+
+def _schritte():
+    wf = yaml.safe_load(open(ABLAUF, encoding='utf-8'))
+    return [s for s in wf['jobs']['einspielen']['steps'] if 'run' in s]
+
+
+def _fuehre_ablauf_aus(tmp_path, mit_fertig=True, konflikt=False):
+    ursprung = tmp_path / 'ursprung.git'
+    arbeit = tmp_path / 'arbeit'
+    _git(tmp_path, 'init', '-q', '--bare', '-b', 'main', str(ursprung))
+    _git(tmp_path, 'clone', '-q', str(ursprung), str(arbeit))
+    for k, v in (('user.name', 'T'), ('user.email', 't@t')):
+        _git(arbeit, 'config', k, v)
+    (arbeit / 'scripts').mkdir()
+    shutil.copy(os.path.join(WURZEL, 'scripts', 'patch_weg.py'), arbeit / 'scripts' / 'patch_weg.py')
+    (arbeit / 'datei.txt').write_text('alt\n', encoding='utf-8')
+    _git(arbeit, 'add', '-A'); _git(arbeit, 'commit', '-q', '-m', 'Basis'); _git(arbeit, 'push', '-q', 'origin', 'main')
+    main_vorher = _git(arbeit, 'rev-parse', 'HEAD')
+    # Der Patch: ein echter Commit, als format-patch.
+    _git(arbeit, 'checkout', '-q', '-b', 'bau')
+    (arbeit / 'datei.txt').write_text('neu\n', encoding='utf-8')
+    _git(arbeit, 'commit', '-q', '-am', 'Die Aenderung')
+    patch = subprocess.run(['git', 'format-patch', '-1', '--stdout'], cwd=arbeit, check=True,
+                           capture_output=True).stdout
+    (tmp_path / 'x.patch').write_bytes(patch)
+    _git(arbeit, 'checkout', '-q', 'main'); _git(arbeit, 'branch', '-q', '-D', 'bau')
+    # Die Anlieferung auf dem Zweig patch/probe.
+    _git(arbeit, 'checkout', '-q', '-b', 'patch/probe')
+    if konflikt:
+        # Der Zweig traegt schon eine andere Fassung derselben Zeile.
+        (arbeit / 'datei.txt').write_text('anders\n', encoding='utf-8')
+    pw.verpacken(str(tmp_path / 'x.patch'), str(arbeit / '.patch-einspielen'), 200)
+    if not mit_fertig:
+        (arbeit / '.patch-einspielen' / 'FERTIG.json').unlink()
+    _git(arbeit, 'add', '-A'); _git(arbeit, 'commit', '-q', '-m', 'Anlieferung')
+    _git(arbeit, 'push', '-q', 'origin', 'patch/probe')
+    anlieferung = _git(arbeit, 'rev-parse', 'HEAD')
+
+    ausgabe = tmp_path / 'github_output'
+    ausgabe.write_text('', encoding='utf-8')
+    umgebung = dict(os.environ, GITHUB_OUTPUT=str(ausgabe), GITHUB_REF_NAME='patch/probe')
+    ausgaben = {}
+    for schritt in _schritte():
+        bedingung = schritt.get('if')
+        if bedingung:
+            m = re.fullmatch(r"steps\.(\w+)\.outputs\.(\w+) == '(\w+)'", bedingung.strip())
+            assert m, f'unbekannte Bedingung im Ablauf: {bedingung}'
+            if ausgaben.get((m.group(1), m.group(2))) != m.group(3):
+                continue
+        vor = ausgabe.read_text(encoding='utf-8')
+        erg = subprocess.run(['bash', '-e', '-c', schritt['run']], cwd=arbeit, env=umgebung,
+                             capture_output=True, text=True)
+        if erg.returncode != 0:
+            if konflikt:
+                return dict(rot=schritt.get('name'), ursprung=ursprung, anlieferung=anlieferung,
+                            refs=_refs(ursprung), main_vorher=main_vorher)
+            raise AssertionError(f"Schritt {schritt.get('name')} rot:\n{erg.stdout}\n{erg.stderr}")
+        for zeile in ausgabe.read_text(encoding='utf-8')[len(vor):].splitlines():
+            k, _, v = zeile.partition('=')
+            ausgaben[(schritt.get('id'), k)] = v
+    return dict(rot=None, ursprung=ursprung, refs=_refs(ursprung), main_vorher=main_vorher, anlieferung=anlieferung)
+
+
+def _refs(ursprung):
+    return dict(reversed(z.split()) for z in
+                _git(ursprung, 'for-each-ref', '--format=%(objectname) %(refname)').splitlines())
+
+
+def test_der_ablauf_spielt_ein_und_beruehrt_nur_den_eigenen_zweig(tmp_path):
+    e = _fuehre_ablauf_aus(tmp_path)
+    assert set(e['refs']) == {'refs/heads/main', 'refs/heads/patch/probe'}, f"neue Zweige im Ursprung: {sorted(e['refs'])}"
+    assert e['refs']['refs/heads/main'] == e['main_vorher'], 'der Ablauf hat main veraendert'
+    spitze = e['refs']['refs/heads/patch/probe']
+    u = str(e['ursprung'])
+    assert _git(u, 'show', f'{spitze}:datei.txt') == 'neu', 'die Aenderung aus dem Patch ist nicht auf dem Zweig'
+    assert _git(u, 'log', '-1', '--format=%s', spitze) == 'Die Aenderung', 'die Spitze ist nicht der eingespielte Commit'
+    assert _git(u, 'log', '-1', '--format=%s', f'{spitze}~1') == 'Patch-Weg: Anlieferung entfernt'
+    assert _git(u, 'rev-parse', f'{spitze}~2') == e['anlieferung'], 'der Zweig wurde umgeschrieben statt fortgesetzt'
+    baum = _git(u, 'ls-tree', '-r', '--name-only', spitze).splitlines()
+    assert not [p for p in baum if p.startswith('.patch-einspielen/')], 'die Anlieferung liegt noch im Baum'
+
+
+def test_ohne_fertig_liste_tut_der_ablauf_nichts(tmp_path):
+    e = _fuehre_ablauf_aus(tmp_path, mit_fertig=False)
+    assert e['refs']['refs/heads/patch/probe'] == e['anlieferung']
+    assert e['refs']['refs/heads/main'] == e['main_vorher']
+
+
+def test_ein_patch_der_nicht_passt_macht_den_lauf_rot_und_schreibt_nichts(tmp_path):
+    """Kein `git am --skip`, kein stilles Weiterlaufen: passt der Patch nicht,
+    bleibt der Zweig auf der Anlieferung stehen und der Lauf ist rot."""
+    e = _fuehre_ablauf_aus(tmp_path, konflikt=True)
+    assert e['rot'], 'der Lauf blieb gruen, obwohl der Patch nicht passt'
+    assert e['refs']['refs/heads/patch/probe'] == e['anlieferung'], 'trotz Konflikt wurde etwas auf den Zweig geschoben'
+    assert e['refs']['refs/heads/main'] == e['main_vorher']

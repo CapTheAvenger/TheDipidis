@@ -773,7 +773,7 @@ jobs:
           for f in backend/core/data/labs_tournament_decks_*.csv \
                    backend/core/data/labs_tournament_matchups_*.csv \
                    backend/core/data/labs_matchups_je_turnier_*.csv \
-                   backend/core/data/labs_matchups_je_turnier_verzeichnis.json; do
+                   backend/core/data/labs_matchups_je_turnier_verzeichnis[s].json; do
               base=$(basename "$f")
               cp "$f" "data/$base"
               sz=$(stat -c%s "data/$base")

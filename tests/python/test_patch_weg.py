@@ -80,6 +80,27 @@ def test_die_gesamtpruefsumme_greift_auch_bei_stimmigen_teilen(tmp_path):
     assert pw.auspacken(str(ordner), str(tmp_path / 'x')) == 1
 
 
+def test_ein_schraegstrich_u_reist_maskiert_und_kommt_woertlich_an(tmp_path):
+    """Gemessen 27.09.2026: ein woertliches Schraegstrich-u2026 aus js/i18n.js
+    kam auf dem MCP-Weg als Auslassungszeichen an. In den Teilen darf es
+    deshalb nicht stehen — im zusammengesetzten Patch muss es wieder stehen."""
+    su = chr(92) + 'u'
+    quelle = tmp_path / 'b.patch'
+    roh = ("+    'arc.loading': 'Lade " + su + "2026',\n") * 30
+    quelle.write_bytes(roh.encode('utf-8'))
+    liste = pw.verpacken(str(quelle), str(tmp_path / 'l'), 300)
+    assert liste.get('flucht') is True
+    for name in liste['teile']:
+        assert su not in (tmp_path / 'l' / name).read_text(encoding='utf-8'), name
+    assert pw.auspacken(str(tmp_path / 'l'), str(tmp_path / 'aus')) == 0
+    assert (tmp_path / 'aus').read_bytes() == roh.encode('utf-8')
+
+
+def test_ohne_schraegstrich_u_bleibt_alles_wie_es_ist(tmp_path):
+    ordner, liste = _verpackt(tmp_path)
+    assert 'flucht' not in liste
+
+
 def test_der_ablauf_wartet_auf_fertig_und_raeumt_vor_dem_einspielen_auf():
     yml = open(os.path.join(WURZEL, '.github', 'workflows', 'patch-einspielen.yml'), encoding='utf-8').read()
     ohne = re.sub(r'(?m)^\s*#.*$', '', yml)

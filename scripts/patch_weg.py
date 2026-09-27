@@ -21,6 +21,13 @@ Jede Zeile bekommt ein `|` angehaengt. Leerzeichen am Zeilenende (Kontext-
 zeilen leerer Codezeilen, die Signatur `-- `) ueberleben so jede Abschrift
 und jeden Editor; entfernt wird genau ein Zeichen je Zeile.
 
+Ein woertliches Schraegstrich-u mit vier Hexziffern (in js/i18n.js steht
+so die Auslassung) kam auf dem MCP-Weg zweimal als `…` an (gemessen
+27.09.2026, Teil 2 von Rutsch 5–7, Pruefsumme falsch). Ein Schraegstrich-u
+wird deshalb als `¤u` getragen, und
+`FERTIG.json` vermerkt es unter `flucht`. Kommt `¤` im Patch selbst vor,
+bricht `verpacken` ab.
+
 AUFRUF
 ------
     python3 scripts/patch_weg.py verpacken <patch> <zielordner> [--teil 24000]
@@ -36,6 +43,8 @@ import os
 import sys
 
 MARKE = '|'
+FLUCHT = '¤u'          # traegt ein woertliches Schraegstrich-u
+SCHRAEG_U = chr(92) + 'u'   # so geschrieben, damit die Datei selbst keins enthaelt
 
 
 def _sha(b):
@@ -47,6 +56,11 @@ def verpacken(patch, ziel, teil=24000):
     text = roh.decode('utf-8')
     if '\r' in text:
         raise SystemExit('CR im Patch — nicht unterstuetzt')
+    flucht = SCHRAEG_U in text
+    if flucht:
+        if FLUCHT[0] in text:
+            raise SystemExit('Fluchtzeichen im Patch — nicht unterstuetzt')
+        text = text.replace(SCHRAEG_U, FLUCHT)
     zeilen = [z + MARKE for z in text.split('\n')]
     os.makedirs(ziel, exist_ok=True)
     teile, puffer, n = {}, [], 0
@@ -65,6 +79,8 @@ def verpacken(patch, ziel, teil=24000):
         open(os.path.join(ziel, name), 'wb').write(daten)
         teile[name] = _sha(daten)
     liste = {'teile': teile, 'patch_sha256': _sha(roh), 'patch_bytes': len(roh)}
+    if flucht:
+        liste['flucht'] = True
     open(os.path.join(ziel, 'FERTIG.json'), 'w', encoding='utf-8').write(
         json.dumps(liste, indent=1, sort_keys=True) + '\n')
     return liste
@@ -91,7 +107,10 @@ def auspacken(ordner, ausgabe):
                 print(f'::error::Zeile ohne Endmarke in {name}: {z[:60]!r}')
                 return 1
             zeilen.append(z[:-1])
-    roh = '\n'.join(zeilen).encode('utf-8')
+    text = '\n'.join(zeilen)
+    if liste.get('flucht'):
+        text = text.replace(FLUCHT, SCHRAEG_U)
+    roh = text.encode('utf-8')
     if _sha(roh) != liste['patch_sha256']:
         print('::error::Pruefsumme des ganzen Patches stimmt nicht')
         return 1

@@ -239,6 +239,9 @@
        Zeilen selbst gelesen (Spalte tournament_date), nicht geschaetzt.
        { key, von, bis, turniere } oder null, wenn kein Auszug da ist. */
     let _majorZeitraum = null;
+    /* Das Format der Major-Matchups (DA-13): leer oder der Schluessel des
+       geladenen Auszugs, z. B. 'TEF-PBL' im Rueckfall. */
+    let _majorMuFormat = '';
     let _loading = null;
     let _openDeck = null;       // name of the deck currently shown
 
@@ -436,17 +439,35 @@
      * die Datei zu Zeilen mit EINEM Feld, `deck_name` ist undefined, und
      * alles faellt still auf "kein Major" zurueck — genau der Fehler, der
      * die Tier-Liste am 01.09. Worlds nicht sehen liess (PR #602). */
+    /* DA-13 (27.09.2026, Hausi): solange es im laufenden Format noch kein
+       Major gibt, stehen die Major-Felder der Kacheln leer da — „leere,
+       suggestive Felder". Dann zeigen sie das LETZTE Major im alten Format,
+       mit dem Format daneben („Major · TEF-PBL"; das Anhaengen macht
+       majorFormatFremd() unten, sobald der geladene Auszug nicht das
+       laufende Format ist).
+
+       Das alte Format kommt aus data/format_window.json →
+       previous_format_key, das der Betreuer bei jeder Rotation setzt —
+       nicht aus einer Liste hier. Beide Schluessel muessen im Verzeichnis
+       der Auszuege stehen, sonst wird nichts behauptet. */
+    function majorAuszugWaehlen(laufend, vorher, bekannte) {
+        const liste = Array.isArray(bekannte) ? bekannte : [];
+        if (laufend && liste.indexOf(laufend) !== -1) return laufend;
+        if (vorher && vorher !== laufend && liste.indexOf(vorher) !== -1) return vorher;
+        return '';
+    }
+
     function _majorLaden(base, stamp) {
         const fw = (typeof window !== 'undefined') ? window._formatWindow : null;
         const alt = fw && fw.oldest_legal_set ? String(fw.oldest_legal_set).toUpperCase() : '';
         const neu = fw && fw.current_set ? String(fw.current_set).toUpperCase() : '';
         if (!alt || !neu) return Promise.resolve({});
-        const key = `${alt}-${neu}`;
+        const vorher = fw && fw.previous_format_key ? String(fw.previous_format_key).toUpperCase() : '';
         return fetch(base + MAJOR_VERZ_URL + stamp)
             .then(r => r.ok ? r.json() : null)
             .then(v => {
-                const kennt = v && Array.isArray(v.meta_keys) && v.meta_keys.indexOf(key) !== -1;
-                if (!kennt) return '';
+                const key = majorAuszugWaehlen(`${alt}-${neu}`, vorher, v && v.meta_keys);
+                if (!key) return '';
                 _majorZeitraum = { key: key, von: null, bis: null, turniere: 0 };
                 return fetch(`${base}labs_tournament_decks_${key}.csv${stamp}`)
                     .then(r => r.ok ? r.text() : '');
@@ -458,6 +479,7 @@
                    die tatsaechlich geladen wurden — sonst stuende an der
                    Kachel ein Datum, das niemand nachzaehlen kann. */
                 const _turniere = new Set();
+                const _feldJeTurnier = {};
                 for (const r of parseCsv(txt, ',')) {
                     const name = String(r.deck_name || '').trim();
                     if (!name) continue;
@@ -468,6 +490,15 @@
                     }
                     const tid = String(r.tournament_id || r.tournament_name || '').trim();
                     if (tid) _turniere.add(tid);
+                    /* Das Feld eines Turniers: total_players, und wo die
+                       Spalte fehlt, aus Antritten und Anteil derselben Zeile
+                       zurueckgerechnet (player_count / share_pct). */
+                    if (tid && !(_feldJeTurnier[tid] > 0)) {
+                        const gesamt = num(r.total_players);
+                        const anteil = num(r.share_pct);
+                        _feldJeTurnier[tid] = gesamt > 0 ? gesamt
+                            : (anteil > 0 ? num(r.player_count) * 100 / anteil : 0);
+                    }
                     const s = num(r.wins), n_ = num(r.losses), u = num(r.ties);
                     const partien = s + n_ + u;
                     const d1 = num(r.day1_players);
@@ -477,7 +508,6 @@
                         unentschieden: 0, day1: 0, day2: 0, turniere: 0,
                     });
                     e.antritte += num(r.player_count);
-                    e.share += num(r.share_pct);
                     e.siege += s;
                     e.partien += partien;
                     e.unentschieden += u;
@@ -486,8 +516,17 @@
                     e.turniere += 1;
                 }
                 if (_majorZeitraum) _majorZeitraum.turniere = _turniere.size;
+                /* DER ANTEIL IST EIN BRUCH UEBER ALLE TURNIERE, NICHT DIE
+                   SUMME DER TURNIERANTEILE (27.09.2026, beim Bauen von DA-13
+                   gefunden). Hier stand `e.share += share_pct` — bei zwei
+                   Turnieren im Auszug zeigte Dragapult 17,89 + 22,33 =
+                   40,2 %. Gezaehlt sind 736 von 3.916 Antritten = 18,8 %
+                   (data/labs_tournament_decks_TEF-PBL.csv). Sichtbar war
+                   das nur, solange ein Auszug mehr als ein Turnier traegt. */
+                const _feld = Object.values(_feldJeTurnier).reduce((a, b) => a + b, 0);
                 for (const k of Object.keys(raus)) {
                     const e = raus[k];
+                    e.share = _feld > 0 ? (e.antritte / _feld) * 100 : 0;
                     // Siege durch ALLE Partien — dieselbe Rechnung wie online.
                     // NICHT die Spalte `win_pct` der Datei: die fuehrt
                     // Matchpunkte (3S+U)/3n und ist eine andere Skala.
@@ -513,12 +552,18 @@
                dieselbe Datei zweimal zu parsen hiesse, zwei Zahlen fuer
                eine Sache zu fuehren. Fehlt der Verweis (andere Seite,
                anderer Ladeweg), bleibt die Spalte leer statt kaputt. */
-            (typeof window.ladeMajorMatchups === 'function')
-                ? window.ladeMajorMatchups().catch(() => ({}))
-                : Promise.resolve({}),
-        ]).then(([decksTxt, top8Txt, major, majorMu]) => {
+            /* DA-13 / FE-5 (27.09.2026): mit Rueckfall auf das letzte
+               Major-Format, wie die Kacheln (majorAuszugWaehlen). Der
+               Schluessel kommt mit und steht dann an der Spalte. */
+            (typeof window.ladeMajorMatchupsMitRueckfall === 'function')
+                ? window.ladeMajorMatchupsMitRueckfall().catch(() => ({ reg: {}, key: '' }))
+                : ((typeof window.ladeMajorMatchups === 'function')
+                    ? window.ladeMajorMatchups().then(reg => ({ reg, key: '' })).catch(() => ({ reg: {}, key: '' }))
+                    : Promise.resolve({ reg: {}, key: '' })),
+        ]).then(([decksTxt, top8Txt, major, majorMuErg]) => {
             _major = major || {};
-            _majorMu = majorMu || {};
+            _majorMu = (majorMuErg && majorMuErg.reg) || {};
+            _majorMuFormat = (majorMuErg && majorMuErg.key) || '';
             _decks = {};
             for (const r of parseSemicolonCsv(decksTxt)) {
                 if (!r.deck_name) continue;
@@ -874,6 +919,16 @@
             ? String(window.getCurrentMetaFormat() || '').trim().toUpperCase() : '';
         if (!auszug || !jetzt || auszug === jetzt) return '';
         return auszug;
+    }
+
+    /* Dasselbe fuer die Major-Matchups: ' · TEF-PBL', wenn der geladene
+       Matchup-Auszug nicht das laufende Format ist (DA-13). */
+    function majorMuFremd() {
+        const jetzt = (typeof window !== 'undefined'
+            && typeof window.getCurrentMetaFormat === 'function')
+            ? String(window.getCurrentMetaFormat() || '').trim().toUpperCase() : '';
+        const k = String(_majorMuFormat || '').trim().toUpperCase();
+        return (k && jetzt && k !== jetzt) ? ' · ' + k : '';
     }
 
     /* Die Day-2-Kachel ist die einzige, die NUR Praesenzzahlen zeigt —
@@ -1796,7 +1851,7 @@
                             ? 'Präsenzturniere: Siege ÷ entschiedene Matches (Unentschieden bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Präsenzturnieren statt online.'
                             : 'In-person events: wins ÷ decided matches (ties left out) — the same calculation and the same smoothing as the WR column on the left, just measured at in-person events instead of online.'))}"
                             data-quote-konvention="ohneUnentschieden">${
-                            esc(L('arc.colMajor', 'Major-WR'))}</th>
+                            esc(L('arc.colMajor', 'Major-WR') + majorMuFremd())}</th>
                         <th title="${esc(L('arc.colMajorN', de
                             ? 'Präsenz-Matches dieser Paarung'
                             : 'in-person matches for this pairing'))}">${
@@ -2106,6 +2161,8 @@
                Kartenpool stehen, muss das AUF dem Bild stehen und nicht
                nur daneben auf der Seite. */
             majorFormat: majorFormatFremd(),
+            /* FE-5: Format der Major-Matchups (leer = laufendes Format). */
+            majorMuFormat: majorMuFremd().replace(/^ · /, ''),
         };
     }
 
@@ -2166,6 +2223,28 @@
     };
     window.getArchetypeMatchups = function (name) {
         return load().then(() => matchupsFor(name));
+    };
+    /* FE-5 (27.09.2026): alle Major-Paarungen eines Decks, nicht nur die,
+       die auch online vorkommen — fuer die Major-Fassung des Bildes.
+       Dieselbe Form wie matchupsFor(), die Quote ist S/(S+N), geglaettet
+       wie links (siehe ladeMajorMatchups in js/app-current-meta.js). */
+    function majorMatchupsFor(name) {
+        const von = _majorMu ? (_majorMu[findKey(_majorMu, name)] || null) : null;
+        if (!von) return [];
+        return Object.keys(von).map(gegner => {
+            const e = von[gegner];
+            return {
+                opponent: gegner,
+                winRate: e.wr == null ? null : e.wr,
+                winRateRoh: e.wrRoh == null ? null : e.wrRoh,
+                wins: e.siege, losses: e.niederlagen, ties: e.unentschieden,
+                games: e.anzahl,
+                thin: !(e.anzahl >= THIN_GAMES),
+            };
+        }).sort((a, b) => (b.winRate == null ? -1 : b.winRate) - (a.winRate == null ? -1 : a.winRate));
+    }
+    window.getArchetypeMajorMatchups = function (name) {
+        return load().then(() => majorMatchupsFor(name));
     };
     /* Die Feldanteile, so wie diese Datei sie ohnehin schon geparst hat.
        Sie entstand fuer js/ds-ev-rechner.js, damit dieselbe CSV nicht ein

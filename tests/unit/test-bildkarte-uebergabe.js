@@ -80,8 +80,11 @@ describe('Bildkarte — die Uebergabe traegt alles, was gezeichnet wird', () => 
            jede Zeile ihr eigenes bekommt. Deshalb zaehlt auch dieser
            Schritt als „gesetzt". */
         const RUFER = rumpf(SHARE, 'function shareDeckCard(name, space)');
+        // Seit FE-5 (27.09.2026) setzt shareDeckCard() variante und
+        // matchupAuswahl je Fassung ueber Object.assign({ …: … }).
         const gesetzt = (f) => new RegExp('(^|[^\\w.])' + f + '\\s*:').test(SAMMLER)
-            || new RegExp('spec\\.' + f + '\\s*=').test(RUFER);
+            || new RegExp('spec\\.' + f + '\\s*=').test(RUFER)
+            || new RegExp('Object\\.assign\\(\\{\\}, spec, \\{[^}]*\\b' + f + '\\s*:').test(RUFER);
         const fehlt = gelesen.filter(f => !gesetzt(f));
         assert.deepEqual(fehlt, [],
             'deckCardCanvas() liest diese Felder, collectDeckSpec() setzt sie nicht:\n  '
@@ -120,7 +123,7 @@ describe('Bildkarte — die Uebergabe traegt alles, was gezeichnet wird', () => 
            Bei mehr als zehn Paarungen trugen die unteren Zeilen die
            Symbole fremder Decks. */
         const fn = rumpf(SHARE, 'function shareDeckCard(name, space)');
-        assert.match(fn, /spec\.matchupAuswahl = sel;/,
+        assert.match(fn, /Object\.assign\(\{\}, spec, \{ variante: variante, matchupAuswahl: sel \}\)/,
             'die Auswahl wird nicht an die Zeichenroutine weitergereicht — '
             + 'dann waehlen beide Stellen getrennt aus und koennen auseinanderlaufen');
         assert.match(fn, /getArchetypeMatchupAuswahl/,

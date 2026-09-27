@@ -865,6 +865,17 @@
          */
         function getArchetypeImage(archetypeName, archetypeCardsData) {
             if (!archetypeCardsData || archetypeCardsData.length === 0) {
+                /* DA-14 (27.09.2026, Hausi): „Bild fehlt beim Deck Okidogi
+                   Barbaracle". Gemessen: es ist das einzige der 20
+                   Rogue-Decks ohne Zeilen in der Kartenauswertung des
+                   laufenden Metas (8 Listen) — deshalb die graue Flaeche.
+                   Statt ihrer das Pokémon-Bild aus data/archetype_icons.json,
+                   dasselbe, das Heatmap und Kacheln zeigen. Erst wenn auch
+                   das fehlt, bleibt die Flaeche grau. */
+                const sprites = (typeof window !== 'undefined' && window.ArchetypeIcons
+                    && typeof window.ArchetypeIcons.getIconUrls === 'function')
+                    ? (window.ArchetypeIcons.getIconUrls(archetypeName) || []) : [];
+                if (sprites.length) return sprites[0];
                 return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="280"%3E%3Crect fill="%23ddd" width="200" height="280"/%3E%3C/svg%3E';
             }
             
@@ -2186,6 +2197,24 @@
                             nichtZugeordnet.length, nichtZugeordnet.join(', '));
                     }
 
+                    /* FE-6 (27.09.2026, Hausi): „sobald Major-Daten fuers
+                       aktuelle Format vorliegen, zusaetzlich zu den Online-
+                       Werten auch Major-Werte zeigen". Quelle ist derselbe
+                       Auszug, den der Tier-Score liest (labsByName, NUR das
+                       laufende Format — kein Rueckfall auf ein altes). Gibt
+                       es ihn nicht, bleibt jede Zelle leer und die Spalten
+                       verschwinden ueber hatWert() unten von selbst.
+                       Anteil = Antritte des Decks / Antritte aller Decks im
+                       Auszug; Win % = Siege / alle Matches, dieselbe
+                       Konvention wie die Online-Spalte. */
+                    const _majorSumme = labsByName
+                        ? Object.values(labsByName).reduce((a, e) => a + (e.players || 0), 0) : 0;
+                    const majorVon = (name) => {
+                        if (!labsByName || !(_majorSumme > 0)) return null;
+                        const e = labsByName[name] || labsByName[kanon(name)] || null;
+                        if (!e || !(e.games > 0)) return null;
+                        return { anteil: (e.players / _majorSumme) * 100, wr: e.winPct };
+                    };
                     const reihen = [...alleNamen].map(name => {
                         const t = turnierVon.get(name) || null;
                         const l = ladderVon.get(name) || null;
@@ -2227,6 +2256,8 @@
                             // unberuehrt, die stehen auf 2.121 Listen.
                             duenn: !(antritteGew >= CONV_THIN_N),
                             rang: l ? (l.new_count || 0) : 0,
+                            majorAnteil: majorVon(name) ? majorVon(name).anteil : null,
+                            majorWr:     majorVon(name) ? majorVon(name).wr : null,
                         };
                     });
 
@@ -2246,6 +2277,15 @@
                                          en: tierQuotenName('mitUnentschieden'),    num: true,
                           tip: { de: tierQuotenHinweis('mitUnentschieden'),
                                  en: tierQuotenHinweis('mitUnentschieden') } },
+                        /* FE-6: die Major-Werte daneben — nur sichtbar, wenn der
+                           Auszug des laufenden Formats Zeilen traegt. */
+                        { k: 'majorAnteil', de: 'Major-Anteil', en: 'Major share', num: true,
+                          tip: { de: 'Anteil an den Antritten der Präsenzturniere (Majors) im laufenden Format.',
+                                 en: 'Share of entries at in-person events (majors) in the current format.' } },
+                        { k: 'majorWr', de: 'Major ' + tierQuotenName('mitUnentschieden'),
+                                        en: 'Major ' + tierQuotenName('mitUnentschieden'), num: true,
+                          tip: { de: tierQuotenHinweis('mitUnentschieden') + ' Gemessen auf den Präsenzturnieren des laufenden Formats.',
+                                 en: tierQuotenHinweis('mitUnentschieden') + ' Measured at the in-person events of the current format.' } },
                         /* DREI UEBERSCHRIFTEN NEU BENANNT AM 01.09.2026.
                            Gemeldet: "was sind denn bitte 618,5 Antritte?
                            Was ist das fuer eine Kennzahl? … 'davon Top 8,
@@ -2317,7 +2357,8 @@
                        Tabelle steht. */
                     const hatWert = (k) => reihen.some(r => r[k] != null);
                     const SPALTEN_SICHTBAR = SPALTEN.filter(c =>
-                        (c.k !== 'antritte' && c.k !== 'cuts') || hatWert(c.k));
+                        (c.k !== 'antritte' && c.k !== 'cuts' && c.k !== 'majorAnteil' && c.k !== 'majorWr')
+                        || hatWert(c.k));
 
                     /* DAS BILD GEHOERT ZUM DECKNAMEN (15.09.2026).
                        -----------------------------------------------
@@ -2351,6 +2392,8 @@
                                 : txt;
                         }
                         if (k === 'wr')       return r.wr       == null ? '–' : fmtPct(r.wr);
+                        if (k === 'majorAnteil') return r.majorAnteil == null ? '–' : fmtPct(r.majorAnteil);
+                        if (k === 'majorWr')     return r.majorWr     == null ? '–' : fmtPct(r.majorWr);
                         if (k === 'antritte') return r.antritte == null ? '–' : fmtHalb(r.antritte);
                         if (k === 'quote')    return r.quote    == null ? '–' : fmtPct(r.quote);
                         if (k === 'cuts')     return r.cuts     == null ? '–' : fmtHalb(r.cuts);

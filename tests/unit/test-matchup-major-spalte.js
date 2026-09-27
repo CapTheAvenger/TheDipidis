@@ -107,7 +107,10 @@ describe('Die Datei wird nur einmal gelesen', () => {
         // getArchetypeShares() existiert.
         assert.ok(/window\.ladeMajorMatchups = ladeMajorMatchups/.test(meta),
             'js/app-current-meta.js reicht den Lader nicht mehr nach aussen');
-        assert.ok(/window\.ladeMajorMatchups\(\)/.test(karteK),
+        // Seit DA-13 (27.09.2026) ueber ladeMajorMatchupsMitRueckfall(),
+        // das selbst ladeMajorMatchups() und denselben Parser benutzt.
+        assert.ok(/window\.ladeMajorMatchupsMitRueckfall\(\)/.test(karteK)
+                  && /window\.ladeMajorMatchups\(\)/.test(karteK),
             'die Karte parst die Labs-Matchups wieder selbst — dann gibt es '
             + 'zwei Parser fuer eine Datei');
     });
@@ -118,7 +121,8 @@ describe('Die Datei wird nur einmal gelesen', () => {
         // Auf den AUFRUF pruefen, nicht auf ein Fenster darum: _majorLaden
         // daneben hat sein eigenes catch, und die erste Fassung dieser
         // Zusage nahm das stellvertretend an.
-        assert.ok(/window\.ladeMajorMatchups\(\)\s*\.catch\(/.test(karteK),
+        assert.ok(/window\.ladeMajorMatchupsMitRueckfall\(\)\s*\.catch\(/.test(karteK)
+                  && /window\.ladeMajorMatchups\(\)[^;]*\.catch\(/.test(karteK),
             'der Aufruf von ladeMajorMatchups() hat kein eigenes Fangnetz mehr — '
             + 'ein Fehler beim Laden reisst dann die ganze Karte mit. Die Spalte '
             + 'ist Zusatz, nie Voraussetzung');
@@ -269,8 +273,9 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
            ladeMajorMatchups, und in der Karte die VERZWEIGUNG, die den
            Satz auswaehlt. Gefunden durch die Mutationsprobe. */
         const meta = ohneKomm(lies(path.join('js', 'app-current-meta.js')));
-        const a = meta.indexOf('async function ladeMajorMatchups');
-        const rumpf = meta.slice(a, meta.indexOf('window._majorMatchupRegistry = reg;', a));
+        // Die Zuweisung steht seit dem 27.09.2026 im gemeinsamen Parser.
+        const a = meta.indexOf('function majorMatchupsParsen(');
+        const rumpf = meta.slice(a, meta.indexOf('return reg;', a));
         assert.ok(/bilanzDa\s*:/.test(rumpf),
             'das Register schreibt bilanzDa nicht mehr — dann unterscheidet '
             + 'niemand "keine Bilanz" von "keine entschiedene Partie"');
@@ -331,10 +336,11 @@ describe('Die Zahl kommt aus der Bilanz, nicht aus vs_win_pct', () => {
            weiter benutzt. Gefunden durch die Mutationsprobe, nicht durch
            Nachdenken. */
         const meta = ohneKomm(lies(path.join('js', 'app-current-meta.js')));
-        const a = meta.indexOf('async function ladeMajorMatchups');
-        assert.ok(a > 0, 'ladeMajorMatchups ist weg');
-        const rumpf = meta.slice(a, meta.indexOf('window._majorMatchupRegistry = reg;', a));
-        assert.ok(rumpf.length > 200, 'der Rumpf von ladeMajorMatchups ist leer');
+        // Seit dem 27.09.2026 im gemeinsamen Parser majorMatchupsParsen().
+        const a = meta.indexOf('function majorMatchupsParsen(');
+        assert.ok(a > 0, 'majorMatchupsParsen ist weg');
+        const rumpf = meta.slice(a, meta.indexOf('return reg;', a));
+        assert.ok(rumpf.length > 200, 'der Rumpf des Parsers ist leer');
         assert.ok(/DsGlaettung/.test(rumpf),
             'die Major-Quote wird nicht mehr geglaettet — dann steht ein 2-0 '
             + 'als 100 % neben einer geglaetteten Online-Zahl, und der '
@@ -880,6 +886,7 @@ describe('Die Schwelle steht sichtbar unter der Tabelle', () => {
             'const shadeFor = () => "";',
             'const barFor = () => ({ pct: 0, cls: "" });',
             'const matchupsFor = () => ZEILEN;',
+            'const majorMuFremd = () => "";',
             // dieselben vier Helfer wie oben, aus DERSELBEN Datei
             schneideAus(karte, 'function quotenFormel(id)'),
             schneideAus(karte, 'function quotenName(id)'),

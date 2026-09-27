@@ -962,6 +962,32 @@ html.is-signed-out [onclick*="radelist"]:hover {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   margin: 0 auto;
 }
+/* FE-5 (27.09.2026): Umschalter Online / Major / Kombiniert — dieselbe
+   Pillenform wie die Datenraum-Knoepfe, aus Tokens. */
+.ds-bildvorschau-varianten {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 18px 0;
+}
+.ds-bildvorschau-variante {
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-1);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+.ds-bildvorschau-variante.is-on {
+  background: var(--brand-ink);
+  border-color: var(--brand-ink);
+  color: var(--surface-1);
+}
+.ds-bildvorschau-variante:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .ds-bildvorschau-actions {
   display: flex;
   gap: 10px;

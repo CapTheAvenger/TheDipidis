@@ -240,7 +240,10 @@ describe('A-F4.7 — die Kacheln sagen, welchen Zeitraum sie zeigen', () => {
              Win % online    = win_rate_numeric       -> 50,0 %
              Nenner online   = wins+losses+ties = 200
              Top-8-Quote     = 10 / 100               -> 10,0 %
-             Anteil Major    = share_pct 22,33+10,00  -> 32,3 %
+             Anteil Major    = (178+50) / (178/0,2233 + 50/0,10) -> 17,6 %
+                               (bis 27.09.2026 stand hier die SUMME der
+                               Turnieranteile, 32,3 % — derselbe Fehler wie
+                               auf der Seite, dort 40,2 % statt 18,8 %) 
              Day-2-Quote     = (22+5) / (178+50)      -> 11,8 % */
         const w = ladeKarte(DATEIEN);
         const wirt = { innerHTML: '' };
@@ -250,7 +253,8 @@ describe('A-F4.7 — die Kacheln sagen, welchen Zeitraum sie zeigen', () => {
         assert.match(h, /50,0 %/, 'Win % online');
         assert.match(h, /200/, 'Nenner der Online-Win-%');
         assert.match(h, /10,0 %/, 'Top-8-Quote');
-        assert.match(h, /32,3 %/, 'Anteil Major (Summe der beiden Zeilen)');
+        assert.match(h, /17,6 %/, 'Anteil Major (Antritte durch Feld ueber beide Turniere)');
+        assert.doesNotMatch(h, /32,3 %/, 'der Anteil ist wieder die Summe der Turnieranteile');
         const d2 = (22 + 5) / (178 + 50) * 100;
         assert.match(h, new RegExp(d2.toFixed(1).replace('.', ',') + ' %'), 'Day-2-Quote');
     });

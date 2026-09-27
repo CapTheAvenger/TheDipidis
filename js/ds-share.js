@@ -756,7 +756,15 @@
         var tx = mx + 20;
         var ty = bodyY + 30;
         var rowH = MU_ZEILE_H;
-        var budget = muBudget((spec.matchups || []).length);
+        /* FE-5 (27.09.2026, Hausi): drei Fassungen desselben Bildes —
+           „Online" (bisher), „Major" (die Paarungen der Praesenzturniere)
+           und „Kombiniert" (je Gegner beide Quoten nebeneinander; statt
+           des Decknamens zwei Pokémon-Bilder, weil sonst der Platz fehlt).
+           Umgeschaltet wird in der Bildvorschau. */
+        var variante = spec.variante === 'major' || spec.variante === 'kombiniert'
+            ? spec.variante : 'online';
+        var muQuelle = variante === 'major' ? (spec.majorMatchups || []) : (spec.matchups || []);
+        var budget = muBudget(muQuelle.length);
         var zeilenProSpalte = budget.proSpalte;
 
         /* ZWEI SPALTEN STATT EINER (15.09.2026).
@@ -790,7 +798,33 @@
            ruecken Zahlenspalten und Quotenfeld zusammen — die Werte sind
            an der schmalsten Fassung (439 px) nachgerechnet:
            22 Symbol + 8 Abstand + Name + 52 Matches + 66 Record + 96 Quote. */
+        /* Getoente Quotenzelle, eine fuer alle Fassungen. Ohne Quote (kein
+           Match entschieden, oder keine Major-Paarung) ein Strich — nie
+           eine erfundene Zahl. */
+        function quoteZelle(x, w, wert, duenn, cy) {
+            var da = wert != null && isFinite(wert);
+            var d = da ? wert - 50 : 0;
+            ctx.fillStyle = (duenn || !da) ? 'rgba(135,145,184,.10)'
+                          : (d >= 0 ? C.dvPosBg : C.dvNegBg);
+            rr(ctx, x, cy - 13, w, 26, 6); ctx.fill();
+            ctx.font = fMono(14, 700);
+            ctx.fillStyle = (duenn || !da) ? C.ink3 : C.ink;
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(da ? num(wert, 1) + ' %' : '–', x + w - 10, cy);
+            ctx.textAlign = 'start';
+        }
         function kanten(x0) {
+            if (variante === 'kombiniert') {
+                /* Rechts nach links: Major-Quote, Major-Matches, Luecke,
+                   Online-Quote, Online-Matches. Links die zwei Bilder. */
+                var zb = spalten > 1 ? 84 : 104;
+                var majorWrX = x0 + spaltenB - zb;
+                var majorGames = majorWrX - 8;
+                var onlineWrX = majorGames - 44 - 14 - zb;
+                return { x: x0, zb: zb, majorWrX: majorWrX, majorGames: majorGames,
+                         onlineWrX: onlineWrX, onlineGames: onlineWrX - 8 };
+            }
             var quoteB = spalten > 1 ? 96 : 116;
             return {
                 x: x0,
@@ -802,11 +836,24 @@
         }
 
         function kopf(k) {
+            if (variante === 'kombiniert') {
+                label(ctx, L('Gegner', 'Opponent'), k.x, ty);
+                ctx.textAlign = 'right';
+                label(ctx, 'M', k.onlineGames, ty);
+                label(ctx, L('Online', 'Online'), k.onlineWrX + k.zb - 10, ty);
+                label(ctx, 'M', k.majorGames, ty);
+                label(ctx, L('Major', 'Major'), k.majorWrX + k.zb - 10, ty);
+                ctx.textAlign = 'start';
+                ctx.fillStyle = C.line;
+                ctx.fillRect(k.x, ty + 8, spaltenB, 1);
+                return;
+            }
             label(ctx, L('Gegner', 'Opponent'), k.x, ty);
             ctx.textAlign = 'right';
             label(ctx, L('Matches', 'Matches'), k.games, ty);
             label(ctx, L('Record', 'Record'), k.record, ty);
-            label(ctx, quotenKuerzel('ohneUnentschieden'), k.wrX + k.wrW - 10, ty);
+            label(ctx, (variante === 'major' ? 'Major-' : '') + quotenKuerzel('ohneUnentschieden'),
+                  k.wrX + k.wrW - 10, ty);
             ctx.textAlign = 'start';
             ctx.fillStyle = C.line;
             ctx.fillRect(k.x, ty + 8, k.x + spaltenB - k.x, 1);
@@ -818,7 +865,7 @@
          * Eine Bildkarte, die nur die Oberseite der sortierten Liste
          * zeigt, ist Werbung — jedes Deck sieht darauf gut aus. Die
          * Frage vor einem Turnier ist die andere: woran stirbt es? */
-        var all = (spec.matchups || []);
+        var all = muQuelle;
         var mus = all;
         var cutAfter = -1;
         if (all.length > maxRows) {
@@ -884,6 +931,29 @@
             var ry = ty + 14 + (bildZeile % zeilenProSpalte) * rowH;
             var cy = ry + rowH / 2;
 
+            if (variante === 'kombiniert') {
+                var paar = (art.mIcons2 && art.mIcons2[r]) || [];
+                if (paar.length) {
+                    for (var pi = 0; pi < Math.min(2, paar.length); pi++) {
+                        sprite(ctx, paar[pi], k.x + pi * 26, cy - 12, 24, initials(m.opponent));
+                    }
+                } else {
+                    sprite(ctx, null, k.x, cy - 12, 24, initials(m.opponent));
+                }
+                quoteZelle(k.onlineWrX, k.zb, m.winRate, m.thin, cy);
+                ctx.textAlign = 'right';
+                ctx.font = fMono(12, 400);
+                ctx.fillStyle = C.ink3;
+                ctx.textBaseline = 'middle';
+                ctx.fillText(num(m.games, 0), k.onlineGames, cy);
+                ctx.fillText(m.majorAnzahl ? num(m.majorAnzahl, 0) : '–', k.majorGames, cy);
+                ctx.textAlign = 'start';
+                quoteZelle(k.majorWrX, k.zb, m.majorWr, !(m.majorAnzahl >= (spec.thinGames || 20)), cy);
+                ctx.fillStyle = 'rgba(37,48,87,.55)';
+                ctx.fillRect(k.x, ry + rowH - 1, spaltenB, 1);
+                if (r === cutAfter && hidden > 0) auslassung(bildZeile);
+                continue;
+            }
             sprite(ctx, (art.mIcons && art.mIcons[r]) || null, k.x, cy - 11, 22, initials(m.opponent));
             ctx.font = fSans(13, 500);
             ctx.fillStyle = m.thin ? C.ink3 : C.ink;
@@ -899,21 +969,15 @@
 
             /* Getönte Zelle statt farbigem Text: der Kontrast bleibt
              * konstant, egal wie stark die Tönung ist. */
-            var d = m.winRate - 50;
-            ctx.fillStyle = m.thin ? 'rgba(135,145,184,.10)'
-                          : (d >= 0 ? C.dvPosBg : C.dvNegBg);
-            rr(ctx, k.wrX, cy - 13, k.wrW, 26, 6); ctx.fill();
-            ctx.font = fMono(14, 700);
-            ctx.fillStyle = m.thin ? C.ink3 : C.ink;
-            ctx.textAlign = 'right';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(num(m.winRate, 1) + ' %', k.wrX + k.wrW - 10, cy);
-            ctx.textAlign = 'start';
+            quoteZelle(k.wrX, k.wrW, m.winRate, m.thin, cy);
 
             ctx.fillStyle = 'rgba(37,48,87,.55)';
             ctx.fillRect(k.x, ry + rowH - 1, spaltenB, 1);
 
-            if (r === cutAfter && hidden > 0) {
+            if (r === cutAfter && hidden > 0) auslassung(bildZeile);
+        }
+        function auslassung(bildZeile) {
+            {
                 var aZeile = bildZeile + 1;
                 var aSp = Math.floor(aZeile / zeilenProSpalte);
                 if (aSp < spalten) {
@@ -956,6 +1020,25 @@
                     quotenKuerzel('ohneUnentschieden') + ' = ' + quotenName('ohneUnentschieden')
                       + ' (' + quotenFormel('ohneUnentschieden') + '). '
                       + 'Showing the most-played pairings above and below 50 %, sorted by rate.');
+            /* FE-5: die beiden neuen Fassungen sagen, was sie zeigen —
+               und aus welchem Format die Major-Zahlen stammen, wenn es
+               nicht das laufende ist (DA-13). */
+            var muFmt = spec.majorMuFormat ? String(spec.majorMuFormat) : '';
+            if (variante === 'major') {
+                note = L('Major-' + quotenKuerzel('ohneUnentschieden') + ' = ' + quotenName('ohneUnentschieden')
+                          + ' (' + quotenFormel('ohneUnentschieden') + ') auf Präsenzturnieren'
+                          + (muFmt ? ' · aus ' + muFmt + ', dem letzten Format mit Major' : '') + '.',
+                         'Major ' + quotenKuerzel('ohneUnentschieden') + ' = ' + quotenName('ohneUnentschieden')
+                          + ' (' + quotenFormel('ohneUnentschieden') + ') at in-person events'
+                          + (muFmt ? ' · from ' + muFmt + ', the last format with a major' : '') + '.');
+            } else if (variante === 'kombiniert') {
+                note = L('Je Gegner links online, rechts Major' + (muFmt ? ' (' + muFmt + ')' : '')
+                          + ' · ' + quotenKuerzel('ohneUnentschieden') + ' = ' + quotenFormel('ohneUnentschieden')
+                          + ' · M = Matches.',
+                         'Per opponent: online left, major right' + (muFmt ? ' (' + muFmt + ')' : '')
+                          + ' · ' + quotenKuerzel('ohneUnentschieden') + ' = ' + quotenFormel('ohneUnentschieden')
+                          + ' · M = matches.');
+            }
             ctx.font = fSans(11, 400);
             ctx.fillStyle = C.ink3;
             ctx.textBaseline = 'alphabetic';
@@ -1233,7 +1316,7 @@
             .slice(0, 60) || 'bild';
     }
 
-    function deliver(canvas, name) {
+    function deliver(canvas, name, mehr) {
         /* Erst zeigen, dann entscheiden.
          *
          * Bis zum 19.08.2026 schob diese Funktion die PNG-Datei direkt in
@@ -1249,11 +1332,11 @@
          * Faellt das Modul aus, bleibt der alte Weg: lieber ein Download
          * ohne Vorschau als ein Knopf, der nichts tut. */
         if (window.DsBildvorschau && typeof window.DsBildvorschau.zeige === 'function') {
-            return window.DsBildvorschau.zeige(canvas, {
+            return window.DsBildvorschau.zeige(canvas, Object.assign({
                 dateiname: name,
                 titel: L('Bildkarte', 'Image card'),
                 alt: L('Analyse als Bild', 'Analysis as an image'),
-            });
+            }, mehr || {}));
         }
         return new Promise(function (resolve) {
             canvas.toBlob(function (blob) {
@@ -1311,12 +1394,15 @@
         var getMus = window.getArchetypeMatchups;
         if (typeof getFacts !== 'function') return Promise.resolve(null);
 
+        var getMajorMus = window.getArchetypeMajorMatchups;
         return Promise.all([
             getFacts(name),
-            typeof getMus === 'function' ? getMus(name) : Promise.resolve([])
+            typeof getMus === 'function' ? getMus(name) : Promise.resolve([]),
+            typeof getMajorMus === 'function' ? getMajorMus(name) : Promise.resolve([])
         ]).then(function (res) {
             var f = res[0] || {};
             var mus = res[1] || [];
+            var majorMus = res[2] || [];
             return {
                 name: name,
                 share: f.share, winRate: f.winRate, count: f.count,
@@ -1360,7 +1446,9 @@
                 majorDay2Feld: f.majorDay2Feld,
                 majorDuennAb: f.majorDuennAb,
                 majorFormat: f.majorFormat,
+                majorMuFormat: f.majorMuFormat || '',
                 matchups: mus,
+                majorMatchups: majorMus,
                 thinGames: f.thinGames || 20,
                 space: sp,
                 spaceLabel: facts.region || '',
@@ -1489,26 +1577,54 @@
                Also erst auswaehlen, dann laden. Wie viele Zeilen die
                Karte traegt, rechnet muBudget() — dieselbe Funktion, die
                auch deckCardCanvas() benutzt. */
-            var alleMus = (spec.matchups || []);
-            var b = muBudget(alleMus.length);
-            /* maxRows - 1: eine Bildzeile geht fuer den Hinweis
-               "… weitere Matchups ausgelassen" drauf. Passt alles, wird
-               nichts ausgelassen und die Zeile faellt weg. */
-            var sel = (typeof window.getArchetypeMatchupAuswahl === 'function'
-                && alleMus.length > b.max)
-                ? window.getArchetypeMatchupAuswahl(alleMus, b.max - 1)
-                : alleMus.slice(0, b.max);
-            var mus = sel;
-            spec.matchupAuswahl = sel;
-            return Promise.all([
-                loadIcons(spec.name, 2),
-                Promise.all(mus.map(function (m) {
-                    return loadIcons(m.opponent, 1).then(function (a) { return a[0] || null; });
-                }))
-            ]).then(function (art) {
-                var cv = deckCardCanvas(spec, { icons: art[0], mIcons: art[1] });
-                return deliver(cv, safeName(spec.name) + '_analyse_'
-                    + new Date().toISOString().slice(0, 10) + '.png');
+            /* FE-5: jede Fassung waehlt ihre Zeilen selbst und laedt die
+               Symbole genau dafuer — sonst truege eine Zeile das Bild
+               eines anderen Decks (Befund 11.09.2026, siehe unten). */
+            function baue(variante) {
+                var quelle = variante === 'major' ? (spec.majorMatchups || []) : (spec.matchups || []);
+                var b = muBudget(quelle.length);
+                /* SYMBOLE FUER GENAU DIE ZEILEN, DIE GEZEICHNET WERDEN.
+                   Bis zum 11.09.2026 wurden die Symbole der ERSTEN ZWOELF der
+                   nach Quote sortierten Liste geladen, das Bild adressierte
+                   sie aber mit dem Index der AUSGEWAEHLTEN Zeilen
+                   (art.mIcons[r]). Bei mehr als zehn Paarungen trugen die
+                   unteren Zeilen damit fremde Symbole.
+                   maxRows - 1: eine Bildzeile geht fuer den Hinweis
+                   "… weitere Matchups ausgelassen" drauf. */
+                var sel = (typeof window.getArchetypeMatchupAuswahl === 'function'
+                    && quelle.length > b.max)
+                    ? window.getArchetypeMatchupAuswahl(quelle, b.max - 1)
+                    : quelle.slice(0, b.max);
+                var s2 = Object.assign({}, spec, { variante: variante, matchupAuswahl: sel });
+                var zwei = variante === 'kombiniert' ? 2 : 1;
+                return Promise.all([
+                    loadIcons(spec.name, 2),
+                    Promise.all(sel.map(function (m) { return loadIcons(m.opponent, zwei); }))
+                ]).then(function (art) {
+                    return deckCardCanvas(s2, {
+                        icons: art[0],
+                        mIcons: art[1].map(function (a) { return a[0] || null; }),
+                        mIcons2: art[1]
+                    });
+                });
+            }
+            var dateiname = function (v) {
+                return safeName(spec.name) + '_analyse_' + (v === 'online' ? '' : v + '_')
+                    + new Date().toISOString().slice(0, 10) + '.png';
+            };
+            var hatMajor = (spec.majorMatchups || []).length > 0;
+            return baue('online').then(function (cv) {
+                return deliver(cv, dateiname('online'), hatMajor ? {
+                    varianten: [
+                        { id: 'online', label: L('Online', 'Online') },
+                        { id: 'major', label: 'Major' + (spec.majorMuFormat ? ' (' + spec.majorMuFormat + ')' : '') },
+                        { id: 'kombiniert', label: L('Kombiniert', 'Combined') }
+                    ],
+                    aktiv: 'online',
+                    wechsle: function (id) {
+                        return baue(id).then(function (c) { return { canvas: c, dateiname: dateiname(id) }; });
+                    }
+                } : null);
             });
         }).catch(function (err) {
             console.error('[DsShare] deck card failed', err);

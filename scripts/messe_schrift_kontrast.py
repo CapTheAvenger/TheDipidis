@@ -59,6 +59,12 @@ SAMMLER = r"""
   const emoji = /^[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{S}\p{P}\s‍️\d]*$/u;
   const raus = [];
   const deckkraft = (el) => { let o = 1; for (let e = el; e && e.nodeType === 1; e = e.parentElement) o *= parseFloat(getComputedStyle(e).opacity || '1'); return o; };
+  // filter: brightness() eines Vorfahren dimmt die Schrift GENAUSO wie den
+  // Grund. Der Grund kommt aus dem Bildschirmfoto (schon gedimmt), die
+  // Schriftfarbe aus dem CSS (ungedimmt) — ohne diesen Faktor misst das
+  // Werkzeug im Dunkelmodus der Anleitung zu schwache Kontraste
+  // (Rutsch 6, 27.09.2026: 3 von 4 Befunden waren nur dieser Fehler).
+  const helligkeit = (el) => { let h = 1; for (let e = el; e && e.nodeType === 1; e = e.parentElement) { const f = getComputedStyle(e).filter || ''; const m = f.match(/brightness\(([\d.]+)\)/); if (m) h *= parseFloat(m[1]); } return h; };
   const walker = document.createTreeWalker(wurzel, NodeFilter.SHOW_TEXT);
   const gesehen = new Set();
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
@@ -80,7 +86,7 @@ SAMMLER = r"""
     el.dataset.wz1 = String(raus.length);
     raus.push({
       text: text.slice(0, 50), klasse: (el.className && el.className.baseVal === undefined ? el.className : '') || el.tagName.toLowerCase(),
-      fs, gewicht: parseInt(cs.fontWeight, 10) || 400, farbe: cs.color, deckkraft: op,
+      fs, gewicht: parseInt(cs.fontWeight, 10) || 400, farbe: cs.color, deckkraft: op, helligkeit: helligkeit(el),
       x: rect.left + scrollX, y: rect.top + scrollY, b: rect.width, h: rect.height,
     });
   }
@@ -197,7 +203,8 @@ def messe(seite, ansicht, breite, dunkel, klasse):
         if bg is None:
             k["kontrast"] = None
             continue
-        vg = tuple(a * c + (1 - a) * h for c, h in zip((r, g, b), bg))
+        hf = k.get("helligkeit", 1.0)
+        vg = tuple(a * min(255.0, c * hf) + (1 - a) * h for c, h in zip((r, g, b), bg))
         k["hintergrund"] = "#%02x%02x%02x" % bg
         k["kontrast"] = round(kontrast(vg, bg), 2)
         gross = k["fs"] >= 24 or (k["fs"] >= 18.66 and k["gewicht"] >= 700)

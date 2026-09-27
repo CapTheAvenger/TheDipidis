@@ -158,7 +158,7 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {
            wieder fuer eine von dreien. */
         for (const [kuerzel, wort] of [['WR', '{quote}'], ['M', 'Matches'],
                                         ['Major-WR', 'Präsenzturnieren'],
-                                        ['Major-Matches', 'Partien']]) {
+                                        ['Major-Matches', 'die Matches dahinter']]) {
             const zeilen = [...I18N.matchAll(/'arc\.muLegende':\s*'([^']*)'/g)]
                 .map(m => m[1]);
             assert.ok(zeilen.length >= 1, 'arc.muLegende fehlt in i18n.js');

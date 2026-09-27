@@ -2226,7 +2226,7 @@
             })).sort((a, b) => (b.games - a.games) || (b.winPct - a.winPct));
 
             const headerOpp = (typeof t === 'function' ? t('pm.matchupColOpponent') : 'Opponent');
-            const headerGames = (typeof t === 'function' ? t('pm.matchupColGames') : 'Games');
+            const headerGames = (typeof t === 'function' ? t('pm.matchupColGames') : 'Matches');
             const headerWr = (typeof t === 'function' ? t('pm.matchupColWinPct') : 'Win %');
             const tournHint = _muJeTurnier
                 ? (typeof t === 'function' ? t('pm.matchupTournSingle') : 'Matchups of this tournament only.')

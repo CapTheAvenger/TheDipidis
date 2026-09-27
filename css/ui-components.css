@@ -2441,7 +2441,7 @@ img[src*="limitlesstcg"] {
     .heatmap-th-y {
         min-width: 84px !important;
         padding: 6px 5px !important;
-        font-size: 0.68rem !important;
+        font-size: var(--fs-xs) !important;  /* UI-11: war 0,68 rem = 10,9 px */
     }
 
     .heatmap-th-row {
@@ -2459,7 +2459,7 @@ img[src*="limitlesstcg"] {
 @media (max-width: 360px) {
     .heatmap-th-y {
         min-width: 80px !important;
-        font-size: 0.64rem !important;
+        font-size: var(--fs-xs) !important;
     }
 
     .heatmap-th-row {

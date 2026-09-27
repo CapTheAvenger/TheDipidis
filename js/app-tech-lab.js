@@ -140,19 +140,19 @@
         const grad = String((tech && tech.beleg) || '').trim();
         if (grad === 'nutzer' || (tech && tech.isUserAdded)) {
             return _tf('techLab.belegNutzer', 'vom Nutzer eingetragen')
-                + ' · ' + _tf('techLab.belegNutzerSatz', 'nicht an Partien gemessen');
+                + ' · ' + _tf('techLab.belegNutzerSatz', 'nicht an Matches gemessen');
         }
         if (grad !== 'paarung') {
             return _tf('techLab.belegNein', 'unbelegt')
                 + ' · ' + _tf('techLab.belegHeuristik',
-                    'aus dem Kartentext abgeleitet, nicht an Partien gemessen');
+                    'aus dem Kartentext abgeleitet, nicht an Matches gemessen');
         }
         const st = _regelstand || { version: null, datum: null, paarungen: 0 };
         const teile = [_tf('techLab.belegJa', 'belegt')];
         teile.push(BELEG_QUELLE.replace(/^data\//, '') + (st.version ? ' v' + st.version : ''));
         teile.push(_tf('techLab.belegStand', 'Stand') + ' ' + _belegDatum(st.datum));
         teile.push(_tf('techLab.belegOhnePartien',
-            'keine Partien dahinter — hier stehen Kartentexte gegeneinander, keine Deckpaarungen'));
+            'keine Matches dahinter — hier stehen Kartentexte gegeneinander, keine Deckpaarungen'));
         return teile.join(' · ');
     }
 

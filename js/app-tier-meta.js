@@ -281,13 +281,13 @@
              * so gar nicht gerechnet wurde. */
             const labsDe = g.labsAktiv
                 ? ('und, wo eine Turnierdatei vorliegt (ab ' + ganz(g.labsMinPartien)
-                   + ' Partien je Deck), dem Turnier-Win % über 50 (bis +' + z(g.labsWrDeckel, 0)
+                   + ' Matches je Deck), dem Turnier-Win % über 50 (bis +' + z(g.labsWrDeckel, 0)
                    + ' pp, Gewicht ' + z(g.labsWrGewicht, 1) + ') samt Tag-2-Quote (bis '
                    + z(g.tag2Deckel, 2) + ', Gewicht ' + z(g.tag2Gewicht, 0) + ')')
                 : 'Für dieses Meta liegt KEINE Turnierdatei vor — der dritte Anteil (Turnier-Win % und Tag-2-Quote) fehlt, gerechnet wurde nur aus Anteil und Win %';
             const labsEn = g.labsAktiv
                 ? ('and, where a tournament file exists (from ' + ganz(g.labsMinPartien)
-                   + ' games per deck), tournament Win % above 50 (up to +' + z(g.labsWrDeckel, 0)
+                   + ' matches per deck), tournament Win % above 50 (up to +' + z(g.labsWrDeckel, 0)
                    + ' pp, weight ' + z(g.labsWrGewicht, 1) + ') plus day-2 conversion (up to '
                    + z(g.tag2Deckel, 2) + ', weight ' + z(g.tag2Gewicht, 0) + ')')
                 : 'No tournament file exists for this meta — the third component (tournament Win % and day-2 conversion) is missing; the score used share and Win % only';
@@ -1686,7 +1686,8 @@
                        der Kommentar bei der Funktion oben erklaert, was das
                        Runden hier schon einmal angerichtet hat. */
                     const nZahl = antritte > 0 ? fmtHalb(antritte) : '';
-                    const nText = antritte > 0 ? `· ${nZahl}` : '';
+                    /* UI-17 (27.09.2026, Hausi): die Zahl hinter der WR
+                       steht nicht mehr auf der Kachel, nur noch im Hinweis. */
                     /* Die Plakette schreibt „WR" — eine Kurzform. Zulaessig
                        ist sie nur mit einem Hinweis, der den vollen Namen UND
                        die Formel nennt; den liefert tierQuotenHinweis(). Die
@@ -1718,7 +1719,7 @@
                                             : `Sum across ${variantCount} variants — the individual variant is smaller and listed in the table below.`)
                                         : (getLang() === 'de' ? 'Eine einzelne Variante' : 'Single variant')}">${
                                         fmtPct(parseFloat(shareText))}</span>
-                                    <span class="stat-badge" title="${escapeHtmlAttr(wrTitel)}" data-quote-konvention="mitUnentschieden">WR ${fmtPct(parseFloat(winrateText))} <span class="stat-badge-nenner">${nText}</span></span>
+                                    <span class="stat-badge" title="${escapeHtmlAttr(wrTitel)}" data-quote-konvention="mitUnentschieden">WR ${fmtPct(parseFloat(winrateText))}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -2229,6 +2230,8 @@
                         };
                     });
 
+                    const schnittKopf = (conv && Number.isFinite(conv.expected))
+                        ? ' (Ø ' + fmtPct(conv.expected * 100, 1) + ')' : '';
                     const SPALTEN = [
                         { k: 'name',     de: 'Deck',          en: 'Deck',        num: false },
                         { k: 'listen',   de: 'Listen',        en: 'Lists',       num: true,
@@ -2269,7 +2272,9 @@
                            die noch nicht fuehrt, traegt die Ueberschrift das
                            Wort "gewichtet" — dann erklaert sie wenigstens, was
                            man sieht. */
-                        { k: 'antritte', de: 'Turnier-Antritte', en: 'Tournament entries',
+                        /* UI-24 (27.09.2026, Hausi): „Online Tournaments" statt
+                           „Turnier-Antritte" — die Quelle steht im Namen. */
+                        { k: 'antritte', de: 'Online Tournaments', en: 'Online tournaments',
                           num: true,
                           tip: { de: _antritteRoh
                                     ? 'Wie oft dieses Deck auf einem Turnier angetreten ist — gezählte Starts. Eine andere Zählung als die Listen links.'
@@ -2277,26 +2282,20 @@
                                  en: _antritteRoh
                                     ? 'How often this deck entered a tournament — counted starts. A different count from the lists on the left.'
                                     : 'Counted starts arrive with the next data run. Until then a dash: the file so far carries only a recency-weighted sum, and that is not a number of entries — you cannot half-attend.' } },
-                        { k: 'cuts', de: 'Top 8', en: 'Top 8',
+                        /* UI-25: „Online Top 8", damit die Quelle klar ist. */
+                        { k: 'cuts', de: 'Online Top 8', en: 'Online top 8',
                           num: true,
-                          tip: { de: 'davon in die Top 8 — bezogen auf die Turnier-Antritte links, nicht auf die Listen.',
-                                 en: 'of those, made top 8 — out of the tournament entries on the left, not the lists.' } },
-                        { k: 'quote',    de: 'Top-8-Quote',   en: 'Top-8 rate',  num: true, hilf: 'top8' },
-                        // hilf statt tip: TERMS.vsField sagt beides — was 1,6-mal
-                        // heisst UND dass kleine Stichproben geglaettet werden.
-                        //
-                        // `zusatz` traegt die einzige Zahl, die der feste
-                        // Glossartext nicht kennen kann: den Meta-Durchschnitt
-                        // dieses Laufs. Er stand bis zum 01.09.2026 im
-                        // Blocktext ueber der Tabelle — in einem Absatz von
-                        // 918 Zeichen, den der Betreiber zu Recht nicht
-                        // gelesen hat. Ohne ihn haette "0,8-mal" keinen
-                        // Bezugspunkt, also steht er jetzt an der Spalte, die
-                        // damit vergleicht.
-                        { k: 'faktor',   de: 'ggü. Schnitt',  en: 'vs. average', num: true, hilf: 'vsField',
-                          zusatz: deR
-                            ? `Der Meta-Durchschnitt liegt bei ${fmtPct(conv.expected * 100, 1)} Top-8-Quote.`
-                            : `The field average is ${fmtPct(conv.expected * 100, 1)} top-8 rate.` },
+                          tip: { de: 'davon in die Top 8 — bezogen auf die Online Tournaments links, nicht auf die Listen.',
+                                 en: 'of those, made top 8 — out of the online tournaments on the left, not the lists.' } },
+                        /* UI-26 (27.09.2026, Hausi): der Vergleich mit dem
+                           Schnitt stand dreifach da (Quote, eigene Spalte
+                           „ggü. Schnitt" mit Balken, Durchschnitt im Hinweis).
+                           Jetzt EINE Spalte, der Schnitt steht im Kopf:
+                           „Online Top 8-Quote (Ø 6,6 %)". */
+                        { k: 'quote',
+                          de: 'Online Top 8-Quote' + schnittKopf,
+                          en: 'Online top-8 rate' + schnittKopf,
+                          num: true, hilf: 'top8' },
                     ];
 
                     /* BEFUND (02.09.2026, vom Betreiber angestrichen):
@@ -2355,37 +2354,7 @@
                         if (k === 'antritte') return r.antritte == null ? '–' : fmtHalb(r.antritte);
                         if (k === 'quote')    return r.quote    == null ? '–' : fmtPct(r.quote);
                         if (k === 'cuts')     return r.cuts     == null ? '–' : fmtHalb(r.cuts);
-                        if (r.faktor == null) return '–';
-                        // Unter CONV_MIN_N gewichteten Antritten ist die Zahl der
-                        // Prior, nicht die Schaetzung: 23 Decks ohne einen
-                        // einzigen Cut standen mit "1,0-mal" und einem Balken auf
-                        // der Nulllinie da — das liest sich als "genau
-                        // Durchschnitt" und heisst "wir wissen nichts". Die Zeile
-                        // bleibt, ihre Antritte zaehlen weiter in den
-                        // Feld-Durchschnitt; nur der Faktor schweigt.
-                        if (!(r.antritteGew >= CONV_MIN_N)) {
-                            return `<span class="cm-rang-wert" title="${escapeHtml(deR
-                                ? 'Unter ' + CONV_MIN_N + ' gewichteten Antritten — zu wenig für eine Schätzung'
-                                : 'Fewer than ' + CONV_MIN_N + ' weighted entries — too little for an estimate')}">–</span>`;
-                        }
-                        const einsNK = (v) => v.toLocaleString(deR ? 'de-DE' : 'en-US',
-                            { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-                        const txt = einsNK(r.faktor) + (deR ? '-mal' : '×');
-                        const titel = r.faktorRoh == null ? '' : escapeHtml(deR
-                            ? `geglättet (k = ${CONV_PRIOR}); roh ${einsNK(r.faktorRoh)}-mal`
-                            : `smoothed (k = ${CONV_PRIOR}); raw ${einsNK(r.faktorRoh)}×`);
-                        // Der divergierende Balken aus components.css: Nulllinie in
-                        // der Mitte, blau nach oben, rot nach unten. Er zeigt auf
-                        // einen Blick, wer ueber dem Schnitt liegt. Er traegt keine
-                        // Ziffern, darum liest die Sortierung weiter die Zahl aus
-                        // dem Text der Zelle.
-                        const abw = (r.faktor - 1) * 100;
-                        const breite = Math.min(Math.abs(abw), CONV_CAP) / CONV_CAP * 50;
-                        const posi = abw >= 0;
-                        return `<span class="cm-rang-wert"${titel ? ` title="${titel}"` : ''}>${txt}</span>`
-                            + `<span class="ds-bar-track is-diverging">`
-                            + `<span class="ds-bar-fill ${posi ? 'is-pos' : 'is-neg'}"`
-                            + ` style="width:${breite.toFixed(1)}%"></span></span>`;
+                        return '–';
                     };
 
                     // Nach Listen, absteigend. Das ist dieselbe Reihenfolge,

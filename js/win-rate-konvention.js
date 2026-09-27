@@ -164,7 +164,7 @@
                   + 'sinkt, je haeufiger unentschieden gespielt wird; zwischen zwei '
                   + 'Feldern mit verschiedener Unentschieden-Quote ist sie deshalb '
                   + 'nicht vergleichbar.',
-            langEn: 'Share of games won out of all games played — ties count in the '
+            langEn: 'Share of matches won out of all matches played — ties count in the '
                   + 'denominator, but not as half a win. The figure drops as ties get '
                   + 'more common, so it cannot be compared across two fields with '
                   + 'different tie rates.',
@@ -204,7 +204,7 @@
                   + 'haengt sie nicht davon ab, wie oft im Feld unentschieden '
                   + 'gespielt wird; nur sie darf zwischen zwei Quellen verrechnet '
                   + 'werden.',
-            langEn: 'Share of decided games won — ties are left out entirely. Alone '
+            langEn: 'Share of decided matches won — ties are left out entirely. Alone '
                   + 'among the three it does not depend on how often the field draws, '
                   + 'so it is the only one that may be differenced across sources.',
             quelle: 'data/limitless_online_decks_matchups.csv (Spalte win_rate)',

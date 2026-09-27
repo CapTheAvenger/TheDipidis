@@ -80,8 +80,9 @@ describe('Rangliste — eine statt drei', () => {
            von 2715 Listen Top 8 gekommen sind? Aber das kann ja nicht
            sein." Der Bezug steht jetzt nicht mehr im Wort, sondern in
            der Erklaerung an der Spalte, wo er vollstaendig hinpasst. */
-        assert.match(TIER, /k: 'cuts',[\s\S]{0,60}de: 'Top 8'/);
-        assert.match(TIER, /bezogen auf die Turnier-Antritte links, nicht auf die Listen/);
+        // UI-25 (27.09.2026): „Online Top 8", damit die Quelle klar ist.
+        assert.match(TIER, /k: 'cuts',[\s\S]{0,60}de: 'Online Top 8'/);
+        assert.match(TIER, /bezogen auf die Online Tournaments links, nicht auf die Listen/);
     });
 
     it('die Kopfzellen sagen, dass man sie antippen kann', () => {
@@ -91,9 +92,9 @@ describe('Rangliste — eine statt drei', () => {
         assert.match(TIER, /aria-sort=/);
     });
 
-    it('der divergierende Balken ist mitgewandert', () => {
-        assert.match(TIER, /ds-bar-track is-diverging/);
-        assert.match(CSS, /\.cm-rangliste \.ds-bar-track/, 'der Balken hat in der Tabelle kein CSS');
+    it('der divergierende Balken ist mit der Spalte gegangen (UI-26, 27.09.2026)', () => {
+        assert.doesNotMatch(TIER, /ds-bar-track is-diverging/);
+        assert.doesNotMatch(CSS, /\.cm-rangliste \.ds-bar-track/, 'totes CSS fuer den Balken steht noch');
     });
 });
 

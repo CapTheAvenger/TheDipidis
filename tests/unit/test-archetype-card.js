@@ -111,9 +111,13 @@ describe('the card and the panel cannot disagree', () => {
            nicht. Jetzt steht dort der Feld-Durchschnitt, roh wie die
            Quote. Der Leser kann die beiden Zahlen ineinander umrechnen,
            und es geht auf — das ist der ganze Punkt. */
-        const ctx = html.match(/arc-tile--conv[\s\S]*?arc-tile-ctx">([^<]+)</)[1];
+        // UI-26 (27.09.2026, Hausi): der Schnitt steht im Namen der Kachel —
+        // „Online Top 8-Quote (Ø 6,3 %)" —, nicht mehr als eigene Zeile.
+        const ctx = html.match(/arc-tile--conv[\s\S]*?arc-tile-label">([^<]+)</)[1];
         const schnitt = (conv.expected * 100).toFixed(1).replace('.', ',');
-        assert.equal(ctx.trim(), `Schnitt aller Decks ${schnitt} %`);
+        assert.equal(ctx.trim(), `Online Top 8-Quote (Ø ${schnitt} %)`);
+        assert.ok(!/arc-tile--conv[^]*?arc-tile-ctx">[^<]*Schnitt/.test(html.split('arc-tile--day2')[0]),
+            'der Schnitt steht wieder als eigene Zeile darunter');
         // Und die Probe: die grosse Zahl geteilt durch diese ergibt
         // genau das, was der Leser im Kopf ausrechnen wuerde.
         const gross = Number(shown.trim().replace(' %', '').replace(',', '.'));

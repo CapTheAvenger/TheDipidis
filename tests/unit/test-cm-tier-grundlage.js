@@ -248,7 +248,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
             ['Gewicht 123,0)', 'TIER_SCORE.ANTEIL_GEWICHT'],
             ['über 50 (bis +124 pp', 'TIER_SCORE.WR_DECKEL'],
             ['Gewicht 125,0;', 'TIER_SCORE.WR_GEWICHT'],
-            ['ab 126 Partien je Deck', 'TIER_SCORE.LABS_MIN_PARTIEN'],
+            ['ab 126 Matches je Deck', 'TIER_SCORE.LABS_MIN_PARTIEN'],
             ['bis +127 pp', 'TIER_SCORE.LABS_WR_DECKEL'],
             ['Gewicht 128,0)', 'TIER_SCORE.LABS_WR_GEWICHT'],
             ['Tag-2-Quote (bis 129,00', 'TIER_SCORE.TAG2_DECKEL'],
@@ -297,7 +297,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
 
     it('B2: Labs-Schwelle, -Deckel und -Gewicht im Satz sind die gemessenen', () => {
         const s = satz('de');
-        assert.ok(s.includes('ab ' + GEMESSEN.labsMinPartien + ' Partien je Deck'),
+        assert.ok(s.includes('ab ' + GEMESSEN.labsMinPartien + ' Matches je Deck'),
             'gemessene Schwelle: ' + GEMESSEN.labsMinPartien + '\n' + s);
         assert.ok(s.includes('bis +' + de(GEMESSEN.labsWrDeckel, 0) + ' pp, Gewicht '
             + de(GEMESSEN.labsWrGewicht, 1)), s);

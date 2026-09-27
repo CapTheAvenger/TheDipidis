@@ -1135,14 +1135,14 @@
         const wr = d
             ? tileGeteilt('wr', toneFor(wrDelta), mitQuote(L('arc.wrLabel', '{quote}'), 'mitUnentschieden'),
                 `${esc(fmt(d.winRate))} %`,
-                /* Die Matchzahl steht MIT auf der Zeile, nicht nur im
-                   Hinweis: sie ist die Zahl, an der man entscheidet, ob man
-                   der Quote glaubt, und ein Hinweis erscheint erst beim
-                   Verweilen — auf dem Telefon also nie. Seit dem 02.09.2026
-                   auch fuer online, vorher stand sie nur beim Major. */
-                fmtGanz(d.partien),
+                /* UI-17 (27.09.2026, Hausi): die Matchzahl steht NICHT mehr
+                   auf der Kachel — „fuer Enduser ohne Erklaerung
+                   verwirrend". Sie bleibt im Hinweis der Kachel („Online aus
+                   n Matches") und im erzeugten Bild. Vom 02.09. bis
+                   27.09.2026 stand sie rechts neben der Quote. */
+                '',
                 wrMajor,
-                (m && m.partien > 0) ? fmtGanz(m.partien) : '',
+                '',
                 majorLeer,
                 wrDuenn,
                 /* DIE REMISQUOTE STEHT HIER, UND SIE MUSS ES.
@@ -1156,18 +1156,18 @@
                    Leistungseinbruch — und das waere falsch. */
                 L('arc.wrTip2', de
                     ? 'Siege geteilt durch alle Matches, auf beiden Seiten gleich gerechnet. Online aus {n} Matches. {mj}'
-                    : 'Wins divided by all games, same on both sides. Online from {n} games. {mj}')
+                    : 'Wins divided by all matches, same on both sides. Online from {n} matches. {mj}')
                     .replace('{n}', fmtGanz(d.partien))
                     .replace('{mj}', (m && m.partien > 0)
                         ? L('arc.wrTipMajor', de
                             ? 'Major aus {p} Matches, davon {u} % unentschieden — online sind es 1,3 %. Unentschieden zählen auf beiden Seiten nicht als Sieg, drücken die Major-Spalte also spürbar. Bei dieser Matchzahl liegt der Wert auf ±{k} Punkte genau.'
-                            : 'Major from {p} games, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down. At this sample the value is accurate to ±{k} points.')
+                            : 'Major from {p} matches, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down. At this sample the value is accurate to ±{k} points.')
                             .replace('{p}', fmtGanz(m.partien))
                             .replace('{u}', fmt(m.remisQuote))
                             .replace('{k}', fmt(wrKi, 0))
                         : L('arc.wrTipOhne', de
                             ? 'Noch keine Major-Matches für dieses Deck in diesem Format.'
-                            : 'No in-person games for this deck in this format yet.'))
+                            : 'No in-person matches for this deck in this format yet.'))
                     + _wrKonventionsSatz(de),
                 arrow(wrDelta))
             : tile('wr', 'tie', mitQuote(L('arc.wrLabel', '{quote}'), 'mitUnentschieden'), '–',
@@ -1212,14 +1212,14 @@
         const quote = c && c.brought > 0 ? (c.top8 / c.brought) * 100 : null;
         const schnitt = (_conv && isFinite(_conv.expected)) ? _conv.expected * 100 : null;
         const conv = (c && quote != null)
+            /* UI-26 (27.09.2026, Hausi): der Schnitt steht im Namen —
+               „Online Top 8-Quote (Ø 6,6 %)" —, nicht mehr als eigene
+               Zeile darunter. */
             ? tile('conv', toneFor(c.perfPct),
-                L('arc.convLabel3', de ? 'Top-8-Quote (online)' : 'Top-8 rate (online)'),
+                L('arc.convLabel4', de ? 'Online Top 8-Quote' : 'Online top-8 rate')
+                    + (schnitt != null ? ' (Ø ' + fmt(schnitt) + ' %)' : ''),
                 `${esc(fmt(quote))} %`,
-                esc(schnitt != null
-                    ? L('arc.convCtx2', de ? 'Schnitt aller Decks {s} %'
-                                           : 'field average {s} %')
-                        .replace('{s}', fmt(schnitt))
-                    : ''),
+                '',
                 // WICHTIG: c.brought zaehlt NICHT dieselbe Grundgesamtheit wie
                 // d.count. d.count sind alle Listen aus allen Onlineturnieren
                 // (Dragapult 2.158). c.brought sind nur die Antritte auf
@@ -1242,7 +1242,7 @@
                     ? 'Kleine Stichprobe — die Quote steht auf wenigen Antritten und schwankt stark.'
                     : 'Small sample — the rate rests on few entries and swings hard.') : ''),
                 arrow(c.perfPct))
-            : tile('conv', 'tie', L('arc.convLabel3', de ? 'Top-8-Quote (online)' : 'Top-8 rate (online)'),
+            : tile('conv', 'tie', L('arc.convLabel4', de ? 'Online Top 8-Quote' : 'Online top-8 rate'),
                 '–',
                 esc(L('arc.convMissing', de ? 'zu wenig Daten' : 'not enough data')),
                 /* Der Satz zeigt auf die Kachel darueber, und die rechnet
@@ -1522,8 +1522,8 @@
                 art: 'fehlt',
                 inhalt: '–',
                 titel: L('arc.muMajorFehlt', de
-                    ? 'Keine Präsenzpartien für diese Paarung.'
-                    : 'No in-person games for this pairing.'),
+                    ? 'Keine Präsenz-Matches für diese Paarung.'
+                    : 'No in-person matches for this pairing.'),
             };
         }
         const bilanz = praesenzBilanz(m);
@@ -1540,8 +1540,8 @@
             : (m.majorSiege + m.majorNiederlagen + m.majorUnentschieden);
         const spiegelSatz = (summe != null && summe !== n)
             ? (de
-                ? ` Die Quelle zählt hier ${summe} Einzelergebnisse auf ${n} Partien — jede Spiegelpartie ist für beide Seiten verbucht.`
-                : ` The source books ${summe} results on ${n} games — each mirror game is counted for both sides.`)
+                ? ` Die Quelle zählt hier ${summe} Einzelergebnisse auf ${n} Matches — jedes Spiegel-Match ist für beide Seiten verbucht.`
+                : ` The source books ${summe} results on ${n} matches — each mirror match is counted for both sides.`)
             : '';
 
         if (!m.majorBilanzDa) {
@@ -1549,8 +1549,8 @@
                 art: 'ohne-bilanz',
                 inhalt: '–',
                 titel: mitQuote(L('arc.muMajorOhneBilanz', de
-                    ? '{n} Präsenzpartien, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine {quote} ({formel}) bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'
-                    : '{n} in-person games, but the source row carries no record — without wins and losses there is no {quote} ({formel}) to show. Hence the dash instead of an estimate.'), 'ohneUnentschieden')
+                    ? '{n} Präsenz-Matches, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine {quote} ({formel}) bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'
+                    : '{n} in-person matches, but the source row carries no record — without wins and losses there is no {quote} ({formel}) to show. Hence the dash instead of an estimate.'), 'ohneUnentschieden')
                     .replace('{n}', String(n)) + spiegelSatz,
             };
         }
@@ -1562,11 +1562,11 @@
                 art: 'unter-schwelle',
                 inhalt: esc(bilanz),
                 titel: (de
-                    ? `Bilanz ${bilanz} (S–N–U) aus ${n} Präsenzpartien. Unter ${MIN_PRAESENZ_PARTIEN} Partien steht hier kein Prozentwert: `
-                      + `bei ${n} Partien verschiebt eine einzige Partie die Quote um ${fmt(100 / n)} Punkte. `
+                    ? `Bilanz ${bilanz} (S–N–U) aus ${n} Präsenz-Matches. Unter ${MIN_PRAESENZ_PARTIEN} Matches steht hier kein Prozentwert: `
+                      + `bei ${n} Matches verschiebt ein einziges Match die Quote um ${fmt(100 / n)} Punkte. `
                       + `Die Bilanz sagt dasselbe, ohne eine Genauigkeit zu behaupten, die die Stichprobe nicht trägt.`
-                    : `Record ${bilanz} (W–L–T) from ${n} in-person games. Below ${MIN_PRAESENZ_PARTIEN} games no percentage is shown: `
-                      + `at ${n} games a single game moves the rate by ${fmt(100 / n)} points. `
+                    : `Record ${bilanz} (W–L–T) from ${n} in-person matches. Below ${MIN_PRAESENZ_PARTIEN} matches no percentage is shown: `
+                      + `at ${n} matches a single match moves the rate by ${fmt(100 / n)} points. `
                       + `The record says the same without claiming a precision the sample cannot carry.`)
                     + spiegelSatz,
             };
@@ -1579,8 +1579,8 @@
                 art: 'nur-remis',
                 inhalt: '–',
                 titel: mitQuote(L('arc.muMajorNurRemis', de
-                    ? '{n} Präsenzpartien, alle unentschieden ({b}). Die {quote} ({formel}) zählt Siege gegen entschiedene Partien — entschieden ist hier keine. Ein Wert stünde für nichts.'
-                    : '{n} in-person games, all drawn ({b}). The {quote} ({formel}) counts wins against decided games — none here were decided. A number would stand for nothing.'), 'ohneUnentschieden')
+                    ? '{n} Präsenz-Matches, alle unentschieden ({b}). Die {quote} ({formel}) zählt Siege gegen entschiedene Matches — entschieden ist hier keine. Ein Wert stünde für nichts.'
+                    : '{n} in-person matches, all drawn ({b}). The {quote} ({formel}) counts wins against decided matches — none here were decided. A number would stand for nothing.'), 'ohneUnentschieden')
                     .replace('{n}', String(n)).replace('{b}', bilanz) + spiegelSatz,
             };
         }
@@ -1589,8 +1589,8 @@
             art: 'quote',
             inhalt: esc(fmt(m.majorWr)) + ' %',
             titel: L('arc.muMajorTip', de
-                ? '{w} aus {n} Präsenzpartien (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Siege ÷ entschiedene Partien, mit demselben Ausgleich für dünne Paarungen. Roh {r} %.'
-                : '{w} from {n} in-person games (record {b}). Same calculation as the column on the left: wins ÷ decided games, with the same allowance for thin pairings. Raw {r} %.')
+                ? '{w} aus {n} Präsenz-Matches (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Siege ÷ entschiedene Matches, mit demselben Ausgleich für dünne Paarungen. Roh {r} %.'
+                : '{w} from {n} in-person matches (record {b}). Same calculation as the column on the left: wins ÷ decided matches, with the same allowance for thin pairings. Raw {r} %.')
                 .replace('{w}', fmt(m.majorWr) + ' %')
                 .replace('{n}', String(n))
                 .replace('{b}', bilanz)
@@ -1631,8 +1631,8 @@
         const de = isDe();
         return hatMajor
             ? mitQuote(L('arc.muLegende', de
-                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Partien dahinter'
-                : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the games behind it'), 'ohneUnentschieden')
+                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Matches dahinter'
+                : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the matches behind it'), 'ohneUnentschieden')
             /* Ohne Praesenzdaten sagt EIN Satz, was zwei leere
                Spalten nicht gesagt haetten: dass es sie gibt und
                dass hier keine anfallen. */
@@ -1733,11 +1733,11 @@
                Arbeitspaket. Zweisprachig inline ueber getLang(), wie es
                das Projekt an Dutzenden Stellen macht. */
             ? `<p class="arc-mu-note arc-mu-note-praesenz">${esc((de
-                ? 'Major-WR: erst ab {n} Präsenzpartien als Prozentwert. Darunter steht die Bilanz (S–N–U) '
-                  + 'und daneben die Partienzahl — bei {n} Partien verschiebt eine einzige Partie die Quote '
+                ? 'Major-WR: erst ab {n} Präsenz-Matches als Prozentwert. Darunter steht die Bilanz (S–N–U) '
+                  + 'und daneben die Matchzahl — bei {n} Matches verschiebt ein einziges Match die Quote '
                   + 'schon um {p} Punkte, darunter entsprechend mehr. Betroffen hier: {k} von {g} Zeilen.'
-                : 'Major WR: shown as a percentage only from {n} in-person games. Below that you get the record (W–L–T) '
-                  + 'next to the game count — at {n} games a single game already moves the rate by {p} points, '
+                : 'Major WR: shown as a percentage only from {n} in-person matches. Below that you get the record (W–L–T) '
+                  + 'next to the match count — at {n} matches a single match already moves the rate by {p} points, '
                   + 'and more below. Affected here: {k} of {g} rows.')
                 .replace(/\{n\}/g, String(MIN_PRAESENZ_PARTIEN))
                 .replace('{p}', fmt(100 / MIN_PRAESENZ_PARTIEN))
@@ -1756,10 +1756,10 @@
                              zusammen; ohne ihn waere „WR" ein Hausname. -->
                         <th title="${esc(quotenHinweis('ohneUnentschieden'))}"
                             data-quote-konvention="ohneUnentschieden">${esc(L('arc.colWinRate', 'WR'))}</th>
-                        <th title="${esc(L('arc.colGames', de ? 'gespielte Matches' : 'games played'))}">${
+                        <th title="${esc(L('arc.colGames', de ? 'gespielte Matches' : 'matches played'))}">${
                             esc(L('arc.colGamesKurz', 'M'))}</th>
-                        <th title="${esc(de ? 'gewonnene Matches' : 'games won')}">W</th>
-                        <th title="${esc(de ? 'verlorene Matches' : 'games lost')}">L</th>
+                        <th title="${esc(de ? 'gewonnene Matches' : 'matches won')}">W</th>
+                        <th title="${esc(de ? 'verlorene Matches' : 'matches lost')}">L</th>
                         <!-- T, nicht U. Gemeldet am 01.09.2026: "wenn man bei
                              der Tierliste die Matchups aufklappt, dann auf
                              jeden Fall Win-Loss-Tie nutzen und nicht
@@ -1793,13 +1793,13 @@
                              wo Platz ist. WR bleibt abgekuerzt, weil es in
                              der Szene der stehende Begriff ist. -->
                         ${!hatMajor ? '' : `                        <th title="${esc(quotenHinweis('ohneUnentschieden') + '  ' + L('arc.colMajorTip', de
-                            ? 'Präsenzturniere: Siege ÷ entschiedene Partien (Unentschieden bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Präsenzturnieren statt online.'
-                            : 'In-person events: wins ÷ decided games (ties left out) — the same calculation and the same smoothing as the WR column on the left, just measured at in-person events instead of online.'))}"
+                            ? 'Präsenzturniere: Siege ÷ entschiedene Matches (Unentschieden bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Präsenzturnieren statt online.'
+                            : 'In-person events: wins ÷ decided matches (ties left out) — the same calculation and the same smoothing as the WR column on the left, just measured at in-person events instead of online.'))}"
                             data-quote-konvention="ohneUnentschieden">${
                             esc(L('arc.colMajor', 'Major-WR'))}</th>
                         <th title="${esc(L('arc.colMajorN', de
-                            ? 'Präsenzpartien dieser Paarung'
-                            : 'in-person games for this pairing'))}">${
+                            ? 'Präsenz-Matches dieser Paarung'
+                            : 'in-person matches for this pairing'))}">${
                             esc(L('arc.colMajorNKurz', de ? 'Major-Matches' : 'Major matches'))}</th>`}
                     </tr></thead>
                     <tbody>${body}</tbody>

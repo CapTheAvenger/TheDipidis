@@ -58,9 +58,11 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
     it('Listen und Antritte haben getrennte Spalten', () => {
         // Genau die gemeldete Verwechslung: 2.121 und 673 sind beide richtig
         // und meinen Verschiedenes.
-        for (const k of ['listen', 'anteil', 'wr', 'antritte', 'cuts', 'quote', 'faktor']) {
+        for (const k of ['listen', 'anteil', 'wr', 'antritte', 'cuts', 'quote']) {
             assert.match(TIER, new RegExp("k: '" + k + "'"), 'Spalte fehlt: ' + k);
         }
+        // UI-26 (27.09.2026): die Spalte „ggü. Schnitt" ist weg.
+        assert.doesNotMatch(TIER, /k: 'faktor'/);
         assert.match(TIER, /de: 'Listen'/);
         /* SEIT DEM 08.09.2026 STEHT HIER KEIN FESTER NAME MEHR.
            Der Kopf der Quotenspalte hiess „Win Rate" — ein Hausname.
@@ -90,7 +92,9 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
            blieb halb, also kam die Frage zurueck — zu Recht. Diesmal
            traegt die Spalte die gezaehlten Starts; die Gewichtung
            bleibt dort, wo sie hingehoert, in der Quote. */
-        assert.match(TIER, /'Turnier-Antritte'/,
+        // UI-24 (27.09.2026, Hausi): „Online Tournaments" — die Quelle
+        // steht weiter in der Ueberschrift, nur deutlicher.
+        assert.match(TIER, /de: 'Online Tournaments'/,
             'die Herkunft ist wieder aus der Ueberschrift verschwunden');
         assert.match(TIER, /t\.broughtAnzeige/,
             'die Spalte zeigt wieder die gewichtete Summe statt der '
@@ -121,7 +125,7 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
         // "davon Top 8" und wurde als "davon von den Listen links"
         // gelesen: "Heisst es jetzt, dass nur 21 Listen von 2715 Listen
         // Top 8 gekommen sind? Aber das kann ja nicht sein."
-        assert.match(TIER, /bezogen auf die Turnier-Antritte links, nicht auf die Listen/);
+        assert.match(TIER, /bezogen auf die Online Tournaments links, nicht auf die Listen/);
     });
 
     it('die Tabelle nimmt Decks aus BEIDEN Quellen', () => {
@@ -261,9 +265,9 @@ describe('Auf- und Absteiger — entfernt, nicht vergessen', () => {
     });
 
     it('und die Regel, wegen der es ihn gab, gilt weiter', () => {
-        // Der divergierende Balken der Rangliste ist die letzte Stelle,
-        // an der eine Skala eine Richtung hat.
-        assert.match(TIER, /ds-bar-track is-diverging/);
+        // Der divergierende Balken der Rangliste ist seit UI-26
+        // (27.09.2026) weg; die Farbregel fuer --dv-pos gilt weiter fuer
+        // die Komponente in components.css.
         const TOK = read('css/tokens.css');
         const hex = /--dv-pos:\s*#([0-9a-fA-F]{6})/.exec(TOK);
         assert.ok(hex, '--dv-pos ist keine Hex-Farbe');

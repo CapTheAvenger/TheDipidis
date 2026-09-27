@@ -552,7 +552,7 @@
                Partien. Dieselbe Angabe traegt die Kachel auf der Seite
                seit dem 02.09.2026 rechts neben der Quote. */
             isFinite(spec.partien) && spec.partien > 0
-                ? num(spec.partien, 0) + ' ' + L('Partien', 'games')
+                ? num(spec.partien, 0) + ' ' + L('Matches', 'matches')
                 : (wrDelta === null ? L('keine Daten', 'no data') : ''),
             /* Die Fussnote beschrieb eine vierte Konvention, die hier
                niemand rechnet. spec.winRate ist die Deck-Win-Rate aus
@@ -580,7 +580,7 @@
                und deshalb steht sie hier mit dabei. */
             hatMajorWr
                 ? 'Major ' + num(spec.majorWinRate, 2) + ' %  ·  '
-                    + num(spec.majorPartien, 0) + ' ' + L('Partien', 'games')
+                    + num(spec.majorPartien, 0) + ' ' + L('Matches', 'matches')
                     + (isFinite(spec.majorRemis)
                         ? '  ·  ' + num(spec.majorRemis, 1) + ' % ' + L('unentsch.', 'ties')
                         : '')
@@ -804,7 +804,7 @@
         function kopf(k) {
             label(ctx, L('Gegner', 'Opponent'), k.x, ty);
             ctx.textAlign = 'right';
-            label(ctx, L('Matches', 'Games'), k.games, ty);
+            label(ctx, L('Matches', 'Matches'), k.games, ty);
             label(ctx, L('Record', 'Record'), k.record, ty);
             label(ctx, quotenKuerzel('ohneUnentschieden'), k.wrX + k.wrW - 10, ty);
             ctx.textAlign = 'start';
@@ -944,7 +944,7 @@
              * bestehenden Ansichten bemängelt hat. */
             var note = mus.some(function (m) { return m.thin; })
                 ? L('Graue Zeilen: unter ' + (spec.thinGames || 20) + ' Matches — die Quote ist dort noch ein Gerücht.',
-                    'Grey rows: fewer than ' + (spec.thinGames || 20) + ' games — that rate is still a rumour.')
+                    'Grey rows: fewer than ' + (spec.thinGames || 20) + ' matches — that rate is still a rumour.')
                 /* Loest das Spaltenkuerzel auf UND sagt, wonach ausgewaehlt
                    wurde. Das zweite ist seit dem 11.09.2026 noetig: es
                    sind nicht mehr die besten und schlechtesten, sondern

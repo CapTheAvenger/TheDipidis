@@ -864,15 +864,8 @@ html.is-signed-out [onclick*="radelist"]:hover {
    Heatmap — die Aussage "wenig Antritte" darf keinen Kontrast kosten. */
 .cm-rangliste tbody tr.is-muted td { color: var(--ink-2); }
 
-/* Der Balken sitzt jetzt in der Rangliste, nicht mehr im eigenen Block.
-   Wert oben, Balken darunter — in einer schmalen Zahlenspalte ist
-   nebeneinander kein Platz. */
-.cm-rangliste .cm-rang-wert { display: block; }
-.cm-rangliste .ds-bar-track {
-    display: block;
-    margin-top: 3px;
-    min-width: 64px;
-}
+/* Der Balken der Spalte „ggü. Schnitt" ist mit ihr gegangen (UI-26,
+   27.09.2026). */
 
 
 /* ── Bildvorschau ───────────────────────────────────────────────────

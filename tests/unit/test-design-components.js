@@ -129,13 +129,12 @@ describe('Current Meta benutzt die Komponenten wirklich', () => {
             'die Rangliste traegt ihre eigene Klasse nicht');
     });
 
-    it('die Balkenzeile lebt jetzt in der Rangliste', () => {
-        // Sie stand im eigenen Block "Top 8 vs. Erwartung". Der Block ist am
-        // 19.08.2026 in die sortierbare Rangliste aufgegangen, der Balken ist
-        // mitgewandert — er zeigt auf einen Blick, wer ueber dem Schnitt liegt.
-        assert.match(TIER, /ds-bar-track is-diverging/);
-        assert.match(TIER, /ds-bar-fill \$\{posi \? 'is-pos' : 'is-neg'\}/);
-        assert.match(TIER, /cm-rangliste/, 'der Balken haengt nicht an der Rangliste');
+    it('die Balkenzeile ist mit der Spalte „ggü. Schnitt" gegangen (UI-26)', () => {
+        // Sie stand seit dem 19.08.2026 in der Rangliste. Am 27.09.2026 hat
+        // Hausi den dreifachen Vergleich mit dem Schnitt auf einen Kopf
+        // „Online Top 8-Quote (Ø …)" zusammengelegt.
+        assert.doesNotMatch(TIER, /ds-bar-track is-diverging/);
+        assert.match(TIER, /cm-rangliste/);
     });
 
     it('die Datenbasis steht unter Quellen & Methodik, nicht mehr auf der Startseite', () => {

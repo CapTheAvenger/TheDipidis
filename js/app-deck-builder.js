@@ -4300,7 +4300,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (grad === 'nutzer') {
                 return _ideenText('buildInfo.belegNutzer', 'vom Nutzer eingetragen')
                     + ' · '
-                    + _ideenText('buildInfo.belegNutzerSatz', 'nicht an Partien gemessen');
+                    + _ideenText('buildInfo.belegNutzerSatz', 'nicht an Matches gemessen');
             }
             if (grad !== 'paarung') {
                 /* Die vorsichtige Richtung: wer keine benannte Paarung
@@ -4310,7 +4310,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 return _ideenText('buildInfo.belegNein', 'unbelegt')
                     + ' · '
                     + _ideenText('buildInfo.belegHeuristik',
-                        'aus dem Kartentext abgeleitet, nicht an Partien gemessen');
+                        'aus dem Kartentext abgeleitet, nicht an Matches gemessen');
             }
             const st = stand || {};
             const quelle = String((v && v.quelleDatei) || 'data/card_capability_interactions.json')
@@ -4320,8 +4320,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             teile.push(_ideenText('buildInfo.belegStand', 'Stand') + ' ' + _ideenDatum(st.datum));
             const n = Number(v && v.partien) || 0;
             teile.push(n > 0
-                ? _ideenText('buildInfo.belegPartien', 'Matchup aus {n} Partien').replace('{n}', String(n))
-                : _ideenText('buildInfo.belegOhnePartien', 'Partienzahl des Matchups nicht bekannt'));
+                ? _ideenText('buildInfo.belegPartien', 'Matchup aus {n} Matches').replace('{n}', String(n))
+                : _ideenText('buildInfo.belegOhnePartien', 'Matchzahl des Matchups nicht bekannt'));
             return teile.join(' · ');
         }
 

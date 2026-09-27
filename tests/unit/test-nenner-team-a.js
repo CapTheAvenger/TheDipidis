@@ -81,12 +81,11 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {
                         'function tierQuotenHinweis(id)'].map(helferAusTier).join('\n');
 
         const bauen = new Function('item', 'fmtHalb', 'getLang',
-            helfer + '\n' + stueck + ' return { nText, wrTitel };');
+            helfer + '\n' + stueck + ' return { wrTitel };');
         const fmtHalb = (n) => Number.isInteger(n) ? String(n) : n.toFixed(1).replace('.', ',');
 
         const de = () => 'de';
         const viele = bauen({ totalCount: 2948 }, fmtHalb, de);
-        assert.strictEqual(viele.nText, '· 2948', `bekommen: ${viele.nText}`);
         assert.match(viele.wrTitel, /über 2948 Antritte/,
             `der Tooltip nennt die Menge nicht: ${viele.wrTitel}`);
 
@@ -94,14 +93,12 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {
            fmtHalb erklärt, was das Runden hier schon einmal angerichtet
            hat (Terapagos Noctowl las sich als "2 / 1 / 33,3 %"). */
         const halb = bauen({ totalCount: 35.5 }, fmtHalb, de);
-        assert.strictEqual(halb.nText, '· 35,5',
-            `halbe Antritte werden gerundet: ${halb.nText}`);
+        assert.match(halb.wrTitel, /über 35,5 Antritte/,
+            `halbe Antritte werden gerundet: ${halb.wrTitel}`);
 
         /* Ohne Antritte lieber gar nichts als eine behauptete Null. */
         for (const leer of [{ totalCount: 0 }, { totalCount: null }, {}]) {
             const r = bauen(leer, fmtHalb, de);
-            assert.strictEqual(r.nText, '',
-                `bei ${JSON.stringify(leer)} entsteht "${r.nText}" statt nichts`);
             assert.ok(!/\d/.test(r.wrTitel),
                 `der Tooltip behauptet eine Menge, die es nicht gibt: ${r.wrTitel}`);
         }
@@ -112,11 +109,15 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {
             `der englische Tooltip nennt die Menge nicht: ${en.wrTitel}`);
     });
 
-    it('die Zahl steht in der Kachel und hat eine Gestalt', () => {
-        assert.match(TIER, /WR \$\{fmtPct\(parseFloat\(winrateText\)\)\} <span class="stat-badge-nenner">\$\{nText\}<\/span>/,
-            'der Nenner wird nicht neben der Win Rate ausgegeben');
-        assert.match(CSS, /\.stat-badge \.stat-badge-nenner\s*\{[\s\S]{0,400}opacity/,
-            'die Gestalt des Nenners fehlt im Stylesheet');
+    it('die Zahl steht im Hinweis, nicht mehr auf der Kachel (UI-17, 27.09.2026)', () => {
+        // Hausi: die Zahl neben der Quote ist „fuer Enduser ohne Erklaerung
+        // verwirrend". Die Hausregel „jede Quote traegt ihren Nenner" gilt
+        // weiter — im Hinweis der Plakette (wrTitel, oben ausgefuehrt).
+        assert.match(TIER, /WR \$\{fmtPct\(parseFloat\(winrateText\)\)\}<\/span>/,
+            'neben der Win Rate steht wieder etwas');
+        const ohne = (x) => x.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+        assert.ok(!/stat-badge-nenner/.test(ohne(TIER)) && !/\.stat-badge-nenner/.test(ohne(CSS)),
+            'der Nenner steht wieder auf der Kachel oder im Stylesheet');
 
         /* EIGENE KLASSE MIT ABSICHT. `.stat-badge-suffix` ist verbrannt:
            er trug einmal die Variantenzahl ein zweites Mal, und der

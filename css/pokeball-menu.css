@@ -290,8 +290,10 @@
 .btn-toggle-item {
     background: transparent; border: none; border-right: 1px solid var(--line-strong);
     padding: 7px 13px; font-weight: 700; color: var(--ink-2); cursor: pointer;
-    /* BODEN 03.09.2026: 0.83em auf einem 12-px-Elternwert = 9,96 px. */
-    font-size: max(10px, 0.83em);
+    /* BODEN 03.09.2026: 0.83em auf einem 12-px-Elternwert = 9,96 px.
+       UI-11 (27.09.2026): der Boden ist jetzt --fs-xs (11 px) — mit 10 px
+       standen die Top-Karten-Umschalter im Aktuellen Meta darunter. */
+    font-size: max(var(--fs-xs), 0.83em);
     transition: all 0.2s ease; font-family: 'Nunito', sans-serif;
 }
 .btn-toggle-item:last-child { border-right: none; }

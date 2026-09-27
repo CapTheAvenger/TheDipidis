@@ -3,13 +3,13 @@
  *
  *   computeTierScore() nannte seinen Eingang `games`, glaettete gegen
  *   `PRIOR_GAMES: 50` und liess den Satz ueber der Liste sagen
- *   "geglaettet gegen einen Vorwert von 50 Partien bei 50 %".
+ *   "geglaettet gegen einen Vorwert von 50 Matches bei 50 %".
  *   Hineingereicht wird aber `new_count` aus
  *   data/limitless_online_decks_comparison.csv — die Zahl der LISTEN.
  *
  *   Groessenordnung, an der Quelle gemessen: Dragapult steht dort mit
  *   3.138 Listen; dieselbe Woche hat in data/limitless_online_decks.csv
- *   7943 + 6642 + 276 = 14.861 Partien. Der Vorwert wog also rund
+ *   7943 + 6642 + 276 = 14.861 Matches. Der Vorwert wog also rund
  *   4,7-mal schwerer, als sein Name behauptete.
  *
  * WAS DIESER TEST PRUEFT — und was er ausdruecklich NICHT tut:
@@ -193,7 +193,7 @@ describe('B1 — der Vorwert der Tier-Glaettung zaehlt Listen, nicht Partien', (
         // Die Labs-Schwelle zaehlt dagegen WIRKLICH Partien
         // (labsByName[].games aus der Turnierdatei) — die Umbenennung
         // darf sie nicht mitgerissen haben.
-        assert.ok(de.includes('ab ' + RECHNUNG.TIER_SCORE.LABS_MIN_PARTIEN + ' Partien je Deck'),
-            'die Labs-Schwelle zaehlt Partien und muss so heissen:\n' + de);
+        assert.ok(de.includes('ab ' + RECHNUNG.TIER_SCORE.LABS_MIN_PARTIEN + ' Matches je Deck'),
+            'die Labs-Schwelle zaehlt Matches (UI-18: Matches statt Partien) und muss so heissen:\n' + de);
     });
 });

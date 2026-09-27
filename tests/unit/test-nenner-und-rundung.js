@@ -594,22 +594,14 @@ describe('Halbe gewichtete Antritte werden als halbe gedruckt', () => {
 // ---------------------------------------------------------------------------
 
 describe('Glaettung wird benannt', () => {
-    it('der Spaltenkopf traegt den Glossartext, nicht den kurzen Tooltip', () => {
-        assert.match(TIER, /k: 'faktor',[\s\S]{0,120}hilf: 'vsField'/);
-        assert.match(TIER, /vsField: '1,6-mal heißt[\s\S]*?geglättet \(k = 50\)/);
-    });
-    it('der rohe Wert steht in der Zelle', () => {
-        assert.match(TIER, /faktorRoh: rohVon\.has\(name\)/);
-        assert.match(TIER, /roh \$\{einsNK\(r\.faktorRoh\)\}-mal/);
-    });
-    it('der Meta-Durchschnitt steht an der Spalte, die mit ihm vergleicht', () => {
-        // Stand bis zum 01.09.2026 im Blocktext. Ohne ihn hat "0,8-mal"
-        // keinen Bezugspunkt — er darf also umziehen, aber nicht gehen.
-        assert.match(TIER, /zusatz: deR/);
-        assert.match(TIER, /Der Meta-Durchschnitt liegt bei \$\{fmtPct\(conv\.expected \* 100, 1\)\} Top-8-Quote/);
-        assert.match(TIER, /The field average is \$\{fmtPct\(conv\.expected \* 100, 1\)\} top-8 rate/);
-        // Und er muss auch wirklich in die Marke wandern.
-        assert.match(TIER, /voll = hilfstext \+ \(c\.zusatz \? ' ' \+ c\.zusatz : ''\)/);
+    it('der Meta-Durchschnitt steht im Kopf der Top-8-Quote (UI-26, 27.09.2026)', () => {
+        // Bis zum 27.09.2026 stand er an der Spalte „ggü. Schnitt". Hausi:
+        // „Online Top 8-Quote (Ø 6,6 %)" statt eines separaten Vergleichswerts.
+        // Er darf umziehen, aber nicht gehen.
+        assert.match(TIER, /' \(Ø ' \+ fmtPct\(conv\.expected \* 100, 1\) \+ '\)'/);
+        assert.match(TIER, /de: 'Online Top 8-Quote' \+ schnittKopf/);
+        assert.match(TIER, /en: 'Online top-8 rate' \+ schnittKopf/);
+        assert.doesNotMatch(TIER, /k: 'faktor'/);
     });
     it('die Tier-Banner zeigen die geglaettete Win Rate', () => {
         assert.match(TIER, /const zeigWR = \(sc && isFinite\(sc\.adjWR\)\) \? sc\.adjWR : winRate/);

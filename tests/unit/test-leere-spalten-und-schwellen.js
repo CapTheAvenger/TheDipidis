@@ -58,13 +58,6 @@ function filterAusQuelle() {
 }
 
 /** Schneidet die Faktor-Schwelle aus der Datei und macht sie ausfuehrbar. */
-function faktorSchwelleAusQuelle() {
-    const m = OHNE_KOMMENTAR.match(/if \(!\((r\.[A-Za-z]+) >= CONV_MIN_N\)\)/);
-    assert.ok(m, 'die Faktor-Schwelle steht nicht mehr in js/app-tier-meta.js');
-    return new Function('r', 'CONV_MIN_N',
-        'return !(' + m[1] + ' >= CONV_MIN_N);');
-}
-
 /** Schneidet die duenn-Schwelle aus der Datei und macht sie ausfuehrbar. */
 function duennSchwelleAusQuelle() {
     const m = OHNE_KOMMENTAR.match(/duenn: !\(([A-Za-z]+) >= CONV_THIN_N\)/);
@@ -119,17 +112,9 @@ describe('Leere Spalten fallen weg, Schwellen rechnen weiter', () => {
             '"null Cuts" wurde als "kein Wert" gelesen — 0 ist aber ein Ergebnis');
     });
 
-    it('der Faktor haengt am gewichteten Wert, nicht an der Anzeige', () => {
-        const schweigt = faktorSchwelleAusQuelle();
-        // Genau der ausgelieferte Zustand: keine gezaehlte Zahl da,
-        // aber 640,5 gewichtete Antritte — weit ueber der Schwelle.
-        assert.equal(schweigt({ antritte: null, antritteGew: 640.5 }, 20), false,
-            'der Faktor schweigt wieder, obwohl die Stichprobe traegt');
-        // Und er schweigt weiterhin, wo die Stichprobe wirklich zu klein ist.
-        assert.equal(schweigt({ antritte: null, antritteGew: 4 }, 20), true,
-            'der Faktor redet jetzt auch bei vier Antritten');
-        assert.equal(schweigt({ antritte: null, antritteGew: null }, 20), true,
-            'ohne jeden Wert muss der Faktor schweigen');
+    it('eine Faktor-Schwelle gibt es nicht mehr — die Spalte ist weg (UI-26)', () => {
+        assert.doesNotMatch(OHNE_KOMMENTAR, /r\.antritteGew >= CONV_MIN_N/);
+        assert.doesNotMatch(OHNE_KOMMENTAR, /k: 'faktor'/);
     });
 
     it('duenn haengt am gewichteten Wert, nicht an der Anzeige', () => {

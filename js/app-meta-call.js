@@ -206,7 +206,7 @@ window.MetaCall = (function () {
      Zuwachs nicht. */
   const BELEGTE_FELDQUOTEN = {
     unentschiedenPraesenz: {
-      was:        'Anteil unentschiedener Partien im Praesenzfeld',
+      was:        'Anteil unentschiedener Matches im Praesenzfeld',
       datei:      'data/labs_tournament_matchups_TEF-PBL.csv',
       auswahl:    "day_filter='overall', Zeilen mit vs_wins/vs_losses",
       fenster:    'TEF-PBL',
@@ -214,7 +214,7 @@ window.MetaCall = (function () {
       gemessenAm: '22.09.2026',
     },
     unentschiedenOnline: {
-      was:        'Anteil unentschiedener Partien in den Limitless-Online-Turnieren',
+      was:        'Anteil unentschiedener Matches in den Limitless-Online-Turnieren',
       datei:      'data/limitless_online_decks.csv',
       auswahl:    'Summe ueber alle Zeilen (wins/losses/ties)',
       fenster:    'TEF-30C',
@@ -8334,7 +8334,7 @@ window.MetaCall = (function () {
             `Day-1: ${rowsConsumedDay1} rows → ${day1.pairs} pairs (${day1Summary || 'none'}); ` +
             `Day-2: ${rowsConsumedDay2} rows → ${day2.pairs} pairs (${day2Summary || 'none'}); ` +
             `blend ${pct(MATCHUP_BLEND_WEIGHT_DAY2)}/${pct(MATCHUP_BLEND_WEIGHT_DAY1)}/${pct(MATCHUP_BLEND_WEIGHT_ONLINE)} (Day-2/Day-1/Online); ` +
-            `min ${MAJOR_MATCHUP_MIN_GAMES} games (Overall fallback) / ${MAJOR_MATCHUP_MIN_GAMES_DAY1} (Day-1) / ${MAJOR_MATCHUP_MIN_GAMES_DAY2} (Day-2)`
+            `min ${MAJOR_MATCHUP_MIN_GAMES} matches (Overall fallback) / ${MAJOR_MATCHUP_MIN_GAMES_DAY1} (Day-1) / ${MAJOR_MATCHUP_MIN_GAMES_DAY2} (Day-2)`
           );
         } else {
           console.info('[MetaCall] No labs_tournament_matchups.csv — Major matchup blend skipped (online-only matchups)');
@@ -10766,7 +10766,7 @@ window.MetaCall = (function () {
     const frozen = _inFrozenPastMode();
     const hintHtml = frozen
       ? `<span class="mc-source-hint" title="${esc(t('mc.frozenSourceHintTitle'))}">📌 ${esc(t('mc.frozenSourceHint'))}</span>`
-      : `<span class="mc-source-hint" title="Matchups use the labs major-tournament matrix for this past format (pairs without ≥10 games default to 50/50). The live online matrix is not blended in — current-format decks don't represent past-format play.">ⓘ Matchups = labs majors</span>`;
+      : `<span class="mc-source-hint" title="Matchups use the labs major-tournament matrix for this past format (pairs without ≥10 matches default to 50/50). The live online matrix is not blended in — current-format decks don't represent past-format play.">ⓘ Matchups = labs majors</span>`;
     const formatRow = _metaSource === 'past'
       ? `<div class="mc-source-format-row">
            <label class="mc-source-format-label">Format:</label>
@@ -11296,7 +11296,7 @@ window.MetaCall = (function () {
           <span class="mc-feld-name">${esc(d.name)}</span>
           <span class="mc-feld-zahlen">${esc(L('gemessen ', 'measured '))}${
             Number.isFinite(gemessen) ? _mcPct(gemessen, 1) : '—'}${
-            partien > 0 ? ' · ' + zahlLokal(partien) + ' ' + L('Partien', 'games') : ''}</span>
+            partien > 0 ? ' · ' + zahlLokal(partien) + ' ' + L('Matches', 'matches') : ''}</span>
         </span>
       </button>`;
     }).join('');
@@ -11531,7 +11531,7 @@ window.MetaCall = (function () {
       .filter(opp => ((_journalStats[opp] || {}).total || 0) > 0).length;
     const text = partien > 0
       ? `wirkt auf ${zahlLokal(partien)} Journalpartie(n) gegen ${zahlLokal(gegner)} Deck(s)`
-      : 'keine Journalpartien für dieses Deck — der Filter hat nichts zu filtern';
+      : 'keine Journal-Matches für dieses Deck — der Filter hat nichts zu filtern';
     return `<span class="mc-brick-filter-stand" style="margin-left:8px;font-size:0.8rem;color:var(--ink-2,#667)">${esc(text)}</span>`;
   }
 
@@ -12351,9 +12351,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     if (z.eigene > 0) {
       return { text: _evL('gemessen + Journal', 'measured + journal'), klasse: 'is-journal',
                titel: _evL('Gemessene Quote, bayesianisch mit deinen ' + z.eigene
-                           + ' Journalpartien gemischt (Meta als 30-Partien-Vorwissen).',
+                           + ' Journal-Matches eingemischt (Meta als Vorwissen von 30 Matches).',
                            'Measured rate, blended Bayesian-style with your ' + z.eigene
-                           + ' journal games (meta as a 30-game prior).') };
+                           + ' journal matches (meta as a 30-match prior).') };
     }
     return { text: _evL('gemessen', 'measured'), klasse: 'is-gemessen',
              titel: _evL('Papier und Online gemischt (80 / 20), geglättet; der Nenner steht '
@@ -12501,7 +12501,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       quote:    _evQuotenKuerzel(),
       balken:   _evL('gegen 50 %', 'vs. 50%'),
       herkunft: _evL('Herkunft', 'Source'),
-      matches:  _evL('Matches', 'Games'),
+      matches:  _evL('Matches', 'Matches'),
     };
 
     /* Sortiert nach „wie oft". Eine Sortierung, deren Schlüssel nicht in
@@ -12563,7 +12563,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
                    + 'hast oder hinter denen keine gezählten Matches stehen; für die rechnet die '
                    + 'Seite keine Unsicherheit, das Band ist deshalb eher zu schmal.',
                    _mcNum(r.ohneBand, 0) + '% of the weight rests on rates you set yourself or '
-                   + 'that have no games counted behind them; no uncertainty is computed for '
+                   + 'that have no matches counted behind them; no uncertainty is computed for '
                    + 'those, so the band is narrow rather than wide.')
       : '';
 
@@ -13608,8 +13608,8 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         ? konvNameRoh
         : konvNameRoh.charAt(0).toLowerCase() + konvNameRoh.slice(1);
       const titel = _mcIstDeutsch()
-        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Feldern vergleichbar: auf Papier enden rund 11 % der Partien unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird in getBaseMatchup auf dieselbe Quote der Paarung aufgeschlagen.'
-        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two fields: about 11 % of games on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. getBaseMatchup adds the gap to the pair\u2019s rate in the same convention.';
+        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Feldern vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird in getBaseMatchup auf dieselbe Quote der Paarung aufgeschlagen.'
+        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two fields: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. getBaseMatchup adds the gap to the pair\u2019s rate in the same convention.';
       return ` <span class="mc-predictor-banner-gewichtung" title="${esc(titel)}">${esc(kern + schub)}</span>`;
     })();
 
@@ -13790,10 +13790,10 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       const _papierText = _pPapier > 0
         ? zahlLokal(_pPapier) + (_de ? ' auf Präsenzturnieren' : ' at in-person events')
           + (_tz ? ' (' + _tz + ' ' + _tzWort + ')' : '')
-        : (_de ? 'keine Präsenzpartien im laufenden Format'
-               : 'no in-person games in the current format');
+        : (_de ? 'keine Präsenz-Matches im laufenden Format'
+               : 'no in-person matches in the current format');
       tiles.push(_intelStatTile(
-        _de ? 'Gezählte Partien im Format' : 'Games counted this format',
+        _de ? 'Gezählte Matches im Format' : 'Matches counted this format',
         _pOnline > 0
           ? zahlLokal(_pOnline) + (_de ? ' online' : ' online')
           : zahlLokal(_pPapier) + (_de ? ' Präsenz' : ' in person'),

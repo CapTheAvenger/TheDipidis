@@ -193,7 +193,7 @@ describe('Der Datenumfang — von der Startseite nach Quellen & Methodik', () =>
         assert.match(z, /8\.130 gewichtete Turnier-Antritte/);
         assert.match(z, /475 Turniere/);
         assert.match(z, /14\.026 Spieler/);
-        assert.match(z, /59\.910 Partien/);
+        assert.match(z, /59\.910 Matches/);
         assert.match(z, /60 Archetypen, zu denen vollständige/);
         assert.ok(!/null|undefined|NaN/.test(z), z);
     });

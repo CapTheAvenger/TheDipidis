@@ -5969,25 +5969,8 @@ details[open] > .tier-trending-summary::after {
  * surface the variant count so the user understands why the
  * Tier-Card share doesn't match the Full Comparison Table's per-
  * variant rows. */
-/* Der NENNER hinter einer Quote — nicht zu verwechseln mit
- * `.stat-badge-suffix` darunter, der einmal die Variantenzahl
- * wiederholte und deshalb am 01.09.2026 von der Kachel geflogen ist
- * ("einmal das in Groß reicht auf jeden Fall aus").
- *
- * Das hier ist keine Wiederholung, sondern die fehlende Hälfte: die
- * Menge, aus der die Win Rate gebildet ist. Hausregel dieses Projekts —
- * jede Quote trägt ihren Nenner. Deshalb eigene Klasse, damit die
- * Zusicherung zur alten Anordnung weiter greifen kann.
- *
- * Bewusst blasser und kleiner als die Quote selbst: er soll sie
- * einordnen, nicht mit ihr konkurrieren. */
-.stat-badge .stat-badge-nenner {
-    margin-left: 3px;
-    opacity: 0.6;
-    font-weight: 500;
-    font-size: var(--fs-xs);
-    font-variant-numeric: tabular-nums;
-}
+/* .stat-badge-nenner (die Antrittszahl neben der WR der Startkacheln) ist
+   seit UI-17 (27.09.2026) weg — die Zahl steht im Hinweis der Plakette. */
 
 .stat-badge .stat-badge-suffix {
     margin-left: 4px;
@@ -10396,12 +10379,12 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-variant-numeric: tabular-nums;
 }
 .heatmap-zelle-quelle {
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);  /* UI-11 (27.09.2026): war 0,65/0,66 rem = 10,4 px */
     font-weight: 600;
     letter-spacing: 0.02em;
 }
 .heatmap-zelle-kennzahl {
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);  /* UI-11 (27.09.2026): war 0,65/0,66 rem = 10,4 px */
     font-weight: 600;
     text-align: left;
 }
@@ -10410,7 +10393,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-weight: 700;
 }
 .heatmap-zelle-n {
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);  /* UI-11 (27.09.2026): war 0,65/0,66 rem = 10,4 px */
     font-weight: 500;
 }
 .heatmap-zelle-strich {
@@ -11415,7 +11398,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 
 .arc-halb-anzahl {
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);  /* UI-11 (27.09.2026): war 0,65/0,66 rem = 10,4 px */
     font-weight: 500;
     text-align: right;
     white-space: nowrap;

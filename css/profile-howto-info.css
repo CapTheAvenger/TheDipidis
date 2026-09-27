@@ -902,7 +902,7 @@
     font-weight: 600;
 }
 .tutorial-mockup .mockup-pill {
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -942,7 +942,7 @@
     line-height: 1.2;
 }
 .mockup-hub-tile .mockup-tile-desc {
-    font-size: 0.68rem;
+    font-size: var(--fs-xs);
     color: var(--ink-3);
     line-height: 1.3;
 }
@@ -989,9 +989,9 @@
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
     z-index: 2;
 }
-.mockup-card-badge--max  { top: -6px; right: -6px; background: #ef4444; }
+.mockup-card-badge--max  { top: -6px; right: -6px; background: #dc2626; }
 .mockup-card-badge--in   { top: -6px; left: -6px;  background: var(--solid-ok); }
-.mockup-card-badge--wish { bottom: -4px; right: -4px; background: #ec4899; font-size: 0.7rem; }
+.mockup-card-badge--wish { bottom: -4px; right: -4px; background: #be185d; font-size: 0.7rem; }
 .mockup-card-info {
     display: flex;
     flex-direction: column;
@@ -1005,7 +1005,7 @@
     line-height: 1.15;
 }
 .mockup-card-stats {
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);
     color: var(--ink-3);
     line-height: 1.3;
 }
@@ -1100,9 +1100,9 @@
     justify-content: space-between;
     align-items: center;
 }
-.mockup-tier-card--t1 .mockup-tier-header { background: linear-gradient(90deg, #d32f2f, #ef4444); }
-.mockup-tier-card--t2 .mockup-tier-header { background: linear-gradient(90deg, #a55300, #fb923c); }
-.mockup-tier-card--t3 .mockup-tier-header { background: linear-gradient(90deg, #2d7530, #4ade80); }
+.mockup-tier-card--t1 .mockup-tier-header { background: linear-gradient(90deg, #b91c1c, #dc2626); }
+.mockup-tier-card--t2 .mockup-tier-header { background: linear-gradient(90deg, #a55300, #c2410c); }
+.mockup-tier-card--t3 .mockup-tier-header { background: linear-gradient(90deg, #2d7530, #15803d); }
 .mockup-tier-rows {
     background: var(--surface-1);
 }
@@ -1242,7 +1242,7 @@
     letter-spacing: 0.04em;
     color: #fff;
 }
-.mockup-movers-block.is-up   .mockup-movers-head { background: linear-gradient(90deg, var(--solid-ok), #4ade80); }
+.mockup-movers-block.is-up   .mockup-movers-head { background: linear-gradient(90deg, var(--solid-ok), #15803d); }
 .mockup-movers-block.is-down .mockup-movers-head { background: linear-gradient(90deg, #dc2626, #f87171); }
 .mockup-movers-table {
     display: grid;
@@ -1301,7 +1301,7 @@
     grid-template-columns: 18px 1fr auto;
     gap: 6px;
     padding: 4px 8px;
-    font-size: 0.64rem;
+    font-size: var(--fs-xs);
     border-top: 1px solid rgba(15, 23, 42, 0.05);
     align-items: center;
 }
@@ -1323,7 +1323,7 @@
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
     text-align: right;
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
 }
 
 /* Comparison table — replaces the rank-Δ table screenshot. */
@@ -1340,7 +1340,7 @@
     background: #1e293b;
     color: #cbd5e1;
     padding: 6px 10px;
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -1391,7 +1391,7 @@
     .mockup-hub-tiles { gap: 8px; }
     .mockup-hub-tile { padding: 10px; }
     .mockup-hub-tile .mockup-tile-title { font-size: 0.74rem; }
-    .mockup-hub-tile .mockup-tile-desc  { font-size: 0.63rem; }
+    .mockup-hub-tile .mockup-tile-desc  { font-size: var(--fs-xs); }
 }
 
 /* ── Wishlist / Trade List card-grid mockups ──────────────────────
@@ -1488,7 +1488,7 @@
     text-overflow: ellipsis;
 }
 .mockup-wt-card-set {
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     color: var(--ink-3);
     line-height: 1.2;
 }
@@ -1499,7 +1499,7 @@
 }
 .mockup-wt-card-live {
     align-self: flex-start;
-    background: linear-gradient(135deg, var(--solid-ok), #219a52);
+    background: linear-gradient(135deg, var(--solid-ok), #15803d);
     color: #fff;
     padding: 3px 9px;
     border-radius: 6px;
@@ -1515,7 +1515,7 @@
     margin: 1px 0;
 }
 .mockup-wt-card-user-label {
-    font-size: 0.68rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     color: #8e44ad;
 }
@@ -1532,7 +1532,7 @@
     background: var(--surface-1);
 }
 .mockup-wt-card-user-suffix {
-    font-size: 0.68rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     color: #8e44ad;
 }
@@ -1617,7 +1617,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
@@ -1692,7 +1692,7 @@
     background: rgba(15, 23, 42, 0.06);
     padding: 1px 5px;
     border-radius: 3px;
-    font-size: 0.95em;
+    font-size: 1em;
 }
 .mockup-form-help a { color: var(--pokemon-blue, #3B4CCA); font-weight: 700; }
 .mockup-form-save {
@@ -1799,7 +1799,7 @@
     cursor: pointer;
 }
 .mockup-deck-section-count {
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     background: rgba(255, 255, 255, 0.6);
     padding: 1px 6px;
@@ -1863,7 +1863,7 @@
 }
 .mockup-deck-section--rare .mockup-deck-rare-folded {
     padding: 6px 10px;
-    font-size: 0.68rem;
+    font-size: var(--fs-xs);
     color: var(--ink-3);
     font-style: italic;
     background: rgba(241, 245, 249, 0.4);
@@ -1933,7 +1933,7 @@
     border-radius: 50%;
     background: var(--pokemon-blue, #3B4CCA);
     color: #fff;
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1984,7 +1984,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 0.68rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: #475569;
     letter-spacing: 0.04em;
@@ -2056,13 +2056,13 @@
 .mockup-deckgrid-section-head .dot.is-tech { background: #f59e0b; }
 .mockup-deckgrid-section-head .dot.is-rare { background: #94a3b8; }
 .mockup-deckgrid-section-head .hint {
-    font-size: 0.68rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     color: var(--ink-3);
 }
 .mockup-deckgrid-section-head .count {
     margin-left: auto;
-    font-size: 0.68rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     background: rgba(15, 23, 42, 0.06);
     color: var(--tint-info-ink);
@@ -2109,14 +2109,14 @@
 .mockup-deckgrid-badge.is-deck {
     top: 4px;
     left: 4px;
-    background: rgba(34, 197, 94, 0.92);
+    background: rgba(21, 128, 61, 0.94);
 }
 .mockup-deckgrid-badge.is-star {
     bottom: 4px;
     right: 4px;
-    background: rgba(245, 158, 11, 0.96);
+    background: rgba(180, 83, 9, 0.96);
     padding: 2px 5px;
-    font-size: 0.68rem;
+    font-size: var(--fs-xs);
 }
 .mockup-deckgrid-info {
     padding: 5px 6px 6px;
@@ -2265,11 +2265,11 @@
     border-radius: 5px;
     text-align: center;
     padding: 2px 0;
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
 }
-.mockup-bs-rank.is-t1 { background: linear-gradient(135deg, #d32f2f, #ef4444); }
-.mockup-bs-rank.is-t2 { background: linear-gradient(135deg, #a55300, #fb923c); }
-.mockup-bs-rank.is-t3 { background: linear-gradient(135deg, #2d7530, #4ade80); }
+.mockup-bs-rank.is-t1 { background: linear-gradient(135deg, #b91c1c, #dc2626); }
+.mockup-bs-rank.is-t2 { background: linear-gradient(135deg, #a55300, #c2410c); }
+.mockup-bs-rank.is-t3 { background: linear-gradient(135deg, #2d7530, #15803d); }
 .mockup-bs-deck {
     font-weight: 800;
     color: #0f172a;
@@ -2310,7 +2310,7 @@
     font-weight: 700;
     color: var(--ink-3);
     text-align: right;
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     min-width: 36px;
 }
 .mockup-bs--compact .mockup-bs-head,
@@ -2369,7 +2369,7 @@
 }
 .mockup-staple-rank {
     font-weight: 800;
-    font-size: 0.64rem;
+    font-size: var(--fs-xs);
     color: var(--ink-3);
     text-align: center;
 }
@@ -2410,7 +2410,7 @@
 .mockup-staple-bar > span {
     display: block;
     height: 100%;
-    background: linear-gradient(90deg, var(--pokemon-blue, #3B4CCA), #6366f1);
+    background: linear-gradient(90deg, var(--pokemon-blue, #3B4CCA), #4f46e5);
     border-radius: inherit;
 }
 .mockup-staple-pct {
@@ -2431,7 +2431,7 @@
 }
 .mockup-cooking-toggle span {
     padding: 4px 12px;
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     border-radius: 999px;
     color: #475569;
@@ -2472,7 +2472,7 @@
     gap: 4px;
 }
 .mockup-cooking-active {
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: var(--tint-ok-ink);
     background: rgba(34, 197, 94, 0.12);
@@ -2500,8 +2500,8 @@
     color: #fff;
     letter-spacing: 0.04em;
 }
-.mockup-matchup-section.is-best  .mockup-matchup-head { background: linear-gradient(90deg, var(--solid-ok), #22c55e); }
-.mockup-matchup-section.is-worst .mockup-matchup-head { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.mockup-matchup-section.is-best  .mockup-matchup-head { background: linear-gradient(90deg, var(--solid-ok), #15803d); }
+.mockup-matchup-section.is-worst .mockup-matchup-head { background: linear-gradient(90deg, #b91c1c, #dc2626); }
 .mockup-matchup-section.is-neutral .mockup-matchup-head { background: linear-gradient(90deg, #475569, #64748b); }
 .mockup-matchup-rows {
     border: 1px solid rgba(15, 23, 42, 0.10);
@@ -2613,6 +2613,7 @@
     margin-top: 10px;
     flex-wrap: wrap;
 }
+.mockup-tech-slots-label small { font-size: var(--fs-xs); }  /* UI-10: stand bei 9,3 px */
 .mockup-tech-slots-label {
     font-size: 0.7rem;
     font-weight: 800;
@@ -2635,7 +2636,7 @@
 }
 .mockup-tech-slots-cta {
     margin-left: auto;
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 4px 10px;
     border-radius: 999px;
@@ -2784,7 +2785,7 @@
     color: #0f172a;
 }
 .mockup-techlab-target-sub {
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     color: var(--ink-3);
     letter-spacing: 0.04em;
@@ -2990,7 +2991,7 @@
     position: absolute;
     top: 4px;
     left: 4px;
-    background: rgba(245, 158, 11, 0.95);
+    background: rgba(180, 83, 9, 0.95);
     color: #fff;
     border-radius: 50%;
     width: 22px;
@@ -3049,9 +3050,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--pokemon-blue, #3B4CCA), #6366f1);
+    background: linear-gradient(135deg, var(--pokemon-blue, #3B4CCA), #4f46e5);
     color: #fff;
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     border-radius: 6px;
     letter-spacing: 0.04em;
@@ -3165,7 +3166,7 @@
     justify-content: space-between;
     margin-top: 8px;
     padding: 0 4px;
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: var(--tint-warn-ink);
     letter-spacing: 0.04em;
@@ -3197,12 +3198,12 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 .mockup-tg-dash-avatar:first-child { margin-left: 0; }
-.mockup-tg-dash-avatar.v2 { background: linear-gradient(135deg, var(--solid-ok), #facc15); }
+.mockup-tg-dash-avatar.v2 { background: linear-gradient(135deg, var(--solid-ok), #a16207); }
 .mockup-tg-dash-avatar.v3 { background: linear-gradient(135deg, #b45309, #a3231b); }  /* 2,80:1 -> 5,02:1 */
 .mockup-tg-dash-avatar.v4 { background: linear-gradient(135deg, #067391, #6366f1); }
 .mockup-tg-dash-count {
     margin-left: auto;
-    font-size: 0.66rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: #475569;
     letter-spacing: 0.04em;
@@ -3387,6 +3388,9 @@
        Text auf dem weissen Mockup-Grund, 2,61:1. Eine halb umgestellte
        Insel ist schlimmer als gar keine. */
     --brand-ink: #2a3899;
+    /* UI-9 (27.09.2026): --brand lief im Mockup noch mit seinem
+       Dunkelmodus-Wert #5566e0 — gemessen 3,7:1 auf dem hellen Grund. */
+    --brand: #3B4CCA;
     --tint-warn-ink: #a74d08;
     --tint-ok-ink:   #137337;
     --tint-bad-ink:  #991b1b;

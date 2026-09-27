@@ -34,7 +34,7 @@
  * wieder zwei Rechnungen unter einem Namen erzeugen wuerde.
  *
  * ABDECKUNG, gemessen an Mega Excadrill: 15 von 20 Paarungen haben einen
- * Major-Wert, 7 davon unter 10 Partien. Grimmsnarl Froslass steht mit
+ * Major-Wert, 7 davon unter 10 Matches. Grimmsnarl Froslass steht mit
  * 100,0 % auf ZWEI Partien da — deshalb die Markierung, und deshalb steht
  * die Partienzahl in einer eigenen Spalte daneben statt nur im Hinweis.
  */
@@ -276,7 +276,7 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
             + 'niemand "keine Bilanz" von "keine entschiedene Partie"');
         /* AUSGEFUEHRT. Dieselbe Zeile, einmal mit und einmal ohne
            Bilanz — sie muessen zwei verschiedene Saetze bekommen.
-           40 Partien, damit die Mindeststichprobe nicht dazwischenfunkt. */
+           40 Matches, damit die Mindeststichprobe nicht dazwischenfunkt. */
         const remis = PZ.praesenzZelle(paarung({
             majorAnzahl: 40, majorBilanzDa: true, majorWr: null,
             majorSiege: 0, majorNiederlagen: 0, majorUnentschieden: 40,
@@ -399,7 +399,7 @@ describe('Die Partienzahl steht daneben', () => {
         assert.strictEqual(z.inhalt, '–',
             'eine fehlende Praesenzpaarung wird nicht mehr als fehlend gezeigt — '
             + 'eine 0 liest sich als "nie gewonnen"');
-        assert.ok(/Keine Präsenzpartien/.test(z.titel),
+        assert.ok(/Keine Präsenz-Matches/.test(z.titel),
             'der Hinweis fuer fehlende Paarungen ist weg');
         assert.ok(/arc\.muMajorFehlt/.test(karte),
             'der i18n-Schluessel fuer fehlende Paarungen ist weg');
@@ -472,7 +472,7 @@ describe('Die Zahlen hinter der Spalte', () => {
         /* GEFUNDEN AM 03.09.2026 durch die Zusicherung darueber: 15 von 769
            Paarungen addierten sich nicht zu vs_count. Alle 15 waren Spiegel
            (Dragapult gegen Dragapult), und alle 15 lagen exakt beim Faktor
-           2,0 — Dragapult 124-124-24 auf 136 Partien.
+           2,0 — Dragapult 124-124-24 auf 136 Matches.
 
            Das ist kein Fehler, sondern die Natur der Sache: in einer
            Spiegelpartie sitzt dasselbe Deck auf beiden Seiten, also wird
@@ -750,8 +750,8 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>
 
     /* DER ANLASS, gemessen an data/labs_tournament_matchups_TEF-PBL.csv
        (day_filter = overall): Mega Excadrill führt 27 Gegner, GENAU EINER
-       erreicht 30 Partien (Dragapult, 52). "vs Crustle 88,89 %" stand auf
-       9 Partien, "vs Grimmsnarl Froslass 100 %" auf 2.
+       erreicht 30 Matches (Dragapult, 52). "vs Crustle 88,89 %" stand auf
+       9 Matches, "vs Grimmsnarl Froslass 100 %" auf 2.
 
        Die Schwelle ist abgelesen, nicht gewählt: bei n Partien verschiebt
        eine einzige Partie die Quote um 100/n Punkte — 3,3 bei 30, 11,1
@@ -764,7 +764,7 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>
             + 'dann laufen Zelle, Hinweis und Fußzeile auseinander');
     });
 
-    it('9 Partien: Bilanz und Fallzahl, kein Prozentwert', () => {
+    it('9 Matches: Bilanz und Fallzahl, kein Prozentwert', () => {
         const m = paarung({
             majorAnzahl: 9, majorBilanzDa: true, majorWr: 82.4, majorWrRoh: 88.9,
             majorSiege: 8, majorNiederlagen: 1, majorUnentschieden: 0,
@@ -782,7 +782,7 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>
             'der Hinweis rechnet nicht vor, was eine einzelne Partie ausmacht');
     });
 
-    it('2 Partien: dasselbe, und ganz sicher keine 100 %', () => {
+    it('2 Matches: dasselbe, und ganz sicher keine 100 %', () => {
         const z = PZ.praesenzZelle(paarung({
             majorAnzahl: 2, majorBilanzDa: true, majorWr: 65, majorWrRoh: 100,
             majorSiege: 2, majorNiederlagen: 0, majorUnentschieden: 0,
@@ -793,7 +793,7 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>
         assert.ok(/50,0 Punkte/.test(z.titel));
     });
 
-    it('genau 30 Partien: ab hier steht die Quote', () => {
+    it('genau 30 Matches: ab hier steht die Quote', () => {
         /* Die Grenze selbst — sonst könnte sie um eins verrutschen,
            ohne dass etwas rot wird. */
         const z = PZ.praesenzZelle(paarung({
@@ -810,7 +810,7 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>
             'die Schwelle greift eine Partie zu spät');
     });
 
-    it('52 Partien (Dragapult): die Quote, wie bisher', () => {
+    it('52 Matches (Dragapult): die Quote, wie bisher', () => {
         const z = PZ.praesenzZelle(paarung({
             majorAnzahl: 52, majorBilanzDa: true, majorWr: 47.2, majorWrRoh: 47.7,
             majorSiege: 21, majorNiederlagen: 23, majorUnentschieden: 8,
@@ -824,13 +824,13 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>
         /* Gemessen: in 15 Zeilen der Datei (alle Spiegelpaarungen) ist
            vs_count ≠ Siege + Niederlagen + Unentschieden, weil jede
            Spiegelpartie für beide Seiten verbucht ist — Basic Box gegen
-           sich selbst: 24 Partien, Bilanz 24-24-0. */
+           sich selbst: 24 Matches, Bilanz 24-24-0. */
         const z = PZ.praesenzZelle(paarung({
             opponent: 'Basic Box', majorAnzahl: 24, majorBilanzDa: true,
             majorWr: 50, majorWrRoh: 50,
             majorSiege: 24, majorNiederlagen: 24, majorUnentschieden: 0,
         }), true);
-        assert.ok(/48 Einzelergebnisse auf 24 Partien/.test(z.titel),
+        assert.ok(/48 Einzelergebnisse auf 24 Matches/.test(z.titel),
             'dass Bilanzsumme und Partienzahl auseinandergehen, steht nirgends');
         const sauber = PZ.praesenzZelle(paarung({
             majorAnzahl: 52, majorBilanzDa: true, majorWr: 47.2, majorWrRoh: 47.7,
@@ -857,7 +857,7 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>
         }), false);
         assert.strictEqual(z.inhalt, '8–1–0');
         assert.ok(/Record 8–1–0/.test(z.titel));
-        assert.ok(/Below 30 games/.test(z.titel));
+        assert.ok(/Below 30 matches/.test(z.titel));
     });
 });
 
@@ -921,7 +921,7 @@ describe('Die Schwelle steht sichtbar unter der Tabelle', () => {
     it('liegt eine Zeile darunter, steht der Satz mit Schwelle und Anzahl da', () => {
         const html = tabelle([DICK, DUENN]);
         assert.ok(/arc-mu-note-praesenz/.test(html), 'die Zeile fehlt ganz');
-        assert.ok(/ab 30 Präsenzpartien/.test(html), 'die Schwelle wird nicht genannt');
+        assert.ok(/ab 30 Präsenz-Matches/.test(html), 'die Schwelle wird nicht genannt');
         assert.ok(/3,3 Punkte/.test(html),
             'die Begründung der Schwelle steht nicht daneben');
         assert.ok(/1 von 2 Zeilen/.test(html),

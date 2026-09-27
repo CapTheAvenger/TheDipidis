@@ -1,0 +1,431 @@
++                    if (!eff) break;|
++                    const cardType = String(eff.card_type || '').toLowerCase().trim();|
++                    const m = /^evolves from\s+(.+)$/.exec(cardType);|
++                    if (!m) break;|
++                    currentName = m[1].trim();|
++                }|
++                return _getDexNumFromName(currentName, dexMap);|
++            }|
++|
++|
++            /* FE-9 (27.09.2026, Hausi): innerhalb der Kategorien nach Karten-Share,|
++               „damit die meistgenutzten Karten des Decks zuerst stehen". Bei den|
++               Pokémon zaehlt dafuer die FAMILIE: ihr hoechster Anteil stellt die|
++               ganze Entwicklungslinie nach vorn, innerhalb der Linie bleibt|
++               Basic → Phase 1 → Phase 2. So steht Abra (100 %) mit Kadabra und|
++               Alakazam vor Psyduck (38 %), ohne dass die Linie zerreisst — der|
++               Fehler aus 410cebd („share% zuerst“ zerriss die Linien) kommt|
++               nicht zurueck. */|
++            const _famAnteil = new Map();|
++            const _famKey = new Map();|
++            cards.forEach(c => {|
++                const typ = c.type || c.card_type || '';|
++                if (getCardTypeCategory(typ) !== 'Pokemon') return;|
++                const key = _getFamilyBaseDex(c);|
++                _famKey.set(c, key);|
++                const p = parseLocaleNumber(c.percentage_in_archetype || '0', 0) || 0;|
++                if (!_famAnteil.has(key) || p > _famAnteil.get(key)) _famAnteil.set(key, p);|
++            });|
++|
+             const sorted = cards.sort((a, b) => {|
+@@ -2297,111 +2426,2 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+                 |
+-                // Helper: resolve Pokedex number from card data or global map.|
+-                //|
+-                // Card-name shapes we need to handle:|
+-                //   "Garchomp ex"                 → garchomp|
+-                //   "Cynthia's Garchomp ex"       → garchomp (trainer-possessive)|
+-                //   "Hop's Trevenant"             → trevenant|
+-                //   "Bloodmoon Ursaluna ex"       → ursaluna (form prefix)|
+-                //   "Hisuian Zoroark"             → zoroark (regional)|
+-                //   "Hisui Goomy"                 → goomy|
+-                //   "Paldean Tauros"              → tauros|
+-                //   "Galarian Slowking"           → slowking|
+-                //   "Alolan Vulpix"               → vulpix|
+-                //   "Origin Forme Dialga"         → dialga|
+-                //   "Dusk Mane Necrozma"          → necrozma|
+-                //   "Dawn Wings Necrozma"         → necrozma|
+-                //   "Iron Hands ex"               → iron hands  (no prefix to strip)|
+-                //|
+-                // pokemon_dex_numbers.json keys cards by bare base name only,|
+-                // so the regional/form prefixes MUST come off before the|
+-                // lookup or the card falls to 99999 and lands in the wrong|
+-                // pokedex position.|
+-                function _getDexNum(card) {|
+-                    const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);|
+-                    if (!isNaN(direct) && direct > 0) return direct;|
+-                    const dexMap = window.pokedexNumbers || {};|
+-                    const rawName = String(card.card_name || card.name || '').trim().toLowerCase();|
+-                    return _getDexNumFromName(rawName, dexMap);|
+-                }|
+-|
+-                // Lookup-only variant — same multi-stage fallback as|
+-                // _getDexNum (direct → trainer-prefix-strip → form-prefix-|
+-                // strip → ex/vmax/... suffix-strip → first-word-strip)|
+-                // but takes a name string instead of a card object.|
+-                // Used by _getFamilyBaseDex when walking up the|
+-                // evolution chain.|
+-                function _getDexNumFromName(rawName, dexMap) {|
+-                    dexMap = dexMap || window.pokedexNumbers || {};|
+-                    const direct = parseInt(dexMap[rawName], 10);|
+-                    if (!isNaN(direct) && direct > 0) return direct;|
+-                    // Strip trainer-possessive prefixes ("Cynthia's Gible" →|
+-                    // "gible", "Hop's Trevenant" → "trevenant", "Team Rocket's|
+-                    // Mewtwo" → "mewtwo") via the shared helper.|
+-                    const trainerStripped = (typeof window !== 'undefined' && window.stripTrainerOwnerPrefix)|
+-                        ? window.stripTrainerOwnerPrefix(rawName).base.trim()|
+-                        : rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();|
+-                    if (trainerStripped !== rawName) {|
+-                        const stripMap = parseInt(dexMap[trainerStripped], 10);|
+-                        if (!isNaN(stripMap) && stripMap > 0) return stripMap;|
+-                    }|
+-                    // Strip form / regional prefixes that the dex map doesn't|
+-                    // index ("Bloodmoon Ursaluna ex" → "ursaluna ex"). The|
+-                    // ex / vmax / etc. suffix strip below then drops the|
+-                    // tail and leaves the bare base name.|
+-                    const formStripped = trainerStripped|
+-                        .replace(/^(?:bloodmoon|origin\s+forme|origin|dusk\s+mane|dawn\s+wings|crowned\s+sword|crowned\s+shield|crowned|hisuian|hisui|paldean|paldea|galarian|galar|alolan|alola)\s+/, '')|
+-                        .trim();|
+-                    if (formStripped !== trainerStripped) {|
+-                        const formMap = parseInt(dexMap[formStripped], 10);|
+-                        if (!isNaN(formMap) && formMap > 0) return formMap;|
+-                    }|
+-                    const baseName = formStripped|
+-                        .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')|
+-                        .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();|
+-                    const baseMap = parseInt(dexMap[baseName], 10);|
+-                    if (!isNaN(baseMap) && baseMap > 0) return baseMap;|
+-                    // Final fallback for unknown form prefixes not in the|
+-                    // explicit list — drop the first word and try again.|
+-                    // Compound species (Iron Thorns, Raging Bolt) resolve|
+-                    // directly via baseMap above and never reach this branch.|
+-                    const words = baseName.split(/\s+/).filter(Boolean);|
+-                    if (words.length >= 2) {|
+-                        const stripped = words.slice(1).join(' ');|
+-                        const formMap = parseInt(dexMap[stripped], 10);|
+-                        if (!isNaN(formMap) && formMap > 0) return formMap;|
+-                    }|
+-                    return 99999;|
+-                }|
+-|
+-                // Family-line grouping — walks up the evolution chain via|
+-                // pokemon_card_effects.json's "Evolves from X" card_type|
+-                // text and returns the dex of the BASE species. With this,|
+-                // Dusknoir (#477) sorts alongside Dusclops (#356) and|
+-                // Duskull (#355) under the family base dex 355 instead of|
+-                // landing 122 numbers later in strict pokédex order. User|
+-                // flagged: "duskull, dusclops und Dusknoir stehen immer|
+-                // noch nicht nebeneinander" — TCG convention is to group|
+-                // evolution lines together, not split them by Gen.|
+-                //|
+-                // Falls back to plain _getDexNum when card-effects isn't|
+-                // loaded yet (e.g. the index is lazy-loaded during|
+-                // autoCompleteConsistency; on a fresh page load before any|
+-                // build, sort runs without it). Walk depth capped at 4 to|
+-                // protect against malformed cycles.|
+-                function _getFamilyBaseDex(card) {|
+-                    const idx = (typeof window !== 'undefined') && window._cardEffectsIndex;|
+-                    if (!idx || !idx.byName || idx.byName.size === 0) return _getDexNum(card);|
+-                    let currentName = String(card.card_name || card.name || '').toLowerCase().trim();|
+-                    const dexMap = window.pokedexNumbers || {};|
+-                    for (let depth = 0; depth < 4; depth++) {|
+-                        const eff = idx.byName.get(currentName);|
+-                        if (!eff) break;|
+-                        const cardType = String(eff.card_type || '').toLowerCase().trim();|
+-                        const m = /^evolves from\s+(.+)$/.exec(cardType);|
+-                        if (!m) break;|
+-                        currentName = m[1].trim();|
+-                    }|
+-                    return _getDexNumFromName(currentName, dexMap);|
+-                }|
+-|
+                 // For Pokemon: sort by element type → family-base Pokedex →|
+@@ -2423,2 +2443,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+                 if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {|
++                    // FE-9: die meistgespielte Familie zuerst (s. oben).|
++                    const famA = _famAnteil.get(_famKey.get(a)) || 0;|
++                    const famB = _famAnteil.get(_famKey.get(b)) || 0;|
++                    if (famA !== famB) {|
++                        return famB - famA;|
++                    }|
++|
+                     const elementA = cardTypeA.charAt(0);|
+@@ -2436,4 +2463,4 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+                     // Dusknoir #477 sort with Duskull #355).|
+-                    const dexA = _getFamilyBaseDex(a);|
+-                    const dexB = _getFamilyBaseDex(b);|
++                    const dexA = _famKey.get(a);|
++                    const dexB = _famKey.get(b);|
+                     if (dexA !== dexB) {|
+diff --git a/js/app-past-meta.js b/js/app-past-meta.js|
+index 3e95dc4..306ed38 100644|
+--- a/js/app-past-meta.js|
++++ b/js/app-past-meta.js|
+@@ -1210,3 +1210,3 @@|
+                 if (abschnitt && kacheln && matrix) {|
+-                    abschnitt.classList.remove('d-none');|
++                    abschnitt.classList.toggle('d-none', !pastMetaEinFormat(formatFilter));|
+                     kacheln.innerHTML = '';|
+@@ -1942,2 +1942,9 @@|
+ |
++        // FE-7 (27.09.2026): ist genau EIN Format gewaehlt? „all" ist|
++        // Multi-Format, leer heisst noch nichts gewaehlt. Eigene Funktion,|
++        // damit die Zusicherung sie ausfuehren kann.|
++        function pastMetaEinFormat(formatKey) {|
++            return !!formatKey && formatKey !== 'all';|
++        }|
++|
+         async function renderPastMetaPerformance(archetype, formatKey, tournamentFilter) {|
+@@ -1948,11 +1955,11 @@|
+ |
+-            // Multi-format aggregate isn't supported — labs CSVs are|
+-            // per-meta and combining different rotations would mix decks|
+-            // that wouldn't even share a card pool. Surface the section|
+-            // anyway so the user understands why it's blank instead of|
+-            // silently hiding the entire panel.|
+-            if (!archetype || formatKey === 'all' || !formatKey) {|
+-                section.classList.remove('d-none');|
++            // Multi-Format: der Abschnitt ist aus (FE-7, Entscheidung Hausi|
++            // 27.09.2026). Die Labs-Dateien gelten je Format; eine Bilanz|
++            // ueber mehrere Rotationen mischte Decks, die nicht einmal|
++            // denselben Kartenpool haben. Vorher stand hier ein leerer|
++            // Abschnitt mit dem Hinweis, ein Format zu waehlen.|
++            if (!pastMetaEinFormat(formatKey) || !archetype) {|
++                section.classList.add('d-none');|
+                 cards.innerHTML = '';|
+-                matchup.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${(typeof t === 'function' ? t('pm.performanceFormatAllHint') : 'Pick a specific format to see this archetype\'s cumulative tournament performance.')}</p>`;|
++                matchup.innerHTML = '';|
+                 return;|
+@@ -2397,4 +2404,7 @@|
+ |
+-            if (!archetype) {|
++            // FE-7: auch die beste Liste gilt nur innerhalb EINES Formats —|
++            // bei Multi-Format waere sie die beste ueber Rotationen hinweg.|
++            if (!archetype || !pastMetaEinFormat(formatKey)) {|
+                 section.classList.add('d-none');|
++                body.innerHTML = '';|
+                 window.pastMetaMostSuccessfulList = null;|
+diff --git a/js/i18n.js b/js/i18n.js|
+index 677463b..349808a 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -766,3 +766,2 @@ const translations = {|
+     'pm.performanceNoArchetype':'No labs rows for this archetype in the selected format.',|
+-    'pm.performanceFormatAllHint': 'Pick a specific format (left filter) to see this archetype\'s cumulative tournament performance.',|
+     'pm.mostSuccessfulTitle':   'Most Successful List',|
+@@ -3459,3 +3458,2 @@ const translations = {|
+     'pm.performanceNoArchetype':'Keine Labs-Daten für diesen Archetyp im ausgewählten Format.',|
+-    'pm.performanceFormatAllHint': 'Wähle ein spezifisches Format (Filter links), um die kumulierte Turnier-Performance dieses Archetyps zu sehen.',|
+     'pm.mostSuccessfulTitle':   'Erfolgreichste Decklist',|
+diff --git a/scripts/messe_deckkachel_ueberlappung.py b/scripts/messe_deckkachel_ueberlappung.py|
+new file mode 100644|
+index 0000000..3ad5eaf|
+--- /dev/null|
++++ b/scripts/messe_deckkachel_ueberlappung.py|
+@@ -0,0 +1,86 @@|
++#!/usr/bin/env python3|
++"""Ueberlappen sich Kennzahl-Band und Knoepfe auf den Kacheln des gebauten Decks?|
++|
++UI-38 (Backlog 27.09.2026): `div.deck-card-overlay` (Anteil | Ø) und|
++`div.deck-card-actions` (−/★/+, L/P/Preis) ueberlappen sich „manchmal".|
++Gemessen wird jede Kachel des per Generate gebauten Decks: schneiden sich|
++die Rechtecke der beiden, zaehlt sie. Dazu die Hoehe der Ueberlappung.|
++|
++AUFRUF|
++    python3 -m http.server 8000 --bind 127.0.0.1 &|
++    python3 scripts/messe_deckkachel_ueberlappung.py --ansicht past-meta --breiten 390,768,1024,1280|
++"""|
++import argparse|
++import sys|
++|
++QUELLE = {"past-meta": ("pastMeta", "pastMetaDeckSelect", "pastMetaMyDeckGrid"),|
++          "current-analysis": ("currentMeta", "currentMetaDeckSelect", "currentMetaMyDeckGrid"),|
++          "city-league": ("cityLeague", "cityLeagueDeckSelect", "cityLeagueMyDeckGrid")}|
++|
++MESSUNG = r"""|
++(gitter) => {|
++  const out = {kacheln: 0, ueber: 0, max: 0, beispiele: []};|
++  document.querySelectorAll('#' + gitter + ' .deck-card').forEach(k => {|
++    // Gegen die KNOPFZEILEN messen, nicht gegen den Behaelter: seit UI-38|
++    // liegt das Band selbst im Behaelter der Knoepfe.|
++    const o = k.querySelector('.deck-card-overlay');|
++    const zeilen = [...k.querySelectorAll('.deck-card-action-row')];|
++    if (!o || !zeilen.length) return;|
++    const ro = o.getBoundingClientRect();|
++    if (ro.height === 0) return;|
++    out.kacheln++;|
++    let h = 0;|
++    zeilen.forEach(z => { const ra = z.getBoundingClientRect();|
++      if (ra.height === 0 || Math.min(ro.right, ra.right) <= Math.max(ro.left, ra.left)) return;|
++      h = Math.max(h, Math.min(ro.bottom, ra.bottom) - Math.max(ro.top, ra.top)); });|
++    if (h > 0.5) {|
++      out.ueber++; out.max = Math.max(out.max, Math.round(h * 10) / 10);|
++      if (out.beispiele.length < 3) out.beispiele.push((k.title || '').slice(0, 30) + ' ' + Math.round(h) + 'px');|
++    }|
++  });|
++  return out;|
++}|
++"""|
++|
++|
++def main():|
++    from playwright.sync_api import sync_playwright|
++    ap = argparse.ArgumentParser()|
++    ap.add_argument("--url", default="http://127.0.0.1:8000/index.html")|
++    ap.add_argument("--ansicht", default="past-meta", choices=sorted(QUELLE))|
++    ap.add_argument("--breiten", default="390,768,1024,1280")|
++    a = ap.parse_args()|
++    quelle, auswahl, gitter = QUELLE[a.ansicht]|
++    with sync_playwright() as p:|
++        b = p.chromium.launch()|
++        s = b.new_page(viewport={"width": 1280, "height": 900})|
++        s.add_init_script("try { localStorage.setItem('app_lang', 'de'); } catch (e) {}")|
++        s.goto(a.url, wait_until="load", timeout=60000)|
++        s.wait_for_timeout(3000)|
++        for _ in range(4):|
++            try:|
++                s.evaluate("a => window.switchTab && window.switchTab(a)", a.ansicht)|
++            except Exception:|
++                s.wait_for_timeout(3000)|
++                continue|
++            s.wait_for_timeout(7000)|
++            if s.evaluate("a => getComputedStyle(document.getElementById(a)).display !== 'none'", a.ansicht):|
++                break|
++        s.evaluate("""id => { const sel = document.getElementById(id);|
++            const o = [...sel.options].find(o => o.value && !/alle|all/i.test(o.textContent));|
++            sel.value = o.value; sel.dispatchEvent(new Event('change', {bubbles: true})); }""", auswahl)|
++        s.wait_for_timeout(12000)|
++        s.evaluate("q => { try { autoCompleteConsistency(q, 'min'); } catch (e) {} }", quelle)|
++        s.wait_for_timeout(15000)|
++        for w in [int(x) for x in a.breiten.split(",")]:|
++            s.set_viewport_size({"width": w, "height": 900})|
++            s.wait_for_timeout(1500)|
++            e = s.evaluate(MESSUNG, gitter)|
++            print("%s @ %4d px: %d Kacheln, %d ueberlappen (max %s px) %s"|
++                  % (a.ansicht, w, e["kacheln"], e["ueber"], e["max"], "; ".join(e["beispiele"])))|
++        b.close()|
++    return 0|
++|
++|
++if __name__ == "__main__":|
++    sys.exit(main())|
+diff --git a/scripts/messe_druckwahl.py b/scripts/messe_druckwahl.py|
+new file mode 100644|
+index 0000000..6d3429a|
+--- /dev/null|
++++ b/scripts/messe_druckwahl.py|
+@@ -0,0 +1,121 @@|
++#!/usr/bin/env python3|
++"""Welcher Druck steht in der Kartenuebersicht — und waere ein anderer richtig?|
++|
++FE-8 (Backlog 27.09.2026, Entscheidung Hausi): in der Kartenuebersicht steht|
++jede Karte im AKTUELLSTEN LOW-RARITY-DRUCK: unter allen Drucken derselben|
++Karte (verbunden ueber set/number — getInternationalPrintsForCard, nie ueber|
++den Namen) die niedrigste Seltenheit, bei Gleichstand das neueste Set.|
++|
++Das Werkzeug liest jede Kachel der Uebersicht (data-card-set/-number), holt|
++den Druckvorrat dieser Karte und meldet jede Kachel, fuer die ein Druck mit|
++NIEDRIGERER Seltenheit oder GLEICHER Seltenheit aus einem NEUEREN Set|
++existiert. Die Seltenheitsstufe ist bewusst eine eigene, einfache Leiter|
++(nicht getRarityPriority der Seite) — sonst pruefte die Seite sich selbst.|
++|
++AUFRUF|
++    python3 -m http.server 8000 --bind 127.0.0.1 &|
++    python3 scripts/messe_druckwahl.py --ansicht past-meta|
++    python3 scripts/messe_druckwahl.py --ansicht current-analysis --breite 1280|
++"""|
++import argparse|
++import sys|
++|
++GITTER = {"past-meta": "pastMetaDeckGrid", "current-analysis": "currentMetaDeckGrid",|
++          "city-league": "cityLeagueDeckGrid"}|
++AUSWAHL = {"past-meta": "pastMetaDeckSelect", "current-analysis": "currentMetaDeckSelect",|
++           "city-league": "cityLeagueDeckSelect"}|
++|
++QUELLE = {"past-meta": "pastMeta", "current-analysis": "currentMeta", "city-league": "cityLeague"}|
++|
++MESSUNG = r"""|
++([gitterId, quelle]) => {|
++  const stufe = (r) => {|
++    r = String(r || '').toLowerCase();|
++    if (!r) return 50;|
++    if (r === 'common') return 1;|
++    if (r === 'uncommon') return 2;|
++    if (r === 'rare') return 3;|
++    if (r.includes('ace spec')) return 4;|
++    if (r === 'rare holo' || r === 'holo rare') return 4;|
++    if (r.includes('double rare')) return 5;|
++    if (r.includes('promo')) return 8;|
++    return 10;   // alles Hoehere (Ultra, Illustration, Hyper, ...)|
++  };|
++  const neu = (s) => (window.setOrderMap || {})[s] || 0;|
++  const out = [];|
++  // Kacheln der Uebersicht ODER (quelle gesetzt) die Karten des gebauten Decks|
++  const eintraege = quelle|
++    ? Object.keys(window[quelle + 'Deck'] || {}).map(k => { const m = k.match(/^(.*) \(([A-Z0-9]+) ([A-Z0-9-]+)\)$/);|
++        return m ? {name: m[1], set: m[2], nr: m[3]} : {name: k, set: '', nr: ''}; })|
++    : [...document.querySelectorAll('#' + gitterId + ' .card-item')].map(k => ({|
++        name: k.dataset.cardName, set: String(k.dataset.cardSet || '').toUpperCase(),|
++        nr: String(k.dataset.cardNumber || '').toUpperCase()}));|
++  eintraege.forEach((k) => {|
++    const set = k.set, nr = k.nr;|
++    if (!set || !nr) { out.push({name: k.name, fehler: 'ohne set/nummer'}); return; }|
++    const vorrat = (typeof getInternationalPrintsForCard === 'function')|
++      ? getInternationalPrintsForCard(set, nr) : [];|
++    const eigen = vorrat.find(v => String(v.set).toUpperCase() === set && String(v.number).toUpperCase() === nr);|
++    const sE = eigen ? stufe(eigen.rarity) : 50;|
++    const besser = vorrat.filter(v => {|
++      const s = stufe(v.rarity);|
++      if (s >= 50) return false;|
++      return s < sE || (s === sE && neu(v.set) > neu(set));|
++    });|
++    // Basis-Energien stehen per Regel auf SVE (getPreferredVersionForCard,|
++    // "SPECIAL HANDLING: Basic Energies") — das ist Absicht, kein Befund.|
++    const basisEnergie = set === 'SVE' && /^(grass|fire|water|lightning|psychic|fighting|darkness|metal) energy$/i.test(k.name);|
++    out.push({name: k.name, druck: set + ' ' + nr, seltenheit: eigen ? eigen.rarity : '?',|
++              vorrat: vorrat.length,|
++              besser: basisEnergie ? [] : besser.map(v => v.set + ' ' + v.number + ' (' + (v.rarity || '-') + ')')});|
++  });|
++  return out;|
++}|
++"""|
++|
++|
++def main():|
++    from playwright.sync_api import sync_playwright|
++    ap = argparse.ArgumentParser()|
++    ap.add_argument("--url", default="http://127.0.0.1:8000/index.html")|
++    ap.add_argument("--ansicht", default="past-meta", choices=sorted(GITTER))|
++    ap.add_argument("--breite", type=int, default=1280)|
++    ap.add_argument("--deck", default="", help="Archetyp; leer = erster in der Auswahl")|
++    ap.add_argument("--gebaut", action="store_true", help="statt der Uebersicht das per Generate (min) gebaute Deck messen")|
++    a = ap.parse_args()|
++    with sync_playwright() as p:|
++        b = p.chromium.launch()|
++        s = b.new_page(viewport={"width": a.breite, "height": 900})|
++        s.add_init_script("try { localStorage.setItem('app_lang', 'de'); } catch (e) {}")|
++        s.goto(a.url, wait_until="load", timeout=60000)|
++        s.wait_for_timeout(3000)|
++        for _ in range(4):|
++            try:|
++                s.evaluate("a => window.switchTab && window.switchTab(a)", a.ansicht)|
++            except Exception:|
++                s.wait_for_timeout(3000)|
++                continue|
++            s.wait_for_timeout(7000)|
++            if s.evaluate("a => getComputedStyle(document.getElementById(a)).display !== 'none'", a.ansicht):|
++                break|
++        gewaehlt = s.evaluate("""([id, deck]) => { const sel = document.getElementById(id); if (!sel) return null;|
++            const o = [...sel.options].find(o => deck ? o.value === deck : (o.value && !/alle|all/i.test(o.textContent)));|
++            if (!o) return null; sel.value = o.value; sel.dispatchEvent(new Event('change', {bubbles: true})); return o.value; }""",|
++                              [AUSWAHL[a.ansicht], a.deck])|
++        s.wait_for_timeout(12000)|
++        if a.gebaut:|
++            s.evaluate("q => { try { autoCompleteConsistency(q, 'min'); } catch (e) {} }", QUELLE[a.ansicht])|
++            s.wait_for_timeout(15000)|
++        erg = s.evaluate(MESSUNG, [GITTER[a.ansicht], QUELLE[a.ansicht] if a.gebaut else ""])|
++        b.close()|
++    falsch = [k for k in erg if k.get("besser")]|
++    for k in erg:|
++        if k.get("besser") or k.get("fehler"):|
++            print("%-28s %-10s %-22s -> %s" % (k.get("name", "")[:28], k.get("druck", ""),|

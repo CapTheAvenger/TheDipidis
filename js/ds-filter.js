@@ -160,13 +160,14 @@
 
         var g1 = document.createElement('div');
         g1.className = 'ds-filter-group';
-        var l1 = document.createElement('span');
-        l1.className = 'ds-filter-lab';
-        l1.textContent = d ? 'Datenraum' : 'Data space';
+        /* UI-13 (27.09.2026, Hausi): die Beschriftung „Datenraum" ist
+           weg — „Man muss ja nicht alles noch mal extra benennen." Die
+           Knoepfe Japan / Global / Rotationen sprechen fuer sich. Der
+           Name bleibt fuer Bildschirmleser als aria-label der Gruppe. */
         var seg = document.createElement('div');
         seg.className = 'ds-filter-seg is-space';
         seg.setAttribute('role', 'group');
-        seg.setAttribute('aria-label', l1.textContent);
+        seg.setAttribute('aria-label', d ? 'Datenraum' : 'Data space');
         RAEUME.forEach(function (r) {
             var b = document.createElement('button');
             b.type = 'button';
@@ -184,9 +185,17 @@
             });
             seg.appendChild(b);
         });
-        g1.appendChild(l1);
         g1.appendChild(seg);
         wrap.appendChild(g1);
+
+        var f = formate(raum);
+        /* UI-12 (27.09.2026, Hausi): in Global gibt es keine Formatwahl —
+           das Feld war nur ein Schild mit demselben Format, das die
+           Ueberschrift direkt darueber schon nennt („Aktuelles Meta ·
+           TEF–30C"). Gemessen: kein Klick, keine Optionen. Es faellt
+           deshalb ganz weg, samt Beschriftung. Japan und Rotationen
+           behalten ihre echte Auswahl. */
+        if (!f) return wrap;
 
         var g2 = document.createElement('div');
         g2.className = 'ds-filter-group';
@@ -195,26 +204,7 @@
         l2.textContent = d ? raum.zweiteDe : raum.zweiteEn;
         g2.appendChild(l2);
 
-        var f = formate(raum);
-        if (!f) {
-            // Global: das laufende Fenster, ohne Wahl. Ein Schild.
-            var chip = document.createElement('span');
-            chip.className = 'ds-filter-fixed';
-            chip.textContent = (window.DsNav && typeof window.DsNav.getFacts === 'function'
-                && (window.DsNav.getFacts(raum.key) || {}).format) || (d ? 'laufendes Fenster' : 'current window');
-            g2.appendChild(chip);
-            /* HIER STAND EIN ERKLAERSATZ BIS ZUM 01.09.2026.
-               Erst "hier gibt es nur das laufende Format", dann — nach
-               der ersten Rueckmeldung — "Global laeuft immer im
-               aktuellen Format." Beide Fassungen erklaerten dasselbe
-               Feld, das direkt daneben steht und "TEF-PBL" sagt.
-               Gemeldet: "Okay, den Zusatz kannst du aber rauslassen.
-               Lieber dieses TEF-bis-PBL-Feld optisch den anderen
-               anpassen." Genau das ist passiert — der Satz ist weg, das
-               Schild sieht jetzt aus wie ein gesetzter Knopf
-               (css/components.css, .ds-filter-fixed). Wo eine Anzeige
-               fuer sich spricht, braucht sie keine Bildunterschrift. */
-        } else if (f.opts.length > 4) {
+        if (f.opts.length > 4) {
             // Sechzehn Knoepfe mit Beschriftungen wie "Scarlet & Violet
             // → Phantasmal Flames (SVI-PFL)" waeren eine Wand, keine
             // Auswahl. Ab fuenf Optionen ein Auswahlfeld — das ist

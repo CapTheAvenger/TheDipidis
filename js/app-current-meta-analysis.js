@@ -3981,7 +3981,7 @@
             if (!m || !m.interactionTag) {
                 return _uvText('antiTech.belegNein', 'unbelegt')
                     + ' · ' + _uvText('antiTech.belegHeuristik',
-                        'aus dem Kartentext abgeleitet, nicht an Partien gemessen');
+                        'aus dem Kartentext abgeleitet, nicht an Matches gemessen');
             }
             const st = _uvRegelstand || { version: null, datum: null, paarungen: 0 };
             const teile = [_uvText('antiTech.belegJa', 'belegt')];
@@ -3989,8 +3989,8 @@
             teile.push(_uvText('antiTech.belegStand', 'Stand') + ' ' + _uvBelegDatum(st.datum));
             const n = Number(partien) || 0;
             teile.push(n > 0
-                ? _uvText('antiTech.belegPartien', 'Matchup aus {n} Partien').replace('{n}', String(n))
-                : _uvText('antiTech.belegOhnePartien', 'Partienzahl des Matchups nicht bekannt'));
+                ? _uvText('antiTech.belegPartien', 'Matchup aus {n} Matches').replace('{n}', String(n))
+                : _uvText('antiTech.belegOhnePartien', 'Matchzahl des Matchups nicht bekannt'));
             return teile.join(' · ');
         }
 

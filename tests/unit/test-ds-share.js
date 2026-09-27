@@ -13,7 +13,7 @@
  *  - Die Bildkarte zeigt beste UND schlechteste Matchups. Nur die
  *    Oberseite einer sortierten Liste zu zeigen ist Werbung, und jedes
  *    Deck sieht darauf gut aus.
- *  - Jede Zeile trägt ihre Partienzahl. Eine 68-%-Zeile über 9 Partien
+ *  - Jede Zeile trägt ihre Partienzahl. Eine 68-%-Zeile über 9 Matches
  *    ist nicht dasselbe Argument wie eine über 238.
  *  - Die divergierende Skala bleibt blau↔rot. Grün↔rot ist die
  *    häufigste Farbsehschwäche, und css/tokens.css nennt poke_hive
@@ -134,7 +134,7 @@ describe('ds-share: die Entscheidungen gegen die Vorlage', () => {
     });
 
     it('malt keine Zeile ohne ihre Partienzahl', () => {
-        assert.match(SHARE, /L\('Matches', 'Games'\)/,
+        assert.match(SHARE, /L\('Matches', 'Matches'\)/,
             'Die Spalte mit der Matchzahl ist aus der Matchup-Tabelle verschwunden.');
         assert.match(SHARE, /num\(m\.games, 0\)/,
             'Die Matchzahl wird nicht mehr je Zeile gemalt.');

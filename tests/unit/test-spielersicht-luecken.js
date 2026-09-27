@@ -8,9 +8,9 @@
  * 1. TECH-IDEEN. Der Baustein zeigte genau einen Gegner — Toucannon,
  *    2,55 % des Online-Feldes, bei Worlds zwei Spieler. Nicht gezeigt:
  *
- *        Alakazam Dudunsparce   25,6 %   743 Partien   5,79 % des Feldes
- *        Slowking               37,3 %   811 Partien   5,53 %
- *        Dragapult Blaziken     38,7 %   833 Partien   5,76 %
+ *        Alakazam Dudunsparce   25,6 %   743 Matches   5,79 % des Feldes
+ *        Slowking               37,3 %   811 Matches   5,53 %
+ *        Dragapult Blaziken     38,7 %   833 Matches   5,76 %
  *
  *    Zusammen 17,1 % des Feldes, zwei von drei Partien verloren. Alle
  *    drei erfüllen beide Schwellen des Moduls. Der ehrliche Satz dafür
@@ -74,9 +74,9 @@ describe('Tech-Ideen: was NICHT gefunden wurde, wird benannt', () => {
     });
 
     it('die Lücke nennt Deck, Quote und Partienzahl', () => {
-        assert.match(I18N, /'buildInfo\.techIdeenOhneEintrag':\s*'\{name\} \(\{wr\}, \{n\} games\)'/,
+        assert.match(I18N, /'buildInfo\.techIdeenOhneEintrag':\s*'\{name\} \(\{wr\}, \{n\} matches\)'/,
             'der englische Eintrag nennt nicht alle drei Angaben');
-        assert.match(I18N, /'buildInfo\.techIdeenOhneEintrag':\s*'\{name\} \(\{wr\}, \{n\} Partien\)'/,
+        assert.match(I18N, /'buildInfo\.techIdeenOhneEintrag':\s*'\{name\} \(\{wr\}, \{n\} Matches\)'/,
             'der deutsche Eintrag nennt nicht alle drei Angaben');
         for (const k of ['buildInfo.techIdeenOhne', 'buildInfo.techIdeenOhneEintrag']) {
             const n = (I18N.match(new RegExp("'" + k.replace(/\./g, '\\.') + "'", 'g')) || []).length;

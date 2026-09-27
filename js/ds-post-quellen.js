@@ -565,7 +565,7 @@ REZEPTE['matchups-online'] = {
                     fuss: 'smoothed k=20 · ' + acht.length + ' of ' + reihe.length +
                         ' erfassten Gegnern',
                     caption: "The best matchups for " + deck +
-                        ' online — smoothed, with the game count per row. ' +
+                        ' online — smoothed, with the match count per row. ' +
                         'Erfasst sind die ' + reihe.length + ' häufigsten Gegner.',
                     tags: hashtags(['matchups', 'deckguide', deck]
                         .concat(acht.slice(0, 4).map(function (r) { return r.gegner; }))),
@@ -1672,7 +1672,7 @@ REZEPTE['deck-bilanz'] = {
                         { wert: prozent(d.anteil, 2), label: 'Share · online',
                           notiz: tausend(d.listen) + ' lists' },
                         { wert: prozent(d.quote, 1), label: 'Win rate · ties count',
-                          notiz: tausend(d.partien) + ' games' },
+                          notiz: tausend(d.partien) + ' matches' },
                         t8 ? { wert: prozent(t8.quote, 1), label: 'Top-8 rate · online',
                                notiz: tausend(t8.antritte) + ' entries' }
                            : { wert: '–', label: 'Top-8 rate · online', notiz: 'no data' }
@@ -1690,7 +1690,7 @@ REZEPTE['deck-bilanz'] = {
                         + (stand ? ' · ' + stand : ''),
                     caption: name + ' against the field: ' + prozent(d.anteil, 2)
                         + ' share, ' + prozent(d.quote, 1) + ' win rate over '
-                        + tausend(d.partien) + ' games. Shown are the most-played '
+                        + tausend(d.partien) + ' matches. Shown are the most-played '
                         + 'pairings above and below 50 % — not the best and worst, '
                         + 'because a matchup you meet twice matters less than one you '
                         + 'meet constantly.',

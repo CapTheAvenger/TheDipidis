@@ -261,17 +261,17 @@
             teile.push(_tf('antiTech.belegStand', 'Stand') + ' ' + _belegDatum(st.datum));
             const partien = _belegPartien(entry);
             if (partien > 0) {
-                teile.push(_tf('antiTech.belegPartien', 'Matchup aus {n} Partien')
+                teile.push(_tf('antiTech.belegPartien', 'Matchup aus {n} Matches')
                     .replace('{n}', String(partien)));
             } else {
-                teile.push(_tf('antiTech.belegOhnePartien', 'Partienzahl des Matchups nicht bekannt'));
+                teile.push(_tf('antiTech.belegOhnePartien', 'Matchzahl des Matchups nicht bekannt'));
             }
             return teile.join(' · ');
         }
         return _tf('antiTech.belegNein', 'unbelegt')
             + ' · '
             + _tf('antiTech.belegHeuristik',
-                 'aus dem Kartentext abgeleitet, nicht an Partien gemessen');
+                 'aus dem Kartentext abgeleitet, nicht an Matches gemessen');
     }
 
     /* Die groesste Stichprobe unter den Zielen, gegen die diese Karte

@@ -125,16 +125,16 @@ describe('Tech Lab: jede Kachel sagt, worauf sie beruht', () => {
 
     it('Tech Lab behauptet KEINE Partienzahl — hier steht Karte gegen Karte', () => {
         const html = maleGitter([AUS_REGELBASIS]);
-        assert.ok(html.includes('keine Partien dahinter'),
+        assert.ok(html.includes('keine Matches dahinter'),
             `die fehlende Stichprobe wird benannt: ${html}`);
-        assert.ok(!/\d+\s*Partien\b(?! dahinter)/.test(html.replace('keine Partien dahinter', '')),
+        assert.ok(!/\d+\s*Matches\b(?! dahinter)/.test(html.replace('keine Matches dahinter', '')),
             'eine Zahl aus irgendeiner Deckpaarung waere hier erfunden');
     });
 
     it('eine selbst eingetragene Karte sagt genau das', () => {
         const html = maleGitter([SELBST_EINGETRAGEN]);
         assert.ok(html.includes('vom Nutzer eingetragen'), html);
-        assert.ok(html.includes('nicht an Partien gemessen'), html);
+        assert.ok(html.includes('nicht an Matches gemessen'), html);
         assert.ok(html.includes('tech-lab-beleg-nutzer'), 'eigene Klasse fuer die eigene Eintragung');
         assert.ok(!html.includes('belegt ·'),
             'was ein Mensch hingeschrieben hat, ist kein Befund der Maschine');
@@ -143,7 +143,7 @@ describe('Tech Lab: jede Kachel sagt, worauf sie beruht', () => {
     it('eine Kachel ohne Herkunftsangabe gilt als unbelegt, nicht als belegt', () => {
         const html = maleGitter([{ name: 'X', confidence: 'medium' }]);
         assert.ok(html.includes('unbelegt'), html);
-        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'), html);
+        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'), html);
         assert.ok(html.includes('tech-lab-beleg-nein'), html);
         assert.ok(!html.includes('card_capability_interactions.json · '),
             'eine unbelegte Kachel beruft sich nicht auf die Regelbasis');
@@ -332,13 +332,13 @@ describe('Erkannte Tech-Interaktionen: jede Zeile sagt, worauf sie beruht', () =
         assert.ok(html.includes('card_capability_interactions.json'), html);
         assert.ok(html.includes('v0.1'), html);
         assert.ok(html.includes('15.05.2026'), html);
-        assert.ok(html.includes('358 Partien'),
+        assert.ok(html.includes('358 Matches'),
             `die Stichprobe des Matchups steht daneben: ${html}`);
     });
 
     it('die Partien eines FREMDEN Decks zaehlen nicht mit', () => {
         const html = maleInteraktionen(daten([REGELZEILE]), 'Mega Excadrill', MATCHUPS);
-        assert.ok(!html.includes('280 Partien'),
+        assert.ok(!html.includes('280 Matches'),
             'die 280 gehoeren Dragapult und haben hier nichts zu suchen');
     });
 
@@ -352,14 +352,14 @@ describe('Erkannte Tech-Interaktionen: jede Zeile sagt, worauf sie beruht', () =
         const ohne = { narrative: 'Irgendwas', confidence: 'low' };
         const html = maleInteraktionen(daten([ohne]), 'Mega Excadrill', MATCHUPS);
         assert.ok(html.includes('unbelegt'), html);
-        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'), html);
+        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'), html);
         assert.ok(html.includes('uv-tech-beleg-nein'), html);
     });
 
     it('ohne Partienzahl steht das da und keine Null', () => {
         const html = maleInteraktionen(daten([REGELZEILE]), 'Mega Excadrill', []);
         assert.ok(html.includes('nicht bekannt'), html);
-        assert.ok(!html.includes('0 Partien'), `keine Null als Angabe: ${html}`);
+        assert.ok(!html.includes('0 Matches'), `keine Null als Angabe: ${html}`);
     });
 
     it('ueber der Liste stehen Quelle, Version, Stand und die Abdeckung', () => {
@@ -444,16 +444,16 @@ describe('i18n: kein deutscher Rueckfall in englischer Oberflaeche', () => {
         assert.strictEqual(woerterbuch.de['antiTech.belegJa'], 'belegt');
         assert.strictEqual(woerterbuch.de['antiTech.belegNein'], 'unbelegt');
         assert.strictEqual(woerterbuch.de['antiTech.belegHeuristik'],
-            'aus dem Kartentext abgeleitet, nicht an Partien gemessen');
-        assert.strictEqual(woerterbuch.de['antiTech.belegPartien'], 'Matchup aus {n} Partien');
+            'aus dem Kartentext abgeleitet, nicht an Matches gemessen');
+        assert.strictEqual(woerterbuch.de['antiTech.belegPartien'], 'Matchup aus {n} Matches');
         assert.strictEqual(woerterbuch.de['antiTech.belegOhnePartien'],
-            'Partienzahl des Matchups nicht bekannt');
+            'Matchzahl des Matchups nicht bekannt');
         assert.strictEqual(woerterbuch.de['antiTech.belegKeineDaten'], 'keine Daten');
         assert.strictEqual(woerterbuch.de['antiTech.belegOhneAntwort'], 'keine bekannte Antwort');
         assert.strictEqual(woerterbuch.de['buildInfo.belegKeine'], 'keine Daten');
         assert.strictEqual(woerterbuch.de['techLab.belegNutzer'], 'vom Nutzer eingetragen');
         assert.strictEqual(woerterbuch.de['techLab.belegOhnePartien'],
-            'keine Partien dahinter — hier stehen Kartentexte gegeneinander, keine Deckpaarungen');
+            'keine Matches dahinter — hier stehen Kartentexte gegeneinander, keine Deckpaarungen');
     });
 
     it('die Platzhalter ueberleben die Uebersetzung', () => {

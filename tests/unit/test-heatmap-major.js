@@ -76,9 +76,14 @@ function csv(rel, sep) {
 describe('Die Praesenzdaten werden geladen', () => {
 
     it('mit Komma geparst, nicht mit Semikolon', () => {
-        const i = jsK.indexOf('function ladeMajorMatchups');
+        const i = jsK.indexOf('async function ladeMajorMatchups()');
         assert.ok(i > 0, 'ladeMajorMatchups ist verschwunden');
-        const rumpf = jsK.slice(i, jsK.indexOf('\n        }', i));
+        const rumpfLade = jsK.slice(i, jsK.indexOf('\n        }', i));
+        // Seit dem 27.09.2026 parst majorMatchupsParsen() — auch fuer den
+        // Rueckfall auf das letzte Major-Format (DA-13).
+        assert.match(rumpfLade, /majorMatchupsParsen\(txt\)/);
+        const p = jsK.indexOf('function majorMatchupsParsen(');
+        const rumpf = jsK.slice(p, jsK.indexOf('\n        }', p));
         assert.ok(/delimiter:\s*','/.test(rumpf),
             "die Labs-Datei wird nicht mehr mit ',' geparst — mit dem "
             + "hauseigenen ';' zerfaellt sie zu Zeilen mit einem Feld und "
@@ -86,7 +91,7 @@ describe('Die Praesenzdaten werden geladen', () => {
     });
 
     it('erst das Verzeichnis fragen', () => {
-        const i = jsK.indexOf('function ladeMajorMatchups');
+        const i = jsK.indexOf('async function ladeMajorMatchups()');
         const rumpf = jsK.slice(i, jsK.indexOf('\n        }', i));
         const iV = rumpf.indexOf('labs_tournament_matchups_verzeichnis.json');
         const iC = rumpf.indexOf('labs_tournament_matchups_${key}.csv');

@@ -487,22 +487,16 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
             + '"es gibt ueberhaupt Partien"');
     });
 
-    it('die Matchzahl steht auf der Kachel — fuer BEIDE Quellen', () => {
-        // Ein Hinweis erscheint erst beim Verweilen — auf dem Telefon also nie.
-        // Die Matchzahl ist aber genau die Zahl, an der man entscheidet, ob
-        // man der Quote glaubt.
-        //
-        // ANLASS (02.09.2026): "wenn wir da aber schon eine Zahl hinschreiben
-        // wie viele Leute das Deck genutzt haben, dann sollten wir das bei
-        // Online auch machen ... und dann sollten wir die Online Matches da
-        // auch als Zahl erwaehnen." Vorher stand die Zahl nur beim Major.
+    it('die Matchzahl steht NICHT mehr auf der Win-Rate-Kachel, die Stueckzahl weiter auf der Anteil-Kachel', () => {
+        // UI-17 (27.09.2026, Hausi): „aus X Matches" in der normalen Kachel
+        // weg — fuer Enduser ohne Erklaerung verwirrend. Die Zahl steht im
+        // Hinweis der Kachel und im erzeugten Bild. Vom 02.09. bis
+        // 27.09.2026 stand sie auf der Kachel.
         const i = ohneKomm.indexOf("tileGeteilt('wr'");
         assert.ok(i > 0, "tileGeteilt('wr') fehlt");
         const r = ohneKomm.slice(i, i + 400);
-        assert.ok(/fmtGanz\(d\.partien\)/.test(r),
-            'die Online-Matchzahl fehlt auf der Win-Rate-Kachel');
-        assert.ok(/fmtGanz\(m\.partien\)/.test(r),
-            'die Major-Matchzahl fehlt auf der Win-Rate-Kachel');
+        assert.ok(!/fmtGanz\(d\.partien\)|fmtGanz\(m\.partien\)/.test(r),
+            'die Matchzahl steht wieder auf der Win-Rate-Kachel');
 
         const j = ohneKomm.indexOf("tileGeteilt('rep'");
         assert.ok(j > 0, "tileGeteilt('rep') fehlt");
@@ -574,7 +568,8 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
 describe('Top-8 und Day 2 bleiben getrennt', () => {
 
     it('die Top-8-Quote ist als online beschriftet', () => {
-        assert.ok(/Top-8-Quote \(online\)/.test(quelle),
+        // UI-26 (27.09.2026): „Online Top 8-Quote (Ø …)" — online steht vorn.
+        assert.ok(/Online Top 8-Quote/.test(quelle),
             'die Top-8-Quote sagt nicht mehr, dass sie aus Online-Turnieren stammt');
     });
 

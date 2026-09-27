@@ -281,13 +281,13 @@
              * so gar nicht gerechnet wurde. */
             const labsDe = g.labsAktiv
                 ? ('und, wo eine Turnierdatei vorliegt (ab ' + ganz(g.labsMinPartien)
-                   + ' Partien je Deck), dem Turnier-Win % über 50 (bis +' + z(g.labsWrDeckel, 0)
+                   + ' Matches je Deck), dem Turnier-Win % über 50 (bis +' + z(g.labsWrDeckel, 0)
                    + ' pp, Gewicht ' + z(g.labsWrGewicht, 1) + ') samt Tag-2-Quote (bis '
                    + z(g.tag2Deckel, 2) + ', Gewicht ' + z(g.tag2Gewicht, 0) + ')')
                 : 'Für dieses Meta liegt KEINE Turnierdatei vor — der dritte Anteil (Turnier-Win % und Tag-2-Quote) fehlt, gerechnet wurde nur aus Anteil und Win %';
             const labsEn = g.labsAktiv
                 ? ('and, where a tournament file exists (from ' + ganz(g.labsMinPartien)
-                   + ' games per deck), tournament Win % above 50 (up to +' + z(g.labsWrDeckel, 0)
+                   + ' matches per deck), tournament Win % above 50 (up to +' + z(g.labsWrDeckel, 0)
                    + ' pp, weight ' + z(g.labsWrGewicht, 1) + ') plus day-2 conversion (up to '
                    + z(g.tag2Deckel, 2) + ', weight ' + z(g.tag2Gewicht, 0) + ')')
                 : 'No tournament file exists for this meta — the third component (tournament Win % and day-2 conversion) is missing; the score used share and Win % only';
@@ -865,6 +865,17 @@
          */
         function getArchetypeImage(archetypeName, archetypeCardsData) {
             if (!archetypeCardsData || archetypeCardsData.length === 0) {
+                /* DA-14 (27.09.2026, Hausi): „Bild fehlt beim Deck Okidogi
+                   Barbaracle". Gemessen: es ist das einzige der 20
+                   Rogue-Decks ohne Zeilen in der Kartenauswertung des
+                   laufenden Metas (8 Listen) — deshalb die graue Flaeche.
+                   Statt ihrer das Pokémon-Bild aus data/archetype_icons.json,
+                   dasselbe, das Heatmap und Kacheln zeigen. Erst wenn auch
+                   das fehlt, bleibt die Flaeche grau. */
+                const sprites = (typeof window !== 'undefined' && window.ArchetypeIcons
+                    && typeof window.ArchetypeIcons.getIconUrls === 'function')
+                    ? (window.ArchetypeIcons.getIconUrls(archetypeName) || []) : [];
+                if (sprites.length) return sprites[0];
                 return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="280"%3E%3Crect fill="%23ddd" width="200" height="280"/%3E%3C/svg%3E';
             }
             
@@ -1686,7 +1697,8 @@
                        der Kommentar bei der Funktion oben erklaert, was das
                        Runden hier schon einmal angerichtet hat. */
                     const nZahl = antritte > 0 ? fmtHalb(antritte) : '';
-                    const nText = antritte > 0 ? `· ${nZahl}` : '';
+                    /* UI-17 (27.09.2026, Hausi): die Zahl hinter der WR
+                       steht nicht mehr auf der Kachel, nur noch im Hinweis. */
                     /* Die Plakette schreibt „WR" — eine Kurzform. Zulaessig
                        ist sie nur mit einem Hinweis, der den vollen Namen UND
                        die Formel nennt; den liefert tierQuotenHinweis(). Die
@@ -1718,7 +1730,7 @@
                                             : `Sum across ${variantCount} variants — the individual variant is smaller and listed in the table below.`)
                                         : (getLang() === 'de' ? 'Eine einzelne Variante' : 'Single variant')}">${
                                         fmtPct(parseFloat(shareText))}</span>
-                                    <span class="stat-badge" title="${escapeHtmlAttr(wrTitel)}" data-quote-konvention="mitUnentschieden">WR ${fmtPct(parseFloat(winrateText))} <span class="stat-badge-nenner">${nText}</span></span>
+                                    <span class="stat-badge" title="${escapeHtmlAttr(wrTitel)}" data-quote-konvention="mitUnentschieden">WR ${fmtPct(parseFloat(winrateText))}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -1841,15 +1853,15 @@
                 }
             });
             
+            // UI-15/20/21/22 (27.09.2026, Hausi): keine Zusatztexte mehr.
+            // „Tier 1" sagt schon, was „Beherrschen das Meta" sagen
+            // wollte; der Rogue-Block heisst nur noch „Rogue". Die
+            // Einteilung selbst (Schwellen oben) bleibt unveraendert.
             const tierTitles = {
-                'tier-1':        { title: 'Tier 1',           subtitle: t('tier.sub1')     },
-                'tier-2':        { title: 'Tier 2',           subtitle: t('tier.sub2')     },
-                'tier-3':        { title: 'Tier 3',           subtitle: t('tier.sub3')     },
-                // "Aufkommende Archetypen" war eine Aussage ueber die Zukunft
-                // dieser Decks. Was den Block wirklich zusammenhaelt, ist,
-                // dass sie unter den Tier-Schwellen liegen — und dass ihre
-                // Zahlen auf den duennsten Stichproben der Seite stehen.
-                'tier-trending': { title: 'Rogue / Trending',  subtitle: t('tier.cmSubRogue') }
+                'tier-1':        { title: 'Tier 1' },
+                'tier-2':        { title: 'Tier 2' },
+                'tier-3':        { title: 'Tier 3' },
+                'tier-trending': { title: 'Rogue' }
             };
             
             // Limit trending decks to top 20
@@ -2185,6 +2197,24 @@
                             nichtZugeordnet.length, nichtZugeordnet.join(', '));
                     }
 
+                    /* FE-6 (27.09.2026, Hausi): „sobald Major-Daten fuers
+                       aktuelle Format vorliegen, zusaetzlich zu den Online-
+                       Werten auch Major-Werte zeigen". Quelle ist derselbe
+                       Auszug, den der Tier-Score liest (labsByName, NUR das
+                       laufende Format — kein Rueckfall auf ein altes). Gibt
+                       es ihn nicht, bleibt jede Zelle leer und die Spalten
+                       verschwinden ueber hatWert() unten von selbst.
+                       Anteil = Antritte des Decks / Antritte aller Decks im
+                       Auszug; Win % = Siege / alle Matches, dieselbe
+                       Konvention wie die Online-Spalte. */
+                    const _majorSumme = labsByName
+                        ? Object.values(labsByName).reduce((a, e) => a + (e.players || 0), 0) : 0;
+                    const majorVon = (name) => {
+                        if (!labsByName || !(_majorSumme > 0)) return null;
+                        const e = labsByName[name] || labsByName[kanon(name)] || null;
+                        if (!e || !(e.games > 0)) return null;
+                        return { anteil: (e.players / _majorSumme) * 100, wr: e.winPct };
+                    };
                     const reihen = [...alleNamen].map(name => {
                         const t = turnierVon.get(name) || null;
                         const l = ladderVon.get(name) || null;
@@ -2226,9 +2256,22 @@
                             // unberuehrt, die stehen auf 2.121 Listen.
                             duenn: !(antritteGew >= CONV_THIN_N),
                             rang: l ? (l.new_count || 0) : 0,
+                            majorAnteil: majorVon(name) ? majorVon(name).anteil : null,
+                            majorWr:     majorVon(name) ? majorVon(name).wr : null,
                         };
                     });
 
+                    /* Der Schnitt im Kopf rechnet mit DENSELBEN Zahlen wie die
+                       Spalte darunter: gezaehlt, wo die Datei Zaehlungen fuehrt
+                       (window.gezaehlteZeilen, dasselbe Tor wie die Karte).
+                       Gemessen 27.09.2026: vorher 6,7 % im Kopf, 6,6 % auf der
+                       Kachel — derselbe Schnitt, zwei Zahlen. */
+                    const _convSchnitt = (typeof window !== 'undefined'
+                        && typeof window.gezaehlteZeilen === 'function' && t8rows && t8rows.length)
+                        ? computeConversionPerformance(window.gezaehlteZeilen(t8rows).zeilen)
+                        : conv;
+                    const schnittKopf = (_convSchnitt && Number.isFinite(_convSchnitt.expected))
+                        ? ' (Ø ' + fmtPct(_convSchnitt.expected * 100, 1) + ')' : '';
                     const SPALTEN = [
                         { k: 'name',     de: 'Deck',          en: 'Deck',        num: false },
                         { k: 'listen',   de: 'Listen',        en: 'Lists',       num: true,
@@ -2243,6 +2286,15 @@
                                          en: tierQuotenName('mitUnentschieden'),    num: true,
                           tip: { de: tierQuotenHinweis('mitUnentschieden'),
                                  en: tierQuotenHinweis('mitUnentschieden') } },
+                        /* FE-6: die Major-Werte daneben — nur sichtbar, wenn der
+                           Auszug des laufenden Formats Zeilen traegt. */
+                        { k: 'majorAnteil', de: 'Major-Anteil', en: 'Major share', num: true,
+                          tip: { de: 'Anteil an den Antritten der Präsenzturniere (Majors) im laufenden Format.',
+                                 en: 'Share of entries at in-person events (majors) in the current format.' } },
+                        { k: 'majorWr', de: 'Major ' + tierQuotenName('mitUnentschieden'),
+                                        en: 'Major ' + tierQuotenName('mitUnentschieden'), num: true,
+                          tip: { de: tierQuotenHinweis('mitUnentschieden') + ' Gemessen auf den Präsenzturnieren des laufenden Formats.',
+                                 en: tierQuotenHinweis('mitUnentschieden') + ' Measured at the in-person events of the current format.' } },
                         /* DREI UEBERSCHRIFTEN NEU BENANNT AM 01.09.2026.
                            Gemeldet: "was sind denn bitte 618,5 Antritte?
                            Was ist das fuer eine Kennzahl? … 'davon Top 8,
@@ -2269,7 +2321,9 @@
                            die noch nicht fuehrt, traegt die Ueberschrift das
                            Wort "gewichtet" — dann erklaert sie wenigstens, was
                            man sieht. */
-                        { k: 'antritte', de: 'Turnier-Antritte', en: 'Tournament entries',
+                        /* UI-24 (27.09.2026, Hausi): „Online Tournaments" statt
+                           „Turnier-Antritte" — die Quelle steht im Namen. */
+                        { k: 'antritte', de: 'Online Tournaments', en: 'Online tournaments',
                           num: true,
                           tip: { de: _antritteRoh
                                     ? 'Wie oft dieses Deck auf einem Turnier angetreten ist — gezählte Starts. Eine andere Zählung als die Listen links.'
@@ -2277,26 +2331,20 @@
                                  en: _antritteRoh
                                     ? 'How often this deck entered a tournament — counted starts. A different count from the lists on the left.'
                                     : 'Counted starts arrive with the next data run. Until then a dash: the file so far carries only a recency-weighted sum, and that is not a number of entries — you cannot half-attend.' } },
-                        { k: 'cuts', de: 'Top 8', en: 'Top 8',
+                        /* UI-25: „Online Top 8", damit die Quelle klar ist. */
+                        { k: 'cuts', de: 'Online Top 8', en: 'Online top 8',
                           num: true,
-                          tip: { de: 'davon in die Top 8 — bezogen auf die Turnier-Antritte links, nicht auf die Listen.',
-                                 en: 'of those, made top 8 — out of the tournament entries on the left, not the lists.' } },
-                        { k: 'quote',    de: 'Top-8-Quote',   en: 'Top-8 rate',  num: true, hilf: 'top8' },
-                        // hilf statt tip: TERMS.vsField sagt beides — was 1,6-mal
-                        // heisst UND dass kleine Stichproben geglaettet werden.
-                        //
-                        // `zusatz` traegt die einzige Zahl, die der feste
-                        // Glossartext nicht kennen kann: den Meta-Durchschnitt
-                        // dieses Laufs. Er stand bis zum 01.09.2026 im
-                        // Blocktext ueber der Tabelle — in einem Absatz von
-                        // 918 Zeichen, den der Betreiber zu Recht nicht
-                        // gelesen hat. Ohne ihn haette "0,8-mal" keinen
-                        // Bezugspunkt, also steht er jetzt an der Spalte, die
-                        // damit vergleicht.
-                        { k: 'faktor',   de: 'ggü. Schnitt',  en: 'vs. average', num: true, hilf: 'vsField',
-                          zusatz: deR
-                            ? `Der Meta-Durchschnitt liegt bei ${fmtPct(conv.expected * 100, 1)} Top-8-Quote.`
-                            : `The field average is ${fmtPct(conv.expected * 100, 1)} top-8 rate.` },
+                          tip: { de: 'davon in die Top 8 — bezogen auf die Online Tournaments links, nicht auf die Listen.',
+                                 en: 'of those, made top 8 — out of the online tournaments on the left, not the lists.' } },
+                        /* UI-26 (27.09.2026, Hausi): der Vergleich mit dem
+                           Schnitt stand dreifach da (Quote, eigene Spalte
+                           „ggü. Schnitt" mit Balken, Durchschnitt im Hinweis).
+                           Jetzt EINE Spalte, der Schnitt steht im Kopf:
+                           „Online Top 8-Quote (Ø 6,6 %)". */
+                        { k: 'quote',
+                          de: 'Online Top 8-Quote' + schnittKopf,
+                          en: 'Online top-8 rate' + schnittKopf,
+                          num: true, hilf: 'top8' },
                     ];
 
                     /* BEFUND (02.09.2026, vom Betreiber angestrichen):
@@ -2318,7 +2366,8 @@
                        Tabelle steht. */
                     const hatWert = (k) => reihen.some(r => r[k] != null);
                     const SPALTEN_SICHTBAR = SPALTEN.filter(c =>
-                        (c.k !== 'antritte' && c.k !== 'cuts') || hatWert(c.k));
+                        (c.k !== 'antritte' && c.k !== 'cuts' && c.k !== 'majorAnteil' && c.k !== 'majorWr')
+                        || hatWert(c.k));
 
                     /* DAS BILD GEHOERT ZUM DECKNAMEN (15.09.2026).
                        -----------------------------------------------
@@ -2352,40 +2401,12 @@
                                 : txt;
                         }
                         if (k === 'wr')       return r.wr       == null ? '–' : fmtPct(r.wr);
+                        if (k === 'majorAnteil') return r.majorAnteil == null ? '–' : fmtPct(r.majorAnteil);
+                        if (k === 'majorWr')     return r.majorWr     == null ? '–' : fmtPct(r.majorWr);
                         if (k === 'antritte') return r.antritte == null ? '–' : fmtHalb(r.antritte);
                         if (k === 'quote')    return r.quote    == null ? '–' : fmtPct(r.quote);
                         if (k === 'cuts')     return r.cuts     == null ? '–' : fmtHalb(r.cuts);
-                        if (r.faktor == null) return '–';
-                        // Unter CONV_MIN_N gewichteten Antritten ist die Zahl der
-                        // Prior, nicht die Schaetzung: 23 Decks ohne einen
-                        // einzigen Cut standen mit "1,0-mal" und einem Balken auf
-                        // der Nulllinie da — das liest sich als "genau
-                        // Durchschnitt" und heisst "wir wissen nichts". Die Zeile
-                        // bleibt, ihre Antritte zaehlen weiter in den
-                        // Feld-Durchschnitt; nur der Faktor schweigt.
-                        if (!(r.antritteGew >= CONV_MIN_N)) {
-                            return `<span class="cm-rang-wert" title="${escapeHtml(deR
-                                ? 'Unter ' + CONV_MIN_N + ' gewichteten Antritten — zu wenig für eine Schätzung'
-                                : 'Fewer than ' + CONV_MIN_N + ' weighted entries — too little for an estimate')}">–</span>`;
-                        }
-                        const einsNK = (v) => v.toLocaleString(deR ? 'de-DE' : 'en-US',
-                            { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-                        const txt = einsNK(r.faktor) + (deR ? '-mal' : '×');
-                        const titel = r.faktorRoh == null ? '' : escapeHtml(deR
-                            ? `geglättet (k = ${CONV_PRIOR}); roh ${einsNK(r.faktorRoh)}-mal`
-                            : `smoothed (k = ${CONV_PRIOR}); raw ${einsNK(r.faktorRoh)}×`);
-                        // Der divergierende Balken aus components.css: Nulllinie in
-                        // der Mitte, blau nach oben, rot nach unten. Er zeigt auf
-                        // einen Blick, wer ueber dem Schnitt liegt. Er traegt keine
-                        // Ziffern, darum liest die Sortierung weiter die Zahl aus
-                        // dem Text der Zelle.
-                        const abw = (r.faktor - 1) * 100;
-                        const breite = Math.min(Math.abs(abw), CONV_CAP) / CONV_CAP * 50;
-                        const posi = abw >= 0;
-                        return `<span class="cm-rang-wert"${titel ? ` title="${titel}"` : ''}>${txt}</span>`
-                            + `<span class="ds-bar-track is-diverging">`
-                            + `<span class="ds-bar-fill ${posi ? 'is-pos' : 'is-neg'}"`
-                            + ` style="width:${breite.toFixed(1)}%"></span></span>`;
+                        return '–';
                     };
 
                     // Nach Listen, absteigend. Das ist dieselbe Reihenfolge,
@@ -2441,7 +2462,11 @@
 
                     overallTop8Html = `
                         <div class="ds-panel cm-rangliste-block">
-                            <h3 class="ds-label">🏆 ${deR ? 'Meta-Performance' : 'Meta performance'}</h3>
+                            <!-- UI-23 (27.09.2026, Hausi): die zweite Ueberschrift
+                                 „🏆 Meta-Performance" und der Verweis „Nenner und
+                                 Rechenweg →" sind weg — der Abschnitt heisst schon
+                                 so, und der Rechenweg steht hinter dem Info-Knopf
+                                 und unter „Quellen und Methodik". -->
                             <!-- DER ERKLAERTEXT WANDERT HINTER DEN KNOPF
                                  (10.09.2026). Er stand als sieben Zeilen ueber
                                  einer Tabelle mit neun Spalten. Gemeldet mit
@@ -2516,8 +2541,7 @@
                                 /* Ohne Register bleibt der Text, wo er war —
                                    sonst waere die Erklaerung ersatzlos weg. */
                                 return langText;
-                            })()}<a class="qu-verweis" href="#quellen">${
-                                    deR ? 'Nenner und Rechenweg →' : 'Denominators and method →'}</a></p>
+                            })()}</p>
                             <div class="mobile-table-scroll">
                                 <table class="ds-table cm-rangliste" data-rang-sortiert="listen" data-rang-richtung="ab">
                                     <thead><tr><th class="ds-rank">#</th>${kopfZellen}</tr></thead>
@@ -2726,7 +2750,6 @@
                 const decks = tierGroups[tierKey];
                 if (decks.length === 0) return;
                 const tierMeta = tierTitles[tierKey];
-                const isTrending = tierKey === 'tier-trending';
 
                 // Tier 1 bis 3 bekommen die volle Archetyp-Karte, eine je
                 // Zeile: das sind die Decks, die man wirklich gegeneinander
@@ -2753,21 +2776,12 @@
                 const isStacked = (tierKey === 'tier-1' || tierKey === 'tier-2' || tierKey === 'tier-3');
                 const gridCls = isStacked ? 'arc-inline-list' : 'deck-grid tier-deck-grid';
 
-                if (isTrending) {
-                    html += `
+                // UI-13: auch der Rogue-Block ist offen — kein <details>
+                // mehr. Eine Unterzeile steht nur, wenn es eine gibt.
+                html += `
                     <div class="tier-section ${tierKey}" id="cm-${tierKey}">
-                        <details>
-                            <summary class="tier-trending-summary">
-                                <h3 style="display:inline;">${tierMeta.title} <small>${tierMeta.subtitle}</small></h3>
-                                <span class="tier-trending-count">${decks.length} Decks</span>
-                            </summary>
-                            <div class="${gridCls}">`;
-                } else {
-                    html += `
-                    <div class="tier-section ${tierKey}" id="cm-${tierKey}">
-                        <h3>${tierMeta.title} <small>${tierMeta.subtitle}</small></h3>
+                        <h3>${tierMeta.title}${tierMeta.subtitle ? ` <small>${tierMeta.subtitle}</small>` : ''}</h3>
                         <div class="${gridCls}">`;
-                }
                 
                 decks.forEach(deck => {
                     const archetypeName = deck.archetype;
@@ -2909,16 +2923,9 @@
                         </div>`;
                 });
                 
-                if (isTrending) {
-                    html += `
-                            </div>
-                        </details>
-                    </div>`;
-                } else {
-                    html += `
+                html += `
                         </div>
                     </div>`;
-                }
             });
             
             html += '</div>';

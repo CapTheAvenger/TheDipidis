@@ -351,15 +351,13 @@ describe('Nachgezeichnet wird die Knopfzeile, nicht der Abschnitt', () => {
             'ein zweites Knopf-Markup hier waere die naechste Stelle, die auseinanderlaeuft');
     });
 
-    it('der Knopf steht NEBEN dem Klapp-Knopf, nicht darin', () => {
-        // <button> im <button> ist ungueltig; Chromium laesst es beim
-        // Setzen von innerHTML stehen, es faellt also nicht auf.
+    it('der Knopf steht NEBEN der Ueberschrift, nicht darin', () => {
+        // Seit UI-13 (27.09.2026) ist der Kopf eine <h2> aus Knoten; der
+        // Info-Knopf haengt im Platz daneben, nie in der Ueberschrift.
         const fn = ausschnitt(OHNE_KOMMENTAR, 'function kopf(');
-        assert.match(fn, /zeile\.appendChild\(b\)/, 'der Klapp-Knopf haengt nicht in der Zeile');
+        assert.match(fn, /zeile\.appendChild\(b\)/, 'die Ueberschrift haengt nicht in der Zeile');
         assert.match(fn, /className = 'ds-sec-info'/, 'der Platz fuer den Info-Knopf fehlt');
-        const knopfInnen = /b\.innerHTML =[\s\S]{0,300}?;/.exec(fn)[0];
-        assert.ok(!/<button/.test(knopfInnen),
-            'der Info-Knopf steckt wieder im Klapp-Knopf — zwei Bedienelemente ineinander');
+        assert.ok(!/b\.innerHTML/.test(fn), 'die Ueberschrift wird wieder per innerHTML gefuellt');
     });
 });
 
@@ -369,22 +367,13 @@ describe('Der Klick auf den Knopf klappt nichts um', () => {
         .replace(/\/\*[\s\S]*?\*\//g, '')
         .replace(/(^|[^:"'`])\/\/.*$/gm, '$1');
 
-    it('die Weiche am Host steigt beim Info-Knopf sofort aus', () => {
-        // Heute wirkungslos, weil der Knopf neben dem Klapp-Knopf steht
-        // und closest('.ds-sec-hd') ihn gar nicht erst findet. Sie ist
-        // die Absicherung fuer den Tag, an dem jemand ihn in die
-        // Ueberschrift zieht — dann klappte der Abschnitt beim Oeffnen
-        // des Dialogs zu, und zwar gespeichert (siehe Kopf der Datei).
-        const i = OHNE_KOMMENTAR.indexOf("host.addEventListener('click'");
-        assert.ok(i > -1, 'die Weiche am Host fehlt');
-        const weiche = OHNE_KOMMENTAR.slice(i, i + 1200);
-        const aus = weiche.indexOf("closest('[data-abschnitt-info]')");
-        const klapp = weiche.indexOf("closest('.ds-sec-hd')");
-        assert.ok(aus > -1, 'der Info-Knopf wird in der Weiche nicht erkannt — er klappt den Abschnitt zu');
-        assert.ok(klapp > -1 && aus < klapp,
-            'die Ausnahme muss VOR dem Umschalten stehen, sonst ist der Zustand schon gewechselt');
-        assert.match(weiche.slice(aus, aus + 80), /\breturn\b/,
-            'erkannt, aber nicht ausgestiegen');
+    it('es gibt keine Klapp-Weiche mehr, die er ausloesen koennte (UI-13)', () => {
+        // Bis zum 27.09.2026 stieg hier eine Weiche am Host beim
+        // Info-Knopf aus, bevor sie den Abschnitt umklappte. Seit alle
+        // Abschnitte immer offen sind, gibt es die Weiche nicht mehr.
+        assert.ok(OHNE_KOMMENTAR.length > SEKTIONEN_QUELLE.length * 0.3,
+            'das Ausschneiden hat zu viel entfernt');
+        assert.equal(OHNE_KOMMENTAR.indexOf("addEventListener('click'"), -1);
     });
 
     it('der Zuhoerer im Register haelt die Weitergabe trotzdem an', () => {

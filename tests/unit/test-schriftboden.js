@@ -134,7 +134,8 @@ describe('Schriftboden: em-Ketten tragen einen Boden', () => {
         ['current-meta-matchups.css', /\.top-card-decks\s*\{[^}]*font-size:\s*max\(\s*10px\s*,/, '.top-card-decks (gemessen 7,49 px)'],
         ['current-meta-matchups.css', /\.top-card-share\s*\{[^}]*font-size:\s*max\(\s*10px\s*,/, '.top-card-share (gemessen 8,11 px)'],
         ['mobile-responsive.css', /font-size:\s*max\(\s*10px\s*,\s*0\.78em\s*\)\s*!important/, 'Kopf-Nutzerknopf (gemessen 9,36 px)'],
-        ['pokeball-menu.css', /\.btn-toggle-item\s*\{[^}]*font-size:\s*max\(\s*10px\s*,/, '.btn-toggle-item (gemessen 9,96 px)'],
+        // UI-11 (27.09.2026): Boden jetzt --fs-xs (11 px) statt 10 px.
+        ['pokeball-menu.css', /\.btn-toggle-item\s*\{[^}]*font-size:\s*max\(\s*var\(--fs-xs\)\s*,/, '.btn-toggle-item (gemessen 9,96 px)'],
     ];
     for (const [datei, muster, was] of gemessen) {
         it(`${was} behält seinen Boden`, () => {

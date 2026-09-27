@@ -197,7 +197,7 @@
             var teile = [];
             if (u.turniere) teile.push(g(u.turniere) + (de ? ' Turniere' : ' tournaments'));
             if (u.spieler)  teile.push(g(u.spieler)  + (de ? ' Spieler'  : ' players'));
-            if (u.partien)  teile.push(g(u.partien)  + (de ? ' Partien'  : ' games'));
+            if (u.partien)  teile.push(g(u.partien)  + (de ? ' Matches'  : ' matches'));
             var satz = (de ? 'Ausgewertet wurden ' : 'Evaluated: ') + teile.join(' · ');
             if (u.stand) {
                 var dt = new Date(u.stand);

@@ -147,6 +147,20 @@
                 '<button type="button" class="ds-bildvorschau-close" aria-label="' +
                     esc(L('Schließen', 'Close')) + '">×</button>' +
               '</div>' +
+              /* FE-5 (27.09.2026): mehrere Fassungen desselben Bildes
+                 (Online / Major / Kombiniert). Nur da, wenn der Aufrufer
+                 sie anbietet — sonst sieht das Fenster aus wie bisher. */
+              (Array.isArray(o.varianten) && o.varianten.length > 1
+                ? '<div class="ds-bildvorschau-varianten" role="group" aria-label="' +
+                    esc(L('Fassung', 'Version')) + '">' +
+                    o.varianten.map(function (v) {
+                        var an = v.id === (o.aktiv || o.varianten[0].id);
+                        return '<button type="button" class="ds-bildvorschau-variante' + (an ? ' is-on' : '') +
+                            '" data-variante="' + esc(v.id) + '" aria-pressed="' + an + '">' +
+                            esc(v.label) + '</button>';
+                    }).join('') +
+                  '</div>'
+                : '') +
               '<div class="ds-bildvorschau-body">' +
                 '<img src="' + canvas.toDataURL('image/png') + '" class="ds-bildvorschau-img" alt="' +
                     esc(o.alt || o.titel || L('Vorschau', 'Preview')) + '">' +
@@ -175,6 +189,28 @@
             canvas.toBlob(function (b) { fertigerBlob = b; }, 'image/png');
         } catch (e) { /* dann eben erst beim Klick */ }
 
+        /* Fassung wechseln: neues Bild bauen lassen, zeigen, und das PNG
+           fuer Kopieren/Speichern neu vorbereiten. */
+        var knoepfe = modal.querySelectorAll('.ds-bildvorschau-variante');
+        for (var vi = 0; vi < knoepfe.length; vi++) {
+            knoepfe[vi].addEventListener('click', function (ev) {
+                var id = ev.currentTarget.getAttribute('data-variante');
+                if (typeof o.wechsle !== 'function') return;
+                for (var k = 0; k < knoepfe.length; k++) {
+                    var an = knoepfe[k].getAttribute('data-variante') === id;
+                    knoepfe[k].classList.toggle('is-on', an);
+                    knoepfe[k].setAttribute('aria-pressed', String(an));
+                }
+                Promise.resolve(o.wechsle(id)).then(function (erg) {
+                    if (!erg || !erg.canvas) return;
+                    canvas = erg.canvas;
+                    if (erg.dateiname) dateiname = erg.dateiname;
+                    modal.querySelector('.ds-bildvorschau-img').src = canvas.toDataURL('image/png');
+                    fertigerBlob = null;
+                    try { canvas.toBlob(function (b) { fertigerBlob = b; }, 'image/png'); } catch (e) { /* beim Klick */ }
+                });
+            });
+        }
         function mitBlob(weiter) {
             if (fertigerBlob) { weiter(fertigerBlob); return; }
             canvas.toBlob(function (b) { fertigerBlob = b; weiter(b); }, 'image/png');

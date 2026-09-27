@@ -170,8 +170,14 @@
      * „vielleicht koennen wir den freigewordenen Platz irgendwie ja
      * dafuer nutzen". Eine Zeile misst 34 px, die beiden Absaetze
      * zusammen rund 130 — das sind knapp vier Zeilen, und zwoelf statt
-     * acht kostet vier. */
-    const MU_VORSCHAU = 12;
+     * acht kostet vier.
+     *
+     * Sind zwanzig (27.09.2026, UI-19, Hausi): „Top 12" und „Alle 20"
+     * waren zwei Knoepfe fuer fast dieselbe Tabelle. Jetzt EIN Knopf
+     * „Top 20 Matchups anzeigen", der beim Aufklappen gleich die zwanzig
+     * zeigt. Den Knopf „Alle {n}" gibt es nur noch, wenn ein Deck mehr
+     * als zwanzig Gegner hat. */
+    const MU_VORSCHAU = 20;
 
     /* ── WELCHE PAARUNGEN DIE VORSCHAU ZEIGT ─────────────────────────
      *
@@ -233,6 +239,9 @@
        Zeilen selbst gelesen (Spalte tournament_date), nicht geschaetzt.
        { key, von, bis, turniere } oder null, wenn kein Auszug da ist. */
     let _majorZeitraum = null;
+    /* Das Format der Major-Matchups (DA-13): leer oder der Schluessel des
+       geladenen Auszugs, z. B. 'TEF-PBL' im Rueckfall. */
+    let _majorMuFormat = '';
     let _loading = null;
     let _openDeck = null;       // name of the deck currently shown
 
@@ -430,17 +439,35 @@
      * die Datei zu Zeilen mit EINEM Feld, `deck_name` ist undefined, und
      * alles faellt still auf "kein Major" zurueck — genau der Fehler, der
      * die Tier-Liste am 01.09. Worlds nicht sehen liess (PR #602). */
+    /* DA-13 (27.09.2026, Hausi): solange es im laufenden Format noch kein
+       Major gibt, stehen die Major-Felder der Kacheln leer da — „leere,
+       suggestive Felder". Dann zeigen sie das LETZTE Major im alten Format,
+       mit dem Format daneben („Major · TEF-PBL"; das Anhaengen macht
+       majorFormatFremd() unten, sobald der geladene Auszug nicht das
+       laufende Format ist).
+
+       Das alte Format kommt aus data/format_window.json →
+       previous_format_key, das der Betreuer bei jeder Rotation setzt —
+       nicht aus einer Liste hier. Beide Schluessel muessen im Verzeichnis
+       der Auszuege stehen, sonst wird nichts behauptet. */
+    function majorAuszugWaehlen(laufend, vorher, bekannte) {
+        const liste = Array.isArray(bekannte) ? bekannte : [];
+        if (laufend && liste.indexOf(laufend) !== -1) return laufend;
+        if (vorher && vorher !== laufend && liste.indexOf(vorher) !== -1) return vorher;
+        return '';
+    }
+
     function _majorLaden(base, stamp) {
         const fw = (typeof window !== 'undefined') ? window._formatWindow : null;
         const alt = fw && fw.oldest_legal_set ? String(fw.oldest_legal_set).toUpperCase() : '';
         const neu = fw && fw.current_set ? String(fw.current_set).toUpperCase() : '';
         if (!alt || !neu) return Promise.resolve({});
-        const key = `${alt}-${neu}`;
+        const vorher = fw && fw.previous_format_key ? String(fw.previous_format_key).toUpperCase() : '';
         return fetch(base + MAJOR_VERZ_URL + stamp)
             .then(r => r.ok ? r.json() : null)
             .then(v => {
-                const kennt = v && Array.isArray(v.meta_keys) && v.meta_keys.indexOf(key) !== -1;
-                if (!kennt) return '';
+                const key = majorAuszugWaehlen(`${alt}-${neu}`, vorher, v && v.meta_keys);
+                if (!key) return '';
                 _majorZeitraum = { key: key, von: null, bis: null, turniere: 0 };
                 return fetch(`${base}labs_tournament_decks_${key}.csv${stamp}`)
                     .then(r => r.ok ? r.text() : '');
@@ -452,6 +479,7 @@
                    die tatsaechlich geladen wurden — sonst stuende an der
                    Kachel ein Datum, das niemand nachzaehlen kann. */
                 const _turniere = new Set();
+                const _feldJeTurnier = {};
                 for (const r of parseCsv(txt, ',')) {
                     const name = String(r.deck_name || '').trim();
                     if (!name) continue;
@@ -462,6 +490,15 @@
                     }
                     const tid = String(r.tournament_id || r.tournament_name || '').trim();
                     if (tid) _turniere.add(tid);
+                    /* Das Feld eines Turniers: total_players, und wo die
+                       Spalte fehlt, aus Antritten und Anteil derselben Zeile
+                       zurueckgerechnet (player_count / share_pct). */
+                    if (tid && !(_feldJeTurnier[tid] > 0)) {
+                        const gesamt = num(r.total_players);
+                        const anteil = num(r.share_pct);
+                        _feldJeTurnier[tid] = gesamt > 0 ? gesamt
+                            : (anteil > 0 ? num(r.player_count) * 100 / anteil : 0);
+                    }
                     const s = num(r.wins), n_ = num(r.losses), u = num(r.ties);
                     const partien = s + n_ + u;
                     const d1 = num(r.day1_players);
@@ -471,7 +508,6 @@
                         unentschieden: 0, day1: 0, day2: 0, turniere: 0,
                     });
                     e.antritte += num(r.player_count);
-                    e.share += num(r.share_pct);
                     e.siege += s;
                     e.partien += partien;
                     e.unentschieden += u;
@@ -480,8 +516,17 @@
                     e.turniere += 1;
                 }
                 if (_majorZeitraum) _majorZeitraum.turniere = _turniere.size;
+                /* DER ANTEIL IST EIN BRUCH UEBER ALLE TURNIERE, NICHT DIE
+                   SUMME DER TURNIERANTEILE (27.09.2026, beim Bauen von DA-13
+                   gefunden). Hier stand `e.share += share_pct` — bei zwei
+                   Turnieren im Auszug zeigte Dragapult 17,89 + 22,33 =
+                   40,2 %. Gezaehlt sind 736 von 3.916 Antritten = 18,8 %
+                   (data/labs_tournament_decks_TEF-PBL.csv). Sichtbar war
+                   das nur, solange ein Auszug mehr als ein Turnier traegt. */
+                const _feld = Object.values(_feldJeTurnier).reduce((a, b) => a + b, 0);
                 for (const k of Object.keys(raus)) {
                     const e = raus[k];
+                    e.share = _feld > 0 ? (e.antritte / _feld) * 100 : 0;
                     // Siege durch ALLE Partien — dieselbe Rechnung wie online.
                     // NICHT die Spalte `win_pct` der Datei: die fuehrt
                     // Matchpunkte (3S+U)/3n und ist eine andere Skala.
@@ -507,12 +552,18 @@
                dieselbe Datei zweimal zu parsen hiesse, zwei Zahlen fuer
                eine Sache zu fuehren. Fehlt der Verweis (andere Seite,
                anderer Ladeweg), bleibt die Spalte leer statt kaputt. */
-            (typeof window.ladeMajorMatchups === 'function')
-                ? window.ladeMajorMatchups().catch(() => ({}))
-                : Promise.resolve({}),
-        ]).then(([decksTxt, top8Txt, major, majorMu]) => {
+            /* DA-13 / FE-5 (27.09.2026): mit Rueckfall auf das letzte
+               Major-Format, wie die Kacheln (majorAuszugWaehlen). Der
+               Schluessel kommt mit und steht dann an der Spalte. */
+            (typeof window.ladeMajorMatchupsMitRueckfall === 'function')
+                ? window.ladeMajorMatchupsMitRueckfall().catch(() => ({ reg: {}, key: '' }))
+                : ((typeof window.ladeMajorMatchups === 'function')
+                    ? window.ladeMajorMatchups().then(reg => ({ reg, key: '' })).catch(() => ({ reg: {}, key: '' }))
+                    : Promise.resolve({ reg: {}, key: '' })),
+        ]).then(([decksTxt, top8Txt, major, majorMuErg]) => {
             _major = major || {};
-            _majorMu = majorMu || {};
+            _majorMu = (majorMuErg && majorMuErg.reg) || {};
+            _majorMuFormat = (majorMuErg && majorMuErg.key) || '';
             _decks = {};
             for (const r of parseSemicolonCsv(decksTxt)) {
                 if (!r.deck_name) continue;
@@ -870,6 +921,16 @@
         return auszug;
     }
 
+    /* Dasselbe fuer die Major-Matchups: ' · TEF-PBL', wenn der geladene
+       Matchup-Auszug nicht das laufende Format ist (DA-13). */
+    function majorMuFremd() {
+        const jetzt = (typeof window !== 'undefined'
+            && typeof window.getCurrentMetaFormat === 'function')
+            ? String(window.getCurrentMetaFormat() || '').trim().toUpperCase() : '';
+        const k = String(_majorMuFormat || '').trim().toUpperCase();
+        return (k && jetzt && k !== jetzt) ? ' · ' + k : '';
+    }
+
     /* Die Day-2-Kachel ist die einzige, die NUR Praesenzzahlen zeigt —
        ohne Online-Zeile daneben, an der man das Format ablesen koennte.
        Steht der Auszug in einem anderen Format, gehoert der Schluessel
@@ -1129,14 +1190,14 @@
         const wr = d
             ? tileGeteilt('wr', toneFor(wrDelta), mitQuote(L('arc.wrLabel', '{quote}'), 'mitUnentschieden'),
                 `${esc(fmt(d.winRate))} %`,
-                /* Die Matchzahl steht MIT auf der Zeile, nicht nur im
-                   Hinweis: sie ist die Zahl, an der man entscheidet, ob man
-                   der Quote glaubt, und ein Hinweis erscheint erst beim
-                   Verweilen — auf dem Telefon also nie. Seit dem 02.09.2026
-                   auch fuer online, vorher stand sie nur beim Major. */
-                fmtGanz(d.partien),
+                /* UI-17 (27.09.2026, Hausi): die Matchzahl steht NICHT mehr
+                   auf der Kachel — „fuer Enduser ohne Erklaerung
+                   verwirrend". Sie bleibt im Hinweis der Kachel („Online aus
+                   n Matches") und im erzeugten Bild. Vom 02.09. bis
+                   27.09.2026 stand sie rechts neben der Quote. */
+                '',
                 wrMajor,
-                (m && m.partien > 0) ? fmtGanz(m.partien) : '',
+                '',
                 majorLeer,
                 wrDuenn,
                 /* DIE REMISQUOTE STEHT HIER, UND SIE MUSS ES.
@@ -1150,18 +1211,18 @@
                    Leistungseinbruch — und das waere falsch. */
                 L('arc.wrTip2', de
                     ? 'Siege geteilt durch alle Matches, auf beiden Seiten gleich gerechnet. Online aus {n} Matches. {mj}'
-                    : 'Wins divided by all games, same on both sides. Online from {n} games. {mj}')
+                    : 'Wins divided by all matches, same on both sides. Online from {n} matches. {mj}')
                     .replace('{n}', fmtGanz(d.partien))
                     .replace('{mj}', (m && m.partien > 0)
                         ? L('arc.wrTipMajor', de
                             ? 'Major aus {p} Matches, davon {u} % unentschieden — online sind es 1,3 %. Unentschieden zählen auf beiden Seiten nicht als Sieg, drücken die Major-Spalte also spürbar. Bei dieser Matchzahl liegt der Wert auf ±{k} Punkte genau.'
-                            : 'Major from {p} games, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down. At this sample the value is accurate to ±{k} points.')
+                            : 'Major from {p} matches, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down. At this sample the value is accurate to ±{k} points.')
                             .replace('{p}', fmtGanz(m.partien))
                             .replace('{u}', fmt(m.remisQuote))
                             .replace('{k}', fmt(wrKi, 0))
                         : L('arc.wrTipOhne', de
                             ? 'Noch keine Major-Matches für dieses Deck in diesem Format.'
-                            : 'No in-person games for this deck in this format yet.'))
+                            : 'No in-person matches for this deck in this format yet.'))
                     + _wrKonventionsSatz(de),
                 arrow(wrDelta))
             : tile('wr', 'tie', mitQuote(L('arc.wrLabel', '{quote}'), 'mitUnentschieden'), '–',
@@ -1206,14 +1267,14 @@
         const quote = c && c.brought > 0 ? (c.top8 / c.brought) * 100 : null;
         const schnitt = (_conv && isFinite(_conv.expected)) ? _conv.expected * 100 : null;
         const conv = (c && quote != null)
+            /* UI-26 (27.09.2026, Hausi): der Schnitt steht im Namen —
+               „Online Top 8-Quote (Ø 6,6 %)" —, nicht mehr als eigene
+               Zeile darunter. */
             ? tile('conv', toneFor(c.perfPct),
-                L('arc.convLabel3', de ? 'Top-8-Quote (online)' : 'Top-8 rate (online)'),
+                L('arc.convLabel4', de ? 'Online Top 8-Quote' : 'Online top-8 rate')
+                    + (schnitt != null ? ' (Ø ' + fmt(schnitt) + ' %)' : ''),
                 `${esc(fmt(quote))} %`,
-                esc(schnitt != null
-                    ? L('arc.convCtx2', de ? 'Schnitt aller Decks {s} %'
-                                           : 'field average {s} %')
-                        .replace('{s}', fmt(schnitt))
-                    : ''),
+                '',
                 // WICHTIG: c.brought zaehlt NICHT dieselbe Grundgesamtheit wie
                 // d.count. d.count sind alle Listen aus allen Onlineturnieren
                 // (Dragapult 2.158). c.brought sind nur die Antritte auf
@@ -1236,7 +1297,7 @@
                     ? 'Kleine Stichprobe — die Quote steht auf wenigen Antritten und schwankt stark.'
                     : 'Small sample — the rate rests on few entries and swings hard.') : ''),
                 arrow(c.perfPct))
-            : tile('conv', 'tie', L('arc.convLabel3', de ? 'Top-8-Quote (online)' : 'Top-8 rate (online)'),
+            : tile('conv', 'tie', L('arc.convLabel4', de ? 'Online Top 8-Quote' : 'Online top-8 rate'),
                 '–',
                 esc(L('arc.convMissing', de ? 'zu wenig Daten' : 'not enough data')),
                 /* Der Satz zeigt auf die Kachel darueber, und die rechnet
@@ -1516,8 +1577,8 @@
                 art: 'fehlt',
                 inhalt: '–',
                 titel: L('arc.muMajorFehlt', de
-                    ? 'Keine Präsenzpartien für diese Paarung.'
-                    : 'No in-person games for this pairing.'),
+                    ? 'Keine Präsenz-Matches für diese Paarung.'
+                    : 'No in-person matches for this pairing.'),
             };
         }
         const bilanz = praesenzBilanz(m);
@@ -1534,8 +1595,8 @@
             : (m.majorSiege + m.majorNiederlagen + m.majorUnentschieden);
         const spiegelSatz = (summe != null && summe !== n)
             ? (de
-                ? ` Die Quelle zählt hier ${summe} Einzelergebnisse auf ${n} Partien — jede Spiegelpartie ist für beide Seiten verbucht.`
-                : ` The source books ${summe} results on ${n} games — each mirror game is counted for both sides.`)
+                ? ` Die Quelle zählt hier ${summe} Einzelergebnisse auf ${n} Matches — jedes Spiegel-Match ist für beide Seiten verbucht.`
+                : ` The source books ${summe} results on ${n} matches — each mirror match is counted for both sides.`)
             : '';
 
         if (!m.majorBilanzDa) {
@@ -1543,8 +1604,8 @@
                 art: 'ohne-bilanz',
                 inhalt: '–',
                 titel: mitQuote(L('arc.muMajorOhneBilanz', de
-                    ? '{n} Präsenzpartien, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine {quote} ({formel}) bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'
-                    : '{n} in-person games, but the source row carries no record — without wins and losses there is no {quote} ({formel}) to show. Hence the dash instead of an estimate.'), 'ohneUnentschieden')
+                    ? '{n} Präsenz-Matches, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine {quote} ({formel}) bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'
+                    : '{n} in-person matches, but the source row carries no record — without wins and losses there is no {quote} ({formel}) to show. Hence the dash instead of an estimate.'), 'ohneUnentschieden')
                     .replace('{n}', String(n)) + spiegelSatz,
             };
         }
@@ -1556,11 +1617,11 @@
                 art: 'unter-schwelle',
                 inhalt: esc(bilanz),
                 titel: (de
-                    ? `Bilanz ${bilanz} (S–N–U) aus ${n} Präsenzpartien. Unter ${MIN_PRAESENZ_PARTIEN} Partien steht hier kein Prozentwert: `
-                      + `bei ${n} Partien verschiebt eine einzige Partie die Quote um ${fmt(100 / n)} Punkte. `
+                    ? `Bilanz ${bilanz} (S–N–U) aus ${n} Präsenz-Matches. Unter ${MIN_PRAESENZ_PARTIEN} Matches steht hier kein Prozentwert: `
+                      + `bei ${n} Matches verschiebt ein einziges Match die Quote um ${fmt(100 / n)} Punkte. `
                       + `Die Bilanz sagt dasselbe, ohne eine Genauigkeit zu behaupten, die die Stichprobe nicht trägt.`
-                    : `Record ${bilanz} (W–L–T) from ${n} in-person games. Below ${MIN_PRAESENZ_PARTIEN} games no percentage is shown: `
-                      + `at ${n} games a single game moves the rate by ${fmt(100 / n)} points. `
+                    : `Record ${bilanz} (W–L–T) from ${n} in-person matches. Below ${MIN_PRAESENZ_PARTIEN} matches no percentage is shown: `
+                      + `at ${n} matches a single match moves the rate by ${fmt(100 / n)} points. `
                       + `The record says the same without claiming a precision the sample cannot carry.`)
                     + spiegelSatz,
             };
@@ -1573,8 +1634,8 @@
                 art: 'nur-remis',
                 inhalt: '–',
                 titel: mitQuote(L('arc.muMajorNurRemis', de
-                    ? '{n} Präsenzpartien, alle unentschieden ({b}). Die {quote} ({formel}) zählt Siege gegen entschiedene Partien — entschieden ist hier keine. Ein Wert stünde für nichts.'
-                    : '{n} in-person games, all drawn ({b}). The {quote} ({formel}) counts wins against decided games — none here were decided. A number would stand for nothing.'), 'ohneUnentschieden')
+                    ? '{n} Präsenz-Matches, alle unentschieden ({b}). Die {quote} ({formel}) zählt Siege gegen entschiedene Matches — entschieden ist hier keine. Ein Wert stünde für nichts.'
+                    : '{n} in-person matches, all drawn ({b}). The {quote} ({formel}) counts wins against decided matches — none here were decided. A number would stand for nothing.'), 'ohneUnentschieden')
                     .replace('{n}', String(n)).replace('{b}', bilanz) + spiegelSatz,
             };
         }
@@ -1583,8 +1644,8 @@
             art: 'quote',
             inhalt: esc(fmt(m.majorWr)) + ' %',
             titel: L('arc.muMajorTip', de
-                ? '{w} aus {n} Präsenzpartien (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Siege ÷ entschiedene Partien, mit demselben Ausgleich für dünne Paarungen. Roh {r} %.'
-                : '{w} from {n} in-person games (record {b}). Same calculation as the column on the left: wins ÷ decided games, with the same allowance for thin pairings. Raw {r} %.')
+                ? '{w} aus {n} Präsenz-Matches (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Siege ÷ entschiedene Matches, mit demselben Ausgleich für dünne Paarungen. Roh {r} %.'
+                : '{w} from {n} in-person matches (record {b}). Same calculation as the column on the left: wins ÷ decided matches, with the same allowance for thin pairings. Raw {r} %.')
                 .replace('{w}', fmt(m.majorWr) + ' %')
                 .replace('{n}', String(n))
                 .replace('{b}', bilanz)
@@ -1625,8 +1686,8 @@
         const de = isDe();
         return hatMajor
             ? mitQuote(L('arc.muLegende', de
-                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Partien dahinter'
-                : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the games behind it'), 'ohneUnentschieden')
+                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Matches dahinter'
+                : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the matches behind it'), 'ohneUnentschieden')
             /* Ohne Praesenzdaten sagt EIN Satz, was zwei leere
                Spalten nicht gesagt haetten: dass es sie gibt und
                dass hier keine anfallen. */
@@ -1727,11 +1788,11 @@
                Arbeitspaket. Zweisprachig inline ueber getLang(), wie es
                das Projekt an Dutzenden Stellen macht. */
             ? `<p class="arc-mu-note arc-mu-note-praesenz">${esc((de
-                ? 'Major-WR: erst ab {n} Präsenzpartien als Prozentwert. Darunter steht die Bilanz (S–N–U) '
-                  + 'und daneben die Partienzahl — bei {n} Partien verschiebt eine einzige Partie die Quote '
+                ? 'Major-WR: erst ab {n} Präsenz-Matches als Prozentwert. Darunter steht die Bilanz (S–N–U) '
+                  + 'und daneben die Matchzahl — bei {n} Matches verschiebt ein einziges Match die Quote '
                   + 'schon um {p} Punkte, darunter entsprechend mehr. Betroffen hier: {k} von {g} Zeilen.'
-                : 'Major WR: shown as a percentage only from {n} in-person games. Below that you get the record (W–L–T) '
-                  + 'next to the game count — at {n} games a single game already moves the rate by {p} points, '
+                : 'Major WR: shown as a percentage only from {n} in-person matches. Below that you get the record (W–L–T) '
+                  + 'next to the match count — at {n} matches a single match already moves the rate by {p} points, '
                   + 'and more below. Affected here: {k} of {g} rows.')
                 .replace(/\{n\}/g, String(MIN_PRAESENZ_PARTIEN))
                 .replace('{p}', fmt(100 / MIN_PRAESENZ_PARTIEN))
@@ -1750,10 +1811,10 @@
                              zusammen; ohne ihn waere „WR" ein Hausname. -->
                         <th title="${esc(quotenHinweis('ohneUnentschieden'))}"
                             data-quote-konvention="ohneUnentschieden">${esc(L('arc.colWinRate', 'WR'))}</th>
-                        <th title="${esc(L('arc.colGames', de ? 'gespielte Matches' : 'games played'))}">${
+                        <th title="${esc(L('arc.colGames', de ? 'gespielte Matches' : 'matches played'))}">${
                             esc(L('arc.colGamesKurz', 'M'))}</th>
-                        <th title="${esc(de ? 'gewonnene Matches' : 'games won')}">W</th>
-                        <th title="${esc(de ? 'verlorene Matches' : 'games lost')}">L</th>
+                        <th title="${esc(de ? 'gewonnene Matches' : 'matches won')}">W</th>
+                        <th title="${esc(de ? 'verlorene Matches' : 'matches lost')}">L</th>
                         <!-- T, nicht U. Gemeldet am 01.09.2026: "wenn man bei
                              der Tierliste die Matchups aufklappt, dann auf
                              jeden Fall Win-Loss-Tie nutzen und nicht
@@ -1787,13 +1848,13 @@
                              wo Platz ist. WR bleibt abgekuerzt, weil es in
                              der Szene der stehende Begriff ist. -->
                         ${!hatMajor ? '' : `                        <th title="${esc(quotenHinweis('ohneUnentschieden') + '  ' + L('arc.colMajorTip', de
-                            ? 'Präsenzturniere: Siege ÷ entschiedene Partien (Unentschieden bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Präsenzturnieren statt online.'
-                            : 'In-person events: wins ÷ decided games (ties left out) — the same calculation and the same smoothing as the WR column on the left, just measured at in-person events instead of online.'))}"
+                            ? 'Präsenzturniere: Siege ÷ entschiedene Matches (Unentschieden bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Präsenzturnieren statt online.'
+                            : 'In-person events: wins ÷ decided matches (ties left out) — the same calculation and the same smoothing as the WR column on the left, just measured at in-person events instead of online.'))}"
                             data-quote-konvention="ohneUnentschieden">${
-                            esc(L('arc.colMajor', 'Major-WR'))}</th>
+                            esc(L('arc.colMajor', 'Major-WR') + majorMuFremd())}</th>
                         <th title="${esc(L('arc.colMajorN', de
-                            ? 'Präsenzpartien dieser Paarung'
-                            : 'in-person games for this pairing'))}">${
+                            ? 'Präsenz-Matches dieser Paarung'
+                            : 'in-person matches for this pairing'))}">${
                             esc(L('arc.colMajorNKurz', de ? 'Major-Matches' : 'Major matches'))}</th>`}
                     </tr></thead>
                     <tbody>${body}</tbody>
@@ -1821,7 +1882,7 @@
            `all.length`. Zwei Knoepfe, zwei Zahlen, beide wahr. */
         return `<details class="arc-mu-details">
                 <summary class="arc-mu-summary">${esc(
-                    L('arc.matchupsToggle', de ? 'Matchups anzeigen ({n})' : 'Show matchups ({n})')
+                    L('arc.matchupsToggle', de ? 'Top {n} Matchups anzeigen' : 'Show top {n} matchups')
                         .replace('{n}', String(rows.length)))}</summary>
                 ${table}
             </details>`;
@@ -2100,6 +2161,8 @@
                Kartenpool stehen, muss das AUF dem Bild stehen und nicht
                nur daneben auf der Seite. */
             majorFormat: majorFormatFremd(),
+            /* FE-5: Format der Major-Matchups (leer = laufendes Format). */
+            majorMuFormat: majorMuFremd().replace(/^ · /, ''),
         };
     }
 
@@ -2142,8 +2205,8 @@
         html += '<p>' + esc(zeitraumText()) + '</p>';
         html += '<p>' + esc(legendeText(hatMajor)) + '</p>';
         html += '<p>' + esc(de
-            ? 'Die zugeklappte Karte zeigt ' + MU_VORSCHAU + ' Paarungen: je zur Hälfte die mit den meisten Begegnungen über und unter 50 %, danach nach Quote sortiert. Nicht die besten und schlechtesten — eine Paarung, die man zweimal trifft, zählt für die Vorbereitung weniger als eine, die ständig kommt. „Alle" zeigt die vollständige Liste.'
-            : 'The collapsed card shows ' + MU_VORSCHAU + ' pairings: half of them the most-played above 50 %, half the most-played below, then sorted by rate. Not the best and worst — a pairing you meet twice matters less for preparation than one you meet constantly. “All” shows the full list.')
+            ? 'Der Knopf „Top ' + MU_VORSCHAU + ' Matchups anzeigen“ zeigt bis zu ' + MU_VORSCHAU + ' Paarungen: hat ein Deck mehr Gegner, je zur Hälfte die mit den meisten Begegnungen über und unter 50 %, danach nach Quote sortiert. Nicht die besten und schlechtesten — eine Paarung, die man zweimal trifft, zählt für die Vorbereitung weniger als eine, die ständig kommt. „Alle" zeigt dann die vollständige Liste.'
+            : 'The button “Show top ' + MU_VORSCHAU + ' matchups” shows up to ' + MU_VORSCHAU + ' pairings: if a deck has more opponents, half of them the most-played above 50 %, half the most-played below, then sorted by rate. Not the best and worst — a pairing you meet twice matters less for preparation than one you meet constantly. “All” then shows the full list.')
             + '</p>';
         return html;
     };
@@ -2160,6 +2223,28 @@
     };
     window.getArchetypeMatchups = function (name) {
         return load().then(() => matchupsFor(name));
+    };
+    /* FE-5 (27.09.2026): alle Major-Paarungen eines Decks, nicht nur die,
+       die auch online vorkommen — fuer die Major-Fassung des Bildes.
+       Dieselbe Form wie matchupsFor(), die Quote ist S/(S+N), geglaettet
+       wie links (siehe ladeMajorMatchups in js/app-current-meta.js). */
+    function majorMatchupsFor(name) {
+        const von = _majorMu ? (_majorMu[findKey(_majorMu, name)] || null) : null;
+        if (!von) return [];
+        return Object.keys(von).map(gegner => {
+            const e = von[gegner];
+            return {
+                opponent: gegner,
+                winRate: e.wr == null ? null : e.wr,
+                winRateRoh: e.wrRoh == null ? null : e.wrRoh,
+                wins: e.siege, losses: e.niederlagen, ties: e.unentschieden,
+                games: e.anzahl,
+                thin: !(e.anzahl >= THIN_GAMES),
+            };
+        }).sort((a, b) => (b.winRate == null ? -1 : b.winRate) - (a.winRate == null ? -1 : a.winRate));
+    }
+    window.getArchetypeMajorMatchups = function (name) {
+        return load().then(() => majorMatchupsFor(name));
     };
     /* Die Feldanteile, so wie diese Datei sie ohnehin schon geparst hat.
        Sie entstand fuer js/ds-ev-rechner.js, damit dieselbe CSV nicht ein

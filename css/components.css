@@ -292,14 +292,10 @@
     cursor: help;
     text-decoration: none;
 }
-.ds-term::after {
-    content: "?";
-    margin-left: 2px;
-    font-size: var(--fs-xs);
-    vertical-align: super;
-    color: var(--ink-3);
-    font-weight: 700;
-}
+/* UI-27 (27.09.2026, Hausi): kein Fragezeichen mehr hinter dem Begriff —
+   „Fragezeichen-Icons neben mehreren Ueberschriften durchgaengig
+   entfernen". Die Erklaerung bleibt: gepunktete Linie, Blase bei
+   Beruehren/Fokus. */
 
 /* Die Sprechblase.
    Sie gilt fuer .ds-term (Fachbegriffe an Zahlen) UND fuer
@@ -586,27 +582,14 @@ html.is-signed-out [onclick*="radelist"]:hover {
     align-items: center;
     gap: var(--s-2);
     width: 100%;
+    margin: 0;
     padding: var(--s-3) var(--s-4);
     border: 0;
     background: none;
     font: inherit;
     text-align: left;
     color: var(--ink);
-    cursor: pointer;
 }
-.ds-sec-hd:hover { background: var(--surface-2); }
-.ds-sec-hd:focus-visible {
-    outline: 2px solid var(--brand);
-    outline-offset: -2px;
-}
-
-.ds-sec-arrow {
-    flex: none;
-    color: var(--ink-3);
-    font-size: var(--fs-sm);
-    transition: transform .15s;
-}
-.ds-sec.is-open .ds-sec-arrow { transform: rotate(90deg); }
 
 .ds-sec-t {
     font-size: var(--fs-lg);
@@ -623,14 +606,9 @@ html.is-signed-out [onclick*="radelist"]:hover {
 }
 
 .ds-sec-body {
-    display: none;
+    display: block;
     padding: 0 var(--s-4) var(--s-4);
 }
-.ds-sec.is-open > .ds-sec-body { display: block; }
-
-/* Der Rueckweg. Steht nur da, wenn jemand vom Startzustand abweicht —
-   sonst waere er ein Bedienelement fuer einen Zustand, in dem es
-   nichts zu tun gibt. */
 /* Ein Knopf, der aussieht wie der Rest der Seite.
 
    `class="action-btn"` kam im ganzen Projekt genau einmal vor: am Knopf
@@ -640,9 +618,9 @@ html.is-signed-out [onclick*="radelist"]:hover {
    gemessen 108x18 px, `border: 1.11px outset black`, eckig, grau. Das war
    der Browser-Standardknopf, kein Entwurf.
 
-   .ds-btn benutzt dieselben Tokens wie .ds-sec-reset-btn direkt darunter,
-   nur eine Stufe groesser, weil er ein Abschnitt umschaltet und nicht nur
-   zuruecksetzt. Ohne !important. */
+   .ds-btn benutzt dieselben Tokens wie die Knoepfe daneben. Ohne
+   !important. (Die Zuruecksetzen-Zeile der Abschnitte ist seit UI-13,
+   27.09.2026, weg — alle Abschnitte sind offen.) */
 .ds-btn {
     display: inline-flex;
     align-items: center;
@@ -662,34 +640,6 @@ html.is-signed-out [onclick*="radelist"]:hover {
 }
 .ds-btn:hover { background: var(--surface-2); border-color: var(--brand); }
 .ds-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-
-.ds-sec-reset {
-    display: flex;
-    align-items: center;
-    gap: var(--s-2);
-    margin-bottom: var(--s-3);
-}
-.ds-sec-reset-btn {
-    padding: 5px 12px;
-    min-height: 28px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--surface-1);
-    color: var(--brand-ink);
-    font: inherit;
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    cursor: pointer;
-}
-.ds-sec-reset-btn:hover { background: var(--surface-2); }
-.ds-sec-reset-btn:focus-visible {
-    outline: 2px solid var(--brand);
-    outline-offset: 2px;
-}
-.ds-sec-reset-n {
-    font-size: var(--fs-xs);
-    color: var(--ink-3);
-}
 
 @media (max-width: 768px) {
     .ds-sec-hd { padding: var(--s-3); }
@@ -839,33 +789,8 @@ html.is-signed-out [onclick*="radelist"]:hover {
 .ds-filter-seg.is-space .ds-filter-btn.is-on[data-space="gl"]   { box-shadow: inset 0 -2px 0 var(--space-gl), var(--e-1); }
 .ds-filter-seg.is-space .ds-filter-btn.is-on[data-space="past"] { box-shadow: inset 0 -2px 0 var(--space-past), var(--e-1); }
 
-/* Global hat keine Formatwahl. Ein Schild, kein Schalter — ein Knopf,
-   der nichts zu waehlen hat, ist eine Luege ueber die Daten.
-
-   BIS ZUM 01.09.2026 stand hier eine gestrichelte Umrandung, 32px hoch,
-   neben zwei 44px hohen Knopfreihen mit voller Flaeche. Gemeldet:
-   "Lieber dieses TEF-bis-PBL-Feld optisch den anderen anpassen."
-   Es sieht jetzt aus wie ein gesetzter Knopf — gleiche Groesse, gleiche
-   Rundung, gleicher Schatten — und traegt die Datenraum-Farbe an der
-   Unterkante, genau wie der aktive Datenraum-Knopf daneben. Dass es
-   kein Schalter ist, sagt der fehlende Zeigefinger und der fehlende
-   Hover; eine gestrichelte Linie musste das nicht zusaetzlich sagen. */
-.ds-filter-fixed {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 13px;
-    min-height: 44px;
-    border: 0;
-    border-radius: 999px;
-    background: var(--surface-1);
-    box-shadow: inset 0 -2px 0 var(--space-gl), var(--e-1);
-    color: var(--ink);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    white-space: nowrap;
-}
-/* Damit das Schild in derselben Schiene sitzt wie eine Knopfreihe. */
-.ds-filter-group > .ds-filter-fixed { margin: 3px 0; }
+/* Das Format-Schild in Global (.ds-filter-fixed) ist seit UI-12
+   (27.09.2026) weg: es wiederholte das Format der Ueberschrift darueber. */
 
 @media (max-width: 768px) {
     .ds-filter {
@@ -933,20 +858,14 @@ html.is-signed-out [onclick*="radelist"]:hover {
 .cm-rang-th[aria-sort="descending"] .cm-rang-pfeil::after { content: '▼'; }
 
 .cm-rang-hinweis { margin: 0 0 var(--s-3) 0; }
+.cm-rang-hinweis:empty { display: none; }  /* UI-23: Text steht hinter dem Info-Knopf */
 
 /* Duenne Zeilen: gedaempft, aber lesbar. Dieselbe Konvention wie in der
    Heatmap — die Aussage "wenig Antritte" darf keinen Kontrast kosten. */
 .cm-rangliste tbody tr.is-muted td { color: var(--ink-2); }
 
-/* Der Balken sitzt jetzt in der Rangliste, nicht mehr im eigenen Block.
-   Wert oben, Balken darunter — in einer schmalen Zahlenspalte ist
-   nebeneinander kein Platz. */
-.cm-rangliste .cm-rang-wert { display: block; }
-.cm-rangliste .ds-bar-track {
-    display: block;
-    margin-top: 3px;
-    min-width: 64px;
-}
+/* Der Balken der Spalte „ggü. Schnitt" ist mit ihr gegangen (UI-26,
+   27.09.2026). */
 
 
 /* ── Bildvorschau ───────────────────────────────────────────────────
@@ -1043,6 +962,32 @@ html.is-signed-out [onclick*="radelist"]:hover {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   margin: 0 auto;
 }
+/* FE-5 (27.09.2026): Umschalter Online / Major / Kombiniert — dieselbe
+   Pillenform wie die Datenraum-Knoepfe, aus Tokens. */
+.ds-bildvorschau-varianten {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 18px 0;
+}
+.ds-bildvorschau-variante {
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-1);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+.ds-bildvorschau-variante.is-on {
+  background: var(--brand-ink);
+  border-color: var(--brand-ink);
+  color: var(--surface-1);
+}
+.ds-bildvorschau-variante:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .ds-bildvorschau-actions {
   display: flex;
   gap: 10px;

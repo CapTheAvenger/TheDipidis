@@ -89,6 +89,9 @@ function tabelleMit(zeilen) {
         'const shadeFor = () => "";',
         'const barFor = () => ({ pct: 0, cls: "" });',
         'const matchupsFor = () => ZEILEN;',
+        // Seit DA-13 (27.09.2026) haengt an der Kopfzelle das Format der
+        // Major-Matchups, wenn es nicht das laufende ist. Hier: laufendes.
+        'const majorMuFremd = () => "";',
         // Die Praesenzspalten baut seit dem 07.09.2026 eine eigene
         // Funktion — sie traegt die Mindeststichprobe.
         'const MIN_PRAESENZ_PARTIEN = 30;',

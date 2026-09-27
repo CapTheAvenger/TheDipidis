@@ -95,8 +95,9 @@ describe('Bausteine — Aufbau', () => {
         assert.strictEqual(flags.length, ids.length, 'jeder Abschnitt braucht auf:');
         const auf = {};
         ids.forEach((id, i) => { auf[id] = flags[i]; });
+        // UI-13 (27.09.2026, Hausi): alle offen, immer.
         assert.deepStrictEqual(auf,
-            { top: true, heatmap: true, tiers: false, rang: false, cards: true });
+            { top: true, heatmap: true, tiers: true, rang: true, cards: true });
     });
 
     it('die Antwort steht vorn: Decks, Matchups — die Karten ganz hinten', () => {
@@ -130,15 +131,13 @@ describe('Bausteine — verschieben, nicht neu erzeugen', () => {
         assert.match(CODE, /body2\.appendChild\(t\)/);
         // innerHTML darf nur auf Knoten stehen, die dieses Modul selbst
         // erzeugt hat — nie auf einem Block, der schon Handler traegt.
-        //   b      der Kopf-Knopf, in kopf() erzeugt
-        //   platz   das leere <span class="ds-sec-info"> daneben, in
-        //           kopf() erzeugt — dort und nur dort steht seit dem
-        //           10.09.2026 der Info-Knopf. Nachgezeichnet wird die
-        //           Knopfzeile, NIE der Abschnitt: die Bloecke darin
-        //           sind verschoben und traegen fremde Handler.
-        //   row     die Rueckweg-Zeile, in zeichneReset() erzeugt
+        //   platz   das leere <span class="ds-sec-info"> in kopf() — dort
+        //           und nur dort steht seit dem 10.09.2026 der Info-Knopf.
+        //           Kopf und Rueckweg-Zeile setzen seit UI-13 (27.09.2026)
+        //           kein innerHTML mehr: den Rueckweg gibt es nicht, der
+        //           Kopf wird aus Knoten gebaut.
         const ziele = [...CODE.matchAll(/(\w+)\.innerHTML\s*=/g)].map(m => m[1]);
-        assert.deepStrictEqual([...new Set(ziele)].sort(), ['b', 'platz', 'row'],
+        assert.deepStrictEqual([...new Set(ziele)].sort(), ['platz'],
             'innerHTML auf fremdem Inhalt: ' + ziele.join(', '));
     });
 
@@ -200,27 +199,23 @@ describe('Bausteine — wiederholbar', () => {
     });
 });
 
-describe('Bausteine — zugeklappt ist nicht weg', () => {
-    it('ein zugeklappter Abschnitt behaelt seine Ueberschrift', () => {
-        // Nur der Koerper verschwindet, nie der Kopf.
-        assert.match(CSS, /\.ds-sec-body\s*\{[^}]*display:\s*none/);
-        assert.match(CSS, /\.ds-sec\.is-open\s*>\s*\.ds-sec-body\s*\{[^}]*display:\s*block/);
-        const hd = /\.ds-sec-hd\s*\{([^}]*)\}/.exec(CSS)[1];
-        assert.ok(!/display:\s*none/.test(hd));
+describe('Bausteine — nichts klappt mehr (UI-13, 27.09.2026)', () => {
+    it('der Koerper ist immer sichtbar', () => {
+        assert.match(CSS, /\.ds-sec-body\s*\{[^}]*display:\s*block/);
+        assert.ok(!/\.ds-sec-body\s*\{[^}]*display:\s*none/.test(CSS));
     });
 
     it('kein Abschnitt wird je aus dem Dokument entfernt', () => {
-        assert.ok(!/\.remove\(\)/.test(CODE.replace(/if \(alt\) alt\.remove\(\);/g, '')),
-            'nur die Rueckweg-Zeile darf sich entfernen');
+        assert.ok(!/\.remove\(\)/.test(CODE.replace(/if \(altReset\) altReset\.remove\(\);/g, '')),
+            'nur eine alte Rueckweg-Zeile darf verschwinden');
     });
 
-    it('der Klappzustand wird gemerkt', () => {
-        assert.match(CODE, /localStorage\.setItem\(STORE/);
-        assert.match(CODE, /localStorage\.getItem\(STORE\)/);
+    it('kein Klappzustand wird mehr gespeichert oder gelesen', () => {
+        assert.ok(!/localStorage/.test(CODE));
     });
 
-    it('der Kopf sagt Screenreadern, ob er offen ist', () => {
-        assert.match(CODE, /setAttribute\('aria-expanded'/);
+    it('eine Ueberschrift traegt kein aria-expanded', () => {
+        assert.ok(!/setAttribute\('aria-expanded'/.test(CODE));
     });
 });
 
@@ -236,21 +231,8 @@ describe('Bausteine — Aussehen aus Tokens', () => {
         assert.ok(!/!important/.test(block), 'der Umbau selbst waere sonst der naechste Befund');
     });
 
-    it('Kopf und Rueckweg haben einen sichtbaren Fokusrahmen', () => {
-        assert.match(CSS, /\.ds-sec-hd:focus-visible\s*\{[^}]*outline/);
-        assert.match(CSS, /\.ds-sec-reset-btn:focus-visible\s*\{[^}]*outline/);
-    });
-});
-
-describe('Bausteine — der Rueckweg', () => {
-    it('erscheint nur bei Abweichung vom Startzustand', () => {
-        const fn = /function zeichneReset\(host\) \{[\s\S]*?\n    \}/.exec(CODE)[0];
-        assert.match(fn, /if \(gleich\) \{ if \(alt\) alt\.remove\(\); return; \}/);
-    });
-
-    it('nennt, wie viele Abschnitte offen sind', () => {
-        const fn = /function zeichneReset\(host\) \{[\s\S]*?\n    \}/.exec(CODE)[0];
-        assert.match(fn, /SECTIONS\.length/);
+    it('keine Regeln mehr fuer Pfeil und Rueckweg', () => {
+        assert.ok(!/\.ds-sec-arrow|\.ds-sec-reset/.test(CSS), 'tote Regeln stehen noch da');
     });
 });
 

@@ -311,7 +311,9 @@ describe('Fachbegriffe erklären sich dort, wo die Zahl steht', () => {
         const spalten = TIER.slice(TIER.indexOf('const SPALTEN = ['));
         const block = spalten.slice(0, spalten.indexOf('];'));
         const hilfen = [...block.matchAll(/hilf:\s*'([a-zA-Z]+)'/g)].map(m => m[1]);
-        assert.ok(hilfen.length >= 2, `nur ${hilfen.length} Spalten mit Hilfstext`);
+        // Seit UI-26 (27.09.2026) ist die Spalte „ggü. Schnitt" (vsField)
+        // weg; es bleiben die Top-8-Quote und die Win-Rate-Spalte.
+        assert.ok(hilfen.length >= 1, `nur ${hilfen.length} Spalten mit Hilfstext`);
         hilfen.forEach(k => assert.match(TIER, new RegExp('\\n\\s+' + k + ':'),
             `TERMS kennt '${k}' nicht — die Marke zeigte undefined`));
         // Und mindestens eine Spalte mit eigenem Tipp statt Sammelbegriff.

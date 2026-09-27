@@ -131,8 +131,9 @@ describe('B1 — die Saetze neben der Spalte tragen denselben Namen wie die Spal
         });
         const html = ctx.renderFrozenBanner();
         assert.ok(!/win\s?%/i.test(html), 'englischer Text nennt weiter win %:\n' + html);
-        assert.equal(K.kurz('mitUnentschieden'), 'Win share incl. ties');
-        assert.ok(html.includes('Win share incl. ties'),
+        // UI-16 (27.09.2026): Kurzname „Win rate" statt „Win share incl. ties".
+        assert.equal(K.kurz('mitUnentschieden'), 'Win rate');
+        assert.ok(html.includes('Win rate'),
             'der englische Kurzname fehlt:\n' + html);
     });
 

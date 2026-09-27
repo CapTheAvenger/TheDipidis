@@ -101,6 +101,112 @@
            (index.html:3734 gegen :3745), der Verweis steht also. */
         window.ladeMajorMatchups = ladeMajorMatchups;
 
+        /* Die Zeilen eines Labs-Matchup-Auszugs in das Register je Paarung.
+           Herausgeloest am 27.09.2026 (DA-13/FE-5), damit der Rueckfall auf
+           das letzte Major-Format DENSELBEN Parser benutzt — zwei Parser
+           fuer eine Datei waeren zwei Zahlen fuer eine Sache. */
+        function majorMatchupsParsen(txt) {
+            const parsed = (typeof Papa !== 'undefined' && Papa.parse)
+                ? Papa.parse(txt, { header: true, delimiter: ',', skipEmptyLines: true })
+                : { data: [] };
+            const reg = {};
+            for (const r of (parsed.data || [])) {
+                // Nur die Gesamtsicht, nicht Tag 1 / Tag 2 getrennt —
+                // sonst zaehlt dieselbe Partie mehrfach.
+                if (String(r.day_filter || '').trim() !== 'overall') continue;
+                const a = String(r.my_deck_name || '').trim();
+                const b = String(r.opponent_deck_name || '').trim();
+                if (!a || !b) continue;
+                const anzahl = parseInt(r.vs_count || '0', 10) || 0;
+                const punkte = parseLocaleNumber(r.vs_win_pct || '0', 0);
+                if (!anzahl) continue;
+                /* DIE BILANZ JE PAARUNG (03.09.2026).
+                   Bis hierher stand in der Major-Spalte `punkte` — die
+                   Spalte vs_win_pct der Labs-Datei. Die heisst dort
+                   "Win %", ist aber nachweislich die Matchpunktquote
+                   (3S+U)/(3M): drei Paarungen aus dem Worlds-Lauf
+                   treffen sie auf 0,01 Punkte genau, die Win Rate
+                   S/(S+N) verfehlt sie um 1,5 bis 12 Punkte. Deshalb
+                   hiess die Spalte anders als die daneben.
+
+                   Jetzt scrapen wir die Bilanz mit (vs_wins /
+                   vs_losses / vs_ties, backend/scrapers/
+                   labs_tournament_scraper.py). Damit laesst sich die
+                   Major-Quote MIT DERSELBEN RECHNUNG bilden wie die
+                   Online-Spalte links: S/(S+N), geglaettet mit
+                   demselben 20-Partien-Prior (js/matchup-glaettung.js).
+                   Erst dadurch darf die Spalte "Major-WR" heissen.
+
+                   LEER IST LEER: fehlt die Bilanz (Zeile aus einem
+                   Lauf vor dieser Aenderung), bleibt `wr` null und die
+                   Oberflaeche zeigt einen Strich. Aus `punkte` eine
+                   Win Rate zu schaetzen waere eine Behauptung. */
+                const ganz = (v) => {
+                    const n = parseInt(String(v == null ? '' : v).trim(), 10);
+                    return Number.isFinite(n) && n >= 0 ? n : null;
+                };
+                const siege = ganz(r.vs_wins);
+                const niederlagen = ganz(r.vs_losses);
+                const unentschieden = ganz(r.vs_ties);
+                const hatBilanz = siege != null && niederlagen != null;
+                const entschieden = hatBilanz ? siege + niederlagen : 0;
+                const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;
+                const wr = (hatBilanz && entschieden > 0 && G && typeof G.quote === 'function')
+                    ? G.quote(siege, niederlagen)
+                    : (hatBilanz && entschieden > 0 ? (siege / entschieden) * 100 : null);
+                const wrRoh = (hatBilanz && entschieden > 0)
+                    ? (siege / entschieden) * 100 : null;
+                if (!reg[a]) reg[a] = {};
+                /* DREI ZUSTAENDE, NICHT ZWEI (03.09.2026, live gefunden).
+                   25 der 769 Paarungen stehen auf 0-0-1: eine einzige
+                   Partie, und die endete unentschieden. Die Bilanz IST
+                   da, sie hat nur keinen Nenner — S/(S+N) ist auf null
+                   entschiedenen Partien nicht definiert. Der erste
+                   Wurf zeigte dafuer den Hinweis "ohne Bilanz in der
+                   Quelle", was schlicht falsch war. `bilanzDa`
+                   unterscheidet die beiden Faelle, damit die
+                   Oberflaeche sagen kann, welcher vorliegt. */
+                reg[a][b] = { anzahl, punkte, siege, niederlagen, unentschieden,
+                              wr, wrRoh, bilanzDa: hatBilanz };
+            }
+            return reg;
+        }
+
+        /* DA-13 / FE-5 (27.09.2026): solange es im laufenden Format noch
+           kein Major gibt, das LETZTE Major-Format (data/format_window.json
+           → previous_format_key). Das Register der Heatmap bleibt davon
+           unberuehrt — sie zeigt weiter nur das laufende Format. Wer den
+           Rueckfall nutzt, bekommt den Schluessel mit und muss ihn
+           anschreiben. */
+        async function ladeMajorMatchupsMitRueckfall() {
+            const fw = window._formatWindow;
+            const alt = fw && fw.oldest_legal_set ? String(fw.oldest_legal_set).toUpperCase() : '';
+            const neu = fw && fw.current_set ? String(fw.current_set).toUpperCase() : '';
+            const laufend = (alt && neu) ? `${alt}-${neu}` : '';
+            const reg = await ladeMajorMatchups();
+            if (reg && Object.keys(reg).length) return { reg, key: laufend };
+            if (window._majorMatchupRueckfall) return window._majorMatchupRueckfall;
+            const leer = { reg: {}, key: '' };
+            try {
+                const vorher = fw && fw.previous_format_key ? String(fw.previous_format_key).toUpperCase() : '';
+                if (!vorher || vorher === laufend) { window._majorMatchupRueckfall = leer; return leer; }
+                const stamp = `?t=${Date.now()}`;
+                const v = await fetch(`${BASE_PATH}labs_tournament_matchups_verzeichnis.json${stamp}`)
+                    .then(r => r.ok ? r.json() : null).catch(() => null);
+                if (!v || !Array.isArray(v.meta_keys) || v.meta_keys.indexOf(vorher) === -1) {
+                    window._majorMatchupRueckfall = leer; return leer;
+                }
+                const txt = await fetch(`${BASE_PATH}labs_tournament_matchups_${vorher}.csv${stamp}`)
+                    .then(r => r.ok ? r.text() : '').catch(() => '');
+                window._majorMatchupRueckfall = txt ? { reg: majorMatchupsParsen(txt), key: vorher } : leer;
+                return window._majorMatchupRueckfall;
+            } catch (_e) {
+                window._majorMatchupRueckfall = leer;
+                return leer;
+            }
+        }
+        window.ladeMajorMatchupsMitRueckfall = ladeMajorMatchupsMitRueckfall;
+
         async function ladeMajorMatchups() {
             if (window._majorMatchupRegistry) return window._majorMatchupRegistry;
             const leer = {};
@@ -125,69 +231,7 @@
                 // KOMMA. Die Labs-Auszuege kommen aus einer anderen Quelle als
                 // die eigenen Exporte; mit ';' zerfaellt die Datei zu Zeilen
                 // mit einem Feld und alles faellt still auf leer zurueck.
-                const parsed = (typeof Papa !== 'undefined' && Papa.parse)
-                    ? Papa.parse(txt, { header: true, delimiter: ',', skipEmptyLines: true })
-                    : { data: [] };
-                const reg = {};
-                for (const r of (parsed.data || [])) {
-                    // Nur die Gesamtsicht, nicht Tag 1 / Tag 2 getrennt —
-                    // sonst zaehlt dieselbe Partie mehrfach.
-                    if (String(r.day_filter || '').trim() !== 'overall') continue;
-                    const a = String(r.my_deck_name || '').trim();
-                    const b = String(r.opponent_deck_name || '').trim();
-                    if (!a || !b) continue;
-                    const anzahl = parseInt(r.vs_count || '0', 10) || 0;
-                    const punkte = parseLocaleNumber(r.vs_win_pct || '0', 0);
-                    if (!anzahl) continue;
-                    /* DIE BILANZ JE PAARUNG (03.09.2026).
-                       Bis hierher stand in der Major-Spalte `punkte` — die
-                       Spalte vs_win_pct der Labs-Datei. Die heisst dort
-                       "Win %", ist aber nachweislich die Matchpunktquote
-                       (3S+U)/(3M): drei Paarungen aus dem Worlds-Lauf
-                       treffen sie auf 0,01 Punkte genau, die Win Rate
-                       S/(S+N) verfehlt sie um 1,5 bis 12 Punkte. Deshalb
-                       hiess die Spalte anders als die daneben.
-
-                       Jetzt scrapen wir die Bilanz mit (vs_wins /
-                       vs_losses / vs_ties, backend/scrapers/
-                       labs_tournament_scraper.py). Damit laesst sich die
-                       Major-Quote MIT DERSELBEN RECHNUNG bilden wie die
-                       Online-Spalte links: S/(S+N), geglaettet mit
-                       demselben 20-Partien-Prior (js/matchup-glaettung.js).
-                       Erst dadurch darf die Spalte "Major-WR" heissen.
-
-                       LEER IST LEER: fehlt die Bilanz (Zeile aus einem
-                       Lauf vor dieser Aenderung), bleibt `wr` null und die
-                       Oberflaeche zeigt einen Strich. Aus `punkte` eine
-                       Win Rate zu schaetzen waere eine Behauptung. */
-                    const ganz = (v) => {
-                        const n = parseInt(String(v == null ? '' : v).trim(), 10);
-                        return Number.isFinite(n) && n >= 0 ? n : null;
-                    };
-                    const siege = ganz(r.vs_wins);
-                    const niederlagen = ganz(r.vs_losses);
-                    const unentschieden = ganz(r.vs_ties);
-                    const hatBilanz = siege != null && niederlagen != null;
-                    const entschieden = hatBilanz ? siege + niederlagen : 0;
-                    const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;
-                    const wr = (hatBilanz && entschieden > 0 && G && typeof G.quote === 'function')
-                        ? G.quote(siege, niederlagen)
-                        : (hatBilanz && entschieden > 0 ? (siege / entschieden) * 100 : null);
-                    const wrRoh = (hatBilanz && entschieden > 0)
-                        ? (siege / entschieden) * 100 : null;
-                    if (!reg[a]) reg[a] = {};
-                    /* DREI ZUSTAENDE, NICHT ZWEI (03.09.2026, live gefunden).
-                       25 der 769 Paarungen stehen auf 0-0-1: eine einzige
-                       Partie, und die endete unentschieden. Die Bilanz IST
-                       da, sie hat nur keinen Nenner — S/(S+N) ist auf null
-                       entschiedenen Partien nicht definiert. Der erste
-                       Wurf zeigte dafuer den Hinweis "ohne Bilanz in der
-                       Quelle", was schlicht falsch war. `bilanzDa`
-                       unterscheidet die beiden Faelle, damit die
-                       Oberflaeche sagen kann, welcher vorliegt. */
-                    reg[a][b] = { anzahl, punkte, siege, niederlagen, unentschieden,
-                                  wr, wrRoh, bilanzDa: hatBilanz };
-                }
+                const reg = majorMatchupsParsen(txt);
                 window._majorMatchupRegistry = reg;
                 return reg;
             } catch (_e) {
@@ -525,7 +569,17 @@
                  * Genau die Frage, fuer die man zwischen zwei Runden zum
                  * Handy greift — und sie sah aus wie eine fertige Antwort
                  * ohne Daten. */
-                let tableHtml = `<table class="heatmap-table" style="--heatmap-cols: ${xDecks.length};">`;
+                /* FE-4 (27.09.2026, Hausi): „CSV-Button durch ‚Bild generieren'
+                   ersetzen — nur wenn gut lesbar umsetzbar, sonst CSV-Button
+                   ersatzlos raus." Gemessen: 20 × 20 Zellen auf einem
+                   1080 px breiten Bild lassen je Zelle rund 45 px; auf einem
+                   390 px breiten Telefon angezeigt (Faktor 0,36) wird selbst
+                   eine zweistellige Quote in 22 px zu 8 px Schrift — unter
+                   der Grenze von 11 px, die diese Seite sonst einhaelt. Also
+                   kein Bild und kein CSV-Knopf mehr an der Heatmap
+                   (data-csv="nein" ist der vorgesehene Ausstieg aus
+                   js/ds-csv.js). */
+                let tableHtml = `<table class="heatmap-table" data-csv="nein" style="--heatmap-cols: ${xDecks.length};">`;
                 tableHtml += `<colgroup><col class="heatmap-col-first">${xDecks.map(() => '<col class="heatmap-col-data">').join('')}</colgroup>`;
                 
                 // PERFORMANCE: Pre-compute normalized colDeck names (once per render, not per cell)

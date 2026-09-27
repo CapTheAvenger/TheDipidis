@@ -119,7 +119,7 @@ describe('Build-vs: jede Zeile sagt, worauf sie beruht', () => {
         assert.ok(satz.includes('v0.1'), `nennt die Version: ${satz}`);
         assert.ok(satz.includes('15.05.2026'),
             `nennt das Alter der Datenbasis in deutscher Schreibweise: ${satz}`);
-        assert.ok(satz.includes('358 Partien'),
+        assert.ok(satz.includes('358 Matches'),
             `nennt die Zahl der Partien hinter dem Matchup: ${satz}`);
     });
 
@@ -129,7 +129,7 @@ describe('Build-vs: jede Zeile sagt, worauf sie beruht', () => {
             name: 'Kieran', beleg: 'heuristik', targets: new Set(['Toucannon'])
         });
         assert.ok(satz.startsWith('unbelegt'), `faengt mit der Einordnung an: ${satz}`);
-        assert.ok(satz.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'),
+        assert.ok(satz.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'),
             `der vom Betreiber verlangte Wortlaut steht da: ${satz}`);
         assert.ok(!satz.includes('card_capability_interactions.json'),
             'eine unbelegte Zeile darf sich nicht auf die Regelbasis berufen');
@@ -203,7 +203,7 @@ describe('Build-vs: jede Zeile sagt, worauf sie beruht', () => {
         const h = belegHelfer(STAND, MATCHUPS, 'Mega Excadrill');
         const satz = h._belegSatz({ beleg: 'paarung', targets: new Set(['Unbekanntes Deck']) });
         assert.ok(satz.includes('nicht bekannt'), satz);
-        assert.ok(!satz.includes('0 Partien'), `keine Null als Angabe: ${satz}`);
+        assert.ok(!satz.includes('0 Matches'), `keine Null als Angabe: ${satz}`);
     });
 
 });
@@ -365,10 +365,10 @@ describe('Build-vs: Kopf und "keine Daten" stehen in der Liste', () => {
     it('jede Zeile traegt ihre Einordnung sichtbar, nicht im Tooltip', () => {
         const html = male(EINE, ['Toucannon']);
         assert.ok(html.includes('anti-tech-card-beleg'), 'eigenes Element je Zeile');
-        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'),
+        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'),
             'der Wortlaut steht im Text der Zeile');
         const vorTitle = html.split('title=')[0];
-        assert.ok(vorTitle.includes('nicht an Partien gemessen'),
+        assert.ok(vorTitle.includes('nicht an Matches gemessen'),
             'die Einordnung darf nicht in einem title-Attribut verschwinden');
     });
 
@@ -455,14 +455,14 @@ describe('Warum-Dialog: die Ideen-Zeile nennt ihre Regelbasis', () => {
         assert.ok(satz.includes('card_capability_interactions.json'), satz);
         assert.ok(satz.includes('v0.1'), satz);
         assert.ok(satz.includes('15.05.2026'), satz);
-        assert.ok(satz.includes('358 Partien'), satz);
+        assert.ok(satz.includes('358 Matches'), satz);
     });
 
     it('sagt es, wenn die Partienzahl fehlt, statt eine Null zu behaupten', () => {
         const satz = ideenHelfer()({ karte: 'Crustle', beleg: 'paarung' },
             { version: '0.1', datum: '2026-05-15' });
         assert.ok(satz.includes('nicht bekannt'), satz);
-        assert.ok(!satz.includes('0 Partien'), satz);
+        assert.ok(!satz.includes('0 Matches'), satz);
     });
 
     it('ohne bekanntes Datum steht ein Fragezeichen, kein erfundenes Datum', () => {
@@ -478,7 +478,7 @@ describe('Warum-Dialog: die Ideen-Zeile nennt ihre Regelbasis', () => {
         const satz = ideenHelfer()({ karte: 'X', beleg: 'heuristik', partien: 358 },
             { version: '0.1', datum: '2026-05-15' });
         assert.ok(satz.startsWith('unbelegt'), satz);
-        assert.ok(satz.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'), satz);
+        assert.ok(satz.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'), satz);
         assert.ok(!satz.includes('358'),
             'die Partienzahl gehoert zum Matchup und beglaubigt keine Vermutung');
         assert.ok(!satz.includes('card_capability_interactions.json'),
@@ -495,7 +495,7 @@ describe('Warum-Dialog: die Ideen-Zeile nennt ihre Regelbasis', () => {
         const satz = ideenHelfer()({ karte: 'X', beleg: 'nutzer' },
             { version: '0.1', datum: '2026-05-15' });
         assert.ok(satz.startsWith('vom Nutzer eingetragen'), satz);
-        assert.ok(satz.includes('nicht an Partien gemessen'), satz);
+        assert.ok(satz.includes('nicht an Matches gemessen'), satz);
     });
 
     it('die CSS-Klasse wird gerechnet, nicht behauptet', () => {
@@ -547,7 +547,7 @@ describe('Warum-Dialog: die Luecke wird geschrieben, nicht verschwiegen', () => 
         // den ausgelieferten Satz sieht und nicht einen Platzhalter.
         const woerter = {
             'buildInfo.techIdeenOhne': 'Nichts gefunden gegen: {liste}. Die Regelbasis kennt {n} Paarungen vom {datum} — diese Matchups sind nicht abgedeckt.',
-            'buildInfo.techIdeenOhneEintrag': '{name} ({wr}, {n} Partien)'
+            'buildInfo.techIdeenOhneEintrag': '{name} ({wr}, {n} Matches)'
         };
         new Function('_ohne', 'stand', 'wrap', 'document', 't', 'getLang', 'zahlKomma', code)(
             ohne, stand, wrap, dok, (k) => woerter[k] || k, () => 'de', zahlKomma);

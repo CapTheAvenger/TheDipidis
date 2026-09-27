@@ -394,7 +394,7 @@ describe('M4 — der Brick-Filter schreibt an, worauf er wirkt', () => {
 
     it('ohne Journalpartien sagt er genau das — statt stumm nichts zu tun', () => {
         const html = baue({ myDeck: 'Mega Excadrill' }, {})();
-        assert.match(html, /keine Journalpartien für dieses Deck/);
+        assert.match(html, /keine Journal-Matches für dieses Deck/);
     });
 
     it('die Zeile haengt auch wirklich neben dem Umschalter', () => {

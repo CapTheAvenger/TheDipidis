@@ -17,7 +17,7 @@
 // #currentMetaContent hat zwoelf direkte Kinder, jedes ein sauberer
 // Block mit eigener Ueberschrift. Sie werden hier in benannte,
 // klappbare Abschnitte gefasst und in eine Reihenfolge gebracht, die
-// mit der Antwort beginnt. Der Zustand jedes Abschnitts wird gemerkt.
+// mit der Antwort beginnt. Seit dem 27.09.2026 (UI-13) sind alle offen.
 //
 // WAS SIE AUSDRUECKLICH NICHT TUT
 //
@@ -37,7 +37,6 @@
     'use strict';
 
     var HOST_ID = 'currentMetaContent';
-    var STORE = 'ds_sections_v1';
 
     // Reihenfolge = Reihenfolge auf der Seite. `auf` ist der
     // Startzustand; wer etwas anders einstellt, bekommt seine
@@ -46,9 +45,6 @@
     // Die ersten drei beantworten die Eingangsfrage. Alles danach ist
     // Vertiefung und faengt zugeklappt an — sichtbar vorhanden, aber
     // nicht im Weg.
-    // Luft ueber dem aufgeklappten Abschnitt. Oben klebt nichts fest,
-    // also reicht ein schmaler Rand, damit er nicht an der Kante pickt.
-    var ABSTAND_OBEN = 16;
 
     // ZWEI AENDERUNGEN AM 01.09.2026, beide aus derselben Rueckmeldung.
     //
@@ -74,8 +70,9 @@
           de: ['Die meistgespielten Archetypen', ''],
           en: ['Most played archetypes', ''] },
         { id: 'heatmap', auf: true,  nimm: ['#matchupHeatmapContainer'],
-          de: ['Matchups', ''],
-          en: ['Matchups', ''] },
+          /* UI-14 (27.09.2026, Hausi): „Matchups" → „Matchup Heatmap". */
+          de: ['Matchup Heatmap', ''],
+          en: ['Matchup heatmap', ''] },
         /* „Dein Deck gegen das Meta" stand bis zum 11.09.2026 hier.
            Erst zog die Rechnung in den Meta Call, dann blieb an dieser
            Stelle ein Abschnitt, der nur noch einen Verweis trug — und
@@ -86,7 +83,7 @@
            an jeder Deck-Karte der Tier-Liste — dort ist er an einem
            konkreten Deck, statt als leerer Abschnitt herumzustehen.
            js/ds-ev-rechner.js ist damit entfallen. */
-        { id: 'tiers',   auf: false, nimm: ['__tiers__'],
+        { id: 'tiers',   auf: true, nimm: ['__tiers__'],
           de: ['Tier-Liste', 'alle Archetypen nach Stärke gruppiert'],
           en: ['Tier list', 'all archetypes grouped by strength'] },
         /* Der Untertitel nennt die Kennzahl so, wie die Spalte darunter
@@ -98,7 +95,7 @@
            Abschrift entsteht, die stehen bleibt, wenn das Modul sich
            aendert. Faellt das Modul aus, steht die Formel da statt
            eines Hausnamens. */
-        { id: 'rang',    auf: false, nimm: ['div.cm-rangliste-block'],
+        { id: 'rang',    auf: true, nimm: ['div.cm-rangliste-block'],
           de: ['Meta-Performance', 'Listen, {quote:mitUnentschieden} und Top-8-Quote je Deck — sortierbar'],
           en: ['Meta performance', 'lists, {quote:mitUnentschieden} and top-8 rate per deck — sortable'] },
         /* GANZ NACH UNTEN (11.09.2026). Betreiber: „Most played cards
@@ -151,43 +148,10 @@
         return [fuelleQuoten(t[0]), fuelleQuoten(t[1])];
     }
 
-    function gemerkt() {
-        try {
-            var v = JSON.parse(localStorage.getItem(STORE));
-            if (Array.isArray(v)) return nurBekannte(v);
-        } catch (e) { /* kein Speicher, kein Problem */ }
-        return null;
-    }
-
-    /* Gespeicherte Abschnitte, die es nicht mehr gibt, fliegen raus.
-     *
-     * BEFUND (04.09.2026, live auf der Startseite): dort stand
-     * "7 von 6 Abschnitten offen". Der Abschnitt "Auf- und Absteiger"
-     * ist am 01.09.2026 aus SECTIONS verschwunden, seine ID stand aber
-     * weiter im localStorage jedes Besuchers, der die Seite vorher
-     * benutzt hatte. Gezaehlt wurde die gespeicherte Liste, verglichen
-     * wurde gegen die aktuelle — daher mehr offene Abschnitte als
-     * ueberhaupt vorhanden.
-     *
-     * Zwei Folgen, beide sichtbar: die unsinnige Zahl, und ein
-     * "Ansicht zuruecksetzen", das nie wieder verschwindet, weil
-     * `gleich` in zeichneReset() mit einer Geister-ID nie zutreffen
-     * kann.
-     *
-     * Der Filter gehoert ans LESEN, nicht ans Schreiben: die alten
-     * Eintraege liegen schon in fremden Browsern, und die erreicht man
-     * nur beim naechsten Laden. */
-    function nurBekannte(ids) {
-        var bekannt = SECTIONS.map(function (s) { return s.id; });
-        return ids.filter(function (id) { return bekannt.indexOf(id) > -1; });
-    }
-
-    function merken(offen) {
-        try { localStorage.setItem(STORE, JSON.stringify(offen)); } catch (e) {}
-    }
-
+    /* UI-13: jeder Abschnitt ist offen, immer. Ein gemerkter alter
+       Zustand (ds_sections_v1) wird nicht mehr gelesen. */
     function standard() {
-        return SECTIONS.filter(function (s) { return s.auf; }).map(function (s) { return s.id; });
+        return SECTIONS.map(function (s) { return s.id; });
     }
 
     var offen = null;
@@ -290,20 +254,24 @@
        Der Klapp-Knopf behaelt die ganze Breite (flex: 1), damit die
        Zeile weiter ueberall klickbar ist; der Info-Knopf sitzt am
        rechten Rand, immer an derselben Stelle. */
-    function kopf(s, aufgeklappt) {
+    function kopf(s) {
         var t = texte(s);
         var zeile = document.createElement('div');
         zeile.className = 'ds-sec-kopf';
 
-        var b = document.createElement('button');
-        b.type = 'button';
+        /* UI-13 (27.09.2026, Hausi): „Alle Abschnitte sollen offen
+           bleiben." Die Kopfzeile ist seitdem eine UEBERSCHRIFT, kein
+           Knopf mehr — ein Knopf, der nichts klappt, waere schlimmer
+           als keiner. Kein Pfeil, keine Zuruecksetzen-Zeile. */
+        var b = document.createElement('h2');
         b.className = 'ds-sec-hd';
-        b.setAttribute('aria-expanded', String(aufgeklappt));
-        b.innerHTML =
-            '<span class="ds-sec-arrow" aria-hidden="true">▸</span>' +
-            '<span class="ds-sec-t"></span>' +
-            '<span class="ds-sec-sub"></span>';
-        b.querySelector('.ds-sec-t').textContent = t[0];
+        var titel = document.createElement('span');
+        titel.className = 'ds-sec-t';
+        titel.textContent = t[0];
+        var unter = document.createElement('span');
+        unter.className = 'ds-sec-sub';
+        b.appendChild(titel);
+        b.appendChild(unter);
         setzeUnterzeile(b, t[1]);
         zeile.appendChild(b);
 
@@ -354,40 +322,6 @@
         });
     }
 
-    function zeichneReset(host) {
-        var alt = document.getElementById('dsSecReset');
-        // Ohne Zustand gibt es nichts zurueckzusetzen. Das passiert
-        // wirklich: wer die Sprache wechselt, ohne current-meta je
-        // geoeffnet zu haben, kommt hier mit offen === null an —
-        // gemessen am 18.08.2026 auf past-meta und city-league,
-        // TypeError: Cannot read properties of null (reading 'length').
-        if (!offen) { if (alt) alt.remove(); return; }
-        var std = standard();
-        var gleich = offen.length === std.length && std.every(function (x) { return offen.indexOf(x) > -1; });
-        if (gleich) { if (alt) alt.remove(); return; }
-        var row = alt || document.createElement('div');
-        row.id = 'dsSecReset';
-        row.className = 'ds-sec-reset';
-        row.innerHTML = '';
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'ds-sec-reset-btn';
-        b.textContent = de() ? 'Ansicht zurücksetzen' : 'Reset view';
-        b.addEventListener('click', function () {
-            offen = standard();
-            merken(offen);
-            anwenden(host);
-        });
-        var n = document.createElement('span');
-        n.className = 'ds-sec-reset-n';
-        n.textContent = de()
-            ? offen.length + ' von ' + SECTIONS.length + ' Abschnitten offen'
-            : offen.length + ' of ' + SECTIONS.length + ' sections open';
-        row.appendChild(b);
-        row.appendChild(n);
-        if (!alt) host.insertBefore(row, host.firstChild);
-    }
-
     // Aufklappen, das man auch sieht.
     //
     // GEMESSEN am 19.08.2026 auf der Live-Seite, Fenster 1175 px hoch, mit
@@ -399,42 +333,14 @@
     //     davon sichtbar       44 px  =  6 %
     //     Seite gescrollt       0 px
     //
-    // Sechs Prozent am unteren Rand sieht aus wie nichts. Darum den
-    // Abschnitt nach dem Aufklappen an den oberen Bildrand holen — aber nur,
-    // wenn er sonst nicht hineinpasst. Ein Sprung ohne Anlass stoert genauso
-    // wie eine ausbleibende Reaktion.
-    function insBild(sec) {
-        if (!sec || typeof sec.getBoundingClientRect !== 'function') return;
-        // Direkt nach dem Umschalten stimmt die Messung noch nicht.
-        var rahmen = (typeof requestAnimationFrame === 'function')
-            ? requestAnimationFrame
-            : function (f) { setTimeout(f, 16); };
-        rahmen(function () {
-            var r = sec.getBoundingClientRect();
-            var sicht = window.innerHeight || document.documentElement.clientHeight;
-            if (r.top >= 0 && r.bottom <= sicht) return;   // passt ohnehin
-            if (r.top >= 0 && r.top <= ABSTAND_OBEN) return;  // steht schon oben
-            var ziel = (window.pageYOffset || document.documentElement.scrollTop || 0)
-                     + r.top - ABSTAND_OBEN;
-            if (ziel < 0) ziel = 0;
-            var sanft = !(window.matchMedia
-                && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-            try {
-                window.scrollTo({ top: ziel, behavior: sanft ? 'smooth' : 'auto' });
-            } catch (e) {
-                window.scrollTo(0, ziel);
-            }
-        });
-    }
-
+    // UI-13: jeder Abschnitt offen; eine Ueberschrift traegt kein
+    // aria-expanded.
     function anwenden(host) {
         host.querySelectorAll('.ds-sec').forEach(function (sec) {
-            var auf = offen.indexOf(sec.getAttribute('data-sec')) > -1;
-            sec.classList.toggle('is-open', auf);
-            var hd = sec.querySelector('.ds-sec-hd');
-            if (hd) hd.setAttribute('aria-expanded', String(auf));
+            sec.classList.add('is-open');
         });
-        zeichneReset(host);
+        var altReset = document.getElementById('dsSecReset');
+        if (altReset) altReset.remove();
     }
 
     // Schrittweise und wiederholbar.
@@ -458,7 +364,7 @@
         if (!host.querySelector('.tier-hero-section, #matchupHeatmapContainer, .top-cards-container, #cm-tier-1')) {
             return false;
         }
-        if (!offen) offen = gemerkt() || standard();
+        offen = standard();
 
         // EINE Weiche am Host statt eines Handlers je Kopf.
         //
@@ -482,65 +388,7 @@
         // Der Host selbst wird nie ersetzt, nur sein Inhalt. Ein Handler an
         // IHM ueberlebt jedes innerHTML darunter. Das Kennzeichen sorgt
         // dafuer, dass nicht bei jedem Durchlauf ein weiterer dazukommt.
-        if (!host.__dsSecWeiche) {
-            host.__dsSecWeiche = true;
-            host.addEventListener('click', function (ev) {
-                if (!ev.target || !ev.target.closest) return;
-                /* DER INFO-KNOPF KLAPPT NICHTS.
-                 *
-                 * js/ds-abschnitt-info.js ruft in seinem eigenen
-                 * Zuhoerer stopPropagation(). Das reicht hier NICHT:
-                 * jener Zuhoerer haengt am `document`, diese Weiche am
-                 * Host, und der Host liegt im Baum darunter. Ein Klick
-                 * blubbert von unten nach oben — diese Weiche ist also
-                 * zuerst dran, und wenn der andere die Weitergabe
-                 * stoppt, ist hier laengst umgeschaltet.
-                 *
-                 * LIVE GEMESSEN (10.09.2026, Chromium 1440 x 900, echte
-                 * Datei ueber einen lokalen Server, Klick auf den
-                 * Info-Knopf des Abschnitts "heatmap"). Drei Faelle:
-                 *
-                 *   Knopf NEBEN dem Klapp-Knopf, ohne diese Zeile
-                 *       aria-expanded true -> true, ds_sections_v1 leer
-                 *   Knopf IM Klapp-Knopf, ohne diese Zeile
-                 *       aria-expanded true -> FALSE,
-                 *       ds_sections_v1 ["top","cards"] — zugeklappt
-                 *   Knopf IM Klapp-Knopf, mit dieser Zeile
-                 *       aria-expanded true -> true, ds_sections_v1 leer
-                 *
-                 * Der erste Fall ist der ausgelieferte: weil der Knopf
-                 * ein GESCHWISTER von .ds-sec-hd ist, greift
-                 * closest('.ds-sec-hd') schon nicht. Die Zeile ist
-                 * damit heute wirkungslos — und steht trotzdem hier,
-                 * weil der zweite Fall zeigt, was passiert, sobald
-                 * jemand den Knopf in die Ueberschrift zieht: der
-                 * Dialog geht auf UND der Abschnitt klappt zu, und das
-                 * Zuklappen wird auch noch gespeichert. */
-                if (ev.target.closest('[data-abschnitt-info]')) return;
-                // Der Zuruecksetzen-Knopf haengt am selben Problem: er sitzt
-                // im Host und verliert seinen Handler bei jedem fremden
-                // innerHTML. Hier mitbehandelt, statt ihn spaeter einzeln
-                // wiederzufinden.
-                if (ev.target.closest('.ds-sec-reset-btn')) {
-                    offen = standard();
-                    merken(offen);
-                    anwenden(host);
-                    return;
-                }
-                var hd = ev.target.closest('.ds-sec-hd');
-                if (!hd || !host.contains(hd)) return;
-                var sec = hd.closest('.ds-sec');
-                var id = sec && sec.getAttribute('data-sec');
-                if (!id) return;
-                if (!offen) offen = gemerkt() || standard();
-                var jetzt = offen.indexOf(id) > -1;
-                offen = jetzt ? offen.filter(function (x) { return x !== id; })
-                              : offen.concat([id]);
-                merken(offen);
-                anwenden(host);
-                if (!jetzt) insBild(sec);
-            });
-        }
+        /* UI-13: kein Klick-Zweig mehr — nichts klappt. */
 
         var geaendert = false;
 
@@ -554,8 +402,7 @@
                 sec = document.createElement('section');
                 sec.className = 'ds-sec';
                 sec.setAttribute('data-sec', s.id);
-                var auf = offen.indexOf(s.id) > -1;
-                var kopfzeile = kopf(s, auf);
+                var kopfzeile = kopf(s);
                 var body = document.createElement('div');
                 body.className = 'ds-sec-body';
                 sec.appendChild(kopfzeile);
@@ -646,7 +493,6 @@
            Seite; ohne diesen Aufruf bliebe seine Beschriftung nach einem
            Sprachwechsel in der alten stehen. */
         zeichneInfoKnoepfe(host);
-        zeichneReset(host);
     }
 
     function start() {

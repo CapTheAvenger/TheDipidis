@@ -404,11 +404,12 @@ describe('the diverging bar keeps its colours', () => {
         assert.ok(b > g && b > r, `--dv-pos #${pos} is not a blue`);
     });
 
-    it('and it is still used somewhere', () => {
-        // Ein Balken, den niemand mehr rendert, ist toter Stil.
+    it('the meta-performance table no longer draws it (UI-26, 27.09.2026)', () => {
+        // Hausi: der Vergleich mit dem Schnitt stand dreifach da. Die Spalte
+        // „ggü. Schnitt" samt Balken ist weg; die Komponente bleibt in
+        // components.css fuer kuenftige Nutzer.
         const tier = fs.readFileSync(path.join(ROOT, 'js', 'app-tier-meta.js'), 'utf8');
-        assert.match(tier, /ds-bar-track is-diverging/,
-            'der divergierende Balken wird nirgends mehr erzeugt');
+        assert.doesNotMatch(tier, /ds-bar-track is-diverging/);
     });
 });
 
@@ -442,34 +443,13 @@ describe('the listing floor', () => {
     // ohne einen einzigen Cut standen derweil mit "1,0-mal" in der
     // Tabelle. Ein gruener Test auf totem Code ist die gefaehrlichste
     // Form von Nachweis. Dieser hier RUFT die Zellenfunktion auf.
-    it('the floor is applied where the number is printed, not in the maths', () => {
+    it('the table prints no factor any more (UI-26, 27.09.2026)', () => {
+        // Bis zum 27.09.2026 stand hier die Mindeststichprobe des Faktors.
+        // Die Spalte ist weg; die Zelle zeigt fuer den alten Schluessel
+        // einen Strich, nie eine Zahl.
         const zelle = ladeZelle();
-        const MIN = compute.CONV_MIN_N;
-        // antritteGew, nicht antritte: die Schwelle liest seit dem
-        // 02.09.2026 den gewichteten Wert, die Anzeige die gezaehlte Zahl.
-        const unterGrenze = zelle({ name: 'X', faktor: 1.0, faktorRoh: 0.96,
-                                    antritteGew: MIN - 0.5 }, 'faktor');
-        assert.ok(!/\d/.test(unterGrenze.replace(/[^>]*>/g, '').trim()),
-            'unter der Mindeststichprobe darf keine Faktor-Zahl gedruckt werden: ' + unterGrenze);
-        assert.match(unterGrenze, /–/);
-
-        const drueber = zelle({ name: 'X', faktor: 1.6, faktorRoh: 1.2,
-                                antritteGew: MIN }, 'faktor');
-        assert.match(drueber, /1,6-mal/);
-
-        /* Der gemeldete Fall vom 02.09.2026: keine gezaehlte Zahl da,
-           aber 640,5 gewichtete Antritte. Die Spalte "ggue. Schnitt"
-           stand trotzdem auf Strich, in jeder einzelnen Zeile. */
-        const ohneZaehlung = zelle({ name: 'X', faktor: 1.6, faktorRoh: 1.2,
-                                     antritte: null, antritteGew: 640.5 }, 'faktor');
-        assert.match(ohneZaehlung, /1,6-mal/,
-            'ohne gezaehlte Startzahl schweigt der Faktor wieder, obwohl '
-            + 'die Stichprobe traegt');
-        assert.match(drueber, /roh 1,2-mal/, 'der rohe Wert gehoert in den Titel');
-
-        const compFn = utilsChunk(/function computeConversionPerformance\(rows\) \{[\s\S]*?\n\}\n/, 'compute');
-        assert.doesNotMatch(compFn, /CONV_MIN_N/,
-            'the floor must not touch the field average');
+        const aus = zelle({ name: 'X', faktor: 1.6, faktorRoh: 1.2, antritteGew: 640.5 }, 'faktor');
+        assert.equal(aus, '–');
     });
 
     it('halbe gewichtete Antritte werden nicht als ganze gedruckt', () => {

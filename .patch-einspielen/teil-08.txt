@@ -1,0 +1,398 @@
+new file mode 100644|
+index 0000000..0e926ab|
+--- /dev/null|
++++ b/tests/unit/test-matches-und-lesbarkeit.js|
+@@ -0,0 +1,106 @@|
++/**|
++ * Rutsch 6 (27.09.2026) — UI-18 „Matches" statt „Partien"/„Games",|
++ * UI-9/10/11 Lesbarkeit.|
++ *|
++ * UI-18, Entscheidung Hausi: die Meta-Ansichten und die erzeugten Bilder|
++ * sagen „Matches". Das Battle Journal (bj.*), der Playtester (pt.*, mp.*)|
++ * und das Glossar (Bo1/Bo3) behalten „Game" — dort ist ein Game eine|
++ * Einzelpartie innerhalb eines Matches.|
++ *|
++ * Gemessen wurde am gezeichneten Schirm mit scripts/messe_begriffe.py|
++ * (0 Treffer in sechs Meta-Ansichten, beide Sprachen); diese Datei haelt|
++ * die Quelle der Texte fest, damit es so bleibt.|
++ */|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const { lies } = require('./lib-dom-sandkasten.js');|
++|
++const I18N = lies('js', 'i18n.js');|
++const META_PRAEFIXE = ['arc', 'mc', 'buildInfo', 'heatmap', 'techLab', 'antiTech', 'matchup', 'pm'];|
++|
++function eintraege() {|
++    const raus = [];|
++    const zeile = /^\s*'([^']+)':\s*'((?:[^'\\]|\\.)*)',?\s*$/gm;|
++    let m;|
++    while ((m = zeile.exec(I18N))) raus.push({ schluessel: m[1], wert: m[2] });|
++    return raus;|
++}|
++|
++describe('UI-18 — die Meta-Texte sagen „Matches"', () => {|
++    const alle = eintraege();|
++    const meta = alle.filter(e => META_PRAEFIXE.includes(e.schluessel.split('.')[0]));|
++|
++    it('die Tabelle ist gelesen (sonst prueft der Rest nichts)', () => {|
++        assert.ok(meta.length > 500, 'nur ' + meta.length + ' Meta-Eintraege gefunden');|
++    });|
++|
++    it('kein Meta-Eintrag sagt „Partie" oder „Partien"', () => {|
++        const funde = meta.filter(e => /Partie/.test(e.wert)).map(e => e.schluessel + ': ' + e.wert.slice(0, 60));|
++        assert.deepEqual(funde, []);|
++    });|
++|
++    it('kein Meta-Eintrag sagt „game" oder „games"', () => {|
++        const funde = meta.filter(e => /\b[Gg]ames?\b/.test(e.wert)).map(e => e.schluessel + ': ' + e.wert.slice(0, 60));|
++        assert.deepEqual(funde, []);|
++    });|
++|
++    it('das Glossar erklaert Bo1/Bo3 weiter mit „Game" — dort ist es richtig', () => {|
++        assert.match(I18N, /'glossary\.bo3':\s*'Best of 3 — wer zuerst zwei Games gewinnt'/);|
++    });|
++|
++    it('das erzeugte Bild der Deck-Analyse beschriftet die Spalte mit „Matches"', () => {|
++        const SHARE = lies('js', 'ds-share.js');|
++        assert.match(SHARE, /L\('Matches', 'Matches'\)/);|
++        assert.doesNotMatch(SHARE, /L\('Partien', 'games'\)/);|
++    });|
++});|
++|
++const ohneKommentare = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '');|
++|
++describe('UI-11 — Aktuelles Meta bei 390 px nicht unter 11 px', () => {|
++    const STYLES = ohneKommentare(lies('css', 'styles.css'));|
++    const MENU = ohneKommentare(lies('css', 'pokeball-menu.css'));|
++    const UIK = ohneKommentare(lies('css', 'ui-components.css'));|
++|
++    it('die Heatmap-Zellen stehen auf --fs-xs', () => {|
++        for (const k of ['heatmap-zelle-quelle', 'heatmap-zelle-kennzahl', 'heatmap-zelle-n']) {|
++            assert.match(STYLES, new RegExp('\\.' + k + '\\s*\\{\\s*font-size:\\s*var\\(--fs-xs\\)'), k);|
++        }|
++    });|
++|
++    it('die Umschalter haben 11 px als Boden', () => {|
++        assert.match(MENU, /\.btn-toggle-item\s*\{[^}]*font-size:\s*max\(var\(--fs-xs\), 0\.83em\)/);|
++    });|
++|
++    it('die Zeilenkoepfe der Heatmap fallen am Telefon nicht unter --fs-xs', () => {|
++        const ab430 = UIK.slice(UIK.indexOf('@media (max-width: 430px) {'));|
++        assert.match(ab430.slice(0, 400), /\.heatmap-th-y\s*\{[^}]*font-size:\s*var\(--fs-xs\) !important/);|
++    });|
++});|
++|
++describe('UI-9 / UI-10 — die Anleitung', () => {|
++    const HOWTO = lies('css', 'profile-howto-info.css');|
++    const HOWTO_OHNE = ohneKommentare(HOWTO);|
++|
++    it('keine Schrift unter 0,6875 rem (11 px) in den Mockups', () => {|
++        assert.deepEqual(HOWTO_OHNE.match(/font-size:\s*0\.6[0-8]rem/g) || [], []);|
++        for (const f of ['tutorial.de.html', 'tutorial.en.html']) {|
++            const html = lies('tutorial', f);|
++            assert.deepEqual(html.match(/font-size:\s*0\.6[0-8]rem/g) || [], [], f);|
++        }|
++    });|
++|
++    it('das helle Mockup setzt im Dunkelmodus auch --brand zurueck', () => {|
++        const insel = HOWTO_OHNE.slice(HOWTO_OHNE.indexOf('[data-theme="dark"] .tutorial-mockup {'));|
++        assert.match(insel.slice(0, insel.indexOf('}')), /--brand:\s*#3B4CCA;/);|
++    });|
++|
++    it('weisse Schrift steht auf Verlaeufen, die dunkel genug enden', () => {|
++        // Vorher endeten sie in #fb923c / #4ade80 / #ef4444 / #22c55e —|
++        // weiss darauf 2,0–3,8:1 (gemessen 27.09.2026).|
++        assert.match(HOWTO_OHNE, /\.mockup-bs-rank\.is-t2 \{ background: linear-gradient\(135deg, #a55300, #c2410c\); \}/);|
++        assert.match(HOWTO_OHNE, /\.mockup-bs-rank\.is-t3 \{ background: linear-gradient\(135deg, #2d7530, #15803d\); \}/);|
++        assert.match(HOWTO_OHNE, /\.mockup-bs-rank\.is-t1 \{ background: linear-gradient\(135deg, #b91c1c, #dc2626\); \}/);|
++        assert.match(HOWTO_OHNE, /is-best  \.mockup-matchup-head \{ background: linear-gradient\(90deg, var\(--solid-ok\), #15803d\); \}/);|
++    });|
++});|
+diff --git a/tests/unit/test-matchup-major-spalte.js b/tests/unit/test-matchup-major-spalte.js|
+index c73ad73..c74b234 100644|
+--- a/tests/unit/test-matchup-major-spalte.js|
++++ b/tests/unit/test-matchup-major-spalte.js|
+@@ -36,3 +36,3 @@|
+  * ABDECKUNG, gemessen an Mega Excadrill: 15 von 20 Paarungen haben einen|
+- * Major-Wert, 7 davon unter 10 Partien. Grimmsnarl Froslass steht mit|
++ * Major-Wert, 7 davon unter 10 Matches. Grimmsnarl Froslass steht mit|
+  * 100,0 % auf ZWEI Partien da — deshalb die Markierung, und deshalb steht|
+@@ -278,3 +278,3 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {|
+            Bilanz — sie muessen zwei verschiedene Saetze bekommen.|
+-           40 Partien, damit die Mindeststichprobe nicht dazwischenfunkt. */|
++           40 Matches, damit die Mindeststichprobe nicht dazwischenfunkt. */|
+         const remis = PZ.praesenzZelle(paarung({|
+@@ -401,3 +401,3 @@ describe('Die Partienzahl steht daneben', () => {|
+             + 'eine 0 liest sich als "nie gewonnen"');|
+-        assert.ok(/Keine Präsenzpartien/.test(z.titel),|
++        assert.ok(/Keine Präsenz-Matches/.test(z.titel),|
+             'der Hinweis fuer fehlende Paarungen ist weg');|
+@@ -474,3 +474,3 @@ describe('Die Zahlen hinter der Spalte', () => {|
+            (Dragapult gegen Dragapult), und alle 15 lagen exakt beim Faktor|
+-           2,0 — Dragapult 124-124-24 auf 136 Partien.|
++           2,0 — Dragapult 124-124-24 auf 136 Matches.|
+ |
+@@ -752,4 +752,4 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>|
+        (day_filter = overall): Mega Excadrill führt 27 Gegner, GENAU EINER|
+-       erreicht 30 Partien (Dragapult, 52). "vs Crustle 88,89 %" stand auf|
+-       9 Partien, "vs Grimmsnarl Froslass 100 %" auf 2.|
++       erreicht 30 Matches (Dragapult, 52). "vs Crustle 88,89 %" stand auf|
++       9 Matches, "vs Grimmsnarl Froslass 100 %" auf 2.|
+ |
+@@ -766,3 +766,3 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>|
+ |
+-    it('9 Partien: Bilanz und Fallzahl, kein Prozentwert', () => {|
++    it('9 Matches: Bilanz und Fallzahl, kein Prozentwert', () => {|
+         const m = paarung({|
+@@ -784,3 +784,3 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>|
+ |
+-    it('2 Partien: dasselbe, und ganz sicher keine 100 %', () => {|
++    it('2 Matches: dasselbe, und ganz sicher keine 100 %', () => {|
+         const z = PZ.praesenzZelle(paarung({|
+@@ -795,3 +795,3 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>|
+ |
+-    it('genau 30 Partien: ab hier steht die Quote', () => {|
++    it('genau 30 Matches: ab hier steht die Quote', () => {|
+         /* Die Grenze selbst — sonst könnte sie um eins verrutschen,|
+@@ -812,3 +812,3 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>|
+ |
+-    it('52 Partien (Dragapult): die Quote, wie bisher', () => {|
++    it('52 Matches (Dragapult): die Quote, wie bisher', () => {|
+         const z = PZ.praesenzZelle(paarung({|
+@@ -826,3 +826,3 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>|
+            Spiegelpartie für beide Seiten verbucht ist — Basic Box gegen|
+-           sich selbst: 24 Partien, Bilanz 24-24-0. */|
++           sich selbst: 24 Matches, Bilanz 24-24-0. */|
+         const z = PZ.praesenzZelle(paarung({|
+@@ -832,3 +832,3 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>|
+         }), true);|
+-        assert.ok(/48 Einzelergebnisse auf 24 Partien/.test(z.titel),|
++        assert.ok(/48 Einzelergebnisse auf 24 Matches/.test(z.titel),|
+             'dass Bilanzsumme und Partienzahl auseinandergehen, steht nirgends');|
+@@ -859,3 +859,3 @@ describe('Unter der Mindeststichprobe steht die Bilanz, kein Prozentwert', () =>|
+         assert.ok(/Record 8–1–0/.test(z.titel));|
+-        assert.ok(/Below 30 games/.test(z.titel));|
++        assert.ok(/Below 30 matches/.test(z.titel));|
+     });|
+@@ -923,3 +923,3 @@ describe('Die Schwelle steht sichtbar unter der Tabelle', () => {|
+         assert.ok(/arc-mu-note-praesenz/.test(html), 'die Zeile fehlt ganz');|
+-        assert.ok(/ab 30 Präsenzpartien/.test(html), 'die Schwelle wird nicht genannt');|
++        assert.ok(/ab 30 Präsenz-Matches/.test(html), 'die Schwelle wird nicht genannt');|
+         assert.ok(/3,3 Punkte/.test(html),|
+diff --git a/tests/unit/test-meta-performance.js b/tests/unit/test-meta-performance.js|
+index 3a15072..7f364cf 100644|
+--- a/tests/unit/test-meta-performance.js|
++++ b/tests/unit/test-meta-performance.js|
+@@ -60,5 +60,7 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {|
+         // und meinen Verschiedenes.|
+-        for (const k of ['listen', 'anteil', 'wr', 'antritte', 'cuts', 'quote', 'faktor']) {|
++        for (const k of ['listen', 'anteil', 'wr', 'antritte', 'cuts', 'quote']) {|
+             assert.match(TIER, new RegExp("k: '" + k + "'"), 'Spalte fehlt: ' + k);|
+         }|
++        // UI-26 (27.09.2026): die Spalte „ggü. Schnitt" ist weg.|
++        assert.doesNotMatch(TIER, /k: 'faktor'/);|
+         assert.match(TIER, /de: 'Listen'/);|
+@@ -92,3 +94,5 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {|
+            bleibt dort, wo sie hingehoert, in der Quote. */|
+-        assert.match(TIER, /'Turnier-Antritte'/,|
++        // UI-24 (27.09.2026, Hausi): „Online Tournaments" — die Quelle|
++        // steht weiter in der Ueberschrift, nur deutlicher.|
++        assert.match(TIER, /de: 'Online Tournaments'/,|
+             'die Herkunft ist wieder aus der Ueberschrift verschwunden');|
+@@ -123,3 +127,3 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {|
+         // Top 8 gekommen sind? Aber das kann ja nicht sein."|
+-        assert.match(TIER, /bezogen auf die Turnier-Antritte links, nicht auf die Listen/);|
++        assert.match(TIER, /bezogen auf die Online Tournaments links, nicht auf die Listen/);|
+     });|
+@@ -263,5 +267,5 @@ describe('Auf- und Absteiger — entfernt, nicht vergessen', () => {|
+     it('und die Regel, wegen der es ihn gab, gilt weiter', () => {|
+-        // Der divergierende Balken der Rangliste ist die letzte Stelle,|
+-        // an der eine Skala eine Richtung hat.|
+-        assert.match(TIER, /ds-bar-track is-diverging/);|
++        // Der divergierende Balken der Rangliste ist seit UI-26|
++        // (27.09.2026) weg; die Farbregel fuer --dv-pos gilt weiter fuer|
++        // die Komponente in components.css.|
+         const TOK = read('css/tokens.css');|
+diff --git a/tests/unit/test-metacall-live-befunde-07-09.js b/tests/unit/test-metacall-live-befunde-07-09.js|
+index 46083bb..ee5fdd4 100644|
+--- a/tests/unit/test-metacall-live-befunde-07-09.js|
++++ b/tests/unit/test-metacall-live-befunde-07-09.js|
+@@ -396,3 +396,3 @@ describe('M4 — der Brick-Filter schreibt an, worauf er wirkt', () => {|
+         const html = baue({ myDeck: 'Mega Excadrill' }, {})();|
+-        assert.match(html, /keine Journalpartien für dieses Deck/);|
++        assert.match(html, /keine Journal-Matches für dieses Deck/);|
+     });|
+diff --git a/tests/unit/test-nenner-team-a.js b/tests/unit/test-nenner-team-a.js|
+index ea08646..773dc64 100644|
+--- a/tests/unit/test-nenner-team-a.js|
++++ b/tests/unit/test-nenner-team-a.js|
+@@ -83,3 +83,3 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {|
+         const bauen = new Function('item', 'fmtHalb', 'getLang',|
+-            helfer + '\n' + stueck + ' return { nText, wrTitel };');|
++            helfer + '\n' + stueck + ' return { wrTitel };');|
+         const fmtHalb = (n) => Number.isInteger(n) ? String(n) : n.toFixed(1).replace('.', ',');|
+@@ -88,3 +88,2 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {|
+         const viele = bauen({ totalCount: 2948 }, fmtHalb, de);|
+-        assert.strictEqual(viele.nText, '· 2948', `bekommen: ${viele.nText}`);|
+         assert.match(viele.wrTitel, /über 2948 Antritte/,|
+@@ -96,4 +95,4 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {|
+         const halb = bauen({ totalCount: 35.5 }, fmtHalb, de);|
+-        assert.strictEqual(halb.nText, '· 35,5',|
+-            `halbe Antritte werden gerundet: ${halb.nText}`);|
++        assert.match(halb.wrTitel, /über 35,5 Antritte/,|
++            `halbe Antritte werden gerundet: ${halb.wrTitel}`);|
+ |
+@@ -102,4 +101,2 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {|
+             const r = bauen(leer, fmtHalb, de);|
+-            assert.strictEqual(r.nText, '',|
+-                `bei ${JSON.stringify(leer)} entsteht "${r.nText}" statt nichts`);|
+             assert.ok(!/\d/.test(r.wrTitel),|
+@@ -114,7 +111,11 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {|
+ |
+-    it('die Zahl steht in der Kachel und hat eine Gestalt', () => {|
+-        assert.match(TIER, /WR \$\{fmtPct\(parseFloat\(winrateText\)\)\} <span class="stat-badge-nenner">\$\{nText\}<\/span>/,|
+-            'der Nenner wird nicht neben der Win Rate ausgegeben');|
+-        assert.match(CSS, /\.stat-badge \.stat-badge-nenner\s*\{[\s\S]{0,400}opacity/,|
+-            'die Gestalt des Nenners fehlt im Stylesheet');|
++    it('die Zahl steht im Hinweis, nicht mehr auf der Kachel (UI-17, 27.09.2026)', () => {|
++        // Hausi: die Zahl neben der Quote ist „fuer Enduser ohne Erklaerung|
++        // verwirrend". Die Hausregel „jede Quote traegt ihren Nenner" gilt|
++        // weiter — im Hinweis der Plakette (wrTitel, oben ausgefuehrt).|
++        assert.match(TIER, /WR \$\{fmtPct\(parseFloat\(winrateText\)\)\}<\/span>/,|
++            'neben der Win Rate steht wieder etwas');|
++        const ohne = (x) => x.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');|
++        assert.ok(!/stat-badge-nenner/.test(ohne(TIER)) && !/\.stat-badge-nenner/.test(ohne(CSS)),|
++            'der Nenner steht wieder auf der Kachel oder im Stylesheet');|
+ |
+diff --git a/tests/unit/test-nenner-und-rundung.js b/tests/unit/test-nenner-und-rundung.js|
+index b5318ca..f91b170 100644|
+--- a/tests/unit/test-nenner-und-rundung.js|
++++ b/tests/unit/test-nenner-und-rundung.js|
+@@ -596,18 +596,10 @@ describe('Halbe gewichtete Antritte werden als halbe gedruckt', () => {|
+ describe('Glaettung wird benannt', () => {|
+-    it('der Spaltenkopf traegt den Glossartext, nicht den kurzen Tooltip', () => {|
+-        assert.match(TIER, /k: 'faktor',[\s\S]{0,120}hilf: 'vsField'/);|
+-        assert.match(TIER, /vsField: '1,6-mal heißt[\s\S]*?geglättet \(k = 50\)/);|
+-    });|
+-    it('der rohe Wert steht in der Zelle', () => {|
+-        assert.match(TIER, /faktorRoh: rohVon\.has\(name\)/);|
+-        assert.match(TIER, /roh \$\{einsNK\(r\.faktorRoh\)\}-mal/);|
+-    });|
+-    it('der Meta-Durchschnitt steht an der Spalte, die mit ihm vergleicht', () => {|
+-        // Stand bis zum 01.09.2026 im Blocktext. Ohne ihn hat "0,8-mal"|
+-        // keinen Bezugspunkt — er darf also umziehen, aber nicht gehen.|
+-        assert.match(TIER, /zusatz: deR/);|
+-        assert.match(TIER, /Der Meta-Durchschnitt liegt bei \$\{fmtPct\(conv\.expected \* 100, 1\)\} Top-8-Quote/);|
+-        assert.match(TIER, /The field average is \$\{fmtPct\(conv\.expected \* 100, 1\)\} top-8 rate/);|
+-        // Und er muss auch wirklich in die Marke wandern.|
+-        assert.match(TIER, /voll = hilfstext \+ \(c\.zusatz \? ' ' \+ c\.zusatz : ''\)/);|
++    it('der Meta-Durchschnitt steht im Kopf der Top-8-Quote (UI-26, 27.09.2026)', () => {|
++        // Bis zum 27.09.2026 stand er an der Spalte „ggü. Schnitt". Hausi:|
++        // „Online Top 8-Quote (Ø 6,6 %)" statt eines separaten Vergleichswerts.|
++        // Er darf umziehen, aber nicht gehen.|
++        assert.match(TIER, /' \(Ø ' \+ fmtPct\(conv\.expected \* 100, 1\) \+ '\)'/);|
++        assert.match(TIER, /de: 'Online Top 8-Quote' \+ schnittKopf/);|
++        assert.match(TIER, /en: 'Online top-8 rate' \+ schnittKopf/);|
++        assert.doesNotMatch(TIER, /k: 'faktor'/);|
+     });|
+diff --git a/tests/unit/test-online-major-kacheln.js b/tests/unit/test-online-major-kacheln.js|
+index 428dfbf..9eb13bc 100644|
+--- a/tests/unit/test-online-major-kacheln.js|
++++ b/tests/unit/test-online-major-kacheln.js|
+@@ -489,11 +489,7 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {|
+ |
+-    it('die Matchzahl steht auf der Kachel — fuer BEIDE Quellen', () => {|
+-        // Ein Hinweis erscheint erst beim Verweilen — auf dem Telefon also nie.|
+-        // Die Matchzahl ist aber genau die Zahl, an der man entscheidet, ob|
+-        // man der Quote glaubt.|
+-        //|
+-        // ANLASS (02.09.2026): "wenn wir da aber schon eine Zahl hinschreiben|
+-        // wie viele Leute das Deck genutzt haben, dann sollten wir das bei|
+-        // Online auch machen ... und dann sollten wir die Online Matches da|
+-        // auch als Zahl erwaehnen." Vorher stand die Zahl nur beim Major.|
++    it('die Matchzahl steht NICHT mehr auf der Win-Rate-Kachel, die Stueckzahl weiter auf der Anteil-Kachel', () => {|
++        // UI-17 (27.09.2026, Hausi): „aus X Matches" in der normalen Kachel|
++        // weg — fuer Enduser ohne Erklaerung verwirrend. Die Zahl steht im|
++        // Hinweis der Kachel und im erzeugten Bild. Vom 02.09. bis|
++        // 27.09.2026 stand sie auf der Kachel.|
+         const i = ohneKomm.indexOf("tileGeteilt('wr'");|
+@@ -501,6 +497,4 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {|
+         const r = ohneKomm.slice(i, i + 400);|
+-        assert.ok(/fmtGanz\(d\.partien\)/.test(r),|
+-            'die Online-Matchzahl fehlt auf der Win-Rate-Kachel');|
+-        assert.ok(/fmtGanz\(m\.partien\)/.test(r),|
+-            'die Major-Matchzahl fehlt auf der Win-Rate-Kachel');|
++        assert.ok(!/fmtGanz\(d\.partien\)|fmtGanz\(m\.partien\)/.test(r),|
++            'die Matchzahl steht wieder auf der Win-Rate-Kachel');|
+ |
+@@ -576,3 +570,4 @@ describe('Top-8 und Day 2 bleiben getrennt', () => {|
+     it('die Top-8-Quote ist als online beschriftet', () => {|
+-        assert.ok(/Top-8-Quote \(online\)/.test(quelle),|
++        // UI-26 (27.09.2026): „Online Top 8-Quote (Ø …)" — online steht vorn.|
++        assert.ok(/Online Top 8-Quote/.test(quelle),|
+             'die Top-8-Quote sagt nicht mehr, dass sie aus Online-Turnieren stammt');|
+diff --git a/tests/unit/test-rangliste.js b/tests/unit/test-rangliste.js|
+index b677945..eccd433 100644|
+--- a/tests/unit/test-rangliste.js|
++++ b/tests/unit/test-rangliste.js|
+@@ -82,4 +82,5 @@ describe('Rangliste — eine statt drei', () => {|
+            der Erklaerung an der Spalte, wo er vollstaendig hinpasst. */|
+-        assert.match(TIER, /k: 'cuts',[\s\S]{0,60}de: 'Top 8'/);|
+-        assert.match(TIER, /bezogen auf die Turnier-Antritte links, nicht auf die Listen/);|
++        // UI-25 (27.09.2026): „Online Top 8", damit die Quelle klar ist.|
++        assert.match(TIER, /k: 'cuts',[\s\S]{0,60}de: 'Online Top 8'/);|
++        assert.match(TIER, /bezogen auf die Online Tournaments links, nicht auf die Listen/);|
+     });|
+@@ -93,5 +94,5 @@ describe('Rangliste — eine statt drei', () => {|
+ |
+-    it('der divergierende Balken ist mitgewandert', () => {|
+-        assert.match(TIER, /ds-bar-track is-diverging/);|
+-        assert.match(CSS, /\.cm-rangliste \.ds-bar-track/, 'der Balken hat in der Tabelle kein CSS');|
++    it('der divergierende Balken ist mit der Spalte gegangen (UI-26, 27.09.2026)', () => {|
++        assert.doesNotMatch(TIER, /ds-bar-track is-diverging/);|
++        assert.doesNotMatch(CSS, /\.cm-rangliste \.ds-bar-track/, 'totes CSS fuer den Balken steht noch');|
+     });|
+diff --git a/tests/unit/test-schriftboden.js b/tests/unit/test-schriftboden.js|
+index f6fafe5..cdf0ce4 100644|
+--- a/tests/unit/test-schriftboden.js|
++++ b/tests/unit/test-schriftboden.js|
+@@ -136,3 +136,4 @@ describe('Schriftboden: em-Ketten tragen einen Boden', () => {|
+         ['mobile-responsive.css', /font-size:\s*max\(\s*10px\s*,\s*0\.78em\s*\)\s*!important/, 'Kopf-Nutzerknopf (gemessen 9,36 px)'],|
+-        ['pokeball-menu.css', /\.btn-toggle-item\s*\{[^}]*font-size:\s*max\(\s*10px\s*,/, '.btn-toggle-item (gemessen 9,96 px)'],|
++        // UI-11 (27.09.2026): Boden jetzt --fs-xs (11 px) statt 10 px.|
++        ['pokeball-menu.css', /\.btn-toggle-item\s*\{[^}]*font-size:\s*max\(\s*var\(--fs-xs\)\s*,/, '.btn-toggle-item (gemessen 9,96 px)'],|
+     ];|
+diff --git a/tests/unit/test-spielersicht-luecken.js b/tests/unit/test-spielersicht-luecken.js|
+index 364792e..42b1d0b 100644|
+--- a/tests/unit/test-spielersicht-luecken.js|
++++ b/tests/unit/test-spielersicht-luecken.js|
+@@ -10,5 +10,5 @@|
+  *|
+- *        Alakazam Dudunsparce   25,6 %   743 Partien   5,79 % des Feldes|
+- *        Slowking               37,3 %   811 Partien   5,53 %|
+- *        Dragapult Blaziken     38,7 %   833 Partien   5,76 %|
++ *        Alakazam Dudunsparce   25,6 %   743 Matches   5,79 % des Feldes|
++ *        Slowking               37,3 %   811 Matches   5,53 %|
++ *        Dragapult Blaziken     38,7 %   833 Matches   5,76 %|
+  *|
+@@ -76,5 +76,5 @@ describe('Tech-Ideen: was NICHT gefunden wurde, wird benannt', () => {|
+     it('die Lücke nennt Deck, Quote und Partienzahl', () => {|
+-        assert.match(I18N, /'buildInfo\.techIdeenOhneEintrag':\s*'\{name\} \(\{wr\}, \{n\} games\)'/,|
++        assert.match(I18N, /'buildInfo\.techIdeenOhneEintrag':\s*'\{name\} \(\{wr\}, \{n\} matches\)'/,|
+             'der englische Eintrag nennt nicht alle drei Angaben');|
+-        assert.match(I18N, /'buildInfo\.techIdeenOhneEintrag':\s*'\{name\} \(\{wr\}, \{n\} Partien\)'/,|
++        assert.match(I18N, /'buildInfo\.techIdeenOhneEintrag':\s*'\{name\} \(\{wr\}, \{n\} Matches\)'/,|
+             'der deutsche Eintrag nennt nicht alle drei Angaben');|
+diff --git a/tests/unit/test-sprache-win-rate.js b/tests/unit/test-sprache-win-rate.js|
+index 0566827..79af123 100644|
+--- a/tests/unit/test-sprache-win-rate.js|
++++ b/tests/unit/test-sprache-win-rate.js|
+@@ -160,3 +160,3 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {|
+                                         ['Major-WR', 'Präsenzturnieren'],|
+-                                        ['Major-Matches', 'Partien']]) {|
++                                        ['Major-Matches', 'die Matches dahinter']]) {|
+             const zeilen = [...I18N.matchAll(/'arc\.muLegende':\s*'([^']*)'/g)]|
+diff --git a/tests/unit/test-tech-beleg-kennzeichnung.js b/tests/unit/test-tech-beleg-kennzeichnung.js|
+index 5a3132f..8047cde 100644|
+--- a/tests/unit/test-tech-beleg-kennzeichnung.js|

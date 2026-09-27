@@ -294,6 +294,15 @@ def load_pools():
     return product_group, pools
 
 
+def besetzt_von(done, pid, eigener_schluessel):
+    """Welche ANDERE Karte traegt diese Produktnummer schon als bestaetigt?"""
+    for k, v in done.items():
+        if k != eigener_schluessel and v.get('status') == 'verified' \
+                and str(v.get('verified_product_id')) == str(pid):
+            return f"{k[0]}-{k[1]}"
+    return ''
+
+
 def limitless_verify(args):
     import requests  # noqa: PLC0415
 
@@ -382,11 +391,22 @@ def limitless_verify(args):
                     row_out['status'] = evidence.split('(')[0]
                     row_out['evidence'] = evidence
                 else:
-                    row_out['status'] = 'verified'
-                    row_out['verified_product_id'] = str(pid)
-                    row_out['evidence'] = evidence
-                    row_out['agrees_with_heuristic'] = (
-                        'yes' if str(pid) == str(m['cardmarket_product_id']) else 'no')
+                    schon = besetzt_von(done, str(pid), key)
+                    if schon:
+                        # KOLLISION (27.09.2026, Lauf #16): BLW-59 bekam per
+                        # Fingerabdruck (Pool 2, eine Kennzahl) dieselbe
+                        # Nummer wie das seit dem 09.08. bestaetigte BLW-58.
+                        # Dieselbe Nummer kann nicht zwei Karten gehoeren —
+                        # gemeldet wird der Widerspruch, bestaetigt wird nichts.
+                        row_out['status'] = 'kollision'
+                        row_out['evidence'] = (f"{evidence} — Nummer {pid} ist schon "
+                                               f"fuer {schon} bestaetigt")
+                    else:
+                        row_out['status'] = 'verified'
+                        row_out['verified_product_id'] = str(pid)
+                        row_out['evidence'] = evidence
+                        row_out['agrees_with_heuristic'] = (
+                            'yes' if str(pid) == str(m['cardmarket_product_id']) else 'no')
             new_rows.append(row_out)
             done[key] = row_out
         if fetched % 50 == 0:

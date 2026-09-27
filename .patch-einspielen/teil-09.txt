@@ -1,0 +1,386 @@
++++ b/tests/unit/test-tech-beleg-kennzeichnung.js|
+@@ -121,3 +121,3 @@ describe('Build-vs: jede Zeile sagt, worauf sie beruht', () => {|
+             `nennt das Alter der Datenbasis in deutscher Schreibweise: ${satz}`);|
+-        assert.ok(satz.includes('358 Partien'),|
++        assert.ok(satz.includes('358 Matches'),|
+             `nennt die Zahl der Partien hinter dem Matchup: ${satz}`);|
+@@ -131,3 +131,3 @@ describe('Build-vs: jede Zeile sagt, worauf sie beruht', () => {|
+         assert.ok(satz.startsWith('unbelegt'), `faengt mit der Einordnung an: ${satz}`);|
+-        assert.ok(satz.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'),|
++        assert.ok(satz.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'),|
+             `der vom Betreiber verlangte Wortlaut steht da: ${satz}`);|
+@@ -205,3 +205,3 @@ describe('Build-vs: jede Zeile sagt, worauf sie beruht', () => {|
+         assert.ok(satz.includes('nicht bekannt'), satz);|
+-        assert.ok(!satz.includes('0 Partien'), `keine Null als Angabe: ${satz}`);|
++        assert.ok(!satz.includes('0 Matches'), `keine Null als Angabe: ${satz}`);|
+     });|
+@@ -367,6 +367,6 @@ describe('Build-vs: Kopf und "keine Daten" stehen in der Liste', () => {|
+         assert.ok(html.includes('anti-tech-card-beleg'), 'eigenes Element je Zeile');|
+-        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'),|
++        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'),|
+             'der Wortlaut steht im Text der Zeile');|
+         const vorTitle = html.split('title=')[0];|
+-        assert.ok(vorTitle.includes('nicht an Partien gemessen'),|
++        assert.ok(vorTitle.includes('nicht an Matches gemessen'),|
+             'die Einordnung darf nicht in einem title-Attribut verschwinden');|
+@@ -457,3 +457,3 @@ describe('Warum-Dialog: die Ideen-Zeile nennt ihre Regelbasis', () => {|
+         assert.ok(satz.includes('15.05.2026'), satz);|
+-        assert.ok(satz.includes('358 Partien'), satz);|
++        assert.ok(satz.includes('358 Matches'), satz);|
+     });|
+@@ -464,3 +464,3 @@ describe('Warum-Dialog: die Ideen-Zeile nennt ihre Regelbasis', () => {|
+         assert.ok(satz.includes('nicht bekannt'), satz);|
+-        assert.ok(!satz.includes('0 Partien'), satz);|
++        assert.ok(!satz.includes('0 Matches'), satz);|
+     });|
+@@ -480,3 +480,3 @@ describe('Warum-Dialog: die Ideen-Zeile nennt ihre Regelbasis', () => {|
+         assert.ok(satz.startsWith('unbelegt'), satz);|
+-        assert.ok(satz.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'), satz);|
++        assert.ok(satz.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'), satz);|
+         assert.ok(!satz.includes('358'),|
+@@ -497,3 +497,3 @@ describe('Warum-Dialog: die Ideen-Zeile nennt ihre Regelbasis', () => {|
+         assert.ok(satz.startsWith('vom Nutzer eingetragen'), satz);|
+-        assert.ok(satz.includes('nicht an Partien gemessen'), satz);|
++        assert.ok(satz.includes('nicht an Matches gemessen'), satz);|
+     });|
+@@ -549,3 +549,3 @@ describe('Warum-Dialog: die Luecke wird geschrieben, nicht verschwiegen', () =>|
+             'buildInfo.techIdeenOhne': 'Nichts gefunden gegen: {liste}. Die Regelbasis kennt {n} Paarungen vom {datum} — diese Matchups sind nicht abgedeckt.',|
+-            'buildInfo.techIdeenOhneEintrag': '{name} ({wr}, {n} Partien)'|
++            'buildInfo.techIdeenOhneEintrag': '{name} ({wr}, {n} Matches)'|
+         };|
+diff --git a/tests/unit/test-tech-beleg-lab-und-interaktionen.js b/tests/unit/test-tech-beleg-lab-und-interaktionen.js|
+index 9866ac4..b176b66 100644|
+--- a/tests/unit/test-tech-beleg-lab-und-interaktionen.js|
++++ b/tests/unit/test-tech-beleg-lab-und-interaktionen.js|
+@@ -127,5 +127,5 @@ describe('Tech Lab: jede Kachel sagt, worauf sie beruht', () => {|
+         const html = maleGitter([AUS_REGELBASIS]);|
+-        assert.ok(html.includes('keine Partien dahinter'),|
++        assert.ok(html.includes('keine Matches dahinter'),|
+             `die fehlende Stichprobe wird benannt: ${html}`);|
+-        assert.ok(!/\d+\s*Partien\b(?! dahinter)/.test(html.replace('keine Partien dahinter', '')),|
++        assert.ok(!/\d+\s*Matches\b(?! dahinter)/.test(html.replace('keine Matches dahinter', '')),|
+             'eine Zahl aus irgendeiner Deckpaarung waere hier erfunden');|
+@@ -136,3 +136,3 @@ describe('Tech Lab: jede Kachel sagt, worauf sie beruht', () => {|
+         assert.ok(html.includes('vom Nutzer eingetragen'), html);|
+-        assert.ok(html.includes('nicht an Partien gemessen'), html);|
++        assert.ok(html.includes('nicht an Matches gemessen'), html);|
+         assert.ok(html.includes('tech-lab-beleg-nutzer'), 'eigene Klasse fuer die eigene Eintragung');|
+@@ -145,3 +145,3 @@ describe('Tech Lab: jede Kachel sagt, worauf sie beruht', () => {|
+         assert.ok(html.includes('unbelegt'), html);|
+-        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'), html);|
++        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'), html);|
+         assert.ok(html.includes('tech-lab-beleg-nein'), html);|
+@@ -334,3 +334,3 @@ describe('Erkannte Tech-Interaktionen: jede Zeile sagt, worauf sie beruht', () =|
+         assert.ok(html.includes('15.05.2026'), html);|
+-        assert.ok(html.includes('358 Partien'),|
++        assert.ok(html.includes('358 Matches'),|
+             `die Stichprobe des Matchups steht daneben: ${html}`);|
+@@ -340,3 +340,3 @@ describe('Erkannte Tech-Interaktionen: jede Zeile sagt, worauf sie beruht', () =|
+         const html = maleInteraktionen(daten([REGELZEILE]), 'Mega Excadrill', MATCHUPS);|
+-        assert.ok(!html.includes('280 Partien'),|
++        assert.ok(!html.includes('280 Matches'),|
+             'die 280 gehoeren Dragapult und haben hier nichts zu suchen');|
+@@ -354,3 +354,3 @@ describe('Erkannte Tech-Interaktionen: jede Zeile sagt, worauf sie beruht', () =|
+         assert.ok(html.includes('unbelegt'), html);|
+-        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Partien gemessen'), html);|
++        assert.ok(html.includes('aus dem Kartentext abgeleitet, nicht an Matches gemessen'), html);|
+         assert.ok(html.includes('uv-tech-beleg-nein'), html);|
+@@ -361,3 +361,3 @@ describe('Erkannte Tech-Interaktionen: jede Zeile sagt, worauf sie beruht', () =|
+         assert.ok(html.includes('nicht bekannt'), html);|
+-        assert.ok(!html.includes('0 Partien'), `keine Null als Angabe: ${html}`);|
++        assert.ok(!html.includes('0 Matches'), `keine Null als Angabe: ${html}`);|
+     });|
+@@ -446,6 +446,6 @@ describe('i18n: kein deutscher Rueckfall in englischer Oberflaeche', () => {|
+         assert.strictEqual(woerterbuch.de['antiTech.belegHeuristik'],|
+-            'aus dem Kartentext abgeleitet, nicht an Partien gemessen');|
+-        assert.strictEqual(woerterbuch.de['antiTech.belegPartien'], 'Matchup aus {n} Partien');|
++            'aus dem Kartentext abgeleitet, nicht an Matches gemessen');|
++        assert.strictEqual(woerterbuch.de['antiTech.belegPartien'], 'Matchup aus {n} Matches');|
+         assert.strictEqual(woerterbuch.de['antiTech.belegOhnePartien'],|
+-            'Partienzahl des Matchups nicht bekannt');|
++            'Matchzahl des Matchups nicht bekannt');|
+         assert.strictEqual(woerterbuch.de['antiTech.belegKeineDaten'], 'keine Daten');|
+@@ -455,3 +455,3 @@ describe('i18n: kein deutscher Rueckfall in englischer Oberflaeche', () => {|
+         assert.strictEqual(woerterbuch.de['techLab.belegOhnePartien'],|
+-            'keine Partien dahinter — hier stehen Kartentexte gegeneinander, keine Deckpaarungen');|
++            'keine Matches dahinter — hier stehen Kartentexte gegeneinander, keine Deckpaarungen');|
+     });|
+diff --git a/tutorial/tutorial.de.html b/tutorial/tutorial.de.html|
+index 2c42efb..9134768 100644|
+--- a/tutorial/tutorial.de.html|
++++ b/tutorial/tutorial.de.html|
+@@ -1707,3 +1707,3 @@|
+                                                 <span class="mockup-bs-share">14 %</span>|
+-                                                <span class="mockup-matchup-wr is-bad" style="font-size: 0.62rem; padding: 1px 5px;">38 %</span>|
++                                                <span class="mockup-matchup-wr is-bad" style="font-size: var(--fs-xs); padding: 1px 5px;">38 %</span>|
+                                             </div>|
+@@ -1713,3 +1713,3 @@|
+                                                 <span class="mockup-bs-share">11 %</span>|
+-                                                <span class="mockup-matchup-wr is-bad" style="font-size: 0.62rem; padding: 1px 5px;">42 %</span>|
++                                                <span class="mockup-matchup-wr is-bad" style="font-size: var(--fs-xs); padding: 1px 5px;">42 %</span>|
+                                             </div>|
+@@ -1719,3 +1719,3 @@|
+                                                 <span class="mockup-bs-share">3 %</span>|
+-                                                <span class="mockup-matchup-wr is-even" style="font-size: 0.62rem; padding: 1px 5px;">48 %</span>|
++                                                <span class="mockup-matchup-wr is-even" style="font-size: var(--fs-xs); padding: 1px 5px;">48 %</span>|
+                                             </div>|
+@@ -1725,3 +1725,3 @@|
+                                                 <span class="mockup-bs-share">10 %</span>|
+-                                                <span class="mockup-matchup-wr is-good" style="font-size: 0.62rem; padding: 1px 5px;">61 %</span>|
++                                                <span class="mockup-matchup-wr is-good" style="font-size: var(--fs-xs); padding: 1px 5px;">61 %</span>|
+                                             </div>|
+@@ -2548,3 +2548,3 @@|
+                                                     </div>|
+-                                                    <div style="margin-top: 6px; font-size: 0.66rem; opacity: 0.85;">Tier 1 · Dragapult ex 13,8 % · Mega Greninja 10,2 %</div>|
++                                                    <div style="margin-top: 6px; font-size: var(--fs-xs); opacity: 0.85;">Tier 1 · Dragapult ex 13,8 % · Mega Greninja 10,2 %</div>|
+                                                 </div>|
+diff --git a/tutorial/tutorial.en.html b/tutorial/tutorial.en.html|
+index 8754164..e1b2e53 100644|
+--- a/tutorial/tutorial.en.html|
++++ b/tutorial/tutorial.en.html|
+@@ -1716,3 +1716,3 @@|
+                                                 <span class="mockup-bs-share">14 %</span>|
+-                                                <span class="mockup-matchup-wr is-bad" style="font-size: 0.62rem; padding: 1px 5px;">38 %</span>|
++                                                <span class="mockup-matchup-wr is-bad" style="font-size: var(--fs-xs); padding: 1px 5px;">38 %</span>|
+                                             </div>|
+@@ -1722,3 +1722,3 @@|
+                                                 <span class="mockup-bs-share">11 %</span>|
+-                                                <span class="mockup-matchup-wr is-bad" style="font-size: 0.62rem; padding: 1px 5px;">42 %</span>|
++                                                <span class="mockup-matchup-wr is-bad" style="font-size: var(--fs-xs); padding: 1px 5px;">42 %</span>|
+                                             </div>|
+@@ -1728,3 +1728,3 @@|
+                                                 <span class="mockup-bs-share">3 %</span>|
+-                                                <span class="mockup-matchup-wr is-even" style="font-size: 0.62rem; padding: 1px 5px;">48 %</span>|
++                                                <span class="mockup-matchup-wr is-even" style="font-size: var(--fs-xs); padding: 1px 5px;">48 %</span>|
+                                             </div>|
+@@ -1734,3 +1734,3 @@|
+                                                 <span class="mockup-bs-share">10 %</span>|
+-                                                <span class="mockup-matchup-wr is-good" style="font-size: 0.62rem; padding: 1px 5px;">61 %</span>|
++                                                <span class="mockup-matchup-wr is-good" style="font-size: var(--fs-xs); padding: 1px 5px;">61 %</span>|
+                                             </div>|
+@@ -2565,3 +2565,3 @@|
+                                                     </div>|
+-                                                    <div style="margin-top: 6px; font-size: 0.66rem; opacity: 0.85;">Tier 1 · Dragapult ex 13,8 % · Mega Greninja 10,2 %</div>|
++                                                    <div style="margin-top: 6px; font-size: var(--fs-xs); opacity: 0.85;">Tier 1 · Dragapult ex 13,8 % · Mega Greninja 10,2 %</div>|
+                                                 </div>|
+-- |
+2.43.0|
+|
+|
+From b55c38e557f8767f927e3a8d291063497fb78639 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sun, 27 Sep 2026 10:58:23 +0200|
+Subject: [PATCH 3/4] Rutsch 7: Major-Rueckfall auf das letzte Format,|
+ Major-Anteil als Bruch, Bild in drei Fassungen, Heatmap ohne CSV, Rogue-Bild|
+ (DA-13, DA-14, FE-4, FE-5, FE-6)|
+|
+---|
+ css/components.css                            |  26 +++|
+ js/app-archetype-card.js                      |  99 ++++++++-|
+ js/app-current-meta.js                        | 182 +++++++++++------|
+ js/app-tier-meta.js                           |  45 +++-|
+ js/ds-bildvorschau.js                         |  36 ++++|
+ js/ds-share.js                                | 192 ++++++++++++++----|
+ tests/unit/test-bildkarte-uebergabe.js        |   7 +-|
+ tests/unit/test-heatmap-major.js              |  11 +-|
+ .../test-kacheln-zeitraum-und-typfilter.js    |   8 +-|
+ tests/unit/test-leere-spalten.js              |   3 +|
+ tests/unit/test-major-rueckfall-und-bild.js   | 178 ++++++++++++++++|
+ tests/unit/test-matchup-major-spalte.js       |  23 ++-|
+ 12 files changed, 682 insertions(+), 128 deletions(-)|
+ create mode 100644 tests/unit/test-major-rueckfall-und-bild.js|
+|
+diff --git a/css/components.css b/css/components.css|
+index c6cad99..efce438 100644|
+--- a/css/components.css|
++++ b/css/components.css|
+@@ -964,2 +964,28 @@ html.is-signed-out [onclick*="radelist"]:hover {|
+ }|
++/* FE-5 (27.09.2026): Umschalter Online / Major / Kombiniert — dieselbe|
++   Pillenform wie die Datenraum-Knoepfe, aus Tokens. */|
++.ds-bildvorschau-varianten {|
++  display: flex;|
++  flex-wrap: wrap;|
++  gap: 6px;|
++  padding: 10px 18px 0;|
++}|
++.ds-bildvorschau-variante {|
++  min-height: 36px;|
++  padding: 6px 14px;|
++  border: 1px solid var(--line);|
++  border-radius: 999px;|
++  background: var(--surface-1);|
++  color: var(--ink-2);|
++  font: inherit;|
++  font-size: var(--fs-sm);|
++  font-weight: 700;|
++  cursor: pointer;|
++}|
++.ds-bildvorschau-variante.is-on {|
++  background: var(--brand-ink);|
++  border-color: var(--brand-ink);|
++  color: var(--surface-1);|
++}|
++.ds-bildvorschau-variante:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }|
+ .ds-bildvorschau-actions {|
+diff --git a/js/app-archetype-card.js b/js/app-archetype-card.js|
+index e2f5d70..41d80b8 100644|
+--- a/js/app-archetype-card.js|
++++ b/js/app-archetype-card.js|
+@@ -241,2 +241,5 @@|
+     let _majorZeitraum = null;|
++    /* Das Format der Major-Matchups (DA-13): leer oder der Schluessel des|
++       geladenen Auszugs, z. B. 'TEF-PBL' im Rueckfall. */|
++    let _majorMuFormat = '';|
+     let _loading = null;|
+@@ -438,2 +441,20 @@|
+      * die Tier-Liste am 01.09. Worlds nicht sehen liess (PR #602). */|
++    /* DA-13 (27.09.2026, Hausi): solange es im laufenden Format noch kein|
++       Major gibt, stehen die Major-Felder der Kacheln leer da — „leere,|
++       suggestive Felder". Dann zeigen sie das LETZTE Major im alten Format,|
++       mit dem Format daneben („Major · TEF-PBL"; das Anhaengen macht|
++       majorFormatFremd() unten, sobald der geladene Auszug nicht das|
++       laufende Format ist).|
++|
++       Das alte Format kommt aus data/format_window.json →|
++       previous_format_key, das der Betreuer bei jeder Rotation setzt —|
++       nicht aus einer Liste hier. Beide Schluessel muessen im Verzeichnis|
++       der Auszuege stehen, sonst wird nichts behauptet. */|
++    function majorAuszugWaehlen(laufend, vorher, bekannte) {|
++        const liste = Array.isArray(bekannte) ? bekannte : [];|
++        if (laufend && liste.indexOf(laufend) !== -1) return laufend;|
++        if (vorher && vorher !== laufend && liste.indexOf(vorher) !== -1) return vorher;|
++        return '';|
++    }|
++|
+     function _majorLaden(base, stamp) {|
+@@ -443,3 +464,3 @@|
+         if (!alt || !neu) return Promise.resolve({});|
+-        const key = `${alt}-${neu}`;|
++        const vorher = fw && fw.previous_format_key ? String(fw.previous_format_key).toUpperCase() : '';|
+         return fetch(base + MAJOR_VERZ_URL + stamp)|
+@@ -447,4 +468,4 @@|
+             .then(v => {|
+-                const kennt = v && Array.isArray(v.meta_keys) && v.meta_keys.indexOf(key) !== -1;|
+-                if (!kennt) return '';|
++                const key = majorAuszugWaehlen(`${alt}-${neu}`, vorher, v && v.meta_keys);|
++                if (!key) return '';|
+                 _majorZeitraum = { key: key, von: null, bis: null, turniere: 0 };|
+@@ -460,2 +481,3 @@|
+                 const _turniere = new Set();|
++                const _feldJeTurnier = {};|
+                 for (const r of parseCsv(txt, ',')) {|
+@@ -470,2 +492,11 @@|
+                     if (tid) _turniere.add(tid);|
++                    /* Das Feld eines Turniers: total_players, und wo die|
++                       Spalte fehlt, aus Antritten und Anteil derselben Zeile|
++                       zurueckgerechnet (player_count / share_pct). */|
++                    if (tid && !(_feldJeTurnier[tid] > 0)) {|
++                        const gesamt = num(r.total_players);|
++                        const anteil = num(r.share_pct);|
++                        _feldJeTurnier[tid] = gesamt > 0 ? gesamt|
++                            : (anteil > 0 ? num(r.player_count) * 100 / anteil : 0);|
++                    }|
+                     const s = num(r.wins), n_ = num(r.losses), u = num(r.ties);|
+@@ -479,3 +510,2 @@|
+                     e.antritte += num(r.player_count);|
+-                    e.share += num(r.share_pct);|
+                     e.siege += s;|
+@@ -488,4 +518,13 @@|
+                 if (_majorZeitraum) _majorZeitraum.turniere = _turniere.size;|
++                /* DER ANTEIL IST EIN BRUCH UEBER ALLE TURNIERE, NICHT DIE|
++                   SUMME DER TURNIERANTEILE (27.09.2026, beim Bauen von DA-13|
++                   gefunden). Hier stand `e.share += share_pct` — bei zwei|
++                   Turnieren im Auszug zeigte Dragapult 17,89 + 22,33 =|
++                   40,2 %. Gezaehlt sind 736 von 3.916 Antritten = 18,8 %|
++                   (data/labs_tournament_decks_TEF-PBL.csv). Sichtbar war|
++                   das nur, solange ein Auszug mehr als ein Turnier traegt. */|
++                const _feld = Object.values(_feldJeTurnier).reduce((a, b) => a + b, 0);|
+                 for (const k of Object.keys(raus)) {|
+                     const e = raus[k];|
++                    e.share = _feld > 0 ? (e.antritte / _feld) * 100 : 0;|
+                     // Siege durch ALLE Partien — dieselbe Rechnung wie online.|
+@@ -515,8 +554,14 @@|
+                anderer Ladeweg), bleibt die Spalte leer statt kaputt. */|
+-            (typeof window.ladeMajorMatchups === 'function')|
+-                ? window.ladeMajorMatchups().catch(() => ({}))|
+-                : Promise.resolve({}),|
+-        ]).then(([decksTxt, top8Txt, major, majorMu]) => {|
++            /* DA-13 / FE-5 (27.09.2026): mit Rueckfall auf das letzte|
++               Major-Format, wie die Kacheln (majorAuszugWaehlen). Der|
++               Schluessel kommt mit und steht dann an der Spalte. */|
++            (typeof window.ladeMajorMatchupsMitRueckfall === 'function')|
++                ? window.ladeMajorMatchupsMitRueckfall().catch(() => ({ reg: {}, key: '' }))|
++                : ((typeof window.ladeMajorMatchups === 'function')|
++                    ? window.ladeMajorMatchups().then(reg => ({ reg, key: '' })).catch(() => ({ reg: {}, key: '' }))|
++                    : Promise.resolve({ reg: {}, key: '' })),|
++        ]).then(([decksTxt, top8Txt, major, majorMuErg]) => {|
+             _major = major || {};|
+-            _majorMu = majorMu || {};|
++            _majorMu = (majorMuErg && majorMuErg.reg) || {};|
++            _majorMuFormat = (majorMuErg && majorMuErg.key) || '';|
+             _decks = {};|
+@@ -878,2 +923,12 @@|
+ |
++    /* Dasselbe fuer die Major-Matchups: ' · TEF-PBL', wenn der geladene|
++       Matchup-Auszug nicht das laufende Format ist (DA-13). */|
++    function majorMuFremd() {|
++        const jetzt = (typeof window !== 'undefined'|
++            && typeof window.getCurrentMetaFormat === 'function')|
++            ? String(window.getCurrentMetaFormat() || '').trim().toUpperCase() : '';|
++        const k = String(_majorMuFormat || '').trim().toUpperCase();|
++        return (k && jetzt && k !== jetzt) ? ' · ' + k : '';|
++    }|
++|
+     /* Die Day-2-Kachel ist die einzige, die NUR Praesenzzahlen zeigt —|
+@@ -1798,3 +1853,3 @@|
+                             data-quote-konvention="ohneUnentschieden">${|
+-                            esc(L('arc.colMajor', 'Major-WR'))}</th>|
++                            esc(L('arc.colMajor', 'Major-WR') + majorMuFremd())}</th>|
+                         <th title="${esc(L('arc.colMajorN', de|
+@@ -2108,2 +2163,4 @@|
+             majorFormat: majorFormatFremd(),|
++            /* FE-5: Format der Major-Matchups (leer = laufendes Format). */|
++            majorMuFormat: majorMuFremd().replace(/^ · /, ''),|
+         };|
+@@ -2169,2 +2226,24 @@|
+     };|
++    /* FE-5 (27.09.2026): alle Major-Paarungen eines Decks, nicht nur die,|
++       die auch online vorkommen — fuer die Major-Fassung des Bildes.|
++       Dieselbe Form wie matchupsFor(), die Quote ist S/(S+N), geglaettet|
++       wie links (siehe ladeMajorMatchups in js/app-current-meta.js). */|
++    function majorMatchupsFor(name) {|
++        const von = _majorMu ? (_majorMu[findKey(_majorMu, name)] || null) : null;|
++        if (!von) return [];|
++        return Object.keys(von).map(gegner => {|
++            const e = von[gegner];|
++            return {|
++                opponent: gegner,|
++                winRate: e.wr == null ? null : e.wr,|
++                winRateRoh: e.wrRoh == null ? null : e.wrRoh,|
++                wins: e.siege, losses: e.niederlagen, ties: e.unentschieden,|
++                games: e.anzahl,|
++                thin: !(e.anzahl >= THIN_GAMES),|
++            };|
++        }).sort((a, b) => (b.winRate == null ? -1 : b.winRate) - (a.winRate == null ? -1 : a.winRate));|
++    }|
++    window.getArchetypeMajorMatchups = function (name) {|
++        return load().then(() => majorMatchupsFor(name));|
++    };|
+     /* Die Feldanteile, so wie diese Datei sie ohnehin schon geparst hat.|
+diff --git a/js/app-current-meta.js b/js/app-current-meta.js|
+index f2da195..da3f727 100644|
+--- a/js/app-current-meta.js|
++++ b/js/app-current-meta.js|
+@@ -103,2 +103,108 @@|
+ |
++        /* Die Zeilen eines Labs-Matchup-Auszugs in das Register je Paarung.|
++           Herausgeloest am 27.09.2026 (DA-13/FE-5), damit der Rueckfall auf|
++           das letzte Major-Format DENSELBEN Parser benutzt — zwei Parser|
++           fuer eine Datei waeren zwei Zahlen fuer eine Sache. */|
++        function majorMatchupsParsen(txt) {|
++            const parsed = (typeof Papa !== 'undefined' && Papa.parse)|
++                ? Papa.parse(txt, { header: true, delimiter: ',', skipEmptyLines: true })|
++                : { data: [] };|
++            const reg = {};|
++            for (const r of (parsed.data || [])) {|

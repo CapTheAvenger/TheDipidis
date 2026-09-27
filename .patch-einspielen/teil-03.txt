@@ -1,0 +1,461 @@
+-        assert.ok(a || b,|
+-            'beide Ausloeser sind weg — dann bitte den Kommentar in ds-sections.js nachziehen');|
+-    });|
+-});|
+-|
+-describe('Abschnitte — man sieht, dass etwas passiert ist', () => {|
+-    it('nach dem Aufklappen wird der Abschnitt ins Bild geholt', () => {|
+-        assert.match(SRC, /function insBild/, 'insBild fehlt');|
+-        assert.match(SRC, /if \(!jetzt\) insBild\(sec\)/,|
+-            'insBild wird nicht beim Aufklappen gerufen');|
+-    });|
+-|
+-    it('aber nur beim Aufklappen, nicht beim Zuklappen', () => {|
+-        assert.ok(!/if \(jetzt\) insBild/.test(SRC),|
+-            'beim Zuklappen zu springen waere gegen die Erwartung');|
+-    });|
+-|
+-    it('und nur, wenn es noetig ist', () => {|
+-        const fn = SRC.slice(SRC.indexOf('function insBild'));|
+-        const koerper = fn.slice(0, fn.indexOf('\n    }'));|
+-        assert.match(koerper, /r\.bottom <= sicht/,|
+-            'passt der Abschnitt schon ins Bild, darf die Seite nicht springen');|
+-    });|
+-|
+-    it('das Springen respektiert prefers-reduced-motion', () => {|
+-        assert.match(SRC, /prefers-reduced-motion/,|
+-            'wer Bewegung abgestellt hat, bekommt sie hier trotzdem');|
+-    });|
+-|
+-    it('die Messung passiert erst im naechsten Frame', () => {|
+-        // Direkt nach dem Umschalten steht die neue Hoehe noch nicht fest.|
+-        const fn = SRC.slice(SRC.indexOf('function insBild'));|
+-        assert.match(fn.slice(0, 900), /requestAnimationFrame/);|
+-    });|
+-});|
+diff --git a/tests/unit/test-design-components.js b/tests/unit/test-design-components.js|
+index aa10912..213c4c9 100644|
+--- a/tests/unit/test-design-components.js|
++++ b/tests/unit/test-design-components.js|
+@@ -115,3 +115,6 @@ describe('Current Meta benutzt die Komponenten wirklich', () => {|
+         // Reihenfolge; seit dem 19.08.2026 ist es eine sortierbare Tabelle.|
+-        assert.match(TIER, /<div class="ds-panel cm-rangliste-block">\s*\n\s*<h3 class="ds-label">🏆/);|
++        // UI-23 (27.09.2026): die zweite Ueberschrift „🏆 Meta-Performance"|
++        // im Panel ist weg — der Abschnitt heisst schon so.|
++        assert.match(TIER, /<div class="ds-panel cm-rangliste-block">/);|
++        assert.ok(!/<h3 class="ds-label">🏆/.test(TIER), 'die doppelte Ueberschrift ist zurueck');|
+         assert.ok(!/<h3 class="ds-label">🌐/.test(TIER),|
+diff --git a/tests/unit/test-geister-abschnitte.js b/tests/unit/test-geister-abschnitte.js|
+deleted file mode 100644|
+index 6dd1e4a..0000000|
+--- a/tests/unit/test-geister-abschnitte.js|
++++ /dev/null|
+@@ -1,116 +0,0 @@|
+-/**|
+- * Gespeicherte Abschnitte, die es nicht mehr gibt.|
+- *|
+- * BEFUND (04.09.2026, live auf der Startseite, nach dem Deploy|
+- * angesehen — genau dafuer gibt es die Regel "nach jedem Deploy die|
+- * geaenderte Stelle im Browser ANSEHEN"):|
+- *|
+- *     Ansicht zuruecksetzen    7 von 6 Abschnitten offen|
+- *|
+- * Sieben von sechs. Der Abschnitt "Auf- und Absteiger" ist am|
+- * 01.09.2026 aus SECTIONS verschwunden; seine ID stand aber weiter im|
+- * localStorage jedes Besuchers, der die Seite vorher benutzt hatte.|
+- * Gezaehlt wurde die GESPEICHERTE Liste, verglichen wurde gegen die|
+- * AKTUELLE.|
+- *|
+- * Zwei sichtbare Folgen:|
+- *|
+- *   1. die unsinnige Zahl,|
+- *   2. ein "Ansicht zuruecksetzen", das nie wieder verschwindet — denn|
+- *      `gleich` in zeichneReset() vergleicht Laenge und Inhalt gegen|
+- *      standard(), und mit einer Geister-ID kann das nie zutreffen.|
+- *|
+- * Kein Test hat das bemerkt, weil alle mit einem frischen, leeren|
+- * Speicher rechnen. Der echte Besucher hat keinen frischen Speicher.|
+- *|
+- * Die Reparatur gehoert ans LESEN, nicht ans Schreiben: die alten|
+- * Eintraege liegen bereits in fremden Browsern, und die erreicht man|
+- * nur beim naechsten Laden.|
+- */|
+-|
+-const { describe, it } = require('node:test');|
+-const assert = require('node:assert/strict');|
+-const fs = require('fs');|
+-const path = require('path');|
+-|
+-const WURZEL = path.join(__dirname, '..', '..');|
+-const QUELLE = fs.readFileSync(path.join(WURZEL, 'js', 'ds-sections.js'), 'utf8');|
+-|
+-/** Ein Stueck aus der Quelle holen, statt es nachzubauen. */|
+-function ausQuelle(name) {|
+-    const i = QUELLE.indexOf('function ' + name + '(');|
+-    assert.ok(i > 0, name + '() steht nicht mehr in js/ds-sections.js');|
+-    let tiefe = 0, j = QUELLE.indexOf('{', i);|
+-    for (; j < QUELLE.length; j++) {|
+-        if (QUELLE[j] === '{') tiefe++;|
+-        else if (QUELLE[j] === '}') { tiefe--; if (tiefe === 0) break; }|
+-    }|
+-    return QUELLE.slice(i, j + 1);|
+-}|
+-|
+-/** Die echten IDs aus der echten SECTIONS-Liste. */|
+-function abschnittsIds() {|
+-    const i = QUELLE.indexOf('var SECTIONS = [');|
+-    assert.ok(i > 0, 'SECTIONS steht nicht mehr in js/ds-sections.js');|
+-    const bis = QUELLE.indexOf('];', i);|
+-    return [...QUELLE.slice(i, bis).matchAll(/\{\s*id:\s*'([^']+)'/g)].map(m => m[1]);|
+-}|
+-|
+-/** nurBekannte() mit einer gesetzten Abschnittsliste laufen lassen. */|
+-function filter(ids) {|
+-    const fn = new Function('SECTIONS',|
+-        ausQuelle('nurBekannte') + '\nreturn nurBekannte;')(|
+-        abschnittsIds().map(id => ({ id })));|
+-    return fn(ids);|
+-}|
+-|
+-describe('Ein geloeschter Abschnitt spukt nicht im Speicher weiter', () => {|
+-|
+-    it('die Quelle kennt sechs Abschnitte, nicht mehr und nicht weniger', () => {|
+-        // Die Zahl selbst ist nicht der Punkt — dass sie ENDLICH ist und|
+-        // aus der Quelle kommt, ist der Punkt. Sonst prueft alles|
+-        // darunter gegen eine leere Liste und ist wertlos.|
+-        const ids = abschnittsIds();|
+-        assert.ok(ids.length >= 4,|
+-            `nur ${ids.length} Abschnitte gefunden — dann liest dieser Test die `|
+-            + 'SECTIONS-Liste nicht mehr richtig');|
+-        assert.equal(new Set(ids).size, ids.length, 'doppelte Abschnitts-ID');|
+-    });|
+-|
+-    it('eine ID, die es nicht mehr gibt, faellt raus', () => {|
+-        const ids = abschnittsIds();|
+-        const gespeichert = ids.slice(0, 3).concat(['auf-ab']);|
+-        const raus = filter(gespeichert);|
+-        assert.ok(!raus.includes('auf-ab'),|
+-            'die Geister-ID "auf-ab" ueberlebt den Filter — genau sie hat am '|
+-            + '04.09.2026 "7 von 6 Abschnitten offen" erzeugt');|
+-        assert.deepEqual(raus, ids.slice(0, 3),|
+-            'der Filter wirft mehr weg als die unbekannte ID');|
+-    });|
+-|
+-    it('nie mehr offene Abschnitte als es Abschnitte gibt', () => {|
+-        // Die Zusage in der Sprache des Nutzers: die Zahl links kann die|
+-        // Zahl rechts nicht uebersteigen. Egal, was im Speicher steht.|
+-        const ids = abschnittsIds();|
+-        const muell = ids.concat(['auf-ab', 'alt1', 'alt2', 'nochwas']);|
+-        assert.ok(filter(muell).length <= ids.length,|
+-            `${filter(muell).length} von ${ids.length} — genau der Satz, der live stand`);|
+-    });|
+-|
+-    it('ein sauberer Speicher bleibt unangetastet', () => {|
+-        const ids = abschnittsIds();|
+-        assert.deepEqual(filter(ids), ids);|
+-        assert.deepEqual(filter([]), []);|
+-    });|
+-|
+-    it('gemerkt() benutzt den Filter wirklich', () => {|
+-        // Ohne diese Zusicherung kann nurBekannte() unbenutzt danebenstehen|
+-        // und alles oben bleibt gruen.|
+-        const g = ausQuelle('gemerkt');|
+-        assert.match(g, /nurBekannte\(/,|
+-            'gemerkt() gibt die gespeicherte Liste ungefiltert zurueck — dann '|
+-            + 'nuetzt der Filter niemandem');|
+-        assert.doesNotMatch(g, /return v;/,|
+-            'gemerkt() hat noch einen Pfad, der die rohe Liste zurueckgibt');|
+-    });|
+-});|
+diff --git a/tests/unit/test-meta-bausteine.js b/tests/unit/test-meta-bausteine.js|
+index f347b57..45e2ed1 100644|
+--- a/tests/unit/test-meta-bausteine.js|
++++ b/tests/unit/test-meta-bausteine.js|
+@@ -97,4 +97,5 @@ describe('Bausteine — Aufbau', () => {|
+         ids.forEach((id, i) => { auf[id] = flags[i]; });|
++        // UI-13 (27.09.2026, Hausi): alle offen, immer.|
+         assert.deepStrictEqual(auf,|
+-            { top: true, heatmap: true, tiers: false, rang: false, cards: true });|
++            { top: true, heatmap: true, tiers: true, rang: true, cards: true });|
+     });|
+@@ -132,11 +133,9 @@ describe('Bausteine — verschieben, nicht neu erzeugen', () => {|
+         // erzeugt hat — nie auf einem Block, der schon Handler traegt.|
+-        //   b      der Kopf-Knopf, in kopf() erzeugt|
+-        //   platz   das leere <span class="ds-sec-info"> daneben, in|
+-        //           kopf() erzeugt — dort und nur dort steht seit dem|
+-        //           10.09.2026 der Info-Knopf. Nachgezeichnet wird die|
+-        //           Knopfzeile, NIE der Abschnitt: die Bloecke darin|
+-        //           sind verschoben und traegen fremde Handler.|
+-        //   row     die Rueckweg-Zeile, in zeichneReset() erzeugt|
++        //   platz   das leere <span class="ds-sec-info"> in kopf() — dort|
++        //           und nur dort steht seit dem 10.09.2026 der Info-Knopf.|
++        //           Kopf und Rueckweg-Zeile setzen seit UI-13 (27.09.2026)|
++        //           kein innerHTML mehr: den Rueckweg gibt es nicht, der|
++        //           Kopf wird aus Knoten gebaut.|
+         const ziele = [...CODE.matchAll(/(\w+)\.innerHTML\s*=/g)].map(m => m[1]);|
+-        assert.deepStrictEqual([...new Set(ziele)].sort(), ['b', 'platz', 'row'],|
++        assert.deepStrictEqual([...new Set(ziele)].sort(), ['platz'],|
+             'innerHTML auf fremdem Inhalt: ' + ziele.join(', '));|
+@@ -202,9 +201,6 @@ describe('Bausteine — wiederholbar', () => {|
+ |
+-describe('Bausteine — zugeklappt ist nicht weg', () => {|
+-    it('ein zugeklappter Abschnitt behaelt seine Ueberschrift', () => {|
+-        // Nur der Koerper verschwindet, nie der Kopf.|
+-        assert.match(CSS, /\.ds-sec-body\s*\{[^}]*display:\s*none/);|
+-        assert.match(CSS, /\.ds-sec\.is-open\s*>\s*\.ds-sec-body\s*\{[^}]*display:\s*block/);|
+-        const hd = /\.ds-sec-hd\s*\{([^}]*)\}/.exec(CSS)[1];|
+-        assert.ok(!/display:\s*none/.test(hd));|
++describe('Bausteine — nichts klappt mehr (UI-13, 27.09.2026)', () => {|
++    it('der Koerper ist immer sichtbar', () => {|
++        assert.match(CSS, /\.ds-sec-body\s*\{[^}]*display:\s*block/);|
++        assert.ok(!/\.ds-sec-body\s*\{[^}]*display:\s*none/.test(CSS));|
+     });|
+@@ -212,13 +208,12 @@ describe('Bausteine — zugeklappt ist nicht weg', () => {|
+     it('kein Abschnitt wird je aus dem Dokument entfernt', () => {|
+-        assert.ok(!/\.remove\(\)/.test(CODE.replace(/if \(alt\) alt\.remove\(\);/g, '')),|
+-            'nur die Rueckweg-Zeile darf sich entfernen');|
++        assert.ok(!/\.remove\(\)/.test(CODE.replace(/if \(altReset\) altReset\.remove\(\);/g, '')),|
++            'nur eine alte Rueckweg-Zeile darf verschwinden');|
+     });|
+ |
+-    it('der Klappzustand wird gemerkt', () => {|
+-        assert.match(CODE, /localStorage\.setItem\(STORE/);|
+-        assert.match(CODE, /localStorage\.getItem\(STORE\)/);|
++    it('kein Klappzustand wird mehr gespeichert oder gelesen', () => {|
++        assert.ok(!/localStorage/.test(CODE));|
+     });|
+ |
+-    it('der Kopf sagt Screenreadern, ob er offen ist', () => {|
+-        assert.match(CODE, /setAttribute\('aria-expanded'/);|
++    it('eine Ueberschrift traegt kein aria-expanded', () => {|
++        assert.ok(!/setAttribute\('aria-expanded'/.test(CODE));|
+     });|
+@@ -238,17 +233,4 @@ describe('Bausteine — Aussehen aus Tokens', () => {|
+ |
+-    it('Kopf und Rueckweg haben einen sichtbaren Fokusrahmen', () => {|
+-        assert.match(CSS, /\.ds-sec-hd:focus-visible\s*\{[^}]*outline/);|
+-        assert.match(CSS, /\.ds-sec-reset-btn:focus-visible\s*\{[^}]*outline/);|
+-    });|
+-});|
+-|
+-describe('Bausteine — der Rueckweg', () => {|
+-    it('erscheint nur bei Abweichung vom Startzustand', () => {|
+-        const fn = /function zeichneReset\(host\) \{[\s\S]*?\n    \}/.exec(CODE)[0];|
+-        assert.match(fn, /if \(gleich\) \{ if \(alt\) alt\.remove\(\); return; \}/);|
+-    });|
+-|
+-    it('nennt, wie viele Abschnitte offen sind', () => {|
+-        const fn = /function zeichneReset\(host\) \{[\s\S]*?\n    \}/.exec(CODE)[0];|
+-        assert.match(fn, /SECTIONS\.length/);|
++    it('keine Regeln mehr fuer Pfeil und Rueckweg', () => {|
++        assert.ok(!/\.ds-sec-arrow|\.ds-sec-reset/.test(CSS), 'tote Regeln stehen noch da');|
+     });|
+diff --git a/tests/unit/test-meta-filter.js b/tests/unit/test-meta-filter.js|
+index 0919a2b..3e2bf38 100644|
+--- a/tests/unit/test-meta-filter.js|
++++ b/tests/unit/test-meta-filter.js|
+@@ -86,24 +86,10 @@ describe('Filter — kein zweites Bedienelement', () => {|
+ |
+-    it('Global bekommt ein Schild, keinen Schalter', () => {|
+-        // Dort gilt immer das laufende Fenster. Ein Knopf, der nichts|
+-        // zu waehlen hat, ist eine Luege ueber die Daten.|
++    it('Global bekommt weder Schild noch Schalter (UI-12, 27.09.2026)', () => {|
++        // Dort gilt immer das laufende Fenster, und die Ueberschrift|
++        // darueber nennt es schon („Aktuelles Meta · TEF–30C"). Das|
++        // Schild war doppelt — Hausi: „redundant … weg". Das Verhalten|
++        // prueft tests/unit/test-abschnitte-immer-offen.js am Ausschnitt.|
+         const block = /var RAEUME = \[([\s\S]*?)\n    \];/.exec(CODE)[1];|
+         assert.match(block, /key:\s*'gl',[\s\S]*?quelle:\s*null/);|
+-        assert.match(CODE, /ds-filter-fixed/);|
+-        /* DIE GESTRICHELTE UMRANDUNG IST AM 01.09.2026 GEFALLEN.|
+-           Sie war 32px hoch und stand neben zwei 44px hohen Knopfreihen.|
+-           Gemeldet: "Lieber dieses TEF-bis-PBL-Feld optisch den anderen|
+-           anpassen." Das Schild sieht jetzt aus wie ein gesetzter Knopf.|
+-           Dass es keiner ist, sagt der fehlende Hover und der fehlende|
+-           Zeigefinger — nicht mehr eine zweite Formensprache.|
+-           Geprueft wird deshalb die GLEICHHEIT statt des Unterschieds:|
+-           dieselbe Mindesthoehe und dieselbe Rundung wie .ds-filter-btn. */|
+-        const schild = /\.ds-filter-fixed\s*\{([^}]*)\}/.exec(CSS)[1];|
+-        const knopf  = /\.ds-filter-btn\s*\{([^}]*)\}/.exec(CSS)[1];|
+-        assert.ok(!/border:\s*1px dashed/.test(schild), 'die gestrichelte Kante ist zurueck');|
+-        for (const eig of ['min-height', 'border-radius']) {|
+-            const w = (t) => (new RegExp(eig + ':\\s*([^;]+);').exec(t) || [])[1];|
+-            assert.strictEqual(w(schild), w(knopf),|
+-                `${eig} weicht wieder vom Knopf ab: ${w(schild)} statt ${w(knopf)}`);|
+-        }|
++        assert.ok(!/\.ds-filter-fixed\s*\{/.test(CSS), 'die Regel fuer das Schild steht noch');|
+     });|
+@@ -184,10 +170,6 @@ describe('Filter — Aussehen aus Tokens', () => {|
+ describe('Regression 18.08. — Sprachwechsel ohne Sektionen', () => {|
+-    it('zeichneReset faellt nicht ueber einen fehlenden Zustand', () => {|
+-        // Wer die Sprache wechselt, ohne current-meta je geoeffnet zu|
+-        // haben, kam mit offen === null an:|
+-        //   TypeError: Cannot read properties of null (reading 'length')|
+-        // Gemessen auf past-meta und city-league. Der Fehler war schon|
+-        // ausgeliefert, als er auffiel.|
+-        const fn = /function zeichneReset\(host\) \{[\s\S]*?\n    \}/.exec(SEC)[0];|
+-        assert.match(fn, /if \(!offen\)/);|
++    it('es gibt kein zeichneReset mehr, das ueber einen fehlenden Zustand fallen koennte', () => {|
++        // Bis zum 27.09.2026 (UI-13) fiel es ohne geoeffnete Meta-Ansicht|
++        // ueber offen === null. Die Zeile gibt es nicht mehr.|
++        assert.ok(!/function zeichneReset\(/.test(SEC));|
+     });|
+diff --git a/tests/unit/test-sprache-meta-ansicht.js b/tests/unit/test-sprache-meta-ansicht.js|
+index 75d344a..ed5d5ec 100644|
+--- a/tests/unit/test-sprache-meta-ansicht.js|
++++ b/tests/unit/test-sprache-meta-ansicht.js|
+@@ -98,3 +98,7 @@ describe('js/app-tier-meta.js — nichts mehr fest verdrahtet', () => {|
+ |
+-    it('beide tierTitles-Tabellen holen jeden Untertitel aus t()', () => {|
++    it('jede tierTitles-Tabelle holt jeden Untertitel aus t() — oder hat keinen', () => {|
++        // Seit UI-15/20/21/22 (27.09.2026, Hausi) traegt die Tabelle des|
++        // aktuellen Metas KEINE Untertitel mehr („Tier 1" reicht, der|
++        // Rogue-Block heisst „Rogue"). Die City-League-Tabelle behaelt|
++        // ihre vier, denn die nennen die Raenge.|
+         const tabellen = TIER.match(/const tierTitles = \{[\s\S]*?\};/g) || [];|
+@@ -102,3 +106,6 @@ describe('js/app-tier-meta.js — nichts mehr fest verdrahtet', () => {|
+             'erwartet werden genau die zwei bekannten Tabellen, gefunden: ' + tabellen.length);|
+-        for (const [i, tb] of tabellen.entries()) {|
++        const ohne = tabellen.filter(tb => !/subtitle:/.test(tb));|
++        assert.equal(ohne.length, 1, 'genau eine Tabelle (aktuelles Meta) ist ohne Untertitel');|
++        assert.match(ohne[0], /'tier-trending':\s*\{\s*title:\s*'Rogue'\s*\}/);|
++        for (const [i, tb] of tabellen.filter(tb => /subtitle:/.test(tb)).entries()) {|
+             // Vier Eintraege, vier t()-Aufrufe, kein Literal dazwischen.|
+@@ -136,4 +143,4 @@ describe('js/app-tier-meta.js — nichts mehr fest verdrahtet', () => {|
+         }|
+-        assert.ok(schluessel.size >= 5,|
+-            'die beiden Tabellen benutzen dieselben Schluessel — dann sagen sie wieder dasselbe');|
++        assert.ok(schluessel.size >= 4,|
++            'die City-League-Tabelle hat ihre vier Untertitel verloren');|
+         const I18N = fs.readFileSync(path.join(ROOT, 'js/i18n.js'), 'utf8');|
+-- |
+2.43.0|
+|
+|
+From c74860c374dffbad09369ecbb374a5cda290a5ec Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sun, 27 Sep 2026 10:37:22 +0200|
+Subject: [PATCH 2/4] Rutsch 6: Matches statt Partien, Kacheln ohne Matchzahl,|
+ Online-Beschriftungen, Lesbarkeit (UI-9, UI-10, UI-11, UI-17, UI-18, UI-24,|
+ UI-25, UI-26)|
+|
+---|
+ css/components.css                            |  11 +-|
+ css/pokeball-menu.css                         |   6 +-|
+ css/profile-howto-info.css                    |  98 ++++++------|
+ css/styles.css                                |  29 +---|
+ css/ui-components.css                         |   4 +-|
+ js/app-anti-tech.js                           |   6 +-|
+ js/app-archetype-card.js                      |  88 +++++------|
+ js/app-current-meta-analysis.js               |   6 +-|
+ js/app-deck-builder.js                        |   8 +-|
+ js/app-meta-call.js                           |  30 ++--|
+ js/app-past-meta.js                           |   2 +-|
+ js/app-tech-lab.js                            |   6 +-|
+ js/app-tier-meta.js                           |  79 +++-------|
+ js/ds-datenumfang.js                          |   2 +-|
+ js/ds-post-quellen.js                         |   6 +-|
+ js/ds-share.js                                |   8 +-|
+ js/i18n.js                                    | 144 +++++++++---------|
+ js/win-rate-konvention.js                     |   4 +-|
+ scripts/messe_begriffe.py                     |  94 ++++++++++++|
+ scripts/messe_schrift_kontrast.py             |  11 +-|
+ tests/unit/test-archetype-card.js             |   8 +-|
+ tests/unit/test-audit-p0-fixes.js             |  31 ++--|
+ tests/unit/test-b1-listen-vorwert.js          |   8 +-|
+ tests/unit/test-cm-tier-grundlage.js          |   4 +-|
+ tests/unit/test-conversion-performance.js     |  42 ++---|
+ tests/unit/test-design-components.js          |  13 +-|
+ tests/unit/test-design-depth.js               |   4 +-|
+ tests/unit/test-ds-share.js                   |   4 +-|
+ tests/unit/test-karten-und-kacheln.js         |   2 +-|
+ .../unit/test-leere-spalten-und-schwellen.js  |  21 +--|
+ tests/unit/test-matches-und-lesbarkeit.js     | 106 +++++++++++++|
+ tests/unit/test-matchup-major-spalte.js       |  28 ++--|
+ tests/unit/test-meta-performance.js           |  16 +-|
+ .../unit/test-metacall-live-befunde-07-09.js  |   2 +-|
+ tests/unit/test-nenner-team-a.js              |  23 +--|
+ tests/unit/test-nenner-und-rundung.js         |  24 +--|
+ tests/unit/test-online-major-kacheln.js       |  23 ++-|
+ tests/unit/test-rangliste.js                  |  11 +-|
+ tests/unit/test-schriftboden.js               |   3 +-|
+ tests/unit/test-spielersicht-luecken.js       |  10 +-|
+ tests/unit/test-sprache-win-rate.js           |   2 +-|
+ tests/unit/test-tech-beleg-kennzeichnung.js   |  20 +--|
+ .../test-tech-beleg-lab-und-interaktionen.js  |  24 +--|
+ tutorial/tutorial.de.html                     |  10 +-|
+ tutorial/tutorial.en.html                     |  10 +-|
+ 45 files changed, 601 insertions(+), 490 deletions(-)|
+ create mode 100644 scripts/messe_begriffe.py|
+ create mode 100644 tests/unit/test-matches-und-lesbarkeit.js|
+|
+diff --git a/css/components.css b/css/components.css|
+index aa7c8f9..c6cad99 100644|
+--- a/css/components.css|
++++ b/css/components.css|
+@@ -866,11 +866,4 @@ html.is-signed-out [onclick*="radelist"]:hover {|
+ |
+-/* Der Balken sitzt jetzt in der Rangliste, nicht mehr im eigenen Block.|
+-   Wert oben, Balken darunter — in einer schmalen Zahlenspalte ist|
+-   nebeneinander kein Platz. */|
+-.cm-rangliste .cm-rang-wert { display: block; }|
+-.cm-rangliste .ds-bar-track {|
+-    display: block;|
+-    margin-top: 3px;|
+-    min-width: 64px;|
+-}|
++/* Der Balken der Spalte „ggü. Schnitt" ist mit ihr gegangen (UI-26,|
++   27.09.2026). */|
+ |
+diff --git a/css/pokeball-menu.css b/css/pokeball-menu.css|
+index ff99406..d8cea24 100644|
+--- a/css/pokeball-menu.css|
++++ b/css/pokeball-menu.css|
+@@ -292,4 +292,6 @@|
+     padding: 7px 13px; font-weight: 700; color: var(--ink-2); cursor: pointer;|
+-    /* BODEN 03.09.2026: 0.83em auf einem 12-px-Elternwert = 9,96 px. */|
+-    font-size: max(10px, 0.83em);|
++    /* BODEN 03.09.2026: 0.83em auf einem 12-px-Elternwert = 9,96 px.|
++       UI-11 (27.09.2026): der Boden ist jetzt --fs-xs (11 px) — mit 10 px|
++       standen die Top-Karten-Umschalter im Aktuellen Meta darunter. */|
++    font-size: max(var(--fs-xs), 0.83em);|
+     transition: all 0.2s ease; font-family: 'Nunito', sans-serif;|
+diff --git a/css/profile-howto-info.css b/css/profile-howto-info.css|
+index ee18b31..65d73f6 100644|
+--- a/css/profile-howto-info.css|
++++ b/css/profile-howto-info.css|
+@@ -904,3 +904,3 @@|
+ .tutorial-mockup .mockup-pill {|
+-    font-size: 0.65rem;|
++    font-size: var(--fs-xs);|
+     font-weight: 800;|
+@@ -944,3 +944,3 @@|
+ .mockup-hub-tile .mockup-tile-desc {|
+-    font-size: 0.68rem;|
++    font-size: var(--fs-xs);|
+     color: var(--ink-3);|
+@@ -991,5 +991,5 @@|
+ }|
+-.mockup-card-badge--max  { top: -6px; right: -6px; background: #ef4444; }|
++.mockup-card-badge--max  { top: -6px; right: -6px; background: #dc2626; }|
+ .mockup-card-badge--in   { top: -6px; left: -6px;  background: var(--solid-ok); }|
+-.mockup-card-badge--wish { bottom: -4px; right: -4px; background: #ec4899; font-size: 0.7rem; }|
++.mockup-card-badge--wish { bottom: -4px; right: -4px; background: #be185d; font-size: 0.7rem; }|
+ .mockup-card-info {|
+@@ -1007,3 +1007,3 @@|
+ .mockup-card-stats {|
+-    font-size: 0.65rem;|
++    font-size: var(--fs-xs);|
+     color: var(--ink-3);|
+@@ -1102,5 +1102,5 @@|
+ }|
+-.mockup-tier-card--t1 .mockup-tier-header { background: linear-gradient(90deg, #d32f2f, #ef4444); }|
+-.mockup-tier-card--t2 .mockup-tier-header { background: linear-gradient(90deg, #a55300, #fb923c); }|
+-.mockup-tier-card--t3 .mockup-tier-header { background: linear-gradient(90deg, #2d7530, #4ade80); }|
++.mockup-tier-card--t1 .mockup-tier-header { background: linear-gradient(90deg, #b91c1c, #dc2626); }|
++.mockup-tier-card--t2 .mockup-tier-header { background: linear-gradient(90deg, #a55300, #c2410c); }|
++.mockup-tier-card--t3 .mockup-tier-header { background: linear-gradient(90deg, #2d7530, #15803d); }|
+ .mockup-tier-rows {|
+@@ -1244,3 +1244,3 @@|
+ }|
+-.mockup-movers-block.is-up   .mockup-movers-head { background: linear-gradient(90deg, var(--solid-ok), #4ade80); }|

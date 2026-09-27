@@ -1123,10 +1123,12 @@ def check_set_order(findings):
     # independently, so the JP current set is legitimately below the newest EN
     # set. What must hold is that it is inside the standard window — below that
     # boundary prepare_card_data bins it out of the standard chunk.
-    # Mirrors STANDARD_ANKER / STANDARD_MIN_ORDER in
-    # backend/core/prepare_card_data.py: die Grenze haengt am Set PAR, nicht
-    # an der Zahl (sets.json wird neu nummeriert, 27.09.2026).
-    standard_min = order.get("PAR") or 136
+    # Mirrors standard_anker() / STANDARD_MIN_ORDER in
+    # backend/core/prepare_card_data.py: die Grenze haengt am aeltesten
+    # legalen Set des Formatfensters (DA-10, 27.09.2026 — vorher PAR, das
+    # war eine abgelesene Zahl, kein Formatbeginn), nicht an einer Zahl.
+    anker = str(fw.get("oldest_legal_set") or "TEF").strip().upper()
+    standard_min = order.get(anker) or 136
     # The card-database tab filters EVERYTHING through the hand-maintained
     # pokemon_sets_mapping.csv (js/app-cards-db.js englishCards filter): a
     # set missing there has ALL its cards silently removed before any

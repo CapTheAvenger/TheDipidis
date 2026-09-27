@@ -2,16 +2,16 @@
   "_gesamtstand_zweck": "Zaehlt ueber die ganze Datenbank, nicht ueber diesen Lauf — sonst beantwortet ein gezielter --sets-Lauf die Frage „ist alles da?\" nicht mehr.",
   "gesamtstand": {
     "standard": {
-      "karten": 4626,
-      "mit_text_de": 4207,
-      "mit_text_en": 4616,
-      "anteil_de": 90.9
+      "karten": 4115,
+      "mit_text_de": 3696,
+      "mit_text_en": 4105,
+      "anteil_de": 89.8
     },
     "extended": {
-      "karten": 4153,
-      "mit_text_de": 4083,
-      "mit_text_en": 4099,
-      "anteil_de": 98.3
+      "karten": 4664,
+      "mit_text_de": 4594,
+      "mit_text_en": 4610,
+      "anteil_de": 98.5
     },
     "legacy": {
       "karten": 11822,

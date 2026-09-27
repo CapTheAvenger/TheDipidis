@@ -684,8 +684,36 @@ EXTENDED_MIN_ORDER = 113   # RCL (Rebel Clash) and newer.
 # deshalb nur noch der Rueckfall, wenn das Anker-Set in der Ordnung fehlt.
 # Die Anker sind die Sets, die heute an den Grenzen stehen: PAR hatte am
 # 27.09.2026 die Ordnung 136, RCL die 113.
-STANDARD_ANKER = 'PAR'
+#
+# DA-10 (27.09.2026): der Standard-Anker war PAR — abgelesen an der Zahl
+# 136, die am 27.09. in sets.json auf PAR stand. Gemeint war aber TEF: der
+# Kommentar an STANDARD_MIN_ORDER sagt es, und das laufende Format beginnt
+# laut data/format_window.json (oldest_legal_set) bei TEF. Gemessen: der
+# Standard-Chunk trug PAR und PAF mit, zwei Sets, die in TEF-30C nicht
+# legal sind. Der Anker kommt deshalb jetzt aus format_window.json — das
+# wird bei jeder Rotation automatisch fortgeschrieben —, TEF nur als
+# Rueckfall, falls die Datei fehlt.
+STANDARD_ANKER_RUECKFALL = 'TEF'
 EXTENDED_ANKER = 'RCL'
+
+
+def standard_anker(fenster: dict = None) -> str:
+    """Das aelteste legale Set des laufenden Formats."""
+    if fenster is None:
+        fenster = {}
+        wurzel_data = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'data'))
+        for ort in (get_data_dir(), wurzel_data):
+            try:
+                with open(os.path.join(ort, 'format_window.json'), encoding='utf-8') as f:
+                    fenster = json.load(f)
+                break
+            except Exception:  # noqa: BLE001 — naechster Ort, dann Rueckfall
+                continue
+    wert = str((fenster or {}).get('oldest_legal_set') or '').strip().upper()
+    return wert or STANDARD_ANKER_RUECKFALL
+
+
+STANDARD_ANKER = standard_anker()
 
 
 def _schwelle(set_order: dict, anker: str, rueckfall: int) -> int:

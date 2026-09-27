@@ -34,6 +34,7 @@ festhalten() {
 sichern
 if ! festhalten; then echo "Nichts zu schreiben."; exit 0; fi
 
+
 for versuch in 1 2 3 4 5; do
     if git push -q origin HEAD:main; then
         echo "Geschrieben (Versuch $versuch)."
@@ -42,6 +43,17 @@ for versuch in 1 2 3 4 5; do
     echo "Push abgelehnt (Versuch $versuch) — auf origin/main neu aufsetzen."
     git rebase --abort >/dev/null 2>&1 || true
     git fetch -q origin main || { sleep $((2 ** versuch)); continue; }
+    # WZ-7 (27.09.2026): Beim Neuaufsetzen unten wird hart auf origin/main
+    # zurueckgesetzt. Was der Lauf geaendert, aber NICHT uebergeben hat, waere
+    # danach weg — still. Also vorher nachsehen und in dem Fall abbrechen,
+    # mit Namen. data_stand.json ist abgeleitet und wird neu gebaut.
+    uebrig="$(git status --porcelain --untracked-files=no | grep -v ' data/data_stand.json$' || true)"
+    if [ -n "$uebrig" ]; then
+        echo "::error::daten_pushen: nicht uebergebene Aenderungen wuerden beim Neuaufsetzen verloren gehen:"
+        echo "$uebrig"
+        echo "Diese Dateien an daten_pushen.sh uebergeben oder vorher verwerfen."
+        exit 1
+    fi
     git reset -q --hard origin/main
     zurueck
     stand

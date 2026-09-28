@@ -1,0 +1,467 @@
++    else:|
++        with urllib.request.urlopen(QUELLE_URL, timeout=60) as r:|
++            roh = r.read()|
++    karten = json.loads(roh)|
++    tab, ohne = tabelle_aus_quelle(karten)|
++    if len(tab) < 1000:|
++        print(f"ABBRUCH: nur {len(tab)} Karten gelesen — die Quelle sieht nicht aus wie erwartet")|
++        return 1|
++|
++    alt = lies_tabelle(ZIEL) if os.path.exists(ZIEL) else {}|
++    verloren = sorted(k for k in alt if k not in tab)|
++    geaendert = sorted(k for k in alt if k in tab and alt[k][:2] != tab[k][:2])|
++    if verloren or geaendert:|
++        print("ABBRUCH: bekannte Karten fehlen oder haben eine andere Kennung —"|
++              f" verloren {verloren[:10]} ({len(verloren)}), geändert {geaendert[:10]} ({len(geaendert)})")|
++        return 1|
++|
++    decks = json.load(open(DECKS, encoding="utf-8")).get("decks", []) if os.path.exists(DECKS) else []|
++    probe = gegenprobe(tab, decks)|
++|
++    # KOMPAKT, ABER LESBAR: je Set eine Zeile, Index = Nummer - 1, Eintrag|
++    # [Codewert, Namensindex]. Der Codewert ist genau die Zahl im|
++    # Scan-Code (Trainer schon mit +10.000.000), die Namen stehen einmal in|
++    # `namen`. So bleibt die Datei bei rund 70 KB statt 125 KB, und ein|
++    # Set-Wechsel ändert eine Zeile, nicht hundert.|
++    namen = sorted({e[2] for e in tab.values()})|
++    idx = {n: i for i, n in enumerate(namen)}|
++    je_set = collections.defaultdict(dict)|
++    for k, e in tab.items():|
++        set_, nr = k.rsplit("-", 1)|
++        je_set[set_][int(nr)] = [e[1] + (TRAINER_VERSATZ if e[0] == "T" else 0), idx[e[2]]]|
++    sets_zeilen = {}|
++    for set_ in sorted(je_set):|
++        hoechste = max(je_set[set_])|
++        sets_zeilen[set_] = [je_set[set_].get(n) for n in range(1, hoechste + 1)]|
++|
++    meta = {|
++        "zweck": "Kennungen im Scan-Code von Pokémon TCG Pocket je (Set, Nummer) — für eigene Scan-Codes aus einer Deckliste (FE-11).",|
++        "quelle": QUELLE_SEITE,|
++        "quelle_datei": QUELLE_URL,|
++        "quelle_lizenz": "MIT",|
++        "quelle_sha256": hashlib.sha256(roh).hexdigest(),|
++        "abgerufen": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat(),|
++        "format": "sets[SET][Nummer-1] = [Codewert, Index in namen] oder null. Codewert = Kennung, bei Trainern + 10.000.000 — genau die 3 Byte im Scan-Code.",|
++        "anzahl": len(tab),|
++        "ohne_kennung": ohne,|
++        "neu_in_diesem_lauf": sorted(k for k in tab if k not in alt) if alt else [],|
++        "gegenprobe": probe,|
++    }|
++    teile = ['{', '"_meta":' + json.dumps(meta, ensure_ascii=False, indent=1) + ',',|
++             '"namen":' + json.dumps(namen, ensure_ascii=False) + ',', '"sets":{']|
++    zeilen = [json.dumps(set_, ensure_ascii=False) + ':' + json.dumps(v, separators=(",", ":"))|
++              for set_, v in sets_zeilen.items()]|
++    teile.append(",\n".join(zeilen))|
++    teile.append('}}')|
++    text = "\n".join(teile) + "\n"|
++    # Unveraendert heisst: alles gleich ausser dem Abrufzeitpunkt. Sonst|
++    # meldete die woechentliche Ernte die Datei jede Woche als geaendert,|
++    # und jeder Lauf trueg 66 KB ohne neuen Inhalt aus.|
++    if os.path.exists(ZIEL):|
++        vorher = json.load(open(ZIEL, encoding="utf-8"))|
++        jetzt = json.loads(text)|
++        for d_ in (vorher, jetzt):|
++            d_["_meta"].pop("abgerufen", None)|
++        if vorher == jetzt:|
++            print(f"{len(tab)} Karten — unverändert, Datei bleibt stehen")|
++            return 0|
++    tmp = ZIEL + ".tmp"|
++    with open(tmp, "w", encoding="utf-8") as f:|
++        f.write(text)|
++    os.replace(tmp, ZIEL)|
++    print(f"{len(tab)} Karten in {len(sets_zeilen)} Sets; Gegenprobe {probe['gleich']} von {probe['decks']} Decks gleich,"|
++          f" {len(probe['abweichend'])} abweichend")|
++    return 0|
++|
++|
++if __name__ == "__main__":|
++    sys.exit(main())|
+diff --git a/scripts/build_pocket_sets.py b/scripts/build_pocket_sets.py|
+index dec6dca..610cdbf 100644|
+--- a/scripts/build_pocket_sets.py|
++++ b/scripts/build_pocket_sets.py|
+@@ -140,2 +140,20 @@ def alte_nachtraege():|
+ |
++def alte_bestaetigungen():|
++    """Die schon bestaetigten Nachtraege aus dem Bestand.|
++|
++    BEFUND (28.09.2026, Rutsch 12): der zweite Erntelauf nach der|
++    Bestaetigung schrieb `nachtrag_bestaetigt: []` — die Liste wurde je Lauf|
++    nur aus den OFFENEN Nachtraegen neu berechnet. Der Beleg fuer B4b ging|
++    damit eine Ernte spaeter doch verloren. Bestaetigungen werden jetzt|
++    fortgeschrieben wie alles andere im Bestand.|
++    """|
++    if not os.path.exists(ZIEL):|
++        return []|
++    try:|
++        meta = json.load(open(ZIEL, encoding="utf-8")).get("_meta") or {}|
++    except Exception:|
++        return []|
++    return [e for e in (meta.get("nachtrag_bestaetigt") or []) if isinstance(e, dict)]|
++|
++|
+ def nachtraege_fortschreiben(nachtraege, von_der_quelle):|
+@@ -170,2 +188,5 @@ def main():|
+         print(f"Nachtrag {e['kennung']} ({e['name']!r}) fuehrt die Quelle jetzt selbst")|
++    neu_bestaetigt = {e.get("kennung") for e in bestaetigt}|
++    bestaetigt = [e for e in alte_bestaetigungen()|
++                  if e.get("kennung") not in neu_bestaetigt] + bestaetigt|
+     print(f"{len(namen)} Sets benannt")|
+diff --git a/scripts/pocket_ernte.sh b/scripts/pocket_ernte.sh|
+index 108103d..32fdea1 100644|
+--- a/scripts/pocket_ernte.sh|
++++ b/scripts/pocket_ernte.sh|
+@@ -45,2 +45,9 @@ fi|
+ |
++# Die Kennungen fuer eigene Scan-Codes (FE-11). Quelle ist GitHub, nicht|
++# Game8; faellt sie aus oder bricht der Lauf ab (bekannte Karte verloren),|
++# bleibt die alte Tabelle stehen — das haelt die Decks nicht auf.|
++if ! python3 scripts/build_pocket_karten_ids.py; then|
++    echo "WARNUNG build_pocket_karten_ids.py fehlgeschlagen — Kartentabelle bleibt alt" >&2|
++fi|
++|
+ # Den Datenstand VOR dem Commit fortschreiben; build_data_stand.py liest|
+@@ -53,3 +60,3 @@ python3 scripts/build_data_stand.py || {|
+ geaendert=0|
+-for f in data/pocket_tierlist.json data/pocket_sets.json data/data_stand.json; do|
++for f in data/pocket_tierlist.json data/pocket_sets.json data/pocket_karten_ids.json data/data_stand.json; do|
+     if [ -n "$(git status --porcelain -- "$f")" ]; then|
+diff --git a/scripts/scrape_pocket_tierlist.py b/scripts/scrape_pocket_tierlist.py|
+index 4eb7ed1..02bf097 100644|
+--- a/scripts/scrape_pocket_tierlist.py|
++++ b/scripts/scrape_pocket_tierlist.py|
+@@ -225,6 +225,14 @@ def hole(url, binaer=False, versuche=3):|
+ |
+-    raise RuntimeError(|
+-        f"{url}: keine Sprosse kam durch — " + " | ".join(berichte)|
+-        + ". HTTP 202 heißt Cloudflare-Prüfung, 403 heißt abgewiesen; "|
+-        "beides ist Bot-Schutz und kein Fehler im Aufbau der Seite.")|
++    meldung = (f"{url}: keine Sprosse kam durch — " + " | ".join(berichte)|
++               + ". HTTP 202 heißt Cloudflare-Prüfung, 403 heißt abgewiesen; "|
++               "beides ist Bot-Schutz und kein Fehler im Aufbau der Seite.")|
++    # SC-5 (28.09.2026): Hausi hat den Ablauf von Hand gestartet und nur|
++    # „keine Sprosse kam durch" gesehen. Auf dem GitHub-Laeufer ist das der|
++    # bekannte Zustand; die Meldung sagt jetzt, wo stattdessen geerntet wird.|
++    if os.environ.get("GITHUB_ACTIONS") == "true":|
++        meldung += (" Auf dem GitHub-Läufer ist das der bekannte Zustand"|
++                    " (gemessen 04.09. und 26.09.2026) — geerntet wird beaufsichtigt:"|
++                    " die Montags-Erinnerung meldet sich, dann „/dd-bau Pocket-Ernte\""|
++                    " senden, die Sitzung fährt scripts/pocket_ernte.sh.")|
++    raise RuntimeError(meldung)|
+ |
+@@ -1323,4 +1331,10 @@ def main():|
+ |
+-    html = (open(a.aus_datei, encoding="utf-8").read() if a.aus_datei|
+-            else hole(QUELLE))|
++    try:|
++        html = (open(a.aus_datei, encoding="utf-8").read() if a.aus_datei|
++                else hole(QUELLE))|
++    except RuntimeError as e:|
++        # Als ::error:: statt als Traceback: dann steht der Grund in der|
++        # Anmerkung des Laufs, nicht nur „siehe Protokoll oben".|
++        print(f"::error::{e}")|
++        return 1|
+     tier, set_decks = lies_seite(html)|
+diff --git a/service-worker.js b/service-worker.js|
+index 6188cd4..2f4bba9 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202609272220|
++// v202609280750|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202609272220';|
++const CACHE_NAME = 'tcg-analysis-v202609280750';|
+ |
+@@ -120,2 +120,3 @@ const SHELL_ASSETS = [|
+   './js/qr-svg.js',|
++  './js/pocket-deckcode.js',|
+   './js/ds-pocket.js',|
+diff --git a/tests/python/test_pocket_ernte.py b/tests/python/test_pocket_ernte.py|
+index 5db4aea..69f5d3c 100644|
+--- a/tests/python/test_pocket_ernte.py|
++++ b/tests/python/test_pocket_ernte.py|
+@@ -56,2 +56,3 @@ def test_die_ernte_laeuft_in_der_richtigen_reihenfolge(tmp_path):|
+                        "scripts/build_pocket_sets.py",|
++                       "scripts/build_pocket_karten_ids.py",|
+                        "scripts/build_data_stand.py"], aufrufe|
+diff --git a/tests/python/test_pocket_karten_ids.py b/tests/python/test_pocket_karten_ids.py|
+new file mode 100644|
+index 0000000..5d6e2c6|
+--- /dev/null|
++++ b/tests/python/test_pocket_karten_ids.py|
+@@ -0,0 +1,101 @@|
++"""FE-11: die Kartentabelle fuer eigene Pocket-Scan-Codes.|
++|
++data/pocket_karten_ids.json ordnet (Set, Nummer) die Kennung zu, die im|
++Scan-Code steht. Gebaut von scripts/build_pocket_karten_ids.py aus|
++github.com/flibustier/pokemon-tcg-pocket-database (MIT).|
++|
++Die Zusicherungen FUEHREN die Funktionen des Bauskripts aus.|
++"""|
++import copy|
++import importlib.util|
++import json|
++import os|
++|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++_spec = importlib.util.spec_from_file_location(|
++    "build_pocket_karten_ids", os.path.join(WURZEL, "scripts", "build_pocket_karten_ids.py"))|
++bk = importlib.util.module_from_spec(_spec)|
++_spec.loader.exec_module(bk)|
++|
++DATEI = os.path.join(WURZEL, "data", "pocket_karten_ids.json")|
++DECKS = json.load(open(os.path.join(WURZEL, "data", "pocket_tierlist.json"), encoding="utf-8"))["decks"]|
++|
++|
++def _tabelle():|
++    return bk.lies_tabelle(DATEI)|
++|
++|
++def test_was_beim_bau_gepasst_hat_passt_weiter():|
++    """Die Tabelle darf nicht rueckwaerts brechen: jedes Deck, dessen Code beim|
++    Bau der Tabelle aus seiner Kartenliste herauskam (_meta.gegenprobe.|
++    gleich_codes), muss das heute noch tun, solange es in der Tier-Liste|
++    steht. Neue Decks werden hier bewusst NICHT verlangt — die Tier-Liste|
++    aendert sich jede Woche, und Game8s Textliste widerspricht manchmal|
++    Game8s eigenem Muster (siehe _meta.gegenprobe.abweichend)."""|
++    gespeichert = json.load(open(DATEI, encoding="utf-8"))["_meta"]["gegenprobe"]|
++    assert gespeichert["gleich_codes"], "die Tabelle nennt kein einziges passendes Deck"|
++    heute = bk.gegenprobe(_tabelle(), DECKS)|
++    noch_da = [d for d in DECKS if bk.code_kennung(d["code"]) in set(gespeichert["gleich_codes"])]|
++    passt = set(heute["gleich_codes"])|
++    gebrochen = [d["name"] for d in noch_da if bk.code_kennung(d["code"]) not in passt]|
++    assert not gebrochen, f"passte beim Bau, passt heute nicht mehr: {gebrochen}"|
++|
++|
++def test_jede_karte_eines_bekannten_sets_steht_in_der_tabelle():|
++    """Fehlt eine Karte, deren Set die Tabelle fuehrt, ist die Tabelle|
++    unvollstaendig. Ein ganz neues Set darf fehlen, bis der naechste Bau es|
++    bringt — das steht dann als fehlt_in_tabelle mit unbekanntem Set da."""|
++    tab = _tabelle()|
++    sets = {k.rsplit("-", 1)[0] for k in tab}|
++    probe = bk.gegenprobe(tab, DECKS)|
++    fehlt = [(a["deck"], k) for a in probe["abweichend"] for k in a["fehlt_in_tabelle"]|
++             if k.rsplit("-", 1)[0] in sets]|
++    assert not fehlt, f"Karten bekannter Sets fehlen in der Tabelle: {fehlt}"|
++    assert probe["gleich"] + len(probe["abweichend"]) == probe["decks"] == len(DECKS)|
++|
++|
++def test_eine_falsche_kennung_faellt_in_der_gegenprobe_auf():|
++    """Verfaelschungsprobe fuer die Gegenprobe selbst: eine Kennung um 10|
++    verschoben, und das Deck, das die Karte fuehrt, muss abweichen."""|
++    tab = _tabelle()|
++    probe = bk.gegenprobe(tab, DECKS)|
++    abw = {a["deck"] for a in probe["abweichend"]}|
++    deck = next(d for d in DECKS if d["name"] not in abw)|
++    karte = deck["pokemon"][0]|
++    schl = bk.schluessel(karte["set"], karte["nummer"])|
++    falsch = copy.deepcopy(tab)|
++    falsch[schl][1] += 10|
++    neu = {a["deck"] for a in bk.gegenprobe(falsch, DECKS)["abweichend"]}|
++    assert deck["name"] in neu|
++|
++|
++def test_verbunden_wird_ueber_set_und_nummer_nicht_ueber_den_namen():|
++    """Zwei Drucke derselben Karte, zwei Kennungen — gemessen 28.09.2026 an|
++    Game8s Charizard-Deck, dessen Textliste den einen und dessen Muster den|
++    anderen Druck nennt."""|
++    tab = _tabelle()|
++    assert tab["B1a-12"][2] == tab["B2b-8"][2] == "Charmeleon"|
++    assert tab["B1a-12"][1] != tab["B2b-8"][1]|
++|
++|
++def test_eine_verlorene_karte_bricht_den_bau_ab(tmp_path, monkeypatch):|
++    """Neu ist erlaubt, verloren nicht: fehlt in der Quelle eine Karte, die|
++    die Tabelle schon kennt, wird nichts geschrieben."""|
++    ziel = tmp_path / "ids.json"|
++    ziel.write_bytes(open(DATEI, "rb").read())|
++    monkeypatch.setattr(bk, "ZIEL", str(ziel))|
++    tab = _tabelle()|
++    quelle = []|
++    for schl, (art, kennung, name) in tab.items():|
++        set_, nr = schl.rsplit("-", 1)|
++        set_q = {"P-A": "PROMO-A", "P-B": "PROMO-B"}.get(set_, set_)|
++        quelle.append({"set": set_q, "number": int(nr), "name": name,|
++                       "image": f"c{'TR' if art == 'T' else 'PK'}_10_{kennung:06d}_00_X.webp"})|
++    q_voll = tmp_path / "voll.json"|
++    q_voll.write_text(json.dumps(quelle), encoding="utf-8")|
++    assert bk.main(["--quelle", str(q_voll)]) == 0|
++    vorher = ziel.read_bytes()|
++    q_kurz = tmp_path / "kurz.json"|
++    q_kurz.write_text(json.dumps(quelle[1:]), encoding="utf-8")|
++    assert bk.main(["--quelle", str(q_kurz)]) == 1|
++    assert ziel.read_bytes() == vorher, "trotz verlorener Karte wurde geschrieben"|
+diff --git a/tests/python/test_pocket_setnamen_kein_etikett.py b/tests/python/test_pocket_setnamen_kein_etikett.py|
+index afa73f8..7ef7672 100644|
+--- a/tests/python/test_pocket_setnamen_kein_etikett.py|
++++ b/tests/python/test_pocket_setnamen_kein_etikett.py|
+@@ -153 +153,20 @@ def test_main_schreibt_die_nachtraege_mit(mod, tmp_path, monkeypatch):|
+     assert d["sets"]["B9x"] == "Kommt noch"|
++|
++|
++def test_eine_bestaetigung_ueberlebt_den_naechsten_lauf(mod, tmp_path, monkeypatch):|
++    """Rutsch 12: der zweite Lauf nach der Bestaetigung warf sie weg."""|
++    ziel = tmp_path / "pocket_sets.json"|
++    ziel.write_text(json.dumps({"_meta": {"nachgetragen": [],|
++        "nachtrag_bestaetigt": [{"kennung": "B4b", "name": "Deluxe Pack Mega",|
++                                 "nachgetragen_am": "2026-09-25"}]},|
++        "sets": {"B4b": "Deluxe Pack Mega"}}), encoding="utf-8")|
++    monkeypatch.setattr(mod, "ZIEL", str(ziel))|
++    monkeypatch.setattr(mod, "hole", lambda url: SEITE)|
++    monkeypatch.setattr(mod, "MINDESTENS", 1)|
++    monkeypatch.setattr(mod, "gebrauchte_kennungen", lambda: set())|
++    for _ in range(2):|
++        assert mod.main() == 0|
++        d = json.loads(ziel.read_text(encoding="utf-8"))|
++        assert d["_meta"]["nachtrag_bestaetigt"] == [|
++            {"kennung": "B4b", "name": "Deluxe Pack Mega", "nachgetragen_am": "2026-09-25"}], (|
++            "die Bestaetigung eines Nachtrags ging mit dem naechsten Lauf verloren")|
+diff --git a/tests/python/test_pocket_tierlist.py b/tests/python/test_pocket_tierlist.py|
+index c3f904d..d140d9f 100644|
+--- a/tests/python/test_pocket_tierlist.py|
++++ b/tests/python/test_pocket_tierlist.py|
+@@ -2428 +2428,18 @@ def test_die_ausgelieferte_datei_fuehrt_jede_benutzte_ueberschrift(mod):|
+         f"Abschnitte in _meta, die an keinem Deck haengen: {set(ordnung) - benutzt}")|
++|
++|
++def test_auf_dem_github_laeufer_nennt_der_abbruch_den_richtigen_weg(mod, monkeypatch, capsys):|
++    """SC-5 (28.09.2026): ein Handstart des Ablaufs endete mit einem|
++    Traceback und der Anmerkung „siehe Protokoll oben". Jetzt steht der|
++    Grund als ::error:: da, und auf dem Laeufer auch, wo geerntet wird."""|
++    _leiter(mod, monkeypatch, {|
++        "cloudscraper": _Sprosse(_Antwort(202)),|
++        "curl_cffi": _Sprosse(_Antwort(202)),|
++        "requests": _Sprosse(_Antwort(202)),|
++    })|
++    monkeypatch.setenv("GITHUB_ACTIONS", "true")|
++    monkeypatch.setattr(sys, "argv", ["scrape_pocket_tierlist.py", "--trocken"])|
++    assert mod.main() == 1|
++    fehler = [z for z in capsys.readouterr().out.splitlines() if z.startswith("::error::")]|
++    assert fehler, "kein ::error:: — die Anmerkung des Laufs bliebe leer"|
++    assert "202" in fehler[0] and "Pocket-Ernte" in fehler[0] and "pocket_ernte.sh" in fehler[0]|
+diff --git a/tests/unit/test-pocket-deckcode.js b/tests/unit/test-pocket-deckcode.js|
+new file mode 100644|
+index 0000000..24a8044|
+--- /dev/null|
++++ b/tests/unit/test-pocket-deckcode.js|
+@@ -0,0 +1,162 @@|
++/**|
++ * FE-11 (28.09.2026): eigener Pocket-Scan-Code aus einer Deckliste.|
++ *|
++ * js/pocket-deckcode.js wird AUSGEFUEHRT, gegen die echte Kartentabelle|
++ * (data/pocket_karten_ids.json) und die echten Game8-Codes|
++ * (data/pocket_tierlist.json): aus der Kartenliste eines Decks gebaut,|
++ * muss derselbe Inhalt herauskommen, den Game8s Muster traegt.|
++ */|
++const { test } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('fs');|
++const path = require('path');|
++const vm = require('vm');|
++const R = (p) => fs.readFileSync(path.join(__dirname, '..', '..', p), 'utf8');|
++|
++const sb = {};|
++vm.createContext(sb);|
++vm.runInContext(R('js/pocket-deckcode.js'), sb);|
++const P = sb.PocketDeckcode;|
++const TAB = JSON.parse(R('data/pocket_karten_ids.json'));|
++const DECKS = JSON.parse(R('data/pocket_tierlist.json')).decks;|
++const crypto = require('crypto');|
++const kennung = (code) => crypto.createHash('sha1').update(code, 'ascii').digest('hex').slice(0, 12);|
++// Die Decks, deren Code beim Bau der Tabelle aus ihrer Liste herauskam.|
++// Nicht die Namen: die Tier-Liste ändert sich jede Woche, der Inhalt eines|
++// Codes nicht (siehe scripts/build_pocket_karten_ids.py, code_kennung).|
++const PASSTE = new Set(TAB._meta.gegenprobe.gleich_codes);|
++const sortiert = (a) => Array.from(a).sort((x, y) => x - y).join(',');|
++|
++function alsText(d, energie) {|
++    return [...d.pokemon, ...d.trainer]|
++        .map((c) => `${c.anzahl} ${c.name} ${c.set} ${Number(c.nummer)}`).join('\n') +|
++        '\nEnergy: ' + energie.map((e) => P.ENERGIE_NAME[e]).join(', ');|
++}|
++|
++test('jedes Game8-Deck, das beim Bau passte, ergibt aus seiner Liste denselben Code-Inhalt', () => {|
++    assert.ok(PASSTE.size, 'die Tabelle nennt kein passendes Deck');|
++    let geprueft = 0;|
++    for (const d of DECKS) {|
++        if (!PASSTE.has(kennung(d.code))) continue;|
++        const orig = P.lese(d.code);|
++        const erg = P.baue(P.leseListe(alsText(d, Array.from(orig.energie))), TAB);|
++        assert.ok(erg.code, `${d.name}: kein Code — ${JSON.stringify(erg.fehler)}`);|
++        const neu = P.lese(erg.code);|
++        assert.equal(sortiert(neu.trainer), sortiert(orig.trainer), d.name + ' Trainer');|
++        assert.equal(sortiert(neu.pokemon), sortiert(orig.pokemon), d.name + ' Pokémon');|
++        assert.equal(Array.from(neu.energie).join(), Array.from(orig.energie).join(), d.name + ' Energie');|
++        assert.equal(neu.laenge, orig.laenge, d.name + ' Länge');|
++        assert.equal(neu.rest, 0);|
++        geprueft++;|
++    }|
++    assert.equal(geprueft, DECKS.filter((d) => PASSTE.has(kennung(d.code))).length);|
++});|
++|
++test('die Zuordnung trennt Trainer und Pokémon über die Kennung, nicht über den Namen', () => {|
++    const erg = P.baue(P.leseListe('2 Poké Ball P-A 5\n2 Frigibax B2a 34\nEnergy: Water'), TAB);|
++    assert.ok(!erg.code, '4 Karten sind kein Deck');|
++    assert.equal(erg.trainer[0].name, 'Poké Ball');|
++    assert.equal(erg.pokemon[0].name, 'Frigibax');|
++});|
++|
++function deck20(extra) {|
++    // 10 verschiedene Karten je 2 — ein gültiges Deck aus der Tabelle.|
++    return ['2 Frigibax B2a 34', '2 Baxcalibur B2a 36', '1 Chien-Pao ex B2a 37', '2 Suicune ex A4a 20',|
++        '2 Giant Cape A2 147', '1 Pokemon Center Lady A2b 70', '2 Rare Candy A3 144',|
++        '1 Inflatable Boat A4a 67', '1 Copycat B1 225', '1 Soothing Shore B4 154',|
++        "1 Team Rocket's Boss B4a 71", '2 Poke Ball P-A 5', '2 Professor\'s Research P-A 7']|
++        .concat(extra || []).join('\n');|
++}|
++|
++test('ein gültiges Deck ergibt einen Code, den lese() wieder zerlegt', () => {|
++    const erg = P.baue(P.leseListe(deck20() + '\nEnergy: Water'), TAB);|
++    assert.deepEqual(Array.from(erg.fehler), []);|
++    const z = P.lese(erg.code);|
++    const soll = deck20().split('\n').reduce((a, z) => a + Number(z.split(' ')[0]), 0);|
++    assert.equal(z.trainer.length + z.pokemon.length, soll);|
++    assert.deepEqual(Array.from(z.energie), [3]);|
++    // Genau Game8s Muster für dieses Deck (Chien-Pao ex and Baxcalibur).|
++    const orig = P.lese(DECKS.find((d) => d.name === 'Chien-Pao ex and Baxcalibur').code);|
++    assert.equal(sortiert(z.pokemon), sortiert(orig.pokemon));|
++    assert.equal(sortiert(z.trainer), sortiert(orig.trainer));|
++});|
++|
++const arten = (erg) => Array.from(erg.fehler).map((f) => f.art);|
++|
++test('abgewiesen: 21 Karten, drei gleichen Namens, unbekanntes Set, unbekannte Nummer', () => {|
++    assert.ok(arten(P.baue(P.leseListe(deck20('1 Copycat B1 225') + '\nEnergy: Water'), TAB)).includes('deckgroesse'));|
++    const dreimal = deck20().replace('2 Frigibax B2a 34', '1 Frigibax B2a 34') + '\n1 Rare Candy A3 144\nEnergy: Water';|
++    const drei = P.baue(P.leseListe(dreimal), TAB);|
++    assert.ok(arten(drei).includes('zu_viele'), 'drei Rare Candy gingen durch');|
++    assert.equal(Array.from(drei.fehler).find((f) => f.art === 'zu_viele').text, 'Rare Candy');|
++    // Zwei verschiedene Drucke desselben Namens zählen zusammen.|
++    const drucke = P.baue(P.leseListe('2 Charmeleon B1a 12\n1 Charmeleon B2b 8\nEnergy: Fire'), TAB);|
++    assert.ok(arten(drucke).includes('zu_viele'), 'zwei Drucke umgingen die Zwei-Karten-Regel');|
++    assert.ok(arten(P.baue(P.leseListe('2 Irgendwas Z9 1\nEnergy: Fire'), TAB)).includes('set_unbekannt'));|
++    assert.ok(arten(P.baue(P.leseListe('2 Irgendwas A1 999\nEnergy: Fire'), TAB)).includes('karte_unbekannt'));|
++});|
++|
++test('abgewiesen: Drache und Farblos als Energie, fehlende und zu viele Energien', () => {|
++    const drache = P.baue(P.leseListe(deck20() + '\nEnergy: Dragon'), TAB);|
++    assert.ok(!drache.code && arten(drache).includes('energie_verboten'));|
++    assert.ok(arten(P.baue(P.leseListe(deck20()), TAB)).includes('energie_fehlt'));|
++    assert.ok(arten(P.baue(P.leseListe(deck20() + '\nEnergy: Fire, Water, Grass, Metal'), TAB)).includes('energie_zu_viele'));|
++    // Deutsch geht auch, mehrere mit Komma.|
++    const de = P.baue(P.leseListe(deck20() + '\nEnergie: Wasser, Kampf'), TAB);|
++    assert.deepEqual(Array.from(P.lese(de.code).energie), [3, 6]);|
++});|
++|
++test('ein abweichender Name wird gemeldet, nicht stillschweigend übernommen', () => {|
++    const erg = P.baue(P.leseListe(deck20().replace('2 Frigibax B2a 34', '2 Glaziola B2a 34') + '\nEnergy: Water'), TAB);|
++    assert.ok(erg.code, 'der Code entsteht über Set und Nummer');|
++    assert.deepEqual(Array.from(erg.hinweise).map((h) => h.erwartet), ['Frigibax']);|
++});|
++|
++test('nicht erkannte Zeilen werden gemeldet, Überschriften übergangen', () => {|
++    const l = P.leseListe('Pokémon: 8\nTrainer (12)\n2 Riolu B3 79\nirgendwas\nPROMO-A');|

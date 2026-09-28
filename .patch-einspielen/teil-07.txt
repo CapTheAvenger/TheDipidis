@@ -1,0 +1,67 @@
++    assert.equal(l.karten.length, 1);|
++    assert.deepEqual(Array.from(l.fehler).map((f) => f.art), ['nicht_erkannt', 'nicht_erkannt']);|
++    const alias = P.baue(P.leseListe('2 Poke Ball PROMO-A 5\nEnergy: Water'), TAB);|
++    assert.equal(alias.trainer[0].set, 'P-A');|
++});|
++|
++test('die Seite lädt den Baustein vor dem Pocket-Reiter, der Service Worker hält ihn vor', () => {|
++    const html = R('index.html').replace(/<!--[\s\S]*?-->/g, '');|
++    const a = html.indexOf('js/pocket-deckcode.js');|
++    const b = html.indexOf('js/ds-pocket.js');|
++    assert.notEqual(a, -1, 'pocket-deckcode.js fehlt');|
++    assert.ok(a < b, 'pocket-deckcode.js steht nach ds-pocket.js');|
++    assert.ok(R('service-worker.js').includes("'./js/pocket-deckcode.js'"));|
++});|
++|
++test('der Reiter zeigt Fehler an der Liste und öffnet bei Erfolg das Vollbild mit Muster', async () => {|
++    // ds-pocket.js wird mit einer kleinen Attrappe des DOM ausgeführt.|
++    const knoten = {};|
++    const el = (id) => knoten[id] || (knoten[id] = { id, innerHTML: '', hidden: true, value: '', dataset: {},|
++        addEventListener() {}, querySelector() { return null; }, focus() {} });|
++    const ctx = {|
++        console, Promise, JSON, Number, String, Array, Object, Math, Date, RegExp, Error,|
++        document: { readyState: 'complete', getElementById: el, addEventListener() {} },|
++        history: { pushState() {}, back() {} }, navigator: {},|
++        fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve(TAB) }),|
++        getLang: () => 'de'|
++    };|
++    ctx.window = ctx;|
++    ctx.addEventListener = () => {};|
++    vm.createContext(ctx);|
++    vm.runInContext(R('js/qr-svg.js'), ctx);|
++    vm.runInContext(R('js/pocket-deckcode.js'), ctx);|
++    vm.runInContext(R('js/ds-pocket.js'), ctx);|
++|
++    el('pkEigenListe').value = '2 Frigibax B2a 34\nEnergy: Water';|
++    await ctx.dsPocket.eigenErzeugen();|
++    assert.match(el('pkEigenMeldung').innerHTML, /genau 20 Karten/);|
++    assert.equal(el('pocketOverlay').hidden, true, 'bei Fehler darf kein Vollbild aufgehen');|
++|
++    el('pkEigenListe').value = deck20() + '\nEnergy: Water';|
++    await ctx.dsPocket.eigenErzeugen();|
++    assert.equal(el('pocketOverlay').hidden, false, 'das Vollbild ging nicht auf');|
++    assert.match(el('pocketOverlay').innerHTML, /<svg/);|
++    assert.match(el('pocketOverlay').innerHTML, /Eigenes Deck/);|
++    assert.match(el('pocketOverlay').innerHTML, /Energie: Wasser/);|
++});|
+diff --git a/tests/unit/test-testdaten-wachhund.js b/tests/unit/test-testdaten-wachhund.js|
+index 1c97b11..73b7aca 100644|
+--- a/tests/unit/test-testdaten-wachhund.js|
++++ b/tests/unit/test-testdaten-wachhund.js|
+@@ -173,2 +173,3 @@ const REGISTER = {|
+     'test-qr-svg.js':                    'Der eigene QR-Erzeuger. Liest data/pocket_tierlist.json ausschliesslich als VORRAT ECHTER ZEICHENKETTEN — 33 Base64-Codes von je 88 Zeichen. Geprueft wird, was daraus wird: Version und Modulzahl je Fehlerkorrekturstufe (Eigenschaften der Kodierung, nicht der Decks), Suchmuster, Taktspur, Ausrichtungsmuster, Formatinformation gegen die Tabelle der Norm, und dass der Datenstrom aus dem Raster wieder herauskommt. Welche Decks diese Woche in der Datei stehen und welche Stufe sie tragen, ist jeder Zusicherung egal; die Vorpruefung verlangt nur mindestens 30 Codes, damit die Schleifen nicht leer bestehen. Ersetzt Game8s Bild durch unser eigenes, deshalb kommen die echten Codes zum Einsatz und keine erfundenen: der Python-Test test_pocket_tierlist.py hatte genau diesen Fehler und pruefte drei ausgedachte Zeichenketten.',|
++    'test-pocket-deckcode.js':          'FE-11, der Baustein fuer eigene Scan-Codes, ausgefuehrt. Liest data/pocket_tierlist.json als VORRAT ECHTER CODES MIT IHREN KARTENLISTEN und data/pocket_karten_ids.json als Kartentabelle. Jeder Sollwert kommt aus denselben Dateien: aus der Liste eines Decks gebaut, muss derselbe Inhalt herauskommen wie aus Game8s Code; welche Decks diese Woche drinstehen, ist egal. Geprueft werden genau die Decks, deren Code beim Bau der Tabelle aus ihrer Liste herauskam (_meta.gegenprobe.gleich_codes, als Kennung des Code-Inhalts, nicht des Namens) — neue Decks der Woche verlangt der Test bewusst nicht, weil Game8s Textliste manchmal Game8s eigenem Muster widerspricht; gezaehlt wird gegen genau diese Menge, nicht gegen eine feste Zahl. Die uebrigen Faelle (21 Karten, drei gleichen Namens, Drache, Namensabweichung) laufen an einer Liste, die der Test selbst baut.',|
+     'test-pocket-code-kopieren.js':     'Der Kopierknopf im Pocket-Vollbild, ausgefuehrt statt gegriffen. Liest data/pocket_tierlist.json als EINGABE fuer den echten Renderer und benutzt daraus nur die Deck-CODES — Base64-Zeichenketten, die der Knopf unveraendert weiterreichen muss. Behauptet keinen Wochenwert: jeder Sollwert kommt aus derselben Datei (der Knopf des geoeffneten Decks traegt DESSEN code, writeText bekommt DENSELBEN code, das Hilfsfeld des Rueckfalls traegt DENSELBEN code). Welche Decks diese Woche in der Liste stehen und wie sie eingestuft sind, ist jeder Zusicherung egal; geprueft werden drei Ausfallwege, die man nur ausgefuehrt sieht — fehlendes navigator.clipboard (unsicherer Kontext), ein writeText, das ABLEHNT oder WIRFT, und die Rueckmeldung, die kommen UND wieder gehen muss. Die Indexprobe laeuft ueber [0, 1, decks.length - 1], also ueber Positionen, nicht ueber Namen. Ungleichungen gegen feste Zahlen enthaelt die Datei keine.',|
+diff --git a/version.json b/version.json|
+index 740e027..e1a25e9 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202609272220"}|
+\ No newline at end of file|
++{"version":"202609280750"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

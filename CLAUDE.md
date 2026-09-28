@@ -405,9 +405,23 @@ je PR.
 **Grenzen, gemessen 27.09.2026:** MCP schreibt keine Datei unter
 `.github/workflows/` (403 „Resource not accessible by integration"), und
 `GITHUB_TOKEN` darf Ablaeufe auch nicht aendern. Ablaufaenderungen gehoeren
-deshalb nie in den Patch — sie macht der Betreiber ueber einen
-Bearbeiten-Link auf GitHub.com. `merge_pull_request` braucht die volle
+deshalb nie in den Patch. `merge_pull_request` braucht die volle
 40-stellige SHA in `expectedHeadSha`.
+
+**Ablaufaenderungen — zwei Wege, in dieser Reihenfolge (28.09.2026):**
+
+1. **Chrome auf dem Rechner des Betreibers**, wenn er an ist. ERST
+   `list_connected_browsers` aufrufen — ohne diesen Aufruf gibt es keine
+   Aussage „Chrome ist nicht verbunden" (am 27.09. stand genau das im
+   Bericht, ohne dass ein Chrome-Werkzeug je aufgerufen worden war; Chrome
+   war die ganze Zeit verbunden). Dann im GitHub-Web-Editor des Betreibers
+   die Aenderung auf einem Zweig vorbereiten. Der Web-Editor mit seiner
+   Anmeldung schreibt Ablaufdateien (gemessen 27.09.: so sind
+   `patch-einspielen.yml` und die WZ-8-Zeile entstanden). Den Klick auf
+   „Commit changes" gibt der Betreiber im Chat frei — Warten auf ein „ja"
+   statt auf einen Handgriff.
+2. Sonst ein vorausgefuellter **Bearbeiten-Link** auf GitHub.com, den der
+   Betreiber am Handy abschickt.
 
 **Live-Abnahme:** die Sandkiste erreicht `thedipidis.app` nicht (403 am
 Proxy). Gemessen geht Chrome auf dem Rechner des Betreibers (Claude in

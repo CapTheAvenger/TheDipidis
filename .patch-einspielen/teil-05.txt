@@ -1,0 +1,139 @@
++    });|
++});|
+diff --git a/tests/unit/test-mc-deck-gegen-meta.js b/tests/unit/test-mc-deck-gegen-meta.js|
+index 5a5fee7..1e07d9d 100644|
+--- a/tests/unit/test-mc-deck-gegen-meta.js|
++++ b/tests/unit/test-mc-deck-gegen-meta.js|
+@@ -359,7 +359,8 @@ describe('EV gegen das erwartete Meta — der Einbau', () => {|
+         /* §5 und §12 der Bestellung: „AKTUELL BEOBACHTET" und|
+-           „ERWARTET" muessen nebeneinander lesbar sein. */|
+-        assert.match(SRC, /class="mc-share-gemessen"/,|
++           „ERWARTET" muessen nebeneinander lesbar sein. Seit FE-16|
++           (28.09.2026) als eigene Spalte „Online" neben „Prognose". */|
++        assert.match(SRC, /class="mc-mct-onlinezahl"/,|
+             'der gemessene Online-Anteil steht nicht in der Zeile');|
+-        assert.match(SRC, /_sl\.ladderShare/,|
+-            'er wird nicht aus _shareList geholt — dann ist es wieder die Modellausgabe');|
++        assert.match(SRC, /const online = isCustom \? \{ wert: null \} : _mctOnline\(deck\.name\)/,|
++            'er wird nicht ueber _mctOnline geholt — dann ist es wieder die Modellausgabe');|
+     });|
+diff --git a/tests/unit/test-mc-deckauswahl.js b/tests/unit/test-mc-deckauswahl.js|
+index 6b2483f..cf94e0f 100644|
+--- a/tests/unit/test-mc-deckauswahl.js|
++++ b/tests/unit/test-mc-deckauswahl.js|
+@@ -93,2 +93,4 @@ function umgebung(opt) {|
+         _junkDeckZahl: 0,|
++        _prognoseAktiv: o.prognoseAktiv || false,   // FE-15|
++        _prognoseRest: o.prognoseRest || 0,|
+         _settings: {|
+@@ -277,3 +279,6 @@ describe('Deck-Auswahl — der Einbau', () => {|
+ |
+-    it('steht als eigener Block vor der Feldtabelle', () => {|
++    it('steht als erste Spalte IN der Meta-Call-Tabelle (FE-16)', () => {|
++        /* Bis 28.09.2026 ein eigenes Kachelraster ueber der Tabelle; seit|
++           FE-16 ist „einzeln im Feld" der Haken jeder Zeile, und die|
++           Vorwahl-Pillen stehen in der Leiste der Tabelle. */|
+         const i = SRC.indexOf('function renderAll()');|
+@@ -281,17 +286,20 @@ describe('Deck-Auswahl — der Einbau', () => {|
+         const rumpf = SRC.slice(i, j);|
+-        assert.ok(rumpf.includes('renderDeckAuswahlPanel()'), 'renderAll ruft die Auswahl nicht auf');|
+-        assert.ok(rumpf.indexOf('renderDeckAuswahlPanel()') < rumpf.indexOf('renderFieldPanel(field)'),|
+-            'die Auswahl steht hinter der Tabelle, die sie bestimmt');|
++        assert.ok(rumpf.includes('renderFieldPanel(field)'), 'renderAll zeigt die Tabelle nicht');|
++        assert.ok(!/renderDeckAuswahlPanel\(/.test(SRC), 'das alte Kachelraster ist wieder da');|
++        const f = SRC.slice(SRC.indexOf('  function renderFieldPanel(field) {'),|
++                            SRC.indexOf('  function _feldTabelleNachziehen()'));|
++        assert.match(f, /MetaCall\._setFeldVorwahl/, 'die Vorwahl-Pillen fehlen in der Tabelle');|
++        const zeile = SRC.slice(SRC.indexOf('  function _mctZeileFeld('), SRC.indexOf('  function _mctZeileAussen('));|
++        assert.match(zeile, /MetaCall\._toggleFeldDeck/, 'die Zeile traegt keinen Haken fuer „einzeln im Feld"');|
+     });|
+ |
+-    it('die Kacheln zeigen den gemessenen Anteil, nicht die Prognose', () => {|
+-        /* `onlineShare` traegt nach dem Praediktorlauf die Modellausgabe|
+-           — genau die Verwechslung, die der Spalte „Prognose %" am|
+-           18.08.2026 ihren Namen gekostet hat. */|
+-        const i = SRC.indexOf('function renderDeckAuswahlPanel()');|
+-        const j = SRC.indexOf('\n  function _feldSummeHtml()', i);|
+-        const rumpf = SRC.slice(i, j);|
+-        assert.match(rumpf, /ladderShare/, 'die Kachel liest den gemessenen Anteil nicht');|
+-        assert.match(rumpf, /class="mc-feld-zahlen">\$\{esc\(L\('gemessen /,|
+-            'die Zahl auf der Kachel ist nicht als gemessen ausgewiesen');|
++    it('die Online-Spalte zeigt eine Messung, nicht die Prognose', () => {|
++        /* `onlineShare` traegt nach dem Praediktorlauf die Modellausgabe.|
++           Die Spalte „Online" liest den gemessenen Stand — aus der|
++           Prognosedatei (online_anteil) oder den Leiteranteil. */|
++        const i = SRC.indexOf('  function _mctOnline(name) {');|
++        const rumpf = SRC.slice(i, SRC.indexOf('\n  }\n', i));|
++        assert.match(rumpf, /online_anteil/, 'die Spalte liest den Online-Stand der Prognosedatei nicht');|
++        assert.match(rumpf, /ladderShare/, 'ohne Prognosedatei fehlt der gemessene Leiteranteil');|
++        assert.doesNotMatch(rumpf, /\.onlineShare/, 'die Online-Spalte liest die Modellausgabe');|
+     });|
+diff --git a/tests/unit/test-meta-call-format.js b/tests/unit/test-meta-call-format.js|
+index 597390f..b0d4cc4 100644|
+--- a/tests/unit/test-meta-call-format.js|
++++ b/tests/unit/test-meta-call-format.js|
+@@ -258,2 +258,3 @@ describe('Junk-Win-Rate: gerechnet statt geraten', () => {|
+             let _junkDeckZahl = 0;|
++            const _prognoseAktiv = false, _prognoseRest = 0;   // FE-15: ohne Prognosedatei|
+             ${teilungBlock}|
+diff --git a/tests/unit/test-meta-prognose.js b/tests/unit/test-meta-prognose.js|
+index b44d54b..1670cd5 100644|
+--- a/tests/unit/test-meta-prognose.js|
++++ b/tests/unit/test-meta-prognose.js|
+@@ -158,9 +158,13 @@ describe('die Anzeige', () => {|
+ describe('die Einbettung', () => {|
+-    it('der Wirt steht im Reiter Meta Call', () => {|
+-        assert.match(HTML, /id="metaPrognoseHost"/,|
+-            'ohne Wirt rendert das Modul nichts');|
+-        const iP = HTML.indexOf('id="metaPrognoseHost"');|
+-        const iM = HTML.indexOf('id="metaCallHost"');|
+-        assert.ok(iP > 0 && iM > 0 && iP < iM,|
+-            'die Prognose steht nicht vor der Meta-Call-Karte');|
++    it('der eigene Block ist in der Meta-Call-Tabelle aufgegangen (FE-16)', () => {|
++        /* Bis 28.09.2026 stand hier ein eigener Wirt vor der Meta-Call-|
++           Karte — mit einem zweiten Modell neben dem Praediktor (Dragapult|
++           13,3 % oben, 18,72 % unten). Seit FE-15/FE-16 liest der Meta Call|
++           dieselbe Datei und zeigt Online, Prognose und Band als Spalten. */|
++        assert.doesNotMatch(HTML, /id="metaPrognoseHost"/,|
++            'der zweite Prognoseblock steht wieder ueber dem Meta Call');|
++        const MC = fs.readFileSync(path.join(ROOT, 'js', 'app-meta-call.js'), 'utf8');|
++        assert.match(MC, /const PROGNOSE_DATEI = 'data\/meta_prognose\.json'/,|
++            'der Meta Call liest die Prognosedatei nicht');|
++        assert.match(MC, /prognose_von/, 'die Bandbreite fehlt in der Tabelle');|
+     });|
+diff --git a/tests/unit/test-metacall-live-befunde-07-09.js b/tests/unit/test-metacall-live-befunde-07-09.js|
+index ee5fdd4..c3d6f39 100644|
+--- a/tests/unit/test-metacall-live-befunde-07-09.js|
++++ b/tests/unit/test-metacall-live-befunde-07-09.js|
+@@ -319,3 +319,3 @@ describe('M3 — refreshResults reisst das Schaetzfeld nicht mehr unter dem Curs|
+             'const aktivVorher = document.activeElement;',|
+-            "const neuerKopf = tmp.querySelector('#mc-th-enc');");|
++            "const neuerKopf = tmp.querySelector('#mc-mct-kopf');");|
+ |
+diff --git a/tests/unit/test-praesenz-unentschieden.js b/tests/unit/test-praesenz-unentschieden.js|
+index ecf5d03..83b70cd 100644|
+--- a/tests/unit/test-praesenz-unentschieden.js|
++++ b/tests/unit/test-praesenz-unentschieden.js|
+@@ -188,5 +188,15 @@ describe('Die Quote wird gemessen, nicht gesetzt', () => {|
+            Quote — die gegen das eigene Deck, also die häufigste im Feld. */|
+-        const treffer = (MC.match(/_stelleUm\(\{ pWin: 0\.45, pTie: 0\.10, pLoss: 0\.45 \}\)/g) || []).length;|
+-        assert.strictEqual(treffer, 2,|
+-            `die Spiegelnäherung steht ${treffer}-mal umgestellt statt zweimal`);|
++        /* Seit FE-16 (28.09.2026) rechnet calcDay2 jede Paarung EINMAL je|
++           Felddeck vor (`paarung`) und benutzt sie in der Punktekette wie in|
++           den erwarteten Siegen — die Spiegelnaeherung steht deshalb nur|
++           noch einmal da. Entscheidend ist: keine Stelle ohne Umstellung. */|
++        const i = MC.indexOf('  function calcDay2(field, deckOverride) {');|
++        const rumpf = MC.slice(i, MC.indexOf('\n  }\n', i));|
++        const umgestellt = (rumpf.match(/_stelleUm\(\{ pWin: 0\.45, pTie: 0\.10, pLoss: 0\.45 \}\)/g) || []).length;|
++        const gesamt = (rumpf.match(/\{ pWin: 0\.45, pTie: 0\.10, pLoss: 0\.45 \}/g) || []).length;|
++        assert.ok(umgestellt >= 1, 'die Spiegelnäherung fehlt in calcDay2');|
++        assert.strictEqual(umgestellt, gesamt,|
++            `${gesamt - umgestellt} Spiegelnäherung(en) laufen ohne Umstellung durch`);|
++        assert.strictEqual((rumpf.match(/paarung\[fi\]/g) || []).length, 2,|
++            'Punktekette und erwartete Siege lesen nicht beide die vorgerechnete Paarung');|
+     });|
+-- |
+2.43.0|
+|
+|

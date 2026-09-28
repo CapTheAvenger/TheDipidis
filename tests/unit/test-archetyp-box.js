@@ -355,6 +355,7 @@ describe('FE-13: jeder Text in beiden Sprachen', () => {
     const code = ohneKommentare(QUELLE);
     const schluessel = new Set([...code.matchAll(/tx\('(abx\.[A-Za-z.]+)'/g)].map(m => m[1]).filter(k => !k.endsWith('.')));
     ['fehlt', 'original', 'proxy'].forEach(s => schluessel.add('abx.status.' + s));
+    L.ELEMENTE.forEach(e => schluessel.add('abx.el.' + e));
     schluessel.add('abx.untertitel'); schluessel.add('profile.archetypBox');
 
     it('es gibt ueberhaupt Schluessel', () => assert.ok(schluessel.size > 40, 'nur ' + schluessel.size));
@@ -403,5 +404,105 @@ describe('FE-13 Nachtrag: Handy-Regel fuer Knoepfe greift nicht auf die Plakette
     it('Plaketten behalten 28 px, Knoepfe duerfen schmal werden', () => {
         assert.match(CSS, /\.abx-karte \.abx-soll,\s*\.abx-karte \.abx-herz \{[^}]*height: 28px !important/);
         assert.match(CSS, /\.abx-karte \.abx-mini,\s*\.abx-karte \.abx-seg \{[^}]*min-width: 0 !important/);
+    });
+});
+
+describe('FE-13 Nachtrag (28.09.2026 abends): entfernte Karten kommen nur auf Nachfrage zurueck', () => {
+    const start = L.neueBox({ name: 'X', archetyp: 'X' }, [
+        karte('TWM-130', { anteil: 90 }), karte('SVI-1', { anteil: 4 })], HEUTE);
+    const ohne = L.entfernen(start, 'SVI-1', '2026-09-28');
+
+    it('entfernen merkt sich die Karte samt Anteil', () => {
+        assert.ok(!ohne.karten.some(k => k.id === 'SVI-1'));
+        gleich(ohne.entfernt.map(e => [e.id, e.anteil]), [['SVI-1', 4]]);
+    });
+
+    it('gleich oft gespielt: bleibt draussen, kein Angebot', () => {
+        const e = L.abgleichen(ohne, [karte('TWM-130', { anteil: 90 }), karte('SVI-1', { anteil: 4 })], {}, HEUTE);
+        assert.ok(!e.box.karten.some(k => k.id === 'SVI-1'));
+        assert.equal(e.box.wieder.length, 0);
+        assert.equal(e.neu.length, 0);
+    });
+
+    it('oefter gespielt: wird angeboten, aber NICHT still hineingelegt', () => {
+        const e = L.abgleichen(ohne, [karte('TWM-130', { anteil: 90 }), karte('SVI-1', { anteil: 12 })], {}, HEUTE);
+        assert.ok(!e.box.karten.some(k => k.id === 'SVI-1'));
+        gleich(e.box.wieder.map(w => [w.id, w.anteil, w.anteilVorher]), [['SVI-1', 12, 4]]);
+        gleich(e.wieder.map(w => w.id), ['SVI-1']);
+    });
+
+    it('ein anderer Druck derselben Karte zaehlt als dieselbe Karte', () => {
+        const e = L.abgleichen(ohne, [karte('PAF-9', { anteil: 12, refs: ['SVI-1'] })], {}, HEUTE);
+        gleich(e.box.wieder.map(w => w.id), ['PAF-9']);
+    });
+
+    it('Aufnehmen legt sie als "fehlt" + "Neu" zurueck und vergisst die Entfernung', () => {
+        const e = L.abgleichen(ohne, [karte('SVI-1', { anteil: 12 })], {}, HEUTE).box;
+        const x = L.wiederAufnehmen(e, 'SVI-1', HEUTE);
+        const k = x.karten.find(q => q.id === 'SVI-1');
+        assert.equal(k.status, 'fehlt');
+        assert.equal(k.neu, HEUTE);
+        assert.equal(x.wieder.length, 0);
+        assert.equal(x.entfernt.length, 0);
+    });
+
+    it('Draussen lassen: erst wieder angeboten, wenn der Anteil weiter steigt', () => {
+        const e = L.abgleichen(ohne, [karte('SVI-1', { anteil: 12 })], {}, HEUTE).box;
+        const x = L.draussenLassen(e, 'SVI-1');
+        assert.equal(x.wieder.length, 0);
+        assert.equal(x.entfernt[0].anteil, 12);
+        assert.equal(L.abgleichen(x, [karte('SVI-1', { anteil: 12 })], {}, HEUTE).box.wieder.length, 0);
+        assert.equal(L.abgleichen(x, [karte('SVI-1', { anteil: 15 })], {}, HEUTE).box.wieder.length, 1);
+    });
+
+    it('von Hand wieder hinzugefuegt: die Entfernung ist vergessen', () => {
+        const x = L.manuellHinzufuegen(ohne, karte('SVI-1'), HEUTE).box;
+        assert.equal(x.entfernt.length, 0);
+    });
+});
+
+describe('FE-13 Nachtrag: Filter und Sortierung', () => {
+    const kk = [
+        { k: { id: 'A-1', name: 'Pikachu', typ: 'Pokemon', anteil: 95 }, element: 'Lightning', box: { name: 'B1' } },
+        { k: { id: 'A-2', name: 'Venusaur', typ: 'Pokemon', anteil: 40 }, element: 'Grass', box: { name: 'B1' } },
+        { k: { id: 'A-3', name: 'Iono', typ: 'Supporter', anteil: 100 }, element: '', box: { name: 'B2' } },
+        { k: { id: 'A-4', name: 'Tech', typ: 'Item', anteil: 3 }, element: '', box: { name: 'B2' } },
+        { k: { id: 'A-5', name: 'Hand', typ: 'Item', anteil: null, manuell: true }, element: '', box: { name: 'B2' } },
+        { k: { id: 'A-6', name: 'Charmander', typ: 'Pokemon', anteil: 70 }, element: 'Fire', box: { name: 'B2' } },
+    ];
+    const ids = (f) => kk.filter(e => L.filterPasst(e.k, f, e.element)).map(e => e.k.id);
+
+    it('Anteil ab 70 % / unter 10 % / alle', () => {
+        gleich(ids({ anteil: '70' }), ['A-1', 'A-3', 'A-6']);
+        gleich(ids({ anteil: 'u10' }), ['A-4']);
+        assert.equal(ids({ anteil: 'alle' }).length, 6);
+    });
+
+    it('Kartenart und Pokemon-Typ', () => {
+        gleich(ids({ art: 'Supporter' }), ['A-3']);
+        gleich(ids({ art: 'Pokemon', element: 'Grass' }), ['A-2']);
+        gleich(ids({ art: 'Item', element: 'Grass' }), ['A-4', 'A-5'], 'der Typ gilt nur fuer Pokemon');
+    });
+
+    it('nach Kartenart und Typ: Pflanze vor Feuer vor Elektro, dann Supporter, dann Items', () => {
+        gleich(L.sortieren(kk, 'art', false).map(e => e.k.id), ['A-2', 'A-6', 'A-1', 'A-3', 'A-5', 'A-4']);
+    });
+
+    it('ueber alle Boxen nach Anteil: hoechster zuerst', () => {
+        gleich(L.sortieren(kk, 'anteil', false).map(e => e.k.id).slice(0, 3), ['A-3', 'A-1', 'A-6']);
+    });
+});
+
+
+describe('FE-13 Nachtrag: "gefordert" bleibt am iPhone rund', () => {
+    // css/tippziele.css gibt bei (pointer: coarse) jedem Knopf min-height
+    // 44 px — mit einer Spezifitaet (sieben :not), gegen die keine
+    // Klassenregel ankommt. Der dafuer vorgesehene Ausweg ist data-klein.
+    // Gemessen (Playwright, has_touch, 390 px): ohne 44 px, mit 28 px.
+    it('der Knopf "gefordert" traegt data-klein', () => {
+        const code = ohneKommentare(QUELLE);
+        assert.match(code, /<button type="button" data-klein class="abx-soll/);
+        assert.match(R('css/tippziele.css'), /button:not\(\.card-badge\):not\(\[data-klein\]\)/,
+            'der Ausweg data-klein steht nicht mehr in css/tippziele.css');
     });
 });

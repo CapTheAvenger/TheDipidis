@@ -247,3 +247,40 @@
 .abx-karte .abx-seg {
     min-width: 0 !important; padding: 0 2px !important;
 }
+
+/* ── Filter und Sortierung (Nachtrag 28.09.2026, Abend) ── */
+.abx-filterblock {
+    display: flex; flex-direction: column; gap: var(--s-2);
+    margin: var(--s-3) 0;
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    background: var(--surface-1);
+}
+.abx-filter-reihe { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.abx-filter-label { flex: 0 0 88px; color: var(--ink-3); font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.abx-filter-knoepfe { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 240px; }
+.abx-filter {
+    min-height: 36px; padding: 4px 12px;
+    border: 1.5px solid var(--line); border-radius: 18px;
+    background: var(--surface-1); color: var(--ink-2);
+    font-size: var(--fs-sm); font-weight: 700; cursor: pointer;
+}
+.abx-filter.is-active { background: var(--solid-info); border-color: var(--solid-info); color: #fff; }
+.abx-gefiltert { color: var(--ink-3); font-weight: 400; }
+.abx-boxname {
+    color: var(--ink-3); font-size: var(--fs-xs); font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── Schon mal entfernt, wieder oefter gespielt ── */
+.abx-rubrik-wieder {
+    padding: var(--s-3);
+    border: 1.5px dashed var(--solid-info); border-radius: var(--r-md);
+    background: var(--tint-info);
+}
+.abx-rubrik-wieder .abx-leer { color: var(--tint-info-ink); }
+.abx-wieder-alle { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.abx-wieder-alle .btn { min-height: 40px; }
+.abx-wieder-zeile { color: var(--ink-2); font-size: var(--fs-xs); font-weight: 700; }
+.abx-wieder-knoepfe { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.abx-karte .abx-wieder-knoepfe .abx-seg { font-size: var(--fs-xs); }

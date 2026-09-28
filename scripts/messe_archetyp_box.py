@@ -90,6 +90,7 @@ def main():
         s.add_init_script("try { localStorage.setItem('app_lang', 'de'); } catch (e) {}")
         konsole = []
         s.on("pageerror", lambda e: konsole.append(str(e)))
+        s.on("dialog", lambda d: d.accept())   # "aus der Box entfernen?" bestaetigen
         s.goto(a.url, wait_until="load", timeout=90000)
         # Der Service Worker laedt beim Erstbesuch einmal neu — erst warten,
         # bis die Seite steht, dann das Ersatzkonto setzen.
@@ -252,6 +253,67 @@ def main():
         hand = [k for k in nachher if k.get("manuell")]
         pruefe(len(nachher) in (vorher, vorher + 1), "von Hand: %d -> %d Karten %s" % (vorher, len(nachher), [k["id"] for k in hand]))
 
+        # 7b. Nachtrag 28.09. abends: entfernen, wieder anbieten, Filter, alle Boxen
+        weg_id = s.evaluate("() => document.querySelector('.abx-rubrik-fehlt .abx-karte').dataset.karte")
+        s.evaluate("() => document.querySelector('.abx-karte[data-karte=\"%s\"] .abx-weg').click()" % weg_id)
+        s.wait_for_timeout(400)
+        b0 = s.evaluate("() => Object.values(window.__abxSpeicher)[0]")
+        pruefe(not any(k["id"] == weg_id for k in b0["karten"]) and any(e["id"] == weg_id for e in b0.get("entfernt", [])),
+               "Entfernen merkt sich die Karte (%s)" % weg_id)
+        # Anteil beim Entfernen kuenstlich auf 0 -> die echten Daten sind "oefter gespielt"
+        s.evaluate("""id => { const b = Object.values(window.__abxSpeicher)[0];
+            b.entfernt.forEach(e => { if (e.id === id) e.anteil = 0; }); b.datenStand = '2000-01-01'; }""", weg_id)
+        s.evaluate(PROFIL_SICHTBAR)
+        s.wait_for_timeout(2500)
+        s.evaluate("() => document.getElementById('abxAktualisierenBtn').click()")
+        warte_bis(s, "() => !!document.querySelector('.abx-rubrik-wieder')", 300)
+        w = s.evaluate("""() => ({ n: document.querySelectorAll('.abx-rubrik-wieder .abx-wieder-karte').length,
+            inKarten: Object.values(window.__abxSpeicher)[0].karten.some(k => k.id === '%s') })""" % weg_id)
+        pruefe(w["n"] == 1 and not w["inKarten"], "entfernte Karte wird angeboten, nicht still zurueckgelegt (%s)" % w)
+        s.evaluate("() => document.querySelector('.abx-rubrik-wieder .abx-seg-original').click()")
+        s.wait_for_timeout(400)
+        w2 = s.evaluate("""() => ({ bereich: !!document.querySelector('.abx-rubrik-wieder'),
+            k: (Object.values(window.__abxSpeicher)[0].karten.find(k => k.id === '%s') || {}) })""" % weg_id)
+        pruefe(not w2["bereich"] and w2["k"].get("status") == "fehlt" and w2["k"].get("neu"),
+               "Aufnehmen legt sie als 'fehlt' + Neu zurueck, Bereich weg")
+        # Filter
+        s.evaluate("() => ArchetypBox.ansicht('anteil', 'u10')")
+        s.wait_for_timeout(400)
+        f1 = s.evaluate("""() => { const ids = [...document.querySelectorAll('#abxInhalt .abx-rubrik:not(.abx-rubrik-wieder) .abx-karte')].map(k => k.dataset.karte);
+            const karten = Object.values(window.__abxSpeicher)[0].karten;
+            const soll = karten.filter(k => k.anteil != null && k.anteil < 10).map(k => k.id).sort();
+            return { ist: ids.sort(), soll: soll }; }""")
+        pruefe(f1["ist"] == f1["soll"], "Filter unter 10 %%: %d Karten, genau die mit Anteil < 10" % len(f1["ist"]))
+        s.evaluate("() => { ArchetypBox.ansicht('anteil', 'alle'); ArchetypBox.ansicht('art', 'Pokemon'); ArchetypBox.ansicht('sort', 'art'); }")
+        s.wait_for_timeout(400)
+        f2 = s.evaluate("""() => [...document.querySelectorAll('#abxInhalt .abx-rubrik:not(.abx-rubrik-wieder) .abx-karte')]
+            .map(k => Object.values(window.__abxSpeicher)[0].karten.find(x => x.id === k.dataset.karte)).map(k => k.typ)""")
+        pruefe(f2 and all(t == "Pokemon" for t in f2), "Filter Pokémon: %d Karten, alle Pokémon" % len(f2))
+        typ_knoepfe = s.evaluate("() => document.querySelectorAll('.abx-filter-reihe').length")
+        pruefe(typ_knoepfe == 4, "bei Pokémon erscheint die Reihe 'Typ' (%d Reihen)" % typ_knoepfe)
+        s.evaluate("() => { ArchetypBox.ansicht('art', 'alle'); ArchetypBox.ansicht('sort', 'anteil'); }")
+        # zweite Box -> "Alle Boxen"
+        s.evaluate("""() => { const k = Object.keys(window.__abxSpeicher)[0]; const b = JSON.parse(JSON.stringify(window.__abxSpeicher[k]));
+            b.name = 'TEST Kopie'; b.archetyp = 'TEST'; window.__abxSpeicher[k.replace(/[^/]+$/, 'testkopie')] = b; }""")
+        s.evaluate("() => { ArchetypBox.waehlen(null); }")
+        s.evaluate(PROFIL_SICHTBAR)
+        warte_bis(s, "() => document.querySelectorAll('.abx-chip').length === 3", 20)
+        ab = s.evaluate("""() => ({ chips: [...document.querySelectorAll('.abx-chip')].map(c => c.querySelector('.abx-chip-name').textContent),
+            aktiv: (document.querySelector('.abx-chip.is-active .abx-chip-name')||{}).textContent,
+            kacheln: document.querySelectorAll('#abxInhalt .abx-rubrik:not(.abx-rubrik-wieder) .abx-karte').length,
+            namen: document.querySelectorAll('#abxInhalt .abx-boxname').length,
+            summe: Object.values(window.__abxSpeicher).reduce((a, b) => a + b.karten.length, 0) })""")
+        print("Alle Boxen:", ab)
+        pruefe(ab["aktiv"] in ("Alle Boxen", "All boxes") and ab["kacheln"] == ab["summe"] and ab["namen"] >= ab["kacheln"],
+               "ohne Wahl: alle Boxen zusammen, jede Kachel nennt ihre Box")
+        s.evaluate("() => ArchetypBox.ansicht('sort', 'art')")
+        s.wait_for_timeout(400)
+        paar = s.evaluate("""() => { const t = [...document.querySelectorAll('#abxInhalt .abx-rubrik-fehlt .abx-karte')];
+            return t.slice(0, 6).map(k => [k.dataset.karte, k.querySelector('.abx-boxname').textContent]); }""")
+        pruefe(len(paar) >= 2 and paar[0][0] == paar[1][0] and paar[0][1] != paar[1][1],
+               "nach Kartenart: dieselbe Karte beider Boxen steht nebeneinander (%s)" % paar[:2])
+        s.evaluate("() => { ArchetypBox.ansicht('sort', 'anteil'); }")
+
         # 8. Breiten
         for w in (390, 768, 1280):
             s.set_viewport_size({"width": w, "height": 900})
@@ -280,6 +342,38 @@ def main():
                 s.evaluate("() => document.getElementById('profile-archetypbox').scrollIntoView()")
                 s.wait_for_timeout(1500)
                 s.screenshot(path="%s/abx-box-%d.png" % (a.bilder, w))
+        # 8b. Wie am iPhone: Beruehrungsbildschirm, grober Zeiger. Erst damit
+        # greift css/tippziele.css (min-height 44 px fuer Knoepfe) — genau die
+        # Regel, die am 28.09. die Plakette "gefordert" zum Oval zog.
+        speicher = s.evaluate("() => window.__abxSpeicher")
+        hc = b.new_context(viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True, device_scale_factor=3)
+        h = hc.new_page()
+        h.add_init_script("try { localStorage.setItem('app_lang', 'de'); } catch (e) {}")
+        h.goto(a.url, wait_until="load", timeout=90000)
+        warte_bis(h, "() => typeof switchTabAndUpdateMenu === 'function' && !!window.ArchetypBox", 90)
+        h.wait_for_timeout(6000)
+        warte_bis(h, "() => typeof switchTabAndUpdateMenu === 'function' && !!window.ArchetypBox", 90)
+        h.evaluate(ERSATZKONTO)
+        h.evaluate("sp => { window.__abxSpeicher = sp; }", speicher)
+        h.evaluate(ERSATZKONTO)
+        h.evaluate(PROFIL_SICHTBAR)
+        warte_bis(h, "() => document.querySelectorAll('#abxInhalt .abx-karte').length > 0", 30)
+        hm = h.evaluate("""() => { let oval = 0, raus = 0; const grob = matchMedia('(pointer: coarse)').matches;
+            document.querySelectorAll('#abxInhalt .abx-karte').forEach(k => { const rk = k.getBoundingClientRect();
+              k.querySelectorAll('.abx-soll, .abx-herz, .abx-anzahl').forEach(x => { const r = x.getBoundingClientRect();
+                if (r.width && Math.abs(r.height - 28) > 1.5) oval++; });
+              k.querySelectorAll('button').forEach(x => { const r = x.getBoundingClientRect();
+                if (r.width && (r.left < rk.left - 0.5 || r.right > rk.right + 0.5)) raus++; }); });
+            return { grob: grob, oval: oval, raus: raus, ueberlauf: document.documentElement.scrollWidth - innerWidth }; }""")
+        print("iPhone-Nachbildung:", hm)
+        pruefe(hm["grob"] and hm["oval"] == 0 and hm["raus"] == 0 and hm["ueberlauf"] <= 0,
+               "Touch 390 px (pointer: coarse): Plaketten rund, nichts ragt heraus")
+        if a.bilder:
+            h.evaluate("() => document.querySelector('#abxInhalt .abx-rubrik-fehlt').scrollIntoView()")
+            h.wait_for_timeout(800)
+            h.screenshot(path=a.bilder + "/abx-touch-390.png")
+        hc.close()
+
         # 9. Dunkler Modus: Kontrast der aktiven Knoepfe und der Plakette
         s.evaluate("() => { document.documentElement.dataset.theme = 'dark'; }")
         s.wait_for_timeout(500)

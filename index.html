@@ -2363,13 +2363,12 @@
                     <nav class="tool-back-nav" data-i18n-aria="aria.backNav" aria-label="Back navigation">
                         <button type="button" class="tool-back-btn" onclick="switchTabAndUpdateMenu('current-meta')" data-i18n="metaHub.backToOverview">← Startseite</button>
                     </nav>
-                    <!-- Meta-Prognose (js/app-meta-prognose.js).
-                         Eigenes Modul mit eigenem Wirt, bewusst NICHT in
-                         app-meta-call.js: das sind 10.839 Zeilen, und die
-                         Prognose braucht nichts davon. Sie steht oben,
-                         weil sie die Frage beantwortet, mit der man den
-                         Reiter aufmacht. -->
-                    <div id="metaPrognoseHost"></div>
+                    <!-- FE-16 (28.09.2026): der eigene Block „Meta-Prognose"
+                         (js/app-meta-prognose.js) hat hier keinen Wirt mehr.
+                         Seine Zahlen — Online, Prognose, Bandbreite, Modell —
+                         stehen jetzt als Spalten in der Meta-Call-Tabelle;
+                         zwei Blöcke mit zwei Modellen zum selben Deck waren
+                         der Befund in claude/metacall-analyse-2026-09-28.md. -->
                     <!-- Befuellt von MetaCall.init() -->
                     <div id="metaCallHost"></div>
                 </div>

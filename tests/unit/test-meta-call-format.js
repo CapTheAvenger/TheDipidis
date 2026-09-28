@@ -256,6 +256,7 @@ describe('Junk-Win-Rate: gerechnet statt geraten', () => {
             let _feldAuswahl = null;
             let _junkWrCacheQuelle = null, _junkWrCacheWert = null, _junkWrCacheSchluessel = null;
             let _junkDeckZahl = 0;
+            const _prognoseAktiv = false, _prognoseRest = 0;   // FE-15: ohne Prognosedatei
             ${teilungBlock}
             ${schluesselBlock}
             ${block.replace(/^[\s\S]*?function _junkWinRatePct/, 'function _junkWinRatePct')

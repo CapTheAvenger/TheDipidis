@@ -357,11 +357,12 @@ describe('EV gegen das erwartete Meta — der Einbau', () => {
 
     it('der gemessene Anteil steht in der Feldtabelle, nicht nur in der Detailzeile', () => {
         /* §5 und §12 der Bestellung: „AKTUELL BEOBACHTET" und
-           „ERWARTET" muessen nebeneinander lesbar sein. */
-        assert.match(SRC, /class="mc-share-gemessen"/,
+           „ERWARTET" muessen nebeneinander lesbar sein. Seit FE-16
+           (28.09.2026) als eigene Spalte „Online" neben „Prognose". */
+        assert.match(SRC, /class="mc-mct-onlinezahl"/,
             'der gemessene Online-Anteil steht nicht in der Zeile');
-        assert.match(SRC, /_sl\.ladderShare/,
-            'er wird nicht aus _shareList geholt — dann ist es wieder die Modellausgabe');
+        assert.match(SRC, /const online = isCustom \? \{ wert: null \} : _mctOnline\(deck\.name\)/,
+            'er wird nicht ueber _mctOnline geholt — dann ist es wieder die Modellausgabe');
     });
 
     it('die gezaehlten Partien werden nach Online und Praesenz getrennt', () => {

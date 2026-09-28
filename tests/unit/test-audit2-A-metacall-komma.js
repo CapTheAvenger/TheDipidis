@@ -50,25 +50,25 @@ describe('F11 — _mcNum / _mcPct formatieren nach Sprache', () => {
 
 describe('F11 — die Render-Ausdrücke benutzen die locale-fähige Formatierung', () => {
     it('Online-Share-Zelle liefert in de Komma, in en Punkt', () => {
-        const line = cut("const onlineDisplay = isCustom ? '—' :", ';');
+        // FE-16 (28.09.2026): die Zelle steht in der Meta-Call-Tabelle.
+        const span = cut('<span class="mc-mct-onlinezahl">', '</span>');
         function run(lang) {
             const { _mcPct } = ladeHelfer(lang);
-            const fn = new Function('_mcPct', 'isCustom', 'deck',
-                line + '\nreturn onlineDisplay;');
-            return fn(_mcPct, false, { onlineShare: 10 });
+            const fn = new Function('_mcPct', 'online', 'return `' + span + '`;');
+            return fn(_mcPct, { wert: 10.25 });
         }
-        assert.match(run('de'), /10,00/, 'de-Share zeigt keinen Komma-Dezimaltrenner');
-        assert.ok(!run('de').includes('10.00'), 'de-Share zeigt noch Punkt');
-        assert.match(run('en'), /10\.00/, 'en-Share zeigt keinen Punkt');
+        assert.match(run('de'), /10,3/, 'de-Share zeigt keinen Komma-Dezimaltrenner');
+        assert.ok(!run('de').includes('10.3'), 'de-Share zeigt noch Punkt');
+        assert.match(run('en'), /10\.3/, 'en-Share zeigt keinen Punkt');
     });
 
     it('Begegnungs-Label (∅ λ) liefert in de Komma', () => {
-        const span = cut('<span class="mc-encounters-label">', '</span>');
+        const span = cut('<span class="mc-mct-enc-zahl mc-enc-${encTier}">', '</span>');
         function run(lang) {
             const { _mcNum } = ladeHelfer(lang);
-            const fn = new Function('_mcNum', 'lambda',
+            const fn = new Function('_mcNum', 'lambda', 'encTier',
                 'return `' + span + '`;');
-            return fn(_mcNum, 0.8);
+            return fn(_mcNum, 0.8, 'low');
         }
         assert.match(run('de'), /∅ 0,80/, 'de-Begegnungen zeigen keinen Komma-Dezimaltrenner');
         assert.ok(!run('de').includes('0.80'));

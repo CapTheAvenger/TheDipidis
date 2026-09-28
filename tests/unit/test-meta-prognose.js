@@ -156,13 +156,17 @@ describe('die Anzeige', () => {
 });
 
 describe('die Einbettung', () => {
-    it('der Wirt steht im Reiter Meta Call', () => {
-        assert.match(HTML, /id="metaPrognoseHost"/,
-            'ohne Wirt rendert das Modul nichts');
-        const iP = HTML.indexOf('id="metaPrognoseHost"');
-        const iM = HTML.indexOf('id="metaCallHost"');
-        assert.ok(iP > 0 && iM > 0 && iP < iM,
-            'die Prognose steht nicht vor der Meta-Call-Karte');
+    it('der eigene Block ist in der Meta-Call-Tabelle aufgegangen (FE-16)', () => {
+        /* Bis 28.09.2026 stand hier ein eigener Wirt vor der Meta-Call-
+           Karte — mit einem zweiten Modell neben dem Praediktor (Dragapult
+           13,3 % oben, 18,72 % unten). Seit FE-15/FE-16 liest der Meta Call
+           dieselbe Datei und zeigt Online, Prognose und Band als Spalten. */
+        assert.doesNotMatch(HTML, /id="metaPrognoseHost"/,
+            'der zweite Prognoseblock steht wieder ueber dem Meta Call');
+        const MC = fs.readFileSync(path.join(ROOT, 'js', 'app-meta-call.js'), 'utf8');
+        assert.match(MC, /const PROGNOSE_DATEI = 'data\/meta_prognose\.json'/,
+            'der Meta Call liest die Prognosedatei nicht');
+        assert.match(MC, /prognose_von/, 'die Bandbreite fehlt in der Tabelle');
     });
 
     it('Skript und Stylesheet sind eingehaengt', () => {

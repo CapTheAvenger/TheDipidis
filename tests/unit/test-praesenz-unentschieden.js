@@ -186,9 +186,19 @@ describe('Die Quote wird gemessen, nicht gesetzt', () => {
     it('die Spiegelpartie geht durch dieselbe Umstellung', () => {
         /* Sonst bliebe genau eine Paarung je Runde auf der alten festen
            Quote — die gegen das eigene Deck, also die häufigste im Feld. */
-        const treffer = (MC.match(/_stelleUm\(\{ pWin: 0\.45, pTie: 0\.10, pLoss: 0\.45 \}\)/g) || []).length;
-        assert.strictEqual(treffer, 2,
-            `die Spiegelnäherung steht ${treffer}-mal umgestellt statt zweimal`);
+        /* Seit FE-16 (28.09.2026) rechnet calcDay2 jede Paarung EINMAL je
+           Felddeck vor (`paarung`) und benutzt sie in der Punktekette wie in
+           den erwarteten Siegen — die Spiegelnaeherung steht deshalb nur
+           noch einmal da. Entscheidend ist: keine Stelle ohne Umstellung. */
+        const i = MC.indexOf('  function calcDay2(field, deckOverride) {');
+        const rumpf = MC.slice(i, MC.indexOf('\n  }\n', i));
+        const umgestellt = (rumpf.match(/_stelleUm\(\{ pWin: 0\.45, pTie: 0\.10, pLoss: 0\.45 \}\)/g) || []).length;
+        const gesamt = (rumpf.match(/\{ pWin: 0\.45, pTie: 0\.10, pLoss: 0\.45 \}/g) || []).length;
+        assert.ok(umgestellt >= 1, 'die Spiegelnäherung fehlt in calcDay2');
+        assert.strictEqual(umgestellt, gesamt,
+            `${gesamt - umgestellt} Spiegelnäherung(en) laufen ohne Umstellung durch`);
+        assert.strictEqual((rumpf.match(/paarung\[fi\]/g) || []).length, 2,
+            'Punktekette und erwartete Siege lesen nicht beide die vorgerechnete Paarung');
     });
 
     it('ohne Messung bleibt die Kette unangetastet', () => {

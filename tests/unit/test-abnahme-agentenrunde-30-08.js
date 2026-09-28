@@ -246,8 +246,9 @@ describe('Funktionen', () => {
     it('die Rundenzahl im Spaltenkopf wird mitgezogen', () => {
         // "Ø Begegnungen (8 R.)" blieb stehen, wenn man auf 9 Runden
         // stellte — nur der <tbody> wurde getauscht.
-        assert.match(MC, /id="mc-th-enc"/);
-        assert.match(MC, /const neuerKopf = tmp\.querySelector\('#mc-th-enc'\)/);
+        // FE-16: der Kopf der Meta-Call-Tabelle wird als Ganzes getauscht.
+        assert.match(MC, /<thead id="mc-mct-kopf">/);
+        assert.match(MC, /const neuerKopf = tmp\.querySelector\('#mc-mct-kopf'\)/);
     });
 
     it('die Formatauswahl schreibt in beide Richtungen', () => {

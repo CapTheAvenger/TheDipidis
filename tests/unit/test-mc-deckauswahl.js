@@ -91,6 +91,8 @@ function umgebung(opt) {
         _junkWrCacheWert: null,
         _junkWrCacheSchluessel: null,
         _junkDeckZahl: 0,
+        _prognoseAktiv: o.prognoseAktiv || false,   // FE-15
+        _prognoseRest: o.prognoseRest || 0,
         _settings: {
             totalPlayers: 1000, junkPct: 0, junkWinRate: 55,
             rounds: 8, myDeck: '',
@@ -275,25 +277,31 @@ describe('Deck-Auswahl — die Summe des Feldes', () => {
 
 describe('Deck-Auswahl — der Einbau', () => {
 
-    it('steht als eigener Block vor der Feldtabelle', () => {
+    it('steht als erste Spalte IN der Meta-Call-Tabelle (FE-16)', () => {
+        /* Bis 28.09.2026 ein eigenes Kachelraster ueber der Tabelle; seit
+           FE-16 ist „einzeln im Feld" der Haken jeder Zeile, und die
+           Vorwahl-Pillen stehen in der Leiste der Tabelle. */
         const i = SRC.indexOf('function renderAll()');
         const j = SRC.indexOf('function _inFrozenPastMode()', i);
         const rumpf = SRC.slice(i, j);
-        assert.ok(rumpf.includes('renderDeckAuswahlPanel()'), 'renderAll ruft die Auswahl nicht auf');
-        assert.ok(rumpf.indexOf('renderDeckAuswahlPanel()') < rumpf.indexOf('renderFieldPanel(field)'),
-            'die Auswahl steht hinter der Tabelle, die sie bestimmt');
+        assert.ok(rumpf.includes('renderFieldPanel(field)'), 'renderAll zeigt die Tabelle nicht');
+        assert.ok(!/renderDeckAuswahlPanel\(/.test(SRC), 'das alte Kachelraster ist wieder da');
+        const f = SRC.slice(SRC.indexOf('  function renderFieldPanel(field) {'),
+                            SRC.indexOf('  function _feldTabelleNachziehen()'));
+        assert.match(f, /MetaCall\._setFeldVorwahl/, 'die Vorwahl-Pillen fehlen in der Tabelle');
+        const zeile = SRC.slice(SRC.indexOf('  function _mctZeileFeld('), SRC.indexOf('  function _mctZeileAussen('));
+        assert.match(zeile, /MetaCall\._toggleFeldDeck/, 'die Zeile traegt keinen Haken fuer „einzeln im Feld"');
     });
 
-    it('die Kacheln zeigen den gemessenen Anteil, nicht die Prognose', () => {
-        /* `onlineShare` traegt nach dem Praediktorlauf die Modellausgabe
-           — genau die Verwechslung, die der Spalte „Prognose %" am
-           18.08.2026 ihren Namen gekostet hat. */
-        const i = SRC.indexOf('function renderDeckAuswahlPanel()');
-        const j = SRC.indexOf('\n  function _feldSummeHtml()', i);
-        const rumpf = SRC.slice(i, j);
-        assert.match(rumpf, /ladderShare/, 'die Kachel liest den gemessenen Anteil nicht');
-        assert.match(rumpf, /class="mc-feld-zahlen">\$\{esc\(L\('gemessen /,
-            'die Zahl auf der Kachel ist nicht als gemessen ausgewiesen');
+    it('die Online-Spalte zeigt eine Messung, nicht die Prognose', () => {
+        /* `onlineShare` traegt nach dem Praediktorlauf die Modellausgabe.
+           Die Spalte „Online" liest den gemessenen Stand — aus der
+           Prognosedatei (online_anteil) oder den Leiteranteil. */
+        const i = SRC.indexOf('  function _mctOnline(name) {');
+        const rumpf = SRC.slice(i, SRC.indexOf('\n  }\n', i));
+        assert.match(rumpf, /online_anteil/, 'die Spalte liest den Online-Stand der Prognosedatei nicht');
+        assert.match(rumpf, /ladderShare/, 'ohne Prognosedatei fehlt der gemessene Leiteranteil');
+        assert.doesNotMatch(rumpf, /\.onlineShare/, 'die Online-Spalte liest die Modellausgabe');
     });
 
     it('die Auswahl wird gemerkt und faehrt im Szenario mit', () => {

@@ -235,6 +235,96 @@ window.MetaCall = (function () {
      Kumulativstand und sagt es in der Konsole. Wer die Zahl anzeigt,
      muss diesen Wert lesen, damit die Quote ihren Nenner traegt. */
   let _fensterMeta = null;
+
+  /* ── FE-15 (28.09.2026): EINE Feldprognose ─────────────────────────
+   *
+   * GEMESSEN 28.09.2026 (claude/metacall-analyse-2026-09-28.md): auf dem
+   * Reiter liefen zwei Modelle nebeneinander. Der Block oben
+   * (data/meta_prognose.json, an 7 Regionals geprueft, mittlerer Fehler
+   * 0,5 pp) sagte Dragapult 13,3 %, die Feldtabelle (dieser Praediktor)
+   * 18,72 %. Die 18,72 % entstanden im Modus A zu vier Fuenfteln aus dem
+   * Last-Meta-Boden (0,85 x Anteil im Vorformat), weil 60 % der
+   * Formelgewichte gemessen null waren (DA-17).
+   *
+   * Entscheidung (Hausi, 28.09.2026, FE-15 a): die Feldanteile kommen aus
+   * der Prognosedatei, solange sie zum laufenden Format passt. Der
+   * Praediktor laeuft weiter, sein Wert bleibt als d.predictorShare
+   * nachlesbar; Decks, die die Datei nicht fuehrt, teilen sich den Rest
+   * bis 100 % nach ihrem gemessenen Online-Anteil. */
+  const PROGNOSE_DATEI = 'data/meta_prognose.json';
+  let _prognoseDatei = null;   // { meta, modell, zeilen: Map(normName -> Zeile) }
+  let _prognoseAktiv = false;  // hat der letzte Lauf die Datei angewandt?
+  let _prognoseRest  = 0;      // Anteil ohne Deckzeile (Limitless-Eimer „other") -> „Sonstige"
+
+  async function _ladePrognoseDatei() {
+    _prognoseDatei = null;
+    try {
+      const antwort = await fetch(PROGNOSE_DATEI + '?t=' + Date.now());
+      if (!antwort.ok) {
+        console.info('[MetaCall] Prognosedatei fehlt (%s) — die Feldanteile kommen aus dem Praediktor.', antwort.status);
+        return;
+      }
+      _prognoseDatei = _prognoseDateiLesen(await antwort.json());
+    } catch (e) {
+      console.info('[MetaCall] Prognosedatei nicht lesbar — die Feldanteile kommen aus dem Praediktor.', e);
+    }
+  }
+
+  function _prognoseDateiLesen(j) {
+    if (!j || !Array.isArray(j.prognose)) return null;
+    const zeilen = new Map();
+    j.prognose.forEach(z => {
+      const name = z && (z.archetyp_name || z.archetyp_id);
+      if (!name || !Number.isFinite(Number(z.prognose))) return;
+      zeilen.set(normalize(name), z);
+    });
+    return zeilen.size ? { meta: j._meta || {}, modell: j.modell || {}, zeilen } : null;
+  }
+
+  function _prognoseDateiAnwenden() {
+    _prognoseAktiv = false;
+    if (_metaSource !== 'current' || !_prognoseDatei || !Array.isArray(_shareList) || !_shareList.length) return;
+    const set = (_formatWindow && _formatWindow.current_set)
+      ? String(_formatWindow.current_set).trim().toUpperCase() : '';
+    const fenster = String((_prognoseDatei.meta && _prognoseDatei.meta.fenster) || '').toUpperCase();
+    if (set && fenster && !fenster.endsWith('-' + set) && fenster !== set) {
+      console.info('[MetaCall] Prognosedatei gilt fuer %s, laufendes Format %s — nicht angewandt.', fenster, set);
+      return;
+    }
+    let summe = 0;
+    const ohne = [];
+    _shareList.forEach(d => {
+      d.predictorShare = d.predictedShare;
+      const z = _prognoseDatei.zeilen.get(normalize(d.name));
+      if (z) {
+        d.prognoseZeile = z;
+        d.predictedShare = Number(z.prognose);
+        summe += d.predictedShare;
+      } else {
+        d.prognoseZeile = null;
+        ohne.push(d);
+      }
+    });
+    if (summe <= 0) return;
+    /* Decks ohne Zeile behalten ihren gemessenen Online-Anteil — mehr
+       als den Rest bis 100 % bekommen sie zusammen nicht. Was dann noch
+       fehlt, ist der Eimer „other" der Datei: Spieler mit Decks, die
+       Limitless keinem Archetyp zuordnet. Er ist kein Deck und geht in
+       „Sonstige" (buildField). Erst verteilt, dann gemessen: am
+       28.09.2026 bekam Rocket's Spidops (0,1 % online) sonst allein die
+       4,4 % des Eimers, weil die anderen elf Decks ohne Zeile online 0
+       trugen. */
+    const rest  = Math.max(0, 100 - summe);
+    const basis = ohne.reduce((s, d) => s + (d.ladderShare || 0), 0);
+    const faktor = basis > rest && basis > 0 ? rest / basis : 1;
+    let vergeben = 0;
+    ohne.forEach(d => { d.predictedShare = (d.ladderShare || 0) * faktor; vergeben += d.predictedShare; });
+    _prognoseRest = Math.max(0, rest - vergeben);
+    _shareList.forEach(d => { d.onlineShare = d.predictedShare; });
+    _prognoseAktiv = true;
+    console.info('[MetaCall] Feldanteile aus %s: %d Decks aus der Datei (%s %%), %d ohne Zeile (%s %%), in Sonstige %s %%.',
+      PROGNOSE_DATEI, _shareList.length - ohne.length, summe.toFixed(1), ohne.length, vergeben.toFixed(1), _prognoseRest.toFixed(1));
+  }
   /* Der Pfad der Umfangsdatei — EINMAL, weil ihn zwei Stellen brauchen:
      der Ladeschritt (§1b) und die Quellenangabe im Banner. Bis zum
      07.09.2026 standen dort zwei verschiedene Namen, und der im
@@ -1252,7 +1342,10 @@ window.MetaCall = (function () {
   /** Alle Decks, normiert auf 100 % und nach gemessenem Anteil sortiert. */
   function _feldSortiert() {
     if (!_shareList) return [];
-    const summe = _shareList.reduce((s, d) => s + d.onlineShare, 0) || 1;
+    /* FE-15: der Eimer „other" zaehlt zum Nenner — sonst blaehte die
+       Normierung jede Deckzeile um rund 4 % auf (Dragapult 13,3 -> 13,9). */
+    const summe = (_shareList.reduce((s, d) => s + d.onlineShare, 0)
+      + (_prognoseAktiv ? _prognoseRest : 0)) || 1;
     return [..._shareList]
       .map(d => ({ name: d.name, onlineShare: (d.onlineShare / summe) * 100 }))
       .sort((a, b) => b.onlineShare - a.onlineShare);
@@ -1319,7 +1412,7 @@ window.MetaCall = (function () {
   // Effective expansion for deck k:
   //     def = (_detailGlobalMode === 'expanded')
   //     expanded = _detailOverrides.has(k) ? !def : def
-  let _detailGlobalMode = 'expanded';
+  let _detailGlobalMode = 'collapsed';   // FE-16: Detailzeilen standardmaessig zu
   const _detailOverrides = new Set();
   // Brand shown in share-image footer.
   const BRAND_FOOTER = 'thedipidis.app';
@@ -5841,6 +5934,8 @@ window.MetaCall = (function () {
       } catch (_e) { /* ignore */ }
     }
 
+    _prognoseDateiAnwenden();   // FE-15: die eine Feldprognose
+
     _shareList.sort((a, b) => b.predictedShare - a.predictedShare);
 
     // Append run-log entry — Part 6 / system-learning groundwork. Captures
@@ -6165,6 +6260,7 @@ window.MetaCall = (function () {
     // would re-introduce the race we just fixed.
 
     // §1 — limitless_online_decks_comparison.csv → _trendMap + _shareList
+    await _ladePrognoseDatei();   // FE-15
     try {
       const shareResp = await fetch('data/limitless_online_decks_comparison.csv?t=' + Date.now());
       if (!shareResp.ok) throw new Error('share CSV not found');
@@ -9275,7 +9371,11 @@ window.MetaCall = (function () {
     const teilung   = _feldTeilung(sorted);
     const topDecks  = teilung.genannt;
     const restDecks = teilung.rest;
-    const restShare = restDecks.reduce((s, d) => s + d.onlineShare, 0);
+    /* FE-15: der Eimer „other" der Prognosedatei steht in keiner Deckzeile
+       und gehoert zu „Sonstige" — ohne ihn summierte das Feld auf ~96 %
+       und die Day-2-Rechnung verloere diesen Teil der Paarungen. */
+    const restShare = restDecks.reduce((s, d) => s + d.onlineShare, 0)
+      + (_prognoseAktiv ? _prognoseRest : 0);
 
     // Baseline allocation
     const alloc = {};
@@ -9570,21 +9670,25 @@ window.MetaCall = (function () {
     const maxPts = rounds * 3;
     let dp = new Float64Array(maxPts + 1);
     dp[0] = 1.0;
+    /* FE-16 (28.09.2026): die Paarung haengt weder an der Runde noch am
+       Punktstand. Frueher wurde sie in der innersten Schleife je Runde
+       und Punktstand neu gerechnet (8 x 25 x Feld Aufrufe); die
+       Meta-Call-Tabelle rechnet calcDay2 fuer jede ihrer Zeilen. */
+    const paarung = field.map(deck => (normalize(deck.name) === normalize(myDeck)
+      ? _stelleUm({ pWin: 0.45, pTie: 0.10, pLoss: 0.45 }) // Spiegel
+      : matchupFn(myDeck, deck.name)));
 
     for (let r = 0; r < rounds; r++) {
       const newDp = new Float64Array(maxPts + 1);
       for (let pts = 0; pts <= r * 3; pts++) {
         if (dp[pts] < 1e-14) continue;
         const p = dp[pts];
-        for (const deck of field) {
-          const share = deck.finalShare / 100;
+        for (let fi = 0; fi < field.length; fi++) {
+          const share = field[fi].finalShare / 100;
           if (share <= 1e-9) continue;
           // Skip the candidate matching itself in the field (mirror
           // matches contribute neutral but we treat them as ties).
-          const isMirror = normalize(deck.name) === normalize(myDeck);
-          const m = isMirror
-            ? _stelleUm({ pWin: 0.45, pTie: 0.10, pLoss: 0.45 }) // Spiegel
-            : matchupFn(myDeck, deck.name);
+          const m = paarung[fi];
           if (pts + 3 <= maxPts) newDp[pts + 3] += p * share * m.pWin;
           if (pts + 1 <= maxPts) newDp[pts + 1] += p * share * m.pTie;
           newDp[pts]            += p * share * m.pLoss;
@@ -9597,12 +9701,9 @@ window.MetaCall = (function () {
     for (let pt = day2Points; pt <= maxPts; pt++) day2Prob += dp[pt];
 
     let expWin = 0, expTie = 0, expLoss = 0;
-    for (const deck of field) {
-      const share = deck.finalShare / 100;
-      const isMirror = normalize(deck.name) === normalize(myDeck);
-      const m = isMirror
-        ? _stelleUm({ pWin: 0.45, pTie: 0.10, pLoss: 0.45 })
-        : matchupFn(myDeck, deck.name);
+    for (let fi = 0; fi < field.length; fi++) {
+      const share = field[fi].finalShare / 100;
+      const m = paarung[fi];
       expWin  += rounds * share * m.pWin;
       expTie  += rounds * share * m.pTie;
       expLoss += rounds * share * m.pLoss;
@@ -10846,94 +10947,6 @@ window.MetaCall = (function () {
     return esc(String(t('mc.sourceArchetypes')).replace('{n}', anzahl));
   }
 
-  function _renderFlatDeckRow(deck, maxShare) {
-    const isJunk      = deck.name === '_junk';
-    const isCustom    = !!deck.isCustom;
-    const icons       = isJunk ? '' : _mcIconHtml(deck.name);
-    const label       = isJunk ? t('mc.junkDecks') : (icons + esc(deck.name));
-    const lambda      = _settings.rounds * deck.finalShare / 100;
-    const hasPersonal = deck.personalShare !== undefined;
-    const barW        = Math.round((deck.finalShare / Math.max(maxShare, 0.01)) * 100);
-    const rowClass    = isJunk ? 'mc-row-junk' : (isCustom ? 'mc-row-custom' : '');
-    const encTier     = _avgEncTier(lambda);
-    const personalCell = (isJunk || isCustom)
-      ? '<span class="mc-cell-dash">—</span>'
-      : `<input type="number" min="0" max="100" step="0.1" placeholder="${esc(t('mc.estimatePh'))}"
-                value="${hasPersonal ? deck.personalShare : ''}"
-                class="mc-personal-input${hasPersonal ? ' has-value' : ''}" data-deck="${esc(deck.name)}"
-                oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)">`;
-    const onlineDisplay = isCustom ? '—' : _mcPct(deck.onlineShare, 2);
-    /* ── DER GEMESSENE ANTEIL STEHT JETZT UNTER DER PROGNOSE ────────
-     *
-     * BESTELLT (Betreiber, 11.09.2026, §5 und §12): „Die Oberfläche
-     * soll klar zwischen zwei Ebenen unterscheiden: AKTUELL BEOBACHTET
-     * und ERWARTET … Was sehen wir aktuell in den Daten? Was glaube
-     * ich, wird beim nächsten Turnier relevant sein?"
-     *
-     * Beide Zahlen gab es schon, aber nicht nebeneinander: die Prognose
-     * stand in der Spalte, der gemessene Online-Anteil versteckt in der
-     * aufklappbaren Detailzeile. Wer die Tabelle las, ohne aufzuklappen,
-     * sah eine Modellausgabe und hielt sie fuer die Messung — genau der
-     * Befund vom 18.08.2026, der dieser Spalte ihren Namen gegeben hat.
-     * Ein Spaltenname allein hat es nicht behoben; die Vergleichszahl
-     * musste danebenstehen.
-     *
-     * ES BLEIBT EINE ZELLE, KEINE SIEBTE SPALTE. Die Tabelle traegt auf
-     * dem Telefon eine Kartenansicht, deren Beschriftungen an der
-     * Spaltenposition haengen (css/meta-call.css:1630 ff.), dazu eine
-     * colgroup und einen Bild-Export, der die Spalten zeichnet. Eine
-     * Spalte einzufuegen haette alle drei stillschweigend verschoben.
-     *
-     * `ladderShare` liegt auf _shareList, nicht auf dem Feld: das Feld
-     * fuehrt nur die gerechneten Groessen. Fehlt der Eintrag (eigenes
-     * Deck), steht nichts da statt einer Null. */
-    const _sl = _shareList && _shareList.find(d => normalize(d.name) === normalize(deck.name));
-    const _gemessen = (_sl && Number.isFinite(_sl.ladderShare) && _sl.ladderShare > 0)
-      ? _sl.ladderShare : null;
-    const gemessenHtml = (isJunk || isCustom || _gemessen == null) ? '' :
-      `<span class="mc-share-gemessen" title="${esc(_mcIstDeutsch()
-        ? 'Der aktuell gemessene Online-Anteil dieses Decks — die Zahl, aus der die Prognose '
-          + 'darüber entsteht. Sie weicht bewusst ab: das Modell gewichtet sie mit '
-          + 'Turnier-Conversion, Trend und Format.'
-        : 'The currently measured online share of this deck — the number the forecast above is '
-          + 'built from. It differs by design: the model weights it with tournament conversion, '
-          + 'trend and format.')}">${esc(_mcIstDeutsch() ? 'gemessen ' : 'measured ')}${
-        _mcPct(_gemessen, 1)}</span>`;
-    const intelHtml = (isJunk || isCustom) ? '' : _renderDeckBadge(deck.name);
-    const k = normalize(deck.name);
-    const expanded = _isDetailExpanded(k);
-    const toggleHtml = intelHtml
-      ? `<button type="button" class="mc-row-toggle${expanded ? ' is-expanded' : ''}"
-                aria-expanded="${expanded ? 'true' : 'false'}"
-                aria-label="${esc(t('mc.toggleDetailsAria'))}"
-                title="${esc(t('mc.toggleDetailsAria'))}"
-                data-deck-key="${esc(k)}"
-                onclick="MetaCall._toggleDetail(this)">▾</button>`
-      : '';
-    const mainRow = `<tr class="mc-row-main ${rowClass}">
-      <td class="mc-cell-deck">
-        <span class="mc-deck-name">${label}</span>
-        ${toggleHtml}
-      </td>
-      <td class="mc-cell-online"><span class="mc-share-online">${onlineDisplay}</span>${gemessenHtml}</td>
-      <td class="mc-cell-est">${personalCell}</td>
-      <td class="mc-cell-final"><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${_mcPct(deck.finalShare, 2)}</span></td>
-      <td class="mc-cell-players"><span class="mc-players-count">${zahlLokal(deck.count)}</span></td>
-      <td class="mc-cell-enc">
-        <div class="mc-encounters-bar mc-enc-${encTier}">
-          <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
-          <span class="mc-encounters-label">∅ ${_mcNum(lambda, 2)}</span>
-        </div>
-      </td>
-    </tr>`;
-    const detailRow = intelHtml
-      ? `<tr class="mc-row-detail${expanded ? '' : ' is-collapsed'}" data-deck-key="${esc(k)}">
-          <td colspan="6">${intelHtml}</td>
-        </tr>`
-      : '';
-    return mainRow + detailRow;
-  }
-
   // Effective expanded-state for a deck row, given the global mode +
   // per-row overrides. See _detailGlobalMode comment for the model.
   function _isDetailExpanded(k) {
@@ -11043,218 +11056,338 @@ window.MetaCall = (function () {
 </div>`;
   }
 
-  function renderFieldPanel(field) {
-    let rows;
-    if (_groupByMain) {
-      const groups  = buildGroups(field);
-      const maxShare = Math.max(...groups.map(g => g.totalShare), 0.1);
-      rows = groups.map((group, gi) => {
-        if (group.variants.length === 1) {
-          return _renderFlatDeckRow(group.variants[0], maxShare);
-        }
-        const gid    = `mcg-${gi}`;
-        const lambda = _settings.rounds * group.totalShare / 100;
-        const barW   = Math.round((group.totalShare / maxShare) * 100);
-        const groupEncTier = _avgEncTier(lambda);
-        const header = `
-<tr class="mc-row-main mc-group-header" onclick="MetaCall._toggleGroup('${gid}')">
-  <td class="mc-cell-deck">
-    <span class="mc-group-arrow" id="mc-gt-${gid}">▶</span>
-    <span class="mc-deck-name">${_mcIconHtml(group.main)}${esc(_familyDisplayForKey(group.main))}</span>
-    <span class="mc-group-count">${group.variants.length} ${t('mc.variants')}</span>
-  </td>
-  <td class="mc-cell-online"><span class="mc-share-online">${_mcPct(group.totalOnline, 2)}</span></td>
-  <td class="mc-cell-est"><span class="mc-cell-dash">—</span></td>
-  <td class="mc-cell-final"><span class="mc-share-final">${_mcPct(group.totalShare, 2)}</span></td>
-  <td class="mc-cell-players"><span class="mc-players-count">${zahlLokal(group.totalCount)}</span></td>
-  <td class="mc-cell-enc">
-    <div class="mc-encounters-bar mc-enc-${groupEncTier}">
-      <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
-      <span class="mc-encounters-label">∅ ${_mcNum(lambda, 2)}</span>
-    </div>
-  </td>
-</tr>`;
-        const details = group.variants.map(deck => {
-          const hasP   = deck.personalShare !== undefined;
-          const dLam   = _settings.rounds * deck.finalShare / 100;
-          const dBarW  = Math.round((deck.finalShare / maxShare) * 100);
-          const dEncTier = _avgEncTier(dLam);
-          const pCell  = `<input type="number" min="0" max="100" step="0.1" placeholder="${esc(t('mc.estimatePh'))}"
-                            value="${hasP ? deck.personalShare : ''}"
-                            class="mc-personal-input${hasP ? ' has-value' : ''}" data-deck="${esc(deck.name)}"
-                            oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)">`;
-          const variantIntel = _renderDeckBadge(deck.name);
-          const dk = normalize(deck.name);
-          const variantExpanded = _isDetailExpanded(dk);
-          const variantToggle = variantIntel
-            ? `<button type="button" class="mc-row-toggle${variantExpanded ? ' is-expanded' : ''}"
-                       aria-expanded="${variantExpanded ? 'true' : 'false'}"
-                       aria-label="${esc(t('mc.toggleDetailsAria'))}"
-                       title="${esc(t('mc.toggleDetailsAria'))}"
-                       data-deck-key="${esc(dk)}"
-                       onclick="event.stopPropagation();MetaCall._toggleDetail(this)">▾</button>`
-            : '';
-          const variantMain = `<tr class="mc-row-main mc-group-detail mc-group-hidden" data-group="${gid}">
-            <td class="mc-cell-deck mc-cell-deck-variant">
-              <span class="mc-deck-name mc-variant-name">${_mcIconHtml(deck.name)}${esc(deck.name)}</span>
-              ${variantToggle}
-            </td>
-            <td class="mc-cell-online"><span class="mc-share-online">${_mcPct(deck.onlineShare, 2)}</span></td>
-            <td class="mc-cell-est">${pCell}</td>
-            <td class="mc-cell-final"><span class="mc-share-final${hasP ? ' has-personal' : ''}">${_mcPct(deck.finalShare, 2)}</span></td>
-            <td class="mc-cell-players"><span class="mc-players-count">${zahlLokal(deck.count)}</span></td>
-            <td class="mc-cell-enc">
-              <div class="mc-encounters-bar mc-enc-${dEncTier}">
-                <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${dBarW}%"></div></div>
-                <span class="mc-encounters-label">∅ ${_mcNum(dLam, 2)}</span>
-              </div>
-            </td>
-          </tr>`;
-          // Detail row for the variant — hidden both by group-collapse
-          // (mc-group-hidden, parent state) AND by per-row collapse
-          // (is-collapsed, this row's own state).
-          const variantDetail = variantIntel
-            ? `<tr class="mc-row-detail mc-group-detail mc-group-hidden${variantExpanded ? '' : ' is-collapsed'}" data-group="${gid}" data-deck-key="${esc(dk)}">
-                 <td colspan="6">${variantIntel}</td>
-               </tr>`
-            : '';
-          return variantMain + variantDetail;
-        }).join('');
-        return header + details;
-      }).join('');
-    } else {
-      const maxShare = Math.max(...field.map(d => d.finalShare), 0.1);
-      rows = field.map(deck => _renderFlatDeckRow(deck, maxShare)).join('');
-    }
-
-    // The "Group variants by family" toggle is a power-user feature.
-    // On mobile, keep only the icon (🔗 / 📊) — the verbose label
-    // would otherwise hog the row and push other controls off-screen.
-    // The .mc-btn-text span is hidden via CSS at <600px.
-    const groupBtnFullLabel = _groupByMain ? t('mc.flatView') : t('mc.groupByPokemon');
-    const groupBtnIcon  = _groupByMain ? '📊' : '🔗';
-    const groupBtnTextOnly = groupBtnFullLabel.replace(/^[^\wÀ-ſ]+\s*/, '').trim();
-
-    // Global "Collapse / Expand all" — flips the default state for
-    // every detail row. Label reflects what clicking will DO, not
-    // the current state.
-    const allCollapsed = _detailGlobalMode === 'collapsed';
-    const allBtnLabel  = allCollapsed ? t('mc.expandAll') : t('mc.collapseAll');
-    const allBtnIcon   = allCollapsed ? '▾' : '▴';
-
-    return `
-<div class="metacall-panel">
-  <div class="metacall-panel-title">
-    <span class="mc-panel-title-text">${t('mc.panelField')}</span>
-    <span class="mc-badge">Top ${TOP_N}</span>
-    <span class="mc-badge" id="mc-players-badge">${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')}</span>
-    <span class="${_rundenAbzeichenKlassen()}" id="mc-rounds-badge"
-          title="${esc(_rundenAbzeichenTitel())}"
-          data-hinweis="${esc(_rundenAbzeichenTitel())}">${esc(_rundenAbzeichenText())}</span>
-    <button class="mc-collapse-all-btn" onclick="MetaCall._toggleAllDetails()" title="${esc(allBtnLabel)}" aria-label="${esc(allBtnLabel)}">
-      <span class="mc-btn-icon">${allBtnIcon}</span>
-      <span class="mc-btn-text">${esc(allBtnLabel)}</span>
-    </button>
-    <button class="mc-group-toggle-btn" onclick="MetaCall._toggleGroupField()" title="${esc(groupBtnFullLabel)}" aria-label="${esc(groupBtnFullLabel)}">
-      <span class="mc-btn-icon">${groupBtnIcon}</span>
-      <span class="mc-btn-text">${esc(groupBtnTextOnly)}</span>
-    </button>
-    <button class="mc-share-btn" onclick="MetaCall.exportFieldShareImage()" title="${esc(t('mc.shareField'))}" aria-label="${esc(t('mc.shareField'))}">
-      <span class="mc-btn-icon">📤</span>
-      <span class="mc-btn-text">${t('mc.share')}</span>
-    </button>
-  </div>
-  <div class="mc-field-info" role="note">
-    <span class="mc-field-info-icon" aria-hidden="true">ℹ️</span>
-    <span class="mc-field-info-text">${t('mc.personalShareExpl')}</span>
-  </div>
-  <div class="metacall-table-wrap">
-    <table class="metacall-table">
-      <colgroup>
-        <col class="col-deck">
-        <col class="col-online">
-        <col class="col-est">
-        <col class="col-final">
-        <col class="col-players">
-        <col class="col-enc">
-      </colgroup>
-      <thead>
-        <tr>
-          <th class="mc-th-deck">${t('mc.headerDeck')}</th>
-          ${/* Hiess bis zum 18.08.2026 "Online %", zeigt aber d.onlineShare —
-               und das ist seit Zeile 3916 (d.onlineShare = d.predictedShare)
-               die Modellausgabe, nicht der rohe Anteil. Gemessen am selben
-               Tag, Zeile Dragapult: Spalte 13,10 %, Detailzeile derselben
-               Zeile "Online-Share heute 7,1 %", Quelldatei
-               limitless_online_decks.csv 7,06 %. Faktor 1,86. Der Tooltip
-               nannte die Spalte dabei "die Basisdaten".
-               Der Wert ist richtig, der Name war falsch. */ ''}
-          <th class="mc-th-online" title="${esc(t('mc.headerOnlineTooltip'))}">${t('mc.headerOnline')}</th>
-          <th class="mc-th-est" title="${esc(t('mc.headerPersonalTooltip'))}">${t('mc.headerPersonal')}</th>
-          <th class="mc-th-final" title="${esc(t('mc.headerFinalTooltip'))}">${t('mc.headerFinal')}</th>
-          <th class="mc-th-players" title="${esc(t('mc.tipPlayers'))}">${t('mc.headerPlayers')}</th>
-          <th class="mc-th-enc" id="mc-th-enc" title="${esc(t('mc.headerAvgEncTooltip').replace('{n}', _settings.rounds))}">${t('mc.headerAvgEnc')} (${_settings.rounds} R.)</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-  </div>
-  ${_feldSummeHtml()}
-</div>`;
-  }
-
-
   /* ═══════════════════════════════════════════════════════════════════
-   * SCHRITT 2a — DIE DECK-AUSWAHL
+   * DIE META-CALL-TABELLE (FE-16, 28.09.2026)
    * ═══════════════════════════════════════════════════════════════════
    *
-   * BESTELLT (§3): „Die Deck-Auswahl soll deutlich visueller und
-   * intuitiver werden … Pokémon-Sprite, Deckname, aktueller beobachteter
-   * Meta Share, relevante Game-Anzahl. Das Ziel ist die gleiche
-   * Klarheit: Deck erkennen → Share verstehen → Datenbasis verstehen →
-   * Erwartung definieren."
+   * BESTELLT (Hausi, 28.09.2026): „lieber habe ich eine Tabelle mit
+   * mehreren Spalten … vorne das Deck, dann den Online-Share, dann die
+   * berechnete Prognose, wie oft man das Deck auf einem Turnier treffen
+   * wird, und dann kann man in die Tabelle direkt schon die
+   * Day-2-Chancen einberechnen und alle anderen Werte auch."
    *
-   * Die Kacheln zeigen NUR gemessene Zahlen: den beobachteten
-   * Online-Anteil und die Partien, auf denen er beruht. Die Prognose und
-   * die eigene Schaetzung stehen eine Tabelle weiter unten — hier geht
-   * es um die Frage davor, „wem begegne ich ueberhaupt", und die
-   * beantwortet man an der Messung, nicht am Modell.
-   */
+   * WAS VORHER DA STAND (gemessen 28.09.2026, Beleg
+   * claude/metacall-analyse-2026-09-28.md): ein Kachelraster „Welche
+   * Decks erwartest du?", darunter eine Feldtabelle mit Prognose/Final/
+   * Spieler/Begegnungen, dazu ein eigener Block „Meta-Prognose" über dem
+   * Reiter mit einem ZWEITEN Modell. Zum selben Deck standen bis zu neun
+   * Prozentzahlen auf der Seite; die Day-2-Chance je Deck stand erst ganz
+   * unten, in den Empfehlungen.
+   *
+   * JETZT: eine Zeile je Deck, jede Zahl einmal.
+   *   Im Feld · Deck · Online · Prognose · Deine Schätzung ·
+   *   Begegnungen · Deine Siegquote dagegen · Day-2 mit diesem Deck ·
+   *   Erwartete Bilanz
+   * Die Auswahl („einzeln im Feld") ist die erste Spalte statt eines
+   * eigenen Rasters; Decks ausserhalb des Feldes stehen unter der Zeile
+   * „Sonstige" und lassen sich dort zuschalten. Die Day-2-Spalte rechnet
+   * calcDay2 fuer JEDE Zeile gegen dasselbe Feld — dieselbe Rechnung wie
+   * die Empfehlungen und die Ergebniskachel. */
 
-  const FELD_KACHELN_KURZ = 36;   // ohne Ausklappen sichtbare Kacheln
+  let _mctSortierung = { spalte: 'prognose', ab: true };
 
-  function _feldKachelPartien(name) {
-    const k = normalize(name);
-    const b = _onlineBilanzByDeck && _onlineBilanzByDeck[k];
-    if (!b) return 0;
-    return (b.s || 0) + (b.n || 0) + (b.u || 0);
+  /* Die Namen der Quoten kommen aus js/win-rate-konvention.js — kein
+     Hausname (W2). Die Spalte zeigt die Win-Rate (Unentschieden zaehlen
+     mit), wie die Deck-Kacheln (UI-16); die Farbe folgt dem Verhaeltnis
+     Sieg zu Niederlage, damit 13 % Unentschieden kein Deck rot faerben. */
+  function _mctWrKopf(L) {
+    const n = _mctQuotenName('mitUnentschieden');
+    return L('Deine ' + n, 'Your ' + n.charAt(0).toLowerCase() + n.slice(1));
   }
 
-  function renderDeckAuswahlPanel() {
-    if (_inFrozenPastMode() || !_shareList) return '';
+  function _mctQuotenName(id) {
+    const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
+    return (W && typeof W.kurz === 'function') ? W.kurz(id) : '';
+  }
+
+  function _mctSortiere(spalte) {
+    if (_mctSortierung.spalte === spalte) _mctSortierung.ab = !_mctSortierung.ab;
+    else _mctSortierung = { spalte, ab: spalte !== 'deck' };
+    _feldTabelleNachziehen();
+  }
+
+  /** Online-Anteil fuer die Spalte „Online" — derselbe Stand, aus dem die
+   *  Prognose gerechnet ist, wenn die Prognosedatei greift; sonst der
+   *  gemessene Leiteranteil. Beides steht auf _shareList. */
+  function _mctOnline(name) {
+    const d = _shareList && _shareList.find(x => normalize(x.name) === normalize(name));
+    if (!d) return { wert: null, listen: null, von: null, bis: null };
+    if (d.prognoseZeile && Number.isFinite(Number(d.prognoseZeile.online_anteil))) {
+      const z = d.prognoseZeile;
+      return {
+        wert: Number(z.online_anteil),
+        listen: Number(z.online_listen) || null,
+        von: Number(z.prognose_von), bis: Number(z.prognose_bis),
+      };
+    }
+    return {
+      wert: Number.isFinite(d.ladderShare) ? d.ladderShare : null,
+      listen: null, von: null, bis: null,
+    };
+  }
+
+  function _mctZeileRechne(name, field, istMein) {
+    const r = istMein ? calcDay2(field) : calcDay2(field, name);
+    const runden = _settings.rounds || 1;
+    let wr = null, wrOhneU = null, wrPartien = 0, wrOhne = false, spiegel = false;
+    const mein = _settings.myDeck;
+    if (mein) {
+      if (normalize(mein) === normalize(name)) spiegel = true;
+      else {
+        const m = getMatchup(mein, name) || {};
+        wrOhne = !!m.ohneMessung && !m.handEingestellt;
+        wr = (wrOhne || !Number.isFinite(m.pWin)) ? null : m.pWin * 100;
+        wrOhneU = wrOhne ? null : _anzeigeQuote(m);
+        wrPartien = Number(m.partien) || 0;
+      }
+    }
+    return {
+      day2: r.day2Prob * 100,
+      w: r.expWin, u: r.expTie, n: r.expLoss,
+      quote: (r.expWin / runden) * 100,
+      wr, wrOhneU, wrPartien, wrOhne, spiegel,
+    };
+  }
+
+  function _mctZelleWr(z, L) {
+    if (!_settings.myDeck) return '<span class="mc-cell-dash">—</span>';
+    if (z.spiegel) return `<span class="mc-mct-wr-spiegel">${esc(L('Spiegel', 'mirror'))}</span>`;
+    if (z.wr == null) {
+      return `<span class="mc-cell-dash" title="${esc(L('Für diese Paarung liegen keine Matches vor.',
+        'No matches recorded for this pairing.'))}">—</span>`;
+    }
+    const q = z.wrOhneU != null ? z.wrOhneU : z.wr;
+    const klasse = q >= 55 ? 'is-gut' : (q <= 45 ? 'is-schlecht' : 'is-mittel');
+    const titel = _mctQuotenName('mitUnentschieden') + ' ' + _mcPct(z.wr, 1)
+      + (z.wrOhneU != null ? ' · ' + _mctQuotenName('ohneUnentschieden') + ' ' + _mcPct(z.wrOhneU, 1) : '')
+      + ' · ' + zahlLokal(z.wrPartien) + ' ' + L('gezählte Matches', 'counted matches');
+    return `<span class="mc-mct-wr ${klasse}" title="${esc(titel)}">${_mcPct(z.wr, 0)}</span>`;
+  }
+
+  function _mctZelleDay2(z) {
+    const klasse = z.day2 >= 20 ? 'is-gut' : '';
+    return `<span class="mc-mct-day2 ${klasse}">${_mcPct(z.day2, 1)}</span>`;
+  }
+
+  function _mctZelleBilanz(z, L) {
+    const titel = L('Erwartete Siege – Unentschieden – Niederlagen über ' + _settings.rounds + ' Runden',
+      'Expected wins – ties – losses over ' + _settings.rounds + ' rounds')
+      + ' · ' + _mctQuotenName('mitUnentschieden') + ' ' + _mcPct(z.quote, 1);
+    return `<span class="mc-mct-bilanz" title="${esc(titel)}">${_mcNum(z.w, 1)}–${
+      _mcNum(z.u, 1)}–${_mcNum(z.n, 1)}</span>`;
+  }
+
+  function _mctPrognoseZelle(prog, online) {
+    const band = (Number.isFinite(online.von) && Number.isFinite(online.bis))
+      ? `<span class="mc-mct-band">${_mcNum(online.von, 1)}–${_mcNum(online.bis, 1)}</span>` : '';
+    return `<span class="mc-mct-prognose">${_mcPct(prog, 1)}</span>${band}`;
+  }
+
+  function _mctSternKnopf(name, L) {
+    const istMein = !!_settings.myDeck && normalize(_settings.myDeck) === normalize(name);
+    const titel = istMein ? L('Dein Deck', 'Your deck') : L('Als mein Deck wählen', 'Pick as my deck');
+    return `<button type="button" class="mc-mct-stern${istMein ? ' is-mein' : ''}"
+              title="${esc(titel)}" aria-label="${esc(titel + ': ' + name)}"
+              aria-pressed="${istMein ? 'true' : 'false'}"
+              onclick="MetaCall._onMyDeck('${escJs(istMein ? '' : name)}')">${istMein ? '★' : '☆'}</button>`;
+  }
+
+  function _mctZeileFeld(deck, field, L) {
+    const isJunk   = deck.name === '_junk';
+    const isCustom = !!deck.isCustom;
+    const istMein  = !isJunk && !!_settings.myDeck && normalize(_settings.myDeck) === normalize(deck.name);
+    const lambda   = _settings.rounds * deck.finalShare / 100;
+    const encTier  = _avgEncTier(lambda);
+    const hasP     = deck.personalShare !== undefined;
+    const lab = (s) => `data-label="${esc(s)}"`;
+
+    if (isJunk) {
+      return `<tr class="mc-mct-zeile mc-row-junk">
+        <td class="mc-mct-an"></td>
+        <td class="mc-mct-deck"><span class="mc-deck-name">${esc(t('mc.junkDecks'))}</span></td>
+        <td class="mc-mct-online" ${lab(L('Online', 'Online'))}><span class="mc-cell-dash">—</span></td>
+        <td class="mc-mct-prog" ${lab(L('Prognose', 'Forecast'))}><span class="mc-mct-prognose">${_mcPct(deck.finalShare, 1)}</span></td>
+        <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}><span class="mc-cell-dash">—</span></td>
+        <td class="mc-mct-enc" ${lab(L('Begegnungen', 'Encounters'))}><span class="mc-mct-enc-zahl mc-enc-${encTier}">∅ ${_mcNum(lambda, 2)}</span><span class="mc-mct-spieler" title="${esc(t('mc.tipPlayers'))}">≈ ${zahlLokal(deck.count)} ${esc(L('Spieler', 'players'))}</span></td>
+        <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}><span class="mc-cell-dash" title="${esc(L('Sammelquote über alle übrigen Decks', 'Pooled rate over all other decks'))}">—</span></td>
+        <td class="mc-mct-d2" ${lab(L('Day-2 mit diesem Deck', 'Day 2 with this deck'))}><span class="mc-cell-dash">—</span></td>
+        <td class="mc-mct-bil" ${lab(L('Bilanz', 'Record'))}><span class="mc-cell-dash">—</span></td>
+      </tr>`;
+    }
+
+    const z = _mctZeileRechne(deck.name, field, istMein);
+    const online = isCustom ? { wert: null } : _mctOnline(deck.name);
+    const k = normalize(deck.name);
+    const intelHtml = isCustom ? '' : _renderDeckBadge(deck.name);
+    const expanded = _isDetailExpanded(k);
+    const toggle = intelHtml
+      ? `<button type="button" class="mc-row-toggle${expanded ? ' is-expanded' : ''}"
+                aria-expanded="${expanded ? 'true' : 'false'}"
+                aria-label="${esc(t('mc.toggleDetailsAria'))}"
+                title="${esc(t('mc.toggleDetailsAria'))}"
+                data-deck-key="${esc(k)}"
+                onclick="MetaCall._toggleDetail(this)">▾</button>` : '';
+    const personalCell = isCustom
+      ? '<span class="mc-cell-dash">—</span>'
+      : `<input type="number" min="0" max="100" step="0.1" placeholder="${esc(t('mc.estimatePh'))}"
+                value="${hasP ? deck.personalShare : ''}"
+                class="mc-personal-input${hasP ? ' has-value' : ''}" data-deck="${esc(deck.name)}"
+                aria-label="${esc(L('Deine Schätzung für ', 'Your estimate for ') + deck.name)}"
+                oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)">`;
+    /* Mit eigener Schaetzung rechnet alles darunter mit DEINER Zahl —
+       die Prognose bleibt stehen, damit man sieht, wovon man abweicht. */
+    const progZahl = Number.isFinite(deck.onlineShare) ? deck.onlineShare : deck.finalShare;
+    const anHaken = isCustom
+      ? '<span class="mc-mct-haken-fest" title="' + esc(L('Eigenes Deck', 'Custom deck')) + '">+</span>'
+      : `<input type="checkbox" class="mc-mct-haken" checked
+               aria-label="${esc(L('Einzeln im Feld: ', 'Listed in the field: ') + deck.name)}"
+               onchange="MetaCall._toggleFeldDeck('${escJs(deck.name)}')">`;
+    const main = `<tr class="mc-mct-zeile${istMein ? ' is-mein' : ''}${isCustom ? ' mc-row-custom' : ''}">
+      <td class="mc-mct-an">${anHaken}</td>
+      <td class="mc-mct-deck"><div class="mc-mct-deckzeile">${_mctSternKnopf(deck.name, L)}<span class="mc-deck-name">${_mcIconHtml(deck.name)}<span class="mc-mct-name">${esc(deck.name)}</span>${
+        istMein ? `<span class="mc-mct-mein-marke">${esc(L('dein Deck', 'your deck'))}</span>` : ''}</span>${toggle}</div></td>
+      <td class="mc-mct-online" ${lab(L('Online', 'Online'))}>${online.wert == null ? '<span class="mc-cell-dash">—</span>'
+        : `<span class="mc-mct-onlinezahl">${_mcPct(online.wert, 1)}</span>${online.listen ? `<span class="mc-mct-listen">${zahlLokal(online.listen)} ${esc(L('Listen', 'lists'))}</span>` : ''}`}</td>
+      <td class="mc-mct-prog" ${lab(L('Prognose', 'Forecast'))}>${isCustom ? '<span class="mc-cell-dash">—</span>' : _mctPrognoseZelle(progZahl, online)}</td>
+      <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}>${personalCell}</td>
+      <td class="mc-mct-enc" ${lab(L('Begegnungen', 'Encounters'))}><span class="mc-mct-enc-zahl mc-enc-${encTier}">∅ ${_mcNum(lambda, 2)}</span><span class="mc-mct-spieler" title="${esc(t('mc.tipPlayers'))}">≈ ${zahlLokal(deck.count)} ${esc(L('Spieler', 'players'))}</span></td>
+      <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}>${_mctZelleWr(z, L)}</td>
+      <td class="mc-mct-d2" ${lab(L('Day-2 mit diesem Deck', 'Day 2 with this deck'))}>${_mctZelleDay2(z)}</td>
+      <td class="mc-mct-bil" ${lab(L('Bilanz', 'Record'))}>${_mctZelleBilanz(z, L)}</td>
+    </tr>`;
+    const detail = intelHtml
+      ? `<tr class="mc-row-detail mc-mct-detail${expanded ? '' : ' is-collapsed'}" data-deck-key="${esc(k)}">
+          <td colspan="9">${intelHtml}</td></tr>` : '';
+    return { html: main + detail, z };
+  }
+
+  function _mctZeileAussen(d, field, L) {
+    const z = _mctZeileRechne(d.name, field, false);
+    const online = _mctOnline(d.name);
+    const lab = (s) => `data-label="${esc(s)}"`;
+    return `<tr class="mc-mct-zeile is-aussen">
+      <td class="mc-mct-an"><input type="checkbox" class="mc-mct-haken"
+            aria-label="${esc(L('Einzeln ins Feld nehmen: ', 'Add to the field: ') + d.name)}"
+            onchange="MetaCall._toggleFeldDeck('${escJs(d.name)}')"></td>
+      <td class="mc-mct-deck"><div class="mc-mct-deckzeile">${_mctSternKnopf(d.name, L)}<span class="mc-deck-name">${_mcIconHtml(d.name)}<span class="mc-mct-name">${esc(d.name)}</span></span></div></td>
+      <td class="mc-mct-online" ${lab(L('Online', 'Online'))}>${online.wert == null ? '<span class="mc-cell-dash">—</span>'
+        : `<span class="mc-mct-onlinezahl">${_mcPct(online.wert, 1)}</span>`}</td>
+      <td class="mc-mct-prog" ${lab(L('Prognose', 'Forecast'))}>${_mctPrognoseZelle(d.onlineShare, online)}</td>
+      <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}><span class="mc-cell-dash" title="${esc(L('Erst ins Feld nehmen (Haken links)', 'Add to the field first (tick on the left)'))}">—</span></td>
+      <td class="mc-mct-enc" ${lab(L('Begegnungen', 'Encounters'))}><span class="mc-mct-in-sonstige">${esc(L('in „Sonstige"', 'in "Others"'))}</span></td>
+      <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}>${_mctZelleWr(z, L)}</td>
+      <td class="mc-mct-d2" ${lab(L('Day-2 mit diesem Deck', 'Day 2 with this deck'))}>${_mctZelleDay2(z)}</td>
+      <td class="mc-mct-bil" ${lab(L('Bilanz', 'Record'))}>${_mctZelleBilanz(z, L)}</td>
+    </tr>`;
+  }
+
+  function _mctSortWert(eintrag, spalte) {
+    const d = eintrag.deck, z = eintrag.z;
+    switch (spalte) {
+      case 'deck':     return d.name.toLowerCase();
+      case 'online':   { const o = _mctOnline(d.name).wert; return o == null ? -1 : o; }
+      case 'enc':      return d.finalShare;
+      case 'prognose': return Number.isFinite(d.onlineShare) ? d.onlineShare : d.finalShare;
+      case 'wr':       return z && z.wr != null ? z.wr : -1;
+      case 'day2':     return z ? z.day2 : -1;
+      case 'bilanz':   return z ? z.w : -1;
+      default:         return d.finalShare;
+    }
+  }
+
+  function _mctTbody(field, L) {
+    const genannt = field.filter(d => d.name !== '_junk');
+    const junk = field.find(d => d.name === '_junk');
+    const eintraege = genannt.map(d => {
+      const r = _mctZeileFeld(d, field, L);
+      return { deck: d, z: r.z, html: r.html };
+    });
+    const { spalte, ab } = _mctSortierung;
+    eintraege.sort((a, b) => {
+      const va = _mctSortWert(a, spalte), vb = _mctSortWert(b, spalte);
+      if (typeof va === 'string') return ab ? vb.localeCompare(va) : va.localeCompare(vb);
+      return ab ? (vb - va) : (va - vb);
+    });
+    let html = eintraege.map(e => e.html).join('');
+    if (junk) html += _mctZeileFeld(junk, field, L);
+
+    /* Decks ausserhalb des Feldes: zugeklappt, per Suche oder Knopf offen.
+       Sie rechnen gegen DASSELBE Feld — die Day-2-Spalte sagt also auch
+       für ein Deck, das niemand erwartet, wie weit man damit kaeme. */
+    const imFeld = new Set(genannt.map(d => normalize(d.name)));
+    const sortiert = _feldSortiert();
+    const aussen = sortiert.filter(d => !imFeld.has(normalize(d.name)));
+    const suche = _feldSuche.trim().toLowerCase();
+    const sichtbar = suche ? aussen.filter(d => d.name.toLowerCase().includes(suche))
+                           : (_feldAlle ? aussen : []);
+    if (aussen.length) {
+      const knopfText = _feldAlle
+        ? L('Decks außerhalb des Feldes ausblenden', 'Hide decks outside the field')
+        : L(aussen.length + ' weitere Decks zeigen (stecken in „Sonstige")',
+            'Show ' + aussen.length + ' more decks (inside "Others")');
+      html += `<tr class="mc-mct-trenner"><td colspan="9">
+        <button type="button" class="mc-mct-mehr" onclick="MetaCall._feldAlleUmschalten()">${esc(knopfText)}</button>${
+          suche ? `<span class="mc-mct-suchtreffer">${esc(L(sichtbar.length + ' Treffer für „' + _feldSuche.trim() + '"',
+            sichtbar.length + ' matches for "' + _feldSuche.trim() + '"'))}</span>` : ''}
+      </td></tr>`;
+      html += sichtbar.map(d => _mctZeileAussen(d, field, L)).join('');
+    }
+    return html;
+  }
+
+  function _mctKopf(L) {
+    const s = _mctSortierung;
+    const th = (id, klasse, text, titel) => {
+      const aktiv = s.spalte === id;
+      const pfeil = aktiv ? (s.ab ? ' ▼' : ' ▲') : '';
+      return `<th class="${klasse}${aktiv ? ' is-sortiert' : ''}" title="${esc(titel)}"
+                  aria-sort="${aktiv ? (s.ab ? 'descending' : 'ascending') : 'none'}">
+        <button type="button" class="mc-mct-sortknopf" onclick="MetaCall._mctSortiere('${id}')">${esc(text)}${pfeil}</button></th>`;
+    };
+    const tage = _prognoseDatei && _prognoseAktiv && _prognoseDatei.meta
+      ? Number(_prognoseDatei.meta.vorlauf_tage) || null : null;
+    return `<tr>
+      <th class="mc-mct-an" title="${esc(L('Haken: dieses Deck steht einzeln im Feld und bekommt eine eigene Paarung. Ohne Haken zählt es zu „Sonstige".',
+        'Tick: this deck is listed individually and gets its own pairing. Unticked it counts as "Others".'))}">${esc(L('Feld', 'Field'))}</th>
+      ${th('deck', 'mc-mct-deck', L('Deck', 'Deck'), L('☆ wählt dein Deck', '☆ picks your deck'))}
+      ${th('online', 'mc-mct-online', tage ? L('Online (' + tage + ' Tage)', 'Online (' + tage + ' days)') : L('Online', 'Online'),
+        L('Anteil an den Online-Listen — gemessen, keine Prognose.', 'Share of online lists — measured, not a forecast.'))}
+      ${th('prognose', 'mc-mct-prog', L('Prognose vor Ort', 'Forecast on site'),
+        L('Erwarteter Anteil im Turnierlokal mit Bandbreite. Die großen Decks legen vor Ort erfahrungsgemäß zu.',
+          'Expected share at the venue with range. Big decks usually gain on site.'))}
+      <th class="mc-mct-est" title="${esc(t('mc.headerPersonalTooltip'))}">${esc(L('Deine Schätzung', 'Your estimate'))}</th>
+      ${th('enc', 'mc-mct-enc', L('Begegnungen (' + _settings.rounds + ' R.)', 'Encounters (' + _settings.rounds + ' r.)'),
+        t('mc.headerAvgEncTooltip').replace('{n}', _settings.rounds))}
+      ${th('wr', 'mc-mct-wrz', _mctWrKopf(L),
+        L('Dein Deck gegen dieses Deck (Unentschieden zählen mit). Erscheint, sobald du mit ☆ ein Deck wählst.',
+          'Your deck against this deck (ties count). Appears once you pick a deck with ☆.'))}
+      ${th('day2', 'mc-mct-d2', L('Day-2 mit diesem Deck', 'Day 2 with this deck'),
+        L('Chance auf ' + _settings.day2Points + ' Punkte in ' + _settings.rounds + ' Runden, wenn DU dieses Deck gegen genau dieses Feld spielst.',
+          'Chance of ' + _settings.day2Points + ' points in ' + _settings.rounds + ' rounds if YOU play this deck against exactly this field.'))}
+      ${th('bilanz', 'mc-mct-bil', L('Bilanz S–U–N', 'Record W–T–L'),
+        L('Erwartete Siege – Unentschieden – Niederlagen mit diesem Deck.', 'Expected wins – ties – losses with this deck.'))}
+    </tr>`;
+  }
+
+  function _mctQuelleZeile(L) {
+    if (!(_prognoseDatei && _prognoseAktiv)) return '';
+    const m = _prognoseDatei.meta || {}, mo = _prognoseDatei.modell || {};
+    const datum = (iso) => String(iso || '').split('-').reverse().join('.');
+    const anker = Number(mo.anker) || 0;
+    const mae = Number(mo.mae_mittel);
+    return `<p class="mc-mct-quelle">${esc(L(
+      'Online: ' + datum(m.online_von) + '–' + datum(m.online_bis) + ', ' + zahlLokal(Number(m.online_listen) || 0)
+        + ' Listen (' + (m.fenster || '') + '). Prognose: an ' + anker + ' Regionals geprüft, liegt im Mittel '
+        + (Number.isFinite(mae) ? _mcNum(mae, 1) : '–') + ' Prozentpunkte daneben. Paarungen und Day-2 aus gezählten Matches.',
+      'Online: ' + (m.online_von || '') + ' to ' + (m.online_bis || '') + ', ' + zahlLokal(Number(m.online_listen) || 0)
+        + ' lists (' + (m.fenster || '') + '). Forecast: checked against ' + anker + ' regionals, off by '
+        + (Number.isFinite(mae) ? _mcNum(mae, 1) : '–') + ' percentage points on average. Pairings and Day 2 from counted matches.'))}</p>`;
+  }
+
+  function renderFieldPanel(field) {
     const de = _mcIstDeutsch();
     const L = (d, e) => (de ? d : e);
-
     const sortiert = _feldSortiert();
-    const teilung  = _feldTeilung(sortiert);
-    const gewaehlt = new Set(teilung.genannt.map(d => d.name));
-    const abgedeckt = teilung.genannt.reduce((s, d) => s + d.onlineShare, 0);
-    const rest      = Math.max(0, 100 - abgedeckt);
-
-    const suche = _feldSuche.trim().toLowerCase();
-    const gefiltert = suche
-      ? sortiert.filter(d => d.name.toLowerCase().includes(suche))
-      : sortiert;
-    const sichtbar = (_feldAlle || suche) ? gefiltert : gefiltert.slice(0, FELD_KACHELN_KURZ);
-
-    const pille = (id, text, aktiv) =>
-      `<button type="button" class="mc-feld-pille${aktiv ? ' is-aktiv' : ''}"
-               onclick="MetaCall._setFeldVorwahl('${id}')">${esc(text)}</button>`;
-
-    /* „Top 8" ist genau dann aktiv, wenn die Auswahl die groessten acht
-       IST — nicht, wenn sie acht Decks umfasst. Ein Nutzer, der acht
-       beliebige Decks waehlt, soll keine Pille leuchten sehen, die
-       etwas anderes behauptet. */
     const istVorwahl = (n) => {
       if (!_feldAuswahl) return n === TOP_N;
       if (_feldAuswahl.size !== n) return false;
@@ -11262,98 +11395,89 @@ window.MetaCall = (function () {
     };
     const istAlle  = !!_feldAuswahl && _feldAuswahl.size === sortiert.length;
     const istKeine = !!_feldAuswahl && _feldAuswahl.size === 0;
-
-    const pillen = FELD_VORWAHLEN.map(n =>
-      pille(String(n), L('Top ' + n, 'Top ' + n), istVorwahl(n))).join('')
+    const pille = (id, text, aktiv) =>
+      `<button type="button" class="mc-feld-pille${aktiv ? ' is-aktiv' : ''}"
+               onclick="MetaCall._setFeldVorwahl('${id}')">${esc(text)}</button>`;
+    const pillen = FELD_VORWAHLEN.map(n => pille(String(n), 'Top ' + n, istVorwahl(n))).join('')
       + pille('alle', L('Alle ' + sortiert.length, 'All ' + sortiert.length), istAlle)
       + pille('keine', L('Keine', 'None'), istKeine);
 
-    /* DIE ZAHL AUF DER KACHEL IST DIE GEMESSENE, NICHT DIE PROGNOSE.
-       `d.onlineShare` traegt nach dem Praediktorlauf die Modellausgabe
-       (siehe die Notiz bei `d.onlineShare = d.predictedShare`) — genau
-       die Verwechslung, die dieser Spalte am 18.08.2026 ihren Namen
-       gekostet hat. §3 der Bestellung verlangt hier ausdruecklich den
-       „aktuellen beobachteten Meta Share"; der steht auf `ladderShare`.
-       Die REIHENFOLGE und die Vorwahl „Top 8" bleiben auf der Prognose,
-       damit die Auswahl dieselbe Rangfolge hat wie die Tabelle
-       darunter. */
-    const gemessenVon = {};
-    (_shareList || []).forEach(d => {
-      if (Number.isFinite(d.ladderShare)) gemessenVon[normalize(d.name)] = d.ladderShare;
-    });
-
-    const kacheln = sichtbar.map(d => {
-      const an = gewaehlt.has(d.name);
-      const partien = _feldKachelPartien(d.name);
-      const gemessen = gemessenVon[normalize(d.name)];
-      return `
-      <button type="button" class="mc-feld-kachel${an ? ' is-an' : ''}"
-              role="checkbox" aria-checked="${an ? 'true' : 'false'}"
-              onclick="MetaCall._toggleFeldDeck('${escJs(d.name)}')">
-        <span class="mc-feld-haken" aria-hidden="true">${an ? '✓' : ''}</span>
-        <span class="mc-feld-bild">${_mcIconHtml(d.name)}</span>
-        <span class="mc-feld-text">
-          <span class="mc-feld-name">${esc(d.name)}</span>
-          <span class="mc-feld-zahlen">${esc(L('gemessen ', 'measured '))}${
-            Number.isFinite(gemessen) ? _mcPct(gemessen, 1) : '—'}${
-            partien > 0 ? ' · ' + zahlLokal(partien) + ' ' + L('Matches', 'matches') : ''}</span>
-        </span>
-      </button>`;
-    }).join('');
-
-    const mehr = (!_feldAlle && !suche && gefiltert.length > FELD_KACHELN_KURZ)
-      ? `<button type="button" class="mc-feld-mehr" onclick="MetaCall._feldAlleZeigen()">${
-          esc(L('alle ' + gefiltert.length + ' Decks zeigen',
-                'show all ' + gefiltert.length + ' decks'))}</button>`
-      : '';
-
-    const leer = sichtbar.length ? '' :
-      `<p class="mc-feld-leer">${esc(L('Kein Deck mit diesem Namen.', 'No deck by that name.'))}</p>`;
-
-    /* Was das Abwaehlen kostet, in einer Zeile. Ohne sie sieht der
-       Nutzer nur, dass die Tabelle kuerzer wird — nicht, dass die
-       Day-2-Zahl dafuer auf einer Sammelquote statt auf gemessenen
-       Paarungen steht. */
-    const restWarnung = rest >= 30
-      ? ` <strong class="mc-feld-warnung">${esc(L(
-          'Das ist viel: für „Sonstige" gibt es keine gemessenen Paarungen, sondern nur eine '
-          + 'Sammelquote. Die Day-2-Zahl darunter steht damit zu einem großen Teil auf einer '
-          + 'Schätzung.',
-          'That is a lot: "Others" has no measured pairings, only a pooled rate. The Day-2 number '
-          + 'below then rests largely on an estimate.'))}</strong>`
-      : '';
-
-    const bilanz = `${esc(L(
-      teilung.genannt.length + ' von ' + sortiert.length + ' Decks stehen einzeln im Feld · '
-        + 'zusammen ' + _mcNum(abgedeckt, 1) + ' % des prognostizierten Metas · „Sonstige" '
-        + _mcNum(rest, 1) + ' %',
-      teilung.genannt.length + ' of ' + sortiert.length + ' decks are listed individually · '
-        + _mcNum(abgedeckt, 1) + '% of the forecast meta between them · "Others" '
-        + _mcNum(rest, 1) + '%'))}${restWarnung}`;
-
     return `
-<div class="metacall-panel mc-feld-auswahl-panel">
-  <div class="metacall-panel-title">${esc(L('Welche Decks erwartest du?', 'Which decks do you expect?'))}</div>
-  <p class="mc-feld-lead">${esc(L(
-    'Jedes gewählte Deck bekommt eine eigene Zeile in der Tabelle darunter und eine eigene '
-    + 'Paarung in der Rechnung. Was du abwählst, verschwindet nicht aus dem Turnier — es wandert '
-    + 'in „Sonstige", und dort steht nur noch eine Sammelquote statt gemessener Paarungen.',
-    'Every deck you pick gets its own row in the table below and its own pairing in the '
-    + 'calculation. What you unpick does not vanish from the tournament — it moves into "Others", '
-    + 'where only a pooled rate remains instead of measured pairings.'))}</p>
-  <div class="mc-feld-leiste">
+<div class="metacall-panel mc-mct-panel">
+  <div class="metacall-panel-title">
+    <span class="mc-panel-title-text">${esc(L('Alle Decks im erwarteten Feld', 'Every deck in the expected field'))}</span>
+    <span class="mc-badge" id="mc-players-badge">${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')}</span>
+    <span class="${_rundenAbzeichenKlassen()}" id="mc-rounds-badge"
+          title="${esc(_rundenAbzeichenTitel())}"
+          data-hinweis="${esc(_rundenAbzeichenTitel())}">${esc(_rundenAbzeichenText())}</span>
+    <button class="mc-share-btn" onclick="MetaCall.exportFieldShareImage()" title="${esc(t('mc.shareField'))}" aria-label="${esc(t('mc.shareField'))}">
+      <span class="mc-btn-icon">📤</span>
+      <span class="mc-btn-text">${t('mc.share')}</span>
+    </button>
+  </div>
+  <p class="mc-mct-lead">${esc(L(
+    'Eine Zeile je Deck: wie oft es online gespielt wird, wie oft du es vor Ort erwartest, wie oft du ihm '
+    + 'begegnest — und wie weit du kämst, wenn du es selbst spielst. Mit ☆ wählst du dein Deck, dann siehst du, '
+    + 'wie es gegen jede Zeile steht. In „Deine Schätzung" überschreibst du die Prognose; alles rechnet sofort neu.',
+    'One row per deck: how often it is played online, how often you expect it on site, how often you will face it — '
+    + 'and how far you would get playing it yourself. ☆ picks your deck, then you see how it does against every row. '
+    + '"Your estimate" overrides the forecast; everything recalculates at once.'))}</p>
+  <div class="mc-feld-leiste mc-mct-leiste">
+    <span class="mc-mct-leiste-titel">${esc(L('Einzeln im Feld:', 'Listed individually:'))}</span>
     ${pillen}
     <input type="search" class="mc-feld-suche" value="${esc(_feldSuche)}"
            placeholder="${esc(L('Deck suchen…', 'Search decks…'))}"
            aria-label="${esc(L('Deck suchen', 'Search decks'))}"
            oninput="MetaCall._onFeldSuche(this.value)">
   </div>
-  <p class="mc-feld-bilanz">${bilanz}</p>
-  <div class="mc-feld-raster">${kacheln}</div>
-  ${leer}
-  ${mehr}
+  <div class="mc-mct-wrap">
+    <table class="mc-mct-table">
+      <thead id="mc-mct-kopf">${_mctKopf(L)}</thead>
+      <tbody>${_mctTbody(field, L)}</tbody>
+    </table>
+  </div>
+  ${_feldSummeHtml()}
+  ${_mctQuelleZeile(L)}
 </div>`;
   }
+
+  /** Tauscht Kopf, Zeilen und Summenzeile der Tabelle, ohne dem Nutzer das
+   *  Eingabefeld unter dem Cursor wegzunehmen (derselbe Weg wie in
+   *  refreshResults). Fuer Sortierung, Suche und das Nachziehen, wenn die
+   *  Matchup-Karte spaeter kommt. */
+  function _feldTabelleNachziehen() {
+    const container = document.getElementById('metaCallHost');
+    if (!container || !_shareList) return;
+    const panel = container.querySelector('.mc-mct-panel');
+    if (!panel) return;
+    const aktiv = document.activeElement;
+    const merke = (aktiv && aktiv.classList && aktiv.classList.contains('mc-personal-input')
+      && panel.contains(aktiv)) ? aktiv.getAttribute('data-deck') : null;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = renderFieldPanel(buildField());
+    const neu = tmp.querySelector('.mc-mct-panel');
+    const altBody = panel.querySelector('tbody'), neuBody = neu && neu.querySelector('tbody');
+    const altKopf = panel.querySelector('thead'), neuKopf = neu && neu.querySelector('thead');
+    if (altBody && neuBody) altBody.innerHTML = neuBody.innerHTML;
+    if (altKopf && neuKopf) altKopf.innerHTML = neuKopf.innerHTML;
+    const altL = panel.querySelector('.mc-mct-leiste'), neuL = neu && neu.querySelector('.mc-mct-leiste');
+    if (altL && neuL) {
+      altL.querySelectorAll('.mc-feld-pille').forEach((p, i) => {
+        const q = neuL.querySelectorAll('.mc-feld-pille')[i];
+        if (q) p.className = q.className;
+      });
+    }
+    if (merke) {
+      const wieder = panel.querySelector(`.mc-personal-input[data-deck="${(window.CSS && CSS.escape) ? CSS.escape(merke) : merke}"]`);
+      if (wieder) { wieder.focus(); const v = wieder.value; wieder.value = ''; wieder.value = v; }
+    }
+  }
+
+  function _feldAlleUmschalten() {
+    _feldAlle = !_feldAlle;
+    _feldTabelleNachziehen();
+  }
+
 
   /** Die Summenzeile unter der Feldtabelle — §6 der Bestellung. */
   function _feldSummeHtml() {
@@ -11382,12 +11506,12 @@ window.MetaCall = (function () {
         'Deine Einträge ergeben zusammen ' + _mcNum(b.eingetragen, 1) + ' %, das Feld damit '
         + _mcNum(b.normiertVon, 1) + ' %. Mehr als 100 % kann ein Turnierfeld nicht haben — '
         + 'alle Anteile sind deshalb proportional auf 100 % heruntergerechnet. Dein Verhältnis '
-        + 'zwischen den Decks bleibt dabei erhalten, die Zahlen in „Final %" sind aber kleiner '
-        + 'als das, was du eingetragen hast.',
+        + 'zwischen den Decks bleibt dabei erhalten, die Zahlen, mit denen gerechnet wird, sind aber '
+        + 'kleiner als das, was du eingetragen hast.',
         'Your entries add up to ' + _mcNum(b.eingetragen, 1) + '%, the field to '
         + _mcNum(b.normiertVon, 1) + '%. A tournament field cannot exceed 100 % — every share '
         + 'has therefore been scaled down proportionally to 100 %. The ratio between your decks '
-        + 'is kept, but the numbers in "Final %" are smaller than what you entered.'))}</span>`;
+        + 'is kept, but the numbers used in the calculation are smaller than what you entered.'))}</span>`;
     } else if (b.gekuerztUm > 0.05) {
       warnung = `<span class="mc-feld-summe-warnung">${esc(L(
         'Deine Einträge beanspruchen ' + _mcNum(b.gekuerztUm, 1) + ' Punkte mehr, als „Sonstige" '
@@ -11437,36 +11561,18 @@ window.MetaCall = (function () {
     _feldSucheNeu();
   }
 
-  /* Nur das Auswahlpanel neu zeichnen — die Eingabestelle des Nutzers
-     ist das Suchfeld, und renderAll() wuerde ihm den Fokus nehmen
-     (derselbe Befund wie am 07.09.2026 bei „Meine Schaetzung"). */
+  /* FE-16: die Suche filtert die Zeilen der Meta-Call-Tabelle; das
+     Suchfeld steht in der Leiste darueber und behaelt den Fokus. */
   function _feldSucheNeu() {
-    const container = document.getElementById('metaCallHost');
-    const alt = container && container.querySelector('.mc-feld-auswahl-panel');
-    if (!alt) return;
-    const aktiv = document.activeElement;
-    const warSuche = aktiv && aktiv.classList && aktiv.classList.contains('mc-feld-suche');
-    const stand = warSuche ? aktiv.selectionStart : null;
-    const tmp = document.createElement('div');
-    tmp.innerHTML = renderDeckAuswahlPanel();
-    const neu = tmp.querySelector('.mc-feld-auswahl-panel');
-    if (!neu) return;
-    alt.innerHTML = neu.innerHTML;
-    if (warSuche) {
-      const wieder = alt.querySelector('.mc-feld-suche');
-      if (wieder) {
-        wieder.focus();
-        try { if (stand != null) wieder.setSelectionRange(stand, stand); } catch (_e) {}
-      }
-    }
+    _feldTabelleNachziehen();
   }
 
   /* Eine Umwahl aendert das ganze Feld: Tabelle, Ergebnis, Empfehlungen
      und den EV-Block. Der Zwischenspeicher der Sammelquote haengt am
      Auswahlschluessel und loest sich selbst auf. */
   function _feldNeu() {
-    _feldSucheNeu();
     refreshResults();
+    _feldTabelleNachziehen();
   }
 
   function renderCustomDecksPanel() {
@@ -11861,8 +11967,10 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         </div>
       </div>
 
-      <div class="mc-section-sep">${esc(t('mc.encounters').replace('{r}', String(_settings.rounds)))}</div>
-      <div class="mc-encounter-list">${encRows}</div>
+      <details class="mc-klappe">
+        <summary>${esc(t('mc.encounters').replace('{r}', String(_settings.rounds)))}</summary>
+        <div class="mc-encounter-list">${encRows}</div>
+      </details>
     </div>
   </div>
 </div>`;
@@ -11919,10 +12027,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       { t: 'Das Turnier',
         s: 'Wofür rechnest du? Turnierart, Rundenzahl und Datenbasis setzen den Rahmen für '
          + 'alles darunter.' },
-      { t: 'Das Meta, das du erwartest',
-        s: 'Links steht, was das Modell für das nächste Turnier erwartet. In „Meine Schätzung" '
-         + 'trägst du deine eigene Erwartung ein — sie ersetzt die Prognose für dieses Deck. '
-         + 'Alles Weitere rechnet mit der Spalte „Final %".' },
+      { t: 'Das Meta und deine Chancen',
+        s: 'Wer spielt was, wie oft triffst du es, und wie weit kommst du mit welchem Deck — '
+         + 'alles in einer Tabelle. Sortieren per Klick auf die Spaltenköpfe.' },
       { t: 'Dein Deck',
         s: 'Wähle dein Deck. Unter „' + _mcKnopfQuoten() + '" kannst du jede Paarung selbst '
          + 'setzen; daneben steht immer, was die gemessenen Daten sagen.' },
@@ -11934,10 +12041,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       { t: 'The tournament',
         s: 'What are you calculating for? Tournament type, round count and data window set the '
          + 'frame for everything below.' },
-      { t: 'The meta you expect',
-        s: 'On the left is what the model expects for the next tournament. In "My estimate" you '
-         + 'enter your own expectation — it replaces the forecast for that deck. Everything '
-         + 'below works off the "Final %" column.' },
+      { t: 'The meta and your chances',
+        s: 'Who plays what, how often you face it, and how far you get with which deck — all in '
+         + 'one table. Click a column header to sort.' },
       { t: 'Your deck',
         s: 'Pick your deck. Under "' + _mcKnopfQuoten() + '" you can set any pairing yourself; '
          + 'the measured number is always shown next to it.' },
@@ -12031,10 +12137,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
        Die Diagnose-Marken (Quelle, aktive Rotation) sind dabei
        ausgeblendet — sonst waere das derselbe Fehler wie oben. */ ''}
   ${_inFrozenPastMode() ? '' : _mcSchritt(2, _SCHRITTE[1].t, _SCHRITTE[1].s)}
-  ${_inFrozenPastMode() ? '' : renderPredictorBanner()}
-  ${_inFrozenPastMode() ? '' : renderDeckAuswahlPanel()}
   ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
+  ${_inFrozenPastMode() ? '' : `<details class="mc-rechenweg"><summary>${esc(_mcIstDeutsch() ? 'Datenbasis und Rechenweg' : 'Data and method')}</summary>${renderPredictorBanner()}</details>`}
   ${_inFrozenPastMode() ? '' : _mcSchritt(3, _SCHRITTE[2].t, _SCHRITTE[2].s)}
   ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}
   ${_inFrozenPastMode() ? '' : _mcSchritt(4, _SCHRITTE[3].t, _SCHRITTE[3].s)}
@@ -12379,9 +12484,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
                   + 'this deck.');
     }
     return _evL('Alle Gegner deines erwarteten Metas, zu denen Paarungen vorliegen — jeder mit '
-                + 'dem Anteil aus „Final %" weiter oben.',
+                + 'dem Anteil, mit dem die Tabelle oben rechnet (Prognose oder deine Schätzung).',
                 'Every opponent of the meta you expect that we have pairings for — each weighted '
-                + 'by its "Final %" share above.');
+                + 'by the share the table above works with (forecast or your estimate).');
   }
 
   function renderDeckGegenMetaPanel(field) {
@@ -12569,16 +12674,15 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
 
     const fuss = _evL(
       'Gerechnet wird <strong>Anteil × ' + _evQuotenName() + '</strong>, aufsummiert über alle Gegner '
-      + 'deines erwarteten Metas, zu denen eine Quote vorliegt. Die Anteile sind die Spalte '
-      + '„Final %" aus der Zusammensetzung oben — also Prognose, oder deine Schätzung, wo du eine '
-      + 'eingetragen hast. Die Quoten kommen aus derselben Kette wie die Begegnungsliste im '
+      + 'deines erwarteten Metas, zu denen eine Quote vorliegt. Die Anteile sind die der Tabelle '
+      + 'oben — also Prognose, oder deine Schätzung, wo du eine eingetragen hast. Die Quoten kommen aus derselben Kette wie die Begegnungsliste im '
       + 'Ergebnis: Papier und Online gemischt (80 / 20), geglättet, mit deinem Journal und deinen '
       + 'eigenen Werten. „Sonstige" und Paarungen ohne Daten bleiben draußen und werden nicht mit '
       + '50 % aufgefüllt — darum steht die Abdeckung daneben. Das Band ist ±1,96 '
       + 'Standardabweichungen aus der Streuung der einzelnen Paarungen; es nimmt die Anteile als '
       + 'bekannt an.' + _evAbgrenzungDe() + eigenSatz,
       'The sum is <strong>share × ' + _evQuotenName() + '</strong> over every opponent of the meta you '
-      + 'expect that we have a rate for. The shares are the "Final %" column of the composition '
+      + 'expect that we have a rate for. The shares are those of the table '
       + 'above — the forecast, or your estimate where you entered one. The rates come from the '
       + 'same chain as the encounter list in the results: paper and online blended (80 / 20), '
       + 'smoothed, with your journal and your own values. "Others" and pairings without data are '
@@ -12601,7 +12705,11 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
   ${umfangHtml}
   ${kacheln}
   ${_evVorbereitungHtml(r.zeilen)}
-  ${tabelle}
+  <details class="mc-klappe">
+    <summary>${esc(_evL('Alle Paarungen einzeln — Anteil, Quote, Herkunft, Matches',
+      'Every pairing — share, rate, source, matches'))}</summary>
+    ${tabelle}
+  </details>
   <p class="mc-ev-fuss">${fuss}</p>
 </div>`;
   }
@@ -13363,6 +13471,19 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     return m ? `${m[3]}.${m[2]}.` : (iso || '');
   }
 
+  /* FE-15: greift die Prognosedatei, beschreibt der Streifen DIESE
+     Herkunft der Feldanteile — der Modus-Satz des Praediktors wuerde
+     eine Zahl erklaeren, die nicht mehr in der Tabelle steht. */
+  function _bannerFeldSatz() {
+    const mo = (_prognoseDatei && _prognoseDatei.modell) || {};
+    const n = Number(mo.anker) || 0;
+    return _mcIstDeutsch()
+      ? 'Die Feldanteile kommen aus der Meta-Prognose: Online-Stand plus die Verschiebung zur Spitze, '
+        + 'die an ' + n + ' Regionals gemessen wurde. Die Paarungen darunter:'
+      : 'Field shares come from the meta forecast: online standing plus the shift towards the top '
+        + 'measured at ' + n + ' regionals. Pairings below:';
+  }
+
   function renderPredictorBanner() {
     const tgLoaded = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0) > 0;
     const clTags = [];
@@ -13617,12 +13738,12 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       const tournNum = _labsMajorRows;
       return `<div class="mc-predictor-banner mc-predictor-banner-b">
         <span class="mc-predictor-banner-icon">📊</span>
-        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${sourceTag}${activeTag}${_lagWindowChip}${staleTag}${stichprobe}${gewichtung}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+        <span class="mc-predictor-banner-text">${_prognoseAktiv ? _bannerFeldSatz() : t('mc.bannerModeB').replace('{n}', tournNum)}${sourceTag}${activeTag}${_lagWindowChip}${staleTag}${stichprobe}${gewichtung}${trendSuffix}${clSuffix}${accuracySuffix}</span>
       </div>`;
     }
     return `<div class="mc-predictor-banner mc-predictor-banner-a">
       <span class="mc-predictor-banner-icon">⚡</span>
-      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${sourceTag}${activeTag}${_lagWindowChip}${staleTag}${stichprobe}${gewichtung}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+      <span class="mc-predictor-banner-text">${_prognoseAktiv ? _bannerFeldSatz() : t('mc.bannerModeA')}${sourceTag}${activeTag}${_lagWindowChip}${staleTag}${stichprobe}${gewichtung}${trendSuffix}${clSuffix}${accuracySuffix}</span>
     </div>`;
   }
 
@@ -14205,6 +14326,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       const neu = tmp.querySelector('.mc-rec-panel');
       if (neu) recPanel.innerHTML = neu.innerHTML;
     }
+    /* Die Meta-Call-Tabelle traegt Siegquoten und Day-2 je Zeile — auch
+       sie stuende sonst auf der Vorgabe. Der Weg haelt das Eingabefeld. */
+    if (typeof _feldTabelleNachziehen === 'function') _feldTabelleNachziehen();
     console.info('[MetaCall] Empfehlungen nach dem Laden der Matchup-Karte nachgezogen '
       + '(%d Decks in der Karte).', _matchupMap ? Object.keys(_matchupMap).length : 0);
   }
@@ -14213,7 +14337,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     const container = document.getElementById('metaCallHost');
     if (!container || !_shareList) return;
     const field = buildField();
-    const fieldTbody = container.querySelector('.metacall-table tbody');
+    const fieldTbody = container.querySelector('.mc-mct-table tbody');
     if (fieldTbody) {
       /* BEFUND (Live-Pruefung 07.09.2026, M3): "Final %" liess sich
          nicht zuruecknehmen. Wer in "Meine Schaetzung" 50 eintrug und
@@ -14281,12 +14405,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
          getauscht. Die Kopfzeile traegt aber die Rundenzahl —
          "Ø Begegnungen (8 R.)". Wer die Runden auf 9 stellte, bekam
          richtig gerechnete Zahlen unter einem Kopf, der 8 behauptete. */
-      const neuerKopf = tmp.querySelector('#mc-th-enc');
-      const alterKopf = container.querySelector('#mc-th-enc');
-      if (neuerKopf && alterKopf) {
-        alterKopf.innerHTML = neuerKopf.innerHTML;
-        alterKopf.title = neuerKopf.title;
-      }
+      const neuerKopf = tmp.querySelector('#mc-mct-kopf');
+      const alterKopf = container.querySelector('#mc-mct-kopf');
+      if (neuerKopf && alterKopf) alterKopf.innerHTML = neuerKopf.innerHTML;
       /* Die Summenzeile steht UNTER dem tbody und wird vom Tausch oben
          nicht erfasst. Ohne diese Zeilen meldete sie die Summe von
          vorhin — und gerade sie ist der Hinweis darauf, dass gekuerzt
@@ -16925,6 +17046,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _toggleFeldDeck,
     _onFeldSuche,
     _feldAlleZeigen,
+    _feldAlleUmschalten,
+    _mctSortiere,
+    _prognoseDateiLesen,
     /* Nur fuer Tests und Konsole: die Rechnung ohne Darstellung. */
     _evRechne: (field) => _evRechne(field || buildField()),
     _toggleOverrides,

@@ -317,7 +317,7 @@ describe('M3 — refreshResults reisst das Schaetzfeld nicht mehr unter dem Curs
     function laufe({ mitAuswahlbereich }) {
         const quelle = schnittOhne(
             'const aktivVorher = document.activeElement;',
-            "const neuerKopf = tmp.querySelector('#mc-th-enc');");
+            "const neuerKopf = tmp.querySelector('#mc-mct-kopf');");
 
         const protokoll = { fokussiert: 0, bereich: null, wertNeuGesetzt: 0, tbodyGesetzt: 0 };
         const neuesFeld = {

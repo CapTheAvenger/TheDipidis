@@ -4125,3 +4125,133 @@
   .mc-feld-suche { flex-basis: 100%; }
   .mc-feld-lead, .mc-feld-bilanz { font-size: 0.8rem; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+ * FE-16 (28.09.2026) — die Meta-Call-Tabelle: eine Zeile je Deck,
+ * jede Zahl einmal. Auf dem Telefon wird jede Zeile eine Karte; die
+ * Beschriftungen haengen am data-label der Zelle, nicht an ihrer
+ * Position — eine neue Spalte verschiebt nichts.
+ * ═══════════════════════════════════════════════════════════════════ */
+.mc-mct-lead { margin: 4px 0 10px; color: var(--mc-text-muted); font-size: 0.9rem; line-height: 1.45; }
+.mc-mct-leiste { align-items: center; }
+.mc-mct-leiste-titel { font-size: 0.85rem; font-weight: 600; color: var(--mc-text-heading); margin-right: 2px; }
+.mc-mct-wrap { overflow-x: auto; margin-top: 8px; }
+.mc-mct-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.mc-mct-table th {
+  text-align: right; font-size: 0.78rem; font-weight: 600; color: var(--mc-text-muted);
+  padding: 6px 6px; border-bottom: 2px solid var(--mc-border); vertical-align: bottom; white-space: normal;
+}
+.mc-mct-table th.mc-mct-deck, .mc-mct-table td.mc-mct-deck { text-align: left; }
+.mc-mct-table thead th { background: var(--mc-bg-subtle); color: var(--mc-text-muted); }
+.mc-mct-table thead th.is-sortiert { color: var(--mc-text-heading); }
+.mc-mct-deckzeile { display: flex; align-items: center; gap: 4px; }
+.mc-mct-deckzeile .mc-deck-name { flex: 1 1 auto; display: inline-flex; align-items: center; flex-wrap: nowrap; gap: 4px; }
+.mc-mct-name { white-space: normal; }
+.mc-mct-deckzeile .mc-row-toggle { flex: 0 0 auto; margin-left: auto; }
+.mc-mct-table th.mc-mct-an, .mc-mct-table td.mc-mct-an { text-align: center; width: 40px; }
+.mc-mct-table th.is-sortiert { color: var(--mc-text-heading); }
+.mc-mct-sortknopf {
+  background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: inherit;
+}
+.mc-mct-sortknopf:hover { color: var(--mc-accent); }
+.mc-mct-table td {
+  text-align: right; padding: 7px 6px; border-bottom: 1px solid var(--mc-border-faint);
+  vertical-align: middle; color: var(--mc-text-heading); white-space: nowrap;
+}
+.mc-mct-table td.mc-mct-deck { white-space: normal; min-width: 230px; width: 24%; }
+.mc-mct-deck .mc-deck-name { font-weight: 600; }
+.mc-mct-zeile.is-mein td { background: var(--mc-tint-personal); }
+.mc-mct-zeile.is-aussen td { color: var(--mc-text-muted); }
+.mc-mct-zeile.is-aussen .mc-deck-name { font-weight: 500; }
+.mc-mct-stern {
+  background: none; border: 0; cursor: pointer; font-size: 1.15rem; line-height: 1;
+  color: var(--mc-text-muted); padding: 2px 6px 2px 0; min-width: 28px; min-height: 28px;
+}
+#meta-call .mc-mct-table td, #meta-call .mc-mct-table th { font-size: 0.9rem; }
+#meta-call .mc-mct-stern { min-width: 36px; min-height: 36px; padding: 0 4px 0 0; font-size: 1.15rem; }
+#meta-call .mc-mct-deckzeile .mc-row-toggle { min-width: 32px; min-height: 32px; padding: 0; font-size: 0.8rem; }
+.mc-mct-stern:hover, .mc-mct-stern.is-mein { color: var(--mc-personal-accent-dark); }
+.mc-mct-mein-marke {
+  display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 0.72rem;
+  font-weight: 700; background: var(--mc-tint-personal); color: var(--mc-personal-accent-dark);
+  border: 1px solid var(--mc-personal-accent);
+}
+.mc-mct-haken { width: 18px; height: 18px; cursor: pointer; accent-color: var(--mc-accent); }
+.mc-mct-haken-fest { font-weight: 700; color: var(--mc-personal-accent); }
+.mc-mct-listen, .mc-mct-band, .mc-mct-spieler {
+  display: block; font-size: 0.72rem; color: var(--mc-text-muted); font-weight: 400;
+}
+.mc-mct-prognose { font-weight: 700; font-size: 0.98rem; }
+.mc-mct-enc-zahl { font-weight: 600; }
+.mc-mct-enc-zahl.mc-enc-low  { color: var(--color-success-dark); }
+.mc-mct-enc-zahl.mc-enc-mid  { color: var(--tint-warn-ink); }
+.mc-mct-enc-zahl.mc-enc-high { color: var(--color-danger-dark); }
+.mc-mct-in-sonstige { font-size: 0.78rem; color: var(--mc-text-muted); }
+.mc-mct-wr { font-weight: 700; }
+.mc-mct-wr.is-gut { color: var(--color-success-dark); }
+.mc-mct-wr.is-schlecht { color: var(--color-danger-dark); }
+.mc-mct-wr.is-mittel { color: var(--mc-text-heading); }
+.mc-mct-wr-spiegel { font-size: 0.78rem; color: var(--mc-text-muted); }
+.mc-mct-day2 { font-weight: 700; }
+.mc-mct-day2.is-gut { color: var(--color-success-dark); }
+.mc-mct-bilanz { color: var(--mc-text-heading); }
+.mc-mct-table .mc-personal-input {
+  width: 72px; background: var(--surface-1); color: var(--mc-text-heading);
+  border: 1px solid var(--mc-border-strong); border-radius: 6px; padding: 4px 6px;
+}
+.mc-mct-table .mc-personal-input.has-value { border-color: var(--mc-personal-accent); font-weight: 700; }
+#meta-call .mc-mct-table thead th.mc-mct-an { background: var(--mc-bg-subtle); }
+.mc-mct-trenner td { text-align: left; padding: 10px 6px; background: var(--mc-bg-subtle); }
+.mc-mct-mehr {
+  background: none; border: 1px dashed var(--mc-border-strong); border-radius: 8px; padding: 6px 12px;
+  font: inherit; font-size: 0.85rem; color: var(--mc-text-heading); cursor: pointer; min-height: 36px;
+}
+.mc-mct-mehr:hover { border-color: var(--mc-accent); }
+.mc-mct-suchtreffer { margin-left: 10px; font-size: 0.8rem; color: var(--mc-text-muted); }
+.mc-mct-table tr.mc-row-detail.is-collapsed { display: none; }
+.mc-mct-table tr.mc-row-detail td { text-align: left; white-space: normal; background: var(--mc-bg-subtle); }
+.mc-mct-quelle { margin: 6px 0 0; font-size: 0.78rem; color: var(--mc-text-muted); line-height: 1.4; }
+.mc-rechenweg { margin: 10px 0 16px; }
+.mc-rechenweg > summary { cursor: pointer; font-weight: 600; color: var(--mc-text-heading); padding: 6px 0; }
+
+@media (max-width: 700px) {
+  .mc-mct-table thead { display: none; }
+  .mc-mct-table, .mc-mct-table tbody { display: block; }
+  .mc-mct-table tr.mc-mct-zeile {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px 10px;
+    padding: 10px 8px; border-bottom: 1px solid var(--mc-border);
+  }
+  .mc-mct-table tr.mc-mct-zeile td {
+    display: block; border: 0; padding: 0; text-align: left; white-space: normal; background: none;
+  }
+  .mc-mct-table tr.mc-mct-zeile.is-mein { background: var(--mc-tint-personal); }
+  .mc-mct-table tr.mc-mct-zeile td.mc-mct-an { grid-column: 1; grid-row: 1; width: auto; text-align: left; }
+  .mc-mct-table tr.mc-mct-zeile td.mc-mct-deck { grid-column: 1 / -1; grid-row: 1; padding-left: 30px; min-width: 0; }
+  #meta-call .mc-mct-table tr.mc-mct-zeile td { font-size: 0.88rem; padding: 0; }
+  #meta-call .mc-mct-table tr.mc-mct-zeile td.mc-mct-deck {
+    /* Die Sammelregel fuer Tabellen auf dem Telefon (styles.css) klebt die
+       erste Spalte fest und setzt ihr Innenabstand und Schatten — hier
+       ist die erste Zelle der Haken, und der Stern darf nicht darunter
+       liegen. */
+    padding-left: 40px !important; font-size: 1rem; background: none; box-shadow: none; position: static;
+  }
+  #meta-call .mc-mct-table tr.mc-mct-zeile td.mc-mct-an {
+    position: relative !important; left: auto !important; z-index: 1; padding: 8px 0 0 !important;
+    box-shadow: none !important; background: none !important; width: 30px;
+  }
+  .mc-mct-table tr.mc-mct-zeile td[data-label]::before {
+    content: attr(data-label); display: block; font-size: 0.7rem; font-weight: 600;
+    color: var(--mc-text-muted); margin-bottom: 1px;
+  }
+  .mc-mct-table tr.mc-row-detail td { display: block; }
+  .mc-mct-table tr.mc-mct-trenner, .mc-mct-table tr.mc-mct-trenner td { display: block; }
+  .mc-mct-table .mc-personal-input { width: 100%; max-width: 110px; }
+}
+/* FE-16: Einzelheiten, die die Meta-Call-Tabelle schon zusammenfasst,
+   stehen hinter einer Klappe — da, nicht weg. */
+.mc-klappe { margin-top: 10px; }
+.mc-klappe > summary {
+  cursor: pointer; font-weight: 600; font-size: 0.88rem; color: var(--mc-text-heading);
+  padding: 8px 0; min-height: 36px;
+}
+.mc-klappe > summary:hover { color: var(--mc-accent); }

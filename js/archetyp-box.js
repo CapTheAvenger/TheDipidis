@@ -34,7 +34,7 @@
     const SAMMLUNG = 'archetypBoxen';
     const SPIEGEL_SCHLUESSEL = 'archetypBoxenV1';
     const STATUS = ['fehlt', 'original', 'proxy'];
-    const MAX_ANZAHL = 60;
+    const MAX_ANZAHL = 99;
     // Reihenfolge der Kartenarten in jeder Rubrik der Box.
     const TYP_REIHENFOLGE = ['Pokemon', 'Supporter', 'Item', 'Tool', 'Stadium',
         'Ace Spec', 'Special Energy', 'Energy'];
@@ -66,6 +66,59 @@
         return Math.min(MAX_ANZAHL, z);
     }
 
+    function nullBis(n) {
+        const z = Math.round(Number(n));
+        if (!Number.isFinite(z) || z < 0) return 0;
+        return Math.min(MAX_ANZAHL, z);
+    }
+
+    /*
+     * Zwei Zahlen je Karte (Hausi, 28.09.2026, nach dem ersten Live-Blick):
+     *
+     *   gefordert — wie oft die Karte in einer Liste hoechstens gespielt
+     *               wurde (max_count der Turnierdaten). Kommt aus den Daten,
+     *               das Aktualisieren zieht sie nach. Von Hand hinzugefuegte
+     *               Karten haben keine.
+     *   drin      — wie viele Kopien wirklich in der Box liegen, aufgeteilt
+     *               nach Druck (`drucke`: [{id, set, number, n}]). Gehoert
+     *               dem Nutzer, kein Aktualisieren fasst sie an. Darf ueber
+     *               "gefordert" hinausgehen.
+     *
+     * Aeltere Boxen (Rutsch 15, #859) kannten nur `anzahl` und den Status;
+     * normiert() liest sie ohne Verlust in die neue Form.
+     */
+    function gefordertVon(k) {
+        if (k.gefordert != null) return k.gefordert;
+        if (k.manuell) return null;
+        const m = parseInt(k.maxAnzahl, 10);
+        return m > 0 ? m : null;
+    }
+
+    function normiert(k) {
+        if (!k) return k;
+        const aus = Object.assign({}, k);
+        aus.gefordert = gefordertVon(k);
+        if (!Array.isArray(k.drucke)) {
+            const alt = (k.status === 'original' || k.status === 'proxy') ? anzahlBegrenzen(k.anzahl) : 0;
+            aus.drucke = alt > 0 ? [{ id: k.id, set: k.set, number: k.number, n: alt }] : [];
+        } else {
+            aus.drucke = k.drucke.filter(function (d) { return d && d.id && nullBis(d.n) > 0; })
+                .map(function (d) { return { id: d.id, set: d.set, number: d.number, n: nullBis(d.n) }; });
+        }
+        delete aus.anzahlEigen;
+        return aus;
+    }
+
+    function drin(k) {
+        return (normiert(k).drucke || []).reduce(function (a, d) { return a + d.n; }, 0);
+    }
+
+    /** Status folgt der Menge: nichts drin = fehlt; etwas drin und bisher fehlt = Original. */
+    function statusNachMenge(k, gesamt) {
+        if (gesamt <= 0) return 'fehlt';
+        return k.status === 'proxy' || k.status === 'original' ? k.status : 'original';
+    }
+
     /** Neue Box aus den Karten der Uebersicht. Keine "neu"-Marken: beim Anlegen ist alles neu. */
     function neueBox(kopf, frische, heute) {
         const karten = [];
@@ -73,12 +126,12 @@
             if (!f || !f.id) return;
             if (karten.some(function (k) { return gleicheKarte(k, f); })) return;
             karten.push(Object.assign({}, f, {
-                anzahl: anzahlBegrenzen(f.anzahl),
-                status: 'fehlt', manuell: false, inDaten: true, neu: null, anzahlEigen: false
+                gefordert: f.maxAnzahl > 0 ? f.maxAnzahl : null, drucke: [],
+                status: 'fehlt', manuell: false, inDaten: true, neu: null
             }));
         });
         return {
-            schemaVersion: 1,
+            schemaVersion: 2,
             name: String(kopf.name || ''),
             archetyp: String(kopf.archetyp || ''),
             schwelle: String(kopf.schwelle || 'all'),
@@ -101,7 +154,7 @@
      */
     function abgleichen(box, frische, kopf, heute) {
         const alt = Array.isArray(box && box.karten) ? box.karten : [];
-        const karten = alt.map(function (k) { return Object.assign({}, k); });
+        const karten = alt.map(normiert);
         const getroffen = new Set();
         const neu = [];
         (frische || []).forEach(function (f) {
@@ -116,17 +169,17 @@
                 const k = karten[idx];
                 k.anteil = f.anteil;
                 k.maxAnzahl = f.maxAnzahl;
+                if (!k.manuell && f.maxAnzahl > 0) k.gefordert = f.maxAnzahl;
                 k.inDaten = true;
                 if (f.reihe != null) k.reihe = f.reihe;
-                if (!k.anzahlEigen) k.anzahl = anzahlBegrenzen(f.anzahl);
                 const refs = new Set([].concat(k.refs || [], f.refs || [], [f.id]));
                 refs.delete(k.id);
                 k.refs = Array.from(refs);
                 if (!k.typ && f.typ) k.typ = f.typ;
             } else {
                 const eintrag = Object.assign({}, f, {
-                    anzahl: anzahlBegrenzen(f.anzahl),
-                    status: 'fehlt', manuell: false, inDaten: true, neu: heute, anzahlEigen: false
+                    gefordert: f.maxAnzahl > 0 ? f.maxAnzahl : null, drucke: [],
+                    status: 'fehlt', manuell: false, inDaten: true, neu: heute
                 });
                 karten.push(eintrag);
                 getroffen.add(karten.length - 1);
@@ -140,6 +193,7 @@
             k.inDaten = false;
         });
         const ergebnis = Object.assign({}, box, {
+            schemaVersion: 2,
             karten: karten,
             aktualisiert: heute,
             datenStand: (kopf && kopf.datenStand) || (box && box.datenStand) || null
@@ -178,34 +232,91 @@
         (box && box.karten || []).forEach(function (k) {
             const s = STATUS.indexOf(k.status) >= 0 ? k.status : 'fehlt';
             z[s] += 1;
-            z.kopien[s] += anzahlBegrenzen(k.anzahl);
+            z.kopien[s] += drin(k);
             if (k.neu) z.neu += 1;
         });
         return z;
     }
 
-    /** Was die Druckfunktion bekommt: jede Proxy-Karte mit ihrer Anzahl. */
+    /** Was die Druckfunktion bekommt: jede Proxy-Karte, je Druck mit seiner Anzahl. */
     function proxyListe(box) {
-        return rubriken(box).proxy.map(function (k) {
-            return { name: k.name, set: k.set, number: k.number, anzahl: anzahlBegrenzen(k.anzahl) };
+        const aus = [];
+        rubriken(box).proxy.forEach(function (k) {
+            normiert(k).drucke.forEach(function (d) {
+                aus.push({ name: k.name, set: d.set, number: d.number, anzahl: d.n });
+            });
+        });
+        return aus;
+    }
+
+    function karteAendern(box, id, fn) {
+        return Object.assign({}, box, {
+            karten: (box.karten || []).map(function (k) { return k.id === id ? fn(normiert(k)) : k; })
         });
     }
 
-    /** Status setzen. Wer eine Karte einsortiert, hat die Neu-Marke gesehen. */
+    /**
+     * Status setzen. Wer eine Karte einsortiert, hat die Neu-Marke gesehen.
+     * "Fehlt" heisst: nichts in der Box. Original/Proxy bei leerer Box
+     * legt die geforderte Menge hinein (mindestens eine Kopie).
+     */
     function statusSetzen(box, id, status) {
         if (STATUS.indexOf(status) < 0) return box;
-        return Object.assign({}, box, {
-            karten: (box.karten || []).map(function (k) {
-                return k.id === id ? Object.assign({}, k, { status: status, neu: null }) : k;
-            })
+        return karteAendern(box, id, function (k) {
+            let drucke = k.drucke;
+            if (status === 'fehlt') drucke = [];
+            else if (!drucke.length) drucke = [{ id: k.id, set: k.set, number: k.number, n: nullBis(k.gefordert || 1) || 1 }];
+            return Object.assign(k, { status: status, drucke: drucke, neu: null });
         });
     }
 
-    function anzahlSetzen(box, id, anzahl) {
-        return Object.assign({}, box, {
-            karten: (box.karten || []).map(function (k) {
-                return k.id === id ? Object.assign({}, k, { anzahl: anzahlBegrenzen(anzahl), anzahlEigen: true }) : k;
-            })
+    /**
+     * Gesamtmenge in der Box setzen (Knoepfe − und +). Der angezeigte Druck
+     * nimmt die Aenderung auf; wird er beim Wegnehmen leer, geben die
+     * anderen Drucke ab, der groesste zuerst.
+     */
+    function drinSetzen(box, id, gesamt) {
+        const ziel = nullBis(gesamt);
+        return karteAendern(box, id, function (k) {
+            let drucke = k.drucke.map(function (d) { return Object.assign({}, d); });
+            let delta = ziel - drucke.reduce(function (a, d) { return a + d.n; }, 0);
+            let haupt = drucke.find(function (d) { return d.id === k.id; });
+            if (delta > 0) {
+                if (!haupt) { haupt = { id: k.id, set: k.set, number: k.number, n: 0 }; drucke.unshift(haupt); }
+                haupt.n += delta;
+            } else if (delta < 0) {
+                const reihe = drucke.slice().sort(function (a, b) {
+                    return (b.id === k.id) - (a.id === k.id) || b.n - a.n;
+                });
+                for (let i = 0; i < reihe.length && delta < 0; i++) {
+                    const weg = Math.min(reihe[i].n, -delta);
+                    reihe[i].n -= weg; delta += weg;
+                }
+            }
+            drucke = drucke.filter(function (d) { return d.n > 0; });
+            return Object.assign(k, { drucke: drucke, status: statusNachMenge(k, ziel), neu: null });
+        });
+    }
+
+    /** Tippen auf die Plakette "gefordert": auf die geforderte Menge auffuellen. */
+    function auffuellen(box, id) {
+        const k = (box.karten || []).find(function (x) { return x.id === id; });
+        if (!k) return box;
+        const soll = gefordertVon(k);
+        if (!(soll > 0) || drin(k) >= soll) return box;
+        return drinSetzen(box, id, soll);
+    }
+
+    /** Aufteilung nach Druck aus dem Druck-Dialog: [{id, set, number, n}]. */
+    function druckeSetzen(box, id, liste) {
+        return karteAendern(box, id, function (k) {
+            const gesehen = new Set();
+            const drucke = (liste || []).filter(function (d) {
+                if (!d || !d.id || gesehen.has(d.id) || !(nullBis(d.n) > 0)) return false;
+                gesehen.add(d.id); return true;
+            }).map(function (d) { return { id: d.id, set: d.set, number: d.number, n: nullBis(d.n) }; });
+            const gesamt = drucke.reduce(function (a, d) { return a + d.n; }, 0);
+            return Object.assign(k, { drucke: drucke, status: statusNachMenge(k, gesamt), neu: null });
         });
     }
 
@@ -217,8 +328,8 @@
             return { box: box, hinzugefuegt: false };
         }
         const neuEintrag = Object.assign({}, eintrag, {
-            anzahl: anzahlBegrenzen(eintrag.anzahl || 1),
-            status: 'fehlt', manuell: true, inDaten: null, neu: null, anzahlEigen: true,
+            gefordert: null, drucke: [],
+            status: 'fehlt', manuell: true, inDaten: null, neu: null,
             hinzugefuegt: heute
         });
         return { box: Object.assign({}, box, { karten: karten.concat([neuEintrag]) }), hinzugefuegt: true };
@@ -274,7 +385,8 @@
 
     const Logik = {
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
-        statusSetzen, anzahlSetzen, manuellHinzufuegen, entfernen, anzahlWieUebersicht,
+        statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon,
+        manuellHinzufuegen, entfernen, anzahlWieUebersicht,
         isoTag, neuestesDatumImManifest, neueDatenDa, anzahlBegrenzen, STATUS
     };
 
@@ -781,9 +893,12 @@
         }).join('');
     }
 
-    function kachel(k) {
+    function kachel(roh) {
+        const k = normiert(roh);
         const status = STATUS.indexOf(k.status) >= 0 ? k.status : 'fehlt';
         const idJs = esc(k.id);
+        const menge = drin(k);
+        const soll = k.gefordert;
         const marken = [];
         if (k.neu) marken.push('<span class="abx-marke abx-marke-neu">' + esc(tx('abx.markeNeu', null, 'Neu')) + '</span>');
         if (k.manuell) marken.push('<span class="abx-marke">' + esc(tx('abx.markeManuell', null, 'von Hand')) + '</span>');
@@ -801,18 +916,43 @@
             : '<div class="abx-kein-bild">' + esc(k.set + ' ' + k.number) + '</div>';
         const anteil = (k.anteil != null && k.inDaten !== false && !k.manuell)
             ? '<span class="abx-anteil">' + esc(prozent(k.anteil)) + '</span>' : '';
+        // Oben links: wie oft hoechstens gespielt. Tippen legt so viele hinein.
+        const sollKnopf = soll > 0
+            ? '<button type="button" class="abx-soll' + (menge >= soll ? ' is-voll' : '') + '" onclick="ArchetypBox.auffuellen(\''
+                + idJs + '\')" title="' + esc(tx('abx.sollTitel', { n: soll },
+                    'Höchstens {n}× in einer Liste gespielt — tippen, um {n} in die Box zu legen')) + '" aria-label="'
+                + esc(tx('abx.sollTitel', { n: soll }, 'Höchstens {n}× in einer Liste gespielt — tippen, um {n} in die Box zu legen'))
+                + '">' + esc(soll) + '</button>'
+            : '';
+        // Unten rechts: wie viele wirklich drin liegen.
+        const drinKlasse = menge === 0 ? ' is-leer' : (soll > 0 && menge >= soll ? ' is-voll' : '');
+        const drinPlakette = '<span class="abx-anzahl' + drinKlasse + '" title="'
+            + esc(tx('abx.anzahlTitel', null, 'Kopien in der Box')) + '">' + esc(menge) + '</span>';
+        // Wunschliste: dasselbe Herz wie ueberall (Schluessel Name|Set|Nummer),
+        // aber mit der fehlenden Menge statt einer Kopie — wie im Meta Binder.
+        const wunschId = k.name + '|' + k.set + '|' + k.number;
+        const aufListe = !!(window.userWishlist && window.userWishlist.has(wunschId));
+        const herz = '<button type="button" class="wishlist-heart-badge abx-herz' + (aufListe ? ' wishlisted' : '')
+            + '" data-card-id="' + esc(wunschId) + '" onclick="event.stopPropagation(); ArchetypBox.wunsch(this, \'' + idJs + '\')" title="'
+            + esc(aufListe ? tx('wishBadge.remove', null, 'Von der Wunschliste nehmen') : tx('abx.wunschTitel', null, 'Fehlende auf die Wunschliste'))
+            + '">' + (aufListe ? '&#9829;' : '&#9825;') + '</button>';
+        const weitere = k.drucke.filter(function (d) { return d.id !== k.id; }).length;
+        const druckZusatz = weitere
+            ? ' <span class="abx-weitere">' + esc(tx('abx.weitereDrucke', { n: weitere }, '+{n} Druck')) + '</span>' : '';
         return '<div class="abx-karte abx-karte-' + status + '" data-karte="' + esc(k.id) + '">'
-            + '<div class="abx-bild">' + bild + '<span class="abx-anzahl" title="'
-            + esc(tx('abx.anzahlTitel', null, 'Kopien in der Box')) + '">' + esc(k.anzahl) + '×</span>'
+            + '<div class="abx-bild">' + bild + sollKnopf + herz + drinPlakette
             + (marken.length ? '<div class="abx-marken">' + marken.join('') + '</div>' : '') + '</div>'
             + '<div class="abx-text"><div class="abx-name" title="' + esc(k.name) + '">' + esc(k.name) + '</div>'
-            + '<div class="abx-druck">' + esc(k.set + ' ' + k.number) + anteil + '</div></div>'
+            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + druckZusatz + '</span>' + anteil + '</div></div>'
             + '<div class="abx-segmente" role="group" aria-label="' + esc(tx('abx.statusAria', null, 'Status in der Box')) + '">' + knoepfe + '</div>'
             + '<div class="abx-zeile2">'
             + '<button type="button" class="abx-mini" onclick="ArchetypBox.anzahl(\'' + idJs + '\',-1)" aria-label="'
             + esc(tx('abx.wenigerAria', null, 'Eine Kopie weniger')) + '">−</button>'
             + '<button type="button" class="abx-mini" onclick="ArchetypBox.anzahl(\'' + idJs + '\',1)" aria-label="'
             + esc(tx('abx.mehrAria', null, 'Eine Kopie mehr')) + '">+</button>'
+            + '<button type="button" class="abx-mini abx-drucke-btn" onclick="ArchetypBox.druckeOeffnen(\'' + idJs + '\')" title="'
+            + esc(tx('abx.druckeTitel', null, 'Drucke: welcher Druck wie oft in der Box liegt')) + '" aria-label="'
+            + esc(tx('abx.druckeTitel', null, 'Drucke: welcher Druck wie oft in der Box liegt')) + '">★</button>'
             + '<button type="button" class="abx-mini abx-weg" onclick="ArchetypBox.entfernen(\'' + idJs + '\')" title="'
             + esc(tx('abx.entfernenTitel', null, 'Aus der Box entfernen')) + '" aria-label="'
             + esc(tx('abx.entfernenTitel', null, 'Aus der Box entfernen')) + '">✕</button>'
@@ -893,8 +1033,142 @@
         aendern(id, function (b) {
             const k = (b.karten || []).find(function (x) { return x.id === id; });
             if (!k) return b;
-            return anzahlSetzen(b, id, anzahlBegrenzen(k.anzahl) + delta);
+            return drinSetzen(b, id, drin(k) + delta);
         });
+    }
+
+    function fuellen(id) { aendern(id, function (b) { return auffuellen(b, id); }); }
+
+    async function wunsch(knopf, id) {
+        const wunschId = knopf && knopf.getAttribute('data-card-id');
+        if (!wunschId) return;
+        const box = boxen.find(function (b) { return b.id === aktiveId; });
+        const k = box && (box.karten || []).find(function (x) { return x.id === id; });
+        const drauf = window.userWishlist && window.userWishlist.has(wunschId);
+        try {
+            if (drauf) {
+                if (typeof removeFromWishlist === 'function') await removeFromWishlist(wunschId);
+            } else if (typeof addToWishlistWithCount === 'function') {
+                const soll = k ? gefordertVon(k) : null;
+                const fehlt = soll > 0 ? soll - drin(k) : 1;
+                await addToWishlistWithCount(wunschId, Math.max(1, fehlt));
+            }
+        } catch (e) { console.warn('[ArchetypBox] Wunschliste:', e && e.message); }
+        const jetzt = !!(window.userWishlist && window.userWishlist.has(wunschId));
+        document.querySelectorAll('.wishlist-heart-badge[data-card-id="' + CSS.escape(wunschId) + '"]').forEach(function (b) {
+            b.classList.toggle('wishlisted', jetzt);
+            b.innerHTML = jetzt ? '&#9829;' : '&#9825;';
+        });
+    }
+
+    // ── Drucke: welcher Druck wie oft in der Box liegt ──
+
+    function druckeDerKarte(k) {
+        const liste = [];
+        const gesehen = new Set();
+        const dazu = function (set, number, extra) {
+            const id = kartenId(set, number);
+            if (!id || gesehen.has(id)) return;
+            gesehen.add(id);
+            liste.push(Object.assign({ id: id, set: String(set).toUpperCase(), number: String(number) }, extra || {}));
+        };
+        let prints = [];
+        if (typeof getInternationalPrintsForCard === 'function') {
+            try { prints = getInternationalPrintsForCard(k.set, k.number) || []; } catch (_) { prints = []; }
+        }
+        dazu(k.set, k.number, { bild: k.bild, rarity: '' });
+        prints.forEach(function (p) {
+            let bild = p.image_url || '';
+            if (typeof getBestCardImage === 'function') {
+                try { bild = getBestCardImage(Object.assign({}, p, { set_code: p.set, set_number: p.number, card_name: k.name })) || bild; }
+                catch (_) { /* Datenbankbild */ }
+            }
+            if (kartenId(p.set, p.number) === k.id) {
+                const erst = liste[0]; erst.rarity = p.rarity || ''; if (!erst.bild) erst.bild = bild;
+                return;
+            }
+            dazu(p.set, p.number, { bild: bild, rarity: p.rarity || '' });
+        });
+        // Drucke, die schon in der Box liegen, aber die Datenbank nicht (mehr) kennt.
+        k.drucke.forEach(function (d) { dazu(d.set, d.number, { bild: '', rarity: '' }); });
+        const n = {};
+        k.drucke.forEach(function (d) { n[d.id] = d.n; });
+        liste.forEach(function (d) { d.n = n[d.id] || 0; });
+        return liste;
+    }
+
+    let dialogZustand = null;   // {id, liste}
+
+    function dialogZeichnen() {
+        const d = el('abxDruckDialog');
+        if (!d || !dialogZustand) return;
+        const box = boxen.find(function (b) { return b.id === aktiveId; });
+        const k = box && normiert((box.karten || []).find(function (x) { return x.id === dialogZustand.id; }) || null);
+        if (!k) return;
+        const summe = dialogZustand.liste.reduce(function (a, x) { return a + x.n; }, 0);
+        d.querySelector('.abx-dialog-inhalt').innerHTML =
+            '<h3 id="abxDruckTitel">' + esc(k.name) + '</h3>'
+            + '<p class="abx-dialog-zeile">' + esc(k.gefordert > 0
+                ? tx('abx.druckeSumme', { n: summe, soll: k.gefordert }, 'In der Box: {n} · höchstens gespielt: {soll}')
+                : tx('abx.druckeSummeOhne', { n: summe }, 'In der Box: {n}')) + '</p>'
+            + '<div class="abx-dialog-liste">' + dialogZustand.liste.map(function (x, i) {
+                return '<div class="abx-dialog-druck' + (x.n > 0 ? ' is-drin' : '') + '">'
+                    + (x.bild ? '<img src="' + esc(x.bild) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<div class="abx-dialog-ohne"></div>')
+                    + '<div class="abx-dialog-text"><strong>' + esc(x.set + ' ' + x.number) + '</strong>'
+                    + (x.rarity ? '<span>' + esc(x.rarity) + '</span>' : '') + '</div>'
+                    + '<div class="abx-dialog-zahl">'
+                    + '<button type="button" class="abx-mini" onclick="ArchetypBox._druck(' + i + ',-1)" aria-label="'
+                    + esc(tx('abx.wenigerAria', null, 'Eine Kopie weniger')) + '">−</button>'
+                    + '<span aria-live="polite">' + x.n + '</span>'
+                    + '<button type="button" class="abx-mini" onclick="ArchetypBox._druck(' + i + ',1)" aria-label="'
+                    + esc(tx('abx.mehrAria', null, 'Eine Kopie mehr')) + '">+</button></div></div>';
+            }).join('') + '</div>'
+            + '<div class="abx-dialog-fuss">'
+            + '<button type="button" class="btn btn-outline" onclick="ArchetypBox.druckeSchliessen(false)">'
+            + esc(tx('abx.abbrechen', null, 'Abbrechen')) + '</button>'
+            + '<button type="button" class="btn btn-primary" onclick="ArchetypBox.druckeSchliessen(true)">'
+            + esc(tx('abx.uebernehmen', null, 'Übernehmen')) + '</button></div>';
+    }
+
+    function druckeOeffnen(id) {
+        const box = boxen.find(function (b) { return b.id === aktiveId; });
+        const roh = box && (box.karten || []).find(function (x) { return x.id === id; });
+        if (!roh) return;
+        dialogZustand = { id: id, liste: druckeDerKarte(normiert(roh)) };
+        let d = el('abxDruckDialog');
+        if (!d) {
+            d = document.createElement('div');
+            d.id = 'abxDruckDialog';
+            d.className = 'abx-dialog';
+            d.setAttribute('role', 'dialog');
+            d.setAttribute('aria-modal', 'true');
+            d.setAttribute('aria-labelledby', 'abxDruckTitel');
+            d.innerHTML = '<div class="abx-dialog-inhalt"></div>';
+            d.addEventListener('click', function (e) { if (e.target === d) druckeSchliessen(false); });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && dialogZustand) druckeSchliessen(false);
+            });
+            document.body.appendChild(d);
+        }
+        d.classList.remove('d-none');
+        dialogZeichnen();
+    }
+
+    function druckAendern(i, delta) {
+        if (!dialogZustand || !dialogZustand.liste[i]) return;
+        const x = dialogZustand.liste[i];
+        x.n = Math.max(0, Math.min(MAX_ANZAHL, x.n + delta));
+        dialogZeichnen();
+    }
+
+    function druckeSchliessen(uebernehmen) {
+        const d = el('abxDruckDialog');
+        if (uebernehmen && dialogZustand) {
+            const z = dialogZustand;
+            aendern(z.id, function (b) { return druckeSetzen(b, z.id, z.liste); });
+        }
+        dialogZustand = null;
+        if (d) d.classList.add('d-none');
     }
 
     function entfernenKarte(id) {
@@ -1063,6 +1337,11 @@
         waehlen: waehlen,
         status: status,
         anzahl: anzahl,
+        auffuellen: fuellen,
+        wunsch: wunsch,
+        druckeOeffnen: druckeOeffnen,
+        druckeSchliessen: druckeSchliessen,
+        _druck: druckAendern,
         entfernen: entfernenKarte,
         loeschen: loeschen,
         aktualisieren: aktualisieren,

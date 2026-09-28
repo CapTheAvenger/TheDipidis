@@ -157,15 +157,61 @@ def main():
         pruefe(z["sichtbar"] and z["fehlt"] == len(ids), "Profil zeigt die Box, alle Karten unter 'Noch nicht in der Box'")
         pruefe(z["reihenfolge"] == ["fehlt", "original", "proxy"], "Reihenfolge fehlt / Original / Proxy")
 
+        # 4b. Nachtrag 28.09.: gefordert / drin / Drucke / Wunschliste
+        SP = "() => Object.values(window.__abxSpeicher)[0].karten"
+        erste = s.evaluate('''() => { const t = document.querySelector('.abx-rubrik-fehlt .abx-karte');
+            return { id: t.dataset.karte, soll: (t.querySelector('.abx-soll')||{}).textContent,
+                     drin: t.querySelector('.abx-anzahl').textContent,
+                     herzen: document.querySelectorAll('#abxInhalt .abx-karte .abx-herz').length,
+                     kacheln: document.querySelectorAll('#abxInhalt .abx-karte').length }; }''')
+        k0 = [k for k in s.evaluate(SP) if k["id"] == erste["id"]][0]
+        print("erste Karte:", erste, "gefordert im Konto:", k0.get("gefordert"), "max_count:", k0.get("maxAnzahl"))
+        pruefe(str(k0.get("gefordert")) == erste["soll"] == str(k0.get("maxAnzahl")),
+               "Plakette oben links = hoechstens gespielt (max_count %s)" % k0.get("maxAnzahl"))
+        pruefe(erste["drin"] == "0", "Plakette unten rechts = 0 drin")
+        pruefe(erste["herzen"] == erste["kacheln"], "jede Karte hat das Wunschlisten-Herz")
+        kid = erste["id"]
+        sel = "document.querySelector('.abx-karte[data-karte=\"%s\"]')" % kid
+        s.evaluate("() => %s.querySelectorAll('.abx-mini')[1].click()" % sel)   # +
+        s.wait_for_timeout(300)
+        k1 = [k for k in s.evaluate(SP) if k["id"] == kid][0]
+        pruefe(k1["status"] == "original" and sum(d["n"] for d in k1["drucke"]) == 1,
+               "+ auf fehlender Karte: 1 drin, jetzt Original")
+        s.evaluate("() => %s.querySelector('.abx-soll').click()" % sel)
+        s.wait_for_timeout(300)
+        k2 = [k for k in s.evaluate(SP) if k["id"] == kid][0]
+        pruefe(sum(d["n"] for d in k2["drucke"]) == k2["gefordert"], "Tippen auf 'gefordert' fuellt auf %s" % k2["gefordert"])
+        s.evaluate("() => %s.querySelectorAll('.abx-mini')[1].click()" % sel)
+        s.wait_for_timeout(300)
+        k3 = [k for k in s.evaluate(SP) if k["id"] == kid][0]
+        pruefe(sum(d["n"] for d in k3["drucke"]) == k2["gefordert"] + 1, "+ geht ueber 'gefordert' hinaus")
+        s.evaluate("() => %s.querySelector('.abx-drucke-btn').click()" % sel)
+        warte_bis(s, "() => !document.getElementById('abxDruckDialog').classList.contains('d-none')", 10)
+        zeilen = s.evaluate("() => document.querySelectorAll('#abxDruckDialog .abx-dialog-druck').length")
+        print("Druck-Dialog: %d Drucke" % zeilen)
+        pruefe(zeilen >= 1, "Druck-Dialog zeigt die Drucke der Karte (%d)" % zeilen)
+        if zeilen >= 2:
+            s.evaluate("() => { ArchetypBox._druck(0, -2); ArchetypBox._druck(1, 2); }")
+            s.evaluate("() => document.querySelector('#abxDruckDialog .abx-dialog-fuss .btn-primary').click()")
+            s.wait_for_timeout(300)
+            k4 = [k for k in s.evaluate(SP) if k["id"] == kid][0]
+            gesamt = sum(d["n"] for d in k4["drucke"])
+            pruefe(len(k4["drucke"]) == 2 and gesamt == k2["gefordert"] + 1,
+                   "Aufteilung gespeichert: %s" % [(d["id"], d["n"]) for d in k4["drucke"]])
+            weitere = s.evaluate("() => (%s.querySelector('.abx-weitere')||{}).textContent || ''" % sel)
+            pruefe("+1" in weitere, "Kachel nennt den zweiten Druck (%s)" % weitere)
+        else:
+            s.evaluate("() => ArchetypBox.druckeSchliessen(false)")
+
         # 5. Status, Proxy-Druck
         s.evaluate("() => document.querySelector('.abx-rubrik-fehlt .abx-seg-original').click()")
         s.evaluate("() => document.querySelector('.abx-rubrik-fehlt .abx-seg-proxy').click()")
         s.evaluate("() => document.querySelector('.abx-rubrik-fehlt .abx-seg-proxy').click()")
         s.wait_for_timeout(500)
         gespeichert = s.evaluate("() => Object.values(window.__abxSpeicher)[0].karten.map(k => k.status)")
-        pruefe(gespeichert.count("original") == 1 and gespeichert.count("proxy") == 2,
-               "Status im Konto: 1 Original, 2 Proxy")
-        erwartet = s.evaluate("() => Object.values(window.__abxSpeicher)[0].karten.filter(k => k.status === 'proxy').reduce((a, k) => a + k.anzahl, 0)")
+        pruefe(gespeichert.count("original") == 2 and gespeichert.count("proxy") == 2,
+               "Status im Konto: 2 Original, 2 Proxy")
+        erwartet = s.evaluate("() => Object.values(window.__abxSpeicher)[0].karten.filter(k => k.status === 'proxy').reduce((a, k) => a + k.drucke.reduce((x, d) => x + d.n, 0), 0)")
         s.evaluate("() => { window.proxyQueue = []; }")
         s.evaluate("() => document.querySelector('.abx-druck-btn').click()")
         s.wait_for_timeout(1500)
@@ -190,7 +236,9 @@ def main():
         print("Aktualisieren:", json.dumps(erg, ensure_ascii=False)[:400])
         pruefe(erg["neu"] == erg["weg"], "genau die zwei entfernten Karten kommen als 'neu' zurueck")
         pruefe(erg["marken"] == 2, "zwei Neu-Marken sichtbar")
-        pruefe(erg["status"].count("original") == 1 and erg["status"].count("proxy") == 2, "Status der uebrigen Karten bleibt")
+        pruefe(erg["status"].count("original") == 2 and erg["status"].count("proxy") == 2, "Status der uebrigen Karten bleibt")
+        kn = [k for k in s.evaluate(SP) if k["id"] == kid][0]
+        pruefe(sum(d["n"] for d in kn["drucke"]) == k2["gefordert"] + 1, "Aktualisieren laesst die Mengen in der Box stehen")
         pruefe(not erg["hinweis"], "Hinweis auf neue Daten ist danach weg")
 
         # 7. Von Hand
@@ -211,10 +259,19 @@ def main():
             m = s.evaluate("""() => { const r = document.getElementById('abxInhalt').getBoundingClientRect();
                 const sp = new Set([...document.querySelectorAll('.abx-rubrik-fehlt .abx-karte')].map(k => Math.round(k.getBoundingClientRect().left)));
                 const segs = [...document.querySelectorAll('.abx-seg')].map(x => x.getBoundingClientRect().height);
-                return { ueberlauf: document.documentElement.scrollWidth - window.innerWidth,
+                let raus = 0, oval = 0;
+                document.querySelectorAll('#abxInhalt .abx-karte').forEach(k => {
+                  const rk = k.getBoundingClientRect();
+                  k.querySelectorAll('button').forEach(x => { const r = x.getBoundingClientRect();
+                    if (r.width && (r.left < rk.left - 0.5 || r.right > rk.right + 0.5)) raus++; });
+                  k.querySelectorAll('.abx-soll, .abx-herz, .abx-anzahl').forEach(x => { const r = x.getBoundingClientRect();
+                    if (r.width && Math.abs(r.height - 28) > 1.5) oval++; }); });
+                return { raus: raus, oval: oval, ueberlauf: document.documentElement.scrollWidth - window.innerWidth,
                          rechts: Math.round(r.right), spalten: sp.size, segMin: Math.min(...segs) }; }""")
             print("%4d px: %s" % (w, m))
             pruefe(m["ueberlauf"] <= 0, "%d px ohne waagerechten Ueberlauf" % w)
+            pruefe(m["raus"] == 0, "%d px: kein Knopf ragt aus seiner Kachel (%d)" % (w, m["raus"]))
+            pruefe(m["oval"] == 0, "%d px: Plaketten 28 px hoch, keine Ovale (%d)" % (w, m["oval"]))
             pruefe(m["spalten"] >= 2, "%d px mindestens zwei Spalten" % w)
         if a.bilder:
             for w in (1280, 390):

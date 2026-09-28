@@ -70,7 +70,7 @@ describe('FE-13: Aktualisieren', () => {
     })();
 
     const frisch = [
-        karte('TWM-130', { anteil: 80, anzahl: 3 }),
+        karte('TWM-130', { anteil: 80, maxAnzahl: 3 }),
         // anderer Druck derselben Karte (Iono PAL 185 -> PAF 80): kein neuer Eintrag
         karte('PAF-80', { typ: 'Supporter', refs: ['PAL-185', 'SVP-124'] }),
         karte('30C-12', { anteil: 12 })            // neu im Format
@@ -88,7 +88,8 @@ describe('FE-13: Aktualisieren', () => {
         const d = erg.box.karten.find(x => x.id === 'TWM-130');
         assert.equal(d.status, 'original');
         assert.equal(d.anteil, 80);
-        assert.equal(d.anzahl, 3);
+        assert.equal(d.gefordert, 3, '"gefordert" kommt aus den Daten und wird nachgezogen');
+        assert.equal(L.drin(d), 4, 'was in der Box liegt, fasst das Aktualisieren nicht an');
         const iono = erg.box.karten.find(x => x.id === 'PAL-185');
         assert.equal(iono.status, 'proxy', 'der andere Druck hat die Karte als neu angelegt');
         assert.ok(iono.refs.includes('PAF-80'));
@@ -109,10 +110,10 @@ describe('FE-13: Aktualisieren', () => {
         assert.ok(!alt.karten.some(k => k.id === '30C-12'));
     });
 
-    it('eine selbst gesetzte Anzahl ueberschreibt das Aktualisieren nicht', () => {
-        const b = L.anzahlSetzen(alt, 'TWM-130', 1);
+    it('eine selbst gesetzte Menge ueberschreibt das Aktualisieren nicht', () => {
+        const b = L.drinSetzen(alt, 'TWM-130', 1);
         const e = L.abgleichen(b, frisch, {}, HEUTE);
-        assert.equal(e.box.karten.find(x => x.id === 'TWM-130').anzahl, 1);
+        assert.equal(L.drin(e.box.karten.find(x => x.id === 'TWM-130')), 1);
     });
 
     it('ein zweiter Lauf mit denselben Daten bringt nichts Neues', () => {
@@ -140,8 +141,8 @@ describe('FE-13: Ansicht und Druck', () => {
     let b = L.neueBox({ name: 'X', archetyp: 'X' }, [
         karte('SVE-1', { typ: 'Energy', anteil: 100 }),
         karte('TWM-130', { typ: 'Pokemon', anteil: 90 }),
-        karte('PAL-185', { typ: 'Supporter', anteil: 95 }),
-        karte('TWM-129', { typ: 'Pokemon', anteil: 99, anzahl: 4 }),
+        karte('PAL-185', { typ: 'Supporter', anteil: 95, maxAnzahl: 2 }),
+        karte('TWM-129', { typ: 'Pokemon', anteil: 99, maxAnzahl: 4 }),
     ], HEUTE);
     b = L.statusSetzen(b, 'PAL-185', 'proxy');
     b = L.statusSetzen(b, 'TWM-129', 'proxy');
@@ -168,7 +169,7 @@ describe('FE-13: Ansicht und Druck', () => {
         gleich(L.proxyListe(b).map(p => [p.set + ' ' + p.number, p.anzahl]),
             [['TWM 129', 4], ['PAL 185', 2]]);
         const z = L.zaehlen(b);
-        assert.equal(z.kopien.proxy, 6);
+        assert.equal(z.kopien.proxy, 6, 'Proxy ohne Menge legt die geforderte Menge hinein');
         gleich([z.fehlt, z.original, z.proxy], [1, 1, 2]);
     });
 
@@ -183,9 +184,86 @@ describe('FE-13: Ansicht und Druck', () => {
         assert.equal(e.hinzugefuegt, false);
     });
 
-    it('Anzahl bleibt zwischen 1 und 60', () => {
-        assert.equal(L.anzahlSetzen(b, 'SVE-1', 0).karten.find(k => k.id === 'SVE-1').anzahl, 1);
-        assert.equal(L.anzahlSetzen(b, 'SVE-1', 99).karten.find(k => k.id === 'SVE-1').anzahl, 60);
+    it('Menge zwischen 0 und 99, auch ueber "gefordert" hinaus', () => {
+        const k = (x) => x.karten.find(q => q.id === 'SVE-1');
+        assert.equal(L.drin(k(L.drinSetzen(b, 'SVE-1', 7))), 7);
+        assert.equal(L.drin(k(L.drinSetzen(b, 'SVE-1', 500))), 99);
+        const leer = L.drinSetzen(b, 'SVE-1', 0);
+        assert.equal(L.drin(k(leer)), 0);
+        assert.equal(k(leer).status, 'fehlt', 'nichts drin heisst fehlt');
+    });
+});
+
+describe('FE-13 Nachtrag (28.09.2026): gefordert, drin, Drucke', () => {
+    const basis = L.neueBox({ name: 'X', archetyp: 'X' }, [
+        karte('MEG-54', { name: 'Abra', typ: 'Pokemon', maxAnzahl: 4, refs: ['SVI-1', 'PAF-7'] })], HEUTE);
+    const k = (x) => x.karten.find(q => q.id === 'MEG-54');
+
+    it('neu angelegt: gefordert aus max_count, nichts drin', () => {
+        assert.equal(k(basis).gefordert, 4);
+        assert.equal(L.drin(k(basis)), 0);
+        assert.equal(k(basis).status, 'fehlt');
+    });
+
+    it('+ auf einer fehlenden Karte legt sie als Original hinein', () => {
+        const x = L.drinSetzen(basis, 'MEG-54', 1);
+        assert.equal(L.drin(k(x)), 1);
+        assert.equal(k(x).status, 'original');
+    });
+
+    it('Proxy bleibt Proxy, wenn die Menge sich aendert', () => {
+        let x = L.statusSetzen(basis, 'MEG-54', 'proxy');
+        x = L.drinSetzen(x, 'MEG-54', 2);
+        assert.equal(k(x).status, 'proxy');
+        assert.equal(L.drin(k(x)), 2);
+    });
+
+    it('Tippen auf "gefordert" fuellt auf, nimmt aber nie etwas weg', () => {
+        let x = L.drinSetzen(basis, 'MEG-54', 1);
+        x = L.auffuellen(x, 'MEG-54');
+        assert.equal(L.drin(k(x)), 4);
+        x = L.drinSetzen(x, 'MEG-54', 6);
+        x = L.auffuellen(x, 'MEG-54');
+        assert.equal(L.drin(k(x)), 6);
+    });
+
+    it('Aufteilung nach Druck: Summe ist die Menge, Minus nimmt erst vom angezeigten Druck', () => {
+        let x = L.druckeSetzen(basis, 'MEG-54', [
+            { id: 'MEG-54', set: 'MEG', number: '54', n: 2 },
+            { id: 'SVI-1', set: 'SVI', number: '1', n: 2 },
+            { id: 'PAF-7', set: 'PAF', number: '7', n: 0 }]);
+        assert.equal(L.drin(k(x)), 4);
+        gleich(k(x).drucke.map(d => [d.id, d.n]), [['MEG-54', 2], ['SVI-1', 2]]);
+        assert.equal(k(x).status, 'original');
+        x = L.drinSetzen(x, 'MEG-54', 1);
+        gleich(k(x).drucke.map(d => [d.id, d.n]), [['SVI-1', 1]]);
+        // Der angezeigte Druck gibt zuerst ab, auch wenn ein anderer mehr hat.
+        let y = L.druckeSetzen(basis, 'MEG-54', [
+            { id: 'MEG-54', set: 'MEG', number: '54', n: 1 }, { id: 'SVI-1', set: 'SVI', number: '1', n: 3 }]);
+        y = L.drinSetzen(y, 'MEG-54', 3);
+        gleich(k(y).drucke.map(d => [d.id, d.n]), [['SVI-1', 3]]);
+    });
+
+    it('Proxy-Druck bekommt jeden Druck mit seiner Menge', () => {
+        let x = L.druckeSetzen(basis, 'MEG-54', [
+            { id: 'MEG-54', set: 'MEG', number: '54', n: 1 }, { id: 'SVI-1', set: 'SVI', number: '1', n: 3 }]);
+        x = L.statusSetzen(x, 'MEG-54', 'proxy');
+        gleich(L.proxyListe(x).map(p => [p.set + ' ' + p.number, p.anzahl]), [['MEG 54', 1], ['SVI 1', 3]]);
+    });
+
+    it('"Fehlt" leert die Box fuer diese Karte', () => {
+        let x = L.drinSetzen(basis, 'MEG-54', 3);
+        x = L.statusSetzen(x, 'MEG-54', 'fehlt');
+        assert.equal(L.drin(k(x)), 0);
+    });
+
+    it('Boxen aus #859 (nur anzahl + Status) werden ohne Verlust gelesen', () => {
+        const alt = { id: 'TWM-130', set: 'TWM', number: '130', status: 'proxy', anzahl: 3, maxAnzahl: 4, anzahlEigen: true };
+        const n = L.normiert(alt);
+        assert.equal(L.drin(n), 3);
+        assert.equal(n.gefordert, 4);
+        const leer = L.normiert({ id: 'A-1', set: 'A', number: '1', status: 'fehlt', anzahl: 2, maxAnzahl: 2 });
+        assert.equal(L.drin(leer), 0);
     });
 });
 
@@ -316,3 +394,14 @@ describe('FE-13: lesbar im dunklen Modus (live gefunden 28.09.2026)', () => {
     });
 });
 
+
+describe('FE-13 Nachtrag: Handy-Regel fuer Knoepfe greift nicht auf die Plaketten', () => {
+    // 390 px, 28.09.2026: die allgemeine Regel (button min 44x44, padding
+    // 10px 15px) machte die runden Plaketten zu Ovalen und schob den
+    // vierten Knopf aus der Kachel. Gemessen in scripts/messe_archetyp_box.py.
+    const CSS = ohneKommentare(R('css/archetyp-box.css'));
+    it('Plaketten behalten 28 px, Knoepfe duerfen schmal werden', () => {
+        assert.match(CSS, /\.abx-karte \.abx-soll,\s*\.abx-karte \.abx-herz \{[^}]*height: 28px !important/);
+        assert.match(CSS, /\.abx-karte \.abx-mini,\s*\.abx-karte \.abx-seg \{[^}]*min-width: 0 !important/);
+    });
+});

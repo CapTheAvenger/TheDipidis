@@ -359,6 +359,19 @@ def main():
         print("Alle Boxen:", ab)
         pruefe(ab["aktiv"] in ("Alle Boxen", "All boxes") and ab["kacheln"] == ab["summe"] and ab["namen"] >= ab["kacheln"],
                "ohne Wahl: alle Boxen zusammen, jede Kachel nennt ihre Box")
+        # 7c2. Chip nennt Groesse der Box: verschiedene Karten, Stueck, fehlend, offen — eigene Rechnung
+        cz = s.evaluate("""() => { const b = Object.values(window.__abxSpeicher).find(x => x.name !== 'TEST Kopie');
+            const d = k => (k.drucke || []).reduce((a, x) => a + (x.n || 0), 0);
+            const soll = k => (k.gefordert > 0 ? k.gefordert : (!k.manuell && k.maxAnzahl > 0 ? k.maxAnzahl : 1));
+            const e = { karten: b.karten.length, stueck: b.karten.reduce((a, k) => a + Math.max(soll(k), d(k)), 0),
+                fehlen: b.karten.filter(k => (k.status || 'fehlt') === 'fehlt').length,
+                offen: b.karten.reduce((a, k) => a + Math.max(0, soll(k) - d(k)), 0) };
+            const chip = [...document.querySelectorAll('.abx-chip')].find(c => c.querySelector('.abx-chip-name').textContent === b.name);
+            return { e, text: [...chip.querySelectorAll('.abx-chip-zahl')].map(z => z.textContent) }; }""")
+        print("Chip:", cz)
+        e = cz["e"]
+        pruefe(cz["text"] == ["%d Karten · %d Stück" % (e["karten"], e["stueck"]), "%d fehlen · %d Stück offen" % (e["fehlen"], e["offen"])],
+               "Chip zeigt verschiedene Karten, Stück, fehlende und offene Stück (%s)" % cz["text"])
         # 7d. Alle Boxen aktualisieren: Anteile je Format weg, ein Knopf holt sie fuer jede Box zurueck
         s.evaluate("""() => Object.values(window.__abxSpeicher).forEach(b => { b.karten.forEach(k => { delete k.formate; }); b.mitFormaten = false; })""")
         s.evaluate(PROFIL_SICHTBAR)

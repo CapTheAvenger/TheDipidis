@@ -634,3 +634,36 @@ describe('FE-13 Nachtrag: Hauptfilter Format (aktuelles Meta, Standard, Expanded
         });
     });
 });
+
+
+describe('FE-13 Nachtrag: Groesse der Box auf dem Chip (Karten und Stueck)', () => {
+    // Hausi, 28.09.2026: „wie viele verschiedene Karten und wie viele in Summe,
+    // damit ich weiss, wie gross die Box sein muss“.
+    const box = {
+        karten: [
+            { id: 'A-1', set: 'A', number: '1', gefordert: 4, status: 'fehlt', drucke: [] },
+            { id: 'A-2', set: 'A', number: '2', gefordert: 2, status: 'original', drucke: [{ id: 'A-2', set: 'A', number: '2', n: 1 }] },
+            { id: 'A-3', set: 'A', number: '3', gefordert: 1, status: 'proxy', drucke: [{ id: 'A-3', set: 'A', number: '3', n: 3 }] },
+            { id: 'A-4', set: 'A', number: '4', gefordert: null, manuell: true, status: 'fehlt', drucke: [] }
+        ]
+    };
+    it('verschiedene Karten, Stueck (Hoechstes aus gefordert und drin), fehlende Karten, offene Stueck', () => {
+        gleich(L.umfang(box), { karten: 4, stueck: 4 + 2 + 3 + 1, fehlen: 2, offen: 4 + 1 + 0 + 1 });
+    });
+    it('Verfaelschungsproben', () => {
+        const probe = (alt, neu) => { assert.ok(QUELLE.includes(alt), alt); return logik(QUELLE.replace(alt, neu)); };
+        assert.notEqual(probe('u.stueck += Math.max(soll, menge);', 'u.stueck += soll;').umfang(box).stueck, 10,
+            'mehr drin als gefordert faellt nicht auf');
+        assert.notEqual(probe('u.offen += Math.max(0, soll - menge);', 'u.offen += soll - menge;').umfang(box).offen, 6,
+            'negatives Offen faellt nicht auf');
+        assert.notEqual(probe("const soll = gefordertVon(k) > 0 ? gefordertVon(k) : 1;", "const soll = gefordertVon(k) || 0;").umfang(box).stueck, 10,
+            'von Hand ohne Vorgabe zaehlt nicht mit');
+    });
+    it('der Chip zeigt beides, in beiden Sprachen', () => {
+        const code = ohneKommentare(QUELLE);
+        assert.match(code, /tx\('abx\.chipUmfang', \{ karten: u\.karten, stueck: u\.stueck \}/);
+        assert.match(code, /tx\('abx\.chipFehlen', \{ n: u\.fehlen, offen: u\.offen \}/);
+        const i18n = R('js/i18n.js');
+        ['abx.chipUmfang', 'abx.chipFehlen'].forEach(k => assert.equal(i18n.split("'" + k + "':").length - 1, 2, k));
+    });
+});

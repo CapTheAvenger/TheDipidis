@@ -292,3 +292,27 @@ describe('FE-13: jeder Text in beiden Sprachen', () => {
         gleich(falsch, []);
     });
 });
+
+describe('FE-13: lesbar im dunklen Modus (live gefunden 28.09.2026)', () => {
+    // Live im dunklen Modus war der aktive Knopf "Fehlt" ein heller Kasten
+    // ohne lesbare Schrift: var(--ink-2) wird dort hell, und --on-dark ist
+    // nicht weiss. Die --solid-*-Toene tragen weisse Schrift in beiden Modi.
+    const CSS = ohneKommentare(R('css/archetyp-box.css'));
+    const regel = (sel) => {
+        const i = CSS.indexOf(sel + ' {');
+        assert.ok(i >= 0, sel + ' fehlt');
+        return CSS.slice(i, CSS.indexOf('}', i));
+    };
+    for (const s of ['fehlt', 'original', 'proxy']) {
+        it('aktiver Knopf ' + s + ': solid-Ton mit weisser Schrift', () => {
+            const r = regel('.abx-seg-' + s + '.is-active');
+            assert.match(r, /background:\s*var\(--solid-(neutral|ok|info)\)/);
+            assert.match(r, /color:\s*#fff/);
+        });
+    }
+    it('Anzahl-Plakette haengt nicht an Tokens, die im dunklen Modus kippen', () => {
+        const r = regel('.abx-anzahl');
+        assert.ok(!/var\(--ink\)|var\(--on-dark\)/.test(r), r);
+    });
+});
+

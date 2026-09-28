@@ -223,6 +223,20 @@ def main():
                 s.evaluate("() => document.getElementById('profile-archetypbox').scrollIntoView()")
                 s.wait_for_timeout(1500)
                 s.screenshot(path="%s/abx-box-%d.png" % (a.bilder, w))
+        # 9. Dunkler Modus: Kontrast der aktiven Knoepfe und der Plakette
+        s.evaluate("() => { document.documentElement.dataset.theme = 'dark'; }")
+        s.wait_for_timeout(500)
+        k = s.evaluate("""() => {
+          const rgb = c => (c.match(/[\\d.]+/g) || []).map(Number);
+          const lum = ([r, g, b]) => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+            return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+          const kon = el => { const cs = getComputedStyle(el); let bg = rgb(cs.backgroundColor);
+            if (bg.length === 4 && bg[3] < 1) { const a = bg[3]; bg = bg.slice(0, 3).map(v => v * a + 255 * (1 - a) * 0); }
+            const a = lum(rgb(cs.color)), b = lum(bg.slice(0, 3));
+            return Math.round(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)) * 100) / 100; };
+          return [...document.querySelectorAll('.abx-seg.is-active, .abx-anzahl')].slice(0, 40).map(kon); }""")
+        print("dunkel, Kontraste:", sorted(set(k))[:6])
+        pruefe(k and min(k) >= 4.5, "dunkler Modus: aktive Knoepfe und Plaketten >= 4,5:1 (min %s)" % (min(k) if k else "-"))
         pruefe(not [k for k in konsole if "ArchetypBox" in k or "archetyp" in k.lower()],
                "keine Skriptfehler aus der Archetyp-Box (%d Seitenfehler gesamt)" % len(konsole))
         b.close()

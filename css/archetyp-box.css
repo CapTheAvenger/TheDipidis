@@ -116,7 +116,9 @@
     position: absolute; right: 6px; bottom: 6px;
     min-width: 28px; height: 28px; line-height: 28px; padding: 0 6px;
     border-radius: 14px;
-    background: var(--ink); color: var(--on-dark);
+    /* Fest dunkel mit weisser Schrift — in BEIDEN Modi lesbar (var(--ink)
+       wird im dunklen Modus hell, und --on-dark ist nicht weiss). */
+    background: rgba(0, 0, 0, 0.78); color: #fff;
     font-weight: 800; font-size: var(--fs-sm); text-align: center;
 }
 .abx-marken { position: absolute; left: 6px; top: 6px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
@@ -126,7 +128,7 @@
     font-size: var(--fs-xs); font-weight: 700;
     box-shadow: var(--e-1);
 }
-.abx-marke-neu { background: var(--solid-ok); color: var(--on-dark); }
+.abx-marke-neu { background: var(--solid-ok); color: #fff; }
 .abx-marke-alt { background: var(--tint-warn); color: var(--tint-warn-ink); }
 .abx-text { min-width: 0; }
 .abx-name {
@@ -147,9 +149,11 @@
     font-size: var(--fs-xs); font-weight: 700;
     cursor: pointer;
 }
-.abx-seg-fehlt.is-active { background: var(--ink-2); border-color: var(--ink-2); color: var(--on-dark); }
-.abx-seg-original.is-active { background: var(--solid-ok); border-color: var(--solid-ok); color: var(--on-dark); }
-.abx-seg-proxy.is-active { background: var(--solid-info); border-color: var(--solid-info); color: var(--on-dark); }
+/* Die --solid-*-Toene sind fuer weisse Schrift gebaut (>= 5:1) und in
+   beiden Modi gleich. --ink-2/--on-dark kippen im dunklen Modus. */
+.abx-seg-fehlt.is-active { background: var(--solid-neutral); border-color: var(--solid-neutral); color: #fff; }
+.abx-seg-original.is-active { background: var(--solid-ok); border-color: var(--solid-ok); color: #fff; }
+.abx-seg-proxy.is-active { background: var(--solid-info); border-color: var(--solid-info); color: #fff; }
 
 .abx-zeile2 { display: flex; gap: 4px; }
 .abx-mini {

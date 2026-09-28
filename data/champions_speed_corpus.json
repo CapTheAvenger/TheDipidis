@@ -1,13 +1,13 @@
 {
   "_meta": {
-    "last_updated": "2026-09-27",
+    "last_updated": "2026-09-28",
     "window_days": 14,
-    "window_start": "2026-09-13",
-    "window_end": "2026-09-27",
+    "window_start": "2026-09-14",
+    "window_end": "2026-09-28",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
     "content_to": "2026-09-22",
-    "samples_outside_window": 36,
+    "samples_outside_window": 66,
     "team_count": 120,
     "teams_with_samples": 120,
     "sample_count": 716,
@@ -2536,48 +2536,6 @@
       "replica": "HL8WHRG0GE"
     },
     {
-      "species": "Salamence",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "13 Sep 2026",
-      "replica": "HBP260F81K"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "30 HP / 27 Def / 5 SpA / 4 Spe",
-      "nature": "Modest",
-      "date": "13 Sep 2026",
-      "replica": "HBP260F81K"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "32 HP / 2 SpA / 32 SpD",
-      "nature": "Calm",
-      "date": "13 Sep 2026",
-      "replica": "HBP260F81K"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "4 HP / 28 Atk / 9 SpD / 25 Spe",
-      "nature": "Adamant",
-      "date": "13 Sep 2026",
-      "replica": "HBP260F81K"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "13 Sep 2026",
-      "replica": "HBP260F81K"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 2 Atk / 32 SpD",
-      "nature": "Sassy",
-      "date": "13 Sep 2026",
-      "replica": "HBP260F81K"
-    },
-    {
       "species": "Golisopod",
       "evs": "32 HP / 10 Atk / 1 SpD / 23 Spe",
       "nature": "Adamant",
@@ -5026,6 +4984,48 @@
       "nature": "Careful",
       "date": "15 Sep 2026",
       "replica": "YM8P3T36XR"
+    },
+    {
+      "species": "Armarouge",
+      "evs": "32 HP / 32 SpA / 2 SpD",
+      "nature": "Quiet",
+      "date": "15 Sep 2026",
+      "replica": "0XJX4NBLXM"
+    },
+    {
+      "species": "Indeedee-F",
+      "evs": "32 HP / 32 Def / 2 SpD",
+      "nature": "Relaxed",
+      "date": "15 Sep 2026",
+      "replica": "0XJX4NBLXM"
+    },
+    {
+      "species": "Torkoal",
+      "evs": "32 HP / 2 Def / 32 SpA",
+      "nature": "Quiet",
+      "date": "15 Sep 2026",
+      "replica": "0XJX4NBLXM"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Adamant",
+      "date": "15 Sep 2026",
+      "replica": "0XJX4NBLXM"
+    },
+    {
+      "species": "Gardevoir",
+      "evs": "32 HP / 8 Def / 15 SpA / 11 Spe",
+      "nature": "Modest",
+      "date": "15 Sep 2026",
+      "replica": "0XJX4NBLXM"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "32 HP / 25 Atk / 9 Def",
+      "nature": "Adamant",
+      "date": "15 Sep 2026",
+      "replica": "0XJX4NBLXM"
     }
   ]
 }

@@ -2055,13 +2055,20 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     || ((card.original_set_code || '').toUpperCase() === 'M3')
                     || (typeof imageUrl === 'string' && /\/M3\//i.test(imageUrl));
 
+                /* UI-42 (28.09.2026): Anteil und Ø als zwei Teile statt
+                   einer Zeile mit „|“. Passt beides nicht nebeneinander,
+                   bricht der Ø-Teil in die zweite Zeile, statt mit „…“
+                   abgeschnitten zu werden — gemessen vorher bei 1280 und
+                   1920 px auf 26 von 26 Kacheln (92 px Platz, 105 px Text). */
+                const kennzahlTeile = `<span class="deck-card-overlay-teil">${fallbackShare}%</span> `
+                    + `<span class="deck-card-overlay-teil">Ø ${fallbackAvg}x</span>`;
                 let overlayText = '';
                 if (fallbackShareValue > 0 || fallbackAvgValue > 0) {
-                    overlayText = `${fallbackShare}% | Ø ${fallbackAvg}x`;
+                    overlayText = kennzahlTeile;
                 } else if (isM3Special) {
                     overlayText = t('deck.m3Exclusive');
                 } else {
-                    overlayText = `${fallbackShare}% | Ø ${fallbackAvg}x`;
+                    overlayText = kennzahlTeile;
                 }
                 
                 // Check if user owns this card (specific print)

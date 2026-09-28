@@ -1671,6 +1671,27 @@
             position: static;
         }
 
+        /* UI-42 (28.09.2026): die Kennzahl-Zeile wurde am Desktop auf
+           JEDER Kachel abgeschnitten („100,0% | Ø 1,0…“) — gemessen bei
+           1280 und 1920 px 26/26, 92 px Platz fuer 105 px Text. Die
+           Bedingung ist „passt nicht nebeneinander“, nicht eine Breite:
+           zwei Teile, die als Ganzes umbrechen. Seit UI-38 steht das
+           Band im Fluss der Knopfsaeule, eine zweite Zeile schiebt also
+           nichts uebereinander. */
+        .deck-card-actions > .deck-card-overlay {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            column-gap: 0.45em;
+            row-gap: 1px;
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+        }
+        .deck-card-overlay-teil {
+            white-space: nowrap;
+        }
+
         .deck-card-action-row {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -3120,6 +3141,13 @@
                 min-height: 44px; /* Touch-Target Mindestgröße */
                 font-size: 14px; /* Kompakter für Mobile */
                 padding: 10px;
+                width: 100%;
+            }
+
+            /* UI-44 (28.09.2026): der Major-Knopf steckt mit seinem Zusatz
+               in einem Rahmen. Der Rahmen folgt derselben Regel wie der
+               Knopf, sonst ist er hier der einzige, der nicht voll breit ist. */
+            .controls .cm-major-knopf-rahmen {
                 width: 100%;
             }
             

@@ -158,8 +158,10 @@ describe('FE-5 — drei Fassungen des Bildes', () => {
 });
 
 describe('FE-4 — die Heatmap hat keinen CSV-Knopf mehr', () => {
-    it('die Tabelle steigt aus js/ds-csv.js aus', () => {
-        assert.match(META, /<table class="heatmap-table" data-csv="nein"/);
+    // Seit UI-41 (28.09.2026) gibt es seitenweit keinen CSV-Export mehr;
+    // die Zusicherung dafuer steht in test-ui41-kein-csv.js.
+    it('die Heatmap wird weiter als Tabelle gezeichnet', () => {
+        assert.match(META, /<table class="heatmap-table"/);
     });
 });
 

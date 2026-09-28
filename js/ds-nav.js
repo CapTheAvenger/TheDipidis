@@ -488,11 +488,14 @@
     // ist das Format. Es kommt aus derselben Stelle wie ueberall sonst
     // (window._formatWindow, gespeist aus data/format_window.json), damit
     // die naechste Rotation es mitnimmt statt es stehen zu lassen.
+    // UI-43 (28.09.2026): dieselbe Marke steht auch in der Ueberschrift
+    // der Deck-Analyse (Global), statt dort „aktuelles Meta“ zu sagen.
     function formatMarke() {
-        var el = document.getElementById('cmFormatLabel');
-        if (!el) return;
         var f = formatFor('gl');
-        el.textContent = f.label ? ' \u00b7 ' + f.label : '';
+        ['cmFormatLabel', 'cmAnalysisFormatLabel'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = f.label ? ' \u00b7 ' + f.label : '';
+        });
     }
 
     if (document.readyState === 'loading') {

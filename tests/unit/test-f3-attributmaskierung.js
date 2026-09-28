@@ -436,13 +436,14 @@ describe('Einschleusungsversuche durch jede reparierte Bauform', () => {
  * Wird eine einzige Stelle zurueckgedreht, faellt sie um.
  *
  * Die Zahlen stammen aus dem Bestand am 07.09.2026, nachgezaehlt:
- *   js/app-city-league.js  16   js/app-deck-builder.js   6
+ *   js/app-city-league.js  12   js/app-deck-builder.js   6
+ *   (City League 16 -> 12: UI-45, 28.09.2026, die Vergleichsrubriken sind weg)
  *   js/app-meta-cards.js    5   js/app-tier-meta.js     10
  * Kommt eine Stelle dazu, muss sie hier eingetragen werden — und das
  * ist Absicht: der Eintrag zwingt zum Hinsehen.
  */
 const ERWARTET = {
-    'app-city-league.js': 16,
+    'app-city-league.js': 12,
     'app-deck-builder.js': 6,
     'app-meta-cards.js': 5,
     'app-tier-meta.js': 10,

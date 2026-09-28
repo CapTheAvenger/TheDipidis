@@ -313,8 +313,13 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
             + 'dann folgt der Nenner einer knappen Mehrheit statt einem Beleg');
     });
 
-    it('die City League braucht keine: dort IST die Summe das Feld', () => {
-        assert.match(lies('js/app-city-league.js'), /renderMetaChart\('cityLeague', sorted\)/);
+    it('die City League zeichnet keinen Donut mehr (UI-45, 28.09.2026)', () => {
+        // Bis 28.09.2026: renderMetaChart('cityLeague', sorted) ohne
+        // Feldgroesse, weil dort die Summe das Feld ist. Der Bereich
+        // „Top-Archetypen nach Share“ ist in Japan auf Wunsch entfallen.
+        const code = lies('js/app-city-league.js').replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/(^|[^:'"\\])\/\/[^\n]*/g, '$1');
+        assert.doesNotMatch(code, /renderMetaChart\(/);
     });
 });
 

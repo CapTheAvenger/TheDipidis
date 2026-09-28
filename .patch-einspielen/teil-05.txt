@@ -1,0 +1,150 @@
++        const frische = formateZuordnen(eintraegeAus(karten, summe.totalDecklists), jeFormatAus(auswahl.matchingDecks));|
++        const erg = abgleichen(box, frische, { datenStand: isoTag(summe.letztesDatumMs) }, heuteIso());|
++        erg.box.id = box.id;|
++        await schreiben(erg.box);|
++        return erg;|
++    }|
++|
++    /**|
++     * Aktualisieren: eine Box (id) oder, mit id null, alle Boxen nacheinander —|
++     * die Turnierdaten werden dafuer nur einmal geladen.|
++     */|
+     async function aktualisieren(id) {|
+         if (aktualisiertGerade) return;|
+-        const box = boxen.find(function (b) { return b.id === id; });|
+-        if (!box) return;|
++        const liste = id ? boxen.filter(function (b) { return b.id === id; }) : boxen.slice();|
++        if (!liste.length) return;|
+         aktualisiertGerade = true;|
+@@ -1110,17 +1127,20 @@|
+             await rotationenDatenLaden(zeile);|
+-            const auswahl = _pmDeckAuswahl('all', 'all', box.archetyp);|
+-            if (!auswahl.matchingDecks.length) {|
+-                zeile('');|
+-                toast(tx('abx.archetypWeg', { name: box.name },|
+-                    '„{name}“ kommt in den Turnierdaten nicht mehr vor — die Box bleibt unverändert.'), 'warning');|
+-                return;|
++            const weg = [];|
++            let neuSumme = 0;|
++            for (let i = 0; i < liste.length; i++) {|
++                if (liste.length > 1) zeile(tx('abx.ladeBox', { n: i + 1, g: liste.length, name: liste[i].name }, 'Gleiche ab: {name} ({n} von {g}) …'));|
++                const erg = await abgleichSpeichern(liste[i]);|
++                if (!erg) { weg.push(liste[i].name); continue; }|
++                neuSumme += erg.neu.length;|
++                if (id) letztesErgebnis = { id: liste[i].id, neu: erg.neu, nichtMehr: erg.nichtMehr, wieder: erg.wieder };|
+             }|
+-            const summe = _pmAggregiereDecks(auswahl.matchingDecks);|
+-            const karten = gefilterteKarten(summe.aggregatedCards, String(box.schwelle || 'all'));|
+-            const frische = formateZuordnen(eintraegeAus(karten, summe.totalDecklists), jeFormatAus(auswahl.matchingDecks));|
+-            const erg = abgleichen(box, frische, { datenStand: isoTag(summe.letztesDatumMs) }, heuteIso());|
+-            erg.box.id = box.id;|
+-            await schreiben(erg.box);|
+-            letztesErgebnis = { id: box.id, neu: erg.neu, nichtMehr: erg.nichtMehr, wieder: erg.wieder };|
+             zeile('');|
++            if (weg.length) {|
++                toast(tx('abx.archetypWeg', { name: weg.join(', ') },|
++                    '„{name}“ kommt in den Turnierdaten nicht mehr vor — die Box bleibt unverändert.'), 'warning');|
++            }|
++            if (!id) {|
++                toast(tx('abx.alleAktualisiert', { n: liste.length - weg.length, neu: neuSumme },|
++                    '{n} Boxen abgeglichen, {neu} neue Karten.'), 'success');|
++            }|
+             zeichnen();|
+@@ -1424,3 +1444,3 @@|
+         if (ohneFormate && (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu')) {|
+-            fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal „Archetyp-Box aktualisieren“.');|
++            fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal aktualisieren („Alle Boxen“ → „Alle Boxen aktualisieren“).');|
+         }|
+@@ -1502,3 +1522,5 @@|
+             + (eine ? '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(\''|
+-                + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>' : '')|
++                + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>'|
++                : '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(null)">'|
++                + esc(tx('abx.alleAktualisieren', { n: boxen.length }, 'Alle {n} Boxen aktualisieren')) + '</button>')|
+             + (r.proxy.length|
+diff --git a/js/i18n.js b/js/i18n.js|
+index 4bae80fe..9a71c26c 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -898,3 +898,6 @@ const translations = {|
+     'abx.fmtFensterOhne': 'There is no tournament data for {fenster} yet.',|
+-    'abx.fmtAlteBox': 'At least one box does not know the per-format shares yet — please run “Update archetype box” once.',|
++    'abx.fmtAlteBox': 'At least one box does not know the per-format shares yet — please update once (“All boxes” → “Update all boxes”).',|
++    'abx.alleAktualisieren': 'Update all {n} boxes',|
++    'abx.alleAktualisiert': '{n} boxes updated, {neu} new cards.',|
++    'abx.ladeBox': 'Updating {name} ({n} of {g}) …',|
+     'abx.fTyp': 'Type',|
+@@ -3699,3 +3702,6 @@ const translations = {|
+     'abx.fmtFensterOhne': 'Für {fenster} gibt es noch keine Turnierdaten.',|
+-    'abx.fmtAlteBox': 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal „Archetyp-Box aktualisieren“.',|
++    'abx.fmtAlteBox': 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal aktualisieren („Alle Boxen“ → „Alle Boxen aktualisieren“).',|
++    'abx.alleAktualisieren': 'Alle {n} Boxen aktualisieren',|
++    'abx.alleAktualisiert': '{n} Boxen abgeglichen, {neu} neue Karten.',|
++    'abx.ladeBox': 'Gleiche ab: {name} ({n} von {g}) …',|
+     'abx.fTyp': 'Typ',|
+diff --git a/scripts/messe_archetyp_box.py b/scripts/messe_archetyp_box.py|
+index 8c7b42f7..bf218dd9 100644|
+--- a/scripts/messe_archetyp_box.py|
++++ b/scripts/messe_archetyp_box.py|
+@@ -361,2 +361,18 @@ def main():|
+                "ohne Wahl: alle Boxen zusammen, jede Kachel nennt ihre Box")|
++        # 7d. Alle Boxen aktualisieren: Anteile je Format weg, ein Knopf holt sie fuer jede Box zurueck|
++        s.evaluate("""() => Object.values(window.__abxSpeicher).forEach(b => { b.karten.forEach(k => { delete k.formate; }); b.mitFormaten = false; })""")|
++        s.evaluate(PROFIL_SICHTBAR)|
++        warte_bis(s, "() => !!document.querySelector('#abxAktualisierenBtn')", 20)|
++        knopftext = s.evaluate("() => document.getElementById('abxAktualisierenBtn').textContent")|
++        s.evaluate("() => document.getElementById('abxAktualisierenBtn').click()")|
++        warte_bis(s, "() => Object.values(window.__abxSpeicher).some(b => b.mitFormaten)", 300)|
++        s.wait_for_timeout(1500)|
++        aa = s.evaluate("""() => Object.values(window.__abxSpeicher).map(b => ({ name: b.name, mit: !!b.mitFormaten,|
++            ohne: b.karten.filter(k => !k.manuell && k.inDaten !== false && !k.formate).length }))""")|
++        print("Alle aktualisieren:", knopftext, aa)|
++        dr = [b for b in aa if b["name"] != "TEST Kopie"]|
++        tk = [b for b in aa if b["name"] == "TEST Kopie"]|
++        pruefe("2" in knopftext and dr and all(b["mit"] and b["ohne"] == 0 for b in dr),|
++               "ohne Wahl: 'Alle Boxen aktualisieren' gleicht jede Box ab (%s)" % knopftext)|
++        pruefe(tk and not tk[0]["mit"], "eine Box, deren Archetyp nicht in den Daten ist, bleibt unveraendert")|
+         s.evaluate("() => ArchetypBox.ansicht('sort', 'art')")|
+diff --git a/service-worker.js b/service-worker.js|
+index 4fa47823..0ca2b9ce 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202609281950|
++// v202609282014|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202609281950';|
++const CACHE_NAME = 'tcg-analysis-v202609282014';|
+ |
+diff --git a/tests/unit/test-archetyp-box.js b/tests/unit/test-archetyp-box.js|
+index 647ae3a0..9d11baa2 100644|
+--- a/tests/unit/test-archetyp-box.js|
++++ b/tests/unit/test-archetyp-box.js|
+@@ -623,2 +623,5 @@ describe('FE-13 Nachtrag: Hauptfilter Format (aktuelles Meta, Standard, Expanded|
+         assert.match(code, /formateZuordnen\(eintraegeAus\(gefilterteKarten\(z\.karten, schwelle\)/);|
++        // Ohne gewaehlte Box: ein Knopf gleicht alle Boxen ab (sonst bleiben die Meta-Filter bei alten Boxen leer).|
++        assert.match(code, /onclick="ArchetypBox\.aktualisieren\(null\)"/);|
++        assert.match(code, /const liste = id \? boxen\.filter\(function \(b\) \{ return b\.id === id; \}\) : boxen\.slice\(\);/);|
+         const i18n = R('js/i18n.js');|
+@@ -626,3 +629,4 @@ describe('FE-13 Nachtrag: Hauptfilter Format (aktuelles Meta, Standard, Expanded|
+             'abx.fmtAktuell', 'abx.fmtRaus', 'abx.fmtNeu', 'abx.fmtStandard', 'abx.fmtExpanded', 'abx.fmtRotiert',|
+-            'abx.fmtFensterOhne', 'abx.fmtAlteBox', 'abx.fmtKeineDaten', 'abx.fmtLegalUnbekannt'].forEach(key => {|
++            'abx.fmtFensterOhne', 'abx.fmtAlteBox', 'abx.fmtKeineDaten', 'abx.fmtLegalUnbekannt',|
++            'abx.alleAktualisieren', 'abx.alleAktualisiert', 'abx.ladeBox'].forEach(key => {|
+             const n = i18n.split("'" + key + "':").length - 1;|
+diff --git a/version.json b/version.json|
+index 840dba67..04aab9d4 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202609281950"}|
+\ No newline at end of file|
++{"version":"202609282014"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

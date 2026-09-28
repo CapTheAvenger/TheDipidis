@@ -1,0 +1,353 @@
+++        if (meta && c.fensterSet && c.aktuell && String(c.aktuell).split('-')[1] !== String(c.fensterSet)) {||
+++            satz += ' ' + tx('abx.fmtFensterOhne', v, 'Für {fenster} gibt es noch keine Turnierdaten.');||
+++        }||
+++        return satz;||
+++    }||
+++||
+++    function filterLeiste(kontext, ohneFormate) {||
++         const knopf = function (feld, wert, text) {||
++@@ -1178,3 +1415,16 @@||
++             ['Ace Spec', tx('cl.typeAceSpec', null, 'Ace Spec')], ['Energy', tx('cl.typeEnergy', null, 'Energie')]];||
++-        let html = reihe(tx('abx.fAnteil', null, 'Anteil'), anteil.map(function (a) { return knopf('anteil', a[0], a[1]); }).join(''))||
+++        const fmtText = {||
+++            alle: tx('abx.fAlle', null, 'Alle'), aktuell: tx('abx.fmt.aktuell', null, 'Aktuelles Meta'),||
+++            standard: tx('abx.fmt.standard', null, 'Standard-legal'), expanded: tx('abx.fmt.expanded', null, 'Nur Expanded'),||
+++            raus: tx('abx.fmt.raus', null, 'Aus dem Meta gefallen'), neu: tx('abx.fmt.neu', null, 'Neu im Meta'),||
+++            rotiert: tx('abx.fmt.rotiert', null, 'Bei der Rotation raus')||
+++        };||
+++        const c = kontext || {};||
+++        let fmtZeile = ansicht.format && ansicht.format !== 'alle' ? formatHinweis(ansicht.format, c) : '';||
+++        if (ohneFormate && (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu')) {||
+++            fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal „Archetyp-Box aktualisieren“.');||
+++        }||
+++        let html = reihe(tx('abx.fFormat', null, 'Format'), FORMAT_WAHL.map(function (w) { return knopf('format', w, fmtText[w]); }).join(''))||
+++            + (fmtZeile ? '<p class="abx-filter-hinweis">' + esc(fmtZeile) + '</p>' : '')||
+++            + reihe(tx('abx.fAnteil', null, 'Anteil'), anteil.map(function (a) { return knopf('anteil', a[0], a[1]); }).join(''))||
++             + reihe(tx('abx.fArt', null, 'Kartenart'), arten.map(function (a) { return knopf('art', a[0], a[1]); }).join(''));||
++@@ -1213,3 +1463,10 @@||
++         const gesamt = eintraege.length;||
++-        eintraege = eintraege.filter(function (e) { return filterPasst(e.k, ansicht, e.element); });||
+++        const kontext = formatKontext();||
+++        eintraege = eintraege.filter(function (e) {||
+++            return filterPasst(e.k, ansicht, e.element) && formatPasst(e.k, ansicht.format, kontext);||
+++        });||
+++        if (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu') {||
+++            eintraege.forEach(function (e) { e.formatZeile = formatZeileVon(e.k, ansicht.format, kontext); });||
+++        }||
+++        const ohneFormate = gewaehlt.some(function (b) { return !b.mitFormaten; });||
++         eintraege = sortieren(eintraege, ansicht.sort, !!eine);||
++@@ -1264,3 +1521,3 @@||
++                 '({n} von {g} nach Filter)')) + '</span>' : '') + '</p>';||
++-        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName) + filterLeiste() + summe||
+++        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName) + filterLeiste(kontext, ohneFormate) + summe||
++             + rubrik('fehlt', tx('abx.rubrikFehlt', null, 'Noch nicht in der Box'), r.fehlt, mitBoxName)||
++@@ -1474,2 +1731,3 @@||
++         const quelle = id ? [boxVon(id)].filter(Boolean) : boxen.slice();||
+diff --git a/.lieferung/teil-03.txt b/.lieferung/teil-03.txt|
+new file mode 100644|
+index 00000000..ffad9cbc|
+--- /dev/null|
++++ b/.lieferung/teil-03.txt|
+@@ -0,0 +1,271 @@|
+++        const kontext = formatKontext();||
++         const liste = [];||
++@@ -1477,3 +1735,3 @@||
++             const sichtbar = Object.assign({}, b, { karten: (b.karten || []).filter(function (roh) {||
++-                const k = normiert(roh); return filterPasst(k, ansicht, elementVon(k));||
+++                const k = normiert(roh); return filterPasst(k, ansicht, elementVon(k)) && formatPasst(k, ansicht.format, kontext);||
++             }) });||
++diff --git a/js/i18n.js b/js/i18n.js||
++index 212cec8a..4bae80fe 100644||
++--- a/js/i18n.js||
+++++ b/js/i18n.js||
++@@ -882,2 +882,19 @@ const translations = {||
++     'abx.fArt': 'Card type',||
+++    'abx.fFormat': 'Formats',||
+++    'abx.fmt.aktuell': 'Current meta',||
+++    'abx.fmt.standard': 'Standard legal',||
+++    'abx.fmt.expanded': 'Expanded only',||
+++    'abx.fmt.raus': 'Dropped from meta',||
+++    'abx.fmt.neu': 'New in meta',||
+++    'abx.fmt.rotiert': 'Rotated out',||
+++    'abx.fmtKeineDaten': 'No per-format tournament data loaded.',||
+++    'abx.fmtLegalUnbekannt': 'Legality is not loaded yet — please try again in a moment.',||
+++    'abx.fmtAktuell': 'Played in {aktuell}, the newest format with tournament data (until {bis}).',||
+++    'abx.fmtRaus': 'In at least {n} % of lists in {vorher} (until {bisV}), below that in {aktuell} (until {bis}).',||
+++    'abx.fmtNeu': 'In at least {n} % of lists in {aktuell} (until {bis}), below that in {vorher} (until {bisV}).',||
+++    'abx.fmtStandard': 'At least one print is legal in {standard}.',||
+++    'abx.fmtExpanded': 'No print is legal in {standard} — Expanded only.',||
+++    'abx.fmtRotiert': 'Was legal before the last rotation (from {block}), no longer legal in {standard}.',||
+++    'abx.fmtFensterOhne': 'There is no tournament data for {fenster} yet.',||
+++    'abx.fmtAlteBox': 'At least one box does not know the per-format shares yet — please run “Update archetype box” once.',||
++     'abx.fTyp': 'Type',||
++@@ -3666,2 +3683,19 @@ const translations = {||
++     'abx.fArt': 'Kartenart',||
+++    'abx.fFormat': 'Format',||
+++    'abx.fmt.aktuell': 'Aktuelles Meta',||
+++    'abx.fmt.standard': 'Standard-legal',||
+++    'abx.fmt.expanded': 'Nur Expanded',||
+++    'abx.fmt.raus': 'Aus dem Meta gefallen',||
+++    'abx.fmt.neu': 'Neu im Meta',||
+++    'abx.fmt.rotiert': 'Bei der Rotation raus',||
+++    'abx.fmtKeineDaten': 'Keine Turnierdaten je Format geladen.',||
+++    'abx.fmtLegalUnbekannt': 'Die Legalität ist noch nicht geladen — gleich noch einmal versuchen.',||
+++    'abx.fmtAktuell': 'Gespielt in {aktuell}, dem neuesten Format mit Turnierdaten (bis {bis}).',||
+++    'abx.fmtRaus': 'In {vorher} (bis {bisV}) in mindestens {n} % der Listen, in {aktuell} (bis {bis}) darunter.',||
+++    'abx.fmtNeu': 'In {aktuell} (bis {bis}) in mindestens {n} % der Listen, in {vorher} (bis {bisV}) darunter.',||
+++    'abx.fmtStandard': 'Mindestens ein Druck ist in {standard} legal.',||
+++    'abx.fmtExpanded': 'Kein Druck ist in {standard} legal — nur noch in Expanded spielbar.',||
+++    'abx.fmtRotiert': 'War vor der letzten Rotation legal (ab {block}), ist in {standard} nicht mehr legal.',||
+++    'abx.fmtFensterOhne': 'Für {fenster} gibt es noch keine Turnierdaten.',||
+++    'abx.fmtAlteBox': 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal „Archetyp-Box aktualisieren“.',||
++     'abx.fTyp': 'Typ',||
++diff --git a/scripts/messe_archetyp_box.py b/scripts/messe_archetyp_box.py||
++index 90b83d18..8c7b42f7 100644||
++--- a/scripts/messe_archetyp_box.py||
+++++ b/scripts/messe_archetyp_box.py||
++@@ -292,4 +292,57 @@ def main():||
++         typ_knoepfe = s.evaluate("() => document.querySelectorAll('.abx-filter-reihe').length")||
++-        pruefe(typ_knoepfe == 4, "bei Pokémon erscheint die Reihe 'Typ' (%d Reihen)" % typ_knoepfe)||
+++        pruefe(typ_knoepfe == 5, "bei Pokémon erscheint die Reihe 'Typ' (%d Reihen: Format, Anteil, Kartenart, Typ, Sortierung)" % typ_knoepfe)||
++         s.evaluate("() => { ArchetypBox.ansicht('art', 'alle'); ArchetypBox.ansicht('sort', 'anteil'); }")||
+++        # 7c. Nachtrag 28.09. spaet: Hauptfilter Format — gegen eine eigene Rechnung||
+++        FMT = '''async (arch) => {||
+++            const m = await (await fetch('data/tournament_cards_manifest.json')).json();||
+++            const fw = await (await fetch('data/format_window.json')).json();||
+++            const reihe = m.meta_keys.map((k, i) => ({ k, bis: (m.chunk_dates[m.chunks[i]] || {}).max_date || '' }))||
+++                .filter(x => x.bis).sort((a, b) => a.bis < b.bis ? 1 : -1);||
+++            const akt = reihe[0].k, vor = reihe[1].k;||
+++            const b = Object.values(window.__abxSpeicher)[0];||
+++            const sichtbar = () => [...document.querySelectorAll('#abxInhalt .abx-rubrik:not(.abx-rubrik-wieder) .abx-karte')].map(k => k.dataset.karte).sort();||
+++            const legal = getFormatLegalSetCodes(fw.oldest_legal_set + '-' + fw.current_set);||
+++            const vorRot = getFormatLegalSetCodes('SVI-' + fw.current_set);||
+++            const ids = k => [k.id].concat(k.refs || [], (k.drucke || []).map(d => d.id));||
+++            const basis = k => { const r = getCanonicalCardRecord(k.set, k.number); return !!(r && /^basic energy$/i.test(r.type || '')); };||
+++            const std = k => basis(k) || ids(k).some(i => legal.has(i.split('-')[0]));||
+++            const vr = k => basis(k) || ids(k).some(i => vorRot.has(i.split('-')[0]));||
+++            const a = (k, f) => Number((k.formate || {})[f]) || 0;||
+++            const soll = {||
+++                aktuell: b.karten.filter(k => a(k, akt) > 0), standard: b.karten.filter(std),||
+++                expanded: b.karten.filter(k => !std(k)), rotiert: b.karten.filter(k => !std(k) && vr(k)),||
+++                raus: b.karten.filter(k => a(k, vor) >= 10 && a(k, akt) < 10), neu: b.karten.filter(k => a(k, akt) >= 10 && a(k, vor) < 10)||
+++            };||
+++            const aus = { akt, vor, mitFormaten: b.mitFormaten, ohneFormate: b.karten.filter(k => !k.manuell && k.inDaten !== false && !k.formate).length };||
+++            for (const w of Object.keys(soll)) {||
+++                ArchetypBox.ansicht('format', w);||
+++                const ist = sichtbar(); const s2 = soll[w].map(k => k.id).sort();||
+++                aus[w] = { n: ist.length, gleich: JSON.stringify(ist) === JSON.stringify(s2), hinweis: (document.querySelector('.abx-filter-hinweis') || {}).textContent || '' };||
+++            }||
+++            ArchetypBox.ansicht('format', 'aktuell');||
+++            const zeile = (document.querySelector('#abxInhalt .abx-formatzeile') || {}).textContent || '';||
+++            // Anteil einer Karte im aktuellen Format: eigene Zusammenfassung nur der Decks dieses Formats||
+++            const decks = pastMetaDecks.filter(d => d.format === akt && d.deck_name === arch);||
+++            const agg = decks.length ? _pmAggregiereDecks(decks).aggregatedCards : [];||
+++            let probe = null;||
+++            const kandidaten = soll.aktuell.filter(k => a(k, akt) < 100).concat(soll.aktuell.filter(k => a(k, akt) >= 100));||
+++            for (const k of kandidaten) {||
+++                const c = agg.find(c => String(c.set_code).toUpperCase() + '-' + String(c.set_number) === k.id);||
+++                if (c) { probe = { id: k.id, box: a(k, akt), neu: Math.round(parseLocaleNumber(c.percentage_in_archetype, NaN) * 10) / 10 }; break; }||
+++            }||
+++            ArchetypBox.ansicht('format', 'alle');||
+++            aus.zeile = zeile; aus.probe = probe;||
+++            return aus;||
+++        }'''||
+++        fm = s.evaluate(FMT, a.archetyp)||
+++        print("Format-Filter:", json.dumps(fm, ensure_ascii=False)[:1200])||
+++        pruefe(fm["mitFormaten"] and fm["ohneFormate"] == 0, "nach dem Aktualisieren kennt jede Karte ihre Anteile je Format")||
+++        for w in ("aktuell", "standard", "expanded", "rotiert", "raus", "neu"):||
+++            pruefe(fm[w]["gleich"], "Format '%s': %d Karten, genau die der eigenen Rechnung" % (w, fm[w]["n"]))||
+++        pruefe(fm["standard"]["n"] + fm["expanded"]["n"] == len(s.evaluate(SP)), "Standard + nur Expanded = alle Karten")||
+++        pruefe(fm["akt"] in fm["aktuell"]["hinweis"] and fm["vor"] in fm["raus"]["hinweis"],||
+++               "Hinweiszeile nennt die Formate (%s / %s)" % (fm["akt"], fm["vor"]))||
+++        pruefe(fm["akt"] in fm["zeile"], "Kachel zeigt den Anteil im aktuellen Format (%s)" % fm["zeile"])||
+++        pruefe(fm["probe"] is not None and fm["probe"]["box"] == fm["probe"]["neu"],||
+++               "Anteil je Format = eigene Zusammenfassung der Decks dieses Formats (%s)" % fm["probe"])||
++         # zweite Box -> "Alle Boxen"||
++diff --git a/service-worker.js b/service-worker.js||
++index 1c2f676f..4fa47823 100644||
++--- a/service-worker.js||
+++++ b/service-worker.js||
++@@ -1,3 +1,3 @@||
++ // Service Worker for Pokemon TCG Analysis PWA||
++-// v202609281809||
+++// v202609281950||
++ // Strategies:||
++@@ -8,3 +8,3 @@||
++ ||
++-const CACHE_NAME = 'tcg-analysis-v202609281809';||
+++const CACHE_NAME = 'tcg-analysis-v202609281950';||
++ ||
++diff --git a/tests/unit/test-archetyp-box.js b/tests/unit/test-archetyp-box.js||
++index e5b41c24..647ae3a0 100644||
++--- a/tests/unit/test-archetyp-box.js||
+++++ b/tests/unit/test-archetyp-box.js||
++@@ -508 +508,125 @@ describe('FE-13 Nachtrag: "gefordert" bleibt am iPhone rund', () => {||
++ });||
+++||
+++||
+++describe('FE-13 Nachtrag: Hauptfilter Format (aktuelles Meta, Standard, Expanded, Rotation)', () => {||
+++    // Anteile je Format kommen aus den Rotationen-Daten (deck.format), die||
+++    // Legalitaet aus data/format_window.json + data/sets.json. Hier mit||
+++    // festen Beispielzahlen, damit der Test nicht an Wochendaten haengt.||
+++    const kontext = {||
+++        aktuell: 'TEF-PBL', vorher: 'TEF-CRI',||
+++        legal: (k) => (k.legal === undefined ? null : k.legal),||
+++        legalVorRotation: (k) => (k.vorher === undefined ? null : k.vorher)||
+++    };||
+++    const k = (id, formate, legal, vorher) => ({ id, formate, legal, vorher });||
+++    const karten = [||
+++        k('A-1', { 'TEF-PBL': 80, 'TEF-CRI': 75 }, true, true),   // bleibt||
+++        k('A-2', { 'TEF-CRI': 40, 'TEF-PBL': 5 }, true, true),    // raus||
+++        k('A-3', { 'TEF-PBL': 30 }, true, true),                 // neu||
+++        k('A-4', { 'SVI-ASC': 90 }, false, true),                 // rotiert||
+++        k('A-5', {}, false, false),                               // nur Expanded, schon laenger||
+++        k('A-6', { 'TEF-PBL': 12, 'TEF-CRI': 10 }, null, null)    // Legalitaet unbekannt||
+++    ];||
+++    const wahl = (w) => karten.filter(x => L.formatPasst(x, w, kontext)).map(x => x.id);||
+++||
+++    it('aktuelles Meta: im neuesten Format gespielt', () => {||
+++        gleich(wahl('aktuell'), ['A-1', 'A-2', 'A-3', 'A-6']);||
+++    });||
+++    it('aus dem Meta gefallen und neu im Meta, an der Schwelle 10 %', () => {||
+++        assert.equal(L.META_SCHWELLE, 10);||
+++        gleich(wahl('raus'), ['A-2']);||
+++        gleich(wahl('neu'), ['A-3']);||
+++    });||
+++    it('Standard, nur Expanded, bei der Rotation raus — unbekannt passt zu keinem', () => {||
+++        gleich(wahl('standard'), ['A-1', 'A-2', 'A-3']);||
+++        gleich(wahl('expanded'), ['A-4', 'A-5']);||
+++        gleich(wahl('rotiert'), ['A-4']);||
+++        gleich(wahl('alle'), ['A-1', 'A-2', 'A-3', 'A-4', 'A-5', 'A-6']);||
+++    });||
+++||
+++    it('aktuell und vorher nach dem juengsten Turnierdatum, nicht nach der Reihenfolge im Manifest', () => {||
+++        const m = {||
+++            meta_keys: ['SVI-ASC', 'TEF-CRI', 'TEF-PBL', 'TEF-POR'],||
+++            chunks: ['a.csv', 'b.csv', 'c.csv', 'd.csv'],||
+++            chunk_dates: { 'a.csv': { max_date: '2026-04-04' }, 'b.csv': { max_date: '2026-06-12' },||
+++                'c.csv': { max_date: '2026-09-19' }, 'd.csv': { max_date: '2026-05-30' } }||
+++        };||
+++        gleich(L.formateNachDatum(m).map(x => x.key), ['TEF-PBL', 'TEF-CRI', 'TEF-POR', 'SVI-ASC']);||
+++    });||
+++||
+++    it('Block vor der Rotation: juengster Blockanfang, der aelter ist als das aelteste legale Set', () => {||
+++        const order = { BST: 120, BRS: 125, SVI: 134, TEF: 140 };||
+++        assert.equal(L.blockVorRotation(['BRS-TEF', 'BST-PAR', 'SVI-ASC', 'TEF-PBL'], 'TEF', order), 'SVI');||
+++        assert.equal(L.blockVorRotation(['BRS-TEF', 'BST-PAR', 'SVI-ASC', 'TEF-PBL'], 'SVI', order), 'BRS');||
+++        assert.equal(L.blockVorRotation(['TEF-PBL'], 'TEF', order), null);||
+++    });||
+++||
+++    it('legal ueber irgendeinen Druck (Set der Kennung), ohne Setliste unbekannt', () => {||
+++        const sets = new Set(['PBL', 'MEG']);||
+++        assert.equal(L.druckIn(['SVI-196', 'MEG-131'], sets), true);||
+++        assert.equal(L.druckIn(['SVI-196', 'PAL-172'], sets), false);||
+++        assert.equal(L.druckIn(['PBL-1'], null), null);||
+++    });||
+++||
+++    it('Anteile je Format ueber (Set, Nummer) und die Drucke — nie ueber den Namen', () => {||
+++        const frische = [{ id: 'PBL-12', name: 'Ultra Ball', refs: ['SVI-196'] }, { id: 'PBL-99', name: 'Ultra Ball', refs: [] }];||
+++        const jeFormat = {||
+++            'TEF-PBL': [{ ids: ['SVI-196', 'X-1'], anteil: 80 }, { ids: ['PBL-12'], anteil: 60 }],||
+++            'TEF-CRI': [{ ids: ['Y-1'], anteil: 99, name: 'Ultra Ball' }]||
+++        };||
+++        const aus = L.formateZuordnen(frische, jeFormat);||
+++        gleich(aus[0].formate, { 'TEF-PBL': 80 }, 'hoechster Anteil ueber die Drucke');||
+++        gleich(aus[1].formate, {}, 'gleicher Name, anderer Druck: kein Anteil');||
+++    });||
+++||
+++    it('Aktualisieren uebernimmt die Anteile je Format und leert sie fuer Karten, die nicht mehr vorkommen', () => {||
+++        const box = L.neueBox({ name: 'X', archetyp: 'X' }, [karte('A-1'), karte('A-2')], HEUTE);||
+++        assert.equal(box.mitFormaten, false);||
+++        const erg = L.abgleichen(box, [karte('A-1', { formate: { 'TEF-PBL': 55 } })], {}, HEUTE);||
+++        const k1 = erg.box.karten.find(x => x.id === 'A-1');||
+++        const k2 = erg.box.karten.find(x => x.id === 'A-2');||
+++        gleich(k1.formate, { 'TEF-PBL': 55 });||
+++        gleich(k2.formate, {});||
+++        assert.equal(erg.box.mitFormaten, true);||
+++    });||
+++||
+++    it('Verfaelschungsproben: jede Regel beisst', () => {||
+++        const probe = (alt, neu) => {||
+++            assert.ok(QUELLE.includes(alt), 'Probe passt nicht mehr: ' + alt);||
+++            return logik(QUELLE.replace(alt, neu));||
+++        };||
+++        const M1 = probe("return anteilIn(k, c.vorher) >= META_SCHWELLE && anteilIn(k, c.aktuell) < META_SCHWELLE;",||
+++            "return anteilIn(k, c.vorher) >= META_SCHWELLE;");||
+++        assert.ok(karten.filter(x => M1.formatPasst(x, 'raus', kontext)).length > 1, 'raus ohne "jetzt darunter" faellt nicht auf');||
+++        const M2 = probe("return legal === false && vorher === true;", "return legal === false;");||
+++        assert.ok(karten.filter(x => M2.formatPasst(x, 'rotiert', kontext)).length > 1, 'rotiert ohne "vorher legal" faellt nicht auf');||
+++        const M3 = probe("if (wahl === 'standard') return legal === true;", "if (wahl === 'standard') return legal !== false;");||
+++        assert.ok(M3.formatPasst(karten[5], 'standard', kontext), 'unbekannte Legalitaet als Standard faellt nicht auf');||
+++        const M4 = probe(".sort(function (a, b) { return a.bis < b.bis ? 1 : (a.bis > b.bis ? -1 : 0); });", ";");||
+++        assert.equal(L.formateNachDatum({ meta_keys: ['B', 'A'], chunks: ['b', 'a'],||
+++            chunk_dates: { a: { max_date: '2026-09-01' }, b: { max_date: '2026-01-01' } } })[0].key, 'A');||
+++        assert.equal(M4.formateNachDatum({ meta_keys: ['B', 'A'], chunks: ['b', 'a'],||
+++            chunk_dates: { a: { max_date: '2026-09-01' }, b: { max_date: '2026-01-01' } } })[0].key, 'B', 'Sortierung faellt nicht auf');||
+++        const M5 = probe("if (!best || v > o[best]) best = start;", "if (!best) best = start;");||
+++        assert.notEqual(M5.blockVorRotation(['BST-PAR', 'SVI-ASC'], 'TEF', { BST: 120, SVI: 134, TEF: 140 }), 'SVI');||
+++        const M6 = probe("if (mitFormaten) k.formate = {};", "");||
+++        const b0 = M6.neueBox({ name: 'X' }, [karte('A-2', { formate: { 'TEF-CRI': 40 } })], HEUTE);||
+++        const e6 = M6.abgleichen(b0, [karte('A-1', { formate: { 'TEF-PBL': 5 } })], {}, HEUTE);||
+++        assert.notDeepEqual(JSON.parse(JSON.stringify(e6.box.karten.find(x => x.id === 'A-2').formate)), {});||
+++    });||
+++||
+++    it('Filterzeile, Anwendung und Proxydruck sind verdrahtet; Texte in beiden Sprachen', () => {||
+++        const code = ohneKommentare(QUELLE);||
+++        assert.ok(code.length > QUELLE.length * 0.3, 'das Ausschneiden hat zu viel entfernt');||
+++        assert.match(code, /filterPasst\(e\.k, ansicht, e\.element\) && formatPasst\(e\.k, ansicht\.format, kontext\)/);||
+++        assert.match(code, /filterPasst\(k, ansicht, elementVon\(k\)\) && formatPasst\(k, ansicht\.format, kontext\)/);||
+++        assert.match(code, /formateZuordnen\(eintraegeAus\(karten, summe\.totalDecklists\), jeFormatAus\(auswahl\.matchingDecks\)\)/);||
+++        assert.match(code, /formateZuordnen\(eintraegeAus\(gefilterteKarten\(z\.karten, schwelle\)/);||
+++        const i18n = R('js/i18n.js');||
+++        ['abx.fFormat', 'abx.fmt.aktuell', 'abx.fmt.standard', 'abx.fmt.expanded', 'abx.fmt.raus', 'abx.fmt.neu', 'abx.fmt.rotiert',||
+++            'abx.fmtAktuell', 'abx.fmtRaus', 'abx.fmtNeu', 'abx.fmtStandard', 'abx.fmtExpanded', 'abx.fmtRotiert',||
+++            'abx.fmtFensterOhne', 'abx.fmtAlteBox', 'abx.fmtKeineDaten', 'abx.fmtLegalUnbekannt'].forEach(key => {||
+++            const n = i18n.split("'" + key + "':").length - 1;||
+++            assert.equal(n, 2, key + ' steht nicht in beiden Sprachen');||
+++        });||
+++    });||
+++});||
++diff --git a/version.json b/version.json||
++index b360efa1..840dba67 100644||
++--- a/version.json||
+++++ b/version.json||
++@@ -1 +1 @@||
++-{"version":"202609281809"}||
++\ No newline at end of file||
+++{"version":"202609281950"}||
++\ No newline at end of file||
++-- ||
++2.43.0||
++||
++||
+diff --git a/index.html b/index.html|
+index 6c1db008..5e68130c 100644|
+--- a/index.html|
++++ b/index.html|
+@@ -105,3 +105,3 @@|
+     // If the server has a newer version, we purge caches + SW and hard-reload.|
+-    window.APP_VERSION = '202609281950';|
++    window.APP_VERSION = '202609282014';|
+     (function() {|
+@@ -175,47 +175,47 @@|
+          darf sich auf die Variablen verlassen. -->|
+-    <link rel="stylesheet" href="css/tokens.css?v=202609281950" type="text/css">|
+-    <link rel="stylesheet" href="css/components.css?v=202609281950" type="text/css">|
+-    <link rel="stylesheet" href="css/ds-nav.css?v=202609281950">|
+-    <link rel="stylesheet" href="css/styles.css?v=202609281950" type="text/css">|
+-    <link rel="stylesheet" href="css/ui-components.css?v=202609281950" type="text/css">|
+-    <link rel="stylesheet" href="css/ds-share.css?v=202609281950">|
+-    <link rel="stylesheet" href="css/pokeball-menu.css?v=202609281950" type="text/css">|
+-    <link rel="stylesheet" href="css/dashboard-theme.css?v=202609281950" type="text/css">|
++    <link rel="stylesheet" href="css/tokens.css?v=202609282014" type="text/css">|
++    <link rel="stylesheet" href="css/components.css?v=202609282014" type="text/css">|
++    <link rel="stylesheet" href="css/ds-nav.css?v=202609282014">|
++    <link rel="stylesheet" href="css/styles.css?v=202609282014" type="text/css">|
++    <link rel="stylesheet" href="css/ui-components.css?v=202609282014" type="text/css">|
++    <link rel="stylesheet" href="css/ds-share.css?v=202609282014">|
++    <link rel="stylesheet" href="css/pokeball-menu.css?v=202609282014" type="text/css">|
++    <link rel="stylesheet" href="css/dashboard-theme.css?v=202609282014" type="text/css">|
+     <!-- Non-critical CSS: async load (tab-specific styles) -->|
+-    <link rel="stylesheet" href="css/auth-styles.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-header.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-filter-section.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">|

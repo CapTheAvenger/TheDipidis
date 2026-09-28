@@ -1,0 +1,444 @@
+@@ -587,5 +584,2 @@ const translations = {|
+     'cl.thArchetype':           'Archetype',|
+-    'cl.thOldCount':            'Old Count',|
+-    'cl.thNewCount':            'New Count',|
+-    'cl.thChange':              'Change',|
+     'cl.thAvgPlacement':        'Average Placement',|
+@@ -1663,3 +1657,3 @@ const translations = {|
+     'currentMeta.majorLeerUnbekannt': 'No major-tournament decks for this selection. Why, this view cannot say — that is a gap, not a result.',|
+-    'currentMeta.alleWieLive': 'Active filter: All Tournaments — but {format} has no major-tournament data yet, so this shows exactly what "Limitless Decks" shows.',|
++    'currentMeta.majorNochKeine': '(none in the current format yet)',|
+     'currentMeta.noCards':            'No cards found',|
+@@ -1937,3 +1931,3 @@ const translations = {|
+     // ── Tab 4: Current Meta Deck Analysis ────────────────────|
+-    'cm.analysisHeading':       'Current Meta Deck Analysis',|
++    'cm.analysisHeading':       'Deck Analysis',|
+     'cm.analyzeAndBuild':       'Analyze and Build Decks from Current Meta',|
+@@ -3244,5 +3238,2 @@ const translations = {|
+     'cl.tournaments':           'Turniere:',|
+-    'cl.popDecreases':          'Seltener gespielt',|
+-    'cl.perfImprovers':         'Performance verbessert (bessere Ø-Platzierung)',|
+-    'cl.perfDecliners':         'Performance verschlechtert (schlechtere Ø-Platzierung)',|
+     'cl.fullComparison':        'Vollständige Vergleichstabelle (Top 30)',|
+@@ -3255,5 +3246,2 @@ const translations = {|
+     'cl.thArchetype':           'Archetyp',|
+-    'cl.thOldCount':            'Alte Anzahl',|
+-    'cl.thNewCount':            'Neue Anzahl',|
+-    'cl.thChange':              'Änderung',|
+     'cl.thAvgPlacement':        'Ø-Platzierung',|
+@@ -4357,3 +4345,3 @@ const translations = {|
+     'currentMeta.majorLeerUnbekannt': 'Keine Major-Turnier-Decks für diese Auswahl. Woran es liegt, kann diese Ansicht nicht sagen — das ist eine Lücke, kein Ergebnis.',|
+-    'currentMeta.alleWieLive': 'Aktiver Filter: Alle Turniere — für {format} gibt es aber noch keine Major-Daten, hier steht also genau dasselbe wie unter „Limitless Decks".',|
++    'currentMeta.majorNochKeine': '(noch keine im aktuellen Format)',|
+     'currentMeta.noCards':            'Keine Karten gefunden',|
+@@ -4629,3 +4617,3 @@ const translations = {|
+     // ── Tab 4: Current Meta Deck Analysis ────────────────────|
+-    'cm.analysisHeading':       'Deck-Analyse: aktuelles Meta',|
++    'cm.analysisHeading':       'Deck-Analyse',|
+     'cm.analyzeAndBuild':       'Decks aus dem aktuellen Meta analysieren & bauen',|
+diff --git a/scripts/messe_deckkachel_abgeschnitten.py b/scripts/messe_deckkachel_abgeschnitten.py|
+new file mode 100644|
+index 0000000..30bd50c|
+--- /dev/null|
++++ b/scripts/messe_deckkachel_abgeschnitten.py|
+@@ -0,0 +1,84 @@|
++#!/usr/bin/env python3|
++"""Wird die Kennzahl-Zeile auf den Kacheln des gebauten Decks abgeschnitten?|
++|
++UI-42 (Backlog 28.09.2026, Hausi): in `div.deck-card-actions` wird die|
++untere Zeile („32,5% | Ø 1,20x“) bei schmalerem Fenster (geteilter|
++Bildschirm) abgeschnitten. Gemessen wird jede Kachel des per Generate|
++gebauten Decks: steht in `.deck-card-overlay` mehr Text, als sichtbar ist|
++(scrollWidth > clientWidth), oder ragt ein Teil aus der Kachel, zaehlt sie.|
++|
++AUFRUF|
++    python3 -m http.server 8000 --bind 127.0.0.1 &|
++    python3 scripts/messe_deckkachel_abgeschnitten.py --ansicht current-analysis --breiten 390,768,960,1024,1280,1920|
++"""|
++import argparse|
++import sys|
++|
++QUELLE = {"past-meta": ("pastMeta", "pastMetaDeckSelect", "pastMetaMyDeckGrid"),|
++          "current-analysis": ("currentMeta", "currentMetaDeckSelect", "currentMetaMyDeckGrid"),|
++          "city-league": ("cityLeague", "cityLeagueDeckSelect", "cityLeagueMyDeckGrid")}|
++|
++MESSUNG = r"""|
++(gitter) => {|
++  const out = {kacheln: 0, ab: 0, breite: 0, beispiele: []};|
++  document.querySelectorAll('#' + gitter + ' .deck-card').forEach(k => {|
++    const o = k.querySelector('.deck-card-overlay');|
++    if (!o) return;|
++    const ro = o.getBoundingClientRect(), rk = k.getBoundingClientRect();|
++    if (ro.height === 0) return;|
++    out.kacheln++; out.breite = Math.round(rk.width);|
++    let zuViel = o.scrollWidth - o.clientWidth > 0.5;|
++    o.querySelectorAll('*').forEach(t => { const r = t.getBoundingClientRect();|
++      if (r.width && (r.left < ro.left - 0.5 || r.right > ro.right + 0.5)) zuViel = true; });|
++    if (ro.left < rk.left - 0.5 || ro.right > rk.right + 0.5) zuViel = true;|
++    if (zuViel) {|
++      out.ab++;|
++      if (out.beispiele.length < 2) out.beispiele.push(JSON.stringify(o.textContent.trim()) + ' ' + o.clientWidth + '/' + o.scrollWidth);|
++    }|
++  });|
++  return out;|
++}|
++"""|
++|
++|
++def main():|
++    from playwright.sync_api import sync_playwright|
++    ap = argparse.ArgumentParser()|
++    ap.add_argument("--url", default="http://127.0.0.1:8000/index.html")|
++    ap.add_argument("--ansicht", default="past-meta", choices=sorted(QUELLE))|
++    ap.add_argument("--breiten", default="390,768,1024,1280")|
++    a = ap.parse_args()|
++    quelle, auswahl, gitter = QUELLE[a.ansicht]|
++    with sync_playwright() as p:|
++        b = p.chromium.launch()|
++        s = b.new_page(viewport={"width": 1280, "height": 900})|
++        s.add_init_script("try { localStorage.setItem('app_lang', 'de'); } catch (e) {}")|
++        s.goto(a.url, wait_until="load", timeout=60000)|
++        s.wait_for_timeout(3000)|
++        for _ in range(4):|
++            try:|
++                s.evaluate("a => window.switchTab && window.switchTab(a)", a.ansicht)|
++            except Exception:|
++                s.wait_for_timeout(3000)|
++                continue|
++            s.wait_for_timeout(7000)|
++            if s.evaluate("a => getComputedStyle(document.getElementById(a)).display !== 'none'", a.ansicht):|
++                break|
++        s.evaluate("""id => { const sel = document.getElementById(id);|
++            const o = [...sel.options].find(o => o.value && !/alle|all/i.test(o.textContent));|
++            sel.value = o.value; sel.dispatchEvent(new Event('change', {bubbles: true})); }""", auswahl)|
++        s.wait_for_timeout(12000)|
++        s.evaluate("q => { try { autoCompleteConsistency(q, 'min'); } catch (e) {} }", quelle)|
++        s.wait_for_timeout(15000)|
++        for w in [int(x) for x in a.breiten.split(",")]:|
++            s.set_viewport_size({"width": w, "height": 900})|
++            s.wait_for_timeout(1500)|
++            e = s.evaluate(MESSUNG, gitter)|
++            print("%s @ %4d px: %d Kacheln (je %d px), %d abgeschnitten %s"|
++                  % (a.ansicht, w, e["kacheln"], e["breite"], e["ab"], "; ".join(e["beispiele"])))|
++        b.close()|
++    return 0|
++|
++|
++if __name__ == "__main__":|
++    sys.exit(main())|
+diff --git a/service-worker.js b/service-worker.js|
+index 2f4bba9..21d2b24 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202609280750|
++// v202609281240|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202609280750';|
++const CACHE_NAME = 'tcg-analysis-v202609281240';|
+ |
+@@ -183,3 +183,2 @@ const SHELL_ASSETS = [|
+   './js/ds-datenstand.js',|
+-  './js/ds-csv.js',|
+   './js/ds-nav.js',|
+diff --git a/tests/unit/lib-cityleague-sandkasten.js b/tests/unit/lib-cityleague-sandkasten.js|
+index 72b65db..2ab417b 100644|
+--- a/tests/unit/lib-cityleague-sandkasten.js|
++++ b/tests/unit/lib-cityleague-sandkasten.js|
+@@ -54,3 +54,4 @@ const FUNKTIONEN = [|
+     'cityLeagueTurnierHerkunft', 'cityLeagueHerkunftSatz',|
+-    'cityLeagueRubrikNamen', 'cityLeagueVergleichLeerHinweis',|
++    /* cityLeagueRubrikNamen und cityLeagueVergleichLeerHinweis sind mit|
++       UI-45 (28.09.2026) entfallen. */|
+     /* Die Siegerliste der japanischen Majors (25.09.2026) haengt|
+diff --git a/tests/unit/test-anteile-und-konventionen-07-09.js b/tests/unit/test-anteile-und-konventionen-07-09.js|
+index a6d9210..a27bf2f 100644|
+--- a/tests/unit/test-anteile-und-konventionen-07-09.js|
++++ b/tests/unit/test-anteile-und-konventionen-07-09.js|
+@@ -568,120 +568,5 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {|
+ |
+-/* ══ BEFUND B4 ══════════════════════════════════════════════════════ */|
+-|
+-describe('B4 — der Reiter Deck-Analyse nennt seinen Datenstand', () => {|
+-|
+-    const STAND = JSON.parse(lies('data/data_stand.json'));|
+-|
+-    function ladeChip(opt) {|
+-        opt = opt || {};|
+-        const h2 = { _kinder: [], innerHTML: '',|
+-            querySelector: (sel) => h2._kinder.find(k => ('.' + k.className) === sel) || null,|
+-            appendChild: (k) => { h2._kinder.push(k); } };|
+-        const dok = Object.assign(grunddom(), {|
+-            querySelector: (sel) => (sel === '#current-analysis .header h2' ? h2 : null),|
+-            createElement: () => {|
+-                const kl = new Set();|
+-                const el = { className: '', innerHTML: '', _attr: {},|
+-                    classList: { add: (...c) => c.forEach(x => kl.add(x)),|
+-                                 remove: (...c) => c.forEach(x => kl.delete(x)),|
+-                                 contains: (c) => kl.has(c) },|
+-                    setAttribute: (k, v) => { el._attr[k] = v; },|
+-                    getAttribute: (k) => (k in el._attr ? el._attr[k] : null),|
+-                    querySelector: () => el._feld };|
+-                el._feld = { _attr: {}, textContent: '',|
+-                    setAttribute: (k, v) => { el._feld._attr[k] = v; },|
+-                    getAttribute: (k) => (k in el._feld._attr ? el._feld._attr[k] : null) };|
+-                return el;|
+-            },|
+-        });|
+-        const gezeichnet = [];|
+-        const kontext = {|
+-            console, document: dok, getLang: () => 'de',|
+-            setTimeout, clearTimeout, Promise,|
+-        };|
+-        kontext.window = kontext;|
+-        kontext.DsDatenstand = opt.ohneModul ? undefined : {|
+-            stand: (datei) => Promise.resolve(|
+-                (opt.staende && datei in opt.staende)|
+-                    ? (opt.staende[datei] ? new Date(opt.staende[datei]) : null)|
+-                    : (STAND.dateien[datei] ? new Date(STAND.dateien[datei]) : null)),|
+-            zeichne: (w) => { gezeichnet.push(w); },|
+-        };|
+-        vm.createContext(kontext);|
+-        vm.runInContext(cmStueck('function cmAeltesteQuelle(staende)'), kontext);|
+-        vm.runInContext(cmStueck('function cmDatenstandChipEinhaengen(wurzel)'), kontext);|
+-        vm.runInContext('var CM_STAND_QUELLEN = ' + JSON.stringify(|
+-            CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]|
+-                .match(/'([^']+)'/g).map(x => x.slice(1, -1))) + ';', kontext);|
+-        return { kontext, h2, gezeichnet };|
+-    }|
+-|
+-    it('die genannten Quellen sind Dateien, die es gibt', () => {|
+-        const quellen = CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]|
+-            .match(/'([^']+)'/g).map(x => x.slice(1, -1));|
+-        assert.notEqual(quellen.length, 0, 'die Quellenliste ist leer');|
+-        const fehlend = quellen.filter(f => !fs.existsSync(path.join(WURZEL, 'data', f)));|
+-        assert.deepEqual(fehlend, [], 'der Chip nennt eine Datei, die es nicht gibt');|
+-    });|
+-|
+-    it('gewaehlt wird die AELTESTE Quelle — nicht die erste', () => {|
+-        const s = ladeChip();|
+-        const f = s.kontext.cmAeltesteQuelle;|
+-        const a = new Date('2026-09-06T16:00:00Z');|
+-        const b = new Date('2026-09-01T06:00:00Z');|
+-        assert.equal(f([{ datei: 'a', stand: a }, { datei: 'b', stand: b }]).datei, 'b');|
+-        assert.equal(f([{ datei: 'b', stand: b }, { datei: 'a', stand: a }]).datei, 'b');|
+-        assert.equal(f([{ datei: 'a', stand: null }, { datei: 'b', stand: b }]).datei, 'b');|
+-        assert.equal(f([]), null);|
+-        assert.equal(f([{ datei: 'a', stand: null }]), null,|
+-            'ohne bekannten Stand darf keine Quelle gewaehlt werden');|
+-    });|
+-|
+-    it('der Chip haengt in der Ueberschrift und zeigt den Stand aus data_stand.json', async () => {|
+-        const s = ladeChip();|
+-        const chip = s.kontext.cmDatenstandChipEinhaengen();|
+-        assert.ok(chip, 'kein Chip eingehaengt');|
+-        assert.equal(s.h2._kinder.length, 1, 'der Chip steht nicht in der Ueberschrift');|
+-        assert.match(chip.innerHTML, /js-data-freshness/, 'ohne diese Klasse fuellt ihn niemand');|
+-        await new Promise(r => setTimeout(r, 0));|
+-        const quellen = CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]|
+-            .match(/'([^']+)'/g).map(x => x.slice(1, -1));|
+-        const bekannt = quellen.filter(f => STAND.dateien[f]);|
+-        assert.notEqual(bekannt.length, 0,|
+-            'data_stand.json fuehrt keine der Quellen — dann prueft das hier nichts');|
+-        const soll = bekannt.slice().sort((a, b) =>|
+-            new Date(STAND.dateien[a]) - new Date(STAND.dateien[b]))[0];|
+-        assert.equal(chip.getAttribute('data-cm-quelle'), soll,|
+-            'der Chip nennt nicht die aelteste Quelle des Reiters');|
+-        assert.equal(chip.querySelector().getAttribute('data-quelle'), soll,|
+-            'ds-datenstand.js findet keine Quelle am Chip');|
+-        assert.equal(s.gezeichnet.length, 1, 'ds-datenstand.js wurde nicht gebeten zu zeichnen');|
+-    });|
+-|
+-    it('ohne hinterlegten Stand steht "unbekannt" — kein geratenes Datum', async () => {|
+-        const quellen = CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]|
+-            .match(/'([^']+)'/g).map(x => x.slice(1, -1));|
+-        const leer = {};|
+-        quellen.forEach(f => { leer[f] = null; });|
+-        const s = ladeChip({ staende: leer });|
+-        const chip = s.kontext.cmDatenstandChipEinhaengen();|
+-        await new Promise(r => setTimeout(r, 0));|
+-        assert.equal(chip.getAttribute('data-cm-quelle'), null,|
+-            'ohne Stand wird trotzdem eine Quelle behauptet');|
+-        assert.match(chip.innerHTML, /unbekannt/);|
+-        assert.equal(s.gezeichnet.length, 0, 'gezeichnet wird nur mit einer echten Quelle');|
+-        assert.ok(chip.classList.contains('is-unbekannt'));|
+-        const heute = new Date().toLocaleDateString('de-DE');|
+-        assert.ok(!chip.innerHTML.includes(heute),|
+-            'das Datum des BESUCHS steht wieder im Chip — genau der Fehler, gegen den '|
+-            + 'js/ds-datenstand.js geschrieben wurde');|
+-    });|
+-|
+-    it('zweimal aufgerufen haengt kein zweiter Chip dran', () => {|
+-        const s = ladeChip();|
+-        s.kontext.cmDatenstandChipEinhaengen();|
+-        s.kontext.cmDatenstandChipEinhaengen();|
+-        assert.equal(s.h2._kinder.length, 1);|
+-    });|
+-});|
++/* ══ BEFUND B4 ══════════════════════════════════════════════════════|
++   Der Datenstands-Chip der Deck-Analyse (Global) ist mit UI-43|
++   (28.09.2026, Hausi) entfernt; die Zusicherungen dazu entfallen. */|
+ |
+@@ -894,5 +779,4 @@ describe('kein Oberflaechentext nennt eine Datei, die es nicht gibt', () => {|
+         }|
+-        /* Die Quellenliste des Datenstands-Chips (Befund B4) gehoert|
+-           dazu: sie nennt Dateien ohne Praefix und wird zur Laufzeit an|
+-           ds-datenstand.js gereicht.|
++        /* Die Quellenliste des Datenstands-Chips (Befund B4) gehoerte|
++           bis zu UI-43 (28.09.2026) dazu; der Chip ist entfernt.|
+ |
+@@ -904,6 +788,2 @@ describe('kein Oberflaechentext nennt eine Datei, die es nicht gibt', () => {|
+            tests/unit/test-kacheln-zeitraum-und-typfilter.js schon fest. */|
+-        for (const q of (CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]|
+-                .match(/'([^']+)'/g) || [])) {|
+-            namen.push(q.slice(1, -1));|
+-        }|
+         const einmalig = [...new Set(namen)].sort();|
+diff --git a/tests/unit/test-b5-drei-rubriken.js b/tests/unit/test-b5-drei-rubriken.js|
+deleted file mode 100644|
+index c514936..0000000|
+--- a/tests/unit/test-b5-drei-rubriken.js|
++++ /dev/null|
+@@ -1,146 +0,0 @@|
+-/**|
+- * BEFUND B5 (07.09.2026, Reiter "City League"):|
+- *|
+- *   getCityLeagueSortedSections() rechnet `newArchetypes`, `disappeared`|
+- *   und `increased` — und renderCityLeagueTable zeigte keine davon.|
+- *   Seit dem 07.09. stand nur ihre ZAHL im Leerzustandsblock ("Ohne|
+- *   Tabelle auf dieser Seite, obwohl Daten vorliegen: …"). Eine Seite,|
+- *   die selbst schreibt, dass sie etwas hat und nicht zeigt.|
+- *|
+- *   Geprueft, ob sie mit den vorhandenen Daten darstellbar sind: ja.|
+- *   Die Vergleichsdatei fuehrt fuer jede Zeile old_count, new_count,|
+- *   count_change, old_meta_share/new_meta_share,|
+- *   old_avg_placement/new_avg_placement und old_best/new_best.|
+- *|
+- * EINE AUSNAHME, und die ist Absicht: OHNE VORZEITRAUM bekommt "Neue|
+- * Archetypen" keine Tabelle. Dann tragen alle Zeilen status=NEU, weil es|
+- * keine zweite Messung gibt — "neu" waere dieselbe erfundene Rubrik, die|
+- * am 30.08.2026 bei den Performance-Tabellen abgestellt wurde. Der|
+- * Leerzustandstext sagt das dann, statt zu schweigen.|
+- *|
+- * Geprueft wird am gerenderten HTML: die Tabellen muessen dastehen,|
+- * nicht nur im Quelltext vorkommen. Keine Live-Daten.|
+- */|
+-|
+-const { describe, it } = require('node:test');|
+-const assert = require('node:assert/strict');|
+-const { rendern, nurFunktionen, ueberschriften, zeilenUnter } =|
+-    require('./lib-cityleague-sandkasten.js');|
+-|
+-const vgl = (o) => Object.assign({|
+-    archetype: 'X', status: 'BESTEHEND', trend: 'STABIL',|
+-    old_count: '0', new_count: '0', count_change: '0',|
+-    old_meta_share: '0', new_meta_share: '0', meta_share_change: '0',|
+-    old_avg_placement: '0', new_avg_placement: '0', avg_placement_change: '0',|
+-    old_best: '', new_best: ''|
+-}, o);|
+-|
+-const archetypZeile = { date: '6th June 2026', tournament_id: '568',|
+-    prefecture: 'Special Event', shop: 'Tournament 568',|
+-    format: 'City League (JP)', placement: '1', player: 'Jemand', archetype: 'A' };|
+-|
+-/** Ein Feld MIT Vorzeitraum: alle drei Rubriken sind besetzt. */|
+-const mitVorzeitraum = [|
+-    vgl({ archetype: 'Steigt A', old_count: '4', new_count: '9', count_change: '5',|
+-          new_avg_placement: '6,0', new_meta_share: '18,0', new_best: '1' }),|
+-    vgl({ archetype: 'Steigt B', old_count: '2', new_count: '5', count_change: '3',|
+-          new_avg_placement: '7,5', new_meta_share: '10,0', new_best: '2' }),|
+-    vgl({ archetype: 'Neu A', status: 'NEU', old_count: '0', new_count: '6',|
+-          count_change: '6', new_meta_share: '12,0', new_avg_placement: '9,25', new_best: '3' }),|
+-    vgl({ archetype: 'Weg A', status: 'VERSCHWUNDEN', old_count: '7', new_count: '0',|
+-          count_change: '-7', old_meta_share: '14,0', old_avg_placement: '5,5', old_best: '2' }),|
+-    vgl({ archetype: 'Faellt A', old_count: '8', new_count: '3', count_change: '-5',|
+-          new_avg_placement: '11,0', avg_placement_change: '2,0' })|
+-];|
+-|
+-/** Ein Feld OHNE Vorzeitraum: jede Zeile alt = 0, alle als NEU verzeichnet. */|
+-const ohneVorzeitraum = [|
+-    vgl({ archetype: 'Dragapult Blaziken', status: 'NEU', new_count: '6', count_change: '6',|
+-          new_meta_share: '23,08', new_avg_placement: '14,83', new_best: '5' }),|
+-    vgl({ archetype: 'Ogerpon Box', status: 'NEU', new_count: '5', count_change: '5',|
+-          new_meta_share: '19,23', new_avg_placement: '14,2', new_best: '1' })|
+-];|
+-|
+-const lauf = (daten, sprache) => rendern({|
+-    vergleich: daten, archetypen: [archetypZeile],|
+-    turniere: 1, zeitraum: '6. Juni 2026', sprache: sprache || 'de'|
+-});|
+-|
+-describe('B5 — die drei gerechneten Rubriken stehen jetzt auch da', () => {|
+-|
+-    it('mit Vorzeitraum: alle drei Tabellen werden gerendert', () => {|
+-        const { html } = lauf(mitVorzeitraum);|
+-        const titel = ueberschriften(html);|
+-        ['Häufiger gespielt', 'Neue Archetypen', 'Verschwundene Archetypen'].forEach(x => {|
+-            assert.ok(titel.includes(x),|
+-                'Tabelle fehlt: ' + x + '\ngerendert wurde: ' + JSON.stringify(titel));|
+-        });|
+-    });|
+-|
+-    it('in den Tabellen stehen die richtigen Archetypen, nach der richtigen Groesse sortiert', () => {|
+-        const { html } = lauf(mitVorzeitraum);|
+-        assert.deepEqual(zeilenUnter(html, 'Häufiger gespielt'), ['Steigt A', 'Steigt B'],|
+-            '"Häufiger gespielt" fuehrt nicht die Aufsteiger, absteigend nach Zuwachs');|
+-        assert.deepEqual(zeilenUnter(html, 'Neue Archetypen'), ['Neu A']);|
+-        assert.deepEqual(zeilenUnter(html, 'Verschwundene Archetypen'), ['Weg A']);|
+-    });|
+-|
+-    it('die Zahlen der Tabellen kommen aus den Zeilen — mit deutschem Komma', () => {|
+-        const { html } = lauf(mitVorzeitraum);|
+-        const neu = html.slice(html.indexOf('>Neue Archetypen</h2>'),|
+-                               html.indexOf('>Verschwundene Archetypen</h2>'));|
+-        assert.ok(neu.includes('>6<'), 'die Listenzahl 6 von "Neu A" fehlt:\n' + neu);|
+-        assert.ok(neu.includes('12,00 %'), 'der Meta-Anteil steht nicht mit Komma da:\n' + neu);|
+-        assert.ok(neu.includes('9,25'), 'die Ø-Platzierung fehlt:\n' + neu);|
+-        assert.ok(neu.includes('>3<'), 'der beste Platz fehlt:\n' + neu);|
+-    });|
+-|
+-    it('englisch bleibt englisch — Titel und Zahlen', () => {|
+-        const { html } = lauf(mitVorzeitraum, 'en');|
+-        const titel = ueberschriften(html);|
+-        ['Popularity Increases', 'New Archetypes', 'Disappeared Archetypes'].forEach(x => {|
+-            assert.ok(titel.includes(x), 'englischer Titel fehlt: ' + x|
+-                + '\ngerendert wurde: ' + JSON.stringify(titel));|
+-        });|
+-        const neu = html.slice(html.indexOf('>New Archetypes</h2>'));|
+-        assert.ok(neu.includes('12.00 %'), 'im Englischen steht ein Dezimalkomma:\n'|
+-            + neu.slice(0, 900));|
+-    });|
+-|
+-    it('OHNE Vorzeitraum steht "Neue Archetypen" bewusst nicht da — und die Seite sagt warum', () => {|
+-        const { html } = lauf(ohneVorzeitraum);|
+-        assert.equal(ueberschriften(html).includes('Neue Archetypen'), false,|
+-            'ohne zweite Messung waere "neu" eine erfundene Rubrik');|
+-        assert.ok(html.includes('Eine Tabelle „Neue Archetypen“ steht hier bewusst nicht'),|
+-            'der Grund fehlt im Leerzustandstext');|
+-        assert.ok(html.includes('„Neue Archetypen“ (2)'),|
+-            'die Zahl der betroffenen Archetypen fehlt');|
+-    });|
+-|
+-    it('gibt es die Tabelle, meldet der Leerzustandstext sie NICHT mehr als ungezeigt', () => {|
+-        const { html } = lauf(mitVorzeitraum);|
+-        assert.equal(html.includes('Ohne eigene Tabelle, obwohl Daten vorliegen'), false,|
+-            'der Hinweis nennt Rubriken als ungezeigt, die jetzt eine Tabelle haben:\n'|
+-            + html.slice(html.indexOf('city-league-info-combined-explanation'), 1200));|
+-    });|
+-|
+-    it('Ueberschrift und Hinweistext benutzen denselben Namen', () => {|
+-        const k = nurFunktionen('de');|
+-        const namen = k.cityLeagueRubrikNamen(true);|
+-        ['haeufiger', 'neuTabelle', 'verschwunden'].forEach(schluessel => {|
+-            assert.equal(namen.zitiert[schluessel], '„' + namen.roh[schluessel] + '“',|
+-                'zitierter und roher Name laufen auseinander: ' + schluessel);|
+-        });|
+-        const { html } = lauf(ohneVorzeitraum);|
+-        // Der Hinweis zitiert genau die Ueberschrift, die es sonst gaebe.|
+-        assert.ok(html.includes(namen.zitiert.neuTabelle), html.slice(0, 200));|
+-    });|
+-|
+-    it('leere Rubriken erzeugen keine leeren Tabellen', () => {|

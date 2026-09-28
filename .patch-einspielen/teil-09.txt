@@ -1,0 +1,266 @@
+-        assert.match(h, /bewusst nicht/, 'der Grund fehlt: ' + h);|
+-    });|
+-|
+-    it('B5: Rubriken, die jetzt eine Tabelle haben, werden NICHT mehr als ungezeigt gemeldet', () => {|
+-        // Bis zum 07.09.2026 standen "Häufiger gespielt", "neue Archetypen"|
+-        // und "verschwundene Archetypen" hier — obwohl sie nur deshalb|
+-        // ungezeigt waren, weil es die Tabellen nicht gab. Jetzt gibt es sie.|
+-        const h = hinweis('de', VOLLSTAENDIG);|
+-        assert.equal(h, '', 'nichts fehlt und nichts ist ungezeigt — dann bleibt der Block leer');|
+-    });|
+-|
+-    it('ist nichts zu melden, bleibt der Block leer statt eine Ueberschrift ohne Inhalt zu setzen', () => {|
+-        const still = Object.assign({}, VOLLSTAENDIG, { ohneTabelle: {} });|
+-        assert.equal(hinweis('de', still), '');|
+-    });|
+-|
+-    it('mit Vorzeitraum, aber leeren Listen, nennt sie die Schwelle statt "kein Vorzeitraum"', () => {|
+-        const h = hinweis('de', Object.assign({}, VOLLSTAENDIG, {|
+-            leer: { seltener: true, haeufiger: true, verbessert: true, verschlechtert: true,|
+-                    aufsteiger: true, neuTabelle: true, verschwunden: true },|
+-            ohneTabelle: {}|
+-        }));|
+-        assert.ok(!h.includes('keinen Vorzeitraum'), 'der Grund muss zum Zustand passen');|
+-        assert.match(h, /mindestens 32 Listen \(10 % des größten Archetyps\)/);|
+-    });|
+-|
+-    it('B4: der Prozentsatz im Satz ist der uebergebene, kein Literal', () => {|
+-        const leer = { seltener: true, haeufiger: true, verbessert: true, verschlechtert: true,|
+-                       aufsteiger: true, neuTabelle: true, verschwunden: true };|
+-        const nichts = {};|
+-        const h = hinweis('de', Object.assign({}, VOLLSTAENDIG, {|
+-            leer, ohneTabelle: nichts, mindestAnteil: 0.25, mindestListen: 76|
+-        }));|
+-        assert.match(h, /mindestens 76 Listen \(25 % des größten Archetyps\)/,|
+-            'vorher stand hier fest "10 %": ' + h);|
+-        const gebrochen = hinweis('de', Object.assign({}, VOLLSTAENDIG, {|
+-            leer, ohneTabelle: nichts, mindestAnteil: 0.125, mindestListen: 38|
+-        }));|
+-        assert.match(gebrochen, /\(12,5 % des größten Archetyps\)/,|
+-            'gebrochene Anteile duerfen nicht zu "12" oder "13" gerundet werden');|
+-        const en = hinweis('en', Object.assign({}, VOLLSTAENDIG, {|
+-            leer, ohneTabelle: nichts, mindestAnteil: 0.25, mindestListen: 76|
+-        }));|
+-        assert.match(en, /76 lists \(25 % of the largest archetype\)/);|
+-    });|
+-|
+-    it('englisch sagt dasselbe', () => {|
+-        const h = hinweis('en', OHNE_VORZEITRAUM);|
+-        assert.match(h, /Missing here:/);|
+-        assert.match(h, /no prior window in the data/);|
+-        assert.ok(h.includes('25.07.2026 – 31.07.2026'));|
+-        assert.match(h, /Why no comparison tables are shown/);|
+-    });|
+-|
+-    // ───────────────────────────────────────────────────────────|
+-    // (A) B4: die Aufrufstelle, ausgefuehrt statt gelesen.|
+-    // ───────────────────────────────────────────────────────────|
+-|
+-    const MARKE = 'html += cityLeagueVergleichLeerHinweis({';|
+-|
+-    /** Das Objekt, das renderCityLeagueTable wirklich baut. */|
+-    function aufrufObjekt(umgebung) {|
+-        const ab = SRC.indexOf(MARKE);|
+-        assert.ok(ab >= 0, 'die Aufrufstelle steht nicht mehr in der Datei');|
+-        const auf = SRC.indexOf('{', ab + MARKE.length - 1);|
+-        const zu = SRC.indexOf('});', auf);|
+-        assert.ok(zu > auf, 'das Objektliteral ist nicht abgeschlossen');|
+-        const kasten = Object.assign({ Math, Object, Number, String }, umgebung);|
+-        vm.createContext(kasten);|
+-        return vm.runInContext('(' + SRC.slice(auf, zu + 1) + ')', kasten);|
+-    }|
+-|
+-    /** Eine Liste bekannter Laenge — mehr braucht die Aufrufstelle nicht. */|
+-    const liste = (n) => new Array(n).fill(0);|
+-|
+-    it('B4: jede Zahl des Leerzustands kommt aus der Umgebung, keine ist an der Aufrufstelle abgeschrieben', () => {|
+-        // Kennwerte statt echter Werte. Steht rechts vom Doppelpunkt ein|
+-        // Literal oder eine zweite Rechnung, taucht der Kennwert nicht auf.|
+-        const o = aufrufObjekt({|
+-            keinVorzeitraum: true,|
+-            totalArchetypes: 141,|
+-            newArchetypes: liste(142),|
+-            dateRange: '01.01.2099 – 02.01.2099',|
+-            tournamentCount: 143,|
+-            countThreshold: 144,|
+-            CL_MINDEST_ANTEIL_GROESSTER: 1.45,      // * 100 = 145|
+-            decreased: [], increased: [], improvers: [], decliners: [],|
+-            entries: [], exits: [], disappeared: [],|
+-            // BEFUND B4/B5: die Tabellen-Entscheidung wird hineingereicht,|
+-            // nicht hier gerechnet.|
+-            // BEFUND B1/2 (07.09.2026, zweite Runde): der Herkunftssatz wird|
+-            // hier NICHT mehr durchgereicht — er stand damit zweimal auf der|
+-            // Seite. Er bleibt in der Karte "Datenquelle"; siehe unten.|
+-            // Dafuer kommen Quelldatei und die ausgezaehlte Bilanz herein.|
+-            _quelle: 'data/QUELLE-147.csv',|
+-            zaehlwerk: { zeilen: 148, mitZuwachs: 149, zuwachsUndNeu: 149,|
+-                         statusVerschwunden: 0 },|
+-            _herkunftSatz: 'HERKUNFT-146', _herkunftDe: true, zeigeNeue: false|
+-        });|
+-        assert.equal(o.archetypen, 141, 'archetypen');|
+-        assert.equal(o.neu, 142, 'neu: newArchetypes.length wurde nicht durchgereicht');|
+-        assert.equal(o.turniere, 143, 'turniere');|
+-        assert.equal(o.mindestListen, 144,|
+-            'mindestListen muss die Schwelle sein, mit der WIRKLICH gefiltert wurde — '|
+-            + 'nicht eine zweite Rechnung an dieser Stelle');|
+-        assert.equal(o.mindestAnteil, 1.45, 'mindestAnteil');|
+-        assert.equal(o.zeitraum, '01.01.2099 – 02.01.2099', 'zeitraum');|
+-        /* BEFUND B1/2 (07.09.2026, zweite Runde): bis hierher verlangte|
+-           dieser Test, dass der Herkunftssatz durchgereicht wird. Genau|
+-           das war der Befund — er stand dadurch ZWEIMAL auf der Seite,|
+-           einmal in der Karte "Datenquelle" und einmal hier. Er bleibt in|
+-           der Karte (die wird immer gerendert, dieser Block nur solange|
+-           Rubriken fehlen), und die Aufrufstelle reicht ihn nicht mehr|
+-           herein. Gegenprobe in tests/unit/test-r4-herkunft-einmal.js. */|
+-        assert.equal(o.herkunftSatz, undefined,|
+-            'BEFUND B1/2: der Herkunftssatz wird wieder in den Leerzustand gereicht — '|
+-            + 'dann steht er ein zweites Mal auf der Seite');|
+-        assert.equal(o.quelle, 'data/QUELLE-147.csv',|
+-            'BEFUND B4: die Quelldatei muss durchgereicht werden, nicht hier gebildet');|
+-        assert.equal(o.zaehlwerk.zeilen, 148,|
+-            'BEFUND B2: die Bilanz muss aus getCityLeagueSortedSections kommen');|
+-        // Die Felder stammen aus dem vm-Realm; deepStrictEqual vergleicht|
+-        // auch den Prototyp, also Feld fuer Feld.|
+-        assert.deepEqual(Object.keys(o.ohneTabelle), ['neuTabelle'],|
+-            'BEFUND B5: ohne Tabelle gemeldet wird genau die Rubrik, die keine bekommt');|
+-        assert.equal(o.ohneTabelle.neuTabelle, 142,|
+-            'BEFUND B5: die Zahl der betroffenen Archetypen wird nicht durchgereicht');|
+-|
+-        const h = hinweis('de', o);|
+-        assert.ok(h.includes('alle 141 Archetypen'), h);|
+-        assert.ok(h.includes('141 Archetypen.'), h);|
+-        assert.ok(h.includes('142 ausdrücklich als NEU verzeichnet'),|
+-            'BEFUND B4 war genau das: neu liess sich auf 0 setzen, ohne dass etwas rot wurde\n' + h);|
+-        assert.ok(h.includes('143 Turniere'), h);|
+-        assert.ok(h.includes('01.01.2099 – 02.01.2099'), h);|
+-        assert.equal(h.includes('HERKUNFT-146'), false,|
+-            'BEFUND B1/2: der Herkunftssatz steht wieder im Leerzustandstext — '|
+-            + 'zusammen mit der Karte "Datenquelle" also zweimal auf der Seite:\n' + h);|
+-        assert.ok(h.includes('data/QUELLE-147.csv'),|
+-            'BEFUND B4: der Leerzustand nennt die Quelldatei nicht:\n' + h);|
+-    });|
+-|
+-    it('B4: an der Aufrufstelle steht rechts vom Doppelpunkt keine nackte Zahl mehr', () => {|
+-        const ab = SRC.indexOf(MARKE);|
+-        const block = SRC.slice(ab, SRC.indexOf('});', ab));|
+-        const literale = block.split('\n').slice(1)|
+-            .filter(z => /:\s*[^,\n]*\b\d/.test(z) && !/\|\|\s*0\b/.test(z)|
+-                      && !/length === 0/.test(z))|
+-            .map(z => z.trim());|
+-        assert.deepEqual(literale, [],|
+-            'wieder abgeschrieben statt durchgereicht: ' + literale.join(' | '));|
+-    });|
+-|
+-    // ───────────────────────────────────────────────────────────|
+-    // (B) B4: die genannte Schwelle ist die, an der wirklich gefiltert wird.|
+-    // ───────────────────────────────────────────────────────────|
+-|
+-    /** getCityLeagueSortedSections() auf gesetzten Zeilen ausfuehren. */|
+-    function stufen(zeilen) {|
+-        const kasten = {|
+-            Math, Number, String, Object, Array, JSON, parseInt, parseFloat,|
+-            console: { warn() {}, log() {}, info() {} },|
+-            parseLocaleNumber: (v, s) => {|
+-                const n = parseFloat(String(v).replace(',', '.'));|
+-                return Number.isFinite(n) ? n : (s || 0);|
+-            }|
+-        };|
+-        vm.createContext(kasten);|
+-        // Die Konstante wird AUSGEFUEHRT, nicht abgeschrieben.|
+-        const konstZeile = /const CL_MINDEST_ANTEIL_GROESSTER\s*=\s*[^;]+;/.exec(SRC);|
+-        assert.ok(konstZeile, 'CL_MINDEST_ANTEIL_GROESSTER steht nicht mehr in der Datei');|
+-        vm.runInContext(|
+-            'let _cityLeagueSortCache = null; let _cityLeagueSortDataRef = null;\n'|
+-            + konstZeile[0] + '\n'|
+-            + funktion(SRC, 'getCityLeagueSortedSections')|
+-            + '\n;globalThis.CL_ANTEIL = CL_MINDEST_ANTEIL_GROESSTER;', kasten);|
+-        return { erg: kasten.getCityLeagueSortedSections(zeilen), anteil: kasten.CL_ANTEIL };|
+-    }|
+-|
+-    it('B4: die im Satz genannte Schwelle ist genau die Grenze der Performance-Rubriken', () => {|
+-        // Groesster Archetyp: 200 Listen. Zwei Kandidaten mit verbesserter|
+-        // Platzierung liegen knapp unter und knapp auf der Schwelle.|
+-        const schwelleSoll = 20;   // 200 * 0,1 — die Rechnung macht der Code|
+-        const zeilen = [|
+-            { archetype: 'Gross',  status: 'BESTEHEND', new_count: '200', old_count: '150',|
+-              count_change: '50', avg_placement_change: '0,0', new_avg_placement: '5,0' },|
+-            { archetype: 'Knapp drunter', status: 'BESTEHEND', new_count: String(schwelleSoll - 1),|
+-              old_count: '10', count_change: '9', avg_placement_change: '-2,0', new_avg_placement: '4,0' },|
+-            { archetype: 'Genau drauf', status: 'BESTEHEND', new_count: String(schwelleSoll),|
+-              old_count: '10', count_change: '10', avg_placement_change: '-3,0', new_avg_placement: '3,0' }|
+-        ];|
+-        const { erg, anteil } = stufen(zeilen);|
+-        assert.equal(erg.countThreshold, 200 * anteil,|
+-            'die Schwelle im Zwischenspeicher muss die gefilterte sein');|
+-        const drin = erg.improvers.map(d => d.archetype);|
+-        assert.deepEqual(drin, ['Genau drauf'],|
+-            'genau die Zeile AUF der Schwelle zaehlt, die darunter nicht — '|
+-            + 'sonst nennt der Satz eine Schwelle, nach der nicht gefiltert wird');|
+-|
+-        // Und derselbe Wert steht im Satz.|
+-        const h = hinweis('de', Object.assign({}, VOLLSTAENDIG, {|
+-            mindestListen: erg.countThreshold,|
+-            mindestAnteil: anteil,|
+-            leer: { seltener: true, haeufiger: true, verbessert: true, verschlechtert: true,|
+-                    aufsteiger: true, neuTabelle: true, verschwunden: true },|
+-            ohneTabelle: {}|
+-        }));|
+-        assert.ok(h.includes('mindestens ' + schwelleSoll + ' Listen'),|
+-            'der Satz nennt eine andere Zahl als die Filterung: ' + h);|
+-    });|
+-|
+-    it('der Block wird wirklich gerendert, an der Stelle der fehlenden Tabellen', () => {|
+-        assert.match(SRC, /html \+= cityLeagueVergleichLeerHinweis\(\{/,|
+-            'der Aufruf steht in renderCityLeagueTable');|
+-        const ab = SRC.indexOf('html += cityLeagueVergleichLeerHinweis({');|
+-        const bis = SRC.indexOf('// Add conditional tables', ab);|
+-        /* BEFUND B5 (07.09.2026): zwischen dem Aufruf und den bedingten|
+-           Tabellen stehen seither die Bausteine der drei neuen Tabellen|
+-           (_kopf, _archZelle, _anteil ...). Die Aussage bleibt dieselbe —|
+-           dazwischen wird NICHTS gerendert —, und die wird jetzt direkt|
+-           geprueft statt ueber einen Abstand in Zeichen. */|
+-        assert.notEqual(bis, -1, 'die bedingten Tabellen stehen nicht mehr dahinter');|
+-        const dazwischen = SRC.slice(SRC.indexOf('});', ab) + 3, bis);|
+-        assert.equal(/html \+=/.test(dazwischen), false,|
+-            'zwischen dem Leerzustands-Hinweis und den bedingten Tabellen wird gerendert:\n'|
+-            + dazwischen);|
+-        const block = SRC.slice(ab, SRC.indexOf('});', ab));|
+-        ['keinVorzeitraum: keinVorzeitraum', 'zeitraum: dateRange',|
+-         'turniere: tournamentCount', 'archetypen: totalArchetypes',|
+-         'neu: newArchetypes.length',|
+-         'mindestListen: countThreshold',|
+-         'mindestAnteil: CL_MINDEST_ANTEIL_GROESSTER',|
+-         'seltener:       decreased.length === 0',|
+-         'verbessert:     improvers.length === 0',|
+-         'verschlechtert: decliners.length === 0'].forEach(p => {|
+-            assert.ok(block.includes(p), 'nicht durchgereicht: ' + p);|
+-        });|
+-        // countThreshold muss aus getCityLeagueSortedSections kommen, sonst|
+-        // ist es wieder eine zweite Rechnung.|
+-        assert.match(SRC, /countThreshold \} = getCityLeagueSortedSections\(cityLeagueData\)/,|
+-            'die Schwelle muss aus der Sortierfunktion herausgereicht werden');|
+-    });|
+-|
+-    it('benutzt nur Klassen, die es schon gibt — kein neues CSS noetig', () => {|
+-        const h = hinweis('de', OHNE_VORZEITRAUM);|
+-        const ui = fs.readFileSync(path.join(WURZEL, 'css', 'ui-components.css'), 'utf8');|
+-        ['city-league-info-table-block', 'city-league-info-table-title',|
+-         'city-league-info-combined-explanation'].forEach(k => {|
+-            assert.ok(h.includes(k), 'Klasse nicht benutzt: ' + k);|
+-            assert.ok(ui.includes('.' + k), 'Klasse nicht gestylt: ' + k);|
+-        });|
+-    });|
+-});|
+diff --git a/version.json b/version.json|
+index e1a25e9..b6ad12b 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202609280750"}|
+\ No newline at end of file|
++{"version":"202609281240"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

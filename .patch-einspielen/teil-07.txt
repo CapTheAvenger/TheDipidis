@@ -1,0 +1,351 @@
+-    { archetype: 'Ogerpon Box', status: 'NEU', old_count: '0', new_count: '5',|
+-      count_change: '5', old_meta_share: '0', new_meta_share: '19,23',|
+-      old_avg_placement: '0', new_avg_placement: '14,2', avg_placement_change: '14,2',|
+-      old_best: '0', new_best: '1' }|
+-];|
+-|
+-/**|
+- * Eine Lage, in der JEDE der sieben Rubriken etwas zu zeigen hat — dann|
+- * faellt der Leerzustandsblock ganz weg. Genau darum geht es: die Karte|
+- * traegt die Herkunft auch dann noch.|
+- *|
+- * Gebaut, nicht gemessen. Die Zahlen sind so gewaehlt, dass|
+- * getCityLeagueSortedSections() alle sieben Listen fuellt:|
+- *   Seltener gespielt      A11 (11 -> 1) und WEG1 (9 -> 0)|
+- *   Haeufiger gespielt     A10 (1 -> 11), Status nicht NEU|
+- *   Performance besser     A1  (avg_placement_change -1,50)|
+- *   Performance schlechter A2  (avg_placement_change +2,00)|
+- *   Top-10-Wechsel         A10 rein, A11 raus|
+- *   Neue Archetypen        NEU1 (Status NEU, aber Vorzeitraum vorhanden)|
+- *   Verschwundene          WEG1 (Status VERSCHWUNDEN)|
+- */|
+-function _zeile(archetype, status, alt, neu, wechsel, best) {|
+-    return {|
+-        archetype, status,|
+-        old_count: String(alt), new_count: String(neu),|
+-        count_change: String(neu - alt),|
+-        old_meta_share: '10,00', new_meta_share: '10,00',|
+-        old_avg_placement: '10,00', new_avg_placement: '10,00',|
+-        avg_placement_change: wechsel,|
+-        old_best: String(best), new_best: String(best)|
+-    };|
+-}|
+-const MIT_VORZEITRAUM = [|
+-    _zeile('A1', 'BESTAND', 20, 20, '-1,50', 1),|
+-    _zeile('A2', 'BESTAND', 19, 19, '2,00', 2),|
+-    _zeile('A3', 'BESTAND', 18, 18, '0', 3),|
+-    _zeile('A4', 'BESTAND', 17, 17, '0', 4),|
+-    _zeile('A5', 'BESTAND', 16, 16, '0', 5),|
+-    _zeile('A6', 'BESTAND', 15, 15, '0', 6),|
+-    _zeile('A7', 'BESTAND', 14, 14, '0', 7),|
+-    _zeile('A8', 'BESTAND', 13, 13, '0', 8),|
+-    _zeile('A9', 'BESTAND', 12, 12, '0', 9),|
+-    _zeile('A10', 'BESTAND', 1, 11, '0', 10),|
+-    _zeile('A11', 'BESTAND', 11, 1, '0', 11),|
+-    _zeile('NEU1', 'NEU', 0, 5, '0', 12),|
+-    _zeile('WEG1', 'VERSCHWUNDEN', 9, 0, '0', 13)|
+-];|
+-|
+-const ARCHETYPEN = [|
+-    { tournament_id: '568', prefecture: 'Special Event', shop: 'Tournament 568', placement: '1' },|
+-    { tournament_id: '568', prefecture: 'Special Event', shop: 'Tournament 568', placement: '9' }|
+-];|
+-|
+-/** Wie oft kommt der Kopf des Herkunftssatzes im HTML vor? */|
+-function vorkommen(html, de) {|
+-    const kopf = de ? 'Diese Ansicht beruht auf' : 'This view rests on';|
+-    return (String(html).match(new RegExp(kopf, 'g')) || []).length;|
+-}|
+-|
+-/** Der Inhalt des Herkunfts-<span> der Karte "Datenquelle". */|
+-function ausKarte(html) {|
+-    const m = String(html).match(|
+-        /<span class="city-league-info-card-herkunft">([\s\S]*?)<\/span>/);|
+-    return m ? m[1] : null;|
+-}|
+-|
+-/** Der Text des Leerzustandsblocks. */|
+-function leerzustand(html) {|
+-    const m = String(html).match(|
+-        /<div class="city-league-info-combined-explanation" role="status">([\s\S]*?)<\/div>/);|
+-    return m ? m[1] : null;|
+-}|
+-|
+-describe('B1/2 — der Herkunftssatz steht genau einmal, und zwar in der Karte', () => {|
+-|
+-    it('Vorpruefung: die gesetzte Lage erzeugt ueberhaupt beide Bloecke', () => {|
+-        const { html } = rendern({ vergleich: OHNE_VORZEITRAUM, archetypen: ARCHETYPEN,|
+-                                   turniere: 1, zeitraum: '6th June 2026' });|
+-        assert.notEqual(ausKarte(html), null, 'die Karte "Datenquelle" traegt keinen Herkunftssatz');|
+-        assert.notEqual(leerzustand(html), null,|
+-            'der Leerzustandsblock steht gar nicht da — dann kann dieser Test nichts doppelt finden');|
+-    });|
+-|
+-    it('DER FALL DES BEFUNDS: genau ein Vorkommen, wenn der Leerzustand danebensteht', () => {|
+-        const { html } = rendern({ vergleich: OHNE_VORZEITRAUM, archetypen: ARCHETYPEN,|
+-                                   turniere: 1, zeitraum: '6th June 2026' });|
+-        assert.equal(vorkommen(html, true), 1,|
+-            'der Herkunftssatz steht ' + vorkommen(html, true) + '-mal auf der Seite — genau B1');|
+-    });|
+-|
+-    it('das eine Vorkommen sitzt in der Karte, nicht im Leerzustand', () => {|
+-        const { html } = rendern({ vergleich: OHNE_VORZEITRAUM, archetypen: ARCHETYPEN,|
+-                                   turniere: 1, zeitraum: '6th June 2026' });|
+-        assert.match(ausKarte(html), /Diese Ansicht beruht auf einem einzigen Turnier/);|
+-        assert.doesNotMatch(leerzustand(html), /Diese Ansicht beruht auf/,|
+-            'der Leerzustand traegt den Satz ein zweites Mal');|
+-    });|
+-|
+-    it('der Leerzustand behaelt seinen eigenen Bestandssatz — nur die Herkunft faellt weg', () => {|
+-        const { html } = rendern({ vergleich: OHNE_VORZEITRAUM, archetypen: ARCHETYPEN,|
+-                                   turniere: 1, zeitraum: '6th June 2026' });|
+-        assert.match(leerzustand(html),|
+-            /Was dieser Reiter hat: Zeitraum 6th June 2026, 1 Turnier, 2 Archetypen\./);|
+-    });|
+-|
+-    it('WARUM DIE KARTE: bei besserer Datenlage faellt der Block weg, die Karte bleibt', () => {|
+-        const { html } = rendern({ vergleich: MIT_VORZEITRAUM, archetypen: ARCHETYPEN,|
+-                                   turniere: 1, zeitraum: '6th June 2026' });|
+-        assert.equal(leerzustand(html), null,|
+-            'Vorpruefung: bei dieser Lage darf der Leerzustandsblock gar nicht mehr erscheinen');|
+-        assert.equal(vorkommen(html, true), 1,|
+-            'die Herkunft ist mit dem Leerzustand verschwunden — genau der Grund fuer die Karte');|
+-        assert.match(ausKarte(html), /Diese Ansicht beruht auf einem einzigen Turnier/);|
+-    });|
+-|
+-    it('englisch: dieselbe Zaehlung, damit die Dopplung nicht sprachweise zurueckkommt', () => {|
+-        const { html } = rendern({ vergleich: OHNE_VORZEITRAUM, archetypen: ARCHETYPEN,|
+-                                   turniere: 1, zeitraum: '6th June 2026', sprache: 'en' });|
+-        assert.equal(vorkommen(html, false), 1);|
+-        assert.match(ausKarte(html), /This view rests on a single tournament/);|
+-        assert.doesNotMatch(leerzustand(html), /This view rests on/);|
+-    });|
+-});|
+diff --git a/tests/unit/test-r4-leerzustand-echte-daten.js b/tests/unit/test-r4-leerzustand-echte-daten.js|
+deleted file mode 100644|
+index 9a8eca2..0000000|
+--- a/tests/unit/test-r4-leerzustand-echte-daten.js|
++++ /dev/null|
+@@ -1,210 +0,0 @@|
+-/**|
+- * BEFUNDE B2 UND B4 (07.09.2026, Reiter "City League", Vergangenheitsfenster)|
+- *|
+- * B4: DREI TABELLEN, DIE NIE ERSCHEINEN.|
+- *   Am 07.09.2026 wurden "Häufiger gespielt", "Neue Archetypen" und|
+- *   "Verschwundene Archetypen" gerendert — und mit den heutigen Daten|
+- *   erscheint keine davon. Dieser Test stellt fest WARUM, und zwar an der|
+- *   echten Datei, und haelt fest, dass an ihrer Stelle ein ehrlicher|
+- *   Leerzustand steht: Quelle (Dateiname) und Zeitfenster inbegriffen.|
+- *|
+- * B2: DIE BEGRUENDUNG WAR FALSCH.|
+- *   Im Quelltext stand, "Häufiger gespielt" sei ohne Vorzeitraum leer,|
+- *   "weil count_change > 0 … ohne Vorzeitraum nicht vorkommt". An den|
+- *   Daten ist das Gegenteil richtig: ALLE Zeilen von|
+- *   data/city_league_archetypes_past_comparison.csv haben count_change > 0.|
+- *   Leer ist die Rubrik, weil ihr Filter zusaetzlich status !== 'NEU'|
+- *   verlangt und jede Zeile den Status NEU traegt.|
+- *|
+- * WAS DIESER TEST PRUEFT — UND WAS NICHT|
+- *|
+- *   Er liest zwei Dateien aus data/, behauptet aber KEINE Wochenwerte.|
+- *   Jeder Sollwert wird aus derselben Datei gezaehlt, gegen die geprueft|
+- *   wird; verglichen werden zwei Rechenwege auf denselben Zeilen:|
+- *|
+- *     (1) Der Filter der Oberflaeche gegen die Zaehlung im Test.|
+- *         `increased` muss genau die Zeilen sein, die status !== 'NEU'|
+- *         UND count_change > 0 erfuellen — nicht "0 Zeilen".|
+- *     (2) Die Zahlen im Leerzustandstext gegen dieselbe Zaehlung.|
+- *         Steht dort "11 von 11", muessen es 11 von 11 sein.|
+- *     (3) Jede Rubrik ist entweder als Tabelle da ODER im Leerzustand|
+- *         benannt. Eine dritte Moeglichkeit — weder noch — ist der|
+- *         Befund selbst.|
+- *|
+- *   Aendert sich die Datenlage (eine echte City-League-Saison faengt|
+- *   wieder an), bleiben alle drei Zusicherungen gruen: dann stehen die|
+- *   Tabellen da, und der Leerzustand faellt weg.|
+- *|
+- * EINGETRAGEN in tests/unit/test-testdaten-wachhund.js.|
+- * KEIN jsdom.|
+- */|
+-|
+-const { describe, it } = require('node:test');|
+-const assert = require('node:assert/strict');|
+-const fs = require('node:fs');|
+-const path = require('node:path');|
+-const { WURZEL, QUELLE, rendern, ueberschriften } = require('./lib-cityleague-sandkasten.js');|
+-|
+-const VERGLEICHSDATEI = 'city_league_archetypes_past_comparison.csv';|
+-const ARCHETYPDATEI = 'city_league_archetypes_past.csv';|
+-|
+-/** Eine Semikolon-CSV aus data/ lesen, so wie die Seite sie bekommt. */|
+-function csv(name) {|
+-    const roh = fs.readFileSync(path.join(WURZEL, 'data', name), 'utf8').replace(/^﻿/, '');|
+-    const zeilen = roh.trim().split(/\r?\n/);|
+-    const kopf = zeilen[0].split(';');|
+-    return zeilen.slice(1).map(z => {|
+-        const werte = z.split(';');|
+-        const o = {};|
+-        kopf.forEach((k, i) => { o[k] = werte[i]; });|
+-        return o;|
+-    });|
+-}|
+-|
+-const VERGLEICH = csv(VERGLEICHSDATEI);|
+-const ARCHETYPEN = csv(ARCHETYPDATEI);|
+-|
+-/** Die Zaehlung, gegen die alles geprueft wird — aus der Datei, nicht gesetzt. */|
+-const Z = {|
+-    zeilen: VERGLEICH.length,|
+-    mitZuwachs: VERGLEICH.filter(d => parseInt(d.count_change || 0, 10) > 0).length,|
+-    zuwachsUndNeu: VERGLEICH.filter(d => parseInt(d.count_change || 0, 10) > 0|
+-                                      && d.status === 'NEU').length,|
+-    haeufiger: VERGLEICH.filter(d => d.status !== 'NEU'|
+-                                  && parseInt(d.count_change || 0, 10) > 0).length,|
+-    neu: VERGLEICH.filter(d => d.status === 'NEU').length,|
+-    verschwunden: VERGLEICH.filter(d => d.status === 'VERSCHWUNDEN').length|
+-};|
+-|
+-/** Das Zeitfenster, wie die Seite es aus den Datumsangaben der Datei bildet. */|
+-const ZEITFENSTER = (() => {|
+-    const d = [...new Set(ARCHETYPEN.map(r => r.date).filter(Boolean))].sort();|
+-    return d.length === 1 ? d[0] : (d[0] + ' – ' + d[d.length - 1]);|
+-})();|
+-|
+-function seite(sprache) {|
+-    return rendern({|
+-        vergleich: VERGLEICH, archetypen: ARCHETYPEN,|
+-        turniere: new Set(ARCHETYPEN.map(r => r.tournament_id)).size,|
+-        zeitraum: ZEITFENSTER, sprache: sprache || 'de'|
+-    }).html;|
+-}|
+-|
+-/** Der Text des Leerzustandsblocks, ohne HTML-Maskierung. */|
+-function leerzustand(html) {|
+-    const m = String(html).match(|
+-        /<div class="city-league-info-combined-explanation" role="status">([\s\S]*?)<\/div>/);|
+-    return m ? m[1].replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&') : null;|
+-}|
+-|
+-describe('B2/B4 — die leeren Rubriken, ihr wahrer Grund und der Leerzustand', () => {|
+-|
+-    it('Vorpruefung: beide Dateien haben ueberhaupt Zeilen', () => {|
+-        assert.notEqual(Z.zeilen, 0, 'data/' + VERGLEICHSDATEI + ' ist leer');|
+-        assert.notEqual(ARCHETYPEN.length, 0, 'data/' + ARCHETYPDATEI + ' ist leer');|
+-        assert.notEqual(ZEITFENSTER, '', 'die Archetypdatei fuehrt kein Datum');|
+-    });|
+-|
+-    it('B2: die Datei widerlegt die alte Begruendung — Zuwachs gibt es sehr wohl', () => {|
+-        // Die alte Behauptung war: "count_change > 0 kommt ohne Vorzeitraum|
+-        // nicht vor". Wahr ist: mitZuwachs Zeilen haben Zuwachs, und genau|
+-        // so viele tragen zugleich den Status NEU — daran scheitert die|
+-        // Rubrik, nicht am fehlenden Zuwachs.|
+-        assert.equal(Z.haeufiger, Z.mitZuwachs - Z.zuwachsUndNeu,|
+-            'die Rechnung des Tests trifft den Filter der Oberflaeche nicht mehr');|
+-        assert.doesNotMatch(QUELLE, /count_change > 0 bzw\. status=VERSCHWUNDEN kommt ohne/,|
+-            'die widerlegte Begruendung steht wieder im Quelltext');|
+-    });|
+-|
+-    it('B2: der Filter der Oberflaeche liefert genau die gezaehlten Zeilen', () => {|
+-        const html = seite('de');|
+-        const titel = ueberschriften(html);|
+-        const daSteht = titel.includes('Häufiger gespielt');|
+-        assert.equal(daSteht, Z.haeufiger > 0,|
+-            'die Tabelle "Häufiger gespielt" steht ' + (daSteht ? 'da' : 'nicht da')|
+-            + ', die Datei traegt aber ' + Z.haeufiger + ' passende Zeile(n)');|
+-    });|
+-|
+-    it('B4: der Leerzustand nennt die QUELLE, und die Datei gibt es wirklich', () => {|
+-        const text = leerzustand(seite('de'));|
+-        assert.notEqual(text, null, 'es steht ueberhaupt kein Leerzustand da');|
+-        const m = text.match(/Quelle: (\S+?),/);|
+-        assert.notEqual(m, null, 'der Leerzustand nennt keine Quelle: ' + text);|
+-        assert.equal(fs.existsSync(path.join(WURZEL, m[1])), true,|
+-            'der genannte Pfad "' + m[1] + '" existiert im Arbeitsbaum nicht');|
+-        assert.equal(path.basename(m[1]), VERGLEICHSDATEI,|
+-            'genannt wird "' + m[1] + '", gelesen wurde ' + VERGLEICHSDATEI);|
+-    });|
+-|
+-    it('B4: der Leerzustand nennt das ZEITFENSTER, und zwar dasselbe wie die Karte', () => {|
+-        const html = seite('de');|
+-        const text = leerzustand(html);|
+-        assert.match(text, new RegExp('Zeitfenster ' + ZEITFENSTER.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));|
+-        assert.match(html, new RegExp('cl\\.period</strong><br>' + ZEITFENSTER.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),|
+-            'Karte und Leerzustand nennen verschiedene Zeitfenster');|
+-    });|
+-|
+-    it('B4: die Zahlen im Leerzustand sind die Zahlen der Datei', () => {|
+-        const text = leerzustand(seite('de'));|
+-        const m = text.match(|
+-            /count_change > 0, die NICHT den Status NEU tragen: (\d+) von (\d+) Zeilen haben count_change > 0, davon tragen (\d+) den Status NEU — es bleiben (\d+)\./);|
+-        assert.notEqual(m, null, 'die ausgezaehlte Bilanz steht nicht im Text: ' + text);|
+-        assert.equal(Number(m[1]), Z.mitZuwachs);|
+-        assert.equal(Number(m[2]), Z.zeilen);|
+-        assert.equal(Number(m[3]), Z.zuwachsUndNeu);|
+-        assert.equal(Number(m[4]), Z.haeufiger);|
+-|
+-        const v = text.match(/Status VERSCHWUNDEN: (\d+) von (\d+)\./);|
+-        assert.notEqual(v, null, 'die Bilanz zu "Verschwundene Archetypen" fehlt: ' + text);|
+-        assert.equal(Number(v[1]), Z.verschwunden);|
+-        assert.equal(Number(v[2]), Z.zeilen);|
+-    });|
+-|
+-    it('B4: jede der drei Rubriken ist entweder Tabelle ODER benannter Leerzustand', () => {|
+-        const html = seite('de');|
+-        const titel = ueberschriften(html);|
+-        const text = leerzustand(html) || '';|
+-        const rubriken = [|
+-            ['Häufiger gespielt', Z.haeufiger],|
+-            ['Neue Archetypen', Z.neu],|
+-            ['Verschwundene Archetypen', Z.verschwunden]|
+-        ];|
+-        rubriken.forEach(([name, anzahl]) => {|
+-            const alsTabelle = titel.includes(name);|
+-            const imText = text.includes('„' + name + '“');|
+-            assert.equal(alsTabelle || imText, true,|
+-                'die Rubrik "' + name + '" (' + anzahl + ' Zeile(n) in der Datei) erscheint weder '|
+-                + 'als Tabelle noch im Leerzustand — genau Befund B4');|
+-        });|
+-    });|
+-|
+-    it('B4: "Neue Archetypen" hat Zeilen, bekommt aber bewusst keine Tabelle — und sagt das', () => {|
+-        const text = leerzustand(seite('de'));|
+-        if (Z.neu > 0 && Z.neu === Z.zeilen) {|
+-            // Kein Vorzeitraum: jede Zeile ist NEU, also sagt "neu" nichts.|
+-            assert.match(text, new RegExp('Ohne eigene Tabelle, obwohl Daten vorliegen: '|
+-                + '„Neue Archetypen“ \\(' + Z.neu + '\\)'));|
+-            assert.match(text, /steht hier bewusst nicht/);|
+-        }|
+-    });|
+-|
+-    it('B5-Beleg an den heutigen Daten: die Ortsangabe ist der Scraper-Platzhalter', () => {|
+-        const orte = [...new Set(ARCHETYPEN.map(r => r.prefecture).filter(Boolean))];|
+-        const html = seite('de');|
+-        orte.forEach(ort => {|
+-            if (ort !== 'Special Event') return;|
+-            assert.match(html, /Ortsangabe „Special Event“ \(vom Scraper gesetzt, nicht aus der Quelle\)/,|
+-                'die Seite gibt den Platzhalter der Datei unmarkiert als Ortsangabe aus');|
+-        });|
+-    });|
+-|
+-    it('englisch: derselbe Leerzustand, dieselben Zahlen', () => {|
+-        const text = leerzustand(seite('en'));|
+-        assert.match(text, new RegExp('source: \\S*' + VERGLEICHSDATEI.replace(/\./g, '\\.')));|
+-        const m = text.match(/(\d+) of (\d+) rows have count_change > 0, (\d+) of those are flagged NEW/);|
+-        assert.notEqual(m, null, 'die englische Bilanz fehlt: ' + text);|
+-        assert.equal(Number(m[1]), Z.mitZuwachs);|
+-        assert.equal(Number(m[2]), Z.zeilen);|
+-        assert.equal(Number(m[3]), Z.zuwachsUndNeu);|
+-    });|
+-});|
+diff --git a/tests/unit/test-testdaten-wachhund.js b/tests/unit/test-testdaten-wachhund.js|
+index 73b7aca..aaca26a 100644|
+--- a/tests/unit/test-testdaten-wachhund.js|
++++ b/tests/unit/test-testdaten-wachhund.js|
+@@ -182,3 +182,2 @@ const REGISTER = {|
+     'test-anteile-und-konventionen-07-09.js': 'Befunde B1, B2, B4, B5 und B6 vom 07.09.2026, ausgefuehrt statt gegriffen. STEHT HIER FREIWILLIG: liestLiveDaten() findet die Datei nicht, weil sie den Pfad ueber eine lies()-Hilfe reicht — dieselbe Luecke wie bei test-labs-trennzeichen.js. Sie liest vier Dateien aus data/ (online_tournament_top8_decks.csv, limitless_online_decks.csv, limitless_online_decks_matchups.csv, data_stand.json) und behauptet an keiner Stelle einen Wochenwert: alle Sollwerte werden aus denselben Dateien gerechnet. Drei Sorten Zusicherung. (1) GLEICHUNGEN GEGEN DIE DATEI: der Anteil der Startseite ist total_brought / Summe total_brought; der aus den Anteilen eingegrenzte Limitless-Nenner gibt die Spalte share_numeric jeder Zeile wieder her (Toleranz 0,005 — die halbe Einheit der letzten angezeigten Stelle, also Rundung, kein Feld); der Top-20-Schnitt der Kachel ist der partiengewichtete Rohschnitt derselben Zeilen. (2) EIGENSCHAFTEN DER KONVENTIONEN: fuer Zeilen, die GENAU EINE der drei Formeln aus js/win-rate-konvention.js treffen, muss der erzeugte Text den Kurznamen eben dieser Konvention vor sein Gleichheitszeichen setzen. Welche Quoten dort stehen, ist der Pruefung egal — sie muessen nur zu ihrer eigenen Bilanz passen. (3) VORPRUEFUNGEN GEGEN EIN LEERES BESTEHEN: es gibt ueberhaupt eine eindeutige Zeile, der eingegrenzte Nenner ist nicht die Summe der gelisteten Listen, mindestens ein Deck steht auf zwei verschiedenen Anteilen, beide Sprachen tragen fuer cl.usageShare verschiedene Werte, und die erste Zeile der Datei hat ueberhaupt Top-20-Paarungen. Ohne sie koennte die jeweilige Zusicherung leer bestehen — genau der Fehler, den dieser Wachhund verhindern soll. Der Zaehler unten sieht die Datei NICHT; sie enthaelt EINE echte Ungleichung an Live-Daten (erg.partien > 0, eine Vorpruefung), und die OBERGRENZE wird dafuer bewusst nicht erhoeht — sie gilt den Dateien, die der Zaehler wirklich liest.',|
+-    'test-r4-leerzustand-echte-daten.js': 'Befunde B2 und B4 vom 07.09.2026 (zweite Runde), Reiter "City League". Liest data/city_league_archetypes_past_comparison.csv und data/city_league_archetypes_past.csv und behauptet keinen einzigen Wochenwert: JEDER Sollwert wird aus derselben Datei gezaehlt, gegen die geprueft wird. Drei Sorten Zusicherung. (1) ZWEI RECHENWEGE AUF DENSELBEN ZEILEN: der Filter der Oberflaeche (increased) gegen die Zaehlung im Test (status !== \'NEU\' UND count_change > 0) — geprueft wird die Gleichung haeufiger == mitZuwachs - zuwachsUndNeu, nicht die Zahl 0. (2) GLEICHUNGEN GEGEN DEN TEXT: die Zahlen, die der Leerzustand ausschreibt ("11 von 11 Zeilen haben count_change > 0"), muessen die aus der Datei gezaehlten sein — genau das war am 07.09.2026 falsch, der Quelltext behauptete das Gegenteil der Datei. (3) VOLLSTAENDIGKEIT: jede der drei Rubriken ist entweder Tabelle ODER im Leerzustand benannt; die genannte Quelldatei existiert im Arbeitsbaum; Karte und Leerzustand nennen dasselbe Zeitfenster. Faengt eine echte City-League-Saison wieder an, bleiben alle Zusicherungen gruen — dann stehen die Tabellen da und der Leerzustand faellt weg. Ungleichungen an Live-Daten enthaelt die Datei keine; die drei Vorpruefungen gegen ein leeres Bestehen sind notEqual(..., 0).',|
+     'test-r5-duenne-basis.js':           'Befunde B2 und B3 der Nachpruefung vom 07.09.2026. STEHT HIER FREIWILLIG: liestLiveDaten() findet die Datei nicht, weil sie den Pfad ueber eine lies()-Hilfe reicht — dieselbe Luecke wie bei test-labs-trennzeichen.js. Gelesen werden ZWEI Dateien aus data/: tournament_decklists_per_player.csv (Felder deck_archetype, tournament_date, tournament_id, player_name, place) und format_window.json (in_person_legal_date). Behauptet wird kein einziger Wochenwert — jeder Sollwert wird aus DERSELBEN Datei gerechnet und gegen MostConsistencyBuilder.bestandsLageAus gestellt: Listenzahl, Listen im Fenster, Archetypen, Zahl der Archetypen unter MIN_WEIGHTED_LISTS und deren Aufteilung. Welche Decks diese Woche wie viele Listen haben, ist jeder Zusicherung egal; sie muessen nur zu sich selbst passen. Genau deshalb gibt es die Datei: der Kommentar im Deckbauer sagte "elf mit EINER Liste, vier mit zweien", gezaehlt waren es zehn und fuenf — eine einmal gemessene und danach stehen gebliebene Zahl. Sie steht jetzt nicht mehr im Text, sondern wird zur Laufzeit gezaehlt. ZWEI VORPRUEFUNGEN gegen ein leeres Bestehen (die Datei liefert ueberhaupt Listen; das Formatfenster aendert die Zahl der Listen ueberhaupt) sind bewusst als Gleichung bzw. Ungleichheit formuliert, nicht als Band. EINE Ungleichung enthaelt die Datei ("der uebrige Hinweis ist laenger als 50 Zeichen"), und die laeuft auf einem SELBST GESETZTEN Befund, nicht auf Livedaten. Der Zaehler unten sieht die Datei nicht; die Obergrenze bleibt deshalb, wo sie ist.',|
+@@ -242,3 +241,2 @@ const REGISTER = {|
+     'test-ui-tippziele-kontrast.js': 'Drei UI-Befunde vom 30.08.2026 (Kontrast, Tippziele, Proxy-Kopf). Aus data/ kommt genau eine Datei, all_cards_merged.csv, und zwar fuer eine reine EXISTENZPRUEFUNG: der Druck, den der Beispieltext im Proxy-Drucker nennt (heute Buddy-Buddy Poffin TEF 144, einer von sieben Drucken dieser Karte), muss es in den Kartendaten wirklich geben. Keine Zahl und keine Ungleichung: die Kartendatenbank waechst nur, ein einmal gedruckter Druck verschwindet nicht.',|
+-    'test-vergleich-leerzustand.js': 'FEHLALARM des weiten Blicks: data/QUELLE-147.csv ist ein KENNWERT, kein Pfad — er wird in das Aufrufobjekt gereicht, um zu zeigen, dass die Quelldatei durchgereicht und nicht an der Aufrufstelle gebildet wird. Geoeffnet werden js/app-city-league.js und css/ui-components.css. Alle Zahlen des Leerzustands sind gesetzte Testvorgaben oder Kennwerte, keine gemessenen Wochenwerte.',|
+     'test-win-rate-konvention.js': 'Eine Bilanz, vier Win Rates (20.08.2026). Liest labs_tournament_decks.csv, limitless_online_decks_matchups.csv und limitless_online_decks.csv und prueft an jeder eine GLEICHUNG: die Prozentspalte der Datei gegen die Formel, die js/win-rate-konvention.js fuer diese Quelle auffuehrt. Die Untergrenzen sind Vorpruefungen gegen ein leeres Bestehen und haben Luft. Die Ausnahmeliste Wailord ist am 22.09.2026 aus der Gleichheit genommen worden und traegt jetzt einen ANTEIL (hoechstens 3 %, gemessen 0,7 %); die Gegenrichtung — ein eingetragener Ausreisser, der sich wieder an die Konvention haelt — meldet seither, statt anzuhalten, denn eine veraltete Notiz deckt hier nichts zu.',|

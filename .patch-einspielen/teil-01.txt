@@ -1,0 +1,344 @@
+From 64ee83fc2200d138ee4a142c2533a9407e80cb62 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Mon, 28 Sep 2026 14:47:13 +0200|
+Subject: [PATCH] =?UTF-8?q?Rutsch=2013:=20Kram=20raus=20=E2=80=94=20CSV-Ex?=|
+ =?UTF-8?q?port,=20Datenstands-Chip,=20Major-Banner,=20Japan-Vergleichsrub?=|
+ =?UTF-8?q?riken;=20Kennzahl=20bricht=20um=20(UI-41=E2=80=A645)?=|
+MIME-Version: 1.0|
+Content-Type: text/plain; charset=UTF-8|
+Content-Transfer-Encoding: 8bit|
+|
+UI-41 CSV-Knöpfe seitenweit entfernt (js/ds-csv.js).|
+UI-43 Deck-Analyse (Global): Überschrift nennt das Format, Datenstands-Chip weg.|
+UI-44 Oranger Banner unter „Alle“ weg; „(noch keine im aktuellen Format)“ unter „Major-Decks“.|
+UI-45 Japan: Siegerliste ohne Quelle/Fußtext, Deck direkt; Vergleichsrubriken samt Leerzustandstext und „Top-Archetypen nach Share“ weg.|
+UI-42 Kennzahl-Zeile der Deckkacheln bricht um statt abgeschnitten zu werden; Messwerkzeug scripts/messe_deckkachel_abgeschnitten.py.|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01K6DYaehLdnuzsrMUKxmm6y|
+---|
+ css/city-league.css                           |  26 +|
+ css/components.css                            |  22 -|
+ css/styles.css                                |  28 +|
+ css/ui-components.css                         |   3 +-|
+ index.html                                    | 263 ++++-----|
+ js/app-city-league.js                         | 520 +-----------------|
+ js/app-current-meta-analysis.js               | 257 ++-------|
+ js/app-current-meta.js                        |   7 +-|
+ js/app-deck-builder.js                        |  11 +-|
+ js/ds-csv.js                                  | 124 -----|
+ js/ds-nav.js                                  |   9 +-|
+ js/i18n.js                                    |  20 +-|
+ scripts/messe_deckkachel_abgeschnitten.py     |  84 +++|
+ service-worker.js                             |   5 +-|
+ tests/unit/lib-cityleague-sandkasten.js       |   3 +-|
+ .../test-anteile-und-konventionen-07-09.js    | 130 +----|
+ tests/unit/test-b5-drei-rubriken.js           | 146 -----|
+ tests/unit/test-cl-siegerliste.js             |  20 +-|
+ tests/unit/test-eine-datumsgrenze.js          |  89 +--|
+ tests/unit/test-f3-attributmaskierung.js      |   5 +-|
+ tests/unit/test-major-rueckfall-und-bild.js   |   6 +-|
+ tests/unit/test-nenner-und-rundung.js         |   9 +-|
+ tests/unit/test-r1-datenstand-reichweite.js   | 212 -------|
+ tests/unit/test-r4-herkunft-einmal.js         | 163 ------|
+ tests/unit/test-r4-leerzustand-echte-daten.js | 210 -------|
+ tests/unit/test-testdaten-wachhund.js         |   2 -|
+ tests/unit/test-textabbau-und-quellen.js      |   4 +-|
+ tests/unit/test-ui41-kein-csv.js              |  56 ++|
+ tests/unit/test-ui42-kennzahl-umbruch.js      |  63 +++|
+ tests/unit/test-ui43-deckanalyse-format.js    |  82 +++|
+ tests/unit/test-ui45-japan-schlanker.js       |  63 +++|
+ tests/unit/test-ui8-validierung.js            |  27 +-|
+ tests/unit/test-vergleich-leerzustand.js      | 399 --------------|
+ version.json                                  |   2 +-|
+ 34 files changed, 718 insertions(+), 2352 deletions(-)|
+ delete mode 100644 js/ds-csv.js|
+ create mode 100644 scripts/messe_deckkachel_abgeschnitten.py|
+ delete mode 100644 tests/unit/test-b5-drei-rubriken.js|
+ delete mode 100644 tests/unit/test-r1-datenstand-reichweite.js|
+ delete mode 100644 tests/unit/test-r4-herkunft-einmal.js|
+ delete mode 100644 tests/unit/test-r4-leerzustand-echte-daten.js|
+ create mode 100644 tests/unit/test-ui41-kein-csv.js|
+ create mode 100644 tests/unit/test-ui42-kennzahl-umbruch.js|
+ create mode 100644 tests/unit/test-ui43-deckanalyse-format.js|
+ create mode 100644 tests/unit/test-ui45-japan-schlanker.js|
+ delete mode 100644 tests/unit/test-vergleich-leerzustand.js|
+|
+diff --git a/css/city-league.css b/css/city-league.css|
+index 3b3666d..72a488a 100644|
+--- a/css/city-league.css|
++++ b/css/city-league.css|
+@@ -1525,2 +1525,28 @@|
+ }|
++/* UI-44 (28.09.2026): der Knopf "Major-Decks" mit seinem Zusatz|
++   "(noch keine im aktuellen Format)" darunter. Der Zusatz haengt unter|
++   dem Knopf, ohne die Knopfreihe zu verschieben (alle drei Knoepfe|
++   bleiben auf einer Linie); ist er sichtbar, bekommt die Reihe unten und|
++   zwischen umgebrochenen Zeilen so viel Luft, wie er hoch ist. */|
++.cm-major-knopf-rahmen {|
++    position: relative;|
++    display: inline-flex;|
++}|
++.cm-major-hinweis {|
++    position: absolute;|
++    top: 100%;|
++    left: 50%;|
++    transform: translateX(-50%);|
++    margin-top: 3px;|
++    font-size: var(--fs-xs);|
++    color: var(--ink-3);|
++    line-height: 1.2;|
++    white-space: nowrap;|
++}|
++.cm-major-hinweis[hidden] { display: none; }|
++.current-meta-format-btns:has(.cm-major-hinweis:not([hidden])),|
++#current-analysis .current-meta-format-btns:has(.cm-major-hinweis:not([hidden])) {|
++    row-gap: 22px;|
++    padding-bottom: 16px;|
++}|
+ .current-meta-format-btns {|
+diff --git a/css/components.css b/css/components.css|
+index 1bb8205..3c5f92a 100644|
+--- a/css/components.css|
++++ b/css/components.css|
+@@ -1334,23 +1334 @@ a:not([class]) { color: var(--link); }|
+ |
+-/* UI-8 (7), 26.09.2026: CSV-Knopf vor jeder Datentabelle (js/ds-csv.js).|
+-   Klein und rechtsbuendig — er soll da sein, nicht auffallen. */|
+-.ds-csv-leiste {|
+-    display: flex;|
+-    justify-content: flex-end;|
+-    margin: 0 0 var(--s-1);|
+-}|
+-.ds-csv-knopf {|
+-    font: inherit;|
+-    font-size: var(--fs-xs);|
+-    font-weight: 600;|
+-    line-height: 1;|
+-    padding: 5px 9px;|
+-    min-height: 28px;|
+-    border: 1px solid var(--line-strong);|
+-    border-radius: var(--r-sm);|
+-    background: var(--surface-1);|
+-    color: var(--ink-2);|
+-    cursor: pointer;|
+-}|
+-.ds-csv-knopf:hover,|
+-.ds-csv-knopf:focus-visible { border-color: var(--brand); color: var(--brand-ink); }|
+diff --git a/css/styles.css b/css/styles.css|
+index 904fd30..0c526e7 100644|
+--- a/css/styles.css|
++++ b/css/styles.css|
+@@ -1673,2 +1673,23 @@|
+ |
++        /* UI-42 (28.09.2026): die Kennzahl-Zeile wurde am Desktop auf|
++           JEDER Kachel abgeschnitten („100,0% | Ø 1,0…“) — gemessen bei|
++           1280 und 1920 px 26/26, 92 px Platz fuer 105 px Text. Die|
++           Bedingung ist „passt nicht nebeneinander“, nicht eine Breite:|
++           zwei Teile, die als Ganzes umbrechen. Seit UI-38 steht das|
++           Band im Fluss der Knopfsaeule, eine zweite Zeile schiebt also|
++           nichts uebereinander. */|
++        .deck-card-actions > .deck-card-overlay {|
++            display: flex;|
++            flex-wrap: wrap;|
++            justify-content: center;|
++            column-gap: 0.45em;|
++            row-gap: 1px;|
++            white-space: normal;|
++            overflow: visible;|
++            text-overflow: clip;|
++        }|
++        .deck-card-overlay-teil {|
++            white-space: nowrap;|
++        }|
++|
+         .deck-card-action-row {|
+@@ -3124,2 +3145,9 @@|
+             }|
++|
++            /* UI-44 (28.09.2026): der Major-Knopf steckt mit seinem Zusatz|
++               in einem Rahmen. Der Rahmen folgt derselben Regel wie der|
++               Knopf, sonst ist er hier der einzige, der nicht voll breit ist. */|
++            .controls .cm-major-knopf-rahmen {|
++                width: 100%;|
++            }|
+             |
+diff --git a/css/ui-components.css b/css/ui-components.css|
+index b1cfd77..74e09bc 100644|
+--- a/css/ui-components.css|
++++ b/css/ui-components.css|
+@@ -3181,4 +3181,3 @@ img[src*="limitlesstcg"] {|
+ .city-league-sieger-tabelle tbody tr:hover { background: var(--cl-table-row-hover, transparent); }|
+-.city-league-sieger-leer,|
+-.city-league-sieger-fuss {|
++.city-league-sieger-leer {|
+     margin: 8px 0 0;|
+diff --git a/index.html b/index.html|
+index 1f40a21..bb2bc90 100644|
+--- a/index.html|
++++ b/index.html|
+@@ -105,3 +105,3 @@|
+     // If the server has a newer version, we purge caches + SW and hard-reload.|
+-    window.APP_VERSION = '202609280750';|
++    window.APP_VERSION = '202609281240';|
+     (function() {|
+@@ -175,46 +175,46 @@|
+          darf sich auf die Variablen verlassen. -->|
+-    <link rel="stylesheet" href="css/tokens.css?v=202609280750" type="text/css">|
+-    <link rel="stylesheet" href="css/components.css?v=202609280750" type="text/css">|
+-    <link rel="stylesheet" href="css/ds-nav.css?v=202609280750">|
+-    <link rel="stylesheet" href="css/styles.css?v=202609280750" type="text/css">|
+-    <link rel="stylesheet" href="css/ui-components.css?v=202609280750" type="text/css">|
+-    <link rel="stylesheet" href="css/ds-share.css?v=202609280750">|
+-    <link rel="stylesheet" href="css/pokeball-menu.css?v=202609280750" type="text/css">|
+-    <link rel="stylesheet" href="css/dashboard-theme.css?v=202609280750" type="text/css">|
++    <link rel="stylesheet" href="css/tokens.css?v=202609281240" type="text/css">|
++    <link rel="stylesheet" href="css/components.css?v=202609281240" type="text/css">|
++    <link rel="stylesheet" href="css/ds-nav.css?v=202609281240">|
++    <link rel="stylesheet" href="css/styles.css?v=202609281240" type="text/css">|
++    <link rel="stylesheet" href="css/ui-components.css?v=202609281240" type="text/css">|
++    <link rel="stylesheet" href="css/ds-share.css?v=202609281240">|
++    <link rel="stylesheet" href="css/pokeball-menu.css?v=202609281240" type="text/css">|
++    <link rel="stylesheet" href="css/dashboard-theme.css?v=202609281240" type="text/css">|
+     <!-- Non-critical CSS: async load (tab-specific styles) -->|
+-    <link rel="stylesheet" href="css/auth-styles.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-header.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-filter-section.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-tabs.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/city-league.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/anti-tech.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/tech-lab.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/tech-slots.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/profile-howto-info.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/masterclass.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/meta-call.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/app-meta-prognose.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/side-quest.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ds-pocket.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/quellen.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/admin.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/statuszustaende.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/tippziele.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/testing-groups.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/archetype-icons.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step1.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step2.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step3.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step4.css?v=202609280750" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/auth-styles.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/cards-header.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/cards-filter-section.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/cards-tabs.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/city-league.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/anti-tech.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/tech-lab.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/tech-slots.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/profile-howto-info.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/masterclass.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/meta-call.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/app-meta-prognose.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/side-quest.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ds-pocket.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/quellen.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/admin.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/statuszustaende.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/tippziele.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/testing-groups.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/archetype-icons.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step1.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step2.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step3.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step4.css?v=202609281240" type="text/css" media="print" onload="this.media='all'">|
+     <!-- Mobile Responsive Optimization — SCHRITT 1 (Layout Umbrüche) -->|
+-    <link rel="stylesheet" href="css/mobile-responsive.css?v=202609280750" type="text/css">|
++    <link rel="stylesheet" href="css/mobile-responsive.css?v=202609281240" type="text/css">|
+     <!-- Escape Rope Close Buttons -->|
+-    <link rel="stylesheet" href="css/close-buttons.css?v=202609280750" type="text/css">|
+-    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202609280750" type="text/css">|
++    <link rel="stylesheet" href="css/close-buttons.css?v=202609281240" type="text/css">|
++    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202609281240" type="text/css">|
+     <!-- Mobile Drag & Drop polyfill for touch devices -->|
+@@ -460,4 +460,4 @@|
+          ?v=NNNN in dieser Datei, also zieht der Stempel jetzt mit. -->|
+-    <script src="js/pokemon-loading-screen.js?v=202609280750"></script>|
+-    <script src="js/csv-cache-interceptor.js?v=202609280750"></script>|
++    <script src="js/pokemon-loading-screen.js?v=202609281240"></script>|
++    <script src="js/csv-cache-interceptor.js?v=202609281240"></script>|
+     <a href="#main-content" class="skip-to-content">Skip to content</a>|
+@@ -1327,3 +1327,3 @@|
+                     <div class="header">|
+-                        <h2><span data-i18n="cm.analysisHeading">Current Meta Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help" data-i18n-aria="aria.helpCurrentAnalysis" aria-label="Help for Current Meta Deck Analysis" data-i18n-title="btn.helpTitle"></button></h2>|
++                        <h2><span data-i18n="cm.analysisHeading">Deck Analysis</span><!-- UI-43 (28.09.2026): das Format statt „aktuelles Meta“; ds-nav.js fuellt das Kuerzel wie bei #cmFormatLabel. --><span class="cm-format" id="cmAnalysisFormatLabel" aria-hidden="true"></span> <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help" data-i18n-aria="aria.helpCurrentAnalysis" aria-label="Help for Current Meta Deck Analysis" data-i18n-title="btn.helpTitle"></button></h2>|
+                         <p data-i18n="cm.analyzeAndBuild">Analyze and Build Decks from Current Meta</p>|
+@@ -1350,3 +1350,7 @@|
+                                 <button onclick="setCurrentMetaFormatFilter('live')" id="currentMetaFilterLive" class="btn btn-secondary current-meta-format-btn" data-i18n="cm.filterLive">Limitless Decks</button>|
+-                                <button onclick="setCurrentMetaFormatFilter('play')" id="currentMetaFilterPlay" class="btn btn-secondary current-meta-format-btn" data-i18n="cm.filterPlay">Major Tournament Decks</button>|
++                                <!-- UI-44 (28.09.2026): statt des orangen Hinweises unter "Alle" steht hier, solange es im Format kein Major gibt, "(noch keine im aktuellen Format)". -->|
++                                <span class="cm-major-knopf-rahmen">|
++                                    <button onclick="setCurrentMetaFormatFilter('play')" id="currentMetaFilterPlay" class="btn btn-secondary current-meta-format-btn" data-i18n="cm.filterPlay">Major Tournament Decks</button>|
++                                    <span id="currentMetaMajorHinweis" class="cm-major-hinweis" hidden></span>|
++                                </span>|
+                                 <span id="currentMetaFilterStatus" class="current-meta-filter-status"></span>|
+@@ -3912,8 +3916,8 @@|
+     <!-- Error tracking (must load before all other JS) -->|
+-    <script src="js/error-tracking.js?v=202609280750"></script>|
++    <script src="js/error-tracking.js?v=202609281240"></script>|
+ |
+-    <script src="js/inline-init.js?v=202609280750" defer></script>|
++    <script src="js/inline-init.js?v=202609281240" defer></script>|
+     <!-- Haelt die Seite hinter einem Vollbild an. Muss vor allen Modulen|
+          stehen, die ein Overlay oeffnen. -->|
+-    <script src="js/hintergrund-sperre.js?v=202609280750" defer></script>|
++    <script src="js/hintergrund-sperre.js?v=202609281240" defer></script>|
+ |
+@@ -4096,10 +4100,10 @@|
+     <!-- Utilities first (provides escapeHtml globally) -->|
+-    <script src="js/app-utils.js?v=202609280750" defer></script>|
+-    <script src="js/i18n.js?v=202609280750" defer></script>|
++    <script src="js/app-utils.js?v=202609281240" defer></script>|
++    <script src="js/i18n.js?v=202609281240" defer></script>|
+     <!-- Firebase: credentials ? config ? globals ? auth ? collection -->|
+-    <script src="js/firebase-credentials.js?v=202609280750" defer></script>|
+-    <script src="js/firebase-config.js?v=202609280750" defer></script>|
+-    <script src="js/firebase-globals.js?v=202609280750" defer></script>|
+-    <script src="js/firebase-auth.js?v=202609280750" defer></script>|
+-    <script src="js/auth-ui-helpers.js?v=202609280750" defer></script>|
++    <script src="js/firebase-credentials.js?v=202609281240" defer></script>|
++    <script src="js/firebase-config.js?v=202609281240" defer></script>|
++    <script src="js/firebase-globals.js?v=202609281240" defer></script>|
++    <script src="js/firebase-auth.js?v=202609281240" defer></script>|
++    <script src="js/auth-ui-helpers.js?v=202609281240" defer></script>|
+     <!-- Zwei Decklisten nebeneinander. Muss VOR firebase-collection.js|
+@@ -4107,9 +4111,9 @@|
+          auf, sobald die Ansicht "Nebeneinander" gewaehlt wird. -->|
+-    <script src="js/deck-vergleich-nebeneinander.js?v=202609280750" defer></script>|
+-    <script src="js/firebase-collection.js?v=202609280750" defer></script>|
++    <script src="js/deck-vergleich-nebeneinander.js?v=202609281240" defer></script>|
++    <script src="js/firebase-collection.js?v=202609281240" defer></script>|
+     <!-- Wishlist import for the Telegram bot's card lists (paste, not upload). -->|
+-    <script src="js/wishlist-bot-import.js?v=202609280750" defer></script>|
++    <script src="js/wishlist-bot-import.js?v=202609281240" defer></script>|
+     <!-- TCG Showdown handoff — replaces the in-app Playtester.|
+          Standalone helper, no deps; only uses globals from other scripts. -->|
+-    <script src="js/tcg-showdown-link.js?v=202609280750" defer></script>|
++    <script src="js/tcg-showdown-link.js?v=202609281240" defer></script>|
+     <!-- Chart.js, PapaParse and localForage (IndexedDB wrapper) — self-hosted -->|
+@@ -4119,3 +4123,3 @@|
+     <!-- Card data cache layer (IndexedDB) -->|
+-    <script src="js/card-data-cache.js?v=202609280750" defer></script>|
++    <script src="js/card-data-cache.js?v=202609281240" defer></script>|
+     <!-- Offline prefetcher — warms the SW cache with every data file|
+@@ -4123,7 +4127,7 @@|
+          has the full dataset locally without per-tab warm-up. -->|

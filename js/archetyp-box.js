@@ -1095,10 +1095,27 @@
 
     let aktualisiertGerade = false;
 
+    /** Eine Box gegen die geladenen Rotationen-Daten halten und speichern. null = Archetyp nicht mehr in den Daten. */
+    async function abgleichSpeichern(box) {
+        const auswahl = _pmDeckAuswahl('all', 'all', box.archetyp);
+        if (!auswahl.matchingDecks.length) return null;
+        const summe = _pmAggregiereDecks(auswahl.matchingDecks);
+        const karten = gefilterteKarten(summe.aggregatedCards, String(box.schwelle || 'all'));
+        const frische = formateZuordnen(eintraegeAus(karten, summe.totalDecklists), jeFormatAus(auswahl.matchingDecks));
+        const erg = abgleichen(box, frische, { datenStand: isoTag(summe.letztesDatumMs) }, heuteIso());
+        erg.box.id = box.id;
+        await schreiben(erg.box);
+        return erg;
+    }
+
+    /**
+     * Aktualisieren: eine Box (id) oder, mit id null, alle Boxen nacheinander —
+     * die Turnierdaten werden dafuer nur einmal geladen.
+     */
     async function aktualisieren(id) {
         if (aktualisiertGerade) return;
-        const box = boxen.find(function (b) { return b.id === id; });
-        if (!box) return;
+        const liste = id ? boxen.filter(function (b) { return b.id === id; }) : boxen.slice();
+        if (!liste.length) return;
         aktualisiertGerade = true;
         const zeile = function (text) {
             const f = el('abxFortschritt');
@@ -1108,21 +1125,24 @@
         if (knopf) knopf.disabled = true;
         try {
             await rotationenDatenLaden(zeile);
-            const auswahl = _pmDeckAuswahl('all', 'all', box.archetyp);
-            if (!auswahl.matchingDecks.length) {
-                zeile('');
-                toast(tx('abx.archetypWeg', { name: box.name },
-                    '„{name}“ kommt in den Turnierdaten nicht mehr vor — die Box bleibt unverändert.'), 'warning');
-                return;
+            const weg = [];
+            let neuSumme = 0;
+            for (let i = 0; i < liste.length; i++) {
+                if (liste.length > 1) zeile(tx('abx.ladeBox', { n: i + 1, g: liste.length, name: liste[i].name }, 'Gleiche ab: {name} ({n} von {g}) …'));
+                const erg = await abgleichSpeichern(liste[i]);
+                if (!erg) { weg.push(liste[i].name); continue; }
+                neuSumme += erg.neu.length;
+                if (id) letztesErgebnis = { id: liste[i].id, neu: erg.neu, nichtMehr: erg.nichtMehr, wieder: erg.wieder };
             }
-            const summe = _pmAggregiereDecks(auswahl.matchingDecks);
-            const karten = gefilterteKarten(summe.aggregatedCards, String(box.schwelle || 'all'));
-            const frische = formateZuordnen(eintraegeAus(karten, summe.totalDecklists), jeFormatAus(auswahl.matchingDecks));
-            const erg = abgleichen(box, frische, { datenStand: isoTag(summe.letztesDatumMs) }, heuteIso());
-            erg.box.id = box.id;
-            await schreiben(erg.box);
-            letztesErgebnis = { id: box.id, neu: erg.neu, nichtMehr: erg.nichtMehr, wieder: erg.wieder };
             zeile('');
+            if (weg.length) {
+                toast(tx('abx.archetypWeg', { name: weg.join(', ') },
+                    '„{name}“ kommt in den Turnierdaten nicht mehr vor — die Box bleibt unverändert.'), 'warning');
+            }
+            if (!id) {
+                toast(tx('abx.alleAktualisiert', { n: liste.length - weg.length, neu: neuSumme },
+                    '{n} Boxen abgeglichen, {neu} neue Karten.'), 'success');
+            }
             zeichnen();
         } catch (e) {
             console.warn('[ArchetypBox] Aktualisieren gescheitert:', e);
@@ -1422,7 +1442,7 @@
         const c = kontext || {};
         let fmtZeile = ansicht.format && ansicht.format !== 'alle' ? formatHinweis(ansicht.format, c) : '';
         if (ohneFormate && (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu')) {
-            fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal „Archetyp-Box aktualisieren“.');
+            fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal aktualisieren („Alle Boxen“ → „Alle Boxen aktualisieren“).');
         }
         let html = reihe(tx('abx.fFormat', null, 'Format'), FORMAT_WAHL.map(function (w) { return knopf('format', w, fmtText[w]); }).join(''))
             + (fmtZeile ? '<p class="abx-filter-hinweis">' + esc(fmtZeile) + '</p>' : '')
@@ -1500,7 +1520,9 @@
         const druckId = eine ? '\'' + esc(eine.id) + '\'' : 'null';
         const aktionen = '<div class="abx-aktionen">'
             + (eine ? '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(\''
-                + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>' : '')
+                + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>'
+                : '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(null)">'
+                + esc(tx('abx.alleAktualisieren', { n: boxen.length }, 'Alle {n} Boxen aktualisieren')) + '</button>')
             + (r.proxy.length
                 ? '<button type="button" class="btn btn-outline abx-druck-btn" onclick="ArchetypBox.proxysDrucken(' + druckId + ')">'
                     + esc(tx('abx.proxysDrucken', { n: proxyKopien }, 'Proxys drucken ({n})')) + '</button>'

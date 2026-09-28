@@ -1,0 +1,194 @@
++    <script src="js/app-side-quest-usage.js?v=202609282125" defer></script>|
++    <script src="js/app-side-quest-matchups.js?v=202609282125" defer></script>|
+     <!-- Kennzeichnung "Kartentext auf Englisch". MUSS vor jeder Datei stehen,|
+@@ -4219,7 +4219,7 @@|
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202609282057" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202609282057" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202609282057" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202609282057" defer></script>|
+-    <script src="js/ds-nav.js?v=202609282057" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202609282125" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202609282125" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202609282125" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202609282125" defer></script>|
++    <script src="js/ds-nav.js?v=202609282125" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4229,6 +4229,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202609282057" defer></script>|
+-    <script src="js/ds-sections.js?v=202609282057" defer></script>|
+-    <script src="js/ds-filter.js?v=202609282057" defer></script>|
+-    <script src="js/ds-share.js?v=202609282057" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202609282125" defer></script>|
++    <script src="js/ds-sections.js?v=202609282125" defer></script>|
++    <script src="js/ds-filter.js?v=202609282125" defer></script>|
++    <script src="js/ds-share.js?v=202609282125" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4237,5 +4237,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202609282057" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202609282057" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202609282057" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202609282125" defer></script>|
++    <script src="js/ds-tutorial.js?v=202609282125" defer></script>|
++    <script src="js/ds-masterclass.js?v=202609282125" defer></script>|
+ |
+diff --git a/js/archetyp-box.js b/js/archetyp-box.js|
+index 09ed3864..72bde80b 100644|
+--- a/js/archetyp-box.js|
++++ b/js/archetyp-box.js|
+@@ -289,2 +289,18 @@|
+ |
++    /**|
++     * Angezeigter Name einer Box. Eine Box aus einer Sammelauswahl|
++     * (archetyp "__familie__|Alakazam") hiess bisher wie der Titel in|
++     * Rotationen, „Alle Alakazam-Decks“. Hausi, 28.09.2026: das „Alle“ weg —|
++     * „Alakazam-Decks“ sagt schon, dass es mehrere sind; eine einzelne|
++     * Variante traegt nur ihren Decknamen. Gespeichert bleibt der alte Name.|
++     */|
++    const FAMILIE = '__familie__|';|
++    function anzeigeName(box, muster) {|
++        const a = String((box && box.archetyp) || '');|
++        if (a.indexOf(FAMILIE) === 0 && a.length > FAMILIE.length) {|
++            return String(muster || '{name}-Decks').replace('{name}', a.slice(FAMILIE.length));|
++        }|
++        return String((box && box.name) || '');|
++    }|
++|
+     /** Was die Druckfunktion bekommt: jede Proxy-Karte, je Druck mit seiner Anzahl. */|
+@@ -576,3 +592,3 @@|
+         const name = function (e) { return String(e.k.name || ''); };|
+-        const boxName = function (e) { return String((e.box && e.box.name) || ''); };|
++        const boxName = function (e) { return anzeigeName(e.box); };|
+         return eintraege.slice().sort(function (a, b) {|
+@@ -642,3 +658,3 @@|
+         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,|
+-        statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon, umfang,|
++        statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,|
+         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,|
+@@ -670,2 +686,4 @@|
+ |
++    function nameVon(b) { return anzeigeName(b, tx('abx.familieName', null, '{name}-Decks')); }|
++|
+     function esc(s) {|
+@@ -748,3 +766,3 @@|
+             }|
+-            boxen.sort(function (a, b) { return String(a.name || '').localeCompare(String(b.name || '')); });|
++            boxen.sort(function (a, b) { return nameVon(a).localeCompare(nameVon(b)); });|
+             return boxen;|
+@@ -1067,3 +1085,3 @@|
+             letztesErgebnis = null;|
+-            hinweisSetzen('<span>' + esc(tx('abx.angelegt', { name: box.name, n: box.karten.length },|
++            hinweisSetzen('<span>' + esc(tx('abx.angelegt', { name: nameVon(box), n: box.karten.length },|
+                 'Archetyp-Box „{name}“ angelegt: {n} Karten, alle als „fehlt“ markiert.')) + '</span> '|
+@@ -1152,5 +1170,5 @@|
+             for (let i = 0; i < liste.length; i++) {|
+-                if (liste.length > 1) zeile(tx('abx.ladeBox', { n: i + 1, g: liste.length, name: liste[i].name }, 'Gleiche ab: {name} ({n} von {g}) …'));|
++                if (liste.length > 1) zeile(tx('abx.ladeBox', { n: i + 1, g: liste.length, name: nameVon(liste[i]) }, 'Gleiche ab: {name} ({n} von {g}) …'));|
+                 const erg = await abgleichSpeichern(liste[i]);|
+-                if (!erg) { weg.push(liste[i].name); continue; }|
++                if (!erg) { weg.push(nameVon(liste[i])); continue; }|
+                 neuSumme += erg.neu.length;|
+@@ -1299,3 +1317,3 @@|
+         leiste.innerHTML = (boxen.length > 1 ? chip(null, tx('abx.alleBoxen', null, 'Alle Boxen'), alle) : '')|
+-            + boxen.map(function (b) { return chip(b.id, b.name, umfang(b)); }).join('');|
++            + boxen.map(function (b) { return chip(b.id, nameVon(b), umfang(b)); }).join('');|
+     }|
+@@ -1346,3 +1364,3 @@|
+             ? ' <span class="abx-weitere">' + esc(tx('abx.weitereDrucke', { n: weitere }, '+{n} Druck')) + '</span>' : '';|
+-        const boxZeile = mitBoxName ? '<div class="abx-boxname" title="' + esc(b.name) + '">' + esc(b.name) + '</div>' : '';|
++        const boxZeile = mitBoxName ? '<div class="abx-boxname" title="' + esc(nameVon(b)) + '">' + esc(nameVon(b)) + '</div>' : '';|
+         return '<div class="abx-karte abx-karte-' + status + '" data-karte="' + esc(k.id) + '" data-box="' + esc(b.id) + '">'|
+@@ -1392,3 +1410,3 @@|
+                 + '<div class="abx-bild">' + bild + '</div>'|
+-                + '<div class="abx-text">' + (mitBoxName ? '<div class="abx-boxname">' + esc(e.box.name) + '</div>' : '')|
++                + '<div class="abx-text">' + (mitBoxName ? '<div class="abx-boxname">' + esc(nameVon(e.box)) + '</div>' : '')|
+                 + '<div class="abx-name" title="' + esc(e.w.name) + '">' + esc(e.w.name) + '</div>'|
+@@ -1524,3 +1542,3 @@|
+         if (eine) {|
+-            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(eine.name) + '</h3>'|
++            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(nameVon(eine)) + '</h3>'|
+                 + '<p class="abx-meta">' + esc(tx('abx.metaZeile', {|
+@@ -1532,3 +1550,3 @@|
+             kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleBoxen', null, 'Alle Boxen')) + '</h3>'|
+-                + '<p class="abx-meta">' + esc(tx('abx.alleMeta', { n: boxen.length, liste: boxen.map(function (b) { return b.name; }).join(', ') },|
++                + '<p class="abx-meta">' + esc(tx('abx.alleMeta', { n: boxen.length, liste: boxen.map(nameVon).join(', ') },|
+                     '{n} Boxen zusammen: {liste}')) + '</p></div>';|
+@@ -1540,3 +1558,3 @@|
+                     'Es gibt Turnierdaten bis {datum}, die diese Box noch nicht kennt — „Archetyp-Box aktualisieren“ übernimmt neue Karten.')|
+-                : tx('abx.neueDatenAlle', { datum: datumLesbar(manifestDatum), liste: alt.map(function (b) { return b.name; }).join(', ') },|
++                : tx('abx.neueDatenAlle', { datum: datumLesbar(manifestDatum), liste: alt.map(nameVon).join(', ') },|
+                     'Turnierdaten bis {datum} — noch nicht abgeglichen: {liste}. Box antippen und aktualisieren.')) + '</p>'|
+@@ -1760,3 +1778,3 @@|
+         if (!box) return;|
+-        const frage = tx('abx.loeschenFrage', { name: box.name },|
++        const frage = tx('abx.loeschenFrage', { name: nameVon(box) },|
+             'Archetyp-Box „{name}“ löschen? Deine Sammlung bleibt unberührt.');|
+diff --git a/js/i18n.js b/js/i18n.js|
+index b1e277f5..752214f6 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -830,2 +830,3 @@ const translations = {|
+     'abx.chipUmfang': '{karten} cards · {stueck} copies',|
++    'abx.familieName': '{name} decks',|
+     'abx.chipFehlen': '{n} missing · {offen} copies to go',|
+@@ -3635,2 +3636,3 @@ const translations = {|
+     'abx.chipUmfang': '{karten} Karten · {stueck} Stück',|
++    'abx.familieName': '{name}-Decks',|
+     'abx.chipFehlen': '{n} fehlen · {offen} Stück offen',|
+diff --git a/service-worker.js b/service-worker.js|
+index 6ad1144f..d41504a1 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202609282057|
++// v202609282125|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202609282057';|
++const CACHE_NAME = 'tcg-analysis-v202609282125';|
+ |
+diff --git a/tests/unit/test-archetyp-box.js b/tests/unit/test-archetyp-box.js|
+index 197341a5..1a5fad79 100644|
+--- a/tests/unit/test-archetyp-box.js|
++++ b/tests/unit/test-archetyp-box.js|
+@@ -669 +669,23 @@ describe('FE-13 Nachtrag: Groesse der Box auf dem Chip (Karten und Stueck)', ()|
+ });|
++|
++|
++describe('FE-13 Nachtrag: Sammelboxen ohne „Alle“ im Namen', () => {|
++    // Hausi, 28.09.2026: „Alakazam-Decks“ sagt schon, dass es mehrere Decks sind.|
++    it('Sammelauswahl heisst "{name}-Decks", eine einzelne Variante behaelt ihren Decknamen', () => {|
++        assert.equal(L.anzeigeName({ archetyp: '__familie__|Alakazam', name: 'Alle Alakazam-Decks' }), 'Alakazam-Decks');|
++        assert.equal(L.anzeigeName({ archetyp: '__familie__|Alakazam', name: 'All Alakazam decks' }, '{name} decks'), 'Alakazam decks');|
++        assert.equal(L.anzeigeName({ archetyp: 'Alakazam Dudunsparce', name: 'Alakazam Dudunsparce' }), 'Alakazam Dudunsparce');|
++    });|
++    it('Verfaelschungsprobe und Verdrahtung', () => {|
++        const alt = "if (a.indexOf(FAMILIE) === 0 && a.length > FAMILIE.length) {";|
++        assert.ok(QUELLE.includes(alt));|
++        const M = logik(QUELLE.replace(alt, 'if (false) {'));|
++        assert.notEqual(M.anzeigeName({ archetyp: '__familie__|Alakazam', name: 'Alle Alakazam-Decks' }), 'Alakazam-Decks');|
++        const code = ohneKommentare(QUELLE);|
++        assert.match(code, /chip\(b\.id, nameVon\(b\), umfang\(b\)\)/);|
++        assert.match(code, /esc\(nameVon\(eine\)\) \+ '<\/h3>'/);|
++        assert.doesNotMatch(code, /esc\((b|eine|e\.box)\.name\)/, 'ein Boxname wird noch roh gezeigt');|
++        const i18n = R('js/i18n.js');|
++        assert.equal(i18n.split("'abx.familieName':").length - 1, 2);|
++    });|
++});|
+diff --git a/version.json b/version.json|
+index 96cf7310..a207fe04 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202609282057"}|
+\ No newline at end of file|
++{"version":"202609282125"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

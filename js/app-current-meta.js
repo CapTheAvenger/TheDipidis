@@ -576,10 +576,9 @@
                    390 px breiten Telefon angezeigt (Faktor 0,36) wird selbst
                    eine zweistellige Quote in 22 px zu 8 px Schrift — unter
                    der Grenze von 11 px, die diese Seite sonst einhaelt. Also
-                   kein Bild und kein CSV-Knopf mehr an der Heatmap
-                   (data-csv="nein" ist der vorgesehene Ausstieg aus
-                   js/ds-csv.js). */
-                let tableHtml = `<table class="heatmap-table" data-csv="nein" style="--heatmap-cols: ${xDecks.length};">`;
+                   kein Bild und kein CSV-Knopf mehr an der Heatmap.
+                   UI-41 (28.09.2026): CSV-Export seitenweit entfernt. */
+                let tableHtml = `<table class="heatmap-table" style="--heatmap-cols: ${xDecks.length};">`;
                 tableHtml += `<colgroup><col class="heatmap-col-first">${xDecks.map(() => '<col class="heatmap-col-data">').join('')}</colgroup>`;
                 
                 // PERFORMANCE: Pre-compute normalized colDeck names (once per render, not per cell)

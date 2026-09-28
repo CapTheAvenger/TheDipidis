@@ -52,7 +52,8 @@ const GESCHNITTEN = [
 const FUNKTIONEN = [
     '_komma', '_kommaText', '_rang',
     'cityLeagueTurnierHerkunft', 'cityLeagueHerkunftSatz',
-    'cityLeagueRubrikNamen', 'cityLeagueVergleichLeerHinweis',
+    /* cityLeagueRubrikNamen und cityLeagueVergleichLeerHinweis sind mit
+       UI-45 (28.09.2026) entfallen. */
     /* Die Siegerliste der japanischen Majors (25.09.2026) haengt
        renderCityLeagueTable() in dieselbe Ausgabe — ohne sie hier
        laeuft der Sandkasten in ein ReferenceError. */

@@ -1523,6 +1523,32 @@
     font-weight: 600;
     margin-right: 10px;
 }
+/* UI-44 (28.09.2026): der Knopf "Major-Decks" mit seinem Zusatz
+   "(noch keine im aktuellen Format)" darunter. Der Zusatz haengt unter
+   dem Knopf, ohne die Knopfreihe zu verschieben (alle drei Knoepfe
+   bleiben auf einer Linie); ist er sichtbar, bekommt die Reihe unten und
+   zwischen umgebrochenen Zeilen so viel Luft, wie er hoch ist. */
+.cm-major-knopf-rahmen {
+    position: relative;
+    display: inline-flex;
+}
+.cm-major-hinweis {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 3px;
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.cm-major-hinweis[hidden] { display: none; }
+.current-meta-format-btns:has(.cm-major-hinweis:not([hidden])),
+#current-analysis .current-meta-format-btns:has(.cm-major-hinweis:not([hidden])) {
+    row-gap: 22px;
+    padding-bottom: 16px;
+}
 .current-meta-format-btns {
     display: flex;
     gap: 15px;

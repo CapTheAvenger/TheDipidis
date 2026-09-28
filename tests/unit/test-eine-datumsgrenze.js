@@ -21,6 +21,7 @@
  */
 
 const { describe, it } = require('node:test');
+const vm = require('vm');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -142,44 +143,64 @@ describe('"Meta Live (Dated)" zaehlt als live', () => {
     });
 });
 
-describe('"Alle" sagt, wenn es dasselbe zeigt wie "Nur Limitless"', () => {
-    it('es gibt einen Hinweistext in beiden Sprachen', () => {
-        const treffer = I18N.match(/'currentMeta\.alleWieLive':/g) || [];
-        assert.equal(treffer.length, 2, 'Hinweis fehlt in einer der Sprachen');
-        assert.match(I18N, /alleWieLive[^\n]*\{format\}/,
-            'der Hinweis nennt das Format nicht');
+describe('UI-44 — fehlende Major-Daten stehen am Knopf "Major-Decks", nicht als Banner unter "Alle"', () => {
+    /* Bis 28.09.2026 schrieb die Statuszeile unter "Alle" einen orangen
+       Satz ("… gibt es aber noch keine Major-Daten, hier steht also genau
+       dasselbe wie unter Limitless Decks"). Hausi (Video-Review 28.09.,
+       19:48–20:36): Banner weg, stattdessen "(noch keine im aktuellen
+       Format)" unter dem Major-Knopf. Geprueft wird AUSGEFUEHRT: die
+       beiden Funktionen laufen in einem vm-Kontext gegen ein Mini-DOM. */
+    const I18N_DE = I18N.slice(I18N.lastIndexOf("'currentMeta.majorNochKeine'") - 20000);
+    const deText = (k) => {
+        const m = I18N_DE.match(new RegExp("'" + k.replace(/\./g, '\\.') + "':\\s*'([^']*)'"));
+        return m ? m[1] : k;
+    };
+    function lauf(keinMajor, format) {
+        const code = extrahiere(CM, 'let _cmKeinMajorFormat = null;',
+                'async function setCurrentMetaFormatFilter(format) {', 'Hinweis und Statuszeile')
+            .replace('async function setCurrentMetaFormatFilter(format) {', '');
+        const klassen = new Set();
+        const status = { textContent: '', classList: {
+            add: (c) => klassen.add(c), remove: (c) => klassen.delete(c) } };
+        const hinweis = { textContent: 'alt', hidden: false };
+        const ctx = {
+            t: deText,
+            document: { getElementById: (id) => ({ currentMetaFilterStatus: status,
+                currentMetaMajorHinweis: hinweis })[id] || null },
+        };
+        vm.runInNewContext(code + '\n_cmKeinMajorFormat = ' + JSON.stringify(keinMajor)
+            + ';\nupdateCurrentMetaFilterStatusLabel(' + JSON.stringify(format) + ');', ctx);
+        return { status, hinweis, klassen };
+    }
+
+    it('ohne Major im Format: Zusatz am Knopf, kein Banner unter "Alle"', () => {
+        const r = lauf('TEF-30C', 'all');
+        assert.equal(r.hinweis.hidden, false);
+        assert.equal(r.hinweis.textContent, '(noch keine im aktuellen Format)');
+        assert.equal(r.klassen.has('cm-filter-status-vorbehalt'), false, 'der orange Banner ist wieder da');
+        assert.doesNotMatch(r.status.textContent, /Major/, `Statuszeile: ${r.status.textContent}`);
     });
 
-    it('der Filter "all" prueft den Major-Leerstand', () => {
-        const block = extrahiere(
-            CM,
-            'async function setCurrentMetaFormatFilter(format) {',
-            'Respect value already set by populateCurrentMetaDeckSelect',
-            'Formatfilter');
-        assert.match(block, /format === 'all'/);
+    it('der Zusatz gilt bei jedem Filter — er beschreibt die Daten, nicht die Auswahl', () => {
+        assert.equal(lauf('TEF-30C', 'live').hinweis.hidden, false);
+    });
+
+    it('mit Major im Format: kein Zusatz', () => {
+        const r = lauf(null, 'all');
+        assert.equal(r.hinweis.hidden, true);
+        assert.equal(r.hinweis.textContent, '');
+    });
+
+    it('der Filter ermittelt den Leerstand bei jedem Wechsel', () => {
+        const block = extrahiere(CM, 'async function setCurrentMetaFormatFilter(format) {',
+            'Respect value already set by populateCurrentMetaDeckSelect', 'Formatfilter');
         assert.match(block, /kein-major-im-format/);
-        // Seit dem Sprachdurchgang vom 30.08.2026 merkt sich der Filter nur
-        // noch den Formatschluessel; den Satz baut
-        // updateCurrentMetaFilterStatusLabel(). Grund: sonst koennte der
-        // languageChanged-Listener den Vorbehalt beim Nachziehen der
-        // Statuszeile nicht mitnehmen und wuerde ihn wegschreiben.
-        assert.match(block, /_cmAlleWieLiveFormat/,
-            'der Filter merkt sich den Vorbehalt nicht mehr');
-        assert.match(block, /updateCurrentMetaFilterStatusLabel\(format\)/,
-            'der Filter laesst die Statuszeile nicht neu schreiben');
+        assert.doesNotMatch(block, /if \(format === 'all'\) \{\s*const grund/,
+            'der Leerstand wird wieder nur bei "Alle" ermittelt');
     });
 
-    it('die Statuszeile formuliert den Hinweis in der aktiven Sprache', () => {
-        const fn = extrahiere(
-            CM,
-            'function updateCurrentMetaFilterStatusLabel(format) {',
-            'async function setCurrentMetaFormatFilter(format) {',
-            'Statuszeile');
-        assert.match(fn, /alleWieLive/,
-            'der Hinweistext wird nicht mehr aus i18n geholt');
-        assert.match(fn, /_cmAlleWieLiveFormat/,
-            'der gemerkte Vorbehalt wird nicht ausgewertet');
-        assert.match(fn, /cm-filter-status-vorbehalt/,
-            'die Auszeichnung des Vorbehalts fehlt');
+    it('der Hinweistext steht in beiden Sprachen, der alte Bannertext in keiner', () => {
+        assert.equal((I18N.match(/'currentMeta\.majorNochKeine':/g) || []).length, 2);
+        assert.doesNotMatch(I18N, /'currentMeta\.alleWieLive':/);
     });
 });

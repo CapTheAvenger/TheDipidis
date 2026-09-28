@@ -1358,11 +1358,25 @@
          * Nutzer den Filter noch einmal anfasste. Als eigene Funktion kann
          * der languageChanged-Listener am Dateiende sie nachziehen.
          */
-        /* Merkzettel fuer den Vorbehalt "Alle zeigt dasselbe wie Limitless".
-           Enthaelt den Formatschluessel, solange der Vorbehalt gilt, sonst
-           null. Als Zustand statt als fertiger Satz, damit der
-           Sprachwechsel ihn in der neuen Sprache neu formulieren kann. */
-        let _cmAlleWieLiveFormat = null;
+        /* Merkzettel: gibt es im aktuellen Format noch kein Major?
+           Enthaelt den Formatschluessel, solange das gilt, sonst null.
+           Als Zustand statt als fertiger Satz, damit der Sprachwechsel
+           den Hinweis in der neuen Sprache neu schreiben kann.
+
+           UI-44 (28.09.2026, Hausi): bis hierher stand der Vorbehalt als
+           oranger Satz unter „Alle“ („… hier steht also genau dasselbe wie
+           unter Limitless Decks“). Jetzt steht er knapp unter dem Knopf
+           „Major-Decks“ — dort, wo die Daten fehlen. */
+        let _cmKeinMajorFormat = null;
+
+        function _cmMajorHinweisZeichnen() {
+            const el = document.getElementById('currentMetaMajorHinweis');
+            if (!el) return;
+            const text = _cmKeinMajorFormat && typeof t === 'function'
+                ? t('currentMeta.majorNochKeine') : '';
+            el.textContent = text;
+            el.hidden = !text;
+        }
 
         function updateCurrentMetaFilterStatusLabel(format) {
             const statusEl = document.getElementById('currentMetaFilterStatus');
@@ -1372,16 +1386,8 @@
                 'live': typeof t === 'function' ? t('currentMeta.limitlessOnly') : 'Limitless Decks Only',
                 'play': typeof t === 'function' ? t('currentMeta.majorOnly') : 'Major Tournament Decks Only'
             };
+            _cmMajorHinweisZeichnen();
             if (!labels[format]) return;
-            if (format === 'all' && _cmAlleWieLiveFormat) {
-                const hinweis = (typeof t === 'function' ? t('currentMeta.alleWieLive') : '')
-                    .replace('{format}', _cmAlleWieLiveFormat);
-                if (hinweis) {
-                    statusEl.textContent = hinweis;
-                    statusEl.classList.add('cm-filter-status-vorbehalt');
-                    return;
-                }
-            }
             statusEl.classList.remove('cm-filter-status-vorbehalt');
             const filterLabel = typeof t === 'function' ? t('currentMeta.activeFilter') : 'Active filter:';
             statusEl.textContent = `${filterLabel} ${labels[format]}`;
@@ -1432,6 +1438,9 @@
                 : 0;
             if (format === 'play' && echteOptionen === 0) {
                 const grund = await _cmMajorLeerGrund();
+                _cmKeinMajorFormat = grund.grund === 'kein-major-im-format'
+                    ? ((await _cmFormatSchluessel()) || '?') : null;
+                _cmMajorHinweisZeichnen();
                 if (statusEl && grund.text) {
                     statusEl.textContent = grund.text;
                     statusEl.classList.add('cm-filter-status-vorbehalt');
@@ -1451,22 +1460,17 @@
                 return;
             }
             // "Alle" und "Nur Limitless" zeigen dasselbe, solange es im
-            // Format kein Major gibt. Zwei Knoepfe mit identischem
-            // Ergebnis und ohne Erklaerung lesen sich wie ein Fehler —
-            // also sagt die Statuszeile, warum das so ist.
-            if (format === 'all') {
+            // Format kein Major gibt. Das sagt seit UI-44 (28.09.2026) ein
+            // knapper Zusatz unter dem Knopf "Major-Decks" — bei JEDEM
+            // Filter, nicht nur bei "Alle": er beschreibt die Datenlage,
+            // nicht die Auswahl.
+            {
                 const grund = await _cmMajorLeerGrund();
-                if (grund.grund === 'kein-major-im-format') {
-                    // Nur das Format merken, den Satz baut
-                    // updateCurrentMetaFilterStatusLabel() — sonst koennte
-                    // der Sprachwechsel den Vorbehalt nicht mitnehmen und
-                    // wuerde ihn beim Nachziehen wegschreiben.
-                    _cmAlleWieLiveFormat = (await _cmFormatSchluessel()) || '?';
-                } else {
-                    _cmAlleWieLiveFormat = null;
-                }
-            } else {
-                _cmAlleWieLiveFormat = null;
+                // Nur das Format merken, den Satz baut
+                // _cmMajorHinweisZeichnen() — sonst koennte der
+                // Sprachwechsel den Hinweis nicht mitnehmen.
+                _cmKeinMajorFormat = grund.grund === 'kein-major-im-format'
+                    ? ((await _cmFormatSchluessel()) || '?') : null;
             }
             updateCurrentMetaFilterStatusLabel(format);
 
@@ -6008,194 +6012,7 @@ document.addEventListener('languageChanged', () => {
     }
 });
 
-/* ── BEFUND B4 (07.09.2026): DER REITER OHNE DATENSTAND ──────────────
- *
- * Live gemessen auf thedipidis.app: der Reiter „Current meta"
- * (#current-meta) trug seinen Frische-Chip mit „6.9.2026", der Reiter
- * „Deck-Analyse (Global)" (#current-analysis) trug gar keinen. Fünf von
- * sechs Reitern nannten ihren Stand, dieser eine nicht — und er ist der,
- * auf dem die meisten Zahlen stehen.
- *
- * Der Chip steckt bei allen anderen Reitern in index.html; index.html
- * gehört einem anderen Arbeitspaket. Er wird deshalb hier eingehängt,
- * mit derselben Klasse und demselben Mechanismus wie überall sonst
- * (js/ds-datenstand.js liest data/data_stand.json, das
- * scripts/build_data_stand.py aus dem Git-Verlauf schreibt).
- *
- * WELCHES DATUM? NICHT irgendeins, sondern das ÄLTESTE der Quellen,
- * aus denen dieser Reiter seine Kennzahlen rechnet:
- *
- *   data/limitless_online_decks.csv            Quote, Rang, Bilanz
- *   data/limitless_online_decks_matchups.csv   Paarungen, Top-20-Schnitt
- *   data/online_tournament_top8_decks.csv      Top-8-Quote der Kachelreihe
- *
- * „Am besten so frisch wie die älteste Quelle" ist die einzige Aussage,
- * die über eine Ansicht aus drei Dateien stimmt. Steht für KEINE davon
- * ein Stand in data_stand.json, bleibt der Chip bei „unbekannt" — ein
- * geratenes Datum ist schlimmer als gar keins, und diese Regel steht im
- * Kopf von js/ds-datenstand.js aus genau diesem Grund.
- *
- * UND SIE GILT NUR ÜBER DIE QUELLEN, DIE EINEN STAND HABEN (Befund B2,
- * 07.09.2026). Fehlt der Eintrag für eine der drei, wird sie
- * übersprungen; das angezeigte Datum ist dann das älteste der
- * ÜBRIGEN und kann jünger sein als die übergangene Datei. Der Chip
- * schreibt diese Reichweite deshalb sichtbar daneben — „älteste von 3
- * Quellen" bzw. „älteste der 2 von 3 Quellen mit Stand" — statt ein
- * Teilwissen als vollständige Auskunft auszugeben.
- *
- * Die Kartenliste des Reiters kommt aus einer Formatdatei
- * (tournament_cards_data_cards_<Format>.csv), die der Wochenlauf über
- * das Manifest auflöst; für sie führt data_stand.json keinen Eintrag.
- * Sie steht deshalb NICHT in der Liste: ein Chip, der eine Datei
- * mitzählt, deren Stand niemand kennt, behauptet mehr, als er weiß.
- */
-var CM_STAND_QUELLEN = [
-    'limitless_online_decks.csv',
-    'limitless_online_decks_matchups.csv',
-    'online_tournament_top8_decks.csv',
-];
-
-/**
- * Die älteste der Quellen, FÜR DIE EIN STAND HINTERLEGT IST — und wie
- * viele das sind.
- *
- * BEFUND B2 (07.09.2026): DIE FUNKTION WUSSTE WENIGER, ALS IHR NAME SAGTE.
- * Sie hieß „die älteste Quelle" und übersprang jede Zeile ohne Datum.
- * Führt data_stand.json für eine der drei Dateien keinen Eintrag, kam
- * trotzdem eine Antwort heraus — und die konnte JÜNGER sein als die
- * übergangene Datei. Der Chip hätte dann eine Frische behauptet, die
- * für den Reiter nicht gilt: „am besten so frisch wie die älteste
- * Quelle" stimmt nur über die Quellen, die man kennt.
- *
- * Deshalb gibt sie jetzt beides zurück: den Fund UND seine Reichweite
- * (`bekannt` von `gesamt`, dazu `ohneStand` mit den übergangenen
- * Dateinamen). Der Aufrufer schreibt diese Reichweite an den Chip, statt
- * sie zu verschweigen.
- *
- * Reine Funktion, damit eine Zusicherung sie AUSFÜHREN kann, statt den
- * Quelltext zu lesen.
- *
- * @param {Array<{datei:string, stand:Date|null}>} staende
- * @returns {{datei:string, stand:Date, bekannt:number, gesamt:number,
- *            ohneStand:string[]}|null} null, wenn für KEINE der Quellen
- *          ein Stand hinterlegt ist
- */
-function cmAeltesteQuelle(staende) {
-    var liste = staende || [];
-    var beste = null, bekannt = 0, ohneStand = [];
-    for (var i = 0; i < liste.length; i++) {
-        var e = liste[i];
-        if (!e || !e.datei) continue;
-        var t = (e.stand && e.stand.getTime) ? e.stand.getTime() : NaN;
-        if (!isFinite(t)) { ohneStand.push(e.datei); continue; }
-        bekannt++;
-        if (!beste || t < beste.stand.getTime()) beste = { datei: e.datei, stand: e.stand };
-    }
-    if (!beste) return null;
-    beste.bekannt = bekannt;
-    beste.gesamt = bekannt + ohneStand.length;
-    beste.ohneStand = ohneStand;
-    return beste;
-}
-
-/**
- * Hängt den Frische-Chip in die Überschrift des Reiters, einmal.
- * Ohne DsDatenstand passiert nichts — dann steht lieber kein Chip da
- * als einer, den niemand füllen kann.
- */
-function cmDatenstandChipEinhaengen(wurzel) {
-    var host = wurzel || document;
-    var titel = host.querySelector && host.querySelector('#current-analysis .header h2');
-    if (!titel) return null;
-    if (titel.querySelector('.data-freshness-chip')) return titel.querySelector('.data-freshness-chip');
-    if (!window.DsDatenstand || typeof window.DsDatenstand.stand !== 'function') return null;
-
-    var de = (typeof getLang === 'function') && getLang() === 'de';
-    var chip = document.createElement('span');
-    chip.className = 'data-freshness-chip';
-    chip.setAttribute('data-cm-stand', '1');
-    /* BEFUND B2 (07.09.2026): DER CHIP SAGT JETZT, WORÜBER ER REDET.
-       Er trug „Daten: 6.9.2026" und daneben, über ds-datenstand.js,
-       den Namen EINER Datei. Gemeint war aber „so frisch wie die
-       älteste der Quellen dieses Reiters" — und selbst das nur, soweit
-       für sie überhaupt ein Stand hinterlegt ist. Beides stand nirgends.
-       Die Reichweite gehört sichtbar an die Zahl, sonst liest sich ein
-       Teilwissen wie eine vollständige Auskunft.
-
-       Das Feld dafür wird HIER angelegt und später nur noch beschriftet:
-       ds-datenstand.js schreibt in `.js-data-freshness` und in title und
-       Klassen des Chips — dieses Feld fasst es nicht an. */
-    chip.innerHTML = ' <span class="data-freshness-chip-icon" aria-hidden="true">\u{1F504}</span> '
-        + '<span data-i18n="data.updated">' + (de ? 'Daten:' : 'Data:') + '</span> '
-        + '<span class="js-data-freshness">' + (de ? 'unbekannt' : 'unknown') + '</span>'
-        + '<span class="cm-stand-umfang"></span>';
-    titel.appendChild(chip);
-
-    Promise.all(CM_STAND_QUELLEN.map(function (f) {
-        return window.DsDatenstand.stand(f).then(function (d) { return { datei: f, stand: d }; });
-    })).then(function (staende) {
-        var aelteste = cmAeltesteQuelle(staende);
-        var feld = chip.querySelector('.js-data-freshness');
-        if (!aelteste) {
-            /* Kein Stand für keine der Quellen. Dann bleibt „unbekannt"
-               stehen — und der Hinweis sagt, warum, statt den Leser
-               raten zu lassen. */
-            chip.classList.add('is-unbekannt');
-            chip.setAttribute('title', (de
-                ? 'Für keine der Quellen dieses Reiters ist ein Stand hinterlegt: '
-                : 'No recorded date for any source of this tab: ') + CM_STAND_QUELLEN.join(', '));
-            return;
-        }
-        /* WORÜBER GILT DIESE ZAHL? Über die älteste der Quellen, für die
-           ein Stand hinterlegt ist — nicht über „die Daten dieses
-           Reiters". Fehlt für eine Quelle der Eintrag, wird sie
-           übersprungen, und die angezeigte Frische kann JÜNGER sein als
-           die übergangene Datei. Genau das steht jetzt daneben, mit den
-           Namen der übergangenen Dateien im Titel. */
-        var umfang = chip.querySelector('.cm-stand-umfang');
-        if (umfang) {
-            if (aelteste.ohneStand.length) {
-                umfang.textContent = de
-                    ? ' (älteste der ' + aelteste.bekannt + ' von ' + aelteste.gesamt
-                      + ' Quellen mit Stand)'
-                    : ' (oldest of the ' + aelteste.bekannt + ' of ' + aelteste.gesamt
-                      + ' sources with a recorded date)';
-                umfang.setAttribute('title', (de
-                    ? 'Ohne hinterlegten Stand und deshalb nicht berücksichtigt: '
-                      + aelteste.ohneStand.join(', ')
-                      + '. Diese Dateien können älter sein als das angezeigte Datum.'
-                    : 'No recorded date, therefore not considered: '
-                      + aelteste.ohneStand.join(', ')
-                      + '. Those files may be older than the date shown.'));
-            } else {
-                umfang.textContent = de
-                    ? ' (älteste von ' + aelteste.gesamt + ' Quellen)'
-                    : ' (oldest of ' + aelteste.gesamt + ' sources)';
-                umfang.setAttribute('title', (de
-                    ? 'Quellen dieses Reiters: ' : 'Sources of this tab: ')
-                    + CM_STAND_QUELLEN.join(', '));
-            }
-        }
-        chip.setAttribute('data-cm-bekannt', String(aelteste.bekannt));
-        chip.setAttribute('data-cm-gesamt', String(aelteste.gesamt));
-        /* Ab hier macht ds-datenstand.js den Rest — dieselbe Anzeige,
-           dieselben Klassen und derselbe Hinweis wie in den fünf
-           Reitern, deren Chip in index.html steht. */
-        chip.setAttribute('data-cm-quelle', aelteste.datei);
-        if (feld) feld.setAttribute('data-quelle', aelteste.datei);
-        window.DsDatenstand.zeichne(chip);
-    }).catch(function () { /* still bleiben ist hier richtig: der Chip sagt dann „unbekannt" */ });
-
-    return chip;
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { cmDatenstandChipEinhaengen(); });
-} else {
-    cmDatenstandChipEinhaengen();
-}
-document.addEventListener('languageChanged', function () { cmDatenstandChipEinhaengen(); });
-
-window.cmAeltesteQuelle = cmAeltesteQuelle;
-window.cmDatenstandChipEinhaengen = cmDatenstandChipEinhaengen;
-window.CM_STAND_QUELLEN = CM_STAND_QUELLEN;
+/* UI-43 (28.09.2026, Hausi): der Frische-Chip in der Ueberschrift dieses
+ * Reiters („Daten: 27.9.2026 (älteste von 3 Quellen)“) ist entfernt — der
+ * Stand steht auf „Aktuelles Meta“. Die Ueberschrift nennt stattdessen das
+ * Format (js/ds-nav.js, formatMarke). */

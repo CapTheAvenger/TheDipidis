@@ -8,7 +8,8 @@
  *   (4) Oe-Kopien-Verteilung                      HIER — Spanne aus max_count, mehr fuehren die Daten nicht
  *   (5) Tooltips fuer Fachbegriffe                HIER — 8 Kopfzeilen ohne Erklaerung (gemessen)
  *   (6) Rohdaten-Link                             gebaut 26.09., auf Wunsch wieder entfernt 27.09. (UI-30/31)
- *   (7) CSV-Export                                HIER — js/ds-csv.js
+ *   (7) CSV-Export                                gebaut 26.09., auf Wunsch wieder entfernt 28.09. (UI-41,
+ *                                                 Zusicherung in test-ui41-kein-csv.js)
  *   (8) Past-Meta-Vorauswahl                      schon da (defaultFormat = neuestes Fenster)
  *   (9) Deep-Links                                schon da (#current-analysis?deck=…, js/inline-init.js)
  * Die Faelle „schon da" haben eigene Zusicherungen in ihren Dateien; hier
@@ -126,29 +127,5 @@ describe('UI-30/UI-31: der Datenstands-Chip zeigt keinen Rohdaten-Verweis', () =
         const { ctx } = await lauf();
         assert.ok(ctx.window.DsDatenstand, 'Modul nicht geladen');
         assert.equal(ctx.window.DsDatenstand.rohdatenVerweis, undefined);
-    });
-});
-
-describe('UI-8 (7): CSV-Export', () => {
-    const ctx = {
-        window: {}, document: { readyState: 'complete', querySelectorAll: () => [], body: {} },
-        setTimeout, URL, Blob: function () {},
-    };
-    vm.runInNewContext(R('js/ds-csv.js'), ctx);
-    const Z = (texte, tag = 'td') => ({ cells: texte.map(t => ({ innerText: t })), querySelector: (s) => (s === 'td' && tag === 'td') ? {} : null });
-    it('schreibt, was in der Tabelle steht — Semikolon, Anfuehrungszeichen, deutsche Zahl', () => {
-        const tabelle = { rows: [Z(['Deck', 'Anteil'], 'th'), Z(['Dragapult', '9,95 %']), Z(['Basic; Box', 'a "b"'])] };
-        assert.equal(ctx.window.DsCsv.alsCsv(tabelle), 'Deck;Anteil\r\nDragapult;9,95 %\r\n"Basic; Box";"a ""b"""');
-    });
-    it('keine Knoepfe an Tutorial-Abbildungen und an Tabellen ohne Daten', () => {
-        const mit = (drin) => ({ getAttribute: () => null, rows: [Z(['a']), Z(['b'])], closest: (s) => (s === '.tab-content' ? {} : (drin ? {} : null)) });
-        assert.equal(ctx.window.DsCsv.geeignet(mit(false)), true);
-        assert.equal(ctx.window.DsCsv.geeignet(mit(true)), false, 'Tutorial-Abbildung bekam einen CSV-Knopf');
-        const leer = { getAttribute: () => null, rows: [Z(['a'], 'th')], closest: (s) => (s === '.tab-content' ? {} : null) };
-        assert.equal(ctx.window.DsCsv.geeignet(leer), false);
-    });
-    it('ist eingebunden und steht in der Liste des Service Workers', () => {
-        assert.match(R('index.html'), /<script src="js\/ds-csv\.js\?v=\d+" defer><\/script>/);
-        assert.ok(R('service-worker.js').includes("'./js/ds-csv.js'"));
     });
 });

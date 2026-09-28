@@ -3179,8 +3179,7 @@ img[src*="limitlesstcg"] {
 }
 .city-league-sieger-tabelle th { font-weight: 600; white-space: nowrap; }
 .city-league-sieger-tabelle tbody tr:hover { background: var(--cl-table-row-hover, transparent); }
-.city-league-sieger-leer,
-.city-league-sieger-fuss {
+.city-league-sieger-leer {
     margin: 8px 0 0;
     font-size: .85em;
     opacity: .85;

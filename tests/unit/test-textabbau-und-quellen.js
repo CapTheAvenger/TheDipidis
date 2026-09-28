@@ -100,7 +100,9 @@ describe('Die Ueberschrift nennt das Meta, nicht die Quelle', () => {
         assert.doesNotMatch(umfeld, /TEF|PBL/,
             'das Kuerzel steht fest im HTML und ueberlebt die Rotation nicht');
         assert.match(NAV, /function formatMarke\(\)/, 'niemand fuellt das Kuerzel');
-        assert.match(NAV, /getElementById\('cmFormatLabel'\)/);
+        // Seit UI-43 (28.09.2026) fuellt formatMarke zwei Ueberschriften
+        // aus einer Id-Liste; ausgefuehrt geprueft in test-ui43-deckanalyse-format.js.
+        assert.match(NAV, /'cmFormatLabel'/);
         // Und es muss auch beim Sprachwechsel wieder gesetzt werden.
         assert.match(NAV, /languageChanged'?,\s*formatMarke/,
             'nach einem Sprachwechsel bliebe das Kuerzel stehen wie es war');

@@ -566,124 +566,9 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
     });
 });
 
-/* ══ BEFUND B4 ══════════════════════════════════════════════════════ */
-
-describe('B4 — der Reiter Deck-Analyse nennt seinen Datenstand', () => {
-
-    const STAND = JSON.parse(lies('data/data_stand.json'));
-
-    function ladeChip(opt) {
-        opt = opt || {};
-        const h2 = { _kinder: [], innerHTML: '',
-            querySelector: (sel) => h2._kinder.find(k => ('.' + k.className) === sel) || null,
-            appendChild: (k) => { h2._kinder.push(k); } };
-        const dok = Object.assign(grunddom(), {
-            querySelector: (sel) => (sel === '#current-analysis .header h2' ? h2 : null),
-            createElement: () => {
-                const kl = new Set();
-                const el = { className: '', innerHTML: '', _attr: {},
-                    classList: { add: (...c) => c.forEach(x => kl.add(x)),
-                                 remove: (...c) => c.forEach(x => kl.delete(x)),
-                                 contains: (c) => kl.has(c) },
-                    setAttribute: (k, v) => { el._attr[k] = v; },
-                    getAttribute: (k) => (k in el._attr ? el._attr[k] : null),
-                    querySelector: () => el._feld };
-                el._feld = { _attr: {}, textContent: '',
-                    setAttribute: (k, v) => { el._feld._attr[k] = v; },
-                    getAttribute: (k) => (k in el._feld._attr ? el._feld._attr[k] : null) };
-                return el;
-            },
-        });
-        const gezeichnet = [];
-        const kontext = {
-            console, document: dok, getLang: () => 'de',
-            setTimeout, clearTimeout, Promise,
-        };
-        kontext.window = kontext;
-        kontext.DsDatenstand = opt.ohneModul ? undefined : {
-            stand: (datei) => Promise.resolve(
-                (opt.staende && datei in opt.staende)
-                    ? (opt.staende[datei] ? new Date(opt.staende[datei]) : null)
-                    : (STAND.dateien[datei] ? new Date(STAND.dateien[datei]) : null)),
-            zeichne: (w) => { gezeichnet.push(w); },
-        };
-        vm.createContext(kontext);
-        vm.runInContext(cmStueck('function cmAeltesteQuelle(staende)'), kontext);
-        vm.runInContext(cmStueck('function cmDatenstandChipEinhaengen(wurzel)'), kontext);
-        vm.runInContext('var CM_STAND_QUELLEN = ' + JSON.stringify(
-            CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]
-                .match(/'([^']+)'/g).map(x => x.slice(1, -1))) + ';', kontext);
-        return { kontext, h2, gezeichnet };
-    }
-
-    it('die genannten Quellen sind Dateien, die es gibt', () => {
-        const quellen = CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]
-            .match(/'([^']+)'/g).map(x => x.slice(1, -1));
-        assert.notEqual(quellen.length, 0, 'die Quellenliste ist leer');
-        const fehlend = quellen.filter(f => !fs.existsSync(path.join(WURZEL, 'data', f)));
-        assert.deepEqual(fehlend, [], 'der Chip nennt eine Datei, die es nicht gibt');
-    });
-
-    it('gewaehlt wird die AELTESTE Quelle — nicht die erste', () => {
-        const s = ladeChip();
-        const f = s.kontext.cmAeltesteQuelle;
-        const a = new Date('2026-09-06T16:00:00Z');
-        const b = new Date('2026-09-01T06:00:00Z');
-        assert.equal(f([{ datei: 'a', stand: a }, { datei: 'b', stand: b }]).datei, 'b');
-        assert.equal(f([{ datei: 'b', stand: b }, { datei: 'a', stand: a }]).datei, 'b');
-        assert.equal(f([{ datei: 'a', stand: null }, { datei: 'b', stand: b }]).datei, 'b');
-        assert.equal(f([]), null);
-        assert.equal(f([{ datei: 'a', stand: null }]), null,
-            'ohne bekannten Stand darf keine Quelle gewaehlt werden');
-    });
-
-    it('der Chip haengt in der Ueberschrift und zeigt den Stand aus data_stand.json', async () => {
-        const s = ladeChip();
-        const chip = s.kontext.cmDatenstandChipEinhaengen();
-        assert.ok(chip, 'kein Chip eingehaengt');
-        assert.equal(s.h2._kinder.length, 1, 'der Chip steht nicht in der Ueberschrift');
-        assert.match(chip.innerHTML, /js-data-freshness/, 'ohne diese Klasse fuellt ihn niemand');
-        await new Promise(r => setTimeout(r, 0));
-        const quellen = CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]
-            .match(/'([^']+)'/g).map(x => x.slice(1, -1));
-        const bekannt = quellen.filter(f => STAND.dateien[f]);
-        assert.notEqual(bekannt.length, 0,
-            'data_stand.json fuehrt keine der Quellen — dann prueft das hier nichts');
-        const soll = bekannt.slice().sort((a, b) =>
-            new Date(STAND.dateien[a]) - new Date(STAND.dateien[b]))[0];
-        assert.equal(chip.getAttribute('data-cm-quelle'), soll,
-            'der Chip nennt nicht die aelteste Quelle des Reiters');
-        assert.equal(chip.querySelector().getAttribute('data-quelle'), soll,
-            'ds-datenstand.js findet keine Quelle am Chip');
-        assert.equal(s.gezeichnet.length, 1, 'ds-datenstand.js wurde nicht gebeten zu zeichnen');
-    });
-
-    it('ohne hinterlegten Stand steht "unbekannt" — kein geratenes Datum', async () => {
-        const quellen = CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]
-            .match(/'([^']+)'/g).map(x => x.slice(1, -1));
-        const leer = {};
-        quellen.forEach(f => { leer[f] = null; });
-        const s = ladeChip({ staende: leer });
-        const chip = s.kontext.cmDatenstandChipEinhaengen();
-        await new Promise(r => setTimeout(r, 0));
-        assert.equal(chip.getAttribute('data-cm-quelle'), null,
-            'ohne Stand wird trotzdem eine Quelle behauptet');
-        assert.match(chip.innerHTML, /unbekannt/);
-        assert.equal(s.gezeichnet.length, 0, 'gezeichnet wird nur mit einer echten Quelle');
-        assert.ok(chip.classList.contains('is-unbekannt'));
-        const heute = new Date().toLocaleDateString('de-DE');
-        assert.ok(!chip.innerHTML.includes(heute),
-            'das Datum des BESUCHS steht wieder im Chip — genau der Fehler, gegen den '
-            + 'js/ds-datenstand.js geschrieben wurde');
-    });
-
-    it('zweimal aufgerufen haengt kein zweiter Chip dran', () => {
-        const s = ladeChip();
-        s.kontext.cmDatenstandChipEinhaengen();
-        s.kontext.cmDatenstandChipEinhaengen();
-        assert.equal(s.h2._kinder.length, 1);
-    });
-});
+/* ══ BEFUND B4 ══════════════════════════════════════════════════════
+   Der Datenstands-Chip der Deck-Analyse (Global) ist mit UI-43
+   (28.09.2026, Hausi) entfernt; die Zusicherungen dazu entfallen. */
 
 /* ══ BEFUND B5 ══════════════════════════════════════════════════════ */
 
@@ -892,9 +777,8 @@ describe('kein Oberflaechentext nennt eine Datei, die es nicht gibt', () => {
                 namen.push(m.replace(/data-quelle="|"/g, ''));
             }
         }
-        /* Die Quellenliste des Datenstands-Chips (Befund B4) gehoert
-           dazu: sie nennt Dateien ohne Praefix und wird zur Laufzeit an
-           ds-datenstand.js gereicht.
+        /* Die Quellenliste des Datenstands-Chips (Befund B4) gehoerte
+           bis zu UI-43 (28.09.2026) dazu; der Chip ist entfernt.
 
            NICHT dazu gehoeren blosse LADESCHLUESSEL wie
            'tournament_cards_data_cards.csv': die loest
@@ -902,10 +786,6 @@ describe('kein Oberflaechentext nennt eine Datei, die es nicht gibt', () => {
            Formatdatei auf, sie stehen in keinem Oberflaechentext und es
            gibt sie als Datei nicht. Genau diese Unterscheidung haelt
            tests/unit/test-kacheln-zeitraum-und-typfilter.js schon fest. */
-        for (const q of (CM.match(/var CM_STAND_QUELLEN = (\[[\s\S]*?\]);/)[1]
-                .match(/'([^']+)'/g) || [])) {
-            namen.push(q.slice(1, -1));
-        }
         const einmalig = [...new Set(namen)].sort();
         assert.notEqual(einmalig.length, 0, 'kein einziger Dateiname gefunden');
         const fehlend = einmalig.filter(n => !fs.existsSync(path.join(WURZEL, 'data', n)));

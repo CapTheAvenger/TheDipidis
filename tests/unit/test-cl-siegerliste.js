@@ -137,7 +137,7 @@ test('ohne Major sagt die Ansicht das, statt City-League-Sieger zu zeigen', () =
         'der Leerzustand nennt nicht, worauf gewartet wird');
 });
 
-test('mit Major steht der Sieger mit Datum, Klasse, Deck und Quelle da', () => {
+test('mit Major steht der Sieger mit Datum, Klasse und Deck da — ohne Quellenspalte (UI-45)', () => {
     const { liste, html } = lade();
     const raus = liste([zeile({
         tournament_id: '6ab0f1', format: 'Champions League (JP)',
@@ -148,9 +148,14 @@ test('mit Major steht der Sieger mit Datum, Klasse, Deck und Quelle da', () => {
     assert.ok(s.includes('data-cl-sieger="voll"'));
     assert.ok(s.includes('Keiyo Watanabe'));
     assert.ok(s.includes('Champions League (JP)'));
-    assert.ok(s.includes('Mega Excadrill'));
-    assert.ok(s.includes('https://limitlesstcg.com/tournaments/6ab0f1'));
     assert.ok(s.includes('20th September 2026'));
+    /* UI-45 (28.09.2026, Hausi): keine Spalte „Quelle“ mehr, das Deck
+       selbst ist der Weg weiter — ein Klick oeffnet die Deck-Analyse. */
+    assert.ok(!s.includes('https://limitlesstcg.com/tournaments/6ab0f1'),
+        'die Quellenspalte ist wieder da:\n' + s);
+    assert.ok(!/>Quelle<\/th>/.test(s), 'Spaltenkopf „Quelle“ steht noch da');
+    assert.match(s, /data-cl-deck="Mega Excadrill"[^>]*jumpToCardAnalysis\(this\.dataset\.clDeck,'cityLeague'\)[^>]*>Mega Excadrill<\/a>/,
+        'das Deck fuehrt nicht in die Deck-Analyse:\n' + s);
 });
 
 test('was der Datensatz nicht fuehrt, wird nicht behauptet', () => {
@@ -164,9 +169,9 @@ test('was der Datensatz nicht fuehrt, wird nicht behauptet', () => {
     /* Keine Teilnehmerzahl: die Spalte gibt es in der Quelle nicht. */
     assert.ok(!/\bSpieler\b\s*<\/th>/.test(s),
         'eine Spalte „Spieler(zahl)“ steht da, obwohl die Quelle keine fuehrt');
-    assert.ok(s.includes('Teilnehmerzahl und Deckliste fuehrt der Datensatz nicht')
-        || s.includes('fuehrt der Datensatz nicht'),
-        'der Fusstext sagt nicht, was fehlt:\n' + s);
+    /* Der Fusstext („Teilnehmerzahl und Deckliste fuehrt der Datensatz
+       nicht …“) ist mit UI-45 (28.09.2026) auf Wunsch entfallen. */
+    assert.ok(!s.includes('city-league-sieger-fuss'), 'der Fusstext ist wieder da');
 });
 
 test('die englische Fassung ist englisch', () => {
@@ -197,8 +202,7 @@ test('die Siegerliste wird auch gezeichnet und nicht nur gerechnet', () => {
 });
 
 test('die Siegerliste hat eigene Regeln im Stilblatt', () => {
-    ['.city-league-sieger', '.city-league-sieger-tabelle', '.city-league-sieger-leer',
-     '.city-league-sieger-fuss']
+    ['.city-league-sieger', '.city-league-sieger-tabelle', '.city-league-sieger-leer']
         .forEach((k) => assert.ok(CSS.includes(k), `Regel fehlt: ${k}`));
 });
 

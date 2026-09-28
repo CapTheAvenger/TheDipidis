@@ -1332,25 +1332,3 @@ a:not([class]) { color: var(--link); }
 }
 .heatmap-info-btn[aria-expanded="true"]::before { transform: rotate(90deg); }
 
-/* UI-8 (7), 26.09.2026: CSV-Knopf vor jeder Datentabelle (js/ds-csv.js).
-   Klein und rechtsbuendig — er soll da sein, nicht auffallen. */
-.ds-csv-leiste {
-    display: flex;
-    justify-content: flex-end;
-    margin: 0 0 var(--s-1);
-}
-.ds-csv-knopf {
-    font: inherit;
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    line-height: 1;
-    padding: 5px 9px;
-    min-height: 28px;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--r-sm);
-    background: var(--surface-1);
-    color: var(--ink-2);
-    cursor: pointer;
-}
-.ds-csv-knopf:hover,
-.ds-csv-knopf:focus-visible { border-color: var(--brand); color: var(--brand-ink); }

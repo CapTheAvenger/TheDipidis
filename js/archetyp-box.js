@@ -287,6 +287,22 @@
         return u;
     }
 
+    /**
+     * Angezeigter Name einer Box. Eine Box aus einer Sammelauswahl
+     * (archetyp "__familie__|Alakazam") hiess bisher wie der Titel in
+     * Rotationen, „Alle Alakazam-Decks“. Hausi, 28.09.2026: das „Alle“ weg —
+     * „Alakazam-Decks“ sagt schon, dass es mehrere sind; eine einzelne
+     * Variante traegt nur ihren Decknamen. Gespeichert bleibt der alte Name.
+     */
+    const FAMILIE = '__familie__|';
+    function anzeigeName(box, muster) {
+        const a = String((box && box.archetyp) || '');
+        if (a.indexOf(FAMILIE) === 0 && a.length > FAMILIE.length) {
+            return String(muster || '{name}-Decks').replace('{name}', a.slice(FAMILIE.length));
+        }
+        return String((box && box.name) || '');
+    }
+
     /** Was die Druckfunktion bekommt: jede Proxy-Karte, je Druck mit seiner Anzahl. */
     function proxyListe(box) {
         const aus = [];
@@ -574,7 +590,7 @@
     function sortieren(eintraege, art, eineBox) {
         const reihe = function (k) { return Number.isFinite(k.reihe) ? k.reihe : 1e9; };
         const name = function (e) { return String(e.k.name || ''); };
-        const boxName = function (e) { return String((e.box && e.box.name) || ''); };
+        const boxName = function (e) { return anzeigeName(e.box); };
         return eintraege.slice().sort(function (a, b) {
             if (art === 'art') {
                 return typRang(a.k.typ) - typRang(b.k.typ)
@@ -640,7 +656,7 @@
 
     const Logik = {
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
-        statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon, umfang,
+        statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
         formatPasst, formateNachDatum, blockVorRotation, druckIn, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
@@ -667,6 +683,8 @@
         if (vars) r = r.replace(/\{(\w+)\}/g, function (g, n) { return n in vars ? String(vars[n]) : g; });
         return r;
     }
+
+    function nameVon(b) { return anzeigeName(b, tx('abx.familieName', null, '{name}-Decks')); }
 
     function esc(s) {
         return String(s == null ? '' : s)
@@ -746,7 +764,7 @@
                 boxen = spiegelLesen(u.uid);
                 geladenFuer = u.uid;
             }
-            boxen.sort(function (a, b) { return String(a.name || '').localeCompare(String(b.name || '')); });
+            boxen.sort(function (a, b) { return nameVon(a).localeCompare(nameVon(b)); });
             return boxen;
         })();
         try { return await ladeLauf; } finally { ladeLauf = null; }
@@ -1065,7 +1083,7 @@
             box.id = neueId();
             await schreiben(box);
             letztesErgebnis = null;
-            hinweisSetzen('<span>' + esc(tx('abx.angelegt', { name: box.name, n: box.karten.length },
+            hinweisSetzen('<span>' + esc(tx('abx.angelegt', { name: nameVon(box), n: box.karten.length },
                 'Archetyp-Box „{name}“ angelegt: {n} Karten, alle als „fehlt“ markiert.')) + '</span> '
                 + oeffnenKnopf(box.id), z.archetyp);
         }
@@ -1150,9 +1168,9 @@
             const weg = [];
             let neuSumme = 0;
             for (let i = 0; i < liste.length; i++) {
-                if (liste.length > 1) zeile(tx('abx.ladeBox', { n: i + 1, g: liste.length, name: liste[i].name }, 'Gleiche ab: {name} ({n} von {g}) …'));
+                if (liste.length > 1) zeile(tx('abx.ladeBox', { n: i + 1, g: liste.length, name: nameVon(liste[i]) }, 'Gleiche ab: {name} ({n} von {g}) …'));
                 const erg = await abgleichSpeichern(liste[i]);
-                if (!erg) { weg.push(liste[i].name); continue; }
+                if (!erg) { weg.push(nameVon(liste[i])); continue; }
                 neuSumme += erg.neu.length;
                 if (id) letztesErgebnis = { id: liste[i].id, neu: erg.neu, nichtMehr: erg.nichtMehr, wieder: erg.wieder };
             }
@@ -1297,7 +1315,7 @@
                 + '<span class="abx-chip-zahl">' + esc(tx('abx.chipFehlen', { n: u.fehlen, offen: u.offen }, '{n} fehlen · {offen} Stück offen')) + '</span></button>';
         };
         leiste.innerHTML = (boxen.length > 1 ? chip(null, tx('abx.alleBoxen', null, 'Alle Boxen'), alle) : '')
-            + boxen.map(function (b) { return chip(b.id, b.name, umfang(b)); }).join('');
+            + boxen.map(function (b) { return chip(b.id, nameVon(b), umfang(b)); }).join('');
     }
 
     function kachel(eintrag, mitBoxName) {
@@ -1344,7 +1362,7 @@
         const weitere = k.drucke.filter(function (d) { return d.id !== k.id; }).length;
         const druckZusatz = weitere
             ? ' <span class="abx-weitere">' + esc(tx('abx.weitereDrucke', { n: weitere }, '+{n} Druck')) + '</span>' : '';
-        const boxZeile = mitBoxName ? '<div class="abx-boxname" title="' + esc(b.name) + '">' + esc(b.name) + '</div>' : '';
+        const boxZeile = mitBoxName ? '<div class="abx-boxname" title="' + esc(nameVon(b)) + '">' + esc(nameVon(b)) + '</div>' : '';
         return '<div class="abx-karte abx-karte-' + status + '" data-karte="' + esc(k.id) + '" data-box="' + esc(b.id) + '">'
             + '<div class="abx-bild">' + bild + sollKnopf + herz + drinPlakette
             + (marken.length ? '<div class="abx-marken">' + marken.join('') + '</div>' : '') + '</div>'
@@ -1390,7 +1408,7 @@
                 : tx('abx.wiederAnteilOhne', { jetzt: prozent(e.w.anteil) }, 'jetzt {jetzt}');
             return '<div class="abx-karte abx-wieder-karte" data-karte="' + esc(e.w.id) + '" data-box="' + esc(e.box.id) + '">'
                 + '<div class="abx-bild">' + bild + '</div>'
-                + '<div class="abx-text">' + (mitBoxName ? '<div class="abx-boxname">' + esc(e.box.name) + '</div>' : '')
+                + '<div class="abx-text">' + (mitBoxName ? '<div class="abx-boxname">' + esc(nameVon(e.box)) + '</div>' : '')
                 + '<div class="abx-name" title="' + esc(e.w.name) + '">' + esc(e.w.name) + '</div>'
                 + '<div class="abx-druck"><span>' + esc(e.w.set + ' ' + e.w.number) + '</span></div>'
                 + '<div class="abx-wieder-zeile">' + esc(zeile) + '</div></div>'
@@ -1522,7 +1540,7 @@
 
         let kopf;
         if (eine) {
-            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(eine.name) + '</h3>'
+            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(nameVon(eine)) + '</h3>'
                 + '<p class="abx-meta">' + esc(tx('abx.metaZeile', {
                     schwelle: schwelleText(eine.schwelle || 'all'),
                     daten: datumLesbar(eine.datenStand),
@@ -1530,7 +1548,7 @@
                 }, 'Alle Formate · {schwelle} · Turnierdaten bis {daten} · abgeglichen am {datum}')) + '</p></div>';
         } else {
             kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleBoxen', null, 'Alle Boxen')) + '</h3>'
-                + '<p class="abx-meta">' + esc(tx('abx.alleMeta', { n: boxen.length, liste: boxen.map(function (b) { return b.name; }).join(', ') },
+                + '<p class="abx-meta">' + esc(tx('abx.alleMeta', { n: boxen.length, liste: boxen.map(nameVon).join(', ') },
                     '{n} Boxen zusammen: {liste}')) + '</p></div>';
         }
         const alt = gewaehlt.filter(function (b) { return neueDatenDa(b, manifestDatum); });
@@ -1538,7 +1556,7 @@
             ? '<p class="abx-neudaten">' + esc(eine
                 ? tx('abx.neueDaten', { datum: datumLesbar(manifestDatum) },
                     'Es gibt Turnierdaten bis {datum}, die diese Box noch nicht kennt — „Archetyp-Box aktualisieren“ übernimmt neue Karten.')
-                : tx('abx.neueDatenAlle', { datum: datumLesbar(manifestDatum), liste: alt.map(function (b) { return b.name; }).join(', ') },
+                : tx('abx.neueDatenAlle', { datum: datumLesbar(manifestDatum), liste: alt.map(nameVon).join(', ') },
                     'Turnierdaten bis {datum} — noch nicht abgeglichen: {liste}. Box antippen und aktualisieren.')) + '</p>'
             : '';
         const erg = (eine && letztesErgebnis && letztesErgebnis.id === eine.id)
@@ -1758,7 +1776,7 @@
     function loeschen(id) {
         const box = boxen.find(function (b) { return b.id === id; });
         if (!box) return;
-        const frage = tx('abx.loeschenFrage', { name: box.name },
+        const frage = tx('abx.loeschenFrage', { name: nameVon(box) },
             'Archetyp-Box „{name}“ löschen? Deine Sammlung bleibt unberührt.');
         if (typeof window.confirm === 'function' && !window.confirm(frage)) return;
         boxen = boxen.filter(function (b) { return b.id !== id; });

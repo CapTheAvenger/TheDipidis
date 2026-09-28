@@ -1,0 +1,517 @@
++        return s + '-' + n;|
++    }|
++|
++    /** Zwei Eintraege meinen dieselbe Karte, wenn ihre Drucke sich beruehren. */|
++    function gleicheKarte(a, b) {|
++        if (!a || !b || !a.id || !b.id) return false;|
++        if (a.id === b.id) return true;|
++        const ra = Array.isArray(a.refs) ? a.refs : [];|
++        const rb = Array.isArray(b.refs) ? b.refs : [];|
++        return rb.indexOf(a.id) >= 0 || ra.indexOf(b.id) >= 0;|
++    }|
++|
++    function anzahlBegrenzen(n) {|
++        const z = Math.round(Number(n));|
++        if (!Number.isFinite(z) || z < 1) return 1;|
++        return Math.min(MAX_ANZAHL, z);|
++    }|
++|
++    /** Neue Box aus den Karten der Uebersicht. Keine "neu"-Marken: beim Anlegen ist alles neu. */|
++    function neueBox(kopf, frische, heute) {|
++        const karten = [];|
++        (frische || []).forEach(function (f) {|
++            if (!f || !f.id) return;|
++            if (karten.some(function (k) { return gleicheKarte(k, f); })) return;|
++            karten.push(Object.assign({}, f, {|
++                anzahl: anzahlBegrenzen(f.anzahl),|
++                status: 'fehlt', manuell: false, inDaten: true, neu: null, anzahlEigen: false|
++            }));|
++        });|
++        return {|
++            schemaVersion: 1,|
++            name: String(kopf.name || ''),|
++            archetyp: String(kopf.archetyp || ''),|
++            schwelle: String(kopf.schwelle || 'all'),|
++            datenStand: kopf.datenStand || null,|
++            erstellt: heute,|
++            aktualisiert: heute,|
++            karten: karten|
++        };|
++    }|
++|
++    /**|
++     * Box gegen frische Daten halten. Liefert eine NEUE Box (die alte bleibt|
++     * unberuehrt) und die Liste der neu hinzugekommenen Karten.|
++     *|
++     *  - bekannte Karte: Anteil und Datenzahl nachziehen; die Anzahl nur,|
++     *    wenn der Nutzer sie nicht selbst gesetzt hat. Status bleibt.|
++     *  - unbekannte Karte: kommt als "fehlt" mit Marke "neu" dazu.|
++     *  - Karte, die in den Daten fehlt: bleibt, wird als "nicht mehr in den|
++     *    Listen" benannt (manuell hinzugefuegte Karten sind davon ausgenommen).|
++     */|
++    function abgleichen(box, frische, kopf, heute) {|
++        const alt = Array.isArray(box && box.karten) ? box.karten : [];|
++        const karten = alt.map(function (k) { return Object.assign({}, k); });|
++        const getroffen = new Set();|
++        const neu = [];|
++        (frische || []).forEach(function (f) {|
++            if (!f || !f.id) return;|
++            let idx = -1;|
++            for (let i = 0; i < karten.length; i++) {|
++                if (gleicheKarte(karten[i], f)) { idx = i; break; }|
++            }|
++            if (idx >= 0) {|
++                if (getroffen.has(idx)) return;      // zweiter Druck derselben Karte|
++                getroffen.add(idx);|
++                const k = karten[idx];|
++                k.anteil = f.anteil;|
++                k.maxAnzahl = f.maxAnzahl;|
++                k.inDaten = true;|
++                if (f.reihe != null) k.reihe = f.reihe;|
++                if (!k.anzahlEigen) k.anzahl = anzahlBegrenzen(f.anzahl);|
++                const refs = new Set([].concat(k.refs || [], f.refs || [], [f.id]));|
++                refs.delete(k.id);|
++                k.refs = Array.from(refs);|
++                if (!k.typ && f.typ) k.typ = f.typ;|
++            } else {|
++                const eintrag = Object.assign({}, f, {|
++                    anzahl: anzahlBegrenzen(f.anzahl),|
++                    status: 'fehlt', manuell: false, inDaten: true, neu: heute, anzahlEigen: false|
++                });|
++                karten.push(eintrag);|
++                getroffen.add(karten.length - 1);|
++                neu.push(eintrag);|
++            }|
++        });|
++        const nichtMehr = [];|
++        karten.forEach(function (k, i) {|
++            if (getroffen.has(i) || k.manuell) return;|
++            if (k.inDaten !== false) nichtMehr.push(k);|
++            k.inDaten = false;|
++        });|
++        const ergebnis = Object.assign({}, box, {|
++            karten: karten,|
++            aktualisiert: heute,|
++            datenStand: (kopf && kopf.datenStand) || (box && box.datenStand) || null|
++        });|
++        return { box: ergebnis, neu: neu, nichtMehr: nichtMehr };|
++    }|
++|
++    function typRang(typ) {|
++        const i = TYP_REIHENFOLGE.indexOf(String(typ || ''));|
++        return i >= 0 ? i : TYP_REIHENFOLGE.length;|
++    }|
++|
++    /** Die drei Rubriken der Box, in der Reihenfolge, in der sie gezeigt werden. */|
++    function rubriken(box) {|
++        const r = { fehlt: [], original: [], proxy: [] };|
++        (box && box.karten || []).forEach(function (k) {|
++            const s = STATUS.indexOf(k.status) >= 0 ? k.status : 'fehlt';|
++            r[s].push(k);|
++        });|
++        // Erst die Reihenfolge der Kartenuebersicht (Familie mit dem hoechsten|
++        // Anteil zuerst, Linie Basic -> Phase 2), dann Kartenart und Anteil.|
++        const reihe = function (k) { return Number.isFinite(k.reihe) ? k.reihe : 1e9; };|
++        const ordnung = function (a, b) {|
++            return reihe(a) - reihe(b)|
++                || typRang(a.typ) - typRang(b.typ)|
++                || (Number(b.anteil) || 0) - (Number(a.anteil) || 0)|
++                || String(a.name || '').localeCompare(String(b.name || ''))|
++                || String(a.id).localeCompare(String(b.id));|
++        };|
++        r.fehlt.sort(ordnung); r.original.sort(ordnung); r.proxy.sort(ordnung);|
++        return r;|
++    }|
++|
++    function zaehlen(box) {|
++        const z = { fehlt: 0, original: 0, proxy: 0, kopien: { fehlt: 0, original: 0, proxy: 0 }, neu: 0 };|
++        (box && box.karten || []).forEach(function (k) {|
++            const s = STATUS.indexOf(k.status) >= 0 ? k.status : 'fehlt';|
++            z[s] += 1;|
++            z.kopien[s] += anzahlBegrenzen(k.anzahl);|
++            if (k.neu) z.neu += 1;|
++        });|
++        return z;|
++    }|
++|
++    /** Was die Druckfunktion bekommt: jede Proxy-Karte mit ihrer Anzahl. */|
++    function proxyListe(box) {|
++        return rubriken(box).proxy.map(function (k) {|
++            return { name: k.name, set: k.set, number: k.number, anzahl: anzahlBegrenzen(k.anzahl) };|
++        });|
++    }|
++|
++    /** Status setzen. Wer eine Karte einsortiert, hat die Neu-Marke gesehen. */|
++    function statusSetzen(box, id, status) {|
++        if (STATUS.indexOf(status) < 0) return box;|
++        return Object.assign({}, box, {|
++            karten: (box.karten || []).map(function (k) {|
++                return k.id === id ? Object.assign({}, k, { status: status, neu: null }) : k;|
++            })|
++        });|
++    }|
++|
++    function anzahlSetzen(box, id, anzahl) {|
++        return Object.assign({}, box, {|
++            karten: (box.karten || []).map(function (k) {|
++                return k.id === id ? Object.assign({}, k, { anzahl: anzahlBegrenzen(anzahl), anzahlEigen: true }) : k;|
++            })|
++        });|
++    }|
++|
++    /** Karte von Hand dazu. Liegt sie (oder ein anderer Druck davon) schon drin, passiert nichts. */|
++    function manuellHinzufuegen(box, eintrag, heute) {|
++        if (!eintrag || !eintrag.id) return { box: box, hinzugefuegt: false };|
++        const karten = box.karten || [];|
++        if (karten.some(function (k) { return gleicheKarte(k, eintrag); })) {|
++            return { box: box, hinzugefuegt: false };|
++        }|
++        const neuEintrag = Object.assign({}, eintrag, {|
++            anzahl: anzahlBegrenzen(eintrag.anzahl || 1),|
++            status: 'fehlt', manuell: true, inDaten: null, neu: null, anzahlEigen: true,|
++            hinzugefuegt: heute|
++        });|
++        return { box: Object.assign({}, box, { karten: karten.concat([neuEintrag]) }), hinzugefuegt: true };|
++    }|
++|
++    function entfernen(box, id) {|
++        return Object.assign({}, box, {|
++            karten: (box.karten || []).filter(function (k) { return k.id !== id; })|
++        });|
++    }|
++|
++    /**|
++     * Anzahl, die die Kartenuebersicht auf dem Kaertchen zeigt — dieselbe|
++     * Regel wie getPastMetaDisplayCount in js/app-past-meta.js, aber mit|
++     * eigenem Umfang, weil die Box auch ohne sichtbare Uebersicht rechnet.|
++     * Die Gleichheit beider Regeln prueft tests/unit/test-archetyp-box.js,|
++     * indem es beide ausfuehrt.|
++     */|
++    function anzahlWieUebersicht(card, totalDecklists, repraesentativ) {|
++        const maxCount = parseInt((card && card.max_count) || 0, 10) || 0;|
++        if (!(totalDecklists > 1)) return maxCount;|
++        const r = Number(repraesentativ);|
++        if (r > 0) return Math.max(1, Math.round(r));|
++        return maxCount;|
++    }|
++|
++    /** ISO-Datum (JJJJ-MM-TT) aus Millisekunden, sonst null. */|
++    function isoTag(ms) {|
++        if (!Number.isFinite(ms) || ms <= 0) return null;|
++        const d = new Date(ms);|
++        const p = function (n) { return String(n).padStart(2, '0'); };|
++        return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());|
++    }|
++|
++    /** Juengstes max_date im Manifest der Rotationen-Daten, sonst null. */|
++    function neuestesDatumImManifest(manifest) {|
++        const daten = manifest && manifest.chunk_dates;|
++        if (!daten || typeof daten !== 'object') return null;|
++        let best = null;|
++        Object.keys(daten).forEach(function (k) {|
++            const m = daten[k] && daten[k].max_date;|
++            if (typeof m === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(m) && (!best || m > best)) best = m;|
++        });|
++        return best;|
++    }|
++|
++    /** Gibt es Turnierdaten, die juenger sind als der letzte Abgleich der Box? */|
++    function neueDatenDa(box, manifestDatum) {|
++        if (!box || !manifestDatum) return false;|
++        if (!box.datenStand) return true;|
++        return manifestDatum > box.datenStand;|
++    }|
++|
++    const Logik = {|
++        kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,|
++        statusSetzen, anzahlSetzen, manuellHinzufuegen, entfernen, anzahlWieUebersicht,|
++        isoTag, neuestesDatumImManifest, neueDatenDa, anzahlBegrenzen, STATUS|
++    };|
++|
++    // Im Test gibt es kein document: dann nur die Logik ausliefern.|
++    if (typeof document === 'undefined') {|
++        if (typeof module !== 'undefined' && module.exports) module.exports = Logik;|
++        else if (typeof globalThis !== 'undefined') globalThis.ArchetypBoxLogik = Logik;|
++        return;|
++    }|
++|
++    // ════════════════════════════════════════════════════════|
++    // Hilfen fuer die Seite|
++    // ════════════════════════════════════════════════════════|
++|
++    function tx(key, vars, rueckfall) {|
++        if (typeof t === 'function') {|
++            const s = t(key, vars);|
++            if (s && s !== key) return s;|
++        }|
++        let r = rueckfall || key;|
++        if (vars) r = r.replace(/\{(\w+)\}/g, function (g, n) { return n in vars ? String(vars[n]) : g; });|
++        return r;|
++    }|
++|
++    function esc(s) {|
++        return String(s == null ? '' : s)|
++            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')|
++            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');|
++    }|
++|
++    function toast(text, art) {|
++        if (typeof showToast === 'function') showToast(text, art || 'info');|
++    }|
++|
++    function heuteIso() { return isoTag(Date.now()); }|
++|
++    function datumLesbar(iso) {|
++        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));|
++        if (!m) return '–';|
++        return m[3] + '.' + m[2] + '.' + m[1];|
++    }|
++|
++    function prozent(x) {|
++        const n = Number(x);|
++        if (!Number.isFinite(n)) return '';|
++        if (typeof zahlKomma === 'function') return zahlKomma(n) + ' %';|
++        return String(Math.round(n * 10) / 10) + ' %';|
++    }|
++|
++    function nutzer() {|
++        try { return (window.auth && window.auth.currentUser) || null; } catch (_) { return null; }|
++    }|
++|
++    function sammlung() {|
++        const u = nutzer();|
++        if (!u || !window.db) return null;|
++        try { return window.db.collection('users').doc(u.uid).collection(SAMMLUNG); }|
++        catch (_) { return null; }|
++    }|
++|
++    // ════════════════════════════════════════════════════════|
++    // Speicher|
++    // ════════════════════════════════════════════════════════|
++|
++    let boxen = [];            // [{id, ...box}]|
++    let geladenFuer = null;    // uid, fuer die `boxen` gilt|
++    let ladeLauf = null;|
++    let aktiveId = null;|
++    let letztesErgebnis = null; // {id, neu:[], nichtMehr:[]}|
++    let manifestDatum = null;|
++|
++    function spiegelLesen(uid) {|
++        try {|
++            const roh = JSON.parse(localStorage.getItem(SPIEGEL_SCHLUESSEL + ':' + uid) || '[]');|
++            return Array.isArray(roh) ? roh : [];|
++        } catch (_) { return []; }|
++    }|
++|
++    function spiegelSchreiben() {|
++        if (!geladenFuer) return;|
++        try { localStorage.setItem(SPIEGEL_SCHLUESSEL + ':' + geladenFuer, JSON.stringify(boxen)); }|
++        catch (_) { /* voll oder gesperrt */ }|
++    }|
++|
++    async function laden(erzwingen) {|
++        const u = nutzer();|
++        if (!u) { boxen = []; geladenFuer = null; return boxen; }|
++        if (geladenFuer === u.uid && !erzwingen) return boxen;|
++        if (ladeLauf) return ladeLauf;|
++        ladeLauf = (async function () {|
++            const col = sammlung();|
++            try {|
++                if (!col) throw new Error('keine Datenbank');|
++                const snap = await col.get();|
++                boxen = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });|
++                geladenFuer = u.uid;|
++                spiegelSchreiben();|
++            } catch (e) {|
++                console.warn('[ArchetypBox] Boxen nicht ladbar:', e && e.message);|
++                boxen = spiegelLesen(u.uid);|
++                geladenFuer = u.uid;|
++            }|
++            boxen.sort(function (a, b) { return String(a.name || '').localeCompare(String(b.name || '')); });|
++            return boxen;|
++        })();|
++        try { return await ladeLauf; } finally { ladeLauf = null; }|
++    }|
++|
++    /** Schreiben: sofort in der Liste, im Hintergrund ins Konto. Fehler werden gemeldet. */|
++    function schreiben(box) {|
++        const i = boxen.findIndex(function (b) { return b.id === box.id; });|
++        if (i >= 0) boxen[i] = box; else boxen.push(box);|
++        spiegelSchreiben();|
++        const col = sammlung();|
++        if (!col) {|
++            toast(tx('abx.nichtGespeichert', null, 'Die Box konnte nicht im Konto gespeichert werden.'), 'error');|
++            return Promise.resolve(false);|
++        }|
++        // Firestore lehnt `undefined` ab — ueber JSON gehen, dann fehlt so ein Feld einfach.|
++        const nutzlast = JSON.parse(JSON.stringify(box));|
++        delete nutzlast.id;|
++        return col.doc(box.id).set(nutzlast).then(function () { return true; }, function (err) {|
++            console.warn('[ArchetypBox] nicht gespeichert:', err && err.message);|
++            toast(tx('abx.nichtGespeichert', null, 'Die Box konnte nicht im Konto gespeichert werden.'), 'error');|
++            return false;|
++        });|
++    }|
++|
++    function neueId() {|
++        const col = sammlung();|
++        if (col) { try { return col.doc().id; } catch (_) { /* unten */ } }|
++        return 'abx-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);|
++    }|
++|
++    function boxFuerArchetyp(archetyp) {|
++        return boxen.find(function (b) { return b.archetyp === archetyp; }) || null;|
++    }|
++|
++    // ════════════════════════════════════════════════════════|
++    // Karten der Uebersicht -> Eintraege der Box|
++    // ════════════════════════════════════════════════════════|
++|
++    /** Druck einer Uebersichtskarte, so wie die Kartenuebersicht ihn im Modus "Low Rarity" zeigt. */|
++    function eintragAusUebersicht(card, totalDecklists) {|
++        const vollName = String(card.full_card_name || card.card_name || '').trim();|
++        let name = vollName;|
++        let set = String(card.set_code || card.set || '').trim().toUpperCase();|
++        let nummer = String(card.set_number || card.number || '').trim();|
++        if ((!set || !nummer) && card.card_identifier) {|
++            const m = String(card.card_identifier).trim().match(/^([A-Z0-9]{2,6})\s+([A-Z0-9-]+)$/i);|
++            if (m) { if (!set) set = m[1].toUpperCase(); if (!nummer) nummer = m[2]; }|
++        }|
++        if (!set || !nummer) {|
++            const m = vollName.match(/^(.+?)\s+([A-Z0-9]{2,4})\s+([A-Z0-9]+)$/);|
++            if (m) { name = m[1].trim(); set = m[2]; nummer = m[3]; }|
++        }|
++        if (!set || !nummer) return null;   // ohne (Set, Nummer) keine Identitaet|
++|
++        let druck = null;|
++        const imDb = (typeof getCanonicalCardRecord === 'function') ? getCanonicalCardRecord(set, nummer) : null;|
++        if (imDb && typeof getPreferredVersionForCard === 'function') {|
++            let vorher;|
++            let gesetzt = false;|
++            try {|
++                // Dieselbe Wahl wie die Uebersicht im Modus "Low Rarity".|
++                if (typeof globalRarityPreference !== 'undefined') {|
++                    vorher = globalRarityPreference;|
++                    globalRarityPreference = 'min';|
++                    gesetzt = true;|
++                }|
++                druck = getPreferredVersionForCard(name, imDb.set, imDb.number);|
++            } catch (_) {|
++                druck = null;|
++            } finally {|
++                if (gesetzt) globalRarityPreference = vorher;|
++            }|
++        }|
++        if (!druck) druck = imDb;|
++        const dSet = String((druck && druck.set) || set).toUpperCase();|
++        const dNummer = String((druck && druck.number) || nummer);|
++        const id = kartenId(dSet, dNummer);|
++        if (!id) return null;|
++|
++        let refs = [];|
++        if (typeof getInternationalPrintsForCard === 'function') {|
++            try {|
++                refs = (getInternationalPrintsForCard(dSet, dNummer) || [])|
++                    .map(function (p) { return kartenId(p.set, p.number); }).filter(Boolean);|
++            } catch (_) { refs = []; }|
++        }|
++        const eigen = kartenId(set, nummer);|
++        if (eigen && refs.indexOf(eigen) < 0) refs.push(eigen);|
++        refs = refs.filter(function (r) { return r !== id; });|
++|
++        const anzeigeName = (typeof getDisplayCardName === 'function')|
++            ? getDisplayCardName(name, dSet, dNummer) : name;|
++        let bild = '';|
++        if (typeof getBestCardImage === 'function') {|
++            try {|
++                bild = getBestCardImage(Object.assign({}, druck || {}, {|
++                    set_code: dSet, set_number: dNummer, card_name: name,|
++                    image_url: (druck && druck.image_url) || card.image_url || ''|
++                })) || '';|
++            } catch (_) { bild = ''; }|
++        }|
++        if (!bild) bild = (druck && druck.image_url) || card.image_url || '';|
++        const typ = (typeof getCardType === 'function') ? getCardType(name, dSet, dNummer) : '';|
++        const rep = (typeof getPastMetaRepresentativeCardCopies === 'function')|
++            ? getPastMetaRepresentativeCardCopies(card) : 0;|
++        const anteilRoh = (typeof parseLocaleNumber === 'function')|
++            ? parseLocaleNumber(card.percentage_in_archetype || card.share_percent || '', NaN)|
++            : parseFloat(String(card.percentage_in_archetype || '').replace(',', '.'));|
++|
++        return {|
++            id: id,|
++            name: anzeigeName || name,|
++            set: dSet,|
++            number: dNummer,|
++            bild: bild,|
++            typ: typ || '',|
++            anzahl: anzahlWieUebersicht(card, totalDecklists, rep),|
++            maxAnzahl: parseInt(card.max_count || 0, 10) || 0,|
++            anteil: Number.isFinite(anteilRoh) ? Math.round(anteilRoh * 10) / 10 : null,|
++            refs: refs|
++        };|
++    }|
++|
++    /** In der Reihenfolge der Kartenuebersicht (sortCardsByType), mit Platznummer. */|
++    function eintraegeAus(karten, totalDecklists) {|
++        let liste = (karten || []).slice();|
++        if (typeof sortCardsByType === 'function') {|
++            try { liste = sortCardsByType(liste); } catch (_) { /* Reihenfolge wie geliefert */ }|
++        }|
++        const aus = [];|
++        liste.forEach(function (c) {|
++            const e = eintragAusUebersicht(c, totalDecklists);|
++            if (e) { e.reihe = aus.length; aus.push(e); }|
++        });|
++        return aus;|
++    }|
++|
++    // ════════════════════════════════════════════════════════|
++    // Rotationen: der Knopf in der Kartenuebersicht|
++    // ════════════════════════════════════════════════════════|
++|
++    function el(id) { return document.getElementById(id); }|
++|
++    function uebersichtZustand() {|
++        const format = el('pastMetaFormatFilter');|
++        const deck = el('pastMetaDeckSelect');|
++        const filter = el('pastMetaFilterSelect');|
++        const archetyp = deck ? String(deck.value || '').trim() : '';|
++        const karten = (typeof pastMetaCurrentCards !== 'undefined' && Array.isArray(pastMetaCurrentCards))|
++            ? pastMetaCurrentCards : [];|
++        const aktuellesDeck = (typeof pastMetaCurrentDeck !== 'undefined') ? pastMetaCurrentDeck : null;|
++        const umfang = (typeof pastMetaCurrentScope !== 'undefined') ? pastMetaCurrentScope : null;|
++        return {|
++            alleFormate: !!format && format.value === 'all',|
++            archetyp: archetyp,|
++            name: (aktuellesDeck && aktuellesDeck.deck_name) || archetyp,|
++            schwelle: filter ? String(filter.value || 'all') : 'all',|
++            karten: karten,|
++            umfang: umfang,|
++            passt: !!aktuellesDeck && karten.length > 0 && umfang && umfang.format === 'all'|
++        };|
++    }|
++|
++    function gefilterteKarten(karten, schwelle) {|
++        if (typeof applyShareFilterWithAceSpecBoost === 'function') {|
++            return applyShareFilterWithAceSpecBoost(karten, schwelle);|
++        }|
++        return karten.slice();|
++    }|
++|
++    function schwelleText(schwelle) {|
++        return schwelle === 'all'|
++            ? tx('abx.schwelleAlle', null, 'alle Karten')|
++            : tx('abx.schwelleAb', { n: schwelle }, 'Karten ab {n} %');|
++    }|
++|
++    async function uebersichtGezeichnet() {|
++        const knopf = el('pastMetaArchetypBoxBtn');|
++        if (!knopf) return;|
++        const z = uebersichtZustand();|
++        const zeigen = z.alleFormate && z.passt && !!z.archetyp;|
++        knopf.classList.toggle('d-none', !zeigen);|
++        if (!zeigen) { hinweisSetzen(''); return; }|
++        // Die Rueckmeldung gehoert zu EINEM Archetyp — beim Wechsel weg damit.|
++        if (hinweisFuer && hinweisFuer !== z.archetyp) hinweisSetzen('');|
++        if (nutzer()) { try { await laden(); } catch (_) { /* Liste bleibt leer */ } }|

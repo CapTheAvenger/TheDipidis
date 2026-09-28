@@ -121,7 +121,23 @@
     background: rgba(0, 0, 0, 0.78); color: #fff;
     font-weight: 800; font-size: var(--fs-sm); text-align: center;
 }
-.abx-marken { position: absolute; left: 6px; top: 6px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.abx-anzahl.is-leer { background: rgba(0, 0, 0, 0.55); }
+.abx-anzahl.is-voll { background: var(--solid-ok); }
+
+/* Oben links: hoechstens gespielt. Ein Knopf — tippen fuellt auf. Gleiche
+   Groesse wie die Plakette unten rechts, damit beide als Paar lesen. */
+.abx-soll {
+    position: absolute; left: 6px; top: 6px;
+    min-width: 28px; height: 28px; padding: 0 6px;
+    border: 2px solid #fff; border-radius: 14px;
+    background: var(--solid-info); color: #fff;
+    font-weight: 800; font-size: var(--fs-sm); line-height: 24px; text-align: center;
+    cursor: pointer; box-shadow: var(--e-1);
+}
+.abx-soll.is-voll { background: var(--solid-neutral); }
+.abx-bild .abx-herz { top: 6px; right: 6px; width: 28px; height: 28px; font-size: 15px; }
+
+.abx-marken { position: absolute; left: 6px; bottom: 6px; right: 44px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .abx-marke {
     padding: 2px 8px; border-radius: 11px;
     background: var(--surface-1); color: var(--ink);
@@ -156,6 +172,41 @@
 .abx-seg-proxy.is-active { background: var(--solid-info); border-color: var(--solid-info); color: #fff; }
 
 .abx-zeile2 { display: flex; gap: 4px; }
+.abx-weitere { color: var(--ink-2); font-weight: 700; }
+
+/* Druck-Dialog: welcher Druck wie oft in der Box liegt */
+.abx-dialog {
+    position: fixed; inset: 0; z-index: var(--z-modal);
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--s-3);
+    background: rgba(0, 0, 0, 0.55);
+    overscroll-behavior: contain;
+}
+.abx-dialog-inhalt {
+    overscroll-behavior: contain;
+    width: min(520px, 100%); max-height: 88vh; overflow: auto;
+    padding: var(--s-4);
+    border-radius: var(--r-lg);
+    background: var(--surface-1); color: var(--ink);
+    box-shadow: var(--e-2);
+}
+.abx-dialog-inhalt h3 { margin: 0; font-size: var(--fs-lg); }
+.abx-dialog-zeile { margin: var(--s-1) 0 var(--s-3); color: var(--ink-2); font-size: var(--fs-sm); font-weight: 700; }
+.abx-dialog-liste { display: flex; flex-direction: column; gap: var(--s-2); }
+.abx-dialog-druck {
+    display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: var(--s-2);
+    padding: var(--s-2);
+    border: 1.5px solid var(--line); border-radius: var(--r-md);
+}
+.abx-dialog-druck.is-drin { border-color: var(--solid-ok); }
+.abx-dialog-druck img, .abx-dialog-ohne { width: 52px; aspect-ratio: 63 / 88; object-fit: cover; border-radius: 4px; background: var(--bg-muted); }
+.abx-dialog-text { display: flex; flex-direction: column; min-width: 0; font-size: var(--fs-sm); }
+.abx-dialog-text span { color: var(--ink-3); font-size: var(--fs-xs); }
+.abx-dialog-zahl { display: flex; align-items: center; gap: 6px; }
+.abx-dialog-zahl .abx-mini { width: 40px; min-height: 40px; flex: 0 0 auto; }
+.abx-dialog-zahl span { min-width: 24px; text-align: center; font-weight: 800; font-size: var(--fs-md); }
+.abx-dialog-fuss { display: flex; justify-content: flex-end; gap: var(--s-2); margin-top: var(--s-3); }
+.abx-dialog-fuss .btn { min-height: 44px; }
 .abx-mini {
     flex: 1 1 0;
     min-height: 32px;
@@ -179,4 +230,20 @@
 
 @media (max-width: 480px) {
     .abx-gitter { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); }
+}
+
+/* Die allgemeine Handy-Regel (button: min 44x44 px, padding 10px 15px,
+   css/mobile-responsive.css) machte aus den runden Plaketten hohe Ovale
+   und schob den vierten Knopf der Zeile aus der Kachel (390 px, gemessen
+   28.09.2026). Plaketten bleiben 28 px rund, die Knoepfe teilen sich die
+   Breite; die Tippflaeche der Knoepfe bleibt >= 36 px hoch. */
+.abx-karte .abx-soll,
+.abx-karte .abx-herz {
+    min-width: 28px !important; min-height: 28px !important; height: 28px !important;
+    padding: 0 6px !important; line-height: 24px !important; max-width: none !important;
+}
+.abx-karte .abx-herz { width: 28px !important; padding: 0 !important; }
+.abx-karte .abx-mini,
+.abx-karte .abx-seg {
+    min-width: 0 !important; padding: 0 2px !important;
 }

@@ -43,6 +43,13 @@ if ! python3 scripts/build_pocket_sets.py; then
     echo "WARNUNG build_pocket_sets.py fehlgeschlagen — Set-Namen bleiben alt" >&2
 fi
 
+# Die Kennungen fuer eigene Scan-Codes (FE-11). Quelle ist GitHub, nicht
+# Game8; faellt sie aus oder bricht der Lauf ab (bekannte Karte verloren),
+# bleibt die alte Tabelle stehen — das haelt die Decks nicht auf.
+if ! python3 scripts/build_pocket_karten_ids.py; then
+    echo "WARNUNG build_pocket_karten_ids.py fehlgeschlagen — Kartentabelle bleibt alt" >&2
+fi
+
 # Den Datenstand VOR dem Commit fortschreiben; build_data_stand.py liest
 # git status und schreibt nur fort, was dieser Lauf angefasst hat.
 python3 scripts/build_data_stand.py || {
@@ -51,7 +58,7 @@ python3 scripts/build_data_stand.py || {
 }
 
 geaendert=0
-for f in data/pocket_tierlist.json data/pocket_sets.json data/data_stand.json; do
+for f in data/pocket_tierlist.json data/pocket_sets.json data/pocket_karten_ids.json data/data_stand.json; do
     if [ -n "$(git status --porcelain -- "$f")" ]; then
         echo "GEAENDERT $f"
         geaendert=1

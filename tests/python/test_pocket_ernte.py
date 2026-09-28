@@ -54,6 +54,7 @@ def test_die_ernte_laeuft_in_der_richtigen_reihenfolge(tmp_path):
     assert r.returncode == 0, r.stderr
     assert aufrufe == ["scripts/scrape_pocket_tierlist.py",
                        "scripts/build_pocket_sets.py",
+                       "scripts/build_pocket_karten_ids.py",
                        "scripts/build_data_stand.py"], aufrufe
     assert "UNVERAENDERT" in r.stdout
 

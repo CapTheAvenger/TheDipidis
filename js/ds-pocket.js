@@ -66,6 +66,11 @@
        laeuft weiter. Ein erfundener Set-Name schickt den Betreiber in
        den Laden nach etwas, das es nicht gibt. */
     var SET_QUELLE = 'data/pocket_sets.json';
+    /* FE-11: die Kennungen fuer eigene Scan-Codes. Erst beim ersten Klick
+       auf "Scan-Code erzeugen" geholt — die Tier-Liste braucht sie nicht. */
+    var KARTEN_QUELLE = 'data/pocket_karten_ids.json';
+    var kartenTabelle = null;
+    var eigenText = '';
     var setNamen = null;
     var HOST = 'pocket';
     var TIER_ORDNUNG = ['S', 'A+', 'A', 'B', 'C', 'D'];
@@ -487,6 +492,95 @@
         return s;
     }
 
+    /* ── Eigenes Deck als Scan-Code (FE-11, 28.09.2026) ───────────────
+     *
+     * Pocket liest Decks nur als 2D-Muster ein. Wer eine Liste als Text
+     * hat, fügt sie hier ein und bekommt dasselbe Vollbild wie bei den
+     * Game8-Decks. Gebaut wird in js/pocket-deckcode.js; verbunden wird
+     * über Set und Nummer, nie über den Namen. */
+    function eigenesDeck() {
+        return '<section class="pk-eigen" aria-labelledby="pkEigenTitel">' +
+            '<div class="pk-eigen-titel" id="pkEigenTitel" role="heading" aria-level="3">' +
+            esc(t('Eigenes Deck als Scan-Code', 'Your own deck as a scan code')) + '</div>' +
+            '<p class="pk-hell">' + esc(t(
+                'Eine Karte je Zeile mit Anzahl, Name, Set und Nummer, dazu eine Zeile mit der Energie. ' +
+                'Beispiel: „2 Riolu B3 79" und „Energy: Fighting".',
+                'One card per line with count, name, set and number, plus a line with the energy. ' +
+                'Example: "2 Riolu B3 79" and "Energy: Fighting".')) + '</p>' +
+            '<textarea id="pkEigenListe" class="pk-eigen-liste" rows="10" spellcheck="false" ' +
+            'aria-label="' + esc(t('Deckliste', 'Deck list')) + '" placeholder="2 Riolu B3 79&#10;2 Lucario B3 80&#10;…&#10;Energy: Fighting">' +
+            esc(eigenText) + '</textarea>' +
+            '<button type="button" class="pk-kopieren pk-eigen-knopf" data-pk-eigen="1">' +
+            esc(t('Scan-Code erzeugen', 'Create scan code')) + '</button>' +
+            '<div id="pkEigenMeldung" aria-live="polite"></div>' +
+            '</section>';
+    }
+
+    function eigenFehlerText(f) {
+        var z = f.zeile ? t('Zeile ', 'Line ') + f.zeile + ': ' : '';
+        switch (f.art) {
+        case 'nicht_erkannt': return z + t('nicht erkannt — erwartet „Anzahl Name Set Nummer": ', 'not recognised — expected "count name set number": ') + f.text;
+        case 'set_unbekannt': return z + t('Set unbekannt: ', 'unknown set: ') + f.text;
+        case 'karte_unbekannt': return z + t('diese Nummer gibt es in unserer Kartentabelle nicht: ', 'this number is not in our card table: ') + f.text;
+        case 'anzahl': return z + t('Anzahl fehlt oder ist 0', 'count missing or 0');
+        case 'energie_verboten': return z + t('Drache und Farblos sind keine wählbare Deck-Energie: ', 'Dragon and Colorless cannot be chosen as deck energy: ') + f.text;
+        case 'energie_unbekannt': return z + t('Energie unbekannt: ', 'unknown energy: ') + f.text;
+        case 'energie_fehlt': return t('Es fehlt die Zeile mit der Energie, z. B. „Energy: Fighting".', 'The energy line is missing, e.g. "Energy: Fighting".');
+        case 'energie_zu_viele': return t('Höchstens drei Energien — hier sind es ', 'At most three energies — found ') + f.anzahl + '.';
+        case 'zu_viele': return t('Höchstens zwei Karten gleichen Namens: ', 'At most two cards with the same name: ') + f.text + ' (' + f.anzahl + ')';
+        case 'deckgroesse': return t('Ein Deck hat genau 20 Karten — hier sind es ', 'A deck has exactly 20 cards — found ') + f.anzahl + '.';
+        case 'keine_pokemon': return t('Das Deck enthält kein Pokémon.', 'The deck contains no Pokémon.');
+        default: return z + f.art;
+        }
+    }
+
+    function eigenMeldung(html) {
+        var m = document.getElementById('pkEigenMeldung');
+        if (m) m.innerHTML = html;
+    }
+
+    function eigenErzeugen() {
+        var feld = document.getElementById('pkEigenListe');
+        if (feld) eigenText = feld.value;
+        if (!window.PocketDeckcode) {
+            eigenMeldung(meldung(t('Der Baustein für eigene Codes fehlt.', 'The own-code module is missing.'), true));
+            return Promise.resolve();
+        }
+        var tabelle = kartenTabelle ? Promise.resolve(kartenTabelle)
+            : fetch(KARTEN_QUELLE, { cache: 'no-store' }).then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            }).then(function (j) { kartenTabelle = j; return j; });
+        return tabelle.then(function (tab) {
+            var P = window.PocketDeckcode;
+            var erg = P.baue(P.leseListe(eigenText), tab);
+            var hinweise = erg.hinweise.map(function (h) {
+                return t('Zeile ', 'Line ') + h.zeile + ': ' +
+                       t('„' + h.text + '" steht in ' + h.karte + ' als „' + h.erwartet + '" — bitte Set und Nummer prüfen.',
+                         '"' + h.text + '" is "' + h.erwartet + '" in ' + h.karte + ' — please check set and number.');
+            });
+            if (!erg.code) {
+                eigenMeldung('<div class="pk-meldung is-fehler"><ul>' +
+                    erg.fehler.map(function (f) { return '<li>' + esc(eigenFehlerText(f)) + '</li>'; }).join('') +
+                    hinweise.map(function (h) { return '<li>' + esc(h) + '</li>'; }).join('') + '</ul></div>');
+                return;
+            }
+            eigenMeldung(hinweise.length
+                ? '<div class="pk-meldung pk-eigen-hinweis"><ul>' +
+                  hinweise.map(function (h) { return '<li>' + esc(h) + '</li>'; }).join('') + '</ul></div>'
+                : '');
+            zeigeVollbild({
+                name: t('Eigenes Deck', 'Your deck'), code: erg.code,
+                pokemon: erg.pokemon, trainer: erg.trainer
+            }, t('Aus deiner Liste · Energie: ' + erg.energieDe.join(', '),
+                 'From your list · Energy: ' + erg.energie.join(', ')));
+        }).catch(function (e) {
+            eigenMeldung(meldung(t('Die Kartentabelle ließ sich nicht laden. Bist du gerade offline?',
+                                   'The card table could not be loaded. Are you offline?'), true));
+            if (window.console) console.warn('[pocket]', e);
+        });
+    }
+
     /* ── Vollbild ────────────────────────────────────────────────── */
 
     function wachHalten() {
@@ -665,10 +759,15 @@
 
     function oeffne(index) {
         var d = (daten.decks || [])[index];
+        if (!d) return;
+        var stand = kurzDatum((daten._meta || {}).abgerufen);
+        zeigeVollbild(d, t('Stufe ', 'Tier ') + d.tier + ' · Game8' +
+                         (stand ? ' · ' + t('Stand ', 'as of ') + stand : ''));
+    }
+
+    function zeigeVollbild(d, unterzeile) {
         var host = document.getElementById('pocketOverlay');
         if (!d || !host) return;
-
-        var stand = kurzDatum((daten._meta || {}).abgerufen);
         var bild;
         try {
             if (!window.qrSvg || typeof window.qrSvg.svg !== 'function') {
@@ -703,8 +802,7 @@
         // bleibt erhalten, die Sprachpruefung greift hier nicht mehr.
         s += '<div class="pk-overlay-name" role="heading" aria-level="2">' +
              esc(d.name) + '</div>';
-        s += '<p>' + esc(t('Stufe ', 'Tier ') + d.tier) + ' · Game8' +
-             (stand ? ' · ' + esc(t('Stand ', 'as of ') + stand) : '') + '</p>';
+        s += '<p>' + esc(unterzeile) + '</p>';
         s += '</div>';
         s += bild;
         s += '<p class="pk-hell">' + esc(
@@ -783,7 +881,7 @@
             host.innerHTML = meldung(t('Die Tier-Liste ist leer.', 'The tier list is empty.'));
             return;
         }
-        host.innerHTML = kopf() + filterleiste() + liste() + rechnung();
+        host.innerHTML = kopf() + filterleiste() + liste() + rechnung() + eigenesDeck();
         spritesNachziehen(host);
     }
 
@@ -878,8 +976,14 @@
             if (z) { oeffne(Number(z.getAttribute('data-pk-deck'))); return; }
             var k = ev.target.closest('[data-pk-kopieren]');
             if (k) { kopiere(k, k.getAttribute('data-pk-kopieren')); return; }
+            var eigen = ev.target.closest('[data-pk-eigen]');
+            if (eigen) { eigenErzeugen(); return; }
             var zu = ev.target.closest('[data-pk-zu]');
             if (zu) schliesse();
+        });
+        // Der eingefuegte Text ueberlebt das Neuzeichnen (Filterklick).
+        reiter.addEventListener('input', function (ev) {
+            if (ev.target && ev.target.id === 'pkEigenListe') eigenText = ev.target.value;
         });
 
         document.addEventListener('keydown', function (ev) {
@@ -905,5 +1009,6 @@
                            AUSGEFUEHRT geprueft, nicht im Test
                            nachgebaut. Ein Nachbau haette bewiesen, dass
                            der Nachbau stimmt. */
+                        eigenErzeugen: eigenErzeugen,
                         _intern: { benannteArten: benannteArten } };
 }());

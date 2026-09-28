@@ -2426,3 +2426,20 @@ def test_die_ausgelieferte_datei_fuehrt_jede_benutzte_ueberschrift(mod):
         f"Abschnitte an Decks, die _meta nicht kennt: {benutzt - set(ordnung)}")
     assert set(ordnung) <= benutzt, (
         f"Abschnitte in _meta, die an keinem Deck haengen: {set(ordnung) - benutzt}")
+
+
+def test_auf_dem_github_laeufer_nennt_der_abbruch_den_richtigen_weg(mod, monkeypatch, capsys):
+    """SC-5 (28.09.2026): ein Handstart des Ablaufs endete mit einem
+    Traceback und der Anmerkung „siehe Protokoll oben". Jetzt steht der
+    Grund als ::error:: da, und auf dem Laeufer auch, wo geerntet wird."""
+    _leiter(mod, monkeypatch, {
+        "cloudscraper": _Sprosse(_Antwort(202)),
+        "curl_cffi": _Sprosse(_Antwort(202)),
+        "requests": _Sprosse(_Antwort(202)),
+    })
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setattr(sys, "argv", ["scrape_pocket_tierlist.py", "--trocken"])
+    assert mod.main() == 1
+    fehler = [z for z in capsys.readouterr().out.splitlines() if z.startswith("::error::")]
+    assert fehler, "kein ::error:: — die Anmerkung des Laufs bliebe leer"
+    assert "202" in fehler[0] and "Pocket-Ernte" in fehler[0] and "pocket_ernte.sh" in fehler[0]

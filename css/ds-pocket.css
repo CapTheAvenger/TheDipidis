@@ -383,3 +383,41 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
+
+/* ── Eigenes Deck als Scan-Code (FE-11, 28.09.2026) ───────────────── */
+.pk-eigen {
+    margin-top: 26px;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #d1d5db);
+    background: var(--surface-1, #fff);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.pk-eigen-titel {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary, #111827);
+}
+.pk-eigen .pk-hell { margin: 0; text-align: left; }
+.pk-eigen-liste {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 12em;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #d1d5db);
+    background: var(--surface-2, #f3f4f6);
+    color: var(--text-primary, #111827);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .9rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+.pk-eigen-knopf { align-self: flex-start; }
+.pk-eigen .pk-meldung ul { margin: 0; padding-left: 1.2em; }
+.pk-eigen-hinweis {
+    background: var(--tint-warn);
+    color: var(--tint-warn-ink);
+}

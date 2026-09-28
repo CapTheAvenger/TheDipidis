@@ -265,6 +265,28 @@
         return z;
     }
 
+    /**
+     * Groesse einer Box (Hausi, 28.09.2026: „wie gross die Box sein muss“).
+     *  karten  — verschiedene Karten
+     *  stueck  — Kopien, die die Box fassen muss: je Karte das Hoechste aus
+     *            „gefordert“ und „drin“ (von Hand ohne Vorgabe: mindestens 1)
+     *  fehlen  — Karten mit Status „fehlt“ (wie die Rubrik)
+     *  offen   — Kopien, die noch fehlen: je Karte „gefordert“ minus „drin“
+     */
+    function umfang(box) {
+        const u = { karten: 0, stueck: 0, fehlen: 0, offen: 0 };
+        (box && box.karten || []).forEach(function (roh) {
+            const k = normiert(roh);
+            const soll = gefordertVon(k) > 0 ? gefordertVon(k) : 1;
+            const menge = drin(k);
+            u.karten += 1;
+            u.stueck += Math.max(soll, menge);
+            u.offen += Math.max(0, soll - menge);
+            if ((STATUS.indexOf(k.status) >= 0 ? k.status : 'fehlt') === 'fehlt') u.fehlen += 1;
+        });
+        return u;
+    }
+
     /** Was die Druckfunktion bekommt: jede Proxy-Karte, je Druck mit seiner Anzahl. */
     function proxyListe(box) {
         const aus = [];
@@ -618,7 +640,7 @@
 
     const Logik = {
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
-        statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon,
+        statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon, umfang,
         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
         formatPasst, formateNachDatum, blockVorRotation, druckIn, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
@@ -1262,16 +1284,20 @@
         const leiste = el('abxLeiste');
         if (!leiste) return;
         if (!boxen.length) { leiste.innerHTML = ''; return; }
-        const alle = boxen.reduce(function (a, b) { return a + zaehlen(b).fehlt; }, 0);
-        const chip = function (id, name, zahl) {
+        const alle = boxen.reduce(function (a, b) {
+            const u = umfang(b);
+            return { karten: a.karten + u.karten, stueck: a.stueck + u.stueck, fehlen: a.fehlen + u.fehlen, offen: a.offen + u.offen };
+        }, { karten: 0, stueck: 0, fehlen: 0, offen: 0 });
+        const chip = function (id, name, u) {
             const aktiv = boxen.length === 1 || (id || null) === (aktiveId || null);
             return '<button type="button" class="abx-chip' + (aktiv ? ' is-active' : '') + '" aria-pressed="'
                 + (aktiv ? 'true' : 'false') + '" onclick="ArchetypBox.waehlen(' + (id ? '\'' + esc(id) + '\'' : 'null') + ')">'
                 + '<span class="abx-chip-name">' + esc(name) + '</span>'
-                + '<span class="abx-chip-zahl">' + esc(tx('abx.chipFehlt', { n: zahl }, '{n} fehlen')) + '</span></button>';
+                + '<span class="abx-chip-zahl">' + esc(tx('abx.chipUmfang', { karten: u.karten, stueck: u.stueck }, '{karten} Karten · {stueck} Stück')) + '</span>'
+                + '<span class="abx-chip-zahl">' + esc(tx('abx.chipFehlen', { n: u.fehlen, offen: u.offen }, '{n} fehlen · {offen} Stück offen')) + '</span></button>';
         };
         leiste.innerHTML = (boxen.length > 1 ? chip(null, tx('abx.alleBoxen', null, 'Alle Boxen'), alle) : '')
-            + boxen.map(function (b) { return chip(b.id, b.name, zaehlen(b).fehlt); }).join('');
+            + boxen.map(function (b) { return chip(b.id, b.name, umfang(b)); }).join('');
     }
 
     function kachel(eintrag, mitBoxName) {

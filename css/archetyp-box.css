@@ -153,6 +153,7 @@
 }
 .abx-druck { display: flex; justify-content: space-between; gap: var(--s-1); color: var(--ink-3); font-size: var(--fs-xs); }
 .abx-anteil { color: var(--ink-2); font-weight: 700; }
+.abx-formatzeile { color: var(--ink-2); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .abx-segmente { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
 .abx-seg {
@@ -265,6 +266,7 @@
     background: var(--surface-1); color: var(--ink-2);
     font-size: var(--fs-sm); font-weight: 700; cursor: pointer;
 }
+.abx-filter-hinweis { margin: 0; color: var(--ink-3); font-size: var(--fs-xs); line-height: 1.4; }
 .abx-filter.is-active { background: var(--solid-info); border-color: var(--solid-info); color: #fff; }
 .abx-gefiltert { color: var(--ink-3); font-weight: 400; }
 .abx-boxname {

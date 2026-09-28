@@ -138,6 +138,7 @@
             datenStand: kopf.datenStand || null,
             erstellt: heute,
             aktualisiert: heute,
+            mitFormaten: karten.some(function (k) { return !!k.formate; }),
             karten: karten
         };
     }
@@ -191,6 +192,7 @@
                 if (!k.manuell && f.maxAnzahl > 0) k.gefordert = f.maxAnzahl;
                 k.inDaten = true;
                 if (f.reihe != null) k.reihe = f.reihe;
+                if (f.formate) k.formate = f.formate;
                 const refs = new Set([].concat(k.refs || [], f.refs || [], [f.id]));
                 refs.delete(k.id);
                 k.refs = Array.from(refs);
@@ -206,10 +208,13 @@
             }
         });
         const nichtMehr = [];
+        const mitFormaten = (frische || []).some(function (f) { return f && f.formate; });
         karten.forEach(function (k, i) {
             if (getroffen.has(i) || k.manuell) return;
             if (k.inDaten !== false) nichtMehr.push(k);
             k.inDaten = false;
+            // In keinem Format mehr gespielt: auch kein Anteil je Format.
+            if (mitFormaten) k.formate = {};
         });
         const ergebnis = Object.assign({}, box, {
             schemaVersion: 2,
@@ -217,7 +222,8 @@
             entfernt: entfernt,
             wieder: wieder,
             aktualisiert: heute,
-            datenStand: (kopf && kopf.datenStand) || (box && box.datenStand) || null
+            datenStand: (kopf && kopf.datenStand) || (box && box.datenStand) || null,
+            mitFormaten: mitFormaten || !!(box && box.mitFormaten)
         });
         return { box: ergebnis, neu: neu, nichtMehr: nichtMehr, wieder: wiederNeu };
     }
@@ -424,6 +430,112 @@
         return true;
     }
 
+    /*
+     * Hauptfilter "Format" (Hausi, 28.09.2026 abends). Alle Zahlen stammen
+     * aus den Rotationen-Daten (Anteil der Karte je Format, k.formate) und
+     * aus data/format_window.json + data/sets.json (Legalitaet).
+     *
+     *   aktuell  — im neuesten Format mit Turnierdaten gespielt
+     *   standard — mindestens ein Druck ist im aktuellen Standard legal
+     *   expanded — kein Druck ist im Standard legal
+     *   raus     — vorher >= META_SCHWELLE, jetzt darunter (oder gar nicht)
+     *   neu      — jetzt >= META_SCHWELLE, vorher darunter (oder gar nicht)
+     *   rotiert  — vor der letzten Rotation legal, jetzt nicht mehr
+     *
+     * kontext = { aktuell, vorher, legal(k) -> true|false|null, legalVorRotation(k) }
+     * Unbekannt (null) passt zu keinem der Legalitaetsfilter — lieber eine
+     * Karte zu wenig anzeigen als eine falsch einsortieren.
+     */
+    const META_SCHWELLE = 10;
+
+    function anteilIn(k, fmt) {
+        const f = k && k.formate;
+        if (!f || !fmt) return 0;
+        const v = Number(f[fmt]);
+        return Number.isFinite(v) ? v : 0;
+    }
+
+    function formatPasst(k, wahl, kontext) {
+        if (!wahl || wahl === 'alle') return true;
+        const c = kontext || {};
+        if (wahl === 'aktuell') return anteilIn(k, c.aktuell) > 0;
+        if (wahl === 'raus') return anteilIn(k, c.vorher) >= META_SCHWELLE && anteilIn(k, c.aktuell) < META_SCHWELLE;
+        if (wahl === 'neu') return anteilIn(k, c.aktuell) >= META_SCHWELLE && anteilIn(k, c.vorher) < META_SCHWELLE;
+        const legal = typeof c.legal === 'function' ? c.legal(k) : null;
+        if (wahl === 'standard') return legal === true;
+        if (wahl === 'expanded') return legal === false;
+        if (wahl === 'rotiert') {
+            const vorher = typeof c.legalVorRotation === 'function' ? c.legalVorRotation(k) : null;
+            return legal === false && vorher === true;
+        }
+        return true;
+    }
+
+    /** Neuestes und vorletztes Format mit Turnierdaten, nach max_date im Manifest. */
+    function formateNachDatum(manifest) {
+        const keys = (manifest && manifest.meta_keys) || [];
+        const chunks = (manifest && manifest.chunks) || [];
+        const daten = (manifest && manifest.chunk_dates) || {};
+        return keys.map(function (k, i) {
+            const d = daten[chunks[i]] || {};
+            return { key: k, bis: d.max_date || '' };
+        }).filter(function (x) { return x.bis; })
+          .sort(function (a, b) { return a.bis < b.bis ? 1 : (a.bis > b.bis ? -1 : 0); });
+    }
+
+    /**
+     * Blockanfang vor der letzten Rotation: das juengste Anfangsset aus den
+     * Formatschluesseln (BRS-…, SVI-…, TEF-…), das aelter ist als das
+     * aktuelle oldest_legal_set. Reihenfolge aus data/sets.json.
+     */
+    function blockVorRotation(metaKeys, aeltestesLegal, setOrder) {
+        const o = setOrder || {};
+        const jetzt = o[String(aeltestesLegal || '').toUpperCase()];
+        if (jetzt == null) return null;
+        let best = null;
+        (metaKeys || []).forEach(function (key) {
+            const start = String(key).split('-')[0].toUpperCase();
+            const v = o[start];
+            if (v == null || v >= jetzt) return;
+            if (!best || v > o[best]) best = start;
+        });
+        return best;
+    }
+
+    /**
+     * Anteil je Format an die frischen Eintraege haengen.
+     * jeFormat = { 'TEF-PBL': [{ ids: ['PBL-12', 'SVP-1'], anteil: 80 }], … }
+     * Verbunden wird ueber (Set, Nummer) — der Eintrag und alle seine
+     * internationalen Drucke —, nie ueber den Namen. Mehrere Treffer in
+     * einem Format (zwei Drucke derselben Karte): der hoechste Anteil.
+     */
+    function formateZuordnen(frische, jeFormat) {
+        const formate = Object.keys(jeFormat || {});
+        return (frische || []).map(function (f) {
+            if (!f || !f.id) return f;
+            const ids = new Set([f.id].concat(f.refs || []));
+            const aus = {};
+            formate.forEach(function (fmt) {
+                (jeFormat[fmt] || []).forEach(function (r) {
+                    const a = Number(r && r.anteil);
+                    if (!Number.isFinite(a)) return;
+                    if (!(r.ids || []).some(function (id) { return ids.has(id); })) return;
+                    if (aus[fmt] == null || a > aus[fmt]) aus[fmt] = a;
+                });
+            });
+            return Object.assign({}, f, { formate: aus });
+        });
+    }
+
+    /** Ist eine der Kennungen (Set-Nummer) in einem der Sets? */
+    function druckIn(ids, sets) {
+        if (!sets) return null;
+        return (ids || []).some(function (id) {
+            const set = String(id).split('-')[0];
+            return sets.has(set);
+        });
+    }
+
     function elementRang(e) {
         const i = ELEMENTE.indexOf(String(e || ''));
         return i >= 0 ? i : ELEMENTE.length;
@@ -508,6 +620,7 @@
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon,
         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
+        formatPasst, formateNachDatum, blockVorRotation, druckIn, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
         isoTag, neuestesDatumImManifest, neueDatenDa, anzahlBegrenzen, STATUS
     };
@@ -652,7 +765,8 @@
     // ════════════════════════════════════════════════════════
 
     /** Druck einer Uebersichtskarte, so wie die Kartenuebersicht ihn im Modus "Low Rarity" zeigt. */
-    function eintragAusUebersicht(card, totalDecklists) {
+    /** Name, Set und Nummer einer Uebersichtskarte. */
+    function setNummerVon(card) {
         const vollName = String(card.full_card_name || card.card_name || '').trim();
         let name = vollName;
         let set = String(card.set_code || card.set || '').trim().toUpperCase();
@@ -665,6 +779,55 @@
             const m = vollName.match(/^(.+?)\s+([A-Z0-9]{2,4})\s+([A-Z0-9]+)$/);
             if (m) { name = m[1].trim(); set = m[2]; nummer = m[3]; }
         }
+        return { name: name, set: set, nummer: nummer };
+    }
+
+    function anteilVon(card) {
+        const roh = (typeof parseLocaleNumber === 'function')
+            ? parseLocaleNumber(card.percentage_in_archetype || card.share_percent || '', NaN)
+            : parseFloat(String(card.percentage_in_archetype || '').replace(',', '.'));
+        return Number.isFinite(roh) ? Math.round(roh * 10) / 10 : null;
+    }
+
+    /**
+     * Anteil je Format: die Decks nach deck.format getrennt, jede Gruppe
+     * mit derselben Statistik wie die Kartenuebersicht zusammengefasst.
+     * Liefert { format: [{ ids, anteil }] } fuer formateZuordnen.
+     */
+    function jeFormatAus(matchingDecks) {
+        if (typeof _pmAggregiereDecks !== 'function') return {};
+        const gruppen = {};
+        (matchingDecks || []).forEach(function (d) {
+            const f = String((d && d.format) || '');
+            if (!f) return;
+            (gruppen[f] = gruppen[f] || []).push(d);
+        });
+        const aus = {};
+        Object.keys(gruppen).forEach(function (fmt) {
+            let karten = [];
+            try { karten = _pmAggregiereDecks(gruppen[fmt]).aggregatedCards || []; } catch (_) { karten = []; }
+            aus[fmt] = karten.map(function (c) {
+                const sn = setNummerVon(c);
+                const id = kartenId(sn.set, sn.nummer);
+                if (!id) return null;
+                let ids = [id];
+                if (typeof getInternationalPrintsForCard === 'function') {
+                    try {
+                        ids = ids.concat((getInternationalPrintsForCard(sn.set, sn.nummer) || [])
+                            .map(function (p) { return kartenId(p.set, p.number); }).filter(Boolean));
+                    } catch (_) { /* nur der eigene Druck */ }
+                }
+                return { ids: ids, anteil: anteilVon(c) };
+            }).filter(Boolean);
+        });
+        return aus;
+    }
+
+    function eintragAusUebersicht(card, totalDecklists) {
+        const sn = setNummerVon(card);
+        const name = sn.name;
+        const set = sn.set;
+        const nummer = sn.nummer;
         if (!set || !nummer) return null;   // ohne (Set, Nummer) keine Identitaet
 
         let druck = null;
@@ -718,9 +881,6 @@
         const typ = (typeof getCardType === 'function') ? getCardType(name, dSet, dNummer) : '';
         const rep = (typeof getPastMetaRepresentativeCardCopies === 'function')
             ? getPastMetaRepresentativeCardCopies(card) : 0;
-        const anteilRoh = (typeof parseLocaleNumber === 'function')
-            ? parseLocaleNumber(card.percentage_in_archetype || card.share_percent || '', NaN)
-            : parseFloat(String(card.percentage_in_archetype || '').replace(',', '.'));
 
         return {
             id: id,
@@ -732,7 +892,7 @@
             element: typ === 'Pokemon' ? String((druck && druck.energy_type) || (imDb && imDb.energy_type) || '') : '',
             anzahl: anzahlWieUebersicht(card, totalDecklists, rep),
             maxAnzahl: parseInt(card.max_count || 0, 10) || 0,
-            anteil: Number.isFinite(anteilRoh) ? Math.round(anteilRoh * 10) / 10 : null,
+            anteil: anteilVon(card),
             refs: refs
         };
     }
@@ -864,7 +1024,9 @@
         const vorhanden = boxFuerArchetyp(z.archetyp);
         const schwelle = vorhanden ? String(vorhanden.schwelle || 'all') : z.schwelle;
         const datenStand = isoTag(stichtagFuer(z.archetyp));
-        const frische = eintraegeAus(gefilterteKarten(z.karten, schwelle), z.umfang && z.umfang.totalDecklists);
+        const decks = (typeof _pmDeckAuswahl === 'function') ? (_pmDeckAuswahl('all', 'all', z.archetyp).matchingDecks || []) : [];
+        const frische = formateZuordnen(eintraegeAus(gefilterteKarten(z.karten, schwelle), z.umfang && z.umfang.totalDecklists),
+            jeFormatAus(decks));
         if (frische.length === 0) {
             toast(tx('abx.keineKarten', null, 'Keine Karten mit Set und Nummer gefunden.'), 'warning');
             return;
@@ -955,7 +1117,7 @@
             }
             const summe = _pmAggregiereDecks(auswahl.matchingDecks);
             const karten = gefilterteKarten(summe.aggregatedCards, String(box.schwelle || 'all'));
-            const frische = eintraegeAus(karten, summe.totalDecklists);
+            const frische = formateZuordnen(eintraegeAus(karten, summe.totalDecklists), jeFormatAus(auswahl.matchingDecks));
             const erg = abgleichen(box, frische, { datenStand: isoTag(summe.letztesDatumMs) }, heuteIso());
             erg.box.id = box.id;
             await schreiben(erg.box);
@@ -973,13 +1135,57 @@
         }
     }
 
-    async function manifestDatumHolen() {
+    let manifestDaten = null;   // tournament_cards_manifest.json
+    let formatFenster = null;   // data/format_window.json
+
+    async function jsonHolen(datei) {
         try {
             const basis = (typeof BASE_PATH !== 'undefined') ? BASE_PATH : './data/';
-            const r = await fetch(basis + 'tournament_cards_manifest.json?t=' + Date.now());
+            const r = await fetch(basis + datei + '?t=' + Date.now());
             if (!r.ok) return null;
-            return neuestesDatumImManifest(await r.json());
+            return await r.json();
         } catch (_) { return null; }
+    }
+
+    async function formatDatenHolen() {
+        const erg = await Promise.all([jsonHolen('tournament_cards_manifest.json'),
+            window._formatWindow && window._formatWindow.oldest_legal_set ? Promise.resolve(window._formatWindow) : jsonHolen('format_window.json')]);
+        manifestDaten = erg[0];
+        formatFenster = erg[1];
+        manifestDatum = neuestesDatumImManifest(manifestDaten);
+    }
+
+    /** Kontext fuer formatPasst: welche Formate "aktuell"/"vorher" sind und was legal ist. */
+    function formatKontext() {
+        const reihe = formateNachDatum(manifestDaten);
+        const fw = formatFenster || {};
+        const legalSets = function (von) {
+            if (!von || !fw.current_set || typeof getFormatLegalSetCodes !== 'function') return null;
+            try { return getFormatLegalSetCodes(von + '-' + fw.current_set); } catch (_) { return null; }
+        };
+        const jetzt = legalSets(fw.oldest_legal_set);
+        const vorBlock = blockVorRotation(manifestDaten && manifestDaten.meta_keys, fw.oldest_legal_set, window.setOrderMap);
+        const vorher = legalSets(vorBlock);
+        const ids = function (k) {
+            return [k.id].concat(k.refs || [], (k.drucke || []).map(function (d) { return d.id; }));
+        };
+        const basisEnergie = function (k) {
+            if (k.typ !== 'Energy' || typeof getCanonicalCardRecord !== 'function') return false;
+            const rec = getCanonicalCardRecord(k.set, k.number);
+            return !!(rec && /^basic energy$/i.test(String(rec.type || '')));
+        };
+        return {
+            aktuell: reihe[0] ? reihe[0].key : null,
+            aktuellBis: reihe[0] ? reihe[0].bis : null,
+            vorher: reihe[1] ? reihe[1].key : null,
+            vorherBis: reihe[1] ? reihe[1].bis : null,
+            standard: fw.oldest_legal_set && fw.current_set ? fw.oldest_legal_set + '-' + fw.current_set : null,
+            vorBlock: vorBlock || null,
+            fensterSet: fw.current_set || null,
+            legalBekannt: !!jetzt,
+            legal: function (k) { return basisEnergie(k) ? true : druckIn(ids(k), jetzt); },
+            legalVorRotation: function (k) { return basisEnergie(k) ? true : druckIn(ids(k), vorher); }
+        };
     }
 
     // ════════════════════════════════════════════════════════
@@ -1001,14 +1207,14 @@
         // dann sucht man z. B. alle Pflanzen-Pokemon fuer alle Decks in einem Gang.
         if (aktiveId && !boxen.some(function (b) { return b.id === aktiveId; })) aktiveId = null;
         zeichnen();
-        manifestDatum = await manifestDatumHolen();
+        await formatDatenHolen();
         zeichnen();
     }
 
     // ── Filter (je Betrachter gemerkt) ──
 
     const ANSICHT_SCHLUESSEL = 'archetypBoxAnsichtV1';
-    let ansicht = { anteil: 'alle', art: 'alle', element: 'alle', sort: 'anteil' };
+    let ansicht = { format: 'alle', anteil: 'alle', art: 'alle', element: 'alle', sort: 'anteil' };
     try {
         const g = JSON.parse(localStorage.getItem(ANSICHT_SCHLUESSEL) || 'null');
         if (g && typeof g === 'object') ansicht = Object.assign(ansicht, g);
@@ -1097,7 +1303,8 @@
             + '<div class="abx-bild">' + bild + sollKnopf + herz + drinPlakette
             + (marken.length ? '<div class="abx-marken">' + marken.join('') + '</div>' : '') + '</div>'
             + '<div class="abx-text">' + boxZeile + '<div class="abx-name" title="' + esc(k.name) + '">' + esc(k.name) + '</div>'
-            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + druckZusatz + '</span>' + anteil + '</div></div>'
+            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + druckZusatz + '</span>' + anteil + '</div>'
+            + (eintrag.formatZeile ? '<div class="abx-formatzeile">' + esc(eintrag.formatZeile) + '</div>' : '') + '</div>'
             + '<div class="abx-segmente" role="group" aria-label="' + esc(tx('abx.statusAria', null, 'Status in der Box')) + '">' + knoepfe + '</div>'
             + '<div class="abx-zeile2">'
             + '<button type="button" class="abx-mini" onclick="ArchetypBox.anzahl(' + arg + ',-1)" aria-label="'
@@ -1160,7 +1367,37 @@
             + '</p><div class="abx-gitter">' + kacheln + '</div></section>';
     }
 
-    function filterLeiste() {
+    /** Kleine Zeile auf der Kachel: Anteil im aktuellen (und vorigen) Format. */
+    function formatZeileVon(k, wahl, c) {
+        if (!c.aktuell) return '';
+        const jetzt = c.aktuell + ' ' + prozent(anteilIn(k, c.aktuell));
+        if (wahl === 'aktuell' || !c.vorher) return jetzt;
+        return c.vorher + ' ' + prozent(anteilIn(k, c.vorher)) + ' → ' + jetzt;
+    }
+
+    const FORMAT_WAHL = ['alle', 'aktuell', 'standard', 'expanded', 'raus', 'neu', 'rotiert'];
+
+    /** Erklaerzeile zur Formatwahl — nennt die Formate und Daten, auf die sie sich stuetzt. */
+    function formatHinweis(wahl, c) {
+        const v = { aktuell: c.aktuell || '?', vorher: c.vorher || '?', bis: datumLesbar(c.aktuellBis), bisV: datumLesbar(c.vorherBis),
+            n: META_SCHWELLE, standard: c.standard || '?', block: c.vorBlock || '?', fenster: c.fensterSet || '?' };
+        const meta = wahl === 'aktuell' || wahl === 'raus' || wahl === 'neu';
+        if (meta && !c.aktuell) return tx('abx.fmtKeineDaten', null, 'Keine Turnierdaten je Format geladen.');
+        if (!meta && wahl !== 'alle' && !c.legalBekannt) return tx('abx.fmtLegalUnbekannt', null, 'Die Legalität ist noch nicht geladen — gleich noch einmal versuchen.');
+        let satz = '';
+        if (wahl === 'aktuell') satz = tx('abx.fmtAktuell', v, 'Gespielt in {aktuell}, dem neuesten Format mit Turnierdaten (bis {bis}).');
+        else if (wahl === 'raus') satz = tx('abx.fmtRaus', v, 'In {vorher} (bis {bisV}) in mindestens {n} % der Listen, in {aktuell} (bis {bis}) darunter.');
+        else if (wahl === 'neu') satz = tx('abx.fmtNeu', v, 'In {aktuell} (bis {bis}) in mindestens {n} % der Listen, in {vorher} (bis {bisV}) darunter.');
+        else if (wahl === 'standard') satz = tx('abx.fmtStandard', v, 'Mindestens ein Druck ist in {standard} legal.');
+        else if (wahl === 'expanded') satz = tx('abx.fmtExpanded', v, 'Kein Druck ist in {standard} legal — nur noch in Expanded spielbar.');
+        else if (wahl === 'rotiert') satz = tx('abx.fmtRotiert', v, 'War vor der letzten Rotation legal (ab {block}), ist in {standard} nicht mehr legal.');
+        if (meta && c.fensterSet && c.aktuell && String(c.aktuell).split('-')[1] !== String(c.fensterSet)) {
+            satz += ' ' + tx('abx.fmtFensterOhne', v, 'Für {fenster} gibt es noch keine Turnierdaten.');
+        }
+        return satz;
+    }
+
+    function filterLeiste(kontext, ohneFormate) {
         const knopf = function (feld, wert, text) {
             const an = ansicht[feld] === wert;
             return '<button type="button" class="abx-filter' + (an ? ' is-active' : '') + '" aria-pressed="' + (an ? 'true' : 'false')
@@ -1176,7 +1413,20 @@
             ['Supporter', tx('cl.typeSupporter', null, 'Supporter')], ['Item', tx('cl.typeItem', null, 'Item')],
             ['Tool', tx('cl.typeTool', null, 'Tool')], ['Stadium', tx('cl.typeStadium', null, 'Stadion')],
             ['Ace Spec', tx('cl.typeAceSpec', null, 'Ace Spec')], ['Energy', tx('cl.typeEnergy', null, 'Energie')]];
-        let html = reihe(tx('abx.fAnteil', null, 'Anteil'), anteil.map(function (a) { return knopf('anteil', a[0], a[1]); }).join(''))
+        const fmtText = {
+            alle: tx('abx.fAlle', null, 'Alle'), aktuell: tx('abx.fmt.aktuell', null, 'Aktuelles Meta'),
+            standard: tx('abx.fmt.standard', null, 'Standard-legal'), expanded: tx('abx.fmt.expanded', null, 'Nur Expanded'),
+            raus: tx('abx.fmt.raus', null, 'Aus dem Meta gefallen'), neu: tx('abx.fmt.neu', null, 'Neu im Meta'),
+            rotiert: tx('abx.fmt.rotiert', null, 'Bei der Rotation raus')
+        };
+        const c = kontext || {};
+        let fmtZeile = ansicht.format && ansicht.format !== 'alle' ? formatHinweis(ansicht.format, c) : '';
+        if (ohneFormate && (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu')) {
+            fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal „Archetyp-Box aktualisieren“.');
+        }
+        let html = reihe(tx('abx.fFormat', null, 'Format'), FORMAT_WAHL.map(function (w) { return knopf('format', w, fmtText[w]); }).join(''))
+            + (fmtZeile ? '<p class="abx-filter-hinweis">' + esc(fmtZeile) + '</p>' : '')
+            + reihe(tx('abx.fAnteil', null, 'Anteil'), anteil.map(function (a) { return knopf('anteil', a[0], a[1]); }).join(''))
             + reihe(tx('abx.fArt', null, 'Kartenart'), arten.map(function (a) { return knopf('art', a[0], a[1]); }).join(''));
         if (ansicht.art === 'Pokemon') {
             html += reihe(tx('abx.fTyp', null, 'Typ'), [knopf('element', 'alle', tx('abx.fAlle', null, 'Alle'))].concat(
@@ -1211,7 +1461,14 @@
             });
         });
         const gesamt = eintraege.length;
-        eintraege = eintraege.filter(function (e) { return filterPasst(e.k, ansicht, e.element); });
+        const kontext = formatKontext();
+        eintraege = eintraege.filter(function (e) {
+            return filterPasst(e.k, ansicht, e.element) && formatPasst(e.k, ansicht.format, kontext);
+        });
+        if (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu') {
+            eintraege.forEach(function (e) { e.formatZeile = formatZeileVon(e.k, ansicht.format, kontext); });
+        }
+        const ohneFormate = gewaehlt.some(function (b) { return !b.mitFormaten; });
         eintraege = sortieren(eintraege, ansicht.sort, !!eine);
         const r = { fehlt: [], original: [], proxy: [] };
         eintraege.forEach(function (e) { r[STATUS.indexOf(e.k.status) >= 0 ? e.k.status : 'fehlt'].push(e); });
@@ -1262,7 +1519,7 @@
         }, '{fehlt} fehlen · {original} als Original drin · {proxy} als Proxy drin'))
             + (eintraege.length < gesamt ? ' <span class="abx-gefiltert">' + esc(tx('abx.gefiltert', { n: eintraege.length, g: gesamt },
                 '({n} von {g} nach Filter)')) + '</span>' : '') + '</p>';
-        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName) + filterLeiste() + summe
+        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName) + filterLeiste(kontext, ohneFormate) + summe
             + rubrik('fehlt', tx('abx.rubrikFehlt', null, 'Noch nicht in der Box'), r.fehlt, mitBoxName)
             + rubrik('original', tx('abx.rubrikOriginal', null, 'Schon drin (Original)'), r.original, mitBoxName)
             + rubrik('proxy', tx('abx.rubrikProxy', null, 'Als Proxy drin'), r.proxy, mitBoxName);
@@ -1472,10 +1729,11 @@
     function proxysDrucken(id) {
         if (typeof addCardToProxy !== 'function') return;
         const quelle = id ? [boxVon(id)].filter(Boolean) : boxen.slice();
+        const kontext = formatKontext();
         const liste = [];
         quelle.forEach(function (b) {
             const sichtbar = Object.assign({}, b, { karten: (b.karten || []).filter(function (roh) {
-                const k = normiert(roh); return filterPasst(k, ansicht, elementVon(k));
+                const k = normiert(roh); return filterPasst(k, ansicht, elementVon(k)) && formatPasst(k, ansicht.format, kontext);
             }) });
             proxyListe(sichtbar).forEach(function (p) { liste.push(p); });
         });

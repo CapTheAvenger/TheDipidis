@@ -423,7 +423,24 @@
             }, 0);
         }
         
-        async function loadPastMeta() {
+        /* EIN Ladevorgang, auch bei zwei Aufrufern. Die Archetyp-Box laedt
+           die Rotationen-Daten aus dem Profil heraus; oeffnet jemand
+           waehrenddessen den Reiter Rotationen, bekaeme er sonst einen
+           zweiten Lauf mit doppelt verdrahteten Auswahlfeldern. Muster:
+           loadAllCardsDatabase in js/app-core.js. Scheitert der Lauf,
+           darf der naechste Aufruf es erneut versuchen. */
+        let _pmLadeLauf = null;
+        function loadPastMeta() {
+            if (window.pastMetaLoaded) return Promise.resolve();
+            if (_pmLadeLauf) return _pmLadeLauf;
+            const lauf = _loadPastMetaImpl().finally(function () {
+                if (!window.pastMetaLoaded && _pmLadeLauf === lauf) _pmLadeLauf = null;
+            });
+            _pmLadeLauf = lauf;
+            return lauf;
+        }
+
+        async function _loadPastMetaImpl() {
           try {
             devLog('Loading Past Meta Deck Analysis...');
             const pastMetaGrid = document.getElementById('pastMetaDeckGrid');
@@ -1016,19 +1033,11 @@
             _loadPastMetaDeckCards(selectedArchetype);
         }
         
-        async function _loadPastMetaDeckCards(selectedArchetype) {
-          try {
-            
-            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
-            const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
-            
-            /* Eine Sammelauswahl ("Alle Dragapult-Decks") kommt als
-               "__familie__|Dragapult" herein. Dann wird nicht auf
-               Namensgleichheit geprueft, sondern auf denselben
-               Familienkopf — und der wird ueber DIESELBE Menge gebildet,
-               aus der auch das Auswahlfeld gefuellt wurde. Waere die Menge
-               eine andere, koennte "Dragapult LZ Box" hier in einer
-               anderen Familie landen als eine Zeile weiter oben. */
+        /* Welche Decks gehoeren zu einer Auswahl? Eigene Funktion, weil die
+           Archetyp-Box (js/archetyp-box.js) dieselbe Frage ohne sichtbare
+           Auswahlfelder stellt — und dieselbe Antwort bekommen muss, sonst
+           zeigt die Box andere Karten als die Kartenuebersicht. */
+        function _pmDeckAuswahl(formatFilter, tournamentFilter, selectedArchetype) {
             const istFamilie = String(selectedArchetype).startsWith(FAMILIE_PREFIX);
             const familienName = istFamilie
                 ? String(selectedArchetype).slice(FAMILIE_PREFIX.length)
@@ -1046,38 +1055,32 @@
             const matchingDecks = imFilter.filter(deck => (istFamilie
                 ? familienKopf(deck.deck_name || '', alleNamen) === familienName
                 : deck.deck_name === selectedArchetype));
-            
-            if (matchingDecks.length === 0) {
-                console.error('No matching decks found for archetype:', selectedArchetype);
-                return;
-            }
+            return { istFamilie, familienName, matchingDecks };
+        }
 
-            // Ab hier ist der Anzeigename gemeint, nicht die Marke aus dem
-            // Auswahlfeld: sie darf in keiner Ueberschrift landen.
-            const anzeigeName = istFamilie
-                ? t('pm.familieTitel').replace('{name}', familienName)
-                : selectedArchetype;
-            const variantenNamen = istFamilie
-                ? Array.from(new Set(matchingDecks.map(d => d.deck_name).filter(Boolean))).sort()
-                : [];
-
+        /* Karten ueber alle gewaehlten Decks zusammenfassen (dieselbe
+           Statistik wie City League/Global). Ebenfalls von der
+           Archetyp-Box benutzt. */
+        function _pmAggregiereDecks(matchingDecks) {
             const uniqueTournamentKeys = new Set(matchingDecks.map(deck => getPastMetaDeckTournamentKey(deck)));
             const uniqueTournamentCount = uniqueTournamentKeys.size;
-            
-            // Aggregate cards across all matching decks (same statistical pipeline as City/Global)
+
             const selectedRows = [];
             let totalDecklists = 0;
             const tournamentNames = [];
-            
+            let letztesDatumMs = 0;
+
             matchingDecks.forEach(deck => {
                 totalDecklists += (deck.decklist_count || 0);
-                
+
                 // Track tournament names for stats display
                 const cleanTournamentName = (deck.tournament_name || '').replace(/\s*[-|•]\s*Limitless\s*$/i, '');
                 if (!tournamentNames.includes(cleanTournamentName)) {
                     tournamentNames.push(cleanTournamentName);
                 }
-                
+                const ms = parsePastMetaDateMs(deck.tournament_date);
+                if (Number.isFinite(ms) && ms > letztesDatumMs) letztesDatumMs = ms;
+
                 // Collect rows for unified aggregation (cards stored during initial stream)
                 deck.cards.forEach(card => {
                     selectedRows.push({
@@ -1094,9 +1097,6 @@
                 });
             });
 
-            // Preserve raw per-tournament rows for Recency scoring in Consistency builder
-            window.pastMetaRawDeckCards = selectedRows.slice();
-
             const aggregatedCardsRaw = aggregateCardStatsByDate(selectedRows).map(card => ({
                 ...card,
                 card_count: parsePastMetaNumber(card.average_count_overall, 0),
@@ -1106,6 +1106,57 @@
                 max_count: parseInt(card.max_count || 0, 10) || 0
             }));
             const aggregatedCards = deduplicateCards(aggregatedCardsRaw);
+            return {
+                aggregatedCards,
+                selectedRows,
+                totalDecklists,
+                tournamentNames,
+                uniqueTournamentCount,
+                letztesDatumMs
+            };
+        }
+
+        async function _loadPastMetaDeckCards(selectedArchetype) {
+          try {
+            
+            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
+            const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
+            
+            /* Eine Sammelauswahl ("Alle Dragapult-Decks") kommt als
+               "__familie__|Dragapult" herein. Dann wird nicht auf
+               Namensgleichheit geprueft, sondern auf denselben
+               Familienkopf — und der wird ueber DIESELBE Menge gebildet,
+               aus der auch das Auswahlfeld gefuellt wurde. Waere die Menge
+               eine andere, koennte "Dragapult LZ Box" hier in einer
+               anderen Familie landen als eine Zeile weiter oben. */
+            const auswahl = _pmDeckAuswahl(formatFilter, tournamentFilter, selectedArchetype);
+            const istFamilie = auswahl.istFamilie;
+            const familienName = auswahl.familienName;
+            const matchingDecks = auswahl.matchingDecks;
+            
+            if (matchingDecks.length === 0) {
+                console.error('No matching decks found for archetype:', selectedArchetype);
+                return;
+            }
+
+            // Ab hier ist der Anzeigename gemeint, nicht die Marke aus dem
+            // Auswahlfeld: sie darf in keiner Ueberschrift landen.
+            const anzeigeName = istFamilie
+                ? t('pm.familieTitel').replace('{name}', familienName)
+                : selectedArchetype;
+            const variantenNamen = istFamilie
+                ? Array.from(new Set(matchingDecks.map(d => d.deck_name).filter(Boolean))).sort()
+                : [];
+
+            const summe = _pmAggregiereDecks(matchingDecks);
+            const uniqueTournamentCount = summe.uniqueTournamentCount;
+            const totalDecklists = summe.totalDecklists;
+            const tournamentNames = summe.tournamentNames;
+
+            // Preserve raw per-tournament rows for Recency scoring in Consistency builder
+            window.pastMetaRawDeckCards = summe.selectedRows.slice();
+
+            const aggregatedCards = summe.aggregatedCards;
             pastMetaCurrentScope = {
                 format: formatFilter,
                 tournamentFilter,
@@ -1240,6 +1291,9 @@
             if (!pastMetaCurrentCards || pastMetaCurrentCards.length === 0) {
                 pastMetaFilteredCards = [];
                 renderPastMetaCards();
+                if (window.ArchetypBox && typeof window.ArchetypBox.uebersichtGezeichnet === 'function') {
+                    window.ArchetypBox.uebersichtGezeichnet();
+                }
                 return;
             }
             
@@ -1249,6 +1303,10 @@
             pastMetaFilteredCards = applyShareFilterWithAceSpecBoost(pastMetaCurrentCards, filterValue);
             
             renderPastMetaCards();
+            // Knopf "Zu Archetyp-Box hinzufuegen" / "aktualisieren" nachziehen.
+            if (window.ArchetypBox && typeof window.ArchetypBox.uebersichtGezeichnet === 'function') {
+                window.ArchetypBox.uebersichtGezeichnet();
+            }
         }
         
         function renderPastMetaCards() {

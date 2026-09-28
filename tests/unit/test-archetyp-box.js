@@ -1,0 +1,294 @@
+/**
+ * FE-13 Archetyp-Box (Rutsch 15, 28.09.2026).
+ *
+ * Die Logik in js/archetyp-box.js wird AUSGEFUEHRT, nicht gelesen. Die
+ * Zusagen, auf die es Hausi ankommt:
+ *
+ *  1. Aktualisieren bringt neue Karten als "fehlt" mit Marke "neu" — und
+ *     laesst den Status bekannter Karten stehen.
+ *  2. Nichts verschwindet still: eine Karte, die in den Daten fehlt, bleibt
+ *     und wird benannt; von Hand hinzugefuegte Karten sind ausgenommen.
+ *  3. Karten werden NIE ueber den Namen verbunden — nur (Set, Nummer) und
+ *     die internationalen Drucke derselben Karte.
+ *  4. Die Box zeigt: oben fehlend, dann Original, dann Proxy; die Druck-
+ *     funktion bekommt genau die Proxy-Karten mit ihrer Anzahl.
+ *  5. Die Anzahl auf dem Kaertchen ist dieselbe wie in der Kartenuebersicht
+ *     (beide Regeln werden ausgefuehrt und verglichen).
+ *  6. Gespeichert wird im Konto unter users/{uid}/archetypBoxen, und die
+ *     bestehende Firestore-Regel deckt das ab.
+ */
+const { describe, it } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+const ROOT = path.join(__dirname, '..', '..');
+const R = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
+const QUELLE = R('js/archetyp-box.js');
+
+const ohneKommentare = (s) => s
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
+function logik(quelle) {
+    const ctx = { module: { exports: {} }, console };
+    vm.runInNewContext(quelle || QUELLE, ctx);
+    return ctx.module.exports;
+}
+
+// Werte aus dem vm-Kontext haben fremde Prototypen — ueber JSON vergleichen.
+const gleich = (a, b, m) => assert.deepEqual(JSON.parse(JSON.stringify(a)), b, m);
+
+const L = logik();
+const HEUTE = '2026-09-28';
+
+function karte(id, extra) {
+    const [set, number] = id.split('-');
+    return Object.assign({ id, name: 'Karte ' + id, set, number, bild: '', typ: 'Item', anzahl: 2, maxAnzahl: 4, anteil: 50, refs: [] }, extra || {});
+}
+
+describe('FE-13: eine neue Box', () => {
+    it('legt jede Karte einmal als "fehlt" an, ohne Neu-Marke', () => {
+        const box = L.neueBox({ name: 'Dragapult', archetyp: 'Dragapult', schwelle: '50', datenStand: '2026-09-19' },
+            [karte('TWM-130'), karte('TWM-129'), karte('TWM-130')], HEUTE);
+        assert.equal(box.karten.length, 2);
+        assert.ok(box.karten.every(k => k.status === 'fehlt' && k.neu === null && k.inDaten === true));
+        assert.equal(box.schwelle, '50');
+        assert.equal(box.datenStand, '2026-09-19');
+    });
+});
+
+describe('FE-13: Aktualisieren', () => {
+    const alt = (() => {
+        let b = L.neueBox({ name: 'X', archetyp: 'X', schwelle: 'all', datenStand: '2026-09-19' },
+            [karte('TWM-130'), karte('PAL-185', { typ: 'Supporter' }), karte('SVI-1')], '2026-09-20');
+        b = L.statusSetzen(b, 'TWM-130', 'original');
+        b = L.statusSetzen(b, 'PAL-185', 'proxy');
+        b = L.manuellHinzufuegen(b, karte('MEW-151'), '2026-09-20').box;
+        return b;
+    })();
+
+    const frisch = [
+        karte('TWM-130', { anteil: 80, anzahl: 3 }),
+        // anderer Druck derselben Karte (Iono PAL 185 -> PAF 80): kein neuer Eintrag
+        karte('PAF-80', { typ: 'Supporter', refs: ['PAL-185', 'SVP-124'] }),
+        karte('30C-12', { anteil: 12 })            // neu im Format
+    ];
+    const erg = L.abgleichen(alt, frisch, { datenStand: '2026-09-26' }, HEUTE);
+
+    it('neue Karte kommt als "fehlt" und "neu" dazu', () => {
+        gleich(erg.neu.map(k => k.id), ['30C-12']);
+        const k = erg.box.karten.find(x => x.id === '30C-12');
+        assert.equal(k.status, 'fehlt');
+        assert.equal(k.neu, HEUTE);
+    });
+
+    it('bekannte Karten behalten ihren Status, ihre Zahlen werden nachgezogen', () => {
+        const d = erg.box.karten.find(x => x.id === 'TWM-130');
+        assert.equal(d.status, 'original');
+        assert.equal(d.anteil, 80);
+        assert.equal(d.anzahl, 3);
+        const iono = erg.box.karten.find(x => x.id === 'PAL-185');
+        assert.equal(iono.status, 'proxy', 'der andere Druck hat die Karte als neu angelegt');
+        assert.ok(iono.refs.includes('PAF-80'));
+    });
+
+    it('fehlende Karten bleiben und werden benannt, von Hand hinzugefuegte nicht', () => {
+        const svi = erg.box.karten.find(x => x.id === 'SVI-1');
+        assert.ok(svi, 'eine Karte ist still verschwunden');
+        assert.equal(svi.inDaten, false);
+        gleich(erg.nichtMehr.map(k => k.id), ['SVI-1']);
+        const mew = erg.box.karten.find(x => x.id === 'MEW-151');
+        assert.ok(mew && mew.manuell && mew.inDaten !== false);
+        assert.equal(erg.box.datenStand, '2026-09-26');
+    });
+
+    it('die alte Box bleibt unberuehrt', () => {
+        assert.equal(alt.karten.length, 4);
+        assert.ok(!alt.karten.some(k => k.id === '30C-12'));
+    });
+
+    it('eine selbst gesetzte Anzahl ueberschreibt das Aktualisieren nicht', () => {
+        const b = L.anzahlSetzen(alt, 'TWM-130', 1);
+        const e = L.abgleichen(b, frisch, {}, HEUTE);
+        assert.equal(e.box.karten.find(x => x.id === 'TWM-130').anzahl, 1);
+    });
+
+    it('ein zweiter Lauf mit denselben Daten bringt nichts Neues', () => {
+        const e2 = L.abgleichen(erg.box, frisch, { datenStand: '2026-09-26' }, HEUTE);
+        assert.equal(e2.neu.length, 0);
+        assert.equal(e2.nichtMehr.length, 0, 'eine schon benannte Karte wird nicht jedes Mal neu gemeldet');
+        assert.equal(e2.box.karten.length, erg.box.karten.length);
+    });
+});
+
+describe('FE-13: nie ueber den Namen', () => {
+    it('gleicher Name, anderer Druck ohne Druckbezug = zwei Karten', () => {
+        const box = L.neueBox({ name: 'X', archetyp: 'X' },
+            [karte('M5-37', { name: 'Dhelmise' }), karte('MEG-18', { name: 'Dhelmise' })], HEUTE);
+        assert.equal(box.karten.length, 2);
+    });
+
+    it('der Abgleich kennt keinen Namensvergleich', () => {
+        const code = ohneKommentare(QUELLE.slice(QUELLE.indexOf('function gleicheKarte'), QUELLE.indexOf('function anzahlBegrenzen')));
+        assert.ok(!/\.name\b/.test(code), 'gleicheKarte liest den Namen');
+    });
+});
+
+describe('FE-13: Ansicht und Druck', () => {
+    let b = L.neueBox({ name: 'X', archetyp: 'X' }, [
+        karte('SVE-1', { typ: 'Energy', anteil: 100 }),
+        karte('TWM-130', { typ: 'Pokemon', anteil: 90 }),
+        karte('PAL-185', { typ: 'Supporter', anteil: 95 }),
+        karte('TWM-129', { typ: 'Pokemon', anteil: 99, anzahl: 4 }),
+    ], HEUTE);
+    b = L.statusSetzen(b, 'PAL-185', 'proxy');
+    b = L.statusSetzen(b, 'TWM-129', 'proxy');
+    b = L.statusSetzen(b, 'SVE-1', 'original');
+
+    it('drei Rubriken, Pokemon zuerst, innerhalb nach Anteil', () => {
+        const r = L.rubriken(b);
+        gleich(r.fehlt.map(k => k.id), ['TWM-130']);
+        gleich(r.original.map(k => k.id), ['SVE-1']);
+        gleich(r.proxy.map(k => k.id), ['TWM-129', 'PAL-185']);
+    });
+
+    it('mit Platznummer gilt die Reihenfolge der Kartenuebersicht, und Aktualisieren zieht sie nach', () => {
+        let x = L.neueBox({ name: 'X', archetyp: 'X' }, [
+            karte('TWM-130', { typ: 'Pokemon', anteil: 100, reihe: 2 }),
+            karte('TWM-128', { typ: 'Pokemon', anteil: 100, reihe: 0 }),
+            karte('TWM-129', { typ: 'Pokemon', anteil: 100, reihe: 1 })], HEUTE);
+        gleich(L.rubriken(x).fehlt.map(k => k.id), ['TWM-128', 'TWM-129', 'TWM-130']);
+        x = L.abgleichen(x, [karte('TWM-130', { reihe: 0 }), karte('TWM-128', { reihe: 1 }), karte('TWM-129', { reihe: 2 })], {}, HEUTE).box;
+        gleich(L.rubriken(x).fehlt.map(k => k.id), ['TWM-130', 'TWM-128', 'TWM-129']);
+    });
+
+    it('die Druckfunktion bekommt genau die Proxy-Karten mit Anzahl', () => {
+        gleich(L.proxyListe(b).map(p => [p.set + ' ' + p.number, p.anzahl]),
+            [['TWM 129', 4], ['PAL 185', 2]]);
+        const z = L.zaehlen(b);
+        assert.equal(z.kopien.proxy, 6);
+        gleich([z.fehlt, z.original, z.proxy], [1, 1, 2]);
+    });
+
+    it('Einsortieren nimmt die Neu-Marke weg', () => {
+        const e = L.abgleichen(b, [karte('30C-1')], {}, HEUTE).box;
+        const s = L.statusSetzen(e, '30C-1', 'original');
+        assert.equal(s.karten.find(k => k.id === '30C-1').neu, null);
+    });
+
+    it('eine Karte, die schon drin ist, wird von Hand nicht doppelt angelegt', () => {
+        const e = L.manuellHinzufuegen(b, karte('PAF-80', { refs: ['PAL-185'] }), HEUTE);
+        assert.equal(e.hinzugefuegt, false);
+    });
+
+    it('Anzahl bleibt zwischen 1 und 60', () => {
+        assert.equal(L.anzahlSetzen(b, 'SVE-1', 0).karten.find(k => k.id === 'SVE-1').anzahl, 1);
+        assert.equal(L.anzahlSetzen(b, 'SVE-1', 99).karten.find(k => k.id === 'SVE-1').anzahl, 60);
+    });
+});
+
+describe('FE-13: neue Turnierdaten erkennen', () => {
+    it('juengstes Datum aus einem Manifest in der Form von tournament_cards_manifest.json', () => {
+        // Form wie in der ausgelieferten Datei (chunk_dates je Datei mit
+        // min_date/max_date); bewusst ohne Datenzugriff, die Werte der
+        // Woche spielen fuer die Regel keine Rolle.
+        const m = { chunk_dates: {
+            'tournament_cards_data_cards_TEF-POR.csv': { min_date: '2026-04-25', max_date: '2026-05-30' },
+            'tournament_cards_data_cards_TEF-PBL.csv': { min_date: '2026-08-28', max_date: '2026-09-19' },
+            'tournament_cards_data_cards_SVI-ASC.csv': { min_date: '2026-03-07', max_date: '2026-04-04' } } };
+        assert.equal(L.neuestesDatumImManifest(m), '2026-09-19');
+        assert.equal(L.neuestesDatumImManifest({}), null);
+    });
+    it('juenger als die Box = Hinweis, gleich alt = kein Hinweis', () => {
+        assert.equal(L.neueDatenDa({ datenStand: '2026-09-19' }, '2026-09-26'), true);
+        assert.equal(L.neueDatenDa({ datenStand: '2026-09-26' }, '2026-09-26'), false);
+        assert.equal(L.neueDatenDa({ datenStand: '2026-09-19' }, null), false);
+    });
+});
+
+describe('FE-13: Anzahl wie auf dem Kaertchen der Kartenuebersicht', () => {
+    // Die echte Regel aus app-past-meta.js ausschneiden und ausfuehren.
+    const PAST = R('js/app-past-meta.js');
+    const stueck = (re) => { const m = re.exec(PAST); assert.ok(m, 'nicht gefunden: ' + re); return m[0]; };
+    const quelle = stueck(/function getPastMetaRepresentativeCardCopies\(card\) \{[\s\S]*?\n        \}/)
+        + '\n' + stueck(/function getPastMetaDisplayCount\(card\) \{[\s\S]*?\n        \}/);
+    const baue = (total) => new Function('parsePastMetaNumber', 'pastMetaCurrentScope',
+        quelle + '\nreturn { rep: getPastMetaRepresentativeCardCopies, anz: getPastMetaDisplayCount };')(
+        (v, f) => { const n = parseFloat(String(v == null ? '' : v).replace(',', '.')); return isFinite(n) ? n : f; },
+        { totalDecklists: total });
+
+    it('gleiche Zahl fuer typische Karten', () => {
+        const faelle = [
+            { card_count: 3.6, max_count: 4 }, { card_count: 0.01, max_count: 1 },
+            { card_count: 0, max_count: 2 }, { card_count: 1.49, max_count: 3 }, { card_count: 2.5, max_count: 4 }];
+        [1, 323].forEach(total => {
+            const u = baue(total);
+            faelle.forEach(c => assert.equal(L.anzahlWieUebersicht(c, total, u.rep(c)), u.anz(c),
+                JSON.stringify(c) + ' bei ' + total + ' Listen'));
+        });
+    });
+});
+
+describe('FE-13: verdrahtet', () => {
+    const HTML = R('index.html');
+    const SW = R('service-worker.js');
+    const FC = ohneKommentare(R('js/firebase-collection.js'));
+
+    it('Skript und Stil sind eingebunden und im Service Worker', () => {
+        assert.match(HTML, /<script src="js\/archetyp-box\.js\?v=\d+" defer><\/script>/);
+        assert.match(HTML, /href="css\/archetyp-box\.css\?v=\d+"/);
+        assert.ok(SW.includes("'./js/archetyp-box.js'") && SW.includes("'./css/archetyp-box.css'"));
+        assert.ok(HTML.indexOf('js/app-past-meta.js') < HTML.indexOf('js/archetyp-box.js'),
+            'archetyp-box.js muss nach app-past-meta.js laden');
+    });
+
+    it('Profil-Untertab und Knopf in Rotationen existieren', () => {
+        assert.match(HTML, /onclick="switchProfileTab\('archetypbox'\)"/);
+        assert.match(HTML, /id="profile-archetypbox"/);
+        assert.match(HTML, /id="pastMetaArchetypBoxBtn"[^>]*onclick="ArchetypBox\.ausUebersicht\(\)"/);
+        assert.ok(/tabName === 'archetypbox'[\s\S]{0,80}ArchetypBox\.profilOeffnen\(\)/.test(FC),
+            'switchProfileTab oeffnet die Boxen nicht');
+    });
+
+    it('der Knopf in Rotationen wird nach jedem Filterlauf nachgezogen', () => {
+        const P = ohneKommentare(R('js/app-past-meta.js'));
+        const f = P.slice(P.indexOf('function filterPastMetaCards'), P.indexOf('function renderPastMetaCards'));
+        assert.equal((f.match(/ArchetypBox\.uebersichtGezeichnet\(\)/g) || []).length, 2,
+            'beide Wege durch filterPastMetaCards muessen den Knopf nachziehen');
+    });
+
+    it('gespeichert unter users/{uid}/archetypBoxen, von der bestehenden Regel gedeckt', () => {
+        const code = ohneKommentare(QUELLE);
+        assert.ok(ohneKommentare(QUELLE).length > QUELLE.length * 0.3);
+        assert.match(code, /const SAMMLUNG = 'archetypBoxen'/);
+        assert.match(code, /collection\('users'\)\.doc\(u\.uid\)\.collection\(SAMMLUNG\)/);
+        const regeln = R('firestore.rules');
+        assert.match(regeln, /match \/users\/\{uid\}\/\{document=\*\*\} \{\s*allow read, write: if request\.auth != null && request\.auth\.uid == uid;/);
+    });
+});
+
+describe('FE-13: jeder Text in beiden Sprachen', () => {
+    const i18n = R('js/i18n.js');
+    const ctx = { window: {}, document: { documentElement: {}, addEventListener() {}, querySelectorAll: () => [] },
+        localStorage: { getItem: () => 'de', setItem() {} }, navigator: { language: 'de' } };
+    vm.runInNewContext(i18n + '\n;this.__tr = translations;', ctx);
+    const code = ohneKommentare(QUELLE);
+    const schluessel = new Set([...code.matchAll(/tx\('(abx\.[A-Za-z.]+)'/g)].map(m => m[1]).filter(k => !k.endsWith('.')));
+    ['fehlt', 'original', 'proxy'].forEach(s => schluessel.add('abx.status.' + s));
+    schluessel.add('abx.untertitel'); schluessel.add('profile.archetypBox');
+
+    it('es gibt ueberhaupt Schluessel', () => assert.ok(schluessel.size > 40, 'nur ' + schluessel.size));
+    for (const sprache of ['de', 'en']) {
+        it('alle Schluessel in ' + sprache, () => {
+            const fehlt = [...schluessel].filter(k => typeof ctx.__tr[sprache][k] !== 'string');
+            gleich(fehlt, []);
+        });
+    }
+    it('Platzhalter stimmen zwischen DE und EN ueberein', () => {
+        const p = (s) => [...String(s).matchAll(/\{(\w+)\}/g)].map(m => m[1]).sort().join(',');
+        const falsch = [...schluessel].filter(k => p(ctx.__tr.de[k]) !== p(ctx.__tr.en[k]));
+        gleich(falsch, []);
+    });
+});

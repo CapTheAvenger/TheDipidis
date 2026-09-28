@@ -3784,6 +3784,11 @@ function switchProfileTab(tabName) {
     window.DsMasterclass.oeffnen();
   }
 
+  // Archetyp-Boxen (FE-13): Liste aus dem Konto holen und zeichnen.
+  if (tabName === 'archetypbox' && window.ArchetypBox) {
+    window.ArchetypBox.profilOeffnen();
+  }
+
   // Scroll the tab nav into view so the user sees both the activated
   // pill and the new content immediately. Without this, clicking a
   // sub-tab while scrolled past the nav looks like nothing happened.

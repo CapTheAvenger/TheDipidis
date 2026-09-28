@@ -667,3 +667,25 @@ describe('FE-13 Nachtrag: Groesse der Box auf dem Chip (Karten und Stueck)', () 
         ['abx.chipUmfang', 'abx.chipFehlen'].forEach(k => assert.equal(i18n.split("'" + k + "':").length - 1, 2, k));
     });
 });
+
+
+describe('FE-13 Nachtrag: Sammelboxen ohne „Alle“ im Namen', () => {
+    // Hausi, 28.09.2026: „Alakazam-Decks“ sagt schon, dass es mehrere Decks sind.
+    it('Sammelauswahl heisst "{name}-Decks", eine einzelne Variante behaelt ihren Decknamen', () => {
+        assert.equal(L.anzeigeName({ archetyp: '__familie__|Alakazam', name: 'Alle Alakazam-Decks' }), 'Alakazam-Decks');
+        assert.equal(L.anzeigeName({ archetyp: '__familie__|Alakazam', name: 'All Alakazam decks' }, '{name} decks'), 'Alakazam decks');
+        assert.equal(L.anzeigeName({ archetyp: 'Alakazam Dudunsparce', name: 'Alakazam Dudunsparce' }), 'Alakazam Dudunsparce');
+    });
+    it('Verfaelschungsprobe und Verdrahtung', () => {
+        const alt = "if (a.indexOf(FAMILIE) === 0 && a.length > FAMILIE.length) {";
+        assert.ok(QUELLE.includes(alt));
+        const M = logik(QUELLE.replace(alt, 'if (false) {'));
+        assert.notEqual(M.anzeigeName({ archetyp: '__familie__|Alakazam', name: 'Alle Alakazam-Decks' }), 'Alakazam-Decks');
+        const code = ohneKommentare(QUELLE);
+        assert.match(code, /chip\(b\.id, nameVon\(b\), umfang\(b\)\)/);
+        assert.match(code, /esc\(nameVon\(eine\)\) \+ '<\/h3>'/);
+        assert.doesNotMatch(code, /esc\((b|eine|e\.box)\.name\)/, 'ein Boxname wird noch roh gezeigt');
+        const i18n = R('js/i18n.js');
+        assert.equal(i18n.split("'abx.familieName':").length - 1, 2);
+    });
+});

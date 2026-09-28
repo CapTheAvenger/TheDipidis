@@ -621,10 +621,14 @@ describe('FE-13 Nachtrag: Hauptfilter Format (aktuelles Meta, Standard, Expanded
         assert.match(code, /filterPasst\(k, ansicht, elementVon\(k\)\) && formatPasst\(k, ansicht\.format, kontext\)/);
         assert.match(code, /formateZuordnen\(eintraegeAus\(karten, summe\.totalDecklists\), jeFormatAus\(auswahl\.matchingDecks\)\)/);
         assert.match(code, /formateZuordnen\(eintraegeAus\(gefilterteKarten\(z\.karten, schwelle\)/);
+        // Ohne gewaehlte Box: ein Knopf gleicht alle Boxen ab (sonst bleiben die Meta-Filter bei alten Boxen leer).
+        assert.match(code, /onclick="ArchetypBox\.aktualisieren\(null\)"/);
+        assert.match(code, /const liste = id \? boxen\.filter\(function \(b\) \{ return b\.id === id; \}\) : boxen\.slice\(\);/);
         const i18n = R('js/i18n.js');
         ['abx.fFormat', 'abx.fmt.aktuell', 'abx.fmt.standard', 'abx.fmt.expanded', 'abx.fmt.raus', 'abx.fmt.neu', 'abx.fmt.rotiert',
             'abx.fmtAktuell', 'abx.fmtRaus', 'abx.fmtNeu', 'abx.fmtStandard', 'abx.fmtExpanded', 'abx.fmtRotiert',
-            'abx.fmtFensterOhne', 'abx.fmtAlteBox', 'abx.fmtKeineDaten', 'abx.fmtLegalUnbekannt'].forEach(key => {
+            'abx.fmtFensterOhne', 'abx.fmtAlteBox', 'abx.fmtKeineDaten', 'abx.fmtLegalUnbekannt',
+            'abx.alleAktualisieren', 'abx.alleAktualisiert', 'abx.ladeBox'].forEach(key => {
             const n = i18n.split("'" + key + "':").length - 1;
             assert.equal(n, 2, key + ' steht nicht in beiden Sprachen');
         });

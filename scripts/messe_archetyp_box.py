@@ -359,6 +359,22 @@ def main():
         print("Alle Boxen:", ab)
         pruefe(ab["aktiv"] in ("Alle Boxen", "All boxes") and ab["kacheln"] == ab["summe"] and ab["namen"] >= ab["kacheln"],
                "ohne Wahl: alle Boxen zusammen, jede Kachel nennt ihre Box")
+        # 7d. Alle Boxen aktualisieren: Anteile je Format weg, ein Knopf holt sie fuer jede Box zurueck
+        s.evaluate("""() => Object.values(window.__abxSpeicher).forEach(b => { b.karten.forEach(k => { delete k.formate; }); b.mitFormaten = false; })""")
+        s.evaluate(PROFIL_SICHTBAR)
+        warte_bis(s, "() => !!document.querySelector('#abxAktualisierenBtn')", 20)
+        knopftext = s.evaluate("() => document.getElementById('abxAktualisierenBtn').textContent")
+        s.evaluate("() => document.getElementById('abxAktualisierenBtn').click()")
+        warte_bis(s, "() => Object.values(window.__abxSpeicher).some(b => b.mitFormaten)", 300)
+        s.wait_for_timeout(1500)
+        aa = s.evaluate("""() => Object.values(window.__abxSpeicher).map(b => ({ name: b.name, mit: !!b.mitFormaten,
+            ohne: b.karten.filter(k => !k.manuell && k.inDaten !== false && !k.formate).length }))""")
+        print("Alle aktualisieren:", knopftext, aa)
+        dr = [b for b in aa if b["name"] != "TEST Kopie"]
+        tk = [b for b in aa if b["name"] == "TEST Kopie"]
+        pruefe("2" in knopftext and dr and all(b["mit"] and b["ohne"] == 0 for b in dr),
+               "ohne Wahl: 'Alle Boxen aktualisieren' gleicht jede Box ab (%s)" % knopftext)
+        pruefe(tk and not tk[0]["mit"], "eine Box, deren Archetyp nicht in den Daten ist, bleibt unveraendert")
         s.evaluate("() => ArchetypBox.ansicht('sort', 'art')")
         s.wait_for_timeout(400)
         paar = s.evaluate("""() => { const t = [...document.querySelectorAll('#abxInhalt .abx-rubrik-fehlt .abx-karte')];

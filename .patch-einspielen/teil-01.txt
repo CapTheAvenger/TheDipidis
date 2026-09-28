@@ -1,0 +1,316 @@
+From a948bf28de9fcb34446373b5fdbcd50d9fc58dbd Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Mon, 28 Sep 2026 22:45:03 +0200|
+Subject: [PATCH] Aufraeumen: versehentlich mitgelieferte Patch-Teile|
+ (.lieferung) entfernen|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_016i7eLED3zcS4XqW9GN9fax|
+---|
+ .lieferung/FERTIG.json |   9 -|
+ .lieferung/teil-01.txt | 305 ------------------------------|
+ .lieferung/teil-02.txt | 415 -----------------------------------------|
+ .lieferung/teil-03.txt | 271 ---------------------------|
+ 4 files changed, 1000 deletions(-)|
+ delete mode 100644 .lieferung/FERTIG.json|
+ delete mode 100644 .lieferung/teil-01.txt|
+ delete mode 100644 .lieferung/teil-02.txt|
+ delete mode 100644 .lieferung/teil-03.txt|
+|
+diff --git a/.lieferung/FERTIG.json b/.lieferung/FERTIG.json|
+deleted file mode 100644|
+index ebf9d042..00000000|
+--- a/.lieferung/FERTIG.json|
++++ /dev/null|
+@@ -1,9 +0,0 @@|
+-{|
+- "patch_bytes": 64788,|
+- "patch_sha256": "584b507a5abcdaae443a2ad118beff55dae2aab8e8aa36266c0fb94c0c806e8f",|
+- "teile": {|
+-  "teil-01.txt": "5408f53e5d1582157587f7c76c19fda8e935fe96dc10ac7e5f761aa46931c695",|
+-  "teil-02.txt": "a167a49fcaf8b05db5d10dd76daf533fd5d260274b9db58a1bfc429a65a77795",|
+-  "teil-03.txt": "01f51ceefa6be57c557a0e6d4c56dd9f0cc7c6e2dfaeced910e4833462fa2133"|
+- }|
+-}|
+diff --git a/.lieferung/teil-01.txt b/.lieferung/teil-01.txt|
+deleted file mode 100644|
+index b7494e0e..00000000|
+--- a/.lieferung/teil-01.txt|
++++ /dev/null|
+@@ -1,305 +0,0 @@|
+-From 3d8f20e3b5f50c799d37b7852c6627856f780d5a Mon Sep 17 00:00:00 2001||
+-From: Claude <noreply@anthropic.com>||
+-Date: Mon, 28 Sep 2026 21:53:37 +0200||
+-Subject: [PATCH] =?UTF-8?q?Archetyp-Box:=20Hauptfilter=20Format=20?=||
+- =?UTF-8?q?=E2=80=94=20aktuelles=20Meta,=20Standard,=20nur=20Expanded,=20a?=||
+- =?UTF-8?q?us=20dem=20Meta=20gefallen,=20neu=20im=20Meta,=20bei=20der=20Ro?=||
+- =?UTF-8?q?tation=20raus?=||
+-MIME-Version: 1.0||
+-Content-Type: text/plain; charset=UTF-8||
+-Content-Transfer-Encoding: 8bit||
+-||
+-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>||
+-Claude-Session: https://claude.ai/code/session_016i7eLED3zcS4XqW9GN9fax||
+----||
+- css/archetyp-box.css            |   2 +||
+- index.html                      | 258 ++++++++++++++--------------||
+- js/archetyp-box.js              | 296 ++++++++++++++++++++++++++++++--||
+- js/i18n.js                      |  34 ++++||
+- scripts/messe_archetyp_box.py   |  55 +++++-||
+- service-worker.js               |   4 +-||
+- tests/unit/test-archetyp-box.js | 124 +++++++++++++||
+- version.json                    |   2 +-||
+- 8 files changed, 623 insertions(+), 152 deletions(-)||
+-||
+-diff --git a/css/archetyp-box.css b/css/archetyp-box.css||
+-index f9b28af7..bca71780 100644||
+---- a/css/archetyp-box.css||
+-+++ b/css/archetyp-box.css||
+-@@ -155,2 +155,3 @@||
+- .abx-anteil { color: var(--ink-2); font-weight: 700; }||
+-+.abx-formatzeile { color: var(--ink-2); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }||
+- ||
+-@@ -267,2 +268,3 @@||
+- }||
+-+.abx-filter-hinweis { margin: 0; color: var(--ink-3); font-size: var(--fs-xs); line-height: 1.4; }||
+- .abx-filter.is-active { background: var(--solid-info); border-color: var(--solid-info); color: #fff; }||
+-diff --git a/index.html b/index.html||
+-index 69eaffb5..6c1db008 100644||
+---- a/index.html||
+-+++ b/index.html||
+-@@ -105,3 +105,3 @@||
+-     // If the server has a newer version, we purge caches + SW and hard-reload.||
+--    window.APP_VERSION = '202609281809';||
+-+    window.APP_VERSION = '202609281950';||
+-     (function() {||
+-@@ -175,47 +175,47 @@||
+-          darf sich auf die Variablen verlassen. -->||
+--    <link rel="stylesheet" href="css/tokens.css?v=202609281809" type="text/css">||
+--    <link rel="stylesheet" href="css/components.css?v=202609281809" type="text/css">||
+--    <link rel="stylesheet" href="css/ds-nav.css?v=202609281809">||
+--    <link rel="stylesheet" href="css/styles.css?v=202609281809" type="text/css">||
+--    <link rel="stylesheet" href="css/ui-components.css?v=202609281809" type="text/css">||
+--    <link rel="stylesheet" href="css/ds-share.css?v=202609281809">||
+--    <link rel="stylesheet" href="css/pokeball-menu.css?v=202609281809" type="text/css">||
+--    <link rel="stylesheet" href="css/dashboard-theme.css?v=202609281809" type="text/css">||
+-+    <link rel="stylesheet" href="css/tokens.css?v=202609281950" type="text/css">||
+-+    <link rel="stylesheet" href="css/components.css?v=202609281950" type="text/css">||
+-+    <link rel="stylesheet" href="css/ds-nav.css?v=202609281950">||
+-+    <link rel="stylesheet" href="css/styles.css?v=202609281950" type="text/css">||
+-+    <link rel="stylesheet" href="css/ui-components.css?v=202609281950" type="text/css">||
+-+    <link rel="stylesheet" href="css/ds-share.css?v=202609281950">||
+-+    <link rel="stylesheet" href="css/pokeball-menu.css?v=202609281950" type="text/css">||
+-+    <link rel="stylesheet" href="css/dashboard-theme.css?v=202609281950" type="text/css">||
+-     <!-- Non-critical CSS: async load (tab-specific styles) -->||
+--    <link rel="stylesheet" href="css/auth-styles.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/cards-header.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/cards-filter-section.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/cards-tabs.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/city-league.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/anti-tech.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/tech-lab.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/tech-slots.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/profile-howto-info.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/masterclass.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/meta-call.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/app-meta-prognose.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/side-quest.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/ds-pocket.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/archetyp-box.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/quellen.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/admin.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/statuszustaende.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/tippziele.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/testing-groups.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/archetype-icons.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/ux-step1.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/ux-step2.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/ux-step3.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+--    <link rel="stylesheet" href="css/ux-step4.css?v=202609281809" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/auth-styles.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/cards-header.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/cards-filter-section.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/cards-tabs.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/city-league.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/anti-tech.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/tech-lab.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/tech-slots.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/profile-howto-info.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/masterclass.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/meta-call.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/app-meta-prognose.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/side-quest.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/ds-pocket.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/archetyp-box.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/quellen.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/admin.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/statuszustaende.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/tippziele.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/testing-groups.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/archetype-icons.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/ux-step1.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/ux-step2.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/ux-step3.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-+    <link rel="stylesheet" href="css/ux-step4.css?v=202609281950" type="text/css" media="print" onload="this.media='all'">||
+-     <!-- Mobile Responsive Optimization — SCHRITT 1 (Layout Umbrüche) -->||
+--    <link rel="stylesheet" href="css/mobile-responsive.css?v=202609281809" type="text/css">||
+-+    <link rel="stylesheet" href="css/mobile-responsive.css?v=202609281950" type="text/css">||
+-     <!-- Escape Rope Close Buttons -->||
+--    <link rel="stylesheet" href="css/close-buttons.css?v=202609281809" type="text/css">||
+--    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202609281809" type="text/css">||
+-+    <link rel="stylesheet" href="css/close-buttons.css?v=202609281950" type="text/css">||
+-+    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202609281950" type="text/css">||
+-     <!-- Mobile Drag & Drop polyfill for touch devices -->||
+-@@ -461,4 +461,4 @@||
+-          ?v=NNNN in dieser Datei, also zieht der Stempel jetzt mit. -->||
+--    <script src="js/pokemon-loading-screen.js?v=202609281809"></script>||
+--    <script src="js/csv-cache-interceptor.js?v=202609281809"></script>||
+-+    <script src="js/pokemon-loading-screen.js?v=202609281950"></script>||
+-+    <script src="js/csv-cache-interceptor.js?v=202609281950"></script>||
+-     <a href="#main-content" class="skip-to-content">Skip to content</a>||
+-@@ -3934,8 +3934,8 @@||
+-     <!-- Error tracking (must load before all other JS) -->||
+--    <script src="js/error-tracking.js?v=202609281809"></script>||
+-+    <script src="js/error-tracking.js?v=202609281950"></script>||
+- ||
+--    <script src="js/inline-init.js?v=202609281809" defer></script>||
+-+    <script src="js/inline-init.js?v=202609281950" defer></script>||
+-     <!-- Haelt die Seite hinter einem Vollbild an. Muss vor allen Modulen||
+-          stehen, die ein Overlay oeffnen. -->||
+--    <script src="js/hintergrund-sperre.js?v=202609281809" defer></script>||
+-+    <script src="js/hintergrund-sperre.js?v=202609281950" defer></script>||
+- ||
+-@@ -4118,10 +4118,10 @@||
+-     <!-- Utilities first (provides escapeHtml globally) -->||
+--    <script src="js/app-utils.js?v=202609281809" defer></script>||
+--    <script src="js/i18n.js?v=202609281809" defer></script>||
+-+    <script src="js/app-utils.js?v=202609281950" defer></script>||
+-+    <script src="js/i18n.js?v=202609281950" defer></script>||
+-     <!-- Firebase: credentials ? config ? globals ? auth ? collection -->||
+--    <script src="js/firebase-credentials.js?v=202609281809" defer></script>||
+--    <script src="js/firebase-config.js?v=202609281809" defer></script>||
+--    <script src="js/firebase-globals.js?v=202609281809" defer></script>||
+--    <script src="js/firebase-auth.js?v=202609281809" defer></script>||
+--    <script src="js/auth-ui-helpers.js?v=202609281809" defer></script>||
+-+    <script src="js/firebase-credentials.js?v=202609281950" defer></script>||
+-+    <script src="js/firebase-config.js?v=202609281950" defer></script>||
+-+    <script src="js/firebase-globals.js?v=202609281950" defer></script>||
+-+    <script src="js/firebase-auth.js?v=202609281950" defer></script>||
+-+    <script src="js/auth-ui-helpers.js?v=202609281950" defer></script>||
+-     <!-- Zwei Decklisten nebeneinander. Muss VOR firebase-collection.js||
+-@@ -4129,9 +4129,9 @@||
+-          auf, sobald die Ansicht "Nebeneinander" gewaehlt wird. -->||
+--    <script src="js/deck-vergleich-nebeneinander.js?v=202609281809" defer></script>||
+--    <script src="js/firebase-collection.js?v=202609281809" defer></script>||
+-+    <script src="js/deck-vergleich-nebeneinander.js?v=202609281950" defer></script>||
+-+    <script src="js/firebase-collection.js?v=202609281950" defer></script>||
+-     <!-- Wishlist import for the Telegram bot's card lists (paste, not upload). -->||
+--    <script src="js/wishlist-bot-import.js?v=202609281809" defer></script>||
+-+    <script src="js/wishlist-bot-import.js?v=202609281950" defer></script>||
+-     <!-- TCG Showdown handoff — replaces the in-app Playtester.||
+-          Standalone helper, no deps; only uses globals from other scripts. -->||
+--    <script src="js/tcg-showdown-link.js?v=202609281809" defer></script>||
+-+    <script src="js/tcg-showdown-link.js?v=202609281950" defer></script>||
+-     <!-- Chart.js, PapaParse and localForage (IndexedDB wrapper) — self-hosted -->||
+-@@ -4141,3 +4141,3 @@||
+-     <!-- Card data cache layer (IndexedDB) -->||
+--    <script src="js/card-data-cache.js?v=202609281809" defer></script>||
+-+    <script src="js/card-data-cache.js?v=202609281950" defer></script>||
+-     <!-- Offline prefetcher — warms the SW cache with every data file||
+-@@ -4145,7 +4145,7 @@||
+-          has the full dataset locally without per-tab warm-up. -->||
+--    <script src="js/offline-prefetch.js?v=202609281809" defer></script>||
+-+    <script src="js/offline-prefetch.js?v=202609281950" defer></script>||
+-     <!-- App modules -->||
+--    <script src="js/deck-analysis-shared.js?v=202609281809" defer></script>||
+--    <script src="js/app-core.js?v=202609281809" defer></script>||
+--    <script src="js/app-price.js?v=202609281809" defer></script>||
+-+    <script src="js/deck-analysis-shared.js?v=202609281950" defer></script>||
+-+    <script src="js/app-core.js?v=202609281950" defer></script>||
+-+    <script src="js/app-price.js?v=202609281950" defer></script>||
+-     <!-- Die Glaettung muss vor jedem Leser der Matchup-Zahlen stehen:||
+-@@ -4156,17 +4156,17 @@||
+-          Quote anzeigt — app-tier-meta, app-past-meta, ds-share. -->||
+--    <script src="js/win-rate-konvention.js?v=202609281809" defer></script>||
+--    <script src="js/matchup-glaettung.js?v=202609281809" defer></script>||
+--    <script src="js/rangliste-sortieren.js?v=202609281809" defer></script>||
+--    <script src="js/ds-bildvorschau.js?v=202609281809" defer></script>||
+--    <script src="js/app-tier-meta.js?v=202609281809" defer></script>||
+--    <script src="js/app-city-league.js?v=202609281809" defer></script>||
+--    <script src="js/app-deck-builder.js?v=202609281809" defer></script>||
+--    <script src="js/card-capability-engine.js?v=202609281809" defer></script>||
+--    <script src="js/tech-ideen.js?v=202609281809" defer></script>||
+--    <script src="js/app-tech-lab.js?v=202609281809" defer></script>||
+--    <script src="js/app-anti-tech.js?v=202609281809" defer></script>||
+--    <script src="js/app-meta-cards.js?v=202609281809" defer></script>||
+--    <script src="js/app-current-meta.js?v=202609281809" defer></script>||
+--    <script src="js/app-past-meta.js?v=202609281809" defer></script>||
+--    <script src="js/app-cards-db.js?v=202609281809" defer></script>||
+-+    <script src="js/win-rate-konvention.js?v=202609281950" defer></script>||
+-+    <script src="js/matchup-glaettung.js?v=202609281950" defer></script>||
+-+    <script src="js/rangliste-sortieren.js?v=202609281950" defer></script>||
+-+    <script src="js/ds-bildvorschau.js?v=202609281950" defer></script>||
+-+    <script src="js/app-tier-meta.js?v=202609281950" defer></script>||
+-+    <script src="js/app-city-league.js?v=202609281950" defer></script>||
+-+    <script src="js/app-deck-builder.js?v=202609281950" defer></script>||
+-+    <script src="js/card-capability-engine.js?v=202609281950" defer></script>||
+-+    <script src="js/tech-ideen.js?v=202609281950" defer></script>||
+-+    <script src="js/app-tech-lab.js?v=202609281950" defer></script>||
+-+    <script src="js/app-anti-tech.js?v=202609281950" defer></script>||
+-+    <script src="js/app-meta-cards.js?v=202609281950" defer></script>||
+-+    <script src="js/app-current-meta.js?v=202609281950" defer></script>||
+-+    <script src="js/app-past-meta.js?v=202609281950" defer></script>||
+-+    <script src="js/app-cards-db.js?v=202609281950" defer></script>||
+-     <!-- Fuellt die Frische-Chips aus data/data_stand.json, dem im Wochenlauf||
+-@@ -4174,44 +4174,44 @@||
+-          das die Fusszeile setzt. -->||
+--    <script src="js/ds-datenstand.js?v=202609281809" defer></script>||
+--    <script src="js/app-init.js?v=202609281809" defer></script>||
+--    <script src="js/app-current-meta-analysis.js?v=202609281809" defer></script>||
+--    <script src="js/app-features.js?v=202609281809" defer></script>||
+--    <script src="js/archetype-icons.js?v=202609281809" defer></script>||
+--    <script src="js/app-archetype-card.js?v=202609281809" defer></script>||
+--    <script src="js/app-meta-call.js?v=202609281809" defer></script>||
+--    <script src="js/app-meta-prognose.js?v=202609281809" defer></script>||
+--    <script src="js/app-deckempfehlung.js?v=202609281809" defer></script>||
+--    <script src="js/meta-analysis-hub.js?v=202609281809" defer></script>||
+--    <script src="js/app-testing-groups.js?v=202609281809" defer></script>||
+--    <script src="js/battle-journal.js?v=202609281809" defer></script>||
+--    <script src="js/meta-binder.js?v=202609281809" defer></script>||
+--    <script src="js/custom-binder.js?v=202609281809" defer></script>||
+--    <script src="js/archetyp-box.js?v=202609281809" defer></script>||
+--    <script src="js/draw-simulator.js?v=202609281809" defer></script>||
+--    <script src="js/app-calculator.js?v=202609281809" defer></script>||
+--    <script src="js/champions-namen.js?v=202609281809" defer></script>||
+--    <script src="js/qr-svg.js?v=202609281809" defer></script>||
+--    <script src="js/pocket-deckcode.js?v=202609281809" defer></script>||
+--    <script src="js/ds-pocket.js?v=202609281809" defer></script>||
+--    <script src="js/app-side-quest.js?v=202609281809" defer></script>||
+--    <script src="js/app-side-quest-play.js?v=202609281809" defer></script>||
+--    <script src="js/champions-shiny.js?v=202609281809" defer></script>||
+--    <script src="js/app-side-quest-pokedex.js?v=202609281809" defer></script>||
+--    <script src="js/app-side-quest-items.js?v=202609281809" defer></script>||
+-+    <script src="js/ds-datenstand.js?v=202609281950" defer></script>||
+-+    <script src="js/app-init.js?v=202609281950" defer></script>||
+-+    <script src="js/app-current-meta-analysis.js?v=202609281950" defer></script>||
+-+    <script src="js/app-features.js?v=202609281950" defer></script>||
+-+    <script src="js/archetype-icons.js?v=202609281950" defer></script>||
+-+    <script src="js/app-archetype-card.js?v=202609281950" defer></script>||
+-+    <script src="js/app-meta-call.js?v=202609281950" defer></script>||
+-+    <script src="js/app-meta-prognose.js?v=202609281950" defer></script>||
+-+    <script src="js/app-deckempfehlung.js?v=202609281950" defer></script>||
+-+    <script src="js/meta-analysis-hub.js?v=202609281950" defer></script>||
+-+    <script src="js/app-testing-groups.js?v=202609281950" defer></script>||
+-+    <script src="js/battle-journal.js?v=202609281950" defer></script>||

@@ -223,10 +223,18 @@ def hole(url, binaer=False, versuche=3):
             return inhalt
         berichte.append(f"{art}: {grund}")
 
-    raise RuntimeError(
-        f"{url}: keine Sprosse kam durch — " + " | ".join(berichte)
-        + ". HTTP 202 heißt Cloudflare-Prüfung, 403 heißt abgewiesen; "
-        "beides ist Bot-Schutz und kein Fehler im Aufbau der Seite.")
+    meldung = (f"{url}: keine Sprosse kam durch — " + " | ".join(berichte)
+               + ". HTTP 202 heißt Cloudflare-Prüfung, 403 heißt abgewiesen; "
+               "beides ist Bot-Schutz und kein Fehler im Aufbau der Seite.")
+    # SC-5 (28.09.2026): Hausi hat den Ablauf von Hand gestartet und nur
+    # „keine Sprosse kam durch" gesehen. Auf dem GitHub-Laeufer ist das der
+    # bekannte Zustand; die Meldung sagt jetzt, wo stattdessen geerntet wird.
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        meldung += (" Auf dem GitHub-Läufer ist das der bekannte Zustand"
+                    " (gemessen 04.09. und 26.09.2026) — geerntet wird beaufsichtigt:"
+                    " die Montags-Erinnerung meldet sich, dann „/dd-bau Pocket-Ernte\""
+                    " senden, die Sitzung fährt scripts/pocket_ernte.sh.")
+    raise RuntimeError(meldung)
 
 
 # ── Die zwei Tabellen lesen ───────────────────────────────────────────
@@ -1321,8 +1329,14 @@ def main():
                         "(fuer den echten Set-Wechsel bei Game8)")
     a = p.parse_args()
 
-    html = (open(a.aus_datei, encoding="utf-8").read() if a.aus_datei
-            else hole(QUELLE))
+    try:
+        html = (open(a.aus_datei, encoding="utf-8").read() if a.aus_datei
+                else hole(QUELLE))
+    except RuntimeError as e:
+        # Als ::error:: statt als Traceback: dann steht der Grund in der
+        # Anmerkung des Laufs, nicht nur „siehe Protokoll oben".
+        print(f"::error::{e}")
+        return 1
     tier, set_decks = lies_seite(html)
     print(f"Übersicht: {len(tier)} Decks in der Tier-Liste, "
           f"{len(set_decks)} beim aktuellen Set")

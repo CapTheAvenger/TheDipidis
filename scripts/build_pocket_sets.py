@@ -138,6 +138,24 @@ def alte_nachtraege():
     return [e for e in (meta.get("nachgetragen") or []) if isinstance(e, dict)]
 
 
+def alte_bestaetigungen():
+    """Die schon bestaetigten Nachtraege aus dem Bestand.
+
+    BEFUND (28.09.2026, Rutsch 12): der zweite Erntelauf nach der
+    Bestaetigung schrieb `nachtrag_bestaetigt: []` — die Liste wurde je Lauf
+    nur aus den OFFENEN Nachtraegen neu berechnet. Der Beleg fuer B4b ging
+    damit eine Ernte spaeter doch verloren. Bestaetigungen werden jetzt
+    fortgeschrieben wie alles andere im Bestand.
+    """
+    if not os.path.exists(ZIEL):
+        return []
+    try:
+        meta = json.load(open(ZIEL, encoding="utf-8")).get("_meta") or {}
+    except Exception:
+        return []
+    return [e for e in (meta.get("nachtrag_bestaetigt") or []) if isinstance(e, dict)]
+
+
 def nachtraege_fortschreiben(nachtraege, von_der_quelle):
     """Ein Nachtrag bleibt, bis die Quelle den Namen selbst fuehrt.
 
@@ -168,6 +186,9 @@ def main():
     nachtraege, bestaetigt = nachtraege_fortschreiben(alte_nachtraege(), namen)
     for e in bestaetigt:
         print(f"Nachtrag {e['kennung']} ({e['name']!r}) fuehrt die Quelle jetzt selbst")
+    neu_bestaetigt = {e.get("kennung") for e in bestaetigt}
+    bestaetigt = [e for e in alte_bestaetigungen()
+                  if e.get("kennung") not in neu_bestaetigt] + bestaetigt
     print(f"{len(namen)} Sets benannt")
     if len(namen) < MINDESTENS:
         print(f"::error::nur {len(namen)} Sets gefunden (erwartet >= {MINDESTENS}). "

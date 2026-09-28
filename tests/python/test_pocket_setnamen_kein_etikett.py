@@ -151,3 +151,22 @@ def test_main_schreibt_die_nachtraege_mit(mod, tmp_path, monkeypatch):
     assert [e["kennung"] for e in d["_meta"]["nachgetragen"]] == ["B9x"]
     assert [e["kennung"] for e in d["_meta"]["nachtrag_bestaetigt"]] == ["B4b"]
     assert d["sets"]["B9x"] == "Kommt noch"
+
+
+def test_eine_bestaetigung_ueberlebt_den_naechsten_lauf(mod, tmp_path, monkeypatch):
+    """Rutsch 12: der zweite Lauf nach der Bestaetigung warf sie weg."""
+    ziel = tmp_path / "pocket_sets.json"
+    ziel.write_text(json.dumps({"_meta": {"nachgetragen": [],
+        "nachtrag_bestaetigt": [{"kennung": "B4b", "name": "Deluxe Pack Mega",
+                                 "nachgetragen_am": "2026-09-25"}]},
+        "sets": {"B4b": "Deluxe Pack Mega"}}), encoding="utf-8")
+    monkeypatch.setattr(mod, "ZIEL", str(ziel))
+    monkeypatch.setattr(mod, "hole", lambda url: SEITE)
+    monkeypatch.setattr(mod, "MINDESTENS", 1)
+    monkeypatch.setattr(mod, "gebrauchte_kennungen", lambda: set())
+    for _ in range(2):
+        assert mod.main() == 0
+        d = json.loads(ziel.read_text(encoding="utf-8"))
+        assert d["_meta"]["nachtrag_bestaetigt"] == [
+            {"kennung": "B4b", "name": "Deluxe Pack Mega", "nachgetragen_am": "2026-09-25"}], (
+            "die Bestaetigung eines Nachtrags ging mit dem naechsten Lauf verloren")

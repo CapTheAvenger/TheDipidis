@@ -290,8 +290,61 @@ def main():
             .map(k => Object.values(window.__abxSpeicher)[0].karten.find(x => x.id === k.dataset.karte)).map(k => k.typ)""")
         pruefe(f2 and all(t == "Pokemon" for t in f2), "Filter Pokémon: %d Karten, alle Pokémon" % len(f2))
         typ_knoepfe = s.evaluate("() => document.querySelectorAll('.abx-filter-reihe').length")
-        pruefe(typ_knoepfe == 4, "bei Pokémon erscheint die Reihe 'Typ' (%d Reihen)" % typ_knoepfe)
+        pruefe(typ_knoepfe == 5, "bei Pokémon erscheint die Reihe 'Typ' (%d Reihen: Format, Anteil, Kartenart, Typ, Sortierung)" % typ_knoepfe)
         s.evaluate("() => { ArchetypBox.ansicht('art', 'alle'); ArchetypBox.ansicht('sort', 'anteil'); }")
+        # 7c. Nachtrag 28.09. spaet: Hauptfilter Format — gegen eine eigene Rechnung
+        FMT = '''async (arch) => {
+            const m = await (await fetch('data/tournament_cards_manifest.json')).json();
+            const fw = await (await fetch('data/format_window.json')).json();
+            const reihe = m.meta_keys.map((k, i) => ({ k, bis: (m.chunk_dates[m.chunks[i]] || {}).max_date || '' }))
+                .filter(x => x.bis).sort((a, b) => a.bis < b.bis ? 1 : -1);
+            const akt = reihe[0].k, vor = reihe[1].k;
+            const b = Object.values(window.__abxSpeicher)[0];
+            const sichtbar = () => [...document.querySelectorAll('#abxInhalt .abx-rubrik:not(.abx-rubrik-wieder) .abx-karte')].map(k => k.dataset.karte).sort();
+            const legal = getFormatLegalSetCodes(fw.oldest_legal_set + '-' + fw.current_set);
+            const vorRot = getFormatLegalSetCodes('SVI-' + fw.current_set);
+            const ids = k => [k.id].concat(k.refs || [], (k.drucke || []).map(d => d.id));
+            const basis = k => { const r = getCanonicalCardRecord(k.set, k.number); return !!(r && /^basic energy$/i.test(r.type || '')); };
+            const std = k => basis(k) || ids(k).some(i => legal.has(i.split('-')[0]));
+            const vr = k => basis(k) || ids(k).some(i => vorRot.has(i.split('-')[0]));
+            const a = (k, f) => Number((k.formate || {})[f]) || 0;
+            const soll = {
+                aktuell: b.karten.filter(k => a(k, akt) > 0), standard: b.karten.filter(std),
+                expanded: b.karten.filter(k => !std(k)), rotiert: b.karten.filter(k => !std(k) && vr(k)),
+                raus: b.karten.filter(k => a(k, vor) >= 10 && a(k, akt) < 10), neu: b.karten.filter(k => a(k, akt) >= 10 && a(k, vor) < 10)
+            };
+            const aus = { akt, vor, mitFormaten: b.mitFormaten, ohneFormate: b.karten.filter(k => !k.manuell && k.inDaten !== false && !k.formate).length };
+            for (const w of Object.keys(soll)) {
+                ArchetypBox.ansicht('format', w);
+                const ist = sichtbar(); const s2 = soll[w].map(k => k.id).sort();
+                aus[w] = { n: ist.length, gleich: JSON.stringify(ist) === JSON.stringify(s2), hinweis: (document.querySelector('.abx-filter-hinweis') || {}).textContent || '' };
+            }
+            ArchetypBox.ansicht('format', 'aktuell');
+            const zeile = (document.querySelector('#abxInhalt .abx-formatzeile') || {}).textContent || '';
+            // Anteil einer Karte im aktuellen Format: eigene Zusammenfassung nur der Decks dieses Formats
+            const decks = pastMetaDecks.filter(d => d.format === akt && d.deck_name === arch);
+            const agg = decks.length ? _pmAggregiereDecks(decks).aggregatedCards : [];
+            let probe = null;
+            const kandidaten = soll.aktuell.filter(k => a(k, akt) < 100).concat(soll.aktuell.filter(k => a(k, akt) >= 100));
+            for (const k of kandidaten) {
+                const c = agg.find(c => String(c.set_code).toUpperCase() + '-' + String(c.set_number) === k.id);
+                if (c) { probe = { id: k.id, box: a(k, akt), neu: Math.round(parseLocaleNumber(c.percentage_in_archetype, NaN) * 10) / 10 }; break; }
+            }
+            ArchetypBox.ansicht('format', 'alle');
+            aus.zeile = zeile; aus.probe = probe;
+            return aus;
+        }'''
+        fm = s.evaluate(FMT, a.archetyp)
+        print("Format-Filter:", json.dumps(fm, ensure_ascii=False)[:1200])
+        pruefe(fm["mitFormaten"] and fm["ohneFormate"] == 0, "nach dem Aktualisieren kennt jede Karte ihre Anteile je Format")
+        for w in ("aktuell", "standard", "expanded", "rotiert", "raus", "neu"):
+            pruefe(fm[w]["gleich"], "Format '%s': %d Karten, genau die der eigenen Rechnung" % (w, fm[w]["n"]))
+        pruefe(fm["standard"]["n"] + fm["expanded"]["n"] == len(s.evaluate(SP)), "Standard + nur Expanded = alle Karten")
+        pruefe(fm["akt"] in fm["aktuell"]["hinweis"] and fm["vor"] in fm["raus"]["hinweis"],
+               "Hinweiszeile nennt die Formate (%s / %s)" % (fm["akt"], fm["vor"]))
+        pruefe(fm["akt"] in fm["zeile"], "Kachel zeigt den Anteil im aktuellen Format (%s)" % fm["zeile"])
+        pruefe(fm["probe"] is not None and fm["probe"]["box"] == fm["probe"]["neu"],
+               "Anteil je Format = eigene Zusammenfassung der Decks dieses Formats (%s)" % fm["probe"])
         # zweite Box -> "Alle Boxen"
         s.evaluate("""() => { const k = Object.keys(window.__abxSpeicher)[0]; const b = JSON.parse(JSON.stringify(window.__abxSpeicher[k]));
             b.name = 'TEST Kopie'; b.archetyp = 'TEST'; window.__abxSpeicher[k.replace(/[^/]+$/, 'testkopie')] = b; }""")

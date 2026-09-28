@@ -506,3 +506,127 @@ describe('FE-13 Nachtrag: "gefordert" bleibt am iPhone rund', () => {
             'der Ausweg data-klein steht nicht mehr in css/tippziele.css');
     });
 });
+
+
+describe('FE-13 Nachtrag: Hauptfilter Format (aktuelles Meta, Standard, Expanded, Rotation)', () => {
+    // Anteile je Format kommen aus den Rotationen-Daten (deck.format), die
+    // Legalitaet aus data/format_window.json + data/sets.json. Hier mit
+    // festen Beispielzahlen, damit der Test nicht an Wochendaten haengt.
+    const kontext = {
+        aktuell: 'TEF-PBL', vorher: 'TEF-CRI',
+        legal: (k) => (k.legal === undefined ? null : k.legal),
+        legalVorRotation: (k) => (k.vorher === undefined ? null : k.vorher)
+    };
+    const k = (id, formate, legal, vorher) => ({ id, formate, legal, vorher });
+    const karten = [
+        k('A-1', { 'TEF-PBL': 80, 'TEF-CRI': 75 }, true, true),   // bleibt
+        k('A-2', { 'TEF-CRI': 40, 'TEF-PBL': 5 }, true, true),    // raus
+        k('A-3', { 'TEF-PBL': 30 }, true, true),                 // neu
+        k('A-4', { 'SVI-ASC': 90 }, false, true),                 // rotiert
+        k('A-5', {}, false, false),                               // nur Expanded, schon laenger
+        k('A-6', { 'TEF-PBL': 12, 'TEF-CRI': 10 }, null, null)    // Legalitaet unbekannt
+    ];
+    const wahl = (w) => karten.filter(x => L.formatPasst(x, w, kontext)).map(x => x.id);
+
+    it('aktuelles Meta: im neuesten Format gespielt', () => {
+        gleich(wahl('aktuell'), ['A-1', 'A-2', 'A-3', 'A-6']);
+    });
+    it('aus dem Meta gefallen und neu im Meta, an der Schwelle 10 %', () => {
+        assert.equal(L.META_SCHWELLE, 10);
+        gleich(wahl('raus'), ['A-2']);
+        gleich(wahl('neu'), ['A-3']);
+    });
+    it('Standard, nur Expanded, bei der Rotation raus — unbekannt passt zu keinem', () => {
+        gleich(wahl('standard'), ['A-1', 'A-2', 'A-3']);
+        gleich(wahl('expanded'), ['A-4', 'A-5']);
+        gleich(wahl('rotiert'), ['A-4']);
+        gleich(wahl('alle'), ['A-1', 'A-2', 'A-3', 'A-4', 'A-5', 'A-6']);
+    });
+
+    it('aktuell und vorher nach dem juengsten Turnierdatum, nicht nach der Reihenfolge im Manifest', () => {
+        const m = {
+            meta_keys: ['SVI-ASC', 'TEF-CRI', 'TEF-PBL', 'TEF-POR'],
+            chunks: ['a.csv', 'b.csv', 'c.csv', 'd.csv'],
+            chunk_dates: { 'a.csv': { max_date: '2026-04-04' }, 'b.csv': { max_date: '2026-06-12' },
+                'c.csv': { max_date: '2026-09-19' }, 'd.csv': { max_date: '2026-05-30' } }
+        };
+        gleich(L.formateNachDatum(m).map(x => x.key), ['TEF-PBL', 'TEF-CRI', 'TEF-POR', 'SVI-ASC']);
+    });
+
+    it('Block vor der Rotation: juengster Blockanfang, der aelter ist als das aelteste legale Set', () => {
+        const order = { BST: 120, BRS: 125, SVI: 134, TEF: 140 };
+        assert.equal(L.blockVorRotation(['BRS-TEF', 'BST-PAR', 'SVI-ASC', 'TEF-PBL'], 'TEF', order), 'SVI');
+        assert.equal(L.blockVorRotation(['BRS-TEF', 'BST-PAR', 'SVI-ASC', 'TEF-PBL'], 'SVI', order), 'BRS');
+        assert.equal(L.blockVorRotation(['TEF-PBL'], 'TEF', order), null);
+    });
+
+    it('legal ueber irgendeinen Druck (Set der Kennung), ohne Setliste unbekannt', () => {
+        const sets = new Set(['PBL', 'MEG']);
+        assert.equal(L.druckIn(['SVI-196', 'MEG-131'], sets), true);
+        assert.equal(L.druckIn(['SVI-196', 'PAL-172'], sets), false);
+        assert.equal(L.druckIn(['PBL-1'], null), null);
+    });
+
+    it('Anteile je Format ueber (Set, Nummer) und die Drucke — nie ueber den Namen', () => {
+        const frische = [{ id: 'PBL-12', name: 'Ultra Ball', refs: ['SVI-196'] }, { id: 'PBL-99', name: 'Ultra Ball', refs: [] }];
+        const jeFormat = {
+            'TEF-PBL': [{ ids: ['SVI-196', 'X-1'], anteil: 80 }, { ids: ['PBL-12'], anteil: 60 }],
+            'TEF-CRI': [{ ids: ['Y-1'], anteil: 99, name: 'Ultra Ball' }]
+        };
+        const aus = L.formateZuordnen(frische, jeFormat);
+        gleich(aus[0].formate, { 'TEF-PBL': 80 }, 'hoechster Anteil ueber die Drucke');
+        gleich(aus[1].formate, {}, 'gleicher Name, anderer Druck: kein Anteil');
+    });
+
+    it('Aktualisieren uebernimmt die Anteile je Format und leert sie fuer Karten, die nicht mehr vorkommen', () => {
+        const box = L.neueBox({ name: 'X', archetyp: 'X' }, [karte('A-1'), karte('A-2')], HEUTE);
+        assert.equal(box.mitFormaten, false);
+        const erg = L.abgleichen(box, [karte('A-1', { formate: { 'TEF-PBL': 55 } })], {}, HEUTE);
+        const k1 = erg.box.karten.find(x => x.id === 'A-1');
+        const k2 = erg.box.karten.find(x => x.id === 'A-2');
+        gleich(k1.formate, { 'TEF-PBL': 55 });
+        gleich(k2.formate, {});
+        assert.equal(erg.box.mitFormaten, true);
+    });
+
+    it('Verfaelschungsproben: jede Regel beisst', () => {
+        const probe = (alt, neu) => {
+            assert.ok(QUELLE.includes(alt), 'Probe passt nicht mehr: ' + alt);
+            return logik(QUELLE.replace(alt, neu));
+        };
+        const M1 = probe("return anteilIn(k, c.vorher) >= META_SCHWELLE && anteilIn(k, c.aktuell) < META_SCHWELLE;",
+            "return anteilIn(k, c.vorher) >= META_SCHWELLE;");
+        assert.ok(karten.filter(x => M1.formatPasst(x, 'raus', kontext)).length > 1, 'raus ohne "jetzt darunter" faellt nicht auf');
+        const M2 = probe("return legal === false && vorher === true;", "return legal === false;");
+        assert.ok(karten.filter(x => M2.formatPasst(x, 'rotiert', kontext)).length > 1, 'rotiert ohne "vorher legal" faellt nicht auf');
+        const M3 = probe("if (wahl === 'standard') return legal === true;", "if (wahl === 'standard') return legal !== false;");
+        assert.ok(M3.formatPasst(karten[5], 'standard', kontext), 'unbekannte Legalitaet als Standard faellt nicht auf');
+        const M4 = probe(".sort(function (a, b) { return a.bis < b.bis ? 1 : (a.bis > b.bis ? -1 : 0); });", ";");
+        assert.equal(L.formateNachDatum({ meta_keys: ['B', 'A'], chunks: ['b', 'a'],
+            chunk_dates: { a: { max_date: '2026-09-01' }, b: { max_date: '2026-01-01' } } })[0].key, 'A');
+        assert.equal(M4.formateNachDatum({ meta_keys: ['B', 'A'], chunks: ['b', 'a'],
+            chunk_dates: { a: { max_date: '2026-09-01' }, b: { max_date: '2026-01-01' } } })[0].key, 'B', 'Sortierung faellt nicht auf');
+        const M5 = probe("if (!best || v > o[best]) best = start;", "if (!best) best = start;");
+        assert.notEqual(M5.blockVorRotation(['BST-PAR', 'SVI-ASC'], 'TEF', { BST: 120, SVI: 134, TEF: 140 }), 'SVI');
+        const M6 = probe("if (mitFormaten) k.formate = {};", "");
+        const b0 = M6.neueBox({ name: 'X' }, [karte('A-2', { formate: { 'TEF-CRI': 40 } })], HEUTE);
+        const e6 = M6.abgleichen(b0, [karte('A-1', { formate: { 'TEF-PBL': 5 } })], {}, HEUTE);
+        assert.notDeepEqual(JSON.parse(JSON.stringify(e6.box.karten.find(x => x.id === 'A-2').formate)), {});
+    });
+
+    it('Filterzeile, Anwendung und Proxydruck sind verdrahtet; Texte in beiden Sprachen', () => {
+        const code = ohneKommentare(QUELLE);
+        assert.ok(code.length > QUELLE.length * 0.3, 'das Ausschneiden hat zu viel entfernt');
+        assert.match(code, /filterPasst\(e\.k, ansicht, e\.element\) && formatPasst\(e\.k, ansicht\.format, kontext\)/);
+        assert.match(code, /filterPasst\(k, ansicht, elementVon\(k\)\) && formatPasst\(k, ansicht\.format, kontext\)/);
+        assert.match(code, /formateZuordnen\(eintraegeAus\(karten, summe\.totalDecklists\), jeFormatAus\(auswahl\.matchingDecks\)\)/);
+        assert.match(code, /formateZuordnen\(eintraegeAus\(gefilterteKarten\(z\.karten, schwelle\)/);
+        const i18n = R('js/i18n.js');
+        ['abx.fFormat', 'abx.fmt.aktuell', 'abx.fmt.standard', 'abx.fmt.expanded', 'abx.fmt.raus', 'abx.fmt.neu', 'abx.fmt.rotiert',
+            'abx.fmtAktuell', 'abx.fmtRaus', 'abx.fmtNeu', 'abx.fmtStandard', 'abx.fmtExpanded', 'abx.fmtRotiert',
+            'abx.fmtFensterOhne', 'abx.fmtAlteBox', 'abx.fmtKeineDaten', 'abx.fmtLegalUnbekannt'].forEach(key => {
+            const n = i18n.split("'" + key + "':").length - 1;
+            assert.equal(n, 2, key + ' steht nicht in beiden Sprachen');
+        });
+    });
+});

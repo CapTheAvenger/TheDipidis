@@ -1,0 +1,394 @@
+From a2ac68798de57fa44454f816dfffc47acbebc21c Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Tue, 29 Sep 2026 11:19:09 +0200|
+Subject: [PATCH] Wochenlauf zuverlaessig: die 13 roten Stellen von #168 an der|
+ Ursache behoben, Kern und Nebenbereiche getrennt|
+|
+Rote Stellen aus Wochenlauf #168 (29.09.2026):|
+- player_continuity: ein laufendes Turnier (kein Top-Cut) gilt nicht als fertig|
+  und wird nicht geschrieben; 0073/0074 waren Momentaufnahmen vom 26.09.|
+- Masterclass: die Majors-Spalte nimmt das juengste Format und stellt Kopf,|
+  Sprechblasen, Legende und Quellenzeile um (erstes Major TEF-30C)|
+- Cardbinder: Basis-Energie ohne Kartentyp ueber den Namen einordnen|
+- Scraper-Kern: kein Bild ueber den Namen fuer einen unbekannten Druck|
+- (Top-Cut-Quote: Reihenfolge im Wochenlauf, siehe Ablauf-Commit)|
+|
+Zeitbomben 07.10.2026 (Ende der Gnadenfrist nach der Rotation):|
+- Win-Rate-Belege fuer TEF-30C nachgemessen (111/111, 976/976)|
+- Zombie-Probe setzt ihre Zeile selbst statt an der Uhr zu haengen|
+- Namensbruecke prueft nur Turniernamen des laufenden Formats|
+|
+Bruchstellen:|
+- vier Scraper enden nach einem Absturz nicht mehr mit Code 0|
+- Retry-After der Quelle auf 60 s gedeckelt|
+- Turnierliste nicht lesbar ist nicht "keine Turniere"|
+- scripts/tor_vor_dem_push.sh: ein Tor fuer jeden Ablauf, der nach main schreibt|
+|
+Trennung (Entscheidung Hausi 29.09.2026): Champions-, Pocket- und|
+Side-Quest-Tests nach tests/nebenbereiche/{unit,python}; beide Wachhunde|
+sehen beide Ordner.|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01T8gGALnD44a7XtwTPafXBa|
+---|
+ CLAUDE.md                                     |  33 +++|
+ backend/core/card_scraper_shared.py           |  36 ++-|
+ .../scrapers/city_league_analysis_scraper.py  |   4 +|
+ .../city_league_past_archetype_scraper.py     |  14 +-|
+ .../scrapers/current_meta_analysis_scraper.py |   4 +|
+ backend/scrapers/limitless_online_scraper.py  |   5 +|
+ backend/scrapers/player_continuity_scraper.py |  46 +++-|
+ backend/scrapers/tournament_scraper_JH.py     |   4 +|
+ index.html                                    | 258 +++++++++---------|
+ js/win-rate-konvention.js                     |  32 ++-|
+ scripts/build_masterclass_cardbinder.py       |  15 +|
+ scripts/masterclass_zahlen_nachziehen.py      | 133 ++++++++-|
+ scripts/run-js-unit-tests.sh                  |  17 +-|
+ scripts/tor_vor_dem_push.sh                   | 117 ++++++++|
+ service-worker.js                             |   4 +-|
+ tests/nebenbereiche/__init__.py               |   0|
+ tests/nebenbereiche/python/__init__.py        |   0|
+ .../test_attacken_typen_vollstaendig.py       |   2 +-|
+ .../python/test_champions_freshness.py        |   2 +-|
+ .../python/test_champions_guardrails.py       |   2 +-|
+ .../python/test_champions_item_sprites.py     |   2 +-|
+ .../test_champions_namen_im_guardian.py       |   4 +-|
+ .../python/test_champions_speed_corpus.py     |   2 +-|
+ .../python/test_champions_sprites.py          |   2 +-|
+ .../python/test_champions_teams_bestand.py    |   4 +-|
+ .../test_champions_usage_im_guardian.py       |   9 +-|
+ .../test_champions_usage_regressionsschutz.py |   2 +-|
+ .../python/test_floette_form.py               |   2 +-|
+ ...est_gegenstandsnamen_aus_den_ressourcen.py |   2 +-|
+ .../python/test_generate_team_strategies.py   |   2 +-|
+ .../python/test_itemnamen_zerschnitten.py     |   2 +-|
+ .../test_kader_luecke_nutzungsformen.py       |   2 +-|
+ .../python/test_mitstreiter_ohne_anteil.py    |   2 +-|
+ .../python/test_opgg_zweitquelle.py           |   4 +-|
+ .../python/test_paldea_tauros.py              |   2 +-|
+ .../python/test_pocket_ernte.py               |   2 +-|
+ .../python/test_pocket_frische_waechter.py    |   2 +-|
+ .../python/test_pocket_karten_ids.py          |   2 +-|
+ .../test_pocket_setnamen_kein_etikett.py      |   2 +-|
+ .../python/test_pocket_tierlist.py            |   2 +-|
+ .../python/test_pokedex_spannen.py            |   2 +-|
+ .../{ => nebenbereiche}/python/test_qr_svg.py |   2 +-|
+ .../python/test_speed_korpus_fenster.py       |   2 +-|
+ .../python/test_victory_road_major.py         |   2 +-|
+ .../python/test_zeichensatz_champions.py      |   2 +-|
+ .../unit/test-attacken-merkmale.js            |   2 +-|
+ .../unit/test-audit2-B-mega-tooltip-basis.js  |   2 +-|
+ .../unit/test-audit2-B-roster-label-limit.js  |   2 +-|
+ .../test-audit2-B-statuswertpunkte-label.js   |   2 +-|
+ .../test-audit2-B-usage-quellenhinweis.js     |   2 +-|
+ .../unit/test-audit3-champions-stand.js       |   2 +-|
+ .../unit/test-builder-freie-auswahl.js        |   2 +-|
+ .../unit/test-champions-base-stats.js         |   2 +-|
+ .../unit/test-champions-damage.js             |   2 +-|
+ .../unit/test-champions-matchups.js           |   2 +-|
+ .../unit/test-champions-namen.js              |   2 +-|
+ .../unit/test-champions-names.js              |   2 +-|
+ .../unit/test-champions-quellen.js            |   2 +-|
+ .../unit/test-champions-raster.js             |   2 +-|
+ .../unit/test-champions-schaden-ketten.js     |   2 +-|
+ .../unit/test-champions-set.js                |   6 +-|
+ .../unit/test-champions-speed-tiers.js        |   2 +-|
+ .../unit/test-champions-sprites.js            |   2 +-|
+ .../unit/test-gegenstand-ohne-namen.js        |   2 +-|
+ .../unit/test-item-nutzung.js                 |   2 +-|
+ .../unit/test-mega-nutzungsdaten.js           |   2 +-|
+ .../unit/test-nachschlagen-anzeige.js         |   2 +-|
+ .../test-nutzung-formatumschalter-07-09.js    |   2 +-|
+ .../unit/test-pocket-code-kopieren.js         |   2 +-|
+ .../unit/test-pocket-deckcode.js              |   2 +-|
+ .../unit/test-pocket-kartenzuordnung.js       |   2 +-|
+ .../unit/test-pocket-reiter.js                |   2 +-|
+ .../unit/test-pocket-verhalten.js             |   2 +-|
+ .../test-pokedex-grundformen-und-filter.js    |   2 +-|
+ tests/{ => nebenbereiche}/unit/test-qr-svg.js |   2 +-|
+ .../unit/test-rechner-items-und-initiative.js |   2 +-|
+ .../unit/test-rechner-kader.js                |   2 +-|
+ .../unit/test-rechner-kampflage.js            |   2 +-|
+ .../unit/test-rechner-reiter.js               |   2 +-|
+ .../unit/test-rechner-schnellleiste.js        |   2 +-|
+ .../unit/test-schwaechen-ausgleich.js         |   2 +-|
+ .../unit/test-set-editor-infos.js             |   2 +-|
+ .../unit/test-shiny-eine-art-ein-stern.js     |   2 +-|
+ .../unit/test-shiny-quelle-und-stand.js       |   2 +-|
+ .../unit/test-side-quest-aktivierung.js       |   2 +-|
+ .../unit/test-side-quest-builder-setzen.js    |   2 +-|
+ .../unit/test-side-quest-play.js              |   2 +-|
+ .../unit/test-side-quest-team-hash.js         |   0|
+ .../unit/test-side-quest-usage.js             |   2 +-|
+ .../unit/test-statuszustaende.js              |   2 +-|
+ .../unit/test-stufen-im-text.js               |   2 +-|
+ .../unit/test-team-rechner.js                 |   2 +-|
+ .../unit/test-variable-staerke.js             |   2 +-|
+ ...test-zweisprachige-namen-und-schliessen.js |   2 +-|
+ tests/python/test_absturz_ist_kein_erfolg.py  |  66 +++++|
+ .../python/test_bild_ohne_namensrueckfall.py  |  54 ++++|
+ .../test_continuity_laufendes_turnier.py      | 142 ++++++++++|
+ tests/python/test_continuity_nutzlast.py      |   6 +-|
+ tests/python/test_livedaten_wachhund.py       |  23 +-|
+ tests/python/test_masterclass_kartennamen.py  |  37 ++-|
+ .../test_masterclass_zahlen_nachziehen.py     |  65 +++++|
+ tests/python/test_nebenbereiche_getrennt.py   | 197 +++++++++++++|
+ tests/python/test_retry_after_gedeckelt.py    |  65 +++++|
+ tests/python/test_tor_vor_dem_push.py         |  95 +++++++|
+ .../python/test_turnierliste_nicht_lesbar.py  |  49 ++++|
+ .../test_wochenlauf_reihenfolge_und_push.py   | 174 ++++++++++++|
+ tests/unit/test-namensbruecke.js              |  38 ++-|
+ tests/unit/test-post-quellen.js               | 108 ++++----|
+ tests/unit/test-testdaten-wachhund.js         |  35 ++-|
+ version.json                                  |   2 +-|
+ 110 files changed, 1730 insertions(+), 317 deletions(-)|
+ create mode 100755 scripts/tor_vor_dem_push.sh|
+ create mode 100644 tests/nebenbereiche/__init__.py|
+ create mode 100644 tests/nebenbereiche/python/__init__.py|
+ rename tests/{ => nebenbereiche}/python/test_attacken_typen_vollstaendig.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_champions_freshness.py (97%)|
+ rename tests/{ => nebenbereiche}/python/test_champions_guardrails.py (98%)|
+ rename tests/{ => nebenbereiche}/python/test_champions_item_sprites.py (97%)|
+ rename tests/{ => nebenbereiche}/python/test_champions_namen_im_guardian.py (97%)|
+ rename tests/{ => nebenbereiche}/python/test_champions_speed_corpus.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_champions_sprites.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_champions_teams_bestand.py (97%)|
+ rename tests/{ => nebenbereiche}/python/test_champions_usage_im_guardian.py (96%)|
+ rename tests/{ => nebenbereiche}/python/test_champions_usage_regressionsschutz.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_floette_form.py (98%)|
+ rename tests/{ => nebenbereiche}/python/test_gegenstandsnamen_aus_den_ressourcen.py (97%)|
+ rename tests/{ => nebenbereiche}/python/test_generate_team_strategies.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_itemnamen_zerschnitten.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_kader_luecke_nutzungsformen.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_mitstreiter_ohne_anteil.py (97%)|
+ rename tests/{ => nebenbereiche}/python/test_opgg_zweitquelle.py (98%)|
+ rename tests/{ => nebenbereiche}/python/test_paldea_tauros.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_pocket_ernte.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_pocket_frische_waechter.py (98%)|
+ rename tests/{ => nebenbereiche}/python/test_pocket_karten_ids.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_pocket_setnamen_kein_etikett.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_pocket_tierlist.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_pokedex_spannen.py (97%)|
+ rename tests/{ => nebenbereiche}/python/test_qr_svg.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_speed_korpus_fenster.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_victory_road_major.py (99%)|
+ rename tests/{ => nebenbereiche}/python/test_zeichensatz_champions.py (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-attacken-merkmale.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-audit2-B-mega-tooltip-basis.js (97%)|
+ rename tests/{ => nebenbereiche}/unit/test-audit2-B-roster-label-limit.js (98%)|
+ rename tests/{ => nebenbereiche}/unit/test-audit2-B-statuswertpunkte-label.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-audit2-B-usage-quellenhinweis.js (98%)|
+ rename tests/{ => nebenbereiche}/unit/test-audit3-champions-stand.js (98%)|
+ rename tests/{ => nebenbereiche}/unit/test-builder-freie-auswahl.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-base-stats.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-damage.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-matchups.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-namen.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-names.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-quellen.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-raster.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-schaden-ketten.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-set.js (97%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-speed-tiers.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-champions-sprites.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-gegenstand-ohne-namen.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-item-nutzung.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-mega-nutzungsdaten.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-nachschlagen-anzeige.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-nutzung-formatumschalter-07-09.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-pocket-code-kopieren.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-pocket-deckcode.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-pocket-kartenzuordnung.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-pocket-reiter.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-pocket-verhalten.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-pokedex-grundformen-und-filter.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-qr-svg.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-rechner-items-und-initiative.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-rechner-kader.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-rechner-kampflage.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-rechner-reiter.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-rechner-schnellleiste.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-schwaechen-ausgleich.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-set-editor-infos.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-shiny-eine-art-ein-stern.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-shiny-quelle-und-stand.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-side-quest-aktivierung.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-side-quest-builder-setzen.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-side-quest-play.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-side-quest-team-hash.js (100%)|
+ rename tests/{ => nebenbereiche}/unit/test-side-quest-usage.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-statuszustaende.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-stufen-im-text.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-team-rechner.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-variable-staerke.js (99%)|
+ rename tests/{ => nebenbereiche}/unit/test-zweisprachige-namen-und-schliessen.js (99%)|
+ create mode 100644 tests/python/test_absturz_ist_kein_erfolg.py|
+ create mode 100644 tests/python/test_bild_ohne_namensrueckfall.py|
+ create mode 100644 tests/python/test_continuity_laufendes_turnier.py|
+ create mode 100644 tests/python/test_nebenbereiche_getrennt.py|
+ create mode 100644 tests/python/test_retry_after_gedeckelt.py|
+ create mode 100644 tests/python/test_tor_vor_dem_push.py|
+ create mode 100644 tests/python/test_turnierliste_nicht_lesbar.py|
+ create mode 100644 tests/python/test_wochenlauf_reihenfolge_und_push.py|
+|
+diff --git a/CLAUDE.md b/CLAUDE.md|
+index 1f07c2c..0fffc65 100644|
+--- a/CLAUDE.md|
++++ b/CLAUDE.md|
+@@ -127,2 +127,35 @@ bleibt rot, Zuwachs nicht.|
+ |
++## WER NACH MAIN SCHREIBT, PRUEFT VORHER — UND DER KERN HAENGT NICHT AN DEN NEBENBEREICHEN|
++|
++Wochenlauf #168 (29.09.2026) blieb am Tor haengen: 13 Zusicherungen rot,|
++kein einziger Datenfehler der Quelle. Die Ursachen, alle behoben:|
++|
++| rot | Ursache ||
++| --- | --- ||
++| Tag-2-Grundgesamtheit (0073/0074) | der Wochenlauf vom 26.09. holte die Standings zweier Regionals WAEHREND sie liefen; `--resume` hielt die Momentaufnahme fuer fertig. Jetzt: ohne Top-Cut kein fertiges Turnier ||
++| Top-Cut-Quote 0.0 ohne Platzierungen | der Rueckweg nach `data/` lief HINTER den Nachbearbeitungen und kopierte sie zu. Jetzt: erst alles zurueck, dann nachbearbeiten ||
++| Masterclass (7x) | erstes Major im neuen Format; der Erzeuger verlangte genau ein Format. Jetzt: die Majors-Spalte nimmt das juengste und benennt sich um ||
++| Cardbinder | Basis-Energie aus einem Druck ohne Kartentyp ||
++| Bild-Deckel 679 > 663 | Bild ueber den NAMEN fuer einen unbekannten Druck ||
++|
++Zwei Regeln sind daraus geworden:|
++|
++1. **Jeder geplante Ablauf, der nach `main` schreibt, faehrt vorher|
++   `bash scripts/tor_vor_dem_push.sh kern`** (Champions/Pocket: `alle`).|
++   Ist etwas rot, wird nicht gepusht. Vorher schrieben zehn Ablaeufe|
++   ungeprueft — und ein roter Tagesstand hielt den Deploy UND das Tor des|
++   naechsten Wochenlaufs an. `tests/python/test_nebenbereiche_getrennt.py`|
++   haelt jeden neuen Schreiber fest.|
++2. **Champions-, Pocket- und Side-Quest-Tests liegen unter|
++   `tests/nebenbereiche/{unit,python}`** (Entscheidung Hausi, 29.09.2026)|
++   und laufen in `nebenbereiche-tests.yml`, nicht im Tor und nicht im|
++   Deploy-Test. Lokal: `bash scripts/run-js-unit-tests.sh|
++   tests/nebenbereiche/unit` und `python3 -m pytest|
++   tests/nebenbereiche/python`. Eine neue Testdatei fuer diese Bereiche|
++   gehoert dorthin — `tests/unit` und `tests/python` sind der TCG-Kern.|
++|
++Und: der Wochenlauf laeuft Dienstag und Freitag um 06:00 UTC — Freitag|
++frueh laufen in Australien und Asien Majors. Ein Scraper, der Turniere|
++holt, muss ein LAUFENDES Turnier erkennen koennen.|
++|
+ ## Eine Zusicherung, die Text liest, prueft die Schreibweise — nicht das Verhalten|
+diff --git a/backend/core/card_scraper_shared.py b/backend/core/card_scraper_shared.py|
+index dc718e8..d053fe2 100644|
+--- a/backend/core/card_scraper_shared.py|
++++ b/backend/core/card_scraper_shared.py|
+@@ -371,2 +371,24 @@ def _get_scraper() -> Any:|
+ |
++# Obergrenze fuer ein Retry-After der Quelle (29.09.2026). Bis hier wurde der|
++# Wert ungeprueft uebernommen: ein 429 mit "Retry-After: 3600" haette je|
++# Adresse zweimal eine Stunde geschlafen (gemessen mit einem lokalen|
++# 429-Server: Schlafzeiten [3600, 3600]), und der Wochenlauf waere an seinem|
++# Job-Limit von 300 Minuten gestorben — ohne Push, ohne Artefakt. Nach 60 s|
++# Pause gilt die Adresse als nicht erreichbar; das ist ein gemeldeter|
++# Ausfall statt eines stillen Abbruchs des ganzen Laufs.|
++RETRY_AFTER_MAX = 60|
++|
++|
++def warte_nach_retry_after(kopf, ersatz):|
++    """Sekunden Pause aus einem Retry-After-Kopf, gedeckelt auf RETRY_AFTER_MAX.|
++|
++    Nimmt Sekunden ("120") an; alles andere (ein HTTP-Datum, Unsinn, nichts)|
++    faellt auf `ersatz` zurueck. Nie negativ, nie ueber der Obergrenze."""|
++    try:|
++        wert = float(str(kopf).strip()) if kopf is not None else float(ersatz)|
++    except (TypeError, ValueError):|
++        wert = float(ersatz)|
++    return max(0.0, min(wert, float(RETRY_AFTER_MAX)))|
++|
++|
+ def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: float = 1.0, quiet: bool = False) -> str:|
+@@ -397,3 +419,3 @@ def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay:|
+             if resp.status_code in (429, 503):|
+-                retry_after = int(resp.headers.get('Retry-After', delay * 3))|
++                retry_after = warte_nach_retry_after(resp.headers.get('Retry-After'), delay * 3)|
+                 logger.warning("HTTP %s for %s — backing off %ss", resp.status_code, url, retry_after)|
+@@ -1209,3 +1231,13 @@ def _resolve_card_info(card_name: str, set_versions: Mapping[Tuple[str, str], in|
+         'type': specific.get('type', fallback.get('type', '')),|
+-        'image_url': specific.get('image_url', fallback.get('image_url', '')),|
++        # KEIN Namens-Rueckfall fuer das Bild (29.09.2026, Wochenlauf #168).|
++        # Kennt die Kartendatenbank den gespielten Druck nicht (MEM 6|
++        # Smoliv, JP-Set vom 31.07.2026), holte diese Zeile das Bild des|
++        # gleichnamigen Drucks aus einem ANDEREN Set (DRI 21) — genau der|
++        # Namens-Join, den tests/python/test_set_nummern_und_maxcount.py|
++        # zaehlt und der den Wochenlauf angehalten hat. Das Frontend|
++        # loest Bilder ohnehin ueber (Set, Nummer) auf|
++        # (getBestCardImage in js/app-city-league.js); eine leere Zelle|
++        # behauptet nichts, eine fremde Bildadresse behauptet die falsche|
++        # Karte.|
++        'image_url': specific.get('image_url', '') if specific else '',|
+     }|
+diff --git a/backend/scrapers/city_league_analysis_scraper.py b/backend/scrapers/city_league_analysis_scraper.py|
+index 2b0225f..ddf6f58 100644|
+--- a/backend/scrapers/city_league_analysis_scraper.py|
++++ b/backend/scrapers/city_league_analysis_scraper.py|
+@@ -481 +481,5 @@ if __name__ == "__main__":|
+         logger.critical(f"Unerwarteter Fehler: {e}", exc_info=True)|
++        # Ein Absturz ist kein Erfolg (29.09.2026). Bis hier endete das|
++        # Skript nach dem Protokolleintrag mit Code 0 — der Wochenlauf|
++        # zaehlte den Absturz als OK, auch fuer die kritischen Scraper.|
++        sys.exit(1)|
+diff --git a/backend/scrapers/city_league_past_archetype_scraper.py b/backend/scrapers/city_league_past_archetype_scraper.py|
+index 1e7e40b..7c90a6d 100644|
+--- a/backend/scrapers/city_league_past_archetype_scraper.py|
++++ b/backend/scrapers/city_league_past_archetype_scraper.py|
+@@ -137,3 +137,3 @@ def parse_date(date_str: str) -> datetime:|
+ |
+-def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: datetime) -> list:|
++def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: datetime) -> Optional[list]:|
+     # Limitless tournament listings cap at 500 rows per page server-side|
+@@ -156,2 +156,9 @@ def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: d|
+             logger.error("Fehler beim Laden der Turnierliste (Seite %s).", page)|
++            if page == 1:|
++                # NICHT LESBAR ist nicht "keine Turniere" (29.09.2026).|
++                # Bis hier endete ein 403/Timeout auf Seite 1 in derselben|
++                # leeren Liste wie eine Saisonpause — der Scraper meldete|
++                # "keine Turniere im Fenster" und Code 0. None laesst den|
++                # Aufrufer den Unterschied sehen.|
++                return None|
+             break|
+@@ -747,2 +754,7 @@ def main() -> int:|
+     tournaments = get_tournaments_in_date_range(settings['region'], start_date, end_date)|
++    if tournaments is None:|
++        print("::error::city_league_past_archetype_scraper: die Turnierliste war nicht "|
++              "lesbar (Seite 1) — der Bestand bleibt unveraendert, der Lauf ist NICHT "|
++              "vollstaendig.", flush=True)|
++        return 1|
+ |
+diff --git a/backend/scrapers/current_meta_analysis_scraper.py b/backend/scrapers/current_meta_analysis_scraper.py|
+index d518c80..622b820 100644|
+--- a/backend/scrapers/current_meta_analysis_scraper.py|
++++ b/backend/scrapers/current_meta_analysis_scraper.py|
+@@ -1110 +1110,5 @@ if __name__ == "__main__":|
+         logger.critical(f"Unerwarteter Fehler: {e}", exc_info=True)|
++        # Ein Absturz ist kein Erfolg (29.09.2026). Bis hier endete das|
++        # Skript nach dem Protokolleintrag mit Code 0 — der Wochenlauf|
++        # zaehlte den Absturz als OK, auch fuer die kritischen Scraper.|
++        sys.exit(1)|
+diff --git a/backend/scrapers/limitless_online_scraper.py b/backend/scrapers/limitless_online_scraper.py|
+index c02f328..fd3c3d5 100644|
+--- a/backend/scrapers/limitless_online_scraper.py|
++++ b/backend/scrapers/limitless_online_scraper.py|
+@@ -6,2 +6,3 @@ Uses cloudscraper + BeautifulSoup4 + ThreadPoolExecutor for parallel matchup scr|
+ |
++import sys|
+ import csv|
+@@ -1436,2 +1437,6 @@ if __name__ == "__main__":|
+         traceback.print_exc()|
++        # Ein Absturz ist kein Erfolg (29.09.2026). Bis hier endete das|
++        # Skript nach dem Protokolleintrag mit Code 0 — der Wochenlauf|
++        # zaehlte den Absturz als OK, auch fuer die kritischen Scraper.|
++        sys.exit(1)|
+     finally:|
+diff --git a/backend/scrapers/player_continuity_scraper.py b/backend/scrapers/player_continuity_scraper.py|
+index 26f12b9..af83dcd 100644|
+--- a/backend/scrapers/player_continuity_scraper.py|
++++ b/backend/scrapers/player_continuity_scraper.py|
+@@ -550,2 +550,5 @@ def bestand_ist_fertig(zeilen: List[Dict], teilnehmer: int) -> tuple:|
+                        % (len(zeilen), teilnehmer))|
++    if not ist_abgeschlossen(zeilen):|
++        return False, ('kein Top-Cut im Bestand — Momentaufnahme eines '|
++                       'laufenden Turniers')|
+     return True, ''|

@@ -1,0 +1,532 @@
+diff --git a/tests/python/test_nebenbereiche_getrennt.py b/tests/python/test_nebenbereiche_getrennt.py|
+new file mode 100644|
+index 0000000..aaa0873|
+--- /dev/null|
++++ b/tests/python/test_nebenbereiche_getrennt.py|
+@@ -0,0 +1,197 @@|
++"""Kern und Nebenbereiche sind getrennt — und wer nach main schreibt, prueft vorher.|
++|
++ANLASS (29.09.2026, Wochenaudit nach dem roten Wochenlauf #168)|
++--------------------------------------------------------------|
++1. Das Tor des Wochenlaufs und der test-Job von deploy-pages.yml fuhren|
++   auch alle Champions-, Pocket- und Side-Quest-Tests. Gemessen: eine neue|
++   Art im Champions-Pokedex macht zwei davon rot — Deploy steht, der|
++   Wochenlauf pusht keine TCG-Daten. Entscheidung Hausi: ganz trennen.|
++2. Zehn geplante Ablaeufe schrieben nach main, ohne vorher eine einzige|
++   Zusicherung zu fahren. Ein roter Tagesstand hielt damit den Deploy UND|
++   das Tor des naechsten Wochenlaufs an (das Tor prueft main + Frischdaten).|
++|
++Was hier steht, ist Ablaufkonfiguration — also wirklich Text. Die Form der|
++Pruefung: jede Aussage an genau dem Schritt, der sie tragen muss, mit|
++herausgeschnittenen Kommentaren (CLAUDE.md, "Dein eigener Kommentar macht|
++die Verfaelschungsprobe blind"). Das VERHALTEN des Tors selbst prueft|
++tests/python/test_tor_vor_dem_push.py, indem es das Skript ausfuehrt.|
++"""|
++import glob|
++import os|
++import re|
++|
++import yaml|
++|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ABLAEUFE = os.path.join(WURZEL, ".github", "workflows")|
++NEBEN_JS = os.path.join(WURZEL, "tests", "nebenbereiche", "unit")|
++NEBEN_PY = os.path.join(WURZEL, "tests", "nebenbereiche", "python")|
++|
++# Ablaeufe, die Champions-/Pocket-Daten schreiben: ihr Tor prueft Kern UND|
++# Nebenbereiche. Alle anderen geplanten Schreiber pruefen den Kern.|
++SCHREIBEN_NEBENBEREICHE = {|
++    "champions-replica-scrape.yml", "champions-usage-refresh.yml",|
++    "champions-sprites.yml", "pocket-tierlist.yml",|
++}|
++|
++|
++def _ohne_kommentare(text):|
++    return re.sub(r"(?m)^\s*#.*$", "", text)|
++|
++|
++def _laden(name):|
++    with open(os.path.join(ABLAEUFE, name), encoding="utf-8") as f:|
++        return yaml.safe_load(f)|
++|
++|
++def _ausloeser(y):|
++    return y.get(True) or y.get("on") or {}|
++|
++|
++def _schritte(y):|
++    for job in (y.get("jobs") or {}).values():|
++        for s in job.get("steps") or []:|
++            yield s|
++|
++|
++def _schreibt_nach_main(roh):|
++    return bool(re.search(r"git push|daten_pushen", _ohne_kommentare(roh)))|
++|
++|
++def _alle_ablaeufe():|
++    for pfad in sorted(glob.glob(os.path.join(ABLAEUFE, "*.yml"))):|
++        with open(pfad, encoding="utf-8") as f:|
++            roh = f.read()|
++        yield os.path.basename(pfad), roh, yaml.safe_load(roh)|
++|
++|
++# ── 1. Die Trennung ──────────────────────────────────────────────────|
++|
++def test_die_nebenbereiche_haben_eigene_ordner_mit_tests():|
++    js = glob.glob(os.path.join(NEBEN_JS, "test-*.js"))|
++    py = glob.glob(os.path.join(NEBEN_PY, "test_*.py"))|
++    assert len(js) >= 40 and len(py) >= 20, (|
++        f"unter tests/nebenbereiche liegen nur {len(js)} JS- und {len(py)} "|
++        "Python-Tests — die Trennung ist verloren gegangen")|
++|
++|
++def test_kein_champions_oder_pocket_test_liegt_wieder_im_kern():|
++    """Eine neue Testdatei landet aus Gewohnheit in tests/unit. Heisst sie|
++    nach einem Nebenbereich, gehoert sie nach tests/nebenbereiche."""|
++    muster = re.compile(r"^test[-_](champions|pocket|side[-_]quest|rechner[-_](kader|kampflage|reiter|schnellleiste|items)|team[-_]rechner|victory[-_]road|opgg|qr[-_]svg)")|
++    im_kern = [os.path.basename(p) for p in|
++               glob.glob(os.path.join(WURZEL, "tests", "unit", "test-*.js"))|
++               + glob.glob(os.path.join(WURZEL, "tests", "python", "test_*.py"))|
++               if muster.match(os.path.basename(p))]|
++    # test_champions_nur_ein_scraper.py prueft den WOCHENLAUF (dass er keine|
++    # Champions-Datei zurueckkopiert) — das ist Kern.|
++    im_kern = [n for n in im_kern if n != "test_champions_nur_ein_scraper.py"]|
++    assert im_kern == [], (|
++        "diese Nebenbereich-Tests liegen im Kern und halten damit Tor und "|
++        "Deploy an: " + ", ".join(im_kern))|
++|
++|
++def test_tor_und_deploy_fahren_nur_den_kern():|
++    wochen = _ohne_kommentare(open(os.path.join(ABLAEUFE, "weekly-full-update.yml"),|
++                                   encoding="utf-8").read())|
++    deploy = _ohne_kommentare(open(os.path.join(ABLAEUFE, "deploy-pages.yml"),|
++                                   encoding="utf-8").read())|
++    for name, text in (("weekly-full-update.yml", wochen), ("deploy-pages.yml", deploy)):|
++        assert "nebenbereiche" not in text, (|
++            f"{name} faehrt die Nebenbereich-Suite — dann haelt ein "|
++            "Champions-Fehler wieder den Kern an")|
++    # und sie fahren den Kern wirklich (sonst waere "nicht nebenbereiche"|
++    # auch mit einer leeren Pruefung erfuellt)|
++    assert "tests/unit/test-*.js" in deploy and re.search(r"pytest tests/python", deploy)|
++    assert "run-js-unit-tests.sh" in wochen and "pytest tests/python" in wochen|
++|
++|
++def test_die_nebenbereiche_laufen_trotzdem_bei_jedem_push_und_pr():|
++    y = _laden("nebenbereiche-tests.yml")|
++    an = _ausloeser(y)|
++    assert "push" in an and "pull_request" in an, (|
++        "die Nebenbereich-Suite laeuft nicht bei jedem Push und PR — dann "|
++        "prueft sie niemand mehr")|
++    befehle = " ".join(str(s.get("run", "")) for s in _schritte(y))|
++    assert "run-js-unit-tests.sh tests/nebenbereiche/unit" in befehle|
++    assert "pytest tests/nebenbereiche/python" in befehle|
++    deploy = open(os.path.join(ABLAEUFE, "deploy-pages.yml"), encoding="utf-8").read()|
++    assert "nebenbereiche-tests" not in _ohne_kommentare(deploy), (|
++        "deploy-pages.yml haengt an der Nebenbereich-Suite")|
++|
++|
++# ── 2. Wer nach main schreibt, prueft vorher ─────────────────────────|
++|
++def _tor_vor_push(y):|
++    """(Bereich des Tors, Index Tor, Index Push) im ersten Job mit Push."""|
++    for job in (y.get("jobs") or {}).values():|
++        schritte = job.get("steps") or []|
++        tor = [(i, s) for i, s in enumerate(schritte)|
++               if "scripts/tor_vor_dem_push.sh" in str(s.get("run", ""))]|
++        push = [i for i, s in enumerate(schritte)|
++                if re.search(r"git push|daten_pushen", str(s.get("run", "")))]|
++        if push:|
++            if not tor:|
++                return None, None, push[0]|
++            i, s = tor[0]|
++            m = re.search(r"tor_vor_dem_push\.sh\s+(\w+)", str(s.get("run", "")))|
++            return (m.group(1) if m else "kern"), i, push[0]|
++    return None, None, None|
++|
++|
++def test_jeder_geplante_schreiber_hat_ein_tor_vor_dem_push():|
++    fehlt = []|
++    for name, roh, y in _alle_ablaeufe():|
++        if name == "weekly-full-update.yml":|
++            continue            # eigenes Tor (test_tor_und_testschritt_ziehen_gleich.py)|
++        if not _schreibt_nach_main(roh):|
++            continue|
++        geplant = isinstance(_ausloeser(y), dict) and "schedule" in _ausloeser(y)|
++        if not geplant and name not in SCHREIBEN_NEBENBEREICHE:|
++            continue|
++        bereich, i_tor, i_push = _tor_vor_push(y)|
++        if i_tor is None or i_tor > i_push:|
++            fehlt.append(f"{name}: kein Tor vor dem Push")|
++            continue|
++        soll = "alle" if name in SCHREIBEN_NEBENBEREICHE else "kern"|
++        if bereich != soll:|
++            fehlt.append(f"{name}: Tor mit Bereich {bereich!r}, soll {soll!r}")|
++    assert not fehlt, ("Ablaeufe, die ungeprueft nach main schreiben:\n  "|
++                       + "\n  ".join(fehlt))|
++|
++|
++def test_das_tor_hat_node_und_zeit():|
++    """Ohne Node schliesst das Tor (Absicht) — dann pusht der Ablauf nie|
++    wieder. Und das Tor braucht im Deploy-Test gemessene 6,5 Minuten; ein|
++    Job mit 10 Minuten Limit stirbt daran."""|
++    probleme = []|
++    for name, roh, y in _alle_ablaeufe():|
++        if "scripts/tor_vor_dem_push.sh" not in _ohne_kommentare(roh):|
++            continue|
++        for job in (y.get("jobs") or {}).values():|
++            schritte = job.get("steps") or []|
++            i_tor = next((i for i, s in enumerate(schritte)|
++                          if "scripts/tor_vor_dem_push.sh" in str(s.get("run", ""))), None)|
++            if i_tor is None:|
++                continue|
++            if not any("setup-node" in str(s.get("uses", "")) for s in schritte[:i_tor]):|
++                probleme.append(f"{name}: kein setup-node vor dem Tor")|
++            if int(job.get("timeout-minutes", 360)) < 25:|
++                probleme.append(f"{name}: timeout-minutes {job.get('timeout-minutes')} < 25")|
++    assert not probleme, "\n".join(probleme)|
++|
++|
++def test_das_tor_folgt_der_bedingung_des_pushs():|
++    """Ein Trockenlauf (inputs.trocken) pusht nicht — dann soll das Tor ihn|
++    auch nicht rot machen. Wo der Push eine Bedingung traegt, traegt das|
++    Tor dieselbe."""|
++    abweichend = []|
++    for name, roh, y in _alle_ablaeufe():|
++        for job in (y.get("jobs") or {}).values():|
++            schritte = job.get("steps") or []|
++            tor = [s for s in schritte if "scripts/tor_vor_dem_push.sh" in str(s.get("run", ""))]|
++            push = [s for s in schritte if re.search(r"git push|daten_pushen", str(s.get("run", "")))]|
++            if tor and push and name != "weekly-full-update.yml":|
++                if tor[0].get("if") != push[0].get("if"):|
++                    abweichend.append(f"{name}: Tor if={tor[0].get('if')!r}, Push if={push[0].get('if')!r}")|
++    assert not abweichend, "\n".join(abweichend)|
+diff --git a/tests/python/test_retry_after_gedeckelt.py b/tests/python/test_retry_after_gedeckelt.py|
+new file mode 100644|
+index 0000000..214c598|
+--- /dev/null|
++++ b/tests/python/test_retry_after_gedeckelt.py|
+@@ -0,0 +1,65 @@|
++"""Ein Retry-After der Quelle darf den Wochenlauf nicht verhungern lassen.|
++|
++BEFUND (29.09.2026): `safe_fetch_html` uebernahm den Retry-After-Kopf|
++ungeprueft. Gemessen mit einem lokalen 429-Server und "Retry-After: 3600":|
++Schlafzeiten [3600, 3600] fuer EINE Adresse — der Wochenlauf haette sein|
++Job-Limit (300 min) erreicht und waere ohne Push und ohne Artefakt|
++gestorben.|
++|
++Die Zusicherung fuehrt `safe_fetch_html` aus, mit einer gesetzten Antwort|
++429 und einem aufgezeichneten `time.sleep`.|
++"""|
++import os|
++import sys|
++|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++sys.path.insert(0, os.path.join(WURZEL, "backend", "core"))|
++|
++import card_scraper_shared as css  # noqa: E402|
++|
++|
++class Antwort:|
++    status_code = 429|
++    text = ""|
++|
++    def __init__(self, kopf):|
++        self.headers = {"Retry-After": kopf} if kopf is not None else {}|
++|
++    def raise_for_status(self):|
++        raise RuntimeError("429")|
++|
++|
++class Scraper:|
++    def __init__(self, kopf):|
++        self.kopf = kopf|
++|
++    def get(self, url, timeout=None):|
++        return Antwort(self.kopf)|
++|
++|
++def _lauf(monkeypatch, kopf):|
++    schlaf = []|
++    monkeypatch.setattr(css, "_get_scraper", lambda: Scraper(kopf))|
++    monkeypatch.setattr(css.time, "sleep", lambda s: schlaf.append(s))|
++    monkeypatch.setattr(css, "_curl_cffi_fetch", lambda *a, **k: "")|
++    css.safe_fetch_html("https://example.invalid/", retries=2, quiet=True)|
++    return schlaf|
++|
++|
++def test_eine_stunde_retry_after_wird_gedeckelt(monkeypatch):|
++    schlaf = _lauf(monkeypatch, "3600")|
++    assert schlaf, "bei 429 wird gar nicht gewartet — dann haemmert der Lauf die Quelle"|
++    assert max(schlaf) <= css.RETRY_AFTER_MAX, (|
++        f"Schlafzeiten {schlaf}: ein Retry-After der Quelle geht ungedeckelt durch")|
++    assert css.RETRY_AFTER_MAX <= 120|
++|
++|
++def test_ein_datum_im_kopf_bricht_nicht_ab(monkeypatch):|
++    schlaf = _lauf(monkeypatch, "Wed, 21 Oct 2026 07:28:00 GMT")|
++    assert schlaf and max(schlaf) <= css.RETRY_AFTER_MAX|
++|
++|
++def test_kleine_werte_bleiben_wie_sie_sind():|
++    assert css.warte_nach_retry_after("5", 3) == 5|
++    assert css.warte_nach_retry_after(None, 3) == 3|
++    assert css.warte_nach_retry_after("-4", 3) == 0|
+diff --git a/tests/python/test_tor_vor_dem_push.py b/tests/python/test_tor_vor_dem_push.py|
+new file mode 100644|
+index 0000000..63f2189|
+--- /dev/null|
++++ b/tests/python/test_tor_vor_dem_push.py|
+@@ -0,0 +1,95 @@|
++"""Das Tor vor dem Push schliesst, wenn eine Suite rot ist — und nur dann.|
++|
++scripts/tor_vor_dem_push.sh wird hier AUSGEFUEHRT, in einem Wegwerf-Baum|
++mit gesetzten Suiten: eine Attrappe fuer den JS-Runner (Rueckgabewert per|
++Umgebung) und echte, winzige pytest-Dateien in tests/python und|
++tests/nebenbereiche/python. Keine Textsuche im Skript.|
++|
++Dazu die Beziehung, die schon fuer das Tor des Wochenlaufs gilt: was der|
++Testschritt von deploy-pages.yml installiert, installiert auch dieses Tor —|
++sonst bricht pytest beim Einsammeln ab (Rueckgabewert 2), und das Tor|
++blockiert jeden Lauf, egal wie gut die Daten sind (Befund 22.09.2026).|
++"""|
++import os|
++import shutil|
++import subprocess|
++import sys|
++|
++import pytest|
++|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++SKRIPT = os.path.join(WURZEL, "scripts", "tor_vor_dem_push.sh")|
++|
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))|
++from test_tor_und_testschritt_ziehen_gleich import _pakete, DEPLOY  # noqa: E402|
++|
++JS_ATTRAPPE = """#!/bin/bash|
++ordner="${1:-tests/unit}"|
++echo "Attrappe fuer $ordner"|
++if [ "$ordner" = "tests/nebenbereiche/unit" ]; then rc="${JS_NEBEN_RC:-0}"; else rc="${JS_KERN_RC:-0}"; fi|
++echo "JS unit tests: 1 passed, $rc failed"|
++exit "$rc"|
++"""|
++|
++|
++def _baum(tmp_path, py_kern_rot=False, py_neben_rot=False):|
++    b = tmp_path / "baum"|
++    (b / "scripts").mkdir(parents=True)|
++    shutil.copy(SKRIPT, b / "scripts" / "tor_vor_dem_push.sh")|
++    (b / "scripts" / "run-js-unit-tests.sh").write_text(JS_ATTRAPPE)|
++    for teil, rot in (("tests/python", py_kern_rot), ("tests/nebenbereiche/python", py_neben_rot)):|
++        d = b / teil|
++        d.mkdir(parents=True)|
++        (d / "test_probe.py").write_text(|
++            "def test_probe():\n    assert %s\n" % ("False" if rot else "True"))|
++    (b / "data").mkdir()|
++    (b / "data" / "probe.csv").write_text("a,b\n1,2\n")|
++    return b|
++|
++|
++def _tor(baum, bereich, **umgebung):|
++    env = dict(os.environ, TOR_OHNE_INSTALL="1", **{k: str(v) for k, v in umgebung.items()})|
++    env.pop("GITHUB_STEP_SUMMARY", None)|
++    env["RUNNER_TEMP"] = str(baum / "tmp")|
++    r = subprocess.run(["bash", str(baum / "scripts" / "tor_vor_dem_push.sh"), bereich],|
++                       cwd=str(baum), env=env, capture_output=True, text=True, timeout=300)|
++    return r.returncode, r.stdout + r.stderr|
++|
++|
++@pytest.fixture(autouse=True)|
++def _braucht_node():|
++    if not shutil.which("node"):|
++        pytest.skip("node fehlt — das Tor schliesst dann absichtlich")|
++|
++|
++def test_alles_gruen_das_tor_ist_offen(tmp_path):|
++    rc, aus = _tor(_baum(tmp_path), "alle")|
++    assert rc == 0, aus|
++|
++|
++def test_js_kern_rot_das_tor_ist_zu(tmp_path):|
++    rc, aus = _tor(_baum(tmp_path), "kern", JS_KERN_RC=1)|
++    assert rc == 1, "die JS-Suite ist rot, und das Tor laesst trotzdem durch:\n" + aus|
++|
++|
++def test_python_kern_rot_das_tor_ist_zu(tmp_path):|
++    rc, aus = _tor(_baum(tmp_path, py_kern_rot=True), "kern")|
++    assert rc == 1, "die Python-Suite ist rot, und das Tor laesst trotzdem durch:\n" + aus|
++|
++|
++def test_ein_roter_nebenbereich_haelt_den_kern_nicht_an(tmp_path):|
++    """Die Trennung, am Verhalten: Bereich `kern` sieht die Nebenbereiche|
++    nicht — Bereich `alle` schon."""|
++    b = _baum(tmp_path, py_neben_rot=True)|
++    rc_kern, aus = _tor(b, "kern", JS_NEBEN_RC=1)|
++    assert rc_kern == 0, "ein roter Nebenbereich schliesst das Kern-Tor:\n" + aus|
++    rc_alle, aus = _tor(b, "alle")|
++    assert rc_alle == 1, "Bereich alle prueft die Nebenbereiche nicht:\n" + aus|
++|
++|
++def test_das_tor_installiert_was_der_deploy_test_installiert():|
++    testschritt = _pakete(DEPLOY, ab="Install Python test dependencies", bis="Run Python unit tests")|
++    tor = _pakete(SKRIPT)|
++    assert testschritt and tor|
++    fehlt = sorted(testschritt - tor)|
++    assert not fehlt, f"das Tor installiert {fehlt} nicht, der Deploy-Test schon"|
+diff --git a/tests/python/test_turnierliste_nicht_lesbar.py b/tests/python/test_turnierliste_nicht_lesbar.py|
+new file mode 100644|
+index 0000000..e5ea15b|
+--- /dev/null|
++++ b/tests/python/test_turnierliste_nicht_lesbar.py|
+@@ -0,0 +1,49 @@|
++"""Nicht lesbar ist nicht "keine Turniere".|
++|
++BEFUND (29.09.2026, Pruefung des Wochenlaufs): scrapers/city_league_past_|
++archetype_scraper.py brach bei einem Ladefehler der Turnierliste (403,|
++Timeout) still ab und meldete danach "keine Turniere im Fenster" — dieselbe|
++Meldung wie in der japanischen Saisonpause, mit Code 0. Ein Ausfall der|
++Quelle war damit unsichtbar. Gemessen mit einer Attrappe fuer|
++fetch_page_bs4, die None liefert.|
++|
++Die Zusicherung fuehrt die Funktion aus.|
++"""|
++import importlib.util|
++import os|
++import sys|
++from datetime import datetime|
++|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++SKRIPT = os.path.join(WURZEL, "backend", "scrapers", "city_league_past_archetype_scraper.py")|
++|
++|
++def _modul():|
++    sys.path.insert(0, os.path.join(WURZEL, "backend", "core"))|
++    sys.path.insert(0, os.path.join(WURZEL, "backend", "scrapers"))|
++    spec = importlib.util.spec_from_file_location("clpa_lesbar", SKRIPT)|
++    m = importlib.util.module_from_spec(spec)|
++    spec.loader.exec_module(m)|
++    return m|
++|
++|
++def test_ein_ladefehler_auf_seite_eins_ist_nicht_leer(monkeypatch):|
++    m = _modul()|
++    monkeypatch.setattr(m, "fetch_page_bs4", lambda url: None)|
++    erg = m.get_tournaments_in_date_range("jp", datetime(2026, 9, 1), datetime(2026, 9, 28))|
++    assert erg is None, (|
++        "ein Ladefehler der Turnierliste kommt als %r zurueck — dann meldet der "|
++        "Scraper 'keine Turniere' statt 'Quelle nicht erreichbar'" % (erg,))|
++|
++|
++def test_main_meldet_den_ladefehler_nach_aussen(monkeypatch, capsys):|
++    m = _modul()|
++    monkeypatch.setattr(m, "fetch_page_bs4", lambda url: None)|
++    monkeypatch.setattr(m, "_load_settings", lambda: {|
++        "region": "jp", "start_date": "2026-09-01", "end_date": "2026-09-28",|
++        "output_file": "city_league_archetypes_past_probe.csv"})|
++    monkeypatch.setattr(m, "calculate_date_range", lambda a, b: (a, b))|
++    monkeypatch.setattr(m, "parse_date", lambda s: datetime.strptime(s, "%Y-%m-%d"))|
++    rc = m.main()|
++    assert rc not in (0, None), "main() meldet Erfolg, obwohl die Turnierliste nicht lesbar war"|
++    assert "::error::" in capsys.readouterr().out|
+diff --git a/tests/python/test_wochenlauf_reihenfolge_und_push.py b/tests/python/test_wochenlauf_reihenfolge_und_push.py|
+new file mode 100644|
+index 0000000..fc84732|
+--- /dev/null|
++++ b/tests/python/test_wochenlauf_reihenfolge_und_push.py|
+@@ -0,0 +1,174 @@|
++"""Der Wochenlauf: erst alles zurueck, dann nachbearbeiten — und ein Push, der nichts verliert.|
++|
++ANLASS (29.09.2026, Wochenlauf #168 und Pruefung danach)|
++-------------------------------------------------------|
++1. Der Schritt "Erzeugte Dateien zurueck nach data/" lief HINTER|
++   "Top-Cut-Quoten aus den Platzierungen fuellen", der Zeilenpruefung und|
++   "Kartentyp nachziehen" — und kopierte deren Ergebnis mit der|
++   Scraper-Fassung wieder zu. Folge in #168: top8_conv_rate 0.0 fuer ein|
++   Turnier ohne Platzierungen, das Tor war rot.|
++2. Die Bilanz der nicht blockierenden Schritte las rc_extra.txt, BEVOR die|
++   Frischepruefung hineinschrieb.|
++3. Die Push-Schleife rebaste mit `-X ours` — beim Rebase gewinnt damit|
++   origin/main, nicht dieser Lauf. Gemessen: ein Konflikt an derselben|
++   Zeile verwarf den ganzen Wochencommit, der Push meldete "Everything|
++   up-to-date" mit rc 0, und pushed=true stiess einen Deploy an.|
++|
++Teil 3 wird AUSGEFUEHRT: der echte Schritt "Commit + push" aus|
++weekly-full-update.yml laeuft in einem Wegwerf-Repo gegen ein Wegwerf-|
++origin, in dem waehrenddessen ein "Nachtlauf" dieselbe Datei geaendert hat.|
++"""|
++import os|
++import re|
++import shutil|
++import subprocess|
++|
++import pytest|
++import yaml|
++|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++WOCHENLAUF = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")|
++|
++|
++def _schritte():|
++    with open(WOCHENLAUF, encoding="utf-8") as f:|
++        y = yaml.safe_load(f)|
++    return list(y["jobs"].values())[0]["steps"]|
++|
++|
++def _index(name_anfang):|
++    for i, s in enumerate(_schritte()):|
++        if str(s.get("name", "")).startswith(name_anfang):|
++            return i|
++    raise AssertionError(f"Schritt '{name_anfang}' fehlt im Wochenlauf")|
++|
++|
++# ── 1. und 2.: die Reihenfolge ───────────────────────────────────────|
++|
++def test_der_rueckweg_kommt_vor_jeder_nachbearbeitung():|
++    rueckweg = _index("Erzeugte Dateien zurueck nach data/")|
++    letzter_scraper = _index("Online-Einzellisten holen")|
++    assert rueckweg > letzter_scraper, "der Rueckweg laeuft, bevor alle Scraper fertig sind"|
++    for nach in ("Top-Cut-Quoten aus den Platzierungen fuellen",|
++                 "Data sanity check",|
++                 "Kartentyp im Decklistenbestand nachziehen",|
++                 "Labs-Verzeichnis aus data/ neu bauen",|
++                 "Zusicherungen gegen die frischen Daten"):|
++        assert rueckweg < _index(nach), (|
++            f"'{nach}' laeuft vor dem Rueckweg — dann kopiert der Rueckweg "|
++            "sein Ergebnis mit der Scraper-Fassung wieder zu (Wochenlauf #168)")|
++|
++|
++def test_die_bilanz_liest_erst_nach_der_frischepruefung():|
++    assert _index("Frischepruefung") < _index("Bilanz der nicht blockierenden Schritte"), (|
++        "die Bilanz liest rc_extra.txt, bevor die Frischepruefung hineinschreibt")|
++    assert _index("Bilanz der nicht blockierenden Schritte") < _index("Commit + push")|
++|
++|
++# ── 3.: die Push-Schleife, ausgefuehrt ───────────────────────────────|
++|
++def _push_skript():|
++    s = next(s for s in _schritte() if s.get("name") == "Commit + push")|
++    text = s["run"]|
++    text = text.replace("${{ github.repository }}", "probe/probe").replace("${{ github.run_id }}", "1")|
++    assert "${{" not in text, "der Push-Schritt nutzt einen Ausdruck, den die Probe nicht setzt"|
++    return text|
++|
++|
++def _git(cwd, *args, **kw):|
++    return subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True, **kw)|
++|
++|
++def _aufbau(tmp_path, tor_rc=0, gleiche_zeile=False):|
++    origin = tmp_path / "origin.git"|
++    _git(tmp_path, "init", "-q", "--bare", "-b", "main", str(origin))|
++    saat = tmp_path / "saat"|
++    _git(tmp_path, "clone", "-q", str(origin), str(saat))|
++    for k, v in (("user.email", "p@p"), ("user.name", "p")):|
++        _git(saat, "config", k, v)|
++    (saat / "data").mkdir()|
++    (saat / "data" / "stand.csv").write_text("kopf\nnacht=alt\nmitte\nwoche=alt\n")|
++    (saat / "scripts").mkdir()|
++    (saat / "scripts" / "build_data_stand.py").write_text("")|
++    (saat / "scripts" / "tor_vor_dem_push.sh").write_text(f"#!/bin/bash\nexit {tor_rc}\n")|
++    _git(saat, "add", "-A"); _git(saat, "commit", "-qm", "start"); _git(saat, "push", "-q", "origin", "main")|
++|
++    laeufer = tmp_path / "laeufer"|

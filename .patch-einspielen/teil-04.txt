@@ -1,0 +1,426 @@
+index 1e551bf..1ceaf79 100644|
+--- a/tests/python/test_champions_guardrails.py|
++++ b/tests/nebenbereiche/python/test_champions_guardrails.py|
+@@ -7,3 +7,3 @@ from pathlib import Path|
+ |
+-_REPO_ROOT = Path(__file__).resolve().parents[2]|
++_REPO_ROOT = Path(__file__).resolve().parents[3]|
+ sys.path.insert(0, str(_REPO_ROOT / "scripts"))|
+diff --git a/tests/python/test_champions_item_sprites.py b/tests/nebenbereiche/python/test_champions_item_sprites.py|
+similarity index 97%|
+rename from tests/python/test_champions_item_sprites.py|
+rename to tests/nebenbereiche/python/test_champions_item_sprites.py|
+index 5abb7b0..c3e0dc0 100644|
+--- a/tests/python/test_champions_item_sprites.py|
++++ b/tests/nebenbereiche/python/test_champions_item_sprites.py|
+@@ -27,3 +27,3 @@ import pytest|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ DATA = os.path.join(ROOT, "data")|
+diff --git a/tests/python/test_champions_namen_im_guardian.py b/tests/nebenbereiche/python/test_champions_namen_im_guardian.py|
+similarity index 97%|
+rename from tests/python/test_champions_namen_im_guardian.py|
+rename to tests/nebenbereiche/python/test_champions_namen_im_guardian.py|
+index 0e99ec7..57e572c 100644|
+--- a/tests/python/test_champions_namen_im_guardian.py|
++++ b/tests/nebenbereiche/python/test_champions_namen_im_guardian.py|
+@@ -30,3 +30,3 @@ import pytest|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ |
+@@ -102,3 +102,3 @@ def test_das_deploy_gate_traegt_keine_stueckzahl_mehr():|
+     """Der Unit-Test darf nicht wieder an einer Tageszahl haengen."""|
+-    pfad = os.path.join(ROOT, "tests", "unit", "test-champions-names.js")|
++    pfad = os.path.join(ROOT, "tests", "nebenbereiche", "unit", "test-champions-names.js")|
+     quelle = open(pfad, encoding="utf-8").read()|
+diff --git a/tests/python/test_champions_speed_corpus.py b/tests/nebenbereiche/python/test_champions_speed_corpus.py|
+similarity index 99%|
+rename from tests/python/test_champions_speed_corpus.py|
+rename to tests/nebenbereiche/python/test_champions_speed_corpus.py|
+index cd8b961..508bc35 100644|
+--- a/tests/python/test_champions_speed_corpus.py|
++++ b/tests/nebenbereiche/python/test_champions_speed_corpus.py|
+@@ -20,3 +20,3 @@ import pytest|
+ |
+-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))|
++REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))|
+ sys.path.insert(0, os.path.join(REPO_ROOT, 'backend', 'scrapers'))|
+diff --git a/tests/python/test_champions_sprites.py b/tests/nebenbereiche/python/test_champions_sprites.py|
+similarity index 99%|
+rename from tests/python/test_champions_sprites.py|
+rename to tests/nebenbereiche/python/test_champions_sprites.py|
+index 76cfef8..245bc28 100644|
+--- a/tests/python/test_champions_sprites.py|
++++ b/tests/nebenbereiche/python/test_champions_sprites.py|
+@@ -26,3 +26,3 @@ import pytest|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ DATA = os.path.join(ROOT, "data")|
+diff --git a/tests/python/test_champions_teams_bestand.py b/tests/nebenbereiche/python/test_champions_teams_bestand.py|
+similarity index 97%|
+rename from tests/python/test_champions_teams_bestand.py|
+rename to tests/nebenbereiche/python/test_champions_teams_bestand.py|
+index 9a5f47b..ff92806 100644|
+--- a/tests/python/test_champions_teams_bestand.py|
++++ b/tests/nebenbereiche/python/test_champions_teams_bestand.py|
+@@ -26,3 +26,3 @@ import pytest|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ sys.path.insert(0, os.path.join(ROOT, "scripts"))|
+@@ -111,3 +111,3 @@ def test_der_unit_test_sperrt_den_deploy_nicht_mehr():|
+     """Die feste Untergrenze darf nicht in den Deploy-Gate-Test zurueckwandern."""|
+-    pfad = os.path.join(ROOT, "tests", "unit", "test-side-quest-usage.js")|
++    pfad = os.path.join(ROOT, "tests", "nebenbereiche", "unit", "test-side-quest-usage.js")|
+     quelle = open(pfad, encoding="utf-8").read()|
+diff --git a/tests/python/test_champions_usage_im_guardian.py b/tests/nebenbereiche/python/test_champions_usage_im_guardian.py|
+similarity index 96%|
+rename from tests/python/test_champions_usage_im_guardian.py|
+rename to tests/nebenbereiche/python/test_champions_usage_im_guardian.py|
+index 0ef1496..a48f7e7 100644|
+--- a/tests/python/test_champions_usage_im_guardian.py|
++++ b/tests/nebenbereiche/python/test_champions_usage_im_guardian.py|
+@@ -36,3 +36,3 @@ import sys|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ sys.path.insert(0, os.path.join(ROOT, "scripts"))|
+@@ -151,4 +151,7 @@ def test_die_datenpruefungen_sind_nicht_ins_gate_zurueckgewandert():|
+     """|
+-    for name in ("test-scraper-selbstkontrolle.js", "test-champions-matchups.js"):|
+-        pfad = os.path.join(ROOT, "tests", "unit", name)|
++    # test-champions-matchups.js liegt seit 29.09.2026 unter|
++    # tests/nebenbereiche/unit (Trennung Kern/Nebenbereiche).|
++    for ordner, name in ((("tests", "unit"), "test-scraper-selbstkontrolle.js"),|
++                         (("tests", "nebenbereiche", "unit"), "test-champions-matchups.js")):|
++        pfad = os.path.join(ROOT, *ordner, name)|
+         code = _ohne_kommentar_js(open(pfad, encoding="utf-8").read())|
+diff --git a/tests/python/test_champions_usage_regressionsschutz.py b/tests/nebenbereiche/python/test_champions_usage_regressionsschutz.py|
+similarity index 99%|
+rename from tests/python/test_champions_usage_regressionsschutz.py|
+rename to tests/nebenbereiche/python/test_champions_usage_regressionsschutz.py|
+index e7f9555..77083cd 100644|
+--- a/tests/python/test_champions_usage_regressionsschutz.py|
++++ b/tests/nebenbereiche/python/test_champions_usage_regressionsschutz.py|
+@@ -33,3 +33,3 @@ import re|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ QUELLE = open(os.path.join(ROOT, "scripts", "scrape_champions_usage.py"),|
+diff --git a/tests/python/test_floette_form.py b/tests/nebenbereiche/python/test_floette_form.py|
+similarity index 98%|
+rename from tests/python/test_floette_form.py|
+rename to tests/nebenbereiche/python/test_floette_form.py|
+index 37e8dc1..3656a77 100644|
+--- a/tests/python/test_floette_form.py|
++++ b/tests/nebenbereiche/python/test_floette_form.py|
+@@ -30,3 +30,3 @@ import pytest|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ DATA = os.path.join(ROOT, "data")|
+diff --git a/tests/python/test_gegenstandsnamen_aus_den_ressourcen.py b/tests/nebenbereiche/python/test_gegenstandsnamen_aus_den_ressourcen.py|
+similarity index 97%|
+rename from tests/python/test_gegenstandsnamen_aus_den_ressourcen.py|
+rename to tests/nebenbereiche/python/test_gegenstandsnamen_aus_den_ressourcen.py|
+index 14e920b..7c7fe75 100644|
+--- a/tests/python/test_gegenstandsnamen_aus_den_ressourcen.py|
++++ b/tests/nebenbereiche/python/test_gegenstandsnamen_aus_den_ressourcen.py|
+@@ -29,3 +29,3 @@ import pytest|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ DATA = os.path.join(ROOT, "data")|
+diff --git a/tests/python/test_generate_team_strategies.py b/tests/nebenbereiche/python/test_generate_team_strategies.py|
+similarity index 99%|
+rename from tests/python/test_generate_team_strategies.py|
+rename to tests/nebenbereiche/python/test_generate_team_strategies.py|
+index 5609b8f..dc46fc5 100644|
+--- a/tests/python/test_generate_team_strategies.py|
++++ b/tests/nebenbereiche/python/test_generate_team_strategies.py|
+@@ -16,3 +16,3 @@ import sys|
+ |
+-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))|
++REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))|
+ sys.path.insert(0, os.path.join(REPO_ROOT, "scripts"))|
+diff --git a/tests/python/test_itemnamen_zerschnitten.py b/tests/nebenbereiche/python/test_itemnamen_zerschnitten.py|
+similarity index 99%|
+rename from tests/python/test_itemnamen_zerschnitten.py|
+rename to tests/nebenbereiche/python/test_itemnamen_zerschnitten.py|
+index e43a791..9ed42e4 100644|
+--- a/tests/python/test_itemnamen_zerschnitten.py|
++++ b/tests/nebenbereiche/python/test_itemnamen_zerschnitten.py|
+@@ -27,3 +27,3 @@ import pytest|
+ HIER = os.path.dirname(os.path.abspath(__file__))|
+-WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
++WURZEL = os.path.normpath(os.path.join(HIER, "..", "..", ".."))|
+ DATEN = os.path.join(WURZEL, "data")|
+diff --git a/tests/python/test_kader_luecke_nutzungsformen.py b/tests/nebenbereiche/python/test_kader_luecke_nutzungsformen.py|
+similarity index 99%|
+rename from tests/python/test_kader_luecke_nutzungsformen.py|
+rename to tests/nebenbereiche/python/test_kader_luecke_nutzungsformen.py|
+index 5ecde2e..18b7696 100644|
+--- a/tests/python/test_kader_luecke_nutzungsformen.py|
++++ b/tests/nebenbereiche/python/test_kader_luecke_nutzungsformen.py|
+@@ -29,3 +29,3 @@ import pytest|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ DATA = os.path.join(ROOT, "data")|
+diff --git a/tests/python/test_mitstreiter_ohne_anteil.py b/tests/nebenbereiche/python/test_mitstreiter_ohne_anteil.py|
+similarity index 97%|
+rename from tests/python/test_mitstreiter_ohne_anteil.py|
+rename to tests/nebenbereiche/python/test_mitstreiter_ohne_anteil.py|
+index cec2235..79a6eb7 100644|
+--- a/tests/python/test_mitstreiter_ohne_anteil.py|
++++ b/tests/nebenbereiche/python/test_mitstreiter_ohne_anteil.py|
+@@ -33,3 +33,3 @@ import re|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ DATEI = os.path.join(ROOT, "data", "champions_usage.json")|
+diff --git a/tests/python/test_opgg_zweitquelle.py b/tests/nebenbereiche/python/test_opgg_zweitquelle.py|
+similarity index 98%|
+rename from tests/python/test_opgg_zweitquelle.py|
+rename to tests/nebenbereiche/python/test_opgg_zweitquelle.py|
+index 775c38a..3bcf9eb 100644|
+--- a/tests/python/test_opgg_zweitquelle.py|
++++ b/tests/nebenbereiche/python/test_opgg_zweitquelle.py|
+@@ -33,6 +33,6 @@ import os|
+ HIER = os.path.dirname(os.path.abspath(__file__))|
+-WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
++WURZEL = os.path.normpath(os.path.join(HIER, "..", "..", ".."))|
+ DATEN = os.path.join(WURZEL, "data")|
+ SKRIPT = os.path.join(WURZEL, "scripts", "scrape_opgg_champions_moves.py")|
+-FIXTURE = os.path.join(HIER, "fixtures", "opgg_moves_ausschnitt.html")|
++FIXTURE = os.path.join(WURZEL, "tests", "python", "fixtures", "opgg_moves_ausschnitt.html")|
+ BAUER = os.path.join(WURZEL, "scripts", "build_champions_resources.py")|
+diff --git a/tests/python/test_paldea_tauros.py b/tests/nebenbereiche/python/test_paldea_tauros.py|
+similarity index 99%|
+rename from tests/python/test_paldea_tauros.py|
+rename to tests/nebenbereiche/python/test_paldea_tauros.py|
+index 411ef4a..7969567 100644|
+--- a/tests/python/test_paldea_tauros.py|
++++ b/tests/nebenbereiche/python/test_paldea_tauros.py|
+@@ -30,3 +30,3 @@ import pytest|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ DATA = os.path.join(ROOT, "data")|
+diff --git a/tests/python/test_pocket_ernte.py b/tests/nebenbereiche/python/test_pocket_ernte.py|
+similarity index 99%|
+rename from tests/python/test_pocket_ernte.py|
+rename to tests/nebenbereiche/python/test_pocket_ernte.py|
+index 69f5d3c..9065bdc 100644|
+--- a/tests/python/test_pocket_ernte.py|
++++ b/tests/nebenbereiche/python/test_pocket_ernte.py|
+@@ -22,3 +22,3 @@ import pytest|
+ |
+-WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ SKRIPT = os.path.join(WURZEL, "scripts", "pocket_ernte.sh")|
+diff --git a/tests/python/test_pocket_frische_waechter.py b/tests/nebenbereiche/python/test_pocket_frische_waechter.py|
+similarity index 98%|
+rename from tests/python/test_pocket_frische_waechter.py|
+rename to tests/nebenbereiche/python/test_pocket_frische_waechter.py|
+index 682b8b3..95de429 100644|
+--- a/tests/python/test_pocket_frische_waechter.py|
++++ b/tests/nebenbereiche/python/test_pocket_frische_waechter.py|
+@@ -27,3 +27,3 @@ import re|
+ HIER = os.path.dirname(os.path.abspath(__file__))|
+-WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
++WURZEL = os.path.normpath(os.path.join(HIER, "..", "..", ".."))|
+ WAECHTER = os.path.join(WURZEL, "scripts", "data_guardian.py")|
+diff --git a/tests/python/test_pocket_karten_ids.py b/tests/nebenbereiche/python/test_pocket_karten_ids.py|
+similarity index 99%|
+rename from tests/python/test_pocket_karten_ids.py|
+rename to tests/nebenbereiche/python/test_pocket_karten_ids.py|
+index 5d6e2c6..9bf7f1d 100644|
+--- a/tests/python/test_pocket_karten_ids.py|
++++ b/tests/nebenbereiche/python/test_pocket_karten_ids.py|
+@@ -13,3 +13,3 @@ import os|
+ |
+-WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ _spec = importlib.util.spec_from_file_location(|
+diff --git a/tests/python/test_pocket_setnamen_kein_etikett.py b/tests/nebenbereiche/python/test_pocket_setnamen_kein_etikett.py|
+similarity index 99%|
+rename from tests/python/test_pocket_setnamen_kein_etikett.py|
+rename to tests/nebenbereiche/python/test_pocket_setnamen_kein_etikett.py|
+index 7ef7672..6e6b8c0 100644|
+--- a/tests/python/test_pocket_setnamen_kein_etikett.py|
++++ b/tests/nebenbereiche/python/test_pocket_setnamen_kein_etikett.py|
+@@ -31,3 +31,3 @@ import pytest|
+ HIER = os.path.dirname(os.path.abspath(__file__))|
+-WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
++WURZEL = os.path.normpath(os.path.join(HIER, "..", "..", ".."))|
+ SKRIPT = os.path.join(WURZEL, "scripts", "build_pocket_sets.py")|
+diff --git a/tests/python/test_pocket_tierlist.py b/tests/nebenbereiche/python/test_pocket_tierlist.py|
+similarity index 99%|
+rename from tests/python/test_pocket_tierlist.py|
+rename to tests/nebenbereiche/python/test_pocket_tierlist.py|
+index d140d9f..4bab257 100644|
+--- a/tests/python/test_pocket_tierlist.py|
++++ b/tests/nebenbereiche/python/test_pocket_tierlist.py|
+@@ -46,3 +46,3 @@ import pytest|
+ HIER = os.path.dirname(os.path.abspath(__file__))|
+-WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
++WURZEL = os.path.normpath(os.path.join(HIER, "..", "..", ".."))|
+ SKRIPT = os.path.join(WURZEL, "scripts", "scrape_pocket_tierlist.py")|
+diff --git a/tests/python/test_pokedex_spannen.py b/tests/nebenbereiche/python/test_pokedex_spannen.py|
+similarity index 97%|
+rename from tests/python/test_pokedex_spannen.py|
+rename to tests/nebenbereiche/python/test_pokedex_spannen.py|
+index e335c96..da0a232 100644|
+--- a/tests/python/test_pokedex_spannen.py|
++++ b/tests/nebenbereiche/python/test_pokedex_spannen.py|
+@@ -24,3 +24,3 @@ import pytest|
+ |
+-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ |
+diff --git a/tests/python/test_qr_svg.py b/tests/nebenbereiche/python/test_qr_svg.py|
+similarity index 99%|
+rename from tests/python/test_qr_svg.py|
+rename to tests/nebenbereiche/python/test_qr_svg.py|
+index 9286d17..6d7a641 100644|
+--- a/tests/python/test_qr_svg.py|
++++ b/tests/nebenbereiche/python/test_qr_svg.py|
+@@ -35,3 +35,3 @@ import pytest|
+ |
+-WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ MODUL = os.path.join(WURZEL, "js", "qr-svg.js")|
+diff --git a/tests/python/test_speed_korpus_fenster.py b/tests/nebenbereiche/python/test_speed_korpus_fenster.py|
+similarity index 99%|
+rename from tests/python/test_speed_korpus_fenster.py|
+rename to tests/nebenbereiche/python/test_speed_korpus_fenster.py|
+index 410db07..5df9876 100644|
+--- a/tests/python/test_speed_korpus_fenster.py|
++++ b/tests/nebenbereiche/python/test_speed_korpus_fenster.py|
+@@ -32,3 +32,3 @@ import re|
+ |
+-WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))|
+ DATEI = os.path.join(WURZEL, "data", "champions_speed_corpus.json")|
+diff --git a/tests/python/test_victory_road_major.py b/tests/nebenbereiche/python/test_victory_road_major.py|
+similarity index 99%|
+rename from tests/python/test_victory_road_major.py|
+rename to tests/nebenbereiche/python/test_victory_road_major.py|
+index 66190a8..8b2e3fd 100644|
+--- a/tests/python/test_victory_road_major.py|
++++ b/tests/nebenbereiche/python/test_victory_road_major.py|
+@@ -22,3 +22,3 @@ import pytest|
+ |
+-WURZEL = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))|
++WURZEL = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))|
+ sys.path.insert(0, os.path.join(WURZEL, "backend", "scrapers"))|
+diff --git a/tests/python/test_zeichensatz_champions.py b/tests/nebenbereiche/python/test_zeichensatz_champions.py|
+similarity index 99%|
+rename from tests/python/test_zeichensatz_champions.py|
+rename to tests/nebenbereiche/python/test_zeichensatz_champions.py|
+index 49c0fd5..dfacc16 100644|
+--- a/tests/python/test_zeichensatz_champions.py|
++++ b/tests/nebenbereiche/python/test_zeichensatz_champions.py|
+@@ -36,3 +36,3 @@ import pytest|
+ HIER = os.path.dirname(os.path.abspath(__file__))|
+-WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
++WURZEL = os.path.normpath(os.path.join(HIER, "..", "..", ".."))|
+ DATEN = os.path.join(WURZEL, "data")|
+diff --git a/tests/unit/test-attacken-merkmale.js b/tests/nebenbereiche/unit/test-attacken-merkmale.js|
+similarity index 99%|
+rename from tests/unit/test-attacken-merkmale.js|
+rename to tests/nebenbereiche/unit/test-attacken-merkmale.js|
+index 9173b6f..1128595 100644|
+--- a/tests/unit/test-attacken-merkmale.js|
++++ b/tests/nebenbereiche/unit/test-attacken-merkmale.js|
+@@ -39,3 +39,3 @@ const vm = require('vm');|
+ |
+-const WURZEL = path.join(__dirname, '..', '..');|
++const WURZEL = path.join(__dirname, '..', '..', '..');|
+ const lies = (p) => JSON.parse(fs.readFileSync(path.join(WURZEL, p), 'utf8'));|
+diff --git a/tests/unit/test-audit2-B-mega-tooltip-basis.js b/tests/nebenbereiche/unit/test-audit2-B-mega-tooltip-basis.js|
+similarity index 97%|
+rename from tests/unit/test-audit2-B-mega-tooltip-basis.js|
+rename to tests/nebenbereiche/unit/test-audit2-B-mega-tooltip-basis.js|
+index 7779773..63f0f52 100644|
+--- a/tests/unit/test-audit2-B-mega-tooltip-basis.js|
++++ b/tests/nebenbereiche/unit/test-audit2-B-mega-tooltip-basis.js|
+@@ -17,3 +17,3 @@ const path = require('node:path');|
+ |
+-const ROOT = path.join(__dirname, '..', '..');|
++const ROOT = path.join(__dirname, '..', '..', '..');|
+ const SRC = fs.readFileSync(path.join(ROOT, 'js', 'app-side-quest-play.js'), 'utf8');|
+diff --git a/tests/unit/test-audit2-B-roster-label-limit.js b/tests/nebenbereiche/unit/test-audit2-B-roster-label-limit.js|
+similarity index 98%|
+rename from tests/unit/test-audit2-B-roster-label-limit.js|
+rename to tests/nebenbereiche/unit/test-audit2-B-roster-label-limit.js|
+index a08ac82..ea2b411 100644|
+--- a/tests/unit/test-audit2-B-roster-label-limit.js|
++++ b/tests/nebenbereiche/unit/test-audit2-B-roster-label-limit.js|
+@@ -18,3 +18,3 @@ const path = require('node:path');|
+ |
+-const ROOT = path.join(__dirname, '..', '..');|
++const ROOT = path.join(__dirname, '..', '..', '..');|
+ const SRC = fs.readFileSync(path.join(ROOT, 'js', 'app-side-quest-matchups.js'), 'utf8');|
+diff --git a/tests/unit/test-audit2-B-statuswertpunkte-label.js b/tests/nebenbereiche/unit/test-audit2-B-statuswertpunkte-label.js|
+similarity index 99%|
+rename from tests/unit/test-audit2-B-statuswertpunkte-label.js|
+rename to tests/nebenbereiche/unit/test-audit2-B-statuswertpunkte-label.js|
+index f6d8085..ca56d19 100644|
+--- a/tests/unit/test-audit2-B-statuswertpunkte-label.js|
++++ b/tests/nebenbereiche/unit/test-audit2-B-statuswertpunkte-label.js|
+@@ -20,3 +20,3 @@ const path = require('node:path');|
+ |
+-const ROOT = path.join(__dirname, '..', '..');|
++const ROOT = path.join(__dirname, '..', '..', '..');|
+ const SRC = fs.readFileSync(path.join(ROOT, 'js', 'app-side-quest.js'), 'utf8');|
+diff --git a/tests/unit/test-audit2-B-usage-quellenhinweis.js b/tests/nebenbereiche/unit/test-audit2-B-usage-quellenhinweis.js|
+similarity index 98%|
+rename from tests/unit/test-audit2-B-usage-quellenhinweis.js|
+rename to tests/nebenbereiche/unit/test-audit2-B-usage-quellenhinweis.js|
+index 09ad5c1..e6f460d 100644|
+--- a/tests/unit/test-audit2-B-usage-quellenhinweis.js|
++++ b/tests/nebenbereiche/unit/test-audit2-B-usage-quellenhinweis.js|
+@@ -22,3 +22,3 @@ const path = require('node:path');|
+ |
+-const ROOT = path.join(__dirname, '..', '..');|
++const ROOT = path.join(__dirname, '..', '..', '..');|
+ const POKEDEX = fs.readFileSync(path.join(ROOT, 'js', 'app-side-quest-pokedex.js'), 'utf8');|
+diff --git a/tests/unit/test-audit3-champions-stand.js b/tests/nebenbereiche/unit/test-audit3-champions-stand.js|
+similarity index 98%|
+rename from tests/unit/test-audit3-champions-stand.js|
+rename to tests/nebenbereiche/unit/test-audit3-champions-stand.js|
+index b3f65ac..1e5626a 100644|
+--- a/tests/unit/test-audit3-champions-stand.js|
++++ b/tests/nebenbereiche/unit/test-audit3-champions-stand.js|
+@@ -24,3 +24,3 @@ const path = require('node:path');|
+ |
+-const ROOT = path.join(__dirname, '..', '..');|
++const ROOT = path.join(__dirname, '..', '..', '..');|
+ const USAGE = fs.readFileSync(path.join(ROOT, 'js', 'app-side-quest-usage.js'), 'utf8');|
+diff --git a/tests/unit/test-builder-freie-auswahl.js b/tests/nebenbereiche/unit/test-builder-freie-auswahl.js|
+similarity index 99%|
+rename from tests/unit/test-builder-freie-auswahl.js|
+rename to tests/nebenbereiche/unit/test-builder-freie-auswahl.js|
+index 0446efb..23c4b43 100644|
+--- a/tests/unit/test-builder-freie-auswahl.js|
++++ b/tests/nebenbereiche/unit/test-builder-freie-auswahl.js|
+@@ -25,3 +25,3 @@ const path = require('path');|
+ |
+-const ROOT = path.join(__dirname, '..', '..');|
++const ROOT = path.join(__dirname, '..', '..', '..');|
+ const lies = p => fs.readFileSync(path.join(ROOT, p), 'utf8');|
+diff --git a/tests/unit/test-champions-base-stats.js b/tests/nebenbereiche/unit/test-champions-base-stats.js|
+similarity index 99%|
+rename from tests/unit/test-champions-base-stats.js|
+rename to tests/nebenbereiche/unit/test-champions-base-stats.js|
+index ba71ca1..d7c8791 100644|
+--- a/tests/unit/test-champions-base-stats.js|
++++ b/tests/nebenbereiche/unit/test-champions-base-stats.js|
+@@ -23,3 +23,3 @@ const path = require('path');|
+ |
+-const ROOT = path.join(__dirname, '..', '..');|

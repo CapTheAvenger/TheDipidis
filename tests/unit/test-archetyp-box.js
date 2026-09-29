@@ -594,8 +594,8 @@ describe('FE-13 Nachtrag: Hauptfilter Format (aktuelles Meta, Standard, Expanded
             assert.ok(QUELLE.includes(alt), 'Probe passt nicht mehr: ' + alt);
             return logik(QUELLE.replace(alt, neu));
         };
-        const M1 = probe("return anteilIn(k, c.vorher) >= META_SCHWELLE && anteilIn(k, c.aktuell) < META_SCHWELLE;",
-            "return anteilIn(k, c.vorher) >= META_SCHWELLE;");
+        const M1 = probe("&& anteilIn(k, c.vorher) >= META_SCHWELLE && anteilIn(k, c.aktuell) < META_SCHWELLE;",
+            "&& anteilIn(k, c.vorher) >= META_SCHWELLE;");
         assert.ok(karten.filter(x => M1.formatPasst(x, 'raus', kontext)).length > 1, 'raus ohne "jetzt darunter" faellt nicht auf');
         const M2 = probe("return legal === false && vorher === true;", "return legal === false;");
         assert.ok(karten.filter(x => M2.formatPasst(x, 'rotiert', kontext)).length > 1, 'rotiert ohne "vorher legal" faellt nicht auf');
@@ -617,8 +617,8 @@ describe('FE-13 Nachtrag: Hauptfilter Format (aktuelles Meta, Standard, Expanded
     it('Filterzeile, Anwendung und Proxydruck sind verdrahtet; Texte in beiden Sprachen', () => {
         const code = ohneKommentare(QUELLE);
         assert.ok(code.length > QUELLE.length * 0.3, 'das Ausschneiden hat zu viel entfernt');
-        assert.match(code, /filterPasst\(e\.k, ansicht, e\.element\) && formatPasst\(e\.k, ansicht\.format, kontext\)/);
-        assert.match(code, /filterPasst\(k, ansicht, elementVon\(k\)\) && formatPasst\(k, ansicht\.format, kontext\)/);
+        assert.match(code, /filterPasst\(e\.k, ansicht, e\.element\) && formatPasst\(e\.k, ansicht\.format, kontext, e\.box\)/);
+        assert.match(code, /filterPasst\(k, ansicht, elementVon\(k\)\) && formatPasst\(k, ansicht\.format, kontext, b\)/);
         assert.match(code, /formateZuordnen\(eintraegeAus\(karten, summe\.totalDecklists\), jeFormatAus\(auswahl\.matchingDecks\)\)/);
         assert.match(code, /formateZuordnen\(eintraegeAus\(gefilterteKarten\(z\.karten, schwelle\)/);
         // Ohne gewaehlte Box: ein Knopf gleicht alle Boxen ab (sonst bleiben die Meta-Filter bei alten Boxen leer).
@@ -687,5 +687,34 @@ describe('FE-13 Nachtrag: Sammelboxen ohne „Alle“ im Namen', () => {
         assert.doesNotMatch(code, /esc\((b|eine|e\.box)\.name\)/, 'ein Boxname wird noch roh gezeigt');
         const i18n = R('js/i18n.js');
         assert.equal(i18n.split("'abx.familieName':").length - 1, 2);
+    });
+});
+
+
+describe('FE-13 Nachtrag: „aus dem Meta gefallen“ nur, wenn der Archetyp im neuen Meta gespielt wurde', () => {
+    // Hausi, 29.09.2026: ohne Deck im neuen Meta bleibt der Datenstand stehen,
+    // es faellt nichts heraus. Spielt ein neues Deck die alten Karten nicht mehr,
+    // fallen sie heraus.
+    const kontext = { aktuell: 'TEF-30C', vorher: 'TEF-PBL' };
+    const alt = { id: 'A-1', formate: { 'TEF-PBL': 100 } };
+    const bleibt = { id: 'A-2', formate: { 'TEF-PBL': 100, 'TEF-30C': 90 } };
+    const ohneDeck = { karten: [alt, { id: 'A-3', formate: { 'TEF-PBL': 60 } }] };
+    const mitDeck = { karten: [alt, bleibt] };
+    it('ohne Deck im neuen Meta faellt nichts heraus, mit Deck schon', () => {
+        assert.equal(L.imFormatGespielt(ohneDeck, 'TEF-30C'), false);
+        assert.equal(L.imFormatGespielt(mitDeck, 'TEF-30C'), true);
+        assert.equal(L.formatPasst(alt, 'raus', kontext, ohneDeck), false);
+        assert.equal(L.formatPasst(alt, 'raus', kontext, mitDeck), true);
+        assert.equal(L.formatPasst(bleibt, 'raus', kontext, mitDeck), false);
+    });
+    it('Verfaelschungsprobe und Verdrahtung', () => {
+        const stelle = "if (wahl === 'raus') return (!box || imFormatGespielt(box, c.aktuell))";
+        assert.ok(QUELLE.includes(stelle));
+        const M = logik(QUELLE.replace(stelle, "if (wahl === 'raus') return (true)"));
+        assert.equal(M.formatPasst(alt, 'raus', kontext, ohneDeck), true, 'die Probe beisst nicht');
+        const code = ohneKommentare(QUELLE);
+        assert.match(code, /formatPasst\(e\.k, ansicht\.format, kontext, e\.box\)/);
+        assert.match(code, /formatPasst\(k, ansicht\.format, kontext, b\)/);
+        assert.equal(R('js/i18n.js').split("'abx.fmtRausOhne':").length - 1, 2);
     });
 });

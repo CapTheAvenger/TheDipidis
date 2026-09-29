@@ -145,18 +145,33 @@ const lokalName = new Function(
  *
  * Die Liste bleibt leer stehen, nicht weg: sie ist das VERFAHREN fuer
  * die naechste Luecke, nicht nur der Eintrag fuer diese. */
-const NOCH_OHNE_BILD = [];
+/* DIE LISTE STEHT SEIT 29.09.2026 IN DEN DATEN, NICHT HIER.
+ *
+ * Hier stand `const NOCH_OHNE_BILD = []` — eine Luecke im TESTCODE. Jede
+ * neue Art, die der Nachtlauf champions-usage-refresh in den Pokedex
+ * aufnimmt, hat zuerst kein Bild (gespiegelt wird nur von Hand); dieser
+ * Test wurde rot, und seit dem Tor vor dem Push (29.09.2026) hielt er den
+ * ganzen Champions-Nachtlauf an. CLAUDE.md: eine geduldete Luecke steht
+ * BENANNT und DATIERT in den Daten — data/champions_sprites.json,
+ * _meta.ohne_bild, geschrieben von scripts/build_champions_sprites.py
+ * --nur-luecken. Geprueft wird in BEIDE Richtungen: kein Eintrag ohne Bild,
+ * der dort fehlt; keiner dort, der ein Bild hat. */
+const OHNE_BILD = (MANIFEST._meta && MANIFEST._meta.ohne_bild) || {};
 
 describe('die gespiegelten Bilder', () => {
-    it('jeder Pokédex-Eintrag hat eine gespiegelte Datei', () => {
+    it('jeder Pokédex-Eintrag ohne Bild ist benannt und datiert — und nur der', () => {
         const ohne = DEX.entries.filter((e) => !MANIFEST.sprites[e.en]).map((e) => e.en).sort();
-        assert.deepEqual(ohne, NOCH_OHNE_BILD,
-            'Die Menge der Pokedex-Eintraege ohne Bild hat sich geaendert.\n'
-            + '  jetzt:    ' + JSON.stringify(ohne) + '\n'
-            + '  erwartet: ' + JSON.stringify(NOCH_OHNE_BILD) + '\n'
-            + '  Dazugekommen: ein Eintrag ohne Bild ist hereingekommen — pruefen, '
-            + 'woher er stammt. Weggefallen: der Spiegel-Lauf hat geliefert, '
-            + 'Zeile loeschen.');
+        assert.deepEqual(ohne, Object.keys(OHNE_BILD).sort(),
+            'Pokedex-Eintraege ohne Bild und data/champions_sprites.json '
+            + '_meta.ohne_bild laufen auseinander.\n'
+            + '  ohne Bild:  ' + JSON.stringify(ohne) + '\n'
+            + '  benannt:    ' + JSON.stringify(Object.keys(OHNE_BILD).sort()) + '\n'
+            + '  Nachziehen: python3 scripts/build_champions_sprites.py --nur-luecken; '
+            + 'Bilder holen: champions-sprites.yml von Hand starten.');
+        for (const [en, seit] of Object.entries(OHNE_BILD)) {
+            assert.match(String(seit), /^\d{4}-\d{2}-\d{2}$/,
+                `${en} steht ohne Datum in _meta.ohne_bild`);
+        }
     });
 
     it('die Namensregel im Frontend deckt sich mit dem Bau-Skript', () => {

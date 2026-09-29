@@ -355,14 +355,6 @@ jobs:
       - name: Editionen und Pokemon-GO-Liste
         run: |
           set -uo pipefail
-          python -u scripts/build_champions_editionen.py
-          rc=$?
-          if [ $rc -ne 0 ]; then
-            echo "::warning::build_champions_editionen exited with $rc — Datei bleibt wie sie ist"
-            echo "FAIL scripts/build_champions_editionen.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
-          else
-            echo "OK   scripts/build_champions_editionen.py" >> "$RUNNER_TEMP/rc_extra.txt"
-          fi
           python -u scripts/scrape_pokemon_go_liste.py
           rc=$?
           if [ $rc -ne 0 ]; then
@@ -393,6 +385,27 @@ jobs:
               echo "OK   scripts/build_champions_pokedex.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           exit 0
+
+      # EDITIONEN NACH DEM POKEDEX (29.09.2026). Sie standen im Schritt
+      # "Editionen und Pokemon-GO-Liste" VOR dem Pokedex-Bau und lasen den
+      # Pokedex vom Vortag: eine Art, die dieser Lauf aufnimmt, stand bis
+      # zum naechsten Morgen ohne Editionsliste da — und
+      # test-champions-raster.js war rot. Dazu die Bild-Luecken benannt und
+      # datiert (data/champions_sprites.json, _meta.ohne_bild), siehe
+      # champions-usage-refresh.yml.
+      - name: Editionen und Bild-Luecken nachziehen
+        run: |
+          set -uo pipefail
+          python -u scripts/build_champions_editionen.py
+          rc=$?
+          if [ $rc -ne 0 ]; then
+            echo "::warning::build_champions_editionen exited with $rc — Datei bleibt wie sie ist"
+            echo "FAIL scripts/build_champions_editionen.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+            echo "OK   scripts/build_champions_editionen.py" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+          python -u scripts/build_champions_sprites.py --nur-luecken || \
+            echo "::warning::build_champions_sprites --nur-luecken fehlgeschlagen"
 
       - name: Bilanz der nicht blockierenden Schritte (S5)
         if: always()
@@ -563,6 +576,7 @@ jobs:
                   data/de_name_overrides.json \
                   data/pokemonproxies_index.json \
                   data/champions_editionen.json \
+                  data/champions_sprites.json \
                   data/pokemon_go_liste.json \
                   data/pokemon_go_shiny.json \
                   data/opgg_champions_moves.json \

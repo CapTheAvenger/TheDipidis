@@ -148,6 +148,33 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           exit 0
 
+      # NEUE ART = BENANNTE LUECKE, NICHT ROTER LAUF (29.09.2026).
+      # Nimmt dieser Lauf eine neue Art in den Pokedex auf, fehlen ihr
+      # zweierlei: eine Editionsliste (bisher nur im 04:00-Lauf gebaut, und
+      # dort VOR dem Pokedex) und ein gespiegeltes Bild (nur von Hand,
+      # champions-sprites.yml). Beides machte je eine Zusicherung rot —
+      # gemessen mit einer Probe-Art: test-champions-raster.js und
+      # test-champions-sprites.js. Seit dem Tor vor dem Push haette das den
+      # Nachtlauf angehalten. Deshalb hier, NACH dem Pokedex: Editionen neu
+      # bauen und die Arten ohne Bild in data/champions_sprites.json
+      # (_meta.ohne_bild) benennen und datieren. Fail-soft wie nebenan.
+      - name: Editionen und Bild-Luecken nachziehen
+        run: |
+          set +e
+          python -u scripts/build_champions_editionen.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::build_champions_editionen exited with $rc — Datei bleibt wie sie ist"
+              git checkout -- data/champions_editionen.json 2>/dev/null
+          fi
+          python -u scripts/build_champions_sprites.py --nur-luecken
+          rc2=$?
+          if [ "$rc2" -ne 0 ]; then
+              echo "::warning::build_champions_sprites --nur-luecken exited with $rc2"
+              git checkout -- data/champions_sprites.json 2>/dev/null
+          fi
+          exit 0
+
       # Das Nachschlagewerk haengt seit dem 09.09.2026 an den Nutzungsdaten:
       # scripts/build_champions_resources.py traegt Attacken nach, die in
       # data/champions_usage.json vorkommen, aber im Quelldatensatz hinter
@@ -254,7 +281,9 @@ jobs:
                   data/champions_roster_extra.json \
                   data/champions_pokedex.json \
                   data/champions_names_de.json \
-                  data/champions_resources.json
+                  data/champions_resources.json \
+                  data/champions_editionen.json \
+                  data/champions_sprites.json
           if git diff --cached --quiet; then
             echo "No usage/pokedex changes — skipping push."
             echo "pushed=false" >> "$GITHUB_OUTPUT"

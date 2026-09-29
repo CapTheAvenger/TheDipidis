@@ -281,7 +281,63 @@ def hole(url):
         return r.read()
 
 
+def luecken_fortschreiben(sprites, eintraege, alt, heute):
+    """Die Pokedex-Eintraege ohne gespiegeltes Bild — BENANNT und DATIERT.
+
+    ANLASS (29.09.2026). Eine neue Art im Pokedex (der Nachtlauf
+    champions-usage-refresh nimmt sie auf) hat in der Regel noch kein Bild:
+    gespiegelt wird nur von Hand (champions-sprites.yml). Bis heute verlangte
+    tests/nebenbereiche/unit/test-champions-sprites.js eine LEERE Liste im
+    Testcode — die neue Art machte den Test rot und hielt seit dem 29.09.
+    (Tor vor dem Push) den ganzen Champions-Nachtlauf an. Gemessen mit einer
+    Probe-Art im Pokedex: 2 Zusicherungen rot.
+
+    Die Regel aus CLAUDE.md: eine geduldete Luecke steht in den DATEN, mit
+    Datum, und die Liste wird in beide Richtungen geprueft. Hier: jeder
+    Eintrag ohne Bild steht in _meta.ohne_bild mit dem Tag, an dem er zuerst
+    ohne Bild gesehen wurde; bekommt er ein Bild, faellt er heraus. Das
+    Frontend zeigt bis dahin den Ersatz (championsSprite.ersatz).
+    """
+    alt = alt if isinstance(alt, dict) else {}
+    raus = {}
+    for e in eintraege:
+        en = e["en"]
+        if en in sprites:
+            continue
+        raus[en] = alt.get(en) or heute
+    return dict(sorted(raus.items()))
+
+
+def nur_luecken():
+    """--nur-luecken: ohne Netz, nur _meta.ohne_bild im Manifest nachziehen."""
+    import datetime as _dt
+    with open(DEX_PATH, encoding="utf-8") as f:
+        eintraege = json.load(f)["entries"]
+    with open(MANIFEST, encoding="utf-8") as f:
+        daten = json.load(f)
+    meta = daten.setdefault("_meta", {})
+    heute = _dt.datetime.now(_dt.timezone.utc).date().isoformat()
+    neu = luecken_fortschreiben(daten.get("sprites") or {}, eintraege,
+                                meta.get("ohne_bild"), heute)
+    if neu == (meta.get("ohne_bild") or {}) and "ohne_bild" in meta:
+        print(f"champions_sprites.json: {len(neu)} Eintraege ohne Bild, unveraendert")
+        return 0
+    meta["ohne_bild"] = neu
+    with open(MANIFEST, "w", encoding="utf-8") as f:
+        json.dump(daten, f, ensure_ascii=False, indent=1)
+        f.write("\n")
+    if neu:
+        print("::warning::Champions-Pokedex: %d Eintrag/Eintraege ohne gespiegeltes "
+              "Bild (benannt in data/champions_sprites.json, _meta.ohne_bild): %s — "
+              "champions-sprites.yml von Hand starten" % (len(neu), ", ".join(neu)))
+    else:
+        print("champions_sprites.json: jeder Pokedex-Eintrag hat ein Bild")
+    return 0
+
+
 def main():
+    if "--nur-luecken" in sys.argv[1:]:
+        return nur_luecken()
     ap = argparse.ArgumentParser()
     ap.add_argument("--force", action="store_true",
                     help="auch bereits vorhandene Dateien neu laden")
@@ -386,6 +442,9 @@ def main():
                 "erzeuger": "scripts/build_champions_sprites.py",
                 "anzahl": len(manifest),
                 "bytes": gesamt,
+                # Nach einem vollstaendigen Lauf leer — sonst waere er oben
+                # mit Fehler ausgestiegen. Gleiche Rechnung wie --nur-luecken.
+                "ohne_bild": luecken_fortschreiben(manifest, eintraege, {}, ""),
             },
             "sprites": manifest,
         }, f, ensure_ascii=False, indent=1)

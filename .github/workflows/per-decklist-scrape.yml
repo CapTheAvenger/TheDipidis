@@ -327,6 +327,19 @@ jobs:
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
 
+      # DAS TOR VOR DEM PUSH (29.09.2026) — scripts/tor_vor_dem_push.sh.
+      # Wer nach main schreibt, prueft vorher: faellt hier eine Zusicherung,
+      # bricht der Schritt ab, und Commit, Push und Deploy-Anstoss werden
+      # uebersprungen. main bleibt gruen, und weder der Deploy noch das Tor
+      # des naechsten Wochenlaufs erben den roten Stand.
+      - name: Node fuer das Tor
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '20'
+
+      - name: Tor vor dem Push
+        run: bash scripts/tor_vor_dem_push.sh kern
+
       - name: Commit + push
         id: commit
         run: |

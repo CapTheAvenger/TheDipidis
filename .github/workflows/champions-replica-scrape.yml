@@ -56,7 +56,8 @@ jobs:
     # in-game usage scrape adds ~1000 throttled sequential requests
     # (championsbattledata, ~234 Pokémon × api+2 CSVs) which takes ~8–10 min
     # on its own. Generous headroom against a slow host.
-    timeout-minutes: 30
+    # +15 min fuer das Tor vor dem Push (Kern-Suiten ~6,5 min im Deploy-Test, 29.09.2026)
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repo
@@ -528,6 +529,21 @@ jobs:
               git checkout -- data/datenluecken.json 2>/dev/null
           fi
           exit 0
+
+      # DAS TOR VOR DEM PUSH (29.09.2026) — scripts/tor_vor_dem_push.sh.
+      # Wer nach main schreibt, prueft vorher: faellt hier eine Zusicherung,
+      # bricht der Schritt ab, und Commit, Push und Deploy-Anstoss werden
+      # uebersprungen. main bleibt gruen, und weder der Deploy noch das Tor
+      # des naechsten Wochenlaufs erben den roten Stand.
+      # Bereich `alle`: dieser Ablauf schreibt Champions-/Pocket-Daten,
+      # also prueft er Kern UND tests/nebenbereiche.
+      - name: Node fuer das Tor
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '20'
+
+      - name: Tor vor dem Push
+        run: bash scripts/tor_vor_dem_push.sh alle
 
       - name: Commit + push
         id: commit

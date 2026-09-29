@@ -125,6 +125,39 @@ verbieten", sondern **welche Richtung ein Fehler ist**. Bei den
 Kaderlisten heisst das „neu ist erlaubt, verloren nicht" — ein Verlust
 bleibt rot, Zuwachs nicht.
 
+## WER NACH MAIN SCHREIBT, PRUEFT VORHER — UND DER KERN HAENGT NICHT AN DEN NEBENBEREICHEN
+
+Wochenlauf #168 (29.09.2026) blieb am Tor haengen: 13 Zusicherungen rot,
+kein einziger Datenfehler der Quelle. Die Ursachen, alle behoben:
+
+| rot | Ursache |
+| --- | --- |
+| Tag-2-Grundgesamtheit (0073/0074) | der Wochenlauf vom 26.09. holte die Standings zweier Regionals WAEHREND sie liefen; `--resume` hielt die Momentaufnahme fuer fertig. Jetzt: ohne Top-Cut kein fertiges Turnier |
+| Top-Cut-Quote 0.0 ohne Platzierungen | der Rueckweg nach `data/` lief HINTER den Nachbearbeitungen und kopierte sie zu. Jetzt: erst alles zurueck, dann nachbearbeiten |
+| Masterclass (7x) | erstes Major im neuen Format; der Erzeuger verlangte genau ein Format. Jetzt: die Majors-Spalte nimmt das juengste und benennt sich um |
+| Cardbinder | Basis-Energie aus einem Druck ohne Kartentyp |
+| Bild-Deckel 679 > 663 | Bild ueber den NAMEN fuer einen unbekannten Druck |
+
+Zwei Regeln sind daraus geworden:
+
+1. **Jeder geplante Ablauf, der nach `main` schreibt, faehrt vorher
+   `bash scripts/tor_vor_dem_push.sh kern`** (Champions/Pocket: `alle`).
+   Ist etwas rot, wird nicht gepusht. Vorher schrieben zehn Ablaeufe
+   ungeprueft — und ein roter Tagesstand hielt den Deploy UND das Tor des
+   naechsten Wochenlaufs an. `tests/python/test_nebenbereiche_getrennt.py`
+   haelt jeden neuen Schreiber fest.
+2. **Champions-, Pocket- und Side-Quest-Tests liegen unter
+   `tests/nebenbereiche/{unit,python}`** (Entscheidung Hausi, 29.09.2026)
+   und laufen in `nebenbereiche-tests.yml`, nicht im Tor und nicht im
+   Deploy-Test. Lokal: `bash scripts/run-js-unit-tests.sh
+   tests/nebenbereiche/unit` und `python3 -m pytest
+   tests/nebenbereiche/python`. Eine neue Testdatei fuer diese Bereiche
+   gehoert dorthin — `tests/unit` und `tests/python` sind der TCG-Kern.
+
+Und: der Wochenlauf laeuft Dienstag und Freitag um 06:00 UTC — Freitag
+frueh laufen in Australien und Asien Majors. Ein Scraper, der Turniere
+holt, muss ein LAUFENDES Turnier erkennen koennen.
+
 ## Eine Zusicherung, die Text liest, prueft die Schreibweise — nicht das Verhalten
 
 Am 12.09.2026 habe ich eine frisch geschriebene Zusicherung verfaelscht,

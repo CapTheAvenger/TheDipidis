@@ -1617,3 +1617,7 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         logger.critical(f"Abbruch: {e}", exc_info=True)
+        # Ein Absturz ist kein Erfolg (29.09.2026). Bis hier endete das
+        # Skript nach dem Protokolleintrag mit Code 0 — der Wochenlauf
+        # zaehlte den Absturz als OK, auch fuer die kritischen Scraper.
+        sys.exit(1)

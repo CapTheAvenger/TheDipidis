@@ -69,6 +69,24 @@ const LADDER = csv('data/limitless_online_decks.csv');
 const TURNIER = csv('data/online_tournament_top8_decks.csv');
 const ladderNamen = new Set(LADDER.map(r => (r.deck_name || '').trim()).filter(Boolean));
 const turnierNamen = new Set(TURNIER.map(r => (r.deck_name || '').trim()).filter(Boolean));
+/* DIE TURNIERNAMEN DES LAUFENDEN FORMATS (29.09.2026).
+
+   Die Ladder zaehlt seit dem Formatstart (`?set=<current_set>`), die
+   Top-8-Datei rollt ueber vier Wochen — und fuehrt deshalb nach einer
+   Rotation noch Decks, die zuletzt VOR dem Formatstart gespielt wurden.
+   Gemessen am 29.09.2026 (Frischdaten Wochenlauf #168): 14 Turniernamen
+   ohne Ladder-Treffer, ALLE mit last_seen_date zwischen 02.09. und
+   15.09. — vor dem Start von TEF-30C am 16.09. Ab dem 07.10.2026 (Ende
+   der Gnadenfrist) haetten sie die Brueckenprobe rot gemacht, bis sie aus
+   dem Fenster gerollt waeren.
+
+   Ein Deck, das im laufenden Format nicht gespielt wurde, kann die
+   Ladder dieses Formats nicht treffen. Die Abdeckungsproben unten fragen
+   deshalb nur nach Namen, die seit dem Formatstart gesehen wurden. */
+const FORMATSTART = FENSTER.fenster().start;
+const turnierNamenImFormat = new Set(TURNIER
+    .filter(r => !FORMATSTART || !r.last_seen_date || String(r.last_seen_date).trim() >= FORMATSTART)
+    .map(r => (r.deck_name || '').trim()).filter(Boolean));
 
 // ───────────────────────────────────────────────────────────────────
 // 1. Die Bruecke selbst
@@ -252,7 +270,7 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
         // Mengengleichheit haette den Lauf hier rot gemacht, obwohl
         // nichts kaputt ist; der Kommentar im Test darunter beschreibt
         // dieselbe Falle eine Ebene tiefer.
-        const nichtTreffend = [...turnierNamen].filter(n => !ladderNamen.has(n)).sort();
+        const nichtTreffend = [...turnierNamenImFormat].filter(n => !ladderNamen.has(n)).sort();
         const bekannt = new Set([
             ...ALIAS.turnier_zu_ladder.map(e => e.turnier),
             ...ALIAS.bewusst_nicht_verbunden.map(e => e.turnier),
@@ -283,14 +301,14 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
            ein weiterer Anteil — und danach wieder der enge. */
         const jung = FENSTER.istJung();
         const anteil = jung ? 0.25 : 0.05;
-        if (jung && durchgefallen.length > turnierNamen.size * 0.05) {
+        if (jung && durchgefallen.length > turnierNamenImFormat.size * 0.05) {
             console.log(`    # junges Fenster ${FENSTER.fenster().schluessel}: `
-                + `${durchgefallen.length} von ${turnierNamen.size} Turniernamen ohne `
+                + `${durchgefallen.length} von ${turnierNamenImFormat.size} Turniernamen ohne `
                 + `Ladder-Treffer — erwartet, solange die Ladder erst sammelt. `
                 + `Ab ${FENSTER.JUNG_TAGE} Tagen gilt wieder 5 %.`);
         }
-        assert.ok(durchgefallen.length <= Math.max(2, turnierNamen.size * anteil),
-            `${durchgefallen.length} von ${turnierNamen.size} Turniernamen sind `
+        assert.ok(durchgefallen.length <= Math.max(2, turnierNamenImFormat.size * anteil),
+            `${durchgefallen.length} von ${turnierNamenImFormat.size} Turniernamen sind `
             + 'weder verbrueckt noch als offen ausgewiesen: '
             + durchgefallen.slice(0, 10).join(', ')
             + (jung
@@ -300,7 +318,7 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
     });
 
     it('und es sind so viele, wie die Bruecke ausweist', () => {
-        // Fruehere Fassung verdrahtete turnierNamen.size = 120,
+        // Fruehere Fassung verdrahtete turnierNamenImFormat.size = 120,
         // ladderNamen.size = 131 und gemeinsam = 113 fest. Der Wochenlauf vom
         // 21.08.2026 machte daraus 123 / 132 / 116 — die Bruecke selbst hat
         // gehalten, es waren weiterhin exakt sieben nicht treffende Namen
@@ -316,7 +334,7 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
         // Richtung, die etwas bedeutet: es darf nichts UNausgewiesenes
         // geben. Mehr Ausgewiesene als aktuell Treffende ist der Normalfall
         // eines rollenden Fensters.
-        const nichtTreffend = [...turnierNamen].filter(n => !ladderNamen.has(n));
+        const nichtTreffend = [...turnierNamenImFormat].filter(n => !ladderNamen.has(n));
         const ausgewiesen = ALIAS.turnier_zu_ladder.length
             + ALIAS.bewusst_nicht_verbunden.length;
         /* Dieselbe Rotation, eine Ebene tiefer: solange die Ladder erst
@@ -333,9 +351,9 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
         }
         // Die Mengen duerfen wachsen, aber die Ueberschneidung muss die Regel
         // bleiben und die Ausnahme klein. Gemessen 21.08.2026: 116 von 123.
-        const gemeinsam = [...turnierNamen].filter(n => ladderNamen.has(n)).length;
-        assert.ok(gemeinsam > turnierNamen.size * (FENSTER.istJung() ? 0.6 : 0.8),
-            `nur ${gemeinsam} von ${turnierNamen.size} Turniernamen treffen die Ladder`);
+        const gemeinsam = [...turnierNamenImFormat].filter(n => ladderNamen.has(n)).length;
+        assert.ok(gemeinsam > turnierNamenImFormat.size * (FENSTER.istJung() ? 0.6 : 0.8),
+            `nur ${gemeinsam} von ${turnierNamenImFormat.size} Turniernamen treffen die Ladder`);
     });
 });
 

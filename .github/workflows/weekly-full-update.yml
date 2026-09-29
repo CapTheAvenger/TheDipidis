@@ -241,13 +241,38 @@ jobs:
       # Cardmarket publishes daily JSON dumps on a public S3 bucket.
       # The cardmarket_id_mapper / cardmarket_price_merger scrapers
       # expect them at data/{products_singles_6,products_nonsingles_6,price_guide_6}.json.
+      # EIN AUSFALL VON S3 IST KEIN GRUND, DEN GANZEN LAUF ABZUBRECHEN
+      # (29.09.2026). Hier stand dreimal `curl -fsSL --retry 3` ohne
+      # Zeitlimit in einem harten Schritt: haengt oder faellt der
+      # Cardmarket-Download, bricht der Wochenlauf ab, bevor ein einziges
+      # Turnier geholt ist. Die drei Dateien liegen im Repo — faellt der
+      # Abruf aus, laeuft der Lauf mit dem Stand der Vorwoche weiter und
+      # meldet es. Geladen wird in eine Zwischendatei, damit ein halber
+      # Download nie die gute Datei ersetzt.
       - name: Download Cardmarket JSONs
         run: |
+          set +e
           mkdir -p data
-          curl -fsSL --retry 3 -o data/products_singles_6.json    https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json
-          curl -fsSL --retry 3 -o data/products_nonsingles_6.json https://downloads.s3.cardmarket.com/productCatalog/productList/products_nonsingles_6.json
-          curl -fsSL --retry 3 -o data/price_guide_6.json         https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json
+          ausfall=0
+          for ziel in productList/products_singles_6.json productList/products_nonsingles_6.json priceGuide/price_guide_6.json; do
+            name=$(basename "$ziel")
+            if curl -fsSL --retry 3 --connect-timeout 30 --max-time 300 \
+                 -o "data/$name.neu" "https://downloads.s3.cardmarket.com/productCatalog/$ziel" \
+               && python3 -c "import json,sys; json.load(open(sys.argv[1]))" "data/$name.neu"; then
+              mv "data/$name.neu" "data/$name"
+            else
+              rm -f "data/$name.neu"
+              ausfall=$((ausfall+1))
+              echo "::warning::$name nicht geladen — es gilt der Stand im Repo"
+            fi
+          done
           ls -lh data/*_6.json
+          if [ "$ausfall" -gt 0 ]; then
+            echo "FAIL Cardmarket-Download ($ausfall von 3)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+            echo "OK   Cardmarket-Download" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+          exit 0
 
       # Run scrapers in BATCH_FULL order.
       # `set +e` so a single scraper failure doesn't abort the whole
@@ -368,9 +393,14 @@ jobs:
           # as a job-level `::error::` so GitHub fires the default
           # maintainer email-notification. Single sporadic failures
           # stay as `::warning::` only.
+          # tournament_scraper_JH ist seit 29.09.2026 kritisch: er liefert die
+          # Turnierdaten der Meta-Reiter. Zusammen mit dem neuen Rueckgabewert
+          # der Scraper (ein Absturz endet nicht mehr mit 0, siehe
+          # tests/python/test_absturz_ist_kein_erfolg.py) faerbt sein Ausfall
+          # den Lauf jetzt rot — die uebrigen Daten gehen trotzdem raus.
           fail_count=$(printf '%s\n' "${rc_summary[@]}" | grep -c '^FAIL ' || true)
           critical_failed=$(printf '%s\n' "${rc_summary[@]}" \
-            | grep -E '^FAIL (core/update_sets|core/prepare_card_data|scrapers/all_cards_scraper|scrapers/japanese_cards_scraper|scrapers/current_meta_analysis_scraper|scrapers/limitless_online_scraper)' \
+            | grep -E '^FAIL (core/update_sets|core/prepare_card_data|scrapers/all_cards_scraper|scrapers/japanese_cards_scraper|scrapers/current_meta_analysis_scraper|scrapers/limitless_online_scraper|scrapers/tournament_scraper_JH)' \
             | wc -l)
           echo "  failed_step_count=$fail_count critical_failed=$critical_failed"
           if [ "$fail_count" -gt 2 ] || [ "$critical_failed" -gt 0 ]; then
@@ -633,6 +663,60 @@ jobs:
           echo "::endgroup::"
           exit 0  # nicht blockierend, aber sichtbar (S5)
 
+      # ── ALLES ZURUECK, WAS DIESER LAUF ERZEUGT HAT ───────────────
+      #
+      # BEFUND 25.09.2026. Die Wochenlaeufe 151 und 152 liefen GRUEN
+      # durch, beide Victory-Road-Scraper meldeten `status: OK` im
+      # Herzschlag — und keine ihrer Dateien lag danach im Repo.
+      #
+      # URSACHE: get_data_dir() loest auf backend/core/data auf. Von dort
+      # kam bisher nur eine VON HAND GEPFLEGTE Liste zurueck (Schritt
+      # "Sync labs output to data/"). Wer nicht darin stand, fiel mit dem
+      # Runner weg. Dieselbe Bauart hat im September schon zweimal
+      # Dateien verloren: champions_speed_corpus.json (05.09.) und
+      # champions_move_flags.json (sieben Tage lang, bis 23.09.).
+      #
+      # Eine Liste, die jemand pflegen muss, wird irgendwann nicht
+      # gepflegt. Deshalb KEINE Liste mehr: zurueck kommt, was nach der
+      # Saat-Marke geschrieben wurde — also genau das, was dieser Lauf
+      # erzeugt hat. Geseedete Dateien sind aelter und bleiben unberuehrt;
+      # ein Scraper, der diese Woche nicht lief, schreibt nichts und kann
+      # folglich auch nichts ueberschreiben. Damit ist der alte Vorbehalt
+      # gegen champions_replica_teams.json von selbst erfuellt.
+      #
+      # Der Schritt laeuft NACH allen Scrapern und VOR den Zusicherungen,
+      # damit die Suite den Stand prueft, der auch committet wird.
+      #
+      # UND VOR JEDER NACHBEARBEITUNG IN data/ (29.09.2026, Wochenlauf
+      # #168). Hier stand er hinter "Top-Cut-Quoten aus den Platzierungen
+      # fuellen", "Kartentyp nachziehen" und der Zeilenpruefung — und
+      # kopierte deren Ergebnis mit der Scraper-Fassung aus
+      # backend/core/data wieder zu. Gemessen: fuelle_conv_rate liess die
+      # Quote fuer die neuen Turniere 0073/0074 richtig leer, der Rueckweg
+      # schrieb die 0.0 des Scrapers darueber, und das Tor fand "top8_conv_rate
+      # traegt 0.0 fuer Turnier 0074, fuer das es keine Platzierungen gibt".
+      # Dasselbe galt fuer die Zeilenpruefung: sie setzte eine zu kurze CSV
+      # zurueck, der Rueckweg holte die kurze wieder. Jetzt: erst alles
+      # zurueck, DANN nachbearbeiten und pruefen.
+      - name: Erzeugte Dateien zurueck nach data/
+        run: |
+          set +e
+          marke="$RUNNER_TEMP/saat.marke"
+          if [ ! -f "$marke" ]; then
+              echo "::warning::keine Saat-Marke gefunden — der Rueckweg wird uebersprungen"
+              exit 0
+          fi
+          zurueck=0
+          for q in backend/core/data/*.json backend/core/data/*.csv; do
+              [ -f "$q" ] || continue
+              [ "$q" -nt "$marke" ] || continue
+              cp "$q" "data/$(basename "$q")"
+              zurueck=$((zurueck+1))
+              echo "  <- $(basename "$q") ($(stat -c%s "data/$(basename "$q")") B)"
+          done
+          echo "$zurueck Datei(en) aus diesem Lauf zurueckgeschrieben."
+          exit 0
+
       # KEIN champions-replica-Scrape mehr in diesem Lauf.
       #
       # Bis 25.08.2026 lief der Scraper hier ein zweites Mal — mit
@@ -651,97 +735,6 @@ jobs:
       # Auswahl. Der Tageslauf ist in jeder Hinsicht der bessere — er
       # laeuft oefter und holt mehr. Der Wochenlauf laesst die Datei
       # deshalb jetzt in Ruhe.
-
-      - name: Bilanz der nicht blockierenden Schritte (S5)
-        if: always()
-        # Die vier Schritte darueber duerfen den Lauf nicht abbrechen —
-        # ihre Ausgaben sind im Frontend optional. Sie durften bis
-        # 21.08.2026 aber auch nichts hinterlassen: ein `exit 0` ohne
-        # Buchfuehrung. Vier Schritte konnten also wochenlang scheitern,
-        # waehrend der Lauf gruen blieb und die zugehoerigen Dateien
-        # unveraendert alt wurden.
-        #
-        # Hier wird nur gelesen und gemeldet, nicht abgebrochen: ein
-        # Ausfall faerbt den Lauf ab zwei Schritten rot (::error:: loest
-        # die Standard-Benachrichtigung aus), ein einzelner bleibt eine
-        # Warnung. Zusaetzlich landet der Stand in
-        # data/_job_heartbeats.json, damit "der Schritt lief" und "die
-        # Datei hat sich geaendert" getrennt sichtbar sind.
-        run: |
-          set +e
-          bilanz="$RUNNER_TEMP/rc_extra.txt"
-          if [ ! -f "$bilanz" ]; then
-              echo "::warning::Kein rc-Protokoll der nicht blockierenden Schritte gefunden."
-              exit 0
-          fi
-          echo "── Bilanz nicht blockierender Schritte ──"
-          cat "$bilanz"
-          fails=$(grep -c '^FAIL ' "$bilanz")
-          echo "  fehlgeschlagen=$fails"
-          {
-            echo "### Nicht blockierende Schritte"
-            echo ""
-            echo '```'
-            cat "$bilanz"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-          # Der Herzschlag bekommt ZWEI Quellen (07.09.2026):
-          #   rc_extra.txt  — die nicht blockierenden Einzelschritte. Nur ihre
-          #                   Ausfaelle faerben den Lauf (oben gezaehlt).
-          #   rc_batch.txt  — jeder Scraper aus dem Schritt "Run scrapers".
-          #                   Dessen Ausfaelle wertet der Schritt selbst aus;
-          #                   hier interessiert nur "lief der Job, und wann
-          #                   zuletzt erfolgreich". Ohne diese Quelle war die
-          #                   gesamte Online-Seite der Datengrundlage
-          #                   (limitless_online, online_tournament,
-          #                   current_meta_analysis) ohne jeden Herzschlag.
-          batch="$RUNNER_TEMP/rc_batch.txt"
-          if [ -f "$batch" ]; then
-              echo "── Bilanz der Scraper-Schleife (nur Herzschlag) ──"
-              cat "$batch"
-          fi
-          python3 - "$bilanz" "$batch" <<'PYHEARTBEAT'
-          import json, os, sys, datetime
-          pfad = os.path.join('data', '_job_heartbeats.json')
-          try:
-              with open(pfad, encoding='utf-8') as f:
-                  stand = json.load(f)
-          except Exception:
-              stand = {}
-          if not isinstance(stand, dict):
-              stand = {}
-          jetzt = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-          quellen = [q for q in sys.argv[1:] if q and os.path.isfile(q)]
-          if not quellen:
-              print('  Keine Bilanzdatei gefunden — kein Herzschlag geschrieben.')
-              raise SystemExit(0)
-          for quelle in quellen:
-            with open(quelle, encoding='utf-8') as f:
-              for zeile in f:
-                  teile = zeile.split()
-                  if len(teile) < 2:
-                      continue
-                  status, name = teile[0], teile[1]
-                  eintrag = stand.get(name) or {}
-                  eintrag['zuletzt_gelaufen'] = jetzt
-                  eintrag['status'] = status
-                  if status == 'OK':
-                      eintrag['zuletzt_erfolgreich'] = jetzt
-                  stand[name] = eintrag
-          stand['_hinweis'] = ('Wann lief welcher nicht blockierende Schritt zuletzt, '
-                               'und mit welchem Ergebnis. Getrennt von der Frage, ob '
-                               'sich die zugehoerige Datei geaendert hat.')
-          os.makedirs('data', exist_ok=True)
-          with open(pfad, 'w', encoding='utf-8') as f:
-              json.dump(stand, f, ensure_ascii=False, indent=2, sort_keys=True)
-          print(f'  Herzschlag geschrieben: {pfad}')
-          PYHEARTBEAT
-          if [ "$fails" -ge 2 ]; then
-              echo "::error::Weekly: $fails nicht blockierende Schritte sind gescheitert. Die zugehoerigen Dateien sind damit von diesem Lauf unberuehrt."
-          elif [ "$fails" -eq 1 ]; then
-              echo "::warning::Weekly: ein nicht blockierender Schritt ist gescheitert (siehe Bilanz oben)."
-          fi
-          exit 0
 
       - name: Sync labs output to data/ (post-scraper)
         # prepare_card_data.py's SYNC_PATTERNS step runs IN the loop
@@ -966,46 +959,105 @@ jobs:
           fi
           exit 0
 
-      # ── ALLES ZURUECK, WAS DIESER LAUF ERZEUGT HAT ───────────────
-      #
-      # BEFUND 25.09.2026. Die Wochenlaeufe 151 und 152 liefen GRUEN
-      # durch, beide Victory-Road-Scraper meldeten `status: OK` im
-      # Herzschlag — und keine ihrer Dateien lag danach im Repo.
-      #
-      # URSACHE: get_data_dir() loest auf backend/core/data auf. Von dort
-      # kam bisher nur eine VON HAND GEPFLEGTE Liste zurueck (Schritt
-      # "Sync labs output to data/"). Wer nicht darin stand, fiel mit dem
-      # Runner weg. Dieselbe Bauart hat im September schon zweimal
-      # Dateien verloren: champions_speed_corpus.json (05.09.) und
-      # champions_move_flags.json (sieben Tage lang, bis 23.09.).
-      #
-      # Eine Liste, die jemand pflegen muss, wird irgendwann nicht
-      # gepflegt. Deshalb KEINE Liste mehr: zurueck kommt, was nach der
-      # Saat-Marke geschrieben wurde — also genau das, was dieser Lauf
-      # erzeugt hat. Geseedete Dateien sind aelter und bleiben unberuehrt;
-      # ein Scraper, der diese Woche nicht lief, schreibt nichts und kann
-      # folglich auch nichts ueberschreiben. Damit ist der alte Vorbehalt
-      # gegen champions_replica_teams.json von selbst erfuellt.
-      #
-      # Der Schritt laeuft NACH allen Scrapern und VOR den Zusicherungen,
-      # damit die Suite den Stand prueft, der auch committet wird.
-      - name: Erzeugte Dateien zurueck nach data/
+      - name: Bilanz der nicht blockierenden Schritte (S5)
+        if: always()
+        # STEHT HINTER DER FRISCHEPRUEFUNG (29.09.2026). pruefe_frische.py
+        # schreibt sein Ergebnis in rc_extra.txt — stand die Bilanz davor,
+        # war die Datei schon gelesen, und ein Ausfall der Frischepruefung
+        # wurde nie gezaehlt und bekam keinen Herzschlag.
+        # Die vier Schritte darueber duerfen den Lauf nicht abbrechen —
+        # ihre Ausgaben sind im Frontend optional. Sie durften bis
+        # 21.08.2026 aber auch nichts hinterlassen: ein `exit 0` ohne
+        # Buchfuehrung. Vier Schritte konnten also wochenlang scheitern,
+        # waehrend der Lauf gruen blieb und die zugehoerigen Dateien
+        # unveraendert alt wurden.
+        #
+        # Hier wird nur gelesen und gemeldet, nicht abgebrochen: ein
+        # Ausfall faerbt den Lauf ab zwei Schritten rot (::error:: loest
+        # die Standard-Benachrichtigung aus), ein einzelner bleibt eine
+        # Warnung. Zusaetzlich landet der Stand in
+        # data/_job_heartbeats.json, damit "der Schritt lief" und "die
+        # Datei hat sich geaendert" getrennt sichtbar sind.
         run: |
           set +e
-          marke="$RUNNER_TEMP/saat.marke"
-          if [ ! -f "$marke" ]; then
-              echo "::warning::keine Saat-Marke gefunden — der Rueckweg wird uebersprungen"
+          bilanz="$RUNNER_TEMP/rc_extra.txt"
+          if [ ! -f "$bilanz" ]; then
+              echo "::warning::Kein rc-Protokoll der nicht blockierenden Schritte gefunden."
               exit 0
           fi
-          zurueck=0
-          for q in backend/core/data/*.json backend/core/data/*.csv; do
-              [ -f "$q" ] || continue
-              [ "$q" -nt "$marke" ] || continue
-              cp "$q" "data/$(basename "$q")"
-              zurueck=$((zurueck+1))
-              echo "  <- $(basename "$q") ($(stat -c%s "data/$(basename "$q")") B)"
-          done
-          echo "$zurueck Datei(en) aus diesem Lauf zurueckgeschrieben."
+          echo "── Bilanz nicht blockierender Schritte ──"
+          cat "$bilanz"
+          fails=$(grep -c '^FAIL ' "$bilanz")
+          echo "  fehlgeschlagen=$fails"
+          {
+            echo "### Nicht blockierende Schritte"
+            echo ""
+            echo '```'
+            cat "$bilanz"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          # Der Herzschlag bekommt ZWEI Quellen (07.09.2026):
+          #   rc_extra.txt  — die nicht blockierenden Einzelschritte. Nur ihre
+          #                   Ausfaelle faerben den Lauf (oben gezaehlt).
+          #   rc_batch.txt  — jeder Scraper aus dem Schritt "Run scrapers".
+          #                   Dessen Ausfaelle wertet der Schritt selbst aus;
+          #                   hier interessiert nur "lief der Job, und wann
+          #                   zuletzt erfolgreich". Ohne diese Quelle war die
+          #                   gesamte Online-Seite der Datengrundlage
+          #                   (limitless_online, online_tournament,
+          #                   current_meta_analysis) ohne jeden Herzschlag.
+          batch="$RUNNER_TEMP/rc_batch.txt"
+          if [ -f "$batch" ]; then
+              echo "── Bilanz der Scraper-Schleife (nur Herzschlag) ──"
+              cat "$batch"
+          fi
+          python3 - "$bilanz" "$batch" <<'PYHEARTBEAT'
+          import json, os, sys, datetime
+          pfad = os.path.join('data', '_job_heartbeats.json')
+          try:
+              with open(pfad, encoding='utf-8') as f:
+                  stand = json.load(f)
+          except Exception:
+              stand = {}
+          if not isinstance(stand, dict):
+              stand = {}
+          jetzt = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+          quellen = [q for q in sys.argv[1:] if q and os.path.isfile(q)]
+          if not quellen:
+              print('  Keine Bilanzdatei gefunden — kein Herzschlag geschrieben.')
+              raise SystemExit(0)
+          for quelle in quellen:
+            with open(quelle, encoding='utf-8') as f:
+              for zeile in f:
+                  teile = zeile.split()
+                  if len(teile) < 2:
+                      continue
+                  status, name = teile[0], teile[1]
+                  eintrag = stand.get(name) or {}
+                  eintrag['zuletzt_gelaufen'] = jetzt
+                  eintrag['status'] = status
+                  if status == 'OK':
+                      eintrag['zuletzt_erfolgreich'] = jetzt
+                  stand[name] = eintrag
+          stand['_hinweis'] = ('Wann lief welcher nicht blockierende Schritt zuletzt, '
+                               'und mit welchem Ergebnis. Getrennt von der Frage, ob '
+                               'sich die zugehoerige Datei geaendert hat.')
+          os.makedirs('data', exist_ok=True)
+          with open(pfad, 'w', encoding='utf-8') as f:
+              json.dump(stand, f, ensure_ascii=False, indent=2, sort_keys=True)
+          print(f'  Herzschlag geschrieben: {pfad}')
+          PYHEARTBEAT
+          if [ "$fails" -ge 2 ]; then
+              echo "::error::Weekly: $fails nicht blockierende Schritte sind gescheitert. Die zugehoerigen Dateien sind damit von diesem Lauf unberuehrt."
+              # Der Kommentar oben sagte schon immer "faerbt den Lauf ab zwei
+              # Schritten rot" — ::error:: allein tat das nicht (29.09.2026
+              # gemessen: der Schritt endet mit exit 0, der Lauf blieb gruen).
+              # Jetzt wie beim Scraper-Stapel: die Daten gehen trotzdem raus,
+              # der letzte Schritt faerbt den Lauf rot.
+              echo "WEEKLY_FAIL_REASON=$fails nicht blockierende Schritte gescheitert" >> "$GITHUB_ENV"
+          elif [ "$fails" -eq 1 ]; then
+              echo "::warning::Weekly: ein nicht blockierender Schritt ist gescheitert (siehe Bilanz oben)."
+          fi
           exit 0
 
       - name: Datenluecken neu bestimmen (Admin-Bereich)
@@ -1036,7 +1088,11 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: scraper-logs
+          # Die Scraper schreiben ihre Logs nach backend/core/data
+          # (setup_logging -> get_data_dir). backend/data und backend/logs
+          # gibt es nicht — bis 29.09.2026 wurde hier nie ein Log gesichert.
           path: |
+            backend/core/data/*.log
             backend/data/*.log
             backend/logs/**/*.log
           retention-days: 7
@@ -1243,8 +1299,12 @@ jobs:
       # Die frischen Daten bleiben erreichbar, auch wenn das Tor
       # zugeschlagen hat — sonst waere eine Stunde Scrapen verloren und
       # der naechste Lauf muesste alles noch einmal holen.
+      # NICHT NUR BEIM TOR (29.09.2026): bei JEDEM Abbruch vor dem Push.
+      # Vorher ging die Stunde Scrapen bei einem harten Abbruch vor dem Tor
+      # (Datenstand, Deckempfehlung, Zeilenpruefung), bei einem
+      # Rebase-Konflikt oder einem Zeitlimit ohne jede Spur verloren.
       - name: Frische Daten sichern, falls das Tor zuschlaegt
-        if: failure() && steps.pruefen.outcome == 'failure'
+        if: failure() && steps.commit.outputs.pushed != 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: daten-wochenlauf-${{ github.run_id }}
@@ -1268,20 +1328,31 @@ jobs:
           Triggered by .github/workflows/weekly-full-update.yml
           Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Push with retry — the scraper job runs ~45 min, in which
-          # time origin/main can advance (manual pushes from the
-          # maintainer, an earlier scheduled run still committing,
-          # etc.). A naive `git push` would 'rejected (fetch first)'
-          # and the whole hour of scraped data would sit unpushed.
+          # Push with retry — the scraper job runs ~65 min, in which
+          # time origin/main can advance (Champions-Nachtlaeufe, der
+          # Preislauf um 08:00, ein Merge). A naive `git push` would be
+          # rejected and the whole hour of scraped data would sit unpushed.
           #
-          # Strategy: pull --rebase with -X ours so our just-baked
-          # data + version-bump win on conflict (this run's outputs
-          # are by definition the newest snapshot). -X ours only
-          # affects FILES BOTH SIDES MODIFIED — code-only changes
-          # the maintainer pushed are untouched and ride along on
-          # the rebase base. Three attempts, brief sleep between
-          # them, then loud failure with the artifact still safe
-          # in the runner's checkout.
+          # BERICHTIGT 29.09.2026. Hier stand `-X ours` mit der Begruendung
+          # "our just-baked data wins on conflict". Beim REBASE ist es
+          # umgekehrt: "ours" ist die Basis (origin/main), "theirs" der
+          # Commit, der neu aufgesetzt wird — also dieser Lauf. Gemessen in
+          # einem Wegwerf-Repo: mit `-X ours` gewann im Konfliktabschnitt der
+          # Nachtlauf, und bei einer Aenderung an derselben Zeile verwarf der
+          # Rebase den ganzen Wochencommit ("patch contents already
+          # upstream"); der Push meldete danach "Everything up-to-date" mit
+          # rc 0, und pushed=true stiess einen Deploy an — alles gruen, Daten
+          # weg. Deshalb jetzt:
+          #   - `-X theirs`: im Konflikt gewinnt dieser Lauf;
+          #   - ist der Commit nach dem Rebase leer (HEAD == origin/main),
+          #     gilt das als "nichts gepusht", nicht als Erfolg;
+          #   - data_stand.json wird nach dem Rebase NEU erzeugt, statt
+          #     zeilenweise zusammengefuehrt;
+          #   - der zusammengefuehrte Stand ist ein anderer als der gepruefte:
+          #     das Tor laeuft vor dem naechsten Push noch einmal
+          #     (scripts/tor_vor_dem_push.sh). Ist es zu, wird nicht gepusht.
+          #   - zwischen den Versuchen eine Pause (stand im Kommentar, fehlte
+          #     im Code).
           for attempt in 1 2 3; do
             if git push origin HEAD:main; then
               echo "Push succeeded on attempt $attempt"
@@ -1289,9 +1360,21 @@ jobs:
               exit 0
             fi
             echo "Push rejected on attempt $attempt — pulling with rebase…"
-            if ! git pull --rebase=true -X ours origin main; then
+            sleep $((attempt * 20))
+            if ! git pull --rebase=true -X theirs origin main; then
               echo "::error::Rebase conflict beyond version files — manual resolution needed"
               git rebase --abort || true
+              exit 1
+            fi
+            if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
+              echo "::warning::Nach dem Rebase enthaelt der Wochencommit nichts mehr, was nicht schon auf main steht — nichts zu pushen."
+              echo "pushed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            python3 scripts/build_data_stand.py \
+              && git add -A && git commit --amend --no-edit -q || true
+            if ! TOR_OHNE_INSTALL=1 bash scripts/tor_vor_dem_push.sh kern; then
+              echo "::error::Nach dem Rebase auf den neuen main-Stand ist das Tor zu — nicht gepusht."
               exit 1
             fi
           done

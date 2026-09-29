@@ -38,6 +38,29 @@ const fs = require('fs');
 const path = require('path');
 
 const UNIT = path.join(__dirname);
+/* ZWEI ORDNER SEIT 29.09.2026. Die Champions-, Pocket- und Side-Quest-Tests
+   liegen unter tests/nebenbereiche/unit und laufen nicht mehr im Tor des
+   Wochenlaufs und nicht im Deploy-Test (ein Fehler dort haelt den TCG-Kern
+   nicht mehr an). Dieses Register bleibt fuer beide Ordner zustaendig: die
+   Regel "keine Wochenwerte in Tests" gilt dort genauso, und die Obergrenzen
+   unten sind ueber beide Ordner gezaehlt. */
+const NEBEN = path.join(__dirname, '..', 'nebenbereiche', 'unit');
+const ORDNER = [UNIT, NEBEN].filter((o) => fs.existsSync(o));
+/* Dateiname -> voller Pfad, ueber beide Ordner. Ein Name darf nur einmal
+   vorkommen — sonst waere das Register mehrdeutig. */
+const PFAD = (() => {
+    const m = new Map();
+    for (const o of ORDNER) {
+        for (const f of fs.readdirSync(o)) {
+            if (m.has(f) && f.startsWith('test-')) {
+                throw new Error(`${f} liegt in zwei Testordnern — das Register waere mehrdeutig`);
+            }
+            m.set(f, path.join(o, f));
+        }
+    }
+    return m;
+})();
+const ALLE = () => [...PFAD.keys()];
 
 /* Der ENGE Blick: der Lesevorgang steht ausgeschrieben im Test.
    Bis zum 22.09.2026 war das der einzige. */
@@ -96,9 +119,9 @@ const UNGLEICHUNG = /assert\.ok\([^;]*[<>]=?\s*-?\d/;
 const GLEICHHEIT = /assert\.(equal|strictEqual|deepEqual|deepStrictEqual)\([^;]*,\s*-?\d{2,}\s*[,)]/;
 
 function dateienMitDatenzugriff() {
-    return fs.readdirSync(UNIT)
+    return ALLE()
         .filter(f => f.startsWith('test-') && f.endsWith('.js'))
-        .filter(f => liestLiveDaten(fs.readFileSync(path.join(UNIT, f), 'utf8')));
+        .filter(f => liestLiveDaten(fs.readFileSync(PFAD.get(f), 'utf8')));
 }
 
 /* Nur die Dateien, die der enge Blick sieht. Seit dem 22.09.2026 haengt
@@ -106,13 +129,13 @@ function dateienMitDatenzugriff() {
    Funktion bleibt, weil die Notiz oben den Unterschied beschreibt und
    eine Pruefung ohne ihren Gegenbegriff schwer zu lesen ist. */
 function dateienMitDirektemDatenzugriff() {
-    return fs.readdirSync(UNIT)
+    return ALLE()
         .filter(f => f.startsWith('test-') && f.endsWith('.js'))
-        .filter(f => liestLiveDatenDirekt(fs.readFileSync(path.join(UNIT, f), 'utf8')));
+        .filter(f => liestLiveDatenDirekt(fs.readFileSync(PFAD.get(f), 'utf8')));
 }
 
 function zeilenMit(datei, muster) {
-    return fs.readFileSync(path.join(UNIT, datei), 'utf8').split('\n')
+    return fs.readFileSync(PFAD.get(datei), 'utf8').split('\n')
         .filter(z => {
             const s = z.trim();
             if (s.startsWith('//') || s.startsWith('*')) return false;
@@ -667,7 +690,7 @@ describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
     });
 
     it('das Register enthaelt keine Datei, die es nicht mehr gibt', () => {
-        const da = new Set(fs.readdirSync(UNIT));
+        const da = new Set(ALLE());
         const tot = Object.keys(REGISTER).filter(f => !da.has(f));
         assert.deepEqual(tot, [], 'Register zeigt auf geloeschte Dateien');
     });

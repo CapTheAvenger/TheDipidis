@@ -81,7 +81,8 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # +15 min fuer das Tor vor dem Push (Kern-Suiten ~6,5 min im Deploy-Test, 29.09.2026)
+    timeout-minutes: 35
 
     steps:
       - name: Checkout repo
@@ -178,6 +179,23 @@ jobs:
       # commiten, fehlte dieser Schritt.
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
+
+      # DAS TOR VOR DEM PUSH (29.09.2026) — scripts/tor_vor_dem_push.sh.
+      # Wer nach main schreibt, prueft vorher: faellt hier eine Zusicherung,
+      # bricht der Schritt ab, und Commit, Push und Deploy-Anstoss werden
+      # uebersprungen. main bleibt gruen, und weder der Deploy noch das Tor
+      # des naechsten Wochenlaufs erben den roten Stand.
+      # Bereich `alle`: dieser Ablauf schreibt Champions-/Pocket-Daten,
+      # also prueft er Kern UND tests/nebenbereiche.
+      - name: Node fuer das Tor
+        if: ${{ success() && inputs.trocken != true }}
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '20'
+
+      - name: Tor vor dem Push
+        if: ${{ success() && inputs.trocken != true }}
+        run: bash scripts/tor_vor_dem_push.sh alle
 
       - name: Commit + push
         id: commit

@@ -4,6 +4,7 @@ Limitless Online Deck Scraper - Fast Edition
 Uses cloudscraper + BeautifulSoup4 + ThreadPoolExecutor for parallel matchup scraping.
 """
 
+import sys
 import csv
 import re
 import json
@@ -1434,5 +1435,9 @@ if __name__ == "__main__":
         logger.error("Unexpected error: %s", e)
         import traceback
         traceback.print_exc()
+        # Ein Absturz ist kein Erfolg (29.09.2026). Bis hier endete das
+        # Skript nach dem Protokolleintrag mit Code 0 — der Wochenlauf
+        # zaehlte den Absturz als OK, auch fuer die kritischen Scraper.
+        sys.exit(1)
     finally:
         print("\n" + "=" * 50)

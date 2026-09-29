@@ -179,19 +179,22 @@
                 datei: 'data/limitless_online_decks.csv',
                 /* Diese Datei traegt ihr Format NICHT im Namen: sie wird bei
                    jeder Rotation neu gefuellt. Die Zeilenzahlen unten gelten
-                   deshalb fuer dieses eine Fenster. Am 16.09.2026 ist auf
-                   TEF-30C rotiert (siehe tests/formatfenster.js). */
-                fenster: 'TEF-PBL',
+                   deshalb fuer dieses eine Fenster.
+                   NACHGEMESSEN 29.09.2026 im Fenster TEF-30C (vorher TEF-PBL:
+                   136 Zeilen, 135 Treffer) — vor Ablauf der Gnadenfrist am
+                   07.10.2026 (tests/formatfenster.js, JUNG_TAGE). */
+                fenster: 'TEF-30C',
                 trenner: ';',
                 spalte: 'win_rate_numeric',
                 bilanz: ['wins', 'losses', 'ties'],
-                zeilen: 136,
+                zeilen: 111,
                 toleranz: 0.01,
-                treffer: 135,
-                /* Wailord, 168-267-1: die Datei sagt 38,65 und trifft damit
-                   KEINE der drei Konventionen (naechste ist S/(S+N) mit
-                   0,029 Punkten Abstand). Ein Datenfehler der Quelle. */
-                ausnahmen: ['Wailord'],
+                treffer: 111,
+                /* Bis 29.09.2026 stand hier Wailord (168-267-1, die Datei
+                   sagte 38,65 und traf keine Konvention). Im Fenster
+                   TEF-30C folgt jede Zeile der Formel — die Ausnahme war
+                   veraltet und ist gestrichen. */
+                ausnahmen: [],
             },
             rechne: function (s, n, u) {
                 var p = (s || 0) + (n || 0) + (u || 0);
@@ -218,15 +221,16 @@
                 datei: 'data/limitless_online_decks_matchups.csv',
                 /* Diese Datei traegt ihr Format NICHT im Namen: sie wird bei
                    jeder Rotation neu gefuellt. Die Zeilenzahlen unten gelten
-                   deshalb fuer dieses eine Fenster. Am 16.09.2026 ist auf
-                   TEF-30C rotiert (siehe tests/formatfenster.js). */
-                fenster: 'TEF-PBL',
+                   deshalb fuer dieses eine Fenster.
+                   NACHGEMESSEN 29.09.2026 im Fenster TEF-30C (vorher TEF-PBL:
+                   1.716 Zeilen, 1.716 Treffer). */
+                fenster: 'TEF-30C',
                 trenner: ';',
                 spalte: 'win_rate',
                 bilanz: 'record',
-                zeilen: 1716,
+                zeilen: 976,
                 toleranz: 0.0051,
-                treffer: 1716,
+                treffer: 976,
             },
             rechne: function (s, n) {
                 var e = (s || 0) + (n || 0);

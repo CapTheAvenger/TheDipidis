@@ -75,20 +75,133 @@ def _fenster_aus_dateiname(pfad):
 
 
 def _majors_meta():
-    """Das Format der Majors-Zeilen \u2014 aus derselben Spalte `meta`, aus der
-    auch die Zahlen kommen."""
+    """Das Format der LETZTEN Majors \u2014 aus derselben Spalte `meta`, aus der
+    auch die Zahlen kommen.
+
+    NACHGETRAGEN 29.09.2026 (Wochenlauf #168, Tor rot). Bis heute verlangte
+    diese Funktion, dass alle Majors-Zeilen EIN Format tragen, und brach
+    sonst ab. Das hielt genau so lange, bis das erste Major des neuen
+    Formats kam: Brisbane und Frankfurt (26.09.2026) brachten TEF-30C-Zeilen
+    neben die TEF-PBL-Zeilen, das Skript brach ab, die Masterclass blieb
+    stehen und das Tor fand ihre Feldanteile veraltet.
+
+    Bestellt sind "die letzten Majors". Das ist das Format, dessen Zeilen
+    das juengste Turnier enthalten \u2014 labs vergibt die Turniernummern
+    fortlaufend, `tournaments_used` nennt sie je Zeile.
+    """
     csv.field_size_limit(10 ** 7)
-    metas = set()
+    juengstes = {}
     with open(LABS_MU, encoding="utf-8-sig") as f:
         for r in csv.DictReader(f):
             if r["my_deck_slug"] != EIGEN or r["day_filter"] != "overall":
                 continue
             if not (r["vs_wins"] or "").strip():
                 continue
-            metas.add(r["meta"])
-    if len(metas) != 1:
-        raise SystemExit(f"::error::die Majors-Zeilen mischen Formate: {sorted(metas)}")
-    return metas.pop()
+            nummern = [int(t) for t in re.findall(r"\d+", r.get("tournaments_used") or "")]
+            if not nummern:
+                raise SystemExit(f"::error::Majors-Zeile ohne tournaments_used ({r['meta']})")
+            juengstes[r["meta"]] = max(juengstes.get(r["meta"], 0), max(nummern))
+    if not juengstes:
+        raise SystemExit("::error::keine Majors-Zeilen fuer " + EIGEN)
+    return max(juengstes, key=juengstes.get)
+
+
+LABS_DECKS = os.path.join(DATEN, "labs_tournament_decks.csv")
+
+
+def _kurzname(name):
+    """"Regional Championship Brisbane" -> "Brisbane", "World Championship
+    San Francisco" -> "Worlds" — so, wie das Stueck die Turniere nennt."""
+    n = str(name or "").strip()
+    if n.lower().startswith("world championship"):
+        return "Worlds"
+    for vorn in ("Regional Championship ", "International Championship ",
+                 "Special Event "):
+        if n.startswith(vorn):
+            rest = n[len(vorn):]
+            return ("IC " + rest) if vorn.startswith("International") else rest
+    return n
+
+
+def _majors_turniere(meta):
+    """Die Turniernummern der Majors-Zeilen dieses Formats, aufsteigend,
+    und ihre Kurznamen aus labs_tournament_decks.csv."""
+    csv.field_size_limit(10 ** 7)
+    nummern = set()
+    with open(LABS_MU, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            if (r["my_deck_slug"] != EIGEN or r["day_filter"] != "overall"
+                    or r["meta"] != meta or not (r["vs_wins"] or "").strip()):
+                continue
+            nummern.update(int(t) for t in re.findall(r"\d+", r.get("tournaments_used") or ""))
+    namen = {}
+    if os.path.exists(LABS_DECKS):
+        with open(LABS_DECKS, encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f):
+                t = (r.get("tournament_id") or "").strip().lstrip("0")
+                if t.isdigit() and int(t) in nummern:
+                    namen[int(t)] = _kurzname(r.get("tournament_name"))
+    reihe = sorted(nummern)
+    return reihe, [namen.get(t, "Turnier %d" % t) for t in reihe]
+
+
+def _und(teile):
+    teile = list(teile)
+    if len(teile) <= 1:
+        return "".join(teile)
+    return ", ".join(teile[:-1]) + " und " + teile[-1]
+
+
+MAJORS_KOPF = re.compile(r"Majors \(([^)<]+)\)")
+
+
+def majors_umstellen(roh, meta_neu, laufend):
+    """Stellt das Stueck auf die Majors eines NEUEN Formats um.
+
+    ANLASS 29.09.2026. Mit dem ersten Major des laufenden Formats (Brisbane
+    und Frankfurt, TEF-30C) wechselt die Spalte "Majors". Ohne diesen
+    Schritt faende der Erzeuger keine einzige Zelle mit dem neuen Kopf und
+    schriebe nichts — und drei Saetze im Stueck (Spaltenkopf, Sprechblase,
+    Legende "ein Praesenzturnier im laufenden Format gab es noch nicht")
+    stuenden weiter da und waeren falsch.
+
+    Umgestellt wird nur, was diese Spalte BENENNT: der Kopf, der Anfang der
+    Sprechblasen, der Legendensatz und die Quellenzeile. Die Zahlen rechnet
+    danach `nachziehen` wie immer. Gibt (Text, Aenderungen) zurueck.
+    """
+    alt_koepfe = set(MAJORS_KOPF.findall(roh))
+    kopf_neu = _kopf(meta_neu)
+    if not alt_koepfe or alt_koepfe == {kopf_neu}:
+        return roh, []
+    if len(alt_koepfe) != 1:
+        raise SystemExit("::error::das Stueck nennt mehrere Majors-Koepfe: %s"
+                         % sorted(alt_koepfe))
+    kopf_alt = alt_koepfe.pop()
+    nummern, namen = _majors_turniere(meta_neu)
+    if not nummern:
+        raise SystemExit("::error::keine Turniere fuer Majors (%s)" % meta_neu)
+    turniere = _und(namen)
+    t = roh.replace("Majors (%s)" % kopf_alt, "Majors (%s)" % kopf_neu)
+    # Sprechblasen: "Letzte Präsenzturniere (Worlds und Baltimore), Format TEF–PBL: "
+    t, n_blasen = re.subn(
+        r'title="Letzte Präsenzturniere \([^)]*\), Format ' + re.escape(kopf_alt) + ': ',
+        'title="Letzte Präsenzturniere (%s), Format %s: ' % (turniere, kopf_neu), t)
+    # Legende: der Satz, der erklaert, woher die Majors-Spalte kommt.
+    if meta_neu == laufend:
+        satz = ("sind die letzten Präsenzturniere (%s), schon im laufenden Format."
+                % turniere)
+    else:
+        satz = ("sind die letzten Präsenzturniere (%s) — die liefen noch im Format %s."
+                % (turniere, kopf_neu))
+    t, n_legende = re.subn(r"sind die letzten Präsenzturniere[^.]*?\.(?:[^.<]*?gab es noch nicht\.)?",
+                           satz, t, count=1)
+    # Quellenzeile: "Turniere 71 und 72"
+    t, n_quelle = re.subn(r"(labs_tournament_matchups\.csv</code>, )Turniere [\d ,und]+?(,\s)",
+                          lambda m: m.group(1) + "Turniere " + _und(str(x) for x in nummern) + m.group(2),
+                          t, count=1)
+    return t, ["Majors-Spalte umgestellt: %s -> %s (%s); %d Sprechblasen, "
+               "Legende %d, Quellenzeile %d" % (kopf_alt, kopf_neu, turniere,
+                                                n_blasen, n_legende, n_quelle)]
 
 
 def koepfe():
@@ -120,6 +233,7 @@ def _online(pfad):
 
 
 def _majors():
+    meta = _majors_meta()
     csv.field_size_limit(10 ** 7)
     z = {}
     with open(LABS_MU, encoding="utf-8-sig") as f:
@@ -127,6 +241,8 @@ def _majors():
             if r["my_deck_slug"] != EIGEN or r["day_filter"] != "overall":
                 continue
             if not (r["vs_wins"] or "").strip():
+                continue
+            if r["meta"] != meta:
                 continue
             z[r["opponent_deck_slug"]] = [
                 int(r["vs_wins"]), int(r["vs_losses"]), int(r["vs_ties"] or 0)]
@@ -353,7 +469,10 @@ def main():
         k["davor"]: _online(ONLINE_DAVOR),
         k["majors"]: _majors(),
     }
+    laufend = _fenster_aus_dateiname(ONLINE_JETZT)
+    roh, umstellung = majors_umstellen(roh, _majors_meta(), laufend)
     neu, aenderungen, ohne_slug = nachziehen(roh, quellen, _slugs())
+    aenderungen = umstellung + aenderungen
     neu, stand_aend = stand_nachziehen(neu)
     aenderungen += stand_aend
     anteile = _feldanteile()

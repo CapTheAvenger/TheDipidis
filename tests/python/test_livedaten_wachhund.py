@@ -45,6 +45,18 @@ import os
 WURZEL = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 PY_TESTS = os.path.join(WURZEL, 'tests', 'python')
+# Seit 29.09.2026 liegen die Champions-/Pocket-/Side-Quest-Tests unter
+# tests/nebenbereiche/python (sie laufen nicht mehr im Tor und nicht im
+# Deploy-Test). Die Regel dieses Wachhunds gilt dort genauso.
+PY_ORDNER = [PY_TESTS, os.path.join(WURZEL, 'tests', 'nebenbereiche', 'python')]
+
+
+def _pfad(name):
+    for ordner in PY_ORDNER:
+        p = os.path.join(ordner, name)
+        if os.path.exists(p):
+            return p
+    return os.path.join(PY_TESTS, name)
 
 # Namen, hinter denen das ECHTE data/ des Repos steckt.
 WURZELNAMEN = {'WURZEL', 'ROOT', 'REPO_ROOT', 'PROJEKT', 'BASE'}
@@ -205,11 +217,14 @@ def _befunde():
     schuldig = []
     if not os.path.isdir(PY_TESTS):
         return schuldig
-    for name in sorted(os.listdir(PY_TESTS)):
+    dateien = sorted(
+        (name, os.path.join(ordner, name))
+        for ordner in PY_ORDNER if os.path.isdir(ordner)
+        for name in os.listdir(ordner))
+    for name, voll in dateien:
         if not name.startswith('test_') or not name.endswith('.py'):
             continue
-        quelle = open(os.path.join(PY_TESTS, name),
-                      encoding='utf-8', errors='replace').read()
+        quelle = open(voll, encoding='utf-8', errors='replace').read()
         try:
             baum = ast.parse(quelle)
         except SyntaxError:
@@ -260,7 +275,7 @@ def test_die_ausnahmeliste_zeigt_auf_echte_pruefungen():
     verwaist = []
     for schluessel in AUSNAHMEN:
         datei, _, funktion = schluessel.partition('::')
-        pfad = os.path.join(PY_TESTS, datei)
+        pfad = _pfad(datei)
         if not os.path.exists(pfad):
             verwaist.append(f'{schluessel} (Datei weg)')
             continue

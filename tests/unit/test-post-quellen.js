@@ -24,7 +24,6 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const FENSTER = require('../formatfenster.js');
 const MUSTER = require('../post-uebergabe-muster.js');
 
 const WURZEL = path.join(__dirname, '..', '..');
@@ -32,18 +31,24 @@ const D = (p) => path.join(WURZEL, p);
 
 /* Ein Fenster, das genug kann: fetch aus dem Dateisystem, sonst nichts.
  * Genau so läuft die Post-Seite auch — ohne Anwendungsrahmen. */
-function fenster() {
+function fenster(ersatz) {
+    // `ersatz`: relativer Pfad -> Dateitext. Damit laesst sich EIN gesetzter
+    // Fall einspeisen (eine Zombie-Zeile), ohne die echten Daten anzufassen.
+    const E = ersatz || {};
     const ctx = { console };
     ctx.window = ctx;
     ctx.globalThis = ctx;
     ctx.fetch = function (u) {
-        const p = D(String(u).replace(/^\.\.\//, ''));
-        const da = fs.existsSync(p);
+        const rel = String(u).replace(/^\.\.\//, '').split('?')[0];
+        const p = D(rel);
+        const gesetzt = Object.prototype.hasOwnProperty.call(E, rel);
+        const da = gesetzt || fs.existsSync(p);
+        const lies = () => (gesetzt ? E[rel] : fs.readFileSync(p, 'utf8'));
         return Promise.resolve({
             ok: da,
             status: da ? 200 : 404,
-            text: () => Promise.resolve(fs.readFileSync(p, 'utf8')),
-            json: () => Promise.resolve(JSON.parse(fs.readFileSync(p, 'utf8')))
+            text: () => Promise.resolve(lies()),
+            json: () => Promise.resolve(JSON.parse(lies()))
         });
     };
     vm.createContext(ctx);
@@ -60,6 +65,46 @@ function fenster() {
 
 
 const Q = fenster().window.DsPostQuellen;
+
+/* DIE ZOMBIE-PROBE HAENGT NICHT MEHR AN DER UHR (29.09.2026).
+
+   Bis heute wurde sie ausgesetzt, solange das Formatfenster jung war, und
+   danach wieder scharf — mit der Vorpruefung "die Datei enthaelt eine
+   share=0-Zeile". Gemessen am 29.09.2026: 0 solche Zeilen bei 9.555
+   Decks im Fenster TEF-30C, und `share` rundet erst ab rund 20.000
+   Decks auf 0,00. Ab dem 07.10.2026 waeren beide Proben rot geworden und
+   haetten Tor und Deploy angehalten — ohne dass der Filter kaputt war.
+
+   Die Bedingung, die gemeint ist: der Filter muss an einer share=0-Zeile
+   gezeigt werden. Fuehrt die echte Datei keine, wird EINE gesetzt: die
+   ERSTE Deckzeile (der Rang-1-Name) bekommt share 0. Die erste, nicht die
+   letzte: ein Zombie ganz hinten sortiert ohnehin nie in die Top acht,
+   dann bestuende die Probe auch ohne Filter. */
+const DECKS = 'data/limitless_online_decks.csv';
+function mitZombie() {
+    const text = fs.readFileSync(D(DECKS), 'utf8');
+    const roh = Q.liesCsv(text, ';');
+    const echt = roh.filter((r) => r.deck_name && Q.zahlAus(r.share_numeric) === 0);
+    if (echt.length) return { Qz: Q, roh, zombies: echt, gesetzt: false };
+    const zeilen = text.split('\n');
+    const kopf = zeilen[0].replace(/^\uFEFF/, '').split(';');
+    const iS = kopf.indexOf('share');
+    const iN = kopf.indexOf('share_numeric');
+    assert.ok(iS >= 0 && iN >= 0, `${DECKS} fuehrt share/share_numeric nicht mehr`);
+    const erste = zeilen.findIndex((z, i) => i > 0 && z.trim());
+    assert.ok(erste > 0 && zeilen.filter((z) => z.trim()).length > 9,
+        `${DECKS} hat zu wenige Deckzeilen, um einen Zombie zu setzen`);
+    const f = zeilen[erste].split(';');
+    f[iS] = '0.00%';
+    f[iN] = '0';
+    zeilen[erste] = f.join(';');
+    const neu = zeilen.join('\n');
+    const Qz = fenster({ [DECKS]: neu }).window.DsPostQuellen;
+    const rohNeu = Qz.liesCsv(neu, ';');
+    const zombies = rohNeu.filter((r) => r.deck_name && Qz.zahlAus(r.share_numeric) === 0);
+    assert.equal(zombies.length, 1, 'die gesetzte Zombie-Zeile ist nicht angekommen');
+    return { Qz, roh: rohNeu, zombies, gesetzt: true };
+}
 
 /* DER BRUCHVERBINDER STEHT AN EINER STELLE.
  *
@@ -219,32 +264,14 @@ test('jede Quelle schreibt eine Zahl in ihre Fusszeile', async () => {
 /* ── Was nicht auf das Bild darf ──────────────────────────────────── */
 
 test('keine Zombie-Zeile kommt in die Ausgabe', async () => {
-    const roh = Q.liesCsv(fs.readFileSync(D('data/limitless_online_decks.csv'), 'utf8'), ';');
-    const zombies = roh.filter((r) => r.deck_name && Q.zahlAus(r.share_numeric) === 0);
-    /* NACH EINER ROTATION GIBT ES NOCH KEINE ZOMBIES (23.09.2026).
-
-       Ein Zombie ist ein Deck, das im laufenden Fenster auf share=0
-       gefallen ist. Das braucht Geschichte. Am 16.09.2026 ist auf 30C
-       rotiert, der Online-Scraper zaehlt seither von vorn, und im
-       Wochenlauf #147 fuehrte keine einzige Zeile mehr share=0 — die
-       Vorpruefung schlug an, kaputt war nichts.
-
-       Die Vorpruefung bleibt trotzdem stehen: sie ist der einzige Schutz
-       davor, dass diese Zusicherung leer besteht. Sie wird nur fuer die
-       ersten drei Wochen eines Fensters ausgesetzt, und danach von
-       selbst wieder scharf. Ein Deploy, der laenger stillstuende, waere
-       schlimmer als drei Wochen ohne diese eine Probe. */
-    if (zombies.length === 0 && FENSTER.istJung()) {
-        console.log('    # keine share=0-Zeile im jungen Fenster '
-            + `${FENSTER.fenster().schluessel} (seit ${FENSTER.fenster().start}) — `
-            + `Probe ausgesetzt, ab ${FENSTER.JUNG_TAGE} Tagen wieder scharf`);
-        return;
-    }
-    assert.ok(zombies.length >= 1,
-        'die Datei enthält keine Zeile mit share=0 mehr — dann kann dieser Test ' +
-        'leer bestehen und prüft nichts');
-    const erg = await Q.lade('meta-online');
+    /* Ein Zombie ist ein Deck, das im laufenden Fenster auf share=0
+       gefallen ist. Fuehrt die Datei keinen, setzt mitZombie() einen
+       (siehe dort, 29.09.2026) — die Probe laeuft IMMER. */
+    const { Qz, zombies, gesetzt } = mitZombie();
+    if (gesetzt) console.log(`    # keine share=0-Zeile in ${DECKS} — gesetzt: ${zombies[0].deck_name}`);
+    const erg = await Qz.lade('meta-online');
     const namen = zeilenVon(erg).map((z) => z.name);
+    assert.ok(namen.length >= 3, 'die Ausgabe ist leer — dann besteht die Probe leer');
     zombies.forEach((z) => {
         assert.ok(!namen.includes(z.deck_name),
             `${z.deck_name} steht mit share=0 in der Ausgabe`);
@@ -699,23 +726,12 @@ test('der Zombie-Filter wirkt dort, wo er wirken muss', async () => {
     /* Die alte Zusicherung war strukturell unfehlbar: Zombies haben
      * share=0 und sortieren garantiert ans Ende, koennen die ersten acht
      * also nie erreichen. Man konnte den Filter loeschen, ohne dass ein
-     * Test fiel. Er wirkt an zwei anderen Stellen. */
-    const roh = Q.liesCsv(
-        fs.readFileSync(D('data/limitless_online_decks.csv'), 'utf8'), ';');
-    const zombies = roh.filter((r) => r.deck_name && Q.zahlAus(r.share_numeric) === 0);
-    /* Siehe die Begruendung an der ersten Zombie-Probe weiter oben:
-       ausgesetzt, solange das Fenster jung ist, danach wieder scharf. */
-    if (zombies.length === 0 && FENSTER.istJung()) {
-        console.log('    # keine share=0-Zeile im jungen Fenster '
-            + `${FENSTER.fenster().schluessel} — Probe ausgesetzt`);
-        return;
-    }
-    assert.ok(zombies.length >= 1,
-        'die Datei enthaelt keine Zeile mit share=0 mehr — dann kann dieser ' +
-        'Test leer bestehen');
+     * Test fiel. Er wirkt an zwei anderen Stellen. Fuehrt die Datei
+     * keinen Zombie, setzt mitZombie() einen (29.09.2026). */
+    const { Qz, roh, zombies } = mitZombie();
     const mitAnteil = roh.filter((r) => r.deck_name && Q.zahlAus(r.share_numeric) > 0);
 
-    const erg = await Q.lade('meta-online');
+    const erg = await Qz.lade('meta-online');
     /* 1. Im Spaltenkopf: "8 von N" muss die Zahl OHNE Zombies sein. */
     const n = Q.zahlAus(erg.listeKopf.split(BRUCH)[1]);
     assert.equal(n, mitAnteil.length,

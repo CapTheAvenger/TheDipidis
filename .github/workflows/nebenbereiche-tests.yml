@@ -1,0 +1,67 @@
+name: Nebenbereiche — Champions, Pocket, Side Quest
+
+# DIE TRENNUNG (29.09.2026, Entscheidung Hausi: "ganz trennen")
+# ------------------------------------------------------------
+# Das Tor des Wochenlaufs und der test-Job von deploy-pages.yml fuhren bis
+# heute auch 53 JS-Dateien und 30 Python-Dateien, die nur Champions,
+# Pocket, Side Quest und Victory Road pruefen. Gemessen am 29.09.2026: eine
+# einzige neue Art im Champions-Pokedex (normales Wachstum durch den
+# Nachtlauf) machte zwei davon rot — und damit stand der Deploy, und der
+# Wochenlauf haette keine TCG-Daten mehr gepusht.
+#
+# Seitdem liegen diese Tests unter tests/nebenbereiche/{unit,python} und
+# laufen HIER: bei jedem Push und jedem PR, aber ohne jede Kopplung an den
+# Deploy (kein `needs`, kein Pflicht-Check). Rot heisst: eine Mail — kein
+# Stillstand des TCG-Kerns.
+#
+# Ungeprueft nach main geht trotzdem nichts: die Ablaeufe, die Champions-
+# oder Pocket-Daten schreiben, fahren vor ihrem Push das Tor mit Bereich
+# `alle` (scripts/tor_vor_dem_push.sh) — Kern UND Nebenbereiche.
+# tests/python/test_nebenbereiche_getrennt.py haelt beides fest.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nebenbereiche-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nebenbereiche:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Abhaengigkeiten
+        run: |
+          npm install --no-save papaparse
+          python -m pip install --quiet pytest beautifulsoup4 requests lxml zxing-cpp segno Pillow PyYAML
+          mkdir -p backend/core/data
+          cp -al data/*.csv data/*.json backend/core/data/ 2>/dev/null \
+            || cp data/*.csv data/*.json backend/core/data/
+
+      - name: JS — Nebenbereiche
+        run: bash scripts/run-js-unit-tests.sh tests/nebenbereiche/unit
+
+      - name: Python — Nebenbereiche
+        if: always()
+        run: python -m pytest tests/nebenbereiche/python -q --tb=short

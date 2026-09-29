@@ -311,7 +311,7 @@ def main():
             const soll = {
                 aktuell: b.karten.filter(k => a(k, akt) > 0), standard: b.karten.filter(std),
                 expanded: b.karten.filter(k => !std(k)), rotiert: b.karten.filter(k => !std(k) && vr(k)),
-                raus: b.karten.filter(k => a(k, vor) >= 10 && a(k, akt) < 10), neu: b.karten.filter(k => a(k, akt) >= 10 && a(k, vor) < 10)
+                raus: b.karten.some(k => a(k, akt) > 0) ? b.karten.filter(k => a(k, vor) >= 10 && a(k, akt) < 10) : [], neu: b.karten.filter(k => a(k, akt) >= 10 && a(k, vor) < 10)
             };
             const aus = { akt, vor, mitFormaten: b.mitFormaten, ohneFormate: b.karten.filter(k => !k.manuell && k.inDaten !== false && !k.formate).length };
             for (const w of Object.keys(soll)) {

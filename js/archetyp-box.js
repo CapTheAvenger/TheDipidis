@@ -493,11 +493,24 @@
         return Number.isFinite(v) ? v : 0;
     }
 
-    function formatPasst(k, wahl, kontext) {
+    /**
+     * Wurde der Archetyp der Box im Format ueberhaupt gespielt? Abgeleitet aus
+     * den Karten: spielt irgendein Deck des Archetyps in diesem Format, hat
+     * mindestens eine Karte der Box dort einen Anteil ueber 0.
+     */
+    function imFormatGespielt(box, fmt) {
+        if (!box || !fmt) return false;
+        return (box.karten || []).some(function (k) { return anteilIn(k, fmt) > 0; });
+    }
+
+    function formatPasst(k, wahl, kontext, box) {
         if (!wahl || wahl === 'alle') return true;
         const c = kontext || {};
         if (wahl === 'aktuell') return anteilIn(k, c.aktuell) > 0;
-        if (wahl === 'raus') return anteilIn(k, c.vorher) >= META_SCHWELLE && anteilIn(k, c.aktuell) < META_SCHWELLE;
+        // Hausi, 29.09.2026: „aus dem Meta gefallen“ nur, wenn der Archetyp im
+        // neuen Meta gespielt wurde — ohne Deck im neuen Meta faellt nichts heraus.
+        if (wahl === 'raus') return (!box || imFormatGespielt(box, c.aktuell))
+            && anteilIn(k, c.vorher) >= META_SCHWELLE && anteilIn(k, c.aktuell) < META_SCHWELLE;
         if (wahl === 'neu') return anteilIn(k, c.aktuell) >= META_SCHWELLE && anteilIn(k, c.vorher) < META_SCHWELLE;
         const legal = typeof c.legal === 'function' ? c.legal(k) : null;
         if (wahl === 'standard') return legal === true;
@@ -658,7 +671,7 @@
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
-        formatPasst, formateNachDatum, blockVorRotation, druckIn, anteilIn, META_SCHWELLE, formateZuordnen,
+        formatPasst, imFormatGespielt, formateNachDatum, blockVorRotation, druckIn, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
         isoTag, neuestesDatumImManifest, neueDatenDa, anzahlBegrenzen, STATUS
     };
@@ -1461,7 +1474,7 @@
         return satz;
     }
 
-    function filterLeiste(kontext, ohneFormate) {
+    function filterLeiste(kontext, ohneFormate, gewaehlt) {
         const knopf = function (feld, wert, text) {
             const an = ansicht[feld] === wert;
             return '<button type="button" class="abx-filter' + (an ? ' is-active' : '') + '" aria-pressed="' + (an ? 'true' : 'false')
@@ -1485,6 +1498,11 @@
         };
         const c = kontext || {};
         let fmtZeile = ansicht.format && ansicht.format !== 'alle' ? formatHinweis(ansicht.format, c) : '';
+        if (ansicht.format === 'raus' && c.aktuell) {
+            const ohne = (gewaehlt || []).filter(function (b) { return !imFormatGespielt(b, c.aktuell); });
+            if (ohne.length) fmtZeile += ' ' + tx('abx.fmtRausOhne', { aktuell: c.aktuell, liste: ohne.map(nameVon).join(', ') },
+                'Ohne Deck in {aktuell} fällt nichts heraus: {liste}.');
+        }
         if (ohneFormate && (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu')) {
             fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal aktualisieren („Alle Boxen“ → „Alle Boxen aktualisieren“).');
         }
@@ -1527,7 +1545,7 @@
         const gesamt = eintraege.length;
         const kontext = formatKontext();
         eintraege = eintraege.filter(function (e) {
-            return filterPasst(e.k, ansicht, e.element) && formatPasst(e.k, ansicht.format, kontext);
+            return filterPasst(e.k, ansicht, e.element) && formatPasst(e.k, ansicht.format, kontext, e.box);
         });
         if (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu') {
             eintraege.forEach(function (e) { e.formatZeile = formatZeileVon(e.k, ansicht.format, kontext); });
@@ -1585,7 +1603,7 @@
         }, '{fehlt} fehlen · {original} als Original drin · {proxy} als Proxy drin'))
             + (eintraege.length < gesamt ? ' <span class="abx-gefiltert">' + esc(tx('abx.gefiltert', { n: eintraege.length, g: gesamt },
                 '({n} von {g} nach Filter)')) + '</span>' : '') + '</p>';
-        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName) + filterLeiste(kontext, ohneFormate) + summe
+        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName) + filterLeiste(kontext, ohneFormate, gewaehlt) + summe
             + rubrik('fehlt', tx('abx.rubrikFehlt', null, 'Noch nicht in der Box'), r.fehlt, mitBoxName)
             + rubrik('original', tx('abx.rubrikOriginal', null, 'Schon drin (Original)'), r.original, mitBoxName)
             + rubrik('proxy', tx('abx.rubrikProxy', null, 'Als Proxy drin'), r.proxy, mitBoxName);
@@ -1799,7 +1817,7 @@
         const liste = [];
         quelle.forEach(function (b) {
             const sichtbar = Object.assign({}, b, { karten: (b.karten || []).filter(function (roh) {
-                const k = normiert(roh); return filterPasst(k, ansicht, elementVon(k)) && formatPasst(k, ansicht.format, kontext);
+                const k = normiert(roh); return filterPasst(k, ansicht, elementVon(k)) && formatPasst(k, ansicht.format, kontext, b);
             }) });
             proxyListe(sichtbar).forEach(function (p) { liste.push(p); });
         });

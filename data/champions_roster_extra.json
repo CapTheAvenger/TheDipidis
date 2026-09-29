@@ -7,7 +7,7 @@
    "Smogon (pokemon-showdown)"
   ],
   "base_count": 98,
-  "aus_mega_count": 8,
+  "aus_mega_count": 7,
   "mega_count": 16,
   "form_count": 2,
   "aus_mega": [
@@ -17,8 +17,7 @@
    "Falinks",
    "Malamar",
    "Sceptile",
-   "Scolipede",
-   "Scrafty"
+   "Scolipede"
   ],
   "aus_teams": [
    "Alakazam",
@@ -44,9 +43,10 @@
    "Snorlax",
    "Squawkabilly",
    "Toxtricity",
+   "Tsareena",
    "Vanilluxe"
   ],
-  "aus_teams_count": 24,
+  "aus_teams_count": 25,
   "aus_teams_ohne_werte": [],
   "geschlechtsformen": [
    "Basculegion-F"
@@ -161,6 +161,7 @@
   "Salamence-Mega",
   "Scovillain",
   "Scovillain-Mega",
+  "Scrafty",
   "Sinistcha",
   "Sneasler",
   "Staraptor",
@@ -171,7 +172,6 @@
   "Talonflame",
   "Torkoal",
   "Toxapex",
-  "Tsareena",
   "Typhlosion-Hisui",
   "Tyranitar",
   "Tyranitar-Mega",
@@ -182,7 +182,6 @@
   "Whimsicott",
   "Sceptile",
   "Scolipede",
-  "Scrafty",
   "Eelektross",
   "Malamar",
   "Barbaracle",
@@ -203,6 +202,7 @@
   "Vanilluxe",
   "Alakazam",
   "Manectric",
+  "Tsareena",
   "Glalie",
   "Medicham",
   "Rotom-Mow",

@@ -135,7 +135,7 @@ def parse_date(date_str: str) -> datetime:
 # ============================================================================
 # parse_tournament_date imported from card_scraper_shared
 
-def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: datetime) -> list:
+def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: datetime) -> Optional[list]:
     # Limitless tournament listings cap at 500 rows per page server-side
     # even when ?show= asks for more (verified empirically on 2026-05-23:
     # show=500 and show=1000 both returned exactly 500 entries). To cover
@@ -154,6 +154,13 @@ def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: d
         soup = fetch_page_bs4(url)
         if not soup:
             logger.error("Fehler beim Laden der Turnierliste (Seite %s).", page)
+            if page == 1:
+                # NICHT LESBAR ist nicht "keine Turniere" (29.09.2026).
+                # Bis hier endete ein 403/Timeout auf Seite 1 in derselben
+                # leeren Liste wie eine Saisonpause — der Scraper meldete
+                # "keine Turniere im Fenster" und Code 0. None laesst den
+                # Aufrufer den Unterschied sehen.
+                return None
             break
 
         rows = [tr for tr in soup.select('table.striped tr') if tr.find('td')]
@@ -745,6 +752,11 @@ def main() -> int:
     logger.info("Zeitraum: %s bis %s", start_date_str, end_date_str)
 
     tournaments = get_tournaments_in_date_range(settings['region'], start_date, end_date)
+    if tournaments is None:
+        print("::error::city_league_past_archetype_scraper: die Turnierliste war nicht "
+              "lesbar (Seite 1) — der Bestand bleibt unveraendert, der Lauf ist NICHT "
+              "vollstaendig.", flush=True)
+        return 1
 
     for t_id in settings.get('additional_tournament_ids', []):
         t_info = get_tournament_by_id(str(t_id))

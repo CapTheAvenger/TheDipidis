@@ -548,7 +548,31 @@ def bestand_ist_fertig(zeilen: List[Dict], teilnehmer: int) -> tuple:
     if teilnehmer > 0 and len(zeilen) < teilnehmer * VOLLSTAENDIG_AB:
         return False, ('%d Zeilen bei %d gemeldeten Teilnehmern'
                        % (len(zeilen), teilnehmer))
+    if not ist_abgeschlossen(zeilen):
+        return False, ('kein Top-Cut im Bestand — Momentaufnahme eines '
+                       'laufenden Turniers')
     return True, ''
+
+
+def ist_abgeschlossen(zeilen: List[Dict]) -> bool:
+    """Traegt dieser Stand schon das ENDE des Turniers?
+
+    BEFUND 29.09.2026 (Wochenlauf #168, Tor rot). Der Wochenlauf vom
+    26.09.2026 lief um 09:05 UTC — waehrend die Regionals Brisbane (0073)
+    und Frankfurt (0074) noch liefen. labs zeigt die Standings eines
+    laufenden Turniers schon vollstaendig an, mit JEDEM Spieler: Frankfurt
+    stand bei Runde 2 (Platz 1 mit 2-0-0), Brisbane bei Runde 8. Die
+    Zeilenzahl passte zum gemeldeten Feld, `bestand_ist_fertig` hielt den
+    Stand fuer fertig, und `--resume` hat ihn seitdem jede Woche
+    uebersprungen. In den Daten: 817 und 2.793 Zeilen, day2 und topcut
+    ueberall 0.
+
+    Die Bedingung, die gemeint ist, laesst sich direkt hinschreiben: ein
+    abgeschlossenes Major hat einen Top-Cut. Alle 72 Turniere davor tragen
+    einen (gemessen 29.09.2026: 8 bis 17 Spieler mit topcut=1 je
+    Turnier), keine Momentaufnahme traegt einen.
+    """
+    return any(str(r.get('topcut', '')).strip() == '1' for r in zeilen)
 
 
 def write_output(rows: List[Dict], out_path: str):
@@ -729,7 +753,27 @@ def main():
         # ein Widerspruch, den niemand still aufloesen sollte: melden und
         # den Bestand behalten.
         alt_bestand = bestand_je_tid.get(tid, [])
-        if not neue and alt_bestand:
+        if neue and not ist_abgeschlossen(neue):
+            # Das Turnier laeuft noch (oder labs hat den Cut noch nicht
+            # eingetragen). Eine Momentaufnahme ist kein Ergebnis: sie
+            # traegt Zwischenplaetze, die sich wie Endplaetze lesen.
+            # Ein abgeschlossener Bestand bleibt stehen (das waere ein
+            # Widerspruch); eine fruehere Momentaufnahme faellt weg — sie
+            # ist genauso falsch wie die neue. Beim naechsten Lauf wird
+            # das Turnier wieder geholt (bestand_ist_fertig).
+            if alt_bestand and ist_abgeschlossen(alt_bestand):
+                logger.error("    tid=%s hatte einen Top-Cut, der neue Stand "
+                             "hat keinen — Widerspruch, Bestand bleibt.", tid)
+                ergebnis_je_tid[tid] = alt_bestand
+                nicht_lesbar.append(tid)
+            else:
+                print("::warning::player_continuity: Turnier %s (%s) hat noch "
+                      "keinen Top-Cut — laeuft noch, wird nicht uebernommen "
+                      "(%d Zeilen verworfen, %d alte Zeilen einer "
+                      "Momentaufnahme entfernt)."
+                      % (tid, date, len(neue), len(alt_bestand)), flush=True)
+                ergebnis_je_tid[tid] = []
+        elif not neue and alt_bestand:
             logger.error("    tid=%s liefert 0 Zeilen, hatte aber %d. Das "
                          "ist kein Ergebnis, das ist ein Widerspruch — "
                          "Bestand bleibt, Turnier gilt als nicht gelesen.",

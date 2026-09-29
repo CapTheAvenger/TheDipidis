@@ -220,3 +220,68 @@ def test_zweimal_nachziehen_aendert_nichts_mehr():
     einmal, _a, _o = m.nachziehen(roh, quellen, slugs)
     zweimal, aend2, _o2 = m.nachziehen(einmal, quellen, slugs)
     assert zweimal == einmal and aend2 == [], "der Erzeuger ist nicht stabil"
+
+
+# ---------------------------------------------------------------------------
+# DAS ERSTE MAJOR IM NEUEN FORMAT (29.09.2026, Wochenlauf #168)
+# ---------------------------------------------------------------------------
+#
+# Brisbane und Frankfurt brachten TEF-30C-Zeilen neben die TEF-PBL-Zeilen.
+# Der Erzeuger verlangte "genau ein Format" und brach ab, das Stueck blieb
+# stehen, und das Tor fand seine Feldanteile veraltet — der ganze
+# Wochenlauf wurde nicht gepusht. Beide Zusicherungen fuehren die
+# Funktionen aus, an gesetzten Dateien.
+
+
+
+def _labs_mu(tmp_path, zeilen):
+    p = tmp_path / "labs_tournament_matchups.csv"
+    felder = ["meta", "tournaments_used", "my_deck_slug", "day_filter",
+              "opponent_deck_slug", "opponent_deck_name", "vs_wins", "vs_losses", "vs_ties"]
+    import csv as _csv
+    with open(p, "w", encoding="utf-8", newline="") as f:
+        w = _csv.DictWriter(f, fieldnames=felder)
+        w.writeheader()
+        for z in zeilen:
+            w.writerow(dict(zip(felder, z)))
+    return str(p)
+
+
+def test_die_majors_spalte_nimmt_das_juengste_format(tmp_path, monkeypatch):
+    m = _modul()
+    monkeypatch.setattr(m, "LABS_MU", _labs_mu(tmp_path, [
+        # Das juengere Format ZUERST: ohne Filter ueberschriebe die spaetere
+        # PBL-Zeile die 30C-Zahl — genau das muss rot werden.
+        ("TEF-30C", "73,74", m.EIGEN, "overall", "dragapult", "Dragapult", "3", "4", "0"),
+        ("TEF-PBL", "71,72", m.EIGEN, "overall", "dragapult", "Dragapult", "10", "5", "1"),
+        ("TEF-30C", "73,74", "anderes-deck", "overall", "dragapult", "Dragapult", "9", "9", "9"),
+    ]))
+    assert m._majors_meta() == "TEF-30C", (
+        "die Majors-Spalte nimmt nicht die letzten Majors — oder bricht wie "
+        "bis 29.09.2026 am zweiten Format ab")
+    assert m._majors() == {"dragapult": [3, 4, 0]}, (
+        "die Zahlen der Majors-Spalte mischen die Formate: die Zeile des "
+        "aelteren Formats ueberschreibt oder ergaenzt die des juengsten")
+
+
+def test_der_kopfwechsel_benennt_die_spalte_ueberall_neu(monkeypatch):
+    m = _modul()
+    monkeypatch.setattr(m, "_majors_turniere", lambda meta: ([73, 74], ["Brisbane", "Frankfurt"]))
+    alt = ('<b>Majors (TEF–PBL)</b> sind die letzten Präsenzturniere — die liefen noch '
+           'im Format TEF–PBL, ein\nPräsenzturnier im laufenden Format gab es noch nicht. '
+           'Alle drei sind gleich.'
+           '<span class="mcl-wrz" title="Letzte Präsenzturniere (Worlds und Baltimore), '
+           'Format TEF–PBL: 50,6 %"><em>Majors (TEF–PBL)</em><b>50,6 %</b></span>'
+           '<code>data/labs_tournament_matchups.csv</code>, Turniere 71 und 72,\nalle Tage.')
+    neu, aend = m.majors_umstellen(alt, "TEF-30C", "TEF-30C")
+    assert aend, "der Kopfwechsel meldet keine Aenderung"
+    assert "PBL" not in neu and "Baltimore" not in neu, (
+        "nach dem Kopfwechsel nennt das Stueck noch das alte Format: " + neu)
+    assert "gab es noch nicht" not in neu, (
+        "die Legende behauptet weiter, es gebe kein Praesenzturnier im "
+        "laufenden Format — mit Brisbane und Frankfurt ist das falsch")
+    assert neu.count("Majors (TEF–30C)") == 2
+    assert "Letzte Präsenzturniere (Brisbane und Frankfurt), Format TEF–30C: " in neu
+    assert "Turniere 73 und 74," in neu
+    assert m.majors_umstellen(neu, "TEF-30C", "TEF-30C") == (neu, []), (
+        "ein zweiter Lauf aendert das Stueck noch einmal")

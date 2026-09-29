@@ -257,8 +257,12 @@ def test_zusatzfelder_stolpern_den_writer_nicht(pcs, tmp_path):
 # --- 5. --resume darf nur ueberspringen, was FERTIG ist --------------
 
 def _bestandszeilen(n, mit_id=True):
+    # Die ersten acht Plaetze im Top-Cut: so sieht jedes abgeschlossene
+    # Turnier im Bestand aus. Ohne ihn ist der Stand eine Momentaufnahme
+    # (test_continuity_laufendes_turnier.py, 29.09.2026).
     return [{'tournament_id': '0070', 'player_id': str(i) if mit_id else '',
-             'place': str(i + 1)} for i in range(n)]
+             'place': str(i + 1), 'topcut': '1' if i < 8 else '0'}
+            for i in range(n)]
 
 
 def test_resume_ueberspringt_keinen_rumpf(pcs):

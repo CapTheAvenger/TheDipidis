@@ -8,7 +8,8 @@
 # Exit code: 0 when every suite passes, 1 on the first failure.
 #
 # Usage:
-#   bash scripts/run-js-unit-tests.sh
+#   bash scripts/run-js-unit-tests.sh                           # Kern
+#   bash scripts/run-js-unit-tests.sh tests/nebenbereiche/unit  # Nebenbereiche
 #   npm run test:unit
 set -e
 cd "$(dirname "$0")/.."
@@ -31,7 +32,19 @@ TOTAL_FAIL=0
 FAILED_FILES=()
 LEERE=()
 
-for f in tests/unit/test-*.js; do
+# WELCHER ORDNER (29.09.2026). Ohne Angabe der TCG-Kern: tests/unit. Die
+# Champions-, Pocket- und Side-Quest-Tests liegen unter
+# tests/nebenbereiche/unit und laufen mit
+#   bash scripts/run-js-unit-tests.sh tests/nebenbereiche/unit
+# in eigenen Ablaeufen — ein Fehler dort haelt weder das Tor des
+# Wochenlaufs noch den Deploy an.
+ORDNER="${1:-tests/unit}"
+if [ ! -d "$ORDNER" ]; then
+    echo "::error::Testordner $ORDNER gibt es nicht"
+    exit 1
+fi
+
+for f in "$ORDNER"/test-*.js; do
     if [ ! -s "$f" ]; then
         LEERE+=("$f")
         continue

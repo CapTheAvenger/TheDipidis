@@ -369,6 +369,28 @@ def _get_scraper() -> Any:
         _thread_local.scraper = create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
     return _thread_local.scraper
 
+# Obergrenze fuer ein Retry-After der Quelle (29.09.2026). Bis hier wurde der
+# Wert ungeprueft uebernommen: ein 429 mit "Retry-After: 3600" haette je
+# Adresse zweimal eine Stunde geschlafen (gemessen mit einem lokalen
+# 429-Server: Schlafzeiten [3600, 3600]), und der Wochenlauf waere an seinem
+# Job-Limit von 300 Minuten gestorben — ohne Push, ohne Artefakt. Nach 60 s
+# Pause gilt die Adresse als nicht erreichbar; das ist ein gemeldeter
+# Ausfall statt eines stillen Abbruchs des ganzen Laufs.
+RETRY_AFTER_MAX = 60
+
+
+def warte_nach_retry_after(kopf, ersatz):
+    """Sekunden Pause aus einem Retry-After-Kopf, gedeckelt auf RETRY_AFTER_MAX.
+
+    Nimmt Sekunden ("120") an; alles andere (ein HTTP-Datum, Unsinn, nichts)
+    faellt auf `ersatz` zurueck. Nie negativ, nie ueber der Obergrenze."""
+    try:
+        wert = float(str(kopf).strip()) if kopf is not None else float(ersatz)
+    except (TypeError, ValueError):
+        wert = float(ersatz)
+    return max(0.0, min(wert, float(RETRY_AFTER_MAX)))
+
+
 def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: float = 1.0, quiet: bool = False) -> str:
     """Zentraler HTML Fetcher mit Cloudflare-Bypass und exponentiellem Backoff.
     quiet=True unterdrückt das finale WARNING-Log (z.B. wenn ein Fallback folgt).
@@ -395,7 +417,7 @@ def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: 
             last_status = resp.status_code
             # Rate-limit / overload: back off longer before retry
             if resp.status_code in (429, 503):
-                retry_after = int(resp.headers.get('Retry-After', delay * 3))
+                retry_after = warte_nach_retry_after(resp.headers.get('Retry-After'), delay * 3)
                 logger.warning("HTTP %s for %s — backing off %ss", resp.status_code, url, retry_after)
                 if attempt <= retries:
                     time.sleep(retry_after)
@@ -1207,7 +1229,17 @@ def _resolve_card_info(card_name: str, set_versions: Mapping[Tuple[str, str], in
         'number': best_number,
         'rarity': specific.get('rarity', fallback.get('rarity', '')),
         'type': specific.get('type', fallback.get('type', '')),
-        'image_url': specific.get('image_url', fallback.get('image_url', '')),
+        # KEIN Namens-Rueckfall fuer das Bild (29.09.2026, Wochenlauf #168).
+        # Kennt die Kartendatenbank den gespielten Druck nicht (MEM 6
+        # Smoliv, JP-Set vom 31.07.2026), holte diese Zeile das Bild des
+        # gleichnamigen Drucks aus einem ANDEREN Set (DRI 21) — genau der
+        # Namens-Join, den tests/python/test_set_nummern_und_maxcount.py
+        # zaehlt und der den Wochenlauf angehalten hat. Das Frontend
+        # loest Bilder ohnehin ueber (Set, Nummer) auf
+        # (getBestCardImage in js/app-city-league.js); eine leere Zelle
+        # behauptet nichts, eine fremde Bildadresse behauptet die falsche
+        # Karte.
+        'image_url': specific.get('image_url', '') if specific else '',
     }
 
 def save_to_csv(data: List[RowDict], output_file: str, append_mode: bool = False):

@@ -747,6 +747,21 @@ def baue_einen(mc_id, eintrag):
             grp = kartengruppe.gruppe(typ_quelle, name)
             if grp is not None and not typ_bestand:
                 typ = typ_quelle
+        if grp is None and not typ_bestand:
+            # BEFUND 29.09.2026 (Wochenlauf #168, Tor rot): Psychic Energy
+            # MEE-13 steht nicht in data/cards_chunk_*.json (die
+            # JP-Nummerierung der Decklisten ist eine andere, benannt in
+            # data/datenluecken.json, Klasse "kartentyp"), und die Quelle
+            # fuehrt nur die grobe Spalte "energy". Beides reicht
+            # kartengruppe.gruppe() nicht — sie gibt dann ausdruecklich None,
+            # "der Aufrufer kann eine andere Quelle fragen". Die andere Quelle
+            # ist der Name, und nur fuer genau eine Frage: ist das eine
+            # Basis-Energie? ("Psychic Energy", nicht "Telepathic Psychic
+            # Energy"). Kein Namens-Join auf Kartendaten — die Karte bekommt
+            # nichts ausser ihrer Gruppe.
+            grp = kartengruppe.gruppe("", name)
+            if grp == "basic-energy":
+                typ = kartengruppe.LABEL_EN.get(grp) or "Basic Energy"
         karten_raus.append({
             "name": name, "name_de": de_namen.get((satz, nr)),
             "set": satz, "nummer": nr,

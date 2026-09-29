@@ -375,33 +375,54 @@ def _online(pfad):
 
 
 def _majors():
+    meta = _majors_meta()
     csv.field_size_limit(10 ** 7)
     z = {}
     with open(LABS_MU, encoding="utf-8-sig") as f:
         for r in csv.DictReader(f):
             if r["my_deck_slug"] != EIGEN or r["day_filter"] != "overall":
                 continue
-            if not (r["vs_wins"] or "").strip():
+            if not (r["vs_wins"] or "").strip() or r["meta"] != meta:
                 continue
             z[r["opponent_deck_slug"]] = [int(r["vs_wins"]), int(r["vs_losses"]), int(r["vs_ties"] or 0)]
     return z
 
 
+LABS_DECKS = os.path.join(WURZEL, "data", "labs_tournament_decks.csv")
+
+
 def _majors_meta():
-    """Das Format, in dem die Majors gespielt wurden — aus der Spalte
-    meta derselben Zeilen, aus denen die Zahlen kommen. Steht im Stueck
-    ein anderes Fenster im Spaltenkopf, ist die Beschriftung falsch."""
+    """Das Format der LETZTEN Majors — aus der Spalte meta derselben Zeilen,
+    aus denen die Zahlen kommen. Steht im Stueck ein anderes Fenster im
+    Spaltenkopf, ist die Beschriftung falsch.
+
+    NACHGETRAGEN 29.09.2026. Hier stand "genau ein Format, sonst rot". Das
+    erste Major des neuen Formats (Brisbane/Frankfurt, TEF-30C neben
+    TEF-PBL) hat damit den Wochenlauf #168 angehalten, ohne dass etwas
+    falsch war. Bestellt sind "die letzten Majors": das Format, dessen
+    Turniere am juengsten sind. Gerechnet wird hier ueber das DATUM aus
+    labs_tournament_decks.csv — der Erzeuger nimmt die Turniernummer. Zwei
+    Wege zur selben Antwort; laufen sie auseinander, ist das ein Befund."""
     csv.field_size_limit(10 ** 7)
-    metas = set()
+    datum = {}
+    with open(LABS_DECKS, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            tid = (r.get("tournament_id") or "").strip().lstrip("0")
+            if tid:
+                datum[tid] = max(datum.get(tid, ""), (r.get("tournament_date") or "").strip())
+    juengstes = {}
     with open(LABS_MU, encoding="utf-8-sig") as f:
         for r in csv.DictReader(f):
             if r["my_deck_slug"] != EIGEN or r["day_filter"] != "overall":
                 continue
             if not (r["vs_wins"] or "").strip():
                 continue
-            metas.add(r["meta"])
-    assert len(metas) == 1, "die Majors-Zeilen mischen Formate: %s" % sorted(metas)
-    return metas.pop()
+            for t in re.findall(r"\d+", r.get("tournaments_used") or ""):
+                d = datum.get(t.lstrip("0"), "")
+                assert d, "Turnier %s der Majors-Zeilen hat kein Datum in %s" % (t, LABS_DECKS)
+                juengstes[r["meta"]] = max(juengstes.get(r["meta"], ""), d)
+    assert juengstes, "keine Majors-Zeilen fuer %s" % EIGEN
+    return max(juengstes, key=juengstes.get)
 
 
 def _fenster_aus_dateiname(pfad):

@@ -40,7 +40,10 @@ const path = require('node:path');
 
 const WURZEL = path.join(__dirname, '..', '..', '..');
 const qr = require(path.join(WURZEL, 'js', 'qr-svg.js'));
-const DATEN = JSON.parse(fs.readFileSync(path.join(WURZEL, 'data', 'pocket_tierlist.json'), 'utf8'));
+// Die echten, in Pocket gescannten Codes vom 28.09.2026 — eingefroren beim
+// Wechsel auf Limitless (29.09.2026), damit der Vorrat nicht mit der
+// Wochenliste wechselt.
+const DATEN = JSON.parse(fs.readFileSync(path.join(WURZEL, 'tests', 'fixtures', 'pocket_game8_decks.json'), 'utf8'));
 const CODES = DATEN.decks.map(d => d.code);
 
 // Gemessen am 07.09.2026 mit segno (requirements.txt) ueber alle 33

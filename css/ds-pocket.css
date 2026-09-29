@@ -164,7 +164,7 @@
 .pk-sprite + .pk-sprite { margin-left: -8px; }
 
 .pk-name {
-    /* Deck-Namen sind englisch (Game8s Bezeichnungen) und lang. Sie
+    /* Deck-Namen sind englisch (Bezeichnungen der Quelle) und lang. Sie
        brechen um statt zu kürzen: sieben beginnen mit "Team Rocket's …",
        das Unterscheidende steht hinten. */
     flex: 1 1 auto;

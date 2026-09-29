@@ -131,11 +131,10 @@ describe('Nicht blockierende Schritte fuehren Buch', () => {
         // Der Deploy selbst: er faellt bei einem echten Fehler ohnehin um,
         // und seine `set +e`-Stellen sind Aufraeumschritte.
         'deploy-pages.yml',
-        // Geprueft am 05.09.2026: der Pocket-Lauf faellt bei einem
-        // Scraperfehler ausdruecklich HART um (der Kommentar "WARUM
-        // DIESER SCHRITT JETZT ROT WERDEN DARF" steht in der Datei).
-        // Seine `exit 0`-Stellen sind der Commit-Schritt, der nichts
-        // zu committen hat — das ist kein verschluckter Fehler.
+        // Geprueft am 05.09.2026, nachgesehen 29.09.2026 (Limitless): der
+        // Pocket-Lauf faellt bei einem Scraperfehler HART um; seine
+        // `exit 0`-Stellen sind der Commit-Schritt, der nichts zu
+        // committen hat — das ist kein verschluckter Fehler.
         'pocket-tierlist.yml',
     ]);
 

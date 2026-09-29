@@ -201,3 +201,37 @@ def test_ohne_format_window_gilt_die_handliste(daten):
     assert fenster, 'ohne format_window.json bleibt gar kein Fenster uebrig'
     assert fenster[0][0] == 'TEF-PBL'
     modul._fenster_zwischenspeicher = None
+
+
+def test_das_abgeloeste_fenster_bleibt_eine_rotation_spaeter_erhalten(daten):
+    """SC-7 (29.09.2026): ein Setwechsel spaeter ist das alte laufende
+    Fenster weder laufend noch in ROTATIONEN. Gemessen mit
+    scripts/simuliere_setwechsel.py: alle 30C-Turniere rutschten dann ins
+    PBL-Fenster. Das abgeloeste Fenster kommt jetzt aus dem Bestand
+    (online_api_cards_<SCHLUESSEL>.csv, previous_format_key)."""
+    modul = _api_modul()
+    meta_pfad = os.path.join(daten, 'sets_metadata.json')
+    fw_pfad = os.path.join(daten, 'format_window.json')
+    meta = json.load(open(meta_pfad, encoding='utf-8'))
+    meta['QX1'] = {'release_date': '2026-09-16'}
+    meta['QX2'] = {'release_date': '2026-11-07'}
+    json.dump(meta, open(meta_pfad, 'w', encoding='utf-8'))
+    fw = json.load(open(fw_pfad, encoding='utf-8'))
+    fw.update({'current_set': 'QX2', 'oldest_legal_set': 'TEF',
+               'previous_format_key': 'TEF-QX1'})
+    json.dump(fw, open(fw_pfad, 'w', encoding='utf-8'))
+
+    assert all(k != 'TEF-QX1' for k, _ in modul.ROTATIONEN), 'Probe braucht ein Set ausserhalb der Handliste'
+    modul._fenster_zwischenspeicher = None
+    assert modul.formatschluessel('2026-10-01', daten) == 'TEF-QX1', (
+        'das gerade abgeloeste Fenster ist verschwunden — seine Turniere '
+        'landen im Fenster davor')
+    assert modul.formatschluessel('2026-11-08', daten) == 'TEF-QX2'
+
+    # Ohne previous_format_key traegt der Dateiname allein.
+    fw['previous_format_key'] = ''
+    json.dump(fw, open(fw_pfad, 'w', encoding='utf-8'))
+    open(os.path.join(daten, 'online_api_cards_TEF-QX1.csv'), 'w').write('tournament_id;meta\n')
+    modul._fenster_zwischenspeicher = None
+    assert modul.formatschluessel('2026-10-01', daten) == 'TEF-QX1'
+    modul._fenster_zwischenspeicher = None

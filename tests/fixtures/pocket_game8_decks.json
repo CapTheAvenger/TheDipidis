@@ -1,0 +1,3298 @@
+{
+ "_meta": {
+  "zweck": "Tier-Liste und Set-Decks für Pokémon TCG Pocket, mit geprüftem Scan-Code je Deck.",
+  "quelle": "game8.co",
+  "quelle_url": "https://game8.co/games/Pokemon-TCG-Pocket/archives/477754",
+  "quelle_hinweis": "Die Tier-Einstufung ist die redaktionelle Einschätzung von Game8, keine von uns gemessene Zahl. Die Oberfläche muss das anschreiben.",
+  "code_hinweis": "Der Scan-Code ist der ausgelesene Inhalt des 2D-Musters, nicht Game8s Bild. Gelesen wurde jedes Muster auf fünf Wegen; übernommen nur, wenn mindestens zwei denselben Inhalt ergaben und keiner widersprach. Danach wurde geprüft, dass der Inhalt unsere eigene Darstellung übersteht — neu erzeugt und wieder ausgelesen ergibt denselben Inhalt. Das Zweite sagt nichts über die Echtheit, nur über die Darstellbarkeit; die Echtheit sichert das Erste.",
+  "abgerufen": "2026-09-28T07:31:02+00:00",
+  "anzahl": 34,
+  "karten_hinweis": "Die Kartenlisten stehen im Fließtext derselben Deck-Seite, von der auch das 2D-Muster stammt — kein zusätzlicher Abruf. Die Aufteilung in Pokémon und Trainer nennt der Scan-Code, die Kartenzahlen nennt die Seite; beide müssen aufgehen. Das ist aber KEIN Beweis, dass ein Code zu seinem Deck gehört: nachgemessen am 07.09.2026 wurden 783 von 1056 Paarungen mit einem FREMDEN Code trotzdem angenommen (74 %). Was die Prüfung zuverlässig fängt, ist ein verrutschter Parser. Decks mit `karten_hinweis` statt Listen haben sie nicht bestanden; ihr Code gilt weiterhin, ihre Liste wird nicht gezeigt. `karten_abgleich` ist die schärfere Angabe (Vielfachheiten der Kennungen gegen die Anzahlen der Seite): auf dem Weg, den der Lauf geht, gehen 117 von 1056 fremden Codes durch (11,1 %) — schärfer als die 74 % der Trennung, aber kein Beweis. Sie sperrt nicht, weil Game8 zwei Drucke derselben Karte in einer Zeile zusammenfasst und ein Deck von 33 deshalb zu Recht herausfällt.",
+  "set_abschnitte": [
+   "New Team Rocket's Ambition Decks",
+   "Old Decks Updated with Team Rocket's Ambition"
+  ],
+  "uebersicht": {
+   "tier_tabelle": 25,
+   "set_tabelle": 28,
+   "angegangen": 53,
+   "mit_kartenliste": 34,
+   "kartenliste_streng": 33
+  },
+  "ohne_code": [
+   {
+    "name": "Mega Absol ex and Hydreigon [hm_101]",
+    "grund": "der Anker hm_101 zeigt auf keinen Deck-Abschnitt, und der Name 'Mega Absol ex and Hydreigon' trifft keinen der 11 Abschnitte eindeutig"
+   },
+   {
+    "name": "Mega Altaria ex and Greninja [hm_104]",
+    "grund": "der Anker hm_104 zeigt auf keinen Deck-Abschnitt, und der Name 'Mega Altaria ex and Greninja' trifft keinen der 8 Abschnitte eindeutig"
+   }
+  ],
+  "zusammengelegt": [
+   {
+    "art": "erwartet",
+    "behalten": "Mega Altaria ex and PD Espeon",
+    "aufgegangen_in": "483458#hm_101",
+    "verloren": "Mega Altaria ex and PD Espeon",
+    "verlorene_stelle": "483458",
+    "verlorene_stufe": "S"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "TRA Garchomp and Mantyke",
+    "aufgegangen_in": "617536#hm_101",
+    "verloren": "TRA Garchomp and Mantyke",
+    "verlorene_stelle": "617536",
+    "verlorene_stufe": "C"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Chien-Pao ex and Baxcalibur",
+    "aufgegangen_in": "583149#hm_102",
+    "verloren": "Chien-Pao ex and Baxcalibur",
+    "verlorene_stelle": "583149",
+    "verlorene_stufe": "S"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Mega Altaria ex and PD Espeon",
+    "aufgegangen_in": "483458#hm_101",
+    "verloren": "Mega Altaria ex and PD Espeon",
+    "verlorene_stelle": "562097",
+    "verlorene_stufe": "S"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Chien-Pao ex and Baxcalibur",
+    "aufgegangen_in": "583149#hm_102",
+    "verloren": "Chien-Pao ex and Baxcalibur",
+    "verlorene_stelle": "583154",
+    "verlorene_stufe": "S"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Hoopa ex and Darkrai ex",
+    "aufgegangen_in": "613775#hm_104",
+    "verloren": "Hoopa ex and Darkrai ex",
+    "verlorene_stelle": "497272",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Hoopa ex and Darkrai ex",
+    "aufgegangen_in": "613775#hm_104",
+    "verloren": "Hoopa ex and Darkrai ex",
+    "verlorene_stelle": "613775",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "RS Heliolisk and Mega Manectric ex",
+    "aufgegangen_in": "613945#hm_101",
+    "verloren": "RS Heliolisk and Mega Manectric ex",
+    "verlorene_stelle": "613945",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Magnezone ex and Pom-Pom Oricorio",
+    "aufgegangen_in": "597251#hm_101",
+    "verloren": "Magnezone ex and Pom-Pom Oricorio",
+    "verlorene_stelle": "597251",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Meowscarada ex and Teal Mask Ogerpon ex",
+    "aufgegangen_in": "583155#hm_102",
+    "verloren": "Meowscarada ex and Teal Mask Ogerpon ex",
+    "verlorene_stelle": "577125",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Magnezone ex and Pom-Pom Oricorio",
+    "aufgegangen_in": "597251#hm_101",
+    "verloren": "Magnezone ex and Pom-Pom Oricorio",
+    "verlorene_stelle": "519066",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Miraidon ex and CB Magnezone",
+    "aufgegangen_in": "602565#hm_101",
+    "verloren": "Miraidon ex and CB Magnezone",
+    "verlorene_stelle": "571718",
+    "verlorene_stufe": "A+"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Miraidon ex and CB Magnezone",
+    "aufgegangen_in": "602565#hm_101",
+    "verloren": "Miraidon ex and CB Magnezone",
+    "verlorene_stelle": "602565",
+    "verlorene_stufe": "A"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Mega Sharpedo ex and Chien-Pao ex",
+    "aufgegangen_in": "489335#hm_101",
+    "verloren": "Mega Sharpedo ex and Chien-Pao ex",
+    "verlorene_stelle": "489335",
+    "verlorene_stufe": "C"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Flygon ex",
+    "aufgegangen_in": "597227#hm_101",
+    "verloren": "Flygon ex",
+    "verlorene_stelle": "597227",
+    "verlorene_stufe": "C"
+   },
+   {
+    "art": "erwartet",
+    "behalten": "Ariados and Whimsicott ex",
+    "aufgegangen_in": "571731#hm_101",
+    "verloren": "Ariados and Whimsicott ex",
+    "verlorene_stelle": "562129",
+    "verlorene_stufe": "B"
+   },
+   {
+    "art": "Kollision",
+    "behalten": "Ariados and Whimsicott ex",
+    "aufgegangen_in": "571731#hm_101",
+    "verloren": "Ariados and Whimsicott ex",
+    "verlorene_stelle": "571731",
+    "verlorene_stufe": "B"
+   }
+  ]
+ },
+ "decks": [
+  {
+   "name": "Chien-Pao ex and Baxcalibur",
+   "tier": "S",
+   "archiv": "583149",
+   "anker": "hm_102",
+   "quelle_liste": "beide",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "DZiWnpiWnpiYYJiYYJiXopiXopiZtJiWqJiWqJiYLpiaXpic6JicrAcAPGQAPEYAPEYAPFoAPFoAKKAAKKABAw==",
+   "pokemon": [
+    {
+     "name": "Suicune ex",
+     "anzahl": 2,
+     "set": "A4a",
+     "nummer": "020"
+    },
+    {
+     "name": "Frigibax",
+     "anzahl": 2,
+     "set": "B2a",
+     "nummer": "034"
+    },
+    {
+     "name": "Baxcalibur",
+     "anzahl": 2,
+     "set": "B2a",
+     "nummer": "036"
+    },
+    {
+     "name": "Chien-Pao ex",
+     "anzahl": 1,
+     "set": "B2a",
+     "nummer": "037"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Giant Cape",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "147"
+    },
+    {
+     "name": "Pokemon Center Lady",
+     "anzahl": 1,
+     "set": "A2b",
+     "nummer": "070"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Inflatable Boat",
+     "anzahl": 1,
+     "set": "A4a",
+     "nummer": "067"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Soothing Shore",
+     "anzahl": 1,
+     "set": "B4",
+     "nummer": "154"
+    },
+    {
+     "name": "Team Rocket's Boss",
+     "anzahl": 1,
+     "set": "B4a",
+     "nummer": "071"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Lucario ex and Hitmonlee",
+   "tier": "S",
+   "archiv": "597144",
+   "anker": "hm_103",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "DZiWnpiWnpiapJibgJicFpiWqJiWqJiXKpiXwJiYLpiaXpiblJibxgcADogADogADpIARDQARDQABgQARBYBBg==",
+   "pokemon": [
+    {
+     "name": "Hitmonlee",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "154"
+    },
+    {
+     "name": "Riolu",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "091"
+    },
+    {
+     "name": "Lucario",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "092"
+    },
+    {
+     "name": "Bonsly",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "078"
+    },
+    {
+     "name": "Mega Lucario ex",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "081"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Pokemon Center Lady",
+     "anzahl": 1,
+     "set": "A2b",
+     "nummer": "070"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Field Blower",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "147"
+    },
+    {
+     "name": "Korrina",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "149"
+    },
+    {
+     "name": "Arena of Antiquity",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "154"
+    },
+    {
+     "name": "Small Balloon",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "064"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Altaria ex and PD Espeon",
+   "tier": "S",
+   "archiv": "483458",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "set_abschnitt": "New Team Rocket's Ambition Decks",
+   "code": "CpiWnpiWnpicFpiWqJiWqJiXKpiXwJiaXpiaXpia9AoAQDgAQDgAMXQAMXQAR64AR64AKfQAKfQAMewALkABBQ==",
+   "pokemon": [
+    {
+     "name": "Igglybuff",
+     "anzahl": 2,
+     "set": "A4a",
+     "nummer": "059"
+    },
+    {
+     "name": "Mega Altaria ex",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "102"
+    },
+    {
+     "name": "Eevee",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "184"
+    },
+    {
+     "name": "Swablu",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "196"
+    },
+    {
+     "name": "Darkrai",
+     "anzahl": 2,
+     "set": "B2b",
+     "nummer": "040"
+    },
+    {
+     "name": "Espeon",
+     "anzahl": 2,
+     "set": "B3a",
+     "nummer": "020"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Training Area",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "153"
+    },
+    {
+     "name": "Small Balloon",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "064"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Hoopa ex and Darkrai ex",
+   "tier": "A+",
+   "archiv": "613775",
+   "anker": "hm_104",
+   "quelle_liste": "beide",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "EJiWlJiWnpiWnpiY4piapJiapJibgJiccJiccJiWqJiWqJiXwJiXwJiX8piYLpiaXgQAD0YAUKAAUKAAMCoBBw==",
+   "pokemon": [
+    {
+     "name": "Darkrai ex",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "110"
+    },
+    {
+     "name": "Mega Absol ex",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "151"
+    },
+    {
+     "name": "Hoopa ex",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "103"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Mars",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "155"
+    },
+    {
+     "name": "Pokemon Center Lady",
+     "anzahl": 1,
+     "set": "A2b",
+     "nummer": "070"
+    },
+    {
+     "name": "Repel",
+     "anzahl": 1,
+     "set": "A3a",
+     "nummer": "064"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Field Blower",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "147"
+    },
+    {
+     "name": "Deceptive Needle",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "148"
+    },
+    {
+     "name": "X Speed",
+     "anzahl": 1,
+     "set": "P-A",
+     "nummer": "002"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Vespiquen ex and Shuckle ex",
+   "tier": "A+",
+   "archiv": "613778",
+   "anker": "hm_102",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "DJiWlJibgJibgJiYfpiYfpiWqJiWqJiXwJiaXpiaXpibvJibvAgATP4ATP4AC64ATQgATQgANgYAIkIAIkIBAQ==",
+   "pokemon": [
+    {
+     "name": "Vespiquen",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "018"
+    },
+    {
+     "name": "Shuckle ex",
+     "anzahl": 2,
+     "set": "A4",
+     "nummer": "021"
+    },
+    {
+     "name": "Teal Mask Ogerpon ex",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "017"
+    },
+    {
+     "name": "Combee",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "010"
+    },
+    {
+     "name": "Vespiquen ex",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "011"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Leaf Cape",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "147"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Field Blower",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "147"
+    },
+    {
+     "name": "Fragrant Forest",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "153"
+    },
+    {
+     "name": "X Speed",
+     "anzahl": 1,
+     "set": "P-A",
+     "nummer": "002"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Sceptile ex and EW Butterfree",
+   "tier": "A+",
+   "archiv": "597145",
+   "anker": "hm_104",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "CpiYYJiafJiafJibgJiWqJiWqJiXwJiaXpibvJibvAoASmAASmAASmoASmoASnQASnQAQTwAQUYAQVoALoYBAQ==",
+   "pokemon": [
+    {
+     "name": "Chingling",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "109"
+    },
+    {
+     "name": "Treecko",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "005"
+    },
+    {
+     "name": "Grovyle",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "006"
+    },
+    {
+     "name": "Mega Sceptile ex",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "008"
+    },
+    {
+     "name": "Caterpie",
+     "anzahl": 2,
+     "set": "B3b",
+     "nummer": "001"
+    },
+    {
+     "name": "Metapod",
+     "anzahl": 2,
+     "set": "B3b",
+     "nummer": "002"
+    },
+    {
+     "name": "Butterfree",
+     "anzahl": 2,
+     "set": "B3b",
+     "nummer": "003"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 1,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Quick-Grow Extract",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "067"
+    },
+    {
+     "name": "Field Blower",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "147"
+    },
+    {
+     "name": "Fragrant Forest",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "153"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Rayquaza ex & Gouging Fire",
+   "tier": "A+",
+   "archiv": "613767",
+   "anker": "hm_102",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "DZiWnpiWnpib2piWqJiWqJiXKpiXwJiaSpiaXpiaXpib+JictpictgcAUUoAQKYAQKYAUSwAUSwASQIASQICBAI=",
+   "pokemon": [
+    {
+     "name": "Dratini",
+     "anzahl": 2,
+     "set": "B2b",
+     "nummer": "051"
+    },
+    {
+     "name": "Gouging Fire",
+     "anzahl": 2,
+     "set": "B3a",
+     "nummer": "054"
+    },
+    {
+     "name": "Dragonair",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "117"
+    },
+    {
+     "name": "Mega Rayquaza ex",
+     "anzahl": 1,
+     "set": "B4",
+     "nummer": "120"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "May",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "223"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Ancient Booster Energy Capsule",
+     "anzahl": 1,
+     "set": "B3a",
+     "nummer": "069"
+    },
+    {
+     "name": "Professor Sada",
+     "anzahl": 1,
+     "set": "B3a",
+     "nummer": "072"
+    },
+    {
+     "name": "Rainbow Cave",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "155"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "RS Heliolisk and Mega Manectric ex",
+   "tier": "A+",
+   "archiv": "613945",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "DJiWnpiWnpiY4piacpiacpicIJiWqJiWqJiahpiahpiaXpic6AgANBIANBIATvwATvwAPooAPooAP8AAP8ABBA==",
+   "pokemon": [
+    {
+     "name": "Helioptile",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "028"
+    },
+    {
+     "name": "Mega Manectric ex",
+     "anzahl": 2,
+     "set": "B2b",
+     "nummer": "027"
+    },
+    {
+     "name": "Heliolisk",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "061"
+    },
+    {
+     "name": "Electrike",
+     "anzahl": 2,
+     "set": "P-B",
+     "nummer": "043"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Repel",
+     "anzahl": 1,
+     "set": "A3a",
+     "nummer": "064"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Clemont's Backpack",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "066"
+    },
+    {
+     "name": "Clemont",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "068"
+    },
+    {
+     "name": "Elegant Cape",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "065"
+    },
+    {
+     "name": "Team Rocket's Boss",
+     "anzahl": 1,
+     "set": "B4a",
+     "nummer": "071"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Miraidon ex and CB Magnezone",
+   "tier": "A",
+   "archiv": "602565",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "DJiWnpiWnpiXopiWqJiWqJiXKpiXwJiahpiYLpiaXpiaaJicAggAM+oAM+oAA9QAA9QAM/4AR6QAGUYAGUYBBA==",
+   "pokemon": [
+    {
+     "name": "Magneton",
+     "anzahl": 2,
+     "set": "A1",
+     "nummer": "098"
+    },
+    {
+     "name": "Oricorio",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "066"
+    },
+    {
+     "name": "Magnemite",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "024"
+    },
+    {
+     "name": "Magnezone",
+     "anzahl": 1,
+     "set": "B1a",
+     "nummer": "026"
+    },
+    {
+     "name": "Miraidon ex",
+     "anzahl": 1,
+     "set": "B3a",
+     "nummer": "019"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Giant Cape",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "147"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Pokemon Center Lady",
+     "anzahl": 1,
+     "set": "A2b",
+     "nummer": "070"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lisia",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "226"
+    },
+    {
+     "name": "Clemont",
+     "anzahl": 1,
+     "set": "B1a",
+     "nummer": "068"
+    },
+    {
+     "name": "Professor Turo",
+     "anzahl": 1,
+     "set": "B3a",
+     "nummer": "073"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Magnezone ex and Pom-Pom Oricorio",
+   "tier": "A",
+   "archiv": "597251",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "C5iWnpiWnpiapJiauJiWqJiWqJiXKpiXwJiahpiaXpiaaAkAM+oAM+oAA9QAA9QAM/4AQyYAGUYAGUYANgYBBA==",
+   "pokemon": [
+    {
+     "name": "Magneton",
+     "anzahl": 2,
+     "set": "A1",
+     "nummer": "098"
+    },
+    {
+     "name": "Oricorio",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "066"
+    },
+    {
+     "name": "Magnemite",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "024"
+    },
+    {
+     "name": "Magnezone",
+     "anzahl": 1,
+     "set": "B1a",
+     "nummer": "026"
+    },
+    {
+     "name": "Teal Mask Ogerpon ex",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "017"
+    },
+    {
+     "name": "Magnezone ex",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "054"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lisia",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "226"
+    },
+    {
+     "name": "Clemont",
+     "anzahl": 1,
+     "set": "B1a",
+     "nummer": "068"
+    },
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Protective Poncho",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "147"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Team Rocket's Weezing ex and Hoopa ex",
+   "tier": "A",
+   "archiv": "498391",
+   "anker": "hm_102",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "DZiWlJiWnpiWnpiY4piapJiapJibgJiccJiccJiWqJiWqJiXwJiaXgcAD0YAUKAAUKAAVC4AVC4AVDgAVDgBBw==",
+   "pokemon": [
+    {
+     "name": "Darkrai ex",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "110"
+    },
+    {
+     "name": "Hoopa ex",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "103"
+    },
+    {
+     "name": "Team Rocket's Koffing",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "042"
+    },
+    {
+     "name": "Team Rocket's Weezing ex",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "043"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Repel",
+     "anzahl": 1,
+     "set": "A3a",
+     "nummer": "064"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Field Blower",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "147"
+    },
+    {
+     "name": "Deceptive Needle",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "148"
+    },
+    {
+     "name": "X Speed",
+     "anzahl": 1,
+     "set": "P-A",
+     "nummer": "002"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Sceptile ex and Greninja",
+   "tier": "A",
+   "archiv": "597145",
+   "anker": "hm_103",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "DJiWnpiWnpiYYJiYYJicFpiWqJiWqJiXwJiaXpiaXpib7pibvAgAA2YAA3oAQTwAQTwAQUYAQVoAHUIATHwBAQ==",
+   "pokemon": [
+    {
+     "name": "Froakie",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "087"
+    },
+    {
+     "name": "Greninja",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "089"
+    },
+    {
+     "name": "Pheromosa",
+     "anzahl": 1,
+     "set": "A3a",
+     "nummer": "007"
+    },
+    {
+     "name": "Treecko",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "005"
+    },
+    {
+     "name": "Grovyle",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "006"
+    },
+    {
+     "name": "Mega Sceptile ex",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "008"
+    },
+    {
+     "name": "Furfrou",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "061"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Fragrant Forest",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "153"
+    },
+    {
+     "name": "Juliana",
+     "anzahl": 1,
+     "set": "B3a",
+     "nummer": "071"
+    },
+    {
+     "name": "Small Balloon",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "064"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Meowscarada ex and Teal Mask Ogerpon ex",
+   "tier": "A",
+   "archiv": "583155",
+   "anker": "hm_102",
+   "quelle_liste": "beide",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "DZiYYJiYYJiapJiYfpiYfpiWqJiWqJiW7piXwJiaSpiaXpibvJibvAcAE9gAE9gAOwYAFIwAOxAAOxAANgYBAQ==",
+   "pokemon": [
+    {
+     "name": "Sprigatito",
+     "anzahl": 2,
+     "set": "A2b",
+     "nummer": "005"
+    },
+    {
+     "name": "Meowscarada",
+     "anzahl": 1,
+     "set": "A2b",
+     "nummer": "007"
+    },
+    {
+     "name": "Teal Mask Ogerpon ex",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "017"
+    },
+    {
+     "name": "Floragato",
+     "anzahl": 1,
+     "set": "B2a",
+     "nummer": "002"
+    },
+    {
+     "name": "Meowscarada ex",
+     "anzahl": 2,
+     "set": "B2a",
+     "nummer": "003"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Erika",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "219"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Leaf Cape",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "147"
+    },
+    {
+     "name": "May",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "223"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Fragrant Forest",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "153"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Ariados and Whimsicott ex",
+   "tier": "B",
+   "archiv": "571731",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "DJiafJiafJicypicypicFpiWqJiWqJiXwJiaXpiaXpibvJibvAgAMzYAMzYAM0AAM0AAKtoAKtoAKuQAKuQBAQ==",
+   "pokemon": [
+    {
+     "name": "Cottonee",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "015"
+    },
+    {
+     "name": "Whimsicott ex",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "016"
+    },
+    {
+     "name": "Spinarak",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "005"
+    },
+    {
+     "name": "Ariados",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "006"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Quick-Grow Extract",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "067"
+    },
+    {
+     "name": "Fragrant Forest",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "153"
+    },
+    {
+     "name": "Small Balloon",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "064"
+    },
+    {
+     "name": "Team Rocket's Goo-zooka",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "068"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Sableye ex and Greninja",
+   "tier": "B",
+   "archiv": "607397",
+   "anker": "hm_101",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "C5iWnpiWnpiYYJiYYJibipicFpiWqJiWqJiXwJiaXpiaXgkAD0YAA2YAA2YAA3oAA3oALoYALoYAMCoAS74BBw==",
+   "pokemon": [
+    {
+     "name": "Froakie",
+     "anzahl": 2,
+     "set": "A1",
+     "nummer": "087"
+    },
+    {
+     "name": "Greninja",
+     "anzahl": 2,
+     "set": "A1",
+     "nummer": "089"
+    },
+    {
+     "name": "Darkrai ex",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "110"
+    },
+    {
+     "name": "Chingling",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "109"
+    },
+    {
+     "name": "Mega Absol ex",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "151"
+    },
+    {
+     "name": "Mega Sableye ex",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "041"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lucky Egg",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "148"
+    },
+    {
+     "name": "Small Balloon",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "064"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Blaziken ex and Greninja",
+   "tier": "B",
+   "archiv": "477472",
+   "anker": "hm_104",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "DJiWnpiWnpiYYJiYYJiaDpiWqJiWqJiXwJiaXpiaXpib7pibdggAK44AK44AK5gAK6wAA2YAA3oAK/wAQfoBAg==",
+   "pokemon": [
+    {
+     "name": "Froakie",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "087"
+    },
+    {
+     "name": "Greninja",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "089"
+    },
+    {
+     "name": "Torchic",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "033"
+    },
+    {
+     "name": "Combusken",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "034"
+    },
+    {
+     "name": "Mega Blaziken ex",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "036"
+    },
+    {
+     "name": "Heatmor",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "044"
+    },
+    {
+     "name": "Castform Sunny Form",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "024"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Flame Patch",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "217"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Hiking Trail",
+     "anzahl": 1,
+     "set": "B2b",
+     "nummer": "069"
+    },
+    {
+     "name": "Juliana",
+     "anzahl": 1,
+     "set": "B3a",
+     "nummer": "071"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Altaria ex and Gourgeist",
+   "tier": "B",
+   "archiv": "562097",
+   "anker": "hm_106",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "CZiWnpiWqJiWqJiXwJiXwJiX8piaXpiaaJia9AsAOCIAOCIAOCwAOCwAGdIALmgALoYAMewAMewALkAALkABBQ==",
+   "pokemon": [
+    {
+     "name": "Comfey",
+     "anzahl": 1,
+     "set": "A3",
+     "nummer": "080"
+    },
+    {
+     "name": "Mega Altaria ex",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "102"
+    },
+    {
+     "name": "Jirachi",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "106"
+    },
+    {
+     "name": "Chingling",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "109"
+    },
+    {
+     "name": "Swablu",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "196"
+    },
+    {
+     "name": "Pumpkaboo",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "071"
+    },
+    {
+     "name": "Gourgeist",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "072"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Mars",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "155"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lisia",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "226"
+    },
+    {
+     "name": "Training Area",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "153"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 1,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Charizard Y ex and Entei ex",
+   "tier": "B",
+   "archiv": "571690",
+   "anker": "hm_102",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "DZiWnpiWnpiaDpiaDpiXopiauJiWqJiWqJiaXpiaXpicopictpictgcAJ+IAJ+IAFJYAFJYAPwwAPwwAM4YBAg==",
+   "pokemon": [
+    {
+     "name": "Charmander",
+     "anzahl": 2,
+     "set": "A2b",
+     "nummer": "008"
+    },
+    {
+     "name": "Entei ex",
+     "anzahl": 2,
+     "set": "A4a",
+     "nummer": "010"
+    },
+    {
+     "name": "Charmeleon",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "012"
+    },
+    {
+     "name": "Mega Charizard Y ex",
+     "anzahl": 1,
+     "set": "B1a",
+     "nummer": "014"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Giant Cape",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "147"
+    },
+    {
+     "name": "Flame Patch",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "217"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Protective Poncho",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "147"
+    },
+    {
+     "name": "Wally",
+     "anzahl": 1,
+     "set": "B4",
+     "nummer": "153"
+    },
+    {
+     "name": "Rainbow Cave",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "155"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "TRA Garchomp and Mantyke",
+   "tier": "C",
+   "archiv": "617536",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "set_abschnitt": "New Team Rocket's Ambition Decks",
+   "code": "DZiWnpiWnpiYYJiYYJicFpiWqJiWqJiXwJiX1JiX1JiaXpiaXpictgcAUpQAUpQAUp4AVJIAVJIAKLQAKLQCAwY=",
+   "pokemon": [
+    {
+     "name": "Mantyke",
+     "anzahl": 2,
+     "set": "A4a",
+     "nummer": "023"
+    },
+    {
+     "name": "Gible",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "052"
+    },
+    {
+     "name": "Gabite",
+     "anzahl": 1,
+     "set": "B4a",
+     "nummer": "053"
+    },
+    {
+     "name": "Garchomp",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "054"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Cynthia",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "152"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Small Balloon",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "064"
+    },
+    {
+     "name": "Rainbow Cave",
+     "anzahl": 1,
+     "set": "B4",
+     "nummer": "155"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Sharpedo ex and Chien-Pao ex",
+   "tier": "C",
+   "archiv": "489335",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "CZiWnpiWnpiWqJiWqJiXwJiaXpiaaJicPpicPgsATe4ATe4ATfgATfgACQYACQYAIzIAIzIAPGQAKLQAKLQBAw==",
+   "pokemon": [
+    {
+     "name": "Magikarp",
+     "anzahl": 2,
+     "set": "A1a",
+     "nummer": "017"
+    },
+    {
+     "name": "Gyarados",
+     "anzahl": 2,
+     "set": "A4",
+     "nummer": "045"
+    },
+    {
+     "name": "Mantyke",
+     "anzahl": 2,
+     "set": "A4a",
+     "nummer": "023"
+    },
+    {
+     "name": "Chien-Pao ex",
+     "anzahl": 1,
+     "set": "B2a",
+     "nummer": "037"
+    },
+    {
+     "name": "Carvanha",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "034"
+    },
+    {
+     "name": "Mega Sharpedo ex",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "035"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lisia",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "226"
+    },
+    {
+     "name": "Wallace",
+     "anzahl": 2,
+     "set": "B3b",
+     "nummer": "068"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Hoopa ex and Zoroark ex",
+   "tier": "C",
+   "archiv": "613775",
+   "anker": "hm_103",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "DJiWnpiWnpibgJiccJiccJiWqJiWqJiXKpiXwJiYLpiaXpiaXggAUKAAUKAAMCoARYgARSQARSQARS4ARS4BBw==",
+   "pokemon": [
+    {
+     "name": "Mega Absol ex",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "151"
+    },
+    {
+     "name": "Zorua",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "105"
+    },
+    {
+     "name": "Zoroark ex",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "106"
+    },
+    {
+     "name": "Bombirdier",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "115"
+    },
+    {
+     "name": "Hoopa ex",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "103"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Pokemon Center Lady",
+     "anzahl": 1,
+     "set": "A2b",
+     "nummer": "070"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Field Blower",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "147"
+    },
+    {
+     "name": "Deceptive Needle",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "148"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Diancie ex and Mega Gardevoir ex",
+   "tier": "C",
+   "archiv": "607291",
+   "anker": "hm_101",
+   "quelle_liste": "tier",
+   "set_abschnitt": "",
+   "code": "C5iWnpiWnpiYYJiWqJiWqJiXwJiaXpiaXpiazJibCJibCAkAS2QAOBgAOBgADaIADaIAN9wAN/AAN/AANGIBBQ==",
+   "pokemon": [
+    {
+     "name": "Ralts",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "068"
+    },
+    {
+     "name": "Xerneas",
+     "anzahl": 1,
+     "set": "B1a",
+     "nummer": "037"
+    },
+    {
+     "name": "Kirlia",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "064"
+    },
+    {
+     "name": "Mega Gardevoir ex",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "066"
+    },
+    {
+     "name": "Meloetta",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "070"
+    },
+    {
+     "name": "Mega Diancie ex",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "032"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 1,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Diantha",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "149"
+    },
+    {
+     "name": "Peculiar Plaza",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "155"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Flygon ex",
+   "tier": "C",
+   "archiv": "597227",
+   "anker": "hm_101",
+   "quelle_liste": "beide",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "D5iWnpiYYJiYYJiapJiapJiXrJiWqJiWqJiXwJiXwJiYzpiaXpiaXpib7pictgUARAIARAIARewARfYARfYCBgE=",
+   "pokemon": [
+    {
+     "name": "Trapinch",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "076"
+    },
+    {
+     "name": "Vibrava",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "125"
+    },
+    {
+     "name": "Flygon ex",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "126"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Rocky Helmet",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "148"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Lillie",
+     "anzahl": 1,
+     "set": "A3",
+     "nummer": "155"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Juliana",
+     "anzahl": 1,
+     "set": "B3a",
+     "nummer": "071"
+    },
+    {
+     "name": "Rainbow Cave",
+     "anzahl": 1,
+     "set": "B4",
+     "nummer": "155"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 1,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Team Rocket's Wobbuffet",
+   "tier": null,
+   "archiv": "621126",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "New Team Rocket's Ambition Decks",
+   "code": "BJiWnpiapJiapJiWqBAAVBAAVCQAVCQAU2YAU2YAUxYAUxYAVHQAVHQAVH4AVH4AVNgAVNgAU7YAUoAAUoABBQ==",
+   "pokemon": [
+    {
+     "name": "Team Rocket's Houndoom",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "009"
+    },
+    {
+     "name": "Team Rocket's Electrode",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "020"
+    },
+    {
+     "name": "Team Rocket's Hypno",
+     "anzahl": 1,
+     "set": "B4a",
+     "nummer": "028"
+    },
+    {
+     "name": "Team Rocket's Arbok",
+     "anzahl": 1,
+     "set": "B4a",
+     "nummer": "039"
+    },
+    {
+     "name": "Team Rocket's Muk",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "041"
+    },
+    {
+     "name": "Team Rocket's Tinkatuff",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "049"
+    },
+    {
+     "name": "Team Rocket's Tinkaton",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "050"
+    },
+    {
+     "name": "Team Rocket's Persian",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "061"
+    },
+    {
+     "name": "Team Rocket's Wobbuffet",
+     "anzahl": 2,
+     "set": "P-B",
+     "nummer": "091"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 1,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 1,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Team Rocket's Articuno ex and 18 Trainers",
+   "tier": "B",
+   "archiv": "617434",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "New Team Rocket's Ambition Decks",
+   "code": "EpiWnpiapJiapJiXrJiXrJiXopiWqJiWqJiW+JiW+JiXKpiXwJiX8piX/JiX/JiaXpicrJicrAIAUzQAUzQBAw==",
+   "pokemon": [
+    {
+     "name": "Team Rocket's Articuno ex",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "014"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Misty",
+     "anzahl": 2,
+     "set": "A1",
+     "nummer": "220"
+    },
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Giant Cape",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "147"
+    },
+    {
+     "name": "Rocky Helmet",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "148"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Mars",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "155"
+    },
+    {
+     "name": "Irida",
+     "anzahl": 2,
+     "set": "A2a",
+     "nummer": "072"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Soothing Shore",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "154"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 1,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Team Rocket's Zapdos ex and Heliolisk",
+   "tier": "B",
+   "archiv": "617481",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "New Team Rocket's Ambition Decks",
+   "code": "D5iWnpiWnpiacpiacpibEpibgJiXopiXopiWqJiWqJiXwJiahpiahpiaXpic6AUANBIANBIATvwATvwAU3ABBA==",
+   "pokemon": [
+    {
+     "name": "Helioptile",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "028"
+    },
+    {
+     "name": "Heliolisk",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "061"
+    },
+    {
+     "name": "Team Rocket's Zapdos ex",
+     "anzahl": 1,
+     "set": "B4a",
+     "nummer": "021"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Giant Cape",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "147"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Clemont's Backpack",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "066"
+    },
+    {
+     "name": "Clemont",
+     "anzahl": 2,
+     "set": "B1a",
+     "nummer": "068"
+    },
+    {
+     "name": "Electric Generator",
+     "anzahl": 1,
+     "set": "B2a",
+     "nummer": "086"
+    },
+    {
+     "name": "Field Blower",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "147"
+    },
+    {
+     "name": "Team Rocket's Boss",
+     "anzahl": 1,
+     "set": "B4a",
+     "nummer": "071"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Team Rocket's Weezing ex and Team Rocket's Magmar",
+   "tier": "B",
+   "archiv": "498391",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "New Team Rocket's Ambition Decks",
+   "code": "DJiWnpiWnpicypicypiYdJiYdJiWqJiWqJiXwJiaXpic3pic3ggAVOwAVOwAUvgAUvgAVC4AVC4AVDgAVDgBBw==",
+   "pokemon": [
+    {
+     "name": "Team Rocket's Magmar",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "006"
+    },
+    {
+     "name": "Team Rocket's Koffing",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "042"
+    },
+    {
+     "name": "Team Rocket's Weezing ex",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "043"
+    },
+    {
+     "name": "Happiny",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "063"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Poison Barb",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "146"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Team Rocket's Goo-zooka",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "068"
+    },
+    {
+     "name": "Team Rocket's Master Plan",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "070"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Team Rocket's Slowking ex and Sylveon ex",
+   "tier": "B",
+   "archiv": "498410",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "New Team Rocket's Ambition Decks",
+   "code": "C5iWnpiWnpicIJicIJiWqJiWqJiXKpiXwJiX8pia1pibCAkAMXQAMXQAIFgAIE4AIFgAU5gAU5gAU6IAU6IBBQ==",
+   "pokemon": [
+    {
+     "name": "Sylveon",
+     "anzahl": 1,
+     "set": "A3b",
+     "nummer": "033"
+    },
+    {
+     "name": "Sylveon ex",
+     "anzahl": 2,
+     "set": "A3b",
+     "nummer": "034"
+    },
+    {
+     "name": "Eevee",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "184"
+    },
+    {
+     "name": "Team Rocket's Slowpoke",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "025"
+    },
+    {
+     "name": "Team Rocket's Slowking ex",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "026"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Mars",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "155"
+    },
+    {
+     "name": "Sightseer",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "150"
+    },
+    {
+     "name": "Peculiar Plaza",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "155"
+    },
+    {
+     "name": "Elegant Cape",
+     "anzahl": 2,
+     "set": "B3b",
+     "nummer": "065"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Team Rocket's Raticate ex and Alolan Ninetales ex",
+   "tier": "B",
+   "archiv": "617527",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "New Team Rocket's Ambition Decks",
+   "code": "DJiWnpiWnpiY4picIJiWqJiWqJiXKpiXwJiaXpiaXpicrJia9AgAGEIAGEIANn4ANn4AVLoAVLoAVMQAVMQBAw==",
+   "pokemon": [
+    {
+     "name": "Alolan Vulpix",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "040"
+    },
+    {
+     "name": "Alolan Ninetales ex",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "029"
+    },
+    {
+     "name": "Team Rocket's Rattata",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "058"
+    },
+    {
+     "name": "Team Rocket's Raticate ex",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "059"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Repel",
+     "anzahl": 1,
+     "set": "A3a",
+     "nummer": "064"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Training Area",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "153"
+    },
+    {
+     "name": "Elegant Cape",
+     "anzahl": 2,
+     "set": "B3b",
+     "nummer": "065"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ],
+   "karten_abgleich": "Trainer: der Code trägt 9 verschiedene Kennungen [1, 1, 1, 1, 1, 1, 2, 2, 2], die Seite listet 8 Karten [1, 1, 1, 1, 2, 2, 2, 2]"
+  },
+  {
+   "name": "Team Rocket's Moltres ex",
+   "tier": "D",
+   "archiv": "617473",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "New Team Rocket's Ambition Decks",
+   "code": "EJiWnpiWnpiaDpiaDpiapJiXopiXopicFpiWqJiWqJiXKpiXwJiYLpiaXpictpictgQAUwIAUwIAQgQAQgQBAg==",
+   "pokemon": [
+    {
+     "name": "Victini",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "025"
+    },
+    {
+     "name": "Team Rocket's Moltres ex",
+     "anzahl": 2,
+     "set": "B4a",
+     "nummer": "007"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Giant Cape",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "147"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Pokemon Center Lady",
+     "anzahl": 1,
+     "set": "A2b",
+     "nummer": "070"
+    },
+    {
+     "name": "Flame Patch",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "217"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Small Balloon",
+     "anzahl": 1,
+     "set": "B3b",
+     "nummer": "064"
+    },
+    {
+     "name": "Rainbow Cave",
+     "anzahl": 2,
+     "set": "B4",
+     "nummer": "155"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Greninja ex and Suicune ex",
+   "tier": "S",
+   "archiv": "546553",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "DJiWnpiWnpiYYJiYYJiXopiWqJiWqJiXwJiXwJiX8piX/Jia/ggALQoALQoAA3oAA3oALR4AKKAAKKAALv4BAw==",
+   "pokemon": [
+    {
+     "name": "Greninja",
+     "anzahl": 2,
+     "set": "A1",
+     "nummer": "089"
+    },
+    {
+     "name": "Suicune ex",
+     "anzahl": 2,
+     "set": "A4a",
+     "nummer": "020"
+    },
+    {
+     "name": "Froakie",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "071"
+    },
+    {
+     "name": "Greninja ex",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "073"
+    },
+    {
+     "name": "Indeedee ex",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "121"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Giant Cape",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "147"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 2,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Mars",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "155"
+    },
+    {
+     "name": "Irida",
+     "anzahl": 1,
+     "set": "A2a",
+     "nummer": "072"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Starting Plains",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "154"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Zoroark ex and Mega Absol ex",
+   "tier": "A+",
+   "archiv": "562115",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "DJiWnpiWnpiapJiYdJiYdJiWqJiWqJiXKpiXwJiaXpiaXpibdggAJiAAMCoARYgAHm4ARSQARSQARS4ARS4BBw==",
+   "pokemon": [
+    {
+     "name": "Nihilego",
+     "anzahl": 1,
+     "set": "A3a",
+     "nummer": "042"
+    },
+    {
+     "name": "Absol",
+     "anzahl": 1,
+     "set": "A4",
+     "nummer": "120"
+    },
+    {
+     "name": "Mega Absol ex",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "151"
+    },
+    {
+     "name": "Zorua",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "105"
+    },
+    {
+     "name": "Zoroark ex",
+     "anzahl": 2,
+     "set": "B3",
+     "nummer": "106"
+    },
+    {
+     "name": "Bombirdier",
+     "anzahl": 1,
+     "set": "B3",
+     "nummer": "115"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Sabrina",
+     "anzahl": 1,
+     "set": "A1",
+     "nummer": "225"
+    },
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Poison Barb",
+     "anzahl": 2,
+     "set": "A3",
+     "nummer": "146"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Lucky Ice Pop",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "145"
+    },
+    {
+     "name": "Hiking Trail",
+     "anzahl": 1,
+     "set": "B2b",
+     "nummer": "069"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Alolan Ninetales ex and Crawdaunt",
+   "tier": "B",
+   "archiv": "577001",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "CpiWnpiWnpiZtJiWqJiWqJiXwJiaXpiaXpia1pia9AoANnQANnQANn4ANn4AI8gAI8gAI9IAI9IAKLQAKLQBAw==",
+   "pokemon": [
+    {
+     "name": "Corphish",
+     "anzahl": 2,
+     "set": "A4",
+     "nummer": "060"
+    },
+    {
+     "name": "Crawdaunt",
+     "anzahl": 2,
+     "set": "A4",
+     "nummer": "061"
+    },
+    {
+     "name": "Mantyke",
+     "anzahl": 2,
+     "set": "A4a",
+     "nummer": "023"
+    },
+    {
+     "name": "Alolan Vulpix",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "028"
+    },
+    {
+     "name": "Alolan Ninetales ex",
+     "anzahl": 2,
+     "set": "B2",
+     "nummer": "029"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Inflatable Boat",
+     "anzahl": 1,
+     "set": "A4a",
+     "nummer": "067"
+    },
+    {
+     "name": "Copycat",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "225"
+    },
+    {
+     "name": "Sightseer",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "150"
+    },
+    {
+     "name": "Training Area",
+     "anzahl": 1,
+     "set": "B2",
+     "nummer": "153"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  },
+  {
+   "name": "Mega Altaria ex and Sylveon ex",
+   "tier": "B",
+   "archiv": "532008",
+   "anker": null,
+   "quelle_liste": "set",
+   "set_abschnitt": "Old Decks Updated with Team Rocket's Ambition",
+   "code": "CZiWnpiYYJiWqJiWqJiXwJiX8piYOJiaaJiaaAsAMXQAMXQAIFgAIFgAMewAMewALkAALkAALv4ALkoADcoBBQ==",
+   "pokemon": [
+    {
+     "name": "Dusknoir",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "072"
+    },
+    {
+     "name": "Sylveon ex",
+     "anzahl": 2,
+     "set": "A3b",
+     "nummer": "034"
+    },
+    {
+     "name": "Swablu",
+     "anzahl": 2,
+     "set": "A4a",
+     "nummer": "064"
+    },
+    {
+     "name": "Mega Altaria ex",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "102"
+    },
+    {
+     "name": "Duskull",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "103"
+    },
+    {
+     "name": "Indeedee ex",
+     "anzahl": 1,
+     "set": "B1",
+     "nummer": "121"
+    },
+    {
+     "name": "Eevee",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "184"
+    }
+   ],
+   "trainer": [
+    {
+     "name": "Cyrus",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "150"
+    },
+    {
+     "name": "Mars",
+     "anzahl": 1,
+     "set": "A2",
+     "nummer": "155"
+    },
+    {
+     "name": "Red",
+     "anzahl": 1,
+     "set": "A2b",
+     "nummer": "071"
+    },
+    {
+     "name": "Rare Candy",
+     "anzahl": 1,
+     "set": "A3",
+     "nummer": "144"
+    },
+    {
+     "name": "Lisia",
+     "anzahl": 2,
+     "set": "B1",
+     "nummer": "226"
+    },
+    {
+     "name": "Poke Ball",
+     "anzahl": 1,
+     "set": "P-A",
+     "nummer": "005"
+    },
+    {
+     "name": "Professor's Research",
+     "anzahl": 2,
+     "set": "P-A",
+     "nummer": "007"
+    }
+   ]
+  }
+ ]
+}

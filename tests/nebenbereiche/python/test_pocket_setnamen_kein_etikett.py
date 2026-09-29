@@ -1,24 +1,18 @@
-"""„New Set" ist kein Set-Name.
+"""„New Set" ist kein Set-Name — und ein Name geht nicht verloren.
 
-BEFUND (25.09.2026, an der Quellseite nachgesehen):
+BEFUND (25.09.2026, damals an Game8s Seite): ein Navigationsbanner
+"New Set (B4a)" traf dasselbe Muster wie der echte Name "Team Rocket's
+Ambition (B4a)". Gewann das Banner, stand in der Oberflaeche "New Set"
+als Set-Name — und der Anlass fuer die Namen war woertlich: „wenn ich
+weiß wie das set heißt kann ich noch schnell fehlende Karten besorgen".
 
-  game8.co/…/archives/482685 fuehrt die Kennung B4a an zwei Stellen —
+Seit 29.09.2026 kommen die Namen aus der Kartendatenbank
+(flibustier/pokemon-tcg-pocket-database, dist/sets.json), weil Game8 den
+GitHub-Laeufer abweist und die Pocket-Daten jetzt taeglich aus CI kommen.
+Die Sperre gegen Etiketten bleibt, ebenso der Bestand: ein Name, den die
+Quelle an einem Tag nicht fuehrt, bleibt stehen.
 
-      "Team Rocket's Ambition (B4a)   Release: August 26, 2026"
-      "New Set (B4a)"                 (Banner in der Seitennavigation)
-
-  Beide treffen das Muster "Name (Kennung)" in build_pocket_sets.lies().
-  Welche zuerst kommt, entscheidet die Reihenfolge im Baum. Gewinnt das
-  Banner, steht in der Oberflaeche "New Set" als Set-Name — und der
-  Anlass fuer diese Datei war woertlich: „wenn ich weiß wie das set
-  heißt kann ich noch schnell fehlende Karten besorgen".
-
-  Dazu kommt: main() schrieb `sets` vollstaendig neu. Ein Name, den die
-  Quellseite an einem Tag nicht fuehrt, war damit weg — samt der
-  nachgeschlagenen Quelle.
-
-Geprueft wird das VERHALTEN von lies() an echtem Seitenaufbau, nicht der
-Wortlaut im Quelltext.
+Geprueft wird das VERHALTEN von lies() und main(), nicht der Wortlaut.
 """
 
 import importlib.util
@@ -36,39 +30,37 @@ DATEN = os.path.join(WURZEL, "data", "pocket_sets.json")
 
 @pytest.fixture(scope="module")
 def mod():
-    pytest.importorskip("bs4")
     sys.path.insert(0, os.path.join(WURZEL, "scripts"))
     spec = importlib.util.spec_from_file_location("build_pocket_sets", SKRIPT)
     m = importlib.util.module_from_spec(spec)
     try:
         spec.loader.exec_module(m)
-    except Exception as e:  # scrape_pocket_tierlist braucht evtl. Pakete
+    except Exception as e:  # noqa: BLE001
         pytest.skip(f"Modul nicht ladbar: {e}")
     return m
 
 
-# Aufbau woertlich wie auf der Quellseite am 25.09.2026 gemessen:
-# das Banner steht VOR der Tabelle.
-SEITE = """<html><body>
-<ul class="nav"><li><a href="/x">New Set (B4a)</a></li></ul>
-<table>
-  <tr><td>Deluxe Pack Mega (B4b)</td><td>Release: September 29, 2026</td></tr>
-  <tr><td>Team Rocket's Ambition (B4a)</td><td>Release: August 26, 2026</td></tr>
-  <tr><td>Ruler of the Skies (B4)</td><td>Release: July 30, 2026</td></tr>
-</table>
-</body></html>"""
+# Aufbau wie dist/sets.json der Datenbank (gemessen 29.09.2026): Gruppen
+# je Buchstabe, darin code, releaseDate und name je Sprache. TESTDATEN.
+SEITE = json.dumps({
+    "A": [{"code": "PROMO-A", "releaseDate": "2024-10-30", "name": {"en": "Promo A"}}],
+    "B": [{"code": "B4b", "releaseDate": "2026-09-29", "name": {"en": "Deluxe Pack Mega"}},
+          {"code": "B4a", "releaseDate": "2026-08-27", "name": {"en": "Team Rocket\u2019s Ambition"}},
+          {"code": "B4", "releaseDate": "2026-07-30", "name": {"en": "Ruler of the Skies"}}],
+})
 
 
-def test_das_banner_gewinnt_nicht(mod):
+def test_der_name_kommt_in_unserer_schreibweise(mod):
     namen = mod.lies(SEITE)
     assert namen.get("B4a") == "Team Rocket's Ambition", (
-        f"B4a heisst {namen.get('B4a')!r} — das Navigationsbanner hat "
-        f"den echten Namen ueberholt")
+        f"B4a heisst {namen.get('B4a')!r} — der typografische Apostroph der "
+        f"Quelle steht nicht in unserer Schreibweise")
+    assert namen.get("P-A") == "Promo A", "PROMO-A wurde nicht zu P-A"
 
 
 def test_kein_etikett_kommt_durch(mod):
     for etikett in ("New Set", "TBA", "Coming Soon", "Latest Set"):
-        seite = f'<html><body><td>{etikett} (B9z)</td></body></html>'
+        seite = json.dumps({"B": [{"code": "B9z", "name": {"en": etikett}}]})
         namen = mod.lies(seite)
         assert "B9z" not in namen, (
             f"{etikett!r} wurde als Set-Name uebernommen")
@@ -79,7 +71,7 @@ def test_echte_namen_kommen_weiter_durch(mod):
     namen = mod.lies(SEITE)
     assert namen.get("B4b") == "Deluxe Pack Mega"
     assert namen.get("B4") == "Ruler of the Skies"
-    assert len(namen) == 3, f"erwartet 3 Namen, bekommen {sorted(namen)}"
+    assert len(namen) == 4, f"erwartet 4 Namen, bekommen {sorted(namen)}"
 
 
 def test_bestand_geht_nicht_verloren(mod, tmp_path, monkeypatch):
@@ -91,7 +83,8 @@ def test_bestand_geht_nicht_verloren(mod, tmp_path, monkeypatch):
 
 
 def test_b4b_steht_in_den_daten():
-    """Gemessen am 25.09.2026 an der Quellseite."""
+    """Gemessen am 25.09.2026 an der Quellseite (Game8); der Name bleibt im
+    Bestand, auch wenn die neue Quelle B4b noch nicht fuehrt."""
     with open(DATEN, encoding="utf-8") as f:
         d = json.load(f)
     assert d["sets"].get("B4b") == "Deluxe Pack Mega", (
@@ -134,7 +127,7 @@ def test_ein_nachtrag_bleibt_bis_die_quelle_ihn_selbst_fuehrt(mod):
 
 
 def test_main_schreibt_die_nachtraege_mit(mod, tmp_path, monkeypatch):
-    """Verhalten, nicht Schreibweise: main() laeuft gegen eine gebaute Seite."""
+    """Verhalten, nicht Schreibweise: main() laeuft gegen eine gebaute Quelle."""
     ziel = tmp_path / "pocket_sets.json"
     ziel.write_text(json.dumps({"_meta": {"nachgetragen": [
         {"kennung": "B9x", "name": "Kommt noch", "am": "2026-09-25",

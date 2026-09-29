@@ -155,7 +155,7 @@ describe('Pocket-Reiter: die Farbentscheidung und die Leiste', () => {
     it('Deck-Namen stehen in einem span, nicht in Ueberschrift oder Verweis', () => {
         // sprachreinheit.yml prueft sichtbaren Text in h1..h5, label,
         // button und a auf Sprachreinheit. Deck-Namen sind zwangslaeufig
-        // englisch (Game8s Bezeichnungen).
+        // englisch (Bezeichnungen der Quelle).
         assert.match(JS, /<span class="pk-name">/,
             'der Deck-Name steht nicht in einem span');
         assert.doesNotMatch(JS, /<h[1-5][^>]*>'\s*\+\s*esc\(d\.name\)/,
@@ -198,8 +198,8 @@ describe('Pocket-Reiter: die Auflagen der Datei', () => {
     it('die Quelle wird angeschrieben, mit Datum aus _meta.abgerufen', () => {
         // _meta.quelle_hinweis verlangt es woertlich: "Die Oberflaeche
         // muss das anschreiben."
-        assert.match(JS, /Einstufung von Game8, keine von uns gemessene Zahl/,
-            'die Quellenzeile fehlt');
+        assert.match(JS, /Stufe nach unserer Regel/, 'die Quellenzeile fehlt');
+        assert.match(JS, /limitlesstcg\.com/, 'die Quelle ist nicht verlinkt');
         assert.match(JS, /_meta[\s\S]{0,80}abgerufen|m\.abgerufen/,
             'das Datum kommt nicht aus _meta.abgerufen');
         assert.doesNotMatch(JS, /data_stand\.json/,
@@ -208,9 +208,11 @@ describe('Pocket-Reiter: die Auflagen der Datei', () => {
     });
 
     it('die fehlenden Decks und die Rechnung stehen in der Fusszeile', () => {
+        // Ausgefuehrt geprueft in test-pocket-verhalten.js („die Fusszeile
+        // nennt …"); hier nur, dass die Felder ueberhaupt gelesen werden.
         assert.match(JS, /ohne_code/, '_meta.ohne_code wird nicht gelesen');
-        assert.match(JS, /zusammengelegt/, '_meta.zusammengelegt wird nicht gelesen');
-        assert.match(JS, /uebersicht/, '_meta.uebersicht wird nicht gelesen');
+        assert.match(JS, /unter_min_listen/, '_meta.unter_min_listen wird nicht gelesen');
+        assert.match(JS, /offene_turniere/, '_meta.offene_turniere wird nicht gelesen');
     });
 
     it('ein Fehler beim Laden wird gemeldet, nicht verschwiegen', () => {

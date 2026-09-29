@@ -1242,112 +1242,55 @@ REZEPTE['champions'] = {
 };
 
 /* ── 8 · Pocket-Tier-Liste ─────────────────────────────────────────── */
-/* KEINE RANGFOLGE UND KEIN ANGESCHNITTENER RANG.
+/* SEIT 29.09.2026 GEZAEHLT, NICHT EINGESCHAETZT.
  *
- * Zwei Befunde der Abnahme am 04.09.2026:
+ * Die Datei kommt aus den Standings der Pocket-Turniere auf Limitless
+ * (scripts/scrape_pocket_limitless.py). Anteil und Siegquote sind
+ * gezaehlt; die Stufe ist unsere Regel darueber (_meta.stufenregel).
+ * Innerhalb einer Stufe steht die Datei nach Anteil — die Ordnung ist
+ * also eine gemessene, und Rangziffern duerfen stehen.
  *
- * 1. Innerhalb einer Stufe gibt es KEINE Ordnung. Die Liste-Vorlage
- *    malt sonst 01–08 davor und erfindet damit eine Rangfolge, die in
- *    der Quelle nicht existiert. Deshalb `ohneRang`.
- *
- * 2. Der Achterschnitt faellt mitten in eine Stufe: S=4, A+=5 ergibt
- *    neun. Acht Zeilen liessen ein A+-Deck weg, das genau gleich
- *    eingestuft ist — auf einem Bild ohne Fussnote heisst das "dieses
- *    Deck ist schlechter". Also wird an einer Stufengrenze
- *    geschnitten, nicht bei acht.
- *
- * Dazu die Auflage der Datei selbst (_meta.quelle_hinweis): "Die
- * Tier-Einstufung ist die redaktionelle Einschaetzung von Game8, keine
- * von uns gemessene Zahl. Die Oberflaeche muss das anschreiben." */
-var TIER_ORDNUNG = ['S', 'A+', 'A', 'B', 'C', 'D'];
+ * EINE UNBEKANNTE STUFE DARF NICHT STILL VERSCHWINDEN (04.09.2026): eine
+ * Stufe, die in der Regel der Datei nicht vorkommt, bricht ab, statt
+ * ans Ende sortiert zu werden. */
 REZEPTE['pocket'] = {
     name: 'Pocket tier list',
     gruppe: 'Pocket',
     lade: function () {
         return hole('data/pocket_tierlist.json', true).then(function (d) {
+            var m = d._meta || {};
             var decks = (d.decks || []).slice();
             if (!decks.length) throw new Error('pocket_tierlist.json hat keine Decks');
-            /* EINE UNBEKANNTE STUFE DARF NICHT STILL VERSCHWINDEN.
-             * Fuehrt Game8 eines Tages "SS" ein, sortierte sie vorher
-             * ans Ende und wurde nie genommen: die Ausgabe zeigte "Stufe
-             * S", waehrend die hoechste Stufe fehlte — und der Test blieb
-             * gruen, weil er nur zaehlt, ob die GEZEIGTEN Stufen ganz
-             * sind (Abnahme 04.09.2026). */
-            /* ZWEI VERSCHIEDENE DINGE, EINE FRUEHERE REGEL (16.09.2026).
-               Bis heute war jede Stufe ausserhalb von TIER_ORDNUNG ein
-               harter Abbruch. Gedacht war das gegen eine NEUE Stufe
-               („SS"), die sonst stumm aus der Liste faellt — und dafuer
-               ist es weiter richtig.
-
-               Am 16.09.2026 fuehrte Game8 aber ein Deck GANZ OHNE Stufe
-               („Team Rocket's Wobbuffet", auf der Seite als „Untiered"
-               bezeichnet). Der Scraper schreibt dafuer `tier: null`, und
-               das ist keine unbekannte Stufe, sondern gar keine — ein
-               Zustand, den die Quelle ausdruecklich kennt.
-
-               Ein Post ohne Stufe zu erzeugen waere falsch; einen
-               ganzen Post-Entwurf daran scheitern zu lassen aber auch.
-               Die Decks ohne Stufe fallen deshalb aus der Auswahl (die
-               Achterliste ordnet NACH Stufe, dort ist fuer sie kein
-               Platz), und der Abbruch bleibt dem vorbehalten, wofuer er
-               gebaut wurde: einer Stufe, die es gibt und die wir nicht
-               kennen. */
-            var ohneStufe = decks.filter(function (dk) {
-                return dk.tier === null || dk.tier === undefined || dk.tier === '';
-            });
-            decks = decks.filter(function (dk) { return ohneStufe.indexOf(dk) < 0; });
-            var fremd = decks.map(function (dk) { return dk.tier; })
-                .filter(function (t) { return TIER_ORDNUNG.indexOf(t) < 0; });
+            var ordnung = (m.stufenregel || []).map(function (r) { return r.stufe; });
+            if (!ordnung.length) throw new Error(
+                'pocket_tierlist.json traegt keine Stufenregel (_meta.stufenregel) — ' +
+                'ohne sie ist eine Stufe auf dem Bild eine Behauptung ohne Grundlage');
+            var fremd = decks.filter(function (dk) { return ordnung.indexOf(dk.tier) < 0; })
+                .map(function (dk) { return String(dk.tier); });
             if (fremd.length) throw new Error(
-                'unbekannte Tier-Stufe in pocket_tierlist.json: ' +
-                fremd.slice(0, 3).join(', ') + '. Die Reihenfolge in ' +
-                'TIER_ORDNUNG muss ergaenzt werden, sonst faellt die Stufe ' +
-                'stumm aus der Liste');
-            if (!decks.length) throw new Error(
-                'pocket_tierlist.json hat nur Decks ohne Stufe — daraus laesst ' +
-                'sich keine nach Stufen geordnete Liste bauen');
+                'Stufe ausserhalb der Regel in pocket_tierlist.json: ' +
+                fremd.slice(0, 3).join(', ') + '. Der Erzeuger hat eine Stufe ' +
+                'geschrieben, die seine eigene Regel nicht kennt');
+            if (!m.listen) throw new Error(
+                'pocket_tierlist.json ohne _meta.listen — ohne diesen Nenner darf ' +
+                'kein Anteil auf ein Bild');
             decks.sort(function (x, y) {
-                var a = TIER_ORDNUNG.indexOf(x.tier), b = TIER_ORDNUNG.indexOf(y.tier);
-                return (a < 0 ? 99 : a) - (b < 0 ? 99 : b)
-                    || String(x.name).localeCompare(String(y.name), 'de');
+                return ordnung.indexOf(x.tier) - ordnung.indexOf(y.tier) || y.anteil - x.anteil;
             });
-            /* An der letzten Stufengrenze schneiden, die noch in acht
-             * Zeilen passt. */
-            var genommen = [], halt = false;
-            TIER_ORDNUNG.forEach(function (stufe) {
-                if (halt) return;
-                var dieser = decks.filter(function (o) { return o.tier === stufe; });
-                if (!dieser.length) return;
-                if (genommen.length + dieser.length > MAX) { halt = true; return; }
-                genommen = genommen.concat(dieser);
-            });
-            /* KEIN RUECKFALL AUF slice(0, MAX).
-             * Der haette die oberste Stufe angeschnitten, sobald sie
-             * mehr als acht Decks hat — genau das, was dieses Rezept
-             * verhindern soll. Dann lieber ein gemeldeter Ausfall. */
-            if (!genommen.length) throw new Error(
-                'die oberste Tier-Stufe hat mehr als ' + MAX + ' Decks — eine ' +
-                'Achterliste muesste sie anschneiden, und innerhalb einer ' +
-                'Stufe gibt es keine Ordnung. Die Vorlage braucht mehr Zeilen ' +
-                'oder der Post eine andere Stufe');
-            var stufen = [];
-            genommen.forEach(function (dk) {
-                if (stufen.indexOf(dk.tier) < 0) stufen.push(dk.tier);
-            });
-            var stand = kurzDatum(d._meta && d._meta.abgerufen);
+            var wert = function (dk) { return dk.tier + ' · ' + prozent(dk.anteil * 100, 1); };
+            var gezeigt = ohneGleichstand(decks, wert);
+            var stand = kurzDatum(m.abgerufen);
             return {
-                zeilen: zeilenText(genommen.map(function (dk) {
-                    return [dk.name, dk.tier];
-                })),
-                listeKopf: 'Game8 tier · ' + genommen.length + ' of ' + decks.length,
-                ohneRang: true,
-                kicker: 'Pocket · Game8 tier list',
-                titel: 'Tier ' + stufen.join(' and '),
-                fuss: 'Game8s Einschätzung, nicht gemessen · ' + stand,
+                zeilen: zeilenText(gezeigt.map(function (dk) { return [dk.name, wert(dk)]; })),
+                listeKopf: kopfMitAnteil('Tier · share', gezeigt.length, decks.length),
+                kicker: 'Pocket · Limitless online',
+                titel: 'Pocket tier list',
+                fuss: tausend(m.listen) + ' lists · ' + (m.turniere || 0) + ' tournaments · ' + stand,
                 tags: hashtags(['pokemontcgpocket', 'tierlist']),
-                caption: 'The decks in tier ' + stufen.join(' and ') +
-                    ' in Pokémon TCG Pocket — die redaktionelle Einschätzung von ' +
-                    'Game8, not a number we measured. As of ' + stand,
+                caption: 'The ' + gezeigt.length + ' strongest decks in Pokémon TCG Pocket — ' +
+                    'share and win rate counted from ' + tausend(m.listen) + ' lists in ' +
+                    (m.turniere || 0) + ' online tournaments on Limitless, tier by our own rule. ' +
+                    'As of ' + stand,
                 vorlagen: ['liste']
             };
         });

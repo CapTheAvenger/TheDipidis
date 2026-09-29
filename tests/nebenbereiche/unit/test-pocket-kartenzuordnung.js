@@ -41,10 +41,12 @@
  *
  * WAS NICHT GEPRUEFT WIRD
  * -----------------------
- * Ob (Set, Nummer) auf die Karte zeigt, die Game8 meint. Das braeuchte
- * einen Abruf bei game8.co, und der Sandkasten hat keinen Netzweg
- * dorthin. Geprueft wird die INNERE Stimmigkeit der Datei — dass sie
- * sich nicht selbst widerspricht.
+ * Ob (Set, Nummer) auf die Karte zeigt, die die Quelle meint. Seit dem
+ * Wechsel auf Limitless (29.09.2026) haelt
+ * tests/nebenbereiche/python/test_pocket_limitless.py dafuer jeden Code
+ * gegen seine Liste und die Kennungstabelle. Hier wird die INNERE
+ * Stimmigkeit der Datei geprueft — dass sie sich nicht selbst
+ * widerspricht.
  *
  * Ebenfalls NICHT geprueft: die Sprite-Aufloesung in js/ds-pocket.js
  * selbst. Die Datei wird gerade umgebaut (Sprites, Stand 10.09.2026);
@@ -166,11 +168,12 @@ describe('die Quelle der Pocket-Daten steht in der Datei', () => {
         assert.ok(String(m.abgerufen || '').trim(), 'kein Abrufdatum');
     });
 
-    it('die Einstufung ist ausdruecklich als fremde Einschaetzung gekennzeichnet', () => {
-        /* Sonst liest sich eine redaktionelle Tier-Liste wie eine
-           gemessene Zahl dieses Projekts. */
-        assert.match(String(POCKET._meta.quelle_hinweis || ''),
-            /redaktionelle Einschätzung|keine von uns gemessene Zahl/,
-            'der Hinweis, dass die Stufen nicht von uns gemessen sind, fehlt');
+    it('die Stufe ist ausdruecklich als UNSERE Regel gekennzeichnet, die Regel steht dabei', () => {
+        /* Seit 29.09.2026 (Limitless): Anteil und Siegquote sind gezaehlt,
+           die Stufe ist unsere Regel darueber. Ohne diesen Hinweis liest
+           sich die Stufe wie eine Angabe der Quelle. */
+        assert.match(String(POCKET._meta.quelle_hinweis || ''), /UNSERE Regel/,
+            'der Hinweis, dass die Stufe unsere Regel ist, fehlt');
+        assert.ok((POCKET._meta.stufenregel || []).length, 'die Regel selbst fehlt');
     });
 });

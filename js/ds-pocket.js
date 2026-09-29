@@ -3,48 +3,42 @@
  *
  * WAS ER ZEIGT
  * ------------
- * Game8s Tier-Liste für Pokémon TCG Pocket plus die Decks des aktuellen
- * Sets, je mit dem 2D-Muster zum Scannen und der Kartenliste. Die Daten
- * kommen aus data/pocket_tierlist.json; das Muster zeichnet
- * js/qr-svg.js selbst aus dem Feld `code` — kein Hotlink auf Game8s
- * Bildserver.
+ * Eine Tier-Liste für Pokémon TCG Pocket aus den Ergebnissen der
+ * Online-Turniere auf Limitless (seit 29.09.2026; vorher Game8), je Deck
+ * mit einer gespielten Liste, ihrem 2D-Muster zum Scannen und dem Code
+ * als Text. Die Daten kommen aus data/pocket_tierlist.json
+ * (scripts/scrape_pocket_limitless.py, täglich); das Muster zeichnet
+ * js/qr-svg.js selbst aus dem Feld `code`.
  *
  * WARUM EIN EIGENER REITER
  * ------------------------
  * Der vorhandene `#side-quest` heißt in Überschrift, Menü und i18n
  * ausdrücklich "Pokémon Champions", und js/ds-nav.js:19 schreibt die
  * Trennung als Zweck auf: "Pokémon Champions ist ein anderes Spiel".
- * TCG Pocket ist ein drittes. Ein achter Unterreiter dort stünde unter
- * einer Überschrift, die etwas anderes verspricht.
+ * TCG Pocket ist ein drittes.
  *
  * WAS DIE DATEN VERLANGEN, NICHT VORSCHLAGEN
  * ------------------------------------------
- * `_meta.quelle_hinweis` sagt wörtlich: "Die Tier-Einstufung ist die
- * redaktionelle Einschätzung von Game8, keine von uns gemessene Zahl.
- * Die Oberfläche muss das anschreiben." Deshalb steht die Quelle mit
- * Datum unter der Überschrift UND im Vollbild — der Screenshot verlässt
- * die Seite, und was nicht im Bild steht, existiert für den Empfänger
- * nicht.
+ * `_meta.quelle_hinweis`: Anteil und Siegquote sind gezählt, die STUFE
+ * ist unsere Regel über diese beiden Zahlen. Deshalb steht die Regel
+ * unter der Überschrift — gebaut aus `_meta.stufenregel`, nicht als
+ * Satz im Code, damit sie nie etwas anderes sagt als die Datei — und
+ * die Quelle mit Datum steht auch im Vollbild: der Screenshot verlässt
+ * die Seite.
  *
- * DREI EHRLICHKEITSLÖCHER, DIE ANGESCHRIEBEN WERDEN
- * -------------------------------------------------
- * 1. `_meta.ohne_code`: zwei Decks stehen NICHT in `decks`. Wer nur die
- *    Liste zeichnet, zeigt 33 von 35 und sagt nirgends, dass zwei
- *    fehlen. Ihre Namen stehen deshalb in der Fußzeile.
- * 2. `_meta.zusammengelegt`: 17 Einträge. Zwei davon tragen eine ANDERE
- *    Stufe als das behaltene Deck — Game8 führt dasselbe Deck an zwei
- *    Stellen verschieden ein. Diese zwei bekommen eine Fußnote, die
- *    übrigen 15 nicht (sie sind stufengleich).
- * 3. `quelle_liste === 'set'`: bei diesen Decks stammt die Stufe aus
- *    der Zelle der Set-Tabelle, nicht aus der Rangliste. Zwei Maße in
- *    einer Liste; das Kennzeichen sagt es.
+ * WAS ANGESCHRIEBEN WIRD
+ * ----------------------
+ * 1. Decks ohne Scan-Code (`code` null, Grund in `code_fehlt`): sie stehen
+ *    in der Liste, das Vollbild nennt den Grund statt eines Musters, und
+ *    die Fußzeile nennt ihre Namen.
+ * 2. Archetypen unter `_meta.min_listen`: gezählt in der Fußzeile.
+ * 3. Laufende Turniere (`_meta.offene_turniere`): gezählt in der Fußzeile.
  *
  * DAS ALTER
  * ---------
- * Der Ablauf .github/workflows/pocket-tierlist.yml läuft nur auf
- * Knopfdruck — Game8 weist GitHub-Läufer mit HTTP 202 ab. Die Datei
- * altert also. Ab PLAUSIBEL_TAGE steht eine sichtbare Warnung da; das
- * bloße Datum liest niemand nach.
+ * Der Ablauf .github/workflows/pocket-tierlist.yml läuft täglich. Ab
+ * PLAUSIBEL_TAGE ohne Auffrischung steht eine sichtbare Warnung da —
+ * derselbe Wert wie in scripts/data_guardian.py check_pocket_frische().
  */
 (function () {
     'use strict';
@@ -73,15 +67,16 @@
     var eigenText = '';
     var setNamen = null;
     var HOST = 'pocket';
-    var TIER_ORDNUNG = ['S', 'A+', 'A', 'B', 'C', 'D'];
-    // Ein neues Pocket-Set erscheint etwa im Monatsabstand; danach ist
-    // eine Bestenliste eine Momentaufnahme von gestern.
-    var PLAUSIBEL_TAGE = 28;
+    // Rueckfall, falls eine Datei keine Stufenregel traegt. Massgeblich
+    // ist `_meta.stufenregel` (siehe stufenOrdnung()).
+    var TIER_ORDNUNG = ['S', 'A', 'B', 'C'];
+    // Der Lauf ist taeglich; drei Tage ohne Auffrischung heisst, er ist
+    // zweimal ausgefallen.
+    var PLAUSIBEL_TAGE = 3;
 
     var daten = null;
     var geladen = false;
     var laeuft = null;
-    var filter = 'alle';
     var wachschloss = null;
 
 
@@ -89,7 +84,7 @@
      *
      * Vom Betreiber am 10.09.2026 gewuenscht. Die Schwierigkeit liegt
      * nicht im Zeichnen, sondern darin, aus einem Deck-Namen die
-     * richtigen Pokemon zu bekommen — Game8 schreibt dort Set-Kuerzel
+     * richtigen Pokemon zu bekommen — Game8 schrieb dort (bis 29.09.2026) Set-Kuerzel
      * ("PD Espeon", "RS Heliolisk", "TRA Garchomp"), Kartenzusaetze
      * ("ex"), Formworte ("Mega", "Alolan", "Teal Mask") und Beiwerk
      * ("and 18 Trainers") bunt durcheinander.
@@ -212,24 +207,39 @@
         return Math.floor((Date.now() - d.getTime()) / 86400000);
     }
 
-    /* Welche Decks tragen laut _meta.zusammengelegt eine abweichende
-     * Stufe? Die Bindung läuft nur über den Namen — das ist die einzige,
-     * die die Datei hergibt. Ein Treffer, der nicht eindeutig ist, wird
-     * still übergangen: lieber keine Fußnote als eine an der falschen
-     * Zeile. */
-    function abweichendeStufen(meta, decks) {
-        var raus = {};
-        var nachName = {};
-        decks.forEach(function (d) {
-            nachName[d.name] = (nachName[d.name] === undefined) ? d : null;
-        });
-        (meta.zusammengelegt || []).forEach(function (z) {
-            var deck = nachName[z.behalten];
-            if (!deck || !z.verlorene_stufe) return;
-            if (z.verlorene_stufe === deck.tier) return;
-            (raus[z.behalten] = raus[z.behalten] || []).push(z.verlorene_stufe);
-        });
-        return raus;
+    function stufenOrdnung() {
+        var r = ((daten && daten._meta) || {}).stufenregel;
+        return (r && r.length) ? r.map(function (x) { return x.stufe; }) : TIER_ORDNUNG;
+    }
+
+    /* Prozent in der Schreibweise der Sprache: „8,2 %" / "8.2 %". */
+    function prozent(x) {
+        if (typeof x !== 'number' || isNaN(x)) return '–';
+        var v = (x * 100).toFixed(1);
+        return (t(v.replace('.', ','), v)) + ' %';
+    }
+
+    /* Der Name der Siegquote kommt aus js/win-rate-konvention.js, nicht
+       aus diesem Reiter (tests/unit/test-w2-hausnamen.js): die Datei rechnet
+       S / (S + N + U), Konvention „mitUnentschieden". Fehlt das Modul,
+       bleibt das Kuerzel mit der Formel. */
+    function wr() {
+        var K = window.WinRateKonvention, id = (daten && daten._meta && daten._meta.quoten_konvention) || 'mitUnentschieden';
+        return {
+            kuerzel: (K && K.kuerzel(id)) || 'WR*',
+            lang: (K && K.kurz(id)) || '',
+            formel: (K && K.kurzHinweis && K.kurzHinweis(id)) ||
+                    ((daten && daten._meta && daten._meta.quoten_formel) || 'S / (S + N + U)')
+        };
+    }
+
+    function wrTitel() {
+        var w = wr();
+        return w.kuerzel + ': ' + (w.lang ? w.lang + ' · ' : '') + w.formel;
+    }
+
+    function bilanzText(d) {
+        return d.siege + '-' + d.niederlagen + '-' + d.unentschieden;
     }
 
     function meldung(text, istFehler) {
@@ -237,202 +247,98 @@
                '" role="status">' + esc(text) + '</div>';
     }
 
+    /* Die Stufenregel, gebaut aus der Datei. Ein Satz über die Regel im
+       Code würde irgendwann etwas anderes sagen als die Datei. */
+    function regelText(m) {
+        var zeilen = (m.stufenregel || []).map(function (r) {
+            var teile = [];
+            if (r.anteil_ab != null) teile.push(t('Anteil ab ', 'share from ') + prozent(r.anteil_ab));
+            if (r.quote_ab != null) teile.push(wr().kuerzel + t(' ab ', ' from ') + prozent(r.quote_ab));
+            return r.stufe + ': ' + (teile.length ? teile.join(t(' und ', ' and '))
+                                                 : t('alle übrigen ab ', 'all others from ') +
+                                                   (m.min_listen || '?') + t(' Listen', ' lists'));
+        });
+        return zeilen.join(' · ');
+    }
+
     function kopf() {
         var m = daten._meta || {};
         var stand = kurzDatum(m.abgerufen);
         var tage = tageSeit(m.abgerufen);
+        var f = m.fenster || {};
         var s = '';
         s += '<div class="header">';
         s += '<h2>' + esc(t('Side Quest · Pokémon TCG Pocket',
                             'Side Quest · Pokémon TCG Pocket')) + '</h2>';
-        s += '<p>' + esc(t('Game8s Tier-Liste und die Decks des neuen Sets. Deck antippen, ' +
-                           'Muster zeigen, zweites Gerät scannt.',
-                           'Game8’s tier list and the new set decks. Tap a deck, show the ' +
-                           'pattern, scan it with a second device.')) + '</p>';
+        s += '<p>' + esc(t('Die meistgespielten Decks der Online-Turniere auf Limitless, ' +
+                           'letzte ' + (f.tage || '?') + ' Tage. Deck antippen, Muster zeigen, ' +
+                           'zweites Gerät scannt.',
+                           'The most played decks of the online tournaments on Limitless, last ' +
+                           (f.tage || '?') + ' days. Tap a deck, show the pattern, scan it with ' +
+                           'a second device.')) + '</p>';
         s += '</div>';
 
+        var w = wr();
         s += '<p class="pk-quelle">' +
-             esc(t('Einstufung von Game8, keine von uns gemessene Zahl',
-                   'Game8’s own assessment, not a figure we measured'));
+             esc(t('Gezählt aus ' + (m.turniere || 0) + ' Turnieren mit ' + (m.listen || 0) + ' Listen',
+                   'Counted from ' + (m.turniere || 0) + ' tournaments with ' + (m.listen || 0) + ' lists')) +
+                 esc(' · ' + w.kuerzel + ' = ' + (w.lang ? w.lang + ', ' : '') + w.formel + ' · ' +
+                     t('Stufe nach unserer Regel', 'tier by our rule'));
         if (m.quelle_url) {
-            s += ' · <a href="' + esc(m.quelle_url) + '" target="_blank" rel="noopener">game8.co</a>';
+            s += ' · <a href="' + esc(m.quelle_url) + '" target="_blank" rel="noopener">limitlesstcg.com</a>';
         }
         if (stand) s += ' · ' + esc(t('Stand ', 'as of ')) + esc(stand);
         s += '</p>';
+        if ((m.stufenregel || []).length) {
+            s += '<p class="pk-quelle pk-regel">' + esc(t('So entsteht die Stufe: ', 'How the tier is set: ')) +
+                 esc(regelText(m)) + '</p>';
+        }
 
         if (tage !== null && tage >= PLAUSIBEL_TAGE) {
             s += '<p class="pk-alt">' + esc(
-                t('Seit ' + tage + ' Tagen nicht aufgefrischt — nach einem neuen Set kann ' +
-                  'sich die Einstufung deutlich verschoben haben.',
-                  'Not refreshed for ' + tage + ' days — after a new set the ratings may ' +
-                  'have shifted considerably.')) + '</p>';
+                t('Seit ' + tage + ' Tagen nicht aufgefrischt — der tägliche Lauf ist ausgefallen.',
+                  'Not refreshed for ' + tage + ' days — the daily run has failed.')) + '</p>';
         }
         return s;
     }
 
-    function filterleiste() {
-        var knoepfe = [
-            ['alle',  t('Alle', 'All')],
-            ['tier',  t('Tier-Liste', 'Tier list')],
-            ['set',   t('Neues Set', 'New set')]
-        ];
-        return '<div class="pk-filter" role="group" aria-label="' +
-            esc(t('Auswahl', 'Filter')) + '">' +
-            knoepfe.map(function (k) {
-                return '<button type="button" data-pk-filter="' + k[0] + '"' +
-                       (filter === k[0] ? ' class="is-active" aria-pressed="true"'
-                                        : ' aria-pressed="false"') +
-                       '>' + esc(k[1]) + '</button>';
-            }).join('') + '</div>';
-    }
-
-    function passt(d) {
-        if (filter === 'alle') return true;
-        if (filter === 'tier') return d.quelle_liste === 'tier' || d.quelle_liste === 'beide';
-        return d.quelle_liste === 'set' || d.quelle_liste === 'beide';
-    }
-
-    /* EINE DECKZEILE — in beiden Gruppierungen dieselbe. */
-    function zeile(d, streit) {
+    /* EINE DECKZEILE. */
+    function zeile(d) {
         var i = (daten.decks || []).indexOf(d);
         var s = '<button type="button" class="pk-zeile" data-pk-deck="' + i + '">';
         s += '<span class="pk-marke">' + esc(d.tier || '?') + '</span>';
         s += spriteHtml(d);
         s += '<span class="pk-name">' + esc(d.name);
-        var fuss = [];
-        if (d.quelle_liste === 'set') {
-            fuss.push(t('Stufe aus der Set-Tabelle', 'tier from the set table'));
-        }
-        if (streit && streit[d.name]) {
-            fuss.push(t('Game8 nennt auch ' + streit[d.name].join('/'),
-                        'Game8 also lists ' + streit[d.name].join('/')));
-        }
-        if (fuss.length) {
-            s += '<span class="pk-fussnote">' + esc(fuss.join(' · ')) + '</span>';
-        }
+        var fuss = [prozent(d.anteil) + t(' der Listen', ' of lists'),
+                    wr().kuerzel + ' ' + prozent(d.quote),
+                    d.listen + t(' Listen', ' lists')];
+        if (!d.code) fuss.push(t('ohne Scan-Code', 'no scan code'));
+        s += '<span class="pk-fussnote" title="' + esc(wrTitel()) + '">' + esc(fuss.join(' · ')) + '</span>';
         s += '</span><span class="pk-pfeil" aria-hidden="true">›</span></button>';
         return s;
     }
 
-    /* „NEUES SET" IST KEINE STUFENLISTE (16.09.2026).
-       ANLASS (Betreiber): „bei neues Set sollten ja nur die New Team
-       Rocket's Ambition Decks und Old Decks Updated with Team Rocket's
-       Ambition inklusive der Tiers".
-
-       Und: „bei Pocket ändert der Filter Alle, Tier-List, Neues Set
-       quasi nichts." Gemessen am 16.09.2026 gegen die echte Seite
-       stimmte das fast — der Filter greift (23 gegen 21 von 33 Decks),
-       aber er SIEHT nicht danach aus, weil elf Decks in beiden Listen
-       stehen und die Gruppierung in beiden Faellen dieselbe war.
-
-       Game8 teilt die Set-Tabelle in ZWEI Abschnitte, und die sagen
-       etwas, das die Stufe nicht sagt: ob ein Deck mit dem Set NEU ist
-       oder ein bestehendes, das durch das Set besser wurde. Genau danach
-       wird hier gruppiert; die Stufe steht weiter an jeder Zeile. */
-    function nachAbschnitten(decks, streit, ordnung) {
-        var gruppen = [], zuordnung = {};
-        decks.forEach(function (d) {
-            var a = d.set_abschnitt || '';
-            if (!zuordnung[a]) { zuordnung[a] = []; gruppen.push(a); }
-            zuordnung[a].push(d);
-        });
-        /* DIE REIHENFOLGE KOMMT AUS DER QUELLE — NICHT AUS DEM ZUFALL.
-
-           Hier stand „die Abschnitte in der Reihenfolge der Quelle
-           lassen". Das war FALSCH und bei der Live-Abnahme am 16.09.2026
-           auch zu sehen: geordnet wurde nach erstem Auftreten in der
-           nach Stufe sortierten Deckliste, und weil das staerkste Deck
-           zufaellig ein aktualisiertes war, stand „Old Decks Updated …"
-           ueber „New … Decks". Game8 zeigt es andersherum.
-
-           Die Reihenfolge kennt nur die Quellseite; sie steht deshalb
-           seit dem 16.09.2026 in `_meta.set_abschnitte`. Fehlt sie
-           (aeltere Datei), bleibt es beim ersten Auftreten — schlechter
-           als die Quelle, aber besser als eine erfundene Regel im Code.
-           Ohne Abschnitt geht ans Ende: diese Decks brauchen eine
-           Auskunft, keine Ueberschrift. */
-        var rangA = function (a) {
-            if (!a) return 1e6;
-            var i = (ordnung || []).indexOf(a);
-            return i < 0 ? 1e5 + gruppen.indexOf(a) : i;
-        };
-        gruppen.sort(function (a, b) { return rangA(a) - rangA(b); });
-        var s = '';
-        gruppen.forEach(function (a) {
-            var teil = zuordnung[a];
-            /* `indexOf` gibt fuer eine unbekannte Stufe -1 — damit
-               stuende ein Deck OHNE Stufe ganz oben, noch vor S. Es
-               gehoert ans Ende. */
-            var rang = function (t) {
-                var i = TIER_ORDNUNG.indexOf(t);
-                return i < 0 ? TIER_ORDNUNG.length : i;
-            };
-            teil.sort(function (x, y) {
-                return rang(x.tier) - rang(y.tier) || x.name.localeCompare(y.name, 'de');
-            });
-            s += '<section class="pk-stufe">';
-            s += '<h3>' + esc(a || t('Ohne Abschnitt', 'No section')) +
-                 ' <span class="pk-stufe-zahl">' + teil.length + '</span></h3>';
-            if (!a) {
-                s += '<p class="pk-alt">' + esc(t(
-                    'Diese Decks stehen in der Set-Tabelle, ohne dass der Lauf '
-                    + 'ihre Überschrift zuordnen konnte. Sie stehen trotzdem da.',
-                    'These decks are in the set table, but the run could not '
-                    + 'assign their heading. They are shown anyway.')) + '</p>';
-            }
-            teil.forEach(function (d) { s += zeile(d, streit); });
-            s += '</section>';
-        });
-        return s;
-    }
-
     function liste() {
-        var decks = (daten.decks || []).filter(passt);
-        if (!decks.length) {
-            return meldung(t('Für diese Auswahl steht kein Deck in der Liste.',
-                             'No deck in the list matches this filter.'));
-        }
-        var streit = abweichendeStufen(daten._meta || {}, daten.decks || []);
-        if (filter === 'set') {
-            return nachAbschnitten(decks, streit,
-                (daten._meta || {}).set_abschnitte || []);
-        }
+        var decks = (daten.decks || []).slice();
+        var ordnung = stufenOrdnung();
         var s = '';
-        TIER_ORDNUNG.forEach(function (stufe) {
+        ordnung.forEach(function (stufe) {
+            // Die Reihenfolge innerhalb einer Stufe kommt aus der Datei:
+            // nach Anteil, gezählt — keine erfundene Rangfolge.
             var teil = decks.filter(function (d) { return d.tier === stufe; });
             if (!teil.length) return;
-            // Innerhalb einer Stufe alphabetisch — Game8 vergibt dort
-            // keine Rangfolge, und eine Nummerierung würde eine erfinden.
-            teil.sort(function (a, b) { return a.name.localeCompare(b.name, 'de'); });
             s += '<section class="pk-stufe">';
             s += '<h3>' + esc(t('Stufe ', 'Tier ')) + esc(stufe) +
                  ' <span class="pk-stufe-zahl">' + teil.length + '</span></h3>';
-            teil.forEach(function (d) { s += zeile(d, streit); });
+            teil.forEach(function (d) { s += zeile(d); });
             s += '</section>';
         });
 
-        // EINE UNBEKANNTE STUFE DARF NICHT STILL VERSCHWINDEN.
-        //
-        // js/ds-post-quellen.js:1024 traegt dieselbe Reihenfolge und
-        // davor genau diesen Riegel, mit dem Kommentar vom 04.09.2026:
-        // fuehrt Game8 eines Tages "SS" ein, sortierte sie vorher ans
-        // Ende und wurde nie genommen — die Ausgabe zeigte "Stufe S",
-        // waehrend die hoechste Stufe fehlte.
-        //
-        // Hier war das Array kopiert und der Riegel nicht (Abnahme
-        // 07.09.2026, nachgestellt): ein Deck mit tier 'S+' oder null
-        // fiel aus der Liste, waehrend die Fusszeile weiter 33 von 52
-        // behauptete. Und `tier: null` ist ueber den Kollisionsweg des
-        // Scrapers schon heute erreichbar
-        // (tests/python/test_pocket_tierlist.py haelt es fest); in den
-        // aktuellen Daten stehen sechs Kollisionen.
-        //
-        // Gezeigt wird es trotzdem — nur angeschrieben. Ein Deck
-        // wegzulassen waere die stille Reparatur, die dieses Projekt
-        // ueberall verbietet.
-        var fremd = decks.filter(function (d) {
-            return TIER_ORDNUNG.indexOf(d.tier) < 0;
-        });
+        // EINE UNBEKANNTE STUFE DARF NICHT STILL VERSCHWINDEN (07.09.2026).
+        // Die Regel steht in der Datei; ein Deck, dessen Stufe dort nicht
+        // vorkommt, ist ein Fehler des Erzeugers — gezeigt wird es trotzdem,
+        // nur angeschrieben. Weglassen wäre die stille Reparatur.
+        var fremd = decks.filter(function (d) { return ordnung.indexOf(d.tier) < 0; });
         if (fremd.length) {
             var stufen = fremd.map(function (d) {
                 return d.tier === null || d.tier === undefined || d.tier === ''
@@ -442,23 +348,13 @@
             s += '<h3>' + esc(t('Ohne bekannte Stufe', 'Tier not recognised')) +
                  ' <span class="pk-stufe-zahl">' + fremd.length + '</span></h3>';
             s += '<p class="pk-alt">' + esc(t(
-                'Game8 führt hier eine Einstufung, die wir nicht kennen (' +
-                stufen.join(', ') + '). Die Decks stehen trotzdem da — ' +
-                'weglassen wäre die stillere, aber schlechtere Lösung.',
-                'Game8 uses a tier we do not know (' + stufen.join(', ') +
+                'Diese Stufe kennt die Regel der Datei nicht (' + stufen.join(', ') +
+                '). Die Decks stehen trotzdem da — weglassen wäre die stillere, ' +
+                'aber schlechtere Lösung.',
+                'The rule in the file does not know this tier (' + stufen.join(', ') +
                 '). The decks are shown anyway — dropping them would be the ' +
                 'quieter but worse option.')) + '</p>';
-            /* DIESELBE ZEILE WIE UEBERALL (16.09.2026).
-               Hier stand eine eigene, magere Fassung ohne Sprites. Das
-               fiel drei Wochen nicht auf, weil nie ein Deck in diesem
-               Zweig landete — bis Game8 am 16.09.2026 „Team Rocket's
-               Wobbuffet" als Untiered fuehrte. Dann stand es als
-               einziges Deck der Liste ohne Bild da.
-
-               Ein Sonderweg, den nichts je betritt, ist kein Sonderweg,
-               sondern eine Falle mit Zeitzuender. */
-            fremd.sort(function (a, b) { return a.name.localeCompare(b.name, 'de'); });
-            fremd.forEach(function (d) { s += zeile(d, streit); });
+            fremd.forEach(function (d) { s += zeile(d); });
             s += '</section>';
         }
         return s;
@@ -466,27 +362,30 @@
 
     function rechnung() {
         var m = daten._meta || {};
-        var u = m.uebersicht || {};
+        var unter = m.unter_min_listen || {};
         var ohne = m.ohne_code || [];
-        var zus = m.zusammengelegt || [];
+        var offen = m.offene_turniere || [];
         var s = '<div class="pk-rechnung">';
-        if (u.angegangen) {
-            s += '<strong>' + (daten.decks || []).length + ' ' +
-                 esc(t('von ', 'of ')) + u.angegangen + '</strong> ' +
-                 esc(t('Einträgen bei Game8 — ' + ohne.length + ' ohne lesbares Muster, ' +
-                       zus.length + ' als Dublette zusammengelegt.',
-                       'entries at Game8 — ' + ohne.length + ' without a readable pattern, ' +
-                       zus.length + ' merged as duplicates.'));
+        s += '<strong>' + (daten.decks || []).length + ' Decks</strong> ' +
+             esc(t('ab ' + (m.min_listen || '?') + ' Listen im Fenster.',
+                   'with ' + (m.min_listen || '?') + ' lists or more in the window.'));
+        if (unter.archetypen) {
+            s += ' ' + esc(t('Darunter nicht gezeigt: ' + unter.archetypen + ' weitere Archetypen mit ' +
+                             'zusammen ' + unter.listen + ' Listen.',
+                             'Not shown below that: ' + unter.archetypen + ' more archetypes with ' +
+                             unter.listen + ' lists in total.'));
         }
         if (ohne.length) {
-            s += '<br>' + esc(t('Diese Decks fehlen hier: ', 'Missing here: ')) +
-                 ohne.map(function (o) {
-                     return esc(String(o.name).replace(/\s*\[[^\]]+\]\s*$/, ''));
-                 }).join(', ') + '. ' +
-                 esc(t('Ihr Muster ließ sich keinem Deck-Abschnitt eindeutig zuordnen — ' +
-                       'ein falscher Code ist schlimmer als keiner.',
-                       'Their pattern could not be matched to a deck section — a wrong ' +
-                       'code is worse than none.'));
+            s += '<br>' + esc(t('Ohne Scan-Code: ', 'Without scan code: ')) +
+                 ohne.map(function (o) { return esc(o.name) + ' (' + esc(o.grund) + ')'; }).join('; ') +
+                 '. ' + esc(t('Ein falscher Code ist schlimmer als keiner.',
+                              'A wrong code is worse than none.'));
+        }
+        if (offen.length) {
+            s += '<br>' + esc(t(offen.length + ' Turniere sind noch nicht dabei (laufen noch oder ' +
+                                'waren nicht abrufbar) und kommen beim nächsten Lauf dazu.',
+                                offen.length + ' tournaments are not included yet (still running ' +
+                                'or not retrievable) and will be added in the next run.'));
         }
         s += '</div>';
         return s;
@@ -496,7 +395,7 @@
      *
      * Pocket liest Decks nur als 2D-Muster ein. Wer eine Liste als Text
      * hat, fügt sie hier ein und bekommt dasselbe Vollbild wie bei den
-     * Game8-Decks. Gebaut wird in js/pocket-deckcode.js; verbunden wird
+     * Decks der Liste. Gebaut wird in js/pocket-deckcode.js; verbunden wird
      * über Set und Nummer, nie über den Namen. */
     function eigenesDeck() {
         return '<section class="pk-eigen" aria-labelledby="pkEigenTitel">' +
@@ -632,9 +531,14 @@
                            esc(nr) + '</span></li>';
                 }).join('') + '</ul>';
         }
+        var ENERGIE_DE = { Grass: 'Pflanze', Fire: 'Feuer', Water: 'Wasser', Lightning: 'Elektro',
+                           Psychic: 'Psycho', Fighting: 'Kampf', Darkness: 'Finsternis', Metal: 'Metall' };
+        var energie = (d.energie || []).map(function (e) { return t(ENERGIE_DE[e] || e, e); });
         return '<div class="pk-karten">' +
                block(t('Pokémon', 'Pokémon'), d.pokemon) +
                block(t('Trainer', 'Trainer'), d.trainer) +
+               (energie.length ? '<p class="pk-hell">' + esc(t('Energie: ', 'Energy: ')) +
+                                 esc(energie.join(', ')) + '</p>' : '') +
                '</div>';
     }
 
@@ -761,15 +665,31 @@
         var d = (daten.decks || [])[index];
         if (!d) return;
         var stand = kurzDatum((daten._meta || {}).abgerufen);
-        zeigeVollbild(d, t('Stufe ', 'Tier ') + d.tier + ' · Game8' +
-                         (stand ? ' · ' + t('Stand ', 'as of ') + stand : ''));
+        var teile = [t('Stufe ', 'Tier ') + d.tier,
+                     prozent(d.anteil) + t(' der Listen', ' of lists'),
+                     wr().kuerzel + ' ' + prozent(d.quote) + ' (' + bilanzText(d) + ')'];
+        var lv = d.liste_von;
+        if (lv) {
+            teile.push(t('Liste: ', 'List: ') + (lv.platz ? t('Platz ', 'place ') + lv.platz + ', ' : '') +
+                       lv.bilanz.join('-') + ', ' + lv.turnier +
+                       (kurzDatum(lv.datum) ? ' (' + kurzDatum(lv.datum) + ')' : ''));
+        }
+        teile.push('Limitless' + (stand ? ' · ' + t('Stand ', 'as of ') + stand : ''));
+        zeigeVollbild(d, teile.join(' · '));
     }
 
     function zeigeVollbild(d, unterzeile) {
         var host = document.getElementById('pocketOverlay');
         if (!d || !host) return;
         var bild;
-        try {
+        if (!d.code) {
+            /* Kein Code ist kein Zeichenfehler: der Grund steht in der
+               Datei (`code_fehlt`) und wird genannt, statt ein leeres
+               Muster oder „null" als Code zu zeigen. */
+            bild = '<div class="pk-meldung is-fehler">' +
+                   esc(t('Für dieses Deck gibt es keinen Scan-Code: ', 'There is no scan code for this deck: ')) +
+                   esc(d.code_fehlt || t('ohne Angabe', 'not given')) + '</div>';
+        } else try {
             if (!window.qrSvg || typeof window.qrSvg.svg !== 'function') {
                 throw new Error('qrSvg fehlt');
             }
@@ -796,13 +716,14 @@
         // Name, Stufe und Quelle stehen IM Bild, nicht darüber: das
         // Bildschirmfoto ist das Lieferstück.
         s += '<div class="pk-overlay-kopf">';
-        // KEIN <h3>. Der Deck-Name ist Game8s englische Bezeichnung, und
+        // KEIN <h3>. Der Deck-Name ist die englische Bezeichnung der Quelle, und
         // .github/workflows/sprachreinheit.yml prueft sichtbaren Text in
         // h1..h5, label, button und a auf Sprachreinheit. Die Rolle
         // bleibt erhalten, die Sprachpruefung greift hier nicht mehr.
         s += '<div class="pk-overlay-name" role="heading" aria-level="2">' +
              esc(d.name) + '</div>';
-        s += '<p>' + esc(unterzeile) + '</p>';
+        s += '<p' + (typeof d.quote === 'number' ? ' title="' + esc(wrTitel()) + '"' : '') + '>' +
+             esc(unterzeile) + '</p>';
         s += '</div>';
         s += bild;
         s += '<p class="pk-hell">' + esc(
@@ -881,7 +802,7 @@
             host.innerHTML = meldung(t('Die Tier-Liste ist leer.', 'The tier list is empty.'));
             return;
         }
-        host.innerHTML = kopf() + filterleiste() + liste() + rechnung() + eigenesDeck();
+        host.innerHTML = kopf() + liste() + rechnung() + eigenesDeck();
         spritesNachziehen(host);
     }
 
@@ -966,12 +887,6 @@
         reiter.dataset.pkVerdrahtet = '1';
 
         reiter.addEventListener('click', function (ev) {
-            var f = ev.target.closest('[data-pk-filter]');
-            if (f) {
-                filter = f.getAttribute('data-pk-filter');
-                zeichne();
-                return;
-            }
             var z = ev.target.closest('[data-pk-deck]');
             if (z) { oeffne(Number(z.getAttribute('data-pk-deck'))); return; }
             var k = ev.target.closest('[data-pk-kopieren]');
@@ -981,7 +896,7 @@
             var zu = ev.target.closest('[data-pk-zu]');
             if (zu) schliesse();
         });
-        // Der eingefuegte Text ueberlebt das Neuzeichnen (Filterklick).
+        // Der eingefuegte Text ueberlebt das Neuzeichnen (Set-Namen, Sprites).
         reiter.addEventListener('input', function (ev) {
             if (ev.target && ev.target.id === 'pkEigenListe') eigenText = ev.target.value;
         });

@@ -197,6 +197,77 @@ FALLBACK_SET_ORDER = {
 }
 
 
+
+# ── DER RUECKFALL LERNT AUS DEM GESPEICHERTEN STAND (29.09.2026, SC-7) ──
+#
+# Die drei Tabellen darueber sind von Hand gepflegt. Beim Wechsel auf 30C
+# (16.09.2026) verlangte test_formatfenster_riegel.py, dass sie den neuen
+# Anker kennen — die Deploy-Kette stand vom 17. bis 20.09., bis Commit
+# 6ffcd00 "Formatwechsel 30C: Rueckfalltabellen ..." sie von Hand
+# nachzog. Beim naechsten Set waere es wieder so gewesen (gemessen mit
+# scripts/simuliere_setwechsel.py). Hausi, 29.09.2026: "auf Dauer nichts
+# mehr manuell".
+#
+# Wozu der Rueckfall da ist: faellt die Live-Erkennung aus, darf das
+# Formatfenster nicht HINTER den Stand fallen, den es schon hat. Dieser
+# Stand steht aber bereits in data/format_window.json — geschrieben vom
+# letzten Lauf, der die Quelle erreicht hat, und durch Monotonie- und
+# Ankerriegel geschuetzt. Der Rueckfall nimmt ihn deshalb dazu, statt zu
+# warten, bis jemand ihn abschreibt. Die Tabellen bleiben als Grundstock
+# fuer eine frische Installation ohne data/.
+def _gespeicherte_anker(verzeichnis: str = None) -> tuple:
+    """({EN-Set: Datum}, {JP-Set: Datum}) aus data/format_window.json.
+
+    Leer, wenn die Datei fehlt oder unlesbar ist — dann gilt der
+    Grundstock allein, der Stand von vorher."""
+    pfad = os.path.join(verzeichnis or data_dir, 'format_window.json')
+    try:
+        with open(pfad, encoding='utf-8') as f:
+            fw = json.load(f)
+    except (OSError, ValueError):
+        return {}, {}
+    if not isinstance(fw, dict):
+        return {}, {}
+    en, jp = {}, {}
+    for code_feld, datum_feld, ziel in (
+            ('current_set', 'set_release_date', en),
+            ('neuestes_set', 'neuestes_set_release_date', en),
+            ('current_set_jp', 'jp_release_date', jp)):
+        code = str(fw.get(code_feld) or '').strip().upper()
+        datum = str(fw.get(datum_feld) or '').strip()
+        if code and len(datum) == 10:
+            ziel[code] = datum
+    return en, jp
+
+
+def rueckfall_release_dates(verzeichnis: str = None) -> dict:
+    """FALLBACK_RELEASE_DATES plus die gespeicherten EN-Anker."""
+    en, _ = _gespeicherte_anker(verzeichnis)
+    return dict(FALLBACK_RELEASE_DATES, **en)
+
+
+def rueckfall_jp_release_dates(verzeichnis: str = None) -> dict:
+    """FALLBACK_JP_RELEASE_DATES plus der gespeicherte JP-Anker."""
+    _, jp = _gespeicherte_anker(verzeichnis)
+    return dict(FALLBACK_JP_RELEASE_DATES, **jp)
+
+
+def rueckfall_set_order(verzeichnis: str = None) -> dict:
+    """FALLBACK_SET_ORDER plus data/sets.json (die Datei gewinnt).
+
+    sets.json schreibt main() in jedem Lauf; ein neues Set bekommt dort
+    seine Ordnungszahl ueber backfill_order_from_release_dates()."""
+    heraus = dict(FALLBACK_SET_ORDER)
+    try:
+        with open(os.path.join(verzeichnis or data_dir, 'sets.json'), encoding='utf-8') as f:
+            gespeichert = json.load(f)
+        if isinstance(gespeichert, dict):
+            heraus.update({k: v for k, v in gespeichert.items() if isinstance(v, int)})
+    except (OSError, ValueError):
+        pass
+    return heraus
+
+
 def scrape_live_sets() -> dict:
     """
     Try to scrape sets from the Limitless TCG sets list page.
@@ -516,7 +587,13 @@ def aktualisiere_neuestes_set(format_window_path: str,
     Ein Ruecksprung auf ein aelteres Erscheinungsdatum wird abgelehnt
     (derselbe Monotonieriegel wie beim Formatfenster).
     """
-    felder = neuestes_set_felder(dict(FALLBACK_RELEASE_DATES, **(release_dates or {})))
+    # Der Rueckfall aus DEMSELBEN Ordner wie die Datei, die hier
+    # fortgeschrieben wird — nicht aus dem Modul-Datenordner. Gemessen
+    # mit scripts/simuliere_setwechsel.py: sonst zog ein Aufruf auf einer
+    # fremden Datei (Tests, tmp) das neueste Set des echten data/ herein.
+    felder = neuestes_set_felder(dict(
+        rueckfall_release_dates(os.path.dirname(os.path.abspath(format_window_path))),
+        **(release_dates or {})))
     if not felder:
         print("[Update Sets] ! neuestes Set nicht aufloesbar — Felder bleiben, wie sie sind")
         return False
@@ -853,8 +930,8 @@ def backfill_order_from_release_dates(sets_order: dict, release_dates: dict,
     """
     jp_release_dates = jp_release_dates or {}
     dates = {}
-    dates.update(FALLBACK_RELEASE_DATES)
-    dates.update(FALLBACK_JP_RELEASE_DATES)
+    dates.update(rueckfall_release_dates())
+    dates.update(rueckfall_jp_release_dates())
     dates.update(jp_release_dates)
     dates.update(release_dates or {})   # live EN wins
 
@@ -968,13 +1045,15 @@ def write_sets_metadata(sets_order: dict, release_dates: dict,
     MP1) would stay with empty release_date and the chunker downstream
     would treat them as order=0 and bin them into legacy."""
     jp_release_dates = jp_release_dates or {}
+    rueckfall_en = rueckfall_release_dates()
+    rueckfall_jp = rueckfall_jp_release_dates()
     metadata = {}
     for code, order in sets_order.items():
         rel = (
             release_dates.get(code)
             or jp_release_dates.get(code)
-            or FALLBACK_RELEASE_DATES.get(code)
-            or FALLBACK_JP_RELEASE_DATES.get(code)
+            or rueckfall_en.get(code)
+            or rueckfall_jp.get(code)
             or ''
         )
         metadata[code] = {'order': order, 'release_date': rel}
@@ -1043,14 +1122,14 @@ def write_format_window(sets_metadata_path: str,
     the predictor / scrapers fall back to "no filter" in that case."""
 
     # --- EN side ---
-    en_dates = dict(FALLBACK_RELEASE_DATES)
+    en_dates = rueckfall_release_dates()
     if en_release_dates:
         en_dates.update(en_release_dates)
     en_current = _pick_current_set(en_dates)
     en_release = en_dates.get(en_current, '') if en_current else ''
 
     # --- JP side ---
-    jp_dates = dict(FALLBACK_JP_RELEASE_DATES)
+    jp_dates = rueckfall_jp_release_dates()
     if jp_release_dates:
         jp_dates.update(jp_release_dates)
     jp_current = _pick_current_set(jp_dates)

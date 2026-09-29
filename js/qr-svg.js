@@ -3,9 +3,10 @@
 // WARUM SELBST ZEICHNEN
 // ---------------------
 // Der Reiter "Pocket" zeigt zu jedem Deck ein 2D-Muster zum Scannen.
-// Game8 liefert dieses Muster als verziertes PNG auf img.game8.co. Wir
-// legen deshalb nur den AUSGELESENEN INHALT ab (data/pocket_tierlist.json,
-// Feld `code`) und zeichnen das Muster hier neu:
+// Bis 29.09.2026 kam es als verziertes PNG von Game8 (img.game8.co), und
+// wir legten nur den ausgelesenen Inhalt ab; seitdem baut
+// scripts/scrape_pocket_limitless.py den Inhalt selbst aus der Deckliste
+// (data/pocket_tierlist.json, Feld `code`). Gezeichnet wird hier:
 //
 //   * kein Hotlink auf einen fremden Server, der jederzeit abschalten kann,
 //   * kein fremdes Bildmaterial im Auslieferungsstand,

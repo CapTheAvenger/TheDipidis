@@ -11,10 +11,10 @@ Der Bereich ist dabei voellig in Ordnung gebaut: die Oberflaeche schreibt
 den Stand an und warnt ab PLAUSIBEL_TAGE. Nur faellt das eben einem
 BESUCHER auf, und erst nach vier Wochen.
 
-Der Lauf hat bewusst keinen Zeitplan — Game8 antwortet dem GitHub-Laeufer
-auf jedem Weg mit HTTP 202 (Cloudflare, dreimal gemessen am 04.09.2026),
-geerntet wird von Hand. Ein Lauf, der nie faellig ist, faellt auch nie
-aus: genau deshalb braucht es hier eine Meldung.
+Seit dem 29.09.2026 laeuft der Erzeuger taeglich (Limitless statt
+Game8, scripts/scrape_pocket_limitless.py). Die Schwelle ist deshalb von
+28 auf 3 Tage gesunken: drei Tage alt heisst, der Lauf ist mehrfach
+ausgefallen.
 
 Gemeldet wird, nicht gesperrt, und mit DERSELBEN Schwelle wie im
 Browser — zwei Schwellen fuer dieselbe Frage waeren eine zu viel.
@@ -51,15 +51,16 @@ def test_der_waechter_kennt_pocket_ueberhaupt():
 
 
 def test_der_waechter_meldet_und_sperrt_nicht():
-    """Ein Lauf ohne Zeitplan ist kein Defekt."""
+    """Gemeldet wird, nicht gesperrt: eine alte Datei ist ein Befund
+    ueber den Lauf, kein Grund, den Deploy anzuhalten."""
     quelle = _lies(WAECHTER)
     i = quelle.find("def check_pocket_frische(")
     block = quelle[i:quelle.find("\ndef ", i + 10)]
     assert '"WARN"' in block, "die Altersmeldung ist keine Warnung mehr"
     assert '"CRITICAL"' not in block.split("abgerufen")[-1], (
         "das ALTER von pocket_tierlist.json wird als CRITICAL gemeldet — "
-        "eine alte Datei ist hier kein Defekt, sondern der Normalfall eines "
-        "Laufs, der von Hand angestossen wird")
+        "den Lauf faerbt die Laufkontrolle rot; eine alte Datei ist hier "
+        "eine Meldung, keine Sperre")
 
 
 def test_waechter_und_browser_benutzen_dieselbe_schwelle():

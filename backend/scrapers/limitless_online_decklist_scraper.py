@@ -157,7 +157,8 @@ FORMAT_AKTUELL = "4"
 MINDEST_SPIELER = 50
 
 # Ab wann ein Lauf als Einbruch gilt statt als Lauf — dieselbe Schwelle
-# und dieselbe Uebersteuerung wie in scripts/scrape_pocket_tierlist.py.
+# und dieselbe Uebersteuerung wie im frueheren Game8-Scraper fuer Pocket
+# (scripts/scrape_pocket_tierlist.py, entfernt 29.09.2026).
 SCHRUMPF_SCHWELLE = 0.7
 
 # Die drei Ueberschriften, die play.limitlesstcg.com auf einer
@@ -575,7 +576,8 @@ def _bestand(pfad: str):
     `None` heisst: keine brauchbare Vorlage — die Datei fehlt oder ist
     leer. Dann greift der Riegel nicht; er soll den ERSTEN Lauf nicht
     verhindern, sondern einen Bestand schuetzen, den es gibt. Gleiche
-    Bauart wie `_bestand` in scripts/scrape_pocket_tierlist.py.
+    Bauart wie `_bestand` im frueheren Game8-Scraper fuer Pocket (entfernt
+    29.09.2026).
     """
     try:
         _kopf, zeilen = _lies_bestand(pfad)

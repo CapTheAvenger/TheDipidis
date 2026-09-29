@@ -108,7 +108,40 @@ function ueberfaelligText(beleg, gemessen) {
         + 'eintragen und das Fenster mitschreiben, nicht die Grenze senken.';
 }
 
+/** Der zuletzt AUSGELIEFERTE Stand einer Datei — aus `git show HEAD:`.
+ *
+ *  SC-7 (29.09.2026): nach Ablauf der Gnadenfrist verlangte
+ *  `ueberfaelligText()`, dass jemand die neu gemessene Zeilenzahl von
+ *  Hand in den Beleg traegt — bei jeder Rotation, drei Wochen spaeter
+ *  (so geschehen am 29.09.2026 fuer TEF-30C, gemessen mit
+ *  scripts/simuliere_setwechsel.py und der Uhr auf +24 Tage). Hausi:
+ *  "auf Dauer nichts mehr manuell".
+ *
+ *  Was der Beleg nach einer Rotation eigentlich sichern soll, ist
+ *  "innerhalb eines Fensters geht nichts verloren". Die Messlatte dafuer
+ *  steht schon im Repo: der letzte ausgelieferte Stand derselben Datei.
+ *  Im Tor des Wochenlaufs ist HEAD genau dieser Stand, die frischen Daten
+ *  liegen im Arbeitsbaum. Traegt HEAD ein anderes Fenster, beginnt die
+ *  Zaehlung neu — dann gibt es keine Untergrenze aus der Vergangenheit.
+ *
+ *  null, wenn git fehlt oder die Datei in HEAD nicht existiert. */
+function ausgelieferterStand(datei) {
+    try {
+        const { execFileSync } = require('child_process');
+        const zeige = (p) => execFileSync('git', ['show', `HEAD:${p}`], {
+            cwd: WURZEL, maxBuffer: 512 * 1024 * 1024,
+            stdio: ['ignore', 'pipe', 'ignore'],
+        }).toString('utf8');
+        const fw = JSON.parse(zeige('data/format_window.json'));
+        const schluessel = `${String(fw.oldest_legal_set || '').trim()}-`
+            + `${String(fw.current_set || '').trim()}`;
+        return { schluessel, text: zeige(datei) };
+    } catch (e) {
+        return null;
+    }
+}
+
 module.exports = {
     fenster, istJung, belegGiltNoch, rotationsLage, ueberfaelligText,
-    JUNG_TAGE, WURZEL,
+    ausgelieferterStand, JUNG_TAGE, WURZEL,
 };

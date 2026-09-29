@@ -35,7 +35,8 @@ import pytest
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 MODUL = os.path.join(WURZEL, "js", "qr-svg.js")
-DATEN = os.path.join(WURZEL, "data", "pocket_tierlist.json")
+# Die echten, in Pocket gescannten Game8-Codes, eingefroren am 29.09.2026.
+DATEN = os.path.join(WURZEL, "tests", "fixtures", "pocket_game8_decks.json")
 
 # Gemessen am 07.09.2026 mit segno über alle 33 Codes, Byte-Modus, ohne
 # Aufwertung der Stufe.
@@ -47,7 +48,7 @@ def _noetig():
 
     Übersprungen zu werden ist die ZWEITBESTE Lösung — deshalb hält
     `test_der_testschritt_installiert_die_qr_bibliotheken` in
-    test_pocket_tierlist.py fest, dass der Ablauf sie installiert.
+    test_pocket_limitless.py fest, dass der Ablauf sie installiert.
     """
     if not shutil.which("node"):
         pytest.skip("node fehlt — der JS-Erzeuger lässt sich nicht ausführen")

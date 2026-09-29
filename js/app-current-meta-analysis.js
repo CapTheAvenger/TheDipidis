@@ -295,10 +295,26 @@
         // that ships needs adding here — missing entries leak the raw
         // set suffix into the UI (the CRI miss is what triggered this).
         function stripExSuffix(name) {
-            return String(name || '')
-                .replace(/\s+(?:30c|asc|blk|cri|dri|jtg|m3|m4|m5|m6|m6a|meg|mee|mep|mew|obf|paf|pal|par|pbl|pfl|por|pre|scr|sfa|ssp|svi|sve|svp|tef|twm|wht)$/i, '')
-                .replace(/\s+ex$/i, '')
-                .trim();
+            // DAZU DIE KUERZEL AUS DEM FORMATFENSTER (29.09.2026, SC-7).
+            // Die feste Liste darunter musste bei jeder Rotation von Hand
+            // um das neue Set ergaenzt werden — sonst hielt
+            // test-online-major-merge.js die Deploy-Kette an (gemessen mit
+            // scripts/simuliere_setwechsel.py). Das laufende EN- und
+            // JP-Set, das neueste Set und beide Haelften des Vorformats
+            // stehen in window._formatWindow: der Schnappschuss in
+            // index.html liefert current_set und current_set_jp SYNCHRON,
+            // bevor ein Modul laeuft (js/app-core.js, loadFormatWindow).
+            const fw = (typeof window !== 'undefined' && window._formatWindow) || {};
+            const laufend = [fw.current_set, fw.current_set_jp, fw.neuestes_set]
+                .concat(String(fw.previous_format_key || '').split('-'))
+                .map(c => String(c || '').trim().toLowerCase())
+                .filter(c => /^[a-z0-9]{2,5}$/.test(c));
+            let s = String(name || '')
+                .replace(/\s+(?:30c|asc|blk|cri|dri|jtg|m3|m4|m5|m6|m6a|meg|mee|mep|mew|obf|paf|pal|par|pbl|pfl|por|pre|scr|sfa|ssp|svi|sve|svp|tef|twm|wht)$/i, '');
+            if (laufend.length) {
+                s = s.replace(new RegExp('\\s+(?:' + laufend.join('|') + ')$', 'i'), '');
+            }
+            return s.replace(/\s+ex$/i, '').trim();
         }
 
         /**

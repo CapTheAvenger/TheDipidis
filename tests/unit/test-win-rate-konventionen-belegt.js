@@ -44,8 +44,8 @@ const W = ladeModul('de');
 /* Ein CSV-Leser, der beide Trennzeichen und beide Zahlformate dieses
    Projekts vertraegt. Anfuehrungszeichen kommen in der Labs-Datei vor
    (Spalte `pokemon`: "dragapult, dusknoir"). */
-function zeilen(datei, trenner) {
-    const text = lies(...datei.split('/')).replace(/\r/g, '').replace(/^﻿/, '');
+function zeilen(datei, trenner, vorgabe) {
+    const text = (vorgabe != null ? vorgabe : lies(...datei.split('/'))).replace(/\r/g, '').replace(/^﻿/, '');
     const teile = (z) => {
         const out = []; let cur = ''; let q = false;
         for (let i = 0; i < z.length; i++) {
@@ -138,10 +138,36 @@ describe('Datei → Formel → nachgerechnet', () => {
                    vorn an. Im Wochenlauf #147 fielen die Matchupzeilen
                    von 1.716 auf 847, ohne dass etwas kaputt war — diese
                    Zeile hat den Lauf angehalten. */
-            const lage = FENSTER.rotationsLage(b);
-            if (lage === 'ueberfaellig') {
-                assert.fail(`${b.datei}: ` + FENSTER.ueberfaelligText(b, `${rows.length} Zeilen`));
+            let lage = FENSTER.rotationsLage(b);
+            /* NACH EINER ROTATION: DIE MESSLATTE IST DER AUSGELIEFERTE
+               STAND, NICHT EINE HANDZAHL (29.09.2026, SC-7). Bis dahin
+               hiess 'ueberfaellig' "rot, bis jemand die neue Zeilenzahl
+               eintraegt" — drei Wochen nach jeder Rotation. Traegt HEAD
+               dasselbe Fenster wie der Arbeitsbaum, ist dessen Stand die
+               Untergrenze (Verlust bleibt ein Fehler); traegt HEAD noch
+               das alte Fenster, beginnt die Zaehlung neu. */
+            let latte = null;
+            if (lage !== 'gilt') {
+                const stand = FENSTER.ausgelieferterStand(b.datei);
+                if (stand && stand.schluessel === FENSTER.fenster().schluessel) {
+                    const alt = zeilen(b.datei, b.trenner, stand.text);
+                    let altTreffer = 0;
+                    for (const r of alt) {
+                        const bz = bilanz(r, b.bilanz);
+                        const soll = zahl(r[b.spalte]);
+                        if (!bz || !isFinite(soll) || (bz.s + bz.n + bz.u) <= 0) continue;
+                        if (Math.abs(k.rechne(bz.s, bz.n, bz.u) - soll) <= b.toleranz) altTreffer++;
+                    }
+                    latte = { zeilen: alt.length, treffer: altTreffer };
+                    lage = 'gilt';
+                    console.log(`    # ${b.datei}: Beleg im Code aus ${b.fenster}, Messlatte ist `
+                        + `der ausgelieferte Stand im Fenster ${stand.schluessel}: `
+                        + `${alt.length} Zeilen, ${altTreffer} Treffer`);
+                } else {
+                    lage = 'jung';
+                }
             }
+            const beleg = latte || b;
             if (lage === 'jung') {
                 console.log(`    # ${b.datei}: Fenster ${b.fenster} -> `
                     + `${FENSTER.fenster().schluessel}, Untergrenze ausgesetzt — `
@@ -153,10 +179,10 @@ describe('Datei → Formel → nachgerechnet', () => {
                     `${b.datei}: nach der Rotation stehen nur noch ${rows.length} `
                     + 'Zeilen — das ist kein neues Fenster, sondern eine leere Datei');
             } else {
-                const untergrenze = b.zeilen * (1 - ZEILEN_BAND);
+                const untergrenze = beleg.zeilen * (1 - ZEILEN_BAND);
                 assert.ok(rows.length >= untergrenze,
                     `${b.datei} hat nur noch ${rows.length} Zeilen, der Beleg nennt `
-                    + `${b.zeilen} (Untergrenze ${Math.round(untergrenze)}). Eine `
+                    + `${beleg.zeilen} (Untergrenze ${Math.round(untergrenze)}). Eine `
                     + 'geschrumpfte Quelle macht die Nachrechnung unten wertlos: '
                     + 'nachmessen, nicht die Zahl senken.');
             }
@@ -192,10 +218,10 @@ describe('Datei → Formel → nachgerechnet', () => {
             if (lage === 'jung') {
                 console.log(`    # ${b.datei}: Trefferzahl im neuen Fenster: ${treffer}`);
             } else {
-                const trefferGrenze = b.treffer * (1 - ZEILEN_BAND);
+                const trefferGrenze = beleg.treffer * (1 - ZEILEN_BAND);
                 assert.ok(treffer >= trefferGrenze,
                     `${b.datei}: nur noch ${treffer} Zeilen treffen ${k.formel}, der `
-                    + `Beleg nennt ${b.treffer} (Untergrenze ${Math.round(trefferGrenze)})`);
+                    + `Beleg nennt ${beleg.treffer} (Untergrenze ${Math.round(trefferGrenze)})`);
             }
 
             /* (d) Die belegten Ausnahmen.

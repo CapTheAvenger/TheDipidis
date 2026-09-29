@@ -5,7 +5,8 @@
   "rechte": "Die Icons sind Spiel-Screenshots. Rechteinhaber: The Pokémon Company / Nintendo / GAME FREAK. PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG; die dortige CC-BY-SA-Lizenz gilt nur fuer den Wiki-Text, nicht fuer diese Bilder.",
   "erzeuger": "scripts/build_champions_sprites.py",
   "anzahl": 343,
-  "bytes": 4969078
+  "bytes": 4969078,
+  "ohne_bild": {}
  },
  "sprites": {
   "Garchomp (Mega-Z)": {

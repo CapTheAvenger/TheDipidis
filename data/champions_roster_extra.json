@@ -16,9 +16,9 @@
    "Eelektross",
    "Falinks",
    "Malamar",
-   "Pyroar",
    "Sceptile",
-   "Scolipede"
+   "Scolipede",
+   "Scrafty"
   ],
   "aus_teams": [
    "Alakazam",
@@ -44,10 +44,9 @@
    "Snorlax",
    "Squawkabilly",
    "Toxtricity",
-   "Tsareena",
    "Vanilluxe"
   ],
-  "aus_teams_count": 25,
+  "aus_teams_count": 24,
   "aus_teams_ohne_werte": [],
   "geschlechtsformen": [
    "Basculegion-F"
@@ -149,6 +148,7 @@
   "Pelipper",
   "Politoed",
   "Primarina",
+  "Pyroar",
   "Pyroar-Mega",
   "Raichu",
   "Raichu-Mega-X",
@@ -161,7 +161,6 @@
   "Salamence-Mega",
   "Scovillain",
   "Scovillain-Mega",
-  "Scrafty",
   "Sinistcha",
   "Sneasler",
   "Staraptor",
@@ -172,6 +171,7 @@
   "Talonflame",
   "Torkoal",
   "Toxapex",
+  "Tsareena",
   "Typhlosion-Hisui",
   "Tyranitar",
   "Tyranitar-Mega",
@@ -180,11 +180,10 @@
   "Volcarona",
   "Weavile",
   "Whimsicott",
-  "Zoroark-Hisui",
   "Sceptile",
   "Scolipede",
+  "Scrafty",
   "Eelektross",
-  "Pyroar",
   "Malamar",
   "Barbaracle",
   "Dragalge",
@@ -204,7 +203,6 @@
   "Vanilluxe",
   "Alakazam",
   "Manectric",
-  "Tsareena",
   "Glalie",
   "Medicham",
   "Rotom-Mow",

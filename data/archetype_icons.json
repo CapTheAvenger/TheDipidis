@@ -3,12 +3,12 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-09-27T01:56:01",
-    "lastScrapedCount": 111,
+    "lastScrapedAt": "2026-09-29T11:26:43",
+    "lastScrapedCount": 112,
     "lastBackfilledAt": "2026-05-05T13:19:27",
     "lastBackfillCount": 342,
     "lastHarvestedFrom": "city_league_archetype_scraper",
-    "lastHarvestedAt": "2026-07-07T22:37:06"
+    "lastHarvestedAt": "2026-09-29T11:18:30"
   },
   "archetypes": {
     "Dragapult": [
@@ -2042,6 +2042,178 @@
     "Ancient Box": [
       "roaring-moon",
       "flutter-mane"
+    ],
+    "Mega Sharpedo Dudunsparce": [
+      "sharpedo-mega",
+      "dudunsparce"
+    ],
+    "Dusknoir Mega Kangaskhan": [
+      "dusknoir",
+      "kangaskhan-mega"
+    ],
+    "Mega Kangaskhan Mega Rayquaza": [
+      "kangaskhan-mega",
+      "rayquaza-mega"
+    ],
+    "Metagross Mega Excadrill": [
+      "metagross",
+      "excadrill-mega"
+    ],
+    "Mega Starmie Mew": [
+      "starmie-mega",
+      "mew"
+    ],
+    "Mamoswine Talonflame": [
+      "mamoswine",
+      "talonflame"
+    ],
+    "Mega Kangaskhan Mega Charizard-X": [
+      "kangaskhan-mega",
+      "charizard-mega-x"
+    ],
+    "Toucannon Noctowl": [
+      "toucannon",
+      "noctowl"
+    ],
+    "Banette Dudunsparce": [
+      "banette",
+      "dudunsparce"
+    ],
+    "Dragapult Arboliva": [
+      "dragapult",
+      "arboliva"
+    ],
+    "Mega Froslass Mega Lopunny": [
+      "froslass-mega",
+      "lopunny-mega"
+    ],
+    "Banette Sinistcha": [
+      "banette",
+      "sinistcha"
+    ],
+    "Mega Kangaskhan Talonflame": [
+      "kangaskhan-mega",
+      "talonflame"
+    ],
+    "Mega Sharpedo Pecharunt": [
+      "sharpedo-mega",
+      "pecharunt"
+    ],
+    "Sinistcha Banette": [
+      "sinistcha",
+      "banette"
+    ],
+    "Mega Rayquaza Talonflame": [
+      "rayquaza-mega",
+      "talonflame"
+    ],
+    "Dudunsparce Banette": [
+      "dudunsparce",
+      "banette"
+    ],
+    "Aegislash Mega Kangaskhan": [
+      "aegislash",
+      "kangaskhan-mega"
+    ],
+    "Mega Charizard-Y Mega Kangaskhan": [
+      "charizard-mega-y",
+      "kangaskhan-mega"
+    ],
+    "Mega Kangaskhan Mega Charizard-Y": [
+      "kangaskhan-mega",
+      "charizard-mega-y"
+    ],
+    "Mega Kangaskhan Dusknoir": [
+      "kangaskhan-mega",
+      "dusknoir"
+    ],
+    "Alakazam Banette": [
+      "alakazam",
+      "banette"
+    ],
+    "Decidueye Mega Kangaskhan": [
+      "decidueye",
+      "kangaskhan-mega"
+    ],
+    "Mega Malamar Toxtricity": [
+      "malamar-mega",
+      "toxtricity"
+    ],
+    "Grimmsnarl Blaziken": [
+      "grimmsnarl",
+      "blaziken"
+    ],
+    "Mega Kangaskhan Mew": [
+      "kangaskhan-mega",
+      "mew"
+    ],
+    "Mega Lucario Mew": [
+      "lucario-mega",
+      "mew"
+    ],
+    "Mew Dudunsparce": [
+      "mew",
+      "dudunsparce"
+    ],
+    "Dragapult Toucannon": [
+      "dragapult",
+      "toucannon"
+    ],
+    "Dudunsparce Mega Manectric": [
+      "dudunsparce",
+      "manectric-mega"
+    ],
+    "Mega Golisopod Mega Froslass": [
+      "golisopod-mega",
+      "froslass-mega"
+    ],
+    "Mew Bronzong": [
+      "mew",
+      "bronzong"
+    ],
+    "Typhlosion Zacian-Crowned": [
+      "typhlosion",
+      "zacian-crowned"
+    ],
+    "Flareon Jolteon": [
+      "flareon",
+      "jolteon"
+    ],
+    "Dusknoir Bronzong": [
+      "dusknoir",
+      "bronzong"
+    ],
+    "Ogerpon Talonflame": [
+      "ogerpon",
+      "talonflame"
+    ],
+    "Toucannon Ogerpon": [
+      "toucannon",
+      "ogerpon"
+    ],
+    "Ogerpon Pikachu": [
+      "ogerpon",
+      "pikachu"
+    ],
+    "Wailord Cinderace": [
+      "wailord",
+      "cinderace"
+    ],
+    "Mega Rayquaza Mega Kangaskhan": [
+      "rayquaza-mega",
+      "kangaskhan-mega"
+    ],
+    "Mega Gardevoir Mew": [
+      "gardevoir-mega",
+      "mew"
+    ],
+    "Mega Gengar Dudunsparce": [
+      "gengar-mega",
+      "dudunsparce"
+    ],
+    "Mew Box": [
+      "mew",
+      "clefairy"
     ]
   }
 }

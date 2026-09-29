@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-22 06:21:48",
+  "last_updated": "2026-09-29 11:19:28",
   "formats": [
     {
       "code": "BRS-PRE",
@@ -70,6 +70,11 @@
       "code": "SVI-PFL",
       "name": "Scarlet & Violet - Phantasmal Flames",
       "source": "known"
+    },
+    {
+      "code": "TEF-30C",
+      "name": "TEF-30C",
+      "source": "scraped"
     },
     {
       "code": "TEF-PBL",

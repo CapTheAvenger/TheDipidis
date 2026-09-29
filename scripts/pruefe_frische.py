@@ -126,6 +126,15 @@ RHYTHMUS = {
     # kein Nebenbefund.
     "scrapers/victory_road_major_scraper.py": "woechentlich",
     "scrapers/victory_road_replika_scraper.py": "woechentlich",
+    # NACHGETRAGEN 29.09.2026 — und zum dritten Mal derselbe Fehler, diesmal
+    # von mir im Wochenaudit: der Cardmarket-Download bucht seitdem in die
+    # Bilanz, und die Frischepruefung selbst bekommt erst einen Herzschlag,
+    # seit die Bilanz HINTER ihr steht. Beide standen in keiner Liste —
+    # Wochenlauf #169 blieb damit am Tor stehen (1 rot von 1.911). Seitdem
+    # prueft test_jeder_name_den_ein_ablauf_bucht_steht_in_einer_liste die
+    # Namen, die ein Ablauf BUCHT, schon im PR — nicht erst die Datei danach.
+    "Cardmarket-Download": "zweimal_woechentlich",
+    "scripts/pruefe_frische.py": "zweimal_woechentlich",
 }
 
 # Erzeuger, die BEWUSST keinen Zeitplan haben — mit der Begruendung.

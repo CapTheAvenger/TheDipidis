@@ -208,3 +208,108 @@ def test_am_heutigen_stand_gibt_es_keinen_befund():
     m = _pruefe_frische()
     offen = m.nicht_ausgeliefert()
     assert not offen, "; ".join(f"{j}: {h}" for j, _, h in offen)
+
+
+# ── WAS DIE ABLAEUFE BUCHEN, NICHT WAS SCHON IN DER DATEI STEHT (29.09.2026) ──
+#
+# Die Zusicherung ganz oben prueft data/_job_heartbeats.json — also den
+# Stand NACH dem letzten Lauf. Ein Name, den ein Ablauf NEU bucht, steht dort
+# erst, wenn der Ablauf gelaufen ist; im PR ist die Zusicherung gruen, und rot
+# wird sie im Tor des naechsten Laufs, gegen die frischen Daten. Genau so
+# blieb Wochenlauf #169 am 29.09.2026 stehen: "Cardmarket-Download" (neu im
+# Wochenaudit) und "scripts/pruefe_frische.py" (bekam erstmals einen
+# Herzschlag, seit die Bilanz hinter der Frischepruefung steht) — beide in
+# keiner Liste, 1 rot von 1.911, nichts gepusht.
+#
+# Deshalb hier der Weg VOR dem Lauf: aus jedem Ablauf mit Herzschlag-
+# Schreiber werden die Zeilen gesammelt, die er in seine Bilanzdateien
+# schreibt, und dann wird DER ECHTE SCHREIBER (der PYHEARTBEAT-Block aus dem
+# Ablauf) auf genau diese Zeilen ausgefuehrt. Was danach in der Datei steht,
+# muss in einer der beiden Listen stehen.
+
+import re as _re
+import subprocess as _sp
+
+import yaml as _yaml
+
+ABLAEUFE = os.path.join(WURZEL, ".github", "workflows")
+
+
+def _ohne_shellkommentare(text):
+    return "\n".join(z for z in text.splitlines() if not z.lstrip().startswith("#"))
+
+
+def _gebuchte_zeilen(ablauf_yaml):
+    """Alle Zeilen, die ein Ablauf in rc_extra.txt / rc_batch.txt schreibt."""
+    zeilen = []
+    for job in (ablauf_yaml.get("jobs") or {}).values():
+        for s in job.get("steps") or []:
+            run = _ohne_shellkommentare(str(s.get("run", "")))
+            for m in _re.finditer(r'echo\s+"((?:OK|FAIL)\s+[^"]*)"\s*>>\s*"\$RUNNER_TEMP/rc_(?:extra|batch)\.txt"', run):
+                teile = m.group(1).split()
+                if teile[1].startswith("$"):
+                    continue    # Name aus einer Variablen: die Schleife unten
+                zeilen.append(_re.sub(r"\$\{?\w+\}?", "1", m.group(1)))
+            if 'echo "OK   $step"' in run:
+                schleife = _re.search(r"for step in(.*?);\s*do", run, _re.S)
+                assert schleife, "Schleife ueber $step nicht gefunden"
+                zeilen += ["OK   " + n for n in _re.findall(r'"([^"]+)"', schleife.group(1))]
+    return zeilen
+
+
+def _schreiber(ablauf_yaml):
+    for job in (ablauf_yaml.get("jobs") or {}).values():
+        for s in job.get("steps") or []:
+            run = str(s.get("run", ""))
+            m = _re.search(r"<<'PYHEARTBEAT'\n(.*?)\n\s*PYHEARTBEAT", run, _re.S)
+            if m:
+                return m.group(1)
+    return None
+
+
+def _ablaeufe_mit_herzschlag():
+    import glob
+    for pfad in sorted(glob.glob(os.path.join(ABLAEUFE, "*.yml"))):
+        with open(pfad, encoding="utf-8") as f:
+            y = _yaml.safe_load(f)
+        code = _schreiber(y)
+        if code:
+            yield os.path.basename(pfad), y, code
+
+
+def _herzschlag_nach_lauf(tmp_path, code, zeilen):
+    (tmp_path / "data").mkdir(exist_ok=True)
+    rc = tmp_path / "rc_extra.txt"
+    rc.write_text("\n".join(zeilen) + "\n", encoding="utf-8")
+    skript = tmp_path / "herz.py"
+    skript.write_text(code, encoding="utf-8")
+    r = _sp.run([sys.executable, str(skript), str(rc)], cwd=str(tmp_path),
+                capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stdout + r.stderr
+    with open(tmp_path / "data" / "_job_heartbeats.json", encoding="utf-8") as f:
+        return {k for k in json.load(f) if not str(k).startswith("_")}
+
+
+def test_die_herzschlag_schreiber_werden_gefunden():
+    namen = [n for n, _, _ in _ablaeufe_mit_herzschlag()]
+    assert "weekly-full-update.yml" in namen and "champions-replica-scrape.yml" in namen, (
+        f"Herzschlag-Schreiber nur in {namen} gefunden — dann prueft das unten nichts")
+
+
+def test_jeder_name_den_ein_ablauf_bucht_steht_in_einer_liste(tmp_path):
+    pf = _pruefe_frische()
+    abgedeckt = set(pf.RHYTHMUS) | set(pf.OHNE_ZEITPLAN)
+    fehlt = {}
+    for name, y, code in _ablaeufe_mit_herzschlag():
+        zeilen = _gebuchte_zeilen(y)
+        assert zeilen, f"{name}: keine einzige gebuchte Zeile gefunden"
+        ziel = tmp_path / name
+        ziel.mkdir()
+        schluessel = _herzschlag_nach_lauf(ziel, code, zeilen)
+        los = sorted(schluessel - abgedeckt)
+        if los:
+            fehlt[name] = los
+    assert not fehlt, (
+        "diese Ablaeufe buchen Herzschlaege fuer Erzeuger, die in keiner Liste "
+        f"von scripts/pruefe_frische.py stehen: {fehlt}. Im PR ist das gruen — "
+        "rot wird es erst im Tor des naechsten Laufs (Wochenlauf #169).")

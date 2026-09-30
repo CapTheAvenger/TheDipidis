@@ -576,25 +576,69 @@
      * legalen zuerst sieht.
      *   'gespielt' — der Archetyp hat im neuesten Format mit Turnierdaten
      *                Decks (imFormatGespielt) — gruen
-     *   'legal'    — nicht gespielt, aber jedes Kern-Pokemon (Anteil >= 50 %,
-     *                nicht von Hand) hat einen Standard-legalen Druck — gelb
-     *   'raus'     — mindestens ein Kern-Pokemon ist nicht mehr legal — grau
+     *   'legal'    — nicht gespielt, aber die HAUPTKARTE hat einen
+     *                Standard-legalen Druck — gelb
+     *   'raus'     — die Hauptkarte ist nicht mehr legal — grau
+     *   null       — unbekannt (Formatdaten noch nicht da, Legalitaet
+     *                unbekannt): keine Farbe, lieber keine Aussage als eine
+     *                falsche
      *
-     * NUR POKEMON (live gemessen 30.09.2026): eine Box sammelt ueber alle
-     * Formate, und Trainer wie Arven OBF 186 oder Iono PAF 80 liegen in fast
-     * jeder Box ueber 50 %. Mit allen Kernkarten stand Iron Thorns (Iron
-     * Thorns ex TWM, legal) grau da — wegen seiner Trainer, die man tauscht.
-     * Das Deck steht und faellt mit seinen Pokemon.
-     *   null       — unbekannt (Formatdaten noch nicht da, Legalitaet einer
-     *                Kernkarte unbekannt, keine Kernkarte): keine Farbe,
-     *                lieber keine Aussage als eine falsche
+     * WARUM DIE HAUPTKARTE (live gemessen 30.09.2026, zwei Anlaeufe): eine
+     * Box sammelt ueber alle Formate. Mit allen Kernkarten stand Iron Thorns
+     * grau da, wegen Arven OBF 186 und Iono PAF 80; mit allen Kern-Pokemon
+     * noch Archaludon (Archaludon ex SSP, legal) wegen Radiant Greninja ASR
+     * und Iron Bundle PAR. Beides sind Mitspieler, die man tauscht. Das
+     * Deck steht und faellt mit seiner Hauptkarte — dieselbe Regel wie bei
+     * den Familien in js/app-past-meta.js (FE-19). Hat die Box keine
+     * erkennbare Hauptkarte ("Ancient Box"), fragen wir die Kern-Pokemon
+     * (Anteil >= 50 %).
      */
     const KERN_SCHWELLE = 50;
+    const ZUSATZ_NAME = /\s+(ex|EX|V|VSTAR|VMAX|GX|V-UNION)$/;
+
+    function grundnameKarte(name) {
+        let n = String(name || '').trim();
+        for (;;) {
+            const m = n.match(ZUSATZ_NAME);
+            if (!m) return n;
+            n = n.slice(0, m.index);
+        }
+    }
+
+    /** Hauptkarte einer Box: das Pokemon, dessen Name (ganz oder hinterer
+     *  Teil) vorne im Archetyp- bzw. Familiennamen steht; der laengste
+     *  Treffer, dann der ganze Name, dann der hoechste Anteil. Liefert [] oder
+     *  [karte]; die Drucke derselben Karte stecken in k.refs. */
+    function hauptkartenDerBox(box) {
+        const a = String((box && box.archetyp) || '');
+        const name = a.indexOf(FAMILIE) === 0 ? a.slice(FAMILIE.length) : a;
+        let best = null;
+        (box && box.karten || []).forEach(function (k) {
+            if (k.manuell || k.typ !== 'Pokemon') return;
+            const woerter = grundnameKarte(k.name).split(' ');
+            for (let i = 0; i < woerter.length; i++) {
+                const teil = woerter.slice(i).join(' ');
+                if (teil && (name === teil || name.indexOf(teil + ' ') === 0)) {
+                    const wert = [teil.length, i === 0 ? 1 : 0, Number(k.anteil) || 0];
+                    if (!best || wert[0] > best.wert[0] || (wert[0] === best.wert[0] && (wert[1] > best.wert[1]
+                        || (wert[1] === best.wert[1] && wert[2] > best.wert[2])))) best = { wert: wert, k: k };
+                    break;
+                }
+            }
+        });
+        return best ? [best.k] : [];
+    }
+
     function boxStufe(box, kontext) {
         const c = kontext || {};
         if (!box || !c.aktuell) return null;
         if (imFormatGespielt(box, c.aktuell)) return 'gespielt';
         if (typeof c.legal !== 'function' || !c.legalBekannt) return null;
+        const haupt = hauptkartenDerBox(box);
+        if (haupt.length) {
+            const l = c.legal(haupt[0]);
+            return l === true ? 'legal' : (l === false ? 'raus' : null);
+        }
         const kern = (box.karten || []).filter(function (k) {
             return !k.manuell && k.typ === 'Pokemon' && Number(k.anteil) >= KERN_SCHWELLE;
         });
@@ -844,7 +888,7 @@
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
-        formatPasst, imFormatGespielt, boxStufe, chipReihe, KERN_SCHWELLE, formateNachDatum, blockVorRotation, druckIn, druckLegal, anteilIn, META_SCHWELLE, formateZuordnen,
+        formatPasst, imFormatGespielt, boxStufe, hauptkartenDerBox, chipReihe, KERN_SCHWELLE, formateNachDatum, blockVorRotation, druckIn, druckLegal, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
         isoTag, neuestesDatumImManifest, neueDatenDa, anzahlBegrenzen, STATUS
     };

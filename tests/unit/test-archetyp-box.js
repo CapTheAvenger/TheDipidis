@@ -833,6 +833,27 @@ describe('UI-51/UI-52/DA-18 (30.09.2026): Stufe der Box, Reihenfolge der Chips, 
         assert.ok(L.chipReihe([gespielt, fam], kontext, () => undefined).every((r) => r.rang === 'kopf'));
     });
 
+    it('die Hauptkarte entscheidet, nicht ihre Mitspieler (live gemessen 30.09.2026)', () => {
+        const fenster2 = new Set(['TEF', 'SSP', 'PBL', '30C', 'SVP', 'SVE']);
+        const k2 = { aktuell: 'TEF-30C', legalBekannt: true,
+            legal: (k) => L.druckLegal([k.id].concat(k.refs || []), fenster2, L.anteilIn(k, 'TEF-30C') > 0) };
+        const archaludon = box('a', '__familie__|Archaludon', [
+            { id: 'SSP-130', name: 'Archaludon ex', typ: P, anteil: 100, formate: { 'TEF-PBL': 100 } },
+            { id: 'ASR-46', name: 'Radiant Greninja', typ: P, anteil: 79, formate: { 'SVI-PFL': 79 } },
+            { id: 'PAR-56', name: 'Iron Bundle', typ: P, anteil: 66, formate: { 'SVI-PFL': 66 } }]);
+        const gardevoir = box('v', '__familie__|Gardevoir', [
+            { id: 'PAF-29', name: 'Gardevoir ex', typ: P, anteil: 100, formate: { 'SVI-PFL': 100 } },
+            { id: '30C-9', name: 'Gardevoir', typ: P, anteil: 3 }]);
+        const palkia = box('p', 'Palkia Noctowl', [{ id: 'ASR-39', name: 'Origin Forme Palkia V', typ: P, anteil: 100 }]);
+        gleich(L.hauptkartenDerBox(archaludon).map((k) => k.id), ['SSP-130']);
+        assert.equal(L.boxStufe(archaludon, k2), 'legal');
+        assert.equal(L.boxStufe(gardevoir, k2), 'raus', 'ein seltener legaler Namensvetter rettet die Box nicht');
+        gleich(L.hauptkartenDerBox(palkia).map((k) => k.id), ['ASR-39']);
+        const s6 = 'const haupt = hauptkartenDerBox(box);';
+        assert.ok(QUELLE.includes(s6));
+        assert.equal(logik(QUELLE.replace(s6, 'const haupt = [];')).boxStufe(archaludon, k2), 'raus', 'Probe Hauptkarte beisst nicht');
+    });
+
     it('Verfaelschungsproben und Verdrahtung', () => {
         const s1 = "if (PAUSCHAL_LEGAL[set]) { pauschal = true; return false; }";
         assert.ok(QUELLE.includes(s1));

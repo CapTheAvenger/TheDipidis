@@ -1,0 +1,121 @@
+From bb17e35e62aa2c0f71db1c32366efb0a13da5f94 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Wed, 30 Sep 2026 18:21:10 +0200|
+Subject: [PATCH] pokepricelab-index: fehlt ein Teil-Sitemap, wird nichts|
+ geschrieben|
+|
+Bis heute wurde ein uebersprungenes Teil-Sitemap nur geloggt und der Index|
+trotzdem neu geschrieben, ohne die fehlenden Zeilen (Bestand 60.965).|
+Lauf #4 und #5 (30.09.2026) hingen stundenlang an der Quelle. Jetzt:|
+fehlt ein Teil, bleibt der alte Index, der Lauf ist rot mit Namen.|
+Ausgefuehrt geprueft (main() mit nachgebauter Sitzung), Verfaelschungsprobe rot.|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01T8gGALnD44a7XtwTPafXBa|
+---|
+ scripts/build_pokepricelab_index.py          | 17 +++++-|
+ tests/python/test_pokepricelab_index_veto.py | 57 ++++++++++++++++++++|
+ 2 files changed, 72 insertions(+), 2 deletions(-)|
+|
+diff --git a/scripts/build_pokepricelab_index.py b/scripts/build_pokepricelab_index.py|
+index 89fe6ec..5f7f879 100644|
+--- a/scripts/build_pokepricelab_index.py|
++++ b/scripts/build_pokepricelab_index.py|
+@@ -237,2 +237,3 @@ def fetch_sitemap_urls(session):|
+     urls = []|
++    fehlend = []|
+     for i, sm in enumerate(subs, 1):|
+@@ -242,2 +243,3 @@ def fetch_sitemap_urls(session):|
+                 print(f'  {sm} -> HTTP {rr.status_code} (skipped)')|
++                fehlend.append(sm)|
+                 continue|
+@@ -249,4 +251,5 @@ def fetch_sitemap_urls(session):|
+             print(f'  {sm} -> ERROR {e} (skipped)')|
++            fehlend.append(sm)|
+         time.sleep(PACE)|
+-    return urls|
++    return urls, fehlend|
+ |
+@@ -321,4 +324,14 @@ def main():|
+ |
+-    urls = fetch_sitemap_urls(s)|
++    urls, fehlend = fetch_sitemap_urls(s)|
+     print(f'\ntotal sitemap urls: {len(urls)}')|
++    # REPORT, DON'T SILENTLY REPAIR (30.09.2026): bis heute wurde ein|
++    # uebersprungenes Teil-Sitemap nur ins Log geschrieben und der Index|
++    # danach trotzdem neu geschrieben — mit den Zeilen, die fehlten, einfach|
++    # weg (60.965 Zeilen im Bestand). Lauf #4 und #5 hingen stundenlang an|
++    # der Quelle. Fehlt ein Teil, wird nichts geschrieben; der alte Index|
++    # bleibt, und der Lauf ist rot mit Namen.|
++    if fehlend:|
++        print(f'::error::pokepricelab-index: {len(fehlend)} Teil-Sitemap(s) nicht '|
++              f'gelesen — Index NICHT neu geschrieben. Erstes: {fehlend[0]}')|
++        return 1|
+ |
+diff --git a/tests/python/test_pokepricelab_index_veto.py b/tests/python/test_pokepricelab_index_veto.py|
+index 77cdfeb..4845905 100644|
+--- a/tests/python/test_pokepricelab_index_veto.py|
++++ b/tests/python/test_pokepricelab_index_veto.py|
+@@ -46 +46,58 @@ def test_short_names_never_veto():|
+     assert bpi.name_vetoes('anything-at-all', '') is False|
++|
++|
++# ── Ein Teil-Sitemap fehlt: nichts schreiben (30.09.2026) ────────────────|
++#|
++# Lauf #4 und #5 hingen stundenlang an pokepricelab.com. Bis dahin wurde|
++# ein uebersprungenes Teil-Sitemap nur ins Log geschrieben und der Index|
++# trotzdem neu geschrieben — ohne die fehlenden Zeilen. Ausgefuehrt, nicht|
++# gelesen: main() laeuft mit einer nachgebauten Sitzung (TESTDATEN).|
++|
++class _Antwort:|
++    def __init__(self, status, text):|
++        self.status_code, self.text = status, text|
++|
++    def raise_for_status(self):|
++        if self.status_code != 200:|
++            raise RuntimeError(self.status_code)|
++|
++|
++class _Sitzung:|
++    def __init__(self, kaputt):|
++        self.kaputt, self.headers = kaputt, {}|
++|
++    def get(self, url, timeout=None):|
++        if url.endswith('/sitemap.xml'):|
++            return _Antwort(200, '<sitemapindex><sitemap><loc>https://pokepricelab.com/sitemap-1.xml</loc>'|
++                                 '</sitemap><sitemap><loc>https://pokepricelab.com/sitemap-2.xml</loc>'|
++                                 '</sitemap></sitemapindex>')|
++        if url.endswith('sitemap-2.xml') and self.kaputt:|
++            return _Antwort(503, '')|
++        return _Antwort(200, '<urlset><url><loc>https://pokepricelab.com/de/catalog/probe-karte-1</loc></url></urlset>')|
++|
++|
++def _lauf(monkeypatch, tmp_path, kaputt):|
++    import requests|
++    ziel = tmp_path / 'index.csv'|
++    ziel.write_text('BESTAND\n', encoding='utf-8')|
++    monkeypatch.setattr(bpi, 'OUT', str(ziel))|
++    monkeypatch.setattr(bpi, 'PACE', 0)|
++    monkeypatch.setattr(requests, 'Session', lambda: _Sitzung(kaputt))|
++    monkeypatch.setattr(bpi, 'load_our_cards', lambda: {})|
++    monkeypatch.setattr(bpi, 'load_our_expansions', lambda: {})|
++    monkeypatch.setattr(bpi, 'load_our_names', lambda: {})|
++    return bpi.main(), ziel.read_text(encoding='utf-8')|
++|
++|
++def test_fehlt_ein_teil_wird_nichts_geschrieben(monkeypatch, tmp_path, capsys):|
++    rc, inhalt = _lauf(monkeypatch, tmp_path, kaputt=True)|
++    assert rc != 0, 'ein fehlendes Teil-Sitemap endete mit Rueckgabe 0'|
++    assert inhalt == 'BESTAND\n', 'der Index wurde trotz fehlendem Teil neu geschrieben'|
++    assert '::error::' in capsys.readouterr().out|
++|
++|
++def test_vollstaendig_wird_geschrieben(monkeypatch, tmp_path):|
++    """Gegenprobe: ohne Ausfall schreibt main() wie bisher."""|
++    rc, inhalt = _lauf(monkeypatch, tmp_path, kaputt=False)|
++    assert rc == 0, rc|
++    assert inhalt.lstrip('¤ufeff').startswith('set,number'), inhalt[:40]|
+-- |
+2.43.0|
+|
+|

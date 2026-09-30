@@ -138,13 +138,14 @@ kein einziger Datenfehler der Quelle. Die Ursachen, alle behoben:
 | Cardbinder | Basis-Energie aus einem Druck ohne Kartentyp |
 | Bild-Deckel 679 > 663 | Bild ueber den NAMEN fuer einen unbekannten Druck |
 
-Zwei Regeln sind daraus geworden:
+Drei Regeln sind daraus geworden:
 
-1. **Jeder geplante Ablauf, der nach `main` schreibt, faehrt vorher
-   `bash scripts/tor_vor_dem_push.sh kern`** (Champions/Pocket: `alle`).
-   Ist etwas rot, wird nicht gepusht. Vorher schrieben zehn Ablaeufe
-   ungeprueft — und ein roter Tagesstand hielt den Deploy UND das Tor des
-   naechsten Wochenlaufs an. `tests/python/test_nebenbereiche_getrennt.py`
+1. **Jeder Ablauf, der nach `main` schreibt — geplant oder von Hand —,
+   faehrt vorher `bash scripts/tor_vor_dem_push.sh kern`**
+   (Champions/Pocket: `alle`). Ist etwas rot, wird nicht gepusht. Vorher
+   schrieben zehn Ablaeufe ungeprueft — und ein roter Tagesstand hielt den
+   Deploy UND das Tor des naechsten Wochenlaufs an. Seit 30.09.2026 gilt
+   das auch fuer die sieben Handlaeufe. `tests/python/test_nebenbereiche_getrennt.py`
    haelt jeden neuen Schreiber fest.
 2. **Champions-, Pocket- und Side-Quest-Tests liegen unter
    `tests/nebenbereiche/{unit,python}`** (Entscheidung Hausi, 29.09.2026)
@@ -153,6 +154,17 @@ Zwei Regeln sind daraus geworden:
    tests/nebenbereiche/unit` und `python3 -m pytest
    tests/nebenbereiche/python`. Eine neue Testdatei fuer diese Bereiche
    gehoert dorthin — `tests/unit` und `tests/python` sind der TCG-Kern.
+3. **Gepusht wird ueber `bash scripts/push_nach_rebase.sh <kern|alle>`,
+   nie ueber eine eigene Schleife** (30.09.2026). Pocket #11 war gruen,
+   meldete `pushed=true` und stiess einen Deploy an — die Daten kamen nie
+   auf main: `git pull --rebase ... && break` liess einen Konflikt auf
+   `data_stand.json` stehen, und `git push origin HEAD:main` schob danach
+   den Stand von origin/main. Neun weitere Ablaeufe verloren im Konflikt
+   gegen main (`-X ours` heisst beim Rebase „main gewinnt"). Das Skript:
+   `-X theirs`, Datenstand neu gebaut, leerer Push = `pushed=false`, Tor
+   nach dem Rebase. Ausgefuehrt geprueft in `tests/python/test_push_nach_rebase.py`,
+   das auch jede neue eigene Schleife abweist. Ausnahmen: der Wochenlauf
+   (eigene, gepruefte Schleife) und `scripts/daten_pushen.sh` (drei Ablaeufe).
 
 Und: der Wochenlauf laeuft Dienstag und Freitag um 06:00 UTC — Freitag
 frueh laufen in Australien und Asien Majors. Ein Scraper, der Turniere

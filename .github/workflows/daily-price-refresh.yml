@@ -224,33 +224,11 @@ jobs:
           Triggered by .github/workflows/daily-price-refresh.yml
           Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Same push-with-retry pattern weekly-full-update uses:
-          # origin/main can advance while this 5-min job runs (manual
-          # pushes from the maintainer, the daily-price-alerts run
-          # racing if both were enabled at the same time). -X ours
-          # only triggers on actual conflict — code-only changes ride
-          # along on the rebase base.
-          for attempt in 1 2 3; do
-            if git push origin HEAD:main; then
-              echo "Push succeeded on attempt $attempt"
-              echo "pushed=true" >> "$GITHUB_OUTPUT"
-              # The sha lets the next step find the deploy run that THIS push
-              # triggered, instead of dispatching a competing one.
-              echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            echo "Push rejected on attempt $attempt — pulling with rebase…"
-            # --autostash: prevents "cannot pull with rebase: You have
-            # unstaged changes" when a build step leaves unstaged tracked
-            # edits outside the `git add` list above.
-            if ! git pull --rebase=true --autostash -X ours origin main; then
-              echo "::error::Rebase conflict beyond price files — manual resolution needed"
-              git rebase --abort 2>/dev/null || true
-              exit 1
-            fi
-          done
-          echo "::error::Push failed after 3 attempts"
-          exit 1
+          # Push ueber scripts/push_nach_rebase.sh (30.09.2026): im Konflikt gewinnt
+          # dieser Lauf, data_stand.json wird neu gebaut, ein Push ohne eigenen
+          # Inhalt heisst pushed=false, nach dem Rebase laeuft das Tor noch einmal.
+          bash scripts/push_nach_rebase.sh kern
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       # Der Push allein loest KEINEN Deploy aus — GitHub unterdrueckt
       # `on: push` fuer Pushes, die mit GITHUB_TOKEN authentifiziert sind.

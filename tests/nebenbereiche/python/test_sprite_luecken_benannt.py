@@ -58,7 +58,8 @@ def test_nach_dem_pokedex_kommen_editionen_und_bild_luecken(ablauf):
     i_dex = next(i for i, r in enumerate(run) if "build_champions_pokedex.py" in r)
     i_ed = [i for i, r in enumerate(run) if "build_champions_editionen.py" in r]
     i_lu = [i for i, r in enumerate(run) if "build_champions_sprites.py --nur-luecken" in r]
-    i_push = next(i for i, r in enumerate(run) if "git push" in r)
+    i_push = next(i for i, r in enumerate(run)
+                  if "git push" in r or "scripts/push_nach_rebase.sh" in r)
     assert i_ed and all(i_dex < i < i_push for i in i_ed), (
         f"{ablauf}: die Editionen werden nicht zwischen Pokedex und Push gebaut")
     assert i_lu and all(i_dex < i < i_push for i in i_lu), (

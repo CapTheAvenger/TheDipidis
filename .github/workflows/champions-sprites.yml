@@ -118,8 +118,10 @@ jobs:
           Quelle: pokewiki.de, CMP-Icons (Pokémon Champions), 128x128.
           Erzeugt von scripts/build_champions_sprites.py; die Herkunft
           jeder einzelnen Datei steht in data/champions_sprites.json."
-          git push
-          echo "pushed=true" >> "$GITHUB_OUTPUT"
+          # Push ueber scripts/push_nach_rebase.sh (30.09.2026): im Konflikt gewinnt
+          # dieser Lauf, data_stand.json wird neu gebaut, ein Push ohne eigenen
+          # Inhalt heisst pushed=false, nach dem Rebase laeuft das Tor noch einmal.
+          bash scripts/push_nach_rebase.sh alle
 
       # GitHub unterdrueckt `on: push`-Workflows fuer Pushes mit
       # GITHUB_TOKEN (Rekursionsschutz). Ohne diesen Schritt laegen die

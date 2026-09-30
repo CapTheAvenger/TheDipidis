@@ -55,7 +55,7 @@ def _schritte(y):
 
 
 def _schreibt_nach_main(roh):
-    return bool(re.search(r"git push|daten_pushen", _ohne_kommentare(roh)))
+    return bool(re.search(r"git push|daten_pushen|push_nach_rebase", _ohne_kommentare(roh)))
 
 
 def _alle_ablaeufe():
@@ -129,7 +129,7 @@ def _tor_vor_push(y):
         tor = [(i, s) for i, s in enumerate(schritte)
                if "scripts/tor_vor_dem_push.sh" in str(s.get("run", ""))]
         push = [i for i, s in enumerate(schritte)
-                if re.search(r"git push|daten_pushen", str(s.get("run", "")))]
+                if re.search(r"git push|daten_pushen|push_nach_rebase", str(s.get("run", "")))]
         if push:
             if not tor:
                 return None, None, push[0]
@@ -139,15 +139,24 @@ def _tor_vor_push(y):
     return None, None, None
 
 
-def test_jeder_geplante_schreiber_hat_ein_tor_vor_dem_push():
+# Schreiber OHNE Tor, jeder mit Grund (30.09.2026). Bis dahin galt die
+# Regel nur fuer GEPLANTE Ablaeufe, und fuenf handgestartete Scraper
+# (City League, Kartentexte, Online-Decklisten, Spielerkontinuitaet,
+# is_ace_spec-Reparatur) schrieben ungeprueft nach main.
+OHNE_TOR = {
+    "weekly-full-update.yml": "eigenes Tor (test_tor_und_testschritt_ziehen_gleich.py)",
+    "patch-einspielen.yml": "schreibt nur auf patch/*-Zweige, nie nach main",
+    "schriften-spiegeln.yml": "spiegelt Schriftdateien, keine Daten",
+    "tutorial-screenshots.yml": "schreibt Bildschirmfotos, keine Daten",
+}
+
+
+def test_jeder_schreiber_hat_ein_tor_vor_dem_push():
     fehlt = []
     for name, roh, y in _alle_ablaeufe():
-        if name == "weekly-full-update.yml":
-            continue            # eigenes Tor (test_tor_und_testschritt_ziehen_gleich.py)
-        if not _schreibt_nach_main(roh):
+        if name in OHNE_TOR:
             continue
-        geplant = isinstance(_ausloeser(y), dict) and "schedule" in _ausloeser(y)
-        if not geplant and name not in SCHREIBEN_NEBENBEREICHE:
+        if not _schreibt_nach_main(roh):
             continue
         bereich, i_tor, i_push = _tor_vor_push(y)
         if i_tor is None or i_tor > i_push:
@@ -190,7 +199,7 @@ def test_das_tor_folgt_der_bedingung_des_pushs():
         for job in (y.get("jobs") or {}).values():
             schritte = job.get("steps") or []
             tor = [s for s in schritte if "scripts/tor_vor_dem_push.sh" in str(s.get("run", ""))]
-            push = [s for s in schritte if re.search(r"git push|daten_pushen", str(s.get("run", "")))]
+            push = [s for s in schritte if re.search(r"git push|daten_pushen|push_nach_rebase", str(s.get("run", "")))]
             if tor and push and name != "weekly-full-update.yml":
                 if tor[0].get("if") != push[0].get("if"):
                     abweichend.append(f"{name}: Tor if={tor[0].get('if')!r}, Push if={push[0].get('if')!r}")

@@ -60,6 +60,18 @@ jobs:
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
 
+      # DAS TOR VOR DEM PUSH (30.09.2026) — scripts/tor_vor_dem_push.sh.
+      # Auch handgestartete Schreiber pruefen vor dem Push.
+      - name: Node fuer das Tor
+        if: always()
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '20'
+
+      - name: Tor vor dem Push
+        if: always()
+        run: bash scripts/tor_vor_dem_push.sh kern
+
       - name: Commit report
         if: always()
         run: |

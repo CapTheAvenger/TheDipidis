@@ -95,11 +95,10 @@ jobs:
             exit 0
           fi
           git commit -m "Auto: data guardian baseline — $(date -u +'%Y-%m-%d %H:%M UTC')"
-          for attempt in 1 2 3; do
-            if git push origin HEAD:main; then exit 0; fi
-            git pull --rebase=true --autostash -X ours origin main || exit 1
-          done
-          echo "::error::Could not push baseline after 3 attempts"; exit 1
+          # Push ueber scripts/push_nach_rebase.sh (30.09.2026): im Konflikt gewinnt
+          # dieser Lauf, data_stand.json wird neu gebaut, ein Push ohne eigenen
+          # Inhalt heisst pushed=false, nach dem Rebase laeuft das Tor noch einmal.
+          bash scripts/push_nach_rebase.sh kern
 
       # Ein roter Datenlauf war bisher nur per Mail sichtbar — und Mails gehen
       # unter. Genau das ist im August passiert: "Champions Usage Refresh" war

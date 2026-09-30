@@ -357,15 +357,10 @@ jobs:
           Triggered by .github/workflows/per-decklist-scrape.yml
           Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          for attempt in 1 2 3; do
-            if git push origin HEAD:main; then
-              echo "Push succeeded on attempt $attempt"
-              echo "pushed=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            git pull --rebase=true -X ours origin main || { git rebase --abort; exit 1; }
-          done
-          exit 1
+          # Push ueber scripts/push_nach_rebase.sh (30.09.2026): im Konflikt gewinnt
+          # dieser Lauf, data_stand.json wird neu gebaut, ein Push ohne eigenen
+          # Inhalt heisst pushed=false, nach dem Rebase laeuft das Tor noch einmal.
+          bash scripts/push_nach_rebase.sh kern
 
       # No explicit deploy dispatch. The push above already triggers
       # deploy-pages (on: push to main); dispatching a second run put both into

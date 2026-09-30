@@ -306,6 +306,10 @@ def index_urls(urls, slug_to_code, set_slugs, our_cards, our_names=None):
 
 
 def main():
+    # Zeilenweise ausgeben: im Ablauf lief #4 (30.09.2026) eine Stunde ohne
+    # eine einzige Zeile im Log und wurde abgebrochen — ob der Abruf hing
+    # oder nur langsam war, liess sich nicht mehr sagen.
+    sys.stdout.reconfigure(line_buffering=True)
     import requests  # noqa: PLC0415
     s = requests.Session()
     s.headers.update({'User-Agent': UA, 'Accept-Language': 'de,en;q=0.8'})

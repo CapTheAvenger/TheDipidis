@@ -38,7 +38,7 @@
  * Traeger stehen, sonst meldet die Pruefung zu Recht Fremdtext in der
  * deutschen Oberflaeche. Deshalb baut `umhuellen` den Text in ein
  * <div lang="en"> und die Kennzeichnung in ein <p> — dieselbe Loesung,
- * die js/ds-pocket.js fuer Game8s englische Decknamen benutzt
+ * die js/ds-pocket.js fuer die englischen Decknamen der Quelle benutzt
  * (role="heading" statt <h3>, siehe der Kommentar dort).
  * Die Kennzeichnung SELBST ist uebersetzt und faellt damit auch dann
  * nicht auf, wenn die Pruefung spaeter weitere Traeger liest.

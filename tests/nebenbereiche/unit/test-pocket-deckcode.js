@@ -2,8 +2,9 @@
  * FE-11 (28.09.2026): eigener Pocket-Scan-Code aus einer Deckliste.
  *
  * js/pocket-deckcode.js wird AUSGEFUEHRT, gegen die echte Kartentabelle
- * (data/pocket_karten_ids.json) und die echten Game8-Codes
- * (data/pocket_tierlist.json): aus der Kartenliste eines Decks gebaut,
+ * (data/pocket_karten_ids.json) und die echten Game8-Codes vom 28.09.2026
+ * (tests/fixtures/pocket_game8_decks.json, eingefroren beim Wechsel auf
+ * Limitless am 29.09.2026): aus der Kartenliste eines Decks gebaut,
  * muss derselbe Inhalt herauskommen, den Game8s Muster traegt.
  */
 const { test } = require('node:test');
@@ -18,7 +19,7 @@ vm.createContext(sb);
 vm.runInContext(R('js/pocket-deckcode.js'), sb);
 const P = sb.PocketDeckcode;
 const TAB = JSON.parse(R('data/pocket_karten_ids.json'));
-const DECKS = JSON.parse(R('data/pocket_tierlist.json')).decks;
+const DECKS = JSON.parse(R('tests/fixtures/pocket_game8_decks.json')).decks;
 const crypto = require('crypto');
 const kennung = (code) => crypto.createHash('sha1').update(code, 'ascii').digest('hex').slice(0, 12);
 // Die Decks, deren Code beim Bau der Tabelle aus ihrer Liste herauskam.

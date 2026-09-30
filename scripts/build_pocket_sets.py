@@ -15,13 +15,14 @@ kann.
 
 QUELLE
 ------
-game8.co, Seite „Card List" (archives/482685) — dieselbe Quelle wie die
-Tier-Liste selbst, damit die Namen nicht aus einer zweiten Welt kommen.
-Die Seite führt jede Erweiterung als „Name (Kennung)".
-
-Für die beiden Aktionskarten-Reihen gibt es keine Klammerform; sie
-heißen dort schlicht „Promo-A" und „Promo-B". Beide stehen unten in
-`ZUSATZ` — benannt und begründet, nicht stillschweigend ergänzt.
+Seit 29.09.2026: die Kartendatenbank github.com/flibustier/
+pokemon-tcg-pocket-database, Datei `dist/sets.json` (MIT) — dieselbe
+Datenbank, aus der data/pocket_karten_ids.json kommt. Vorher game8.co;
+Game8 antwortet dem GitHub-Laeufer aber mit HTTP 202 (Cloudflare), und
+seit die Tier-Liste aus Limitless kommt, laeuft dieses Skript taeglich
+in CI (pocket-tierlist.yml). Die Datenbank fuehrt je Erweiterung
+Kennung und englischen Namen; die Aktionsreihen heissen dort PROMO-A und
+PROMO-B, bei uns P-A und P-B.
 
 WAS DIESES SKRIPT NICHT TUT
 ---------------------------
@@ -36,70 +37,51 @@ import os
 import re
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from scrape_pocket_tierlist import hole          # noqa: E402
+import urllib.request
 
-QUELLE = "https://game8.co/games/Pokemon-TCG-Pocket/archives/482685"
+QUELLE = ("https://raw.githubusercontent.com/flibustier/"
+          "pokemon-tcg-pocket-database/main/dist/sets.json")
+QUELLE_SEITE = "https://github.com/flibustier/pokemon-tcg-pocket-database"
 HIER = os.path.dirname(os.path.abspath(__file__))
 ZIEL = os.path.join(os.path.dirname(HIER), "data", "pocket_sets.json")
 DECKS = os.path.join(os.path.dirname(HIER), "data", "pocket_tierlist.json")
 
-# Kennung -> Name fuer die Reihen, die auf der Seite ohne Klammerform
-# stehen. Beide kommen woertlich aus derselben Seite (Zeile „Promo-A ・
-# Shop Cards ・ …"), nur eben nicht im Muster „Name (Kennung)".
-ZUSATZ = {
-    "P-A": "Promo-A",
-    "P-B": "Promo-B",
-}
-
-# „Name (Kennung)" — Kennung ist A/B plus Ziffer plus optionaler
-# Kleinbuchstabe. Der Name davor darf Leerzeichen und Apostrophe haben
-# („Team Rocket's Ambition"), aber keine Klammern und keine Satzzeichen,
-# die einen halben Satz einfangen wuerden.
-MUSTER = re.compile(r"^([A-Za-z0-9][A-Za-z0-9 '’&:.-]{2,44}?)\s*\(([AB]\d[a-z]?)\)$")
+# Die Datenbank schreibt die Aktionsreihen als PROMO-A/PROMO-B, unsere
+# Kartenlisten als P-A/P-B (wie Limitless und wie Game8).
+KENNUNG = {"PROMO-A": "P-A", "PROMO-B": "P-B"}
 
 MINDESTENS = 18     # so viele Sets fuehrt die Seite seit dem 16.09.2026
 
 # ── ETIKETTEN, DIE KEINE NAMEN SIND ───────────────────────────────────
 #
-# BEFUND 25.09.2026: die Quellseite fuehrt B4a an zwei Stellen —
-#
-#     "Team Rocket's Ambition (B4a)   Release: August 26, 2026"
-#     "New Set (B4a)"                 (Banner in der Seitennavigation)
-#
-# Beide treffen das Muster "Name (Kennung)". Welche zuerst kommt,
-# entscheidet die Reihenfolge im Baum, nicht die Wahrheit — und beim
-# Durchlauf an diesem Tag gewann das Banner. Dann stuende in der
-# Oberflaeche "New Set" als Set-Name, und der Betreiber ginge damit in
-# den Laden.
-#
-# Ein Etikett wie "New Set" ist keine Angabe, die spaeter richtig wird:
-# es wandert mit jeder Erweiterung weiter. Es wird deshalb nicht
-# uebernommen — weder als Name noch als Platzhalter.
+# BEFUND 25.09.2026 (damals an Game8s Seite): ein Navigationsbanner
+# "New Set (B4a)" traf dasselbe Muster wie der echte Name. Ein Etikett wie
+# "New Set" ist keine Angabe, die spaeter richtig wird — es wandert mit
+# jeder Erweiterung weiter. Die Sperre bleibt auch mit der neuen Quelle:
+# eine Datenbank, die fuer ein angekuendigtes Set "TBA" eintraegt, ist
+# denkbar, und dann steht in der Oberflaeche lieber die blanke Kennung.
 PLATZHALTER = {
     "new set", "newest set", "latest set", "new expansion",
     "coming soon", "tba", "tbd", "upcoming", "next set",
 }
 
 
-def lies(html):
-    from bs4 import BeautifulSoup
-    suppe = BeautifulSoup(html, "lxml")
+def hole(url):
+    with urllib.request.urlopen(url, timeout=60) as r:
+        return r.read().decode("utf-8")
+
+
+def lies(text):
+    """sets.json der Datenbank -> {Kennung: englischer Name}."""
+    daten = json.loads(text)
     gefunden = {}
-    for el in suppe.find_all(["h2", "h3", "a", "td", "li", "strong"]):
-        treffer = MUSTER.match(el.get_text(" ", strip=True))
-        if not treffer:
-            continue
-        kennung, name = treffer.group(2), treffer.group(1).strip()
-        if name.lower() in PLATZHALTER:
-            continue
-        # Der erste Fund gewinnt: die Uebersichtstabelle steht oben,
-        # weiter unten wiederholen Fliesstexte dieselben Namen
-        # gelegentlich verkuerzt.
-        gefunden.setdefault(kennung, name)
-    for kennung, name in ZUSATZ.items():
-        if name in suppe.get_text(" ", strip=True):
-            gefunden.setdefault(kennung, name)
+    for reihe in (daten.values() if isinstance(daten, dict) else [daten]):
+        for e in reihe or []:
+            code = KENNUNG.get(str(e.get("code") or ""), str(e.get("code") or ""))
+            name = str(((e.get("name") or {}).get("en")) or "").replace("\u2019", "'").strip()
+            if not code or not name or name.lower() in PLATZHALTER:
+                continue
+            gefunden.setdefault(code, name)
     return gefunden
 
 
@@ -181,8 +163,8 @@ def nachtraege_fortschreiben(nachtraege, von_der_quelle):
 
 
 def main():
-    html = hole(QUELLE)
-    namen = lies(html)
+    text = hole(QUELLE)
+    namen = lies(text)
     nachtraege, bestaetigt = nachtraege_fortschreiben(alte_nachtraege(), namen)
     for e in bestaetigt:
         print(f"Nachtrag {e['kennung']} ({e['name']!r}) fuehrt die Quelle jetzt selbst")
@@ -192,7 +174,7 @@ def main():
     print(f"{len(namen)} Sets benannt")
     if len(namen) < MINDESTENS:
         print(f"::error::nur {len(namen)} Sets gefunden (erwartet >= {MINDESTENS}). "
-              f"Empfangen: {len(html)} Zeichen. Hat Game8 die Seite umgebaut? "
+              f"Empfangen: {len(text)} Zeichen. Hat die Datenbank ihr Format geaendert? "
               f"Es wird NICHTS geschrieben — eine halbe Tabelle "
               f"sieht auf der Seite aus wie eine ganze.")
         return 1
@@ -225,7 +207,7 @@ def main():
         "_meta": {
             "zweck": "Kennung -> Klarname der Pokémon-TCG-Pocket-Sets, damit "
                      "eine Kartenliste sagen kann, WO die Karte zu holen ist.",
-            "quelle": "game8.co",
+            "quelle": QUELLE_SEITE,
             "quelle_url": QUELLE,
             "hinweis": "Nichts hier ist geraten. Wofür die Seite keinen Namen "
                        "führt, steht in ohne_namen und bleibt in der "

@@ -18,7 +18,14 @@ bk = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bk)
 
 DATEI = os.path.join(WURZEL, "data", "pocket_karten_ids.json")
-DECKS = json.load(open(os.path.join(WURZEL, "data", "pocket_tierlist.json"), encoding="utf-8"))["decks"]
+# Die Gegenprobe braucht Codes, die NICHT aus dieser Tabelle gebaut sind —
+# sonst prueft sie sich selbst. Seit dem 29.09.2026 baut der Scraper die
+# Codes der Tier-Liste aus der Tabelle; unabhaengig sind nur die echten,
+# gescannten Game8-Codes vom 28.09.2026 (eingefroren). Gegen die
+# Tier-Liste lief die Probe am 30.09. in Pocket #7 auf ein Deck ohne Code
+# (TypeError), ohne dass die Tabelle falsch war.
+DECKS = json.load(open(os.path.join(WURZEL, "tests", "fixtures", "pocket_game8_decks.json"),
+                       encoding="utf-8"))["decks"]
 
 
 def _tabelle():

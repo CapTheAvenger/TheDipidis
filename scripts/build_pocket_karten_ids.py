@@ -30,7 +30,10 @@ aus dem Spiel. Die Datei wird roh geholt und ihre Prüfsumme festgehalten.
 
 GEGENPROBE
 ----------
-Die Tabelle wird gegen alle Decks in data/pocket_tierlist.json gehalten:
+Die Tabelle wird gegen die echten Game8-Decks vom 28.09.2026 gehalten
+(tests/fixtures/pocket_game8_decks.json — eingefroren, als die Tier-Liste
+auf Limitless wechselte; seitdem baut unser eigener Lauf die Codes AUS
+dieser Tabelle, ein Vergleich mit ihnen bewiese nichts):
 Kartenliste der Seite → Kennungen, verglichen mit den Kennungen im
 ausgelesenen Scan-Code. Stimmt ein Deck nicht, steht es mit beiden
 Seiten in `_meta.gegenprobe.abweichend`. Gemessen 28.09.2026: 31 von 34
@@ -62,7 +65,7 @@ import urllib.request
 HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.dirname(HIER)
 ZIEL = os.path.join(WURZEL, "data", "pocket_karten_ids.json")
-DECKS = os.path.join(WURZEL, "data", "pocket_tierlist.json")
+DECKS = os.path.join(WURZEL, "tests", "fixtures", "pocket_game8_decks.json")
 
 QUELLE_URL = ("https://raw.githubusercontent.com/flibustier/"
               "pokemon-tcg-pocket-database/main/dist/cards.json")

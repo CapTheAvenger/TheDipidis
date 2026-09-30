@@ -119,7 +119,7 @@ def test_bewusst_planlose_erzeuger_melden_nie(daten):
     assert planlos == set(pf.OHNE_ZEITPLAN)
     assert not (planlos & {j for j, _ in stille}), (
         "ein bewusst planloser Erzeuger meldet sich als Befund — dann "
-        "warnt der Lauf jede Nacht wegen Game8, das GitHub sperrt")
+        "warnt der Lauf jede Nacht wegen eines Erzeugers, der nie faellig ist")
 
 
 def test_jeder_planlose_traegt_seine_begruendung():

@@ -315,3 +315,34 @@ def test_niemand_filtert_auf_has_decklists():
     assert verdaechtig == [], (
         "has_decklists wird ausgewertet, obwohl es die Angabe der Quelle "
         f"ist: {verdaechtig}")
+
+
+def test_der_waechter_folgt_dem_formatfenster_ohne_codeaenderung(tmp_path):
+    """SC-7 (29.09.2026): die beiden <FORMAT>-Eintraege in CONSUMERS standen
+    woertlich ("TEF-30C"). Nach dem naechsten Set haetten drei Zusicherungen
+    hier die Kette angehalten, bis jemand die Zeichenketten tauscht
+    (gemessen mit scripts/simuliere_setwechsel.py).
+
+    Ausgefuehrt: der Waechter wird aus einer Kopie geladen, deren
+    format_window.json ein Set fuehrt, das es im Code nirgends gibt."""
+    import importlib.util
+    import shutil
+    skripte = tmp_path / "scripts"
+    daten = tmp_path / "data"
+    skripte.mkdir()
+    daten.mkdir()
+    shutil.copy(os.path.join(WURZEL, "scripts", "data_guardian.py"), skripte / "data_guardian.py")
+    (daten / "format_window.json").write_text(json.dumps(
+        {"current_set": "ZQX", "oldest_legal_set": "TEF"}), encoding="utf-8")
+    spec = importlib.util.spec_from_file_location("waechter_probe", skripte / "data_guardian.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert "online_api_cards_TEF-ZQX.csv" in m.CONSUMERS
+    assert "online_api_matchups_TEF-ZQX.csv" in m.CONSUMERS
+    assert not any("30C" in k for k in m.CONSUMERS), (
+        "ein Formatschluessel steht noch woertlich im Waechter")
+    # Und das Hinsehen, das der woertliche Schluessel erzwingen sollte,
+    # macht der Waechter jetzt selbst: der Auszug fehlt -> CRITICAL.
+    befunde = []
+    m.check_schema(befunde)
+    assert ("CRITICAL", "consumer file missing: data/online_api_cards_TEF-ZQX.csv") in befunde

@@ -281,12 +281,27 @@ describe('stripExSuffix deckt die Set-Kuerzel im echten Bestand ab', () => {
        Eine Liste, die bei jeder Rotation von Hand nachgezogen werden muss,
        zieht ihren Fehler leise ein. Dieser Test holt die Kuerzel aus den
        Daten und schlaegt an, bevor jemand es merkt. */
-    const stripExSuffix = (function () {
+    /* SEIT 29.09.2026 (SC-7) liest stripExSuffix() die laufenden Kuerzel
+       aus window._formatWindow. Die Seite hat dort SYNCHRON den
+       Schnappschuss aus index.html (current_set, oldest_legal_set,
+       current_set_jp — geschrieben von bump-version.sh und vom Schritt
+       "Cache-bust" in deploy-pages.yml aus data/format_window.json).
+       Genau diesen Schnappschuss bekommt die Probe: drei Felder, nicht
+       die ganze Datei, damit sie nichts voraussetzt, was die Seite beim
+       ersten Zeichnen noch nicht hat. */
+    const FENSTER = JSON.parse(lies('data/format_window.json'));
+    const SCHNAPPSCHUSS = {
+        current_set: FENSTER.current_set,
+        oldest_legal_set: FENSTER.oldest_legal_set,
+        current_set_jp: FENSTER.current_set_jp,
+    };
+    const baueStrip = (fensterGlobal) => {
         const quelle = lies('js/app-current-meta-analysis.js');
         const von = quelle.indexOf('        function stripExSuffix(name) {');
         const bis = quelle.indexOf('\n        }', von);
-        return new Function(quelle.slice(von, bis + 10) + '\nreturn stripExSuffix;')();
-    })();
+        return new Function('window', quelle.slice(von, bis + 10) + '\nreturn stripExSuffix;')(fensterGlobal);
+    };
+    const stripExSuffix = baueStrip({ _formatWindow: SCHNAPPSCHUSS });
 
     const setCodes = (function () {
         const text = lies('data/all_cards_database.csv').replace(/^﻿/, '');
@@ -342,16 +357,42 @@ describe('stripExSuffix deckt die Set-Kuerzel im echten Bestand ab', () => {
         assert.ok(offen.length < betroffen.length,
             'stripExSuffix() schneidet gar kein Set-Kuerzel mehr ab — die Liste '
             + 'ist tot: ' + betroffen.slice(0, 5).join(', '));
-        const fenster = JSON.parse(lies('data/format_window.json'));
         for (const schluessel of ['current_set', 'current_set_jp']) {
-            const code = String(fenster[schluessel] || '').trim();
+            const code = String(FENSTER[schluessel] || '').trim();
             if (!code) continue;
             assert.equal(stripExSuffix('Testdeck ' + code), 'Testdeck',
-                `stripExSuffix() kennt ${schluessel} = ${code} nicht. Das ist das `
-                + 'LAUFENDE Set — der erste Archetyp, der so heisst, steht mit '
-                + 'Kuerzel im Namen da. Nachtragen in js/app-current-meta-analysis.js '
-                + 'UND js/app-meta-cards.js.');
+                `stripExSuffix() kennt ${schluessel} = ${code} nicht, obwohl es im `
+                + 'Formatfenster steht. Das ist das LAUFENDE Set — der erste '
+                + 'Archetyp, der so heisst, steht mit Kuerzel im Namen da.');
         }
+    });
+
+    it('ein Set, das keine feste Liste kennt, wird aus dem Formatfenster abgeschnitten', () => {
+        // Ein Kuerzel, das garantiert in keiner festen Liste steht — so
+        // sieht der erste Tag nach dem naechsten Set aus.
+        const neu = baueStrip({ _formatWindow: { current_set: 'ZQX', current_set_jp: 'M9Q' } });
+        assert.equal(neu('Testdeck Zqx'), 'Testdeck');
+        assert.equal(neu('Testdeck Ex M9Q'), 'Testdeck');
+        assert.equal(neu('Testdeck Ex Pbl'), 'Testdeck', 'die feste Liste gilt weiter');
+        // Ohne Fenster (Abruf ausgefallen, kein Schnappschuss) bleibt es
+        // bei der festen Liste — kein Wurf, kein Abschneiden ins Blaue.
+        const ohne = baueStrip(undefined);
+        assert.equal(ohne('Testdeck Pbl'), 'Testdeck');
+        assert.equal(ohne('Testdeck Zqx'), 'Testdeck Zqx');
+        // Ein Name, der nur ZUFAELLIG wie ein Wort endet, bleibt stehen.
+        assert.equal(neu('Ogerpon Box'), 'Ogerpon Box');
+    });
+
+    it('normalizeArchetypeForMatch() folgt demselben Formatfenster', () => {
+        const quelle = lies('js/app-meta-cards.js');
+        const von = quelle.indexOf('        function normalizeArchetypeForMatch(name) {');
+        const bis = quelle.indexOf('\n        }', von);
+        assert.ok(von > 0 && bis > von, 'normalizeArchetypeForMatch nicht gefunden');
+        const baue = (w) => new Function('window',
+            quelle.slice(von, bis + 10) + '\nreturn normalizeArchetypeForMatch;')(w);
+        const mitFenster = baue({ _formatWindow: { current_set: 'ZQX' } });
+        assert.equal(mitFenster("N's Zoroark Ex Zqx"), 'n zoroark');
+        assert.equal(baue(undefined)('Crustle Dri'), 'crustle');
     });
 
     it('haelt beide Listen im Gleichschritt', () => {

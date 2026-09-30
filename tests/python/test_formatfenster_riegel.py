@@ -80,16 +80,43 @@ def _gelesen(ordner):
     return json.loads((ordner / "format_window.json").read_text(encoding="utf-8"))
 
 
-def test_ruecksprung_wird_nicht_geschrieben(fenster_ordner, monkeypatch, capsys):
-    # Fallbacks kuenstlich auf den alten Stand: simuliert "Quelle weg".
-    # Ausgangspunkt ist die gesetzte Welt der Vorrichtung, nicht die
-    # echte Tabelle — sonst haengt der Fall wieder am Kalender.
+def test_quelle_weg_haelt_den_gespeicherten_stand(fenster_ordner, monkeypatch, capsys):
+    """Quelle weg, Grundstock-Tabellen alt — das Fenster bleibt stehen.
+
+    SEIT 29.09.2026 (SC-7) nimmt der Rueckfall den gespeicherten Stand
+    aus format_window.json dazu (update_sets.rueckfall_release_dates).
+    Vorher hiess derselbe Fall "Ruecksprung erkannt, nichts geschrieben,
+    ::error::" — richtig im Ergebnis, aber nur, weil jemand die Tabellen
+    bei jeder Rotation nachzog. Jetzt faellt das Fenster gar nicht erst
+    zurueck, und die Handfelder bleiben."""
     alt_en = dict(WELT_EN)
     alt_jp = dict(WELT_JP)
     alt_en.pop("PBL", None)
     alt_jp.pop("M6", None)
     monkeypatch.setattr(update_sets, "FALLBACK_RELEASE_DATES", alt_en)
     monkeypatch.setattr(update_sets, "FALLBACK_JP_RELEASE_DATES", alt_jp)
+
+    update_sets.write_format_window("", en_release_dates={}, jp_release_dates={})
+    ausgabe = capsys.readouterr().out
+    assert "zurueckfallen" not in ausgabe
+    danach = _gelesen(fenster_ordner)
+    assert danach["current_set"] == "PBL"
+    assert danach["set_release_date"] == "2026-07-17"
+    assert danach["current_set_jp"] == "M6"
+    assert danach["previous_format_key"] == "TEF-CRI"
+
+
+def test_ruecksprung_wird_nicht_geschrieben(fenster_ordner, monkeypatch, capsys):
+    """Der Monotonieriegel bleibt die zweite Linie: kennt der Rueckfall den
+    gespeicherten Stand NICHT (hier erzwungen), wird nicht rueckwaerts
+    geschrieben."""
+    alt_en = dict(WELT_EN)
+    alt_jp = dict(WELT_JP)
+    alt_en.pop("PBL", None)
+    alt_jp.pop("M6", None)
+    monkeypatch.setattr(update_sets, "FALLBACK_RELEASE_DATES", alt_en)
+    monkeypatch.setattr(update_sets, "FALLBACK_JP_RELEASE_DATES", alt_jp)
+    monkeypatch.setattr(update_sets, "_gespeicherte_anker", lambda verzeichnis=None: ({}, {}))
 
     ergebnis = update_sets.write_format_window("", en_release_dates={}, jp_release_dates={})
     ausgabe = capsys.readouterr().out
@@ -159,35 +186,54 @@ def test_gleichstand_wird_geschrieben(fenster_ordner):
 
 
 def test_fallbacks_kennen_den_aktuellen_stand():
-    """Der Riegel ist die zweite Verteidigungslinie. Die erste ist, dass
-    die Fallback-Tabellen nicht auf einem alten Format stehen.
+    """Der Rueckfall kennt den Stand, den data/format_window.json fuehrt.
 
-    KEIN SET-KUERZEL MEHR IM TESTCODE (20.09.2026).
-
-    Hier standen "PBL" und "M6" woertlich — die Anker vom 21.08.2026.
-    Am 16.09.2026 ist Set 30C erschienen, und diese Zusicherung meldete
-    einen Fehler, den es nicht gab: nicht die Tabelle war falsch, der
-    Test war alt. Ein Kuerzel im Testcode ist genau der abgelesene
-    Wochenwert, den der Wachhund sonst verbietet.
-
-    Gefragt wird jetzt, was wirklich gemeint ist: kennen die Tabellen
-    den Stand, den data/format_window.json fuehrt? Das gilt nach JEDER
-    Rotation — und schlaegt genau dann an, wenn jemand sie zu bumpen
-    vergisst.
+    KEIN SET-KUERZEL IM TESTCODE (20.09.2026) — und seit 29.09.2026 (SC-7)
+    auch keine Handarbeit im Code mehr: bis dahin verlangte diese
+    Zusicherung, dass die HANDTABELLEN in update_sets.py den Anker kennen.
+    Beim Wechsel auf 30C hielt das die Deploy-Kette drei Tage an, bis
+    jemand die Tabelle nachzog (Commit 6ffcd00). Gefragt wird jetzt der
+    Rueckfall, der wirklich greift: Grundstock plus gespeicherter Stand.
     """
     with open(os.path.join(WURZEL, "data", "format_window.json"), encoding="utf-8") as f:
         echt = json.load(f)
+    daten = os.path.join(WURZEL, "data")
     en, jp = echt["current_set"], echt["current_set_jp"]
-    assert update_sets.FALLBACK_RELEASE_DATES.get(en) == echt["set_release_date"], (
-        f"der EN-Anker {en} fehlt in FALLBACK_RELEASE_DATES oder traegt ein "
-        f"anderes Datum als data/format_window.json")
-    assert update_sets.FALLBACK_JP_RELEASE_DATES.get(jp) == echt["jp_release_date"], (
-        f"der JP-Anker {jp} fehlt in FALLBACK_JP_RELEASE_DATES oder traegt ein "
-        f"anderes Datum als data/format_window.json")
-    assert en in update_sets.FALLBACK_SET_ORDER, (
+    en_rf = update_sets.rueckfall_release_dates(daten)
+    jp_rf = update_sets.rueckfall_jp_release_dates(daten)
+    assert en_rf.get(en) == echt["set_release_date"], (
+        f"der EN-Anker {en} fehlt im Rueckfall oder traegt ein anderes Datum "
+        f"als data/format_window.json")
+    assert jp_rf.get(jp) == echt["jp_release_date"], (
+        f"der JP-Anker {jp} fehlt im Rueckfall oder traegt ein anderes Datum "
+        f"als data/format_window.json")
+    assert en in update_sets.rueckfall_set_order(daten), (
         f"{en} hat keine Ordnungszahl — der Chunker wuerde seine "
         f"Karten in den Legacy-Chunk werfen.")
-    assert update_sets._pick_current_set(
-        dict(update_sets.FALLBACK_RELEASE_DATES)) == en
-    assert update_sets._pick_current_set(
-        dict(update_sets.FALLBACK_JP_RELEASE_DATES)) == jp
+    assert update_sets._pick_current_set(dict(en_rf)) == en
+    assert update_sets._pick_current_set(dict(jp_rf)) == jp
+
+
+def test_ein_neues_set_braucht_keinen_eintrag_im_code(tmp_path, monkeypatch):
+    """Verhalten, nicht Text: ein Set, das KEINE Tabelle in update_sets.py
+    kennt, steht im gespeicherten Fenster — der Rueckfall kennt es trotzdem,
+    und ein Lauf ohne Quelle faellt nicht dahinter zurueck."""
+    ordner = tmp_path / "data"
+    ordner.mkdir()
+    fenster = dict(FENSTER, current_set="ZQX", set_release_date="2026-08-20",
+                   current_set_jp="M9Q", jp_release_date="2026-08-21",
+                   previous_format_key="TEF-PBL")
+    (ordner / "format_window.json").write_text(json.dumps(fenster), encoding="utf-8")
+    (ordner / "sets.json").write_text(json.dumps({"ZQX": 999}), encoding="utf-8")
+    monkeypatch.setattr(update_sets, "data_dir", str(ordner))
+    monkeypatch.setattr(update_sets, "FALLBACK_RELEASE_DATES", dict(WELT_EN))
+    monkeypatch.setattr(update_sets, "FALLBACK_JP_RELEASE_DATES", dict(WELT_JP))
+    assert "ZQX" not in update_sets.FALLBACK_RELEASE_DATES
+    assert update_sets.rueckfall_release_dates()["ZQX"] == "2026-08-20"
+    assert update_sets.rueckfall_jp_release_dates()["M9Q"] == "2026-08-21"
+    assert update_sets.rueckfall_set_order()["ZQX"] == 999
+
+    update_sets.write_format_window("", en_release_dates={}, jp_release_dates={})
+    danach = _gelesen(ordner)
+    assert danach["current_set"] == "ZQX" and danach["current_set_jp"] == "M9Q", (
+        "ohne Quelle ist das Fenster hinter den gespeicherten Stand gefallen")

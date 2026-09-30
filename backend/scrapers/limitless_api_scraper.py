@@ -231,6 +231,48 @@ def formatfenster(datenverzeichnis: str = "data") -> List[Tuple[str, str]]:
         # der Stand von vor dieser Aenderung, nicht schlechter.
         pass
 
+    # UND DIE FENSTER, DIE IM BESTAND LIEGEN (29.09.2026, SC-7).
+    #
+    # Der Block darueber holt nur das LAUFENDE Fenster aus
+    # format_window.json. Einen Setwechsel spaeter ist das alte laufende
+    # Fenster weder laufend noch in der Handliste — gemessen mit
+    # scripts/simuliere_setwechsel.py (TEF-30C -> neues Set): alle
+    # 30C-Turniere vom 18. bis 25.09. rechnete formatschluessel() dann
+    # TEF-PBL zu, und test_cardbinder_meta_und_gruppen fiel auf 94 %.
+    # Der Weg ins Gruene waere "TEF-30C in ROTATIONEN eintragen" gewesen
+    # — Handarbeit bei jeder Rotation.
+    #
+    # Jedes Format, fuer das der Wochenlauf je einen Auszug geschrieben
+    # hat, traegt seinen Schluessel im Dateinamen
+    # (online_api_cards_<ALT>-<NEU>.csv), und previous_format_key nennt
+    # das gerade abgeloeste. Beginn ist wie oben das Release des
+    # obersten Sets aus sets_metadata.json — kein Datum wird geraten;
+    # fehlt es dort, faellt das Fenster weg wie bisher.
+    bekannt = {k for k, _ in heraus}
+    kandidaten = set()
+    try:
+        for name in os.listdir(datenverzeichnis):
+            if name.startswith("online_api_cards_") and name.endswith(".csv"):
+                kandidaten.add(name[len("online_api_cards_"):-len(".csv")].upper())
+    except OSError:
+        pass
+    try:
+        with open(os.path.join(datenverzeichnis, "format_window.json"),
+                  encoding="utf-8") as datei:
+            vorher = str(json.load(datei).get("previous_format_key") or "").strip().upper()
+        if vorher:
+            kandidaten.add(vorher)
+    except (OSError, ValueError):
+        pass
+    for schluessel in sorted(kandidaten):
+        teile = schluessel.split("-")
+        if len(teile) != 2 or schluessel in bekannt:
+            continue
+        datum = str((meta.get(teile[1]) or {}).get("release_date") or "").strip()
+        if datum:
+            heraus.append((schluessel, datum))
+            bekannt.add(schluessel)
+
     heraus.sort(key=lambda x: x[1], reverse=True)
     _fenster_zwischenspeicher = heraus
     return heraus

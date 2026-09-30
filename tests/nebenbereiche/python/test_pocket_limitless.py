@@ -1,0 +1,410 @@
+"""Pocket-Tier-Liste aus Limitless (scripts/scrape_pocket_limitless.py).
+
+Seit dem 29.09.2026 kommt die Pocket-Liste aus den Turnierergebnissen von
+play.limitlesstcg.com statt von Game8 (Entscheidung Hausi: „auf Dauer
+nichts mehr manuell"). Diese Datei prueft zwei Dinge:
+
+1. die RECHENSCHICHT, ausgefuehrt gegen eine nachgebaute API (Testdaten,
+   als solche benannt) und gegen die ECHTEN Codes, die Game8 am 28.09.2026
+   fuehrte (tests/fixtures/pocket_game8_decks.json — in Pocket gescannt);
+2. die AUSGELIEFERTE Datei data/pocket_tierlist.json gegen sich selbst:
+   jede Stufe folgt der Regel aus ihrem eigenen _meta, jeder Code traegt
+   genau seine Liste, jedes Deck ohne Code ist benannt.
+
+Keine Zusicherung behauptet einen Wochenwert.
+"""
+import base64
+import collections
+import datetime as dt
+import importlib.util
+import json
+import os
+import sys
+
+import pytest
+
+WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+
+
+def _lade(name):
+    spec = importlib.util.spec_from_file_location(name, os.path.join(WURZEL, "scripts", name + ".py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+S = _lade("scrape_pocket_limitless")
+TAB = S.lies_tabelle(os.path.join(WURZEL, "data", "pocket_karten_ids.json"))
+GAME8 = json.load(open(os.path.join(WURZEL, "tests", "fixtures", "pocket_game8_decks.json"),
+                       encoding="utf-8"))["decks"]
+LIVE = os.path.join(WURZEL, "data", "pocket_tierlist.json")
+ENERGIE_NAME = {v: k.capitalize() for k, v in S.ENERGIE.items()}
+TRAINER_VERSATZ = S.TRAINER_VERSATZ
+
+
+def zerlege(code):
+    """Base64 -> (Trainer-Werte, Pokemon-Werte, Energien) — unabhaengig vom
+    Kodierer nachgelesen."""
+    b = base64.b64decode(code)
+    i = 0
+    nt = b[i]; i += 1
+    tr = [int.from_bytes(b[i + 3 * j:i + 3 * j + 3], "big") for j in range(nt)]
+    i += 3 * nt
+    np_ = b[i]; i += 1
+    pk = [int.from_bytes(b[i + 3 * j:i + 3 * j + 3], "big") for j in range(np_)]
+    i += 3 * np_
+    ne = b[i]
+    en = list(b[i + 1:i + 1 + ne])
+    assert i + 1 + ne == len(b), "der Code hat Bytes uebrig"
+    return tr, pk, en
+
+
+def soll_werte(liste):
+    t, p = [], []
+    for k in liste["pokemon"] + liste["trainer"]:
+        wert = TAB["sets"][k["set"]][int(k["nummer"]) - 1][0]
+        (t if wert >= TRAINER_VERSATZ else p).extend([wert] * int(k["anzahl"]))
+    return t, p
+
+
+# ── Kodierer gegen echte, gescannte Codes ─────────────────────────────
+
+def test_aus_der_liste_entsteht_der_inhalt_von_game8s_echtem_code():
+    gleich = 0
+    for d in GAME8:
+        tr, pk, en = zerlege(d["code"])
+        liste = {"pokemon": d["pokemon"], "trainer": d["trainer"],
+                 "energie": [ENERGIE_NAME[e] for e in en]}
+        try:
+            soll_t, soll_p = soll_werte(liste)
+        except (KeyError, IndexError, TypeError):
+            continue
+        if collections.Counter(soll_t) != collections.Counter(tr) or \
+                collections.Counter(soll_p) != collections.Counter(pk):
+            # Game8s Textliste widerspricht hier Game8s eigenem Muster
+            # (drei Decks, siehe build_pocket_karten_ids.py) — kein Fall
+            # fuer den Kodierer.
+            continue
+        code, grund = S.baue_code(liste, TAB)
+        assert code, f"{d['name']}: {grund}"
+        t2, p2, e2 = zerlege(code)
+        assert collections.Counter(t2) == collections.Counter(tr), d["name"]
+        assert collections.Counter(p2) == collections.Counter(pk), d["name"]
+        assert e2 == en, d["name"]
+        gleich += 1
+    assert gleich >= 25, f"nur {gleich} echte Codes geprueft — dann prueft das hier wenig"
+
+
+def _deck20():
+    d = next(x for x in GAME8 if x["name"].startswith("Chien-Pao ex and Baxcalibur"))
+    return {"pokemon": [dict(k) for k in d["pokemon"]], "trainer": [dict(k) for k in d["trainer"]],
+            "energie": ["Water"]}
+
+
+def test_der_kodierer_weist_ab_was_pocket_nicht_annimmt():
+    assert S.baue_code(_deck20(), TAB)[0]
+    l = _deck20(); l["pokemon"][0]["anzahl"] += 1
+    assert "21 Karten" in S.baue_code(l, TAB)[1]
+    l = _deck20(); l["energie"] = []
+    assert "keine Energie" in S.baue_code(l, TAB)[1]
+    l = _deck20(); l["energie"] = ["Dragon"]
+    assert "unbekannte Energie" in S.baue_code(l, TAB)[1]
+    l = _deck20(); l["energie"] = ["Water", "Fire", "Grass", "Metal"]
+    assert "höchstens drei" in S.baue_code(l, TAB)[1]
+    l = _deck20(); l["pokemon"][0]["set"] = "Z9"
+    assert "führt" in S.baue_code(l, TAB)[1]
+    l = _deck20(); l["trainer"][0]["anzahl"] = 3; l["trainer"][1]["anzahl"] -= 1
+    assert "gleichen Namens" in S.baue_code(l, TAB)[1]
+
+
+def test_trainer_und_pokemon_trennt_die_kennung_nicht_die_gruppe_der_quelle():
+    l = _deck20()
+    l["pokemon"], l["trainer"] = l["trainer"], l["pokemon"]      # vertauscht geliefert
+    a = zerlege(S.baue_code(_deck20(), TAB)[0])
+    b = zerlege(S.baue_code(l, TAB)[0])
+    assert sorted(a[0]) == sorted(b[0]) and sorted(a[1]) == sorted(b[1])
+
+
+# ── Rechenschicht mit TESTDATEN ────────────────────────────────────────
+
+def _eintrag(deck, s, n, u=0, platz=None, liste=None, energie=("Water",)):
+    liste = liste or _deck20()
+    return {"name": "TESTSPIELER", "player": "testspieler", "placing": platz,
+            "deck": {"id": deck, "name": deck.upper()},
+            "record": {"wins": s, "losses": n, "ties": u},
+            "decklist": {"pokemon": [{"count": k["anzahl"], "set": k["set"], "number": str(int(k["nummer"])),
+                                      "name": k["name"]} for k in liste["pokemon"]],
+                         "trainer": [{"count": k["anzahl"], "set": k["set"], "number": str(int(k["nummer"])),
+                                      "name": k["name"]} for k in liste["trainer"]],
+                         "energy": list(energie)}}
+
+
+def test_ein_turnier_ohne_platz_1_ist_nicht_fertig():
+    assert not S.ist_fertig([_eintrag("a", 2, 1), _eintrag("b", 1, 2)])
+    assert S.ist_fertig([_eintrag("a", 2, 1, platz=1), _eintrag("b", 1, 2, platz=None)])
+
+
+def test_nur_das_standardformat_zaehlt():
+    assert S.ist_standard({"format": None})
+    assert S.ist_standard({})
+    assert not S.ist_standard({"format": "CUSTOM"})
+
+
+def test_die_auswertung_zaehlt_und_behaelt_je_archetyp_die_beste_liste():
+    t = {"id": "T1", "name": "TEST", "date": "2026-09-20T10:00:00.000Z", "players": 40}
+    erg = S.turnier_auswerten(t, [_eintrag("a", 5, 1, platz=1), _eintrag("a", 3, 3, platz=5),
+                                  _eintrag("b", 1, 4, platz=9), {"deck": None, "decklist": None}])
+    assert erg["listen"] == 3 and erg["ohne_deck"] == 1
+    assert erg["decks"]["a"]["listen"] == 2
+    assert [erg["decks"]["a"][k] for k in "snu"] == [8, 4, 0]
+    assert erg["decks"]["a"]["beste"]["bilanz"] == [5, 1, 0]
+    # Auch ein Archetyp ohne positive Liste bekommt seine beste Liste —
+    # sonst steht er ohne Karten, Bild und Code da (Pocket #7, 30.09.2026:
+    # Mega Gardevoir ex Mega Diancie ex, 11 Listen, keine positiv).
+    assert erg["decks"]["b"]["beste"]["bilanz"] == [1, 4, 0]
+    assert erg["decks"]["b"]["beste"]["platz"] == 9
+    assert "testspieler" not in json.dumps(erg).lower(), "Spielernamen werden nicht gespeichert"
+    assert erg["decks"]["a"]["beste"]["pokemon"][0]["nummer"] == "020", "Nummern dreistellig wie bisher"
+
+
+@pytest.mark.parametrize("anteil,quote,soll", [
+    (0.05, 0.50, "S"), (0.0499, 0.60, "A"), (0.05, 0.4999, "A"), (0.02, 0.48, "A"),
+    (0.02, 0.4799, "B"), (0.01, 0.10, "B"), (0.0099, 0.90, "C"),
+])
+def test_die_stufenregel_an_ihren_grenzen(anteil, quote, soll):
+    assert S.stufe(anteil, quote) == soll
+
+
+def _turnier(tid, datum, decks):
+    return {"name": "TEST " + tid, "datum": datum, "spieler": 32,
+            "listen": sum(z["listen"] for z in decks.values()), "ohne_deck": 0, "decks": decks}
+
+
+def _zaehlung(name, listen, s, n, beste=None, u=0):
+    return {"name": name, "listen": listen, "s": s, "n": n, "u": u, "beste": beste}
+
+
+def test_zusammenfassen_rechnet_anteil_quote_stufe_und_nennt_was_fehlt():
+    gut = {"bilanz": [6, 0, 0], "platz": 1, **_deck20()}
+    ohne_energie = dict(gut, bilanz=[7, 0, 0], energie=[])
+    turniere = {
+        "T1": _turnier("T1", "2026-09-20", {"a": _zaehlung("A", 30, 60, 40, ohne_energie),
+                                             "b": _zaehlung("B", 60, 50, 70, gut),
+                                             "c": _zaehlung("C", 5, 5, 5)}),
+        "T2": _turnier("T2", "2026-09-21", {"a": _zaehlung("A", 5, 10, 5, gut, u=5)}),
+    }
+    decks, ohne_code, unter, gesamt = S.zusammenfassen(turniere, TAB)
+    assert gesamt == 100
+    a = next(d for d in decks if d["id"] == "a")
+    # Unentschieden zaehlen im Nenner mit (Konvention mitUnentschieden).
+    assert a["listen"] == 35 and a["anteil"] == 0.35 and a["quote"] == round(70 / 120, 4)
+    assert a["unentschieden"] == 5
+    assert a["tier"] == "S"
+    # Die beste Liste (7-0) hat keine Energie -> die naechste, benannt.
+    assert a["code"] and a["liste_von"]["rang"] == 2
+    assert "Energie" in a["liste_von"]["warum_nicht_die_beste"]
+    b = next(d for d in decks if d["id"] == "b")
+    assert b["tier"] == "B", "60 % Anteil, aber 41,7 % Siegquote"
+    assert unter == {"archetypen": 1, "listen": 5}
+    assert not any(d["id"] == "c" for d in decks)
+    assert [d["id"] for d in decks] == ["a", "b"], "nach Stufe, dann Anteil"
+    assert ohne_code == []
+
+
+def test_ein_deck_ohne_gueltige_liste_steht_da_und_ist_benannt():
+    kaputt = {"bilanz": [6, 0, 0], "platz": 1, **_deck20()}
+    kaputt["pokemon"] = kaputt["pokemon"][1:]
+    turniere = {"T1": _turnier("T1", "2026-09-20", {"a": _zaehlung("A", 20, 20, 10, kaputt),
+                                                     "b": _zaehlung("B", 20, 5, 20)})}
+    decks, ohne_code, _, _ = S.zusammenfassen(turniere, TAB)
+    assert {d["id"] for d in decks} == {"a", "b"}
+    assert all(d["code"] is None and d["code_fehlt"] for d in decks)
+    assert {o["name"] for o in ohne_code} == {"A", "B"}
+    assert "keine Liste" in next(d for d in decks if d["id"] == "b")["code_fehlt"]
+
+
+class FalscheApi:
+    """TESTDATEN: nachgebaute Limitless-API."""
+
+    def __init__(self, liste, standings, kaputt=()):
+        self.liste, self.st, self.kaputt, self.geholt = liste, standings, set(kaputt), []
+
+    def turniere(self, spiel, limit=100, seite=1):
+        assert spiel == "POCKET"
+        return self.liste if seite == 1 else []
+
+    def standings(self, tid):
+        self.geholt.append(tid)
+        if tid in self.kaputt:
+            raise RuntimeError("HTTP 500")
+        return self.st[tid]
+
+
+def test_der_lauf_holt_jedes_turnier_einmal_und_laesst_benannt_aus():
+    jetzt = dt.datetime(2026, 9, 29, 12, tzinfo=dt.timezone.utc)
+    t = lambda tid, tag, fmt=None, sp=40: {"id": tid, "name": tid, "date": f"2026-09-{tag}T10:00:00.000Z",
+                                          "format": fmt, "players": sp}
+    liste = [t("zukunft", 30), t("neu", 28), t("laeuft", 29), t("kaputt", 27), t("schon", 26),
+             t("custom", 25, "CUSTOM"), t("klein", 24, sp=8), t("alt", 10)]
+    fertig = [_eintrag("a", 4, 1, platz=1), _eintrag("a", 1, 3, platz=2)]
+    api = FalscheApi(liste, {"neu": fertig, "laeuft": [_eintrag("a", 1, 0)], "alt": fertig},
+                     kaputt=["kaputt"])
+    zw = {"schon": _turnier("schon", "2026-09-26", {}), "verfallen": _turnier("v", "2026-09-01", {})}
+    turniere, offen, neu, ab = S.lauf(api, zw, jetzt)
+    assert set(turniere) == {"schon", "neu"}
+    assert neu == 1
+    assert sorted(api.geholt) == ["kaputt", "laeuft", "neu"], api.geholt
+    assert {o["id"]: o["grund"][:6] for o in offen} == {"laeuft": "läuft ", "kaputt": "Abruf "}
+
+
+def test_der_zwischenstand_uebersteht_schreiben_und_lesen(tmp_path):
+    zw = {"x": _turnier("x", "2026-09-20", {"a": _zaehlung("A", 3, 3, 3)})}
+    pfad = tmp_path / "z.json"
+    S.schreibe_zwischenstand(zw, str(pfad))
+    assert S.lies_zwischenstand(str(pfad)) == zw
+    assert len(pfad.read_text(encoding="utf-8").splitlines()) == 4, "ein Turnier je Zeile"
+
+
+def test_ohne_gewertetes_deck_bleibt_die_alte_datei_stehen(monkeypatch, tmp_path):
+    ziel = tmp_path / "ziel.json"
+    ziel.write_text('{"alt": true}', encoding="utf-8")
+    monkeypatch.setattr(S, "ZIEL", str(ziel))
+    monkeypatch.setattr(S, "ZWISCHENSTAND", str(tmp_path / "zw.json"))
+    monkeypatch.setattr(S, "lauf", lambda api, zw, jetzt: ({}, [], 0, jetzt))
+    import types
+    monkeypatch.setitem(sys.modules, "limitless_api_scraper", types.SimpleNamespace(LimitlessApi=lambda: None))
+    assert S.main([]) == 1
+    assert json.loads(ziel.read_text(encoding="utf-8")) == {"alt": True}
+
+
+# ── die ausgelieferte Datei ────────────────────────────────────────────
+
+@pytest.fixture(scope="module")
+def live():
+    with open(LIVE, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def test_die_datei_kommt_von_limitless_und_traegt_ihre_regel(live):
+    m = live["_meta"]
+    assert m["quelle"] == "play.limitlesstcg.com"
+    assert m["stufenregel"] and m["quoten_konvention"] == "mitUnentschieden"
+    assert m["listen"] > 0 and m["turniere"] > 0
+    assert live["decks"], "keine Decks"
+
+
+def test_jede_stufe_folgt_der_regel_aus_dem_eigenen_meta(live):
+    regel = live["_meta"]["stufenregel"]
+
+    def stufe(a, q):
+        for r in regel:
+            if r["anteil_ab"] is not None and a < r["anteil_ab"]:
+                continue
+            if r["quote_ab"] is not None and q < r["quote_ab"]:
+                continue
+            return r["stufe"]
+    for d in live["decks"]:
+        partien = d["siege"] + d["niederlagen"] + d["unentschieden"]
+        assert abs(d["quote"] - d["siege"] / partien) < 1e-3, d["name"]
+        assert abs(d["anteil"] - d["listen"] / live["_meta"]["listen"]) < 1e-3, d["name"]
+        assert d["listen"] >= live["_meta"]["min_listen"], d["name"]
+        assert d["tier"] == stufe(d["anteil"], d["quote"]), d["name"]
+
+
+def test_jeder_code_traegt_genau_seine_liste(live):
+    mit = 0
+    for d in live["decks"]:
+        if not d["code"]:
+            continue
+        tr, pk, en = zerlege(d["code"])
+        soll_t, soll_p = soll_werte(d)
+        assert collections.Counter(tr) == collections.Counter(soll_t), d["name"]
+        assert collections.Counter(pk) == collections.Counter(soll_p), d["name"]
+        assert en == [S.ENERGIE[e.lower()] for e in d["energie"]], d["name"]
+        assert sum(k["anzahl"] for k in d["pokemon"] + d["trainer"]) == 20, d["name"]
+        mit += 1
+    assert mit, "kein einziges Deck mit Code"
+
+
+def test_ein_deck_ohne_code_ist_benannt_in_beide_richtungen(live):
+    ohne = {o["name"] for o in live["_meta"]["ohne_code"]}
+    ohne_im_deck = {d["name"] for d in live["decks"] if not d["code"]}
+    assert ohne == ohne_im_deck
+    for d in live["decks"]:
+        assert bool(d["code"]) != bool(d.get("code_fehlt")), d["name"]
+
+
+def test_keine_testattrappen_in_der_ausgelieferten_datei(live):
+    text = json.dumps(live, ensure_ascii=False)
+    assert "TESTSPIELER" not in text and '"TEST ' not in text
+
+
+# ── der Ablauf pocket-tierlist.yml ─────────────────────────────────────
+# Uebernommen aus dem Game8-Test (bis 29.09.2026), weil die drei Fehler,
+# die sie festhalten, nicht an der Quelle haengen, sondern am Ablauf.
+
+def _ablauf():
+    yaml = pytest.importorskip("yaml")
+    with open(os.path.join(WURZEL, ".github", "workflows", "pocket-tierlist.yml"),
+              encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def _schritt(name):
+    for s in _ablauf()["jobs"]["scrape"]["steps"]:
+        if s.get("name") == name:
+            return s
+    raise AssertionError(f"Schritt '{name}' fehlt im Ablauf")
+
+
+def _ohne_kommentare(befehl):
+    return "\n".join(z for z in befehl.splitlines() if not z.lstrip().startswith("#"))
+
+
+def test_der_ablauf_laeuft_taeglich_und_der_scraper_schritt_darf_nicht_scheitern():
+    an = _ablauf().get(True) or _ablauf().get("on")
+    assert an.get("schedule"), "der Ablauf hat keinen Zeitplan — dann ist er wieder Handarbeit"
+    s = _schritt("Tier-Liste aus Limitless")
+    assert not s.get("continue-on-error"), "ein Abbruch des Scrapers bliebe gruen"
+    befehl = _ohne_kommentare(s["run"])
+    assert "scripts/scrape_pocket_limitless.py" in befehl
+    assert "set +e" not in befehl and "|| true" not in befehl, "der Rueckgabewert wird verschluckt"
+
+
+def test_der_ablauf_committet_nach_einem_abbruch_nicht():
+    """Ein eigenes `if:` ersetzt die stillschweigende Bedingung success()."""
+    bedingung = str(_schritt("Commit + push")["if"])
+    assert "success()" in bedingung, f"der Commit-Schritt laeuft auch nach einem Abbruch: {bedingung}"
+
+
+def test_die_eingabe_aus_dem_actions_dialog_laeuft_nicht_als_shell_text():
+    """`--nur ${{ inputs.nur }}` setzte frueher den Feldinhalt in die Befehlszeile."""
+    for name in ("Tier-Liste aus Limitless", "Commit + push"):
+        befehl = _ohne_kommentare(_schritt(name)["run"])
+        zeilen = [z for z in befehl.splitlines() if "${{" in z and "inputs." in z]
+        assert not zeilen, f"{name}: Actions-Eingabe steht in der Befehlszeile: {zeilen}"
+
+
+def test_der_ablauf_committet_auch_den_zwischenstand():
+    """Ohne den Zwischenstand holt jeder Lauf alle Turniere neu — genau das,
+    was CLAUDE.md verbietet („never re-fetch data you already have")."""
+    befehl = _ohne_kommentare(_schritt("Commit + push")["run"])
+    assert "data/pocket_limitless_turniere.json" in befehl
+    assert "data/pocket_tierlist.json" in befehl
+
+
+def test_der_deploy_wird_nur_fuer_main_angestossen():
+    bedingung = str(_schritt("Deploy anstossen (GITHUB_TOKEN-Push triggert ihn nicht)")["if"])
+    assert "github.ref_name == 'main'" in bedingung and "pushed" in bedingung
+
+
+def test_der_testschritt_installiert_die_qr_bibliotheken():
+    """Sonst werden die QR-Gegenprobe (test_qr_svg.py) und die Ablauf-
+    Zusicherungen hier still uebersprungen. Seit 29.09.2026 laufen die
+    Pocket-Tests in nebenbereiche-tests.yml, nicht mehr im Deploy."""
+    text = open(os.path.join(WURZEL, ".github", "workflows", "nebenbereiche-tests.yml"),
+                encoding="utf-8").read()
+    zusammen = " ".join(z for z in text.splitlines() if "pip install" in z).lower()
+    for paket in ["zxing-cpp", "segno", "pillow", "pyyaml"]:
+        assert paket in zusammen, f"{paket} fehlt in nebenbereiche-tests.yml"

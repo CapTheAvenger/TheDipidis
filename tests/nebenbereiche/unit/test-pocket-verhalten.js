@@ -11,7 +11,7 @@
  *   * TIER_ORDNUNG ohne 'D'          -> eine ganze Stufe verschwindet
  *   * Filter 'tier' ohne 'beide'     -> elf Decks fallen aus der Auswahl
  *   * das Vollbild oeffnet nie       -> der Zweck des Reiters
- *   * esc() escaped nicht mehr       -> Deck-Namen kommen von Game8
+ *   * esc() escaped nicht mehr       -> Deck-Namen kommen von der Quelle
  *
  * Ein Quelltext-Grep kann keine davon sehen. Diese Datei fuehrt den
  * Renderer deshalb wirklich aus, gegen die ECHTEN Daten, und prueft,
@@ -32,6 +32,10 @@ const path = require('node:path');
 
 const WURZEL = path.join(__dirname, '..', '..', '..');
 const DATEN = JSON.parse(fs.readFileSync(path.join(WURZEL, 'data', 'pocket_tierlist.json'), 'utf8'));
+// Die echten Game8-Decks vom 28.09.2026, eingefroren als Testdaten: fuer
+// Namensfaelle, die an genau diesen Namen entdeckt wurden.
+const GAME8 = JSON.parse(fs.readFileSync(
+    path.join(WURZEL, 'tests', 'fixtures', 'pocket_game8_decks.json'), 'utf8')).decks;
 
 // ── Der kleinste Ersatz, der traegt ──────────────────────────────────
 
@@ -236,28 +240,65 @@ describe('Pocket-Reiter: die Liste entsteht wirklich', () => {
     });
 });
 
-describe('Pocket-Reiter: die Filter rechnen', () => {
-    // Faengt "Filter 'tier' ohne 'beide'" (ueberlebende Mutation).
-    const erwartet = {
-        alle: DATEN.decks.length,
-        tier: DATEN.decks.filter(d => d.quelle_liste === 'tier' || d.quelle_liste === 'beide').length,
-        set: DATEN.decks.filter(d => d.quelle_liste === 'set' || d.quelle_liste === 'beide').length
-    };
+describe('Pocket-Reiter: Zahlen und Regel kommen aus der Datei', () => {
+    const prozent = (x) => (x * 100).toFixed(1).replace('.', ',') + ' %';
 
-    it('die Datei taugt ueberhaupt als Probe', () => {
-        // Ohne das koennte jeder Filter alles zeigen und der Test bestaende leer.
-        assert.notEqual(erwartet.tier, erwartet.alle);
-        assert.notEqual(erwartet.set, erwartet.alle);
-        assert.notEqual(erwartet.tier, erwartet.set);
+    it('jede Zeile traegt Anteil, Siegquote und Listenzahl IHRES Decks', async () => {
+        const u = await gezeichnet(DATEN);
+        const zeilen = u.knoten.pocketListe.innerHTML.split('class="pk-zeile"').slice(1);
+        assert.equal(zeilen.length, DATEN.decks.length);
+        const nachIndex = {};
+        zeilen.forEach(z => { nachIndex[(z.match(/data-pk-deck="(\d+)"/) || [])[1]] = z; });
+        DATEN.decks.forEach((d, i) => {
+            const z = nachIndex[String(i)];
+            assert.ok(z, d.name + ': keine Zeile');
+            assert.ok(z.includes(prozent(d.anteil) + ' der Listen'), d.name + ': Anteil fehlt');
+            assert.ok(z.includes('WR* ' + prozent(d.quote)), d.name + ': Siegquote fehlt');
+            assert.ok(z.includes(d.listen + ' Listen'), d.name + ': Listenzahl fehlt');
+        });
     });
 
-    Object.keys(erwartet).forEach(name => {
-        it(`"${name}" zeigt ${erwartet[name]} Decks`, async () => {
-            const u = await gezeichnet(DATEN);
-            klick(u.knoten, 'data-pk-filter', name);
-            const zeilen = (u.knoten.pocketListe.innerHTML.match(/class="pk-zeile"/g) || []).length;
-            assert.equal(zeilen, erwartet[name]);
+    it('innerhalb einer Stufe steht die Reihenfolge der Datei (nach Anteil)', async () => {
+        const u = await gezeichnet(DATEN);
+        const reihe = (u.knoten.pocketListe.innerHTML.match(/data-pk-deck="(\d+)"/g) || [])
+            .map(m => Number(m.match(/\d+/)[0]));
+        const ordnung = DATEN._meta.stufenregel.map(r => r.stufe);
+        const soll = DATEN.decks.map((d, i) => i)
+            .sort((a, b) => ordnung.indexOf(DATEN.decks[a].tier) - ordnung.indexOf(DATEN.decks[b].tier) || a - b);
+        assert.deepEqual(reihe, soll);
+    });
+
+    it('die angeschriebene Stufenregel ist die aus _meta — und folgt ihr (Verfaelschungsprobe)', async () => {
+        const u = await gezeichnet(DATEN);
+        const h = u.knoten.pocketListe.innerHTML;
+        DATEN._meta.stufenregel.filter(r => r.anteil_ab != null).forEach(r => {
+            assert.ok(h.includes(r.stufe + ': Anteil ab ' + prozent(r.anteil_ab)),
+                'die Regel fuer ' + r.stufe + ' steht nicht so da wie in der Datei');
         });
+        const anders = JSON.parse(JSON.stringify(DATEN));
+        anders._meta.stufenregel[0].anteil_ab = 0.123;
+        const u2 = await gezeichnet(anders);
+        assert.ok(u2.knoten.pocketListe.innerHTML.includes('Anteil ab 12,3 %'),
+            'die Regel im Text folgt der Datei nicht — dann steht sie im Code');
+    });
+
+    it('die Fusszeile nennt Decks ohne Code, Archetypen unter der Schwelle und laufende Turniere', async () => {
+        const probe = JSON.parse(JSON.stringify(DATEN));
+        probe._meta.ohne_code = [{ name: 'TESTDECK OHNE CODE', grund: 'TESTGRUND' }];
+        probe._meta.unter_min_listen = { archetypen: 7, listen: 31 };
+        probe._meta.offene_turniere = [{ id: 'x', name: 'TEST', datum: '2026-09-29', grund: 'laeuft' }];
+        const u = await gezeichnet(probe);
+        const h = u.knoten.pocketListe.innerHTML;
+        assert.ok(h.includes('TESTDECK OHNE CODE (TESTGRUND)'), 'Deck ohne Code nicht benannt');
+        assert.ok(h.includes('7 weitere Archetypen mit zusammen 31 Listen'), 'Schwelle nicht benannt');
+        assert.ok(h.includes('1 Turniere sind noch nicht dabei'), 'laufende Turniere nicht benannt');
+    });
+
+    it('die Warnung erscheint ab dem dritten Tag ohne Auffrischung, nicht vorher', async () => {
+        const tage = (n) => { const d = JSON.parse(JSON.stringify(DATEN));
+            d._meta.abgerufen = new Date(Date.now() - n * 86400000 - 60000).toISOString(); return d; };
+        assert.doesNotMatch((await gezeichnet(tage(2))).knoten.pocketListe.innerHTML, /pk-alt/);
+        assert.match((await gezeichnet(tage(3))).knoten.pocketListe.innerHTML, /pk-alt/);
     });
 });
 
@@ -279,7 +320,8 @@ describe('Pocket-Reiter: das Vollbild', () => {
             const h = u.knoten.pocketOverlay.innerHTML;
             const d = DATEN.decks[0];
             assert.ok(h.includes(d.name), 'der Deck-Name fehlt im Vollbild');
-            assert.match(h, /Game8/, 'die Quelle fehlt im Vollbild');
+            assert.match(h, /Limitless/, 'die Quelle fehlt im Vollbild');
+            assert.ok(h.includes('WR* '), 'die Siegquote fehlt im Vollbild');
             assert.match(h, /Stand \d\d\.\d\d\.\d{4}/, 'das Datum fehlt im Vollbild');
         });
     });
@@ -370,8 +412,8 @@ describe('Pocket-Reiter: die Sprites vor dem Namen', () => {
            "Mega Lucario ex" und "Lucario". Ohne die Sperre auf schon
            belegte Stellen im Namen kam zweimal Lucario heraus und
            Hitmonlee gar nicht. */
-        const d = DATEN.decks.find(x => /Lucario/.test(x.name) && /Hitmonlee/.test(x.name));
-        if (!d) return;   // das Deck ist aus der Liste gefallen
+        const d = GAME8.find(x => /Lucario/.test(x.name) && /Hitmonlee/.test(x.name));
+        assert.ok(d, 'das eingefrorene Game8-Deck fehlt');
         const gefunden = arten(d);
         assert.ok(gefunden.some(a => /Hitmonlee/.test(a)),
             `Hitmonlee fehlt: ${JSON.stringify(gefunden)}`);
@@ -382,8 +424,8 @@ describe('Pocket-Reiter: die Sprites vor dem Namen', () => {
 
     it('der laengere Name an derselben Stelle gewinnt', () => {
         // Sonst schlaegt "Altaria" das "Mega Altaria ex", in dem es steckt.
-        const d = DATEN.decks.find(x => /^Mega Altaria ex and PD Espeon/.test(x.name));
-        if (!d) return;
+        const d = GAME8.find(x => /^Mega Altaria ex and PD Espeon/.test(x.name));
+        assert.ok(d, 'das eingefrorene Game8-Deck fehlt');
         assert.deepEqual(arten(d), ['Mega Altaria ex', 'Espeon']);
     });
 
@@ -536,7 +578,7 @@ describe('Pocket-Reiter: der Weg zurueck aus dem Vollbild', () => {
 describe('Pocket-Reiter: was schiefgehen kann', () => {
     it('Deck-Namen werden maskiert', async () => {
         // Faengt "esc() escaped nicht mehr" (ueberlebende Mutation).
-        // Die Namen kommen von Game8, nicht von uns.
+        // Die Namen kommen von der Quelle, nicht von uns.
         const boese = JSON.parse(JSON.stringify(DATEN));
         boese.decks[0].name = '<img src=x onerror=alert(1)>';
         const u = await gezeichnet(boese);
@@ -562,15 +604,18 @@ describe('Pocket-Reiter: was schiefgehen kann', () => {
         assert.ok(h.includes('S+'), 'die unbekannte Stufe wird nicht benannt');
     });
 
-    it('eine leere Kartenliste zeigt den Grund, nicht einen leeren Kasten', async () => {
-        const leer = JSON.parse(JSON.stringify(DATEN));
-        leer.decks[0].pokemon = [];
-        leer.decks[0].trainer = [];
-        leer.decks[0].karten_hinweis = 'auf der Seite steht keine Liste';
-        const u = await gezeichnet(leer);
+    it('ein Deck ohne Code zeigt den Grund, kein Muster und keinen Kopierknopf', async () => {
+        const ohne = JSON.parse(JSON.stringify(DATEN));
+        ohne.decks[0].code = null;
+        ohne.decks[0].code_fehlt = 'TESTGRUND: Karte fehlt in der Tabelle';
+        const u = await gezeichnet(ohne);
+        assert.match(u.knoten.pocketListe.innerHTML, /ohne Scan-Code/, 'die Zeile sagt es nicht');
         klick(u.knoten, 'data-pk-deck', '0');
-        assert.match(u.knoten.pocketOverlay.innerHTML, /auf der Seite steht keine Liste/,
-            'der Grund fehlt — es bleibt ein leerer Kasten stehen');
+        const h = u.knoten.pocketOverlay.innerHTML;
+        assert.match(h, /TESTGRUND: Karte fehlt in der Tabelle/, 'der Grund fehlt im Vollbild');
+        assert.doesNotMatch(h, /<svg /, 'ein Muster ohne Code');
+        assert.doesNotMatch(h, /data-pk-kopieren/, 'ein Kopierknopf ohne Code');
+        assert.doesNotMatch(h, />null</, '„null" steht als Code da');
     });
 
     it('eine leere Datei meldet das, statt nichts zu zeigen', async () => {
@@ -592,175 +637,24 @@ describe('Pocket-Reiter: was schiefgehen kann', () => {
         u.fenster.qrSvg = undefined;
         u.api.render();
         await new Promise(r => setTimeout(r, 0));
-        klick(u.knoten, 'data-pk-deck', '0');
+        const i = DATEN.decks.findIndex(d => d.code);
+        klick(u.knoten, 'data-pk-deck', String(i));
         const h = u.knoten.pocketOverlay.innerHTML;
         assert.match(h, /nicht zeichnen/, 'es bleibt ein leeres weisses Feld stehen');
-        assert.ok(h.includes(DATEN.decks[0].code), 'der Code steht nirgends zum Abschreiben');
+        assert.ok(h.includes(DATEN.decks[i].code), 'der Code steht nirgends zum Abschreiben');
     });
 });
 
-/* ════════════════════════════════════════════════════════════════════
-   SET-NAMEN UND DIE ABSCHNITTE DES NEUEN SETS (16.09.2026)
-   ════════════════════════════════════════════════════════════════════
-   ZWEI ANLAESSE (Betreiber):
-
-     „bei Pocket ändert der Filter Alle, Tier-List, Neues Set quasi
-      nichts … bei neues Set sollten ja nur die New Team Rocket's
-      Ambition Decks und Old Decks Updated with Team Rocket's Ambition
-      inklusive der Tiers"
-
-     „können wir bei den Details von den Karten auch den Set Namen
-      schreiben weil mit B3 und A2 und so kann ich nichts anfangen"
-
-   Nachgemessen am 16.09.2026 gegen die echte Game8-Seite: der Filter
-   GREIFT (23 gegen 21 von 33 Decks), aber er sah nicht danach aus, weil
-   elf Decks in beiden Listen stehen und beide Ansichten nach Stufe
-   gruppierten. Die Set-Tabelle hat zwei Ueberschriften, und die sagen
-   etwas, das die Stufe nicht sagt: ob ein Deck mit dem Set NEU ist oder
-   ein bestehendes, das durch das Set besser wurde.
-   ════════════════════════════════════════════════════════════════════ */
-
-const MIT_ABSCHNITT = {
-    _meta: { anzahl: 3 },
-    decks: [
-        { name: 'Neu Eins', tier: 'B', archiv: '1', quelle_liste: 'set',
-          set_abschnitt: "New Team Rocket's Ambition Decks" },
-        { name: 'Alt Eins', tier: 'S', archiv: '2', quelle_liste: 'beide',
-          set_abschnitt: "Old Decks Updated with Team Rocket's Ambition" },
-        { name: 'Nur Tier', tier: 'A', archiv: '3', quelle_liste: 'tier',
-          set_abschnitt: '' },
-    ],
-};
-
-describe('Pocket: „Neues Set" zeigt die Abschnitte der Quelle', () => {
-    it('gruppiert nach Abschnitt statt nach Stufe', async () => {
-        const u = await gezeichnet(MIT_ABSCHNITT);
-        klick(u.knoten, 'data-pk-filter', 'set');
-        const html = u.knoten.pocketListe.innerHTML;
-        assert.ok(html.indexOf("New Team Rocket&#39;s Ambition Decks") !== -1
-               || html.indexOf("New Team Rocket's Ambition Decks") !== -1,
-            'der Abschnitt der neuen Decks fehlt');
-        assert.ok(/Old Decks Updated with Team Rocket/.test(html),
-            'der Abschnitt der aktualisierten Decks fehlt');
-        // Die Stufe steht weiter an der Zeile — ausdruecklich verlangt
-        // („inklusive der Tiers").
-        assert.ok(/class="pk-marke">S</.test(html), 'die Stufe fehlt an der Zeile');
-        assert.ok(html.indexOf('Nur Tier') === -1,
-            'ein Deck, das nur in der Tier-Liste steht, taucht unter „Neues Set" auf');
-        assert.ok(!/Stufe S/.test(html),
-            'unter „Neues Set" stehen weiter Stufenueberschriften — dann ist die '
-            + 'Aufteilung der Quelle wieder unsichtbar');
-    });
-
-    it('die anderen Filter bleiben nach Stufe gruppiert', async () => {
-        const u = await gezeichnet(MIT_ABSCHNITT);
-        klick(u.knoten, 'data-pk-filter', 'alle');
-        const html = u.knoten.pocketListe.innerHTML;
-        assert.ok(/Stufe S/.test(html), 'die Stufenueberschrift fehlt bei „Alle"');
-        assert.ok(!/Old Decks Updated/.test(html),
-            '„Alle" gruppiert nach Abschnitt — dann sagt der Filter nichts mehr aus');
-    });
-
-    it('ein Deck ohne Abschnitt verschwindet nicht, sondern wird angeschrieben', async () => {
-        const u = await gezeichnet({
-            _meta: {}, decks: [
-                { name: 'Ohne', tier: 'B', archiv: '9', quelle_liste: 'set', set_abschnitt: '' },
-            ],
-        });
-        klick(u.knoten, 'data-pk-filter', 'set');
-        const html = u.knoten.pocketListe.innerHTML;
-        assert.ok(html.indexOf('Ohne') !== -1,
-            'ein Deck ohne Abschnitt faellt aus der Liste — das ist die stille '
-            + 'Reparatur, die dieses Projekt ueberall verbietet');
-        assert.ok(/Ohne Abschnitt|No section/.test(html),
-            'die Ueberschrift fuer Decks ohne Abschnitt fehlt');
-        /* Und die ERKLAERUNG darunter, nicht nur die Ueberschrift: die
-           Ueberschrift steht auch dann da, wenn der erklaerende Satz
-           fehlt — dann liest der Nutzer „Ohne Abschnitt" und weiss
-           nicht, ob das ein Fehler ist oder Absicht. */
-        assert.ok(/pk-alt/.test(html) && /Überschrift zuordnen|assign their heading/.test(html),
-            'es fehlt die Auskunft, WARUM das Deck keine Ueberschrift hat');
-    });
-
-    /* ══════════════════════════════════════════════════════════════
-       DIE REIHENFOLGE DER ABSCHNITTE (Live-Abnahme 16.09.2026)
-       ══════════════════════════════════════════════════════════════
-       Gefunden nicht von einem Test, sondern beim Hinsehen nach dem
-       Deploy: der Reiter zeigte „Old Decks Updated …" ueber „New …
-       Decks", Game8 zeigt es andersherum. Alle Zusicherungen waren
-       gruen — geprueft war, DASS beide Abschnitte da sind.
-
-       Der Grund war eine Sortierung nach erstem Auftreten in der nach
-       Stufe sortierten Deckliste, ueber der ein Kommentar „in der
-       Reihenfolge der Quelle" behauptete. Genau der Fall aus CLAUDE.md:
-       ein Satz, der eine Tatsache behauptet, ist Code.
-
-       Die Reihenfolge steht jetzt in `_meta.set_abschnitte`. Geprueft
-       wird gegen DIESE Angabe, nicht gegen eine Liste im Testcode — die
-       Ueberschriften wechseln mit jedem Set.
-       ══════════════════════════════════════════════════════════════ */
-    const ZWEI_ABSCHNITTE = {
-        _meta: { set_abschnitte: ['Neu zuerst', 'Alt danach'] },
-        decks: [
-            // Absicht: das STAERKSTE Deck steht im ZWEITEN Abschnitt.
-            // Genau diese Lage hat den Fehler live erzeugt.
-            { name: 'Stark alt', tier: 'S', archiv: '1', quelle_liste: 'set',
-              set_abschnitt: 'Alt danach' },
-            { name: 'Schwach neu', tier: 'C', archiv: '2', quelle_liste: 'set',
-              set_abschnitt: 'Neu zuerst' },
-        ],
-    };
-
-    it('folgt der Reihenfolge aus _meta — nicht der Stufe des ersten Decks', async () => {
-        const u = await gezeichnet(ZWEI_ABSCHNITTE);
-        klick(u.knoten, 'data-pk-filter', 'set');
-        const html = u.knoten.pocketListe.innerHTML;
-        const a = html.indexOf('Neu zuerst'), b = html.indexOf('Alt danach');
-        assert.ok(a !== -1, 'der erste Abschnitt fehlt');
-        assert.ok(b !== -1, 'der zweite Abschnitt fehlt');
-        assert.ok(a < b,
-            '„Alt danach" steht vor „Neu zuerst" — geordnet wird nach der Stufe des '
-            + 'ersten Decks statt nach der Quelle');
-    });
-
-    it('umgedrehte Angabe dreht die Anzeige mit (Verfaelschungsprobe)', async () => {
-        const gedreht = JSON.parse(JSON.stringify(ZWEI_ABSCHNITTE));
-        gedreht._meta.set_abschnitte = ['Alt danach', 'Neu zuerst'];
-        const u = await gezeichnet(gedreht);
-        klick(u.knoten, 'data-pk-filter', 'set');
-        const html = u.knoten.pocketListe.innerHTML;
-        assert.ok(html.indexOf('Alt danach') < html.indexOf('Neu zuerst'),
-            'die Angabe in _meta wird gar nicht gelesen — die Anzeige aendert sich nicht');
-    });
-
-    it('ohne die Angabe faellt es auf das erste Auftreten zurueck, nicht auf einen Absturz',
-        async () => {
-            const ohne = JSON.parse(JSON.stringify(ZWEI_ABSCHNITTE));
-            delete ohne._meta.set_abschnitte;
-            const u = await gezeichnet(ohne);
-            klick(u.knoten, 'data-pk-filter', 'set');
-            const html = u.knoten.pocketListe.innerHTML;
-            assert.ok(/Neu zuerst/.test(html) && /Alt danach/.test(html),
-                'ohne _meta.set_abschnitte fehlt ein Abschnitt');
-        });
-
-    it('die echte Datei fuehrt die Reihenfolge und deckt jeden vorkommenden Abschnitt', () => {
-        const ordnung = (DATEN._meta || {}).set_abschnitte;
-        assert.ok(Array.isArray(ordnung) && ordnung.length,
-            'data/pocket_tierlist.json fuehrt keine Abschnittsreihenfolge');
-        const benutzt = new Set(DATEN.decks.map(d => d.set_abschnitt).filter(Boolean));
-        benutzt.forEach(a => {
-            assert.ok(ordnung.indexOf(a) !== -1,
-                `"${a}" steht an Decks, aber nicht in _meta.set_abschnitte — dann `
-                + 'landet der Abschnitt am Ende, ohne dass jemand es merkt');
-        });
-    });
-});
-
+/* SET-NAMEN (16.09.2026). Betreiber: „können wir bei den Details von den
+   Karten auch den Set Namen schreiben weil mit B3 und A2 und so kann ich
+   nichts anfangen". Die Gruppierung nach Game8s Set-Abschnitten ist mit
+   dem Wechsel auf Limitless (29.09.2026) entfallen — Limitless fuehrt
+   keine solchen Abschnitte. */
 describe('Pocket: die Kartenliste nennt das Set beim Namen', () => {
     const MIT_KARTEN = {
         _meta: {}, decks: [{
-            name: 'Testdeck', tier: 'B', archiv: '1', quelle_liste: 'tier',
+            name: 'Testdeck', tier: 'B', anteil: 0.02, quote: 0.5, listen: 12,
+            siege: 6, niederlagen: 6, unentschieden: 0,
             code: 'x', pokemon: [{ name: 'Bonsly', anzahl: 1, set: 'B3b', nummer: '078' }],
             trainer: [{ name: 'Cyrus', anzahl: 1, set: 'ZZ9', nummer: '001' }],
         }],
@@ -793,8 +687,8 @@ describe('Pocket: die Kartenliste nennt das Set beim Namen', () => {
 });
 
 /* ── EIN DECK OHNE STUFE (16.09.2026) ─────────────────────────────────
-   Game8 fuehrt seit heute „Team Rocket's Wobbuffet" als Untiered; der
-   Scraper schreibt dafuer `tier: null`. Der Zweig fuer unbekannte
+   Game8 fuehrte „Team Rocket's Wobbuffet" als Untiered; der
+   damalige Scraper schrieb dafuer `tier: null`. Der Zweig fuer unbekannte
    Stufen gab es seit dem 07.09. — betreten hat ihn nie ein Deck, und
    deshalb ist drei Wochen nicht aufgefallen, dass er als einziger
    Zweig KEINE Sprites zeichnet. Ein Sonderweg, den nichts betritt, ist
@@ -823,21 +717,5 @@ describe('Pocket: ein Deck ohne Stufe', () => {
         assert.ok(nachWobbuffet.indexOf('pk-sprite') !== -1,
             'die Zeile ohne Stufe bekommt kein Bild — sie stuende als einzige '
             + 'der Liste nackt da');
-    });
-
-    it('steht unter „Neues Set" am Ende, nicht vor der Stufe S', async () => {
-        const u = await gezeichnet({
-            _meta: {}, decks: [
-                { name: 'Ohne Stufe', tier: null, archiv: '1', quelle_liste: 'set',
-                  set_abschnitt: 'New Alpha Decks' },
-                { name: 'Mit Stufe S', tier: 'S', archiv: '2', quelle_liste: 'set',
-                  set_abschnitt: 'New Alpha Decks' },
-            ],
-        });
-        klick(u.knoten, 'data-pk-filter', 'set');
-        const html = u.knoten.pocketListe.innerHTML;
-        assert.ok(html.indexOf('Mit Stufe S') < html.indexOf('Ohne Stufe'),
-            'das Deck ohne Stufe steht vor der Stufe S — indexOf() gibt fuer eine '
-            + 'unbekannte Stufe -1, und -1 sortiert ganz nach oben');
     });
 });

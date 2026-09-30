@@ -40,9 +40,41 @@ def test_der_pruefer_fragt_vor_dem_bestaetigen():
     assert block.index("besetzt_von(") < block.index("'verified'")
 
 
-def test_blw_59_ist_als_kollision_gemeldet_nicht_bestaetigt():
+def fremd_belegt(rows, set_, nummer):
+    """Die Nummer, mit der (set_, nummer) bestaetigt ist, wenn eine ANDERE
+    bestaetigte Zeile dieselbe traegt — sonst ''."""
+    eigene = [x for x in rows if x["set"] == set_ and x["number"] == nummer]
+    if not eigene or eigene[0]["status"] != "verified":
+        return ""
+    pid = eigene[0]["verified_product_id"]
+    andere = {x["verified_product_id"] for x in rows
+              if x["status"] == "verified" and (x["set"], x["number"]) != (set_, nummer)}
+    return pid if pid in andere else ""
+
+
+def test_blw_59_traegt_keine_nummer_einer_anderen_karte():
+    """Bis 30.09.2026 verlangte diese Zusicherung woertlich den Status
+    `kollision`. Verify #17 (30.09.) stufte BLW-59 mit frischen Preisen als
+    `fingerprint_ambiguous` ein — weiter NICHT bestaetigt, also richtig —,
+    und das Tor hielt den Lauf an. Ein Wochenwert ist keine Regel: gemeint
+    war immer, dass BLW-59 nicht die Nummer von BLW-58 bekommt. Welchen
+    Status der Pruefer diese Woche vergibt, ist seine Sache."""
     rows = list(csv.DictReader(open(os.path.join(WURZEL, "data", "cardmarket_mapping_verified.csv"),
                                     encoding="utf-8-sig")))
     r = [x for x in rows if x["set"] == "BLW" and x["number"] == "59"]
-    assert r and r[0]["status"] == "kollision" and r[0]["verified_product_id"] == ""
-    assert "BLW-58" in r[0]["evidence"]
+    assert r, "BLW-59 fehlt in der Pruefdatei"
+    assert fremd_belegt(rows, "BLW", "59") == "", \
+        f"BLW-59 ist mit {r[0]['verified_product_id']} bestaetigt — die Nummer gehoert einer anderen Karte"
+    if r[0]["status"] == "kollision":
+        assert r[0]["verified_product_id"] == "" and "BLW-58" in r[0]["evidence"]
+
+
+def test_fremd_belegt_beisst():
+    """Verfaelschungsprobe fuer die Hilfsfunktion, ausgefuehrt."""
+    rows = [{"set": "BLW", "number": "58", "status": "verified", "verified_product_id": "279796"},
+            {"set": "BLW", "number": "59", "status": "verified", "verified_product_id": "279796"}]
+    assert fremd_belegt(rows, "BLW", "59") == "279796"
+    rows[1]["status"] = "fingerprint_ambiguous"
+    assert fremd_belegt(rows, "BLW", "59") == ""
+    rows[1].update(status="verified", verified_product_id="279797")
+    assert fremd_belegt(rows, "BLW", "59") == ""

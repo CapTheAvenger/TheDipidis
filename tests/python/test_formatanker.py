@@ -367,10 +367,21 @@ def test_der_heutige_bestand_belegt_was_die_seite_fuehrt():
         pytest.skip("online_api_cards_TEF-PBL.csv nicht vorhanden")
     import json as _json
     with open(os.path.join("data", "format_window.json"), encoding="utf-8") as f:
-        laufend = (_json.load(f).get("current_set") or "").strip()
+        fenster = _json.load(f)
+    laufend = (fenster.get("current_set") or "").strip()
+    aeltestes = (fenster.get("oldest_legal_set") or "").strip()
     assert laufend, "format_window.json fuehrt kein laufendes Set"
 
-    belegt, zahl, grund = anker_belegt("data", laufend)
+    # MIT oldest_legal_set, wie update_sets.write_format_window() prueft
+    # (29.09.2026, SC-7). Ohne ihn fragt die Zusicherung nur Tor 1
+    # (gespielte Karten) — der Wechsel selbst geht aber schon durch Tor 2
+    # (Turniere mit dem fertigen Formatschluessel). Gemessen mit
+    # scripts/simuliere_setwechsel.py: am ersten Tag nach einem neuen Set
+    # tragen 7 Online-Turniere den neuen Schluessel, 25 verschiedene
+    # Karten des Sets spielt noch niemand — die Seite fuehrte das Format
+    # zu Recht, und diese Zeile meldete "nicht belegt", bis die Karten
+    # nachgezogen haetten. Gefragt wird, was der Riegel fragt.
+    belegt, zahl, grund = anker_belegt("data", laufend, aeltestes)
     assert belegt, (
         f"die Seite fuehrt {laufend} als laufendes Format, der Anker ist aber "
         f"nicht belegt ({grund}). Entweder ist der Riegel umgangen worden oder "

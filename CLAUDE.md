@@ -158,6 +158,57 @@ Und: der Wochenlauf laeuft Dienstag und Freitag um 06:00 UTC — Freitag
 frueh laufen in Australien und Asien Majors. Ein Scraper, der Turniere
 holt, muss ein LAUFENDES Turnier erkennen koennen.
 
+## EIN NEUES SET BRAUCHT KEINEN HANDGRIFF (29.09.2026, SC-7)
+
+Beim Wechsel auf 30C (16.09.2026) stand die Deploy-Kette drei Tage, bis
+Rueckfalltabellen, Set-Kuerzel und ein Waechterschluessel von Hand
+nachgezogen waren (Commit 6ffcd00) — und drei Wochen spaeter haette die
+Gnadenfrist der Bestandsbelege noch einmal Handarbeit verlangt.
+Entscheidung Hausi: auf Dauer nichts mehr manuell.
+
+Was bei einem Set wechselt, kommt jetzt aus den DATEN:
+
+| Stelle | liest jetzt |
+| --- | --- |
+| Rueckfall in `update_sets.py` | Grundstock + `format_window.json`/`sets.json` (`rueckfall_*`) |
+| `stripExSuffix`, `normalizeArchetypeForMatch` | feste Liste + `window._formatWindow` |
+| `CONSUMERS` in `data_guardian.py` | Schluessel aus `format_window.json` |
+| `formatfenster()` im Limitless-Scraper | + `previous_format_key` und `online_api_cards_*`-Dateinamen |
+| Bestandsbelege nach einer Rotation | der ausgelieferte Stand (`git show HEAD:`), nicht eine Handzahl |
+
+**Die Probe:** `scripts/simuliere_setwechsel.py <kopie>` stellt in einem
+Wegwerf-Baum den Stand her, den der erste Wochenlauf nach einem neuen
+Set schreibt — mit dem echten Code aus `update_sets.py`. Der Ablauf
+`setwechsel-probe.yml` faehrt die Kern-Suiten dagegen (Tag danach, 30
+Tage spaeter per `faketime`, nur-JP), sonntags und bei jedem PR. **Rot
+heisst: das naechste Set haelt den Wochenlauf an.** Wer eine Liste von
+Set-Kuerzeln, einen Formatschluessel oder eine datierte Zahl in Code
+oder Tests schreibt, faehrt vorher diese Probe.
+
+## POCKET KOMMT AUS LIMITLESS, TAEGLICH (29.09.2026)
+
+Game8 weist den GitHub-Laeufer ab (HTTP 202, Cloudflare), also war die
+Pocket-Tier-Liste eine woechentliche Handernte. Entscheidung Hausi: Quelle
+wechseln. Seitdem:
+
+* `scripts/scrape_pocket_limitless.py` holt die Standings der
+  Pocket-Standardturniere (Limitless-API, `format: null`, ab 16 Spielern,
+  14 Tage) und schreibt `data/pocket_tierlist.json`. Jedes fertige Turnier
+  wird genau einmal geholt (`data/pocket_limitless_turniere.json`); ein
+  Turnier ohne Platz 1 laeuft noch und kommt am naechsten Tag.
+* Anteil und Siegquote (WR*, `S / (S + N + U)`) sind GEZAEHLT. Die Stufe
+  ist UNSERE Regel darueber (`STUFENREGEL`, steht in `_meta.stufenregel`,
+  die Oberflaeche baut ihren Satz daraus).
+* Der Scan-Code ist aus der gespielten Liste mit der besten Bilanz gebaut,
+  mit ihrer Energie (`decklist.energy`). Kennt die Kennungstabelle eine
+  Karte nicht, steht das Deck OHNE Code und mit Grund da.
+* `pocket-tierlist.yml` laeuft taeglich: Kennungstabelle und Set-Namen
+  (beide aus flibustier/pokemon-tcg-pocket-database), Tier-Liste, Tor
+  `alle`, Push. Die Laufkontrolle in `data-guardian.yml` beobachtet ihn.
+* Die echten Game8-Codes vom 28.09.2026 liegen eingefroren in
+  `tests/fixtures/pocket_game8_decks.json` — der Vorrat ECHTER, gescannter
+  Codes fuer die Pruefung von `js/qr-svg.js` und des Kodierers.
+
 ## Eine Zusicherung, die Text liest, prueft die Schreibweise — nicht das Verhalten
 
 Am 12.09.2026 habe ich eine frisch geschriebene Zusicherung verfaelscht,

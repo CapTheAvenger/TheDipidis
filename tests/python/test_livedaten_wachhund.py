@@ -81,14 +81,11 @@ AUSNAHMEN = {
 
     # 20 Karten sind die REGEL eines Pocket-Decks, kein abgelesener
     # Bestand. Waere die Summe 21, waere das Deck kaputt.
-    'test_pocket_tierlist.py::test_der_scan_code_nennt_die_trennstelle_und_sie_geht_auf':
+    'test_pocket_limitless.py::test_jeder_code_traegt_genau_seine_liste':
         '20 Karten sind die Deckregel von Pocket, kein Bestandswert',
-    'test_pocket_tierlist.py::test_die_trennstelle_liegt_dort_wo_der_code_sie_nennt':
-        'dieselbe Deckregel, aufgeteilt in Pokemon und Trainer',
-    'test_pocket_tierlist.py::test_der_lauf_haengt_die_kartenliste_ans_deck':
-        'dieselbe Deckregel',
-    'test_pocket_tierlist.py::test_eine_trennstelle_zwischen_zwei_karten_wird_abgelehnt':
-        'dieselbe Deckregel',
+    'test_pocket_limitless.py::test_zusammenfassen_rechnet_anteil_quote_stufe_und_nennt_was_fehlt':
+        '100 und 35 sind die Summen der Turniere, die der Test selbst baut '
+        '(_turnier/_zaehlung) — keine Live-Daten',
 
     # Die 29 sind die Summe des HTML, das der Test SELBST baut
     # (suppe(html) ein paar Zeilen darueber). Die Live-Daten kommen nur

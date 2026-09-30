@@ -93,7 +93,7 @@ nachgelagerten Schritte.
 | `champions_usage.json` | `scripts/scrape_champions_usage.py:3` | `championsbattledata.com` | champions-usage-refresh (+ replica) | täglich 05:00 | 238 Pokémon | `scraped_at` 2026-09-07T05:10:52Z |
 | `champions_replica_teams.json` | `backend/scrapers/champions_replica_scraper.py:8` | `docs.google.com` + `pokepast.es` | champions-replica-scrape | täglich 04:00 | — | `_meta` |
 | `champions_pokedex.json`, `_resources.json`, `_names_de.json`, `_roster_extra.json`, `_available_items.json`, `_team_strategies.json`, `_sprites.json` | `scripts/build_champions_*.py`, `scrape_champions_*.py`, `generate_team_strategies.py` | dto. | champions-replica-scrape | täglich 04:00 | — | Herzschläge in `data/_job_heartbeats.json` |
-| `pocket_tierlist.json` | `scripts/scrape_pocket_tierlist.py:85` | `game8.co` | pocket-tierlist (**nur von Hand**) | — | **33 Decks** | `_meta.quelle_url` |
+| `pocket_tierlist.json` (+ Zwischenstand `pocket_limitless_turniere.json`) | `scripts/scrape_pocket_limitless.py` (seit 29.09.2026; vorher Game8 von Hand) | `play.limitlesstcg.com/api` | pocket-tierlist | täglich 05:20 | — | `_meta.quelle_url`, `_meta.abgerufen` |
 | `pokemonproxies_url_map.json` / `pokemonproxies_index.json` | `backend/scrapers/scrape_pokemonproxies_urls.py:15` / `scripts/scrape_pokemonproxies.py:2` | `pokemonproxies.com` | weekly-full-update / champions | Di+Fr | — | — |
 | `prizepack_official_images.csv/.json` | `scripts/build_prizepack_official_images.py:2` | offizielle Play!-Galerie (PDF) | prizepack-official-images | So 07:45 | — | — |
 | `cardmarket_card_images.csv`, `cm_expansions.csv` | `scripts/build_cardmarket_card_images.py:2`, `build_cm_expansions.py:2` | Cardmarket-Dumps | cardmarket-card-images | So 07:30 | — | — |
@@ -133,7 +133,7 @@ nachgelagerten Schritte.
 | `data_stand.json` | `js/ds-datenstand.js:62` |
 | `deckempfehlung.json` | `js/ds-post-quellen.js:1110`, `js/app-deckempfehlung.js:49` (Basis) |
 | `datenluecken.json` | `js/app-admin.js:49/100/128` |
-| `pocket_tierlist.json` | `js/ds-pocket.js:52`, `js/ds-post-quellen.js:1029` |
+| `pocket_tierlist.json` | `js/ds-pocket.js`, `js/ds-post-quellen.js` (Rezept `pocket`) |
 | `champions_*.json` | `js/app-side-quest*.js`, `js/champions-namen.js:40` |
 | `all_cards_merged.json`, `cards_chunk_*.json`, `cards_manifest.json` | `js/app-core.js:3107/2990/3034/3047/3080`, `js/app-profile-deck-builder.js:687/705` |
 | `online_share_history/manifest.json` + `<datum>.csv` | `js/app-meta-call.js:1831/2421/6324/6336` |
@@ -617,9 +617,9 @@ eines Datums. Die rechnenden Ansichten darüber bleiben trotzdem stehen:
   `jp_release_date: 2026-07-31` in `data/format_window.json`. Seit der Rotation
   ist **keine einzige Zeile** dazugekommen, obwohl der Wochenlauf zweimal pro
   Woche läuft. Der Waechter meldet die Dateien als „leer", nicht als „veraltet".
-* **TCG Pocket.** `pocket-tierlist.yml` hat **keinen Zeitplan** (Begründung
-  `:24–48`); `data/pocket_tierlist.json` wird nur aus einer Arbeitssitzung heraus
-  aktualisiert.
+* **TCG Pocket.** Bis 29.09.2026 ohne Zeitplan (Game8 sperrt den
+  GitHub-Läufer); seitdem täglich aus Limitless (`pocket-tierlist.yml`,
+  `scripts/scrape_pocket_limitless.py`).
 * **Online-Einzellisten.** `online-decklists.yml` hat keinen Zeitplan
   (`:30–44`), Ziel `data/tournament_decklists_per_player.csv` wird faktisch nur
   über `per-decklist-scrape.yml` (Di 12:00) und den Wochenlauf gefüllt.

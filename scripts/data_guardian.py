@@ -46,6 +46,35 @@ BASELINE = os.path.join(DATA, "_guardian_baseline.json")
 # backend/core/update_sets.py. M3 is fully superseded by POR.
 INTENTIONALLY_UNORDERED_SETS = {"M3"}
 
+def _laufender_formatschluessel(daten=None):
+    """<oldest_legal_set>-<current_set> aus data/format_window.json.
+
+    SEIT 29.09.2026 (SC-7) steht hier kein Formatschluessel mehr von Hand.
+    Bis dahin trugen die beiden <FORMAT>-Eintraege in CONSUMERS den
+    Schluessel woertlich ("TEF-30C"), mit der Begruendung, nach einer
+    Rotation solle jemand hinsehen, ob der neue Auszug entstanden ist.
+    Gemessen mit scripts/simuliere_setwechsel.py: das Hinsehen bestand
+    darin, dass drei Zusicherungen die Deploy-Kette anhielten, bis jemand
+    zwei Zeichenketten austauschte. Hausi, 29.09.2026: "auf Dauer nichts
+    mehr manuell".
+
+    Das Hinsehen macht jetzt der Waechter selbst: der Schluessel folgt dem
+    Formatfenster, und fehlt der Auszug des laufenden Formats, meldet
+    check_schema() die Datei als fehlend — jeden Tag, ohne Codeaenderung.
+    Leer, wenn das Fenster fehlt oder unlesbar ist (das meldet
+    check_format_window() fuer sich)."""
+    try:
+        with open(os.path.join(daten or DATA, "format_window.json"), encoding="utf-8") as f:
+            fw = json.load(f)
+    except (OSError, ValueError):
+        return ""
+    alt = str(fw.get("oldest_legal_set") or "").strip()
+    neu = str(fw.get("current_set") or "").strip()
+    return f"{alt}-{neu}" if alt and neu else ""
+
+
+_FS = _laufender_formatschluessel()
+
 # ── Consumer contract ────────────────────────────────────────────────────────
 # The files other projects (the tcg-exclusive-radar mirror + bot) read from this
 # repo. Documented for humans in data/_consumers.md; this dict is the machine
@@ -152,11 +181,12 @@ CONSUMERS = {
     # gar keine Kopfzeile. Geprueft werden Vorhandensein und
     # Nicht-Leere — genau das, was gefehlt hat.
     #
-    # Die <FORMAT>-Dateien stehen unter ihrem heutigen Formatschluessel.
-    # Rotiert das Format, zeigt der Waechter auf eine Datei, die es
-    # nicht mehr gibt — und das ist Absicht: dann muss jemand hinsehen,
-    # ob der neue Auszug wirklich entstanden ist.
-    "online_api_cards_TEF-30C.csv": {
+    # Die <FORMAT>-Dateien stehen unter dem LAUFENDEN Formatschluessel
+    # aus data/format_window.json (_laufender_formatschluessel, seit
+    # 29.09.2026). Rotiert das Format und der neue Auszug fehlt, meldet
+    # der Waechter die Datei als fehlend — das ist das Hinsehen, ohne
+    # dass jemand einen Schluessel im Code tauschen muss.
+    f"online_api_cards_{_FS or 'FORMAT-UNBEKANNT'}.csv": {
         "sep": ";",
         # `set` und `number` sind der Riegel: backend/core/update_sets.py
         # liest sie, um zu pruefen, ob es fuer ein neues Set ueberhaupt
@@ -169,7 +199,7 @@ CONSUMERS = {
                     "backend/core/update_sets.py den Riegel fuer "
                     "data/format_window.json. Semikolon-getrennt."),
     },
-    "online_api_matchups_TEF-30C.csv": {
+    f"online_api_matchups_{_FS or 'FORMAT-UNBEKANNT'}.csv": {
         "sep": ";",
         "required": ["tournament_id", "date", "meta", "archetype_id",
                      "opponent_id", "wins", "losses", "matches",
@@ -2330,22 +2360,17 @@ def check_proxy_frische(findings):
 def check_pocket_frische(findings):
     """S-POCKET — der Pocket-Bereich altert, und niemand sagt es vorher.
 
-    BEFUND 22.09.2026. data/pocket_tierlist.json steht in KEINER
-    automatischen Frischepruefung: nicht in data_stand.json, nicht in
-    den Schwellen von scripts/sanity_check_data.py, und dieser Waechter
-    kannte sie bis heute gar nicht. Der einzige Alterungsalarm ist ein
-    Banner im Browser, das ab 28 Tagen erscheint (js/ds-pocket.js,
-    PLAUSIBEL_TAGE) — der Einzige, dem das auffaellt, ist also ein
-    Besucher, und erst nach vier Wochen.
+    BEFUND 22.09.2026: data/pocket_tierlist.json stand in keiner
+    automatischen Frischepruefung; der einzige Alarm war ein Banner im
+    Browser. Damals kam die Datei von Game8 und wurde von Hand geerntet.
 
-    Der Bereich geht nicht falsch, er geht ALT: scrape_pocket_tierlist.py
-    hat bewusst keinen Zeitplan, weil Game8 dem GitHub-Laeufer auf jedem
-    Weg mit HTTP 202 antwortet (Cloudflare, dreimal gemessen am
-    04.09.2026). Geerntet wird von Hand aus einer Sitzung heraus, in der
-    die Domain erreichbar ist. Genau deshalb braucht es hier eine
-    Meldung: ein Lauf, der nie faellig ist, faellt auch nie aus.
+    SEIT 29.09.2026 kommt sie taeglich aus Limitless
+    (scripts/scrape_pocket_limitless.py, pocket-tierlist.yml). Ist sie
+    drei Tage alt, ist der Lauf zweimal ausgefallen. Rot faerbt den
+    Ablauf die Laufkontrolle in data-guardian.yml; dieser Waechter sagt,
+    was das fuer die DATEN heisst — dieselbe Schwelle wie im Browser.
 
-    Gemeldet wird, nicht gesperrt — dieselbe Schwelle wie im Browser.
+    Gemeldet wird, nicht gesperrt.
     """
     path = os.path.join(DATA, "pocket_tierlist.json")
     if not os.path.exists(path):
@@ -2381,18 +2406,16 @@ def check_pocket_frische(findings):
     # bei exakt 28 — sah der Besucher die Warnung und der Waechter
     # schwieg. Das ist das Gegenteil dessen, was die Meldung darunter
     # verspricht.
-    PLAUSIBEL_TAGE = 28
+    PLAUSIBEL_TAGE = 3
     if alter >= PLAUSIBEL_TAGE:
         findings.append((
             "WARN",
             f"pocket_tierlist.json ist {alter} Tage alt (Schwelle "
             f"{PLAUSIBEL_TAGE}, dieselbe wie das Banner im Browser). Der "
-            f"Lauf hat bewusst keinen Zeitplan, weil Game8 dem GitHub-"
-            f"Laeufer mit Cloudflare 202 antwortet — geerntet wird "
-            f"woechentlich aus der Cowork-Umgebung (scripts/pocket_ernte.sh). "
-            f"Ist die Datei trotzdem so alt, ist die Ernte ausgefallen. Ab "
-            f"hier sieht der Besucher die Warnung; besser ist, sie vorher "
-            f"hier zu lesen."))
+            f"Lauf pocket-tierlist.yml ist taeglich — die Datei so alt heisst, "
+            f"er ist mehrfach ausgefallen oder hat nicht gepusht. Ab hier "
+            f"sieht der Besucher die Warnung; besser ist, sie vorher hier "
+            f"zu lesen."))
 
 
 def check_proxy_karte_gegen_bestand(findings):

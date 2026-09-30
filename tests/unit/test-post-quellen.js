@@ -417,26 +417,23 @@ test('gleiche Werte in einer Liste bekommen keine Rangziffern', async () => {
         'Test nichts');
 });
 
-test('Pocket schneidet keine Stufe an und erfindet keine Rangfolge', async () => {
-    /* Innerhalb einer Stufe gibt es keine Ordnung. Acht Zeilen fielen
-     * mitten in A+ (S=4, A+=5) und liessen ein gleich eingestuftes Deck
-     * weg — auf einem Bild ohne Fussnote heisst das "schlechter". */
+test('Pocket zeigt die Reihenfolge der Datei — nach Stufe, dann Anteil — und nennt Quelle und Nenner', async () => {
+    /* Seit 29.09.2026 aus Limitless gezaehlt: die Ordnung ist gemessen,
+     * die Stufe ist unsere Regel aus _meta.stufenregel. */
     const d = JSON.parse(fs.readFileSync(D('data/pocket_tierlist.json'), 'utf8'));
     const erg = await Q.lade('pocket');
     const gezeigt = zeilenVon(erg);
-    const stufen = {};
-    gezeigt.forEach((z) => { stufen[z.wert] = (stufen[z.wert] || 0) + 1; });
-    Object.keys(stufen).forEach((st) => {
-        const inDatei = d.decks.filter((x) => x.tier === st).length;
-        assert.equal(stufen[st], inDatei,
-            `Stufe ${st} ist angeschnitten: ${stufen[st]} von ${inDatei} gezeigt`);
+    const ordnung = d._meta.stufenregel.map((r) => r.stufe);
+    const soll = d.decks.slice().sort((x, y) =>
+        ordnung.indexOf(x.tier) - ordnung.indexOf(y.tier) || y.anteil - x.anteil);
+    assert.ok(gezeigt.length >= 1);
+    gezeigt.forEach((z, i) => {
+        assert.equal(z.name, soll[i].name, `Zeile ${i + 1} steht nicht an ihrem Platz`);
+        assert.ok(z.wert.startsWith(soll[i].tier + ' · '), `Zeile ${i + 1}: Stufe fehlt: ${z.wert}`);
     });
-    assert.equal(erg.ohneRang, true,
-        'Pocket bestellt die Rangziffern nicht ab — 01/02 wäre eine Ordnung, ' +
-        'die in der Quelle nicht existiert');
-    assert.ok(/Game8/.test(erg.fuss) && /nicht gemessen/.test(erg.fuss),
-        '_meta.quelle_hinweis verlangt, dass die Oberfläche die redaktionelle ' +
-        `Herkunft anschreibt: ${erg.fuss}`);
+    assert.ok(/Limitless/.test(erg.kicker), `die Quelle fehlt: ${erg.kicker}`);
+    assert.ok(erg.fuss.includes('lists'), `der Nenner fehlt: ${erg.fuss}`);
+    assert.ok(/our own rule/.test(erg.caption), 'die Caption sagt nicht, dass die Stufe unsere Regel ist');
 });
 
 test('die Day-2-Prognose nennt sich Prognose und haelt ihre Schwelle', async () => {
@@ -1163,8 +1160,13 @@ test('jeder Waechter wirft wirklich', async () => {
          'deck_name;opponent;win_rate;record;total_games\n' +
          'A;B;60;3 - 0 - 0;3\nA;C;55;;10\nA;D;50;;10\nA;E;50;;10'],
         ['Pocket mit unbekannter Stufe', 'pocket_tierlist.json', 'pocket',
-         JSON.stringify({ _meta: { abgerufen: '2026-09-04' },
-                          decks: [{ name: 'X', tier: 'SS' }, { name: 'Y', tier: 'S' }] })],
+         JSON.stringify({ _meta: { abgerufen: '2026-09-04', listen: 100,
+                                   stufenregel: [{ stufe: 'S' }, { stufe: 'A' }] },
+                          decks: [{ name: 'X', tier: 'SS', anteil: 0.1 },
+                                  { name: 'Y', tier: 'S', anteil: 0.1 }] })],
+        ['Pocket ohne Stufenregel', 'pocket_tierlist.json', 'pocket',
+         JSON.stringify({ _meta: { abgerufen: '2026-09-04', listen: 100 },
+                          decks: [{ name: 'Y', tier: 'S', anteil: 0.1 }] })],
         ['Champions ohne Pokemon', 'champions_replica_teams.json', 'champions',
          JSON.stringify({ _meta: { team_count: 1, last_updated: '2026-09-04' },
                           teams: [{ tournament: 'T', pokemon: [] }] })]

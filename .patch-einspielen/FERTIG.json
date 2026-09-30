@@ -1,0 +1,18 @@
+{
+ "flucht": true,
+ "patch_bytes": 237147,
+ "patch_sha256": "35672c126a425cd19a36f349b4c69c6ab4f03389fe1d3ce806da0c01301e5bfb",
+ "teile": {
+  "teil-01.txt": "382f7120f0650697f2f3f51d95ed566faa6ee538ff1a6710cc66b6e413d1605c",
+  "teil-02.txt": "c3c771ab9a530e6b4147ab2d117c0f1d6896d891b06136a0ab6b38c4fa1097ef",
+  "teil-03.txt": "ac64c58a5b4fc661539ffbaec07b396eb077f9b1b63c27f9d9ab7bd8fb34f3ba",
+  "teil-04.txt": "efc120a666356c59b9e448d4b333c6a5b03a766587692f9f819fab9e8de4da1b",
+  "teil-05.txt": "7ec78b7581036cd9ef773daca3a9a845320cdff7f17fe71cf99effbbe0d85136",
+  "teil-06.txt": "797a9a66d5db3aed5d666542fcc7ad9cf2b2313b8801aa36bcf98cc74954ac3e",
+  "teil-07.txt": "d3832b75f6abd3e0c7d4b5bfb926dcc25a0340d405cde89878ae13b9b637f3ae",
+  "teil-08.txt": "442d905b869c33650c61e0d123ecfb6d60de611270bfbfd1736de8978a2eb581",
+  "teil-09.txt": "5b7f46d173319dd0dbb5c517b3ebfedd82d776941fc2698cee2aed8c557e1187",
+  "teil-10.txt": "a4997c2adacef4c2309aa17242bbf7448d189362a85efcd72a5c0745635ae55e",
+  "teil-11.txt": "324b216e495f8a26e8596f0b2794219d063c9795dbe6b90b2a148f2708476b2c"
+ }
+}

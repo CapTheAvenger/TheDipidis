@@ -32,6 +32,31 @@
 .abx-chip-name { font-weight: 700; font-size: var(--fs-md); }
 .abx-chip-zahl { color: var(--ink-3); font-size: var(--fs-xs); }
 
+/* UI-51 (30.09.2026): Stufe der Box — gespielt (gruen), legal (gelb),
+   nicht mehr legal (grau). Die Flaeche traegt die Bedeutung, der Punkt
+   wiederholt sie fuer alle, die Toenungen schlecht unterscheiden. */
+.abx-stufe-punkt {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    margin-right: 6px; vertical-align: 1px; background: var(--ink-3);
+}
+.abx-chip.abx-stufe-gespielt { background: var(--tint-ok); border-left: 4px solid var(--tint-ok-ink); }
+.abx-chip.abx-stufe-legal { background: var(--tint-warn); border-left: 4px solid var(--tint-warn-ink); }
+.abx-chip.abx-stufe-raus { background: var(--surface-2, var(--surface-1)); border-left: 4px solid var(--ink-3); }
+.abx-chip.abx-stufe-raus .abx-chip-name { color: var(--ink-2); }
+.abx-stufe-gespielt .abx-stufe-punkt { background: var(--tint-ok-ink); }
+.abx-stufe-legal .abx-stufe-punkt { background: var(--tint-warn-ink); }
+.abx-stufe-raus .abx-stufe-punkt { background: var(--ink-3); }
+.abx-chip.is-active { border-color: var(--brand); }
+/* UI-52: eine Variante steht direkt hinter ihrer Familienbox und ist
+   leiser gesetzt. */
+.abx-chip.abx-chip-mitglied { border-style: dashed; }
+.abx-chip.abx-chip-mitglied .abx-chip-name { font-weight: 600; color: var(--ink-2); }
+.abx-chip.abx-chip-mitglied .abx-chip-name::before { content: "\21B3\00A0"; }
+.abx-stufen-legende {
+    flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: var(--s-3);
+    margin: 0; color: var(--ink-2); font-size: var(--fs-xs);
+}
+
 /* ── Kopf der geoeffneten Box ── */
 .abx-kopf { margin-bottom: var(--s-2); }
 .abx-titel { margin: 0; font-size: var(--fs-lg); color: var(--ink); }

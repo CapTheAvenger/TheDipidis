@@ -113,7 +113,26 @@ img[src*="limitlesstcg"] {
     font-weight: 600;
 }
 
+/* UI-52 (30.09.2026): in der Deckauswahl ist zu erkennen, was eine Familie
+   ("Alle Banette-Decks"), was ihre Variante und was ein Deck ohne Familie
+   ist. Familie und Einzeldeck fett, Varianten eingerueckt und leiser. */
+.searchable-select-option[data-rang="familie"],
+.searchable-select-option[data-rang="kopf"] {
+    font-weight: 700;
+}
+.searchable-select-option[data-rang="familie"] {
+    border-left: 3px solid var(--brand);
+    padding-left: 13px;
+}
+.searchable-select-option[data-rang="mitglied"] {
+    padding-left: 34px;
+    color: var(--ink-2);
+}
+
 /* Dark theme support */
+[data-theme="dark"] .searchable-select-option[data-rang="mitglied"] {
+    color: #a5b4c8;
+}
 [data-theme="dark"] .searchable-select-dropdown {
     background: #1e293b;
     border-color: #334155;

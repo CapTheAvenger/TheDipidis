@@ -133,6 +133,174 @@
             return best || n;
         }
 
+        /* FAMILIEN NACH DER HAUPTKARTE (FE-19, 30.09.2026).
+         *
+         * Gemeldet: "Banette Dusknoir" und "Banette Gardevoir" bauen sich
+         * beide um Banette ex SVI 88 — eine "Alle Banette-Decks"-Auswahl gab
+         * es trotzdem nicht, weil kein reines "Banette" in den Daten steht.
+         * Umgekehrt stand "Gardevoir Mewtwo" (baut auf Gardevoir ASR TG5) in
+         * derselben Familie wie die Gardevoir-ex-Decks (PAF 217). Der Name
+         * allein reicht nicht; Entscheidung Hausi: die Hauptkarte kommt aus
+         * den Turnierlisten.
+         *
+         * DIE REGEL. Kandidaten sind die Pokemon-Karten aus den Listen des
+         * Archetyps, deren Name ohne Zusatz (ex, V, VSTAR, VMAX, GX) — ganz
+         * oder als hinterer Teil aus ganzen Woertern ("Palkia" aus "Origin
+         * Forme Palkia") — vorne im Archetypnamen steht. Es gewinnt der
+         * laengste Treffer, dann der ganze Name vor dem Teil, dann die Karte
+         * in den meisten Listen. Die Karte ist (Set, Nummer) samt ihrer
+         * internationalen Drucke — nie der Name. Zwei Archetypen gehoeren
+         * zusammen, wenn ihre Hauptkarten einen Druck teilen.
+         *
+         * Gemessen mit scripts/messe_familien_hauptkarte.py ueber alle 202
+         * Archetypen der Rotationen-Daten: 186 mit Hauptkarte, 30 Familien
+         * (vorher 16); neu u. a. Banette, Chien-Pao, Raging Bolt, Snorlax;
+         * Gardevoir Mewtwo und Roaring Moon Dudunsparce stehen jetzt allein.
+         * Ohne Hauptkarte bleiben Namen wie "Ancient Box" oder "Regis" —
+         * sie stehen einzeln, eine Familie wird fuer sie nicht geraten.
+         */
+        const HAUPTKARTE_ZUSATZ = /\s+(ex|EX|V|VSTAR|VMAX|GX|V-UNION)$/;
+        const HAUPTKARTE_POKEMON = { 'Basic': 1, 'Stage 1': 1, 'Stage 2': 1 };
+
+        function hauptkarteGrundname(name) {
+            let n = String(name || '').trim();
+            for (;;) {
+                const m = n.match(HAUPTKARTE_ZUSATZ);
+                if (!m) return n;
+                n = n.slice(0, m.index);
+            }
+        }
+
+        function hauptkarteTreffer(grund, archetyp) {
+            const woerter = String(grund || '').split(' ');
+            for (let i = 0; i < woerter.length; i++) {
+                const teil = woerter.slice(i).join(' ');
+                if (teil && (archetyp === teil || archetyp.startsWith(teil + ' '))) {
+                    return { teil: teil, voll: i === 0 ? 1 : 0 };
+                }
+            }
+            return null;
+        }
+
+        /* decks: die Decks EINES Archetyps (mit .cards). druckeVon(set, nr)
+           liefert die Kennungen "SET-NR" aller Drucke derselben Karte. */
+        function hauptkarteVon(archetyp, decks, druckeVon) {
+            const jeDruck = new Map();
+            (decks || []).forEach(function (deck) {
+                (deck.cards || []).forEach(function (c) {
+                    if (!HAUPTKARTE_POKEMON[String(c.type || '').trim()]) return;
+                    let set = String(c.set_code || '').trim().toUpperCase();
+                    let nr = String(c.set_number || '').trim().toUpperCase();
+                    if (!set || !nr) {
+                        const teile = String(c.card_identifier || '').trim().split(' ');
+                        if (teile.length >= 2) { set = teile[0].toUpperCase(); nr = teile[teile.length - 1].toUpperCase(); }
+                    }
+                    if (!set || !nr) return;
+                    const id = set + '-' + nr;
+                    const e = jeDruck.get(id) || { id: id, set: set, nr: nr, name: c.card_name || '', listen: 0 };
+                    e.listen += Number(c.deck_inclusion_count || c.deck_count || 0) || 0;
+                    jeDruck.set(id, e);
+                });
+            });
+            let best = null;
+            jeDruck.forEach(function (e) {
+                const t = hauptkarteTreffer(hauptkarteGrundname(e.name), archetyp);
+                if (!t) return;
+                const wert = [t.teil.length, t.voll, e.listen];
+                const besser = !best || wert[0] > best.wert[0]
+                    || (wert[0] === best.wert[0] && (wert[1] > best.wert[1]
+                        || (wert[1] === best.wert[1] && wert[2] > best.wert[2])));
+                if (besser) best = { wert: wert, e: e, teil: t.teil };
+            });
+            if (!best) return null;
+            const ids = new Set([best.e.id]);
+            (druckeVon ? (druckeVon(best.e.set, best.e.nr) || []) : []).forEach(function (x) { if (x) ids.add(String(x).toUpperCase()); });
+            return { id: best.e.id, ids: Array.from(ids), teil: best.teil, grund: hauptkarteGrundname(best.e.name) };
+        }
+
+        /* eintraege: [{ archetype, tournaments: [deck…] }]. Liefert
+           Map archetyp -> Familienname fuer alle Archetypen, die mit
+           mindestens einem anderen eine Hauptkarte teilen. Der Name ist der
+           Treffer im Archetypnamen ("Banette"); tragen zwei Familien
+           denselben, bekommen beide den vollen Kartennamen, und ist auch
+           der gleich, den Druck ("Alakazam (MEG 56)"). */
+        function familienNachHauptkarte(eintraege, druckeVon) {
+            const karte = new Map();
+            (eintraege || []).forEach(function (e) {
+                const h = hauptkarteVon(e.archetype, e.tournaments, druckeVon);
+                if (h) karte.set(e.archetype, h);
+            });
+            // Vereinigen ueber geteilte Drucke.
+            const wurzel = new Map();
+            const finde = function (a) { while (wurzel.get(a) !== a) a = wurzel.get(a); return a; };
+            const nachDruck = new Map();
+            karte.forEach(function (h, a) {
+                wurzel.set(a, a);
+                h.ids.forEach(function (id) {
+                    if (nachDruck.has(id)) {
+                        const x = finde(nachDruck.get(id)), y = finde(a);
+                        if (x !== y) wurzel.set(y < x ? x : y, y < x ? y : x);
+                    } else {
+                        nachDruck.set(id, a);
+                    }
+                });
+            });
+            const gruppen = new Map();
+            karte.forEach(function (h, a) {
+                const w = finde(a);
+                if (!gruppen.has(w)) gruppen.set(w, []);
+                gruppen.get(w).push(a);
+            });
+            const familien = [];
+            gruppen.forEach(function (mitglieder) {
+                if (mitglieder.length < 2) return;
+                mitglieder.sort();
+                const h = karte.get(mitglieder[0]);
+                // Der kuerzeste Treffer der Gruppe ist ihr Name ("Banette").
+                let teil = h.teil;
+                mitglieder.forEach(function (a) { const t = karte.get(a).teil; if (t.length < teil.length) teil = t; });
+                familien.push({ name: teil, grund: h.grund, druck: h.id, mitglieder: mitglieder });
+            });
+            const zaehle = function (feld) {
+                const n = new Map();
+                familien.forEach(function (f) { n.set(f[feld], (n.get(f[feld]) || 0) + 1); });
+                return n;
+            };
+            const gleicherName = zaehle('name');
+            familien.forEach(function (f) { if (gleicherName.get(f.name) > 1) f.name = f.grund; });
+            const nochGleich = zaehle('name');
+            familien.forEach(function (f) {
+                if (nochGleich.get(f.name) > 1) f.name = f.name + ' (' + f.druck.replace('-', ' ') + ')';
+            });
+            const aus = new Map();
+            familien.forEach(function (f) { f.mitglieder.forEach(function (a) { aus.set(a, f.name); }); });
+            return aus;
+        }
+
+        /* Drucke derselben Karte aus der Kartendatenbank; ohne geladene
+           Datenbank nur der Druck selbst. */
+        function _pmDruckeVon(set, nr) {
+            if (typeof getInternationalPrintsForCard !== 'function') return [];
+            try {
+                return (getInternationalPrintsForCard(set, nr) || []).map(function (c) {
+                    return String(c.set || '').toUpperCase() + '-' + String(c.number || '').toUpperCase();
+                });
+            } catch (e) { return []; }
+        }
+
+        let _pmFamilienCache = null;
+
+        /* Die Eintraege [{archetype, tournaments}] aus einer Deckliste. */
+        function _pmNachArchetyp(decks) {
+            const m = new Map();
+            (decks || []).forEach(function (d) {
+                const a = d.deck_name || 'Unknown';
+                if (!m.has(a)) m.set(a, { archetype: a, tournaments: [] });
+                m.get(a).tournaments.push(d);
+            });
+            return Array.from(m.values());
+        }
+
         function resetSelectWithPlaceholder(selectEl, placeholderText, placeholderValue, placeholderI18nKey) {
             if (!selectEl) return;
             selectEl.innerHTML = '';
@@ -934,24 +1102,39 @@
             /* Familien aus dem, was NACH dem Filter uebrig ist — nicht aus
                dem Gesamtbestand. Sonst stuende "Alle Dragapult-Decks (10
                Varianten)" auch dann da, wenn das gewaehlte Turnier nur zwei
-               davon gesehen hat, und die Zahl waere gelogen. */
-            const alleNamen = archetypes.map(e => e.archetype);
+               davon gesehen hat, und die Zahl waere gelogen. Die Familie
+               kommt aus der Hauptkarte (FE-19), nicht aus dem Namen. */
+            const familieVon = familienNachHauptkarte(archetypes, _pmDruckeVon);
             const familien = new Map();
             archetypes.forEach(entry => {
-                const kopf = familienKopf(entry.archetype, alleNamen);
-                if (!familien.has(kopf)) familien.set(kopf, []);
-                familien.get(kopf).push(entry);
+                const f = familieVon.get(entry.archetype);
+                if (!f) return;
+                if (!familien.has(f)) familien.set(f, []);
+                familien.get(f).push(entry);
             });
 
+            /* UI-52: Familie und Einzel-Deck sind zu unterscheiden. Die
+               Sammelzeile und Decks ohne Familie tragen den Rang "kopf"
+               (fett), die Varianten einer Familie "mitglied" (eingerueckt,
+               abgesetzt) und stehen DIREKT unter ihrer Sammelzeile. Jeder
+               Archetyp steht genau einmal als eigene Zeile da. */
+            const gesetzt = new Set();
+            const zeile = (entry, rang) => {
+                const tournamentCount = entry.tournaments.length;
+                const displayName = tournamentCount > 1
+                    ? `${entry.archetype} ${t('pm.tournamentsSuffix').replace('{n}', tournamentCount)}`
+                    : entry.archetype;
+                const option = document.createElement('option');
+                option.value = entry.archetype;
+                option.textContent = displayName;
+                option.dataset.rang = rang;
+                deckSelect.appendChild(option);
+                gesetzt.add(entry.archetype);
+            };
             archetypes.forEach(entry => {
-                // Die Sammelauswahl steht direkt VOR ihrem Kopf-Archetyp.
-                // Die Liste ist alphabetisch, der Kopf ist der kuerzeste
-                // Name der Familie und kommt damit zuerst — die Sammelzeile
-                // steht also unmittelbar ueber ihren Mitgliedern statt in
-                // einem eigenen Block, den man erst suchen muss. Und weil
-                // der Familienname im Text steht, findet die Suche im
-                // Auswahlfeld sie mit demselben Wort wie die Varianten.
-                const meine = familien.get(entry.archetype);
+                if (gesetzt.has(entry.archetype)) return;
+                const fam = familieVon.get(entry.archetype);
+                const meine = fam ? familien.get(fam) : null;
                 if (meine && meine.length > 1) {
                     const turniere = new Set();
                     let listen = 0;
@@ -960,7 +1143,7 @@
                         listen += e.totalDecklists || 0;
                     });
                     const sammel = document.createElement('option');
-                    sammel.value = FAMILIE_PREFIX + entry.archetype;
+                    sammel.value = FAMILIE_PREFIX + fam;
                     // Ein Turnier ist kein "1 Turniere". Zwei Schluessel
                     // statt einer Zahl im Satz — dieselbe Loesung, die das
                     // Haus schon fuer die Varianten-Suffixe benutzt.
@@ -968,20 +1151,15 @@
                         ? t('pm.familieTurnier')
                         : t('pm.familieTurniere').replace('{n}', String(turniere.size));
                     sammel.textContent = t('pm.familieOption')
-                        .replace('{name}', entry.archetype)
+                        .replace('{name}', fam)
                         .replace('{v}', String(meine.length))
                         .replace('{t}', turnierText);
+                    sammel.dataset.rang = 'familie';
                     deckSelect.appendChild(sammel);
+                    meine.forEach(e => zeile(e, 'mitglied'));
+                    return;
                 }
-
-                const tournamentCount = entry.tournaments.length;
-                const displayName = tournamentCount > 1
-                    ? `${entry.archetype} ${t('pm.tournamentsSuffix').replace('{n}', tournamentCount)}`
-                    : entry.archetype;
-                const option = document.createElement('option');
-                option.value = entry.archetype;
-                option.textContent = displayName;
-                deckSelect.appendChild(option);
+                zeile(entry, 'kopf');
             });
 
             if (deckSelect) {
@@ -1048,13 +1226,31 @@
                 const matchesTournament = tournamentFilter === 'all' || deck.tournament_id === tournamentFilter;
                 return matchesFormat && matchesTournament;
             });
-            const alleNamen = istFamilie
-                ? Array.from(new Set(imFilter.map(d => d.deck_name).filter(Boolean)))
-                : [];
-
-            const matchingDecks = imFilter.filter(deck => (istFamilie
-                ? familienKopf(deck.deck_name || '', alleNamen) === familienName
-                : deck.deck_name === selectedArchetype));
+            if (!istFamilie) {
+                return { istFamilie, familienName,
+                    matchingDecks: imFilter.filter(deck => deck.deck_name === selectedArchetype) };
+            }
+            /* Dieselbe Regel und dieselbe gefilterte Menge wie im
+               Auswahlfeld (familienNachHauptkarte ueber imFilter). */
+            /* Einmal je Datenstand und Filter rechnen: "Alle Boxen
+               aktualisieren" fragt elfmal hintereinander. */
+            const schl = pastMetaDecks.length + '|' + formatFilter + '|' + tournamentFilter
+                + '|' + (window.cardsBySetNumberMap ? 1 : 0);
+            if (!_pmFamilienCache || _pmFamilienCache.schl !== schl) {
+                _pmFamilienCache = { schl: schl,
+                    von: familienNachHauptkarte(_pmNachArchetyp(imFilter), _pmDruckeVon) };
+            }
+            const familieVon = _pmFamilienCache.von;
+            let matchingDecks = imFilter.filter(deck => familieVon.get(deck.deck_name || '') === familienName);
+            /* RUECKFALL fuer gespeicherte Auswahlen aus der Zeit vor FE-19
+               (Archetyp-Boxen tragen "__familie__|Name" im Schluessel): gibt
+               es die Familie nach der Hauptkarte nicht, gilt die alte
+               Praefixregel — lieber die alte Box weiter fuellen als sie
+               leer laufen lassen. */
+            if (!matchingDecks.length) {
+                const alleNamen = Array.from(new Set(imFilter.map(d => d.deck_name).filter(Boolean)));
+                matchingDecks = imFilter.filter(deck => familienKopf(deck.deck_name || '', alleNamen) === familienName);
+            }
             return { istFamilie, familienName, matchingDecks };
         }
 

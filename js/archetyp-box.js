@@ -571,6 +571,80 @@
         return (box.karten || []).some(function (k) { return anteilIn(k, fmt) > 0; });
     }
 
+    /**
+     * UI-51 (Hausi, 30.09.2026): Stufe einer Box, damit man beim Bauen die
+     * legalen zuerst sieht.
+     *   'gespielt' — der Archetyp hat im neuesten Format mit Turnierdaten
+     *                Decks (imFormatGespielt) — gruen
+     *   'legal'    — nicht gespielt, aber jede Kernkarte (Anteil >= 50 %,
+     *                nicht von Hand) hat einen Standard-legalen Druck — gelb
+     *   'raus'     — mindestens eine Kernkarte ist nicht mehr legal — grau
+     *   null       — unbekannt (Formatdaten noch nicht da, Legalitaet einer
+     *                Kernkarte unbekannt, keine Kernkarte): keine Farbe,
+     *                lieber keine Aussage als eine falsche
+     */
+    const KERN_SCHWELLE = 50;
+    function boxStufe(box, kontext) {
+        const c = kontext || {};
+        if (!box || !c.aktuell) return null;
+        if (imFormatGespielt(box, c.aktuell)) return 'gespielt';
+        if (typeof c.legal !== 'function' || !c.legalBekannt) return null;
+        const kern = (box.karten || []).filter(function (k) {
+            return !k.manuell && Number(k.anteil) >= KERN_SCHWELLE;
+        });
+        if (!kern.length) return null;
+        let unbekannt = false;
+        for (let i = 0; i < kern.length; i++) {
+            const l = c.legal(kern[i]);
+            if (l === false) return 'raus';
+            if (l !== true) unbekannt = true;
+        }
+        return unbekannt ? null : 'legal';
+    }
+
+    const STUFEN_RANG = { gespielt: 0, legal: 1, raus: 2 };
+
+    /**
+     * Reihenfolge der Box-Chips (UI-51/UI-52): nach Stufe (gespielt, legal,
+     * raus, unbekannt), innerhalb die bisherige Reihenfolge. Eine Box, deren
+     * Archetyp zu einer Familie gehoert, fuer die es eine Familienbox gibt,
+     * steht direkt unter dieser (Rang 'mitglied'); Familienboxen und Boxen
+     * ohne Familie haben Rang 'kopf'. familieVon(archetyp) -> Name|undefined.
+     * Liefert [{ box, stufe, rang }].
+     */
+    function chipReihe(liste, kontext, familieVon) {
+        const stufeVon = new Map();
+        (liste || []).forEach(function (b) { stufeVon.set(b, boxStufe(b, kontext)); });
+        const rang = function (b) { const s = stufeVon.get(b); return s && STUFEN_RANG[s] != null ? STUFEN_RANG[s] : 3; };
+        const sortiert = (liste || []).map(function (b, i) { return { b: b, i: i }; })
+            .sort(function (x, y) { return rang(x.b) - rang(y.b) || x.i - y.i; })
+            .map(function (x) { return x.b; });
+        const familienBox = new Map();
+        sortiert.forEach(function (b) {
+            const a = String(b.archetyp || '');
+            if (a.indexOf(FAMILIE) === 0) familienBox.set(a.slice(FAMILIE.length), b);
+        });
+        const unter = new Map();
+        const eingereiht = new Set();
+        sortiert.forEach(function (b) {
+            const a = String(b.archetyp || '');
+            if (a.indexOf(FAMILIE) === 0 || typeof familieVon !== 'function') return;
+            const f = familieVon(a);
+            const kopf = f && familienBox.get(f);
+            if (!kopf) return;
+            if (!unter.has(kopf)) unter.set(kopf, []);
+            unter.get(kopf).push(b);
+            eingereiht.add(b);
+        });
+        const aus = [];
+        sortiert.forEach(function (b) {
+            if (eingereiht.has(b)) return;
+            aus.push({ box: b, stufe: stufeVon.get(b), rang: 'kopf' });
+            (unter.get(b) || []).forEach(function (m) { aus.push({ box: m, stufe: stufeVon.get(m), rang: 'mitglied' }); });
+        });
+        return aus;
+    }
+
     function formatPasst(k, wahl, kontext, box) {
         if (!wahl || wahl === 'alle') return true;
         const c = kontext || {};
@@ -653,6 +727,31 @@
             const set = String(id).split('-')[0];
             return sets.has(set);
         });
+    }
+
+    /**
+     * DA-18 (gemessen 30.09.2026): getFormatLegalSetCodes zaehlt SVP und SVE
+     * pauschal als Standard. 36 Karten der Rotationen-Daten haben einen
+     * SVP-Druck, aber keinen Druck im Standardfenster — darunter Iono PAF 80
+     * (SVP 124) und Charizard ex OBF 125, beide rotiert. Ob ein Promo legal
+     * ist, haengt an seiner Regulierungsmarke, und die fuehrt keine unserer
+     * Dateien. Deshalb: ein Druck in einem echten Set des Fensters ist
+     * legal; stuetzt sich die Legalitaet NUR auf SVP/SVE, gilt sie nur mit
+     * Beleg (die Karte liegt in Decks des Formats), sonst unbekannt (null).
+     */
+    const PAUSCHAL_LEGAL = { SVP: 1, SVE: 1 };
+    function druckLegal(ids, sets, beleg) {
+        if (!sets) return null;
+        let pauschal = false;
+        const echt = (ids || []).some(function (id) {
+            const set = String(id).split('-')[0];
+            if (!sets.has(set)) return false;
+            if (PAUSCHAL_LEGAL[set]) { pauschal = true; return false; }
+            return true;
+        });
+        if (echt) return true;
+        if (pauschal) return beleg ? true : null;
+        return false;
     }
 
     function elementRang(e) {
@@ -739,7 +838,7 @@
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
-        formatPasst, imFormatGespielt, formateNachDatum, blockVorRotation, druckIn, anteilIn, META_SCHWELLE, formateZuordnen,
+        formatPasst, imFormatGespielt, boxStufe, chipReihe, KERN_SCHWELLE, formateNachDatum, blockVorRotation, druckIn, druckLegal, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
         isoTag, neuestesDatumImManifest, neueDatenDa, anzahlBegrenzen, STATUS
     };
@@ -1324,8 +1423,15 @@
             vorBlock: vorBlock || null,
             fensterSet: fw.current_set || null,
             legalBekannt: !!jetzt,
-            legal: function (k) { return basisEnergie(k) ? true : druckIn(ids(k), jetzt); },
-            legalVorRotation: function (k) { return basisEnergie(k) ? true : druckIn(ids(k), vorher); }
+            legal: function (k) {
+                return basisEnergie(k) ? true : druckLegal(ids(k), jetzt, anteilIn(k, reihe[0] && reihe[0].key) > 0);
+            },
+            legalVorRotation: function (k) {
+                const imBlock = Object.keys(k.formate || {}).some(function (f) {
+                    return vorBlock && String(f).indexOf(vorBlock + '-') === 0 && anteilIn(k, f) > 0;
+                });
+                return basisEnergie(k) ? true : druckLegal(ids(k), vorher, imBlock);
+            }
         };
     }
 
@@ -1379,6 +1485,23 @@
         return '';
     }
 
+    /* UI-52: zu welcher Familie gehoert ein Archetyp? Nur wenn die
+       Rotationen-Daten ALLER Formate geladen sind (dieselbe Regel und Menge
+       wie im Auswahlfeld, js/app-past-meta.js) — sonst keine Aussage. */
+    let familienMerker = null;
+    function familieVonArchetyp(a) {
+        if (typeof familienNachHauptkarte !== 'function' || typeof _pmNachArchetyp !== 'function') return undefined;
+        const man = window._pastMetaManifest;
+        const geladen = window._pastMetaLoadedChunks;
+        if (!man || !geladen || !Array.isArray(man.meta_keys) || !man.meta_keys.every(function (k) { return geladen.has(k); })) return undefined;
+        const decks = (typeof pastMetaDecks !== 'undefined') ? pastMetaDecks : [];
+        const schl = decks.length + '|' + (window.cardsBySetNumberMap ? 1 : 0);
+        if (!familienMerker || familienMerker.schl !== schl) {
+            familienMerker = { schl: schl, von: familienNachHauptkarte(_pmNachArchetyp(decks), _pmDruckeVon) };
+        }
+        return familienMerker.von.get(a);
+    }
+
     function leisteZeichnen() {
         const leiste = el('abxLeiste');
         if (!leiste) return;
@@ -1387,16 +1510,33 @@
             const u = umfang(b);
             return { karten: a.karten + u.karten, stueck: a.stueck + u.stueck, fehlen: a.fehlen + u.fehlen, offen: a.offen + u.offen };
         }, { karten: 0, stueck: 0, fehlen: 0, offen: 0 });
-        const chip = function (id, name, u) {
+        const chip = function (id, name, u, stufe, rang) {
             const aktiv = boxen.length === 1 || (id || null) === (aktiveId || null);
-            return '<button type="button" class="abx-chip' + (aktiv ? ' is-active' : '') + '" aria-pressed="'
-                + (aktiv ? 'true' : 'false') + '" onclick="ArchetypBox.waehlen(' + (id ? '\'' + esc(id) + '\'' : 'null') + ')">'
-                + '<span class="abx-chip-name">' + esc(name) + '</span>'
+            const stufeText = stufe ? tx('abx.stufe.' + stufe, { fmt: (kontext && kontext.aktuell) || '' }, stufe) : '';
+            return '<button type="button" class="abx-chip' + (aktiv ? ' is-active' : '')
+                + (stufe ? ' abx-stufe-' + stufe : '') + (rang === 'mitglied' ? ' abx-chip-mitglied' : '')
+                + '" aria-pressed="'
+                + (aktiv ? 'true' : 'false') + '"' + (stufeText ? ' title="' + esc(stufeText) + '"' : '')
+                + ' onclick="ArchetypBox.waehlen(' + (id ? '\'' + esc(id) + '\'' : 'null') + ')">'
+                + '<span class="abx-chip-name">' + (stufe ? '<span class="abx-stufe-punkt" aria-hidden="true"></span>' : '')
+                + esc(name) + (stufeText ? '<span class="visually-hidden"> (' + esc(stufeText) + ')</span>' : '') + '</span>'
                 + '<span class="abx-chip-zahl">' + esc(tx('abx.chipUmfang', { karten: u.karten, stueck: u.stueck }, '{karten} Karten · {stueck} Stück')) + '</span>'
                 + '<span class="abx-chip-zahl">' + esc(tx('abx.chipFehlen', { n: u.fehlen, offen: u.offen }, '{n} fehlen · {offen} Stück offen')) + '</span></button>';
         };
+        const kontext = manifestDaten ? formatKontext() : null;
+        const reihe = chipReihe(boxen, kontext, familieVonArchetyp);
+        const stufen = {};
+        reihe.forEach(function (r) { if (r.stufe) stufen[r.stufe] = (stufen[r.stufe] || 0) + 1; });
+        const legende = Object.keys(stufen).length
+            ? '<p class="abx-stufen-legende">' + ['gespielt', 'legal', 'raus'].filter(function (s) { return stufen[s]; })
+                .map(function (s) {
+                    return '<span class="abx-stufe-' + s + '"><span class="abx-stufe-punkt" aria-hidden="true"></span>'
+                        + esc(tx('abx.stufe.' + s, { fmt: (kontext && kontext.aktuell) || '' }, s)) + '</span>';
+                }).join('') + '</p>'
+            : '';
         leiste.innerHTML = (boxen.length > 1 ? chip(null, tx('abx.alleBoxen', null, 'Alle Boxen'), alle) : '')
-            + boxen.map(function (b) { return chip(b.id, nameVon(b), umfang(b)); }).join('');
+            + reihe.map(function (r) { return chip(r.box.id, nameVon(r.box), umfang(r.box), r.stufe, r.rang); }).join('')
+            + legende;
     }
 
     function kachel(eintrag, mitBoxName) {

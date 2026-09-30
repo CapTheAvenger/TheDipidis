@@ -151,7 +151,7 @@ def test_nur_das_standardformat_zaehlt():
     assert not S.ist_standard({"format": "CUSTOM"})
 
 
-def test_die_auswertung_zaehlt_und_behaelt_nur_die_beste_positive_liste():
+def test_die_auswertung_zaehlt_und_behaelt_je_archetyp_die_beste_liste():
     t = {"id": "T1", "name": "TEST", "date": "2026-09-20T10:00:00.000Z", "players": 40}
     erg = S.turnier_auswerten(t, [_eintrag("a", 5, 1, platz=1), _eintrag("a", 3, 3, platz=5),
                                   _eintrag("b", 1, 4, platz=9), {"deck": None, "decklist": None}])
@@ -159,7 +159,11 @@ def test_die_auswertung_zaehlt_und_behaelt_nur_die_beste_positive_liste():
     assert erg["decks"]["a"]["listen"] == 2
     assert [erg["decks"]["a"][k] for k in "snu"] == [8, 4, 0]
     assert erg["decks"]["a"]["beste"]["bilanz"] == [5, 1, 0]
-    assert erg["decks"]["b"]["beste"] is None, "eine Liste mit negativer Bilanz ist keine beste Liste"
+    # Auch ein Archetyp ohne positive Liste bekommt seine beste Liste —
+    # sonst steht er ohne Karten, Bild und Code da (Pocket #7, 30.09.2026:
+    # Mega Gardevoir ex Mega Diancie ex, 11 Listen, keine positiv).
+    assert erg["decks"]["b"]["beste"]["bilanz"] == [1, 4, 0]
+    assert erg["decks"]["b"]["beste"]["platz"] == 9
     assert "testspieler" not in json.dumps(erg).lower(), "Spielernamen werden nicht gespeichert"
     assert erg["decks"]["a"]["beste"]["pokemon"][0]["nummer"] == "020", "Nummern dreistellig wie bisher"
 
@@ -217,7 +221,7 @@ def test_ein_deck_ohne_gueltige_liste_steht_da_und_ist_benannt():
     assert {d["id"] for d in decks} == {"a", "b"}
     assert all(d["code"] is None and d["code_fehlt"] for d in decks)
     assert {o["name"] for o in ohne_code} == {"A", "B"}
-    assert "positiver Bilanz" in next(d for d in decks if d["id"] == "b")["code_fehlt"]
+    assert "keine Liste" in next(d for d in decks if d["id"] == "b")["code_fehlt"]
 
 
 class FalscheApi:

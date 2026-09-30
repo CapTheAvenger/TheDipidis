@@ -167,10 +167,14 @@ def _rang(bilanz, datum):
 def turnier_auswerten(turnier, standings):
     """Ein fertiges Turnier -> Zählung je Archetyp plus dessen beste Liste.
 
-    Gespeichert wird je Archetyp nur EINE Liste, und nur eine mit
-    positiver Bilanz: sie ist die einzige, die als „beste Liste im
-    Fenster" je in Frage kommt. Spielernamen werden nicht gespeichert —
-    sie werden für nichts gebraucht."""
+    Gespeichert wird je Archetyp nur EINE Liste: die mit der besten
+    Bilanz in diesem Turnier — auch wenn sie negativ ist. Bis 30.09.2026
+    zählten nur positive Listen; der erste echte Lauf (Pocket #7) fand
+    „Mega Gardevoir ex Mega Diancie ex" mit 11 Listen und keiner einzigen
+    positiven, und das Deck stand ohne Karten, ohne Bild und ohne Code da.
+    Welche Bilanz die gezeigte Liste hat, steht in liste_von.bilanz und in
+    der Oberfläche. Spielernamen werden nicht gespeichert — sie werden für
+    nichts gebraucht."""
     datum = (turnier.get("date") or "")[:10]
     decks = {}
     ohne_deck = 0
@@ -188,8 +192,6 @@ def turnier_auswerten(turnier, standings):
         z["s"] += bilanz[0]
         z["n"] += bilanz[1]
         z["u"] += bilanz[2]
-        if bilanz[0] <= bilanz[1]:
-            continue
         kandidat = {"bilanz": bilanz, "platz": e.get("placing"), **liste_aus_eintrag(e)}
         if z["beste"] is None or _rang(bilanz, datum) > _rang(z["beste"]["bilanz"], datum):
             z["beste"] = kandidat
@@ -324,7 +326,7 @@ def zusammenfassen(turniere, tabelle, jetzt=None, min_listen=MIN_LISTEN):
                 gewaehlt, rang = (t, l), i + 1
                 break
         if not a["kandidaten"]:
-            grund = "keine Liste mit positiver Bilanz im Fenster"
+            grund = "keine Liste im Fenster"
         if gewaehlt is None and a["kandidaten"]:
             gewaehlt, rang = a["kandidaten"][0], 1
         if gewaehlt:

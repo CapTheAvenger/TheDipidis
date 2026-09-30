@@ -77,13 +77,41 @@ def _liste(spieler="testspieler", platz=1, feld=100, bilanz="7 - 0 - 0", karten=
     }
 
 
+def _plaetze(m, roh):
+    nummern, _t = m.gruppen_nummern(roh)
+    return len(nummern)
+
+
+def _listen_fuer_die_gruppe(m, roh):
+    """Die echten Listen, wenn sie die Gruppe fuellen — sonst TESTDATEN in
+    passender Zahl. Stabilitaet und Abgrenzung sind Eigenschaften des
+    Erzeugers, nicht der Datenlage einer Woche (s. unten, #172)."""
+    echt = _listen()
+    n = _plaetze(m, roh)
+    return echt if len(echt) == n else [_liste("s%d" % i, i + 1) for i in range(n)]
+
+
 # ---------------------------------------------------------------- Zustand
 
 @pytest.mark.skipif(not (os.path.exists(STUECK) and os.path.exists(LISTEN)),
                     reason="Stueck oder Listendatei nicht im Baum")
 def test_am_heutigen_stand_ist_nichts_nachzuziehen():
     m = _modul()
-    _neu, aenderungen, grund = m.nachziehen(_stueck(), _listen())
+    roh = _stueck()
+    echt = _listen()
+    if len(echt) != _plaetze(m, roh):
+        # WOCHENLAGE, KEIN FEHLER (Wochenlauf #172, 30.09.2026): im 7-Tage-
+        # Fenster spielte der Archetyp nur 4 Listen, die Gruppe hat 5
+        # Plaetze. Der Wochenlauf meldet das als ::warning und laesst das
+        # Stueck stehen ("das Stueck bleibt, wie es ist") — bis dahin
+        # verlangte diese Zusicherung trotzdem grund == "" und hielt den
+        # ganzen Wochenlauf am Tor an. Geprueft wird jetzt die Regel: bei
+        # falscher Listenzahl wird NICHTS geschrieben, und der Grund nennt es.
+        neu, aenderungen, grund = m.nachziehen(roh, echt)
+        assert _fp(neu) == _fp(roh) and aenderungen == [], "bei falscher Listenzahl wurde geschrieben"
+        assert "Plaetze" in grund, grund
+        return
+    _neu, aenderungen, grund = m.nachziehen(roh, echt)
     assert grund == "", grund
     assert aenderungen == [], (
         "die Online-Listen stehen anders da als die Rohdaten — nachziehen mit "
@@ -94,7 +122,7 @@ def test_am_heutigen_stand_ist_nichts_nachzuziehen():
                     reason="Stueck oder Listendatei nicht im Baum")
 def test_zweimal_nachziehen_aendert_nichts_mehr():
     m = _modul()
-    listen = _listen()
+    listen = _listen_fuer_die_gruppe(m, _stueck())
     einmal, _a, grund = m.nachziehen(_stueck(), listen)
     assert grund == "", grund
     zweimal, aend2, _g2 = m.nachziehen(einmal, listen)
@@ -108,7 +136,7 @@ def test_er_fasst_nur_die_online_gruppe_an():
     muss Zeichen fuer Zeichen stehen bleiben."""
     m = _modul()
     roh = _stueck()
-    listen = [dict(e, player="Proband%d" % i) for i, e in enumerate(_listen())]
+    listen = [dict(e, player="Proband%d" % i) for i, e in enumerate(_listen_fuer_die_gruppe(m, roh))]
     neu, aenderungen, grund = m.nachziehen(roh, listen)
     assert grund == "" and aenderungen, "die Gegenprobe hat gar nichts geaendert"
 

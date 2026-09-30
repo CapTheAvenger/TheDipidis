@@ -787,7 +787,9 @@
      * ist, haengt an seiner Regulierungsmarke, und die fuehrt keine unserer
      * Dateien. Deshalb: ein Druck in einem echten Set des Fensters ist
      * legal; stuetzt sich die Legalitaet NUR auf SVP/SVE, gilt sie nur mit
-     * Beleg (die Karte liegt in Decks des Formats), sonst unbekannt (null).
+     * Beleg (die Karte liegt in Decks des Formats); ohne Beleg ist ein
+     * Nachdruck einer rotierten Set-Karte nicht legal, ein reiner Promo
+     * unbekannt (null).
      */
     const PAUSCHAL_LEGAL = { SVP: 1, SVE: 1 };
     function druckLegal(ids, sets, beleg) {
@@ -800,8 +802,19 @@
             return true;
         });
         if (echt) return true;
-        if (pauschal) return beleg ? true : null;
-        return false;
+        if (!pauschal) return false;
+        if (beleg) return true;
+        /* Nachtrag (Hausi, 30.09.2026): Charizard ex OBF/MEW und Miraidon ex
+           SVI sind rotiert, ihre SVP-Drucke auch. Ein Promo, der eine Karte
+           aus einem Set nachdruckt, das nicht mehr im Fenster liegt, traegt
+           deren Marke — also nicht legal. Unbekannt bleibt nur ein reiner
+           Promo ohne Set-Druck (z. B. Pecharunt SVP 149), solange ihn kein
+           Deck des Formats spielt. */
+        const setDruck = (ids || []).some(function (id) {
+            const set = String(id).split('-')[0];
+            return set && !PAUSCHAL_LEGAL[set];
+        });
+        return setDruck ? false : null;
     }
 
     function elementRang(e) {

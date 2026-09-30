@@ -1,0 +1,478 @@
+From ee00766d9e5002da3305cb4f3d4ae2f061908bdc Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Wed, 30 Sep 2026 11:19:43 +0200|
+Subject: [PATCH] Scraper-Rutsch: Resume nur mit Bilanz, kein halbes Turnier,|
+ Sanity-Tor an der Bedingung, Stolperdraehte in den Waechter|
+MIME-Version: 1.0|
+Content-Type: text/plain; charset=UTF-8|
+Content-Transfer-Encoding: 8bit|
+|
+SC-8  per_decklist --resume holt ein Turnier ohne jede Bilanz erneut.|
+SC-9  tournament_scraper_JH markiert ein Turnier nicht mehr, wenn eine|
+      Deckliste nicht abrufbar war — nichts geschrieben, benannt, naechster|
+      Lauf holt es erneut.|
+SC-10 sanity_check_data: wachsende Dateien gegen den eigenen HEAD-Stand|
+      (Verlust > 10 % = Revert), jede geaenderte JSON muss sich lesen lassen.|
+WZ-18 test_preis_zuordnung prueft die Einteilung, nicht 'unmapped > 1000'.|
+WZ-22 Zusicherungen, die einen Wochenwert festnagelten, pruefen die Regel:|
+      Cent-Pin-Praemissen (Tagespreis) jetzt im Data Guardian|
+      (check_pin_praemissen) statt am Tor; Win-Rate-Beleg mit festen,|
+      datierten Zahlen; Meta-Prognose mit exakten Schranken; Labs-Felder|
+      und Post-Nenner ohne falsche Richtung.|
+WZ-20 CLAUDE.md: Einspiel-Commit stoesst PR-Pruefungen nicht an.|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01T8gGALnD44a7XtwTPafXBa|
+---|
+ CLAUDE.md                                     |   9 +|
+ backend/scrapers/per_decklist_scraper.py      |  27 +-|
+ backend/scrapers/tournament_scraper_JH.py     |  25 +-|
+ scripts/data_guardian.py                      | 109 ++++++++|
+ scripts/sanity_check_data.py                  |  87 ++++++|
+ tests/python/test_cent_regel_zuordnung.py     | 254 +++++++-----------|
+ tests/python/test_jh_abgebrochener_abruf.py   |  77 ++++++|
+ tests/python/test_labs_felder_beschreibung.py |  18 +-|
+ tests/python/test_meta_prognose.py            |  17 +-|
+ .../python/test_per_decklist_resume_bilanz.py |  59 ++++|
+ tests/python/test_preis_zuordnung.py          |  21 +-|
+ tests/python/test_sanity_tor.py               |  58 ++++|
+ tests/unit/test-post-quellen.js               |  17 +-|
+ .../unit/test-win-rate-konventionen-belegt.js |  25 +-|
+ 14 files changed, 608 insertions(+), 195 deletions(-)|
+ create mode 100644 tests/python/test_jh_abgebrochener_abruf.py|
+ create mode 100644 tests/python/test_per_decklist_resume_bilanz.py|
+|
+diff --git a/CLAUDE.md b/CLAUDE.md|
+index 09a2bbb..1633243 100644|
+--- a/CLAUDE.md|
++++ b/CLAUDE.md|
+@@ -488,2 +488,11 @@ je PR.|
+ |
++**Der Einspiel-Commit stoesst die PR-Pruefungen nicht an (gemessen|
++30.09.2026, PR #874).** `patch-einspielen.yml` committet mit dem|
++`GITHUB_TOKEN`; der dadurch ausgeloeste Deploy-Lauf wartete auf eine|
++Freigabe, lief ab und stand rot in der Liste (#3208), die uebrigen|
++Pruefungen liefen gar nicht. Deshalb den PR ERST anlegen, wenn der Zweig|
++fertig eingespielt ist — oder, wenn er schon offen ist, ueber MCP|
++schliessen und wieder oeffnen (`update_pull_request` state closed, dann|
++open). Das startet alle Pruefungen auf dem neuen Kopf.|
++|
+ **Grenzen, gemessen 27.09.2026:** MCP schreibt keine Datei unter|
+diff --git a/backend/scrapers/per_decklist_scraper.py b/backend/scrapers/per_decklist_scraper.py|
+index 0af7e53..3fad8ba 100644|
+--- a/backend/scrapers/per_decklist_scraper.py|
++++ b/backend/scrapers/per_decklist_scraper.py|
+@@ -527,6 +527,13 @@ def load_existing_output(out_path: str) -> set:|
+     We key on the limitless ID (not labs) because that's what we|
+-    iterate. --resume skips these."""|
+-    seen = set()|
++    iterate. --resume skips these.|
++|
++    Erledigt ist ein Turnier erst, wenn mindestens EINE seiner Zeilen|
++    eine Bilanz traegt (SC-8, 30.09.2026). Bis dahin zaehlte jede Zeile:|
++    ein Turnier, das waehrend es lief oder ohne Bilanzspalte geholt|
++    wurde, stand mit leeren wins/losses/ties im Bestand, und --resume|
++    holte es nie wieder. Ein erneuter Abruf ersetzt die alten Zeilen|
++    (write_rows ersetzt nach Schluessel), er verdoppelt nichts."""|
++    mit_bilanz, ohne_bilanz = set(), set()|
+     if not os.path.exists(out_path):|
+-        return seen|
++        return mit_bilanz|
+     try:|
+@@ -536,7 +543,15 @@ def load_existing_output(out_path: str) -> set:|
+                 lid = r.get('limitless_tournament_id', '').strip()|
+-                if lid:|
+-                    seen.add(lid)|
++                if not lid:|
++                    continue|
++                if any((r.get(k) or '').strip() for k in ('wins', 'losses', 'ties')):|
++                    mit_bilanz.add(lid)|
++                else:|
++                    ohne_bilanz.add(lid)|
+     except Exception as e:|
+         logger.warning("Could not parse existing output: %s", e)|
+-    return seen|
++    offen = sorted(ohne_bilanz - mit_bilanz)|
++    if offen:|
++        logger.info("--resume: %d Turnier(e) ohne eine einzige Bilanz werden neu "|
++                    "geholt: %s", len(offen), ', '.join(offen[:20]))|
++    return mit_bilanz|
+ |
+diff --git a/backend/scrapers/tournament_scraper_JH.py b/backend/scrapers/tournament_scraper_JH.py|
+index aaaa5fe..a295522 100644|
+--- a/backend/scrapers/tournament_scraper_JH.py|
++++ b/backend/scrapers/tournament_scraper_JH.py|
+@@ -507,2 +507,8 @@ def _clean_deck_name(name: str) -> str:|
+ |
++class DecklisteNichtAbrufbar(Exception):|
++    """Die Seite einer Deckliste kam nicht (auch nicht nach den Wiederholungen|
++    in fetch_page_bs4). Getrennt von „Seite kam, aber ohne Karten“, damit ein|
++    abgebrochener Abruf das Turnier nicht als erledigt markiert (SC-9)."""|
++|
++|
+ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[list, str]:|
+@@ -510,3 +516,3 @@ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[lis|
+     if not soup:|
+-        return [], "Unknown Deck"|
++        raise DecklisteNichtAbrufbar(deck_url)|
+ |
+@@ -1564,2 +1570,3 @@ def main():|
+         decks_data = []|
++        nicht_abrufbar = []|
+ |
+@@ -1581,4 +1588,20 @@ def main():|
+                 except Exception as e:|
++                    nicht_abrufbar.append(d_info["url"])|
+                     logger.warning(f"Fehler bei {d_info['url']}: {e}")|
+ |
++        # SC-9 (30.09.2026): bis heute reichte EIN erfolgreich geholtes Deck,|
++        # und das Turnier stand fuer immer als erledigt im Ledger — mit den|
++        # Karten nur der Decks, die gerade kamen. Ein abgebrochener Abruf|
++        # wird jetzt weder geschrieben noch markiert, sondern benannt und im|
++        # naechsten Lauf wiederholt.|
++        if nicht_abrufbar:|
++            t["cards"]  = []|
++            t["status"] = "unvollstaendig"|
++            print(f"::warning::tournament_scraper_JH: {len(nicht_abrufbar)} von "|
++                  f"{len(deck_links)} Decklisten von {t['name']} (id {t.get('id')}) "|
++                  f"nicht abrufbar — Turnier NICHT geschrieben und NICHT als "|
++                  f"erledigt markiert, naechster Lauf holt es erneut. Erste: "|
++                  f"{nicht_abrufbar[0]}")|
++            continue|
++|
+         if decks_data:|
+diff --git a/scripts/data_guardian.py b/scripts/data_guardian.py|
+index 853545e..ea114bf 100644|
+--- a/scripts/data_guardian.py|
++++ b/scripts/data_guardian.py|
+@@ -1426,2 +1426,110 @@ def check_meta_preiszuordnung(findings):|
+ |
++# ── Die Praemissen der Cent-Pins (WZ-22, 30.09.2026) ─────────────────────|
++#|
++# Die Pins PRE 96-99 (Betreiberregel "wenn nur Cent Betraege dann den|
++# guenstigeren"), MEP 83 und das bewusst offene MEP 4 ruhen auf Aussagen|
++# ueber den TAGESPREIS: Spanne im Centbereich, ein Produkt mit Markt statt|
++# Einzelangebot, zwei Kandidaten weit auseinander. Bis 30.09.2026 standen|
++# diese Aussagen als Zusicherungen in tests/python/test_cent_regel_zuordnung.py|
++# — und hielten damit JEDEN Datenlauf an, sobald ein einzelner Verkauf sie|
++# verschob (10.09.: MEP 4, 22.09.: MEP 83). Die Daten waren dabei richtig;|
++# was sich aendert, ist eine Entscheidungsgrundlage. Die gehoert gemeldet,|
++# nicht ans Tor. Geschrieben wird hier nichts.|
++PIN_PRE_NUMMERN = ("96", "97", "98", "99")|
++PIN_EXP_MEP = 6232|
++PIN_CENT = 0.10|
++PIN_KENNZAHLEN = ("trend", "avg", "avg7", "avg30")|
++|
++|
++def _pin_preis(eintrag):|
++    for feld in ("trend", "avg30", "avg"):|
++        wert = (eintrag or {}).get(feld)|
++        if wert:|
++            return float(wert)|
++    return None|
++|
++|
++def _pin_hat_handelsgeschichte(eintrag):|
++    """Markt statt Einzelangebot: `low` gesetzt und Durchschnitte, die sich|
++    ueber die Zeitraeume unterscheiden."""|
++    if not eintrag or eintrag.get("low") in (None, ""):|
++        return False|
++    reihe = [eintrag.get(f) for f in ("avg", "avg1", "avg7", "avg30")]|
++    if any(w in (None, "") for w in reihe):|
++        return False|
++    return len({round(float(w), 2) for w in reihe}) > 1|
++|
++|
++def check_pin_praemissen(findings, pins=None, produkte=None, preise=None):|
++    if pins is None or produkte is None or preise is None:|
++        try:|
++            with open(os.path.join(DATA, "cardmarket_mapping_manual.csv"),|
++                      encoding="utf-8-sig", newline="") as f:|
++                pins = {((r.get("set") or "").strip().upper(),|
++                         (r.get("number") or "").strip()): r|
++                        for r in csv.DictReader(f)}|
++            with open(os.path.join(DATA, "products_singles_6.json"), encoding="utf-8") as f:|
++                produkte = {p["idProduct"]: p for p in json.load(f)["products"]}|
++            with open(os.path.join(DATA, "price_guide_6.json"), encoding="utf-8") as f:|
++                preise = {g["idProduct"]: g for g in json.load(f)["priceGuides"]}|
++        except (OSError, ValueError, KeyError) as e:|
++            findings.append(("WARN", f"Praemissen der Cent-Pins nicht pruefbar: {e}"))|
++            return|
++    # PRE 96-99: die vier Kandidaten liegen im Centbereich.|
++    werte = {}|
++    for n in PIN_PRE_NUMMERN:|
++        pin = pins.get(("PRE", n))|
++        if not pin:|
++            continue|
++        werte[n] = _pin_preis(preise.get(int(pin["cardmarket_product_id"])))|
++    if werte:|
++        fehlend = sorted(n for n, v in werte.items() if v is None)|
++        bekannt = [v for v in werte.values() if v is not None]|
++        if fehlend:|
++            findings.append(("WARN", f"Cent-Pin PRE {', '.join(fehlend)}: kein Preis im "|
++                             f"Preisfuehrer — die Spanne der vier Kandidaten ist nicht belegbar"))|
++        elif max(bekannt) - min(bekannt) > PIN_CENT:|
++            findings.append((|
++                "WARN",|
++                f"Cent-Pins PRE 96-99: die vier Kandidaten liegen "|
++                f"{max(bekannt) - min(bekannt):.2f} EUR auseinander ({werte}). Die "|
++                f"Betreiberregel 'wenn nur Cent Betraege dann den guenstigeren' traegt "|
++                f"diese Zuordnung nicht mehr — neu entscheiden. Geschrieben wird hier nichts."))|
++    # MEP 83: der Pin zeigt auf das Produkt mit Markt, nicht auf das Einzelangebot.|
++    if not _pin_hat_handelsgeschichte(preise.get(894262)):|
++        findings.append((|
++            "WARN",|
++            "Pin MEP 83 (894262): traegt heute keine belastbare Preisgrundlage "|
++            "(kein low oder gleiche Durchschnitte) — die Begruendung des Pins neu pruefen."))|
++    if _pin_hat_handelsgeschichte(preise.get(903006)):|
++        findings.append((|
++            "WARN",|
++            "MEP 83: 903006 hat inzwischen eine echte Handelsgeschichte. Damit gibt es "|
++            "zwei belastbare Slowbro-Produkte in Erweiterung 6232 — die Wahl gehoert neu "|
++            "entschieden."))|
++    # MEP 4: bleibt offen, solange die beiden Kandidaten nicht UEBER MEHRERE|
++    # Kennzahlen im Centbereich liegen (eine Kennzahl allein war am 10.09.2026|
++    # eine Tageslaune).|
++    kandidaten = sorted(pid for pid, p in produkte.items()|
++                        if p.get("idExpansion") == PIN_EXP_MEP|
++                        and str(p.get("name", "")).startswith("Lunatone"))|
++    if len(kandidaten) == 2 and ("MEP", "4") not in pins:|
++        spannen = {}|
++        for feld in PIN_KENNZAHLEN:|
++            w = [(preise.get(pid) or {}).get(feld) for pid in kandidaten]|
++            if all(x not in (None, "") for x in w):|
++                spannen[feld] = abs(float(w[0]) - float(w[1]))|
++        if len(spannen) >= 2 and all(v <= PIN_CENT for v in spannen.values()):|
++            guenstiger = min(kandidaten, key=lambda k: _pin_preis(preise.get(k)) or 0)|
++            findings.append((|
++                "WARN",|
++                f"MEP 4: beide Lunatone-Kandidaten liegen ueber alle Kennzahlen im "|
++                f"Centbereich ({spannen}). Damit greift die Betreiberregel — Vorschlag "|
++                f"fuer data/cardmarket_mapping_manual.csv: MEP,4,{guenstiger},"|
++                f"betreiber-regel-cent. Geschrieben wird hier nichts."))|
++    elif ("MEP", "4") not in pins:|
++        findings.append(("WARN", f"MEP 4: in Erweiterung {PIN_EXP_MEP} stehen "|
++                         f"{len(kandidaten)} Lunatone-Produkte statt zwei — die Lage hat sich geaendert"))|
++|
++|
+ def check_geteilte_produkt_ids(findings):|
+@@ -3091,2 +3199,3 @@ def main():|
+     check_geteilte_produkt_ids(findings)|
++    check_pin_praemissen(findings)|
+     champions_ueber_grenze = check_champions_usage(findings, baseline)|
+diff --git a/scripts/sanity_check_data.py b/scripts/sanity_check_data.py|
+index be817b5..6d4967b 100644|
+--- a/scripts/sanity_check_data.py|
++++ b/scripts/sanity_check_data.py|
+@@ -198,2 +198,48 @@ GLOB_MAX_LOSS = 0.10   # mehr als 10 % weniger Zeilen als in HEAD = Revert|
+ |
++# ── SC-10 (30.09.2026): Dateien, die nur WACHSEN. Gemessen am 30.09.2026|
++# lagen die festen Schwellen oben bei 7 % (player_continuity.csv, 2.000|
++# von 28.031) bis 73 % des Bestands, und tournament_decklists_per_player.csv|
++# stand mit 245.829 Zeilen auf Schwelle 0 — ein Zusammenbruch auf ein|
++# Drittel waere durchgegangen. Eine hoehere Handzahl waere in drei Wochen|
++# wieder veraltet; die Bedingung, die gemeint ist, heisst: diese Dateien|
++# verlieren keine Zeilen. Belegt am Verlauf (git log, bis zu 25 Staende|
++# je Datei): keine davon ist je geschrumpft.|
++#|
++# NICHT hier, weil sie bei einem Setwechsel zu Recht schrumpfen:|
++# japanese_cards_database.csv (fuehrt nur die neuesten JP-Sets),|
++# labs_tournament_matchups.csv, die City-League- und Current-Meta-Dateien|
++# (update_sets.py leert sie bei der Rotation). Fuer sie gilt weiter die|
++# feste Untergrenze — die faengt den leeren Lauf, nicht die Rotation.|
++KUMULATIV: tuple = (|
++    'player_continuity.csv',|
++    'tournament_decklists_per_player.csv',|
++    'all_cards_database.csv',|
++    'all_cards_merged.csv',|
++    'price_data.csv',|
++    'cardmarket_id_mapping.csv',|
++)|
++KUMULATIV_MAX_LOSS = 0.10|
++|
++|
++def geaenderte_json(data_dir_abs: str, repo_root: str) -> list:|
++    """data/*.json, die sich gegenueber HEAD geaendert haben oder neu sind."""|
++    try:|
++        rel = os.path.relpath(data_dir_abs, repo_root).replace(os.sep, '/')|
++        res = subprocess.run(|
++            ['git', 'status', '--porcelain', '--', rel],|
++            cwd=repo_root, capture_output=True, text=True, timeout=60)|
++        if res.returncode != 0:|
++            return []|
++    except (subprocess.SubprocessError, OSError):|
++        return []|
++    raus = []|
++    for zeile in res.stdout.splitlines():|
++        pfad = zeile[3:].strip().strip('"')|
++        if ' -> ' in pfad:|
++            pfad = pfad.split(' -> ', 1)[1]|
++        if pfad.endswith('.json') and zeile[:2].strip() != 'D':|
++            raus.append(os.path.join(repo_root, pfad))|
++    return sorted(raus)|
++|
++|
+ def head_csv_rows(path: str, repo_root: str) -> int:|
+@@ -383,2 +429,43 @@ def main(argv: list[str]) -> int:|
+ |
++    # ── SC-10: wachsende Dateien gegen ihren eigenen HEAD-Stand ──|
++    for fname in KUMULATIV:|
++        path = os.path.join(data_dir_abs, fname)|
++        if not os.path.isfile(path):|
++            continue      # fehlt → oben schon wiederhergestellt und gemeldet|
++        rows = count_csv_rows(path)|
++        vorher = head_csv_rows(path, repo_root)|
++        if rows < 0 or vorher < 0:|
++            continue      # unlesbar → oben gemeldet; neu → kein Vergleich|
++        grenze = int(vorher * (1 - KUMULATIV_MAX_LOSS))|
++        if rows < grenze:|
++            ok = git_checkout(path, repo_root)|
++            tag = 'REVERTED' if ok else 'REVERT-FAILED'|
++            reverts.append(f'{fname}: {rows} < {grenze} (HEAD {vorher}, waechst sonst nur) → {tag}')|
++            print(f'  ❌ {fname:55s} {rows:>8} rows  (HEAD {vorher}, {tag})')|
++            print(f'    ::error::Data sanity: {fname} waechst sonst nur und '|
++                  f'verliert jetzt {vorher - rows} von {vorher} Zeilen '|
++                  f'(> {int(KUMULATIV_MAX_LOSS * 100)} %); auf den letzten '|
++                  f'guten Stand zurueckgesetzt ({tag})')|
++        else:|
++            print(f'  ✓     {fname:55s} {rows:>8} rows  (HEAD {vorher}, waechst nur)')|
++|
++    # ── SC-10: jede geaenderte JSON-Datei muss sich lesen lassen ──|
++    # Eine halb geschriebene oder kaputte JSON-Datei laesst die Seite an|
++    # genau der Stelle leer, die sie liest — ohne dass eine Zeilenzahl|
++    # das je bemerkt haette.|
++    import json as _json|
++    for path in geaenderte_json(data_dir_abs, repo_root):|
++        fname = os.path.relpath(path, data_dir_abs)|
++        try:|
++            with open(path, encoding='utf-8') as f:|
++                _json.load(f)|
++        except (OSError, UnicodeDecodeError, ValueError) as e:|
++            ok = git_checkout(path, repo_root)|
++            tag = 'REVERTED' if ok else 'REVERT-FAILED (neu, nicht in HEAD)'|
++            reverts.append(f'{fname}: kein gueltiges JSON → {tag}')|
++            print(f'  ❌ {fname:55s} kein JSON  ({tag})')|
++            print(f'    ::error::Data sanity: {fname} ist kein gueltiges JSON '|
++                  f'({e.__class__.__name__}: {str(e)[:120]}); auf den letzten '|
++                  f'guten Stand zurueckgesetzt ({tag})')|
++|
+     # Anomaly watch — files that should be empty (F-D08 __unsorted etc.).|
+diff --git a/tests/python/test_cent_regel_zuordnung.py b/tests/python/test_cent_regel_zuordnung.py|
+index 598db8c..b54189f 100644|
+--- a/tests/python/test_cent_regel_zuordnung.py|
++++ b/tests/python/test_cent_regel_zuordnung.py|
+@@ -95,15 +95,2 @@ def preise():|
+ |
+-def _preis(eintrag):|
+-    """Der belastbarste Wert, den der Preisfuehrer je Produkt fuehrt.|
+-|
+-    trend zuerst, sonst avg30, sonst avg. Ein Produkt ohne jeden Wert|
+-    liefert None — das ist selbst ein Befund (siehe MEP 83).|
+-    """|
+-    for feld in ("trend", "avg30", "avg"):|
+-        wert = (eintrag or {}).get(feld)|
+-        if wert:|
+-            return float(wert)|
+-    return None|
+-|
+-|
+ # ── Die vier PRE-Drucke ────────────────────────────────────────────────|
+@@ -151,23 +138,2 @@ def test_die_vier_produkte_sind_dieselbe_karte_in_derselben_erweiterung(pins, pr|
+ |
+-def test_die_praemisse_haelt_die_spanne_bleibt_im_centbereich(pins, produkte, preise):|
+-    """Die Regel des Betreibers gilt fuer Cent-Unterschiede.|
+-|
+-    Waechst die Spanne zwischen den vier Produkten, ist die Begruendung|
+-    hinfaellig — dann entscheidet die Zuordnung wieder ueber Geld, das man|
+-    merkt, und jemand muss hinsehen statt sich auf den Pin zu verlassen.|
+-    """|
+-    werte = {}|
+-    for n in PRE_NUMMERN:|
+-        pid = int(pins[("PRE", n)]["cardmarket_product_id"])|
+-        werte[n] = _preis(preise.get(pid))|
+-    fehlend = [n for n, v in werte.items() if v is None]|
+-    assert not fehlend, f"kein Preis fuer PRE {', '.join(fehlend)}"|
+-    spanne = max(werte.values()) - min(werte.values())|
+-    assert spanne <= CENT_GRENZE, (|
+-        f"die vier Kandidaten liegen inzwischen {spanne:.2f} EUR auseinander "|
+-        f"({werte}). Die Betreiberregel 'wenn nur Cent Betraege dann den "|
+-        f"guenstigeren' hat diese Zuordnung getragen, solange es Cent waren — "|
+-        f"jetzt nicht mehr")|
+-|
+-|
+ def test_die_pins_tragen_die_quelle_der_entscheidung(pins):|
+@@ -235,56 +201,2 @@ def test_die_widerlegung_von_cardprovs_haelt(produkte):|
+ |
+-def _hat_handelsgeschichte(eintrag):|
+-    """Traegt dieser Preiseintrag einen MARKT oder ein einzelnes Angebot?|
+-|
+-    Ein Produkt, das nie gehandelt wurde, aber gelistet ist, bekommt bei|
+-    Cardmarket den Listenpreis in jedes Durchschnittsfeld geschrieben:|
+-    avg = avg1 = avg7 = avg30 = trend, und `low` bleibt leer. Ein|
+-    Produkt mit echten Verkaeufen hat ein `low` und Durchschnitte, die|
+-    sich ueber die Zeitraeume unterscheiden.|
+-|
+-    Der Unterschied ist genau der, auf den es beim Pin ankommt — nicht|
+-    "hat einen Preis", sondern "hat eine Preisgrundlage".|
+-    """|
+-    if not eintrag:|
+-        return False|
+-    if eintrag.get("low") in (None, ""):|
+-        return False|
+-    reihe = [eintrag.get(f) for f in ("avg", "avg1", "avg7", "avg30")]|
+-    if any(w in (None, "") for w in reihe):|
+-        return False|
+-    return len({round(float(w), 2) for w in reihe}) > 1|
+-|
+-|
+-def test_der_pin_zeigt_auf_das_produkt_mit_der_belastbaren_preisgrundlage(produkte, preise):|
+-    """Warum 894262 und nicht 903006.|
+-|
+-    HIER STAND BIS ZUM 22.09.2026 `_preis(preise.get(903006)) is None`|
+-    — "903006 fuehrt keinen einzigen Wert". Das war am 03.09.2026 wahr.|
+-    Am 22.09.2026 stand dort avg 125,00 EUR, die Zusicherung fiel um,|
+-    und die Deploy-Kette stand.|
+-|
+-    Die Entscheidung war trotzdem unveraendert richtig. Falsch war ihre|
+-    BEGRUENDUNG: "das einzige mit Preis" ist eine Aussage ueber einen|
+-    Tagesstand des Preisfuehrers, nicht ueber die Produkte. Gemessen am|
+-    22.09.2026:|
+-|
+-        894262  low 5,99 · avg1 18,00 · avg7 17,52 · avg30 16,52|
+-        903006  low —    · avg1 = avg7 = avg30 = trend = 125,00|
+-|
+-    Das eine hat einen Markt, das andere ein einzelnes Angebot. Genau|
+-    das wird jetzt geprueft — und die Tripwire bleibt scharf: bekommt|
+-    903006 je eine echte Handelsgeschichte, gibt es zwei belastbare|
+-    Kandidaten und die Wahl gehoert neu entschieden.|
+-    """|
+-    assert produkte.get(903006), "Produkt 903006 ist aus dem Abzug verschwunden"|
+-    assert _hat_handelsgeschichte(preise.get(894262)), (|
+-        "894262 traegt keine belastbare Preisgrundlage mehr — dann traegt der "|
+-        "Pin seine Begruendung nicht mehr und gehoert neu geprueft")|
+-    assert not _hat_handelsgeschichte(preise.get(903006)), (|
+-        "903006 traegt inzwischen eine echte Handelsgeschichte (low gesetzt und "|
+-        "unterschiedliche Durchschnitte). Damit gibt es zwei belastbare "|
+-        "Slowbro-Produkte in Erweiterung 6232, und die Wahl zwischen ihnen "|
+-        "gehoert neu entschieden — nicht weitergeschrieben")|
+-|
+-|
+ # ── MEP 4: die Regel greift NICHT, und das ist der Punkt ───────────────|
+@@ -298,71 +210,2 @@ def test_mep_4_bleibt_bewusst_ungepinnt(pins):|
+ |
+-# Kennzahlen, ueber die die Naehe belegt sein muss, bevor die Cent-Regel|
+-# greift. EINE Kennzahl reicht nicht — siehe die Begruendung im Test.|
+-CENT_KENNZAHLEN = ("trend", "avg", "avg7", "avg30")|
+-|
+-|
+-def _spannen_je_kennzahl(preise, kandidaten):|
+-    """Abstand der beiden Kandidaten, je Kennzahl. Fehlende werden|
+-    ausgelassen — ein fehlender Wert ist kein Beleg fuer Naehe."""|
+-    heraus = {}|
+-    for feld in CENT_KENNZAHLEN:|
+-        werte = [(preise.get(pid) or {}).get(feld) for pid in kandidaten]|
+-        if any(w is None or w == "" for w in werte):|
+-            continue|
+-        werte = [float(w) for w in werte]|
+-        heraus[feld] = max(werte) - min(werte)|
+-    return heraus|

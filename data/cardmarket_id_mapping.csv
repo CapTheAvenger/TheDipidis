@@ -58,7 +58,7 @@
 30C,57,907664,unique,Zeraora
 30C,58,907665,unique,Toxel
 30C,59,907666,live-verified,Toxtricity
-30C,60,907666,priced-by-date(3↔3),Toxtricity
+30C,60,907667,live-verified,Toxtricity
 30C,61,907668,live-verified,Morpeko
 30C,62,907669,unique,Miraidon
 30C,63,907670,unique,Mewtwo
@@ -114,8 +114,8 @@
 30C,114,907721,unique,Kangaskhan
 30C,115,907722,unique,Ditto
 30C,116,907723,live-verified,Eevee
-30C,117,907723,priced-by-date(3↔3),Eevee
-30C,118,907724,priced-by-date(3↔3),Eevee
+30C,117,907724,live-verified,Eevee
+30C,118,907725,live-verified,Eevee
 30C,119,907726,unique,Snorlax
 30C,120,907727,unique,Igglybuff
 30C,121,907728,live-verified,Lugia
@@ -131,7 +131,7 @@
 30C,131,907739,live-verified,Lapras
 30C,132,907740,live-verified,Articuno
 30C,133,907741,live-verified,Zapdos
-30C,134,907742,priced-by-date(3↔3),Toxtricity
+30C,134,907742,live-verified,Toxtricity
 30C,135,907743,live-verified,Morpeko
 30C,136,907744,live-verified,Drifloon
 30C,137,907745,live-verified,Chandelure
@@ -167,7 +167,7 @@ AOR,5,284186,live-verified,Spinarak
 AOR,6,284187,live-verified,Ariados
 AOR,9,284190,live-verified,Combee
 AOR,10,284191,live-verified,Vespiquen
-AOR,11,284192,priced-by-date(2↔3),Vespiquen
+AOR,11,284192,live-verified,Vespiquen
 AOR,12,284193,unique,Virizion
 AOR,13,284194,unique,Flareon
 AOR,14,284195,live-verified,Entei
@@ -1445,7 +1445,7 @@ BLW,74,279812,unique,Klink
 BLW,75,279813,unique,Klang
 BLW,76,279814,unique,Klinklang
 BLW,77,279815,live-verified,Patrat
-BLW,78,279816,priced-by-date(2↔2),Patrat
+BLW,78,279816,live-verified,Patrat
 BLW,79,279817,live-verified,Watchog
 BLW,80,279818,live-verified,Lillipup
 BLW,81,279818,priced-by-date(2↔3),Lillipup
@@ -2254,7 +2254,7 @@ BWP,4,279922,live-verified,Reshiram
 BWP,5,279926,live-verified,Zekrom
 BWP,6,279927,live-verified,Snivy
 BWP,7,279930,live-verified,Tepig
-BWP,8,279929,priced-by-date(2↔3),Oshawott
+BWP,8,279929,live-verified,Oshawott
 BWP,9,279928,live-verified,Zoroark
 BWP,10,279921,live-verified,Axew
 BWP,11,279913,live-verified,Pansage
@@ -2377,7 +2377,7 @@ CEC,46,407879,unique,Wailord
 CEC,47,407884,unique,Snorunt
 CEC,48,407889,unique,Glalie
 CEC,49,407894,live-verified,Spheal
-CEC,50,407894,priced-by-date(2↔2),Spheal
+CEC,50,407899,live-verified,Spheal
 CEC,51,407904,unique,Sealeo
 CEC,52,407909,unique,Walrein
 CEC,53,407914,unique,Kyogre
@@ -2604,12 +2604,12 @@ CES,4,361251,unique,Scyther
 CES,5,361252,unique,Spinarak
 CES,6,361253,unique,Ariados
 CES,7,361254,live-verified,Treecko
-CES,8,361254,priced-by-date(2↔3),Treecko
+CES,8,361255,live-verified,Treecko
 CES,9,361256,unique,Grovyle
 CES,10,361257,priced-by-all(2↔2),Sceptile
 CES,10a,361257,live-verified,Sceptile
 CES,11,361258,live-verified,Seedot
-CES,12,361258,priced-by-date(2↔2),Seedot
+CES,12,361259,live-verified,Seedot
 CES,13,361260,unique,Nuzleaf
 CES,15,361262,unique,Surskit
 CES,16,361263,unique,Masquerain
@@ -2622,12 +2622,12 @@ CES,22,361269,unique,Dhelmise
 CES,23,361270,unique,Slugma
 CES,24,361271,live-verified,Magcargo
 CES,25,361272,live-verified,Torchic
-CES,26,361273,priced-by-date(2↔2),Torchic
+CES,26,361273,live-verified,Torchic
 CES,27,361274,unique,Combusken
 CES,29,361276,unique,Torkoal
 CES,30,361277,live-verified,Oricorio
 CES,32,361279,live-verified,Mudkip
-CES,33,361279,priced-by-date(2↔2),Mudkip
+CES,33,361280,live-verified,Mudkip
 CES,34,361281,unique,Marshtomp
 CES,35,361282,unique,Swampert
 CES,36,361283,unique,Lotad
@@ -2648,7 +2648,7 @@ CES,51,361297,unique,Electrike
 CES,52,361298,unique,Manectric
 CES,53,361299,unique,Plusle
 CES,54,361300,unique,Minun
-CES,55,361277,priced-by-date(2↔2),Oricorio
+CES,55,361301,live-verified,Oricorio
 CES,57,361302,unique,Gulpin
 CES,58,361303,unique,Swalot
 CES,59,361304,unique,Spoink
@@ -2689,7 +2689,7 @@ CES,98,361340,unique,Heatran
 CES,99,361341,unique,Solgaleo
 CES,100,361342,live-verified,Celesteela
 CES,101,361343,unique,Kartana
-CES,103,361344,priced-by-date(2↔2),Bagon
+CES,103,361344,live-verified,Bagon
 CES,104,361345,priced-by-date(2↔2),Bagon
 CES,105,361346,unique,Shelgon
 CES,106,361347,unique,Salamence
@@ -2776,7 +2776,7 @@ CG,29,277110,live-verified,Charmeleon
 CG,31,277112,priced-by-date(2↔2),Combusken
 CG,33,277114,unique,Gulpin
 CG,34,277115,live-verified,Ivysaur
-CG,35,277115,priced-by-date(2↔3),Ivysaur
+CG,35,277116,live-verified,Ivysaur
 CG,36,277117,unique,Lairon
 CG,37,277118,unique,Lombre
 CG,38,277119,live-verified,Marshtomp
@@ -3515,7 +3515,7 @@ CRZ,36,691753,unique,Kyogre
 CRZ,37,691754,unique,Kyogre V
 CRZ,38,691755,unique,Glaceon V
 CRZ,39,691756,live-verified,Shinx
-CRZ,40,691757,priced-by-date(2↔2),Shinx
+CRZ,40,691757,live-verified,Shinx
 CRZ,41,691759,priced-by-date(2↔2),Luxio
 CRZ,42,691758,priced-by-date(2↔2),Luxio
 CRZ,43,691760,live-verified,Luxray
@@ -3567,7 +3567,7 @@ CRZ,88,691806,unique,Lairon
 CRZ,89,691807,unique,Aggron
 CRZ,90,691808,unique,Metang
 CRZ,91,691809,live-verified,Pawniard
-CRZ,92,691810,priced-by-date(2↔2),Pawniard
+CRZ,92,691810,live-verified,Pawniard
 CRZ,93,691811,unique,Bisharp
 CRZ,94,691813,unique,Zacian
 CRZ,95,691814,live-verified,Zacian V
@@ -3964,13 +3964,13 @@ DEX,10,280338,unique,Shelmet
 DEX,11,280339,unique,Accelgor
 DEX,12,280340,live-verified,Flareon
 DEX,14,280342,live-verified,Torchic
-DEX,15,280342,priced-by-date(2↔2),Torchic
+DEX,15,280343,live-verified,Torchic
 DEX,16,280344,unique,Combusken
 DEX,17,280345,unique,Blaziken
 DEX,18,280346,unique,Torkoal
 DEX,19,280347,unique,Heatmor
 DEX,20,280348,live-verified,Larvesta
-DEX,21,280349,priced-by-date(2↔2),Larvesta
+DEX,21,280349,live-verified,Larvesta
 DEX,22,280350,unique,Volcarona
 DEX,23,280351,unique,Slowpoke
 DEX,24,280352,unique,Slowbro
@@ -4026,7 +4026,7 @@ DEX,77,280405,unique,Klinklang
 DEX,78,280406,unique,Pawniard
 DEX,79,280407,live-verified,Bisharp
 DEX,80,280408,live-verified,Chansey
-DEX,81,280408,priced-by-date(2↔2),Chansey
+DEX,81,280409,live-verified,Chansey
 DEX,82,280410,unique,Blissey
 DEX,83,280411,live-verified,Eevee
 DEX,84,280412,live-verified,Eevee
@@ -4115,7 +4115,7 @@ DR,15,275892,live-verified,Flygon
 DR,16,275893,unique,Girafarig
 DR,17,275894,live-verified,Magneton
 DR,18,275895,live-verified,Ninjask
-DR,19,280584,priced-by-date(2↔3),Salamence
+DR,19,275896,live-verified,Salamence
 DR,20,275897,live-verified,Shelgon
 DR,21,275898,unique,Skarmory
 DR,22,275899,live-verified,Vibrava
@@ -4137,12 +4137,12 @@ DR,37,275914,unique,Meditite
 DR,38,275915,live-verified,Ninjask
 DR,39,275916,live-verified,Seadra
 DR,40,275917,live-verified,Seadra
-DR,41,275918,priced-by-date(3↔3),Shelgon
+DR,41,275918,live-verified,Shelgon
 DR,42,275919,priced-by-date(3↔3),Shelgon
 DR,43,275920,unique,Shuppet
 DR,44,275921,unique,Snorunt
 DR,45,275922,unique,Swellow
-DR,46,275924,priced-by-date(3↔3),Vibrava
+DR,46,275923,live-verified,Vibrava
 DR,47,275923,priced-by-date(3↔3),Vibrava
 DR,48,275925,unique,Whiscash
 DR,49,275926,live-verified,Bagon
@@ -4152,7 +4152,7 @@ DR,52,275929,live-verified,Corphish
 DR,53,275930,live-verified,Corphish
 DR,54,275931,live-verified,Corphish
 DR,55,275932,live-verified,Geodude
-DR,56,275932,priced-by-date(2↔2),Geodude
+DR,56,275933,live-verified,Geodude
 DR,57,275934,unique,Grimer
 DR,58,275935,live-verified,Horsea
 DR,59,275936,unique,Houndour
@@ -4162,11 +4162,11 @@ DR,62,275940,priced-by-date(3↔3),Magnemite
 DR,63,275938,priced-by-date(3↔3),Magnemite
 DR,64,275941,unique,Mareep
 DR,65,275942,unique,Mudkip
-DR,66,275943,priced-by-date(3↔3),Nincada
+DR,66,275943,live-verified,Nincada
 DR,67,275944,priced-by-date(3↔3),Nincada
 DR,68,275945,priced-by-date(3↔3),Nincada
 DR,69,275946,live-verified,Numel
-DR,70,275946,priced-by-date(2↔2),Numel
+DR,70,275947,live-verified,Numel
 DR,71,275948,unique,Pineco
 DR,72,275949,unique,Slugma
 DR,73,275950,live-verified,Spoink
@@ -4612,7 +4612,7 @@ DRX,91,280530,live-verified,Garchomp
 DRX,93,280532,live-verified,Deino
 DRX,94,280533,live-verified,Deino
 DRX,95,280534,live-verified,Zweilous
-DRX,96,280534,priced-by-date(2↔2),Zweilous
+DRX,96,280535,live-verified,Zweilous
 DRX,97,280536,live-verified,Hydreigon
 DRX,98,280537,live-verified,Hydreigon
 DRX,99,280538,unique,Aipom
@@ -4730,7 +4730,7 @@ DX,13,276416,unique,Ninjask
 DX,14,276417,unique,Shedinja
 DX,15,276418,unique,Slaking
 DX,16,276421,live-verified,Deoxys
-DX,17,276420,priced-by-date(3↔5),Deoxys
+DX,17,276420,live-verified,Deoxys
 DX,18,276419,priced-by-date(3↔5),Deoxys
 DX,19,276422,live-verified,Ludicolo
 DX,20,276423,live-verified,Magcargo
@@ -4750,7 +4750,7 @@ DX,33,276436,live-verified,Lombre
 DX,34,276437,live-verified,Lombre
 DX,35,276438,live-verified,Lotad
 DX,36,276439,unique,Lunatone
-DX,37,276423,priced-by-date(2↔2),Magcargo
+DX,37,276440,live-verified,Magcargo
 DX,38,276441,live-verified,Manectric
 DX,39,276442,unique,Masquerain
 DX,40,276443,unique,Metang
@@ -4788,7 +4788,7 @@ DX,71,276474,unique,Seedot
 DX,72,276475,unique,Shroomish
 DX,73,276476,unique,Slakoth
 DX,74,276477,live-verified,Slugma
-DX,75,276477,priced-by-date(2↔2),Slugma
+DX,75,276478,live-verified,Slugma
 DX,76,276479,unique,Spoink
 DX,77,276480,unique,Staryu
 DX,78,276481,unique,Surskit
@@ -4864,7 +4864,7 @@ E1,42,274917,live-verified,Cloyster
 E1,43,274918,live-verified,Dragonite
 E1,44,274919,live-verified,Dugtrio
 E1,45,274920,live-verified,Fearow
-E1,46,274922,priced-by-date(3↔4),Feraligatr
+E1,46,274921,live-verified,Feraligatr
 E1,47,274922,live-verified,Feraligatr
 E1,48,274923,live-verified,Gengar
 E1,49,274924,live-verified,Golem
@@ -5033,21 +5033,21 @@ E2,46,275118,unique,Dodrio
 E2,47,275119,unique,Flaaffy
 E2,48,275120,unique,Furret
 E2,49,275121,unique,Gloom
-E2,50,275122,priced-by-date(1↔2),Golduck
-E2,51,275154,priced-by-date(2↔2),Growlithe
+E2,50,275122,live-verified,Golduck
+E2,51,275124,live-verified,Growlithe
 E2,52,275125,live-verified,Magnemite
 E2,53,275126,unique,Marill
 E2,54,275127,unique,Marowak
 E2,55,275128,unique,Nidorino
 E2,56,275129,unique,Pupitar
-E2,57,275182,priced-by-date(2↔2),Scyther
+E2,57,275130,live-verified,Scyther
 E2,58,275131,unique,Seadra
 E2,59,275132,unique,Seaking
 E2,60,275133,unique,Skiploom
 E2,61,275134,unique,Smoochum
 E2,62,275135,live-verified,Spinarak
 E2,63,275136,unique,Tyrogue
-E2,64,275191,priced-by-date(2↔2),Voltorb
+E2,64,275137,live-verified,Voltorb
 E2,65,275138,unique,Weepinbell
 E2,66,275139,live-verified,Wooper
 E2,67,275140,unique,Aipom
@@ -5057,7 +5057,7 @@ E2,70,275143,live-verified,Chinchou
 E2,71,275144,live-verified,Chinchou
 E2,72,275145,unique,Cubone
 E2,73,275146,unique,Doduo
-E2,74,275147,priced-by-date(1↔2),Drowzee
+E2,74,275148,live-verified,Drowzee
 E2,75,275149,unique,Eevee
 E2,76,275150,live-verified,Exeggcute
 E2,77,275151,live-verified,Exeggcute
@@ -5069,7 +5069,7 @@ E2,82,275156,unique,Hitmontop
 E2,83,275157,unique,Hoppip
 E2,84,275158,priced-by-date(2↔2),Horsea
 E2,85,275159,priced-by-date(2↔2),Horsea
-E2,86,275161,priced-by-date(2↔2),Houndour
+E2,86,275160,live-verified,Houndour
 E2,87,275160,priced-by-date(2↔2),Houndour
 E2,88,275162,unique,Kangaskhan
 E2,89,275163,unique,Larvitar
@@ -5085,7 +5085,7 @@ E2,99,275174,unique,Paras
 E2,100,275175,unique,Phanpy
 E2,101,275176,unique,Pinsir
 E2,102,275177,unique,Ponyta
-E2,103,275179,priced-by-date(1↔2),Porygon
+E2,103,275179,live-verified,Porygon
 E2,104,275180,unique,Psyduck
 E2,105,275181,unique,Remoraid
 E2,106,275130,priced-by-date(2↔2),Scyther
@@ -5130,12 +5130,12 @@ E2,144,275220,unique,Rainbow Energy
 E2,145,275221,unique,Boost Energy
 E2,146,275222,unique,Crystal Energy
 E2,147,275223,unique,Warp Energy
-E2,148,275056,priced-by-date(3↔3),Kingdra
+E2,148,275224,live-verified,Kingdra
 E2,149,275225,unique,Lugia
 E2,150,275226,live-verified,Nidoking
 E2,H1,275052,live-verified,Ampharos
 E2,H10,275051,live-verified,Exeggutor
-E2,H11,275050,priced-by-date(3↔3),Houndoom
+E2,H11,275050,live-verified,Houndoom
 E2,H12,275053,live-verified,Hypno
 E2,H13,275054,live-verified,Jumpluff
 E2,H14,275224,priced-by-date(3↔3),Kingdra
@@ -5145,12 +5145,12 @@ E2,H17,275048,live-verified,Muk
 E2,H18,275043,live-verified,Nidoking
 E2,H19,275042,live-verified,Ninetales
 E2,H2,275041,live-verified,Arcanine
-E2,H20,275044,priced-by-date(2↔2),Octillery
+E2,H20,275044,live-verified,Octillery
 E2,H21,275045,live-verified,Scizor
 E2,H22,275047,live-verified,Slowking
 E2,H23,275058,live-verified,Steelix
 E2,H24,275046,live-verified,Sudowoodo
-E2,H25,275057,priced-by-date(2↔3),Suicune
+E2,H25,275057,live-verified,Suicune
 E2,H26,275061,live-verified,Tentacruel
 E2,H27,275069,live-verified,Togetic
 E2,H28,275071,live-verified,Tyranitar
@@ -5167,7 +5167,7 @@ E2,H8,275065,live-verified,Entei
 E2,H9,275064,live-verified,Espeon
 E3,1,275259,unique,Aerodactyl
 E3,2,275260,live-verified,Alakazam
-E3,3,275261,priced-by-date(2↔2),Arcanine
+E3,3,275261,live-verified,Arcanine
 E3,4,275262,live-verified,Articuno
 E3,5,275263,live-verified,Beedrill
 E3,6,275264,live-verified,Crobat
@@ -5178,20 +5178,20 @@ E3,10,275268,live-verified,Gengar
 E3,11,275269,live-verified,Gyarados
 E3,12,275270,live-verified,Houndoom
 E3,13,275271,live-verified,Jolteon
-E3,14,275272,priced-by-date(3↔4),Kabutops
+E3,14,275272,live-verified,Kabutops
 E3,15,275273,live-verified,Ledian
 E3,16,275274,live-verified,Machamp
-E3,17,275276,priced-by-date(4↔4),Magcargo
+E3,17,275276,live-verified,Magcargo
 E3,18,275275,priced-by-date(4↔4),Magcargo
-E3,19,275278,priced-by-date(4↔4),Magneton
+E3,19,275277,live-verified,Magneton
 E3,20,275277,priced-by-date(4↔4),Magneton
 E3,21,275279,live-verified,Moltres
 E3,22,275280,live-verified,Nidoqueen
 E3,23,275281,unique,Omastar
 E3,24,275301,live-verified,Piloswine
 E3,25,275283,live-verified,Politoed
-E3,26,275284,priced-by-date(2↔2),Poliwrath
-E3,27,275243,priced-by-date(2↔2),Raichu
+E3,26,275284,live-verified,Poliwrath
+E3,27,275285,live-verified,Raichu
 E3,28,275286,live-verified,Raikou
 E3,29,275287,live-verified,Rhydon
 E3,30,275288,live-verified,Starmie
@@ -5199,7 +5199,7 @@ E3,31,275289,live-verified,Steelix
 E3,32,275290,live-verified,Umbreon
 E3,33,275291,live-verified,Vaporeon
 E3,34,275292,unique,Wigglytuff
-E3,35,275293,priced-by-date(2↔2),Xatu
+E3,35,275293,live-verified,Xatu
 E3,36,275294,unique,Electrode
 E3,37,275295,unique,Kabuto
 E3,38,275296,unique,Machoke
@@ -5260,7 +5260,7 @@ E3,94,275353,live-verified,Seel
 E3,95,275352,live-verified,Seel
 E3,96,275354,unique,Shuckle
 E3,97,275355,unique,Skarmory
-E3,98,275357,priced-by-date(2↔2),Slugma
+E3,98,275357,live-verified,Slugma
 E3,99,275356,priced-by-date(2↔2),Slugma
 E3,100,275358,unique,Snorlax
 E3,101,275359,unique,Snubbull
@@ -5312,7 +5312,7 @@ E3,H12,275239,live-verified,Jolteon
 E3,H13,275240,live-verified,Kabutops
 E3,H14,275242,live-verified,Ledian
 E3,H15,275241,live-verified,Machamp
-E3,H16,275235,priced-by-date(4↔4),Magcargo
+E3,H16,275235,live-verified,Magcargo
 E3,H17,275234,priced-by-date(4↔4),Magcargo
 E3,H18,275229,live-verified,Magneton
 E3,H19,275228,priced-by-date(4↔4),Magneton
@@ -5322,7 +5322,7 @@ E3,H21,275231,live-verified,Nidoqueen
 E3,H22,275233,live-verified,Piloswine
 E3,H23,275244,live-verified,Politoed
 E3,H24,275232,live-verified,Poliwrath
-E3,H25,275285,priced-by-date(2↔2),Raichu
+E3,H25,275243,live-verified,Raichu
 E3,H26,275247,live-verified,Raikou
 E3,H27,275257,live-verified,Rhydon
 E3,H28,275254,live-verified,Starmie
@@ -5332,7 +5332,7 @@ E3,H30,275255,live-verified,Umbreon
 E3,H31,275252,live-verified,Vaporeon
 E3,H32,275253,live-verified,Xatu
 E3,H4,275246,live-verified,Beedrill
-E3,H5,275405,priced-by-date(3↔4),Crobat
+E3,H5,275245,live-verified,Crobat
 E3,H6,275248,live-verified,Dewgong
 E3,H7,275249,live-verified,Flareon
 E3,H8,275251,live-verified,Forretress
@@ -5450,9 +5450,9 @@ EPO,3,279968,live-verified,Sewaddle
 EPO,4,279969,live-verified,Sewaddle
 EPO,5,279970,live-verified,Swadloon
 EPO,6,279971,live-verified,Swadloon
-EPO,7,279973,priced-by-date(2↔2),Leavanny
+EPO,7,279973,live-verified,Leavanny
 EPO,8,279972,priced-by-date(2↔2),Leavanny
-EPO,9,279975,priced-by-date(2↔2),Cottonee
+EPO,9,279975,live-verified,Cottonee
 EPO,10,279974,priced-by-date(2↔2),Cottonee
 EPO,11,279976,live-verified,Whimsicott
 EPO,12,279977,live-verified,Whimsicott
@@ -5467,14 +5467,14 @@ EPO,20,279985,unique,Darumaka
 EPO,21,279986,unique,Darmanitan
 EPO,22,279987,unique,Panpour
 EPO,23,279988,unique,Simipour
-EPO,24,279989,priced-by-date(2↔2),Basculin
+EPO,24,279989,live-verified,Basculin
 EPO,25,279990,priced-by-date(2↔2),Basculin
 EPO,26,279991,unique,Ducklett
 EPO,27,279992,unique,Swanna
 EPO,28,279993,live-verified,Cubchoo
 EPO,29,279994,live-verified,Cubchoo
 EPO,30,279995,live-verified,Beartic
-EPO,31,279995,priced-by-date(2↔2),Beartic
+EPO,31,279996,live-verified,Beartic
 EPO,32,279997,unique,Emolga
 EPO,33,279998,unique,Joltik
 EPO,34,279999,unique,Galvantula
@@ -5488,7 +5488,7 @@ EPO,41,280006,live-verified,Sigilyph
 EPO,42,280007,live-verified,Sigilyph
 EPO,43,280008,live-verified,Gothita
 EPO,44,280009,live-verified,Gothita
-EPO,45,280010,priced-by-date(2↔2),Gothorita
+EPO,45,280010,live-verified,Gothorita
 EPO,46,280011,priced-by-date(2↔2),Gothorita
 EPO,47,280012,live-verified,Gothitelle
 EPO,48,280013,live-verified,Gothitelle
@@ -5497,10 +5497,10 @@ EPO,50,280015,live-verified,Roggenrola
 EPO,51,280016,live-verified,Boldore
 EPO,52,280017,live-verified,Boldore
 EPO,53,280018,unique,Gigalith
-EPO,54,280020,priced-by-date(2↔2),Drilbur
+EPO,54,280019,live-verified,Drilbur
 EPO,55,280019,priced-by-date(2↔2),Drilbur
 EPO,56,280021,live-verified,Excadrill
-EPO,57,280021,priced-by-date(2↔2),Excadrill
+EPO,57,280022,live-verified,Excadrill
 EPO,58,280023,unique,Throh
 EPO,59,280024,unique,Sawk
 EPO,60,280025,unique,Sandile
@@ -5548,7 +5548,7 @@ EVO,5,293362,unique,Weedle
 EVO,6,293363,unique,Kakuna
 EVO,7,293364,unique,Beedrill
 EVO,8,293365,unique,Tangela
-EVO,9,293366,priced-by-date(1↔2),Charmander
+EVO,9,293366,live-verified,Charmander
 EVO,10,293367,unique,Charmeleon
 EVO,11,293368,live-verified,Charizard
 EVO,14,293370,unique,Vulpix
@@ -5608,7 +5608,7 @@ EVO,76,293436,unique,Devolution Spray
 EVO,77,293437,unique,Energy Retrieval
 EVO,78,293439,unique,Full Heal
 EVO,79,293441,unique,Maintenance
-EVO,80,293442,priced-by-date(2↔2),Misty's Determination
+EVO,80,293442,live-verified,Misty's Determination
 EVO,81,293443,unique,Pidgeot Spirit Link
 EVO,82,293444,unique,Pokédex
 EVO,83,293445,unique,Potion
@@ -5782,7 +5782,7 @@ EVS,145,574203,unique,Digging Gloves
 EVS,146,574204,unique,Dream Ball
 EVS,147,574205,unique,Elemental Badge
 EVS,148,574206,live-verified,Full Face Guard
-EVS,149,574207,priced-by-date(3↔3),Gordie
+EVS,149,574207,live-verified,Gordie
 EVS,150,574208,unique,Lucky Ice Pop
 EVS,151,574209,unique,Moon & Sun Badge
 EVS,152,574210,live-verified,Raihan
@@ -5796,7 +5796,7 @@ EVS,159,574217,unique,Snow Leaf Badge
 EVS,160,574218,unique,Spirit Mask
 EVS,161,574219,live-verified,Stormy Mountains
 EVS,162,574220,unique,Switching Cups
-EVS,163,574221,priced-by-date(2↔2),Toy Catcher
+EVS,163,574221,live-verified,Toy Catcher
 EVS,164,574222,live-verified,Zinnia's Resolve
 EVS,165,574223,unique,Treasure Energy
 EVS,166,574224,live-verified,Leafeon V
@@ -5835,8 +5835,8 @@ EVS,198,574256,live-verified,Duraludon V
 EVS,199,574257,live-verified,Aroma Lady
 EVS,200,574258,live-verified,Copycat
 EVS,201,574259,priced-by-date(3↔3),Gordie
-EVS,202,574282,priced-by-date(3↔3),Raihan
-EVS,203,574261,priced-by-date(3↔3),Zinnia's Resolve
+EVS,202,574260,live-verified,Raihan
+EVS,203,574261,live-verified,Zinnia's Resolve
 EVS,204,574262,live-verified,Leafeon VMAX
 EVS,205,574263,live-verified,Leafeon VMAX
 EVS,206,574264,live-verified,Trevenant VMAX
@@ -5857,8 +5857,8 @@ EVS,220,574278,live-verified,Duraludon VMAX
 EVS,221,574279,live-verified,Aroma Lady
 EVS,222,574280,live-verified,Copycat
 EVS,223,574281,priced-by-date(3↔3),Gordie
-EVS,224,574260,priced-by-date(3↔3),Raihan
-EVS,225,574283,priced-by-date(3↔3),Zinnia's Resolve
+EVS,224,574282,live-verified,Raihan
+EVS,225,574283,live-verified,Zinnia's Resolve
 EVS,226,574284,unique,Froslass
 EVS,227,574285,unique,Inteleon
 EVS,228,574286,unique,Cresselia
@@ -5873,7 +5873,7 @@ EVS,236,574294,unique,Darkness Energy
 EVS,237,574295,unique,Metal Energy
 FCO,1,289827,unique,Shuckle
 FCO,2,289828,unique,Burmy
-FCO,3,289868,priced-by-date(3↔3),Wormadam
+FCO,3,289829,live-verified,Wormadam
 FCO,4,289830,unique,Mothim
 FCO,5,289831,unique,Snivy
 FCO,6,289832,unique,Servine
@@ -5907,7 +5907,7 @@ FCO,36,289862,unique,Diglett
 FCO,37,289863,unique,Marowak
 FCO,38,289864,unique,Kabuto
 FCO,39,289865,unique,Kabutops
-FCO,40,290535,priced-by-date(2↔2),Larvitar
+FCO,40,290534,live-verified,Larvitar
 FCO,41,290534,priced-by-date(2↔2),Larvitar
 FCO,42,289866,unique,Pupitar
 FCO,44,289880,priced-by-date(3↔3),Wormadam
@@ -5927,7 +5927,7 @@ FCO,59,289829,priced-by-date(3↔3),Wormadam
 FCO,60,289881,unique,Bronzor
 FCO,61,289882,unique,Bronzong
 FCO,62,289883,unique,Bronzong BREAK
-FCO,63,449708,priced-by-date(2↔6),Lucario
+FCO,63,289884,live-verified,Lucario
 FCO,65,289886,unique,Jigglypuff
 FCO,66,289887,unique,Wigglytuff
 FCO,67,289888,unique,Mr. Mime
@@ -5969,7 +5969,7 @@ FCO,107,289927,unique,Pokémon Fan Club
 FCO,108,289928,unique,Power Memory
 FCO,109,289929,unique,Random Receiver
 FCO,110,289930,unique,Scorched Earth
-FCO,111,289931,priced-by-all(2↔2),Shauna
+FCO,111,289931,live-verified,Shauna
 FCO,111a,311411,live-verified,Shauna
 FCO,112,289932,live-verified,Team Rocket's Handiwork
 FCO,113,289933,live-verified,Ultra Ball
@@ -6030,7 +6030,7 @@ FFI,56,281720,unique,Mienfoo
 FFI,57,281721,unique,Mienshao
 FFI,58,281722,unique,Landorus
 FFI,59,281723,live-verified,Pancham
-FFI,60,281724,priced-by-date(2↔2),Pancham
+FFI,60,281724,live-verified,Pancham
 FFI,61,281725,unique,Tyrunt
 FFI,62,281726,unique,Tyrantrum
 FFI,63,281727,unique,Hawlucha
@@ -6160,7 +6160,7 @@ FLF,90,281573,live-verified,Lysandre
 FLF,91,281574,live-verified,Magnetic Storm
 FLF,92,281575,unique,Pal Pad
 FLF,93,281576,live-verified,Pokémon Center Lady
-FLF,94,281577,priced-by-date(2↔3),Pokémon Fan Club
+FLF,94,281577,live-verified,Pokémon Fan Club
 FLF,95,281578,unique,Protection Cube
 FLF,96,281579,unique,Sacred Ash
 FLF,97,281580,live-verified,Startling Megaphone

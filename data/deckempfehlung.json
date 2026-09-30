@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-09-29 13:39:25+00:00",
+ "erzeugt": "2026-09-30 16:12:58+00:00",
  "format": "TEF-30C",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -21,27 +21,27 @@
  ],
  "ankerspieler_gesamt": 3609,
  "online_abdeckung": {
-  "schnappschuss": "2026-09-29",
-  "anteil_unbekannt": 1.13,
+  "schnappschuss": "2026-09-30",
+  "anteil_unbekannt": 1.28,
   "groesste_unbekannte": [
    {
     "deck": "Froslass Munkidori",
-    "anteil": 0.2
+    "anteil": 0.19
    },
    {
     "deck": "Mega Gengar",
-    "anteil": 0.12
+    "anteil": 0.14
    },
    {
-    "deck": "Mega Diancie",
-    "anteil": 0.08
-   },
-   {
-    "deck": "Mega Zygarde",
-    "anteil": 0.08
+    "deck": "Zygarde Barbaracle",
+    "anteil": 0.1
    },
    {
     "deck": "Ursaluna Lunatone",
+    "anteil": 0.09
+   },
+   {
+    "deck": "Mega Diancie",
     "anteil": 0.08
    }
   ]

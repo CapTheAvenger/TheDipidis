@@ -1,0 +1,55 @@
+From 654b61f42e69d71cdeca48a98be86edd3ecfa9b5 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Wed, 30 Sep 2026 08:39:28 +0200|
+Subject: [PATCH] Setwechsel-Probe: stdout traegt nur die Ergebniszeile;|
+ Verify-Zusicherung prueft die Regel|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01T8gGALnD44a7XtwTPafXBa|
+---|
+ scripts/simuliere_setwechsel.py           |  8 +++++++-|
+ tests/python/test_simuliere_setwechsel.py | 14 ++++++++++++++|
+ 2 files changed, 21 insertions(+), 1 deletion(-)|
+|
+diff --git a/scripts/simuliere_setwechsel.py b/scripts/simuliere_setwechsel.py|
+index 59d8d6a..4142dfd 100644|
+--- a/scripts/simuliere_setwechsel.py|
++++ b/scripts/simuliere_setwechsel.py|
+@@ -36,2 +36,3 @@ AUFRUF|
+ import argparse|
++import contextlib|
+ import csv|
+@@ -210,3 +211,8 @@ def main(argv=None):|
+     datum = auto_datum(baum) if a.datum == "auto" else a.datum|
+-    erg = setwechsel(baum, a.en, a.jp, datum)|
++    # stdout traegt NUR die Ergebniszeile: setwechsel-probe.yml liest sie|
++    # als JSON. Das Protokoll von update_sets.py („[Update Sets] …") ging|
++    # bis 30.09.2026 ebenfalls nach stdout, und die erste Probe (PR #874)|
++    # scheiterte an „Expecting value: line 1 column 2".|
++    with contextlib.redirect_stdout(sys.stderr):|
++        erg = setwechsel(baum, a.en, a.jp, datum)|
+     erg["datum"] = datum|
+diff --git a/tests/python/test_simuliere_setwechsel.py b/tests/python/test_simuliere_setwechsel.py|
+index 413f17e..a64b819 100644|
+--- a/tests/python/test_simuliere_setwechsel.py|
++++ b/tests/python/test_simuliere_setwechsel.py|
+@@ -66 +66,15 @@ def test_der_automatische_tag_traegt_den_ankerriegel(tmp_path):|
+     assert tag > "2026-09-01"|
++|
++|
++def test_stdout_traegt_nur_die_ergebniszeile(tmp_path, capsys, monkeypatch):|
++    """setwechsel-probe.yml liest stdout als JSON (30.09.2026: die erste|
++    Probe scheiterte am Protokoll von update_sets.py davor). Ausgefuehrt:|
++    ein setwechsel(), der wie update_sets.py protokolliert."""|
++    def laut(baum, en, jp, datum):|
++        print("[Update Sets] + New set ZZN (2026-09-28) -> order 162")|
++        return {"current_set": en, "current_set_jp": jp}|
++    monkeypatch.setattr(sim, "setwechsel", laut)|
++    assert sim.main([str(tmp_path), "--datum", "2026-09-28"]) == 0|
++    aus = capsys.readouterr()|
++    assert json.loads(aus.out)["datum"] == "2026-09-28"|
++    assert "[Update Sets]" in aus.err|
+-- |
+2.43.0|
+|
+|

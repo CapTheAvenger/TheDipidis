@@ -235,11 +235,13 @@ def fetch_sitemap_urls(session):
     subs = [u for u in locs(r.text) if '/sitemap' in u]
     print(f'sitemap index: {len(subs)} sub-sitemaps')
     urls = []
+    fehlend = []
     for i, sm in enumerate(subs, 1):
         try:
             rr = session.get(sm, timeout=30)
             if rr.status_code != 200:
                 print(f'  {sm} -> HTTP {rr.status_code} (skipped)')
+                fehlend.append(sm)
                 continue
             got = locs(rr.text)
             urls.extend(got)
@@ -247,8 +249,9 @@ def fetch_sitemap_urls(session):
                 print(f'  {i}/{len(subs)} sub-sitemaps, {len(urls)} urls so far')
         except Exception as e:  # noqa: BLE001
             print(f'  {sm} -> ERROR {e} (skipped)')
+            fehlend.append(sm)
         time.sleep(PACE)
-    return urls
+    return urls, fehlend
 
 
 def index_urls(urls, slug_to_code, set_slugs, our_cards, our_names=None):
@@ -319,8 +322,18 @@ def main():
     print(f'our cards: {len(our_cards)} | unverified: {sum(our_cards.values())} '
           f'| set codes with a known expansion: {len(our_expansions)}')
 
-    urls = fetch_sitemap_urls(s)
+    urls, fehlend = fetch_sitemap_urls(s)
     print(f'\ntotal sitemap urls: {len(urls)}')
+    # REPORT, DON'T SILENTLY REPAIR (30.09.2026): bis heute wurde ein
+    # uebersprungenes Teil-Sitemap nur ins Log geschrieben und der Index
+    # danach trotzdem neu geschrieben — mit den Zeilen, die fehlten, einfach
+    # weg (60.965 Zeilen im Bestand). Lauf #4 und #5 hingen stundenlang an
+    # der Quelle. Fehlt ein Teil, wird nichts geschrieben; der alte Index
+    # bleibt, und der Lauf ist rot mit Namen.
+    if fehlend:
+        print(f'::error::pokepricelab-index: {len(fehlend)} Teil-Sitemap(s) nicht '
+              f'gelesen — Index NICHT neu geschrieben. Erstes: {fehlend[0]}')
+        return 1
 
     slug_to_code, set_slugs = derive_slug_to_code(urls, our_expansions)
     rows, unmatched, vetoed = index_urls(urls, slug_to_code, set_slugs,

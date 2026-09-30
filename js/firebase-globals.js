@@ -786,6 +786,57 @@ function _restoreUserDataBackup(userId) {
   }
 }
 
+// ── Löschmarken (FE-18) ──────────────────────────────────────────────
+// Ein gelöschtes Deck blieb nicht gelöscht: _pushMirrorToServer schreibt den
+// ganzen lokalen Spiegel zurück, also brachte ein Gerät mit altem Spiegel das
+// Deck auf den Server, und _adoptServerOnlyDecks holte es überall zurück.
+// Jetzt hinterlässt jede Löschung eine Marke users/{uid}/deckTombstones/{id}
+// (zusammen mit dem Löschen des Decks in EINEM Batch) und zusätzlich lokal.
+// Deck-IDs kommen aus Firestore (doc().id) und werden nie wiederverwendet —
+// eine Marke gilt darum für immer, ohne Zeitvergleich.
+function _tombstoneKey(userId) {
+  return 'tcg_deck_tombstones_' + userId;
+}
+function _readLocalTombstones(userId) {
+  if (!userId) return [];
+  try {
+    var raw = localStorage.getItem(_tombstoneKey(userId));
+    var arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(function (x) { return typeof x === 'string' && x; }) : [];
+  } catch (_) { return []; }
+}
+function _addLocalTombstone(userId, deckId) {
+  if (!userId || !deckId) return;
+  try {
+    var ids = _readLocalTombstones(userId);
+    if (ids.indexOf(deckId) === -1) ids.push(deckId);
+    localStorage.setItem(_tombstoneKey(userId), JSON.stringify(ids));
+  } catch (err) {
+    console.warn('[tombstone] local write failed:', err && err.message);
+  }
+}
+// Rein: Decks ohne die Löschmarken-IDs. Entfernt nie etwas anderes.
+function _ohneLoeschmarken(decks, ids) {
+  var dead = new Set(ids || []);
+  return (decks || []).filter(function (d) { return !(d && d.id && dead.has(d.id)); });
+}
+window._ohneLoeschmarken = _ohneLoeschmarken;
+// Löschmarken vom Server (frisch = echte Serverantwort, nicht der Cache).
+// ids enthält immer auch die lokalen Marken.
+async function _ladeLoeschmarken(userId) {
+  var local = _readLocalTombstones(userId);
+  try {
+    var snap = await window.db.collection('users').doc(userId).collection('deckTombstones').get();
+    var frisch = !(snap.metadata && snap.metadata.fromCache);
+    var ids = local.slice();
+    snap.forEach(function (doc) { if (ids.indexOf(doc.id) === -1) ids.push(doc.id); });
+    return { ids: ids, frisch: frisch };
+  } catch (err) {
+    console.warn('[tombstone] could not read tombstones:', err && err.message);
+    return { ids: local, frisch: false };
+  }
+}
+
 // Push the entire deck mirror to Firestore in one batched write so any
 // offline edits / additions made on this device land on the server.
 // Uses set() WITHOUT merge so nested map fields (the deck's `cards`
@@ -798,10 +849,27 @@ async function _pushMirrorToServer(userId) {
   if (!userId || !window.db || !firebase || !firebase.firestore) return;
   const mirror = _readDeckBackup(userId);
   if (!mirror || !Array.isArray(mirror.decks) || mirror.decks.length === 0) return;
+  // Ohne frische Löschmarken vom Server wird NICHT geschrieben: ein Schreiben
+  // auf Verdacht ist genau das, was gelöschte Decks zurückbringt. Der nächste
+  // Start versucht es erneut, nichts geht verloren.
+  const marken = await _ladeLoeschmarken(userId);
+  if (!marken.frisch) return;
+  const lebendig = _ohneLoeschmarken(mirror.decks, marken.ids);
+  if (lebendig.length !== mirror.decks.length) {
+    // Dieses Gerät hielt Decks, die anderswo gelöscht wurden — hier auch weg.
+    window.userDecks = _ohneLoeschmarken(window.userDecks, marken.ids);
+    _writeDeckBackup(userId, window.userDecks);
+    if (typeof updateDecksUI === 'function') updateDecksUI();
+  }
   try {
     const deckCol = window.db.collection('users').doc(userId).collection('decks');
     const batch = window.db.batch();
-    for (const d of mirror.decks) {
+    // Lokale Marken, die den Server noch nicht erreicht haben, nachreichen.
+    _readLocalTombstones(userId).forEach(function (id) {
+      batch.set(window.db.collection('users').doc(userId).collection('deckTombstones').doc(id),
+        { deletedAtMs: Date.now() }, { merge: true });
+    });
+    for (const d of lebendig) {
       if (!d.id) continue;
       const payload = Object.assign({}, d);
       delete payload.id;
@@ -816,7 +884,7 @@ async function _pushMirrorToServer(userId) {
       batch.set(deckCol.doc(d.id), payload);
     }
     await batch.commit();
-    console.info('[pushMirrorToServer] flushed', mirror.decks.length, 'decks to server');
+    console.info('[pushMirrorToServer] flushed', lebendig.length, 'decks to server');
   } catch (err) {
     console.warn('[pushMirrorToServer] batch.commit failed:', err && err.message);
   }
@@ -850,9 +918,12 @@ async function _adoptServerOnlyDecks(userId, mirrorDecks) {
     // A cache-only snapshot says nothing new — the mirror already covers it.
     if (snapshot.metadata && snapshot.metadata.fromCache) return;
 
-    const server = [];
+    let server = [];
     snapshot.forEach(doc => server.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) }));
-    const { decks, adopted } = _mergeAdoptOnly(mirrorDecks, server);
+    const marken = await _ladeLoeschmarken(userId);
+    if (!marken.frisch) return;
+    server = _ohneLoeschmarken(server, marken.ids);
+    const { decks, adopted } = _mergeAdoptOnly(_ohneLoeschmarken(mirrorDecks, marken.ids), server);
     if (!adopted.length) return;
 
     decks.sort((a, b) => {
@@ -899,8 +970,7 @@ async function loadUserDecks(userId, opts) {
   // Deliberately NOT fixed here, because each needs work this change
   // cannot carry safely (see the review notes in the commit message):
   //   * a deck edited on two devices still resolves to the local copy
-  //   * a deck deleted on device A can still be resurrected by device B's
-  //     whole-mirror push (pre-existing; unchanged by this)
+  //   * (erledigt, FE-18: Löschmarken users/{uid}/deckTombstones)
   // Both need per-deck timestamps written by _persistDeckMutation and a
   // single clock domain first.
   if (haveMirror && !forcePull) {
@@ -918,6 +988,12 @@ async function loadUserDecks(userId, opts) {
     const snapshot = await window.db.collection('users').doc(userId).collection('decks').get();
     const fresh = [];
     snapshot.forEach(doc => fresh.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) }));
+    const markenFp = await _ladeLoeschmarken(userId);
+    if (markenFp.frisch) {
+      const lebendigFp = _ohneLoeschmarken(fresh, markenFp.ids);
+      fresh.length = 0;
+      lebendigFp.forEach(d => fresh.push(d));
+    }
     fresh.sort((a, b) => {
       const tsA = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAtMs || 0);
       const tsB = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAtMs || 0);

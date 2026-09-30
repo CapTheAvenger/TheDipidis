@@ -847,30 +847,58 @@ jobs:
         run: |
           python3 scripts/reconcile_tournament_coverage.py data
 
-      - name: is_ace_spec nachrechnen (melden, nicht reparieren)
-        # Am 01.09.2026 kam die Drift zurueck: der Scraper uebernahm
-        # is_ace_spec aus der Stichprobenzeile und liess das Feld leer,
-        # wenn die Stichprobe leer war — 7.790 unbelegte Felder, darunter
-        # Pokemon. Gemerkt hat es niemand, bis
-        # tests/python/test_ace_spec_bestand.py im Deploy rot wurde. Und
-        # ein roter Deploy heisst: die ganze Seite bleibt stehen, wegen
-        # einer Spalte, die das Frontend nicht einmal liest.
+      - name: ACE-SPEC-Liste aus der Quelle nachziehen
+        # DA-22 (Hausi, 30.09.2026): „Falls irgendwann mal neue ACE SPECs
+        # kommen, dann muessen die ja korrekt erkannt werden." Bis hierhin
+        # wurde data/ace_specs.json von Hand gepflegt — ein neues Set mit
+        # einer ACE SPEC haette die Liste unvollstaendig gemacht, ohne dass
+        # es jemand merkt, und der Deckbau (window.isAceSpec liest dieselbe
+        # Datei) haette die Karte zweimal zugelassen.
         #
-        # Die Ursache ist behoben (backend/scrapers/tournament_scraper_JH.py).
-        # Dieser Schritt ist das Netz darunter, und er haengt bewusst HIER:
-        # vor dem Commit, solange der Deploy noch gruen ist.
+        # Das Skript liest limitlesstcg.com/cards?q=is:ace (EN) und
+        # /cards/jp?q=is:ace (JP). JP-Namen kommen ueber (Set, Nummer) aus
+        # unserer japanese_cards_database.csv, nie aus der Uebersetzung der
+        # Seite. Es nimmt nur auf, entfernt nichts; liefert die Quelle
+        # nichts oder Unplausibles, bleibt die Liste stehen (::warning::).
         #
-        # Nur melden, nicht schreiben — CLAUDE.md, "Report, don't silently
-        # repair". Faende der Lauf Drift, waere das ein Hinweis auf eine
-        # NEUE Quelle unbelegter Zeilen; die will man ansehen, nicht stumm
-        # ueberschreiben lassen. Geraeumt wird danach von Hand ueber den
-        # Workflow "Daten reparieren" (ace-spec-reparatur.yml).
-        #
-        # Weich wie die Abgleichung darueber: ::warning:: auf der Laufseite,
-        # Exit 0. Ein Hinweis darf den Wochenlauf nicht abbrechen, den er
-        # retten soll. Mit --streng wuerde er gaten.
+        # Steht HINTER den Scrapern (die JP-Kartendatenbank ist dann frisch)
+        # und VOR der Berichtigung darunter, damit die mit der neuen Liste
+        # rechnet. Nicht blockierend, aber im Herzschlag (S5).
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
         run: |
-          python3 scripts/repariere_ace_spec.py --melden
+          set +e
+          python3 scripts/ace_specs_nachziehen.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::ace_specs_nachziehen endete mit $rc — die Liste bleibt auf ihrem Stand"
+              echo "FAIL scripts/ace_specs_nachziehen.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/ace_specs_nachziehen.py" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+          exit 0
+
+      - name: is_ace_spec nach der Regel berichtigen
+        # ENTSCHEIDUNG HAUSI, 30.09.2026 (DA-22): „Da-22 muss auf jeden Fall
+        # repariert werden." Bis hierhin stand hier `--melden`: der Lauf
+        # meldete die Drift, geschrieben wurde von Hand ueber „Daten
+        # reparieren". Die Drift kam aber nach jedem neuen JP-Set wieder
+        # (30.09.: 35 Felder, 29 davon in city_league_analysis.csv) — eine
+        # neue Karte hat beim Schreiben noch keinen Beleg, der Bestand
+        # liefert ihn eine Woche spaeter. Das ist kein Fehler, den man
+        # ansehen muss, sondern der normale Weg der Belege.
+        #
+        # Warum das kein stilles Reparieren ist: geschrieben wird nur, was
+        # die EINE Regel (backend/core/ace_spec_regel.py) aus Belegen ergibt,
+        # nur in der Spalte is_ace_spec, und das Skript prueft danach Datei
+        # fuer Datei, dass keine andere Spalte anders ist (sonst rc 2, der
+        # Lauf wird rot und pusht nicht). Die Zahl der berichtigten Felder
+        # steht als ::notice:: auf der Laufseite.
+        #
+        # Hinter dem Rueckweg nach data/ und vor dem Tor: das Tor prueft den
+        # berichtigten Stand, und genau der wird committet.
+        run: |
+          python3 scripts/repariere_ace_spec.py --schreiben
 
       - name: Kartentyp im Decklistenbestand nachziehen
         # WOZU: data/tournament_decklists_per_player.csv fuehrt eine

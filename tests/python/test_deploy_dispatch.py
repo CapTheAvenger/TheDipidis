@@ -123,7 +123,10 @@ def _pusht_nach_main(text):
             continue
         # Seit dem 27.09.2026 schreiben drei Ablaeufe ueber
         # scripts/daten_pushen.sh — das ist ebenfalls ein Push nach main.
-        if "git push" in nackt or "scripts/daten_pushen.sh" in nackt:
+        # Seit dem 30.09.2026 pushen die Datenlaeufe ueber
+        # scripts/push_nach_rebase.sh.
+        if ("git push" in nackt or "scripts/daten_pushen.sh" in nackt
+                or "scripts/push_nach_rebase.sh" in nackt):
             return True
     return False
 

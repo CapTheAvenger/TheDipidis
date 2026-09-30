@@ -29,10 +29,10 @@
    "P-A"
   ],
   "ohne_namen": [],
-  "nicht_mehr_auf_der_quellseite": [
+  "nicht_mehr_auf_der_quellseite": [],
+  "geaendert_in_diesem_lauf": [
    "B4b"
   ],
-  "geaendert_in_diesem_lauf": [],
   "nachgetragen": [],
   "nachtrag_bestaetigt": [
    {
@@ -64,7 +64,7 @@
   "B3b": "Everyday Wonders",
   "B4": "Ruler of the Skies",
   "B4a": "Team Rocket's Ambition",
-  "B4b": "Deluxe Pack Mega",
+  "B4b": "Deluxe Pack: Mega",
   "P-A": "Promo A",
   "P-B": "Promo B"
  }

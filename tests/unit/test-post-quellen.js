@@ -204,7 +204,7 @@ test('eine fehlende Zahl wird gemeldet, nicht als "NaN" gemalt', () => {
 
 /* ── Der Nenner ───────────────────────────────────────────────────── */
 
-test('der Nenner ist die erfasste Spielerzahl, nicht die Summe der Zeilen', async () => {
+test('der Nenner ist die erfasste Spielerzahl, nicht die Summe der Zeilen', async (t) => {
     /* DER TEURE FEHLER (04.09.2026).
      * Summe der Spalte count = 38.398, erfasste Spieler = 39.842.
      * 1.444 Spieler stehen in keiner Deckzeile, und es gibt kein
@@ -213,9 +213,18 @@ test('der Nenner ist die erfasste Spielerzahl, nicht die Summe der Zeilen', asyn
     const stat = JSON.parse(fs.readFileSync(D('data/limitless_meta_stats.json'), 'utf8'));
     const roh = Q.liesCsv(fs.readFileSync(D('data/limitless_online_decks.csv'), 'utf8'), ';');
     const summe = roh.reduce((a, r) => a + (Q.zahlAus(r.count) || 0), 0);
-    assert.ok(Math.abs(summe - stat.players) > 100,
-        'Summe und erfasste Spielerzahl liegen beieinander — dann prüft dieser ' +
-        `Test die Lücke nicht mehr (${summe} vs. ${stat.players})`);
+    /* GEAENDERT 30.09.2026 (WZ-22): hier stand eine Zusicherung, dass
+     * die Luecke ueber 100 liegt. Werden die Daten besser und Summe und
+     * Spielerzahl gleich, waere der Test rot geworden und haette den
+     * Push eines richtigen Datenlaufs angehalten. Auf solchen Daten laesst
+     * sich die Verwechslung nicht unterscheiden — dann wird das GESAGT
+     * (Skip mit Grund), nicht als Fehler gemeldet. Gemessen 30.09.2026:
+     * 9.934 gegen 9.555. */
+    if (Math.abs(summe - stat.players) <= 100) {
+        t.skip(`Summe (${summe}) und Spielerzahl (${stat.players}) liegen beieinander — ` +
+               'an diesen Daten ist die Verwechslung nicht pruefbar');
+        return;
+    }
 
     const erg = await Q.lade('meta-online');
     assert.ok(erg.fuss.includes(Q.tausend(stat.players)),

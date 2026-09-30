@@ -335,20 +335,19 @@ describe('Dieselbe Formel ist noch keine Vergleichbarkeit', () => {
                         { wert: 40, konvention: 'ohneUnentschieden' }), 10);
     });
 
-    it('an den echten Zahlen: 112-122-20 gegen 48,69 % online', () => {
+    it('an echten Zahlen: 112-122-20 (Worlds) gegen 983-988-27 (online)', () => {
         /* Mega Excadrill bei den Worlds in San Francisco gegen seinen
-           kumulativen Online-Stand. Die Bilanz steht in
-           data/labs_tournament_decks.csv (tournament_id 0071), die
-           48,69 % in data/limitless_online_decks.csv — beide werden hier
-           aus den Dateien gelesen, nicht abgeschrieben. */
-        const labs = zeilen('data/labs_tournament_decks.csv', ',')
-            .filter((r) => r.tournament_id === '0071' && /xcadrill/.test(r.deck_name || ''));
-        assert.strictEqual(labs.length, 1, 'Mega Excadrill steht nicht genau einmal bei 0071');
-        const L = bilanz(labs[0], ['wins', 'losses', 'ties']);
-        const online = zeilen('data/limitless_online_decks.csv', ';')
-            .filter((r) => /xcadrill/.test(r.deck_name || ''));
-        assert.strictEqual(online.length, 1);
-        const O = bilanz(online[0], ['wins', 'losses', 'ties']);
+           Online-Stand. BIS 30.09.2026 las dieser Test beide Bilanzen aus
+           den Live-Dateien — die Online-Zahl aus dem rollenden 14-Tage-
+           Fenster data/limitless_online_decks.csv. Faellt das Deck dort
+           heraus oder aendert sich die Bilanz, waere der Test rot geworden
+           und haette den Push eines richtigen Datenlaufs angehalten (WZ-22).
+           Die Aussage ist eine Eigenschaft der RECHNUNG, deshalb stehen die
+           Zahlen jetzt fest, mit Quelle und Datum:
+             labs_tournament_decks.csv, tournament_id 0071:  112-122-20
+             limitless_online_decks.csv, 30.09.2026:         983-988-27 */
+        const L = { s: 112, n: 122, u: 20 };
+        const O = { s: 983, n: 988, u: 27 };
 
         const labsMit = W.KONVENTIONEN.mitUnentschieden.rechne(L.s, L.n, L.u);
         const onlMit  = W.KONVENTIONEN.mitUnentschieden.rechne(O.s, O.n, O.u);

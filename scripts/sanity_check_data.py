@@ -196,6 +196,52 @@ GLOB_RULES: tuple = (
 GLOB_MAX_LOSS = 0.10   # mehr als 10 % weniger Zeilen als in HEAD = Revert
 
 
+# ── SC-10 (30.09.2026): Dateien, die nur WACHSEN. Gemessen am 30.09.2026
+# lagen die festen Schwellen oben bei 7 % (player_continuity.csv, 2.000
+# von 28.031) bis 73 % des Bestands, und tournament_decklists_per_player.csv
+# stand mit 245.829 Zeilen auf Schwelle 0 — ein Zusammenbruch auf ein
+# Drittel waere durchgegangen. Eine hoehere Handzahl waere in drei Wochen
+# wieder veraltet; die Bedingung, die gemeint ist, heisst: diese Dateien
+# verlieren keine Zeilen. Belegt am Verlauf (git log, bis zu 25 Staende
+# je Datei): keine davon ist je geschrumpft.
+#
+# NICHT hier, weil sie bei einem Setwechsel zu Recht schrumpfen:
+# japanese_cards_database.csv (fuehrt nur die neuesten JP-Sets),
+# labs_tournament_matchups.csv, die City-League- und Current-Meta-Dateien
+# (update_sets.py leert sie bei der Rotation). Fuer sie gilt weiter die
+# feste Untergrenze — die faengt den leeren Lauf, nicht die Rotation.
+KUMULATIV: tuple = (
+    'player_continuity.csv',
+    'tournament_decklists_per_player.csv',
+    'all_cards_database.csv',
+    'all_cards_merged.csv',
+    'price_data.csv',
+    'cardmarket_id_mapping.csv',
+)
+KUMULATIV_MAX_LOSS = 0.10
+
+
+def geaenderte_json(data_dir_abs: str, repo_root: str) -> list:
+    """data/*.json, die sich gegenueber HEAD geaendert haben oder neu sind."""
+    try:
+        rel = os.path.relpath(data_dir_abs, repo_root).replace(os.sep, '/')
+        res = subprocess.run(
+            ['git', 'status', '--porcelain', '--', rel],
+            cwd=repo_root, capture_output=True, text=True, timeout=60)
+        if res.returncode != 0:
+            return []
+    except (subprocess.SubprocessError, OSError):
+        return []
+    raus = []
+    for zeile in res.stdout.splitlines():
+        pfad = zeile[3:].strip().strip('"')
+        if ' -> ' in pfad:
+            pfad = pfad.split(' -> ', 1)[1]
+        if pfad.endswith('.json') and zeile[:2].strip() != 'D':
+            raus.append(os.path.join(repo_root, pfad))
+    return sorted(raus)
+
+
 def head_csv_rows(path: str, repo_root: str) -> int:
     """Zeilenzahl derselben Datei im letzten Commit. -1, wenn die Datei
     dort nicht existiert (neu angelegt) oder git nicht antwortet."""
@@ -380,6 +426,47 @@ def main(argv: list[str]) -> int:
               f'HEAD-Stand geprueft (Verlustgrenze '
               f'{int(GLOB_MAX_LOSS * 100)} %)')
         print()
+
+    # ── SC-10: wachsende Dateien gegen ihren eigenen HEAD-Stand ──
+    for fname in KUMULATIV:
+        path = os.path.join(data_dir_abs, fname)
+        if not os.path.isfile(path):
+            continue      # fehlt → oben schon wiederhergestellt und gemeldet
+        rows = count_csv_rows(path)
+        vorher = head_csv_rows(path, repo_root)
+        if rows < 0 or vorher < 0:
+            continue      # unlesbar → oben gemeldet; neu → kein Vergleich
+        grenze = int(vorher * (1 - KUMULATIV_MAX_LOSS))
+        if rows < grenze:
+            ok = git_checkout(path, repo_root)
+            tag = 'REVERTED' if ok else 'REVERT-FAILED'
+            reverts.append(f'{fname}: {rows} < {grenze} (HEAD {vorher}, waechst sonst nur) → {tag}')
+            print(f'  ❌ {fname:55s} {rows:>8} rows  (HEAD {vorher}, {tag})')
+            print(f'    ::error::Data sanity: {fname} waechst sonst nur und '
+                  f'verliert jetzt {vorher - rows} von {vorher} Zeilen '
+                  f'(> {int(KUMULATIV_MAX_LOSS * 100)} %); auf den letzten '
+                  f'guten Stand zurueckgesetzt ({tag})')
+        else:
+            print(f'  ✓     {fname:55s} {rows:>8} rows  (HEAD {vorher}, waechst nur)')
+
+    # ── SC-10: jede geaenderte JSON-Datei muss sich lesen lassen ──
+    # Eine halb geschriebene oder kaputte JSON-Datei laesst die Seite an
+    # genau der Stelle leer, die sie liest — ohne dass eine Zeilenzahl
+    # das je bemerkt haette.
+    import json as _json
+    for path in geaenderte_json(data_dir_abs, repo_root):
+        fname = os.path.relpath(path, data_dir_abs)
+        try:
+            with open(path, encoding='utf-8') as f:
+                _json.load(f)
+        except (OSError, UnicodeDecodeError, ValueError) as e:
+            ok = git_checkout(path, repo_root)
+            tag = 'REVERTED' if ok else 'REVERT-FAILED (neu, nicht in HEAD)'
+            reverts.append(f'{fname}: kein gueltiges JSON → {tag}')
+            print(f'  ❌ {fname:55s} kein JSON  ({tag})')
+            print(f'    ::error::Data sanity: {fname} ist kein gueltiges JSON '
+                  f'({e.__class__.__name__}: {str(e)[:120]}); auf den letzten '
+                  f'guten Stand zurueckgesetzt ({tag})')
 
     # Anomaly watch — files that should be empty (F-D08 __unsorted etc.).
     anomalies: list[str] = []

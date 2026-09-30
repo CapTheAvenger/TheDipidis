@@ -505,10 +505,16 @@ def _clean_deck_name(name: str) -> str:
     return cleaned or name  # never return empty if regex over-matches
 
 
+class DecklisteNichtAbrufbar(Exception):
+    """Die Seite einer Deckliste kam nicht (auch nicht nach den Wiederholungen
+    in fetch_page_bs4). Getrennt von „Seite kam, aber ohne Karten“, damit ein
+    abgebrochener Abruf das Turnier nicht als erledigt markiert (SC-9)."""
+
+
 def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[list, str]:
     soup = fetch_page_bs4(deck_url)
     if not soup:
-        return [], "Unknown Deck"
+        raise DecklisteNichtAbrufbar(deck_url)
 
     title_elem = soup.select_one(".decklist-title")
     raw_deck_name = title_elem.get_text(strip=True) if title_elem else "Unknown Deck"
@@ -1562,6 +1568,7 @@ def main():
 
         logger.info("Lade %s Decklisten parallel...", len(deck_links))
         decks_data = []
+        nicht_abrufbar = []
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=settings["max_workers"]) as executor:
             futures = {
@@ -1579,7 +1586,23 @@ def main():
                             "deck_name": d_name
                         })
                 except Exception as e:
+                    nicht_abrufbar.append(d_info["url"])
                     logger.warning(f"Fehler bei {d_info['url']}: {e}")
+
+        # SC-9 (30.09.2026): bis heute reichte EIN erfolgreich geholtes Deck,
+        # und das Turnier stand fuer immer als erledigt im Ledger — mit den
+        # Karten nur der Decks, die gerade kamen. Ein abgebrochener Abruf
+        # wird jetzt weder geschrieben noch markiert, sondern benannt und im
+        # naechsten Lauf wiederholt.
+        if nicht_abrufbar:
+            t["cards"]  = []
+            t["status"] = "unvollstaendig"
+            print(f"::warning::tournament_scraper_JH: {len(nicht_abrufbar)} von "
+                  f"{len(deck_links)} Decklisten von {t['name']} (id {t.get('id')}) "
+                  f"nicht abrufbar — Turnier NICHT geschrieben und NICHT als "
+                  f"erledigt markiert, naechster Lauf holt es erneut. Erste: "
+                  f"{nicht_abrufbar[0]}")
+            continue
 
         if decks_data:
             if not t.get("format"):

@@ -23,7 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     # 271 sub-sitemaps at ~0.6s pace is ~3 min of waiting, but the files
     # are large and the first run hit the 30-min wall — give it room.
-    timeout-minutes: 60
+    # 30.09.2026: gemessen #2 50 min, #3 22 min, #4 nach 60 min abgebrochen
+    # (nur der Sitemap-Abruf, danach kommen noch Tor und Push, ~8 min).
+    # Die Dauer haengt an der Antwortzeit von pokepricelab.com, nicht an uns.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

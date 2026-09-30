@@ -804,7 +804,8 @@ describe('UI-51/UI-52/DA-18 (30.09.2026): Stufe der Box, Reihenfolge der Chips, 
     const legal = box('l', 'Ceruledge', [{ id: 'PBL-12', typ: P, anteil: 90, formate: { 'TEF-PBL': 90 } },
         { id: 'OBF-186', typ: 'Supporter', anteil: 95, formate: { 'SVI-PFL': 95 } }]);
     const raus = box('r', 'Lost Box', [{ id: 'LOR-81', typ: P, anteil: 80, formate: { 'SVI-PFL': 80 } }, { id: 'PBL-3', typ: P, anteil: 60 }]);
-    const unbekannt = box('u', 'Mew Box', [{ id: 'MEW-151', typ: P, refs: ['SVP-53'], anteil: 70, formate: { 'SVI-PFL': 70 } }]);
+    // Reiner Promo ohne Set-Druck, im Format nicht gespielt: keine Aussage.
+    const unbekannt = box('u', 'Roxanne Box', [{ id: 'SVP-290', typ: P, anteil: 70, formate: { 'BRS-PRE': 70 } }]);
 
     it('gespielt / legal / raus / unbekannt', () => {
         assert.equal(L.boxStufe(gespielt, kontext), 'gespielt');
@@ -815,7 +816,11 @@ describe('UI-51/UI-52/DA-18 (30.09.2026): Stufe der Box, Reihenfolge der Chips, 
     });
 
     it('DA-18: ein Promo zaehlt nur mit Beleg, ein echtes Set immer', () => {
-        assert.equal(L.druckLegal(['PAF-80', 'SVP-124'], fenster, false), null);
+        // Nachdruck einer rotierten Set-Karte als Promo: nicht legal (Hausi, 30.09.2026).
+        assert.equal(L.druckLegal(['PAF-80', 'SVP-124'], fenster, false), false);
+        assert.equal(L.druckLegal(['OBF-125', 'MEW-6', 'SVP-56'], fenster, false), false);
+        assert.equal(L.druckLegal(['SVI-81', 'SVP-28'], fenster, false), false);
+        assert.equal(L.druckLegal(['SVP-290'], fenster, false), null);
         assert.equal(L.druckLegal(['SVP-149'], fenster, true), true);
         assert.equal(L.druckLegal(['PBL-12', 'SVP-1'], fenster, false), true);
         assert.equal(L.druckLegal(['LOR-81'], fenster, true), false);
@@ -859,6 +864,10 @@ describe('UI-51/UI-52/DA-18 (30.09.2026): Stufe der Box, Reihenfolge der Chips, 
         assert.ok(QUELLE.includes(s1));
         const M1 = logik(QUELLE.replace(s1, ''));
         assert.equal(M1.druckLegal(['PAF-80', 'SVP-124'], fenster, false), true, 'Probe Promo pauschal beisst nicht');
+        const s7 = 'return setDruck ? false : null;';
+        assert.ok(QUELLE.includes(s7));
+        assert.equal(logik(QUELLE.replace(s7, 'return null;')).druckLegal(['SVI-81', 'SVP-28'], fenster, false), null,
+            'Probe Promo-Nachdruck beisst nicht');
         const s2 = "if (imFormatGespielt(box, c.aktuell)) return 'gespielt';";
         assert.ok(QUELLE.includes(s2));
         assert.notEqual(logik(QUELLE.replace(s2, '')).boxStufe(gespielt, kontext), 'gespielt', 'Probe gespielt beisst nicht');

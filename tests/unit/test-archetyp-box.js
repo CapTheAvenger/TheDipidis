@@ -718,3 +718,74 @@ describe('FE-13 Nachtrag: „aus dem Meta gefallen“ nur, wenn der Archetyp im 
         assert.equal(R('js/i18n.js').split("'abx.fmtRausOhne':").length - 1, 2);
     });
 });
+
+describe('Alle Boxen „Zusammen“ (30.09.2026): Summe je Karte, Verteilung, Reingelegt, Sammlung', () => {
+    // Zahlen aus Hausis Screenshot vom 30.09.2026: Budew ASC 16 in sechs Boxen, Soll 2+1+1+1+2+1 = 8.
+    const budew = (soll, extra) => Object.assign({ id: 'ASC-16', name: 'Budew', set: 'ASC', number: '16', gefordert: soll, status: 'fehlt', drucke: [], anteil: 5 }, extra || {});
+    const box = (id, karten) => ({ id, name: id, karten });
+    const boxen = [box('Alakazam', [budew(2)]), box('Archaludon', [budew(1)]), box('Beedrill', [budew(1)]),
+        box('Ceruledge', [budew(1)]), box('Charizard', [budew(2)]), box('Conkeldurr', [budew(1, { status: 'original', drucke: [{ id: 'ASC-16', set: 'ASC', number: '16', n: 1 }] })])];
+    const eintraege = (bs) => bs.flatMap(b => b.karten.map(k => ({ box: b, k })));
+
+    it('eine Gruppe je (Set, Nummer): Soll summiert, drin und offen je Box', () => {
+        const g = L.zusammenfassen(eintraege(boxen));
+        assert.equal(g.length, 1);
+        assert.equal(g[0].soll, 8);
+        assert.equal(g[0].drin, 1);
+        assert.equal(g[0].offen, 7);
+        assert.equal(g[0].teile.length, 6);
+        gleich(g[0].teile.map(t => [t.box.id, t.soll, t.drin, t.offen]),
+            [['Alakazam', 2, 0, 2], ['Archaludon', 1, 0, 1], ['Beedrill', 1, 0, 1], ['Ceruledge', 1, 0, 1], ['Charizard', 2, 0, 2], ['Conkeldurr', 1, 1, 0]]);
+    });
+    it('gleicher Name, anderer Druck bleibt getrennt — nie ueber den Namen verbunden', () => {
+        const anders = box('X', [{ id: 'PRE-1', name: 'Budew', set: 'PRE', number: '1', gefordert: 3, status: 'fehlt', drucke: [] }]);
+        const g = L.zusammenfassen(eintraege(boxen.concat([anders])));
+        assert.equal(g.length, 2);
+        gleich(g.map(x => [x.id, x.soll]), [['ASC-16', 8], ['PRE-1', 3]]);
+    });
+    it('Reingelegt: Box bekommt ihr Soll, "fehlt" wird Original; Proxy bleibt Proxy; von Hand ohne Soll: 1', () => {
+        const b = L.reinlegen(box('A', [budew(2)]), 'ASC-16');
+        assert.equal(L.drin(b.karten[0]), 2);
+        assert.equal(b.karten[0].status, 'original');
+        const p = L.reinlegen(box('P', [budew(3, { status: 'proxy', drucke: [{ id: 'ASC-16', set: 'ASC', number: '16', n: 1 }] })]), 'ASC-16');
+        assert.equal(L.drin(p.karten[0]), 3);
+        assert.equal(p.karten[0].status, 'proxy');
+        const h = L.reinlegen(box('H', [budew(null, { manuell: true, gefordert: null, maxAnzahl: null })]), 'ASC-16');
+        assert.equal(L.drin(h.karten[0]), 1);
+    });
+    it('Sammlung: nur Originale, hoechstens 4, nie nach unten', () => {
+        const drinAlle = boxen.map(b => L.reinlegen(b, 'ASC-16'));
+        const teile = L.zusammenfassen(eintraege(drinAlle))[0].teile;
+        gleich(L.sammlungsBedarf(teile, () => 1).map(x => [x.schluessel, x.inBoxen, x.besitz, x.ziel]), [['Budew|ASC|16', 8, 1, 4]]);
+        assert.equal(L.sammlungsBedarf(teile, () => 4).length, 0, 'schon 4 in der Sammlung: nichts vorschlagen');
+        assert.equal(L.sammlungsBedarf(teile, () => 9).length, 0, 'mehr in der Sammlung: nie senken');
+        const nurProxy = [box('P', [budew(2, { status: 'proxy', drucke: [{ id: 'ASC-16', set: 'ASC', number: '16', n: 2 }] })])];
+        assert.equal(L.sammlungsBedarf(L.zusammenfassen(eintraege(nurProxy))[0].teile, () => 0).length, 0, 'Proxys zaehlen nicht als Besitz');
+        const zwei = [box('Z', [budew(2, { status: 'original', drucke: [{ id: 'ASC-16', set: 'ASC', number: '16', n: 2 }] })])];
+        gleich(L.sammlungsBedarf(L.zusammenfassen(eintraege(zwei))[0].teile, () => 0).map(x => x.ziel), [2]);
+    });
+    it('Verfaelschungsproben und Verdrahtung', () => {
+        const s1 = 'const id = kartenId(k.set, k.number) || k.id;';
+        assert.ok(QUELLE.includes(s1));
+        const M1 = logik(QUELLE.replace(s1, 'const id = k.name;'));
+        const anders = box('X', [{ id: 'PRE-1', name: 'Budew', set: 'PRE', number: '1', gefordert: 3, status: 'fehlt', drucke: [] }]);
+        assert.equal(M1.zusammenfassen(eintraege(boxen.concat([anders]))).length, 1, 'Probe Name statt Druck beisst nicht');
+        const s2 = "if (!k || k.status !== 'original') return;";
+        assert.ok(QUELLE.includes(s2));
+        const M2 = logik(QUELLE.replace(s2, 'if (!k) return;'));
+        const nurProxy = [box('P', [budew(2, { status: 'proxy', drucke: [{ id: 'ASC-16', set: 'ASC', number: '16', n: 2 }] })])];
+        assert.equal(M2.sammlungsBedarf(M2.zusammenfassen(eintraege(nurProxy))[0].teile, () => 0).length, 1, 'Probe Proxy als Besitz beisst nicht');
+        const s3 = 'const ziel = Math.min(4, x.inBoxen);';
+        assert.ok(QUELLE.includes(s3));
+        const M3 = logik(QUELLE.replace(s3, 'const ziel = x.inBoxen;'));
+        const drinAlle = boxen.map(b => M3.reinlegen(b, 'ASC-16'));
+        assert.equal(M3.sammlungsBedarf(M3.zusammenfassen(eintraege(drinAlle))[0].teile, () => 1)[0].ziel, 8, 'Probe ohne Playset-Grenze beisst nicht');
+        const code = ohneKommentare(QUELLE);
+        assert.match(code, /const zusammen = mitBoxName && ansicht\.gruppe === 'zusammen';/);
+        assert.match(code, /filterLeiste\(kontext, ohneFormate, gewaehlt, mitBoxName\)/);
+        assert.match(code, /addToCollection\(x\.schluessel\)/);
+        for (const k of ['abx.gruppeZusammen', 'abx.verteilungZeile', 'abx.sammlungSetzen', 'abx.alleReingelegt']) {
+            assert.equal(R('js/i18n.js').split("'" + k + "':").length - 1, 2, k + ' in beiden Sprachen');
+        }
+    });
+});

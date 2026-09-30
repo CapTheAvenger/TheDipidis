@@ -372,6 +372,74 @@
         return drinSetzen(box, id, soll);
     }
 
+    /**
+     * "Reingelegt" aus der Zusammen-Ansicht: die Box bekommt ihre geforderte
+     * Menge (Status wird Original, wenn er "fehlt" war). Karten ohne
+     * geforderte Menge (von Hand) bekommen eine Kopie, wenn noch keine drin ist.
+     */
+    function reinlegen(box, id) {
+        const k = (box.karten || []).find(function (x) { return x.id === id; });
+        if (!k) return box;
+        const soll = gefordertVon(k);
+        if (soll > 0) return auffuellen(box, id);
+        return drin(k) > 0 ? box : drinSetzen(box, id, 1);
+    }
+
+    /**
+     * Zusammen-Ansicht: je Karte (Set, Nummer) EINE Gruppe ueber alle Boxen —
+     * nie ueber den Namen. Reihenfolge = erstes Auftreten (die Sortierung der
+     * Eintraege bleibt erhalten). Je Box: soll, drin, offen; die Gruppe summiert.
+     */
+    function zusammenfassen(eintraege) {
+        const gruppen = [];
+        const nachId = new Map();
+        (eintraege || []).forEach(function (e) {
+            if (!e || !e.k) return;
+            const k = normiert(e.k);
+            const id = kartenId(k.set, k.number) || k.id;
+            let g = nachId.get(id);
+            if (!g) {
+                g = { id: id, k: k, element: e.element, teile: [], soll: 0, drin: 0, offen: 0 };
+                nachId.set(id, g);
+                gruppen.push(g);
+            }
+            const soll = k.gefordert > 0 ? k.gefordert : 0;
+            const d = drin(k);
+            const offen = soll > 0 ? Math.max(0, soll - d) : (d > 0 ? 0 : 1);
+            g.teile.push({ box: e.box, k: k, soll: soll, drin: d, offen: offen });
+            g.soll += soll; g.drin += d; g.offen += offen;
+        });
+        return gruppen;
+    }
+
+    /**
+     * Sammlung nachziehen: je Druck, wie viele als ORIGINAL in den Boxen
+     * liegen (Proxys zaehlen nicht, die besitzt man nicht). Vorgeschlagen wird
+     * hoechstens ein Playset (4) und nie weniger als schon in der Sammlung
+     * steht — die Sammlung wird nur angehoben, nie gesenkt.
+     * Schluessel wie in der Sammlung: "Name|SET|Nummer" (genau dieser Druck).
+     */
+    function sammlungsBedarf(teile, besitzVon) {
+        const proDruck = new Map();
+        (teile || []).forEach(function (t) {
+            const k = normiert(t.k);
+            if (!k || k.status !== 'original') return;
+            (k.drucke || []).forEach(function (d) {
+                const schluessel = k.name + '|' + String(d.set).toUpperCase() + '|' + d.number;
+                const x = proDruck.get(schluessel) || { schluessel: schluessel, set: String(d.set).toUpperCase(), number: String(d.number), inBoxen: 0 };
+                x.inBoxen += d.n;
+                proDruck.set(schluessel, x);
+            });
+        });
+        const aus = [];
+        proDruck.forEach(function (x) {
+            const besitz = Math.max(0, parseInt(besitzVon ? besitzVon(x.schluessel) : 0, 10) || 0);
+            const ziel = Math.min(4, x.inBoxen);
+            if (besitz < ziel) aus.push(Object.assign(x, { besitz: besitz, ziel: ziel }));
+        });
+        return aus;
+    }
+
     /** Aufteilung nach Druck aus dem Druck-Dialog: [{id, set, number, n}]. */
     function druckeSetzen(box, id, liste) {
         return karteAendern(box, id, function (k) {
@@ -669,7 +737,7 @@
 
     const Logik = {
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
-        statusSetzen, drinSetzen, auffuellen, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
+        statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
         formatPasst, imFormatGespielt, formateNachDatum, blockVorRotation, druckIn, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
@@ -1287,7 +1355,7 @@
     // ── Filter (je Betrachter gemerkt) ──
 
     const ANSICHT_SCHLUESSEL = 'archetypBoxAnsichtV1';
-    let ansicht = { format: 'alle', anteil: 'alle', art: 'alle', element: 'alle', sort: 'anteil' };
+    let ansicht = { gruppe: 'getrennt', format: 'alle', anteil: 'alle', art: 'alle', element: 'alle', sort: 'anteil' };
     try {
         const g = JSON.parse(localStorage.getItem(ANSICHT_SCHLUESSEL) || 'null');
         if (g && typeof g === 'object') ansicht = Object.assign(ansicht, g);
@@ -1406,6 +1474,39 @@
             + '</section>';
     }
 
+    /** Zusammen-Ansicht: eine Kachel je Karte ueber alle Boxen (Tipp oeffnet die Verteilung). */
+    function gruppenKachel(g) {
+        const k = g.k;
+        const arg = '\'' + esc(g.id) + '\'';
+        const titel = tx('abx.verteilungTitel', null, 'Verteilung auf die Boxen');
+        const bild = k.bild
+            ? '<img src="' + esc(k.bild) + '" alt="' + esc(k.name) + '" loading="lazy" referrerpolicy="no-referrer">'
+            : '<div class="abx-kein-bild">' + esc(k.set + ' ' + k.number) + '</div>';
+        const sollTitel = tx('abx.sollZusammenTitel', { n: g.soll }, 'Zusammen in allen Boxen: {n}');
+        const soll = g.soll > 0 ? '<span class="abx-soll abx-soll-zusammen" title="' + esc(sollTitel) + '">' + esc(g.soll) + '</span>' : '';
+        const drinKlasse = g.drin === 0 ? ' is-leer' : (g.offen === 0 ? ' is-voll' : '');
+        const n = g.teile.length;
+        return '<div class="abx-karte abx-karte-zusammen' + (g.offen === 0 ? ' abx-karte-original' : '') + '" data-karte="' + esc(g.id) + '">'
+            + '<button type="button" class="abx-bild abx-bild-knopf" onclick="ArchetypBox.verteilung(' + arg + ')" title="' + esc(titel)
+            + '" aria-label="' + esc(titel + ': ' + k.name) + '">' + bild + soll
+            + '<span class="abx-anzahl' + drinKlasse + '">' + esc(g.drin) + '</span></button>'
+            + '<div class="abx-text"><div class="abx-boxname">' + esc(n === 1 ? tx('abx.inEinerBox', null, 'in 1 Box')
+                : tx('abx.inBoxen', { n: n }, 'in {n} Boxen')) + '</div>'
+            + '<div class="abx-name" title="' + esc(k.name) + '">' + esc(k.name) + '</div>'
+            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + '</span></div>'
+            + '<div class="abx-offen-zeile">' + esc(tx('abx.drinOffen', { drin: g.drin, offen: g.offen }, '{drin} drin · {offen} offen')) + '</div></div>'
+            + '<button type="button" class="abx-mini abx-vert-btn" onclick="ArchetypBox.verteilung(' + arg + ')">' + esc(titel) + '</button>'
+            + '</div>';
+    }
+
+    function gruppenRubrik(schluessel, titel, gruppen) {
+        return '<section class="abx-rubrik abx-rubrik-' + schluessel + '">'
+            + '<div class="abx-rubrik-kopf"><h3>' + esc(titel) + ' <span class="abx-rubrik-zahl">' + gruppen.length + '</span></h3></div>'
+            + (gruppen.length ? '<div class="abx-gitter">' + gruppen.map(gruppenKachel).join('') + '</div>'
+                : '<p class="abx-leer">' + esc(tx('abx.rubrikLeer', null, 'Keine Karten.')) + '</p>')
+            + '</section>';
+    }
+
     /** Frueher entfernte Karten, die das Aktualisieren wieder anbietet. */
     function wiederBereich(gewaehlt, mitBoxName) {
         const liste = [];
@@ -1474,7 +1575,7 @@
         return satz;
     }
 
-    function filterLeiste(kontext, ohneFormate, gewaehlt) {
+    function filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) {
         const knopf = function (feld, wert, text) {
             const an = ansicht[feld] === wert;
             return '<button type="button" class="abx-filter' + (an ? ' is-active' : '') + '" aria-pressed="' + (an ? 'true' : 'false')
@@ -1506,7 +1607,9 @@
         if (ohneFormate && (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu')) {
             fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal aktualisieren („Alle Boxen“ → „Alle Boxen aktualisieren“).');
         }
-        let html = reihe(tx('abx.fFormat', null, 'Format'), FORMAT_WAHL.map(function (w) { return knopf('format', w, fmtText[w]); }).join(''))
+        let html = (mitBoxName ? reihe(tx('abx.fAnsicht', null, 'Ansicht'),
+            knopf('gruppe', 'getrennt', tx('abx.gruppeGetrennt', null, 'Getrennt')) + knopf('gruppe', 'zusammen', tx('abx.gruppeZusammen', null, 'Zusammen'))) : '')
+            + reihe(tx('abx.fFormat', null, 'Format'), FORMAT_WAHL.map(function (w) { return knopf('format', w, fmtText[w]); }).join(''))
             + (fmtZeile ? '<p class="abx-filter-hinweis">' + esc(fmtZeile) + '</p>' : '')
             + reihe(tx('abx.fAnteil', null, 'Anteil'), anteil.map(function (a) { return knopf('anteil', a[0], a[1]); }).join(''))
             + reihe(tx('abx.fArt', null, 'Kartenart'), arten.map(function (a) { return knopf('art', a[0], a[1]); }).join(''));
@@ -1552,6 +1655,7 @@
         }
         const ohneFormate = gewaehlt.some(function (b) { return !b.mitFormaten; });
         eintraege = sortieren(eintraege, ansicht.sort, !!eine);
+        const zusammen = mitBoxName && ansicht.gruppe === 'zusammen';
         const r = { fehlt: [], original: [], proxy: [] };
         eintraege.forEach(function (e) { r[STATUS.indexOf(e.k.status) >= 0 ? e.k.status : 'fehlt'].push(e); });
         const proxyKopien = r.proxy.reduce(function (a, e) { return a + drin(e.k); }, 0);
@@ -1603,10 +1707,26 @@
         }, '{fehlt} fehlen · {original} als Original drin · {proxy} als Proxy drin'))
             + (eintraege.length < gesamt ? ' <span class="abx-gefiltert">' + esc(tx('abx.gefiltert', { n: eintraege.length, g: gesamt },
                 '({n} von {g} nach Filter)')) + '</span>' : '') + '</p>';
-        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName) + filterLeiste(kontext, ohneFormate, gewaehlt) + summe
-            + rubrik('fehlt', tx('abx.rubrikFehlt', null, 'Noch nicht in der Box'), r.fehlt, mitBoxName)
-            + rubrik('original', tx('abx.rubrikOriginal', null, 'Schon drin (Original)'), r.original, mitBoxName)
-            + rubrik('proxy', tx('abx.rubrikProxy', null, 'Als Proxy drin'), r.proxy, mitBoxName);
+        let hauptteil;
+        if (zusammen) {
+            const gruppen = zusammenfassen(eintraege);
+            const raus = gruppen.filter(function (g) { return g.offen > 0; });
+            const fertig = gruppen.filter(function (g) { return g.offen === 0; });
+            const offen = raus.reduce(function (a, g) { return a + g.offen; }, 0);
+            hauptteil = '<p class="abx-summe">' + esc(tx('abx.summeZusammen', { n: gruppen.length, offen: offen },
+                    '{n} Karten · {offen} Stück noch raussuchen'))
+                + (eintraege.length < gesamt ? ' <span class="abx-gefiltert">' + esc(tx('abx.gefiltert', { n: eintraege.length, g: gesamt },
+                    '({n} von {g} nach Filter)')) + '</span>' : '') + '</p>'
+                + gruppenRubrik('raus', tx('abx.rubrikRaus', null, 'Noch raussuchen'), raus)
+                + gruppenRubrik('fertig', tx('abx.rubrikFertig', null, 'Überall drin'), fertig);
+        } else {
+            hauptteil = summe
+                + rubrik('fehlt', tx('abx.rubrikFehlt', null, 'Noch nicht in der Box'), r.fehlt, mitBoxName)
+                + rubrik('original', tx('abx.rubrikOriginal', null, 'Schon drin (Original)'), r.original, mitBoxName)
+                + rubrik('proxy', tx('abx.rubrikProxy', null, 'Als Proxy drin'), r.proxy, mitBoxName);
+        }
+        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName)
+            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + hauptteil;
     }
 
     function boxVon(boxId) { return boxen.find(function (b) { return b.id === boxId; }) || null; }
@@ -1739,6 +1859,130 @@
             + esc(tx('abx.abbrechen', null, 'Abbrechen')) + '</button>'
             + '<button type="button" class="btn btn-primary" onclick="ArchetypBox.druckeSchliessen(true)">'
             + esc(tx('abx.uebernehmen', null, 'Übernehmen')) + '</button></div>';
+    }
+
+    // ── Verteilung (Zusammen-Ansicht): wie oft gehoert die Karte in welche Box ──
+
+    let verteilungId = null;
+    let sammlungListe = [];
+
+    function besitzIn(schluessel) {
+        return (window.userCollectionCounts && window.userCollectionCounts.get(schluessel)) || 0;
+    }
+
+    /** Alle Boxen, nicht gefiltert: die Liste zeigt jede Box, in die die Karte gehoert. */
+    function gruppeVon(id) {
+        const alle = [];
+        boxen.forEach(function (b) { (b.karten || []).forEach(function (roh) { alle.push({ box: b, k: roh }); }); });
+        return zusammenfassen(alle).find(function (g) { return g.id === id; }) || null;
+    }
+
+    function verteilungZeichnen() {
+        const d = el('abxVertDialog');
+        if (!d || !verteilungId) return;
+        const g = gruppeVon(verteilungId);
+        if (!g) { verteilungSchliessen(); return; }
+        const zeilen = g.teile.map(function (t) {
+            const arg = '\'' + esc(t.box.id) + '\',\'' + esc(t.k.id) + '\'';
+            const knopf = t.offen > 0
+                ? '<button type="button" class="btn btn-primary abx-rein-btn" onclick="ArchetypBox.reinlegen(' + arg + ')">'
+                    + esc(tx('abx.reingelegt', null, 'Reingelegt')) + '</button>'
+                : '<span class="abx-rein-ok">' + esc(tx('abx.istDrin', null, 'drin ✓')) + '</span>';
+            return '<tr' + (t.offen === 0 ? ' class="is-drin"' : '') + '><td>' + esc(nameVon(t.box)) + '</td>'
+                + '<td class="r">' + esc(t.k.anteil != null && !t.k.manuell ? prozent(t.k.anteil) : '–') + '</td>'
+                + '<td class="r"><b>' + esc(t.soll > 0 ? t.soll + '×' : '–') + '</b></td>'
+                + '<td class="r">' + esc(t.drin) + '</td><td class="r">' + knopf + '</td></tr>';
+        }).join('');
+        d.querySelector('.abx-dialog-inhalt').innerHTML =
+            '<h3 id="abxVertTitel">' + esc(g.k.name) + ' <span class="abx-vert-druck">' + esc(g.k.set + ' ' + g.k.number) + '</span></h3>'
+            + '<p class="abx-dialog-zeile">' + esc(tx('abx.verteilungZeile', { n: g.teile.length, soll: g.soll, drin: g.drin, offen: g.offen },
+                'Gehört in {n} Boxen, zusammen {soll} Stück · {drin} drin · {offen} offen')) + '</p>'
+            + '<div class="abx-vert-rahmen"><table class="abx-vert-tabelle"><thead><tr>'
+            + '<th>' + esc(tx('abx.spBox', null, 'Box')) + '</th><th class="r">' + esc(tx('abx.spAnteil', null, 'Anteil')) + '</th>'
+            + '<th class="r">' + esc(tx('abx.spSoll', null, 'Soll')) + '</th><th class="r">' + esc(tx('abx.spDrin', null, 'Drin')) + '</th><th></th></tr></thead>'
+            + '<tbody>' + zeilen + '</tbody><tfoot><tr><td>' + esc(tx('abx.zusammen', null, 'Zusammen')) + '</td><td></td>'
+            + '<td class="r"><b>' + esc(g.soll + '×') + '</b></td><td class="r">' + esc(g.drin) + '</td><td></td></tr></tfoot></table></div>'
+            + sammlungZeilen(g)
+            + '<div class="abx-dialog-fuss">'
+            + '<button type="button" class="btn btn-outline" onclick="ArchetypBox.verteilungSchliessen()">'
+            + esc(tx('abx.schliessen', null, 'Schließen')) + '</button>'
+            + (g.offen > 0 ? '<button type="button" class="btn btn-primary" onclick="ArchetypBox.alleReinlegen()">'
+                + esc(tx('abx.alleReingelegt', { n: g.offen }, 'Alle reingelegt ({n})')) + '</button>' : '')
+            + '</div>';
+    }
+
+    function sammlungZeilen(g) {
+        sammlungListe = sammlungsBedarf(g.teile, besitzIn);
+        if (!sammlungListe.length) return '';
+        return '<div class="abx-sammlung">' + sammlungListe.map(function (x, i) {
+            return '<div class="abx-sammlung-zeile"><span>' + esc(tx('abx.sammlungZeile',
+                { druck: x.set + ' ' + x.number, besitz: x.besitz, boxen: x.inBoxen },
+                'Sammlung {druck}: {besitz} · als Original in den Boxen: {boxen}')) + '</span>'
+                + '<button type="button" class="btn btn-outline abx-sammlung-btn" onclick="ArchetypBox.sammlungSetzen(' + i + ')">'
+                + esc(tx('abx.sammlungSetzen', { n: x.ziel }, 'Sammlung auf {n} setzen')) + '</button></div>';
+        }).join('') + '</div>';
+    }
+
+    /** Hebt die Sammlung ueber den bestehenden Weg (addToCollection) auf das Ziel an — nie darueber, nie nach unten. */
+    function sammlungSetzen(i) {
+        const x = sammlungListe[i];
+        if (!x || typeof addToCollection !== 'function') return;
+        let jetzt = besitzIn(x.schluessel);
+        let schritte = 0;
+        while (jetzt < x.ziel && schritte < 4) {
+            addToCollection(x.schluessel);
+            const neu = besitzIn(x.schluessel);
+            if (neu <= jetzt) break;   // nicht angemeldet oder abgelehnt
+            jetzt = neu; schritte++;
+        }
+        verteilungZeichnen();
+    }
+
+    function verteilungOeffnen(id) {
+        verteilungId = id;
+        let d = el('abxVertDialog');
+        if (!d) {
+            d = document.createElement('div');
+            d.id = 'abxVertDialog';
+            d.className = 'abx-dialog';
+            d.setAttribute('role', 'dialog');
+            d.setAttribute('aria-modal', 'true');
+            d.setAttribute('aria-labelledby', 'abxVertTitel');
+            d.innerHTML = '<div class="abx-dialog-inhalt"></div>';
+            d.addEventListener('click', function (e) { if (e.target === d) verteilungSchliessen(); });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && verteilungId) verteilungSchliessen();
+            });
+            document.body.appendChild(d);
+        }
+        d.classList.remove('d-none');
+        verteilungZeichnen();
+    }
+
+    function verteilungSchliessen() {
+        verteilungId = null;
+        const d = el('abxVertDialog');
+        if (d) d.classList.add('d-none');
+    }
+
+    function reinlegenKarte(boxId, id) {
+        aendern(boxId, function (b) { return reinlegen(b, id); });
+        verteilungZeichnen();
+    }
+
+    function alleReinlegen() {
+        const g = verteilungId && gruppeVon(verteilungId);
+        if (!g) return;
+        g.teile.forEach(function (t) {
+            if (t.offen <= 0) return;
+            const box = boxVon(t.box.id);
+            if (!box) return;
+            const neu = reinlegen(box, t.k.id);
+            neu.id = box.id;
+            schreiben(neu);
+        });
+        zeichnen();
+        verteilungZeichnen();
     }
 
     function druckeOeffnen(boxId, id) {
@@ -1963,6 +2207,11 @@
         wiederAlle: wiederAlle,
         ansicht: ansichtSetzen,
         druckeOeffnen: druckeOeffnen,
+        verteilung: verteilungOeffnen,
+        verteilungSchliessen: verteilungSchliessen,
+        reinlegen: reinlegenKarte,
+        alleReinlegen: alleReinlegen,
+        sammlungSetzen: sammlungSetzen,
         druckeSchliessen: druckeSchliessen,
         _druck: druckAendern,
         entfernen: entfernenKarte,

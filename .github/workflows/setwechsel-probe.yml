@@ -1,0 +1,103 @@
+name: Setwechsel-Probe — braucht das naechste Set Handarbeit?
+
+# WARUM (29.09.2026, SC-7 — Entscheidung Hausi: "auf Dauer nichts mehr
+# manuell")
+# ------------------------------------------------------------------
+# Beim Wechsel auf 30C (16.09.2026) stand die Deploy-Kette vom 17. bis
+# zum 20.09., weil Zusicherungen eine Handaenderung im Code verlangten
+# (Rueckfalltabellen, Set-Kuerzel, Waechterschluessel), und drei Wochen
+# spaeter noch einmal (Gnadenfrist der Bestandsbelege). Gefunden wurde
+# das jedes Mal erst im echten Wochenlauf nach dem Set.
+#
+# Diese Probe stellt den Zustand her, den der erste Wochenlauf nach
+# einem NEUEN Set schreibt — mit dem echten Code aus update_sets.py
+# (scripts/simuliere_setwechsel.py, in einem Wegwerf-Baum) — und faehrt
+# die Kern-Suiten dagegen:
+#   1. ein neues EN-Set, am Tag danach,
+#   2. dasselbe 30 Tage spaeter (Uhr per faketime vorgestellt),
+#   3. nur ein neues JP-Set (JP kommt Monate vor EN).
+# Rot heisst: das naechste Set wuerde den Wochenlauf anhalten, bis
+# jemand etwas von Hand nachzieht. Das soll auffallen, BEVOR es passiert.
+#
+# Keine Kopplung an den Deploy, kein Schreibzugriff: die Probe schreibt
+# nur in $RUNNER_TEMP und pusht nichts.
+
+on:
+  schedule:
+    - cron: '17 3 * * 0'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: setwechsel-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Abhaengigkeiten
+        run: |
+          npm install --no-save papaparse
+          python -m pip install --quiet pytest beautifulsoup4 requests lxml zxing-cpp segno Pillow PyYAML
+          sudo apt-get install -y -q faketime >/dev/null
+
+      - name: Wegwerf-Baeume mit neuem Set
+        id: baeume
+        run: |
+          set -e
+          for name in en jp; do
+            git worktree add --detach "$RUNNER_TEMP/$name" HEAD
+            cp -r node_modules "$RUNNER_TEMP/$name/"
+          done
+          python scripts/simuliere_setwechsel.py "$RUNNER_TEMP/en" | tee "$RUNNER_TEMP/en.json"
+          python scripts/simuliere_setwechsel.py "$RUNNER_TEMP/jp" --en "" | tee "$RUNNER_TEMP/jp.json"
+          datum=$(python -c "import json;print(json.load(open('$RUNNER_TEMP/en.json'))['datum'])")
+          echo "spaeter=$(date -u -d "$datum + 30 days" '+%F 12:00:00')" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Setwechsel-Probe"
+            echo ""
+            echo '```'
+            cat "$RUNNER_TEMP/en.json" "$RUNNER_TEMP/jp.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 1 — neues EN-Set, am Tag danach
+        working-directory: ${{ runner.temp }}/en
+        run: TOR_OHNE_INSTALL=1 bash scripts/tor_vor_dem_push.sh kern
+
+      - name: 2 — dasselbe 30 Tage spaeter
+        if: always() && steps.baeume.outcome == 'success'
+        working-directory: ${{ runner.temp }}/en
+        run: |
+          # HEAD ist der ausgelieferte Stand, gegen den die Bestandsbelege
+          # nach einer Rotation messen (tests/formatfenster.js,
+          # ausgelieferterStand). Im Wegwerf-Baum wird der simulierte Stand
+          # deshalb lokal festgehalten — gepusht wird nichts.
+          git add -A data config
+          git -c user.email=probe@local -c user.name=probe commit -qm "Setwechsel-Probe (lokal)"
+          TOR_OHNE_INSTALL=1 faketime "${{ steps.baeume.outputs.spaeter }}" \
+            bash scripts/tor_vor_dem_push.sh kern
+
+      - name: 3 — nur ein neues JP-Set
+        if: always() && steps.baeume.outcome == 'success'
+        working-directory: ${{ runner.temp }}/jp
+        run: TOR_OHNE_INSTALL=1 bash scripts/tor_vor_dem_push.sh kern

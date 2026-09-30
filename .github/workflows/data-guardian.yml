@@ -115,14 +115,13 @@ jobs:
       # Nicht ueberwacht: bot-keepalive (alle 5 Minuten, waere nur Rauschen),
       # visual-fullpage (Bildvergleich, keine Daten) und dieser Lauf selbst.
       #
-      # Ebenfalls nicht: pocket-tierlist.yml (SC-4, 26.09.2026). Der Lauf
-      # hat keinen Zeitplan und kann auf dem GitHub-Laeufer nichts liefern
-      # (Lauf #5 am 26.09.2026: cloudscraper, curl_cffi und requests je
-      # HTTP 202). Geerntet wird woechentlich aus der Cowork-Umgebung ueber
-      # scripts/pocket_ernte.sh. Sein letzter Lauf sagt deshalb nichts ueber
-      # die Daten — jeder Probelauf von Hand haette die Ampel dauerhaft rot
-      # gestellt. Die Bedingung, um die es geht, ist das ALTER der Datei,
-      # und die prueft check_pocket_frische() im Guardian-Skript.
+      # pocket-tierlist.yml ist seit dem 29.09.2026 wieder dabei: die Quelle
+      # ist jetzt Limitless statt Game8, der Lauf taeglich und aus CI
+      # moeglich. Sein Alter prueft zusaetzlich check_pocket_frische().
+      #
+      # setwechsel-probe.yml (SC-7, 29.09.2026): rot heisst, das naechste
+      # Set haelt den Wochenlauf an, bis jemand etwas von Hand nachzieht —
+      # genau das soll vorher auffallen.
       - name: Datenlaeufe auf Rot pruefen
         id: laeufe
         env:
@@ -155,6 +154,8 @@ jobs:
             prizepack-official-images.yml
             limitless-api-scrape.yml
             firestore-regelprobe.yml
+            pocket-tierlist.yml
+            setwechsel-probe.yml
           "
           rot=0
           for wf in $WORKFLOWS; do

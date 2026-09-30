@@ -1,72 +1,50 @@
 name: Pocket Tier List
 
-# Pokémon TCG Pocket: Tier-Liste und die Decks des aktuellen Sets, je mit
-# geprüftem Scan-Code. Schreibt data/pocket_tierlist.json — die Datei, die
-# der Pocket-Reiter liest.
+# Pokémon TCG Pocket: Tier-Liste aus den Ergebnissen der Online-Turniere
+# auf Limitless, je Deck mit einer gespielten Liste und ihrem Scan-Code.
+# Schreibt data/pocket_tierlist.json — die Datei, die der Pocket-Reiter
+# liest — und den Zwischenstand data/pocket_limitless_turniere.json.
 #
-# WARUM DIESER LAUF IN CI SEIN MUSS
-# ---------------------------------
-# game8.co und img.game8.co sind aus dem Bausandkasten nicht erreichbar
-# (der Egress-Proxy antwortet mit 403). Der Scraper lässt sich dort also
-# schreiben und gegen tests/fixtures/ prüfen, aber nicht gegen die echte
-# Seite laufen. Genau dafür ist dieser Ablauf da — und für den ersten
-# Beweis, dass sich Game8s 2D-Muster überhaupt auslesen lassen.
+# SEIT 29.09.2026 TAEGLICH UND OHNE HANDGRIFF
+# -------------------------------------------
+# Bis heute holte dieser Ablauf Game8s Tier-Liste. Game8 antwortet dem
+# GitHub-Laeufer auf jedem Weg mit HTTP 202 (Cloudflare; gemessen 04.09.
+# und 26.09.2026), also lief die Ernte als woechentliche Handaufgabe.
+# Entscheidung Hausi, 29.09.2026: „wichtig ist nur, dass wir auf Dauer
+# nichts mehr manuell machen muessen" — Quelle wechseln.
 #
-# TEMPO
+# Die neue Quelle ist die API von play.limitlesstcg.com. Derselbe Host
+# wird von limitless-api-scrape.yml seit Wochen taeglich aus CI
+# abgefragt (gruen). Die Sandkiste erreicht ihn nicht (403 am Proxy),
+# deshalb laeuft der Abruf nur hier.
+#
+# REIHENFOLGE
+# -----------
+#   1. Kennungstabelle (data/pocket_karten_ids.json) aus der
+#      Kartendatenbank auf GitHub erneuern — ein neues Set bringt neue
+#      Karten, und ohne ihre Kennung gibt es fuer ein Deck keinen Code.
+#   2. Set-Namen (data/pocket_sets.json) aus derselben Datenbank.
+#   3. Die Tier-Liste.
+#   4. Das Tor, dann der Push.
+# 1 und 2 duerfen scheitern (die alte Tabelle bleibt), 3 nicht.
+#
+# ZWEIG
 # -----
-# Rund 50 Deck-Seiten plus 50 QR-Bilder, mit 1,2 s Pause dazwischen: gut
-# zwei Minuten reine Wartezeit. Das ist Absicht — Game8 schuldet uns
-# nichts.
+# Gepusht wird auf den Zweig, von dem aus der Lauf startet. Geplant ist
+# das `main`; per workflow_dispatch auf einem PR-Zweig landet der Stand
+# dort (CLAUDE.md: „Ein Arbeitsablauf, der Dateien holt, gehoert auf den
+# ZWEIG"). Der Deploy wird nur fuer `main` angestossen.
 #
 # Anstoß: täglich um 05:20 UTC ODER GitHub → Actions → Pocket Tier List
 #         → Run workflow
 
-# KEIN ZEITPLAN — UND DAS IST EIN BEFUND, KEINE BEQUEMLICHKEIT
-# -----------------------------------------------------------
-# Hier stand `cron: '20 5 * * *'`. Drei Läufe am 04.09.2026 haben gezeigt,
-# dass er nie etwas liefern kann: Game8 antwortet dem Github-Läufer auf
-# JEDEN Weg mit HTTP 202 — Cloudflares "Prüfung läuft".
-#
-#     cloudscraper: HTTP 202 | curl_cffi: HTTP 202 | requests: HTTP 202
-#
-# Auch curl_cffi mit Chrome-TLS-Fingerabdruck (chrome120), also das
-# Mittel, mit dem sechs andere Scraper dieses Repos durchkommen. Es liegt
-# nicht an der Bibliothek, sondern am Rechenzentrums-Adressbereich.
-#
-# Ein Zeitplan hätte also jede Nacht eine Warnung erzeugt und nie eine
-# Zeile Daten. Das ist schlimmer als kein Zeitplan: man gewöhnt sich an
-# die Meldung und übersieht die echte.
-#
-# Woher die Daten stattdessen kommen: aus einer Arbeitssitzung, in der
-# game8.co über die Domain-Zulassungsliste erreichbar ist. Das passt zur
-# Sache — eine Tier-Liste ändert sich mit dem Set, nicht über Nacht.
-#
-# Der Ablauf bleibt hier stehen, weil er dann sofort wieder greift, wenn
-# Game8 den Läufer eines Tages durchlässt. Ein Probelauf über
-# `workflow_dispatch` sagt das in fünfzig Sekunden.
-#
-# NACHGEMESSEN 26.09.2026 (SC-4)
-# ------------------------------
-#   Läufer, Lauf #5:   cloudscraper 202 | curl_cffi 202 | requests 202
-#   Cowork-Umgebung:   game8.co 200, voller Lauf 34 Decks mit Scan-Code
-# Die Ernte läuft deshalb wöchentlich als Aufgabe in der Cowork-Umgebung
-# über scripts/pocket_ernte.sh. Der Datenwächter bewacht nicht mehr den
-# letzten Lauf dieses Ablaufs (der sagt nichts über die Daten), sondern
-# das Alter der Datei — check_pocket_frische().
-
 on:
+  schedule:
+    - cron: '20 5 * * *'
   workflow_dispatch:
     inputs:
-      nur:
-        description: 'Nur die ersten N Decks (Probelauf; leer = alle)'
-        type: string
-        default: ''
       trocken:
         description: 'Nichts schreiben, nur berichten'
-        type: boolean
-        default: false
-      schrumpfen_erlauben:
-        description: 'Deutlich weniger Decks als bisher trotzdem schreiben (nur beim echten Set-Wechsel bei Game8)'
         type: boolean
         default: false
 
@@ -75,7 +53,7 @@ permissions:
   actions:  write
 
 concurrency:
-  group: pocket-tierlist
+  group: pocket-tierlist-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -101,92 +79,40 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Pocket tier-list scraper
-        env:
-          # Über die Umgebung, nicht per ${{ }} in die Shell hinein.
-          # Vorher stand `--nur ${{ inputs.nur }}` direkt in der
-          # Befehlszeile: was jemand ins Actions-Feld tippt, lief damit
-          # als Shell-Text mit (dritte Abnahme, 04.09.2026).
-          NUR: ${{ inputs.nur }}
-          TROCKEN: ${{ inputs.trocken }}
-          SCHRUMPFEN: ${{ inputs.schrumpfen_erlauben }}
-        run: |
-          set +e
-          args=""
-          if [ -n "$NUR" ]; then args="$args --nur $NUR"; fi
-          if [ "$TROCKEN" = "true" ]; then args="$args --trocken"; fi
-          if [ "$SCHRUMPFEN" = "true" ]; then args="$args --schrumpfen-erlauben"; fi
-          # NICHT in ::group:: — eine zugeklappte Gruppe ist der falsche
-          # Ort für einen Abbruch. Vorher verschwand der Rückfall
-          # ("keine Set-Tabelle gefunden") in einer zugeklappten Gruppe
-          # und im Protokoll stand nur "Scraper endete mit 1".
-          python scripts/scrape_pocket_tierlist.py $args 2>&1 | tee /tmp/pocket.log
-          rc=${PIPESTATUS[0]}
+      # Neu ist erlaubt, verloren nicht: verschwindet eine bekannte Karte
+      # aus der Quelle oder aendert sich ihre Kennung, bricht das Skript ab
+      # und die alte Tabelle bleibt stehen. Die Tier-Liste laeuft trotzdem —
+      # Decks mit Karten, die die Tabelle nicht kennt, stehen dann ohne Code
+      # und mit Grund da.
+      - name: Kennungstabelle erneuern
+        continue-on-error: true
+        run: python3 scripts/build_pocket_karten_ids.py
 
-          # WARUM DIESER SCHRITT JETZT ROT WERDEN DARF
-          # -----------------------------------------
-          # Hier stand `exit 0` mit der Begründung, ein Fehlschlag sei
-          # ein Befund und kein Grund für eine Mailflut. Das galt, solange
-          # der Ablauf jede Nacht lief. Er läuft jetzt nur noch auf
-          # Knopfdruck (siehe oben) — dann ist genau EIN Mensch da, der
-          # das Ergebnis sehen will, und ein grüner Haken über einem
-          # Abbruch belügt ihn.
-          #
-          # Konkret neutralisierte das `exit 0` die harten Abbrüche im
-          # Skript: fehlende Set-Tabelle, Quote unter zwei Dritteln,
-          # Rechnung geht nicht auf. Alle drei sind dafür gebaut, dass
-          # jemand hinsieht.
-          if [ $rc -ne 0 ]; then
-            letzte="$(grep -m1 '::error::' /tmp/pocket.log | sed 's/^::error:://' || true)"
-            echo "::error::Pocket-Scraper abgebrochen (Code $rc): ${letzte:-siehe Protokoll oben}"
-            exit $rc
-          fi
-
-      # DIE SET-NAMEN GEHOEREN IN DENSELBEN LAUF (16.09.2026)
-      #
-      # ANLASS (Betreiber): „mit B3 und A2 und so kann ich nichts
-      # anfangen. Aber wenn ich weiß wie das set heißt kann ich noch
-      # schnell fehlende Karten besorgen."
-      #
-      # data/pocket_sets.json steht in einer eigenen Datei, weil es sich
-      # mit den Erweiterungen aendert und nicht mit den Decks. Es gehoert
-      # trotzdem in DIESEN Lauf: ein neues Set bringt neue Decks UND eine
-      # neue Kennung mit. Liefen die beiden getrennt, stuenden nach jedem
-      # Set-Wechsel fuer ein paar Tage Karten in der Liste, deren Set die
-      # Namenstabelle noch nicht kennt.
-      #
-      # `continue-on-error`: die Deckliste ist das Ergebnis dieses Laufs,
-      # die Namen sind die Zugabe. Faellt die Namensseite aus, bleibt in
-      # der Oberflaeche die blanke Kennung stehen — das ist schlechter
-      # als ein Name, aber weit besser als ein abgebrochener Lauf ohne
-      # frische Decks.
+      # Die Set-Namen gehoeren in denselben Lauf: ein neues Set bringt neue
+      # Decks UND eine neue Kennung mit. Faellt die Quelle aus, bleibt in der
+      # Oberflaeche die blanke Kennung stehen.
       - name: Set-Namen fortschreiben
         continue-on-error: true
         run: python3 scripts/build_pocket_sets.py
 
-      # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN (12.09.2026)
-      #
-      # `build_data_stand.py` schreibt den Stand einer Datei nur fort,
-      # wenn der LAUFENDE Job sie angefasst hat (`geaendert()` liest
-      # `git status --porcelain`). Faellt der Schritt hier weg, commitet
-      # der Job neue Daten und laesst `data/_datenstand.json` auf dem
-      # alten Datum stehen — die Seite schreibt dann ein Datum an die
-      # Zahlen, das nicht zu ihnen gehoert.
-      #
-      # Gefunden am 12.09.2026: `test_datenstand_abdeckung.py` war auf
-      # `main` rot, weil `price_data.csv` im Stand den 11.09. trug und
-      # im Git-Verlauf den 12.09. 14 von 17 Ablaeufen, die nach data/
-      # commiten, fehlte dieser Schritt.
+      - name: Tier-Liste aus Limitless
+        env:
+          # Ueber die Umgebung, nicht per ${{ }} in die Shell hinein
+          # (dritte Abnahme, 04.09.2026).
+          TROCKEN: ${{ inputs.trocken }}
+        run: |
+          args=""
+          if [ "$TROCKEN" = "true" ]; then args="--trocken"; fi
+          python scripts/scrape_pocket_limitless.py $args
+
+      # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN (12.09.2026) —
+      # build_data_stand.py schreibt nur fort, was dieser Lauf angefasst hat.
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
 
       # DAS TOR VOR DEM PUSH (29.09.2026) — scripts/tor_vor_dem_push.sh.
-      # Wer nach main schreibt, prueft vorher: faellt hier eine Zusicherung,
-      # bricht der Schritt ab, und Commit, Push und Deploy-Anstoss werden
-      # uebersprungen. main bleibt gruen, und weder der Deploy noch das Tor
-      # des naechsten Wochenlaufs erben den roten Stand.
-      # Bereich `alle`: dieser Ablauf schreibt Champions-/Pocket-Daten,
-      # also prueft er Kern UND tests/nebenbereiche.
+      # Bereich `alle`: dieser Ablauf schreibt Pocket-Daten, also prueft er
+      # Kern UND tests/nebenbereiche.
       - name: Node fuer das Tor
         if: ${{ success() && inputs.trocken != true }}
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
@@ -199,20 +125,17 @@ jobs:
 
       - name: Commit + push
         id: commit
-        # `success() &&` ist hier nicht überflüssig: ein eigenes `if:`
-        # ersetzt die sonst stillschweigende Bedingung success(). Ohne
-        # das würde nach einem Abbruch des Scrapers trotzdem committet —
-        # genau das, was die Abbrüche verhindern sollen.
+        # `success() &&`: ein eigenes `if:` ersetzt die stille Bedingung
+        # success(). Ohne das wuerde nach einem Abbruch trotzdem committet.
         if: ${{ success() && inputs.trocken != true }}
+        env:
+          ZWEIG: ${{ github.ref_name }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           echo "pushed=false" >> "$GITHUB_OUTPUT"
-          if [ ! -f data/pocket_tierlist.json ]; then
-            echo "keine Ausgabe — nichts zu committen"
-            exit 0
-          fi
-          git add data/pocket_tierlist.json data/pocket_sets.json data/data_stand.json
+          git add data/pocket_tierlist.json data/pocket_limitless_turniere.json \
+                  data/pocket_sets.json data/pocket_karten_ids.json data/data_stand.json
           if git diff --cached --quiet; then
             echo "unverändert — kein Push."
             exit 0
@@ -220,36 +143,30 @@ jobs:
           ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
           git commit -m "Auto: Pocket-Tier-Liste — ${ts}
 
-          Quelle: game8.co (redaktionelle Einstufung)
+          Quelle: play.limitlesstcg.com (Standings der Pocket-Standardturniere)
           Triggered by .github/workflows/pocket-tierlist.yml
           Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           for i in 1 2 3; do
-            git pull --rebase --autostash origin main && break
+            git pull --rebase --autostash origin "$ZWEIG" && break
             sleep $((i * 5))
           done
           for i in 1 2 3; do
-            if git push origin HEAD:main; then
+            if git push origin "HEAD:$ZWEIG"; then
               echo "pushed=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             echo "Push $i fehlgeschlagen — neu aufsetzen und erneut"
-            git pull --rebase --autostash origin main || true
+            git pull --rebase --autostash origin "$ZWEIG" || true
             sleep $((i * 5))
           done
           echo "::error::Push nach drei Versuchen fehlgeschlagen"
           exit 1
 
-      # Ohne diesen Schritt veraltet die Seite still: ein Push mit dem
-      # GITHUB_TOKEN loest `on: push` NICHT aus (Rekursionsschutz von
-      # GitHub Actions). Dieselbe Zeile steht in jedem Datenlauf, der
-      # nach main pusst; tests/python/test_deploy_dispatch.py haelt das
-      # fest.
-      #
-      # `if` bindet den Deploy an Laeufe, die wirklich etwas gepusht
-      # haben — sonst stiesse jeder unveraenderte Tageslauf einen Deploy
-      # an, der nichts ausliefert.
+      # Ein Push mit dem GITHUB_TOKEN loest `on: push` NICHT aus
+      # (Rekursionsschutz). tests/python/test_deploy_dispatch.py haelt diese
+      # Zeile fest. Nur fuer main — ein PR-Zweig wird nicht ausgeliefert.
       - name: Deploy anstossen (GITHUB_TOKEN-Push triggert ihn nicht)
-        if: ${{ success() && steps.commit.outputs.pushed == 'true' }}
+        if: ${{ success() && steps.commit.outputs.pushed == 'true' && github.ref_name == 'main' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run deploy-pages.yml --ref main

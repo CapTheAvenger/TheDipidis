@@ -1,0 +1,470 @@
+@@ -365,8 +406,25 @@ def nachziehen(roh, listen):|
+ |
++    # Neue Bloecke hinter den letzten Block des Stuecks|
++    dazu = [n for n in ziel if n not in nummern]|
++    if dazu:|
++        letzte = None|
++        for letzte in BLOCK.finditer(neu_roh):|
++            pass|
++        if letzte is None:|
++            return roh, [], "im Stueck steht kein Listenblock, hinter den neue passen"|
++        einfuegen = "".join(neue_bloecke[n] for n in dazu)|
++        neu_roh = neu_roh[:letzte.end()] + einfuegen + neu_roh[letzte.end():]|
++        for n in dazu:|
++            name = re.search(r'data-mcl-listenname="([^"]*)"', neue_bloecke[n])|
++            aenderungen.append("Block %s neu: %s" % (n, html.unescape(name.group(1)) if name else "?"))|
++|
+     # Schalter ersetzen|
+-    reihe = "".join(chip(n, l) for n, l in zip(nummern, listen))|
++    reihe = "".join(chip(n, l) for n, l in zip(ziel, listen)) or LEER_HINWEIS|
+     alt_reihe = treffer.group(1)|
+     if alt_reihe.strip() != reihe.strip():|
+-        aenderungen.append("Schalterreihe der Gruppe neu beschriftet")|
+-    neu_roh = neu_roh.replace(alt_reihe, reihe, 1)|
++        aenderungen.append("Schalterreihe der Gruppe neu beschriftet (%d Listen)" % len(listen))|
++    start = neu_roh.index(treffer.group(0))|
++    kopf = treffer.group(0)|
++    neu_kopf = kopf[:treffer.start(1) - treffer.start(0)] + reihe + kopf[treffer.end(1) - treffer.start(0):]|
++    neu_roh = neu_roh[:start] + neu_kopf + neu_roh[start + len(kopf):]|
+     return neu_roh, aenderungen, ""|
+@@ -390,2 +448,6 @@ def main():|
+     neu, aenderungen, grund = nachziehen(roh, listen)|
++    if not grund and len(listen) < MAX_PLAETZE:|
++        print("::notice::Masterclass, Gruppe „%s“: %d von %d Plaetzen — mehr frische "|
++              "Listen ab %s Spielern gibt das Fenster nicht her. Alte Listen werden "|
++              "nicht stehen gelassen (DA-26)." % (GRUPPE, len(listen), MAX_PLAETZE, 100))|
+     if grund:|
+diff --git a/scripts/pruefe_frische.py b/scripts/pruefe_frische.py|
+index 5c1ea00..b0aaf92 100644|
+--- a/scripts/pruefe_frische.py|
++++ b/scripts/pruefe_frische.py|
+@@ -94,2 +94,3 @@ RHYTHMUS = {|
+     "scripts/build_online_fenster.py": "zweimal_woechentlich",|
++    "scripts/ace_specs_nachziehen.py": "zweimal_woechentlich",  # DA-22, seit 30.09.2026|
+     "tools/build_threat_intel.py": "zweimal_woechentlich",|
+diff --git a/scripts/repariere_ace_spec.py b/scripts/repariere_ace_spec.py|
+index d813d17..771f49a 100644|
+--- a/scripts/repariere_ace_spec.py|
++++ b/scripts/repariere_ace_spec.py|
+@@ -98,2 +98,18 @@ Workflow "Daten reparieren".|
+ |
++NACHTRAG 30.09.2026 — DER WOCHENLAUF SCHREIBT JETZT (Hausi, DA-22)|
++------------------------------------------------------------------|
++Der Absatz oben galt bis hierhin. Gemessen am 30.09.: die Drift kommt|
++nach jedem neuen JP-Set wieder (35 Felder, 29 davon in|
++city_league_analysis.csv, z. B. Special Vest M6 65), weil eine neue|
++Karte beim Schreiben noch keinen Beleg hat und der Bestand ihn erst|
++spaeter liefert. Das ist der normale Weg der Belege, keine neue|
++Fehlerquelle. Hausi: „Da-22 muss auf jeden Fall repariert werden."|
++|
++Seitdem faehrt der Wochenlauf `--schreiben`. Gemeldet wird trotzdem:|
++die Zahl der berichtigten Felder steht als ::notice:: auf der|
++Laufseite, und die Nachpruefung (nur diese eine Spalte darf anders|
++sein) macht den Lauf rot, bevor etwas gepusht wird. Die Namensliste|
++selbst zieht scripts/ace_specs_nachziehen.py im selben Lauf aus der|
++Quelle nach.|
++|
+ Aufruf:  python3 scripts/repariere_ace_spec.py [--schreiben | --melden] [--streng]|
+@@ -341,2 +357,6 @@ def main() -> int:|
+         print("\n(Nur berichtet. Mit --schreiben wird geaendert.)")|
++    elif gesamt["geaendert"]:|
++        # Berichtigt, aber nicht still: die Zahl steht auf der Laufseite.|
++        print("::notice::is_ace_spec: %d Felder nach der Regel berichtigt "|
++              "(nur diese Spalte, nachgeprueft)." % gesamt["geaendert"])|
+ |
+diff --git a/service-worker.js b/service-worker.js|
+index 5e199a4..484286e 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202609291742|
++// v202609301733|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202609291742';|
++const CACHE_NAME = 'tcg-analysis-v202609301733';|
+ |
+diff --git a/tests/python/test_ace_spec_bestandsbelege.py b/tests/python/test_ace_spec_bestandsbelege.py|
+index edd9b8a..b9946b4 100644|
+--- a/tests/python/test_ace_spec_bestandsbelege.py|
++++ b/tests/python/test_ace_spec_bestandsbelege.py|
+@@ -75,7 +75,9 @@ def test_beide_schreibstellen_nutzen_den_ganzen_bestand():|
+ |
+-def test_der_wochenlauf_meldet_weiterhin_nur():|
+-    """Die Ursache ist behoben — die Regel 'melden statt reparieren' bleibt.|
+-|
+-    Sie war nie das Problem: sie hat den Befund sichtbar gemacht.|
+-    """|
++def test_der_wochenlauf_berichtigt_seit_30_09():|
++    """Bis 30.09.2026 stand hier „die Regel 'melden statt reparieren'|
++    bleibt". Hausi hat am 30.09. anders entschieden (DA-22): die Drift kam|
++    nach jedem neuen JP-Set wieder, weil eine neue Karte beim Schreiben|
++    noch keinen Beleg hat. Der Wochenlauf faehrt seitdem --schreiben —|
++    Reihenfolge und Meldung prueft|
++    tests/python/test_ace_spec_wochenlauf_berichtigt.py."""|
+     pfad = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")|
+@@ -85,7 +87,3 @@ def test_der_wochenlauf_meldet_weiterhin_nur():|
+     assert ruf, "der Wochenlauf rechnet is_ace_spec nicht mehr nach"|
+-    assert "--melden" in ruf.group(0)|
+-    assert "--schreiben" not in ruf.group(0), (|
+-        "der Wochenlauf schreibt jetzt selbst. Die Ursache steckt seit "|
+-        "10.09.2026 im Scraper — ein unbeaufsichtigter Schreiblauf ueber "|
+-        "660.000 Zeilen loest nichts mehr und widerspricht CLAUDE.md.")|
++    assert "--schreiben" in ruf.group(0) and "--melden" not in ruf.group(0), ruf.group(0)|
+ |
+diff --git a/tests/python/test_ace_spec_liste_geprueft.py b/tests/python/test_ace_spec_liste_geprueft.py|
+index 3d220c0..f77aaac 100644|
+--- a/tests/python/test_ace_spec_liste_geprueft.py|
++++ b/tests/python/test_ace_spec_liste_geprueft.py|
+@@ -40,4 +40,7 @@ stillschweigend geschrumpft ist. Ein neues Set mit einer ACE SPEC macht|
+ die Liste unvollstaendig, und weder sie noch dieser Test merken das von|
+-selbst — die Datei haengt an keinem Zeitplan (siehe|
+-scripts/pruefe_frische.py, Abschnitt OHNE PLAN).|
++selbst — die Datei hing an keinem Zeitplan.|
++|
++NACHTRAG 30.09.2026 (DA-22): jetzt haengt sie an einem. Der Wochenlauf|
++faehrt scripts/ace_specs_nachziehen.py und schreibt diesen Vermerk bei|
++jeder Aenderung neu (tests/python/test_ace_specs_nachziehen.py).|
+ """|
+@@ -72,7 +75,14 @@ def test_die_pruefung_steht_in_der_datei():|
+ def test_die_pruefung_war_ergebnislos_und_sagt_das_auch():|
++    """Kein Name der Quelle fehlt in der Liste.|
++|
++    Seit 30.09.2026 schreibt scripts/ace_specs_nachziehen.py den Vermerk|
++    und nimmt dabei jeden Namen der Quelle auf — `fehlend` ist danach 0.|
++    `ueberzaehlig` (Namen, die die Quelle nicht mehr fuehrt) darf dagegen|
++    stehen: entfernt wird nie, gemeldet wird es als ::notice::. Eine|
++    Karte hoert nicht auf, ACE SPEC zu sein."""|
+     g = _liste()["_geprueft"]|
+-    assert g["fehlend"] == 0 and g["ueberzaehlig"] == 0, (|
+-        f"Die Pruefung fand Abweichungen ({g['fehlend']} fehlend, "|
+-        f"{g['ueberzaehlig']} ueberzaehlig) — dann muss die Liste "|
+-        "nachgezogen werden, nicht der Vermerk.")|
++    assert g["fehlend"] == 0, (|
++        f"Die Pruefung fand {g['fehlend']} Namen der Quelle, die in der "|
++        "Liste fehlen — dann muss die Liste nachgezogen werden, nicht der Vermerk.")|
++    assert 0 <= g["ueberzaehlig"] <= g["liste_namen"]|
+ |
+@@ -95,5 +105,7 @@ def test_drucke_und_namen_duerfen_auseinanderfallen_aber_nur_so_herum():|
+     g = _liste()["_geprueft"]|
+-    assert g["quelle_drucke"] >= g["liste_namen"], (|
+-        f"{g['liste_namen']} Namen bei nur {g['quelle_drucke']} Drucken — "|
+-        "die Liste fuehrt mehr, als die Quelle hergibt.")|
++    # Seit 30.09.2026 kommen Namen auch ueber JP-Drucke dazu (jp_drucke).|
++    aus_quelle = g["liste_namen"] - g["ueberzaehlig"]|
++    assert g["quelle_drucke"] + g.get("jp_drucke", 0) >= aus_quelle, (|
++        f"{aus_quelle} Namen aus der Quelle bei nur {g['quelle_drucke']} + "|
++        f"{g.get('jp_drucke', 0)} Drucken — die Liste fuehrt mehr, als die Quelle hergibt.")|
+     assert "warum_die_zahlen_verschieden_sind" in g, (|
+diff --git a/tests/python/test_ace_spec_meldung.py b/tests/python/test_ace_spec_meldung.py|
+index e1ae8c9..366a54c 100644|
+--- a/tests/python/test_ace_spec_meldung.py|
++++ b/tests/python/test_ace_spec_meldung.py|
+@@ -10,5 +10,4 @@ dem alten Stand stehen, wegen einer Spalte, die das Frontend nicht liest.|
+ |
+-Seitdem laeuft das Skript mit --melden im Wochenlauf mit, BEVOR committet|
+-wird. Es schreibt dort nichts (CLAUDE.md: "Report, don't silently repair") —|
+-es sagt nur Bescheid, solange der Deploy noch gruen ist.|
++Danach lief das Skript mit --melden im Wochenlauf mit, BEVOR committet|
++wurde. Der Berichtsmodus bleibt fuer Handlaeufe und Proben.|
+ |
+@@ -24,3 +23,6 @@ Was diese Tests halten:|
+      Vorrangregel.|
+-  6. Der Wochenlauf ruft den Schritt wirklich auf, und zwar vor dem Commit.|
++  6. --schreiben nennt die Zahl der berichtigten Felder (::notice::).|
++|
++Seit 30.09.2026 (Hausi, DA-22) faehrt der Wochenlauf --schreiben statt|
++--melden; wie und wo, prueft tests/python/test_ace_spec_wochenlauf_berichtigt.py.|
+ """|
+@@ -169,29 +171,16 @@ def test_nach_dem_schreiben_meldet_der_naechste_lauf_nichts(tmp_path):|
+ |
+-def test_wochenlauf_prueft_vor_dem_commit():|
+-    """Ein Skript, das niemand aufruft, ist kein Netz.|
++def test_schreiben_meldet_die_zahl_der_berichtigten_felder(tmp_path):|
++    """Seit 30.09.2026 schreibt der Wochenlauf (DA-22). Berichtigt wird|
++    trotzdem nicht still: die Zahl steht als ::notice:: auf der Laufseite.|
++    Ohne Aenderung keine Meldung — sonst stuende jede Woche dieselbe Zeile|
++    da und niemand saehe mehr hin."""|
++    d = _datenordner(tmp_path, ["Unfair Stamp;Item;1;No\n", "Pikachu;Basic;1;\n"])|
++    e = _lauf(d, "--schreiben")|
++    assert e.returncode == 0, e.stdout + e.stderr|
++    assert "::notice::is_ace_spec: 2 Felder nach der Regel berichtigt" in e.stdout, e.stdout|
++    e2 = _lauf(d, "--schreiben")|
++    assert "::notice::" not in e2.stdout, e2.stdout|
++|
+ |
+-    Geprueft wird die REIHENFOLGE: die Meldung muss vor dem Commit stehen,|
+-    sonst erfaehrt man von der Drift erst, wenn sie schon auf main liegt.|
+-    """|
+-    pfad = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")|
+-    text = io.open(pfad, encoding="utf-8").read()|
+-    assert "repariere_ace_spec.py --melden" in text, (|
+-        "der Wochenlauf ruft die ace_spec-Pruefung nicht auf")|
+-    assert "--schreiben" not in text.split("repariere_ace_spec.py")[1][:200], (|
+-        "der Wochenlauf schreibt — er soll nur melden")|
+-    i_pruefung = text.index("repariere_ace_spec.py --melden")|
+-    i_commit = text.index("- name: Commit + push")|
+-    assert i_pruefung < i_commit, (|
+-        "die Pruefung steht hinter dem Commit — dann ist die Drift schon "|
+-        "auf main, bevor jemand sie sieht")|
+-|
+-|
+-def test_reparaturworkflow_bleibt_von_hand():|
+-    """Das Schreiben bleibt eine Entscheidung, kein Automatismus."""|
+-    pfad = os.path.join(WURZEL, ".github", "workflows", "ace-spec-reparatur.yml")|
+-    text = io.open(pfad, encoding="utf-8").read()|
+-    assert "workflow_dispatch:" in text|
+-    for auslöser in ("schedule:", "  push:", "pull_request:"):|
+-        assert auslöser not in text, (|
+-            f"{auslöser.strip()} im Reparaturworkflow — der Bestand wuerde "|
+-            "unbeaufsichtigt ueberschrieben")|
++# Wie der Wochenlauf das Skript aufruft (schreibend, an welcher Stelle),|
++# steht seit 30.09.2026 in tests/python/test_ace_spec_wochenlauf_berichtigt.py.|
+diff --git a/tests/python/test_ace_spec_schalter_bleibt_melden.py b/tests/python/test_ace_spec_schalter_bleibt_melden.py|
+deleted file mode 100644|
+index 4fef729..0000000|
+--- a/tests/python/test_ace_spec_schalter_bleibt_melden.py|
++++ /dev/null|
+@@ -1,153 +0,0 @@|
+-"""Warum der Wochenlauf die Ace-Spec-Reparatur nur MELDEN laesst.|
+-|
+-FRAGE (07.09.2026): `data/ace_specs.json` traegt `timestamp` =|
+-2026-02-18 und ist seither unveraendert. Der Wochenlauf fuehrt|
+-`scripts/repariere_ace_spec.py --melden`|
+-(`.github/workflows/weekly-full-update.yml`) — er meldet also nur und|
+-schreibt nie. Soll der Schalter fallen?|
+-|
+-ANTWORT: nein. Trockenlauf am 07.09.2026, ueber 22 Dateien und|
+-659.506 Zeilen:|
+-|
+-    Gesamt: Yes 22961, No 635644, leer 901 — 0 Felder geaendert.|
+-    is_ace_spec: keine Drift — 22 Dateien, 659506 Zeilen geprueft.|
+-|
+-`--schreiben` haette also nichts zu schreiben. Der Schalter umzulegen|
+-wuerde kein Feld reparieren und dafuer den Weg oeffnen, dass ein Lauf|
+-ohne Aufsicht 659.506 Zeilen anfasst — genau das, was CLAUDE.md mit|
+-„Report, don't silently repair" ausschliesst.|
+-|
+-Der alte Zeitstempel ist auch kein Alarm. Die Liste ist fuer das|
+-aktuelle Format vollstaendig: in|
+-`tournament_cards_data_cards_TEF-PBL.csv` sind alle 879 Zeilen|
+-entschieden (41 Yes, 838 No, **0 leer**). Unentschieden bleiben 901|
+-Zeilen in aelteren Formaten; die 13 haeufigsten Namen darunter|
+-(`Team Yell's Cheer` 348x, `Ruffian` 100x, `Roseanne's Backup` 91x,|
+-`Justified Gloves` 64x …) fuehrt `all_cards_merged.csv` als Supporter,|
+-Item oder Tool mit gewoehnlichen Seltenheiten — kein Hinweis auf einen|
+-uebersehenen Ace Spec. Positiv belegen laesst sich das dort nicht: die|
+-Kartendatenbank fuehrt ueberhaupt kein Ace-Spec-Kennzeichen|
+-(`grep -ic "ace spec" data/all_cards_merged.csv` → 0). Genau deshalb|
+-laesst der Reparaturlauf diese Felder leer, statt sie zu raten.|
+-|
+-Geschrieben wird weiterhin von Hand ueber den Workflow „Daten|
+-reparieren" (ace-spec-reparatur.yml) mit seinem `schreiben`-Eingang.|
+-|
+-NACHTRAG 10.09.2026 — die Begruendung oben stimmte nicht mehr|
+--------------------------------------------------------------|
+-Der Lauf vom 10.09.2026 meldete 5276 abweichende Felder, nicht 0. Der|
+-Satz „--schreiben haette also nichts zu schreiben" traf damit nicht mehr|
+-zu, und der Schalter stand ohne seine Begruendung da.|
+-|
+-Die Untersuchung ergab, dass die Drift KEIN Scraper-Fehler war, sondern|
+-der Unterschied zwischen zwei richtigen Formen derselben Regel:|
+-`entscheide_zeile` (nur diese Zeile bekannt, so schrieben die Scraper)|
+-gegen `entscheide` (ganzer Bestand bekannt, so rechnet der Abgleich).|
+-Die Differenz steckte in genau zwei Dateien — den beiden, die bei jedem|
+-Lauf vollstaendig neu geschrieben werden:|
+-|
+-    current_meta_card_data.csv          770 von  4501 Zeilen|
+-    online_tournament_dated_cards.csv  4506 von 29153 Zeilen|
+-|
+-Der Betreiber hat entschieden: Ursache im Scraper beheben. Seither holen|
+-sich beide Schreibstellen die Belege des Gesamtbestands|
+-(`belege_aus_bestand()` in backend/core/ace_spec_regel.py) und schreiben|
+-gleich den starken Wert. Damit hat der Abgleich nichts mehr zu finden —|
+-und der Schalter bleibt aus demselben Grund wie vorher auf „melden":|
+-nicht weil nichts zu tun waere, sondern weil ein unbeaufsichtigter Lauf|
+-ueber 660.000 Zeilen die falsche Antwort auf einen Befund ist.|
+-|
+-Abgesichert in tests/python/test_ace_spec_bestandsbelege.py.|
+-"""|
+-|
+-import csv|
+-import collections|
+-import json|
+-import os|
+-import re|
+-|
+-import pytest|
+-|
+-HIER = os.path.dirname(os.path.abspath(__file__))|
+-WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
+-DATEN = os.path.join(WURZEL, "data")|
+-WOCHENLAUF = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")|
+-REPARATUR = os.path.join(WURZEL, ".github", "workflows", "ace-spec-reparatur.yml")|
+-|
+-|
+-def test_der_wochenlauf_meldet_und_schreibt_nicht():|
+-    with open(WOCHENLAUF, encoding="utf-8") as f:|
+-        w = f.read()|
+-    ruf = re.search(r"^\s*python3 scripts/repariere_ace_spec\.py.*$", w, re.M)|
+-    assert ruf, "der Wochenlauf ruft repariere_ace_spec.py nicht mehr"|
+-    zeile = ruf.group(0)|
+-    assert "--melden" in zeile, f"Schalter geaendert: {zeile.strip()}"|
+-    assert "--schreiben" not in zeile, (|
+-        "der Wochenlauf schreibt jetzt selbst — der Trockenlauf am 07.09.2026 "|
+-        "fand 0 zu aendernde Felder, das gaebe keinen Gewinn und viel Risiko: "|
+-        + zeile.strip())|
+-|
+-|
+-def test_geschrieben_wird_von_hand_und_mit_schalter():|
+-    """Der schreibende Weg muss existieren — sonst waere „nur melden"|
+-    eine Sackgasse statt einer Arbeitsteilung."""|
+-    assert os.path.exists(REPARATUR), "ace-spec-reparatur.yml fehlt"|
+-    with open(REPARATUR, encoding="utf-8") as f:|
+-        r = f.read()|
+-    assert "workflow_dispatch" in r, "der Reparaturlauf ist nicht von Hand ausloesbar"|
+-    assert "schreiben" in r, "der Reparaturlauf hat keinen Schreib-Eingang"|
+-    assert "repariere_ace_spec" in r|
+-|
+-|
+-def test_im_aktuellen_format_ist_jede_zeile_entschieden():|
+-    """Im laufenden Format darf keine Zeile unentschieden bleiben.|
+-|
+-    WAS DIESER TEST NICHT MEHR BEHAUPTET (22.09.2026). Er hiess|
+-    `..._liste_deckt_das_aktuelle_format_vollstaendig_ab` und meldete|
+-    beim Umfallen "die Ace-Spec-Liste hinkt der Rotation hinterher". Am|
+-    22.09.2026 fiel er mit 294 unentschiedenen Zeilen um — und die|
+-    Diagnose war falsch:|
+-|
+-      * `data/ace_specs.json` fuehrt 39 Namen.|
+-      * limitlesstcg.com/cards?q=is:ace&display=list, abgerufen am|
+-        22.09.2026: 46 Drucke, 39 verschiedene Namen — dieselben.|
+-|
+-    Die Liste war also vollstaendig. Unentschieden waren die Zeilen aus|
+-    einem anderen Grund: der Wochenlauf hatte 1.589 neue Zeilen|
+-    geschrieben, und `scripts/repariere_ace_spec.py --melden` wies 2.618|
+-    Felder im Gesamtbestand aus, die anders belegt sind als die Regel es|
+-    vorgibt. Der Bestand hinkte, nicht die Liste.|
+-|
+-    Repariert wird das mit dem Ablauf „Daten reparieren"|
+-    (ace-spec-reparatur.yml, `schreiben=true`) — bewusst von Hand und|
+-    bewusst nicht im Wochenlauf, weil ein unbeaufsichtigter Lauf ueber|
+-    660.000 Zeilen die falsche Antwort auf einen Befund ist (siehe|
+-    Kopf dieser Datei).|
+-    """|
+-    pfad = os.path.join(DATEN, "tournament_cards_data_cards_TEF-PBL.csv")|
+-    c = collections.Counter()|
+-    with open(pfad, encoding="utf-8-sig", newline="") as f:|
+-        for r in csv.DictReader(f, delimiter=";"):|
+-            c[(r.get("is_ace_spec") or "").strip()] += 1|
+-    assert c[""] == 0, (|
+-        f"{c['']} von {sum(c.values())} Zeile(n) im aktuellen Format sind "|
+-        "unentschieden. ERST PRUEFEN, WORAN ES LIEGT:\n"|
+-        "  1. `python3 scripts/repariere_ace_spec.py --melden` — weist er "|
+-        "Abweichungen aus, hinkt der BESTAND. Dann den Ablauf "|
+-        "„Daten reparieren\" (ace-spec-reparatur.yml) mit schreiben=true "|
+-        "ausloesen.\n"|
+-        "  2. Meldet er nichts, hinkt die LISTE. Dann "|
+-        "limitlesstcg.com/cards?q=is:ace&display=list abrufen (die "|
+-        "Bildansicht gibt keine Namen her) und data/ace_specs.json "|
+-        "nachziehen.")|
+-    assert c["Yes"] > 0 and c["No"] > 0, dict(c)|
+-|
+-|
+-def test_die_liste_ist_da_und_lesbar():|
+-    with open(os.path.join(DATEN, "ace_specs.json"), encoding="utf-8") as f:|
+-        d = json.load(f)|
+-    assert d["total_count"] == len(d["ace_specs"]), (|
+-        "total_count passt nicht zur Liste")|
+-    assert d["total_count"] >= 39, (|
+-        f"die Liste ist auf {d['total_count']} Eintraege geschrumpft")|
+-    assert d.get("source", "").startswith("http")|
+diff --git a/tests/python/test_ace_spec_wochenlauf_berichtigt.py b/tests/python/test_ace_spec_wochenlauf_berichtigt.py|
+new file mode 100644|
+index 0000000..036db31|
+--- /dev/null|
++++ b/tests/python/test_ace_spec_wochenlauf_berichtigt.py|
+@@ -0,0 +1,153 @@|
++"""Der Wochenlauf haelt is_ace_spec selbst richtig — Liste UND Bestand.|
++|
++ENTSCHEIDUNG HAUSI, 30.09.2026 (DA-22): „Da-22 muss auf jeden Fall|
++repariert werden. Falls irgendwann mal neue ACE SPECs kommen, dann|
++muessen die ja korrekt erkannt werden."|
++|
++Vorher (07.09.–30.09.2026, frueher test_ace_spec_schalter_bleibt_melden.py)|
++meldete der Wochenlauf nur (`--melden`), geschrieben wurde von Hand ueber|
++„Daten reparieren". Gemessen am 30.09.: die Drift kommt nach jedem neuen|
++JP-Set wieder (35 Felder, 29 in city_league_analysis.csv), weil eine neue|
++Karte beim Schreiben noch keinen Beleg hat — der normale Weg der Belege.|
++Und die Namensliste data/ace_specs.json hing an keinem Zeitplan.|
++|
++Jetzt, in dieser Reihenfolge im Wochenlauf:|
++  1. Erzeugte Dateien zurueck nach data/  (sonst berichtigt man einen Stand,|
++     den der Rueckweg danach wieder ueberschreibt — Wochenlauf #168)|
++  2. scripts/ace_specs_nachziehen.py       (die Liste aus der Quelle)|
++  3. scripts/repariere_ace_spec.py --schreiben (der Bestand nach der Regel)|
++  4. das Tor (Zusicherungen gegen die frischen Daten)|
++  5. Commit + push|
++|
++Geprueft wird die Reihenfolge an den Schritten selbst, nicht an Textstellen,|
++und die Pruefung wird an einem verfaelschten Ablauf rot gesehen.|
++"""|
++|
++import collections|
++import csv|
++import json|
++import os|
++import re|
++|
++import yaml|
++|
++HIER = os.path.dirname(os.path.abspath(__file__))|
++WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
++DATEN = os.path.join(WURZEL, "data")|
++WOCHENLAUF = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")|
++REPARATUR = os.path.join(WURZEL, ".github", "workflows", "ace-spec-reparatur.yml")|
++|
++|
++def _ohne_kommentare(text):|
++    return "\n".join(z for z in str(text).splitlines() if not z.lstrip().startswith("#"))|
++|
++|
++def befunde(text):|
++    """Was an der Verdrahtung im Wochenlauf nicht stimmt — leer heisst gut."""|
++    y = yaml.safe_load(text)|
++    schritte = [s for j in (y.get("jobs") or {}).values() for s in (j.get("steps") or [])]|
++|
++    def stelle(pruef):|
++        for i, s in enumerate(schritte):|
++            if pruef(s):|
++                return i|
++        return None|
++|
++    run = lambda s: _ohne_kommentare(s.get("run", ""))  # noqa: E731|
++    i_rueckweg = stelle(lambda s: (s.get("name") or "").startswith("Erzeugte Dateien zurueck nach data/"))|
++    # Aufgerufen, nicht nur erwaehnt: der Schritt nennt das Skript auch in|
++    # seinen Herzschlag-Zeilen („OK   scripts/ace_specs_nachziehen.py").|
++    ruft = lambda s, skript: re.search(r"(?m)^\s*python3?\s+(-u\s+)?%s\b" % re.escape(skript), run(s))  # noqa: E731|
++    i_liste = stelle(lambda s: ruft(s, "scripts/ace_specs_nachziehen.py"))|
++    i_rep = stelle(lambda s: ruft(s, "scripts/repariere_ace_spec.py"))|
++    i_tor = stelle(lambda s: (s.get("name") or "") == "Zusicherungen gegen die frischen Daten")|
++    i_commit = stelle(lambda s: (s.get("name") or "") == "Commit + push")|
++|
++    aus = []|
++    if i_liste is None:|
++        aus.append("die ACE-SPEC-Liste wird nicht nachgezogen")|
++    if i_rep is None:|
++        return aus + ["repariere_ace_spec.py wird nicht aufgerufen"]|
++    aufruf = run(schritte[i_rep])|
++    if "--schreiben" not in aufruf or "--melden" in aufruf:|
++        aus.append("die Berichtigung schreibt nicht: " + aufruf.strip())|
++    if schritte[i_rep].get("continue-on-error"):|
++        aus.append("eine gescheiterte Nachpruefung (rc 2) darf den Lauf nicht gruen lassen")|
++    if i_rueckweg is not None and i_rep < i_rueckweg:|
++        aus.append("berichtigt VOR dem Rueckweg nach data/ — der ueberschreibt es wieder")|
++    if i_liste is not None and i_liste > i_rep:|
++        aus.append("die Liste wird erst NACH der Berichtigung nachgezogen")|
++    for name, i in (("Tor", i_tor), ("Commit", i_commit)):|
++        if i is None or i < i_rep:|

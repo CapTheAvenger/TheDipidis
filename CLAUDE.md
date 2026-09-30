@@ -486,6 +486,15 @@ je PR.
    Zweig. Danach den Baum des Zweigs (`git rev-parse <zweig>^{tree}`)
    gegen den lokalen Baum halten, erst dann PR, CI, Merge.
 
+**Der Einspiel-Commit stoesst die PR-Pruefungen nicht an (gemessen
+30.09.2026, PR #874).** `patch-einspielen.yml` committet mit dem
+`GITHUB_TOKEN`; der dadurch ausgeloeste Deploy-Lauf wartete auf eine
+Freigabe, lief ab und stand rot in der Liste (#3208), die uebrigen
+Pruefungen liefen gar nicht. Deshalb den PR ERST anlegen, wenn der Zweig
+fertig eingespielt ist — oder, wenn er schon offen ist, ueber MCP
+schliessen und wieder oeffnen (`update_pull_request` state closed, dann
+open). Das startet alle Pruefungen auf dem neuen Kopf.
+
 **Grenzen, gemessen 27.09.2026:** MCP schreibt keine Datei unter
 `.github/workflows/` (403 „Resource not accessible by integration"), und
 `GITHUB_TOKEN` darf Ablaeufe auch nicht aendern. Ablaufaenderungen gehoeren

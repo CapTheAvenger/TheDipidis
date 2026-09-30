@@ -87,12 +87,21 @@ def test_die_einteilung_reproduziert_die_pruefzahlen():
         else:
             c["ok"] += 1
 
-    # Die Pruefung vom 20.08.2026: 3.015 ohne Zuordnung, 200 Kollisionszeilen.
-    assert c["unmapped"] > 1000, c
-    assert c["collision"] > 0 and c["collision"] % 2 == 0, c
-    assert c["ok"] > c["unmapped"], c
-    # Und keine dieser Zeilen faellt mehr in den ok-Topf.
-    assert sum(c.values()) == sum(1 for x in cards if x.get("number"))
+    # Die Pruefung vom 20.08.2026 zaehlte 3.015 ohne Zuordnung und 200
+    # Kollisionszeilen. Bis 30.09.2026 standen hier `unmapped > 1000` und
+    # `collision > 0` — beide waeren rot geworden, sobald die Zuordnung
+    # BESSER wird (WZ-18). Geprueft wird jetzt die Regel, nicht der Stand:
+    # jede Karte ohne Eintrag landet in 'unmapped', jede mit geteilter
+    # Nummer in 'collision' — unabhaengig nachgezaehlt —, und keine davon
+    # im ok-Topf.
+    mit_nummer = [x for x in cards if x.get("number")]
+    ohne_eintrag = sum(1 for x in mit_nummer if (x["set"], x["number"]) not in mapping)
+    geteilt = sum(1 for x in mit_nummer
+                  if (x["set"], x["number"]) in mapping
+                  and mapping[(x["set"], x["number"])] in kollidierend)
+    assert c["unmapped"] == ohne_eintrag, c
+    assert c["collision"] == geteilt, c
+    assert sum(c.values()) == len(mit_nummer)
 
 
 def test_keine_nummer_ist_doppelt_verifiziert():

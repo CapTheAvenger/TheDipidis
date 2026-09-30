@@ -237,9 +237,20 @@ def test_der_gemessene_fall_von_mega_excadrill_bleibt_stehen():
     _ganz, gg, _rg = bp.online_anteile(zeilen, "TEF-PBL", "2026-01-01", "2099-01-01")
 
     # 1. Der feste Wert des abgeschlossenen Fensters. DAS ist der Riegel.
-    assert vor["mega-excadrill-ex"] == pytest.approx(7.59, abs=0.05), (
-        f"Vorwert {vor['mega-excadrill-ex']:.2f} % statt 7,59 % — steht ein "
-        f"fremdes Formatfenster im Nenner? (Nenner: {gv}, erwartet 26.130)")
+    #    GEAENDERT 30.09.2026 (WZ-22): hier stand `== 7.59 ± 0,05`. Weil
+    #    der Nenner durch nachgetragene Turniere wachsen darf (siehe unten),
+    #    verschiebt schon ein Nachtrag von rund 170 Listen den Anteil um
+    #    0,05 — ein richtiger Lauf haette das Tor geschlossen. Die Regel
+    #    dahinter ist rechnerisch exakt: kommen k Listen dazu, liegt der
+    #    neue Anteil zwischen "keine davon Excadrill" und "alle Excadrill".
+    #    Bei k = 0 ist das wieder genau 7,59 %.
+    k = gv - 26130
+    unten = 7.59 * 26130 / gv - 0.05
+    oben = (7.59 * 26130 + 100 * k) / gv + 0.05
+    assert unten <= vor["mega-excadrill-ex"] <= oben, (
+        f"Vorwert {vor['mega-excadrill-ex']:.2f} % liegt ausserhalb dessen, was "
+        f"{k} nachgetragene Listen erlauben ({unten:.2f}–{oben:.2f} %) — steht "
+        f"ein fremdes Formatfenster im Nenner? (Nenner: {gv}, gemessen 10.09.2026: 26.130)")
     # GEAENDERT 22.09.2026: hier stand `gv == 26130` mit der Begruendung
     # "er kann nicht wachsen". Er kann es doch: der Labs-Scraper probiert
     # aeltere Turnier-IDs nach (siehe tests/python/test_labs_gap_fill.py).

@@ -525,20 +525,35 @@ def load_tournament_metadata_lookup() -> Dict[str, Dict]:
 def load_existing_output(out_path: str) -> set:
     """Return set of limitless tournament IDs already in the output.
     We key on the limitless ID (not labs) because that's what we
-    iterate. --resume skips these."""
-    seen = set()
+    iterate. --resume skips these.
+
+    Erledigt ist ein Turnier erst, wenn mindestens EINE seiner Zeilen
+    eine Bilanz traegt (SC-8, 30.09.2026). Bis dahin zaehlte jede Zeile:
+    ein Turnier, das waehrend es lief oder ohne Bilanzspalte geholt
+    wurde, stand mit leeren wins/losses/ties im Bestand, und --resume
+    holte es nie wieder. Ein erneuter Abruf ersetzt die alten Zeilen
+    (write_rows ersetzt nach Schluessel), er verdoppelt nichts."""
+    mit_bilanz, ohne_bilanz = set(), set()
     if not os.path.exists(out_path):
-        return seen
+        return mit_bilanz
     try:
         with open(out_path, encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for r in reader:
                 lid = r.get('limitless_tournament_id', '').strip()
-                if lid:
-                    seen.add(lid)
+                if not lid:
+                    continue
+                if any((r.get(k) or '').strip() for k in ('wins', 'losses', 'ties')):
+                    mit_bilanz.add(lid)
+                else:
+                    ohne_bilanz.add(lid)
     except Exception as e:
         logger.warning("Could not parse existing output: %s", e)
-    return seen
+    offen = sorted(ohne_bilanz - mit_bilanz)
+    if offen:
+        logger.info("--resume: %d Turnier(e) ohne eine einzige Bilanz werden neu "
+                    "geholt: %s", len(offen), ', '.join(offen[:20]))
+    return mit_bilanz
 
 
 CSV_FIELDS = [

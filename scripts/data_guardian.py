@@ -1424,6 +1424,114 @@ def check_meta_preiszuordnung(findings):
             f"zurueck. Betrag je Karte im Centbereich."))
 
 
+# ── Die Praemissen der Cent-Pins (WZ-22, 30.09.2026) ─────────────────────
+#
+# Die Pins PRE 96-99 (Betreiberregel "wenn nur Cent Betraege dann den
+# guenstigeren"), MEP 83 und das bewusst offene MEP 4 ruhen auf Aussagen
+# ueber den TAGESPREIS: Spanne im Centbereich, ein Produkt mit Markt statt
+# Einzelangebot, zwei Kandidaten weit auseinander. Bis 30.09.2026 standen
+# diese Aussagen als Zusicherungen in tests/python/test_cent_regel_zuordnung.py
+# — und hielten damit JEDEN Datenlauf an, sobald ein einzelner Verkauf sie
+# verschob (10.09.: MEP 4, 22.09.: MEP 83). Die Daten waren dabei richtig;
+# was sich aendert, ist eine Entscheidungsgrundlage. Die gehoert gemeldet,
+# nicht ans Tor. Geschrieben wird hier nichts.
+PIN_PRE_NUMMERN = ("96", "97", "98", "99")
+PIN_EXP_MEP = 6232
+PIN_CENT = 0.10
+PIN_KENNZAHLEN = ("trend", "avg", "avg7", "avg30")
+
+
+def _pin_preis(eintrag):
+    for feld in ("trend", "avg30", "avg"):
+        wert = (eintrag or {}).get(feld)
+        if wert:
+            return float(wert)
+    return None
+
+
+def _pin_hat_handelsgeschichte(eintrag):
+    """Markt statt Einzelangebot: `low` gesetzt und Durchschnitte, die sich
+    ueber die Zeitraeume unterscheiden."""
+    if not eintrag or eintrag.get("low") in (None, ""):
+        return False
+    reihe = [eintrag.get(f) for f in ("avg", "avg1", "avg7", "avg30")]
+    if any(w in (None, "") for w in reihe):
+        return False
+    return len({round(float(w), 2) for w in reihe}) > 1
+
+
+def check_pin_praemissen(findings, pins=None, produkte=None, preise=None):
+    if pins is None or produkte is None or preise is None:
+        try:
+            with open(os.path.join(DATA, "cardmarket_mapping_manual.csv"),
+                      encoding="utf-8-sig", newline="") as f:
+                pins = {((r.get("set") or "").strip().upper(),
+                         (r.get("number") or "").strip()): r
+                        for r in csv.DictReader(f)}
+            with open(os.path.join(DATA, "products_singles_6.json"), encoding="utf-8") as f:
+                produkte = {p["idProduct"]: p for p in json.load(f)["products"]}
+            with open(os.path.join(DATA, "price_guide_6.json"), encoding="utf-8") as f:
+                preise = {g["idProduct"]: g for g in json.load(f)["priceGuides"]}
+        except (OSError, ValueError, KeyError) as e:
+            findings.append(("WARN", f"Praemissen der Cent-Pins nicht pruefbar: {e}"))
+            return
+    # PRE 96-99: die vier Kandidaten liegen im Centbereich.
+    werte = {}
+    for n in PIN_PRE_NUMMERN:
+        pin = pins.get(("PRE", n))
+        if not pin:
+            continue
+        werte[n] = _pin_preis(preise.get(int(pin["cardmarket_product_id"])))
+    if werte:
+        fehlend = sorted(n for n, v in werte.items() if v is None)
+        bekannt = [v for v in werte.values() if v is not None]
+        if fehlend:
+            findings.append(("WARN", f"Cent-Pin PRE {', '.join(fehlend)}: kein Preis im "
+                             f"Preisfuehrer — die Spanne der vier Kandidaten ist nicht belegbar"))
+        elif max(bekannt) - min(bekannt) > PIN_CENT:
+            findings.append((
+                "WARN",
+                f"Cent-Pins PRE 96-99: die vier Kandidaten liegen "
+                f"{max(bekannt) - min(bekannt):.2f} EUR auseinander ({werte}). Die "
+                f"Betreiberregel 'wenn nur Cent Betraege dann den guenstigeren' traegt "
+                f"diese Zuordnung nicht mehr — neu entscheiden. Geschrieben wird hier nichts."))
+    # MEP 83: der Pin zeigt auf das Produkt mit Markt, nicht auf das Einzelangebot.
+    if not _pin_hat_handelsgeschichte(preise.get(894262)):
+        findings.append((
+            "WARN",
+            "Pin MEP 83 (894262): traegt heute keine belastbare Preisgrundlage "
+            "(kein low oder gleiche Durchschnitte) — die Begruendung des Pins neu pruefen."))
+    if _pin_hat_handelsgeschichte(preise.get(903006)):
+        findings.append((
+            "WARN",
+            "MEP 83: 903006 hat inzwischen eine echte Handelsgeschichte. Damit gibt es "
+            "zwei belastbare Slowbro-Produkte in Erweiterung 6232 — die Wahl gehoert neu "
+            "entschieden."))
+    # MEP 4: bleibt offen, solange die beiden Kandidaten nicht UEBER MEHRERE
+    # Kennzahlen im Centbereich liegen (eine Kennzahl allein war am 10.09.2026
+    # eine Tageslaune).
+    kandidaten = sorted(pid for pid, p in produkte.items()
+                        if p.get("idExpansion") == PIN_EXP_MEP
+                        and str(p.get("name", "")).startswith("Lunatone"))
+    if len(kandidaten) == 2 and ("MEP", "4") not in pins:
+        spannen = {}
+        for feld in PIN_KENNZAHLEN:
+            w = [(preise.get(pid) or {}).get(feld) for pid in kandidaten]
+            if all(x not in (None, "") for x in w):
+                spannen[feld] = abs(float(w[0]) - float(w[1]))
+        if len(spannen) >= 2 and all(v <= PIN_CENT for v in spannen.values()):
+            guenstiger = min(kandidaten, key=lambda k: _pin_preis(preise.get(k)) or 0)
+            findings.append((
+                "WARN",
+                f"MEP 4: beide Lunatone-Kandidaten liegen ueber alle Kennzahlen im "
+                f"Centbereich ({spannen}). Damit greift die Betreiberregel — Vorschlag "
+                f"fuer data/cardmarket_mapping_manual.csv: MEP,4,{guenstiger},"
+                f"betreiber-regel-cent. Geschrieben wird hier nichts."))
+    elif ("MEP", "4") not in pins:
+        findings.append(("WARN", f"MEP 4: in Erweiterung {PIN_EXP_MEP} stehen "
+                         f"{len(kandidaten)} Lunatone-Produkte statt zwei — die Lage hat sich geaendert"))
+
+
 def check_geteilte_produkt_ids(findings):
     """Zwei Karten auf einer Produkt-ID, obwohl Cardmarket beide fuehrt.
 
@@ -3089,6 +3197,7 @@ def main():
     check_kartentext_bericht(findings)
     check_meta_preiszuordnung(findings)
     check_geteilte_produkt_ids(findings)
+    check_pin_praemissen(findings)
     champions_ueber_grenze = check_champions_usage(findings, baseline)
     check_champions_namen(findings)
     check_champions_freshness(findings)

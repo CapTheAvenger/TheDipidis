@@ -93,19 +93,6 @@ def preise():
         return {g["idProduct"]: g for g in json.load(f)["priceGuides"]}
 
 
-def _preis(eintrag):
-    """Der belastbarste Wert, den der Preisfuehrer je Produkt fuehrt.
-
-    trend zuerst, sonst avg30, sonst avg. Ein Produkt ohne jeden Wert
-    liefert None — das ist selbst ein Befund (siehe MEP 83).
-    """
-    for feld in ("trend", "avg30", "avg"):
-        wert = (eintrag or {}).get(feld)
-        if wert:
-            return float(wert)
-    return None
-
-
 # ── Die vier PRE-Drucke ────────────────────────────────────────────────
 
 PRE_NUMMERN = ["96", "97", "98", "99"]
@@ -147,27 +134,6 @@ def test_die_vier_produkte_sind_dieselbe_karte_in_derselben_erweiterung(pins, pr
     assert erweiterungen == {EXP_PRE}, (
         f"die vier Pins liegen nicht mehr alle in Erweiterung {EXP_PRE}: "
         f"{sorted(erweiterungen)}")
-
-
-def test_die_praemisse_haelt_die_spanne_bleibt_im_centbereich(pins, produkte, preise):
-    """Die Regel des Betreibers gilt fuer Cent-Unterschiede.
-
-    Waechst die Spanne zwischen den vier Produkten, ist die Begruendung
-    hinfaellig — dann entscheidet die Zuordnung wieder ueber Geld, das man
-    merkt, und jemand muss hinsehen statt sich auf den Pin zu verlassen.
-    """
-    werte = {}
-    for n in PRE_NUMMERN:
-        pid = int(pins[("PRE", n)]["cardmarket_product_id"])
-        werte[n] = _preis(preise.get(pid))
-    fehlend = [n for n, v in werte.items() if v is None]
-    assert not fehlend, f"kein Preis fuer PRE {', '.join(fehlend)}"
-    spanne = max(werte.values()) - min(werte.values())
-    assert spanne <= CENT_GRENZE, (
-        f"die vier Kandidaten liegen inzwischen {spanne:.2f} EUR auseinander "
-        f"({werte}). Die Betreiberregel 'wenn nur Cent Betraege dann den "
-        f"guenstigeren' hat diese Zuordnung getragen, solange es Cent waren — "
-        f"jetzt nicht mehr")
 
 
 def test_die_pins_tragen_die_quelle_der_entscheidung(pins):
@@ -233,60 +199,6 @@ def test_die_widerlegung_von_cardprovs_haelt(produkte):
         f"dieselbe Konsequenz")
 
 
-def _hat_handelsgeschichte(eintrag):
-    """Traegt dieser Preiseintrag einen MARKT oder ein einzelnes Angebot?
-
-    Ein Produkt, das nie gehandelt wurde, aber gelistet ist, bekommt bei
-    Cardmarket den Listenpreis in jedes Durchschnittsfeld geschrieben:
-    avg = avg1 = avg7 = avg30 = trend, und `low` bleibt leer. Ein
-    Produkt mit echten Verkaeufen hat ein `low` und Durchschnitte, die
-    sich ueber die Zeitraeume unterscheiden.
-
-    Der Unterschied ist genau der, auf den es beim Pin ankommt — nicht
-    "hat einen Preis", sondern "hat eine Preisgrundlage".
-    """
-    if not eintrag:
-        return False
-    if eintrag.get("low") in (None, ""):
-        return False
-    reihe = [eintrag.get(f) for f in ("avg", "avg1", "avg7", "avg30")]
-    if any(w in (None, "") for w in reihe):
-        return False
-    return len({round(float(w), 2) for w in reihe}) > 1
-
-
-def test_der_pin_zeigt_auf_das_produkt_mit_der_belastbaren_preisgrundlage(produkte, preise):
-    """Warum 894262 und nicht 903006.
-
-    HIER STAND BIS ZUM 22.09.2026 `_preis(preise.get(903006)) is None`
-    — "903006 fuehrt keinen einzigen Wert". Das war am 03.09.2026 wahr.
-    Am 22.09.2026 stand dort avg 125,00 EUR, die Zusicherung fiel um,
-    und die Deploy-Kette stand.
-
-    Die Entscheidung war trotzdem unveraendert richtig. Falsch war ihre
-    BEGRUENDUNG: "das einzige mit Preis" ist eine Aussage ueber einen
-    Tagesstand des Preisfuehrers, nicht ueber die Produkte. Gemessen am
-    22.09.2026:
-
-        894262  low 5,99 · avg1 18,00 · avg7 17,52 · avg30 16,52
-        903006  low —    · avg1 = avg7 = avg30 = trend = 125,00
-
-    Das eine hat einen Markt, das andere ein einzelnes Angebot. Genau
-    das wird jetzt geprueft — und die Tripwire bleibt scharf: bekommt
-    903006 je eine echte Handelsgeschichte, gibt es zwei belastbare
-    Kandidaten und die Wahl gehoert neu entschieden.
-    """
-    assert produkte.get(903006), "Produkt 903006 ist aus dem Abzug verschwunden"
-    assert _hat_handelsgeschichte(preise.get(894262)), (
-        "894262 traegt keine belastbare Preisgrundlage mehr — dann traegt der "
-        "Pin seine Begruendung nicht mehr und gehoert neu geprueft")
-    assert not _hat_handelsgeschichte(preise.get(903006)), (
-        "903006 traegt inzwischen eine echte Handelsgeschichte (low gesetzt und "
-        "unterschiedliche Durchschnitte). Damit gibt es zwei belastbare "
-        "Slowbro-Produkte in Erweiterung 6232, und die Wahl zwischen ihnen "
-        "gehoert neu entschieden — nicht weitergeschrieben")
-
-
 # ── MEP 4: die Regel greift NICHT, und das ist der Punkt ───────────────
 
 def test_mep_4_bleibt_bewusst_ungepinnt(pins):
@@ -296,75 +208,6 @@ def test_mep_4_bleibt_bewusst_ungepinnt(pins):
         "hier waere geraten, nicht entschieden")
 
 
-# Kennzahlen, ueber die die Naehe belegt sein muss, bevor die Cent-Regel
-# greift. EINE Kennzahl reicht nicht — siehe die Begruendung im Test.
-CENT_KENNZAHLEN = ("trend", "avg", "avg7", "avg30")
-
-
-def _spannen_je_kennzahl(preise, kandidaten):
-    """Abstand der beiden Kandidaten, je Kennzahl. Fehlende werden
-    ausgelassen — ein fehlender Wert ist kein Beleg fuer Naehe."""
-    heraus = {}
-    for feld in CENT_KENNZAHLEN:
-        werte = [(preise.get(pid) or {}).get(feld) for pid in kandidaten]
-        if any(w is None or w == "" for w in werte):
-            continue
-        werte = [float(w) for w in werte]
-        heraus[feld] = max(werte) - min(werte)
-    return heraus
-
-
-def test_die_beiden_mep_4_kandidaten_liegen_weiterhin_ueber_dem_centbereich(produkte, preise):
-    """Die Gegenprobe zur Aussage oben.
-
-    Faellt die Spanne der beiden Kandidaten je in den Centbereich, dann
-    GILT die Betreiberregel auch hier, und MEP 4 gehoert entschieden statt
-    offengelassen. Dieser Test macht aus 'bleibt offen' eine pruefbare
-    Aussage statt einer Gewohnheit.
-
-    WARUM ES NICHT AN EINER EINZIGEN KENNZAHL HAENGT (10.09.2026)
-    ------------------------------------------------------------
-    An diesem Tag stand der Test auf rot: `trend` lag bei 15,47 gegen
-    15,51 — vier Cent. Nach der Regel waere MEP 4 damit entschieden
-    gewesen. Die uebrigen Kennzahlen desselben Tages sagten aber etwas
-    ganz anderes:
-
-        trend    15,47   15,51   ->  0,04
-        avg      17,75   16,40   ->  1,35
-        low       9,00    7,80   ->  1,20
-        avg1     15,75    9,00   ->  6,75
-        avg7     16,16   18,86   ->  2,70
-        avg30    16,95   15,39   ->  1,56
-
-    Die Naehe war also eine Tageslaune einer einzigen Kennzahl, nicht die
-    Lage der beiden Produkte. Eine Zuordnung von Kartenidentitaet, die an
-    so etwas kippt, waere geraten — und Raten ist genau das, was
-    CLAUDE.md hier ausschliesst ("card identity is not something a
-    scraper gets to decide").
-
-    Deshalb muss die Naehe ueber MEHRERE Kennzahlen belegt sein. Erst
-    dann ist es die Lage der Produkte und nicht das Rauschen eines Tages.
-    """
-    kandidaten = [pid for pid, p in produkte.items()
-                  if p["idExpansion"] == EXP_MEP and p["name"].startswith("Lunatone")]
-    assert len(kandidaten) == 2, (
-        f"in Erweiterung {EXP_MEP} stehen {len(kandidaten)} Lunatone-Produkte "
-        f"({sorted(kandidaten)}) statt zwei — die Lage hat sich geaendert")
-    werte = [_preis(preise.get(pid)) for pid in kandidaten]
-    assert all(w is not None for w in werte), \
-        f"ein Lunatone-Kandidat hat keinen Preis mehr: {dict(zip(kandidaten, werte))}"
-
-    spannen = _spannen_je_kennzahl(preise, kandidaten)
-    assert len(spannen) >= 2, (
-        f"nur {len(spannen)} Kennzahl(en) fuer beide Kandidaten vorhanden "
-        f"({spannen}) — auf dieser Grundlage laesst sich die Naehe weder "
-        "belegen noch widerlegen")
-    nah = sorted(f for f, s in spannen.items() if s <= CENT_GRENZE)
-    assert len(nah) < len(spannen), (
-        f"ALLE Kennzahlen liegen im Centbereich ({spannen}). Damit greift "
-        "die Betreiberregel 'bei Cent-Betraegen den guenstigeren' auch "
-        f"hier, und MEP 4 gehoert auf {min(kandidaten, key=lambda k: _preis(preise.get(k)))} "
-        "gepinnt statt offengelassen.")
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -498,3 +341,100 @@ def test_die_regel_laeuft_wirklich_durch_und_entscheidet_richtig():
     # Und die belegte Zeile wandert NICHT.
     assert "PRE,200," not in text, (
         f"Die bestaetigte Zeile wurde umgehaengt. Befunde: {befunde}")
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Die Praemissen stehen im Waechter, nicht am Tor (WZ-22, 30.09.2026)
+# ─────────────────────────────────────────────────────────────────────
+#
+# Bis heute prueften drei Zusicherungen hier den TAGESPREIS aus
+# data/price_guide_6.json: Spanne der vier PRE-Kandidaten, Markt statt
+# Einzelangebot bei MEP 83, Abstand der beiden MEP-4-Kandidaten. Die Datei
+# holt der Preislauf taeglich neu, und jeder dieser Tests hielt damit den
+# Push des Laufs und den Deploy an, sobald ein einzelner Verkauf eine
+# Praemisse verschob (10.09. und 22.09. gemessen). Die Praemissen werden
+# weiter geprueft — von scripts/data_guardian.py, check_pin_praemissen(),
+# taeglich, mit Meldung im Sammel-Issue. Hier wird die Pruefung AUSGEFUEHRT,
+# gegen gesetzte Preise (TESTDATEN), in beide Richtungen.
+
+def _waechter():
+    spec = _ilu.spec_from_file_location(
+        "dg_pin_praemissen", os.path.join(_WURZEL, "scripts", "data_guardian.py"))
+    mod = _ilu.module_from_spec(spec)
+    _sys.modules["dg_pin_praemissen"] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _lage(pre=(0.04, 0.05, 0.05, 0.06), mep83_markt=True, mep83_einzel=True,
+          mep4=((15.47, 17.75, 16.16, 16.95), (15.51, 16.40, 18.86, 15.39))):
+    """TESTDATEN: Pins, Produkte und Preise wie am 10./22.09.2026 gemessen."""
+    pins = {("PRE", n): {"cardmarket_product_id": str(800000 + i)}
+            for i, n in enumerate(PRE_NUMMERN)}
+    produkte = {851049: {"idExpansion": EXP_MEP, "name": "Lunatone (MEP 4)"},
+                851050: {"idExpansion": EXP_MEP, "name": "Lunatone (MEP 4) v2"}}
+    preise = {800000 + i: {"trend": w} for i, w in enumerate(pre)}
+    preise[894262] = ({"low": 5.99, "avg": 16.0, "avg1": 18.0, "avg7": 17.52, "avg30": 16.52}
+                      if mep83_markt else {"low": "", "avg": 20, "avg1": 20, "avg7": 20, "avg30": 20})
+    preise[903006] = ({"low": "", "avg": 125, "avg1": 125, "avg7": 125, "avg30": 125}
+                      if mep83_einzel else {"low": 90, "avg": 125, "avg1": 110, "avg7": 118, "avg30": 121})
+    for pid, (t, a, a7, a30) in zip((851049, 851050), mep4):
+        preise[pid] = {"trend": t, "avg": a, "avg7": a7, "avg30": a30}
+    return pins, produkte, preise
+
+
+def test_der_waechter_schweigt_solange_die_praemissen_halten():
+    befunde = []
+    _waechter().check_pin_praemissen(befunde, *_lage())
+    assert befunde == [], befunde
+
+
+def test_der_waechter_meldet_eine_pre_spanne_ueber_dem_centbereich():
+    befunde = []
+    _waechter().check_pin_praemissen(befunde, *_lage(pre=(0.04, 0.05, 0.05, 0.20)))
+    assert any("PRE 96-99" in m and "neu entscheiden" in m for _, m in befunde), befunde
+
+
+def test_der_waechter_meldet_einen_markt_fuer_903006():
+    befunde = []
+    _waechter().check_pin_praemissen(befunde, *_lage(mep83_einzel=False))
+    assert any("903006" in m for _, m in befunde), befunde
+
+
+def test_der_waechter_meldet_894262_ohne_preisgrundlage():
+    befunde = []
+    _waechter().check_pin_praemissen(befunde, *_lage(mep83_markt=False))
+    assert any("894262" in m for _, m in befunde), befunde
+
+
+def test_mep_4_wird_erst_bei_naehe_ueber_alle_kennzahlen_gemeldet():
+    w = _waechter()
+    # 10.09.2026: nur trend nah (0,04) — keine Meldung.
+    befunde = []
+    w.check_pin_praemissen(befunde, *_lage())
+    assert not any("MEP 4" in m for _, m in befunde), befunde
+    # Alle Kennzahlen nah — Vorschlag auf den guenstigeren.
+    befunde = []
+    w.check_pin_praemissen(befunde, *_lage(mep4=((15.47, 15.50, 15.52, 15.49),
+                                                  (15.51, 15.55, 15.49, 15.45))))
+    treffer = [m for _, m in befunde if "MEP 4" in m]
+    assert treffer and "MEP,4,851049,betreiber-regel-cent" in treffer[0], befunde
+
+
+def test_der_waechter_prueft_die_praemissen_taeglich():
+    """Aufgerufen in main(), nicht nur definiert."""
+    import ast as _ast
+    baum = _ast.parse(_guardian_quelle().lstrip('\ufeff'))
+    main = next(n for n in baum.body if isinstance(n, _ast.FunctionDef) and n.name == "main")
+    aufrufe = {n.func.id for n in _ast.walk(main)
+               if isinstance(n, _ast.Call) and isinstance(n.func, _ast.Name)}
+    assert "check_pin_praemissen" in aufrufe
+
+
+def test_die_praemissen_laufen_auf_den_echten_dateien_durch():
+    """Die echten Dateien: keine Ausnahme. WELCHE Meldung heute kommt, ist
+    eine Tagesfrage und gehoert in den Waechterlauf, nicht hierher."""
+    befunde = []
+    _waechter().check_pin_praemissen(befunde)
+    assert all(lvl == "WARN" for lvl, _ in befunde)
+    assert not any("nicht pruefbar" in m for _, m in befunde), befunde

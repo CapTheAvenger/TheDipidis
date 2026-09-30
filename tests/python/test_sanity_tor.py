@@ -210,3 +210,61 @@ def test_waechter_liest_dieselbe_liste():
     for name in PAST_ARCHETYPEN:
         assert name not in erlaubt, (
             f"{name} wird vom Waechter noch als 'darf leer sein' gefuehrt")
+
+
+# ── SC-10 (30.09.2026): wachsende Dateien und JSON ──────────────────────
+#
+# Ausgefuehrt im Wegwerf-Repo der Fixture (TESTDATEN).
+
+def test_wachsende_datei_verliert_zeilen_und_wird_zurueckgesetzt(repo, capsys):
+    ziel = repo / "data" / "player_continuity.csv"
+    ziel.write_text("a;b\n" + "".join(f"{i};x\n" for i in range(5000)), encoding="utf-8")
+    _git("add", "-A", cwd=repo)
+    _git("commit", "-qm", "gewachsen", cwd=repo)
+    vorher = tor.count_csv_rows(str(ziel))
+    assert vorher == 5000
+    zeilen = ziel.read_text(encoding="utf-8").split("\n")
+    # Weiter UEBER der festen Schwelle (2.000), aber ein Drittel weniger:
+    # genau der Fall, den die feste Zahl nicht faengt.
+    behalten = max(tor.THRESHOLDS["player_continuity.csv"] + 1, int(vorher * 0.6))
+    ziel.write_text("\n".join(zeilen[:behalten + 1]) + "\n", encoding="utf-8")
+    assert tor.count_csv_rows(str(ziel)) >= tor.THRESHOLDS["player_continuity.csv"]
+    rc = _lauf(repo)
+    ausgabe = capsys.readouterr().out
+    assert "waechst sonst nur" in ausgabe
+    assert tor.count_csv_rows(str(ziel)) == vorher, "der gute Stand ist nicht zurueck"
+    assert rc == 1
+
+
+def test_eine_rotationsdatei_darf_schrumpfen(repo):
+    """current_meta_card_data.csv wird bei einem Setwechsel geleert —
+    solange sie ueber ihrer festen Schwelle bleibt, kein Revert."""
+    ziel = repo / "data" / "current_meta_card_data.csv"
+    schwelle = tor.THRESHOLDS["current_meta_card_data.csv"]
+    ziel.write_text("a;b\n" + "".join(f"{i};x\n" for i in range(schwelle)), encoding="utf-8")
+    rc = _lauf(repo)
+    assert rc == 0
+    assert tor.count_csv_rows(str(ziel)) == schwelle
+
+
+def test_kaputte_json_wird_zurueckgesetzt(repo, capsys):
+    ziel = repo / "data" / "irgendwas.json"
+    ziel.write_text('{"a": 1}', encoding="utf-8")
+    _git("add", "-A", cwd=repo)
+    _git("commit", "-qm", "json", cwd=repo)
+    ziel.write_text('{"a": 1', encoding="utf-8")        # abgeschnitten
+    rc = _lauf(repo)
+    ausgabe = capsys.readouterr().out
+    assert "kein gueltiges JSON" in ausgabe
+    assert ziel.read_text(encoding="utf-8") == '{"a": 1}'
+    assert rc == 1
+
+
+def test_gueltige_geaenderte_json_bleibt(repo):
+    ziel = repo / "data" / "irgendwas.json"
+    ziel.write_text('{"a": 1}', encoding="utf-8")
+    _git("add", "-A", cwd=repo)
+    _git("commit", "-qm", "json", cwd=repo)
+    ziel.write_text('{"a": 2}', encoding="utf-8")
+    assert _lauf(repo) == 0
+    assert ziel.read_text(encoding="utf-8") == '{"a": 2}'

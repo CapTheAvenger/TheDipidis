@@ -124,14 +124,22 @@ def test_die_anwesenheit_liegt_hoeher_und_steht_woanders():
     assert not groesser, (
         "die Decksumme liegt ueber der Anwesenheit — das kann nicht sein: "
         + str(groesser))
-    assert len(kleiner) >= 50, (
-        "die beiden Zahlen sind fast ueberall gleich geworden — dann ist "
-        "diese Beschreibung erklaerungsbeduerftig, nicht der Bestand")
-    # Die vier vom Nutzer an der Quelle gemessenen Paare.
+    # GEAENDERT 30.09.2026 (WZ-22): hier stand `len(kleiner) >= 50` — rot,
+    # sobald die Daten BESSER werden (nachgereichte Decklisten schliessen
+    # die Luecke). Die Beschreibung sagt "fast immer hoeher"; das ist die
+    # Mehrheit, nicht eine Zahl. Gemessen 30.09.2026: 66 von 69.
+    assert len(kleiner) > len(gemeinsam) / 2, (
+        f"nur noch {len(kleiner)} von {len(gemeinsam)} Turnieren haben eine "
+        "kleinere Decksumme — dann ist diese Beschreibung erklaerungsbeduerftig, "
+        "nicht der Bestand")
+    # Die vier vom Nutzer an der Quelle gemessenen Paare. Die Anwesenheit
+    # ist der Kopf der Turnierseite und steht fest; die Decksumme darf
+    # WACHSEN, wenn der Labs-Scraper nachgereichte Listen holt (Wiedervorlage),
+    # aber nie ueber die Anwesenheit und nie unter den gemessenen Stand.
     for tid, kopf_der_quelle, deck in (("0067", 499, 485), ("0068", 1974, 1970),
                                        ("0069", 2033, 2032), ("0070", 3752, 3743)):
         assert anwesend[tid] == kopf_der_quelle, (tid, anwesend[tid])
-        assert decksumme[tid] == deck, (tid, decksumme[tid])
+        assert deck <= decksumme[tid] <= kopf_der_quelle, (tid, decksumme[tid])
 
 
 # ── Befund B: die Spalten, die keine Messung sind ────────────────────────────

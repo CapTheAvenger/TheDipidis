@@ -93,6 +93,7 @@ RHYTHMUS = {
     "scrapers/scrape_pokemonproxies_urls.py": "zweimal_woechentlich",
     "scripts/build_online_fenster.py": "zweimal_woechentlich",
     "scripts/ace_specs_nachziehen.py": "zweimal_woechentlich",  # DA-22, seit 30.09.2026
+    "scripts/regulation_marks_nachziehen.py": "zweimal_woechentlich",  # DA-28, seit 30.09.2026
     "tools/build_threat_intel.py": "zweimal_woechentlich",
     # taeglich
     "scrapers/champions_replica_scraper.py": "taeglich",

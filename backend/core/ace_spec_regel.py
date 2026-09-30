@@ -16,6 +16,11 @@ Kurz: es wird nicht geraten. Drei Werte, jeder mit Beleg.
            gepflegt; ob seit Februar ACE SPECs dazugekommen sind, laesst
            sich im Repo nicht feststellen (data/ace_specs.json,
            Feld _hinweis). Leer heisst "unbekannt" und ist wahr.
+
+Seit 30.09.2026 (DA-22) wird die Liste nicht mehr von Hand gepflegt:
+scripts/ace_specs_nachziehen.py zieht sie im Wochenlauf aus der Quelle
+nach (EN-Namen direkt, JP-Drucke ueber Set und Nummer), und der
+Wochenlauf berichtigt den Bestand danach mit dieser Regel.
 """
 
 import json

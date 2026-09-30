@@ -156,7 +156,10 @@ test('jede Liste fuehrt 60 Karten und hoechstens eine ACE SPEC', () => {
      * abgeschrieben, und jede kommt auf 60 — ein Lesefehler waere hier
      * aufgefallen. */
     const bloecke = FRAGMENT.match(/data-mcl-listenblock="\d+"[\s\S]*?<\/div>\s*<p class="mcl-quelle">/g) || [];
-    assert.ok(bloecke.length >= 25, `${bloecke.length} Listenbloecke gefunden, erwartet mindestens 25`);
+    /* 20 feste Listen (Tim + Worlds Day 2) plus 0 bis 5 Online-Listen der
+     * letzten 7 Tage — seit 30.09.2026 (DA-26) hat die Online-Gruppe nur so
+     * viele Plaetze, wie das Fenster frische Listen hergibt. */
+    assert.ok(bloecke.length >= 20, `${bloecke.length} Listenbloecke gefunden, erwartet mindestens 20`);
     /* ACE SPEC STEHT AN DER KACHEL, NICHT IN EINER NAMENSLISTE
      *
      * BEFUND (Wochenlauf 158, 25.09.2026): „Liste 23 hat 0 ACE SPEC".
@@ -580,11 +583,20 @@ test('die fuenf Online-Listen der letzten sieben Tage sind eigene Listen', () =>
      * Woche erreichen womoeglich keine fuenf Turniere diese Groesse.
      * Dann zeigt die Gruppe weniger, und das ist RICHTIG, nicht kaputt.
      *
-     * Was ein Fehler bleibt: gar keine Liste (dann steht die Gruppe
-     * leer da) und mehr als fuenf (dann greift die Auswahl nicht). */
-    assert.ok(online.length >= 1 && online.length <= 5,
-        `${online.length} Online-Chips — erwartet 1 bis 5 (Platz und `
+     * Was ein Fehler bleibt: mehr als fuenf (dann greift die Auswahl
+     * nicht).
+     *
+     * NULL IST SEIT 30.09.2026 ERLAUBT (Hausi, DA-26: „lieber weniger
+     * Listen anzeigen, veraltete online bringen nichts"). Dann steht die
+     * Gruppe aber nicht leer da, sondern mit einem Satz, der auf die
+     * Major-Listen verweist. */
+    assert.ok(online.length <= 5,
+        `${online.length} Online-Chips — erwartet 0 bis 5 (Platz und `
         + `Feldgroesse im Namen)`);
+    if (online.length === 0) {
+        assert.ok(/class="mcl-listgruppe-titel">Online · letzte 7 Tage<\/span>\s*<div class="mcl-listwahl-reihe"><span class="mcl-listgruppe-leer">[^<]+<\/span>/.test(FRAGMENT),
+            'keine Online-Liste, aber auch kein Satz in der Gruppe — sie stuende leer da');
+    }
 
     online.forEach((c) => {
         const m = />([^<]+?)\s*·\s*(\d+)\.\s*von\s*(\d+)\s*<?/.exec(c);
@@ -697,7 +709,7 @@ test('jede Liste traegt einen Kopierknopf, jede Kachel beide Drucke', () => {
     const knoepfe = FRAGMENT.match(/data-mcl-kopieren="\d+"/g) || [];
     assert.strictEqual(knoepfe.length, bloecke.length,
         `${knoepfe.length} Kopierknoepfe auf ${bloecke.length} Listen`);
-    assert.ok(bloecke.length >= 25, `nur ${bloecke.length} Listen`);
+    assert.ok(bloecke.length >= 20, `nur ${bloecke.length} Listen`);
 
     /* Das Bild braucht einen Namen, sonst heisst jede Datei gleich. */
     const namen = FRAGMENT.match(/data-mcl-listenname="[^"]+"/g) || [];
@@ -742,9 +754,17 @@ test('die Regalkachel zeigt den Sammlerdruck und nennt die Zahlen des Stuecks', 
     assert.ok(kenn, 'die Regalkachel fuehrt keine Kennzahlen');
     const zahl = (muster) => { const m = muster.exec(kenn[1]); return m ? Number(m[1].replace(/\./g, '')) : null; };
     const mus = (FRAGMENT.match(/class="mcl-mu"/g) || []).length;
-    const listen = (FRAGMENT.match(/data-mcl-listenblock="\d+"/g) || []).length;
+    /* Seit 30.09.2026 (DA-26) wechselt die Zahl der Online-Listen mit der
+     * Woche (0 bis 5). Die Kachel nennt deshalb die FESTEN Listen und
+     * „+ Online" — die Zahl muss zu den Bloecken AUSSERHALB der
+     * Online-Gruppe passen. */
+    const gruppe = /class="mcl-listgruppe-titel">Online · letzte 7 Tage<\/span>\s*<div class="mcl-listwahl-reihe">([\s\S]*?)<\/div>/.exec(FRAGMENT);
+    assert.ok(gruppe, 'die Online-Gruppe fehlt');
+    const onlineNr = new Set([...gruppe[1].matchAll(/data-mcl-liste="(\d+)"/g)].map((m) => m[1]));
+    const fest = [...FRAGMENT.matchAll(/data-mcl-listenblock="(\d+)"/g)].filter((m) => !onlineNr.has(m[1])).length;
     assert.strictEqual(zahl(/(\d+)\s*Matchups/), mus, `Kachel nennt andere Matchups als das Stueck (${mus})`);
-    assert.strictEqual(zahl(/(\d+)\s*Listen/), listen, `Kachel nennt andere Listen als das Stueck (${listen})`);
+    assert.strictEqual(zahl(/(\d+)\s*Listen/), fest, `Kachel nennt andere feste Listen als das Stueck (${fest})`);
+    assert.ok(/\+\s*Online/.test(kenn[1]), `die Kachel sagt nicht, dass Online-Listen dazukommen: ${kenn[1]}`);
 
     /* Die Wortzahl gegen den tatsaechlichen Text, mit 10 % Luft: sie ist
      * eine Angabe fuer den Leser, keine Messgroesse — aber "10.250", wenn
@@ -823,7 +843,7 @@ test('die Kangama/Arktos-Liste und die Worlds-Gruppe sind da', () => {
     /* Die dreizehn fremden Listen tragen Name und Platzierung, sonst
      * weiss der Leser nicht, wessen Liste er sieht. */
     const chips = FRAGMENT.match(/data-mcl-liste="\d+"[^>]*>([^<]+)</g) || [];
-    assert.ok(chips.length >= 25, `nur ${chips.length} Listenchips`);
+    assert.ok(chips.length >= 20, `nur ${chips.length} Listenchips`);
     const mitPlatz = chips.filter((c) => /·\s*\d+\./.test(c));
     assert.ok(mitPlatz.length >= 11,
         `nur ${mitPlatz.length} Chips nennen eine Platzierung`);

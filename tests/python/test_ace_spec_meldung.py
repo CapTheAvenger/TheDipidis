@@ -8,9 +8,8 @@ darunter Pokemon). Gemerkt hat es niemand, bis test_ace_spec_bestand.py im
 Deploy rot wurde — und ein roter Deploy heisst: die ganze Seite bleibt auf
 dem alten Stand stehen, wegen einer Spalte, die das Frontend nicht liest.
 
-Seitdem laeuft das Skript mit --melden im Wochenlauf mit, BEVOR committet
-wird. Es schreibt dort nichts (CLAUDE.md: "Report, don't silently repair") —
-es sagt nur Bescheid, solange der Deploy noch gruen ist.
+Danach lief das Skript mit --melden im Wochenlauf mit, BEVOR committet
+wurde. Der Berichtsmodus bleibt fuer Handlaeufe und Proben.
 
 Was diese Tests halten:
   1. Ohne Drift meldet der Lauf nicht nur "OK", sondern auch WIEVIEL er
@@ -22,7 +21,10 @@ Was diese Tests halten:
      Meldung den Wochenlauf abbrechen, den sie eigentlich retten soll.
   5. --schreiben und --melden zusammen sind ein Fehler, keine stille
      Vorrangregel.
-  6. Der Wochenlauf ruft den Schritt wirklich auf, und zwar vor dem Commit.
+  6. --schreiben nennt die Zahl der berichtigten Felder (::notice::).
+
+Seit 30.09.2026 (Hausi, DA-22) faehrt der Wochenlauf --schreiben statt
+--melden; wie und wo, prueft tests/python/test_ace_spec_wochenlauf_berichtigt.py.
 """
 
 import io
@@ -167,31 +169,18 @@ def test_nach_dem_schreiben_meldet_der_naechste_lauf_nichts(tmp_path):
 
 # ── 3. Der Wochenlauf ruft es wirklich auf ──────────────────────────
 
-def test_wochenlauf_prueft_vor_dem_commit():
-    """Ein Skript, das niemand aufruft, ist kein Netz.
-
-    Geprueft wird die REIHENFOLGE: die Meldung muss vor dem Commit stehen,
-    sonst erfaehrt man von der Drift erst, wenn sie schon auf main liegt.
-    """
-    pfad = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")
-    text = io.open(pfad, encoding="utf-8").read()
-    assert "repariere_ace_spec.py --melden" in text, (
-        "der Wochenlauf ruft die ace_spec-Pruefung nicht auf")
-    assert "--schreiben" not in text.split("repariere_ace_spec.py")[1][:200], (
-        "der Wochenlauf schreibt — er soll nur melden")
-    i_pruefung = text.index("repariere_ace_spec.py --melden")
-    i_commit = text.index("- name: Commit + push")
-    assert i_pruefung < i_commit, (
-        "die Pruefung steht hinter dem Commit — dann ist die Drift schon "
-        "auf main, bevor jemand sie sieht")
+def test_schreiben_meldet_die_zahl_der_berichtigten_felder(tmp_path):
+    """Seit 30.09.2026 schreibt der Wochenlauf (DA-22). Berichtigt wird
+    trotzdem nicht still: die Zahl steht als ::notice:: auf der Laufseite.
+    Ohne Aenderung keine Meldung — sonst stuende jede Woche dieselbe Zeile
+    da und niemand saehe mehr hin."""
+    d = _datenordner(tmp_path, ["Unfair Stamp;Item;1;No\n", "Pikachu;Basic;1;\n"])
+    e = _lauf(d, "--schreiben")
+    assert e.returncode == 0, e.stdout + e.stderr
+    assert "::notice::is_ace_spec: 2 Felder nach der Regel berichtigt" in e.stdout, e.stdout
+    e2 = _lauf(d, "--schreiben")
+    assert "::notice::" not in e2.stdout, e2.stdout
 
 
-def test_reparaturworkflow_bleibt_von_hand():
-    """Das Schreiben bleibt eine Entscheidung, kein Automatismus."""
-    pfad = os.path.join(WURZEL, ".github", "workflows", "ace-spec-reparatur.yml")
-    text = io.open(pfad, encoding="utf-8").read()
-    assert "workflow_dispatch:" in text
-    for auslöser in ("schedule:", "  push:", "pull_request:"):
-        assert auslöser not in text, (
-            f"{auslöser.strip()} im Reparaturworkflow — der Bestand wuerde "
-            "unbeaufsichtigt ueberschrieben")
+# Wie der Wochenlauf das Skript aufruft (schreibend, an welcher Stelle),
+# steht seit 30.09.2026 in tests/python/test_ace_spec_wochenlauf_berichtigt.py.

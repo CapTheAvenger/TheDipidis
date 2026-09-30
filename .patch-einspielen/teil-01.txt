@@ -1,0 +1,494 @@
+From 035e28b33f13bc1e70a69c756707e6bcda6ed41d Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Wed, 30 Sep 2026 20:20:11 +0200|
+Subject: [PATCH] Automatik: ACE-SPEC-Liste und Berichtigung im Wochenlauf,|
+ Masterclass nur frische Online-Listen, pokepricelab-verify mit Zeitplan|
+|
+DA-22: scripts/ace_specs_nachziehen.py zieht data/ace_specs.json aus|
+limitlesstcg.com (EN direkt, JP ueber Set und Nummer) nach; der Wochenlauf|
+berichtigt is_ace_spec mit --schreiben statt nur zu melden.|
+DA-26: die Online-Gruppe der Masterclass hat so viele Plaetze, wie das|
+7-Tage-Fenster frische Listen hergibt (0-5); alte bleiben nicht stehen.|
+Handlaeufe: pokepricelab-verify donnerstags, Tor haelt den Commit jetzt|
+wirklich an; tests/python/test_kein_scraper_nur_von_hand.py.|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01T8gGALnD44a7XtwTPafXBa|
+---|
+ backend/core/ace_spec_regel.py                |   5 +|
+ css/masterclass.css                           |   3 +|
+ js/ds-masterclass.js                          |   5 +-|
+ masterclass/mega-stalobor.de.html             | Bin 647199 -> 618016 bytes|
+ scripts/ace_specs_nachziehen.py               | 279 ++++++++++++++++++|
+ scripts/masterclass_listen_nachziehen.py      |  92 +++++-|
+ scripts/pruefe_frische.py                     |   1 +|
+ scripts/repariere_ace_spec.py                 |  20 ++|
+ service-worker.js                             |   4 +-|
+ tests/python/test_ace_spec_bestandsbelege.py  |  18 +-|
+ tests/python/test_ace_spec_liste_geprueft.py  |  30 +-|
+ tests/python/test_ace_spec_meldung.py         |  51 ++--|
+ .../test_ace_spec_schalter_bleibt_melden.py   | 153 ----------|
+ .../test_ace_spec_wochenlauf_berichtigt.py    | 153 ++++++++++|
+ tests/python/test_ace_specs_nachziehen.py     | 198 +++++++++++++|
+ .../python/test_kein_scraper_nur_von_hand.py  | 134 +++++++++|
+ .../test_masterclass_listen_nachziehen.py     |  91 ++++--|
+ tests/python/test_nebenbereiche_getrennt.py   |  61 +++-|
+ tests/unit/test-datenstand.js                 |  10 +-|
+ tests/unit/test-masterclass.js                |  38 ++-|
+ version.json                                  |   2 +-|
+ 21 files changed, 1082 insertions(+), 266 deletions(-)|
+ create mode 100644 scripts/ace_specs_nachziehen.py|
+ delete mode 100644 tests/python/test_ace_spec_schalter_bleibt_melden.py|
+ create mode 100644 tests/python/test_ace_spec_wochenlauf_berichtigt.py|
+ create mode 100644 tests/python/test_ace_specs_nachziehen.py|
+ create mode 100644 tests/python/test_kein_scraper_nur_von_hand.py|
+|
+diff --git a/backend/core/ace_spec_regel.py b/backend/core/ace_spec_regel.py|
+index c7cbfd7..5df5f33 100644|
+--- a/backend/core/ace_spec_regel.py|
++++ b/backend/core/ace_spec_regel.py|
+@@ -18,2 +18,7 @@ Kurz: es wird nicht geraten. Drei Werte, jeder mit Beleg.|
+            Feld _hinweis). Leer heisst "unbekannt" und ist wahr.|
++|
++Seit 30.09.2026 (DA-22) wird die Liste nicht mehr von Hand gepflegt:|
++scripts/ace_specs_nachziehen.py zieht sie im Wochenlauf aus der Quelle|
++nach (EN-Namen direkt, JP-Drucke ueber Set und Nummer), und der|
++Wochenlauf berichtigt den Bestand danach mit dieser Regel.|
+ """|
+diff --git a/css/masterclass.css b/css/masterclass.css|
+index 4d322fe..6ef0799 100644|
+--- a/css/masterclass.css|
++++ b/css/masterclass.css|
+@@ -177,2 +177,5 @@|
+ .mcl-listgruppe { margin-bottom: var(--s-3); }|
++/* 30.09.2026 (DA-26): hat das 7-Tage-Fenster keine Online-Liste, steht|
++   die Gruppe mit diesem Satz da statt mit Listen der Vorwoche. */|
++.mcl-listgruppe-leer { font-size: var(--fs-sm); color: var(--ink-2); }|
+ .mcl-listgruppe-titel {|
+diff --git a/js/ds-masterclass.js b/js/ds-masterclass.js|
+index abbf007..1274852 100644|
+--- a/js/ds-masterclass.js|
++++ b/js/ds-masterclass.js|
+@@ -49,3 +49,6 @@|
+          * Listen" stand hier noch, als es laengst 25 waren. */|
+-        kennzahlen: '22 Matchups · 25 Listen · 10.164 Wörter',|
++        /* 30.09.2026 (DA-26): die Online-Gruppe hat nur so viele Plaetze,|
++         * wie die letzten 7 Tage frische Listen hergeben (0 bis 5). Die|
++         * Kachel nennt deshalb die 20 festen Listen und „+ Online". */|
++        kennzahlen: '22 Matchups · 20 Listen + Online (7 Tage) · 10.164 Wörter',|
+         sprachen: ['de'],|
+diff --git a/masterclass/mega-stalobor.de.html b/masterclass/mega-stalobor.de.html|
+index 6fcc9070c4fc09816311ee15497472ea4108ccce..55fd19de730109da0216d530bc854f535ef60076 100644|
+GIT binary patch|
+delta 569|
+zcmbP#Kz+d-)eRxnCU3s3G&%Z=+2qyNBqa*+vs2R&^OEv26%K7zFw;{g%g<9VG_sf+|
+zc*bF}%ymgQ-^7xVjMQ=k_x!x7#GKS(kTMIXG7H1Wj90~`E2}daH4EQp7rwy=#7scU|
+z48$xz%(`9p23u0p_AF}-Zr|yjJJ{#*qggop{3SLuMziVPF0u7aU(m!P#bS7Py2A8}|
+zTbL!LZ@SDT!|733kXn?Kn3FSojxoEsf>UZ@Nq$kLZfb>&LUw9q9#9}HH6sV;>|6z>|
+z{Nm#2im%x<w+p;tdM&g4LL%D)=ItMDvlK9IU;l*Bk8AqAN9+@}`+j2<W8R*9jh&Tw|
+zdxHgQ9rJdFFcwz!?F-}>U$IZ$xt-B>I?qe?`2>7Ey>J_gtUoX$0&)^dsvyB;VW^;C|
+z_NZa95fB?_>L@&FnD=4+#EH&D`Q>^3X~6}FK=*<K6qGF$Gz<+MHLX!7NUSVK%+Y+*|
+zFh@th$a1<u7keO!5hw&4Vpznd2ib6_O`mAPkvm=3mP1NHN5NR3xC9s>3ML8x`Pqk8|
+zCIfwKtY-l7?<4l@{H`3ln$yphvNui7e$U9iJzkYvmuY(Q3P$hg0hVlW(-$N$xo!6;|
+u<XFrG^*664%L?Z01=5TLK$3|C6cTM5rcBdMTX6)nAMfDUe!PP-A{+oM%+pE$|
+|
+delta 1661|
+zcmb`HO>9(E6vy*E@9<5u_5*0SmLL>6FmGns0u8jKv{EQ``hl$yz{||-%yizo*SvWn|
+z)DW5C0^<VO4CX{*VA9~i2%$CF8zUwniDF}7p|M@mMX8#wFrhSIp%L`XbVBO~#)XTs|
+zc<=ttxhLoR?mzYY`U{_L7;GEQ+hraLn10P$fxlqbvl+i)8d%fHlg-~$Cohc`<nJO!|
+zW04-$R=2iL;L$RI!ij?QjRgCM9uH8wJB;h8Mf7lx*j8HY&6b-}3+`n9t^8!$cyV&c|
+zcS~RInmFAxA@C4+NIYa73hSCs&%N}xu7KQ9pKaF4@y7D$L{j77Dk;U&iSxdAAP_c!|
+zxSi67-h<a^UVH+#hlu^my5sJO${6k>F`HUAX2y*GHZ9DX4B1uFiFZq}+XD~2MqY4?|
+zsf7jZ>ww!RiQ*R1AE9;(w-bNJj$2VUpFnGuJV!$`9Hn@dc^tk>pbfCigNmd|?17cN|
+zC<i9T)Kvw%B97U_wy`%;#f;%PE5h$(NA4&;q2X)7XEJ-a8m(T+X5L1c%vJ=&H|619|
+z)GC?XJtsUNG1o_GpTw%qOA%>%S3D4;#W+B0;tbFo#Vujp54Ey?sIjAX??QzY_eXXV|
+z`<hyu6>v=yasamo>RNYJ&ed8mCRUg@b#j#I*>W&6D>uQEA}taspubLehs|^dBO*&A|
+zln)lO!83{~LD6rh7xY<S#alkdGFIhMMiA>hBL<~>n~%$BWya-<Igb&WH)tNC7LYb6|
+z-|=XE<Y}>pf6bl3?UUkDf(G~cl^p1sl$2$fYraP}47CcY=TmD=i7&v=a_Io{Z58WT|
+zX|3|R$WkB52SxZ{r`iaPlPL9AP&3Tz^JsWu1?R;*&rEAwO>0dpZloj_r?@smbe$SO|
+z%Hb))8`FnP&*QQZe6Y-gYnyi0wH{hPOEaVrsIa`wirEpJ#A4wfhpYbjMV@b!VvR%8|
+z8X`T>uu+L4G;H8KR1Z)i9t{yASPA_elqZzI!x6Nq^f9c&jUca+<;abFdf4bB?3xEn|
+z{|TTgKdWCMHaaHnl-ZR|<x>Y6Y!;rBV8$oC!BTDLM-h(n3#ZuT0g1mYzR$aeO_eBD|
+zMK*I4HLB^|DiXMEDh8}^Dl6FKn@WM0tbMQ#x+lfMP+iZ*J+%gHl6PAid#69WzDMw-|
+zas0;#EP&IO&cn5HdC;4u=D^T>DF;@*hm`Hww)vfNE;Ec1Kd<^1NdJBb49?0vIJ;C>|
+zENo-<R;eXIhE4WunV2ua$Fp)9?5~jzfUiOPgdN(e+~Mb)awCl0K&k)cSZQnuU*rzv|
+z(~14+oGt#(5FJ>)r>C1*M>%*IW*}t>xoMv%XvkvYGb7jE_nT2}%&yWolG48P$Wbzs|
+zWB{83B&%tNcAGji4JSPg%X(1>{5pcx!2L0`Wq3dg<^KyWhq>*Hi%prQ&rumYA#zlF|
+z1M+K98kLI*8!b~WOT(9h4vB5Kt@tIjX$#`R-F`uAgm|u_6{eWr6y07Js#1&CLk%t2|
+VFL*(#QkzfT$aSzAxr;j5{{RPmQ8)kq|
+|
+diff --git a/scripts/ace_specs_nachziehen.py b/scripts/ace_specs_nachziehen.py|
+new file mode 100644|
+index 0000000..adfa4aa|
+--- /dev/null|
++++ b/scripts/ace_specs_nachziehen.py|
+@@ -0,0 +1,279 @@|
++#!/usr/bin/env python3|
++"""Zieht data/ace_specs.json aus der Quelle nach — automatisch, im Wochenlauf.|
++|
++BESTELLUNG (Hausi, 30.09.2026, DA-22): „Falls irgendwann mal neue ACE|
++SPECs kommen, dann muessen die ja korrekt erkannt werden."|
++|
++Bis hierhin wurde die Liste von Hand gepflegt (Stand 18.02.2026, zuletzt|
++am 22.09.2026 von Hand gegengeprueft). Ein neues Set mit einer ACE SPEC|
++haette sie unvollstaendig gemacht, ohne dass es jemand merkt: die Regel|
++in backend/core/ace_spec_regel.py liesse das Feld leer („unbekannt"), der|
++Deckbau im Frontend (window.isAceSpec liest dieselbe Datei) wuerde die|
++Karte zweimal zulassen.|
++|
++QUELLE — gemessen am 30.09.2026 im Browser|
++------------------------------------------|
++    EN: limitlesstcg.com/cards?q=is:ace&display=list      46 Drucke, 39 Namen|
++    JP: limitlesstcg.com/cards/jp?q=is:ace&display=list   74 Drucke|
++|
++Beide Seiten sind Tabellen: Spalte 1 Set, 2 Nummer, 3 Name; 50 Zeilen je|
++Seite, weiter mit &page=N, eine leere Seite beendet die Liste.|
++|
++WIE EIN NAME IN DIE LISTE KOMMT — nie geraten|
++---------------------------------------------|
++  * EN-Drucke: der Name steht auf der Quellseite. Das ist der offizielle|
++    englische Name, derselbe, den unsere Daten tragen.|
++  * JP-Drucke: die Quellseite nennt japanische Namen, und ihre|
++    Uebersetzung (&translate=en) ist NICHT der englische Kartenname|
++    („Fishing Rod Max" statt „Max Rod") und laesst obendrein 13 Drucke|
++    weg (gemessen 30.09.2026). Deshalb wird der Name NICHT von dort|
++    genommen, sondern ueber (Set, Nummer) aus unserer eigenen|
++    data/japanese_cards_database.csv geholt — also genau der Name, unter|
++    dem die Karte in den City-League-Daten steht. Nie ueber den Namen|
++    verbunden (CLAUDE.md).|
++  * Ein JP-Name, den die englische Kartendatenbank als GEWOEHNLICHE Karte|
++    fuehrt (kein Druck davon ist eine EN-ACE-SPEC), wird nicht|
++    aufgenommen, sondern gemeldet: dann meinen zwei Karten denselben|
++    Namen, und ein „Yes" traefe die falsche.|
++|
++WAS NICHT PASSIERT|
++------------------|
++  * Es wird nichts entfernt. Eine Karte hoert nicht auf, ACE SPEC zu|
++    sein; fehlt ein Name in der Quelle, wird das gemeldet.|
++  * Liefert die Quelle nichts, zu wenig oder etwas, das nicht wie die|
++    Liste aussieht (weniger als 90 % der bekannten Namen), wird NICHTS|
++    geschrieben — eine geaenderte Seite darf keine Liste aus Unsinn|
++    erzeugen. Das ist eine benannte Luecke (::warning::), kein Fehler,|
++    der den Wochenlauf anhaelt.|
++  * Aendert sich nichts, wird die Datei nicht angefasst.|
++|
++Aufruf:  python3 scripts/ace_specs_nachziehen.py [--trocken]|
++Rueckgabe 0 auch bei unerreichbarer Quelle (die Warnung steht auf der|
++Laufseite); 2 nur, wenn die eigene Datei nicht lesbar ist.|
++"""|
++|
++import argparse|
++import csv|
++import datetime as dt|
++import json|
++import os|
++import re|
++import sys|
++|
++WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))|
++DATEN = os.path.join(WURZEL, "data")|
++LISTE = os.path.join(DATEN, "ace_specs.json")|
++JP_DB = os.path.join(DATEN, "japanese_cards_database.csv")|
++EN_DB = os.path.join(DATEN, "all_cards_database.csv")|
++|
++QUELLE_EN = "https://limitlesstcg.com/cards?q=is%3Aace&display=list"|
++QUELLE_JP = "https://limitlesstcg.com/cards/jp?q=is%3Aace&display=list"|
++MAX_SEITEN = 20|
++NACHTRAG_KENNUNG = "scripts/ace_specs_nachziehen.py"|
++NACHTRAG_HINWEIS = ("NACHTRAG 30.09.2026 (DA-22) — SEITDEM AUTOMATISCH: "|
++                    "scripts/ace_specs_nachziehen.py zieht die Liste im Wochenlauf aus "|
++                    "limitlesstcg.com/cards?q=is:ace&display=list (EN) und /cards/jp (JP-Drucke "|
++                    "ueber Set und Nummer) nach; die Handpflege entfaellt. Es wird nur "|
++                    "aufgenommen, nie entfernt.")|
++MINDEST_ANTEIL = 0.9|
++|
++_ZEILE = re.compile(r"<tr\b[^>]*>(.*?)</tr>", re.S | re.I)|
++_ZELLE = re.compile(r"<td\b[^>]*>(.*?)</td>", re.S | re.I)|
++_TAG = re.compile(r"<[^>]+>")|
++|
++|
++def _text(zelle):|
++    import html|
++    return re.sub(r"\s+", " ", html.unescape(_TAG.sub(" ", zelle))).strip()|
++|
++|
++def zeilen_der_seite(roh):|
++    """[(set, nummer, name)] aus einer Listenseite. Nur Zeilen mit|
++    Zellen — die Kopfzeile traegt <th>."""|
++    aus = []|
++    for z in _ZEILE.finditer(roh or ""):|
++        zellen = _ZELLE.findall(z.group(1))|
++        if len(zellen) < 3:|
++            continue|
++        s, n, name = (_text(zellen[0]), _text(zellen[1]), _text(zellen[2]))|
++        if s and n and name:|
++            aus.append((s, n, name))|
++    return aus|
++|
++|
++def _abruf_standard(url):|
++    sys.path.insert(0, os.path.join(WURZEL, "backend", "core"))|
++    from card_scraper_shared import safe_fetch_html  # noqa: E402|
++    return safe_fetch_html(url, timeout=20, retries=2)|
++|
++|
++def alle_seiten(basis, abruf):|
++    """Alle Zeilen einer Suche. None, wenn schon die erste Seite fehlt —|
++    dann ist die Quelle nicht erreicht, nicht leer."""|
++    aus = []|
++    for seite in range(1, MAX_SEITEN + 1):|
++        url = basis if seite == 1 else "%s&page=%d" % (basis, seite)|
++        roh = abruf(url)|
++        if not roh:|
++            return None if seite == 1 else aus|
++        zeilen = zeilen_der_seite(roh)|
++        if not zeilen:|
++            return aus|
++        aus.extend(zeilen)|
++    return aus|
++|
++|
++def _schluessel(set_code, nummer):|
++    return "%s-%s" % (str(set_code).strip().upper(), str(nummer).strip().lstrip("0") or "0")|
++|
++|
++def _norm(name):|
++    return re.sub(r"\s+", " ", str(name or "").replace("’", "'")).strip().lower()|
++|
++|
++def lies_db(pfad, name_spalte):|
++    """(Set-Nummer) -> Name aus einer unserer Kartendatenbanken."""|
++    aus = {}|
++    if not os.path.exists(pfad):|
++        return aus|
++    with open(pfad, encoding="utf-8-sig", newline="") as f:|
++        for r in csv.DictReader(f):|
++            name = (r.get(name_spalte) or "").strip()|
++            if name and r.get("set") and r.get("number"):|
++                aus[_schluessel(r["set"], r["number"])] = name|
++    return aus|
++|
++|
++def rechne(alt, en, jp, jp_db, en_db):|
++    """Reine Rechnung ohne Abruf, damit sie ausgefuehrt geprueft werden|
++    kann. Gibt (neue Datei oder None, Meldungen)."""|
++    meldungen = []|
++    bekannt = [_norm(n) for n in alt.get("ace_specs") or []]|
++    bekannt_set = set(bekannt)|
++|
++    if en is None:|
++        return None, ["::warning::ACE-SPEC-Liste NICHT nachgezogen: %s nicht erreicht "|
++                      "— die Liste bleibt auf ihrem Stand, neue ACE SPECs werden erst "|
++                      "beim naechsten Lauf erkannt." % QUELLE_EN]|
++    en_namen = {_norm(n) for _, _, n in en}|
++    # Vergleichsmenge: die Namen, die beim letzten Mal aus der EN-Quelle|
++    # kamen — die nur ueber JP-Drucke aufgenommenen stehen dort nie.|
++    nur_jp_alt = {_norm(n) for n in (alt.get("_geprueft") or {}).get("nur_aus_jp") or []}|
++    bekannt_en = bekannt_set - nur_jp_alt|
++    if bekannt_en and len(en_namen & bekannt_en) < MINDEST_ANTEIL * len(bekannt_en):|
++        return None, ["::warning::ACE-SPEC-Liste NICHT nachgezogen: die Quelle liefert "|
++                      "%d Namen, davon nur %d der %d bekannten — sieht nicht wie die "|
++                      "Liste aus (Seitenaufbau geaendert?). Nichts geschrieben."|
++                      % (len(en_namen), len(en_namen & bekannt_en), len(bekannt_en))]|
++|
++    drucke_en = sorted({_schluessel(s, n) for s, n, _ in en})|
++    drucke_jp = sorted({_schluessel(s, n) for s, n, _ in (jp or [])})|
++    if jp is None:|
++        meldungen.append("::warning::JP-Liste der ACE SPECs nicht erreicht (%s) — nur "|
++                         "die englischen Drucke nachgezogen." % QUELLE_JP)|
++        drucke_jp = sorted(set((alt.get("drucke") or {}).get("jp") or []))|
++|
++    # Gewoehnliche EN-Karten: Name -> gibt es einen Druck, der KEINE ACE SPEC ist?|
++    ace_drucke_en = set(drucke_en)|
++    gewoehnlich = {_norm(n) for k, n in en_db.items() if k not in ace_drucke_en}|
++    gewoehnlich -= en_namen|
++|
++    neue_namen = set(en_namen)|
++    jp_namen, fremd, luecke = set(), [], []|
++    jp_sets = {k.split("-")[0] for k in jp_db}|
++    for k in drucke_jp:|
++        name = jp_db.get(k)|
++        if not name:|
++            if k.split("-")[0] in jp_sets:|
++                luecke.append(k)|
++            continue|
++        n = _norm(name)|
++        if n in gewoehnlich and n not in bekannt_set:|
++            fremd.append("%s (%s)" % (name, k))|
++            continue|
++        jp_namen.add(n)|
++    neue_namen |= jp_namen|
++|
++    if luecke:|
++        meldungen.append("::warning::%d JP-ACE-SPEC-Drucke fehlen in "|
++                         "japanese_cards_database.csv, obwohl ihr Set dort gefuehrt wird: %s"|
++                         % (len(luecke), ", ".join(luecke[:10])))|
++    if fremd:|
++        meldungen.append("::warning::NICHT aufgenommen — der Name gehoert in der englischen "|
++                         "Kartendatenbank einer gewoehnlichen Karte: %s" % ", ".join(fremd))|
++    fehlt_in_quelle = sorted(bekannt_set - en_namen - jp_namen)|
++    if fehlt_in_quelle:|
++        meldungen.append("::notice::%d Namen der Liste fuehrt die Quelle nicht (mehr) — "|
++                         "bleiben stehen: %s" % (len(fehlt_in_quelle), ", ".join(fehlt_in_quelle)))|
++|
++    namen = sorted(bekannt_set | neue_namen)|
++    dazu = sorted(set(namen) - bekannt_set)|
++    alte_drucke = alt.get("drucke") or {}|
++    if (not dazu and alte_drucke.get("en") == drucke_en|
++            and alte_drucke.get("jp") == drucke_jp):|
++        meldungen.append("ACE-SPEC-Liste aktuell: %d Namen, Quelle %d EN- und %d JP-Drucke — "|
++                         "nichts neu." % (len(namen), len(drucke_en), len(drucke_jp)))|
++        return None, meldungen|
++|
++    heute = dt.date.today().isoformat()|
++    neu = dict(alt)|
++    neu["ace_specs"] = namen|
++    neu["total_count"] = len(namen)|
++    neu["source"] = QUELLE_EN|
++    neu["drucke"] = {"en": drucke_en, "jp": drucke_jp}|
++    if dazu:|
++        neu["timestamp"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")|
++    geprueft = dict(alt.get("_geprueft") or {})|
++    geprueft.update({|
++        "am": heute,|
++        "gegen": QUELLE_EN,|
++        "quelle_drucke": len(drucke_en),|
++        "liste_namen": len(namen),|
++        "fehlend": len(en_namen - set(namen)),|
++        "ueberzaehlig": len(set(namen) - en_namen - jp_namen),|
++        "jp_drucke": len(drucke_jp),|
++        "nur_aus_jp": sorted(jp_namen - en_namen),|
++        "wie": "automatisch, scripts/ace_specs_nachziehen.py im Wochenlauf",|
++    })|
++    geprueft[heute] = ("%d EN-Drucke / %d JP-Drucke gegen die Quelle, %d Namen — automatisch"|
++                       % (len(drucke_en), len(drucke_jp), len(namen)))|
++    neu["_geprueft"] = geprueft|
++    if NACHTRAG_KENNUNG not in str(neu.get("_hinweis") or ""):|
++        neu["_hinweis"] = (str(neu.get("_hinweis") or "") + " " + NACHTRAG_HINWEIS).strip()|
++    if dazu:|
++        meldungen.append("::notice::ACE-SPEC-Liste nachgezogen: %d neue Namen — %s"|
++                         % (len(dazu), ", ".join(dazu)))|
++    else:|
++        meldungen.append("ACE-SPEC-Liste: Drucke fortgeschrieben (EN %d, JP %d), keine neuen Namen."|
++                         % (len(drucke_en), len(drucke_jp)))|
++    return neu, meldungen|
++|
++|
++def main(argv=None, abruf=None):|
++    ap = argparse.ArgumentParser()|
++    ap.add_argument("--trocken", action="store_true", help="nichts schreiben, nur berichten")|
++    args = ap.parse_args(argv)|
++    abruf = abruf or _abruf_standard|
++    try:|
++        with open(LISTE, encoding="utf-8") as f:|
++            alt = json.load(f)|
++    except (OSError, ValueError) as e:|
++        print("::error::%s nicht lesbar: %s" % (LISTE, e))|
++        return 2|
++|
++    en = alle_seiten(QUELLE_EN, abruf)|
++    jp = alle_seiten(QUELLE_JP, abruf) if en is not None else None|
++    neu, meldungen = rechne(alt, en, jp, lies_db(JP_DB, "name"), lies_db(EN_DB, "name_en"))|
++    for m in meldungen:|
++        print(m)|
++    if neu is None or args.trocken:|
++        return 0|
++    with open(LISTE, "w", encoding="utf-8") as f:|
++        json.dump(neu, f, ensure_ascii=False, indent=2)|
++        f.write("\n")|
++    print("data/ace_specs.json geschrieben (%d Namen)." % neu["total_count"])|
++    return 0|
++|
++|
++if __name__ == "__main__":|
++    sys.exit(main())|
+diff --git a/scripts/masterclass_listen_nachziehen.py b/scripts/masterclass_listen_nachziehen.py|
+index ff8e5c7..ef08520 100644|
+--- a/scripts/masterclass_listen_nachziehen.py|
++++ b/scripts/masterclass_listen_nachziehen.py|
+@@ -19,6 +19,7 @@ DREI REGELN, damit das Stueck nie schlechter dasteht als vorher:|
+ |
+-  1. ALLES ODER NICHTS. Liefert die Datei nicht genau so viele Listen,|
+-     wie die Gruppe Plaetze hat, wird NICHTS geschrieben. Sonst|
+-     wanderten die Nummern der Bloecke (data-mcl-listenblock) und die|
+-     Regalkachel behauptete eine falsche Listenzahl.|
++  1. NUR FRISCHE LISTEN (seit 30.09.2026, DA-26). Die Gruppe hat genau|
++     so viele Plaetze, wie die Datei Listen liefert (0 bis 5); alte|
++     Listen bleiben nicht stehen. Die Regalkachel nennt deshalb nur die|
++     festen Listen und „+ Online (7 Tage)" (js/ds-masterclass.js).|
++     Bis 30.09. galt hier „alles oder nichts" — siehe nachziehen().|
+   2. KEINE ERFUNDENEN KACHELN. Jede Karte kommt entweder als fertige|
+@@ -318,3 +319,4 @@ def gruppen_nummern(roh):|
+     """Die Blocknummern, die in der Online-Gruppe stehen — in der|
+-    Reihenfolge ihrer Schalter."""|
++    Reihenfolge ihrer Schalter. Eine Gruppe ohne Schalter (diese Woche|
++    keine Liste) wird gefunden und liefert eine leere Liste."""|
+     m = re.search(r'<div class="mcl-listgruppe">\s*<span class="mcl-listgruppe-titel">%s</span>'|
+@@ -326,10 +328,36 @@ def gruppen_nummern(roh):|
+ |
++# Hoechstens so viele Plaetze hat die Gruppe — so viele liefert|
++# build_masterclass_listen (MASTERCLASS_LISTEN im Scraper).|
++MAX_PLAETZE = 5|
++|
++LEER_HINWEIS = ('<span class="mcl-listgruppe-leer">Keine Online-Liste ab 100 Spielern in den '|
++                'letzten 7 Tagen — ältere Listen stehen unter „Worlds · Day 2“.</span>')|
++|
++|
+ def nachziehen(roh, listen):|
+-    """Gibt (neuer Text, Aenderungen, Grund). Grund gesetzt = nichts getan."""|
++    """Gibt (neuer Text, Aenderungen, Grund). Grund gesetzt = nichts getan.|
++|
++    WENIGER LISTEN = WENIGER PLAETZE (Hausi, 30.09.2026, DA-26): „dann|
++    lieber weniger Listen anzeigen, veraltete online bringen nichts, dann|
++    nehme ich lieber eine aeltere Major als ne alte Online-Liste."|
++|
++    Bis dahin galt ALLES ODER NICHTS: lieferte die Datei nicht genau so|
++    viele Listen, wie die Gruppe Plaetze hat, blieb das Stueck stehen —|
++    mit den Listen der Vorwoche unter der Ueberschrift „letzte 7 Tage"|
++    (Wochenlauf #172: 4 Listen fuer 5 Plaetze). Jetzt bekommt die Gruppe|
++    genau so viele Plaetze, wie das Fenster frische Listen hat (0 bis 5):|
++      * weniger Listen: die ueberzaehligen Bloecke und Schalter fallen weg;|
++      * mehr Listen als Plaetze: neue Bloecke mit freien Nummern, hinter|
++        dem letzten Block des Stuecks;|
++      * keine Liste: die Gruppe bleibt mit einem Satz stehen, der auf die|
++        Major-Listen (Worlds · Day 2) verweist.|
++    Weiter gilt: eine unbekannte Karte in irgendeiner Liste — dann wird|
++    NICHTS geschrieben.|
++    """|
+     nummern, treffer = gruppen_nummern(roh)|
+-    if not nummern:|
++    if treffer is None:|
+         return roh, [], "die Gruppe „%s“ steht nicht im Stueck" % GRUPPE|
+-    if len(listen) != len(nummern):|
+-        return roh, [], ("die Datei liefert %d Listen, die Gruppe hat %d Plaetze"|
+-                         % (len(listen), len(nummern)))|
++    if len(listen) > MAX_PLAETZE:|
++        return roh, [], ("die Datei liefert %d Listen, die Gruppe hat hoechstens %d Plaetze"|
++                         % (len(listen), MAX_PLAETZE))|
+ |
+@@ -340,4 +368,12 @@ def nachziehen(roh, listen):|
+ |
++    alle_nummern = [int(n) for n in re.findall(r'data-mcl-listenblock="(\d+)"', roh)]|
++    frei = max(alle_nummern) + 1 if alle_nummern else 0|
++    ziel = list(nummern[:len(listen)])|
++    while len(ziel) < len(listen):|
++        ziel.append(str(frei))|
++        frei += 1|
++    weg = set(nummern[len(listen):])|
++|
+     neue_bloecke, aenderungen = {}, []|
+-    for nummer, liste in zip(nummern, listen):|
++    for nummer, liste in zip(ziel, listen):|
+         b, fehlende = block(nummer, liste, vorlagen, tims)|
+@@ -348,5 +384,10 @@ def nachziehen(roh, listen):|
+ |
+-    # Bloecke ersetzen|
++    # Bloecke ersetzen bzw. entfernen|
+     def ersetze(m):|
+         nummer = m.group(1)|
++        if nummer in weg:|
++            name = re.search(r'data-mcl-listenname="([^"]*)"', m.group(0))|
++            aenderungen.append("Block %s entfernt: %s (nicht mehr im 7-Tage-Fenster)" % (|
++                nummer, html.unescape(name.group(1)) if name else "?"))|
++            return ""|
+         if nummer not in neue_bloecke:|

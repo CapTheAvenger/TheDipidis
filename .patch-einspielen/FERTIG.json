@@ -1,0 +1,8 @@
+{
+ "flucht": true,
+ "patch_bytes": 5313,
+ "patch_sha256": "8a3c298fe7e56e5ee94395f09af2ebe2072af3164891bf7a6f88f706d5353c19",
+ "teile": {
+  "teil-01.txt": "a7b649f0fc2a13703b77abfdc0c7fd9d98534f06818ff13a58b2c0752a25dc1d"
+ }
+}

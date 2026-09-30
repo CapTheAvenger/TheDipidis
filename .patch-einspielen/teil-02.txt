@@ -1,6 +1,0 @@
-+    assert len(_falsche_schleifen(alt)) == 2|
-+    assert not _falsche_schleifen("bash scripts/push_nach_rebase.sh alle\n")|
--- |
-2.43.0|
-|
-|

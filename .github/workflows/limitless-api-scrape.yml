@@ -328,21 +328,10 @@ jobs:
           Quelle: play.limitlesstcg.com/api (offizielle API, ganzes Feld)
           Triggered by .github/workflows/limitless-api-scrape.yml
           Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          for i in 1 2 3; do
-            git pull --rebase --autostash origin main && break
-            sleep $((i * 5))
-          done
-          for i in 1 2 3; do
-            if git push origin HEAD:main; then
-              echo "pushed=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            echo "Push $i fehlgeschlagen — neu aufsetzen und erneut"
-            git pull --rebase --autostash origin main || true
-            sleep $((i * 5))
-          done
-          echo "::error::Push nach drei Versuchen fehlgeschlagen"
-          exit 1
+          # Push ueber scripts/push_nach_rebase.sh (30.09.2026): im Konflikt gewinnt
+          # dieser Lauf, data_stand.json wird neu gebaut, ein Push ohne eigenen
+          # Inhalt heisst pushed=false, nach dem Rebase laeuft das Tor noch einmal.
+          bash scripts/push_nach_rebase.sh kern
 
       # Ein Push mit dem GITHUB_TOKEN loest `on: push` NICHT aus
       # (Rekursionsschutz von GitHub Actions); ohne diese Zeile veraltet

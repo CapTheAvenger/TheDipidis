@@ -634,22 +634,10 @@ jobs:
           Triggered by .github/workflows/champions-replica-scrape.yml
           Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Push-with-retry — same pattern weekly-full-update uses, since
-          # this job overlaps the daily-price-refresh window on some
-          # days and origin/main can advance while we run.
-          for attempt in 1 2 3; do
-            if git push origin HEAD:main; then
-              echo "Push succeeded on attempt $attempt"
-              echo "pushed=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            # --autostash: the scrapers/build can leave unstaged changes in
-            # tracked files that aren't in the `git add` list above; without
-            # autostash the rebase aborts with "cannot pull with rebase: You
-            # have unstaged changes" (observed 2026-06-29).
-            git pull --rebase=true --autostash -X ours origin main || { git rebase --abort 2>/dev/null || true; exit 1; }
-          done
-          exit 1
+          # Push ueber scripts/push_nach_rebase.sh (30.09.2026): im Konflikt gewinnt
+          # dieser Lauf, data_stand.json wird neu gebaut, ein Push ohne eigenen
+          # Inhalt heisst pushed=false, nach dem Rebase laeuft das Tor noch einmal.
+          bash scripts/push_nach_rebase.sh alle
 
       # Without this, the new JSON sits on main but the live site keeps
       # serving the previous Pages build — the user saw their 30-team

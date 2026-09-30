@@ -191,9 +191,25 @@ jobs:
         if: ${{ inputs.trockenlauf != true }}
         run: python3 scripts/build_data_stand.py
 
+      # DAS TOR VOR DEM PUSH (30.09.2026) — scripts/tor_vor_dem_push.sh.
+      # Bis heute galt die Regel nur fuer GEPLANTE Schreiber; dieser Ablauf
+      # startet von Hand und schrieb ungeprueft nach main. Faellt hier eine
+      # Zusicherung, wird nicht gepusht, und main bleibt gruen.
+      - name: Node fuer das Tor
+        if: ${{ inputs.trockenlauf != true }}
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '20'
+
+      - name: Tor vor dem Push
+        if: ${{ inputs.trockenlauf != true }}
+        run: bash scripts/tor_vor_dem_push.sh kern
+
       - name: Committen
         id: commit
         if: ${{ inputs.trockenlauf != true }}
+        env:
+          ZWEIG: ${{ github.ref_name }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -206,8 +222,10 @@ jobs:
             echo "pushed=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "Auto: Kartentexte DE+EN aktualisiert"
-            git push origin HEAD:${{ github.ref_name }}
-            echo "pushed=true" >> "$GITHUB_OUTPUT"
+            # Push ueber scripts/push_nach_rebase.sh (30.09.2026): im Konflikt gewinnt
+            # dieser Lauf, data_stand.json wird neu gebaut, ein Push ohne eigenen
+            # Inhalt heisst pushed=false, nach dem Rebase laeuft das Tor noch einmal.
+            bash scripts/push_nach_rebase.sh kern
           fi
 
       # DER PUSH ALLEIN LOEST KEINEN DEPLOY AUS (Befund 21.08.2026).

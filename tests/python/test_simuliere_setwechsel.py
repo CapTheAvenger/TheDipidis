@@ -64,3 +64,17 @@ def test_der_automatische_tag_traegt_den_ankerriegel(tmp_path):
     tag = sim.auto_datum(str(tmp_path), mindestens=3)
     assert tag == "2026-09-05", tag
     assert tag > "2026-09-01"
+
+
+def test_stdout_traegt_nur_die_ergebniszeile(tmp_path, capsys, monkeypatch):
+    """setwechsel-probe.yml liest stdout als JSON (30.09.2026: die erste
+    Probe scheiterte am Protokoll von update_sets.py davor). Ausgefuehrt:
+    ein setwechsel(), der wie update_sets.py protokolliert."""
+    def laut(baum, en, jp, datum):
+        print("[Update Sets] + New set ZZN (2026-09-28) -> order 162")
+        return {"current_set": en, "current_set_jp": jp}
+    monkeypatch.setattr(sim, "setwechsel", laut)
+    assert sim.main([str(tmp_path), "--datum", "2026-09-28"]) == 0
+    aus = capsys.readouterr()
+    assert json.loads(aus.out)["datum"] == "2026-09-28"
+    assert "[Update Sets]" in aus.err

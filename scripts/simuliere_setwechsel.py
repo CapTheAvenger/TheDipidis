@@ -34,6 +34,7 @@ AUFRUF
                                             [--datum JJJJ-MM-TT]
 """
 import argparse
+import contextlib
 import csv
 import importlib
 import json
@@ -208,7 +209,12 @@ def main(argv=None):
         print("::error::simuliere_setwechsel.py laeuft nur in einer Kopie, nicht im Repo-Baum")
         return 2
     datum = auto_datum(baum) if a.datum == "auto" else a.datum
-    erg = setwechsel(baum, a.en, a.jp, datum)
+    # stdout traegt NUR die Ergebniszeile: setwechsel-probe.yml liest sie
+    # als JSON. Das Protokoll von update_sets.py („[Update Sets] …") ging
+    # bis 30.09.2026 ebenfalls nach stdout, und die erste Probe (PR #874)
+    # scheiterte an „Expecting value: line 1 column 2".
+    with contextlib.redirect_stdout(sys.stderr):
+        erg = setwechsel(baum, a.en, a.jp, datum)
     erg["datum"] = datum
     print(json.dumps(erg, ensure_ascii=False))
     ok = erg["current_set_jp"] == a.jp and (not a.en or erg["current_set"] == a.en)

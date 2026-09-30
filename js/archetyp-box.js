@@ -792,8 +792,84 @@
      * unbekannt (null).
      */
     const PAUSCHAL_LEGAL = { SVP: 1, SVE: 1 };
-    function druckLegal(ids, sets, beleg) {
+
+    /**
+     * DA-28 (Hausi, 30.09.2026): die Regulierungsmarke entscheidet, nicht die
+     * Pauschale. Datei data/regulation_marks.json (limitlesstcg.com, je Marke
+     * G/H/I/J die (Set, Nummer)-Drucke). Gilt nur fuer Promo-Sets aus
+     * PAUSCHAL_LEGAL und MEP; ein Druck ohne Marke in den Daten (SVE) bleibt
+     * bei der alten Regel. Nie ueber den Namen, nur (Set, Nummer).
+     */
+    const MARKEN_REIHE = ['G', 'H', 'I', 'J', 'K', 'L'];
+    const MARKEN_SETS = { SVP: 1, SVE: 1, MEP: 1 };
+
+    function markenIndex(daten) {
+        if (!daten || !daten.marks) return null;
+        const mk = {};
+        Object.keys(daten.marks).forEach(function (marke) {
+            const sets = daten.marks[marke] || {};
+            Object.keys(sets).forEach(function (set) {
+                (mk[set] = mk[set] || {});
+                String(sets[set]).split(',').forEach(function (teil) {
+                    const r = /^(\d+)-(\d+)$/.exec(teil);
+                    if (r) { for (let n = +r[1]; n <= +r[2]; n++) mk[set][String(n)] = marke; }
+                    else if (teil) mk[set][teil] = marke;
+                });
+            });
+        });
+        return mk;
+    }
+
+    /** Haeufigste Marke der Drucke eines Sets (z. B. TEF -> H), sonst null. */
+    function markeDesSets(index, set) {
+        const s = index && index[set];
+        if (!s) return null;
+        const z = {};
+        Object.keys(s).forEach(function (n) { z[s[n]] = (z[s[n]] || 0) + 1; });
+        const ks = Object.keys(z).sort(function (a, b) { return z[b] - z[a]; });
+        return ks[0] || null;
+    }
+
+    /** Kontext { index, legal:Set } fuer ein Format, dessen aeltestes legales Set bekannt ist. */
+    function markenKontext(daten, aeltestesSet) {
+        const index = markenIndex(daten);
+        const ab = markeDesSets(index, aeltestesSet);
+        if (!index || !ab || MARKEN_REIHE.indexOf(ab) < 0) return null;
+        const legal = new Set(MARKEN_REIHE.slice(MARKEN_REIHE.indexOf(ab)));
+        return { index: index, legal: legal };
+    }
+
+    /**
+     * Basis-Energien sind immer legal — ausser Fairy-Energie: den Typ gibt es
+     * im Standard nicht mehr (Hausi, 30.09.2026). true / false fuer eine Basis-
+     * Energie, null fuer jede andere Karte (dann entscheidet der Druck).
+     */
+    function basisEnergieRegel(rec) {
+        if (!rec || !/^basic energy$/i.test(String(rec.type || ''))) return null;
+        return /fairy/i.test(String(rec.name_en || rec.name || '')) ? false : true;
+    }
+
+    function druckMarke(markenK, id) {
+        const teile = String(id).split('-');
+        const set = teile[0];
+        if (!markenK || !MARKEN_SETS[set]) return null;
+        const nr = teile.slice(1).join('-').replace(/^0+(?=\d)/, '');
+        return (markenK.index[set] && markenK.index[set][nr]) || null;
+    }
+
+    function druckLegal(ids, sets, beleg, markenK) {
         if (!sets) return null;
+        if (markenK) {
+            let mitMarke = false, markeLegal = false, echtMarke = false;
+            (ids || []).forEach(function (id) {
+                const set = String(id).split('-')[0];
+                const m = druckMarke(markenK, id);
+                if (m) { mitMarke = true; if (markenK.legal.has(m)) markeLegal = true; }
+                else if (sets.has(set) && !PAUSCHAL_LEGAL[set] && !MARKEN_SETS[set]) echtMarke = true;
+            });
+            if (markeLegal || echtMarke) return true;
+            if (mitMarke) return false;
+        }
         let pauschal = false;
         const echt = (ids || []).some(function (id) {
             const set = String(id).split('-')[0];
@@ -901,7 +977,7 @@
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
-        formatPasst, imFormatGespielt, boxStufe, hauptkartenDerBox, chipReihe, KERN_SCHWELLE, formateNachDatum, blockVorRotation, druckIn, druckLegal, anteilIn, META_SCHWELLE, formateZuordnen,
+        markenKontext, basisEnergieRegel, formatPasst, imFormatGespielt, boxStufe, hauptkartenDerBox, chipReihe, KERN_SCHWELLE, formateNachDatum, blockVorRotation, druckIn, druckLegal, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
         isoTag, neuestesDatumImManifest, neueDatenDa, anzahlBegrenzen, STATUS
     };
@@ -1440,6 +1516,7 @@
 
     let manifestDaten = null;   // tournament_cards_manifest.json
     let formatFenster = null;   // data/format_window.json
+    let markenDaten = null;     // data/regulation_marks.json (DA-28)
 
     async function jsonHolen(datei) {
         try {
@@ -1455,6 +1532,7 @@
             window._formatWindow && window._formatWindow.oldest_legal_set ? Promise.resolve(window._formatWindow) : jsonHolen('format_window.json')]);
         manifestDaten = erg[0];
         formatFenster = erg[1];
+        if (!markenDaten) markenDaten = await jsonHolen('regulation_marks.json');
         manifestDatum = neuestesDatumImManifest(manifestDaten);
     }
 
@@ -1472,10 +1550,11 @@
         const ids = function (k) {
             return [k.id].concat(k.refs || [], (k.drucke || []).map(function (d) { return d.id; }));
         };
-        const basisEnergie = function (k) {
-            if (k.typ !== 'Energy' || typeof getCanonicalCardRecord !== 'function') return false;
-            const rec = getCanonicalCardRecord(k.set, k.number);
-            return !!(rec && /^basic energy$/i.test(String(rec.type || '')));
+        const markeJetzt = markenKontext(markenDaten, fw.oldest_legal_set);
+        const markeVorher = markenKontext(markenDaten, vorBlock);
+        const energieRegel = function (k) {
+            if (k.typ !== 'Energy' || typeof getCanonicalCardRecord !== 'function') return null;
+            return basisEnergieRegel(getCanonicalCardRecord(k.set, k.number));
         };
         return {
             aktuell: reihe[0] ? reihe[0].key : null,
@@ -1487,13 +1566,15 @@
             fensterSet: fw.current_set || null,
             legalBekannt: !!jetzt,
             legal: function (k) {
-                return basisEnergie(k) ? true : druckLegal(ids(k), jetzt, anteilIn(k, reihe[0] && reihe[0].key) > 0);
+                const e = energieRegel(k);
+                return e !== null ? e : druckLegal(ids(k), jetzt, anteilIn(k, reihe[0] && reihe[0].key) > 0, markeJetzt);
             },
             legalVorRotation: function (k) {
                 const imBlock = Object.keys(k.formate || {}).some(function (f) {
                     return vorBlock && String(f).indexOf(vorBlock + '-') === 0 && anteilIn(k, f) > 0;
                 });
-                return basisEnergie(k) ? true : druckLegal(ids(k), vorher, imBlock);
+                const e = energieRegel(k);
+                return e !== null ? e : druckLegal(ids(k), vorher, imBlock, markeVorher);
             }
         };
     }

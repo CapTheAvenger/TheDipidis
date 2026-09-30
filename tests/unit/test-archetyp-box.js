@@ -682,7 +682,7 @@ describe('FE-13 Nachtrag: Sammelboxen ohne „Alle“ im Namen', () => {
         const M = logik(QUELLE.replace(alt, 'if (false) {'));
         assert.notEqual(M.anzeigeName({ archetyp: '__familie__|Alakazam', name: 'Alle Alakazam-Decks' }), 'Alakazam-Decks');
         const code = ohneKommentare(QUELLE);
-        assert.match(code, /chip\(b\.id, nameVon\(b\), umfang\(b\)\)/);
+        assert.match(code, /chip\(r\.box\.id, nameVon\(r\.box\), umfang\(r\.box\)/);
         assert.match(code, /esc\(nameVon\(eine\)\) \+ '<\/h3>'/);
         assert.doesNotMatch(code, /esc\((b|eine|e\.box)\.name\)/, 'ein Boxname wird noch roh gezeigt');
         const i18n = R('js/i18n.js');
@@ -786,6 +786,71 @@ describe('Alle Boxen „Zusammen“ (30.09.2026): Summe je Karte, Verteilung, Re
         assert.match(code, /addToCollection\(x\.schluessel\)/);
         for (const k of ['abx.gruppeZusammen', 'abx.verteilungZeile', 'abx.sammlungSetzen', 'abx.alleReingelegt']) {
             assert.equal(R('js/i18n.js').split("'" + k + "':").length - 1, 2, k + ' in beiden Sprachen');
+        }
+    });
+});
+
+describe('UI-51/UI-52/DA-18 (30.09.2026): Stufe der Box, Reihenfolge der Chips, Promos nur mit Beleg', () => {
+    // Legalitaet wie im Kontext: Druck in einem Set des Fensters.
+    const fenster = new Set(['TEF', 'PBL', '30C', 'SVP', 'SVE']);
+    const kontext = {
+        aktuell: 'TEF-30C', legalBekannt: true,
+        legal: (k) => L.druckLegal([k.id].concat(k.refs || []), fenster, L.anteilIn(k, 'TEF-30C') > 0)
+    };
+    const box = (id, archetyp, karten) => ({ id, archetyp, name: archetyp, karten });
+    const gespielt = box('g', 'Dragapult Dusknoir', [{ id: 'TWM-130', anteil: 100, formate: { 'TEF-30C': 100 } }]);
+    const legal = box('l', 'Ceruledge', [{ id: 'PBL-12', anteil: 90, formate: { 'TEF-PBL': 90 } }]);
+    const raus = box('r', 'Lost Box', [{ id: 'LOR-81', anteil: 80, formate: { 'SVI-PFL': 80 } }, { id: 'PBL-3', anteil: 60 }]);
+    const unbekannt = box('u', 'Iono Box', [{ id: 'PAF-80', refs: ['SVP-124'], anteil: 70, formate: { 'SVI-PFL': 70 } }]);
+
+    it('gespielt / legal / raus / unbekannt', () => {
+        assert.equal(L.boxStufe(gespielt, kontext), 'gespielt');
+        assert.equal(L.boxStufe(legal, kontext), 'legal');
+        assert.equal(L.boxStufe(raus, kontext), 'raus');
+        assert.equal(L.boxStufe(unbekannt, kontext), null, 'SVP allein ohne Beleg ist keine Aussage');
+        assert.equal(L.boxStufe(gespielt, {}), null, 'ohne Formatdaten keine Farbe');
+    });
+
+    it('DA-18: ein Promo zaehlt nur mit Beleg, ein echtes Set immer', () => {
+        assert.equal(L.druckLegal(['PAF-80', 'SVP-124'], fenster, false), null);
+        assert.equal(L.druckLegal(['SVP-149'], fenster, true), true);
+        assert.equal(L.druckLegal(['PBL-12', 'SVP-1'], fenster, false), true);
+        assert.equal(L.druckLegal(['LOR-81'], fenster, true), false);
+        assert.equal(L.druckLegal(['PBL-12'], null, true), null);
+    });
+
+    it('Chips: nach Stufe, Varianten unter ihrer Familienbox', () => {
+        const fam = box('f', '__familie__|Dragapult', [{ id: 'TWM-130', anteil: 100, formate: { 'TEF-30C': 100 } }]);
+        const reihe = L.chipReihe([raus, unbekannt, legal, gespielt, fam], kontext,
+            (a) => (a === 'Dragapult Dusknoir' ? 'Dragapult' : undefined));
+        gleich(reihe.map((r) => [r.box.id, r.stufe, r.rang]), [
+            ['f', 'gespielt', 'kopf'], ['g', 'gespielt', 'mitglied'],
+            ['l', 'legal', 'kopf'], ['r', 'raus', 'kopf'], ['u', null, 'kopf']]);
+        // Ohne Familienkenntnis steht jede Box fuer sich.
+        assert.ok(L.chipReihe([gespielt, fam], kontext, () => undefined).every((r) => r.rang === 'kopf'));
+    });
+
+    it('Verfaelschungsproben und Verdrahtung', () => {
+        const s1 = "if (PAUSCHAL_LEGAL[set]) { pauschal = true; return false; }";
+        assert.ok(QUELLE.includes(s1));
+        const M1 = logik(QUELLE.replace(s1, ''));
+        assert.equal(M1.druckLegal(['PAF-80', 'SVP-124'], fenster, false), true, 'Probe Promo pauschal beisst nicht');
+        const s2 = "if (imFormatGespielt(box, c.aktuell)) return 'gespielt';";
+        assert.ok(QUELLE.includes(s2));
+        assert.notEqual(logik(QUELLE.replace(s2, '')).boxStufe(gespielt, kontext), 'gespielt', 'Probe gespielt beisst nicht');
+        const s3 = "if (l === false) return 'raus';";
+        assert.ok(QUELLE.includes(s3));
+        assert.notEqual(logik(QUELLE.replace(s3, '')).boxStufe(raus, kontext), 'raus', 'Probe raus beisst nicht');
+        const s4 = ".sort(function (x, y) { return rang(x.b) - rang(y.b) || x.i - y.i; })";
+        assert.ok(QUELLE.includes(s4));
+        const M4 = logik(QUELLE.replace(s4, ''));
+        assert.equal(M4.chipReihe([raus, gespielt], kontext, null)[0].box.id, 'r', 'Probe Sortierung beisst nicht');
+        const code = ohneKommentare(QUELLE);
+        assert.match(code, /const reihe = chipReihe\(boxen, kontext, familieVonArchetyp\)/);
+        assert.match(code, /druckLegal\(ids\(k\), jetzt, anteilIn\(k, reihe\[0\] && reihe\[0\]\.key\) > 0\)/);
+        const i18n = R('js/i18n.js');
+        for (const k of ['abx.stufe.gespielt', 'abx.stufe.legal', 'abx.stufe.raus']) {
+            assert.equal(i18n.split("'" + k + "':").length - 1, 2, k + ' in beiden Sprachen');
         }
     });
 });

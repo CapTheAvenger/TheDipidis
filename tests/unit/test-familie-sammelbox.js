@@ -171,7 +171,7 @@ describe('die Sammelauswahl steht im Auswahlfeld', () => {
         /* Sonst stuende "10 Varianten" da, wenn das gewaehlte Turnier nur
            zwei davon gesehen hat — eine Zahl, die man nachzaehlen kann und
            die dann nicht stimmt. */
-        const i = PMK.indexOf('const alleNamen = archetypes.map');
+        const i = PMK.indexOf('const familieVon = familienNachHauptkarte(archetypes');
         assert.ok(i > 0,
             'die Familien werden nicht mehr aus der gefilterten Archetypenliste '
             + 'gebildet');
@@ -211,21 +211,22 @@ describe('die Auswahl wird auch beim Laden als Familie verstanden', () => {
     });
 
     it('gefiltert wird ueber den Familienkopf, nicht ueber Namensgleichheit', () => {
-        const i = PMK.indexOf('const matchingDecks = imFilter.filter');
+        // Seit FE-19 (30.09.2026) ueber die Hauptkarte, mit der alten
+        // Praefixregel nur als Rueckfall fuer gespeicherte Auswahlen.
+        const i = PMK.indexOf('let matchingDecks = imFilter.filter');
         assert.ok(i > 0, 'die Deckauswahl im Lader ist umgebaut worden');
-        const stelle = PMK.slice(i, i + 320);
-        assert.match(stelle, /familienKopf\(/,
-            'eine Sammelauswahl filtert wieder auf Namensgleichheit — dann '
-            + 'enthaelt die Box nur den Kopf und keine Variante');
-        assert.match(stelle, /=== familienName/,
-            'der Vergleich gegen den Familiennamen ist weg');
+        const stelle = PMK.slice(i, i + 700);
+        assert.match(stelle, /familieVon\.get\(deck\.deck_name \|\| ''\) === familienName/,
+            'eine Sammelauswahl filtert nicht mehr ueber die Familie der Hauptkarte');
+        assert.match(stelle, /familienKopf\(deck\.deck_name \|\| '', alleNamen\) === familienName/,
+            'der Rueckfall fuer alte Auswahlen ist weg — gespeicherte Boxen liefen leer');
     });
 
     it('der Kopf wird ueber DIESELBE Menge gebildet wie im Auswahlfeld', () => {
         /* Sonst koennte "Dragapult LZ Box" hier in einer anderen Familie
            landen als eine Zeile weiter oben, und die Box enthielte etwas
            anderes, als die Zeile verspricht. */
-        const i = PMK.indexOf('const alleNamen = istFamilie');
+        const i = PMK.indexOf('familienNachHauptkarte(_pmNachArchetyp(imFilter)');
         assert.ok(i > 0, 'die Namensmenge fuer den Lader ist weg');
         assert.match(PMK.slice(i, i + 260), /imFilter/,
             'der Lader bildet die Familien nicht mehr aus derselben gefilterten '

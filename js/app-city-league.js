@@ -2388,6 +2388,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     item.className = 'searchable-select-option' + (child.value === selectEl.value ? ' selected' : '');
                     item.textContent = child.textContent;
                     item.dataset.value = child.value;
+                    // Rang aus der Deckauswahl (UI-52): Familie / Variante / Einzeldeck
+                    if (child.dataset && child.dataset.rang) item.dataset.rang = child.dataset.rang;
                     item.onclick = () => pick(child.value, child.textContent);
                     list.appendChild(item);
                 });

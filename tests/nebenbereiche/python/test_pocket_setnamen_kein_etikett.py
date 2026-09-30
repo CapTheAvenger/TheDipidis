@@ -45,7 +45,7 @@ def mod():
 SEITE = json.dumps({
     "A": [{"code": "PROMO-A", "releaseDate": "2024-10-30", "name": {"en": "Promo A"}}],
     "B": [{"code": "B4b", "releaseDate": "2026-09-29", "name": {"en": "Deluxe Pack Mega"}},
-          {"code": "B4a", "releaseDate": "2026-08-27", "name": {"en": "Team Rocket\u2019s Ambition"}},
+          {"code": "B4a", "releaseDate": "2026-08-27", "name": {"en": "Team Rocket’s Ambition"}},
           {"code": "B4", "releaseDate": "2026-07-30", "name": {"en": "Ruler of the Skies"}}],
 })
 
@@ -82,13 +82,24 @@ def test_bestand_geht_nicht_verloren(mod, tmp_path, monkeypatch):
     assert mod.bestand() == {"A1": "Genetic Apex"}
 
 
-def test_b4b_steht_in_den_daten():
-    """Gemessen am 25.09.2026 an der Quellseite (Game8); der Name bleibt im
-    Bestand, auch wenn die neue Quelle B4b noch nicht fuehrt."""
+def test_b4b_steht_in_den_daten(mod):
+    """B4b traegt einen echten Namen — nicht die blanke Kennung, kein Etikett.
+
+    Bis 30.09.2026 stand hier der Wortlaut "Deluxe Pack Mega" (Game8,
+    25.09.). Am 30.09. fuehrte die Kartendatenbank B4b selbst, als
+    "Deluxe Pack: Mega", und Pocket #10 wurde am Tor rot, obwohl der Lauf
+    genau das tat, was er soll: den Namen der Quelle uebernehmen. Die
+    Zusicherung prueft jetzt ihren Zweck, nicht die Schreibweise eines Tages.
+    """
     with open(DATEN, encoding="utf-8") as f:
         d = json.load(f)
-    assert d["sets"].get("B4b") == "Deluxe Pack Mega", (
+    name = str(d["sets"].get("B4b") or "").strip()
+    assert name and name != "B4b", (
         "B4b fehlt — die Kartenliste zeigt dafuer die blanke Kennung")
+    assert name.lower() not in mod.PLATZHALTER, f"B4b traegt das Etikett {name!r}"
+    klein = name.lower()
+    assert "deluxe" in klein and "mega" in klein, (
+        f"B4b heisst {name!r} — das ist nicht das Deluxe Pack Mega")
     assert d["sets"].get("B4a") == "Team Rocket's Ambition", (
         "B4a traegt nicht mehr seinen Namen")
     assert d["_meta"]["anzahl"] == len(d["sets"]), (

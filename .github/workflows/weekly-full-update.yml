@@ -878,6 +878,25 @@ jobs:
           fi
           exit 0
 
+      - name: Regulierungsmarken aus der Quelle nachziehen
+        # DA-28 (Hausi, 30.09.2026): Standard-Legalitaet ueber die Marken
+        # G/H/I/J statt Pauschale fuer SVP/SVE. Das Skript liest
+        # limitlesstcg.com/cards?q=regulation=<M>&display=list (EN) und
+        # schreibt data/regulation_marks.json ((set, number) je Marke).
+        # Liefert die Quelle nichts oder unter 90 % des Bisherigen, bleibt die
+        # Datei stehen (::warning::). Nicht blockierend, aber im Herzschlag.
+        run: |
+          set +e
+          python3 scripts/regulation_marks_nachziehen.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::regulation_marks_nachziehen endete mit $rc — die Datei bleibt auf ihrem Stand"
+              echo "FAIL scripts/regulation_marks_nachziehen.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scripts/regulation_marks_nachziehen.py" >> "$RUNNER_TEMP/rc_extra.txt"
+          fi
+          exit 0
+
       - name: is_ace_spec nach der Regel berichtigen
         # ENTSCHEIDUNG HAUSI, 30.09.2026 (DA-22): „Da-22 muss auf jeden Fall
         # repariert werden." Bis hierhin stand hier `--melden`: der Lauf

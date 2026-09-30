@@ -884,7 +884,7 @@ describe('UI-51/UI-52/DA-18 (30.09.2026): Stufe der Box, Reihenfolge der Chips, 
         assert.equal(M4.chipReihe([raus, gespielt], kontext, null)[0].box.id, 'r', 'Probe Sortierung beisst nicht');
         const code = ohneKommentare(QUELLE);
         assert.match(code, /const reihe = chipReihe\(boxen, kontext, familieVonArchetyp\)/);
-        assert.match(code, /druckLegal\(ids\(k\), jetzt, anteilIn\(k, reihe\[0\] && reihe\[0\]\.key\) > 0\)/);
+        assert.match(code, /druckLegal\(ids\(k\), jetzt, anteilIn\(k, reihe\[0\] && reihe\[0\]\.key\) > 0, markeJetzt\)/);
         const i18n = R('js/i18n.js');
         for (const k of ['abx.stufe.gespielt', 'abx.stufe.legal', 'abx.stufe.raus']) {
             assert.equal(i18n.split("'" + k + "':").length - 1, 2, k + ' in beiden Sprachen');

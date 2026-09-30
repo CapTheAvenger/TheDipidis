@@ -32,7 +32,8 @@
       "Bash(git show *)",
       "Read(//tmp/**)",
       "Bash(node -c js/app-city-league.js)",
-      "Bash(node -c js/app-current-meta-analysis.js)"
+      "Bash(node -c js/app-current-meta-analysis.js)",
+      "mcp__Claude_Code_Remote__read_documentation"
     ],
     "additionalDirectories": [
       "\\tmp"

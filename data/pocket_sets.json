@@ -1,8 +1,8 @@
 {
  "_meta": {
   "zweck": "Kennung -> Klarname der Pokémon-TCG-Pocket-Sets, damit eine Kartenliste sagen kann, WO die Karte zu holen ist.",
-  "quelle": "game8.co",
-  "quelle_url": "https://game8.co/games/Pokemon-TCG-Pocket/archives/482685",
+  "quelle": "https://github.com/flibustier/pokemon-tcg-pocket-database",
+  "quelle_url": "https://raw.githubusercontent.com/flibustier/pokemon-tcg-pocket-database/main/dist/sets.json",
   "hinweis": "Nichts hier ist geraten. Wofür die Seite keinen Namen führt, steht in ohne_namen und bleibt in der Oberfläche die blanke Kennung.",
   "anzahl": 24,
   "in_kartenlisten": [
@@ -30,8 +30,14 @@
    "P-B"
   ],
   "ohne_namen": [],
-  "nicht_mehr_auf_der_quellseite": [],
-  "geaendert_in_diesem_lauf": [],
+  "nicht_mehr_auf_der_quellseite": [
+   "B4b"
+  ],
+  "geaendert_in_diesem_lauf": [
+   "A4b",
+   "P-A",
+   "P-B"
+  ],
   "nachgetragen": [],
   "nachtrag_bestaetigt": [
    {
@@ -52,7 +58,7 @@
   "A3b": "Eevee Grove",
   "A4": "Wisdom of Sea and Sky",
   "A4a": "Secluded Springs",
-  "A4b": "Deluxe Pack ex",
+  "A4b": "Deluxe Pack: ex",
   "B1": "Mega Rising",
   "B1a": "Crimson Blaze",
   "B2": "Fantastical Parade",
@@ -64,7 +70,7 @@
   "B4": "Ruler of the Skies",
   "B4a": "Team Rocket's Ambition",
   "B4b": "Deluxe Pack Mega",
-  "P-A": "Promo-A",
-  "P-B": "Promo-B"
+  "P-A": "Promo A",
+  "P-B": "Promo B"
  }
 }

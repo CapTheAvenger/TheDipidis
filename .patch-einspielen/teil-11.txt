@@ -1,0 +1,21 @@
+             } else {|
+-                const trefferGrenze = b.treffer * (1 - ZEILEN_BAND);|
++                const trefferGrenze = beleg.treffer * (1 - ZEILEN_BAND);|
+                 assert.ok(treffer >= trefferGrenze,|
+                     `${b.datei}: nur noch ${treffer} Zeilen treffen ${k.formel}, der `|
+-                    + `Beleg nennt ${b.treffer} (Untergrenze ${Math.round(trefferGrenze)})`);|
++                    + `Beleg nennt ${beleg.treffer} (Untergrenze ${Math.round(trefferGrenze)})`);|
+             }|
+diff --git a/version.json b/version.json|
+index 27c8846..eef7eff 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202609291522"}|
+\ No newline at end of file|
++{"version":"202609291742"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

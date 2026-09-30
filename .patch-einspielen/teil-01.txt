@@ -1,0 +1,73 @@
+From fbcb0b2889ebec3cb53ed0c15d9b814431dd0d11 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Wed, 30 Sep 2026 17:15:27 +0200|
+Subject: [PATCH] Masterclass-Listen: die Zusicherung prueft die Regel, nicht|
+ die Wochenlage|
+|
+Wochenlauf #172 (30.09.2026) hielt am Tor: im 7-Tage-Fenster nur 4 Listen|
+fuer Mega Excadrill, die Gruppe hat 5 Plaetze. Der Wochenlauf laesst das|
+Stueck dann bewusst stehen (::warning), die Zusicherung verlangte trotzdem|
+grund == "". Jetzt: bei falscher Listenzahl wird nichts geschrieben und der|
+Grund nennt es; Stabilitaet und Abgrenzung pruefen mit passender Zahl.|
+Verfaelschungsprobe: Laengenpruefung im Erzeuger entfernt -> rot.|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01T8gGALnD44a7XtwTPafXBa|
+---|
+ .../test_masterclass_listen_nachziehen.py     | 34 +++++++++++++++++--|
+ 1 file changed, 31 insertions(+), 3 deletions(-)|
+|
+diff --git a/tests/python/test_masterclass_listen_nachziehen.py b/tests/python/test_masterclass_listen_nachziehen.py|
+index 737ba63..6b1d5d7 100644|
+--- a/tests/python/test_masterclass_listen_nachziehen.py|
++++ b/tests/python/test_masterclass_listen_nachziehen.py|
+@@ -79,2 +79,16 @@ def _liste(spieler="testspieler", platz=1, feld=100, bilanz="7 - 0 - 0", karten=|
+ |
++def _plaetze(m, roh):|
++    nummern, _t = m.gruppen_nummern(roh)|
++    return len(nummern)|
++|
++|
++def _listen_fuer_die_gruppe(m, roh):|
++    """Die echten Listen, wenn sie die Gruppe fuellen — sonst TESTDATEN in|
++    passender Zahl. Stabilitaet und Abgrenzung sind Eigenschaften des|
++    Erzeugers, nicht der Datenlage einer Woche (s. unten, #172)."""|
++    echt = _listen()|
++    n = _plaetze(m, roh)|
++    return echt if len(echt) == n else [_liste("s%d" % i, i + 1) for i in range(n)]|
++|
++|
+ # ---------------------------------------------------------------- Zustand|
+@@ -85,3 +99,17 @@ def test_am_heutigen_stand_ist_nichts_nachzuziehen():|
+     m = _modul()|
+-    _neu, aenderungen, grund = m.nachziehen(_stueck(), _listen())|
++    roh = _stueck()|
++    echt = _listen()|
++    if len(echt) != _plaetze(m, roh):|
++        # WOCHENLAGE, KEIN FEHLER (Wochenlauf #172, 30.09.2026): im 7-Tage-|
++        # Fenster spielte der Archetyp nur 4 Listen, die Gruppe hat 5|
++        # Plaetze. Der Wochenlauf meldet das als ::warning und laesst das|
++        # Stueck stehen ("das Stueck bleibt, wie es ist") — bis dahin|
++        # verlangte diese Zusicherung trotzdem grund == "" und hielt den|
++        # ganzen Wochenlauf am Tor an. Geprueft wird jetzt die Regel: bei|
++        # falscher Listenzahl wird NICHTS geschrieben, und der Grund nennt es.|
++        neu, aenderungen, grund = m.nachziehen(roh, echt)|
++        assert _fp(neu) == _fp(roh) and aenderungen == [], "bei falscher Listenzahl wurde geschrieben"|
++        assert "Plaetze" in grund, grund|
++        return|
++    _neu, aenderungen, grund = m.nachziehen(roh, echt)|
+     assert grund == "", grund|
+@@ -96,3 +124,3 @@ def test_zweimal_nachziehen_aendert_nichts_mehr():|
+     m = _modul()|
+-    listen = _listen()|
++    listen = _listen_fuer_die_gruppe(m, _stueck())|
+     einmal, _a, grund = m.nachziehen(_stueck(), listen)|
+@@ -110,3 +138,3 @@ def test_er_fasst_nur_die_online_gruppe_an():|
+     roh = _stueck()|
+-    listen = [dict(e, player="Proband%d" % i) for i, e in enumerate(_listen())]|
++    listen = [dict(e, player="Proband%d" % i) for i, e in enumerate(_listen_fuer_die_gruppe(m, roh))]|
+     neu, aenderungen, grund = m.nachziehen(roh, listen)|
+-- |
+2.43.0|
+|
+|

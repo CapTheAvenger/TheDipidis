@@ -287,6 +287,8 @@ index e1aad2c2..7c288aa7 100644|
 -    <script src="js/app-side-quest-resources.js?v=202609302151" defer></script>|
 -    <script src="js/champions-damage.js?v=202609302151" defer></script>|
 -    <script src="js/champions-schwaechen.js?v=202609302151" defer></script>|
+-    <script src="js/app-side-quest-usage.js?v=202609302151" defer></script>|
+-    <script src="js/app-side-quest-matchups.js?v=202609302151" defer></script>|
 +    <script src="js/champions-set.js?v=202609302254" defer></script>|
 +    <script src="js/champions-names.js?v=202609302254" defer></script>|
 +    <script src="js/app-side-quest-builder.js?v=202609302254" defer></script>|

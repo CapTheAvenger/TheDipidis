@@ -1,0 +1,460 @@
+-|
+-|
+-def test_die_beiden_mep_4_kandidaten_liegen_weiterhin_ueber_dem_centbereich(produkte, preise):|
+-    """Die Gegenprobe zur Aussage oben.|
+-|
+-    Faellt die Spanne der beiden Kandidaten je in den Centbereich, dann|
+-    GILT die Betreiberregel auch hier, und MEP 4 gehoert entschieden statt|
+-    offengelassen. Dieser Test macht aus 'bleibt offen' eine pruefbare|
+-    Aussage statt einer Gewohnheit.|
+-|
+-    WARUM ES NICHT AN EINER EINZIGEN KENNZAHL HAENGT (10.09.2026)|
+-    ------------------------------------------------------------|
+-    An diesem Tag stand der Test auf rot: `trend` lag bei 15,47 gegen|
+-    15,51 — vier Cent. Nach der Regel waere MEP 4 damit entschieden|
+-    gewesen. Die uebrigen Kennzahlen desselben Tages sagten aber etwas|
+-    ganz anderes:|
+-|
+-        trend    15,47   15,51   ->  0,04|
+-        avg      17,75   16,40   ->  1,35|
+-        low       9,00    7,80   ->  1,20|
+-        avg1     15,75    9,00   ->  6,75|
+-        avg7     16,16   18,86   ->  2,70|
+-        avg30    16,95   15,39   ->  1,56|
+-|
+-    Die Naehe war also eine Tageslaune einer einzigen Kennzahl, nicht die|
+-    Lage der beiden Produkte. Eine Zuordnung von Kartenidentitaet, die an|
+-    so etwas kippt, waere geraten — und Raten ist genau das, was|
+-    CLAUDE.md hier ausschliesst ("card identity is not something a|
+-    scraper gets to decide").|
+-|
+-    Deshalb muss die Naehe ueber MEHRERE Kennzahlen belegt sein. Erst|
+-    dann ist es die Lage der Produkte und nicht das Rauschen eines Tages.|
+-    """|
+-    kandidaten = [pid for pid, p in produkte.items()|
+-                  if p["idExpansion"] == EXP_MEP and p["name"].startswith("Lunatone")]|
+-    assert len(kandidaten) == 2, (|
+-        f"in Erweiterung {EXP_MEP} stehen {len(kandidaten)} Lunatone-Produkte "|
+-        f"({sorted(kandidaten)}) statt zwei — die Lage hat sich geaendert")|
+-    werte = [_preis(preise.get(pid)) for pid in kandidaten]|
+-    assert all(w is not None for w in werte), \|
+-        f"ein Lunatone-Kandidat hat keinen Preis mehr: {dict(zip(kandidaten, werte))}"|
+-|
+-    spannen = _spannen_je_kennzahl(preise, kandidaten)|
+-    assert len(spannen) >= 2, (|
+-        f"nur {len(spannen)} Kennzahl(en) fuer beide Kandidaten vorhanden "|
+-        f"({spannen}) — auf dieser Grundlage laesst sich die Naehe weder "|
+-        "belegen noch widerlegen")|
+-    nah = sorted(f for f, s in spannen.items() if s <= CENT_GRENZE)|
+-    assert len(nah) < len(spannen), (|
+-        f"ALLE Kennzahlen liegen im Centbereich ({spannen}). Damit greift "|
+-        "die Betreiberregel 'bei Cent-Betraegen den guenstigeren' auch "|
+-        f"hier, und MEP 4 gehoert auf {min(kandidaten, key=lambda k: _preis(preise.get(k)))} "|
+-        "gepinnt statt offengelassen.")|
+ |
+@@ -500 +343,98 @@ def test_die_regel_laeuft_wirklich_durch_und_entscheidet_richtig():|
+         f"Die bestaetigte Zeile wurde umgehaengt. Befunde: {befunde}")|
++|
++|
++# ─────────────────────────────────────────────────────────────────────|
++# Die Praemissen stehen im Waechter, nicht am Tor (WZ-22, 30.09.2026)|
++# ─────────────────────────────────────────────────────────────────────|
++#|
++# Bis heute prueften drei Zusicherungen hier den TAGESPREIS aus|
++# data/price_guide_6.json: Spanne der vier PRE-Kandidaten, Markt statt|
++# Einzelangebot bei MEP 83, Abstand der beiden MEP-4-Kandidaten. Die Datei|
++# holt der Preislauf taeglich neu, und jeder dieser Tests hielt damit den|
++# Push des Laufs und den Deploy an, sobald ein einzelner Verkauf eine|
++# Praemisse verschob (10.09. und 22.09. gemessen). Die Praemissen werden|
++# weiter geprueft — von scripts/data_guardian.py, check_pin_praemissen(),|
++# taeglich, mit Meldung im Sammel-Issue. Hier wird die Pruefung AUSGEFUEHRT,|
++# gegen gesetzte Preise (TESTDATEN), in beide Richtungen.|
++|
++def _waechter():|
++    spec = _ilu.spec_from_file_location(|
++        "dg_pin_praemissen", os.path.join(_WURZEL, "scripts", "data_guardian.py"))|
++    mod = _ilu.module_from_spec(spec)|
++    _sys.modules["dg_pin_praemissen"] = mod|
++    spec.loader.exec_module(mod)|
++    return mod|
++|
++|
++def _lage(pre=(0.04, 0.05, 0.05, 0.06), mep83_markt=True, mep83_einzel=True,|
++          mep4=((15.47, 17.75, 16.16, 16.95), (15.51, 16.40, 18.86, 15.39))):|
++    """TESTDATEN: Pins, Produkte und Preise wie am 10./22.09.2026 gemessen."""|
++    pins = {("PRE", n): {"cardmarket_product_id": str(800000 + i)}|
++            for i, n in enumerate(PRE_NUMMERN)}|
++    produkte = {851049: {"idExpansion": EXP_MEP, "name": "Lunatone (MEP 4)"},|
++                851050: {"idExpansion": EXP_MEP, "name": "Lunatone (MEP 4) v2"}}|
++    preise = {800000 + i: {"trend": w} for i, w in enumerate(pre)}|
++    preise[894262] = ({"low": 5.99, "avg": 16.0, "avg1": 18.0, "avg7": 17.52, "avg30": 16.52}|
++                      if mep83_markt else {"low": "", "avg": 20, "avg1": 20, "avg7": 20, "avg30": 20})|
++    preise[903006] = ({"low": "", "avg": 125, "avg1": 125, "avg7": 125, "avg30": 125}|
++                      if mep83_einzel else {"low": 90, "avg": 125, "avg1": 110, "avg7": 118, "avg30": 121})|
++    for pid, (t, a, a7, a30) in zip((851049, 851050), mep4):|
++        preise[pid] = {"trend": t, "avg": a, "avg7": a7, "avg30": a30}|
++    return pins, produkte, preise|
++|
++|
++def test_der_waechter_schweigt_solange_die_praemissen_halten():|
++    befunde = []|
++    _waechter().check_pin_praemissen(befunde, *_lage())|
++    assert befunde == [], befunde|
++|
++|
++def test_der_waechter_meldet_eine_pre_spanne_ueber_dem_centbereich():|
++    befunde = []|
++    _waechter().check_pin_praemissen(befunde, *_lage(pre=(0.04, 0.05, 0.05, 0.20)))|
++    assert any("PRE 96-99" in m and "neu entscheiden" in m for _, m in befunde), befunde|
++|
++|
++def test_der_waechter_meldet_einen_markt_fuer_903006():|
++    befunde = []|
++    _waechter().check_pin_praemissen(befunde, *_lage(mep83_einzel=False))|
++    assert any("903006" in m for _, m in befunde), befunde|
++|
++|
++def test_der_waechter_meldet_894262_ohne_preisgrundlage():|
++    befunde = []|
++    _waechter().check_pin_praemissen(befunde, *_lage(mep83_markt=False))|
++    assert any("894262" in m for _, m in befunde), befunde|
++|
++|
++def test_mep_4_wird_erst_bei_naehe_ueber_alle_kennzahlen_gemeldet():|
++    w = _waechter()|
++    # 10.09.2026: nur trend nah (0,04) — keine Meldung.|
++    befunde = []|
++    w.check_pin_praemissen(befunde, *_lage())|
++    assert not any("MEP 4" in m for _, m in befunde), befunde|
++    # Alle Kennzahlen nah — Vorschlag auf den guenstigeren.|
++    befunde = []|
++    w.check_pin_praemissen(befunde, *_lage(mep4=((15.47, 15.50, 15.52, 15.49),|
++                                                  (15.51, 15.55, 15.49, 15.45))))|
++    treffer = [m for _, m in befunde if "MEP 4" in m]|
++    assert treffer and "MEP,4,851049,betreiber-regel-cent" in treffer[0], befunde|
++|
++|
++def test_der_waechter_prueft_die_praemissen_taeglich():|
++    """Aufgerufen in main(), nicht nur definiert."""|
++    import ast as _ast|
++    baum = _ast.parse(_guardian_quelle().lstrip('¤ufeff'))|
++    main = next(n for n in baum.body if isinstance(n, _ast.FunctionDef) and n.name == "main")|
++    aufrufe = {n.func.id for n in _ast.walk(main)|
++               if isinstance(n, _ast.Call) and isinstance(n.func, _ast.Name)}|
++    assert "check_pin_praemissen" in aufrufe|
++|
++|
++def test_die_praemissen_laufen_auf_den_echten_dateien_durch():|
++    """Die echten Dateien: keine Ausnahme. WELCHE Meldung heute kommt, ist|
++    eine Tagesfrage und gehoert in den Waechterlauf, nicht hierher."""|
++    befunde = []|
++    _waechter().check_pin_praemissen(befunde)|
++    assert all(lvl == "WARN" for lvl, _ in befunde)|
++    assert not any("nicht pruefbar" in m for _, m in befunde), befunde|
+diff --git a/tests/python/test_jh_abgebrochener_abruf.py b/tests/python/test_jh_abgebrochener_abruf.py|
+new file mode 100644|
+index 0000000..df48756|
+--- /dev/null|
++++ b/tests/python/test_jh_abgebrochener_abruf.py|
+@@ -0,0 +1,77 @@|
++"""SC-9 (30.09.2026): ein abgebrochener Deck-Abruf markiert kein Turnier.|
++|
++Bis heute reichte dem JH-Scraper EIN erfolgreich geholtes Deck: das|
++Turnier kam in den Ledger (tournament_jh_scraped.json) und wurde nie|
++wieder geholt — mit den Karten nur der Decks, die gerade kamen.|
++|
++Ausgefuehrt: main() laeuft mit nachgebauten Abrufen (TESTDATEN), eine|
++von zwei Decklisten-Seiten kommt nicht. Erwartet: nichts geschrieben,|
++nichts markiert, eine benannte Warnung. Kommen beide, wird geschrieben.|
++"""|
++import importlib.util|
++import os|
++import sys|
++|
++import pytest|
++|
++ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))|
++sys.path.insert(0, ROOT)|
++sys.path.insert(0, os.path.join(ROOT, 'backend', 'core'))|
++sys.path.insert(0, os.path.join(ROOT, 'backend', 'scrapers'))|
++|
++_spec = importlib.util.spec_from_file_location(|
++    'tournament_scraper_JH_sc9',|
++    os.path.join(ROOT, 'backend', 'scrapers', 'tournament_scraper_JH.py'))|
++JH = importlib.util.module_from_spec(_spec)|
++_spec.loader.exec_module(JH)|
++|
++|
++def _aufbauen(monkeypatch, kaputt):|
++    geschrieben, markiert = [], []|
++    monkeypatch.setattr(JH, '_load_settings', lambda: {|
++        'max_tournaments': 5, 'tournament_types': ['Regional'], 'max_workers': 2,|
++        'output_file': 'tournament_cards_data.csv', 'append_mode': True})|
++    class _Db:  # TESTDATEN|
++        def is_ace_spec_by_name(self, name):|
++            return False|
++    monkeypatch.setattr(JH, 'CardDatabaseLookup', _Db)|
++    monkeypatch.setattr(JH, '_reassemble_monolith_from_chunks', lambda *a, **k: 0)|
++    monkeypatch.setattr(JH, 'revalidate_recent_tournament_meta', lambda **k: None)|
++    monkeypatch.setattr(JH, 'load_scraped_tournaments', lambda: set())|
++    monkeypatch.setattr(JH, 'get_tournament_links', lambda *a: [|
++        {'id': '9001', 'url': 'https://example.invalid/t/9001', 'name': 'TEST Regional'}])|
++    monkeypatch.setattr(JH, 'get_tournament_info', lambda url: {|
++        'name': 'TEST Regional', 'format': 'TEF-30C', 'meta': 'Standard'})|
++    monkeypatch.setattr(JH, 'get_deck_list_links', lambda url: [|
++        {'url': 'https://example.invalid/d/1', 'player_count': 1},|
++        {'url': 'https://example.invalid/d/2', 'player_count': 1}])|
++    class _Seite:  # TESTDATEN: eine Deckseite ohne Titel|
++        def select_one(self, sel):|
++            return None|
++    monkeypatch.setattr(JH, 'fetch_page_bs4',|
++                        lambda url, *a, **k: None if (kaputt and url.endswith('/2')) else _Seite())|
++    monkeypatch.setattr(JH, 'extract_cards_from_decklist_soup', lambda soup, db: [|
++        {'name': 'TEST Karte', 'set_code': 'TST', 'set_number': '1', 'count': 4, 'type': ''}])|
++    monkeypatch.setattr(JH, 'is_valid_card', lambda n: True)|
++    monkeypatch.setattr(JH, 'entscheide', lambda *a, **k: 'No')|
++    monkeypatch.setattr(JH, 'aggregate_tournament_cards', lambda decks, t, db: [{'n': len(decks)}])|
++    monkeypatch.setattr(JH, 'save_scraped_tournaments', lambda ids: markiert.append(set(ids)))|
++    monkeypatch.setattr(JH, 'save_csv_files', lambda ts, *a, **k: geschrieben.extend(ts))|
++    return geschrieben, markiert|
++|
++|
++def test_ein_fehlendes_deck_haelt_das_turnier_offen(monkeypatch, capsys):|
++    geschrieben, markiert = _aufbauen(monkeypatch, kaputt=True)|
++    JH.main()|
++    assert geschrieben == [], 'ein unvollstaendiges Turnier wurde geschrieben'|
++    assert markiert == [], 'ein unvollstaendiges Turnier wurde als erledigt markiert'|
++    aus = capsys.readouterr().out|
++    assert '::warning::' in aus and '1 von 2' in aus and '9001' in aus|
++|
++|
++def test_vollstaendig_geholt_wird_geschrieben_und_markiert(monkeypatch):|
++    geschrieben, markiert = _aufbauen(monkeypatch, kaputt=False)|
++    JH.main()|
++    assert [t['id'] for t in geschrieben] == ['9001']|
++    assert markiert and '9001' in markiert[-1]|
++    assert geschrieben[0]['cards'] == [{'n': 2}], 'beide Decks muessen eingehen'|
+diff --git a/tests/python/test_labs_felder_beschreibung.py b/tests/python/test_labs_felder_beschreibung.py|
+index d37177b..3f63ebd 100644|
+--- a/tests/python/test_labs_felder_beschreibung.py|
++++ b/tests/python/test_labs_felder_beschreibung.py|
+@@ -126,6 +126,14 @@ def test_die_anwesenheit_liegt_hoeher_und_steht_woanders():|
+         + str(groesser))|
+-    assert len(kleiner) >= 50, (|
+-        "die beiden Zahlen sind fast ueberall gleich geworden — dann ist "|
+-        "diese Beschreibung erklaerungsbeduerftig, nicht der Bestand")|
+-    # Die vier vom Nutzer an der Quelle gemessenen Paare.|
++    # GEAENDERT 30.09.2026 (WZ-22): hier stand `len(kleiner) >= 50` — rot,|
++    # sobald die Daten BESSER werden (nachgereichte Decklisten schliessen|
++    # die Luecke). Die Beschreibung sagt "fast immer hoeher"; das ist die|
++    # Mehrheit, nicht eine Zahl. Gemessen 30.09.2026: 66 von 69.|
++    assert len(kleiner) > len(gemeinsam) / 2, (|
++        f"nur noch {len(kleiner)} von {len(gemeinsam)} Turnieren haben eine "|
++        "kleinere Decksumme — dann ist diese Beschreibung erklaerungsbeduerftig, "|
++        "nicht der Bestand")|
++    # Die vier vom Nutzer an der Quelle gemessenen Paare. Die Anwesenheit|
++    # ist der Kopf der Turnierseite und steht fest; die Decksumme darf|
++    # WACHSEN, wenn der Labs-Scraper nachgereichte Listen holt (Wiedervorlage),|
++    # aber nie ueber die Anwesenheit und nie unter den gemessenen Stand.|
+     for tid, kopf_der_quelle, deck in (("0067", 499, 485), ("0068", 1974, 1970),|
+@@ -133,3 +141,3 @@ def test_die_anwesenheit_liegt_hoeher_und_steht_woanders():|
+         assert anwesend[tid] == kopf_der_quelle, (tid, anwesend[tid])|
+-        assert decksumme[tid] == deck, (tid, decksumme[tid])|
++        assert deck <= decksumme[tid] <= kopf_der_quelle, (tid, decksumme[tid])|
+ |
+diff --git a/tests/python/test_meta_prognose.py b/tests/python/test_meta_prognose.py|
+index 84a8629..ff22321 100644|
+--- a/tests/python/test_meta_prognose.py|
++++ b/tests/python/test_meta_prognose.py|
+@@ -239,5 +239,16 @@ def test_der_gemessene_fall_von_mega_excadrill_bleibt_stehen():|
+     # 1. Der feste Wert des abgeschlossenen Fensters. DAS ist der Riegel.|
+-    assert vor["mega-excadrill-ex"] == pytest.approx(7.59, abs=0.05), (|
+-        f"Vorwert {vor['mega-excadrill-ex']:.2f} % statt 7,59 % — steht ein "|
+-        f"fremdes Formatfenster im Nenner? (Nenner: {gv}, erwartet 26.130)")|
++    #    GEAENDERT 30.09.2026 (WZ-22): hier stand `== 7.59 ± 0,05`. Weil|
++    #    der Nenner durch nachgetragene Turniere wachsen darf (siehe unten),|
++    #    verschiebt schon ein Nachtrag von rund 170 Listen den Anteil um|
++    #    0,05 — ein richtiger Lauf haette das Tor geschlossen. Die Regel|
++    #    dahinter ist rechnerisch exakt: kommen k Listen dazu, liegt der|
++    #    neue Anteil zwischen "keine davon Excadrill" und "alle Excadrill".|
++    #    Bei k = 0 ist das wieder genau 7,59 %.|
++    k = gv - 26130|
++    unten = 7.59 * 26130 / gv - 0.05|
++    oben = (7.59 * 26130 + 100 * k) / gv + 0.05|
++    assert unten <= vor["mega-excadrill-ex"] <= oben, (|
++        f"Vorwert {vor['mega-excadrill-ex']:.2f} % liegt ausserhalb dessen, was "|
++        f"{k} nachgetragene Listen erlauben ({unten:.2f}–{oben:.2f} %) — steht "|
++        f"ein fremdes Formatfenster im Nenner? (Nenner: {gv}, gemessen 10.09.2026: 26.130)")|
+     # GEAENDERT 22.09.2026: hier stand `gv == 26130` mit der Begruendung|
+diff --git a/tests/python/test_per_decklist_resume_bilanz.py b/tests/python/test_per_decklist_resume_bilanz.py|
+new file mode 100644|
+index 0000000..d8c2b71|
+--- /dev/null|
++++ b/tests/python/test_per_decklist_resume_bilanz.py|
+@@ -0,0 +1,59 @@|
++"""SC-8 (30.09.2026): --resume holt ein Turnier ohne jede Bilanz erneut.|
++|
++Bis heute zaehlte fuer `load_existing_output` jede Zeile. Ein Turnier,|
++das waehrend es lief oder ohne Bilanzspalte geholt wurde, stand mit|
++leeren wins/losses/ties im Bestand, und der woechentliche Lauf mit|
++--resume holte es nie wieder. Gemessen am 30.09.: 0 von 85 Turnieren|
++betroffen — die Regel gehoert trotzdem an ihre Bedingung.|
++|
++Ausgefuehrt, nicht gelesen: die Funktion laeuft gegen eine TESTDATEN-CSV|
++in einem Wegwerf-Verzeichnis.|
++"""|
++import csv|
++import importlib.util|
++import os|
++import sys|
++|
++import pytest|
++|
++HIER = os.path.dirname(os.path.abspath(__file__))|
++WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))|
++QUELLE = os.path.join(WURZEL, "backend", "scrapers", "per_decklist_scraper.py")|
++|
++|
++@pytest.fixture(scope="module")|
++def modul():|
++    sys.path.insert(0, os.path.join(WURZEL, "backend", "core"))|
++    spec = importlib.util.spec_from_file_location("pds_resume_test", QUELLE)|
++    m = importlib.util.module_from_spec(spec)|
++    spec.loader.exec_module(m)|
++    return m|
++|
++|
++def _csv(pfad, zeilen, felder):|
++    with open(pfad, "w", newline="", encoding="utf-8") as f:|
++        w = csv.DictWriter(f, fieldnames=felder)|
++        w.writeheader()|
++        for z in zeilen:|
++            w.writerow({k: z.get(k, "") for k in felder})|
++|
++|
++def test_nur_ein_turnier_mit_bilanz_gilt_als_erledigt(modul, tmp_path):|
++    pfad = tmp_path / "per_player.csv"|
++    _csv(pfad, [|
++        # TESTDATEN|
++        {"limitless_tournament_id": "501", "player_name": "TEST A", "wins": "6", "losses": "2", "ties": "1"},|
++        {"limitless_tournament_id": "501", "player_name": "TEST B", "wins": "", "losses": "", "ties": ""},|
++        {"limitless_tournament_id": "502", "player_name": "TEST C", "wins": "", "losses": "", "ties": ""},|
++        {"limitless_tournament_id": "502", "player_name": "TEST D", "wins": "", "losses": "", "ties": ""},|
++        {"limitless_tournament_id": "503", "player_name": "TEST E", "wins": "0", "losses": "3", "ties": "0"},|
++    ], modul.CSV_FIELDS)|
++    erledigt = modul.load_existing_output(str(pfad))|
++    assert erledigt == {"501", "503"}, (|
++        "502 hat keine einzige Bilanz und muss neu geholt werden; 501 hat "|
++        "eine (Rueckfall-Luecken einzelner Spieler sind kein Grund) und "|
++        f"503 eine echte 0-3-0 — bekommen: {sorted(erledigt)}")|
++|
++|
++def test_ohne_datei_ist_nichts_erledigt(modul, tmp_path):|
++    assert modul.load_existing_output(str(tmp_path / "gibt-es-nicht.csv")) == set()|
+diff --git a/tests/python/test_preis_zuordnung.py b/tests/python/test_preis_zuordnung.py|
+index ad2b8c1..cf0947c 100644|
+--- a/tests/python/test_preis_zuordnung.py|
++++ b/tests/python/test_preis_zuordnung.py|
+@@ -89,8 +89,17 @@ def test_die_einteilung_reproduziert_die_pruefzahlen():|
+ |
+-    # Die Pruefung vom 20.08.2026: 3.015 ohne Zuordnung, 200 Kollisionszeilen.|
+-    assert c["unmapped"] > 1000, c|
+-    assert c["collision"] > 0 and c["collision"] % 2 == 0, c|
+-    assert c["ok"] > c["unmapped"], c|
+-    # Und keine dieser Zeilen faellt mehr in den ok-Topf.|
+-    assert sum(c.values()) == sum(1 for x in cards if x.get("number"))|
++    # Die Pruefung vom 20.08.2026 zaehlte 3.015 ohne Zuordnung und 200|
++    # Kollisionszeilen. Bis 30.09.2026 standen hier `unmapped > 1000` und|
++    # `collision > 0` — beide waeren rot geworden, sobald die Zuordnung|
++    # BESSER wird (WZ-18). Geprueft wird jetzt die Regel, nicht der Stand:|
++    # jede Karte ohne Eintrag landet in 'unmapped', jede mit geteilter|
++    # Nummer in 'collision' — unabhaengig nachgezaehlt —, und keine davon|
++    # im ok-Topf.|
++    mit_nummer = [x for x in cards if x.get("number")]|
++    ohne_eintrag = sum(1 for x in mit_nummer if (x["set"], x["number"]) not in mapping)|
++    geteilt = sum(1 for x in mit_nummer|
++                  if (x["set"], x["number"]) in mapping|
++                  and mapping[(x["set"], x["number"])] in kollidierend)|
++    assert c["unmapped"] == ohne_eintrag, c|
++    assert c["collision"] == geteilt, c|
++    assert sum(c.values()) == len(mit_nummer)|
+ |
+diff --git a/tests/python/test_sanity_tor.py b/tests/python/test_sanity_tor.py|
+index 30e8b40..2fa26d2 100644|
+--- a/tests/python/test_sanity_tor.py|
++++ b/tests/python/test_sanity_tor.py|
+@@ -212 +212,59 @@ def test_waechter_liest_dieselbe_liste():|
+             f"{name} wird vom Waechter noch als 'darf leer sein' gefuehrt")|
++|
++|
++# ── SC-10 (30.09.2026): wachsende Dateien und JSON ──────────────────────|
++#|
++# Ausgefuehrt im Wegwerf-Repo der Fixture (TESTDATEN).|
++|
++def test_wachsende_datei_verliert_zeilen_und_wird_zurueckgesetzt(repo, capsys):|
++    ziel = repo / "data" / "player_continuity.csv"|
++    ziel.write_text("a;b\n" + "".join(f"{i};x\n" for i in range(5000)), encoding="utf-8")|
++    _git("add", "-A", cwd=repo)|
++    _git("commit", "-qm", "gewachsen", cwd=repo)|
++    vorher = tor.count_csv_rows(str(ziel))|
++    assert vorher == 5000|
++    zeilen = ziel.read_text(encoding="utf-8").split("\n")|
++    # Weiter UEBER der festen Schwelle (2.000), aber ein Drittel weniger:|
++    # genau der Fall, den die feste Zahl nicht faengt.|
++    behalten = max(tor.THRESHOLDS["player_continuity.csv"] + 1, int(vorher * 0.6))|
++    ziel.write_text("\n".join(zeilen[:behalten + 1]) + "\n", encoding="utf-8")|
++    assert tor.count_csv_rows(str(ziel)) >= tor.THRESHOLDS["player_continuity.csv"]|
++    rc = _lauf(repo)|
++    ausgabe = capsys.readouterr().out|
++    assert "waechst sonst nur" in ausgabe|
++    assert tor.count_csv_rows(str(ziel)) == vorher, "der gute Stand ist nicht zurueck"|
++    assert rc == 1|
++|
++|
++def test_eine_rotationsdatei_darf_schrumpfen(repo):|
++    """current_meta_card_data.csv wird bei einem Setwechsel geleert —|
++    solange sie ueber ihrer festen Schwelle bleibt, kein Revert."""|
++    ziel = repo / "data" / "current_meta_card_data.csv"|
++    schwelle = tor.THRESHOLDS["current_meta_card_data.csv"]|
++    ziel.write_text("a;b\n" + "".join(f"{i};x\n" for i in range(schwelle)), encoding="utf-8")|
++    rc = _lauf(repo)|
++    assert rc == 0|
++    assert tor.count_csv_rows(str(ziel)) == schwelle|
++|
++|
++def test_kaputte_json_wird_zurueckgesetzt(repo, capsys):|
++    ziel = repo / "data" / "irgendwas.json"|
++    ziel.write_text('{"a": 1}', encoding="utf-8")|
++    _git("add", "-A", cwd=repo)|
++    _git("commit", "-qm", "json", cwd=repo)|
++    ziel.write_text('{"a": 1', encoding="utf-8")        # abgeschnitten|
++    rc = _lauf(repo)|
++    ausgabe = capsys.readouterr().out|
++    assert "kein gueltiges JSON" in ausgabe|
++    assert ziel.read_text(encoding="utf-8") == '{"a": 1}'|
++    assert rc == 1|
++|
++|
++def test_gueltige_geaenderte_json_bleibt(repo):|
++    ziel = repo / "data" / "irgendwas.json"|
++    ziel.write_text('{"a": 1}', encoding="utf-8")|
++    _git("add", "-A", cwd=repo)|
++    _git("commit", "-qm", "json", cwd=repo)|
++    ziel.write_text('{"a": 2}', encoding="utf-8")|
++    assert _lauf(repo) == 0|
++    assert ziel.read_text(encoding="utf-8") == '{"a": 2}'|
+diff --git a/tests/unit/test-post-quellen.js b/tests/unit/test-post-quellen.js|
+index 5eba997..1d12d8a 100644|
+--- a/tests/unit/test-post-quellen.js|
++++ b/tests/unit/test-post-quellen.js|
+@@ -206,3 +206,3 @@ test('eine fehlende Zahl wird gemeldet, nicht als "NaN" gemalt', () => {|
+ |
+-test('der Nenner ist die erfasste Spielerzahl, nicht die Summe der Zeilen', async () => {|
++test('der Nenner ist die erfasste Spielerzahl, nicht die Summe der Zeilen', async (t) => {|
+     /* DER TEURE FEHLER (04.09.2026).|
+@@ -215,5 +215,14 @@ test('der Nenner ist die erfasste Spielerzahl, nicht die Summe der Zeilen', asyn|
+     const summe = roh.reduce((a, r) => a + (Q.zahlAus(r.count) || 0), 0);|
+-    assert.ok(Math.abs(summe - stat.players) > 100,|
+-        'Summe und erfasste Spielerzahl liegen beieinander — dann prüft dieser ' +|
+-        `Test die Lücke nicht mehr (${summe} vs. ${stat.players})`);|
++    /* GEAENDERT 30.09.2026 (WZ-22): hier stand eine Zusicherung, dass|

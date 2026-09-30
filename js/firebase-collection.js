@@ -853,12 +853,16 @@ function deleteDeck(deckId) {
   showNotification(fcText('notif.deckDeleted', 'Deck deleted'), 'success');
   if (typeof updateDecksUI === 'function') updateDecksUI();
 
-  // Fire Firestore delete in background.
-  db.collection('users').doc(user.uid)
-    .collection('decks').doc(deckId).delete()
-    .catch(function (err) {
-      console.warn('[deleteDeck] Firestore delete deferred / failed:', err && err.message);
-    });
+  // FE-18: Löschmarke lokal UND am Server, zusammen mit dem Löschen des Decks in
+  // einem Batch. Ohne Marke brachte ein Gerät mit altem Spiegel das Deck zurück.
+  if (typeof _addLocalTombstone === 'function') _addLocalTombstone(user.uid, deckId);
+  const userDoc = db.collection('users').doc(user.uid);
+  const delBatch = db.batch();
+  delBatch.set(userDoc.collection('deckTombstones').doc(deckId), { deletedAtMs: Date.now() });
+  delBatch.delete(userDoc.collection('decks').doc(deckId));
+  delBatch.commit().catch(function (err) {
+    console.warn('[deleteDeck] Firestore delete deferred / failed:', err && err.message);
+  });
 }
 
 // Load deck from profile for comparison (removed old loadDeckFromProfile function)

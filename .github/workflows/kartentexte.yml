@@ -179,6 +179,17 @@ jobs:
             echo "- keine Standdatei geschrieben (Trockenlauf oder Abbruch)" >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      # DAS LUECKEN-INVENTAR (30.09.2026): scripts/datenluecken.py rechnet
+      # aus data/all_cards_database.csv (Kartentyp je Druck). Wer sie schreibt, schreibt das Inventar
+      # mit — sonst urteilt data/datenluecken.json ueber den alten Stand und
+      # das Tor ist zu (Online-Einzellisten #3, 30.09.2026).
+      # tests/python/test_datenluecken_folgt_ihren_quellen.py haelt das fest.
+      # Fail-soft wie in den anderen Ablaeufen: faellt es um, bleibt das
+      # alte Inventar stehen.
+      - name: Luecken-Inventar fortschreiben
+        if: ${{ inputs.trockenlauf != true }}
+        run: python3 scripts/datenluecken.py || true
+
       # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN
       #
       # `build_data_stand.py` schreibt den Stand einer Datei nur fort,
@@ -216,7 +227,8 @@ jobs:
           git add data/all_cards_database.csv data/kartentext_stand.json \
                   data/cards_chunk_standard.json data/cards_chunk_extended.json \
                   data/cards_chunk_legacy.json data/cards_manifest.json \
-                  data/all_cards_merged.json data/data_stand.json 2>/dev/null || true
+                  data/all_cards_merged.json data/data_stand.json \
+                  data/datenluecken.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "Nichts geaendert."
             echo "pushed=false" >> "$GITHUB_OUTPUT"

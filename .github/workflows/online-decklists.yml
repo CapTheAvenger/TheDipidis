@@ -183,6 +183,17 @@ jobs:
                data/tournament_decklists_per_player.csv
           fi
 
+      # DAS LUECKEN-INVENTAR (30.09.2026): scripts/datenluecken.py rechnet
+      # aus data/tournament_decklists_per_player.csv. Wer sie schreibt, schreibt das Inventar
+      # mit — sonst urteilt data/datenluecken.json ueber den alten Stand und
+      # das Tor ist zu (Online-Einzellisten #3, 30.09.2026).
+      # tests/python/test_datenluecken_folgt_ihren_quellen.py haelt das fest.
+      # Fail-soft wie in den anderen Ablaeufen: faellt es um, bleibt das
+      # alte Inventar stehen.
+      - name: Luecken-Inventar fortschreiben
+        if: ${{ success() && inputs.trocken != true }}
+        run: python3 scripts/datenluecken.py || true
+
       # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN (12.09.2026)
       #
       # `build_data_stand.py` schreibt den Stand einer Datei nur fort,
@@ -224,7 +235,8 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           echo "pushed=false" >> "$GITHUB_OUTPUT"
-          git add data/tournament_decklists_per_player.csv data/data_stand.json
+          git add data/tournament_decklists_per_player.csv data/data_stand.json \
+                  data/datenluecken.json
           if git diff --cached --quiet; then
             echo "unveraendert — kein Push."
             exit 0

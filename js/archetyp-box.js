@@ -576,9 +576,15 @@
      * legalen zuerst sieht.
      *   'gespielt' — der Archetyp hat im neuesten Format mit Turnierdaten
      *                Decks (imFormatGespielt) — gruen
-     *   'legal'    — nicht gespielt, aber jede Kernkarte (Anteil >= 50 %,
+     *   'legal'    — nicht gespielt, aber jedes Kern-Pokemon (Anteil >= 50 %,
      *                nicht von Hand) hat einen Standard-legalen Druck — gelb
-     *   'raus'     — mindestens eine Kernkarte ist nicht mehr legal — grau
+     *   'raus'     — mindestens ein Kern-Pokemon ist nicht mehr legal — grau
+     *
+     * NUR POKEMON (live gemessen 30.09.2026): eine Box sammelt ueber alle
+     * Formate, und Trainer wie Arven OBF 186 oder Iono PAF 80 liegen in fast
+     * jeder Box ueber 50 %. Mit allen Kernkarten stand Iron Thorns (Iron
+     * Thorns ex TWM, legal) grau da — wegen seiner Trainer, die man tauscht.
+     * Das Deck steht und faellt mit seinen Pokemon.
      *   null       — unbekannt (Formatdaten noch nicht da, Legalitaet einer
      *                Kernkarte unbekannt, keine Kernkarte): keine Farbe,
      *                lieber keine Aussage als eine falsche
@@ -590,7 +596,7 @@
         if (imFormatGespielt(box, c.aktuell)) return 'gespielt';
         if (typeof c.legal !== 'function' || !c.legalBekannt) return null;
         const kern = (box.karten || []).filter(function (k) {
-            return !k.manuell && Number(k.anteil) >= KERN_SCHWELLE;
+            return !k.manuell && k.typ === 'Pokemon' && Number(k.anteil) >= KERN_SCHWELLE;
         });
         if (!kern.length) return null;
         let unbekannt = false;

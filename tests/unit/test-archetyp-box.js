@@ -798,10 +798,13 @@ describe('UI-51/UI-52/DA-18 (30.09.2026): Stufe der Box, Reihenfolge der Chips, 
         legal: (k) => L.druckLegal([k.id].concat(k.refs || []), fenster, L.anteilIn(k, 'TEF-30C') > 0)
     };
     const box = (id, archetyp, karten) => ({ id, archetyp, name: archetyp, karten });
-    const gespielt = box('g', 'Dragapult Dusknoir', [{ id: 'TWM-130', anteil: 100, formate: { 'TEF-30C': 100 } }]);
-    const legal = box('l', 'Ceruledge', [{ id: 'PBL-12', anteil: 90, formate: { 'TEF-PBL': 90 } }]);
-    const raus = box('r', 'Lost Box', [{ id: 'LOR-81', anteil: 80, formate: { 'SVI-PFL': 80 } }, { id: 'PBL-3', anteil: 60 }]);
-    const unbekannt = box('u', 'Iono Box', [{ id: 'PAF-80', refs: ['SVP-124'], anteil: 70, formate: { 'SVI-PFL': 70 } }]);
+    const P = 'Pokemon';
+    const gespielt = box('g', 'Dragapult Dusknoir', [{ id: 'TWM-130', typ: P, anteil: 100, formate: { 'TEF-30C': 100 } }]);
+    // Trainer wie Arven OBF 186 (rotiert) machen eine Box nicht grau — live gemessen 30.09.2026.
+    const legal = box('l', 'Ceruledge', [{ id: 'PBL-12', typ: P, anteil: 90, formate: { 'TEF-PBL': 90 } },
+        { id: 'OBF-186', typ: 'Supporter', anteil: 95, formate: { 'SVI-PFL': 95 } }]);
+    const raus = box('r', 'Lost Box', [{ id: 'LOR-81', typ: P, anteil: 80, formate: { 'SVI-PFL': 80 } }, { id: 'PBL-3', typ: P, anteil: 60 }]);
+    const unbekannt = box('u', 'Mew Box', [{ id: 'MEW-151', typ: P, refs: ['SVP-53'], anteil: 70, formate: { 'SVI-PFL': 70 } }]);
 
     it('gespielt / legal / raus / unbekannt', () => {
         assert.equal(L.boxStufe(gespielt, kontext), 'gespielt');
@@ -820,7 +823,7 @@ describe('UI-51/UI-52/DA-18 (30.09.2026): Stufe der Box, Reihenfolge der Chips, 
     });
 
     it('Chips: nach Stufe, Varianten unter ihrer Familienbox', () => {
-        const fam = box('f', '__familie__|Dragapult', [{ id: 'TWM-130', anteil: 100, formate: { 'TEF-30C': 100 } }]);
+        const fam = box('f', '__familie__|Dragapult', [{ id: 'TWM-130', typ: P, anteil: 100, formate: { 'TEF-30C': 100 } }]);
         const reihe = L.chipReihe([raus, unbekannt, legal, gespielt, fam], kontext,
             (a) => (a === 'Dragapult Dusknoir' ? 'Dragapult' : undefined));
         gleich(reihe.map((r) => [r.box.id, r.stufe, r.rang]), [
@@ -841,6 +844,10 @@ describe('UI-51/UI-52/DA-18 (30.09.2026): Stufe der Box, Reihenfolge der Chips, 
         const s3 = "if (l === false) return 'raus';";
         assert.ok(QUELLE.includes(s3));
         assert.notEqual(logik(QUELLE.replace(s3, '')).boxStufe(raus, kontext), 'raus', 'Probe raus beisst nicht');
+        const s5 = "return !k.manuell && k.typ === 'Pokemon' && Number(k.anteil) >= KERN_SCHWELLE;";
+        assert.ok(QUELLE.includes(s5));
+        assert.equal(logik(QUELLE.replace(s5, 'return !k.manuell && Number(k.anteil) >= KERN_SCHWELLE;')).boxStufe(legal, kontext),
+            'raus', 'Probe Trainer als Kern beisst nicht');
         const s4 = ".sort(function (x, y) { return rang(x.b) - rang(y.b) || x.i - y.i; })";
         assert.ok(QUELLE.includes(s4));
         const M4 = logik(QUELLE.replace(s4, ''));

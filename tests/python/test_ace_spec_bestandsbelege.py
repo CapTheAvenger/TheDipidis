@@ -73,21 +73,19 @@ def test_beide_schreibstellen_nutzen_den_ganzen_bestand():
             "geschrieben wird, geht das Wissen aelterer Formate verloren.")
 
 
-def test_der_wochenlauf_meldet_weiterhin_nur():
-    """Die Ursache ist behoben — die Regel 'melden statt reparieren' bleibt.
-
-    Sie war nie das Problem: sie hat den Befund sichtbar gemacht.
-    """
+def test_der_wochenlauf_berichtigt_seit_30_09():
+    """Bis 30.09.2026 stand hier „die Regel 'melden statt reparieren'
+    bleibt". Hausi hat am 30.09. anders entschieden (DA-22): die Drift kam
+    nach jedem neuen JP-Set wieder, weil eine neue Karte beim Schreiben
+    noch keinen Beleg hat. Der Wochenlauf faehrt seitdem --schreiben —
+    Reihenfolge und Meldung prueft
+    tests/python/test_ace_spec_wochenlauf_berichtigt.py."""
     pfad = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")
     with open(pfad, encoding="utf-8") as f:
         w = f.read()
     ruf = re.search(r"^\s*python3 scripts/repariere_ace_spec\.py.*$", w, re.M)
     assert ruf, "der Wochenlauf rechnet is_ace_spec nicht mehr nach"
-    assert "--melden" in ruf.group(0)
-    assert "--schreiben" not in ruf.group(0), (
-        "der Wochenlauf schreibt jetzt selbst. Die Ursache steckt seit "
-        "10.09.2026 im Scraper — ein unbeaufsichtigter Schreiblauf ueber "
-        "660.000 Zeilen loest nichts mehr und widerspricht CLAUDE.md.")
+    assert "--schreiben" in ruf.group(0) and "--melden" not in ruf.group(0), ruf.group(0)
 
 
 def test_die_beiden_belegsammlungen_stimmen_ueberein():

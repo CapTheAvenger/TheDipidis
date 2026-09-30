@@ -96,6 +96,22 @@ ueberschreiben lassen. Die Meldung erscheint auf der Laufseite, bevor
 der Deploy rot wird; geschrieben wird danach von Hand ueber den
 Workflow "Daten reparieren".
 
+NACHTRAG 30.09.2026 — DER WOCHENLAUF SCHREIBT JETZT (Hausi, DA-22)
+------------------------------------------------------------------
+Der Absatz oben galt bis hierhin. Gemessen am 30.09.: die Drift kommt
+nach jedem neuen JP-Set wieder (35 Felder, 29 davon in
+city_league_analysis.csv, z. B. Special Vest M6 65), weil eine neue
+Karte beim Schreiben noch keinen Beleg hat und der Bestand ihn erst
+spaeter liefert. Das ist der normale Weg der Belege, keine neue
+Fehlerquelle. Hausi: „Da-22 muss auf jeden Fall repariert werden."
+
+Seitdem faehrt der Wochenlauf `--schreiben`. Gemeldet wird trotzdem:
+die Zahl der berichtigten Felder steht als ::notice:: auf der
+Laufseite, und die Nachpruefung (nur diese eine Spalte darf anders
+sein) macht den Lauf rot, bevor etwas gepusht wird. Die Namensliste
+selbst zieht scripts/ace_specs_nachziehen.py im selben Lauf aus der
+Quelle nach.
+
 Aufruf:  python3 scripts/repariere_ace_spec.py [--schreiben | --melden] [--streng]
 Ohne Schalter wird nur berichtet.
   --melden   zusaetzlich eine ::warning::-Zeile je Datei mit Drift
@@ -339,6 +355,10 @@ def main() -> int:
             print("   ... und %d weitere Namen" % (len(offen) - 15))
     if not args.schreiben:
         print("\n(Nur berichtet. Mit --schreiben wird geaendert.)")
+    elif gesamt["geaendert"]:
+        # Berichtigt, aber nicht still: die Zahl steht auf der Laufseite.
+        print("::notice::is_ace_spec: %d Felder nach der Regel berichtigt "
+              "(nur diese Spalte, nachgeprueft)." % gesamt["geaendert"])
 
     # Drift = Felder, die anders belegt waeren als sie dastehen. Im
     # Schreibmodus sind sie soeben geraeumt worden und keine Meldung

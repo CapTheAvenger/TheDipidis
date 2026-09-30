@@ -175,6 +175,9 @@
    einzige Chip-Reihe auf dem Handy nicht mehr zu lesen; die Beschriftung
    sagt, ob es Tims eigene Liste ist oder eine fremde vom Turnier. */
 .mcl-listgruppe { margin-bottom: var(--s-3); }
+/* 30.09.2026 (DA-26): hat das 7-Tage-Fenster keine Online-Liste, steht
+   die Gruppe mit diesem Satz da statt mit Listen der Vorwoche. */
+.mcl-listgruppe-leer { font-size: var(--fs-sm); color: var(--ink-2); }
 .mcl-listgruppe-titel {
     display: block;
     font-size: var(--fs-sm);

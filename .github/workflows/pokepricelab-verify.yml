@@ -11,6 +11,15 @@
 name: Pokepricelab verify
 
 on:
+  # ZEITPLAN SEIT 30.09.2026 — Hausi: „ich will eigentlich keine Scraper
+  # von Hand starten. Es soll alles automatisch laufen." Donnerstags, weit
+  # weg vom Wochenlauf (Di/Fr 06:00) und vom Cardmarket-Pruefer (Mi 04:20).
+  # Das Skript setzt fort, wo der letzte Lauf aufgehoert hat; ein Lauf ohne
+  # offene Karten schreibt nichts. Der Katalog-Index, aus dem es liest,
+  # laeuft noch von Hand (SC-12: pokepricelab.com liefert die Sitemap zur
+  # Zeit nicht vollstaendig).
+  schedule:
+    - cron: '50 2 * * 4'
   workflow_dispatch:
     inputs:
       limit:
@@ -42,7 +51,8 @@ jobs:
         run: pip install requests
 
       - name: Cross-check against pokepricelab
-        run: python scripts/verify_via_pokepricelab.py --limit "${{ inputs.limit }}"
+        # Im Zeitplan ist inputs.limit leer — dann alle (0).
+        run: python scripts/verify_via_pokepricelab.py --limit "${{ inputs.limit || '0' }}"
 
       # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN (12.09.2026)
       #
@@ -69,11 +79,16 @@ jobs:
           node-version: '20'
 
       - name: Tor vor dem Push
+        id: tor
         if: always()
         run: bash scripts/tor_vor_dem_push.sh kern
 
+      # NUR WENN DAS TOR OFFEN IST (30.09.2026). Hier stand `if: always()`
+      # wie beim Tor — damit lief der Commit auch dann, wenn das Tor rot
+      # war, und das Tor hielt nichts an. `always()` bleibt, damit ein
+      # abgebrochener Abgleich seinen Teilbericht trotzdem sichert.
       - name: Commit report
-        if: always()
+        if: ${{ always() && steps.tor.outcome == 'success' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

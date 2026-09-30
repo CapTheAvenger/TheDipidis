@@ -47,7 +47,10 @@
         /* Gezaehlt am Stueck, nicht geschaetzt: 22 Matchups, 25 Listen,
          * 10.164 Woerter in der Ausarbeitung (22.09.2026). Die Zahl "6
          * Listen" stand hier noch, als es laengst 25 waren. */
-        kennzahlen: '22 Matchups · 25 Listen · 10.164 Wörter',
+        /* 30.09.2026 (DA-26): die Online-Gruppe hat nur so viele Plaetze,
+         * wie die letzten 7 Tage frische Listen hergeben (0 bis 5). Die
+         * Kachel nennt deshalb die 20 festen Listen und „+ Online". */
+        kennzahlen: '22 Matchups · 20 Listen + Online (7 Tage) · 10.164 Wörter',
         sprachen: ['de'],
         datei: 'masterclass/mega-stalobor.de.html'
     }];

@@ -17,10 +17,11 @@ zusaetzlicher Abruf.
 
 DREI REGELN, damit das Stueck nie schlechter dasteht als vorher:
 
-  1. ALLES ODER NICHTS. Liefert die Datei nicht genau so viele Listen,
-     wie die Gruppe Plaetze hat, wird NICHTS geschrieben. Sonst
-     wanderten die Nummern der Bloecke (data-mcl-listenblock) und die
-     Regalkachel behauptete eine falsche Listenzahl.
+  1. NUR FRISCHE LISTEN (seit 30.09.2026, DA-26). Die Gruppe hat genau
+     so viele Plaetze, wie die Datei Listen liefert (0 bis 5); alte
+     Listen bleiben nicht stehen. Die Regalkachel nennt deshalb nur die
+     festen Listen und „+ Online (7 Tage)" (js/ds-masterclass.js).
+     Bis 30.09. galt hier „alles oder nichts" — siehe nachziehen().
   2. KEINE ERFUNDENEN KACHELN. Jede Karte kommt entweder als fertige
      Kachel aus dem Stueck (dann traegt sie deutschen Namen, Kartentext
      und Tims Begruendung) oder aus data/all_cards_database.csv. Laesst
@@ -316,7 +317,8 @@ def tims_zaehlung(roh):
 
 def gruppen_nummern(roh):
     """Die Blocknummern, die in der Online-Gruppe stehen — in der
-    Reihenfolge ihrer Schalter."""
+    Reihenfolge ihrer Schalter. Eine Gruppe ohne Schalter (diese Woche
+    keine Liste) wird gefunden und liefert eine leere Liste."""
     m = re.search(r'<div class="mcl-listgruppe">\s*<span class="mcl-listgruppe-titel">%s</span>'
                   r'\s*<div class="mcl-listwahl-reihe">(.*?)</div>' % re.escape(GRUPPE), roh, re.S)
     if not m:
@@ -324,31 +326,70 @@ def gruppen_nummern(roh):
     return re.findall(r'data-mcl-liste="(\d+)"', m.group(1)), m
 
 
+# Hoechstens so viele Plaetze hat die Gruppe — so viele liefert
+# build_masterclass_listen (MASTERCLASS_LISTEN im Scraper).
+MAX_PLAETZE = 5
+
+LEER_HINWEIS = ('<span class="mcl-listgruppe-leer">Keine Online-Liste ab 100 Spielern in den '
+                'letzten 7 Tagen — ältere Listen stehen unter „Worlds · Day 2“.</span>')
+
+
 def nachziehen(roh, listen):
-    """Gibt (neuer Text, Aenderungen, Grund). Grund gesetzt = nichts getan."""
+    """Gibt (neuer Text, Aenderungen, Grund). Grund gesetzt = nichts getan.
+
+    WENIGER LISTEN = WENIGER PLAETZE (Hausi, 30.09.2026, DA-26): „dann
+    lieber weniger Listen anzeigen, veraltete online bringen nichts, dann
+    nehme ich lieber eine aeltere Major als ne alte Online-Liste."
+
+    Bis dahin galt ALLES ODER NICHTS: lieferte die Datei nicht genau so
+    viele Listen, wie die Gruppe Plaetze hat, blieb das Stueck stehen —
+    mit den Listen der Vorwoche unter der Ueberschrift „letzte 7 Tage"
+    (Wochenlauf #172: 4 Listen fuer 5 Plaetze). Jetzt bekommt die Gruppe
+    genau so viele Plaetze, wie das Fenster frische Listen hat (0 bis 5):
+      * weniger Listen: die ueberzaehligen Bloecke und Schalter fallen weg;
+      * mehr Listen als Plaetze: neue Bloecke mit freien Nummern, hinter
+        dem letzten Block des Stuecks;
+      * keine Liste: die Gruppe bleibt mit einem Satz stehen, der auf die
+        Major-Listen (Worlds · Day 2) verweist.
+    Weiter gilt: eine unbekannte Karte in irgendeiner Liste — dann wird
+    NICHTS geschrieben.
+    """
     nummern, treffer = gruppen_nummern(roh)
-    if not nummern:
+    if treffer is None:
         return roh, [], "die Gruppe „%s“ steht nicht im Stueck" % GRUPPE
-    if len(listen) != len(nummern):
-        return roh, [], ("die Datei liefert %d Listen, die Gruppe hat %d Plaetze"
-                         % (len(listen), len(nummern)))
+    if len(listen) > MAX_PLAETZE:
+        return roh, [], ("die Datei liefert %d Listen, die Gruppe hat hoechstens %d Plaetze"
+                         % (len(listen), MAX_PLAETZE))
 
     vorlagen = kachel_vorlagen(roh)
     tims = tims_zaehlung(roh)
     if not vorlagen or not tims:
         return roh, [], "im Stueck sind keine Kartenkacheln zu finden"
 
+    alle_nummern = [int(n) for n in re.findall(r'data-mcl-listenblock="(\d+)"', roh)]
+    frei = max(alle_nummern) + 1 if alle_nummern else 0
+    ziel = list(nummern[:len(listen)])
+    while len(ziel) < len(listen):
+        ziel.append(str(frei))
+        frei += 1
+    weg = set(nummern[len(listen):])
+
     neue_bloecke, aenderungen = {}, []
-    for nummer, liste in zip(nummern, listen):
+    for nummer, liste in zip(ziel, listen):
         b, fehlende = block(nummer, liste, vorlagen, tims)
         if b is None:
             return roh, [], ("unbekannte Karten in %s: %s"
                              % (listenname(liste), ", ".join(sorted(set(fehlende)))))
         neue_bloecke[nummer] = b
 
-    # Bloecke ersetzen
+    # Bloecke ersetzen bzw. entfernen
     def ersetze(m):
         nummer = m.group(1)
+        if nummer in weg:
+            name = re.search(r'data-mcl-listenname="([^"]*)"', m.group(0))
+            aenderungen.append("Block %s entfernt: %s (nicht mehr im 7-Tage-Fenster)" % (
+                nummer, html.unescape(name.group(1)) if name else "?"))
+            return ""
         if nummer not in neue_bloecke:
             return m.group(0)
         alt = m.group(0)
@@ -363,12 +404,29 @@ def nachziehen(roh, listen):
 
     neu_roh = BLOCK.sub(ersetze, roh)
 
+    # Neue Bloecke hinter den letzten Block des Stuecks
+    dazu = [n for n in ziel if n not in nummern]
+    if dazu:
+        letzte = None
+        for letzte in BLOCK.finditer(neu_roh):
+            pass
+        if letzte is None:
+            return roh, [], "im Stueck steht kein Listenblock, hinter den neue passen"
+        einfuegen = "".join(neue_bloecke[n] for n in dazu)
+        neu_roh = neu_roh[:letzte.end()] + einfuegen + neu_roh[letzte.end():]
+        for n in dazu:
+            name = re.search(r'data-mcl-listenname="([^"]*)"', neue_bloecke[n])
+            aenderungen.append("Block %s neu: %s" % (n, html.unescape(name.group(1)) if name else "?"))
+
     # Schalter ersetzen
-    reihe = "".join(chip(n, l) for n, l in zip(nummern, listen))
+    reihe = "".join(chip(n, l) for n, l in zip(ziel, listen)) or LEER_HINWEIS
     alt_reihe = treffer.group(1)
     if alt_reihe.strip() != reihe.strip():
-        aenderungen.append("Schalterreihe der Gruppe neu beschriftet")
-    neu_roh = neu_roh.replace(alt_reihe, reihe, 1)
+        aenderungen.append("Schalterreihe der Gruppe neu beschriftet (%d Listen)" % len(listen))
+    start = neu_roh.index(treffer.group(0))
+    kopf = treffer.group(0)
+    neu_kopf = kopf[:treffer.start(1) - treffer.start(0)] + reihe + kopf[treffer.end(1) - treffer.start(0):]
+    neu_roh = neu_roh[:start] + neu_kopf + neu_roh[start + len(kopf):]
     return neu_roh, aenderungen, ""
 
 
@@ -388,6 +446,10 @@ def main():
         roh = f.read()
 
     neu, aenderungen, grund = nachziehen(roh, listen)
+    if not grund and len(listen) < MAX_PLAETZE:
+        print("::notice::Masterclass, Gruppe „%s“: %d von %d Plaetzen — mehr frische "
+              "Listen ab %s Spielern gibt das Fenster nicht her. Alte Listen werden "
+              "nicht stehen gelassen (DA-26)." % (GRUPPE, len(listen), MAX_PLAETZE, 100))
     if grund:
         print("::warning::Online-Listen NICHT nachgezogen: %s" % grund)
         return 0

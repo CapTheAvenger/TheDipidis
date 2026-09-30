@@ -38,8 +38,11 @@ Er kann die Quelle nicht abrufen. Er haelt fest, dass die Pruefung
 stattgefunden hat, mit welchen Zahlen, und dass die Liste seither nicht
 stillschweigend geschrumpft ist. Ein neues Set mit einer ACE SPEC macht
 die Liste unvollstaendig, und weder sie noch dieser Test merken das von
-selbst — die Datei haengt an keinem Zeitplan (siehe
-scripts/pruefe_frische.py, Abschnitt OHNE PLAN).
+selbst — die Datei hing an keinem Zeitplan.
+
+NACHTRAG 30.09.2026 (DA-22): jetzt haengt sie an einem. Der Wochenlauf
+faehrt scripts/ace_specs_nachziehen.py und schreibt diesen Vermerk bei
+jeder Aenderung neu (tests/python/test_ace_specs_nachziehen.py).
 """
 
 import json
@@ -70,11 +73,18 @@ def test_die_pruefung_steht_in_der_datei():
 
 
 def test_die_pruefung_war_ergebnislos_und_sagt_das_auch():
+    """Kein Name der Quelle fehlt in der Liste.
+
+    Seit 30.09.2026 schreibt scripts/ace_specs_nachziehen.py den Vermerk
+    und nimmt dabei jeden Namen der Quelle auf — `fehlend` ist danach 0.
+    `ueberzaehlig` (Namen, die die Quelle nicht mehr fuehrt) darf dagegen
+    stehen: entfernt wird nie, gemeldet wird es als ::notice::. Eine
+    Karte hoert nicht auf, ACE SPEC zu sein."""
     g = _liste()["_geprueft"]
-    assert g["fehlend"] == 0 and g["ueberzaehlig"] == 0, (
-        f"Die Pruefung fand Abweichungen ({g['fehlend']} fehlend, "
-        f"{g['ueberzaehlig']} ueberzaehlig) — dann muss die Liste "
-        "nachgezogen werden, nicht der Vermerk.")
+    assert g["fehlend"] == 0, (
+        f"Die Pruefung fand {g['fehlend']} Namen der Quelle, die in der "
+        "Liste fehlen — dann muss die Liste nachgezogen werden, nicht der Vermerk.")
+    assert 0 <= g["ueberzaehlig"] <= g["liste_namen"]
 
 
 def test_die_zahl_der_namen_stimmt_mit_dem_vermerk_ueberein():
@@ -93,9 +103,11 @@ def test_drucke_und_namen_duerfen_auseinanderfallen_aber_nur_so_herum():
     Namen als Drucke waere ein Befund: dann stuende in der Liste ein
     Name, den die Quelle gar nicht fuehrt."""
     g = _liste()["_geprueft"]
-    assert g["quelle_drucke"] >= g["liste_namen"], (
-        f"{g['liste_namen']} Namen bei nur {g['quelle_drucke']} Drucken — "
-        "die Liste fuehrt mehr, als die Quelle hergibt.")
+    # Seit 30.09.2026 kommen Namen auch ueber JP-Drucke dazu (jp_drucke).
+    aus_quelle = g["liste_namen"] - g["ueberzaehlig"]
+    assert g["quelle_drucke"] + g.get("jp_drucke", 0) >= aus_quelle, (
+        f"{aus_quelle} Namen aus der Quelle bei nur {g['quelle_drucke']} + "
+        f"{g.get('jp_drucke', 0)} Drucken — die Liste fuehrt mehr, als die Quelle hergibt.")
     assert "warum_die_zahlen_verschieden_sind" in g, (
         "Ohne diese Erklaerung liest die naechste Person 46 gegen 39 als "
         "Fehler und zieht die Liste neu.")

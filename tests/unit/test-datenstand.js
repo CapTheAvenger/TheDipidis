@@ -336,8 +336,12 @@ describe('ace_specs.json ist in sich stimmig', () => {
         assert.match(text, /display=list/,
             'weder Hinweis noch Quelle nennen die Listenansicht '
             + '(?q=is:ace&display=list) — die Bildansicht gibt keine Namen her');
-        assert.match(String(LISTE._hinweis || ''), /von Hand gepflegt/,
-            'dass die Liste von Hand gepflegt wird, muss dranstehen — daran '
-            + 'aendert eine bestandene Pruefung nichts');
+        /* Seit 30.09.2026 (DA-22) zieht scripts/ace_specs_nachziehen.py
+           die Liste im Wochenlauf nach und schreibt das beim ersten Mal
+           in den Hinweis. Verlangt wird weiter, dass dasteht, WIE die
+           Liste gepflegt wird — von Hand oder von diesem Skript. */
+        assert.match(String(LISTE._hinweis || ''), /von Hand gepflegt|scripts\/ace_specs_nachziehen\.py/,
+            'der Hinweis sagt nicht, wie die Liste gepflegt wird (von Hand oder '
+            + 'durch scripts/ace_specs_nachziehen.py)');
     });
 });

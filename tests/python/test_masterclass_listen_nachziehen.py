@@ -7,8 +7,9 @@ haengen, damit ich immer die aktuellsten Daten habe."
 Ein Erzeuger, der in ein 600 KB grosses Stueck schreibt, kann mehr
 kaputtmachen als er nuetzt. Was hier beissen soll:
 
-  1. Er schreibt nur, was er belegen kann — unbekannte Karte, falsche
-     Listenzahl, fehlende Gruppe: NICHTS wird geschrieben.
+  1. Er schreibt nur, was er belegen kann — unbekannte Karte, mehr als
+     fuenf Listen, fehlende Gruppe: NICHTS wird geschrieben. Weniger
+     Listen heissen seit 30.09.2026 weniger Plaetze (DA-26).
   2. Er fasst nur die Online-Gruppe an. Tims Listen, die Worlds-Listen,
      die Matchups und die Ausarbeitung bleiben Zeichen fuer Zeichen.
   3. Er ist stabil: zweimal laufen aendert beim zweiten Mal nichts.
@@ -96,26 +97,18 @@ def _listen_fuer_die_gruppe(m, roh):
 @pytest.mark.skipif(not (os.path.exists(STUECK) and os.path.exists(LISTEN)),
                     reason="Stueck oder Listendatei nicht im Baum")
 def test_am_heutigen_stand_ist_nichts_nachzuziehen():
+    """Das Stueck steht wie die Rohdaten — mit genau so vielen Plaetzen,
+    wie die Datei Listen liefert (DA-26, 30.09.2026). Die Ausnahme fuer
+    „falsche Listenzahl" (Wochenlauf #172) entfaellt damit: eine andere
+    Zahl ist kein Grund mehr, nicht nachzuziehen."""
     m = _modul()
     roh = _stueck()
-    echt = _listen()
-    if len(echt) != _plaetze(m, roh):
-        # WOCHENLAGE, KEIN FEHLER (Wochenlauf #172, 30.09.2026): im 7-Tage-
-        # Fenster spielte der Archetyp nur 4 Listen, die Gruppe hat 5
-        # Plaetze. Der Wochenlauf meldet das als ::warning und laesst das
-        # Stueck stehen ("das Stueck bleibt, wie es ist") — bis dahin
-        # verlangte diese Zusicherung trotzdem grund == "" und hielt den
-        # ganzen Wochenlauf am Tor an. Geprueft wird jetzt die Regel: bei
-        # falscher Listenzahl wird NICHTS geschrieben, und der Grund nennt es.
-        neu, aenderungen, grund = m.nachziehen(roh, echt)
-        assert _fp(neu) == _fp(roh) and aenderungen == [], "bei falscher Listenzahl wurde geschrieben"
-        assert "Plaetze" in grund, grund
-        return
-    _neu, aenderungen, grund = m.nachziehen(roh, echt)
+    _neu, aenderungen, grund = m.nachziehen(roh, _listen())
     assert grund == "", grund
     assert aenderungen == [], (
         "die Online-Listen stehen anders da als die Rohdaten — nachziehen mit "
         "'python3 scripts/masterclass_listen_nachziehen.py':\n  " + "\n  ".join(aenderungen))
+    assert len(m.gruppen_nummern(roh)[0]) == len(_listen())
 
 
 @pytest.mark.skipif(not (os.path.exists(STUECK) and os.path.exists(LISTEN)),
@@ -163,15 +156,69 @@ def test_er_fasst_nur_die_online_gruppe_an():
 
 # ------------------------------------------------------- Alles oder nichts
 
+def _bloecke(text):
+    return re.findall(r'data-mcl-listenblock="(\d+)"', text)
+
+
+def _feste_teile(m, text):
+    """Alles ausser der Online-Gruppe: die Bloecke der anderen Gruppen und
+    die Ausarbeitung, als Fingerabdruck."""
+    nummern, _t = m.gruppen_nummern(text)
+    fest = [b.group(0) for b in m.BLOCK.finditer(text) if b.group(1) not in nummern]
+    doku = text[text.find('data-mcl-abschnitt="doku"'):]
+    return _fp("".join(fest)), _fp(doku)
+
+
 @pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
-def test_falsche_listenzahl_schreibt_nichts():
+def test_weniger_listen_heisst_weniger_plaetze():
+    """DA-26 (Hausi, 30.09.2026): „lieber weniger Listen anzeigen,
+    veraltete online bringen nichts". Bis dahin blieb bei 4 Listen fuer
+    5 Plaetze das ganze Stueck mit den Listen der Vorwoche stehen."""
     m = _modul()
     roh = _stueck()
-    for anzahl in (0, 1, 4, 6):
-        neu, aend, grund = m.nachziehen(roh, [_liste("s%d" % i, i + 1) for i in range(anzahl)])
-        assert _fp(neu) == _fp(roh) and aend == [] and grund, \
-            "bei %d Listen wurde geschrieben" % anzahl
-        assert "Plaetze" in grund or "Gruppe" in grund
+    fest_vorher = _feste_teile(m, roh)
+    for anzahl in (4, 1, 0):
+        listen = [_liste("s%d" % i, i + 1) for i in range(anzahl)]
+        neu, aend, grund = m.nachziehen(roh, listen)
+        assert grund == "", grund
+        nummern, _t = m.gruppen_nummern(neu)
+        assert len(nummern) == anzahl, (anzahl, nummern)
+        online = [n for n in _bloecke(neu) if n in nummern]
+        assert sorted(online) == sorted(nummern), "Schalter und Bloecke passen nicht zusammen"
+        assert "s0 · 1. von 100" in neu if anzahl else "mcl-listgruppe-leer" in neu
+        # Keine Liste der Vorwoche bleibt stehen.
+        for alt in m.gruppen_nummern(roh)[0][anzahl:]:
+            assert alt not in _bloecke(neu), "Block %s blieb stehen" % alt
+        assert neu.count("data-mcl-kopieren=") == len(_bloecke(neu))
+        assert _feste_teile(m, neu) == fest_vorher, "ausserhalb der Online-Gruppe wurde etwas veraendert"
+
+
+@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
+def test_die_gruppe_waechst_wieder():
+    """Von 0 bzw. 2 zurueck auf 5: neue Bloecke bekommen freie Nummern,
+    keine Nummer kommt doppelt vor, und der zweite Lauf ist still."""
+    m = _modul()
+    roh = _stueck()
+    fuenf = [_liste("s%d" % i, i + 1) for i in range(5)]
+    for start in (0, 2):
+        klein, _a, g = m.nachziehen(roh, fuenf[:start])
+        assert g == "", g
+        gross, aend, g2 = m.nachziehen(klein, fuenf)
+        assert g2 == "", g2
+        nummern, _t = m.gruppen_nummern(gross)
+        assert len(nummern) == 5 and len(set(_bloecke(gross))) == len(_bloecke(gross)), _bloecke(gross)
+        assert all(n in _bloecke(gross) for n in nummern)
+        assert "mcl-listgruppe-leer" not in gross
+        nochmal, aend3, _g3 = m.nachziehen(gross, fuenf)
+        assert _fp(nochmal) == _fp(gross) and aend3 == []
+
+
+@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
+def test_mehr_listen_als_plaetze_schreibt_nichts():
+    m = _modul()
+    roh = _stueck()
+    neu, aend, grund = m.nachziehen(roh, [_liste("s%d" % i, i + 1) for i in range(6)])
+    assert _fp(neu) == _fp(roh) and aend == [] and "hoechstens" in grund
 
 
 @pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")

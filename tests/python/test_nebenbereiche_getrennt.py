@@ -190,17 +190,58 @@ def test_das_tor_hat_node_und_zeit():
     assert not probleme, "\n".join(probleme)
 
 
+def tor_und_push_befunde(name, y):
+    """Passt die Bedingung des Tors zu der des Pushs — und haelt das Tor
+    den Push wirklich an?
+
+    Zwei Regeln:
+      1. Ein Trockenlauf (inputs.trocken) pusht nicht — dann soll das Tor
+         ihn auch nicht rot machen. Wo der Push eine Bedingung traegt,
+         traegt das Tor dieselbe.
+      2. (30.09.2026) Laeuft der Push auch nach einem Fehler (`always()`,
+         `!cancelled()`, `failure()`), laeuft er auch nach einem ROTEN Tor
+         — dann haelt das Tor nichts an. Gefunden an pokepricelab-verify:
+         Tor und Commit trugen beide `if: always()`. Ein solcher Push muss
+         am Erfolg des Tors haengen: `steps.<id>.outcome == 'success'`.
+    """
+    aus = []
+    for job in (y.get("jobs") or {}).values():
+        schritte = job.get("steps") or []
+        tor = [s for s in schritte if "scripts/tor_vor_dem_push.sh" in str(s.get("run", ""))]
+        push = [s for s in schritte if re.search(r"git push|daten_pushen|push_nach_rebase", str(s.get("run", "")))]
+        if not (tor and push) or name == "weekly-full-update.yml":
+            continue
+        t_if, p_if = str(tor[0].get("if") or ""), str(push[0].get("if") or "")
+        if re.search(r"always\(\)|!\s*cancelled\(\)|failure\(\)", p_if):
+            tid = tor[0].get("id")
+            if not tid or not re.search(r"steps\.%s\.outcome\s*==\s*'success'" % re.escape(str(tid)), p_if):
+                aus.append(f"{name}: der Push laeuft mit {p_if!r} auch nach rotem Tor")
+        elif t_if != p_if:
+            aus.append(f"{name}: Tor if={t_if!r}, Push if={p_if!r}")
+    return aus
+
+
 def test_das_tor_folgt_der_bedingung_des_pushs():
-    """Ein Trockenlauf (inputs.trocken) pusht nicht — dann soll das Tor ihn
-    auch nicht rot machen. Wo der Push eine Bedingung traegt, traegt das
-    Tor dieselbe."""
     abweichend = []
     for name, roh, y in _alle_ablaeufe():
-        for job in (y.get("jobs") or {}).values():
-            schritte = job.get("steps") or []
-            tor = [s for s in schritte if "scripts/tor_vor_dem_push.sh" in str(s.get("run", ""))]
-            push = [s for s in schritte if re.search(r"git push|daten_pushen|push_nach_rebase", str(s.get("run", "")))]
-            if tor and push and name != "weekly-full-update.yml":
-                if tor[0].get("if") != push[0].get("if"):
-                    abweichend.append(f"{name}: Tor if={tor[0].get('if')!r}, Push if={push[0].get('if')!r}")
+        abweichend += tor_und_push_befunde(name, y)
     assert not abweichend, "\n".join(abweichend)
+
+
+def test_die_tor_regel_beisst():
+    """Verfaelschungsprobe: der Stand von pokepricelab-verify bis 30.09."""
+    def ablauf(tor_if, tor_id, push_if):
+        tor = {"name": "Tor", "run": "bash scripts/tor_vor_dem_push.sh kern"}
+        if tor_if:
+            tor["if"] = tor_if
+        if tor_id:
+            tor["id"] = tor_id
+        push = {"name": "Commit", "run": "bash scripts/daten_pushen.sh x"}
+        if push_if:
+            push["if"] = push_if
+        return {"jobs": {"j": {"steps": [tor, push]}}}
+    assert tor_und_push_befunde("p.yml", ablauf("always()", None, "always()"))
+    assert tor_und_push_befunde("p.yml", ablauf("always()", "tor", "${{ always() && steps.andere.outcome == 'success' }}"))
+    assert not tor_und_push_befunde("p.yml", ablauf("always()", "tor", "${{ always() && steps.tor.outcome == 'success' }}"))
+    assert tor_und_push_befunde("p.yml", ablauf("inputs.x", None, None))
+    assert not tor_und_push_befunde("p.yml", ablauf(None, None, None))

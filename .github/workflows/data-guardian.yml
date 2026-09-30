@@ -155,6 +155,7 @@ jobs:
             firestore-regelprobe.yml
             pocket-tierlist.yml
             setwechsel-probe.yml
+            pokepricelab-verify.yml
           "
           rot=0
           for wf in $WORKFLOWS; do

@@ -393,6 +393,36 @@ Agentenrunden und der Browser.
    Am 12.09. ist ein Auftrag ohne diese Regel auf sieben PRs
    angewachsen.
 
+### ARBEITSORT UND SCHREIBWEG SEIT 01.10.2026: DER LOKALE KLON (Aufraeumprojekt)
+
+Gemessen am 30.09./01.10.2026, nicht angenommen. Der Klon liegt auf dem Rechner
+des Betreibers unter `C:\TheDipidis\repo` (aus der Sitzung: `$HOME/mnt/TheDipidis/repo`).
+Er ersetzt fuer neue Rutsche den Patch-Weg und den Browser-Upload; beides
+bleibt darunter stehen und ist jetzt NOTLOESUNG.
+
+- **Was in der Sitzung geht:** `git fetch`, Commit, alle Suiten (Python 3.12 —
+  die Suiten brauchen die CI-Version, 3.10 scheitert an f-Strings), Browser
+  fuer Quellen. **Was nicht geht:** `git push` aus der Sitzung (kein Login:
+  „could not read Username"), limitlesstcg.com ueber `device_bash` (403 am
+  Proxy; im eingebauten Browser der Desktop-App erreichbar).
+- **Push macht der Betreiber** — im Ordner `C:\TheDipidis\repo`
+  `git push -u origin <zweig>` (gemessen 01.10.2026: klappt, auch mit
+  Aenderungen unter `.github/workflows/`). Claude liefert dafuer jedes Mal den
+  fertigen Befehl bzw. einen Claude-Code-Prompt, damit nichts von Hand
+  getippt wird.
+- **Zu Sitzungsbeginn** `git fetch` und `git pull --ff-only` auf `main`, dazu
+  ein Blick auf geaenderte Datendateien (Scraper schreiben weiter auf GitHub).
+- **Vor jedem Push** `git fetch` und Abgleich mit `origin/main`: nur Daten
+  geaendert → rebase und Suiten neu; Ueberschneidung → anhalten und melden.
+- **Freigaberegel „bereit zum Push":** alle Suiten komplett gruen (JS-Kern,
+  JS-Neben, Py-Kern, Py-Neben), `./bump-version.sh` gelaufen, lokal angesehen,
+  Abgleich mit `main`. Danach pusht der Betreiber, Claude eroeffnet den PR,
+  wartet auf die CI, mergt (`merge_pull_request`, `squash`) und prueft
+  `version.json` live. Rueckfrage vor dem Merge nur bei Aenderungen an
+  Nutzerdaten.
+- **Python-Kern in der Geraete-VM:** passt nicht in ein 180-s-Fenster → in zwei
+  Haelften laufen lassen (`ls tests/python/test_*.py`, Zeilen 1–90 und Rest).
+
 ### Der Schreibweg — und die Sackgassen
 
 **Ausliefern geht NUR ueber die GitHub-Weboberflaeche in Chrome.** Das
@@ -474,7 +504,7 @@ Billiger wird der Weg nur ueber **weniger PRs**, nicht ueber ein anderes
 Werkzeug: die Kosten haengen an der Zahl der beruehrten Verzeichnisse
 je PR.
 
-#### DER PATCH-WEG (seit 27.09.2026 der Standard fuer grosse Aenderungen)
+#### DER PATCH-WEG (seit 27.09.2026; seit 01.10.2026 NOTLOESUNG — Standard ist der Klon, s. o.)
 
 `push_files` traegt den ganzen Dateiinhalt im Aufruf — bei `index.html`
 (363 KB) nicht machbar. Der Patch-Weg schickt stattdessen nur den DIFF:

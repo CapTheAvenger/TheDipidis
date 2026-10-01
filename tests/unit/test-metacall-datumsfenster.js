@@ -52,7 +52,7 @@ describe('Meta Call — Datumsfenster', () => {
 
     it('der Hinweistext nutzt den Formatierer und nicht mehr die ISO-Kette', () => {
         assert.match(MC, /dateWindowActive'\)\.replace\('\{date\}', _datumLesbar\(_dateValue\)\)/);
-        assert.match(MC, /dateWindowAuto'\)\.replace\('\{date\}', _datumLesbar\(_autoCutoff\)\)/);
+        assert.match(MC, /dateWindowAuto'\)\.replace\('\{date\}', _datumLesbar\(_autoCutoff\)\)\.replace\('\{days\}', String\(_autoFensterTage\(_autoCutoff\)\)\)/);
     });
 
     it('das Feld traegt denselben Format-Titel wie die anderen Datumsfelder', () => {

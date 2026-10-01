@@ -2709,6 +2709,16 @@ window.MetaCall = (function () {
     return new Date().toISOString().slice(0, 10);
   }
 
+  /* UI-49 (28.09.2026): das Etikett sagte "letzte 28 Tage", gerechnet wurde
+     ab dem Beginn des aktuellen Formats (12 Tage nach dem Setstart). Die
+     Tageszahl kommt jetzt aus dem Datum selbst: heute minus Grenze. */
+  function _autoFensterTage(cutoffISO) {
+    if (!cutoffISO || !/^\d{4}-\d{2}-\d{2}$/.test(cutoffISO)) return 0;
+    const a = Date.parse(_todayISO() + 'T00:00:00Z');
+    const b = Date.parse(cutoffISO + 'T00:00:00Z');
+    return Math.max(0, Math.round((a - b) / 86400000));
+  }
+
   function _clip(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
   // Rank-weighted mean for per-tournament conversion samples (Predictor
@@ -7750,8 +7760,13 @@ window.MetaCall = (function () {
         _labsShareGrowthByDeck = {};
         _activeFormatLabsDecks = new Set();
         _activeFormatTop15Decks = new Set();
-        _tournamentStats = {};
-        _gezaehlteQuote = false;
+        /* DA-17 (28.09.2026): HIER stand auch `_tournamentStats = {}` und
+           `_gezaehlteQuote = false`. Das sind aber nicht die Labs-Aggregate
+           des Vorformats, sondern die ONLINE-Turnierdaten
+           (data/online_tournament_top8_decks.csv, `source_format` = das
+           laufende Format). Der Wächter leerte sie mit: 0 Schlüssel,
+           `broughtPct` und `top8Boost` für jedes Deck 0, 60 % der
+           Formelgewichte tot. Sie bleiben stehen. */
         _labsMajorRows = 0;
         // KEEP _majorSharesByDeck, _lastMajorByDeck, _lastMajorInfo
         // populated even in lag-window — Past Meta needs them for
@@ -12087,7 +12102,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     const _activeWindowText = _dateValue
       ? t('mc.dateWindowActive').replace('{date}', _datumLesbar(_dateValue))
       : (_autoCutoff
-          ? t('mc.dateWindowAuto').replace('{date}', _datumLesbar(_autoCutoff))
+          ? t('mc.dateWindowAuto').replace('{date}', _datumLesbar(_autoCutoff)).replace('{days}', String(_autoFensterTage(_autoCutoff)))
           : t('mc.dateWindowNone'));
     const dateBanner = `
       <div class="metacall-date-window">

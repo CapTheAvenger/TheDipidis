@@ -108,8 +108,14 @@ describe('Die Abschnitte der Startseite', () => {
                     `${sprache}/${s.id}: "${s.t[1]}" wiederholt "${doppelt}" aus "${s.t[0]}"`);
             }
         }
-        // Und die drei, die keine mehr haben, haben wirklich keine.
-        for (const id of ['top', 'heatmap', 'cards']) {
+        // Und die zwei, die keine mehr haben, haben wirklich keine. Die
+        // Heatmap traegt seit UI-40 (01.10.2026) EINE Zeile: die Datenherkunft
+        // ("Online: ... · Major: ..."), sonst nichts (Hausi, 28.09.).
+        for (const sprache of ['de', 'en']) {
+            assert.equal(abschnitte(sprache).find(s => s.id === 'heatmap').t[1], '{daten}',
+                'die Heatmap darf nur die Datenzeile tragen');
+        }
+        for (const id of ['top', 'cards']) {
             assert.equal(abschnitte('de').find(s => s.id === id).t[1], '',
                 `${id} hat wieder eine Unterzeile`);
             assert.equal(abschnitte('en').find(s => s.id === id).t[1], '');

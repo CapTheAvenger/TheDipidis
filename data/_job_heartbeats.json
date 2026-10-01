@@ -37,8 +37,8 @@
   },
   "scrapers/champions_replica_scraper.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scrapers/city_league_analysis_scraper.py": {
     "status": "OK",
@@ -137,28 +137,28 @@
   },
   "scripts/build_champions_editionen.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/build_champions_item_sprites.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/build_champions_move_flags.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/build_champions_pokedex.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/build_champions_resources.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/build_online_fenster.py": {
     "status": "OK",
@@ -172,43 +172,43 @@
   },
   "scripts/scrape_champions_items.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/scrape_champions_roster.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/scrape_champions_usage.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/scrape_de_names.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/scrape_opgg_champions_moves.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/scrape_pokemon_go_liste.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/scrape_pokemon_go_shiny.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "scripts/scrape_pokemonproxies.py": {
     "status": "OK",
-    "zuletzt_erfolgreich": "2026-10-01T09:45:22Z",
-    "zuletzt_gelaufen": "2026-10-01T09:45:22Z"
+    "zuletzt_erfolgreich": "2026-10-01T17:17:55Z",
+    "zuletzt_gelaufen": "2026-10-01T17:17:55Z"
   },
   "tools/build_threat_intel.py": {
     "status": "OK",

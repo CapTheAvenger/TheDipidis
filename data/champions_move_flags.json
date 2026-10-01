@@ -2,7 +2,7 @@
  "_meta": {
   "quelle": "https://raw.githubusercontent.com/smogon/pokemon-showdown/master/data/moves.ts",
   "lizenz": "Pokemon Showdown, MIT",
-  "erzeugt_am": "2026-10-01T09:45:19+00:00",
+  "erzeugt_am": "2026-10-01T17:17:52+00:00",
   "erzeuger": "scripts/build_champions_move_flags.py",
   "attacken_im_bestand": 513,
   "davon_belegt": 513,

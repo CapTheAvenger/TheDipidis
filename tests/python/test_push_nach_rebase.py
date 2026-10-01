@@ -88,10 +88,10 @@ def _schreiben(repo, datei, inhalt, nachricht):
     _git(repo, "commit", "-q", "-m", nachricht)
 
 
-def _push(repo, tmp, tor=""):
+def _push(repo, tmp, tor="", extra=None):
     ausgabe = os.path.join(tmp, "github_output_" + os.path.basename(repo))
     open(ausgabe, "w").close()
-    env = dict(os.environ, GITHUB_OUTPUT=ausgabe, PUSH_WARTEN="0")
+    env = dict(os.environ, GITHUB_OUTPUT=ausgabe, PUSH_WARTEN="0", **(extra or {}))
     r = subprocess.run(["bash", "scripts/push_nach_rebase.sh"] + ([tor] if tor else []),
                        cwd=repo, env=env, capture_output=True, text=True, timeout=120)
     gesetzt = [z for z in open(ausgabe).read().splitlines() if z.startswith("pushed=")]
@@ -240,3 +240,54 @@ def test_die_bauartpruefung_beisst():
            "done\nif git push origin HEAD:main; then echo pushed=true; fi\n")
     assert len(_falsche_schleifen(alt)) == 2
     assert not _falsche_schleifen("bash scripts/push_nach_rebase.sh alle\n")
+
+
+# Befund 01.10.2026 (SC-11, Champions Sprites #11): eine aus dem Pokedex
+# abgeleitete Datei (das Sprite-Manifest) behielt beim Rebase die Fassung
+# von vor dem Lauf — der Pokedex war inzwischen gewachsen, fuenf Arten
+# standen ohne Bild da, das Tor ging zu.
+BAU_ABGELEITET = "python3 -c \"import os;n=len(open('data/quelle.txt').read().split());open('data/abgeleitet.txt','w').write(str(n))\""
+
+
+def _abgeleitet_lauf(tmp, extra):
+    origin = _aufbau(tmp)
+    a = _klon(tmp, "a", origin)
+    b = _klon(tmp, "b", origin)
+    open(os.path.join(a, "data", "quelle.txt"), "w").write("x y\n")
+    open(os.path.join(a, "data", "abgeleitet.txt"), "w").write("0")
+    _git(a, "add", "-A")
+    _git(a, "commit", "-q", "-m", "Grundstand")
+    _git(a, "push", "-q", "origin", "main")
+    _git(b, "pull", "-q")
+    # B laesst die Quelle wachsen und pusht; A baut aus der kleinen Quelle.
+    _schreiben(b, "data/quelle.txt", "x y z w v\n", "B waechst")
+    _git(b, "push", "-q", "origin", "main")
+    _schreiben(a, "data/abgeleitet.txt", "2", "A baut aus alter Quelle")
+    rc, pushed, log = _push(a, tmp, extra=extra)
+    return origin, rc, pushed, log
+
+
+def test_abgeleitete_datei_wird_nach_dem_rebase_neu_gebaut(tmp_path):
+    tmp = str(tmp_path)
+    origin, rc, pushed, log = _abgeleitet_lauf(tmp, {
+        "NACH_REBASE_BEFEHL": BAU_ABGELEITET, "NACH_REBASE_PFADE": "data/abgeleitet.txt"})
+    assert rc == 0 and pushed == "pushed=true", log
+    assert _auf_origin(tmp, origin, "data/quelle.txt").split() == ["x", "y", "z", "w", "v"]
+    assert _auf_origin(tmp, origin, "data/abgeleitet.txt") == "5", (
+        "die abgeleitete Datei steht auf der Quelle von VOR dem Rebase")
+
+
+def test_ohne_neubau_bleibt_die_abgeleitete_datei_veraltet(tmp_path):
+    """Verfaelschungsprobe: ohne NACH_REBASE_BEFEHL ist genau der Befund
+    da — der Test oben beisst also."""
+    tmp = str(tmp_path)
+    origin, rc, pushed, log = _abgeleitet_lauf(tmp, {})
+    assert rc == 0 and pushed == "pushed=true", log
+    assert _auf_origin(tmp, origin, "data/abgeleitet.txt").strip() == "2"
+
+
+def test_der_sprites_ablauf_baut_das_manifest_nach_dem_rebase():
+    w = open(os.path.join(WURZEL, ".github", "workflows", "champions-sprites.yml"), encoding="utf-8").read()
+    assert "NACH_REBASE_BEFEHL=" in w and "build_champions_sprites.py --pruefen" in w, (
+        "champions-sprites.yml baut das Manifest nach dem Rebase nicht neu (Befund 01.10.2026)")
+    assert "NACH_REBASE_PFADE='images/champions data/champions_sprites.json'" in w

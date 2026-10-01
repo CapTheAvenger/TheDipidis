@@ -37,7 +37,19 @@
 #
 # Aufruf (der Commit ist schon gemacht):
 #   bash scripts/push_nach_rebase.sh [kern|alle]
-# Umgebung: ZWEIG (Standard main), GITHUB_OUTPUT (pushed=true|false).
+# Umgebung: ZWEIG (Standard main), GITHUB_OUTPUT (pushed=true|false),
+#   NACH_REBASE_BEFEHL (optional): Befehl, der nach dem Rebase abgeleitete
+#   Dateien auf dem NEUEN Stand neu baut, NACH_REBASE_PFADE (optional,
+#   leerzeichengetrennt): was davon in den Commit kommt.
+#
+# WARUM NACH_REBASE_BEFEHL (01.10.2026, SC-11, Champions Sprites #11): der
+# Lauf baute data/champions_sprites.json aus dem Pokedex von vor dem Lauf
+# (338 Eintraege). Waehrenddessen wuchs der Pokedex durch den Replica-Scrape
+# auf 343; beim Rebase gewinnt dieser Lauf (`-X theirs`), also blieb die
+# Fassung mit 338 Eintraegen — fuenf Arten ohne Bild und ohne Namen in
+# _meta.ohne_bild, das Tor ging zu, nichts wurde gepusht. Eine abgeleitete
+# Datei, deren Eingabe sich beim Rebase aendern kann, wird nach dem Rebase
+# neu gebaut, nicht mitgenommen.
 set -uo pipefail
 
 zweig="${ZWEIG:-main}"
@@ -58,9 +70,18 @@ stand_neu_bauen() {
     # Die Fassung von main nehmen und nur die Dateien dieses Commits neu
     # stempeln: build_data_stand.py stempelt, was `git status` als geaendert
     # zeigt — deshalb den Commit kurz in den Index zurueckholen.
-    [ -f scripts/build_data_stand.py ] && [ -f data/data_stand.json ] || return 0
     local nachricht
     nachricht="$(git log -1 --format=%B)"
+    if [ -n "${NACH_REBASE_BEFEHL:-}" ]; then
+        git reset -q --soft "origin/$zweig"
+        if ! bash -c "$NACH_REBASE_BEFEHL"; then
+            echo "::warning::push_nach_rebase: NACH_REBASE_BEFEHL scheiterte — die Dateien bleiben, wie der Lauf sie gebaut hat"
+        fi
+        # shellcheck disable=SC2086
+        [ -n "${NACH_REBASE_PFADE:-}" ] && git add $NACH_REBASE_PFADE
+        git commit -q -m "$nachricht" 2>/dev/null || true
+    fi
+    [ -f scripts/build_data_stand.py ] && [ -f data/data_stand.json ] || return 0
     git reset -q --soft "origin/$zweig"
     git checkout -q "origin/$zweig" -- data/data_stand.json 2>/dev/null || true
     if ! python3 scripts/build_data_stand.py >/dev/null; then
@@ -94,6 +115,10 @@ for versuch in 1 2 3 4 5; do
         exit 0
     fi
     stand_neu_bauen
+    if [ -z "$(git rev-list "origin/$zweig..HEAD")" ]; then
+        echo "::warning::push_nach_rebase: nach dem Neubau steht nichts Eigenes mehr vor origin/$zweig — nichts gepusht"
+        exit 0
+    fi
     if [ -n "$tor" ]; then
         if ! TOR_OHNE_INSTALL=1 bash scripts/tor_vor_dem_push.sh "$tor"; then
             echo "::error::push_nach_rebase: auf dem neuen Stand ist das Tor zu — nicht gepusht"

@@ -121,6 +121,11 @@ jobs:
           # Push ueber scripts/push_nach_rebase.sh (30.09.2026): im Konflikt gewinnt
           # dieser Lauf, data_stand.json wird neu gebaut, ein Push ohne eigenen
           # Inhalt heisst pushed=false, nach dem Rebase laeuft das Tor noch einmal.
+          # Das Manifest ist aus dem Pokedex abgeleitet, und der wächst beim
+          # Replica-Scrape: nach dem Rebase wird es aus den vorhandenen
+          # Bildern neu gebaut (kein Netz), eine Luecke wird benannt.
+          NACH_REBASE_BEFEHL='python3 scripts/build_champions_sprites.py --pruefen || python3 scripts/build_champions_sprites.py --nur-luecken' \
+          NACH_REBASE_PFADE='images/champions data/champions_sprites.json' \
           bash scripts/push_nach_rebase.sh alle
 
       # GitHub unterdrueckt `on: push`-Workflows fuer Pushes mit

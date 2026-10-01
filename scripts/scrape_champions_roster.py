@@ -167,6 +167,34 @@ def geschlechtsformen(vorhanden, smogon, usage):
             if form.lower() not in zeilen:
                 continue
             neu.append(form)
+    # ZWEITER WEG, OHNE DEN KADER DER QUELLE (01.10.2026).
+    #
+    # BEFUND: Der Replica-Lauf vom 01.10. (04:02 UTC, Lauf #139, und der
+    # Neulauf um 07:40) hielt am Tor: "nur 2 Geschlechtsformen im Pokedex",
+    # "Psiaugon-Eintraege fehlen". Meowstic-F stand im Kader nur, weil die
+    # Top-Teams es spielten (aus_teams) — nicht, weil diese Funktion es
+    # fand. Der Grund: `vorhanden` kennt nur, was pokebase listet. pokebase
+    # fuehrt Indeedee als "indeedee-female/-male" und Meowstic gar nicht,
+    # die Grundform kam aus dem otterlyclueless-Roster, den diese Datei
+    # nicht sieht. Wechselten die Teams, fiel die Form heraus und mit ihr
+    # der Test — ein Pendel nach den Teams, dieselbe Bauart wie SC-1.
+    #
+    # Dieselbe Bedingung, anderer Beleg: hat die Form eine eigene
+    # Nutzungszeile UND die Grundform ebenfalls, wird beides gespielt, und
+    # die Grundform muss nicht in `vorhanden` stehen. Basiswerte weiterhin
+    # nur aus Smogon; wer dort fehlt, kommt nicht herein.
+    for schluessel in sorted(zeilen):
+        for endung in ("-f", "-m"):
+            if not schluessel.endswith(endung):
+                continue
+            if schluessel[:-len(endung)] not in zeilen:
+                continue
+            form = slug_to_smogon(schluessel)
+            if form in vorhanden or form in neu:
+                continue
+            if form not in smogon or "baseStats" not in smogon[form]:
+                continue
+            neu.append(form)
     return neu
 
 

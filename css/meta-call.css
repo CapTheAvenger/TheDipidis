@@ -4169,7 +4169,22 @@
 }
 #meta-call .mc-mct-table td, #meta-call .mc-mct-table th { font-size: 0.9rem; }
 #meta-call .mc-mct-stern { min-width: 36px; min-height: 36px; padding: 0 4px 0 0; font-size: 1.15rem; }
-#meta-call .mc-mct-deckzeile .mc-row-toggle { min-width: 32px; min-height: 32px; padding: 0; font-size: 0.8rem; }
+#meta-call .mc-mct-deckzeile .mc-row-toggle { width: auto; height: auto; min-width: 32px; min-height: 32px; padding: 0 8px; gap: 4px; font-size: 0.8rem; border-radius: 6px; }
+/* UI-57 (01.10.2026): der Knopf traegt das Wort "Details" — ein nackter Pfeil
+   verriet nicht, dass sich dahinter etwas versteckt. Gedreht wird nur der
+   Pfeil, nicht das Wort. */
+#meta-call .mc-mct-deckzeile .mc-row-toggle.is-expanded { transform: none; }
+.mc-row-toggle-pfeil { display: inline-block; transition: transform 0.18s; }
+.mc-row-toggle.is-expanded .mc-row-toggle-pfeil { transform: rotate(180deg); }
+/* DA-30 (01.10.2026): Kopf und Zeilen waren zwei getrennte Tabellen (Spalten
+   je 237 px gegen 465/205 px), weil die globale Regel `table { display: block }`
+   (styles.css) auch diese Tabelle traf. Wieder EINE Tabelle, ausser auf dem
+   Telefon (dort baut die Regel unten Karten). */
+@media (min-width: 701px) {
+  #meta-call .mc-mct-table { display: table; table-layout: auto; }
+  #meta-call .mc-mct-table thead { display: table-header-group; table-layout: auto; }
+  #meta-call .mc-mct-table tbody { display: table-row-group; table-layout: auto; }
+}
 .mc-mct-stern:hover, .mc-mct-stern.is-mein { color: var(--mc-personal-accent-dark); }
 .mc-mct-mein-marke {
   display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 0.72rem;
@@ -4255,3 +4270,19 @@
   padding: 8px 0; min-height: 36px;
 }
 .mc-klappe > summary:hover { color: var(--mc-accent); }
+
+/* FE-23 (01.10.2026): „Deine Win-Rate" als Eingabefeld; ein eigener Wert
+   traegt Rahmen (has-value, wie „Deine Schaetzung") und den Text „von Hand". */
+.mc-mct-table input.mc-wr-input { width: 64px; text-align: center; }
+.mc-mct-table input.mc-wr-input.is-gut { color: var(--color-success-dark); }
+.mc-mct-table input.mc-wr-input.is-schlecht { color: var(--color-danger-dark); }
+.mc-wr-hand { display: block; font-size: 0.72rem; color: var(--mc-personal-accent-dark); }
+
+/* UI-56 (01.10.2026): Bereiche zum Herumspielen erst nach dem Haken „Erweitert". */
+.mc-schlicht .mc-erweitert-nur { display: none !important; }
+.mc-erweitert .mc-combo-panel > .mc-erweitert-nur { display: contents; }
+.mc-erweitert-schalter {
+  display: inline-flex; align-items: center; gap: 4px; align-self: center;
+  font-size: 0.78rem; color: var(--mc-text-muted); cursor: pointer; margin-left: auto;
+}
+.mc-erweitert-schalter input { width: 14px; height: 14px; accent-color: var(--mc-accent); }

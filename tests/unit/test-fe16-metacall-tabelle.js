@@ -158,7 +158,8 @@ describe('FE-16 — die Meta-Call-Tabelle rechnet jede Zeile', () => {
             'function _mctQuotenName(id)',
             'function _mctOnline(name)',
             'function _mctZeileRechne(name, field, istMein)',
-            'function _mctZelleWr(z, L)',
+            'function _wrHandWert(deckName)',
+            'function _mctZelleWr(z, L, deckName)',
             'function _mctZelleDay2(z)',
             'function _mctZelleBilanz(z, L)',
             'function _mctPrognoseZelle(prog, online)',
@@ -169,6 +170,8 @@ describe('FE-16 — die Meta-Call-Tabelle rechnet jede Zeile', () => {
             'function _mctTbody(field, L)',
         ], {
             window: {}, normalize,
+            _winRateOverrides: {}, WR_EINGABE_MAX: 96.04,
+            _findByNormalized: (o, n) => { for (const k of Object.keys(o)) if (normalize(k) === normalize(n)) return o[k]; return undefined; },
             _settings: { rounds: 8, day2Points: 16, myDeck: o.mein || '' },
             _mctSortierung: o.sort || { spalte: 'prognose', ab: true },
             _feldAlle: !!o.alle, _feldSuche: '',
@@ -230,7 +233,8 @@ describe('FE-16 — die Meta-Call-Tabelle rechnet jede Zeile', () => {
         const z = zeilen(html);
         const alpha = z.find(x => x.includes('Alpha'));
         const beta = z.find(x => x.includes('>Beta<'));
-        assert.match(alpha, /class="mc-mct-wr is-schlecht"[^>]*>40 %/, 'Alpha zeigt nicht pWin 40 %');
+        /* seit FE-23 (01.10.2026) ein Eingabefeld mit derselben Zahl */
+        assert.match(alpha, /class="[^"]*mc-mct-wr is-schlecht[^"]*"[^>]*value="40"/, 'Alpha zeigt nicht pWin 40 %');
         assert.match(beta, /Spiegel/);
     });
 

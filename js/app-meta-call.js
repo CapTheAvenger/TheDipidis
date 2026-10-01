@@ -2709,6 +2709,16 @@ window.MetaCall = (function () {
     return new Date().toISOString().slice(0, 10);
   }
 
+  /* UI-49 (28.09.2026): das Etikett sagte "letzte 28 Tage", gerechnet wurde
+     ab dem Beginn des aktuellen Formats (12 Tage nach dem Setstart). Die
+     Tageszahl kommt jetzt aus dem Datum selbst: heute minus Grenze. */
+  function _autoFensterTage(cutoffISO) {
+    if (!cutoffISO || !/^\d{4}-\d{2}-\d{2}$/.test(cutoffISO)) return 0;
+    const a = Date.parse(_todayISO() + 'T00:00:00Z');
+    const b = Date.parse(cutoffISO + 'T00:00:00Z');
+    return Math.max(0, Math.round((a - b) / 86400000));
+  }
+
   function _clip(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
   // Rank-weighted mean for per-tournament conversion samples (Predictor
@@ -7750,8 +7760,13 @@ window.MetaCall = (function () {
         _labsShareGrowthByDeck = {};
         _activeFormatLabsDecks = new Set();
         _activeFormatTop15Decks = new Set();
-        _tournamentStats = {};
-        _gezaehlteQuote = false;
+        /* DA-17 (28.09.2026): HIER stand auch `_tournamentStats = {}` und
+           `_gezaehlteQuote = false`. Das sind aber nicht die Labs-Aggregate
+           des Vorformats, sondern die ONLINE-Turnierdaten
+           (data/online_tournament_top8_decks.csv, `source_format` = das
+           laufende Format). Der Wächter leerte sie mit: 0 Schlüssel,
+           `broughtPct` und `top8Boost` für jedes Deck 0, 60 % der
+           Formelgewichte tot. Sie bleiben stehen. */
         _labsMajorRows = 0;
         // KEEP _majorSharesByDeck, _lastMajorByDeck, _lastMajorInfo
         // populated even in lag-window — Past Meta needs them for
@@ -10590,7 +10605,7 @@ window.MetaCall = (function () {
         + `Challenge and Cup). Check the organiser's announcement before `
         + `the event: ${ander} rounds instead of ${r} moves the target to `
         + `${ziel} points.`;
-    return `<p class="mc-tt-hint mc-runden-herkunft">${esc(satz)}</p>`;
+    return `<p class="mc-tt-hint mc-runden-herkunft mc-erweitert-nur">${esc(satz)}</p>`;
   }
 
   function _typeLabelI18nKey(type) {
@@ -10792,6 +10807,33 @@ window.MetaCall = (function () {
 </div>`;
   }
 
+  /* UI-56 (01.10.2026): „Erweitert"-Haken. Datenfenster, Meta-Call-Modus,
+     City-League-Datenquellen und der Rundenhinweis sind Dinge zum
+     Herumspielen und verwirrten Besucher (Hausi, 01.10.). Sie erscheinen
+     erst nach dem Haken. Weicht eine dieser Einstellungen vom Standard ab
+     (Counter-Modus, eigenes Datum, eingeschaltete City League), bleibt der
+     Bereich offen — sonst wirkte ein unsichtbarer Wert mit. */
+  const ERWEITERT_KEY = 'metacall_erweitert_v1';
+  let _erweitertWahl = false;
+  (function _erweitertLaden() {
+    try { _erweitertWahl = localStorage.getItem(ERWEITERT_KEY) === '1'; }
+    catch (_e) { /* kein Speicher, kein Problem */ }
+  }());
+
+  function _erweitertErzwungen() {
+    return _metaCallMode === 'counter'
+      || /^\d{4}-\d{2}-\d{2}$/.test(String((typeof window !== 'undefined' && window.currentMetaDateFrom) || ''))
+      || !!_useClCurrent || !!_useClPast;
+  }
+
+  function _istErweitert() { return _erweitertWahl || _erweitertErzwungen(); }
+
+  function _setErweitert(an) {
+    _erweitertWahl = !!an;
+    try { localStorage.setItem(ERWEITERT_KEY, an ? '1' : '0'); } catch (_e) { /* ok */ }
+    renderAll();
+  }
+
   function _renderCombinedConfigPanel() {
     const source = renderMetaSourcePanel();
     const mode   = renderMetaCallModePanel();
@@ -10800,8 +10842,7 @@ window.MetaCall = (function () {
     return `
 <div class="metacall-panel mc-combo-panel">
   ${source}
-  ${mode}
-  ${data}
+  <div class="mc-erweitert-nur">${mode}${data}</div>
 </div>`;
   }
 
@@ -11149,19 +11190,58 @@ window.MetaCall = (function () {
     };
   }
 
-  function _mctZelleWr(z, L) {
+  /* FE-23 (01.10.2026): die Spalte „Deine Win-Rate" ist ein Eingabefeld.
+     Gezeigt wird weiter die Zahl der Spalte (mit Unentschieden), getippt
+     wird dieselbe Zahl: _onWrZelle rechnet sie in die Groesse um, die der
+     Override-Speicher fuehrt (S/(S+N), siehe getMatchup), damit nach dem
+     Tippen genau die getippte Zahl wieder dasteht — gemessene und eigene
+     Werte werden nie unklar vermischt: ein eigener Wert traegt einen
+     Rahmen und den Text „von Hand". Leeren des Feldes gibt den gemessenen
+     Wert zurueck. */
+  const WR_HAND_UNENTSCHIEDEN = 0.02;
+  const WR_EINGABE_MAX = (1 - WR_HAND_UNENTSCHIEDEN) * 0.98 * 100;
+
+  function _wrHandWert(deckName) {
+    const v = _findByNormalized(_winRateOverrides, deckName);
+    return (v === undefined || v === '' || !Number.isFinite(Number(v))) ? null : Number(v);
+  }
+
+  function _mctZelleWr(z, L, deckName) {
     if (!_settings.myDeck) return '<span class="mc-cell-dash">—</span>';
     if (z.spiegel) return `<span class="mc-mct-wr-spiegel">${esc(L('Spiegel', 'mirror'))}</span>`;
+    const hand = deckName ? _wrHandWert(deckName) : null;
+    const q = z.wr == null ? null : (z.wrOhneU != null ? z.wrOhneU : z.wr);
+    const klasse = q == null ? '' : (q >= 55 ? 'is-gut' : (q <= 45 ? 'is-schlecht' : 'is-mittel'));
+    let titel;
     if (z.wr == null) {
-      return `<span class="mc-cell-dash" title="${esc(L('Für diese Paarung liegen keine Matches vor.',
-        'No matches recorded for this pairing.'))}">—</span>`;
+      titel = L('Für diese Paarung liegen keine Matches vor — du kannst eine Zahl eintragen.',
+        'No matches recorded for this pairing — you can enter a number.');
+    } else {
+      titel = (hand != null ? L('Von dir eingetragen. ', 'Entered by you. ') : '')
+        + _mctQuotenName('mitUnentschieden') + ' ' + _mcPct(z.wr, 1)
+        + (z.wrOhneU != null ? ' · ' + _mctQuotenName('ohneUnentschieden') + ' ' + _mcPct(z.wrOhneU, 1) : '')
+        + ' · ' + zahlLokal(z.wrPartien) + ' ' + L('gezählte Matches', 'counted matches');
     }
-    const q = z.wrOhneU != null ? z.wrOhneU : z.wr;
-    const klasse = q >= 55 ? 'is-gut' : (q <= 45 ? 'is-schlecht' : 'is-mittel');
-    const titel = _mctQuotenName('mitUnentschieden') + ' ' + _mcPct(z.wr, 1)
-      + (z.wrOhneU != null ? ' · ' + _mctQuotenName('ohneUnentschieden') + ' ' + _mcPct(z.wrOhneU, 1) : '')
-      + ' · ' + zahlLokal(z.wrPartien) + ' ' + L('gezählte Matches', 'counted matches');
-    return `<span class="mc-mct-wr ${klasse}" title="${esc(titel)}">${_mcPct(z.wr, 0)}</span>`;
+    if (!deckName) {
+      return z.wr == null ? '<span class="mc-cell-dash" title="' + esc(titel) + '">—</span>'
+        : `<span class="mc-mct-wr ${klasse}" title="${esc(titel)}">${_mcPct(z.wr, 0)}</span>`;
+    }
+    const wert = z.wr == null ? '' : String(Math.round(z.wr * 10) / 10);
+    return `<input type="number" min="0" max="${Math.floor(WR_EINGABE_MAX)}" step="0.1"
+              class="mc-personal-input mc-wr-input mc-mct-wr ${klasse}${hand != null ? ' has-value' : ''}"
+              data-feld="wr" data-deck="${esc(deckName)}" value="${esc(wert)}" placeholder="—"
+              title="${esc(titel)}"
+              aria-label="${esc(_mctWrKopf(L) + ': ' + deckName)}"
+              oninput="MetaCall._onWrZelle('${escJs(deckName)}', this.value)">${
+      hand != null ? `<span class="mc-wr-hand">${esc(L('von Hand', 'manual'))}</span>` : ''}`;
+  }
+
+  function _onWrZelle(deckName, val) {
+    const x = parseFloat(val);
+    if (val === '' || isNaN(x)) { _onWrOverride(deckName, ''); return; }
+    const gedeckelt = Math.max(0, Math.min(WR_EINGABE_MAX, x));
+    /* gezeigt = pWin = Quote * (1 - 0,02); Quote ist S/(S+N) */
+    _onWrOverride(deckName, String(gedeckelt / (1 - WR_HAND_UNENTSCHIEDEN)));
   }
 
   function _mctZelleDay2(z) {
@@ -11226,12 +11306,12 @@ window.MetaCall = (function () {
                 aria-label="${esc(t('mc.toggleDetailsAria'))}"
                 title="${esc(t('mc.toggleDetailsAria'))}"
                 data-deck-key="${esc(k)}"
-                onclick="MetaCall._toggleDetail(this)">▾</button>` : '';
+                onclick="MetaCall._toggleDetail(this)"><span class="mc-row-toggle-text">${esc(L('Details', 'Details'))}</span><span class="mc-row-toggle-pfeil" aria-hidden="true">▾</span></button>` : '';
     const personalCell = isCustom
       ? '<span class="mc-cell-dash">—</span>'
       : `<input type="number" min="0" max="100" step="0.1" placeholder="${esc(t('mc.estimatePh'))}"
                 value="${hasP ? deck.personalShare : ''}"
-                class="mc-personal-input${hasP ? ' has-value' : ''}" data-deck="${esc(deck.name)}"
+                class="mc-personal-input${hasP ? ' has-value' : ''}" data-feld="est" data-deck="${esc(deck.name)}"
                 aria-label="${esc(L('Deine Schätzung für ', 'Your estimate for ') + deck.name)}"
                 oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)">`;
     /* Mit eigener Schaetzung rechnet alles darunter mit DEINER Zahl —
@@ -11251,7 +11331,7 @@ window.MetaCall = (function () {
       <td class="mc-mct-prog" ${lab(L('Prognose', 'Forecast'))}>${isCustom ? '<span class="mc-cell-dash">—</span>' : _mctPrognoseZelle(progZahl, online)}</td>
       <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}>${personalCell}</td>
       <td class="mc-mct-enc" ${lab(L('Begegnungen', 'Encounters'))}><span class="mc-mct-enc-zahl mc-enc-${encTier}">∅ ${_mcNum(lambda, 2)}</span><span class="mc-mct-spieler" title="${esc(t('mc.tipPlayers'))}">≈ ${zahlLokal(deck.count)} ${esc(L('Spieler', 'players'))}</span></td>
-      <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}>${_mctZelleWr(z, L)}</td>
+      <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}>${_mctZelleWr(z, L, isCustom ? '' : deck.name)}</td>
       <td class="mc-mct-d2" ${lab(L('Day-2 mit diesem Deck', 'Day 2 with this deck'))}>${_mctZelleDay2(z)}</td>
       <td class="mc-mct-bil" ${lab(L('Bilanz', 'Record'))}>${_mctZelleBilanz(z, L)}</td>
     </tr>`;
@@ -11275,7 +11355,7 @@ window.MetaCall = (function () {
       <td class="mc-mct-prog" ${lab(L('Prognose', 'Forecast'))}>${_mctPrognoseZelle(d.onlineShare, online)}</td>
       <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}><span class="mc-cell-dash" title="${esc(L('Erst ins Feld nehmen (Haken links)', 'Add to the field first (tick on the left)'))}">—</span></td>
       <td class="mc-mct-enc" ${lab(L('Begegnungen', 'Encounters'))}><span class="mc-mct-in-sonstige">${esc(L('in „Sonstige"', 'in "Others"'))}</span></td>
-      <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}>${_mctZelleWr(z, L)}</td>
+      <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}>${_mctZelleWr(z, L, d.name)}</td>
       <td class="mc-mct-d2" ${lab(L('Day-2 mit diesem Deck', 'Day 2 with this deck'))}>${_mctZelleDay2(z)}</td>
       <td class="mc-mct-bil" ${lab(L('Bilanz', 'Record'))}>${_mctZelleBilanz(z, L)}</td>
     </tr>`;
@@ -11308,8 +11388,16 @@ window.MetaCall = (function () {
       if (typeof va === 'string') return ab ? vb.localeCompare(va) : va.localeCompare(vb);
       return ab ? (vb - va) : (va - vb);
     });
-    let html = eintraege.map(e => e.html).join('');
-    if (junk) html += _mctZeileFeld(junk, field, L);
+    /* UI-58 (01.10.2026): die Suche galt nur fuer Decks AUSSERHALB des
+       Feldes — "Mega Excadrill" stand im Feld, also kam kein Treffer.
+       Jetzt filtert sie auch die Zeilen im Feld; "Sonstige" bleibt bei einer
+       Suche weg (kein Deckname). */
+    const sucheText = _feldSuche.trim().toLowerCase();
+    const imFeldTreffer = sucheText
+      ? eintraege.filter(e => e.deck.name.toLowerCase().includes(sucheText))
+      : eintraege;
+    let html = imFeldTreffer.map(e => e.html).join('');
+    if (junk && !sucheText) html += _mctZeileFeld(junk, field, L);
 
     /* Decks ausserhalb des Feldes: zugeklappt, per Suche oder Knopf offen.
        Sie rechnen gegen DASSELBE Feld — die Day-2-Spalte sagt also auch
@@ -11327,8 +11415,8 @@ window.MetaCall = (function () {
             'Show ' + aussen.length + ' more decks (inside "Others")');
       html += `<tr class="mc-mct-trenner"><td colspan="9">
         <button type="button" class="mc-mct-mehr" onclick="MetaCall._feldAlleUmschalten()">${esc(knopfText)}</button>${
-          suche ? `<span class="mc-mct-suchtreffer">${esc(L(sichtbar.length + ' Treffer für „' + _feldSuche.trim() + '"',
-            sichtbar.length + ' matches for "' + _feldSuche.trim() + '"'))}</span>` : ''}
+          suche ? `<span class="mc-mct-suchtreffer">${esc(L((sichtbar.length + imFeldTreffer.length) + ' Treffer für „' + _feldSuche.trim() + '"',
+            (sichtbar.length + imFeldTreffer.length) + ' matches for "' + _feldSuche.trim() + '"'))}</span>` : ''}
       </td></tr>`;
       html += sichtbar.map(d => _mctZeileAussen(d, field, L)).join('');
     }
@@ -11359,8 +11447,8 @@ window.MetaCall = (function () {
       ${th('enc', 'mc-mct-enc', L('Begegnungen (' + _settings.rounds + ' R.)', 'Encounters (' + _settings.rounds + ' r.)'),
         t('mc.headerAvgEncTooltip').replace('{n}', _settings.rounds))}
       ${th('wr', 'mc-mct-wrz', _mctWrKopf(L),
-        L('Dein Deck gegen dieses Deck (Unentschieden zählen mit). Erscheint, sobald du mit ☆ ein Deck wählst.',
-          'Your deck against this deck (ties count). Appears once you pick a deck with ☆.'))}
+        L('Dein Deck gegen dieses Deck (Unentschieden zählen mit). Erscheint, sobald du mit ☆ ein Deck wählst. Zahl eintippen, um sie mit deinem Wissen zu überschreiben; Feld leeren gibt den gemessenen Wert zurück.',
+          'Your deck against this deck (ties count). Appears once you pick a deck with ☆. Type a number to override it with your own knowledge; clear the field to get the measured value back.'))}
       ${th('day2', 'mc-mct-d2', L('Day-2 mit diesem Deck', 'Day 2 with this deck'),
         L('Chance auf ' + _settings.day2Points + ' Punkte in ' + _settings.rounds + ' Runden, wenn DU dieses Deck gegen genau dieses Feld spielst.',
           'Chance of ' + _settings.day2Points + ' points in ' + _settings.rounds + ' rounds if YOU play this deck against exactly this field.'))}
@@ -11452,7 +11540,7 @@ window.MetaCall = (function () {
     if (!panel) return;
     const aktiv = document.activeElement;
     const merke = (aktiv && aktiv.classList && aktiv.classList.contains('mc-personal-input')
-      && panel.contains(aktiv)) ? aktiv.getAttribute('data-deck') : null;
+      && panel.contains(aktiv)) ? { deck: aktiv.getAttribute('data-deck'), feld: aktiv.getAttribute('data-feld') || 'est' } : null;
     const tmp = document.createElement('div');
     tmp.innerHTML = renderFieldPanel(buildField());
     const neu = tmp.querySelector('.mc-mct-panel');
@@ -11468,7 +11556,7 @@ window.MetaCall = (function () {
       });
     }
     if (merke) {
-      const wieder = panel.querySelector(`.mc-personal-input[data-deck="${(window.CSS && CSS.escape) ? CSS.escape(merke) : merke}"]`);
+      const wieder = panel.querySelector(`.mc-personal-input[data-feld="${merke.feld}"][data-deck="${(window.CSS && CSS.escape) ? CSS.escape(merke.deck) : merke.deck}"]`);
       if (wieder) { wieder.focus(); const v = wieder.value; wieder.value = ''; wieder.value = v; }
     }
   }
@@ -12087,10 +12175,10 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     const _activeWindowText = _dateValue
       ? t('mc.dateWindowActive').replace('{date}', _datumLesbar(_dateValue))
       : (_autoCutoff
-          ? t('mc.dateWindowAuto').replace('{date}', _datumLesbar(_autoCutoff))
+          ? t('mc.dateWindowAuto').replace('{date}', _datumLesbar(_autoCutoff)).replace('{days}', String(_autoFensterTage(_autoCutoff)))
           : t('mc.dateWindowNone'));
     const dateBanner = `
-      <div class="metacall-date-window">
+      <div class="metacall-date-window mc-erweitert-nur">
         <label class="metacall-date-label" for="metacallDateFrom"
                title="${esc(t('mc.dateWindowHelp'))}">📅 ${t('mc.dateWindowLabel')}
           <span class="metacall-date-help-icon" title="${esc(t('mc.dateWindowHelp'))}">ⓘ</span>
@@ -12105,7 +12193,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         <span class="metacall-date-window-hint">${_activeWindowText}</span>
       </div>`;
     container.innerHTML = `
-<div class="metacall-wrap">
+<div class="metacall-wrap ${_istErweitert() ? 'mc-erweitert' : 'mc-schlicht'}">
   <div class="metacall-header">
     <h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="${esc(t('btn.helpTitle'))}" aria-label="${esc(t('btn.helpAriaMetaCall'))}" data-i18n-title="btn.helpTitle" data-i18n-aria="btn.helpAriaMetaCall"></button></h2>
     <p class="color-grey">${esc(t('mc.subtitle').replace('{ziel}', _zielKurz()))}</p>
@@ -12113,6 +12201,11 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
   <div class="mc-top-bar">
     ${renderScenariosBar()}
     ${dateBanner}
+    <label class="mc-erweitert-schalter" title="${esc(_mcIstDeutsch() ? 'Zeigt Datenfenster, Meta-Call-Modus, Datenquellen und Hinweise zu den Runden' : 'Shows data window, Meta Call mode, data sources and notes on rounds')}">
+      <input type="checkbox" ${_istErweitert() ? 'checked' : ''} ${_erweitertErzwungen() ? 'disabled' : ''}
+             onchange="MetaCall._setErweitert(this.checked)">
+      <span>${esc(_mcIstDeutsch() ? 'Erweitert' : 'Advanced')}</span>
+    </label>
   </div>
   ${_inFrozenPastMode() ? '' : _mcSchritt(1, _SCHRITTE[0].t, _SCHRITTE[0].s)}
   ${_inFrozenPastMode() ? _renderFrozenSourceOnlyPanel() : _renderCombinedConfigPanel()}
@@ -14365,6 +14458,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         && fieldTbody.contains(aktivVorher))
         ? {
             deck:  aktivVorher.getAttribute('data-deck'),
+            feld:  aktivVorher.getAttribute('data-feld') || 'est',
             start: aktivVorher.selectionStart,
             ende:  aktivVorher.selectionEnd,
           }
@@ -14377,7 +14471,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
 
       if (merkeDeck && merkeDeck.deck) {
         const wieder = fieldTbody.querySelector(
-          `.mc-personal-input[data-deck="${(window.CSS && CSS.escape) ? CSS.escape(merkeDeck.deck) : merkeDeck.deck}"]`);
+          `.mc-personal-input[data-feld="${merkeDeck.feld}"][data-deck="${(window.CSS && CSS.escape) ? CSS.escape(merkeDeck.deck) : merkeDeck.deck}"]`);
         if (wieder) {
           wieder.focus();
           /* Der Cursor gehoert zurueck ins Feld. Bei `type="number"`
@@ -16760,7 +16854,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     if (_shareList && _matchupMap) { renderAll(); return; }
 
     container.innerHTML = `
-<div class="metacall-wrap">
+<div class="metacall-wrap ${_istErweitert() ? 'mc-erweitert' : 'mc-schlicht'}">
   <div class="metacall-header"><h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="${esc(t('btn.helpTitle'))}" aria-label="${esc(t('btn.helpAriaMetaCall'))}" data-i18n-title="btn.helpTitle" data-i18n-aria="btn.helpAriaMetaCall"></button></h2></div>
   <div class="metacall-loading">${t('mb.loading')}</div>
 </div>`;
@@ -17055,6 +17149,8 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _toggleGroup,
     _toggleGroupField,
     _toggleDetail,
+    _onWrZelle,
+    _setErweitert,
     _toggleAllDetails,
     _addCustomDeck,
     _removeCustomDeck,

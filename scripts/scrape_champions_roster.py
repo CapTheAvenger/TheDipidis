@@ -248,6 +248,30 @@ def pokedex_schluessel(pokedex, ohne=()):
     return raus
 
 
+def frueher_ergaenzt(letzte):
+    """Alles, was diese Datei beim letzten Lauf selbst ergaenzt hat.
+
+    SC-14 (01.10.2026, gemessen am Commit 0b5d21bc): der Pokedex fiel von 343
+    auf 338 Eintraege. Cinderace, Grapploct, Perrserker, Rotom (Heat) und
+    Rotom (Mow) standen nur ueber `aus_teams` im Kader; als die Replica-Teams
+    sich aenderten (aus_teams 25 -> 14), blieben sie im Pokedex des Vortags
+    stehen, `nutzungsformen` hielt sie deshalb fuer "schon da" und holte sie
+    nicht ueber ihre Nutzungszeile zurueck. Dasselbe Pendel wie SC-1, nur
+    ueber die zweite Quelle.
+
+    Deshalb zaehlen beim Abgleich ALLE eigenen Ergaenzungen nicht mit:
+    aus_nutzung, aus_teams und aus_mega. Wer in den aktuellen Teams steht,
+    steht ohnehin in `vorhanden`; wer nur noch eine Nutzungszeile hat, wird
+    ueber sie ergaenzt. Der Eintrag haengt damit an einem Beleg des
+    heutigen Laufs, nicht an seinem Echo von gestern.
+    """
+    meta = ((letzte or {}).get("_meta") or {})
+    raus = []
+    for schluessel in ("aus_nutzung", "aus_teams", "aus_mega"):
+        raus.extend(meta.get(schluessel) or [])
+    return sorted(set(raus))
+
+
 def nutzungsformen(vorhanden, smogon, usage, pokedex, eigene=()):
     """FORMEN, DIE GESPIELT WERDEN UND IM POKEDEX FEHLEN.
 
@@ -442,7 +466,7 @@ def main():
     vorhanden = vorhanden | set(geschlecht)
     # Was diese Datei beim letzten Lauf selbst ergaenzt hat — gegen das
     # Pendel, siehe nutzungsformen().
-    frueher = ((_lade(OUT) or {}).get("_meta") or {}).get("aus_nutzung") or []
+    frueher = frueher_ergaenzt(_lade(OUT))
     nutzung_neu, nutzung_ohne = nutzungsformen(
         vorhanden, smogon, _lade(USAGE_PATH), _lade(POKEDEX_PATH), eigene=frueher)
     if nutzung_neu:

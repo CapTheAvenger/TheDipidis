@@ -386,6 +386,24 @@
     }
 
     /**
+     * Wie viele VERSCHIEDENE Karten ueber alle Boxen liegen — je (Set, Nummer)
+     * einmal, nie ueber den Namen. Die Zahl oben ("Alle Boxen") zaehlte die
+     * Kartenplaetze (jede Karte so oft, wie sie in einer Box liegt) und stand
+     * neben der Zusammen-Ansicht, die jede Karte einmal zaehlt: 7547 gegen
+     * 1089 bei denselben 15134 Stueck (Hausi, 01.10.2026: "was stimmt jetzt").
+     */
+    function verschiedeneKarten(liste) {
+        const ids = new Set();
+        (liste || []).forEach(function (b) {
+            ((b && b.karten) || []).forEach(function (k) {
+                const n = normiert(k);
+                ids.add(kartenId(n.set, n.number) || n.id);
+            });
+        });
+        return ids.size;
+    }
+
+    /**
      * Zusammen-Ansicht: je Karte (Set, Nummer) EINE Gruppe ueber alle Boxen —
      * nie ueber den Namen. Reihenfolge = erstes Auftreten (die Sortierung der
      * Eintraege bleibt erhalten). Je Box: soll, drin, offen; die Gruppe summiert.
@@ -998,7 +1016,7 @@
 
     const Logik = {
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
-        statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
+        statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, verschiedeneKarten, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
         markenKontext, basisEnergieRegel, formatPasst, imFormatGespielt, boxStufe, hauptkartenDerBox, chipReihe, KERN_SCHWELLE, formateNachDatum, blockVorRotation, druckIn, druckLegal, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
@@ -1689,6 +1707,7 @@
             const u = umfang(b);
             return { karten: a.karten + u.karten, stueck: a.stueck + u.stueck, fehlen: a.fehlen + u.fehlen, offen: a.offen + u.offen };
         }, { karten: 0, stueck: 0, fehlen: 0, offen: 0 });
+        alle.verschieden = verschiedeneKarten(boxen);
         const chip = function (id, name, u, stufe, rang) {
             const aktiv = boxen.length === 1 || (id || null) === (aktiveId || null);
             const stufeText = stufe ? tx('abx.stufe.' + stufe, { fmt: (kontext && kontext.aktuell) || '' }, stufe) : '';
@@ -1699,8 +1718,12 @@
                 + ' onclick="ArchetypBox.waehlen(' + (id ? '\'' + esc(id) + '\'' : 'null') + ')">'
                 + '<span class="abx-chip-name">' + (stufe ? '<span class="abx-stufe-punkt" aria-hidden="true"></span>' : '')
                 + esc(name) + (stufeText ? '<span class="visually-hidden"> (' + esc(stufeText) + ')</span>' : '') + '</span>'
-                + '<span class="abx-chip-zahl">' + esc(tx('abx.chipUmfang', { karten: u.karten, stueck: u.stueck }, '{karten} Karten · {stueck} Stück')) + '</span>'
-                + '<span class="abx-chip-zahl">' + esc(tx('abx.chipFehlen', { n: u.fehlen, offen: u.offen }, '{n} fehlen · {offen} Stück offen')) + '</span></button>';
+                + '<span class="abx-chip-zahl">' + esc(u.verschieden != null
+                    ? tx('abx.chipUmfangAlle', { plaetze: u.karten, karten: u.verschieden, stueck: u.stueck }, '{plaetze} Kartenplätze · {karten} verschiedene Karten · {stueck} Stück')
+                    : tx('abx.chipUmfang', { karten: u.karten, stueck: u.stueck }, '{karten} Karten · {stueck} Stück')) + '</span>'
+                + '<span class="abx-chip-zahl">' + esc(u.verschieden != null
+                    ? tx('abx.chipOffenAlle', { offen: u.offen }, '{offen} Stück offen')
+                    : tx('abx.chipFehlen', { n: u.fehlen, offen: u.offen }, '{n} fehlen · {offen} Stück offen')) + '</span></button>';
         };
         const kontext = manifestDaten ? formatKontext() : null;
         const reihe = chipReihe(boxen, kontext, familieVonArchetyp);

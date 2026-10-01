@@ -285,3 +285,74 @@ def test_der_kopfwechsel_benennt_die_spalte_ueberall_neu(monkeypatch):
     assert "Turniere 73 und 74," in neu
     assert m.majors_umstellen(neu, "TEF-30C", "TEF-30C") == (neu, []), (
         "ein zweiter Lauf aendert das Stueck noch einmal")
+
+
+def test_ein_setwechsel_stellt_die_online_spalten_um():
+    """Setwechsel-Probe (PR #893, 01.10.2026): seit DA-20 kommen die Koepfe aus
+    format_window.json. Ohne diesen Schritt stuende nach dem naechsten Set im
+    Stueck noch TEF\u201330C/TEF\u2013PBL, der Erzeuger braeche ab und das Tor hielte den
+    Wochenlauf an. Die Abbildung ist (30C, PBL) -> (ZZN, 30C), nicht zweimal
+    30C -> ZZN."""
+    m = _modul()
+    alt = ('<b>TEF\u201330C</b> ist das laufende Online-Format, <b>TEF\u2013PBL</b> das '
+           'Online-Format davor, <b>Majors (TEF\u201330C)</b> sind Majors.'
+           '<span class="mcl-wrz" title="Online-Meta TEF\u201330C (laufendes Format): 48,8 %">'
+           '<em>TEF\u201330C</em><b>48,8 %</b></span>'
+           '<span class="mcl-wrz" title="Online-Meta TEF\u2013PBL (Format davor): 49,4 %">'
+           '<em>TEF\u2013PBL</em><b>49,4 %</b></span>'
+           '<span class="mcl-wrz" title="Letzte Pr\u00e4senzturniere (X), Format TEF\u201330C: 50 %">'
+           '<em>Majors (TEF\u201330C)</em><b>50 %</b></span>'
+           '<p class="mcl-quelle">TEF\u201330C (online): <code>data/online_api_matchups_TEF-30C.csv</code>, Stand 2026-09-30 \u00b7\n'
+           'TEF\u2013PBL (online): <code>data/online_api_matchups_TEF-PBL.csv</code>, Stand 2026-09-18 \u00b7\n'
+           'Majors (TEF\u201330C): <code>data/labs_tournament_matchups.csv</code></p>')
+    neu, aend = m.online_umstellen(alt, "TEF\u2013ZZN", "TEF\u201330C")
+    assert aend, "der Setwechsel meldet keine Aenderung"
+    assert "<b>TEF\u2013ZZN</b> ist das laufende Online-Format, <b>TEF\u201330C</b> das Online-Format davor" in neu
+    assert "<em>TEF\u2013ZZN</em><b>48,8 %</b>" in neu and "<em>TEF\u201330C</em><b>49,4 %</b>" in neu, (
+        "die Zellen sind nicht um eine Stelle weitergerueckt: " + neu)
+    assert 'Online-Meta TEF\u2013ZZN (laufendes Format)' in neu
+    assert 'Online-Meta TEF\u201330C (Format davor)' in neu
+    assert "online_api_matchups_TEF-ZZN.csv" in neu and "online_api_matchups_TEF-PBL.csv" not in neu
+    assert "TEF\u2013PBL" not in neu
+    # Die Majors-Spalte gehoert zu majors_umstellen und bleibt unberuehrt.
+    assert neu.count("Majors (TEF\u201330C)") == 3
+    assert m.online_umstellen(neu, "TEF\u2013ZZN", "TEF\u201330C") == (neu, []), (
+        "ein zweiter Lauf aendert das Stueck noch einmal")
+
+
+def test_am_echten_stueck_rueckt_jede_zelle_mit(tmp_path):
+    """Dasselbe am echten Stueck: nach der Umstellung gibt es genauso viele
+    Zellen mit dem neuen Kopf wie vorher mit dem alten."""
+    m = _modul()
+    with open(m.STUECK, encoding="utf-8") as f:
+        roh = f.read()
+    # Die Koepfe stehen im Stueck selbst (Legende), nicht in format_window.json:
+    # das Stueck kann vor oder nach dem Nachziehen stehen.
+    jetzt, davor = m.LEGENDE_ONLINE.search(roh).groups()
+    n_jetzt = roh.count("<em>%s</em>" % jetzt)
+    n_davor = roh.count("<em>%s</em>" % davor)
+    assert n_jetzt >= 20 and n_davor >= 20, "das Stueck hat zu wenige Zellen zum Pruefen"
+    neu, _ = m.online_umstellen(roh, "TEF\u2013QQQ", jetzt)
+    assert neu.count("<em>TEF\u2013QQQ</em>") == n_jetzt
+    assert neu.count("<em>%s</em>" % jetzt) == n_davor
+    assert "<em>%s</em>" % davor not in neu
+
+
+# DA-20 (01.10.2026): die Online-Dateien kommen aus format_window.json.
+def test_formatfenster_aus_den_daten(tmp_path):
+    import importlib.util, json, os
+    spec = importlib.util.spec_from_file_location(
+        "mc_nz", os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "masterclass_zahlen_nachziehen.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    f = tmp_path / "fw.json"
+    f.write_text(json.dumps({"oldest_legal_set": "ABC", "current_set": "XYZ", "previous_format_key": "ABC-QRS"}))
+    assert m._formatfenster(str(f)) == ("ABC-XYZ", "ABC-QRS")
+    # Verfaelschungsprobe: ein fehlendes Feld bricht ab, statt zu raten
+    f.write_text(json.dumps({"oldest_legal_set": "ABC", "current_set": "XYZ"}))
+    import pytest
+    with pytest.raises(SystemExit):
+        m._formatfenster(str(f))
+    # die echten Daten ergeben die vorhandenen Dateien
+    assert os.path.basename(m.ONLINE_JETZT) == f"online_api_matchups_{m._JETZT}.csv"
+    assert os.path.exists(m.ONLINE_JETZT) and os.path.exists(m.ONLINE_DAVOR)

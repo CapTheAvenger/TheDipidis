@@ -461,6 +461,20 @@ def aus_git():
     return stand
 
 
+def _nur_stempel_neu(ziel, neu_stand):
+    """True, wenn die vorhandene Datei bis auf `erzeugt_am` dasselbe sagt."""
+    try:
+        with open(ziel, encoding="utf-8") as fh:
+            alt = json.load(fh)
+    except (OSError, ValueError):
+        return False
+    if not isinstance(alt, dict):
+        return False
+    a = {k: v for k, v in alt.items() if k != "erzeugt_am"}
+    n = {k: v for k, v in neu_stand.items() if k != "erzeugt_am"}
+    return a == n
+
+
 def main():
     p = argparse.ArgumentParser(description="Pflegt data/data_stand.json")
     p.add_argument("--aus-git", dest="aus_git_flag", action="store_true",
@@ -553,13 +567,18 @@ def main():
     unlesbar = [{"datei": d, "spalte": sp, "beispiel": bsp}
                 for d, sp, bsp in unlesbare_inhaltsspalten(inhalt_bis_tabelle())]
 
-    with open(ZIEL, "w", encoding="utf-8") as fh:
-        json.dump({"erzeugt_am": jetzt, "quelle": quelle,
-                   "dateien": stand, "inhalt_bis": inhalt, "leer": leer,
-                   "ohne_stand": ohne_stand,
-                   "inhaltsspalte_unlesbar": unlesbar},
-                  fh, indent=2, ensure_ascii=False)
-        fh.write("\n")
+    neu_stand = {"erzeugt_am": jetzt, "quelle": quelle,
+                 "dateien": stand, "inhalt_bis": inhalt, "leer": leer,
+                 "ohne_stand": ohne_stand,
+                 "inhaltsspalte_unlesbar": unlesbar}
+    # WZ-24 (01.10.2026): aendert sich nur `erzeugt_am`, bleibt die Datei
+    # unberuehrt. Sonst entsteht je Lauf ein Commit und ein Deploy fuer
+    # nichts (30.09.: Spielerkontinuitaet de7e6f6, per-decklist 2ec1a77).
+    # Den Zeitpunkt des Laufs tragen die Herzschlaege, nicht diese Datei.
+    if not _nur_stempel_neu(ZIEL, neu_stand):
+        with open(ZIEL, "w", encoding="utf-8") as fh:
+            json.dump(neu_stand, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
     if unlesbar:
         print("Inhaltsspalte vorhanden, aber kein Wert lesbar — das ist ein "
               "Ausfall dieses Skripts, keine Aussage ueber die Daten:")

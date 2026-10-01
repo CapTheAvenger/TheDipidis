@@ -543,6 +543,22 @@ open). Das startet alle Pruefungen auf dem neuen Kopf.
 deshalb nie in den Patch. `merge_pull_request` braucht die volle
 40-stellige SHA in `expectedHeadSha`.
 
+**Push und Merge im Alltag, gemessen 30.09./01.10.2026 (WZ-25):**
+
+- Die Geraete-VM hat keinen git-Login (`git push` → „could not read
+  Username"). Claude committet im Klon, der Betreiber pusht den Zweig aus
+  PowerShell (`cd C:\TheDipidis\repo`, `git push -u origin <zweig>`). Erst
+  wenn der Zweig auf origin steht, wird der PR eroeffnet.
+- Commits in der VM brauchen Namen und Adresse am Aufruf:
+  `git -c user.name=... -c user.email=... commit`.
+- Die Pruefungen eines PR brauchen rund 21 Minuten: nicht pollen, den Turn
+  beenden und beim naechsten Anstoss nachsehen. Gemerged wird mit Squash und
+  der vollen 40-stelligen SHA in `expectedHeadSha`.
+- Fertig ist es erst, wenn `thedipidis.app/version.json` den neuen Stempel
+  (`JJJJMMTTHHMM-<sha>`) zeigt — Deploy-Lauf gruen heisst noch nicht live.
+- Gestapelte Zweige (D auf C): nach dem Merge des unteren Zweigs den oberen
+  auf `main` neu aufsetzen und die Version noch einmal anheben.
+
 **Ablaufaenderungen — zwei Wege, in dieser Reihenfolge (28.09.2026):**
 
 1. **Chrome auf dem Rechner des Betreibers**, wenn er an ist. ERST

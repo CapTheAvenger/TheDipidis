@@ -564,6 +564,10 @@
             _major = major || {};
             _majorMu = (majorMuErg && majorMuErg.reg) || {};
             _majorMuFormat = (majorMuErg && majorMuErg.key) || '';
+            /* UI-40: die Abschnittsueberschriften (js/ds-sections.js) nennen
+               Online- und Major-Format in EINER Zeile; sie kennen den
+               Major-Schluessel erst jetzt. */
+            try { document.dispatchEvent(new Event('majorFormatGeladen')); } catch (_e) { /* ohne DOM nichts zu melden */ }
             _decks = {};
             for (const r of parseSemicolonCsv(decksTxt)) {
                 if (!r.deck_name) continue;
@@ -2269,6 +2273,11 @@
     };
 
     window.openArchetypeCard = open;
+    /* UI-40: Major-Format, aus dem die Major-Zahlen der Seite kommen ('' = unbekannt). */
+    window.getMajorDatenFormat = function () {
+        const k = _majorMuFormat || (_majorZeitraum && _majorZeitraum.key) || '';
+        return String(k).trim().toUpperCase();
+    };
     window.closeArchetypeCard = close;
     window.renderInlineArchetypeCards = fillInline;
     window.renderArchetypeCardInto = function (el, name) {

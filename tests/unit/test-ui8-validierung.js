@@ -57,11 +57,7 @@ describe('UI-8 (4): die Spanne der Kopien', () => {
 });
 
 describe('UI-8 (5): Kopfzeilen mit Erklaerung', () => {
-    it('die acht gemessenen Kopfzeilen tragen ein title', () => {
-        const mp = ohneKommentare(R('js/app-meta-prognose.js'));
-        for (const k of ['tipOnline', 'tipErwartet', 'tipBewegung']) {
-            assert.match(mp, new RegExp(`<th[^>]*title="\\$\\{esc\\(l\\.${k}\\)\\}"`), `mp-tabelle: ${k}`);
-        }
+    it('die gemessenen Kopfzeilen tragen ein title (Meta-Prognose-Tabelle entfiel mit FE-17)', () => {
         const cl = ohneKommentare(R('js/app-city-league.js'));
         for (const k of ['cl.tipCount', 'cl.tipAvgPlacement', 'cl.tipVariants']) {
             assert.ok(cl.includes(`title="\${escapeHtml(t('${k}'))}"`), `City League: ${k}`);

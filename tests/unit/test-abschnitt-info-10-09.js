@@ -97,6 +97,8 @@ function platz(sprache) {
         ausschnitt(SEKTIONEN_QUELLE, 'function quotenName('),
         ausschnitt(SEKTIONEN_QUELLE, 'function de('),
         ausschnitt(SEKTIONEN_QUELLE, 'function fuelleQuoten('),
+        ausschnitt(SEKTIONEN_QUELLE, 'function datenZeile('),
+        ausschnitt(SEKTIONEN_QUELLE, 'function fuelleDaten('),
         ausschnitt(SEKTIONEN_QUELLE, 'function texte('),
         ausschnitt(SEKTIONEN_QUELLE, 'function zeichneInfoKnoepfe('),
         'globalThis.SECTIONS = SECTIONS;',

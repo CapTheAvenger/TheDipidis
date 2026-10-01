@@ -281,7 +281,36 @@ def test_der_lauf_reicht_seine_letzte_ergaenzung_weiter(roster_modul):
     quelle = inspect.getsource(roster_modul.main)
     ohne = re.sub(r"#[^\n]*", "", quelle)
     assert len(ohne) > len(quelle) * 0.3, "das Ausschneiden hat zu viel entfernt"
-    assert re.search(r"_lade\(OUT\)", ohne) and '"aus_nutzung"' in ohne, (
+    assert re.search(r"frueher_ergaenzt\(_lade\(OUT\)\)", ohne), (
         "main() liest die letzte Ergaenzung nicht aus der eigenen Ausgabedatei")
     assert re.search(r"nutzungsformen\((?:[^()]|\([^()]*\))*eigene=frueher", ohne), (
         "main() reicht `eigene` nicht an nutzungsformen weiter — das Pendel ist zurueck")
+
+
+# ── SC-14: dasselbe Pendel ueber aus_teams (01.10.2026) ────────────────
+
+def test_frueher_ergaenzt_nimmt_alle_eigenen_quellen(roster_modul):
+    letzte = {"_meta": {"aus_nutzung": ["Persian"], "aus_teams": ["Cinderace", "Rotom-Mow"],
+                         "aus_mega": ["Scrafty"], "geschlechtsformen": ["Meowstic-F"]}}
+    assert roster_modul.frueher_ergaenzt(letzte) == ["Cinderace", "Persian", "Rotom-Mow", "Scrafty"]
+    assert roster_modul.frueher_ergaenzt(None) == []
+    assert roster_modul.frueher_ergaenzt({}) == []
+
+
+def test_ein_team_eintrag_pendelt_nicht(roster_modul):
+    """Cinderace kam gestern nur ueber die Teams in den Pokedex. Heute ist es
+    aus den Teams raus, hat aber eine eigene Nutzungszeile und Smogon-Werte:
+    es muss ueber die Nutzung ergaenzt werden, nicht als "schon da" gelten."""
+    smogon = {"Cinderace": {"baseStats": {"hp": 80}}}
+    usage = {"pokemon": {"cinderace": {}}}
+    dex = {"entries": [{"en": "Cinderace", "meta": {"slug": "cinderace"}}]}
+    # Vorher (nur aus_nutzung bekannt): bleibt draussen -> das Pendel
+    neu_alt, _ = roster_modul.nutzungsformen(set(), smogon, usage, dex, eigene=[])
+    assert "Cinderace" not in neu_alt
+    # Jetzt: die frueheren Team-Ergaenzungen zaehlen nicht mit
+    eigene = roster_modul.frueher_ergaenzt({"_meta": {"aus_teams": ["Cinderace"]}})
+    neu, _ = roster_modul.nutzungsformen(set(), smogon, usage, dex, eigene=eigene)
+    assert neu == ["Cinderace"]
+    # Und wer heute noch in den Teams steht (vorhanden), wird nicht doppelt angelegt
+    neu2, _ = roster_modul.nutzungsformen({"Cinderace"}, smogon, usage, dex, eigene=eigene)
+    assert neu2 == []

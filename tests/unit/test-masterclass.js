@@ -26,6 +26,17 @@ const FRAGMENT = fs.readFileSync(path.join(WURZEL, 'masterclass', 'mega-stalobor
 const CSS = fs.readFileSync(path.join(WURZEL, 'css', 'masterclass.css'), 'utf8');
 const INDEX = fs.readFileSync(path.join(WURZEL, 'index.html'), 'utf8');
 const I18N = fs.readFileSync(path.join(WURZEL, 'js', 'i18n.js'), 'utf8');
+/* Die beiden Online-Fenster stehen in der Legende des Stuecks selbst
+ * ("<b>X</b> ist das laufende Online-Format, <b>Y</b> das Online-Format davor").
+ * Fest eingetragene Namen machten diesen Test beim naechsten Setwechsel rot,
+ * obwohl das Stueck stimmt (Setwechsel-Probe, PR #893, 01.10.2026). Dass die
+ * Legende zu den DATEN passt, prueft tests/python/test_masterclass_kartennamen.py
+ * gegen data/format_window.json — dieser Test liest bewusst nichts aus data/
+ * (tests/unit/test-testdaten-wachhund.js). */
+const LEGENDE = (FRAGMENT.match(/<b>([^<]+)<\/b> ist das laufende Online-Format, <b>([^<]+)<\/b> das Online-Format davor/) || []);
+const KOPF_JETZT = LEGENDE[1];
+const KOPF_DAVOR = LEGENDE[2];
+const dateiZu = (kopf) => `online_api_matchups_${kopf.replace('\u2013', '-')}.csv`;
 const SWITCH = fs.readFileSync(path.join(WURZEL, 'js', 'firebase-collection.js'), 'utf8');
 
 /* Kommentare heraus, bevor Quelltext nach Zeichenketten durchsucht wird.
@@ -266,14 +277,12 @@ test('jedes Matchup zeigt drei Metas und Tims Einschaetzung', () => {
      * sein Meta nennen. Der laufende kommt aus data/format_window.json,
      * genau wie im Rest der Seite; die Majors-Spalte traegt ihr Format
      * in Klammern, weil sie aus einem anderen stammt. */
-    /* Das laufende Fenster kommt aus dem Stempel des Stuecks selbst
-     * (data-mcl-drucke-fenster) — der wird beim Bau aus
-     * data/format_window.json gesetzt und in der Python-Zusicherung
-     * dagegen geprueft. So haengt dieser Test nicht an den Daten dieser
-     * Woche (tests/unit/test-testdaten-wachhund.js). */
-    const stempel = (FRAGMENT.match(/data-mcl-drucke-fenster="([^"]+)"/) || [])[1];
-    assert.ok(stempel, 'der Formatfenster-Stempel des Stuecks fehlt');
-    const laufend = stempel.replace('-', '\u2013');
+    /* Das laufende Fenster steht in der Legende des Stuecks; der Stempel
+     * data-mcl-drucke-fenster gehoert zu den DRUCKEN der Listen und bleibt beim
+     * Setwechsel stehen. Die Spaltenkoepfe rueckt scripts/masterclass_zahlen_nachziehen.py
+     * (online_umstellen) mit dem Wochenlauf nach. */
+    assert.ok(KOPF_JETZT && KOPF_DAVOR, 'die Legende der Online-Spalten fehlt');
+    const laufend = KOPF_JETZT;
     const koepfe = [...FRAGMENT.matchAll(/<span class="mcl-wr3">([\s\S]*?)<\/span><\/span>/g)]
         .map((m) => [...m[1].matchAll(/<em>([^<]+)<\/em>/g)].map((e) => e[1]).join('|'));
     assert.strictEqual(koepfe.length, mus, `${koepfe.length} Zahlenreihen auf ${mus} Matchups`);
@@ -285,6 +294,8 @@ test('jedes Matchup zeigt drei Metas und Tims Einschaetzung', () => {
         `die erste Spalte heisst "${k1}", das laufende Formatfenster ist "${laufend}"`);
     assert.ok(/^[A-Z0-9]+\u2013[A-Z0-9]+$/.test(k2) && k2 !== k1,
         `die zweite Spalte nennt kein eigenes Meta: "${k2}"`);
+    assert.strictEqual(k2, KOPF_DAVOR,
+        `die zweite Spalte heisst "${k2}", die Legende nennt "${KOPF_DAVOR}"`);
     assert.ok(/^Majors \([A-Z0-9]+\u2013[A-Z0-9]+\)$/.test(k3),
         `die Majors-Spalte nennt ihr Format nicht in Klammern: "${k3}"`);
     assert.strictEqual(k4, 'Tim', `die vierte Spalte heisst "${k4}"`);
@@ -301,7 +312,7 @@ test('jedes Matchup zeigt drei Metas und Tims Einschaetzung', () => {
 
     /* Und die Zahlen muessen als das beschriftet sein, was sie sind. */
     assert.ok(/Win % nach Matchpunkten/.test(FRAGMENT), 'die Konvention der Quoten steht nirgends');
-    assert.ok(/online_api_matchups_TEF-30C\.csv/.test(FRAGMENT), 'die Quelle des aktuellen Metas fehlt');
+    assert.ok(FRAGMENT.includes(dateiZu(KOPF_JETZT)), 'die Quelle des aktuellen Metas fehlt');
     assert.ok(/labs_tournament_matchups\.csv/.test(FRAGMENT), 'die Quelle der Majors fehlt');
 });
 
@@ -327,8 +338,8 @@ test('das Stueck nennt seine Quellen und behauptet keine eigenen Zahlen', () => 
      * denen die Quoten selbst gerechnet werden — die alte Zeile waere
      * eine vierte Zahl fuer dieselbe Frage gewesen. */
     [
-        'online_api_matchups_TEF-30C.csv',
-        'online_api_matchups_TEF-PBL.csv',
+        dateiZu(KOPF_JETZT),
+        dateiZu(KOPF_DAVOR),
         'labs_tournament_matchups.csv',
         'limitless_online_decks.csv',
     ].forEach((quelle) => {

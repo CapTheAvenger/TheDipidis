@@ -71,8 +71,8 @@
           en: ['Most played archetypes', ''] },
         { id: 'heatmap', auf: true,  nimm: ['#matchupHeatmapContainer'],
           /* UI-14 (27.09.2026, Hausi): „Matchups" → „Matchup Heatmap". */
-          de: ['Matchup Heatmap', ''],
-          en: ['Matchup heatmap', ''] },
+          de: ['Matchup Heatmap', '{daten}'],
+          en: ['Matchup heatmap', '{daten}'] },
         /* „Dein Deck gegen das Meta" stand bis zum 11.09.2026 hier.
            Erst zog die Rechnung in den Meta Call, dann blieb an dieser
            Stelle ein Abschnitt, der nur noch einen Verweis trug — und
@@ -84,8 +84,8 @@
            konkreten Deck, statt als leerer Abschnitt herumzustehen.
            js/ds-ev-rechner.js ist damit entfallen. */
         { id: 'tiers',   auf: true, nimm: ['__tiers__'],
-          de: ['Tier-Liste', 'alle Archetypen nach Stärke gruppiert'],
-          en: ['Tier list', 'all archetypes grouped by strength'] },
+          de: ['Tier-Liste', 'alle Archetypen nach Stärke gruppiert · {daten}'],
+          en: ['Tier list', 'all archetypes grouped by strength · {daten}'] },
         /* Der Untertitel nennt die Kennzahl so, wie die Spalte darunter
            sie nennt. Die Spalte liest new_winrate aus
            data/limitless_online_decks_comparison.csv; das ist
@@ -143,9 +143,32 @@
         });
     }
 
+    /* UI-40 (01.10.2026, Hausi 28.09.): die Datenherkunft steht EINMAL in
+       der Ueberschrift — „Online: TEF–30C · Major: TEF–PBL" — statt an
+       jeder Stelle einzeln. Beide Schluessel kommen aus den Daten: das
+       laufende Format aus window.getCurrentMetaFormat() (format_window.json),
+       der Major-Auszug aus window.getMajorDatenFormat() (der Datei, die
+       tatsaechlich geladen wurde). Ist einer unbekannt, steht nur der andere
+       da; sind beide unbekannt, nichts. */
+    function datenZeile() {
+        var jetzt = (typeof window.getCurrentMetaFormat === 'function')
+            ? String(window.getCurrentMetaFormat() || '').trim().toUpperCase() : '';
+        var major = (typeof window.getMajorDatenFormat === 'function')
+            ? String(window.getMajorDatenFormat() || '').trim().toUpperCase() : '';
+        var teile = [];
+        if (jetzt) teile.push('Online: ' + jetzt.replace(/-/g, '–'));
+        if (major) teile.push('Major: ' + major.replace(/-/g, '–'));
+        return teile.join(' · ');
+    }
+
+    function fuelleDaten(text) {
+        var z = datenZeile();
+        return String(text || '').replace(/\{daten\}/g, z).replace(/\s*·\s*$/, '');
+    }
+
     function texte(s) {
         var t = de() ? s.de : s.en;
-        return [fuelleQuoten(t[0]), fuelleQuoten(t[1])];
+        return [fuelleQuoten(t[0]), fuelleDaten(fuelleQuoten(t[1]))];
     }
 
     /* UI-13: jeder Abschnitt ist offen, immer. Ein gemerkter alter
@@ -511,6 +534,8 @@
         // i18n verschickt auf document und ohne bubbles — auf window
         // kaeme es nie an. Das war der Fehler aus Block 4.
         document.addEventListener('languageChanged', neuBeschriften);
+        /* UI-40: der Major-Schluessel steht erst nach dem Laden fest. */
+        document.addEventListener('majorFormatGeladen', neuBeschriften);
         window.addEventListener('languageChanged', neuBeschriften);
     }
 

@@ -92,8 +92,9 @@ jobs:
           # die Gegenprobe hinter den Pokemon-Pocket-Scan-Codes: einen
           # Code auslesen, neu erzeugen, WIEDER auslesen und beide
           # Inhalte vergleichen. Ohne sie ueberspringt pytest genau diese
-          # Pruefung still (tests/python/test_pocket_tierlist.py,
-          # _qr_noetig) — der Lauf waere gruen und niemand haette
+          # Pruefung still (frueher tests/python/test_pocket_tierlist.py, seit
+          # PR #874 entfernt; heute tests/nebenbereiche/python/test_qr_svg.py
+          # mit pytest.skip bei fehlender Bibliothek) — der Lauf waere gruen und niemand haette
           # geprueft, ob ein Code beim Rendern zu etwas anderem wird.
           # Der Nutzer scannt dann ins Leere, und der Scan-Code ist der
           # ganze Zweck des Reiters.

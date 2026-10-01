@@ -224,6 +224,59 @@ def majors_umstellen(roh, meta_neu, laufend):
                                                 n_blasen, n_legende, n_quelle)]
 
 
+LEGENDE_ONLINE = re.compile(
+    r"<b>([^<]+)</b> ist das laufende Online-Format, "
+    r"<b>([^<]+)</b> das Online-Format davor")
+
+
+def online_umstellen(roh, jetzt_neu, davor_neu):
+    """Stellt die beiden Online-Spalten des Stuecks auf ein NEUES Formatfenster um.
+
+    ANLASS 01.10.2026 (Setwechsel-Probe, PR #893). Seit DA-20 kommen die
+    Spaltenkoepfe aus format_window.json statt aus dem Quelltext. Beim
+    naechsten Setwechsel (TEF-30C -> TEF-ZZN) stuende im Stueck aber noch
+    "TEF\u201330C / TEF\u2013PBL": der Erzeuger faende keine Zelle mit dem neuen
+    Kopf, braeche ab, und das Tor hielte den Wochenlauf an, bis jemand das
+    Stueck von Hand umschreibt. Wie `majors_umstellen` fuer die Majors-Spalte
+    benennt dieser Schritt nur um, was die Spalten BENENNT: Zellkopf,
+    Sprechblasenanfang, Legendensatz, Quellenzeile. Die Zahlen rechnet danach
+    `nachziehen`. Eine Abbildung, kein Kettenersetzen: aus (30C, PBL) wird
+    (ZZN, 30C), ohne dass ein Kopf zweimal umbenannt wird.
+    Gibt (Text, Aenderungen) zurueck."""
+    m = LEGENDE_ONLINE.search(roh)
+    if not m:
+        return roh, []
+    jetzt_alt, davor_alt = m.group(1), m.group(2)
+    if (jetzt_alt, davor_alt) == (jetzt_neu, davor_neu):
+        return roh, []
+    ab = {jetzt_alt: jetzt_neu, davor_alt: davor_neu}
+    zaehler = [0]
+
+    def umbenannt(kopf):
+        if kopf in ab and ab[kopf] != kopf:
+            zaehler[0] += 1
+            return ab[kopf]
+        return kopf
+
+    t = LEGENDE_ONLINE.sub(
+        lambda x: "<b>%s</b> ist das laufende Online-Format, <b>%s</b> das Online-Format davor"
+        % (umbenannt(x.group(1)), umbenannt(x.group(2))), roh, count=1)
+    t = re.sub(r"<em>([^<]+)</em>",
+               lambda x: "<em>%s</em>" % umbenannt(x.group(1)), t)
+    t = re.sub(r'title="Online-Meta ([^ (]+) \(',
+               lambda x: 'title="Online-Meta %s (' % umbenannt(x.group(1)), t)
+
+    def quellzeile(x):
+        kopf = umbenannt(x.group(1))
+        return "%s (online): <code>data/online_api_matchups_%s.csv</code>" % (
+            kopf, kopf.replace("\u2013", "-"))
+
+    t = re.sub(r"([^\s<>]+) \(online\): <code>data/online_api_matchups_[^<]+\.csv</code>",
+               quellzeile, t)
+    return t, ["Online-Spalten umgestellt: %s/%s -> %s/%s (%d Stellen)"
+               % (jetzt_alt, davor_alt, jetzt_neu, davor_neu, zaehler[0])]
+
+
 def koepfe():
     """Die drei Spaltenkoepfe, so wie sie im Stueck stehen muessen."""
     return {
@@ -490,7 +543,9 @@ def main():
         k["majors"]: _majors(),
     }
     laufend = _fenster_aus_dateiname(ONLINE_JETZT)
+    roh, online_umst = online_umstellen(roh, k["jetzt"], k["davor"])
     roh, umstellung = majors_umstellen(roh, _majors_meta(), laufend)
+    umstellung = online_umst + umstellung
     neu, aenderungen, ohne_slug = nachziehen(roh, quellen, _slugs())
     aenderungen = umstellung + aenderungen
     neu, stand_aend = stand_nachziehen(neu)

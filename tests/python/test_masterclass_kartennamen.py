@@ -346,8 +346,21 @@ def test_listendruck_ist_der_neueste_guenstige_sammlerdruck_der_hochwertigste():
 # Die Matchup-Zahlen stehen so im Stueck, wie die Rohdaten sie hergeben
 # ---------------------------------------------------------------------------
 
-ONLINE_JETZT = os.path.join(WURZEL, "data", "online_api_matchups_TEF-30C.csv")
-ONLINE_DAVOR = os.path.join(WURZEL, "data", "online_api_matchups_TEF-PBL.csv")
+def _fenster_dateien():
+    """Die beiden Online-Dateien aus data/format_window.json — wie der
+    Erzeuger (DA-20, 01.10.2026). Fest eingetragene Namen liessen diesen Test
+    beim naechsten Setwechsel rot werden, obwohl das Stueck stimmt
+    (Setwechsel-Probe, PR #893)."""
+    import json
+    with open(os.path.join(WURZEL, "data", "format_window.json"), encoding="utf-8") as f:
+        fw = json.load(f)
+    jetzt = "%s-%s" % (fw["oldest_legal_set"], fw["current_set"])
+    davor = str(fw["previous_format_key"])
+    return tuple(os.path.join(WURZEL, "data", "online_api_matchups_%s.csv" % n)
+                 for n in (jetzt, davor))
+
+
+ONLINE_JETZT, ONLINE_DAVOR = _fenster_dateien()
 LABS_MU = os.path.join(WURZEL, "data", "labs_tournament_matchups.csv")
 ARCHETYPEN = os.path.join(WURZEL, "data", "online_api_archetypes.csv")
 MINDEST_PARTIEN = 30

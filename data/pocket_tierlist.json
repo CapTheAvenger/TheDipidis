@@ -4,7 +4,7 @@
   "quelle": "play.limitlesstcg.com",
   "quelle_url": "https://play.limitlesstcg.com/tournaments?game=POCKET&format=STANDARD",
   "quelle_hinweis": "Anteil und Siegquote sind gezählt, aus den Standings der Standardturniere auf Limitless. Die Stufe ist UNSERE Regel über diese beiden Zahlen (stufenregel), keine Einschätzung von Limitless. Die Oberfläche muss das anschreiben.",
-  "abgerufen": "2026-10-01T05:33:10+00:00",
+  "abgerufen": "2026-10-01T18:53:18+00:00",
   "fenster": {
    "von": "2026-09-17",
    "bis": "2026-10-01",
@@ -12,9 +12,9 @@
   },
   "min_spieler": 16,
   "min_listen": 10,
-  "turniere": 32,
-  "spieler": 2264,
-  "listen": 2264,
+  "turniere": 34,
+  "spieler": 2376,
+  "listen": 2376,
   "listen_hinweis": "Nenner des Anteils: alle Listen mit Archetyp in den Turnieren des Fensters. Limitless führt nicht zu jedem Spieler eine Liste, deshalb ist die Zahl kleiner als die Spielerzahl.",
   "stufenregel": [
    {
@@ -43,24 +43,133 @@
   "liste_hinweis": "Je Deck die gespielte Liste mit der besten Bilanz im Fenster (Siege minus Niederlagen, dann Siege, dann die jüngere). Ergibt sie keinen gültigen Code, die nächste — dann steht der Grund in liste_von.warum_nicht_die_beste.",
   "code_hinweis": "Der Scan-Code ist aus genau dieser Liste gebaut, mit ihrer Energie, in der Kodierung von js/pocket-deckcode.js und mit den Kennungen aus data/pocket_karten_ids.json.",
   "unter_min_listen": {
-   "archetypen": 221,
-   "listen": 407
+   "archetypen": 230,
+   "listen": 417
   },
   "ohne_code": [],
   "offene_turniere": []
  },
  "decks": [
   {
+   "id": "mega-altaria-ex-b1-espeon-b3a",
+   "name": "Mega Altaria ex Espeon",
+   "tier": "S",
+   "anteil": 0.0926,
+   "listen": 220,
+   "siege": 637,
+   "niederlagen": 578,
+   "unentschieden": 47,
+   "quote": 0.5048,
+   "turniere": 31,
+   "liste_von": {
+    "turnier": "$40 USD+FA | 巫獅對戰塔盃 LeoWizard BattleTower Cup #12",
+    "datum": "2026-09-19",
+    "platz": 1,
+    "bilanz": [
+     10,
+     1,
+     1
+    ],
+    "rang": 1
+   },
+   "pokemon": [
+    {
+     "anzahl": 2,
+     "name": "Swablu",
+     "nummer": "196",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Mega Altaria ex",
+     "nummer": "102",
+     "set": "B1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Eevee",
+     "nummer": "184",
+     "set": "B1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Espeon",
+     "nummer": "020",
+     "set": "B3a"
+    },
+    {
+     "anzahl": 2,
+     "name": "Darkrai",
+     "nummer": "040",
+     "set": "B2b"
+    },
+    {
+     "anzahl": 1,
+     "name": "Igglybuff",
+     "nummer": "059",
+     "set": "A4a"
+    }
+   ],
+   "trainer": [
+    {
+     "anzahl": 2,
+     "name": "Professor's Research",
+     "nummer": "007",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Copycat",
+     "nummer": "225",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Sabrina",
+     "nummer": "225",
+     "set": "A1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 1,
+     "name": "Field Blower",
+     "nummer": "147",
+     "set": "B3"
+    },
+    {
+     "anzahl": 1,
+     "name": "Small Balloon",
+     "nummer": "064",
+     "set": "B3b"
+    },
+    {
+     "anzahl": 1,
+     "name": "Training Area",
+     "nummer": "153",
+     "set": "B2"
+    }
+   ],
+   "energie": [
+    "Psychic"
+   ],
+   "code": "CpiWqJiWqJiaXpiaXpiXKpiWnpiWnpibgJicFpia9AoAMewAMewALkAAMXQAMXQAR64AR64AQDgAQDgAKfQBBQ=="
+  },
+  {
    "id": "hoopa-ex-b4-mega-absol-ex-b1",
    "name": "Hoopa ex Mega Absol ex",
    "tier": "S",
-   "anteil": 0.0512,
-   "listen": 116,
-   "siege": 353,
-   "niederlagen": 294,
-   "unentschieden": 32,
-   "quote": 0.5199,
-   "turniere": 30,
+   "anteil": 0.0501,
+   "listen": 119,
+   "siege": 362,
+   "niederlagen": 304,
+   "unentschieden": 33,
+   "quote": 0.5179,
+   "turniere": 31,
    "liste_von": {
     "turnier": "PMPT #47 - TEAM ROCKETS ADMIRATION!!! | $100 USD",
     "datum": "2026-09-19",
@@ -166,125 +275,16 @@
    "code": "EJiWqJiWqJiXwJiXwJiX8piYLpiaXpiWnpiWnpiapJiapJiWlJiY4pibgJiccJiccAQAUKAAUKAAD0YAMCoBBw=="
   },
   {
-   "id": "mega-altaria-ex-b1-espeon-b3a",
-   "name": "Mega Altaria ex Espeon",
-   "tier": "A",
-   "anteil": 0.0919,
-   "listen": 208,
-   "siege": 581,
-   "niederlagen": 545,
-   "unentschieden": 40,
-   "quote": 0.4983,
-   "turniere": 29,
-   "liste_von": {
-    "turnier": "$40 USD+FA | 巫獅對戰塔盃 LeoWizard BattleTower Cup #12",
-    "datum": "2026-09-19",
-    "platz": 1,
-    "bilanz": [
-     10,
-     1,
-     1
-    ],
-    "rang": 1
-   },
-   "pokemon": [
-    {
-     "anzahl": 2,
-     "name": "Swablu",
-     "nummer": "196",
-     "set": "B1"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mega Altaria ex",
-     "nummer": "102",
-     "set": "B1"
-    },
-    {
-     "anzahl": 2,
-     "name": "Eevee",
-     "nummer": "184",
-     "set": "B1"
-    },
-    {
-     "anzahl": 2,
-     "name": "Espeon",
-     "nummer": "020",
-     "set": "B3a"
-    },
-    {
-     "anzahl": 2,
-     "name": "Darkrai",
-     "nummer": "040",
-     "set": "B2b"
-    },
-    {
-     "anzahl": 1,
-     "name": "Igglybuff",
-     "nummer": "059",
-     "set": "A4a"
-    }
-   ],
-   "trainer": [
-    {
-     "anzahl": 2,
-     "name": "Professor's Research",
-     "nummer": "007",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 2,
-     "name": "Copycat",
-     "nummer": "225",
-     "set": "B1"
-    },
-    {
-     "anzahl": 1,
-     "name": "Sabrina",
-     "nummer": "225",
-     "set": "A1"
-    },
-    {
-     "anzahl": 2,
-     "name": "Poké Ball",
-     "nummer": "005",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 1,
-     "name": "Field Blower",
-     "nummer": "147",
-     "set": "B3"
-    },
-    {
-     "anzahl": 1,
-     "name": "Small Balloon",
-     "nummer": "064",
-     "set": "B3b"
-    },
-    {
-     "anzahl": 1,
-     "name": "Training Area",
-     "nummer": "153",
-     "set": "B2"
-    }
-   ],
-   "energie": [
-    "Psychic"
-   ],
-   "code": "CpiWqJiWqJiaXpiaXpiXKpiWnpiWnpibgJicFpia9AoAMewAMewALkAAMXQAMXQAR64AR64AQDgAQDgAKfQBBQ=="
-  },
-  {
    "id": "butterfree-b3b-mega-sceptile-ex-b3",
    "name": "Butterfree Mega Sceptile ex",
    "tier": "A",
-   "anteil": 0.0534,
-   "listen": 121,
-   "siege": 328,
-   "niederlagen": 313,
-   "unentschieden": 17,
-   "quote": 0.4985,
-   "turniere": 24,
+   "anteil": 0.0556,
+   "listen": 132,
+   "siege": 355,
+   "niederlagen": 346,
+   "unentschieden": 21,
+   "quote": 0.4917,
+   "turniere": 26,
    "liste_von": {
     "turnier": "PMPT #47 - TEAM ROCKETS ADMIRATION!!! | $100 USD",
     "datum": "2026-09-19",
@@ -393,13 +393,13 @@
    "id": "vespiquen-ex-b4-shuckle-ex-a4",
    "name": "Vespiquen ex Shuckle ex",
    "tier": "A",
-   "anteil": 0.053,
-   "listen": 120,
-   "siege": 326,
-   "niederlagen": 322,
-   "unentschieden": 22,
-   "quote": 0.4866,
-   "turniere": 28,
+   "anteil": 0.0513,
+   "listen": 122,
+   "siege": 334,
+   "niederlagen": 327,
+   "unentschieden": 24,
+   "quote": 0.4876,
+   "turniere": 30,
    "liste_von": {
     "turnier": "Block Dragon $30 PRIZE POOL",
     "datum": "2026-09-20",
@@ -497,13 +497,13 @@
    "id": "dragonair-mega-rayquaza-ex-b4",
    "name": "Dragonair Mega Rayquaza ex",
    "tier": "A",
-   "anteil": 0.0504,
-   "listen": 114,
-   "siege": 287,
-   "niederlagen": 289,
+   "anteil": 0.0488,
+   "listen": 116,
+   "siege": 294,
+   "niederlagen": 295,
    "unentschieden": 17,
-   "quote": 0.484,
-   "turniere": 30,
+   "quote": 0.4851,
+   "turniere": 32,
    "liste_von": {
     "turnier": "$40 USD+FA | 巫獅對戰塔盃 LeoWizard BattleTower Cup #12",
     "datum": "2026-09-19",
@@ -604,16 +604,114 @@
    "code": "DZiWqJiWqJiaXpiaXpiYLpib+JiXKpiWnpiWnpib2picFpictpictgcAQKYAQKYAUSwAUSwASQIASQIAUUoCAgQ="
   },
   {
+   "id": "mega-altaria-ex-b1-greninja-a1",
+   "name": "Mega Altaria ex Greninja",
+   "tier": "A",
+   "anteil": 0.0412,
+   "listen": 98,
+   "siege": 264,
+   "niederlagen": 265,
+   "unentschieden": 14,
+   "quote": 0.4862,
+   "turniere": 30,
+   "liste_von": {
+    "turnier": "$40 USD+FA | 巫獅對戰塔盃 LeoWizard BattleTower Cup #12",
+    "datum": "2026-09-19",
+    "platz": 4,
+    "bilanz": [
+     8,
+     3,
+     0
+    ],
+    "rang": 3,
+    "warum_nicht_die_beste": "die Liste nennt keine Energie"
+   },
+   "pokemon": [
+    {
+     "anzahl": 2,
+     "name": "Swablu",
+     "nummer": "196",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Mega Altaria ex",
+     "nummer": "102",
+     "set": "B1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Froakie",
+     "nummer": "087",
+     "set": "A1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Greninja",
+     "nummer": "089",
+     "set": "A1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Chingling",
+     "nummer": "109",
+     "set": "B1"
+    }
+   ],
+   "trainer": [
+    {
+     "anzahl": 2,
+     "name": "Professor's Research",
+     "nummer": "007",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Copycat",
+     "nummer": "225",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Cyrus",
+     "nummer": "150",
+     "set": "A2"
+    },
+    {
+     "anzahl": 2,
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Rare Candy",
+     "nummer": "144",
+     "set": "A3"
+    },
+    {
+     "anzahl": 2,
+     "name": "Lucky Egg",
+     "nummer": "148",
+     "set": "B3"
+    }
+   ],
+   "energie": [
+    "Psychic"
+   ],
+   "code": "C5iWqJiWqJiaXpiaXpiXwJiWnpiWnpiYYJiYYJibipibigkAMewAMewALkAAA2YAA2YAA3oAA3oALoYALoYBBQ=="
+  },
+  {
    "id": "suicune-ex-a4a-baxcalibur-b2a",
    "name": "Suicune ex Baxcalibur",
    "tier": "A",
-   "anteil": 0.0358,
-   "listen": 81,
-   "siege": 234,
-   "niederlagen": 204,
+   "anteil": 0.037,
+   "listen": 88,
+   "siege": 250,
+   "niederlagen": 226,
    "unentschieden": 12,
-   "quote": 0.52,
-   "turniere": 23,
+   "quote": 0.5123,
+   "turniere": 25,
    "liste_von": {
     "turnier": "PMPT #48 - TEAM ROCKETS ALTERCATION!!! | $100 USD",
     "datum": "2026-09-26",
@@ -711,13 +809,13 @@
    "id": "mega-charizard-y-ex-b1a-entei-ex-a4a",
    "name": "Mega Charizard Y ex Entei ex",
    "tier": "A",
-   "anteil": 0.0331,
-   "listen": 75,
-   "siege": 199,
-   "niederlagen": 186,
+   "anteil": 0.0328,
+   "listen": 78,
+   "siege": 206,
+   "niederlagen": 196,
    "unentschieden": 10,
-   "quote": 0.5038,
-   "turniere": 25,
+   "quote": 0.5,
+   "turniere": 26,
    "liste_von": {
     "turnier": "⭐Nuggie's POG Tourney #15 Deluxe Edition $20 1st⭐",
     "datum": "2026-09-30",
@@ -732,84 +830,84 @@
    },
    "pokemon": [
     {
+     "anzahl": 2,
      "name": "Charmander",
-     "anzahl": 2,
-     "set": "B2b",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "B2b"
     },
     {
+     "anzahl": 2,
      "name": "Charmeleon",
-     "anzahl": 2,
-     "set": "B2b",
-     "nummer": "008"
+     "nummer": "008",
+     "set": "B2b"
     },
     {
+     "anzahl": 1,
      "name": "Mega Charizard Y ex",
-     "anzahl": 1,
-     "set": "B1a",
-     "nummer": "014"
+     "nummer": "014",
+     "set": "B1a"
     },
     {
+     "anzahl": 1,
      "name": "Charizard",
-     "anzahl": 1,
-     "set": "B1a",
-     "nummer": "013"
+     "nummer": "013",
+     "set": "B1a"
     },
     {
-     "name": "Entei ex",
      "anzahl": 2,
-     "set": "A4a",
-     "nummer": "010"
+     "name": "Entei ex",
+     "nummer": "010",
+     "set": "A4a"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 1,
      "name": "Pokémon Center Lady",
-     "anzahl": 1,
-     "set": "A2b",
-     "nummer": "070"
+     "nummer": "070",
+     "set": "A2b"
     },
     {
+     "anzahl": 1,
      "name": "Copycat",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Wally",
-     "anzahl": 1,
-     "set": "B4",
-     "nummer": "153"
+     "nummer": "153",
+     "set": "B4"
     },
     {
+     "anzahl": 2,
      "name": "Poké Ball",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "005"
+     "nummer": "005",
+     "set": "P-A"
     },
     {
+     "anzahl": 2,
      "name": "Flame Patch",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "217"
+     "nummer": "217",
+     "set": "B1"
     },
     {
-     "name": "Giant Cape",
      "anzahl": 1,
-     "set": "A2",
-     "nummer": "147"
+     "name": "Giant Cape",
+     "nummer": "147",
+     "set": "A2"
     },
     {
-     "name": "Rainbow Cave",
      "anzahl": 2,
-     "set": "B4",
-     "nummer": "155"
+     "name": "Rainbow Cave",
+     "nummer": "155",
+     "set": "B4"
     }
    ],
    "energie": [
@@ -821,13 +919,13 @@
    "id": "magnezone-b1a-miraidon-ex-b3a",
    "name": "Magnezone Miraidon ex",
    "tier": "A",
-   "anteil": 0.0309,
-   "listen": 70,
-   "siege": 206,
-   "niederlagen": 178,
-   "unentschieden": 19,
-   "quote": 0.5112,
-   "turniere": 25,
+   "anteil": 0.032,
+   "listen": 76,
+   "siege": 225,
+   "niederlagen": 195,
+   "unentschieden": 23,
+   "quote": 0.5079,
+   "turniere": 26,
    "liste_von": {
     "turnier": "$40 USD+FA | 巫獅對戰塔盃 LeoWizard BattleTower Cup #13",
     "datum": "2026-09-26",
@@ -937,13 +1035,13 @@
    "id": "mega-blaziken-ex-b1",
    "name": "Mega Blaziken ex",
    "tier": "A",
-   "anteil": 0.0287,
-   "listen": 65,
-   "siege": 213,
-   "niederlagen": 158,
+   "anteil": 0.0286,
+   "listen": 68,
+   "siege": 225,
+   "niederlagen": 167,
    "unentschieden": 18,
-   "quote": 0.5476,
-   "turniere": 23,
+   "quote": 0.5488,
+   "turniere": 25,
    "liste_von": {
     "turnier": "PMPT #48 - TEAM ROCKETS ALTERCATION!!! | $100 USD",
     "datum": "2026-09-26",
@@ -1046,13 +1144,13 @@
    "id": "hydreigon-mega-absol-ex-b1",
    "name": "Hydreigon Mega Absol ex",
    "tier": "A",
-   "anteil": 0.0283,
-   "listen": 64,
-   "siege": 186,
-   "niederlagen": 179,
-   "unentschieden": 8,
-   "quote": 0.4987,
-   "turniere": 25,
+   "anteil": 0.0282,
+   "listen": 67,
+   "siege": 195,
+   "niederlagen": 190,
+   "unentschieden": 10,
+   "quote": 0.4937,
+   "turniere": 26,
    "liste_von": {
     "turnier": "PMPT #48 - TEAM ROCKETS ALTERCATION!!! | $100 USD",
     "datum": "2026-09-26",
@@ -1150,13 +1248,13 @@
    "id": "mega-lucario-ex-b3-lucario-a2",
    "name": "Mega Lucario ex Lucario",
    "tier": "B",
-   "anteil": 0.0618,
-   "listen": 140,
-   "siege": 321,
-   "niederlagen": 379,
-   "unentschieden": 18,
-   "quote": 0.4471,
-   "turniere": 29,
+   "anteil": 0.0614,
+   "listen": 146,
+   "siege": 342,
+   "niederlagen": 398,
+   "unentschieden": 20,
+   "quote": 0.45,
+   "turniere": 31,
    "liste_von": {
     "turnier": "PMPT #47 - TEAM ROCKETS ADMIRATION!!! | $100 USD",
     "datum": "2026-09-19",
@@ -1166,7 +1264,7 @@
      3,
      0
     ],
-    "rang": 4,
+    "rang": 5,
     "warum_nicht_die_beste": "die Liste nennt keine Energie"
    },
    "pokemon": [
@@ -1269,114 +1367,16 @@
    "code": "DZiaXpiaXpiWqJiWqJiXwJiYLpiblJiWnpiWnpiWlJiapJibgJibxgcADogADogARDQARDQADpIARBYABgQBBg=="
   },
   {
-   "id": "mega-altaria-ex-b1-greninja-a1",
-   "name": "Mega Altaria ex Greninja",
-   "tier": "B",
-   "anteil": 0.0406,
-   "listen": 92,
-   "siege": 232,
-   "niederlagen": 254,
-   "unentschieden": 10,
-   "quote": 0.4677,
-   "turniere": 28,
-   "liste_von": {
-    "turnier": "$40 USD+FA | 巫獅對戰塔盃 LeoWizard BattleTower Cup #12",
-    "datum": "2026-09-19",
-    "platz": 4,
-    "bilanz": [
-     8,
-     3,
-     0
-    ],
-    "rang": 2,
-    "warum_nicht_die_beste": "die Liste nennt keine Energie"
-   },
-   "pokemon": [
-    {
-     "anzahl": 2,
-     "name": "Swablu",
-     "nummer": "196",
-     "set": "B1"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mega Altaria ex",
-     "nummer": "102",
-     "set": "B1"
-    },
-    {
-     "anzahl": 2,
-     "name": "Froakie",
-     "nummer": "087",
-     "set": "A1"
-    },
-    {
-     "anzahl": 2,
-     "name": "Greninja",
-     "nummer": "089",
-     "set": "A1"
-    },
-    {
-     "anzahl": 2,
-     "name": "Chingling",
-     "nummer": "109",
-     "set": "B1"
-    }
-   ],
-   "trainer": [
-    {
-     "anzahl": 2,
-     "name": "Professor's Research",
-     "nummer": "007",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 2,
-     "name": "Copycat",
-     "nummer": "225",
-     "set": "B1"
-    },
-    {
-     "anzahl": 1,
-     "name": "Cyrus",
-     "nummer": "150",
-     "set": "A2"
-    },
-    {
-     "anzahl": 2,
-     "name": "Poké Ball",
-     "nummer": "005",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 2,
-     "name": "Rare Candy",
-     "nummer": "144",
-     "set": "A3"
-    },
-    {
-     "anzahl": 2,
-     "name": "Lucky Egg",
-     "nummer": "148",
-     "set": "B3"
-    }
-   ],
-   "energie": [
-    "Psychic"
-   ],
-   "code": "C5iWqJiWqJiaXpiaXpiXwJiWnpiWnpiYYJiYYJibipibigkAMewAMewALkAAA2YAA2YAA3oAA3oALoYALoYBBQ=="
-  },
-  {
    "id": "dedenne-ex-b3b-indeedee-ex-b1",
    "name": "Dedenne ex Indeedee ex",
    "tier": "B",
-   "anteil": 0.0181,
-   "listen": 41,
-   "siege": 113,
-   "niederlagen": 106,
-   "unentschieden": 10,
-   "quote": 0.4934,
-   "turniere": 17,
+   "anteil": 0.0185,
+   "listen": 44,
+   "siege": 125,
+   "niederlagen": 116,
+   "unentschieden": 11,
+   "quote": 0.496,
+   "turniere": 19,
    "liste_von": {
     "turnier": "$40 USD+FA | 巫獅對戰塔盃 LeoWizard BattleTower Cup #13",
     "datum": "2026-09-26",
@@ -1473,13 +1473,13 @@
    "id": "mega-manectric-ex-b2b-heliolisk-b4",
    "name": "Mega Manectric ex Heliolisk",
    "tier": "B",
-   "anteil": 0.0181,
-   "listen": 41,
-   "siege": 86,
-   "niederlagen": 107,
+   "anteil": 0.0177,
+   "listen": 42,
+   "siege": 89,
+   "niederlagen": 111,
    "unentschieden": 12,
-   "quote": 0.4195,
-   "turniere": 18,
+   "quote": 0.4198,
+   "turniere": 19,
    "liste_von": {
     "turnier": "PMPT #48 - TEAM ROCKETS ALTERCATION!!! | $100 USD",
     "datum": "2026-09-26",
@@ -1582,13 +1582,13 @@
    "id": "zoroark-ex-b3-mega-absol-ex-b1",
    "name": "Zoroark ex Mega Absol ex",
    "tier": "B",
-   "anteil": 0.0159,
-   "listen": 36,
-   "siege": 104,
-   "niederlagen": 103,
-   "unentschieden": 8,
-   "quote": 0.4837,
-   "turniere": 18,
+   "anteil": 0.0156,
+   "listen": 37,
+   "siege": 108,
+   "niederlagen": 106,
+   "unentschieden": 9,
+   "quote": 0.4843,
+   "turniere": 19,
    "liste_von": {
     "turnier": "PMPT #48 - TEAM ROCKETS ALTERCATION!!! | $100 USD",
     "datum": "2026-09-26",
@@ -1698,7 +1698,7 @@
    "id": "mega-sceptile-ex-b3-greninja-a1",
    "name": "Mega Sceptile ex Greninja",
    "tier": "B",
-   "anteil": 0.0155,
+   "anteil": 0.0147,
    "listen": 35,
    "siege": 90,
    "niederlagen": 90,
@@ -1813,13 +1813,13 @@
    "id": "charizard-ex-a1-mega-charizard-y-ex-b1a",
    "name": "Charizard ex Mega Charizard Y ex",
    "tier": "B",
-   "anteil": 0.0133,
-   "listen": 30,
+   "anteil": 0.013,
+   "listen": 31,
    "siege": 77,
-   "niederlagen": 65,
+   "niederlagen": 67,
    "unentschieden": 8,
-   "quote": 0.5133,
-   "turniere": 12,
+   "quote": 0.5066,
+   "turniere": 13,
    "liste_von": {
     "turnier": "Umbreon99's Aura Sphere #6 ($10 USD)",
     "datum": "2026-09-25",
@@ -1919,16 +1919,138 @@
    "code": "DJiWqJiWqJiYLpiYLpiaSpicopiaXpiaDpiaDpiWnpiWnpictggAPwIAPwIAPwwAPwwAAWgAM4YAJ+IAJ+IBAg=="
   },
   {
+   "id": "mega-blaziken-ex-b1-greninja-a1",
+   "name": "Mega Blaziken ex Greninja",
+   "tier": "B",
+   "anteil": 0.0118,
+   "listen": 28,
+   "siege": 75,
+   "niederlagen": 77,
+   "unentschieden": 7,
+   "quote": 0.4717,
+   "turniere": 15,
+   "liste_von": {
+    "turnier": "⭐Nuggie's POG Tourney #15 Deluxe Edition $20 1st⭐",
+    "datum": "2026-09-30",
+    "platz": 3,
+    "bilanz": [
+     6,
+     2,
+     2
+    ],
+    "rang": 2,
+    "warum_nicht_die_beste": "die Liste nennt keine Energie"
+   },
+   "pokemon": [
+    {
+     "anzahl": 2,
+     "name": "Torchic",
+     "nummer": "033",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Mega Blaziken ex",
+     "nummer": "036",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Froakie",
+     "nummer": "087",
+     "set": "A1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Greninja",
+     "nummer": "089",
+     "set": "A1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Heatmor",
+     "nummer": "044",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Castform Sunny Form",
+     "nummer": "024",
+     "set": "B3"
+    }
+   ],
+   "trainer": [
+    {
+     "anzahl": 2,
+     "name": "Professor's Research",
+     "nummer": "007",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Copycat",
+     "nummer": "225",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Cyrus",
+     "nummer": "150",
+     "set": "A2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Juliana",
+     "nummer": "071",
+     "set": "B3a"
+    },
+    {
+     "anzahl": 2,
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Rare Candy",
+     "nummer": "144",
+     "set": "A3"
+    },
+    {
+     "anzahl": 1,
+     "name": "Flame Patch",
+     "nummer": "217",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Field Blower",
+     "nummer": "147",
+     "set": "B3"
+    },
+    {
+     "anzahl": 1,
+     "name": "Hiking Trail",
+     "nummer": "069",
+     "set": "B2b"
+    }
+   ],
+   "energie": [
+    "Fire"
+   ],
+   "code": "DZiWqJiWqJiaXpiaXpiXwJib7piWnpiWnpiYYJiYYJiaDpibgJibdgcAK44AK44AK6wAA2YAA3oAK/wAQfoBAg=="
+  },
+  {
    "id": "beautifly-dustox-b4",
    "name": "Beautifly Dustox",
    "tier": "B",
-   "anteil": 0.0115,
-   "listen": 26,
-   "siege": 56,
-   "niederlagen": 72,
+   "anteil": 0.0114,
+   "listen": 27,
+   "siege": 58,
+   "niederlagen": 75,
    "unentschieden": 2,
-   "quote": 0.4308,
-   "turniere": 14,
+   "quote": 0.4296,
+   "turniere": 15,
    "liste_von": {
     "turnier": "PMPT #48 - TEAM ROCKETS ALTERCATION!!! | $100 USD",
     "datum": "2026-09-26",
@@ -2025,13 +2147,13 @@
    "id": "magnezone-ex-b3-magnezone-b1a",
    "name": "Magnezone ex Magnezone",
    "tier": "B",
-   "anteil": 0.0115,
-   "listen": 26,
+   "anteil": 0.0114,
+   "listen": 27,
    "siege": 77,
-   "niederlagen": 73,
+   "niederlagen": 76,
    "unentschieden": 6,
-   "quote": 0.4936,
-   "turniere": 12,
+   "quote": 0.4843,
+   "turniere": 13,
    "liste_von": {
     "turnier": "Umbreon99's Aura Sphere #5: $5 USD + OAK",
     "datum": "2026-09-18",
@@ -2146,7 +2268,7 @@
    "id": "mega-altaria-ex-b1-happiny-b4a",
    "name": "Mega Altaria ex Happiny",
    "tier": "B",
-   "anteil": 0.0115,
+   "anteil": 0.0109,
    "listen": 26,
    "siege": 81,
    "niederlagen": 64,
@@ -2258,132 +2380,10 @@
    "code": "DJiaXpiaXpiWqJiWqJiXwJiaaJiXKpiWnpiWnpibgJiapJia9AgAMewAMewALkAALkAAVOwAVOwAUiYAT6YBBQ=="
   },
   {
-   "id": "mega-blaziken-ex-b1-greninja-a1",
-   "name": "Mega Blaziken ex Greninja",
-   "tier": "B",
-   "anteil": 0.0115,
-   "listen": 26,
-   "siege": 71,
-   "niederlagen": 70,
-   "unentschieden": 7,
-   "quote": 0.4797,
-   "turniere": 14,
-   "liste_von": {
-    "turnier": "⭐Nuggie's POG Tourney #15 Deluxe Edition $20 1st⭐",
-    "datum": "2026-09-30",
-    "platz": 3,
-    "bilanz": [
-     6,
-     2,
-     2
-    ],
-    "rang": 2,
-    "warum_nicht_die_beste": "die Liste nennt keine Energie"
-   },
-   "pokemon": [
-    {
-     "name": "Torchic",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "033"
-    },
-    {
-     "name": "Mega Blaziken ex",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "036"
-    },
-    {
-     "name": "Froakie",
-     "anzahl": 1,
-     "set": "A1",
-     "nummer": "087"
-    },
-    {
-     "name": "Greninja",
-     "anzahl": 1,
-     "set": "A1",
-     "nummer": "089"
-    },
-    {
-     "name": "Heatmor",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "044"
-    },
-    {
-     "name": "Castform Sunny Form",
-     "anzahl": 1,
-     "set": "B3",
-     "nummer": "024"
-    }
-   ],
-   "trainer": [
-    {
-     "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
-    },
-    {
-     "name": "Copycat",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "225"
-    },
-    {
-     "name": "Cyrus",
-     "anzahl": 1,
-     "set": "A2",
-     "nummer": "150"
-    },
-    {
-     "name": "Juliana",
-     "anzahl": 1,
-     "set": "B3a",
-     "nummer": "071"
-    },
-    {
-     "name": "Poké Ball",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "005"
-    },
-    {
-     "name": "Rare Candy",
-     "anzahl": 2,
-     "set": "A3",
-     "nummer": "144"
-    },
-    {
-     "name": "Flame Patch",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "217"
-    },
-    {
-     "name": "Field Blower",
-     "anzahl": 1,
-     "set": "B3",
-     "nummer": "147"
-    },
-    {
-     "name": "Hiking Trail",
-     "anzahl": 1,
-     "set": "B2b",
-     "nummer": "069"
-    }
-   ],
-   "energie": [
-    "Fire"
-   ],
-   "code": "DZiWqJiWqJiaXpiaXpiXwJib7piWnpiWnpiYYJiYYJiaDpibgJibdgcAK44AK44AK6wAA2YAA3oAK/wAQfoBAg=="
-  },
-  {
    "id": "miraidon-ex-b3a-magnezone-b1a",
    "name": "Miraidon ex Magnezone",
    "tier": "B",
-   "anteil": 0.0115,
+   "anteil": 0.0109,
    "listen": 26,
    "siege": 70,
    "niederlagen": 75,
@@ -2499,12 +2499,12 @@
    "name": "Mega Sharpedo ex Gyarados",
    "tier": "C",
    "anteil": 0.0093,
-   "listen": 21,
-   "siege": 54,
-   "niederlagen": 54,
+   "listen": 22,
+   "siege": 55,
+   "niederlagen": 57,
    "unentschieden": 3,
-   "quote": 0.4865,
-   "turniere": 12,
+   "quote": 0.4783,
+   "turniere": 13,
    "liste_von": {
     "turnier": "PMPT #47 - TEAM ROCKETS ADMIRATION!!! | $100 USD",
     "datum": "2026-09-19",
@@ -2605,119 +2605,16 @@
    "code": "CZiWqJiWqJicPpicPpiYLpiaXpiaaJiWnpia9AsATe4ATe4ATfgATfgAIygAIygAIzIAIzIAKLQAKLQAPGQBAw=="
   },
   {
-   "id": "dedenne-ex-b3b-pichu-a4",
-   "name": "Dedenne ex Pichu",
-   "tier": "C",
-   "anteil": 0.0084,
-   "listen": 19,
-   "siege": 51,
-   "niederlagen": 48,
-   "unentschieden": 4,
-   "quote": 0.4951,
-   "turniere": 19,
-   "liste_von": {
-    "turnier": "TH Event's Presents: When DX Pack?!|5$ + FA's!",
-    "datum": "2026-09-23",
-    "platz": 10,
-    "bilanz": [
-     5,
-     1,
-     2
-    ],
-    "rang": 1
-   },
-   "pokemon": [
-    {
-     "anzahl": 2,
-     "name": "Dedenne ex",
-     "nummer": "024",
-     "set": "B3b"
-    },
-    {
-     "anzahl": 2,
-     "name": "Emolga",
-     "nummer": "023",
-     "set": "B3b"
-    },
-    {
-     "anzahl": 2,
-     "name": "Pichu",
-     "nummer": "066",
-     "set": "A4"
-    },
-    {
-     "anzahl": 1,
-     "name": "Oricorio",
-     "nummer": "066",
-     "set": "A3"
-    }
-   ],
-   "trainer": [
-    {
-     "anzahl": 2,
-     "name": "Professor's Research",
-     "nummer": "007",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 2,
-     "name": "Copycat",
-     "nummer": "225",
-     "set": "B1"
-    },
-    {
-     "anzahl": 1,
-     "name": "Cyrus",
-     "nummer": "150",
-     "set": "A2"
-    },
-    {
-     "anzahl": 1,
-     "name": "Poké Ball",
-     "nummer": "005",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 2,
-     "name": "Electrical Cord",
-     "nummer": "065",
-     "set": "A3a"
-    },
-    {
-     "anzahl": 2,
-     "name": "Protective Poncho",
-     "nummer": "147",
-     "set": "B2"
-    },
-    {
-     "anzahl": 2,
-     "name": "Clear Veil",
-     "nummer": "149",
-     "set": "B4"
-    },
-    {
-     "anzahl": 1,
-     "name": "Giant Cape",
-     "nummer": "147",
-     "set": "A2"
-    }
-   ],
-   "energie": [
-    "Lightning"
-   ],
-   "code": "DZiWqJiWqJiaXpiaXpiXwJiWnpiY7JiY7JiauJiauJicepicepiXogcASxQASxQASkwASkwAJAQAJAQAGUYBBA=="
-  },
-  {
    "id": "meowscarada-ex-b2a-meowscarada-a2b",
    "name": "Meowscarada ex Meowscarada",
    "tier": "C",
-   "anteil": 0.0084,
-   "listen": 19,
-   "siege": 42,
-   "niederlagen": 49,
-   "unentschieden": 3,
-   "quote": 0.4468,
-   "turniere": 16,
+   "anteil": 0.0093,
+   "listen": 22,
+   "siege": 50,
+   "niederlagen": 57,
+   "unentschieden": 5,
+   "quote": 0.4464,
+   "turniere": 18,
    "liste_von": {
     "turnier": "Umbreon99's Aura Sphere #6 ($10 USD)",
     "datum": "2026-09-25",
@@ -2828,12 +2725,12 @@
    "name": "Team Rocket's Slowking ex Meloetta",
    "tier": "C",
    "anteil": 0.0084,
-   "listen": 19,
-   "siege": 46,
-   "niederlagen": 53,
+   "listen": 20,
+   "siege": 47,
+   "niederlagen": 57,
    "unentschieden": 2,
-   "quote": 0.4554,
-   "turniere": 10,
+   "quote": 0.4434,
+   "turniere": 11,
    "liste_von": {
     "turnier": "PMPT #47 - TEAM ROCKETS ADMIRATION!!! | $100 USD",
     "datum": "2026-09-19",
@@ -2939,10 +2836,113 @@
    "code": "DZiWqJiWqJiXKpiXwJiX8piYLpiWnpiWnpiapJicIJiXopibCJibCAcAU5gAU5gAU6IAU6IAOBgAOBgAGdIBBQ=="
   },
   {
+   "id": "dedenne-ex-b3b-pichu-a4",
+   "name": "Dedenne ex Pichu",
+   "tier": "C",
+   "anteil": 0.008,
+   "listen": 19,
+   "siege": 51,
+   "niederlagen": 48,
+   "unentschieden": 4,
+   "quote": 0.4951,
+   "turniere": 19,
+   "liste_von": {
+    "turnier": "TH Event's Presents: When DX Pack?!|5$ + FA's!",
+    "datum": "2026-09-23",
+    "platz": 10,
+    "bilanz": [
+     5,
+     1,
+     2
+    ],
+    "rang": 1
+   },
+   "pokemon": [
+    {
+     "anzahl": 2,
+     "name": "Dedenne ex",
+     "nummer": "024",
+     "set": "B3b"
+    },
+    {
+     "anzahl": 2,
+     "name": "Emolga",
+     "nummer": "023",
+     "set": "B3b"
+    },
+    {
+     "anzahl": 2,
+     "name": "Pichu",
+     "nummer": "066",
+     "set": "A4"
+    },
+    {
+     "anzahl": 1,
+     "name": "Oricorio",
+     "nummer": "066",
+     "set": "A3"
+    }
+   ],
+   "trainer": [
+    {
+     "anzahl": 2,
+     "name": "Professor's Research",
+     "nummer": "007",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Copycat",
+     "nummer": "225",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Cyrus",
+     "nummer": "150",
+     "set": "A2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Electrical Cord",
+     "nummer": "065",
+     "set": "A3a"
+    },
+    {
+     "anzahl": 2,
+     "name": "Protective Poncho",
+     "nummer": "147",
+     "set": "B2"
+    },
+    {
+     "anzahl": 2,
+     "name": "Clear Veil",
+     "nummer": "149",
+     "set": "B4"
+    },
+    {
+     "anzahl": 1,
+     "name": "Giant Cape",
+     "nummer": "147",
+     "set": "A2"
+    }
+   ],
+   "energie": [
+    "Lightning"
+   ],
+   "code": "DZiWqJiWqJiaXpiaXpiXwJiWnpiY7JiY7JiauJiauJicepicepiXogcASxQASxQASkwASkwAJAQAJAQAGUYBBA=="
+  },
+  {
    "id": "team-rockets-weezing-ex-b4a-hoopa-ex-b4",
    "name": "Team Rocket's Weezing ex Hoopa ex",
    "tier": "C",
-   "anteil": 0.0084,
+   "anteil": 0.008,
    "listen": 19,
    "siege": 47,
    "niederlagen": 57,
@@ -3043,10 +3043,113 @@
    "code": "DZiWqJiWqJiXwJiXwJiaXpiaXpiX8piWnpiWnpiWlJibgJiccJiccAcAVC4AVC4AVDgAVDgAUKAAUKAAD0YBBw=="
   },
   {
+   "id": "mega-diancie-ex-carbink-b3b",
+   "name": "Mega Diancie ex Carbink",
+   "tier": "C",
+   "anteil": 0.0076,
+   "listen": 18,
+   "siege": 52,
+   "niederlagen": 47,
+   "unentschieden": 2,
+   "quote": 0.5149,
+   "turniere": 10,
+   "liste_von": {
+    "turnier": "Umbreon99's Aura Sphere #6 ($10 USD)",
+    "datum": "2026-09-25",
+    "platz": 3,
+    "bilanz": [
+     8,
+     2,
+     0
+    ],
+    "rang": 1
+   },
+   "pokemon": [
+    {
+     "anzahl": 2,
+     "name": "Flutter Mane",
+     "nummer": "035",
+     "set": "B3b"
+    },
+    {
+     "anzahl": 2,
+     "name": "Mega Diancie ex",
+     "nummer": "032",
+     "set": "B3b"
+    },
+    {
+     "anzahl": 2,
+     "name": "Carbink",
+     "nummer": "031",
+     "set": "B3b"
+    }
+   ],
+   "trainer": [
+    {
+     "anzahl": 2,
+     "name": "Professor's Research",
+     "nummer": "007",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Copycat",
+     "nummer": "225",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Cyrus",
+     "nummer": "150",
+     "set": "A2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Pokémon Center Lady",
+     "nummer": "070",
+     "set": "A2b"
+    },
+    {
+     "anzahl": 2,
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lucky Ice Pop",
+     "nummer": "145",
+     "set": "B2"
+    },
+    {
+     "anzahl": 2,
+     "name": "Giant Cape",
+     "nummer": "147",
+     "set": "A2"
+    },
+    {
+     "anzahl": 2,
+     "name": "Peculiar Plaza",
+     "nummer": "155",
+     "set": "B2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Starting Plains",
+     "nummer": "154",
+     "set": "B2"
+    }
+   ],
+   "energie": [
+    "Psychic"
+   ],
+   "code": "DpiWqJiWqJiaXpiaXpiXwJiYLpiWnpiWnpiapJiXopiXopibCJibCJia/gYAS4IAS4IAS2QAS2QAS1oAS1oBBQ=="
+  },
+  {
    "id": "mega-scizor-ex-revavroom-b2b",
    "name": "Mega Scizor ex Revavroom",
    "tier": "C",
-   "anteil": 0.0075,
+   "anteil": 0.0072,
    "listen": 17,
    "siege": 41,
    "niederlagen": 37,
@@ -3150,13 +3253,13 @@
    "id": "team-rockets-raticate-ex-b4a-alolan-ninetales-ex-b2",
    "name": "Team Rocket's Raticate ex Alolan Ninetales ex",
    "tier": "C",
-   "anteil": 0.0071,
-   "listen": 16,
-   "siege": 30,
-   "niederlagen": 43,
-   "unentschieden": 3,
-   "quote": 0.3947,
-   "turniere": 14,
+   "anteil": 0.0072,
+   "listen": 17,
+   "siege": 35,
+   "niederlagen": 46,
+   "unentschieden": 4,
+   "quote": 0.4118,
+   "turniere": 15,
    "liste_von": {
     "turnier": "Pop Up Series 9 || FA OAK",
     "datum": "2026-09-17",
@@ -3166,7 +3269,7 @@
      2,
      1
     ],
-    "rang": 2,
+    "rang": 3,
     "warum_nicht_die_beste": "die Liste nennt keine Energie"
    },
    "pokemon": [
@@ -3260,13 +3363,13 @@
    "id": "beautifly-b1-dustox-b4",
    "name": "Beautifly Dustox",
    "tier": "C",
-   "anteil": 0.0066,
-   "listen": 15,
-   "siege": 43,
-   "niederlagen": 42,
+   "anteil": 0.0067,
+   "listen": 16,
+   "siege": 44,
+   "niederlagen": 45,
    "unentschieden": 2,
-   "quote": 0.4943,
-   "turniere": 12,
+   "quote": 0.4835,
+   "turniere": 13,
    "liste_von": {
     "turnier": "The TCGP Arena #6! Prizing: 🌟🌟 Cards",
     "datum": "2026-09-21",
@@ -3372,223 +3475,16 @@
    "code": "CpiaXpiXwJiW7piWqJic3piafJiafJiYfpiYfpicSAoATKQATKQATMIATMIATK4ATK4AKnYATLgATMwATMwBAQ=="
   },
   {
-   "id": "mega-diancie-ex-carbink-b3b",
-   "name": "Mega Diancie ex Carbink",
-   "tier": "C",
-   "anteil": 0.0066,
-   "listen": 15,
-   "siege": 49,
-   "niederlagen": 37,
-   "unentschieden": 2,
-   "quote": 0.5568,
-   "turniere": 9,
-   "liste_von": {
-    "turnier": "Umbreon99's Aura Sphere #6 ($10 USD)",
-    "datum": "2026-09-25",
-    "platz": 3,
-    "bilanz": [
-     8,
-     2,
-     0
-    ],
-    "rang": 1
-   },
-   "pokemon": [
-    {
-     "anzahl": 2,
-     "name": "Flutter Mane",
-     "nummer": "035",
-     "set": "B3b"
-    },
-    {
-     "anzahl": 2,
-     "name": "Mega Diancie ex",
-     "nummer": "032",
-     "set": "B3b"
-    },
-    {
-     "anzahl": 2,
-     "name": "Carbink",
-     "nummer": "031",
-     "set": "B3b"
-    }
-   ],
-   "trainer": [
-    {
-     "anzahl": 2,
-     "name": "Professor's Research",
-     "nummer": "007",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 2,
-     "name": "Copycat",
-     "nummer": "225",
-     "set": "B1"
-    },
-    {
-     "anzahl": 1,
-     "name": "Cyrus",
-     "nummer": "150",
-     "set": "A2"
-    },
-    {
-     "anzahl": 1,
-     "name": "Pokémon Center Lady",
-     "nummer": "070",
-     "set": "A2b"
-    },
-    {
-     "anzahl": 2,
-     "name": "Poké Ball",
-     "nummer": "005",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 1,
-     "name": "Lucky Ice Pop",
-     "nummer": "145",
-     "set": "B2"
-    },
-    {
-     "anzahl": 2,
-     "name": "Giant Cape",
-     "nummer": "147",
-     "set": "A2"
-    },
-    {
-     "anzahl": 2,
-     "name": "Peculiar Plaza",
-     "nummer": "155",
-     "set": "B2"
-    },
-    {
-     "anzahl": 1,
-     "name": "Starting Plains",
-     "nummer": "154",
-     "set": "B2"
-    }
-   ],
-   "energie": [
-    "Psychic"
-   ],
-   "code": "DpiWqJiWqJiaXpiaXpiXwJiYLpiWnpiWnpiapJiXopiXopibCJibCJia/gYAS4IAS4IAS2QAS2QAS1oAS1oBBQ=="
-  },
-  {
-   "id": "hoopa-ex-b4-greninja-a1",
-   "name": "Hoopa ex Greninja",
-   "tier": "C",
-   "anteil": 0.0057,
-   "listen": 13,
-   "siege": 36,
-   "niederlagen": 41,
-   "unentschieden": 4,
-   "quote": 0.4444,
-   "turniere": 10,
-   "liste_von": {
-    "turnier": "PMPT #48 - TEAM ROCKETS ALTERCATION!!! | $100 USD",
-    "datum": "2026-09-26",
-    "platz": 66,
-    "bilanz": [
-     4,
-     3,
-     0
-    ],
-    "rang": 5,
-    "warum_nicht_die_beste": "die Liste nennt keine Energie"
-   },
-   "pokemon": [
-    {
-     "anzahl": 2,
-     "name": "Froakie",
-     "nummer": "087",
-     "set": "A1"
-    },
-    {
-     "anzahl": 2,
-     "name": "Greninja",
-     "nummer": "089",
-     "set": "A1"
-    },
-    {
-     "anzahl": 2,
-     "name": "Hoopa ex",
-     "nummer": "103",
-     "set": "B4"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mega Absol ex",
-     "nummer": "151",
-     "set": "B1"
-    }
-   ],
-   "trainer": [
-    {
-     "anzahl": 2,
-     "name": "Professor's Research",
-     "nummer": "007",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 2,
-     "name": "Copycat",
-     "nummer": "225",
-     "set": "B1"
-    },
-    {
-     "anzahl": 2,
-     "name": "Cyrus",
-     "nummer": "150",
-     "set": "A2"
-    },
-    {
-     "anzahl": 2,
-     "name": "Rare Candy",
-     "nummer": "144",
-     "set": "A3"
-    },
-    {
-     "anzahl": 2,
-     "name": "Poké Ball",
-     "nummer": "005",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 1,
-     "name": "X Speed",
-     "nummer": "002",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 1,
-     "name": "Field Blower",
-     "nummer": "147",
-     "set": "B3"
-    },
-    {
-     "anzahl": 1,
-     "name": "Deceptive Needle",
-     "nummer": "148",
-     "set": "B4"
-    }
-   ],
-   "energie": [
-    "Darkness"
-   ],
-   "code": "DZiWqJiWqJiaXpiaXpiXwJiXwJiYYJiYYJiWnpiWnpiWlJibgJiccAcAA2YAA2YAA3oAA3oAUKAAUKAAMCoBBw=="
-  },
-  {
    "id": "mega-blaziken-ex-b1-teal-mask-ogerpon-ex-b2",
    "name": "Mega Blaziken ex Teal Mask Ogerpon ex",
    "tier": "C",
-   "anteil": 0.0057,
-   "listen": 13,
-   "siege": 38,
-   "niederlagen": 32,
-   "unentschieden": 4,
-   "quote": 0.5135,
-   "turniere": 11,
+   "anteil": 0.0059,
+   "listen": 14,
+   "siege": 42,
+   "niederlagen": 35,
+   "unentschieden": 5,
+   "quote": 0.5122,
+   "turniere": 12,
    "liste_von": {
     "turnier": "Block Dragon $30 PRIZE POOL",
     "datum": "2026-09-20",
@@ -3697,13 +3593,13 @@
    "id": "mega-sharpedo-ex-b4-chien-pao-ex-b2a",
    "name": "Mega Sharpedo ex Chien-Pao ex",
    "tier": "C",
-   "anteil": 0.0057,
-   "listen": 13,
-   "siege": 38,
-   "niederlagen": 35,
+   "anteil": 0.0059,
+   "listen": 14,
+   "siege": 42,
+   "niederlagen": 38,
    "unentschieden": 3,
-   "quote": 0.5,
-   "turniere": 12,
+   "quote": 0.506,
+   "turniere": 13,
    "liste_von": {
     "turnier": "Umbreon99's Aura Sphere #6 ($10 USD)",
     "datum": "2026-09-25",
@@ -3804,16 +3700,132 @@
    "code": "DpiWqJiWqJicPpicPpiaXpiX/Jic6JiWnpiWnpiZRpicFpiZtJicrJicrAYATe4ATe4ATfgATfgAPGQAPGQBAw=="
   },
   {
+   "id": "milotic-ex-b3b-eevee-ex-a3b",
+   "name": "Milotic ex Eevee ex",
+   "tier": "C",
+   "anteil": 0.0059,
+   "listen": 14,
+   "siege": 35,
+   "niederlagen": 38,
+   "unentschieden": 3,
+   "quote": 0.4605,
+   "turniere": 8,
+   "liste_von": {
+    "turnier": "Umbreon99's Aura Sphere #6 ($10 USD)",
+    "datum": "2026-09-25",
+    "platz": 31,
+    "bilanz": [
+     4,
+     3,
+     0
+    ],
+    "rang": 3,
+    "warum_nicht_die_beste": "die Liste nennt keine Energie"
+   },
+   "pokemon": [
+    {
+     "anzahl": 2,
+     "name": "Feebas",
+     "nummer": "021",
+     "set": "A4a"
+    },
+    {
+     "anzahl": 2,
+     "name": "Milotic ex",
+     "nummer": "015",
+     "set": "B3b"
+    },
+    {
+     "anzahl": 2,
+     "name": "Eevee ex",
+     "nummer": "056",
+     "set": "A3b"
+    },
+    {
+     "anzahl": 1,
+     "name": "Vaporeon",
+     "nummer": "019",
+     "set": "A1a"
+    },
+    {
+     "anzahl": 1,
+     "name": "Vaporeon ex",
+     "nummer": "037",
+     "set": "B3"
+    },
+    {
+     "anzahl": 1,
+     "name": "Chien-Pao ex",
+     "nummer": "037",
+     "set": "B2a"
+    }
+   ],
+   "trainer": [
+    {
+     "anzahl": 2,
+     "name": "Professor's Research",
+     "nummer": "007",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Copycat",
+     "nummer": "225",
+     "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Wallace",
+     "nummer": "068",
+     "set": "B3b"
+    },
+    {
+     "anzahl": 2,
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 1,
+     "name": "Field Blower",
+     "nummer": "147",
+     "set": "B3"
+    },
+    {
+     "anzahl": 1,
+     "name": "Giant Cape",
+     "nummer": "147",
+     "set": "A2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Training Area",
+     "nummer": "153",
+     "set": "B2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Soothing Shore",
+     "nummer": "154",
+     "set": "B4"
+    }
+   ],
+   "energie": [
+    "Water"
+   ],
+   "code": "C5iWqJiWqJiaXpiaXpicPpiWnpiWnpibgJiXopia9JicrAkAKKoAKKoAStgAStgAISAAISAACRoAQnwAPGQBAw=="
+  },
+  {
    "id": "greninja-a1-mega-absol-ex-b1",
    "name": "Greninja Mega Absol ex",
    "tier": "C",
-   "anteil": 0.0053,
-   "listen": 12,
-   "siege": 34,
-   "niederlagen": 32,
+   "anteil": 0.0055,
+   "listen": 13,
+   "siege": 41,
+   "niederlagen": 34,
    "unentschieden": 1,
-   "quote": 0.5075,
-   "turniere": 10,
+   "quote": 0.5395,
+   "turniere": 11,
    "liste_von": {
     "turnier": "The TCGP Arena #7! Prizing: 2 Star Trainers ⭐⭐",
     "datum": "2026-09-24",
@@ -3823,7 +3835,7 @@
      3,
      0
     ],
-    "rang": 2,
+    "rang": 3,
     "warum_nicht_die_beste": "die Liste nennt keine Energie"
    },
    "pokemon": [
@@ -3914,10 +3926,230 @@
    "code": "DJiWqJiWqJiaXpiaXpiXwJiX8piYYJiYYJiWnpiWnpibipicFggAA2YAA2YAA3oAA3oALoYALoYAMCoAD0YBBw=="
   },
   {
+   "id": "hoopa-ex-b4-greninja-a1",
+   "name": "Hoopa ex Greninja",
+   "tier": "C",
+   "anteil": 0.0055,
+   "listen": 13,
+   "siege": 36,
+   "niederlagen": 41,
+   "unentschieden": 4,
+   "quote": 0.4444,
+   "turniere": 10,
+   "liste_von": {
+    "turnier": "PMPT #48 - TEAM ROCKETS ALTERCATION!!! | $100 USD",
+    "datum": "2026-09-26",
+    "platz": 66,
+    "bilanz": [
+     4,
+     3,
+     0
+    ],
+    "rang": 5,
+    "warum_nicht_die_beste": "die Liste nennt keine Energie"
+   },
+   "pokemon": [
+    {
+     "anzahl": 2,
+     "name": "Froakie",
+     "nummer": "087",
+     "set": "A1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Greninja",
+     "nummer": "089",
+     "set": "A1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Hoopa ex",
+     "nummer": "103",
+     "set": "B4"
+    },
+    {
+     "anzahl": 1,
+     "name": "Mega Absol ex",
+     "nummer": "151",
+     "set": "B1"
+    }
+   ],
+   "trainer": [
+    {
+     "anzahl": 2,
+     "name": "Professor's Research",
+     "nummer": "007",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 2,
+     "name": "Copycat",
+     "nummer": "225",
+     "set": "B1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Cyrus",
+     "nummer": "150",
+     "set": "A2"
+    },
+    {
+     "anzahl": 2,
+     "name": "Rare Candy",
+     "nummer": "144",
+     "set": "A3"
+    },
+    {
+     "anzahl": 2,
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 1,
+     "name": "X Speed",
+     "nummer": "002",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 1,
+     "name": "Field Blower",
+     "nummer": "147",
+     "set": "B3"
+    },
+    {
+     "anzahl": 1,
+     "name": "Deceptive Needle",
+     "nummer": "148",
+     "set": "B4"
+    }
+   ],
+   "energie": [
+    "Darkness"
+   ],
+   "code": "DZiWqJiWqJiaXpiaXpiXwJiXwJiYYJiYYJiWnpiWnpiWlJibgJiccAcAA2YAA2YAA3oAA3oAUKAAUKAAMCoBBw=="
+  },
+  {
+   "id": "mega-gardevoir-ex-b2-mega-diancie-ex-b3b",
+   "name": "Mega Gardevoir ex Mega Diancie ex",
+   "tier": "C",
+   "anteil": 0.0055,
+   "listen": 13,
+   "siege": 20,
+   "niederlagen": 31,
+   "unentschieden": 0,
+   "quote": 0.3922,
+   "turniere": 10,
+   "liste_von": {
+    "turnier": "Block Dragon $30 PRIZE POOL",
+    "datum": "2026-09-20",
+    "platz": 32,
+    "bilanz": [
+     3,
+     3,
+     0
+    ],
+    "rang": 2,
+    "warum_nicht_die_beste": "die Liste nennt keine Energie"
+   },
+   "pokemon": [
+    {
+     "anzahl": 2,
+     "name": "Ralts",
+     "nummer": "063",
+     "set": "B2"
+    },
+    {
+     "anzahl": 2,
+     "name": "Mega Gardevoir ex",
+     "nummer": "066",
+     "set": "B2"
+    },
+    {
+     "anzahl": 2,
+     "name": "Meloetta",
+     "nummer": "070",
+     "set": "B2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Mega Diancie ex",
+     "nummer": "032",
+     "set": "B3b"
+    }
+   ],
+   "trainer": [
+    {
+     "anzahl": 2,
+     "name": "Professor's Research",
+     "nummer": "007",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 1,
+     "name": "Sabrina",
+     "nummer": "225",
+     "set": "A1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Diantha",
+     "nummer": "149",
+     "set": "B2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Copycat",
+     "nummer": "225",
+     "set": "B1"
+    },
+    {
+     "anzahl": 2,
+     "name": "Rare Candy",
+     "nummer": "144",
+     "set": "A3"
+    },
+    {
+     "anzahl": 2,
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 1,
+     "name": "Team Rocket's Thieving Machine",
+     "nummer": "067",
+     "set": "B4a"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lucky Ice Pop",
+     "nummer": "145",
+     "set": "B2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Field Blower",
+     "nummer": "147",
+     "set": "B3"
+    },
+    {
+     "anzahl": 1,
+     "name": "Peculiar Plaza",
+     "nummer": "155",
+     "set": "B2"
+    }
+   ],
+   "energie": [
+    "Psychic"
+   ],
+   "code": "DZiWqJiWqJiXKpiazJiaXpiYYJiYYJiWnpiWnpicwJiapJibgJibCAcAN9IAN9IAN/AAN/AAOBgAOBgAS2QBBQ=="
+  },
+  {
    "id": "hoopa-ex-b4-mega-sableye-ex-b3b",
    "name": "Hoopa ex Mega Sableye ex",
    "tier": "C",
-   "anteil": 0.0053,
+   "anteil": 0.0051,
    "listen": 12,
    "siege": 24,
    "niederlagen": 28,
@@ -4035,52 +4267,58 @@
    "code": "EJiWqJiWqJiXwJiXwJiaXpiZPJiX8piWnpiWnpiapJiapJiY4piWlJibgJiccJia/gQAUKAAUKAAD0YAS74BBw=="
   },
   {
-   "id": "mega-gardevoir-ex-b2-mega-diancie-ex-b3b",
-   "name": "Mega Gardevoir ex Mega Diancie ex",
+   "id": "mega-lucario-ex-b3-greninja-a1",
+   "name": "Mega Lucario ex Greninja",
    "tier": "C",
-   "anteil": 0.0053,
+   "anteil": 0.0051,
    "listen": 12,
-   "siege": 20,
-   "niederlagen": 29,
-   "unentschieden": 0,
-   "quote": 0.4082,
-   "turniere": 9,
+   "siege": 46,
+   "niederlagen": 30,
+   "unentschieden": 10,
+   "quote": 0.5349,
+   "turniere": 8,
    "liste_von": {
-    "turnier": "Block Dragon $30 PRIZE POOL",
-    "datum": "2026-09-20",
-    "platz": 32,
+    "turnier": "OTS Pokemon TCG Pocket Arena Pop Up",
+    "datum": "2026-09-30",
+    "platz": 4,
     "bilanz": [
-     3,
+     5,
      3,
      0
     ],
-    "rang": 2,
+    "rang": 5,
     "warum_nicht_die_beste": "die Liste nennt keine Energie"
    },
    "pokemon": [
     {
      "anzahl": 2,
-     "name": "Ralts",
-     "nummer": "063",
-     "set": "B2"
+     "name": "Froakie",
+     "nummer": "087",
+     "set": "A1"
     },
     {
      "anzahl": 2,
-     "name": "Mega Gardevoir ex",
-     "nummer": "066",
-     "set": "B2"
+     "name": "Greninja",
+     "nummer": "089",
+     "set": "A1"
     },
     {
      "anzahl": 2,
-     "name": "Meloetta",
-     "nummer": "070",
-     "set": "B2"
+     "name": "Riolu",
+     "nummer": "091",
+     "set": "A2"
     },
     {
-     "anzahl": 1,
-     "name": "Mega Diancie ex",
-     "nummer": "032",
-     "set": "B3b"
+     "anzahl": 2,
+     "name": "Mega Lucario ex",
+     "nummer": "081",
+     "set": "B3"
+    },
+    {
+     "anzahl": 2,
+     "name": "Wynaut",
+     "nummer": "074",
+     "set": "B4"
     }
    ],
    "trainer": [
@@ -4091,22 +4329,22 @@
      "set": "P-A"
     },
     {
-     "anzahl": 1,
-     "name": "Sabrina",
-     "nummer": "225",
-     "set": "A1"
-    },
-    {
-     "anzahl": 1,
-     "name": "Diantha",
-     "nummer": "149",
-     "set": "B2"
-    },
-    {
-     "anzahl": 1,
+     "anzahl": 2,
      "name": "Copycat",
      "nummer": "225",
      "set": "B1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Cyrus",
+     "nummer": "150",
+     "set": "A2"
+    },
+    {
+     "anzahl": 2,
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
     },
     {
      "anzahl": 2,
@@ -4115,162 +4353,22 @@
      "set": "A3"
     },
     {
-     "anzahl": 2,
-     "name": "Poké Ball",
-     "nummer": "005",
-     "set": "P-A"
-    },
-    {
      "anzahl": 1,
-     "name": "Team Rocket's Thieving Machine",
-     "nummer": "067",
-     "set": "B4a"
-    },
-    {
-     "anzahl": 1,
-     "name": "Lucky Ice Pop",
-     "nummer": "145",
-     "set": "B2"
-    },
-    {
-     "anzahl": 1,
-     "name": "Field Blower",
-     "nummer": "147",
-     "set": "B3"
-    },
-    {
-     "anzahl": 1,
-     "name": "Peculiar Plaza",
-     "nummer": "155",
-     "set": "B2"
-    }
-   ],
-   "energie": [
-    "Psychic"
-   ],
-   "code": "DZiWqJiWqJiXKpiazJiaXpiYYJiYYJiWnpiWnpicwJiapJibgJibCAcAN9IAN9IAN/AAN/AAOBgAOBgAS2QBBQ=="
-  },
-  {
-   "id": "milotic-ex-b3b-eevee-ex-a3b",
-   "name": "Milotic ex Eevee ex",
-   "tier": "C",
-   "anteil": 0.0053,
-   "listen": 12,
-   "siege": 30,
-   "niederlagen": 30,
-   "unentschieden": 2,
-   "quote": 0.4839,
-   "turniere": 7,
-   "liste_von": {
-    "turnier": "Umbreon99's Aura Sphere #6 ($10 USD)",
-    "datum": "2026-09-25",
-    "platz": 31,
-    "bilanz": [
-     4,
-     3,
-     0
-    ],
-    "rang": 3,
-    "warum_nicht_die_beste": "die Liste nennt keine Energie"
-   },
-   "pokemon": [
-    {
-     "anzahl": 2,
-     "name": "Feebas",
-     "nummer": "021",
-     "set": "A4a"
-    },
-    {
-     "anzahl": 2,
-     "name": "Milotic ex",
-     "nummer": "015",
-     "set": "B3b"
-    },
-    {
-     "anzahl": 2,
-     "name": "Eevee ex",
-     "nummer": "056",
-     "set": "A3b"
-    },
-    {
-     "anzahl": 1,
-     "name": "Vaporeon",
-     "nummer": "019",
-     "set": "A1a"
-    },
-    {
-     "anzahl": 1,
-     "name": "Vaporeon ex",
-     "nummer": "037",
-     "set": "B3"
-    },
-    {
-     "anzahl": 1,
-     "name": "Chien-Pao ex",
-     "nummer": "037",
-     "set": "B2a"
-    }
-   ],
-   "trainer": [
-    {
-     "anzahl": 2,
-     "name": "Professor's Research",
-     "nummer": "007",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 2,
-     "name": "Copycat",
-     "nummer": "225",
-     "set": "B1"
-    },
-    {
-     "anzahl": 1,
-     "name": "Wallace",
-     "nummer": "068",
-     "set": "B3b"
-    },
-    {
-     "anzahl": 2,
-     "name": "Poké Ball",
-     "nummer": "005",
-     "set": "P-A"
-    },
-    {
-     "anzahl": 1,
-     "name": "Field Blower",
-     "nummer": "147",
-     "set": "B3"
-    },
-    {
-     "anzahl": 1,
-     "name": "Giant Cape",
-     "nummer": "147",
-     "set": "A2"
-    },
-    {
-     "anzahl": 1,
-     "name": "Training Area",
-     "nummer": "153",
-     "set": "B2"
-    },
-    {
-     "anzahl": 1,
-     "name": "Soothing Shore",
+     "name": "Arena of Antiquity",
      "nummer": "154",
-     "set": "B4"
+     "set": "B3"
     }
    ],
    "energie": [
-    "Water"
+    "Fighting"
    ],
-   "code": "C5iWqJiWqJiaXpiaXpicPpiWnpiWnpibgJiXopia9JicrAkAKKoAKKoAStgAStgAISAAISAACRoAQnwAPGQBAw=="
+   "code": "CpiWqJiWqJiaXpiaXpiXwJiWnpiWnpiYYJiYYJibxgoAA2YAA2YAA3oAA3oADogADogARDQARDQAT34AT34BBg=="
   },
   {
    "id": "mega-sceptile-ex-b3-teal-mask-ogerpon-ex-b2",
    "name": "Mega Sceptile ex Teal Mask Ogerpon ex",
    "tier": "C",
-   "anteil": 0.0049,
+   "anteil": 0.0046,
    "listen": 11,
    "siege": 20,
    "niederlagen": 32,
@@ -4374,7 +4472,7 @@
    "id": "mega-charizard-y-ex-b1a-charizard-ex-a1",
    "name": "Mega Charizard Y ex Charizard ex",
    "tier": "C",
-   "anteil": 0.0044,
+   "anteil": 0.0042,
    "listen": 10,
    "siege": 16,
    "niederlagen": 34,
@@ -4481,102 +4579,131 @@
    "code": "DJiWqJiWqJiYLpiYLpiaSpiaXpicopiaDpiaDpiWnpiWnpictggAPwIAPwIAPwwAPwwAM4YAAWgAJ+IAJ+IBAg=="
   },
   {
-   "id": "mega-lucario-ex-b3-greninja-a1",
-   "name": "Mega Lucario ex Greninja",
+   "id": "mega-lucario-ex-b3-teal-mask-ogerpon-ex-b2",
+   "name": "Mega Lucario ex Teal Mask Ogerpon ex",
    "tier": "C",
-   "anteil": 0.0044,
+   "anteil": 0.0042,
    "listen": 10,
-   "siege": 44,
-   "niederlagen": 21,
-   "unentschieden": 10,
-   "quote": 0.5867,
-   "turniere": 7,
+   "siege": 26,
+   "niederlagen": 32,
+   "unentschieden": 2,
+   "quote": 0.4333,
+   "turniere": 5,
    "liste_von": {
-    "turnier": "OTS Pokemon TCG Pocket Arena Pop Up",
-    "datum": "2026-09-30",
-    "platz": 4,
+    "turnier": "PMPT #48 - TEAM ROCKETS ALTERCATION!!! | $100 USD",
+    "datum": "2026-09-26",
+    "platz": 1,
     "bilanz": [
-     5,
-     3,
-     0
+     11,
+     1,
+     1
     ],
-    "rang": 5,
-    "warum_nicht_die_beste": "die Liste nennt keine Energie"
+    "rang": 1
    },
    "pokemon": [
     {
-     "name": "Froakie",
-     "anzahl": 2,
-     "set": "A1",
-     "nummer": "087"
-    },
-    {
-     "name": "Greninja",
-     "anzahl": 2,
-     "set": "A1",
-     "nummer": "089"
-    },
-    {
+     "anzahl": 1,
      "name": "Riolu",
-     "anzahl": 2,
-     "set": "A2",
-     "nummer": "091"
+     "nummer": "079",
+     "set": "B3"
     },
     {
+     "anzahl": 1,
+     "name": "Riolu",
+     "nummer": "091",
+     "set": "A2"
+    },
+    {
+     "anzahl": 2,
      "name": "Mega Lucario ex",
-     "anzahl": 2,
-     "set": "B3",
-     "nummer": "081"
+     "nummer": "081",
+     "set": "B3"
     },
     {
-     "name": "Wynaut",
-     "anzahl": 2,
-     "set": "B4",
-     "nummer": "074"
+     "anzahl": 1,
+     "name": "Lucario",
+     "nummer": "092",
+     "set": "A2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Hitmonlee",
+     "nummer": "040",
+     "set": "A2b"
+    },
+    {
+     "anzahl": 1,
+     "name": "Hitmonlee",
+     "nummer": "154",
+     "set": "A1"
+    },
+    {
+     "anzahl": 1,
+     "name": "Teal Mask Ogerpon ex",
+     "nummer": "017",
+     "set": "B2"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 2,
      "name": "Copycat",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Cyrus",
-     "anzahl": 1,
-     "set": "A2",
-     "nummer": "150"
+     "nummer": "150",
+     "set": "A2"
     },
     {
+     "anzahl": 1,
+     "name": "Korrina",
+     "nummer": "149",
+     "set": "B3"
+    },
+    {
+     "anzahl": 1,
+     "name": "Sabrina",
+     "nummer": "225",
+     "set": "A1"
+    },
+    {
+     "anzahl": 2,
      "name": "Poké Ball",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "005"
+     "nummer": "005",
+     "set": "P-A"
     },
     {
-     "name": "Rare Candy",
-     "anzahl": 2,
-     "set": "A3",
-     "nummer": "144"
-    },
-    {
-     "name": "Arena of Antiquity",
      "anzahl": 1,
-     "set": "B3",
-     "nummer": "154"
+     "name": "X Speed",
+     "nummer": "002",
+     "set": "P-A"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lucky Ice Pop",
+     "nummer": "145",
+     "set": "B2"
+    },
+    {
+     "anzahl": 1,
+     "name": "Arena of Antiquity",
+     "nummer": "154",
+     "set": "B3"
     }
    ],
    "energie": [
     "Fighting"
    ],
-   "code": "CpiWqJiWqJiaXpiaXpiXwJiWnpiWnpiYYJiYYJibxgoAA2YAA2YAA3oAA3oADogADogARDQARDQAT34AT34BBg=="
+   "code": "DJiWqJiWqJiaXpiaXpiXwJiblJiXKpiWnpiWnpiWlJiapJibxggARCAADogARDQARDQADpIAFbgABgQANgYBBg=="
   }
  ]
 }

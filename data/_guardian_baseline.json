@@ -125,7 +125,7 @@
    "PLS 130"
   ]
  },
- "champions_teams": 117,
+ "champions_teams": 93,
  "champions_ueber_grenze": 0,
  "empty_files": {
   "labs_tournament_decks__unsorted.csv": true
@@ -136,7 +136,7 @@
   "cardmarket_card_images.csv": 1295,
   "cardmarket_id_mapping.csv": 17567,
   "cardmarket_mapping_verified.csv": 6439,
-  "champions_editionen.json": 26121,
+  "champions_editionen.json": 25970,
   "champions_resources.json": 0,
   "champions_type_chart.json": 183,
   "cm_expansions.csv": 784,
@@ -151,7 +151,7 @@
   "price_data.csv": 20601,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-10-01 09:42 UTC",
+ "generated": "2026-10-01 17:11 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,

@@ -138,16 +138,35 @@ function startStaticServer() {
     });
 }
 
+// Chrome auf dem Runner startet gelegentlich nicht innerhalb von 30 s
+// ("Timed out after 30000 ms while waiting for the WS endpoint URL",
+// Deploy #3278 vom 01.10.2026 — der Fehler lag vor jeder Seite, nicht im
+// Code der Seite). Ein zweiter und dritter Start kostet nichts; ein
+// einzelner Fehlstart darf den Deploy nicht anhalten.
+async function chromeStarten(startFn = (opt) => puppeteer.launch(opt), warteMs = 5000) {
+    let letzter;
+    for (let versuch = 1; versuch <= 3; versuch++) {
+        try {
+            return await startFn({
+                headless: true,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                ],
+            });
+        } catch (e) {
+            letzter = e;
+            console.warn(`Chrome-Start ${versuch}/3 gescheitert: ${e && e.message}`);
+            if (versuch < 3) await new Promise((r) => setTimeout(r, warteMs));
+        }
+    }
+    throw letzter;
+}
+
 async function renderMetaCall(baseUrl, currentFormatKey) {
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-        ],
-    });
+    const browser = await chromeStarten();
 
     /** @type {Array<{ kind: 'current'|'past', key: string, png: Buffer }>} */
     const renders = [];

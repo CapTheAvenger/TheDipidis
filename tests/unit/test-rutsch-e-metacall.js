@@ -4,7 +4,7 @@
  *   FE-23  „Deine Win-Rate" ist ein Eingabefeld; die getippte Zahl kommt als
  *          genau diese Zahl wieder heraus (Rundreise durch getMatchup).
  *   UI-58  die Decksuche findet auch Decks, die IM Feld stehen.
- *   UI-56  „Erweitert": offen, sobald eine Einstellung vom Standard abweicht.
+ *   UI-56  (seit UI-59: Zahnrad) Punkt, sobald eine Einstellung vom Standard abweicht.
  *   DA-30  Kopf und Zeilen sind eine Tabelle (CSS gegen die globale
  *          `table { display: block }`-Regel).
  * Die Funktionen werden aus der Quelle geschnitten und AUSGEFUEHRT.
@@ -119,26 +119,18 @@ describe('UI-58: die Decksuche findet Decks im Feld', () => {
     });
 });
 
-describe('UI-56: „Erweitert" bleibt offen, wenn etwas vom Standard abweicht', () => {
+describe('UI-56 (abgeloest durch UI-59): das Zahnrad traegt einen Punkt, wenn etwas vom Standard abweicht', () => {
     function umfeld(o) {
-        const ctx = baue(MC, ['function _erweitertErzwungen(', 'function _istErweitert('], Object.assign({
-            _metaCallMode: 'standard', _useClCurrent: false, _useClPast: false,
-            _erweitertWahl: false, window: {},
+        return baue(MC, ['function _optionenAbweichend('], Object.assign({
+            _metaCallMode: 'standard', _useClCurrent: false, _useClPast: false, window: {},
         }, o || {}));
-        return ctx;
     }
-    it('Standard: zu', () => assert.equal(umfeld()._istErweitert(), false));
-    it('Counter-Modus, eigenes Datum, City League: offen und erzwungen', () => {
-        assert.equal(umfeld({ _metaCallMode: 'counter' })._istErweitert(), true);
-        assert.equal(umfeld({ window: { currentMetaDateFrom: '2026-09-20' } })._istErweitert(), true);
-        assert.equal(umfeld({ _useClCurrent: true })._erweitertErzwungen(), true);
-        assert.equal(umfeld({ _useClPast: true })._istErweitert(), true);
-    });
-    it('der Haken allein genuegt', () => assert.equal(umfeld({ _erweitertWahl: true })._istErweitert(), true));
-    it('Datenfenster, Modus, Quellen und Rundenhinweis tragen die Klasse, die CSS versteckt', () => {
-        const css = lies('css', 'meta-call.css');
-        assert.match(css, /\.mc-schlicht \.mc-erweitert-nur \{ display: none !important; \}/);
-        assert.equal((QUELLE.match(/mc-erweitert-nur/g) || []).length >= 3, true);
+    it('Standard: kein Punkt', () => assert.equal(umfeld()._optionenAbweichend(), false));
+    it('Counter-Modus, eigenes Datum, City League: Punkt', () => {
+        assert.equal(umfeld({ _metaCallMode: 'counter' })._optionenAbweichend(), true);
+        assert.equal(umfeld({ window: { currentMetaDateFrom: '2026-09-20' } })._optionenAbweichend(), true);
+        assert.equal(umfeld({ _useClCurrent: true })._optionenAbweichend(), true);
+        assert.equal(umfeld({ _useClPast: true })._optionenAbweichend(), true);
     });
 });
 

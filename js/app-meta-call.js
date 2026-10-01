@@ -10605,7 +10605,7 @@ window.MetaCall = (function () {
         + `Challenge and Cup). Check the organiser's announcement before `
         + `the event: ${ander} rounds instead of ${r} moves the target to `
         + `${ziel} points.`;
-    return `<p class="mc-tt-hint mc-runden-herkunft mc-erweitert-nur">${esc(satz)}</p>`;
+    return `<span class="mc-runden-info" tabindex="0" role="note" title="${esc(satz)}" aria-label="${esc(satz)}">\u24d8</span>`;
   }
 
   function _typeLabelI18nKey(type) {
@@ -10807,42 +10807,61 @@ window.MetaCall = (function () {
 </div>`;
   }
 
-  /* UI-56 (01.10.2026): „Erweitert"-Haken. Datenfenster, Meta-Call-Modus,
-     City-League-Datenquellen und der Rundenhinweis sind Dinge zum
-     Herumspielen und verwirrten Besucher (Hausi, 01.10.). Sie erscheinen
-     erst nach dem Haken. Weicht eine dieser Einstellungen vom Standard ab
-     (Counter-Modus, eigenes Datum, eingeschaltete City League), bleibt der
-     Bereich offen — sonst wirkte ein unsichtbarer Wert mit. */
-  const ERWEITERT_KEY = 'metacall_erweitert_v1';
-  let _erweitertWahl = false;
-  (function _erweitertLaden() {
-    try { _erweitertWahl = localStorage.getItem(ERWEITERT_KEY) === '1'; }
-    catch (_e) { /* kein Speicher, kein Problem */ }
-  }());
+  /* UI-56/UI-59 (01.10.2026): Datenfenster, Meta-Call-Modus und
+     City-League-Datenquellen sind Dinge zum Herumspielen und verwirrten
+     Besucher (Hausi, 01.10.). Der Haken „Erweitert" war nur ein Versteck in
+     der Ecke; jetzt sitzen sie hinter einem kleinen Zahnrad in der schmalen
+     Leiste, standardmaessig zu. Weicht eine dieser Einstellungen vom Standard
+     ab (Counter-Modus, eigenes Datum, eingeschaltete City League), traegt das
+     Zahnrad einen Punkt — sonst wirkte ein unsichtbarer Wert mit. */
+  let _optionenOffen = false;
 
-  function _erweitertErzwungen() {
+  function _optionenAbweichend() {
     return _metaCallMode === 'counter'
       || /^\d{4}-\d{2}-\d{2}$/.test(String((typeof window !== 'undefined' && window.currentMetaDateFrom) || ''))
       || !!_useClCurrent || !!_useClPast;
   }
 
-  function _istErweitert() { return _erweitertWahl || _erweitertErzwungen(); }
-
-  function _setErweitert(an) {
-    _erweitertWahl = !!an;
-    try { localStorage.setItem(ERWEITERT_KEY, an ? '1' : '0'); } catch (_e) { /* ok */ }
-    renderAll();
+  function _toggleOptionen(an) {
+    _optionenOffen = (typeof an === 'boolean') ? an : !_optionenOffen;
+    const wrap = document.querySelector('#metaCallHost .mc-optionen-wrap, #meta-call .mc-optionen-wrap');
+    if (wrap) {
+      wrap.classList.toggle('offen', _optionenOffen);
+      const knopf = wrap.querySelector('.mc-zahnrad');
+      if (knopf) knopf.setAttribute('aria-expanded', _optionenOffen ? 'true' : 'false');
+    }
   }
 
-  function _renderCombinedConfigPanel() {
+  (function _optionenSchliessenRegistrieren() {
+    if (typeof document === 'undefined' || !document.addEventListener) return;
+    document.addEventListener('click', (e) => {
+      if (!_optionenOffen) return;
+      if (e.target && e.target.closest && e.target.closest('.mc-optionen-wrap')) return;
+      _toggleOptionen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (_optionenOffen && e.key === 'Escape') _toggleOptionen(false);
+    });
+  }());
+
+  function _renderCombinedConfigPanel(dateBanner) {
     const source = renderMetaSourcePanel();
     const mode   = renderMetaCallModePanel();
     const data   = renderSourcesPanel();
-    if (!source && !mode && !data) return '';
+    const de = _mcIstDeutsch();
+    const titel = de ? 'Optionen: Datenfenster, Modus, Datenquellen' : 'Options: data window, mode, data sources';
     return `
-<div class="metacall-panel mc-combo-panel">
+<div class="metacall-panel mc-combo-panel mc-leiste">
   ${source}
-  <div class="mc-erweitert-nur">${mode}${data}</div>
+  <div class="mc-optionen-wrap${_optionenOffen ? ' offen' : ''}">
+    <button type="button" class="mc-zahnrad${_optionenAbweichend() ? ' hat-punkt' : ''}"
+            aria-haspopup="true" aria-expanded="${_optionenOffen ? 'true' : 'false'}"
+            title="${esc(titel)}" aria-label="${esc(titel)}"
+            onclick="MetaCall._toggleOptionen()">\u2699</button>
+    <div class="mc-optionen" role="dialog" aria-label="${esc(titel)}">
+      ${dateBanner || ''}${mode}${data}
+    </div>
+  </div>
 </div>`;
   }
 
@@ -10869,75 +10888,59 @@ window.MetaCall = (function () {
   // Source picker (Current Meta | Past Meta + format dropdown).
   // Hidden entirely when no past-meta chunks are available (manifest
   // missing or empty after current-set filter).
+  /* UI-59 (01.10.2026, Hausi): die Quellenzeile war eine ganze Kachel mit
+     Dropdown ueber alle Vergangenheits-Formate. Gemeint ist etwas Schmaleres:
+     das Meta heisst beim Namen (TEF\u201330C), und eine Wahl gibt es nur im
+     UEBERGANG — wenn Online schon das neue Set spielt (set_release_date), die
+     Majors aber noch im vorigen Format laufen (heute < in_person_legal_date).
+     Dann steht neben dem neuen Meta genau EIN Gegenstueck: das vorige Format
+     (previous_format_key). Ausserhalb des Uebergangs ist die Zeile nur eine
+     Beschriftung. Wer ueber einen gespeicherten Meta Call schon im
+     Vergangenheits-Blick steht, behaelt den Weg zurueck (M1). */
+  function _metaUebergang() {
+    const fw = _formatWindow || {};
+    const legal = String(fw.in_person_legal_date || '').trim();
+    const davor = String(fw.previous_format_key || '').trim();
+    const heute = new Date().toISOString().slice(0, 10);
+    const jetzt = (fw.oldest_legal_set && fw.current_set)
+      ? String(fw.oldest_legal_set) + '-' + String(fw.current_set) : '';
+    const katalog = Array.isArray(_pastMetaAvailableFormats) ? _pastMetaAvailableFormats : [];
+    const imUebergang = !!(legal && heute < legal && davor && jetzt
+      && katalog.some(f => f.key === davor));
+    return { imUebergang, jetzt, davor };
+  }
+
   function renderMetaSourcePanel() {
-    if (!Array.isArray(_pastMetaAvailableFormats) || _pastMetaAvailableFormats.length === 0) return '';
-
-    const expander = (typeof window !== 'undefined' && typeof window.expandPastMetaCode === 'function')
-      ? window.expandPastMetaCode
-      : (k => k);
-
-    // Current-meta pill shows the *live* in-person legal format right
-    // in the label so beginners know which set is the source. e.g.
-    // "Current Meta · Phantasmal Flames" instead of bare "Current
-    // Meta". Falls back to the code (or just the base label) when
-    // format_window isn't loaded yet.
-    const currentSetCode = (_formatWindow && _formatWindow.current_set)
-      ? String(_formatWindow.current_set).trim().toUpperCase()
-      : '';
-    const currentSetName = currentSetCode ? expander(currentSetCode) : '';
-    const currentLabel = currentSetName
-      ? `Current Meta · ${currentSetName}`
-      : 'Current Meta';
-
-    const pill = (key, label) => {
-      const active = key === _metaSource ? ' mc-tt-tab-active' : '';
-      return `<button type="button" class="mc-tt-tab${active}"
-        onclick="MetaCall._setMetaSource('${key}')">${esc(label)}</button>`;
+    const u = _metaUebergang();
+    if (!u.jetzt) return '';
+    const de = _mcIstDeutsch();
+    const kopf = k => String(k).replace('-', '\u2013');
+    const wahl = u.imUebergang || (_metaSource === 'past' && !!_pastMetaFormatKey);
+    const label = `<span class="mc-combo-label">Meta</span>`;
+    if (!wahl) {
+      return `
+<div class="mc-combo-row mc-meta-zeile" title="${esc(t('mc.sourceHintCurrent'))}">
+  ${label}
+  <span class="mc-meta-name">${esc(kopf(u.jetzt))}</span>
+</div>`;
+    }
+    const davorKey = (_metaSource === 'past' && _pastMetaFormatKey) ? _pastMetaFormatKey : u.davor;
+    const pill = (key, text, hinweis, onclick) => {
+      const aktiv = key === _metaSource ? ' mc-tt-tab-active' : '';
+      return `<button type="button" class="mc-tt-tab${aktiv}" title="${esc(hinweis)}"
+        onclick="${onclick}">${esc(text)}</button>`;
     };
-    const dropdownOptions = _pastMetaAvailableFormats.map(f => {
-      const expanded = expander(f.key);
-      const display = expanded && expanded !== f.key ? `${expanded} (${f.key})` : f.key;
-      const sel = (f.key === _pastMetaFormatKey) ? ' selected' : '';
-      return `<option value="${esc(f.key)}"${sel}>${esc(display)}</option>`;
-    }).join('');
-
-    // Hint shown next to the format dropdown. In frozen mode the
-    // matchup-proxy warning is irrelevant — the frozen panels don't
-    // use the matchup matrix at all — so we swap it for a brief note
-    // explaining what the user is looking at.
-    const frozen = _inFrozenPastMode();
-    const hintHtml = frozen
-      ? `<span class="mc-source-hint" title="${esc(t('mc.frozenSourceHintTitle'))}">📌 ${esc(t('mc.frozenSourceHint'))}</span>`
-      : `<span class="mc-source-hint" title="Matchups use the labs major-tournament matrix for this past format (pairs without ≥10 matches default to 50/50). The live online matrix is not blended in — current-format decks don't represent past-format play.">ⓘ Matchups = labs majors</span>`;
-    const formatRow = _metaSource === 'past'
-      ? `<div class="mc-source-format-row">
-           <label class="mc-source-format-label">Format:</label>
-           <select class="mc-source-format-select" onchange="MetaCall._setMetaSource('past', this.value)">
-             <option value="">— select format —</option>
-             ${dropdownOptions}
-           </select>
-           ${hintHtml}
-         </div>`
-      : '';
-
-    // Inline hint under the pill row — tells the beginner which tab
-    // does what, instead of leaving them to guess from the label.
-    const sourceHintText = _metaSource === 'past'
-      ? t('mc.sourceHintPast')
-      : t('mc.sourceHintCurrent');
-
-    // When Past Meta is active, the row needs the full width — the
-    // Source label + 2 pills + Format dropdown + matchup-proxy hint
-    // are too wide to share one flex line with Mode + Data Sources.
-    const wideClass = _metaSource === 'past' ? ' mc-combo-row-wide' : '';
+    const jetztText = kopf(u.jetzt) + ' \u00b7 ' + (de ? 'neu online' : 'new online');
+    const davorText = kopf(davorKey) + ' \u00b7 ' + (u.imUebergang
+      ? (de ? 'Majors noch aktiv' : 'majors still on')
+      : (de ? 'vorheriges Meta' : 'previous meta'));
     return `
-<div class="mc-combo-row${wideClass}" title="${esc(sourceHintText)}">
-  <span class="mc-combo-label">${t('mc.panelSource')}</span>
-  <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="Meta source">
-    ${pill('current', currentLabel)}
-    ${pill('past', t('mc.sourcePastMeta'))}
+<div class="mc-combo-row mc-meta-zeile">
+  ${label}
+  <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="Meta">
+    ${pill('current', jetztText, t('mc.sourceHintCurrent'), "MetaCall._setMetaSource('current')")}
+    ${pill('past', davorText, t('mc.sourceHintPast'), "MetaCall._setMetaSource('past', '" + esc(davorKey) + "')")}
   </div>
-  ${formatRow}
 </div>`;
   }
 
@@ -12178,7 +12181,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
           ? t('mc.dateWindowAuto').replace('{date}', _datumLesbar(_autoCutoff)).replace('{days}', String(_autoFensterTage(_autoCutoff)))
           : t('mc.dateWindowNone'));
     const dateBanner = `
-      <div class="metacall-date-window mc-erweitert-nur">
+      <div class="metacall-date-window">
         <label class="metacall-date-label" for="metacallDateFrom"
                title="${esc(t('mc.dateWindowHelp'))}">📅 ${t('mc.dateWindowLabel')}
           <span class="metacall-date-help-icon" title="${esc(t('mc.dateWindowHelp'))}">ⓘ</span>
@@ -12193,22 +12196,16 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         <span class="metacall-date-window-hint">${_activeWindowText}</span>
       </div>`;
     container.innerHTML = `
-<div class="metacall-wrap ${_istErweitert() ? 'mc-erweitert' : 'mc-schlicht'}">
+<div class="metacall-wrap">
   <div class="metacall-header">
     <h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="${esc(t('btn.helpTitle'))}" aria-label="${esc(t('btn.helpAriaMetaCall'))}" data-i18n-title="btn.helpTitle" data-i18n-aria="btn.helpAriaMetaCall"></button></h2>
     <p class="color-grey">${esc(t('mc.subtitle').replace('{ziel}', _zielKurz()))}</p>
   </div>
   <div class="mc-top-bar">
     ${renderScenariosBar()}
-    ${dateBanner}
-    <label class="mc-erweitert-schalter" title="${esc(_mcIstDeutsch() ? 'Zeigt Datenfenster, Meta-Call-Modus, Datenquellen und Hinweise zu den Runden' : 'Shows data window, Meta Call mode, data sources and notes on rounds')}">
-      <input type="checkbox" ${_istErweitert() ? 'checked' : ''} ${_erweitertErzwungen() ? 'disabled' : ''}
-             onchange="MetaCall._setErweitert(this.checked)">
-      <span>${esc(_mcIstDeutsch() ? 'Erweitert' : 'Advanced')}</span>
-    </label>
   </div>
   ${_inFrozenPastMode() ? '' : _mcSchritt(1, _SCHRITTE[0].t, _SCHRITTE[0].s)}
-  ${_inFrozenPastMode() ? _renderFrozenSourceOnlyPanel() : _renderCombinedConfigPanel()}
+  ${_inFrozenPastMode() ? _renderFrozenSourceOnlyPanel() : _renderCombinedConfigPanel(dateBanner)}
   ${renderSettingsPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
   ${/* Der GROSSE Statusstreifen (_renderPredictorStatusBanner) bleibt
@@ -16854,7 +16851,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     if (_shareList && _matchupMap) { renderAll(); return; }
 
     container.innerHTML = `
-<div class="metacall-wrap ${_istErweitert() ? 'mc-erweitert' : 'mc-schlicht'}">
+<div class="metacall-wrap">
   <div class="metacall-header"><h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="${esc(t('btn.helpTitle'))}" aria-label="${esc(t('btn.helpAriaMetaCall'))}" data-i18n-title="btn.helpTitle" data-i18n-aria="btn.helpAriaMetaCall"></button></h2></div>
   <div class="metacall-loading">${t('mb.loading')}</div>
 </div>`;
@@ -17150,7 +17147,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _toggleGroupField,
     _toggleDetail,
     _onWrZelle,
-    _setErweitert,
+    _toggleOptionen,
     _toggleAllDetails,
     _addCustomDeck,
     _removeCustomDeck,

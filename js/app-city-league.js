@@ -2390,6 +2390,11 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     item.dataset.value = child.value;
                     // Rang aus der Deckauswahl (UI-52): Familie / Variante / Einzeldeck
                     if (child.dataset && child.dataset.rang) item.dataset.rang = child.dataset.rang;
+                    // Box vorhanden (UI-55): Haken ueber CSS, Hinweis als Tooltip
+                    if (child.dataset && child.dataset.box) {
+                        item.dataset.box = child.dataset.box;
+                        item.title = t(child.dataset.box === 'familie' ? 'pm.boxFamilie' : 'pm.boxVorhanden');
+                    }
                     item.onclick = () => pick(child.value, child.textContent);
                     list.appendChild(item);
                 });

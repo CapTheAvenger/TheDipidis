@@ -27,7 +27,10 @@ function schneide(quelle, name) {
 function regel(quelle) {
     const kopfZeilen = quelle.match(/ {8}const HAUPTKARTE_ZUSATZ = [^\n]*\n {8}const HAUPTKARTE_POKEMON = [^\n]*\n/);
     assert.ok(kopfZeilen, 'die Konstanten der Hauptkartenregel fehlen');
-    const code = kopfZeilen[0]
+    // THEMEN_FAMILIEN (FE-20/21/22) steht vor der Hauptkartenregel; die Funktion liest sie.
+    const handListe = quelle.match(/ {8}const THEMEN_FAMILIEN = \{[\s\S]*?\n {8}\};\n/);
+    assert.ok(handListe, 'die Liste THEMEN_FAMILIEN fehlt');
+    const code = handListe[0] + kopfZeilen[0]
         + ['hauptkarteGrundname', 'hauptkarteTreffer', 'hauptkarteVon', 'familienNachHauptkarte']
             .map((n) => schneide(quelle, n)).join('\n');
     // eslint-disable-next-line no-new-func
@@ -136,7 +139,7 @@ describe('FE-19: Verfaelschungsproben', () => {
     });
 
     it('gleichnamige Familien ohne Umbenennung', () => {
-        const M = lauf(ersetze('if (gleicherName.get(f.name) > 1) f.name = f.grund;', ''));
+        const M = lauf(ersetze('if (!f.hand && gleicherName.get(f.name) > 1) f.name = f.grund;', ''));
         assert.notStrictEqual(M.get('Ogerpon Box'), 'Teal Mask Ogerpon', 'die Probe beisst nicht');
     });
 });

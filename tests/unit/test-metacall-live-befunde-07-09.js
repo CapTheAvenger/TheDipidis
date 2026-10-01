@@ -158,7 +158,7 @@ describe('M1 — "Vergangenes Meta" waehlt ein Format, statt die Tabelle zu leer
 describe('M1 — im eingefrorenen Past-Meta bleibt der Weg zurueck stehen', () => {
     it('renderAll setzt dort die Quellenkachel, nicht den leeren String', () => {
         assert.ok(
-            SRC.includes("${_inFrozenPastMode() ? _renderFrozenSourceOnlyPanel() : _renderCombinedConfigPanel()}"),
+            SRC.includes("${_inFrozenPastMode() ? _renderFrozenSourceOnlyPanel() : _renderCombinedConfigPanel(dateBanner)}"),
             'renderAll blendet die Konfigurationskachel im eingefrorenen Blick wieder komplett aus — '
             + 'dann gibt es keine Pille "Current Meta" mehr und kein Zurueck ohne Neuladen');
     });

@@ -4278,11 +4278,42 @@
 .mc-mct-table input.mc-wr-input.is-schlecht { color: var(--color-danger-dark); }
 .mc-wr-hand { display: block; font-size: 0.72rem; color: var(--mc-personal-accent-dark); }
 
-/* UI-56 (01.10.2026): Bereiche zum Herumspielen erst nach dem Haken „Erweitert". */
-.mc-schlicht .mc-erweitert-nur { display: none !important; }
-.mc-erweitert .mc-combo-panel > .mc-erweitert-nur { display: contents; }
-.mc-erweitert-schalter {
-  display: inline-flex; align-items: center; gap: 4px; align-self: center;
-  font-size: 0.78rem; color: var(--mc-text-muted); cursor: pointer; margin-left: auto;
+/* UI-59 (01.10.2026): eine schmale Leiste statt dreier Kacheln. Links das
+   Meta beim Namen (im Uebergang mit einem Gegenstueck), rechts ein Zahnrad,
+   das Datenfenster, Modus und Datenquellen aufklappt. Standard: zu. */
+.mc-combo-panel.mc-leiste {
+  display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between;
+  gap: 8px 12px; padding: 6px 12px; position: relative;
 }
-.mc-erweitert-schalter input { width: 14px; height: 14px; accent-color: var(--mc-accent); }
+.mc-leiste .mc-meta-zeile { flex: 0 1 auto; padding: 0; }
+.mc-meta-name {
+  font-weight: 700; font-size: 0.85rem; color: var(--mc-text-heading);
+  padding: 3px 10px; border: 1px solid var(--mc-border, var(--border-color, #cbd5e1)); border-radius: 999px;
+}
+.mc-optionen-wrap { position: relative; margin-left: auto; flex: 0 0 auto; }
+.mc-zahnrad {
+  position: relative; width: 32px; height: 32px; line-height: 1; font-size: 1.05rem;
+  border: 1px solid var(--mc-border, var(--border-color, #cbd5e1)); border-radius: 8px;
+  background: transparent; color: var(--mc-text-muted); cursor: pointer;
+}
+.mc-zahnrad:hover, .mc-optionen-wrap.offen .mc-zahnrad { color: var(--mc-accent); border-color: var(--mc-accent); }
+.mc-zahnrad.hat-punkt::after {
+  content: ""; position: absolute; top: 3px; right: 3px; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--mc-accent);
+}
+.mc-optionen {
+  display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 30;
+  width: min(560px, calc(100vw - 32px)); padding: 10px 12px;
+  background: var(--surface-1, var(--surface-2, #fff)); border: 1px solid var(--mc-border, var(--border-color, #cbd5e1));
+  border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  flex-direction: column; gap: 8px;
+}
+.mc-optionen-wrap.offen .mc-optionen { display: flex; }
+.mc-optionen .mc-combo-row, .mc-optionen .metacall-date-window { flex: 0 0 auto; width: 100%; box-sizing: border-box; }
+.mc-runden-info {
+  display: inline-block; margin-left: 6px; font-size: 0.85rem; color: var(--mc-text-muted); cursor: help;
+}
+@media (max-width: 768px) {
+  .mc-combo-panel.mc-leiste { flex-wrap: wrap; }
+  .mc-leiste .mc-meta-zeile { flex: 1 1 100%; border-top: none; }
+}

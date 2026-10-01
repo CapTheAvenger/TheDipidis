@@ -14,6 +14,11 @@
 (function (global) {
   'use strict';
 
+  // DA-21 (01.10.2026): fuer "golisopod-mega" gibt es auf dem Limitless-CDN
+  // kein Bild (live gemessen), fuer "golisopod" schon. Faellt ein "-mega"-Bild
+  // aus, wird einmal die Grundform versucht, sonst versteckt sich das Bild.
+  const ICON_FEHLER = "if(!this.dataset.fb&&/-mega\\.png$/.test(this.src)){this.dataset.fb=1;this.src=this.src.replace('-mega.png','.png')}else{this.style.display='none'}";
+
   const DATA_URL = 'data/archetype_icons.json';
 
   // Cache-buster so a fresh deploy's JSON is picked up even when the
@@ -277,7 +282,7 @@
     const imgs = urls.map(u =>
       `<img class="tcg-pokemon-icon tcg-pokemon-icon--${size}" ` +
       `src="${_escAttr(u)}" alt="${_escAttr(alt)}" ` +
-      `loading="lazy" onerror="this.style.display='none'">`
+      `loading="lazy" onerror="${ICON_FEHLER}">`
     ).join('');
     if (urls.length === 1) return imgs;
     const groupCls = layout === 'inline'
@@ -324,7 +329,7 @@
     return `<img class="tcg-pokemon-icon tcg-pokemon-icon--${size}" ` +
            `src="${_escAttr(prefix + roh.toLowerCase() + suffix)}" ` +
            `alt="${_escAttr(alt)}" loading="lazy" ` +
-           `onerror="this.style.display='none'">`;
+           `onerror="${ICON_FEHLER}">`;
   }
 
   global.ArchetypeIcons = {

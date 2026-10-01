@@ -39,8 +39,28 @@ WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATEN = os.path.join(WURZEL, "data")
 STUECK = os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
 
-ONLINE_JETZT = os.path.join(DATEN, "online_api_matchups_TEF-30C.csv")
-ONLINE_DAVOR = os.path.join(DATEN, "online_api_matchups_TEF-PBL.csv")
+def _formatfenster(pfad=None):
+    """(jetzt, davor) aus data/format_window.json: "TEF-30C" und "TEF-PBL".
+
+    DA-20 (01.10.2026): die beiden Dateinamen standen hier fest. Beim
+    naechsten Setwechsel haette das Skript still das alte Fenster
+    nachgezogen. Jetzt kommt das laufende Fenster aus oldest_legal_set und
+    current_set, das vorige aus previous_format_key — dieselben Felder,
+    aus denen die Scraper ihre Dateinamen bilden. Fehlt eines, bricht das
+    Skript ab, statt zu raten."""
+    import json
+    pfad = pfad or os.path.join(DATEN, "format_window.json")
+    with open(pfad, encoding="utf-8") as f:
+        fw = json.load(f)
+    aelt, neu, davor = fw.get("oldest_legal_set"), fw.get("current_set"), fw.get("previous_format_key")
+    if not (aelt and neu and davor):
+        raise SystemExit(f"::error::format_window.json ohne oldest_legal_set/current_set/previous_format_key ({pfad})")
+    return f"{aelt}-{neu}", str(davor)
+
+
+_JETZT, _DAVOR = _formatfenster()
+ONLINE_JETZT = os.path.join(DATEN, f"online_api_matchups_{_JETZT}.csv")
+ONLINE_DAVOR = os.path.join(DATEN, f"online_api_matchups_{_DAVOR}.csv")
 LABS_MU = os.path.join(DATEN, "labs_tournament_matchups.csv")
 ARCHETYPEN = os.path.join(DATEN, "online_api_archetypes.csv")
 

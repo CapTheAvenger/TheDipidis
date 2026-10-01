@@ -285,3 +285,23 @@ def test_der_kopfwechsel_benennt_die_spalte_ueberall_neu(monkeypatch):
     assert "Turniere 73 und 74," in neu
     assert m.majors_umstellen(neu, "TEF-30C", "TEF-30C") == (neu, []), (
         "ein zweiter Lauf aendert das Stueck noch einmal")
+
+
+# DA-20 (01.10.2026): die Online-Dateien kommen aus format_window.json.
+def test_formatfenster_aus_den_daten(tmp_path):
+    import importlib.util, json, os
+    spec = importlib.util.spec_from_file_location(
+        "mc_nz", os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "masterclass_zahlen_nachziehen.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    f = tmp_path / "fw.json"
+    f.write_text(json.dumps({"oldest_legal_set": "ABC", "current_set": "XYZ", "previous_format_key": "ABC-QRS"}))
+    assert m._formatfenster(str(f)) == ("ABC-XYZ", "ABC-QRS")
+    # Verfaelschungsprobe: ein fehlendes Feld bricht ab, statt zu raten
+    f.write_text(json.dumps({"oldest_legal_set": "ABC", "current_set": "XYZ"}))
+    import pytest
+    with pytest.raises(SystemExit):
+        m._formatfenster(str(f))
+    # die echten Daten ergeben die vorhandenen Dateien
+    assert os.path.basename(m.ONLINE_JETZT) == f"online_api_matchups_{m._JETZT}.csv"
+    assert os.path.exists(m.ONLINE_JETZT) and os.path.exists(m.ONLINE_DAVOR)

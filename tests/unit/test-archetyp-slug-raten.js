@@ -227,6 +227,7 @@ describe('slugIconHtml erkennt einen Namen als Namen', () => {
             + chunk(/  function _formSlug\(art, suffix\) \{[\s\S]*?\n  \}\n/, '_formSlug')
             + chunk(/  function _sanitizeWord\(w\) \{[\s\S]*?\n  \}\n/, '_sanitizeWord')
             + chunk(/  function _speculativeSlugs\(name\) \{[\s\S]*?\n  \}\n/, '_speculativeSlugs')
+            + chunk(/  const ICON_FEHLER = .*;\n/, 'ICON_FEHLER')
             + chunk(/  function _escAttr\([\s\S]*?\n  \}\n/, '_escAttr')
             + chunk(/  function getIconUrls\(archetypeName\) \{[\s\S]*?\n  \}\n/, 'getIconUrls')
             + chunk(/  function getIconHtml\(archetypeName, opts\) \{[\s\S]*?\n  \}\n/, 'getIconHtml')

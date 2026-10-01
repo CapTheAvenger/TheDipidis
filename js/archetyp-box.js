@@ -609,9 +609,25 @@
      *  Teil) vorne im Archetyp- bzw. Familiennamen steht; der laengste
      *  Treffer, dann der ganze Name, dann der hoechste Anteil. Liefert [] oder
      *  [karte]; die Drucke derselben Karte stecken in k.refs. */
+    /* Hauptkarte per Hand (Hausi, 01.10.2026): der Name nennt nicht immer das
+       Pokemon, um das sich das Deck baut. "Dudunsparce Control" spielt
+       Pidgeot ex als Hauptkarte, die Namensregel fand Dudunsparce (legal).
+       Schluessel: Archetypname, Wert: Grundname der Hauptkarte IN DER BOX
+       (gesucht unter den Pokemon der Box, nie in fremden Daten). */
+    const HAUPTKARTE_PER_HAND = { 'Dudunsparce Control': 'Pidgeot' };
+
     function hauptkartenDerBox(box) {
         const a = String((box && box.archetyp) || '');
         const name = a.indexOf(FAMILIE) === 0 ? a.slice(FAMILIE.length) : a;
+        const hand = HAUPTKARTE_PER_HAND[name];
+        if (hand) {
+            let beste = null;
+            (box && box.karten || []).forEach(function (k) {
+                if (k.manuell || k.typ !== 'Pokemon' || grundnameKarte(k.name) !== hand) return;
+                if (!beste || (Number(k.anteil) || 0) > (Number(beste.anteil) || 0)) beste = k;
+            });
+            if (beste) return [beste];
+        }
         let best = null;
         (box && box.karten || []).forEach(function (k) {
             if (k.manuell || k.typ !== 'Pokemon') return;
@@ -852,7 +868,14 @@
     function druckMarke(markenK, id) {
         const teile = String(id).split('-');
         const set = teile[0];
-        if (!markenK || !MARKEN_SETS[set]) return null;
+        /* 01.10.2026 (Hausi: Gholdengo, Iron Valiant, Roaring Moon standen
+           gelb): die Marke gilt fuer JEDEN Druck, nicht nur fuer Promos.
+           Prismatic Evolutions (PRE) liegt im Standardfenster, traegt aber
+           Nachdrucke mit Marke G — Gholdengo ex PRE 164, Iron Valiant ex PRE
+           157, Roaring Moon ex PRE 162 — und die zaehlten bisher als legal,
+           weil das SET im Fenster liegt. Ein Druck ohne Marke in den Daten
+           bleibt bei der Set-Regel. */
+        if (!markenK) return null;
         const nr = teile.slice(1).join('-').replace(/^0+(?=\d)/, '');
         return (markenK.index[set] && markenK.index[set][nr]) || null;
     }
@@ -1063,6 +1086,10 @@
         if (!geladenFuer) return;
         try { localStorage.setItem(SPIEGEL_SCHLUESSEL + ':' + geladenFuer, JSON.stringify(boxen)); }
         catch (_) { /* voll oder gesperrt */ }
+        // UI-55: die Haken in der Archetyp-Auswahl folgen jeder Aenderung der Boxen.
+        if (typeof window._pmBoxMarkenAktualisieren === 'function') {
+            try { window._pmBoxMarkenAktualisieren(); } catch (_) { /* Auswahl nicht da */ }
+        }
     }
 
     async function laden(erzwingen) {
@@ -1117,6 +1144,14 @@
 
     function boxFuerArchetyp(archetyp) {
         return boxen.find(function (b) { return b.archetyp === archetyp; }) || null;
+    }
+
+    /* UI-55: Hat der Nutzer fuer diesen Auswahlwert eine Box? `wert` ist der
+       Wert der Zeile in der Archetyp-Auswahl (Archetypname oder
+       "__familie__|Name"). Ohne Anmeldung nie. */
+    function hatBox(wert) {
+        if (!geladenFuer || !nutzer()) return false;
+        return boxen.some(function (b) { return b.archetyp === wert; });
     }
 
     // ════════════════════════════════════════════════════════
@@ -2478,6 +2513,10 @@
     });
 
     window.ArchetypBox = Object.assign({}, Logik, {
+        // UI-54: die Kartenuebersicht benutzt dieselbe Marken-Rechnung (DA-28).
+        marken: { kontext: markenKontext, druckMarke: druckMarke },
+        hatBox: hatBox,
+        boxenLaden: laden,
         uebersichtGezeichnet: uebersichtGezeichnet,
         ausUebersicht: ausUebersicht,
         profilOeffnen: profilOeffnen,

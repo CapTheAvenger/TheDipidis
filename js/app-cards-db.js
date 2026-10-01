@@ -1802,6 +1802,40 @@
             window.getJapaneseOnlySetCodes = getJapaneseOnlySetCodes;
         }
 
+        /* UI-54 (01.10.2026): "Alle Drucke + Meta" liess SVP und SVE pauschal
+           durch den Set-Filter, obwohl die Regulierungsmarke je Druck gilt
+           (Iono PAF 80 / SVP 124 ist Marke G, rotiert; SVP 87 ist H, legal).
+           Die Marken stehen in data/regulation_marks.json (DA-28), die
+           Rechnung teilt sich die Kartenuebersicht mit den Archetyp-Boxen
+           (window.ArchetypBox.marken). Ein Druck OHNE Marke in den Daten
+           (SVE-Energien) bleibt bei der alten Regel. Verbunden wird nur ueber
+           (Set, Nummer). */
+        const _REG_PROMO_SETS = { SVP: 1, SVE: 1, MEP: 1 };
+        let _regMarkenDaten;   // undefined: nicht geholt, null: nicht ladbar
+
+        function _regMarkenLaden() {
+            if (_regMarkenDaten !== undefined || typeof fetch !== 'function') return;
+            _regMarkenDaten = null;
+            fetch(BASE_PATH + 'regulation_marks.json').then(r => (r.ok ? r.json() : null)).then(d => {
+                _regMarkenDaten = d && d.marks ? d : null;
+                if (_regMarkenDaten && typeof filterAndRenderCards === 'function') filterAndRenderCards();
+            }).catch(() => { _regMarkenDaten = null; });
+        }
+
+        /* kontexte: [{ index, legal:Set }] je gewaehltem Format. */
+        function _regPromoPasst(card, kontexte, druckMarke) {
+            const set = String((card && card.set) || '').toUpperCase();
+            if (!_REG_PROMO_SETS[set] || !kontexte || !kontexte.length || typeof druckMarke !== 'function') return true;
+            let markiert = false;
+            for (const k of kontexte) {
+                const m = druckMarke(k, set + '-' + String(card.number || ''));
+                if (!m) return true;                 // keine Marke bekannt: alte Regel
+                markiert = true;
+                if (k.legal.has(m)) return true;
+            }
+            return !markiert;
+        }
+
         function getFormatLegalSetCodes(formatCode) {
             const map = window.setOrderMap;
             if (!map || !formatCode) return null;
@@ -1965,6 +1999,20 @@
                 }
                 if (metaLegalSets.size === 0) metaLegalSets = null;
                 else devLog(`[Cards Tab] All Prints + Meta: restricting to ${metaLegalSets.size} format-legal sets`);
+            }
+            // UI-54: Marken je Format, sobald data/regulation_marks.json da ist.
+            let metaMarkenKontexte = null;
+            let metaMarkenDruck = null;
+            if (metaLegalSets) {
+                _regMarkenLaden();
+                const lib = window.ArchetypBox && window.ArchetypBox.marken;
+                if (_regMarkenDaten && lib) {
+                    metaMarkenDruck = lib.druckMarke;
+                    metaMarkenKontexte = selectedMetaFilters
+                        .map(m => lib.kontext(_regMarkenDaten, String(m).split('-')[0].toUpperCase()))
+                        .filter(Boolean);
+                    if (!metaMarkenKontexte.length) metaMarkenKontexte = null;
+                }
             }
             
             window.filteredCardsData = window.allCardsData.filter(card => {
@@ -2277,6 +2325,10 @@
                 
                 // In All Prints + meta period: only show prints from format-legal sets
                 if (metaLegalSets && !metaLegalSets.has(card.set)) {
+                    failedFormatSet++;
+                    return false;
+                }
+                if (metaLegalSets && metaMarkenKontexte && !_regPromoPasst(card, metaMarkenKontexte, metaMarkenDruck)) {
                     failedFormatSet++;
                     return false;
                 }

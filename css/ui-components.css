@@ -129,6 +129,22 @@ img[src*="limitlesstcg"] {
     color: var(--ink-2);
 }
 
+/* UI-55 (01.10.2026): Haken vor Zeilen, fuer die schon eine Archetyp-Box
+   existiert; bei einer Variante, die nur ueber die Familienbox abgedeckt
+   ist, blasser. Die Zeile behaelt ihren Text — der Haken ist reine Zierde. */
+.searchable-select-option[data-box]::before {
+    content: "\2713";
+    display: inline-block;
+    width: 1.2em;
+    margin-left: -1.2em;
+    font-weight: 700;
+    color: var(--tint-ok-ink);
+}
+.searchable-select-option[data-box="familie"]::before { opacity: 0.55; }
+.searchable-select-option[data-box] { padding-left: calc(16px + 1.2em); }
+.searchable-select-option[data-box][data-rang="mitglied"] { padding-left: calc(34px + 1.2em); }
+.searchable-select-option[data-box][data-rang="familie"] { padding-left: calc(13px + 1.2em); }
+
 /* Dark theme support */
 [data-theme="dark"] .searchable-select-option[data-rang="mitglied"] {
     color: #a5b4c8;

@@ -88,6 +88,46 @@
                 .trim() || 'Unknown Deck';
         }
 
+        /* LISTEN OHNE ARCHETYP-NAMEN (DA-29, 01.10.2026).
+         *
+         * Hat ein Spieler bei Limitless keinen Archetyp eingetragen, traegt
+         * die Liste dort den Titel "Decklist". Gemessen 01.10.: fuenf
+         * Listen aus fuenf Turnieren, die die Seite zu EINEM Archetyp
+         * "Decklist" (111 Karten, "5 Turniere") vermischte. Wie "Unknown
+         * Deck" gilt das als "ohne Namen" und wird ausgeblendet (Entscheidung
+         * Hausi, 01.10.). Den echten Archetyp kennt die Quelle nicht. */
+        const PM_OHNE_ARCHETYPNAMEN = ['Decklist'];
+        function _pmOhneArchetypName(name) {
+            const n = String(name || '').trim().toLowerCase();
+            return PM_OHNE_ARCHETYPNAMEN.some(function (x) { return x.toLowerCase() === n; });
+        }
+
+        /* THEMEN-FAMILIEN PER HAND (FE-20, FE-21, FE-22, 01.10.2026).
+         *
+         * Hausi: "Fusion Mew" und "Mew Genesect" gehoeren zusammen, ebenso
+         * "Future Box" / "Future Iron Hands" / "Future Thorns" und
+         * "Hop's Trevenant" / "Hop's Zacian"; nachgetragen am selben Tag
+         * "Lost Box Charizard" / "Lost Box Paradox" / "Lost Zone Box" und
+         * "Mega Lucario" / "Lucario Hariyama", "Festival Lead" / "Seaking
+         * Festival Lead" und die drei "Rocket's ..."-Decks. Ihre Hauptkarten sind
+         * verschieden, die Hauptkarten-Regel (FE-19) verbindet sie deshalb
+         * nicht. Entscheidung Hausi: eine BENANNTE Liste statt einer Regel
+         * ueber das Namenswort — neue Zuordnungen werden hier nachgetragen.
+         * Die Schluessel sind Archetyp-Namen der Turnierdaten (nie Karten).
+         * Eine Familie erscheint nur, wenn mindestens zwei ihrer Mitglieder
+         * nach dem Filter uebrig sind. Gilt auch fuer die Archetyp-Boxen,
+         * die dieselbe Funktion benutzen. */
+        const THEMEN_FAMILIEN = {
+            'Mew': ['Fusion Mew', 'Mew Genesect'],
+            'Future': ['Future Box', 'Future Iron Hands', 'Future Thorns'],
+            "Hop's": ["Hop's Trevenant", "Hop's Zacian"],
+            'Lost Box': ['Lost Box Charizard', 'Lost Box Paradox', 'Lost Zone Box', 'Roaring Moon LZ Box'],
+            'Lucario': ['Mega Lucario', 'Lucario Hariyama'],
+            'Ancient Box': ['Ancient Box', 'Roaring Moon Dudunsparce'],
+            'Festival Lead': ['Festival Lead', 'Seaking Festival Lead'],
+            "Rocket's": ["Rocket's Honchkrow", "Rocket's Mewtwo", "Rocket's Spidops"]
+        };
+
         /* ALLE VARIANTEN EINES HAUPTPOKEMON AUF EINMAL (03.09.2026).
          *
          * Gemeldet: "ich würde mich auch gerne alle Karten anzeigen lassen
@@ -225,8 +265,19 @@
            denselben, bekommen beide den vollen Kartennamen, und ist auch
            der gleich, den Druck ("Alakazam (MEG 56)"). */
         function familienNachHauptkarte(eintraege, druckeVon) {
+            // Per Hand zugeordnete Mitglieder (THEMEN_FAMILIEN, mind. zwei nach
+            // dem Filter da) gehoeren NUR ihrer Themen-Familie: "Roaring Moon LZ
+            // Box" teilt die Hauptkarte mit "Roaring Moon", soll aber zur Lost
+            // Box und nicht zu Roaring Moon (Hausi, 01.10.2026).
+            const vorhandenVorab = new Set((eintraege || []).map(function (e) { return e.archetype; }));
+            const nurHand = new Set();
+            Object.keys(THEMEN_FAMILIEN).forEach(function (fam) {
+                const da = THEMEN_FAMILIEN[fam].filter(function (a) { return vorhandenVorab.has(a); });
+                if (da.length >= 2) da.forEach(function (a) { nurHand.add(a); });
+            });
             const karte = new Map();
             (eintraege || []).forEach(function (e) {
+                if (nurHand.has(e.archetype)) return;
                 const h = hauptkarteVon(e.archetype, e.tournaments, druckeVon);
                 if (h) karte.set(e.archetype, h);
             });
@@ -245,8 +296,22 @@
                     }
                 });
             });
+            // Themen-Familien per Hand (FE-20/21/22): Mitglieder, die nach dem
+            // Filter noch da sind, werden verbunden — auch ohne Hauptkarte.
+            const vorhanden = new Set((eintraege || []).map(function (e) { return e.archetype; }));
+            const handName = new Map();
+            Object.keys(THEMEN_FAMILIEN).forEach(function (fam) {
+                const da = THEMEN_FAMILIEN[fam].filter(function (a) { return vorhanden.has(a); });
+                if (da.length < 2) return;
+                da.forEach(function (a) { if (!wurzel.has(a)) wurzel.set(a, a); });
+                da.slice(1).forEach(function (a) {
+                    const x = finde(da[0]), y = finde(a);
+                    if (x !== y) wurzel.set(y < x ? x : y, y < x ? y : x);
+                });
+                da.forEach(function (a) { handName.set(a, fam); });
+            });
             const gruppen = new Map();
-            karte.forEach(function (h, a) {
+            wurzel.forEach(function (_, a) {
                 const w = finde(a);
                 if (!gruppen.has(w)) gruppen.set(w, []);
                 gruppen.get(w).push(a);
@@ -255,10 +320,17 @@
             gruppen.forEach(function (mitglieder) {
                 if (mitglieder.length < 2) return;
                 mitglieder.sort();
-                const h = karte.get(mitglieder[0]);
+                const mitKarte = mitglieder.filter(function (a) { return karte.has(a); });
+                const handFam = mitglieder.map(function (a) { return handName.get(a); }).filter(Boolean)[0];
+                if (handFam) {
+                    // Eine per Hand benannte Familie traegt ihren eigenen Namen.
+                    familien.push({ name: handFam, grund: handFam, druck: handFam, mitglieder: mitglieder, hand: true });
+                    return;
+                }
+                const h = karte.get(mitKarte[0]);
                 // Der kuerzeste Treffer der Gruppe ist ihr Name ("Banette").
                 let teil = h.teil;
-                mitglieder.forEach(function (a) { const t = karte.get(a).teil; if (t.length < teil.length) teil = t; });
+                mitKarte.forEach(function (a) { const t = karte.get(a).teil; if (t.length < teil.length) teil = t; });
                 familien.push({ name: teil, grund: h.grund, druck: h.id, mitglieder: mitglieder });
             });
             const zaehle = function (feld) {
@@ -267,10 +339,10 @@
                 return n;
             };
             const gleicherName = zaehle('name');
-            familien.forEach(function (f) { if (gleicherName.get(f.name) > 1) f.name = f.grund; });
+            familien.forEach(function (f) { if (!f.hand && gleicherName.get(f.name) > 1) f.name = f.grund; });
             const nochGleich = zaehle('name');
             familien.forEach(function (f) {
-                if (nochGleich.get(f.name) > 1) f.name = f.name + ' (' + f.druck.replace('-', ' ') + ')';
+                if (!f.hand && nochGleich.get(f.name) > 1) f.name = f.name + ' (' + f.druck.replace('-', ' ') + ')';
             });
             const aus = new Map();
             familien.forEach(function (f) { f.mitglieder.forEach(function (a) { aus.set(a, f.name); }); });
@@ -859,7 +931,7 @@
                     
                     const rawArchetype = String(card.archetype || '').trim();
                     const deckArchetype = sanitizePastMetaArchetypeName(rawArchetype);
-                    if (!deckArchetype || deckArchetype === 'Unknown Deck') return;
+                    if (!deckArchetype || deckArchetype === 'Unknown Deck' || _pmOhneArchetypName(deckArchetype)) return;
                     
                     const tournamentDate = String(card.tournament_date || '').trim() || 'Unknown Date';
                     const cardTournamentId = String(card.tournament_id || '').trim();
@@ -1119,7 +1191,7 @@
                abgesetzt) und stehen DIREKT unter ihrer Sammelzeile. Jeder
                Archetyp steht genau einmal als eigene Zeile da. */
             const gesetzt = new Set();
-            const zeile = (entry, rang) => {
+            const zeile = (entry, rang, familienWert) => {
                 const tournamentCount = entry.tournaments.length;
                 const displayName = tournamentCount > 1
                     ? `${entry.archetype} ${t('pm.tournamentsSuffix').replace('{n}', tournamentCount)}`
@@ -1128,6 +1200,7 @@
                 option.value = entry.archetype;
                 option.textContent = displayName;
                 option.dataset.rang = rang;
+                if (familienWert) option.dataset.famWert = familienWert;
                 deckSelect.appendChild(option);
                 gesetzt.add(entry.archetype);
             };
@@ -1156,7 +1229,7 @@
                         .replace('{t}', turnierText);
                     sammel.dataset.rang = 'familie';
                     deckSelect.appendChild(sammel);
-                    meine.forEach(e => zeile(e, 'mitglied'));
+                    meine.forEach(e => zeile(e, 'mitglied', FAMILIE_PREFIX + fam));
                     return;
                 }
                 zeile(entry, 'kopf');
@@ -1184,10 +1257,59 @@
             
             devLog(`Filtered to ${archetypes.length} unique archetypes from ${filteredDecks.length} tournament entries`);
 
+            // UI-55: Haken fuer vorhandene Boxen (soweit schon geladen), danach
+            // das Auswahlfeld bauen; sind die Boxen noch nicht da, laedt
+            // _pmBoxMarkenAktualisieren sie nach und zeichnet neu.
+            _pmBoxMarkenSetzen(deckSelect);
             // Convert native <select> to custom searchable dropdown
             if (deckSelect && typeof initSearchableSelect === 'function') initSearchableSelect(deckSelect);
+            _pmBoxMarkenNachladen(deckSelect);
         }
-        
+
+        /* UI-55 (01.10.2026): in der Archetyp-Auswahl steht ein Haken vor
+           jeder Zeile, fuer die der Nutzer schon eine Archetyp-Box hat — so
+           behaelt man beim Anlegen der Boxen den Ueberblick. Eine Box
+           "Alle X-Decks" markiert auch ihre Varianten (data-box="familie").
+           Verbunden wird ueber den Auswahlwert, den die Box selbst als
+           `archetyp` traegt, nie ueber den angezeigten Text. */
+        function _pmBoxMarkenSetzen(deckSelect) {
+            if (!deckSelect) return 0;
+            const lib = window.ArchetypBox;
+            let n = 0;
+            Array.from(deckSelect.options).forEach(opt => {
+                delete opt.dataset.box;
+                if (!opt.value || !lib || typeof lib.hatBox !== 'function') return;
+                if (lib.hatBox(opt.value)) { opt.dataset.box = 'eigen'; n++; }
+                else if (opt.dataset.famWert && lib.hatBox(opt.dataset.famWert)) { opt.dataset.box = 'familie'; n++; }
+            });
+            return n;
+        }
+
+        let _pmBoxMarkenLaeuft = false;
+        function _pmBoxMarkenNachladen(deckSelect) {
+            const lib = window.ArchetypBox;
+            if (_pmBoxMarkenLaeuft || !lib || typeof lib.boxenLaden !== 'function') return;
+            if (!(window.auth && window.auth.currentUser)) return;
+            _pmBoxMarkenLaeuft = true;
+            Promise.resolve(lib.boxenLaden(false)).then(() => {
+                _pmBoxMarkenLaeuft = false;
+                _pmBoxMarkenAktualisieren();
+            }, () => { _pmBoxMarkenLaeuft = false; });
+        }
+
+        /* Haken neu setzen und das Auswahlfeld neu zeichnen, wenn sich die
+           Menge der markierten Zeilen geaendert hat (Boxen geladen, Box
+           angelegt oder geloescht). Die Auswahl selbst bleibt stehen. */
+        function _pmBoxMarkenAktualisieren() {
+            const deckSelect = document.getElementById('pastMetaDeckSelect');
+            if (!deckSelect || !deckSelect.options.length) return;
+            const vorher = Array.from(deckSelect.options).map(o => o.dataset.box || '').join('|');
+            _pmBoxMarkenSetzen(deckSelect);
+            const nachher = Array.from(deckSelect.options).map(o => o.dataset.box || '').join('|');
+            if (vorher !== nachher && typeof initSearchableSelect === 'function') initSearchableSelect(deckSelect);
+        }
+        window._pmBoxMarkenAktualisieren = _pmBoxMarkenAktualisieren;
+
         function onPastMetaDeckSelect() {
             const selectedArchetype = document.getElementById('pastMetaDeckSelect').value;
             

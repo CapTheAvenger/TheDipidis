@@ -961,9 +961,29 @@
             return pokemonCards[0].image_url || '';
         }
 
+        /* UI-53 (01.10.2026): "Meistgespielte Archetypen" gruppierten nach dem
+           ersten Wort. Das macht aus "N's Zoroark" und "N's Reshiram" EINE
+           Kachel "N's" und aus "Basic Box" eine Kachel "Basic". Jetzt:
+           (1) Themen-Familien aus der benannten Liste (FE-20/21/22, dieselbe
+           wie in der Archetyp-Auswahl), (2) ein erstes Wort auf "'s" nimmt
+           den Namen des Pokemon dazu, (3) "Basic" ist kein Pokemon — der
+           ganze Name bleibt die Kachel. */
         function getCombinedMainArchetypeLabel(archetypeName) {
             const raw = String(archetypeName || '').trim().toLowerCase();
             if (!raw) return '';
+
+            if (typeof THEMEN_FAMILIEN !== 'undefined') {
+                for (const fam of Object.keys(THEMEN_FAMILIEN)) {
+                    if (THEMEN_FAMILIEN[fam].some(function (m) { return m.toLowerCase() === raw; })) {
+                        return fam.toLowerCase();
+                    }
+                }
+            }
+            const erstes = raw.split(' ')[0];
+            if (raw.includes(' ') && /['\u2019]s$/.test(erstes)) {
+                return raw.split(' ').slice(0, 2).join(' ');
+            }
+            if (erstes === 'basic') return raw;
 
             if (raw.startsWith('mega ')) {
                 const parts = raw.split(' ');

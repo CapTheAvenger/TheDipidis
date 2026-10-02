@@ -198,44 +198,6 @@ describe('B1 — der Konventionsname im Predictor-5.3-Tooltip kommt aus dem Modu
     });
 });
 
-/* ══ 3. DIE SCHALTFLAECHE DES OVERRIDE-KASTENS ════════════════════ */
-
-describe('B1 — der Umschalter behaelt die uebersetzte Beschriftung', () => {
-
-    function schalter(sprache, label) {
-        const knopf = { id: 'mc-override-btn', textContent: label };
-        const panel = {
-            classList: {
-                _offen: false,
-                toggle() { this._offen = !this._offen; return this._offen; },
-            },
-            innerHTML: '',
-        };
-        const ctx = baue(MC, ['function _toggleOverrides()'], {
-            document: { getElementById: (id) => (id === 'mc-override-panel' ? panel : knopf) },
-            t: () => label,
-            _settings: { myDeck: '' },
-            renderOverrideTable: () => '',
-        });
-        return { ctx, knopf };
-    }
-
-    it('deutsch: nur der Pfeil dreht sich', () => {
-        const { ctx, knopf } = schalter('de', 'Win Rates anpassen ▼');
-        ctx._toggleOverrides();
-        assert.equal(knopf.textContent, 'Win Rates anpassen ▲');
-        ctx._toggleOverrides();
-        assert.equal(knopf.textContent, 'Win Rates anpassen ▼');
-    });
-
-    it('englisch: es bleibt englisch', () => {
-        const { ctx, knopf } = schalter('en', 'Adjust Win Rates ▼');
-        ctx._toggleOverrides();
-        assert.equal(knopf.textContent, 'Adjust Win Rates ▲',
-            'der Umschalter schrieb eine fest verdrahtete deutsche Beschriftung');
-    });
-});
-
 /* ══ 4. DER SUCHLAUF ══════════════════════════════════════════════ */
 
 const DATEIEN = [

@@ -625,30 +625,6 @@
   color: var(--mc-text-muted);
   font-size: 0.85rem;
 }
-.mc-encounters-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.mc-encounters-bar .mc-bar-bg {
-  flex: 1;
-  height: 8px;
-  background: var(--mc-bg-info-soft);
-  border-radius: 4px;
-  overflow: hidden;
-  min-width: 60px;
-}
-.mc-encounters-bar .mc-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-info), var(--solid-ok));
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-.mc-encounters-label {
-  font-size: 0.82rem;
-  color: var(--mc-text-muted);
-  min-width: 36px;
-}
 
 /* Junk row styling */
 .mc-row-junk td {
@@ -1102,6 +1078,8 @@
   gap: 8px;
   align-items: center;
 }
+.mc-custom-name-wrap { position: relative; min-width: 0; }
+.mc-custom-name-wrap .mc-custom-name-input { width: 100%; box-sizing: border-box; }
 .mc-custom-name-input,
 .mc-custom-share-input {
   padding: 8px 10px;
@@ -1695,18 +1673,6 @@
   .metacall-table tbody td:nth-child(6) {
     grid-area: enc;
     min-width: 0;
-  }
-  .metacall-table tbody td:nth-child(6) .mc-encounters-bar {
-    gap: 6px;
-    width: 100%;
-  }
-  .metacall-table tbody td:nth-child(6) .mc-bar-bg {
-    min-width: 0;
-    flex: 1;
-  }
-  .metacall-table tbody td:nth-child(6) .mc-encounters-label {
-    font-size: 0.74rem;
-    white-space: nowrap;
   }
 
   /* Group header rows (when "Group by Pokémon" is active) — keep arrow visible */
@@ -2964,14 +2930,6 @@
 .mc-th-est      { color: var(--mc-personal-accent-dark); }
 .mc-th-final    { color: var(--color-success-dark); }
 
-/* ── AVG ENC traffic-light scale ── */
-.mc-encounters-bar.mc-enc-low  .mc-bar-fill { background: var(--solid-ok); }
-.mc-encounters-bar.mc-enc-mid  .mc-bar-fill { background: #f1c40f; }
-.mc-encounters-bar.mc-enc-high .mc-bar-fill { background: var(--color-danger); }
-.mc-encounters-bar.mc-enc-low  .mc-encounters-label { color: var(--color-success-dark); }
-.mc-encounters-bar.mc-enc-mid  .mc-encounters-label { color: var(--tint-warn-ink); }
-.mc-encounters-bar.mc-enc-high .mc-encounters-label { color: var(--color-danger-dark); }
-
 /* Help cursor on column headers that carry a tooltip — no native
    cue otherwise so the user might not discover the explanations. */
 .metacall-table th[title] { cursor: help; }
@@ -3322,19 +3280,6 @@
     font-size: 0.81rem;
     color: var(--dv-pos-ink);
     max-width: 100%;
-}
-
-/* 15. Encounter bar — slimmer (6px) so the ø number can carry the
-   weight rather than the bar itself. */
-.mc-encounters-bar .mc-bar-bg { height: 6px; background: var(--bar-track); }
-.mc-encounters-bar .mc-bar-fill { height: 6px; }
-.mc-encounters-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #4a5a6a;
-    min-width: 28px;
-    text-align: right;
-    white-space: nowrap;
 }
 
 /* ============================================================

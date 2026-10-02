@@ -11694,14 +11694,19 @@ window.MetaCall = (function () {
   }
 
   function renderCustomDecksPanel() {
-    const suggestionOpts = (_shareList || [])
-      .map(d => `<option value="${esc(d.name)}">`).join('');
-
     const rowsHtml = _customDecks.map((c, idx) => `
       <div class="mc-custom-row">
-        <input type="text" class="mc-custom-name-input" list="mc-custom-datalist"
-               placeholder="${esc(t('mc.customDeckNamePh'))}" value="${esc(c.name || '')}"
-               oninput="MetaCall._onCustomDeckName(${idx}, this.value)">
+        <div class="mc-custom-name-wrap">
+          <input type="text" class="mc-custom-name-input" id="mc-custom-name-${idx}"
+                 role="combobox" aria-expanded="false" aria-controls="mc-custom-vorschlaege-${idx}"
+                 autocomplete="off"
+                 placeholder="${esc(t('mc.customDeckNamePh'))}" value="${esc(c.name || '')}"
+                 oninput="MetaCall._onCustomDeckName(${idx}, this.value); MetaCall._zeigeCustomVorschlaege(${idx}, this.value)"
+                 onfocus="MetaCall._zeigeCustomVorschlaege(${idx}, this.value)"
+                 onblur="MetaCall._versteckeCustomVorschlaege(${idx})"
+                 onkeydown="MetaCall._customTaste(${idx}, event)">
+          <ul class="mc-deck-vorschlaege" id="mc-custom-vorschlaege-${idx}" role="listbox" hidden></ul>
+        </div>
         <input type="number" class="mc-custom-share-input" min="0" max="100" step="0.1"
                placeholder="%" value="${c.share > 0 ? c.share : ''}"
                oninput="MetaCall._onCustomDeckShare(${idx}, this.value)">
@@ -11727,7 +11732,6 @@ window.MetaCall = (function () {
   <p class="mc-custom-hint">${hintText}</p>
   <div class="mc-custom-list">${rowsHtml}</div>
   ${addBtn}
-  <datalist id="mc-custom-datalist">${suggestionOpts}</datalist>
 </div>`;
   }
 
@@ -11812,77 +11816,6 @@ window.MetaCall = (function () {
 </div>`;
   }
 
-  function renderOverrideTable() {
-    if (!_settings.myDeck || !_shareList) {
-      return `<p style="color:#aaa;font-size:0.85rem;padding:8px 0">${t('mc.selectDeckFirst')}</p>`;
-    }
-    const field = buildField().filter(d => d.name !== '_junk');
-    const _titelGemischtZelle = _wrKonventionsTitel('ohneUnentschieden');
-    const _titelManuellZelle  = _wrKonventionsTitel('ohneUnentschieden');
-    const rows  = field.map(deck => {
-      const m   = getMatchup(_settings.myDeck, deck.name);
-      const wr  = Math.round(_anzeigeQuote(m));
-      const ind = wr >= 55 ? 'favorable' : wr <= 45 ? 'unfavorable' : 'even';
-      const lbl = wr >= 55 ? t('mc.favorable') : wr <= 45 ? t('mc.unfavorable') : t('mc.even');
-      const ov  = _winRateOverrides[deck.name];
-      const js  = _journalStats[deck.name];
-      const fromJournal = _journalRateKeys.includes(deck.name);
-      const badge = fromJournal && js
-        ? ` <span class="mc-journal-badge-inline" title="${t('mc.personalGames').replace('{n}', js.total)}">📓 ${js.total}</span>`
-        : '';
-      /* Jede der beiden Zahlen traegt ihre Konvention selbst — der
-         Spaltenkopf ist auf dem Telefon nicht mehr im Blick, wenn die
-         Zeile gelesen wird. Seit dem 11.09.2026 ist es DIESELBE
-         Konvention: die getippte Zahl wird als S/(S+N) eingesetzt, so
-         wie die Zahl links daneben gerechnet ist (siehe getMatchup).
-         Die Vorbelegung des Eingabefelds ist deshalb nicht mehr nur der
-         beste verfuegbare Anhaltspunkt, sondern genau der Wert, den das
-         Feld ersetzt. */
-      return `<tr>
-        <td style="font-size:0.85rem;font-weight:600">${esc(deck.name)}${badge}</td>
-        <td><span class="mc-wr-meta" title="${esc(_titelGemischtZelle)}" data-hinweis="${esc(_titelGemischtZelle)}">${wr}%</span></td>
-        <td class="mc-wr-indicator ${ind}">${lbl}</td>
-        <td class="mc-wr-override">
-          <input type="number" min="0" max="100" placeholder="${wr}"
-                 title="${esc(_titelManuellZelle)}" data-hinweis="${esc(_titelManuellZelle)}"
-                 value="${ov !== undefined ? ov : ''}"
-                 oninput="MetaCall._onWrOverride('${escJs(deck.name)}', this.value)">
-        </td>
-      </tr>`;
-    }).join('');
-
-    /* ── ZWEI SPALTEN, EINE KONVENTION (seit 11.09.2026) ──
-     *
-     * Befund W2 vom 08.09.2026 hatte hier zwei verschiedene Groessen
-     * gefunden — links S/(S+N), im Eingabefeld S/(S+N+U) — und sie
-     * beschriftet. Beschriften genuegt an einer Stelle nicht, an der
-     * der Nutzer eine Zahl EINGIBT: er liest links 55 %, tippt 55, und
-     * zwei Zeilen weiter steht 56 %. Die Ursache ist jetzt behoben
-     * (getMatchup setzt die getippte Zahl als S/(S+N) ein), und beide
-     * Spalten tragen denselben Konventionsnamen.
-     *
-     * Der Satz darueber bleibt — er sagt jetzt, dass beide Spalten
-     * dieselbe Groesse meinen, und nennt sie. Ihn ersatzlos zu
-     * streichen hiesse, die Frage „rechnen die beiden dasselbe?" wieder
-     * unbeantwortet zu lassen. */
-    const _titelGemischt = _wrKonventionsTitel('ohneUnentschieden');
-    const _titelManuell  = _wrKonventionsTitel('ohneUnentschieden');
-    const _zweiKonv = _wrEineKonvention(
-      'ohneUnentschieden',
-      _wrKurzform(t('mc.colWrBlended')),
-      _wrKurzform(t('mc.colManualWr')));
-
-    return `
-<p style="font-size:0.78rem;color:#888;margin:10px 0 8px" title="${esc(_titelManuell)}" data-hinweis="${esc(_titelManuell)}">${t('mc.overrideHint')}</p>
-${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888;margin:0 0 8px">${esc(_zweiKonv)}</p>` : ''}
-<table class="mc-override-table">
-  <thead>
-    <tr><th>${t('mc.colOpponent')}</th><th title="${esc(_titelGemischt)}" data-hinweis="${esc(_titelGemischt)}">${esc(_wrKurzform(t('mc.colWrBlended')))}</th><th>${t('mc.colIndicator')}</th><th title="${esc(_titelManuell)}" data-hinweis="${esc(_titelManuell)}">${esc(_wrKurzform(t('mc.colManualWr')))}</th></tr>
-  </thead>
-  <tbody>${rows}</tbody>
-</table>`;
-  }
-
   /* ── Was in die Day-2-Zahl eingeht, und was danebensteht ──
    *
    * BEFUND B2 (07.09.2026). Unter der Prozentzahl stand
@@ -11938,18 +11871,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
    * Die Kacheln bleiben, wo sie sind. Dazwischen stehen jetzt vier
    * Überschriften, die sagen, an welcher Stelle des Ablaufs man ist und
    * was der Schritt von einem will. */
-  /* Der Knopf, hinter dem die eigenen Quoten liegen — beim Namen
-     genannt, aber nicht abgeschrieben. Er heisst zur Laufzeit
-     t('mc.adjustWinRates'); eine Kopie davon im Quelltext waere nach
-     der naechsten Umbenennung ein Verweis auf einen Knopf, den es
-     nicht mehr gibt, und traegt ausserdem einen Hausnamen fuer eine
-     Quote in den angezeigten Text (Hausregel seit 02.09.2026,
-     tests/unit/test-w2-hausnamen.js). Der Pfeil am Ende gehoert zum
-     Knopf, nicht zu seinem Namen. */
-  function _mcKnopfQuoten() {
-    return String(t('mc.adjustWinRates') || '').replace(/[\u25b2\u25bc]/g, '').trim();
-  }
-
   function _mcSchritt(n, titel) {
     return `
   <div class="mc-schritt">
@@ -15960,6 +15881,54 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     if (erster) { ev.preventDefault(); _waehleMyDeckAus(erster); }
   }
 
+  /* VORSCHLAGSLISTE FUER "EIGENE DECKS" (UI-67, 02.10.2026).
+     Dasselbe Feld-Muster wie "Mein Deck": der <datalist> am Namensfeld zeigt
+     auf dem iPhone keine Liste. Gleiche Trefferregel (_myDeckVorschlaege),
+     eine Liste je Zeile. */
+  function _zeigeCustomVorschlaege(idx, val) {
+    const ul = document.getElementById('mc-custom-vorschlaege-' + idx);
+    const inp = document.getElementById('mc-custom-name-' + idx);
+    if (!ul || !inp) return;
+    const namen = _myDeckVorschlaege(val);
+    const q = String(val || '').trim().toLowerCase();
+    if (!namen.length || (namen.length === 1 && namen[0].toLowerCase() === q)) {
+      ul.hidden = true; inp.setAttribute('aria-expanded', 'false'); return;
+    }
+    ul.innerHTML = namen.map(n =>
+      `<li role="option" class="mc-deck-vorschlag" data-name="${esc(n)}" `
+      + `onmousedown="event.preventDefault()" onclick="MetaCall._waehleCustomAus(${idx}, this)">${esc(n)}</li>`).join('');
+    ul.hidden = false;
+    inp.setAttribute('aria-expanded', 'true');
+  }
+
+  function _versteckeCustomVorschlaege(idx) {
+    setTimeout(() => {
+      const ul = document.getElementById('mc-custom-vorschlaege-' + idx);
+      const inp = document.getElementById('mc-custom-name-' + idx);
+      if (ul) ul.hidden = true;
+      if (inp) inp.setAttribute('aria-expanded', 'false');
+    }, 200);
+  }
+
+  function _waehleCustomAus(idx, li) {
+    const name = li && li.dataset ? li.dataset.name : '';
+    if (!name) return;
+    const inp = document.getElementById('mc-custom-name-' + idx);
+    if (inp) inp.value = name;
+    const ul = document.getElementById('mc-custom-vorschlaege-' + idx);
+    if (ul) ul.hidden = true;
+    _onCustomDeckName(idx, name);
+  }
+
+  function _customTaste(idx, ev) {
+    if (!ev) return;
+    if (ev.key === 'Escape') { _versteckeCustomVorschlaege(idx); return; }
+    if (ev.key !== 'Enter') return;
+    const ul = document.getElementById('mc-custom-vorschlaege-' + idx);
+    const erster = ul && !ul.hidden ? ul.querySelector('.mc-deck-vorschlag') : null;
+    if (erster) { ev.preventDefault(); _waehleCustomAus(idx, erster); }
+  }
+
   // Filter / select handler for the searchable My-Deck input. The
   // <input list> + <datalist> combo lets users type to filter the
   // archetype list instead of scrolling through a long <select>.
@@ -16157,25 +16126,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     // user loses focus and the whole panel collapses back to closed state
     clearTimeout(_winRateOverrides.__timer);
     _winRateOverrides.__timer = setTimeout(refreshResults, 600);
-  }
-
-  function _toggleOverrides() {
-    const panel = document.getElementById('mc-override-panel');
-    const btn   = document.getElementById('mc-override-btn');
-    if (!panel) return;
-    const open = panel.classList.toggle('open');
-    /* DIE BESCHRIFTUNG WAR EINSPRACHIG UND ANDERS GESCHRIEBEN
-       (07.09.2026, Nachpruefung). Hier stand fest verdrahtet
-       "Win-Rates anpassen"; die Schaltflaeche wird aber aus
-       t('mc.adjustWinRates') gebaut ("Win Rates anpassen ▼" / "Adjust
-       Win Rates ▼"). Wer den Kasten oeffnete, bekam also eine andere
-       Schreibweise — und in englischer Oberflaeche einen deutschen
-       Text. Gedreht wird jetzt nur noch der Pfeil. */
-    if (btn) {
-      const _lbl = String(t('mc.adjustWinRates') || '');
-      btn.textContent = open ? _lbl.replace('▼', '▲') : _lbl.replace('▲', '▼');
-    }
-    if (open && _settings.myDeck) panel.innerHTML = renderOverrideTable();
   }
 
   // Expand/collapse a pokemon variant group in the field table
@@ -16869,6 +16819,10 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _versteckeMyDeckVorschlaege,
     _waehleMyDeckAus,
     _myDeckTaste,
+    _zeigeCustomVorschlaege,
+    _versteckeCustomVorschlaege,
+    _waehleCustomAus,
+    _customTaste,
     _myDeckVorschlaege,
     _onMyDeckCommit,
     _onPersonalShare,
@@ -16888,7 +16842,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _prognoseDateiLesen,
     /* Nur fuer Tests und Konsole: die Rechnung ohne Darstellung. */
     _evRechne: (field) => _evRechne(field || buildField()),
-    _toggleOverrides,
     _toggleGroup,
     _toggleGroupField,
     _toggleDetail,

@@ -263,10 +263,10 @@ describe('B2 — die Unterzeile trennt Rechengroessen von Turnierrahmen', () => 
     });
 
     it('beide Zeilen stehen wirklich in der Ergebniskachel', () => {
-        assert.ok(SRC.includes('const day2Sub    = _day2RechnungsZeile();'));
-        assert.ok(SRC.includes('const day2Rahmen = _day2RahmenZeile();'));
-        assert.ok(SRC.includes('<div class="mc-day2-sub">${day2Sub}</div>'));
-        assert.ok(SRC.includes('<div class="mc-day2-sub mc-day2-rahmen">${day2Rahmen}</div>'),
+        /* UI-62 (02.10.2026): die Karte ist weg; beide Zeilen stehen im
+           aufklappbaren „Rechenweg" der Ergebnis-Uebersicht. */
+        assert.ok(SRC.includes('<p class="mc-day2-sub">${_day2RechnungsZeile()}</p>'));
+        assert.ok(SRC.includes('<p class="mc-day2-sub mc-day2-rahmen">${_day2RahmenZeile()}</p>'),
             'die Rahmenzeile wird berechnet, aber nicht gezeigt — dann bleibt die Spielerzahl unerklaert');
     });
 

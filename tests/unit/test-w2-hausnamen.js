@@ -431,12 +431,6 @@ const REGISTER = [
            + 'deren Hinweis — seit dem 11.09.2026 dieselbe Konvention wie die Spalte '
            + 'daneben.' },
 
-    { datei: 'js/app-meta-call.js', schluessel: 'mc.wrNennerTitel',
-      konvention: 'ohneUnentschieden', marken: ['_wrVollname'],
-      grund: 'Der Nennersatz haengt an der Begegnungsliste, die _anzeigeQuote zeigt. '
-           + 'Er ist selbst ein Hinweistext und hat keinen zweiten Ort fuer einen '
-           + 'Namen — also wird der Hausname ersetzt.' },
-
     { datei: 'js/app-meta-call.js', schluessel: 'mc.reasonWr',
       konvention: 'mitUnentschieden', marken: ['_wrKurzform'],
       grund: '_topMatchupsVsField legt wr = m.pWin ab, den Anteil an allen Partien. '

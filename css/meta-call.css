@@ -3901,8 +3901,8 @@
   display: grid;
   grid-template-columns: 30px 1fr;
   gap: 12px;
-  align-items: start;
-  margin: 26px 0 10px 0;
+  align-items: center;
+  margin: 22px 0 8px 0;
   padding-top: 14px;
   border-top: 1px solid var(--mc-border-faint);
 }
@@ -3921,25 +3921,17 @@
   line-height: 1;
 }
 .mc-schritt-titel {
-  margin: 3px 0 2px 0;
+  margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--mc-text-heading);
   letter-spacing: 0;
   text-transform: none;
 }
-.mc-schritt-satz {
-  margin: 0;
-  font-size: 0.84rem;
-  line-height: 1.5;
-  color: var(--mc-text-muted);
-  max-width: 84ch;
-}
 @media (max-width: 700px) {
   .mc-schritt { grid-template-columns: 26px 1fr; gap: 9px; margin: 20px 0 8px 0; }
   .mc-schritt-nr { width: 26px; height: 26px; font-size: 0.8rem; }
   .mc-schritt-titel { font-size: 0.98rem; }
-  .mc-schritt-satz { font-size: 0.8rem; }
 }
 
 /* Der gemessene Online-Anteil, direkt unter der Prognose in derselben
@@ -4286,6 +4278,7 @@
   gap: 8px 12px; padding: 6px 12px; position: relative;
 }
 .mc-leiste .mc-meta-zeile { flex: 0 1 auto; padding: 0; }
+.mc-leiste .mc-tt-tabs { flex: 1 1 auto; flex-wrap: wrap; margin: 0; }
 .mc-meta-name {
   font-weight: 700; font-size: 0.85rem; color: var(--mc-text-heading);
   padding: 3px 10px; border: 1px solid var(--mc-border, var(--border-color, #cbd5e1)); border-radius: 999px;
@@ -4333,33 +4326,18 @@
 .mc-einzeilig .metacall-field-group input[type="text"],
 .mc-einzeilig .metacall-field-group select { padding: 5px 9px; font-size: 0.9rem; }
 .mc-einzeilig .mc-turnier-name { grid-column: span 2; }
-.mc-turnier-kompakt .mc-bild-zeile { margin-top: 8px; gap: 8px; }
-.mc-turnier-kompakt .mc-bild-btn { padding: 5px 14px; border-radius: 999px; font-size: 0.8rem; }
-.mc-turnier-kompakt .mc-tt-swisscalc { font-size: 0.78rem; margin-left: auto; }
+.mc-bild-zeile.metacall-panel { margin-top: 14px; gap: 8px; padding-top: 10px; padding-bottom: 10px; }
+.mc-bild-zeile .mc-bild-btn { padding: 5px 14px; border-radius: 999px; font-size: 0.8rem; }
+.mc-bild-zeile .mc-tt-swisscalc { font-size: 0.78rem; margin-left: auto; }
 @media (max-width: 768px) {
   .mc-einzeilig .mc-turnier-name { grid-column: 1 / -1; }
-  .mc-turnier-kompakt .mc-bild-btn { width: auto; }
+  .mc-bild-zeile .mc-bild-btn { width: auto; }
 }
 
-/* UI-60 (02.10.2026): die kleine Ergebnis-Uebersicht unter der Deck-Wahl. */
+/* UI-60/UI-62 (02.10.2026): die Ergebnis-Uebersicht direkt unter der Deck-Wahl
+   (Klasse mc-uebersicht am mc-ev-panel). Kleine Kacheln in einer Reihe. */
 .mc-uebersicht { padding-top: 10px; padding-bottom: 10px; }
-.mc-uebersicht-kopf {
-  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.05em; color: var(--mc-text-muted); margin-bottom: 6px;
-}
 .mc-uebersicht-leer { margin: 0; font-size: 0.85rem; color: var(--mc-text-muted); }
-.mc-uebersicht-kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
-.mc-uebersicht-kachel {
-  display: flex; flex-direction: column; gap: 1px; padding: 8px 12px;
-  border: 1px solid var(--mc-border); border-top: 3px solid var(--mc-border);
-  border-radius: 10px; background: var(--surface-1);
-}
-.mc-uebersicht-kachel.is-pos { border-top-color: var(--color-success); }
-.mc-uebersicht-kachel.is-neg { border-top-color: var(--color-danger); }
-.mc-uebersicht-label { font-size: 0.75rem; font-weight: 600; color: var(--mc-text-heading); }
-.mc-uebersicht-wert {
-  font-size: 1.5rem; font-weight: 800; line-height: 1.15;
-  color: var(--mc-text-heading); font-variant-numeric: tabular-nums;
-}
-.mc-uebersicht-kontext { font-size: 0.72rem; color: var(--mc-text-muted); }
-.mc-uebersicht-wert.mc-day2-pct { font-size: 1.5rem; line-height: 1.15; margin: 0; }
+.mc-uebersicht .mc-ev-kacheln { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.mc-uebersicht .mc-ev-wert { font-size: 1.35rem; }
+.mc-ev-bilanz { letter-spacing: 0.02em; }

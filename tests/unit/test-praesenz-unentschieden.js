@@ -170,7 +170,7 @@ describe('Die Quote wird gemessen, nicht gesetzt', () => {
     });
 
     it('die Annahme steht unter der Zahl, nicht nur im Quelltext', () => {
-        assert.match(MC, /<div class="mc-day2-sub mc-day2-unentschieden">\$\{_uqText\}<\/div>/,
+        assert.match(MC, /<p class="mc-day2-sub mc-day2-unentschieden">\$\{_uqText\}<\/p>/,
             'die Unentschieden-Zeile wird nicht gerendert');
         assert.match(CSS, /\.mc-day2-unentschieden/,
             'die Zeile hat keine eigene Gestalt und klebt an der darüber');
@@ -179,7 +179,7 @@ describe('Die Quote wird gemessen, nicht gesetzt', () => {
     it('calcDay2 reicht die benutzte Quote nach außen', () => {
         assert.match(MC, /return \{ day2Prob, dp, expWin, expTie, expLoss, unentschieden: uq \};/,
             'die Anzeige müsste die Quote sonst ein zweites Mal berechnen');
-        assert.match(MC, /const \{ day2Prob, dp, expWin, expTie, expLoss, unentschieden \} = calcDay2\(field\);/,
+        assert.match(MC, /const _uq = d2\.unentschieden \|\| _unentschiedenQuote\(\);/,
             'die Anzeige nimmt die Quote nicht entgegen');
     });
 

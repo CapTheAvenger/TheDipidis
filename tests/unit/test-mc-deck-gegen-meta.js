@@ -316,7 +316,7 @@ describe('EV gegen das erwartete Meta — der Einbau', () => {
     it('der Block haengt im Meta Call und nicht mehr im Reiter „Aktuelles Meta"', () => {
         assert.match(SRC, /renderDeckGegenMetaPanel\(field\)/,
             'renderAll ruft den Block nicht auf');
-        assert.match(SRC, /class="metacall-panel mc-ev-panel"/,
+        assert.match(SRC, /class="metacall-panel mc-ev-panel mc-uebersicht"/,
             'der Block traegt seine Kennung nicht mehr');
     });
 
@@ -339,19 +339,19 @@ describe('EV gegen das erwartete Meta — der Einbau', () => {
         assert.match(SRC, /const EV_UMFANG_KEY = 'metacall_ev_umfang_v1'/);
     });
 
-    it('die vier Schritte des Ablaufs stehen zwischen den Kacheln', () => {
+    it('die zwei Schritte des Ablaufs stehen zwischen den Kacheln', () => {
         /* Der eigentliche Befund vom 11.09.2026 war kein Rechenfehler,
            sondern acht gleich aussehende Kacheln ohne Reihenfolge. */
         const i = SRC.indexOf('function renderAll()');
         const j = SRC.indexOf('function _inFrozenPastMode()', i);
         const rumpf = SRC.slice(i, j);
-        for (const n of [1, 2, 3, 4]) {
+        /* UI-62 (02.10.2026): aus vier Schritten wurden zwei —
+           „Turnier und Deck" und „Das Meta und deine Chancen". */
+        for (const n of [1, 2]) {
             assert.ok(rumpf.includes('_mcSchritt(' + n + ','),
                 'Schritt ' + n + ' fehlt in renderAll');
         }
-        assert.ok(rumpf.indexOf('_mcSchritt(1,') < rumpf.indexOf('_mcSchritt(2,')
-               && rumpf.indexOf('_mcSchritt(2,') < rumpf.indexOf('_mcSchritt(3,')
-               && rumpf.indexOf('_mcSchritt(3,') < rumpf.indexOf('_mcSchritt(4,'),
+        assert.ok(rumpf.indexOf('_mcSchritt(1,') < rumpf.indexOf('_mcSchritt(2,'),
             'die Schritte stehen nicht in ihrer Reihenfolge');
     });
 

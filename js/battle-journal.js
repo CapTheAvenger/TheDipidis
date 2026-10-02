@@ -3221,6 +3221,39 @@
         }
         const normOwn = _normDeck(ownDeck);
         if (!normOwn) return {};
+        /* UI-62 (02.10.2026): Journal-Zeilen tragen oft einen Zusatz, den
+           der Spieler selbst getippt hat — „Mega Excadrill Frankfurt" fuer
+           das Archetyp-Deck „Mega Excadrill". Mit der strengen Gleichheit
+           oben fiel jede solche Partie aus der Meta-Call-Rechnung. Der
+           Zusatz wird nur geduldet, wenn (1) der Archetypname am WORTANFANG
+           steht und (2) die Zeile nicht zu einem anderen, laengeren
+           bekannten Archetyp gehoert („Dragapult" darf nicht
+           „Dragapult Dusknoir" einsammeln). Ohne Liste bekannter Decks
+           bleibt es bei der strengen Gleichheit. */
+        function _woerter(s) {
+            return String(s || '').toLowerCase()
+                .replace(/[\u0027\u2018\u2019\u201B\u0060\u00B4\u02BC\-]/g, '')
+                .split(/\s+/).filter(Boolean);
+        }
+        var bekannteWorte = ((options && options.bekannteDecks) || []).map(_woerter)
+            .filter(function(w) { return w.length > 0; });
+        var ownWorte = _woerter(ownDeck);
+        function _beginntMit(worte, praefix) {
+            if (worte.length < praefix.length) return false;
+            for (var i = 0; i < praefix.length; i++) if (worte[i] !== praefix[i]) return false;
+            return true;
+        }
+        function _gehoertZuEigenemDeck(entryDeck) {
+            if (_normDeck(entryDeck) === normOwn) return true;
+            if (!bekannteWorte.length) return false;
+            var ew = _woerter(entryDeck);
+            if (ew.length <= ownWorte.length || !_beginntMit(ew, ownWorte)) return false;
+            for (var k = 0; k < bekannteWorte.length; k++) {
+                var kw = bekannteWorte[k];
+                if (kw.length > ownWorte.length && _beginntMit(ew, kw)) return false;
+            }
+            return true;
+        }
         const all = Array.isArray(journalHistoryCache) ? journalHistoryCache : [];
         const matchups = {};
         all.forEach(function(e) {
@@ -3230,7 +3263,7 @@
             // gespielt. Ohne diese Zeile landet er unten im `else` und
             // zaehlt als Unentschieden.
             if (istNoShow(e)) return;
-            if (_normDeck(e.ownDeck) !== normOwn) return;
+            if (!_gehoertZuEigenemDeck(e.ownDeck)) return;
             const opp = e.opponentArchetype;
             if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0 };
             matchups[opp].total++;

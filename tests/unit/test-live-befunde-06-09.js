@@ -105,11 +105,11 @@ describe('Day-2-Block: eine Kachel, ein Zahlformat', () => {
        Bauanweisung — und zwar auf die konkreten Variablen, die live
        falsch herauskamen, nicht auf "irgendwo kein toFixed". */
     const stellen = [
-        ['Day-2-Prozentwert',        '_mcNum(day2Prob * 100, 1)'],
-        ['Schwellenanteil',          '_mcNum(_settings.day2Points / maxPts * 100, 1)'],
-        ['Ø Wins',                   '_mcNum(expWin, 1)'],
-        ['Ø Ties',                   '_mcNum(expTie, 1)'],
-        ['Ø Losses',                 '_mcNum(expLoss, 1)'],
+        ['Day-2-Prozentwert (Teilen-Bild)', '_mcNum(day2Prob * 100, 1)'],
+        ['Day-2-Prozentwert (Kachel)', '_mcNum(d2.day2Prob * 100, 1)'],
+        ['Ø Wins',                   '_mcNum(d2.expWin, 1)'],
+        ['Ø Losses',                 '_mcNum(d2.expLoss, 1)'],
+        ['Ø Ties',                   '_mcNum(d2.expTie, 1)'],
     ];
     for (const [was, ausdruck] of stellen) {
         it(`${was} laeuft ueber _mcNum`, () => {

@@ -383,26 +383,29 @@ describe('M3 — refreshResults reisst das Schaetzfeld nicht mehr unter dem Curs
 // ───────────────────────────────────────────────────────────────────
 describe('M4 — der Brick-Filter schreibt an, worauf er wirkt', () => {
     function baue(settings, journal) {
-        const quelle = funktion('function _brickFilterStand() {');
+        const quelle = funktion('function _journalFilterTitel() {');
         return new Function('_settings', '_journalStats', 'zahlLokal', 'esc',
-            quelle + '\nreturn _brickFilterStand;')(settings, journal, zahlLokal, (s) => String(s));
+            quelle + '\nreturn _journalFilterTitel;')(settings, journal, zahlLokal, (s) => String(s));
     }
 
     it('ohne Deck sagt er, dass er noch nicht wirkt', () => {
-        assert.match(baue({ myDeck: '' }, {})(), /wirkt erst, wenn ein Deck gewählt ist/);
+        assert.match(baue({ myDeck: '' }, {})(), /Wirkt erst, wenn ein Deck gewählt ist/);
     });
 
     it('ohne Journalpartien sagt er genau das — statt stumm nichts zu tun', () => {
         const html = baue({ myDeck: 'Mega Excadrill' }, {})();
-        assert.match(html, /keine Journal-Matches für dieses Deck/);
+        assert.match(html, /Keine Journal-Matches für dieses Deck/);
     });
 
     it('die Zeile haengt auch wirklich neben dem Umschalter', () => {
         // Ohne diese Zusicherung ueberlebt das Entfernen des Aufrufs im
         // Markup: die Funktion waere geprueft, aber niemand riefe sie.
         const kachel = schnitt('<div class="mc-brick-filter-wrap">', '</div>');
-        assert.ok(kachel.includes('${_brickFilterStand()}'),
-            'der Brick-Umschalter steht wieder ohne Angabe da, worauf er wirkt');
+        /* UI-62 (02.10.2026): die Angabe steht nicht mehr als Zeile neben dem
+           Umschalter, sondern als Hinweistext (title) am Umschalter. */
+        const auswahl = schnitt('<select class="mc-brick-filter-select"', '>');
+        assert.ok(auswahl.includes('_journalFilterTitel()'),
+            'der Journal-Umschalter steht wieder ohne Angabe da, worauf er wirkt');
     });
 
     it('mit Journalpartien nennt er die gemessene Zahl', () => {
@@ -468,8 +471,10 @@ describe('M4 — "Mein Deck" schweigt nicht mehr, wenn die Eingabe nicht passt',
         const q = funktion('function _myDeckStatusText() {');
         const fn = (settings) => new Function('_settings', 'esc',
             q + '\nreturn _myDeckStatusText;')(settings, (x) => String(x))();
-        assert.match(fn({ myDeck: '' }), /Noch kein Deck gewählt/);
-        assert.match(fn({ myDeck: 'Mega Excadrill' }), /Gewählt: Mega Excadrill/);
+        /* UI-62 (02.10.2026): die Dauerzeile ist weg — der Status meldet sich
+           nur noch beim Tippen (_setzeMyDeckStatus), nicht als Erklaertext. */
+        assert.equal(fn({ myDeck: '' }), '');
+        assert.equal(fn({ myDeck: 'Mega Excadrill' }), '');
     });
 });
 

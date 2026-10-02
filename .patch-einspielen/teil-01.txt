@@ -177,7 +177,7 @@ index 4785a44b..4e19749b 100644|
    ${addBtn}|
 -  <datalist id="mc-custom-datalist">${suggestionOpts}</datalist>|
  </div>`;|
-@@ -11814,73 +11818,2 @@ window.MetaCall = (function () {|
+@@ -11814,73 +11818,2 @@|
  |
 -  function renderOverrideTable() {|
 -    if (!_settings.myDeck || !_shareList) {|
@@ -230,7 +230,7 @@ index 4785a44b..4e19749b 100644|
 -     *|
 -     * Der Satz darueber bleibt — er sagt jetzt, dass beide Spalten|
 -     * dieselbe Groesse meinen, und nennt sie. Ihn ersatzlos zu|
--     * streichen hiesse, die Frage „rechnen die beiden dasselbe?“ wieder|
+-     * streichen hiesse, die Frage „rechnen die beiden dasselbe?" wieder|
 -     * unbeantwortet zu lassen. */|
 -    const _titelGemischt = _wrKonventionsTitel('ohneUnentschieden');|
 -    const _titelManuell  = _wrKonventionsTitel('ohneUnentschieden');|

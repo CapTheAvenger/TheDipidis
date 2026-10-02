@@ -720,6 +720,28 @@
   color: var(--mc-text-faint);
   font-weight: 500;
 }
+.mc-deck-vorschlaege {
+  position: absolute;
+  left: 0; right: 0; top: calc(100% + 4px);
+  z-index: 30;
+  margin: 0; padding: 4px 0;
+  list-style: none;
+  max-height: 260px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--surface-1);
+  border: 1px solid var(--mc-border-strong);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.mc-deck-vorschlaege[hidden] { display: none; }
+.mc-deck-vorschlag {
+  padding: 11px 14px;
+  font-size: 0.95rem;
+  color: var(--mc-text-heading);
+  cursor: pointer;
+}
+.mc-deck-vorschlag:hover, .mc-deck-vorschlag:active { background: var(--mc-bg-subtle); }
 .mc-deck-search-wrap::before {
   content: "🔍";
   position: absolute;
@@ -3741,29 +3763,6 @@
 .mc-ev-deckzelle > *:only-child { grid-column: 2; }
 .mc-ev-deckwort { font-weight: 600; overflow-wrap: break-word; }
 
-/* Abstand zur 50 — dieselbe Zahl wie in der Spalte davor, als Bild. */
-.mc-ev-td-balken { padding-right: 14px !important; }
-.mc-ev-spur {
-  position: relative;
-  display: block;
-  height: 10px;
-  border-radius: 5px;
-  background: var(--mc-bg-subtle);
-  min-width: 60px;
-}
-.mc-ev-mitte {
-  position: absolute;
-  left: 50%; top: -2px; bottom: -2px;
-  width: 1px;
-  background: var(--mc-border);
-}
-.mc-ev-balken {
-  position: absolute;
-  top: 0; bottom: 0;
-  border-radius: 5px;
-}
-.mc-ev-balken.is-pos { background: var(--color-success); }
-.mc-ev-balken.is-neg { background: var(--color-danger); }
 .metacall-wrap .metacall-wrap .mc-ev-tabelle tr.is-duenn td { opacity: 0.55; }
 .metacall-wrap .mc-ev-tabelle .is-gut { color: var(--color-success); font-weight: 700; }
 .metacall-wrap .mc-ev-tabelle .is-schlecht { color: var(--color-danger); font-weight: 700; }

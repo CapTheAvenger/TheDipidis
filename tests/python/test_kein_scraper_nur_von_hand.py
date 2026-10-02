@@ -31,11 +31,6 @@ NUR_VON_HAND = {
     "probe-cardmarket-expansions.yml": "Messwerkzeug, kein Scraper — einmalige Probe",
     "probe-pokepricelab.yml": "Messwerkzeug, kein Scraper — einmalige Probe",
     "schriften-spiegeln.yml": "Schriftdateien, keine Daten; laeuft nur, wenn eine Schrift dazukommt",
-    "pokepricelab-index.yml": (
-        "SC-12 (Backlog): pokepricelab.com liefert die Sitemap zur Zeit nicht "
-        "vollstaendig (#4 nach 60 min, #5 nach 120 min abgebrochen). Ein Zeitplan "
-        "erzeugte jede Woche einen roten Lauf. Bekommt seinen Zeitplan mit dem "
-        "Etappenabruf aus SC-12."),
 }
 
 

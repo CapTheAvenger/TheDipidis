@@ -28,7 +28,10 @@ Output: data/pokepricelab_catalog_index.csv
     set, number, url, product_id_in_url, lang
 """
 
+import argparse
 import csv
+import gzip
+import json
 import os
 import re
 import sys
@@ -45,6 +48,15 @@ UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
 # Their robots.txt has no Disallow and declares this sitemap; still pace
 # the requests — 271 files is a lot of hits for someone else's server.
 PACE = 0.6
+# SC-12 (02.10.2026): der Abruf laeuft in ETAPPEN. pokepricelab.com antwortet
+# zeitweise ~27 s je Teil-Sitemap (Lauf #5: 280 Teile, ab Teil 87 nur noch
+# Zeitueberschreitung) — an einem Stueck ist das mehr als ein Lauf haelt. Jeder
+# Lauf holt, was in sein Zeitbudget passt, merkt sich die fertigen Teile und
+# macht beim naechsten Lauf dort weiter. Geschrieben wird erst bei vollstaendigem
+# Satz; der Index schrumpft nie still (Regel aus #882 bleibt).
+FORTSCHRITT = os.path.join(ROOT, '.cache', 'pokepricelab_sitemap.json.gz')
+FRISCH_TAGE = 6        # so lange gilt ein fertiger Index als aktuell
+STEHEN_TAGE = 5        # so lange darf ein Satz unvollstaendig bleiben, dann rot
 FIELDS = ['set', 'number', 'url', 'product_id_in_url', 'lang']
 
 CATALOG_RE = re.compile(
@@ -219,39 +231,79 @@ def name_vetoes(url_body, our_name):
     return ours not in _flat(url_body)
 
 
-def fetch_sitemap_urls(session):
+def _locs(text):
     import xml.etree.ElementTree as ET  # noqa: PLC0415
+    try:
+        root = ET.fromstring(text)
+    except ET.ParseError:
+        return re.findall(r'<loc>([^<]+)</loc>', text)
+    return [e.text.strip() for e in root.iter()
+            if e.tag.endswith('loc') and e.text]
 
-    def locs(text):
-        try:
-            root = ET.fromstring(text)
-        except ET.ParseError:
-            return re.findall(r'<loc>([^<]+)</loc>', text)
-        return [e.text.strip() for e in root.iter()
-                if e.tag.endswith('loc') and e.text]
 
-    r = session.get(f'{BASE}/sitemap.xml', timeout=30)
-    r.raise_for_status()
-    subs = [u for u in locs(r.text) if '/sitemap' in u]
-    print(f'sitemap index: {len(subs)} sub-sitemaps')
-    urls = []
-    fehlend = []
-    for i, sm in enumerate(subs, 1):
-        try:
-            rr = session.get(sm, timeout=30)
-            if rr.status_code != 200:
-                print(f'  {sm} -> HTTP {rr.status_code} (skipped)')
-                fehlend.append(sm)
-                continue
-            got = locs(rr.text)
-            urls.extend(got)
-            if i % 25 == 0 or i == len(subs):
-                print(f'  {i}/{len(subs)} sub-sitemaps, {len(urls)} urls so far')
-        except Exception as e:  # noqa: BLE001
-            print(f'  {sm} -> ERROR {e} (skipped)')
-            fehlend.append(sm)
-        time.sleep(PACE)
-    return urls, fehlend
+def lade_fortschritt(pfad):
+    """Der Stand der letzten Etappe — oder ein leerer Anfang."""
+    try:
+        with gzip.open(pfad, 'rt', encoding='utf-8') as f:
+            st = json.load(f)
+        if isinstance(st, dict) and isinstance(st.get('teile'), dict):
+            return st
+    except (OSError, ValueError):
+        pass
+    return {'gestartet': None, 'fertig_am': None, 'teile': {}}
+
+
+def speichere_fortschritt(pfad, st):
+    os.makedirs(os.path.dirname(pfad), exist_ok=True)
+    tmp = pfad + '.tmp'
+    with gzip.open(tmp, 'wt', encoding='utf-8') as f:
+        json.dump(st, f)
+    os.replace(tmp, pfad)
+
+
+def hole_etappe(session, subs, st, jetzt=time.time, budget_s=None, pace=None):
+    """Holt die Teil-Sitemaps, die in `st['teile']` noch fehlen.
+
+    Schon gelesene Teile werden NICHT noch einmal abgerufen. Ein Teil, der
+    nicht antwortet, bleibt offen (kommt in dieser Etappe noch einmal dran,
+    solange Budget da ist). Gespeichert werden nur die Katalog-URLs — nur die
+    liest alles weitere (derive_slug_to_code, index_urls).
+    Gibt die Liste der noch offenen Teile zurueck."""
+    pace = PACE if pace is None else pace
+    ende = None if not budget_s else jetzt() + budget_s
+    teile = st['teile']
+    # Teile, die der Index nicht mehr nennt, fallen aus dem Stand.
+    for alt in [k for k in teile if k not in set(subs)]:
+        del teile[alt]
+    for durchgang in (1, 2):
+        offen = [sm for sm in subs if sm not in teile]
+        if not offen:
+            break
+        for sm in offen:
+            if ende is not None and jetzt() >= ende:
+                print(f'  Zeitbudget aufgebraucht — {len([x for x in subs if x not in teile])} '
+                      f'Teil-Sitemap(s) offen, Fortsetzung beim naechsten Lauf')
+                return [x for x in subs if x not in teile]
+            try:
+                rr = session.get(sm, timeout=30)
+                if rr.status_code != 200:
+                    print(f'  {sm} -> HTTP {rr.status_code} (bleibt offen)')
+                else:
+                    teile[sm] = [u for u in _locs(rr.text) if CATALOG_RE.match(u)]
+                    done = len(teile)
+                    if done % 25 == 0 or done == len(subs):
+                        print(f'  {done}/{len(subs)} sub-sitemaps gelesen')
+            except Exception as e:  # noqa: BLE001
+                print(f'  {sm} -> ERROR {e} (bleibt offen)')
+            time.sleep(pace)
+    return [sm for sm in subs if sm not in teile]
+
+
+def _ausgabe(name, wert):
+    pfad = os.environ.get('GITHUB_OUTPUT')
+    if pfad:
+        with open(pfad, 'a', encoding='utf-8') as f:
+            f.write(f'{name}={wert}\n')
 
 
 def index_urls(urls, slug_to_code, set_slugs, our_cards, our_names=None):
@@ -308,7 +360,14 @@ def index_urls(urls, slug_to_code, set_slugs, our_cards, our_names=None):
     return rows, unmatched, vetoed
 
 
-def main():
+def main(argv=None):
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--budget-min', type=float, default=0,
+                    help='Zeitbudget fuer den Abruf in Minuten (0 = unbegrenzt)')
+    ap.add_argument('--fortschritt', default=FORTSCHRITT)
+    ap.add_argument('--neu', action='store_true',
+                    help='Stand verwerfen und von vorn beginnen')
+    args = ap.parse_args(argv)
     # Zeilenweise ausgeben: im Ablauf lief #4 (30.09.2026) eine Stunde ohne
     # eine einzige Zeile im Log und wurde abgebrochen — ob der Abruf hing
     # oder nur langsam war, liess sich nicht mehr sagen.
@@ -317,23 +376,51 @@ def main():
     s = requests.Session()
     s.headers.update({'User-Agent': UA, 'Accept-Language': 'de,en;q=0.8'})
 
+    jetzt = time.time()
+    st = {'gestartet': None, 'fertig_am': None, 'teile': {}} if args.neu \
+        else lade_fortschritt(args.fortschritt)
+    if st.get('fertig_am') and jetzt - st['fertig_am'] < FRISCH_TAGE * 86400:
+        tage = (jetzt - st['fertig_am']) / 86400
+        print(f'::notice::pokepricelab-index: Index ist aktuell (vor {tage:.1f} Tagen '
+              f'geschrieben, gilt {FRISCH_TAGE} Tage) — nichts zu tun.')
+        _ausgabe('schreiben', 'false')
+        return 0
+    if st.get('fertig_am'):                 # abgelaufen: neuer Durchgang
+        st = {'gestartet': None, 'fertig_am': None, 'teile': {}}
+    if not st.get('gestartet'):
+        st['gestartet'] = jetzt
+
     our_cards = load_our_cards()
     our_expansions = load_our_expansions()
     print(f'our cards: {len(our_cards)} | unverified: {sum(our_cards.values())} '
           f'| set codes with a known expansion: {len(our_expansions)}')
 
-    urls, fehlend = fetch_sitemap_urls(s)
+    r = s.get(f'{BASE}/sitemap.xml', timeout=30)
+    r.raise_for_status()
+    subs = [u for u in _locs(r.text) if '/sitemap' in u]
+    print(f'sitemap index: {len(subs)} sub-sitemaps, davon schon gelesen: '
+          f'{len([x for x in subs if x in st["teile"]])}')
+    budget = args.budget_min * 60 if args.budget_min else None
+    offen = hole_etappe(s, subs, st, budget_s=budget)
+    speichere_fortschritt(args.fortschritt, st)
+    # REPORT, DON'T SILENTLY REPAIR: unvollstaendig heisst NICHT schreiben —
+    # der alte Index bleibt (60.965 Zeilen im Bestand). Aber auch nicht still
+    # ewig warten: steht der Satz laenger als STEHEN_TAGE offen, ist der Lauf rot.
+    if offen:
+        alter = (jetzt - st['gestartet']) / 86400
+        if alter > STEHEN_TAGE:
+            print(f'::error::pokepricelab-index: nach {alter:.1f} Tagen noch '
+                  f'{len(offen)} Teil-Sitemap(s) offen — Index NICHT neu geschrieben. '
+                  f'Erstes: {offen[0]}')
+            _ausgabe('schreiben', 'false')
+            return 1
+        print(f'::notice::pokepricelab-index: Etappe fertig, {len(offen)} von '
+              f'{len(subs)} Teil-Sitemaps offen (Satz seit {alter:.1f} Tagen) — '
+              f'Index nicht neu geschrieben, der Lauf setzt beim naechsten Mal fort.')
+        _ausgabe('schreiben', 'false')
+        return 0
+    urls = [u for sm in subs for u in st['teile'][sm]]
     print(f'\ntotal sitemap urls: {len(urls)}')
-    # REPORT, DON'T SILENTLY REPAIR (30.09.2026): bis heute wurde ein
-    # uebersprungenes Teil-Sitemap nur ins Log geschrieben und der Index
-    # danach trotzdem neu geschrieben — mit den Zeilen, die fehlten, einfach
-    # weg (60.965 Zeilen im Bestand). Lauf #4 und #5 hingen stundenlang an
-    # der Quelle. Fehlt ein Teil, wird nichts geschrieben; der alte Index
-    # bleibt, und der Lauf ist rot mit Namen.
-    if fehlend:
-        print(f'::error::pokepricelab-index: {len(fehlend)} Teil-Sitemap(s) nicht '
-              f'gelesen — Index NICHT neu geschrieben. Erstes: {fehlend[0]}')
-        return 1
 
     slug_to_code, set_slugs = derive_slug_to_code(urls, our_expansions)
     rows, unmatched, vetoed = index_urls(urls, slug_to_code, set_slugs,
@@ -357,6 +444,10 @@ def main():
         w.writeheader()
         w.writerows(rows)
     print(f'\nwrote {os.path.relpath(OUT, ROOT)} ({len(rows)} rows)')
+    # Fertig: der Stand haelt nur noch den Zeitpunkt, nicht die Teile.
+    speichere_fortschritt(args.fortschritt, {
+        'gestartet': st['gestartet'], 'fertig_am': time.time(), 'teile': {}})
+    _ausgabe('schreiben', 'true')
     return 0
 
 

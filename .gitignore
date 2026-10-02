@@ -143,3 +143,4 @@ backend/core/data/
 # Geschichte, und ein „letzte 7 Tage", das bis zum naechsten Commit
 # altert. Lokal darf sie liegen — fuer die Abnahme im Browser.
 data/post_decklists.json
+.cache/

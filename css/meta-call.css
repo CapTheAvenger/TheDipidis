@@ -3741,29 +3741,6 @@
 .mc-ev-deckzelle > *:only-child { grid-column: 2; }
 .mc-ev-deckwort { font-weight: 600; overflow-wrap: break-word; }
 
-/* Abstand zur 50 — dieselbe Zahl wie in der Spalte davor, als Bild. */
-.mc-ev-td-balken { padding-right: 14px !important; }
-.mc-ev-spur {
-  position: relative;
-  display: block;
-  height: 10px;
-  border-radius: 5px;
-  background: var(--mc-bg-subtle);
-  min-width: 60px;
-}
-.mc-ev-mitte {
-  position: absolute;
-  left: 50%; top: -2px; bottom: -2px;
-  width: 1px;
-  background: var(--mc-border);
-}
-.mc-ev-balken {
-  position: absolute;
-  top: 0; bottom: 0;
-  border-radius: 5px;
-}
-.mc-ev-balken.is-pos { background: var(--color-success); }
-.mc-ev-balken.is-neg { background: var(--color-danger); }
 .metacall-wrap .metacall-wrap .mc-ev-tabelle tr.is-duenn td { opacity: 0.55; }
 .metacall-wrap .mc-ev-tabelle .is-gut { color: var(--color-success); font-weight: 700; }
 .metacall-wrap .mc-ev-tabelle .is-schlecht { color: var(--color-danger); font-weight: 700; }

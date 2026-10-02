@@ -12275,32 +12275,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
      abgelehnt („trägt bei … versteh ich nicht, brauch ich nicht"), und
      zu Recht — eine Zahl mit zwei Nachkommastellen sagt niemandem
      etwas. Was dasteht, sind die zwei Zahlen, die jeder versteht. */
-  /* Die Spalte „gegen 50 %" — dieselbe Zahl wie daneben, nur als
-     Abstand zur Mitte. Sie traegt keine neue Information und soll auch
-     keine: eine Tabelle mit fuenf schmalen Spalten auf 1.300 px laesst
-     den Leser die Zeilen nicht vergleichen, weil 54,9 und 38,8 in
-     derselben Schriftgroesse nebeneinanderstehen. Der Balken macht den
-     Unterschied sichtbar, ohne eine zweite Groesse einzufuehren.
-
-     Die Skala ist FEST (±EV_BALKEN_SPANNE Punkte) und nicht auf das
-     jeweils groesste Deck normiert. Eine mitwachsende Skala haette
-     dieselbe Paarung je nach Deckwahl mal halb und mal ganz gefuellt
-     gezeigt — dann misst der Balken die Nachbarschaft und nicht die
-     Paarung. Was darueber hinausgeht, stoesst sichtbar an den Rand;
-     der Hinweis am Spaltenkopf sagt es. */
-  const EV_BALKEN_SPANNE = 25;
-
-  function _evBalken(quote) {
-    const d = Math.max(-EV_BALKEN_SPANNE, Math.min(EV_BALKEN_SPANNE, quote - 50));
-    const breite = (Math.abs(d) / EV_BALKEN_SPANNE) * 50;   // % der halben Spur
-    const seite = d >= 0 ? 'left: 50%;' : 'right: 50%;';
-    const klasse = d >= 0 ? 'is-pos' : 'is-neg';
-    return `<span class="mc-ev-spur" aria-hidden="true">`
-         + `<span class="mc-ev-mitte"></span>`
-         + `<span class="mc-ev-balken ${klasse}" style="${seite} width: ${breite.toFixed(1)}%"></span>`
-         + `</span>`;
-  }
-
   function _evVorbereitungHtml(zeilen) {
     if (!zeilen || !zeilen.length) return '';
     const satz = (liste) => liste.map(z =>
@@ -12329,31 +12303,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     }
     if (!teile.length) return '';
     return teile.join('');
-  }
-
-  /* Woher die QUOTE dieser Zeile kommt. Vier Fälle, vier Wörter — §17
-     der Bestellung: „Keine dieser Kategorien darf unklar vermischt
-     werden." */
-  function _evHerkunft(z) {
-    if (z.hand) {
-      return { text: _evL('deine Zahl', 'your number'), klasse: 'is-eigen',
-               titel: _evL('Von dir unter „' + _mcKnopfQuoten() + '" eingetragen. Sie ersetzt die '
-                           + 'gemessene Quote vollständig und trägt kein Unsicherheitsband.',
-                           'Entered by you under "' + _mcKnopfQuoten() + '". It replaces the '
-                           + 'measured rate entirely and carries no uncertainty band.') };
-    }
-    if (z.eigene > 0) {
-      return { text: _evL('gemessen + Journal', 'measured + journal'), klasse: 'is-journal',
-               titel: _evL('Gemessene Quote, bayesianisch mit deinen ' + z.eigene
-                           + ' Journal-Matches eingemischt (Meta als Vorwissen von 30 Matches).',
-                           'Measured rate, blended Bayesian-style with your ' + z.eigene
-                           + ' journal matches (meta as a 30-match prior).') };
-    }
-    return { text: _evL('gemessen', 'measured'), klasse: 'is-gemessen',
-             titel: _evL('Papier und Online gemischt (80 / 20), geglättet; der Nenner steht '
-                         + 'in der Spalte daneben.',
-                         'Paper and online blended (80 / 20), smoothed; the denominator is in '
-                         + 'the column next to it.') };
   }
 
   function _evUmfangZeile(r) {

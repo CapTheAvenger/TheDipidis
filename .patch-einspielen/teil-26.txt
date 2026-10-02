@@ -1,0 +1,17 @@
+-                                        <li><strong>Eigene Decks (bis zu 10):</strong> Decks hinzuf&uuml;gen die du lokal erwartest aber nicht in den Top 12 sind. Ihr Anteil wird von &bdquo;Others&ldquo; abgezogen. Bei bekanntem Deck-Namen werden echte Matchup-Daten geladen; unbekannte Namen defaulten auf 50/50 (per WR-Override anpassbar)</li>|
++                                        <li><strong>Meta-Zusammensetzung (Top 12):</strong> Die 12 meist-gespielten Decks nach Online-Share mit editierbarem &bdquo;Meine Sch&auml;tzung&ldquo;. Alle &uuml;brigen Decks werden automatisch zu &bdquo;Others&ldquo; zusammengefasst &mdash; Summe bleibt immer 100%</li>|
++                                        <li><strong>Weitere Decks im erwarteten Meta (bis zu 10):</strong> Decks hinzuf&uuml;gen die du bei deinem Turnier zus&auml;tzlich erwartest und die oben noch nicht einzeln stehen. Ihr Anteil wird von &bdquo;Others&ldquo; abgezogen. Bei bekanntem Deck-Namen werden echte Matchup-Daten geladen; unbekannte Namen defaulten auf 50/50 (per WR-Override anpassbar)</li>|
+                                         <li><strong>Nach Pok&eacute;mon:</strong> Varianten (z.B. alle Dragapult-Builds) in einer aufklappbaren Zeile zusammenfassen</li>|
+diff --git a/version.json b/version.json|
+index 9317714a..cfff6c6a 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610021531"}|
+\ No newline at end of file|
++{"version":"202610022256"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

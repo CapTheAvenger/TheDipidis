@@ -1,0 +1,85 @@
++|
++const VERBOTEN = [|
++  { muster: /(?<![\w-])Feld(?:es|er|ern|s)?(?![\w-])/, was: '„Feld" (deutsch)' },|
++  { muster: /Turnierfeld|Teilnehmerfeld|Feldanteil|Feldquote|Feldgr[oö]/i, was: 'Zusammensetzung mit „Feld"' },|
++  { muster: /Field-(?:Share|Anteil|Zusammensetzung)/, was: '„Field-…" im deutschen Text' },|
++  { muster: /(?<![\w-])[Ff]ields?(?![\w-])/, was: '„field" (englisch)' },|
++];|
++|
++const POSITIVLISTE = [|
++  { datei: 'js/app-meta-call.js', text: 'Feld leeren gibt den gemessenen Wert zurück',|
++    grund: 'EINGABEFELD (Schaetzung), kein Teilnehmerfeld.' },|
++  { datei: 'js/app-meta-call.js', text: 'clear the field to get the measured value back',|
++    grund: 'EINGABEFELD (englische Fassung derselben Zeile).' },|
++];|
++|
++function ohneKommentare(q) {|
++  const b = q.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));|
++  return b.split('\n').map((z) => (/^\s*\/\//.test(z) ? '' : z)).join('\n');|
++}|
++const LITERAL = /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/g;|
++|
++/** Alle Zeichenketten mit Zeilennummer; console.*-Zeilen bleiben aussen vor. */|
++function literale(quelle) {|
++  const code = ohneKommentare(quelle);|
++  const raus = [];|
++  code.split('\n').forEach((zeile, i) => {|
++    if (/console\.(?:log|info|warn|error)\s*\(/.test(zeile)) return;|
++    for (const m of zeile.matchAll(LITERAL)) raus.push({ zeile: i + 1, text: m[0] });|
++  });|
++  return raus;|
++}|
++|
++function befunde(datei, nurMc) {|
++  const q = lies(datei);|
++  const liste = datei.endsWith('i18n.js')|
++    ? q.split('\n').map((z, i) => ({ z, i })).filter(({ z }) => /^\s*'mc\.[A-Za-z0-9_]+'\s*:/.test(z))|
++        .map(({ z, i }) => ({ zeile: i + 1, text: z }))|
++    : literale(q);|
++  const raus = [];|
++  for (const l of liste) {|
++    for (const v of VERBOTEN) {|
++      if (v.muster.test(l.text)) {|
++        const ok = POSITIVLISTE.some((p) => p.datei === datei && l.text.includes(p.text));|
++        if (!ok) raus.push(`${datei}:${l.zeile} ${v.was}: ${l.text.slice(0, 140)}`);|
++      }|
++    }|
++  }|
++  return raus;|
++}|
++|
++const DATEIEN = ['js/app-meta-call.js', 'js/win-rate-konvention.js', 'js/i18n.js'];|
++|
++describe('W5 — kein „Feld" im Meta Call', () => {|
++  for (const d of DATEIEN) {|
++    it(d + ' sagt „Meta", nicht „Feld"', () => {|
++      const b = befunde(d);|
++      assert.deepEqual(b, [], 'Das Wort „Feld" steht (wieder) in einer Zeichenkette:\n' + b.join('\n'));|
++    });|
++  }|
++|
++  it('POSITIVLISTE: keine tote Zeile', () => {|
++    for (const p of POSITIVLISTE) {|
++      assert.ok(lies(p.datei).includes(p.text), `tote Ausnahme: ${p.text}`);|
++      assert.ok(p.grund && p.grund.length > 10, 'Ausnahme ohne Begruendung: ' + p.text);|
++    }|
++  });|
++|
++  it('VORPRUEFUNG: das Muster greift auf einen gesetzten Fall (nicht leer)', () => {|
++    const t = [|
++      'const a = L(\'Alle Decks im erwarteten Feld\', \'x\');',|
++      'const b = `Die Feldanteile kommen aus der Prognose`;',|
++      'const c = \'Listed in the field: \';',|
++      'const ok = \'metacall-field-group\'; const _feldTeilung = 1; // Feld im Kommentar',|
++    ].join('\n');|
++    const treffer = literale(t).filter((l) => VERBOTEN.some((v) => v.muster.test(l.text)));|
++    assert.equal(treffer.length, 3, 'das Muster erkennt die drei Fehler nicht (oder zu viele): ' + JSON.stringify(treffer));|
++  });|
++});|
+diff --git a/tutorial/tutorial.de.html b/tutorial/tutorial.de.html|
+index 91347687..898efb6a 100644|
+--- a/tutorial/tutorial.de.html|
++++ b/tutorial/tutorial.de.html|
+@@ -2934,4 +2934,4 @@|
+                                         <li><strong>Szenarien:</strong> Komplette Einstellung (Sch&auml;tzungen, eigene Decks, WR-Overrides, gew&auml;hltes Deck) unter einem Namen speichern &mdash; jederzeit per Dropdown wieder laden. N&uuml;tzlich um mehrere Turnierprognosen parallel zu pflegen (z.B. &bdquo;Frankfurt Regional&ldquo;, &bdquo;Nationals 2026&ldquo;)</li>|
+-                                        <li><strong>Feld-Zusammensetzung (Top 12):</strong> Die 12 meist-gespielten Decks nach Online-Share mit editierbarem &bdquo;Meine Sch&auml;tzung&ldquo;. Alle &uuml;brigen Decks werden automatisch zu &bdquo;Others&ldquo; zusammengefasst &mdash; Summe bleibt immer 100%</li>|

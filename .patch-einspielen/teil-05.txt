@@ -1,0 +1,25 @@
+   }|
+@@ -13181,5 +13181,5 @@ window.MetaCall = (function () {|
+     return _mcIstDeutsch()|
+-      ? 'Die Feldanteile kommen aus der Meta-Prognose: Online-Stand plus die Verschiebung zur Spitze, '|
++      ? 'Die Meta-Anteile kommen aus der Meta-Prognose: Online-Stand plus die Verschiebung zur Spitze, '|
+         + 'die an ' + n + ' Regionals gemessen wurde. Die Paarungen darunter:'|
+-      : 'Field shares come from the meta forecast: online standing plus the shift towards the top '|
++      : 'Meta shares come from the meta forecast: online standing plus the shift towards the top '|
+         + 'measured at ' + n + ' regionals. Pairings below:';|
+@@ -13432,4 +13432,4 @@ window.MetaCall = (function () {|
+       const titel = _mcIstDeutsch()|
+-        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Feldern vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird in getBaseMatchup auf dieselbe Quote der Paarung aufgeschlagen.'|
+-        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two fields: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. getBaseMatchup adds the gap to the pair¤u2019s rate in the same convention.';|
++        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Metas vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird in getBaseMatchup auf dieselbe Quote der Paarung aufgeschlagen.'|
++        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two metas: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. getBaseMatchup adds the gap to the pair¤u2019s rate in the same convention.';|
+       return ` <span class="mc-predictor-banner-gewichtung" title="${esc(titel)}">${esc(kern + schub)}</span>`;|
+@@ -14691,3 +14691,3 @@ window.MetaCall = (function () {|
+     _showSharePreview(canvas, `metacall-field-${_formatDateFilename()}.png`,|
+-      'Meta Call — Field Composition',|
++      'Meta Call — Meta Composition',|
+       `Meta share prognosis for ${zahlLokal(_settings.totalPlayers)} players · ${_settings.rounds} rounds`);|
+@@ -14952,3 +14952,3 @@ window.MetaCall = (function () {|
+       `metacall-field-and-recs-${_formatDateFilename()}.png`,|
+-      'Meta Call — Field & Recommendations',|
++      'Meta Call — Meta & Recommendations',|

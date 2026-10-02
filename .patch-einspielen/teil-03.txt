@@ -1,4 +1,4 @@
-                            `(${shareP}%) · median Platz P.${Math.round(s.plurality_median)} ` +|
+                             `(${shareP}%) · median Platz P.${Math.round(s.plurality_median)} ` +|
 -                            `vs P.${Math.round(s.naive_median)} (Δ ${Math.round(s.placement_gap)} besser) · ` +|
 +                            `vs P.${Math.round(s.naive_median)} (Δ ${Math.round(s.placement_gap)} besser, p = ${s.p_value == null ? '–' : s.p_value.toFixed(4).replace('.', ',')}) · ` +|
                              `Ø ${(s.weighted_avg || 0).toFixed(2)}`;|

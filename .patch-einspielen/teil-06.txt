@@ -1,0 +1,72 @@
+       `Meta + top picks for ${zahlLokal(_settings.totalPlayers)} players · ${_settings.rounds} rounds`,|
+@@ -15828,5 +15828,4 @@ window.MetaCall = (function () {|
+      (nicht nur am Anfang), Treffer am Anfang zuerst, Antippen waehlt. */|
+-  function _myDeckVorschlaege(val) {|
++  function _trefferListe(namen, val) {|
+     const q = String(val || '').trim().toLowerCase();|
+-    const namen = (_shareList || []).map(d => d.name).filter(n => n && n !== '_junk');|
+     if (!q) return namen.slice(0, 12);|
+@@ -15837,2 +15836,24 @@ window.MetaCall = (function () {|
+ |
++  function _myDeckVorschlaege(val) {|
++    const namen = (_shareList || []).map(d => d.name).filter(n => n && n !== '_junk');|
++    return _trefferListe(namen, val);|
++  }|
++|
++  /* VORSCHLAEGE FUER "WEITERE DECKS IM ERWARTETEN META" (UI-71, 03.10.2026).|
++     Das Panel ergaenzt NUR Decks, die oben NICHT schon einzeln im erwarteten|
++     Meta stehen (Hausi, 03.10.). Angeboten wird deshalb der Restposten der|
++     Meta-Teilung (`_feldTeilung(...).rest` — dieselbe Quelle wie buildField,|
++     also richtig bei Top 8/16/25, "Alle", "Keine" und von Hand angehakten|
++     Decks) abzueglich der Decks, die in einer ANDEREN Zeile dieses Panels|
++     schon eingetragen sind. Abgleich ueber normalize(), wie ueberall hier.|
++     Gekuerzt auf 12 wird NACH dem Filtern. */|
++  function _customVorschlaege(val, idx) {|
++    const rest = _feldTeilung(_feldSortiert()).rest.map(d => d.name);|
++    const vergeben = new Set(_customDecks|
++      .filter((_d, i) => i !== idx)|
++      .map(d => normalize(d && d.name)).filter(Boolean));|
++    const namen = rest.filter(n => n && n !== '_junk' && !vergeben.has(normalize(n)));|
++    return _trefferListe(namen, val);|
++  }|
++|
+   function _zeigeMyDeckVorschlaege(val) {|
+@@ -15891,3 +15912,3 @@ window.MetaCall = (function () {|
+     if (!ul || !inp) return;|
+-    const namen = _myDeckVorschlaege(val);|
++    const namen = _customVorschlaege(val, idx);|
+     const q = String(val || '').trim().toLowerCase();|
+@@ -15901,2 +15922,22 @@ window.MetaCall = (function () {|
+     inp.setAttribute('aria-expanded', 'true');|
++    _vorschlaegeEinpassen(ul, inp);|
++  }|
++|
++  /* UI-71: die Liste darf nicht unter Tastatur oder Tab-Leiste verschwinden|
++     (iPhone-Screenshot 03.10.: letzter Eintrag halb verdeckt). Misst die|
++     sichtbare Unterkante (visualViewport, Tab-Leiste), scrollt die Seite so,|
++     dass mindestens ~3 Eintraege sichtbar sind, und begrenzt die Hoehe. */|
++  function _vorschlaegeEinpassen(ul, inp) {|
++    try {|
++      const bar = document.getElementById('dsTabbarHost');|
++      const vv = window.visualViewport;|
++      let unten = vv ? vv.offsetTop + vv.height : window.innerHeight;|
++      if (bar && bar.offsetHeight) unten = Math.min(unten, bar.getBoundingClientRect().top);|
++      unten -= 8;|
++      let r = ul.getBoundingClientRect();|
++      const ueber = r.top + Math.min(r.height, 160) - unten;|
++      if (ueber > 0) window.scrollBy(0, Math.min(ueber, inp.getBoundingClientRect().top - 8));|
++      r = ul.getBoundingClientRect();|
++      ul.style.maxHeight = Math.max(132, Math.min(260, unten - r.top)) + 'px';|
++    } catch (_e) { /* Messung nicht moeglich: CSS-Grenze genuegt */ }|
+   }|
+@@ -15961,3 +16002,3 @@ window.MetaCall = (function () {|
+         ? `„${trimmed}" ist noch kein vollständiger Deckname. Gemeint: ${treffer.slice(0, 3).map(d => d.name).join(', ')}${treffer.length > 3 ? ' …' : ''}`|
+-        : `„${trimmed}" steht nicht im prognostizierten Feld — dort stehen ${zahlLokal(list.length)} Decks. Nur diese lassen sich wählen.`);|
++        : `„${trimmed}" steht nicht im prognostizierten Meta — dort stehen ${zahlLokal(list.length)} Decks. Nur diese lassen sich wählen.`);|
+     }|
+@@ -16825,2 +16866,3 @@ window.MetaCall = (function () {|
+     _customTaste,|
++    _customVorschlaege,|
+     _myDeckVorschlaege,|
+diff --git a/js/deck-builder-consistency.js b/js/deck-builder-consistency.js|
+index 55080d14..04cc2580 100644|

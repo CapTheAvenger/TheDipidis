@@ -1,0 +1,75 @@
+--- a/js/deck-builder-consistency.js|
++++ b/js/deck-builder-consistency.js|
+@@ -282,2 +282,4 @@|
+   //|
++  // HISTORISCH (bis 02.10.2026; die feste 50 ist seit DA-31 ersetzt, siehe|
++  // ALT_SUGGESTION_ALPHA unten):|
+   // WAS SIE HEUTE TATSAECHLICH TUT (gemessen 10.09.2026 an allen|
+@@ -353,3 +355,45 @@|
+   const ALT_SUGGESTION_MIN_SAMPLE   = 30;  // GEWAEHLT, Wirkung gemessen — siehe oben.|
+-  const ALT_SUGGESTION_MIN_GAP      = 50;  // GEGRIFFEN, siehe oben.|
++  /* DA-31 (03.10.2026): DIE GEGRIFFENE 50 IST ERSETZT.|
++   *|
++   * Statt einer festen Zahl entscheidet jetzt ein Permutationstest, ob der|
++   * Medianabstand der Plaetze mehr ist als Zufall. Gemessen an|
++   * data/tournament_decklists_per_player.csv (HEAD 02.10.2026, Skript|
++   * scratchpad da31_analyse.py, Seed fest):|
++   *|
++   *   - Test-Fenster: 31 Kandidaten am Abstands-Tor, Abstand von -58 bis|
++   *     +36, Median -8,5; 18 von 31 negativ. Kein systematischer|
++   *     Plus-Effekt — das ist Rauschen.|
++   *   - Das 95-%-Quantil des REINEN ZUFALLS-Abstands liegt je Kandidat|
++   *     zwischen 11 und 55 Plaetzen (Median 25). Die 50 war fuer kleine|
++   *     Gruppen zu lasch und fuer grosse (Slowking, n = 329/271, Zufalls-q95|
++   *     = 11) viel zu streng. Eine feste Zahl ist in beide Richtungen falsch,|
++   *     weil der Zufall von der Gruppengroesse abhaengt.|
++   *   - Fehlalarm (pro Lauf Plaetze innerhalb jedes Archetyps zufaellig|
++   *     vermischt, 300 Laeufe): alte Regel Abstand > 50 in 26,7 % der|
++   *     Laeufe; Permutationstest ohne Korrektur 70 %; mit Bonferroni-Niveau|
++   *     (0,05 / 31) 2,7 %.|
++   *   - Kleinster p-Wert unter allen 31 Kandidaten: 0,070. HEUTE ZEIGT DAS|
++   *     TOR DAMIT NICHTS — und das ist die ehrliche Datenlage, nicht ein|
++   *     Fehler: keiner der 31 Abstaende ist von Zufall zu unterscheiden.|
++   *|
++   * Parameter: ALPHA = 0,001 ist eine KONVENTION (rund 0,05 / 50 Tests; die|
++   * Familie schwankt je Lauf, gemessen waren 31). Sie ist bewusst strenger|
++   * als 0,05/31, weil ein gezeigter Vorschlag dem Betreiber eine Kartenzahl|
++   * empfiehlt. MIN_GROUP = 5 je Gruppe ist ebenfalls Konvention. PERMUTATIONS|
++   * = 9999 gibt ein kleinstes p von 1e-4 — genug Aufloesung fuer ALPHA.|
++   * SEED ist fest, damit dieselbe Eingabe dasselbe p liefert.|
++   *|
++   * Statistik bleibt der ROHPLATZ: Quantile (Platz / Feldgroesse) sind|
++   * nachweislich verzerrt (Papier ist auf den Top Cut gekuerzt; geschichtet|
++   * nach Turnier faellt p von 0,0009 auf 0,0127).|
++   *|
++   * NICHT GEPRUEFT: ob eine Kartenzahl KAUSAL besser platziert oder nur eine|
++   * Variante anzeigt; die Laufzeit im Browser (der Test bricht frueh ab, sobald|
++   * p >= ALPHA feststeht). Spieler mit mehreren Listen (1,42 je Spieler)|
++   * verletzen die Unabhaengigkeit grob.|
++   */|
++  const ALT_SUGGESTION_ALPHA        = 0.001; // KONVENTION, siehe oben.|
++  const ALT_SUGGESTION_MIN_GROUP    = 5;     // KONVENTION, siehe oben.|
++  const ALT_SUGGESTION_PERMUTATIONS = 9999;|
++  const ALT_SUGGESTION_SEED         = 20261003;|
+ |
+@@ -1094,2 +1138,48 @@|
+ |
++  // ── Permutationstest fuer den Medianabstand (DA-31) ───────────────|
++  // Gruppenzugehoerigkeit zufaellig mischen; p = Anteil der Mischungen, deren|
++  // Medianabstand (naiv - Mehrheit) mindestens so gross ist wie der beobachtete.|
++  // p = (Treffer + 1) / (P + 1). Fester Seed => reproduzierbar. Bricht ab, sobald|
++  // feststeht, dass p >= ALPHA wird.|
++  function _mulberry32(seed) {|
++    let a = seed >>> 0;|
++    return function () {|
++      a = (a + 0x6D2B79F5) >>> 0;|
++      let t = a;|
++      t = Math.imul(t ^ (t >>> 15), t | 1);|
++      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);|
++      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;|
++    };|
++  }|
++  function _medianSortiert(arr, n) {|
++    return n % 2 === 1 ? arr[(n - 1) / 2] : (arr[n / 2 - 1] + arr[n / 2]) / 2;|
++  }|
++  function _permutationsP(mehrheitsPlaetze, naivePlaetze, beobachtet) {|

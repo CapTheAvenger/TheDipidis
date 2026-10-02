@@ -3755,7 +3755,7 @@ window.MetaCall = (function () {
         _antiLeaderLastLogId = majorId;
         const lines = applied
           .sort((a, b) => b.boost - a.boost)
-          .map(a => `${a.name}: +${a.boost.toFixed(2)} pp (WR ${(a.wr * 100).toFixed(1)} % vs ${leaderDeckName}, field ${a.fieldShare.toFixed(2)} %)`)
+          .map(a => `${a.name}: +${a.boost.toFixed(2)} pp (WR ${(a.wr * 100).toFixed(1)} % vs ${leaderDeckName}, meta ${a.fieldShare.toFixed(2)} %)`)
           .join('\n  ');
         console.log(`[Predictor 5.7] Anti-leader tech-boost vs ${leaderFamily} (${leaderPct.toFixed(1)} % field):\n  ${lines}`);
       }
@@ -6790,7 +6790,7 @@ window.MetaCall = (function () {
                 `Fenster, noetig sind ${PREDICTOR_5_8_MIN_TURNIERE}. Unter dieser Zahl ` +
                 `ist sticky_pct kein niedriger Wert, sondern gar keiner: ein zweites ` +
                 `Mitbringen ist im Fenster nicht moeglich. Ohne diese Sperre bekaeme ` +
-                `das groesste Deck des Feldes x${PREDICTOR_5_8_STRONG_DAMP}.`
+                `das groesste Deck des Metas x${PREDICTOR_5_8_STRONG_DAMP}.`
               );
             }
             if (!zeilenMitMeta) {
@@ -11355,9 +11355,9 @@ window.MetaCall = (function () {
        die Prognose bleibt stehen, damit man sieht, wovon man abweicht. */
     const progZahl = Number.isFinite(deck.onlineShare) ? deck.onlineShare : deck.finalShare;
     const anHaken = isCustom
-      ? '<span class="mc-mct-haken-fest" title="' + esc(L('Eigenes Deck', 'Custom deck')) + '">+</span>'
+      ? '<span class="mc-mct-haken-fest" title="' + esc(L('Weiteres Deck', 'Additional deck')) + '">+</span>'
       : `<input type="checkbox" class="mc-mct-haken" checked
-               aria-label="${esc(L('Einzeln im Feld: ', 'Listed in the field: ') + deck.name)}"
+               aria-label="${esc(L('Einzeln im Meta: ', 'Listed in the meta: ') + deck.name)}"
                onchange="MetaCall._toggleFeldDeck('${escJs(deck.name)}')">`;
     const main = `<tr class="mc-mct-zeile${istMein ? ' is-mein' : ''}${isCustom ? ' mc-row-custom' : ''}">
       <td class="mc-mct-an">${anHaken}</td>
@@ -11384,13 +11384,13 @@ window.MetaCall = (function () {
     const lab = (s) => `data-label="${esc(s)}"`;
     return `<tr class="mc-mct-zeile is-aussen">
       <td class="mc-mct-an"><input type="checkbox" class="mc-mct-haken"
-            aria-label="${esc(L('Einzeln ins Feld nehmen: ', 'Add to the field: ') + d.name)}"
+            aria-label="${esc(L('Einzeln ins Meta nehmen: ', 'Add to the meta: ') + d.name)}"
             onchange="MetaCall._toggleFeldDeck('${escJs(d.name)}')"></td>
       <td class="mc-mct-deck"><div class="mc-mct-deckzeile">${_mctSternKnopf(d.name, L)}<span class="mc-deck-name">${_mcIconHtml(d.name)}<span class="mc-mct-name">${esc(d.name)}</span></span></div></td>
       <td class="mc-mct-online" ${lab(L('Online', 'Online'))}>${online.wert == null ? '<span class="mc-cell-dash">—</span>'
         : `<span class="mc-mct-onlinezahl">${_mcPct(online.wert, 1)}</span>`}</td>
       <td class="mc-mct-prog" ${lab(L('Prognose', 'Forecast'))}>${_mctPrognoseZelle(d.onlineShare, online)}</td>
-      <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}><span class="mc-cell-dash" title="${esc(L('Erst ins Feld nehmen (Haken links)', 'Add to the field first (tick on the left)'))}">—</span></td>
+      <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}><span class="mc-cell-dash" title="${esc(L('Erst ins Meta nehmen (Haken links)', 'Add to the meta first (tick on the left)'))}">—</span></td>
       <td class="mc-mct-enc" ${lab(L('Begegnungen', 'Encounters'))}><span class="mc-mct-in-sonstige">${esc(L('in „Sonstige"', 'in "Others"'))}</span></td>
       <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}>${_mctZelleWr(z, L, d.name)}</td>
       <td class="mc-mct-d2" ${lab(L('Day-2 mit diesem Deck', 'Day 2 with this deck'))}>${_mctZelleDay2(z)}</td>
@@ -11447,7 +11447,7 @@ window.MetaCall = (function () {
                            : (_feldAlle ? aussen : []);
     if (aussen.length) {
       const knopfText = _feldAlle
-        ? L('Decks außerhalb des Feldes ausblenden', 'Hide decks outside the field')
+        ? L('Decks außerhalb des Metas ausblenden', 'Hide decks outside the meta')
         : L(aussen.length + ' weitere Decks zeigen (stecken in „Sonstige")',
             'Show ' + aussen.length + ' more decks (inside "Others")');
       html += `<tr class="mc-mct-trenner"><td colspan="9">
@@ -11472,8 +11472,8 @@ window.MetaCall = (function () {
     const tage = _prognoseDatei && _prognoseAktiv && _prognoseDatei.meta
       ? Number(_prognoseDatei.meta.vorlauf_tage) || null : null;
     return `<tr>
-      <th class="mc-mct-an" title="${esc(L('Haken: dieses Deck steht einzeln im Feld und bekommt eine eigene Paarung. Ohne Haken zählt es zu „Sonstige".',
-        'Tick: this deck is listed individually and gets its own pairing. Unticked it counts as "Others".'))}">${esc(L('Feld', 'Field'))}</th>
+      <th class="mc-mct-an" title="${esc(L('Haken: dieses Deck steht einzeln im Meta und bekommt eine eigene Paarung. Ohne Haken zählt es zu „Sonstige".',
+        'Tick: this deck is listed individually and gets its own pairing. Unticked it counts as "Others".'))}">${esc(L('Im Meta', 'In meta'))}</th>
       ${th('deck', 'mc-mct-deck', L('Deck', 'Deck'), L('☆ wählt dein Deck', '☆ picks your deck'))}
       ${th('online', 'mc-mct-online', tage ? L('Online (' + tage + ' Tage)', 'Online (' + tage + ' days)') : L('Online', 'Online'),
         L('Anteil an den Online-Listen — gemessen, keine Prognose.', 'Share of online lists — measured, not a forecast.'))}
@@ -11487,8 +11487,8 @@ window.MetaCall = (function () {
         L('Dein Deck gegen dieses Deck (Unentschieden zählen mit). Erscheint, sobald du mit ☆ ein Deck wählst. Zahl eintippen, um sie mit deinem Wissen zu überschreiben; Feld leeren gibt den gemessenen Wert zurück.',
           'Your deck against this deck (ties count). Appears once you pick a deck with ☆. Type a number to override it with your own knowledge; clear the field to get the measured value back.'))}
       ${th('day2', 'mc-mct-d2', L('Day-2 mit diesem Deck', 'Day 2 with this deck'),
-        L('Chance auf ' + _settings.day2Points + ' Punkte in ' + _settings.rounds + ' Runden, wenn DU dieses Deck gegen genau dieses Feld spielst.',
-          'Chance of ' + _settings.day2Points + ' points in ' + _settings.rounds + ' rounds if YOU play this deck against exactly this field.'))}
+        L('Chance auf ' + _settings.day2Points + ' Punkte in ' + _settings.rounds + ' Runden, wenn DU dieses Deck gegen genau dieses Meta spielst.',
+          'Chance of ' + _settings.day2Points + ' points in ' + _settings.rounds + ' rounds if YOU play this deck against exactly this meta.'))}
       ${th('bilanz', 'mc-mct-bil', L('Bilanz W–L–T', 'Record W–L–T'),
         L('Erwartete Wins – Losses – Ties mit diesem Deck.', 'Expected wins – losses – ties with this deck.'))}
     </tr>`;
@@ -11530,7 +11530,7 @@ window.MetaCall = (function () {
     return `
 <div class="metacall-panel mc-mct-panel">
   <div class="metacall-panel-title">
-    <span class="mc-panel-title-text">${esc(L('Alle Decks im erwarteten Feld', 'Every deck in the expected field'))}</span>
+    <span class="mc-panel-title-text">${esc(L('Alle Decks im erwarteten Meta', 'Every deck in the expected meta'))}</span>
     <span class="mc-badge" id="mc-players-badge">${zahlLokal(_settings.totalPlayers)} ${t('mc.labelPlayers')}</span>
     <span class="${_rundenAbzeichenKlassen()}" id="mc-rounds-badge"
           title="${esc(_rundenAbzeichenTitel())}"
@@ -11541,7 +11541,7 @@ window.MetaCall = (function () {
     </button>
   </div>
   <div class="mc-feld-leiste mc-mct-leiste">
-    <span class="mc-mct-leiste-titel">${esc(L('Einzeln im Feld:', 'Listed individually:'))}</span>
+    <span class="mc-mct-leiste-titel">${esc(L('Einzeln im Meta:', 'Listed individually:'))}</span>
     ${pillen}
     <input type="search" class="mc-feld-suche" value="${esc(_feldSuche)}"
            placeholder="${esc(L('Deck suchen…', 'Search decks…'))}"
@@ -11621,13 +11621,13 @@ window.MetaCall = (function () {
     let warnung = '';
     if (b.normiertVon > 100.05) {
       warnung = `<span class="mc-feld-summe-warnung">${esc(L(
-        'Deine Einträge ergeben zusammen ' + _mcNum(b.eingetragen, 1) + ' %, das Feld damit '
-        + _mcNum(b.normiertVon, 1) + ' %. Mehr als 100 % kann ein Turnierfeld nicht haben — '
+        'Deine Einträge ergeben zusammen ' + _mcNum(b.eingetragen, 1) + ' %, das Meta damit '
+        + _mcNum(b.normiertVon, 1) + ' %. Mehr als 100 % kann ein Meta nicht haben — '
         + 'alle Anteile sind deshalb proportional auf 100 % heruntergerechnet. Dein Verhältnis '
         + 'zwischen den Decks bleibt dabei erhalten, die Zahlen, mit denen gerechnet wird, sind aber '
         + 'kleiner als das, was du eingetragen hast.',
-        'Your entries add up to ' + _mcNum(b.eingetragen, 1) + '%, the field to '
-        + _mcNum(b.normiertVon, 1) + '%. A tournament field cannot exceed 100 % — every share '
+        'Your entries add up to ' + _mcNum(b.eingetragen, 1) + '%, the meta to '
+        + _mcNum(b.normiertVon, 1) + '%. A meta cannot exceed 100 % — every share '
         + 'has therefore been scaled down proportionally to 100 %. The ratio between your decks '
         + 'is kept, but the numbers used in the calculation are smaller than what you entered.'))}</span>`;
     } else if (b.gekuerztUm > 0.05) {
@@ -11845,8 +11845,8 @@ window.MetaCall = (function () {
   function _day2RahmenZeile() {
     const n = zahlLokal(_settings.totalPlayers);
     return _mcIstDeutsch()
-      ? `Turnierrahmen: ${n} ${t('mc.labelPlayers')} — geht nicht in diese Chance ein. Sie folgt aus Runden, Punkteziel, Feldanteilen und Paarungen.`
-      : `Tournament frame: ${n} ${t('mc.labelPlayers')} — not an input to this chance. It follows from rounds, target points, field shares and matchups.`;
+      ? `Turnierrahmen: ${n} ${t('mc.labelPlayers')} — geht nicht in diese Chance ein. Sie folgt aus Runden, Punkteziel, Meta-Anteilen und Paarungen.`
+      : `Tournament frame: ${n} ${t('mc.labelPlayers')} — not an input to this chance. It follows from rounds, target points, meta shares and matchups.`;
   }
 
   // ── Full Render ────────────────────────────────────────────
@@ -13179,9 +13179,9 @@ window.MetaCall = (function () {
     const mo = (_prognoseDatei && _prognoseDatei.modell) || {};
     const n = Number(mo.anker) || 0;
     return _mcIstDeutsch()
-      ? 'Die Feldanteile kommen aus der Meta-Prognose: Online-Stand plus die Verschiebung zur Spitze, '
+      ? 'Die Meta-Anteile kommen aus der Meta-Prognose: Online-Stand plus die Verschiebung zur Spitze, '
         + 'die an ' + n + ' Regionals gemessen wurde. Die Paarungen darunter:'
-      : 'Field shares come from the meta forecast: online standing plus the shift towards the top '
+      : 'Meta shares come from the meta forecast: online standing plus the shift towards the top '
         + 'measured at ' + n + ' regionals. Pairings below:';
   }
 
@@ -13430,8 +13430,8 @@ window.MetaCall = (function () {
         ? konvNameRoh
         : konvNameRoh.charAt(0).toLowerCase() + konvNameRoh.slice(1);
       const titel = _mcIstDeutsch()
-        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Feldern vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird in getBaseMatchup auf dieselbe Quote der Paarung aufgeschlagen.'
-        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two fields: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. getBaseMatchup adds the gap to the pair\u2019s rate in the same convention.';
+        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Metas vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird in getBaseMatchup auf dieselbe Quote der Paarung aufgeschlagen.'
+        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two metas: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. getBaseMatchup adds the gap to the pair\u2019s rate in the same convention.';
       return ` <span class="mc-predictor-banner-gewichtung" title="${esc(titel)}">${esc(kern + schub)}</span>`;
     })();
 
@@ -14689,7 +14689,7 @@ window.MetaCall = (function () {
 
     _paintFooter(ctx, W, H);
     _showSharePreview(canvas, `metacall-field-${_formatDateFilename()}.png`,
-      'Meta Call — Field Composition',
+      'Meta Call — Meta Composition',
       `Meta share prognosis for ${zahlLokal(_settings.totalPlayers)} players · ${_settings.rounds} rounds`);
   }
 
@@ -14950,7 +14950,7 @@ window.MetaCall = (function () {
     _showSharePreview(
       canvas,
       `metacall-field-and-recs-${_formatDateFilename()}.png`,
-      'Meta Call — Field & Recommendations',
+      'Meta Call — Meta & Recommendations',
       `Meta + top picks for ${zahlLokal(_settings.totalPlayers)} players · ${_settings.rounds} rounds`,
     );
   }
@@ -15826,13 +15826,34 @@ window.MetaCall = (function () {
      Hausi sah beim Tippen von "Exca" keinen Vorschlag (Screenshot 02.10.).
      Jetzt zeichnet die Seite die Liste selbst: Treffer ueberall im Namen
      (nicht nur am Anfang), Treffer am Anfang zuerst, Antippen waehlt. */
-  function _myDeckVorschlaege(val) {
+  function _trefferListe(namen, val) {
     const q = String(val || '').trim().toLowerCase();
-    const namen = (_shareList || []).map(d => d.name).filter(n => n && n !== '_junk');
     if (!q) return namen.slice(0, 12);
     const alle = namen.filter(n => n.toLowerCase().includes(q));
     const vorn = alle.filter(n => n.toLowerCase().startsWith(q));
     return vorn.concat(alle.filter(n => !n.toLowerCase().startsWith(q))).slice(0, 12);
+  }
+
+  function _myDeckVorschlaege(val) {
+    const namen = (_shareList || []).map(d => d.name).filter(n => n && n !== '_junk');
+    return _trefferListe(namen, val);
+  }
+
+  /* VORSCHLAEGE FUER "WEITERE DECKS IM ERWARTETEN META" (UI-71, 03.10.2026).
+     Das Panel ergaenzt NUR Decks, die oben NICHT schon einzeln im erwarteten
+     Meta stehen (Hausi, 03.10.). Angeboten wird deshalb der Restposten der
+     Meta-Teilung (`_feldTeilung(...).rest` — dieselbe Quelle wie buildField,
+     also richtig bei Top 8/16/25, "Alle", "Keine" und von Hand angehakten
+     Decks) abzueglich der Decks, die in einer ANDEREN Zeile dieses Panels
+     schon eingetragen sind. Abgleich ueber normalize(), wie ueberall hier.
+     Gekuerzt auf 12 wird NACH dem Filtern. */
+  function _customVorschlaege(val, idx) {
+    const rest = _feldTeilung(_feldSortiert()).rest.map(d => d.name);
+    const vergeben = new Set(_customDecks
+      .filter((_d, i) => i !== idx)
+      .map(d => normalize(d && d.name)).filter(Boolean));
+    const namen = rest.filter(n => n && n !== '_junk' && !vergeben.has(normalize(n)));
+    return _trefferListe(namen, val);
   }
 
   function _zeigeMyDeckVorschlaege(val) {
@@ -15889,7 +15910,7 @@ window.MetaCall = (function () {
     const ul = document.getElementById('mc-custom-vorschlaege-' + idx);
     const inp = document.getElementById('mc-custom-name-' + idx);
     if (!ul || !inp) return;
-    const namen = _myDeckVorschlaege(val);
+    const namen = _customVorschlaege(val, idx);
     const q = String(val || '').trim().toLowerCase();
     if (!namen.length || (namen.length === 1 && namen[0].toLowerCase() === q)) {
       ul.hidden = true; inp.setAttribute('aria-expanded', 'false'); return;
@@ -15899,6 +15920,26 @@ window.MetaCall = (function () {
       + `onmousedown="event.preventDefault()" onclick="MetaCall._waehleCustomAus(${idx}, this)">${esc(n)}</li>`).join('');
     ul.hidden = false;
     inp.setAttribute('aria-expanded', 'true');
+    _vorschlaegeEinpassen(ul, inp);
+  }
+
+  /* UI-71: die Liste darf nicht unter Tastatur oder Tab-Leiste verschwinden
+     (iPhone-Screenshot 03.10.: letzter Eintrag halb verdeckt). Misst die
+     sichtbare Unterkante (visualViewport, Tab-Leiste), scrollt die Seite so,
+     dass mindestens ~3 Eintraege sichtbar sind, und begrenzt die Hoehe. */
+  function _vorschlaegeEinpassen(ul, inp) {
+    try {
+      const bar = document.getElementById('dsTabbarHost');
+      const vv = window.visualViewport;
+      let unten = vv ? vv.offsetTop + vv.height : window.innerHeight;
+      if (bar && bar.offsetHeight) unten = Math.min(unten, bar.getBoundingClientRect().top);
+      unten -= 8;
+      let r = ul.getBoundingClientRect();
+      const ueber = r.top + Math.min(r.height, 160) - unten;
+      if (ueber > 0) window.scrollBy(0, Math.min(ueber, inp.getBoundingClientRect().top - 8));
+      r = ul.getBoundingClientRect();
+      ul.style.maxHeight = Math.max(132, Math.min(260, unten - r.top)) + 'px';
+    } catch (_e) { /* Messung nicht moeglich: CSS-Grenze genuegt */ }
   }
 
   function _versteckeCustomVorschlaege(idx) {
@@ -15959,7 +16000,7 @@ window.MetaCall = (function () {
       const treffer = list.filter(d => d.name.toLowerCase().includes(trimmed.toLowerCase()));
       _setzeMyDeckStatus(treffer.length > 0
         ? `„${trimmed}" ist noch kein vollständiger Deckname. Gemeint: ${treffer.slice(0, 3).map(d => d.name).join(', ')}${treffer.length > 3 ? ' …' : ''}`
-        : `„${trimmed}" steht nicht im prognostizierten Feld — dort stehen ${zahlLokal(list.length)} Decks. Nur diese lassen sich wählen.`);
+        : `„${trimmed}" steht nicht im prognostizierten Meta — dort stehen ${zahlLokal(list.length)} Decks. Nur diese lassen sich wählen.`);
     }
   }
 
@@ -16823,6 +16864,7 @@ window.MetaCall = (function () {
     _versteckeCustomVorschlaege,
     _waehleCustomAus,
     _customTaste,
+    _customVorschlaege,
     _myDeckVorschlaege,
     _onMyDeckCommit,
     _onPersonalShare,

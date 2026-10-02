@@ -4223,7 +4223,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     // korrigiert, dieser Ersatztext blieb stehen — er greift nur,
                     // wenn der Schluessel fehlt, traegt dann aber die alte
                     // Falschaussage weiter.
-                    : 'Bei diesen Karten spielt die Mehrheit der ausgewerteten Day-2-Listen eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich deutlich besser. Das ist eine Aussage über die veröffentlichten Listen, nicht über das Feld. Der Builder hat NICHT automatisch angepasst, du kannst manuell überlegen ob du den Vorschlag übernimmst.';
+                    : 'Bei diesen Karten spielt die Mehrheit der ausgewerteten Day-2-Listen eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich besser, als der Zufall erklärt (Zufallstest, p < 0,001). Das ist eine Aussage über die veröffentlichten Listen, nicht über alle Spieler. Der Builder hat NICHT automatisch angepasst, du kannst manuell überlegen ob du den Vorschlag übernimmst.';
                 altWrap.appendChild(altIntro);
 
                 altSuggestions
@@ -4243,7 +4243,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         detail.textContent =
                             `${s.plurality_n}/${totN} Listen spielen ${s.suggested_count}× ` +
                             `(${shareP}%) · median Platz P.${Math.round(s.plurality_median)} ` +
-                            `vs P.${Math.round(s.naive_median)} (Δ ${Math.round(s.placement_gap)} besser) · ` +
+                            `vs P.${Math.round(s.naive_median)} (Δ ${Math.round(s.placement_gap)} besser, p = ${s.p_value == null ? '–' : s.p_value.toFixed(4).replace('.', ',')}) · ` +
                             `Ø ${(s.weighted_avg || 0).toFixed(2)}`;
                         row.appendChild(card);
                         row.appendChild(detail);
@@ -8901,6 +8901,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         plurality_median: ev.plurality_median,
                         naive_median:     ev.naive_median,
                         placement_gap:    ev.placement_gap,
+                        p_value:          ev.p_value,
                         weighted_avg:     ev.weighted_avg,
                         direction:        ev.direction,
                     }));

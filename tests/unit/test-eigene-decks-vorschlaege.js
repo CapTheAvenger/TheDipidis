@@ -5,6 +5,10 @@
  * einem <datalist>; Safari auf iOS zeigt davon keine Liste unter dem Feld.
  * DIE REPARATUR: dieselbe eigene Vorschlagsliste wie bei "Mein Deck".
  *
+ * UI-71 (03.10.2026): das Panel heisst "Weitere Decks im erwarteten Meta" und
+ * bietet NUR Decks an, die oben nicht schon einzeln im Meta stehen und in keiner
+ * anderen Zeile eingetragen sind.
+ *
  * Dieser Test FUEHRT die Funktionen aus (Kommentare vorher herausgeschnitten).
  */
 const { describe, it } = require('node:test');
@@ -30,8 +34,8 @@ function umgebung(elemente, vorschlaege, gewaehlt) {
   const doc = { getElementById: (id) => elemente[id] || null };
   const body = ['_zeigeCustomVorschlaege', '_waehleCustomAus', '_customTaste']
     .map(funktion).join('\n') + '\nreturn { zeige: _zeigeCustomVorschlaege, waehle: _waehleCustomAus, taste: _customTaste };';
-  return new Function('document', '_myDeckVorschlaege', '_onCustomDeckName', 'esc', 'setTimeout', '_versteckeCustomVorschlaege', body)(
-    doc, vorschlaege, (i, n) => gewaehlt.push([i, n]), (s) => String(s), (f) => f(), () => {});
+  return new Function('document', '_customVorschlaege', '_onCustomDeckName', 'esc', 'setTimeout', '_versteckeCustomVorschlaege', '_vorschlaegeEinpassen', body)(
+    doc, vorschlaege, (i, n) => gewaehlt.push([i, n]), (s) => String(s), (f) => f(), () => {}, () => {});
 }
 
 function feld() {
@@ -39,7 +43,7 @@ function feld() {
   return { value: '', setAttribute: (k, v) => { attr[k] = v; }, attr };
 }
 
-describe('Panel "Eigene Decks"', () => {
+describe('Panel "Weitere Decks im erwarteten Meta"', () => {
   const panel = funktion('renderCustomDecksPanel');
   it('keine datalist mehr', () => {
     assert.ok(!/<datalist/.test(panel), 'datalist ist zurueck');
@@ -51,7 +55,7 @@ describe('Panel "Eigene Decks"', () => {
     assert.ok(/onkeydown="MetaCall\._customTaste/.test(panel));
   });
   it('Funktionen stehen im Export', () => {
-    for (const n of ['_zeigeCustomVorschlaege', '_versteckeCustomVorschlaege', '_waehleCustomAus', '_customTaste']) {
+    for (const n of ['_zeigeCustomVorschlaege', '_versteckeCustomVorschlaege', '_waehleCustomAus', '_customTaste', '_customVorschlaege']) {
       assert.ok(new RegExp('\\n\\s+' + n + ',').test(QUELLE), n + ' fehlt im Export');
     }
   });
@@ -91,5 +95,61 @@ describe('Verhalten', () => {
     u.taste(1, { key: 'Enter', preventDefault: () => { verhindert = true; } });
     assert.ok(verhindert);
     assert.deepEqual(gewaehlt, [[1, 'Erster']]);
+  });
+});
+
+describe('Vorschlaege: nur Decks, die NICHT schon im Meta stehen (UI-71)', () => {
+  /* Die echte Funktion, mit gesetzter Meta-Teilung. */
+  function vorschlaege(rest, customDecks, val, idx) {
+    const body = ['_trefferListe', '_customVorschlaege'].map(funktion).join('\n')
+      + '\nreturn _customVorschlaege;';
+    const normalize = (n) => (n || '').toLowerCase().replace(/[\s\-\u0027\u2018\u2019\u201B\u0060\u00B4\u02BC]/g, '');
+    return new Function('_feldTeilung', '_feldSortiert', '_customDecks', 'normalize', body)(
+      () => ({ genannt: [], rest: rest.map(name => ({ name })) }), () => [], customDecks, normalize)(val, idx);
+  }
+  it('bietet nur den Restposten an, nie ein Deck aus der Meta-Liste', () => {
+    // "Dragapult" steht in `genannt` (oben im Meta) und erscheint deshalb nicht in rest.
+    const r = vorschlaege(['Slowking', 'Basic Box'], [{ name: '' }], '', 0);
+    assert.deepEqual(r, ['Slowking', 'Basic Box']);
+  });
+  it('bietet kein Deck an, das in einer ANDEREN Zeile schon steht (auch bei anderer Schreibweise)', () => {
+    const r = vorschlaege(['N\u2019s Zoroark', 'Slowking'], [{ name: '' }, { name: "N's Zoroark" }], '', 0);
+    assert.deepEqual(r, ['Slowking']);
+  });
+  it('die eigene Zeile sperrt sich nicht selbst', () => {
+    const r = vorschlaege(['Slowking'], [{ name: 'Slowking' }], 'slow', 0);
+    assert.deepEqual(r, ['Slowking']);
+  });
+  it('gekuerzt wird NACH dem Filtern', () => {
+    const rest = Array.from({ length: 30 }, (_, i) => 'Deck ' + i);
+    const r = vorschlaege(rest, [{ name: '' }, { name: 'Deck 0' }, { name: 'Deck 1' }], '', 0);
+    assert.equal(r.length, 12);
+    assert.ok(!r.includes('Deck 0') && !r.includes('Deck 1'));
+  });
+  it('leerer Restposten ("Alle" im Meta) ergibt keine Vorschlaege', () => {
+    assert.deepEqual(vorschlaege([], [{ name: '' }], 'x', 0), []);
+  });
+  it('Quelle ist die Meta-Teilung, nicht die ganze Deckliste', () => {
+    const f = funktion('_customVorschlaege');
+    assert.ok(/_feldTeilung\(/.test(f) && /\.rest\b/.test(f), 'die Meta-Teilung ist nicht mehr die Quelle');
+    assert.ok(!/_shareList/.test(f), 'die ganze Deckliste ist zurueck als Quelle');
+  });
+});
+
+describe('Einpassen ueber der Tastatur (UI-71)', () => {
+  it('die Liste wird nach dem Zeichnen eingepasst', () => {
+    assert.ok(/_vorschlaegeEinpassen\(ul, inp\)/.test(funktion('_zeigeCustomVorschlaege')));
+  });
+  it('rechnet mit visualViewport und Tab-Leiste und begrenzt die Hoehe', () => {
+    const f = funktion('_vorschlaegeEinpassen');
+    const ul = { style: {}, getBoundingClientRect: () => ({ top: 236, height: 260 }) };
+    const inp = { getBoundingClientRect: () => ({ top: 200 }) };
+    let gescrollt = 0;
+    const win = { innerHeight: 844, visualViewport: { offsetTop: 0, height: 420 }, scrollBy: (x, y) => { gescrollt = y; } };
+    const doc = { getElementById: () => ({ offsetHeight: 71, getBoundingClientRect: () => ({ top: 349 }) }) };
+    new Function('window', 'document', 'ul', 'inp', f + '\n_vorschlaegeEinpassen(ul, inp);')(win, doc, ul, inp);
+    // Unterkante = min(420, 349) - 8 = 341; Oberkante der Liste 236 => Hoehe 105 -> mind. 132
+    assert.equal(ul.style.maxHeight, '132px');
+    assert.ok(gescrollt > 0, 'die Seite wurde nicht gescrollt, obwohl die Liste unter der Leiste endet');
   });
 });

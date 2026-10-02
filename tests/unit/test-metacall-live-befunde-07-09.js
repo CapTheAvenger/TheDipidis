@@ -450,7 +450,7 @@ describe('M4 — "Mein Deck" schweigt nicht mehr, wenn die Eingabe nicht passt',
         fn('Blubb');
         assert.deepEqual(protokoll.uebernommen, []);
         assert.equal(protokoll.status.length, 1);
-        assert.match(protokoll.status[0], /steht nicht im prognostizierten Feld/);
+        assert.match(protokoll.status[0], /steht nicht im prognostizierten Meta/);
         assert.match(protokoll.status[0], /3 Decks/);
     });
 

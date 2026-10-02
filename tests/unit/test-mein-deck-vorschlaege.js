@@ -35,7 +35,7 @@ const FELD = [{ name: 'Dragapult' }, { name: 'Mega Excadrill' }, { name: 'Excadr
               { name: 'Mega Lucario' }, { name: '_junk' }, { name: 'Excavator' }];
 
 function vorschlaege(val) {
-  return new Function('_shareList', funktion('_myDeckVorschlaege') + '\nreturn _myDeckVorschlaege;')(FELD)(val);
+  return new Function('_shareList', funktion('_trefferListe') + funktion('_myDeckVorschlaege') + '\nreturn _myDeckVorschlaege;')(FELD)(val);
 }
 
 describe('Vorschlagsliste fuer "Mein Deck"', () => {
@@ -61,7 +61,7 @@ describe('Vorschlagsliste fuer "Mein Deck"', () => {
 
   it('die Obergrenze liegt bei 12', () => {
     const viele = Array.from({ length: 40 }, (_, i) => ({ name: 'Deck ' + i }));
-    const r = new Function('_shareList', funktion('_myDeckVorschlaege') + '\nreturn _myDeckVorschlaege;')(viele)('deck');
+    const r = new Function('_shareList', funktion('_trefferListe') + funktion('_myDeckVorschlaege') + '\nreturn _myDeckVorschlaege;')(viele)('deck');
     assert.equal(r.length, 12);
   });
 });

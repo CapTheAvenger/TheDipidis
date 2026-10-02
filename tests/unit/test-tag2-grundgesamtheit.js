@@ -1016,6 +1016,7 @@ describe('Die Mehrheitsdiagnose nennt Listen, nicht das Feld', () => {
     const GESETZT = {
         plurality_n: 5, naive_n: 3, suggested_count: 3,
         placement_gap: 60, plurality_median: 40, naive_median: 100,
+        p_value: 0.0004, alpha: 0.001,
     };
 
     it('beide Textvorlagen sprechen von Day-2-Listen', () => {

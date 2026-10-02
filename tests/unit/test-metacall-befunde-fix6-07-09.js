@@ -247,7 +247,7 @@ describe('B2 — die Unterzeile trennt Rechengroessen von Turnierrahmen', () => 
         const z = baueZeilen(FRANKFURT, true).rahmen();
         assert.match(z, /2\.700 Spieler/);
         assert.match(z, /geht nicht in diese Chance ein/);
-        assert.match(z, /Runden, Punkteziel, Feldanteilen und Paarungen/);
+        assert.match(z, /Runden, Punkteziel, Meta-Anteilen und Paarungen/);
     });
 
     it('auch bei einem einzigen Spieler liest sich die Karte richtig', () => {

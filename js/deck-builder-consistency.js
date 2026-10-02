@@ -280,6 +280,8 @@
   // belegt. Sie wird NICHT geraten korrigiert — eine erfundene bessere
   // Zahl saehe genauso aus und waere genauso unbelegt.
   //
+  // HISTORISCH (bis 02.10.2026; die feste 50 ist seit DA-31 ersetzt, siehe
+  // ALT_SUGGESTION_ALPHA unten):
   // WAS SIE HEUTE TATSAECHLICH TUT (gemessen 10.09.2026 an allen
   // 89 Archetypen der CSV, 58 davon baubar; Messweg und Zahlen in
   // tests/unit/test-alt-vorschlag-schwelle.js):
@@ -351,7 +353,49 @@
   const ALT_SUGGESTION_FRAC_MAX     = 0.70;
   const ALT_SUGGESTION_MIN_SHARE    = 0.50;
   const ALT_SUGGESTION_MIN_SAMPLE   = 30;  // GEWAEHLT, Wirkung gemessen — siehe oben.
-  const ALT_SUGGESTION_MIN_GAP      = 50;  // GEGRIFFEN, siehe oben.
+  /* DA-31 (03.10.2026): DIE GEGRIFFENE 50 IST ERSETZT.
+   *
+   * Statt einer festen Zahl entscheidet jetzt ein Permutationstest, ob der
+   * Medianabstand der Plaetze mehr ist als Zufall. Gemessen an
+   * data/tournament_decklists_per_player.csv (HEAD 02.10.2026, Skript
+   * scratchpad da31_analyse.py, Seed fest):
+   *
+   *   - Test-Fenster: 31 Kandidaten am Abstands-Tor, Abstand von -58 bis
+   *     +36, Median -8,5; 18 von 31 negativ. Kein systematischer
+   *     Plus-Effekt — das ist Rauschen.
+   *   - Das 95-%-Quantil des REINEN ZUFALLS-Abstands liegt je Kandidat
+   *     zwischen 11 und 55 Plaetzen (Median 25). Die 50 war fuer kleine
+   *     Gruppen zu lasch und fuer grosse (Slowking, n = 329/271, Zufalls-q95
+   *     = 11) viel zu streng. Eine feste Zahl ist in beide Richtungen falsch,
+   *     weil der Zufall von der Gruppengroesse abhaengt.
+   *   - Fehlalarm (pro Lauf Plaetze innerhalb jedes Archetyps zufaellig
+   *     vermischt, 300 Laeufe): alte Regel Abstand > 50 in 26,7 % der
+   *     Laeufe; Permutationstest ohne Korrektur 70 %; mit Bonferroni-Niveau
+   *     (0,05 / 31) 2,7 %.
+   *   - Kleinster p-Wert unter allen 31 Kandidaten: 0,070. HEUTE ZEIGT DAS
+   *     TOR DAMIT NICHTS — und das ist die ehrliche Datenlage, nicht ein
+   *     Fehler: keiner der 31 Abstaende ist von Zufall zu unterscheiden.
+   *
+   * Parameter: ALPHA = 0,001 ist eine KONVENTION (rund 0,05 / 50 Tests; die
+   * Familie schwankt je Lauf, gemessen waren 31). Sie ist bewusst strenger
+   * als 0,05/31, weil ein gezeigter Vorschlag dem Betreiber eine Kartenzahl
+   * empfiehlt. MIN_GROUP = 5 je Gruppe ist ebenfalls Konvention. PERMUTATIONS
+   * = 9999 gibt ein kleinstes p von 1e-4 — genug Aufloesung fuer ALPHA.
+   * SEED ist fest, damit dieselbe Eingabe dasselbe p liefert.
+   *
+   * Statistik bleibt der ROHPLATZ: Quantile (Platz / Feldgroesse) sind
+   * nachweislich verzerrt (Papier ist auf den Top Cut gekuerzt; geschichtet
+   * nach Turnier faellt p von 0,0009 auf 0,0127).
+   *
+   * NICHT GEPRUEFT: ob eine Kartenzahl KAUSAL besser platziert oder nur eine
+   * Variante anzeigt; die Laufzeit im Browser (der Test bricht frueh ab, sobald
+   * p >= ALPHA feststeht). Spieler mit mehreren Listen (1,42 je Spieler)
+   * verletzen die Unabhaengigkeit grob.
+   */
+  const ALT_SUGGESTION_ALPHA        = 0.001; // KONVENTION, siehe oben.
+  const ALT_SUGGESTION_MIN_GROUP    = 5;     // KONVENTION, siehe oben.
+  const ALT_SUGGESTION_PERMUTATIONS = 9999;
+  const ALT_SUGGESTION_SEED         = 20261003;
 
   // Hard rules from the game:
   const DECK_SIZE = 60;
@@ -1092,13 +1136,60 @@
     return winner;
   }
 
+  // ── Permutationstest fuer den Medianabstand (DA-31) ───────────────
+  // Gruppenzugehoerigkeit zufaellig mischen; p = Anteil der Mischungen, deren
+  // Medianabstand (naiv - Mehrheit) mindestens so gross ist wie der beobachtete.
+  // p = (Treffer + 1) / (P + 1). Fester Seed => reproduzierbar. Bricht ab, sobald
+  // feststeht, dass p >= ALPHA wird.
+  function _mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function _medianSortiert(arr, n) {
+    return n % 2 === 1 ? arr[(n - 1) / 2] : (arr[n / 2 - 1] + arr[n / 2]) / 2;
+  }
+  function _permutationsP(mehrheitsPlaetze, naivePlaetze, beobachtet) {
+    const nA = mehrheitsPlaetze.length, nB = naivePlaetze.length, n = nA + nB;
+    const alle = new Float64Array(n);
+    for (let i = 0; i < nA; i++) alle[i] = mehrheitsPlaetze[i];
+    for (let i = 0; i < nB; i++) alle[nA + i] = naivePlaetze[i];
+    const rng = _mulberry32(ALT_SUGGESTION_SEED);
+    const P = ALT_SUGGESTION_PERMUTATIONS;
+    const gA = new Float64Array(nA), gB = new Float64Array(nB);
+    let treffer = 0;
+    for (let k = 0; k < P; k++) {
+      // Fisher-Yates, nur die ersten nA Plaetze werden gebraucht.
+      for (let i = 0; i < nA; i++) {
+        const j = i + Math.floor(rng() * (n - i));
+        const tmp = alle[i]; alle[i] = alle[j]; alle[j] = tmp;
+      }
+      for (let i = 0; i < nA; i++) gA[i] = alle[i];
+      for (let i = 0; i < nB; i++) gB[i] = alle[nA + i];
+      gA.sort(); gB.sort();
+      const d = _medianSortiert(gB, nB) - _medianSortiert(gA, nA);
+      if (d >= beobachtet) {
+        treffer++;
+        // Selbst wenn alle uebrigen Mischungen kaeme es nicht mehr unter ALPHA.
+        if ((treffer + 1) / (P + 1) >= ALT_SUGGESTION_ALPHA) return (treffer + 1) / (P + 1);
+      }
+    }
+    return (treffer + 1) / (P + 1);
+  }
+
   // ── Alternative-count suggestion (2nd Prüfstand) ─────────────────
   //
   // For a card whose naive Math.round(weightedAvgCount) lands in the
   // borderline zone, compute the plurality ACROSS THE ANALYSED LISTS +
   // that group's median placement. If the plurality is
   // well-represented (≥50 % of lists running the card) AND places
-  // clearly better than the naive group (≥50-place median delta),
+  // clearly better than the naive group (median delta not explained by chance:
+  // permutation test, p < ALT_SUGGESTION_ALPHA — DA-31, 03.10.2026),
   // emit a suggestion. Caller attaches it to the deck entry; the live
   // build does NOT change.
   //
@@ -1153,29 +1244,18 @@
     const naiveMedian     = median(naivePlaces);
     if (pluralityMedian == null || naiveMedian == null) return null;
 
-    // Only flag when plurality places MEANINGFULLY better than naive.
-    // Direction matches the user's intuition: higher copies should
-    // correlate with lower median place (smaller place = better).
+    // Nur melden, wenn die Mehrheit BESSER platziert (kleinerer Platz).
     const gap = naiveMedian - pluralityMedian;
-    // ECHT GROESSER, NICHT GROESSER-GLEICH (26.09.2026).
-    //
-    // BEFUND: Wochenlauf #162 lief rot, weil in den frischen Daten ein
-    // gemessener Abstand GENAU 50 betrug. Mit ">=" haette damit eine
-    // ausdruecklich als GEGRIFFEN gekennzeichnete Zahl einen einzelnen
-    // Vorschlag per Gleichstand ERZEUGT — das Bild haette dem Betreiber
-    // eine Kartenzahl empfohlen, und der einzige Grund dafuer waere
-    // gewesen, dass zwei Mediane zufaellig exakt 50 Plaetze
-    // auseinanderlagen.
-    //
-    // Die Zahl bleibt unbelegt. Sie darf aber nie die alleinige
-    // Ursache eines GEZEIGTEN Vorschlags sein. Beim Gleichstand gilt
-    // deshalb, was fuer jedes andere nicht erfuellte Tor in dieser
-    // Datei gilt: kein Vorschlag. Eine unbelegte Zahl darf bremsen,
-    // nicht treiben.
-    //
-    // Wirkung, gemessen: genau die Kandidaten mit Abstand exakt
-    // ALT_SUGGESTION_MIN_GAP fallen weg — diese Woche einer.
-    if (gap <= ALT_SUGGESTION_MIN_GAP) return null;
+    if (gap <= 0) return null;
+
+    // Beide Gruppen muessen gross genug sein (Konvention, siehe oben).
+    if (pluralityPlaces.length < ALT_SUGGESTION_MIN_GROUP
+        || naivePlaces.length < ALT_SUGGESTION_MIN_GROUP) return null;
+
+    // DA-31: der Abstand muss mehr sein als Zufall (Permutationstest auf den
+    // Medianabstand, einseitig). Eine feste Schwelle gibt es nicht mehr.
+    const pWert = _permutationsP(pluralityPlaces, naivePlaces, gap);
+    if (!(pWert < ALT_SUGGESTION_ALPHA)) return null;
 
     return {
       naive_count:        naiveCount,
@@ -1186,6 +1266,8 @@
       plurality_median:   pluralityMedian,
       naive_median:       naiveMedian,
       placement_gap:      gap,
+      p_value:            pWert,
+      alpha:              ALT_SUGGESTION_ALPHA,
       weighted_avg:       raw,
       direction:          plurality > naiveCount ? 'up' : 'down',
     };
@@ -1255,7 +1337,7 @@
           ...altSuggestion,
           detail: `Day-2 list plurality (${altSuggestion.plurality_n}/${altSuggestion.plurality_n + altSuggestion.naive_n} lists) `
                 + `plays ${altSuggestion.suggested_count} and places ${altSuggestion.placement_gap.toFixed(0)} `
-                + `places better (median P.${altSuggestion.plurality_median.toFixed(0)} vs P.${altSuggestion.naive_median.toFixed(0)}). `
+                + `places better (median P.${altSuggestion.plurality_median.toFixed(0)} vs P.${altSuggestion.naive_median.toFixed(0)}; p = ${altSuggestion.p_value.toFixed(4)}). `
                 + `Builder kept ${copies}; consider ${altSuggestion.suggested_count}.`,
         });
       }
@@ -1480,7 +1562,7 @@
           ...altSuggestion,
           detail: `Day-2 list plurality (${altSuggestion.plurality_n}/${altSuggestion.plurality_n + altSuggestion.naive_n} lists) `
                 + `plays ${altSuggestion.suggested_count} and places ${altSuggestion.placement_gap.toFixed(0)} `
-                + `places better (median P.${altSuggestion.plurality_median.toFixed(0)} vs P.${altSuggestion.naive_median.toFixed(0)}). `
+                + `places better (median P.${altSuggestion.plurality_median.toFixed(0)} vs P.${altSuggestion.naive_median.toFixed(0)}; p = ${altSuggestion.p_value.toFixed(4)}). `
                 + `Builder kept ${placed}; consider ${altSuggestion.suggested_count}.`,
         });
       }
@@ -2188,7 +2270,7 @@
        gefallen ist. Ohne diesen Export haette er die 3 abschreiben
        muessen, und dann gaebe es die Zahl zweimal. */
     MIN_WEIGHTED_LISTS,
-    /* Die vier Schwellen des Alternativvorschlags. Exportiert am
+    /* Die Schwellen des Alternativvorschlags (seit DA-31: Signifikanz statt fester 50). Exportiert am
        10.09.2026, damit tests/unit/test-alt-vorschlag-schwelle.js sie
        messen kann, ohne sie abzuschreiben — eine abgeschriebene
        Schwelle prueft nur die Kopie. */
@@ -2197,7 +2279,10 @@
       FRAC_MAX:   ALT_SUGGESTION_FRAC_MAX,
       MIN_SHARE:  ALT_SUGGESTION_MIN_SHARE,
       MIN_SAMPLE: ALT_SUGGESTION_MIN_SAMPLE,
-      MIN_GAP:    ALT_SUGGESTION_MIN_GAP,
+      ALPHA:        ALT_SUGGESTION_ALPHA,
+      MIN_GROUP:    ALT_SUGGESTION_MIN_GROUP,
+      PERMUTATIONS: ALT_SUGGESTION_PERMUTATIONS,
+      SEED:         ALT_SUGGESTION_SEED,
     },
     // Exposed for unit tests / future "explain why" UIs:
     _internals: {

@@ -1078,7 +1078,15 @@
   gap: 8px;
   align-items: center;
 }
-.mc-custom-name-wrap { position: relative; min-width: 0; }
+/* UI-71: die Vorschlagsliste haengt an der ganzen Zeile (338 statt 218 px), ist
+   opak und bleibt ueber der Tastatur/Tab-Leiste (Hoehe setzt app-meta-call.js). */
+.mc-custom-row { position: relative; }
+.mc-custom-name-wrap { position: static; min-width: 0; }
+.mc-custom-decks-panel .mc-deck-vorschlaege {
+  max-height: min(260px, 45vh);
+  overscroll-behavior: contain;
+  background: var(--surface-1);
+}
 .mc-custom-name-wrap .mc-custom-name-input { width: 100%; box-sizing: border-box; }
 .mc-custom-name-input,
 .mc-custom-share-input {
@@ -4196,6 +4204,25 @@
   .mc-mct-table tr.mc-row-detail td { display: block; }
   .mc-mct-table tr.mc-mct-trenner, .mc-mct-table tr.mc-mct-trenner td { display: block; }
   .mc-mct-table .mc-personal-input { width: 100%; max-width: 110px; }
+  /* UI-70: Deckzelle erbte width:24% (77 px) aus der Desktop-Regel -> Name bekam ~75 px */
+  .mc-mct-table tr.mc-mct-zeile td.mc-mct-deck { width: auto; }
+  /* "Details" wandert in die freie rechte Ecke der Bilanz-Zeile (Spalte 2-3 sind dort leer),
+     als Textknopf ohne Rahmen; der Name bekommt die ganze Zeile. */
+  .mc-mct-table tr.mc-mct-zeile { position: relative; }
+  #meta-call .mc-mct-deckzeile .mc-row-toggle {
+    position: absolute; right: 8px; bottom: 6px; margin: 0;
+    border-color: transparent; background: none; color: var(--mc-accent);
+    padding: 0 6px; min-width: 44px; min-height: 44px; font-weight: 600;
+  }
+  #meta-call .mc-mct-deckzeile .mc-row-toggle.is-expanded { background: none; border-color: transparent; color: var(--mc-accent); }
+  /* zweiter "Details"-Knopf in der aufgeklappten Zeile entfaellt */
+  .mc-mct-table tr.mc-mct-detail .mc-mobile-detail-toggle { display: none !important; }
+  .mc-mct-table tr.mc-mct-detail .mc-deck-intel-wrap .mc-deck-intel { display: flex !important; }
+  /* weniger Rahmen: Kacheln als Flaeche statt Kasten */
+  .mc-mct-table .mc-intel-tile { border-color: transparent; }
+  /* Kachel-Beschriftungen umbrechen statt abzuschneiden */
+  .mc-mct-table .mc-intel-tile-label,
+  .mc-mct-table .mc-intel-tile-extra { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
 }
 /* FE-16: Einzelheiten, die die Meta-Call-Tabelle schon zusammenfasst,
    stehen hinter einer Klappe — da, nicht weg. */

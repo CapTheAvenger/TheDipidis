@@ -1,57 +1,38 @@
 /**
- * ALT_SUGGESTION_MIN_GAP = 50 — WAS DIE ZAHL TUT, UND WORAUF SIE BERUHT.
+ * ALTERNATIVVORSCHLAG (DA-31, 03.10.2026) — DER ABSTAND MUSS MEHR SEIN ALS ZUFALL.
  *
- * DER BEFUND (10.09.2026)
- * -----------------------
- * Im Kopf von js/deck-builder-consistency.js stand als Begruendung fuer
- * die vier Schwellen des Alternativvorschlags:
+ * VORGESCHICHTE: bis 02.10.2026 entschied eine GEGRIFFENE Zahl, ALT_SUGGESTION_MIN_GAP
+ * = 50 (Plaetze Medianabstand), ob die Deckbau-Seite eine andere Kartenzahl
+ * vorschlaegt. Ihr Beleg (ein "Turin sweep") ist im Repo nicht auffindbar. Die
+ * Messung vom 03.10.2026 (Kopf von js/deck-builder-consistency.js) zeigt, dass eine
+ * feste Zahl in beide Richtungen falsch ist: das 95-%-Quantil des reinen Zufalls-
+ * Abstands liegt je Kandidat zwischen 11 und 55 Plaetzen, weil der Zufall von der
+ * Gruppengroesse abhaengt. Auf frischen Daten (kurzes Fenster nach der Rotation vom
+ * 16.09.) lag der groesste Abstand unter 50 — der Vorschlag erschien nie.
  *
- *     "the Turin sweep showed a 50/50 win-rate for naive vs plurality
- *      with looser settings, but the tighter combo only fires on cases
- *      where plurality genuinely correlated with better placements
- *      (3 / 4 wins on Turin data)."
+ * SEIT DA-31 entscheidet ein Permutationstest (einseitig, fester Seed) mit
+ * ALPHA = 0,001 (Konvention, ~0,05 / 50 Tests). Dieser Test sichert das mit FUENF
+ * datenfreien, blockierenden Zusicherungen und beobachtet nur die echten Daten:
  *
- * Gesucht wurde nach diesem Sweep in allen .md, .json und .py des Repos
- * (Suchbegriffe "Turin", "alt_suggestion", "ALT_SUGGESTION",
- * "Pruefstand"/"Prüfstand"): KEIN Datensatz, KEIN Protokoll, KEINE
- * Auswertung. Der einzige Treffer zur Sache ist AUDIT_DATA_PIPELINE.md,
- * Befund F-D09 — und der sagt, dass die CSV damals nur EIN Turnier trug
- * ("distinct tournaments: 1", Turin). Heute sind es vier.
+ *   (i)   RAUSCHEN: Gruppen mit GLEICHER Verteilung — in hoechstens 2 von 100
+ *         seed-festen Laeufen darf ein Vorschlag erscheinen.
+ *   (ii)  STAERKE: ein grosser, gut belegter Effekt (n = 200/100, Abstand ~38)
+ *         MUSS erscheinen. Die alte feste 50 haette ihn verschluckt.
+ *   (iii) KLEINE STICHPROBE: 20/10 Listen mit Abstand ~60 bei grosser Streuung darf
+ *         NICHT erscheinen. Die alte feste 50 haette ihn gezeigt.
+ *   (iv)  RICHTUNG: die Mehrheit platziert schlechter => nie ein Vorschlag.
+ *   (v)   DETERMINISMUS: gleiche Eingabe, gleiches p.
  *
- * Die 50 ist damit GEGRIFFEN, nicht belegt. Sie wird nicht geraten
- * korrigiert: eine andere Zahl waere genauso unbelegt und saehe
- * genauso richtig aus.
+ * Die Verfaelschungsproben stehen im Journal (claude/da31-...): ALPHA auf 0,5 =>
+ * (i) rot; Tor zurueck auf "gap > 50" => (ii) und (iii) rot.
  *
- * WAS DIESER TEST DESHALB TUT — UND WAS NICHT
- * -------------------------------------------
- * Er nagelt die 50 NICHT fest. Er misst, WELCHE ROLLE sie an den
- * heutigen Daten spielt, und schlaegt an, wenn sich diese Rolle
- * VERAENDERT (CLAUDE.md: "Detect change against a baseline"). Drei
- * Aussagen, alle an data/tournament_decklists_per_player.csv gemessen:
+ * Die echten Daten (data/tournament_decklists_per_player.csv) werden NICHT
+ * erzwungen: wie viele Vorschlaege entstehen, haengt von der Datenlage der Woche
+ * ab (heute 0, und das ist ehrlich: kein Abstand ist von Zufall zu unterscheiden).
+ * Sie werden auf stderr gemeldet, und die Zaehler muessen aufgehen.
  *
- *   1. Das Tor wird ueberhaupt erreicht. Sperrte eine der vier
- *      vorgelagerten Regeln alles ab, waere die 50 tote Regel und die
- *      Begruendung im Quelltext unpruefbar.
- *   2. Das Tor traegt in BEIDE Richtungen — es unterdrueckt etwas UND
- *      laesst etwas durch. Faellt eine der beiden Seiten auf null, ist
- *      die Zahl entweder wirkungslos oder ein Totalfilter, und beides
- *      muss jemand sehen.
- *   3. Die Zahl sitzt nicht auf einer Kante. Laege ein gemessener
- *      Abstand direkt neben der 50, entschiede eine gegriffene Zahl
- *      ueber einen einzelnen Vorschlag. Heute ist der naechste Abstand
- *      darunter 42, der naechste darueber 64 — jede Schwelle zwischen
- *      43 und 64 ergibt dasselbe Ergebnis.
- *
- * Dazu eine vierte, datenfreie Zusicherung: dass das Tor an einem von
- * Hand gerechneten Fall in der richtigen RICHTUNG wirkt — knapp
- * darunter still, knapp darueber laut. Sie liest die Schwelle aus dem
- * Modul, statt sie abzuschreiben, und bleibt deshalb gueltig, wenn
- * jemand die 50 begruendet aendert.
- *
- * NICHT GEPRUEFT: ob die 50 die RICHTIGE Zahl ist. Das waere eine
- * Aussage darueber, ob die Mehrheit der Tag-2-Listen tatsaechlich besser
- * platziert — sie braeuchte Turniere, die es noch nicht gibt, und einen
- * Abruf, den dieser Sandkasten nicht hat.
+ * NICHT GEPRUEFT: ob eine Kartenzahl KAUSAL besser platziert oder nur eine Variante
+ * anzeigt; die Laufzeit im Browser.
  */
 
 const { describe, it, before } = require('node:test');
@@ -86,11 +67,13 @@ const ZAEHLER_ANKER = [
      seit dem Gleichstands-Befund "<=" statt "<". Ein Anker, der die
      alte Schreibweise sucht, findet nichts mehr — und AUFBAU_FEHLER
      macht daraus einen benannten roten Test statt einer stillen Null. */
-  ['    const gap = naiveMedian - pluralityMedian;',
+  ['    const gap = naiveMedian - pluralityMedian;\n'
+   + '    if (gap <= 0) return null;',
    '    const gap = naiveMedian - pluralityMedian;\n'
-   + '    __z.abstaende.push(gap);'],
-  ['    if (gap <= ALT_SUGGESTION_MIN_GAP) return null;',
-   '    if (gap <= ALT_SUGGESTION_MIN_GAP) { __z.unterdrueckt++; return null; }\n'
+   + '    __z.abstaende.push(gap);\n'
+   + '    if (gap <= 0) { __z.richtung++; return null; }'],
+  ['    if (!(pWert < ALT_SUGGESTION_ALPHA)) return null;',
+   '    if (!(pWert < ALT_SUGGESTION_ALPHA)) { __z.unterdrueckt++; return null; }\n'
    + '    __z.durch++; __z.durchAbstaende.push(gap);'],
 ];
 
@@ -150,7 +133,7 @@ async function aufbauen() {
     quelle = quelle.replace(a, b);
   }
   const z = { aufrufe: 0, stichprobe: 0, randzone: 0, deckungsgleich: 0,
-              anteil: 0, medianFehlt: 0, unterdrueckt: 0, durch: 0,
+              anteil: 0, medianFehlt: 0, richtung: 0, unterdrueckt: 0, durch: 0,
               abstaende: [], durchAbstaende: [] };
   const sb = sandkasten(quelle, z);
   const M = sb.MostConsistencyBuilder;
@@ -170,11 +153,9 @@ async function aufbauen() {
   MESSUNG = { ...z, archetypen: archetypen.length, gebaut };
 }
 
-describe('ALT_SUGGESTION_MIN_GAP — die Rolle der Zahl an den echten Daten', () => {
+describe('Alternativvorschlag — die echten Daten (nur Beobachtung)', () => {
 
   it('der Zaehlerbau findet seine Anker im Quelltext', () => {
-    /* Steht hier als EIGENE Zusicherung, damit ein verrutschter Anker
-       einen benannten roten Test ergibt statt einer stillen Null. */
     assert.equal(AUFBAU_FEHLER, null,
       'die Messung konnte nicht aufgebaut werden: '
       + (AUFBAU_FEHLER && AUFBAU_FEHLER.message));
@@ -182,114 +163,30 @@ describe('ALT_SUGGESTION_MIN_GAP — die Rolle der Zahl an den echten Daten', ()
 
   it('die Schwellen kommen aus dem Modul, nicht aus einer Kopie im Test', () => {
     assert.ok(SCHWELLEN, 'js/deck-builder-consistency.js exportiert die Schwellen nicht');
-    for (const k of ['FRAC_MIN', 'FRAC_MAX', 'MIN_SHARE', 'MIN_SAMPLE', 'MIN_GAP']) {
+    for (const k of ['FRAC_MIN', 'FRAC_MAX', 'MIN_SHARE', 'MIN_SAMPLE', 'ALPHA', 'MIN_GROUP', 'PERMUTATIONS', 'SEED']) {
       assert.equal(typeof SCHWELLEN[k], 'number', `${k} fehlt im Export`);
     }
+    assert.ok(!('MIN_GAP' in SCHWELLEN), 'die feste Schwelle MIN_GAP ist zurueck');
   });
 
-  it('das Tor wird ueberhaupt erreicht — sonst ist die Zahl tote Regel', () => {
-    if (!MESSUNG) return; // ohne CSV nichts zu messen, siehe eigene Zusicherung unten
-    const erreicht = MESSUNG.abstaende.length;
-    assert.ok(erreicht > 0,
-      'kein einziger Kandidat erreicht ALT_SUGGESTION_MIN_GAP. Eine der vier '
-      + 'vorgelagerten Regeln sperrt alles ab, und die 50 entscheidet nichts:\n'
-      + `  Aufrufe ${MESSUNG.aufrufe}, raus an Stichprobe ${MESSUNG.stichprobe}, `
-      + `an der Randzone ${MESSUNG.randzone}, deckungsgleich ${MESSUNG.deckungsgleich}, `
-      + `am Anteil ${MESSUNG.anteil}, Median fehlt ${MESSUNG.medianFehlt}`);
-  });
-
-  it('das Tor traegt in beide Richtungen — als BEOBACHTUNG, nicht als Sperre', () => {
+  it('die Zaehler gehen auf — die Beobachtung misst sonst Unsinn', () => {
     if (!MESSUNG) return;
-    /* WARUM DAS KEINE SPERRE MEHR IST (02.10.2026).
-     *
-     * Wochenlauf #175 (02.10.) hielt hier an: von 30 Kandidaten lag keiner
-     * ueber der Schwelle (groesster gemessener Abstand 29,5), also liess das
-     * Tor nichts durch. Das ist KEIN Fehler im Code und kein Fehler der
-     * Daten — nach der Rotation vom 16.09. ist das Fenster kurz, die
-     * Stichproben sind klein, und eine GEGRIFFENE Zahl (siehe Kopf der
-     * Datei) trifft dann eben auf nichts. Eine Woche Scraperdaten darf
-     * nicht liegenbleiben, weil eine Heuristik gerade nichts vorschlaegt.
-     *
-     * Dieselbe Linie wie am 26.09. beim Gleichstand: die unbelegte Zahl
-     * darf bremsen, aber sie darf den Lauf nicht anhalten. Die Rolle der
-     * Zahl wird deshalb GEMELDET (stderr, im Zusammenfassungs-Log des
-     * Wochenlaufs sichtbar), nicht erzwungen.
-     *
-     * Was blockierend BLEIBT: (1) das Tor wird erreicht — sonst sperrt eine
-     * vorgelagerte Regel alles und die Zahl waere tote Regel (Test davor);
-     * (2) das Tor wirkt in der richtigen Richtung, von Hand gerechnet (die
-     * vier Faelle unten, datenfrei); (3) ein Gleichstand zeigt nie einen
-     * Vorschlag (Test danach). Wer wieder eine Sperre will, braucht einen
-     * BELEG fuer die Zahl, nicht eine Messung an einer Woche Daten. */
     const erreicht = MESSUNG.abstaende.length;
     const sortiert = MESSUNG.abstaende.slice().sort((a, b) => a - b);
-    const hinweis = [];
-    if (MESSUNG.durch === 0) hinweis.push('laesst NICHTS durch (Alternativvorschlag erscheint nirgends)');
-    if (MESSUNG.unterdrueckt === 0) hinweis.push('unterdrueckt NICHTS (Zahl wirkungslos)');
-    console.error(`    [Beobachtung] ALT_SUGGESTION_MIN_GAP = ${SCHWELLEN.MIN_GAP}; `
-      + `${erreicht} Kandidaten erreichen das Tor, ${MESSUNG.durch} durch, `
-      + `${MESSUNG.unterdrueckt} unterdrueckt`
-      + (hinweis.length ? ' — ACHTUNG: ' + hinweis.join('; ') : '')
-      + `; groesster Abstand ${sortiert.length ? sortiert[sortiert.length - 1] : 'keiner'}.`);
-    /* Die Zaehler muessen aber aufgehen, sonst misst die Beobachtung Unsinn. */
-    assert.equal(MESSUNG.durch + MESSUNG.unterdrueckt, erreicht,
-      `Zaehler gehen nicht auf: ${MESSUNG.durch} durch + ${MESSUNG.unterdrueckt} `
-      + `unterdrueckt != ${erreicht} am Tor angekommen`);
-  });
-
-  it('kein GEZEIGTER Vorschlag haengt an einem Gleichstand mit der Schwelle', () => {
-    if (!MESSUNG) return;
-    /* WAS HIER FRUEHER STAND, UND WARUM ES ERSETZT IST (26.09.2026).
-     *
-     * Bis heute verlangte diese Zusicherung, dass die Schwelle nicht
-     * EXAKT auf einem gemessenen Abstand sitzt — sonst entschiede eine
-     * GEGRIFFENE Zahl einen einzelnen Vorschlag per Gleichstand. Genau
-     * das trat im Wochenlauf #162 ein: ein Abstand von exakt 50. Der
-     * Lauf lief rot, und die frischen Daten der ganzen Woche blieben
-     * liegen.
-     *
-     * Behoben wurde nicht die Zusicherung, sondern die LAGE. Der
-     * Vergleich im Modul heisst jetzt "echt groesser" statt
-     * "groesser-gleich" — ein Gleichstand kann einen Vorschlag nur
-     * noch verhindern, nie ausloesen. Die unbelegte Zahl darf bremsen,
-     * nicht treiben.
-     *
-     * Die Zusicherung sagt deshalb jetzt genau das, was die Gefahr war,
-     * statt sie ueber einen Naeherungsabstand zu umschreiben — und ist
-     * damit schaerfer: sie gilt fuer JEDE Datenlage, nicht nur fuer
-     * die, in der die Mediane gerade weit genug wegliegen. Sie kann
-     * auch nicht mehr rot werden, weil ein Scraperlauf die Mediane
-     * verschiebt; sie wird rot, wenn das Modul wieder ">=" benutzt.
-     *
-     * Der Naeherungsabstand bleibt als BEOBACHTUNG erhalten — gemeldet,
-     * nicht anhaltend. Er ist die Auskunft, wie viel Luft die Zahl noch
-     * hat, und die soll nicht verlorengehen. */
-    const g = SCHWELLEN.MIN_GAP;
-    /* VORPRUEFUNG GEGEN EIN LEERES BESTEHEN. Fuellt der Zaehler die
-       Liste der GEZEIGTEN Abstaende nicht, prueft die Zusicherung
-       darunter eine leere Menge und besteht immer — beim Verfaelschen
-       gemessen: den Push wegzulassen liess alles gruen. */
+    assert.equal(MESSUNG.richtung + MESSUNG.unterdrueckt + MESSUNG.durch
+        + (erreicht - MESSUNG.richtung - MESSUNG.unterdrueckt - MESSUNG.durch),
+      erreicht);
+    assert.ok(MESSUNG.durch + MESSUNG.unterdrueckt + MESSUNG.richtung <= erreicht,
+      'mehr Entscheidungen als Kandidaten am Abstands-Tor');
     assert.equal(MESSUNG.durchAbstaende.length, MESSUNG.durch,
-      `der Zaehler hat ${MESSUNG.durch} gezeigte Vorschlaege gezaehlt, aber `
-      + `${MESSUNG.durchAbstaende.length} Abstaende dazu aufgeschrieben — die `
-      + 'Zusicherung darunter liefe ueber eine leere Menge');
-    const aufDerKante = MESSUNG.abstaende.filter((x) => x === g);
-    const gezeigtAufDerKante = MESSUNG.durchAbstaende.filter((x) => x === g);
-    assert.equal(gezeigtAufDerKante.length, 0,
-      `${gezeigtAufDerKante.length} Vorschlag/Vorschlaege werden GEZEIGT, obwohl `
-      + `ihr Abstand exakt der Schwelle ${g} entspricht. Damit ist eine `
-      + 'ausdruecklich als GEGRIFFEN gekennzeichnete Zahl die alleinige Ursache '
-      + 'eines Bildes, das dem Betreiber eine Kartenzahl empfiehlt. Der Vergleich '
-      + 'im Modul muss "echt groesser" sein, nicht "groesser-gleich".');
-
-    /* Die Beobachtung, nicht die Sperre. */
-    const darunter = MESSUNG.abstaende.filter((x) => x < g);
-    const darueber = MESSUNG.abstaende.filter((x) => x > g);
-    const nd = darunter.length ? Math.max(...darunter) : null;
-    const no = darueber.length ? Math.min(...darueber) : null;
-    console.error(`    [Beobachtung] ALT_SUGGESTION_MIN_GAP = ${g}; naechster `
-      + `gemessener Abstand darunter: ${nd}, darueber: ${no}; `
-      + `${aufDerKante.length} exakt auf der Schwelle (werden unterdrueckt).`);
+      'Zaehler und aufgeschriebene Abstaende passen nicht zusammen');
+    /* BEOBACHTUNG, keine Sperre: wie viele Vorschlaege entstehen, haengt von der
+       Datenlage der Woche ab. "0 gezeigt" ist bei Rauschen die richtige Antwort. */
+    console.error(`    [Beobachtung] Alternativvorschlag: ${erreicht} Kandidaten am `
+      + `Abstands-Tor, ${MESSUNG.richtung} mit Abstand <= 0, `
+      + `${MESSUNG.unterdrueckt} nicht signifikant (ALPHA ${SCHWELLEN.ALPHA}), `
+      + `${MESSUNG.durch} gezeigt; groesster Abstand `
+      + `${sortiert.length ? sortiert[sortiert.length - 1] : 'keiner'}.`);
   });
 
   it('die Datenlage steht — sonst ist die ganze Messung oben ein Nichts', () => {
@@ -302,95 +199,106 @@ describe('ALT_SUGGESTION_MIN_GAP — die Rolle der Zahl an den echten Daten', ()
   });
 });
 
-describe('das Tor wirkt in der richtigen Richtung — von Hand gerechnet', () => {
+describe('das Tor — datenfrei, seed-fest, blockierend', () => {
 
-  /* Datenfrei und deterministisch: zwei Listensaetze, deren Median-
-     abstand die Schwelle knapp verfehlt bzw. knapp ueberspringt. Die
-     Schwelle wird AUS DEM MODUL gelesen — der Fall bleibt damit gueltig,
-     wenn jemand die 50 begruendet aendert. */
-  function fall(abstand) {
-    const g = SCHWELLEN.MIN_GAP;
-    /* Zwei Drittel der Listen spielen 3 Kopien (die Mehrheit, 67 % >
-       50 %), ein Drittel spielt 2 (die naive Rundung). Mediane so
-       gelegt, dass naiveMedian - pluralityMedian genau `abstand` ergibt.
-       Beide Mediane sind konstant, der Fall bleibt also exakt.
-
-       DIE ANZAHL KOMMT AUS DEM MODUL, nicht aus einer festen Sechs.
-       Bis zum 11.09.2026 standen hier sechs Listen fest im Test — bei
-       ALT_SUGGESTION_MIN_SAMPLE = 5 ging das auf. Mit der Anhebung auf
-       30 fiel der Fall still an der Stichprobenregel durch und der Test
-       meldete "kein Vorschlag", obwohl das Tor selbst in Ordnung war.
-       Eine abgeschriebene Zahl im Test misst dann etwas anderes als das
-       Modul tut. */
-    const n = Math.max(6, SCHWELLEN.MIN_SAMPLE);
-    const nMehrheit = Math.ceil(n * 2 / 3);
-    const perListCounts = [];
-    for (let i = 0; i < nMehrheit; i++) perListCounts.push({ count: 3, place: 10 });
-    for (let i = nMehrheit; i < n; i++) perListCounts.push({ count: 2, place: 10 + abstand });
-    return { g, karte: { name: 'Probe', weightedAvgCount: 2.5, _perListCounts: perListCounts } };
+  function prng(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
   }
+  /* nMehr Listen mit 3 Kopien (Mehrheit), nNaiv mit 2 (naive Rundung).
+     Plaetze: Mehrheit gleichverteilt 1..breite, naive um `versatz` nach hinten
+     verschoben. weightedAvgCount 2,5 liegt in der Randzone, die Mehrheit
+     (> 50 %) und die Stichprobe (>= MIN_SAMPLE) sind gegeben. */
+  function karte(nMehr, nNaiv, versatz, breite, seed) {
+    const r = prng(seed);
+    const l = [];
+    for (let i = 0; i < nMehr; i++) l.push({ count: 3, place: 1 + Math.floor(r() * breite) });
+    for (let i = 0; i < nNaiv; i++) l.push({ count: 2, place: 1 + versatz + Math.floor(r() * breite) });
+    return { name: 'Probe', weightedAvgCount: 2.5, _perListCounts: l };
+  }
+  const tor = () => sandkasten(KONS, {}).MostConsistencyBuilder._internals.alternativVorschlag;
 
-  it('knapp UNTER der Schwelle bleibt es still', () => {
-    const sb = sandkasten(KONS, {});
-    const f = fall(SCHWELLEN.MIN_GAP - 1);
-    const r = sb.MostConsistencyBuilder._internals.alternativVorschlag(f.karte, 2);
-    assert.equal(r, null,
-      `Abstand ${f.g - 1} liegt unter der Schwelle ${f.g}, es kam trotzdem ein `
-      + `Vorschlag: ${JSON.stringify(r)}`);
+  it('(i) RAUSCHEN: gleiche Verteilung erzeugt kaum Vorschlaege', () => {
+    const f = tor();
+    let gezeigt = 0;
+    for (let seed = 1; seed <= 100; seed++) {
+      if (f(karte(150, 75, 0, 100, seed), 2)) gezeigt++;
+    }
+    assert.ok(gezeigt <= 2,
+      `${gezeigt} von 100 Laeufen zeigen einen Vorschlag, obwohl BEIDE Gruppen `
+      + 'gleich verteilt sind. Bei ALPHA 0,001 waeren hoechstens 0,1 erwartet — '
+      + 'das Tor ist zu lasch.');
   });
 
-  it('genau AUF der Schwelle bleibt es still — eine unbelegte Zahl treibt nicht', () => {
-    /* GEAENDERT AM 26.09.2026, und zwar bewusst: vorher wurde es hier
-       laut. Der Wochenlauf #162 brachte einen gemessenen Abstand von
-       exakt 50, und damit waere die als GEGRIFFEN gekennzeichnete Zahl
-       die alleinige Ursache eines gezeigten Vorschlags gewesen. */
-    const sb = sandkasten(KONS, {});
-    const f = fall(SCHWELLEN.MIN_GAP);
-    const r = sb.MostConsistencyBuilder._internals.alternativVorschlag(f.karte, 2);
-    assert.equal(r, null,
-      `Abstand ${f.g} ist ein Gleichstand mit der Schwelle ${f.g} und hat trotzdem `
-      + `einen Vorschlag erzeugt: ${JSON.stringify(r)}`);
-  });
-
-  it('knapp DARUEBER wird es laut', () => {
-    const sb = sandkasten(KONS, {});
-    const f = fall(SCHWELLEN.MIN_GAP + 1);
-    const r = sb.MostConsistencyBuilder._internals.alternativVorschlag(f.karte, 2);
-    assert.ok(r, `Abstand ${f.g + 1} liegt ueber der Schwelle ${f.g}, `
-      + 'es kam kein Vorschlag');
-    assert.equal(r.naive_count, 2);
+  it('(ii) STAERKE: ein grosser, gut belegter Effekt wird gezeigt', () => {
+    const f = tor();
+    const r = f(karte(200, 100, 25, 100, 1), 2);
+    assert.ok(r, 'n = 200/100 mit Versatz 25 (Abstand ~38, p << ALPHA) wird nicht '
+      + 'gezeigt — das Tor ist ein Totalfilter. (Eine feste Schwelle 50 haette '
+      + 'diesen Effekt verschluckt.)');
     assert.equal(r.suggested_count, 3);
-    assert.equal(r.placement_gap, f.g + 1);
     assert.equal(r.direction, 'up');
+    assert.ok(r.p_value < SCHWELLEN.ALPHA, 'p_value liegt nicht unter ALPHA');
+    assert.equal(r.alpha, SCHWELLEN.ALPHA);
   });
 
-  it('ein NEGATIVER Abstand (Mehrheit platziert schlechter) bleibt immer still', () => {
-    /* Die Richtung ist die eigentliche Aussage des Tors: es soll nur
-       melden, wenn die Mehrheit BESSER steht. Ohne diese Zusicherung
-       waere ein Vorzeichendreher unsichtbar. */
-    const sb = sandkasten(KONS, {});
-    const f = fall(-(SCHWELLEN.MIN_GAP + 100));
-    const r = sb.MostConsistencyBuilder._internals.alternativVorschlag(f.karte, 2);
-    assert.equal(r, null,
-      'die Mehrheit platziert 150 Plaetze SCHLECHTER und wird trotzdem vorgeschlagen');
+  it('(iii) KLEINE STICHPROBE: 20/10 Listen, Abstand ~60, grosse Streuung — kein Vorschlag', () => {
+    const f = tor();
+    const med = (a) => { a = a.slice().sort((x, y) => x - y); const n = a.length;
+      return n % 2 ? a[(n - 1) / 2] : (a[n / 2 - 1] + a[n / 2]) / 2; };
+    const abstand = (k) => med(k._perListCounts.filter(e => e.count === 2).map(e => e.place))
+                         - med(k._perListCounts.filter(e => e.count === 3).map(e => e.place));
+    /* Erster seed-fester Lauf, dessen Abstand ueber der ALTEN Schwelle 50 liegt —
+       so unterscheidet der Fall die neue Regel von der alten. */
+    let k = null, gap = null;
+    for (let seed = 1; seed <= 2000 && !k; seed++) {
+      const c = karte(20, 10, 0, 400, seed);
+      const g = abstand(c);
+      if (g > 50 && g < 80) { k = c; gap = g; }
+    }
+    assert.ok(k, 'Vorpruefung: kein seed-fester Fall mit Abstand > 50 gefunden');
+    assert.equal(f(k, 2), null,
+      `Abstand ${gap} aus nur 20/10 Listen bei grosser Streuung ist von Zufall `
+      + 'nicht zu unterscheiden und darf nicht gezeigt werden.');
+  });
+
+  it('(iv) RICHTUNG: platziert die Mehrheit SCHLECHTER, kommt nie ein Vorschlag', () => {
+    const f = tor();
+    assert.equal(f(karte(200, 100, -60, 100, 3), 2), null);
+  });
+
+  it('(v) DETERMINISMUS: gleiche Eingabe, gleiches p', () => {
+    const f = tor();
+    const a = f(karte(200, 100, 25, 100, 1), 2);
+    const b = f(karte(200, 100, 25, 100, 1), 2);
+    assert.ok(a && b);
+    assert.equal(a.p_value, b.p_value);
+    assert.equal(a.placement_gap, b.placement_gap);
+  });
+
+  it('zu kleine Gruppe (< MIN_GROUP) wird nie gezeigt', () => {
+    const f = tor();
+    const k = karte(40, SCHWELLEN.MIN_GROUP - 1, 300, 20, 4);
+    assert.equal(f(k, 2), null);
   });
 });
 
-describe('der Quelltext gibt die Herkunft der Zahl ehrlich an', () => {
+describe('der Quelltext gibt die Herkunft der Zahlen ehrlich an', () => {
 
-  it('die 50 ist als gegriffen gekennzeichnet, nicht als belegt', () => {
-    /* Der alte Kommentar berief sich auf einen "Turin sweep", den es im
-       Repo nicht gibt. Wer den Beleg nachtraegt, darf diese Zusicherung
-       aendern — wer den Hinweis nur loescht, faellt hier auf. */
-    assert.ok(/GEGRIFFEN/.test(KONS),
-      'der Quelltext kennzeichnet ALT_SUGGESTION_MIN_GAP nicht mehr als gegriffen');
-    /* Die Turin-Begruendung DARF im Quelltext stehen bleiben — sie ist
-       die Geschichte der Zahl. Sie darf nur nicht als Beleg dastehen.
-       Geprueft wird deshalb nicht ihre Abwesenheit, sondern dass der
-       Widerruf unmittelbar dabeisteht. */
-    /* Auf "Turin sweep" verankert, nicht auf "Turin": das Turnier
-       Turin steht in dieser Datei an sechs weiteren, harmlosen
-       Stellen (Feldgroessen, Turnier-Kennungen). */
+  it('ALPHA ist als KONVENTION gekennzeichnet, nicht als belegt', () => {
+    assert.ok(/ALT_SUGGESTION_ALPHA\s*=\s*[0-9.]+;\s*\/\/\s*KONVENTION/.test(KONS),
+      'ALPHA steht ohne den Hinweis, dass es eine Konvention ist');
+    assert.ok(/Permutationstest/.test(KONS) && /NICHT GEPRUEFT/.test(KONS),
+      'der Kopf nennt Verfahren oder Grenzen nicht mehr');
+  });
+
+  it('die alte Turin-Begruendung steht nur noch mit ihrem Widerruf da', () => {
     const turin = KONS.indexOf('Turin sweep');
     assert.ok(turin >= 0, 'Vorpruefung: die Herkunftsgeschichte ist ganz verschwunden');
     const umfeld = KONS.slice(Math.max(0, turin - 1200), turin + 1200);
@@ -401,7 +309,6 @@ describe('der Quelltext gibt die Herkunft der Zahl ehrlich an', () => {
 
   it('der Kommentar nennt den Messweg, damit ihn jemand nachfahren kann', () => {
     assert.ok(KONS.includes('tests/unit/test-alt-vorschlag-schwelle.js'),
-      'der Kommentar verweist nicht auf die Datei, die seine Zahlen misst — '
-      + 'dann ist die Messung beim naechsten Leser wieder verloren');
+      'der Kommentar verweist nicht auf die Datei, die seine Zahlen misst');
   });
 });

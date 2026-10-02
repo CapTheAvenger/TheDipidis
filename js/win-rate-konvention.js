@@ -168,11 +168,11 @@
             langDe: 'Anteil gewonnener Matches an allen gespielten — Unentschieden '
                   + 'zaehlen im Nenner mit, aber nicht als halber Sieg. Die Zahl '
                   + 'sinkt, je haeufiger unentschieden gespielt wird; zwischen zwei '
-                  + 'Feldern mit verschiedener Unentschieden-Quote ist sie deshalb '
+                  + 'Metas mit verschiedener Unentschieden-Quote ist sie deshalb '
                   + 'nicht vergleichbar.',
             langEn: 'Share of matches won out of all matches played — ties count in the '
                   + 'denominator, but not as half a win. The figure drops as ties get '
-                  + 'more common, so it cannot be compared across two fields with '
+                  + 'more common, so it cannot be compared across two metas with '
                   + 'different tie rates.',
             quelle: 'data/limitless_online_decks.csv (Spalte win_rate_numeric)',
             beleg: {
@@ -210,11 +210,11 @@
             kurzEn: 'Win share excluding ties',
             langDe: 'Anteil gewonnener an den entschiedenen Matches — Unentschieden '
                   + 'bleiben ganz aussen vor. Als einzige der drei Konventionen '
-                  + 'haengt sie nicht davon ab, wie oft im Feld unentschieden '
+                  + 'haengt sie nicht davon ab, wie oft im Meta unentschieden '
                   + 'gespielt wird; nur sie darf zwischen zwei Quellen verrechnet '
                   + 'werden.',
             langEn: 'Share of decided matches won — ties are left out entirely. Alone '
-                  + 'among the three it does not depend on how often the field draws, '
+                  + 'among the three it does not depend on how often the meta draws, '
                   + 'so it is the only one that may be differenced across sources.',
             quelle: 'data/limitless_online_decks_matchups.csv (Spalte win_rate)',
             beleg: {

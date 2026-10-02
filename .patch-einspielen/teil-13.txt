@@ -15,7 +15,7 @@
      'mc.frozenShareBadge':      'Finaler Player-Share',|
 -    'mc.frozenShareHint':       'Vollständige Field-Zusammensetzung dieses geschlossenen Metas — der tatsächliche Anteil der Day-1-Spieler, die jedes Deck über alle Turniere im Datensatz hinweg gespielt haben. Direkt aus den Limitless-Labs-Turnierdaten, ohne Predictor-Anpassung.',|
 +    'mc.frozenShareHint':       'Vollständige Zusammensetzung dieses geschlossenen Metas — der tatsächliche Anteil der Day-1-Spieler, die jedes Deck über alle Turniere im Datensatz hinweg gespielt haben. Direkt aus den Limitless-Labs-Turnierdaten, ohne Predictor-Anpassung.',|
-     'mc.frozenShareTotals':     '{archetypen} Archetypen · {players} Day-1-Spieler · {n} Turniere.',|
+     'mc.frozenShareTotals':     '{archetypes} Archetypen · {players} Day-1-Spieler · {n} Turniere.',|
 @@ -4329,4 +4329,4 @@ const translations = {|
      'mc.wrNennerTitel':         'Die Zahl hinter der Win Rate ist die Matchzahl, auf der sie steht — Online-Matches plus die eingemischten Major-Matches. 13 % aus 737 Matches und 73 % aus 9 sind nicht dieselbe Aussage.',|
 -    'mc.customDecksTitle':      'Eigene Decks',|

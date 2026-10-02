@@ -1,0 +1,56 @@
++  .mc-mct-table .mc-intel-tile { border-color: transparent; }|
++  /* Kachel-Beschriftungen umbrechen statt abzuschneiden */|
++  .mc-mct-table .mc-intel-tile-label,|
++  .mc-mct-table .mc-intel-tile-extra { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }|
+ }|
+diff --git a/index.html b/index.html|
+index 51fc2b9401473887bcd9a6565ae46fb48c64dd3a..0f1bc3bcd10619ef09d77e89872ef099025f01a5 100644|
+GIT binary patch|
+delta 1835|
+zcmZ8hTWAwO6s6j$){0tNTOTo+_(+<xF<F~5MvJfF3#?RX8<k+1HBZ~rv?U@Uh<=Dr|
+zm9of1&@UCS{<Kuhhp1qG1hr^E(4Qg{m5Peur=af6&Ft*@u`p-vz2}}ecV>oeR}bB;|
+z9^Pvyl_Y;)w8iqWoUIhAvz0G`%01^|0=9am@|6RtGpIDxQl*+7RIb+6h_rXch}UJM|
+zh$m!GvaURVTw_#eshg#=xQq1s$1C>=W5!YeUeqlUU{AeGfbse@0<?RU2r%I(%F^if|
+ztv9iiD{t4Y6scja0ZjVlC{tcTdemoVKIvO6>f(|?$rs7cJh8z*Ftx!DIohyX5KJ~y|
+z3lR2K3Gmuqv`$lhAYdRE4;Wn9->9dZ<i*J<$s_mmZOJ!DUMb-7dL?bhO0F@fj0YF$|
+zS<0S`I@qe**m#K|p3rGpXruiYvh%-|QOBlbPSB|AI2eYNN?ax@&JV~J2ILa;o1uO)|
+z3j=bg?FlQx5gUYPW$T6IIM)t087z$0;h{v4&Nf(Ao%RK@p3MK6kySlA2(&lUQgJv8|
+z<(O@UMWS5$SB9hQKnF_CE5qM<UPTA&5K;<#9Z*?fW}sP8&mUnpE3)y*A$TNUA$=I)|
+z#bT!L+Y$IJ!Z<quI|;T%U^A@-BhVyL3g03yVQfEr6zB+&b}0%)HNHI5;@K$B5k!^H|
+zh0mivM_Yq#oZks_JSf`M$&-I(!GYI0fyPA4pUla1F`yGjwI^Z*W*0t)appHMXx2C4|
+z#%9@2=EjRMcb?htSccE~{#`h6jL%AC37|D@>LJHDl{z5@-iiY~EhOl>83q%k+A|5B|
+z%udEwf}6-}T9`CN+s*KL66lH|v*|;UyT)X!P4TEY00*X1K)040A5C!?YONRlq@a@a|
+z%Vcay16^ct{8Sp~!XlgHm>#udpaB<TV1DsjWMCJqR8k+_$Z*%xyZ}yTIBCgo*j=p9|
+z?o{eH+$G31y`_tfg28iLTpF9q{VsT__weGKZata-KmO|GwQ5U0Zp-qP3|`KfHvL|Y|
+zs&cs?t*p1lMEazM&zC9q)dPP?!C(aH(4K=;1ewp>IasUfbKv6~(ECHy&Fh5<7A>e$|
+v!^P{vO#Rcxn=rVopDSnZT)(bJb*yl|9|FeWn!KTSJGEEeCrd%eLyhGhuEYAh|
+|
+delta 1835|
+zcmZ8hT}TvB6vpaQW|a1${cP55*{-{~?yT;*SyGl%1{sCfRxGYg>;9-~tFjRhL_I`c|
+zg$!{B@~I@U7e#9yB7=MhDk&kT7YU-m$S8aas+oKC&YkID;C^$?`ObI0bMGA<DjXgv|
+z964lJB>5_(u|~_QJhoDb9Y^^hpgeS}C15RgDBn3Kb_A5#QmRz*1In$^B9Zpq81XoZ|
+zDdMiNC`o6UK&m>dG?pz^8eLg>{^PZ4lQCnx058in2+&Y&6=14-n*h!3bplMgv$8b$|
+z!xbjBJmp=*W|1277{H9QRQcpFq=zL#^BHNYsEc?FO1^mw&D$#t1fMDmk(R2Bf?%eq|
+zP=KIsjR0?aS?e_Q$NUC@DZjy`Bh`A^IbIxH<8{luy}Q%3UXRx=c|2Zi$V#d@s!Rp)|
+z^(>`fhYt2AgFCKM#9ecN7TRb(*Vy=9%b0!V1_x+VHXI1TW+ft%6<7M@tNn70`Ylku|
+zg_(YNk#&NV;iwgAXl3nzjkwGPcNxr#+TgL5BCSoZy)Z5XlJ3O+nvqpKKMu4v)KYOI|
+z2zi)nhE<|m`<IJj%|HiA&&$Q%dS1Z^*e9f9dQZUW95VyWl6w9O!X=T7H&4P70W<Ma|
+z5XlxZg>$Fjw+Q2s5bP&-Gz7b7H4uVYk&>AU!L+gcYzxp4B<<cXWYtJ%D8)-*pd*MX|
+zp%Y((fsVEYUAUqZ=y*`Hsg)=HN`f74w*rlcn7^2l%i4fWAl062GcY^xQ5$D|+XnUe|
+zMqF4g8_HaGP3F!sJD$q$Ro}l8r_b<NsVsghj+lDL5l*E}$d30SKu-$^`eBBFc2n)e|
+zcAm^m#$-D;k=c|VHAS1v@J<xyiXyY=W0bqbWR%2sR2_gF<1wIHOOB7lxD2({gMVVM|
+zn)b_N?2H3lWODp`9O%L#o8_b)wI-knS0-RZ_FN?30IgI~2?rD0H8szVvk6X`(*Xyw|
+z722JOb-)9HY}30t`6w8?+{vY}$&7cxGrflg?|13Z1o&{ii`S|xeOQ;|Eg8I#G;R8W|
+z9#!RXL0VZ)w~2J3o6nainD2(aq+lQfWoS#m7J|&@t`wB$`t0~L1@!)qb<2C8fJHMZ|
+w)kyaGFjN2Z@+J({^>O74UhdNssg7mF`@nB3E=n7U_fmWHeX?YfG!$9>0j{R_LI3~&|
+|
+diff --git a/js/app-deck-builder.js b/js/app-deck-builder.js|
+index 5a3ba338..7c7f39a2 100644|
+--- a/js/app-deck-builder.js|
++++ b/js/app-deck-builder.js|
+@@ -4225,3 +4225,3 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+                     // Falschaussage weiter.|
+-                    : 'Bei diesen Karten spielt die Mehrheit der ausgewerteten Day-2-Listen eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich deutlich besser. Das ist eine Aussage über die veröffentlichten Listen, nicht über das Feld. Der Builder hat NICHT automatisch angepasst, du kannst manuell überlegen ob du den Vorschlag übernimmst.';|
++                    : 'Bei diesen Karten spielt die Mehrheit der ausgewerteten Day-2-Listen eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich besser, als der Zufall erklärt (Zufallstest, p < 0,001). Das ist eine Aussage über die veröffentlichten Listen, nicht über alle Spieler. Der Builder hat NICHT automatisch angepasst, du kannst manuell überlegen ob du den Vorschlag übernimmst.';|
+                 altWrap.appendChild(altIntro);|
+@@ -4245,3 +4245,3 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|

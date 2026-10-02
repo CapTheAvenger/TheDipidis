@@ -156,6 +156,7 @@ jobs:
             pocket-tierlist.yml
             setwechsel-probe.yml
             pokepricelab-verify.yml
+            pokepricelab-index.yml
           "
           rot=0
           for wf in $WORKFLOWS; do

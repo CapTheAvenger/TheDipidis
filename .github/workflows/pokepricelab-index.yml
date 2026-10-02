@@ -8,7 +8,17 @@
 # CI is the only place this can run.
 name: Pokepricelab catalog index
 
+# SC-12 (02.10.2026): der Abruf laeuft in ETAPPEN. pokepricelab.com antwortet
+# zeitweise ~27 s je Teil-Sitemap, an einem Stueck reichen 120 min nicht. Jeder
+# Lauf holt, was in sein Zeitbudget passt, merkt sich die fertigen Teile im
+# Actions-Cache (.cache/) und setzt beim naechsten Lauf fort. Geschrieben und
+# gepusht wird erst bei vollstaendigem Satz (steps.bau.outputs.schreiben).
+# Ein fertiger Index gilt 6 Tage; taeglich ein Lauf ist dann ein
+# Minutenlauf ohne Abruf. Steht ein Satz laenger als 5 Tage offen, wird
+# der Lauf rot (Skript, ::error::).
 on:
+  schedule:
+    - cron: '20 1 * * *'
   workflow_dispatch:
 
 permissions:
@@ -37,8 +47,18 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
+      # Der Stand der letzten Etappe. Schluessel je Lauf neu, der juengste
+      # vorherige wird wiederhergestellt; gespeichert wird am Ende des Jobs.
+      - name: Stand der letzten Etappe
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache
+          key: pokepricelab-sitemap-${{ github.run_id }}
+          restore-keys: pokepricelab-sitemap-
+
       - name: Build catalog index
-        run: python scripts/build_pokepricelab_index.py
+        id: bau
+        run: python scripts/build_pokepricelab_index.py --budget-min 85
 
       # DEN DATENSTAND VOR DEM COMMIT FORTSCHREIBEN (12.09.2026)
       #
@@ -54,19 +74,23 @@ jobs:
       # im Git-Verlauf den 12.09. 14 von 17 Ablaeufen, die nach data/
       # commiten, fehlte dieser Schritt.
       - name: Datenstaende fortschreiben
+        if: steps.bau.outputs.schreiben == 'true'
         run: python3 scripts/build_data_stand.py
 
       # DAS TOR VOR DEM PUSH (30.09.2026) — scripts/tor_vor_dem_push.sh.
       # Auch handgestartete Schreiber pruefen vor dem Push.
       - name: Node fuer das Tor
+        if: steps.bau.outputs.schreiben == 'true'
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
         with:
           node-version: '20'
 
       - name: Tor vor dem Push
+        if: steps.bau.outputs.schreiben == 'true'
         run: bash scripts/tor_vor_dem_push.sh kern
 
       - name: Commit index
+        if: steps.bau.outputs.schreiben == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

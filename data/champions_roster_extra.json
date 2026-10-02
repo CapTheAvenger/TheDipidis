@@ -21,7 +21,6 @@
    "Scrafty"
   ],
   "aus_teams": [
-   "Alakazam",
    "Altaria",
    "Arboliva",
    "Gyarados",
@@ -36,7 +35,7 @@
    "Toxtricity",
    "Vanilluxe"
   ],
-  "aus_teams_count": 14,
+  "aus_teams_count": 13,
   "aus_teams_ohne_werte": [],
   "geschlechtsformen": [
    "Basculegion-F",
@@ -44,6 +43,7 @@
   ],
   "geschlechtsformen_count": 2,
   "aus_nutzung": [
+   "Alakazam",
    "Cinderace",
    "Farfetch’d",
    "Gogoat",
@@ -74,7 +74,7 @@
    "Vileplume",
    "Wigglytuff"
   ],
-  "aus_nutzung_count": 29,
+  "aus_nutzung_count": 30,
   "aus_nutzung_ohne_werte": []
  },
  "smogonKeys": [
@@ -197,9 +197,9 @@
   "Toxtricity",
   "Arboliva",
   "Vanilluxe",
-  "Alakazam",
   "Basculegion-F",
   "Meowstic-F",
+  "Alakazam",
   "Cinderace",
   "Farfetch’d",
   "Gogoat",

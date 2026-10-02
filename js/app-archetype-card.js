@@ -1621,7 +1621,7 @@
                 art: 'unter-schwelle',
                 inhalt: esc(bilanz),
                 titel: (de
-                    ? `Bilanz ${bilanz} (S–N–U) aus ${n} Präsenz-Matches. Unter ${MIN_PRAESENZ_PARTIEN} Matches steht hier kein Prozentwert: `
+                    ? `Bilanz ${bilanz} (W–L–T) aus ${n} Präsenz-Matches. Unter ${MIN_PRAESENZ_PARTIEN} Matches steht hier kein Prozentwert: `
                       + `bei ${n} Matches verschiebt ein einziges Match die Quote um ${fmt(100 / n)} Punkte. `
                       + `Die Bilanz sagt dasselbe, ohne eine Genauigkeit zu behaupten, die die Stichprobe nicht trägt.`
                     : `Record ${bilanz} (W–L–T) from ${n} in-person matches. Below ${MIN_PRAESENZ_PARTIEN} matches no percentage is shown: `
@@ -1792,7 +1792,7 @@
                Arbeitspaket. Zweisprachig inline ueber getLang(), wie es
                das Projekt an Dutzenden Stellen macht. */
             ? `<p class="arc-mu-note arc-mu-note-praesenz">${esc((de
-                ? 'Major-WR: erst ab {n} Präsenz-Matches als Prozentwert. Darunter steht die Bilanz (S–N–U) '
+                ? 'Major-WR: erst ab {n} Präsenz-Matches als Prozentwert. Darunter steht die Bilanz (W–L–T) '
                   + 'und daneben die Matchzahl — bei {n} Matches verschiebt ein einziges Match die Quote '
                   + 'schon um {p} Punkte, darunter entsprechend mehr. Betroffen hier: {k} von {g} Zeilen.'
                 : 'Major WR: shown as a percentage only from {n} in-person matches. Below that you get the record (W–L–T) '

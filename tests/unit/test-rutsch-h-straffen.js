@@ -78,9 +78,13 @@ describe('UI-62: Aufbau und Texte', () => {
         assert.equal(vorkommen.length, 2);
         assert.ok(vorkommen.every(v => v === 'Journal'), vorkommen.join('|'));
     });
-    it('Bilanz heisst S–N–U / W–L–T und die Zelle schreibt Siege–Niederlagen–Unentschieden', () => {
-        assert.match(QUELLE, /L\('Bilanz S–N–U', 'Record W–L–T'\)/);
-        assert.ok(!QUELLE.includes('Bilanz S–U–N'));
+    it('Bilanz heisst ueberall W–L–T (auch deutsch) und die Zelle schreibt Wins–Losses–Ties', () => {
+        assert.match(QUELLE, /L\('Bilanz W–L–T', 'Record W–L–T'\)/);
+        for (const alt of ['S–N–U', 'S–U–N', 'Bilanz S–']) {
+            assert.ok(!QUELLE.includes(alt), alt + ' ist zurueck — die Reihenfolge heisst immer W–L–T');
+            for (const d of ['app-archetype-card.js', 'app-current-meta-analysis.js'])
+                assert.ok(!lies('js', d).includes(alt), alt + ' in ' + d);
+        }
         assert.match(QUELLE, /_mcNum\(z\.w, 1\)\}–\$\{\s*_mcNum\(z\.n, 1\)\}–\$\{_mcNum\(z\.u, 1\)\}/);
         const bild = QUELLE.indexOf("{ label: t('mc.avgWins')");
         const s = QUELLE.slice(bild, bild + 400);
@@ -90,6 +94,16 @@ describe('UI-62: Aufbau und Texte', () => {
         const kaputt = QUELLE.replace('_mcNum(z.n, 1)}–${_mcNum(z.u, 1)}', '_mcNum(z.u, 1)}–${_mcNum(z.n, 1)}');
         assert.notEqual(kaputt, QUELLE, 'die Mutation hat nichts geaendert');
         assert.ok(!/_mcNum\(z\.w, 1\)\}–\$\{\s*_mcNum\(z\.n, 1\)\}–\$\{_mcNum\(z\.u, 1\)\}/.test(kaputt));
+    });
+    it('UI-65: die Abdeckungs-Kachel ist entfernt (Hausi: unverstaendlich)', () => {
+        assert.ok(!QUELLE.includes("_evL('Abdeckung', 'Coverage')"));
+    });
+    it('UI-65: keine Erklaerabsaetze mehr unter der Tabelle und unter „Darauf vorbereiten"', () => {
+        assert.ok(!QUELLE.includes('mc-mct-lead'), 'der Absatz ueber der Meta-Tabelle ist zurueck');
+        const a = QUELLE.indexOf('function _evVorbereitungHtml(');
+        const rumpf = QUELLE.slice(a, QUELLE.indexOf('\n  }\n', a));
+        assert.ok(!rumpf.includes('class="mc-ev-fuss"'), 'der Klammer-Satz steht wieder als Absatz da');
+        assert.ok((rumpf.match(/title="\$\{hinweis\}"/g) || []).length === 2, 'der Hinweis haengt nicht an beiden Zeilen');
     });
     it('keine Schritt-Erklaersaetze mehr', () => {
         assert.ok(!QUELLE.includes('mc-schritt-satz'));

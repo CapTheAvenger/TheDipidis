@@ -11287,7 +11287,7 @@ window.MetaCall = (function () {
   }
 
   function _mctZelleBilanz(z, L) {
-    const titel = L('Erwartete Siege – Niederlagen – Unentschieden über ' + _settings.rounds + ' Runden',
+    const titel = L('Erwartete Wins – Losses – Ties über ' + _settings.rounds + ' Runden',
       'Expected wins – losses – ties over ' + _settings.rounds + ' rounds')
       + ' · ' + _mctQuotenName('mitUnentschieden') + ' ' + _mcPct(z.quote, 1);
     return `<span class="mc-mct-bilanz" title="${esc(titel)}">${_mcNum(z.w, 1)}–${
@@ -11489,8 +11489,8 @@ window.MetaCall = (function () {
       ${th('day2', 'mc-mct-d2', L('Day-2 mit diesem Deck', 'Day 2 with this deck'),
         L('Chance auf ' + _settings.day2Points + ' Punkte in ' + _settings.rounds + ' Runden, wenn DU dieses Deck gegen genau dieses Feld spielst.',
           'Chance of ' + _settings.day2Points + ' points in ' + _settings.rounds + ' rounds if YOU play this deck against exactly this field.'))}
-      ${th('bilanz', 'mc-mct-bil', L('Bilanz S–N–U', 'Record W–L–T'),
-        L('Erwartete Siege – Niederlagen – Unentschieden mit diesem Deck.', 'Expected wins – losses – ties with this deck.'))}
+      ${th('bilanz', 'mc-mct-bil', L('Bilanz W–L–T', 'Record W–L–T'),
+        L('Erwartete Wins – Losses – Ties mit diesem Deck.', 'Expected wins – losses – ties with this deck.'))}
     </tr>`;
   }
 
@@ -11540,13 +11540,6 @@ window.MetaCall = (function () {
       <span class="mc-btn-text">${t('mc.share')}</span>
     </button>
   </div>
-  <p class="mc-mct-lead">${esc(L(
-    'Eine Zeile je Deck: wie oft es online gespielt wird, wie oft du es vor Ort erwartest, wie oft du ihm '
-    + 'begegnest — und wie weit du kämst, wenn du es selbst spielst. Mit ☆ wählst du dein Deck, dann siehst du, '
-    + 'wie es gegen jede Zeile steht. In „Deine Schätzung" überschreibst du die Prognose; alles rechnet sofort neu.',
-    'One row per deck: how often it is played online, how often you expect it on site, how often you will face it — '
-    + 'and how far you would get playing it yourself. ☆ picks your deck, then you see how it does against every row. '
-    + '"Your estimate" overrides the forecast; everything recalculates at once.'))}</p>
   <div class="mc-feld-leiste mc-mct-leiste">
     <span class="mc-mct-leiste-titel">${esc(L('Einzeln im Feld:', 'Listed individually:'))}</span>
     ${pillen}
@@ -12319,22 +12312,22 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     const gut      = nachBeitrag.filter(z => z.beitrag > 0).slice(0, EV_VORBEREITUNG_MAX);
 
     const teile = [];
+    /* UI-65 (02.10.2026): der Erklaersatz unter den Zeilen ist ein Hinweistext
+       (title) an den Zeilen geworden — die Seite soll nicht erzaehlen. */
+    const hinweis = esc(_evL(
+      'In Klammern: ' + _evQuotenKuerzel() + ' gegen dieses Deck und wie oft du ihm in dem Meta '
+        + 'begegnest, das du erwartest. Sortiert danach, wie stark die Paarung dein Ergebnis zieht.',
+      'In brackets: ' + _evQuotenKuerzel() + ' against that deck and how often you meet it in the '
+        + 'meta you expect. Sorted by how strongly the pairing pulls your result.'));
     if (schlecht.length) {
-      teile.push(`<p class="mc-ev-zeile mc-ev-warauf"><span class="mc-ev-zeile-label">`
+      teile.push(`<p class="mc-ev-zeile mc-ev-warauf" title="${hinweis}"><span class="mc-ev-zeile-label">`
         + esc(_evL('Darauf vorbereiten', 'Prepare for these')) + `</span> ${satz(schlecht)}</p>`);
     }
     if (gut.length) {
-      teile.push(`<p class="mc-ev-zeile mc-ev-laeuft"><span class="mc-ev-zeile-label">`
+      teile.push(`<p class="mc-ev-zeile mc-ev-laeuft" title="${hinweis}"><span class="mc-ev-zeile-label">`
         + esc(_evL('Das läuft für dich', 'These run in your favour')) + `</span> ${satz(gut)}</p>`);
     }
     if (!teile.length) return '';
-    teile.push(`<p class="mc-ev-fuss">` + esc(_evL(
-      'In Klammern: ' + _evQuotenKuerzel() + ' gegen dieses Deck und wie oft du ihm in dem Meta '
-        + 'begegnest, das du erwartest. Sortiert danach, wie stark die Paarung dein Ergebnis '
-        + 'zieht — also beides zusammen, nicht nur die Quote.',
-      'In brackets: ' + _evQuotenKuerzel() + ' against that deck and how often you meet it in the '
-        + 'meta you expect. Sorted by how strongly the pairing pulls your result — both '
-        + 'together, not one of the two alone.')) + `</p>`);
     return teile.join('');
   }
 
@@ -12495,18 +12488,9 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
         'from ' + _settings.day2Points + ' points after ' + runden + ' rounds'))}</span>
     </div>
     <div class="mc-ev-kachel mc-ev-kachel-bilanz">
-      <span class="mc-ev-label">${esc(_evL('Erwartete Bilanz S–N–U', 'Expected record W–L–T'))}</span>
+      <span class="mc-ev-label">${esc(_evL('Erwartete Bilanz W–L–T', 'Expected record W–L–T'))}</span>
       <span class="mc-ev-wert mc-ev-bilanz"><span style="color:var(--tint-ok-ink)">${_mcNum(d2.expWin, 1)}</span>–<span style="color:var(--tint-bad-ink)">${_mcNum(d2.expLoss, 1)}</span>–<span style="color:#f39c12">${_mcNum(d2.expTie, 1)}</span></span>
-      <span class="mc-ev-kontext">${esc(_evL('Siege – Niederlagen – Unentschieden', 'wins – losses – ties'))}</span>
-    </div>
-    <div class="mc-ev-kachel">
-      <span class="mc-ev-label">${esc(_evL('Abdeckung', 'Coverage'))}</span>
-      <span class="mc-ev-wert">${_mcNum(r.abdeckung, 0)}<span class="mc-ev-einheit">${_mcPz()}</span></span>
-      <span class="mc-ev-kontext">${esc(_evL(
-        r.gegner + ' Decks · ' + zahlLokal(r.partien) + ' Matches'
-          + (r.eigene ? ' · ' + r.eigene + ' von dir' : ''),
-        r.gegner + ' decks · ' + zahlLokal(r.partien) + ' games'
-          + (r.eigene ? ' · ' + r.eigene + ' from you' : '')))}</span>
+      <span class="mc-ev-kontext">${esc('Wins – Losses – Ties')}</span>
     </div>
   </div>`;
 

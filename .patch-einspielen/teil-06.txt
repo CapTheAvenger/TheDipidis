@@ -1,0 +1,85 @@
++}|
++|
++function feld() {|
++  const attr = {};|
++  return { value: '', setAttribute: (k, v) => { attr[k] = v; }, attr };|
++}|
++|
++describe('Panel "Eigene Decks"', () => {|
++  const panel = funktion('renderCustomDecksPanel');|
++  it('keine datalist mehr', () => {|
++    assert.ok(!/<datalist/.test(panel), 'datalist ist zurueck');|
++    assert.ok(!/\blist="/.test(panel));|
++  });|
++  it('Liste und Ereignisse sind verdrahtet', () => {|
++    assert.ok(/id="mc-custom-vorschlaege-\$\{idx\}"[^>]*role="listbox"/.test(panel));|
++    assert.ok(/oninput="[^"]*_zeigeCustomVorschlaege\(\$\{idx\}, this\.value\)/.test(panel));|
++    assert.ok(/onkeydown="MetaCall\._customTaste/.test(panel));|
++  });|
++  it('Funktionen stehen im Export', () => {|
++    for (const n of ['_zeigeCustomVorschlaege', '_versteckeCustomVorschlaege', '_waehleCustomAus', '_customTaste']) {|
++      assert.ok(new RegExp('\\n\\s+' + n + ',').test(QUELLE), n + ' fehlt im Export');|
++    }|
++  });|
++});|
++|
++describe('Verhalten', () => {|
++  it('Tippen zeigt die Liste mit allen Treffern', () => {|
++    const ul = { hidden: true, innerHTML: '' }, inp = feld();|
++    const u = umgebung({ 'mc-custom-vorschlaege-2': ul, 'mc-custom-name-2': inp }, () => ['Mega Excadrill', 'Excavator'], []);|
++    u.zeige(2, 'exca');|
++    assert.equal(ul.hidden, false);|
++    assert.equal((ul.innerHTML.match(/<li /g) || []).length, 2);|
++    assert.equal(inp.attr['aria-expanded'], 'true');|
++  });|
++  it('kein Treffer oder exakter Einzeltreffer versteckt die Liste', () => {|
++    const ul = { hidden: false, innerHTML: '' }, inp = feld();|
++    const u = umgebung({ 'mc-custom-vorschlaege-0': ul, 'mc-custom-name-0': inp }, (v) => v === 'x' ? [] : ['Dragapult'], []);|
++    u.zeige(0, 'x');|
++    assert.equal(ul.hidden, true);|
++    ul.hidden = false;|
++    u.zeige(0, 'dragapult');|
++    assert.equal(ul.hidden, true);|
++  });|
++  it('Antippen setzt Feld und meldet den Namen an die richtige Zeile', () => {|
++    const ul = { hidden: false }, inp = feld(), gewaehlt = [];|
++    const u = umgebung({ 'mc-custom-vorschlaege-3': ul, 'mc-custom-name-3': inp }, () => [], gewaehlt);|
++    u.waehle(3, { dataset: { name: 'Mega Lucario' } });|
++    assert.equal(inp.value, 'Mega Lucario');|
++    assert.equal(ul.hidden, true);|
++    assert.deepEqual(gewaehlt, [[3, 'Mega Lucario']]);|
++  });|
++  it('Enter waehlt den ersten Vorschlag', () => {|
++    const erster = { dataset: { name: 'Erster' } };|
++    const ul = { hidden: false, querySelector: () => erster }, inp = feld(), gewaehlt = [];|
++    const u = umgebung({ 'mc-custom-vorschlaege-1': ul, 'mc-custom-name-1': inp }, () => [], gewaehlt);|
++    let verhindert = false;|
++    u.taste(1, { key: 'Enter', preventDefault: () => { verhindert = true; } });|
++    assert.ok(verhindert);|
++    assert.deepEqual(gewaehlt, [[1, 'Erster']]);|
++  });|
++});|
+ diff --git a/tests/unit/test-r5-win-prozent-namen.js b/tests/unit/test-r5-win-prozent-namen.js|
+index bf69df6a..9ce181c6 100644|
+--- a/tests/unit/test-r5-win-prozent-namen.js|
++++ b/tests/unit/test-r5-win-prozent-namen.js|
+@@ -200,40 +200,2 @@ describe('B1 — der Konventionsname im Predictor-5.3-Tooltip kommt aus dem Modu|
+ |
+-/* ══ 3. DIE SCHALTFLAECHE DES OVERRIDE-KASTENS ═════════════════════════════════════════ */|
+-|
+-describe('B1 — der Umschalter behaelt die uebersetzte Beschriftung', () => {|
+-|
+-    function schalter(sprache, label) {|
+-        const knopf = { id: 'mc-override-btn', textContent: label };|
+-        const panel = {|
+-            classList: {|
+-                _offen: false,|
+-                toggle() { this._offen = !this._offen; return this._offen; },|
+-            },|
+-            innerHTML: '',|
+-        };|
+-        const ctx = baue(MC, ['function _toggleOverrides()'], {|
+-            document: { getElementById: (id) => (id === 'mc-override-panel' ? panel : knopf) },|
+-            t: () => label,|
+-            _settings: { myDeck: '' },|
+-            renderOverrideTable: () => '',|

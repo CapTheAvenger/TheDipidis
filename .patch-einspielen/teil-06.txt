@@ -59,7 +59,7 @@
 +    assert.deepEqual(gewaehlt, [[1, 'Erster']]);|
 +  });|
 +});|
- diff --git a/tests/unit/test-r5-win-prozent-namen.js b/tests/unit/test-r5-win-prozent-namen.js|
+diff --git a/tests/unit/test-r5-win-prozent-namen.js b/tests/unit/test-r5-win-prozent-namen.js|
 index bf69df6a..9ce181c6 100644|
 --- a/tests/unit/test-r5-win-prozent-namen.js|
 +++ b/tests/unit/test-r5-win-prozent-namen.js|

@@ -1,0 +1,16 @@
+-                `der Satz nennt die Formel von ${id} nicht: ` + satz[1]);|
+-        }|
+-        assert.notEqual(WK.kurz('ohneUnentschieden'), WK.kurz('mitUnentschieden'));|
+     });|
+diff --git a/version.json b/version.json|
+index c1aefced..9317714a 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610020917"}|
+\ No newline at end of file|
++{"version":"202610021531"}|
+\ No newline at end of file|
+-- |
+2.34.1|
+|

@@ -720,6 +720,28 @@
   color: var(--mc-text-faint);
   font-weight: 500;
 }
+.mc-deck-vorschlaege {
+  position: absolute;
+  left: 0; right: 0; top: calc(100% + 4px);
+  z-index: 30;
+  margin: 0; padding: 4px 0;
+  list-style: none;
+  max-height: 260px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--surface-1);
+  border: 1px solid var(--mc-border-strong);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.mc-deck-vorschlaege[hidden] { display: none; }
+.mc-deck-vorschlag {
+  padding: 11px 14px;
+  font-size: 0.95rem;
+  color: var(--mc-text-heading);
+  cursor: pointer;
+}
+.mc-deck-vorschlag:hover, .mc-deck-vorschlag:active { background: var(--mc-bg-subtle); }
 .mc-deck-search-wrap::before {
   content: "🔍";
   position: absolute;

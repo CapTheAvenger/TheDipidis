@@ -11776,7 +11776,6 @@ window.MetaCall = (function () {
 
   function renderMyDeckPanel() {
     const decks   = (_shareList || []).map(d => d.name);
-    const options = decks.map(n => `<option value="${esc(n)}"></option>`).join('');
     const currentDeck = _settings.myDeck || '';
 
     return `
@@ -11786,15 +11785,18 @@ window.MetaCall = (function () {
     <div class="mc-deck-search-wrap">
       <input type="text" id="mc-my-deck"
              class="mc-deck-search-input"
-             list="mc-my-deck-options"
+             role="combobox" aria-expanded="false" aria-controls="mc-my-deck-vorschlaege"
              placeholder="${esc(t('mc.selectDeckPlaceholder'))}"
              value="${esc(currentDeck)}"
              autocomplete="off"
              spellcheck="false"
              aria-label="${esc(t('mc.panelMyDeck'))}"
-             oninput="MetaCall._onMyDeckInput(this.value)"
+             oninput="MetaCall._onMyDeckInput(this.value); MetaCall._zeigeMyDeckVorschlaege(this.value)"
+             onfocus="MetaCall._zeigeMyDeckVorschlaege(this.value)"
+             onblur="MetaCall._versteckeMyDeckVorschlaege()"
+             onkeydown="MetaCall._myDeckTaste(event)"
              onchange="MetaCall._onMyDeckCommit(this)">
-      <datalist id="mc-my-deck-options">${options}</datalist>
+      <ul class="mc-deck-vorschlaege" id="mc-my-deck-vorschlaege" role="listbox" hidden></ul>
     </div>
     <div class="mc-brick-filter-wrap">
       <label class="mc-brick-filter-label">${t('mc.journalBricks')}</label>
@@ -15897,6 +15899,67 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, sy)));
   }
 
+  /* VORSCHLAGSLISTE FUER "MEIN DECK" (02.10.2026).
+     Bis heute hing am Feld ein <datalist>. Auf dem iPhone zeigt Safari davon
+     nur einen Eintrag in der Tastaturleiste, keine Liste unter dem Feld —
+     Hausi sah beim Tippen von "Exca" keinen Vorschlag (Screenshot 02.10.).
+     Jetzt zeichnet die Seite die Liste selbst: Treffer ueberall im Namen
+     (nicht nur am Anfang), Treffer am Anfang zuerst, Antippen waehlt. */
+  function _myDeckVorschlaege(val) {
+    const q = String(val || '').trim().toLowerCase();
+    const namen = (_shareList || []).map(d => d.name).filter(n => n && n !== '_junk');
+    if (!q) return namen.slice(0, 12);
+    const alle = namen.filter(n => n.toLowerCase().includes(q));
+    const vorn = alle.filter(n => n.toLowerCase().startsWith(q));
+    return vorn.concat(alle.filter(n => !n.toLowerCase().startsWith(q))).slice(0, 12);
+  }
+
+  function _zeigeMyDeckVorschlaege(val) {
+    const ul = document.getElementById('mc-my-deck-vorschlaege');
+    const inp = document.getElementById('mc-my-deck');
+    if (!ul || !inp) return;
+    const namen = _myDeckVorschlaege(val);
+    const q = String(val || '').trim().toLowerCase();
+    // Steht genau der gewaehlte Name im Feld, braucht es keine Liste.
+    if (!namen.length || (namen.length === 1 && namen[0].toLowerCase() === q)) {
+      ul.hidden = true; inp.setAttribute('aria-expanded', 'false'); return;
+    }
+    ul.innerHTML = namen.map(n =>
+      `<li role="option" class="mc-deck-vorschlag" data-name="${esc(n)}" `
+      + `onmousedown="event.preventDefault()" onclick="MetaCall._waehleMyDeckAus(this)">${esc(n)}</li>`).join('');
+    ul.hidden = false;
+    inp.setAttribute('aria-expanded', 'true');
+  }
+
+  function _versteckeMyDeckVorschlaege() {
+    // Verzoegert, damit ein Antippen noch ankommt, bevor die Liste verschwindet.
+    setTimeout(() => {
+      const ul = document.getElementById('mc-my-deck-vorschlaege');
+      const inp = document.getElementById('mc-my-deck');
+      if (ul) ul.hidden = true;
+      if (inp) inp.setAttribute('aria-expanded', 'false');
+    }, 200);
+  }
+
+  function _waehleMyDeckAus(li) {
+    const name = li && li.dataset ? li.dataset.name : '';
+    if (!name) return;
+    const inp = document.getElementById('mc-my-deck');
+    if (inp) inp.value = name;
+    const ul = document.getElementById('mc-my-deck-vorschlaege');
+    if (ul) ul.hidden = true;
+    if (name !== _settings.myDeck) _onMyDeck(name);
+  }
+
+  function _myDeckTaste(ev) {
+    if (!ev) return;
+    if (ev.key === 'Escape') { _versteckeMyDeckVorschlaege(); return; }
+    if (ev.key !== 'Enter') return;
+    const ul = document.getElementById('mc-my-deck-vorschlaege');
+    const erster = ul && !ul.hidden ? ul.querySelector('.mc-deck-vorschlag') : null;
+    if (erster) { ev.preventDefault(); _waehleMyDeckAus(erster); }
+  }
+
   // Filter / select handler for the searchable My-Deck input. The
   // <input list> + <datalist> combo lets users type to filter the
   // archetype list instead of scrolling through a long <select>.
@@ -16802,6 +16865,11 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _onToggleSource,
     _onMyDeck,
     _onMyDeckInput,
+    _zeigeMyDeckVorschlaege,
+    _versteckeMyDeckVorschlaege,
+    _waehleMyDeckAus,
+    _myDeckTaste,
+    _myDeckVorschlaege,
     _onMyDeckCommit,
     _onPersonalShare,
     _onWrOverride,

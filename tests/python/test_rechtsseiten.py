@@ -118,3 +118,28 @@ def test_die_erklaerung_beschreibt_die_schriften_so_wie_sie_sind():
         assert sagt_lokal, (
             'Die Schrift liegt lokal, die Erklaerung sagt es nicht. Das '
             'ist die gute Nachricht, und sie gehoert hinein.')
+
+
+def test_die_rechtsseiten_tragen_keine_platzhalter_mehr():
+    """02.10.2026: Name, Anschrift und E-Mail stehen drin. Bleibt der
+    Platzhalter irgendwo stehen, haelt der Deploy die Seite zurueck —
+    und sie fehlt still. Die Angaben muessen auf BEIDEN Seiten stehen
+    (Datenschutz nennt den Verantwortlichen)."""
+    for name in SEITEN:
+        t = _lies(name)
+        assert PLATZHALTER not in t, f'{name} traegt noch {PLATZHALTER}'
+        assert 'Jens Haushalter' in t, f'{name} nennt den Namen nicht'
+        assert '14624 Dallgow' in t, f'{name} nennt die Anschrift nicht'
+        assert 'haushalterj@me.com' in t, f'{name} nennt die E-Mail nicht'
+
+
+def test_die_seite_verlinkt_impressum_und_datenschutz():
+    """§ 5 DDG: leicht erkennbar und unmittelbar erreichbar. Eine fertige
+    Seite ohne Link darauf ist nicht erreichbar (gemessen 02.10.2026: in
+    index.html stand kein einziger Verweis)."""
+    index = _lies('index.html')
+    for ziel in ('/impressum.html', '/datenschutz.html'):
+        assert f'href="{ziel}"' in index, f'index.html verlinkt {ziel} nicht'
+    i18n = _lies('js/i18n.js')
+    for key in ('footer.impressum', 'footer.datenschutz'):
+        assert i18n.count(f"'{key}'") == 2, f'{key} fehlt in einer der beiden Sprachen'

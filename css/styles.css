@@ -1046,6 +1046,10 @@
             padding: 20px;
             margin-top: 30px;
         }
+        /* 02.10.2026: Impressum und Datenschutz — nach § 5 DDG leicht
+           erkennbar und von jeder Ansicht aus erreichbar. */
+        .footer-recht { margin: 6px 0 0; }
+        .footer-recht a { color: inherit; text-decoration: underline; }
 
         /* .analysis-container ist am 02.09.2026 entfernt worden: kein
            einziger Treffer in index.html, js/ oder den Vorlagen. Sie sah

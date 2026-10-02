@@ -322,6 +322,8 @@ const translations = {
 
     // ── Footer ───────────────────────────────────────────────
     'footer.lastUpdate':      'Last Update:',
+    'footer.impressum':       'Legal notice',
+    'footer.datenschutz':     'Privacy policy',
 
     // ── Misc ─────────────────────────────────────────────────
     'misc.unique':            'Unique:',
@@ -3143,6 +3145,8 @@ const translations = {
 
     // ── Footer ───────────────────────────────────────────────
     'footer.lastUpdate':      'Letztes Update:',
+    'footer.impressum':       'Impressum',
+    'footer.datenschutz':     'Datenschutz',
 
     // ── Misc ─────────────────────────────────────────────────
     'misc.unique':            'Verschiedene:',

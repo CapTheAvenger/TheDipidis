@@ -1920,7 +1920,7 @@
                 ? zahlLokal(x, 0) : String(Math.round(x));
             const nenner = hatBilanz
                 ? (de
-                    ? `Nenner: ${zahl(n)} Matches (Bilanz ${zahl(w)}–${zahl(l)}–${zahl(u)}, S–N–U).`
+                    ? `Nenner: ${zahl(n)} Matches (Bilanz ${zahl(w)}–${zahl(l)}–${zahl(u)}, W–L–T).`
                     : `Denominator: ${zahl(n)} games (record ${zahl(w)}–${zahl(l)}–${zahl(u)}, W–L–T).`)
                 : (de
                     ? 'Nenner: die Bilanzspalten dieser Zeile fehlen — ohne sie ist die Grundgesamtheit nicht nachzählbar.'

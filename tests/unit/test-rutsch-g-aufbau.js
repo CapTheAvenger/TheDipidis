@@ -100,7 +100,7 @@ describe('UI-60/62: Ergebnis-Kacheln', () => {
         assert.match(h, /mc-uebersicht-leer/);
         assert.ok(!/mc-ev-wert/.test(h));
     });
-    it('mit Deck: Quote, Day-2 (gefaerbt) und Bilanz in der Reihenfolge Siege-Niederlagen-Unentschieden', () => {
+    it('mit Deck: Quote, Day-2 (gefaerbt) und Bilanz in der Reihenfolge W–L–T', () => {
         const h = uebersicht().renderDeckGegenMetaPanel([]);
         assert.match(h, /53,4/);
         assert.match(h, /41,0/);
@@ -108,7 +108,7 @@ describe('UI-60/62: Ergebnis-Kacheln', () => {
         assert.match(h, /ab 18 Punkten nach 9 Runden/);
         const bil = h.match(/mc-ev-bilanz">([\s\S]*?)<\/span>\s*<span class="mc-ev-kontext"/)[1]
             .replace(/<[^>]+>/g, '');
-        assert.equal(bil, '5,1–3,4–0,5', 'S–N–U, nicht S–U–N');
+        assert.equal(bil, '5,1–3,4–0,5', 'W–L–T, nicht W–T–L');
     });
     it('VERFAELSCHUNG: aendert sich die Rechnung, aendert sich die Zahl; vertauschte Bilanz faellt auf', () => {
         const h = uebersicht({ calcDay2: () => ({ day2Prob: 0.7, expWin: 7, expLoss: 1, expTie: 1 }) })

@@ -405,7 +405,9 @@ describe('EV-Rechner: die Spalte heisst, was sie zeigt', () => {
            „Sonstige" eingeschlossen — sonst behauptet sie eine
            Vollstaendigkeit, die nur aus der eigenen Auswahl stammt. */
         assert.match(MCALL, /abdeckung: feldSumme > 0/);
-        assert.match(MCALL, /_evL\('Abdeckung', 'Coverage'\)/);
+        // UI-65 (02.10.2026): die Kachel ist entfernt (Hausi: unverstaendlich);
+        // die Abdeckung wird weiter gerechnet (r.abdeckung) und steht im Rechenweg-Satz.
+        assert.doesNotMatch(MCALL, /_evL\('Abdeckung', 'Coverage'\)/);
     });
     it('"nur die 8 groessten" heisst, was es ist, und sagt es, wenn es weniger sind', () => {
         assert.doesNotMatch(MCALL, /'Nur Top 8 Archetypes'/);

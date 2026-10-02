@@ -4124,7 +4124,6 @@
  * Beschriftungen haengen am data-label der Zelle, nicht an ihrer
  * Position — eine neue Spalte verschiebt nichts.
  * ═══════════════════════════════════════════════════════════════════ */
-.mc-mct-lead { margin: 4px 0 10px; color: var(--mc-text-muted); font-size: 0.9rem; line-height: 1.45; }
 .mc-mct-leiste { align-items: center; }
 .mc-mct-leiste-titel { font-size: 0.85rem; font-weight: 600; color: var(--mc-text-heading); margin-right: 2px; }
 .mc-mct-wrap { overflow-x: auto; margin-top: 8px; }

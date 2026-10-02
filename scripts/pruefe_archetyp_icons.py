@@ -87,9 +87,19 @@ def main():
         print("FEHLER: keine Slugs gefunden — ist die Datei leer?", file=sys.stderr)
         return 1
 
-    kaputt, unklar = [], []
+    kaputt, unklar, aufgefangen = [], [], []
     for i, slug in enumerate(sorted(nutzer), 1):
         ok, hinweis = erreichbar(praefix + slug + suffix)
+        if ok is False and slug.endswith("-mega"):
+            # Dieselbe Regel wie js/archetype-icons.js (DA-21): faellt ein
+            # "-mega"-Bild aus, zeigt die Seite die Grundform. Laedt die,
+            # ist der Slug aufgefangen — das ist kein roter Befund, sondern
+            # eine Meldung. Laedt auch sie nicht, bleibt es ein Fehler.
+            ok_basis, _ = erreichbar(praefix + slug[:-len("-mega")] + suffix)
+            if ok_basis is True:
+                aufgefangen.append(slug)
+                time.sleep(PAUSE_S)
+                continue
         if ok is False:
             kaputt.append((slug, hinweis))
         elif ok is None:
@@ -101,6 +111,12 @@ def main():
 
     for slug, hinweis in unklar:
         print(f"::warning::Icon-Slug '{slug}' nicht pruefbar ({hinweis})")
+
+    for slug in aufgefangen:
+        wer = nutzer[slug]
+        print(f"::notice::Icon-Slug '{slug}' laedt nicht, die Seite zeigt die "
+              f"Grundform ('{slug[:-len('-mega')]}') — benutzt von "
+              f"{len(wer)} Archetyp(en): {', '.join(wer[:5])}")
 
     if not kaputt:
         return 0

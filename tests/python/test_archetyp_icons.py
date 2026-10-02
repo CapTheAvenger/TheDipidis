@@ -239,3 +239,43 @@ def test_das_skript_geht_freundlich_mit_dem_cdn_um():
     mod = _pruefer()
     assert mod.PAUSE_S >= 0.1, "zu schnell hintereinander"
     assert "thedipidis.app" in mod.UA, "der Absender muss erkennbar sein"
+
+
+# ── DA-21: "-mega" ohne Bild, Grundform vorhanden ───────────────────
+#
+# Die Seite faengt ein fehlendes "-mega"-Bild mit der Grundform auf
+# (js/archetype-icons.js). Der Wochenlauf meldete denselben Fall
+# trotzdem jede Woche als ::error:: samt exit 1 — zwei rote Zeilen im
+# Lauf fuer etwas, das niemand sieht. Das Skript haelt jetzt dieselbe
+# Regel: aufgefangen = Hinweis, nicht aufgefangen = weiter Fehler.
+
+def _lauf(monkeypatch, tmp_path, erreichbar_map, capsys):
+    mod = _pruefer()
+    import json as _j
+    d = {"_meta": {"urlPrefix": "http://x/", "urlSuffix": ".png"},
+         "archetypes": {"Mega Golisopod": ["golisopod-mega", "froslass-mega"]}}
+    f = tmp_path / "icons.json"
+    f.write_text(_j.dumps(d), encoding="utf-8")
+    monkeypatch.setattr(mod, "PFAD", str(f))
+    monkeypatch.setattr(mod, "PAUSE_S", 0)
+    monkeypatch.setattr(mod, "erreichbar",
+                        lambda url: erreichbar_map.get(url, (True, "")))
+    monkeypatch.setattr(mod.sys, "argv", ["x"])
+    rc = mod.main()
+    return rc, capsys.readouterr().out
+
+
+def test_mega_ohne_bild_mit_grundform_ist_nur_ein_hinweis(monkeypatch, tmp_path, capsys):
+    rc, out = _lauf(monkeypatch, tmp_path,
+                    {"http://x/golisopod-mega.png": (False, "404")}, capsys)
+    assert rc == 0
+    assert "::error::" not in out
+    assert "::notice::Icon-Slug 'golisopod-mega'" in out
+
+
+def test_mega_ohne_bild_und_ohne_grundform_bleibt_ein_fehler(monkeypatch, tmp_path, capsys):
+    rc, out = _lauf(monkeypatch, tmp_path,
+                    {"http://x/golisopod-mega.png": (False, "404"),
+                     "http://x/golisopod.png": (False, "404")}, capsys)
+    assert rc == 1
+    assert "::error::Icon-Slug 'golisopod-mega'" in out

@@ -18,7 +18,7 @@
 -    });|
 -});|
 -|
- /* ══ 4. DER SUCHLAUF ═══════════════════════════════════════════════════ */|
+ /* ══ 4. DER SUCHLAUF ══════════════════════════════════════════════ */|
 diff --git a/tests/unit/test-w2-hausnamen.js b/tests/unit/test-w2-hausnamen.js|
 index 39c82d25..6566b224 100644|
 --- a/tests/unit/test-w2-hausnamen.js|

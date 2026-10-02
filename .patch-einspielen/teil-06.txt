@@ -65,7 +65,7 @@ index bf69df6a..9ce181c6 100644|
 +++ b/tests/unit/test-r5-win-prozent-namen.js|
 @@ -200,40 +200,2 @@ describe('B1 — der Konventionsname im Predictor-5.3-Tooltip kommt aus dem Modu|
  |
--/* ══ 3. DIE SCHALTFLAECHE DES OVERRIDE-KASTENS ═════════════════════════════════════════ */|
+-/* ══ 3. DIE SCHALTFLAECHE DES OVERRIDE-KASTENS ════════════════════ */|
 -|
 -describe('B1 — der Umschalter behaelt die uebersetzte Beschriftung', () => {|
 -|

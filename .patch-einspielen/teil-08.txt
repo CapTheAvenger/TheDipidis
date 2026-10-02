@@ -8,7 +8,7 @@ index 090bb2a0..f60345f4 100644|
      const ctx = baue(MC, [|
 -        'function renderOverrideTable()',|
          'function _anzeigeQuote(m)',|
-@@ -153,29 +152,3 @@|
+@@ -153,29 +152,3 @@ function overrideUmgebung(paarung, override) {|
   * ist. */|
 -describe('W2 — der Override-Kasten: zwei Spalten, dieselbe Konvention', () => {|
 -|
